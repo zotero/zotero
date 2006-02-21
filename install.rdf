@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<RDF:RDF xmlns:em="http://www.mozilla.org/2004/em-rdf#"
+         xmlns:NC="http://home.netscape.com/NC-rdf#"
+         xmlns:RDF="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+  <RDF:Description RDF:about="rdf:#$V4RG2"
+                   em:id="{ec8030f7-c20a-464f-9b0e-13a3a9e97384}"
+                   em:minVersion="1.0+"
+                   em:maxVersion="1.5.0.*" />
+  <RDF:Description RDF:about="urn:mozilla:install-manifest"
+                   em:id="scholar@chnm"
+                   em:name="Firefox Scholar"
+                   em:version="1.0"
+                   em:creator="Center for History and New Media, George Mason University"
+                   em:homepageURL="http://chnm.gmu.edu">
+    <em:targetApplication RDF:resource="rdf:#$V4RG2"/>
+  </RDF:Description>
+</RDF:RDF>

@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://scholar/skin/scholar.css" type="text/css"?>
+<!DOCTYPE window SYSTEM "chrome://scholar/locale/scholar.dtd">
+
+<window
+	id="test-window"
+	title="Test"
+	orient="horizontal"
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	style="padding:2em">
+	
+	<script src="../scholar.js"/>
+	<script src="../db.js"/>
+	
+	<script src="test.js"/>
+	
+	<label>I am a test page.</label>
+</window>

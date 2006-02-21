@@ -1,0 +1,85 @@
+<schema version="1">
+BEGIN;
+    CREATE TABLE version (
+        version INT PRIMARY KEY
+    );
+    
+    CREATE TABLE objects (
+        objectID INT PRIMARY KEY,
+        objectTypeID INT,
+        objectTitle TEXT,
+        objectDate DATETIME,
+        objectDateAdded DATETIME DEFAULT CURRENT_TIMESTAMP,
+        objectDateModified DATETIME DEFAULT CURRENT_TIMESTAMP,
+        objectSource TEXT,
+        objectRights TEXT,
+        parentID INT,
+        orderIndex INT
+    );
+    CREATE INDEX parentID ON objects (parentID);
+    
+    CREATE TABLE objectTypes (
+        objectTypeID INT PRIMARY KEY,
+        typeName TEXT
+    );
+    
+    CREATE TABLE fields (
+        fieldID INT PRIMARY KEY,
+        fieldName TEXT,
+        regex TEXT
+    );
+    
+    CREATE TABLE objectTypeFields (
+        objectTypeID,
+        fieldID INT,
+        orderIndex INT,
+        PRIMARY KEY (objectTypeID, fieldID),
+        FOREIGN KEY (objectTypeID) REFERENCES objectTypes(objectTypeID),
+        FOREIGN KEY (fieldID) REFERENCES objectTypes(objectTypeID)
+    );
+    
+    CREATE TABLE objectData (
+        objectID INT,
+        fieldID INT,
+        value NONE,
+        PRIMARY KEY (objectID, fieldID),
+        FOREIGN KEY (objectID) REFERENCES objects(objectID),
+        FOREIGN KEY (fieldID) REFERENCES fields(fieldID)
+    );
+    CREATE INDEX value ON objectData (value);
+    
+    CREATE TABLE keywords (
+        keywordID INT PRIMARY KEY,
+        keyword TEXT
+    );
+    
+    CREATE TABLE objectKeywords (
+        objectID INT,
+        keywordID INT,
+        PRIMARY KEY (objectID, keywordID),
+        FOREIGN KEY (objectID) REFERENCES objects(objectID),
+        FOREIGN KEY (keywordID) REFERENCES keywords(keywordID)
+    );
+    
+    CREATE TABLE creators (
+        creatorID INT PRIMARY KEY,
+        firstName TEXT,
+        lastName TEXT
+    );
+    
+    CREATE TABLE creatorTypes (
+        creatorTypeID INT PRIMARY KEY,
+        creatorType TEXT
+    );
+    
+    CREATE TABLE objectCreators (
+        objectID INT,
+        creatorID INT,
+        creatorTypeID INT,
+        orderIndex INT,
+        PRIMARY KEY (objectID, creatorID),
+        FOREIGN KEY (objectID) REFERENCES objects(objectID),
+        FOREIGN KEY (creatorID) REFERENCES creators(creatorID)
+    );
+COMMIT;
+</schema>

@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://scholar/skin/scholar.css" type="text/css"?>
+<!DOCTYPE window SYSTEM "chrome://scholar/locale/scholar.dtd">
+
+<overlay id="scholar"
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	
+	<script src="scholar.js"/>
+	<script src="db.js"/>
+	
+	<statusbar id="status-bar">
+		<statusbarpanel id="my-panel" label="&statusbarpanel.helloworld;"/>
+	</statusbar>
+</overlay>
