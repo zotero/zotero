@@ -1,0 +1,74 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin/" type"text/css"Ê?>
+<?xml-stylesheet href="chrome://browser/skin/browser.css" type="text/css"Ê?>
+
+<page id="scholar-sidebar" title="Scholar"
+         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" >
+
+  
+    <tree
+        id="scholar-sidebar-items"
+        seltype="multiple"
+        flex="1"
+        enableColumnDrag="true"
+        datasources="rdf:null"
+        ref=""
+        flags="dont-build-content">
+
+        <treecols>
+            <treecol
+                id="title_column"
+                label="Title"
+                flex="1"
+                sort="?rsst"
+                persist="width ordinal hidden sortActive sortDirection"/>
+            <splitter class="tree-splitter"/>
+            <treecol
+                id="description_column"
+                label="Description"
+                flex="1"
+                sort="?rssd"
+                persist="width ordinal hidden sortActive sortDirection"/>
+            <splitter class="tree-splitter"/>
+            <treecol
+                id="link_column"
+                label="URL"
+                flex="1"
+                sort="?rssl"
+                persist="width ordinal hidden sortActive sortDirection"/>
+        </treecols>
+    </tree>
+	<tree
+        id="scholar-sidebar-notes"
+        seltype="multiple"
+        flex="1"
+        enableColumnDrag="true"
+        datasources="rdf:null"
+        ref=""
+        flags="dont-build-content">
+
+        <treecols>
+            <treecol
+                id="title_column"
+                label="Title"
+                flex="1"
+                sort="?rsst"
+                persist="width ordinal hidden sortActive sortDirection"/>
+            <splitter class="tree-splitter"/>
+            <treecol
+                id="description_column"
+                label="Description"
+                flex="1"
+                sort="?rssd"
+                persist="width ordinal hidden sortActive sortDirection"/>
+            <splitter class="tree-splitter"/>
+            <treecol
+                id="link_column"
+                label="URL"
+                flex="1"
+                sort="?rssl"
+                persist="width ordinal hidden sortActive sortDirection"/>
+        </treecols>
+    </tree>
+
+</page>
