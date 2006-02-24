@@ -11,4 +11,26 @@
 	<statusbar id="status-bar">
 		<statusbarpanel id="my-panel" label="&statusbarpanel.helloworld;"/>
 	</statusbar>
+	
+  <menupopup id="viewSidebarMenu">
+    <menuitem key="key_openScholarSidebar" observes="viewScholarSidebar"  />
+  </menupopup>
+  
+  <keyset id="mainKeyset">
+    <key id="key_openScholarSidebar" command="viewScholarSidebar"
+         key="S" 
+         modifiers="shift accel" />
+  </keyset>
+  
+  <broadcasterset id="mainBroadcasterSet"> 
+    <broadcaster id="viewScholarSidebar" 
+                 label="Scholar"
+                 autoCheck="false"
+                 type="checkbox"
+                 group="sidebar"
+                 sidebarurl="chrome://scholar/content/sidebar.xul"
+                 sidebartitle="Scholar"
+                 oncommand="toggleSidebar('viewScholarSidebar');" />
+  </broadcasterset>
+
 </overlay>
