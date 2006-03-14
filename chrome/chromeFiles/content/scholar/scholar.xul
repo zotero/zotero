@@ -7,6 +7,7 @@
 	
 	<script src="scholar.js"/>
 	<script src="db.js"/>
+	<script src="data_access.js"/>
 	
 	<statusbar id="status-bar">
 		<statusbarpanel id="my-panel" label="&statusbarpanel.helloworld;"/>
