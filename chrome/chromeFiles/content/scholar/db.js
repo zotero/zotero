@@ -1,9 +1,7 @@
-var scholarDB = new Scholar_DB();
-
 /*
  * DB connection and schema management class
  */
-function Scholar_DB(){
+var Scholar_DB = new function(){
 	// Private members
 	var _connection;
 	
@@ -11,9 +9,14 @@ function Scholar_DB(){
 	this.query = query;
 	this.valueQuery = valueQuery;
 	this.rowQuery = rowQuery;
+	this.columnQuery = columnQuery;
 	this.statementQuery = statementQuery;
+	this.getColumns = getColumns;
+	this.getColumnHash = getColumnHash;
 	this.updateSchema = updateSchema;
-	
+	this.beginTransaction = beginTransaction;
+	this.commitTransaction = commitTransaction;
+	this.rollbackTransaction = rollbackTransaction;
 	
 	/////////////////////////////////////////////////////////////////
 	//
@@ -24,33 +27,56 @@ function Scholar_DB(){
 	/*
 	 * Run an SQL query
 	 *
+	 *  Optional _params_ is an array of bind parameters in the form
+	 *		[{'int':2},{'string':'foobar'}]
+	 *
 	 * 	Returns:
-	 *  	 - mozIStorageStatementWrapper for SELECT's
+	 *  	 - Associative array (similar to mysql_fetch_assoc) for SELECT's
 	 *	 - lastInsertId for INSERT's
 	 *	 - TRUE for other successful queries
 	 *	 - FALSE on error
 	 */
-	function query(sql){
+	function query(sql,params){
 		var db = _getDBConnection();
 		
 		try {
 			// Parse out the SQL command being used
-			var op = sql.match(/^[^a-z]*[^ ]+/i).toString().toLowerCase();
+			var op = sql.match(/^[^a-z]*[^ ]+/i);
+			if (op){
+				op = op.toString().toLowerCase();
+			}
 			
 			// If SELECT statement, return result
 			if (op=='select'){
-				var wrapper =
-					Components.classes['@mozilla.org/storage/statement-wrapper;1']
-					.createInstance(Components.interfaces.mozIStorageStatementWrapper);
+				// Until the native dataset methods work (or at least exist),
+				// we build a multi-dimensional associative array manually
 				
-				wrapper.initialize(db.createStatement(sql));
-				return wrapper;
+				var statement = statementQuery(sql,params);
+				
+				var dataset = new Array();
+				while (statement.executeStep()){
+					var row = new Array();
+					for(var i=0; i<statement.columnCount; i++) {
+						row[statement.getColumnName(i)] = statement.getAsUTF8String(i);
+					}
+					dataset.push(row);
+				}
+				statement.reset();
+				
+				return dataset.length ? dataset : false;
 			}
 			else {
-				db.executeSimpleSQL(sql);
+				if (params){
+					var statement = statementQuery(sql,params);
+					statement.execute();
+				}
+				else {
+					Scholar.debug(sql,5);
+					db.executeSimpleSQL(sql);
+				}
 				
 				if (op=='insert'){
-					return db.lastInsertId;
+					return db.lastInsertRowID;
 				}
 				// DEBUG: Can't get affected rows for UPDATE or DELETE?
 				else {
@@ -58,9 +84,8 @@ function Scholar_DB(){
 				}
 			}
 		}
-		catch(ex){
-			alert(db.lastErrorString);
-			return false;
+		catch (e){
+			throw(e + ' (SQL error: ' + db.lastErrorString + ')');
 		}
 	}
 	
@@ -68,21 +93,26 @@ function Scholar_DB(){
 	/*
 	 * Query a single value and return it
 	 */
-	function valueQuery(sql){
+	function valueQuery(sql,params){
 		var db = _getDBConnection();
 		try {
-			var statement = db.createStatement(sql);
+			var statement = statementQuery(sql,params);
 		}
 		catch (e){
-			alert(db.lastErrorString);
-			return false;
+			throw(db.lastErrorString);
 		}
 		
 		// No rows
 		if (!statement.executeStep()){
+			statement.reset();
 			return false;
 		}
-		var value = statement.getAsUTF8String(0);
+		if (sql.indexOf('SELECT COUNT(*)') > -1){
+			var value = statement.getAsInt32(0);
+		}
+		else {
+			var value = statement.getAsUTF8String(0);
+		}
 		statement.reset();
 		return value;
 	}
@@ -91,28 +121,118 @@ function Scholar_DB(){
 	/*
 	 * Run a query and return the first row
 	 */
-	function rowQuery(sql){
-		var result = query(sql);
-		if (result && result.step()){
-			return result.row;
+	function rowQuery(sql,params){
+		var result = query(sql,params);
+		if (result){
+			return result[0];
 		}
 	}
 	
 	
 	/*
-	 * Run a query, returning a mozIStorageStatement for direct manipulation
+	 * Run a query and return the first column as a numerically-indexed array
 	 */
-	function statementQuery(sql){
+	function columnQuery(sql,params){
+		var statement = statementQuery(sql,params);
+		
+		if (statement){
+			var column = new Array();
+			while (statement.executeStep()){
+				column.push(statement.getAsUTF8String(0));
+			}
+			statement.reset();
+			return column.length ? column : false;
+		}
+		return false;
+	}
+	
+	
+	/*
+	 * Run a query, returning a mozIStorageStatement for direct manipulation
+	 *
+	 *  Optional _params_ is an array of bind parameters in the form
+	 *		[{'int':2},{'string':'foobar'}]
+	 */
+	function statementQuery(sql,params){
 		var db = _getDBConnection();
 		
 		try {
-			return db.createStatement(sql);
+			Scholar.debug(sql,5);
+			var statement = db.createStatement(sql);
 		}
 		catch (e){
+			throw(db.lastErrorString);
+		}
+		
+		if (statement && params){
+			for (var i=0; i<params.length; i++){
+				if (typeof params[i]['int'] != 'undefined'){
+					Scholar.debug('Binding parameter ' + (i+1) + ': ' +
+						params[i]['int'],5);
+					statement.bindInt32Parameter(i,params[i]['int']);
+				}
+				else if (typeof params[i]['string'] != 'undefined'){
+					Scholar.debug('Binding parameter ' + (i+1) + ': "' +
+						params[i]['string'] + '"',5);
+					statement.bindUTF8StringParameter(i,params[i]['string']);
+				}
+			}
+		}
+		return statement;
+	}
+	
+	
+	function beginTransaction(){
+		var db = _getDBConnection();
+		Scholar.debug('Beginning DB transaction',5);
+		db.beginTransaction();
+	}
+	
+	
+	function commitTransaction(){
+		var db = _getDBConnection();
+		Scholar.debug('Committing transaction',5);
+		db.commitTransaction();
+	}
+	
+	
+	function rollbackTransaction(){
+		var db = _getDBConnection();
+		Scholar.debug('Rolling back transaction',5);
+		db.rollbackTransaction();
+	}
+	
+	
+	function getColumns(table){
+		var db = _getDBConnection();
+		
+		try {
+			var sql = "SELECT * FROM " + table + " LIMIT 1";
+			var statement = statementQuery(sql);
+			
+			var cols = new Array();
+			for (var i=0,len=statement.columnCount; i<len; i++){
+				cols.push(statement.getColumnName(i));
+			}
+			return cols;
+		}
+		catch (e){
+			Scholar.debug(e,1);
 			return false;
 		}
 	}
 	
+	
+	function getColumnHash(table){
+		var cols = getColumns(table);
+		var hash = new Array();
+		if (cols.length){
+			for (var i=0; i<cols.length; i++){
+				hash[cols[i]] = true;
+			}
+		}
+		return hash;
+	}
 	
 	/*
 	 * Checks if the DB schema exists and is up-to-date, updating if necessary
@@ -125,11 +245,16 @@ function Scholar_DB(){
 		}
 		else if (DBVersion < SCHOLAR_CONFIG['DB_VERSION']){
 			if (!DBVersion){
-				dump('Database does not exist -- creating\n');
+				Scholar.debug('Database does not exist -- creating\n');
 				return _initializeSchema();
 			}
 			
 			return _migrateSchema(DBVersion);
+		}
+		else if (SCHOLAR_CONFIG['DB_REBUILD']){
+			if (confirm('Erase all data and recreate database from schema?')){
+				return _initializeSchema();
+			}
 		}
 	}
 	
@@ -180,22 +305,42 @@ function Scholar_DB(){
 	
 	/*
 	 * Load in SQL schema
+	 *
+	 * Returns an _array_ of SQL statements for feeding into query()
 	 */
 	function _getSchemaSQL(){
 		// We pull the schema from an external file so we only have to process
 		// it when necessary
-		var req = new XMLHttpRequest();
-		req.open("GET", "chrome://scholar/content/schema.xml", false);
-		req.send(null);
+		var file = Components.classes["@mozilla.org/extensions/manager;1"]
+                    .getService(Components.interfaces.nsIExtensionManager)
+                    .getInstallLocation(SCHOLAR_CONFIG['GUID'])
+                    .getItemLocation(SCHOLAR_CONFIG['GUID']); 
+		file.append('schema.sql');
 		
-		var schemaVersion =
-			req.responseXML.documentElement.getAttribute('version');
+		// Open an input stream from file
+		var istream = Components.classes["@mozilla.org/network/file-input-stream;1"]
+			.createInstance(Components.interfaces.nsIFileInputStream);
+		istream.init(file, 0x01, 0444, 0);
+		istream.QueryInterface(Components.interfaces.nsILineInputStream);
+		
+		var line = {}, sql = '', hasmore;
+		
+		// Fetch the schema version from the first line of the file
+		istream.readLine(line);
+		var schemaVersion = line.value.match(/-- ([0-9]+)/)[1];
+		
+		do {
+			hasmore = istream.readLine(line);
+			sql += line.value + "\n";
+		} while(hasmore);
+		
+		istream.close();
 		
 		if (schemaVersion!=SCHOLAR_CONFIG['DB_VERSION']){
 			throw("Scholar config version does not match schema version");
 		}
 		
-		return req.responseXML.documentElement.firstChild.data;
+		return sql;
 	}
 	
 	
@@ -203,10 +348,26 @@ function Scholar_DB(){
 	 * Retrieve the version attribute of the schema SQL XML
 	 */
 	function _getSchemaSQLVersion(){
-		var req = new XMLHttpRequest();
-		req.open("GET", "chrome://scholar/content/schema.xml", false);
-		req.send(null);
-		return req.responseXML.documentElement.getAttribute('version');
+		var file = Components.classes["@mozilla.org/extensions/manager;1"]
+                    .getService(Components.interfaces.nsIExtensionManager)
+                    .getInstallLocation(SCHOLAR_CONFIG['GUID'])
+                    .getItemLocation(SCHOLAR_CONFIG['GUID']); 
+		file.append('schema.sql');
+		
+		// Open an input stream from file
+		var istream = Components.classes["@mozilla.org/network/file-input-stream;1"]
+			.createInstance(Components.interfaces.nsIFileInputStream);
+		istream.init(file, 0x01, 0444, 0);
+		istream.QueryInterface(Components.interfaces.nsILineInputStream);
+		
+		var line = {};
+		
+		// Fetch the schema version from the first line of the file
+		istream.readLine(line);
+		var schemaVersion = line.value.match(/-- ([0-9]+)/)[1];
+		istream.close();
+		
+		return schemaVersion;
 	}
 	
 	
@@ -214,8 +375,32 @@ function Scholar_DB(){
 	 * Create new DB schema
 	 */
 	function _initializeSchema(){
-		query(_getSchemaSQL());
-		query("INSERT INTO version VALUES (" + SCHOLAR_CONFIG['DB_VERSION'] + ")");
+		// Until DROP TABLE IF EXISTS works with the mozStorage extension
+		try { query('DROP TABLE version'); } catch(e){}
+		try { query('DROP TABLE objects'); } catch(e){}
+		try { query('DROP TABLE objectTypes'); } catch(e){}
+		try { query('DROP TABLE fieldFormats'); } catch(e){}
+		try { query('DROP TABLE fields'); } catch(e){}
+		try { query('DROP TABLE objectTypeFields'); } catch(e){}
+		try { query('DROP TABLE objectData'); } catch(e){}
+		try { query('DROP TABLE keywords'); } catch(e){}
+		try { query('DROP TABLE objectKeywords'); } catch(e){}
+		try { query('DROP TABLE creators'); } catch(e){}
+		try { query('DROP TABLE creatorTypes'); } catch(e){}
+		try { query('DROP TABLE objectCreators'); } catch(e){}
+		try { query('DROP TABLE folders'); } catch(e){}
+		
+		try {
+			beginTransaction();
+			var sql = _getSchemaSQL();
+			query(sql);
+			query("INSERT INTO version VALUES (" + SCHOLAR_CONFIG['DB_VERSION'] + ")");
+			commitTransaction();
+		}
+		catch(e){
+			alert(e);
+			rollbackTransaction();
+		}
 	}
 	
 	
@@ -230,17 +415,22 @@ function Scholar_DB(){
 			throw("Scholar config version does not match schema version");
 		}
 		
-		dump('Updating DB from version ' + fromVersion + ' to ' + toVersion + '\n');
+		Scholar.debug('Updating DB from version ' + fromVersion + ' to ' + toVersion + '\n');
 		
 		// Step through version changes until we reach the current version
 		//
 		// Each block performs the changes necessary to move from the
-		// previous revision to that one. 
+		// previous revision to that one.
 		//
 		// N.B. Be sure to call _updateDBVersion(i) at the end of each block!
-		for (var i=fromVersion+1; i<=toVersion; i++){
+		for (var i=parseInt(fromVersion) + 1; i<=toVersion; i++){
 			
-			if (i==1){
+			// For now, just wipe and recreate
+			if (i==2){
+				_initializeSchema();
+			}
+			
+			if (i==3){
 				// do stuff
 				// _updateDBVersion(i);
 			}
