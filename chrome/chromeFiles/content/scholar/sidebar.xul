@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
-<?xml-stylesheet href="chrome://global/skin/" type"text/css"Ê?>
-<?xml-stylesheet href="chrome://browser/skin/browser.css" type="text/css"Ê?>
+<?xml-stylesheet href="chrome://global/skin/" type"text/css"?>
+<?xml-stylesheet href="chrome://browser/skin/browser.css" type="text/css"?>
 
 <page id="scholar-sidebar" title="Scholar"
 		onload="setView()"
