@@ -29,12 +29,14 @@ Scholar_Object.prototype._init = function(){
 	this._changedObjectData = new Scholar.Hash();
 }
 
+
 /*
  * Check if the specified field is a primary field from the objects table
  */
 Scholar_Object.prototype.isPrimaryField = function(field){
 	if (!Scholar_Object.primaryFields){
 		Scholar_Object.primaryFields = Scholar_DB.getColumnHash('objects');
+		Scholar_Object.primaryFields['firstCreator'] = true;
 	}
 	
 	return !!Scholar_Object.primaryFields[field];
@@ -45,7 +47,6 @@ Scholar_Object.editableFields = {
 	source: true,
 	rights: true
 };
-
 
 /*
  * Check if the specified primary field can be changed with setField()
@@ -62,7 +63,7 @@ Scholar_Object.prototype.loadFromID = function(id){
 	var sql = 'SELECT O.*, lastName AS firstCreator FROM objects O '
 		+ 'LEFT JOIN objectCreators OC USING (objectID) '
 		+ 'LEFT JOIN creators USING (creatorID) '
-		+ 'WHERE objectID=' + id + ' AND OC.orderIndex=1';
+		+ 'WHERE objectID=' + id + ' AND OC.orderIndex=0';
 	var row = Scholar_DB.rowQuery(sql);
 	this.loadFromRow(row);
 }
@@ -219,7 +220,7 @@ Scholar_Object.prototype.removeCreator = function(orderIndex){
  */
 Scholar_Object.prototype.getField = function(field){
 	if (this.isPrimaryField(field)){
-		return this._data[field] ? this._data[field] : false;
+		return this._data[field] ? this._data[field] : '';
 	}
 	else {
 		if (this.getID() && !this._objectDataLoaded){
@@ -228,7 +229,7 @@ Scholar_Object.prototype.getField = function(field){
 		
 		var fieldID = Scholar_ObjectFields.getID(field);
 		
-		return this._objectData[fieldID] ? this._objectData[fieldID] : false;
+		return this._objectData[fieldID] ? this._objectData[fieldID] : '';
 	}
 }
 
@@ -733,7 +734,7 @@ var Scholar_Objects = new function(){
 		
 		// Build return array
 		for (i=0; i<ids.length; i++){
-			loaded[ids[i]] = _objects[ids[i]];
+			loaded.push(_objects[ids[i]]);
 		}
 	
 		return loaded;
@@ -750,7 +751,7 @@ var Scholar_Objects = new function(){
 			+ 'LEFT JOIN folders F ON (O.folderID=F.folderID) '
 			
 			// Only get first creator
-			+ 'WHERE OC.orderIndex=1 '
+			+ 'WHERE OC.orderIndex=0 '
 			
 			// folderID=0 puts root folder items after folders
 			// TODO: allow folders to intermingle with items, order-wise
@@ -815,7 +816,7 @@ var Scholar_Objects = new function(){
 		var sql = 'SELECT O.*, lastName AS firstCreator FROM objects O '
 			+ 'LEFT JOIN objectCreators OC USING (objectID) '
 			+ 'LEFT JOIN creators USING (creatorID) '
-			+ 'WHERE OC.orderIndex=1';
+			+ 'WHERE OC.orderIndex=0';
 		
 		if (arguments[0]!='all'){
 			sql += ' AND O.objectID IN (' + Scholar.join(arguments,',') + ')';
