@@ -7,6 +7,9 @@
          xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" >
 
 	<script src="sidebar.js"/>
+	<script src="scholar.js"/>
+	<script src="db.js"/>
+	<script src="data_access.js"/>
   
     <tree
         id="scholar-sidebar-items"
@@ -24,8 +27,8 @@
                 flex="1"/>
             <splitter class="tree-splitter"/>
             <treecol
-                id="description_column"
-                label="Description"
+                id="creator_column"
+                label="Creator"
                 flex="1"/>
             <splitter class="tree-splitter"/>
             <treecol
