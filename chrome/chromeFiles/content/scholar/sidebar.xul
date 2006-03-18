@@ -30,11 +30,6 @@
                 id="creator_column"
                 label="Creator"
                 flex="1"/>
-            <splitter class="tree-splitter"/>
-            <treecol
-                id="link_column"
-                label="URL"
-                flex="1"/>
         </treecols>
         <treechildren/>
     </tree>
