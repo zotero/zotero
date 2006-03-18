@@ -1,3 +1,5 @@
+var ScholarLocalizedStrings;
+
 var treeView = {
 	treebox: null,
 	dataObjects: null,
@@ -22,11 +24,6 @@ var treeView = {
     setTree: function(treebox){ 
     	this.treebox = treebox;
     	this.dataObjects = Scholar_Objects.getAll();
-    	
-        //Dan S: Check out the debug output created by this
-		for(var i = 0; i < this.dataObjects.length; i++)
-			Scholar.debug(Scholar.varDump(this.dataObjects[i]),5);
-
     },
     isContainer: function(row){ return false; },
     isSeparator: function(row){ return false; },
@@ -35,10 +32,71 @@ var treeView = {
     getImageSrc: function(row,col){ return null; },
     getRowProperties: function(row,props){},
     getCellProperties: function(row,col,props){},
-    getColumnProperties: function(colid,col,props){}
+    getColumnProperties: function(colid,col,props){},
+    selectionChanged: function(){
+		if(this.selection.count == 0)
+		{
+			setObjectPaneVisibility(false);
+			document.getElementById('status-text').value = "(No selection)";
+		}
+		else if(this.selection.count == 1)
+		{
+			document.getElementById('status-text').value = "Selected: " + this.selection.currentIndex;
+			setObjectPaneVisibility(true);
+			populateObjectPane(this.dataObjects[this.selection.currentIndex]);
+		}
+		else
+		{
+			setObjectPaneVisibility(false);
+			document.getElementById('status-text').value = "(Multiple selection)";
+		}
+	}
 };
+
+function setObjectPaneVisibility(vis)
+{
+	document.getElementById('scholar-sidebar-object-pane').hidden = !vis;
+	document.getElementById('status-text').hidden = vis;
+}
+
+function populateObjectPane(objectRow)
+{
+	var dynamicBox = document.getElementById('scholar-sidebar-object-pane-dynamic-fields');
+	while(dynamicBox.hasChildNodes())
+		dynamicBox.removeChild(dynamicBox.firstChild);
+	
+	var fields = Scholar_ObjectFields.getObjectTypeFields(objectRow.getField("objectTypeID"));
+	var fieldNames = new Array("title","dateAdded","dateModified","source","rights");
+	for(var i = 0; i<fields.length; i++)
+		fieldNames.push(Scholar_ObjectFields.getName(fields[i]));
+	
+	for(var i = 0; i<fieldNames.length; i++)
+	{
+		if(objectRow.getField(fieldNames[i]) != "")
+		{
+			var label = document.createElement("label");
+			label.setAttribute("value",ScholarLocalizedStrings.getString("objectFields."+fieldNames[i])+":");
+			
+			var valueElement = document.createElement("description");
+			valueElement.appendChild(document.createTextNode(objectRow.getField(fieldNames[i])));
+			
+			var row = document.createElement("row");
+			row.appendChild(label)
+			row.appendChild(valueElement)
+			
+			dynamicBox.appendChild(row);
+		}
+	}
+	
+}
+
+function selectionChanged()
+{
+	treeView.selectionChanged();
+}
 
 function setView()
 {
+	ScholarLocalizedStrings = document.getElementById('scholar-strings');
     document.getElementById('scholar-sidebar-items').view=treeView;
 }

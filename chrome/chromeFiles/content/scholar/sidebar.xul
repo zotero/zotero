@@ -1,6 +1,8 @@
 <?xml version="1.0"?>
 <?xml-stylesheet href="chrome://global/skin/" type"text/css"?>
 <?xml-stylesheet href="chrome://browser/skin/browser.css" type="text/css"?>
+<?xml-stylesheet href="chrome://scholar/skin/scholar.css" type="text/css"?>
+<!DOCTYPE window SYSTEM "chrome://scholar/locale/scholar.dtd">
 
 <page id="scholar-sidebar" title="Scholar"
 		onload="setView()"
@@ -10,10 +12,12 @@
 	<script src="scholar.js"/>
 	<script src="db.js"/>
 	<script src="data_access.js"/>
+	<stringbundle id="scholar-strings" src="chrome://scholar/locale/scholar.properties"/>
   
     <tree
         id="scholar-sidebar-items"
         seltype="multiple"
+        onselect="selectionChanged()"
         flex="1"
         enableColumnDrag="true"
         datasources="rdf:null"
@@ -23,25 +27,31 @@
         <treecols>
             <treecol
                 id="title_column"
-                label="Title"
+                label="&sidebar.items.title_column;"
                 flex="1"/>
             <splitter class="tree-splitter"/>
             <treecol
                 id="creator_column"
-                label="Creator"
+                label="&sidebar.items.creator_column;"
                 flex="1"/>
         </treecols>
         <treechildren/>
     </tree>
-    <splitter collapse="before" resizeafter="grow"/>
-    
-    <vbox>
-    	<label control="test1" value="Test1:"/>
+   	<label id="status-text" value="(No selection)"/>
+	<grid id="scholar-sidebar-object-pane" hidden="true">
+	  <columns>
+		<column/>
+		<column flex="1"/>
+	  </columns>
+	
+	  <rows id="scholar-sidebar-object-pane-dynamic-fields">
+	  </rows>
+	</grid>
+    	<!--
 		<textbox id="test1"/>
     	<label control="test2" value="Test2:"/>
 		<textbox id="test2"/>
     	<label control="test3" value="Test3:"/>
 		<textbox id="test3"/>
-	</vbox>
-
+		-->
 </page>

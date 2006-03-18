@@ -1,1 +1,4 @@
 <!ENTITY statusbarpanel.helloworld "Hello, World">
+
+<!ENTITY sidebar.items.title_column "Title">
+<!ENTITY sidebar.items.creator_column "Creator">
