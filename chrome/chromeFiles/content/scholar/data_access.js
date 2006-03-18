@@ -219,6 +219,7 @@ Scholar_Object.prototype.removeCreator = function(orderIndex){
  * Field can be passed as fieldID or fieldName
  */
 Scholar_Object.prototype.getField = function(field){
+	//Scholar.debug('Requesting field ' + field + ' for object ' + this.getID(), 4);
 	if (this.isPrimaryField(field)){
 		return this._data[field] ? this._data[field] : '';
 	}
@@ -646,6 +647,8 @@ Scholar_Object.prototype._loadCreators = function(){
 		+ 'WHERE objectID=' + this.getID() + ' ORDER BY orderIndex';
 	var creators = Scholar_DB.query(sql);
 	
+	this._creatorsLoaded = true;
+	
 	if (!creators){
 		return true;
 	}
@@ -659,7 +662,6 @@ Scholar_Object.prototype._loadCreators = function(){
 		this._creators.set(creators[i]['orderIndex'], creator);
 	}
 	
-	this._creatorsLoaded = true;
 	return true;
 }
 
@@ -679,11 +681,12 @@ Scholar_Object.prototype._loadObjectData = function(){
 		
 	var result = Scholar_DB.query(sql,[{'int':this._data['objectID']}]);
 	
+	this._objectDataLoaded = true;
+	
 	if (result){
 		for (var i=0,len=result.length; i<len; i++){
 			this.setField(result[i]['fieldID'], result[i]['value'], true);
 		}
-		this._objectDataLoaded = true;
 		return true;
 	}
 	else {
