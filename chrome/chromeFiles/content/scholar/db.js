@@ -1,7 +1,7 @@
 /*
  * DB connection and schema management class
  */
-var Scholar_DB = new function(){
+Scholar.DB = new function(){
 	// Private members
 	var _connection;
 	

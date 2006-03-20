@@ -8,10 +8,9 @@
 		onload="setView()"
          xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" >
 
+	<script src="include.js"/>
 	<script src="sidebar.js"/>
-	<script src="scholar.js"/>
-	<script src="db.js"/>
-	<script src="data_access.js"/>
+	
 	<stringbundle id="scholar-strings" src="chrome://scholar/locale/scholar.properties"/>
   
     <tree

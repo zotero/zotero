@@ -1,9 +1,9 @@
 /*
  * Constructor for Object object
  *
- * Generally should be called through Scholar_Objects rather than directly
+ * Generally should be called through Scholar.Objects rather than directly
  */
-function Scholar_Object(){
+Scholar.Object = function(){
 	this._init();
 	
 	// Accept objectTypeID, folderID and orderIndex in constructor
@@ -13,7 +13,7 @@ function Scholar_Object(){
 	}
 }
 
-Scholar_Object.prototype._init = function(){
+Scholar.Object.prototype._init = function(){
 	//
 	// Public members for access by public methods -- do not access directly
 	//
@@ -33,16 +33,16 @@ Scholar_Object.prototype._init = function(){
 /*
  * Check if the specified field is a primary field from the objects table
  */
-Scholar_Object.prototype.isPrimaryField = function(field){
-	if (!Scholar_Object.primaryFields){
-		Scholar_Object.primaryFields = Scholar_DB.getColumnHash('objects');
-		Scholar_Object.primaryFields['firstCreator'] = true;
+Scholar.Object.prototype.isPrimaryField = function(field){
+	if (!Scholar.Object.primaryFields){
+		Scholar.Object.primaryFields = Scholar.DB.getColumnHash('objects');
+		Scholar.Object.primaryFields['firstCreator'] = true;
 	}
 	
-	return !!Scholar_Object.primaryFields[field];
+	return !!Scholar.Object.primaryFields[field];
 }
 
-Scholar_Object.editableFields = {
+Scholar.Object.editableFields = {
 	title: true,
 	source: true,
 	rights: true
@@ -51,20 +51,20 @@ Scholar_Object.editableFields = {
 /*
  * Check if the specified primary field can be changed with setField()
  */
-Scholar_Object.prototype.isEditableField = function(field){
-	return !!Scholar_Object.editableFields[field];
+Scholar.Object.prototype.isEditableField = function(field){
+	return !!Scholar.Object.editableFields[field];
 }
 
 
 /*
  * Build object from database
  */
-Scholar_Object.prototype.loadFromID = function(id){
+Scholar.Object.prototype.loadFromID = function(id){
 	var sql = 'SELECT O.*, lastName AS firstCreator FROM objects O '
 		+ 'LEFT JOIN objectCreators OC USING (objectID) '
 		+ 'LEFT JOIN creators USING (creatorID) '
 		+ 'WHERE objectID=' + id + ' AND OC.orderIndex=0';
-	var row = Scholar_DB.rowQuery(sql);
+	var row = Scholar.DB.rowQuery(sql);
 	this.loadFromRow(row);
 }
 
@@ -72,7 +72,7 @@ Scholar_Object.prototype.loadFromID = function(id){
 /*
  * Populate basic object data from a database row
  */
-Scholar_Object.prototype.loadFromRow = function(row){
+Scholar.Object.prototype.loadFromRow = function(row){
 	this._init();
 	for (col in row){
 		if (this.isPrimaryField(col) || col=='firstCreator'){
@@ -86,18 +86,18 @@ Scholar_Object.prototype.loadFromRow = function(row){
 /*
  * Check if any data fields have changed since last save
  */
-Scholar_Object.prototype.hasChanged = function(){
+Scholar.Object.prototype.hasChanged = function(){
 	return (this._changed.length || this._changedCreators.length ||
 		this._changedObjectData.length);
 }
 
 
-Scholar_Object.prototype.getID = function(){
+Scholar.Object.prototype.getID = function(){
 	return this._data['objectID'] ? this._data['objectID'] : false;
 }
 
 
-Scholar_Object.prototype.getType = function(){
+Scholar.Object.prototype.getType = function(){
 	return this._data['objectTypeID'] ? this._data['objectTypeID'] : false;
 }
 
@@ -105,7 +105,7 @@ Scholar_Object.prototype.getType = function(){
 /*
  * Set or change the object's type
  */
-Scholar_Object.prototype.setType = function(objectTypeID){
+Scholar.Object.prototype.setType = function(objectTypeID){
 	if (objectTypeID==this.getType()){
 		return true;
 	}
@@ -116,7 +116,7 @@ Scholar_Object.prototype.setType = function(objectTypeID){
 			+ 'WHERE objectTypeID=' + this.getType() + ' AND fieldID NOT IN '
 			+ '(SELECT fieldID FROM objectTypeFields WHERE objectTypeID='
 			+ objectTypeID + ')';
-		var obsoleteFields = Scholar_DB.columnQuery(sql);
+		var obsoleteFields = Scholar.DB.columnQuery(sql);
 		
 		if (obsoleteFields){
 			for (var i=0; i<obsoleteFields.length; i++){
@@ -134,7 +134,7 @@ Scholar_Object.prototype.setType = function(objectTypeID){
 /*
  * Returns the number of creators for this object
  */
-Scholar_Object.prototype.numCreators = function(){
+Scholar.Object.prototype.numCreators = function(){
 	if (this.getID() && !this._creatorsLoaded){
 		this._loadCreators();
 	}
@@ -144,7 +144,7 @@ Scholar_Object.prototype.numCreators = function(){
 /*
  * Returns an array of the creator data at the given position, or false if none
  */
-Scholar_Object.prototype.getCreator = function(pos){
+Scholar.Object.prototype.getCreator = function(pos){
 	if (this.getID() && !this._creatorsLoaded){
 		this._loadCreators();
 	}
@@ -159,7 +159,7 @@ Scholar_Object.prototype.getCreator = function(pos){
 /*
  * Set or update the creator at the specified position
  */
-Scholar_Object.prototype.setCreator = function(orderIndex, firstName, lastName, creatorTypeID){
+Scholar.Object.prototype.setCreator = function(orderIndex, firstName, lastName, creatorTypeID){
 	if (this.getID() && !this._creatorsLoaded){
 		this._loadCreators();
 	}
@@ -193,7 +193,7 @@ Scholar_Object.prototype.setCreator = function(orderIndex, firstName, lastName, 
 /*
  * Remove a creator and shift others down
  */
-Scholar_Object.prototype.removeCreator = function(orderIndex){
+Scholar.Object.prototype.removeCreator = function(orderIndex){
 	if (this.getID() && !this._creatorsLoaded){
 		this._loadCreators();
 	}
@@ -218,7 +218,7 @@ Scholar_Object.prototype.removeCreator = function(orderIndex){
  *
  * Field can be passed as fieldID or fieldName
  */
-Scholar_Object.prototype.getField = function(field){
+Scholar.Object.prototype.getField = function(field){
 	//Scholar.debug('Requesting field ' + field + ' for object ' + this.getID(), 4);
 	if (this.isPrimaryField(field)){
 		return this._data[field] ? this._data[field] : '';
@@ -228,7 +228,7 @@ Scholar_Object.prototype.getField = function(field){
 			this._loadObjectData();
 		}
 		
-		var fieldID = Scholar_ObjectFields.getID(field);
+		var fieldID = Scholar.ObjectFields.getID(field);
 		
 		return this._objectData[fieldID] ? this._objectData[fieldID] : '';
 	}
@@ -240,7 +240,7 @@ Scholar_Object.prototype.getField = function(field){
  *
  * Field can be passed as fieldID or fieldName
  */
-Scholar_Object.prototype.setField = function(field, value, loadIn){
+Scholar.Object.prototype.setField = function(field, value, loadIn){
 	// Primary field
 	if (this.isPrimaryField(field)){
 		if (!this.isEditableField()){
@@ -267,13 +267,13 @@ Scholar_Object.prototype.setField = function(field, value, loadIn){
 			this._loadObjectData();
 		}
 		
-		var fieldID = Scholar_ObjectFields.getID(field);
+		var fieldID = Scholar.ObjectFields.getID(field);
 		
 		if (!fieldID){
 			throw (field + ' is not a valid objectData field.');
 		}
 		
-		if (!Scholar_ObjectFields.isValidForType(fieldID, this.getType())){
+		if (!Scholar.ObjectFields.isValidForType(fieldID, this.getType())){
 			throw (field + ' is not a valid field for this type.');
 		}
 		
@@ -296,7 +296,7 @@ Scholar_Object.prototype.setField = function(field, value, loadIn){
  * N.B. This action updates the DB immediately and reloads all cached
  * objects -- a save() is not required
  */
-Scholar_Object.prototype.setPosition = function(newFolder, newPos){
+Scholar.Object.prototype.setPosition = function(newFolder, newPos){
 	var oldFolder = this.getField('folderID');
 	var oldPos = this.getField('orderIndex');
 	
@@ -308,7 +308,7 @@ Scholar_Object.prototype.setPosition = function(newFolder, newPos){
 		
 		// If no position provided, drop at end of folder
 		if (!newPos){
-			newPos = Scholar_DB.valueQuery('SELECT MAX(orderIndex)+1 FROM ' +
+			newPos = Scholar.DB.valueQuery('SELECT MAX(orderIndex)+1 FROM ' +
 				'objects WHERE folderID=' + newFolder);
 		}
 		// Otherwise shift down above it in old folder and shift up at it or
@@ -326,12 +326,12 @@ Scholar_Object.prototype.setPosition = function(newFolder, newPos){
 			
 		sql += 'COMMIT;';
 		
-		Scholar_DB.query(sql);
+		Scholar.DB.query(sql);
 	}
 	
 	this._data['folderID'] = newFolder;
 	this._data['orderIndex'] = newPos;
-	Scholar_Objects.reloadAll();
+	Scholar.Objects.reloadAll();
 	return true;
 }
 
@@ -339,7 +339,7 @@ Scholar_Object.prototype.setPosition = function(newFolder, newPos){
 /*
  * Save changes back to database
  */
-Scholar_Object.prototype.save = function(){
+Scholar.Object.prototype.save = function(){
 	if (!this.hasChanged()){
 		Scholar.debug('Object ' + this.getID() + ' has not changed', 4);
 		return !!this.getID();
@@ -354,7 +354,7 @@ Scholar_Object.prototype.save = function(){
 		var objectID = this.getID();
 		
 		try {
-			Scholar_DB.beginTransaction();
+			Scholar.DB.beginTransaction();
 			
 			//
 			// Primary fields
@@ -397,7 +397,7 @@ Scholar_Object.prototype.save = function(){
 						sql2 = 'DELETE FROM objectCreators '
 							+ ' WHERE objectID=' + this.getID()
 							+ ' AND orderIndex=' + orderIndex;
-						Scholar_DB.query(sql2);
+						Scholar.DB.query(sql2);
 						continue;
 					}
 					
@@ -422,7 +422,7 @@ Scholar_Object.prototype.save = function(){
 						+ ' WHERE objectID=' + this.getID()
 						+ ' AND orderIndex=' + orderIndex;
 					
-					if (Scholar_DB.valueQuery(sql2)){
+					if (Scholar.DB.valueQuery(sql2)){
 						sql += 'UPDATE objectCreators SET creatorID='
 							+ creatorID + ' WHERE objectID=' + this.getID()
 							+ ' AND orderIndex=' + orderIndex + ";\n";
@@ -451,10 +451,10 @@ Scholar_Object.prototype.save = function(){
 							+ 'WHERE objectID=' + this.getID()
 							+ ' AND fieldID=' + fieldID;
 						
-						if (Scholar_DB.valueQuery(sql2)){
+						if (Scholar.DB.valueQuery(sql2)){
 							sql += "UPDATE objectData SET value=";
 							// Take advantage of SQLite's manifest typing
-							if (Scholar_ObjectFields.isInteger(fieldID)){
+							if (Scholar.ObjectFields.isInteger(fieldID)){
 								sql += this.getField(fieldID);
 							}
 							else {
@@ -467,7 +467,7 @@ Scholar_Object.prototype.save = function(){
 							sql += 'INSERT INTO objectData VALUES ('
 								+ this.getID() + ',' + fieldID + ',';
 								
-							if (Scholar_ObjectFields.isInteger(fieldID)){
+							if (Scholar.ObjectFields.isInteger(fieldID)){
 								sql += this.getField(fieldID);
 							}
 							else {
@@ -491,11 +491,11 @@ Scholar_Object.prototype.save = function(){
 			}
 			
 			
-			Scholar_DB.query(sql);
-			Scholar_DB.commitTransaction();
+			Scholar.DB.query(sql);
+			Scholar.DB.commitTransaction();
 		}
 		catch (e){
-			Scholar_DB.rollbackTransaction();
+			Scholar.DB.rollbackTransaction();
 			throw (e);
 		}
 	}
@@ -535,7 +535,7 @@ Scholar_Object.prototype.save = function(){
 		sqlValues.push({'int':newFolder});
 		
 		try {
-			Scholar_DB.beginTransaction();
+			Scholar.DB.beginTransaction();
 			
 			// We set the index here within the transaction so that MAX()+1
 			// stays consistent through the INSERT
@@ -544,7 +544,7 @@ Scholar_Object.prototype.save = function(){
 				sqlValues.push({'int':this.getField('orderIndex')});
 			}
 			else {
-				var newPos = Scholar_DB.valueQuery('SELECT MAX(orderIndex)+1 '
+				var newPos = Scholar.DB.valueQuery('SELECT MAX(orderIndex)+1 '
 					+ 'FROM objects WHERE folderID=' + newFolder);
 				sqlValues.push({'int': newPos});
 			}
@@ -597,14 +597,14 @@ Scholar_Object.prototype.save = function(){
 			}
 			sql = sql.substring(0,sql.length-1) + ");\n";
 			
-			var objectID = Scholar_DB.query(sql,sqlValues);
+			var objectID = Scholar.DB.query(sql,sqlValues);
 			
 			if (this._changedObjectData.length){
 				sql = '';
 				for (fieldID in this._changedObjectData.items){
 					sql += 'INSERT INTO objectData VALUES (' +
 						objectID + ',' + fieldID + ',';
-						if (Scholar_ObjectFields.isInteger(fieldID)){
+						if (Scholar.ObjectFields.isInteger(fieldID)){
 							sql += this.getField(fieldID);
 						}
 						else {
@@ -614,22 +614,22 @@ Scholar_Object.prototype.save = function(){
 				}
 			}
 			
-			Scholar_DB.query(sql);
-			Scholar_DB.commitTransaction();
+			Scholar.DB.query(sql);
+			Scholar.DB.commitTransaction();
 		}
 		catch (e){
-			Scholar_DB.rollbackTransaction();
+			Scholar.DB.rollbackTransaction();
 			throw (e);
 		}
 	}
 	
-	Scholar_Objects.reload(this.getID());
+	Scholar.Objects.reload(this.getID());
 	
 	return isNew ? this.getID() : true;
 }
 
 
-Scholar_Object.prototype.toString = function(){
+Scholar.Object.prototype.toString = function(){
 	return this.getTitle();
 }
 
@@ -637,7 +637,7 @@ Scholar_Object.prototype.toString = function(){
 /*
  * Load in the creators from the database
  */
-Scholar_Object.prototype._loadCreators = function(){
+Scholar.Object.prototype._loadCreators = function(){
 	if (!this.getID()){
 		throw ('ObjectID not set for object before attempting to load creators');
 	}
@@ -645,7 +645,7 @@ Scholar_Object.prototype._loadCreators = function(){
 	var sql = 'SELECT C.creatorID, C.*, orderIndex FROM objectCreators OC '
 		+ 'LEFT JOIN creators C USING (creatorID) '
 		+ 'WHERE objectID=' + this.getID() + ' ORDER BY orderIndex';
-	var creators = Scholar_DB.query(sql);
+	var creators = Scholar.DB.query(sql);
 	
 	this._creatorsLoaded = true;
 	
@@ -669,7 +669,7 @@ Scholar_Object.prototype._loadCreators = function(){
 /*
  * Load in the field data from the database
  */
-Scholar_Object.prototype._loadObjectData = function(){
+Scholar.Object.prototype._loadObjectData = function(){
 	if (!this.getID()){
 		throw ('ObjectID not set for object before attempting to load data');
 	}
@@ -679,7 +679,7 @@ Scholar_Object.prototype._loadObjectData = function(){
 		+ 'objects WHERE objectID=?1) AND OTF.fieldID=OD.fieldID) '
 		+ 'WHERE objectID=?1 ORDER BY orderIndex';
 		
-	var result = Scholar_DB.query(sql,[{'int':this._data['objectID']}]);
+	var result = Scholar.DB.query(sql,[{'int':this._data['objectID']}]);
 	
 	this._objectDataLoaded = true;
 	
@@ -698,7 +698,7 @@ Scholar_Object.prototype._loadObjectData = function(){
 
 
 
-var Scholar_Objects = new function(){
+Scholar.Objects = new function(){
 	// Private members
 	var _objects = new Array();
 	
@@ -760,7 +760,7 @@ var Scholar_Objects = new function(){
 			// TODO: allow folders to intermingle with items, order-wise
 			+ 'ORDER BY O.folderID=0, F.orderIndex, O.orderIndex';
 		
-		var ids = Scholar_DB.columnQuery(sql);
+		var ids = Scholar.DB.columnQuery(sql);
 		return this.get(ids);
 	}
 	
@@ -799,7 +799,7 @@ var Scholar_Objects = new function(){
 	function add(data, objectTypeID, folderID, orderIndex){
 		var insert = new Array();
 		
-		var obj = new Scholar_Object(objectTypeID, folderID, orderIndex);
+		var obj = new Scholar.Object(objectTypeID, folderID, orderIndex);
 		
 		for (field in data){
 			obj.setField(data[field]);
@@ -825,11 +825,11 @@ var Scholar_Objects = new function(){
 			sql += ' AND O.objectID IN (' + Scholar.join(arguments,',') + ')';
 		}
 		
-		var result = Scholar_DB.query(sql);
+		var result = Scholar.DB.query(sql);
 		
 		if (result){
 			for (var i=0,len=result.length; i<len; i++){
-				var obj = new Scholar_Object();
+				var obj = new Scholar.Object();
 				obj.loadFromRow(result[i]);
 				_objects[result[i]['objectID']] = obj;
 			}
@@ -839,7 +839,7 @@ var Scholar_Objects = new function(){
 }
 
 
-var Scholar_Creators = new function(){
+Scholar.Creators = new function(){
 	var _creators = new Array; // indexed by first%%%last%%%creatorTypeID hash
 	var _creatorsByID = new Array; // indexed by creatorID
 	
@@ -857,7 +857,7 @@ var Scholar_Creators = new function(){
 		}
 		
 		var sql = 'SELECT * FROM creators WHERE creatorID=' + creatorID;
-		var result = Scholar_DB.rowQuery(sql);
+		var result = Scholar.DB.rowQuery(sql);
 		
 		if (!result){
 			return false;
@@ -883,7 +883,7 @@ var Scholar_Creators = new function(){
 		var params = [
 			{'string': firstName}, {'string': lastName}, {'int': creatorTypeID}
 		];
-		var creatorID = Scholar_DB.valueQuery(sql,params);
+		var creatorID = Scholar.DB.valueQuery(sql,params);
 		
 		if (creatorID){
 			_creators[hash] = creatorID;
@@ -915,7 +915,7 @@ var Scholar_Creators = new function(){
 			}
 			var rnd = Math.floor(Math.random()*max);
 			var sql2 = 'SELECT COUNT(*) FROM creators WHERE creatorID=' + rnd;
-			var exists = Scholar_DB.valueQuery(sql2);
+			var exists = Scholar.DB.valueQuery(sql2);
 			tries--;
 		}
 		while (exists);
@@ -924,7 +924,7 @@ var Scholar_Creators = new function(){
 			{'int': rnd}, {'int': creatorTypeID},
 			{'string': firstName}, {'string': lastName},
 		];
-		return Scholar_DB.query(sql,params);
+		return Scholar.DB.query(sql,params);
 	}
 	
 	
@@ -936,7 +936,7 @@ var Scholar_Creators = new function(){
 	function purge(returnSQL){
 		var sql = 'SELECT creatorID FROM creators WHERE creatorID NOT IN '
 			+ '(SELECT creatorID FROM objectCreators);';
-		var toDelete = Scholar_DB.columnQuery(sql);
+		var toDelete = Scholar.DB.columnQuery(sql);
 		
 		if (!toDelete){
 			return false;
@@ -946,7 +946,7 @@ var Scholar_Creators = new function(){
 			+ '(SELECT creatorID FROM objectCreators);';
 		
 		if (!returnSQL){
-			var result = Scholar_DB.query(sql);
+			var result = Scholar.DB.query(sql);
 		}
 		
 		// Clear creator entries in internal array
@@ -971,7 +971,7 @@ var Scholar_Creators = new function(){
 }
 
 
-var Scholar_ObjectFields = new function(){
+Scholar.ObjectFields = new function(){
 	// Private members
 	var _fields = new Array();
 	var _fieldFormats = new Array();
@@ -1034,7 +1034,7 @@ var Scholar_ObjectFields = new function(){
 		var sql = 'SELECT fieldID FROM objectTypeFields '
 			+ 'WHERE objectTypeID=' + objectTypeID + ' ORDER BY orderIndex';
 		
-		_objectTypeFields[objectTypeID] = Scholar_DB.columnQuery(sql);
+		_objectTypeFields[objectTypeID] = Scholar.DB.columnQuery(sql);
 		return _objectTypeFields[objectTypeID];
 	}
 	
@@ -1045,7 +1045,7 @@ var Scholar_ObjectFields = new function(){
 	function _getFieldObjectTypes(){
 		var sql = 'SELECT fieldID,objectTypeID FROM objectTypeFields';
 		
-		var results = Scholar_DB.query(sql);
+		var results = Scholar.DB.query(sql);
 		
 		if (!results){
 			throw ('No fields in objectTypeFields!');
@@ -1067,7 +1067,7 @@ var Scholar_ObjectFields = new function(){
 	function _loadFields(){
 		var i,len;
 		
-		var result = Scholar_DB.query('SELECT * FROM fieldFormats');
+		var result = Scholar.DB.query('SELECT * FROM fieldFormats');
 		
 		for (i=0; i<result.length; i++){
 			_fieldFormats[result[i]['fieldFormatID']] = {
@@ -1076,7 +1076,7 @@ var Scholar_ObjectFields = new function(){
 			};
 		}
 		
-		result = Scholar_DB.query('SELECT * FROM fields');
+		result = Scholar.DB.query('SELECT * FROM fields');
 		
 		if (!result.length){
 			throw ('No fields in database!');
@@ -1098,7 +1098,7 @@ var Scholar_ObjectFields = new function(){
 }
 
 /*
-var objects = Scholar_Objects.getAll();
+var objects = Scholar.Objects.getAll();
 
 var obj = objects[9];
 for (var i=0,len=obj.numCreators(); i<len; i++){

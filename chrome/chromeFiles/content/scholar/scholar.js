@@ -9,13 +9,29 @@ const SCHOLAR_CONFIG = {
 /*
  * Core functions
  */
-var Scholar = {
+var Scholar = new function(){
+	var _initialized = false
+	
+	this.testString = 'Sidebar is not registered';
+	
+	this.init = init;
+	this.debug = debug;
+	this.varDump = varDump;
+	this.flattenArguments = flattenArguments;
+	this.join = join;
+	this.Hash = Hash;
+	
 	/*
 	 * Initialize the extension
 	 */
-	init: function() {
-		Scholar_DB.updateSchema();
-	},
+	function init(){
+		if (!_initialized){
+			Scholar.DB.updateSchema();
+			_initialized = true;
+			return true;
+		}
+		return false;
+	}
 	
 	
 	/*
@@ -26,7 +42,7 @@ var Scholar = {
 	 *
 	 * Defaults to log level 3 if level not provided
 	 */
-	debug: function(message, level) {
+	function debug(message, level) {
 		if (!SCHOLAR_CONFIG['DEBUG_LOGGING']){
 			return false;
 		}
@@ -50,7 +66,7 @@ var Scholar = {
 			dump('scholar(' + level + '): ' + message);
 		}
 		return true;
-	},
+	}
 	
 	
 	/**
@@ -58,7 +74,7 @@ var Scholar = {
 	 *
 	 * Adapted from http://binnyva.blogspot.com/2005/10/dump-function-javascript-equivalent-of.html
 	 */
-	varDump: function(arr,level) {
+	function varDump(arr,level) {
 		var dumped_text = "";
 		if (!level){
 			level = 0;
@@ -92,7 +108,7 @@ var Scholar = {
 			dumped_text = "===>"+arr+"<===("+typeof(arr)+")";
 		}
 		return dumped_text;
-	},
+	}
 	
 	
 	/*
@@ -100,7 +116,7 @@ var Scholar = {
 	 * an array of values -- allows for functions to accept both arrays of
 	 * values and/or an arbitrary number of individual values
 	 */
-	flattenArguments: function(args){
+	function flattenArguments(args){
 		var returns = new Array();
 		
 		for (var i=0; i<args.length; i++){
@@ -115,7 +131,7 @@ var Scholar = {
 		}
 		
 		return returns;
-	},
+	}
 	
 	
 	/*
@@ -124,13 +140,13 @@ var Scholar = {
 	 *
 	 * Note that this is safer than extending Object()
 	 */
-	join: function(obj, delim){
+	function join(obj, delim){
 		var a = [];
 		for (var i=0, len=obj.length; i<len; i++){
 			a.push(obj[i]);
 		}
 		return a.join(delim);
-	},
+	}
 	
 	
 	/*
@@ -155,7 +171,7 @@ var Scholar = {
 	 * (c) Mojavelinux, Inc.
 	 * License: Creative Commons
 	 */
-	 Hash: function(){
+	 function Hash(){
 		 this.length = 0;
 		 this.items = new Array();
 		 
@@ -204,6 +220,5 @@ Scholar.Hash.prototype.remove = function(in_key){
 Scholar.Hash.prototype.has = function(in_key){
 	return typeof(this.items[in_key]) != 'undefined';
 }
-
 
 window.addEventListener("load", function(e) { Scholar.init(e); }, false);

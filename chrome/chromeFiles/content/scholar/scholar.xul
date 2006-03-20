@@ -10,7 +10,7 @@
 	<script src="data_access.js"/>
 	
 	<statusbar id="status-bar">
-		<statusbarpanel id="my-panel" label="&statusbarpanel.helloworld;"/>
+		<statusbarpanel onclick="alert(Scholar.testString)" id="my-panel" label="&statusbarpanel.helloworld;"/>
 	</statusbar>
 	
   <menupopup id="viewSidebarMenu">

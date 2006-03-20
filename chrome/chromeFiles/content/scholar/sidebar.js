@@ -23,7 +23,7 @@ var treeView = {
     },
     setTree: function(treebox){ 
     	this.treebox = treebox;
-    	this.dataObjects = Scholar_Objects.getAll();
+    	this.dataObjects = Scholar.Objects.getAll();
     },
     isContainer: function(row){ return false; },
     isSeparator: function(row){ return false; },
@@ -100,3 +100,5 @@ function setView()
 	ScholarLocalizedStrings = document.getElementById('scholar-strings');
     document.getElementById('scholar-sidebar-items').view=treeView;
 }
+
+Scholar.testString = 'Sidebar is registered.';
