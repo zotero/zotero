@@ -36,19 +36,18 @@ var treeView = {
     selectionChanged: function(){
 		if(this.selection.count == 0)
 		{
-			setObjectPaneVisibility(false);
 			document.getElementById('status-text').value = "(No selection)";
+			setObjectPaneVisibility(false);
 		}
 		else if(this.selection.count == 1)
 		{
-			document.getElementById('status-text').value = "Selected: " + this.selection.currentIndex;
-			setObjectPaneVisibility(true);
 			populateObjectPane(this.dataObjects[this.selection.currentIndex]);
+			setObjectPaneVisibility(true);
 		}
 		else
 		{
-			setObjectPaneVisibility(false);
 			document.getElementById('status-text').value = "(Multiple selection)";
+			setObjectPaneVisibility(false);
 		}
 	}
 };
@@ -65,11 +64,11 @@ function populateObjectPane(objectRow)
 	while(dynamicBox.hasChildNodes())
 		dynamicBox.removeChild(dynamicBox.firstChild);
 	
-	var fields = Scholar_ObjectFields.getObjectTypeFields(objectRow.getField("objectTypeID"));
+	var fields = Scholar.ObjectFields.getObjectTypeFields(objectRow.getField("objectTypeID"));
 	var fieldNames = new Array("title","dateAdded","dateModified","source","rights");
 	for(var i = 0; i<fields.length; i++)
-		fieldNames.push(Scholar_ObjectFields.getName(fields[i]));
-	
+		fieldNames.push(Scholar.ObjectFields.getName(fields[i]));
+
 	for(var i = 0; i<fieldNames.length; i++)
 	{
 		if(objectRow.getField(fieldNames[i]) != "")
