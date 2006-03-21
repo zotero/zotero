@@ -402,7 +402,7 @@ Scholar.Object.prototype.save = function(){
 					}
 					
 					// See if this is an existing creator
-					var creatorID = Scholar_Creators.getID(
+					var creatorID = Scholar.Creators.getID(
 							creator['firstName'],
 							creator['lastName'],
 							creator['creatorTypeID']
@@ -410,7 +410,7 @@ Scholar.Object.prototype.save = function(){
 					
 					// If not, add it
 					if (!creatorID){
-						creatorID = Scholar_Creators.add(
+						creatorID = Scholar.Creators.add(
 							creator['firstName'],
 							creator['lastName'],
 							creator['creatorTypeID']
@@ -435,7 +435,7 @@ Scholar.Object.prototype.save = function(){
 				}
 				
 				// Append the SQL to delete obsolete creators
-				sql += Scholar_Creators.purge(true) + "\n";
+				sql += Scholar.Creators.purge(true) + "\n";
 			}
 			
 			
@@ -564,7 +564,7 @@ Scholar.Object.prototype.save = function(){
 					}
 					
 					// See if this is an existing creator
-					var creatorID = Scholar_Creators.getID(
+					var creatorID = Scholar.Creators.getID(
 							creator['firstName'],
 							creator['lastName'],
 							creator['creatorTypeID']
@@ -572,7 +572,7 @@ Scholar.Object.prototype.save = function(){
 					
 					// If not, add it
 					if (!creatorID){
-						creatorID = Scholar_Creators.add(
+						creatorID = Scholar.Creators.add(
 							creator['firstName'],
 							creator['lastName'],
 							creator['creatorTypeID']
