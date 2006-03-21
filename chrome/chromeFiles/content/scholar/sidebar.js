@@ -5,7 +5,8 @@ var treeView = {
 	dataObjects: null,
 	
     get rowCount() { return this.dataObjects.length; },
-    getCellText: function(row,column){
+    getCellText: function(row,column)
+    {
       	obj = this.dataObjects[row];
       	
       	if(column.id == "title_column")
@@ -21,7 +22,8 @@ var treeView = {
       		return obj.getField("source");
       	}
     },
-    setTree: function(treebox){ 
+    setTree: function(treebox)
+    { 
     	this.treebox = treebox;
     	this.dataObjects = Scholar.Objects.getAll();
     },
@@ -33,7 +35,8 @@ var treeView = {
     getRowProperties: function(row,props){},
     getCellProperties: function(row,col,props){},
     getColumnProperties: function(colid,col,props){},
-    selectionChanged: function(){
+    selectionChanged: function()
+    {
 		if(this.selection.count == 0)
 		{
 			document.getElementById('status-text').value = "(No selection)";
@@ -80,12 +83,34 @@ function populateObjectPane(objectRow)
 			valueElement.appendChild(document.createTextNode(objectRow.getField(fieldNames[i])));
 			
 			var row = document.createElement("row");
-			row.appendChild(label)
-			row.appendChild(valueElement)
+			row.appendChild(label);
+			row.appendChild(valueElement);
+			row.setAttribute("id","dynamic-"+fieldNames[i]);
 			
 			dynamicBox.appendChild(row);
 		}
 	}
+	
+	var beforeField = document.getElementById('dynamic-title');
+	beforeField = beforeField.nextSibling;
+	
+	for (var i=0,len=objectRow.numCreators(); i<len; i++)
+	{
+		var creator = objectRow.getCreator(i);
+		
+		var label = document.createElement("label");
+		label.setAttribute("value","Creator:");
+		
+		var valueElement = document.createElement("description");
+		valueElement.appendChild(document.createTextNode(creator.lastName+", "+creator.firstName));
+		
+		var row = document.createElement("row");
+		row.appendChild(label);
+		row.appendChild(valueElement);
+
+		dynamicBox.insertBefore(row, beforeField);
+	}
+
 	
 }
 
