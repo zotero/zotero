@@ -57,7 +57,7 @@ Scholar.DB = new function(){
 				while (statement.executeStep()){
 					var row = new Array();
 					for(var i=0; i<statement.columnCount; i++) {
-						row[statement.getColumnName(i)] = statement.getAsUTF8String(i);
+						row[statement.getColumnName(i)] = statement.getUTF8String(i);
 					}
 					dataset.push(row);
 				}
@@ -108,10 +108,10 @@ Scholar.DB = new function(){
 			return false;
 		}
 		if (sql.indexOf('SELECT COUNT(*)') > -1){
-			var value = statement.getAsInt32(0);
+			var value = statement.getInt32(0);
 		}
 		else {
-			var value = statement.getAsUTF8String(0);
+			var value = statement.getUTF8String(0);
 		}
 		statement.reset();
 		return value;
@@ -138,7 +138,7 @@ Scholar.DB = new function(){
 		if (statement){
 			var column = new Array();
 			while (statement.executeStep()){
-				column.push(statement.getAsUTF8String(0));
+				column.push(statement.getUTF8String(0));
 			}
 			statement.reset();
 			return column.length ? column : false;
