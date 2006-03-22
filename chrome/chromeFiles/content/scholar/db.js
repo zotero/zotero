@@ -375,21 +375,6 @@ Scholar.DB = new function(){
 	 * Create new DB schema
 	 */
 	function _initializeSchema(){
-		// Until DROP TABLE IF EXISTS works with the mozStorage extension
-		try { query('DROP TABLE version'); } catch(e){}
-		try { query('DROP TABLE objects'); } catch(e){}
-		try { query('DROP TABLE objectTypes'); } catch(e){}
-		try { query('DROP TABLE fieldFormats'); } catch(e){}
-		try { query('DROP TABLE fields'); } catch(e){}
-		try { query('DROP TABLE objectTypeFields'); } catch(e){}
-		try { query('DROP TABLE objectData'); } catch(e){}
-		try { query('DROP TABLE keywords'); } catch(e){}
-		try { query('DROP TABLE objectKeywords'); } catch(e){}
-		try { query('DROP TABLE creators'); } catch(e){}
-		try { query('DROP TABLE creatorTypes'); } catch(e){}
-		try { query('DROP TABLE objectCreators'); } catch(e){}
-		try { query('DROP TABLE folders'); } catch(e){}
-		
 		try {
 			beginTransaction();
 			var sql = _getSchemaSQL();

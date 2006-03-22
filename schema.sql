@@ -1,14 +1,11 @@
 -- 2
 
-    -- IF EXISTS not yet available in available mozStorage binaries,
-    -- so we fake it with a bunch of try/catches in the _initializeSchema()
-    
-    -- DROP TABLE IF EXISTS version;
+    DROP TABLE IF EXISTS version;
     CREATE TABLE version (
         version INTEGER PRIMARY KEY
     );
     
-    -- DROP TABLE IF EXISTS objects;
+    DROP TABLE IF EXISTS objects;
     CREATE TABLE objects (
         objectID INTEGER PRIMARY KEY,
         objectTypeID INT,
@@ -23,20 +20,20 @@
     );
     CREATE INDEX folderID ON objects(folderID);
     
-    -- DROP TABLE IF EXISTS objectTypes;
+    DROP TABLE IF EXISTS objectTypes;
     CREATE TABLE objectTypes (
         objectTypeID INTEGER PRIMARY KEY,
         typeName TEXT
     );
     
-    -- DROP TABLE IF EXISTS fieldFormats;
+    DROP TABLE IF EXISTS fieldFormats;
     CREATE TABLE fieldFormats (
         fieldFormatID INTEGER PRIMARY KEY,
         regex TEXT,
         isInteger INT
     );
     
-    -- DROP TABLE IF EXISTS fields;
+    DROP TABLE IF EXISTS fields;
     CREATE TABLE fields (
         fieldID INTEGER PRIMARY KEY,
         fieldName TEXT,
@@ -44,7 +41,7 @@
         FOREIGN KEY (fieldFormatID) REFERENCES fieldFormat(fieldFormatID)
     );
     
-    -- DROP TABLE IF EXISTS objectTypeFields;
+    DROP TABLE IF EXISTS objectTypeFields;
     CREATE TABLE objectTypeFields (
         objectTypeID INT,
         fieldID INT,
@@ -54,7 +51,7 @@
         FOREIGN KEY (fieldID) REFERENCES objectTypes(objectTypeID)
     );
     
-    -- DROP TABLE IF EXISTS objectData;
+    DROP TABLE IF EXISTS objectData;
     CREATE TABLE objectData (
         objectID INT,
         fieldID INT,
@@ -65,13 +62,13 @@
     );
     CREATE INDEX value ON objectData (value);
     
-    -- DROP TABLE IF EXISTS keywords;
+    DROP TABLE IF EXISTS keywords;
     CREATE TABLE keywords (
         keywordID INTEGER PRIMARY KEY,
         keyword TEXT
     );
     
-    -- DROP TABLE IF EXISTS objectKeywords;
+    DROP TABLE IF EXISTS objectKeywords;
     CREATE TABLE objectKeywords (
         objectID INT,
         keywordID INT,
@@ -80,7 +77,7 @@
         FOREIGN KEY (keywordID) REFERENCES keywords(keywordID)
     );
     
-    -- DROP TABLE IF EXISTS creators;
+    DROP TABLE IF EXISTS creators;
     CREATE TABLE creators (
         creatorID INT,
         creatorTypeID INT DEFAULT 1,
@@ -90,13 +87,13 @@
         FOREIGN KEY (creatorTypeID) REFERENCES creatorTypes(creatorTypeID)
     );
     
-    -- DROP TABLE IF EXISTS creatorTypes;
+    DROP TABLE IF EXISTS creatorTypes;
     CREATE TABLE creatorTypes (
         creatorTypeID INTEGER PRIMARY KEY,
         creatorType TEXT
     );
     
-    -- DROP TABLE IF EXISTS objectCreators;
+    DROP TABLE IF EXISTS objectCreators;
     CREATE TABLE objectCreators (
         objectID INT,
         creatorID INT,
@@ -106,7 +103,7 @@
         FOREIGN KEY (creatorID) REFERENCES creators(creatorID)
     );
     
-    -- DROP TABLE IF EXISTS folders;
+    DROP TABLE IF EXISTS folders;
     CREATE TABLE folders (
         folderID INTEGER PRIMARY KEY,
         folderName TEXT,
