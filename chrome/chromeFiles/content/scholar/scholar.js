@@ -3,7 +3,8 @@ const SCHOLAR_CONFIG = {
 	DB_FILE: 'scholar.sqlite',
 	DB_VERSION: 2,
 	DB_REBUILD: false, // erase DB and recreate from schema
-	DEBUG_LOGGING: true
+	DEBUG_LOGGING: true,
+	DEBUG_TO_CONSOLE: false // dump debug messages to console rather than (much slower) Debug Logger
 };
 
 /*
@@ -51,19 +52,21 @@ var Scholar = new function(){
 			level = 3;
 		}
 		
-		try {
-			var logManager =
+		if (!SCHOLAR_CONFIG['DEBUG_TO_CONSOLE']){
+			try {
+				var logManager =
 				Components.classes["@mozmonkey.com/debuglogger/manager;1"]
 				.getService(Components.interfaces.nsIDebugLoggerManager);
-			var logger = logManager.registerLogger("Firefox Scholar");
+				var logger = logManager.registerLogger("Firefox Scholar");
+			}
+			catch (e){}
 		}
-		catch (e){}
 		
 		if (logger){
 			logger.log(level, message);
 		}
 		else {
-			dump('scholar(' + level + '): ' + message);
+			dump('scholar(' + level + '): ' + message + "\n\n");
 		}
 		return true;
 	}
