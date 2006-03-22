@@ -243,7 +243,7 @@ Scholar.Object.prototype.getField = function(field){
 Scholar.Object.prototype.setField = function(field, value, loadIn){
 	// Primary field
 	if (this.isPrimaryField(field)){
-		if (!this.isEditableField()){
+		if (!this.isEditableField(field)){
 			throw ('Primary field ' + field + ' cannot be changed through ' +
 				'setField');
 		}
