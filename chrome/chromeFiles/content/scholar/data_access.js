@@ -37,6 +37,8 @@ Scholar.Object.prototype.isPrimaryField = function(field){
 	if (!Scholar.Object.primaryFields){
 		Scholar.Object.primaryFields = Scholar.DB.getColumnHash('objects');
 		Scholar.Object.primaryFields['firstCreator'] = true;
+		Scholar.Object.primaryFields['level'] = true;
+		Scholar.Object.primaryFields['orderIndex'] = true;
 	}
 	
 	return !!Scholar.Object.primaryFields[field];
@@ -60,9 +62,12 @@ Scholar.Object.prototype.isEditableField = function(field){
  * Build object from database
  */
 Scholar.Object.prototype.loadFromID = function(id){
-	var sql = 'SELECT O.*, lastName AS firstCreator FROM objects O '
-		+ 'LEFT JOIN objectCreators OC USING (objectID) '
-		+ 'LEFT JOIN creators USING (creatorID) '
+	var sql = 'SELECT O.*, lastName AS firstCreator, F.level, ORD.orderIndex '
+		+ 'FROM objects O '
+		+ 'LEFT JOIN folders F USING (folderID) '
+		+ 'LEFT JOIN treeOrder ORD ON (O.objectID=ORD.id AND isFolder=0) '
+		+ 'LEFT JOIN objectCreators OC ON (O.objectID=OC.objectID) '
+		+ 'LEFT JOIN creators C ON (OC.creatorID=C.creatorID) '
 		+ 'WHERE objectID=' + id + ' AND OC.orderIndex=0';
 	var row = Scholar.DB.rowQuery(sql);
 	this.loadFromRow(row);
@@ -287,6 +292,17 @@ Scholar.Object.prototype.setField = function(field, value, loadIn){
 		}
 		return true;
 	}
+}
+
+
+/*
+ * Get the nesting level of the object (0 for root items)
+ */
+Scholar.Object.prototype.getLevel = function(){
+	if (!this.getID()){
+		throw ('Cannot get level of unsaved object'); // DEBUG: may change
+	}
+	return this._data['level'];
 }
 
 
@@ -696,6 +712,7 @@ Scholar.Object.prototype._loadObjectData = function(){
 
 
 
+
 /*
  * Primary interface for accessing Scholar objects
  */
@@ -858,9 +875,13 @@ Scholar.Objects = new function(){
 			return false;
 		}
 		
-		var sql = 'SELECT O.*, lastName AS firstCreator FROM objects O '
-			+ 'LEFT JOIN objectCreators OC USING (objectID) '
-			+ 'LEFT JOIN creators USING (creatorID) '
+		// Should be the same as query in Scholar.Object.loadFromID, just without objectID clause
+		var sql = 'SELECT O.*, lastName AS firstCreator, F.level, ORD.orderIndex '
+			+ 'FROM objects O '
+			+ 'LEFT JOIN folders F USING (folderID) '
+			+ 'LEFT JOIN treeOrder ORD ON (O.objectID=ORD.id AND isFolder=0) '
+			+ 'LEFT JOIN objectCreators OC ON (O.objectID=OC.objectID) '
+			+ 'LEFT JOIN creators C ON (OC.creatorID=C.creatorID) '
 			+ 'WHERE OC.orderIndex=0';
 		
 		if (arguments[0]!='all'){
@@ -911,6 +932,7 @@ Scholar.Folder.prototype.loadFromRow = function(row){
 	this._id = row['folderID'];
 	this._name = row['folderName'];
 	this._parent = row['parentFolderID'];
+	this._level = row['level'];
 }
 
 Scholar.Folder.prototype.getID = function(){
@@ -919,6 +941,10 @@ Scholar.Folder.prototype.getID = function(){
 
 Scholar.Folder.prototype.getName = function(){
 	return this._name;
+}
+
+Scholar.Folder.prototype.getLevel = function(){
+	return this._level;
 }
 
 

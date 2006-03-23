@@ -107,11 +107,12 @@
         folderID INT,
         folderName TEXT,
         parentFolderID INT DEFAULT 0,
+        level INT DEFAULT 0,
         PRIMARY KEY (folderID),
         FOREIGN KEY (parentFolderID) REFERENCES folders(folderID)
     );
     CREATE INDEX parentFolderID ON folders(parentFolderID);
-    INSERT INTO folders VALUES (0, 'root', 0);
+    INSERT INTO folders VALUES (0, 'root', 0, 0);
     
     DROP TABLE IF EXISTS treeOrder;
     CREATE TABLE treeOrder (
@@ -215,10 +216,11 @@
     INSERT INTO "objectCreators" VALUES(7, 8, 2);
     INSERT INTO "objectCreators" VALUES(9, 11, 1);
     
-    INSERT INTO folders VALUES (1241, 'Test Folder', 0);
-    INSERT INTO folders VALUES (3262, 'Another Test Folder', 0);
-    INSERT INTO folders VALUES (6856, 'A Subfolder', 0);
-    INSERT INTO folders VALUES (7373, 'A Sub-Subfolder!', 3262);
+    INSERT INTO folders VALUES (1241, 'Test Folder', 0, 0);
+    INSERT INTO folders VALUES (3262, 'Another Test Folder', 0, 0);
+    INSERT INTO folders VALUES (6856, 'Yet Another Folder', 0, 0);
+    INSERT INTO folders VALUES (7373, 'A Subfolder!', 6856, 1);
+    INSERT INTO folders VALUES (9233, 'A Sub-subfolder!', 7373, 2);
     
     INSERT INTO treeOrder VALUES (1, 0, 1);
     INSERT INTO treeOrder VALUES (3262, 1, 2);
@@ -235,7 +237,8 @@
     INSERT INTO treeOrder VALUES (13, 0, 13);
     INSERT INTO treeOrder VALUES (7373, 1, 14);
     INSERT INTO treeOrder VALUES (15, 0, 15);
-    INSERT INTO treeOrder VALUES (11, 0, 16);
-    INSERT INTO treeOrder VALUES (10, 0, 17);
-    INSERT INTO treeOrder VALUES (1241, 1, 18);
-    INSERT INTO treeOrder VALUES (12, 0, 19);
+    INSERT INTO treeOrder VALUES (9233, 1, 16);
+    INSERT INTO treeOrder VALUES (11, 0, 17);
+    INSERT INTO treeOrder VALUES (10, 0, 18);
+    INSERT INTO treeOrder VALUES (1241, 1, 19);
+    INSERT INTO treeOrder VALUES (12, 0, 20);
