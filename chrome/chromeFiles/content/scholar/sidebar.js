@@ -25,7 +25,7 @@ var treeView = {
     setTree: function(treebox)
     { 
     	this.treebox = treebox;
-    	this.dataObjects = Scholar.Objects.getAll();
+    	this.dataObjects = Scholar.Objects.getTreeRows();
     },
     isContainer: function(row){ return false; },
     isSeparator: function(row){ return false; },

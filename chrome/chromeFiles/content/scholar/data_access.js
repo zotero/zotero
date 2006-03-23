@@ -696,8 +696,9 @@ Scholar.Object.prototype._loadObjectData = function(){
 
 
 
-
-
+/*
+ * Primary interface for accessing Scholar objects
+ */
 Scholar.Objects = new function(){
 	// Private members
 	var _objects = new Array();
@@ -705,6 +706,7 @@ Scholar.Objects = new function(){
 	// Privileged methods
 	this.get = get;
 	this.getAll = getAll;
+	this.getTreeRows = getTreeRows;
 	this.reload = reload;
 	this.reloadAll = reloadAll;
 	
@@ -712,6 +714,9 @@ Scholar.Objects = new function(){
 	 * Retrieves (and loads, if necessary) an arbitrary number of objects
 	 *
 	 * Can be passed ids as individual parameters or as an array of ids, or both
+	 *
+	 * If only one argument and it's an id, return object directly;
+	 * otherwise, return array indexed by objectID
 	 */
 	function get(){
 		var toLoad = new Array();
@@ -722,7 +727,7 @@ Scholar.Objects = new function(){
 		}
 		
 		var ids = Scholar.flattenArguments(arguments);
-	
+		
 		for (var i=0; i<ids.length; i++){
 			// Check if already loaded
 			if (!_objects[ids[i]]){
@@ -735,9 +740,15 @@ Scholar.Objects = new function(){
 			_load(toLoad);
 		}
 		
-		// Build return array
+		// If single id, return the object directly
+		if (arguments[0] && typeof arguments[0]!='Object'
+				&& typeof arguments[1]=='undefined'){
+			return _objects[arguments[0]];
+		}
+		
+		// Otherwise, build return array
 		for (i=0; i<ids.length; i++){
-			loaded.push(_objects[ids[i]]);
+			loaded[ids[i]] = _objects[ids[i]];
 		}
 	
 		return loaded;
@@ -749,21 +760,52 @@ Scholar.Objects = new function(){
 	 */
 	function getAll(){
 		var sql = 'SELECT O.objectID FROM objects O '
-			+ 'LEFT JOIN objectCreators OC USING (objectID) '
-			+ 'LEFT JOIN creators C USING (creatorID) '
-			+ 'LEFT JOIN folders F ON (O.folderID=F.folderID) '
-			
-			// Only get first creator
-			+ 'WHERE OC.orderIndex=0 '
-			
-			// folderID=0 puts root folder items after folders
-			// TODO: allow folders to intermingle with items, order-wise
-			+ 'ORDER BY O.folderID=0, F.orderIndex, O.orderIndex';
+			+ 'LEFT JOIN treeOrder ORD ON (O.objectID=ORD.id AND isFolder=0) '
+			+ 'ORDER BY orderIndex';
 		
 		var ids = Scholar.DB.columnQuery(sql);
 		return this.get(ids);
 	}
 	
+	
+	/*
+	 * Returns an array of all folders and objects as
+	 * Scholar.Folder and Scholar.Object instances
+	 *
+	 * Type can tested with instanceof (e.g. if (obj instanceof Scholar.Folder))
+	 */
+	function getTreeRows(){
+		var toReturn = new Array();
+		
+		var sql = 'SELECT * FROM treeOrder WHERE id>0 ORDER BY orderIndex';
+		var tree = Scholar.DB.query(sql);
+		
+		if (!tree){
+			throw ('treeOrder is empty');
+		}
+		
+		_load('all');
+		
+		for (var i=0, len=tree.length; i<len; i++){
+			if (parseInt(tree[i]['isFolder'])){
+				var obj = Scholar.Folders.get(tree[i]['id']);
+				if (!obj){
+					throw ('Folder ' + tree[i]['id'] + ' not found');
+				}
+			}
+			else {
+				var obj = Scholar.Objects.get(tree[i]['id']);
+				if (!obj){
+					throw ('Object ' + tree[i]['id'] + ' not found');
+				}
+			}
+			
+			toReturn.push(obj);
+		}
+		
+		return toReturn;
+	}
+	 
 	
 	/*
 	 * Reloads data for specified objects into internal array
@@ -835,6 +877,86 @@ Scholar.Objects = new function(){
 			}
 		}
 		return true;
+	}
+}
+
+
+
+/*
+ * Constructor for Folder object
+ *
+ * Generally should be called from Scholar.Folders rather than directly
+ */
+Scholar.Folder = function(){
+	this._id;
+	this._name;
+	this._parent;
+}
+
+
+/*
+ * Build folder from database
+ */
+Scholar.Folder.prototype.loadFromID = function(id){
+	var sql = 'SELECT * FROM folders WHERE folderID=' + id;
+	var row = Scholar.DB.rowQuery(sql);
+	this.loadFromRow(row);
+}
+
+
+/*
+ * Populate folder data from a database row
+ */
+Scholar.Folder.prototype.loadFromRow = function(row){
+	this._id = row['folderID'];
+	this._name = row['folderName'];
+	this._parent = row['parentFolderID'];
+}
+
+Scholar.Folder.prototype.getID = function(){
+	return this._id;
+}
+
+Scholar.Folder.prototype.getName = function(){
+	return this._name;
+}
+
+
+
+/*
+ * Primary interface for accessing Scholar folders
+ */
+Scholar.Folders = new function(){
+	var _folders = new Array();
+	var _foldersLoaded = false;
+	
+	this.get = get;
+	
+	/*
+	 * Returns a Scholar.Folder object for a folderID
+	 */
+	function get(id){
+		if (!_foldersLoaded){
+			_load();
+		}
+		return (typeof _folders[id]!='undefined') ? _folders[id] : false;
+	}
+	
+	
+	function _load(){
+		var sql = "SELECT * FROM folders WHERE folderID>0"; // skip 'root' folder
+		var result = Scholar.DB.query(sql);
+		
+		if (!result){
+			throw ('No folders exist');
+		}
+		
+		for (var i=0; i<result.length; i++){
+			var folder = new Scholar.Folder();
+			folder.loadFromRow(result[i]);
+			_folders[folder.getID()] = folder;
+		}
+		_foldersLoaded = true;
 	}
 }
 
