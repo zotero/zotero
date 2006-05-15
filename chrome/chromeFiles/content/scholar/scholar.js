@@ -39,7 +39,8 @@ var Scholar = new function(){
 	 * Debug logging function
 	 *
 	 * Uses DebugLogger extension available from http://mozmonkey.com/debuglogger/
-	 * if available, otherwise the console
+	 * if available, otherwise the console (in which case boolean browser.dom.window.dump.enabled
+	 * must be created and set to true in about:config)
 	 *
 	 * Defaults to log level 3 if level not provided
 	 */
