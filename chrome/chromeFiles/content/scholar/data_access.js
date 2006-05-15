@@ -30,6 +30,12 @@ Scholar.Object.prototype._init = function(){
 }
 
 
+//////////////////////////////////////////////////////////////////////////////
+//
+// Public Scholar.Object methods
+//
+//////////////////////////////////////////////////////////////////////////////
+
 /*
  * Check if the specified field is a primary field from the objects table
  */
@@ -104,6 +110,11 @@ Scholar.Object.prototype.getID = function(){
 
 Scholar.Object.prototype.getType = function(){
 	return this._data['objectTypeID'] ? this._data['objectTypeID'] : false;
+}
+
+
+Scholar.Object.prototype.getParent = function(){
+	return this._data['folderID'] ? this._data['folderID'] : false;
 }
 
 
@@ -650,6 +661,17 @@ Scholar.Object.prototype.toString = function(){
 }
 
 
+Scholar.Object.prototype.isFolder = function(){
+	return false;
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+//
+// Private Scholar.Object methods
+//
+//////////////////////////////////////////////////////////////////////////////
+
 /*
  * Load in the creators from the database
  */
@@ -709,6 +731,7 @@ Scholar.Object.prototype._loadObjectData = function(){
 		return false;
 	}
 }
+
 
 
 
@@ -903,6 +926,8 @@ Scholar.Objects = new function(){
 
 
 
+
+
 /*
  * Constructor for Folder object
  *
@@ -947,6 +972,13 @@ Scholar.Folder.prototype.getLevel = function(){
 	return this._level;
 }
 
+Scholar.Folder.prototype.isFolder = function(){
+	return true;
+}
+
+Scholar.Folder.prototype.getParent = function(){
+	return this._parent;
+}
 
 
 /*
@@ -985,6 +1017,9 @@ Scholar.Folders = new function(){
 		_foldersLoaded = true;
 	}
 }
+
+
+
 
 
 Scholar.Creators = new function(){
@@ -1117,6 +1152,10 @@ Scholar.Creators = new function(){
 			+ '%%%' + creator['creatorTypeID'];
 	}
 }
+
+
+
+
 
 
 Scholar.ObjectFields = new function(){
