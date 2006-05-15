@@ -1,59 +1,108 @@
 var ScholarLocalizedStrings;
+var myTreeView;
 
-var treeView = {
-	treebox: null,
-	dataObjects: null,
+Scholar.TreeView = function()
+{
+	this._treebox = null;
+	this._dataObjects = new Array();
+	this.rowCount = 0;
+}
+
+Scholar.TreeView.prototype.setTree = function(treebox)
+{
+	this._treebox = treebox;
+	this._dataObjects = Scholar.Objects.getTreeRows();
+	this.rowCount = this._dataObjects.length;
+}
+
+Scholar.TreeView.prototype.getCellText = function(row, column)
+{
+	var obj = this._dataObjects[row];
 	
-    get rowCount() { return this.dataObjects.length; },
-    getCellText: function(row,column)
-    {
-      	obj = this.dataObjects[row];
-      	
-      	if(column.id == "title_column")
-      	{
-      		return obj.getField("title");
-      	}
-      	else if(column.id == "creator_column")
-      	{
-      		return obj.getField("firstCreator");
-      	}
-      	else
-      	{
-      		return obj.getField("source");
-      	}
-    },
-    setTree: function(treebox)
-    { 
-    	this.treebox = treebox;
-    	this.dataObjects = Scholar.Objects.getTreeRows();
-    },
-    isContainer: function(row){ return false; },
-    isSeparator: function(row){ return false; },
-    isSorted: function(){ return false; },
-    getLevel: function(row){ return 0; },
-    getImageSrc: function(row,col){ return null; },
-    getRowProperties: function(row,props){},
-    getCellProperties: function(row,col,props){},
-    getColumnProperties: function(colid,col,props){},
-    selectionChanged: function()
-    {
-		if(this.selection.count == 0)
+	if(column.id == "title_column")
+	{
+		return obj.getField("title");
+	}
+	else if(column.id == "creator_column")
+	{
+		return obj.getField("firstCreator");
+	}
+	else
+	{
+		return obj.getField("source");
+	}
+}
+
+Scholar.TreeView.prototype.isContainer = function(row)
+{
+	return this._dataObjects(row).isFolder();
+}
+
+Scholar.TreeView.prototype.isContainerOpen = function(row)
+{
+	return false;
+}
+
+Scholar.TreeView.prototype.isContainerEmpty = function(row)
+{
+}
+
+Scholar.TreeView.prototype.getLevel = function(row)
+{
+	return this._dataObjects(row).getLevel();
+}
+
+Scholar.TreeView.prototype.toggleOpenState = function(row)
+{
+	if(this.isContainerOpen(row))
+	{
+		var thisLevel = this._dataObjects[row].getLevel();
+		while(this._dataObjects[row + 1].getLevel > thisLevel)
 		{
-			document.getElementById('status-text').value = "(No selection)";
-			setObjectPaneVisibility(false);
-		}
-		else if(this.selection.count == 1)
-		{
-			populateObjectPane(this.dataObjects[this.selection.currentIndex]);
-			setObjectPaneVisibility(true);
-		}
-		else
-		{
-			document.getElementById('status-text').value = "(Multiple selection)";
-			setObjectPaneVisibility(false);
+			this._dataObjects.splice(row+1,1);
 		}
 	}
-};
+	else
+	{
+		var newRows = Scholar.Objects.getTreeRows(this._dataObjects[row].getID()); //Get children of 
+		for(i in newRows)
+		{
+			this._dataObjects.splice(row+i+1,0,newRows[i]);
+		}
+	}
+	
+	this.rowCount = this._dataObjects.length;
+}
+
+Scholar.TreeView.prototype.selectionChanged = function()
+{
+	if(this.selection.count == 0)
+	{
+		document.getElementById('status-text').value = "(No selection)";
+		setObjectPaneVisibility(false);
+	}
+	else if(this.selection.count == 1)
+	{
+		populateObjectPane(this._dataObjects[this.selection.currentIndex]);
+		setObjectPaneVisibility(true);
+	}
+	else
+	{
+		document.getElementById('status-text').value = "(Multiple selection)";
+		setObjectPaneVisibility(false);
+	}
+
+}
+
+Scholar.TreeView.prototype.isSorted = function()
+{
+	return false;
+}
+
+Scholar.TreeView.prototype.getColumnProperties = function(col, prop)
+{
+	return null;
+}
 
 function setObjectPaneVisibility(vis)
 {
@@ -116,13 +165,14 @@ function populateObjectPane(objectRow)
 
 function selectionChanged()
 {
-	treeView.selectionChanged();
+	myTreeView.selectionChanged();
 }
 
 function setView()
 {
+	myTreeView = new Scholar.TreeView();
 	ScholarLocalizedStrings = document.getElementById('scholar-strings');
-    document.getElementById('scholar-sidebar-items').view=treeView;
+    document.getElementById('scholar-sidebar-items').view=myTreeView;
 }
 
 Scholar.testString = 'Sidebar is registered.';
