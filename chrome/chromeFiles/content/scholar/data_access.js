@@ -809,15 +809,31 @@ Scholar.Objects = new function(){
 	
 	
 	/*
-	 * Returns an array of all folders and objects as
-	 * Scholar.Folder and Scholar.Object instances
+	 * Returns an array of all folders and objects that are children of a folder
+	 * as Scholar.Folder and Scholar.Object instances
 	 *
-	 * Type can tested with instanceof (e.g. if (obj instanceof Scholar.Folder))
+	 * Takes parent folderID as optional parameter; by default, returns root items
+	 *
+	 * Type can tested with instanceof (e.g. if (obj instanceof Scholar.Folder)) or isFolder()
 	 */
-	function getTreeRows(){
+	function getTreeRows(parent){
 		var toReturn = new Array();
 		
+		/*
+		// To return all items (no longer used)
 		var sql = 'SELECT * FROM treeOrder WHERE id>0 ORDER BY orderIndex';
+		*/
+		
+		if (!parent){
+			parent = 0;
+		}
+		
+		var sql = 'SELECT TORD.* FROM treeOrder TORD '
+			+ 'LEFT JOIN objects O ON (TORD.id=O.objectID AND isFolder=0) '
+			+ 'LEFT JOIN folders F ON (TORD.id=F.folderID AND isFolder=1) '
+			+ 'WHERE IFNULL(O.folderID, F.parentFolderID)=' + parent
+			+ ' ORDER BY orderIndex';
+		
 		var tree = Scholar.DB.query(sql);
 		
 		if (!tree){
