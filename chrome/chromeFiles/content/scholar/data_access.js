@@ -845,7 +845,8 @@ Scholar.Objects = new function(){
 		var tree = Scholar.DB.query(sql);
 		
 		if (!tree){
-			throw ('treeStructure is empty');
+			Scholar.debug('No children of folder ' + parent, 5);
+			return toReturn;
 		}
 		
 		_load('all');
