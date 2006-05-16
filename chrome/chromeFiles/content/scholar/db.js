@@ -416,6 +416,11 @@ Scholar.DB = new function(){
 			}
 			
 			if (i==5){
+				query("UPDATE folders SET level=-1, parentFolderID=NULL WHERE folderID=0");
+				_updateDBVersion(i);
+			}
+			
+			if (i==6){
 				// do stuff
 				// _updateDBVersion(i);
 			}

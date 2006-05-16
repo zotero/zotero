@@ -68,7 +68,7 @@ Scholar.Object.prototype.isEditableField = function(field){
  * Build object from database
  */
 Scholar.Object.prototype.loadFromID = function(id){
-	var sql = 'SELECT O.*, lastName AS firstCreator, F.level, ORD.orderIndex '
+	var sql = 'SELECT O.*, lastName AS firstCreator, F.level+1 AS level, ORD.orderIndex '
 		+ 'FROM objects O '
 		+ 'LEFT JOIN folders F USING (folderID) '
 		+ 'LEFT JOIN treeOrder ORD ON (O.objectID=ORD.id AND isFolder=0) '
@@ -899,7 +899,7 @@ Scholar.Objects = new function(){
 		}
 		
 		// Should be the same as query in Scholar.Object.loadFromID, just without objectID clause
-		var sql = 'SELECT O.*, lastName AS firstCreator, F.level, ORD.orderIndex '
+		var sql = 'SELECT O.*, lastName AS firstCreator, F.level+1 AS level, ORD.orderIndex '
 			+ 'FROM objects O '
 			+ 'LEFT JOIN folders F USING (folderID) '
 			+ 'LEFT JOIN treeOrder ORD ON (O.objectID=ORD.id AND isFolder=0) '

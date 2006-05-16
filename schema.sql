@@ -1,4 +1,4 @@
--- 3
+-- 5
 
     DROP TABLE IF EXISTS version;
     CREATE TABLE version (
@@ -112,7 +112,7 @@
         FOREIGN KEY (parentFolderID) REFERENCES folders(folderID)
     );
     CREATE INDEX parentFolderID ON folders(parentFolderID);
-    INSERT INTO folders VALUES (0, 'root', 0, 0);
+    INSERT INTO folders VALUES (0, 'root', NULL, -1);
     
     DROP TABLE IF EXISTS treeOrder;
     CREATE TABLE treeOrder (

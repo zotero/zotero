@@ -1,7 +1,7 @@
 const SCHOLAR_CONFIG = {
 	GUID: 'scholar@chnm',
 	DB_FILE: 'scholar.sqlite',
-	DB_VERSION: 3,
+	DB_VERSION: 5, // must match version at top of schema.sql
 	DB_REBUILD: false, // erase DB and recreate from schema
 	DEBUG_LOGGING: true,
 	DEBUG_TO_CONSOLE: false // dump debug messages to console rather than (much slower) Debug Logger
