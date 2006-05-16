@@ -43,7 +43,7 @@ Scholar.TreeView.prototype.getCellText = function(row, column)
 
 Scholar.TreeView.prototype.isContainer = function(row) 		{ return this._getObjectAtRow(row).isFolder(); }
 Scholar.TreeView.prototype.isContainerOpen = function(row)  { return this._dataObjects[row][1]; }
-Scholar.TreeView.prototype.isContainerEmpty = function(row) { return false; }
+Scholar.TreeView.prototype.isContainerEmpty = function(row) { return (this.isContainer(row) && this._getObjectAtRow(row).isEmpty()); }
 Scholar.TreeView.prototype.getLevel = function(row) 		{ return this._dataObjects[row][2]; }
 
 Scholar.TreeView.prototype.getParentIndex = function(row)
