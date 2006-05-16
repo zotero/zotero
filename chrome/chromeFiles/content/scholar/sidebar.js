@@ -11,71 +11,111 @@ Scholar.TreeView = function()
 Scholar.TreeView.prototype.setTree = function(treebox)
 {
 	this._treebox = treebox;
-	this._dataObjects = Scholar.Objects.getTreeRows();
+	
+	var newRows = Scholar.Objects.getTreeRows();
+	for(var i = 0; i < newRows.length; i++)
+	{
+		this._dataObjects.push( [ newRows[i],false ] );
+	}
+	
 	this.rowCount = this._dataObjects.length;
 }
 
 Scholar.TreeView.prototype.getCellText = function(row, column)
 {
-	var obj = this._dataObjects[row];
+	var obj = this._getObjectAtRow(row);
 	
-	if(column.id == "title_column")
+	if(obj.isFolder())
 	{
-		return obj.getField("title");
-	}
-	else if(column.id == "creator_column")
-	{
-		return obj.getField("firstCreator");
+		if(column.id == "title_column")
+			return obj.getName();
+		else
+			return "";
 	}
 	else
 	{
-		return obj.getField("source");
+		if(column.id == "title_column")
+		{
+			return obj.getField("title");
+		}
+		else if(column.id == "creator_column")
+		{
+			return obj.getField("firstCreator");
+		}
+		else
+		{
+			return obj.getField("source");
+		}
 	}
 }
 
 Scholar.TreeView.prototype.isContainer = function(row)
 {
-	return this._dataObjects(row).isFolder();
+	return this._getObjectAtRow(row).isFolder();
 }
 
 Scholar.TreeView.prototype.isContainerOpen = function(row)
 {
-	return false;
+	return this._dataObjects[row][1];
 }
 
-Scholar.TreeView.prototype.isContainerEmpty = function(row)
-{
-}
+Scholar.TreeView.prototype.isContainerEmpty = function(row) { return false; }
 
 Scholar.TreeView.prototype.getLevel = function(row)
 {
-	return this._dataObjects(row).getLevel();
+	return this._getObjectAtRow(row).getLevel();
 }
+
+Scholar.TreeView.prototype.getParentIndex = function(row)
+{
+	thisLevel = this._getObjectAtRow(row).getLevel();
+	for(var i = row - 1; i >= 0; i--)
+		if(this._getObjectAtRow(i).getLevel() < thisLevel)
+			return i;
+}
+
+
+Scholar.TreeView.prototype.hasNextSibling = function(row, afterIndex)
+{
+	thisLevel = this._getObjectAtRow(row).getLevel();
+//	for(var i = afterIndex + 1; i < this.rowCount; i++)
+	return (this._getObjectAtRow(afterIndex+1).getLevel() == thisLevel)
+	//return false;
+	//return true;
+}
+
 
 Scholar.TreeView.prototype.toggleOpenState = function(row)
 {
+	var count = 0;
 	if(this.isContainerOpen(row))
 	{
-		var thisLevel = this._dataObjects[row].getLevel();
-		while(this._dataObjects[row + 1].getLevel > thisLevel)
+		var thisLevel = this._getObjectAtRow(row).getLevel();
+		while(this._getObjectAtRow(row + 1).getLevel() > thisLevel)
 		{
 			this._dataObjects.splice(row+1,1);
+			count--;
 		}
 	}
 	else
 	{
-		var newRows = Scholar.Objects.getTreeRows(this._dataObjects[row].getID()); //Get children of 
-		for(i in newRows)
+		var newRows = Scholar.Objects.getTreeRows(this._getObjectAtRow(row).getID()); //Get children of 
+		for(var i = 0; i < newRows.length; i++)
 		{
-			this._dataObjects.splice(row+i+1,0,newRows[i]);
+			count++
+			this._dataObjects.splice(row+i+1,0,[ newRows[i], false ]);
 		}
 	}
 	
+	this._dataObjects[row][1] = !this._dataObjects[row][1];
 	this.rowCount = this._dataObjects.length;
+	
+	this._treebox.rowCountChanged(row, count);
 }
 
 Scholar.TreeView.prototype.selectionChanged = function()
 {
+/*
 	if(this.selection.count == 0)
 	{
 		document.getElementById('status-text').value = "(No selection)";
@@ -83,7 +123,7 @@ Scholar.TreeView.prototype.selectionChanged = function()
 	}
 	else if(this.selection.count == 1)
 	{
-		populateObjectPane(this._dataObjects[this.selection.currentIndex]);
+		populateObjectPane(this._getObjectAtRow(this.selection.currentIndex));
 		setObjectPaneVisibility(true);
 	}
 	else
@@ -91,18 +131,31 @@ Scholar.TreeView.prototype.selectionChanged = function()
 		document.getElementById('status-text').value = "(Multiple selection)";
 		setObjectPaneVisibility(false);
 	}
+*/
 
 }
 
-Scholar.TreeView.prototype.isSorted = function()
+Scholar.TreeView.prototype._insertRow = function(item, beforeRow)
 {
 	return false;
 }
 
-Scholar.TreeView.prototype.getColumnProperties = function(col, prop)
+Scholar.TreeView.prototype._deleteRow = function(row)
 {
-	return null;
+	return false;
 }
+
+Scholar.TreeView.prototype._getObjectAtRow = function(row)
+{
+	return this._dataObjects[row][0];
+}
+
+Scholar.TreeView.prototype.isSorted = function() { return false; }
+Scholar.TreeView.prototype.isSeparator = function(row) { return false; }
+Scholar.TreeView.prototype.getRowProperties = function(row, prop) { return null; }
+Scholar.TreeView.prototype.getColumnProperties = function(col, prop) { return null; }
+Scholar.TreeView.prototype.getCellProperties = function(row, col, prop) { return null; }
+Scholar.TreeView.prototype.getImageSrc = function(row, col) { return null; }
 
 function setObjectPaneVisibility(vis)
 {
