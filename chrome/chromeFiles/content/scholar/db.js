@@ -407,7 +407,8 @@ Scholar.DB = new function(){
 		// Each block performs the changes necessary to move from the
 		// previous revision to that one.
 		//
-		// N.B. Be sure to call _updateDBVersion(i) at the end of each block!
+		// N.B. Be sure to call _updateDBVersion(i) at the end of each block and
+		// update SCHOLAR_CONFIG['DB_VERSION'] to the target version
 		for (var i=parseInt(fromVersion) + 1; i<=toVersion; i++){
 			
 			// For now, just wipe and recreate
