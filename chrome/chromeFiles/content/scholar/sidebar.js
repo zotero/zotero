@@ -14,9 +14,7 @@ Scholar.TreeView.prototype.setTree = function(treebox)
 	
 	var newRows = Scholar.Objects.getTreeRows();
 	for(var i = 0; i < newRows.length; i++)
-	{
-		this._dataObjects.push( [ newRows[i],false ] );
-	}
+		this._dataObjects.push( [ newRows[i], false, 0 ] ); //object ref, isContainerOpen, level
 	
 	this.rowCount = this._dataObjects.length;
 }
@@ -35,63 +33,50 @@ Scholar.TreeView.prototype.getCellText = function(row, column)
 	else
 	{
 		if(column.id == "title_column")
-		{
 			return obj.getField("title");
-		}
 		else if(column.id == "creator_column")
-		{
 			return obj.getField("firstCreator");
-		}
 		else
-		{
 			return obj.getField("source");
-		}
 	}
 }
 
-Scholar.TreeView.prototype.isContainer = function(row)
-{
-	return this._getObjectAtRow(row).isFolder();
-}
-
-Scholar.TreeView.prototype.isContainerOpen = function(row)
-{
-	return this._dataObjects[row][1];
-}
-
+Scholar.TreeView.prototype.isContainer = function(row) 		{ return this._getObjectAtRow(row).isFolder(); }
+Scholar.TreeView.prototype.isContainerOpen = function(row)  { return this._dataObjects[row][1]; }
 Scholar.TreeView.prototype.isContainerEmpty = function(row) { return false; }
-
-Scholar.TreeView.prototype.getLevel = function(row)
-{
-	return this._getObjectAtRow(row).getLevel();
-}
+Scholar.TreeView.prototype.getLevel = function(row) 		{ return this._dataObjects[row][2]; }
 
 Scholar.TreeView.prototype.getParentIndex = function(row)
 {
-	thisLevel = this._getObjectAtRow(row).getLevel();
+	var thisLevel = this.getLevel(row);
+	if(thisLevel == 0) return -1;
 	for(var i = row - 1; i >= 0; i--)
-		if(this._getObjectAtRow(i).getLevel() < thisLevel)
+		if(this.getLevel(i) < thisLevel)
 			return i;
+	return -1;
 }
 
 
 Scholar.TreeView.prototype.hasNextSibling = function(row, afterIndex)
 {
-	thisLevel = this._getObjectAtRow(row).getLevel();
-//	for(var i = afterIndex + 1; i < this.rowCount; i++)
-	return (this._getObjectAtRow(afterIndex+1).getLevel() == thisLevel)
-	//return false;
-	//return true;
+	var thisLevel = this.getLevel(row);
+	for(var i = afterIndex + 1; i < this.rowCount; i++)
+	{	
+		var nextLevel = this.getLevel(i);
+		if(nextLevel == thisLevel) return true;
+		else if(nextLevel < thisLevel) return false;
+	}
 }
 
 
 Scholar.TreeView.prototype.toggleOpenState = function(row)
 {
 	var count = 0;
+	var thisLevel = this.getLevel(row);
+
 	if(this.isContainerOpen(row))
 	{
-		var thisLevel = this._getObjectAtRow(row).getLevel();
-		while(this._getObjectAtRow(row + 1).getLevel() > thisLevel)
+		while((row + 1 < this._dataObjects.length) && (this.getLevel(row + 1) > thisLevel))
 		{
 			this._dataObjects.splice(row+1,1);
 			count--;
@@ -99,18 +84,19 @@ Scholar.TreeView.prototype.toggleOpenState = function(row)
 	}
 	else
 	{
-		var newRows = Scholar.Objects.getTreeRows(this._getObjectAtRow(row).getID()); //Get children of 
+		var newRows = Scholar.Objects.getTreeRows(this._getObjectAtRow(row).getID()); //Get children
+		
 		for(var i = 0; i < newRows.length; i++)
 		{
-			count++
-			this._dataObjects.splice(row+i+1,0,[ newRows[i], false ]);
+			count++;
+			this._dataObjects.splice(row+i+1,0,[ newRows[i], false, thisLevel+1 ]); //insert new row
 		}
 	}
 	
 	this._dataObjects[row][1] = !this._dataObjects[row][1];
 	this.rowCount = this._dataObjects.length;
 	
-	this._treebox.rowCountChanged(row, count);
+	this._treebox.rowCountChanged(row, count); //tell treebox to repaint these
 }
 
 Scholar.TreeView.prototype.selectionChanged = function()
@@ -135,6 +121,7 @@ Scholar.TreeView.prototype.selectionChanged = function()
 
 }
 
+/*
 Scholar.TreeView.prototype._insertRow = function(item, beforeRow)
 {
 	return false;
@@ -144,18 +131,24 @@ Scholar.TreeView.prototype._deleteRow = function(row)
 {
 	return false;
 }
+*/
 
 Scholar.TreeView.prototype._getObjectAtRow = function(row)
 {
 	return this._dataObjects[row][0];
 }
 
-Scholar.TreeView.prototype.isSorted = function() { return false; }
-Scholar.TreeView.prototype.isSeparator = function(row) { return false; }
-Scholar.TreeView.prototype.getRowProperties = function(row, prop) { return null; }
-Scholar.TreeView.prototype.getColumnProperties = function(col, prop) { return null; }
-Scholar.TreeView.prototype.getCellProperties = function(row, col, prop) { return null; }
-Scholar.TreeView.prototype.getImageSrc = function(row, col) { return null; }
+Scholar.TreeView.prototype.isSorted = function() 					{ return false; }
+Scholar.TreeView.prototype.isSeparator = function(row) 				{ return false; }
+Scholar.TreeView.prototype.isEditable = function(row, idx) 			{ return false; }
+
+Scholar.TreeView.prototype.getRowProperties = function(row, prop) 			{ }
+Scholar.TreeView.prototype.getColumnProperties = function(col, prop) 		{ }
+Scholar.TreeView.prototype.getCellProperties = function(row, col, prop) 	{ }
+Scholar.TreeView.prototype.getImageSrc = function(row, col) 				{ }
+Scholar.TreeView.prototype.performAction = function(action) 				{ }
+Scholar.TreeView.prototype.performActionOnCell = function(action, row, col)	{ }
+Scholar.TreeView.prototype.getProgressMode = function(row, col) 			{ }
 
 function setObjectPaneVisibility(vis)
 {
@@ -213,7 +206,6 @@ function populateObjectPane(objectRow)
 		dynamicBox.insertBefore(row, beforeField);
 	}
 
-	
 }
 
 function selectionChanged()
