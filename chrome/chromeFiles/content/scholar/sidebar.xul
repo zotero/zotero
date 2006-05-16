@@ -24,7 +24,7 @@
             <treecol
                 id="title_column"
                 label="&sidebar.items.title_column;"
-                flex="1"
+                flex="2"
                 primary="true"/>
             <splitter class="tree-splitter"/>
             <treecol
@@ -33,11 +33,7 @@
                 flex="1"/>
         </treecols>
         <treechildren/>
-    </tree>
-    
-    
-   	<label id="status-text" value="(No selection)"/>
-   	
+    </tree>   	
    	
 	<grid id="scholar-sidebar-object-pane" hidden="true">
 	  <columns>

@@ -101,24 +101,15 @@ Scholar.TreeView.prototype.toggleOpenState = function(row)
 
 Scholar.TreeView.prototype.selectionChanged = function()
 {
-/*
-	if(this.selection.count == 0)
-	{
-		document.getElementById('status-text').value = "(No selection)";
-		setObjectPaneVisibility(false);
-	}
-	else if(this.selection.count == 1)
+	if(this.selection.count == 1 && !this.isContainer(this.selection.currentIndex))
 	{
 		populateObjectPane(this._getObjectAtRow(this.selection.currentIndex));
 		setObjectPaneVisibility(true);
 	}
 	else
 	{
-		document.getElementById('status-text').value = "(Multiple selection)";
 		setObjectPaneVisibility(false);
 	}
-*/
-
 }
 
 /*
@@ -133,14 +124,17 @@ Scholar.TreeView.prototype._deleteRow = function(row)
 }
 */
 
-Scholar.TreeView.prototype._getObjectAtRow = function(row)
-{
-	return this._dataObjects[row][0];
-}
+Scholar.TreeView.prototype._getObjectAtRow = function(row)					{ return this._dataObjects[row][0]; }
 
-Scholar.TreeView.prototype.isSorted = function() 					{ return false; }
-Scholar.TreeView.prototype.isSeparator = function(row) 				{ return false; }
-Scholar.TreeView.prototype.isEditable = function(row, idx) 			{ return false; }
+/*
+DRAG AND DROP (IMPLEMENT LATER)
+Scholar.TreeView.prototype.canDrop = function(row, orient)					{ return !orient; }
+Scholar.TreeView.prototype.drop = function(row, orient)						{ }
+*/
+
+Scholar.TreeView.prototype.isSorted = function() 							{ return false; }
+Scholar.TreeView.prototype.isSeparator = function(row) 						{ return false; }
+Scholar.TreeView.prototype.isEditable = function(row, idx) 					{ return false; }
 
 Scholar.TreeView.prototype.getRowProperties = function(row, prop) 			{ }
 Scholar.TreeView.prototype.getColumnProperties = function(col, prop) 		{ }
@@ -153,7 +147,6 @@ Scholar.TreeView.prototype.getProgressMode = function(row, col) 			{ }
 function setObjectPaneVisibility(vis)
 {
 	document.getElementById('scholar-sidebar-object-pane').hidden = !vis;
-	document.getElementById('status-text').hidden = vis;
 }
 
 function populateObjectPane(objectRow)
