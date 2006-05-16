@@ -412,16 +412,11 @@ Scholar.DB = new function(){
 		for (var i=parseInt(fromVersion) + 1; i<=toVersion; i++){
 			
 			// For now, just wipe and recreate
-			if (i==4){
+			if (i==6){
 				_initializeSchema();
 			}
 			
-			if (i==5){
-				query("UPDATE folders SET level=-1, parentFolderID=NULL WHERE folderID=0");
-				_updateDBVersion(i);
-			}
-			
-			if (i==6){
+			if (i==7){
 				// do stuff
 				// _updateDBVersion(i);
 			}

@@ -43,7 +43,7 @@ Scholar.Object.prototype.isPrimaryField = function(field){
 	if (!Scholar.Object.primaryFields){
 		Scholar.Object.primaryFields = Scholar.DB.getColumnHash('objects');
 		Scholar.Object.primaryFields['firstCreator'] = true;
-		Scholar.Object.primaryFields['level'] = true;
+		Scholar.Object.primaryFields['parentFolderID'] = true;
 		Scholar.Object.primaryFields['orderIndex'] = true;
 	}
 	
@@ -68,10 +68,10 @@ Scholar.Object.prototype.isEditableField = function(field){
  * Build object from database
  */
 Scholar.Object.prototype.loadFromID = function(id){
-	var sql = 'SELECT O.*, lastName AS firstCreator, F.level+1 AS level, ORD.orderIndex '
+	var sql = 'SELECT O.*, lastName AS firstCreator, TS.parentFolderID, '
+		+ 'TS.orderIndex '
 		+ 'FROM objects O '
-		+ 'LEFT JOIN folders F USING (folderID) '
-		+ 'LEFT JOIN treeOrder ORD ON (O.objectID=ORD.id AND isFolder=0) '
+		+ 'LEFT JOIN treeStructure TS ON (O.objectID=TS.id AND isFolder=0) '
 		+ 'LEFT JOIN objectCreators OC ON (O.objectID=OC.objectID) '
 		+ 'LEFT JOIN creators C ON (OC.creatorID=C.creatorID) '
 		+ 'WHERE objectID=' + id + ' AND OC.orderIndex=0';
@@ -114,7 +114,7 @@ Scholar.Object.prototype.getType = function(){
 
 
 Scholar.Object.prototype.getParent = function(){
-	return this._data['folderID'] ? this._data['folderID'] : false;
+	return this._data['parentFolderID'] ? this._data['parentFolderID'] : false;
 }
 
 
@@ -307,58 +307,71 @@ Scholar.Object.prototype.setField = function(field, value, loadIn){
 
 
 /*
- * Get the nesting level of the object (0 for root items)
- */
-Scholar.Object.prototype.getLevel = function(){
-	if (!this.getID()){
-		throw ('Cannot get level of unsaved object'); // DEBUG: may change
-	}
-	return this._data['level'];
-}
-
-
-/*
  * Move object to new position and shift surrounding objects
  *
- * N.B. This action updates the DB immediately and reloads all cached
- * objects -- a save() is not required
+ * N.B. Unless isNew is set, this function updates the DB immediately and
+ * reloads all cached objects -- a save() is not required
+ *
+ * If isNew is true, a transaction is not started or committed, so it
+ * should only be run from an existing transaction within save()
  */
-Scholar.Object.prototype.setPosition = function(newFolder, newPos){
-	var oldFolder = this.getField('folderID');
+Scholar.Object.prototype.setPosition = function(newFolder, newPos, isNew){
+	var oldFolder = this.getField('parentFolderID');
 	var oldPos = this.getField('orderIndex');
 	
 	if (this.getID()){
 		if (newFolder==oldFolder && newPos==oldPos){
 			return true;
 		}
-		var sql = "BEGIN;\n";
+		
+		if (!isNew){
+			Scholar.DB.beginTransaction();
+		}
 		
 		// If no position provided, drop at end of folder
 		if (!newPos){
 			newPos = Scholar.DB.valueQuery('SELECT MAX(orderIndex)+1 FROM ' +
-				'objects WHERE folderID=' + newFolder);
+				'treeStructure WHERE parentFolderID=' + newFolder);
 		}
 		// Otherwise shift down above it in old folder and shift up at it or
 		// above it in new folder
 		else {
-			sql += 'UPDATE objects SET orderIndex=orderIndex-1 WHERE folderID='
-				+ oldFolder + ' AND orderIndex>' + oldPos + ";\n";
+			sql = 'UPDATE treeStructure SET orderIndex=orderIndex-1 ' +
+				'WHERE parentFolderID=' + oldFolder +
+				' AND orderIndex>' + oldPos + ";\n";
 		
-			sql += 'UPDATE objects SET orderIndex=orderIndex+1 WHERE folderID='
-				+ newFolder + ' AND orderIndex>=' + newPos + ";\n";
+			sql += 'UPDATE treeStructure SET orderIndex=orderIndex+1 ' +
+				'WHERE parentFolderID=' + newFolder +
+				' AND orderIndex>=' + newPos + ";\n";
+				
+			Scholar.DB.query(sql);
 		}
 		
-		sql += 'UPDATE objects SET folderID=' + newFolder + ', orderIndex=' +
-			newPos + ' WHERE objectID=' + this.getID() + ";\n";
-			
-		sql += 'COMMIT;';
-		
+		// If a new object, insert
+		if (isNew){
+			sql = 'INSERT INTO treeStructure SET id=' + this.getID() + ', ' +
+				'isFolder=0, orderIndex=' + newPos + ', ' +
+				'parentFolderID=' + newFolder;
+		}
+		// Otherwise update
+		else {
+			sql = 'UPDATE treeStructure SET parentFolderID=' + newFolder +
+				', orderIndex=' + newPos + ' WHERE id=' + this.getID() +
+				" AND isFolder=0;\n";
+		}
 		Scholar.DB.query(sql);
+		
+		if (!isNew){
+			Scholar.DB.commitTransaction();
+		}
 	}
 	
-	this._data['folderID'] = newFolder;
+	this._data['parentFolderID'] = newFolder;
 	this._data['orderIndex'] = newPos;
-	Scholar.Objects.reloadAll();
+	
+	if (!isNew){
+		Scholar.Objects.reloadAll();
+	}
 	return true;
 }
 
@@ -556,26 +569,8 @@ Scholar.Object.prototype.save = function(){
 			sqlValues.push({'string':this.getField('rights')});
 		}
 		
-		sqlColumns.push('folderID');
-		var newFolder =
-			this._changed.has('folderID') ? this.getField('folderID') : 0;
-		sqlValues.push({'int':newFolder});
-		
 		try {
 			Scholar.DB.beginTransaction();
-			
-			// We set the index here within the transaction so that MAX()+1
-			// stays consistent through the INSERT
-			sqlColumns.push('orderIndex');
-			if (this._changed.has('orderIndex')){
-				sqlValues.push({'int':this.getField('orderIndex')});
-			}
-			else {
-				var newPos = Scholar.DB.valueQuery('SELECT MAX(orderIndex)+1 '
-					+ 'FROM objects WHERE folderID=' + newFolder);
-				sqlValues.push({'int': newPos});
-			}
-			
 			
 			//
 			// Creators
@@ -641,7 +636,23 @@ Scholar.Object.prototype.save = function(){
 				}
 			}
 			
+			
+			
 			Scholar.DB.query(sql);
+			
+			
+			// Set the position of the new object
+			var newFolder = this._changed.has('parentFolderID')
+				? this.getField('parentFolderID') : 0;
+			
+			var newPos = this._changed.has('orderIndex')
+				? this.getField('orderIndex') : false;
+			
+			this.setPosition(newFolder, newPos, true);
+			
+			// TODO: reload Folder or set the empty flag to false manually
+			// in case this was the first object in a folder
+			
 			Scholar.DB.commitTransaction();
 		}
 		catch (e){
@@ -800,7 +811,7 @@ Scholar.Objects = new function(){
 	 */
 	function getAll(){
 		var sql = 'SELECT O.objectID FROM objects O '
-			+ 'LEFT JOIN treeOrder ORD ON (O.objectID=ORD.id AND isFolder=0) '
+			+ 'LEFT JOIN treeStructure TS ON (O.objectID=TS.id AND isFolder=0) '
 			+ 'ORDER BY orderIndex';
 		
 		var ids = Scholar.DB.columnQuery(sql);
@@ -821,23 +832,20 @@ Scholar.Objects = new function(){
 		
 		/*
 		// To return all items (no longer used)
-		var sql = 'SELECT * FROM treeOrder WHERE id>0 ORDER BY orderIndex';
+		var sql = 'SELECT * FROM treeStructure WHERE id>0 ORDER BY orderIndex';
 		*/
 		
 		if (!parent){
 			parent = 0;
 		}
 		
-		var sql = 'SELECT TORD.* FROM treeOrder TORD '
-			+ 'LEFT JOIN objects O ON (TORD.id=O.objectID AND isFolder=0) '
-			+ 'LEFT JOIN folders F ON (TORD.id=F.folderID AND isFolder=1) '
-			+ 'WHERE IFNULL(O.folderID, F.parentFolderID)=' + parent
-			+ ' ORDER BY orderIndex';
+		var sql = 'SELECT * FROM treeStructure TS '
+			+ 'WHERE parentFolderID=' + parent + ' ORDER BY orderIndex';
 		
 		var tree = Scholar.DB.query(sql);
 		
 		if (!tree){
-			throw ('treeOrder is empty');
+			throw ('treeStructure is empty');
 		}
 		
 		_load('all');
@@ -914,11 +922,12 @@ Scholar.Objects = new function(){
 			return false;
 		}
 		
-		// Should be the same as query in Scholar.Object.loadFromID, just without objectID clause
-		var sql = 'SELECT O.*, lastName AS firstCreator, F.level+1 AS level, ORD.orderIndex '
+		// Should be the same as query in Scholar.Object.loadFromID, just
+		// without objectID clause
+		var sql = 'SELECT O.*, lastName AS firstCreator, TS.parentFolderID, '
+			+ 'TS.orderIndex '
 			+ 'FROM objects O '
-			+ 'LEFT JOIN folders F USING (folderID) '
-			+ 'LEFT JOIN treeOrder ORD ON (O.objectID=ORD.id AND isFolder=0) '
+			+ 'LEFT JOIN treeStructure TS ON (O.objectID=TS.id AND isFolder=0) '
 			+ 'LEFT JOIN objectCreators OC ON (O.objectID=OC.objectID) '
 			+ 'LEFT JOIN creators C ON (OC.creatorID=C.creatorID) '
 			+ 'WHERE OC.orderIndex=0';
@@ -960,7 +969,13 @@ Scholar.Folder = function(){
  * Build folder from database
  */
 Scholar.Folder.prototype.loadFromID = function(id){
-	var sql = 'SELECT * FROM folders WHERE folderID=' + id;
+	// Should be same as query in Scholar.Folders, just with folderID
+	var sql = "SELECT folderID, folderName, parentFolderID, "
+		+ "(SELECT COUNT(*) FROM treeStructure WHERE parentFolderID=" +
+		id + ")=0 AS isEmpty FROM folders F "
+		+ "JOIN treeStructure TS ON (F.folderID=TS.id AND TS.isFolder=1) "
+		+ "WHERE folderID=" + id;
+	
 	var row = Scholar.DB.rowQuery(sql);
 	this.loadFromRow(row);
 }
@@ -973,7 +988,7 @@ Scholar.Folder.prototype.loadFromRow = function(row){
 	this._id = row['folderID'];
 	this._name = row['folderName'];
 	this._parent = row['parentFolderID'];
-	this._level = row['level'];
+	this._empty = row['isEmpty'];
 }
 
 Scholar.Folder.prototype.getID = function(){
@@ -984,16 +999,16 @@ Scholar.Folder.prototype.getName = function(){
 	return this._name;
 }
 
-Scholar.Folder.prototype.getLevel = function(){
-	return this._level;
-}
-
 Scholar.Folder.prototype.isFolder = function(){
 	return true;
 }
 
 Scholar.Folder.prototype.getParent = function(){
 	return this._parent;
+}
+
+Scholar.Folder.prototype.isEmpty = function(){
+	return !!parseInt(this._empty);
 }
 
 
@@ -1018,7 +1033,11 @@ Scholar.Folders = new function(){
 	
 	
 	function _load(){
-		var sql = "SELECT * FROM folders WHERE folderID>0"; // skip 'root' folder
+		var sql = "SELECT folderID, folderName, parentFolderID, "
+			+ "(SELECT COUNT(*) FROM treeStructure WHERE "
+			+ "parentFolderID=TS.id)=0 AS isEmpty FROM folders F "
+			+ "JOIN treeStructure TS ON (F.folderID=TS.id AND TS.isFolder=1) "
+			+ "WHERE folderID>0"; // skip 'root' folder
 		var result = Scholar.DB.query(sql);
 		
 		if (!result){
