@@ -12,49 +12,47 @@
 	<script src="sidebar.js"/>
 	
 	<stringbundle id="scholar-strings" src="chrome://scholar/locale/scholar.properties"/>
-  
-    <tree
-        id="scholar-sidebar-items"
-        onselect="this.view.selectionChanged()"
-        enableColumnDrag="true"
-        seltype="multiple"
-        flex="1">
-
-        <treecols>
-            <treecol
-                id="title_column"
-                label="&sidebar.items.title_column;"
-                flex="2"
-                primary="true"/>
-            <splitter class="tree-splitter"/>
-            <treecol
-                id="creator_column"
-                label="&sidebar.items.creator_column;"
-                flex="1"/>
-        </treecols>
-        <treechildren/>
-    </tree>   	
+  	<vbox id="view-pane" flex="1">
+		<tree
+			id="scholar-sidebar-items"
+			onselect="this.view.selectionChanged()"
+			enableColumnDrag="true"
+			seltype="multiple" flex="1">
+	
+			<treecols>
+				<treecol
+					id="title_column"
+					label="&sidebar.items.title_column;"
+					flex="2"
+					primary="true"/>
+				<splitter class="tree-splitter"/>
+				<treecol
+					id="creator_column"
+					label="&sidebar.items.creator_column;"
+					flex="1"/>
+			</treecols>
+			<treechildren/>
+		</tree>   	
+   	</vbox>
    	
    	<vbox id="scholar-sidebar-object-pane" hidden="true">
-   	<sidebarheader>
-		<spacer flex="1" />
-	   	<toolbarbutton label="Edit" oncommand="editSelectedRow();" />
-   	</sidebarheader>
+		<sidebarheader id="edit-button">
+			<spacer flex="1" />
+			<button id="tb-edit" label="Edit" oncommand="editSelectedRow();" />
+		</sidebarheader>
 	<grid>
 	  <columns>
 		<column/>
 		<column flex="1"/>
 	  </columns>
 	
-	  <rows id="scholar-sidebar-object-pane-dynamic-fields">
+	  <rows id="dynamic-fields">
 	  </rows>
 	</grid>
 	</vbox>
-    	<!--
-		<textbox id="test1"/>
-    	<label control="test2" value="Test2:"/>
-		<textbox id="test2"/>
-    	<label control="test3" value="Test3:"/>
-		<textbox id="test3"/>
-		-->
+	
+  	<hbox id="edit-pane" hidden="true">
+		<button label="Cancel" oncommand="returnToTree()"/>
+		<button label="Save" oncommand="returnToTree()"/>
+	</hbox>
 </page>
