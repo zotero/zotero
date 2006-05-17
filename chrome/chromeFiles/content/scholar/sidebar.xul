@@ -15,7 +15,7 @@
   
     <tree
         id="scholar-sidebar-items"
-        onselect="selectionChanged()"
+        onselect="this.view.selectionChanged()"
         enableColumnDrag="true"
         seltype="multiple"
         flex="1">
@@ -35,7 +35,12 @@
         <treechildren/>
     </tree>   	
    	
-	<grid id="scholar-sidebar-object-pane" hidden="true">
+   	<vbox id="scholar-sidebar-object-pane" hidden="true">
+   	<sidebarheader>
+		<spacer flex="1" />
+	   	<toolbarbutton label="Edit" oncommand="editSelectedRow();" />
+   	</sidebarheader>
+	<grid>
 	  <columns>
 		<column/>
 		<column flex="1"/>
@@ -44,6 +49,7 @@
 	  <rows id="scholar-sidebar-object-pane-dynamic-fields">
 	  </rows>
 	</grid>
+	</vbox>
     	<!--
 		<textbox id="test1"/>
     	<label control="test2" value="Test2:"/>

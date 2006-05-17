@@ -201,10 +201,14 @@ function populateObjectPane(objectRow)
 
 }
 
-function selectionChanged()
+function editSelectedRow()
 {
-	myTreeView.selectionChanged();
+	var thisRow = myTreeView._getObjectAtRow(myTreeView.selection.currentIndex);
+	window.openDialog('chrome://scholar/content/editDialog.xul','editDialog','modal,dialog,chrome',thisRow);
+	
 }
+
+
 
 function setView()
 {
