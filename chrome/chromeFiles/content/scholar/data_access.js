@@ -76,7 +76,8 @@ Scholar.Item.prototype.loadFromID = function(id){
 		+ 'LEFT JOIN treeStructure TS ON (I.itemID=TS.id AND isFolder=0) '
 		+ 'LEFT JOIN itemCreators IC ON (I.itemID=IC.itemID) '
 		+ 'LEFT JOIN creators C ON (IC.creatorID=C.creatorID) '
-		+ 'WHERE itemID=' + id + ' AND IC.orderIndex=0';
+		+ 'WHERE itemID=' + id
+		+ ' AND (IC.orderIndex=0 OR IC.orderIndex IS NULL)';
 	var row = Scholar.DB.rowQuery(sql);
 	this.loadFromRow(row);
 }
@@ -323,9 +324,8 @@ Scholar.Item.prototype.setPosition = function(newFolder, newPos, isNew){
 	var oldFolder = this.getField('parentFolderID');
 	var oldPos = this.getField('orderIndex');
 	
-	
 	if (this.getID()){
-		if (newFolder==oldFolder && newPos==oldPos){
+		if (!isNew && newFolder==oldFolder && newPos==oldPos){
 			return true;
 		}
 		
@@ -363,13 +363,13 @@ Scholar.Item.prototype.setPosition = function(newFolder, newPos, isNew){
 		
 		// If a new item, insert
 		if (isNew){
-			sql = 'INSERT INTO treeStructure SET id=' + this.getID() + ', ' +
-				'isFolder=0, orderIndex=' + newPos + ', ' +
-				'parentFolderID=' + newFolder;
+			var sql = 'INSERT INTO treeStructure '
+				+ '(id, isFolder, orderIndex, parentFolderID) VALUES ('
+				+ this.getID() + ', 0, ' + newPos + ', ' + newFolder + ')';
 		}
 		// Otherwise update
 		else {
-			sql = 'UPDATE treeStructure SET parentFolderID=' + newFolder +
+			var sql = 'UPDATE treeStructure SET parentFolderID=' + newFolder +
 				', orderIndex=' + newPos + ' WHERE id=' + this.getID() +
 				" AND isFolder=0;\n";
 		}
@@ -385,6 +385,7 @@ Scholar.Item.prototype.setPosition = function(newFolder, newPos, isNew){
 	
 	if (this.getID() && !isNew){
 		Scholar.Items.reloadAll();
+		Scholar.Folders.reloadAll(); // needed to recheck isEmpty
 	}
 	return true;
 }
@@ -550,7 +551,7 @@ Scholar.Item.prototype.save = function(){
 		}
 		catch (e){
 			Scholar.DB.rollbackTransaction();
-			throw (e);
+			throw(e);
 		}
 	}
 	
@@ -633,11 +634,18 @@ Scholar.Item.prototype.save = function(){
 			}
 			sql = sql.substring(0,sql.length-1) + ");\n";
 			
+			// Save basic data to items table and get new ID
 			var itemID = Scholar.DB.query(sql,sqlValues);
+			this._data['itemID'] = itemID;
 			
+			// Set itemData
 			if (this._changedItemData.length){
 				sql = '';
 				for (fieldID in this._changedItemData.items){
+					if (!this.getField(fieldID)){
+						continue;
+					}
+					
 					sql += 'INSERT INTO itemData VALUES (' +
 						itemID + ',' + fieldID + ',';
 						if (Scholar.ItemFields.isInteger(fieldID)){
@@ -648,12 +656,11 @@ Scholar.Item.prototype.save = function(){
 						}
 						sql += ");\n";
 				}
+				
+				if (sql){
+					Scholar.DB.query(sql);
+				}
 			}
-			
-			
-			
-			Scholar.DB.query(sql);
-			
 			
 			// Set the position of the new item
 			var newFolder = this.getField('parentFolderID')
@@ -664,14 +671,15 @@ Scholar.Item.prototype.save = function(){
 			
 			this.setPosition(newFolder, newPos, true);
 			
-			// TODO: reload Folder or set the empty flag to false manually
-			// in case this was the first item in a folder
-			
 			Scholar.DB.commitTransaction();
+			
+			// Reload folders to update isEmpty,
+			// in case this was the first item in a folder
+			Scholar.Folders.reloadAll();
 		}
 		catch (e){
 			Scholar.DB.rollbackTransaction();
-			throw (e);
+			throw(e);
 		}
 	}
 	
@@ -951,7 +959,7 @@ Scholar.Items = new function(){
 			+ 'LEFT JOIN treeStructure TS ON (I.itemID=TS.id AND isFolder=0) '
 			+ 'LEFT JOIN itemCreators IC ON (I.itemID=IC.itemID) '
 			+ 'LEFT JOIN creators C ON (IC.creatorID=C.creatorID) '
-			+ 'WHERE IC.orderIndex=0';
+			+ 'WHERE IC.orderIndex=0 OR IC.orderIndex IS NULL';
 		
 		if (arguments[0]!='all'){
 			sql += ' AND I.itemID IN (' + Scholar.join(arguments,',') + ')';
@@ -1041,6 +1049,7 @@ Scholar.Folders = new function(){
 	var _foldersLoaded = false;
 	
 	this.get = get;
+	this.reloadAll = reloadAll;
 	
 	/*
 	 * Returns a Scholar.Folder object for a folderID
@@ -1052,6 +1061,11 @@ Scholar.Folders = new function(){
 		return (typeof _folders[id]!='undefined') ? _folders[id] : false;
 	}
 	
+	
+	function reloadAll(){
+		_folders = new Array();
+		_load();
+	}
 	
 	function _load(){
 		var sql = "SELECT folderID, folderName, parentFolderID, "
