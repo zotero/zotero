@@ -1,4 +1,4 @@
--- 7
+-- 8
 
     DROP TABLE IF EXISTS version;
     CREATE TABLE version (
@@ -122,8 +122,8 @@
     INSERT INTO treeStructure VALUES (0, 1, 0, NULL);
     
     -- Some sample data
-    INSERT INTO itemTypes VALUES (1,'Book');
-    INSERT INTO itemTypes VALUES (2,'Journal Article');
+    INSERT INTO itemTypes VALUES (1,'book');
+    INSERT INTO itemTypes VALUES (2,'journalArticle');
     
     INSERT INTO "fieldFormats" VALUES(1, '.*', 0);
     INSERT INTO "fieldFormats" VALUES(2, '[0-9]*', 1);

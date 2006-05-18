@@ -1212,6 +1212,22 @@ Scholar.Creators = new function(){
 
 
 
+Scholar.ItemTypes = new function(){
+	this.getTypes = getTypes;
+	this.getTypeName = getTypeName;
+	
+	function getTypes(){
+		return Scholar.DB.query('SELECT itemTypeID AS id, typeName AS name '
+			+ 'FROM itemTypes order BY typeName');
+	}
+	
+	function getTypeName(itemTypeID){
+		return Scholar.DB.valueQuery('SELECT typeName FROM itemTypes '
+			+ 'WHERE itemTypeID=' + itemTypeID);
+	}
+}
+
+
 
 
 Scholar.ItemFields = new function(){
