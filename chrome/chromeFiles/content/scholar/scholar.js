@@ -4,7 +4,7 @@ const SCHOLAR_CONFIG = {
 	DB_VERSION: 7, // must match version at top of schema.sql
 	DB_REBUILD: false, // erase DB and recreate from schema
 	DEBUG_LOGGING: true,
-	DEBUG_TO_CONSOLE: false // dump debug messages to console rather than (much slower) Debug Logger
+	DEBUG_TO_CONSOLE: true // dump debug messages to console rather than (much slower) Debug Logger
 };
 
 /*
