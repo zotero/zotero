@@ -11,7 +11,8 @@
                    em:name="Firefox Scholar"
                    em:version="1.0"
                    em:creator="Center for History and New Media, George Mason University"
-                   em:homepageURL="http://chnm.gmu.edu">
+                   em:homepageURL="http://chnm.gmu.edu"
+                   em:optionsURL="chrome://scholar/content/preferences.xul">
     <em:targetApplication RDF:resource="rdf:#$V4RG2"/>
   </RDF:Description>
 </RDF:RDF>

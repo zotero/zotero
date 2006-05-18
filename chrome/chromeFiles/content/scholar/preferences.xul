@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+
+<dialog id="winMain" title="Scholar Preferences" style="min-width:400px;"
+		onload="init();" ondialogaccept="accept()"
+		xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+<script src="preferences.js"/>
+<script src="include.js"/>
+
+<dialogheader id="header" title="Scholar" description="Scholar Preferences"/>
+
+<checkbox id="whateverBox" label="Whatever!"/>
+
+
+</dialog>

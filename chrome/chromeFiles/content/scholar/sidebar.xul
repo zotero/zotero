@@ -12,7 +12,7 @@
 	<script src="sidebar.js"/>
 	
 	<stringbundle id="scholar-strings" src="chrome://scholar/locale/scholar.properties"/>
-  	<vbox id="view-pane" flex="1">
+  	<vbox id="list-pane" flex="1">
 		<tree
 			id="list-tree"
 			onselect="this.view.selectionChanged()"
@@ -41,7 +41,7 @@
    	</vbox>
 
 	
-   	<vbox id="object-pane" hidden="true">
+   	<vbox id="view-pane" hidden="true">
 		<grid>
 			<columns>
 				<column/>

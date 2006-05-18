@@ -5,7 +5,7 @@ var dynamicBox;
 Scholar.TreeView = function()
 {
 	this._treebox = null;
-	this._dataObjects = new Array();
+	this._dataItems = new Array();
 	this.rowCount = 0;
 }
 
@@ -17,9 +17,9 @@ Scholar.TreeView.prototype.setTree = function(treebox)
 	
 	var newRows = Scholar.Items.getTreeRows();
 	for(var i = 0; i < newRows.length; i++)
-		this._insertItem(newRows[i],  0, i+1); //object ref, isContainerOpen, level
+		this._insertItem(newRows[i],  0, i+1); //item ref, isContainerOpen, level
 	
-	this.rowCount = this._dataObjects.length;
+	this.rowCount = this._dataItems.length;
 }
 
 Scholar.TreeView.prototype.getCellText = function(row, column)
@@ -45,9 +45,9 @@ Scholar.TreeView.prototype.getCellText = function(row, column)
 }
 
 Scholar.TreeView.prototype.isContainer = function(row) 		{ return this._getItemAtRow(row).isFolder(); }
-Scholar.TreeView.prototype.isContainerOpen = function(row)  { return this._dataObjects[row][1]; }
+Scholar.TreeView.prototype.isContainerOpen = function(row)  { return this._dataItems[row][1]; }
 Scholar.TreeView.prototype.isContainerEmpty = function(row) { return (this.isContainer(row) && this._getItemAtRow(row).isEmpty()); }
-Scholar.TreeView.prototype.getLevel = function(row) 		{ return this._dataObjects[row][2]; }
+Scholar.TreeView.prototype.getLevel = function(row) 		{ return this._dataItems[row][2]; }
 
 Scholar.TreeView.prototype.getParentIndex = function(row)
 {
@@ -77,7 +77,7 @@ Scholar.TreeView.prototype.toggleOpenState = function(row)
 
 	if(this.isContainerOpen(row))
 	{
-		while((row + 1 < this._dataObjects.length) && (this.getLevel(row + 1) > thisLevel))
+		while((row + 1 < this._dataItems.length) && (this.getLevel(row + 1) > thisLevel))
 		{
 			this._deleteItem(row+1);
 			count--;	//count is negative when closing a container because we are removing rows
@@ -94,8 +94,8 @@ Scholar.TreeView.prototype.toggleOpenState = function(row)
 		}
 	}
 	
-	this._dataObjects[row][1] = !this._dataObjects[row][1];  //toggle container open value
-	this.rowCount = this._dataObjects.length;
+	this._dataItems[row][1] = !this._dataItems[row][1];  //toggle container open value
+	this.rowCount = this._dataItems.length;
 	
 	this._treebox.rowCountChanged(row, count); //tell treebox to repaint these
 }
@@ -104,24 +104,24 @@ Scholar.TreeView.prototype.selectionChanged = function()
 {
 	if(this.selection.count == 1 && !this.isContainer(this.selection.currentIndex))
 	{
-		populateObjectPane(this._getItemAtRow(this.selection.currentIndex));
-		document.getElementById('object-pane').hidden = false;
+		viewSelectedItem();
+		document.getElementById('view-pane').hidden = false;
 		document.getElementById('tb-edit').hidden = false;
 	}
 	else
 	{
-		document.getElementById('object-pane').hidden = true;
+		document.getElementById('view-pane').hidden = true;
 		document.getElementById('tb-edit').hidden = true;
 	}
 }
 
 
-Scholar.TreeView.prototype._insertItem = function(item, level, beforeRow) 	{ this._dataObjects.splice(beforeRow, 0, [item, false, level]); }
+Scholar.TreeView.prototype._insertItem = function(item, level, beforeRow) 	{ this._dataItems.splice(beforeRow, 0, [item, false, level]); }
 
-Scholar.TreeView.prototype._deleteItem = function(row) 						{ this._dataObjects.splice(row,1);; }
+Scholar.TreeView.prototype._deleteItem = function(row) 						{ this._dataItems.splice(row,1);; }
 
 
-Scholar.TreeView.prototype._getItemAtRow = function(row)					{ return this._dataObjects[row][0]; }
+Scholar.TreeView.prototype._getItemAtRow = function(row)					{ return this._dataItems[row][0]; }
 Scholar.TreeView.prototype.isSorted = function() 							{ return false; }
 Scholar.TreeView.prototype.isSeparator = function(row) 						{ return false; }
 Scholar.TreeView.prototype.isEditable = function(row, idx) 					{ return false; }
@@ -139,10 +139,12 @@ Scholar.TreeView.prototype.canDrop = function(row, orient)					{ return !orient;
 Scholar.TreeView.prototype.drop = function(row, orient)						{ }
 */
 
-function populateObjectPane(thisItem)
+function viewSelectedItem()
 {
 	removeDynamicRows();
-	
+
+	var thisItem = myTreeView._getItemAtRow(myTreeView.selection.currentIndex);
+
 	var fieldNames = getFullFieldList(thisItem);
 
 	for(var i = 0; i<fieldNames.length; i++)
@@ -150,7 +152,7 @@ function populateObjectPane(thisItem)
 		if(thisItem.getField(fieldNames[i]) != "")
 		{
 			var label = document.createElement("label");
-			label.setAttribute("value",ScholarLocalizedStrings.getString("objectFields."+fieldNames[i])+":");
+			label.setAttribute("value",ScholarLocalizedStrings.getString("itemFields."+fieldNames[i])+":");
 			
 			var valueElement = document.createElement("description");
 			valueElement.appendChild(document.createTextNode(thisItem.getField(fieldNames[i])));
@@ -192,7 +194,7 @@ function newItem()
 
 function editSelectedItem()
 {
-	document.getElementById('view-pane').hidden = true;
+	document.getElementById('list-pane').hidden = true;
 	document.getElementById('edit-pane').hidden = false;
 
 	var thisItem = myTreeView._getItemAtRow(myTreeView.selection.currentIndex);
@@ -205,7 +207,7 @@ function editSelectedItem()
 		if(!thisItem.isPrimaryField(fieldNames[i]) || thisItem.isEditableField(fieldNames[i]))
 		{
 			var label = document.createElement("label");
-			label.setAttribute("value",ScholarLocalizedStrings.getString("objectFields."+fieldNames[i])+":");
+			label.setAttribute("value",ScholarLocalizedStrings.getString("itemFields."+fieldNames[i])+":");
 			label.setAttribute("control","dynamic-field-"+i);
 			
 			//create the textbox
@@ -271,15 +273,15 @@ function returnToTree(save)
 		//get fields, call data access methods
 		var valueElements = dynamicBox.getElementsByTagName("textbox");		//All elements of tagname 'textbox' should be the values of edits
 		for(var i=0; i<valueElements.length; i++)
-			thisItem.setField(valueElements[i].getAttribute("fieldName"),valueElements[i].value,false);
+			thisItem.setField(valueElements[i].getAttribute("fieldName"),valueElements[i].value);
 	
 		thisItem.save();
 	}
 	
-	document.getElementById('view-pane').hidden = false;
+	document.getElementById('list-pane').hidden = false;
 	document.getElementById('edit-pane').hidden = true;
 
-	populateObjectPane(thisItem);
+	viewSelectedItem();
 }
 
 function init()
