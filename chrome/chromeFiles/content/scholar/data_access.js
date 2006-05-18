@@ -9,7 +9,9 @@ Scholar.Item = function(){
 	// Accept itemTypeID, folderID and orderIndex in constructor
 	if (arguments.length){
 		this.setType(arguments[0]);
-		this.setPosition(arguments[1],arguments[2]);
+		if (arguments.length>1){
+			this.setPosition(arguments[1], arguments[2] ? arguments[2] : false);
+		}
 	}
 }
 
@@ -309,15 +311,18 @@ Scholar.Item.prototype.setField = function(field, value, loadIn){
 /*
  * Move item to new position and shift surrounding items
  *
- * N.B. Unless isNew is set, this function updates the DB immediately and
+ * N.B. Unless isNew is set or the item doesn't yet have an id,
+ * this function updates the DB immediately and
  * reloads all cached items -- a save() is not required
  *
- * If isNew is true, a transaction is not started or committed, so it
- * should only be run from an existing transaction within save()
+ * If isNew is true, a transaction is not started or committed, so if
+ * the item has an id it should only be run from an existing transaction
+ * within Scholar.Item.save()
  */
 Scholar.Item.prototype.setPosition = function(newFolder, newPos, isNew){
 	var oldFolder = this.getField('parentFolderID');
 	var oldPos = this.getField('orderIndex');
+	
 	
 	if (this.getID()){
 		if (newFolder==oldFolder && newPos==oldPos){
@@ -326,6 +331,15 @@ Scholar.Item.prototype.setPosition = function(newFolder, newPos, isNew){
 		
 		if (!isNew){
 			Scholar.DB.beginTransaction();
+		}
+		
+		if (!newFolder){
+			newFolder = 0;
+		}
+		// Do a foreign key check manually
+		else if (!parseInt(Scholar.DB.valueQuery('SELECT COUNT(*) FROM folders '
+				+ 'WHERE folderID=' + newFolder))){
+			throw('Attempt to add item to invalid folder');
 		}
 		
 		// If no position provided, drop at end of folder
@@ -369,7 +383,7 @@ Scholar.Item.prototype.setPosition = function(newFolder, newPos, isNew){
 	this._data['parentFolderID'] = newFolder;
 	this._data['orderIndex'] = newPos;
 	
-	if (!isNew){
+	if (this.getID() && !isNew){
 		Scholar.Items.reloadAll();
 	}
 	return true;
@@ -642,10 +656,10 @@ Scholar.Item.prototype.save = function(){
 			
 			
 			// Set the position of the new item
-			var newFolder = this._changed.has('parentFolderID')
+			var newFolder = this.getField('parentFolderID')
 				? this.getField('parentFolderID') : 0;
 			
-			var newPos = this._changed.has('orderIndex')
+			var newPos = this.getField('orderIndex')
 				? this.getField('orderIndex') : false;
 			
 			this.setPosition(newFolder, newPos, true);
@@ -760,6 +774,7 @@ Scholar.Items = new function(){
 	this.getTreeRows = getTreeRows;
 	this.reload = reload;
 	this.reloadAll = reloadAll;
+	this.getNewItemByType = getNewItemByType;
 	
 	/*
 	 * Retrieves (and loads, if necessary) an arbitrary number of items
@@ -900,6 +915,11 @@ Scholar.Items = new function(){
 		}
 		_load(ids);
 		return true;
+	}
+	
+	
+	function getNewItemByType(itemTypeID, parentFolderID, orderIndex){
+		return new Scholar.Item(itemTypeID, parentFolderID, orderIndex);
 	}
 	
 	
