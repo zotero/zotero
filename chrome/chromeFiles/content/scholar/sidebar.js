@@ -15,7 +15,7 @@ Scholar.TreeView.prototype.setTree = function(treebox)
 		return;
 	this._treebox = treebox;
 	
-	var newRows = Scholar.Objects.getTreeRows();
+	var newRows = Scholar.Items.getTreeRows();
 	for(var i = 0; i < newRows.length; i++)
 		this._insertItem(newRows[i],  0, i+1); //object ref, isContainerOpen, level
 	
@@ -85,7 +85,7 @@ Scholar.TreeView.prototype.toggleOpenState = function(row)
 	}
 	else
 	{
-		var newRows = Scholar.Objects.getTreeRows(this._getObjectAtRow(row).getID()); //Get children
+		var newRows = Scholar.Items.getTreeRows(this._getObjectAtRow(row).getID()); //Get children
 		
 		for(var i = 0; i < newRows.length; i++)
 		{
@@ -245,10 +245,10 @@ function removeDynamicRows()
 
 function getFullFieldList(item)
 {
-	var fields = Scholar.ObjectFields.getObjectTypeFields(item.getField("objectTypeID"));
+	var fields = Scholar.ItemFields.getItemTypeFields(item.getField("itemTypeID"));
 	var fieldNames = new Array("title","dateAdded","dateModified","source","rights");
 	for(var i = 0; i<fields.length; i++)
-		fieldNames.push(Scholar.ObjectFields.getName(fields[i]));
+		fieldNames.push(Scholar.ItemFields.getName(fields[i]));
 	return fieldNames;
 }
 

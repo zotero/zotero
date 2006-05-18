@@ -412,11 +412,11 @@ Scholar.DB = new function(){
 		for (var i=parseInt(fromVersion) + 1; i<=toVersion; i++){
 			
 			// For now, just wipe and recreate
-			if (i==6){
+			if (i==7){
 				_initializeSchema();
 			}
 			
-			if (i==7){
+			if (i==8){
 				// do stuff
 				// _updateDBVersion(i);
 			}

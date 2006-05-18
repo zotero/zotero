@@ -1,56 +1,56 @@
 /*
- * Constructor for Object object
+ * Constructor for Item object
  *
- * Generally should be called through Scholar.Objects rather than directly
+ * Generally should be called through Scholar.Items rather than directly
  */
-Scholar.Object = function(){
+Scholar.Item = function(){
 	this._init();
 	
-	// Accept objectTypeID, folderID and orderIndex in constructor
+	// Accept itemTypeID, folderID and orderIndex in constructor
 	if (arguments.length){
 		this.setType(arguments[0]);
 		this.setPosition(arguments[1],arguments[2]);
 	}
 }
 
-Scholar.Object.prototype._init = function(){
+Scholar.Item.prototype._init = function(){
 	//
 	// Public members for access by public methods -- do not access directly
 	//
 	this._data = new Array();
 	this._creators = new Scholar.Hash();
-	this._objectData = new Array();
+	this._itemData = new Array();
 	
 	this._creatorsLoaded = false;
-	this._objectDataLoaded = false;
+	this._itemDataLoaded = false;
 	
 	this._changed = new Scholar.Hash();
 	this._changedCreators = new Scholar.Hash();
-	this._changedObjectData = new Scholar.Hash();
+	this._changedItemData = new Scholar.Hash();
 }
 
 
 //////////////////////////////////////////////////////////////////////////////
 //
-// Public Scholar.Object methods
+// Public Scholar.Item methods
 //
 //////////////////////////////////////////////////////////////////////////////
 
 /*
- * Check if the specified field is a primary field from the objects table
+ * Check if the specified field is a primary field from the items table
  */
-Scholar.Object.prototype.isPrimaryField = function(field){
-	if (!Scholar.Object.primaryFields){
-		Scholar.Object.primaryFields = Scholar.DB.getColumnHash('objects');
-		Scholar.Object.primaryFields['firstCreator'] = true;
-		Scholar.Object.primaryFields['parentFolderID'] = true;
-		Scholar.Object.primaryFields['orderIndex'] = true;
+Scholar.Item.prototype.isPrimaryField = function(field){
+	if (!Scholar.Item.primaryFields){
+		Scholar.Item.primaryFields = Scholar.DB.getColumnHash('items');
+		Scholar.Item.primaryFields['firstCreator'] = true;
+		Scholar.Item.primaryFields['parentFolderID'] = true;
+		Scholar.Item.primaryFields['orderIndex'] = true;
 	}
 	
-	return !!Scholar.Object.primaryFields[field];
+	return !!Scholar.Item.primaryFields[field];
 }
 
-Scholar.Object.editableFields = {
+Scholar.Item.editableFields = {
 	title: true,
 	source: true,
 	rights: true
@@ -59,31 +59,31 @@ Scholar.Object.editableFields = {
 /*
  * Check if the specified primary field can be changed with setField()
  */
-Scholar.Object.prototype.isEditableField = function(field){
-	return !!Scholar.Object.editableFields[field];
+Scholar.Item.prototype.isEditableField = function(field){
+	return !!Scholar.Item.editableFields[field];
 }
 
 
 /*
  * Build object from database
  */
-Scholar.Object.prototype.loadFromID = function(id){
-	var sql = 'SELECT O.*, lastName AS firstCreator, TS.parentFolderID, '
+Scholar.Item.prototype.loadFromID = function(id){
+	var sql = 'SELECT I.*, lastName AS firstCreator, TS.parentFolderID, '
 		+ 'TS.orderIndex '
-		+ 'FROM objects O '
-		+ 'LEFT JOIN treeStructure TS ON (O.objectID=TS.id AND isFolder=0) '
-		+ 'LEFT JOIN objectCreators OC ON (O.objectID=OC.objectID) '
-		+ 'LEFT JOIN creators C ON (OC.creatorID=C.creatorID) '
-		+ 'WHERE objectID=' + id + ' AND OC.orderIndex=0';
+		+ 'FROM items I '
+		+ 'LEFT JOIN treeStructure TS ON (I.itemID=TS.id AND isFolder=0) '
+		+ 'LEFT JOIN itemCreators IC ON (I.itemID=IC.itemID) '
+		+ 'LEFT JOIN creators C ON (IC.creatorID=C.creatorID) '
+		+ 'WHERE itemID=' + id + ' AND IC.orderIndex=0';
 	var row = Scholar.DB.rowQuery(sql);
 	this.loadFromRow(row);
 }
 
 
 /*
- * Populate basic object data from a database row
+ * Populate basic item data from a database row
  */
-Scholar.Object.prototype.loadFromRow = function(row){
+Scholar.Item.prototype.loadFromRow = function(row){
 	this._init();
 	for (col in row){
 		if (this.isPrimaryField(col) || col=='firstCreator'){
@@ -97,41 +97,41 @@ Scholar.Object.prototype.loadFromRow = function(row){
 /*
  * Check if any data fields have changed since last save
  */
-Scholar.Object.prototype.hasChanged = function(){
+Scholar.Item.prototype.hasChanged = function(){
 	return (this._changed.length || this._changedCreators.length ||
-		this._changedObjectData.length);
+		this._changedItemData.length);
 }
 
 
-Scholar.Object.prototype.getID = function(){
-	return this._data['objectID'] ? this._data['objectID'] : false;
+Scholar.Item.prototype.getID = function(){
+	return this._data['itemID'] ? this._data['itemID'] : false;
 }
 
 
-Scholar.Object.prototype.getType = function(){
-	return this._data['objectTypeID'] ? this._data['objectTypeID'] : false;
+Scholar.Item.prototype.getType = function(){
+	return this._data['itemTypeID'] ? this._data['itemTypeID'] : false;
 }
 
 
-Scholar.Object.prototype.getParent = function(){
+Scholar.Item.prototype.getParent = function(){
 	return this._data['parentFolderID'] ? this._data['parentFolderID'] : false;
 }
 
 
 /*
- * Set or change the object's type
+ * Set or change the item's type
  */
-Scholar.Object.prototype.setType = function(objectTypeID){
-	if (objectTypeID==this.getType()){
+Scholar.Item.prototype.setType = function(itemTypeID){
+	if (itemTypeID==this.getType()){
 		return true;
 	}
 	
 	// If existing type, clear fields from old type that aren't in new one
 	if (this.getType()){
-		var sql = 'SELECT fieldID FROM objectTypeFields '
-			+ 'WHERE objectTypeID=' + this.getType() + ' AND fieldID NOT IN '
-			+ '(SELECT fieldID FROM objectTypeFields WHERE objectTypeID='
-			+ objectTypeID + ')';
+		var sql = 'SELECT fieldID FROM itemTypeFields '
+			+ 'WHERE itemTypeID=' + this.getType() + ' AND fieldID NOT IN '
+			+ '(SELECT fieldID FROM itemTypeFields WHERE itemTypeID='
+			+ itemTypeID + ')';
 		var obsoleteFields = Scholar.DB.columnQuery(sql);
 		
 		if (obsoleteFields){
@@ -141,16 +141,16 @@ Scholar.Object.prototype.setType = function(objectTypeID){
 		}
 	}
 	
-	this._data['objectTypeID'] = objectTypeID;
-	this._changed.set('objectTypeID');
+	this._data['itemTypeID'] = itemTypeID;
+	this._changed.set('itemTypeID');
 	return true;
 }
 
 
 /*
- * Returns the number of creators for this object
+ * Returns the number of creators for this item
  */
-Scholar.Object.prototype.numCreators = function(){
+Scholar.Item.prototype.numCreators = function(){
 	if (this.getID() && !this._creatorsLoaded){
 		this._loadCreators();
 	}
@@ -160,7 +160,7 @@ Scholar.Object.prototype.numCreators = function(){
 /*
  * Returns an array of the creator data at the given position, or false if none
  */
-Scholar.Object.prototype.getCreator = function(pos){
+Scholar.Item.prototype.getCreator = function(pos){
 	if (this.getID() && !this._creatorsLoaded){
 		this._loadCreators();
 	}
@@ -175,7 +175,7 @@ Scholar.Object.prototype.getCreator = function(pos){
 /*
  * Set or update the creator at the specified position
  */
-Scholar.Object.prototype.setCreator = function(orderIndex, firstName, lastName, creatorTypeID){
+Scholar.Item.prototype.setCreator = function(orderIndex, firstName, lastName, creatorTypeID){
 	if (this.getID() && !this._creatorsLoaded){
 		this._loadCreators();
 	}
@@ -209,7 +209,7 @@ Scholar.Object.prototype.setCreator = function(orderIndex, firstName, lastName, 
 /*
  * Remove a creator and shift others down
  */
-Scholar.Object.prototype.removeCreator = function(orderIndex){
+Scholar.Item.prototype.removeCreator = function(orderIndex){
 	if (this.getID() && !this._creatorsLoaded){
 		this._loadCreators();
 	}
@@ -230,33 +230,33 @@ Scholar.Object.prototype.removeCreator = function(orderIndex){
 
 
 /*
- * Retrieves (and loads from DB, if necessary) an objectData field value
+ * Retrieves (and loads from DB, if necessary) an itemData field value
  *
  * Field can be passed as fieldID or fieldName
  */
-Scholar.Object.prototype.getField = function(field){
-	//Scholar.debug('Requesting field ' + field + ' for object ' + this.getID(), 4);
+Scholar.Item.prototype.getField = function(field){
+	//Scholar.debug('Requesting field ' + field + ' for item ' + this.getID(), 4);
 	if (this.isPrimaryField(field)){
 		return this._data[field] ? this._data[field] : '';
 	}
 	else {
-		if (this.getID() && !this._objectDataLoaded){
-			this._loadObjectData();
+		if (this.getID() && !this._itemDataLoaded){
+			this._loadItemData();
 		}
 		
-		var fieldID = Scholar.ObjectFields.getID(field);
+		var fieldID = Scholar.ItemFields.getID(field);
 		
-		return this._objectData[fieldID] ? this._objectData[fieldID] : '';
+		return this._itemData[fieldID] ? this._itemData[fieldID] : '';
 	}
 }
 
 
 /*
- * Set a field value, loading existing objectData first if necessary
+ * Set a field value, loading existing itemData first if necessary
  *
  * Field can be passed as fieldID or fieldName
  */
-Scholar.Object.prototype.setField = function(field, value, loadIn){
+Scholar.Item.prototype.setField = function(field, value, loadIn){
 	// Primary field
 	if (this.isPrimaryField(field)){
 		if (!this.isEditableField(field)){
@@ -274,32 +274,32 @@ Scholar.Object.prototype.setField = function(field, value, loadIn){
 	// Type-specific field
 	else {
 		if (!this.getType()){
-			throw ('Object type must be set before setting field data.');
+			throw ('Item type must be set before setting field data.');
 		}
 		
-		// If existing object, load field data first unless we're already in
+		// If existing item, load field data first unless we're already in
 		// the middle of a load
-		if (this.getID() && !loadIn && !this._objectDataLoaded){
-			this._loadObjectData();
+		if (this.getID() && !loadIn && !this._itemDataLoaded){
+			this._loadItemData();
 		}
 		
-		var fieldID = Scholar.ObjectFields.getID(field);
+		var fieldID = Scholar.ItemFields.getID(field);
 		
 		if (!fieldID){
-			throw (field + ' is not a valid objectData field.');
+			throw (field + ' is not a valid itemData field.');
 		}
 		
-		if (!Scholar.ObjectFields.isValidForType(fieldID, this.getType())){
+		if (!Scholar.ItemFields.isValidForType(fieldID, this.getType())){
 			throw (field + ' is not a valid field for this type.');
 		}
 		
 		// If existing value, make sure it's actually changing
-		if (this._objectData[fieldID] && this._objectData[fieldID]==value){
+		if (this._itemData[fieldID] && this._itemData[fieldID]==value){
 			return false;
 		}
-		this._objectData[fieldID] = value;
+		this._itemData[fieldID] = value;
 		if (!loadIn){
-			this._changedObjectData.set(fieldID);
+			this._changedItemData.set(fieldID);
 		}
 		return true;
 	}
@@ -307,15 +307,15 @@ Scholar.Object.prototype.setField = function(field, value, loadIn){
 
 
 /*
- * Move object to new position and shift surrounding objects
+ * Move item to new position and shift surrounding items
  *
  * N.B. Unless isNew is set, this function updates the DB immediately and
- * reloads all cached objects -- a save() is not required
+ * reloads all cached items -- a save() is not required
  *
  * If isNew is true, a transaction is not started or committed, so it
  * should only be run from an existing transaction within save()
  */
-Scholar.Object.prototype.setPosition = function(newFolder, newPos, isNew){
+Scholar.Item.prototype.setPosition = function(newFolder, newPos, isNew){
 	var oldFolder = this.getField('parentFolderID');
 	var oldPos = this.getField('orderIndex');
 	
@@ -347,7 +347,7 @@ Scholar.Object.prototype.setPosition = function(newFolder, newPos, isNew){
 			Scholar.DB.query(sql);
 		}
 		
-		// If a new object, insert
+		// If a new item, insert
 		if (isNew){
 			sql = 'INSERT INTO treeStructure SET id=' + this.getID() + ', ' +
 				'isFolder=0, orderIndex=' + newPos + ', ' +
@@ -370,7 +370,7 @@ Scholar.Object.prototype.setPosition = function(newFolder, newPos, isNew){
 	this._data['orderIndex'] = newPos;
 	
 	if (!isNew){
-		Scholar.Objects.reloadAll();
+		Scholar.Items.reloadAll();
 	}
 	return true;
 }
@@ -379,19 +379,19 @@ Scholar.Object.prototype.setPosition = function(newFolder, newPos, isNew){
 /*
  * Save changes back to database
  */
-Scholar.Object.prototype.save = function(){
+Scholar.Item.prototype.save = function(){
 	if (!this.hasChanged()){
-		Scholar.debug('Object ' + this.getID() + ' has not changed', 4);
+		Scholar.debug('Item ' + this.getID() + ' has not changed', 4);
 		return !!this.getID();
 	}
 	
 	//
-	// Existing object, update
+	// Existing item, update
 	//
 	if (this.getID()){
-		Scholar.debug('Updating database with new object data', 4);
+		Scholar.debug('Updating database with new item data', 4);
 		
-		var objectID = this.getID();
+		var itemID = this.getID();
 		
 		try {
 			Scholar.DB.beginTransaction();
@@ -399,11 +399,11 @@ Scholar.Object.prototype.save = function(){
 			//
 			// Primary fields
 			//
-			var sql = "UPDATE objects SET ";
+			var sql = "UPDATE items SET ";
 			var sql2;
 			
-			if (this._changed.has('objectTypeID')){
-				sql += "objectTypeID='" +  this.getField('objectTypeID') + "', ";
+			if (this._changed.has('itemTypeID')){
+				sql += "itemTypeID='" +  this.getField('itemTypeID') + "', ";
 			}
 			if (this._changed.has('title')){
 				sql += "title='" +  this.getField('title') + "', ";
@@ -417,7 +417,7 @@ Scholar.Object.prototype.save = function(){
 			
 			// Always update modified time
 			sql += "dateModified=CURRENT_TIMESTAMP ";
-			sql += "WHERE objectID=" + this.getID() + ";\n";
+			sql += "WHERE itemID=" + this.getID() + ";\n";
 			
 			
 			//
@@ -434,8 +434,8 @@ Scholar.Object.prototype.save = function(){
 					// We have to do this immediately so old entries are
 					// cleared before other ones are shifted down
 					if (!creator['firstName'] && !creator['lastName']){
-						sql2 = 'DELETE FROM objectCreators '
-							+ ' WHERE objectID=' + this.getID()
+						sql2 = 'DELETE FROM itemCreators '
+							+ ' WHERE itemID=' + this.getID()
 							+ ' AND orderIndex=' + orderIndex;
 						Scholar.DB.query(sql2);
 						continue;
@@ -458,18 +458,18 @@ Scholar.Object.prototype.save = function(){
 					}
 					
 					
-					sql2 = 'SELECT COUNT(*) FROM objectCreators'
-						+ ' WHERE objectID=' + this.getID()
+					sql2 = 'SELECT COUNT(*) FROM itemCreators'
+						+ ' WHERE itemID=' + this.getID()
 						+ ' AND orderIndex=' + orderIndex;
 					
 					if (Scholar.DB.valueQuery(sql2)){
-						sql += 'UPDATE objectCreators SET creatorID='
-							+ creatorID + ' WHERE objectID=' + this.getID()
+						sql += 'UPDATE itemCreators SET creatorID='
+							+ creatorID + ' WHERE itemID=' + this.getID()
 							+ ' AND orderIndex=' + orderIndex + ";\n";
 					}
 					else {
-						sql += 'INSERT INTO objectCreators VALUES ('
-							+ creatorID + ',' + objectID + ',' + orderIndex
+						sql += 'INSERT INTO itemCreators VALUES ('
+							+ creatorID + ',' + itemID + ',' + orderIndex
 							+ ");\n";
 					}
 				}
@@ -480,34 +480,34 @@ Scholar.Object.prototype.save = function(){
 			
 			
 			//
-			// ObjectData
+			// ItemData
 			//
-			if (this._changedObjectData.length){
+			if (this._changedItemData.length){
 				var del = new Array();
-				for (fieldID in this._changedObjectData.items){
+				for (fieldID in this._changedItemData.items){
 					if (this.getField(fieldID)){
 						// Oh, for an INSERT...ON DUPLICATE KEY UPDATE
-						sql2 = 'SELECT COUNT(*) FROM objectData '
-							+ 'WHERE objectID=' + this.getID()
+						sql2 = 'SELECT COUNT(*) FROM itemData '
+							+ 'WHERE itemID=' + this.getID()
 							+ ' AND fieldID=' + fieldID;
 						
 						if (Scholar.DB.valueQuery(sql2)){
-							sql += "UPDATE objectData SET value=";
+							sql += "UPDATE itemData SET value=";
 							// Take advantage of SQLite's manifest typing
-							if (Scholar.ObjectFields.isInteger(fieldID)){
+							if (Scholar.ItemFields.isInteger(fieldID)){
 								sql += this.getField(fieldID);
 							}
 							else {
 								sql += "'" + this.getField(fieldID) + "'";
 							}
-							sql += " WHERE objectID=" + this.getID()
+							sql += " WHERE itemID=" + this.getID()
 								+ ' AND fieldID=' + fieldID + ";\n";
 						}
 						else {
-							sql += 'INSERT INTO objectData VALUES ('
+							sql += 'INSERT INTO itemData VALUES ('
 								+ this.getID() + ',' + fieldID + ',';
 								
-							if (Scholar.ObjectFields.isInteger(fieldID)){
+							if (Scholar.ItemFields.isInteger(fieldID)){
 								sql += this.getField(fieldID);
 							}
 							else {
@@ -524,8 +524,8 @@ Scholar.Object.prototype.save = function(){
 				
 				// Delete blank fields
 				if (del.length){
-					sql += 'DELETE from objectData '
-						+ 'WHERE objectID=' + this.getID() + ' '
+					sql += 'DELETE from itemData '
+						+ 'WHERE itemID=' + this.getID() + ' '
 						+ 'AND fieldID IN (' + del.join() + ");\n";
 				}
 			}
@@ -541,10 +541,10 @@ Scholar.Object.prototype.save = function(){
 	}
 	
 	//
-	// New object, insert and return id
+	// New item, insert and return id
 	//
 	else {
-		Scholar.debug('Saving data for new object to database');
+		Scholar.debug('Saving data for new item to database');
 		
 		var isNew = true;
 		var sqlColumns = new Array();
@@ -553,8 +553,8 @@ Scholar.Object.prototype.save = function(){
 		//
 		// Primary fields
 		//
-		sqlColumns.push('objectTypeID');
-		sqlValues.push({'int':this.getField('objectTypeID')});
+		sqlColumns.push('itemTypeID');
+		sqlValues.push({'int':this.getField('itemTypeID')});
 		
 		if (this._changed.has('title')){
 			sqlColumns.push('title');
@@ -601,17 +601,17 @@ Scholar.Object.prototype.save = function(){
 						);
 					}
 					
-					sql += 'INSERT INTO objectCreators VALUES ('
-						+ creatorID + ',' + objectID + ',' + orderIndex
+					sql += 'INSERT INTO itemCreators VALUES ('
+						+ creatorID + ',' + itemID + ',' + orderIndex
 						+ ");\n";
 				}
 			}
 			
 			
 			//
-			// objectData fields
+			// itemData fields
 			//
-			var sql = "INSERT INTO objects (" + sqlColumns.join() + ')'
+			var sql = "INSERT INTO items (" + sqlColumns.join() + ')'
 				+ ' VALUES (';
 			// Insert placeholders for bind parameters
 			for (var i=0; i<sqlValues.length; i++){
@@ -619,14 +619,14 @@ Scholar.Object.prototype.save = function(){
 			}
 			sql = sql.substring(0,sql.length-1) + ");\n";
 			
-			var objectID = Scholar.DB.query(sql,sqlValues);
+			var itemID = Scholar.DB.query(sql,sqlValues);
 			
-			if (this._changedObjectData.length){
+			if (this._changedItemData.length){
 				sql = '';
-				for (fieldID in this._changedObjectData.items){
-					sql += 'INSERT INTO objectData VALUES (' +
-						objectID + ',' + fieldID + ',';
-						if (Scholar.ObjectFields.isInteger(fieldID)){
+				for (fieldID in this._changedItemData.items){
+					sql += 'INSERT INTO itemData VALUES (' +
+						itemID + ',' + fieldID + ',';
+						if (Scholar.ItemFields.isInteger(fieldID)){
 							sql += this.getField(fieldID);
 						}
 						else {
@@ -641,7 +641,7 @@ Scholar.Object.prototype.save = function(){
 			Scholar.DB.query(sql);
 			
 			
-			// Set the position of the new object
+			// Set the position of the new item
 			var newFolder = this._changed.has('parentFolderID')
 				? this.getField('parentFolderID') : 0;
 			
@@ -651,7 +651,7 @@ Scholar.Object.prototype.save = function(){
 			this.setPosition(newFolder, newPos, true);
 			
 			// TODO: reload Folder or set the empty flag to false manually
-			// in case this was the first object in a folder
+			// in case this was the first item in a folder
 			
 			Scholar.DB.commitTransaction();
 		}
@@ -661,39 +661,39 @@ Scholar.Object.prototype.save = function(){
 		}
 	}
 	
-	Scholar.Objects.reload(this.getID());
+	Scholar.Items.reload(this.getID());
 	
 	return isNew ? this.getID() : true;
 }
 
 
-Scholar.Object.prototype.toString = function(){
+Scholar.Item.prototype.toString = function(){
 	return this.getTitle();
 }
 
 
-Scholar.Object.prototype.isFolder = function(){
+Scholar.Item.prototype.isFolder = function(){
 	return false;
 }
 
 
 //////////////////////////////////////////////////////////////////////////////
 //
-// Private Scholar.Object methods
+// Private Scholar.Item methods
 //
 //////////////////////////////////////////////////////////////////////////////
 
 /*
  * Load in the creators from the database
  */
-Scholar.Object.prototype._loadCreators = function(){
+Scholar.Item.prototype._loadCreators = function(){
 	if (!this.getID()){
-		throw ('ObjectID not set for object before attempting to load creators');
+		throw ('ItemID not set for item before attempting to load creators');
 	}
 	
-	var sql = 'SELECT C.creatorID, C.*, orderIndex FROM objectCreators OC '
+	var sql = 'SELECT C.creatorID, C.*, orderIndex FROM itemCreators IC '
 		+ 'LEFT JOIN creators C USING (creatorID) '
-		+ 'WHERE objectID=' + this.getID() + ' ORDER BY orderIndex';
+		+ 'WHERE itemID=' + this.getID() + ' ORDER BY orderIndex';
 	var creators = Scholar.DB.query(sql);
 	
 	this._creatorsLoaded = true;
@@ -718,19 +718,19 @@ Scholar.Object.prototype._loadCreators = function(){
 /*
  * Load in the field data from the database
  */
-Scholar.Object.prototype._loadObjectData = function(){
+Scholar.Item.prototype._loadItemData = function(){
 	if (!this.getID()){
-		throw ('ObjectID not set for object before attempting to load data');
+		throw ('ItemID not set for object before attempting to load data');
 	}
 	
-	var sql = 'SELECT OD.fieldID, value FROM objectData OD JOIN '
-		+ 'objectTypeFields OTF ON (OTF.objectTypeID=(SELECT objectTypeID FROM '
-		+ 'objects WHERE objectID=?1) AND OTF.fieldID=OD.fieldID) '
-		+ 'WHERE objectID=?1 ORDER BY orderIndex';
+	var sql = 'SELECT ID.fieldID, value FROM itemData ID JOIN '
+		+ 'itemTypeFields ITF ON (ITF.itemTypeID=(SELECT itemTypeID FROM '
+		+ 'items WHERE itemID=?1) AND ITF.fieldID=ID.fieldID) '
+		+ 'WHERE itemID=?1 ORDER BY orderIndex';
 		
-	var result = Scholar.DB.query(sql,[{'int':this._data['objectID']}]);
+	var result = Scholar.DB.query(sql,[{'int':this._data['itemID']}]);
 	
-	this._objectDataLoaded = true;
+	this._itemDataLoaded = true;
 	
 	if (result){
 		for (var i=0,len=result.length; i<len; i++){
@@ -748,11 +748,11 @@ Scholar.Object.prototype._loadObjectData = function(){
 
 
 /*
- * Primary interface for accessing Scholar objects
+ * Primary interface for accessing Scholar items
  */
-Scholar.Objects = new function(){
+Scholar.Items = new function(){
 	// Private members
-	var _objects = new Array();
+	var _items = new Array();
 	
 	// Privileged methods
 	this.get = get;
@@ -762,12 +762,12 @@ Scholar.Objects = new function(){
 	this.reloadAll = reloadAll;
 	
 	/*
-	 * Retrieves (and loads, if necessary) an arbitrary number of objects
+	 * Retrieves (and loads, if necessary) an arbitrary number of items
 	 *
 	 * Can be passed ids as individual parameters or as an array of ids, or both
 	 *
 	 * If only one argument and it's an id, return object directly;
-	 * otherwise, return array indexed by objectID
+	 * otherwise, return array indexed by itemID
 	 */
 	function get(){
 		var toLoad = new Array();
@@ -781,12 +781,12 @@ Scholar.Objects = new function(){
 		
 		for (var i=0; i<ids.length; i++){
 			// Check if already loaded
-			if (!_objects[ids[i]]){
+			if (!_items[ids[i]]){
 				toLoad.push(ids[i]);
 			}
 		}
 		
-		// New objects to load
+		// New items to load
 		if (toLoad.length){
 			_load(toLoad);
 		}
@@ -794,12 +794,12 @@ Scholar.Objects = new function(){
 		// If single id, return the object directly
 		if (arguments[0] && typeof arguments[0]!='Object'
 				&& typeof arguments[1]=='undefined'){
-			return _objects[arguments[0]];
+			return _items[arguments[0]];
 		}
 		
 		// Otherwise, build return array
 		for (i=0; i<ids.length; i++){
-			loaded[ids[i]] = _objects[ids[i]];
+			loaded[ids[i]] = _items[ids[i]];
 		}
 	
 		return loaded;
@@ -807,11 +807,11 @@ Scholar.Objects = new function(){
 	
 	
 	/*
-	 * Returns all objects in the database
+	 * Returns all items in the database
 	 */
 	function getAll(){
-		var sql = 'SELECT O.objectID FROM objects O '
-			+ 'LEFT JOIN treeStructure TS ON (O.objectID=TS.id AND isFolder=0) '
+		var sql = 'SELECT I.itemID FROM items I '
+			+ 'LEFT JOIN treeStructure TS ON (I.itemID=TS.id AND isFolder=0) '
 			+ 'ORDER BY orderIndex';
 		
 		var ids = Scholar.DB.columnQuery(sql);
@@ -820,8 +820,8 @@ Scholar.Objects = new function(){
 	
 	
 	/*
-	 * Returns an array of all folders and objects that are children of a folder
-	 * as Scholar.Folder and Scholar.Object instances
+	 * Returns an array of all folders and items that are children of a folder
+	 * as Scholar.Folder and Scholar.Item instances
 	 *
 	 * Takes parent folderID as optional parameter; by default, returns root items
 	 *
@@ -859,9 +859,9 @@ Scholar.Objects = new function(){
 				}
 			}
 			else {
-				var obj = Scholar.Objects.get(tree[i]['id']);
+				var obj = Scholar.Items.get(tree[i]['id']);
 				if (!obj){
-					throw ('Object ' + tree[i]['id'] + ' not found');
+					throw ('Item ' + tree[i]['id'] + ' not found');
 				}
 			}
 			
@@ -873,7 +873,7 @@ Scholar.Objects = new function(){
 	 
 	
 	/*
-	 * Reloads data for specified objects into internal array
+	 * Reloads data for specified items into internal array
 	 *
 	 * Can be passed ids as individual parameters or as an array of ids, or both
 	 */
@@ -891,22 +891,22 @@ Scholar.Objects = new function(){
 	
 	
 	/*
-	 * Reloads all currently cached objects
+	 * Reloads all currently cached items
 	 */
 	function reloadAll(){
 		var ids = new Array();
-		for (objectID in _objects){
-			ids.push(objectID);
+		for (itemID in _items){
+			ids.push(itemID);
 		}
 		_load(ids);
 		return true;
 	}
 	
 	
-	function add(data, objectTypeID, folderID, orderIndex){
+	function add(data, itemTypeID, folderID, orderIndex){
 		var insert = new Array();
 		
-		var obj = new Scholar.Object(objectTypeID, folderID, orderIndex);
+		var obj = new Scholar.Item(itemTypeID, folderID, orderIndex);
 		
 		for (field in data){
 			obj.setField(data[field]);
@@ -923,27 +923,27 @@ Scholar.Objects = new function(){
 			return false;
 		}
 		
-		// Should be the same as query in Scholar.Object.loadFromID, just
-		// without objectID clause
-		var sql = 'SELECT O.*, lastName AS firstCreator, TS.parentFolderID, '
+		// Should be the same as query in Scholar.Item.loadFromID, just
+		// without itemID clause
+		var sql = 'SELECT I.*, lastName AS firstCreator, TS.parentFolderID, '
 			+ 'TS.orderIndex '
-			+ 'FROM objects O '
-			+ 'LEFT JOIN treeStructure TS ON (O.objectID=TS.id AND isFolder=0) '
-			+ 'LEFT JOIN objectCreators OC ON (O.objectID=OC.objectID) '
-			+ 'LEFT JOIN creators C ON (OC.creatorID=C.creatorID) '
-			+ 'WHERE OC.orderIndex=0';
+			+ 'FROM items I '
+			+ 'LEFT JOIN treeStructure TS ON (I.itemID=TS.id AND isFolder=0) '
+			+ 'LEFT JOIN itemCreators IC ON (I.itemID=IC.itemID) '
+			+ 'LEFT JOIN creators C ON (IC.creatorID=C.creatorID) '
+			+ 'WHERE IC.orderIndex=0';
 		
 		if (arguments[0]!='all'){
-			sql += ' AND O.objectID IN (' + Scholar.join(arguments,',') + ')';
+			sql += ' AND I.itemID IN (' + Scholar.join(arguments,',') + ')';
 		}
 		
 		var result = Scholar.DB.query(sql);
 		
 		if (result){
 			for (var i=0,len=result.length; i<len; i++){
-				var obj = new Scholar.Object();
+				var obj = new Scholar.Item();
 				obj.loadFromRow(result[i]);
-				_objects[result[i]['objectID']] = obj;
+				_items[result[i]['itemID']] = obj;
 			}
 		}
 		return true;
@@ -1154,7 +1154,7 @@ Scholar.Creators = new function(){
 	 */
 	function purge(returnSQL){
 		var sql = 'SELECT creatorID FROM creators WHERE creatorID NOT IN '
-			+ '(SELECT creatorID FROM objectCreators);';
+			+ '(SELECT creatorID FROM itemCreators);';
 		var toDelete = Scholar.DB.columnQuery(sql);
 		
 		if (!toDelete){
@@ -1162,7 +1162,7 @@ Scholar.Creators = new function(){
 		}
 		
 		sql = 'DELETE FROM creators WHERE creatorID NOT IN '
-			+ '(SELECT creatorID FROM objectCreators);';
+			+ '(SELECT creatorID FROM itemCreators);';
 		
 		if (!returnSQL){
 			var result = Scholar.DB.query(sql);
@@ -1194,18 +1194,18 @@ Scholar.Creators = new function(){
 
 
 
-Scholar.ObjectFields = new function(){
+Scholar.ItemFields = new function(){
 	// Private members
 	var _fields = new Array();
 	var _fieldFormats = new Array();
-	var _objectTypeFields = new Array();
+	var _itemTypeFields = new Array();
 	
 	// Privileged methods
 	this.getName = getName;
 	this.getID = getID;
 	this.isValidForType = isValidForType;
 	this.isInteger = isInteger;
-	this.getObjectTypeFields = getObjectTypeFields;
+	this.getItemTypeFields = getItemTypeFields;
 	
 	/*
 	 * Return the fieldName for a passed fieldID or fieldName
@@ -1229,11 +1229,11 @@ Scholar.ObjectFields = new function(){
 	}
 	
 	
-	function isValidForType(fieldID, objectTypeID){
+	function isValidForType(fieldID, itemTypeID){
 		if (!_fields.length){
 			_loadFields();
 		}
-		return !!_fields[fieldID]['objectTypes'][objectTypeID];
+		return !!_fields[fieldID]['itemTypes'][itemTypeID];
 	}
 	
 	
@@ -1247,38 +1247,38 @@ Scholar.ObjectFields = new function(){
 	
 	
 	/*
-	 * Returns an array of fieldIDs for a given object type
+	 * Returns an array of fieldIDs for a given item type
 	 */
-	function getObjectTypeFields(objectTypeID){
-		if (_objectTypeFields[objectTypeID]){
-			return _objectTypeFields[objectTypeID];
+	function getItemTypeFields(itemTypeID){
+		if (_itemTypeFields[itemTypeID]){
+			return _itemTypeFields[itemTypeID];
 		}
 		
-		var sql = 'SELECT fieldID FROM objectTypeFields '
-			+ 'WHERE objectTypeID=' + objectTypeID + ' ORDER BY orderIndex';
+		var sql = 'SELECT fieldID FROM itemTypeFields '
+			+ 'WHERE itemTypeID=' + itemTypeID + ' ORDER BY orderIndex';
 		
-		_objectTypeFields[objectTypeID] = Scholar.DB.columnQuery(sql);
-		return _objectTypeFields[objectTypeID];
+		_itemTypeFields[itemTypeID] = Scholar.DB.columnQuery(sql);
+		return _itemTypeFields[itemTypeID];
 	}
 	
 	
 	/*
-	 * Returns hash array of objectTypeIDs for which a given field is valid
+	 * Returns hash array of itemTypeIDs for which a given field is valid
 	 */
-	function _getFieldObjectTypes(){
-		var sql = 'SELECT fieldID,objectTypeID FROM objectTypeFields';
+	function _getFieldItemTypes(){
+		var sql = 'SELECT fieldID, itemTypeID FROM itemTypeFields';
 		
 		var results = Scholar.DB.query(sql);
 		
 		if (!results){
-			throw ('No fields in objectTypeFields!');
+			throw ('No fields in itemTypeFields!');
 		}
 		var fields = new Array();
 		for (var i=0; i<results.length; i++){
 			if (!fields[results[i]['fieldID']]){
 				fields[results[i]['fieldID']] = new Array();
 			}
-			fields[results[i]['fieldID']][results[i]['objectTypeID']] = true;
+			fields[results[i]['fieldID']][results[i]['itemTypeID']] = true;
 		}
 		return fields;
 	}
@@ -1305,14 +1305,14 @@ Scholar.ObjectFields = new function(){
 			throw ('No fields in database!');
 		}
 		
-		var fieldObjectTypes = _getFieldObjectTypes();
+		var fieldItemTypes = _getFieldItemTypes();
 		
 		for (i=0,len=result.length; i<len; i++){
 			_fields[result[i]['fieldID']] = {
 				id: result[i]['fieldID'],
 				name: result[i]['fieldName'],
 				formatID: result[i]['fieldFormatID'],
-				objectTypes: fieldObjectTypes[result[i]['fieldID']]
+				itemTypes: fieldItemTypes[result[i]['fieldID']]
 			};
 			// Store by name as well as id
 			_fields[result[i]['fieldName']] = _fields[result[i]['fieldID']];
@@ -1321,9 +1321,9 @@ Scholar.ObjectFields = new function(){
 }
 
 /*
-var objects = Scholar.Objects.getAll();
+var items = Scholar.Items.getAll();
 
-var obj = objects[9];
+var obj = items[9];
 for (var i=0,len=obj.numCreators(); i<len; i++){
 	Scholar.debug(Scholar.varDump(obj.getCreator(i)));
 }
