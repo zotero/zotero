@@ -1,6 +1,7 @@
 var ScholarLocalizedStrings;
 var myTreeView;
 var dynamicBox;
+var itemBeingEdited; 			//the item currently being edited
 
 Scholar.TreeView = function()
 {
@@ -105,12 +106,11 @@ Scholar.TreeView.prototype.selectionChanged = function()
 	if(this.selection.count == 1 && !this.isContainer(this.selection.currentIndex))
 	{
 		viewSelectedItem();
-		document.getElementById('view-pane').hidden = false;
 		document.getElementById('tb-edit').hidden = false;
 	}
 	else
 	{
-		document.getElementById('view-pane').hidden = true;
+		removeDynamicRows();
 		document.getElementById('tb-edit').hidden = true;
 	}
 }
@@ -187,17 +187,20 @@ function viewSelectedItem()
 
 }
 
-function newItem()
+function newItem(typeID)
 {
-
+	editItem(Scholar.Items.getNewItemByType(typeID));
 }
 
 function editSelectedItem()
 {
+	editItem(myTreeView._getItemAtRow(myTreeView.selection.currentIndex));
+}
+
+function editItem(thisItem)
+{
 	document.getElementById('list-pane').hidden = true;
 	document.getElementById('edit-pane').hidden = false;
-
-	var thisItem = myTreeView._getItemAtRow(myTreeView.selection.currentIndex);
 	
 	removeDynamicRows();
 	var fieldNames = getFullFieldList(thisItem);
@@ -222,10 +225,10 @@ function editSelectedItem()
 			dynamicBox.appendChild(row);
 		}
 	}
-	
+
+/* DISABLE EDITING OF CREATORS UNTIL WE COME UP WITH A GOOD METHOD		
 	var beforeField = dynamicBox.firstChild.nextSibling;
 
-/* DISABLE EDITING OF CREATORS UNTIL WE COME UP WITH A GOOD METHOD	
 	for (var i=0,len=thisItem.numCreators(); i<len; i++)
 	{
 		var creator = thisItem.getCreator(i);
@@ -245,7 +248,7 @@ function editSelectedItem()
 		dynamicBox.insertBefore(row, beforeField);
 	}
 */
-	
+	itemBeingEdited = thisItem;
 }
 
 function removeDynamicRows()
@@ -265,19 +268,17 @@ function getFullFieldList(item)
 
 function returnToTree(save)
 {
-	var thisItem = myTreeView._getItemAtRow(myTreeView.selection.currentIndex);
-
 	if(save)
 	{
-	
 		//get fields, call data access methods
 		var valueElements = dynamicBox.getElementsByTagName("textbox");		//All elements of tagname 'textbox' should be the values of edits
 		for(var i=0; i<valueElements.length; i++)
-			thisItem.setField(valueElements[i].getAttribute("fieldName"),valueElements[i].value);
+			itemBeingEdited.setField(valueElements[i].getAttribute("fieldName"),valueElements[i].value);
 	
-		thisItem.save();
+		itemBeingEdited.save();
 	}
-	
+	itemBeingEdited = null;
+
 	document.getElementById('list-pane').hidden = false;
 	document.getElementById('edit-pane').hidden = true;
 
@@ -289,6 +290,16 @@ function init()
 	myTreeView = new Scholar.TreeView();
 	ScholarLocalizedStrings = document.getElementById('scholar-strings');
 	dynamicBox = document.getElementById('dynamic-fields');
+	
+	var addMenu = document.getElementById('tb-add').firstChild;
+	var itemTypes = Scholar.ItemTypes.getTypes();
+	for(var i = 0; i<itemTypes.length; i++)
+	{
+		var menuitem = document.createElement("menuitem");
+		menuitem.setAttribute("label",ScholarLocalizedStrings.getString("itemTypes."+itemTypes[i]['name']));
+		menuitem.setAttribute("oncommand","newItem("+itemTypes[i]['id']+")");
+		addMenu.appendChild(menuitem);
+	}
 
     document.getElementById('list-tree').view=myTreeView;
 }

@@ -34,14 +34,17 @@
 			<treechildren/>
 		</tree>   	
 		<sidebarheader>
-			<toolbarbutton id="tb-add" label="New&#8230;" oncommand="newItem();" />
+			<toolbarbutton id="tb-add" type="menu" label="New&#8230;">
+				<menupopup>
+				</menupopup>
+			</toolbarbutton>
 			<spacer flex="1" />
 			<toolbarbutton id="tb-edit" label="Edit&#8230;" oncommand="editSelectedItem();" hidden="true"/>
 		</sidebarheader>
    	</vbox>
 
 	
-   	<vbox id="view-pane" hidden="true">
+   	<vbox id="view-pane">
 		<grid>
 			<columns>
 				<column/>
