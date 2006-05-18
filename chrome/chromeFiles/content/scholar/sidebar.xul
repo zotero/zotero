@@ -5,7 +5,7 @@
 <!DOCTYPE window SYSTEM "chrome://scholar/locale/scholar.dtd">
 
 <page id="scholar-sidebar" title="Scholar"
-		onload="setView()"
+		onload="init()"
          xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" >
 
 	<script src="include.js"/>
@@ -14,7 +14,7 @@
 	<stringbundle id="scholar-strings" src="chrome://scholar/locale/scholar.properties"/>
   	<vbox id="view-pane" flex="1">
 		<tree
-			id="scholar-sidebar-items"
+			id="list-tree"
 			onselect="this.view.selectionChanged()"
 			enableColumnDrag="true"
 			seltype="multiple" flex="1">
@@ -33,26 +33,28 @@
 			</treecols>
 			<treechildren/>
 		</tree>   	
-   	</vbox>
-   	
-   	<vbox id="scholar-sidebar-object-pane" hidden="true">
-		<sidebarheader id="edit-button">
+		<sidebarheader>
+			<toolbarbutton id="tb-add" label="New&#8230;" oncommand="newItem();" />
 			<spacer flex="1" />
-			<button id="tb-edit" label="Edit" oncommand="editSelectedRow();" />
+			<toolbarbutton id="tb-edit" label="Edit&#8230;" oncommand="editSelectedItem();" hidden="true"/>
 		</sidebarheader>
-	<grid>
-	  <columns>
-		<column/>
-		<column flex="1"/>
-	  </columns>
+   	</vbox>
+
 	
-	  <rows id="dynamic-fields">
-	  </rows>
-	</grid>
+   	<vbox id="object-pane" hidden="true">
+		<grid>
+			<columns>
+				<column/>
+				<column flex="1"/>
+		  	</columns>
+		  	
+			<rows id="dynamic-fields">
+		  	</rows>
+		</grid>
 	</vbox>
 	
   	<hbox id="edit-pane" hidden="true">
-		<button label="Cancel" oncommand="returnToTree()"/>
-		<button label="Save" oncommand="returnToTree()"/>
+		<button label="Cancel" oncommand="returnToTree(false)"/>
+		<button label="Save" oncommand="returnToTree(true)"/>
 	</hbox>
 </page>
