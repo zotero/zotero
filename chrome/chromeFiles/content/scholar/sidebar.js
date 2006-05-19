@@ -76,6 +76,7 @@ Scholar.TreeView.prototype.toggleOpenState = function(row)
 	var count = 0;		//used to tell the tree how many rows were added/removed
 	var thisLevel = this.getLevel(row);
 
+	this._treebox.beginUpdateBatch();
 	if(this.isContainerOpen(row))
 	{
 		while((row + 1 < this._dataItems.length) && (this.getLevel(row + 1) > thisLevel))
@@ -94,17 +95,17 @@ Scholar.TreeView.prototype.toggleOpenState = function(row)
 			this._showItem(newRows[i], thisLevel+1, row+i+1); //insert new row
 		}
 	}
-	
 	this._dataItems[row][1] = !this._dataItems[row][1];  //toggle container open value
 
 	this.rowCount = this._dataItems.length;
 	this._treebox.rowCountChanged(row+1, count); //tell treebox to repaint these
 	this._treebox.invalidateRow(row);
+	this._treebox.endUpdateBatch();	
 }
 
 Scholar.TreeView.prototype.selectionChanged = function()
 {
-	if(this.selection.count == 1 && !this.isContainer(this.selection.currentIndex))
+	if(this.selection.count == 1 && this.selection.currentIndex != -1 && !this.isContainer(this.selection.currentIndex))
 	{
 		viewSelectedItem();
 		document.getElementById('tb-edit').hidden = false;
@@ -139,9 +140,8 @@ Scholar.TreeView.prototype.deleteSelectedItem = function()
 	{
 		return;
 	}
-	else if(confirm("Are you sure you want to delete the selected item"+(this.selection.count > 1 ? "s" : "")))
+	else if(confirm("Are you sure you want to delete the selected item"+(this.selection.count > 1 ? "s" : "")+"?"))
 	{
-		//PS - ask first!!
 		var items = new Array();
 		var start = new Object();
 		var end = new Object();
@@ -150,22 +150,20 @@ Scholar.TreeView.prototype.deleteSelectedItem = function()
 		{
 			this.selection.getRangeAt(i,start,end);
 			for (var j=start.value; j<=end.value; j++)
-			{
 				if(!this.isContainer(j))
-				{
 					items.push(j);
-					//this._getItemAtRow(j).erase();
-				}
-			}
 		}
 		
+		this._treebox.beginUpdateBatch();
 		for (var i=0; i<items.length; i++)
 		{
+			this._getItemAtRow(items[i]-i).erase();
 			this._hideItem(items[i]-i);
+
 			this.rowCount--;
-			
 			this._treebox.rowCountChanged(items[i]-i, -1);
 		}
+		this._treebox.endUpdateBatch();
 	}
 }
 /*
