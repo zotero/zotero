@@ -18,7 +18,7 @@ Scholar.TreeView.prototype.setTree = function(treebox)
 	
 	var newRows = Scholar.Items.getTreeRows();
 	for(var i = 0; i < newRows.length; i++)
-		this._insertItem(newRows[i],  0, i+1); //item ref, isContainerOpen, level
+		this._showItem(newRows[i],  0, i+1); //item ref, isContainerOpen, level
 	
 	this.rowCount = this._dataItems.length;
 }
@@ -80,7 +80,7 @@ Scholar.TreeView.prototype.toggleOpenState = function(row)
 	{
 		while((row + 1 < this._dataItems.length) && (this.getLevel(row + 1) > thisLevel))
 		{
-			this._deleteItem(row+1);
+			this._hideItem(row+1);
 			count--;	//count is negative when closing a container because we are removing rows
 		}
 	}
@@ -91,14 +91,15 @@ Scholar.TreeView.prototype.toggleOpenState = function(row)
 		for(var i = 0; i < newRows.length; i++)
 		{
 			count++;
-			this._insertItem(newRows[i], thisLevel+1, row+i+1); //insert new row
+			this._showItem(newRows[i], thisLevel+1, row+i+1); //insert new row
 		}
 	}
 	
 	this._dataItems[row][1] = !this._dataItems[row][1];  //toggle container open value
+
 	this.rowCount = this._dataItems.length;
-	
-	this._treebox.rowCountChanged(row, count); //tell treebox to repaint these
+	this._treebox.rowCountChanged(row+1, count); //tell treebox to repaint these
+	this._treebox.invalidateRow(row);
 }
 
 Scholar.TreeView.prototype.selectionChanged = function()
@@ -116,10 +117,9 @@ Scholar.TreeView.prototype.selectionChanged = function()
 }
 
 
-Scholar.TreeView.prototype._insertItem = function(item, level, beforeRow) 	{ this._dataItems.splice(beforeRow, 0, [item, false, level]); }
+Scholar.TreeView.prototype._showItem = function(item, level, beforeRow) 	{ this._dataItems.splice(beforeRow, 0, [item, false, level]); }
 
-Scholar.TreeView.prototype._deleteItem = function(row) 						{ this._dataItems.splice(row,1);; }
-
+Scholar.TreeView.prototype._hideItem = function(row) 						{ this._dataItems.splice(row,1); }
 
 Scholar.TreeView.prototype._getItemAtRow = function(row)					{ return this._dataItems[row][0]; }
 Scholar.TreeView.prototype.isSorted = function() 							{ return false; }
@@ -133,10 +133,45 @@ Scholar.TreeView.prototype.performAction = function(action) 				{ }
 Scholar.TreeView.prototype.performActionOnCell = function(action, row, col)	{ }
 Scholar.TreeView.prototype.getProgressMode = function(row, col) 			{ }
 
+Scholar.TreeView.prototype.deleteSelectedItem = function()
+{
+	if(this.selection.count == 0)
+	{
+		return;
+	}
+	else if(confirm("Are you sure you want to delete the selected item"+(this.selection.count > 1 ? "s" : "")))
+	{
+		//PS - ask first!!
+		var items = new Array();
+		var start = new Object();
+		var end = new Object();
+		
+		for (var i=0, len=this.selection.getRangeCount(); i<len; i++)
+		{
+			this.selection.getRangeAt(i,start,end);
+			for (var j=start.value; j<=end.value; j++)
+			{
+				if(!this.isContainer(j))
+				{
+					items.push(j);
+					//this._getItemAtRow(j).erase();
+				}
+			}
+		}
+		
+		for (var i=0; i<items.length; i++)
+		{
+			this._hideItem(items[i]-i);
+			this.rowCount--;
+			
+			this._treebox.rowCountChanged(items[i]-i, -1);
+		}
+	}
+}
 /*
 DRAG AND DROP (IMPLEMENT LATER)
-Scholar.TreeView.prototype.canDrop = function(row, orient)					{ return !orient; }
-Scholar.TreeView.prototype.drop = function(row, orient)						{ }
+Scholar.DragObserver.canDrop = function(row, orient)					{ return !orient; }
+Scholar.DragObserver.drop = function(row, orient)						{ }
 */
 
 function viewSelectedItem()
