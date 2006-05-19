@@ -421,6 +421,7 @@ Scholar.DB = new function(){
 					+ "DROP TABLE IF EXISTS objectData; DROP TABLE IF EXISTS objectKeywords; "
 					+ "DROP TABLE IF EXISTS objectTypeFields; DROP TABLE IF EXISTS objectTypes; "
 					+ "DROP TABLE IF EXISTS objects; DROP TABLE IF EXISTS treeOrder;");
+				_updateDBVersion(i);
 			}
 			
 			if (i==10){
