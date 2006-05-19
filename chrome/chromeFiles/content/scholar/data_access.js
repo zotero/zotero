@@ -689,6 +689,50 @@ Scholar.Item.prototype.save = function(){
 }
 
 
+/**
+* Delete item from database and clear from Scholar.Items internal array
+**/
+Scholar.Item.prototype.erase = function(){
+	if (!this.getID()){
+		return false;
+	}
+	
+	Scholar.debug('Deleting item ' + this.getID());
+		
+	Scholar.DB.beginTransaction();
+	
+	
+	var parentFolderID = this.getField('parentFolderID');
+	var orderIndex = this.getField('orderIndex');
+	
+	var sql = 'DELETE FROM treeStructure WHERE id=' + this.getID() + ";\n";
+	
+	sql += 'UPDATE treeStructure SET orderIndex=orderIndex-1 ' +
+		'WHERE parentFolderID=' + parentFolderID +
+		' AND orderIndex>' + orderIndex + ";\n\n";
+	
+	sql += 'DELETE FROM itemCreators WHERE itemID=' + this.getID() + ";\n";
+	sql += 'DELETE FROM itemKeywords WHERE itemID=' + this.getID() + ";\n";
+	sql += 'DELETE FROM itemData WHERE itemID=' + this.getID() + ";\n";
+	sql += 'DELETE FROM items WHERE itemID=' + this.getID() + ";\n";
+	
+	Scholar.DB.query(sql);
+	Scholar.Creators.purge();
+	
+	try {
+		Scholar.DB.commitTransaction();
+	}
+	catch (e){
+		Scholar.DB.rollbackTransaction();
+		throw (e);
+	}
+	
+	Scholar.Items.unload(this.getID());
+	
+	// TODO: trigger reloading of treeview
+}
+
+
 Scholar.Item.prototype.toString = function(){
 	return this.getTitle();
 }
@@ -783,6 +827,8 @@ Scholar.Items = new function(){
 	this.reload = reload;
 	this.reloadAll = reloadAll;
 	this.getNewItemByType = getNewItemByType;
+	this.erase = erase;
+	this.unload = unload;
 	
 	/*
 	 * Retrieves (and loads, if necessary) an arbitrary number of items
@@ -946,6 +992,26 @@ Scholar.Items = new function(){
 	}
 	
 	
+	/**
+	* Delete item from database and clear from internal array
+	**/
+	function erase(id){
+		var obj = this.get(id);
+		obj.erase(); // calls unload()
+		obj = undefined;
+		
+		// TODO: trigger reload of treeview
+	}
+	
+	
+	/**
+	* Clear item from internal array (used by Scholar.Item.erase())
+	**/
+	function unload(id){
+		delete _items[id];
+	}
+	
+	
 	function _load(){
 		if (!arguments){
 			return false;
@@ -1101,6 +1167,8 @@ Scholar.Creators = new function(){
 	this.add = add;
 	this.purge = purge;
 	
+	var self = this;
+	
 	/*
 	 * Returns an array of creator data for a given creatorID
 	 */
@@ -1214,7 +1282,7 @@ Scholar.Creators = new function(){
 	
 	
 	function _getHash(creatorID){
-		var creator = this.get(creatorID);
+		var creator = self.get(creatorID);
 		if (!creator){
 			return false;
 		}
