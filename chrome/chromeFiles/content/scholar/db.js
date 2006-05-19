@@ -417,6 +417,13 @@ Scholar.DB = new function(){
 			}
 			
 			if (i==9){
+				Scholar.DB.query("DROP TABLE IF EXISTS objectCreators; "
+					+ "DROP TABLE IF EXISTS objectData; DROP TABLE IF EXISTS objectKeywords; "
+					+ "DROP TABLE IF EXISTS objectTypeFields; DROP TABLE IF EXISTS objectTypes; "
+					+ "DROP TABLE IF EXISTS objects; DROP TABLE IF EXISTS treeOrder;");
+			}
+			
+			if (i==10){
 				// do stuff
 				// _updateDBVersion(i);
 			}

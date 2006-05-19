@@ -1,4 +1,4 @@
--- 8
+-- 9
 
     DROP TABLE IF EXISTS version;
     CREATE TABLE version (
