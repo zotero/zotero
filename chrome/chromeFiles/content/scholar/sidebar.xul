@@ -11,8 +11,8 @@
 	<script src="include.js"/>
 	<script src="sidebar.js"/>
 	<keyset>
-		<key id="delete-cmd" keycode="VK_DELETE" oncommand="myTreeView.deleteSelectedItem()"/>
-		<key id="backspace-cmd" keycode="VK_BACK" oncommand="myTreeView.deleteSelectedItem()"/>
+		<key id="delete-cmd" keycode="VK_DELETE" oncommand="myTreeView.deleteSelection()"/>
+		<key id="backspace-cmd" keycode="VK_BACK" oncommand="myTreeView.deleteSelection()"/>
 	</keyset>
 	<stringbundle id="scholar-strings" src="chrome://scholar/locale/scholar.properties"/>
   	<vbox id="list-pane" flex="1">

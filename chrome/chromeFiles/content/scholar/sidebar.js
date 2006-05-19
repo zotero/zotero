@@ -134,37 +134,48 @@ Scholar.TreeView.prototype.performAction = function(action) 				{ }
 Scholar.TreeView.prototype.performActionOnCell = function(action, row, col)	{ }
 Scholar.TreeView.prototype.getProgressMode = function(row, col) 			{ }
 
-Scholar.TreeView.prototype.deleteSelectedItem = function()
+Scholar.TreeView.prototype.deleteSelection = function()
 {
 	if(this.selection.count == 0)
 	{
 		return;
 	}
-	else if(confirm("Are you sure you want to delete the selected item"+(this.selection.count > 1 ? "s" : "")+"?"))
+	if(!confirm("Are you sure you want to delete the selected item"+(this.selection.count > 1 ? "s" : "")+"?"))
 	{
-		var items = new Array();
-		var start = new Object();
-		var end = new Object();
-		
-		for (var i=0, len=this.selection.getRangeCount(); i<len; i++)
-		{
-			this.selection.getRangeAt(i,start,end);
-			for (var j=start.value; j<=end.value; j++)
-				if(!this.isContainer(j))
-					items.push(j);
-		}
-		
-		this._treebox.beginUpdateBatch();
-		for (var i=0; i<items.length; i++)
-		{
-			this._getItemAtRow(items[i]-i).erase();
-			this._hideItem(items[i]-i);
-
-			this.rowCount--;
-			this._treebox.rowCountChanged(items[i]-i, -1);
-		}
-		this._treebox.endUpdateBatch();
+		return;
 	}
+
+	//collapse open folders
+	for(var i=0; i<this.rowCount; i++)
+	{
+		if(this.selection.isSelected(i) && this.isContainer(i) && this.isContainerOpen(i))
+			this.toggleOpenState(i);
+	}
+	
+	//create an array of selected items/folders
+	var rows = new Array();
+	var start = new Object();
+	var end = new Object();
+	for (var i=0, len=this.selection.getRangeCount(); i<len; i++)
+	{
+		this.selection.getRangeAt(i,start,end);
+		for (var j=start.value; j<=end.value; j++)
+			rows.push(j);
+	}
+	
+	//iterate and erase...
+	this._treebox.beginUpdateBatch();
+	for (var i=0; i<rows.length; i++)
+	{
+		this._getItemAtRow(rows[i]-i).erase();		//erases item/folder from DB
+		
+		//remove row from tree
+		this._hideItem(rows[i]-i);
+		this.rowCount--;
+		this._treebox.rowCountChanged(rows[i]-i, -1);
+	}
+	this._treebox.endUpdateBatch();
+
 }
 /*
 DRAG AND DROP (IMPLEMENT LATER)
