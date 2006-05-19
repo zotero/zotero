@@ -2,3 +2,7 @@
 
 <!ENTITY sidebar.items.title_column "Title">
 <!ENTITY sidebar.items.creator_column "Creator">
+<!ENTITY sidebar.items.source_column "Source">
+<!ENTITY sidebar.creators.firstname_column "First name">
+<!ENTITY sidebar.creators.lastname_column "Last name">
+<!ENTITY sidebar.creators.type_column "Type">

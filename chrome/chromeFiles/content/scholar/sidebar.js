@@ -19,8 +19,6 @@ Scholar.TreeView.prototype.setTree = function(treebox)
 	var newRows = Scholar.Items.getTreeRows();
 	for(var i = 0; i < newRows.length; i++)
 		this._showItem(newRows[i],  0, i+1); //item ref, isContainerOpen, level
-	
-	this.rowCount = this._dataItems.length;
 }
 
 Scholar.TreeView.prototype.getCellText = function(row, column)
@@ -97,7 +95,6 @@ Scholar.TreeView.prototype.toggleOpenState = function(row)
 	}
 	this._dataItems[row][1] = !this._dataItems[row][1];  //toggle container open value
 
-	this.rowCount = this._dataItems.length;
 	this._treebox.rowCountChanged(row+1, count); //tell treebox to repaint these
 	this._treebox.invalidateRow(row);
 	this._treebox.endUpdateBatch();	
@@ -112,15 +109,15 @@ Scholar.TreeView.prototype.selectionChanged = function()
 	}
 	else
 	{
-		removeDynamicRows();
+		removeDynamicRows(dynamicBox);
 		document.getElementById('tb-edit').hidden = true;
 	}
 }
 
 
-Scholar.TreeView.prototype._showItem = function(item, level, beforeRow) 	{ this._dataItems.splice(beforeRow, 0, [item, false, level]); }
+Scholar.TreeView.prototype._showItem = function(item, level, beforeRow) 	{ this._dataItems.splice(beforeRow, 0, [item, false, level]); this.rowCount++; }
 
-Scholar.TreeView.prototype._hideItem = function(row) 						{ this._dataItems.splice(row,1); }
+Scholar.TreeView.prototype._hideItem = function(row) 						{ this._dataItems.splice(row,1); this.rowCount--; }
 
 Scholar.TreeView.prototype._getItemAtRow = function(row)					{ return this._dataItems[row][0]; }
 Scholar.TreeView.prototype.isSorted = function() 							{ return false; }
@@ -171,7 +168,6 @@ Scholar.TreeView.prototype.deleteSelection = function()
 		
 		//remove row from tree
 		this._hideItem(rows[i]-i);
-		this.rowCount--;
 		this._treebox.rowCountChanged(rows[i]-i, -1);
 	}
 	this._treebox.endUpdateBatch();
@@ -185,7 +181,7 @@ Scholar.DragObserver.drop = function(row, orient)						{ }
 
 function viewSelectedItem()
 {
-	removeDynamicRows();
+	removeDynamicRows(dynamicBox);
 
 	var thisItem = myTreeView._getItemAtRow(myTreeView.selection.currentIndex);
 
@@ -246,7 +242,7 @@ function editItem(thisItem)
 	document.getElementById('list-pane').hidden = true;
 	document.getElementById('edit-pane').hidden = false;
 	
-	removeDynamicRows();
+	removeDynamicRows(dynamicBox);
 	var fieldNames = getFullFieldList(thisItem);
 
 	for(var i = 0; i<fieldNames.length; i++)
@@ -270,35 +266,13 @@ function editItem(thisItem)
 		}
 	}
 
-/* DISABLE EDITING OF CREATORS UNTIL WE COME UP WITH A GOOD METHOD		
-	var beforeField = dynamicBox.firstChild.nextSibling;
-
-	for (var i=0,len=thisItem.numCreators(); i<len; i++)
-	{
-		var creator = thisItem.getCreator(i);
-		
-		var label = document.createElement("label");
-		label.setAttribute("value","Creator:");
-		label.setAttribute("control","dynamic-creator-"+i);
-
-		var valueElement = document.createElement("textbox");
-		valueElement.setAttribute("value",creator.lastName+", "+creator.firstName);
-		valueElement.setAttribute("id","dynamic-field-"+i);
-		
-		var row = document.createElement("row");
-		row.appendChild(label);
-		row.appendChild(valueElement);
-		
-		dynamicBox.insertBefore(row, beforeField);
-	}
-*/
 	itemBeingEdited = thisItem;
 }
 
-function removeDynamicRows()
+function removeDynamicRows(box)
 {
-	while(dynamicBox.hasChildNodes())
-		dynamicBox.removeChild(dynamicBox.firstChild);
+	while(box.hasChildNodes())
+		box.removeChild(box.firstChild);
 }
 
 function getFullFieldList(item)
@@ -318,7 +292,13 @@ function returnToTree(save)
 		var valueElements = dynamicBox.getElementsByTagName("textbox");		//All elements of tagname 'textbox' should be the values of edits
 		for(var i=0; i<valueElements.length; i++)
 			itemBeingEdited.setField(valueElements[i].getAttribute("fieldName"),valueElements[i].value);
-	
+		
+		if(!itemBeingEdited.getID())
+		{
+			myTreeView._showItem(itemBeingEdited, 0, myTreeView.rowCount);
+			myTreeView._treebox.rowCountChanged(myTreeView.rowCount-1,1);
+		}
+		
 		itemBeingEdited.save();
 	}
 	itemBeingEdited = null;
