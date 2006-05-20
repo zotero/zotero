@@ -183,12 +183,12 @@ Scholar.Item.prototype.setCreator = function(orderIndex, firstName, lastName, cr
 		this._loadCreators();
 	}
 	
-	if (!creatorTypeID){
-		creatorTypeID = 1;
+	if (!firstName){
+		firstName = '';
 	}
 	
-	if (!firstName && !lastName){
-		throw ('Name not provided for creator');
+	if (!lastName){
+		lastName = '';
 	}
 	
 	if (this._creators.has(orderIndex) &&
@@ -196,6 +196,10 @@ Scholar.Item.prototype.setCreator = function(orderIndex, firstName, lastName, cr
 		this._creators.get(orderIndex)['lastName']==lastName &&
 		this._creators.get(orderIndex)['creatorTypeID']==creatorTypeID){
 		return true;
+	}
+	
+	if (!creatorTypeID){
+		creatorTypeID = 1;
 	}
 	
 	var creator = new Array();
@@ -222,7 +226,8 @@ Scholar.Item.prototype.removeCreator = function(orderIndex){
 	}
 	this._creators.remove(orderIndex);
 	
-	for (var i=orderIndex,len=this._creators.length; i<=len; i++){
+	// Go to length+1 so we clear the last one
+	for (var i=orderIndex, max=this._creators.length+1; i<max; i++){
 		var next =
 			this._creators.items[i+1] ? this._creators.items[i+1] : false;
 		this._creators.set(i, next);
@@ -444,10 +449,7 @@ Scholar.Item.prototype.save = function(){
 					
 					var creator = this.getCreator(orderIndex);
 					
-					// If empty, delete at position and shift down any above it
-					//
-					// We have to do this immediately so old entries are
-					// cleared before other ones are shifted down
+					// If empty, delete at position
 					if (!creator['firstName'] && !creator['lastName']){
 						sql2 = 'DELETE FROM itemCreators '
 							+ ' WHERE itemID=' + this.getID()
@@ -459,37 +461,43 @@ Scholar.Item.prototype.save = function(){
 					// See if this is an existing creator
 					var creatorID = Scholar.Creators.getID(
 							creator['firstName'],
-							creator['lastName'],
-							creator['creatorTypeID']
+							creator['lastName']
 					);
 					
 					// If not, add it
 					if (!creatorID){
 						creatorID = Scholar.Creators.add(
 							creator['firstName'],
-							creator['lastName'],
-							creator['creatorTypeID']
+							creator['lastName']
 						);
 					}
 					
 					
+					// If there's a creator at this position, update
+					// with new creator data
 					sql2 = 'SELECT COUNT(*) FROM itemCreators'
 						+ ' WHERE itemID=' + this.getID()
 						+ ' AND orderIndex=' + orderIndex;
 					
 					if (Scholar.DB.valueQuery(sql2)){
 						sql += 'UPDATE itemCreators SET creatorID='
-							+ creatorID + ' WHERE itemID=' + this.getID()
+							+ creatorID + ', creatorTypeID='
+							+ creator['creatorTypeID'] + ', '
+							+ 'WHERE itemID=' + this.getID()
 							+ ' AND orderIndex=' + orderIndex + ";\n";
 					}
+					// Otherwise insert
 					else {
 						sql += 'INSERT INTO itemCreators VALUES ('
-							+ creatorID + ',' + itemID + ',' + orderIndex
+							+ itemID + ', ' + creatorID + ', '
+							+ creator['creatorTypeID'] + ', ' + orderIndex
 							+ ");\n";
 					}
 				}
 				
 				// Append the SQL to delete obsolete creators
+				//
+				// TODO: fix this so it actually purges the internal memory
 				sql += Scholar.Creators.purge(true) + "\n";
 			}
 			
@@ -595,29 +603,27 @@ Scholar.Item.prototype.save = function(){
 					var creator = this.getCreator(orderIndex);
 					
 					// If empty, skip
-					if (typeof creator['firstName'] == 'undefined'
-						&& typeof creator['lastName'] == 'undefined'){
+					if (!creator['firstName'] && !creator['lastName']){
 						continue;
 					}
 					
 					// See if this is an existing creator
 					var creatorID = Scholar.Creators.getID(
 							creator['firstName'],
-							creator['lastName'],
-							creator['creatorTypeID']
+							creator['lastName']
 					);
 					
 					// If not, add it
 					if (!creatorID){
 						creatorID = Scholar.Creators.add(
 							creator['firstName'],
-							creator['lastName'],
-							creator['creatorTypeID']
+							creator['lastName']
 						);
 					}
 					
 					sql += 'INSERT INTO itemCreators VALUES ('
-						+ creatorID + ',' + itemID + ',' + orderIndex
+						+ itemID + ',' + creatorID + ','
+						+ creator['creatorTypeID'] + ', ' + orderIndex
 						+ ");\n";
 				}
 			}
@@ -757,7 +763,8 @@ Scholar.Item.prototype._loadCreators = function(){
 		throw ('ItemID not set for item before attempting to load creators');
 	}
 	
-	var sql = 'SELECT C.creatorID, C.*, orderIndex FROM itemCreators IC '
+	var sql = 'SELECT C.creatorID, C.*, creatorTypeID, orderIndex '
+		+ 'FROM itemCreators IC '
 		+ 'LEFT JOIN creators C USING (creatorID) '
 		+ 'WHERE itemID=' + this.getID() + ' ORDER BY orderIndex';
 	var creators = Scholar.DB.query(sql);
@@ -774,6 +781,7 @@ Scholar.Item.prototype._loadCreators = function(){
 		creator['firstName'] = creators[i]['firstName'];
 		creator['lastName'] = creators[i]['lastName'];
 		creator['creatorTypeID'] = creators[i]['creatorTypeID'];
+		// Save creator data into Hash, indexed by orderIndex
 		this._creators.set(creators[i]['orderIndex'], creator);
 	}
 	
@@ -1159,7 +1167,7 @@ Scholar.Folders = new function(){
 
 
 Scholar.Creators = new function(){
-	var _creators = new Array; // indexed by first%%%last%%%creatorTypeID hash
+	var _creators = new Array; // indexed by first%%%last hash
 	var _creatorsByID = new Array; // indexed by creatorID
 	
 	this.get = get;
@@ -1192,17 +1200,17 @@ Scholar.Creators = new function(){
 	/*
 	 * Returns the creatorID matching given name and type
 	 */
-	function getID(firstName, lastName, creatorTypeID){
-		var hash = firstName + '%%%' + lastName + '%%%' + creatorTypeID;
+	function getID(firstName, lastName){
+		var hash = firstName + '%%%' + lastName;
 		
 		if (_creators[hash]){
 			return _creators[hash];
 		}
 		
-		var sql = 'SELECT creatorID FROM creators WHERE firstName=? AND '
-			+ 'lastName=? AND creatorTypeID=?';
+		var sql = 'SELECT creatorID FROM creators '
+			+ 'WHERE firstName=? AND lastName=?';
 		var params = [
-			{'string': firstName}, {'string': lastName}, {'int': creatorTypeID}
+			{'string': firstName}, {'string': lastName}
 		];
 		var creatorID = Scholar.DB.valueQuery(sql,params);
 		
@@ -1219,11 +1227,11 @@ Scholar.Creators = new function(){
 	 *
 	 * Returns new creatorID
 	 */
-	function add(firstName, lastName, creatorTypeID){
+	function add(firstName, lastName){
 		Scholar.debug('Adding new creator', 4);
 		
 		var sql = 'INSERT INTO creators '
-			+ 'VALUES (?,?,?,?)';
+			+ 'VALUES (?,?,?)';
 		
 		// Use a random integer for the creatorID
 		var tries = 10; // # of tries to find a unique id
@@ -1242,10 +1250,11 @@ Scholar.Creators = new function(){
 		while (exists);
 		
 		var params = [
-			{'int': rnd}, {'int': creatorTypeID},
-			{'string': firstName}, {'string': lastName},
+			{'int': rnd}, {'string': firstName}, {'string': lastName}
 		];
-		return Scholar.DB.query(sql,params);
+		
+		Scholar.DB.query(sql, params);
+		return rnd;
 	}
 	
 	
@@ -1260,7 +1269,7 @@ Scholar.Creators = new function(){
 		var toDelete = Scholar.DB.columnQuery(sql);
 		
 		if (!toDelete){
-			return false;
+			return returnSQL ? '' : false;
 		}
 		
 		sql = 'DELETE FROM creators WHERE creatorID NOT IN '
@@ -1286,8 +1295,7 @@ Scholar.Creators = new function(){
 		if (!creator){
 			return false;
 		}
-		return creator['firstName'] + '%%%' + creator['lastName']
-			+ '%%%' + creator['creatorTypeID'];
+		return creator['firstName'] + '%%%' + creator['lastName'];
 	}
 }
 
@@ -1437,6 +1445,26 @@ Scholar.ItemFields = new function(){
 		}
 	}
 }
+
+
+
+
+Scholar.CreatorTypes = new function(){
+	this.getTypes = getTypes;
+	this.getTypeName = getTypeName;
+	
+	function getTypes(){
+		return Scholar.DB.query('SELECT creatorTypeID AS id, '
+			+ 'creatorType AS name FROM creatorTypes order BY creatorType');
+	}
+	
+	function getTypeName(creatorTypeID){
+		return Scholar.DB.valueQuery('SELECT creatorType FROM creatorTypes '
+			+ 'WHERE creatorTypeID=' + creatorTypeID);
+	}
+}
+
+
 
 /*
 var items = Scholar.Items.getAll();

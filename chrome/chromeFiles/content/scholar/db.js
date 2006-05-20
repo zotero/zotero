@@ -411,11 +411,6 @@ Scholar.DB = new function(){
 		// update SCHOLAR_CONFIG['DB_VERSION'] to the target version
 		for (var i=parseInt(fromVersion) + 1; i<=toVersion; i++){
 			
-			// For now, just wipe and recreate
-			if (i==8){
-				_initializeSchema();
-			}
-			
 			if (i==9){
 				Scholar.DB.query("DROP TABLE IF EXISTS objectCreators; "
 					+ "DROP TABLE IF EXISTS objectData; DROP TABLE IF EXISTS objectKeywords; "
@@ -424,7 +419,12 @@ Scholar.DB = new function(){
 				_updateDBVersion(i);
 			}
 			
+			// For now, just wipe and recreate
 			if (i==10){
+				_initializeSchema();
+			}
+			
+			if (i==11){
 				// do stuff
 				// _updateDBVersion(i);
 			}

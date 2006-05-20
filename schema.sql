@@ -1,4 +1,4 @@
--- 9
+-- 10
 
     DROP TABLE IF EXISTS version;
     CREATE TABLE version (
@@ -77,11 +77,9 @@
     DROP TABLE IF EXISTS creators;
     CREATE TABLE creators (
         creatorID INT,
-        creatorTypeID INT DEFAULT 1,
         firstName TEXT,
         lastName TEXT,
-        PRIMARY KEY (creatorID),
-        FOREIGN KEY (creatorTypeID) REFERENCES creatorTypes(creatorTypeID)
+        PRIMARY KEY (creatorID)
     );
     
     DROP TABLE IF EXISTS creatorTypes;
@@ -94,10 +92,12 @@
     CREATE TABLE itemCreators (
         itemID INT,
         creatorID INT,
+        creatorTypeID INT DEFAULT 1,
         orderIndex INT DEFAULT 0,
         PRIMARY KEY (itemID, creatorID),
         FOREIGN KEY (itemID) REFERENCES items(itemID),
         FOREIGN KEY (creatorID) REFERENCES creators(creatorID)
+        FOREIGN KEY (creatorTypeID) REFERENCES creatorTypes(creatorTypeID)
     );
     
     DROP TABLE IF EXISTS folders;
@@ -179,40 +179,44 @@
     INSERT INTO "itemData" VALUES(2, 8, 347);
     INSERT INTO "itemData" VALUES(2, 9, '0-205-32145-3');
     
-    INSERT INTO "creators" VALUES(1, 1, 'Susan B.', 'Barnes');
-    INSERT INTO "creators" VALUES(2, 1, 'J.S.', 'Bassard');
-    INSERT INTO "creators" VALUES(3, 1, 'Mary', 'Chayko');
-    INSERT INTO "creators" VALUES(4, 1, 'Michael', 'Civin');
-    INSERT INTO "creators" VALUES(5, 1, 'Paul', 'DiMaggio');
-    INSERT INTO "creators" VALUES(6, 1, 'Leon', 'Festinger');
-    INSERT INTO "creators" VALUES(7, 1, 'Stanley', 'Schachter');
-    INSERT INTO "creators" VALUES(8, 1, 'Kurt', 'Back');
-    INSERT INTO "creators" VALUES(9, 1, 'Steven G.', 'Jones');
-    INSERT INTO "creators" VALUES(10, 1, 'J.C.R.', 'Licklider');
-    INSERT INTO "creators" VALUES(11, 1, 'Robert W.', 'Taylor');
-    INSERT INTO "creators" VALUES(12, 1, 'Yuliang', 'Lui');
-    INSERT INTO "creators" VALUES(13, 1, 'Sherry', 'Turkle');
-    INSERT INTO "creators" VALUES(14, 1, 'J.', 'Vallee');
-    INSERT INTO "creators" VALUES(15, 1, 'Barry', 'Wellman');
+    INSERT INTO "creatorTypes" VALUES(1, "author");
+    INSERT INTO "creatorTypes" VALUES(2, "contributor");
+    INSERT INTO "creatorTypes" VALUES(3, "editor");
     
-    INSERT INTO "itemCreators" VALUES(1, 1, 0);
-    INSERT INTO "itemCreators" VALUES(2, 1, 0);
-    INSERT INTO "itemCreators" VALUES(3, 2, 0);
-    INSERT INTO "itemCreators" VALUES(4, 3, 0);
-    INSERT INTO "itemCreators" VALUES(5, 4, 0);
-    INSERT INTO "itemCreators" VALUES(6, 5, 0);
-    INSERT INTO "itemCreators" VALUES(7, 6, 0);
-    INSERT INTO "itemCreators" VALUES(8, 9, 0);
-    INSERT INTO "itemCreators" VALUES(9, 10, 0);
-    INSERT INTO "itemCreators" VALUES(10, 12, 0);
-    INSERT INTO "itemCreators" VALUES(11, 13, 0);
-    INSERT INTO "itemCreators" VALUES(12, 13, 0);
-    INSERT INTO "itemCreators" VALUES(13, 14, 0);
-    INSERT INTO "itemCreators" VALUES(14, 15, 0);
-    INSERT INTO "itemCreators" VALUES(15, 15, 0);
-    INSERT INTO "itemCreators" VALUES(7, 7, 1);
-    INSERT INTO "itemCreators" VALUES(7, 8, 2);
-    INSERT INTO "itemCreators" VALUES(9, 11, 1);
+    INSERT INTO "creators" VALUES(1, 'Susan B.', 'Barnes');
+    INSERT INTO "creators" VALUES(2, 'J.S.', 'Bassard');
+    INSERT INTO "creators" VALUES(3, 'Mary', 'Chayko');
+    INSERT INTO "creators" VALUES(4, 'Michael', 'Civin');
+    INSERT INTO "creators" VALUES(5, 'Paul', 'DiMaggio');
+    INSERT INTO "creators" VALUES(6, 'Leon', 'Festinger');
+    INSERT INTO "creators" VALUES(7, 'Stanley', 'Schachter');
+    INSERT INTO "creators" VALUES(8, 'Kurt', 'Back');
+    INSERT INTO "creators" VALUES(9, 'Steven G.', 'Jones');
+    INSERT INTO "creators" VALUES(10, 'J.C.R.', 'Licklider');
+    INSERT INTO "creators" VALUES(11, 'Robert W.', 'Taylor');
+    INSERT INTO "creators" VALUES(12, 'Yuliang', 'Lui');
+    INSERT INTO "creators" VALUES(13, 'Sherry', 'Turkle');
+    INSERT INTO "creators" VALUES(14, 'J.', 'Vallee');
+    INSERT INTO "creators" VALUES(15, 'Barry', 'Wellman');
+    
+    INSERT INTO "itemCreators" VALUES(1, 1, 1, 0);
+    INSERT INTO "itemCreators" VALUES(2, 1, 1, 0);
+    INSERT INTO "itemCreators" VALUES(3, 2, 1, 0);
+    INSERT INTO "itemCreators" VALUES(4, 3, 1, 0);
+    INSERT INTO "itemCreators" VALUES(5, 4, 1, 0);
+    INSERT INTO "itemCreators" VALUES(6, 5, 1, 0);
+    INSERT INTO "itemCreators" VALUES(7, 6, 1, 0);
+    INSERT INTO "itemCreators" VALUES(8, 9, 1, 0);
+    INSERT INTO "itemCreators" VALUES(9, 10, 1, 0);
+    INSERT INTO "itemCreators" VALUES(10, 12, 1, 0);
+    INSERT INTO "itemCreators" VALUES(11, 13, 1, 0);
+    INSERT INTO "itemCreators" VALUES(12, 13, 1, 0);
+    INSERT INTO "itemCreators" VALUES(13, 14, 1, 0);
+    INSERT INTO "itemCreators" VALUES(14, 15, 1, 0);
+    INSERT INTO "itemCreators" VALUES(15, 15, 1, 0);
+    INSERT INTO "itemCreators" VALUES(7, 7, 1, 1);
+    INSERT INTO "itemCreators" VALUES(7, 8, 1, 2);
+    INSERT INTO "itemCreators" VALUES(9, 11, 1, 1);
     
     INSERT INTO folders VALUES (1241, 'Test Folder');
     INSERT INTO folders VALUES (3262, 'Another Test Folder');
