@@ -14,7 +14,7 @@ var Scholar = new function(){
 	var _initialized = false
 	
 	this.testString = 'Sidebar is not registered';
-	
+	this.LocalizedStrings;
 	this.init = init;
 	this.debug = debug;
 	this.varDump = varDump;
@@ -26,6 +26,8 @@ var Scholar = new function(){
 	 * Initialize the extension
 	 */
 	function init(){
+		this.LocalizedStrings = document.getElementById('scholar-strings');
+		
 		if (!_initialized){
 			Scholar.DB.updateSchema();
 			_initialized = true;

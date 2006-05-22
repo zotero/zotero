@@ -1,4 +1,3 @@
-var ScholarLocalizedStrings;
 var myTreeView;
 var dynamicBox;
 var itemBeingEdited; 			//the item currently being edited
@@ -192,7 +191,7 @@ function viewSelectedItem()
 		if(thisItem.getField(fieldNames[i]) != "")
 		{
 			var label = document.createElement("label");
-			label.setAttribute("value",ScholarLocalizedStrings.getString("itemFields."+fieldNames[i])+":");
+			label.setAttribute("value",Scholar.LocalizedStrings.getString("itemFields."+fieldNames[i])+":");
 			
 			var valueElement = document.createElement("description");
 			valueElement.appendChild(document.createTextNode(thisItem.getField(fieldNames[i])));
@@ -229,44 +228,13 @@ function viewSelectedItem()
 
 function newItem(typeID)
 {
-	editItem(Scholar.Items.getNewItemByType(typeID));
+	Scholar.EditPane.editItem(Scholar.Items.getNewItemByType(typeID));
 }
 
 function editSelectedItem()
 {
-	editItem(myTreeView._getItemAtRow(myTreeView.selection.currentIndex));
-}
-
-function editItem(thisItem)
-{
-	document.getElementById('list-pane').hidden = true;
-	document.getElementById('edit-pane').hidden = false;
-	
-	removeDynamicRows(dynamicBox);
-	var fieldNames = getFullFieldList(thisItem);
-
-	for(var i = 0; i<fieldNames.length; i++)
-	{
-		if(!thisItem.isPrimaryField(fieldNames[i]) || thisItem.isEditableField(fieldNames[i]))
-		{
-			var label = document.createElement("label");
-			label.setAttribute("value",ScholarLocalizedStrings.getString("itemFields."+fieldNames[i])+":");
-			label.setAttribute("control","dynamic-field-"+i);
-			
-			//create the textbox
-			var valueElement = document.createElement("textbox");
-			valueElement.setAttribute("value",thisItem.getField(fieldNames[i]));
-			valueElement.setAttribute("id","dynamic-field-"+i);		//just so the label can be assigned to this valueElement
-			valueElement.setAttribute("fieldName",fieldNames[i]);	//we will use this later
-			
-			var row = document.createElement("row");
-			row.appendChild(label);
-			row.appendChild(valueElement);
-			dynamicBox.appendChild(row);
-		}
-	}
-
-	itemBeingEdited = thisItem;
+	Scholar.EditPane.editItem(myTreeView._getItemAtRow(myTreeView.selection.currentIndex));
+//	editItem(myTreeView._getItemAtRow(myTreeView.selection.currentIndex));
 }
 
 function removeDynamicRows(box)
@@ -284,35 +252,10 @@ function getFullFieldList(item)
 	return fieldNames;
 }
 
-function returnToTree(save)
-{
-	if(save)
-	{
-		//get fields, call data access methods
-		var valueElements = dynamicBox.getElementsByTagName("textbox");		//All elements of tagname 'textbox' should be the values of edits
-		for(var i=0; i<valueElements.length; i++)
-			itemBeingEdited.setField(valueElements[i].getAttribute("fieldName"),valueElements[i].value);
-		
-		if(!itemBeingEdited.getID())
-		{
-			myTreeView._showItem(itemBeingEdited, 0, myTreeView.rowCount);
-			myTreeView._treebox.rowCountChanged(myTreeView.rowCount-1,1);
-		}
-		
-		itemBeingEdited.save();
-	}
-	itemBeingEdited = null;
-
-	document.getElementById('list-pane').hidden = false;
-	document.getElementById('edit-pane').hidden = true;
-
-	viewSelectedItem();
-}
-
 function init()
 {
 	myTreeView = new Scholar.TreeView();
-	ScholarLocalizedStrings = document.getElementById('scholar-strings');
+	
 	dynamicBox = document.getElementById('dynamic-fields');
 	
 	var addMenu = document.getElementById('tb-add').firstChild;
@@ -320,7 +263,7 @@ function init()
 	for(var i = 0; i<itemTypes.length; i++)
 	{
 		var menuitem = document.createElement("menuitem");
-		menuitem.setAttribute("label",ScholarLocalizedStrings.getString("itemTypes."+itemTypes[i]['name']));
+		menuitem.setAttribute("label",Scholar.LocalizedStrings.getString("itemTypes."+itemTypes[i]['name']));
 		menuitem.setAttribute("oncommand","newItem("+itemTypes[i]['id']+")");
 		addMenu.appendChild(menuitem);
 	}

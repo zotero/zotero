@@ -4,34 +4,39 @@
 
 <overlay id="scholar"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+	<?xul-overlay href="editpane.xul" ?>
 	
 	<script src="scholar.js"/>
 	<script src="db.js"/>
 	<script src="data_access.js"/>
 	
+	<stringbundleset id="stringbundleset">
+		<stringbundle id="scholar-strings" src="chrome://scholar/locale/scholar.properties"/>
+	</stringbundleset>
+	
 	<statusbar id="status-bar">
 		<statusbarpanel onclick="alert(Scholar.testString)" id="my-panel" label="&statusbarpanel.helloworld;"/>
 	</statusbar>
 	
-  <menupopup id="viewSidebarMenu">
-    <menuitem key="key_openScholarSidebar" observes="viewScholarSidebar"  />
-  </menupopup>
+	<menupopup id="viewSidebarMenu">
+		<menuitem key="key_openScholarSidebar" observes="viewScholarSidebar"  />
+	</menupopup>
   
-  <keyset id="mainKeyset">
-    <key id="key_openScholarSidebar" command="viewScholarSidebar"
-         key="S" 
-         modifiers="shift accel" />
-  </keyset>
+	<keyset id="mainKeyset">
+		<key id="key_openScholarSidebar" command="viewScholarSidebar"
+			 key="S" 
+			 modifiers="shift accel" />
+	</keyset>
   
-  <broadcasterset id="mainBroadcasterSet"> 
-    <broadcaster id="viewScholarSidebar" 
-                 label="Scholar"
-                 autoCheck="false"
-                 type="checkbox"
-                 group="sidebar"
-                 sidebarurl="chrome://scholar/content/sidebar.xul"
-                 sidebartitle="Scholar"
-                 oncommand="toggleSidebar('viewScholarSidebar');" />
-  </broadcasterset>
-
+	<broadcasterset id="mainBroadcasterSet"> 
+		<broadcaster id="viewScholarSidebar" 
+					label="Scholar"
+					autoCheck="false"
+					type="checkbox"
+					group="sidebar"
+					sidebarurl="chrome://scholar/content/sidebar.xul"
+					sidebartitle="Scholar"
+					oncommand="toggleSidebar('viewScholarSidebar');" />
+	</broadcasterset>
 </overlay>

@@ -52,7 +52,6 @@
 			<toolbarbutton id="tb-edit" label="Edit&#8230;" oncommand="editSelectedItem();" hidden="true"/>
 		</sidebarheader>
    	</vbox>
-
 	
    	<vbox id="view-pane">
 		<grid>
@@ -65,9 +64,4 @@
 		  	</rows>
 		</grid>
 	</vbox>
-	
-	<hbox id="edit-pane" hidden="true">
-		<button label="Cancel" oncommand="returnToTree(false)"/>
-		<button label="Save" oncommand="returnToTree(true)"/>
-	</hbox>
 </page>
