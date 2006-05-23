@@ -20,11 +20,17 @@
 	</statusbar>
 	
 	<menupopup id="viewSidebarMenu">
-		<menuitem key="key_openScholarSidebar" observes="viewScholarSidebar"  />
+		<menuitem observes="viewScholarSidebar"  />
+	</menupopup>
+	
+	<menupopup id="menu_ToolsPopup">
+		<menuitem id="tools-scholar"
+			oncommand="open('chrome://scholar/content/scholar-main.xul','scholar-window','chrome, resizable');" label="Scholar"
+			key="key_openScholar"/>
 	</menupopup>
   
 	<keyset id="mainKeyset">
-		<key id="key_openScholarSidebar" command="viewScholarSidebar"
+		<key id="key_openScholar"
 			 key="S" 
 			 modifiers="shift accel" />
 	</keyset>

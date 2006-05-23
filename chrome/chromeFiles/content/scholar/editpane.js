@@ -31,7 +31,7 @@ Scholar.EditPane = new function()
 					  promptService.BUTTON_TITLE_DONT_SAVE * promptService.BUTTON_POS_2;
 					  
 			var response = promptService.confirmEx(window,"",
-								  "One or more files have not been saved.",
+								  "Do you want to save the changes to '"+_itemBeingEdited.getField("title")+"'?",
 								  flags, null, null, null, null, {});
 			if(response == 1)
 				return;
