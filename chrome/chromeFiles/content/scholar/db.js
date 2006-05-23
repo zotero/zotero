@@ -4,6 +4,8 @@
 Scholar.DB = new function(){
 	// Private members
 	var _connection;
+	var _transactionRollback;
+	var _transactionNestingLevel = 0;
 	
 	// Privileged methods
 	this.query = query;
@@ -85,7 +87,7 @@ Scholar.DB = new function(){
 			}
 		}
 		catch (e){
-			throw(e + ' (SQL error: ' + db.lastErrorString + ')');
+			throw(e + ' [QUERY: ' + sql + '] [ERROR: ' + db.lastErrorString + ']');
 		}
 	}
 	
@@ -161,7 +163,7 @@ Scholar.DB = new function(){
 			var statement = db.createStatement(sql);
 		}
 		catch (e){
-			throw(db.lastErrorString);
+			throw('[QUERY: ' + sql + '] [ERROR: ' + db.lastErrorString + ']');
 		}
 		
 		if (statement && params){
@@ -184,22 +186,49 @@ Scholar.DB = new function(){
 	
 	function beginTransaction(){
 		var db = _getDBConnection();
-		Scholar.debug('Beginning DB transaction',5);
-		db.beginTransaction();
+		
+		if (db.transactionInProgress){
+			_transactionNestingLevel++;
+			Scholar.debug('Transaction in progress -- increasing level to '
+				+ _transactionNestingLevel, 5);
+		}
+		else {
+			Scholar.debug('Beginning DB transaction', 5);
+			db.beginTransaction();
+		}
 	}
 	
 	
 	function commitTransaction(){
 		var db = _getDBConnection();
-		Scholar.debug('Committing transaction',5);
-		db.commitTransaction();
+		
+		if (_transactionNestingLevel){
+			_transactionNestingLevel--;
+			Scholar.debug('Decreasing transaction level to ' + _transactionNestingLevel, 5);
+		}
+		else if (_transactionRollback){
+			Scholar.debug('Rolling back previously flagged transaction', 5);
+			db.rollbackTransaction();
+		}
+		else {
+			Scholar.debug('Committing transaction',5);
+			db.commitTransaction();
+		}
 	}
 	
 	
 	function rollbackTransaction(){
 		var db = _getDBConnection();
-		Scholar.debug('Rolling back transaction',5);
-		db.rollbackTransaction();
+		
+		if (_transactionNestingLevel){
+			Scholar.debug('Flagging nested transaction for rollback', 5);
+			_transactionRollback = true;
+		}
+		else {
+			Scholar.debug('Rolling back transaction', 5);
+			_transactionRollback = false;
+			db.rollbackTransaction();
+		}
 	}
 	
 	
