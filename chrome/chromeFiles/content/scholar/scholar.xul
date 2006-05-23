@@ -8,30 +8,42 @@
     orient="vertical"
     width="800"
     height="600"
-    onload="init()"
+    onload="Scholar.init(); init();"
     xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-    
+
+    <!-- Include these until we get a global XPCOM object: -->
+	<script src="overlay.js"/>
+	<script src="db.js"/>
+	<script src="data_access.js"/>
+	
     <script src="scholar.js"/>
     <script src="treeView.js"/>
     
+	<stringbundle id="scholar-strings" src="chrome://scholar/locale/scholar.properties"/>
+    
 	<toolbar>
-		<toolbarbutton label="Add Folder..."/>
+		<toolbarbutton label="New Folder..." oncommand="newFolder();"/>
 		<spacer flex="1"/>
-		<toolbarbutton label="New Item..." type="menu">
+		<toolbarbutton id="tb-add" label="New Item..." type="menu">
 			<menupopup>
-				<menuitem label="Book"/>
-				<menuitem label="Journal Article"/>
 			</menupopup>
 		</toolbarbutton>
+		<spacer flex="1"/>
+		<label control="tb-search" value="Search:"/><textbox id="tb-search" value=""/>
 	</toolbar>
 	<hbox flex="1">
 		<vbox id="folders-pane" flex="1">
-			<tree id="folders-tree" flex="1">
+			<tree 
+				id="folders-tree"
+				treeviewtype="folders"
+				onselect="folderSelected();"
+				flex="1">
 				<treecols>
 					<treecol
 						id="name_column"
 						label="Name"
-						flex="1"/>
+						flex="1"
+						primary="true"/>
 				</treecols>
 				<treechildren/>
 			</tree>
@@ -43,6 +55,7 @@
 			<tree 
 				id="items-tree" 
 				enablecolumndrag="true"
+				treeviewtype="items" 
 				flex="1">
 				
 				<treecols>
