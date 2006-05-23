@@ -9,7 +9,7 @@
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	style="padding:2em">
 	
-	<script src="../scholar.js"/>
+	<script src="../overlay.js"/>
 	<script src="../db.js"/>
 	
 	<script src="test.js"/>

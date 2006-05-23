@@ -7,7 +7,7 @@
 
 	<?xul-overlay href="editpane.xul" ?>
 	
-	<script src="scholar.js"/>
+	<script src="overlay.js"/>
 	<script src="db.js"/>
 	<script src="data_access.js"/>
 	
