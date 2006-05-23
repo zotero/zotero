@@ -904,7 +904,7 @@ Scholar.Items = new function(){
 	 *
 	 * Type can tested with instanceof (e.g. if (obj instanceof Scholar.Folder)) or isFolder()
 	 */
-	function getTreeRows(parent){
+	function getTreeRows(parent, type){
 		var toReturn = new Array();
 		
 		/*
@@ -917,7 +917,18 @@ Scholar.Items = new function(){
 		}
 		
 		var sql = 'SELECT * FROM treeStructure TS '
-			+ 'WHERE parentFolderID=' + parent + ' ORDER BY orderIndex';
+			+ 'WHERE parentFolderID=' + parent;
+		
+		switch (type){
+			case 'folder':
+				sql += ' AND isFolder=1';
+				break;
+			case 'item':
+				sql += ' AND isFolder=0';
+				break;
+		}
+		
+		sql += ' ORDER BY orderIndex';
 		
 		var tree = Scholar.DB.query(sql);
 		
@@ -1074,8 +1085,11 @@ Scholar.Folder = function(){
 Scholar.Folder.prototype.loadFromID = function(id){
 	// Should be same as query in Scholar.Folders, just with folderID
 	var sql = "SELECT folderID, folderName, parentFolderID, "
-		+ "(SELECT COUNT(*) FROM treeStructure WHERE parentFolderID=" +
-		id + ")=0 AS isEmpty FROM folders F "
+		+ "(SELECT COUNT(*) FROM treeStructure WHERE "
+		+ "parentFolderID=TS.id AND isFolder=1)!=0 AS hasChildFolders, "
+		+ "(SELECT COUNT(*) FROM treeStructure WHERE "
+		+ "parentFolderID=TS.id AND isFolder=0)!=0 AS hasChildItems "
+		+ "FROM folders F "
 		+ "JOIN treeStructure TS ON (F.folderID=TS.id AND TS.isFolder=1) "
 		+ "WHERE folderID=" + id;
 	
@@ -1091,7 +1105,8 @@ Scholar.Folder.prototype.loadFromRow = function(row){
 	this._id = row['folderID'];
 	this._name = row['folderName'];
 	this._parent = row['parentFolderID'];
-	this._empty = row['isEmpty'];
+	this._hasChildFolders = row['hasChildFolders'];
+	this._hasChildItems = row['hasChildItems'];
 }
 
 Scholar.Folder.prototype.getID = function(){
@@ -1111,8 +1126,17 @@ Scholar.Folder.prototype.getParent = function(){
 }
 
 Scholar.Folder.prototype.isEmpty = function(){
-	return !!parseInt(this._empty);
+	return !(parseInt(this._hasChildFolders)) && !(parseInt(this._hasChildItems));
 }
+
+Scholar.Folder.prototype.hasChildFolders = function(){
+	return !!(parseInt(this._hasChildFolders));
+}
+
+Scholar.Folder.prototype.hasChildItems = function(){
+	return !!(parseInt(this._hasChildItems));
+}
+
 
 /**
 * Deletes a folder and all descendent folders and items
@@ -1232,7 +1256,10 @@ Scholar.Folders = new function(){
 	function _load(){
 		var sql = "SELECT folderID, folderName, parentFolderID, "
 			+ "(SELECT COUNT(*) FROM treeStructure WHERE "
-			+ "parentFolderID=TS.id)=0 AS isEmpty FROM folders F "
+			+ "parentFolderID=TS.id AND isFolder=1)!=0 AS hasChildFolders, "
+			+ "(SELECT COUNT(*) FROM treeStructure WHERE "
+			+ "parentFolderID=TS.id AND isFolder=0)!=0 AS hasChildItems "
+			+ "FROM folders F "
 			+ "JOIN treeStructure TS ON (F.folderID=TS.id AND TS.isFolder=1) "
 			+ "WHERE folderID>0"; // skip 'root' folder
 		var result = Scholar.DB.query(sql);
