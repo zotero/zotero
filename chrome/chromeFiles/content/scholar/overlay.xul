@@ -25,7 +25,7 @@
 	
 	<menupopup id="menu_ToolsPopup">
 		<menuitem id="tools-scholar"
-			oncommand="open('chrome://scholar/content/scholar-main.xul','scholar-window','chrome, resizable');" label="Scholar"
+			oncommand="open('chrome://scholar/content/scholar.xul','scholar-window','chrome, resizable');" label="Scholar"
 			key="key_openScholar"/>
 	</menupopup>
   

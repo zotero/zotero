@@ -11,7 +11,7 @@
     onload="init()"
     xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
     
-    <script src="scholar-main.js"/>
+    <script src="scholar.js"/>
     <script src="treeView.js"/>
     
 	<toolbar>
