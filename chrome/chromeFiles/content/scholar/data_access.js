@@ -921,9 +921,11 @@ Scholar.Items = new function(){
 		
 		switch (type){
 			case 'folder':
+			case 'folders':
 				sql += ' AND isFolder=1';
 				break;
 			case 'item':
+			case 'items':
 				sql += ' AND isFolder=0';
 				break;
 		}
