@@ -1114,6 +1114,72 @@ Scholar.Folder.prototype.isEmpty = function(){
 	return !!parseInt(this._empty);
 }
 
+/**
+* Deletes a folder and all descendent folders and items
+**/
+Scholar.Folder.prototype.erase = function(){
+	Scholar.DB.beginTransaction();
+	
+	var descendents = this._getDescendents();
+	var folders = new Array(this._id);
+	
+	for(var i=0, len=descendents.length; i<len; i++){
+		if (!descendents[i]['isFolder']){
+			// Have items delete themselves
+			Scholar.Items.get(descendents[i]['id']).erase();
+		}
+		else {
+			folders.push(descendents[i]['id']);
+		}
+	}
+	
+	Scholar.DB.query('DELETE FROM folders WHERE folderID IN ('
+		+ folders.join() + ')');
+	
+	Scholar.DB.query('DELETE FROM treeStructure WHERE id IN ('
+		+ folders.join() + ') AND isFolder=1');
+	
+	// Clear deleted folder from internal memory
+	Scholar.Folders.unload(folders);
+	
+	Scholar.DB.commitTransaction();
+}
+
+
+/**
+* Returns an array of descendent folders and items (rows of 'id' and 'isFolder')
+**/
+Scholar.Folder.prototype._getDescendents = function(){
+	var toReturn = new Array();
+	
+	var children = Scholar.DB.query('SELECT id, isFolder FROM treeStructure '
+		+ 'WHERE parentFolderID=' + this._id);
+	
+	for(var i=0, len=children.length; i<len; i++){
+		if (parseInt(children[i]['isFolder'])){
+			toReturn.push({
+				id: children[i]['id'],
+				isFolder: 1
+			});
+			
+			var descendents =
+				Scholar.Folders.get(children[i]['id'])._getDescendents();
+			
+			for(var j=0, len=descendents.length; j<len; j++){
+				toReturn.push(descendents[j]);
+			}
+		}
+		else {
+			toReturn.push({
+				id: children[i]['id'],
+				isFolder: 0
+			});
+		}
+	}
+	
+	return toReturn;
+}
+
 
 /*
  * Primary interface for accessing Scholar folders
@@ -1124,6 +1190,7 @@ Scholar.Folders = new function(){
 	
 	this.get = get;
 	this.reloadAll = reloadAll;
+	this.unload = unload;
 	
 	/*
 	 * Returns a Scholar.Folder object for a folderID
@@ -1136,11 +1203,32 @@ Scholar.Folders = new function(){
 	}
 	
 	
+	/**
+	* Clears internal cache and reloads folder data from DB
+	**/
 	function reloadAll(){
 		_folders = new Array();
 		_load();
 	}
 	
+	
+	/**
+	* Clear folder from internal cache (used by Scholar.Folder.erase())
+	*
+	* Can be passed ids as individual parameters or as an array of ids, or both
+	**/
+	function unload(){
+		var ids = Scholar.flattenArguments(arguments);
+		
+		for(var i=0; i<ids.length; i++){
+			delete _folders[ids[i]];
+		}
+	}
+	
+	
+	/**
+	* Loads folder data from DB and adds to internal cache
+	**/
 	function _load(){
 		var sql = "SELECT folderID, folderName, parentFolderID, "
 			+ "(SELECT COUNT(*) FROM treeStructure WHERE "
