@@ -7,7 +7,7 @@
 
 	<script src="editpane.js"/>
 	<vbox id="appcontent">
-			<vbox id="editpane" hidden="true">
+			<vbox id="editpane" hidden="true" position="1">
 				<grid>
 					<columns>
 						<column/>

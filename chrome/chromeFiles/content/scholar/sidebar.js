@@ -18,6 +18,8 @@ Scholar.TreeView.prototype.setTree = function(treebox)
 	var newRows = Scholar.Items.getTreeRows();
 	for(var i = 0; i < newRows.length; i++)
 		this._showItem(newRows[i],  0, i+1); //item ref, isContainerOpen, level
+		
+	this._refreshHashMap();
 }
 
 Scholar.TreeView.prototype.getCellText = function(row, column)
@@ -97,6 +99,7 @@ Scholar.TreeView.prototype.toggleOpenState = function(row)
 	this._treebox.rowCountChanged(row+1, count); //tell treebox to repaint these
 	this._treebox.invalidateRow(row);
 	this._treebox.endUpdateBatch();	
+	this._refreshHashMap();
 }
 
 Scholar.TreeView.prototype.selectionChanged = function()
@@ -170,6 +173,27 @@ Scholar.TreeView.prototype.deleteSelection = function()
 		this._treebox.rowCountChanged(rows[i]-i, -1);
 	}
 	this._treebox.endUpdateBatch();
+	
+	this._refreshHashMap();
+}
+
+Scholar.TreeView.prototype._refreshHashMap = function()
+{	
+	// Create hash map of folder and object ids to row indexes
+	// Author: Dan Stillman
+	
+	this._itemRowMap = new Array();
+	this._folderRowMap = new Array();
+	for(var i=0; i < this.rowCount; i++){
+		if (this.isContainer(i)){
+			this._folderRowMap[this._getItemAtRow(i).getID()] = i;
+		}
+		else {
+			this._itemRowMap[this._getItemAtRow(i).getID()] = i;
+		}
+	}
+	//Scholar.debug(Scholar.varDump(this.folderRowMap));
+	//Scholar.debug(Scholar.varDump(this.objectRowMap));
 
 }
 /*
