@@ -480,9 +480,9 @@ Scholar.Item.prototype.save = function(){
 						+ ' AND orderIndex=' + orderIndex;
 					
 					if (Scholar.DB.valueQuery(sql2)){
-						sql += 'UPDATE itemCreators SET creatorID='
-							+ creatorID + ', creatorTypeID='
-							+ creator['creatorTypeID'] + ', '
+						sql += 'UPDATE itemCreators SET '
+							+ 'creatorID=' + creatorID +', '
+							+ 'creatorTypeID=' + creator['creatorTypeID'] + ' '
 							+ 'WHERE itemID=' + this.getID()
 							+ ' AND orderIndex=' + orderIndex + ";\n";
 					}
