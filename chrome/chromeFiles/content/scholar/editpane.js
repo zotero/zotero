@@ -5,11 +5,13 @@ Scholar.EditPane = new function()
 	var _dynamicCreators;
 	var _itemBeingEdited;
 	var _creatorTypes = Scholar.CreatorTypes.getTypes();
-
+	var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"].getService(Components.interfaces.nsIPromptService);
+	
 	this.init = init;
 	this.editItem = editItem;
 	this.close = close;
 	this.addCreator = addCreator;
+	this.removeCreator = removeCreator;
 	
 	function init()
 	{
@@ -22,7 +24,21 @@ Scholar.EditPane = new function()
 	
 	function editItem(thisItem)
 	{
+		if(!_editpane.hidden)
+		{
+			var flags=promptService.BUTTON_TITLE_SAVE * promptService.BUTTON_POS_0 +
+					  promptService.BUTTON_TITLE_CANCEL * promptService.BUTTON_POS_1 +
+					  promptService.BUTTON_TITLE_DONT_SAVE * promptService.BUTTON_POS_2;
+					  
+			var response = promptService.confirmEx(window,"",
+								  "One or more files have not been saved.",
+								  flags, null, null, null, null, {});
+			if(response == 1)
+				return;
+			else if(response == 0)
+				saveItem();
 
+		}
 		_editpane.hidden = false;
 
 		removeDynamicRows(_dynamicFields);
@@ -52,9 +68,7 @@ Scholar.EditPane = new function()
 		removeDynamicRows(_dynamicCreators);
 				
 		for(var i = 0, len=thisItem.numCreators(); i<len; i++)
-		{
 			addCreator(thisItem.getCreator(i)['firstName'],thisItem.getCreator(i)['lastName'],thisItem.getCreator(i)['creatorTypeID']);
-		}
 	
 		_itemBeingEdited = thisItem;
 	}
@@ -62,38 +76,45 @@ Scholar.EditPane = new function()
 	function close(save)
 	{
 		if(save)
-		{
-			//get fields, call data access methods
-			var valueElements = _dynamicFields.getElementsByTagName("textbox");		//All elements of tagname 'textbox' should be the values of edits
-			for(var i=0; i<valueElements.length; i++)
-				_itemBeingEdited.setField(valueElements[i].getAttribute("fieldName"),valueElements[i].value);
-			
-			var creatorRows = _dynamicCreators.childNodes;
-			for(var i=0; i<creatorRows.length; i++)
-			{
-				var firstname = creatorRows[i].firstChild.value;
-				var lastname = creatorRows[i].firstChild.nextSibling.value;
-				var typeMenu = creatorRows[i].firstChild.nextSibling.nextSibling;
-				var typeID = typeMenu.firstChild.childNodes[typeMenu.selectedIndex].getAttribute('typeid');
-				
-				_itemBeingEdited.setCreator(i, firstname, lastname, typeID);
-			}
-			
-			if(!_itemBeingEdited.getID())  //NEW ITEM
-			{
-				/* get ref to myTreeView?
-				myTreeView._showItem(_itemBeingEdited, 0, myTreeView.rowCount);
-				myTreeView._treebox.rowCountChanged(myTreeView.rowCount-1,1);
-				*/
-			}
-			
-			_itemBeingEdited.save();
-	
-			
-		}
+			saveItem();
+		
 		_itemBeingEdited = null;
 	
 		_editpane.hidden = true;
+	}
+	
+	function saveItem()
+	{
+		//get fields, call data access methods
+		var valueElements = _dynamicFields.getElementsByTagName("textbox");		//All elements of tagname 'textbox' should be the values of edits
+		for(var i=0; i<valueElements.length; i++)
+			_itemBeingEdited.setField(valueElements[i].getAttribute("fieldName"),valueElements[i].value);
+		
+		var numCreatorsBefore = _itemBeingEdited.numCreators();
+		
+		var creatorRows = _dynamicCreators.childNodes;
+		for(var i=0; i < creatorRows.length; i++)
+		{
+			var firstname = creatorRows[i].firstChild.value;
+			var lastname = creatorRows[i].firstChild.nextSibling.value;
+			var typeMenu = creatorRows[i].firstChild.nextSibling.nextSibling;
+			var typeID = typeMenu.firstChild.childNodes[typeMenu.selectedIndex].getAttribute('typeid');
+			
+			_itemBeingEdited.setCreator(i, firstname, lastname, typeID);
+		}
+		
+		for(var i = creatorRows.length; i < numCreatorsBefore; i++)
+			_itemBeingEdited.setCreator(i, false);
+		
+		if(!_itemBeingEdited.getID())  //NEW ITEM
+		{
+			/* get ref to myTreeView?
+			myTreeView._showItem(_itemBeingEdited, 0, myTreeView.rowCount);
+			myTreeView._treebox.rowCountChanged(myTreeView.rowCount-1,1);
+			*/
+		}
+		
+		_itemBeingEdited.save();
 	}
 
 	function getFullFieldList(item)
@@ -141,7 +162,7 @@ Scholar.EditPane = new function()
 		
 		var remove = document.createElement("toolbarbutton");
 		remove.setAttribute("label","x");
-		
+		remove.setAttribute("oncommand","Scholar.EditPane.removeCreator(this.parentNode);");
 		var row = document.createElement("row");
 		row.appendChild(first);
 		row.appendChild(last);
@@ -149,6 +170,11 @@ Scholar.EditPane = new function()
 		row.appendChild(remove);
 		_dynamicCreators.appendChild(row);
 		
+	}
+	
+	function removeCreator(row)
+	{
+		_dynamicCreators.removeChild(row);
 	}
 }
 
