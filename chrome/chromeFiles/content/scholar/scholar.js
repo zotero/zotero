@@ -60,3 +60,9 @@ function deleteSelection()
 		itemsView.deleteSelection();
 	}
 }
+
+function search()
+{
+	//TO DO: reload items tree with a search instead of a root folder
+	alert(document.getElementById('tb-search').value);
+}

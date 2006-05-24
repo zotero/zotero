@@ -18,7 +18,8 @@
 	</statusbar>
 	
 	<menupopup id="menu_ToolsPopup">
-		<menuitem id="tools-scholar"
+		<menuseparator id="scholarSeparator" insertbefore="devToolsSeparator"/>
+		<menuitem id="tools-scholar" insertbefore="devToolsSeparator"
 			oncommand="toOpenWindowByType('scholar:window','chrome://scholar/content/scholar.xul');" label="Scholar"
 			key="key_openScholar"/>
 	</menupopup>

@@ -35,12 +35,14 @@
 	<stringbundle id="scholar-strings" src="chrome://scholar/locale/scholar.properties"/>
 	
 	<command id="cmd_close" oncommand="closeWindow(true);"/>
+	<command id="cmd_delete" oncommand="deleteSelection()"/>
 	<command id="cmd_scholar_newItem" oncommand="newItem(1);"/>
 	<command id="cmd_scholar_newFolder" oncommand="newFolder();"/>
+	<command id="cmd_scholar_search" oncommand="search();"/>
 	
 	<keyset>
-		<key id="delete-cmd" keycode="VK_DELETE" oncommand="deleteSelection()"/>
-		<key id="backspace-cmd" keycode="VK_BACK" oncommand="deleteSelection()"/>
+		<key id="delete-cmd" keycode="VK_DELETE" command="cmd_delete"/>
+		<key id="backspace-cmd" keycode="VK_BACK" command="cmd_delete"/>
 		<key id="key_close" key="&closeCmd.commandkey;" modifiers="accel" command="cmd_close"/>
 	</keyset>
 	
@@ -54,6 +56,10 @@
 			  <menuitem label="&menuitem.newFolder.label;" 
 						accesskey="&menuitem.newFolder.accesskey;"
 						command="cmd_scholar_newFolder"/>
+			  <menuseparator/>
+			  <menuitem label="Import..." disabled="true"/>
+			  <menuitem label="Export..." disabled="true"/>
+			  <menuseparator/>
 			  <menuitem label="&closeCmd.label;" command="cmd_close"
 						key="key_close" accesskey="&closeCmd.accesskey;"/>
 			</menupopup>
@@ -67,7 +73,7 @@
 			  <menuitem id="menu_cut"/>
 			  <menuitem id="menu_copy"/>
 			  <menuitem id="menu_paste"/>
-			  <menuitem id="menu_delete"/>
+			  <menuitem id="menu_delete" command="cmd_delete"/>
 			  <menuseparator/>
 			  <menuitem id="menu_selectAll"/>
 			</menupopup>
@@ -89,18 +95,16 @@
 		</toolbar>	
 		<toolbar>
 			<label value="Search:" control="tb-search"/>
-			<textbox id="tb-search" type="timed" timeout="500" flex="1"/>
+			<textbox id="tb-search" type="timed" timeout="500" flex="1" command="cmd_scholar_search"/>
 		</toolbar>
 	</toolbox>
 	
 	<hbox flex="1">
 		<vbox id="folders-pane" flex="1">
-			<tree 
-				id="folders-tree"
-				treeviewtype="folders"
+			<tree id="folders-tree"
+				treeviewtype="folders" style="-moz-user-focus: ignore;" hidecolumnpicker="true"
 				onselect="folderSelected();"
-				persist="width"
-				flex="1">
+				persist="width" flex="1">
 				<treecols>
 					<treecol
 						id="name_column"
@@ -120,24 +124,23 @@
 				enablecolumndrag="true"
 				treeviewtype="items"
 				onselect="itemSelected();"
-				persist="height"
-				flex="1">
+				persist="height" flex="1">
 				
 				<treecols>
 					<treecol
 						id="title_column"
 						label="&items.title_column;"
-						flex="2"/>
+						flex="4" persist="width ordinal hidden"/>
 					<splitter class="tree-splitter"/>
 					<treecol
 						id="creator_column"
 						label="&items.creator_column;"
-						flex="1"/>
+						flex="1" persist="width ordinal hidden"/>
 					<splitter class="tree-splitter"/>
 					<treecol
 						id="source_column"
 						label="&items.source_column;"
-						flex="1"/>
+						flex="1" persist="width ordinal hidden"/>
 				</treecols>
 		
 				<treechildren/>
@@ -145,20 +148,12 @@
 			<splitter collapse="after" resizebefore="closest" resizeafter="closest" persist="state">
 				<grippy/>
 			</splitter>
-			<tabbox flex="3" persist="height">
-				<tabs>
-					<tab label="Item" selected="true"/>
-					<tab label="Metadeta"/>
-				</tabs>
-				<tabpanels flex="1">
-					<tabpanel>
-						<browser id="view-pane" src="" type="content" flex="1"/>
-					</tabpanel>
-					<tabpanel>
-						<label value="sorry!"/>
-					</tabpanel>
-				</tabpanels>
-			</tabbox>
+			<vbox flex="3" persist="height">
+				<toolbar>
+					<toolbarbutton label="hello"/>
+				</toolbar>
+				<iframe id="view-pane" src="" type="content" flex="1"/>
+			</vbox>
 		</vbox>
 	</hbox>
 	<statusbar id="statusbar">
