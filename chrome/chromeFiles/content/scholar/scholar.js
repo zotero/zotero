@@ -57,7 +57,6 @@ function deleteSelection()
 {
 	if(itemsView && itemsView.selection.count > 0 && confirm("Are you sure you want to delete the selection????"))
 	{
-		//either determine focus or just delete from items...
-		alert("delete not quite implemented yet");
+		itemsView.deleteSelection();
 	}
 }

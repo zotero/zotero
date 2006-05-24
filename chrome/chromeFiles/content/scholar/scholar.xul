@@ -1,15 +1,23 @@
 <?xml version="1.0"?>
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xul-overlay href="chrome://global/content/editMenuOverlay.xul"?>
+<?xul-overlay href="chrome://browser/content/baseMenuOverlay.xul"?>
 <!DOCTYPE window SYSTEM "chrome://scholar/locale/scholar.dtd">
 
 <window
     id="scholar-window"
     title="Scholar"
     orient="vertical"
-    width="1000"
-    height="700"
+    width="1000" height="700" screenX="20" screenY="20"
+    persist="width height screenX screenY sizemode"
+    windowtype="scholar:window"
     onload="Scholar.init(); init();"
     xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+	<script type="application/x-javascript" src="chrome://global/content/globalOverlay.js"/>
+ 	<script type="application/x-javascript" src="chrome://global/content/nsDragAndDrop.js"/>
+	<script type="application/x-javascript" src="chrome://global/content/nsTransferable.js"/>
+	<script type="application/x-javascript" src="chrome://browser/content/utilityOverlay.js"/>
 
     <!-- Include these until we get a global XPCOM object: -->
 	<script src="overlay.js"/>
@@ -19,76 +27,125 @@
     <script src="scholar.js"/>
     <script src="treeView.js"/>
     
+    <stringbundleset id="stringbundleset"/>
+	<commandset id="baseMenuCommandSet" />
+	<keyset id="baseMenuKeyset" />
+	<keyset id="editMenuKeys"/>
+	
 	<stringbundle id="scholar-strings" src="chrome://scholar/locale/scholar.properties"/>
+	
+	<command id="cmd_close" oncommand="closeWindow(true);"/>
+	<command id="cmd_scholar_newItem" oncommand="newItem(1);"/>
+	<command id="cmd_scholar_newFolder" oncommand="newFolder();"/>
+	
 	<keyset>
 		<key id="delete-cmd" keycode="VK_DELETE" oncommand="deleteSelection()"/>
 		<key id="backspace-cmd" keycode="VK_BACK" oncommand="deleteSelection()"/>
+		<key id="key_close" key="&closeCmd.commandkey;" modifiers="accel" command="cmd_close"/>
 	</keyset>
+	
+	<toolbox>
+	    <menubar id="main-menubar">
+		  <menu label="&fileMenu.label;" accesskey="&fileMenu.accesskey;">
+			<menupopup>
+			  <menuitem label="&menuitem.newItem.label;" 
+						accesskey="&menuitem.newItem.accesskey;"
+						command="cmd_scholar_newItem"/>
+			  <menuitem label="&menuitem.newFolder.label;" 
+						accesskey="&menuitem.newFolder.accesskey;"
+						command="cmd_scholar_newFolder"/>
+			  <menuitem label="&closeCmd.label;" command="cmd_close"
+						key="key_close" accesskey="&closeCmd.accesskey;"/>
+			</menupopup>
+		  </menu>
+	
+		  <menu id="menu_edit">
+			<menupopup>
+			  <menuitem id="menu_undo"/>
+			  <menuitem id="menu_redo"/>
+			  <menuseparator/>
+			  <menuitem id="menu_cut"/>
+			  <menuitem id="menu_copy"/>
+			  <menuitem id="menu_paste"/>
+			  <menuitem id="menu_delete"/>
+			  <menuseparator/>
+			  <menuitem id="menu_selectAll"/>
+			</menupopup>
+		  </menu>
+
+#ifdef XP_MACOSX
+		  <menu id="windowMenu"/>
+		  <menupopup id="menu_ToolsPopup"/>
+#endif
+		  <menu id="helpMenu"/>
+		</menubar>
+
+		<toolbar>
+			<toolbarbutton label="&menuitem.newFolder.label;" command="cmd_scholar_newFolder"/>
+			<toolbarbutton id="tb-add" label="&menuitem.newItem.label;" type="menu">
+				<menupopup>
+				</menupopup>
+			</toolbarbutton>
+		</toolbar>	
+		<toolbar>
+			<label value="Search:" control="tb-search"/>
+			<textbox id="tb-search" type="timed" timeout="500" flex="1"/>
+		</toolbar>
+	</toolbox>
+	
 	<hbox flex="1">
 		<vbox id="folders-pane" flex="1">
-			<toolbar>
-				<toolbarbutton label="New Folder..." oncommand="newFolder();"/>
-				<spacer flex="1"/>
-			</toolbar>
-			<separator/>
 			<tree 
 				id="folders-tree"
 				treeviewtype="folders"
 				onselect="folderSelected();"
+				persist="width"
 				flex="1">
 				<treecols>
 					<treecol
 						id="name_column"
-						label="Name"
+						label="&folders.name_column;"
 						flex="1"
 						primary="true"/>
 				</treecols>
 				<treechildren/>
 			</tree>
 		</vbox>
-		<splitter collapse="before" resizebefore="closest" resizeafter="closest">
+		<splitter collapse="before" resizebefore="closest" resizeafter="closest" persist="state">
 			<grippy/>
 		</splitter>
-		<vbox flex="4">
-			<toolbar>
-				<toolbarbutton id="tb-add" label="New Item..." type="menu">
-					<menupopup>
-					</menupopup>
-				</toolbarbutton>
-				<spacer flex="1"/>
-				<label control="tb-search" value="Search:"/><textbox id="tb-search" value=""/>
-			</toolbar>
-			<separator/>
+		<vbox flex="4" persist="width">
 			<tree 
 				id="items-tree" 
 				enablecolumndrag="true"
 				treeviewtype="items"
 				onselect="itemSelected();"
+				persist="height"
 				flex="1">
 				
 				<treecols>
 					<treecol
 						id="title_column"
-						label="&sidebar.items.title_column;"
+						label="&items.title_column;"
 						flex="2"/>
 					<splitter class="tree-splitter"/>
 					<treecol
 						id="creator_column"
-						label="&sidebar.items.creator_column;"
+						label="&items.creator_column;"
 						flex="1"/>
 					<splitter class="tree-splitter"/>
 					<treecol
 						id="source_column"
-						label="&sidebar.items.source_column;"
+						label="&items.source_column;"
 						flex="1"/>
 				</treecols>
 		
 				<treechildren/>
 			</tree>
-			<splitter collapse="after" resizebefore="closest" resizeafter="closest">
+			<splitter collapse="after" resizebefore="closest" resizeafter="closest" persist="state">
 				<grippy/>
 			</splitter>
-			<tabbox flex="3">
+			<tabbox flex="3" persist="height">
 				<tabs>
 					<tab label="Item" selected="true"/>
 					<tab label="Metadeta"/>
@@ -104,4 +161,7 @@
 			</tabbox>
 		</vbox>
 	</hbox>
+	<statusbar id="statusbar">
+		<statuspanel id="statusbar-text" flex="1"/>
+	</statusbar>
 </window>

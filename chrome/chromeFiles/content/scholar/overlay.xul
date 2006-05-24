@@ -4,8 +4,6 @@
 
 <overlay id="scholar"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-
-	<?xul-overlay href="editpane.xul" ?>
 	
 	<script src="overlay.js"/>
 	<script src="db.js"/>
@@ -19,13 +17,9 @@
 		<statusbarpanel onclick="alert(Scholar.testString)" id="my-panel" label="&statusbarpanel.helloworld;"/>
 	</statusbar>
 	
-	<menupopup id="viewSidebarMenu">
-		<menuitem observes="viewScholarSidebar"  />
-	</menupopup>
-	
 	<menupopup id="menu_ToolsPopup">
 		<menuitem id="tools-scholar"
-			oncommand="open('chrome://scholar/content/scholar.xul','scholar-window','chrome, resizable');" label="Scholar"
+			oncommand="toOpenWindowByType('scholar:window','chrome://scholar/content/scholar.xul');" label="Scholar"
 			key="key_openScholar"/>
 	</menupopup>
   
@@ -34,15 +28,4 @@
 			 key="S" 
 			 modifiers="shift accel" />
 	</keyset>
-  
-	<broadcasterset id="mainBroadcasterSet"> 
-		<broadcaster id="viewScholarSidebar" 
-					label="Scholar"
-					autoCheck="false"
-					type="checkbox"
-					group="sidebar"
-					sidebarurl="chrome://scholar/content/sidebar.xul"
-					sidebartitle="Scholar"
-					oncommand="toggleSidebar('viewScholarSidebar');" />
-	</broadcasterset>
 </overlay>

@@ -1,8 +1,26 @@
 <!ENTITY statusbarpanel.helloworld "Hello, World">
 
-<!ENTITY sidebar.items.title_column "Title">
-<!ENTITY sidebar.items.creator_column "Creator">
-<!ENTITY sidebar.items.source_column "Source">
-<!ENTITY sidebar.creators.firstname_column "First name">
-<!ENTITY sidebar.creators.lastname_column "Last name">
-<!ENTITY sidebar.creators.type_column "Type">
+<!ENTITY items.title_column "Title">
+<!ENTITY items.creator_column "Creator">
+<!ENTITY items.source_column "Source">
+
+<!ENTITY folders.name_column "Name">
+
+<!ENTITY creators.firstname "First name">
+<!ENTITY creators.lastname "Last name">
+<!ENTITY creators.type "Type">
+
+<!ENTITY fileMenu.label                 "File">
+<!ENTITY fileMenu.accesskey             "F">
+<!ENTITY viewMenu.label                 "View">
+<!ENTITY viewMenu.accesskey             "V">
+
+<!ENTITY menuitem.newItem.label    "New Item...">
+<!ENTITY menuitem.newItem.accesskey "n">
+<!ENTITY menuitem.newFolder.label        "New Folder...">
+<!ENTITY menuitem.newFolder.accesskey    "o">
+
+
+<!ENTITY closeCmd.label "Close">
+<!ENTITY closeCmd.accesskey "C">
+<!ENTITY closeCmd.commandkey "W">
