@@ -6,8 +6,8 @@
     id="scholar-window"
     title="Scholar"
     orient="vertical"
-    width="800"
-    height="600"
+    width="1000"
+    height="700"
     onload="Scholar.init(); init();"
     xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
@@ -20,19 +20,17 @@
     <script src="treeView.js"/>
     
 	<stringbundle id="scholar-strings" src="chrome://scholar/locale/scholar.properties"/>
-    
-	<toolbar>
-		<toolbarbutton label="New Folder..." oncommand="newFolder();"/>
-		<spacer flex="1"/>
-		<toolbarbutton id="tb-add" label="New Item..." type="menu">
-			<menupopup>
-			</menupopup>
-		</toolbarbutton>
-		<spacer flex="1"/>
-		<label control="tb-search" value="Search:"/><textbox id="tb-search" value=""/>
-	</toolbar>
+	<keyset>
+		<key id="delete-cmd" keycode="VK_DELETE" oncommand="deleteSelection()"/>
+		<key id="backspace-cmd" keycode="VK_BACK" oncommand="deleteSelection()"/>
+	</keyset>
 	<hbox flex="1">
 		<vbox id="folders-pane" flex="1">
+			<toolbar>
+				<toolbarbutton label="New Folder..." oncommand="newFolder();"/>
+				<spacer flex="1"/>
+			</toolbar>
+			<separator/>
 			<tree 
 				id="folders-tree"
 				treeviewtype="folders"
@@ -51,11 +49,21 @@
 		<splitter collapse="before" resizebefore="closest" resizeafter="closest">
 			<grippy/>
 		</splitter>
-		<vbox flex="3">
+		<vbox flex="4">
+			<toolbar>
+				<toolbarbutton id="tb-add" label="New Item..." type="menu">
+					<menupopup>
+					</menupopup>
+				</toolbarbutton>
+				<spacer flex="1"/>
+				<label control="tb-search" value="Search:"/><textbox id="tb-search" value=""/>
+			</toolbar>
+			<separator/>
 			<tree 
 				id="items-tree" 
 				enablecolumndrag="true"
-				treeviewtype="items" 
+				treeviewtype="items"
+				onselect="itemSelected();"
 				flex="1">
 				
 				<treecols>
@@ -80,7 +88,20 @@
 			<splitter collapse="after" resizebefore="closest" resizeafter="closest">
 				<grippy/>
 			</splitter>
-			<tree id="edit-pane" flex="2"/>
+			<tabbox flex="3">
+				<tabs>
+					<tab label="Item" selected="true"/>
+					<tab label="Metadeta"/>
+				</tabs>
+				<tabpanels flex="1">
+					<tabpanel>
+						<browser id="view-pane" src="" type="content" flex="1"/>
+					</tabpanel>
+					<tabpanel>
+						<label value="sorry!"/>
+					</tabpanel>
+				</tabpanels>
+			</tabbox>
 		</vbox>
 	</hbox>
 </window>

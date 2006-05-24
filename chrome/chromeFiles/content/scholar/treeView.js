@@ -130,9 +130,6 @@ Scholar.TreeView.prototype.deleteSelection = function()
 {
 	if(this.selection.count == 0)
 		return;
-	
-	if(!confirm("Are you sure you want to delete the selected item"+(this.selection.count > 1 ? "s" : "")+"?"))
-		return;
 
 	//collapse open folders
 	for(var i=0; i<this.rowCount; i++)

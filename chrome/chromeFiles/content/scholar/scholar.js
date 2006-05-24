@@ -21,12 +21,12 @@ function init()
 
 function newItem(typeID)
 {
-
+	alert("new item of type: "+typeID);
 }
 
 function newFolder()
 {
-
+	alert("new folder");
 }
 
 function folderSelected()
@@ -46,4 +46,18 @@ function folderSelected()
 		document.getElementById('items-tree').view = null;
 	}
 	
+}
+
+function itemSelected()
+{
+	document.getElementById('view-pane').setAttribute('src','http://www.apple.com/');
+}
+
+function deleteSelection()
+{
+	if(itemsView && itemsView.selection.count > 0 && confirm("Are you sure you want to delete the selection????"))
+	{
+		//either determine focus or just delete from items...
+		alert("delete not quite implemented yet");
+	}
 }
