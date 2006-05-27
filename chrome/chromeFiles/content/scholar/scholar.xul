@@ -11,7 +11,7 @@
     width="1000" height="700" screenX="20" screenY="20"
     persist="width height screenX screenY sizemode"
     windowtype="scholar:window"
-    onload="Scholar.init(); init();"
+    onload="init();"
     xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
 	<script type="application/x-javascript" src="chrome://global/content/globalOverlay.js"/>
@@ -19,20 +19,15 @@
 	<script type="application/x-javascript" src="chrome://global/content/nsTransferable.js"/>
 	<script type="application/x-javascript" src="chrome://browser/content/utilityOverlay.js"/>
 
-    <!-- Include these until we get a global XPCOM object: -->
-	<script src="overlay.js"/>
-	<script src="db.js"/>
-	<script src="data_access.js"/>
+    <!-- Include the global XPCOM object -->
+	<script src="include.js"/>
 	
     <script src="scholar.js"/>
     <script src="treeView.js"/>
     
-    <stringbundleset id="stringbundleset"/>
 	<commandset id="baseMenuCommandSet" />
 	<keyset id="baseMenuKeyset" />
 	<keyset id="editMenuKeys"/>
-	
-	<stringbundle id="scholar-strings" src="chrome://scholar/locale/scholar.properties"/>
 	
 	<command id="cmd_close" oncommand="closeWindow(true);"/>
 	<command id="cmd_delete" oncommand="deleteSelection()"/>

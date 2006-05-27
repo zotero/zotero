@@ -13,7 +13,7 @@ function init()
 	for(var i = 0; i<itemTypes.length; i++)
 	{
 		var menuitem = document.createElement("menuitem");
-		menuitem.setAttribute("label",Scholar.LocalizedStrings.getString("itemTypes."+itemTypes[i]['name']));
+		menuitem.setAttribute("label", Scholar.getString("itemTypes."+itemTypes[i]['name']));
 		menuitem.setAttribute("oncommand","newItem("+itemTypes[i]['id']+")");
 		addMenu.appendChild(menuitem);
 	}

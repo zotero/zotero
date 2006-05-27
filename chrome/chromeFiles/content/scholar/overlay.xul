@@ -5,17 +5,20 @@
 <overlay id="scholar"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 	
-	<script src="overlay.js"/>
-	<script src="db.js"/>
-	<script src="data_access.js"/>
-	
-	<stringbundleset id="stringbundleset">
-		<stringbundle id="scholar-strings" src="chrome://scholar/locale/scholar.properties"/>
-	</stringbundleset>
+    <!-- Include the global XPCOM object -->
+	<script src="include.js"/>
 	
 	<statusbar id="status-bar">
-		<statusbarpanel onclick="alert(Scholar.testString)" id="my-panel" label="&statusbarpanel.helloworld;"/>
+		<statusbarpanel id="scholar-load-status" label="Scholar is NOT loaded"/>
 	</statusbar>
+	
+	<script>
+	window.addEventListener('load', function(e){
+		if (Scholar){
+			document.getElementById('scholar-load-status').setAttribute('label', 'Scholar is loaded');
+		}
+	}, false);
+	</script>
 	
 	<menupopup id="menu_ToolsPopup">
 		<menuseparator id="scholarSeparator" insertbefore="devToolsSeparator"/>

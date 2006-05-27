@@ -11,29 +11,42 @@ const SCHOLAR_CONFIG = {
  * Core functions
  */
 var Scholar = new function(){
-	var _initialized = false
+	var _initialized = false;
+	var _localizedStringBundle;
 	
-	this.testString = 'Sidebar is not registered';
-	this.LocalizedStrings;
+	// Privileged (public) methods
 	this.init = init;
 	this.debug = debug;
 	this.varDump = varDump;
+	this.getString = getString;
 	this.flattenArguments = flattenArguments;
 	this.join = join;
+	
 	this.Hash = Hash;
 	
 	/*
 	 * Initialize the extension
 	 */
 	function init(){
-		this.LocalizedStrings = document.getElementById('scholar-strings');
-		
-		if (!_initialized){
-			Scholar.DB.updateSchema();
-			_initialized = true;
-			return true;
+		if (_initialized){
+			return false;
 		}
-		return false;
+		
+		Scholar.DB.updateSchema();
+		
+		// Load in the localization stringbundle for use by getString(name)
+		var src = 'chrome://scholar/locale/scholar.properties';
+		var localeService =
+			Components.classes["@mozilla.org/intl/nslocaleservice;1"]
+			.getService(Components.interfaces.nsILocaleService);
+		var appLocale = localeService.getApplicationLocale();
+		var stringBundleService =
+			Components.classes["@mozilla.org/intl/stringbundle;1"]
+			.getService(Components.interfaces.nsIStringBundleService);
+		_localizedStringBundle = stringBundleService.createBundle(src, appLocale);
+		
+		_initialized = true;
+		return true;
 	}
 	
 	
@@ -114,6 +127,11 @@ var Scholar = new function(){
 			dumped_text = "===>"+arr+"<===("+typeof(arr)+")";
 		}
 		return dumped_text;
+	}
+	
+	
+	function getString(name){
+		return _localizedStringBundle.GetStringFromName(name);
 	}
 	
 	
@@ -226,5 +244,3 @@ Scholar.Hash.prototype.remove = function(in_key){
 Scholar.Hash.prototype.has = function(in_key){
 	return typeof(this.items[in_key]) != 'undefined';
 }
-
-window.addEventListener("load", function(e) { Scholar.init(e); }, false);
