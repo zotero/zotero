@@ -16,16 +16,16 @@ var ScholarWrapped = this;
 
 Cc["@mozilla.org/moz/jssubscript-loader;1"]
 	.getService(Ci.mozIJSSubScriptLoader)
-	.loadSubScript("chrome://scholar/content/overlay.js");
+	.loadSubScript("chrome://scholar/content/xpcom/scholar.js");
 
 
 Cc["@mozilla.org/moz/jssubscript-loader;1"]
 	.getService(Ci.mozIJSSubScriptLoader)
-	.loadSubScript("chrome://scholar/content/db.js");
+	.loadSubScript("chrome://scholar/content/xpcom/db.js");
 
 Cc["@mozilla.org/moz/jssubscript-loader;1"]
 	.getService(Ci.mozIJSSubScriptLoader)
-	.loadSubScript("chrome://scholar/content/data_access.js");
+	.loadSubScript("chrome://scholar/content/xpcom/data_access.js");
 
 /********************************************************************/
 
