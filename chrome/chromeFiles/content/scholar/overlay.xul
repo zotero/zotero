@@ -8,6 +8,85 @@
     <!-- Include the global XPCOM object -->
 	<script src="include.js"/>
 	
+	<script src="overlay.js"/>
+    <script src="itemTreeView.js"/>
+    <script src="folderTreeView.js"/>
+	
+	<command id="cmd_scholar_newItem" oncommand="ScholarPane.newItem(1);"/>
+	<command id="cmd_scholar_newFolder" oncommand="ScholarPane.newFolder();"/>
+	<command id="cmd_scholar_search" oncommand="ScholarPane.search();"/>
+
+	<vbox id="appcontent">
+		<vbox id="scholar-pane" position="1" persist="height">
+			<hbox flex="1">				
+				<tree id="folders-tree"
+					treeviewtype="folders" style="-moz-user-focus: ignore;" hidecolumnpicker="true"
+					onselect="ScholarPane.folderSelected();"
+					persist="width" flex="1">
+					<treecols>
+						<treecol
+							id="name_column"
+							label="&folders.name_column;"
+							flex="1"
+							primary="true"/>
+					</treecols>
+					<treechildren/>
+				</tree>		
+				<splitter resizebefore="closest" resizeafter="closest"/>
+				<tree 
+					id="items-tree" 
+					enableColumnDrag="true"
+					onselect="ScholarPane.itemSelected();"
+					persist="width" flex="5">
+					<treecols>
+						<treecol
+							id="title"
+							label="&items.title_column;"
+							flex="4" persist="width ordinal hidden"/>
+						<splitter class="tree-splitter"/>
+						<treecol
+							id="firstCreator"
+							label="&items.creator_column;"
+							flex="1" persist="width ordinal hidden"/>
+						<splitter class="tree-splitter"/>
+						<treecol
+							id="source"
+							label="&items.source_column;"
+							flex="1" persist="width ordinal hidden"/>
+						<splitter class="tree-splitter"/>
+						<treecol
+							id="rights" hidden="true"
+							label="&items.rights_column;"
+							flex="1" persist="width ordinal hidden"/>
+						<splitter class="tree-splitter"/>
+						<treecol
+							id="dateAdded" hidden="true"
+							label="&items.dateAdded_column;"
+							flex="1" persist="width ordinal hidden"/>
+						<splitter class="tree-splitter"/>
+						<treecol
+							id="dateModified" hidden="true"
+							label="&items.dateModified_column;"
+							flex="1" persist="width ordinal hidden"/>
+					</treecols>
+			
+					<treechildren/>
+				</tree>
+			</hbox>
+			<toolbar>
+				<toolbarbutton label="&menuitem.newFolder.label;" command="cmd_scholar_newFolder"/>
+				<toolbarbutton id="tb-add" label="&menuitem.newItem.label;" type="menu">
+					<menupopup>
+					</menupopup>
+				</toolbarbutton>
+				<spacer flex="1"/>
+				<label value="Search:" control="tb-search"/>
+				<textbox id="tb-search" type="timed" timeout="500" width="150" command="cmd_scholar_search"/>
+			</toolbar>
+		</vbox>
+		<splitter resizebefore="closest" resizeafter="closest" position="2"/>
+	</vbox>
+	
 	<statusbar id="status-bar">
 		<statusbarpanel id="scholar-load-status" label="Scholar is NOT loaded"/>
 	</statusbar>
@@ -23,7 +102,7 @@
 	<menupopup id="menu_ToolsPopup">
 		<menuseparator id="scholarSeparator" insertbefore="devToolsSeparator"/>
 		<menuitem id="tools-scholar" insertbefore="devToolsSeparator"
-			oncommand="toOpenWindowByType('scholar:window','chrome://scholar/content/organizeWindow.xul');" label="Scholar"
+			oncommand="document.getElementById('scholar-pane').collapsed='false';" label="Scholar"
 			key="key_openScholar"/>
 	</menupopup>
   
