@@ -2,7 +2,7 @@
 <RDF:RDF xmlns:RDF="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
          xmlns="http://www.mozilla.org/2004/em-rdf#">
 <!-- Firefox Scholar Extension -->
-<RDF:Description about="urn:mozilla:extension:{e007c81c-eb2a-4e1d-b381-d25a45cd11ed}">
+<RDF:Description about="urn:mozilla:extension:scholar@chnm.gmu.edu">
   <updates>
     <RDF:Seq>
       <RDF:li>

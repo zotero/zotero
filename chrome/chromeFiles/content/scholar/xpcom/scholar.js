@@ -1,5 +1,5 @@
 const SCHOLAR_CONFIG = {
-	GUID: '{e007c81c-eb2a-4e1d-b381-d25a45cd11ed}',
+	GUID: 'scholar@chnm.gmu.edu',
 	DB_FILE: 'scholar.sqlite',
 	DB_VERSION: 10, // must match version at top of schema.sql
 	DB_REBUILD: false, // erase DB and recreate from schema
