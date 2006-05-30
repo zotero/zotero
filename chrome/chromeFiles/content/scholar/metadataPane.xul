@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+
+<overlay 
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	
+	<script src="metadataPane.js"/>
+	
+	<vbox id="metadata-pane">
+		<grid>
+			<columns>
+				<column/>
+				<column flex="1"/>
+			</columns>
+			
+			<rows id="editpane-dynamic-fields">
+			</rows>
+		</grid>
+		<grid>
+			<columns>
+				<column flex="1"/>
+				<column flex="1"/>
+				<column/>
+				<column/>
+			</columns>
+			
+			<rows id="editpane-dynamic-creators">
+			</rows>
+		</grid>
+		<spacer flex="1"/>
+		<toolbar>
+			<toolbarbutton id="metadata-pane-edit-button" label="Edit" oncommand="MetadataPane.toggleEdit()"/>
+			<spacer flex="1" />
+			<toolbarbutton id="tb-creator-add" label="Add Creator" oncommand="MetadataPane.addCreator()" disabled="true"/>
+
+		</toolbar>
+	</vbox>
+	
+</overlay>

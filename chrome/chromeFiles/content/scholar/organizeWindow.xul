@@ -13,6 +13,8 @@
     windowtype="scholar:window"
     onload="init();"
     xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+    
+    <?xul-overlay href="metadataPane.xul"?>
 
 	<script type="application/x-javascript" src="chrome://global/content/globalOverlay.js"/>
  	<script type="application/x-javascript" src="chrome://global/content/nsDragAndDrop.js"/>
@@ -116,7 +118,7 @@
 		<vbox flex="4" persist="width">
 			<tree 
 				id="items-tree" 
-				enablecolumndrag="true"
+				enableColumnDrag="true"
 				onselect="itemSelected();"
 				persist="height" flex="1">
 				
@@ -157,12 +159,18 @@
 			<splitter collapse="after" resizebefore="closest" resizeafter="closest" persist="state">
 				<grippy/>
 			</splitter>
-			<vbox flex="3" persist="height">
-				<toolbar>
-					<toolbarbutton label="hello"/>
-				</toolbar>
-				<iframe id="view-pane" src="" type="content" flex="1"/>
-			</vbox>
+			<tabbox id="item-tabs" flex="3" persist="height" hidden="true">
+				<tabs onselect="itemSelected();">
+					<tab label="Item"/>
+					<tab label="Metadata"/>
+					<tab label="Notes"/>
+				</tabs>
+				<tabpanels flex="1">
+					<iframe id="view-pane" src="" type="content" flex="1"/>
+					<vbox id="metadata-pane"/>
+					<tabpanel/>
+				</tabpanels>
+			</tabbox>
 		</vbox>
 	</hbox>
 	<statusbar id="statusbar">

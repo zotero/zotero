@@ -1,5 +1,6 @@
 var foldersView;
 var itemsView;
+var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"].getService(Components.interfaces.nsIPromptService);
 
 function init()
 {
@@ -50,19 +51,54 @@ function folderSelected()
 
 function itemSelected()
 {
-	if(itemsView.selection.count == 1)
+	var tabs = document.getElementById('item-tabs');
+	var editButton = document.getElementById('metadata-pane-edit-button');
+	
+	if(editButton.checked)
+	{
+		var flags=promptService.BUTTON_TITLE_SAVE * promptService.BUTTON_POS_0 +
+				  promptService.BUTTON_TITLE_CANCEL * promptService.BUTTON_POS_1 +
+				  promptService.BUTTON_TITLE_DONT_SAVE * promptService.BUTTON_POS_2;
+				  
+		var response = promptService.confirmEx(window,"",
+							  "Do you want to save the changes?", // to '"+_itemBeingEdited.getField("title")+"'
+							  flags, null, null, null, null, {});
+		if(response == 1)
+			return;
+		else if(response == 0)
+			MetadataPane.toggleEdit();
+		else
+			editButton.checked = false;
+	}
+	
+	if(itemsView && itemsView.selection.count == 1)
 	{
 		var item = itemsView._getItemAtRow(itemsView.selection.currentIndex);
-		document.getElementById('view-pane').setAttribute('src','http://www.google.com/search?q='+encodeURIComponent('"'+item.getField("title")+'"')+'&btnI');
+		tabs.hidden=false;
+		
+		if(tabs.firstChild.selectedIndex == 0)
+		{
+			document.getElementById('view-pane').setAttribute('src','http://www.google.com/search?q='+encodeURIComponent('"'+item.getField("title")+'"')+'&btnI');
+		}
+		else if(tabs.firstChild.selectedIndex == 1)
+		{
+			MetadataPane.viewItem(item);
+		}
+		else
+		{
+			//do notes
+		}
+	}
+	else
+	{
+		tabs.hidden=true;
 	}
 }
 
 function deleteSelection()
 {
-	if(itemsView && itemsView.selection.count > 0 && confirm("Are you sure you want to delete the selection????"))
-	{
+	if(itemsView && itemsView.selection.count > 0 && confirm("Are you sure you want to delete the selected items?"))
 		itemsView.deleteSelection();
-	}
 }
 
 function search()
