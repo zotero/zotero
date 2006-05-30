@@ -5,7 +5,7 @@ function init()
 {
 	foldersView = new Scholar.TreeView(0); //pass params here?
 	document.getElementById('folders-tree').view = foldersView;
-	itemsView = new Scholar.TreeView(0);
+	itemsView = new Scholar.ItemTreeView(0);
 	document.getElementById('items-tree').view = itemsView;
 
 	var addMenu = document.getElementById('tb-add').firstChild;
@@ -33,12 +33,12 @@ function folderSelected()
 {
 	if(foldersView.selection.count == 1 && foldersView.selection.currentIndex != -1)
 	{
-		itemsView = new Scholar.TreeView(foldersView._getItemAtRow(foldersView.selection.currentIndex).getID());
+		itemsView = new Scholar.ItemTreeView(foldersView._getItemAtRow(foldersView.selection.currentIndex).getID());
 		document.getElementById('items-tree').view = itemsView;
 	}
 	else if(foldersView.selection.count == 0)
 	{
-		itemsView = new Scholar.TreeView(0);
+		itemsView = new Scholar.ItemTreeView(0);
 		document.getElementById('items-tree').view = itemsView;
 	}
 	else
@@ -50,7 +50,11 @@ function folderSelected()
 
 function itemSelected()
 {
-	document.getElementById('view-pane').setAttribute('src','http://www.apple.com/');
+	if(itemsView.selection.count == 1)
+	{
+		var item = itemsView._getItemAtRow(itemsView.selection.currentIndex);
+		document.getElementById('view-pane').setAttribute('src','http://www.google.com/search?q='+encodeURIComponent('"'+item.getField("title")+'"')+'&btnI');
+	}
 }
 
 function deleteSelection()

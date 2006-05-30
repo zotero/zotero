@@ -23,7 +23,8 @@
 	<script src="include.js"/>
 	
     <script src="scholar.js"/>
-    <script src="treeView.js"/>
+    <script src="itemTreeView.js"/>
+    <script src="folderTreeView.js"/>
     
 	<commandset id="baseMenuCommandSet" />
 	<keyset id="baseMenuKeyset" />
@@ -87,10 +88,9 @@
 				<menupopup>
 				</menupopup>
 			</toolbarbutton>
-		</toolbar>	
-		<toolbar>
+			<spacer flex="1"/>
 			<label value="Search:" control="tb-search"/>
-			<textbox id="tb-search" type="timed" timeout="500" flex="1" command="cmd_scholar_search"/>
+			<textbox id="tb-search" type="timed" timeout="500" width="150" command="cmd_scholar_search"/>
 		</toolbar>
 	</toolbox>
 	
@@ -117,24 +117,38 @@
 			<tree 
 				id="items-tree" 
 				enablecolumndrag="true"
-				treeviewtype="items"
 				onselect="itemSelected();"
 				persist="height" flex="1">
 				
 				<treecols>
 					<treecol
-						id="title_column"
+						id="title"
 						label="&items.title_column;"
 						flex="4" persist="width ordinal hidden"/>
 					<splitter class="tree-splitter"/>
 					<treecol
-						id="creator_column"
+						id="firstCreator"
 						label="&items.creator_column;"
 						flex="1" persist="width ordinal hidden"/>
 					<splitter class="tree-splitter"/>
 					<treecol
-						id="source_column"
+						id="source"
 						label="&items.source_column;"
+						flex="1" persist="width ordinal hidden"/>
+					<splitter class="tree-splitter"/>
+					<treecol
+						id="rights" hidden="true"
+						label="&items.rights_column;"
+						flex="1" persist="width ordinal hidden"/>
+					<splitter class="tree-splitter"/>
+					<treecol
+						id="dateAdded" hidden="true"
+						label="&items.dateAdded_column;"
+						flex="1" persist="width ordinal hidden"/>
+					<splitter class="tree-splitter"/>
+					<treecol
+						id="dateModified" hidden="true"
+						label="&items.dateModified_column;"
 						flex="1" persist="width ordinal hidden"/>
 				</treecols>
 		
