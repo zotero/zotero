@@ -22,7 +22,7 @@
     <!-- Include the global XPCOM object -->
 	<script src="include.js"/>
 	
-    <script src="scholar.js"/>
+    <script src="organizeWindow.js"/>
     <script src="itemTreeView.js"/>
     <script src="folderTreeView.js"/>
     
