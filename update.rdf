@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<RDF:RDF xmlns:RDF="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns="http://www.mozilla.org/2004/em-rdf#">
+<!-- Firefox Scholar Extension -->
+<RDF:Description about="urn:mozilla:extension:{e007c81c-eb2a-4e1d-b381-d25a45cd11ed}">
+  <updates>
+    <RDF:Seq>
+      <RDF:li>
+        <RDF:Description>
+          <version>0.1pre1-SVN</version>
+          <targetApplication>
+            <RDF:Description>
+              <id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</id>
+              <minVersion>2.0a1+</minVersion>
+              <maxVersion>3.0+</maxVersion>
+              <updateLink>http://chnm.gmu.edu/firefoxscholar/download/scholar.xpi</updateLink>
+            </RDF:Description>
+          </targetApplication>
+        </RDF:Description>
+      </RDF:li>
+    </RDF:Seq>
+  </updates>
+</RDF:Description>
+</RDF:RDF>

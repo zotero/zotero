@@ -1,18 +1,31 @@
 <?xml version="1.0"?>
-<RDF:RDF xmlns:em="http://www.mozilla.org/2004/em-rdf#"
-         xmlns:NC="http://home.netscape.com/NC-rdf#"
-         xmlns:RDF="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
-  <RDF:Description RDF:about="rdf:#$V4RG2"
-                   em:id="{ec8030f7-c20a-464f-9b0e-13a3a9e97384}"
-		   em:minVersion="1.6a1"
-		   em:maxVersion="3.0+" />
-  <RDF:Description RDF:about="urn:mozilla:install-manifest"
-                   em:id="scholar@chnm"
-                   em:name="Firefox Scholar"
-                   em:version="1.0"
-                   em:creator="Center for History and New Media, George Mason University"
-                   em:homepageURL="http://chnm.gmu.edu"
-                   em:optionsURL="chrome://scholar/content/preferences.xul">
-    <em:targetApplication RDF:resource="rdf:#$V4RG2"/>
-  </RDF:Description>
-</RDF:RDF>
+<RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" 
+     xmlns:em="http://www.mozilla.org/2004/em-rdf#">
+
+  <Description about="urn:mozilla:install-manifest">
+  
+    <em:id>{e007c81c-eb2a-4e1d-b381-d25a45cd11ed}</em:id>
+    <em:name>Firefox Scholar</em:name>
+    <em:version>0.1pre1-SVN</em:version>
+    <em:description>This is a one-line description of Firefox Scholar.</em:description>
+    <em:creator>Center for History and New Media, George Mason University</em:creator>
+    <!--<em:contributor>...</em:contributor>-->
+    <em:homepageURL>http://chnm.gmu.edu</em:homepageURL>
+    <em:optionsURL>chrome://scholar/content/preferences.xul</em:optionsURL>
+    <!--<em:aboutURL>chrome://scholar/content/about.xul</em:aboutURL>-->
+    <!--<em:iconURL>chrome://scholar/skin/mainicon.png</em:iconURL>-->
+    <em:updateURL>http://chnm.gmu.edu/firefoxscholar/download/update-svn.rdf</em:updateURL>
+    <em:type>2</em:type> <!-- type=extension --> 
+    
+    <!-- Firefox -->
+    <em:targetApplication>
+      <Description>
+        <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
+        <em:minVersion>2.0a1+</em:minVersion>
+        <em:maxVersion>3.0+</em:maxVersion>
+      </Description>
+    </em:targetApplication>
+  
+  </Description>
+
+</RDF>
