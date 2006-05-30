@@ -1,6 +1,6 @@
 content	scholar				chrome/chromeFiles/content/scholar/
 locale	scholar	en-US		chrome/chromeFiles/locale/en-US/scholar/
-skin		scholar	default		chrome/chromeFiles/skin/default/scholar/
+skin	scholar	default		chrome/chromeFiles/skin/default/scholar/
 
 overlay	chrome://browser/content/browser.xul	chrome://scholar/content/overlay.xul
 style	chrome://browser/content/browser.xul	chrome://scholar/skin/scholar.css
