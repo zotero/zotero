@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://scholar/skin/scholar.css" type="text/css"?>
+<?xml-stylesheet href="chrome://scholar/skin/view.css" type="text/css"?>
+
+<page
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	<script src="view.js"/>
+	<script src="include.js"/>
+	
+	<toolbar id="view-toolbar">
+		<toolbarbutton class="toggler" id="tb-view" label="View" checked="true"				oncommand="toggle('view')"/>
+		<toolbarbutton class="toggler" id="tb-metadata" label="Metadata" checked="true"		oncommand="toggle('metadata')"/>
+		<toolbarbutton class="toggler" id="tb-notes" label="Notes" checked="true"			oncommand="toggle('notes')"/>
+	</toolbar>
+	<stack flex="1">
+		<browser id="view" flex="1"/>
+		<vbox>
+			<stack id="metadata">
+				<box id="metadata-background"/>
+				<vbox id="metadata-pane">
+					<textbox value="Title"/>
+					<textbox value="Rights"/>
+					<textbox value="Etc."/>
+					<textbox value="Etc."/>
+					<textbox value="Etc."/>
+				</vbox>
+			</stack>
+			<stack id="notes">
+				<box id="notes-background"/>
+				<vbox id="notes-pane">
+					<textbox value="Notes.... lorem ispum delorum..." multiline="true" flex="1"/>
+				</vbox>
+			</stack>
+		</vbox>
+	</stack>
+</page>

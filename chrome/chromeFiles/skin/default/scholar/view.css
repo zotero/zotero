@@ -1,0 +1,50 @@
+#view-toolbar
+{
+	
+}
+
+#view-toolbar .toggler
+{
+	
+}
+
+#metadata-background
+{
+	position: relative;
+	margin-top: 10px;
+	left: 10px;
+	width: 400px;
+	height: 100px;
+	background-color: black;
+	opacity: 0.4;
+}
+
+#metadata-pane
+{
+	position: relative;
+	margin-top: 10px;
+	left: 10px;
+	width: 400px;
+	height: 100px;
+	overflow: auto;
+}
+
+#notes-background
+{
+	position: relative;
+	margin-top: 10px;
+	left: 10px;
+	width: 400px;
+	height: 100px;
+	background-color: black;
+	opacity: 0.4;
+}
+
+#notes-pane
+{
+	position: relative;
+	margin-top: 10px;
+	left: 10px;
+	width: 400px;
+	height: 100px;
+}

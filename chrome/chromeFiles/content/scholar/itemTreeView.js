@@ -22,7 +22,23 @@ Scholar.ItemTreeView.prototype.setTree = function(treebox)
 Scholar.ItemTreeView.prototype.getCellText = function(row, column)
 {
 	var obj = this._getItemAtRow(row);
-	return obj.getField(column.id);
+	var val = obj.getField(column.id);
+	
+	if(column.id == 'dateAdded' || column.id == 'dateModified')		//this is not so much that we will use this format for date, but a simple template for later revisions.
+	{
+		//
+		var d = val.split(' ');
+		var date = d[0].split('-');
+		var time = d[1].split('-');
+		
+		var myDate = new Date();
+		myDate.setFullYear(date[0],date[1]-1,date[2]);
+		
+		val = myDate.getMonth()+1 + '/' + myDate.getDate() + '/' + myDate.getFullYear();
+	}
+	
+	return val;
+	
 }
 
 

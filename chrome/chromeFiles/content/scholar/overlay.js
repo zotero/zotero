@@ -68,7 +68,7 @@ var ScholarPane = new function()
 		{
 			var item = itemsView._getItemAtRow(itemsView.selection.currentIndex);
 			
-			document.getElementById('content').loadURI('chrome://scholar/content/view.xul?url='+encodeURIComponent('http://www.google.com/search?q='+encodeURIComponent('"'+item.getField("title")+'"')+'&btnI'));
+			document.getElementById('content').loadURI('chrome://scholar/content/view.xul?id='+encodeURIComponent(item.getID()));
 		}
 		else
 		{
