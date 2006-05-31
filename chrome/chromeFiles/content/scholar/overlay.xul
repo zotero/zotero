@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
 <?xml-stylesheet href="chrome://scholar/skin/scholar.css" type="text/css"?>
+<?xml-stylesheet href="chrome://scholar/skin/overlay.css" type="text/css"?>
 <!DOCTYPE window SYSTEM "chrome://scholar/locale/scholar.dtd">
 
 <overlay id="scholar"
@@ -20,7 +21,7 @@
 		<vbox id="scholar-pane" position="1" persist="height">
 			<hbox flex="1">				
 				<tree id="folders-tree"
-					treeviewtype="folders" style="-moz-user-focus: ignore;" hidecolumnpicker="true"
+					style="-moz-user-focus: ignore;" hidecolumnpicker="true"
 					onselect="ScholarPane.folderSelected();"
 					persist="width" flex="1">
 					<treecols>
@@ -32,7 +33,7 @@
 					</treecols>
 					<treechildren/>
 				</tree>		
-				<splitter resizebefore="closest" resizeafter="closest"/>
+				<splitter id="scholar-tree-splitter" resizebefore="closest" resizeafter="closest"/>
 				<tree 
 					id="items-tree" 
 					enableColumnDrag="true"
@@ -73,7 +74,7 @@
 					<treechildren/>
 				</tree>
 			</hbox>
-			<toolbar>
+			<toolbar id="scholar-toolbar">
 				<toolbarbutton label="&menuitem.newFolder.label;" command="cmd_scholar_newFolder"/>
 				<toolbarbutton id="tb-add" label="&menuitem.newItem.label;" type="menu">
 					<menupopup>
@@ -81,10 +82,10 @@
 				</toolbarbutton>
 				<spacer flex="1"/>
 				<label value="Search:" control="tb-search"/>
-				<textbox id="tb-search" type="timed" timeout="500" width="150" command="cmd_scholar_search"/>
+				<textbox id="tb-search" type="timed" timeout="500" command="cmd_scholar_search"/>
 			</toolbar>
 		</vbox>
-		<splitter resizebefore="closest" resizeafter="closest" position="2"/>
+		<splitter id="scholar-splitter" resizebefore="closest" resizeafter="closest" position="2"/>
 	</vbox>
 	
 	<statusbar id="status-bar">

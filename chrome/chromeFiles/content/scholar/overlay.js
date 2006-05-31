@@ -15,10 +15,9 @@ var ScholarPane = new function()
 	
 	function init()
 	{
-		foldersView = new Scholar.TreeView(0); //pass params here?
+		foldersView = new Scholar.FolderTreeView(); //pass params here?
 		document.getElementById('folders-tree').view = foldersView;
-		itemsView = new Scholar.ItemTreeView(0);
-		document.getElementById('items-tree').view = itemsView;
+		document.getElementById('items-tree').view = null;
 	
 		var addMenu = document.getElementById('tb-add').firstChild;
 		var itemTypes = Scholar.ItemTypes.getTypes();
@@ -45,13 +44,12 @@ var ScholarPane = new function()
 	{
 		if(foldersView.selection.count == 1 && foldersView.selection.currentIndex != -1)
 		{
-			itemsView = new Scholar.ItemTreeView(foldersView._getItemAtRow(foldersView.selection.currentIndex).getID());
+			itemsView = new Scholar.ItemTreeView(foldersView._getItemAtRow(foldersView.selection.currentIndex));
 			document.getElementById('items-tree').view = itemsView;
 		}
 		else if(foldersView.selection.count == 0)
 		{
-			itemsView = new Scholar.ItemTreeView(0);
-			document.getElementById('items-tree').view = itemsView;
+			document.getElementById('items-tree').view = null;
 		}
 		else
 		{

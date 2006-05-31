@@ -16,7 +16,6 @@
 		<browser id="view" flex="1"/>
 		<vbox>
 			<stack id="metadata">
-				<box id="metadata-background"/>
 				<vbox id="metadata-pane">
 					<textbox value="Title"/>
 					<textbox value="Rights"/>
@@ -26,7 +25,6 @@
 				</vbox>
 			</stack>
 			<stack id="notes">
-				<box id="notes-background"/>
 				<vbox id="notes-pane">
 					<textbox value="Notes.... lorem ispum delorum..." multiline="true" flex="1"/>
 				</vbox>

@@ -1,0 +1,45 @@
+vbox #scholar-pane
+{
+	background: #f5f5f5;
+	min-height: 150px;
+}
+
+tree #folders-tree
+{
+	min-width: 100px;
+	max-width: 200px;
+}
+
+#scholar-tree-splitter
+{
+
+}
+
+tree #items-tree
+{
+
+}
+
+#scholar-toolbar
+{
+
+}
+
+#scholar-toolbar toolbarbutton
+{
+	
+}
+
+#tb-search
+{
+	width: 150px;
+}
+
+#scholar-splitter
+{
+	border-top: none;
+	border-bottom: 1px solid #A3A3A3;
+	min-height: 4px;
+	max-height: 4px;
+	background: #f5f5f5 !important;
+}

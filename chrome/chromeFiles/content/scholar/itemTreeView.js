@@ -1,9 +1,9 @@
-Scholar.ItemTreeView = function(root)
+Scholar.ItemTreeView = function(itemGroup)
 {
 	this._treebox = null;
 	this._dataItems = new Array();
 	this.rowCount = 0;
-	this._rootFolder = root;
+	this._itemGroup = itemGroup;
 }
 
 Scholar.ItemTreeView.prototype.setTree = function(treebox)
@@ -12,7 +12,7 @@ Scholar.ItemTreeView.prototype.setTree = function(treebox)
 		return;
 	this._treebox = treebox;
 	
-	var newRows = Scholar.Items.getTreeRows(this._rootFolder,"items");
+	var newRows = this._itemGroup.getChildItems();
 	for(var i = 0; i < newRows.length; i++)
 		this._showItem(newRows[i], i+1); //item ref, before row
 		
