@@ -6,6 +6,7 @@ var ScholarPane = new function()
 	var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"].getService(Components.interfaces.nsIPromptService);
 	
 	this.init = init;
+	this.toggleScholar = toggleScholar;
 	this.newItem = newItem;
 	this.newFolder = newFolder;
 	this.folderSelected = folderSelected;
@@ -28,6 +29,14 @@ var ScholarPane = new function()
 			menuitem.setAttribute("oncommand","ScholarPane.newItem("+itemTypes[i]['id']+")");
 			addMenu.appendChild(menuitem);
 		}
+	}
+	
+	function toggleScholar()
+	{
+		var visible = document.getElementById('scholar-pane').getAttribute('collapsed') == 'true';
+		
+		document.getElementById('scholar-pane').setAttribute('collapsed',!visible);
+		document.getElementById('scholar-splitter').setAttribute('collapsed',!visible);
 	}
 	
 	function newItem(typeID)

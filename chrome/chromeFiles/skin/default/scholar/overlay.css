@@ -2,6 +2,7 @@ vbox #scholar-pane
 {
 	background: #f5f5f5;
 	min-height: 150px;
+	padding: 4px;
 }
 
 tree #folders-tree
@@ -22,7 +23,7 @@ tree #items-tree
 
 #scholar-toolbar
 {
-
+	border-bottom: none;
 }
 
 #scholar-toolbar toolbarbutton

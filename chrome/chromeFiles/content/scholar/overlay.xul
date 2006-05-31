@@ -18,7 +18,7 @@
 	<command id="cmd_scholar_search" oncommand="ScholarPane.search();"/>
 
 	<vbox id="appcontent">
-		<vbox id="scholar-pane" position="1" persist="height">
+		<vbox id="scholar-pane" position="1" persist="height collapsed">
 			<hbox flex="1">				
 				<tree id="folders-tree"
 					style="-moz-user-focus: ignore;" hidecolumnpicker="true"
@@ -74,7 +74,7 @@
 					<treechildren/>
 				</tree>
 			</hbox>
-			<toolbar id="scholar-toolbar">
+			<toolbar id="scholar-toolbar" align="center">
 				<toolbarbutton label="&menuitem.newFolder.label;" command="cmd_scholar_newFolder"/>
 				<toolbarbutton id="tb-add" label="&menuitem.newItem.label;" type="menu">
 					<menupopup>
@@ -83,13 +83,14 @@
 				<spacer flex="1"/>
 				<label value="Search:" control="tb-search"/>
 				<textbox id="tb-search" type="timed" timeout="500" command="cmd_scholar_search"/>
+                <toolbarbutton class="tabs-closebutton" oncommand="ScholarPane.toggleScholar()"/>
 			</toolbar>
 		</vbox>
-		<splitter id="scholar-splitter" resizebefore="closest" resizeafter="closest" position="2"/>
+		<splitter id="scholar-splitter" resizebefore="closest" resizeafter="closest" position="2" persist="collapsed"/>
 	</vbox>
 	
 	<statusbar id="status-bar">
-		<statusbarpanel id="scholar-load-status" label="Scholar is NOT loaded"/>
+		<statusbarpanel id="scholar-load-status" label="Scholar is NOT loaded" onclick="ScholarPane.toggleScholar();"/>
 	</statusbar>
 	
 	<script>
@@ -103,7 +104,7 @@
 	<menupopup id="menu_ToolsPopup">
 		<menuseparator id="scholarSeparator" insertbefore="devToolsSeparator"/>
 		<menuitem id="tools-scholar" insertbefore="devToolsSeparator"
-			oncommand="document.getElementById('scholar-pane').collapsed='false';" label="Scholar"
+			oncommand="ScholarPane.toggleScholar();" label="Scholar"
 			key="key_openScholar"/>
 	</menupopup>
   
