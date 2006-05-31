@@ -6,6 +6,7 @@
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 	<script src="view.js"/>
 	<script src="include.js"/>
+	<?xul-overlay href="metadataPane.xul" ?>
 	
 	<toolbar id="view-toolbar">
 		<toolbarbutton class="toggler" id="tb-view" label="View" checked="true"				oncommand="toggle('view')"/>
@@ -14,21 +15,11 @@
 	</toolbar>
 	<stack flex="1">
 		<browser id="view" flex="1"/>
-		<vbox>
-			<stack id="metadata">
-				<vbox id="metadata-pane">
-					<textbox value="Title"/>
-					<textbox value="Rights"/>
-					<textbox value="Etc."/>
-					<textbox value="Etc."/>
-					<textbox value="Etc."/>
-				</vbox>
-			</stack>
-			<stack id="notes">
-				<vbox id="notes-pane">
-					<textbox value="Notes.... lorem ispum delorum..." multiline="true" flex="1"/>
-				</vbox>
-			</stack>
+		<vbox align="end">
+			<vbox id="metadata" class="floater"/>
+			<vbox id="notes" class="floater">
+				<textbox value="Notes.... lorem ispum delorum..." multiline="true" flex="1"/>
+			</vbox>
 		</vbox>
 	</stack>
 </page>

@@ -5,6 +5,7 @@ function init()
 	thisItem = Scholar.Items.get(getArgument("id"));
 	
 	document.getElementById('view').setAttribute('src','http://www.google.com/search?q='+encodeURIComponent('"'+thisItem.getField("title")+'"')+'&btnI');
+	MetadataPane.viewItem(thisItem);
 }
 
 function toggle(id)

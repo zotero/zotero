@@ -5,7 +5,7 @@
 	
 	<script src="metadataPane.js"/>
 	
-	<vbox id="metadata-pane">
+	<vbox id="metadata">
 		<grid>
 			<columns>
 				<column/>

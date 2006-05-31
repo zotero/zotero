@@ -1,6 +1,6 @@
 #view-toolbar
 {
-	
+	background: #f5f5f5;
 }
 
 #view-toolbar .toggler
@@ -13,27 +13,29 @@
 	width: 400px;
 }
 
-#metadata-pane
+.floater
 {
 	position: relative;
 	margin-top: 10px;
-	left: 10px;
-	width: 400px;
-	height: 100px;
-	overflow: auto;
+	margin-right: 30px;
+	
 	padding: 5px;
-	font-size: 11px;
+	font-size: 12px;
 	background: #f5f5f5;
+	width: 400px;
 }
 
-#notes-pane
+#metadata
 {
-	position: relative;
-	margin-top: 10px;
-	left: 10px;
-	width: 400px;
+
+}
+
+#notes
+{
 	height: 100px;
-	padding: 5px;
-	font-size: 11px;
-	background: #f5f5f5;
+}
+
+#metadata toolbar
+{
+	border-bottom: none;
 }

@@ -194,4 +194,4 @@ MetadataPane = new function()
 	}
 }
 
-window.addEventListener("load", function(e) { MetadataPane.init(e); }, false);
+document.addEventListener("load", function(e) { MetadataPane.init(e); }, false);
