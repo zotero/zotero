@@ -500,40 +500,6 @@ Scholar.Item.prototype.save = function(){
 			Scholar.DB.beginTransaction();
 			
 			//
-			// Creators
-			//
-			if (this._changedCreators.length){
-				for (orderIndex in this._changedCreators.items){
-					var creator = this.getCreator(orderIndex);
-					
-					// If empty, skip
-					if (!creator['firstName'] && !creator['lastName']){
-						continue;
-					}
-					
-					// See if this is an existing creator
-					var creatorID = Scholar.Creators.getID(
-							creator['firstName'],
-							creator['lastName']
-					);
-					
-					// If not, add it
-					if (!creatorID){
-						creatorID = Scholar.Creators.add(
-							creator['firstName'],
-							creator['lastName']
-						);
-					}
-					
-					sql += 'INSERT INTO itemCreators VALUES ('
-						+ itemID + ',' + creatorID + ','
-						+ creator['creatorTypeID'] + ', ' + orderIndex
-						+ ");\n";
-				}
-			}
-			
-			
-			//
 			// itemData fields
 			//
 			var sql = "INSERT INTO items (" + sqlColumns.join() + ')'
@@ -568,6 +534,40 @@ Scholar.Item.prototype.save = function(){
 				}
 				
 				if (sql){
+					Scholar.DB.query(sql);
+				}
+			}
+			
+			//
+			// Creators
+			//
+			if (this._changedCreators.length){
+				for (orderIndex in this._changedCreators.items){
+					var creator = this.getCreator(orderIndex);
+					
+					// If empty, skip
+					if (!creator['firstName'] && !creator['lastName']){
+						continue;
+					}
+					
+					// See if this is an existing creator
+					var creatorID = Scholar.Creators.getID(
+							creator['firstName'],
+							creator['lastName']
+					);
+					
+					// If not, add it
+					if (!creatorID){
+						creatorID = Scholar.Creators.add(
+							creator['firstName'],
+							creator['lastName']
+						);
+					}
+					
+					sql = 'INSERT INTO itemCreators VALUES ('
+						+ itemID + ',' + creatorID + ','
+						+ creator['creatorTypeID'] + ', ' + orderIndex
+						+ ");\n";
 					Scholar.DB.query(sql);
 				}
 			}
