@@ -6,7 +6,7 @@ Scholar.ItemTreeView = function(itemGroup)
 	this._itemGroup = itemGroup;
 	this.refresh();
 	
-//	this._unregisterID = Scholar.registerItemTree(this);
+	this._unregisterID = Scholar.Notifier.registerItemTree(this);
 }
 
 Scholar.ItemTreeView.prototype.refresh = function()
@@ -23,7 +23,7 @@ Scholar.ItemTreeView.prototype.refresh = function()
 
 Scholar.ItemTreeView.prototype.unregister = function()
 {
-	Scholar.unregisterItemTree(this._unregisterID);
+	Scholar.Notifier.unregisterItemTree(this._unregisterID);
 }
 
 Scholar.ItemTreeView.prototype.setTree = function(treebox)
@@ -172,7 +172,7 @@ Scholar.ItemTreeView.prototype.notify = function(action, type, id)
 	{
 		var item = Scholar.Items.get(id);
 		
-		if(this._itemGroup.isLibrary() || item.hasParent(this.getCollectionID()))
+		if(this._itemGroup.isLibrary() || item.inCollection(this.getCollectionID()))
 		{
 			this._showItem(item,this.rowCount);
 			this._treebox.rowCountChanged(this.rowCount,1);

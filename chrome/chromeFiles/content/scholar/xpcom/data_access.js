@@ -150,6 +150,16 @@ Scholar.Item.prototype.getCollections = function(){
 }
 
 
+/**
+* Determine whether the item belongs to a given collectionID
+**/
+Scholar.Item.prototype.inCollection = function(collectionID){
+	return !!parseInt(Scholar.DB.valueQuery("SELECT COUNT(*) collectionID "
+		+ "FROM collectionItems WHERE collectionID=" + collectionID + " AND "
+		+ "itemID=" + this.getID()));
+}
+
+
 /*
  * Returns the number of creators for this item
  */
@@ -839,8 +849,6 @@ Scholar.Items = new function(){
 		var obj = this.get(id);
 		obj.erase(); // calls unload()
 		obj = undefined;
-		
-		// TODO: trigger reload of treeview
 	}
 	
 	
@@ -976,7 +984,10 @@ Scholar.Collection.prototype.addItem = function(itemID){
 	
 	this._childItems.set(itemID);
 	this._hasChildItems = true;
+	
+	Scholar.Notifier.trigger('add', 'item', itemID);
 }
+
 
 Scholar.Collection.prototype.removeItem = function(itemID){
 	Scholar.DB.beginTransaction();
@@ -1009,6 +1020,8 @@ Scholar.Collection.prototype.removeItem = function(itemID){
 	if (!this._childItems.length){
 		this._hasChildItems = false;
 	}
+	
+	Scholar.Notifier.trigger('remove', 'item', itemID);
 }
 
 
