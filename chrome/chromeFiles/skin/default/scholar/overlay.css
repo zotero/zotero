@@ -59,21 +59,21 @@ tree #items-tree
 	right: 0px;
 	margin-bottom: 30px;
 	margin-right: 30px;
-	border: 1px solid #a5a5a5;
-	padding: 5px;
-	background: #f5f5f5;
 	
 	font-size: 12px;
 	width: 400px;
 	max-width: 400px;
 }
 
-#scholar-floater vbox, #scholar-floater toolbar
+#scholar-floater vbox
 {
+	
+	border: 1px solid #a5a5a5;
+	background: #f5f5f5;
+	
 	width: 400px;
 	max-width: 400px;
 	margin-top: 5px;
-	padding: none;
 }
 
 #scholar-metadata

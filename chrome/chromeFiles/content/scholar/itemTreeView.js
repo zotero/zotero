@@ -4,6 +4,9 @@ Scholar.ItemTreeView = function(itemGroup)
 	this._dataItems = new Array();
 	this.rowCount = 0;
 	this._itemGroup = itemGroup;
+	this.refresh();
+	
+//	Scholar.registerItemTree(this);
 }
 
 Scholar.ItemTreeView.prototype.setTree = function(treebox)
@@ -11,12 +14,6 @@ Scholar.ItemTreeView.prototype.setTree = function(treebox)
 	if(this._treebox)
 		return;
 	this._treebox = treebox;
-	
-	var newRows = this._itemGroup.getChildItems();
-	for(var i = 0; i < newRows.length; i++)
-		this._showItem(newRows[i], i+1); //item ref, before row
-		
-	this._refreshHashMap();
 }
 
 Scholar.ItemTreeView.prototype.getCellText = function(row, column)
@@ -132,4 +129,55 @@ Scholar.ItemTreeView.prototype._refreshHashMap = function()
 	//Scholar.debug(Scholar.varDump(this.folderRowMap));
 	//Scholar.debug(Scholar.varDump(this.objectRowMap));
 
+}
+
+Scholar.ItemTreeView.prototype.getCollectionID = function()
+{
+	if(this._itemGroup.isCollection())
+		return this._itemGroup.ref.getID();
+	
+}
+
+//CALLED BY DATA LAYER ON CHANGE:
+Scholar.ItemTreeView.prototype.notify = function(action, type, id)
+{
+	var row = this._itemRowMap[id];
+	if(action == 'remove' && row)
+	{
+		this._hideItem(row);
+		this._treebox.rowCountChanged(row,-1);
+	}
+	else if(action == 'modify' && row)
+	{
+		this._treebox.invalidateRow(row)
+	}
+	else if(action == 'add' && !row)
+	{
+		var item = Scholar.Items.get(id);
+		
+		if(this._itemGroup.isLibrary() || item.hasParent(this.getCollectionID()))
+		{
+			this._showItem(item,this.rowCount);
+			this._treebox.rowCountChanged(this.rowCount,1);
+		}
+		//TODO: sorted? figure it out later
+	}
+	else
+	{
+		return;
+	}
+	
+	this._refreshHashMap();
+}
+
+Scholar.ItemTreeView.prototype.refresh = function()
+{
+	this._dataItems = new Array();
+	this.rowCount = 0;
+	
+	var newRows = this._itemGroup.getChildItems();
+	for(var i = 0; i < newRows.length; i++)
+		this._showItem(newRows[i], i+1); //item ref, before row
+	
+	this._refreshHashMap();
 }

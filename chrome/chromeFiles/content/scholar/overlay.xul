@@ -21,10 +21,6 @@
 	
 	<window id="main-window">
 		<vbox id="scholar-floater" hidden="true">
-			<toolbar id="scholar-floater-handle">
-				<label value="Scholar Quick Info"/>
-				<spacer flex="1"/>
-			</toolbar>
 			<vbox id="scholar-metadata"/>
 			<vbox id="scholar-notes">
 				<textbox value="Notes.... lorem ispum delorum..." multiline="true" flex="1"/>
