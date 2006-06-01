@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+
+
+<!-- Note: Contains Firefox-specific overlay -->
+
+<overlay id="scholar-ingester-overlay" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+	<script src="../include.js"/>
+	
+    <script src="ingester.js"/>
+    <script src="browser.js"/>
+    
+	<script type="application/x-javascript">
+		Scholar.Ingester.Interface.init();
+	</script>
+    
+    <statusbar id="status-bar">
+        <statusbarpanel id="schlar-status" insertafter="livemark-button">
+            <label id="scholar-status-label" collapsed="true" crop="end" style="width:0px" />
+            <image id="scholar-status-image" width="16" height="16" onclick="Scholar.Ingester.Interface.scrapeThisPage()" />
+         </statusbarpanel>
+    </statusbar>
+</overlay>
