@@ -324,6 +324,7 @@ Scholar.Item.prototype.setField = function(field, value, loadIn){
 	}
 }
 
+
 /*
  * Save changes back to database
  */
@@ -634,9 +635,12 @@ Scholar.Item.prototype.erase = function(){
 		throw (e);
 	}
 	
-	Scholar.Items.unload(this.getID());
+	// If we're not in the middle of a larger commit, trigger the notifier now
+	if (!Scholar.DB.transactionInProgress()){
+		Scholar.Notifier.trigger('remove', 'item', this.getID());
+	}
 	
-	// TODO: trigger reloading of treeview
+	Scholar.Items.unload(this.getID());
 }
 
 
@@ -1043,6 +1047,7 @@ Scholar.Collection.prototype.erase = function(deleteItems){
 	
 	var descendents = this._getDescendents();
 	var collections = new Array(this._id);
+	var items = new Array();
 	
 	for(var i=0, len=descendents.length; i<len; i++){
 		// Descendent collections
@@ -1055,21 +1060,25 @@ Scholar.Collection.prototype.erase = function(deleteItems){
 				// Delete items from DB
 				Scholar.Items.get(descendents[i]['id']).erase();
 			}
+			items.push(descendents[i]['id']);
 		}
 	}
 	
 	// Remove item associations for all descendent collections
-	Scholar.DB.query('DELETE FROM itemCollections WHERE collectionID IN ('
+	Scholar.DB.query('DELETE FROM collectionItems WHERE collectionID IN ('
 		+ collections.join() + ')');
 	
 	// And delete all descendent collections
-	Scholar.DB.query('DELETE FROM collection WHERE collectionID IN ('
+	Scholar.DB.query('DELETE FROM collections WHERE collectionID IN ('
 		+ collections.join() + ')');
+	
+	Scholar.DB.commitTransaction();
+	
+	Scholar.Notifier.trigger('remove', 'collection', collections);
+	Scholar.Notifier.trigger('remove', 'item', items);
 	
 	// Clear deleted collection from internal memory
 	Scholar.Collections.unload(collections);
-	
-	Scholar.DB.commitTransaction();
 }
 
 

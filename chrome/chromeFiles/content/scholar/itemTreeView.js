@@ -156,32 +156,38 @@ Scholar.ItemTreeView.prototype.getCollectionID = function()
 }
 
 //CALLED BY DATA LAYER ON CHANGE:
-Scholar.ItemTreeView.prototype.notify = function(action, type, id)
+Scholar.ItemTreeView.prototype.notify = function(action, type, ids)
 {
-	var row = this._itemRowMap[id];
-	if(action == 'remove' && row)
-	{
-		this._hideItem(row);
-		this._treebox.rowCountChanged(row,-1);
-	}
-	else if(action == 'modify' && row)
-	{
-		this._treebox.invalidateRow(row)
-	}
-	else if(action == 'add' && !row)
-	{
-		var item = Scholar.Items.get(id);
-		
-		if(this._itemGroup.isLibrary() || item.inCollection(this.getCollectionID()))
+	ids = Scholar.flattenArguments(ids);
+	
+	for (var i=0, len=ids.length; i<len; i++){
+	
+		var row = this._itemRowMap[ids[i]];
+		if(action == 'remove' && row)
 		{
-			this._showItem(item,this.rowCount);
-			this._treebox.rowCountChanged(this.rowCount,1);
+			this._hideItem(row);
+			this._treebox.rowCountChanged(row,-1);
 		}
-		//TODO: sorted? figure it out later
-	}
-	else
-	{
-		return;
+		else if(action == 'modify' && row)
+		{
+			this._treebox.invalidateRow(row)
+		}
+		else if(action == 'add' && !row)
+		{
+			var item = Scholar.Items.get(ids[i]);
+			
+			if(this._itemGroup.isLibrary() || item.inCollection(this.getCollectionID()))
+			{
+				this._showItem(item,this.rowCount);
+				this._treebox.rowCountChanged(this.rowCount,1);
+			}
+			//TODO: sorted? figure it out later
+		}
+		else
+		{
+			return;
+		}
+		
 	}
 	
 	this._refreshHashMap();

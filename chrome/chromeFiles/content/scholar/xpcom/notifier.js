@@ -26,10 +26,11 @@ Scholar.Notifier = new function(){
 	}
 	
 	/**
-	* event is one of 'add', 'remove', 'modify'
-	* type is one of 'collection', 'smartcollection', 'item'
+	* event - 'add', 'remove', 'modify'
+	* type - 'collection', 'smartcollection', 'item'
+	* ids - single id or array of ids
 	**/
-	function trigger(event, type, id){
+	function trigger(event, type, ids){
 		switch (type){
 			case 'item':
 				var treeType = 'itemTree';
@@ -44,8 +45,8 @@ Scholar.Notifier = new function(){
 		
 		for (i in _observers[treeType]){
 			Scholar.debug("Calling _observers['" + treeType + "']['" + i + "'].notify('" + event
-				+ "', " + type + "', " + id + ")", 4);
-			_observers[treeType][i].notify(event, type, id);
+				+ "', " + type + "', " + ids.join() + ")", 4);
+			_observers[treeType][i].notify(event, type, ids);
 		}
 	}
 	
