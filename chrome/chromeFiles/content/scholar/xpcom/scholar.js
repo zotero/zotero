@@ -21,6 +21,7 @@ var Scholar = new function(){
 	this.getString = getString;
 	this.flattenArguments = flattenArguments;
 	this.join = join;
+	this.randomString = randomString;
 	
 	this.Hash = Hash;
 	
@@ -174,6 +175,23 @@ var Scholar = new function(){
 			a.push(obj[i]);
 		}
 		return a.join(delim);
+	}
+	
+	
+	/**
+	* Generate a random string of length 'len' (defaults to 8)
+	**/
+	function randomString(len) {
+		var chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz";
+		if (!len){
+			len = 8;
+		}
+		var randomstring = '';
+		for (var i=0; i<len; i++) {
+			var rnum = Math.floor(Math.random() * chars.length);
+			randomstring += chars.substring(rnum,rnum+1);
+		}
+		return randomstring;
 	}
 	
 	
