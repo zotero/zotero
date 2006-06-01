@@ -6,12 +6,9 @@
 Scholar.Item = function(){
 	this._init();
 	
-	// Accept itemTypeID, folderID and orderIndex in constructor
+	// Accept itemTypeIDin constructor
 	if (arguments.length){
 		this.setType(arguments[0]);
-		if (arguments.length>1){
-			this.setPosition(arguments[1], arguments[2] ? arguments[2] : false);
-		}
 	}
 }
 
@@ -42,20 +39,17 @@ Scholar.Item.prototype._init = function(){
  * Check if the specified field is a primary field from the items table
  */
 Scholar.Item.prototype.isPrimaryField = function(field){
+	// Create primaryFields hash array if not yet created
 	if (!Scholar.Item.primaryFields){
 		Scholar.Item.primaryFields = Scholar.DB.getColumnHash('items');
 		Scholar.Item.primaryFields['firstCreator'] = true;
-		Scholar.Item.primaryFields['parentFolderID'] = true;
-		Scholar.Item.primaryFields['orderIndex'] = true;
 	}
 	
 	return !!Scholar.Item.primaryFields[field];
 }
 
 Scholar.Item.editableFields = {
-	title: true,
-	source: true,
-	rights: true
+	title: true
 };
 
 /*
@@ -70,14 +64,12 @@ Scholar.Item.prototype.isEditableField = function(field){
  * Build object from database
  */
 Scholar.Item.prototype.loadFromID = function(id){
-	var sql = 'SELECT I.*, lastName AS firstCreator, TS.parentFolderID, '
-		+ 'TS.orderIndex '
+	var sql = 'SELECT I.*, lastName AS firstCreator '
 		+ 'FROM items I '
-		+ 'LEFT JOIN treeStructure TS ON (I.itemID=TS.id AND isFolder=0) '
 		+ 'LEFT JOIN itemCreators IC ON (I.itemID=IC.itemID) '
 		+ 'LEFT JOIN creators C ON (IC.creatorID=C.creatorID) '
 		+ 'WHERE itemID=' + id
-		+ ' AND (IC.orderIndex=0 OR IC.orderIndex IS NULL)';
+		+ ' AND (IC.orderIndex=0 OR IC.orderIndex IS NULL)'; // first creator
 	var row = Scholar.DB.rowQuery(sql);
 	this.loadFromRow(row);
 }
@@ -89,8 +81,12 @@ Scholar.Item.prototype.loadFromID = function(id){
 Scholar.Item.prototype.loadFromRow = function(row){
 	this._init();
 	for (col in row){
-		if (this.isPrimaryField(col) || col=='firstCreator'){
+		// Only accept primary field data through loadFromRow()
+		if (this.isPrimaryField(col)){
 			this._data[col] = row[col];
+		}
+		else {
+			Scholar.debug(col + ' is not a valid primary field');
 		}
 	}
 	return true;
@@ -113,11 +109,6 @@ Scholar.Item.prototype.getID = function(){
 
 Scholar.Item.prototype.getType = function(){
 	return this._data['itemTypeID'] ? this._data['itemTypeID'] : false;
-}
-
-
-Scholar.Item.prototype.getParent = function(){
-	return this._data['parentFolderID'] ? this._data['parentFolderID'] : false;
 }
 
 
@@ -150,6 +141,15 @@ Scholar.Item.prototype.setType = function(itemTypeID){
 }
 
 
+/**
+* Return an array of collectionIDs for all collections the item belongs to
+**/
+Scholar.Item.prototype.getCollections = function(){
+	return Scholar.DB.columnQuery("SELECT collectionID FROM collectionItems "
+		+ "WHERE itemID=" + this.getID());
+}
+
+
 /*
  * Returns the number of creators for this item
  */
@@ -159,6 +159,7 @@ Scholar.Item.prototype.numCreators = function(){
 	}
 	return this._creators.length;
 }
+
 
 /*
  * Returns an array of the creator data at the given position, or false if none
@@ -313,89 +314,6 @@ Scholar.Item.prototype.setField = function(field, value, loadIn){
 	}
 }
 
-
-/*
- * Move item to new position and shift surrounding items
- *
- * N.B. Unless isNew is set or the item doesn't yet have an id,
- * this function updates the DB immediately and
- * reloads all cached items -- a save() is not required
- *
- * If isNew is true, a transaction is not started or committed, so if
- * the item has an id it should only be run from an existing transaction
- * within Scholar.Item.save()
- */
-Scholar.Item.prototype.setPosition = function(newFolder, newPos, isNew){
-	var oldFolder = this.getField('parentFolderID');
-	var oldPos = this.getField('orderIndex');
-	
-	if (this.getID()){
-		if (!isNew && newFolder==oldFolder && newPos==oldPos){
-			return true;
-		}
-		
-		if (!isNew){
-			Scholar.DB.beginTransaction();
-		}
-		
-		if (!newFolder){
-			newFolder = 0;
-		}
-		// Do a foreign key check manually
-		else if (!parseInt(Scholar.DB.valueQuery('SELECT COUNT(*) FROM folders '
-				+ 'WHERE folderID=' + newFolder))){
-			throw('Attempt to add item to invalid folder');
-		}
-		
-		// If no position provided, drop at end of folder
-		if (!newPos){
-			newPos = Scholar.DB.valueQuery('SELECT MAX(orderIndex)+1 FROM ' +
-				'treeStructure WHERE parentFolderID=' + newFolder);
-		}
-		// Otherwise shift down above it in old folder and shift up at it or
-		// above it in new folder
-		else {
-			sql = 'UPDATE treeStructure SET orderIndex=orderIndex-1 ' +
-				'WHERE parentFolderID=' + oldFolder +
-				' AND orderIndex>' + oldPos + ";\n";
-		
-			sql += 'UPDATE treeStructure SET orderIndex=orderIndex+1 ' +
-				'WHERE parentFolderID=' + newFolder +
-				' AND orderIndex>=' + newPos + ";\n";
-				
-			Scholar.DB.query(sql);
-		}
-		
-		// If a new item, insert
-		if (isNew){
-			var sql = 'INSERT INTO treeStructure '
-				+ '(id, isFolder, orderIndex, parentFolderID) VALUES ('
-				+ this.getID() + ', 0, ' + newPos + ', ' + newFolder + ')';
-		}
-		// Otherwise update
-		else {
-			var sql = 'UPDATE treeStructure SET parentFolderID=' + newFolder +
-				', orderIndex=' + newPos + ' WHERE id=' + this.getID() +
-				" AND isFolder=0;\n";
-		}
-		Scholar.DB.query(sql);
-		
-		if (!isNew){
-			Scholar.DB.commitTransaction();
-		}
-	}
-	
-	this._data['parentFolderID'] = newFolder;
-	this._data['orderIndex'] = newPos;
-	
-	if (this.getID() && !isNew){
-		Scholar.Items.reloadAll();
-		Scholar.Folders.reloadAll(); // needed to recheck isEmpty
-	}
-	return true;
-}
-
-
 /*
  * Save changes back to database
  */
@@ -427,12 +345,6 @@ Scholar.Item.prototype.save = function(){
 			}
 			if (this._changed.has('title')){
 				sql += "title='" +  this.getField('title') + "', ";
-			}
-			if (this._changed.has('source')){
-				sql += "source='" +  this.getField('source') + "', ";
-			}
-			if (this._changed.has('rights')){
-				sql += "rights='" +  this.getField('rights') + "', ";
 			}
 			
 			// Always update modified time
@@ -583,14 +495,6 @@ Scholar.Item.prototype.save = function(){
 			sqlColumns.push('title');
 			sqlValues.push({'string':this.getField('title')});
 		}
-		if (this._changed.has('source')){
-			sqlColumns.push('source');
-			sqlValues.push({'string':this.getField('source')});
-		}
-		if (this._changed.has('rights')){
-			sqlColumns.push('rights');
-			sqlValues.push({'string':this.getField('rights')});
-		}
 		
 		try {
 			Scholar.DB.beginTransaction();
@@ -668,20 +572,11 @@ Scholar.Item.prototype.save = function(){
 				}
 			}
 			
-			// Set the position of the new item
-			var newFolder = this.getField('parentFolderID')
-				? this.getField('parentFolderID') : 0;
-			
-			var newPos = this.getField('orderIndex')
-				? this.getField('orderIndex') : false;
-			
-			this.setPosition(newFolder, newPos, true);
-			
 			Scholar.DB.commitTransaction();
 			
-			// Reload folders to update isEmpty,
-			// in case this was the first item in a folder
-			Scholar.Folders.reloadAll();
+			// Reload collection to update isEmpty,
+			// in case this was the first item in a collection
+			Scholar.Collections.reloadAll();
 		}
 		catch (e){
 			Scholar.DB.rollbackTransaction();
@@ -707,15 +602,11 @@ Scholar.Item.prototype.erase = function(){
 		
 	Scholar.DB.beginTransaction();
 	
-	
-	var parentFolderID = this.getField('parentFolderID');
-	var orderIndex = this.getField('orderIndex');
-	
-	var sql = 'DELETE FROM treeStructure WHERE id=' + this.getID() + ";\n";
-	
-	sql += 'UPDATE treeStructure SET orderIndex=orderIndex-1 ' +
-		'WHERE parentFolderID=' + parentFolderID +
-		' AND orderIndex>' + orderIndex + ";\n\n";
+	// Remove item from parent collections
+	var parentCollectionIDs = this.getCollections();
+	for (var i=0; i<parentCollectionIDs.length; i++){
+		Scholar.Collections.get(parentCollectionIDs[i]).removeItem(this.getID());
+	}
 	
 	sql += 'DELETE FROM itemCreators WHERE itemID=' + this.getID() + ";\n";
 	sql += 'DELETE FROM itemKeywords WHERE itemID=' + this.getID() + ";\n";
@@ -743,10 +634,6 @@ Scholar.Item.prototype.toString = function(){
 	return this.getTitle();
 }
 
-
-Scholar.Item.prototype.isFolder = function(){
-	return false;
-}
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -831,7 +718,6 @@ Scholar.Items = new function(){
 	// Privileged methods
 	this.get = get;
 	this.getAll = getAll;
-	this.getTreeRows = getTreeRows;
 	this.reload = reload;
 	this.reloadAll = reloadAll;
 	this.getNewItemByType = getNewItemByType;
@@ -887,78 +773,13 @@ Scholar.Items = new function(){
 	 * Returns all items in the database
 	 */
 	function getAll(){
-		var sql = 'SELECT I.itemID FROM items I '
-			+ 'LEFT JOIN treeStructure TS ON (I.itemID=TS.id AND isFolder=0) '
-			+ 'ORDER BY orderIndex';
+		var sql = 'SELECT itemID FROM items';
+		// DEBUG: default order?
 		
 		var ids = Scholar.DB.columnQuery(sql);
 		return this.get(ids);
 	}
 	
-	
-	/*
-	 * Returns an array of all folders and items that are children of a folder
-	 * as Scholar.Folder and Scholar.Item instances
-	 *
-	 * Takes parent folderID as optional parameter; by default, returns root items
-	 *
-	 * Type can tested with instanceof (e.g. if (obj instanceof Scholar.Folder)) or isFolder()
-	 */
-	function getTreeRows(parent, type){
-		var toReturn = new Array();
-		
-		/*
-		// To return all items (no longer used)
-		var sql = 'SELECT * FROM treeStructure WHERE id>0 ORDER BY orderIndex';
-		*/
-		
-		if (!parent){
-			parent = 0;
-		}
-		
-		var sql = 'SELECT * FROM treeStructure TS '
-			+ 'WHERE parentFolderID=' + parent;
-		
-		switch (type){
-			case 'folders':
-				sql += ' AND isFolder=1';
-				break;
-			case 'items':
-				sql += ' AND isFolder=0';
-				break;
-		}
-		
-		sql += ' ORDER BY orderIndex';
-		
-		var tree = Scholar.DB.query(sql);
-		
-		if (!tree){
-			Scholar.debug('No children of folder ' + parent, 5);
-			return toReturn;
-		}
-		
-		_load('all');
-		
-		for (var i=0, len=tree.length; i<len; i++){
-			if (parseInt(tree[i]['isFolder'])){
-				var obj = Scholar.Folders.get(tree[i]['id']);
-				if (!obj){
-					throw ('Folder ' + tree[i]['id'] + ' not found');
-				}
-			}
-			else {
-				var obj = Scholar.Items.get(tree[i]['id']);
-				if (!obj){
-					throw ('Item ' + tree[i]['id'] + ' not found');
-				}
-			}
-			
-			toReturn.push(obj);
-		}
-		
-		return toReturn;
-	}
-	 
 	
 	/*
 	 * Reloads data for specified items into internal array
@@ -991,15 +812,15 @@ Scholar.Items = new function(){
 	}
 	
 	
-	function getNewItemByType(itemTypeID, parentFolderID, orderIndex){
-		return new Scholar.Item(itemTypeID, parentFolderID, orderIndex);
+	function getNewItemByType(itemTypeID){
+		return new Scholar.Item(itemTypeID);
 	}
 	
 	
-	function add(data, itemTypeID, folderID, orderIndex){
+	function add(data, itemTypeID){
 		var insert = new Array();
 		
-		var obj = new Scholar.Item(itemTypeID, folderID, orderIndex);
+		var obj = new Scholar.Item(itemTypeID);
 		
 		for (field in data){
 			obj.setField(data[field]);
@@ -1038,10 +859,8 @@ Scholar.Items = new function(){
 		
 		// Should be the same as query in Scholar.Item.loadFromID, just
 		// without itemID clause
-		var sql = 'SELECT I.*, lastName AS firstCreator, TS.parentFolderID, '
-			+ 'TS.orderIndex '
+		var sql = 'SELECT I.*, lastName AS firstCreator '
 			+ 'FROM items I '
-			+ 'LEFT JOIN treeStructure TS ON (I.itemID=TS.id AND isFolder=0) '
 			+ 'LEFT JOIN itemCreators IC ON (I.itemID=IC.itemID) '
 			+ 'LEFT JOIN creators C ON (IC.creatorID=C.creatorID) '
 			+ 'WHERE IC.orderIndex=0 OR IC.orderIndex IS NULL';
@@ -1068,30 +887,33 @@ Scholar.Items = new function(){
 
 
 /*
- * Constructor for Folder object
+ * Constructor for Collection object
  *
- * Generally should be called from Scholar.Folders rather than directly
+ * Generally should be called from Scholar.Collection rather than directly
  */
-Scholar.Folder = function(){
+Scholar.Collection = function(){
 	this._id;
 	this._name;
 	this._parent;
+	this._hasChildCollections;
+	this._hasChildItems;
+	this._childItems = new Scholar.Hash();
+	this._childItemsLoaded;
 }
 
 
 /*
- * Build folder from database
+ * Build collection from database
  */
-Scholar.Folder.prototype.loadFromID = function(id){
-	// Should be same as query in Scholar.Folders, just with folderID
-	var sql = "SELECT folderID, folderName, parentFolderID, "
-		+ "(SELECT COUNT(*) FROM treeStructure WHERE "
-		+ "parentFolderID=TS.id AND isFolder=1)!=0 AS hasChildFolders, "
-		+ "(SELECT COUNT(*) FROM treeStructure WHERE "
-		+ "parentFolderID=TS.id AND isFolder=0)!=0 AS hasChildItems "
-		+ "FROM folders F "
-		+ "JOIN treeStructure TS ON (F.folderID=TS.id AND TS.isFolder=1) "
-		+ "WHERE folderID=" + id;
+Scholar.Collection.prototype.loadFromID = function(id){
+	// Should be same as query in Scholar.Collections, just with collectionID
+	var sql = "SELECT collectionID, collectionName, parentCollectionID, "
+		+ "(SELECT COUNT(*) FROM collections WHERE "
+		+ "parentCollectionID=C.collectionID)!=0 AS hasChildCollections, "
+		+ "(SELECT COUNT(*) FROM collectionItems WHERE "
+		+ "collectionID=C.collectionID)!=0 AS hasChildItems "
+		+ "FROM collections C "
+		+ "WHERE collectionID=" + id;
 	
 	var row = Scholar.DB.rowQuery(sql);
 	this.loadFromRow(row);
@@ -1099,95 +921,183 @@ Scholar.Folder.prototype.loadFromID = function(id){
 
 
 /*
- * Populate folder data from a database row
+ * Populate collection data from a database row
  */
-Scholar.Folder.prototype.loadFromRow = function(row){
-	this._id = row['folderID'];
-	this._name = row['folderName'];
-	this._parent = row['parentFolderID'];
-	this._hasChildFolders = row['hasChildFolders'];
+Scholar.Collection.prototype.loadFromRow = function(row){
+	this._id = row['collectionID'];
+	this._name = row['collectionName'];
+	this._parent = row['parentCollectionID'];
+	this._hasChildCollections = row['hasChildCollections'];
 	this._hasChildItems = row['hasChildItems'];
 }
 
-Scholar.Folder.prototype.getID = function(){
+
+Scholar.Collection.prototype.getID = function(){
 	return this._id;
 }
 
-Scholar.Folder.prototype.getName = function(){
+Scholar.Collection.prototype.getName = function(){
 	return this._name;
 }
 
-Scholar.Folder.prototype.isFolder = function(){
-	return true;
-}
-
-Scholar.Folder.prototype.getParent = function(){
+Scholar.Collection.prototype.getParent = function(){
 	return this._parent;
 }
 
-Scholar.Folder.prototype.isEmpty = function(){
-	return !(parseInt(this._hasChildFolders)) && !(parseInt(this._hasChildItems));
+
+Scholar.Collection.prototype.isEmpty = function(){
+	return !(parseInt(this._hasChildCollections)) && !(parseInt(this._hasChildItems));
 }
 
-Scholar.Folder.prototype.hasChildFolders = function(){
-	return !!(parseInt(this._hasChildFolders));
+Scholar.Collection.prototype.hasChildCollections = function(){
+	return !!(parseInt(this._hasChildCollections));
 }
 
-Scholar.Folder.prototype.hasChildItems = function(){
+Scholar.Collection.prototype.hasChildItems = function(){
 	return !!(parseInt(this._hasChildItems));
 }
 
+Scholar.Collection.prototype.addItem = function(itemID){
+	Scholar.DB.beginTransaction();
+	
+	if (!Scholar.Items.get(itemID)){
+		Scholar.DB.rollbackTransaction();	
+		throw(itemID + ' is not a valid item id');
+	}
+	
+	var nextOrderIndex = Scholar.DB.valueQuery("SELECT IFNULL(MAX(orderIndex)+1, 0) "
+		+ "FROM collectionItems WHERE collectionID=" + this._id);
+	
+	var sql = "INSERT OR IGNORE INTO collectionItems VALUES "
+		+ "(" + this._id + ", " + itemID + ", " + nextOrderIndex + ")";
+	
+	Scholar.DB.query(sql);
+	Scholar.DB.commitTransaction();
+	
+	this._childItems.set(itemID);
+	this._hasChildItems = true;
+}
+
+Scholar.Collection.prototype.removeItem = function(itemID){
+	Scholar.DB.beginTransaction();
+	
+	var sql = "SELECT orderIndex FROM collectionItems "
+		+ "WHERE collectionID=" + this._id + " AND itemID=" + itemID;
+	var orderIndex = Scholar.DB.valueQuery(sql);
+	
+	if (orderIndex===false){
+		Scholar.debug('Item ' + itemID + ' is not a child of collection '
+			+ this._id);
+		Scholar.DB.rollbackTransaction();
+		return false;
+	}
+	
+	var sql = "DELETE FROM collectionItems WHERE collectionID=" + this._id
+		+ " AND itemID=" + itemID;
+	Scholar.DB.query(sql);
+	
+	// Move down items above deleted item in collection
+	sql = 'UPDATE collectionItems SET orderIndex=orderIndex-1 '
+		+ 'WHERE collectionID=' + this._id
+		+ ' AND orderIndex>' + orderIndex;
+	Scholar.DB.query(sql);
+	
+	Scholar.DB.commitTransaction();
+	this._childItems.remove(itemID);
+	
+	// If this was the last item, set collection to empty
+	if (!this._childItems.length){
+		this._hasChildItems = false;
+	}
+}
+
+
+Scholar.Collection.prototype.hasItem = function(itemID){
+	if (!this._childItemsLoaded){
+		this._loadChildItems();
+	}
+	return this._childItems.has(itemID);
+}
+
+
+
 
 /**
-* Deletes a folder and all descendent folders and items
+* Deletes a collection and all descendent collections and items
 **/
-Scholar.Folder.prototype.erase = function(){
+Scholar.Collection.prototype.erase = function(deleteItems){
 	Scholar.DB.beginTransaction();
 	
 	var descendents = this._getDescendents();
-	var folders = new Array(this._id);
+	var collections = new Array(this._id);
 	
 	for(var i=0, len=descendents.length; i<len; i++){
-		if (!descendents[i]['isFolder']){
-			// Have items delete themselves
-			Scholar.Items.get(descendents[i]['id']).erase();
+		// Descendent collections
+		if (descendents[i]['isCollection']){
+			collections.push(descendents[i]['id']);
 		}
+		// Descendent items
 		else {
-			folders.push(descendents[i]['id']);
+			if (deleteItems){
+				// Delete items from DB
+				Scholar.Items.get(descendents[i]['id']).erase();
+			}
 		}
 	}
 	
-	Scholar.DB.query('DELETE FROM folders WHERE folderID IN ('
-		+ folders.join() + ')');
+	// Remove item associations for all descendent collections
+	Scholar.DB.query('DELETE FROM itemCollections WHERE collectionID IN ('
+		+ collections.join() + ')');
 	
-	Scholar.DB.query('DELETE FROM treeStructure WHERE id IN ('
-		+ folders.join() + ') AND isFolder=1');
+	// And delete all descendent collections
+	Scholar.DB.query('DELETE FROM collection WHERE collectionID IN ('
+		+ collections.join() + ')');
 	
-	// Clear deleted folder from internal memory
-	Scholar.Folders.unload(folders);
+	// Clear deleted collection from internal memory
+	Scholar.Collections.unload(collections);
 	
 	Scholar.DB.commitTransaction();
 }
 
 
+Scholar.Collection.prototype._loadChildItems = function(){
+	this._childItems = new Scholar.Hash();
+	
+	var sql = "SELECT itemID FROM collectionItems WHERE collectionID=" + this._id;
+	var itemIDs = Scholar.DB.columnQuery(sql);
+	
+	if (!itemIDs){
+		Scholar.debug('Collection ' + this._id + ' has no child items');
+	}
+	
+	for (var i=0; i<itemIDs.length; i++){
+		this._childItems.set(itemIDs[i]);
+	}
+	this._childItemsLoaded = true;
+}
+
+
 /**
-* Returns an array of descendent folders and items (rows of 'id' and 'isFolder')
+* Returns an array of descendent collections and items (rows of 'id' and 'isCollection')
 **/
-Scholar.Folder.prototype._getDescendents = function(){
+Scholar.Collection.prototype._getDescendents = function(){
 	var toReturn = new Array();
 	
-	var children = Scholar.DB.query('SELECT id, isFolder FROM treeStructure '
-		+ 'WHERE parentFolderID=' + this._id);
+	var children = Scholar.DB.query('SELECT collectionID AS id, '
+		+ '1 AS isCollection FROM collections '
+		+ 'WHERE parentCollectionID=' + this._id
+		+ ' UNION SELECT itemID AS id, 0 AS isCollection FROM collectionItems '
+		+ 'WHERE collectionID=' + this._id);
 	
 	for(var i=0, len=children.length; i<len; i++){
-		if (parseInt(children[i]['isFolder'])){
+		if (parseInt(children[i]['isCollection'])){
 			toReturn.push({
 				id: children[i]['id'],
-				isFolder: 1
+				isCollection: true
 			});
 			
 			var descendents =
-				Scholar.Folders.get(children[i]['id'])._getDescendents();
+				Scholar.Collections.get(children[i]['id'])._getDescendents();
 			
 			for(var j=0, len=descendents.length; j<len; j++){
 				toReturn.push(descendents[j]);
@@ -1196,7 +1106,7 @@ Scholar.Folder.prototype._getDescendents = function(){
 		else {
 			toReturn.push({
 				id: children[i]['id'],
-				isFolder: 0
+				isCollection: false
 			});
 		}
 	}
@@ -1206,38 +1116,38 @@ Scholar.Folder.prototype._getDescendents = function(){
 
 
 /*
- * Primary interface for accessing Scholar folders
+ * Primary interface for accessing Scholar collection
  */
-Scholar.Folders = new function(){
-	var _folders = new Array();
-	var _foldersLoaded = false;
+Scholar.Collections = new function(){
+	var _collections = new Array();
+	var _collectionsLoaded = false;
 	
 	this.get = get;
 	this.reloadAll = reloadAll;
 	this.unload = unload;
 	
 	/*
-	 * Returns a Scholar.Folder object for a folderID
+	 * Returns a Scholar.Collection object for a collectionID
 	 */
 	function get(id){
-		if (!_foldersLoaded){
+		if (!_collectionsLoaded){
 			_load();
 		}
-		return (typeof _folders[id]!='undefined') ? _folders[id] : false;
+		return (typeof _collections[id]!='undefined') ? _collections[id] : false;
 	}
 	
 	
 	/**
-	* Clears internal cache and reloads folder data from DB
+	* Clears internal cache and reloads collection data from DB
 	**/
 	function reloadAll(){
-		_folders = new Array();
+		_collections = new Array();
 		_load();
 	}
 	
 	
 	/**
-	* Clear folder from internal cache (used by Scholar.Folder.erase())
+	* Clear collection from internal cache (used by Scholar.Collection.erase())
 	*
 	* Can be passed ids as individual parameters or as an array of ids, or both
 	**/
@@ -1245,40 +1155,38 @@ Scholar.Folders = new function(){
 		var ids = Scholar.flattenArguments(arguments);
 		
 		for(var i=0; i<ids.length; i++){
-			delete _folders[ids[i]];
+			delete _collections[ids[i]];
 		}
 	}
 	
 	
 	/**
-	* Loads folder data from DB and adds to internal cache
+	* Loads collection data from DB and adds to internal cache
 	**/
 	function _load(){
-		var sql = "SELECT folderID, folderName, parentFolderID, "
-			+ "(SELECT COUNT(*) FROM treeStructure WHERE "
-			+ "parentFolderID=TS.id AND isFolder=1)!=0 AS hasChildFolders, "
-			+ "(SELECT COUNT(*) FROM treeStructure WHERE "
-			+ "parentFolderID=TS.id AND isFolder=0)!=0 AS hasChildItems "
-			+ "FROM folders F "
-			+ "JOIN treeStructure TS ON (F.folderID=TS.id AND TS.isFolder=1) "
-			+ "WHERE folderID>0"; // skip 'root' folder
+		// This should be the same as the query in Scholar.Collection.loadFromID,
+		// just without a specific collectionID
+		var sql = "SELECT collectionID, collectionName, parentCollectionID, "
+			+ "(SELECT COUNT(*) FROM collections WHERE "
+			+ "parentCollectionID=C.collectionID)!=0 AS hasChildCollections, "
+			+ "(SELECT COUNT(*) FROM collectionItems WHERE "
+			+ "collectionID=C.collectionID)!=0 AS hasChildItems "
+			+ "FROM collections C";
+		
 		var result = Scholar.DB.query(sql);
 		
 		if (!result){
-			throw ('No folders exist');
+			throw ('No collections exist');
 		}
 		
 		for (var i=0; i<result.length; i++){
-			var folder = new Scholar.Folder();
-			folder.loadFromRow(result[i]);
-			_folders[folder.getID()] = folder;
+			var collection = new Scholar.Collection();
+			collection.loadFromRow(result[i]);
+			_collections[collection.getID()] = collection;
 		}
-		_foldersLoaded = true;
+		_collectionsLoaded = true;
 	}
 }
-
-
-
 
 
 Scholar.Creators = new function(){
@@ -1581,18 +1489,87 @@ Scholar.CreatorTypes = new function(){
 
 
 
+
+
+
 /*
-var items = Scholar.Items.getAll();
-
-var obj = items[9];
-for (var i=0,len=obj.numCreators(); i<len; i++){
-	Scholar.debug(Scholar.varDump(obj.getCreator(i)));
+ * Scholar.getCollections(parent)
+ *
+ * Returns an array of all collections are children of a collection
+ * as Scholar.Collection instances
+ *
+ * Takes parent collectionID as optional parameter;
+ * by default, returns root collections
+ */
+Scholar.getCollections = function(parent){
+	var toReturn = new Array();
+	
+	if (!parent){
+		parent = null;
+	}
+	
+	var sql = 'SELECT collectionID FROM collections C WHERE parentCollectionID';
+	sql += parent ? '=' + parent : ' IS NULL';
+	
+	sql += ' ORDER BY collectionName';
+	
+	var children = Scholar.DB.columnQuery(sql);
+	
+	if (!children){
+		Scholar.debug('No child collections of collection ' + parent, 5);
+		return toReturn;
+	}
+	
+	for (var i=0, len=children.length; i<len; i++){
+		var obj = Scholar.Collections.get(children[i]);
+		if (!obj){
+			throw ('Collection ' + children[i] + ' not found');
+		}
+		
+		toReturn.push(obj);
+	}
+	
+	return toReturn;
 }
 
-obj.setCreator(2,'bob','smith');
 
-for (var i=0,len=obj.numCreators(); i<len; i++){
-	Scholar.debug(Scholar.varDump(obj.getCreator(i)));
+/*
+ * Scholar.getItems(parent)
+ *
+ * Returns an array of all items that are children of a collection--or all
+ * items if no parent provided--as Scholar.Item instances
+ */
+Scholar.getItems = function(parent){
+	var toReturn = new Array();
+	
+	if (!parent){
+		var sql = 'SELECT itemID FROM items';
+	}
+	else {
+		var sql = 'SELECT itemID FROM collectionItems '
+			+ 'WHERE collectionID=' + parent;
+	}
+	
+	var children = Scholar.DB.columnQuery(sql);
+	
+	if (!children){
+		if (!parent){
+			Scholar.debug('No items in library', 5);
+		}
+		else {
+			Scholar.debug('No child items of collection ' + parent, 5);
+		}
+		return toReturn;
+	}
+	
+	for (var i=0, len=children.length; i<len; i++){
+		var obj = Scholar.Items.get(children[i]);
+		if (!obj){
+			throw ('Item ' + children[i] + ' not found');
+		}
+		
+		toReturn.push(obj);
+	}
+	
+	return toReturn;
 }
-obj.save();
-*/
