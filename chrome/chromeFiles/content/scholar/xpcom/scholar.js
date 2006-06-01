@@ -64,6 +64,10 @@ var Scholar = new function(){
 			return false;
 		}
 		
+		if (typeof message!='string'){
+			message = Scholar.varDump(message);
+		}
+		
 		if (!level){
 			level = 3;
 		}
