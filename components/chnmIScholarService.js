@@ -58,6 +58,14 @@ function alert(msg){
 		.alert(null, "", msg);
 }
 
+/**
+* Convenience method to replicate window.confirm()
+**/
+function confirm(msg){
+	return Cc["@mozilla.org/embedcomp/prompt-service;1"]
+		.getService(Ci.nsIPromptService)
+		.confirm(null, "", msg);
+}
 
 //
 // XPCOM goop
