@@ -6,7 +6,7 @@
 Scholar.Item = function(){
 	this._init();
 	
-	// Accept itemTypeIDin constructor
+	// Accept itemTypeID in constructor
 	if (arguments.length){
 		this.setType(arguments[0]);
 	}

@@ -1,4 +1,4 @@
--- 11
+-- 12
 
     DROP TABLE IF EXISTS version;
     CREATE TABLE version (
@@ -123,6 +123,19 @@
     DROP INDEX IF EXISTS itemID;
     CREATE INDEX itemID ON collectionItems(itemID);
     
+    CREATE TABLE scrapers (
+        scraperID INTEGER PRIMARY KEY,
+        centralScraperID INT,
+        centralLastUpdated DATETIME,
+        localLastUpdated DATETIME,
+        label TEXT,
+        creator TEXT,
+        urlPattern TEXT,
+        scraperDetectCode TEXT,
+        scraperJavaScript TEXT
+    );
+    
+    
     -- Some sample data
     INSERT INTO itemTypes VALUES (1,'book');
     INSERT INTO itemTypes VALUES (2,'journalArticle');
@@ -226,7 +239,6 @@
     INSERT INTO "itemCreators" VALUES(7, 8, 1, 2);
     INSERT INTO "itemCreators" VALUES(9, 11, 1, 1);
     
-    
     INSERT INTO collections VALUES (1241, 'Test Project', NULL);
     INSERT INTO collections VALUES (3262, 'Another Test Project', NULL);
     INSERT INTO collections VALUES (6856, 'Yet Another Project', NULL);
@@ -237,3 +249,75 @@
     INSERT INTO collectionItems VALUES (6856, 13, 1);
     INSERT INTO collectionItems VALUES (7373, 15, 0);
     INSERT INTO collectionItems VALUES (1241, 12, 0);
+    
+    INSERT INTO "scrapers" VALUES(1, NULL, NULL, NULL, 'Amazon.com Scraper', 'Simon Kornblith', '^http://www.amazon.com/gp/product/', NULL, 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
+var prefixDC = ''http://purl.org/dc/elements/1.1/'';
+var prefixDCMI = ''http://purl.org/dc/dcmitype/'';
+var prefixDummy = ''http://chnm.gmu.edu/firefox-scholar/'';
+
+var namespace = doc.documentElement.namespaceURI;
+var nsResolver = namespace ? function(prefix) {
+if (prefix == ''x'') return namespace; else return null;
+} : null;
+
+var getNode = function(doc, contextNode, xpath, nsResolver) {
+return doc.evaluate(xpath, contextNode, nsResolver, XPathResult.ANY_TYPE,null).iterateNext();
+}
+
+var cleanString = function(s) {
+s = utilities.trimString(s);
+return s.replace(/ +/g, " ");
+}
+
+var uri = doc.location.href;
+
+model.addStatement(uri, prefixRDF + "type", prefixDCMI + "text", false);
+
+// Retrieve authors
+var xpath = ''/html/body/table/tbody/tr/td[2]/form/div[@class="buying"]/a'';
+var elmts = utilities.gatherElementsOnXPath(doc, doc, xpath, nsResolver);
+for (var i = 0; i < elmts.length; i++) {
+var elmt = elmts[i];
+
+model.addStatement(uri, prefixDC + ''creator'', cleanString(getNode(doc, elmt, ''./text()[1]'', nsResolver).nodeValue), false); // Use your own type here
+}
+
+// Retrieve data from "Product Details" box
+var xpath = ''/html/body/table/tbody/tr/td[2]/table/tbody/tr/td[@class="bucket"]/div[@class="content"]/ul/li'';
+var elmts = utilities.gatherElementsOnXPath(doc, doc, xpath, nsResolver);
+for (var i = 0; i < elmts.length; i++) {
+var elmt = elmts[i];
+var attribute = cleanString(getNode(doc, elmt, ''./B[1]/text()[1]'', nsResolver).nodeValue);
+if(getNode(doc, elmt, ''./text()[1]'', nsResolver)) {
+var value = cleanString(getNode(doc, elmt, ''./text()[1]'', nsResolver).nodeValue);
+
+if(attribute == "Publisher:") {
+if(value.lastIndexOf("(") != -1) {
+var date = value.substring(value.lastIndexOf("(")+1, value.length-1);
+value = value.substring(0, value.lastIndexOf("(")-1);
+}
+if(value.lastIndexOf(";") != -1) {
+var edition = value.substring(value.lastIndexOf(";")+2, value.length);
+value = value.substring(0, value.lastIndexOf(";"));
+}
+model.addStatement(uri, prefixDC + ''publisher'', value);
+model.addStatement(uri, prefixDC + ''date'', date);
+model.addStatement(uri, prefixDC + ''hasVersion'', edition);
+} else if(attribute == "Language:") {
+model.addStatement(uri, prefixDC + ''language'', value);
+} else if(attribute == "ISBN:") {
+model.addStatement(uri, prefixDC + ''identifier'', ''ISBN ''+value);
+} else if(value.substring(value.indexOf(" ")+1, value.length) == "pages") {
+model.addStatement(uri, prefixDummy + ''pages'', value.substring(0, value.indexOf(" ")));
+model.addStatement(uri, prefixDC + ''medium'', attribute.substring(0, attribute.indexOf(":")));
+}
+}
+}
+
+var xpath = ''/html/body/table/tbody/tr/td[2]/form/div[@class="buying"]/b[@class="sans"]'';
+var elmts = utilities.gatherElementsOnXPath(doc, doc, xpath, nsResolver);
+var title = cleanString(getNode(doc, elmts[0], ''./text()[1]'', nsResolver).nodeValue);
+if(title.lastIndexOf("(") != -1 && title.lastIndexOf(")") == title.length-1) {
+title = title.substring(0, title.lastIndexOf("(")-1);
+}
+model.addStatement(uri, prefixDC + ''title'', title);');

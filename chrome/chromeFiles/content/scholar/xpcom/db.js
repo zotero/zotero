@@ -449,13 +449,13 @@ Scholar.DB = new function(){
 			}
 			
 			// For now, just wipe and recreate
-			if (i==11){
+			if (i==12){
 				Scholar.DB.query("DROP TABLE IF EXISTS folders; "
 					+ "DROP TABLE IF EXISTS treeStructure;");
 				_initializeSchema();
 			}
 			
-			if (i==12){
+			if (i==13){
 				// do stuff
 				// _updateDBVersion(i);
 			}
