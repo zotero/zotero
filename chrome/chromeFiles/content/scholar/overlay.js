@@ -13,6 +13,7 @@ var ScholarPane = new function()
 	this.itemSelected = itemSelected;
 	this.deleteSelection = deleteSelection;
 	this.search = search;
+	this.toggleView = toggleView;
 	
 	function init()
 	{
@@ -29,6 +30,8 @@ var ScholarPane = new function()
 			menuitem.setAttribute("oncommand","ScholarPane.newItem("+itemTypes[i]['id']+")");
 			addMenu.appendChild(menuitem);
 		}
+		
+//		Drag.init(document.getElementById('scholar-floater-handle'),document.getElementById('scholar-floater'), 0, 400, 0, 500, true, true);
 	}
 	
 	function toggleScholar()
@@ -75,10 +78,17 @@ var ScholarPane = new function()
 		{
 			var item = itemsView._getItemAtRow(itemsView.selection.currentIndex);
 			
-			document.getElementById('content').loadURI('chrome://scholar/content/view.xul?id='+encodeURIComponent(item.getID()));
+			MetadataPane.viewItem(item);
+			var url = item.getField('source');
+			if(!validURL(url))
+				url = 'http://www.google.com/search?q='+encodeURIComponent('"'+item.getField("title")+'"'); //+'&btnI'
+			
+			document.getElementById('content').loadURI(url);
+			document.getElementById('scholar-floater').hidden=false;
 		}
 		else
 		{
+			document.getElementById('scholar-floater').hidden=true;
 			
 		}
 
@@ -92,8 +102,25 @@ var ScholarPane = new function()
 	
 	function search()
 	{
-		//TO DO: reload items tree with a search instead of a root folder
-		alert(document.getElementById('tb-search').value);
+		if(itemsView)
+			itemsView.searchText(document.getElementById('tb-search').value);
+	}
+
+	function toggleView(id)
+	{		
+		var button = document.getElementById('tb-'+id);
+		var elem = document.getElementById('scholar-'+id);
+		
+		button.checked = !button.checked;
+		elem.hidden = !elem.hidden;
+	}
+	
+	//Thanks: http://www.bigbold.com/snippets/posts/show/452
+	//TODO: move this out of overlay.js, into Scholar.js?
+	function validURL(s)
+	{
+		var regexp = /(http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/
+		return regexp.test(s);
 	}
 }
 

@@ -100,8 +100,11 @@ Scholar.ItemTreeView.prototype.deleteSelection = function()
 	this._treebox.beginUpdateBatch();
 	for (var i=0; i<rows.length; i++)
 	{
-		//erase item/folder from DB
-		this._getItemAtRow(rows[i]-i).erase();		
+		if(this._itemGroup.isLibrary()) //erase item from DB
+			this._getItemAtRow(rows[i]-i).erase();
+		else if(this._itemGroup.isCollection())
+			this._itemGroup.ref.removeItem(this._getItemAtRow(rows[i]-i).getID());
+
 		
 		//remove row from tree:
 		this._hideItem(rows[i]-i);
@@ -110,6 +113,12 @@ Scholar.ItemTreeView.prototype.deleteSelection = function()
 	this._treebox.endUpdateBatch();
 	
 	this._refreshHashMap();
+}
+
+Scholar.ItemTreeView.prototype.searchText = function(search)
+{
+	//does nothing, right now.
+//	this._refreshHashMap();
 }
 
 Scholar.ItemTreeView.prototype._refreshHashMap = function()

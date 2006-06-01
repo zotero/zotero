@@ -15,7 +15,7 @@ MetadataPane = new function()
 	
 	function init()
 	{
-		_metadataPane = document.getElementById('metadata-pane');
+		_metadataPane = document.getElementById('scholar-metadata');
 		_dynamicFields = document.getElementById('editpane-dynamic-fields');
 		_dynamicCreators = document.getElementById('editpane-dynamic-creators');
 		_editButton = document.getElementById('metadata-pane-edit-button');
@@ -194,4 +194,4 @@ MetadataPane = new function()
 	}
 }
 
-document.addEventListener("load", function(e) { MetadataPane.init(e); }, false);
+addEventListener("load", function(e) { MetadataPane.init(e); }, false);

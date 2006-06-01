@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
-<?xml-stylesheet href="chrome://scholar/skin/scholar.css" type="text/css"?>
 <?xml-stylesheet href="chrome://scholar/skin/overlay.css" type="text/css"?>
 <!DOCTYPE window SYSTEM "chrome://scholar/locale/scholar.dtd">
 
 <overlay id="scholar"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	<?xul-overlay href="metadataPane.xul" ?>
 	
     <!-- Include the global XPCOM object -->
 	<script src="include.js"/>
@@ -18,6 +18,19 @@
 		<command id="cmd_scholar_newCollection" oncommand="ScholarPane.newCollection();"/>
 		<command id="cmd_scholar_search" oncommand="ScholarPane.search();"/>
 	</commandset>
+	
+	<window id="main-window">
+		<vbox id="scholar-floater" hidden="true">
+			<toolbar id="scholar-floater-handle">
+				<label value="Scholar Quick Info"/>
+				<spacer flex="1"/>
+			</toolbar>
+			<vbox id="scholar-metadata"/>
+			<vbox id="scholar-notes">
+				<textbox value="Notes.... lorem ispum delorum..." multiline="true" flex="1"/>
+			</vbox>
+		</vbox>
+	</window>
 	
 	<vbox id="appcontent">
 		<vbox id="scholar-pane" position="1" persist="height collapsed">
@@ -37,7 +50,7 @@
 				<splitter id="scholar-tree-splitter" resizebefore="closest" resizeafter="closest"/>
 				<tree 
 					id="items-tree" 
-					enableColumnDrag="true"
+					enableColumnDrag="true" onkeypress="if(event.keyCode == event.DOM_VK_BACK_SPACE || event.keyCode == event.DOM_VK_DELETE){ ScholarPane.deleteSelection(); return false; }"
 					onselect="ScholarPane.itemSelected();"
 					persist="width" flex="5">
 					<treecols>
@@ -81,6 +94,10 @@
 					<menupopup>
 					</menupopup>
 				</toolbarbutton>
+				<spacer flex="1"/>
+<!--				<toolbarbutton class="scholar-toggler" id="tb-view" label="View" checked="true"				oncommand="ScholarPane.toggleView('view')"/> -->
+				<toolbarbutton class="scholar-toggler" id="tb-metadata" label="Metadata" checked="true"		oncommand="ScholarPane.toggleView('metadata')"/>
+				<toolbarbutton class="scholar-toggler" id="tb-notes" label="Notes" checked="true"			oncommand="ScholarPane.toggleView('notes')"/>
 				<spacer flex="1"/>
 				<label value="Search:" control="tb-search"/>
 				<textbox id="tb-search" type="timed" timeout="500" command="cmd_scholar_search"/>
