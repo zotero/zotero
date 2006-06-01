@@ -127,7 +127,7 @@ MetadataPane = new function()
 	function getFullFieldList(item)
 	{
 		var fields = Scholar.ItemFields.getItemTypeFields(item.getField("itemTypeID"));
-		var fieldNames = new Array("title","dateAdded","dateModified","source","rights");
+		var fieldNames = new Array("title","dateAdded","dateModified");
 		for(var i = 0; i<fields.length; i++)
 			fieldNames.push(Scholar.ItemFields.getName(fields[i]));
 		return fieldNames;

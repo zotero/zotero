@@ -5,7 +5,7 @@
 <!ENTITY items.dateAdded_column 		"Date Added">
 <!ENTITY items.dateModified_column	 	"Date Modified">
 
-<!ENTITY folders.name_column 			"Name">
+<!ENTITY collections.name_column 			"Name">
 
 <!ENTITY creators.firstname 			"First name">
 <!ENTITY creators.lastname 				"Last name">
@@ -18,7 +18,7 @@
 
 <!ENTITY menuitem.newItem.label    		"New Item...">
 <!ENTITY menuitem.newItem.accesskey 	"n">
-<!ENTITY menuitem.newFolder.label       "New Folder...">
+<!ENTITY menuitem.newCollection.label   "New Collection...">
 <!ENTITY menuitem.newFolder.accesskey   "o">
 
 

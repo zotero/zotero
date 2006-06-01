@@ -2,10 +2,22 @@ var thisItem;
 
 function init()
 {
-	thisItem = Scholar.Items.get(getArgument("id"));
-	
-	document.getElementById('view').setAttribute('src','http://www.google.com/search?q='+encodeURIComponent('"'+thisItem.getField("title")+'"')+'&btnI');
-	MetadataPane.viewItem(thisItem);
+	if(thisItem)
+		return;
+		
+	var id = getArgument("id");
+	if(id)
+	{
+		thisItem = Scholar.Items.get(id);
+		document.getElementById('view').setAttribute('src','http://www.google.com/search?q='+encodeURIComponent('"'+thisItem.getField("title")+'"')+'&btnI');
+		MetadataPane.viewItem(thisItem);
+	}
+	else
+	{
+		thisItem = new Scholar.Item(getArgument('new'));
+		MetadataPane.viewItem(thisItem);
+		MetadataPane.toggleEdit();
+	}
 }
 
 function toggle(id)

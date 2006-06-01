@@ -8,7 +8,7 @@ var ScholarPane = new function()
 	this.init = init;
 	this.toggleScholar = toggleScholar;
 	this.newItem = newItem;
-	this.newFolder = newFolder;
+	this.newCollection = newCollection;
 	this.folderSelected = folderSelected;
 	this.itemSelected = itemSelected;
 	this.deleteSelection = deleteSelection;
@@ -18,7 +18,7 @@ var ScholarPane = new function()
 	{
 		foldersView = new Scholar.FolderTreeView(); //pass params here?
 		document.getElementById('folders-tree').view = foldersView;
-		document.getElementById('items-tree').view = null;
+		foldersView.selection.select(0);
 	
 		var addMenu = document.getElementById('tb-add').firstChild;
 		var itemTypes = Scholar.ItemTypes.getTypes();
@@ -41,12 +41,12 @@ var ScholarPane = new function()
 	
 	function newItem(typeID)
 	{
-		alert("new item of type: "+typeID);
+		document.getElementById('content').loadURI('chrome://scholar/content/view.xul?new='+typeID);
 	}
 	
-	function newFolder()
+	function newCollection()
 	{
-		alert("new folder");
+		alert("new collection");
 	}
 	
 	function folderSelected()

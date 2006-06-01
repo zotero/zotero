@@ -13,21 +13,22 @@
     <script src="itemTreeView.js"/>
     <script src="folderTreeView.js"/>
 	
-	<command id="cmd_scholar_newItem" oncommand="ScholarPane.newItem(1);"/>
-	<command id="cmd_scholar_newFolder" oncommand="ScholarPane.newFolder();"/>
-	<command id="cmd_scholar_search" oncommand="ScholarPane.search();"/>
-
+	<commandset id="mainCommandSet">
+		<command id="cmd_scholar_newItem" oncommand="ScholarPane.newItem(1);"/>
+		<command id="cmd_scholar_newCollection" oncommand="ScholarPane.newCollection();"/>
+		<command id="cmd_scholar_search" oncommand="ScholarPane.search();"/>
+	</commandset>
+	
 	<vbox id="appcontent">
 		<vbox id="scholar-pane" position="1" persist="height collapsed">
 			<hbox flex="1">				
-				<tree id="folders-tree"
-					style="-moz-user-focus: ignore;" hidecolumnpicker="true"
-					onselect="ScholarPane.folderSelected();"
+				<tree id="folders-tree" hidecolumnpicker="true"
+					onselect="ScholarPane.folderSelected();" seltype="single"
 					persist="width" flex="1">
 					<treecols>
 						<treecol
 							id="name_column"
-							label="&folders.name_column;"
+							label="&collections.name_column;"
 							flex="1"
 							primary="true"/>
 					</treecols>
@@ -75,7 +76,7 @@
 				</tree>
 			</hbox>
 			<toolbar id="scholar-toolbar" align="center">
-				<toolbarbutton label="&menuitem.newFolder.label;" command="cmd_scholar_newFolder"/>
+				<toolbarbutton label="&menuitem.newCollection.label;" command="cmd_scholar_newCollection"/>
 				<toolbarbutton id="tb-add" label="&menuitem.newItem.label;" type="menu">
 					<menupopup>
 					</menupopup>

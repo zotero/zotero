@@ -12,9 +12,9 @@ Scholar.FolderTreeView.prototype.setTree = function(treebox)
 		return;
 	this._treebox = treebox;
 	
-	var newRows = Scholar.Items.getTreeRows(0,'folders');
+	var newRows = Scholar.getCollections();
 	for(var i = 0; i < newRows.length; i++)
-		this._showItem(new Scholar.ItemGroup('folder',newRows[i]),  0, this._dataItems.length); //item ref, level, beforeRow
+		this._showItem(new Scholar.ItemGroup('collection',newRows[i]),  0, this._dataItems.length); //item ref, level, beforeRow
 		
 	this._refreshHashMap();
 }
@@ -29,13 +29,13 @@ Scholar.FolderTreeView.prototype.getCellText = function(row, column)
 		return "";
 }
 
-Scholar.FolderTreeView.prototype.isContainer = function(row) 		{ return this._getItemAtRow(row).isFolder(); }
+Scholar.FolderTreeView.prototype.isContainer = function(row) 		{ return this._getItemAtRow(row).isCollection(); }
 Scholar.FolderTreeView.prototype.isContainerOpen = function(row)  { return this._dataItems[row][1]; }
 Scholar.FolderTreeView.prototype.isContainerEmpty = function(row)
 {
 	var itemGroup = this._getItemAtRow(row);
-	if(itemGroup.isFolder())
-		return !itemGroup.ref.hasChildFolders();
+	if(itemGroup.isCollection())
+		return !itemGroup.ref.hasChildCollections();
 	else
 		return true;
 }
@@ -79,12 +79,12 @@ Scholar.FolderTreeView.prototype.toggleOpenState = function(row)
 	}
 	else
 	{
-		var newRows = Scholar.Items.getTreeRows(this._getItemAtRow(row).ref.getID(),'folders'); //Get children
+		var newRows = Scholar.getCollections(this._getItemAtRow(row).ref.getID()); //Get children
 		
 		for(var i = 0; i < newRows.length; i++)
 		{
 			count++;
-			this._showItem(new Scholar.ItemGroup('folder',newRows[i]), thisLevel+1, row+i+1); //insert new row
+			this._showItem(new Scholar.ItemGroup('collection',newRows[i]), thisLevel+1, row+i+1); //insert new row
 		}
 	}
 	this._dataItems[row][1] = !this._dataItems[row][1];  //toggle container open value
@@ -117,12 +117,12 @@ Scholar.FolderTreeView.prototype.deleteSelection = function()
 	if(this.selection.count == 0)
 		return;
 
-	//collapse open folders
+	//collapse open collections
 	for(var i=0; i<this.rowCount; i++)
 		if(this.selection.isSelected(i) && this.isContainer(i) && this.isContainerOpen(i))
 			this.toggleOpenState(i);
 	
-	//create an array of selected items/folders
+	//create an array of selected items/collections
 	var rows = new Array();
 	var start = new Object();
 	var end = new Object();
@@ -137,7 +137,7 @@ Scholar.FolderTreeView.prototype.deleteSelection = function()
 	this._treebox.beginUpdateBatch();
 	for (var i=0; i<rows.length; i++)
 	{
-		//erase item/folder from DB:
+		//erase item/collection from DB:
 		this._getItemAtRow(rows[i]-i).erase();		
 		
 		//remove row from tree:
@@ -152,15 +152,15 @@ Scholar.FolderTreeView.prototype.deleteSelection = function()
 
 Scholar.FolderTreeView.prototype._refreshHashMap = function()
 {	
-	// Create hash map of folder and object ids to row indexes
+	// Create hash map of collection and object ids to row indexes
 	
-	this._folderRowMap = new Array();
+	this._collectionRowMap = new Array();
 	for(var i=0; i < this.rowCount; i++){
 		if (this.isContainer(i)){
-			this._folderRowMap[this._getItemAtRow(i).ref.getID()] = i;
+			this._collectionRowMap[this._getItemAtRow(i).ref.getID()] = i;
 		}
 	}
-	//Scholar.debug(Scholar.varDump(this.folderRowMap));
+	//Scholar.debug(Scholar.varDump(this.collectionRowMap));
 	//Scholar.debug(Scholar.varDump(this.objectRowMap));
 }
 
@@ -175,14 +175,14 @@ Scholar.ItemGroup.prototype.isLibrary = function()
 	return this.type == 'library';
 }
 
-Scholar.ItemGroup.prototype.isFolder = function()
+Scholar.ItemGroup.prototype.isCollection = function()
 {
-	return this.type == 'folder';
+	return this.type == 'collection';
 }
 
 Scholar.ItemGroup.prototype.getName = function()
 {
-	if(this.isFolder())
+	if(this.isCollection())
 		return this.ref.getName();
 	else if(this.isLibrary())
 		return "Library";
@@ -192,10 +192,10 @@ Scholar.ItemGroup.prototype.getName = function()
 
 Scholar.ItemGroup.prototype.getChildItems = function()
 {
-	if(this.isFolder())
-		return Scholar.Items.getTreeRows(this.ref.getID(),'items');
+	if(this.isCollection())
+		return Scholar.getItems(this.ref.getID());
 	else if(this.isLibrary())
-		return Scholar.Items.getAll();
+		return Scholar.getItems();
 	else
 		return null;
 }
