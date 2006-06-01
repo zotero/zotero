@@ -19,6 +19,7 @@ Scholar.DB = new function(){
 	this.beginTransaction = beginTransaction;
 	this.commitTransaction = commitTransaction;
 	this.rollbackTransaction = rollbackTransaction;
+	this.transactionInProgress = transactionInProgress;
 	
 	/////////////////////////////////////////////////////////////////
 	//
@@ -229,6 +230,12 @@ Scholar.DB = new function(){
 			_transactionRollback = false;
 			db.rollbackTransaction();
 		}
+	}
+	
+	
+	function transactionInProgress(){
+		var db = _getDBConnection();
+		return db.transactionInProgress;
 	}
 	
 	
