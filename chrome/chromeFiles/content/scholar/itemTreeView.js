@@ -6,7 +6,24 @@ Scholar.ItemTreeView = function(itemGroup)
 	this._itemGroup = itemGroup;
 	this.refresh();
 	
-//	Scholar.registerItemTree(this);
+//	this._unregisterID = Scholar.registerItemTree(this);
+}
+
+Scholar.ItemTreeView.prototype.refresh = function()
+{
+	this._dataItems = new Array();
+	this.rowCount = 0;
+	
+	var newRows = this._itemGroup.getChildItems();
+	for(var i = 0; i < newRows.length; i++)
+		this._showItem(newRows[i], i+1); //item ref, before row
+	
+	this._refreshHashMap();
+}
+
+Scholar.ItemTreeView.prototype.unregister = function()
+{
+	Scholar.unregisterItemTree(this._unregisterID);
 }
 
 Scholar.ItemTreeView.prototype.setTree = function(treebox)
@@ -166,18 +183,6 @@ Scholar.ItemTreeView.prototype.notify = function(action, type, id)
 	{
 		return;
 	}
-	
-	this._refreshHashMap();
-}
-
-Scholar.ItemTreeView.prototype.refresh = function()
-{
-	this._dataItems = new Array();
-	this.rowCount = 0;
-	
-	var newRows = this._itemGroup.getChildItems();
-	for(var i = 0; i < newRows.length; i++)
-		this._showItem(newRows[i], i+1); //item ref, before row
 	
 	this._refreshHashMap();
 }

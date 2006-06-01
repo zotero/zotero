@@ -40,11 +40,13 @@ var ScholarPane = new function()
 		
 		document.getElementById('scholar-pane').setAttribute('collapsed',!visible);
 		document.getElementById('scholar-splitter').setAttribute('collapsed',!visible);
+		document.getElementById('scholar-floater').hidden = (!visible || itemsView.selection.count != 1);
 	}
 	
 	function newItem(typeID)
 	{
-		document.getElementById('content').loadURI('chrome://scholar/content/view.xul?new='+typeID);
+		MetadataPane.viewItem(new Scholar.Item(typeID));
+		MetadataPane.toggleEdit();
 	}
 	
 	function newCollection()
@@ -54,6 +56,9 @@ var ScholarPane = new function()
 	
 	function folderSelected()
 	{
+		//if(itemsView)
+		//	itemsView.unregister();
+			
 		if(foldersView.selection.count == 1 && foldersView.selection.currentIndex != -1)
 		{
 			itemsView = new Scholar.ItemTreeView(foldersView._getItemAtRow(foldersView.selection.currentIndex));
@@ -61,11 +66,11 @@ var ScholarPane = new function()
 		}
 		else if(foldersView.selection.count == 0)
 		{
-			document.getElementById('items-tree').view = null;
+			document.getElementById('items-tree').view = itemsView = null;
 		}
 		else
 		{
-			document.getElementById('items-tree').view = null;
+			document.getElementById('items-tree').view = itemsView = null;
 		}
 		
 	}

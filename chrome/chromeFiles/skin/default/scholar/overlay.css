@@ -67,13 +67,11 @@ tree #items-tree
 
 #scholar-floater vbox
 {
-	
 	border: 1px solid #a5a5a5;
 	background: #f5f5f5;
 	
 	width: 400px;
 	max-width: 400px;
-	margin-top: 5px;
 }
 
 #scholar-metadata
