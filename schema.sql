@@ -123,6 +123,7 @@
     DROP INDEX IF EXISTS itemID;
     CREATE INDEX itemID ON collectionItems(itemID);
     
+    DROP TABLE IF EXISTS scrapers;
     CREATE TABLE scrapers (
         scraperID INTEGER PRIMARY KEY,
         centralScraperID INT,
