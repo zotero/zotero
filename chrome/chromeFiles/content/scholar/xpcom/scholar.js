@@ -146,6 +146,11 @@ var Scholar = new function(){
 	 * values and/or an arbitrary number of individual values
 	 */
 	function flattenArguments(args){
+		// Put passed scalar values into an array
+		if (typeof args!='object'){
+			args = [args];
+		}
+		
 		var returns = new Array();
 		
 		for (var i=0; i<args.length; i++){

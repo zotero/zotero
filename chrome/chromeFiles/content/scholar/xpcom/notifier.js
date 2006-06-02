@@ -74,7 +74,7 @@ Scholar.Notifier = new function(){
 	}
 	
 	function _unregister(type, hash){
-		Scholar.debug("Unregistering ' + type + ' in notifier with hash '" + hash + "'", 4);
+		Scholar.debug("Unregistering " + type + " in notifier with hash '" + hash + "'", 4);
 		delete _observers[type][hash];
 	}
 }
