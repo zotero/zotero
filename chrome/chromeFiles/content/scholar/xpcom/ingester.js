@@ -83,7 +83,7 @@ Scholar.Ingester.Utilities.prototype.trimString = function(s) {
 Scholar.Ingester.Utilities.prototype.gatherElementsOnXPath = function(doc, parentNode, xpath, nsResolver) {
 	var elmts = [];
 	
-	var iterator = doc.evaluate(xpath, parentNode, nsResolver, XPathResult.ANY_TYPE,null);
+	var iterator = doc.evaluate(xpath, parentNode, nsResolver, Components.interfaces.nsIDOMXPathResult.ANY_TYPE,null);
 	var elmt = iterator.iterateNext();
 	var i = 0;
 	while (elmt) {
@@ -180,7 +180,7 @@ Scholar.Ingester.Utilities.prototype.collectURLsWithSubstring = function(doc, su
 	var urls = [];
 	var addedURLs = [];
 	
-	var aElements = doc.evaluate("//a", doc, null, XPathResult.ANY_TYPE,null);
+	var aElements = doc.evaluate("//a", doc, null, Components.interfaces.nsIDOMXPathResult.ANY_TYPE,null);
 	var aElement = aElements.iterateNext();
 	while (aElement) {
 		var href = aElement.href;
@@ -294,7 +294,6 @@ Scholar.Ingester.Utilities.HTTPUtilities.prototype.stateChange = function(xmlhtt
  *
  * Private properties:
  * _sandbox - sandbox for code execution
- * _progressDialog - dialog showing scrape progress
  */
 
 //////////////////////////////////////////////////////////////////////////////
@@ -365,15 +364,17 @@ Scholar.Ingester.Document.prototype.canScrape = function(currentScraper) {
 
 /*
  * Populate model with semantic data regarding this page using _scraper_
+ * Callback will be executed once scraping is complete
  */
-Scholar.Ingester.Document.prototype.scrapePage = function() {
+Scholar.Ingester.Document.prototype.scrapePage = function(callback) {
+	if(callback) {
+		this._scrapeCallback = callback;
+	}
+	
 	Scholar.debug("Scraping "+this.browser.contentDocument.location.href);
 	
 	var scraperSandbox = this.sandbox;
 	
-	this._progressDialog = openDialog("chrome://scholar/content/ingester/scrape-progress.xul", 
-		"_blank", "chrome,all,dialog=no", null, null, null);
-		
 	Components.utils.evalInSandbox(this.scraper.scraperJavaScript, scraperSandbox);
 	
 	// If synchronous, call _scrapePageComplete();
@@ -406,12 +407,14 @@ Scholar.Ingester.Document.prototype.scrapePage = function() {
  *          function before returning
  */
 
-/*
+/*`
  * Called when scraping (synchronous or asynchronous) is complete
  */
 Scholar.Ingester.Document.prototype._scrapePageComplete = function() {
 	this._updateDatabase();
-	this._progressDialog.close();
+	if(this._scrapeCallback) {
+		this._scrapeCallback();
+	}
 }
  
 Scholar.Ingester.Document.prototype._generateSandbox = function() {
@@ -420,7 +423,7 @@ Scholar.Ingester.Document.prototype._generateSandbox = function() {
 	this.sandbox.doc = this.sandbox.browser.contentDocument;
 	this.sandbox.utilities = new Scholar.Ingester.Utilities;
 	this.sandbox.model = this.model;
-	this.sandbox.XPathResult = XPathResult;
+	this.sandbox.XPathResult = Components.interfaces.nsIDOMXPathResult;
 	
 	this.sandbox.wait = function(){ this._waitForCompletion = true; };
 	this.sandbox.done = function(){ this._scrapePageComplete(); };
@@ -456,15 +459,12 @@ Scholar.Ingester.Document.prototype._updateDatabase = function() {
 		if(this.model.data[uri][prefixDC + 'identifier']) {
 			newItem.setField("ISBN", this.model.data[uri][prefixDC + 'identifier'].substring(5));
 		}
-		if(this.model.data[uri][prefixDummy + 'pages']) {
-			newItem.setField("pages", this.model.data[uri][prefixDummy + 'pages']);
-		}
 		if(this.model.data[uri][prefixDC + 'creator']) {
 			var creator = this.model.data[uri][prefixDC + 'creator'];
 			
 			var spaceIndex = creator.lastIndexOf(" ");
-			var firstName = creator.substring(spaceIndex+1, creator.length);
-			var lastName = creator.substring(0, spaceIndex);
+			var lastName = creator.substring(spaceIndex+1, creator.length);
+			var firstName = creator.substring(0, spaceIndex);
 			
 			newItem.setCreator(0, firstName, lastName);
 		}

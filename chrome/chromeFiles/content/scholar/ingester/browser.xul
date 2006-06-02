@@ -6,8 +6,7 @@
 <overlay id="scholar-ingester-overlay" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
 	<script src="../include.js"/>
-	
-    <script src="ingester.js"/>
+
     <script src="browser.js"/>
     
 	<script type="application/x-javascript">
