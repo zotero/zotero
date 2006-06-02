@@ -22,7 +22,7 @@ Scholar.Notifier = new function(){
 	}
 	
 	function unregisterItemTree(hash){
-		_unregister('columnTree', hash);
+		_unregister('itemTree', hash);
 	}
 	
 	/**
@@ -74,6 +74,7 @@ Scholar.Notifier = new function(){
 	}
 	
 	function _unregister(type, hash){
+		Scholar.debug('Unregistering ' + type + ' in notifier with hash ' + hash, 4);
 		delete _observers[type][hash];
 	}
 }
