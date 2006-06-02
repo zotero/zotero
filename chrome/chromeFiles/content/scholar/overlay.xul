@@ -21,8 +21,19 @@
 	
 	<window id="main-window">
 		<vbox id="scholar-floater" hidden="true">
-			<vbox id="scholar-metadata"/>
+			<vbox id="scholar-metadata">
+                <toolbar>
+                	<label value="Metadata"/>
+            		<spacer flex="1"/>
+					<toolbarbutton class="tabs-closebutton" oncommand="ScholarPane.toggleView('metadata')"/>
+				</toolbar>
+			</vbox>
 			<vbox id="scholar-notes">
+                <toolbar>
+                	<label value="Notes"/>
+            		<spacer flex="1"/>
+                	<toolbarbutton class="tabs-closebutton" oncommand="ScholarPane.toggleView('notes')"/>
+                </toolbar>
 				<textbox value="Notes.... lorem ispum delorum..." multiline="true" flex="1"/>
 			</vbox>
 		</vbox>

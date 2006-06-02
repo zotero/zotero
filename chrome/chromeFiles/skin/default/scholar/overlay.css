@@ -74,13 +74,24 @@ tree #items-tree
 	max-width: 400px;
 }
 
-#scholar-metadata
+#scholar-floater vbox:first-child
 {
+	margin-bottom: 5px;
 }
 
-#scholar-metadata toolbar
+#scholar-metadata
+{
+
+}
+
+#metadata-toolbar
 {
 	border-bottom: none;
+}
+
+#scholar-metadata .addremove
+{
+	font-weight: bold;
 }
 
 #scholar-notes

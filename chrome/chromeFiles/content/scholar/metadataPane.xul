@@ -15,10 +15,16 @@
 			<rows id="editpane-dynamic-fields">
 			</rows>
 		</grid>
+		<toolbar id="metadata-creators-toolbar" hidden="true">
+			<label value="Creators"/>
+			<spacer flex="1"/>
+			<toolbarbutton label="+" oncommand="MetadataPane.addCreator()"/>
+		</toolbar>
 		<grid>
 			<columns>
 				<column flex="1"/>
 				<column flex="1"/>
+				<column/>
 				<column/>
 				<column/>
 			</columns>
@@ -27,11 +33,9 @@
 			</rows>
 		</grid>
 		<spacer flex="1"/>
-		<toolbar>
+		<toolbar id="metadata-toolbar">
 			<toolbarbutton id="metadata-pane-edit-button" label="Edit" oncommand="MetadataPane.toggleEdit()"/>
 			<spacer flex="1" />
-			<toolbarbutton id="tb-creator-add" label="Add Creator" oncommand="MetadataPane.addCreator()" disabled="true"/>
-
 		</toolbar>
 	</vbox>
 	

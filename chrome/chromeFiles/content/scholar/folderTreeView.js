@@ -187,6 +187,7 @@ Scholar.FolderTreeView.prototype.getImageSrc = function(row, col) 				{ }
 Scholar.FolderTreeView.prototype.performAction = function(action) 				{ }
 Scholar.FolderTreeView.prototype.performActionOnCell = function(action, row, col)	{ }
 Scholar.FolderTreeView.prototype.getProgressMode = function(row, col) 			{ }
+Scholar.FolderTreeView.prototype.cycleHeader = function(column)					{ }
 
 Scholar.FolderTreeView.prototype.deleteSelection = function()
 {
