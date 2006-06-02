@@ -356,7 +356,7 @@ Scholar.Ingester.Document.prototype.canScrape = function(currentScraper) {
 							   currentScraper.scraperDetectCode +
 							   "\n})()", scraperSandbox);
 		} catch(e) {
-			throw e+' in scraper '+currentScraper.label;
+			throw e+' in scraperDetectCode for '+currentScraper.label;
 		}
 	}
 	return canScrape;
@@ -375,7 +375,11 @@ Scholar.Ingester.Document.prototype.scrapePage = function(callback) {
 	
 	var scraperSandbox = this.sandbox;
 	
-	Components.utils.evalInSandbox(this.scraper.scraperJavaScript, scraperSandbox);
+	try {
+		Components.utils.evalInSandbox(this.scraper.scraperJavaScript, scraperSandbox);
+	} catch(e) {
+		throw e+' in scraperJavaScript for '+this.scraper.label;
+	}
 	
 	// If synchronous, call _scrapePageComplete();
 	if(!scraperSandbox._waitForCompletion) {
@@ -413,7 +417,7 @@ Scholar.Ingester.Document.prototype.scrapePage = function(callback) {
 Scholar.Ingester.Document.prototype._scrapePageComplete = function() {
 	this._updateDatabase();
 	if(this._scrapeCallback) {
-		this._scrapeCallback();
+		this._scrapeCallback(this);
 	}
 }
  
@@ -469,5 +473,10 @@ Scholar.Ingester.Document.prototype._updateDatabase = function() {
 			newItem.setCreator(0, firstName, lastName);
 		}
 		newItem.save();
+		
+		// First one is stored so as to be accessible
+		if(!this.item) {
+			this.item = newItem;
+		}
 	}
 }
