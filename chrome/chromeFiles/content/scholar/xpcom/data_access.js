@@ -597,7 +597,14 @@ Scholar.Item.prototype.save = function(){
 	
 	Scholar.Items.reload(this.getID());
 	
-	return isNew ? this.getID() : true;
+	if (isNew){
+		Scholar.Notifier.trigger('add', 'item', this.getID());
+		return this.getID();
+	}
+	else {
+		Scholar.Notifier.trigger('modify', 'item', this.getID());
+		return true;
+	}
 }
 
 
@@ -635,12 +642,12 @@ Scholar.Item.prototype.erase = function(){
 		throw (e);
 	}
 	
+	Scholar.Items.unload(this.getID());
+	
 	// If we're not in the middle of a larger commit, trigger the notifier now
 	if (!Scholar.DB.transactionInProgress()){
 		Scholar.Notifier.trigger('remove', 'item', this.getID());
 	}
-	
-	Scholar.Items.unload(this.getID());
 }
 
 
@@ -952,6 +959,9 @@ Scholar.Collection.prototype.getName = function(){
 	return this._name;
 }
 
+/**
+* Returns the parent collection
+**/
 Scholar.Collection.prototype.getParent = function(){
 	return this._parent;
 }
@@ -1074,11 +1084,11 @@ Scholar.Collection.prototype.erase = function(deleteItems){
 	
 	Scholar.DB.commitTransaction();
 	
-	Scholar.Notifier.trigger('remove', 'collection', collections);
-	Scholar.Notifier.trigger('remove', 'item', items);
-	
 	// Clear deleted collection from internal memory
 	Scholar.Collections.unload(collections);
+	
+	Scholar.Notifier.trigger('remove', 'collection', collections);
+	Scholar.Notifier.trigger('remove', 'item', items);
 }
 
 

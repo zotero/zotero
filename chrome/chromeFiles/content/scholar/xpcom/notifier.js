@@ -66,7 +66,7 @@ Scholar.Notifier = new function(){
 		}
 		while (_observers[type][hash]);
 		
-		Scholar.debug('Registering ' + type + " with hash '" + hash + "'", 4);
+		Scholar.debug('Registering ' + type + " in notifier with hash '" + hash + "'", 4);
 		_observers[type][hash] = ref;
 		return hash;
 	}
