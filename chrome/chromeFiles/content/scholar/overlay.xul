@@ -100,14 +100,14 @@
 				<spacer flex="1"/>
 				<label value="Search:" control="tb-search"/>
 				<textbox id="tb-search" type="timed" timeout="500" command="cmd_scholar_search"/>
-                <toolbarbutton class="tabs-closebutton" oncommand="ScholarPane.toggleScholar()"/>
+                <toolbarbutton class="tabs-closebutton" oncommand="ScholarPane.toggleDisplay()"/>
 			</toolbar>
 		</vbox>
 		<splitter id="scholar-splitter" resizebefore="closest" resizeafter="closest" position="2" persist="collapsed"/>
 	</vbox>
 	
 	<statusbar id="status-bar">
-		<statusbarpanel id="scholar-load-status" label="Scholar is NOT loaded" onclick="ScholarPane.toggleScholar();"/>
+		<statusbarpanel id="scholar-load-status" label="Scholar is NOT loaded" onclick="ScholarPane.toggleDisplay();"/>
 	</statusbar>
 	
 	<script>
@@ -121,7 +121,7 @@
 	<menupopup id="menu_ToolsPopup">
 		<menuseparator id="scholarSeparator" insertbefore="devToolsSeparator"/>
 		<menuitem id="tools-scholar" insertbefore="devToolsSeparator"
-			oncommand="ScholarPane.toggleScholar();" label="Scholar"
+			oncommand="ScholarPane.toggleDisplay();" label="Scholar"
 			key="key_openScholar"/>
 	</menupopup>
   

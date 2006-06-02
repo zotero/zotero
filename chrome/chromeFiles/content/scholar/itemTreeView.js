@@ -40,19 +40,14 @@ Scholar.ItemTreeView.prototype.getCellText = function(row, column)
 	
 	if(column.id == 'dateAdded' || column.id == 'dateModified')		//this is not so much that we will use this format for date, but a simple template for later revisions.
 	{
-		//
-		var d = val.split(' ');
-		var date = d[0].split('-');
-		var time = d[1].split('-');
-		
 		var myDate = new Date();
-		myDate.setFullYear(date[0],date[1]-1,date[2]);
 		
-		val = myDate.getMonth()+1 + '/' + myDate.getDate() + '/' + myDate.getFullYear();
+		myDate.setTime(Date.parse(val.replace("-","/").replace("-","/")));
+		
+		val = myDate.getMonth()+1 + '/' + myDate.getDate() + '/' + myDate.getFullYear() + " " + myDate.getHours() + ":" + myDate.getMinutes();
 	}
 	
 	return val;
-	
 }
 
 
@@ -100,24 +95,24 @@ Scholar.ItemTreeView.prototype.deleteSelection = function()
 		return;
 
 	//create an array of selected items
-	var rows = new Array();
+	var items = new Array();
 	var start = new Object();
 	var end = new Object();
 	for (var i=0, len=this.selection.getRangeCount(); i<len; i++)
 	{
 		this.selection.getRangeAt(i,start,end);
 		for (var j=start.value; j<=end.value; j++)
-			rows.push(j);
+			items.push(this._getItemAtRow(j));
 	}
 	
 	//iterate and erase...
 	this._treebox.beginUpdateBatch();
-	for (var i=0; i<rows.length; i++)
+	for (var i=0; i<items.length; i++)
 	{
 		if(this._itemGroup.isLibrary()) //erase item from DB
-			this._getItemAtRow(rows[i]-i).erase();
+			items[i].erase();
 		else if(this._itemGroup.isCollection())
-			this._itemGroup.ref.removeItem(this._getItemAtRow(rows[i]-i).getID());
+			this._itemGroup.ref.removeItem(items[i].getID());
 
 		/* Disabled for now (notifier)
 		//remove row from tree:
@@ -125,8 +120,6 @@ Scholar.ItemTreeView.prototype.deleteSelection = function()
 		this._treebox.rowCountChanged(rows[i]-i, -1); */
 	}
 	this._treebox.endUpdateBatch();
-	
-	this._refreshHashMap();
 }
 
 Scholar.ItemTreeView.prototype.searchText = function(search)

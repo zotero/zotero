@@ -1,12 +1,16 @@
+/*
+ * This object contains the various functions for the interface
+ */
 var ScholarPane = new function()
 {
-	
 	var foldersView;
 	var itemsView;
 	var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"].getService(Components.interfaces.nsIPromptService);
 	
-	this.init = init;
-	this.toggleScholar = toggleScholar;
+	//Privileged methods
+	this.onLoad = onLoad;
+	this.onUnload = onUnload;
+	this.toggleDisplay = toggleDisplay;
 	this.newItem = newItem;
 	this.newCollection = newCollection;
 	this.folderSelected = folderSelected;
@@ -16,12 +20,19 @@ var ScholarPane = new function()
 	this.search = search;
 	this.toggleView = toggleView;
 	
-	function init()
+	/*
+	 * Called when the window is open
+	 */
+	function onLoad()
 	{
-		foldersView = new Scholar.FolderTreeView(); //pass params here?
+		//Initialize folders view
+		foldersView = new Scholar.FolderTreeView();
 		document.getElementById('folders-tree').view = foldersView;
+
+		//select Library
 		foldersView.selection.select(0);
 	
+		//Create the add menu with each item type
 		var addMenu = document.getElementById('tb-add').firstChild;
 		var itemTypes = Scholar.ItemTypes.getTypes();
 		for(var i = 0; i<itemTypes.length; i++)
@@ -32,10 +43,23 @@ var ScholarPane = new function()
 			addMenu.appendChild(menuitem);
 		}
 		
-//		Drag.init(document.getElementById('scholar-floater-handle'),document.getElementById('scholar-floater'), 0, 400, 0, 500, true, true);
+		//Drag.init(document.getElementById('scholar-floater-handle'),document.getElementById('scholar-floater'), 0, 400, 0, 500, true, true);
 	}
 	
-	function toggleScholar()
+	/*
+	 * Called when the window closes
+	 */
+	function onUnload()
+	{
+		foldersView.unregister();
+		if(itemsView)
+			itemsView.unregister();
+	}
+
+	/*
+	 * Hides/displays the Scholar interface
+	 */
+	function toggleDisplay()
 	{
 		var visible = document.getElementById('scholar-pane').getAttribute('collapsed') == 'true';
 		
@@ -43,7 +67,10 @@ var ScholarPane = new function()
 		document.getElementById('scholar-splitter').setAttribute('collapsed',!visible);
 		document.getElementById('scholar-floater').hidden = (!visible || itemsView.selection.count != 1);
 	}
-	
+		
+	/*
+	 * Called when the window closes
+	 */
 	function newItem(typeID)
 	{
 		MetadataPane.viewItem(new Scholar.Item(typeID));
@@ -82,7 +109,7 @@ var ScholarPane = new function()
 	{
 		var editButton = document.getElementById('metadata-pane-edit-button');
 				
-		if(itemsView && itemsView.selection.count == 1)
+		if(itemsView && itemsView.selection.count == 1 && itemsView.selection.currentIndex != -1)
 		{
 			var item = itemsView._getItemAtRow(itemsView.selection.currentIndex);
 			
@@ -164,4 +191,5 @@ var ScholarCollectionsDragObserver =
 	}
 }
 
-window.addEventListener("load", function(e) { ScholarPane.init(e); }, false);
+window.addEventListener("load", function(e) { ScholarPane.onLoad(e); }, false);
+window.addEventListener("unload", function(e) { ScholarPane.onUnload(e); }, false);

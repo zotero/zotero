@@ -7,12 +7,17 @@ Scholar.FolderTreeView = function()
 	this._unregisterID = Scholar.Notifier.registerColumnTree(this);
 }
 
+/*
+ *  Unregisters itself from Scholar.Notifier (called on window close)
+ */
 Scholar.FolderTreeView.prototype.unregister = function()
 {
 	Scholar.Notifier.unregisterColumnTree(this._unregisterID);
 }
 
-//CALLED BY DATA LAYER ON CHANGE:
+/*
+ *  Is called by Scholar.Notifier on any changes to the data layer
+ */
 Scholar.FolderTreeView.prototype.notify = function(action, type, ids)
 {
 	ids = Scholar.flattenArguments(ids);
