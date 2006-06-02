@@ -667,12 +667,12 @@ Scholar.Item.prototype.erase = function(){
 		Scholar.Collections.get(parentCollectionIDs[i]).removeItem(this.getID());
 	}
 	
-	sql += 'DELETE FROM itemCreators WHERE itemID=' + this.getID() + ";\n";
-	sql += 'DELETE FROM itemKeywords WHERE itemID=' + this.getID() + ";\n";
-	sql += 'DELETE FROM itemData WHERE itemID=' + this.getID() + ";\n";
-	sql += 'DELETE FROM items WHERE itemID=' + this.getID() + ";\n";
+	sql = "DELETE FROM itemCreators WHERE itemID=?1;\n";
+	sql += "DELETE FROM itemKeywords WHERE itemID=?1;\n";
+	sql += "DELETE FROM itemData WHERE itemID=?1;\n";
+	sql += "DELETE FROM items WHERE itemID=?1;";
 	
-	Scholar.DB.query(sql);
+	Scholar.DB.query(sql, [{'int':this.getID()}]);
 	Scholar.Creators.purge();
 	
 	try {
