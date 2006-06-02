@@ -350,18 +350,23 @@ Scholar.Item.prototype.save = function(){
 			//
 			var sql = "UPDATE items SET ";
 			var sql2;
+			var sqlValues = [];
 			
 			if (this._changed.has('itemTypeID')){
-				sql += "itemTypeID='" +  this.getField('itemTypeID') + "', ";
+				sql += "itemTypeID=?, ";
+				sqlValues.push({'int':this.getField('itemTypeID')});
 			}
 			if (this._changed.has('title')){
-				sql += "title='" +  this.getField('title') + "', ";
+				sql += "title=?, ";
+				sqlValues.push({'string':this.getField('title')});
 			}
 			
 			// Always update modified time
 			sql += "dateModified=CURRENT_TIMESTAMP ";
-			sql += "WHERE itemID=" + this.getID() + ";\n";
+			sql += "WHERE itemID=?;\n";
+			sqlValues.push({'int':this.getID()});
 			
+			Scholar.DB.query(sql, sqlValues);
 			
 			//
 			// Creators
@@ -403,25 +408,40 @@ Scholar.Item.prototype.save = function(){
 						+ ' AND orderIndex=' + orderIndex;
 					
 					if (Scholar.DB.valueQuery(sql2)){
-						sql += 'UPDATE itemCreators SET '
-							+ 'creatorID=' + creatorID +', '
-							+ 'creatorTypeID=' + creator['creatorTypeID'] + ' '
-							+ 'WHERE itemID=' + this.getID()
-							+ ' AND orderIndex=' + orderIndex + ";\n";
+						sql = 'UPDATE itemCreators SET creatorID=?, '
+							+ 'creatorTypeID=? WHERE itemID=?'
+							+ " AND orderIndex=?;\n";
+							
+						sqlValues = [
+							{'int':creatorID},
+							{'int':creator['creatorTypeID']},
+							{'int':this.getID()},
+							{'int':orderIndex}
+						];
+						
+						Scholar.DB.query(sql, sqlValues);
 					}
 					// Otherwise insert
 					else {
-						sql += 'INSERT INTO itemCreators VALUES ('
-							+ itemID + ', ' + creatorID + ', '
-							+ creator['creatorTypeID'] + ', ' + orderIndex
-							+ ");\n";
+						sql = "INSERT INTO itemCreators VALUES (?,?,?,?);\n";
+						
+						sqlValues = [
+							{'int':itemID},
+							{'int':creatorID},
+							{'int':creator['creatorTypeID']},
+							{'int':orderIndex}
+						];
+						
+						Scholar.DB.query(sql, sqlValues);
 					}
 				}
 				
 				// Append the SQL to delete obsolete creators
 				//
 				// TODO: fix this so it actually purges the internal memory
-				sql += Scholar.Creators.purge(true) + "\n";
+				if (sql = Scholar.Creators.purge(true)){
+					Scholar.DB.query(sql);
+				}
 			}
 			
 			
@@ -438,28 +458,41 @@ Scholar.Item.prototype.save = function(){
 							+ ' AND fieldID=' + fieldID;
 						
 						if (Scholar.DB.valueQuery(sql2)){
-							sql += "UPDATE itemData SET value=";
+							sqlValues = [];
+							
+							sql = "UPDATE itemData SET value=?";
 							// Take advantage of SQLite's manifest typing
 							if (Scholar.ItemFields.isInteger(fieldID)){
-								sql += this.getField(fieldID);
+								sqlValues.push({'int':this.getField(fieldID)});
 							}
 							else {
-								sql += "'" + this.getField(fieldID) + "'";
+								sqlValues.push({'string':this.getField(fieldID)});
 							}
-							sql += " WHERE itemID=" + this.getID()
-								+ ' AND fieldID=' + fieldID + ";\n";
+							sql += " WHERE itemID=? AND fieldID=?;\n";
+							
+							sqlValues.push(
+								{'int':this.getID()},
+								{'int':fieldID}
+							);
+							
+							Scholar.DB.query(sql, sqlValues);
 						}
 						else {
-							sql += 'INSERT INTO itemData VALUES ('
-								+ this.getID() + ',' + fieldID + ',';
+							sql = "INSERT INTO itemData VALUES (?,?,?);\n";
 								
+							sqlValues = [
+								{'int':this.getID()},
+								{'int':fieldID},
+							];
+							
 							if (Scholar.ItemFields.isInteger(fieldID)){
-								sql += this.getField(fieldID);
+								sqlValues.push({'int':this.getField(fieldID)});
 							}
 							else {
-								sql += "'" + this.getField(fieldID) + "'";
+								sqlValues.push({'string':this.getField(fieldID)});
 							}
-							sql += ");\n";
+							
+							Scholar.DB.query(sql, sqlValues);
 						}
 					}
 					// If field changed and is empty, mark row for deletion
@@ -470,14 +503,13 @@ Scholar.Item.prototype.save = function(){
 				
 				// Delete blank fields
 				if (del.length){
-					sql += 'DELETE from itemData '
+					sql = 'DELETE from itemData '
 						+ 'WHERE itemID=' + this.getID() + ' '
 						+ 'AND fieldID IN (' + del.join() + ");\n";
+					Scholar.DB.query(sql);
 				}
 			}
 			
-			
-			Scholar.DB.query(sql);
 			Scholar.DB.commitTransaction();
 		}
 		catch (e){
@@ -528,24 +560,33 @@ Scholar.Item.prototype.save = function(){
 			// Set itemData
 			if (this._changedItemData.length){
 				sql = '';
+				sqlValues = [];
+				
 				for (fieldID in this._changedItemData.items){
 					if (!this.getField(fieldID)){
 						continue;
 					}
 					
-					sql += 'INSERT INTO itemData VALUES (' +
-						itemID + ',' + fieldID + ',';
-						if (Scholar.ItemFields.isInteger(fieldID)){
-							sql += this.getField(fieldID);
-						}
-						else {
-							sql += "'" + this.getField(fieldID) + "'";
-						}
-						sql += ");\n";
+					// TODO: update DB methods so that this can be
+					// implemented as a prepared statement that gets
+					// called multiple times
+					sql += "INSERT INTO itemData VALUES (?,?,?);\n";
+					
+					sqlValues.push(
+						{'int':itemID},
+						{'int':fieldID}
+					);
+					
+					if (Scholar.ItemFields.isInteger(fieldID)){
+						sqlValues.push({'int':this.getField(fieldID)});
+					}
+					else {
+						sqlValues.push({'string':this.getField(fieldID)});
+					}
 				}
 				
 				if (sql){
-					Scholar.DB.query(sql);
+					Scholar.DB.query(sql, sqlValues);
 				}
 			}
 			
