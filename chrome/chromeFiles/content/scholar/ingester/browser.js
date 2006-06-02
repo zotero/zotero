@@ -211,31 +211,36 @@ Scholar.Ingester.Interface._deleteDocument = function(browser) {
  * Callback to be executed when scraping is complete
  */
 Scholar.Ingester.Interface._finishScraping = function(documentObject) {
-	Scholar.Ingester.Interface.scrapeProgress.changeHeadline(Scholar.getString("ingester.scrapeComplete"));
-	
-	var fields = Scholar.ItemFields.getItemTypeFields(documentObject.item.getField("itemTypeID"));
+	if(documentObject.item) {
+		Scholar.Ingester.Interface.scrapeProgress.changeHeadline(Scholar.getString("ingester.scrapeComplete"));
 		
-	var titleLabel = Scholar.getString("itemFields.title") + ":"
-	Scholar.Ingester.Interface.scrapeProgress.addResult(titleLabel, this.item.getField("title"));
-	var creators = documentObject.item.numCreators();
-	if(creators) {
-		for(var i=0; i<creators; i++) {
-			var creator = documentObject.item.getCreator(i);
-			var label = Scholar.getString("creatorTypes."+Scholar.CreatorTypes.getTypeName(creator.creatorTypeID)) + ":";
-			var data = creator.firstName + ' ' + creator.lastName;
-			Scholar.Ingester.Interface.scrapeProgress.addResult(label, data);
-		}
-	}
-	
-	for(i in fields) {
-		var data = documentObject.item.getField(fields[i]);
-		if(data) {
-			var name = Scholar.ItemFields.getName(fields[i]);
-			if(name != "source") {
-				var label = Scholar.getString("itemFields."+ name) + ":";
+		var fields = Scholar.ItemFields.getItemTypeFields(documentObject.item.getField("itemTypeID"));
+			
+		var titleLabel = Scholar.getString("itemFields.title") + ":"
+		Scholar.Ingester.Interface.scrapeProgress.addResult(titleLabel, this.item.getField("title"));
+		var creators = documentObject.item.numCreators();
+		if(creators) {
+			for(var i=0; i<creators; i++) {
+				var creator = documentObject.item.getCreator(i);
+				var label = Scholar.getString("creatorTypes."+Scholar.CreatorTypes.getTypeName(creator.creatorTypeID)) + ":";
+				var data = creator.firstName + ' ' + creator.lastName;
 				Scholar.Ingester.Interface.scrapeProgress.addResult(label, data);
 			}
 		}
+		
+		for(i in fields) {
+			var data = documentObject.item.getField(fields[i]);
+			if(data) {
+				var name = Scholar.ItemFields.getName(fields[i]);
+				if(name != "source") {
+					var label = Scholar.getString("itemFields."+ name) + ":";
+					Scholar.Ingester.Interface.scrapeProgress.addResult(label, data);
+				}
+			}
+		}
+	} else {
+		Scholar.Ingester.Interface.scrapeProgress.changeHeadline(Scholar.getString("ingester.scrapeError"));
+		Scholar.Ingester.Interface.scrapeProgress.addDescription(Scholar.getString("ingester.scrapeErrorDescription"));
 	}
 	
 	setTimeout(function() { Scholar.Ingester.Interface.scrapeProgress.fade() }, 2000);
@@ -310,6 +315,19 @@ Scholar.Ingester.Interface.Progress.prototype.addResult = function(label, data) 
 	tr.appendChild(dataTd);
 	this.table.appendChild(tr);
 }
+
+Scholar.Ingester.Interface.Progress.prototype.addDescription = function(description) {
+	var descriptionNode = this.document.createTextNode(description);
+	var tr = this.document.createElement("tr");
+	var descriptionTd = this.document.createElement("td");
+	descriptionTd.style.fontSize = '10px';
+	descriptionTd.style.colspan = '2';
+	
+	descriptionTd.appendChild(descriptionNode);
+	tr.appendChild(descriptionTd);
+	this.table.appendChild(tr);
+}
+
 
 Scholar.Ingester.Interface.Progress.prototype.fade = function() {
 	// Icky, icky hack to keep objects

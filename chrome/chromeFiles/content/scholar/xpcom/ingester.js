@@ -200,46 +200,55 @@ Scholar.Ingester.Utilities.prototype.collectURLsWithSubstring = function(doc, su
 // essential components for Scholar and would take a great deal of effort to
 // implement. We can, however, always implement them later.
 
-// It looks like these are simple front-ends for XMLHttpRequest. They're a
-// component of the Piggy Bank API, so they're implemented here.
-Scholar.Ingester.Utilities.HTTPUtilities = function() {}
-
-Scholar.Ingester.Utilities.HTTPUtilities.prototype.doGet = function(url, onStatus, onDone) {
-   var xmlhttp = new XMLHttpRequest();
-   
-   xmlhttp.open('GET', url, true);
-   xmlhttp.overrideMimeType("text/xml");
-   xmlhttp.onreadystatechange = function() {
-	  Scholar.Ingester.Utilities.HTTPUtilities.stateChange(xmlhttp, onStatus, onDone);
-   };
-   xmlhttp.send(null);
+// These are front ends for XMLHttpRequest. XMLHttpRequest can't actually be
+// accessed outside the sandbox, and even if it could, it wouldn't let scripts
+// access across domains, so everything's replicated here.
+Scholar.Ingester.HTTPUtilities = function(contentWindow) {
+	this.window = contentWindow;
 }
 
-Scholar.Ingester.Utilities.HTTPUtilities.prototype.doPost = function(url, body, onStatus, onDone) {
-   var xmlhttp = new XMLHttpRequest();
-   
-   xmlhttp.open('POST', url, true);
-   xmlhttp.overrideMimeType("text/xml");
-   xmlhttp.onreadystatechange = function() {
-	  Scholar.Ingester.Utilities.HTTPUtilities.stateChange(xmlhttp, onStatus, onDone);
-   };
-   xmlhttp.send(body);
+Scholar.Ingester.HTTPUtilities.prototype.doGet = function(url, onStatus, onDone) {
+	var xmlhttp = new this.window.XMLHttpRequest();
+	
+	xmlhttp.open('GET', url, true);
+	xmlhttp.overrideMimeType("text/xml");
+	
+	var me = this;
+	xmlhttp.onreadystatechange = function() {
+		me.stateChange(xmlhttp, onStatus, onDone);
+	};
+	xmlhttp.send(null);
+}
+
+Scholar.Ingester.HTTPUtilities.prototype.doPost = function(url, body, onStatus, onDone) {
+	var xmlhttp = new this.window.XMLHttpRequest();
+	
+	xmlhttp.open('POST', url, true);
+	xmlhttp.overrideMimeType("text/xml");
+	
+	var me = this;
+	xmlhttp.onreadystatechange = function() {
+		me.stateChange(xmlhttp, onStatus, onDone);
+	};
+	xmlhttp.send(body);
 }
 	
-Scholar.Ingester.Utilities.HTTPUtilities.prototype.doOptions = function(url, body, onStatus, onDone) {
-   var xmlhttp = new XMLHttpRequest();
-   
-   xmlhttp.open('OPTIONS', url, true);
-   xmlhttp.overrideMimeType("text/xml");
-   xmlhttp.onreadystatechange = function() {
-	  Scholar.Ingester.Utilities.HTTPUtilities.stateChange(xmlhttp, onStatus, onDone);
-   };
-   xmlhttp.send(body);
+Scholar.Ingester.HTTPUtilities.prototype.doOptions = function(url, body, onStatus, onDone) {
+	var xmlhttp = new this.window.XMLHttpRequest();
+  
+	xmlhttp.open('OPTIONS', url, true);
+	xmlhttp.overrideMimeType("text/xml");
+	
+	var me = this;
+	xmlhttp.onreadystatechange = function() {
+		me.stateChange(xmlhttp, onStatus, onDone);
+	};
+	xmlhttp.send(body);
 }
 	
 // Possible point of failure; for some reason, this used to be a separate
 // class, so make sure it works
-Scholar.Ingester.Utilities.HTTPUtilities.prototype.stateChange = function(xmlhttp, onStatus, onDone) {
+Scholar.Ingester.HTTPUtilities.prototype.stateChange = function(xmlhttp, onStatus, onDone) {
 	switch (xmlhttp.readyState) {
 
 		// Request not yet made
@@ -307,6 +316,8 @@ Scholar.Ingester.Utilities.HTTPUtilities.prototype.stateChange = function(xmlhtt
  */
 Scholar.Ingester.Document = function(browserWindow){
 	this.browser = browserWindow;
+	this.appSvc = Cc["@mozilla.org/appshell/appShellService;1"]
+	             .getService(Ci.nsIAppShellService);
 	this.scraper = null
 	this.model = new Scholar.Ingester.Model();
 	this._generateSandbox();
@@ -379,10 +390,11 @@ Scholar.Ingester.Document.prototype.scrapePage = function(callback) {
 		Components.utils.evalInSandbox(this.scraper.scraperJavaScript, scraperSandbox);
 	} catch(e) {
 		throw e+' in scraperJavaScript for '+this.scraper.label;
+		this._scrapePageComplete();
 	}
 	
 	// If synchronous, call _scrapePageComplete();
-	if(!scraperSandbox._waitForCompletion) {
+	if(!this._waitForCompletion) {
 		this._scrapePageComplete();
 	}
 }
@@ -411,7 +423,7 @@ Scholar.Ingester.Document.prototype.scrapePage = function(callback) {
  *          function before returning
  */
 
-/*`
+/*
  * Called when scraping (synchronous or asynchronous) is complete
  */
 Scholar.Ingester.Document.prototype._scrapePageComplete = function() {
@@ -420,17 +432,23 @@ Scholar.Ingester.Document.prototype._scrapePageComplete = function() {
 		this._scrapeCallback(this);
 	}
 }
- 
+
+/*
+ * Generates a sandbox for scraping/scraper detection
+ */
 Scholar.Ingester.Document.prototype._generateSandbox = function() {
 	this.sandbox = new Components.utils.Sandbox(this.browser.contentDocument.location.href);
 	this.sandbox.browser = this.browser;
 	this.sandbox.doc = this.sandbox.browser.contentDocument;
 	this.sandbox.utilities = new Scholar.Ingester.Utilities;
+	this.sandbox.utilities.HTTPUtilities = new Scholar.Ingester.HTTPUtilities(this.appSvc.hiddenDOMWindow);
+	this.sandbox.window = this.window;
 	this.sandbox.model = this.model;
 	this.sandbox.XPathResult = Components.interfaces.nsIDOMXPathResult;
 	
-	this.sandbox.wait = function(){ this._waitForCompletion = true; };
-	this.sandbox.done = function(){ this._scrapePageComplete(); };
+	var me = this;
+	this.sandbox.wait = function(){ me._waitForCompletion = true; };
+	this.sandbox.done = function(){ me._scrapePageComplete(); };
 }
 
 /*
@@ -453,9 +471,15 @@ Scholar.Ingester.Document.prototype._updateDatabase = function() {
 			newItem.setField("publisher", this.model.data[uri][prefixDC + 'publisher']);
 		}
 		if(this.model.data[uri][prefixDC + 'year']) {
-			data.date = this.model.data[uri][prefixDC + 'year'].substring(
-						 this.model.data[uri][prefixDC + 'year'].lastIndexOf(" ")+1,
-						 this.model.data[uri][prefixDC + 'year'].length);
+			if(this.model.data[uri][prefixDC + 'year'].length == 4) {
+				newItem.setField("year", this.model.data[uri][prefixDC + 'year']);
+			} else {
+				try {
+					newItem.setField(this.model.data[uri][prefixDC + 'year'].substring(
+							 this.model.data[uri][prefixDC + 'year'].lastIndexOf(" ")+1,
+							 this.model.data[uri][prefixDC + 'year'].length));
+				} catch(e) {}
+			}
 		}
 		if(this.model.data[uri][prefixDC + 'edition']) {
 			newItem.setField("edition", this.model.data[uri][prefixDC + 'edition']);
