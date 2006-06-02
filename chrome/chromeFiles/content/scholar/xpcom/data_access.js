@@ -857,15 +857,11 @@ Scholar.Items = new function(){
 	
 	
 	/*
-	 * Reloads all currently cached items
+	 * Reloads all items
 	 */
 	function reloadAll(){
-		var ids = new Array();
-		for (itemID in _items){
-			ids.push(itemID);
-		}
-		_load(ids);
-		return true;
+		_items = new Array();
+		_load();
 	}
 	
 	
@@ -908,10 +904,6 @@ Scholar.Items = new function(){
 	
 	
 	function _load(){
-		if (!arguments){
-			return false;
-		}
-		
 		// Should be the same as query in Scholar.Item.loadFromID, just
 		// without itemID clause
 		var sql = 'SELECT I.*, lastName AS firstCreator '
@@ -920,7 +912,7 @@ Scholar.Items = new function(){
 			+ 'LEFT JOIN creators C ON (IC.creatorID=C.creatorID) '
 			+ 'WHERE (IC.orderIndex=0 OR IC.orderIndex IS NULL)';
 		
-		if (arguments[0]!='all'){
+		if (arguments[0]){
 			sql += ' AND I.itemID IN (' + Scholar.join(arguments,',') + ')';
 		}
 		
@@ -928,9 +920,16 @@ Scholar.Items = new function(){
 		
 		if (result){
 			for (var i=0,len=result.length; i<len; i++){
-				var obj = new Scholar.Item();
-				obj.loadFromRow(result[i]);
-				_items[result[i]['itemID']] = obj;
+				// Item doesn't exist -- create new object and stuff in array
+				if (!_items[result[i]['itemID']]){
+					var obj = new Scholar.Item();
+					obj.loadFromRow(result[i]);
+					_items[result[i]['itemID']] = obj;
+				}
+				// Existing item -- reload in place
+				else {
+					_items[result[i]['itemID']].loadFromRow(result[i]);
+				}
 			}
 		}
 		return true;
@@ -947,6 +946,13 @@ Scholar.Items = new function(){
  * Generally should be called from Scholar.Collection rather than directly
  */
 Scholar.Collection = function(){
+	 this._init();
+}
+
+Scholar.Collection.prototype._init = function(){
+	//
+	// Public members for access by public methods -- do not access directly
+	//
 	this._id;
 	this._name;
 	this._parent;
@@ -955,7 +961,6 @@ Scholar.Collection = function(){
 	this._childItems = new Scholar.Hash();
 	this._childItemsLoaded;
 }
-
 
 /*
  * Build collection from database
@@ -979,6 +984,7 @@ Scholar.Collection.prototype.loadFromID = function(id){
  * Populate collection data from a database row
  */
 Scholar.Collection.prototype.loadFromRow = function(row){
+	this._init();
 	this._id = row['collectionID'];
 	this._name = row['collectionName'];
 	this._parent = row['parentCollectionID'];
@@ -1248,9 +1254,18 @@ Scholar.Collections = new function(){
 		}
 		
 		for (var i=0; i<result.length; i++){
-			var collection = new Scholar.Collection();
-			collection.loadFromRow(result[i]);
-			_collections[collection.getID()] = collection;
+			var collectionID = result[i]['collectionID'];
+			
+			// If collection doesn't exist, create new object and stuff in array
+			if (!_collections[collectionID]){
+				var collection = new Scholar.Collection();
+				collection.loadFromRow(result[i]);
+				_collections[collectionID] = collection;
+			}
+			// If existing collection, reload in place
+			else {
+				_collections[collectionID].loadFromRow(result[i]);
+			}
 		}
 		_collectionsLoaded = true;
 	}
