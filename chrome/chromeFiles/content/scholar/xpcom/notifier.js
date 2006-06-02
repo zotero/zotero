@@ -44,8 +44,10 @@ Scholar.Notifier = new function(){
 		}
 		
 		for (i in _observers[treeType]){
-			Scholar.debug("Calling _observers['" + treeType + "']['" + i + "'].notify('" + event
-				+ "', " + type + "', " + ids.join() + ")", 4);
+			Scholar.debug("Calling _observers['" + treeType + "']"
+				+ "['" + i + "'].notify('" + event + "', " + type + "', "
+				+ (typeof ids=='Object' ? ids.join() : ids)
+				+ ")", 4);
 			_observers[treeType][i].notify(event, type, ids);
 		}
 	}
