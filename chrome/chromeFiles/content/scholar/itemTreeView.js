@@ -119,10 +119,10 @@ Scholar.ItemTreeView.prototype.deleteSelection = function()
 		else if(this._itemGroup.isCollection())
 			this._itemGroup.ref.removeItem(this._getItemAtRow(rows[i]-i).getID());
 
-		
+		/* Don't do this, the notifier tells us?
 		//remove row from tree:
 		this._hideItem(rows[i]-i);
-		this._treebox.rowCountChanged(rows[i]-i, -1);
+		this._treebox.rowCountChanged(rows[i]-i, -1); */
 	}
 	this._treebox.endUpdateBatch();
 	
@@ -159,36 +159,66 @@ Scholar.ItemTreeView.prototype.getCollectionID = function()
 Scholar.ItemTreeView.prototype.notify = function(action, type, ids)
 {
 	ids = Scholar.flattenArguments(ids);
+	var madeChanges = false;
 	
-	for (var i=0, len=ids.length; i<len; i++){
-	
-		var row = this._itemRowMap[ids[i]];
-		if(action == 'remove' && row)
+	if(action == 'remove')
+	{
+		//Since a remove involves
+		
+		//sort the ids by row
+		var rows = new Array();
+		for(var i=0, len=ids.length; i<len; i++)
+			if(this._itemRowMap[ids[i]] != null)
+				rows.push(this._itemRowMap[ids[i]]);
+		
+		if(rows.length > 0)
 		{
-			this._hideItem(row);
-			this._treebox.rowCountChanged(row,-1);
-		}
-		else if(action == 'modify' && row)
-		{
-			this._treebox.invalidateRow(row)
-		}
-		else if(action == 'add' && !row)
-		{
-			var item = Scholar.Items.get(ids[i]);
+			rows.sort(function(a,b) { return a-b });
 			
-			if(this._itemGroup.isLibrary() || item.inCollection(this.getCollectionID()))
+			for(var i=0, len=rows.length; i<len; i++)
 			{
-				this._showItem(item,this.rowCount);
-				this._treebox.rowCountChanged(this.rowCount,1);
+				var row = rows[i];
+				this._hideItem(row-i);
+				this._treebox.rowCountChanged(row-i,-1);
 			}
-			//TODO: sorted? figure it out later
-		}
-		else
-		{
-			return;
-		}
+			
+			madeChanges = true;
+		}		
 		
 	}
+	else
+	{
+		for (var i=0, len=ids.length; i<len; i++)
+		{
+		
+			var row = this._itemRowMap[ids[i]];
+			if(action == 'modify' && row != null) 	//must check for null because it could legitimately be 0
+			{
+				this._treebox.invalidateRow(row)
+			}
+			else if(action == 'add' && row == null)
+			{
+				var item = Scholar.Items.get(ids[i]);
+				
+				if(this._itemGroup.isLibrary() || item.inCollection(this.getCollectionID()))
+				{
+					this._showItem(item,this.rowCount);
+					this._treebox.rowCountChanged(this.rowCount,1);
+				}
+			
+				madeChanges = true;
+				
+				//TODO: sorted? figure it out later
+			}
+			
+		}
+	}
 	
-	this._refreshHashMap();
+	if(madeChanges)
+		this._refreshHashMap();
+}
+
+Scholar.ItemTreeView.prototype.canDrop = function(index, orient)
+{
+	return false;
 }

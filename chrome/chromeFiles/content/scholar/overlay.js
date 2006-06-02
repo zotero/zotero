@@ -56,8 +56,8 @@ var ScholarPane = new function()
 	
 	function folderSelected()
 	{
-		//if(itemsView)
-		//	itemsView.unregister();
+		if(itemsView)
+			itemsView.unregister();
 			
 		if(foldersView.selection.count == 1 && foldersView.selection.currentIndex != -1)
 		{
@@ -88,7 +88,7 @@ var ScholarPane = new function()
 			if(!validURL(url))
 				url = 'http://www.google.com/search?q='+encodeURIComponent('"'+item.getField("title")+'"'); //+'&btnI'
 			
-			document.getElementById('content').loadURI(url);
+//			document.getElementById('content').loadURI(url);
 			document.getElementById('scholar-floater').hidden=false;
 		}
 		else
@@ -126,6 +126,32 @@ var ScholarPane = new function()
 	{
 		var regexp = /(http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/
 		return regexp.test(s);
+	}
+}
+
+var ScholarItemsDragObserver =
+{ 
+	onDragStart: function (evt,transferData,action)
+	{ 
+		transferData.data=new TransferData(); 
+		transferData.data.addDataForFlavour("text/unicode","finally"); 
+		
+	}	
+}; 
+
+var ScholarCollectionsDragObserver =
+{
+	getSupportedFlavours : function () 
+	{ 
+		var flavours = new FlavourSet(); 
+		flavours.appendFlavour("text/unicode"); 
+		
+		return flavours; 
+	}, 
+	onDragOver: function (evt,dropdata,session){}, 
+	onDrop: function (evt,dropdata,session)
+	{ 
+		alert(dropdata.data);
 	}
 }
 

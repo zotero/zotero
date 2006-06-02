@@ -33,6 +33,7 @@
 			<hbox flex="1">				
 				<tree id="folders-tree" hidecolumnpicker="true"
 					onselect="ScholarPane.folderSelected();" seltype="single"
+					ondragover="nsDragAndDrop.dragOver(event,ScholarCollectionsDragObserver)" ondragdrop="nsDragAndDrop.drop(event,ScholarCollectionsDragObserver)"
 					persist="width" flex="1">
 					<treecols>
 						<treecol
@@ -48,6 +49,7 @@
 					id="items-tree" 
 					enableColumnDrag="true" onkeypress="if(event.keyCode == event.DOM_VK_BACK_SPACE || event.keyCode == event.DOM_VK_DELETE){ ScholarPane.deleteSelection(); return false; }"
 					onselect="ScholarPane.itemSelected();"
+					ondraggesture="if (event.target.localName == 'treechildren') nsDragAndDrop.startDrag(event,ScholarItemsDragObserver);"
 					persist="width" flex="5">
 					<treecols>
 						<treecol

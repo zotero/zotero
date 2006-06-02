@@ -29,8 +29,16 @@ Scholar.FolderTreeView.prototype.getCellText = function(row, column)
 		return "";
 }
 
-Scholar.FolderTreeView.prototype.isContainer = function(row) 		{ return this._getItemAtRow(row).isCollection(); }
-Scholar.FolderTreeView.prototype.isContainerOpen = function(row)  { return this._dataItems[row][1]; }
+Scholar.FolderTreeView.prototype.isContainer = function(row)
+{
+	return this._getItemAtRow(row).isCollection();
+}
+
+Scholar.FolderTreeView.prototype.isContainerOpen = function(row)
+{
+	return this._dataItems[row][1];
+}
+
 Scholar.FolderTreeView.prototype.isContainerEmpty = function(row)
 {
 	var itemGroup = this._getItemAtRow(row);
@@ -164,6 +172,23 @@ Scholar.FolderTreeView.prototype._refreshHashMap = function()
 	//Scholar.debug(Scholar.varDump(this.objectRowMap));
 }
 
+Scholar.FolderTreeView.prototype.canDrop = function(row, orient)
+{
+	if(orient == this.DROP_ON && this._getItemAtRow(row).isCollection())
+		return true;
+	else
+		return false;
+		
+}
+
+Scholar.FolderTreeView.prototype.drop = function(row, orient)
+{
+	//you can't really do anything here, look to overlay.js - ScholarCollectionsDragObserver
+}
+
+//
+// SCHOLAR ITEMGROUP
+//
 Scholar.ItemGroup = function(type, ref)
 {
 	this.type = type;

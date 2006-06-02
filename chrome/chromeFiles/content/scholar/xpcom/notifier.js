@@ -10,11 +10,11 @@ Scholar.Notifier = new function(){
 	this.trigger = trigger;
 	
 	function registerColumnTree(ref){
-		_register('columnTree', ref);
+		return _register('columnTree', ref);
 	}
 	
 	function registerItemTree(ref){
-		_register('itemTree', ref);
+		return _register('itemTree', ref);
 	}
 	
 	function unregisterColumnTree(hash){
