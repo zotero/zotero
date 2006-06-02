@@ -410,7 +410,7 @@ Scholar.Item.prototype.save = function(){
 					if (Scholar.DB.valueQuery(sql2)){
 						sql = 'UPDATE itemCreators SET creatorID=?, '
 							+ 'creatorTypeID=? WHERE itemID=?'
-							+ " AND orderIndex=?;\n";
+							+ " AND orderIndex=?";
 							
 						sqlValues = [
 							{'int':creatorID},
@@ -423,7 +423,7 @@ Scholar.Item.prototype.save = function(){
 					}
 					// Otherwise insert
 					else {
-						sql = "INSERT INTO itemCreators VALUES (?,?,?,?);\n";
+						sql = "INSERT INTO itemCreators VALUES (?,?,?,?)";
 						
 						sqlValues = [
 							{'int':itemID},
@@ -468,7 +468,7 @@ Scholar.Item.prototype.save = function(){
 							else {
 								sqlValues.push({'string':this.getField(fieldID)});
 							}
-							sql += " WHERE itemID=? AND fieldID=?;\n";
+							sql += " WHERE itemID=? AND fieldID=?";
 							
 							sqlValues.push(
 								{'int':this.getID()},
@@ -478,8 +478,8 @@ Scholar.Item.prototype.save = function(){
 							Scholar.DB.query(sql, sqlValues);
 						}
 						else {
-							sql = "INSERT INTO itemData VALUES (?,?,?);\n";
-								
+							sql = "INSERT INTO itemData VALUES (?,?,?)";
+							
 							sqlValues = [
 								{'int':this.getID()},
 								{'int':fieldID},
@@ -505,7 +505,7 @@ Scholar.Item.prototype.save = function(){
 				if (del.length){
 					sql = 'DELETE from itemData '
 						+ 'WHERE itemID=' + this.getID() + ' '
-						+ 'AND fieldID IN (' + del.join() + ");\n";
+						+ 'AND fieldID IN (' + del.join() + ")";
 					Scholar.DB.query(sql);
 				}
 			}
@@ -559,9 +559,6 @@ Scholar.Item.prototype.save = function(){
 			
 			// Set itemData
 			if (this._changedItemData.length){
-				sql = '';
-				sqlValues = [];
-				
 				for (fieldID in this._changedItemData.items){
 					if (!this.getField(fieldID)){
 						continue;
@@ -570,12 +567,12 @@ Scholar.Item.prototype.save = function(){
 					// TODO: update DB methods so that this can be
 					// implemented as a prepared statement that gets
 					// called multiple times
-					sql += "INSERT INTO itemData VALUES (?,?,?);\n";
+					sql = "INSERT INTO itemData VALUES (?,?,?)";
 					
-					sqlValues.push(
+					sqlValues = [
 						{'int':itemID},
 						{'int':fieldID}
-					);
+					];
 					
 					if (Scholar.ItemFields.isInteger(fieldID)){
 						sqlValues.push({'int':this.getField(fieldID)});
@@ -583,9 +580,7 @@ Scholar.Item.prototype.save = function(){
 					else {
 						sqlValues.push({'string':this.getField(fieldID)});
 					}
-				}
-				
-				if (sql){
+					
 					Scholar.DB.query(sql, sqlValues);
 				}
 			}
@@ -923,7 +918,7 @@ Scholar.Items = new function(){
 			+ 'FROM items I '
 			+ 'LEFT JOIN itemCreators IC ON (I.itemID=IC.itemID) '
 			+ 'LEFT JOIN creators C ON (IC.creatorID=C.creatorID) '
-			+ 'WHERE IC.orderIndex=0 OR IC.orderIndex IS NULL';
+			+ 'WHERE (IC.orderIndex=0 OR IC.orderIndex IS NULL)';
 		
 		if (arguments[0]!='all'){
 			sql += ' AND I.itemID IN (' + Scholar.join(arguments,',') + ')';

@@ -170,12 +170,12 @@ Scholar.DB = new function(){
 		if (statement && params){
 			for (var i=0; i<params.length; i++){
 				if (typeof params[i]['int'] != 'undefined'){
-					Scholar.debug('Binding parameter ' + (i+1) + ': ' +
+					Scholar.debug('Binding parameter ' + (i+1) + ' of type int: ' +
 						params[i]['int'],5);
 					statement.bindInt32Parameter(i,params[i]['int']);
 				}
 				else if (typeof params[i]['string'] != 'undefined'){
-					Scholar.debug('Binding parameter ' + (i+1) + ': "' +
+					Scholar.debug('Binding parameter ' + (i+1) + ' of type string: "' +
 						params[i]['string'] + '"',5);
 					statement.bindUTF8StringParameter(i,params[i]['string']);
 				}
