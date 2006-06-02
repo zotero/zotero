@@ -11,7 +11,8 @@ var ScholarPane = new function()
 	this.newCollection = newCollection;
 	this.folderSelected = folderSelected;
 	this.itemSelected = itemSelected;
-	this.deleteSelection = deleteSelection;
+	this.deleteItemSelection = deleteItemSelection;
+	this.deleteCollectionSelection = deleteCollectionSelection;
 	this.search = search;
 	this.toggleView = toggleView;
 	
@@ -51,7 +52,9 @@ var ScholarPane = new function()
 	
 	function newCollection()
 	{
-		alert("new collection");
+		var c = new Scholar.Collection();
+		//c.setName('Untitled');
+		//c.save();
 	}
 	
 	function folderSelected()
@@ -99,10 +102,16 @@ var ScholarPane = new function()
 
 	}
 	
-	function deleteSelection()
+	function deleteItemSelection()
 	{
 		if(itemsView && itemsView.selection.count > 0 && confirm("Are you sure you want to delete the selected items?"))
 			itemsView.deleteSelection();
+	}
+	
+	function deleteCollectionSelection()
+	{
+		if(itemsView && foldersView.selection.count > 0 && confirm("Are you sure you want to delete the selected collections?"))
+			foldersView.deleteSelection();
 	}
 	
 	function search()

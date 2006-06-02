@@ -119,7 +119,7 @@ Scholar.ItemTreeView.prototype.deleteSelection = function()
 		else if(this._itemGroup.isCollection())
 			this._itemGroup.ref.removeItem(this._getItemAtRow(rows[i]-i).getID());
 
-		/* Don't do this, the notifier tells us?
+		/* Disabled for now (notifier)
 		//remove row from tree:
 		this._hideItem(rows[i]-i);
 		this._treebox.rowCountChanged(rows[i]-i, -1); */
@@ -163,7 +163,7 @@ Scholar.ItemTreeView.prototype.notify = function(action, type, ids)
 	
 	if(action == 'remove')
 	{
-		//Since a remove involves
+		//Since a remove involves shifting of rows, we have to do it in order
 		
 		//sort the ids by row
 		var rows = new Array();

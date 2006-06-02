@@ -4,6 +4,70 @@ Scholar.FolderTreeView = function()
 	this._dataItems = new Array();
 	this.rowCount = 0;
 	this._showItem(new Scholar.ItemGroup('library',null),0,1);
+	this._unregisterID = Scholar.Notifier.registerColumnTree(this);
+}
+
+Scholar.FolderTreeView.prototype.unregister = function()
+{
+	Scholar.Notifier.unregisterColumnTree(this._unregisterID);
+}
+
+//CALLED BY DATA LAYER ON CHANGE:
+Scholar.FolderTreeView.prototype.notify = function(action, type, ids)
+{
+	ids = Scholar.flattenArguments(ids);
+	var madeChanges = false;
+	
+	if(action == 'remove')
+	{
+		//Since a remove involves shifting of rows, we have to do it in order
+		
+		//sort the ids by row
+		var rows = new Array();
+		for(var i=0, len=ids.length; i<len; i++)
+			if(this._collectionRowMap[ids[i]] != null)
+				rows.push(this._collectionRowMap[ids[i]]);
+		
+		if(rows.length > 0)
+		{
+			rows.sort(function(a,b) { return a-b });
+			
+			for(var i=0, len=rows.length; i<len; i++)
+			{
+				var row = rows[i];
+				this._hideItem(row-i);
+				this._treebox.rowCountChanged(row-i,-1);
+			}
+			
+			madeChanges = true;
+		}		
+		
+	}
+	else
+	{
+		for (var i=0, len=ids.length; i<len; i++)
+		{
+		
+			var row = this._collectionRowMap[ids[i]];
+			if(action == 'modify' && row != null) 	//must check for null because it could legitimately be 0
+			{
+				this._treebox.invalidateRow(row)
+			}
+			else if(action == 'add' && row == null)
+			{
+				var item = Scholar.Items.get(ids[i]);
+				
+				this._showItem(item,this.rowCount);
+				this._treebox.rowCountChanged(this.rowCount,1);
+			
+				madeChanges = true;
+			}
+			
+		}
+	}
+	
+	if(madeChanges)
+		this._refreshHashMap();
 }
 
 Scholar.FolderTreeView.prototype.setTree = function(treebox)
@@ -121,7 +185,6 @@ Scholar.FolderTreeView.prototype.getProgressMode = function(row, col) 			{ }
 
 Scholar.FolderTreeView.prototype.deleteSelection = function()
 {
-	/*
 	if(this.selection.count == 0)
 		return;
 
@@ -129,8 +192,9 @@ Scholar.FolderTreeView.prototype.deleteSelection = function()
 	for(var i=0; i<this.rowCount; i++)
 		if(this.selection.isSelected(i) && this.isContainer(i) && this.isContainerOpen(i))
 			this.toggleOpenState(i);
+	this._refreshHashMap();
 	
-	//create an array of selected items/collections
+	//create an array of collections
 	var rows = new Array();
 	var start = new Object();
 	var end = new Object();
@@ -138,7 +202,8 @@ Scholar.FolderTreeView.prototype.deleteSelection = function()
 	{
 		this.selection.getRangeAt(i,start,end);
 		for (var j=start.value; j<=end.value; j++)
-			rows.push(j);
+			if(!this._getItemAtRow(j).isLibrary())
+				rows.push(j);
 	}
 	
 	//iterate and erase...
@@ -146,16 +211,17 @@ Scholar.FolderTreeView.prototype.deleteSelection = function()
 	for (var i=0; i<rows.length; i++)
 	{
 		//erase item/collection from DB:
-		this._getItemAtRow(rows[i]-i).erase();		
-		
+		this._getItemAtRow(rows[i]-i).ref.erase();
+
+		/* Disabled for now because notifier handles it this:
 		//remove row from tree:
 		this._hideItem(rows[i]-i);
-		this._treebox.rowCountChanged(rows[i]-i, -1);
+		this._treebox.rowCountChanged(rows[i]-i, -1);*/
 	}
 	this._treebox.endUpdateBatch();
 	
 	this._refreshHashMap();
-	*/
+	
 }
 
 Scholar.FolderTreeView.prototype._refreshHashMap = function()
