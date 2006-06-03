@@ -22,6 +22,7 @@ var Scholar = new function(){
 	this.flattenArguments = flattenArguments;
 	this.join = join;
 	this.randomString = randomString;
+	this.getRandomID = getRandomID;
 	
 	this.Hash = Hash;
 	
@@ -197,6 +198,40 @@ var Scholar = new function(){
 			randomstring += chars.substring(rnum,rnum+1);
 		}
 		return randomstring;
+	}
+	
+	
+	/**
+	* Find a unique random id for use in a DB table
+	**/
+	function getRandomID(table, column, max){
+		if (!table){
+			throw('SQL query not provided');
+		}
+		
+		if (!column){
+			throw('SQL query not provided');
+		}
+		
+		var sql = 'SELECT COUNT(*) FROM ' + table + ' WHERE ' + column + '=';
+		
+		if (!max){
+			max = 16383;
+		}
+		
+		var tries = 10; // # of tries to find a unique id
+		do {
+			// If no luck after number of tries, try a larger range
+			if (!tries){
+				max = max * 2;
+			}
+			var rnd = Math.floor(Math.random()*max);
+			var exists = Scholar.DB.valueQuery(sql + rnd);
+			tries--;
+		}
+		while (exists);
+		
+		return rnd;
 	}
 	
 	
