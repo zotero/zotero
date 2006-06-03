@@ -687,6 +687,11 @@ Scholar.Item.prototype.erase = function(){
 }
 
 
+Scholar.Item.prototype.isCollection = function(){
+	return false;
+}
+
+
 Scholar.Item.prototype.toString = function(){
 	return this.getTitle();
 }
@@ -1002,7 +1007,7 @@ Scholar.Collection.prototype.getName = function(){
 }
 
 /**
-* Returns the parent collection
+* Returns collectionID of the parent collection
 **/
 Scholar.Collection.prototype.getParent = function(){
 	return this._parent;
@@ -1021,6 +1026,28 @@ Scholar.Collection.prototype.hasChildItems = function(){
 	return !!(parseInt(this._hasChildItems));
 }
 
+/**
+* Rename the collection
+*
+* Returns true on success, or false on error
+**/
+Scholar.Collection.prototype.rename = function(name){
+	if (!name){
+		return false;
+	}
+	
+	var sql = "UPDATE collections SET collectionName=? "
+		+ "WHERE collectionID=?";
+	Scholar.DB.query(sql, [{'string':name},{'int':this.getID()}]);
+	this._name = name;
+	
+	Scholar.Notifier.trigger('modify', 'collection', this.getID());
+	return true;
+}
+
+/**
+* Add an item to the collection
+**/
 Scholar.Collection.prototype.addItem = function(itemID){
 	Scholar.DB.beginTransaction();
 	
@@ -1045,6 +1072,9 @@ Scholar.Collection.prototype.addItem = function(itemID){
 }
 
 
+/**
+* Remove an item from the collection (does not delete item from library)
+**/
 Scholar.Collection.prototype.removeItem = function(itemID){
 	Scholar.DB.beginTransaction();
 	
@@ -1081,6 +1111,9 @@ Scholar.Collection.prototype.removeItem = function(itemID){
 }
 
 
+/**
+* Check if an item belongs to the collection
+**/
 Scholar.Collection.prototype.hasItem = function(itemID){
 	if (!this._childItemsLoaded){
 		this._loadChildItems();
@@ -1089,10 +1122,8 @@ Scholar.Collection.prototype.hasItem = function(itemID){
 }
 
 
-
-
 /**
-* Deletes a collection and all descendent collections and items
+* Deletes collection and all descendent collections and items
 **/
 Scholar.Collection.prototype.erase = function(deleteItems){
 	Scholar.DB.beginTransaction();
@@ -1131,6 +1162,11 @@ Scholar.Collection.prototype.erase = function(deleteItems){
 	
 	Scholar.Notifier.trigger('remove', 'collection', collections);
 	Scholar.Notifier.trigger('remove', 'item', items);
+}
+
+
+Scholar.Collection.prototype.isCollection = function(){
+	return true;
 }
 
 
@@ -1197,6 +1233,7 @@ Scholar.Collections = new function(){
 	var _collectionsLoaded = false;
 	
 	this.get = get;
+	this.add = add;
 	this.reloadAll = reloadAll;
 	this.unload = unload;
 	
@@ -1208,6 +1245,35 @@ Scholar.Collections = new function(){
 			_load();
 		}
 		return (typeof _collections[id]!='undefined') ? _collections[id] : false;
+	}
+	
+	
+	function add(name, parent){
+		if (!name){
+			return false;
+		}
+		
+		Scholar.DB.beginTransaction();
+		
+		if (parent && !this.get(parent)){
+			Scholar.DB.rollbackTransaction();
+			throw('Cannot add collection to invalid parent ' + parent);
+		}
+		
+		var parentParam = parent ? {'int':parent} : {'null':true};
+		
+		var rnd = Scholar.getRandomID('collections', 'collectionID');
+		
+		var sql = "INSERT INTO collections VALUES (?,?,?)";
+		var sqlValues = [ {'int':rnd}, {'string':name}, parentParam ];
+		Scholar.DB.query(sql, sqlValues);
+		
+		Scholar.DB.commitTransaction();
+		
+		_load(rnd);
+		Scholar.Notifier.trigger('add', 'collection', rnd);
+		
+		return this.get(rnd);
 	}
 	
 	
@@ -1247,10 +1313,15 @@ Scholar.Collections = new function(){
 			+ "collectionID=C.collectionID)!=0 AS hasChildItems "
 			+ "FROM collections C";
 		
+		var ids = Scholar.flattenArguments(arguments)
+		if (ids.length){
+			sql += " WHERE collectionID IN (" + ids.join() + ")";
+		}
+		
 		var result = Scholar.DB.query(sql);
 		
 		if (!result){
-			throw ('No collections exist');
+			throw ('No collections found');
 		}
 		
 		for (var i=0; i<result.length; i++){
@@ -1336,30 +1407,20 @@ Scholar.Creators = new function(){
 	function add(firstName, lastName){
 		Scholar.debug('Adding new creator', 4);
 		
+		Scholar.DB.beginTransaction();
+		
 		var sql = 'INSERT INTO creators '
 			+ 'VALUES (?,?,?)';
 		
-		// Use a random integer for the creatorID
-		var tries = 10; // # of tries to find a unique id
-		var max = 65535;
-		do {
-			// If no luck after 10 tries, try a larger range
-			if (!tries){
-				tries = 10;
-				max = max * 10;
-			}
-			var rnd = Math.floor(Math.random()*max);
-			var sql2 = 'SELECT COUNT(*) FROM creators WHERE creatorID=' + rnd;
-			var exists = Scholar.DB.valueQuery(sql2);
-			tries--;
-		}
-		while (exists);
+		var rnd = Scholar.getRandomID('creators', 'creatorID');
 		
 		var params = [
 			{'int': rnd}, {'string': firstName}, {'string': lastName}
 		];
 		
 		Scholar.DB.query(sql, params);
+		
+		Scholar.DB.commitTransaction();
 		return rnd;
 	}
 	
