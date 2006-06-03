@@ -169,15 +169,22 @@ Scholar.DB = new function(){
 		
 		if (statement && params){
 			for (var i=0; i<params.length; i++){
+				// Int
 				if (typeof params[i]['int'] != 'undefined'){
 					Scholar.debug('Binding parameter ' + (i+1) + ' of type int: ' +
 						params[i]['int'],5);
 					statement.bindInt32Parameter(i,params[i]['int']);
 				}
+				// String
 				else if (typeof params[i]['string'] != 'undefined'){
 					Scholar.debug('Binding parameter ' + (i+1) + ' of type string: "' +
 						params[i]['string'] + '"',5);
 					statement.bindUTF8StringParameter(i,params[i]['string']);
+				}
+				// Null
+				else if (typeof params[i]['null'] != 'undefined'){
+					Scholar.debug('Binding parameter ' + (i+1) + ' of type NULL', 5);
+					statement.bindNullParameter(i);
 				}
 			}
 		}
