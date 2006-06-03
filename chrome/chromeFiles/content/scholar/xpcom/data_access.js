@@ -1029,6 +1029,8 @@ Scholar.Collection.prototype.hasChildItems = function(){
 /**
 * Rename the collection
 *
+* _name_ is non-empty string
+*
 * Returns true on success, or false on error
 **/
 Scholar.Collection.prototype.rename = function(name){
@@ -1248,6 +1250,14 @@ Scholar.Collections = new function(){
 	}
 	
 	
+	/**
+	* Add new collection to DB and return Collection object
+	*
+	* _name_ is non-empty string
+	* _parent_ is optional collectionID -- creates root collection by default
+	*
+	* Returns true on success; false on error
+	**/
 	function add(name, parent){
 		if (!name){
 			return false;
