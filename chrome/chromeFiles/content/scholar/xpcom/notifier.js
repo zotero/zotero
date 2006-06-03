@@ -1,7 +1,7 @@
 Scholar.Notifier = new function(){
 	var _observers = new Array();
-	_observers['columnTree'] = new Array();
-	_observers['itemTree'] = new Array();
+	_observers['columnTree'] = new Scholar.Hash();
+	_observers['itemTree'] = new Scholar.Hash();
 	
 	this.registerColumnTree = registerColumnTree;
 	this.registerItemTree = registerItemTree;
@@ -43,12 +43,15 @@ Scholar.Notifier = new function(){
 				throw('Invalid type in Notifier.trigger()');
 		}
 		
-		for (i in _observers[treeType]){
-			Scholar.debug("Calling _observers['" + treeType + "']"
-				+ "['" + i + "'].notify('" + event + "', " + type + "', "
-				+ (typeof ids=='Object' ? ids.join() : ids)
-				+ ")", 4);
-			_observers[treeType][i].notify(event, type, ids);
+		Scholar.debug("Notifier.trigger('" + event + "', '" + type + "', "
+			+ (typeof ids=='Object' ? ids.join() : ids) + ") called "
+			+ "[column trees: " + _observers['columnTree'].length
+			+ ", item trees: " + _observers['itemTree'].length + "]");
+		
+		for (i in _observers[treeType].items){
+			Scholar.debug("Calling notify() on " + treeType + " with hash '"
+				+ i + "'", 4);
+			_observers[treeType].get(i).notify(event, type, ids);
 		}
 	}
 	
@@ -66,15 +69,15 @@ Scholar.Notifier = new function(){
 			var hash = Scholar.randomString(len);
 			tries--;
 		}
-		while (_observers[type][hash]);
+		while (_observers[type].get(hash));
 		
 		Scholar.debug('Registering ' + type + " in notifier with hash '" + hash + "'", 4);
-		_observers[type][hash] = ref;
+		_observers[type].set(hash, ref);
 		return hash;
 	}
 	
 	function _unregister(type, hash){
 		Scholar.debug("Unregistering " + type + " in notifier with hash '" + hash + "'", 4);
-		delete _observers[type][hash];
+		_observers[type].remove(hash);
 	}
 }
