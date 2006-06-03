@@ -27,7 +27,10 @@ Scholar.Ingester.Model = function() {
 // RDF URI and thus this is unnecessary.
 Scholar.Ingester.Model.prototype.addStatement = function(uri, rdfUri, literal) {
 	if(!this.data[uri]) this.data[uri] = new Object();
-	this.data[uri][rdfUri] = literal;
+	if(!this.data[uri][rdfUri]) {
+		this.data[uri][rdfUri] = new Array();
+	}
+	this.data[uri][rdfUri].push(literal);
 	Scholar.debug(rdfUri+" for "+uri+" is "+literal);
 }
 
@@ -200,6 +203,92 @@ Scholar.Ingester.Utilities.prototype.collectURLsWithSubstring = function(doc, su
 // essential components for Scholar and would take a great deal of effort to
 // implement. We can, however, always implement them later.
 
+// These functions are for use by importMARCRecord. They're private, because,
+// while they are useful, it's also nice if as many of our scrapers as possible
+// are PiggyBank compatible, and if our scrapers used functions, that would
+// break compatibility
+Scholar.Ingester.Utilities.prototype._MARCCleanString = function(author) {
+	author = author.replace(/^[\s\.\,\/\[\]\:]+/, '');
+	return author.replace(/[\s\.\,\/\[\]\:]+$/, '');
+}
+
+Scholar.Ingester.Utilities.prototype._MARCCleanAuthor = function(author) {
+	author = author.replace(/^[\s\.\,\/\[\]\:]+/, '');
+	author = author.replace(/[\s\.\,\/\[\]\:]+$/, '');
+	var splitNames = author.split(', ');
+	if(splitNames.length > 1) {
+		author = splitNames[1]+' '+splitNames[0];
+	}
+	return author;
+}
+
+Scholar.Ingester.Utilities.prototype._MARCAssociateField = function(record, uri, model, fieldNo, rdfUri, execMe, prefix, part) {
+	if(!part) {
+		part = 'a';
+	}
+	var field = record.get_field_subfields(fieldNo);
+	Scholar.debug('Found '+field.length+' matches for '+fieldNo+part);
+	if(field) {
+		for(i in field) {
+			if(field[i][part]) {
+				var value = field[i][part];
+				Scholar.debug(value);
+				if(fieldNo == '245') {	// special case - title + subtitle
+					if(field[i]['b']) {
+						value += ' '+field[i]['b'];
+					}
+				}
+				if(execMe) {
+					value = execMe(value);
+				}
+				if(prefix) {
+					value = prefix + value;
+				}
+				model.addStatement(uri, rdfUri, value);
+			}
+		}
+	}
+	return model;
+}
+
+// This is an extension to PiggyBank's architecture. It's here so that we don't
+// need an enormous library for each scraper that wants to use MARC records
+Scholar.Ingester.Utilities.prototype.importMARCRecord = function(text, format, uri, model) {
+	var prefixDC = 'http://purl.org/dc/elements/1.1/';
+	var prefixDCMI = 'http://purl.org/dc/dcmitype/';
+	var prefixDummy = 'http://chnm.gmu.edu/firefox-scholar/';
+	
+	var record = new Scholar.Ingester.MARC_Record();
+	record.load(text, format);
+	
+	// Extract ISBNs
+	model = this._MARCAssociateField(record, uri, model, '020', prefixDC + 'identifier', this._MARCCleanString, 'ISBN ');
+	// Extract ISSNs
+	model = this._MARCAssociateField(record, uri, model, '022', prefixDC + 'identifier', this._MARCCleanString, 'ISBN ');
+	// Extract creators
+	model = this._MARCAssociateField(record, uri, model, '100', prefixDC + 'creator', this._MARCCleanAuthor);
+	model = this._MARCAssociateField(record, uri, model, '110', prefixDC + 'creator', this._MARCCleanString);
+	model = this._MARCAssociateField(record, uri, model, '111', prefixDC + 'creator', this._MARCCleanString);
+	model = this._MARCAssociateField(record, uri, model, '130', prefixDC + 'creator', this._MARCCleanString);
+	if(!model.data[uri][prefixDC + 'creator']) {
+		var field = record.get_field_subfields('600');
+		if(field) {
+			model = this.addStatement(uri, prefixDC + 'creator', this._MARCCleanAuthor(field[0]['a']));	
+		}
+	}
+	// Extract title
+	model = this._MARCAssociateField(record, uri, model, '245', prefixDC + 'title', this._MARCCleanString);
+	// Extract edition
+	model = this._MARCAssociateField(record, uri, model, '250', prefixDC + 'edition', this._MARCCleanString);
+	// Extract place info
+	model = this._MARCAssociateField(record, uri, model, '260', prefixDummy + 'place', this._MARCCleanString, '', 'a');
+	// Extract publisher info
+	model = this._MARCAssociateField(record, uri, model, '260', prefixDC + 'publisher', this._MARCCleanString, '', 'b');
+	// Extract series
+	model = this._MARCAssociateField(record, uri, model, '440', prefixDummy + 'series', this._MARCCleanString);
+}
+
+
 // These are front ends for XMLHttpRequest. XMLHttpRequest can't actually be
 // accessed outside the sandbox, and even if it could, it wouldn't let scripts
 // access across domains, so everything's replicated here.
@@ -361,13 +450,15 @@ Scholar.Ingester.Document.prototype.canScrape = function(currentScraper) {
 	// passed regular expression test
 	if((!currentScraper.urlPattern || canScrape)
 	  && currentScraper.scraperDetectCode) {
+		Scholar.debug("Checking scraperDetectCode");
 		var scraperSandbox = this.sandbox;
 		try {
-			canScrape = this.evalInSandbox("(function(){\n" +
+			canScrape = Components.utils.evalInSandbox("(function(){\n" +
 							   currentScraper.scraperDetectCode +
 							   "\n})()", scraperSandbox);
 		} catch(e) {
-			throw e+' in scraperDetectCode for '+currentScraper.label;
+			Scholar.debug(e+' in scraperDetectCode for '+currentScraper.label);
+			canScrape = false;
 		}
 	}
 	return canScrape;
@@ -385,11 +476,10 @@ Scholar.Ingester.Document.prototype.scrapePage = function(callback) {
 	Scholar.debug("Scraping "+this.browser.contentDocument.location.href);
 	
 	var scraperSandbox = this.sandbox;
-	
 	try {
 		Components.utils.evalInSandbox(this.scraper.scraperJavaScript, scraperSandbox);
 	} catch(e) {
-		throw e+' in scraperJavaScript for '+this.scraper.label;
+		Scholar.debug(e+' in scraperJavaScript for '+this.scraper.label);
 		this._scrapePageComplete();
 	}
 	
@@ -465,36 +555,48 @@ Scholar.Ingester.Document.prototype._updateDatabase = function() {
 		var newItem = Scholar.Items.getNewItemByType(1);
 		newItem.setField("source", uri);
 		if(this.model.data[uri][prefixDC + 'title']) {
-			newItem.setField("title", this.model.data[uri][prefixDC + 'title']);
+			newItem.setField("title", this.model.data[uri][prefixDC + 'title'][0]);
 		}
 		if(this.model.data[uri][prefixDC + 'publisher']) {
-			newItem.setField("publisher", this.model.data[uri][prefixDC + 'publisher']);
+			newItem.setField("publisher", this.model.data[uri][prefixDC + 'publisher'][0]);
 		}
 		if(this.model.data[uri][prefixDC + 'year']) {
 			if(this.model.data[uri][prefixDC + 'year'].length == 4) {
-				newItem.setField("year", this.model.data[uri][prefixDC + 'year']);
+				newItem.setField("year", this.model.data[uri][prefixDC + 'year'][0]);
 			} else {
 				try {
-					newItem.setField(this.model.data[uri][prefixDC + 'year'].substring(
-							 this.model.data[uri][prefixDC + 'year'].lastIndexOf(" ")+1,
-							 this.model.data[uri][prefixDC + 'year'].length));
+					newItem.setField(this.model.data[uri][prefixDC + 'year'][0].substring(
+							 this.model.data[uri][prefixDC + 'year'][0].lastIndexOf(" ")+1,
+							 this.model.data[uri][prefixDC + 'year'][0].length));
 				} catch(e) {}
 			}
 		}
 		if(this.model.data[uri][prefixDC + 'edition']) {
-			newItem.setField("edition", this.model.data[uri][prefixDC + 'edition']);
+			newItem.setField("edition", this.model.data[uri][prefixDC + 'edition'][0]);
+		}
+		if(this.model.data[uri][prefixDummy + 'series']) {
+			newItem.setField("series", this.model.data[uri][prefixDummy + 'series'][0]);
+		}
+		if(this.model.data[uri][prefixDummy + 'place']) {
+			newItem.setField("place", this.model.data[uri][prefixDummy + 'place'][0]);
 		}
 		if(this.model.data[uri][prefixDC + 'identifier']) {
-			newItem.setField("ISBN", this.model.data[uri][prefixDC + 'identifier'].substring(5));
+			for(i in this.model.data[uri][prefixDC + 'identifier']) {
+				if(this.model.data[uri][prefixDC + 'identifier'][i].substring(0, 4) == 'ISBN') {
+					newItem.setField("ISBN", this.model.data[uri][prefixDC + 'identifier'][0].substring(5));
+					break;
+				}
+			}
 		}
 		if(this.model.data[uri][prefixDC + 'creator']) {
-			var creator = this.model.data[uri][prefixDC + 'creator'];
+			for(i in this.model.data[uri][prefixDC + 'creator']) {
+				var creator = this.model.data[uri][prefixDC + 'creator'][i];
+				var spaceIndex = creator.lastIndexOf(" ");
+				var lastName = creator.substring(spaceIndex+1, creator.length);
+				var firstName = creator.substring(0, spaceIndex);
 			
-			var spaceIndex = creator.lastIndexOf(" ");
-			var lastName = creator.substring(spaceIndex+1, creator.length);
-			var firstName = creator.substring(0, spaceIndex);
-			
-			newItem.setCreator(0, firstName, lastName);
+				newItem.setCreator(i, firstName, lastName);
+			}
 		}
 		newItem.save();
 		
