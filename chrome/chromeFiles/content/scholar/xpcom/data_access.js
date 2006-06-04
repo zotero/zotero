@@ -1536,6 +1536,13 @@ Scholar.ItemFields = new function(){
 		if (!_fields.length){
 			_loadFields();
 		}
+		
+		_fieldCheck(fieldID);
+		
+		if (!_fields[fieldID]['itemTypes']){
+			throw('No associated itemTypes for fieldID ' + fieldID);
+		}
+		
 		return !!_fields[fieldID]['itemTypes'][itemTypeID];
 	}
 	
@@ -1544,6 +1551,9 @@ Scholar.ItemFields = new function(){
 		if (!_fields.length){
 			_loadFields();
 		}
+		
+		_fieldCheck(fieldID);
+		
 		var ffid = _fields[fieldID]['formatID'];
 		return _fieldFormats[ffid] ? _fieldFormats[ffid]['isInteger'] : false;
 	}
@@ -1562,6 +1572,20 @@ Scholar.ItemFields = new function(){
 		
 		_itemTypeFields[itemTypeID] = Scholar.DB.columnQuery(sql);
 		return _itemTypeFields[itemTypeID];
+	}
+	
+	
+	/**
+	* Check whether a fieldID is valid, throwing an exception if not
+	* (since it should never actually happen)
+	**/
+	function _fieldCheck(fieldID){
+		if (!_fields.length){
+			_loadFields();
+		}
+		if (typeof _fields[fieldID]=='undefined'){
+			throw('Invalid fieldID ' + fieldID);
+		}
 	}
 	
 	
