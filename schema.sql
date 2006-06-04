@@ -1,4 +1,4 @@
--- 12
+-- 13
 
     DROP TABLE IF EXISTS version;
     CREATE TABLE version (
@@ -176,6 +176,7 @@
     INSERT INTO itemTypeFields VALUES (2,4,4);
     INSERT INTO itemTypeFields VALUES (2,5,5);
     INSERT INTO itemTypeFields VALUES (2,10,6);
+    INSERT INTO itemTypeFields VALUES (2,13,7);
     
     INSERT INTO "items" VALUES(1, 1, 'Online connections: Internet interpersonal relationships', '2006-03-12 05:24:40', '2006-03-12 05:24:40');
     INSERT INTO "items" VALUES(2, 1, 'Computer-Mediated Communication: Human-to-Human Communication Across the Internet', '2006-03-12 05:25:50', '2006-03-12 05:25:50');
