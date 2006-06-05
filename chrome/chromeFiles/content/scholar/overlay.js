@@ -74,13 +74,14 @@ var ScholarPane = new function()
 	 */
 	function newItem(typeID)
 	{
+		document.getElementById('scholar-floater').hidden=false;
 		MetadataPane.viewItem(new Scholar.Item(typeID));
 		MetadataPane.toggleEdit();
 	}
 	
 	function newCollection()
 	{
-		Scholar.Collections.add('Untitled Collection');
+		Scholar.Collections.add(Scholar.getString('pane.collections.untitled'));
 	}
 	
 	function folderSelected()
@@ -130,13 +131,13 @@ var ScholarPane = new function()
 	
 	function deleteItemSelection()
 	{
-		if(itemsView && itemsView.selection.count > 0 && confirm("Are you sure you want to delete the selected items?"))
+		if(itemsView && itemsView.selection.count > 0 && confirm(Scholar.getString('pane.items.delete')))
 			itemsView.deleteSelection();
 	}
 	
 	function deleteCollectionSelection()
 	{
-		if(foldersView.selection.count > 0 && confirm("Are you sure you want to delete the selected collections?"))
+		if(foldersView.selection.count > 0 && confirm(Scholar.getString('pane.collections.delete')))
 			foldersView.deleteSelection();
 	}
 	
@@ -146,7 +147,7 @@ var ScholarPane = new function()
 		{
 			collection = foldersView._getItemAtRow(foldersView.selection.currentIndex);
 			
-			var newName = prompt('Rename collection:',collection.getName());
+			var newName = prompt(Scholar.getString('pane.collections.rename'),collection.getName());
 			if(newName)
 				collection.ref.rename(newName);
 		}
@@ -180,7 +181,7 @@ var ScholarItemsDragObserver =
 	onDragStart: function (evt,transferData,action)
 	{ 
 		transferData.data=new TransferData(); 
-		transferData.data.addDataForFlavour("text/unicode","finally"); 
+		transferData.data.addDataForFlavour("text/unicode","random data"); 
 		
 	}	
 }; 

@@ -1,3 +1,13 @@
+<!ENTITY scholar.name					"Scholar">
+
+<!ENTITY metadata.label					"Metadata">
+<!ENTITY notes.label					"Notes">
+
+<!ENTITY metadata.creators.label		"Creators">
+<!ENTITY metadata.edit.label			"Edit">
+<!ENTITY metadata.cancel.label			"Cancel">
+<!ENTITY metadata.save.label			"Save">
+
 <!ENTITY items.title_column 			"Title">
 <!ENTITY items.creator_column 			"Creator">
 <!ENTITY items.source_column 			"Source">
@@ -5,22 +15,14 @@
 <!ENTITY items.dateAdded_column 		"Date Added">
 <!ENTITY items.dateModified_column	 	"Date Modified">
 
-<!ENTITY collections.name_column 			"Name">
+<!ENTITY collections.name_column		"Name">
 
-<!ENTITY creators.firstname 			"First name">
-<!ENTITY creators.lastname 				"Last name">
-<!ENTITY creators.type 					"Type">
-
-<!ENTITY fileMenu.label                 "File">
-<!ENTITY fileMenu.accesskey             "F">
-<!ENTITY viewMenu.label                 "View">
-<!ENTITY viewMenu.accesskey             "V">
-
-<!ENTITY menuitem.newItem.label    		"New Item...">
-<!ENTITY menuitem.newItem.accesskey 	"n">
-<!ENTITY menuitem.newCollection.label   "New Collection...">
-<!ENTITY menuitem.newFolder.accesskey   "o">
-
+<!ENTITY toolbar.newItem.label    		"New Item">
+<!ENTITY toolbar.newCollection.label   	"New Project">
+<!ENTITY toolbar.renameCollection.label   "Rename Project...">
+<!ENTITY toolbar.search.label   			"Search:">
+<!ENTITY toolbar.metadata.label   			"Metadata">
+<!ENTITY toolbar.notes.label   			"Notes">
 
 <!ENTITY closeCmd.label 				"Close">
 <!ENTITY closeCmd.accesskey 			"C">

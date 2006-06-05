@@ -279,7 +279,7 @@ Scholar.ItemGroup.prototype.getName = function()
 	if(this.isCollection())
 		return this.ref.getName();
 	else if(this.isLibrary())
-		return "Library";
+		return Scholar.getString('pane.collections.library');
 	else
 		return "";
 }

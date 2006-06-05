@@ -1,4 +1,5 @@
 <?xml version="1.0"?>
+<!DOCTYPE window SYSTEM "chrome://scholar/locale/scholar.dtd">
 
 <overlay 
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
@@ -16,7 +17,7 @@
 			</rows>
 		</grid>
 		<toolbar id="metadata-creators-toolbar" hidden="true">
-			<label value="Creators"/>
+			<label value="&metadata.creators.label;"/>
 			<spacer flex="1"/>
 			<toolbarbutton label="+" oncommand="MetadataPane.addCreator()" class="addremove"/>
 		</toolbar>
@@ -34,9 +35,9 @@
 		</grid>
 		<spacer flex="1"/>
 		<toolbar id="metadata-toolbar">
-			<toolbarbutton id="metadata-pane-edit-button" label="Edit" oncommand="MetadataPane.toggleEdit()"/>
-			<toolbarbutton id="metadata-pane-cancel-button" label="Cancel" oncommand="MetadataPane.toggleEdit()" hidden="true"/>
-			<toolbarbutton id="metadata-pane-save-button" label="Save" oncommand="MetadataPane.toggleEdit(true)" hidden="true"/>
+			<toolbarbutton id="metadata-pane-edit-button" label="&metadata.edit.label;" oncommand="MetadataPane.toggleEdit()"/>
+			<toolbarbutton id="metadata-pane-cancel-button" label="&metadata.cancel.label;" oncommand="MetadataPane.toggleEdit()" hidden="true"/>
+			<toolbarbutton id="metadata-pane-save-button" label="&metadata.save.label;" oncommand="MetadataPane.toggleEdit(true)" hidden="true"/>
 			<spacer flex="1" />
 		</toolbar>
 	</vbox>

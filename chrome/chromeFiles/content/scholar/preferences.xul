@@ -1,14 +1,16 @@
 <?xml version="1.0"?>
+<!DOCTYPE window SYSTEM "chrome://scholar/locale/preferences.dtd">
+
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 
-<dialog id="winMain" title="Scholar Preferences" style="min-width:400px;"
+<dialog id="winMain" title="&scholar.preferences.title;" style="min-width:400px;"
 		onload="init();" ondialogaccept="accept()"
 		xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
 <script src="preferences.js"/>
 <script src="include.js"/>
 
-<dialogheader id="header" title="Scholar" description="Scholar Preferences"/>
+<dialogheader id="header" title="&scholar.name;" description="&scholar.preferences.title;"/>
 
 <checkbox id="whateverBox" label="Whatever!"/>
 

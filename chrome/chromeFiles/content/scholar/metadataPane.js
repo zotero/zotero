@@ -36,7 +36,7 @@ MetadataPane = new function()
 	function viewItem(thisItem)
 	{
 		if(_editButton.hidden)
-			toggleEdit(confirm("Save changes to '"+_itemBeingEdited.getField('title')+"'?"));
+			toggleEdit(confirm(Scholar.getString('metadata.savechanges').replace('%1',_itemBeingEdited.getField('title'))));
 		
 		_itemBeingEdited = thisItem;
 		
