@@ -17,6 +17,7 @@ var ScholarPane = new function()
 	this.itemSelected = itemSelected;
 	this.deleteItemSelection = deleteItemSelection;
 	this.deleteCollectionSelection = deleteCollectionSelection;
+	this.renameSelectedCollection = renameSelectedCollection;
 	this.search = search;
 	this.toggleView = toggleView;
 	
@@ -89,16 +90,16 @@ var ScholarPane = new function()
 			
 		if(foldersView.selection.count == 1 && foldersView.selection.currentIndex != -1)
 		{
-			itemsView = new Scholar.ItemTreeView(foldersView._getItemAtRow(foldersView.selection.currentIndex));
+			var collection = foldersView._getItemAtRow(foldersView.selection.currentIndex);
+			
+			itemsView = new Scholar.ItemTreeView(collection);
 			document.getElementById('items-tree').view = itemsView;
-		}
-		else if(foldersView.selection.count == 0)
-		{
-			document.getElementById('items-tree').view = itemsView = null;
+			document.getElementById('tb-rename').disabled = collection.isLibrary();
 		}
 		else
 		{
 			document.getElementById('items-tree').view = itemsView = null;
+			document.getElementById('tb-rename').disabled = true;
 		}
 		
 	}
@@ -135,10 +136,21 @@ var ScholarPane = new function()
 	
 	function deleteCollectionSelection()
 	{
-		if(itemsView && foldersView.selection.count > 0 && confirm("Are you sure you want to delete the selected collections?"))
+		if(foldersView.selection.count > 0 && confirm("Are you sure you want to delete the selected collections?"))
 			foldersView.deleteSelection();
 	}
 	
+	function renameSelectedCollection()
+	{
+		if(foldersView.selection.count > 0)
+		{
+			collection = foldersView._getItemAtRow(foldersView.selection.currentIndex);
+			
+			var newName = prompt('Rename collection:',collection.getName());
+			if(newName)
+				collection.ref.rename(newName);
+		}
+	}
 	function search()
 	{
 		if(itemsView)

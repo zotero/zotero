@@ -40,13 +40,17 @@
 	</window>
 	
 	<vbox id="appcontent">
-		<vbox id="scholar-pane" position="1" persist="height collapsed">
-			<hbox flex="1">				
+		<hbox id="scholar-pane" position="1" persist="height collapsed">
+			<vbox persist="width" flex="1">
+				<toolbar>
+					<toolbarbutton label="&menuitem.newCollection.label;" command="cmd_scholar_newCollection"/>
+					<toolbarbutton id="tb-rename" label="Rename Collection" oncommand="ScholarPane.renameSelectedCollection();" disabled="true"/>
+				</toolbar>
 				<tree id="folders-tree" hidecolumnpicker="true"
 					onselect="ScholarPane.folderSelected();" seltype="single"
 					ondragover="nsDragAndDrop.dragOver(event,ScholarCollectionsDragObserver)" ondragdrop="nsDragAndDrop.drop(event,ScholarCollectionsDragObserver)"
 					onkeypress="if(event.keyCode == event.DOM_VK_BACK_SPACE || event.keyCode == event.DOM_VK_DELETE){ ScholarPane.deleteCollectionSelection(); return false; }"
-					persist="width" flex="1">
+					flex="1">
 					<treecols>
 						<treecol
 							id="name_column"
@@ -55,14 +59,29 @@
 							primary="true"/>
 					</treecols>
 					<treechildren/>
-				</tree>		
-				<splitter id="scholar-tree-splitter" resizebefore="closest" resizeafter="closest"/>
+				</tree>
+			</vbox>
+			<splitter id="scholar-tree-splitter" resizebefore="closest" resizeafter="closest"/>
+			<vbox persist="width" flex="5">
+				<toolbar align="center">
+					<toolbarbutton id="tb-add" label="&menuitem.newItem.label;" type="menu">
+						<menupopup>
+						</menupopup>
+					</toolbarbutton>
+					<spacer flex="1"/>
+					<toolbarbutton class="scholar-toggler" id="tb-metadata" label="Metadata" checked="true"		oncommand="ScholarPane.toggleView('metadata')"/>
+					<toolbarbutton class="scholar-toggler" id="tb-notes" label="Notes" checked="true"			oncommand="ScholarPane.toggleView('notes')"/>
+					<spacer flex="1"/>
+					<label value="Search:" control="tb-search"/>
+					<textbox id="tb-search" type="timed" timeout="500" command="cmd_scholar_search"/>
+					<toolbarbutton class="tabs-closebutton" oncommand="ScholarPane.toggleDisplay()"/>
+				</toolbar>
 				<tree 
 					id="items-tree" 
 					enableColumnDrag="true" onkeypress="if(event.keyCode == event.DOM_VK_BACK_SPACE || event.keyCode == event.DOM_VK_DELETE){ ScholarPane.deleteItemSelection(); return false; }"
 					onselect="ScholarPane.itemSelected();"
 					ondraggesture="if (event.target.localName == 'treechildren') nsDragAndDrop.startDrag(event,ScholarItemsDragObserver);"
-					persist="width" flex="5">
+					flex="1">
 					<treecols>
 						<treecol
 							id="title"
@@ -97,23 +116,9 @@
 			
 					<treechildren/>
 				</tree>
-			</hbox>
-			<toolbar id="scholar-toolbar" align="center">
-				<toolbarbutton label="&menuitem.newCollection.label;" command="cmd_scholar_newCollection"/>
-				<toolbarbutton id="tb-add" label="&menuitem.newItem.label;" type="menu">
-					<menupopup>
-					</menupopup>
-				</toolbarbutton>
-				<spacer flex="1"/>
-<!--				<toolbarbutton class="scholar-toggler" id="tb-view" label="View" checked="true"				oncommand="ScholarPane.toggleView('view')"/> -->
-				<toolbarbutton class="scholar-toggler" id="tb-metadata" label="Metadata" checked="true"		oncommand="ScholarPane.toggleView('metadata')"/>
-				<toolbarbutton class="scholar-toggler" id="tb-notes" label="Notes" checked="true"			oncommand="ScholarPane.toggleView('notes')"/>
-				<spacer flex="1"/>
-				<label value="Search:" control="tb-search"/>
-				<textbox id="tb-search" type="timed" timeout="500" command="cmd_scholar_search"/>
-                <toolbarbutton class="tabs-closebutton" oncommand="ScholarPane.toggleDisplay()"/>
-			</toolbar>
-		</vbox>
+			
+			</vbox>			
+		</hbox>
 		<splitter id="scholar-splitter" resizebefore="closest" resizeafter="closest" position="2" persist="collapsed"/>
 	</vbox>
 	
