@@ -44,7 +44,7 @@ Scholar.Notifier = new function(){
 		}
 		
 		Scholar.debug("Notifier.trigger('" + event + "', '" + type + "', "
-			+ (typeof ids=='Object' ? ids.join() : ids) + ") called "
+			+ (typeof ids=='object' ? '[' + ids.join() + ']' : ids) + ") called "
 			+ "[column trees: " + _observers['columnTree'].length
 			+ ", item trees: " + _observers['itemTree'].length + "]");
 		
