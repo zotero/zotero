@@ -90,10 +90,27 @@ tree #items-tree
 	border-bottom: none;
 }
 
+#metadata-toolbar toolbarbutton
+{
+	color: blue;
+}
+
+#metadata-toolbar toolbarbutton:hover
+{
+	text-decoration: underline;
+}
+
 #scholar-metadata .addremove
 {
 	font-weight: bold;
+	color: blue;
 }
+
+#scholar-metadata .addremove:hover
+{
+	text-decoration: underline;
+}
+
 
 #scholar-notes
 {

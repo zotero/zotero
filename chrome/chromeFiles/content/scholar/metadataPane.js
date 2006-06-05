@@ -3,6 +3,9 @@ MetadataPane = new function()
 	var _dynamicFields;
 	var _dynamicCreators;
 	var	_editButton;
+	var	_cancelButton;
+	var	_saveButton;
+	var _creatorsToolbar;
 	
 	var _itemBeingEdited;
 	var _creatorTypes = Scholar.CreatorTypes.getTypes();
@@ -20,20 +23,35 @@ MetadataPane = new function()
 		_dynamicFields = document.getElementById('editpane-dynamic-fields');
 		_dynamicCreators = document.getElementById('editpane-dynamic-creators');
 		_editButton = document.getElementById('metadata-pane-edit-button');
+		_cancelButton = document.getElementById('metadata-pane-cancel-button');
+		_saveButton = document.getElementById('metadata-pane-save-button');
+		_creatorsToolbar = document.getElementById('metadata-creators-toolbar');
 		
 		return true;
 	}
 	
 	/*
-	 * Dynamically loads an item 
+	 * Loads an item 
 	 */
 	function viewItem(thisItem)
-	{		
+	{
+		if(_editButton.hidden)
+			toggleEdit(confirm("Save changes to '"+_itemBeingEdited.getField('title')+"'?"));
+		
+		_itemBeingEdited = thisItem;
+		
+		reloadFields();
+	
+	}
+	
+	function reloadFields()
+	{
 		removeDynamicRows(_dynamicFields);
 		removeDynamicRows(_dynamicCreators);
+		thisItem = _itemBeingEdited;
 		
 		var fieldNames = getFullFieldList(thisItem);
-		var editingMode = _editButton.checked;
+		var editingMode = _editButton.hidden;
 		
 		for(var i = 0; i<fieldNames.length; i++)
 		{
@@ -44,33 +62,43 @@ MetadataPane = new function()
 					addDynamicField(Scholar.getString("itemFields."+fieldNames[i])+":",rowValue,editingMode ? fieldNames[i] : null);
 			}
 		}
-						
-		for(var i = 0, len=thisItem.numCreators(); i<len; i++)
+		
+		if(thisItem.numCreators() > 0)
 		{
-			var creator = thisItem.getCreator(i);
-			if(_editButton.checked)
+			for(var i = 0, len=thisItem.numCreators(); i<len; i++)
 			{
-				addCreator(creator['firstName'],creator['lastName'],creator['creatorTypeID']);
-			}
-			else
-			{
-				addDynamicField(Scholar.getString('creatorTypes.'+Scholar.CreatorTypes.getTypeName(creator['creatorTypeID']))+":",
-								creator['firstName']+' '+creator['lastName'],
-								false);
+				var creator = thisItem.getCreator(i);
+				if(editingMode)
+				{
+					addCreator(creator['firstName'],creator['lastName'],creator['creatorTypeID']);
+				}
+				else
+				{
+					addDynamicField(Scholar.getString('creatorTypes.'+Scholar.CreatorTypes.getTypeName(creator['creatorTypeID']))+":",
+									creator['firstName']+' '+creator['lastName'],
+									false);
+				}
 			}
 		}
-	
-		_itemBeingEdited = thisItem;
+		else if(editingMode)
+		{
+			//display a empty creator box if editing, and if there are no creators
+			addCreator();
+		}
 	}
 	
-	function toggleEdit()
+	function toggleEdit(save)
 	{
-		if(_editButton.checked)
+		if(_editButton.hidden && save)
 			saveItem();
 		
-		_editButton.checked = !_editButton.checked;
-		document.getElementById('metadata-creators-toolbar').hidden = !_editButton.checked;
-		viewItem(_itemBeingEdited);
+		_cancelButton.hidden = _editButton.hidden;
+		_saveButton.hidden = _editButton.hidden;
+		_creatorsToolbar.hidden = _editButton.hidden;
+		
+		_editButton.hidden = !_editButton.hidden;
+		
+		reloadFields();
 	}
 	
 	function saveItem()
@@ -133,6 +161,7 @@ MetadataPane = new function()
 		}
 		
 		var row = document.createElement("row");
+		row.align="center";
 		row.appendChild(label);
 		row.appendChild(valueElement);
 		_dynamicFields.appendChild(row);		
@@ -173,7 +202,7 @@ MetadataPane = new function()
 		
 		var add = document.createElement("toolbarbutton");
 		add.setAttribute("label","+");
-		remove.setAttribute("class","addremove");
+		add.setAttribute("class","addremove");
 		add.setAttribute("oncommand","MetadataPane.addCreator();");
 		
 		var row = document.createElement("row");

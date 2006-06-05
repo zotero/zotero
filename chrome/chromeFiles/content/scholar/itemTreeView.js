@@ -196,7 +196,7 @@ Scholar.ItemTreeView.prototype.notify = function(action, type, ids)
 				if(this._itemGroup.isLibrary() || item.inCollection(this.getCollectionID()))
 				{
 					this._showItem(item,this.rowCount);
-					this._treebox.rowCountChanged(this.rowCount,1);
+					this._treebox.rowCountChanged(this.rowCount-1,1);
 				}
 			
 				madeChanges = true;
@@ -209,6 +209,10 @@ Scholar.ItemTreeView.prototype.notify = function(action, type, ids)
 	
 	if(madeChanges)
 		this._refreshHashMap();
+	
+	//Select last add
+	if(action == 'add' && item)
+		this.selection.select(this._itemRowMap[item.getID()]);
 }
 
 Scholar.ItemTreeView.prototype.canDrop = function(index, orient)

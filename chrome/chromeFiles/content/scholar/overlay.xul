@@ -34,7 +34,7 @@
             		<spacer flex="1"/>
                 	<toolbarbutton class="tabs-closebutton" oncommand="ScholarPane.toggleView('notes')"/>
                 </toolbar>
-				<textbox value="Notes.... lorem ispum delorum..." multiline="true" flex="1"/>
+				<textbox multiline="true" flex="1" disabled="true"/>
 			</vbox>
 		</vbox>
 	</window>
