@@ -89,14 +89,14 @@ MetadataPane = new function()
 	
 	function toggleEdit(save)
 	{
-		if(_editButton.hidden && save)
-			saveItem();
-		
 		_cancelButton.hidden = _editButton.hidden;
 		_saveButton.hidden = _editButton.hidden;
 		_creatorsToolbar.hidden = _editButton.hidden;
 		
 		_editButton.hidden = !_editButton.hidden;
+		
+		if(!_editButton.hidden && save)
+			saveItem();
 		
 		reloadFields();
 	}

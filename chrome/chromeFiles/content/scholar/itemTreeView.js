@@ -31,6 +31,7 @@ Scholar.ItemTreeView.prototype.setTree = function(treebox)
 	if(this._treebox)
 		return;
 	this._treebox = treebox;
+	this.sort();
 }
 
 Scholar.ItemTreeView.prototype.getCellText = function(row, column)
@@ -57,7 +58,14 @@ Scholar.ItemTreeView.prototype._hideItem = function(row) 						{ this._dataItems
 
 Scholar.ItemTreeView.prototype._getItemAtRow = function(row)					{ return this._dataItems[row]; }
 
-Scholar.ItemTreeView.prototype.isSorted = function() 							{ return false; }
+Scholar.ItemTreeView.prototype.isSorted = function()
+{
+	for(var i=0, len=this._treebox.columns.count; i<len; i++)
+		if(this._treebox.columns.getColumnAt(i).element.getAttribute('sortActive'))
+			return true;
+	return false;
+}
+
 Scholar.ItemTreeView.prototype.isSeparator = function(row) 						{ return false; }
 Scholar.ItemTreeView.prototype.isContainer = function(row) 						{ return false; }
 Scholar.ItemTreeView.prototype.getLevel = function(row) 						{ return 0; }
@@ -68,8 +76,41 @@ Scholar.ItemTreeView.prototype.getImageSrc = function(row, col) 				{ }
 
 Scholar.ItemTreeView.prototype.cycleHeader = function(column)
 {
-	var order = 0;
-	if(order==0)
+	for(var i=0, len=this._treebox.columns.count; i<len; i++)
+	{
+		col = this._treebox.columns.getColumnAt(i);
+		if(column != col)
+		{
+			col.element.removeAttribute('sortActive');
+			col.element.removeAttribute('sortDirection');
+		}
+		else
+		{
+			col.element.setAttribute('sortActive',true);
+			col.element.setAttribute('sortDirection',col.element.getAttribute('sortDirection') == 'descending' ? 'ascending' : 'descending');
+		}
+	}
+	
+	this.sort();
+}
+
+Scholar.ItemTreeView.prototype.sort = function()
+{
+	this.selection.selectEventsSuppressed = true;
+	
+	var selectedIDs = new Array();
+	var start = new Object();
+	var end = new Object();
+	for (var i=0, len=this.selection.getRangeCount(); i<len; i++)
+	{
+		this.selection.getRangeAt(i,start,end);
+		for (var j=start.value; j<=end.value; j++)
+			selectedIDs.push(this._getItemAtRow(j).getID());
+	}
+	
+	var column = this._treebox.columns.getSortedColumn()
+	var order = column.element.getAttribute('sortDirection') == 'descending';
+	if(order)
 	{
 		function columnSort(a,b)
 		{
@@ -86,6 +127,13 @@ Scholar.ItemTreeView.prototype.cycleHeader = function(column)
 	
 	this._dataItems.sort(columnSort);
 	this._refreshHashMap();
+	
+	this.selection.clearSelection();
+	for(var i=0; i < selectedIDs.length; i++)
+	{
+		this.selection.toggleSelect(this._itemRowMap[selectedIDs[i]]);
+	}
+	this.selection.selectEventsSuppressed = false;
 	this._treebox.invalidate();
 }
 
@@ -187,7 +235,10 @@ Scholar.ItemTreeView.prototype.notify = function(action, type, ids)
 			var row = this._itemRowMap[ids[i]];
 			if(action == 'modify' && row != null) 	//must check for null because it could legitimately be 0
 			{
-				this._treebox.invalidateRow(row)
+				var item = Scholar.Items.get(ids[i]);
+				
+				this._treebox.invalidateRow(row);
+				madeChanges = true;
 			}
 			else if(action == 'add' && row == null)
 			{
@@ -200,19 +251,22 @@ Scholar.ItemTreeView.prototype.notify = function(action, type, ids)
 				}
 			
 				madeChanges = true;
-				
-				//TODO: sorted? figure it out later
 			}
 			
 		}
 	}
 	
 	if(madeChanges)
-		this._refreshHashMap();
-	
-	//Select last add
-	if(action == 'add' && item)
-		this.selection.select(this._itemRowMap[item.getID()]);
+	{
+		if(action == 'add')
+			this.selection.select(this._itemRowMap[item.getID()]);
+
+		if(this.isSorted())
+			this.sort();				//this also refreshes the hash map
+		else if(action != 'modify') //no need to update this if we just modified
+			this._refreshHashMap();
+			
+	}	
 }
 
 Scholar.ItemTreeView.prototype.canDrop = function(index, orient)
