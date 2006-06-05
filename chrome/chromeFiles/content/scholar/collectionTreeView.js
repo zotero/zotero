@@ -1,4 +1,4 @@
-Scholar.FolderTreeView = function()
+Scholar.CollectionTreeView = function()
 {
 	this._treebox = null;
 	this._dataItems = new Array();
@@ -10,7 +10,7 @@ Scholar.FolderTreeView = function()
 /*
  *  Unregisters itself from Scholar.Notifier (called on window close)
  */
-Scholar.FolderTreeView.prototype.unregister = function()
+Scholar.CollectionTreeView.prototype.unregister = function()
 {
 	Scholar.Notifier.unregisterColumnTree(this._unregisterID);
 }
@@ -18,7 +18,7 @@ Scholar.FolderTreeView.prototype.unregister = function()
 /*
  *  Is called by Scholar.Notifier on any changes to the data layer
  */
-Scholar.FolderTreeView.prototype.notify = function(action, type, ids)
+Scholar.CollectionTreeView.prototype.notify = function(action, type, ids)
 {
 	ids = Scholar.flattenArguments(ids);
 	var madeChanges = false;
@@ -75,7 +75,7 @@ Scholar.FolderTreeView.prototype.notify = function(action, type, ids)
 		this._refreshHashMap();
 }
 
-Scholar.FolderTreeView.prototype.setTree = function(treebox)
+Scholar.CollectionTreeView.prototype.setTree = function(treebox)
 {
 	if(this._treebox)
 		return;
@@ -88,7 +88,7 @@ Scholar.FolderTreeView.prototype.setTree = function(treebox)
 	this._refreshHashMap();
 }
 
-Scholar.FolderTreeView.prototype.getCellText = function(row, column)
+Scholar.CollectionTreeView.prototype.getCellText = function(row, column)
 {
 	var obj = this._getItemAtRow(row);
 	
@@ -98,17 +98,17 @@ Scholar.FolderTreeView.prototype.getCellText = function(row, column)
 		return "";
 }
 
-Scholar.FolderTreeView.prototype.isContainer = function(row)
+Scholar.CollectionTreeView.prototype.isContainer = function(row)
 {
 	return this._getItemAtRow(row).isCollection();
 }
 
-Scholar.FolderTreeView.prototype.isContainerOpen = function(row)
+Scholar.CollectionTreeView.prototype.isContainerOpen = function(row)
 {
 	return this._dataItems[row][1];
 }
 
-Scholar.FolderTreeView.prototype.isContainerEmpty = function(row)
+Scholar.CollectionTreeView.prototype.isContainerEmpty = function(row)
 {
 	var itemGroup = this._getItemAtRow(row);
 	if(itemGroup.isCollection())
@@ -117,9 +117,9 @@ Scholar.FolderTreeView.prototype.isContainerEmpty = function(row)
 		return true;
 }
 
-Scholar.FolderTreeView.prototype.getLevel = function(row) 		{ return this._dataItems[row][2]; }
+Scholar.CollectionTreeView.prototype.getLevel = function(row) 		{ return this._dataItems[row][2]; }
 
-Scholar.FolderTreeView.prototype.getParentIndex = function(row)
+Scholar.CollectionTreeView.prototype.getParentIndex = function(row)
 {
 	var thisLevel = this.getLevel(row);
 	if(thisLevel == 0) return -1;
@@ -129,7 +129,7 @@ Scholar.FolderTreeView.prototype.getParentIndex = function(row)
 	return -1;
 }
 
-Scholar.FolderTreeView.prototype.hasNextSibling = function(row, afterIndex)
+Scholar.CollectionTreeView.prototype.hasNextSibling = function(row, afterIndex)
 {
 	var thisLevel = this.getLevel(row);
 	for(var i = afterIndex + 1; i < this.rowCount; i++)
@@ -140,7 +140,7 @@ Scholar.FolderTreeView.prototype.hasNextSibling = function(row, afterIndex)
 	}
 }
 
-Scholar.FolderTreeView.prototype.toggleOpenState = function(row)
+Scholar.CollectionTreeView.prototype.toggleOpenState = function(row)
 {
 	var count = 0;		//used to tell the tree how many rows were added/removed
 	var thisLevel = this.getLevel(row);
@@ -172,24 +172,24 @@ Scholar.FolderTreeView.prototype.toggleOpenState = function(row)
 	this._refreshHashMap();
 }
 
-Scholar.FolderTreeView.prototype._showItem = function(item, level, beforeRow) 	{ this._dataItems.splice(beforeRow, 0, [item, false, level]); this.rowCount++; }
+Scholar.CollectionTreeView.prototype._showItem = function(item, level, beforeRow) 	{ this._dataItems.splice(beforeRow, 0, [item, false, level]); this.rowCount++; }
 
-Scholar.FolderTreeView.prototype._hideItem = function(row) 						{ this._dataItems.splice(row,1); this.rowCount--; }
+Scholar.CollectionTreeView.prototype._hideItem = function(row) 						{ this._dataItems.splice(row,1); this.rowCount--; }
 
-Scholar.FolderTreeView.prototype._getItemAtRow = function(row)					{ return this._dataItems[row][0]; }
-Scholar.FolderTreeView.prototype.isSorted = function() 							{ return false; }
-Scholar.FolderTreeView.prototype.isSeparator = function(row) 						{ return false; }
-Scholar.FolderTreeView.prototype.isEditable = function(row, idx) 					{ return false; }
-Scholar.FolderTreeView.prototype.getRowProperties = function(row, prop) 			{ }
-Scholar.FolderTreeView.prototype.getColumnProperties = function(col, prop) 		{ }
-Scholar.FolderTreeView.prototype.getCellProperties = function(row, col, prop) 	{ }
-Scholar.FolderTreeView.prototype.getImageSrc = function(row, col) 				{ }
-Scholar.FolderTreeView.prototype.performAction = function(action) 				{ }
-Scholar.FolderTreeView.prototype.performActionOnCell = function(action, row, col)	{ }
-Scholar.FolderTreeView.prototype.getProgressMode = function(row, col) 			{ }
-Scholar.FolderTreeView.prototype.cycleHeader = function(column)					{ }
+Scholar.CollectionTreeView.prototype._getItemAtRow = function(row)					{ return this._dataItems[row][0]; }
+Scholar.CollectionTreeView.prototype.isSorted = function() 							{ return false; }
+Scholar.CollectionTreeView.prototype.isSeparator = function(row) 						{ return false; }
+Scholar.CollectionTreeView.prototype.isEditable = function(row, idx) 					{ return false; }
+Scholar.CollectionTreeView.prototype.getRowProperties = function(row, prop) 			{ }
+Scholar.CollectionTreeView.prototype.getColumnProperties = function(col, prop) 		{ }
+Scholar.CollectionTreeView.prototype.getCellProperties = function(row, col, prop) 	{ }
+Scholar.CollectionTreeView.prototype.getImageSrc = function(row, col) 				{ }
+Scholar.CollectionTreeView.prototype.performAction = function(action) 				{ }
+Scholar.CollectionTreeView.prototype.performActionOnCell = function(action, row, col)	{ }
+Scholar.CollectionTreeView.prototype.getProgressMode = function(row, col) 			{ }
+Scholar.CollectionTreeView.prototype.cycleHeader = function(column)					{ }
 
-Scholar.FolderTreeView.prototype.deleteSelection = function()
+Scholar.CollectionTreeView.prototype.deleteSelection = function()
 {
 	if(this.selection.count == 0)
 		return;
@@ -227,7 +227,7 @@ Scholar.FolderTreeView.prototype.deleteSelection = function()
 		this.selection.select(this.rowCount-1);
 }
 
-Scholar.FolderTreeView.prototype._refreshHashMap = function()
+Scholar.CollectionTreeView.prototype._refreshHashMap = function()
 {	
 	// Create hash map of collection and object ids to row indexes
 	
@@ -241,7 +241,7 @@ Scholar.FolderTreeView.prototype._refreshHashMap = function()
 	//Scholar.debug(Scholar.varDump(this.objectRowMap));
 }
 
-Scholar.FolderTreeView.prototype.canDrop = function(row, orient)
+Scholar.CollectionTreeView.prototype.canDrop = function(row, orient)
 {
 	if(orient == this.DROP_ON && this._getItemAtRow(row).isCollection())
 		return true;
@@ -250,7 +250,7 @@ Scholar.FolderTreeView.prototype.canDrop = function(row, orient)
 		
 }
 
-Scholar.FolderTreeView.prototype.drop = function(row, orient)
+Scholar.CollectionTreeView.prototype.drop = function(row, orient)
 {
 	//you can't really do anything here, look to overlay.js - ScholarCollectionsDragObserver
 }

@@ -5,7 +5,7 @@ vbox #scholar-pane
 	padding: 4px;
 }
 
-tree #folders-tree
+tree #collections-tree
 {
 	min-width: 100px;
 	max-width: 200px;

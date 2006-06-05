@@ -178,15 +178,11 @@ Scholar.ItemTreeView.prototype.searchText = function(search)
 
 Scholar.ItemTreeView.prototype._refreshHashMap = function()
 {	
-	// Create hash map of folder and object ids to row indexes
+	// Create hash map of item ids to row indexes
 	
 	this._itemRowMap = new Array();
 	for(var i=0; i < this.rowCount; i++)
 		this._itemRowMap[this._getItemAtRow(i).getID()] = i;
-		
-	//Scholar.debug(Scholar.varDump(this.folderRowMap));
-	//Scholar.debug(Scholar.varDump(this.objectRowMap));
-
 }
 
 Scholar.ItemTreeView.prototype.getCollectionID = function()

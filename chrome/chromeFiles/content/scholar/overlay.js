@@ -3,7 +3,7 @@
  */
 var ScholarPane = new function()
 {
-	var foldersView;
+	var collectionsView;
 	var itemsView;
 	var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"].getService(Components.interfaces.nsIPromptService);
 	
@@ -13,7 +13,7 @@ var ScholarPane = new function()
 	this.toggleDisplay = toggleDisplay;
 	this.newItem = newItem;
 	this.newCollection = newCollection;
-	this.folderSelected = folderSelected;
+	this.onCollectionSelected = onCollectionSelected;
 	this.itemSelected = itemSelected;
 	this.deleteItemSelection = deleteItemSelection;
 	this.deleteCollectionSelection = deleteCollectionSelection;
@@ -26,12 +26,12 @@ var ScholarPane = new function()
 	 */
 	function onLoad()
 	{
-		//Initialize folders view
-		foldersView = new Scholar.FolderTreeView();
-		document.getElementById('folders-tree').view = foldersView;
+		//Initialize collections view
+		collectionsView = new Scholar.CollectionTreeView();
+		document.getElementById('collections-tree').view = collectionsView;
 
 		//select Library
-		foldersView.selection.select(0);
+		collectionsView.selection.select(0);
 	
 		//Create the add menu with each item type
 		var addMenu = document.getElementById('tb-add').firstChild;
@@ -52,7 +52,7 @@ var ScholarPane = new function()
 	 */
 	function onUnload()
 	{
-		foldersView.unregister();
+		collectionsView.unregister();
 		if(itemsView)
 			itemsView.unregister();
 	}
@@ -84,14 +84,14 @@ var ScholarPane = new function()
 		Scholar.Collections.add(Scholar.getString('pane.collections.untitled'));
 	}
 	
-	function folderSelected()
+	function onCollectionSelected()
 	{
 		if(itemsView)
 			itemsView.unregister();
 			
-		if(foldersView.selection.count == 1 && foldersView.selection.currentIndex != -1)
+		if(collectionsView.selection.count == 1 && collectionsView.selection.currentIndex != -1)
 		{
-			var collection = foldersView._getItemAtRow(foldersView.selection.currentIndex);
+			var collection = collectionsView._getItemAtRow(collectionsView.selection.currentIndex);
 			
 			itemsView = new Scholar.ItemTreeView(collection);
 			document.getElementById('items-tree').view = itemsView;
@@ -137,15 +137,15 @@ var ScholarPane = new function()
 	
 	function deleteCollectionSelection()
 	{
-		if(foldersView.selection.count > 0 && confirm(Scholar.getString('pane.collections.delete')))
-			foldersView.deleteSelection();
+		if(collectionsView.selection.count > 0 && confirm(Scholar.getString('pane.collections.delete')))
+			collectionsView.deleteSelection();
 	}
 	
 	function renameSelectedCollection()
 	{
-		if(foldersView.selection.count > 0)
+		if(collectionsView.selection.count > 0)
 		{
-			collection = foldersView._getItemAtRow(foldersView.selection.currentIndex);
+			collection = collectionsView._getItemAtRow(collectionsView.selection.currentIndex);
 			
 			var newName = prompt(Scholar.getString('pane.collections.rename'),collection.getName());
 			if(newName)

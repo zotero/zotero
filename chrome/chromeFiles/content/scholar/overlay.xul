@@ -11,7 +11,7 @@
 	
 	<script src="overlay.js"/>
     <script src="itemTreeView.js"/>
-    <script src="folderTreeView.js"/>
+    <script src="collectionTreeView.js"/>
 	
 	<commandset id="mainCommandSet">
 		<command id="cmd_scholar_newItem" oncommand="ScholarPane.newItem(1);"/>
@@ -46,8 +46,8 @@
 					<toolbarbutton label="&toolbar.newCollection.label;" command="cmd_scholar_newCollection"/>
 					<toolbarbutton id="tb-rename" label="&toolbar.renameCollection.label;" oncommand="ScholarPane.renameSelectedCollection();" disabled="true"/>
 				</toolbar>
-				<tree id="folders-tree" hidecolumnpicker="true"
-					onselect="ScholarPane.folderSelected();" seltype="single"
+				<tree id="collections-tree" hidecolumnpicker="true"
+					onselect="ScholarPane.onCollectionSelected();" seltype="single"
 					ondragover="nsDragAndDrop.dragOver(event,ScholarCollectionsDragObserver)" ondragdrop="nsDragAndDrop.drop(event,ScholarCollectionsDragObserver)"
 					onkeypress="if(event.keyCode == event.DOM_VK_BACK_SPACE || event.keyCode == event.DOM_VK_DELETE){ ScholarPane.deleteCollectionSelection(); return false; }"
 					flex="1">
