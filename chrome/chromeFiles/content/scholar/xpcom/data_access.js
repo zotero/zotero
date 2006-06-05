@@ -1047,6 +1047,66 @@ Scholar.Collection.prototype.rename = function(name){
 	return true;
 }
 
+
+/**
+* Change the parentCollectionID of a collection
+*
+* Returns TRUE on success, FALSE on error
+**/
+Scholar.Collection.prototype.changeParent = function(parent){
+	if (!parent){
+		parent = null;
+	}
+	
+	var previousParent = this.getParent();
+	
+	if (parent==previousParent){
+		Scholar.debug('Collection ' + this.getID() + ' is already in '
+			+ (parent ? 'collection ' + parent : 'root collection'), 2);
+		return false;
+	}
+	
+	if (parent && !Scholar.Collections.get(parent)){
+		throw('Invalid parentCollectionID ' + parent + ' in changeParent()');
+	}
+	
+	if (parent && parent==this.getID()){
+		Scholar.debug('Cannot move collection into itself!', 2);
+		return false;
+	}
+	
+	if (parent){
+		var descendents = this._getDescendents();
+		for (var i=0, len=descendents.length; i<len; i++){
+			if (descendents[i]['isCollection'] && parent==descendents[i]['id']){
+				Scholar.debug('Cannot move collection into one of its own '
+					+ 'descendents!', 2);
+				return false;
+			}
+		}
+	}
+	
+	var parentParam = parent ? {'int':parent} : {'null':true};
+	
+	var sql = "UPDATE collections SET parentCollectionID=? "
+		+ "WHERE collectionID=?";
+	
+	Scholar.DB.query(sql, [parentParam, {'int':this.getID()}]);
+	this._parent = parent;
+	
+	var notifyIDs = [this.getID()];
+	if (previousParent){
+		notifyIDs.push(previousParent);
+	}
+	if (parent){
+		notifyIDs.push(parent);
+	}
+	
+	Scholar.Notifier.trigger('modify', 'collection', notifyIDs);
+	return true;
+}
+
+
 /**
 * Add an item to the collection
 **/
