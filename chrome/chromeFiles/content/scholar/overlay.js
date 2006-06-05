@@ -79,9 +79,7 @@ var ScholarPane = new function()
 	
 	function newCollection()
 	{
-		var c = new Scholar.Collection();
-		//c.setName('Untitled');
-		//c.save();
+		Scholar.Collections.add('Untitled Collection');
 	}
 	
 	function folderSelected()

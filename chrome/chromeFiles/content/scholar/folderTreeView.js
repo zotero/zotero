@@ -60,10 +60,10 @@ Scholar.FolderTreeView.prototype.notify = function(action, type, ids)
 			}
 			else if(action == 'add' && row == null)
 			{
-				var item = Scholar.Items.get(ids[i]);
+				var item = Scholar.Collections.get(ids[i]);
 				
-				this._showItem(item,this.rowCount);
-				this._treebox.rowCountChanged(this.rowCount,1);
+				this._showItem(new Scholar.ItemGroup('collection',item), 0, this.rowCount);
+				this._treebox.rowCountChanged(this.rowCount-1,1);
 			
 				madeChanges = true;
 			}
@@ -216,18 +216,15 @@ Scholar.FolderTreeView.prototype.deleteSelection = function()
 	this._treebox.beginUpdateBatch();
 	for (var i=0; i<rows.length; i++)
 	{
-		//erase item/collection from DB:
+		//erase collection from DB:
 		this._getItemAtRow(rows[i]-i).ref.erase();
-
-		/* Disabled for now because notifier handles it this:
-		//remove row from tree:
-		this._hideItem(rows[i]-i);
-		this._treebox.rowCountChanged(rows[i]-i, -1);*/
 	}
 	this._treebox.endUpdateBatch();
 	
-	this._refreshHashMap();
-	
+	if(end.value < this.rowCount)
+		this.selection.select(end.value);
+	else
+		this.selection.select(this.rowCount-1);
 }
 
 Scholar.FolderTreeView.prototype._refreshHashMap = function()
