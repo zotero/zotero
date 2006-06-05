@@ -45,7 +45,7 @@ Scholar.ItemTreeView.prototype.getCellText = function(row, column)
 		
 		myDate.setTime(Date.parse(val.replace("-","/").replace("-","/")));
 		
-		val = myDate.getMonth()+1 + '/' + myDate.getDate() + '/' + myDate.getFullYear() + " " + myDate.getHours() + ":" + myDate.getMinutes();
+		val = Scholar.Date.formatDate(myDate,'M/d/y h:mma');
 	}
 	
 	return val;
