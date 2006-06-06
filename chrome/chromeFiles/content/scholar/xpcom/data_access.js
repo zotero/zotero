@@ -783,6 +783,7 @@ Scholar.Items = new function(){
 	this.reload = reload;
 	this.reloadAll = reloadAll;
 	this.getNewItemByType = getNewItemByType;
+	this.search = search;
 	this.erase = erase;
 	this.unload = unload;
 	
@@ -887,6 +888,28 @@ Scholar.Items = new function(){
 		var id = obj.save();
 		
 		return this.get(id);
+	}
+	
+	
+	/**
+	* Fulltext search on all fields
+	*
+	* TODO: more
+	**/
+	function search(text){
+		if (!text){
+			text = '';
+		}
+		
+		var sql = "SELECT itemID FROM items WHERE title LIKE ?1 UNION "
+			+ "SELECT itemID FROM itemData WHERE value LIKE ?1 UNION "
+			+ "SELECT itemID FROM itemCreators WHERE creatorID IN "
+			+ "(SELECT creatorID FROM creators WHERE firstName LIKE ?1 "
+				+ "OR lastName LIKE ?1) UNION "
+			+ "SELECT itemID FROM itemKeywords WHERE keywordID IN "
+			+ "(SELECT keywordID FROM keywords WHERE keyword LIKE ?)";
+			
+		return Scholar.DB.columnQuery(sql, [{'string':'%' + text + '%'}]);
 	}
 	
 	
