@@ -1,6 +1,7 @@
 Scholar.ItemTreeView = function(itemGroup)
 {
 	this._treebox = null;
+	this._savedSelection = null;
 	this._dataItems = new Array();
 	this.rowCount = 0;
 	this._itemGroup = itemGroup;
@@ -88,22 +89,16 @@ Scholar.ItemTreeView.prototype.cycleHeader = function(column)
 		}
 	}
 	
+	this.selection.selectEventsSuppressed = true;
+	this.saveSelection();
 	this.sort();
+	this.rememberSelection();
+	this.selection.selectEventsSuppressed = false;
+	this._treebox.invalidate();
 }
 
 Scholar.ItemTreeView.prototype.sort = function()
 {
-	this.selection.selectEventsSuppressed = true;
-	
-	var selectedIDs = new Array();
-	var start = new Object();
-	var end = new Object();
-	for (var i=0, len=this.selection.getRangeCount(); i<len; i++)
-	{
-		this.selection.getRangeAt(i,start,end);
-		for (var j=start.value; j<=end.value; j++)
-			selectedIDs.push(this._getItemAtRow(j).getID());
-	}
 	
 	var column = this._treebox.columns.getSortedColumn()
 	var order = column.element.getAttribute('sortDirection') == 'descending';
@@ -125,13 +120,6 @@ Scholar.ItemTreeView.prototype.sort = function()
 	this._dataItems.sort(columnSort);
 	this._refreshHashMap();
 	
-	this.selection.clearSelection();
-	for(var i=0; i < selectedIDs.length; i++)
-	{
-		this.selection.toggleSelect(this._itemRowMap[selectedIDs[i]]);
-	}
-	this.selection.selectEventsSuppressed = false;
-	this._treebox.invalidate();
 }
 
 Scholar.ItemTreeView.prototype.deleteSelection = function()
@@ -169,10 +157,18 @@ Scholar.ItemTreeView.prototype.deleteSelection = function()
 
 Scholar.ItemTreeView.prototype.searchText = function(search)
 {
+	this.selection.selectEventsSuppressed = true;
+	this.saveSelection();
+	
 	this._itemGroup.setSearch(search);
 	var oldCount = this.rowCount;
 	this.refresh();
 	this._treebox.rowCountChanged(0,this.rowCount-oldCount);
+	
+	this.sort();
+
+	this.rememberSelection();
+	this.selection.selectEventsSuppressed = false;
 	this._treebox.invalidate();
 }
 
@@ -263,6 +259,30 @@ Scholar.ItemTreeView.prototype.notify = function(action, type, ids)
 			this._refreshHashMap();
 			
 	}	
+}
+
+Scholar.ItemTreeView.prototype.saveSelection = function()
+{
+	this._savedSelection = new Array();
+	
+	var start = new Object();
+	var end = new Object();
+	for (var i=0, len=this.selection.getRangeCount(); i<len; i++)
+	{
+		this.selection.getRangeAt(i,start,end);
+		for (var j=start.value; j<=end.value; j++)
+			this._savedSelection.push(this._getItemAtRow(j).getID());
+	}
+}
+
+Scholar.ItemTreeView.prototype.rememberSelection = function()
+{
+	this.selection.clearSelection();
+	for(var i=0; i < this._savedSelection.length; i++)
+	{
+		if(this._itemRowMap[this._savedSelection[i]] != null)
+			this.selection.toggleSelect(this._itemRowMap[this._savedSelection[i]]);
+	}
 }
 
 Scholar.ItemTreeView.prototype.canDrop = function(index, orient)

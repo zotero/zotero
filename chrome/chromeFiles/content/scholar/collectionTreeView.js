@@ -288,7 +288,7 @@ Scholar.ItemGroup.prototype.getChildItems = function()
 {
 	if(this.searchText)
 	{
-		return Scholar.Items.get(Scholar.Items.search(this.searchText));
+		return Scholar.Items.get(Scholar.Items.search(this.searchText,(this.isCollection() ? this.ref.getID() : null)));
 	}
 	else
 	{

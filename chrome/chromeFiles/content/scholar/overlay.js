@@ -83,10 +83,13 @@ var ScholarPane = new function()
 	{
 		if(itemsView)
 			itemsView.unregister();
+		
+		document.getElementById('tb-search').value = "";
 			
 		if(collectionsView.selection.count == 1 && collectionsView.selection.currentIndex != -1)
 		{
 			var collection = collectionsView._getItemAtRow(collectionsView.selection.currentIndex);
+			collection.setSearch('');
 			
 			itemsView = new Scholar.ItemTreeView(collection);
 			document.getElementById('items-tree').view = itemsView;
