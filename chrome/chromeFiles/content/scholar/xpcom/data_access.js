@@ -795,7 +795,7 @@ Scholar.Items = new function(){
 	 * Can be passed ids as individual parameters or as an array of ids, or both
 	 *
 	 * If only one argument and it's an id, return object directly;
-	 * otherwise, return array indexed by itemID
+	 * otherwise, return array
 	 */
 	function get(){
 		var toLoad = new Array();
@@ -828,7 +828,7 @@ Scholar.Items = new function(){
 		
 		// Otherwise, build return array
 		for (i=0; i<ids.length; i++){
-			loaded[ids[i]] = _items[ids[i]];
+			loaded.push(_items[ids[i]]);
 		}
 		
 		return loaded;
@@ -1828,12 +1828,5 @@ Scholar.getItems = function(parent){
 		return toReturn;
 	}
 	
-	// Items.get() returns an array indexed by itemID,
-	// so we have to turn it into a regular numeric array from 0
-	var items = Scholar.Items.get(children)
-	for (var i=0, len=children.length; i<len; i++){
-		toReturn.push(items[children[i]]);
-	}
-	
-	return toReturn;
+	return Scholar.Items.get(children)
 }
