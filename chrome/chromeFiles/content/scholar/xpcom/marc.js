@@ -80,8 +80,7 @@ Scholar.Ingester.MARC_Record.prototype.load = function(s,f) { // loads record s 
 			}
 			this.add_field(tag,ind1,ind2,value);
 		}
-	}
-	if (f == 'MARC_Harvard') {
+	} else if (f == 'MARC_Harvard') {
 		var linee = s.split('\n');
 		for (var i=0; i<linee.length; i++) {
 			linee[i] = this._trim(linee[i]);
@@ -128,8 +127,7 @@ Scholar.Ingester.MARC_Record.prototype.load = function(s,f) { // loads record s 
 			}
 		}
 		this.add_field_005();
-	}
-	if (f == 'MARC_BNI') {
+	} else if (f == 'MARC_BNI') {
 		var linee = s.split('\n');
 		for (var i=0; i<linee.length; i++) {
 			linee[i] = this._trim(linee[i]);
@@ -167,8 +165,7 @@ Scholar.Ingester.MARC_Record.prototype.load = function(s,f) { // loads record s 
 			}
 		}
 		this.add_field_005();
-	}
-	if (f == 'MARC_Loc') { // MARC copiato dal browser dal sito catalog.loc.gov 
+	} else if (f == 'MARC_Loc') { // MARC copiato dal browser dal sito catalog.loc.gov 
 		var linee = s.split('\n');
 		for (var i=0; i<linee.length; i++) {
 			linee[i] = this._trim(linee[i]);
@@ -186,6 +183,46 @@ Scholar.Ingester.MARC_Record.prototype.load = function(s,f) { // loads record s 
 			if (tag == '000') {
 				linee[i] = linee[i].replace(/    /,' ');
 				value = linee[i].substr(4);
+				this.leader.record_length = '00000';
+				this.leader.record_status = value.substr(5,1);
+				this.leader.type_of_record = value.substr(6,1);
+				this.leader.bibliographic_level = value.substr(7,1);
+				this.leader.type_of_control = value.substr(8,1);
+				this.leader.character_coding_scheme = value.substr(9,1);
+				this.leader.indicator_count = '2';
+				this.leader.subfield_code_length = '2';
+				this.leader.base_address_of_data = '00000';
+				this.leader.encoding_level = value.substr(17,1);
+				this.leader.descriptive_cataloging_form = value.substr(18,1);
+				this.leader.linked_record_requirement = value.substr(19,1);
+				this.leader.entry_map = '4500';
+				
+				this.directory = '';
+				this.directory_terminator = this.field_terminator;
+				this.variable_fields = new Array();
+			}
+			else if (tag > '008' && tag < '899') { // jumps low and high tags
+				if (tag != '040') this.add_field(tag,ind1,ind2,value);
+			}
+		}
+		this.add_field_005();
+	} else if (f == 'MARC_PAC') {
+		var linee = s.split('\n');
+		for (var i=0; i<linee.length; i++) {
+			linee[i] = linee[i].replace(/\xA0/g,' '); // in some browsers, nbsp is copied as xA0
+			linee[i] = linee[i].replace(/_/g,' ');
+			linee[i] = linee[i].replace(/\t/g,'');
+			linee[i] = this._trim(linee[i]);
+			if (linee[i] == '') continue; // jumps empty lines
+			var replacer = this.subfield_delimiter+'$1';
+			linee[i]  = linee[i].replace(/\|(.)/g,replacer);
+			linee[i]  = linee[i].replace(/\|/g,this.subfield_delimiter);
+			var tag   = linee[i].substr(0,3);
+			var ind1  = linee[i].substr(4,1);
+			var ind2  = linee[i].substr(5,1);
+			var value = this.subfield_delimiter+'a'+linee[i].substr(7);
+			if(linee[i].substr(0, 6) == "LEADER") {
+				value = linee[i].substr(7);
 				this.leader.record_length = '00000';
 				this.leader.record_status = value.substr(5,1);
 				this.leader.type_of_record = value.substr(6,1);
@@ -310,7 +347,7 @@ Scholar.Ingester.MARC_Record.prototype.exists = function(tag) { // field existen
 	return false;
 }
 
-function MARC_field(rec,tag,ind1,ind2,value) { // new MARC gield
+Scholar.Ingester.MARC_Record.prototype.MARC_field = function(rec,tag,ind1,ind2,value) { // new MARC gield
 	this.tag = tag;
 	this.occ = rec.count_occ(tag)+1; // occurrence order no.
 	this.ind1 = ind1; if (this.ind1 == '') this.ind1 = ' ';
@@ -428,7 +465,7 @@ Scholar.Ingester.MARC_Record.prototype.get_field_subfields = function(tag) { // 
 
 Scholar.Ingester.MARC_Record.prototype.add_field = function(tag,ind1,ind2,value) { // adds a field to the record
 	if (tag.length != 3) { return false; }
-	var F = new MARC_field(this,tag,ind1,ind2,value);
+	var F = new this.MARC_field(this,tag,ind1,ind2,value);
 	// adds pointer to list of fields
 	this.variable_fields[this.variable_fields.length] = F;
 	// adds the entry to the directory

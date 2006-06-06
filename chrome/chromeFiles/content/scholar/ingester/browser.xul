@@ -19,4 +19,7 @@
             <image id="scholar-status-image" width="16" height="16" onclick="Scholar.Ingester.Interface.scrapeThisPage()" />
          </statusbarpanel>
     </statusbar>
+	<box style="visibility: collapse">
+		<browser id="scholar-hidden-browser" />
+	</box>
 </overlay>

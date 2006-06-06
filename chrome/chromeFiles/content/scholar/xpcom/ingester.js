@@ -48,7 +48,9 @@ Scholar.Ingester.Model.prototype.detachRepository = function() {}
 /////////////////////////////////////////////////////////////////
 // Scholar.Ingester.Utilities class, a set of methods to assist in data
 // extraction. Most code here was stolen directly from the Piggy Bank project.
-Scholar.Ingester.Utilities = function() {}
+Scholar.Ingester.Utilities = function(hiddenBrowser) {
+	this.hiddenBrowser = hiddenBrowser;
+}
 
 // Adapter for Piggy Bank function to print debug messages; log level is
 // fixed at 4 (could change this)
@@ -99,6 +101,7 @@ Scholar.Ingester.Utilities.prototype.gatherElementsOnXPath = function(doc, paren
 // Loads a single document for a scraper, running succeeded() on success or
 // failed() on failure
 Scholar.Ingester.Utilities.prototype.loadDocument = function(url, browser, succeeded, failed) {
+	Scholar.debug("loadDocument called");
 	this.processDocuments(browser, null, [ url ], succeeded, function() {}, failed);
 }
 
@@ -112,6 +115,9 @@ Scholar.Ingester.Utilities.prototype.loadDocument = function(url, browser, succe
 // exception - a function to execute if an exception occurs (exceptions are
 //             also logged in the Firefox Scholar log)
 Scholar.Ingester.Utilities.prototype.processDocuments = function(browser, firstDoc, urls, processor, done, exception) {
+	var hiddenBrowser = this.hiddenBrowser;
+	Scholar.debug("processDocuments called");
+	
 	try {
 		if (urls.length == 0) {
 			if (firstDoc) {
@@ -128,53 +134,51 @@ Scholar.Ingester.Utilities.prototype.processDocuments = function(browser, firstD
 			if (urlIndex < urls.length) {
 				try {
 					var url = urls[urlIndex];
-					var b = Scholar.Ingester.progressDialog.document.getElementById("hidden-browser");
-					b.loadURI(url);
+					Scholar.debug("loading "+url);
+					hiddenBrowser.loadURI(url);
 				} catch (e) {
-					exception(e);
 					Scholar.debug("Scholar.Ingester.Utilities.processDocuments doLoad: " + e, 2);
+					exception(e);
 				}
 			} else {
-				window.setTimeout(done, 10);
+				hiddenBrowser.setTimeout(done, 10);
 			}
 		};
 		var onLoad = function() {
-			try {
-				var b = Scholar.Ingester.progressDialog.document.getElementById("hidden-browser").selectedBrowser;
-				processor(b.contentDocument, doLoad);
-			} catch (e) {
-				exception(e);
-				Scholar.debug("Scholar.Ingester.Utilities.processDocuments onLoad: " + e, 2);
+			Scholar.debug("onLoad called");
+			if(hiddenBrowser.id == "scholar-hidden-browser") {
+				hiddenBrowser.removeEventListener("DOMContentLoaded", onLoad, true);
+				try {
+					var newHiddenBrowser = new Object();
+					Scholar.debug("new hidden browser");
+					newHiddenBrowser.contentDocument = hiddenBrowser.contentDocument;
+					newHiddenBrowser.contentWindow = hiddenBrowser.contentWindow;
+					Scholar.debug("added attributes");
+					processor(newHiddenBrowser);
+					Scholar.debug("called processor");
+				} catch (e) {
+					Scholar.debug("Scholar.Ingester.Utilities.processDocuments onLoad: " + e, 2);
+					exception(e);
+				}
 			}
 		};
 		var init = function() {
-			var listener;
-			listener.onStateChange = function(webProgress, request, stateFlags, status) {
-				if ((stateFlags & Components.interfaces.nsIWebProgressListener.STATE_STOP) > 0 &&
-					request.name == urls[urlIndex]) {
-					try {
-						Scholar.Ingester.progressDialog.setTimeout(onLoad, 10);
-					} catch (e) {
-						exception(e);
-						Scholar.debug("Scholar.Ingester.Utilities.processDocuments onLocationChange: " + e, 2);
-					}
-				}
-			};
-			
-			var tb = Scholar.Ingester.progressDialog.document.getElementById("hidden-browser");
-			tb.addProgressListener(listener, Components.interfaces.nsIWebProgress.NOTIFY_STATUS);
+			Scholar.debug("init called");
+			hiddenBrowser.addEventListener("DOMContentLoaded", onLoad, true);
 			
 			if (firstDoc) {
+				Scholar.debug("processing");
 				processor(firstDoc, doLoad);
 			} else {
+				Scholar.debug("doing load");
 				doLoad();
 			}
 		}
 		
-		w.addEventListener("load", init, false);
+		init();
 	} catch (e) {
+		Scholar.debug("processDocuments: " + e);
 		exception(e);
-		PB_Debug.print("processDocuments: " + e);
 	}
 }
 
@@ -209,17 +213,33 @@ Scholar.Ingester.Utilities.prototype.collectURLsWithSubstring = function(doc, su
 // break compatibility
 Scholar.Ingester.Utilities.prototype._MARCCleanString = function(author) {
 	author = author.replace(/^[\s\.\,\/\[\]\:]+/, '');
-	return author.replace(/[\s\.\,\/\[\]\:]+$/, '');
+	author = author.replace(/[\s\.\,\/\[\]\:]+$/, '');
+	return author.replace(/  +/, ' ');
 }
 
 Scholar.Ingester.Utilities.prototype._MARCCleanAuthor = function(author) {
 	author = author.replace(/^[\s\.\,\/\[\]\:]+/, '');
-	author = author.replace(/[\s\.\,\/\[\]\:]+$/, '');
+	author = author.replace(/[\s\,\/\[\]\:\.]+$/, '');
+	author = author.replace(/  +/, ' ');
+	// Add period for initials
+	if(author.substring(author.length-2, author.length-1) == " ") {
+		author += ".";
+	}
 	var splitNames = author.split(', ');
 	if(splitNames.length > 1) {
 		author = splitNames[1]+' '+splitNames[0];
 	}
 	return author;
+}
+
+Scholar.Ingester.Utilities.prototype._MARCCleanNumber = function(author) {
+	author = author.replace(/^[\s\.\,\/\[\]\:]+/, '');
+	author = author.replace(/[\s\.\,\/\[\]\:]+$/, '');
+	var regexp = /^[^ ]*/;
+	var m = regexp.exec(author);
+	if(m) {
+		return m[0];
+	}
 }
 
 Scholar.Ingester.Utilities.prototype._MARCAssociateField = function(record, uri, model, fieldNo, rdfUri, execMe, prefix, part) {
@@ -253,27 +273,29 @@ Scholar.Ingester.Utilities.prototype._MARCAssociateField = function(record, uri,
 
 // This is an extension to PiggyBank's architecture. It's here so that we don't
 // need an enormous library for each scraper that wants to use MARC records
-Scholar.Ingester.Utilities.prototype.importMARCRecord = function(text, format, uri, model) {
+Scholar.Ingester.Utilities.prototype.importMARCRecord = function(record, uri, model) {
 	var prefixDC = 'http://purl.org/dc/elements/1.1/';
 	var prefixDCMI = 'http://purl.org/dc/dcmitype/';
 	var prefixDummy = 'http://chnm.gmu.edu/firefox-scholar/';
 	
-	var record = new Scholar.Ingester.MARC_Record();
-	record.load(text, format);
-	
 	// Extract ISBNs
-	model = this._MARCAssociateField(record, uri, model, '020', prefixDC + 'identifier', this._MARCCleanString, 'ISBN ');
+	model = this._MARCAssociateField(record, uri, model, '020', prefixDC + 'identifier', this._MARCCleanNumber, 'ISBN ');
 	// Extract ISSNs
-	model = this._MARCAssociateField(record, uri, model, '022', prefixDC + 'identifier', this._MARCCleanString, 'ISBN ');
+	model = this._MARCAssociateField(record, uri, model, '022', prefixDC + 'identifier', this._MARCCleanNumber, 'ISSN ');
 	// Extract creators
 	model = this._MARCAssociateField(record, uri, model, '100', prefixDC + 'creator', this._MARCCleanAuthor);
 	model = this._MARCAssociateField(record, uri, model, '110', prefixDC + 'creator', this._MARCCleanString);
 	model = this._MARCAssociateField(record, uri, model, '111', prefixDC + 'creator', this._MARCCleanString);
 	model = this._MARCAssociateField(record, uri, model, '130', prefixDC + 'creator', this._MARCCleanString);
-	if(!model.data[uri][prefixDC + 'creator']) {
+	model = this._MARCAssociateField(record, uri, model, '700', prefixDC + 'contributor', this._MARCCleanAuthor);
+	model = this._MARCAssociateField(record, uri, model, '710', prefixDC + 'contributor', this._MARCCleanString);
+	model = this._MARCAssociateField(record, uri, model, '711', prefixDC + 'contributor', this._MARCCleanString);
+	model = this._MARCAssociateField(record, uri, model, '730', prefixDC + 'contributor', this._MARCCleanString);
+	if(!model.data[uri] || (!model.data[uri][prefixDC + 'creator'] && !model.data[uri][prefixDC + 'contributor'])) {	// some LOC entries have no listed author, but have the author
+													// in the person subject field as the first entry
 		var field = record.get_field_subfields('600');
-		if(field) {
-			model = this.addStatement(uri, prefixDC + 'creator', this._MARCCleanAuthor(field[0]['a']));	
+		if(field[0]) {
+			model.addStatement(uri, prefixDC + 'creator', this._MARCCleanAuthor(field[0]['a']));	
 		}
 	}
 	// Extract title
@@ -403,12 +425,13 @@ Scholar.Ingester.HTTPUtilities.prototype.stateChange = function(xmlhttp, onStatu
 /*
  * Constructor for Document object
  */
-Scholar.Ingester.Document = function(browserWindow){
+Scholar.Ingester.Document = function(browserWindow, hiddenBrowser){
 	this.browser = browserWindow;
+	this.model = new Scholar.Ingester.Model();
 	this.appSvc = Cc["@mozilla.org/appshell/appShellService;1"]
 	             .getService(Ci.nsIAppShellService);
-	this.scraper = null
-	this.model = new Scholar.Ingester.Model();
+	this.scraper = null;
+	this.hiddenBrowser = hiddenBrowser;
 	this._generateSandbox();
 }
 
@@ -530,11 +553,13 @@ Scholar.Ingester.Document.prototype._generateSandbox = function() {
 	this.sandbox = new Components.utils.Sandbox(this.browser.contentDocument.location.href);
 	this.sandbox.browser = this.browser;
 	this.sandbox.doc = this.sandbox.browser.contentDocument;
-	this.sandbox.utilities = new Scholar.Ingester.Utilities;
+	this.sandbox.utilities = new Scholar.Ingester.Utilities(this.hiddenBrowser);
 	this.sandbox.utilities.HTTPUtilities = new Scholar.Ingester.HTTPUtilities(this.appSvc.hiddenDOMWindow);
 	this.sandbox.window = this.window;
 	this.sandbox.model = this.model;
 	this.sandbox.XPathResult = Components.interfaces.nsIDOMXPathResult;
+	this.sandbox.MARC_Record = Scholar.Ingester.MARC_Record;
+	this.sandbox.MARC_Record.prototype = new Scholar.Ingester.MARC_Record();
 	
 	var me = this;
 	this.sandbox.wait = function(){ me._waitForCompletion = true; };
@@ -552,50 +577,90 @@ Scholar.Ingester.Document.prototype._updateDatabase = function() {
 	var prefixDummy = 'http://chnm.gmu.edu/firefox-scholar/';
 	
 	for(var uri in this.model.data) {
-		var newItem = Scholar.Items.getNewItemByType(1);
+		if(this.model.data[uri][prefixRDF + 'type'] == (prefixDummy + 'journal')) {
+			var newItem = Scholar.Items.getNewItemByType(2);
+		} else {
+			var newItem = Scholar.Items.getNewItemByType(1);
+		}
 		newItem.setField("source", uri);
 		if(this.model.data[uri][prefixDC + 'title']) {
 			newItem.setField("title", this.model.data[uri][prefixDC + 'title'][0]);
 		}
-		if(this.model.data[uri][prefixDC + 'publisher']) {
-			newItem.setField("publisher", this.model.data[uri][prefixDC + 'publisher'][0]);
-		}
-		if(this.model.data[uri][prefixDC + 'year']) {
-			if(this.model.data[uri][prefixDC + 'year'].length == 4) {
-				newItem.setField("year", this.model.data[uri][prefixDC + 'year'][0]);
-			} else {
-				try {
-					newItem.setField(this.model.data[uri][prefixDC + 'year'][0].substring(
-							 this.model.data[uri][prefixDC + 'year'][0].lastIndexOf(" ")+1,
-							 this.model.data[uri][prefixDC + 'year'][0].length));
-				} catch(e) {}
-			}
-		}
-		if(this.model.data[uri][prefixDC + 'edition']) {
-			newItem.setField("edition", this.model.data[uri][prefixDC + 'edition'][0]);
-		}
-		if(this.model.data[uri][prefixDummy + 'series']) {
-			newItem.setField("series", this.model.data[uri][prefixDummy + 'series'][0]);
-		}
-		if(this.model.data[uri][prefixDummy + 'place']) {
-			newItem.setField("place", this.model.data[uri][prefixDummy + 'place'][0]);
-		}
-		if(this.model.data[uri][prefixDC + 'identifier']) {
-			for(i in this.model.data[uri][prefixDC + 'identifier']) {
-				if(this.model.data[uri][prefixDC + 'identifier'][i].substring(0, 4) == 'ISBN') {
-					newItem.setField("ISBN", this.model.data[uri][prefixDC + 'identifier'][0].substring(5));
-					break;
-				}
-			}
-		}
+		var creatorIndex = 0;
 		if(this.model.data[uri][prefixDC + 'creator']) {
 			for(i in this.model.data[uri][prefixDC + 'creator']) {
 				var creator = this.model.data[uri][prefixDC + 'creator'][i];
 				var spaceIndex = creator.lastIndexOf(" ");
 				var lastName = creator.substring(spaceIndex+1, creator.length);
 				var firstName = creator.substring(0, spaceIndex);
+				
+				newItem.setCreator(creatorIndex, firstName, lastName, 1);
+				creatorIndex++;
+			}
+		}
+		if(this.model.data[uri][prefixDC + 'contributor']) {
+			for(i in this.model.data[uri][prefixDC + 'contributor']) {
+				var creator = this.model.data[uri][prefixDC + 'contributor'][i];
+				var spaceIndex = creator.lastIndexOf(" ");
+				var lastName = creator.substring(spaceIndex+1, creator.length);
+				var firstName = creator.substring(0, spaceIndex);
 			
-				newItem.setCreator(i, firstName, lastName);
+				newItem.setCreator(creatorIndex, firstName, lastName, 2);
+				creatorIndex++;
+			}
+		}
+		if(this.model.data[uri][prefixRDF + 'type'] == (prefixDummy + 'journal')) {
+			if(this.model.data[uri][prefixDummy + 'publication']) {
+				newItem.setField("publication", this.model.data[uri][prefixDummy + 'publication'][0]);
+			}
+			if(this.model.data[uri][prefixDummy + 'volume']) {
+				newItem.setField("volume", this.model.data[uri][prefixDummy + 'volume'][0]);
+			}
+			if(this.model.data[uri][prefixDummy + 'number']) {
+				newItem.setField("number", this.model.data[uri][prefixDummy + 'number'][0]);
+			}
+			if(this.model.data[uri][prefixDummy + 'pages']) {
+				newItem.setField("pages", this.model.data[uri][prefixDummy + 'pages'][0]);
+			}
+			if(this.model.data[uri][prefixDC + 'identifier']) {
+				for(i in this.model.data[uri][prefixDC + 'identifier']) {
+					if(this.model.data[uri][prefixDC + 'identifier'][i].substring(0, 4) == 'ISSN') {
+						newItem.setField("ISSN", this.model.data[uri][prefixDC + 'identifier'][0].substring(5));
+						break;
+					}
+				}
+			}
+		} else {
+			if(this.model.data[uri][prefixDC + 'publisher']) {
+				newItem.setField("publisher", this.model.data[uri][prefixDC + 'publisher'][0]);
+			}
+			if(this.model.data[uri][prefixDC + 'year']) {
+				if(this.model.data[uri][prefixDC + 'year'].length == 4) {
+					newItem.setField("year", this.model.data[uri][prefixDC + 'year'][0]);
+				} else {
+					try {
+						newItem.setField(this.model.data[uri][prefixDC + 'year'][0].substring(
+								 this.model.data[uri][prefixDC + 'year'][0].lastIndexOf(" ")+1,
+								 this.model.data[uri][prefixDC + 'year'][0].length));
+					} catch(e) {}
+				}
+			}
+			if(this.model.data[uri][prefixDC + 'edition']) {
+				newItem.setField("edition", this.model.data[uri][prefixDC + 'edition'][0]);
+			}
+			if(this.model.data[uri][prefixDummy + 'series']) {
+				newItem.setField("series", this.model.data[uri][prefixDummy + 'series'][0]);
+			}
+			if(this.model.data[uri][prefixDummy + 'place']) {
+				newItem.setField("place", this.model.data[uri][prefixDummy + 'place'][0]);
+			}
+			if(this.model.data[uri][prefixDC + 'identifier']) {
+				for(i in this.model.data[uri][prefixDC + 'identifier']) {
+					if(this.model.data[uri][prefixDC + 'identifier'][i].substring(0, 4) == 'ISBN') {
+						newItem.setField("ISBN", this.model.data[uri][prefixDC + 'identifier'][0].substring(5));
+						break;
+					}
+				}
 			}
 		}
 		newItem.save();

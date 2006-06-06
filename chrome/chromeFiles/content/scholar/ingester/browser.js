@@ -35,6 +35,7 @@ Scholar.Ingester.Interface.init = function() {
  */
 Scholar.Ingester.Interface.chromeLoad = function() {
 	Scholar.Ingester.Interface.tabBrowser = document.getElementById("content");
+	Scholar.Ingester.Interface.hiddenBrowser = document.getElementById("scholar-hidden-browser");
 	Scholar.Ingester.Interface.appContent = document.getElementById("appcontent");
 	Scholar.Ingester.Interface.statusImage = document.getElementById("scholar-status-image");
 	
@@ -189,7 +190,7 @@ Scholar.Ingester.Interface._setDocument = function(browser) {
 			browser.setAttribute("scholar-key", key);
 		}
 	}
-	Scholar.Ingester.Interface.browserDocuments[key] = new Scholar.Ingester.Document(browser);
+	Scholar.Ingester.Interface.browserDocuments[key] = new Scholar.Ingester.Document(browser, Scholar.Ingester.Interface.hiddenBrowser);
 	Scholar.Ingester.Interface.browserDocuments[key].retrieveScraper();
 }
 
