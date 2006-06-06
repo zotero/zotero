@@ -64,7 +64,9 @@ Scholar.Item.prototype.isEditableField = function(field){
  * Build object from database
  */
 Scholar.Item.prototype.loadFromID = function(id){
-	var sql = 'SELECT I.*, lastName AS firstCreator '
+	var sql = 'SELECT I.*, lastName || '
+		+ 'CASE ((SELECT COUNT(*) FROM itemCreators WHERE itemID=' + id + ')>1) '
+		+ "WHEN 0 THEN '' ELSE ' et al.' END AS firstCreator "
 		+ 'FROM items I '
 		+ 'LEFT JOIN itemCreators IC ON (I.itemID=IC.itemID) '
 		+ 'LEFT JOIN creators C ON (IC.creatorID=C.creatorID) '
@@ -934,12 +936,15 @@ Scholar.Items = new function(){
 	function _load(){
 		// Should be the same as query in Scholar.Item.loadFromID, just
 		// without itemID clause
-		var sql = 'SELECT I.*, lastName AS firstCreator '
+		var sql = 'SELECT I.*, lastName || '
+			+ 'CASE ((SELECT COUNT(*) FROM itemCreators WHERE itemID=I.itemID)>1) '
+			+ "WHEN 0 THEN '' ELSE ' et al.' END AS firstCreator "
 			+ 'FROM items I '
 			+ 'LEFT JOIN itemCreators IC ON (I.itemID=IC.itemID) '
 			+ 'LEFT JOIN creators C ON (IC.creatorID=C.creatorID) '
 			+ 'WHERE (IC.orderIndex=0 OR IC.orderIndex IS NULL)';
 		
+		Scholar.debug(arguments[0]);
 		if (arguments[0]){
 			sql += ' AND I.itemID IN (' + Scholar.join(arguments,',') + ')';
 		}
