@@ -944,7 +944,6 @@ utilities.loadDocument(newUri, browser, function(newBrowser) {
 
 wait();');
 
-
 INSERT INTO "scrapers" VALUES(12, NULL, NULL, 20060603002000, 'Dynix Scraper', 'Simon Kornblith', 'ipac\.jsp\?.*uri=full=[0-9]', NULL,
 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
@@ -988,7 +987,7 @@ utilities.loadDocument(newUri, browser, function(newBrowser) {
 		var elmt = elmts[i];
 		var field = stringTrimmer(getNode(doc, elmt, ''./TD[1]/A[1]/text()[1]'', nsResolver).nodeValue);
 		var value = getNodeString(doc, elmt, ''./TD[2]/TABLE[1]/TBODY[1]/TR[1]/TD[1]/A[1]//text()'', nsResolver);
-		var value = value.replace(/\$([a-z]) /g, record.subfield_delimiter+"$1");
+		value = value.replace(/\$([a-z]) /g, record.subfield_delimiter+"$1");
 		
 		if(field != "FMT" && field != "LDR") {
 			var ind1 = "";
@@ -1004,6 +1003,48 @@ utilities.loadDocument(newUri, browser, function(newBrowser) {
 			}
 			record.add_field(field, ind1, ind2, value);
 		}
+	}
+	
+	model = utilities.importMARCRecord(record, uri, model);
+	done();
+}, function() {})
+
+wait();');
+
+INSERT INTO "scrapers" VALUES(13, NULL, NULL, 20060603002000, 'VTLS Scraper', 'Simon Kornblith', 'chameleon\?.*function=(?:CARDSCR|INITREQ)', NULL,
+'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
+var prefixDC = ''http://purl.org/dc/elements/1.1/'';
+var prefixDCMI = ''http://purl.org/dc/dcmitype/'';
+var prefixDummy = ''http://chnm.gmu.edu/firefox-scholar/'';
+
+var uri = doc.location.href;
+var newUri = uri.replace(/function=[A-Z]{7}/, "function=MARCSCR");
+utilities.debugPrint(newUri);
+	
+var getNode = function(doc, contextNode, xpath, nsResolver) {
+	return doc.evaluate(xpath, contextNode, nsResolver, XPathResult.ANY_TYPE,null).iterateNext();
+}
+
+utilities.loadDocument(newUri, browser, function(newBrowser) {
+	newDoc = newBrowser.contentDocument;
+	
+	var namespace = newDoc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+	  if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	var xpath = ''//table[@class="outertable"]/tbody/tr[td[4]]'';
+	var elmts = utilities.gatherElementsOnXPath(newDoc, newDoc, xpath, nsResolver);
+	var record = new MARC_Record();		
+	for(var i=0; i<elmts.length; i++) {
+		var elmt = elmts[i];
+		var field = getNode(doc, elmt, ''./TD[1]/text()[1]'', nsResolver).nodeValue;
+		var ind1 = getNode(doc, elmt, ''./TD[2]/text()[1]'', nsResolver).nodeValue;
+		var ind2 = getNode(doc, elmt, ''./TD[3]/text()[1]'', nsResolver).nodeValue;
+		var value = getNode(doc, elmt, ''./TD[4]/text()[1]'', nsResolver).nodeValue;
+		value = value.replace(/\\([a-z]) /g, record.subfield_delimiter+"$1");
+		
+		record.add_field(field, ind1, ind2, value);
 	}
 	
 	model = utilities.importMARCRecord(record, uri, model);
