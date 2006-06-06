@@ -16,7 +16,8 @@ Scholar.ItemTreeView.prototype.refresh = function()
 	
 	var newRows = this._itemGroup.getChildItems();
 	for(var i = 0; i < newRows.length; i++)
-		this._showItem(newRows[i], i+1); //item ref, before row
+		if(newRows[i])
+			this._showItem(newRows[i], i+1); //item ref, before row
 	
 	this._refreshHashMap();
 }
@@ -168,8 +169,11 @@ Scholar.ItemTreeView.prototype.deleteSelection = function()
 
 Scholar.ItemTreeView.prototype.searchText = function(search)
 {
-	//does nothing, right now.
-//	this._refreshHashMap();
+	this._itemGroup.setSearch(search);
+	var oldCount = this.rowCount;
+	this.refresh();
+	this._treebox.rowCountChanged(0,this.rowCount-oldCount);
+	this._treebox.invalidate();
 }
 
 Scholar.ItemTreeView.prototype._refreshHashMap = function()

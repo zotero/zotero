@@ -286,10 +286,22 @@ Scholar.ItemGroup.prototype.getName = function()
 
 Scholar.ItemGroup.prototype.getChildItems = function()
 {
-	if(this.isCollection())
-		return Scholar.getItems(this.ref.getID());
-	else if(this.isLibrary())
-		return Scholar.getItems();
+	if(this.searchText)
+	{
+		return Scholar.Items.get(Scholar.Items.search(this.searchText));
+	}
 	else
-		return null;
+	{
+		if(this.isCollection())
+			return Scholar.getItems(this.ref.getID());
+		else if(this.isLibrary())
+			return Scholar.getItems();
+		else
+			return null;
+	}
+}
+
+Scholar.ItemGroup.prototype.setSearch = function(searchText)
+{
+	this.searchText = searchText;
 }
