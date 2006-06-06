@@ -19,7 +19,6 @@ var ScholarPane = new function()
 	this.deleteCollectionSelection = deleteCollectionSelection;
 	this.renameSelectedCollection = renameSelectedCollection;
 	this.search = search;
-	this.toggleView = toggleView;
 	
 	/*
 	 * Called when the window is open
@@ -43,8 +42,6 @@ var ScholarPane = new function()
 			menuitem.setAttribute("oncommand","ScholarPane.newItem("+itemTypes[i]['id']+")");
 			addMenu.appendChild(menuitem);
 		}
-		
-		//Drag.init(document.getElementById('scholar-floater-handle'),document.getElementById('scholar-floater'), 0, 400, 0, 500, true, true);
 	}
 	
 	/*
@@ -66,7 +63,6 @@ var ScholarPane = new function()
 		
 		document.getElementById('scholar-pane').setAttribute('collapsed',!visible);
 		document.getElementById('scholar-splitter').setAttribute('collapsed',!visible);
-		document.getElementById('scholar-floater').hidden = (!visible || itemsView.selection.count != 1);
 	}
 		
 	/*
@@ -74,9 +70,8 @@ var ScholarPane = new function()
 	 */
 	function newItem(typeID)
 	{
-		document.getElementById('scholar-floater').hidden=false;
 		MetadataPane.viewItem(new Scholar.Item(typeID));
-		MetadataPane.toggleEdit();
+		document.getElementById('scholar-view-item').hidden = false;
 	}
 	
 	function newCollection()
@@ -107,23 +102,17 @@ var ScholarPane = new function()
 	
 	function itemSelected()
 	{
-		var editButton = document.getElementById('metadata-pane-edit-button');
-				
 		if(itemsView && itemsView.selection.count == 1 && itemsView.selection.currentIndex != -1)
 		{
 			var item = itemsView._getItemAtRow(itemsView.selection.currentIndex);
 			
 			MetadataPane.viewItem(item);
-			var url = item.getField('source');
-			if(!validURL(url))
-				url = 'http://www.google.com/search?q='+encodeURIComponent('"'+item.getField("title")+'"'); //+'&btnI'
-			
-//			document.getElementById('content').loadURI(url);
-			document.getElementById('scholar-floater').hidden=false;
+
+			document.getElementById('scholar-view-item').hidden=false;
 		}
 		else
 		{
-			document.getElementById('scholar-floater').hidden=true;
+			document.getElementById('scholar-view-item').hidden=true;
 			
 		}
 
@@ -152,27 +141,11 @@ var ScholarPane = new function()
 				collection.ref.rename(newName);
 		}
 	}
+	
 	function search()
 	{
 		if(itemsView)
 			itemsView.searchText(document.getElementById('tb-search').value);
-	}
-
-	function toggleView(id)
-	{		
-		var button = document.getElementById('tb-'+id);
-		var elem = document.getElementById('scholar-'+id);
-		
-		button.checked = !button.checked;
-		elem.hidden = !elem.hidden;
-	}
-	
-	//Thanks: http://www.bigbold.com/snippets/posts/show/452
-	//TODO: move this out of overlay.js, into Scholar.js?
-	function validURL(s)
-	{
-		var regexp = /(http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/
-		return regexp.test(s);
 	}
 }
 

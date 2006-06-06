@@ -53,66 +53,7 @@ tree #items-tree
 	background: #f5f5f5 !important;
 }
 
-#scholar-floater
-{
-	position: fixed;
-	bottom: 0px;
-	right: 0px;
-	margin-bottom: 30px;
-	margin-right: 30px;
-	
-	font-size: 12px;
-	width: 400px;
-	max-width: 400px;
-}
-
-#scholar-floater vbox
-{
-	border: 1px solid #a5a5a5;
-	background: #f5f5f5;
-	
-	width: 400px;
-	max-width: 400px;
-}
-
-#scholar-floater vbox:first-child
-{
-	margin-bottom: 5px;
-}
-
 #scholar-metadata
 {
-
-}
-
-#metadata-toolbar
-{
-	border-bottom: none;
-}
-
-#metadata-toolbar toolbarbutton
-{
-	color: blue;
-}
-
-#metadata-toolbar toolbarbutton:hover
-{
-	text-decoration: underline;
-}
-
-#scholar-metadata .addremove
-{
-	font-weight: bold;
-	color: blue;
-}
-
-#scholar-metadata .addremove:hover
-{
-	text-decoration: underline;
-}
-
-
-#scholar-notes
-{
-	height: 100px;
+	overflow: auto;
 }

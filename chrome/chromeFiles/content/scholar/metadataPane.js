@@ -1,21 +1,17 @@
 MetadataPane = new function()
 {
 	var _dynamicFields;
-	var _dynamicCreators;
-	var	_editButton;
-	var	_cancelButton;
-	var	_saveButton;
-	var _creatorsToolbar;
 	
 	var _itemBeingEdited;
 	var _creatorTypes = Scholar.CreatorTypes.getTypes();
 	
 	this.onLoad = onLoad;
 	this.viewItem = viewItem;
-	this.toggleEdit = toggleEdit;
-	this.saveItem = saveItem;
+/*	this.saveItem = saveItem;
 	this.addCreator = addCreator;
-	this.removeCreator = removeCreator;
+	this.removeCreator = removeCreator; */
+	this.showEditor = showEditor;
+	this.hideEditor = hideEditor;
 	
 	function onLoad()
 	{
@@ -34,33 +30,27 @@ MetadataPane = new function()
 	 * Loads an item 
 	 */
 	function viewItem(thisItem)
-	{
-		if(_editButton.hidden)
-			toggleEdit(confirm(Scholar.getString('metadata.savechanges').replace('%1',_itemBeingEdited.getField('title'))));
-		
+	{		
 		_itemBeingEdited = thisItem;
 		
 		reloadFields();
-	
 	}
 	
 	function reloadFields()
 	{
 		removeDynamicRows(_dynamicFields);
-		removeDynamicRows(_dynamicCreators);
 		thisItem = _itemBeingEdited;
 		
 		var fieldNames = getFullFieldList(thisItem);
-		var editingMode = _editButton.hidden;
 		
 		for(var i = 0; i<fieldNames.length; i++)
 		{
-			rowValue = thisItem.getField(fieldNames[i]);
-			if(!editingMode || !thisItem.isPrimaryField(fieldNames[i]) || thisItem.isEditableField(fieldNames[i]))
-			{
-				if(editingMode || rowValue)
-					addDynamicField(Scholar.getString("itemFields."+fieldNames[i])+":",rowValue,editingMode ? fieldNames[i] : null);
-			}
+			var editable = (!thisItem.isPrimaryField(fieldNames[i]) || thisItem.isEditableField(fieldNames[i]));
+			
+			var label = document.createElement("label");
+			label.setAttribute("value",Scholar.getString("itemFields."+fieldNames[i])+":");
+			
+			addDynamicRow(label,createValueElement(thisItem.getField(fieldNames[i]), editable ? fieldNames[i] : null));
 		}
 		
 		if(thisItem.numCreators() > 0)
@@ -68,39 +58,15 @@ MetadataPane = new function()
 			for(var i = 0, len=thisItem.numCreators(); i<len; i++)
 			{
 				var creator = thisItem.getCreator(i);
-				if(editingMode)
-				{
-					addCreator(creator['firstName'],creator['lastName'],creator['creatorTypeID']);
-				}
-				else
-				{
-					addDynamicField(Scholar.getString('creatorTypes.'+Scholar.CreatorTypes.getTypeName(creator['creatorTypeID']))+":",
-									creator['firstName']+' '+creator['lastName'],
-									false);
-				}
+				
+				var label = document.createElement("label");
+				label.setAttribute("value",Scholar.getString('creatorTypes.'+Scholar.CreatorTypes.getTypeName(creator['creatorTypeID']))+":");
+				
+				addDynamicRow(label, createValueElement(creator['firstName']+' '+creator['lastName'], null), _dynamicFields.firstChild.nextSibling);
 			}
 		}
-		else if(editingMode)
-		{
-			//display a empty creator box if editing, and if there are no creators
-			addCreator();
-		}
 	}
-	
-	function toggleEdit(save)
-	{
-		_cancelButton.hidden = _editButton.hidden;
-		_saveButton.hidden = _editButton.hidden;
-		_creatorsToolbar.hidden = _editButton.hidden;
-		
-		_editButton.hidden = !_editButton.hidden;
-		
-		if(!_editButton.hidden && save)
-			saveItem();
-		
-		reloadFields();
-	}
-	
+	/*
 	function saveItem()
 	{
 		//get fields, call data access methods
@@ -126,7 +92,7 @@ MetadataPane = new function()
 		
 		_itemBeingEdited.save();
 	}
-
+	*/
 	function getFullFieldList(item)
 	{
 		var fieldNames = new Array("title","dateAdded","dateModified");
@@ -142,31 +108,29 @@ MetadataPane = new function()
 			box.removeChild(box.firstChild);
 	}
 	
-	function addDynamicField(labelText, valueText, editable)
-	{
-		var label = document.createElement("label");
-		label.setAttribute("value",labelText);
-		
-		var valueElement;
-		if(editable)
-		{
-			valueElement = document.createElement("textbox");
-			valueElement.setAttribute("value",valueText);
-			valueElement.setAttribute("fieldName",editable);	//used for identifying the field for saving
-		}
-		else
-		{
-			valueElement = document.createElement("label");
-			valueElement.appendChild(document.createTextNode(valueText));
-		}
-		
+	function addDynamicRow(label, value, beforeElement)
+	{		
 		var row = document.createElement("row");
-		row.align="center";
 		row.appendChild(label);
-		row.appendChild(valueElement);
-		_dynamicFields.appendChild(row);		
+		row.appendChild(value);
+		if(beforeElement)
+			_dynamicFields.insertBefore(row, beforeElement);
+		else	
+			_dynamicFields.appendChild(row);		
 	}
 	
+	function createValueElement(valueText, fieldName)
+	{
+	 	var valueElement = document.createElement("label");
+		valueElement.appendChild(document.createTextNode(valueText));
+		if(fieldName)
+		{
+			valueElement.setAttribute('fieldname',fieldName);
+			valueElement.setAttribute('onclick', 'MetadataPane.showEditor(this);');
+		}
+		return valueElement;
+	}
+	/*
 	function addCreator(firstname, lastname, typeID)
 	{
 		if(!lastname)
@@ -218,6 +182,39 @@ MetadataPane = new function()
 	function removeCreator(row)
 	{
 		_dynamicCreators.removeChild(row);
+	}*/
+	
+	
+	function showEditor(elem)
+	{
+		var t = document.createElement("textbox");
+		t.setAttribute('value',_itemBeingEdited.getField(elem.getAttribute('fieldname')));
+		t.setAttribute('fieldname',elem.getAttribute('fieldname'));
+		
+		var box = elem.parentNode;
+		box.removeChild(elem);
+		box.appendChild(t);
+		t.select();
+		t.setAttribute('onblur',"MetadataPane.hideEditor(this);");
+		t.setAttribute('onkeypress','if(event.keyCode == event.DOM_VK_RETURN) document.commandDispatcher.focusedElement.blur()'); //for some reason I can't just say this.blur();
+	}
+	
+	function hideEditor(t)
+	{
+		var textbox = t.parentNode.parentNode;
+		var fieldName = textbox.getAttribute('fieldname');
+		var value = t.value;
+		Scholar.debug(value);
+		
+		_itemBeingEdited.setField(fieldName,value);
+		_itemBeingEdited.save();
+		
+		var elem = createValueElement(value,fieldName);
+		
+		var box = textbox.parentNode;
+		box.removeChild(textbox);
+		box.appendChild(elem);
+		
 	}
 }
 

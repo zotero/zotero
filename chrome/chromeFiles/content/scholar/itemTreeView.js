@@ -41,11 +41,7 @@ Scholar.ItemTreeView.prototype.getCellText = function(row, column)
 	
 	if(column.id == 'dateAdded' || column.id == 'dateModified')		//this is not so much that we will use this format for date, but a simple template for later revisions.
 	{
-		var myDate = new Date();
-		
-		myDate.setTime(Date.parse(val.replace("-","/").replace("-","/")));
-		
-		val = Scholar.Date.formatDate(myDate,'M/d/y h:mma');
+		val = new Date(Date.parse(val.replace(/-/g,"/"))).toLocaleString();
 	}
 	
 	return val;

@@ -19,26 +19,6 @@
 		<command id="cmd_scholar_search" oncommand="ScholarPane.search();"/>
 	</commandset>
 	
-	<window id="main-window">
-		<vbox id="scholar-floater" hidden="true">
-			<vbox id="scholar-metadata">
-                <toolbar>
-                	<label value="&metadata.label;"/>
-            		<spacer flex="1"/>
-					<toolbarbutton class="tabs-closebutton" oncommand="ScholarPane.toggleView('metadata')"/>
-				</toolbar>
-			</vbox>
-			<vbox id="scholar-notes">
-                <toolbar>
-                	<label value="&notes.label;"/>
-            		<spacer flex="1"/>
-                	<toolbarbutton class="tabs-closebutton" oncommand="ScholarPane.toggleView('notes')"/>
-                </toolbar>
-				<textbox multiline="true" flex="1" disabled="true"/>
-			</vbox>
-		</vbox>
-	</window>
-	
 	<vbox id="appcontent">
 		<hbox id="scholar-pane" position="1" persist="height collapsed">
 			<vbox persist="width" flex="1">
@@ -68,9 +48,6 @@
 						<menupopup>
 						</menupopup>
 					</toolbarbutton>
-					<spacer flex="1"/>
-					<toolbarbutton class="scholar-toggler" id="tb-metadata" label="&toolbar.metadata.label;" checked="true"		oncommand="ScholarPane.toggleView('metadata')"/>
-					<toolbarbutton class="scholar-toggler" id="tb-notes" label="&toolbar.notes.label;" checked="true"			oncommand="ScholarPane.toggleView('notes')"/>
 					<spacer flex="1"/>
 					<label value="&toolbar.search.label;" control="tb-search"/>
 					<textbox id="tb-search" type="timed" timeout="500" command="cmd_scholar_search"/>
@@ -117,7 +94,20 @@
 					<treechildren/>
 				</tree>
 			
-			</vbox>			
+			</vbox>
+			<tabbox id="scholar-view-item" hidden="true" flex="2" style="max-width: 300px; min-width: 300px;">
+				<tabs>
+					<tab label="Metadata"/>
+					<tab label="Notes"/>
+				</tabs>
+				<tabpanels flex="1">
+					<vbox id="scholar-metadata">
+					</vbox>
+					<vbox id="scholar-notes">
+						<textbox multiline="true" flex="1" disabled="true"/>
+					</vbox>
+				</tabpanels>
+			</tabbox>
 		</hbox>
 		<splitter id="scholar-splitter" resizebefore="closest" resizeafter="closest" position="2" persist="collapsed"/>
 	</vbox>
