@@ -802,6 +802,7 @@ Scholar.Items = new function(){
 		var loaded = new Array();
 		
 		if (!arguments[0]){
+			Scholar.debug('No arguments provided to Items.get()');
 			return false;
 		}
 		
@@ -820,7 +821,7 @@ Scholar.Items = new function(){
 		}
 		
 		// If single id, return the object directly
-		if (arguments[0] && typeof arguments[0]!='Object'
+		if (arguments[0] && typeof arguments[0]!='object'
 				&& typeof arguments[1]=='undefined'){
 			return _items[arguments[0]];
 		}
@@ -829,7 +830,7 @@ Scholar.Items = new function(){
 		for (i=0; i<ids.length; i++){
 			loaded[ids[i]] = _items[ids[i]];
 		}
-	
+		
 		return loaded;
 	}
 	
@@ -944,7 +945,6 @@ Scholar.Items = new function(){
 			+ 'LEFT JOIN creators C ON (IC.creatorID=C.creatorID) '
 			+ 'WHERE (IC.orderIndex=0 OR IC.orderIndex IS NULL)';
 		
-		Scholar.debug(arguments[0]);
 		if (arguments[0]){
 			sql += ' AND I.itemID IN (' + Scholar.join(arguments,',') + ')';
 		}
@@ -1828,13 +1828,11 @@ Scholar.getItems = function(parent){
 		return toReturn;
 	}
 	
+	// Items.get() returns an array indexed by itemID,
+	// so we have to turn it into a regular numeric array from 0
+	var items = Scholar.Items.get(children)
 	for (var i=0, len=children.length; i<len; i++){
-		var obj = Scholar.Items.get(children[i]);
-		if (!obj){
-			throw ('Item ' + children[i] + ' not found');
-		}
-		
-		toReturn.push(obj);
+		toReturn.push(items[children[i]]);
 	}
 	
 	return toReturn;
