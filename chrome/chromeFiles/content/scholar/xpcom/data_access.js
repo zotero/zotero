@@ -899,7 +899,7 @@ Scholar.Items = new function(){
 	*
 	* TODO: more
 	**/
-	function search(text){
+	function search(text, parentCollectionID){
 		if (!text){
 			text = '';
 		}
@@ -910,9 +910,17 @@ Scholar.Items = new function(){
 			+ "(SELECT creatorID FROM creators WHERE firstName LIKE ?1 "
 				+ "OR lastName LIKE ?1) UNION "
 			+ "SELECT itemID FROM itemKeywords WHERE keywordID IN "
-			+ "(SELECT keywordID FROM keywords WHERE keyword LIKE ?)";
-			
-		return Scholar.DB.columnQuery(sql, [{'string':'%' + text + '%'}]);
+			+ "(SELECT keywordID FROM keywords WHERE keyword LIKE ?1)";
+		
+		var sqlParams = [{'string':'%' + text + '%'}];
+		
+		if (parentCollectionID){
+			sql = "SELECT itemID FROM (" + sql + ") WHERE itemID IN "
+				+ "(SELECT itemID FROM collectionItems WHERE collectionID=?2)";
+			sqlParams.push({'int':parentCollectionID});
+		}
+		
+		return Scholar.DB.columnQuery(sql, sqlParams);
 	}
 	
 	
@@ -1828,5 +1836,5 @@ Scholar.getItems = function(parent){
 		return toReturn;
 	}
 	
-	return Scholar.Items.get(children)
+	return Scholar.Items.get(children);
 }
