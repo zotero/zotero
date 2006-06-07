@@ -1151,7 +1151,6 @@ utilities.loadDocument(newUri, browser, function(newBrowser) {
 
 wait();');
 
-
 INSERT INTO "scrapers" VALUES(16, NULL, NULL, 20060603002000, 'SIRSI -2003 Scraper', 'Simon Kornblith', '/uhtbin/cgisirsi',
 'var namespace = doc.documentElement.namespaceURI;
 var nsResolver = namespace ? function(prefix) {
@@ -1235,7 +1234,6 @@ utilities.HTTPUtilities.doPost(newUri, ''marks=''+recNumber+''&shadow=NO&format=
 })
 wait();');
 
-
 INSERT INTO "scrapers" VALUES(17, NULL, NULL, 20060603002000, 'TLC/YouSeeMore Scraper', 'Simon Kornblith', 'TLCScripts/interpac\.dll\?.*LabelDisplay.*RecordNumber=[0-9]', NULL,
 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
@@ -1313,3 +1311,67 @@ utilities.loadDocument(newUri, browser, function(newBrowser) {
 }, function() {});
 
 wait();');
+
+INSERT INTO "scrapers" VALUES(18, NULL, NULL, 20060603002000, 'Project MUSE Scraper', 'Simon Kornblith', '^http://muse.jhu.edu/journals/[^/]+/[^/]+/[^/]+.html$', NULL, 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
+var prefixDC = ''http://purl.org/dc/elements/1.1/'';
+var prefixDCMI = ''http://purl.org/dc/dcmitype/'';
+var prefixDummy = ''http://chnm.gmu.edu/firefox-scholar/'';
+
+var namespace = doc.documentElement.namespaceURI;
+var nsResolver = namespace ? function(prefix) {
+	if (prefix == ''x'') return namespace; else return null;
+} : null;
+
+function numbersOnly(text) {
+	return text.replace(/[^0-9]/g, "");
+}
+
+var uri = doc.location.href;
+
+var elmts = utilities.gatherElementsOnXPath(doc, doc, ''//comment()'', nsResolver);
+for(i in elmts) {
+	if(elmts[i].nodeValue.substr(0, 10) == "HeaderData") {
+		var headerRegexp = /HeaderData((?:.|\n)*)\#\#EndHeaders/i
+		var m = headerRegexp.exec(elmts[i].nodeValue);
+		var headerData = m[1];
+	}
+}
+
+// Use E4X rather than DOM/XPath, because the Mozilla gods have decided not to
+// expose DOM/XPath to sandboxed scripts
+var newDOM = new XML(headerData);
+
+function mapDOM(path, rdfUri) {
+	if(newDOM.header[path]) {
+		model.addStatement(uri, rdfUri, newDOM[path].text(), true);
+	}
+}
+
+mapDOM("journal", prefixDummy + "publication");
+mapDOM("issn", prefixDummy + "publication", numbersOnly);
+mapDOM("volume", prefixDummy + "volume");
+mapDOM("issue", prefixDummy + "issue");
+mapDOM("year", prefixDummy + "year");
+mapDOM("pubdate", prefixDC + "date");
+mapDOM("doctitle", prefixDC + "title");
+
+// Do pages
+var fpage = newDOM.fpage.text();
+var lpage = newDOM.lpage.text();
+if(fpage) {
+	var pages = fpage;
+	if(lpage) {
+		pages += "-"+lpage;
+	}
+	model.addStatement(uri, prefixDummy + "pages", pages, true);
+}
+
+// Do authors
+var elmts = newDOM.docauthor;
+for(i in elmts) {
+	var fname = elmts[i].fname.text();
+	var surname = elmts[i].surname.text();
+	model.addStatement(uri, prefixDC + "creator", fname+" "+surname, true);
+}
+
+model.addStatement(uri, prefixRDF + "type", prefixDummy + "journal", false);');
