@@ -127,15 +127,15 @@ Scholar.Schema = new function(){
 	 */
 	function _initializeSchema(){
 		try {
-			beginTransaction();
+			Scholar.DB.beginTransaction();
 			var sql = _getSchemaSQL();
-			query(sql);
-			query("INSERT INTO version VALUES (" + _getSchemaSQLVersion() + ")");
-			commitTransaction();
+			Scholar.DB.query(sql);
+			Scholar.DB.query("INSERT INTO version VALUES (" + _getSchemaSQLVersion() + ")");
+			Scholar.DB.commitTransaction();
 		}
 		catch(e){
 			alert(e);
-			rollbackTransaction();
+			Scholar.DB.rollbackTransaction();
 		}
 	}
 	
