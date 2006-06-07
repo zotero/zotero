@@ -15,11 +15,11 @@ Scholar.DB = new function(){
 	this.statementQuery = statementQuery;
 	this.getColumns = getColumns;
 	this.getColumnHash = getColumnHash;
-	this.updateSchema = updateSchema;
 	this.beginTransaction = beginTransaction;
 	this.commitTransaction = commitTransaction;
 	this.rollbackTransaction = rollbackTransaction;
 	this.transactionInProgress = transactionInProgress;
+	this.tableExists = tableExists;
 	
 	/////////////////////////////////////////////////////////////////
 	//
@@ -246,6 +246,11 @@ Scholar.DB = new function(){
 	}
 	
 	
+	function tableExists(table){
+		return _getDBConnection().tableExists(table);
+	}
+	
+	
 	function getColumns(table){
 		var db = _getDBConnection();
 		
@@ -275,30 +280,6 @@ Scholar.DB = new function(){
 			}
 		}
 		return hash;
-	}
-	
-	/*
-	 * Checks if the DB schema exists and is up-to-date, updating if necessary
-	 */
-	function updateSchema(){
-		var DBVersion = _getDBVersion();
-		
-		if (DBVersion > SCHOLAR_CONFIG['DB_VERSION']){
-			throw("Scholar DB version is newer than config version");
-		}
-		else if (DBVersion < SCHOLAR_CONFIG['DB_VERSION']){
-			if (!DBVersion){
-				Scholar.debug('Database does not exist -- creating\n');
-				return _initializeSchema();
-			}
-			
-			return _migrateSchema(DBVersion);
-		}
-		else if (SCHOLAR_CONFIG['DB_REBUILD']){
-			if (confirm('Erase all data and recreate database from schema?')){
-				return _initializeSchema();
-			}
-		}
 	}
 	
 	
@@ -332,155 +313,5 @@ Scholar.DB = new function(){
 		_connection = store.openDatabase(file);
 		
 		return _connection;
-	}
-	
-	
-	/*
-	 * Retrieve the DB schema version
-	 */
-	function _getDBVersion(){
-		if (_getDBConnection().tableExists('version')){
-			return valueQuery("SELECT version FROM version;");
-		}
-		return false;
-	}
-	
-	
-	/*
-	 * Load in SQL schema
-	 *
-	 * Returns an _array_ of SQL statements for feeding into query()
-	 */
-	function _getSchemaSQL(){
-		// We pull the schema from an external file so we only have to process
-		// it when necessary
-		var file = Components.classes["@mozilla.org/extensions/manager;1"]
-                    .getService(Components.interfaces.nsIExtensionManager)
-                    .getInstallLocation(SCHOLAR_CONFIG['GUID'])
-                    .getItemLocation(SCHOLAR_CONFIG['GUID']); 
-		file.append('schema.sql');
-		
-		// Open an input stream from file
-		var istream = Components.classes["@mozilla.org/network/file-input-stream;1"]
-			.createInstance(Components.interfaces.nsIFileInputStream);
-		istream.init(file, 0x01, 0444, 0);
-		istream.QueryInterface(Components.interfaces.nsILineInputStream);
-		
-		var line = {}, sql = '', hasmore;
-		
-		// Fetch the schema version from the first line of the file
-		istream.readLine(line);
-		var schemaVersion = line.value.match(/-- ([0-9]+)/)[1];
-		
-		do {
-			hasmore = istream.readLine(line);
-			sql += line.value + "\n";
-		} while(hasmore);
-		
-		istream.close();
-		
-		if (schemaVersion!=SCHOLAR_CONFIG['DB_VERSION']){
-			throw("Scholar config version does not match schema version");
-		}
-		
-		return sql;
-	}
-	
-	
-	/*
-	 * Retrieve the version attribute of the schema SQL XML
-	 */
-	function _getSchemaSQLVersion(){
-		var file = Components.classes["@mozilla.org/extensions/manager;1"]
-                    .getService(Components.interfaces.nsIExtensionManager)
-                    .getInstallLocation(SCHOLAR_CONFIG['GUID'])
-                    .getItemLocation(SCHOLAR_CONFIG['GUID']); 
-		file.append('schema.sql');
-		
-		// Open an input stream from file
-		var istream = Components.classes["@mozilla.org/network/file-input-stream;1"]
-			.createInstance(Components.interfaces.nsIFileInputStream);
-		istream.init(file, 0x01, 0444, 0);
-		istream.QueryInterface(Components.interfaces.nsILineInputStream);
-		
-		var line = {};
-		
-		// Fetch the schema version from the first line of the file
-		istream.readLine(line);
-		var schemaVersion = line.value.match(/-- ([0-9]+)/)[1];
-		istream.close();
-		
-		return schemaVersion;
-	}
-	
-	
-	/*
-	 * Create new DB schema
-	 */
-	function _initializeSchema(){
-		try {
-			beginTransaction();
-			var sql = _getSchemaSQL();
-			query(sql);
-			query("INSERT INTO version VALUES (" + SCHOLAR_CONFIG['DB_VERSION'] + ")");
-			commitTransaction();
-		}
-		catch(e){
-			alert(e);
-			rollbackTransaction();
-		}
-	}
-	
-	
-	/*
-	 * Migrate schema from an older version, preserving data
-	 */
-	function _migrateSchema(fromVersion){
-		var toVersion = SCHOLAR_CONFIG['DB_VERSION'];
-		var schemaVersion = _getSchemaSQLVersion();
-		
-		if (toVersion!=schemaVersion){
-			throw("Scholar config version does not match schema version");
-		}
-		
-		Scholar.debug('Updating DB from version ' + fromVersion + ' to ' + toVersion + '\n');
-		
-		// Step through version changes until we reach the current version
-		//
-		// Each block performs the changes necessary to move from the
-		// previous revision to that one.
-		//
-		// N.B. Be sure to call _updateDBVersion(i) at the end of each block and
-		// update SCHOLAR_CONFIG['DB_VERSION'] to the target version
-		for (var i=parseInt(fromVersion) + 1; i<=toVersion; i++){
-			
-			if (i==9){
-				Scholar.DB.query("DROP TABLE IF EXISTS objectCreators; "
-					+ "DROP TABLE IF EXISTS objectData; DROP TABLE IF EXISTS objectKeywords; "
-					+ "DROP TABLE IF EXISTS objectTypeFields; DROP TABLE IF EXISTS objectTypes; "
-					+ "DROP TABLE IF EXISTS objects; DROP TABLE IF EXISTS treeOrder;");
-				_updateDBVersion(i);
-			}
-			
-			// For now, just wipe and recreate
-			if (i==13){
-				Scholar.DB.query("DROP TABLE IF EXISTS folders; "
-					+ "DROP TABLE IF EXISTS treeStructure;");
-				_initializeSchema();
-			}
-			
-			if (i==14){
-				// do stuff
-				// _updateDBVersion(i);
-			}
-		}
-	}
-	
-	
-	/*
-	 * Update the DB schema version tag of an existing database
-	 */
-	function _updateDBVersion(version){
-		return query("UPDATE version SET version=" + version);
 	}
 }

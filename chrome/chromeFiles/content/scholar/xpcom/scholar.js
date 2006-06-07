@@ -1,7 +1,6 @@
 const SCHOLAR_CONFIG = {
 	GUID: 'scholar@chnm.gmu.edu',
 	DB_FILE: 'scholar.sqlite',
-	DB_VERSION: 13, // must match version at top of schema.sql
 	DB_REBUILD: false, // erase DB and recreate from schema
 	DEBUG_LOGGING: true,
 	DEBUG_TO_CONSOLE: true // dump debug messages to console rather than (much slower) Debug Logger
@@ -34,7 +33,7 @@ var Scholar = new function(){
 			return false;
 		}
 		
-		Scholar.DB.updateSchema();
+		Scholar.Schema.updateSchema();
 		
 		// Load in the localization stringbundle for use by getString(name)
 		var src = 'chrome://scholar/locale/scholar.properties';

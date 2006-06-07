@@ -18,10 +18,13 @@ Cc["@mozilla.org/moz/jssubscript-loader;1"]
 	.getService(Ci.mozIJSSubScriptLoader)
 	.loadSubScript("chrome://scholar/content/xpcom/scholar.js");
 
-
 Cc["@mozilla.org/moz/jssubscript-loader;1"]
 	.getService(Ci.mozIJSSubScriptLoader)
 	.loadSubScript("chrome://scholar/content/xpcom/db.js");
+
+Cc["@mozilla.org/moz/jssubscript-loader;1"]
+	.getService(Ci.mozIJSSubScriptLoader)
+	.loadSubScript("chrome://scholar/content/xpcom/schema.js");
 
 Cc["@mozilla.org/moz/jssubscript-loader;1"]
 	.getService(Ci.mozIJSSubScriptLoader)
