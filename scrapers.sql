@@ -1,4 +1,4 @@
--- 2
+-- 3
 DELETE FROM scrapers;
 INSERT INTO "scrapers" VALUES(1, NULL, NULL, 20060603002000, 'Amazon.com Scraper', 'Simon Kornblith', '^http://www\.amazon\.com/gp/product/', NULL, 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
@@ -131,63 +131,63 @@ utilities.HTTPUtilities.doPost(newUri, ''exportselect=record&exporttype=plaintex
 	for(var i=0;i<lines.length;i++) {
 		match = lineRegexp.exec(lines[i]);
 		if(match) {
-						if(match[1] == ''Title'') {
-								var title = match[2];
-								if(!lineRegexp.test(lines[i+1])) {
-										i++;
-										title += '' ''+lines[i];
-								}
-								if(title.substring(title.length-2) == " /") {
-										title = title.substring(0, title.length-2);
-								}
-								model.addStatement(uri, prefixDC + ''title'', title);
-						} else if(match[1] == ''Author(s)'') {
-								var authors = match[2].split('';'');
-								if(authors) {
-										model.addStatement(uri, prefixDC + ''creator'', cleanAuthor(authors[0]));
-										for(var j=1; j<authors.length; j+=2) {
-												if(authors[j-1].substring(0, 1) == ''('') {
-														j++;
-												}
-												model.addStatement(uri, prefixDC + ''creator'', cleanAuthor(authors[j]));
-										}
-								} else {
-										model.addStatement(uri, prefixDC + ''creator'', utilities.trimString(match[2]));
-								}
-						} else if(match[1] == ''Publication'') {
-								// Don''t even try to deal with this. The WorldCat metadata is of poor enough quality that this isn''t worth it.
-								match[2] = utilities.trimString(match[2]);
-								if(match[2].substring(match[2].length-1) == '','') {
-										match[2] = match[2].substring(0, match[2].length-1);
-								}
-								model.addStatement(uri, prefixDC + ''publisher'', match[2]);
-						} else if(match[1] == ''Language'') {
-								model.addStatement(uri, prefixDC + ''language'', utilities.trimString(match[2]));
-						} else if(match[1] == ''Standard No'') {
-								var identifiers = match[2].split(/ +/);
-								var j=0;
-								while(j<(identifiers.length-1)) {
-										var type = identifiers[j].substring(0, identifiers[j].length-1);
-										var lastChar;
-										var value;
+			if(match[1] == ''Title'') {
+				var title = match[2];
+				if(!lineRegexp.test(lines[i+1])) {
+					i++;
+					title += '' ''+lines[i];
+				}
+				if(title.substring(title.length-2) == " /") {
+					title = title.substring(0, title.length-2);
+				}
+				model.addStatement(uri, prefixDC + ''title'', title);
+			} else if(match[1] == ''Author(s)'') {
+				var authors = match[2].split('';'');
+				if(authors) {
+					model.addStatement(uri, prefixDC + ''creator'', cleanAuthor(authors[0]));
+					for(var j=1; j<authors.length; j+=2) {
+						if(authors[j-1].substring(0, 1) == ''('') {
+							j++;
+						}
+						model.addStatement(uri, prefixDC + ''creator'', cleanAuthor(authors[j]));
+					}
+				} else {
+						model.addStatement(uri, prefixDC + ''creator'', utilities.trimString(match[2]));
+				}
+			} else if(match[1] == ''Publication'') {
+				// Don''t even try to deal with this. The WorldCat metadata is of poor enough quality that this isn''t worth it.
+				match[2] = utilities.trimString(match[2]);
+				if(match[2].substring(match[2].length-1) == '','') {
+						match[2] = match[2].substring(0, match[2].length-1);
+				}
+				model.addStatement(uri, prefixDC + ''publisher'', match[2]);
+			} else if(match[1] == ''Language'') {
+				model.addStatement(uri, prefixDC + ''language'', utilities.trimString(match[2]));
+			} else if(match[1] == ''Standard No'') {
+				var identifiers = match[2].split(/ +/);
+				var j=0;
+				while(j<(identifiers.length-1)) {
+						var type = identifiers[j].substring(0, identifiers[j].length-1);
+						var lastChar;
+						var value;
 
-										j++;
-										while(j<identifiers.length && (lastChar = identifiers[j].substring(identifiers[j].length-1)) != '':'') {
-												if(identifiers[j].substring(0, 1) != ''('') {
-														if(lastChar == '';'') {
-																value = identifiers[j].substring(0, identifiers[j].length-1);
-														} else {
-																value = identifiers[j];
-														}
-														model.addStatement(uri, prefixDC + ''identifier'', type + '' '' + value);
-												}
-												j++;
-										}
+						j++;
+						while(j<identifiers.length && (lastChar = identifiers[j].substring(identifiers[j].length-1)) != '':'') {
+							if(identifiers[j].substring(0, 1) != ''('') {
+								if(lastChar == '';'') {
+									value = identifiers[j].substring(0, identifiers[j].length-1);
+								} else {
+									value = identifiers[j];
 								}
-						} else if(match[1] == ''Year'') {
-								model.addStatement(uri, prefixDC + ''year'', match[2]);
+								model.addStatement(uri, prefixDC + ''identifier'', type + '' '' + value);
+							}
+							j++;
 						}
 				}
+			} else if(match[1] == ''Year'') {
+				model.addStatement(uri, prefixDC + ''year'', match[2]);
+			}
+		}
 	}
 	
 	done();
@@ -459,7 +459,7 @@ utilities.loadDocument(newUri, browser, function(newBrowser) {
 
 wait();');
 
-INSERT INTO "scrapers" VALUES(7, NULL, NULL, 20060603002000, 'SIRSI Scraper', 'Simon Kornblith', '/uhtbin/cgisirsi',
+INSERT INTO "scrapers" VALUES(7, NULL, NULL, 20060603002000, 'SIRSI 2003+ Scraper', 'Simon Kornblith', '/uhtbin/cgisirsi',
 'var namespace = doc.documentElement.namespaceURI;
 var nsResolver = namespace ? function(prefix) {
 	if (prefix == ''x'') return namespace; else return null;
@@ -1097,8 +1097,10 @@ var prefixDummy = ''http://chnm.gmu.edu/firefox-scholar/'';
 var uri = doc.location.href;
 var newUri = uri.replace(/([:&])next=html\/geacnffull.html/, "$1next=html/marc.html");
 newUri = newUri.replace(/([:&])next=html\/record.html/, "$1next=html/marc.html");
-
-utilities.debugPrint(newUri);
+	
+var getNode = function(doc, contextNode, xpath, nsResolver) {
+	return doc.evaluate(xpath, contextNode, nsResolver, XPathResult.ANY_TYPE,null).iterateNext();
+}
 
 utilities.loadDocument(newUri, browser, function(newBrowser) {
 	newDoc = newBrowser.contentDocument;
@@ -1107,11 +1109,6 @@ utilities.loadDocument(newUri, browser, function(newBrowser) {
 	var nsResolver = namespace ? function(prefix) {
 	  if (prefix == ''x'') return namespace; else return null;
 	} : null;
-		
-	var getNode = function(doc, contextNode, xpath, nsResolver) {
-	  return doc.evaluate(xpath, contextNode, nsResolver, XPathResult.ANY_TYPE,null).iterateNext();
-	}
-	
 	
 	var record = new MARC_Record();
 	
@@ -1123,6 +1120,7 @@ utilities.loadDocument(newUri, browser, function(newBrowser) {
 		
 		if(line.substring(0, 6) == "       ") {
 			content += " "+line.substring(6);
+			continue;
 		} else {
 			if(tag) {
 				record.add_field(tag, ind1, ind2, content);
@@ -1145,11 +1143,94 @@ utilities.loadDocument(newUri, browser, function(newBrowser) {
 			content = line.substring(4);
 		}
 		
-		utilities.debugPrint(''tag:''+tag+'' ind1:''+ind1+'' ind2:''+ind2+'' content:''+content);
 	}
 	
 	model = utilities.importMARCRecord(record, uri, model);
 	done();
 }, function() {});
 
+wait();');
+
+
+INSERT INTO "scrapers" VALUES(16, NULL, NULL, 20060603002000, 'SIRSI -2003 Scraper', 'Simon Kornblith', '/uhtbin/cgisirsi',
+'var namespace = doc.documentElement.namespaceURI;
+var nsResolver = namespace ? function(prefix) {
+	if (prefix == ''x'') return namespace; else return null;
+} : null;
+
+var elmts = utilities.gatherElementsOnXPath(doc, doc, ''/html/body/form/p/text()[1]'', nsResolver);
+for(i in elmts) {
+	utilities.debugPrint(elmts[i].nodeValue);
+	if(elmts[i].nodeValue == "\n\nViewing record\n") {
+		return true;
+	}
+}
+return false;',
+'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
+var prefixDC = ''http://purl.org/dc/elements/1.1/'';
+var prefixDCMI = ''http://purl.org/dc/dcmitype/'';
+var prefixDummy = ''http://chnm.gmu.edu/firefox-scholar/'';
+
+var namespace = doc.documentElement.namespaceURI;
+var nsResolver = namespace ? function(prefix) {
+	if (prefix == ''x'') return namespace; else return null;
+} : null;
+
+var getNode = function(doc, contextNode, xpath, nsResolver) {
+	return doc.evaluate(xpath, contextNode, nsResolver, XPathResult.ANY_TYPE,null).iterateNext();
+}
+
+var uri = doc.location.href;
+var uriRegexp = /^(.*)(\/[0-9]+)$/;
+var m = uriRegexp.exec(uri);
+var newUri = m[1]+"/40";
+utilities.debugPrint(newUri);
+
+var elmts = utilities.gatherElementsOnXPath(doc, doc, ''/html/body/form/p'', nsResolver);
+for(i in elmts) {
+	var elmt = elmts[i];
+	var initialText = getNode(doc, elmt, ''./text()[1]'', nsResolver);
+	if(initialText.nodeValue == "\n\nViewing record\n") {
+		var recNumber = getNode(doc, elmt, ''./b[1]/text()[1]'', nsResolver).nodeValue;
+	}
+}
+
+utilities.HTTPUtilities.doPost(newUri, ''marks=''+recNumber+''&shadow=NO&format=FLAT+ASCII&sort=TITLE&vopt_elst=ALL&library=ALL&display_rule=ASCENDING&duedate_code=l&holdcount_code=t&DOWNLOAD_x=22&DOWNLOAD_y=12&address=&form_type='', null, function(text) {
+	var texts = text.split("<PRE>");
+	texts = texts[1].split("</PRE>");
+	text = texts[0];
+	var lines = text.split("\n");
+	
+	var record = new MARC_Record();
+	
+	var tag, ind1, ind2, content;
+	for(var i=0; i<lines.length; i++) {
+		var line = lines[i];
+		
+		if(line.substr(0, 1) == "." && line.substr(4,2) == ". ") {
+			if(tag) {
+				content = content.replace(/\|([a-z])/g, record.subfield_delimiter+"$1");
+				record.add_field(tag, ind1, ind2, content);
+			}
+		} else {
+			content += " "+line.substring(6);
+			continue;
+		}
+		
+		tag = line.substr(1, 3);
+		
+		if(parseInt(tag) > 10) {
+			ind1 = line.substr(6, 1);
+			ind2 = line.substr(7, 1);
+			content = line.substr(8);
+		} else {
+			ind1 = "";
+			ind2 = "";
+			content = line.substring(6);
+		}
+	}
+
+	model = utilities.importMARCRecord(record, uri, model);
+	done();
+})
 wait();');
