@@ -1,9 +1,12 @@
--- 13
+-- 15
 
     DROP TABLE IF EXISTS version;
     CREATE TABLE version (
-        version INTEGER PRIMARY KEY
+        schema TEXT PRIMARY KEY,
+        version INT NOT NULL
     );
+    DROP INDEX IF EXISTS schema;
+    CREATE INDEX schema ON version(schema);
     
     DROP TABLE IF EXISTS items;
     CREATE TABLE items (

@@ -1,4 +1,4 @@
-BEGIN TRANSACTION;
+-- 1
 DELETE FROM scrapers;
 INSERT INTO "scrapers" VALUES(1, NULL, NULL, 20060603002000, 'Amazon.com Scraper', 'Simon Kornblith', '^http://www\.amazon\.com/gp/product/', NULL, 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
@@ -1052,4 +1052,3 @@ utilities.loadDocument(newUri, browser, function(newBrowser) {
 }, function() {})
 
 wait();');
-COMMIT;
