@@ -72,6 +72,7 @@ var ScholarPane = new function()
 	{
 		MetadataPane.viewItem(new Scholar.Item(typeID));
 		document.getElementById('scholar-view-item').hidden = false;
+		document.getElementById('scholar-view-splitter').hidden = false;
 	}
 	
 	function newCollection()
@@ -112,10 +113,12 @@ var ScholarPane = new function()
 			MetadataPane.viewItem(item);
 
 			document.getElementById('scholar-view-item').hidden=false;
+		document.getElementById('scholar-view-splitter').hidden = false;
 		}
 		else
 		{
 			document.getElementById('scholar-view-item').hidden=true;
+		document.getElementById('scholar-view-splitter').hidden = true;
 			
 		}
 

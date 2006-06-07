@@ -113,11 +113,13 @@ MetadataPane = new function()
 		
 		var removeButton = document.createElement('toolbarbutton');
 		removeButton.setAttribute("label","-");
+		removeButton.setAttribute("class","addremove");
 		removeButton.setAttribute("oncommand","MetadataPane.removeCreator("+_creatorCount+")");
 		row.appendChild(removeButton);
 		
 		var addButton = document.createElement('toolbarbutton');
 		addButton.setAttribute("label","+");
+		addButton.setAttribute("class","addremove");
 		addButton.setAttribute("oncommand","MetadataPane.addCreatorRow('','',1);");
 		row.appendChild(addButton);
 		
@@ -188,11 +190,11 @@ MetadataPane = new function()
 		box.replaceChild(t,elem);
 		
 		t.select();
-		t.setAttribute('onblur',"MetadataPane.hideEditor(this);");
-		t.setAttribute('onkeypress','if(event.keyCode == event.DOM_VK_RETURN) document.commandDispatcher.focusedElement.blur()'); //for some reason I can't just say this.blur();
+		t.setAttribute('onblur',"MetadataPane.hideEditor(this, true);");
+		t.setAttribute('onkeypress','if(event.keyCode == event.DOM_VK_RETURN) document.commandDispatcher.focusedElement.blur(); else if(event.keyCode == event.DOM_VK_ESCAPE) MetadataPane.hideEditor(document.commandDispatcher.focusedElement, false);'); //for some reason I can't just say this.blur();
 	}
 	
-	function hideEditor(t)
+	function hideEditor(t, saveChanges)
 	{
 		var textbox = t.parentNode.parentNode;
 		var fieldName = textbox.getAttribute('fieldname');
@@ -202,14 +204,18 @@ MetadataPane = new function()
 		var creatorFields = fieldName.split('-');
 		if(creatorFields[0] == 'creator')
 		{
-			modifyCreator(creatorFields[1],creatorFields[2],value);
+			if(saveChanges)
+				modifyCreator(creatorFields[1],creatorFields[2],value);
 			
-			elem = createValueElement(value, fieldName);
+			elem = createValueElement(_itemBeingEdited.getCreator(creatorFields[1])[creatorFields[2]], fieldName);
 		}
 		else
 		{
-			_itemBeingEdited.setField(fieldName,value);
-			_itemBeingEdited.save();
+			if(saveChanges)
+			{
+				_itemBeingEdited.setField(fieldName,value);
+				_itemBeingEdited.save();
+			}
 		
 			elem = createValueElement(_itemBeingEdited.getField(fieldName),fieldName);
 		}

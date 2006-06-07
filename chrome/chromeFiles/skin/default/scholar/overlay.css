@@ -57,3 +57,16 @@ tree #items-tree
 {
 	overflow: auto;
 }
+
+#scholar-metadata .addremove
+{
+	-moz-border-radius: 8px;
+	width: 16px;
+	height: 16px;
+}
+
+#scholar-metadata .addremove:hover
+{
+	color: white;
+	background: #666666;
+}
