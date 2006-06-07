@@ -4,8 +4,11 @@
 <overlay 
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 	
-	<script src="metadataPane.js"/>
+	<script src="metadataPane.js"/>	
 	<vbox id="scholar-metadata">
+		<popupset>
+			<popup id="creatorTypeMenu" position="after_start" oncommand="MetadataPane.modifyCreator(document.popupNode.getAttribute('fieldname').split('-')[1],'typeID',event.explicitOriginalTarget.getAttribute('typeid'));"/>
+		</popupset>
 		<grid>
 			<columns>
 				<column/>

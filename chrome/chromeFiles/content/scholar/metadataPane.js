@@ -1,27 +1,36 @@
 MetadataPane = new function()
 {
 	var _dynamicFields;
+	var _creatorTypeMenu;
+	var _beforeRow;
+	
+	var _creatorCount;
 	
 	var _itemBeingEdited;
-	var _creatorTypes = Scholar.CreatorTypes.getTypes();
 	
 	this.onLoad = onLoad;
 	this.viewItem = viewItem;
-/*	this.saveItem = saveItem;
-	this.addCreator = addCreator;
-	this.removeCreator = removeCreator; */
+	this.addCreatorRow = addCreatorRow;
+	this.modifyCreator = modifyCreator;
+	this.removeCreator = removeCreator;
 	this.showEditor = showEditor;
 	this.hideEditor = hideEditor;
 	
 	function onLoad()
 	{
-		_metadataPane = document.getElementById('scholar-metadata');
 		_dynamicFields = document.getElementById('editpane-dynamic-fields');
-		_dynamicCreators = document.getElementById('editpane-dynamic-creators');
-		_editButton = document.getElementById('metadata-pane-edit-button');
-		_cancelButton = document.getElementById('metadata-pane-cancel-button');
-		_saveButton = document.getElementById('metadata-pane-save-button');
-		_creatorsToolbar = document.getElementById('metadata-creators-toolbar');
+		_creatorTypeMenu = document.getElementById('creatorTypeMenu');
+		
+		var creatorTypes = Scholar.CreatorTypes.getTypes();
+		for(var i = 0; i < creatorTypes.length; i++)
+		{
+			var menuitem = document.createElement("menuitem");
+			menuitem.setAttribute("label",Scholar.getString('creatorTypes.'+creatorTypes[i]['name']));
+			menuitem.setAttribute("typeid",creatorTypes[i]['id']);
+			if(creatorTypes[i]['id'] == 0)
+				menuitem.setAttribute("selected",true);
+			_creatorTypeMenu.appendChild(menuitem);
+		}
 		
 		return true;
 	}
@@ -38,74 +47,38 @@ MetadataPane = new function()
 	
 	function reloadFields()
 	{
-		removeDynamicRows(_dynamicFields);
-		thisItem = _itemBeingEdited;
+		while(_dynamicFields.hasChildNodes())
+			_dynamicFields.removeChild(_dynamicFields.firstChild);
 		
-		var fieldNames = getFullFieldList(thisItem);
+		var fieldNames = new Array("title","dateAdded","dateModified");
+		var fields = Scholar.ItemFields.getItemTypeFields(_itemBeingEdited.getField("itemTypeID"));
+		for(var i = 0; i<fields.length; i++)
+			fieldNames.push(Scholar.ItemFields.getName(fields[i]));
 		
 		for(var i = 0; i<fieldNames.length; i++)
 		{
-			var editable = (!thisItem.isPrimaryField(fieldNames[i]) || thisItem.isEditableField(fieldNames[i]));
+			var editable = (!_itemBeingEdited.isPrimaryField(fieldNames[i]) || _itemBeingEdited.isEditableField(fieldNames[i]));
 			
 			var label = document.createElement("label");
 			label.setAttribute("value",Scholar.getString("itemFields."+fieldNames[i])+":");
 			
-			addDynamicRow(label,createValueElement(thisItem.getField(fieldNames[i]), editable ? fieldNames[i] : null));
+			addDynamicRow(label,createValueElement(_itemBeingEdited.getField(fieldNames[i]), editable ? fieldNames[i] : null));
 		}
 		
-		if(thisItem.numCreators() > 0)
+		_beforeRow = _dynamicFields.firstChild.nextSibling;
+		_creatorCount = 0;
+		if(_itemBeingEdited.numCreators() > 0)
 		{
-			for(var i = 0, len=thisItem.numCreators(); i<len; i++)
+			for(var i = 0, len=_itemBeingEdited.numCreators(); i<len; i++)
 			{
-				var creator = thisItem.getCreator(i);
-				
-				var label = document.createElement("label");
-				label.setAttribute("value",Scholar.getString('creatorTypes.'+Scholar.CreatorTypes.getTypeName(creator['creatorTypeID']))+":");
-				
-				addDynamicRow(label, createValueElement(creator['firstName']+' '+creator['lastName'], null), _dynamicFields.firstChild.nextSibling);
+				var creator = _itemBeingEdited.getCreator(i);
+				addCreatorRow(creator['firstName'], creator['lastName'], creator['creatorTypeID']);
 			}
 		}
-	}
-	/*
-	function saveItem()
-	{
-		//get fields, call data access methods
-		var valueElements = _dynamicFields.getElementsByTagName("textbox");		//All elements of tagname 'textbox' should be the values of edits
-		for(var i=0; i<valueElements.length; i++)
-			_itemBeingEdited.setField(valueElements[i].getAttribute("fieldName"),valueElements[i].value);
-		
-		var numCreatorsBefore = _itemBeingEdited.numCreators();
-		
-		var creatorRows = _dynamicCreators.childNodes;
-		for(var i=0; i < creatorRows.length; i++)
+		else
 		{
-			var firstname = creatorRows[i].firstChild.value;
-			var lastname = creatorRows[i].firstChild.nextSibling.value;
-			var typeMenu = creatorRows[i].firstChild.nextSibling.nextSibling;
-			var typeID = typeMenu.firstChild.childNodes[typeMenu.selectedIndex].getAttribute('typeid');
-			
-			_itemBeingEdited.setCreator(i, firstname, lastname, typeID);
+			addCreatorRow('', '', 1);
 		}
-		
-		for(var i = creatorRows.length; i < numCreatorsBefore; i++)
-			_itemBeingEdited.setCreator(i, false);
-		
-		_itemBeingEdited.save();
-	}
-	*/
-	function getFullFieldList(item)
-	{
-		var fieldNames = new Array("title","dateAdded","dateModified");
-		var fields = Scholar.ItemFields.getItemTypeFields(item.getField("itemTypeID"));
-		for(var i = 0; i<fields.length; i++)
-			fieldNames.push(Scholar.ItemFields.getName(fields[i]));
-		return fieldNames;
-	}
-	
-	function removeDynamicRows(box)
-	{
-		while(box.hasChildNodes())
-			box.removeChild(box.firstChild);
 	}
 	
 	function addDynamicRow(label, value, beforeElement)
@@ -114,9 +87,43 @@ MetadataPane = new function()
 		row.appendChild(label);
 		row.appendChild(value);
 		if(beforeElement)
-			_dynamicFields.insertBefore(row, beforeElement);
+			_dynamicFields.insertBefore(row, _beforeRow);
 		else	
 			_dynamicFields.appendChild(row);		
+	}
+	
+	function addCreatorRow(firstName, lastName, typeID)
+	{
+		if(!firstName)
+			firstName = "(first)";
+		if(!lastName)
+			lastName = "(last)";
+		var label = document.createElement("label");
+		label.setAttribute("value",Scholar.getString('creatorTypes.'+Scholar.CreatorTypes.getTypeName(typeID))+":");
+		label.setAttribute("popup","creatorTypeMenu");
+		label.setAttribute("fieldname",'creator-'+_creatorCount+'-typeID');
+		
+		var row = document.createElement("hbox");
+		
+		var firstlast = document.createElement("hbox");
+		firstlast.setAttribute("flex","1");
+		firstlast.appendChild(createValueElement(lastName+",", 'creator-'+_creatorCount+'-lastName'));
+		firstlast.appendChild(createValueElement(firstName, 'creator-'+_creatorCount+'-firstName'));
+		row.appendChild(firstlast);
+		
+		var removeButton = document.createElement('toolbarbutton');
+		removeButton.setAttribute("label","-");
+		removeButton.setAttribute("oncommand","MetadataPane.removeCreator("+_creatorCount+")");
+		row.appendChild(removeButton);
+		
+		var addButton = document.createElement('toolbarbutton');
+		addButton.setAttribute("label","+");
+		addButton.setAttribute("oncommand","MetadataPane.addCreatorRow('','',1);");
+		row.appendChild(addButton);
+		
+		_creatorCount++;
+		
+		addDynamicRow(label, row, true);
 	}
 	
 	function createValueElement(valueText, fieldName)
@@ -130,70 +137,56 @@ MetadataPane = new function()
 		}
 		return valueElement;
 	}
-	/*
-	function addCreator(firstname, lastname, typeID)
+	
+	function removeCreator(index)
 	{
-		if(!lastname)
-			lastname = "";
-		if(!firstname)
-			firstname = "";
-		if(!typeID)
-			typeID = 0;
-		
-		var first = document.createElement("textbox");
-		first.setAttribute("value",firstname);
-		var last = document.createElement("textbox");
-		last.setAttribute("value",lastname);
-
-		var type = document.createElement("menulist");
-		type.setAttribute("label","Type");
-		var typeMenu = document.createElement("menupopup");
-		for(var j = 0; j < _creatorTypes.length; j++)
-		{
-			var menuitem = document.createElement("menuitem");
-			menuitem.setAttribute("label",Scholar.getString('creatorTypes.'+_creatorTypes[j]['name']));
-			menuitem.setAttribute("typeid",_creatorTypes[j]['id']);
-			if(_creatorTypes[j]['id'] == typeID)
-				menuitem.setAttribute("selected",true);
-			typeMenu.appendChild(menuitem);
-		}
-		type.appendChild(typeMenu);
-		
-		var remove = document.createElement("toolbarbutton");
-		remove.setAttribute("label","-");
-		remove.setAttribute("class","addremove");
-		remove.setAttribute("oncommand","MetadataPane.removeCreator(this.parentNode);");
-		
-		var add = document.createElement("toolbarbutton");
-		add.setAttribute("label","+");
-		add.setAttribute("class","addremove");
-		add.setAttribute("oncommand","MetadataPane.addCreator();");
-		
-		var row = document.createElement("row");
-		row.appendChild(first);
-		row.appendChild(last);
-		row.appendChild(type);
-		row.appendChild(remove);
-		row.appendChild(add);
-		_dynamicCreators.appendChild(row);
-		
+		_itemBeingEdited.removeCreator(index);
+		_itemBeingEdited.save();
+		reloadFields();
 	}
 	
-	function removeCreator(row)
+	function modifyCreator(index, field, value)
 	{
-		_dynamicCreators.removeChild(row);
-	}*/
-	
+		var creator = _itemBeingEdited.getCreator(index);
+		var firstName = creator['firstName'];
+		var lastName = creator['lastName'];
+		var typeID = creator['typeID'];
+		
+		if(field == 'firstName')
+			firstName = value;
+		else if(field == 'lastName')
+			lastName = value;
+		else if(field == 'typeID')
+			typeID = value;
+		
+		_itemBeingEdited.setCreator(index, firstName, lastName, typeID);
+		_itemBeingEdited.save();
+	}
 	
 	function showEditor(elem)
 	{
+		var fieldName = elem.getAttribute('fieldname');
+		var value = '';
+		var creatorFields = fieldName.split('-');
+		if(creatorFields[0] == 'creator')
+		{
+			var c = _itemBeingEdited.getCreator(creatorFields[1]);
+			if(c)
+				value = c[creatorFields[2]];
+		}
+		else
+		{
+			value = _itemBeingEdited.getField(fieldName);
+		}
+		
 		var t = document.createElement("textbox");
-		t.setAttribute('value',_itemBeingEdited.getField(elem.getAttribute('fieldname')));
-		t.setAttribute('fieldname',elem.getAttribute('fieldname'));
+		t.setAttribute('value',value);
+		t.setAttribute('fieldname',fieldName);
+		t.setAttribute('flex','1');
 		
 		var box = elem.parentNode;
-		box.removeChild(elem);
-		box.appendChild(t);
+		box.replaceChild(t,elem);
+		
 		t.select();
 		t.setAttribute('onblur',"MetadataPane.hideEditor(this);");
 		t.setAttribute('onkeypress','if(event.keyCode == event.DOM_VK_RETURN) document.commandDispatcher.focusedElement.blur()'); //for some reason I can't just say this.blur();
@@ -204,16 +197,25 @@ MetadataPane = new function()
 		var textbox = t.parentNode.parentNode;
 		var fieldName = textbox.getAttribute('fieldname');
 		var value = t.value;
-		Scholar.debug(value);
 		
-		_itemBeingEdited.setField(fieldName,value);
-		_itemBeingEdited.save();
+		var elem;
+		var creatorFields = fieldName.split('-');
+		if(creatorFields[0] == 'creator')
+		{
+			modifyCreator(creatorFields[1],creatorFields[2],value);
+			
+			elem = createValueElement(value, fieldName);
+		}
+		else
+		{
+			_itemBeingEdited.setField(fieldName,value);
+			_itemBeingEdited.save();
 		
-		var elem = createValueElement(value,fieldName);
+			elem = createValueElement(_itemBeingEdited.getField(fieldName),fieldName);
+		}
 		
 		var box = textbox.parentNode;
-		box.removeChild(textbox);
-		box.appendChild(elem);
+		box.replaceChild(elem,textbox);
 		
 	}
 }

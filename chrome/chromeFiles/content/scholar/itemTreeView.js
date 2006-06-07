@@ -194,6 +194,9 @@ Scholar.ItemTreeView.prototype.notify = function(action, type, ids)
 	ids = Scholar.flattenArguments(ids);
 	var madeChanges = false;
 	
+	this.selection.selectEventsSuppressed = true;
+	this.saveSelection();
+
 	if(action == 'remove')
 	{
 		//Since a remove involves shifting of rows, we have to do it in order
@@ -254,11 +257,18 @@ Scholar.ItemTreeView.prototype.notify = function(action, type, ids)
 			this.selection.select(this._itemRowMap[item.getID()]);
 
 		if(this.isSorted())
+		{
 			this.sort();				//this also refreshes the hash map
+			this._treebox.invalidate();
+		}
 		else if(action != 'modify') //no need to update this if we just modified
+		{
 			this._refreshHashMap();
-			
-	}	
+		}
+		
+		this.rememberSelection();
+	}
+	this.selection.selectEventsSuppressed = false;
 }
 
 Scholar.ItemTreeView.prototype.saveSelection = function()
