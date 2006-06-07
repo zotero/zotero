@@ -1,4 +1,4 @@
--- 1
+-- 2
 DELETE FROM scrapers;
 INSERT INTO "scrapers" VALUES(1, NULL, NULL, 20060603002000, 'Amazon.com Scraper', 'Simon Kornblith', '^http://www\.amazon\.com/gp/product/', NULL, 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
@@ -330,13 +330,15 @@ utilities.HTTPUtilities.doPost(''http://www.jstor.org/browse'', postData, null, 
 						data[prefixDC + "title"].push(fieldContent);
 					} else if(fieldCode == "AU") {
 						var authors = fieldContent.split(";");
-						for(j in authors) {	
+						for(j in authors) {
 							var author = authors[j];
-							var splitNames = author.split('', '');
-							if(splitNames) {
-								author = splitNames[1]+'' ''+splitNames[0];
+							if(author) {
+								var splitNames = author.split('', '');
+								if(splitNames) {
+									author = splitNames[1]+'' ''+splitNames[0];
+								}
+								data[prefixDC + "creator"].push(author);
 							}
-							data[prefixDC + "creator"].push(author);
 						}
 					} else if(fieldCode == "SO") {
 						data[prefixDummy + "publication"].push(fieldContent);
@@ -453,7 +455,7 @@ utilities.loadDocument(newUri, browser, function(newBrowser) {
 	record.load(text, "MARC_PAC");
 	model = utilities.importMARCRecord(record, uri, model);
 	done();
-}, function() {})
+}, function() {});
 
 wait();');
 
@@ -1050,5 +1052,104 @@ utilities.loadDocument(newUri, browser, function(newBrowser) {
 	model = utilities.importMARCRecord(record, uri, model);
 	done();
 }, function() {})
+
+wait();');
+
+INSERT INTO "scrapers" VALUES(14, NULL, NULL, 20060603002000, 'DRA Scraper', 'Simon Kornblith', '/web2/tramp2\.exe/(?:see\_record/|authority\_hits/|goto/.*\?.*screen=Record\.html)',
+'if(doc.location.href.indexOf("authority_hits") > 0) {
+	var body = doc.getElementsByTagName("body");
+	if(body[0].innerHTML.indexOf("ISBN") < 0) {
+		return false;
+	}
+}
+return true;',
+'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
+var prefixDC = ''http://purl.org/dc/elements/1.1/'';
+var prefixDCMI = ''http://purl.org/dc/dcmitype/'';
+var prefixDummy = ''http://chnm.gmu.edu/firefox-scholar/'';
+
+var uri = doc.location.href;
+var uriRegexp = /^(https?:\/\/.*\/web2\/tramp2\.exe\/)(?:goto|see\_record|authority\_hits)(\/.*)\?(?:screen=Record\.html\&)?(.*)$/i;
+var m = uriRegexp.exec(uri);
+if(uri.indexOf("authority_hits") < 0) {
+	var newUri = m[1]+"download_record"+m[2]+"/RECORD.MRC?format=marc&"+m[3];
+} else {
+	var newUri = m[1]+"download_record"+m[2]+"/RECORD.MRC?format=marc";
+}
+
+utilities.debugPrint(newUri);
+
+utilities.HTTPUtilities.doGet(newUri, null, function(text) {
+	var record = new MARC_Record();
+	record.load(text, "binary");
+	model = utilities.importMARCRecord(record, uri, model);
+	done();
+})
+wait();');
+
+
+INSERT INTO "scrapers" VALUES(15, NULL, NULL, 20060603002000, 'GEAC Scraper', 'Simon Kornblith', '/(?:Geac)?FETCH[\:\?].*[&:]next=html/(?:record\.html|geacnffull\.html)', NULL,
+'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
+var prefixDC = ''http://purl.org/dc/elements/1.1/'';
+var prefixDCMI = ''http://purl.org/dc/dcmitype/'';
+var prefixDummy = ''http://chnm.gmu.edu/firefox-scholar/'';
+
+var uri = doc.location.href;
+var newUri = uri.replace(/([:&])next=html\/geacnffull.html/, "$1next=html/marc.html");
+newUri = newUri.replace(/([:&])next=html\/record.html/, "$1next=html/marc.html");
+
+utilities.debugPrint(newUri);
+
+utilities.loadDocument(newUri, browser, function(newBrowser) {
+	newDoc = newBrowser.contentDocument;
+	
+	var namespace = newDoc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+	  if (prefix == ''x'') return namespace; else return null;
+	} : null;
+		
+	var getNode = function(doc, contextNode, xpath, nsResolver) {
+	  return doc.evaluate(xpath, contextNode, nsResolver, XPathResult.ANY_TYPE,null).iterateNext();
+	}
+	
+	
+	var record = new MARC_Record();
+	
+	var elmts = utilities.gatherElementsOnXPath(newDoc, newDoc, ''//pre/text()'', nsResolver);
+	var tag, ind1, ind2, content;
+	
+	for(var i=0; i<elmts.length; i++) {
+		var line = elmts[i].nodeValue;
+		
+		if(line.substring(0, 6) == "       ") {
+			content += " "+line.substring(6);
+		} else {
+			if(tag) {
+				record.add_field(tag, ind1, ind2, content);
+			}
+		}
+		
+		line = line.replace(/\xA0/g," "); // nbsp
+		line = line.replace(/_/g," ");
+		line = line.replace(/\t/g,"");
+		
+		tag = line.substring(0, 3);
+		if(parseInt(tag) > 10) {
+			ind1 = line.substring(4, 5);
+			ind2 = line.substring(5, 6);
+			content = line.substring(7);
+			content = content.replace(/\$([a-z])(?: |$)/g, record.subfield_delimiter+"$1");
+		} else {
+			ind1 = "";
+			ind2 = "";
+			content = line.substring(4);
+		}
+		
+		utilities.debugPrint(''tag:''+tag+'' ind1:''+ind1+'' ind2:''+ind2+'' content:''+content);
+	}
+	
+	model = utilities.importMARCRecord(record, uri, model);
+	done();
+}, function() {});
 
 wait();');
