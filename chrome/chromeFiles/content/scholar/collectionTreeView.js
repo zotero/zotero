@@ -248,11 +248,8 @@ Scholar.CollectionTreeView.prototype._refreshHashMap = function()
 
 Scholar.CollectionTreeView.prototype.canDrop = function(row, orient)
 {
-	if(orient == 0 && this._getItemAtRow(row).isCollection())
-	{
-		Scholar.debug("drag on row: " + row + "      orient: " + orient);
+	if((row == 0 && orient == 1) || orient == 0)
 		return true;
-	}
 	else
 		return false;
 }
@@ -269,7 +266,7 @@ Scholar.CollectionTreeView.prototype.drop = function(row, orient)
 		var oldCount = this.rowCount;
 		
 		var targetCollectionID;
-		if(this.canDrop(row,orient))
+		if(this._getItemAtRow(row).isCollection())
 			targetCollectionID = this._getItemAtRow(row).ref.getID();
 			
 		var droppedCollection = Scholar.Collections.get(ids[0]);
@@ -300,7 +297,6 @@ Scholar.CollectionTreeView.prototype.getSupportedFlavours = function ()
 	return flavors; 
 }
 
-Scholar.CollectionTreeView.prototype.onDragOver = function (evt,dropdata,session) { }
 Scholar.CollectionTreeView.prototype.onDrop = function (evt,dropdata,session) { }
 
 //

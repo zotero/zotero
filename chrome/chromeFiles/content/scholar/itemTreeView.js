@@ -253,9 +253,6 @@ Scholar.ItemTreeView.prototype.notify = function(action, type, ids)
 	
 	if(madeChanges)
 	{
-		if(action == 'add')
-			this.selection.select(this._itemRowMap[item.getID()]);
-
 		if(this.isSorted())
 		{
 			this.sort();				//this also refreshes the hash map
@@ -266,7 +263,10 @@ Scholar.ItemTreeView.prototype.notify = function(action, type, ids)
 			this._refreshHashMap();
 		}
 		
-		this.rememberSelection();
+		if(action == 'add')
+			this.selection.select(this._itemRowMap[item.getID()]);
+		else
+			this.rememberSelection();
 	}
 	this.selection.selectEventsSuppressed = false;
 }

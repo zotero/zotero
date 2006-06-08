@@ -28,7 +28,7 @@
 				</toolbar>
 				<tree id="collections-tree" hidecolumnpicker="true"
 					onselect="ScholarPane.onCollectionSelected();" seltype="single"
-					ondragover="nsDragAndDrop.dragOver(event,ScholarPane.getCollectionsView())" ondragdrop="nsDragAndDrop.drop(event,ScholarPane.getCollectionsView())"
+					ondragdrop="nsDragAndDrop.drop(event,ScholarPane.getCollectionsView())"
 					ondraggesture="if (event.target.localName == 'treechildren') nsDragAndDrop.startDrag(event,ScholarPane.getCollectionsView());"
 					onkeypress="if(event.keyCode == event.DOM_VK_BACK_SPACE || event.keyCode == event.DOM_VK_DELETE){ ScholarPane.deleteCollectionSelection(); return false; }"
 					flex="1">
@@ -59,7 +59,7 @@
 					enableColumnDrag="true" onkeypress="if(event.keyCode == event.DOM_VK_BACK_SPACE || event.keyCode == event.DOM_VK_DELETE){ ScholarPane.deleteItemSelection(); return false; }"
 					onselect="ScholarPane.itemSelected();"
 					ondraggesture="if (event.target.localName == 'treechildren') nsDragAndDrop.startDrag(event,ScholarPane.getItemsView());"
-					ondragover="nsDragAndDrop.dragOver(event,ScholarPane.getItemsView())" ondragdrop="nsDragAndDrop.drop(event,ScholarPane.getItemsView())"
+					ondragdrop="nsDragAndDrop.drop(event,ScholarPane.getItemsView())"
 					flex="1">
 					<treecols>
 						<treecol
