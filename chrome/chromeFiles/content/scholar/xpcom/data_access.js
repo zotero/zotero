@@ -712,7 +712,7 @@ Scholar.Item.prototype.erase = function(){
 	
 	// If we're not in the middle of a larger commit, trigger the notifier now
 	if (!Scholar.DB.transactionInProgress()){
-		Scholar.Notifier.trigger('remove', 'item', this.getID());
+		Scholar.Notifier.trigger('delete', 'item', this.getID());
 	}
 }
 
@@ -1189,7 +1189,12 @@ Scholar.Collection.prototype.addItem = function(itemID){
 	Scholar.DB.commitTransaction();
 	
 	this._childItems.set(itemID);
-	this._hasChildItems = true;
+	
+	// If this was previously empty, update and send a notification to the tree
+	if (!this._hasChildItems){
+		this._hasChildItems = true;
+		Scholar.Notifier.trigger('modify', 'collections', this.getID());
+	}
 	
 	Scholar.Notifier.trigger('add', 'item', itemID);
 }
@@ -1228,6 +1233,7 @@ Scholar.Collection.prototype.removeItem = function(itemID){
 	// If this was the last item, set collection to empty
 	if (!this._childItems.length){
 		this._hasChildItems = false;
+		Scholar.Notifier.trigger('modify', 'collections', this.getID());
 	}
 	
 	Scholar.Notifier.trigger('remove', 'item', itemID);
@@ -1299,7 +1305,7 @@ Scholar.Collection.prototype.erase = function(deleteItems){
 	
 	Scholar.Notifier.trigger('remove', 'collection', collections);
 	if (items.length){
-		Scholar.Notifier.trigger('remove', 'item', items);
+		Scholar.Notifier.trigger('delete', 'item', items);
 	}
 }
 
