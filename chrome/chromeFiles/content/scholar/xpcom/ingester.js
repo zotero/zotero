@@ -322,7 +322,7 @@ Scholar.Ingester.HTTPUtilities.prototype.doGet = function(url, onStatus, onDone)
 	var xmlhttp = new this.window.XMLHttpRequest();
 	
 	xmlhttp.open('GET', url, true);
-	xmlhttp.overrideMimeType("text/xml");
+	xmlhttp.overrideMimeType("text/plain");
 	
 	var me = this;
 	xmlhttp.onreadystatechange = function() {
@@ -335,7 +335,7 @@ Scholar.Ingester.HTTPUtilities.prototype.doPost = function(url, body, onStatus, 
 	var xmlhttp = new this.window.XMLHttpRequest();
 	
 	xmlhttp.open('POST', url, true);
-	xmlhttp.overrideMimeType("text/xml");
+	xmlhttp.overrideMimeType("text/plain");
 	
 	var me = this;
 	xmlhttp.onreadystatechange = function() {
@@ -348,7 +348,7 @@ Scholar.Ingester.HTTPUtilities.prototype.doOptions = function(url, body, onStatu
 	var xmlhttp = new this.window.XMLHttpRequest();
   
 	xmlhttp.open('OPTIONS', url, true);
-	xmlhttp.overrideMimeType("text/xml");
+	xmlhttp.overrideMimeType("text/plain");
 	
 	var me = this;
 	xmlhttp.onreadystatechange = function() {

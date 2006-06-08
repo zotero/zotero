@@ -1,4 +1,4 @@
--- 4
+-- 5
 DELETE FROM scrapers;
 INSERT INTO "scrapers" VALUES(1, NULL, NULL, 20060603002000, 'Amazon.com Scraper', 'Simon Kornblith', '^http://www\.amazon\.com/gp/product/', NULL, 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
@@ -783,7 +783,7 @@ for (var i = 0; i < elmts.length; i++) {
 			if(firstChar == "v") {
 				rdfUri = prefixDummy + "volume";
 			} else if(firstChar == "i") {
-				rdfUri = prefixDummy + "issue";
+				rdfUri = prefixDummy + "number";
 			} else if(firstChar == "p") {
 				rdfUri = prefixDummy + "pages";
 				var pagesRegexp = /p(\w+)\((\w+)\)/;
@@ -1312,7 +1312,7 @@ utilities.loadDocument(newUri, browser, function(newBrowser) {
 
 wait();');
 
-INSERT INTO "scrapers" VALUES(18, NULL, NULL, 20060603002000, 'Project MUSE Scraper', 'Simon Kornblith', '^http://muse.jhu.edu/journals/[^/]+/[^/]+/[^/]+.html$', NULL, 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
+INSERT INTO "scrapers" VALUES(18, NULL, NULL, 20060603002000, 'Project MUSE Scraper', 'Simon Kornblith', '^http://muse\.jhu\.edu/journals/[^/]+/[^/]+/[^/]+\.html$', NULL, 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
 var prefixDCMI = ''http://purl.org/dc/dcmitype/'';
 var prefixDummy = ''http://chnm.gmu.edu/firefox-scholar/'';
@@ -1321,10 +1321,6 @@ var namespace = doc.documentElement.namespaceURI;
 var nsResolver = namespace ? function(prefix) {
 	if (prefix == ''x'') return namespace; else return null;
 } : null;
-
-function numbersOnly(text) {
-	return text.replace(/[^0-9]/g, "");
-}
 
 var uri = doc.location.href;
 
@@ -1341,24 +1337,29 @@ for(i in elmts) {
 // expose DOM/XPath to sandboxed scripts
 var newDOM = new XML(headerData);
 
-function mapDOM(path, rdfUri) {
-	if(newDOM.header[path]) {
-		model.addStatement(uri, rdfUri, newDOM[path].text(), true);
+function mapRDF(text, rdfUri) {
+	if(text) {
+		model.addStatement(uri, rdfUri, text, true);
 	}
 }
 
-mapDOM("journal", prefixDummy + "publication");
-mapDOM("issn", prefixDummy + "publication", numbersOnly);
-mapDOM("volume", prefixDummy + "volume");
-mapDOM("issue", prefixDummy + "issue");
-mapDOM("year", prefixDummy + "year");
-mapDOM("pubdate", prefixDC + "date");
-mapDOM("doctitle", prefixDC + "title");
+mapRDF(newDOM.journal.text(), prefixDummy + "publication");
+mapRDF(newDOM.volume.text(), prefixDummy + "volume");
+mapRDF(newDOM.issue.text(), prefixDummy + "number");
+mapRDF(newDOM.year.text(), prefixDummy + "year");
+mapRDF(newDOM.pubdate.text(), prefixDC + "date");
+mapRDF(newDOM.doctitle.text(), prefixDC + "title");
+
+// Do ISSN
+var issn = newDOM.issn.text();
+if(issn) {
+	model.addStatement(uri, prefixDC + "identifier", "ISSN "+issn.replace(/[^0-9]/g, ""), true);
+}
 
 // Do pages
 var fpage = newDOM.fpage.text();
 var lpage = newDOM.lpage.text();
-if(fpage) {
+if(fpage != "") {
 	var pages = fpage;
 	if(lpage) {
 		pages += "-"+lpage;
@@ -1375,3 +1376,90 @@ for(i in elmts) {
 }
 
 model.addStatement(uri, prefixRDF + "type", prefixDummy + "journal", false);');
+
+INSERT INTO "scrapers" VALUES(19, NULL, NULL, 20060603002000, 'PubMed Scraper', 'Simon Kornblith', '^http://www\.ncbi\.nlm\.nih\.gov/entrez/query\.fcgi\?(?:.*db=PubMed.*list_uids=[0-9]|.*list_uids=[0-9].*db=PubMed)', NULL, 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
+var prefixDC = ''http://purl.org/dc/elements/1.1/'';
+var prefixDCMI = ''http://purl.org/dc/dcmitype/'';
+var prefixDummy = ''http://chnm.gmu.edu/firefox-scholar/'';
+
+function mapRDF(text, rdfUri) {
+	if(text != "") {
+		model.addStatement(uri, rdfUri, text, true);
+	}
+}
+
+function stringTrimmer(x) {
+	var x = x.replace(/^[^\w(]+/, "");
+	return x.replace(/[^\w)]+$/, "");
+}
+
+var uri = doc.location.href;
+var newUri = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=PubMed&retmode=xml&rettype=citation&id=";
+var idRegexp = /[\?\&]list_uids=([0-9\,]+)/;
+var m = idRegexp.exec(uri);
+newUri += m[1];
+
+utilities.HTTPUtilities.doGet(newUri, null, function(text) {
+	// Remove xml parse instruction and doctype
+	text = text.replace(/<!DOCTYPE[^>]*>/, "").replace(/<\?xml[^>]*\?>/, "");
+	
+	var xml = new XML(text);
+	
+	for(var i=0; i<xml.PubmedArticle.length(); i++) {
+		utilities.debugPrint("one article...");
+		var citation = xml.PubmedArticle[i].MedlineCitation;
+		
+		if(citation.PMID.length()) {
+			model.addStatement(uri, prefixDC + "identifier", "PMID "+citation.PMID.text(), true);
+		}
+		
+		var article = citation.Article;
+		if(article.ArticleTitle.length()) {
+			var title = article.ArticleTitle.text().toString();
+			if(title.substr(-1) == ".") {
+				title = title.substring(0, title.length-1);
+			}
+			model.addStatement(uri, prefixDC + "title", title, true);
+		}
+		
+		if(article.Journal.length()) {
+			var issn = article.Journal.ISSN.text();
+			if(issn) {
+				model.addStatement(uri, prefixDC + "identifier", "ISSN "+issn.replace(/[^0-9]/g, ""), true);
+			}
+			
+			if(article.Journal.Title.length()) {
+				model.addStatement(uri, prefixDummy + "publication", stringTrimmer(article.Journal.Title.text()), true);
+			} else if(citation.MedlineJournalInfo.MedlineTA.length()) {
+				model.addStatement(uri, prefixDummy + "publication", stringTrimmer(citation.MedlineJournalInfo.MedlineTA.text()), true);
+			}
+			
+			if(article.Journal.JournalIssue.length()) {
+				mapRDF(article.Journal.JournalIssue.Volume.text(), prefixDummy + "volume");
+				mapRDF(article.Journal.JournalIssue.Issue.text(), prefixDummy + "number");
+				if(article.Journal.JournalIssue.PubDate.length()) {
+					model.addStatement(uri, prefixDC + "date", article.Journal.JournalIssue.PubDate.Day.text()+" "+article.Journal.JournalIssue.PubDate.Month.text()+" "+article.Journal.JournalIssue.PubDate.Year.text(), true);
+				}
+			}
+		}
+		
+		if(article.AuthorList.length() && article.AuthorList.Author.length()) {
+			var authors = article.AuthorList.Author;
+			for(var j=0; j<authors.length(); j++) {
+				var lastName = authors[j].LastName.text();
+				var firstName = authors[j].FirstName.text();
+				if(firstName == "") {
+					var firstName = authors[j].ForeName.text();
+				}
+				if(firstName && lastName) {
+					model.addStatement(uri, prefixDC + "creator", firstName + " " + lastName);
+				}
+			}
+		}
+	}
+
+	done();
+})
+
+model.addStatement(uri, prefixRDF + "type", prefixDummy + "journal", false);
+wait();');
