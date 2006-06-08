@@ -81,27 +81,20 @@ Scholar.CollectionTreeView.prototype.notify = function(action, type, ids)
 		this._treebox.invalidate();
 		this._treebox.endUpdateBatch();
 	}
-	else
+	else if(action == 'modify')
 	{
-		ids = Scholar.flattenArguments(ids);
-		for (var i=0, len=ids.length; i<len; i++)
-		{
+		var row = this._collectionRowMap[ids];
+		if(row != null)
+			this._treebox.invalidateRow(row);
+	}
+	else if(action == 'add')
+	{
+		var item = Scholar.Collections.get(ids);
 		
-			var row = this._collectionRowMap[ids[i]];
-			if(action == 'modify' && row != null) 	//must check for null because it could legitimately be 0
-			{
-				this._treebox.invalidateRow(row)
-			}
-			else if(action == 'add' && row == null)
-			{
-				var item = Scholar.Collections.get(ids[i]);
-				
-				this._showItem(new Scholar.ItemGroup('collection',item), 0, this.rowCount);
-				this._treebox.rowCountChanged(this.rowCount-1,1);
-			
-				madeChanges = true;
-			}
-		}
+		this._showItem(new Scholar.ItemGroup('collection',item), 0, this.rowCount);
+		this._treebox.rowCountChanged(this.rowCount-1,1);
+	
+		madeChanges = true;
 	}
 	
 	if(madeChanges)
@@ -292,6 +285,16 @@ Scholar.CollectionTreeView.prototype.drop = function(row, orient)
 			targetCollectionID = this._getItemAtRow(row).ref.getID();
 		var droppedCollection = Scholar.Collections.get(ids[0]);
 		droppedCollection.changeParent(targetCollectionID);
+		
+		var selectRow = this._collectionRowMap[ids[0]];
+		if(selectRow == null)
+			selectRow = this._collectionRowMap[targetCollectionID];
+		
+		this.selection.selectEventsSuppressed = true;
+		this.selection.clearSelection();
+		this.selection.select(selectRow);
+		this.selection.selectEventsSuppressed = false;
+			
 	}
 	else if(dataType == 'scholar/item' && this.canDrop(row, orient))
 	{
