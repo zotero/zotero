@@ -62,7 +62,7 @@ Scholar.Schema = new function(){
 		if (Scholar.DB.tableExists('version')){
 			try {
 				var dbVersion = Scholar.DB.valueQuery("SELECT version FROM "
-					+ " version WHERE schema='" + schema + "'");
+					+ "version WHERE schema='" + schema + "'");
 			}
 			// DEBUG: this is temporary to handle version table schema change
 			catch(e){
@@ -224,7 +224,7 @@ Scholar.Schema = new function(){
 		//
 		// Change this value to match the schema version
 		//
-		var toVersion = 15;
+		var toVersion = 16;
 		
 		if (toVersion != _getSchemaSQLVersion()){
 			throw('Schema version does not match version in _migrateSchema()');
@@ -239,8 +239,8 @@ Scholar.Schema = new function(){
 		// Each block performs the changes necessary to move from the
 		// previous revision to that one.
 		for (var i=parseInt(fromVersion) + 1; i<=toVersion; i++){
-			if (i==15){
-				// do stuff
+			if (i==16){
+				_initializeSchema();
 			}
 		}
 		

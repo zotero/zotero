@@ -1,4 +1,4 @@
--- 15
+-- 16
 
     DROP TABLE IF EXISTS version;
     CREATE TABLE version (
@@ -99,7 +99,7 @@
         creatorID INT,
         creatorTypeID INT DEFAULT 1,
         orderIndex INT DEFAULT 0,
-        PRIMARY KEY (itemID, creatorID),
+        PRIMARY KEY (itemID, creatorID, creatorTypeID),
         FOREIGN KEY (itemID) REFERENCES items(itemID),
         FOREIGN KEY (creatorID) REFERENCES creators(creatorID)
         FOREIGN KEY (creatorTypeID) REFERENCES creatorTypes(creatorTypeID)

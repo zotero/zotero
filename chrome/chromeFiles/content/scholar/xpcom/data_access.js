@@ -204,11 +204,12 @@ Scholar.Item.prototype.setCreator = function(orderIndex, firstName, lastName, cr
 		lastName = '';
 	}
 	
+	// If creator at this position hasn't changed, cancel
 	if (this._creators.has(orderIndex) &&
 		this._creators.get(orderIndex)['firstName']==firstName &&
 		this._creators.get(orderIndex)['lastName']==lastName &&
 		this._creators.get(orderIndex)['creatorTypeID']==creatorTypeID){
-		return true;
+		return false;
 	}
 	
 	if (!creatorTypeID){
@@ -247,6 +248,23 @@ Scholar.Item.prototype.removeCreator = function(orderIndex){
 		this._changedCreators.set(i);
 	}
 	return true;
+}
+
+
+Scholar.Item.prototype.creatorExists = function(firstName, lastName, creatorTypeID, skipIndex){
+	for (var j=0, len=this.numCreators(); j<len; j++){
+		if (typeof skipIndex!='undefined' && skipIndex==j){
+			continue;
+		}
+		var creator2 = this.getCreator(j);
+		
+		if (firstName==creator2['firstName'] &&
+			lastName==creator2['lastName'] &&
+			creatorTypeID==creator2['creatorTypeID']){
+			return true;
+		}
+	}
+	return false;
 }
 
 
@@ -365,7 +383,7 @@ Scholar.Item.prototype.save = function(){
 			
 			// Always update modified time
 			sql += "dateModified=CURRENT_TIMESTAMP ";
-			sql += "WHERE itemID=?;\n";
+			sql += "WHERE itemID=?";
 			sqlValues.push({'int':this.getID()});
 			
 			Scholar.DB.query(sql, sqlValues);
@@ -374,17 +392,28 @@ Scholar.Item.prototype.save = function(){
 			// Creators
 			//
 			if (this._changedCreators.length){
+				for (var i=0, len=this.numCreators(); i<len; i++){
+					var creator = this.getCreator(i);
+					if (this.creatorExists(creator['firstName'],
+							creator['lastName'], creator['creatorTypeID'], i)){
+						throw('Cannot add duplicate creator/creatorType '
+							+ 'to item ' + this.getID());
+					}
+				}
+				
 				for (orderIndex in this._changedCreators.items){
 					Scholar.debug('Creator ' + orderIndex + ' has changed', 4);
 					
 					var creator = this.getCreator(orderIndex);
 					
-					// If empty, delete at position
+					// Delete at position
+					sql2 = 'DELETE FROM itemCreators'
+						+ ' WHERE itemID=' + this.getID()
+						+ ' AND orderIndex=' + orderIndex;
+					Scholar.DB.query(sql2);
+					
+					// If empty, move on
 					if (!creator['firstName'] && !creator['lastName']){
-						sql2 = 'DELETE FROM itemCreators '
-							+ ' WHERE itemID=' + this.getID()
-							+ ' AND orderIndex=' + orderIndex;
-						Scholar.DB.query(sql2);
 						continue;
 					}
 					
@@ -402,23 +431,22 @@ Scholar.Item.prototype.save = function(){
 						);
 					}
 					
-					
-					// If there's a creator at this position, update
-					// with new creator data
+					// If this creator and creatorType exists elsewhere, move it
 					sql2 = 'SELECT COUNT(*) FROM itemCreators'
 						+ ' WHERE itemID=' + this.getID()
-						+ ' AND orderIndex=' + orderIndex;
+						+ ' AND creatorID=' + creatorID
+						+ ' AND creatorTypeID=' + creator['creatorTypeID'];
 					
 					if (Scholar.DB.valueQuery(sql2)){
-						sql = 'UPDATE itemCreators SET creatorID=?, '
-							+ 'creatorTypeID=? WHERE itemID=?'
-							+ " AND orderIndex=?";
+						sql = 'UPDATE itemCreators SET orderIndex=? '
+							+ "WHERE itemID=? AND creatorID=? AND "
+							+ "creatorTypeID=?";
 							
 						sqlValues = [
-							{'int':creatorID},
-							{'int':creator['creatorTypeID']},
+							{'int':orderIndex},
 							{'int':this.getID()},
-							{'int':orderIndex}
+							{'int':creatorID},
+							{'int':creator['creatorTypeID']}
 						];
 						
 						Scholar.DB.query(sql, sqlValues);
@@ -553,7 +581,7 @@ Scholar.Item.prototype.save = function(){
 			for (var i=0; i<sqlValues.length; i++){
 				sql += '?,';
 			}
-			sql = sql.substring(0,sql.length-1) + ");\n";
+			sql = sql.substring(0,sql.length-1) + ")";
 			
 			// Save basic data to items table and get new ID
 			var itemID = Scholar.DB.query(sql,sqlValues);
@@ -616,7 +644,7 @@ Scholar.Item.prototype.save = function(){
 					sql = 'INSERT INTO itemCreators VALUES ('
 						+ itemID + ',' + creatorID + ','
 						+ creator['creatorTypeID'] + ', ' + orderIndex
-						+ ");\n";
+						+ ")";
 					Scholar.DB.query(sql);
 				}
 			}
