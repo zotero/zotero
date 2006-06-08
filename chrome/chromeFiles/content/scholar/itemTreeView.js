@@ -299,3 +299,20 @@ Scholar.ItemTreeView.prototype.canDrop = function(index, orient)
 {
 	return false;
 }
+
+Scholar.ItemTreeView.prototype.onDragStart = function (evt,transferData,action)
+{ 
+	transferData.data=new TransferData();
+	this.saveSelection();
+	transferData.data.addDataForFlavour("scholar/item",this._savedSelection);
+}
+	
+Scholar.ItemTreeView.prototype.getSupportedFlavours = function () 
+{ 
+	var flavors = new FlavourSet();
+	flavors.appendFlavour("scholar/item");
+	return flavors; 
+}
+
+Scholar.ItemTreeView.prototype.onDragOver = function (evt,dropdata,session) { }
+Scholar.ItemTreeView.prototype.onDrop = function (evt,dropdata,session) { }	

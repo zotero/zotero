@@ -19,6 +19,8 @@ var ScholarPane = new function()
 	this.deleteCollectionSelection = deleteCollectionSelection;
 	this.renameSelectedCollection = renameSelectedCollection;
 	this.search = search;
+	this.getCollectionsView = getCollectionsView;
+	this.getItemsView = getItemsView;
 	
 	/*
 	 * Called when the window is open
@@ -112,13 +114,13 @@ var ScholarPane = new function()
 			
 			MetadataPane.viewItem(item);
 
-			document.getElementById('scholar-view-item').hidden=false;
-		document.getElementById('scholar-view-splitter').hidden = false;
+			document.getElementById('scholar-view-item').hidden = false;
+			document.getElementById('scholar-view-splitter').hidden = false;
 		}
 		else
 		{
-			document.getElementById('scholar-view-item').hidden=true;
-		document.getElementById('scholar-view-splitter').hidden = true;
+			document.getElementById('scholar-view-item').hidden = true;
+			document.getElementById('scholar-view-splitter').hidden = true;
 			
 		}
 
@@ -153,31 +155,15 @@ var ScholarPane = new function()
 		if(itemsView)
 			itemsView.searchText(document.getElementById('tb-search').value);
 	}
-}
-
-var ScholarItemsDragObserver =
-{ 
-	onDragStart: function (evt,transferData,action)
-	{ 
-		transferData.data=new TransferData(); 
-		transferData.data.addDataForFlavour("text/unicode","random data"); 
-		
-	}	
-}; 
-
-var ScholarCollectionsDragObserver =
-{
-	getSupportedFlavours : function () 
-	{ 
-		var flavours = new FlavourSet(); 
-		flavours.appendFlavour("text/unicode"); 
-		
-		return flavours; 
-	}, 
-	onDragOver: function (evt,dropdata,session){}, 
-	onDrop: function (evt,dropdata,session)
-	{ 
-		alert(dropdata.data);
+	
+	function getCollectionsView()
+	{
+		return collectionsView;
+	}
+	
+	function getItemsView()
+	{
+		return itemsView;
 	}
 }
 

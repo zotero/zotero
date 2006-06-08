@@ -28,7 +28,8 @@
 				</toolbar>
 				<tree id="collections-tree" hidecolumnpicker="true"
 					onselect="ScholarPane.onCollectionSelected();" seltype="single"
-					ondragover="nsDragAndDrop.dragOver(event,ScholarCollectionsDragObserver)" ondragdrop="nsDragAndDrop.drop(event,ScholarCollectionsDragObserver)"
+					ondragover="nsDragAndDrop.dragOver(event,ScholarPane.getCollectionsView())" ondragdrop="nsDragAndDrop.drop(event,ScholarPane.getCollectionsView())"
+					ondraggesture="if (event.target.localName == 'treechildren') nsDragAndDrop.startDrag(event,ScholarPane.getCollectionsView());"
 					onkeypress="if(event.keyCode == event.DOM_VK_BACK_SPACE || event.keyCode == event.DOM_VK_DELETE){ ScholarPane.deleteCollectionSelection(); return false; }"
 					flex="1">
 					<treecols>
@@ -57,7 +58,8 @@
 					id="items-tree" 
 					enableColumnDrag="true" onkeypress="if(event.keyCode == event.DOM_VK_BACK_SPACE || event.keyCode == event.DOM_VK_DELETE){ ScholarPane.deleteItemSelection(); return false; }"
 					onselect="ScholarPane.itemSelected();"
-					ondraggesture="if (event.target.localName == 'treechildren') nsDragAndDrop.startDrag(event,ScholarItemsDragObserver);"
+					ondraggesture="if (event.target.localName == 'treechildren') nsDragAndDrop.startDrag(event,ScholarPane.getItemsView());"
+					ondragover="nsDragAndDrop.dragOver(event,ScholarPane.getItemsView())" ondragdrop="nsDragAndDrop.drop(event,ScholarPane.getItemsView())"
 					flex="1">
 					<treecols>
 						<treecol
@@ -95,8 +97,8 @@
 				</tree>
 			
 			</vbox>
-			<splitter id="scholar-view-splitter" resizebefore="closest" resizeafter="closest" hidden="true"/>
-			<tabbox id="scholar-view-item" hidden="true" flex="2" style="min-width: 300px;">
+			<separator orient="vertical" class="thin" id="scholar-view-splitter" hidden="true"/>
+			<tabbox id="scholar-view-item" hidden="true" flex="2" style="min-width: 300px; max-width: 300px;">
 				<tabs>
 					<tab label="Metadata"/>
 					<tab label="Notes"/>

@@ -1,10 +1,21 @@
 Scholar.CollectionTreeView = function()
 {
 	this._treebox = null;
+	this._unregisterID = Scholar.Notifier.registerColumnTree(this);
+	this.refresh();
+}
+
+Scholar.CollectionTreeView.prototype.refresh = function()
+{
 	this._dataItems = new Array();
 	this.rowCount = 0;
 	this._showItem(new Scholar.ItemGroup('library',null),0,1);
-	this._unregisterID = Scholar.Notifier.registerColumnTree(this);
+	
+	var newRows = Scholar.getCollections();
+	for(var i = 0; i < newRows.length; i++)
+		this._showItem(new Scholar.ItemGroup('collection',newRows[i]),  0, this._dataItems.length); //item ref, level, beforeRow
+		
+	this._refreshHashMap();
 }
 
 /*
@@ -80,12 +91,6 @@ Scholar.CollectionTreeView.prototype.setTree = function(treebox)
 	if(this._treebox)
 		return;
 	this._treebox = treebox;
-	
-	var newRows = Scholar.getCollections();
-	for(var i = 0; i < newRows.length; i++)
-		this._showItem(new Scholar.ItemGroup('collection',newRows[i]),  0, this._dataItems.length); //item ref, level, beforeRow
-		
-	this._refreshHashMap();
 }
 
 Scholar.CollectionTreeView.prototype.getCellText = function(row, column)
@@ -243,17 +248,60 @@ Scholar.CollectionTreeView.prototype._refreshHashMap = function()
 
 Scholar.CollectionTreeView.prototype.canDrop = function(row, orient)
 {
-	if(orient == this.DROP_ON && this._getItemAtRow(row).isCollection())
+	if(orient == 0 && this._getItemAtRow(row).isCollection())
+	{
+		Scholar.debug("drag on row: " + row + "      orient: " + orient);
 		return true;
+	}
 	else
 		return false;
-		
 }
 
 Scholar.CollectionTreeView.prototype.drop = function(row, orient)
 {
-	//you can't really do anything here, look to overlay.js - ScholarCollectionsDragObserver
+	var dataSet = nsTransferable.get(this.getSupportedFlavours(),nsDragAndDrop.getDragData, true);
+	var data = dataSet.first.first;
+	var dataType = data.flavour.contentType;
+	var ids = data.data.split(',');
+	
+	if(dataType == 'scholar/collection')
+	{
+		var oldCount = this.rowCount;
+		
+		var targetCollectionID;
+		if(this.canDrop(row,orient))
+			targetCollectionID = this._getItemAtRow(row).ref.getID();
+			
+		var droppedCollection = Scholar.Collections.get(ids[0]);
+		droppedCollection.changeParent(targetCollectionID);
+		this.refresh();
+		this._treebox.rowCountChanged(0,this.rowCount-oldCount);
+		this._treebox.invalidate();
+	}
+	else if(dataType == 'scholar/item' && this.canDrop(row, orient))
+	{
+		var targetCollection = this._getItemAtRow(row).ref;
+		for(var i = 0; i<ids.length; i++)
+			targetCollection.addItem(ids[i]);
+	}
 }
+
+Scholar.CollectionTreeView.prototype.onDragStart = function(evt,transferData,action)
+{
+	transferData.data=new TransferData();
+	transferData.data.addDataForFlavour("scholar/collection",this._getItemAtRow(this.selection.currentIndex).ref.getID());
+}
+
+Scholar.CollectionTreeView.prototype.getSupportedFlavours = function () 
+{ 
+	var flavors = new FlavourSet();
+	flavors.appendFlavour("scholar/item");
+	flavors.appendFlavour("scholar/collection");
+	return flavors; 
+}
+
+Scholar.CollectionTreeView.prototype.onDragOver = function (evt,dropdata,session) { }
+Scholar.CollectionTreeView.prototype.onDrop = function (evt,dropdata,session) { }
 
 //
 // SCHOLAR ITEMGROUP
