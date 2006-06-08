@@ -1155,17 +1155,15 @@ Scholar.Collection.prototype.changeParent = function(parent){
 	Scholar.DB.query(sql, [parentParam, {'int':this.getID()}]);
 	this._parent = parent;
 	
-	var notifyIDs = [this.getID()];
-	if (previousParent){
-		notifyIDs.push(previousParent);
-	}
-	if (parent){
-		notifyIDs.push(parent);
-	}
+	var notifyIDs = [
+		this.getID(),
+		(previousParent ? previousParent : null),
+		(parent ? parent : null)
+	];
 	
 	// TODO: only reload the necessary ones
 	Scholar.Collections.reloadAll();
-	Scholar.Notifier.trigger('modify', 'collection', notifyIDs);
+	Scholar.Notifier.trigger('move', 'collection', notifyIDs);
 	return true;
 }
 
