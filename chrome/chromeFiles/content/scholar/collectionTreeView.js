@@ -31,11 +31,11 @@ Scholar.CollectionTreeView.prototype.unregister = function()
  */
 Scholar.CollectionTreeView.prototype.notify = function(action, type, ids)
 {
-	ids = Scholar.flattenArguments(ids);
 	var madeChanges = false;
 	
 	if(action == 'remove')
 	{
+		ids = Scholar.flattenArguments(ids);
 		//Since a remove involves shifting of rows, we have to do it in order
 		
 		//sort the ids by row
@@ -59,8 +59,31 @@ Scholar.CollectionTreeView.prototype.notify = function(action, type, ids)
 		}		
 		
 	}
+	else if(action == 'move')
+	{
+		var openCollections = new Array();
+		
+		for(var i = 0; i < this.rowCount; i++)
+			if(this.isContainer(i) && this.isContainerOpen(i))
+				openCollections.push(this._getItemAtRow(i).ref.getID());
+		
+		var oldCount = this.rowCount;
+		this._treebox.beginUpdateBatch();
+		this.refresh();
+		this._treebox.rowCountChanged(0,this.rowCount - oldCount);
+		
+		for(var i = 0; i < openCollections.length; i++)
+		{
+			var row = this._collectionRowMap[openCollections[i]];
+			if(row != null)
+				this.toggleOpenState(row);
+		}
+		this._treebox.invalidate();
+		this._treebox.endUpdateBatch();
+	}
 	else
 	{
+		ids = Scholar.flattenArguments(ids);
 		for (var i=0, len=ids.length; i<len; i++)
 		{
 		
@@ -78,7 +101,6 @@ Scholar.CollectionTreeView.prototype.notify = function(action, type, ids)
 			
 				madeChanges = true;
 			}
-			
 		}
 	}
 	
@@ -268,12 +290,8 @@ Scholar.CollectionTreeView.prototype.drop = function(row, orient)
 		var targetCollectionID;
 		if(this._getItemAtRow(row).isCollection())
 			targetCollectionID = this._getItemAtRow(row).ref.getID();
-			
 		var droppedCollection = Scholar.Collections.get(ids[0]);
 		droppedCollection.changeParent(targetCollectionID);
-		this.refresh();
-		this._treebox.rowCountChanged(0,this.rowCount-oldCount);
-		this._treebox.invalidate();
 	}
 	else if(dataType == 'scholar/item' && this.canDrop(row, orient))
 	{
