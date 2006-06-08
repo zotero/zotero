@@ -1279,8 +1279,8 @@ Scholar.Collection.prototype.erase = function(deleteItems){
 			if (deleteItems){
 				// Delete items from DB
 				Scholar.Items.get(descendents[i]['id']).erase();
+				items.push(descendents[i]['id']);
 			}
-			items.push(descendents[i]['id']);
 		}
 	}
 	
@@ -1298,7 +1298,9 @@ Scholar.Collection.prototype.erase = function(deleteItems){
 	Scholar.Collections.unload(collections);
 	
 	Scholar.Notifier.trigger('remove', 'collection', collections);
-	Scholar.Notifier.trigger('remove', 'item', items);
+	if (items.length){
+		Scholar.Notifier.trigger('remove', 'item', items);
+	}
 }
 
 
