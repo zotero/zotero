@@ -1140,13 +1140,10 @@ Scholar.Collection.prototype.changeParent = function(parent){
 	}
 	
 	if (parent){
-		var descendents = this._getDescendents();
-		for (var i=0, len=descendents.length; i<len; i++){
-			if (descendents[i]['isCollection'] && parent==descendents[i]['id']){
-				Scholar.debug('Cannot move collection into one of its own '
-					+ 'descendents!', 2);
-				return false;
-			}
+		if (this.hasDescendent('collection', parent)){
+			Scholar.debug('Cannot move collection into one of its own '
+				+ 'descendents!', 2);
+			return false;
 		}
 	}
 	
@@ -1247,6 +1244,20 @@ Scholar.Collection.prototype.hasItem = function(itemID){
 		this._loadChildItems();
 	}
 	return this._childItems.has(itemID);
+}
+
+
+Scholar.Collection.prototype.hasDescendent = function(type, id){
+	var descendents = this._getDescendents();
+	for (var i=0, len=descendents.length; i<len; i++){
+		// TODO: fix this to work with smart collections
+		if (((type=='collection' && descendents[i]['isCollection']) ||
+			(type=='item' && !descendents[i]['isCollection']))
+			&& id==descendents[i]['id']){
+			return true;
+		}
+	}
+	return false;
 }
 
 
