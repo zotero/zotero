@@ -1,4 +1,4 @@
--- 16
+-- 17
 
     DROP TABLE IF EXISTS version;
     CREATE TABLE version (
@@ -150,36 +150,40 @@
     
     INSERT INTO fields VALUES (1,'source',NULL);
     INSERT INTO fields VALUES (2,'rights',NULL);
-    INSERT INTO fields VALUES (3,'series',NULL);
-    INSERT INTO fields VALUES (4,'volume',NULL);
-    INSERT INTO fields VALUES (5,'number',NULL);
-    INSERT INTO fields VALUES (6,'edition',NULL);
-    INSERT INTO fields VALUES (7,'place',NULL);
-    INSERT INTO fields VALUES (8,'publisher',NULL);
-    INSERT INTO fields VALUES (9,'year',3);
-    INSERT INTO fields VALUES (10,'pages',2);
-    INSERT INTO fields VALUES (11,'ISBN',NULL);
-    INSERT INTO fields VALUES (12,'publication',NULL);
-    INSERT INTO fields VALUES (13,'ISSN',NULL);
+    INSERT INTO fields VALUES (3,'notes',NULL);
+    INSERT INTO fields VALUES (4,'series',NULL);
+    INSERT INTO fields VALUES (5,'volume',NULL);
+    INSERT INTO fields VALUES (6,'number',NULL);
+    INSERT INTO fields VALUES (7,'edition',NULL);
+    INSERT INTO fields VALUES (8,'place',NULL);
+    INSERT INTO fields VALUES (9,'publisher',NULL);
+    INSERT INTO fields VALUES (10,'year',3);
+    INSERT INTO fields VALUES (11,'pages',2);
+    INSERT INTO fields VALUES (12,'ISBN',NULL);
+    INSERT INTO fields VALUES (13,'publication',NULL);
+    INSERT INTO fields VALUES (14,'ISSN',NULL);
     
     INSERT INTO itemTypeFields VALUES (1,1,1);
     INSERT INTO itemTypeFields VALUES (1,2,2);
-    INSERT INTO itemTypeFields VALUES (1,3,3);
-    INSERT INTO itemTypeFields VALUES (1,4,4);
-    INSERT INTO itemTypeFields VALUES (1,5,5);
-    INSERT INTO itemTypeFields VALUES (1,6,6);
-    INSERT INTO itemTypeFields VALUES (1,7,7);
-    INSERT INTO itemTypeFields VALUES (1,8,8);
-    INSERT INTO itemTypeFields VALUES (1,9,9);
-    INSERT INTO itemTypeFields VALUES (1,10,10);
-    INSERT INTO itemTypeFields VALUES (1,11,11);
+    INSERT INTO itemTypeFields VALUES (1,3,NULL);
+    INSERT INTO itemTypeFields VALUES (1,4,3);
+    INSERT INTO itemTypeFields VALUES (1,5,4);
+    INSERT INTO itemTypeFields VALUES (1,6,5);
+    INSERT INTO itemTypeFields VALUES (1,7,6);
+    INSERT INTO itemTypeFields VALUES (1,8,7);
+    INSERT INTO itemTypeFields VALUES (1,9,8);
+    INSERT INTO itemTypeFields VALUES (1,10,9);
+    INSERT INTO itemTypeFields VALUES (1,11,10);
+    INSERT INTO itemTypeFields VALUES (1,12,11);
+    
     INSERT INTO itemTypeFields VALUES (2,1,1);
     INSERT INTO itemTypeFields VALUES (2,2,2);
-    INSERT INTO itemTypeFields VALUES (2,12,3);
-    INSERT INTO itemTypeFields VALUES (2,4,4);
-    INSERT INTO itemTypeFields VALUES (2,5,5);
-    INSERT INTO itemTypeFields VALUES (2,10,6);
-    INSERT INTO itemTypeFields VALUES (2,13,7);
+    INSERT INTO itemTypeFields VALUES (2,3,NULL);
+    INSERT INTO itemTypeFields VALUES (2,13,3);
+    INSERT INTO itemTypeFields VALUES (2,5,4);
+    INSERT INTO itemTypeFields VALUES (2,6,5);
+    INSERT INTO itemTypeFields VALUES (2,11,6);
+    INSERT INTO itemTypeFields VALUES (2,14,7);
     
     INSERT INTO "items" VALUES(1, 1, 'Online connections: Internet interpersonal relationships', '2006-03-12 05:24:40', '2006-03-12 05:24:40');
     INSERT INTO "items" VALUES(2, 1, 'Computer-Mediated Communication: Human-to-Human Communication Across the Internet', '2006-03-12 05:25:50', '2006-03-12 05:25:50');
@@ -197,13 +201,13 @@
     INSERT INTO "items" VALUES(14, 2, 'Computer Networks as Social Networks: Collaborative Work, Telework, and Community', '2006-03-12 05:31:17', '2006-03-12 05:31:17');
     INSERT INTO "items" VALUES(15, 1, 'The Internet in everyday life', '2006-03-12 05:31:41', '2006-03-12 05:31:41');
     
-    INSERT INTO "itemData" VALUES(1, 9, 2001);
-    INSERT INTO "itemData" VALUES(1, 7, 'Cresskill, N.J.');
-    INSERT INTO "itemData" VALUES(1, 8, 'Hampton Press');
-    INSERT INTO "itemData" VALUES(2, 9, 2002);
-    INSERT INTO "itemData" VALUES(2, 8, 'Allyn & Bacon Publishers');
-    INSERT INTO "itemData" VALUES(2, 10, 347);
-    INSERT INTO "itemData" VALUES(2, 11, '0-205-32145-3');
+    INSERT INTO "itemData" VALUES(1, 10, 2001);
+    INSERT INTO "itemData" VALUES(1, 8, 'Cresskill, N.J.');
+    INSERT INTO "itemData" VALUES(1, 9, 'Hampton Press');
+    INSERT INTO "itemData" VALUES(2, 10, 2002);
+    INSERT INTO "itemData" VALUES(2, 9, 'Allyn & Bacon Publishers');
+    INSERT INTO "itemData" VALUES(2, 11, 347);
+    INSERT INTO "itemData" VALUES(2, 12, '0-205-32145-3');
     
     INSERT INTO "creatorTypes" VALUES(1, "author");
     INSERT INTO "creatorTypes" VALUES(2, "contributor");
