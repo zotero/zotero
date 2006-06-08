@@ -1166,6 +1166,8 @@ Scholar.Collection.prototype.changeParent = function(parent){
 		notifyIDs.push(parent);
 	}
 	
+	// TODO: only reload the necessary ones
+	Scholar.Collections.reloadAll();
 	Scholar.Notifier.trigger('modify', 'collection', notifyIDs);
 	return true;
 }
