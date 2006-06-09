@@ -30,7 +30,6 @@ Scholar.ItemTreeView.prototype.refresh = function()
 	this._refreshHashMap();
 }
 
-//CALLED BY DATA LAYER ON CHANGE:
 Scholar.ItemTreeView.prototype.notify = function(action, type, ids)
 {
 	var madeChanges = false;
@@ -246,10 +245,11 @@ Scholar.ItemTreeView.prototype._getItemAtRow = function(row)
 	return this._dataItems[row];
 }
 
+/*
+ * Create hash map of item ids to row indexes
+ */
 Scholar.ItemTreeView.prototype._refreshHashMap = function()
-{	
-	// Create hash map of item ids to row indexes
-	
+{
 	this._itemRowMap = new Array();
 	for(var i=0; i < this.rowCount; i++)
 		this._itemRowMap[this._getItemAtRow(i).getID()] = i;
@@ -303,7 +303,7 @@ Scholar.ItemTreeView.prototype.getSupportedFlavours = function ()
 Scholar.ItemTreeView.prototype.onDragOver = function (evt,dropdata,session) { }
 Scholar.ItemTreeView.prototype.onDrop = function (evt,dropdata,session) { }	
 
-//More functions we have to include for TreeView
+/* MORE TREEVIEW FUNCTIONS THAT HAVE TO BE HERE */
 
 Scholar.ItemTreeView.prototype.isSeparator = function(row) 						{ return false; }
 Scholar.ItemTreeView.prototype.isContainer = function(row) 						{ return false; }

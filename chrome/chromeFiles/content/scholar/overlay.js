@@ -72,7 +72,7 @@ var ScholarPane = new function()
 	 */
 	function newItem(typeID)
 	{
-		MetadataPane.viewItem(new Scholar.Item(typeID));
+		ScholarItemPane.viewItem(new Scholar.Item(typeID));
 		document.getElementById('scholar-view-item').hidden = false;
 		document.getElementById('scholar-view-splitter').hidden = false;
 	}
@@ -112,7 +112,7 @@ var ScholarPane = new function()
 		{
 			var item = itemsView._getItemAtRow(itemsView.selection.currentIndex);
 			
-			MetadataPane.viewItem(item);
+			ScholarItemPane.viewItem(item);
 
 			document.getElementById('scholar-view-item').hidden = false;
 			document.getElementById('scholar-view-splitter').hidden = false;

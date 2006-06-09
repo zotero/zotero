@@ -98,19 +98,7 @@
 			
 			</vbox>
 			<separator orient="vertical" class="thin" id="scholar-view-splitter" hidden="true"/>
-			<tabbox id="scholar-view-item" hidden="true" flex="2" style="min-width: 300px; max-width: 300px;">
-				<tabs>
-					<tab label="Metadata"/>
-					<tab label="Notes"/>
-				</tabs>
-				<tabpanels flex="1">
-					<vbox id="scholar-metadata">
-					</vbox>
-					<vbox id="scholar-notes">
-						<textbox multiline="true" flex="1" disabled="true"/>
-					</vbox>
-				</tabpanels>
-			</tabbox>
+			<tabbox id="scholar-view-item" hidden="true" flex="2" style="min-width: 300px; max-width: 300px;"/>
 		</hbox>
 		<splitter id="scholar-splitter" resizebefore="closest" resizeafter="closest" position="2" persist="collapsed"/>
 	</vbox>
