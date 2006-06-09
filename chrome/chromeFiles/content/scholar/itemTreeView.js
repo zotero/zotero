@@ -1,13 +1,20 @@
 Scholar.ItemTreeView = function(itemGroup)
 {
+	this._itemGroup = itemGroup;
+	
 	this._treebox = null;
 	this._savedSelection = null;
-	this._dataItems = new Array();
-	this.rowCount = 0;
-	this._itemGroup = itemGroup;
 	this.refresh();
 	
 	this._unregisterID = Scholar.Notifier.registerItemTree(this);
+}
+
+Scholar.ItemTreeView.prototype.setTree = function(treebox)
+{
+	if(this._treebox)
+		return;
+	this._treebox = treebox;
+	this.sort();
 }
 
 Scholar.ItemTreeView.prototype.refresh = function()
@@ -23,17 +30,84 @@ Scholar.ItemTreeView.prototype.refresh = function()
 	this._refreshHashMap();
 }
 
+//CALLED BY DATA LAYER ON CHANGE:
+Scholar.ItemTreeView.prototype.notify = function(action, type, ids)
+{
+	var madeChanges = false;
+	
+	this.selection.selectEventsSuppressed = true;
+	this.saveSelection();
+
+	if((action == 'remove' && !this._itemGroup.isLibrary()) || (action == 'delete' && this._itemGroup.isLibrary()))
+	{
+		ids = Scholar.flattenArguments(ids);
+		//Since a remove involves shifting of rows, we have to do it in order
+		
+		//sort the ids by row
+		var rows = new Array();
+		for(var i=0, len=ids.length; i<len; i++)
+			if(action == 'delete' || !this._itemGroup.ref.hasItem(ids[i]))
+				rows.push(this._itemRowMap[ids[i]]);
+		
+		if(rows.length > 0)
+		{
+			rows.sort(function(a,b) { return a-b });
+			
+			for(var i=0, len=rows.length; i<len; i++)
+			{
+				var row = rows[i];
+				this._hideItem(row-i);
+				this._treebox.rowCountChanged(row-i,-1);
+			}
+			
+			madeChanges = true;
+		}		
+		
+	}
+	else if(action == 'modify') 	//must check for null because it could legitimately be 0
+	{
+		if(this._itemRowMap[ids])
+		{
+			this._treebox.invalidateRow(row);
+			madeChanges = true;
+		}
+	}
+	else if(action == 'add')
+	{
+		var item = Scholar.Items.get(ids);
+				
+		if((this._itemGroup.isLibrary() || item.inCollection(this._itemGroup.ref.getID())) && this._itemRowMap[ids] == null)
+		{
+			this._showItem(item,this.rowCount);
+			this._treebox.rowCountChanged(this.rowCount-1,1);
+	
+			madeChanges = true;
+		}
+	}
+	
+	if(madeChanges)
+	{
+		if(this.isSorted())
+		{
+			this.sort();				//this also refreshes the hash map
+			this._treebox.invalidate();
+		}
+		else if(action != 'modify') //no need to update this if we just modified
+		{
+			this._refreshHashMap();
+		}
+		
+		if(action == 'add')
+			this.selection.select(this._itemRowMap[item.getID()]);
+		else
+			this.rememberSelection();
+	}
+	this.selection.selectEventsSuppressed = false;
+}
+
 Scholar.ItemTreeView.prototype.unregister = function()
 {
 	Scholar.Notifier.unregisterItemTree(this._unregisterID);
-}
-
-Scholar.ItemTreeView.prototype.setTree = function(treebox)
-{
-	if(this._treebox)
-		return;
-	this._treebox = treebox;
-	this.sort();
 }
 
 Scholar.ItemTreeView.prototype.getCellText = function(row, column)
@@ -49,13 +123,6 @@ Scholar.ItemTreeView.prototype.getCellText = function(row, column)
 	return val;
 }
 
-
-Scholar.ItemTreeView.prototype._showItem = function(item, beforeRow) 			{ this._dataItems.splice(beforeRow, 0, item); this.rowCount++; }
-
-Scholar.ItemTreeView.prototype._hideItem = function(row) 						{ this._dataItems.splice(row,1); this.rowCount--; }
-
-Scholar.ItemTreeView.prototype._getItemAtRow = function(row)					{ return this._dataItems[row]; }
-
 Scholar.ItemTreeView.prototype.isSorted = function()
 {
 	for(var i=0, len=this._treebox.columns.count; i<len; i++)
@@ -63,14 +130,6 @@ Scholar.ItemTreeView.prototype.isSorted = function()
 			return true;
 	return false;
 }
-
-Scholar.ItemTreeView.prototype.isSeparator = function(row) 						{ return false; }
-Scholar.ItemTreeView.prototype.isContainer = function(row) 						{ return false; }
-Scholar.ItemTreeView.prototype.getLevel = function(row) 						{ return 0; }
-Scholar.ItemTreeView.prototype.getRowProperties = function(row, prop) 			{ }
-Scholar.ItemTreeView.prototype.getColumnProperties = function(col, prop) 		{ }
-Scholar.ItemTreeView.prototype.getCellProperties = function(row, col, prop) 	{ }
-Scholar.ItemTreeView.prototype.getImageSrc = function(row, col) 				{ }
 
 Scholar.ItemTreeView.prototype.cycleHeader = function(column)
 {
@@ -172,6 +231,21 @@ Scholar.ItemTreeView.prototype.searchText = function(search)
 	this._treebox.invalidate();
 }
 
+Scholar.ItemTreeView.prototype._showItem = function(item, beforeRow)
+{
+	this._dataItems.splice(beforeRow, 0, item); this.rowCount++;
+}
+
+Scholar.ItemTreeView.prototype._hideItem = function(row)
+{
+	this._dataItems.splice(row,1); this.rowCount--;
+}
+
+Scholar.ItemTreeView.prototype._getItemAtRow = function(row)
+{
+	return this._dataItems[row];
+}
+
 Scholar.ItemTreeView.prototype._refreshHashMap = function()
 {	
 	// Create hash map of item ids to row indexes
@@ -179,88 +253,6 @@ Scholar.ItemTreeView.prototype._refreshHashMap = function()
 	this._itemRowMap = new Array();
 	for(var i=0; i < this.rowCount; i++)
 		this._itemRowMap[this._getItemAtRow(i).getID()] = i;
-}
-
-Scholar.ItemTreeView.prototype.getCollectionID = function()
-{
-	if(this._itemGroup.isCollection())
-		return this._itemGroup.ref.getID();
-	
-}
-
-//CALLED BY DATA LAYER ON CHANGE:
-Scholar.ItemTreeView.prototype.notify = function(action, type, ids)
-{
-	var madeChanges = false;
-	
-	this.selection.selectEventsSuppressed = true;
-	this.saveSelection();
-
-	if((action == 'remove' && !this._itemGroup.isLibrary()) || (action == 'delete' && this._itemGroup.isLibrary()))
-	{
-		ids = Scholar.flattenArguments(ids);
-		//Since a remove involves shifting of rows, we have to do it in order
-		
-		//sort the ids by row
-		var rows = new Array();
-		for(var i=0, len=ids.length; i<len; i++)
-			if(action == 'delete' || !this._itemGroup.ref.hasItem(ids[i]))
-				rows.push(this._itemRowMap[ids[i]]);
-		
-		if(rows.length > 0)
-		{
-			rows.sort(function(a,b) { return a-b });
-			
-			for(var i=0, len=rows.length; i<len; i++)
-			{
-				var row = rows[i];
-				this._hideItem(row-i);
-				this._treebox.rowCountChanged(row-i,-1);
-			}
-			
-			madeChanges = true;
-		}		
-		
-	}
-	else if(action == 'modify') 	//must check for null because it could legitimately be 0
-	{
-		if(this._itemRowMap[ids])
-		{
-			this._treebox.invalidateRow(row);
-			madeChanges = true;
-		}
-	}
-	else if(action == 'add')
-	{
-		var item = Scholar.Items.get(ids);
-				
-		if(this._itemGroup.isLibrary() || item.inCollection(this.getCollectionID()))
-		{
-			this._showItem(item,this.rowCount);
-			this._treebox.rowCountChanged(this.rowCount-1,1);
-	
-			madeChanges = true;
-		}
-	}
-	
-	if(madeChanges)
-	{
-		if(this.isSorted())
-		{
-			this.sort();				//this also refreshes the hash map
-			this._treebox.invalidate();
-		}
-		else if(action != 'modify') //no need to update this if we just modified
-		{
-			this._refreshHashMap();
-		}
-		
-		if(action == 'add')
-			this.selection.select(this._itemRowMap[item.getID()]);
-		else
-			this.rememberSelection();
-	}
-	this.selection.selectEventsSuppressed = false;
 }
 
 Scholar.ItemTreeView.prototype.saveSelection = function()
@@ -287,6 +279,8 @@ Scholar.ItemTreeView.prototype.rememberSelection = function()
 	}
 }
 
+/* DRAG AND DROP FUNCTIONS */
+
 Scholar.ItemTreeView.prototype.canDrop = function(index, orient)
 {
 	return false;
@@ -308,3 +302,13 @@ Scholar.ItemTreeView.prototype.getSupportedFlavours = function ()
 
 Scholar.ItemTreeView.prototype.onDragOver = function (evt,dropdata,session) { }
 Scholar.ItemTreeView.prototype.onDrop = function (evt,dropdata,session) { }	
+
+//More functions we have to include for TreeView
+
+Scholar.ItemTreeView.prototype.isSeparator = function(row) 						{ return false; }
+Scholar.ItemTreeView.prototype.isContainer = function(row) 						{ return false; }
+Scholar.ItemTreeView.prototype.getLevel = function(row) 						{ return 0; }
+Scholar.ItemTreeView.prototype.getRowProperties = function(row, prop) 			{ }
+Scholar.ItemTreeView.prototype.getColumnProperties = function(col, prop) 		{ }
+Scholar.ItemTreeView.prototype.getCellProperties = function(row, col, prop) 	{ }
+Scholar.ItemTreeView.prototype.getImageSrc = function(row, col) 				{ }
