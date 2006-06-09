@@ -4,7 +4,7 @@
 <overlay 
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 	
-	<script src="metadataPane.js"/>	
+	<script src="itemPane.js"/>	
 	<tabbox id="scholar-view-item">
 		<tabs>
 			<tab label="Info"/>

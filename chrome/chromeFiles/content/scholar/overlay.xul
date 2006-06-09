@@ -4,7 +4,7 @@
 
 <overlay id="scholar"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-	<?xul-overlay href="metadataPane.xul" ?>
+	<?xul-overlay href="itemPane.xul" ?>
 	
     <!-- Include the global XPCOM object -->
 	<script src="include.js"/>
