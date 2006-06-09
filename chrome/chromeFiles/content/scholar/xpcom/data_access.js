@@ -1234,7 +1234,7 @@ Scholar.Collection.prototype.removeItem = function(itemID){
 	// If this was the last item, set collection to empty
 	if (!this._childItems.length){
 		this._hasChildItems = false;
-		Scholar.Notifier.trigger('modify', 'collections', this.getID());
+		Scholar.Notifier.trigger('modify', 'collection', this.getID());
 	}
 	
 	Scholar.Notifier.trigger('remove', 'item', itemID);

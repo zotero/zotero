@@ -191,20 +191,20 @@ Scholar.ItemTreeView.prototype.getCollectionID = function()
 //CALLED BY DATA LAYER ON CHANGE:
 Scholar.ItemTreeView.prototype.notify = function(action, type, ids)
 {
-	ids = Scholar.flattenArguments(ids);
 	var madeChanges = false;
 	
 	this.selection.selectEventsSuppressed = true;
 	this.saveSelection();
 
-	if(action == 'remove')
+	if((action == 'remove' && !this._itemGroup.isLibrary()) || (action == 'delete' && this._itemGroup.isLibrary()))
 	{
+		ids = Scholar.flattenArguments(ids);
 		//Since a remove involves shifting of rows, we have to do it in order
 		
 		//sort the ids by row
 		var rows = new Array();
 		for(var i=0, len=ids.length; i<len; i++)
-			if(this._itemRowMap[ids[i]] != null)
+			if(action == 'delete' || !this._itemGroup.ref.hasItem(ids[i]))
 				rows.push(this._itemRowMap[ids[i]]);
 		
 		if(rows.length > 0)
@@ -222,32 +222,24 @@ Scholar.ItemTreeView.prototype.notify = function(action, type, ids)
 		}		
 		
 	}
-	else
+	else if(action == 'modify') 	//must check for null because it could legitimately be 0
 	{
-		for (var i=0, len=ids.length; i<len; i++)
+		if(this._itemRowMap[ids])
 		{
-		
-			var row = this._itemRowMap[ids[i]];
-			if(action == 'modify' && row != null) 	//must check for null because it could legitimately be 0
-			{
-				var item = Scholar.Items.get(ids[i]);
+			this._treebox.invalidateRow(row);
+			madeChanges = true;
+		}
+	}
+	else if(action == 'add')
+	{
+		var item = Scholar.Items.get(ids);
 				
-				this._treebox.invalidateRow(row);
-				madeChanges = true;
-			}
-			else if(action == 'add' && row == null)
-			{
-				var item = Scholar.Items.get(ids[i]);
-				
-				if(this._itemGroup.isLibrary() || item.inCollection(this.getCollectionID()))
-				{
-					this._showItem(item,this.rowCount);
-					this._treebox.rowCountChanged(this.rowCount-1,1);
-				}
-			
-				madeChanges = true;
-			}
-			
+		if(this._itemGroup.isLibrary() || item.inCollection(this.getCollectionID()))
+		{
+			this._showItem(item,this.rowCount);
+			this._treebox.rowCountChanged(this.rowCount-1,1);
+	
+			madeChanges = true;
 		}
 	}
 	
