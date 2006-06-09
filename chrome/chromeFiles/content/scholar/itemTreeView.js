@@ -122,6 +122,15 @@ Scholar.ItemTreeView.prototype.getCellText = function(row, column)
 	return val;
 }
 
+Scholar.ItemTreeView.prototype.getImageSrc = function(row, col)
+{
+	if(col.id == 'title')
+	{
+		var itemType = Scholar.ItemTypes.getTypeName(this._getItemAtRow(row).getType());
+		return "chrome://scholar/skin/treeitem-"+itemType+".png";
+	}
+}
+
 Scholar.ItemTreeView.prototype.isSorted = function()
 {
 	for(var i=0, len=this._treebox.columns.count; i<len; i++)
@@ -311,4 +320,3 @@ Scholar.ItemTreeView.prototype.getLevel = function(row) 						{ return 0; }
 Scholar.ItemTreeView.prototype.getRowProperties = function(row, prop) 			{ }
 Scholar.ItemTreeView.prototype.getColumnProperties = function(col, prop) 		{ }
 Scholar.ItemTreeView.prototype.getCellProperties = function(row, col, prop) 	{ }
-Scholar.ItemTreeView.prototype.getImageSrc = function(row, col) 				{ }

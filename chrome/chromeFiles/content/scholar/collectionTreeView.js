@@ -119,6 +119,12 @@ Scholar.CollectionTreeView.prototype.getCellText = function(row, column)
 		return "";
 }
 
+Scholar.CollectionTreeView.prototype.getImageSrc = function(row, col)
+{
+	var collectionType = this._getItemAtRow(row).type;
+	return "chrome://scholar/skin/treesource-" + collectionType + ".png";
+}
+
 Scholar.CollectionTreeView.prototype.isContainer = function(row)
 {
 	return this._getItemAtRow(row).isCollection();
@@ -331,7 +337,6 @@ Scholar.CollectionTreeView.prototype.isEditable = function(row, idx) 				{ retur
 Scholar.CollectionTreeView.prototype.getRowProperties = function(row, prop) 		{ }
 Scholar.CollectionTreeView.prototype.getColumnProperties = function(col, prop) 		{ }
 Scholar.CollectionTreeView.prototype.getCellProperties = function(row, col, prop) 	{ }
-Scholar.CollectionTreeView.prototype.getImageSrc = function(row, col) 				{ }
 Scholar.CollectionTreeView.prototype.performAction = function(action) 				{ }
 Scholar.CollectionTreeView.prototype.performActionOnCell = function(action, row, col)	{ }
 Scholar.CollectionTreeView.prototype.getProgressMode = function(row, col) 			{ }
