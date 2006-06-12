@@ -1816,6 +1816,10 @@ Scholar.ItemFields = new function(){
 
 
 Scholar.CreatorTypes = new function(){
+	var _creatorTypes = new Array();
+	var _creatorTypesLoaded;
+	var self = this;
+	
 	this.getTypes = getTypes;
 	this.getTypeName = getTypeName;
 	
@@ -1825,8 +1829,25 @@ Scholar.CreatorTypes = new function(){
 	}
 	
 	function getTypeName(creatorTypeID){
-		return Scholar.DB.valueQuery('SELECT creatorType FROM creatorTypes '
-			+ 'WHERE creatorTypeID=' + creatorTypeID);
+		if (!_creatorTypesLoaded){
+			_load();
+		}
+		
+		if (!_creatorTypes[creatorTypeID]){
+			Scholar.debug('Invalid creator type ' + creatorTypeID, 1);
+		}
+		
+		return _creatorTypes[creatorTypeID];
+	}
+	
+	function _load(){
+		var types = self.getTypes();
+		
+		for (i in types){
+			_creatorTypes[types[i]['id']] = types[i]['name'];
+		}
+		
+		_creatorTypesLoaded = true;
 	}
 }
 
