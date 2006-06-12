@@ -1624,6 +1624,10 @@ Scholar.Creators = new function(){
 
 
 Scholar.ItemTypes = new function(){
+	var _itemTypes = new Array();
+	var _itemTypesLoaded;
+	var self = this;
+	
 	this.getTypes = getTypes;
 	this.getTypeName = getTypeName;
 	
@@ -1633,8 +1637,25 @@ Scholar.ItemTypes = new function(){
 	}
 	
 	function getTypeName(itemTypeID){
-		return Scholar.DB.valueQuery('SELECT typeName FROM itemTypes '
-			+ 'WHERE itemTypeID=' + itemTypeID);
+		if (!_itemTypesLoaded){
+			_load();
+		}
+		
+		if (!_itemTypes[itemTypeID]){
+			Scholar.debug('Invalid item type ' + itemTypeID, 1);
+		}
+		
+		return _itemTypes[itemTypeID];
+	}
+	
+	function _load(){
+		var types = self.getTypes();
+		
+		for (i in types){
+			_itemTypes[types[i]['id']] = types[i]['name'];
+		}
+		
+		_itemTypesLoaded = true;
 	}
 }
 
