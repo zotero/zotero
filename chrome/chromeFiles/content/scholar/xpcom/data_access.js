@@ -1371,6 +1371,8 @@ Scholar.Collection.prototype._getDescendents = function(){
 }
 
 
+
+
 /*
  * Primary interface for accessing Scholar collection
  */
@@ -1497,6 +1499,8 @@ Scholar.Collections = new function(){
 }
 
 
+
+
 Scholar.Creators = new function(){
 	var _creators = new Array; // indexed by first%%%last hash
 	var _creatorsByID = new Array; // indexed by creatorID
@@ -1617,6 +1621,45 @@ Scholar.Creators = new function(){
 			return false;
 		}
 		return creator['firstName'] + '%%%' + creator['lastName'];
+	}
+}
+
+
+
+
+Scholar.CreatorTypes = new function(){
+	var _creatorTypes = new Array();
+	var _creatorTypesLoaded;
+	var self = this;
+	
+	this.getTypes = getTypes;
+	this.getTypeName = getTypeName;
+	
+	function getTypes(){
+		return Scholar.DB.query('SELECT creatorTypeID AS id, '
+			+ 'creatorType AS name FROM creatorTypes order BY creatorType');
+	}
+	
+	function getTypeName(creatorTypeID){
+		if (!_creatorTypesLoaded){
+			_load();
+		}
+		
+		if (!_creatorTypes[creatorTypeID]){
+			Scholar.debug('Invalid creator type ' + creatorTypeID, 1);
+		}
+		
+		return _creatorTypes[creatorTypeID];
+	}
+	
+	function _load(){
+		var types = self.getTypes();
+		
+		for (i in types){
+			_creatorTypes[types[i]['id']] = types[i]['name'];
+		}
+		
+		_creatorTypesLoaded = true;
 	}
 }
 
@@ -1809,45 +1852,6 @@ Scholar.ItemFields = new function(){
 			// Store by name as well as id
 			_fields[result[i]['fieldName']] = _fields[result[i]['fieldID']];
 		}
-	}
-}
-
-
-
-
-Scholar.CreatorTypes = new function(){
-	var _creatorTypes = new Array();
-	var _creatorTypesLoaded;
-	var self = this;
-	
-	this.getTypes = getTypes;
-	this.getTypeName = getTypeName;
-	
-	function getTypes(){
-		return Scholar.DB.query('SELECT creatorTypeID AS id, '
-			+ 'creatorType AS name FROM creatorTypes order BY creatorType');
-	}
-	
-	function getTypeName(creatorTypeID){
-		if (!_creatorTypesLoaded){
-			_load();
-		}
-		
-		if (!_creatorTypes[creatorTypeID]){
-			Scholar.debug('Invalid creator type ' + creatorTypeID, 1);
-		}
-		
-		return _creatorTypes[creatorTypeID];
-	}
-	
-	function _load(){
-		var types = self.getTypes();
-		
-		for (i in types){
-			_creatorTypes[types[i]['id']] = types[i]['name'];
-		}
-		
-		_creatorTypesLoaded = true;
 	}
 }
 
