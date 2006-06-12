@@ -21,6 +21,11 @@ tree #items-tree
 
 }
 
+treechildren::-moz-tree-image
+{
+	
+}
+
 #scholar-pane toolbar
 {
 	border-bottom: none;
@@ -58,10 +63,8 @@ tree #items-tree
 }
 
 #scholar-metadata .addremove
-{
-	-moz-border-radius: 8px;
-	width: 16px;
-	height: 16px;
+{	
+	-moz-border-radius: 6px;
 }
 
 #scholar-metadata .addremove:hover

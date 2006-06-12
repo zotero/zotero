@@ -63,13 +63,18 @@
 					flex="1">
 					<treecols>
 						<treecol
+							id="typeIcon"
+							label="&items.type_column;"
+							width="40" persist="width ordinal hidden sortActive sortDirection"/>
+						<splitter class="tree-splitter"/>
+						<treecol
 							id="title"
 							label="&items.title_column;"
 							flex="4" persist="width ordinal hidden sortActive sortDirection"/>
 						<splitter class="tree-splitter"/>
 						<treecol
 							id="firstCreator"
-							label="&items.creator_column;" sortActive="true" sortDirection="descending"
+							label="&items.creator_column;"
 							flex="1" persist="width ordinal hidden sortActive sortDirection"/>
 						<splitter class="tree-splitter"/>
 						<treecol

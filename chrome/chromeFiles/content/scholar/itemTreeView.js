@@ -14,7 +14,15 @@ Scholar.ItemTreeView.prototype.setTree = function(treebox)
 	if(this._treebox)
 		return;
 	this._treebox = treebox;
-	this.sort();
+	
+	if(!this.isSorted())
+	{
+		this.cycleHeader(this._treebox.columns.getNamedColumn('firstCreator'));
+	}
+	else
+	{
+		this.sort();
+	}
 }
 
 Scholar.ItemTreeView.prototype.refresh = function()
@@ -112,7 +120,10 @@ Scholar.ItemTreeView.prototype.unregister = function()
 Scholar.ItemTreeView.prototype.getCellText = function(row, column)
 {
 	var obj = this._getItemAtRow(row);
-	var val = obj.getField(column.id);
+	var val;
+	
+	if(column.id != "typeIcon")
+		val = obj.getField(column.id);
 	
 	if(column.id == 'dateAdded' || column.id == 'dateModified')		//this is not so much that we will use this format for date, but a simple template for later revisions.
 	{
@@ -124,7 +135,7 @@ Scholar.ItemTreeView.prototype.getCellText = function(row, column)
 
 Scholar.ItemTreeView.prototype.getImageSrc = function(row, col)
 {
-	if(col.id == 'title')
+	if(col.id == 'typeIcon')
 	{
 		var itemType = Scholar.ItemTypes.getTypeName(this._getItemAtRow(row).getType());
 		return "chrome://scholar/skin/treeitem-"+itemType+".png";
@@ -169,22 +180,35 @@ Scholar.ItemTreeView.prototype.sort = function()
 	
 	var column = this._treebox.columns.getSortedColumn()
 	var order = column.element.getAttribute('sortDirection') == 'descending';
-	if(order)
+	
+	if(column.id == 'typeIcon')
 	{
 		function columnSort(a,b)
 		{
-			return(a.getField(column.id) < b.getField(column.id)) ? -1 : (a.getField[column.id] > b.getField(column.id)) ? 1 : 0;
+			var typeA = Scholar.getString('itemTypes.'+Scholar.ItemTypes.getTypeName(a.getType()));
+			var typeB = Scholar.getString('itemTypes.'+Scholar.ItemTypes.getTypeName(b.getType()));
+			
+			return (typeA > typeB) ? -1 : (typeA < typeB) ? 1 : 0;
 		}
 	}
 	else
 	{
 		function columnSort(a,b)
 		{
-			return(a.getField(column.id) > b.getField(column.id)) ? -1 : (a.getField[column.id] < b.getField(column.id)) ? 1 : 0;
+			return (a.getField(column.id) > b.getField(column.id)) ? -1 : (a.getField(column.id) < b.getField(column.id)) ? 1 : 0;
 		}
 	}
 	
-	this._dataItems.sort(columnSort);
+	function oppSort(a,b)
+	{
+		return(columnSort(a,b) * -1);
+	}
+	
+	if(order)
+		this._dataItems.sort(oppSort);
+	else
+		this._dataItems.sort(columnSort);
+		
 	this._refreshHashMap();
 	
 }

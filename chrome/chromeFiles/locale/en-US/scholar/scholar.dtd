@@ -8,6 +8,7 @@
 <!ENTITY metadata.cancel.label			"Cancel">
 <!ENTITY metadata.save.label			"Save">
 
+<!ENTITY items.type_column 				"Type">
 <!ENTITY items.title_column 			"Title">
 <!ENTITY items.creator_column 			"Creator">
 <!ENTITY items.source_column 			"Source">

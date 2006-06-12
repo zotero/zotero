@@ -123,16 +123,16 @@ ScholarItemPane = new function()
 		firstlast.appendChild(createValueElement(firstName, 'creator-'+_creatorCount+'-firstName'));
 		row.appendChild(firstlast);
 		
-		var removeButton = document.createElement('toolbarbutton');
-		removeButton.setAttribute("label","-");
+		var removeButton = document.createElement('label');
+		removeButton.setAttribute("value","-");
 		removeButton.setAttribute("class","addremove");
-		removeButton.setAttribute("oncommand","ScholarItemPane.removeCreator("+_creatorCount+")");
+		removeButton.setAttribute("onclick","ScholarItemPane.removeCreator("+_creatorCount+")");
 		row.appendChild(removeButton);
 		
-		var addButton = document.createElement('toolbarbutton');
-		addButton.setAttribute("label","+");
+		var addButton = document.createElement('label');
+		addButton.setAttribute("value","+");
 		addButton.setAttribute("class","addremove");
-		addButton.setAttribute("oncommand","ScholarItemPane.addCreatorRow('','',1);");
+		addButton.setAttribute("onclick","ScholarItemPane.addCreatorRow('','',1);");
 		row.appendChild(addButton);
 		
 		_creatorCount++;
