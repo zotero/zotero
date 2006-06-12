@@ -11,6 +11,11 @@ tree #collections-tree
 	max-width: 200px;
 }
 
+#collections-tree treechildren::-moz-tree-image
+{
+	margin-right: 5px;
+}
+
 #scholar-tree-splitter
 {
 	background: #f5f5f5;
@@ -19,11 +24,6 @@ tree #collections-tree
 tree #items-tree
 {
 
-}
-
-treechildren::-moz-tree-image
-{
-	
 }
 
 #scholar-pane toolbar
