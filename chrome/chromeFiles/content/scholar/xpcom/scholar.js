@@ -3,7 +3,8 @@ const SCHOLAR_CONFIG = {
 	DB_FILE: 'scholar.sqlite',
 	DB_REBUILD: false, // erase DB and recreate from schema
 	DEBUG_LOGGING: true,
-	DEBUG_TO_CONSOLE: true // dump debug messages to console rather than (much slower) Debug Logger
+	DEBUG_TO_CONSOLE: true, // dump debug messages to console rather than (much slower) Debug Logger
+	REPOSITORY_URL: 'http://chnm.gmu.edu/firefoxscholar/dev/repo'
 };
 
 /*
@@ -304,4 +305,83 @@ Scholar.Hash.prototype.remove = function(in_key){
 
 Scholar.Hash.prototype.has = function(in_key){
 	return typeof(this.items[in_key]) != 'undefined';
+}
+
+
+
+Scholar.HTTP = new function(){
+	
+	this.doGet = doGet;
+	this.doPost = doPost;
+	
+	function doGet(url, onStatus, onDone){
+		var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
+					.createInstance();
+		
+		xmlhttp.open('GET', url, true);
+		
+		xmlhttp.onreadystatechange = function(){
+			_stateChange(xmlhttp, onStatus, onDone);
+		};
+		xmlhttp.send(null);
+	}
+	
+	
+	function doPost(url, body, onStatus, onDone){
+		var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
+					.createInstance();
+		
+		xmlhttp.open('POST', url, true);
+		
+		xmlhttp.onreadystatechange = function(){
+			_stateChange(xmlhttp, onStatus, onDone);
+		};
+		xmlhttp.send(body);
+	}
+	
+	
+	function _stateChange(xmlhttp, onStatus, onDone){
+		switch (xmlhttp.readyState){
+	
+			// Request not yet made
+			case 1:
+			break;
+	
+			// Contact established with server but nothing downloaded yet
+			case 2:
+				try {
+					// Check for HTTP status 200
+					if (xmlhttp.status != 200){
+						if (onStatus) {
+							onStatus(
+								xmlhttp.status,
+								xmlhttp.statusText,
+								xmlhttp
+							);
+							xmlhttp.abort();
+						}
+					}
+				}
+				catch (e){
+					Scholar.debug(e, 2);
+				}
+			break;
+	
+			// Called multiple while downloading in progress
+			case 3:
+			break;
+	
+			// Download complete
+			case 4:
+				try {
+					if (onDone){
+						onDone(xmlhttp);
+					}
+				}
+				catch (e){
+					Scholar.debug(e, 2);
+				}
+			break;
+		}
+	}
 }
