@@ -24,8 +24,6 @@ var Scholar = new function(){
 	this.randomString = randomString;
 	this.getRandomID = getRandomID;
 	
-	this.Hash = Hash;
-	
 	/*
 	 * Initialize the extension
 	 */
@@ -233,45 +231,46 @@ var Scholar = new function(){
 		
 		return rnd;
 	}
-	
-	
-	/*
-	 * Class for creating hash arrays that behave a bit more sanely
-	 *
-	 *   Hashes can be created in the constructor by alternating key and val:
-	 *
-	 *   var hasharray = new Scholar.Hash('foo','foovalue','bar','barvalue');
-	 *
-	 *   Or using hasharray.set(key, val)
-	 *
-	 *   _val_ defaults to true if not provided
-	 *
-	 *   If using foreach-style looping, be sure to use _for (i in arr.items)_
-	 *   rather than just _for (i in arr)_, or else you'll end up with the
-	 *   methods and members instead of the hash items
-	 *
-	 *   Most importantly, hasharray.length will work as expected, even with
-	 *   non-numeric keys
-	 *
-	 * Adapated from http://www.mojavelinux.com/articles/javascript_hashes.html
-	 * (c) Mojavelinux, Inc.
-	 * License: Creative Commons
-	 */
-	 function Hash(){
-		 this.length = 0;
-		 this.items = new Array();
-		 
-		 // Public methods defined on prototype below
-		 
-		 for (var i = 0; i < arguments.length; i += 2) {
-			 if (typeof(arguments[i + 1]) != 'undefined') {
-				 this.items[arguments[i]] = arguments[i + 1];
-				 this.length++;
-			 }
-		 }
-	 }
 };
 
+
+
+
+/**
+* Class for creating hash arrays that behave a bit more sanely
+*
+*   Hashes can be created in the constructor by alternating key and val:
+*
+*   var hasharray = new Scholar.Hash('foo','foovalue','bar','barvalue');
+*
+*   Or using hasharray.set(key, val)
+*
+*   _val_ defaults to true if not provided
+*
+*   If using foreach-style looping, be sure to use _for (i in arr.items)_
+*   rather than just _for (i in arr)_, or else you'll end up with the
+*   methods and members instead of the hash items
+*
+*   Most importantly, hasharray.length will work as expected, even with
+*   non-numeric keys
+*
+* Adapated from http://www.mojavelinux.com/articles/javascript_hashes.html
+* (c) Mojavelinux, Inc.
+* License: Creative Commons
+**/
+Scholar.Hash = function(){
+	this.length = 0;
+	this.items = new Array();
+	
+	// Public methods defined on prototype below
+	
+	for (var i = 0; i < arguments.length; i += 2) {
+		if (typeof(arguments[i + 1]) != 'undefined') {
+			this.items[arguments[i]] = arguments[i + 1];
+			this.length++;
+		}
+	}
+}
 
 Scholar.Hash.prototype.get = function(in_key){
 	return this.items[in_key];
