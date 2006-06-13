@@ -26,9 +26,10 @@
 				</grid>
 			</vbox>
 			<vbox>
-				<textbox id="scholar-notes" multiline="true" flex="1"
-						fieldname="notes" onblur="ScholarItemPane.modifyField('notes',this.value);"/>
-				<button label="Save" oncommand="ScholarItemPane.modifyField('notes',document.getElementById('scholar-notes').value);"/>
+				<textbox id="scholar-notes"
+					type="timed" timeout="1000" oncommand="ScholarItemPane.modifyField('notes',this.value);"
+					multiline="true" flex="1"
+					onblur="ScholarItemPane.modifyField('notes',this.value);"/>
 			</vbox>
 		</tabpanels>
 	</tabbox>

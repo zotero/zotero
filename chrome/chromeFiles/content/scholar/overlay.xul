@@ -21,7 +21,7 @@
 	
 	<vbox id="appcontent">
 		<hbox id="scholar-pane" position="1" persist="height collapsed">
-			<vbox persist="width" flex="1" style="min-width: 150px;">
+			<vbox persist="width" width="200" style="min-width: 150px;">
 				<toolbar>
 					<toolbarbutton label="&toolbar.newCollection.label;" command="cmd_scholar_newCollection"/>
 					<toolbarbutton id="tb-rename" label="&toolbar.renameCollection.label;" oncommand="ScholarPane.renameSelectedCollection();" disabled="true"/>
@@ -43,7 +43,7 @@
 				</tree>
 			</vbox>
 			<splitter id="scholar-tree-splitter" resizebefore="closest" resizeafter="closest"/>
-			<vbox persist="width" flex="5" style="min-width: 300px;">
+			<vbox persist="width" flex="1" style="min-width: 300px;">
 				<toolbar align="center">
 					<toolbarbutton id="tb-add" label="&toolbar.newItem.label;" type="menu">
 						<menupopup>
@@ -102,8 +102,11 @@
 				</tree>
 			
 			</vbox>
-			<separator orient="vertical" class="thin" id="scholar-view-splitter" hidden="true"/>
-			<tabbox id="scholar-view-item" hidden="true" flex="2" style="min-width: 300px; max-width: 300px;"/>
+			<splitter id="scholar-view-splitter" collapse="after"><grippy/></splitter>
+			<box width="300" style="min-width: 300px;" pack="center" align="center">
+				<label id="scholar-view-selected-label" style="text-align: center;"/>
+				<tabbox id="scholar-view-item" hidden="true" flex="1"/>
+			</box>
 		</hbox>
 		<splitter id="scholar-splitter" resizebefore="closest" resizeafter="closest" position="2" persist="collapsed"/>
 	</vbox>

@@ -143,12 +143,20 @@ ScholarItemPane = new function()
 	function createValueElement(valueText, fieldName)
 	{
 	 	var valueElement = document.createElement("label");
-		valueElement.appendChild(document.createTextNode(valueText));
 		if(fieldName)
 		{
 			valueElement.setAttribute('fieldname',fieldName);
 			valueElement.setAttribute('onclick', 'ScholarItemPane.showEditor(this);');
 		}
+		
+		var firstSpace = valueText.indexOf(" ");
+		if((firstSpace == -1 && valueText.length > 29 ) || firstSpace > 29)
+		{
+			valueElement.setAttribute('crop', 'end');
+			valueElement.setAttribute('value',valueText);
+		}
+		else
+			valueElement.appendChild(document.createTextNode(valueText));
 		return valueElement;
 	}
 	

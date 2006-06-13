@@ -74,7 +74,7 @@ var ScholarPane = new function()
 	{
 		ScholarItemPane.viewItem(new Scholar.Item(typeID));
 		document.getElementById('scholar-view-item').hidden = false;
-		document.getElementById('scholar-view-splitter').hidden = false;
+		document.getElementById('scholar-view-selected-label').hidden = true;
 	}
 	
 	function newCollection()
@@ -97,13 +97,13 @@ var ScholarPane = new function()
 			itemsView = new Scholar.ItemTreeView(collection);
 			document.getElementById('items-tree').view = itemsView;
 			document.getElementById('tb-rename').disabled = collection.isLibrary();
+			itemsView.selection.clearSelection();
 		}
 		else
 		{
 			document.getElementById('items-tree').view = itemsView = null;
 			document.getElementById('tb-rename').disabled = true;
 		}
-		
 	}
 	
 	function itemSelected()
@@ -115,13 +115,14 @@ var ScholarPane = new function()
 			ScholarItemPane.viewItem(item);
 
 			document.getElementById('scholar-view-item').hidden = false;
-			document.getElementById('scholar-view-splitter').hidden = false;
+			document.getElementById('scholar-view-selected-label').hidden = true;
 		}
 		else
 		{
 			document.getElementById('scholar-view-item').hidden = true;
-			document.getElementById('scholar-view-splitter').hidden = true;
-			
+			var label = document.getElementById('scholar-view-selected-label');
+			label.hidden = false;
+			label.value = itemsView.selection.count + " items selected.";	
 		}
 
 	}
