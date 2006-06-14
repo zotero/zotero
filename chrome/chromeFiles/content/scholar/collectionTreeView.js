@@ -281,7 +281,8 @@ Scholar.CollectionTreeView.prototype.canDrop = function(row, orient)
 	}
 	catch (e)
 	{
-		//a work around a limitation in nsDragAndDrop.js -- the mDragSession is not set until the drag moves over another control. (this will only happen if the first drag is from the collection list)
+		//a work around a limitation in nsDragAndDrop.js -- the mDragSession is not set until the drag moves over another control.
+		//(this will only happen if the first drag is from the collection list)
 		nsDragAndDrop.mDragSession = nsDragAndDrop.mDragService.getCurrentSession();
 		return false;
 	}
@@ -289,6 +290,7 @@ Scholar.CollectionTreeView.prototype.canDrop = function(row, orient)
 	var dataType = data.flavour.contentType;
 	var rowCollection = this._getItemAtRow(row).ref;
 	
+	//Check to make sure that the highlighting is done right
 	if(orient == 1 && row == 0 && dataType == 'scholar/collection')
 	{
 		return true;

@@ -5,31 +5,31 @@
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 	
 	<script src="itemPane.js"/>	
-	<tabbox id="scholar-view-item">
+	<tabbox id="scholar-view-item" height="1000" style="margin-left: 5px;">
 		<tabs>
-			<tab label="Info"/>
 			<tab label="Notes"/>
+			<tab label="Info"/>
 		</tabs>
 		<tabpanels flex="1">
-			<vbox id="scholar-metadata">
-				<popupset>
-					<popup id="creatorTypeMenu" position="after_start" oncommand="ScholarItemPane.modifyCreator(document.popupNode.getAttribute('fieldname').split('-')[1],'typeID',event.explicitOriginalTarget.getAttribute('typeid'));"/>
-				</popupset>
-				<grid>
-					<columns>
-						<column/>
-						<column flex="1"/>
-					</columns>
-					
-					<rows id="editpane-dynamic-fields">
-					</rows>
-				</grid>
-			</vbox>
 			<vbox>
 				<textbox id="scholar-notes"
 					type="timed" timeout="1000" oncommand="ScholarItemPane.modifyField('notes',this.value);"
 					multiline="true" flex="1"
 					onblur="ScholarItemPane.modifyField('notes',this.value);"/>
+			</vbox>
+			<vbox id="scholar-metadata" flex="1">
+				<popupset>
+					<popup id="creatorTypeMenu" position="after_start" oncommand="ScholarItemPane.modifyCreator(document.popupNode.getAttribute('fieldname').split('-')[1],'typeID',event.explicitOriginalTarget.getAttribute('typeid'));"/>
+				</popupset>
+				<grid flex="1">
+					<columns>
+						<column/>
+						<column flex="1"/>
+					</columns>
+					
+					<rows id="editpane-dynamic-fields" flex="1">
+					</rows>
+				</grid>
 			</vbox>
 		</tabpanels>
 	</tabbox>
