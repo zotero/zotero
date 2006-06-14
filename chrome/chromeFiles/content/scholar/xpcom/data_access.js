@@ -1355,7 +1355,7 @@ Scholar.Collection.prototype._getDescendents = function(){
 			var descendents =
 				Scholar.Collections.get(children[i]['id'])._getDescendents();
 			
-			for(var j=0, len=descendents.length; j<len; j++){
+			for(var j=0, len2=descendents.length; j<len2; j++){
 				toReturn.push(descendents[j]);
 			}
 		}
