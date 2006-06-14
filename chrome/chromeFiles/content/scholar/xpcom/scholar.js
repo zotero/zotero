@@ -405,7 +405,7 @@ Scholar.Date = new function(){
 			else {
 				timeparts = [false, false, false];
 			}
-			return new Date(dateparts[0], dateparts[1], dateparts[2],
+			return new Date(dateparts[0], dateparts[1]-1, dateparts[2],
 				timeparts[0], timeparts[1], timeparts[2]);
 		}
 		catch (e){
