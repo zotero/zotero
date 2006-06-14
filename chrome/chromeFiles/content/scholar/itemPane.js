@@ -68,6 +68,7 @@ ScholarItemPane = new function()
 				
 				var label = document.createElement("label");
 				label.setAttribute("value",Scholar.getString("itemFields."+fieldNames[i])+":");
+				label.setAttribute("onclick","this.nextSibling.blur();");
 				
 				addDynamicRow(label,valueElement);
 			}

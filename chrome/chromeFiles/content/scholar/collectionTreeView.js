@@ -272,10 +272,35 @@ Scholar.CollectionTreeView.prototype._refreshHashMap = function()
 
 Scholar.CollectionTreeView.prototype.canDrop = function(row, orient)
 {
-	if((row == 0 && orient == 1) || orient == 0)
-		return true;
-	else
+	if(typeof row == 'object')	//workaround... two different services call canDrop (nsDragAndDrop, and the tree)
 		return false;
+		
+	try
+	{
+		var dataSet = nsTransferable.get(this.getSupportedFlavours(),nsDragAndDrop.getDragData, true);
+	}
+	catch (e)
+	{
+		//a work around a limitation in nsDragAndDrop.js -- the mDragSession is not set until the drag moves over another control. (this will only happen if the first drag is from the collection list)
+		nsDragAndDrop.mDragSession = nsDragAndDrop.mDragService.getCurrentSession();
+		return false;
+	}
+	var data = dataSet.first.first;
+	var dataType = data.flavour.contentType;
+	var rowCollection = this._getItemAtRow(row).ref;
+	
+	if(orient == 1 && row == 0 && dataType == 'scholar/collection')
+	{
+		return true;
+	}
+	else if(orient == 0)
+	{
+		if(dataType == 'scholar/item' || dataType == "text/x-moz-url")
+			return true;
+		else if(dataType='scholar/collection' && data.data != rowCollection.getID() && !Scholar.Collections.get(data.data).hasDescendent('collection',rowCollection.getID()) )
+			return true;
+	}
+	return false;
 }
 
 Scholar.CollectionTreeView.prototype.drop = function(row, orient)
@@ -283,7 +308,6 @@ Scholar.CollectionTreeView.prototype.drop = function(row, orient)
 	var dataSet = nsTransferable.get(this.getSupportedFlavours(),nsDragAndDrop.getDragData, true);
 	var data = dataSet.first.first;
 	var dataType = data.flavour.contentType;
-	var ids = data.data.split(',');
 	
 	if(dataType == 'scholar/collection')
 	{
@@ -292,10 +316,10 @@ Scholar.CollectionTreeView.prototype.drop = function(row, orient)
 		var targetCollectionID;
 		if(this._getItemAtRow(row).isCollection())
 			targetCollectionID = this._getItemAtRow(row).ref.getID();
-		var droppedCollection = Scholar.Collections.get(ids[0]);
+		var droppedCollection = Scholar.Collections.get(data.data);
 		droppedCollection.changeParent(targetCollectionID);
 		
-		var selectRow = this._collectionRowMap[ids[0]];
+		var selectRow = this._collectionRowMap[data.data];
 		if(selectRow == null)
 			selectRow = this._collectionRowMap[targetCollectionID];
 		
@@ -307,9 +331,17 @@ Scholar.CollectionTreeView.prototype.drop = function(row, orient)
 	}
 	else if(dataType == 'scholar/item' && this.canDrop(row, orient))
 	{
+		var ids = data.data.split(',');
 		var targetCollection = this._getItemAtRow(row).ref;
 		for(var i = 0; i<ids.length; i++)
 			targetCollection.addItem(ids[i]);
+	}
+	else if(dataType == 'text/x-moz-url' && this.canDrop(row, orient))
+	{
+		alert(data.data);
+		var targetCollection = this._getItemAtRow(row).ref;
+		/*for(var i = 0; i<ids.length; i++)
+			targetCollection.addItem(ids[i]); */
 	}
 }
 
@@ -322,6 +354,7 @@ Scholar.CollectionTreeView.prototype.onDragStart = function(evt,transferData,act
 Scholar.CollectionTreeView.prototype.getSupportedFlavours = function () 
 { 
 	var flavors = new FlavourSet();
+	flavors.appendFlavour("text/x-moz-url");
 	flavors.appendFlavour("scholar/item");
 	flavors.appendFlavour("scholar/collection");
 	return flavors; 

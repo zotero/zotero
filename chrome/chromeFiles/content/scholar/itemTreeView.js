@@ -314,11 +314,6 @@ Scholar.ItemTreeView.prototype.rememberSelection = function()
 
 /* DRAG AND DROP FUNCTIONS */
 
-Scholar.ItemTreeView.prototype.canDrop = function(index, orient)
-{
-	return false;
-}
-
 Scholar.ItemTreeView.prototype.onDragStart = function (evt,transferData,action)
 { 
 	transferData.data=new TransferData();
@@ -330,11 +325,30 @@ Scholar.ItemTreeView.prototype.getSupportedFlavours = function ()
 { 
 	var flavors = new FlavourSet();
 	flavors.appendFlavour("scholar/item");
+	flavors.appendFlavour("text/x-moz-url");
 	return flavors; 
 }
 
+Scholar.ItemTreeView.prototype.onDrop = function (evt,data,session)
+{
+	var dataType = data.flavour.contentType;
+	var ids = data.data.split(',');
+	
+	if(dataType == 'scholar/item')
+	{
+		for(var i = 0; i<ids.length; i++)
+			this._itemGroup.ref.addItem(ids[i]);
+	}
+	else if(dataType == 'text/x-moz-url')
+	{
+		alert(data.data);
+		var targetCollection = this._itemGroup.ref;
+		/*for(var i = 0; i<ids.length; i++)
+			targetCollection.addItem(ids[i]); */
+	}
+}
+
 Scholar.ItemTreeView.prototype.onDragOver = function (evt,dropdata,session) { }
-Scholar.ItemTreeView.prototype.onDrop = function (evt,dropdata,session) { }	
 
 /* MORE TREEVIEW FUNCTIONS THAT HAVE TO BE HERE */
 
