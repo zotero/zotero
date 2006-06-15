@@ -327,8 +327,18 @@ Scholar.HTTP = new function(){
 	
 	this.doGet = doGet;
 	this.doPost = doPost;
+	this.browserIsOffline = browserIsOffline;
 	
+	/**
+	* Send an HTTP GET request via XMLHTTPRequest
+	*
+	* Returns false if browser is offline
+	**/
 	function doGet(url, onStatus, onDone){
+		if (this.browserIsOffline()){
+			return false;
+		}
+		
 		var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
 					.createInstance();
 		
@@ -338,10 +348,21 @@ Scholar.HTTP = new function(){
 			_stateChange(xmlhttp, onStatus, onDone);
 		};
 		xmlhttp.send(null);
+		
+		return true;
 	}
 	
 	
+	/**
+	* Send an HTTP POST request via XMLHTTPRequest
+	*
+	* Returns false if browser is offline
+	**/
 	function doPost(url, body, onStatus, onDone){
+		if (this.browserIsOffline()){
+			return false;
+		}
+		
 		var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
 					.createInstance();
 		
@@ -351,6 +372,14 @@ Scholar.HTTP = new function(){
 			_stateChange(xmlhttp, onStatus, onDone);
 		};
 		xmlhttp.send(body);
+		
+		return true;
+	}
+	
+	
+	function browserIsOffline(){
+		return Components.classes["@mozilla.org/network/io-service;1"]
+			.getService(Components.interfaces.nsIIOService).offline;
 	}
 	
 	
