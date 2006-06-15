@@ -1,10 +1,11 @@
 Scholar.Schema = new function(){
 	var _dbVersions = [];
 	var _schemaVersions = [];
+	var _repositoryTimer;
 	
 	this.updateSchema = updateSchema;
 	this.updateScrapersRemote = updateScrapersRemote;
-	
+	this.stopRepositoryTimer = stopRepositoryTimer;
 	
 	/*
 	 * Checks if the DB schema exists and is up-to-date, updating if necessary
@@ -50,14 +51,16 @@ Scholar.Schema = new function(){
 	**/
 	function updateScrapersRemote(force){
 		// Determine the earliest local time that we'd query the repository again
-		var lastChecked = _getDBVersion('lastcheck');
-		var d = new Date();
-		d.setTime((parseInt(lastChecked)
+		var nextCheck = new Date();
+		nextCheck.setTime((parseInt(_getDBVersion('lastcheck'))
 			+ SCHOLAR_CONFIG['REPOSITORY_CHECK_INTERVAL']) * 1000); // JS uses ms
+		var now = new Date();
 		
 		// If enough time hasn't passed and it's not being forced, don't update
-		if (!force && new Date() < d){
-			Scholar.debug('Not checking repository', 4);
+		if (!force && now < nextCheck){
+			Scholar.debug('Too soon since last update -- not checking repository', 4);
+			// Set the repository timer to the remaining time
+			_setRepositoryTimer(Math.round((nextCheck.getTime() - now.getTime()) / 1000));
 			return false;
 		}
 		
@@ -69,9 +72,24 @@ Scholar.Schema = new function(){
 			+ 'version=' + Scholar.version;
 		
 		Scholar.debug('Checking repository for updates (' + url + ')');
-		Scholar.HTTP.doGet(url, false, _updateScrapersRemoteCallback);
+		var get = Scholar.HTTP.doGet(url, false, _updateScrapersRemoteCallback);
+		
+		// TODO: instead, add an observer to start and stop timer on online state change
+		if (!get){
+			Scholar.debug('Browser is offline -- skipping check');
+			_setRepositoryTimer(SCHOLAR_CONFIG['REPOSITORY_CHECK_RETRY']);
+		}
 	}
 	
+	
+	function stopRepositoryTimer(){
+		if (_repositoryTimer){
+			Scholar.debug('Stopping repository check timer');
+			_repositoryTimer.cancel();
+		}
+	}
+	
+
 	
 	/////////////////////////////////////////////////////////////////
 	//
@@ -265,11 +283,12 @@ Scholar.Schema = new function(){
 		
 		// And the local timestamp of the update time
 		var d = new Date();
-		_updateDBVersion('lastcheck', Math.round(d.getTime()/1000));  // JS uses ms
+		_updateDBVersion('lastcheck', Math.round(d.getTime()/1000)); // JS uses ms
 		
 		if (!updates.length){
 			Scholar.debug('All scrapers are up-to-date');
 			Scholar.DB.commitTransaction();
+			_setRepositoryTimer(SCHOLAR_CONFIG['REPOSITORY_CHECK_INTERVAL']);
 			return false;
 		}
 		
@@ -287,6 +306,35 @@ Scholar.Schema = new function(){
 		
 		if (!breakout){
 			Scholar.DB.commitTransaction();
+			_setRepositoryTimer(SCHOLAR_CONFIG['REPOSITORY_CHECK_INTERVAL']);
+		}
+	}
+	
+	
+	/**
+	* Set the interval between repository queries
+	*
+	* We add an additional two seconds to avoid race conditions
+	**/
+	function _setRepositoryTimer(interval){
+		if (!interval){
+			interval = SCHOLAR_CONFIG['REPOSITORY_CHECK_INTERVAL'];
+		}
+		
+		var fudge = 2; // two seconds
+		var displayInterval = interval + fudge;
+		var interval = (interval + fudge) * 1000; // convert to ms
+		
+		if (!_repositoryTimer || _repositoryTimer.delay!=interval){
+			Scholar.debug('Setting repository check interval to ' + displayInterval + ' seconds');
+			_repositoryTimer = Components.classes["@mozilla.org/timer;1"].
+				createInstance(Components.interfaces.nsITimer);
+			_repositoryTimer.initWithCallback({
+				// implements nsITimerCallback
+				notify: function(timer){
+					Scholar.Schema.updateScrapersRemote();
+				}
+			}, interval, Components.interfaces.nsITimer.TYPE_REPEATING_SLACK);
 		}
 	}
 	
@@ -313,7 +361,6 @@ Scholar.Schema = new function(){
 		var sql = "REPLACE INTO scrapers VALUES (?,?,?,?,?,?,?)";
 		return Scholar.DB.query(sql, sqlValues);
 	}
-	
 	
 	
 	/*
