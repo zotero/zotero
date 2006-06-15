@@ -12,8 +12,16 @@
 		</tabs>
 		<tabpanels flex="1">
 			<vbox>
-				<textbox id="scholar-notes"
-					type="timed" timeout="1000" oncommand="ScholarItemPane.modifyField('notes',this.value);"
+				<hbox align="center">
+					<label id="scholar-notes-label"/>
+					<menulist flex="1" id="scholar-notes-menu" onselect="ScholarItemPane.onNoteSelected();">
+						<menupopup/>
+					</menulist>
+					<toolbarbutton label="-" class="addremove" oncommand="ScholarItemPane.removeSelectedNote();"/>
+					<toolbarbutton label="+" class="addremove" oncommand="ScholarItemPane.addNote();"/>
+				</hbox>
+				<textbox id="scholar-notes-field"
+					type="timed" timeout="1000" oncommand="ScholarItemPane.modifySelectedNote();"
 					multiline="true" flex="1"
 					onblur="ScholarItemPane.modifyField('notes',this.value);"/>
 			</vbox>

@@ -1,3 +1,14 @@
+////////////////////////////////////////////////////////////////////////////////
+///
+///  CollectionTreeView
+///    -- handles the link between an individual tree and the data layer
+///    -- displays only collections, in a hierarchy (no items)
+///
+////////////////////////////////////////////////////////////////////////////////
+
+/*
+ *  Constructor the the CollectionTreeView object
+ */
 Scholar.CollectionTreeView = function()
 {
 	this._treebox = null;
@@ -6,6 +17,9 @@ Scholar.CollectionTreeView = function()
 	this._unregisterID = Scholar.Notifier.registerColumnTree(this);
 }
 
+/*
+ *  Called by the tree itself
+ */
 Scholar.CollectionTreeView.prototype.setTree = function(treebox)
 {
 	if(this._treebox)
@@ -13,6 +27,10 @@ Scholar.CollectionTreeView.prototype.setTree = function(treebox)
 	this._treebox = treebox;
 }
 
+/*
+ *  Reload the rows from the data access methods
+ *  (doesn't call the tree.invalidate methods, etc.)
+ */
 Scholar.CollectionTreeView.prototype.refresh = function()
 {
 	this._dataItems = new Array();
@@ -27,7 +45,7 @@ Scholar.CollectionTreeView.prototype.refresh = function()
 }
 
 /*
- *  Is called by Scholar.Notifier on any changes to the data layer
+ *  Called by Scholar.Notifier on any changes to collections in the data layer
  */
 Scholar.CollectionTreeView.prototype.notify = function(action, type, ids)
 {
@@ -102,12 +120,19 @@ Scholar.CollectionTreeView.prototype.notify = function(action, type, ids)
 }
 
 /*
- *  Unregisters itself from Scholar.Notifier (called on window close)
+ *  Unregisters view from Scholar.Notifier (called on window close)
  */
 Scholar.CollectionTreeView.prototype.unregister = function()
 {
 	Scholar.Notifier.unregisterColumnTree(this._unregisterID);
 }
+
+////////////////////////////////////////////////////////////////////////////////
+///
+///  nsITreeView functions
+///  http://www.xulplanet.com/references/xpcomref/ifaces/nsITreeView.html
+///
+////////////////////////////////////////////////////////////////////////////////
 
 Scholar.CollectionTreeView.prototype.getCellText = function(row, column)
 {
@@ -137,6 +162,8 @@ Scholar.CollectionTreeView.prototype.isContainerOpen = function(row)
 
 Scholar.CollectionTreeView.prototype.isContainerEmpty = function(row)
 {
+	//NOTE: this returns true if the collection has no child collections
+	
 	var itemGroup = this._getItemAtRow(row);
 	if(itemGroup.isCollection())
 		return !itemGroup.ref.hasChildCollections();
@@ -170,6 +197,9 @@ Scholar.CollectionTreeView.prototype.hasNextSibling = function(row, afterIndex)
 	}
 }
 
+/*
+ *  Opens/closes the specified row
+ */
 Scholar.CollectionTreeView.prototype.toggleOpenState = function(row)
 {
 	var count = 0;		//used to tell the tree how many rows were added/removed
@@ -202,6 +232,15 @@ Scholar.CollectionTreeView.prototype.toggleOpenState = function(row)
 	this._refreshHashMap();
 }
 
+////////////////////////////////////////////////////////////////////////////////
+///
+///  Additional functions for managing data in the tree
+///
+////////////////////////////////////////////////////////////////////////////////
+
+/*
+ *  Delete the selection
+ */
 Scholar.CollectionTreeView.prototype.deleteSelection = function()
 {
 	if(this.selection.count == 0)
@@ -240,23 +279,37 @@ Scholar.CollectionTreeView.prototype.deleteSelection = function()
 		this.selection.select(this.rowCount-1);
 }
 
-Scholar.CollectionTreeView.prototype._showItem = function(item, level, beforeRow)
+/*
+ *  Called by various view functions to show a row
+ * 
+ *  	itemGroup:	reference to the ItemGroup
+ *  	level:	the indent level of the row
+ *      beforeRow:	row index to insert new row before
+ */
+Scholar.CollectionTreeView.prototype._showItem = function(itemGroup, level, beforeRow)
 {
-	this._dataItems.splice(beforeRow, 0, [item, false, level]); this.rowCount++;
+	this._dataItems.splice(beforeRow, 0, [itemGroup, false, level]); this.rowCount++;
 }
 
+/*
+ *  Called by view to hide specified row
+ */
 Scholar.CollectionTreeView.prototype._hideItem = function(row)
 {
 	this._dataItems.splice(row,1); this.rowCount--;
 }
 
+/*
+ *  Returns a reference to the collection at row (see Scholar.Collection in data_access.js)
+ */
 Scholar.CollectionTreeView.prototype._getItemAtRow = function(row)
 {
 	return this._dataItems[row][0];
 }
 
 /*
- * Create hash map of collection ids to row indexes
+ * Creates hash map of collection ids to row indexes
+ * e.g., var rowForID = this._collectionRowMap[]
  */
 Scholar.CollectionTreeView.prototype._refreshHashMap = function()
 {	
@@ -268,8 +321,17 @@ Scholar.CollectionTreeView.prototype._refreshHashMap = function()
 	
 }
 
-/* DRAG AND DROP FUNCTIONS */
+////////////////////////////////////////////////////////////////////////////////
+///
+///  Drag-and-drop functions:
+///		canDrop() and drop() are for nsITreeView
+///		onDragStart(), getSupportedFlavours(), and onDrop() for nsDragAndDrop.js + nsTransferable.js
+///
+////////////////////////////////////////////////////////////////////////////////
 
+/*
+ *  Called while a drag is over the tree.
+ */
 Scholar.CollectionTreeView.prototype.canDrop = function(row, orient)
 {
 	if(typeof row == 'object')	//workaround... two different services call canDrop (nsDragAndDrop, and the tree)
@@ -288,23 +350,28 @@ Scholar.CollectionTreeView.prototype.canDrop = function(row, orient)
 	}
 	var data = dataSet.first.first;
 	var dataType = data.flavour.contentType;
-	var rowCollection = this._getItemAtRow(row).ref;
 	
-	//Check to make sure that the highlighting is done right
-	if(orient == 1 && row == 0 && dataType == 'scholar/collection')
+	
+	//Highlight the rows correctly on drag:
+	if(orient == 1 && row == 0 && dataType == 'scholar/collection') //for dropping collections into root level
 	{
 		return true;
 	}
-	else if(orient == 0)
+	else if(orient == 0)	//directly on a row...
 	{
+		var rowCollection = this._getItemAtRow(row).ref; //the collection we are dragging over
+		
 		if(dataType == 'scholar/item' || dataType == "text/x-moz-url")
-			return true;
+			return true;	//items can be dropped on anything
 		else if(dataType='scholar/collection' && data.data != rowCollection.getID() && !Scholar.Collections.get(data.data).hasDescendent('collection',rowCollection.getID()) )
-			return true;
+			return true;	//collections cannot be dropped on themselves, nor in their children
 	}
 	return false;
 }
 
+/*
+ *  Called when something's been dropped on or next to a row
+ */
 Scholar.CollectionTreeView.prototype.drop = function(row, orient)
 {
 	var dataSet = nsTransferable.get(this.getSupportedFlavours(),nsDragAndDrop.getDragData, true);
@@ -340,19 +407,31 @@ Scholar.CollectionTreeView.prototype.drop = function(row, orient)
 	}
 	else if(dataType == 'text/x-moz-url' && this.canDrop(row, orient))
 	{
-		alert(data.data);
-		var targetCollection = this._getItemAtRow(row).ref;
-		/*for(var i = 0; i<ids.length; i++)
-			targetCollection.addItem(ids[i]); */
+		var url = data.data.split("\n")[0];
+		
+		/* WAITING FOR INGESTER SUPPORT
+		var newItem = Scholar.Ingester.scrapeURL(url);
+		
+		if(newItem)
+			this._getItemAtRow(row).ref.addItem(newItem.getID());
+		*/
 	}
 }
 
+/*
+ *  Begin a drag
+ */
 Scholar.CollectionTreeView.prototype.onDragStart = function(evt,transferData,action)
 {
 	transferData.data=new TransferData();
+	
+	//attach ID
 	transferData.data.addDataForFlavour("scholar/collection",this._getItemAtRow(this.selection.currentIndex).ref.getID());
 }
 
+/*
+ *  Returns the supported drag flavors
+ */
 Scholar.CollectionTreeView.prototype.getSupportedFlavours = function () 
 { 
 	var flavors = new FlavourSet();
@@ -362,9 +441,16 @@ Scholar.CollectionTreeView.prototype.getSupportedFlavours = function ()
 	return flavors; 
 }
 
+/*
+ *  Called by nsDragAndDrop.js for any sort of drop on the tree
+ */
 Scholar.CollectionTreeView.prototype.onDrop = function (evt,dropdata,session) { }
 
-/* MORE TREEVIEW FUNCTIONS THAT HAVE TO BE HERE */
+////////////////////////////////////////////////////////////////////////////////
+///
+///  Functions for nsITreeView that we have to stub out.
+///
+////////////////////////////////////////////////////////////////////////////////
 
 Scholar.CollectionTreeView.prototype.isSorted = function() 							{ return false; }
 Scholar.CollectionTreeView.prototype.isSeparator = function(row) 					{ return false; }
@@ -377,9 +463,12 @@ Scholar.CollectionTreeView.prototype.performActionOnCell = function(action, row,
 Scholar.CollectionTreeView.prototype.getProgressMode = function(row, col) 			{ }
 Scholar.CollectionTreeView.prototype.cycleHeader = function(column)					{ }
 
-//
-// SCHOLAR ITEMGROUP
-//
+////////////////////////////////////////////////////////////////////////////////
+///
+///  Scholar ItemGroup -- a sort of "super class" for Collection, library, 
+///  	and eventually smartSearch
+///
+////////////////////////////////////////////////////////////////////////////////
 
 Scholar.ItemGroup = function(type, ref)
 {

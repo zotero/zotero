@@ -1,3 +1,14 @@
+////////////////////////////////////////////////////////////////////////////////
+///
+///  ItemTreeView
+///    -- handles the link between an individual tree and the data layer
+///    -- displays only items (no collections, no hierarchy)
+///
+////////////////////////////////////////////////////////////////////////////////
+
+/*
+ *  Constructor the the ItemTreeView object
+ */
 Scholar.ItemTreeView = function(itemGroup)
 {
 	this._itemGroup = itemGroup;
@@ -9,6 +20,9 @@ Scholar.ItemTreeView = function(itemGroup)
 	this._unregisterID = Scholar.Notifier.registerItemTree(this);
 }
 
+/*
+ *  Called by the tree itself
+ */
 Scholar.ItemTreeView.prototype.setTree = function(treebox)
 {
 	if(this._treebox)
@@ -25,6 +39,10 @@ Scholar.ItemTreeView.prototype.setTree = function(treebox)
 	}
 }
 
+/*
+ *  Reload the rows from the data access methods
+ *  (doesn't call the tree.invalidate methods, etc.)
+ */
 Scholar.ItemTreeView.prototype.refresh = function()
 {
 	this._dataItems = new Array();
@@ -38,6 +56,9 @@ Scholar.ItemTreeView.prototype.refresh = function()
 	this._refreshHashMap();
 }
 
+/*
+ *  Called by Scholar.Notifier on any changes to items in the data layer
+ */
 Scholar.ItemTreeView.prototype.notify = function(action, type, ids)
 {
 	var madeChanges = false;
@@ -112,10 +133,20 @@ Scholar.ItemTreeView.prototype.notify = function(action, type, ids)
 	this.selection.selectEventsSuppressed = false;
 }
 
+/*
+ *  Unregisters view from Scholar.Notifier (called on window close)
+ */
 Scholar.ItemTreeView.prototype.unregister = function()
 {
 	Scholar.Notifier.unregisterItemTree(this._unregisterID);
 }
+
+////////////////////////////////////////////////////////////////////////////////
+///
+///  nsITreeView functions
+///  http://www.xulplanet.com/references/xpcomref/ifaces/nsITreeView.html
+///
+////////////////////////////////////////////////////////////////////////////////
 
 Scholar.ItemTreeView.prototype.getCellText = function(row, column)
 {
@@ -175,9 +206,12 @@ Scholar.ItemTreeView.prototype.cycleHeader = function(column)
 	this._treebox.invalidate();
 }
 
+/*
+ *  Sort the items by the currently sorted column.
+ *  Simply uses Array.sort() function, and refreshes the hash map.
+ */
 Scholar.ItemTreeView.prototype.sort = function()
 {
-	
 	var column = this._treebox.columns.getSortedColumn()
 	var order = column.element.getAttribute('sortDirection') == 'descending';
 	
@@ -199,13 +233,13 @@ Scholar.ItemTreeView.prototype.sort = function()
 		}
 	}
 	
-	function oppSort(a,b)
+	function oppositeSort(a,b)
 	{
 		return(columnSort(a,b) * -1);
 	}
 	
 	if(order)
-		this._dataItems.sort(oppSort);
+		this._dataItems.sort(oppositeSort);
 	else
 		this._dataItems.sort(columnSort);
 		
@@ -213,6 +247,15 @@ Scholar.ItemTreeView.prototype.sort = function()
 	
 }
 
+////////////////////////////////////////////////////////////////////////////////
+///
+///  Additional functions for managing data in the tree
+///
+////////////////////////////////////////////////////////////////////////////////
+
+/*
+ *  Delete the selection
+ */
 Scholar.ItemTreeView.prototype.deleteSelection = function()
 {
 	if(this.selection.count == 0)
@@ -246,6 +289,9 @@ Scholar.ItemTreeView.prototype.deleteSelection = function()
 	this._treebox.endUpdateBatch();
 }
 
+/*
+ *  Set the search filter on the view
+ */
 Scholar.ItemTreeView.prototype.searchText = function(search)
 {
 	this.selection.selectEventsSuppressed = true;
@@ -263,23 +309,35 @@ Scholar.ItemTreeView.prototype.searchText = function(search)
 	this._treebox.invalidate();
 }
 
+/*
+ *  Called by various view functions to show a row
+ * 
+ *  	item:	reference to the Item
+ *      beforeRow:	row index to insert new row before
+ */
 Scholar.ItemTreeView.prototype._showItem = function(item, beforeRow)
 {
 	this._dataItems.splice(beforeRow, 0, item); this.rowCount++;
 }
 
+/*
+ *  Called by view to hide specified row
+ */
 Scholar.ItemTreeView.prototype._hideItem = function(row)
 {
 	this._dataItems.splice(row,1); this.rowCount--;
 }
 
+/*
+ *  Returns a reference to the item at row (see Scholar.Item in data_access.js)
+ */
 Scholar.ItemTreeView.prototype._getItemAtRow = function(row)
 {
 	return this._dataItems[row];
 }
 
 /*
- * Create hash map of item ids to row indexes
+ *  Create hash map of item ids to row indexes
  */
 Scholar.ItemTreeView.prototype._refreshHashMap = function()
 {
@@ -288,6 +346,9 @@ Scholar.ItemTreeView.prototype._refreshHashMap = function()
 		this._itemRowMap[this._getItemAtRow(i).getID()] = i;
 }
 
+/*
+ *  Saves the ids of currently selected items for later
+ */
 Scholar.ItemTreeView.prototype.saveSelection = function()
 {
 	this._savedSelection = new Array();
@@ -302,6 +363,9 @@ Scholar.ItemTreeView.prototype.saveSelection = function()
 	}
 }
 
+/*
+ *  Sets the selection based on saved selection ids (see above)
+ */
 Scholar.ItemTreeView.prototype.rememberSelection = function()
 {
 	this.selection.clearSelection();
@@ -312,15 +376,26 @@ Scholar.ItemTreeView.prototype.rememberSelection = function()
 	}
 }
 
-/* DRAG AND DROP FUNCTIONS */
+////////////////////////////////////////////////////////////////////////////////
+///
+///  Drag-and-drop functions:
+///		for nsDragAndDrop.js + nsTransferable.js
+///
+////////////////////////////////////////////////////////////////////////////////
 
+/*
+ *  Begin a drag
+ */
 Scholar.ItemTreeView.prototype.onDragStart = function (evt,transferData,action)
 { 
 	transferData.data=new TransferData();
 	this.saveSelection();
 	transferData.data.addDataForFlavour("scholar/item",this._savedSelection);
 }
-	
+
+/*
+ *  Called by nsDragAndDrop.js for any sort of drop on the tree
+ */
 Scholar.ItemTreeView.prototype.getSupportedFlavours = function () 
 { 
 	var flavors = new FlavourSet();
@@ -329,28 +404,39 @@ Scholar.ItemTreeView.prototype.getSupportedFlavours = function ()
 	return flavors; 
 }
 
+/*
+ *  Called by nsDragAndDrop.js for any sort of drop on the tree
+ */
 Scholar.ItemTreeView.prototype.onDrop = function (evt,data,session)
 {
 	var dataType = data.flavour.contentType;
-	var ids = data.data.split(',');
 	
 	if(dataType == 'scholar/item')
 	{
+		var ids = data.data.split(',');
 		for(var i = 0; i<ids.length; i++)
 			this._itemGroup.ref.addItem(ids[i]);
 	}
 	else if(dataType == 'text/x-moz-url')
 	{
-		alert(data.data);
-		var targetCollection = this._itemGroup.ref;
-		/*for(var i = 0; i<ids.length; i++)
-			targetCollection.addItem(ids[i]); */
+		var url = data.data.split("\n")[0];
+		
+		/* WAITING FOR INGESTER SUPPORT
+		var newItem = Scholar.Ingester.scrapeURL(url);
+		
+		if(newItem)
+			this._itemGroup.ref.addItem(newItem.getID());
+		*/
 	}
 }
 
 Scholar.ItemTreeView.prototype.onDragOver = function (evt,dropdata,session) { }
 
-/* MORE TREEVIEW FUNCTIONS THAT HAVE TO BE HERE */
+////////////////////////////////////////////////////////////////////////////////
+///
+///  Functions for nsITreeView that we have to stub out.
+///
+////////////////////////////////////////////////////////////////////////////////
 
 Scholar.ItemTreeView.prototype.isSeparator = function(row) 						{ return false; }
 Scholar.ItemTreeView.prototype.isContainer = function(row) 						{ return false; }

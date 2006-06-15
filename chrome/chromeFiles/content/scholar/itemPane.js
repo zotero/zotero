@@ -3,7 +3,9 @@ ScholarItemPane = new function()
 	var _dynamicFields;
 	var _creatorTypeMenu;
 	var _beforeRow;
-	var _notesPane;
+	var _notesMenu;
+	var _notesField;
+	var _notesLabel;
 	
 	var _creatorCount;
 	
@@ -17,12 +19,18 @@ ScholarItemPane = new function()
 	this.hideEditor = hideEditor;
 	this.modifyField = modifyField;
 	this.modifyCreator = modifyCreator;
+	this.modifySelectedNote = modifySelectedNote;
+	this.removeSelectedNote = removeSelectedNote;
+	this.addNote = addNote;
+	this.onNoteSelected = onNoteSelected;
 	
 	function onLoad()
 	{
 		_dynamicFields = document.getElementById('editpane-dynamic-fields');
 		_creatorTypeMenu = document.getElementById('creatorTypeMenu');
-		_notesPane = document.getElementById('scholar-notes');
+		_notesMenu = document.getElementById('scholar-notes-menu');
+		_notesField = document.getElementById('scholar-notes-field');
+		_notesLabel = document.getElementById('scholar-notes-label');
 		
 		var creatorTypes = Scholar.CreatorTypes.getTypes();
 		for(var i = 0; i < creatorTypes.length; i++)
@@ -60,24 +68,18 @@ ScholarItemPane = new function()
 		
 		for(var i = 0; i<fieldNames.length; i++)
 		{
-			if(fieldNames[i] != 'notes')
-			{
-				var editable = (!_itemBeingEdited.isPrimaryField(fieldNames[i]) || _itemBeingEdited.isEditableField(fieldNames[i]));
-				
-				var valueElement = createValueElement(_itemBeingEdited.getField(fieldNames[i]), editable ? fieldNames[i] : null);
-				
-				var label = document.createElement("label");
-				label.setAttribute("value",Scholar.getString("itemFields."+fieldNames[i])+":");
-				label.setAttribute("onclick","this.nextSibling.blur();");
-				
-				addDynamicRow(label,valueElement);
-			}
-			else
-			{
-				_notesPane.value = _itemBeingEdited.getField(fieldNames[i]);
-			}
+			var editable = (!_itemBeingEdited.isPrimaryField(fieldNames[i]) || _itemBeingEdited.isEditableField(fieldNames[i]));
+			
+			var valueElement = createValueElement(_itemBeingEdited.getField(fieldNames[i]), editable ? fieldNames[i] : null);
+			
+			var label = document.createElement("label");
+			label.setAttribute("value",Scholar.getString("itemFields."+fieldNames[i])+":");
+			label.setAttribute("onclick","this.nextSibling.blur();");
+			
+			addDynamicRow(label,valueElement);
 		}
 		
+		//CREATORS:
 		_beforeRow = _dynamicFields.firstChild.nextSibling;
 		_creatorCount = 0;
 		if(_itemBeingEdited.numCreators() > 0)
@@ -92,6 +94,19 @@ ScholarItemPane = new function()
 		{
 			addCreatorRow('', '', 1);
 		}
+		
+		//NOTES:
+		_notesMenu.removeAllItems();
+				
+		var notes = _itemBeingEdited.getNotes();
+		if(notes.length)
+			for(var i = 0; i < notes.length; i++)
+				_notesMenu.appendItem(_noteToTitle(_itemBeingEdited.getNote(notes[i])),notes[i]);
+		else
+			addNote();
+
+		_updateNoteCount();
+		_notesMenu.selectedIndex = 0;
 	}
 	
 	function addDynamicRow(label, value, beforeElement)
@@ -247,6 +262,80 @@ ScholarItemPane = new function()
 		
 		_itemBeingEdited.setCreator(index, firstName, lastName, typeID);
 		_itemBeingEdited.save();
+	}
+	
+	function modifySelectedNote()
+	{
+		if(_notesMenu.selectedIndex == -1)
+			return;
+		
+		var id = _notesMenu.selectedItem.value;
+		if(id)
+		{
+			_itemBeingEdited.updateNote(id,_notesField.value);
+		}
+		else //new note
+		{
+			id = _itemBeingEdited.addNote(_notesField.value);
+			_notesMenu.selectedItem.value = id;
+		}
+		var label = _notesField.value;
+		
+		_notesMenu.selectedItem.label = _noteToTitle(_notesField.value);
+	}
+	
+	function removeSelectedNote()
+	{
+		var id = _notesMenu.selectedItem.value;
+		if(id)
+		{
+			_itemBeingEdited.removeNote(id);
+		}
+		_notesMenu.removeitemAt(_notesMenu.selectedIndex);
+		
+		if(_notesMenu.firstChild.childNodes.length == 0)
+			addNote();
+		
+		_updateNoteCount();
+	}
+	
+	function addNote()
+	{
+		modifySelectedNote();
+		_notesMenu.appendItem('Untitled Note');
+		_notesMenu.selectedIndex = _notesMenu.firstChild.childNodes.length-1;
+		
+		_updateNoteCount();
+	}
+	
+	function onNoteSelected()
+	{
+		var id = _notesMenu.selectedItem.value;
+		if(id)
+			_notesField.value = _itemBeingEdited.getNote(id);
+		else
+			_notesField.value = "";
+	}
+	
+	function _noteToTitle(text)
+	{
+		var t = text.substring(0, Math.min(text.indexOf("\n"), 30) );
+		
+		if(t == "")
+		{
+			return "Untitled Note";
+		}
+		else
+		{
+			return t;
+		}
+	}
+	
+	function _updateNoteCount()
+	{
+		var c = _notesMenu.firstChild.childNodes.length;
+		
+		_notesLabel.value = c + " note" + (c != 1 ? "s" : "") + ":";
 	}
 }
 
