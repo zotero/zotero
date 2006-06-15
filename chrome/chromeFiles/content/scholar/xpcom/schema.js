@@ -220,6 +220,7 @@ Scholar.Schema = new function(){
 	 * Update a DB schema version tag in an existing database
 	 */
 	function _updateDBVersion(schema, version){
+		_dbVersions[schema] = version;
 		var sql = "REPLACE INTO version (schema,version) VALUES (?,?)";
 		return Scholar.DB.query(sql, [{'string':schema},{'int':version}]);
 	}
