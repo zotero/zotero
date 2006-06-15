@@ -1,4 +1,4 @@
--- 18
+-- 19
 
     DROP TABLE IF EXISTS version;
     CREATE TABLE version (
@@ -129,8 +129,7 @@
     DROP TABLE IF EXISTS scrapers;
     CREATE TABLE scrapers (
         scraperID TEXT PRIMARY KEY,
-        centralLastUpdated DATETIME,
-        localLastUpdated DATETIME,
+        lastUpdated DATETIME,
         label TEXT,
         creator TEXT,
         urlPattern TEXT,

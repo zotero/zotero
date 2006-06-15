@@ -3,6 +3,8 @@ Scholar.Schema = new function(){
 	var _schemaVersions = [];
 	
 	this.updateSchema = updateSchema;
+	this.updateScrapersRemote = updateScrapersRemote;
+	
 	
 	/*
 	 * Checks if the DB schema exists and is up-to-date, updating if necessary
@@ -19,7 +21,7 @@ Scholar.Schema = new function(){
 				}
 			}
 			
-			_updateScrapers();
+			_updateScrapersLocal();
 			return;
 		}
 		// If DB version is less than schema file, create or update
@@ -31,12 +33,43 @@ Scholar.Schema = new function(){
 			}
 			
 			_migrateSchema(dbVersion);
-			_updateScrapers();
+			_updateScrapersLocal();
 			return;
 		}
 		else {
 			throw("Scholar DB version is newer than schema version");
 		}
+	}
+	
+	
+	/**
+	* Send XMLHTTP request for updated scrapers to the central repository
+	*
+	* _force_ forces a repository query regardless of how long it's been
+	* 	since the last check
+	**/
+	function updateScrapersRemote(force){
+		// Determine the earliest local time that we'd query the repository again
+		var lastChecked = _getDBVersion('lastcheck');
+		var d = new Date();
+		d.setTime((parseInt(lastChecked)
+			+ SCHOLAR_CONFIG['REPOSITORY_CHECK_INTERVAL']) * 1000); // JS uses ms
+		
+		// If enough time hasn't passed and it's not being forced, don't update
+		if (!force && new Date() < d){
+			Scholar.debug('Not checking repository', 4);
+			return false;
+		}
+		
+		// Get the last timestamp we got from the server
+		var lastUpdated = _getDBVersion('repository');
+		
+		var url = SCHOLAR_CONFIG['REPOSITORY_URL'] + '/updated?'
+			+ (lastUpdated ? 'last=' + lastUpdated + '&' : '')
+			+ 'version=' + Scholar.version;
+		
+		Scholar.debug('Checking repository for updates (' + url + ')');
+		Scholar.HTTP.doGet(url, false, _updateScrapersRemoteCallback);
 	}
 	
 	
@@ -171,11 +204,9 @@ Scholar.Schema = new function(){
 		try {
 			Scholar.DB.beginTransaction();
 			Scholar.DB.query(_getSchemaSQL());
-			Scholar.DB.query("INSERT INTO version VALUES ('schema', "
-				+ _getSchemaSQLVersion() + ")");
+			_updateDBVersion('schema', _getSchemaSQLVersion());
 			Scholar.DB.query(_getSchemaSQL('scrapers'));
-			Scholar.DB.query("INSERT INTO version VALUES ('scrapers', "
-				+ _getSchemaSQLVersion('scrapers') + ")");
+			_updateDBVersion('scrapers', _getSchemaSQLVersion('scrapers'));
 			Scholar.DB.commitTransaction();
 		}
 		catch(e){
@@ -189,15 +220,15 @@ Scholar.Schema = new function(){
 	 * Update a DB schema version tag in an existing database
 	 */
 	function _updateDBVersion(schema, version){
-		return Scholar.DB.query("UPDATE version SET version=" + version
-			+ " WHERE schema='" + schema + "'");
+		var sql = "REPLACE INTO version (schema,version) VALUES (?,?)";
+		return Scholar.DB.query(sql, [{'string':schema},{'int':version}]);
 	}
 	
 	
 	/*
 	 * Update the scrapers in the DB to the latest bundled versions
 	 */
-	function _updateScrapers(){
+	function _updateScrapersLocal(){
 		var dbVersion = _getDBVersion('scrapers');
 		var schemaVersion = _getSchemaSQLVersion('scrapers');
 		
@@ -217,6 +248,73 @@ Scholar.Schema = new function(){
 	}
 	
 	
+	/**
+	* Process the response from the repository
+	**/
+	function _updateScrapersRemoteCallback(xmlhttp){
+		// TODO: error handling
+		var currentTime = xmlhttp.responseXML.
+			getElementsByTagName('currentTime')[0].firstChild.nodeValue;
+		var updates = xmlhttp.responseXML.getElementsByTagName('scraper');
+		
+		Scholar.DB.beginTransaction();
+		
+		// Store the timestamp provided by the server
+		_updateDBVersion('repository', currentTime);
+		
+		// And the local timestamp of the update time
+		var d = new Date();
+		_updateDBVersion('lastcheck', Math.round(d.getTime()/1000));  // JS uses ms
+		
+		if (!updates.length){
+			Scholar.debug('All scrapers are up-to-date');
+			Scholar.DB.commitTransaction();
+			return false;
+		}
+		
+		for (var i=0, len=updates.length; i<len; i++){
+			try {
+				_scraperXMLToDBQuery(updates[i]);
+			}
+			catch (e) {
+				Scholar.debug(e, 1);
+				Scholar.DB.rollbackTransaction();
+				var breakout = true;
+				break;
+			}
+		}
+		
+		if (!breakout){
+			Scholar.DB.commitTransaction();
+		}
+	}
+	
+	
+	/**
+	* Traverse an XML scraper node from the repository and
+	* update the local scrapers table with the scraper data
+	**/
+	function _scraperXMLToDBQuery(xmlnode){
+		var sqlValues = [
+			{'string':xmlnode.getAttribute('id')},
+			{'string':centralLastUpdated = xmlnode.getAttribute('lastUpdated')},
+			{'string':xmlnode.getElementsByTagName('label')[0].firstChild.nodeValue},
+			{'string':xmlnode.getElementsByTagName('creator')[0].firstChild.nodeValue},
+			{'string':xmlnode.getElementsByTagName('urlPattern')[0].firstChild.nodeValue},
+			// scraperDetectCode can not exist or be empty
+			(xmlnode.getElementsByTagName('scraperDetectCode').item(0) &&
+				xmlnode.getElementsByTagName('scraperDetectCode')[0].firstChild)
+				? {'string':xmlnode.getElementsByTagName('scraperDetectCode')[0].firstChild.nodeValue}
+				: {'null':true},
+			{'string':xmlnode.getElementsByTagName('scraperJavaScript')[0].firstChild.nodeValue}
+		]
+		
+		var sql = "REPLACE INTO scrapers VALUES (?,?,?,?,?,?,?)";
+		return Scholar.DB.query(sql, sqlValues);
+	}
+	
+	
+	
 	/*
 	 * Migrate schema from an older version, preserving data
 	 */
@@ -224,7 +322,7 @@ Scholar.Schema = new function(){
 		//
 		// Change this value to match the schema version
 		//
-		var toVersion = 18;
+		var toVersion = 19;
 		
 		if (toVersion != _getSchemaSQLVersion()){
 			throw('Schema version does not match version in _migrateSchema()');
@@ -239,7 +337,7 @@ Scholar.Schema = new function(){
 		// Each block performs the changes necessary to move from the
 		// previous revision to that one.
 		for (var i=parseInt(fromVersion) + 1; i<=toVersion; i++){
-			if (i==18){
+			if (i==19){
 				_initializeSchema();
 			}
 		}

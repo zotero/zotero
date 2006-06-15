@@ -4,7 +4,8 @@ const SCHOLAR_CONFIG = {
 	DB_REBUILD: false, // erase DB and recreate from schema
 	DEBUG_LOGGING: true,
 	DEBUG_TO_CONSOLE: true, // dump debug messages to console rather than (much slower) Debug Logger
-	REPOSITORY_URL: 'http://chnm.gmu.edu/firefoxscholar/dev/repo'
+	REPOSITORY_URL: 'http://chnm.gmu.edu/firefoxscholar/repo',
+	REPOSITORY_CHECK_INTERVAL: 86400 // 24 hours
 };
 
 /*
@@ -24,6 +25,9 @@ var Scholar = new function(){
 	this.randomString = randomString;
 	this.getRandomID = getRandomID;
 	
+	// Public properties
+	this.version;
+	
 	/*
 	 * Initialize the extension
 	 */
@@ -32,7 +36,14 @@ var Scholar = new function(){
 			return false;
 		}
 		
-		Scholar.Schema.updateSchema();
+		// Load in the extension version from the extension manager
+		var nsIUpdateItem = Components.interfaces.nsIUpdateItem;
+		var gExtensionManager =
+			Components.classes["@mozilla.org/extensions/manager;1"]
+				.getService(Components.interfaces.nsIExtensionManager);
+		var itemType = nsIUpdateItem.TYPE_EXTENSION;
+		this.version
+			= gExtensionManager.getItemForID(SCHOLAR_CONFIG['GUID']).version;
 		
 		// Load in the localization stringbundle for use by getString(name)
 		var src = 'chrome://scholar/locale/scholar.properties';
@@ -44,6 +55,10 @@ var Scholar = new function(){
 			Components.classes["@mozilla.org/intl/stringbundle;1"]
 			.getService(Components.interfaces.nsIStringBundleService);
 		_localizedStringBundle = stringBundleService.createBundle(src, appLocale);
+		
+		// Trigger updating of schema and scrapers
+		Scholar.Schema.updateSchema();
+		Scholar.Schema.updateScrapersRemote();
 		
 		_initialized = true;
 		return true;
