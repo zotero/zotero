@@ -54,6 +54,9 @@ ScholarItemPane = new function()
 		if(_itemBeingEdited && thisItem.getID() == _itemBeingEdited.getID())
 			return;
 			
+		if(document.commandDispatcher.focusedElement)
+			document.commandDispatcher.focusedElement.blur();
+			
 		_itemBeingEdited = thisItem;
 		
 		reloadFields();
@@ -135,6 +138,7 @@ ScholarItemPane = new function()
 		label.setAttribute("value",Scholar.getString('creatorTypes.'+Scholar.CreatorTypes.getTypeName(typeID))+":");
 		label.setAttribute("popup","creatorTypeMenu");
 		label.setAttribute("fieldname",'creator-'+_creatorCount+'-typeID');
+		label.className = 'clicky';
 		
 		var row = document.createElement("hbox");
 		
@@ -146,13 +150,13 @@ ScholarItemPane = new function()
 		
 		var removeButton = document.createElement('label');
 		removeButton.setAttribute("value","-");
-		removeButton.setAttribute("class","addremove");
+		removeButton.setAttribute("class","clicky");
 		removeButton.setAttribute("onclick","ScholarItemPane.removeCreator("+_creatorCount+")");
 		row.appendChild(removeButton);
 		
 		var addButton = document.createElement('label');
 		addButton.setAttribute("value","+");
-		addButton.setAttribute("class","addremove");
+		addButton.setAttribute("class","clicky");
 		addButton.setAttribute("onclick","ScholarItemPane.addCreatorRow('','',1);");
 		row.appendChild(addButton);
 		
@@ -168,6 +172,7 @@ ScholarItemPane = new function()
 		{
 			valueElement.setAttribute('fieldname',fieldName);
 			valueElement.setAttribute('onclick', 'ScholarItemPane.showEditor(this);');
+			valueElement.className = 'clicky';
 		}
 		
 		var firstSpace = valueText.indexOf(" ");

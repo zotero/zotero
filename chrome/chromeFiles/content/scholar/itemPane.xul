@@ -17,8 +17,8 @@
 					<menulist flex="1" id="scholar-notes-menu" oncommand="ScholarItemPane.onNoteSelected();">
 						<menupopup/>
 					</menulist>
-					<toolbarbutton label="-" class="addremove" oncommand="ScholarItemPane.removeSelectedNote();"/>
-					<toolbarbutton label="+" class="addremove" oncommand="ScholarItemPane.addNote();"/>
+					<label value="-" class="clicky" onclick="ScholarItemPane.removeSelectedNote();"/>
+					<label value="+" class="clicky" onclick="ScholarItemPane.addNote();"/>
 				</hbox>
 				<textbox id="scholar-notes-field"
 					type="timed" timeout="1000" oncommand="ScholarItemPane.modifySelectedNote();"
