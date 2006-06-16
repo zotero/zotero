@@ -112,7 +112,9 @@ Scholar.DB = new function(){
 			return false;
 		}
 		
-		return _getTypedValue(statement, 0);
+		var value = _getTypedValue(statement, 0);
+		statement.reset();
+		return value;
 	}
 	
 	
