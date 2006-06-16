@@ -107,6 +107,8 @@ ScholarItemPane = new function()
 
 		_updateNoteCount();
 		_notesMenu.selectedIndex = 0;
+		
+		onNoteSelected();
 	}
 	
 	function addDynamicRow(label, value, beforeElement)
@@ -269,8 +271,8 @@ ScholarItemPane = new function()
 		if(_notesMenu.selectedIndex == -1)
 			return;
 		
-		var id = _notesMenu.selectedItem.value;
-		if(id)
+		var id = _selectedNoteID();
+		if(id && id != "undefined")
 		{
 			_itemBeingEdited.updateNote(id,_notesField.value);
 		}
@@ -279,24 +281,33 @@ ScholarItemPane = new function()
 			id = _itemBeingEdited.addNote(_notesField.value);
 			_notesMenu.selectedItem.value = id;
 		}
-		var label = _notesField.value;
 		
-		_notesMenu.selectedItem.label = _noteToTitle(_notesField.value);
+		var label = _noteToTitle(_notesField.value);
+		_notesMenu.selectedItem.setAttribute('label', label);
+		_notesMenu.setAttribute('label', label);
 	}
 	
 	function removeSelectedNote()
 	{
-		var id = _notesMenu.selectedItem.value;
-		if(id)
+		var id = _selectedNoteID();
+		if(id && id != "undefined")
 		{
 			_itemBeingEdited.removeNote(id);
 		}
-		_notesMenu.removeitemAt(_notesMenu.selectedIndex);
+		
+		var oldIndex = _notesMenu.selectedIndex;
+		_notesMenu.removeItemAt(oldIndex);
+		_notesMenu.selectedIndex = Math.max(oldIndex-1,0);
 		
 		if(_notesMenu.firstChild.childNodes.length == 0)
+		{
 			addNote();
-		
-		_updateNoteCount();
+		}
+		else
+		{
+			onNoteSelected();
+			_updateNoteCount();
+		}
 	}
 	
 	function addNote()
@@ -305,13 +316,17 @@ ScholarItemPane = new function()
 		_notesMenu.appendItem('Untitled Note');
 		_notesMenu.selectedIndex = _notesMenu.firstChild.childNodes.length-1;
 		
+		onNoteSelected();
 		_updateNoteCount();
 	}
 	
 	function onNoteSelected()
 	{
-		var id = _notesMenu.selectedItem.value;
-		if(id)
+		var id = _selectedNoteID();
+		
+		Scholar.debug(id);
+		
+		if(id && id != "undefined")
 			_notesField.value = _itemBeingEdited.getNote(id);
 		else
 			_notesField.value = "";
@@ -319,9 +334,11 @@ ScholarItemPane = new function()
 	
 	function _noteToTitle(text)
 	{
-		var t = text.substring(0, 30);
+		var MAX_LENGTH = 100;
+		
+		var t = text.substring(0, MAX_LENGTH);
 		var ln = t.indexOf("\n");
-		if (ln>-1 && ln<30)
+		if (ln>-1 && ln<MAX_LENGTH)
 		{
 			t = t.substring(0, ln);
 		}
@@ -341,6 +358,11 @@ ScholarItemPane = new function()
 		var c = _notesMenu.firstChild.childNodes.length;
 		
 		_notesLabel.value = c + " note" + (c != 1 ? "s" : "") + ":";
+	}
+	
+	function _selectedNoteID()
+	{
+		return _notesMenu.selectedItem.getAttribute('value'); //for some reason, selectedItem.value is null sometimes.
 	}
 }
 

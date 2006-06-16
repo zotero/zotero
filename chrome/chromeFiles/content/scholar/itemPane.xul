@@ -14,7 +14,7 @@
 			<vbox>
 				<hbox align="center">
 					<label id="scholar-notes-label"/>
-					<menulist flex="1" id="scholar-notes-menu" onselect="ScholarItemPane.onNoteSelected();">
+					<menulist flex="1" id="scholar-notes-menu" oncommand="ScholarItemPane.onNoteSelected();">
 						<menupopup/>
 					</menulist>
 					<toolbarbutton label="-" class="addremove" oncommand="ScholarItemPane.removeSelectedNote();"/>
@@ -23,7 +23,7 @@
 				<textbox id="scholar-notes-field"
 					type="timed" timeout="1000" oncommand="ScholarItemPane.modifySelectedNote();"
 					multiline="true" flex="1"
-					onblur="ScholarItemPane.modifyField('notes',this.value);"/>
+					onblur="ScholarItemPane.modifySelectedNote();"/>
 			</vbox>
 			<vbox id="scholar-metadata" flex="1">
 				<popupset>

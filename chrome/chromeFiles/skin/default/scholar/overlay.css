@@ -72,3 +72,8 @@ tree #items-tree
 	color: white;
 	background: #666666;
 }
+
+textbox[multiline="true"][type="timed"]
+{
+	-moz-binding: url('chrome://scholar/content/customControls.xml#timed-textarea');
+}
