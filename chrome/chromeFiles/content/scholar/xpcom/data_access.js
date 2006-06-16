@@ -710,7 +710,8 @@ Scholar.Item.prototype.addNote = function(text){
 **/
 Scholar.Item.prototype.updateNote = function(noteID, text){
 	Scholar.DB.beginTransaction();
-	var sql = "UPDATE itemNotes SET note=? WHERE itemID=? AND noteID=?";
+	var sql = "UPDATE itemNotes SET note=?, dateModified=CURRENT_TIMESTAMP "
+		+ "WHERE itemID=? AND noteID=?";
 	Scholar.DB.query(sql,
 		[{'string':text}, {'int':this.getID()}, {'int':noteID}]
 	);
@@ -753,7 +754,8 @@ Scholar.Item.prototype.getNote = function(noteID){
 * Returns an array of noteIDs for this item
 **/
 Scholar.Item.prototype.getNotes = function(){
-	var sql = "SELECT noteID FROM itemNotes WHERE itemID=" + this.getID();
+	var sql = "SELECT noteID FROM itemNotes WHERE itemID=" + this.getID()
+		+ " ORDER BY dateCreated";
 	return Scholar.DB.columnQuery(sql);
 }
 

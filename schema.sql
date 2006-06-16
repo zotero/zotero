@@ -1,4 +1,4 @@
--- 20
+-- 21
 
     DROP TABLE IF EXISTS version;
     CREATE TABLE version (
@@ -65,6 +65,8 @@
         noteID INT,
         itemID INT,
         note TEXT,
+        dateCreated DATETIME DEFAULT CURRENT_TIMESTAMP,
+        dateModified DATETIME DEFAULT CURRENT_TIMESTAMP,
         PRIMARY KEY (noteID),
         FOREIGN KEY (itemID) REFERENCES items(itemID)
     );
