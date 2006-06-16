@@ -438,6 +438,7 @@ Scholar.ItemTreeView.prototype.onDragOver = function (evt,dropdata,session) { }
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
+Scholar.ItemTreeView.prototype.getParentIndex = function(row)					{ return -1; }
 Scholar.ItemTreeView.prototype.isSeparator = function(row) 						{ return false; }
 Scholar.ItemTreeView.prototype.isContainer = function(row) 						{ return false; }
 Scholar.ItemTreeView.prototype.getLevel = function(row) 						{ return 0; }

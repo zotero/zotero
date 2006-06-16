@@ -272,7 +272,7 @@ ScholarItemPane = new function()
 			return;
 		
 		var id = _selectedNoteID();
-		if(id && id != "undefined")
+		if(id)
 		{
 			_itemBeingEdited.updateNote(id,_notesField.value);
 		}
@@ -283,14 +283,18 @@ ScholarItemPane = new function()
 		}
 		
 		var label = _noteToTitle(_notesField.value);
-		_notesMenu.selectedItem.setAttribute('label', label);
+		_notesMenu.selectedItem.label = label;
 		_notesMenu.setAttribute('label', label);
 	}
 	
 	function removeSelectedNote()
 	{
+		if(_notesField.value != "")
+			if(!confirm("Are you sure you want to delete the selected note?"))
+				return;
+		
 		var id = _selectedNoteID();
-		if(id && id != "undefined")
+		if(id)
 		{
 			_itemBeingEdited.removeNote(id);
 		}
@@ -313,7 +317,7 @@ ScholarItemPane = new function()
 	function addNote()
 	{
 		modifySelectedNote();
-		_notesMenu.appendItem('Untitled Note');
+		_notesMenu.appendItem('Untitled Note',null);
 		_notesMenu.selectedIndex = _notesMenu.firstChild.childNodes.length-1;
 		
 		onNoteSelected();
@@ -326,7 +330,7 @@ ScholarItemPane = new function()
 		
 		Scholar.debug(id);
 		
-		if(id && id != "undefined")
+		if(id)
 			_notesField.value = _itemBeingEdited.getNote(id);
 		else
 			_notesField.value = "";
