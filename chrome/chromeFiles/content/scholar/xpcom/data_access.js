@@ -675,6 +675,15 @@ Scholar.Item.prototype.save = function(){
 }
 
 
+Scholar.Item.prototype.updateDateModified = function(){
+	Scholar.DB.query("UPDATE items SET dateModified=CURRENT_TIMESTAMP "
+		+ "WHERE itemID=" + this.getID());
+	var date = Scholar.DB.valueQuery("SELECT dateModified FROM items "
+		+ "WHERE itemID=" + this.getID());
+	this._data['dateModified'] = date;
+}
+
+
 //
 // Methods dealing with item notes
 //
@@ -690,7 +699,9 @@ Scholar.Item.prototype.addNote = function(text){
 	Scholar.DB.query(sql,
 		[{'int':noteID}, {'int':this.getID()}, {'string':text}]
 	);
+	this.updateDateModified();
 	Scholar.DB.commitTransaction();
+	Scholar.Notifier.trigger('modify', 'item', this.getID());
 	return noteID;
 }
 
@@ -698,19 +709,27 @@ Scholar.Item.prototype.addNote = function(text){
 * Update an item note
 **/
 Scholar.Item.prototype.updateNote = function(noteID, text){
+	Scholar.DB.beginTransaction();
 	var sql = "UPDATE itemNotes SET note=? WHERE itemID=? AND noteID=?";
-	return Scholar.DB.query(sql,
+	Scholar.DB.query(sql,
 		[{'string':text}, {'int':this.getID()}, {'int':noteID}]
 	);
+	this.updateDateModified();
+	Scholar.DB.commitTransaction();
+	Scholar.Notifier.trigger('modify', 'item', this.getID());
 }
 
 /**
 * Delete an item note
 **/
 Scholar.Item.prototype.removeNote = function(noteID){
+	Scholar.DB.beginTransaction();
 	var sql = "DELETE FROM itemNotes WHERE itemID=" + this.getID()
 		+ " AND noteID=" + noteID;
-	return Scholar.DB.query(sql);
+	Scholar.DB.query(sql);
+	this.updateDateModified();
+	Scholar.DB.commitTransaction();
+	Scholar.Notifier.trigger('modify', 'item', this.getID());
 }
 
 /**
@@ -758,6 +777,7 @@ Scholar.Item.prototype.erase = function(){
 	}
 	
 	sql = 'DELETE FROM itemCreators WHERE itemID=' + this.getID() + ";\n";
+	sql += 'DELETE FROM itemNotes WHERE itemID=' + this.getID() + ";\n";
 	sql += 'DELETE FROM itemKeywords WHERE itemID=' + this.getID() + ";\n";
 	sql += 'DELETE FROM itemData WHERE itemID=' + this.getID() + ";\n";
 	sql += 'DELETE FROM items WHERE itemID=' + this.getID() + ";\n";
