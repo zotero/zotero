@@ -153,8 +153,16 @@ Scholar.ItemTreeView.prototype.getCellText = function(row, column)
 	var obj = this._getItemAtRow(row);
 	var val;
 	
-	if(column.id != "typeIcon")
+	if(column.id == "numNotes")
+	{
+		var c = obj.numNotes();
+		if(c)	//don't display '0'
+			val = c;
+	}
+	else if(column.id != "typeIcon")
+	{
 		val = obj.getField(column.id);
+	}
 	
 	if(column.id == 'dateAdded' || column.id == 'dateModified')		//this is not so much that we will use this format for date, but a simple template for later revisions.
 	{

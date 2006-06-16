@@ -79,6 +79,11 @@
 							flex="1" persist="width ordinal hidden sortActive sortDirection"/>
 						<splitter class="tree-splitter"/>
 						<treecol
+							id="numNotes"
+							label="&items.numNotes_column;"
+							persist="width ordinal hidden sortActive sortDirection"/>
+						<splitter class="tree-splitter"/>
+						<treecol
 							id="source" hidden="true"
 							label="&items.source_column;"
 							flex="1" persist="width ordinal hidden sortActive sortDirection"/>
