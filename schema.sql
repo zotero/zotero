@@ -1,4 +1,4 @@
--- 19
+-- 20
 
     DROP TABLE IF EXISTS version;
     CREATE TABLE version (
@@ -59,6 +59,17 @@
     );
     DROP INDEX IF EXISTS value;
     CREATE INDEX value ON itemData(value);
+    
+    DROP TABLE IF EXISTS itemNotes;
+    CREATE TABLE itemNotes (
+        noteID INT,
+        itemID INT,
+        note TEXT,
+        PRIMARY KEY (noteID),
+        FOREIGN KEY (itemID) REFERENCES items(itemID)
+    );
+    DROP INDEX IF EXISTS itemNotes_itemID;
+    CREATE INDEX itemNotes_itemID ON itemNotes(itemID);
     
     DROP TABLE IF EXISTS keywords;
     CREATE TABLE keywords (

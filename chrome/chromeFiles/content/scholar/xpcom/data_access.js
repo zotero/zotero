@@ -675,6 +675,62 @@ Scholar.Item.prototype.save = function(){
 }
 
 
+//
+// Methods dealing with item notes
+//
+// save() is not required for note functions
+//
+/**
+* Add a new note to an item and return the noteID
+**/
+Scholar.Item.prototype.addNote = function(text){
+	Scholar.DB.beginTransaction();
+	var noteID = Scholar.getRandomID('itemNotes', 'noteID', 65535);
+	var sql = "INSERT INTO itemNotes (noteID, itemID, note) VALUES (?,?,?)";
+	Scholar.DB.query(sql,
+		[{'int':noteID}, {'int':this.getID()}, {'string':text}]
+	);
+	Scholar.DB.commitTransaction();
+	return noteID;
+}
+
+/**
+* Update an item note
+**/
+Scholar.Item.prototype.updateNote = function(noteID, text){
+	var sql = "UPDATE itemNotes SET note=? WHERE itemID=? AND noteID=?";
+	return Scholar.DB.query(sql,
+		[{'string':text}, {'int':this.getID()}, {'int':noteID}]
+	);
+}
+
+/**
+* Delete an item note
+**/
+Scholar.Item.prototype.removeNote = function(noteID){
+	var sql = "DELETE FROM itemNotes WHERE itemID=" + this.getID()
+		+ " AND noteID=" + noteID;
+	return Scholar.DB.query(sql);
+}
+
+/**
+* Get the text of an item note
+**/
+Scholar.Item.prototype.getNote = function(noteID){
+	var sql = "SELECT note FROM itemNotes WHERE itemID=" + this.getID()
+		+ " AND noteID=" + noteID;
+	return Scholar.DB.valueQuery(sql);
+}
+
+/**
+* Returns an array of noteIDs for this item
+**/
+Scholar.Item.prototype.getNotes = function(){
+	var sql = "SELECT noteID FROM itemNotes WHERE itemID=" + this.getID();
+	return Scholar.DB.columnQuery(sql);
+}
+
+
 /**
 * Delete item from database and clear from Scholar.Items internal array
 **/
