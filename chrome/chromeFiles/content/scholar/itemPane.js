@@ -50,7 +50,10 @@ ScholarItemPane = new function()
 	 * Loads an item 
 	 */
 	function viewItem(thisItem)
-	{		
+	{
+		if(_itemBeingEdited && thisItem.getID() == _itemBeingEdited.getID())
+			return;
+			
 		_itemBeingEdited = thisItem;
 		
 		reloadFields();

@@ -233,6 +233,13 @@ Scholar.ItemTreeView.prototype.sort = function()
 			return (typeA > typeB) ? -1 : (typeA < typeB) ? 1 : 0;
 		}
 	}
+	else if(column.id == 'numNotes')
+	{
+		function columnSort(a,b)
+		{
+			return b.numNotes() - a.numNotes();
+		}
+	}
 	else
 	{
 		function columnSort(a,b)
@@ -241,15 +248,29 @@ Scholar.ItemTreeView.prototype.sort = function()
 		}
 	}
 	
+	function doSort(a,b)
+	{
+		var s = columnSort(a,b);
+		if(s)
+			return s;
+		else
+			return secondarySort(a,b);
+	}
+	
 	function oppositeSort(a,b)
 	{
-		return(columnSort(a,b) * -1);
+		return(doSort(a,b) * -1);
+	}
+	
+	function secondarySort(a,b)
+	{
+		return (a.getField('dateModified') > b.getField('dateModified')) ? -1 : (a.getField('dateModified') < b.getField('dateModified')) ? 1 : 0;
 	}
 	
 	if(order)
 		this._dataItems.sort(oppositeSort);
 	else
-		this._dataItems.sort(columnSort);
+		this._dataItems.sort(doSort);
 		
 	this._refreshHashMap();
 	
