@@ -737,6 +737,10 @@ Scholar.Item.prototype.removeNote = function(noteID){
 * Returns number of notes in item
 **/
 Scholar.Item.prototype.numNotes = function(){
+	if (!this.getID()){
+		return 0;
+	}
+	
 	var sql = "SELECT COUNT(*) FROM itemNotes WHERE itemID=" + this.getID();
 	return parseInt(Scholar.DB.valueQuery(sql));
 }
@@ -754,6 +758,10 @@ Scholar.Item.prototype.getNote = function(noteID){
 * Returns an array of noteIDs for this item
 **/
 Scholar.Item.prototype.getNotes = function(){
+	if (!this.getID()){
+		return [];
+	}
+	
 	var sql = "SELECT noteID FROM itemNotes WHERE itemID=" + this.getID()
 		+ " ORDER BY dateCreated";
 	return Scholar.DB.columnQuery(sql);
