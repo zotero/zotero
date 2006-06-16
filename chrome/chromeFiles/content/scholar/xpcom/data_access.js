@@ -995,7 +995,8 @@ Scholar.Items = new function(){
 			+ "(SELECT creatorID FROM creators WHERE firstName LIKE ?1 "
 				+ "OR lastName LIKE ?1) UNION "
 			+ "SELECT itemID FROM itemKeywords WHERE keywordID IN "
-			+ "(SELECT keywordID FROM keywords WHERE keyword LIKE ?1)";
+			+ "(SELECT keywordID FROM keywords WHERE keyword LIKE ?1) UNION "
+			+ "SELECT itemID FROM itemNotes WHERE note LIKE ?1";
 		
 		var sqlParams = [{'string':'%' + text + '%'}];
 		
