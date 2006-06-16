@@ -319,7 +319,12 @@ ScholarItemPane = new function()
 	
 	function _noteToTitle(text)
 	{
-		var t = text.substring(0, Math.min(text.indexOf("\n"), 30) );
+		var t = text.substring(0, 30);
+		var ln = t.indexOf("\n");
+		if (ln>-1 && ln<30)
+		{
+			t = t.substring(0, ln);
+		}
 		
 		if(t == "")
 		{
