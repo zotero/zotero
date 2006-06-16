@@ -59,8 +59,9 @@ Scholar.DB = new function(){
 				var dataset = new Array();
 				while (statement.executeStep()){
 					var row = new Array();
+					
 					for(var i=0; i<statement.columnCount; i++) {
-						row[statement.getColumnName(i)] = statement.getUTF8String(i);
+						row[statement.getColumnName(i)] = _getTypedValue(statement, i);
 					}
 					dataset.push(row);
 				}
@@ -110,14 +111,8 @@ Scholar.DB = new function(){
 			statement.reset();
 			return false;
 		}
-		if (sql.indexOf('SELECT COUNT(*)') > -1){
-			var value = statement.getInt32(0);
-		}
-		else {
-			var value = statement.getUTF8String(0);
-		}
-		statement.reset();
-		return value;
+		
+		return _getTypedValue(statement, 0);
 	}
 	
 	
@@ -141,7 +136,7 @@ Scholar.DB = new function(){
 		if (statement){
 			var column = new Array();
 			while (statement.executeStep()){
-				column.push(statement.getUTF8String(0));
+				column.push(_getTypedValue(statement, 0));
 			}
 			statement.reset();
 			return column.length ? column : false;
@@ -313,5 +308,28 @@ Scholar.DB = new function(){
 		_connection = store.openDatabase(file);
 		
 		return _connection;
+	}
+	
+	
+	function _getTypedValue(statement, i){
+		var type = statement.getTypeOfIndex(i);
+		switch (type){
+			case statement.VALUE_TYPE_INTEGER:
+				var func = statement.getInt32;
+				break;
+			case statement.VALUE_TYPE_TEXT:
+				var func = statement.getUTF8String;
+				break;
+			case statement.VALUE_TYPE_NULL:
+				return null;
+			case statement.VALUE_TYPE_FLOAT:
+				var func = statement.getDouble;
+				break;
+			case statement.VALUE_TYPE_BLOB:
+				var func = statement.getBlob;
+				break;
+		}
+		
+		return func(i);
 	}
 }
