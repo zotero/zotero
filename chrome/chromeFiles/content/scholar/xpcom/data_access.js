@@ -714,6 +714,14 @@ Scholar.Item.prototype.removeNote = function(noteID){
 }
 
 /**
+* Returns number of notes in item
+**/
+Scholar.Item.prototype.numNotes = function(){
+	var sql = "SELECT COUNT(*) FROM itemNotes WHERE itemID=" + this.getID();
+	return parseInt(Scholar.DB.valueQuery(sql));
+}
+
+/**
 * Get the text of an item note
 **/
 Scholar.Item.prototype.getNote = function(noteID){
