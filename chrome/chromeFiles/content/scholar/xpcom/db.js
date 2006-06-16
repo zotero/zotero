@@ -215,7 +215,12 @@ Scholar.DB = new function(){
 		}
 		else {
 			Scholar.debug('Committing transaction',5);
-			db.commitTransaction();
+			try {
+				db.commitTransaction();
+			}
+			catch(e){
+				throw(e + ' [ERROR: ' + db.lastErrorString + ']');
+			}
 		}
 	}
 	
@@ -230,7 +235,12 @@ Scholar.DB = new function(){
 		else {
 			Scholar.debug('Rolling back transaction', 5);
 			_transactionRollback = false;
-			db.rollbackTransaction();
+			try {
+				db.rollbackTransaction();
+			}
+			catch(e){
+				throw(e + ' [ERROR: ' + db.lastErrorString + ']');
+			}
 		}
 	}
 	
