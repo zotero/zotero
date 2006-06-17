@@ -68,13 +68,14 @@ var ScholarPane = new function()
 	}
 		
 	/*
-	 * Called when the window closes
+	 * Create a new item
 	 */
 	function newItem(typeID)
 	{
-		ScholarItemPane.viewItem(new Scholar.Item(typeID));
-		document.getElementById('scholar-view-item').hidden = false;
-		document.getElementById('scholar-view-selected-label').hidden = true;
+		var item = new Scholar.Item(typeID);
+		item.save();
+		if(itemsView && itemsView._itemGroup.isCollection())
+			itemsView._itemGroup.ref.addItem(item.getID());
 	}
 	
 	function newCollection()

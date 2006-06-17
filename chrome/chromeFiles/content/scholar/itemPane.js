@@ -174,8 +174,11 @@ ScholarItemPane = new function()
 			valueElement.setAttribute('onclick', 'ScholarItemPane.showEditor(this);');
 			valueElement.className = 'clicky';
 		}
-		
-		var firstSpace = valueText.indexOf(" ");
+
+		var firstSpace;		
+		if(typeof valueText == 'string')
+			firstSpace = valueText.indexOf(" ");
+
 		if((firstSpace == -1 && valueText.length > 29 ) || firstSpace > 29)
 		{
 			valueElement.setAttribute('crop', 'end');
@@ -284,15 +287,15 @@ ScholarItemPane = new function()
 		{
 			_itemBeingEdited.updateNote(id,_notesField.value);
 		}
-		else //new note
+		else if(_notesField.value)//new note
 		{
 			id = _itemBeingEdited.addNote(_notesField.value);
-			_notesMenu.selectedItem.value = id;
+			_notesMenu.selectedItem.setAttribute('value',id);
 		}
 		
 		var label = _noteToTitle(_notesField.value);
-		_notesMenu.selectedItem.label = label;
-		_notesMenu.setAttribute('label', label);
+		_notesMenu.selectedItem.label = label;		//sets the individual item label
+		_notesMenu.setAttribute('label', label);	//sets the 'overall' label of the menu... not usually updated unless the item is reselected
 	}
 	
 	function removeSelectedNote()

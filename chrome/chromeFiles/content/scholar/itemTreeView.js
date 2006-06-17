@@ -94,7 +94,7 @@ Scholar.ItemTreeView.prototype.notify = function(action, type, ids)
 	}
 	else if(action == 'modify') 	//must check for null because it could legitimately be 0
 	{
-		if(this._itemRowMap[ids])
+		if(this._itemRowMap[ids] != null)
 		{
 			this._treebox.invalidateRow(row);
 			madeChanges = true;
@@ -126,9 +126,14 @@ Scholar.ItemTreeView.prototype.notify = function(action, type, ids)
 		}
 		
 		if(action == 'add')
+		{
 			this.selection.select(this._itemRowMap[item.getID()]);
+			this._treebox.ensureRowIsVisible(this._itemRowMap[item.getID()]);
+		}
 		else
+		{
 			this.rememberSelection();
+		}
 	}
 	this.selection.selectEventsSuppressed = false;
 }
