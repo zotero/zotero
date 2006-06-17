@@ -49,7 +49,7 @@ Scholar.Ingester.Model.prototype.detachRepository = function() {}
 // Scholar.Ingester.Utilities class, a set of methods to assist in data
 // extraction. Most code here was stolen directly from the Piggy Bank project.
 Scholar.Ingester.Utilities = function(hiddenBrowser) {
-	this.hiddenBrowser = hiddenBrowser;
+	this._hiddenBrowser = hiddenBrowser;
 }
 
 // Adapter for Piggy Bank function to print debug messages; log level is
@@ -115,7 +115,7 @@ Scholar.Ingester.Utilities.prototype.loadDocument = function(url, browser, succe
 // exception - a function to execute if an exception occurs (exceptions are
 //             also logged in the Firefox Scholar log)
 Scholar.Ingester.Utilities.prototype.processDocuments = function(browser, firstDoc, urls, processor, done, exception) {
-	var hiddenBrowser = this.hiddenBrowser;
+	var hiddenBrowser = this._hiddenBrowser;
 	Scholar.debug("processDocuments called");
 	
 	try {
@@ -301,11 +301,13 @@ Scholar.Ingester.Utilities.prototype.importMARCRecord = function(record, uri, mo
 	// Extract title
 	model = this._MARCAssociateField(record, uri, model, '245', prefixDC + 'title', this._MARCCleanString);
 	// Extract edition
-	model = this._MARCAssociateField(record, uri, model, '250', prefixDC + 'edition', this._MARCCleanString);
+	model = this._MARCAssociateField(record, uri, model, '250', prefixDC + 'hasVersion', this._MARCCleanString);
 	// Extract place info
 	model = this._MARCAssociateField(record, uri, model, '260', prefixDummy + 'place', this._MARCCleanString, '', 'a');
 	// Extract publisher info
 	model = this._MARCAssociateField(record, uri, model, '260', prefixDC + 'publisher', this._MARCCleanString, '', 'b');
+	// Extract year
+	model = this._MARCAssociateField(record, uri, model, '260', prefixDC + 'year', this._MARCCleanString, '', 'c');
 	// Extract series
 	model = this._MARCAssociateField(record, uri, model, '440', prefixDummy + 'series', this._MARCCleanString);
 }
@@ -411,9 +413,13 @@ Scholar.Ingester.HTTPUtilities.prototype.stateChange = function(xmlhttp, onStatu
  * browser - browser window object of document
  * model - data model for semantic scrapers
  * scraper - best scraper to use to scrape page
+ * items - items returned after page is scraped
  *
  * Private properties:
  * _sandbox - sandbox for code execution
+ * _appSvc - AppShellService instance
+ * _hiddenBrowser - hiden browser object
+ * _scrapeCallback - callback function to be executed when scraping is complete
  */
 
 //////////////////////////////////////////////////////////////////////////////
@@ -426,12 +432,13 @@ Scholar.Ingester.HTTPUtilities.prototype.stateChange = function(xmlhttp, onStatu
  * Constructor for Document object
  */
 Scholar.Ingester.Document = function(browserWindow, hiddenBrowser){
+	this.scraper = null;
 	this.browser = browserWindow;
 	this.model = new Scholar.Ingester.Model();
-	this.appSvc = Cc["@mozilla.org/appshell/appShellService;1"]
+	this.items = new Array();
+	this._appSvc = Cc["@mozilla.org/appshell/appShellService;1"]
 	             .getService(Ci.nsIAppShellService);
-	this.scraper = null;
-	this.hiddenBrowser = hiddenBrowser;
+	this._hiddenBrowser = hiddenBrowser;
 	this._generateSandbox();
 }
 
@@ -474,7 +481,7 @@ Scholar.Ingester.Document.prototype.canScrape = function(currentScraper) {
 	if((!currentScraper.urlPattern || canScrape)
 	  && currentScraper.scraperDetectCode) {
 		Scholar.debug("Checking scraperDetectCode");
-		var scraperSandbox = this.sandbox;
+		var scraperSandbox = this._sandbox;
 		try {
 			canScrape = Components.utils.evalInSandbox("(function(){\n" +
 							   currentScraper.scraperDetectCode +
@@ -498,7 +505,7 @@ Scholar.Ingester.Document.prototype.scrapePage = function(callback) {
 	
 	Scholar.debug("Scraping "+this.browser.contentDocument.location.href);
 	
-	var scraperSandbox = this.sandbox;
+	var scraperSandbox = this._sandbox;
 	try {
 		Components.utils.evalInSandbox(this.scraper.scraperJavaScript, scraperSandbox);
 	} catch(e) {
@@ -550,20 +557,20 @@ Scholar.Ingester.Document.prototype._scrapePageComplete = function() {
  * Generates a sandbox for scraping/scraper detection
  */
 Scholar.Ingester.Document.prototype._generateSandbox = function() {
-	this.sandbox = new Components.utils.Sandbox(this.browser.contentDocument.location.href);
-	this.sandbox.browser = this.browser;
-	this.sandbox.doc = this.sandbox.browser.contentDocument;
-	this.sandbox.utilities = new Scholar.Ingester.Utilities(this.hiddenBrowser);
-	this.sandbox.utilities.HTTPUtilities = new Scholar.Ingester.HTTPUtilities(this.appSvc.hiddenDOMWindow);
-	this.sandbox.window = this.window;
-	this.sandbox.model = this.model;
-	this.sandbox.XPathResult = Components.interfaces.nsIDOMXPathResult;
-	this.sandbox.MARC_Record = Scholar.Ingester.MARC_Record;
-	this.sandbox.MARC_Record.prototype = new Scholar.Ingester.MARC_Record();
+	this._sandbox = new Components.utils.Sandbox(this.browser.contentDocument.location.href);
+	this._sandbox.browser = this.browser;
+	this._sandbox.doc = this._sandbox.browser.contentDocument;
+	this._sandbox.utilities = new Scholar.Ingester.Utilities(this._hiddenBrowser);
+	this._sandbox.utilities.HTTPUtilities = new Scholar.Ingester.HTTPUtilities(this._appSvc.hiddenDOMWindow);
+	this._sandbox.window = this.window;
+	this._sandbox.model = this.model;
+	this._sandbox.XPathResult = Components.interfaces.nsIDOMXPathResult;
+	this._sandbox.MARC_Record = Scholar.Ingester.MARC_Record;
+	this._sandbox.MARC_Record.prototype = new Scholar.Ingester.MARC_Record();
 	
 	var me = this;
-	this.sandbox.wait = function(){ me._waitForCompletion = true; };
-	this.sandbox.done = function(){ me._scrapePageComplete(); };
+	this._sandbox.wait = function(){ me._waitForCompletion = true; };
+	this._sandbox.done = function(){ me._scrapePageComplete(); };
 }
 
 /*
@@ -571,103 +578,98 @@ Scholar.Ingester.Document.prototype._generateSandbox = function() {
  * (Ontologies are hard-coded until we have a real way of dealing with them)
  */
 Scholar.Ingester.Document.prototype._updateDatabase = function() {
+	Scholar.debug("doing updating");
+	
 	var prefixRDF = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#';
 	var prefixDC = 'http://purl.org/dc/elements/1.1/';
 	var prefixDCMI = 'http://purl.org/dc/dcmitype/';
 	var prefixDummy = 'http://chnm.gmu.edu/firefox-scholar/';
 	
-	for(var uri in this.model.data) {
-		if(this.model.data[uri][prefixRDF + 'type'] == (prefixDummy + 'journal')) {
-			var newItem = Scholar.Items.getNewItemByType(2);
-		} else {
-			var newItem = Scholar.Items.getNewItemByType(1);
-		}
-		newItem.setField("source", uri);
-		if(this.model.data[uri][prefixDC + 'title']) {
-			newItem.setField("title", this.model.data[uri][prefixDC + 'title'][0]);
-		}
-		var creatorIndex = 0;
-		if(this.model.data[uri][prefixDC + 'creator']) {
-			for(i in this.model.data[uri][prefixDC + 'creator']) {
-				var creator = this.model.data[uri][prefixDC + 'creator'][i];
-				var spaceIndex = creator.lastIndexOf(" ");
-				var lastName = creator.substring(spaceIndex+1, creator.length);
-				var firstName = creator.substring(0, spaceIndex);
+	try {
+		for(var uri in this.model.data) {
+			if(this.model.data[uri][prefixRDF + 'type'] == (prefixDummy + 'journal')) {
+				var newItem = Scholar.Items.getNewItemByType(2);
+			} else {
+				var newItem = Scholar.Items.getNewItemByType(1);
+			}
+			newItem.setField("source", uri);
+			if(this.model.data[uri][prefixDC + 'title']) {
+				newItem.setField("title", this.model.data[uri][prefixDC + 'title'][0]);
+			}
+			var creatorIndex = 0;
+			if(this.model.data[uri][prefixDC + 'creator']) {
+				for(i in this.model.data[uri][prefixDC + 'creator']) {
+					var creator = this.model.data[uri][prefixDC + 'creator'][i];
+					var spaceIndex = creator.lastIndexOf(" ");
+					var lastName = creator.substring(spaceIndex+1, creator.length);
+					var firstName = creator.substring(0, spaceIndex);
+					
+					newItem.setCreator(creatorIndex, firstName, lastName, 1);
+					creatorIndex++;
+				}
+			}
+			if(this.model.data[uri][prefixDC + 'contributor']) {
+				for(i in this.model.data[uri][prefixDC + 'contributor']) {
+					var creator = this.model.data[uri][prefixDC + 'contributor'][i];
+					var spaceIndex = creator.lastIndexOf(" ");
+					var lastName = creator.substring(spaceIndex+1, creator.length);
+					var firstName = creator.substring(0, spaceIndex);
 				
-				newItem.setCreator(creatorIndex, firstName, lastName, 1);
-				creatorIndex++;
-			}
-		}
-		if(this.model.data[uri][prefixDC + 'contributor']) {
-			for(i in this.model.data[uri][prefixDC + 'contributor']) {
-				var creator = this.model.data[uri][prefixDC + 'contributor'][i];
-				var spaceIndex = creator.lastIndexOf(" ");
-				var lastName = creator.substring(spaceIndex+1, creator.length);
-				var firstName = creator.substring(0, spaceIndex);
-			
-				newItem.setCreator(creatorIndex, firstName, lastName, 2);
-				creatorIndex++;
-			}
-		}
-		if(this.model.data[uri][prefixRDF + 'type'] == (prefixDummy + 'journal')) {
-			if(this.model.data[uri][prefixDummy + 'publication']) {
-				newItem.setField("publication", this.model.data[uri][prefixDummy + 'publication'][0]);
-			}
-			if(this.model.data[uri][prefixDummy + 'volume']) {
-				newItem.setField("volume", this.model.data[uri][prefixDummy + 'volume'][0]);
-			}
-			if(this.model.data[uri][prefixDummy + 'number']) {
-				newItem.setField("number", this.model.data[uri][prefixDummy + 'number'][0]);
-			}
-			if(this.model.data[uri][prefixDummy + 'pages']) {
-				newItem.setField("pages", this.model.data[uri][prefixDummy + 'pages'][0]);
-			}
-			if(this.model.data[uri][prefixDC + 'identifier']) {
-				for(i in this.model.data[uri][prefixDC + 'identifier']) {
-					if(this.model.data[uri][prefixDC + 'identifier'][i].substring(0, 4) == 'ISSN') {
-						newItem.setField("ISSN", this.model.data[uri][prefixDC + 'identifier'][0].substring(5));
-						break;
-					}
+					newItem.setCreator(creatorIndex, firstName, lastName, 2);
+					creatorIndex++;
 				}
 			}
-		} else {
-			if(this.model.data[uri][prefixDC + 'publisher']) {
-				newItem.setField("publisher", this.model.data[uri][prefixDC + 'publisher'][0]);
-			}
-			if(this.model.data[uri][prefixDC + 'year']) {
-				if(this.model.data[uri][prefixDC + 'year'].length == 4) {
+			if(this.model.data[uri][prefixRDF + 'type'] == (prefixDummy + 'journal')) {
+				if(this.model.data[uri][prefixDummy + 'publication']) {
+					newItem.setField("publication", this.model.data[uri][prefixDummy + 'publication'][0]);
+				}
+				if(this.model.data[uri][prefixDummy + 'volume']) {
+					newItem.setField("volume", this.model.data[uri][prefixDummy + 'volume'][0]);
+				}
+				if(this.model.data[uri][prefixDummy + 'number']) {
+					newItem.setField("number", this.model.data[uri][prefixDummy + 'number'][0]);
+				}
+				if(this.model.data[uri][prefixDummy + 'pages']) {
+					newItem.setField("pages", this.model.data[uri][prefixDummy + 'pages'][0]);
+				}
+				if(this.model.data[uri][prefixDC + 'identifier']) {
+					for(i in this.model.data[uri][prefixDC + 'identifier']) {
+						if(this.model.data[uri][prefixDC + 'identifier'][i].substring(0, 4) == 'ISSN') {
+							newItem.setField("ISSN", this.model.data[uri][prefixDC + 'identifier'][0].substring(5));
+							break;
+						}
+					}
+				}
+			} else {
+				if(this.model.data[uri][prefixDC + 'publisher']) {
+					newItem.setField("publisher", this.model.data[uri][prefixDC + 'publisher'][0]);
+				}
+				if(this.model.data[uri][prefixDC + 'year']) {
 					newItem.setField("year", this.model.data[uri][prefixDC + 'year'][0]);
-				} else {
-					try {
-						newItem.setField(this.model.data[uri][prefixDC + 'year'][0].substring(
-								 this.model.data[uri][prefixDC + 'year'][0].lastIndexOf(" ")+1,
-								 this.model.data[uri][prefixDC + 'year'][0].length));
-					} catch(e) {}
+				} else if(this.model.data[uri][prefixDC + 'date'] && this.model.data[uri][prefixDC + 'date'][0].length >= 4) {
+					newItem.setField("year", this.model.data[uri][prefixDC + 'date'][0].substr(0, 4));
 				}
-			}
-			if(this.model.data[uri][prefixDC + 'edition']) {
-				newItem.setField("edition", this.model.data[uri][prefixDC + 'edition'][0]);
-			}
-			if(this.model.data[uri][prefixDummy + 'series']) {
-				newItem.setField("series", this.model.data[uri][prefixDummy + 'series'][0]);
-			}
-			if(this.model.data[uri][prefixDummy + 'place']) {
-				newItem.setField("place", this.model.data[uri][prefixDummy + 'place'][0]);
-			}
-			if(this.model.data[uri][prefixDC + 'identifier']) {
-				for(i in this.model.data[uri][prefixDC + 'identifier']) {
-					if(this.model.data[uri][prefixDC + 'identifier'][i].substring(0, 4) == 'ISBN') {
-						newItem.setField("ISBN", this.model.data[uri][prefixDC + 'identifier'][0].substring(5));
-						break;
+				if(this.model.data[uri][prefixDC + 'hasVersion']) {
+					newItem.setField("edition", this.model.data[uri][prefixDC + 'hasVersion'][0]);
+				}
+				if(this.model.data[uri][prefixDummy + 'series']) {
+					newItem.setField("series", this.model.data[uri][prefixDummy + 'series'][0]);
+				}
+				if(this.model.data[uri][prefixDummy + 'place']) {
+					newItem.setField("place", this.model.data[uri][prefixDummy + 'place'][0]);
+				}
+				if(this.model.data[uri][prefixDC + 'identifier']) {
+					for(i in this.model.data[uri][prefixDC + 'identifier']) {
+						if(this.model.data[uri][prefixDC + 'identifier'][i].substring(0, 4) == 'ISBN') {
+							newItem.setField("ISBN", this.model.data[uri][prefixDC + 'identifier'][0].substring(5));
+							break;
+						}
 					}
 				}
 			}
+			this.items.push(newItem);
 		}
-		newItem.save();
-		
-		// First one is stored so as to be accessible
-		if(!this.item) {
-			this.item = newItem;
-		}
+	} catch(ex) {
+		Scholar.debug('Error in Scholar.Ingester.Document._updateDatabase: '+ex);
 	}
 }

@@ -22,6 +22,30 @@ var cleanString = function(s) {
 	return s.replace(/ +/g, " ");
 }
 
+var dateToISO = function(jsDate) {
+	var date = "";
+	var year = jsDate.getFullYear().toString();
+	var month = (jsDate.getMonth()+1).toString();
+	var day = jsDate.getDate().toString();
+	
+	for(var i = year.length; i<4; i++) {
+		date += "0";
+	}
+	date += year+"-";
+	
+	if(month.length == 1) {
+		date += "0";
+	}
+	date += month+"-";
+	
+	if(day.length == 1) {
+		date += "0";
+	}
+	date += day;
+	
+	return date;
+}
+
 var uri = doc.location.href;
 
 model.addStatement(uri, prefixRDF + "type", prefixDummy + "book", false);
@@ -43,10 +67,12 @@ for (var i = 0; i < elmts.length; i++) {
 	var attribute = cleanString(getNode(doc, elmt, ''./B[1]/text()[1]'', nsResolver).nodeValue);
 	if(getNode(doc, elmt, ''./text()[1]'', nsResolver)) {
 		var value = cleanString(getNode(doc, elmt, ''./text()[1]'', nsResolver).nodeValue);
-		
 		if(attribute == "Publisher:") {
 			if(value.lastIndexOf("(") != -1) {
-				var date = value.substring(value.lastIndexOf("(")+1, value.length-1);
+				var jsDate = value.substring(value.lastIndexOf("(")+1, value.length-1);
+				jsDate = new Date(jsDate);
+				var date = dateToISO(jsDate);
+				
 				value = value.substring(0, value.lastIndexOf("(")-1);
 			}
 			if(value.lastIndexOf(";") != -1) {

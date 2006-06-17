@@ -211,18 +211,20 @@ Scholar.Ingester.Interface._deleteDocument = function(browser) {
 /*
  * Callback to be executed when scraping is complete
  */
-Scholar.Ingester.Interface._finishScraping = function(documentObject) {
-	if(documentObject.item) {
+Scholar.Ingester.Interface._finishScraping = function(obj) {
+	if(obj.items.length) {
+		var item1 = obj.items[0];
+		
 		Scholar.Ingester.Interface.scrapeProgress.changeHeadline(Scholar.getString("ingester.scrapeComplete"));
 		
-		var fields = Scholar.ItemFields.getItemTypeFields(documentObject.item.getField("itemTypeID"));
+		var fields = Scholar.ItemFields.getItemTypeFields(item1.getField("itemTypeID"));
 			
 		var titleLabel = Scholar.getString("itemFields.title") + ":"
-		Scholar.Ingester.Interface.scrapeProgress.addResult(titleLabel, this.item.getField("title"));
-		var creators = documentObject.item.numCreators();
+		Scholar.Ingester.Interface.scrapeProgress.addResult(titleLabel, item1.getField("title"));
+		var creators = item1.numCreators();
 		if(creators) {
 			for(var i=0; i<creators; i++) {
-				var creator = documentObject.item.getCreator(i);
+				var creator = item1.getCreator(i);
 				var label = Scholar.getString("creatorTypes."+Scholar.CreatorTypes.getTypeName(creator.creatorTypeID)) + ":";
 				var data = creator.firstName + ' ' + creator.lastName;
 				Scholar.Ingester.Interface.scrapeProgress.addResult(label, data);
@@ -230,7 +232,7 @@ Scholar.Ingester.Interface._finishScraping = function(documentObject) {
 		}
 		
 		for(i in fields) {
-			var data = documentObject.item.getField(fields[i]);
+			var data = item1.getField(fields[i]);
 			if(data) {
 				var name = Scholar.ItemFields.getName(fields[i]);
 				if(name != "source") {
@@ -238,6 +240,11 @@ Scholar.Ingester.Interface._finishScraping = function(documentObject) {
 					Scholar.Ingester.Interface.scrapeProgress.addResult(label, data);
 				}
 			}
+		}
+		
+		// Save items
+		for(i in obj.items) {
+			obj.items[i].save();
 		}
 	} else {
 		Scholar.Ingester.Interface.scrapeProgress.changeHeadline(Scholar.getString("ingester.scrapeError"));
