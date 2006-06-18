@@ -1,9 +1,9 @@
--- 5
+-- 6
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-06-12 20:00:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-06-18 11:19:00'));
 
-REPLACE INTO "scrapers" VALUES('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006-06-12 20:00:00', 'Amazon.com Scraper', 'Simon Kornblith', '^http://www\.amazon\.com/gp/product/', NULL, 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
+REPLACE INTO "scrapers" VALUES('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006-06-18 10:15:00', 'Amazon.com Scraper', 'Simon Kornblith', '^http://www\.amazon\.com/gp/product/', NULL, 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
 var prefixDCMI = ''http://purl.org/dc/dcmitype/'';
 var prefixDummy = ''http://chnm.gmu.edu/firefox-scholar/'';
@@ -13,42 +13,7 @@ var nsResolver = namespace ? function(prefix) {
 	if (prefix == ''x'') return namespace; else return null;
 } : null;
 
-var getNode = function(doc, contextNode, xpath, nsResolver) {
-	return doc.evaluate(xpath, contextNode, nsResolver, XPathResult.ANY_TYPE,null).iterateNext();
-}
-
-var cleanString = function(s) {
-	s = utilities.trimString(s);
-	return s.replace(/ +/g, " ");
-}
-
-var dateToISO = function(jsDate) {
-	var date = "";
-	var year = jsDate.getFullYear().toString();
-	var month = (jsDate.getMonth()+1).toString();
-	var day = jsDate.getDate().toString();
-	
-	for(var i = year.length; i<4; i++) {
-		date += "0";
-	}
-	date += year+"-";
-	
-	if(month.length == 1) {
-		date += "0";
-	}
-	date += month+"-";
-	
-	if(day.length == 1) {
-		date += "0";
-	}
-	date += day;
-	
-	return date;
-}
-
 var uri = doc.location.href;
-
-model.addStatement(uri, prefixRDF + "type", prefixDummy + "book", false);
 
 // Retrieve authors
 var xpath = ''/html/body/table/tbody/tr/td[2]/form/div[@class="buying"]/a'';
@@ -56,7 +21,7 @@ var elmts = utilities.gatherElementsOnXPath(doc, doc, xpath, nsResolver);
 for (var i = 0; i < elmts.length; i++) {
 	var elmt = elmts[i];
 	
-	model.addStatement(uri, prefixDC + ''creator'', cleanString(getNode(doc, elmt, ''./text()[1]'', nsResolver).nodeValue), false); // Use your own type here
+	model.addStatement(uri, prefixDC + ''creator'', utilities.cleanString(utilities.getNode(doc, elmt, ''./text()[1]'', nsResolver).nodeValue), false); // Use your own type here
 }
 
 // Retrieve data from "Product Details" box
@@ -64,14 +29,14 @@ var xpath = ''/html/body/table/tbody/tr/td[2]/table/tbody/tr/td[@class="bucket"]
 var elmts = utilities.gatherElementsOnXPath(doc, doc, xpath, nsResolver);
 for (var i = 0; i < elmts.length; i++) {
 	var elmt = elmts[i];
-	var attribute = cleanString(getNode(doc, elmt, ''./B[1]/text()[1]'', nsResolver).nodeValue);
-	if(getNode(doc, elmt, ''./text()[1]'', nsResolver)) {
-		var value = cleanString(getNode(doc, elmt, ''./text()[1]'', nsResolver).nodeValue);
+	var attribute = utilities.cleanString(utilities.getNode(doc, elmt, ''./B[1]/text()[1]'', nsResolver).nodeValue);
+	if(utilities.getNode(doc, elmt, ''./text()[1]'', nsResolver)) {
+		var value = utilities.cleanString(utilities.getNode(doc, elmt, ''./text()[1]'', nsResolver).nodeValue);
 		if(attribute == "Publisher:") {
 			if(value.lastIndexOf("(") != -1) {
 				var jsDate = value.substring(value.lastIndexOf("(")+1, value.length-1);
 				jsDate = new Date(jsDate);
-				var date = dateToISO(jsDate);
+				var date = utilities.dateToISO(jsDate);
 				
 				value = value.substring(0, value.lastIndexOf("(")-1);
 			}
@@ -95,13 +60,14 @@ for (var i = 0; i < elmts.length; i++) {
 
 var xpath = ''/html/body/table/tbody/tr/td[2]/form/div[@class="buying"]/b[@class="sans"]'';
 var elmts = utilities.gatherElementsOnXPath(doc, doc, xpath, nsResolver);
-var title = cleanString(getNode(doc, elmts[0], ''./text()[1]'', nsResolver).nodeValue);
+var title = utilities.cleanString(utilities.getNode(doc, elmts[0], ''./text()[1]'', nsResolver).nodeValue);
 if(title.lastIndexOf("(") != -1 && title.lastIndexOf(")") == title.length-1) {
 	title = title.substring(0, title.lastIndexOf("(")-1);
 }
-model.addStatement(uri, prefixDC + ''title'', title);');
+model.addStatement(uri, prefixDC + ''title'', title);
+model.addStatement(uri, prefixRDF + "type", prefixDummy + "book", false);');
 
-REPLACE INTO "scrapers" VALUES('838d8849-4ffb-9f44-3d0d-aa8a0a079afe', '2006-06-12 20:00:00', 'WorldCat Scraper', 'Simon Kornblith', '^http://newfirstsearch\.oclc\.org/WebZ/',
+REPLACE INTO "scrapers" VALUES('838d8849-4ffb-9f44-3d0d-aa8a0a079afe', '2006-06-18 11:02:00', 'WorldCat Scraper', 'Simon Kornblith', '^http://newfirstsearch\.oclc\.org/WebZ/',
 'if(doc.title == ''FirstSearch: WorldCat Detailed Record'') {
 	return true;
 }
@@ -139,22 +105,6 @@ if(rMatch) {
 
 var newUri = ''http://newfirstsearch.oclc.org/WebZ/DirectExport?numrecs=10:smartpage=directexport:entityexportnumrecs=10:entityexportresultset='' + resultset + '':entityexportrecno='' + number + '':sessionid='' + sessionid + '':entitypagenum=35:0'';
 
-model.addStatement(uri, prefixRDF + "type", prefixDummy + "book", false);
-
-function cleanAuthor(author) {
-	author = author.replace(/^[\s\.\,\/\[\]\:]+/, '''');
-	author = author.replace(/[\s\,\/\[\]\:\.]+$/, '''');
-	// Add period for initials
-	if(author.substring(author.length-2, author.length-1) == " ") {
-		author += ".";
-	}
-	var splitNames = author.split('', '');
-	if(splitNames.length > 1) {
-		author = splitNames[1]+'' ''+splitNames[0];
-	}
-	return author;
-}
-
 utilities.HTTPUtilities.doPost(newUri, ''exportselect=record&exporttype=plaintext'', null, function(text) {
 	var lines = text.split(''\n'');
 	for(var i=0;i<lines.length;i++) {
@@ -173,12 +123,12 @@ utilities.HTTPUtilities.doPost(newUri, ''exportselect=record&exporttype=plaintex
 			} else if(match[1] == ''Author(s)'') {
 				var authors = match[2].split('';'');
 				if(authors) {
-					model.addStatement(uri, prefixDC + ''creator'', cleanAuthor(authors[0]));
+					model.addStatement(uri, prefixDC + ''creator'', utilities.cleanAuthor(authors[0]));
 					for(var j=1; j<authors.length; j+=2) {
 						if(authors[j-1].substring(0, 1) == ''('') {
 							j++;
 						}
-						model.addStatement(uri, prefixDC + ''creator'', cleanAuthor(authors[j]));
+						model.addStatement(uri, prefixDC + ''creator'', utilities.cleanAuthor(authors[j]));
 					}
 				} else {
 						model.addStatement(uri, prefixDC + ''creator'', utilities.trimString(match[2]));
@@ -218,12 +168,13 @@ utilities.HTTPUtilities.doPost(newUri, ''exportselect=record&exporttype=plaintex
 			}
 		}
 	}
+	model.addStatement(uri, prefixRDF + "type", prefixDummy + "book", false);
 	
 	done();
 })
 wait();');
 
-REPLACE INTO "scrapers" VALUES('88915634-1af6-c134-0171-56fd198235ed', '2006-06-12 20:00:00', 'LOC/Voyager WebVoyage Scraper', 'Simon Kornblith', 'Pwebrecon\.cgi',
+REPLACE INTO "scrapers" VALUES('88915634-1af6-c134-0171-56fd198235ed', '2006-06-18 11:02:00', 'LOC/Voyager WebVoyage Scraper', 'Simon Kornblith', 'Pwebrecon\.cgi',
 'try {
 	if(doc.forms.namedItem(''frm'').elements.namedItem(''RC'')) {
 		return false;
@@ -274,8 +225,6 @@ for(i in export_options) {
 }
 postString += ''RD=''+i+''&MAILADDY=&SAVE=Press+to+SAVE+or+PRINT'';
 
-model.addStatement(uri, prefixRDF + ''type'', prefixDummy + ''book'', false);
-
 // No idea why this doesn''t work as post
 utilities.HTTPUtilities.doGet(newUri+''?''+postString, null, function(text) {
 	var record = new MARC_Record();
@@ -285,7 +234,7 @@ utilities.HTTPUtilities.doGet(newUri+''?''+postString, null, function(text) {
 })
 wait();');
 
-REPLACE INTO "scrapers" VALUES('d921155f-0186-1684-615c-ca57682ced9b', '2006-06-12 20:00:00', 'JSTOR Scraper', 'Simon Kornblith', '^http://www\.jstor\.org/(?:view|browse)', NULL, 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
+REPLACE INTO "scrapers" VALUES('d921155f-0186-1684-615c-ca57682ced9b', '2006-06-18 11:02:00', 'JSTOR Scraper', 'Simon Kornblith', '^http://www\.jstor\.org/(?:view|browse)', NULL, 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
 var prefixDCMI = ''http://purl.org/dc/dcmitype/'';
 var prefixDummy = ''http://chnm.gmu.edu/firefox-scholar/'';
@@ -295,17 +244,7 @@ var nsResolver = namespace ? function(prefix) {
 	if (prefix == ''x'') return namespace; else return null;
 } : null;
 
-var getNode = function(doc, contextNode, xpath, nsResolver) {
-	return doc.evaluate(xpath, contextNode, nsResolver, XPathResult.ANY_TYPE,null).iterateNext();
-}
-
-var cleanString = function(s) {
-	s = utilities.trimString(s);
-	return s.replace(/ +/g, " ");
-}
-
 var uri = doc.location.href;
-
 
 // If this is a view page, find the link to the citation
 var xpath = ''/html/body/div[@class="indent"]/center/font/p/a[@class="nav"]'';
@@ -317,8 +256,8 @@ if(!elmts) {
 if(!elmts) {
 	exit;
 }
-var saveCitation = getNode(doc, elmts[0], ''.'', nsResolver).href;
-var viewSavedCitations = getNode(doc, elmts[1], ''.'', nsResolver).href;
+var saveCitation = utilities.getNode(doc, elmts[0], ''.'', nsResolver).href;
+var viewSavedCitations = utilities.getNode(doc, elmts[1], ''.'', nsResolver).href;
 saveCitation = saveCitation.replace(''citationAction=remove'', ''citationAction=save'');
 
 // Parse save citation link
@@ -349,7 +288,7 @@ utilities.HTTPUtilities.doPost(''http://www.jstor.org/browse'', postData, null, 
 			for(i in lines) {
 				if(haveStarted) {
 					var fieldCode = lines[i].substring(0, 2);
-					var fieldContent = cleanString(lines[i].substring(5));
+					var fieldContent = utilities.cleanString(lines[i].substring(5));
 					
 					if(lines[i].substring(2, 5) != " : ") {
 						break;
@@ -378,7 +317,13 @@ utilities.HTTPUtilities.doPost(''http://www.jstor.org/browse'', postData, null, 
 					} else if(fieldCode == "SE") {
 						data[prefixDummy + "series"].push(fieldContent);
 					} else if(fieldCode == "DA") {
-						data[prefixDC + "date"].push(fieldContent);
+						var date = new Date(fieldContent.replace(".", ""));
+						utilities.debugPrint(date.valueOf());
+						if(isNaN(date.valueOf())) {
+							data[prefixDC + "date"].push(fieldContent);
+						} else {
+							data[prefixDC + "date"].push(utilities.dateToISO(date));
+						}
 					} else if(fieldCode == "PP") {
 						data[prefixDummy + "pages"].push(fieldContent);
 					} else if(fieldCode == "EI") {
@@ -411,14 +356,12 @@ utilities.HTTPUtilities.doPost(''http://www.jstor.org/browse'', postData, null, 
 
 wait();');
 
-REPLACE INTO "scrapers" VALUES('e85a3134-8c1a-8644-6926-584c8565f23e', '2006-06-12 20:00:00', 'History Cooperative Scraper', 'Simon Kornblith', '^http://www\.historycooperative\.org/journals/.+/.+/.+\.html', NULL, 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
+REPLACE INTO "scrapers" VALUES('e85a3134-8c1a-8644-6926-584c8565f23e', '2006-06-18 11:02:00', 'History Cooperative Scraper', 'Simon Kornblith', '^http://www\.historycooperative\.org/journals/.+/.+/.+\.html', NULL, 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
 var prefixDCMI = ''http://purl.org/dc/dcmitype/'';
 var prefixDummy = ''http://chnm.gmu.edu/firefox-scholar/'';
 
 var uri = doc.location.href;
-
-model.addStatement(uri, prefixRDF + "type", prefixDummy + "journal", false);
 
 var month, year;
 
@@ -449,9 +392,11 @@ var year = metaTags.namedItem("PublicationYear");
 if(month && year) {
 	model.addStatement(uri, prefixDC + "date", month.getAttribute("content")+" "+year.getAttribute("content"), false);
 }
+
+model.addStatement(uri, prefixRDF + "type", prefixDummy + "journal", false);
 ');
 
-REPLACE INTO "scrapers" VALUES('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '2006-06-12 20:00:00', 'InnoPAC Scraper', 'Simon Kornblith', '^http://[^/]+/search/[^/]+/[^/]+/1\%2C[^/]+/frameset\&FF=', NULL,
+REPLACE INTO "scrapers" VALUES('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '2006-06-18 11:19:00', 'InnoPAC Scraper', 'Simon Kornblith', '^http://[^/]+/search/[^/]+/[^/]+/1\%2C[^/]+/frameset\&FF=', NULL,
 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
 var prefixDCMI = ''http://purl.org/dc/dcmitype/'';
@@ -470,15 +415,11 @@ utilities.loadDocument(newUri, browser, function(newBrowser) {
 	var nsResolver = namespace ? function(prefix) {
 	  if (prefix == ''x'') return namespace; else return null;
 	} : null;
-		
-	var getNode = function(doc, contextNode, xpath, nsResolver) {
-	  return doc.evaluate(xpath, contextNode, nsResolver, XPathResult.ANY_TYPE,null).iterateNext();
-	}
 	
 	var xpath = ''//pre'';
 	var elmts = utilities.gatherElementsOnXPath(newDoc, newDoc, xpath, nsResolver);
 	
-	var text = getNode(doc, elmts[0], ''./text()[1]'', nsResolver).nodeValue;
+	var text = utilities.getNode(doc, elmts[0], ''./text()[1]'', nsResolver).nodeValue;
 	
 	var record = new MARC_Record();
 	record.load(text, "MARC_PAC");
@@ -488,7 +429,7 @@ utilities.loadDocument(newUri, browser, function(newBrowser) {
 
 wait();');
 
-REPLACE INTO "scrapers" VALUES('add7c71c-21f3-ee14-d188-caf9da12728b', '2006-06-12 20:00:00', 'SIRSI 2003+ Scraper', 'Simon Kornblith', '/uhtbin/cgisirsi',
+REPLACE INTO "scrapers" VALUES('add7c71c-21f3-ee14-d188-caf9da12728b', '2006-06-12 09:58:00', 'SIRSI 2003+ Scraper', 'Simon Kornblith', '/uhtbin/cgisirsi',
 'var namespace = doc.documentElement.namespaceURI;
 var nsResolver = namespace ? function(prefix) {
 	if (prefix == ''x'') return namespace; else return null;
@@ -510,45 +451,6 @@ var nsResolver = namespace ? function(prefix) {
 	if (prefix == ''x'') return namespace; else return null;
 } : null;
 
-var getNode = function(doc, contextNode, xpath, nsResolver) {
-  return doc.evaluate(xpath, contextNode, nsResolver, XPathResult.ANY_TYPE,null).iterateNext();
-}
-
-function stringTrimmer(x) {
-	var x = x.replace(/^[^\w(]+/, "");
-	return x.replace(/[^\w)]+$/, "");
-}
-
-function getAnyNumber(x) {
-	var re = /[0-9]+/;
-	var m = re.exec(x);
-	if(m) {
-		return m[0];
-	}
-}
-
-function getISBN(x) {
-	var re = /^[0-9](?:[0-9X]+)/;
-	var m = re.exec(x);
-	if(m) {
-		return m[0];
-	}
-}
-
-function cleanAuthor(author) {
-	author = author.replace(/^[\s\.\,\/\[\]\:]+/, '''');
-	author = author.replace(/[\s\,\/\[\]\:\.]+$/, '''');
-	// Add period for initials
-	if(author.substring(author.length-2, author.length-1) == " ") {
-		author += ".";
-	}
-	var splitNames = author.split('', '');
-	if(splitNames.length > 1) {
-		author = splitNames[1]+'' ''+splitNames[0];
-	}
-	return author;
-}
-
 var uri = doc.location.href;
 var data = new Object();
 
@@ -557,23 +459,29 @@ var elmts = utilities.gatherElementsOnXPath(doc, doc, xpath, nsResolver);
 for (var i = 0; i < elmts.length; i++) {
 	var elmt = elmts[i];
 	try {
-		var node = getNode(doc, elmt, ''./TD[1]/A[1]/text()[1]'', nsResolver);
+		var node = utilities.getNode(doc, elmt, ''./TD[1]/A[1]/text()[1]'', nsResolver);
 		if(!node) {
-			var node = getNode(doc, elmt, ''./TD[1]/text()[1]'', nsResolver);
+			var node = utilities.getNode(doc, elmt, ''./TD[1]/text()[1]'', nsResolver);
 		}
 		if(node) {
-			var field = stringTrimmer(getNode(doc, elmt, ''./TH[1]/text()[1]'', nsResolver).nodeValue);
+			var field = utilities.superCleanString(utilities.getNode(doc, elmt, ''./TH[1]/text()[1]'', nsResolver).nodeValue);
 			field = field.toLowerCase();
-			var value = stringTrimmer(node.nodeValue);
+			var value = utilities.superCleanString(node.nodeValue);
 			var rdfUri = null;
 			if(field == "publisher") {
 				rdfUri = prefixDC + ''publisher'';
 			} else if(field == "pub date") {
-				rdfUri = prefixDC + ''date'';
-				value = getAnyNumber(value);
+				rdfUri = prefixDC + ''year'';
+				
+				var re = /[0-9]+/;
+				var m = re.exec(value);
+				value = m[0];
 			} else if(field == "isbn") {
 				rdfUri = prefixDC + ''identifier'';
-				value = ''ISBN ''+getISBN(value);
+				
+				var re = /^[0-9](?:[0-9X]+)/;
+				var m = re.exec(value);
+				value = m[0];
 			} else if(field == "title") {
 				rdfUri = prefixDC + ''title'';
 				var titleParts = value.split(" / ");
@@ -584,10 +492,10 @@ for (var i = 0; i < elmts.length; i++) {
 				value = pubParts[0];
 			} else if(field == "personal author") {
 				rdfUri = prefixDC + ''creator'';
-				value = cleanAuthor(node.nodeValue);
+				value = utilities.cleanAuthor(node.nodeValue);
 			} else if(field == "added author") {
 				rdfUri = prefixDC + ''contributor'';
-				value = cleanAuthor(node.nodeValue);
+				value = utilities.cleanAuthor(node.nodeValue);
 			} else if(field == "corporate author") {
 				rdfUri = prefixDC + ''creator'';
 			}
@@ -611,10 +519,12 @@ for (var i = 0; i < elmts.length; i++) {
 		}
 	} catch (e) {}
 	
-} 
+}
+
+model.addStatement(uri, prefixRDF + "type", prefixDummy + "book", false);
 ');
 
-REPLACE INTO "scrapers" VALUES('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '2006-06-12 20:00:00', 'ProQuest Scraper', 'Simon Kornblith', 'http://proquest\.umi\.com/pqdweb\?(?:.*\&)?did=', '',
+REPLACE INTO "scrapers" VALUES('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '2006-06-18 09:58:00', 'ProQuest Scraper', 'Simon Kornblith', 'http://proquest\.umi\.com/pqdweb\?(?:.*\&)?did=', '',
 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
 var prefixDCMI = ''http://purl.org/dc/dcmitype/'';
@@ -624,37 +534,6 @@ var namespace = doc.documentElement.namespaceURI;
 var nsResolver = namespace ? function(prefix) {
 	if (prefix == ''x'') return namespace; else return null;
 } : null;
-
-var getNode = function(doc, contextNode, xpath, nsResolver) {
-  return doc.evaluate(xpath, contextNode, nsResolver, XPathResult.ANY_TYPE,null).iterateNext();
-}
-
-function stringTrimmer(x) {
-	var x = x.replace(/^[^\w(]+/, "");
-	return x.replace(/[^\w)]+$/, "");
-}
-
-function getPageRange(x) {
-	var re = /[0-9\-]+/;
-	var m = re.exec(x);
-	if(m) {
-		return m[0];
-	}
-}
-
-function cleanAuthor(author) {
-	author = author.replace(/^[\s\.\,\/\[\]\:]+/, '''');
-	author = author.replace(/[\s\,\/\[\]\:\.]+$/, '''');
-	// Add period for initials
-	if(author.substring(author.length-2, author.length-1) == " ") {
-		author += ".";
-	}
-	var splitNames = author.split('', '');
-	if(splitNames.length > 1) {
-		author = splitNames[1]+'' ''+splitNames[0];
-	}
-	return author;
-}
 
 var uri = doc.location.href;
 var data = new Object();
@@ -685,7 +564,7 @@ for (var i = 0; i < elmts.length; i++) {
 		var authorElmt = authorElmts[j];
 		author += authorElmt.nodeValue;
 	}
-	model.addStatement(uri, prefixDC + ''creator'', cleanAuthor(author), true);
+	model.addStatement(uri, prefixDC + ''creator'', utilities.cleanAuthor(author), true);
 }
 
 // Other info
@@ -693,23 +572,24 @@ var xpath = ''/html/body/span[@class="textMedium"]/font/table/tbody/tr'';
 var elmts = utilities.gatherElementsOnXPath(doc, doc, xpath, nsResolver);
 for (var i = 0; i < elmts.length; i++) {
 	var elmt = elmts[i];
-	var field = stringTrimmer(getNode(doc, elmt, ''./TD[1]/text()[1]'', nsResolver).nodeValue).toLowerCase();
+	var field = utilities.superCleanString(utilities.getNode(doc, elmt, ''./TD[1]/text()[1]'', nsResolver).nodeValue).toLowerCase();
 	if(field == "publication title") {
-		var publication = getNode(doc, elmt, ''./TD[2]/A[1]/text()[1]'', nsResolver);
+		var publication = utilities.getNode(doc, elmt, ''./TD[2]/A[1]/text()[1]'', nsResolver);
 		if(publication.nodeValue) {
-			model.addStatement(uri, prefixDummy + ''publication'', stringTrimmer(publication.nodeValue), true);
+			model.addStatement(uri, prefixDummy + ''publication'', utilities.superCleanString(publication.nodeValue), true);
 		}
-		var place = getNode(doc, elmt, ''./TD[2]/text()[1]'', nsResolver);
+		var place = utilities.getNode(doc, elmt, ''./TD[2]/text()[1]'', nsResolver);
 		if(place.nodeValue) {
-			model.addStatement(uri, prefixDummy + ''place'', stringTrimmer(place.nodeValue), true);
+			model.addStatement(uri, prefixDummy + ''place'', utilities.superCleanString(place.nodeValue), true);
 		}
-		var date = getNode(doc, elmt, ''./TD[2]/A[2]/text()[1]'', nsResolver);		
+		var date = utilities.getNode(doc, elmt, ''./TD[2]/A[2]/text()[1]'', nsResolver);		
 		if(date.nodeValue) {
-			model.addStatement(uri, prefixDC + ''date'', stringTrimmer(date.nodeValue), true);
+			var jsDate = new Date(utilities.superCleanString(date.nodeValue));
+			model.addStatement(uri, prefixDC + ''date'', utilities.dateToISO(jsDate), true);
 		}
-		var moreInfo = getNode(doc, elmt, ''./TD[2]/text()[2]'', nsResolver);
+		var moreInfo = utilities.getNode(doc, elmt, ''./TD[2]/text()[2]'', nsResolver);
 		if(moreInfo.nodeValue) {
-			moreInfo = stringTrimmer(moreInfo.nodeValue);
+			moreInfo = utilities.superCleanString(moreInfo.nodeValue);
 			var parts = moreInfo.split(";\xA0");
 			
 			var issueRegexp = /^(\w+)\.(?: |\xA0)?(.+)$/
@@ -718,34 +598,38 @@ for (var i = 0; i < elmts.length; i++) {
 				var m = issueRegexp.exec(issueInfo[j]);
 				var info = m[1].toLowerCase();
 				if(info == "vol") {
-					model.addStatement(uri, prefixDummy + ''volume'', stringTrimmer(m[2]), true);
+					model.addStatement(uri, prefixDummy + ''volume'', utilities.superCleanString(m[2]), true);
 				} else if(info == "iss" || info == "no") {
-					model.addStatement(uri, prefixDummy + ''number'', stringTrimmer(m[2]), true);
+					model.addStatement(uri, prefixDummy + ''number'', utilities.superCleanString(m[2]), true);
 				}
 			}
-			if(parts[1] && stringTrimmer(parts[1]).substring(0, 3).toLowerCase() == "pg.") {
-				var pages = getPageRange(parts[1]);
-				if(pages) {
-					model.addStatement(uri, prefixDummy + ''pages'', pages, true);
+			if(parts[1] && utilities.superCleanString(parts[1]).substring(0, 3).toLowerCase() == "pg.") {
+				var re = /[0-9\-]+/;
+				var m = re.exec(parts[1]);
+				
+				if(m) {
+					model.addStatement(uri, prefixDummy + ''pages'', m[0], true);
 				}
 			}
 		}
 	} else if(field == "source type") {
-		var value = getNode(doc, elmt, ''./TD[2]/text()[1]'', nsResolver);
+		var value = utilities.getNode(doc, elmt, ''./TD[2]/text()[1]'', nsResolver);
 		if(value.nodeValue) {
-			value = stringTrimmer(value.nodeValue).toLowerCase();
+			value = utilities.superCleanString(value.nodeValue).toLowerCase();
 			
-			if(value == "newspaper" || value == "periodical") {
+			if(value == "periodical") {
 				model.addStatement(uri, prefixRDF + "type", prefixDummy + "journal", false);
+			} else if(value == "newspaper") {
+				model.addStatement(uri, prefixRDF + "type", prefixDummy + "newspaper", false);
 			} else {
 				model.addStatement(uri, prefixRDF + "type", prefixDummy + "book", false);
 			}
 		}
 	} else if(field == "isbn" || field == "issn" || field == "issn/isbn") {
-		var value = getNode(doc, elmt, ''./TD[2]/text()[1]'', nsResolver);
+		var value = utilities.getNode(doc, elmt, ''./TD[2]/text()[1]'', nsResolver);
 		if(value) {
 			var type;
-			value = stringTrimmer(value.nodeValue);
+			value = utilities.superCleanString(value.nodeValue);
 			if(value.length == 10 || value.length == 13) {
 				type = "ISBN";
 			} else if(value.length == 8) {
@@ -758,7 +642,7 @@ for (var i = 0; i < elmts.length; i++) {
 	}
 }');
 
-REPLACE INTO "scrapers" VALUES('6773a9af-5375-3224-d148-d32793884dec', '2006-06-12 20:00:00', 'InfoTrac Scraper', 'Simon Kornblith', '^http://infotrac-college\.thomsonlearning\.com/itw/infomark/',
+REPLACE INTO "scrapers" VALUES('6773a9af-5375-3224-d148-d32793884dec', '2006-06-18 11:19:00', 'InfoTrac Scraper', 'Simon Kornblith', '^http://infotrac-college\.thomsonlearning\.com/itw/infomark/',
 'if(doc.title.substring(0, 8) == "Article ") {
 	return true;
 }
@@ -772,20 +656,6 @@ var namespace = doc.documentElement.namespaceURI;
 var nsResolver = namespace ? function(prefix) {
 	if (prefix == ''x'') return namespace; else return null;
 } : null;
-
-function cleanAuthor(author) {
-	author = author.replace(/^[\s\.\,\/\[\]\:]+/, '''');
-	author = author.replace(/[\s\,\/\[\]\:\.]+$/, '''');
-	// Add period for initials
-	if(author.substring(author.length-2, author.length-1) == " ") {
-		author += ".";
-	}
-	var splitNames = author.split('', '');
-	if(splitNames.length > 1) {
-		author = splitNames[1]+'' ''+splitNames[0];
-	}
-	return author;
-}
 
 var uri = doc.location.href;
 
@@ -837,21 +707,16 @@ for (var i = 0; i < elmts.length; i++) {
 			model.addStatement(uri, prefixDC + "date", date.substring(1), false);
 		}
 	} else if(field == "author") {
-		model.addStatement(uri, prefixDC + "creator", cleanAuthor(value), false);
+		model.addStatement(uri, prefixDC + "creator", utilities.cleanAuthor(value), false);
 	}
 }
 model.addStatement(uri, prefixRDF + "type", prefixDummy + "journal", false);');
 
-REPLACE INTO "scrapers" VALUES('b047a13c-fe5c-6604-c997-bef15e502b09', '2006-06-12 20:00:00', 'LexisNexis Scraper', 'Simon Kornblith', '^http://web\.lexis-nexis\.com/universe/document', NULL,
+REPLACE INTO "scrapers" VALUES('b047a13c-fe5c-6604-c997-bef15e502b09', '2006-06-18 10:13:00', 'LexisNexis Scraper', 'Simon Kornblith', '^http://web\.lexis-nexis\.com/universe/document', NULL,
 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
 var prefixDCMI = ''http://purl.org/dc/dcmitype/'';
 var prefixDummy = ''http://chnm.gmu.edu/firefox-scholar/'';
-
-function clearTags(x) {
-	x = x.replace(/<br[^>]*>/gi, "\n");
-	return x.replace(/<[^>]+>/g, "");
-}
 
 var uri = doc.location.href;
 
@@ -868,10 +733,11 @@ centerElements = citationDataDiv.getElementsByTagName("center");
 var elementParts = centerElements[0].innerHTML.split(/<br[^>]*>/gi);
 model.addStatement(uri, prefixDummy + "publication", elementParts[elementParts.length-1], true);
 
-var dateRegexp = /<br[^>]*><b>([A-Z][a-z]+)<\/b> ([0-9]+, [0-9]{4})/;
+var dateRegexp = /<br[^>]*>(?:<b>)?([A-Z][a-z]+)(?:<\/b>)? ([0-9]+, [0-9]{4})/;
 var m = dateRegexp.exec(centerElements[centerElements.length-1].innerHTML);
 if(m) {
-	model.addStatement(uri, prefixDC + "date", m[1]+" "+m[2], true);
+	var jsDate = new Date(m[1]+" "+m[2]);
+	model.addStatement(uri, prefixDC + "date", utilities.dateToISO(jsDate), true);
 } else {
 	var elementParts = centerElements[centerElements.length-1].innerHTML.split(/<br[^>]*>/gi);
 	model.addStatement(uri, prefixDC + "date", elementParts[1], true);
@@ -887,12 +753,12 @@ if(cutIndex > 0) {
 	citationData = citationDataDiv.innerHTML;
 }
 
-citationData = clearTags(citationData);
+citationData = utilities.cleanTags(citationData);
 
 var headlineRegexp = /\n(?:HEADLINE|TITLE|ARTICLE): ([^\n]+)\n/;
 var m = headlineRegexp.exec(citationData);
 if(m) {
-	model.addStatement(uri, prefixDC + "title", clearTags(m[1]), true);
+	model.addStatement(uri, prefixDC + "title", utilities.cleanTags(m[1]), true);
 }
 
 var bylineRegexp = /\nBYLINE:  *(\w[\w\- ]+)/;
@@ -903,6 +769,9 @@ if(m) {
 		m[1] = m[1].substring(3);
 	}
 	model.addStatement(uri, prefixDC + "creator", m[1], true);
+	model.addStatement(uri, prefixRDF + "type", prefixDummy + "newspaper", false);
+} else {
+	model.addStatement(uri, prefixRDF + "type", prefixDummy + "journal", false);
 }
 
 var authorRegexp = /\n(?:AUTHOR|NAME): ([^\n]+)\n/;
@@ -912,13 +781,9 @@ if(m) {
 	for(i in authors) {
 		model.addStatement(uri, prefixDC + "creator", authors[i].replace(" *", ""), true);
 	}
-}
+}');
 
-model.addStatement(uri, prefixRDF + "type", prefixDummy + "journal", false);
-
-utilities.debugPrint(citationData);');
-
-REPLACE INTO "scrapers" VALUES('cf87eca8-041d-b954-795a-2d86348999d5', '2006-06-12 20:00:00', 'Aleph Scraper', 'Simon Kornblith', 'func=full-set-set.*\&format=999', NULL,
+REPLACE INTO "scrapers" VALUES('cf87eca8-041d-b954-795a-2d86348999d5', '2006-06-18 11:19:00', 'Aleph Scraper', 'Simon Kornblith', 'func=full-set-set.*\&format=999', NULL,
 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
 var prefixDCMI = ''http://purl.org/dc/dcmitype/'';
@@ -929,11 +794,6 @@ var uri = doc.location.href;
 var newUri = uri.replace("&format=999", "&format=001");
 utilities.debugPrint(newUri);
 
-function stringTrimmer(x) {
-	var x = x.replace(/^[^\w(]+/, "");
-	return x.replace(/[^\w)]+$/, "");
-}
-
 utilities.loadDocument(newUri, browser, function(newBrowser) {
 	newDoc = newBrowser.contentDocument;
 	
@@ -942,17 +802,13 @@ utilities.loadDocument(newUri, browser, function(newBrowser) {
 	  if (prefix == ''x'') return namespace; else return null;
 	} : null;
 	
-	var getNode = function(doc, contextNode, xpath, nsResolver) {
-	  return doc.evaluate(xpath, contextNode, nsResolver, XPathResult.ANY_TYPE,null).iterateNext();
-	}
-	
 	var xpath = ''/html/body/table/tbody/tr[td[1][@class="td1"][@id="bold"]][td[2][@class="td1"]]'';
 	var elmts = utilities.gatherElementsOnXPath(newDoc, newDoc, xpath, nsResolver);
 	var record = new MARC_Record();		
 	for(var i=0; i<elmts.length; i++) {
 		var elmt = elmts[i];
-		var field = stringTrimmer(getNode(doc, elmt, ''./TD[1]/text()[1]'', nsResolver).nodeValue);
-		var value = getNode(doc, elmt, ''./TD[2]/text()[1]'', nsResolver).nodeValue;
+		var field = utilities.superCleanString(utilities.getNode(doc, elmt, ''./TD[1]/text()[1]'', nsResolver).nodeValue);
+		var value = utilities.getNode(doc, elmt, ''./TD[2]/text()[1]'', nsResolver).nodeValue;
 		var value = value.replace(/\|([a-z]) /g, record.subfield_delimiter+"$1");
 		
 		if(field != "FMT" && field != "LDR") {
@@ -975,7 +831,7 @@ utilities.loadDocument(newUri, browser, function(newBrowser) {
 
 wait();');
 
-REPLACE INTO "scrapers" VALUES('774d7dc2-3474-2684-392c-f787789ec63d', '2006-06-12 20:00:00', 'Dynix Scraper', 'Simon Kornblith', 'ipac\.jsp\?.*uri=full=[0-9]', NULL,
+REPLACE INTO "scrapers" VALUES('774d7dc2-3474-2684-392c-f787789ec63d', '2006-06-18 11:19:00', 'Dynix Scraper', 'Simon Kornblith', 'ipac\.jsp\?.*uri=full=[0-9]', NULL,
 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
 var prefixDCMI = ''http://purl.org/dc/dcmitype/'';
@@ -984,17 +840,8 @@ var prefixDummy = ''http://chnm.gmu.edu/firefox-scholar/'';
 var uri = doc.location.href;
 var newUri = uri+''&fullmarc=true'';
 utilities.debugPrint(newUri);
-
-function stringTrimmer(x) {
-	var x = x.replace(/^[^\w(]+/, "");
-	return x.replace(/[^\w)]+$/, "");
-}
 	
-var getNode = function(doc, contextNode, xpath, nsResolver) {
-	return doc.evaluate(xpath, contextNode, nsResolver, XPathResult.ANY_TYPE,null).iterateNext();
-}
-	
-var getNodeString = function(doc, contextNode, xpath, nsResolver) {
+var utilities.getNodeString = function(doc, contextNode, xpath, nsResolver) {
 	var elmts = utilities.gatherElementsOnXPath(doc, contextNode, xpath, nsResolver);
 	var returnVar = "";
 	for(var i=0; i<elmts.length; i++) {
@@ -1016,8 +863,8 @@ utilities.loadDocument(newUri, browser, function(newBrowser) {
 	var record = new MARC_Record();		
 	for(var i=0; i<elmts.length; i++) {
 		var elmt = elmts[i];
-		var field = stringTrimmer(getNode(doc, elmt, ''./TD[1]/A[1]/text()[1]'', nsResolver).nodeValue);
-		var value = getNodeString(doc, elmt, ''./TD[2]/TABLE[1]/TBODY[1]/TR[1]/TD[1]/A[1]//text()'', nsResolver);
+		var field = utilities.superCleanString(utilities.getNode(doc, elmt, ''./TD[1]/A[1]/text()[1]'', nsResolver).nodeValue);
+		var value = utilities.getNodeString(doc, elmt, ''./TD[2]/TABLE[1]/TBODY[1]/TR[1]/TD[1]/A[1]//text()'', nsResolver);
 		value = value.replace(/\$([a-z]) /g, record.subfield_delimiter+"$1");
 		
 		if(field != "FMT" && field != "LDR") {
@@ -1042,7 +889,7 @@ utilities.loadDocument(newUri, browser, function(newBrowser) {
 
 wait();');
 
-REPLACE INTO "scrapers" VALUES('63a0a351-3131-18f4-21aa-f46b9ac51d87', '2006-06-12 20:00:00', 'VTLS Scraper', 'Simon Kornblith', 'chameleon\?.*function=(?:CARDSCR|INITREQ)', NULL,
+REPLACE INTO "scrapers" VALUES('63a0a351-3131-18f4-21aa-f46b9ac51d87', '2006-06-18 11:19:00', 'VTLS Scraper', 'Simon Kornblith', 'chameleon\?.*function=(?:CARDSCR|INITREQ)', NULL,
 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
 var prefixDCMI = ''http://purl.org/dc/dcmitype/'';
@@ -1051,10 +898,6 @@ var prefixDummy = ''http://chnm.gmu.edu/firefox-scholar/'';
 var uri = doc.location.href;
 var newUri = uri.replace(/function=[A-Z]{7}/, "function=MARCSCR");
 utilities.debugPrint(newUri);
-	
-var getNode = function(doc, contextNode, xpath, nsResolver) {
-	return doc.evaluate(xpath, contextNode, nsResolver, XPathResult.ANY_TYPE,null).iterateNext();
-}
 
 utilities.loadDocument(newUri, browser, function(newBrowser) {
 	newDoc = newBrowser.contentDocument;
@@ -1069,10 +912,10 @@ utilities.loadDocument(newUri, browser, function(newBrowser) {
 	var record = new MARC_Record();		
 	for(var i=0; i<elmts.length; i++) {
 		var elmt = elmts[i];
-		var field = getNode(doc, elmt, ''./TD[1]/text()[1]'', nsResolver).nodeValue;
-		var ind1 = getNode(doc, elmt, ''./TD[2]/text()[1]'', nsResolver).nodeValue;
-		var ind2 = getNode(doc, elmt, ''./TD[3]/text()[1]'', nsResolver).nodeValue;
-		var value = getNode(doc, elmt, ''./TD[4]/text()[1]'', nsResolver).nodeValue;
+		var field = utilities.getNode(doc, elmt, ''./TD[1]/text()[1]'', nsResolver).nodeValue;
+		var ind1 = utilities.getNode(doc, elmt, ''./TD[2]/text()[1]'', nsResolver).nodeValue;
+		var ind2 = utilities.getNode(doc, elmt, ''./TD[3]/text()[1]'', nsResolver).nodeValue;
+		var value = utilities.getNode(doc, elmt, ''./TD[4]/text()[1]'', nsResolver).nodeValue;
 		value = value.replace(/\\([a-z]) /g, record.subfield_delimiter+"$1");
 		
 		record.add_field(field, ind1, ind2, value);
@@ -1084,7 +927,7 @@ utilities.loadDocument(newUri, browser, function(newBrowser) {
 
 wait();');
 
-REPLACE INTO "scrapers" VALUES('fb12ae9e-f473-cab4-0546-27ab88c64101', '2006-06-12 20:00:00', 'DRA Scraper', 'Simon Kornblith', '/web2/tramp2\.exe/(?:see\_record/|authority\_hits/|goto/.*\?.*screen=Record\.html)',
+REPLACE INTO "scrapers" VALUES('fb12ae9e-f473-cab4-0546-27ab88c64101', '2006-06-18 11:19:00', 'DRA Scraper', 'Simon Kornblith', '/web2/tramp2\.exe/(?:see\_record/|authority\_hits/|goto/.*\?.*screen=Record\.html)',
 'if(doc.location.href.indexOf("authority_hits") > 0) {
 	var body = doc.getElementsByTagName("body");
 	if(body[0].innerHTML.indexOf("ISBN") < 0) {
@@ -1117,7 +960,7 @@ utilities.HTTPUtilities.doGet(newUri, null, function(text) {
 wait();');
 
 
-REPLACE INTO "scrapers" VALUES('c0e6fda6-0ecd-e4f4-39ca-37a4de436e15', '2006-06-12 20:00:00', 'GEAC Scraper', 'Simon Kornblith', '/(?:Geac)?FETCH[\:\?].*[&:]next=html/(?:record\.html|geacnffull\.html)', NULL,
+REPLACE INTO "scrapers" VALUES('c0e6fda6-0ecd-e4f4-39ca-37a4de436e15', '2006-06-18 11:19:00', 'GEAC Scraper', 'Simon Kornblith', '/(?:Geac)?FETCH[\:\?].*[&:]next=html/(?:record\.html|geacnffull\.html)', NULL,
 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
 var prefixDCMI = ''http://purl.org/dc/dcmitype/'';
@@ -1126,10 +969,6 @@ var prefixDummy = ''http://chnm.gmu.edu/firefox-scholar/'';
 var uri = doc.location.href;
 var newUri = uri.replace(/([:&])next=html\/geacnffull.html/, "$1next=html/marc.html");
 newUri = newUri.replace(/([:&])next=html\/record.html/, "$1next=html/marc.html");
-	
-var getNode = function(doc, contextNode, xpath, nsResolver) {
-	return doc.evaluate(xpath, contextNode, nsResolver, XPathResult.ANY_TYPE,null).iterateNext();
-}
 
 utilities.loadDocument(newUri, browser, function(newBrowser) {
 	newDoc = newBrowser.contentDocument;
@@ -1180,7 +1019,7 @@ utilities.loadDocument(newUri, browser, function(newBrowser) {
 
 wait();');
 
-REPLACE INTO "scrapers" VALUES('5287d20c-8a13-6004-4dcb-5bb2b66a9cc9', '2006-06-12 20:00:00', 'SIRSI -2003 Scraper', 'Simon Kornblith', '/uhtbin/cgisirsi',
+REPLACE INTO "scrapers" VALUES('5287d20c-8a13-6004-4dcb-5bb2b66a9cc9', '2006-06-18 11:19:00', 'SIRSI -2003 Scraper', 'Simon Kornblith', '/uhtbin/cgisirsi',
 'var namespace = doc.documentElement.namespaceURI;
 var nsResolver = namespace ? function(prefix) {
 	if (prefix == ''x'') return namespace; else return null;
@@ -1204,10 +1043,6 @@ var nsResolver = namespace ? function(prefix) {
 	if (prefix == ''x'') return namespace; else return null;
 } : null;
 
-var getNode = function(doc, contextNode, xpath, nsResolver) {
-	return doc.evaluate(xpath, contextNode, nsResolver, XPathResult.ANY_TYPE,null).iterateNext();
-}
-
 var uri = doc.location.href;
 var uriRegexp = /^(.*)(\/[0-9]+)$/;
 var m = uriRegexp.exec(uri);
@@ -1217,9 +1052,9 @@ utilities.debugPrint(newUri);
 var elmts = utilities.gatherElementsOnXPath(doc, doc, ''/html/body/form/p'', nsResolver);
 for(i in elmts) {
 	var elmt = elmts[i];
-	var initialText = getNode(doc, elmt, ''./text()[1]'', nsResolver);
+	var initialText = utilities.getNode(doc, elmt, ''./text()[1]'', nsResolver);
 	if(initialText.nodeValue == "\n\nViewing record\n") {
-		var recNumber = getNode(doc, elmt, ''./b[1]/text()[1]'', nsResolver).nodeValue;
+		var recNumber = utilities.getNode(doc, elmt, ''./b[1]/text()[1]'', nsResolver).nodeValue;
 	}
 }
 
@@ -1263,7 +1098,7 @@ utilities.HTTPUtilities.doPost(newUri, ''marks=''+recNumber+''&shadow=NO&format=
 })
 wait();');
 
-REPLACE INTO "scrapers" VALUES('0f9fc2fc-306e-5204-1117-25bca009dffc', '2006-06-12 20:00:00', 'TLC/YouSeeMore Scraper', 'Simon Kornblith', 'TLCScripts/interpac\.dll\?.*LabelDisplay.*RecordNumber=[0-9]', NULL,
+REPLACE INTO "scrapers" VALUES('0f9fc2fc-306e-5204-1117-25bca009dffc', '2006-06-18 11:19:00', 'TLC/YouSeeMore Scraper', 'Simon Kornblith', 'TLCScripts/interpac\.dll\?.*LabelDisplay.*RecordNumber=[0-9]', NULL,
 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
 var prefixDCMI = ''http://purl.org/dc/dcmitype/'';
@@ -1273,10 +1108,6 @@ var namespace = doc.documentElement.namespaceURI;
 var nsResolver = namespace ? function(prefix) {
 	if (prefix == ''x'') return namespace; else return null;
 } : null;
-
-var getNode = function(doc, contextNode, xpath, nsResolver) {
-	return doc.evaluate(xpath, contextNode, nsResolver, XPathResult.ANY_TYPE,null).iterateNext();
-}
 
 var uri = doc.location.href;
 var newUri = uri.replace("LabelDisplay", "MARCDisplay");
@@ -1298,8 +1129,8 @@ utilities.loadDocument(newUri, browser, function(newBrowser) {
 	for(var i=0; i<elmts.length; i++) {
 		var elmt = elmts[i];
 		
-		tag = getNode(newDoc, elmt, ''./td[2]/tt[1]/text()[1]'', nsResolver).nodeValue;
-		var inds = getNode(newDoc, elmt, ''./td[3]/tt[1]/text()[1]'', nsResolver).nodeValue;
+		tag = utilities.getNode(newDoc, elmt, ''./td[2]/tt[1]/text()[1]'', nsResolver).nodeValue;
+		var inds = utilities.getNode(newDoc, elmt, ''./td[3]/tt[1]/text()[1]'', nsResolver).nodeValue;
 		
 		tag = tag.replace(/[\r\n]/g, "");
 		if(tag.length == 1) {
@@ -1341,7 +1172,7 @@ utilities.loadDocument(newUri, browser, function(newBrowser) {
 
 wait();');
 
-REPLACE INTO "scrapers" VALUES('c54d1932-73ce-dfd4-a943-109380e06574', '2006-06-12 20:00:00', 'Project MUSE Scraper', 'Simon Kornblith', '^http://muse\.jhu\.edu/journals/[^/]+/[^/]+/[^/]+\.html$', NULL, 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
+REPLACE INTO "scrapers" VALUES('c54d1932-73ce-dfd4-a943-109380e06574', '2006-06-18 11:19:00', 'Project MUSE Scraper', 'Simon Kornblith', '^http://muse\.jhu\.edu/journals/[^/]+/[^/]+/[^/]+\.html$', NULL, 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
 var prefixDCMI = ''http://purl.org/dc/dcmitype/'';
 var prefixDummy = ''http://chnm.gmu.edu/firefox-scholar/'';
@@ -1406,7 +1237,7 @@ for(i in elmts) {
 
 model.addStatement(uri, prefixRDF + "type", prefixDummy + "journal", false);');
 
-REPLACE INTO "scrapers" VALUES('fcf41bed-0cbc-3704-85c7-8062a0068a7a', '2006-06-12 20:00:00', 'PubMed Scraper', 'Simon Kornblith', '^http://www\.ncbi\.nlm\.nih\.gov/entrez/query\.fcgi\?(?:.*db=PubMed.*list_uids=[0-9]|.*list_uids=[0-9].*db=PubMed)', NULL, 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
+REPLACE INTO "scrapers" VALUES('fcf41bed-0cbc-3704-85c7-8062a0068a7a', '2006-06-18 11:19:00', 'PubMed Scraper', 'Simon Kornblith', '^http://www\.ncbi\.nlm\.nih\.gov/entrez/query\.fcgi\?(?:.*db=PubMed.*list_uids=[0-9]|.*list_uids=[0-9].*db=PubMed)', NULL, 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
 var prefixDCMI = ''http://purl.org/dc/dcmitype/'';
 var prefixDummy = ''http://chnm.gmu.edu/firefox-scholar/'';
@@ -1415,11 +1246,6 @@ function mapRDF(text, rdfUri) {
 	if(text != "") {
 		model.addStatement(uri, rdfUri, text, true);
 	}
-}
-
-function stringTrimmer(x) {
-	var x = x.replace(/^[^\w(]+/, "");
-	return x.replace(/[^\w)]+$/, "");
 }
 
 var uri = doc.location.href;
@@ -1458,9 +1284,9 @@ utilities.HTTPUtilities.doGet(newUri, null, function(text) {
 			}
 			
 			if(article.Journal.Title.length()) {
-				model.addStatement(uri, prefixDummy + "publication", stringTrimmer(article.Journal.Title.text()), true);
+				model.addStatement(uri, prefixDummy + "publication", utilities.superCleanString(article.Journal.Title.text()), true);
 			} else if(citation.MedlineJournalInfo.MedlineTA.length()) {
-				model.addStatement(uri, prefixDummy + "publication", stringTrimmer(citation.MedlineJournalInfo.MedlineTA.text()), true);
+				model.addStatement(uri, prefixDummy + "publication", utilities.superCleanString(citation.MedlineJournalInfo.MedlineTA.text()), true);
 			}
 			
 			if(article.Journal.JournalIssue.length()) {

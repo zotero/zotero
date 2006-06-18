@@ -207,17 +207,41 @@ Scholar.Ingester.Utilities.prototype.collectURLsWithSubstring = function(doc, su
 // essential components for Scholar and would take a great deal of effort to
 // implement. We can, however, always implement them later.
 
-// These functions are for use by importMARCRecord. They're private, because,
-// while they are useful, it's also nice if as many of our scrapers as possible
-// are PiggyBank compatible, and if our scrapers used functions, that would
-// break compatibility
-Scholar.Ingester.Utilities.prototype._MARCCleanString = function(author) {
-	author = author.replace(/^[\s\.\,\/\[\]\:]+/, '');
-	author = author.replace(/[\s\.\,\/\[\]\:]+$/, '');
-	return author.replace(/  +/, ' ');
+/*
+ * BEGIN FIREFOX SCHOLAR EXTENSIONS
+ * Functions below this point are extensions to the utilities provided by
+ * Piggy Bank. When used in external code, the repository will need to add
+ * a function definition when exporting in Piggy Bank format.
+ */
+Scholar.Ingester.Utilities.prototype.dateToISO = function(jsDate) {
+	var date = "";
+	var year = jsDate.getFullYear().toString();
+	var month = (jsDate.getMonth()+1).toString();
+	var day = jsDate.getDate().toString();
+	
+	for(var i = year.length; i<4; i++) {
+		date += "0";
+	}
+	date += year+"-";
+	
+	if(month.length == 1) {
+		date += "0";
+	}
+	date += month+"-";
+	
+	if(day.length == 1) {
+		date += "0";
+	}
+	date += day;
+	
+	return date;
 }
 
-Scholar.Ingester.Utilities.prototype._MARCCleanAuthor = function(author) {
+Scholar.Ingester.Utilities.prototype.getNode = function(doc, contextNode, xpath, nsResolver) {
+	return doc.evaluate(xpath, contextNode, nsResolver, Components.interfaces.nsIDOMXPathResult.ANY_TYPE, null).iterateNext();
+}
+
+Scholar.Ingester.Utilities.prototype.cleanAuthor = function(author) {
 	author = author.replace(/^[\s\.\,\/\[\]\:]+/, '');
 	author = author.replace(/[\s\,\/\[\]\:\.]+$/, '');
 	author = author.replace(/  +/, ' ');
@@ -230,6 +254,31 @@ Scholar.Ingester.Utilities.prototype._MARCCleanAuthor = function(author) {
 		author = splitNames[1]+' '+splitNames[0];
 	}
 	return author;
+}
+
+Scholar.Ingester.Utilities.prototype.cleanString = function(s) {
+	s = this.trimString(s);
+	return s.replace(/ +/g, " ");
+}
+
+Scholar.Ingester.Utilities.prototype.superCleanString = function(x) {
+	var x = x.replace(/^[^\w(]+/, "");
+	return x.replace(/[^\w)]+$/, "");
+}
+
+Scholar.Ingester.Utilities.prototype.cleanTags = function(x) {
+	x = x.replace(/<br[^>]*>/gi, "\n");
+	return x.replace(/<[^>]+>/g, "");
+}
+
+// These functions are for use by importMARCRecord. They're private, because,
+// while they are useful, it's also nice if as many of our scrapers as possible
+// are PiggyBank compatible, and if our scrapers used functions, that would
+// break compatibility
+Scholar.Ingester.Utilities.prototype._MARCCleanString = function(author) {
+	author = author.replace(/^[\s\.\,\/\[\]\:]+/, '');
+	author = author.replace(/[\s\.\,\/\[\]\:]+$/, '');
+	return author.replace(/  +/, ' ');
 }
 
 Scholar.Ingester.Utilities.prototype._MARCCleanNumber = function(author) {
@@ -283,11 +332,11 @@ Scholar.Ingester.Utilities.prototype.importMARCRecord = function(record, uri, mo
 	// Extract ISSNs
 	model = this._MARCAssociateField(record, uri, model, '022', prefixDC + 'identifier', this._MARCCleanNumber, 'ISSN ');
 	// Extract creators
-	model = this._MARCAssociateField(record, uri, model, '100', prefixDC + 'creator', this._MARCCleanAuthor);
+	model = this._MARCAssociateField(record, uri, model, '100', prefixDC + 'creator', this.cleanAuthor);
 	model = this._MARCAssociateField(record, uri, model, '110', prefixDC + 'creator', this._MARCCleanString);
 	model = this._MARCAssociateField(record, uri, model, '111', prefixDC + 'creator', this._MARCCleanString);
 	model = this._MARCAssociateField(record, uri, model, '130', prefixDC + 'creator', this._MARCCleanString);
-	model = this._MARCAssociateField(record, uri, model, '700', prefixDC + 'contributor', this._MARCCleanAuthor);
+	model = this._MARCAssociateField(record, uri, model, '700', prefixDC + 'contributor', this.cleanAuthor);
 	model = this._MARCAssociateField(record, uri, model, '710', prefixDC + 'contributor', this._MARCCleanString);
 	model = this._MARCAssociateField(record, uri, model, '711', prefixDC + 'contributor', this._MARCCleanString);
 	model = this._MARCAssociateField(record, uri, model, '730', prefixDC + 'contributor', this._MARCCleanString);
@@ -295,7 +344,7 @@ Scholar.Ingester.Utilities.prototype.importMARCRecord = function(record, uri, mo
 													// in the person subject field as the first entry
 		var field = record.get_field_subfields('600');
 		if(field[0]) {
-			model.addStatement(uri, prefixDC + 'creator', this._MARCCleanAuthor(field[0]['a']));	
+			model.addStatement(uri, prefixDC + 'creator', this.cleanAuthor(field[0]['a']));	
 		}
 	}
 	// Extract title
@@ -312,6 +361,9 @@ Scholar.Ingester.Utilities.prototype.importMARCRecord = function(record, uri, mo
 	model = this._MARCAssociateField(record, uri, model, '440', prefixDummy + 'series', this._MARCCleanString);
 }
 
+/*
+ * END FIREFOX SCHOLAR EXTENSIONS
+ */
 
 // These are front ends for XMLHttpRequest. XMLHttpRequest can't actually be
 // accessed outside the sandbox, and even if it could, it wouldn't let scripts
@@ -573,6 +625,19 @@ Scholar.Ingester.Document.prototype._generateSandbox = function() {
 	this._sandbox.done = function(){ me._scrapePageComplete(); };
 }
 
+Scholar.Ingester.Document.prototype._associateRDF = function(rdfUri, field, uri, item, typeID) {
+	var fieldID;
+	if(fieldID = Scholar.ItemFields.getID(field)) {
+		if(this.model.data[uri][rdfUri] && Scholar.ItemFields.isValidForType(fieldID, typeID)) {
+			item.setField(field, this.model.data[uri][rdfUri][0]);
+		} else {
+			Scholar.debug("discarded scraper " + field + " data: not valid for item type "+typeID);
+		}
+	} else {
+		Scholar.debug("discarded scraper " + field + " data: no field in database");
+	}
+}
+
 /*
  * Add data ingested using RDF to database
  * (Ontologies are hard-coded until we have a real way of dealing with them)
@@ -585,17 +650,27 @@ Scholar.Ingester.Document.prototype._updateDatabase = function() {
 	var prefixDCMI = 'http://purl.org/dc/dcmitype/';
 	var prefixDummy = 'http://chnm.gmu.edu/firefox-scholar/';
 	
+	var typeToTypeID = new Object();
+	typeToTypeID[prefixDummy + 'book'] = 1;
+	typeToTypeID[prefixDummy + 'journal'] = 2;
+	typeToTypeID[prefixDummy + 'newspaper'] = 2;
+	
 	try {
 		for(var uri in this.model.data) {
-			if(this.model.data[uri][prefixRDF + 'type'] == (prefixDummy + 'journal')) {
-				var newItem = Scholar.Items.getNewItemByType(2);
-			} else {
-				var newItem = Scholar.Items.getNewItemByType(1);
+			var typeID = typeToTypeID[this.model.data[uri][prefixRDF + 'type']];
+			if(!typeID) {
+				var typeID = 1;
 			}
+			
+			var newItem = Scholar.Items.getNewItemByType(typeID);
+			
+			// Handle source and title
 			newItem.setField("source", uri);
 			if(this.model.data[uri][prefixDC + 'title']) {
 				newItem.setField("title", this.model.data[uri][prefixDC + 'title'][0]);
 			}
+			
+			// Handle creators and contributors
 			var creatorIndex = 0;
 			if(this.model.data[uri][prefixDC + 'creator']) {
 				for(i in this.model.data[uri][prefixDC + 'creator']) {
@@ -619,54 +694,45 @@ Scholar.Ingester.Document.prototype._updateDatabase = function() {
 					creatorIndex++;
 				}
 			}
-			if(this.model.data[uri][prefixRDF + 'type'] == (prefixDummy + 'journal')) {
-				if(this.model.data[uri][prefixDummy + 'publication']) {
-					newItem.setField("publication", this.model.data[uri][prefixDummy + 'publication'][0]);
-				}
-				if(this.model.data[uri][prefixDummy + 'volume']) {
-					newItem.setField("volume", this.model.data[uri][prefixDummy + 'volume'][0]);
-				}
-				if(this.model.data[uri][prefixDummy + 'number']) {
-					newItem.setField("number", this.model.data[uri][prefixDummy + 'number'][0]);
-				}
-				if(this.model.data[uri][prefixDummy + 'pages']) {
-					newItem.setField("pages", this.model.data[uri][prefixDummy + 'pages'][0]);
-				}
-				if(this.model.data[uri][prefixDC + 'identifier']) {
-					for(i in this.model.data[uri][prefixDC + 'identifier']) {
-						if(this.model.data[uri][prefixDC + 'identifier'][i].substring(0, 4) == 'ISSN') {
-							newItem.setField("ISSN", this.model.data[uri][prefixDC + 'identifier'][0].substring(5));
-							break;
-						}
-					}
-				}
-			} else {
-				if(this.model.data[uri][prefixDC + 'publisher']) {
-					newItem.setField("publisher", this.model.data[uri][prefixDC + 'publisher'][0]);
-				}
+			
+			// Handle years, extracting from date if necessary
+			if(Scholar.ItemFields.isValidForType(Scholar.ItemFields.getID("year"), typeID)) {
 				if(this.model.data[uri][prefixDC + 'year']) {
 					newItem.setField("year", this.model.data[uri][prefixDC + 'year'][0]);
 				} else if(this.model.data[uri][prefixDC + 'date'] && this.model.data[uri][prefixDC + 'date'][0].length >= 4) {
 					newItem.setField("year", this.model.data[uri][prefixDC + 'date'][0].substr(0, 4));
 				}
-				if(this.model.data[uri][prefixDC + 'hasVersion']) {
-					newItem.setField("edition", this.model.data[uri][prefixDC + 'hasVersion'][0]);
-				}
-				if(this.model.data[uri][prefixDummy + 'series']) {
-					newItem.setField("series", this.model.data[uri][prefixDummy + 'series'][0]);
-				}
-				if(this.model.data[uri][prefixDummy + 'place']) {
-					newItem.setField("place", this.model.data[uri][prefixDummy + 'place'][0]);
-				}
-				if(this.model.data[uri][prefixDC + 'identifier']) {
+			}
+			
+			// Handle ISBNs/ISSNs
+			if(this.model.data[uri][prefixDC + 'identifier']) {
+				var needISSN =  Scholar.ItemFields.isValidForType(Scholar.ItemFields.getID("ISSN"), typeID);
+				var needISBN =  Scholar.ItemFields.isValidForType(Scholar.ItemFields.getID("ISBN"), typeID);
+				if(needISSN || needISBN) {
 					for(i in this.model.data[uri][prefixDC + 'identifier']) {
-						if(this.model.data[uri][prefixDC + 'identifier'][i].substring(0, 4) == 'ISBN') {
+						firstFour = this.model.data[uri][prefixDC + 'identifier'][i].substring(0, 4);
+						if(needISSN && firstFour == 'ISSN') {
+							newItem.setField("ISSN", this.model.data[uri][prefixDC + 'identifier'][0].substring(5));
+							break;
+						}
+						if(needISBN && firstFour == 'ISBN') {
 							newItem.setField("ISBN", this.model.data[uri][prefixDC + 'identifier'][0].substring(5));
 							break;
 						}
 					}
 				}
 			}
+			
+			this._associateRDF(prefixDummy + 'publication', "publication", uri, newItem, typeID);
+			this._associateRDF(prefixDummy + 'volume', "volume", uri, newItem, typeID);
+			this._associateRDF(prefixDummy + 'number', "number", uri, newItem, typeID);
+			this._associateRDF(prefixDummy + 'pages', "pages", uri, newItem, typeID);
+			this._associateRDF(prefixDC + 'publisher', "publisher", uri, newItem, typeID);
+			this._associateRDF(prefixDC + 'date', "date", uri, newItem, typeID);
+			this._associateRDF(prefixDC + 'hasVersion', "edition", uri, newItem, typeID);
+			this._associateRDF(prefixDummy + 'series', "series", uri, newItem, typeID);
+			this._associateRDF(prefixDummy + 'place', "place", uri, newItem, typeID);
+			
 			this.items.push(newItem);
 		}
 	} catch(ex) {
