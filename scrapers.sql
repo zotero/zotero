@@ -1,7 +1,7 @@
 -- 6
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-06-18 11:19:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-06-18 16:55:00'));
 
 REPLACE INTO "scrapers" VALUES('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006-06-18 10:15:00', 'Amazon.com Scraper', 'Simon Kornblith', '^http://www\.amazon\.com/gp/product/', NULL, 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
@@ -396,17 +396,45 @@ if(month && year) {
 model.addStatement(uri, prefixRDF + "type", prefixDummy + "journal", false);
 ');
 
-REPLACE INTO "scrapers" VALUES('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '2006-06-18 11:19:00', 'InnoPAC Scraper', 'Simon Kornblith', '^http://[^/]+/search/[^/]+/[^/]+/1\%2C[^/]+/frameset\&FF=', NULL,
+REPLACE INTO "scrapers" VALUES('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '2006-06-18 16:55:00', 'InnoPAC Scraper', 'Simon Kornblith', '^http://[^/]+/(?:search/|record=)',
+'// First, check to see if the URL alone reveals InnoPAC, since some sites don''t reveal the MARC button
+var matchRegexp = new RegExp(''^(http://[^/]+/search/[^/]+/[^/]+/1\%2C[^/]+/)frameset(.+)$'');
+if(matchRegexp.test(doc.location.href)) {
+	return true;
+}
+// Next, look for the MARC button
+var namespace = doc.documentElement.namespaceURI;
+var nsResolver = namespace ? function(prefix) {
+	if (prefix == ''x'') return namespace; else return null;
+} : null;
+
+var xpath = ''//a[img[@alt="MARC Display"]]'';
+var elmts = utilities.gatherElementsOnXPath(doc, doc, xpath, nsResolver);
+if(elmts.length) {
+	return true;
+}
+return false;
+',
 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
 var prefixDCMI = ''http://purl.org/dc/dcmitype/'';
 var prefixDummy = ''http://chnm.gmu.edu/firefox-scholar/'';
 
 var uri = doc.location.href;
-
 var matchRegexp = new RegExp(''^(http://[^/]+/search/[^/]+/[^/]+/1\%2C[^/]+/)frameset(.+)$'');
 var m = matchRegexp.exec(uri);
-var newUri = m[1]+''marc''+m[2];
+if(m) {
+	var newUri = m[1]+''marc''+m[2];
+} else {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+
+	var xpath = ''//a[img[@alt="MARC Display"]]'';
+	var elmts = utilities.gatherElementsOnXPath(doc, doc, xpath, nsResolver);
+	var newUri = elmts[0].href;
+}
 
 utilities.loadDocument(newUri, browser, function(newBrowser) {
 	newDoc = newBrowser.contentDocument;
