@@ -77,6 +77,7 @@
 						ondraggesture="if (event.target.localName == 'treechildren') nsDragAndDrop.startDrag(event,ScholarPane.getItemsView());"
 						ondragover="nsDragAndDrop.dragOver(event,ScholarPane.getItemsView())"
 						ondragdrop="nsDragAndDrop.drop(event,ScholarPane.getItemsView())"
+						ondblclick="document.getElementById('scholar-view-splitter').setAttribute('state','open');"
 						flex="1">
 						<treecols>
 							<treecol
@@ -118,13 +119,11 @@
 								id="dateModified" hidden="true"
 								label="&items.dateModified_column;"
 								flex="1" persist="width ordinal hidden sortActive sortDirection"/>
-						</treecols>
-				
+						</treecols>				
 						<treechildren/>
 					</tree>
-				
 				</vbox>
-				<splitter id="scholar-view-splitter" collapse="after"><grippy/></splitter>
+				<splitter id="scholar-view-splitter" collapse="after" persist="state"><grippy/></splitter>
 				<box width="300" style="min-width: 300px;" pack="center" align="center">
 					<label id="scholar-view-selected-label" style="text-align: center;"/>
 					<tabbox id="scholar-view-item" hidden="true" flex="1"/>
