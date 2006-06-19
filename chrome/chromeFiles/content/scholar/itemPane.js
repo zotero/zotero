@@ -13,6 +13,7 @@ ScholarItemPane = new function()
 	
 	this.onLoad = onLoad;
 	this.viewItem = viewItem;
+	this.changeTypeTo = changeTypeTo;
 	this.addCreatorRow = addCreatorRow;
 	this.removeCreator = removeCreator;
 	this.showEditor = showEditor;
@@ -27,6 +28,7 @@ ScholarItemPane = new function()
 	function onLoad()
 	{
 		_dynamicFields = document.getElementById('editpane-dynamic-fields');
+		_itemTypeMenu = document.getElementById('editpane-type-menu');
 		_creatorTypeMenu = document.getElementById('creatorTypeMenu');
 		_notesMenu = document.getElementById('scholar-notes-menu');
 		_notesField = document.getElementById('scholar-notes-field');
@@ -42,6 +44,10 @@ ScholarItemPane = new function()
 				menuitem.setAttribute("selected",true);
 			_creatorTypeMenu.appendChild(menuitem);
 		}
+		
+		var itemTypes = Scholar.ItemTypes.getTypes();
+		for(var i = 0; i<itemTypes.length; i++)
+			_itemTypeMenu.appendItem(Scholar.getString("itemTypes."+itemTypes[i]['name']),itemTypes[i]['id']);
 		
 		return true;
 	}
@@ -66,6 +72,10 @@ ScholarItemPane = new function()
 	{
 		while(_dynamicFields.hasChildNodes())
 			_dynamicFields.removeChild(_dynamicFields.firstChild);
+		
+		for(var i = 0, len = _itemTypeMenu.firstChild.childNodes.length; i < len; i++)
+			if(_itemTypeMenu.firstChild.childNodes[i].value == _itemBeingEdited.getType())
+				_itemTypeMenu.selectedIndex = i;
 		
 		var fieldNames = new Array("title","dateAdded","dateModified");
 		var fields = Scholar.ItemFields.getItemTypeFields(_itemBeingEdited.getField("itemTypeID"));
@@ -115,6 +125,16 @@ ScholarItemPane = new function()
 		_notesMenu.selectedIndex = 0;
 		
 		onNoteSelected();
+	}
+	
+	function changeTypeTo(id)
+	{
+		if(id != _itemBeingEdited.getType() && confirm('Are you sure you want to change the item type? Certain fields may be lost.'))
+		{
+			_itemBeingEdited.setType(id);
+			_itemBeingEdited.save();
+			reloadFields();
+		}
 	}
 	
 	function addDynamicRow(label, value, beforeElement)
