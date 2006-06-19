@@ -15,12 +15,14 @@ var ScholarPane = new function()
 	this.newCollection = newCollection;
 	this.onCollectionSelected = onCollectionSelected;
 	this.itemSelected = itemSelected;
-	this.deleteItemSelection = deleteItemSelection;
-	this.deleteCollectionSelection = deleteCollectionSelection;
+	this.deleteSelectedItem = deleteSelectedItem;
+	this.deleteSelectedCollection = deleteSelectedCollection;
 	this.renameSelectedCollection = renameSelectedCollection;
 	this.search = search;
 	this.getCollectionsView = getCollectionsView;
 	this.getItemsView = getItemsView;
+	this.buildCollectionContextMenu = buildCollectionContextMenu;
+	this.buildItemContextMenu = buildItemContextMenu;
 	
 	/*
 	 * Called when the window is open
@@ -72,10 +74,18 @@ var ScholarPane = new function()
 	 */
 	function newItem(typeID)
 	{
+		if(document.getElementById('tb-search').value != "")
+		{
+			document.getElementById('tb-search').value = "";
+			document.getElementById('tb-search').doCommand();
+		}
+		
 		var item = new Scholar.Item(typeID);
 		item.save();
 		if(itemsView && itemsView._itemGroup.isCollection())
 			itemsView._itemGroup.ref.addItem(item.getID());
+			
+		document.getElementById('scholar-view-item').selectedIndex = 1;
 	}
 	
 	function newCollection()
@@ -123,18 +133,18 @@ var ScholarPane = new function()
 			document.getElementById('scholar-view-item').hidden = true;
 			var label = document.getElementById('scholar-view-selected-label');
 			label.hidden = false;
-			label.value = itemsView.selection.count + " items selected.";	
+			label.value = itemsView.selection.count + " items selected";	
 		}
 
 	}
 	
-	function deleteItemSelection()
+	function deleteSelectedItem()
 	{
 		if(itemsView && itemsView.selection.count > 0 && confirm(Scholar.getString('pane.items.delete')))
 			itemsView.deleteSelection();
 	}
 	
-	function deleteCollectionSelection()
+	function deleteSelectedCollection()
 	{
 		if(collectionsView.selection.count > 0 && confirm(Scholar.getString('pane.collections.delete')))
 			collectionsView.deleteSelection();
@@ -166,6 +176,37 @@ var ScholarPane = new function()
 	function getItemsView()
 	{
 		return itemsView;
+	}
+	
+	function buildCollectionContextMenu()
+	{
+		var menu = document.getElementById('scholar-collectionmenu');
+		
+		if(collectionsView.selection.count == 1 && !collectionsView._getItemAtRow(collectionsView.selection.currentIndex).isLibrary())
+		{
+			menu.childNodes[2].removeAttribute('disabled');
+			menu.childNodes[3].removeAttribute('disabled');
+		}
+		else
+		{
+			menu.childNodes[2].setAttribute('disabled', true);
+			menu.childNodes[3].setAttribute('disabled', true);
+		}
+	}
+	
+	function buildItemContextMenu()
+	{
+		var menu = document.getElementById('scholar-itemmenu');
+		
+		if(itemsView && itemsView.selection.count > 0)
+			menu.childNodes[2].removeAttribute('disabled');
+		else
+			menu.childNodes[2].setAttribute('disabled', true);
+	
+		if(itemsView && itemsView.selection.count > 1)
+			menu.childNodes[2].setAttribute('label', 'Remove Selected Items...');
+		else
+			menu.childNodes[2].setAttribute('label', 'Remove Selected Item...');	
 	}
 }
 
