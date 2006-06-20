@@ -10,7 +10,7 @@
     <script src="browser.js"/>
     
 	<script type="application/x-javascript">
-		Scholar.Ingester.Interface.init();
+		Scholar_Ingester_Interface.init();
 	</script>
     
     <statusbar id="status-bar">

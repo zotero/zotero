@@ -4,17 +4,17 @@
 
 //////////////////////////////////////////////////////////////////////////////
 //
-// Scholar.Ingester.Interface
+// Scholar_Ingester_Interface
 //
 //////////////////////////////////////////////////////////////////////////////
 
 // Class to interface with the browser when ingesting data
 
-Scholar.Ingester.Interface = function() {}
+Scholar_Ingester_Interface = function() {}
 
 //////////////////////////////////////////////////////////////////////////////
 //
-// Public Scholar.Ingester.Interface methods
+// Public Scholar_Ingester_Interface methods
 //
 //////////////////////////////////////////////////////////////////////////////
 
@@ -22,47 +22,47 @@ Scholar.Ingester.Interface = function() {}
  * Initialize some variables and prepare event listeners for when chrome is done
  * loading
  */
-Scholar.Ingester.Interface.init = function() {
-	Scholar.Ingester.Interface.browsers = new Array();
-	Scholar.Ingester.Interface.browserDocuments = new Object(); 
+Scholar_Ingester_Interface.init = function() {
+	Scholar_Ingester_Interface.browsers = new Array();
+	Scholar_Ingester_Interface.browserDocuments = new Object();
 	
-    window.addEventListener("load", Scholar.Ingester.Interface.chromeLoad, false);
-    window.addEventListener("unload", Scholar.Ingester.Interface.chromeUnload, false);
+    window.addEventListener("load", Scholar_Ingester_Interface.chromeLoad, false);
+    window.addEventListener("unload", Scholar_Ingester_Interface.chromeUnload, false);
 }
 
 /*
  * When chrome loads, register our event handlers with the appropriate interfaces
  */
-Scholar.Ingester.Interface.chromeLoad = function() {
-	Scholar.Ingester.Interface.tabBrowser = document.getElementById("content");
-	Scholar.Ingester.Interface.hiddenBrowser = document.getElementById("scholar-hidden-browser");
-	Scholar.Ingester.Interface.appContent = document.getElementById("appcontent");
-	Scholar.Ingester.Interface.statusImage = document.getElementById("scholar-status-image");
+Scholar_Ingester_Interface.chromeLoad = function() {
+	Scholar_Ingester_Interface.tabBrowser = document.getElementById("content");
+	Scholar_Ingester_Interface.hiddenBrowser = document.getElementById("scholar-hidden-browser");
+	Scholar_Ingester_Interface.appContent = document.getElementById("appcontent");
+	Scholar_Ingester_Interface.statusImage = document.getElementById("scholar-status-image");
 	
 	// this gives us onLocationChange
-	Scholar.Ingester.Interface.tabBrowser.addProgressListener(Scholar.Ingester.Interface.Listener,
+	Scholar_Ingester_Interface.tabBrowser.addProgressListener(Scholar_Ingester_Interface.Listener,
 		Components.interfaces.nsIWebProgress.NOTIFY_LOCATION);
 	// this gives us DOMContentLoaded
-    Scholar.Ingester.Interface.appContent.addEventListener("DOMContentLoaded",
-    	Scholar.Ingester.Interface.contentLoad, true);
+    Scholar_Ingester_Interface.appContent.addEventListener("DOMContentLoaded",
+    	Scholar_Ingester_Interface.contentLoad, true);
 }
 
 /*
  * When chrome unloads, delete our document objects and remove our listeners
  */
-Scholar.Ingester.Interface.chromeUnload = function() {
-	delete Scholar.Ingester.Interface.browserDocuments;
+Scholar_Ingester_Interface.chromeUnload = function() {
+	delete Scholar_Ingester_Interface.browserDocuments;
 	this.tabBrowser.removeProgressListener(this);
 }
 
 /*
  * Scrapes a page (called when the capture icon is clicked)
  */
-Scholar.Ingester.Interface.scrapeThisPage = function() {
-	var documentObject = Scholar.Ingester.Interface._getDocument(Scholar.Ingester.Interface.tabBrowser.selectedBrowser);
+Scholar_Ingester_Interface.scrapeThisPage = function() {
+	var documentObject = Scholar_Ingester_Interface._getDocument(Scholar_Ingester_Interface.tabBrowser.selectedBrowser);
 	if(documentObject.scraper) {
-		Scholar.Ingester.Interface.scrapeProgress = new Scholar.Ingester.Interface.Progress(window, Scholar.Ingester.Interface.tabBrowser.selectedBrowser.contentDocument, Scholar.getString("ingester.scraping"));
-		documentObject.scrapePage(Scholar.Ingester.Interface._finishScraping);
+		Scholar_Ingester_Interface.scrapeProgress = new Scholar_Ingester_Interface.Progress(window, Scholar_Ingester_Interface.tabBrowser.selectedBrowser.contentDocument, Scholar.getString("ingester.scraping"));
+		documentObject.scrapePage(Scholar_Ingester_Interface._finishScraping);
 	}
 }
 
@@ -70,12 +70,12 @@ Scholar.Ingester.Interface.scrapeThisPage = function() {
  * Updates the status of the capture icon to reflect the scrapability or lack
  * thereof of the current page
  */
-Scholar.Ingester.Interface.updateStatus = function(browser) {
-	var documentObject = Scholar.Ingester.Interface._getDocument(browser);
+Scholar_Ingester_Interface.updateStatus = function(browser) {
+	var documentObject = Scholar_Ingester_Interface._getDocument(browser);
 	if(documentObject && documentObject.scraper) {
-		Scholar.Ingester.Interface.statusImage.src = "chrome://scholar/skin/capture_colored.png";
+		Scholar_Ingester_Interface.statusImage.src = "chrome://scholar/skin/capture_colored.png";
 	} else {
-		Scholar.Ingester.Interface.statusImage.src = "chrome://scholar/skin/capture_gray.png";
+		Scholar_Ingester_Interface.statusImage.src = "chrome://scholar/skin/capture_gray.png";
 	}
 }
 
@@ -88,30 +88,30 @@ Scholar.Ingester.Interface.updateStatus = function(browser) {
  * if a tab is loaded behind the currently selected page, the ingester will not
  * create a new object for it.
  */
-Scholar.Ingester.Interface.contentLoad = function() {	
-	Scholar.Ingester.Interface._setDocument(Scholar.Ingester.Interface.tabBrowser.selectedBrowser);
-	Scholar.Ingester.Interface.updateStatus(Scholar.Ingester.Interface.tabBrowser.selectedBrowser);
+Scholar_Ingester_Interface.contentLoad = function() {
+	Scholar_Ingester_Interface._setDocument(Scholar_Ingester_Interface.tabBrowser.selectedBrowser);
+	Scholar_Ingester_Interface.updateStatus(Scholar_Ingester_Interface.tabBrowser.selectedBrowser);
 }
 
 /*
  * Dummy event handlers for all the events we don't care about
  */
-Scholar.Ingester.Interface.Listener = function() {}
-Scholar.Ingester.Interface.Listener.onStatusChange = function() {}
-Scholar.Ingester.Interface.Listener.onSecurityChange = function() {}
-Scholar.Ingester.Interface.Listener.onProgressChange = function() {}
-Scholar.Ingester.Interface.Listener.onStateChange = function() {}
+Scholar_Ingester_Interface.Listener = function() {}
+Scholar_Ingester_Interface.Listener.onStatusChange = function() {}
+Scholar_Ingester_Interface.Listener.onSecurityChange = function() {}
+Scholar_Ingester_Interface.Listener.onProgressChange = function() {}
+Scholar_Ingester_Interface.Listener.onStateChange = function() {}
 
 /*
  * onLocationChange is called when tabs are switched. Use it to retrieve the
  * appropriate status indicator for the current tab, and to free useless objects
  */
-Scholar.Ingester.Interface.Listener.onLocationChange = function() {
-    var browsers = Scholar.Ingester.Interface.tabBrowser.browsers;
+Scholar_Ingester_Interface.Listener.onLocationChange = function(progressObject) {
+    var browsers = Scholar_Ingester_Interface.tabBrowser.browsers;
 
     // Remove document object of any browser that no longer exists
-    for (var i = 0; i < Scholar.Ingester.Interface.browsers.length; i++) {
-        var browser = Scholar.Ingester.Interface.browsers[i];
+    for (var i = 0; i < Scholar_Ingester_Interface.browsers.length; i++) {
+        var browser = Scholar_Ingester_Interface.browsers[i];
         var exists = false;
 
         for (var j = 0; j < browsers.length; j++) {
@@ -122,10 +122,10 @@ Scholar.Ingester.Interface.Listener.onLocationChange = function() {
         }
 
         if (!exists) {
-            Scholar.Ingester.Interface.browsers.splice(i,1);
+            Scholar_Ingester_Interface.browsers.splice(i,1);
 
         	// To execute if document object does not exist
-            Scholar.Ingester.Interface._deleteDocument(browser);
+            Scholar_Ingester_Interface._deleteDocument(browser);
         }
     }
     
@@ -134,22 +134,22 @@ Scholar.Ingester.Interface.Listener.onLocationChange = function() {
         var browser = browsers[i];
         var exists = false;
 
-        for (var j = 0; j < Scholar.Ingester.Interface.browsers.length; j++) {
-            if (browser == Scholar.Ingester.Interface.browsers[j]) {
+        for (var j = 0; j < Scholar_Ingester_Interface.browsers.length; j++) {
+            if (browser == Scholar_Ingester_Interface.browsers[j]) {
                 exists = true;
                 break;
             }
         }
 
         if (!exists) {
-            Scholar.Ingester.Interface.browsers.splice(i,0,browser);
+            Scholar_Ingester_Interface.browsers.splice(i,0,browser);
             
         	// To execute if window is new
         }
     }*/
 
-    Scholar.Ingester.Interface.updateStatus(
-    	Scholar.Ingester.Interface.tabBrowser.selectedBrowser
+    Scholar_Ingester_Interface.updateStatus(
+    	Scholar_Ingester_Interface.tabBrowser.selectedBrowser
     );
 }
 
@@ -167,11 +167,11 @@ Scholar.Ingester.Interface.Listener.onLocationChange = function() {
  * appropriate mechanism for handling this, but it's what PiggyBank used and it
  * appears to work.
  */
-Scholar.Ingester.Interface._getDocument = function(browser) {
+Scholar_Ingester_Interface._getDocument = function(browser) {
 	try {
 		var key = browser.getAttribute("scholar-key");
-		if(Scholar.Ingester.Interface.browserDocuments[key]) {
-			return Scholar.Ingester.Interface.browserDocuments[key];
+		if(Scholar_Ingester_Interface.browserDocuments[key]) {
+			return Scholar_Ingester_Interface.browserDocuments[key];
 		}
 	} finally {}
 	return false;
@@ -181,7 +181,7 @@ Scholar.Ingester.Interface._getDocument = function(browser) {
  * Creates a new document object for a browser window object, attempts to
  * retrieve appropriate scraper
  */
-Scholar.Ingester.Interface._setDocument = function(browser) {
+Scholar_Ingester_Interface._setDocument = function(browser) {
 	try {
 		var key = browser.getAttribute("scholar-key");
 	} finally {
@@ -190,18 +190,18 @@ Scholar.Ingester.Interface._setDocument = function(browser) {
 			browser.setAttribute("scholar-key", key);
 		}
 	}
-	Scholar.Ingester.Interface.browserDocuments[key] = new Scholar.Ingester.Document(browser, Scholar.Ingester.Interface.hiddenBrowser);
-	Scholar.Ingester.Interface.browserDocuments[key].retrieveScraper();
+	Scholar_Ingester_Interface.browserDocuments[key] = new Scholar.Ingester.Document(browser, Scholar_Ingester_Interface.hiddenBrowser);
+	Scholar_Ingester_Interface.browserDocuments[key].retrieveScraper();
 }
 
 /*
  * Deletes the document object associated with a given browser window object
  */
-Scholar.Ingester.Interface._deleteDocument = function(browser) {
+Scholar_Ingester_Interface._deleteDocument = function(browser) {
 	try {
 		var key = browser.getAttribute("scholar-key");
-		if(Scholar.Ingester.Interface.browserDocuments[key]) {
-			delete Scholar.Ingester.Interface.browserDocuments[key];
+		if(Scholar_Ingester_Interface.browserDocuments[key]) {
+			delete Scholar_Ingester_Interface.browserDocuments[key];
 			return true;
 		}
 	} finally {}
@@ -211,23 +211,23 @@ Scholar.Ingester.Interface._deleteDocument = function(browser) {
 /*
  * Callback to be executed when scraping is complete
  */
-Scholar.Ingester.Interface._finishScraping = function(obj) {
+Scholar_Ingester_Interface._finishScraping = function(obj) {
 	if(obj.items.length) {
 		var item1 = obj.items[0];
 		
-		Scholar.Ingester.Interface.scrapeProgress.changeHeadline(Scholar.getString("ingester.scrapeComplete"));
+		Scholar_Ingester_Interface.scrapeProgress.changeHeadline(Scholar.getString("ingester.scrapeComplete"));
 		
 		var fields = Scholar.ItemFields.getItemTypeFields(item1.getField("itemTypeID"));
 			
 		var titleLabel = Scholar.getString("itemFields.title") + ":"
-		Scholar.Ingester.Interface.scrapeProgress.addResult(titleLabel, item1.getField("title"));
+		Scholar_Ingester_Interface.scrapeProgress.addResult(titleLabel, item1.getField("title"));
 		var creators = item1.numCreators();
 		if(creators) {
 			for(var i=0; i<creators; i++) {
 				var creator = item1.getCreator(i);
 				var label = Scholar.getString("creatorTypes."+Scholar.CreatorTypes.getTypeName(creator.creatorTypeID)) + ":";
 				var data = creator.firstName + ' ' + creator.lastName;
-				Scholar.Ingester.Interface.scrapeProgress.addResult(label, data);
+				Scholar_Ingester_Interface.scrapeProgress.addResult(label, data);
 			}
 		}
 		
@@ -237,7 +237,7 @@ Scholar.Ingester.Interface._finishScraping = function(obj) {
 				var name = Scholar.ItemFields.getName(fields[i]);
 				if(name != "source") {
 					var label = Scholar.getString("itemFields."+ name) + ":";
-					Scholar.Ingester.Interface.scrapeProgress.addResult(label, data);
+					Scholar_Ingester_Interface.scrapeProgress.addResult(label, data);
 				}
 			}
 		}
@@ -247,11 +247,11 @@ Scholar.Ingester.Interface._finishScraping = function(obj) {
 			obj.items[i].save();
 		}
 	} else {
-		Scholar.Ingester.Interface.scrapeProgress.changeHeadline(Scholar.getString("ingester.scrapeError"));
-		Scholar.Ingester.Interface.scrapeProgress.addDescription(Scholar.getString("ingester.scrapeErrorDescription"));
+		Scholar_Ingester_Interface.scrapeProgress.changeHeadline(Scholar.getString("ingester.scrapeError"));
+		Scholar_Ingester_Interface.scrapeProgress.addDescription(Scholar.getString("ingester.scrapeErrorDescription"));
 	}
 	
-	setTimeout(function() { Scholar.Ingester.Interface.scrapeProgress.fade() }, 2000);
+	setTimeout(function() { Scholar_Ingester_Interface.scrapeProgress.fade() }, 2000);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -262,7 +262,7 @@ Scholar.Ingester.Interface._finishScraping = function(obj) {
 
 // Handles the display of a div showing progress in scraping
 
-Scholar.Ingester.Interface.Progress = function(myWindow, myDocument, headline) {
+Scholar_Ingester_Interface.Progress = function(myWindow, myDocument, headline) {
 	this.window = myWindow;
 	this.document = myDocument;
 	this.div = this.document.createElement('div');
@@ -299,14 +299,14 @@ Scholar.Ingester.Interface.Progress = function(myWindow, myDocument, headline) {
 	this.document.body.appendChild(this.div);
 }
 
-Scholar.Ingester.Interface.Progress.prototype.changeHeadline = function(headline) {
+Scholar_Ingester_Interface.Progress.prototype.changeHeadline = function(headline) {
 	this.headlineP.removeChild(this.headlineP.firstChild);
 	
 	var headlineNode = this.document.createTextNode(headline);
 	this.headlineP.appendChild(headlineNode);
 }
 
-Scholar.Ingester.Interface.Progress.prototype.addResult = function(label, data) {
+Scholar_Ingester_Interface.Progress.prototype.addResult = function(label, data) {
 	var labelNode = this.document.createTextNode(label);
 	var dataNode = this.document.createTextNode(data);
 	
@@ -324,7 +324,7 @@ Scholar.Ingester.Interface.Progress.prototype.addResult = function(label, data) 
 	this.table.appendChild(tr);
 }
 
-Scholar.Ingester.Interface.Progress.prototype.addDescription = function(description) {
+Scholar_Ingester_Interface.Progress.prototype.addDescription = function(description) {
 	var descriptionNode = this.document.createTextNode(description);
 	var tr = this.document.createElement("tr");
 	var descriptionTd = this.document.createElement("td");
@@ -337,7 +337,7 @@ Scholar.Ingester.Interface.Progress.prototype.addDescription = function(descript
 }
 
 
-Scholar.Ingester.Interface.Progress.prototype.fade = function() {
+Scholar_Ingester_Interface.Progress.prototype.fade = function() {
 	// Icky, icky hack to keep objects
 	var me = this;
 	this._fader = function() {
