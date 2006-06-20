@@ -249,7 +249,16 @@ Scholar.ItemTreeView.prototype.sort = function()
 	{
 		function columnSort(a,b)
 		{
-			return (a.getField(column.id) > b.getField(column.id)) ? -1 : (a.getField(column.id) < b.getField(column.id)) ? 1 : 0;
+			var fieldA = a.getField(column.id);
+			var fieldB = b.getField(column.id);
+			
+			if(typeof fieldA == 'string')
+			{
+				fieldA = fieldA.toLowerCase();
+				fieldB = fieldB.toLowerCase();
+			}
+			
+			return (fieldA > fieldB) ? -1 : (fieldA < fieldB) ? 1 : 0;
 		}
 	}
 	
