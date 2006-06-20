@@ -107,6 +107,7 @@ Scholar_Ingester_Interface.Listener.onStateChange = function() {}
  * appropriate status indicator for the current tab, and to free useless objects
  */
 Scholar_Ingester_Interface.Listener.onLocationChange = function(progressObject) {
+	Scholar.debug("onLocationChange called");
     var browsers = Scholar_Ingester_Interface.tabBrowser.browsers;
 
     // Remove document object of any browser that no longer exists
@@ -213,33 +214,38 @@ Scholar_Ingester_Interface._deleteDocument = function(browser) {
  */
 Scholar_Ingester_Interface._finishScraping = function(obj) {
 	if(obj.items.length) {
-		var item1 = obj.items[0];
-		
-		Scholar_Ingester_Interface.scrapeProgress.changeHeadline(Scholar.getString("ingester.scrapeComplete"));
-		
-		var fields = Scholar.ItemFields.getItemTypeFields(item1.getField("itemTypeID"));
+		try {		// Encased in a try block to fix a as-of-yet unresolved issue
+			var item1 = obj.items[0];
 			
-		var titleLabel = Scholar.getString("itemFields.title") + ":"
-		Scholar_Ingester_Interface.scrapeProgress.addResult(titleLabel, item1.getField("title"));
-		var creators = item1.numCreators();
-		if(creators) {
-			for(var i=0; i<creators; i++) {
-				var creator = item1.getCreator(i);
-				var label = Scholar.getString("creatorTypes."+Scholar.CreatorTypes.getTypeName(creator.creatorTypeID)) + ":";
-				var data = creator.firstName + ' ' + creator.lastName;
-				Scholar_Ingester_Interface.scrapeProgress.addResult(label, data);
-			}
-		}
-		
-		for(i in fields) {
-			var data = item1.getField(fields[i]);
-			if(data) {
-				var name = Scholar.ItemFields.getName(fields[i]);
-				if(name != "source") {
-					var label = Scholar.getString("itemFields."+ name) + ":";
+			Scholar_Ingester_Interface.scrapeProgress.changeHeadline(Scholar.getString("ingester.scrapeComplete"));
+			
+			var fields = Scholar.ItemFields.getItemTypeFields(item1.getField("itemTypeID"));
+			
+			// Display title and creators
+			var titleLabel = Scholar.getString("itemFields.title") + ":"
+			Scholar_Ingester_Interface.scrapeProgress.addResult(titleLabel, item1.getField("title"));
+			var creators = item1.numCreators();
+			if(creators) {
+				for(var i=0; i<creators; i++) {
+					var creator = item1.getCreator(i);
+					var label = Scholar.getString("creatorTypes."+Scholar.CreatorTypes.getTypeName(creator.creatorTypeID)) + ":";
+					var data = creator.firstName + ' ' + creator.lastName;
 					Scholar_Ingester_Interface.scrapeProgress.addResult(label, data);
 				}
 			}
+			
+			// Add additional fields for display
+			for(i in fields) {
+				var data = item1.getField(fields[i]);
+				if(data) {
+					var name = Scholar.ItemFields.getName(fields[i]);
+					if(name != "source") {
+						var label = Scholar.getString("itemFields."+ name) + ":";
+						Scholar_Ingester_Interface.scrapeProgress.addResult(label, data);
+					}
+				}
+			}
+		} catch(ex) {
 		}
 		
 		// Save items

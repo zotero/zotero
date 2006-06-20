@@ -333,15 +333,13 @@ Scholar.Ingester.Utilities.prototype.importMARCRecord = function(record, uri, mo
 	model = this._MARCAssociateField(record, uri, model, '022', prefixDC + 'identifier', this._MARCCleanNumber, 'ISSN ');
 	// Extract creators
 	model = this._MARCAssociateField(record, uri, model, '100', prefixDC + 'creator', this.cleanAuthor);
-	model = this._MARCAssociateField(record, uri, model, '110', prefixDC + 'creator', this._MARCCleanString);
-	model = this._MARCAssociateField(record, uri, model, '111', prefixDC + 'creator', this._MARCCleanString);
-	model = this._MARCAssociateField(record, uri, model, '130', prefixDC + 'creator', this._MARCCleanString);
+	model = this._MARCAssociateField(record, uri, model, '110', prefixDummy + 'corporateCreator', this._MARCCleanString);
+	model = this._MARCAssociateField(record, uri, model, '111', prefixDummy + 'corporateCreator', this._MARCCleanString);
 	model = this._MARCAssociateField(record, uri, model, '700', prefixDC + 'contributor', this.cleanAuthor);
-	model = this._MARCAssociateField(record, uri, model, '710', prefixDC + 'contributor', this._MARCCleanString);
-	model = this._MARCAssociateField(record, uri, model, '711', prefixDC + 'contributor', this._MARCCleanString);
-	model = this._MARCAssociateField(record, uri, model, '730', prefixDC + 'contributor', this._MARCCleanString);
-	if(!model.data[uri] || (!model.data[uri][prefixDC + 'creator'] && !model.data[uri][prefixDC + 'contributor'])) {	// some LOC entries have no listed author, but have the author
-													// in the person subject field as the first entry
+	model = this._MARCAssociateField(record, uri, model, '710', prefixDummy + 'corporateContributor', this._MARCCleanString);
+	model = this._MARCAssociateField(record, uri, model, '711', prefixDummy + 'corporateContributor', this._MARCCleanString);
+	if(!model.data[uri] || (!model.data[uri][prefixDC + 'creator'] && !model.data[uri][prefixDC + 'contributor'] && !model.data[uri][prefixDummy + 'corporateCreator'] && !model.data[uri][prefixDummy + 'corporateContributor'])) {
+		// some LOC entries have no listed author, but have the author in the person subject field as the first entry
 		var field = record.get_field_subfields('600');
 		if(field[0]) {
 			model.addStatement(uri, prefixDC + 'creator', this.cleanAuthor(field[0]['a']));	
@@ -691,6 +689,18 @@ Scholar.Ingester.Document.prototype._updateDatabase = function() {
 					var firstName = creator.substring(0, spaceIndex);
 				
 					newItem.setCreator(creatorIndex, firstName, lastName, 2);
+					creatorIndex++;
+				}
+			}
+			if(this.model.data[uri][prefixDummy + 'corporateCreator']) {
+				for(i in this.model.data[uri][prefixDummy + 'corporateCreator']) {
+					newItem.setCreator(creatorIndex, this.model.data[uri][prefixDummy + 'corporateCreator'][i], null, 1);
+					creatorIndex++;
+				}
+			}
+			if(this.model.data[uri][prefixDummy + 'corporateContributor']) {
+				for(i in this.model.data[uri][prefixDummy + 'corporateContributor']) {
+					newItem.setCreator(creatorIndex, this.model.data[uri][prefixDummy + 'corporateContributor'][i], null, 2);
 					creatorIndex++;
 				}
 			}

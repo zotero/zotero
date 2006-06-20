@@ -234,7 +234,24 @@ utilities.HTTPUtilities.doGet(newUri+''?''+postString, null, function(text) {
 })
 wait();');
 
-REPLACE INTO "scrapers" VALUES('d921155f-0186-1684-615c-ca57682ced9b', '2006-06-18 11:02:00', 'JSTOR Scraper', 'Simon Kornblith', '^http://www\.jstor\.org/(?:view|browse)', NULL, 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
+REPLACE INTO "scrapers" VALUES('d921155f-0186-1684-615c-ca57682ced9b', '2006-06-18 11:02:00', 'JSTOR Scraper', 'Simon Kornblith', '^http://www\.jstor\.org/(?:view|browse)', 
+'var namespace = doc.documentElement.namespaceURI;
+var nsResolver = namespace ? function(prefix) {
+	if (prefix == ''x'') return namespace; else return null;
+} : null;
+
+// If this is a view page, find the link to the citation
+var xpath = ''/html/body/div[@class="indent"]/center/font/p/a[@class="nav"]'';
+var elmts = utilities.gatherElementsOnXPath(doc, doc, xpath, nsResolver);
+if(!elmts.length) {
+	var xpath = ''/html/body/div[@class="indent"]/center/p/font/a[@class="nav"]'';
+	var elmts = utilities.gatherElementsOnXPath(doc, doc, xpath, nsResolver);
+}
+utilities.debugPrint(elmts.length);
+if(elmts && elmts.length) {
+	return true;
+}
+return false;', 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
 var prefixDCMI = ''http://purl.org/dc/dcmitype/'';
 var prefixDummy = ''http://chnm.gmu.edu/firefox-scholar/'';
@@ -249,15 +266,13 @@ var uri = doc.location.href;
 // If this is a view page, find the link to the citation
 var xpath = ''/html/body/div[@class="indent"]/center/font/p/a[@class="nav"]'';
 var elmts = utilities.gatherElementsOnXPath(doc, doc, xpath, nsResolver);
-if(!elmts) {
+if(!elmts.length) {
 	var xpath = ''/html/body/div[@class="indent"]/center/p/font/a[@class="nav"]'';
 	var elmts = utilities.gatherElementsOnXPath(doc, doc, xpath, nsResolver);
 }
-if(!elmts) {
-	exit;
-}
-var saveCitation = utilities.getNode(doc, elmts[0], ''.'', nsResolver).href;
-var viewSavedCitations = utilities.getNode(doc, elmts[1], ''.'', nsResolver).href;
+
+var saveCitation = elmts[0].href;
+var viewSavedCitations = elmts[1].href;
 saveCitation = saveCitation.replace(''citationAction=remove'', ''citationAction=save'');
 
 // Parse save citation link
