@@ -1289,7 +1289,7 @@ Scholar.Collection.prototype.addItem = function(itemID){
 	// If this was previously empty, update and send a notification to the tree
 	if (!this._hasChildItems){
 		this._hasChildItems = true;
-		Scholar.Notifier.trigger('modify', 'collections', this.getID());
+		Scholar.Notifier.trigger('modify', 'collection', this.getID());
 	}
 	
 	Scholar.Notifier.trigger('add', 'item', itemID);
