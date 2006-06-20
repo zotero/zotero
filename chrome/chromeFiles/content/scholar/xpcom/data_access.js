@@ -1368,8 +1368,7 @@ Scholar.Collection.prototype.erase = function(deleteItems){
 	Scholar.DB.beginTransaction();
 	
 	var descendents = this._getDescendents();
-	var collections = new Array(this._id);
-	var items = new Array();
+	var collections = [this.getID()], items = [];
 	
 	for(var i=0, len=descendents.length; i<len; i++){
 		// Descendent collections
