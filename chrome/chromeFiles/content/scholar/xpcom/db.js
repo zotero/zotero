@@ -31,7 +31,7 @@ Scholar.DB = new function(){
 	 * Run an SQL query
 	 *
 	 *  Optional _params_ is an array of bind parameters in the form
-	 *		[{'int':2},{'string':'foobar'}]
+	 *		[1,"hello",3] or [{'int':2},{'string':'foobar'}]
 	 *
 	 * 	Returns:
 	 *  	 - Associative array (similar to mysql_fetch_assoc) for SELECT's
@@ -89,7 +89,9 @@ Scholar.DB = new function(){
 			}
 		}
 		catch (e){
-			throw(e + ' [QUERY: ' + sql + '] [ERROR: ' + db.lastErrorString + ']');
+			var dberr = (db.lastErrorString!='not an error')
+				? ' [ERROR: ' + db.lastErrorString + ']' : '';
+			throw(e + ' [QUERY: ' + sql + ']' + dberr);
 		}
 	}
 	
@@ -151,7 +153,7 @@ Scholar.DB = new function(){
 	 * Run a query, returning a mozIStorageStatement for direct manipulation
 	 *
 	 *  Optional _params_ is an array of bind parameters in the form
-	 *		[{'int':2},{'string':'foobar'}]
+	 *		[1,"hello",3] or [{'int':2},{'string':'foobar'}]
 	 */
 	function statementQuery(sql,params){
 		var db = _getDBConnection();
@@ -161,27 +163,67 @@ Scholar.DB = new function(){
 			var statement = db.createStatement(sql);
 		}
 		catch (e){
-			throw('[QUERY: ' + sql + '] [ERROR: ' + db.lastErrorString + ']');
+			var dberr = (db.lastErrorString!='not an error')
+				? ' [ERROR: ' + db.lastErrorString + ']' : '';
+			throw(e + ' [QUERY: ' + sql + ']' + dberr);
 		}
 		
 		if (statement && params){
 			for (var i=0; i<params.length; i++){
-				// Int
+				// Integer
 				if (typeof params[i]['int'] != 'undefined'){
-					Scholar.debug('Binding parameter ' + (i+1) + ' of type int: ' +
-						params[i]['int'],5);
-					statement.bindInt32Parameter(i,params[i]['int']);
+					var type = 'int';
+					var value = params[i]['int'];
 				}
 				// String
 				else if (typeof params[i]['string'] != 'undefined'){
-					Scholar.debug('Binding parameter ' + (i+1) + ' of type string: "' +
-						params[i]['string'] + '"',5);
-					statement.bindUTF8StringParameter(i,params[i]['string']);
+					var type = 'string';
+					var value = params[i]['string'];
 				}
 				// Null
 				else if (typeof params[i]['null'] != 'undefined'){
-					Scholar.debug('Binding parameter ' + (i+1) + ' of type NULL', 5);
-					statement.bindNullParameter(i);
+					var type = 'null';
+				}
+				// Automatic (trust the JS type)
+				else {
+					switch (typeof params[i]){
+						case 'string':
+							var type = 'string';
+							break;
+						case 'number':
+							var type = 'int';
+							break;
+						// Object
+						default:
+							// Null value will show as object
+							if (!params[i]){
+								var type = 'null';
+							}
+							else {
+								throw('Invalid bound parameter ' + params[i]);
+							}
+					}
+					var value = params[i];
+				}
+				
+				// Bind the parameter as the correct type
+				switch (type){
+					case 'int':
+						Scholar.debug('Binding parameter ' + (i+1)
+							+ ' of type int: ' + value, 5);
+						statement.bindInt32Parameter(i, value);
+						break;
+						
+					case 'string':
+						Scholar.debug('Binding parameter ' + (i+1)
+							+ ' of type string: "' + value + '"', 5);
+						statement.bindUTF8StringParameter(i, value);
+						break;
+						
+					case 'null':
+						Scholar.debug('Binding parameter ' + (i+1)
+							+ ' of type NULL', 5);
+						statement.bindNullParameter(i);
 				}
 			}
 		}
@@ -221,7 +263,9 @@ Scholar.DB = new function(){
 				db.commitTransaction();
 			}
 			catch(e){
-				throw(e + ' [ERROR: ' + db.lastErrorString + ']');
+				var dberr = (db.lastErrorString!='not an error')
+					? ' [ERROR: ' + db.lastErrorString + ']' : '';
+				throw(e + ' [QUERY: ' + sql + ']' + dberr);
 			}
 		}
 	}
@@ -241,7 +285,9 @@ Scholar.DB = new function(){
 				db.rollbackTransaction();
 			}
 			catch(e){
-				throw(e + ' [ERROR: ' + db.lastErrorString + ']');
+				var dberr = (db.lastErrorString!='not an error')
+					? ' [ERROR: ' + db.lastErrorString + ']' : '';
+				throw(e + ' [QUERY: ' + sql + ']' + dberr);
 			}
 		}
 	}
@@ -312,7 +358,7 @@ Scholar.DB = new function(){
 		// Get the profile directory
 		var file = Components.classes["@mozilla.org/file/directory_service;1"]
 			.getService(Components.interfaces.nsIProperties)
-			.get("ProfD", Components.interfaces.nsILocalFile);
+			.get("ProfD", Components.interfaces.nsIFile);
 		
 		// This makes file point to PROFILE_DIR/<scholar database file>
 		file.append(SCHOLAR_CONFIG['DB_FILE']);
