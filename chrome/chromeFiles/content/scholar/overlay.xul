@@ -35,7 +35,7 @@
 				</popup>
 			</popupset>
 			<toolbar align="end">
-				<label value="Firefox Scholar" style="font-size: larger;"/>
+				<label value="Scholar" style="font-size: larger;"/>
 				<label value="1.0 Alpha"/>
 				<spacer flex="1"/>
 				<toolbarbutton class="tabs-closebutton" oncommand="ScholarPane.toggleDisplay()"/>
@@ -65,7 +65,9 @@
 				<splitter id="scholar-tree-splitter" resizebefore="closest" resizeafter="closest"/>
 				<vbox persist="width" flex="1" style="min-width: 300px;">
 					<toolbar align="center">
-						<toolbarbutton id="tb-add" label="&toolbar.newItem.label;" command="cmd_scholar_newItem"/>
+						<toolbarbutton id="tb-add" label="&toolbar.newItem.label;" type="menu">
+							<menupopup/>
+						</toolbarbutton>
 						<spacer flex="1"/>
 						<label value="&toolbar.search.label;" control="tb-search"/>
 						<textbox id="tb-search" type="timed" timeout="500" command="cmd_scholar_search"/>

@@ -35,6 +35,17 @@ var ScholarPane = new function()
 
 		//select Library
 		collectionsView.selection.select(0);
+		
+		//Create the add menu with each item type
+		var addMenu = document.getElementById('tb-add').firstChild;
+		var itemTypes = Scholar.ItemTypes.getTypes();
+		for(var i = 0; i<itemTypes.length; i++)
+		{
+			var menuitem = document.createElement("menuitem");
+			menuitem.setAttribute("label", Scholar.getString("itemTypes."+itemTypes[i]['name']));
+			menuitem.setAttribute("oncommand","ScholarPane.newItem("+itemTypes[i]['id']+")");
+			addMenu.appendChild(menuitem);
+		}
 	}
 	
 	/*
@@ -122,7 +133,11 @@ var ScholarPane = new function()
 			document.getElementById('scholar-view-item').hidden = true;
 			var label = document.getElementById('scholar-view-selected-label');
 			label.hidden = false;
-			label.value = itemsView.selection.count + " items selected";	
+			
+			if(itemsView && itemsView.selection.count)
+				label.value = itemsView.selection.count + " items selected";	
+			else
+				label.value = "No items selected";
 		}
 
 	}
