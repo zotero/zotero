@@ -1346,3 +1346,37 @@ utilities.HTTPUtilities.doGet(newUri, null, function(text) {
 
 model.addStatement(uri, prefixRDF + "type", prefixDummy + "journal", false);
 wait();');
+
+REPLACE INTO "scrapers" VALUES('951c027d-74ac-47d4-a107-9c3069ab7b48', '2006-06-20 10:52:00', 'Scraper for Dublin Core expressed as HTML META elements', 'Simon Kornblith', NULL,
+'var metaTags = doc.getElementsByTagName("meta");
+
+if(metaTags) {
+	for(var i=0; i<metaTags.length; i++) {
+		var tag = metaTags[i].getAttribute("name");
+		var value = metaTags[i].getAttribute("content");
+		if(tag && value && tag.substr(0, 3).toLowerCase() == "dc.") {
+			return true;
+		}
+	}
+}
+return false;', 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
+var prefixDC = ''http://purl.org/dc/elements/1.1/'';
+var prefixDCMI = ''http://purl.org/dc/dcmitype/'';
+var prefixDummy = ''http://chnm.gmu.edu/firefox-scholar/'';
+
+var uri = doc.location.href;
+
+var metaTags = doc.getElementsByTagName("meta");
+
+for(var i=0; i<metaTags.length; i++) {
+	var tag = metaTags[i].getAttribute("name");
+	var value = metaTags[i].getAttribute("content");
+	if(tag && value && tag.substr(0, 3).toLowerCase() == "dc.") {
+		var suffix = tag.substr(3);
+		if(suffix == "creator") {
+			// Everyone uses different methods of encoding the DC creator; clean them
+			value = utilities.cleanAuthor(value);
+		}
+		model.addStatement(uri, prefixDC + suffix, value, true);
+	}
+}');
