@@ -26,6 +26,26 @@ tree #items-tree
 
 }
 
+#tb-collection-add
+{
+	list-style-image: url('chrome://scholar/skin/toolbar-collection-add.png');
+}
+
+#tb-collection-rename
+{
+	list-style-image: url('chrome://scholar/skin/toolbar-collection-edit.png');
+}
+
+#tb-collection-rename[disabled="true"]
+{
+	list-style-image: url('chrome://scholar/skin/toolbar-collection-edit-gray.png');
+}
+
+#tb-add
+{
+	list-style-image: url('chrome://scholar/skin/toolbar-item-add.png');
+}
+
 #scholar-pane toolbar
 {
 	border-bottom: none;

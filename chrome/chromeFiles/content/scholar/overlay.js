@@ -107,13 +107,13 @@ var ScholarPane = new function()
 			
 			itemsView = new Scholar.ItemTreeView(collection);
 			document.getElementById('items-tree').view = itemsView;
-			document.getElementById('tb-rename').disabled = collection.isLibrary();
+			document.getElementById('tb-collection-rename').disabled = collection.isLibrary();
 			itemsView.selection.clearSelection();
 		}
 		else
 		{
 			document.getElementById('items-tree').view = itemsView = null;
-			document.getElementById('tb-rename').disabled = true;
+			document.getElementById('tb-collection-rename').disabled = true;
 		}
 	}
 	

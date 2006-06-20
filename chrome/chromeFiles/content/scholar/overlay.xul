@@ -43,8 +43,8 @@
 			<hbox flex="1">
 				<vbox persist="width" width="200" style="min-width: 150px;">
 					<toolbar>
-						<toolbarbutton label="&toolbar.newCollection.label;" command="cmd_scholar_newCollection"/>
-						<toolbarbutton id="tb-rename" label="&toolbar.renameCollection.label;" oncommand="ScholarPane.renameSelectedCollection();" disabled="true"/>
+						<toolbarbutton id="tb-collection-add" tooltiptext="&toolbar.newCollection.label;" command="cmd_scholar_newCollection"/>
+						<toolbarbutton id="tb-collection-rename" tooltiptext="&toolbar.renameCollection.label;" oncommand="ScholarPane.renameSelectedCollection();" disabled="true"/>
 					</toolbar>
 					<tree id="collections-tree" hidecolumnpicker="true" context="scholar-collectionmenu"
 						onselect="ScholarPane.onCollectionSelected();" seltype="single"
@@ -65,7 +65,7 @@
 				<splitter id="scholar-tree-splitter" resizebefore="closest" resizeafter="closest"/>
 				<vbox persist="width" flex="1" style="min-width: 300px;">
 					<toolbar align="center">
-						<toolbarbutton id="tb-add" label="&toolbar.newItem.label;" type="menu">
+						<toolbarbutton id="tb-add" tooltiptext="&toolbar.newItem.label;" type="menu">
 							<menupopup/>
 						</toolbarbutton>
 						<spacer flex="1"/>
