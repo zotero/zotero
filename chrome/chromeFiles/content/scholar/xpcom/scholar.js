@@ -5,7 +5,7 @@ const SCHOLAR_CONFIG = {
 	DEBUG_LOGGING: true,
 	DEBUG_TO_CONSOLE: true, // dump debug messages to console rather than (much slower) Debug Logger
 	REPOSITORY_URL: 'http://chnm.gmu.edu/firefoxscholar/repo',
-	REPOSITORY_CHECK_INTERVAL: 86400, // 24 hours
+	REPOSITORY_CHECK_INTERVAL: 3600 // 86400, // 24 hours
 	REPOSITORY_CHECK_RETRY: 3600 // 1 hour
 };
 
