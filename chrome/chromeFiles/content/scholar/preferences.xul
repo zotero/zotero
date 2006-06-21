@@ -12,7 +12,7 @@
 
 <dialogheader id="header" title="&scholar.name;" description="&scholar.preferences.title;"/>
 
-<checkbox id="whateverBox" label="Whatever!"/>
+<checkbox id="autoUpdateBox" label="Automatically check for updated scrapers"/>
 
 
 </dialog>
