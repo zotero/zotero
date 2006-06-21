@@ -1,7 +1,7 @@
--- 7
+-- 8
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-06-21 09:55:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-06-21 10:28:00'));
 
 REPLACE INTO "scrapers" VALUES('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006-06-18 10:15:00', 'Amazon.com Scraper', 'Simon Kornblith', '^http://www\.amazon\.com/gp/product/', NULL, 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
@@ -1374,3 +1374,60 @@ for(var i=0; i<metaTags.length; i++) {
 		model.addStatement(uri, prefixDC + suffix, value, true);
 	}
 }');
+
+REPLACE INTO "scrapers" VALUES('3e684d82-73a3-9a34-095f-19b112d88bbf', '2006-06-21 10:28:00', 'Google Books Scraper', 'Simon Kornblith', 'http://books\.google\.com/books\?vid=.*\&id=.*', NULL,
+'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
+var prefixDC = ''http://purl.org/dc/elements/1.1/'';
+var prefixDCMI = ''http://purl.org/dc/dcmitype/'';
+var prefixDummy = ''http://chnm.gmu.edu/firefox-scholar/'';
+
+var uri = doc.location.href;
+var re = new RegExp(''http://books\\.google\\.com/books\\?vid=([^&]+).*\\&id=([^&]+)'', ''i'');
+var urlParts = re.exec(uri);
+var newUri = ''http://books.google.com/books?vid=''+urlParts[1]+''&id=''+urlParts[2];
+
+utilities.debugPrint(newUri);
+
+utilities.loadDocument(newUri, browser, function(newBrowser) {
+	newDoc = newBrowser.contentDocument;
+	
+	var namespace = newDoc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+	  if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	var xpath = ''/html/body/table/tbody/tr[3]/td[2][@class="content"]/div[@class="content"]/table/tbody/tr/td/p[@class="e"]/table/tbody/tr'';
+	var elmts = utilities.gatherElementsOnXPath(newDoc, newDoc, xpath, nsResolver);
+	for(var i = 0; i<elmts.length; i++) {
+		var field = utilities.getNode(newDoc, elmts[i], ''./td[1]//text()'', nsResolver);
+		var value = utilities.getNode(newDoc, elmts[i], ''./td[2]//text()'', nsResolver);
+		
+		if(field && value) {
+			field = utilities.cleanString(field.nodeValue);
+			value = utilities.cleanString(value.nodeValue);
+			if(field == "Title") {
+				model.addStatement(uri, prefixDC + ''title'', value);
+			} else if(field == "Author(s)") {
+				var authors = value.split(", ");
+				for(j in authors) {
+					model.addStatement(uri, prefixDC + ''creator'', authors[j]);
+				}
+			} else if(field == "Publisher") {
+				model.addStatement(uri, prefixDC + ''publisher'', value);
+			} else if(field == "Publication Date") {
+				jsDate = new Date(value);
+				var date = utilities.dateToISO(jsDate);
+				model.addStatement(uri, prefixDC + ''date'', date);
+			} else if(field == "Format") {
+				model.addStatement(uri, prefixDC + ''medium'', value);
+			} else if(field == "ISBN") {
+				model.addStatement(uri, prefixDC + ''identifier'', ''ISBN ''+value);
+			}
+		}
+	}
+	model.addStatement(uri, prefixRDF + "type", prefixDummy + "book", false);
+	
+	done();
+}, function() {});
+
+wait();');
