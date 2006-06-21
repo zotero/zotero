@@ -147,7 +147,7 @@ Scholar.Ingester.Utilities.prototype.processDocuments = function(browser, firstD
 		var onLoad = function() {
 			Scholar.debug("onLoad called");
 			if(hiddenBrowser.id == "scholar-hidden-browser") {
-				hiddenBrowser.removeEventListener("DOMContentLoaded", onLoad, true);
+				hiddenBrowser.removeEventListener("load", onLoad, true);
 				try {
 					var newHiddenBrowser = new Object();
 					Scholar.debug("new hidden browser");
@@ -586,20 +586,18 @@ Scholar.Ingester.Document.prototype.scrapePage = function(callback) {
 	
 	Scholar.debug("Scraping "+this.browser.contentDocument.location.href);
 	
-	Scholar.debug(this.scraper.scraperJavaScript);
-	
 	var scraperSandbox = this._sandbox;
 	try {
 		Components.utils.evalInSandbox(this.scraper.scraperJavaScript, scraperSandbox);
 	} catch(e) {
 		Scholar.debug(e+' in scraperJavaScript for '+this.scraper.label);
 		this._scrapePageComplete();
+		return;
 	}
-	
-	Scholar.debug("scraping complete");
 	
 	// If synchronous, call _scrapePageComplete();
 	if(!this._waitForCompletion) {
+		Scholar.debug("is asynch");
 		this._scrapePageComplete();
 	}
 }
@@ -736,6 +734,12 @@ Scholar.Ingester.Document.prototype._updateDatabase = function() {
 			if(this.model.data[uri][prefixDummy + 'corporateContributor']) {
 				for(i in this.model.data[uri][prefixDummy + 'corporateContributor']) {
 					newItem.setCreator(creatorIndex, null, this.model.data[uri][prefixDummy + 'corporateContributor'][i], 2);
+					creatorIndex++;
+				}
+			}
+			if(this.model.data[uri][prefixDummy + 'editor']) {
+				for(i in this.model.data[uri][prefixDummy + 'editor']) {
+					newItem.setCreator(creatorIndex, null, this.model.data[uri][prefixDummy + 'editor'][i], 3);
 					creatorIndex++;
 				}
 			}

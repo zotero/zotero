@@ -1412,11 +1412,21 @@ utilities.loadDocument(newUri, browser, function(newBrowser) {
 				for(j in authors) {
 					model.addStatement(uri, prefixDC + ''creator'', authors[j]);
 				}
+			} else if(field == "Editor(s)") {
+				var authors = value.split(", ");
+				for(j in authors) {
+					model.addStatement(uri, prefixDummy + ''editor'', authors[j]);
+				}
 			} else if(field == "Publisher") {
 				model.addStatement(uri, prefixDC + ''publisher'', value);
 			} else if(field == "Publication Date") {
+				var date = value;
+				
 				jsDate = new Date(value);
-				var date = utilities.dateToISO(jsDate);
+				if(!isNaN(jsDate.valueOf())) {
+					date = utilities.dateToISO(jsDate);
+				}
+				
 				model.addStatement(uri, prefixDC + ''date'', date);
 			} else if(field == "Format") {
 				model.addStatement(uri, prefixDC + ''medium'', value);
