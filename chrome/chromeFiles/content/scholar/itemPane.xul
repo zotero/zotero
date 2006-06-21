@@ -9,6 +9,8 @@
 		<tabs>
 			<tab label="Notes"/>
 			<tab label="Info"/>
+			<tab label="Tags"/>
+			<tab label="Files"/>
 		</tabs>
 		<tabpanels flex="1">
 			<vbox>
@@ -41,6 +43,12 @@
 					<rows id="editpane-dynamic-fields" flex="1">
 					</rows>
 				</grid>
+			</vbox>
+			<vbox align="center" pack="center">
+				<label value="Coming soon"/>
+			</vbox>
+			<vbox align="center" pack="center">
+				<label value="Coming soon"/>
 			</vbox>
 		</tabpanels>
 	</tabbox>

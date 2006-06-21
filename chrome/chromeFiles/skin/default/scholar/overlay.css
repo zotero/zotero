@@ -87,6 +87,11 @@ tree #items-tree
 	-moz-user-focus: ignore;
 }
 
+#scholar-view-item tabpanels
+{
+	padding: 8px 0px 0px 0px;
+}
+
 #scholar-view-item .clicky
 {	
 	-moz-border-radius: 6px;
