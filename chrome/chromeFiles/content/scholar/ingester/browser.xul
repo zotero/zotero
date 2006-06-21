@@ -16,7 +16,7 @@
     <statusbar id="status-bar">
         <statusbarpanel id="schlar-status" insertafter="livemark-button">
             <label id="scholar-status-label" collapsed="true" crop="end" style="width:0px" />
-            <image id="scholar-status-image" width="16" height="16" onclick="Scholar_Ingester_Interface.scrapeThisPage()" />
+            <image id="scholar-status-image" width="16" height="16" onclick="Scholar_Ingester_Interface.scrapeThisPage()" src="chrome://scholar/skin/capture_gray.png" />
          </statusbarpanel>
     </statusbar>
     
