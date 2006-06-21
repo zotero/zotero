@@ -26,22 +26,22 @@
 					<menuitem label="&toolbar.newCollection.label;" command="cmd_scholar_newCollection"/>
 					<menuseparator/>
 					<menuitem label="&toolbar.renameCollection.label;" oncommand="ScholarPane.renameSelectedCollection();"/>
-					<menuitem label="Remove Project..." oncommand="ScholarPane.deleteSelectedCollection();"/>
+					<menuitem label="&toolbar.removeCollection.label;" oncommand="ScholarPane.deleteSelectedCollection();"/>
 				</popup>
 				<popup id="scholar-itemmenu" onpopupshowing="ScholarPane.buildItemContextMenu();">
 					<menuitem label="&toolbar.newItem.label;" command="cmd_scholar_newItem"/>
 					<menuseparator/>
-					<menuitem label="Remove Item..." oncommand="ScholarPane.deleteSelectedItem();"/>
+					<menuitem oncommand="ScholarPane.deleteSelectedItem();"/>
 				</popup>
 			</popupset>
 			<toolbar align="end">
-				<label value="Scholar" style="font-size: larger;"/>
+				<label value="Scholar" id="scholar-toolbar-name"/>
 				<label value="1.0 Alpha"/>
 				<spacer flex="1"/>
 				<toolbarbutton class="tabs-closebutton" oncommand="ScholarPane.toggleDisplay()"/>
 			</toolbar>
 			<hbox flex="1">
-				<vbox persist="width" width="200" style="min-width: 150px;">
+				<vbox id="collections-pane" persist="width">
 					<toolbar>
 						<toolbarbutton id="tb-collection-add" tooltiptext="&toolbar.newCollection.label;" command="cmd_scholar_newCollection"/>
 						<toolbarbutton id="tb-collection-rename" tooltiptext="&toolbar.renameCollection.label;" oncommand="ScholarPane.renameSelectedCollection();" disabled="true"/>
@@ -63,7 +63,7 @@
 					</tree>
 				</vbox>
 				<splitter id="scholar-tree-splitter" resizebefore="closest" resizeafter="closest"/>
-				<vbox persist="width" flex="1" style="min-width: 300px;">
+				<vbox id="items-pane" persist="width" flex="1">
 					<toolbar align="center">
 						<toolbarbutton id="tb-add" tooltiptext="&toolbar.newItem.label;" type="menu">
 							<menupopup/>
@@ -81,7 +81,7 @@
 						</hbox>
 						<spacer flex="1"/>
 						<toolbarbutton label="Save"/>
-						<toolbarbutton label="+"/>
+						<toolbarbutton label="&scholar.plus;"/>
 					</hbox>
 					<tree 
 						id="items-tree" context="scholar-itemmenu"
@@ -137,7 +137,7 @@
 					</tree>
 				</vbox>
 				<splitter id="scholar-view-splitter" collapse="after" persist="state"><grippy/></splitter>
-				<box width="300" style="min-width: 300px;" pack="center" align="center">
+				<box id="item-pane" pack="center" align="center">
 					<label id="scholar-view-selected-label"/>
 					<tabbox id="scholar-view-item" hidden="true" flex="1"/>
 				</box>
@@ -168,6 +168,7 @@
 	<keyset id="mainKeyset">
 		<key id="key_openScholar"
 			 key="S" 
+			 oncommand="ScholarPane.toggleDisplay();"
 			 modifiers="shift accel" />
 	</keyset>
 </overlay>

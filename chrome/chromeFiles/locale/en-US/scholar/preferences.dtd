@@ -1,2 +1,3 @@
 <!ENTITY scholar.name					"Scholar">
 <!ENTITY scholar.preferences.title		"Scholar Preferences">
+<!ENTITY scholar.preferences.autoUpdate.label		"Automatically check for updated scrapers">

@@ -136,9 +136,9 @@ var ScholarPane = new function()
 			label.hidden = false;
 			
 			if(itemsView && itemsView.selection.count)
-				label.value = itemsView.selection.count + " items selected";	
+				label.value = Scholar.getString('pane.item.selected.multiple').replace('%1', itemsView.selection.count);	
 			else
-				label.value = "No items selected";
+				label.value = Scholar.getString('pane.item.selected.zero');
 		}
 
 	}
@@ -218,9 +218,9 @@ var ScholarPane = new function()
 			menu.childNodes[2].setAttribute('disabled', true);
 	
 		if(itemsView && itemsView.selection.count > 1)
-			menu.childNodes[2].setAttribute('label', 'Remove Selected Items...');
+			menu.childNodes[2].setAttribute('label', Scholar.getString('pane.items.menu.remove.multiple'));
 		else
-			menu.childNodes[2].setAttribute('label', 'Remove Selected Item...');	
+			menu.childNodes[2].setAttribute('label', Scholar.getString('pane.items.menu.remove'));	
 	}
 }
 

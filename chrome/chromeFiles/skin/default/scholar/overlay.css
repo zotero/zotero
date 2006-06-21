@@ -5,10 +5,11 @@ vbox #scholar-pane
 	padding: 4px;
 }
 
-tree #collections-tree
+#collections-pane
 {
-	min-width: 100px;
+	min-width: 150px;
 	max-width: 200px;
+	width: 150px;
 }
 
 #collections-tree treechildren::-moz-tree-image
@@ -21,9 +22,37 @@ tree #collections-tree
 	background: #f5f5f5;
 }
 
-tree #items-tree
+#items-pane
 {
+	min-width: 300px;
+}
 
+#item-pane
+{
+	width: 300px;
+	min-width: 300px;
+}
+
+#scholar-pane toolbar
+{
+	border-bottom: none;
+	background: #f5f5f5;
+	height: 24px;
+}
+
+#scholar-pane toolbar toolbarbutton
+{
+	
+}
+
+#scholar-pane toolbar .toggler
+{
+	margin: 4px;
+}
+
+#scholar-toolbar-name
+{
+	font-size: larger;
 }
 
 #tb-collection-add
@@ -46,38 +75,12 @@ tree #items-tree
 	list-style-image: url('chrome://scholar/skin/toolbar-item-add.png');
 }
 
-#scholar-pane toolbar
-{
-	border-bottom: none;
-	background: #f5f5f5;
-	height: 24px;
-}
-
-#scholar-pane toolbar toolbarbutton
-{
-	
-}
-
-#scholar-pane toolbar .toggler
-{
-	margin: 4px;
-}
-
 #tb-search
 {
 	width: 150px;
 }
 
-#scholar-splitter
-{
-	border-top: none;
-	border-bottom: 1px solid #A3A3A3;
-	min-height: 4px;
-	max-height: 4px;
-	background: #f5f5f5 !important;
-}
-
-#scholar-metadata
+#scholar-info
 {
 	overflow: auto;
 }
@@ -87,6 +90,10 @@ tree #items-tree
 	-moz-user-focus: ignore;
 }
 
+#scholar-view-item
+{
+	margin-left: 5px;
+}
 #scholar-view-item tabpanels
 {
 	padding: 8px 0px 0px 0px;
@@ -106,4 +113,13 @@ tree #items-tree
 textbox[multiline="true"][type="timed"]
 {
 	-moz-binding: url('chrome://scholar/content/customControls.xml#timed-textarea');
+}
+
+#scholar-splitter
+{
+	border-top: none;
+	border-bottom: 1px solid #A3A3A3;
+	min-height: 4px;
+	max-height: 4px;
+	background: #f5f5f5 !important;
 }

@@ -1,12 +1,12 @@
 <!ENTITY scholar.name					"Scholar">
 
-<!ENTITY metadata.label					"Metadata">
-<!ENTITY notes.label					"Notes">
+<!ENTITY tabs.info.label				"Info">
+<!ENTITY tabs.notes.label				"Notes">
+<!ENTITY tabs.tags.label				"Tags">
+<!ENTITY tabs.files.label				"Files">
 
-<!ENTITY metadata.creators.label		"Creators">
-<!ENTITY metadata.edit.label			"Edit">
-<!ENTITY metadata.cancel.label			"Cancel">
-<!ENTITY metadata.save.label			"Save">
+<!ENTITY scholar.minus					"-">
+<!ENTITY scholar.plus					"+">
 
 <!ENTITY items.type_column 				"Type">
 <!ENTITY items.title_column 			"Title">
@@ -20,12 +20,8 @@
 <!ENTITY collections.name_column		"Name">
 
 <!ENTITY toolbar.newItem.label    		"New Item">
+<!ENTITY toolbar.removeItem.label   "Remove Item...">
 <!ENTITY toolbar.newCollection.label   	"New Project">
 <!ENTITY toolbar.renameCollection.label   "Rename Project...">
+<!ENTITY toolbar.removeCollection.label   "Remove Project...">
 <!ENTITY toolbar.search.label   			"Search:">
-<!ENTITY toolbar.metadata.label   			"Metadata">
-<!ENTITY toolbar.notes.label   			"Notes">
-
-<!ENTITY closeCmd.label 				"Close">
-<!ENTITY closeCmd.accesskey 			"C">
-<!ENTITY closeCmd.commandkey 			"W">

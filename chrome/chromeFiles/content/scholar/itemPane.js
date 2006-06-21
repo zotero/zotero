@@ -129,7 +129,7 @@ ScholarItemPane = new function()
 	
 	function changeTypeTo(id)
 	{
-		if(id != _itemBeingEdited.getType() && confirm('Are you sure you want to change the item type? Certain fields may be lost.'))
+		if(id != _itemBeingEdited.getType() && confirm(Scholar.getString('pane.item.changeType')))
 		{
 			_itemBeingEdited.setType(id);
 			_itemBeingEdited.save();
@@ -321,7 +321,7 @@ ScholarItemPane = new function()
 	function removeSelectedNote()
 	{
 		if(_notesField.value != "")
-			if(!confirm("Are you sure you want to delete the selected note?"))
+			if(!confirm(Scholar.getString('pane.item.notes.delete.confirm')))
 				return;
 		
 		var id = _selectedNoteID();
@@ -348,7 +348,7 @@ ScholarItemPane = new function()
 	function addNote()
 	{
 		modifySelectedNote();
-		_notesMenu.appendItem('Untitled Note',null);
+		_notesMenu.appendItem(Scholar.getString('pane.item.notes.untitled'),null);
 		_notesMenu.selectedIndex = _notesMenu.firstChild.childNodes.length-1;
 		
 		onNoteSelected();
@@ -380,7 +380,7 @@ ScholarItemPane = new function()
 		
 		if(t == "")
 		{
-			return "Untitled Note";
+			return Scholar.getString('pane.item.notes.untitled');
 		}
 		else
 		{
@@ -392,7 +392,7 @@ ScholarItemPane = new function()
 	{
 		var c = _notesMenu.firstChild.childNodes.length;
 		
-		_notesLabel.value = c + " note" + (c != 1 ? "s" : "") + ":";
+		_notesLabel.value = Scholar.getString('pane.item.notes.count.'+(c != 1 ? "plural" : "singular")).replace('%1',c) + ":";
 	}
 	
 	function _selectedNoteID()
