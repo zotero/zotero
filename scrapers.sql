@@ -247,7 +247,6 @@ if(!elmts.length) {
 	var xpath = ''/html/body/div[@class="indent"]/center/p/font/a[@class="nav"]'';
 	var elmts = utilities.gatherElementsOnXPath(doc, doc, xpath, nsResolver);
 }
-utilities.debugPrint(elmts.length);
 if(elmts && elmts.length) {
 	return true;
 }
@@ -333,7 +332,6 @@ utilities.HTTPUtilities.doPost(''http://www.jstor.org/browse'', postData, null, 
 						data[prefixDummy + "series"].push(fieldContent);
 					} else if(fieldCode == "DA") {
 						var date = new Date(fieldContent.replace(".", ""));
-						utilities.debugPrint(date.valueOf());
 						if(isNaN(date.valueOf())) {
 							data[prefixDC + "date"].push(fieldContent);
 						} else {
@@ -540,7 +538,7 @@ for (var i = 0; i < elmts.length; i++) {
 				rdfUri = prefixDC + ''contributor'';
 				value = utilities.cleanAuthor(node.nodeValue);
 			} else if(field == "corporate author") {
-				rdfUri = prefixDC + ''creator'';
+				rdfUri = prefixDummy + ''corporateCreator'';
 			}
 			if(rdfUri) {
 				var insert = true;
@@ -807,7 +805,6 @@ if(m) {
 var bylineRegexp = /\nBYLINE:  *(\w[\w\- ]+)/;
 var m = bylineRegexp.exec(citationData);
 if(m) {
-	utilities.debugPrint(m[1].substring(0, 3).toLowerCase());
 	if(m[1].substring(0, 3).toLowerCase() == "by ") {
 		m[1] = m[1].substring(3);
 	}
@@ -835,7 +832,6 @@ var prefixDummy = ''http://chnm.gmu.edu/firefox-scholar/'';
 var uri = doc.location.href;
 
 var newUri = uri.replace("&format=999", "&format=001");
-utilities.debugPrint(newUri);
 
 utilities.loadDocument(newUri, browser, function(newBrowser) {
 	newDoc = newBrowser.contentDocument;
@@ -847,11 +843,11 @@ utilities.loadDocument(newUri, browser, function(newBrowser) {
 	
 	var xpath = ''/html/body/table/tbody/tr[td[1][@class="td1"][@id="bold"]][td[2][@class="td1"]]'';
 	var elmts = utilities.gatherElementsOnXPath(newDoc, newDoc, xpath, nsResolver);
-	var record = new MARC_Record();		
+	var record = new MARC_Record();
 	for(var i=0; i<elmts.length; i++) {
 		var elmt = elmts[i];
 		var field = utilities.superCleanString(utilities.getNode(doc, elmt, ''./TD[1]/text()[1]'', nsResolver).nodeValue);
-		var value = utilities.getNode(doc, elmt, ''./TD[2]/text()[1]'', nsResolver).nodeValue;
+		var value = utilities.getNodeString(doc, elmt, ''./TD[2]//text()'', nsResolver);
 		var value = value.replace(/\|([a-z]) /g, record.subfield_delimiter+"$1");
 		
 		if(field != "FMT" && field != "LDR") {
@@ -868,9 +864,10 @@ utilities.loadDocument(newUri, browser, function(newBrowser) {
 		}
 	}
 	
+	model.addStatement(uri, prefixRDF + "type", prefixDummy + "book", false);
 	model = utilities.importMARCRecord(record, uri, model);
 	done();
-}, function() {})
+}, function() {});
 
 wait();');
 
@@ -882,16 +879,6 @@ var prefixDummy = ''http://chnm.gmu.edu/firefox-scholar/'';
 
 var uri = doc.location.href;
 var newUri = uri+''&fullmarc=true'';
-utilities.debugPrint(newUri);
-	
-var utilities.getNodeString = function(doc, contextNode, xpath, nsResolver) {
-	var elmts = utilities.gatherElementsOnXPath(doc, contextNode, xpath, nsResolver);
-	var returnVar = "";
-	for(var i=0; i<elmts.length; i++) {
-		returnVar += elmts[i].nodeValue;
-	}
-	return returnVar;
-}
 
 utilities.loadDocument(newUri, browser, function(newBrowser) {
 	newDoc = newBrowser.contentDocument;
@@ -906,8 +893,8 @@ utilities.loadDocument(newUri, browser, function(newBrowser) {
 	var record = new MARC_Record();		
 	for(var i=0; i<elmts.length; i++) {
 		var elmt = elmts[i];
-		var field = utilities.superCleanString(utilities.getNode(doc, elmt, ''./TD[1]/A[1]/text()[1]'', nsResolver).nodeValue);
-		var value = utilities.getNodeString(doc, elmt, ''./TD[2]/TABLE[1]/TBODY[1]/TR[1]/TD[1]/A[1]//text()'', nsResolver);
+		var field = utilities.superCleanString(utilities.getNode(newDoc, elmt, ''./TD[1]/A[1]/text()[1]'', nsResolver).nodeValue);
+		var value = utilities.getNodeString(newDoc, elmt, ''./TD[2]/TABLE[1]/TBODY[1]/TR[1]/TD[1]/A[1]//text()'', nsResolver);
 		value = value.replace(/\$([a-z]) /g, record.subfield_delimiter+"$1");
 		
 		if(field != "FMT" && field != "LDR") {
@@ -940,7 +927,6 @@ var prefixDummy = ''http://chnm.gmu.edu/firefox-scholar/'';
 
 var uri = doc.location.href;
 var newUri = uri.replace(/function=[A-Z]{7}/, "function=MARCSCR");
-utilities.debugPrint(newUri);
 
 utilities.loadDocument(newUri, browser, function(newBrowser) {
 	newDoc = newBrowser.contentDocument;
@@ -991,8 +977,6 @@ if(uri.indexOf("authority_hits") < 0) {
 } else {
 	var newUri = m[1]+"download_record"+m[2]+"/RECORD.MRC?format=marc";
 }
-
-utilities.debugPrint(newUri);
 
 utilities.HTTPUtilities.doGet(newUri, null, function(text) {
 	var record = new MARC_Record();
@@ -1070,7 +1054,6 @@ var nsResolver = namespace ? function(prefix) {
 
 var elmts = utilities.gatherElementsOnXPath(doc, doc, ''/html/body/form/p/text()[1]'', nsResolver);
 for(i in elmts) {
-	utilities.debugPrint(elmts[i].nodeValue);
 	if(elmts[i].nodeValue == "\n\nViewing record\n") {
 		return true;
 	}
@@ -1090,7 +1073,6 @@ var uri = doc.location.href;
 var uriRegexp = /^(.*)(\/[0-9]+)$/;
 var m = uriRegexp.exec(uri);
 var newUri = m[1]+"/40";
-utilities.debugPrint(newUri);
 
 var elmts = utilities.gatherElementsOnXPath(doc, doc, ''/html/body/form/p'', nsResolver);
 for(i in elmts) {
@@ -1154,7 +1136,6 @@ var nsResolver = namespace ? function(prefix) {
 
 var uri = doc.location.href;
 var newUri = uri.replace("LabelDisplay", "MARCDisplay");
-utilities.debugPrint(newUri);
 
 utilities.loadDocument(newUri, browser, function(newBrowser) {
 	newDoc = newBrowser.contentDocument;
@@ -1206,7 +1187,6 @@ utilities.loadDocument(newUri, browser, function(newBrowser) {
 		}
 		
 		record.add_field(tag, ind1, ind2, content);
-		utilities.debugPrint("tag:"+tag+" ind1:"+ind1+" ind2:"+ind2+" content:"+content);
 	}
 	
 	model = utilities.importMARCRecord(record, uri, model);
@@ -1304,7 +1284,6 @@ utilities.HTTPUtilities.doGet(newUri, null, function(text) {
 	var xml = new XML(text);
 	
 	for(var i=0; i<xml.PubmedArticle.length(); i++) {
-		utilities.debugPrint("one article...");
 		var citation = xml.PubmedArticle[i].MedlineCitation;
 		
 		if(citation.PMID.length()) {

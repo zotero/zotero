@@ -164,7 +164,7 @@ Scholar.Ingester.Utilities.prototype.processDocuments = function(browser, firstD
 		};
 		var init = function() {
 			Scholar.debug("init called");
-			hiddenBrowser.addEventListener("DOMContentLoaded", onLoad, true);
+			hiddenBrowser.addEventListener("load", onLoad, true);
 			
 			if (firstDoc) {
 				Scholar.debug("processing");
@@ -213,6 +213,10 @@ Scholar.Ingester.Utilities.prototype.collectURLsWithSubstring = function(doc, su
  * Piggy Bank. When used in external code, the repository will need to add
  * a function definition when exporting in Piggy Bank format.
  */
+
+/*
+ * Converts a JavaScript date object to an ISO-style date
+ */
 Scholar.Ingester.Utilities.prototype.dateToISO = function(jsDate) {
 	var date = "";
 	var year = jsDate.getFullYear().toString();
@@ -237,10 +241,28 @@ Scholar.Ingester.Utilities.prototype.dateToISO = function(jsDate) {
 	return date;
 }
 
+/*
+ * Gets a given node (assumes only one value)
+ */
 Scholar.Ingester.Utilities.prototype.getNode = function(doc, contextNode, xpath, nsResolver) {
 	return doc.evaluate(xpath, contextNode, nsResolver, Components.interfaces.nsIDOMXPathResult.ANY_TYPE, null).iterateNext();
 }
 
+/*
+ * Gets a given node as a string containing all child nodes
+ */
+Scholar.Ingester.Utilities.prototype.getNodeString = function(doc, contextNode, xpath, nsResolver) {
+	var elmts = this.gatherElementsOnXPath(doc, contextNode, xpath, nsResolver);
+	var returnVar = "";
+	for(var i=0; i<elmts.length; i++) {
+		returnVar += elmts[i].nodeValue;
+	}
+	return returnVar;
+}
+
+/*
+ * Cleans extraneous punctuation off an author name
+ */
 Scholar.Ingester.Utilities.prototype.cleanAuthor = function(author) {
 	author = author.replace(/^[\s\.\,\/\[\]\:]+/, '');
 	author = author.replace(/[\s\,\/\[\]\:\.]+$/, '');
@@ -256,16 +278,25 @@ Scholar.Ingester.Utilities.prototype.cleanAuthor = function(author) {
 	return author;
 }
 
+/*
+ * Cleans whitespace off a string and replaces multiple spaces with one
+ */
 Scholar.Ingester.Utilities.prototype.cleanString = function(s) {
 	s = this.trimString(s);
 	return s.replace(/ +/g, " ");
 }
 
+/*
+ * Cleans any non-world non-parenthesis characters off the ends of a string
+ */
 Scholar.Ingester.Utilities.prototype.superCleanString = function(x) {
 	var x = x.replace(/^[^\w(]+/, "");
 	return x.replace(/[^\w)]+$/, "");
 }
 
+/*
+ * Eliminates HTML tags, replacing <br>s with /ns
+ */
 Scholar.Ingester.Utilities.prototype.cleanTags = function(x) {
 	x = x.replace(/<br[^>]*>/gi, "\n");
 	return x.replace(/<[^>]+>/g, "");
@@ -555,6 +586,8 @@ Scholar.Ingester.Document.prototype.scrapePage = function(callback) {
 	
 	Scholar.debug("Scraping "+this.browser.contentDocument.location.href);
 	
+	Scholar.debug(this.scraper.scraperJavaScript);
+	
 	var scraperSandbox = this._sandbox;
 	try {
 		Components.utils.evalInSandbox(this.scraper.scraperJavaScript, scraperSandbox);
@@ -562,6 +595,8 @@ Scholar.Ingester.Document.prototype.scrapePage = function(callback) {
 		Scholar.debug(e+' in scraperJavaScript for '+this.scraper.label);
 		this._scrapePageComplete();
 	}
+	
+	Scholar.debug("scraping complete");
 	
 	// If synchronous, call _scrapePageComplete();
 	if(!this._waitForCompletion) {
@@ -694,13 +729,13 @@ Scholar.Ingester.Document.prototype._updateDatabase = function() {
 			}
 			if(this.model.data[uri][prefixDummy + 'corporateCreator']) {
 				for(i in this.model.data[uri][prefixDummy + 'corporateCreator']) {
-					newItem.setCreator(creatorIndex, this.model.data[uri][prefixDummy + 'corporateCreator'][i], null, 1);
+					newItem.setCreator(creatorIndex, null, this.model.data[uri][prefixDummy + 'corporateCreator'][i], 1);
 					creatorIndex++;
 				}
 			}
 			if(this.model.data[uri][prefixDummy + 'corporateContributor']) {
 				for(i in this.model.data[uri][prefixDummy + 'corporateContributor']) {
-					newItem.setCreator(creatorIndex, this.model.data[uri][prefixDummy + 'corporateContributor'][i], null, 2);
+					newItem.setCreator(creatorIndex, null, this.model.data[uri][prefixDummy + 'corporateContributor'][i], 2);
 					creatorIndex++;
 				}
 			}
