@@ -1,7 +1,7 @@
--- 8
+-- 9
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-06-21 10:28:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-06-21 22:44:00'));
 
 REPLACE INTO "scrapers" VALUES('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006-06-18 10:15:00', 'Amazon.com Scraper', 'Simon Kornblith', '^http://www\.amazon\.com/gp/product/', NULL, 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
@@ -174,7 +174,7 @@ utilities.HTTPUtilities.doPost(newUri, ''exportselect=record&exporttype=plaintex
 })
 wait();');
 
-REPLACE INTO "scrapers" VALUES('88915634-1af6-c134-0171-56fd198235ed', '2006-06-18 11:02:00', 'LOC/Voyager WebVoyage Scraper', 'Simon Kornblith', 'Pwebrecon\.cgi',
+REPLACE INTO "scrapers" VALUES('88915634-1af6-c134-0171-56fd198235ed', '2006-06-21 22:44:00', 'LOC/Voyager WebVoyage Scraper', 'Simon Kornblith', 'Pwebrecon\.cgi',
 'if(doc.forms.namedItem(''frm'').elements.namedItem(''RC'')) {	
 	// We have search results
 	
