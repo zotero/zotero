@@ -4,6 +4,21 @@
 
 Scholar.Ingester = new function() {}
 
+Scholar.Ingester.createHiddenBrowser = function(myWindow) {
+	// Create a hidden browser			
+	var newHiddenBrowser = myWindow.document.createElement("browser");
+	var windows = myWindow.document.getElementsByTagName("window");
+	windows[0].appendChild(newHiddenBrowser);
+	Scholar.debug("created hidden browser");
+	return newHiddenBrowser;
+}
+
+Scholar.Ingester.deleteHiddenBrowser = function(myBrowser) {			
+	// Delete a hidden browser
+	delete myBrowser;
+	Scholar.debug("deleted hidden browser");
+}
+
 /////////////////////////////////////////////////////////////////
 //
 // Scholar.Ingester.Model
@@ -48,8 +63,8 @@ Scholar.Ingester.Model.prototype.detachRepository = function() {}
 /////////////////////////////////////////////////////////////////
 // Scholar.Ingester.Utilities class, a set of methods to assist in data
 // extraction. Most code here was stolen directly from the Piggy Bank project.
-Scholar.Ingester.Utilities = function(hiddenBrowser) {
-	this._hiddenBrowser = hiddenBrowser;
+Scholar.Ingester.Utilities = function(myWindow) {
+	this.window = myWindow;
 }
 
 // Adapter for Piggy Bank function to print debug messages; log level is
@@ -115,7 +130,7 @@ Scholar.Ingester.Utilities.prototype.loadDocument = function(url, browser, succe
 // exception - a function to execute if an exception occurs (exceptions are
 //             also logged in the Firefox Scholar log)
 Scholar.Ingester.Utilities.prototype.processDocuments = function(browser, firstDoc, urls, processor, done, exception) {
-	var hiddenBrowser = this._hiddenBrowser;
+	var hiddenBrowser = Scholar.Ingester.createHiddenBrowser(this.window);
 	Scholar.debug("processDocuments called");
 	
 	try {
@@ -141,26 +156,23 @@ Scholar.Ingester.Utilities.prototype.processDocuments = function(browser, firstD
 					exception(e);
 				}
 			} else {
+				Scholar.Ingester.deleteHiddenBrowser(hiddenBrowser);
 				hiddenBrowser.setTimeout(done, 10);
 			}
 		};
 		var onLoad = function() {
 			Scholar.debug("onLoad called");
-			if(hiddenBrowser.id == "scholar-hidden-browser") {
-				hiddenBrowser.removeEventListener("load", onLoad, true);
-				try {
-					var newHiddenBrowser = new Object();
-					Scholar.debug("new hidden browser");
-					newHiddenBrowser.contentDocument = hiddenBrowser.contentDocument;
-					newHiddenBrowser.contentWindow = hiddenBrowser.contentWindow;
-					Scholar.debug("added attributes");
-					processor(newHiddenBrowser);
-					Scholar.debug("called processor");
-				} catch (e) {
-					Scholar.debug("Scholar.Ingester.Utilities.processDocuments onLoad: " + e, 2);
-					exception(e);
-				}
+			hiddenBrowser.removeEventListener("load", onLoad, true);
+			try {
+				var newHiddenBrowser = new Object();
+				newHiddenBrowser.contentDocument = hiddenBrowser.contentDocument;
+				newHiddenBrowser.contentWindow = hiddenBrowser.contentWindow;
+				processor(newHiddenBrowser);
+			} catch (e) {
+				Scholar.debug("Scholar.Ingester.Utilities.processDocuments onLoad: " + e, 2);
+				exception(e);
 			}
+			doLoad();
 		};
 		var init = function() {
 			Scholar.debug("init called");
@@ -300,6 +312,50 @@ Scholar.Ingester.Utilities.prototype.superCleanString = function(x) {
 Scholar.Ingester.Utilities.prototype.cleanTags = function(x) {
 	x = x.replace(/<br[^>]*>/gi, "\n");
 	return x.replace(/<[^>]+>/g, "");
+}
+
+/*
+ * Allows a user to select which items to scrape
+ */
+Scholar.Ingester.Utilities.prototype.selectItems = function(itemList) {
+	// mozillazine made me do it! honest!
+	var io = { dataIn:itemList, dataOut:null }
+	var newDialog = this.window.openDialog("chrome://scholar/content/ingester/selectitems.xul",
+		"_blank","chrome,modal,centerscreen,resizable=yes", io);
+	return io.dataOut;
+}
+
+/*
+ * Grabs items based on URLs
+ */
+Scholar.Ingester.Utilities.prototype.getItemArray = function(doc, inHere, urlRe, rejectRe) {
+	var availableItems = new Object();	// Technically, associative arrays are objects
+	
+	// Require link to match this
+	var tagRegexp = new RegExp();
+	tagRegexp.compile(urlRe);
+	// Do not allow text to match this
+	var rejectRegexp = new RegExp();
+	rejectRegexp.compile(rejectRe);
+	
+	var links = inHere.getElementsByTagName("a");
+	for(var i=0; i<links.length; i++) {
+		if(tagRegexp.test(links[i].href)) {
+			var text = this.getNodeString(doc, links[i], './/text()', null);
+			if(text) {
+				text = this.cleanString(text);
+				if(!rejectRegexp.test(text)) {
+					if(availableItems[links[i].href]) {
+						availableItems[links[i].href] += " "+text;
+					} else {
+						availableItems[links[i].href] = text;
+					}
+				}
+			}
+		}
+	}
+	
+	return availableItems;
 }
 
 // These functions are for use by importMARCRecord. They're private, because,
@@ -512,14 +568,14 @@ Scholar.Ingester.HTTPUtilities.prototype.stateChange = function(xmlhttp, onStatu
 /*
  * Constructor for Document object
  */
-Scholar.Ingester.Document = function(browserWindow, hiddenBrowser){
+Scholar.Ingester.Document = function(browserWindow, myWindow){
 	this.scraper = null;
 	this.browser = browserWindow;
+	this.window = myWindow;
 	this.model = new Scholar.Ingester.Model();
 	this.items = new Array();
 	this._appSvc = Cc["@mozilla.org/appshell/appShellService;1"]
 	             .getService(Ci.nsIAppShellService);
-	this._hiddenBrowser = hiddenBrowser;
 	this._generateSandbox();
 }
 
@@ -596,17 +652,19 @@ Scholar.Ingester.Document.prototype.scrapePage = function(callback) {
 	
 	var scraperSandbox = this._sandbox;
 	try {
-		Components.utils.evalInSandbox(this.scraper.scraperJavaScript, scraperSandbox);
+		var returnValue = Components.utils.evalInSandbox("(function(){\n" +
+							   this.scraper.scraperJavaScript +
+							   "\n})()", scraperSandbox);
 	} catch(e) {
 		Scholar.debug(e+' in scraperJavaScript for '+this.scraper.label);
-		this._scrapePageComplete();
+		this._scrapePageComplete(false);
 		return;
 	}
 	
 	// If synchronous, call _scrapePageComplete();
 	if(!this._waitForCompletion) {
 		Scholar.debug("is asynch");
-		this._scrapePageComplete();
+		this._scrapePageComplete(returnValue);
 	}
 }
 
@@ -637,10 +695,10 @@ Scholar.Ingester.Document.prototype.scrapePage = function(callback) {
 /*
  * Called when scraping (synchronous or asynchronous) is complete
  */
-Scholar.Ingester.Document.prototype._scrapePageComplete = function() {
+Scholar.Ingester.Document.prototype._scrapePageComplete = function(returnValue) {
 	this._updateDatabase();
 	if(this._scrapeCallback) {
-		this._scrapeCallback(this);
+		this._scrapeCallback(this, returnValue);
 	}
 }
 
@@ -651,7 +709,7 @@ Scholar.Ingester.Document.prototype._generateSandbox = function() {
 	this._sandbox = new Components.utils.Sandbox(this.browser.contentDocument.location.href);
 	this._sandbox.browser = this.browser;
 	this._sandbox.doc = this._sandbox.browser.contentDocument;
-	this._sandbox.utilities = new Scholar.Ingester.Utilities(this._hiddenBrowser);
+	this._sandbox.utilities = new Scholar.Ingester.Utilities(this.window);
 	this._sandbox.utilities.HTTPUtilities = new Scholar.Ingester.HTTPUtilities(this._appSvc.hiddenDOMWindow);
 	this._sandbox.window = this.window;
 	this._sandbox.model = this.model;

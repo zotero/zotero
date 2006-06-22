@@ -19,26 +19,26 @@ Scholar_Ingester_Interface_SelectItems = function() {}
  * loading
  */
 Scholar_Ingester_Interface_SelectItems.init = function() {
-	this.documentObject = window.arguments[0];
+	this.io = window.arguments[0];
+	this.Scholar_Ingester_Interface = window.arguments[1];
 	this.listbox = document.getElementById("scholar-selectitems-links");
 	
-	for(i in this.documentObject.scrapeURLList) {	// we could use a tree for this if we wanted to
+	for(i in this.io.dataIn) {	// we could use a tree for this if we wanted to
 		var itemNode = document.createElement("listitem");
 		itemNode.setAttribute("type", "checkbox");
 		itemNode.setAttribute("value", i);
-		itemNode.setAttribute("label", this.documentObject.scrapeURLList[i]);
+		itemNode.setAttribute("label", this.io.dataIn[i]);
 		itemNode.setAttribute("checked", false);
 		this.listbox.appendChild(itemNode);
 	}
 }
 
 Scholar_Ingester_Interface_SelectItems.acceptSelection = function() {
-	// clear scrapeURLList
-	this.documentObject.scrapeURLList = new Object();
+	this.io.dataOut = new Object();
 	
 	// collect scrapeURLList from listbox
 	for(var i=0; i<this.listbox.length; i++) {
 		var itemNode = this.listbox[i];
-		this.documentObject.scrapeURLList[itemNode.getAttribute("value")] = itemNode.getAttribute("label");
+		this.io.dataOut[itemNode.getAttribute("value")] = itemNode.getAttribute("label");
 	}
 }

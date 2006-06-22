@@ -35,7 +35,6 @@ Scholar_Ingester_Interface.init = function() {
  */
 Scholar_Ingester_Interface.chromeLoad = function() {
 	Scholar_Ingester_Interface.tabBrowser = document.getElementById("content");
-	Scholar_Ingester_Interface.hiddenBrowser = document.getElementById("scholar-hidden-browser");
 	Scholar_Ingester_Interface.appContent = document.getElementById("appcontent");
 	Scholar_Ingester_Interface.statusImage = document.getElementById("scholar-status-image");
 	
@@ -61,19 +60,9 @@ Scholar_Ingester_Interface.chromeUnload = function() {
 Scholar_Ingester_Interface.scrapeThisPage = function() {
 	var documentObject = Scholar_Ingester_Interface._getDocument(Scholar_Ingester_Interface.tabBrowser.selectedBrowser);
 	if(documentObject.scraper) {
-		if(documentObject.scrapeURLList) {
-			// In the case that there are multiple scrapable URLs, make the user choose
-			Scholar_Ingester_Interface.chooseURL(documentObject);
-		}
 		Scholar_Ingester_Interface.scrapeProgress = new Scholar_Ingester_Interface.Progress(window, Scholar_Ingester_Interface.tabBrowser.selectedBrowser.contentDocument, Scholar.getString("ingester.scraping"));
 		documentObject.scrapePage(Scholar_Ingester_Interface._finishScraping);
 	}
-}
-
-Scholar_Ingester_Interface.chooseURL = function(documentObject) {
-	Scholar.debug("chooseURL called");
-	var newDialog = window.openDialog("chrome://scholar/content/ingester/selectitems.xul",
-		"_blank","chrome,modal,centerscreen,resizable=yes", documentObject);
 }
 
 /*
@@ -182,7 +171,7 @@ Scholar_Ingester_Interface._setDocument = function(browser) {
 			browser.setAttribute("scholar-key", key);
 		}
 	}
-	Scholar_Ingester_Interface.browserDocuments[key] = new Scholar.Ingester.Document(browser, Scholar_Ingester_Interface.hiddenBrowser);
+	Scholar_Ingester_Interface.browserDocuments[key] = new Scholar.Ingester.Document(browser, window);
 	Scholar_Ingester_Interface.browserDocuments[key].retrieveScraper();
 }
 
@@ -203,7 +192,7 @@ Scholar_Ingester_Interface._deleteDocument = function(browser) {
 /*
  * Callback to be executed when scraping is complete
  */
-Scholar_Ingester_Interface._finishScraping = function(obj) {
+Scholar_Ingester_Interface._finishScraping = function(obj, returnValue) {
 	if(obj.items.length) {
 		try {		// Encased in a try block to fix a as-of-yet unresolved issue
 			var item1 = obj.items[0];
@@ -243,12 +232,14 @@ Scholar_Ingester_Interface._finishScraping = function(obj) {
 		for(i in obj.items) {
 			obj.items[i].save();
 		}
+		setTimeout(function() { Scholar_Ingester_Interface.scrapeProgress.fade() }, 2000);
+	} else if(returnValue) {
+		Scholar_Ingester_Interface.scrapeProgress.kill();
 	} else {
 		Scholar_Ingester_Interface.scrapeProgress.changeHeadline(Scholar.getString("ingester.scrapeError"));
 		Scholar_Ingester_Interface.scrapeProgress.addDescription(Scholar.getString("ingester.scrapeErrorDescription"));
+		setTimeout(function() { Scholar_Ingester_Interface.scrapeProgress.fade() }, 2000);
 	}
-	
-	setTimeout(function() { Scholar_Ingester_Interface.scrapeProgress.fade() }, 2000);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -333,7 +324,6 @@ Scholar_Ingester_Interface.Progress.prototype.addDescription = function(descript
 	this.table.appendChild(tr);
 }
 
-
 Scholar_Ingester_Interface.Progress.prototype.fade = function() {
 	// Icky, icky hack to keep objects
 	var me = this;
@@ -349,3 +339,8 @@ Scholar_Ingester_Interface.Progress.prototype.fade = function() {
 	// Begin fade
 	this._fader();
 }
+
+Scholar_Ingester_Interface.Progress.prototype.kill = function() {
+	this.div.style.display = 'none';
+}
+
