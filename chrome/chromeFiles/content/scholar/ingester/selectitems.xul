@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<!--
+Borrowed from Linky, originally MPL/GPL/LGPL (now GPL, and modified into oblivion)
+-->
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<!DOCTYPE window SYSTEM "chrome://scholar/locale/scholar.dtd">
+<dialog xmlns:html="http://www.w3.org/1999/xhtml"
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	title="&selectitems.title;" width="400" height="330"
+	persist="width height screenX screenY"
+	buttons="cancel,accept"
+	ondialogaccept="Scholar_Ingester_Interface_SelectItems.acceptSelection()"
+	ondialogcancel="self.close()"
+	id="scholar-selectitems"
+	onload="Scholar_Ingester_Interface_SelectItems.init()">
+	
+	<script src="../include.js"/>
+	<script src="selectitems.js"/>
+	<caption label="&selectitems.intro.label;" id="scholar-selectitems-intro"/>
+	<box flex="1">
+		<listbox id="scholar-selectitems-links" flex="1" context="scholarSelectContext"></listbox>
+	</box>
+</dialog>

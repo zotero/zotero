@@ -25,3 +25,8 @@
 <!ENTITY toolbar.renameCollection.label   "Rename Project...">
 <!ENTITY toolbar.removeCollection.label   "Remove Project...">
 <!ENTITY toolbar.search.label   			"Search:">
+
+<!ENTITY selectitems.title   			"Select Items">
+<!ENTITY selectitems.intro.label   		"Select which items you'd like to add to your library">
+<!ENTITY selectitems.cancel.label   	"Cancel">
+<!ENTITY selectitems.select.label   	"OK">

@@ -175,24 +175,59 @@ utilities.HTTPUtilities.doPost(newUri, ''exportselect=record&exporttype=plaintex
 wait();');
 
 REPLACE INTO "scrapers" VALUES('88915634-1af6-c134-0171-56fd198235ed', '2006-06-18 11:02:00', 'LOC/Voyager WebVoyage Scraper', 'Simon Kornblith', 'Pwebrecon\.cgi',
-'try {
-	if(doc.forms.namedItem(''frm'').elements.namedItem(''RC'')) {
-		return false;
-	}
-	var export_options = doc.forms.namedItem(''frm'').elements.namedItem(''RD'').options;
-	for(i in export_options) {
-		if(export_options[i].text == ''Latin1 MARC''
-		|| export_options[i].text == ''Raw MARC''
-		|| export_options[i].text == ''UTF-8''
-		|| export_options[i].text == ''MARC (Unicode/UTF-8)''
-		|| export_options[i].text == ''MARC (non-Unicode/MARC-8)'') {
-			return true;
+'if(doc.forms.namedItem(''frm'').elements.namedItem(''RC'')) {	
+	// We have search results
+	
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	var availableItems = new Object();	// Technically, associative arrays are objects
+	
+	// Require link to match this
+	var tagRegexp = new RegExp();
+	tagRegexp.compile(''Pwebrecon\\.cgi\\?.*v1=[0-9]+\\&.*ti='');
+	// Do not allow text to match this
+	var rejectRegexp = new RegExp();
+	rejectRegexp.compile(''\[ [0-9]+ \]'');
+	
+	var links = doc.getElementsByTagName("a");
+	for(var i=0; i<links.length; i++) {
+		if(tagRegexp.test(links[i].href)) {
+			var text = utilities.getNodeString(doc, links[i], ''.//text()'', nsResolver);
+			if(text) {
+				text = utilities.cleanString(text);
+				if(!rejectRegexp.test(text)) {
+					if(availableItems[links[i].href]) {
+						availableItems[links[i].href] += " "+text;
+					} else {
+						availableItems[links[i].href] = text;
+					}
+				}
+			}
 		}
 	}
-	return false;
-} catch(e) {
-	return false;
-}',
+	
+	if(availableItems) {
+		return availableItems;
+	} else {
+		return false;
+	}
+}
+
+var export_options = doc.forms.namedItem(''frm'').elements.namedItem(''RD'').options;
+for(i in export_options) {
+	if(export_options[i].text == ''Latin1 MARC''
+	|| export_options[i].text == ''Raw MARC''
+	|| export_options[i].text == ''UTF-8''
+	|| export_options[i].text == ''MARC (Unicode/UTF-8)''
+	|| export_options[i].text == ''MARC (non-Unicode/MARC-8)'') {
+		// We have an exportable single record
+		return true;
+	}
+}
+return false;',
 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
 var prefixDCMI = ''http://purl.org/dc/dcmitype/'';

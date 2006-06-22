@@ -61,9 +61,19 @@ Scholar_Ingester_Interface.chromeUnload = function() {
 Scholar_Ingester_Interface.scrapeThisPage = function() {
 	var documentObject = Scholar_Ingester_Interface._getDocument(Scholar_Ingester_Interface.tabBrowser.selectedBrowser);
 	if(documentObject.scraper) {
+		if(documentObject.scrapeURLList) {
+			// In the case that there are multiple scrapable URLs, make the user choose
+			Scholar_Ingester_Interface.chooseURL(documentObject);
+		}
 		Scholar_Ingester_Interface.scrapeProgress = new Scholar_Ingester_Interface.Progress(window, Scholar_Ingester_Interface.tabBrowser.selectedBrowser.contentDocument, Scholar.getString("ingester.scraping"));
 		documentObject.scrapePage(Scholar_Ingester_Interface._finishScraping);
 	}
+}
+
+Scholar_Ingester_Interface.chooseURL = function(documentObject) {
+	Scholar.debug("chooseURL called");
+	var newDialog = window.openDialog("chrome://scholar/content/ingester/selectitems.xul",
+		"_blank","chrome,modal,centerscreen,resizable=yes", documentObject);
 }
 
 /*
@@ -108,7 +118,6 @@ Scholar_Ingester_Interface.Listener.onStateChange = function() {}
  * appropriate status indicator for the current tab, and to free useless objects
  */
 Scholar_Ingester_Interface.Listener.onLocationChange = function(progressObject) {
-	Scholar.debug("onLocationChange called");
     var browsers = Scholar_Ingester_Interface.tabBrowser.browsers;
 
     // Remove document object of any browser that no longer exists
@@ -130,25 +139,6 @@ Scholar_Ingester_Interface.Listener.onLocationChange = function(progressObject) 
             Scholar_Ingester_Interface._deleteDocument(browser);
         }
     }
-    
-    /*// Add a collector to any new browser
-    for (var i = 0; i < browsers.length; i++) {
-        var browser = browsers[i];
-        var exists = false;
-
-        for (var j = 0; j < Scholar_Ingester_Interface.browsers.length; j++) {
-            if (browser == Scholar_Ingester_Interface.browsers[j]) {
-                exists = true;
-                break;
-            }
-        }
-
-        if (!exists) {
-            Scholar_Ingester_Interface.browsers.splice(i,0,browser);
-            
-        	// To execute if window is new
-        }
-    }*/
 
     Scholar_Ingester_Interface.updateStatus(
     	Scholar_Ingester_Interface.tabBrowser.selectedBrowser

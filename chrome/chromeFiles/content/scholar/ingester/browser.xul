@@ -1,12 +1,8 @@
 <?xml version="1.0"?>
-
-
 <!-- Note: Contains Firefox-specific overlay -->
-
 <overlay id="scholar-ingester-overlay" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
 	<script src="../include.js"/>
-
     <script src="browser.js"/>
     
 	<script type="application/x-javascript">

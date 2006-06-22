@@ -283,7 +283,7 @@ Scholar.Ingester.Utilities.prototype.cleanAuthor = function(author) {
  */
 Scholar.Ingester.Utilities.prototype.cleanString = function(s) {
 	s = this.trimString(s);
-	return s.replace(/ +/g, " ");
+	return s.replace(/[ \xA0]+/g, " ");
 }
 
 /*
@@ -569,7 +569,15 @@ Scholar.Ingester.Document.prototype.canScrape = function(currentScraper) {
 							   "\n})()", scraperSandbox);
 		} catch(e) {
 			Scholar.debug(e+' in scraperDetectCode for '+currentScraper.label);
-			canScrape = false;
+			return false;
+		}
+				
+		// scraperDetectCode returns an associative array (object) in the case of a search result
+		if(typeof(canScrape) == "object") {
+			Scholar.debug("scraperDetectCode returned a URL list");
+			this.scrapeURLList = canScrape;
+		} else {
+			Scholar.debug("canScrape was a "+typeof(canScrape));
 		}
 	}
 	return canScrape;
