@@ -1,4 +1,4 @@
--- 21
+-- 22
 
     DROP TABLE IF EXISTS version;
     CREATE TABLE version (
@@ -148,6 +148,33 @@
         urlPattern TEXT,
         scraperDetectCode TEXT,
         scraperJavaScript TEXT
+    );
+    
+    
+    DROP TABLE IF EXISTS transactionSets;
+    CREATE TABLE transactionSets (
+        transactionSetID INTEGER PRIMARY KEY,
+        event TEXT,
+        id INT
+    );
+    
+    DROP TABLE IF EXISTS transactions;
+    CREATE TABLE transactions (
+        transactionID INTEGER PRIMARY KEY,
+        transactionSetID INT,
+        context TEXT,
+        action TEXT
+    );
+    DROP INDEX IF EXISTS transactions_transactionSetID;
+    CREATE INDEX transactions_transactionSetID ON transactions(transactionSetID);
+    
+    DROP TABLE IF EXISTS transactionLog;
+    CREATE TABLE transactionLog (
+        transactionID INT,
+        field TEXT,
+        value NONE,
+        PRIMARY KEY (transactionID, field, value),
+        FOREIGN KEY (transactionID) REFERENCES transactions(transactionID)
     );
     
     

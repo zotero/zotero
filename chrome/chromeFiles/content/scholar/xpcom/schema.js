@@ -58,7 +58,7 @@ Scholar.Schema = new function(){
 		
 		// If enough time hasn't passed and it's not being forced, don't update
 		if (!force && now < nextCheck){
-			Scholar.debug('Too soon since last update -- not checking repository', 4);
+			Scholar.debug('Not enough time since last update -- not checking repository', 4);
 			// Set the repository timer to the remaining time
 			_setRepositoryTimer(Math.round((nextCheck.getTime() - now.getTime()) / 1000));
 			return false;
@@ -370,7 +370,7 @@ Scholar.Schema = new function(){
 		//
 		// Change this value to match the schema version
 		//
-		var toVersion = 21;
+		var toVersion = 22;
 		
 		if (toVersion != _getSchemaSQLVersion()){
 			throw('Schema version does not match version in _migrateSchema()');
@@ -385,7 +385,7 @@ Scholar.Schema = new function(){
 		// Each block performs the changes necessary to move from the
 		// previous revision to that one.
 		for (var i=parseInt(fromVersion) + 1; i<=toVersion; i++){
-			if (i==21){
+			if (i==22){
 				_initializeSchema();
 			}
 		}
