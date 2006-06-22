@@ -10,7 +10,6 @@ Borrowed from Linky, originally MPL/GPL/LGPL (now GPL, and modified into oblivio
 	persist="width height screenX screenY"
 	buttons="cancel,accept"
 	ondialogaccept="Scholar_Ingester_Interface_SelectItems.acceptSelection()"
-	ondialogcancel="self.close()"
 	id="scholar-selectitems"
 	onload="Scholar_Ingester_Interface_SelectItems.init()">
 	

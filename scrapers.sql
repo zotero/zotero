@@ -192,21 +192,72 @@ var prefixDC = ''http://purl.org/dc/elements/1.1/'';
 var prefixDCMI = ''http://purl.org/dc/dcmitype/'';
 var prefixDummy = ''http://chnm.gmu.edu/firefox-scholar/'';
 
+var uri = doc.location.href;
+var postString = '''';
+var form = doc.forms.namedItem(''frm'');
+var newUri = form.action;
+var multiple = false;
+
 if(doc.forms.namedItem(''frm'').elements.namedItem(''RC'')) {
-	var items = utilities.getItemArray(doc, doc, ''Pwebrecon\\.cgi\\?.*v1=[0-9]+\\&.*ti='', ''\[ [0-9]+ \]'');
-	var items = utilities.selectItems(items);
+	multiple = true;
+	
+	var availableItems = new Object();	// Technically, associative arrays are objects
+		
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	// Require link to match this
+	var tagRegexp = new RegExp();
+	tagRegexp.compile(''Pwebrecon\\.cgi\\?.*v1=[0-9]+\\&.*ti='');
+	// Do not allow text to match this
+	var rejectRegexp = new RegExp();
+	rejectRegexp.compile(''\[ [0-9]+ \]'');
+	
+	var checkboxes = new Array();
+	var urls = new Array();
+	
+	var tableRows = utilities.gatherElementsOnXPath(doc, doc, ''/html/body/form/table/tbody/tr[td/input[@type="checkbox"]]'', nsResolver);
+	// Go through table rows
+	for(var i=0; i<tableRows.length; i++) {
+		// CHK is what we need to get it all as one file
+		var input = utilities.getNode(doc, tableRows[i], ''./td/input[@name="CHK"]'', nsResolver);
+		checkboxes[i] = input.value;
+		var links = utilities.gatherElementsOnXPath(doc, tableRows[i], ''.//a'', nsResolver);
+		urls[i] = links[0].href;
+		utilities.debugPrint(urls[i]+" = "+links[0].href);
+		// Go through links
+		for(var j=0; j<links.length; j++) {
+			if(tagRegexp.test(links[j].href)) {
+				var text = utilities.getNodeString(doc, links[j], ''.//text()'', null);
+				if(text) {
+					text = utilities.cleanString(text);
+					if(!rejectRegexp.test(text)) {
+						if(availableItems[i]) {
+							availableItems[i] += " "+text;
+						} else {
+							availableItems[i] = text;
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	var items = utilities.selectItems(availableItems);
 	if(!items) {
 		return true;
 	}
+	
+	// add arguments for items we need to grab
+	for(i in items) {
+		postString += "CHK="+checkboxes[i]+"&";
+	}
 }
-
-var uri = doc.location.href;
 
 var raw, unicode, latin1;
 
-var form = doc.forms.namedItem(''frm'');
-var newUri = form.action;
-var postString = '''';
 for(i in form.elements) {
 	if(form.elements[i].type == ''HIDDEN'' || form.elements[i].type == ''hidden'') {
 		postString += escape(form.elements[i].name)+''=''+escape(form.elements[i].value)+''&'';
@@ -227,11 +278,21 @@ for(i in export_options) {
 }
 postString += ''RD=''+i+''&MAILADDY=&SAVE=Press+to+SAVE+or+PRINT'';
 
+utilities.debugPrint(postString);
+
 // No idea why this doesn''t work as post
 utilities.HTTPUtilities.doGet(newUri+''?''+postString, null, function(text) {
-	var record = new MARC_Record();
-	record.load(text, "binary");
-	model = utilities.importMARCRecord(record, uri, model);
+	var records = text.split("\x1D");
+	for(var i=0; i<(records.length-1); i++) {
+		if(multiple) {
+			utilities.debugPrint("uri = urls["+i+"]");
+			uri = urls[i];
+			utilities.debugPrint("my uri = "+uri);
+		}
+		var record = new MARC_Record();
+		record.load(records[i], "binary");
+		utilities.importMARCRecord(record, uri, model);
+	}
 	done();
 })
 wait();');
@@ -466,7 +527,7 @@ utilities.loadDocument(newUri, browser, function(newBrowser) {
 	
 	var record = new MARC_Record();
 	record.load(text, "MARC_PAC");
-	model = utilities.importMARCRecord(record, uri, model);
+	utilities.importMARCRecord(record, uri, model);
 	done();
 }, function() {});
 
@@ -867,7 +928,7 @@ utilities.loadDocument(newUri, browser, function(newBrowser) {
 	}
 	
 	model.addStatement(uri, prefixRDF + "type", prefixDummy + "book", false);
-	model = utilities.importMARCRecord(record, uri, model);
+	utilities.importMARCRecord(record, uri, model);
 	done();
 }, function() {});
 
@@ -915,7 +976,7 @@ utilities.loadDocument(newUri, browser, function(newBrowser) {
 		}
 	}
 	
-	model = utilities.importMARCRecord(record, uri, model);
+	utilities.importMARCRecord(record, uri, model);
 	done();
 }, function() {})
 
@@ -952,7 +1013,7 @@ utilities.loadDocument(newUri, browser, function(newBrowser) {
 		record.add_field(field, ind1, ind2, value);
 	}
 	
-	model = utilities.importMARCRecord(record, uri, model);
+	utilities.importMARCRecord(record, uri, model);
 	done();
 }, function() {})
 
@@ -983,7 +1044,7 @@ if(uri.indexOf("authority_hits") < 0) {
 utilities.HTTPUtilities.doGet(newUri, null, function(text) {
 	var record = new MARC_Record();
 	record.load(text, "binary");
-	model = utilities.importMARCRecord(record, uri, model);
+	utilities.importMARCRecord(record, uri, model);
 	done();
 })
 wait();');
@@ -1042,7 +1103,7 @@ utilities.loadDocument(newUri, browser, function(newBrowser) {
 		
 	}
 	
-	model = utilities.importMARCRecord(record, uri, model);
+	utilities.importMARCRecord(record, uri, model);
 	done();
 }, function() {});
 
@@ -1120,7 +1181,7 @@ utilities.HTTPUtilities.doPost(newUri, ''marks=''+recNumber+''&shadow=NO&format=
 		}
 	}
 
-	model = utilities.importMARCRecord(record, uri, model);
+	utilities.importMARCRecord(record, uri, model);
 	done();
 })
 wait();');
@@ -1191,7 +1252,7 @@ utilities.loadDocument(newUri, browser, function(newBrowser) {
 		record.add_field(tag, ind1, ind2, content);
 	}
 	
-	model = utilities.importMARCRecord(record, uri, model);
+	utilities.importMARCRecord(record, uri, model);
 	done();
 }, function() {});
 

@@ -700,6 +700,13 @@ Scholar.Ingester.Document.prototype._scrapePageComplete = function(returnValue) 
 	if(this._scrapeCallback) {
 		this._scrapeCallback(this, returnValue);
 	}
+	// Get us ready for another scrape
+	delete this.model;
+	delete this.items;
+	this.model = new Scholar.Ingester.Model();
+	this.items = new Array();
+	// This is perhaps a bit paranoid, but we need to get the model redone anyway
+	this._generateSandbox();
 }
 
 /*
