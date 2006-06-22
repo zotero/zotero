@@ -13,12 +13,9 @@
 		Scholar_Ingester_Interface.init();
 	</script>
     
-    <statusbar id="status-bar">
-        <statusbarpanel id="schlar-status" insertafter="livemark-button">
-            <label id="scholar-status-label" collapsed="true" crop="end" style="width:0px" />
-            <image id="scholar-status-image" width="16" height="16" onclick="Scholar_Ingester_Interface.scrapeThisPage()" src="chrome://scholar/skin/capture_gray.png" />
-         </statusbarpanel>
-    </statusbar>
+	<hbox id="urlbar-icons">
+		<image src="chrome://scholar/skin/treeitem-book.png" id="scholar-status-image" onclick="Scholar_Ingester_Interface.scrapeThisPage()" position="1" hidden="true"/>
+	</hbox>
     
 	<window id="main-window">
 		<box style="visibility: collapse">

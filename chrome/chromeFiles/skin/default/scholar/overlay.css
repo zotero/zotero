@@ -70,9 +70,19 @@ vbox #scholar-pane
 	list-style-image: url('chrome://scholar/skin/toolbar-collection-edit-gray.png');
 }
 
+#tb-collection-menu
+{
+	list-style-image: url('chrome://scholar/skin/cog.png');
+}
+
 #tb-add
 {
 	list-style-image: url('chrome://scholar/skin/toolbar-item-add.png');
+}
+
+#tb-item-menu
+{
+	list-style-image: url('chrome://scholar/skin/cog.png');
 }
 
 #tb-search

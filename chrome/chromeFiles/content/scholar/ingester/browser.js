@@ -73,9 +73,10 @@ Scholar_Ingester_Interface.scrapeThisPage = function() {
 Scholar_Ingester_Interface.updateStatus = function(browser) {
 	var documentObject = Scholar_Ingester_Interface._getDocument(browser);
 	if(documentObject && documentObject.scraper) {
-		Scholar_Ingester_Interface.statusImage.src = "chrome://scholar/skin/capture_colored.png";
+		//Scholar_Ingester_Interface.statusImage.src = "chrome://scholar/skin/treeitem-"+TYPE+".png";
+		Scholar_Ingester_Interface.statusImage.hidden = false;
 	} else {
-		Scholar_Ingester_Interface.statusImage.src = "chrome://scholar/skin/capture_gray.png";
+		Scholar_Ingester_Interface.statusImage.hidden = true;
 	}
 }
 

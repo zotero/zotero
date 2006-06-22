@@ -45,6 +45,8 @@
 					<toolbar>
 						<toolbarbutton id="tb-collection-add" tooltiptext="&toolbar.newCollection.label;" command="cmd_scholar_newCollection"/>
 						<toolbarbutton id="tb-collection-rename" tooltiptext="&toolbar.renameCollection.label;" oncommand="ScholarPane.renameSelectedCollection();" disabled="true"/>
+						<spacer flex="1"/>
+						<toolbarbutton id="tb-collection-menu" type="menu" menu="scholar-collectionmenu"/>
 					</toolbar>
 					<tree id="collections-tree" hidecolumnpicker="true" context="scholar-collectionmenu"
 						onselect="ScholarPane.onCollectionSelected();" seltype="single"
@@ -69,6 +71,7 @@
 							<menupopup/>
 						</toolbarbutton>
 						<spacer flex="1"/>
+						<toolbarbutton id="tb-item-menu" type="menu" menu="scholar-itemmenu"/>
 						<label value="&toolbar.search.label;" control="tb-search"/>
 						<textbox id="tb-search" type="timed" timeout="250" command="cmd_scholar_search"/>
 					</toolbar>
