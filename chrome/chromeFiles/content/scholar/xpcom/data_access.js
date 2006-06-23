@@ -467,12 +467,8 @@ Scholar.Item.prototype.save = function(){
 					}
 				}
 				
-				// Append the SQL to delete obsolete creators
-				//
-				// TODO: fix this so it actually purges the internal memory
-				if (sql = Scholar.Creators.purge(true)){
-					Scholar.DB.query(sql);
-				}
+				// Delete obsolete creators
+				Scholar.Creators.purge();
 			}
 			
 			
@@ -1680,22 +1676,15 @@ Scholar.Creators = new function(){
 	/*
 	 * Delete obsolete creators from database and clear internal array entries
 	 *
-	 * Returns TRUE on success, or SQL query to run in returnSQL mode
+	 * Returns removed creatorIDs on success
 	 */
-	function purge(returnSQL){
+	function purge(){
 		var sql = 'SELECT creatorID FROM creators WHERE creatorID NOT IN '
 			+ '(SELECT creatorID FROM itemCreators);';
 		var toDelete = Scholar.DB.columnQuery(sql);
 		
 		if (!toDelete){
-			return returnSQL ? '' : false;
-		}
-		
-		sql = 'DELETE FROM creators WHERE creatorID NOT IN '
-			+ '(SELECT creatorID FROM itemCreators);';
-		
-		if (!returnSQL){
-			var result = Scholar.DB.query(sql);
+			return false;
 		}
 		
 		// Clear creator entries in internal array
@@ -1705,7 +1694,11 @@ Scholar.Creators = new function(){
 			delete _creatorsByID[toDelete[i]];
 		}
 		
-		return returnSQL ? sql : result;
+		sql = 'DELETE FROM creators WHERE creatorID NOT IN '
+			+ '(SELECT creatorID FROM itemCreators);';
+		var result = Scholar.DB.query(sql);
+		
+		return toDelete;
 	}
 	
 	
