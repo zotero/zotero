@@ -1382,18 +1382,39 @@ for(i in uris) {
 wait();');
 
 
-REPLACE INTO "scrapers" VALUES('c0e6fda6-0ecd-e4f4-39ca-37a4de436e15', '2006-06-18 11:19:00', 'GEAC Scraper', 'Simon Kornblith', '/(?:Geac)?FETCH[\:\?].*[&:]next=html/(?:record\.html|geacnffull\.html)', NULL,
+REPLACE INTO "scrapers" VALUES('c0e6fda6-0ecd-e4f4-39ca-37a4de436e15', '2006-06-18 11:19:00', 'GEAC Scraper', 'Simon Kornblith', '/(?:GeacQUERY|(?:Geac)?FETCH[\:\?].*[&:]next=html/(?:record\.html|geacnffull\.html))', NULL,
 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
 var prefixDCMI = ''http://purl.org/dc/dcmitype/'';
 var prefixDummy = ''http://chnm.gmu.edu/firefox-scholar/'';
 
 var uri = doc.location.href;
-var newUri = uri.replace(/([:&])next=html\/geacnffull.html/, "$1next=html/marc.html");
-newUri = newUri.replace(/([:&])next=html\/record.html/, "$1next=html/marc.html");
 
-utilities.loadDocument(newUri, browser, function(newBrowser) {
-	newDoc = newBrowser.contentDocument;
+var uris = new Array();
+
+if(uri.indexOf("/GeacQUERY") > 0) {
+	var items = utilities.getItemArray(doc, doc, "(?:Geac)?FETCH[\:\?].*[&:]next=html/(?:record\.html|geacnffull\.html)");
+	items = utilities.selectItems(items);
+	
+	if(!items) {
+		return true;
+	}
+	
+	var uris = new Array();
+	for(i in items) {
+		var newUri = i.replace(/([:&])next=html\/geacnffull.html/, "$1next=html/marc.html");
+		newUri = newUri.replace(/([:&])next=html\/record.html/, "$1next=html/marc.html");
+		uris.push(newUri);
+	}
+} else {
+	var newUri = uri.replace(/([:&])next=html\/geacnffull.html/, "$1next=html/marc.html");
+	newUri = newUri.replace(/([:&])next=html\/record.html/, "$1next=html/marc.html");
+	uris.push(newUri);
+}
+
+utilities.processDocuments(browser, null, uris, function(newBrowser) {
+	var newDoc = newBrowser.contentDocument;
+	var uri = newDoc.location.href;
 	
 	var namespace = newDoc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -1436,8 +1457,7 @@ utilities.loadDocument(newUri, browser, function(newBrowser) {
 	}
 	
 	utilities.importMARCRecord(record, uri, model);
-	done();
-}, function() {});
+}, function() { done(); }, function() {});
 
 wait();');
 
