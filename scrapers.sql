@@ -1,9 +1,9 @@
--- 10
+-- 11
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-06-22 16:51:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-06-22 22:58:00'));
 
-REPLACE INTO "scrapers" VALUES('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006-06-18 10:15:00', 'Amazon.com Scraper', 'Simon Kornblith', '^http://www\.amazon\.com/gp/product/', NULL, 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
+REPLACE INTO "scrapers" VALUES('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006-06-22 22:58:00', 'Amazon.com Scraper', 'Simon Kornblith', '^http://www\.amazon\.com/(?:gp/(?:product|search)/|exec/obidos/search-handle-url/)', NULL, 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
 var prefixDCMI = ''http://purl.org/dc/dcmitype/'';
 var prefixDummy = ''http://chnm.gmu.edu/firefox-scholar/'';
@@ -13,59 +13,98 @@ var nsResolver = namespace ? function(prefix) {
 	if (prefix == ''x'') return namespace; else return null;
 } : null;
 
-var uri = doc.location.href;
-
-// Retrieve authors
-var xpath = ''/html/body/table/tbody/tr/td[2]/form/div[@class="buying"]/a'';
-var elmts = utilities.gatherElementsOnXPath(doc, doc, xpath, nsResolver);
-for (var i = 0; i < elmts.length; i++) {
-	var elmt = elmts[i];
+function scrape(doc) {
+	uri = doc.location.href;
 	
-	model.addStatement(uri, prefixDC + ''creator'', utilities.cleanString(utilities.getNode(doc, elmt, ''./text()[1]'', nsResolver).nodeValue), false); // Use your own type here
-}
-
-// Retrieve data from "Product Details" box
-var xpath = ''/html/body/table/tbody/tr/td[2]/table/tbody/tr/td[@class="bucket"]/div[@class="content"]/ul/li'';
-var elmts = utilities.gatherElementsOnXPath(doc, doc, xpath, nsResolver);
-for (var i = 0; i < elmts.length; i++) {
-	var elmt = elmts[i];
-	var attribute = utilities.cleanString(utilities.getNode(doc, elmt, ''./B[1]/text()[1]'', nsResolver).nodeValue);
-	if(utilities.getNode(doc, elmt, ''./text()[1]'', nsResolver)) {
-		var value = utilities.cleanString(utilities.getNode(doc, elmt, ''./text()[1]'', nsResolver).nodeValue);
-		if(attribute == "Publisher:") {
-			if(value.lastIndexOf("(") != -1) {
-				var jsDate = value.substring(value.lastIndexOf("(")+1, value.length-1);
-				jsDate = new Date(jsDate);
-				var date = utilities.dateToISO(jsDate);
-				
-				value = value.substring(0, value.lastIndexOf("(")-1);
+	// Retrieve authors
+	var xpath = ''/html/body/table/tbody/tr/td[2]/form/div[@class="buying"]/a'';
+	var elmts = utilities.gatherElementsOnXPath(doc, doc, xpath, nsResolver);
+	for (var i = 0; i < elmts.length; i++) {
+		var elmt = elmts[i];
+		
+		model.addStatement(uri, prefixDC + ''creator'', utilities.cleanString(utilities.getNode(doc, elmt, ''./text()[1]'', nsResolver).nodeValue), false); // Use your own type here
+	}
+	
+	// Retrieve data from "Product Details" box
+	var xpath = ''/html/body/table/tbody/tr/td[2]/table/tbody/tr/td[@class="bucket"]/div[@class="content"]/ul/li'';
+	var elmts = utilities.gatherElementsOnXPath(doc, doc, xpath, nsResolver);
+	for (var i = 0; i < elmts.length; i++) {
+		var elmt = elmts[i];
+		var attribute = utilities.cleanString(utilities.getNode(doc, elmt, ''./B[1]/text()[1]'', nsResolver).nodeValue);
+		if(utilities.getNode(doc, elmt, ''./text()[1]'', nsResolver)) {
+			var value = utilities.cleanString(utilities.getNode(doc, elmt, ''./text()[1]'', nsResolver).nodeValue);
+			if(attribute == "Publisher:") {
+				if(value.lastIndexOf("(") != -1) {
+					var date = value.substring(value.lastIndexOf("(")+1, value.length-1);
+					jsDate = new Date(date);
+					if(!isNaN(jsDate.valueOf())) {
+						date = utilities.dateToISO(jsDate);
+					}
+					
+					value = value.substring(0, value.lastIndexOf("(")-1);
+				}
+				if(value.lastIndexOf(";") != -1) {
+					var edition = value.substring(value.lastIndexOf(";")+2, value.length);
+					value = value.substring(0, value.lastIndexOf(";"));
+				}
+				model.addStatement(uri, prefixDC + ''publisher'', value);
+				model.addStatement(uri, prefixDC + ''date'', date);
+				model.addStatement(uri, prefixDC + ''hasVersion'', edition);
+			} else if(attribute == "Language:") {
+				model.addStatement(uri, prefixDC + ''language'', value);
+			} else if(attribute == "ISBN:") {
+				model.addStatement(uri, prefixDC + ''identifier'', ''ISBN ''+value);
+			} else if(value.substring(value.indexOf(" ")+1, value.length) == "pages") {
+				model.addStatement(uri, prefixDummy + ''pages'', value.substring(0, value.indexOf(" ")));
+				model.addStatement(uri, prefixDC + ''medium'', attribute.substring(0, attribute.indexOf(":")));
 			}
-			if(value.lastIndexOf(";") != -1) {
-				var edition = value.substring(value.lastIndexOf(";")+2, value.length);
-				value = value.substring(0, value.lastIndexOf(";"));
-			}
-			model.addStatement(uri, prefixDC + ''publisher'', value);
-			model.addStatement(uri, prefixDC + ''date'', date);
-			model.addStatement(uri, prefixDC + ''hasVersion'', edition);
-		} else if(attribute == "Language:") {
-			model.addStatement(uri, prefixDC + ''language'', value);
-		} else if(attribute == "ISBN:") {
-			model.addStatement(uri, prefixDC + ''identifier'', ''ISBN ''+value);
-		} else if(value.substring(value.indexOf(" ")+1, value.length) == "pages") {
-			model.addStatement(uri, prefixDummy + ''pages'', value.substring(0, value.indexOf(" ")));
-			model.addStatement(uri, prefixDC + ''medium'', attribute.substring(0, attribute.indexOf(":")));
 		}
 	}
+	
+	var xpath = ''/html/body/table/tbody/tr/td[2]/form/div[@class="buying"]/b[@class="sans"]'';
+	var elmts = utilities.gatherElementsOnXPath(doc, doc, xpath, nsResolver);
+	var title = utilities.cleanString(utilities.getNode(doc, elmts[0], ''./text()[1]'', nsResolver).nodeValue);
+	if(title.lastIndexOf("(") != -1 && title.lastIndexOf(")") == title.length-1) {
+		title = title.substring(0, title.lastIndexOf("(")-1);
+	}
+	model.addStatement(uri, prefixDC + ''title'', title);
+	model.addStatement(uri, prefixRDF + "type", prefixDummy + "book", false);
 }
 
-var xpath = ''/html/body/table/tbody/tr/td[2]/form/div[@class="buying"]/b[@class="sans"]'';
-var elmts = utilities.gatherElementsOnXPath(doc, doc, xpath, nsResolver);
-var title = utilities.cleanString(utilities.getNode(doc, elmts[0], ''./text()[1]'', nsResolver).nodeValue);
-if(title.lastIndexOf("(") != -1 && title.lastIndexOf(")") == title.length-1) {
-	title = title.substring(0, title.lastIndexOf("(")-1);
-}
-model.addStatement(uri, prefixDC + ''title'', title);
-model.addStatement(uri, prefixRDF + "type", prefixDummy + "book", false);');
+var searchRe = new RegExp(''http://www\.amazon\.com/(gp/search/|exec/obidos/search-handle-url/)'');
+var m = searchRe.exec(doc.location.href)
+if(m) {
+	// Why can''t amazon use standard stylesheets
+	var xpath;
+	if(m == "gp/search/") {
+		xpath = ''//table[@class="searchresults"]'';
+	} else {
+		xpath = ''//table[@cellpadding="3"]'';
+	}
+	
+	var searchresults = utilities.gatherElementsOnXPath(doc, doc, xpath, nsResolver);
+	var items = utilities.getItemArray(doc, searchresults, ''http://www\.amazon\.com/(gp/product/|exec/obidos/tg/detail/)'', ''^(Buy new|Hardcover|Paperback|Digital)$'');
+	items = utilities.selectItems(items);
+	
+	if(!items) {
+		return true;
+	}
+	
+	var uris = new Array();
+	for(i in items) {
+		uris.push(i);
+	}
+	
+	utilities.processDocuments(browser, null, uris, function(browser) { scrape(browser.contentDocument) },
+		function() {
+			utilities.debugPrint("look, done");
+			done();
+		}, function() {});
+	
+	wait();
+} else {
+	scrape(doc);
+}');
 
 REPLACE INTO "scrapers" VALUES('838d8849-4ffb-9f44-3d0d-aa8a0a079afe', '2006-06-18 11:02:00', 'WorldCat Scraper', 'Simon Kornblith', '^http://newfirstsearch\.oclc\.org/WebZ/',
 'if(doc.title == ''FirstSearch: WorldCat Detailed Record'') {

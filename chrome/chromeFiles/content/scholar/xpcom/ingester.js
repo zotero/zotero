@@ -131,11 +131,13 @@ Scholar.Ingester.Utilities.prototype.loadDocument = function(url, browser, succe
 //             also logged in the Firefox Scholar log)
 Scholar.Ingester.Utilities.prototype.processDocuments = function(browser, firstDoc, urls, processor, done, exception) {
 	var hiddenBrowser = Scholar.Ingester.createHiddenBrowser(this.window);
+	var myWindow = this.window;
+	var prevUrl, url;
 	Scholar.debug("processDocuments called");
 	
 	try {
 		if (urls.length == 0) {
-			if (firstDoc) {
+			if(firstDoc) {
 				processor(firstDoc, done);
 			} else {
 				done();
@@ -148,7 +150,7 @@ Scholar.Ingester.Utilities.prototype.processDocuments = function(browser, firstD
 			urlIndex++;
 			if (urlIndex < urls.length) {
 				try {
-					var url = urls[urlIndex];
+					url = urls[urlIndex];
 					Scholar.debug("loading "+url);
 					hiddenBrowser.loadURI(url);
 				} catch (e) {
@@ -156,23 +158,26 @@ Scholar.Ingester.Utilities.prototype.processDocuments = function(browser, firstD
 					exception(e);
 				}
 			} else {
+				hiddenBrowser.removeEventListener("load", onLoad, true);
 				Scholar.Ingester.deleteHiddenBrowser(hiddenBrowser);
-				hiddenBrowser.setTimeout(done, 10);
+				done();
 			}
 		};
 		var onLoad = function() {
-			Scholar.debug("onLoad called");
-			hiddenBrowser.removeEventListener("load", onLoad, true);
-			try {
-				var newHiddenBrowser = new Object();
-				newHiddenBrowser.contentDocument = hiddenBrowser.contentDocument;
-				newHiddenBrowser.contentWindow = hiddenBrowser.contentWindow;
-				processor(newHiddenBrowser);
-			} catch (e) {
-				Scholar.debug("Scholar.Ingester.Utilities.processDocuments onLoad: " + e, 2);
-				exception(e);
+			Scholar.debug(hiddenBrowser.contentDocument.location.href+" has been loaded");
+			if(hiddenBrowser.contentDocument.location.href != prevUrl) {	// Just in case it fires too many times
+				prevUrl = hiddenBrowser.contentDocument.location.href;
+				try {
+					var newHiddenBrowser = new Object();
+					newHiddenBrowser.contentDocument = hiddenBrowser.contentDocument;
+					newHiddenBrowser.contentWindow = hiddenBrowser.contentWindow;
+					processor(newHiddenBrowser);
+				} catch (e) {
+					Scholar.debug("Scholar.Ingester.Utilities.processDocuments onLoad: " + e, 2);
+					exception(e);
+				}
+				doLoad();
 			}
-			doLoad();
 		};
 		var init = function() {
 			Scholar.debug("init called");
@@ -332,23 +337,33 @@ Scholar.Ingester.Utilities.prototype.getItemArray = function(doc, inHere, urlRe,
 	var availableItems = new Object();	// Technically, associative arrays are objects
 	
 	// Require link to match this
-	var tagRegexp = new RegExp();
-	tagRegexp.compile(urlRe);
+	if(urlRe) {
+		var urlRegexp = new RegExp();
+		urlRegexp.compile(urlRe);
+	}
 	// Do not allow text to match this
-	var rejectRegexp = new RegExp();
-	rejectRegexp.compile(rejectRe);
+	if(rejectRe) {
+		var rejectRegexp = new RegExp();
+		rejectRegexp.compile(rejectRe);
+	}
 	
-	var links = inHere.getElementsByTagName("a");
-	for(var i=0; i<links.length; i++) {
-		if(tagRegexp.test(links[i].href)) {
-			var text = this.getNodeString(doc, links[i], './/text()', null);
-			if(text) {
-				text = this.cleanString(text);
-				if(!rejectRegexp.test(text)) {
-					if(availableItems[links[i].href]) {
-						availableItems[links[i].href] += " "+text;
-					} else {
-						availableItems[links[i].href] = text;
+	if(!inHere.length) {
+		inHere = new Array(inHere);
+	}
+	
+	for(var j=0; j<inHere.length; j++) {
+		var links = inHere[j].getElementsByTagName("a");
+		for(var i=0; i<links.length; i++) {
+			if(!urlRe || urlRegexp.test(links[i].href)) {
+				var text = this.getNodeString(doc, links[i], './/text()', null);
+				if(text) {
+					text = this.cleanString(text);
+					if(!rejectRe || !rejectRegexp.test(text)) {
+						if(availableItems[links[i].href]) {
+							availableItems[links[i].href] += " "+text;
+						} else {
+							availableItems[links[i].href] = text;
+						}
 					}
 				}
 			}
@@ -822,7 +837,16 @@ Scholar.Ingester.Document.prototype._updateDatabase = function() {
 				if(this.model.data[uri][prefixDC + 'year']) {
 					newItem.setField("year", this.model.data[uri][prefixDC + 'year'][0]);
 				} else if(this.model.data[uri][prefixDC + 'date'] && this.model.data[uri][prefixDC + 'date'][0].length >= 4) {
-					newItem.setField("year", this.model.data[uri][prefixDC + 'date'][0].substr(0, 4));
+					var ISORe = /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/
+					if(ISORe.test(this.model.data[uri][prefixDC + 'date'][0])) {
+						newItem.setField("year", this.model.data[uri][prefixDC + 'date'][0].substr(0, 4));
+					} else {
+						var m;
+						var yearRe = /[0-9]{4}$/;
+						if(m = yearRe.exec(this.model.data[uri][prefixDC + 'date'][0])) {
+							newItem.setField("year", m[0]);
+						}
+					}
 				}
 			}
 			

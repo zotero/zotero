@@ -41,8 +41,8 @@ Scholar_Ingester_Interface.chromeLoad = function() {
 	// this gives us onLocationChange
 	Scholar_Ingester_Interface.tabBrowser.addProgressListener(Scholar_Ingester_Interface.Listener,
 		Components.interfaces.nsIWebProgress.NOTIFY_LOCATION);
-	// this gives us DOMContentLoaded
-    Scholar_Ingester_Interface.appContent.addEventListener("DOMContentLoaded",
+	// let's use load instead of DOMContentLoaded
+    Scholar_Ingester_Interface.appContent.addEventListener("load",
     	Scholar_Ingester_Interface.contentLoad, true);
 }
 
