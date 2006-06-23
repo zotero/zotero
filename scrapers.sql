@@ -1,7 +1,7 @@
 -- 12
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-06-23 10:11:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-06-23 12:17:00'));
 
 REPLACE INTO "scrapers" VALUES('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006-06-22 22:58:00', 'Amazon.com Scraper', 'Simon Kornblith', '^http://www\.amazon\.com/(?:gp/(?:product|search)/|exec/obidos/search-handle-url/)', NULL, 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
@@ -661,7 +661,7 @@ if(newUri) {
 
 wait();');
 
-REPLACE INTO "scrapers" VALUES('add7c71c-21f3-ee14-d188-caf9da12728b', '2006-06-12 09:58:00', 'SIRSI 2003+ Scraper', 'Simon Kornblith', '/uhtbin/cgisirsi',
+REPLACE INTO "scrapers" VALUES('add7c71c-21f3-ee14-d188-caf9da12728b', '2006-06-23 12:17:00', 'SIRSI 2003+ Scraper', 'Simon Kornblith', '/uhtbin/cgisirsi',
 'var namespace = doc.documentElement.namespaceURI;
 var nsResolver = namespace ? function(prefix) {
 	if (prefix == ''x'') return namespace; else return null;
@@ -672,6 +672,12 @@ var elmts = utilities.gatherElementsOnXPath(doc, doc, xpath, nsResolver);
 if(elmts.length) {
 	return true;
 }
+var xpath = ''//td[@class="searchsum"]/table'';
+var elmts = utilities.gatherElementsOnXPath(doc, doc, xpath, nsResolver);
+if(elmts.length) {
+	return true;
+}
+
 return false;',
 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
@@ -683,77 +689,122 @@ var nsResolver = namespace ? function(prefix) {
 	if (prefix == ''x'') return namespace; else return null;
 } : null;
 
-var uri = doc.location.href;
 var data = new Object();
 
-var xpath = ''//tr[th[@class="viewmarctags"]][td[@class="viewmarctags"]]'';
-var elmts = utilities.gatherElementsOnXPath(doc, doc, xpath, nsResolver);
-for (var i = 0; i < elmts.length; i++) {
-	var elmt = elmts[i];
-	try {
-		var node = utilities.getNode(doc, elmt, ''./TD[1]/A[1]/text()[1]'', nsResolver);
-		if(!node) {
-			var node = utilities.getNode(doc, elmt, ''./TD[1]/text()[1]'', nsResolver);
-		}
-		if(node) {
-			var field = utilities.superCleanString(utilities.getNode(doc, elmt, ''./TH[1]/text()[1]'', nsResolver).nodeValue);
-			field = field.toLowerCase();
-			var value = utilities.superCleanString(node.nodeValue);
-			var rdfUri = null;
-			if(field == "publisher") {
-				rdfUri = prefixDC + ''publisher'';
-			} else if(field == "pub date") {
-				rdfUri = prefixDC + ''year'';
-				
-				var re = /[0-9]+/;
-				var m = re.exec(value);
-				value = m[0];
-			} else if(field == "isbn") {
-				rdfUri = prefixDC + ''identifier'';
-				
-				var re = /^[0-9](?:[0-9X]+)/;
-				var m = re.exec(value);
-				value = m[0];
-			} else if(field == "title") {
-				rdfUri = prefixDC + ''title'';
-				var titleParts = value.split(" / ");
-				value = titleParts[0];
-			} else if(field == "publication info") {
-				rdfUri = prefixDummy + ''place'';
-				var pubParts = value.split(" : ");
-				value = pubParts[0];
-			} else if(field == "personal author") {
-				rdfUri = prefixDC + ''creator'';
-				value = utilities.cleanAuthor(node.nodeValue);
-			} else if(field == "added author") {
-				rdfUri = prefixDC + ''contributor'';
-				value = utilities.cleanAuthor(node.nodeValue);
-			} else if(field == "corporate author") {
-				rdfUri = prefixDummy + ''corporateCreator'';
-			}
-			if(rdfUri) {
-				var insert = true;
-				if(data && data[rdfUri]) {
-					for(j in data[rdfUri]) {
-						if(data[rdfUri][j] == value) {
-							insert = false;
-							break;
-						}
-					}
-				} else if(!data[rdfUri]) {
-					data[rdfUri] = new Array();
-				}
-				if(insert) {
-					data[rdfUri].push(value);
-					model.addStatement(uri, rdfUri, value, true);
-				}
-			}
-		}
-	} catch (e) {}
+function scrape(doc) {
+	var uri = doc.location.href;
 	
+	var xpath = ''//tr[th[@class="viewmarctags"]][td[@class="viewmarctags"]]'';
+	var elmts = utilities.gatherElementsOnXPath(doc, doc, xpath, nsResolver);
+	if(!elmts.length) {
+		return false;
+	}
+	for (var i = 0; i < elmts.length; i++) {
+		var elmt = elmts[i];
+		try {
+			var node = utilities.getNode(doc, elmt, ''./TD[1]/A[1]/text()[1]'', nsResolver);
+			if(!node) {
+				var node = utilities.getNode(doc, elmt, ''./TD[1]/text()[1]'', nsResolver);
+			}
+			if(node) {
+				var field = utilities.superCleanString(utilities.getNode(doc, elmt, ''./TH[1]/text()[1]'', nsResolver).nodeValue);
+				field = field.toLowerCase();
+				var value = utilities.superCleanString(node.nodeValue);
+				var rdfUri = null;
+				if(field == "publisher") {
+					rdfUri = prefixDC + ''publisher'';
+				} else if(field == "pub date") {
+					rdfUri = prefixDC + ''year'';
+					
+					var re = /[0-9]+/;
+					var m = re.exec(value);
+					value = m[0];
+				} else if(field == "isbn") {
+					rdfUri = prefixDC + ''identifier'';
+					
+					var re = /^[0-9](?:[0-9X]+)/;
+					var m = re.exec(value);
+					value = m[0];
+				} else if(field == "title") {
+					rdfUri = prefixDC + ''title'';
+					var titleParts = value.split(" / ");
+					value = titleParts[0];
+				} else if(field == "publication info") {
+					rdfUri = prefixDummy + ''place'';
+					var pubParts = value.split(" : ");
+					value = pubParts[0];
+				} else if(field == "personal author") {
+					rdfUri = prefixDC + ''creator'';
+					value = utilities.cleanAuthor(node.nodeValue);
+				} else if(field == "added author") {
+					rdfUri = prefixDC + ''contributor'';
+					value = utilities.cleanAuthor(node.nodeValue);
+				} else if(field == "corporate author") {
+					rdfUri = prefixDummy + ''corporateCreator'';
+				}
+				if(rdfUri) {
+					var insert = true;
+					if(data && data[rdfUri]) {
+						for(j in data[rdfUri]) {
+							if(data[rdfUri][j] == value) {
+								insert = false;
+								break;
+							}
+						}
+					} else if(!data[rdfUri]) {
+						data[rdfUri] = new Array();
+					}
+					if(insert) {
+						data[rdfUri].push(value);
+						model.addStatement(uri, rdfUri, value, true);
+					}
+				}
+			}
+		} catch (e) {}
+	}
+	
+	model.addStatement(uri, prefixRDF + "type", prefixDummy + "book", false);
+	return true;
 }
 
-model.addStatement(uri, prefixRDF + "type", prefixDummy + "book", false);
+if(!scrape(doc)) {	
+	var checkboxes = new Array();
+	var urls = new Array();
+	var availableItems = new Array();
+	
+	var tableRows = utilities.gatherElementsOnXPath(doc, doc, ''//td[@class="searchsum"]/table[//input[@value="Details"]]'', nsResolver);
+	// Go through table rows
+	for(var i=1; i<tableRows.length; i++) {
+		var input = utilities.getNode(doc, tableRows[i], ''.//input[@value="Details"]'', nsResolver);
+		checkboxes[i] = input.name;
+		var text = utilities.getNodeString(doc, tableRows[i], ''.//label/strong//text()'', nsResolver);
+		if(text) {
+			availableItems[i] = text;
+		}
+	}
+	
+	var items = utilities.selectItems(availableItems);
+	
+	if(!items) {
+		return true;
+	}
+	
+	var hostRe = new RegExp("^http://[^/]+");
+	var m = hostRe.exec(doc.location.href);
+	var hitlist = doc.forms.namedItem("hitlist");
+	var baseUrl = m[0]+hitlist.getAttribute("action")+"?first_hit="+hitlist.elements.namedItem("first_hit").value+"&last_hit="+hitlist.elements.namedItem("last_hit").value;
+	utilities.debugPrint(baseUrl);
+	
+	var uris = new Array();
+	for(i in items) {
+		uris.push(baseUrl+"&"+checkboxes[i]+"=Details");
+	}
+	
+	utilities.processDocuments(browser, null, uris, function(browser) { scrape(browser.contentDocument) },
+		function() { done() }, function() {});
+	
+	wait();
+}
 ');
 
 REPLACE INTO "scrapers" VALUES('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '2006-06-18 09:58:00', 'ProQuest Scraper', 'Simon Kornblith', 'http://proquest\.umi\.com/pqdweb\?(?:.*\&)?did=', '',
