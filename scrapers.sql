@@ -1,7 +1,7 @@
--- 11
+-- 12
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-06-22 22:58:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-06-23 10:11:00'));
 
 REPLACE INTO "scrapers" VALUES('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006-06-22 22:58:00', 'Amazon.com Scraper', 'Simon Kornblith', '^http://www\.amazon\.com/(?:gp/(?:product|search)/|exec/obidos/search-handle-url/)', NULL, 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
@@ -74,7 +74,7 @@ function scrape(doc) {
 var searchRe = new RegExp(''http://www\.amazon\.com/(gp/search/|exec/obidos/search-handle-url/)'');
 var m = searchRe.exec(doc.location.href)
 if(m) {
-	// Why can''t amazon use standard stylesheets
+	// Why can''t amazon use the same stylesheets
 	var xpath;
 	if(m == "gp/search/") {
 		xpath = ''//table[@class="searchresults"]'';
@@ -511,7 +511,7 @@ if(month && year) {
 model.addStatement(uri, prefixRDF + "type", prefixDummy + "journal", false);
 ');
 
-REPLACE INTO "scrapers" VALUES('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '2006-06-18 16:55:00', 'InnoPAC Scraper', 'Simon Kornblith', '^http://[^/]+/(?:search/|record=)',
+REPLACE INTO "scrapers" VALUES('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '2006-06-23 10:11:00', 'InnoPAC Scraper', 'Simon Kornblith', '^http://[^/]+/(?:search/|record=)',
 '// First, check to see if the URL alone reveals InnoPAC, since some sites don''t reveal the MARC button
 var matchRegexp = new RegExp(''^(http://[^/]+/search/[^/]+/[^/]+/1\%2C[^/]+/)frameset(.+)$'');
 if(matchRegexp.test(doc.location.href)) {
@@ -528,6 +528,13 @@ var elmts = utilities.gatherElementsOnXPath(doc, doc, xpath, nsResolver);
 if(elmts.length) {
 	return true;
 }
+// Also, check for links to an item display page
+var tags = doc.getElementsByTagName("a");
+for(i=0; i<tags.length; i++) {
+	if(matchRegexp.test(tags[i].href)) {
+		return true;
+	}
+}
 return false;
 ',
 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
@@ -535,11 +542,14 @@ var prefixDC = ''http://purl.org/dc/elements/1.1/'';
 var prefixDCMI = ''http://purl.org/dc/dcmitype/'';
 var prefixDummy = ''http://chnm.gmu.edu/firefox-scholar/'';
 
+
 var uri = doc.location.href;
+var newUri;
+
 var matchRegexp = new RegExp(''^(http://[^/]+/search/[^/]+/[^/]+/1\%2C[^/]+/)frameset(.+)$'');
 var m = matchRegexp.exec(uri);
 if(m) {
-	var newUri = m[1]+''marc''+m[2];
+	newUri = m[1]+''marc''+m[2];
 } else {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -548,27 +558,106 @@ if(m) {
 
 	var xpath = ''//a[img[@alt="MARC Display"]]'';
 	var elmts = utilities.gatherElementsOnXPath(doc, doc, xpath, nsResolver);
-	var newUri = elmts[0].href;
+	if(elmts.length) {
+		newUri = elmts[0].href;
+	}
 }
 
-utilities.loadDocument(newUri, browser, function(newBrowser) {
-	newDoc = newBrowser.contentDocument;
+if(newUri) {
+	utilities.loadDocument(newUri, browser, function(newBrowser) {
+		newDoc = newBrowser.contentDocument;
+		
+		var namespace = newDoc.documentElement.namespaceURI;
+		var nsResolver = namespace ? function(prefix) {
+		  if (prefix == ''x'') return namespace; else return null;
+		} : null;
+		
+		var xpath = ''//pre'';
+		var elmts = utilities.gatherElementsOnXPath(newDoc, newDoc, xpath, nsResolver);
+		
+		var text = utilities.getNode(doc, elmts[0], ''./text()[1]'', nsResolver).nodeValue;
+		
+		var record = new MARC_Record();
+		record.load(text, "MARC_PAC");
+		utilities.importMARCRecord(record, uri, model);
+		done();
+	}, function() {});
+} else {	// Search results page
+	// Require link to match this
+	var tagRegexp = new RegExp();
+	tagRegexp.compile(''http://[^/]+/search/[^/]+/[^/]+/1\%2C[^/]+/frameset'');
 	
-	var namespace = newDoc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-	  if (prefix == ''x'') return namespace; else return null;
-	} : null;
+	var checkboxes = new Array();
+	var urls = new Array();
+	var availableItems = new Array();
 	
-	var xpath = ''//pre'';
-	var elmts = utilities.gatherElementsOnXPath(newDoc, newDoc, xpath, nsResolver);
+	var tableRows = utilities.gatherElementsOnXPath(doc, doc, ''//tr[@class="browseEntry"]'', nsResolver);
+	// Go through table rows
+	for(var i=0; i<tableRows.length; i++) {
+		// CHK is what we need to get it all as one file
+		var input = utilities.getNode(doc, tableRows[i], ''./td/input[@name="save"]'', nsResolver);
+		checkboxes[i] = input.value;
+		var links = utilities.gatherElementsOnXPath(doc, tableRows[i], ''.//a'', nsResolver);
+		urls[i] = links[0].href;
+		// Go through links
+		for(var j=0; j<links.length; j++) {
+			if(tagRegexp.test(links[j].href)) {
+				var text = utilities.getNodeString(doc, links[j], ''.//text()'', null);
+				if(text) {
+					text = utilities.cleanString(text);
+					if(availableItems[i]) {
+						availableItems[i] += " "+text;
+					} else {
+						availableItems[i] = text;
+					}
+				}
+			}
+		}
+	}
 	
-	var text = utilities.getNode(doc, elmts[0], ''./text()[1]'', nsResolver).nodeValue;
+	var items = utilities.selectItems(availableItems);
 	
-	var record = new MARC_Record();
-	record.load(text, "MARC_PAC");
-	utilities.importMARCRecord(record, uri, model);
-	done();
-}, function() {});
+	if(!items) {
+		return true;
+	}
+	
+	var urlRe = new RegExp("^(http://[^/]+(/search/[^/]+/))([^\?]*)");
+	var m = urlRe.exec(uri);
+	var clearUrl = m[0]+"?clear_saves=1";
+	var postUrl = m[0];
+	var exportUrl = m[1]+"++export/1,-1,-1,B/export";
+	var actionUrl = m[2]+m[3];
+	
+	var postString = "";
+	for(i in items) {
+		postString += "save="+checkboxes[i]+"&";
+	}
+	/*var hiddens = utilities.gatherElementsOnXPath(doc, doc, ''//form[@action="''+actionUrl+''"]//input[@type="hidden"]'', nsResolver);
+	for(var i=0; i<hiddens.length; i++) {
+		if(hiddens[i].name != "save_func") {
+			postString += hiddens[i].name+"="+hiddens[i].value+"&";
+		}
+	}*/
+	postString += "save_func=save_marked";
+	
+	
+	utilities.HTTPUtilities.doGet(clearUrl, null, function() {
+		utilities.debugPrint(clearUrl);
+		utilities.HTTPUtilities.doPost(postUrl, postString, null, function() {
+		utilities.debugPrint(postUrl + " " + postString);
+			utilities.HTTPUtilities.doPost(exportUrl, "ex_format=50&ex_device=45&SUBMIT=Submit", null, function(text) {
+		utilities.debugPrint(exportUrl);
+				var records = text.split("\x1D");
+				for(var i=0; i<(records.length-1); i++) {
+					var record = new MARC_Record();
+					record.load(records[i], "binary");
+					utilities.importMARCRecord(record, urls[i], model);
+				}
+				done();
+			});
+		});
+	});
+}
 
 wait();');
 
