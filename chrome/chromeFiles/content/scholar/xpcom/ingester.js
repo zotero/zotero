@@ -339,12 +339,12 @@ Scholar.Ingester.Utilities.prototype.getItemArray = function(doc, inHere, urlRe,
 	// Require link to match this
 	if(urlRe) {
 		var urlRegexp = new RegExp();
-		urlRegexp.compile(urlRe);
+		urlRegexp.compile(urlRe, "i");
 	}
 	// Do not allow text to match this
 	if(rejectRe) {
 		var rejectRegexp = new RegExp();
-		rejectRegexp.compile(rejectRe);
+		rejectRegexp.compile(rejectRe, "i");
 	}
 	
 	if(!inHere.length) {

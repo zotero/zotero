@@ -1,7 +1,7 @@
--- 13
+-- 14
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-06-23 15:21:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-06-23 16:09:00'));
 
 REPLACE INTO "scrapers" VALUES('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006-06-22 22:58:00', 'Amazon.com Scraper', 'Simon Kornblith', '^http://www\.amazon\.com/(?:gp/(?:product|search)/|exec/obidos/search-handle-url/)', NULL, 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
@@ -1299,34 +1299,62 @@ utilities.processDocuments(browser, null, newUris, function(newBrowser) {
 
 wait();');
 
-REPLACE INTO "scrapers" VALUES('fb12ae9e-f473-cab4-0546-27ab88c64101', '2006-06-18 11:19:00', 'DRA Scraper', 'Simon Kornblith', '/web2/tramp2\.exe/(?:see\_record/|authority\_hits/|goto/.*\?.*screen=Record\.html)',
-'if(doc.location.href.indexOf("authority_hits") > 0) {
-	var body = doc.getElementsByTagName("body");
-	if(body[0].innerHTML.indexOf("ISBN") < 0) {
-		return false;
-	}
-}
-return true;',
+REPLACE INTO "scrapers" VALUES('fb12ae9e-f473-cab4-0546-27ab88c64101', '2006-06-23 16:09:00', 'DRA Scraper', 'Simon Kornblith', '/web2/tramp2\.exe/(?:see\_record/|authority\_hits/|goto/.*\?.*screen=Record\.html)', NULL,
 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
 var prefixDCMI = ''http://purl.org/dc/dcmitype/'';
 var prefixDummy = ''http://chnm.gmu.edu/firefox-scholar/'';
 
-var uri = doc.location.href;
-var uriRegexp = /^(https?:\/\/.*\/web2\/tramp2\.exe\/)(?:goto|see\_record|authority\_hits)(\/.*)\?(?:screen=Record\.html\&)?(.*)$/i;
-var m = uriRegexp.exec(uri);
-if(uri.indexOf("authority_hits") < 0) {
-	var newUri = m[1]+"download_record"+m[2]+"/RECORD.MRC?format=marc&"+m[3];
-} else {
-	var newUri = m[1]+"download_record"+m[2]+"/RECORD.MRC?format=marc";
+var checkItems = false;
+
+if(doc.location.href.indexOf("/authority_hits") > 0) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	checkItems = utilities.gatherElementsOnXPath(doc, doc, "/html/body//ol/li", nsResolver);
 }
 
-utilities.HTTPUtilities.doGet(newUri, null, function(text) {
-	var record = new MARC_Record();
-	record.load(text, "binary");
-	utilities.importMARCRecord(record, uri, model);
-	done();
-})
+if(checkItems && checkItems.length) {
+	var items = utilities.getItemArray(doc, checkItems, ''https?://.*/web2/tramp2\.exe/see_record'');
+	items = utilities.selectItems(items);
+	
+	if(!items) {
+		return true;
+	}
+	
+	var uris = new Array();
+	for(i in items) {
+		uris.push(i);
+	}
+} else {
+	var uris = new Array(doc.location.href);
+}
+
+for(i in uris) {
+	var uri = uris[i];
+	var uriRegexp = /^(https?:\/\/.*\/web2\/tramp2\.exe\/)(?:goto|see\_record|authority\_hits)(\/.*)\?(?:screen=Record\.html\&)?(.*)$/i;
+	var m = uriRegexp.exec(uri);
+	if(uri.indexOf("/authority_hits") < 0) {
+		var newUri = m[1]+"download_record"+m[2]+"/RECORD.MRC?format=marc&"+m[3];
+	} else {
+		var newUri = m[1]+"download_record"+m[2]+"/RECORD.MRC?format=marc";
+	}
+	
+	// Keep track of how many requests have been completed
+	var j = 0;
+	
+	utilities.HTTPUtilities.doGet(newUri, null, function(text) {
+		var record = new MARC_Record();
+		record.load(text, "binary");
+		utilities.importMARCRecord(record, uris[j], model);
+		j++;
+		if(j == uris.length) {
+			done();
+		}
+	});
+}
 wait();');
 
 
