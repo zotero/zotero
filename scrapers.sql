@@ -1,7 +1,7 @@
--- 12
+-- 13
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-06-23 13:34:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-06-23 15:21:00'));
 
 REPLACE INTO "scrapers" VALUES('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006-06-22 22:58:00', 'Amazon.com Scraper', 'Simon Kornblith', '^http://www\.amazon\.com/(?:gp/(?:product|search)/|exec/obidos/search-handle-url/)', NULL, 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
@@ -1199,17 +1199,81 @@ utilities.loadDocument(newUri, browser, function(newBrowser) {
 
 wait();');
 
-REPLACE INTO "scrapers" VALUES('63a0a351-3131-18f4-21aa-f46b9ac51d87', '2006-06-18 11:19:00', 'VTLS Scraper', 'Simon Kornblith', 'chameleon\?.*function=(?:CARDSCR|INITREQ)', NULL,
+REPLACE INTO "scrapers" VALUES('63a0a351-3131-18f4-21aa-f46b9ac51d87', '2006-06-23 15:21:00', 'VTLS Scraper', 'Simon Kornblith', '\/chameleon(?:\?|$)', 
+'var node = utilities.getNode(doc, doc, ''//a[text()="marc"]'', null);
+if(node) {
+	return true;
+}
+var node = utilities.getNode(doc, doc, ''//tr[@class="intrRow"]/td/table/tbody/tr[th]'', null);
+if(node) {
+	return true;
+}
+return false;',
 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
 var prefixDCMI = ''http://purl.org/dc/dcmitype/'';
 var prefixDummy = ''http://chnm.gmu.edu/firefox-scholar/'';
 
-var uri = doc.location.href;
-var newUri = uri.replace(/function=[A-Z]{7}/, "function=MARCSCR");
+var namespace = doc.documentElement.namespaceURI;
+var nsResolver = namespace ? function(prefix) {
+	if (prefix == ''x'') return namespace; else return null;
+} : null;
 
-utilities.loadDocument(newUri, browser, function(newBrowser) {
-	newDoc = newBrowser.contentDocument;
+var uri = doc.location.href;
+var newUris = new Array();
+
+var marcs = utilities.gatherElementsOnXPath(doc, doc, ''//a[text()="marc"]'', nsResolver);
+
+if(marcs.length == 1) {
+	newUris.push(marcs[0].href)
+} else {
+	// Require link to match this
+	var tagRegexp = new RegExp();
+	tagRegexp.compile("/chameleon\?.*function=CARDSCR");
+	
+	var items = new Array();
+	
+	var tableRows = utilities.gatherElementsOnXPath(doc, doc, ''//tr[@class="intrRow"]'', nsResolver);
+	// Go through table rows
+	for(var i=0; i<tableRows.length; i++) {
+		var links = utilities.gatherElementsOnXPath(doc, tableRows[i], ''.//a'', nsResolver);
+		// Go through links
+		var url;
+		for(var j=0; j<links.length; j++) {
+			if(tagRegexp.test(links[j].href)) {
+				url = links[j].href;
+			}
+		}
+		if(url) {
+			// Collect title information
+			var fields = utilities.gatherElementsOnXPath(doc, tableRows[i], ''./td/table/tbody/tr[th]'', nsResolver);
+			for(var j=0; j<fields.length; j++) {
+				var field = utilities.getNode(doc, fields[j], ''./th/text()'', nsResolver);
+				if(field.nodeValue == "Title") {
+					var value = utilities.getNodeString(doc, fields[j], ''./td//text()'', nsResolver);
+					if(value) {
+						items[url] = utilities.cleanString(value);
+					}
+				}
+			}
+		}
+	}
+	
+	items = utilities.selectItems(items);
+	
+	if(!items) {
+		return true;
+	}
+	
+	for(i in items) {
+		utilities.debugPrint(i.replace(/function=[A-Z]{7}/, "function=MARCSCR"));
+		newUris.push(i.replace(/function=[A-Z]{7}/, "function=MARCSCR"));
+	}
+}
+
+utilities.processDocuments(browser, null, newUris, function(newBrowser) {
+	var newDoc = newBrowser.contentDocument;
+	var uri = newDoc.location.href
 	
 	var namespace = newDoc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -1231,8 +1295,7 @@ utilities.loadDocument(newUri, browser, function(newBrowser) {
 	}
 	
 	utilities.importMARCRecord(record, uri, model);
-	done();
-}, function() {})
+}, function(){ done(); }, function() {});
 
 wait();');
 
