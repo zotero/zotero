@@ -1,7 +1,7 @@
 -- 14
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-06-23 16:09:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-06-23 16:53:00'));
 
 REPLACE INTO "scrapers" VALUES('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006-06-22 22:58:00', 'Amazon.com Scraper', 'Simon Kornblith', '^http://www\.amazon\.com/(?:gp/(?:product|search)/|exec/obidos/search-handle-url/)', NULL, 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
@@ -1151,17 +1151,42 @@ utilities.processDocuments(browser, null, newUris, function(newBrowser) {
 
 wait();');
 
-REPLACE INTO "scrapers" VALUES('774d7dc2-3474-2684-392c-f787789ec63d', '2006-06-21 09:55:00', 'Dynix Scraper', 'Simon Kornblith', 'ipac\.jsp\?.*uri=full=[0-9]', NULL,
+REPLACE INTO "scrapers" VALUES('774d7dc2-3474-2684-392c-f787789ec63d', '2006-06-23 16:53:00', 'Dynix Scraper', 'Simon Kornblith', 'ipac\.jsp\?.*(?:uri=full=[0-9]|menu=search)', NULL,
 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
 var prefixDCMI = ''http://purl.org/dc/dcmitype/'';
 var prefixDummy = ''http://chnm.gmu.edu/firefox-scholar/'';
 
 var uri = doc.location.href;
-var newUri = uri+''&fullmarc=true'';
+var detailsRe = new RegExp(''ipac\.jsp\?.*uri=full=[0-9]'');
 
-utilities.loadDocument(newUri, browser, function(newBrowser) {
-	newDoc = newBrowser.contentDocument;
+var uris = new Array();
+if(detailsRe.test(uri)) {
+	uris.push(uri+''&fullmarc=true'');
+} else {
+	var items = utilities.getItemArray(doc, doc, "ipac\.jsp\?.*uri=full=[0-9]|^javascript:buildNewList\\(''.*uri%3Dfull%3D[0-9]");
+	items = utilities.selectItems(items);
+	
+	if(!items) {
+		return true;
+	}
+	
+	var buildNewList = new RegExp("^javascript:buildNewList\\(''([^'']+)");
+	
+	var uris = new Array();
+	for(i in items) {
+		var m = buildNewList.exec(i);
+		if(m) {
+			uris.push(unescape(m[1]+''&fullmarc=true''));
+		} else {
+			uris.push(i+''&fullmarc=true'');
+		}
+	}
+}
+
+utilities.processDocuments(browser, null, uris, function(newBrowser) {
+	var newDoc = newBrowser.contentDocument;
+	var uri = newDoc.location.href;
 	
 	var namespace = newDoc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -1194,8 +1219,7 @@ utilities.loadDocument(newUri, browser, function(newBrowser) {
 	}
 	
 	utilities.importMARCRecord(record, uri, model);
-	done();
-}, function() {})
+}, function() { done() }, function() {});
 
 wait();');
 
