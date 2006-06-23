@@ -1,7 +1,7 @@
 -- 12
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-06-23 12:17:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-06-23 13:34:00'));
 
 REPLACE INTO "scrapers" VALUES('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006-06-22 22:58:00', 'Amazon.com Scraper', 'Simon Kornblith', '^http://www\.amazon\.com/(?:gp/(?:product|search)/|exec/obidos/search-handle-url/)', NULL, 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
@@ -96,10 +96,7 @@ if(m) {
 	}
 	
 	utilities.processDocuments(browser, null, uris, function(browser) { scrape(browser.contentDocument) },
-		function() {
-			utilities.debugPrint("look, done");
-			done();
-		}, function() {});
+		function() { done(); }, function() {});
 	
 	wait();
 } else {
@@ -511,7 +508,7 @@ if(month && year) {
 model.addStatement(uri, prefixRDF + "type", prefixDummy + "journal", false);
 ');
 
-REPLACE INTO "scrapers" VALUES('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '2006-06-23 10:11:00', 'InnoPAC Scraper', 'Simon Kornblith', '^http://[^/]+/(?:search/|record=)',
+REPLACE INTO "scrapers" VALUES('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '2006-06-23 12:49:00', 'InnoPAC Scraper', 'Simon Kornblith', '^http://[^/]+/(?:search/|record=)',
 '// First, check to see if the URL alone reveals InnoPAC, since some sites don''t reveal the MARC button
 var matchRegexp = new RegExp(''^(http://[^/]+/search/[^/]+/[^/]+/1\%2C[^/]+/)frameset(.+)$'');
 if(matchRegexp.test(doc.location.href)) {
@@ -591,7 +588,7 @@ if(newUri) {
 	var urls = new Array();
 	var availableItems = new Array();
 	
-	var tableRows = utilities.gatherElementsOnXPath(doc, doc, ''//tr[@class="browseEntry"]'', nsResolver);
+	var tableRows = utilities.gatherElementsOnXPath(doc, doc, ''//table[@class="browseScreen"]//tr[td/input[@name="save"]]'', nsResolver);
 	// Go through table rows
 	for(var i=0; i<tableRows.length; i++) {
 		// CHK is what we need to get it all as one file
@@ -1065,25 +1062,67 @@ if(m) {
 	}
 }');
 
-REPLACE INTO "scrapers" VALUES('cf87eca8-041d-b954-795a-2d86348999d5', '2006-06-21 09:55:00', 'Aleph Scraper', 'Simon Kornblith', 'func=full-set-set.*\&format=999', NULL,
+REPLACE INTO "scrapers" VALUES('cf87eca8-041d-b954-795a-2d86348999d5', '2006-06-23 13:34:00', 'Aleph Scraper', 'Simon Kornblith', 'http://[^/]+/F(?:/[A-Z0-9\-]+(?:\?.*)?$|\?func=find)',
+'var singleRe = new RegExp("^http://[^/]+/F/[A-Z0-9\-]+\?.*func=full-set-set.*\&format=[0-9]{3}");
+
+if(singleRe.test(doc.location.href)) {
+	return true;
+} else {
+	var tags = doc.getElementsByTagName("a");
+	for(var i=0; i<tags.length; i++) {
+		if(singleRe.test(tags[i].href)) {
+			return true;
+		}
+	}
+}
+return false;',
 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
 var prefixDCMI = ''http://purl.org/dc/dcmitype/'';
 var prefixDummy = ''http://chnm.gmu.edu/firefox-scholar/'';
 
+var detailRe = new RegExp("^http://[^/]+/F/[A-Z0-9\-]+\?.*func=full-set-set.*\&format=[0-9]{3}");
 var uri = doc.location.href;
+var newUris = new Array();
 
-var newUri = uri.replace("&format=999", "&format=001");
+if(detailRe.test(uri)) {
+	newUris.push(uri.replace(/\&format=[0-9]{3}/, "&format=001"))
+} else {
+	var items = utilities.getItemArray(doc, doc, ''^http://[^/]+/F/[A-Z0-9\-]+\?.*func=full-set-set.*\&format=999'', ''^[0-9]+$'');
+	
+	// ugly hack to see if we have any items
+	var haveItems = false;
+	for(i in items) {
+		haveItems = true;
+		break;
+	}
+	
+	// If we don''t have any items otherwise, let us use the numbers
+	if(!haveItems) {
+		var items = utilities.getItemArray(doc, doc, ''^http://[^/]+/F/[A-Z0-9\-]+\?.*func=full-set-set.*\&format=999'');
+	}
+	
+	items = utilities.selectItems(items);
+	
+	if(!items) {
+		return true;
+	}
+	
+	for(i in items) {
+		newUris.push(i.replace("&format=999", "&format=001"));
+	}
+}
 
-utilities.loadDocument(newUri, browser, function(newBrowser) {
-	newDoc = newBrowser.contentDocument;
+utilities.processDocuments(browser, null, newUris, function(newBrowser) {
+	var newDoc = newBrowser.contentDocument;
+	var uri = newDoc.location.href;
 	
 	var namespace = newDoc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
 	  if (prefix == ''x'') return namespace; else return null;
 	} : null;
 	
-	var xpath = ''/html/body/table/tbody/tr[td[1][@class="td1"][@id="bold"]][td[2][@class="td1"]]'';
+	var xpath = ''/html/body/table/tbody/tr[td[1][@id="bold"]][td[2]]'';
 	var elmts = utilities.gatherElementsOnXPath(newDoc, newDoc, xpath, nsResolver);
 	var record = new MARC_Record();
 	for(var i=0; i<elmts.length; i++) {
@@ -1108,8 +1147,7 @@ utilities.loadDocument(newUri, browser, function(newBrowser) {
 	
 	model.addStatement(uri, prefixRDF + "type", prefixDummy + "book", false);
 	utilities.importMARCRecord(record, uri, model);
-	done();
-}, function() {});
+}, function() { done(); }, function() {});
 
 wait();');
 
