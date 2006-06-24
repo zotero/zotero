@@ -1,7 +1,7 @@
 -- 14
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-06-23 16:53:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-06-24 10:34:00'));
 
 REPLACE INTO "scrapers" VALUES('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006-06-22 22:58:00', 'Amazon.com Scraper', 'Simon Kornblith', '^http://www\.amazon\.com/(?:gp/(?:product|search)/|exec/obidos/search-handle-url/)', NULL, 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
@@ -1266,6 +1266,7 @@ if(marcs.length == 1) {
 		for(var j=0; j<links.length; j++) {
 			if(tagRegexp.test(links[j].href)) {
 				url = links[j].href;
+				break;
 			}
 		}
 		if(url) {
@@ -1461,7 +1462,7 @@ utilities.processDocuments(browser, null, uris, function(newBrowser) {
 
 wait();');
 
-REPLACE INTO "scrapers" VALUES('5287d20c-8a13-6004-4dcb-5bb2b66a9cc9', '2006-06-18 11:19:00', 'SIRSI -2003 Scraper', 'Simon Kornblith', '/uhtbin/cgisirsi',
+REPLACE INTO "scrapers" VALUES('5287d20c-8a13-6004-4dcb-5bb2b66a9cc9', '2006-06-24 10:34:00', 'SIRSI -2003 Scraper', 'Simon Kornblith', '/uhtbin/cgisirsi',
 'var namespace = doc.documentElement.namespaceURI;
 var nsResolver = namespace ? function(prefix) {
 	if (prefix == ''x'') return namespace; else return null;
@@ -1469,9 +1470,14 @@ var nsResolver = namespace ? function(prefix) {
 
 var elmts = utilities.gatherElementsOnXPath(doc, doc, ''/html/body/form/p/text()[1]'', nsResolver);
 for(i in elmts) {
-	if(elmts[i].nodeValue == "\n\nViewing record\n") {
+	if(utilities.superCleanString(elmts[i].nodeValue) == "Viewing record") {
 		return true;
 	}
+}
+var xpath = ''//form[@name="hitlist"]/table/tbody/tr'';
+var elmts = utilities.gatherElementsOnXPath(doc, doc, xpath, nsResolver);
+if(elmts.length) {
+	return true;
 }
 return false;',
 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
@@ -1485,57 +1491,99 @@ var nsResolver = namespace ? function(prefix) {
 } : null;
 
 var uri = doc.location.href;
-var uriRegexp = /^(.*)(\/[0-9]+)$/;
-var m = uriRegexp.exec(uri);
-var newUri = m[1]+"/40";
+var recNumbers = new Array();
 
-var elmts = utilities.gatherElementsOnXPath(doc, doc, ''/html/body/form/p'', nsResolver);
-for(i in elmts) {
-	var elmt = elmts[i];
-	var initialText = utilities.getNode(doc, elmt, ''./text()[1]'', nsResolver);
-	if(initialText.nodeValue == "\n\nViewing record\n") {
-		var recNumber = utilities.getNode(doc, elmt, ''./b[1]/text()[1]'', nsResolver).nodeValue;
+var xpath = ''//form[@name="hitlist"]/table/tbody/tr'';
+var elmts = utilities.gatherElementsOnXPath(doc, doc, xpath, nsResolver);
+if(elmts.length) {	// Search results page
+	var uriRegexp = /^http:\/\/[^\/]+/;
+	var m = uriRegexp.exec(uri);
+	var postAction = doc.forms.namedItem("hitlist").getAttribute("action");
+	var newUri = m[0]+postAction.substr(0, postAction.length-1)+"40"
+	
+	var titleRe = /<br>\s*(.*[^\s])\s*<br>/i;
+	
+	var items = new Array();
+	
+	for(var i=0; i<elmts.length; i++) {
+		var links = utilities.gatherElementsOnXPath(doc, elmts[i], ''.//a'', nsResolver);
+		
+		// Collect title
+		var myTd = utilities.getNode(doc, elmts[i], "./td[2]", nsResolver);
+		var m = titleRe.exec(myTd.innerHTML);
+		var title = m[1];
+		
+		items[i] = title;
+	}
+	
+	
+	items = utilities.selectItems(items);
+	
+	if(!items) {
+		return true;
+	}
+	
+	for(i in items) {
+		recNumbers.push(parseInt(i)+1);
+	}
+} else {		// Normal page
+	var uriRegexp = /^(.*)(\/[0-9]+)$/;
+	var m = uriRegexp.exec(uri);
+	var newUri = m[1]+"/40"
+	
+	var elmts = utilities.gatherElementsOnXPath(doc, doc, ''/html/body/form/p'', nsResolver);
+	for(i in elmts) {
+		var elmt = elmts[i];
+		var initialText = utilities.getNode(doc, elmt, ''./text()[1]'', nsResolver);
+		if(initialText && initialText.nodeValue && utilities.superCleanString(initialText.nodeValue) == "Viewing record") {
+			recNumbers.push(utilities.getNode(doc, elmt, ''./b[1]/text()[1]'', nsResolver).nodeValue);
+			break;
+		}
 	}
 }
 
-utilities.HTTPUtilities.doPost(newUri, ''marks=''+recNumber+''&shadow=NO&format=FLAT+ASCII&sort=TITLE&vopt_elst=ALL&library=ALL&display_rule=ASCENDING&duedate_code=l&holdcount_code=t&DOWNLOAD_x=22&DOWNLOAD_y=12&address=&form_type='', null, function(text) {
+utilities.HTTPUtilities.doGet(newUri+''?marks=''+recNumbers.join(",")+''&shadow=NO&format=FLAT+ASCII&sort=TITLE&vopt_elst=ALL&library=ALL&display_rule=ASCENDING&duedate_code=l&holdcount_code=t&DOWNLOAD_x=22&DOWNLOAD_y=12&address=&form_type='', null, function(text) {
+	utilities.debugPrint(text);
 	var texts = text.split("<PRE>");
 	texts = texts[1].split("</PRE>");
 	text = texts[0];
-	var lines = text.split("\n");
+	var documents = text.split("*** DOCUMENT BOUNDARY ***");
 	
-	var record = new MARC_Record();
-	
-	var tag, ind1, ind2, content;
-	for(var i=0; i<lines.length; i++) {
-		var line = lines[i];
-		
-		if(line.substr(0, 1) == "." && line.substr(4,2) == ". ") {
-			if(tag) {
-				content = content.replace(/\|([a-z])/g, record.subfield_delimiter+"$1");
-				record.add_field(tag, ind1, ind2, content);
+	for(var j=1; j<documents.length; j++) {
+		var uri = newUri+"?marks="+recNumbers[j]+"&shadow=NO&format=FLAT+ASCII&sort=TITLE&vopt_elst=ALL&library=ALL&display_rule=ASCENDING&duedate_code=l&holdcount_code=t&DOWNLOAD_x=22&DOWNLOAD_y=12&address=&form_type=";
+		var lines = documents[j].split("\n");
+		var record = new MARC_Record();
+		var tag, ind1, ind2, content;
+		for(var i=0; i<lines.length; i++) {
+			var line = lines[i];
+			
+			if(line.substr(0, 1) == "." && line.substr(4,2) == ". ") {
+				if(tag) {
+					content = content.replace(/\|([a-z])/g, record.subfield_delimiter+"$1");
+					record.add_field(tag, ind1, ind2, content);
+				}
+			} else {
+				content += " "+line.substring(6);
+				continue;
 			}
-		} else {
-			content += " "+line.substring(6);
-			continue;
+			
+			tag = line.substr(1, 3);
+			
+			if(parseInt(tag) > 10) {
+				ind1 = line.substr(6, 1);
+				ind2 = line.substr(7, 1);
+				content = line.substr(8);
+			} else {
+				ind1 = "";
+				ind2 = "";
+				content = line.substring(6);
+			}
 		}
-		
-		tag = line.substr(1, 3);
-		
-		if(parseInt(tag) > 10) {
-			ind1 = line.substr(6, 1);
-			ind2 = line.substr(7, 1);
-			content = line.substr(8);
-		} else {
-			ind1 = "";
-			ind2 = "";
-			content = line.substring(6);
-		}
+		utilities.importMARCRecord(record, uri, model);
 	}
-
-	utilities.importMARCRecord(record, uri, model);
 	done();
-})
+});
+
 wait();');
 
 REPLACE INTO "scrapers" VALUES('0f9fc2fc-306e-5204-1117-25bca009dffc', '2006-06-18 11:19:00', 'TLC/YouSeeMore Scraper', 'Simon Kornblith', 'TLCScripts/interpac\.dll\?.*LabelDisplay.*RecordNumber=[0-9]', NULL,
