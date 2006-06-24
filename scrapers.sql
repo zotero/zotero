@@ -1,7 +1,7 @@
--- 14
+-- 15
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-06-24 10:34:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-06-24 11:22:00'));
 
 REPLACE INTO "scrapers" VALUES('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006-06-22 22:58:00', 'Amazon.com Scraper', 'Simon Kornblith', '^http://www\.amazon\.com/(?:gp/(?:product|search)/|exec/obidos/search-handle-url/)', NULL, 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
@@ -1462,7 +1462,7 @@ utilities.processDocuments(browser, null, uris, function(newBrowser) {
 
 wait();');
 
-REPLACE INTO "scrapers" VALUES('5287d20c-8a13-6004-4dcb-5bb2b66a9cc9', '2006-06-24 10:34:00', 'SIRSI -2003 Scraper', 'Simon Kornblith', '/uhtbin/cgisirsi',
+REPLACE INTO "scrapers" VALUES('5287d20c-8a13-6004-4dcb-5bb2b66a9cc9', '2006-06-24 11:22:00', 'SIRSI -2003 Scraper', 'Simon Kornblith', '/uhtbin/cgisirsi',
 'var namespace = doc.documentElement.namespaceURI;
 var nsResolver = namespace ? function(prefix) {
 	if (prefix == ''x'') return namespace; else return null;
@@ -1490,6 +1490,15 @@ var nsResolver = namespace ? function(prefix) {
 	if (prefix == ''x'') return namespace; else return null;
 } : null;
 
+// Cheap hack to convert HTML entities
+function unescapeHTML(text) {
+	var div = doc.createElement("div");
+	div.innerHTML = utilities.cleanTags(text);
+	var text = div.childNodes[0] ? div.childNodes[0].nodeValue : null;
+	delete div;
+	return text;
+}
+
 var uri = doc.location.href;
 var recNumbers = new Array();
 
@@ -1511,7 +1520,7 @@ if(elmts.length) {	// Search results page
 		// Collect title
 		var myTd = utilities.getNode(doc, elmts[i], "./td[2]", nsResolver);
 		var m = titleRe.exec(myTd.innerHTML);
-		var title = m[1];
+		var title = unescapeHTML(m[1]);
 		
 		items[i] = title;
 	}
@@ -1543,10 +1552,9 @@ if(elmts.length) {	// Search results page
 }
 
 utilities.HTTPUtilities.doGet(newUri+''?marks=''+recNumbers.join(",")+''&shadow=NO&format=FLAT+ASCII&sort=TITLE&vopt_elst=ALL&library=ALL&display_rule=ASCENDING&duedate_code=l&holdcount_code=t&DOWNLOAD_x=22&DOWNLOAD_y=12&address=&form_type='', null, function(text) {
-	utilities.debugPrint(text);
 	var texts = text.split("<PRE>");
 	texts = texts[1].split("</PRE>");
-	text = texts[0];
+	text = unescapeHTML(texts[0]);
 	var documents = text.split("*** DOCUMENT BOUNDARY ***");
 	
 	for(var j=1; j<documents.length; j++) {
@@ -1586,7 +1594,7 @@ utilities.HTTPUtilities.doGet(newUri+''?marks=''+recNumbers.join(",")+''&shadow=
 
 wait();');
 
-REPLACE INTO "scrapers" VALUES('0f9fc2fc-306e-5204-1117-25bca009dffc', '2006-06-18 11:19:00', 'TLC/YouSeeMore Scraper', 'Simon Kornblith', 'TLCScripts/interpac\.dll\?.*LabelDisplay.*RecordNumber=[0-9]', NULL,
+REPLACE INTO "scrapers" VALUES('0f9fc2fc-306e-5204-1117-25bca009dffc', '2006-06-18 11:19:00', 'TLC/YouSeeMore Scraper', 'Simon Kornblith', 'TLCScripts/interpac\.dll\?(?:.*LabelDisplay.*RecordNumber=[0-9]|Search|ItemTitles)', NULL,
 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
 var prefixDCMI = ''http://purl.org/dc/dcmitype/'';
@@ -1597,11 +1605,28 @@ var nsResolver = namespace ? function(prefix) {
 	if (prefix == ''x'') return namespace; else return null;
 } : null;
 
+var detailRe = new RegExp("TLCScripts/interpac\.dll\?.*LabelDisplay.*RecordNumber=[0-9]");
 var uri = doc.location.href;
-var newUri = uri.replace("LabelDisplay", "MARCDisplay");
+var newUris = new Array();
 
-utilities.loadDocument(newUri, browser, function(newBrowser) {
-	newDoc = newBrowser.contentDocument;
+if(detailRe.test(uri)) {
+	newUris.push(uri.replace("LabelDisplay", "MARCDisplay"));
+} else {
+	var items = utilities.getItemArray(doc, doc, ''TLCScripts/interpac\.dll\?.*LabelDisplay.*RecordNumber=[0-9]'');
+	items = utilities.selectItems(items);
+	
+	if(!items) {
+		return true;
+	}
+	
+	for(i in items) {
+		newUris.push(i.replace("LabelDisplay", "MARCDisplay"));
+	}
+}
+
+utilities.processDocuments(browser, null, newUris, function(newBrowser) {
+	var newDoc = newBrowser.contentDocument;
+	var uri = newDoc.location.href;
 	
 	var namespace = newDoc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -1653,8 +1678,7 @@ utilities.loadDocument(newUri, browser, function(newBrowser) {
 	}
 	
 	utilities.importMARCRecord(record, uri, model);
-	done();
-}, function() {});
+}, function() {done(); }, function() {});
 
 wait();');
 

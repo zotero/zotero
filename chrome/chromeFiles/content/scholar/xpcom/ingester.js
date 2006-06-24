@@ -360,7 +360,9 @@ Scholar.Ingester.Utilities.prototype.getItemArray = function(doc, inHere, urlRe,
 					text = this.cleanString(text);
 					if(!rejectRe || !rejectRegexp.test(text)) {
 						if(availableItems[links[i].href]) {
-							availableItems[links[i].href] += " "+text;
+							if(text != availableItems[links[i].href]) {
+								availableItems[links[i].href] += " "+text;
+							}
 						} else {
 							availableItems[links[i].href] = text;
 						}
@@ -388,6 +390,13 @@ Scholar.Ingester.Utilities.prototype._MARCCleanNumber = function(author) {
 	author = author.replace(/[\s\.\,\/\[\]\:]+$/, '');
 	var regexp = /^[^ ]*/;
 	var m = regexp.exec(author);
+	if(m) {
+		return m[0];
+	}
+}
+Scholar.Ingester.Utilities.prototype._MARCPullYear = function(text) {
+	var pullRe = /[0-9]+/;
+	var m = pullRe.exec(text);
 	if(m) {
 		return m[0];
 	}
@@ -456,7 +465,7 @@ Scholar.Ingester.Utilities.prototype.importMARCRecord = function(record, uri, mo
 	// Extract publisher info
 	model = this._MARCAssociateField(record, uri, model, '260', prefixDC + 'publisher', this._MARCCleanString, '', 'b');
 	// Extract year
-	model = this._MARCAssociateField(record, uri, model, '260', prefixDC + 'year', this._MARCCleanString, '', 'c');
+	model = this._MARCAssociateField(record, uri, model, '260', prefixDC + 'year', this._MARCPullYear, '', 'c');
 	// Extract series
 	model = this._MARCAssociateField(record, uri, model, '440', prefixDummy + 'series', this._MARCCleanString);
 }
