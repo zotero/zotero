@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://scholar/skin/scholar.css" type="text/css"?>
+<!DOCTYPE window SYSTEM "chrome://scholar/locale/scholar.dtd">
+
+<window
+	id="item-type-manager"
+	title="Item Type Manager"
+	orient="horizontal"
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	style="padding:2em">
+	
+	<script src="../include.js"/>
+	<script src="itemTypeManager.js"/>
+	
+	<vbox>
+		<hbox style="height:38em">
+			<listbox id="item-type-list" seltype="single" onselect="Scholar_ItemTypeManager.handleTypeSelect()" >
+				<listhead>
+					<listheader label="Item Types"/>
+				</listhead>
+			</listbox>
+			
+			<listbox id="item-type-fields-list" onselect="">
+				<listhead>
+					<listheader label="Used Fields"/>
+				</listhead>
+			</listbox>
+			
+			<groupbox>
+				<button label="Move up" oncommand="Scholar_ItemTypeManager.moveSelectedFieldUp()" />
+				<button label="Move down" oncommand="Scholar_ItemTypeManager.moveSelectedFieldDown()" />
+			</groupbox>
+			
+			<listbox id="fields-list" onselect="">
+				<listhead>
+					<listheader label="Unused Fields"/>
+				</listhead>
+			</listbox>
+		</hbox>
+		
+		<hbox style="margin:1em 0 0 .2em; font-size:small">
+			<description>Double-click a field to add or remove it from an item type.</description>
+		</hbox>
+	</vbox>
+</window>
