@@ -1,7 +1,7 @@
--- 15
+-- 16
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-06-24 11:22:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-06-24 13:31:00'));
 
 REPLACE INTO "scrapers" VALUES('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006-06-22 22:58:00', 'Amazon.com Scraper', 'Simon Kornblith', '^http://www\.amazon\.com/(?:gp/(?:product|search)/|exec/obidos/search-handle-url/)', NULL, 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
@@ -1747,23 +1747,52 @@ for(i in elmts) {
 
 model.addStatement(uri, prefixRDF + "type", prefixDummy + "journal", false);');
 
-REPLACE INTO "scrapers" VALUES('fcf41bed-0cbc-3704-85c7-8062a0068a7a', '2006-06-18 11:19:00', 'PubMed Scraper', 'Simon Kornblith', '^http://www\.ncbi\.nlm\.nih\.gov/entrez/query\.fcgi\?(?:.*db=PubMed.*list_uids=[0-9]|.*list_uids=[0-9].*db=PubMed)', NULL, 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
+REPLACE INTO "scrapers" VALUES('fcf41bed-0cbc-3704-85c7-8062a0068a7a', '2006-06-24 13:17:00', 'PubMed Scraper', 'Simon Kornblith', '^http://www\.ncbi\.nlm\.nih\.gov/entrez/query\.fcgi\?(?:.*db=PubMed.*list_uids=[0-9]|.*list_uids=[0-9].*db=PubMed|.*db=PubMed.*CMD=search|.*CMD=search.*db=PubMed)', NULL, 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
 var prefixDCMI = ''http://purl.org/dc/dcmitype/'';
 var prefixDummy = ''http://chnm.gmu.edu/firefox-scholar/'';
 
-function mapRDF(text, rdfUri) {
+function mapRDF(uri, text, rdfUri) {
 	if(text != "") {
 		model.addStatement(uri, rdfUri, text, true);
 	}
 }
 
 var uri = doc.location.href;
-var newUri = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=PubMed&retmode=xml&rettype=citation&id=";
+var ids = new Array();
 var idRegexp = /[\?\&]list_uids=([0-9\,]+)/;
-var m = idRegexp.exec(uri);
-newUri += m[1];
 
+var m = idRegexp.exec(uri);
+if(m) {
+	ids.push(m[1]);
+} else {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	var items = new Array();
+	var tableRows = utilities.gatherElementsOnXPath(doc, doc, ''//div[@class="ResultSet"]/table/tbody'', nsResolver);
+	// Go through table rows
+	for(var i=0; i<tableRows.length; i++) {
+		var link = utilities.getNode(doc, tableRows[i], ''.//a'', nsResolver);
+		var article = utilities.getNode(doc, tableRows[i], ''./tr[2]/td[2]/text()[1]'', nsResolver);
+		items[link.href] = article.nodeValue;
+	}
+	
+	items = utilities.selectItems(items);
+	
+	if(!items) {
+		return true;
+	}
+	
+	for(i in items) {
+		var m = idRegexp.exec(i);
+		ids.push(m[1]);
+	}
+}
+
+var newUri = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=PubMed&retmode=xml&rettype=citation&id="+ids.join(",");
 utilities.HTTPUtilities.doGet(newUri, null, function(text) {
 	// Remove xml parse instruction and doctype
 	text = text.replace(/<!DOCTYPE[^>]*>/, "").replace(/<\?xml[^>]*\?>/, "");
@@ -1773,6 +1802,7 @@ utilities.HTTPUtilities.doGet(newUri, null, function(text) {
 	for(var i=0; i<xml.PubmedArticle.length(); i++) {
 		var citation = xml.PubmedArticle[i].MedlineCitation;
 		
+		var uri = "http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?db=pubmed&cmd=Retrieve&list_uids="+citation.PMID.text();
 		if(citation.PMID.length()) {
 			model.addStatement(uri, prefixDC + "identifier", "PMID "+citation.PMID.text(), true);
 		}
@@ -1793,14 +1823,14 @@ utilities.HTTPUtilities.doGet(newUri, null, function(text) {
 			}
 			
 			if(article.Journal.Title.length()) {
-				model.addStatement(uri, prefixDummy + "publication", utilities.superCleanString(article.Journal.Title.text()), true);
+				model.addStatement(uri, prefixDummy + "publication", utilities.superCleanString(article.Journal.Title.text().toString()), true);
 			} else if(citation.MedlineJournalInfo.MedlineTA.length()) {
-				model.addStatement(uri, prefixDummy + "publication", utilities.superCleanString(citation.MedlineJournalInfo.MedlineTA.text()), true);
+				model.addStatement(uri, prefixDummy + "publication", utilities.superCleanString(citation.MedlineJournalInfo.MedlineTA.text().toString()), true);
 			}
 			
 			if(article.Journal.JournalIssue.length()) {
-				mapRDF(article.Journal.JournalIssue.Volume.text(), prefixDummy + "volume");
-				mapRDF(article.Journal.JournalIssue.Issue.text(), prefixDummy + "number");
+				mapRDF(uri, article.Journal.JournalIssue.Volume.text(), prefixDummy + "volume");
+				mapRDF(uri, article.Journal.JournalIssue.Issue.text(), prefixDummy + "number");
 				if(article.Journal.JournalIssue.PubDate.length()) {
 					model.addStatement(uri, prefixDC + "date", article.Journal.JournalIssue.PubDate.Day.text()+" "+article.Journal.JournalIssue.PubDate.Month.text()+" "+article.Journal.JournalIssue.PubDate.Year.text(), true);
 				}
@@ -1810,22 +1840,22 @@ utilities.HTTPUtilities.doGet(newUri, null, function(text) {
 		if(article.AuthorList.length() && article.AuthorList.Author.length()) {
 			var authors = article.AuthorList.Author;
 			for(var j=0; j<authors.length(); j++) {
-				var lastName = authors[j].LastName.text();
-				var firstName = authors[j].FirstName.text();
+				var lastName = authors[j].LastName.text().toString();
+				var firstName = authors[j].FirstName.text().toString();
 				if(firstName == "") {
-					var firstName = authors[j].ForeName.text();
+					var firstName = authors[j].ForeName.text().toString();
 				}
 				if(firstName && lastName) {
 					model.addStatement(uri, prefixDC + "creator", firstName + " " + lastName);
 				}
 			}
 		}
+		model.addStatement(uri, prefixRDF + "type", prefixDummy + "journal", false);
 	}
 
 	done();
 })
 
-model.addStatement(uri, prefixRDF + "type", prefixDummy + "journal", false);
 wait();');
 
 REPLACE INTO "scrapers" VALUES('951c027d-74ac-47d4-a107-9c3069ab7b48', '2006-06-20 10:52:00', 'Scraper for Dublin Core expressed as HTML META elements', 'Simon Kornblith', NULL,
@@ -1862,21 +1892,41 @@ for(var i=0; i<metaTags.length; i++) {
 	}
 }');
 
-REPLACE INTO "scrapers" VALUES('3e684d82-73a3-9a34-095f-19b112d88bbf', '2006-06-21 10:28:00', 'Google Books Scraper', 'Simon Kornblith', 'http://books\.google\.com/books\?vid=.*\&id=.*', NULL,
+REPLACE INTO "scrapers" VALUES('3e684d82-73a3-9a34-095f-19b112d88bbf', '2006-06-24 13:31:00', 'Google Books Scraper', 'Simon Kornblith', 'http://books\.google\.com/books\?(.*vid=.*\&id=.*|.*q=.*)', NULL,
 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
 var prefixDCMI = ''http://purl.org/dc/dcmitype/'';
 var prefixDummy = ''http://chnm.gmu.edu/firefox-scholar/'';
 
 var uri = doc.location.href;
+var newUris = new Array();
+
 var re = new RegExp(''http://books\\.google\\.com/books\\?vid=([^&]+).*\\&id=([^&]+)'', ''i'');
-var urlParts = re.exec(uri);
-var newUri = ''http://books.google.com/books?vid=''+urlParts[1]+''&id=''+urlParts[2];
+var m = re.exec(uri);
+if(m) {
+	newUris.push(''http://books.google.com/books?vid=''+m[1]+''&id=''+m[2]);
+} else {
+	var items = utilities.getItemArray(doc, doc, ''http://books\\.google\\.com/books\\?vid=([^&]+).*\\&id=([^&]+)'', ''^(?:All matching pages|About this Book)'');
 
-utilities.debugPrint(newUri);
+	// Drop " - Page" thing
+	for(i in items) {
+		items[i] = items[i].replace(/- Page [0-9]+\s*$/, "");
+	}
+	items = utilities.selectItems(items);
+	
+	if(!items) {
+		return true;
+	}
+	
+	for(i in items) {
+		var m = re.exec(i);
+		newUris.push(''http://books.google.com/books?vid=''+m[1]+''&id=''+m[2]);
+	}
+}
 
-utilities.loadDocument(newUri, browser, function(newBrowser) {
-	newDoc = newBrowser.contentDocument;
+utilities.processDocuments(browser, null, newUris, function(newBrowser) {
+	var newDoc = newBrowser.contentDocument;
+	var uri = newDoc.location.href;
 	
 	var namespace = newDoc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -1923,8 +1973,6 @@ utilities.loadDocument(newUri, browser, function(newBrowser) {
 		}
 	}
 	model.addStatement(uri, prefixRDF + "type", prefixDummy + "book", false);
-	
-	done();
-}, function() {});
+}, function() { done(); }, function() {});
 
 wait();');
