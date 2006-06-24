@@ -780,8 +780,8 @@ Scholar.Ingester.Document.prototype._updateDatabase = function() {
 	
 	var typeToTypeID = new Object();
 	typeToTypeID[prefixDummy + 'book'] = 1;
-	typeToTypeID[prefixDummy + 'journal'] = 2;
-	typeToTypeID[prefixDummy + 'newspaper'] = 2;
+	typeToTypeID[prefixDummy + 'journal'] = 3;
+	typeToTypeID[prefixDummy + 'newspaper'] = 5;
 	
 	try {
 		for(var uri in this.model.data) {
