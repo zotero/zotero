@@ -25,6 +25,7 @@ Scholar_Ingester_Interface = function() {}
 Scholar_Ingester_Interface.init = function() {
 	Scholar_Ingester_Interface.browsers = new Array();
 	Scholar_Ingester_Interface.browserDocuments = new Object();
+	Scholar_Ingester_Interface.browserUris = new Array();
 	
     window.addEventListener("load", Scholar_Ingester_Interface.chromeLoad, false);
     window.addEventListener("unload", Scholar_Ingester_Interface.chromeUnload, false);
@@ -42,7 +43,7 @@ Scholar_Ingester_Interface.chromeLoad = function() {
 	Scholar_Ingester_Interface.tabBrowser.addProgressListener(Scholar_Ingester_Interface.Listener,
 		Components.interfaces.nsIWebProgress.NOTIFY_LOCATION);
 	// let's use load instead of DOMContentLoaded
-    Scholar_Ingester_Interface.appContent.addEventListener("load",
+    Scholar_Ingester_Interface.appContent.addEventListener("pageshow",
     	Scholar_Ingester_Interface.contentLoad, true);
 }
 
@@ -69,8 +70,8 @@ Scholar_Ingester_Interface.scrapeThisPage = function() {
  * Updates the status of the capture icon to reflect the scrapability or lack
  * thereof of the current page
  */
-Scholar_Ingester_Interface.updateStatus = function(browser) {
-	var documentObject = Scholar_Ingester_Interface._getDocument(browser);
+Scholar_Ingester_Interface.updateStatus = function() {
+	var documentObject = Scholar_Ingester_Interface._getDocument(Scholar_Ingester_Interface.tabBrowser.selectedBrowser);
 	if(documentObject && documentObject.scraper) {
 		//Scholar_Ingester_Interface.statusImage.src = "chrome://scholar/skin/treeitem-"+TYPE+".png";
 		Scholar_Ingester_Interface.statusImage.hidden = false;
@@ -82,15 +83,39 @@ Scholar_Ingester_Interface.updateStatus = function(browser) {
 /*
  * An event handler called when a new document is loaded. Creates a new document
  * object, and updates the status of the capture icon
- *
- * FIXME: This approach, again borrowed from PiggyBank, does not work properly
- * when the newly loaded page is not the currently selected page. For example,
- * if a tab is loaded behind the currently selected page, the ingester will not
- * create a new object for it.
+
  */
-Scholar_Ingester_Interface.contentLoad = function() {
-	Scholar_Ingester_Interface._setDocument(Scholar_Ingester_Interface.tabBrowser.selectedBrowser);
-	Scholar_Ingester_Interface.updateStatus(Scholar_Ingester_Interface.tabBrowser.selectedBrowser);
+Scholar_Ingester_Interface.contentLoad = function(event) {
+	if (event.originalTarget instanceof HTMLDocument) {
+		// Stolen off the Mozilla extension developer's website, a routine to
+		// determine the root document loaded from a frameset
+		if (event.originalTarget.defaultView.frameElement) {
+			var doc = event.originalTarget;
+			while (doc.defaultView.frameElement) {
+				doc=doc.defaultView.frameElement.ownerDocument;
+			}
+			// Frame within a tab was loaded. doc is the root document of the frameset
+		} else {
+			var doc = event.originalTarget;
+			// Page was loaded. doc is the document that loaded.
+		}
+		
+		// Figure out what browser this contentDocument is associated with
+		var browser;
+		for(var i=0; i<Scholar_Ingester_Interface.tabBrowser.browsers.length; i++) {
+			if(doc == Scholar_Ingester_Interface.tabBrowser.browsers[i].contentDocument) {
+				browser = Scholar_Ingester_Interface.tabBrowser.browsers[i];
+				break;
+			}
+		}
+		if(!browser) {
+			Scholar.debug("Could not find browser!");
+			return;
+		}
+		
+		Scholar_Ingester_Interface._setDocument(browser);
+		Scholar_Ingester_Interface.updateStatus();
+	}
 }
 
 /*
@@ -129,9 +154,7 @@ Scholar_Ingester_Interface.Listener.onLocationChange = function(progressObject) 
         }
     }
 
-    Scholar_Ingester_Interface.updateStatus(
-    	Scholar_Ingester_Interface.tabBrowser.selectedBrowser
-    );
+    Scholar_Ingester_Interface.updateStatus();
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -171,8 +194,13 @@ Scholar_Ingester_Interface._setDocument = function(browser) {
 			browser.setAttribute("scholar-key", key);
 		}
 	}
-	Scholar_Ingester_Interface.browserDocuments[key] = new Scholar.Ingester.Document(browser, window);
-	Scholar_Ingester_Interface.browserDocuments[key].retrieveScraper();
+	
+	// Only re-load the scraper if it's a new document
+	if(Scholar_Ingester_Interface.browserUris[key] != browser.contentDocument.location.href) {
+		Scholar_Ingester_Interface.browserUris[key] = browser.contentDocument.location.href;
+		Scholar_Ingester_Interface.browserDocuments[key] = new Scholar.Ingester.Document(browser, window);
+		Scholar_Ingester_Interface.browserDocuments[key].retrieveScraper();
+	}
 }
 
 /*
