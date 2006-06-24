@@ -95,7 +95,7 @@ var Scholar = new function(){
 				var logManager =
 				Components.classes["@mozmonkey.com/debuglogger/manager;1"]
 				.getService(Components.interfaces.nsIDebugLoggerManager);
-				var logger = logManager.registerLogger("Firefox Scholar");
+				var logger = logManager.registerLogger("Scholar for Firefox");
 			}
 			catch (e){}
 		}

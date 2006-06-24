@@ -1,4 +1,4 @@
-// Firefox Scholar Ingester
+// Scholar for Firefox Ingester
 // Utilities based on code taken from Piggy Bank 2.1.1 (BSD-licensed)
 // This code is licensed according to the GPL
 
@@ -128,7 +128,7 @@ Scholar.Ingester.Utilities.prototype.loadDocument = function(url, browser, succe
 // processor - a function to execute to process each document
 // done - a function to execute when all document processing is complete
 // exception - a function to execute if an exception occurs (exceptions are
-//             also logged in the Firefox Scholar log)
+//             also logged in the Scholar for Firefox log)
 Scholar.Ingester.Utilities.prototype.processDocuments = function(browser, firstDoc, urls, processor, done, exception) {
 	var hiddenBrowser = Scholar.Ingester.createHiddenBrowser(this.window);
 	var myWindow = this.window;
@@ -225,7 +225,7 @@ Scholar.Ingester.Utilities.prototype.collectURLsWithSubstring = function(doc, su
 // implement. We can, however, always implement them later.
 
 /*
- * BEGIN FIREFOX SCHOLAR EXTENSIONS
+ * BEGIN SCHOLAR FOR FIREFOX EXTENSIONS
  * Functions below this point are extensions to the utilities provided by
  * Piggy Bank. When used in external code, the repository will need to add
  * a function definition when exporting in Piggy Bank format.
@@ -462,7 +462,7 @@ Scholar.Ingester.Utilities.prototype.importMARCRecord = function(record, uri, mo
 }
 
 /*
- * END FIREFOX SCHOLAR EXTENSIONS
+ * END SCHOLAR FOR FIREFOX EXTENSIONS
  */
 
 // These are front ends for XMLHttpRequest. XMLHttpRequest can't actually be

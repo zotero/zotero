@@ -1,4 +1,4 @@
-// Firefox Scholar Ingester Browser Functions
+// Scholar for Firefox Ingester Browser Functions
 // Based on code taken from Greasemonkey and PiggyBank
 // This code is licensed according to the GPL
 
