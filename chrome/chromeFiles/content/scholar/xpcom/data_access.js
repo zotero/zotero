@@ -366,9 +366,14 @@ Scholar.Item.prototype.save = function(){
 		try {
 			Scholar.DB.beginTransaction();
 			
+			// Begin history transaction
+			Scholar.History.begin('modify-item', this.getID());
+			
 			//
 			// Primary fields
 			//
+			Scholar.History.modify('items', 'itemID', this.getID());
+			
 			var sql = "UPDATE items SET ";
 			var sql2;
 			var sqlValues = [];
@@ -408,6 +413,9 @@ Scholar.Item.prototype.save = function(){
 					var creator = this.getCreator(orderIndex);
 					
 					// Delete at position
+					Scholar.History.remove('itemCreators', 'itemID-orderIndex',
+						[this.getID(), orderIndex]);
+					
 					sql2 = 'DELETE FROM itemCreators'
 						+ ' WHERE itemID=' + this.getID()
 						+ ' AND orderIndex=' + orderIndex;
@@ -430,15 +438,21 @@ Scholar.Item.prototype.save = function(){
 							creator['firstName'],
 							creator['lastName']
 						);
+						Scholar.History.add('creators', 'creatorID', creatorID);
 					}
 					
-					// If this creator and creatorType exists elsewhere, move it
+					
 					sql2 = 'SELECT COUNT(*) FROM itemCreators'
 						+ ' WHERE itemID=' + this.getID()
 						+ ' AND creatorID=' + creatorID
 						+ ' AND creatorTypeID=' + creator['creatorTypeID'];
 					
+					// If this creator and creatorType exists elsewhere, move it
 					if (Scholar.DB.valueQuery(sql2)){
+						Scholar.History.modify('itemCreators',
+							'itemID-creatorID-creatorTypeID',
+							[this.getID(), creatorID, creator['creatorTypeID']]);
+						
 						sql = 'UPDATE itemCreators SET orderIndex=? '
 							+ "WHERE itemID=? AND creatorID=? AND "
 							+ "creatorTypeID=?";
@@ -452,6 +466,7 @@ Scholar.Item.prototype.save = function(){
 						
 						Scholar.DB.query(sql, sqlValues);
 					}
+					
 					// Otherwise insert
 					else {
 						sql = "INSERT INTO itemCreators VALUES (?,?,?,?)";
@@ -464,11 +479,21 @@ Scholar.Item.prototype.save = function(){
 						];
 						
 						Scholar.DB.query(sql, sqlValues);
+						
+						Scholar.History.add('itemCreators',
+							'itemID-creatorID-creatorTypeID',
+							[this.getID(), creatorID, creator['creatorTypeID']]);
 					}
 				}
 				
 				// Delete obsolete creators
-				Scholar.Creators.purge();
+				var deleted;
+				if (deleted = Scholar.Creators.purge()){
+					for (var i in deleted){
+						// Add purged creators to history
+						Scholar.History.remove('creators', 'creatorID', i);
+					}
+				}
 			}
 			
 			
@@ -484,8 +509,12 @@ Scholar.Item.prototype.save = function(){
 							+ 'WHERE itemID=' + this.getID()
 							+ ' AND fieldID=' + fieldID;
 						
+						// Update
 						if (Scholar.DB.valueQuery(sql2)){
 							sqlValues = [];
+							
+							Scholar.History.modify('itemData', 'itemID-fieldID',
+								[this.getID(), fieldID]);
 							
 							sql = "UPDATE itemData SET value=?";
 							// Take advantage of SQLite's manifest typing
@@ -504,7 +533,12 @@ Scholar.Item.prototype.save = function(){
 							
 							Scholar.DB.query(sql, sqlValues);
 						}
+						
+						// Insert
 						else {
+							Scholar.History.add('itemData', 'itemID-fieldID',
+								[this.getID(), fieldID]);
+							
 							sql = "INSERT INTO itemData VALUES (?,?,?)";
 							
 							sqlValues = [
@@ -522,6 +556,7 @@ Scholar.Item.prototype.save = function(){
 							Scholar.DB.query(sql, sqlValues);
 						}
 					}
+					
 					// If field changed and is empty, mark row for deletion
 					else {
 						del.push(fieldID);
@@ -530,6 +565,12 @@ Scholar.Item.prototype.save = function(){
 				
 				// Delete blank fields
 				if (del.length){
+					// Add to history
+					for (var i in del){
+						Scholar.History.remove('itemData', 'itemID-fieldID',
+							[this.getID(), del[i]]);
+					}
+					
 					sql = 'DELETE from itemData '
 						+ 'WHERE itemID=' + this.getID() + ' '
 						+ 'AND fieldID IN (' + del.join() + ")";
@@ -537,9 +578,11 @@ Scholar.Item.prototype.save = function(){
 				}
 			}
 			
+			Scholar.History.commit();
 			Scholar.DB.commitTransaction();
 		}
 		catch (e){
+			Scholar.History.cancel();
 			Scholar.DB.rollbackTransaction();
 			throw(e);
 		}
@@ -569,8 +612,12 @@ Scholar.Item.prototype.save = function(){
 		try {
 			Scholar.DB.beginTransaction();
 			
+			// Begin history transaction
+			// No associated id yet, so we use false
+			Scholar.History.begin('add-item', false);
+			
 			//
-			// itemData fields
+			// Primary fields
 			//
 			var sql = "INSERT INTO items (" + sqlColumns.join() + ')'
 				+ ' VALUES (';
@@ -584,7 +631,12 @@ Scholar.Item.prototype.save = function(){
 			var itemID = Scholar.DB.query(sql,sqlValues);
 			this._data['itemID'] = itemID;
 			
-			// Set itemData
+			Scholar.History.setAssociatedID(itemID);
+			Scholar.History.add('items', 'itemID', itemID);
+			
+			//
+			// ItemData
+			//
 			if (this._changedItemData.length){
 				for (fieldID in this._changedItemData.items){
 					if (!this.getField(fieldID)){
@@ -609,6 +661,9 @@ Scholar.Item.prototype.save = function(){
 					}
 					
 					Scholar.DB.query(sql, sqlValues);
+					
+					Scholar.History.add('itemData', 'itemID-fieldID',
+						this.getField(fieldID));
 				}
 			}
 			
@@ -636,6 +691,7 @@ Scholar.Item.prototype.save = function(){
 							creator['firstName'],
 							creator['lastName']
 						);
+						Scholar.History.add('creators', 'creatorID', creatorID);
 					}
 					
 					sql = 'INSERT INTO itemCreators VALUES ('
@@ -643,9 +699,14 @@ Scholar.Item.prototype.save = function(){
 						+ creator['creatorTypeID'] + ', ' + orderIndex
 						+ ")";
 					Scholar.DB.query(sql);
+					
+					Scholar.History.add('itemCreators',
+						'itemID-creatorID-creatorTypeID',
+						[this.getID(), creatorID, creator['creatorTypeID']]);
 				}
 			}
 			
+			Scholar.History.commit();
 			Scholar.DB.commitTransaction();
 			
 			// Reload collection to update isEmpty,
@@ -653,6 +714,7 @@ Scholar.Item.prototype.save = function(){
 			Scholar.Collections.reloadAll();
 		}
 		catch (e){
+			Scholar.History.cancel();
 			Scholar.DB.rollbackTransaction();
 			throw(e);
 		}

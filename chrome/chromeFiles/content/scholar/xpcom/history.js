@@ -1,5 +1,6 @@
 Scholar.History = new function(){
 	this.begin = begin;
+	this.setAssociatedID = setAssociatedID;
 	this.add = add;
 	this.modify = modify;
 	this.remove = remove;
@@ -18,12 +19,15 @@ Scholar.History = new function(){
 	var _activeEvent;
 	var _maxID = 0;
 	
-	// event: ('item-add', 'item-delete', 'item-modify', 'collection-add', 'collection-modify', 'collection-delete')
-	// context: (itemCreators.itemID-creatorID.1-1)
-	// action: ('add', 'delete', 'modify')
 	
 	/**
 	* Begin a transaction set
+	*
+	* event: 'item-add', 'item-delete', 'item-modify', 'collection-add',
+	*		'collection-modify', 'collection-delete'...
+	*
+	* id: An id or array of ids that will be passed to
+	* 		Scholar.Notifier.trigger() on an undo or redo
 	**/
 	function begin(event, id){
 		if (_activeID){
@@ -40,8 +44,16 @@ Scholar.History = new function(){
 		Scholar.debug('Beginning history transaction set ' + event);
 		var sql = "INSERT INTO transactionSets (event, id) VALUES "
 			+ "('" + event + "', ";
-		// If integer, insert natively; if array, insert as string
-		sql += (typeof id=='object') ? "'" + id.join('-') + "'" : id;
+		if (!id){
+			sql += '0';
+		}
+		// If array, insert hyphen-delimited string
+		else if (typeof id=='object'){
+			sql += "'" + id.join('-') + "'"
+		}
+		else {
+			sql += id;
+		}
 		sql += ")";
 		
 		Scholar.DB.beginTransaction();
@@ -51,7 +63,43 @@ Scholar.History = new function(){
 	
 	
 	/**
+	* Associate an id or array of ids with the transaction set --
+	* 	for use if the ids weren't available at when begin() was called
+	*
+	* id: An id or array of ids that will be passed to
+	* 		Scholar.Notifier.trigger() on an undo or redo
+	**/
+	function setAssociatedID(id){
+		if (!_activeID){
+			throw('Cannot call setAssociatedID() with no history transaction set in progress');
+		}
+		
+		var sql = "UPDATE transactionSets SET id=";
+		if (!id){
+			sql += '0';
+		}
+		// If array, insert hyphen-delimited string
+		else if (typeof id=='object'){
+			sql += "'" + id.join('-') + "'"
+		}
+		else {
+			sql += id;
+		}
+		sql += " WHERE transactionSetID=" + _activeID;
+		Scholar.DB.query(sql);
+	}
+	
+	
+	/**
 	* Add an add transaction to the current set
+	*
+	* Can be called before or after an INSERT statement
+	*
+	* key is a hyphen-delimited list of columns identifying the row
+	* 		e.g. 'itemID-creatorID'
+	*
+	* keyValues is a hyphen-delimited list of values matching the key parts
+	* 		e.g. '1-1'
 	**/
 	function add(table, key, keyValues){
 		return _addTransaction('add', table, key, keyValues);
@@ -60,6 +108,14 @@ Scholar.History = new function(){
 	
 	/**
 	* Add a modify transaction to the current set
+	*
+	* Must be called before an UPDATE statement
+	*
+	* key is a hyphen-delimited list of columns identifying the row
+	* 		e.g. 'itemID-creatorID'
+	*
+	* keyValues is a hyphen-delimited list of values matching the key parts
+	* 		e.g. '1-1'
 	*
 	* _field_ is optional -- otherwise all fields are saved
 	**/
@@ -70,6 +126,14 @@ Scholar.History = new function(){
 	
 	/**
 	* Add a remove transaction to the current set
+	*
+	* Must be called before a DELETE statement
+	*
+	* key is a hyphen-delimited list of columns identifying the row
+	* 		e.g. 'itemID-creatorID'
+	*
+	* keyValues is a hyphen-delimited list of values matching the key parts
+	* 		e.g. '1-1'
 	**/
 	function remove(table, key, keyValues){
 		return _addTransaction('remove', table, key, keyValues);
@@ -139,7 +203,7 @@ Scholar.History = new function(){
 		var undone = _do('undo');
 		_currentID--;
 		Scholar.DB.commitTransaction();
-		_notifyEvent(id);
+		_reloadAndNotify(id);
 		return true;
 	}
 	
@@ -154,7 +218,7 @@ Scholar.History = new function(){
 		var redone = _do('redo');
 		_currentID++;
 		Scholar.DB.commitTransaction();
-		_notifyEvent(id);
+		_reloadAndNotify(id, true);
 		return redone;
 	}
 	
@@ -421,9 +485,25 @@ Scholar.History = new function(){
 	}
 	
 	
-	function _notifyEvent(transactionSetID){
+	function _reloadAndNotify(transactionSetID, redo){
 		var data = _getSetData(transactionSetID);
 		var eventParts = data['event'].split('-'); // e.g. modify-item
+		if (redo){
+			switch (eventParts[0]){
+				case 'add':
+					eventParts[0] = 'remove';
+					break;
+				case 'remove':
+					eventParts[0] = 'add';
+					break;
+			}
+		}
+		switch (eventParts[1]){
+			case 'item':
+				Scholar.Items.reload(data['id']);
+				break;
+		}
+		
 		Scholar.Notifier.trigger(eventParts[0], eventParts[1], data['id']);
 	}
 }
