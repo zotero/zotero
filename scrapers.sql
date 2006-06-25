@@ -1,7 +1,7 @@
--- 18
+-- 19
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-06-25 12:11:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-06-25 14:16:00'));
 
 REPLACE INTO "scrapers" VALUES('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006-06-22 22:58:00', 'Amazon.com Scraper', 'Simon Kornblith', '^http://www\.amazon\.com/(?:gp/(?:product|search)/|exec/obidos/search-handle-url/)', NULL, 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
@@ -384,11 +384,16 @@ utilities.HTTPUtilities.doGet(newUri+''?''+postString, null, function(text) {
 })
 wait();');
 
-REPLACE INTO "scrapers" VALUES('d921155f-0186-1684-615c-ca57682ced9b', '2006-06-18 11:02:00', 'JSTOR Scraper', 'Simon Kornblith', '^http://www\.jstor\.org/(?:view|browse)', 
+REPLACE INTO "scrapers" VALUES('d921155f-0186-1684-615c-ca57682ced9b', '2006-06-25 14:16:00', 'JSTOR Scraper', 'Simon Kornblith', '^http://www\.jstor\.org/(?:view|browse|search/)', 
 'var namespace = doc.documentElement.namespaceURI;
 var nsResolver = namespace ? function(prefix) {
 	if (prefix == ''x'') return namespace; else return null;
 } : null;
+
+// See if this is a seach results page
+if(doc.title == "JSTOR: Search Results") {
+	return true;
+}
 
 // If this is a view page, find the link to the citation
 var xpath = ''/html/body/div[@class="indent"]/center/font/p/a[@class="nav"]'';
@@ -411,52 +416,130 @@ var nsResolver = namespace ? function(prefix) {
 } : null;
 
 var uri = doc.location.href;
+var saveCitations = new Array();
 
-// If this is a view page, find the link to the citation
-var xpath = ''/html/body/div[@class="indent"]/center/font/p/a[@class="nav"]'';
-var elmts = utilities.gatherElementsOnXPath(doc, doc, xpath, nsResolver);
-if(!elmts.length) {
-	var xpath = ''/html/body/div[@class="indent"]/center/p/font/a[@class="nav"]'';
+if(doc.title == "JSTOR: Search Results") {
+	var availableItems = new Object();
+	
+	// Require link to match this
+	var tagRegexp = new RegExp();
+	tagRegexp.compile(''citationAction='');
+	
+	var tableRows = utilities.gatherElementsOnXPath(doc, doc, ''/html/body/div[@class="indent"]/table/tbody/tr[td/span[@class="printDownloadSaveLinks"]]'', nsResolver);
+	// Go through table rows
+	for(var i=0; i<tableRows.length; i++) {
+		var links = utilities.gatherElementsOnXPath(doc, tableRows[i], ''.//a'', nsResolver);
+		// Go through links
+		for(var j=0; j<links.length; j++) {
+			if(tagRegexp.test(links[j].href)) {
+				var text = utilities.getNode(doc, tableRows[i], ''.//strong/text()'', null);
+				if(text && text.nodeValue) {
+					text = utilities.cleanString(text.nodeValue);
+					if(availableItems[links[j].href]) {
+						availableItems[links[j].href] += " "+text;
+					} else {
+						availableItems[links[j].href] = text;
+					}
+				}
+			}
+		}
+	}
+	
+	var items = utilities.selectItems(availableItems);
+	if(!items) {
+		return true;
+	}
+	
+	for(i in items) {
+		saveCitations.push(i.replace(''citationAction=remove'', ''citationAction=save''));
+	}
+} else {
+	// If this is a view page, find the link to the citation
+	var xpath = ''/html/body/div[@class="indent"]/center/font/p/a[@class="nav"]'';
 	var elmts = utilities.gatherElementsOnXPath(doc, doc, xpath, nsResolver);
+	if(!elmts.length) {
+		var xpath = ''/html/body/div[@class="indent"]/center/p/font/a[@class="nav"]'';
+		var elmts = utilities.gatherElementsOnXPath(doc, doc, xpath, nsResolver);
+	}
+	var saveCitation = elmts[0].href;
+	var viewSavedCitations = elmts[1].href;
+	saveCitations.push(saveCitation.replace(''citationAction=remove'', ''citationAction=save''));
 }
 
-var saveCitation = elmts[0].href;
-var viewSavedCitations = elmts[1].href;
-saveCitation = saveCitation.replace(''citationAction=remove'', ''citationAction=save'');
+function getList(urls, each, done, error) {
+	var url = urls.shift();
+	utilities.debugPrint("fetching "+url);
+	utilities.HTTPUtilities.doGet(url, null, function(text) {
+		utilities.debugPrint("got "+url);
+		if(each) {
+			each(text);
+		}
+		
+		if(urls.length) {
+			utilities.debugPrint("still more");
+			getList(urls, each, done, error);
+		} else if(done) {
+			utilities.debugPrint("done");
+			done(text);
+		}
+	}, error);
+}
 
-// Parse save citation link
-var importantCitationRegexp = /userID.*$/;
-var match = importantCitationRegexp.exec(viewSavedCitations);
-var postData = match[0]+''&citationAction=removeAll&confirmRemAll=on'';
-utilities.HTTPUtilities.doPost(''http://www.jstor.org/browse'', postData, null, function() {	// clear marked
-	utilities.HTTPUtilities.doGet(saveCitation, null, function() {								// mark this
-		utilities.HTTPUtilities.doGet(''http://www.jstor.org/browse/citations.txt?exportAction=Save+as+Text+File&exportFormat=cm&''+match[0], null, function(text) {
-																								// get marked
+function newDataObject() {
+	var data = new Object();
+	data[prefixDC + "title"] = new Array();
+	data[prefixDC + "creator"] = new Array();
+	data[prefixDummy + "publication"] = new Array();
+	data[prefixDummy + "volume"] = new Array();
+	data[prefixDummy + "number"] = new Array();
+	data[prefixDummy + "series"] = new Array();
+	data[prefixDC + "date"] = new Array();
+	data[prefixDummy + "pages"] = new Array();
+	data[prefixDC + "identifier"] = new Array();
+	data[prefixDC + "publisher"] = new Array();
+	return data;
+}
+
+utilities.HTTPUtilities.doGet(''http://www.jstor.org/browse?citationAction=removeAll&confirmRemAll=on&viewCitations=1'', null, function() {	// clear marked
+	// Mark all our citations
+	getList(saveCitations, null, function() {						// mark this
+		utilities.debugPrint("getting citations");
+		utilities.HTTPUtilities.doGet(''http://www.jstor.org/browse/citations.txt?exportAction=Save+as+Text+File&exportFormat=cm&viewCitations=1'', null, function(text) {
+																						// get marked
+			var k = 0;
 			var lines = text.split("\n");
 			var haveStarted = false;
-			
-			var data = new Object();
-			data[prefixDC + "title"] = new Array();
-			data[prefixDC + "creator"] = new Array();
-			data[prefixDummy + "publication"] = new Array();
-			data[prefixDummy + "volume"] = new Array();
-			data[prefixDummy + "number"] = new Array();
-			data[prefixDummy + "series"] = new Array();
-			data[prefixDC + "date"] = new Array();
-			data[prefixDummy + "pages"] = new Array();
-			data[prefixDC + "identifier"] = new Array();
-			data[prefixDC + "publisher"] = new Array();
-			
-			var stableURL;
+			var data = newDataObject();
+			var newItemRe = /^<[0-9]+>/;
+			var stableURL, ISSN;
 			
 			for(i in lines) {
-				if(haveStarted) {
-					var fieldCode = lines[i].substring(0, 2);
-					var fieldContent = utilities.cleanString(lines[i].substring(5));
-					
-					if(lines[i].substring(2, 5) != " : ") {
-						break;
+				if(lines[i].substring(0,3) == "<1>") {
+					haveStarted = true;
+				} else if(newItemRe.test(lines[i])) {
+					utilities.debugPrint("new item!");
+					if(!stableURL) {
+						if(ISSN) {
+							stableURL = "http://www.jstor.org/browse/"+ISSN;
+						} else {	// Just make sure it''s unique
+							stableURL = k;
+							k++;
+						}
 					}
+					model.addStatement(stableURL, prefixRDF + "type", prefixDummy + "journalArticle", false);
+					for(i in data) {
+						if(data[i].length) {
+							for(j in data[i]) {
+								model.addStatement(stableURL, i, data[i][j]);
+							}
+						}
+					}
+					var data = newDataObject();
+					delete ISSN;
+					delete stableURL;
+				} else if(lines[i].substring(2, 5) == " : " && haveStarted) {
+					var fieldCode = lines[i].substring(0, 2);
+					var fieldContent = utilities.cleanString(lines[i].substring(5))
 					
 					if(fieldCode == "TI") {
 						data[prefixDC + "title"].push(fieldContent);
@@ -493,16 +576,22 @@ utilities.HTTPUtilities.doPost(''http://www.jstor.org/browse'', postData, null, 
 						stableURL = fieldContent;
 					} else if(fieldCode == "IN") {
 						data[prefixDC + "identifier"].push("ISSN "+fieldContent);
+						ISSN = fieldContent;
 					} else if(fieldCode == "PB") {
 						data[prefixDC + "publisher"].push(fieldContent);
 					}
 				}
-				if(lines[i].substring(0,3) == "<1>") {
-					haveStarted = true;
-				}
 			}
 			
 			// Loop through again so that we can add with the stableURL
+			if(!stableURL) {
+				if(ISSN) {
+					stableURL = "http://www.jstor.org/browse/"+ISSN;
+				} else {	// Just make sure it''s unique
+					stableURL = k;
+					k++;
+				}
+			}
 			model.addStatement(stableURL, prefixRDF + "type", prefixDummy + "journalArticle", false);
 			for(i in data) {
 				if(data[i].length) {
@@ -513,8 +602,8 @@ utilities.HTTPUtilities.doPost(''http://www.jstor.org/browse'', postData, null, 
 			}
 			
 			done();
-		})
-	})
+		});
+	}, function() {});
 });
 
 wait();');
