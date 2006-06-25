@@ -663,7 +663,7 @@ Scholar.Item.prototype.save = function(){
 					Scholar.DB.query(sql, sqlValues);
 					
 					Scholar.History.add('itemData', 'itemID-fieldID',
-						this.getField(fieldID));
+						[itemID, fieldID]);
 				}
 			}
 			
