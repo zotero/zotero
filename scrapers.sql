@@ -1131,7 +1131,7 @@ if(doc.title == "Results") {
 }');
 
 REPLACE INTO "scrapers" VALUES('6773a9af-5375-3224-d148-d32793884dec', '2006-06-18 11:19:00', 'InfoTrac Scraper', 'Simon Kornblith', '^http://infotrac-college\.thomsonlearning\.com/itw/infomark/',
-'if(doc.title.substring(0, 8) == "Article ") {
+'if(doc.title.substring(0, 8) == "Article " || doc.title.substring(0, 10) == "Citations ") {
 	return true;
 }
 return false;',
@@ -1145,60 +1145,109 @@ var nsResolver = namespace ? function(prefix) {
 	if (prefix == ''x'') return namespace; else return null;
 } : null;
 
-var uri = doc.location.href;
-
-var xpath = ''/html/body//comment()'';
-var elmts = utilities.gatherElementsOnXPath(doc, doc, xpath, nsResolver);
-for (var i = 0; i < elmts.length; i++) {
-	var elmt = elmts[i];
-	var colon = elmt.nodeValue.indexOf(":");
-	var field = elmt.nodeValue.substring(1, colon).toLowerCase();
-	var value = elmt.nodeValue.substring(colon+1, elmt.nodeValue.length-1);
-	if(field == "title") {
-		model.addStatement(uri, prefixDC + "title", value, false);
-	} else if(field == "journal") {
-		model.addStatement(uri, prefixDummy + "publication", value, false);
-	} else if(field == "pi") {
-		parts = value.split(" ");
-		var date = "";
-		var isDate = true;
-		var rdfUri;
-		for(j in parts) {
-			firstChar = parts[j].substring(0, 1);
-			rdfUri = false;
-			
-			if(firstChar == "v") {
-				rdfUri = prefixDummy + "volume";
-			} else if(firstChar == "i") {
-				rdfUri = prefixDummy + "number";
-			} else if(firstChar == "p") {
-				rdfUri = prefixDummy + "pages";
-				var pagesRegexp = /p(\w+)\((\w+)\)/;
-				var match = pagesRegexp.exec(parts[j]);
-				if(match) {
-					var finalPage = parseInt(match[1])+parseInt(match[2])
-					parts[j] = "p"+match[1]+"-"+finalPage.toString();
+function extractCitation(uri, elmts, title) {
+	if(title) {
+		model.addStatement(uri, prefixDC + "title", utilities.superCleanString(title), true);
+	}
+	for (var i = 0; i < elmts.length; i++) {
+		var elmt = elmts[i];
+		var colon = elmt.nodeValue.indexOf(":");
+		var field = elmt.nodeValue.substring(1, colon).toLowerCase();
+		var value = elmt.nodeValue.substring(colon+1, elmt.nodeValue.length-1);
+		if(field == "title") {
+			model.addStatement(uri, prefixDC + "title", utilities.superCleanString(value), true);
+		} else if(field == "journal") {
+			model.addStatement(uri, prefixDummy + "publication", value, true);
+		} else if(field == "pi") {
+			parts = value.split(" ");
+			var date = "";
+			var isDate = true;
+			var rdfUri, type;
+			for(j in parts) {
+				firstChar = parts[j].substring(0, 1);
+				rdfUri = false;
+				
+				if(firstChar == "v") {
+					rdfUri = prefixDummy + "volume";
+					type = prefixDummy + "journalArticle";
+				} else if(firstChar == "i") {
+					rdfUri = prefixDummy + "number";
+				} else if(firstChar == "p") {
+					rdfUri = prefixDummy + "pages";
+					var pagesRegexp = /p(\w+)\((\w+)\)/;
+					var match = pagesRegexp.exec(parts[j]);
+					if(match) {
+						var finalPage = parseInt(match[1])+parseInt(match[2])
+						parts[j] = "p"+match[1]+"-"+finalPage.toString();
+					} else if(!type) {
+						var justPageNumber = parts[j].substr(1);
+						if(parseInt(justPageNumber).toString() != justPageNumber) {
+							type = prefixDummy + "newspaperArticle";
+						}
+					}
+				}
+				
+				if(rdfUri) {
+					isDate = false;
+					if(parts[j] != "pNA") {		// not a real page number
+						var content = parts[j].substring(1);
+						model.addStatement(uri, rdfUri, content, false);
+					} else if(!type) {
+						type = prefixDummy + "newspaperArticle";
+					}
+				} else if(isDate) {
+					date += " "+parts[j];
 				}
 			}
 			
-			if(rdfUri) {
-				isDate = false;
-				if(parts[j] != "pNA") {		// not a real page number
-					var content = parts[j].substring(1);
-					model.addStatement(uri, rdfUri, content, true);
-				}
-			} else if(isDate) {
-				date += " "+parts[j];
+			// Set type
+			if(!type) {
+				type = prefixDummy + "magazineArticle";
 			}
+			model.addStatement(uri, prefixRDF + "type", type, false);
+			
+			if(date != "") {
+				model.addStatement(uri, prefixDC + "date", date.substring(1), true);
+			}
+		} else if(field == "author") {
+			model.addStatement(uri, prefixDC + "creator", utilities.cleanAuthor(value), true);
 		}
-		if(date != "") {
-			model.addStatement(uri, prefixDC + "date", date.substring(1), false);
-		}
-	} else if(field == "author") {
-		model.addStatement(uri, prefixDC + "creator", utilities.cleanAuthor(value), false);
 	}
 }
-model.addStatement(uri, prefixRDF + "type", prefixDummy + "journalArticle", false);');
+
+
+var uri = doc.location.href;
+if(doc.title.substring(0, 8) == "Article ") {
+	var xpath = ''/html/body//comment()'';
+	var elmts = utilities.gatherElementsOnXPath(doc, doc, xpath, nsResolver);
+	extractCitation(uri, elmts);
+} else {
+	var items = new Array();
+	var uris = new Array();
+	var tableRows = utilities.gatherElementsOnXPath(doc, doc, ''/html/body//table/tbody/tr/td[a/b]'', nsResolver);
+	// Go through table rows
+	for(var i=0; i<tableRows.length; i++) {
+		var link = utilities.getNode(doc, tableRows[i], ''./a'', nsResolver);
+		uris[i] = link.href;
+		var article = utilities.getNode(doc, link, ''./b/text()'', nsResolver);
+		items[i] = article.nodeValue;
+		// Chop off final period
+		if(items[i].substr(items[i].length-1) == ".") {
+			items[i] = items[i].substr(0, items[i].length-1);
+		}
+	}
+	
+	items = utilities.selectItems(items);
+	
+	if(!items) {
+		return true;
+	}
+	
+	for(i in items) {
+		var elmts = utilities.gatherElementsOnXPath(doc, tableRows[i], ".//comment()", nsResolver);
+		extractCitation(uris[i], elmts, items[i]);
+	}
+}');
 
 REPLACE INTO "scrapers" VALUES('b047a13c-fe5c-6604-c997-bef15e502b09', '2006-06-25 16:09:00', 'LexisNexis Scraper', 'Simon Kornblith', '^http://web\.lexis-nexis\.com/universe/(?:document|doclist)', NULL,
 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
