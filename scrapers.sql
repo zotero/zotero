@@ -1,7 +1,7 @@
--- 21
+-- 22
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-06-25 15:32:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-06-25 17:11:00'));
 
 REPLACE INTO "scrapers" VALUES('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006-06-22 22:58:00', 'Amazon.com Scraper', 'Simon Kornblith', '^http://www\.amazon\.com/(?:gp/(?:product|search)/|exec/obidos/search-handle-url/)', NULL, 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
@@ -1200,7 +1200,7 @@ for (var i = 0; i < elmts.length; i++) {
 }
 model.addStatement(uri, prefixRDF + "type", prefixDummy + "journalArticle", false);');
 
-REPLACE INTO "scrapers" VALUES('b047a13c-fe5c-6604-c997-bef15e502b09', '2006-06-18 10:13:00', 'LexisNexis Scraper', 'Simon Kornblith', '^http://web\.lexis-nexis\.com/universe/(?:document|doclist)', NULL,
+REPLACE INTO "scrapers" VALUES('b047a13c-fe5c-6604-c997-bef15e502b09', '2006-06-25 16:09:00', 'LexisNexis Scraper', 'Simon Kornblith', '^http://web\.lexis-nexis\.com/universe/(?:document|doclist)', NULL,
 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
 var prefixDCMI = ''http://purl.org/dc/dcmitype/'';
@@ -1914,7 +1914,7 @@ utilities.processDocuments(browser, null, newUris, function(newBrowser) {
 
 wait();');
 
-REPLACE INTO "scrapers" VALUES('c54d1932-73ce-dfd4-a943-109380e06574', '2006-06-18 11:19:00', 'Project MUSE Scraper', 'Simon Kornblith', '^http://muse\.jhu\.edu/journals/[^/]+/[^/]+/[^/]+\.html$', NULL, 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
+REPLACE INTO "scrapers" VALUES('c54d1932-73ce-dfd4-a943-109380e06574', '2006-06-25 17:11:00', 'Project MUSE Scraper', 'Simon Kornblith', '^http://muse\.jhu\.edu/(?:journals/[^/]+/[^/]+/[^/]+\.html|search/pia.cgi)', NULL, 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
 var prefixDCMI = ''http://purl.org/dc/dcmitype/'';
 var prefixDummy = ''http://chnm.gmu.edu/firefox-scholar/'';
@@ -1924,60 +1924,166 @@ var nsResolver = namespace ? function(prefix) {
 	if (prefix == ''x'') return namespace; else return null;
 } : null;
 
-var uri = doc.location.href;
+function newDataObject() {
+	var data = new Object();
+	data[prefixDC + "title"] = new Array();
+	data[prefixDC + "creator"] = new Array();
+	data[prefixDummy + "publication"] = new Array();
+	data[prefixDummy + "volume"] = new Array();
+	data[prefixDummy + "number"] = new Array();
+	data[prefixDummy + "series"] = new Array();
+	data[prefixDC + "year"] = new Array();
+	data[prefixDummy + "pages"] = new Array();
+	data[prefixDC + "identifier"] = new Array();
+	data[prefixDC + "publisher"] = new Array();
+	return data;
+}
 
-var elmts = utilities.gatherElementsOnXPath(doc, doc, ''//comment()'', nsResolver);
-for(i in elmts) {
-	if(elmts[i].nodeValue.substr(0, 10) == "HeaderData") {
-		var headerRegexp = /HeaderData((?:.|\n)*)\#\#EndHeaders/i
-		var m = headerRegexp.exec(elmts[i].nodeValue);
-		var headerData = m[1];
+var searchRe = new RegExp("^http://[^/]+/search/pia\.cgi");
+if(searchRe.test(doc.location.href)) {
+	var items = new Array();
+	var tableRows = utilities.gatherElementsOnXPath(doc, doc, ''/html/body/table[@class="navbar"]/tbody/tr/td/form/table'', nsResolver);
+	// Go through table rows
+	for(var i=0; i<tableRows.length; i++) {
+		// article_id is what we need to get it all as one file
+		var input = utilities.getNode(doc, tableRows[i], ''./tbody/tr/td/input[@name="article_id"]'', nsResolver);
+		var link = utilities.getNode(doc, tableRows[i], ''.//b/i/a/text()'', nsResolver);
+		if(input && input.value && link && link.nodeValue) {
+			items[input.value] = link.nodeValue;
+		}
 	}
-}
-
-// Use E4X rather than DOM/XPath, because the Mozilla gods have decided not to
-// expose DOM/XPath to sandboxed scripts
-var newDOM = new XML(headerData);
-
-function mapRDF(text, rdfUri) {
-	if(text) {
-		model.addStatement(uri, rdfUri, text, true);
+	
+	items = utilities.selectItems(items);
+	if(!items) {
+		return true;
 	}
-}
-
-mapRDF(newDOM.journal.text(), prefixDummy + "publication");
-mapRDF(newDOM.volume.text(), prefixDummy + "volume");
-mapRDF(newDOM.issue.text(), prefixDummy + "number");
-mapRDF(newDOM.year.text(), prefixDummy + "year");
-mapRDF(newDOM.pubdate.text(), prefixDC + "date");
-mapRDF(newDOM.doctitle.text(), prefixDC + "title");
-
-// Do ISSN
-var issn = newDOM.issn.text();
-if(issn) {
-	model.addStatement(uri, prefixDC + "identifier", "ISSN "+issn.replace(/[^0-9]/g, ""), true);
-}
-
-// Do pages
-var fpage = newDOM.fpage.text();
-var lpage = newDOM.lpage.text();
-if(fpage != "") {
-	var pages = fpage;
-	if(lpage) {
-		pages += "-"+lpage;
+	
+	try {
+		var search_id = doc.forms.namedItem("results").elements.namedItem("search_id").value;
+	} catch(e) {
+		var search_id = "";
 	}
-	model.addStatement(uri, prefixDummy + "pages", pages, true);
-}
-
-// Do authors
-var elmts = newDOM.docauthor;
-for(i in elmts) {
-	var fname = elmts[i].fname.text();
-	var surname = elmts[i].surname.text();
-	model.addStatement(uri, prefixDC + "creator", fname+" "+surname, true);
-}
-
-model.addStatement(uri, prefixRDF + "type", prefixDummy + "journalArticle", false);');
+	var articleString = "";
+	for(i in items) {
+		articleString += "&article_id="+i;
+	}
+	var savePostString = "actiontype=save&search_id="+search_id+articleString;
+	
+	utilities.HTTPUtilities.doGet("http://muse.jhu.edu/search/save.cgi?"+savePostString, null, function() {
+		utilities.HTTPUtilities.doGet("http://muse.jhu.edu/search/export.cgi?exporttype=endnote"+articleString, null, function(text) {
+			var records = text.split("\n\n");
+			for(i in records) {
+				var lines = records[i].split("\n");
+				if(lines.length > 1) {
+					var data = newDataObject();
+					for(i in lines) {
+						var fieldCode = lines[i].substring(0, 2);
+						var fieldContent = utilities.cleanString(lines[i].substring(6))
+						
+						if(fieldCode == "T1") {
+							data[prefixDC + "title"].push(fieldContent);
+						} else if(fieldCode == "A1") {
+							var authors = fieldContent.split(";");
+							for(j in authors) {
+								var author = authors[j];
+								if(author) {
+									var splitNames = author.split('', '');
+									if(splitNames) {
+										author = splitNames[1]+'' ''+splitNames[0];
+									}
+									data[prefixDC + "creator"].push(author);
+								}
+							}
+						} else if(fieldCode == "JF") {
+							data[prefixDummy + "publication"].push(fieldContent);
+						} else if(fieldCode == "VL") {
+							data[prefixDummy + "volume"].push(fieldContent);
+						} else if(fieldCode == "IS") {
+							data[prefixDummy + "number"].push(fieldContent);
+						} else if(fieldCode == "Y1") {
+							data[prefixDC + "year"].push(fieldContent);
+						} else if(fieldCode == "PP") {
+							data[prefixDummy + "pages"].push(fieldContent);
+						} else if(fieldCode == "UR") {
+							stableURL = fieldContent;
+						} else if(fieldCode == "SN") {
+							data[prefixDC + "identifier"].push("ISSN "+fieldContent);
+							ISSN = fieldContent;
+						} else if(fieldCode == "PB") {
+							data[prefixDC + "publisher"].push(fieldContent);
+						}
+					}
+					model.addStatement(stableURL, prefixRDF + "type", prefixDummy + "journalArticle", false);
+					for(i in data) {
+						if(data[i].length) {
+							for(j in data[i]) {
+								model.addStatement(stableURL, i, data[i][j]);
+							}
+						}
+					}
+				}
+			}
+			done();
+		}, function() {});
+	}, function() {});
+	
+	wait();
+} else {
+	var uri = doc.location.href;
+	
+	var elmts = utilities.gatherElementsOnXPath(doc, doc, ''//comment()'', nsResolver);
+	for(i in elmts) {
+		if(elmts[i].nodeValue.substr(0, 10) == "HeaderData") {
+			var headerRegexp = /HeaderData((?:.|\n)*)\#\#EndHeaders/i
+			var m = headerRegexp.exec(elmts[i].nodeValue);
+			var headerData = m[1];
+		}
+	}
+	
+	// Use E4X rather than DOM/XPath, because the Mozilla gods have decided not to
+	// expose DOM/XPath to sandboxed scripts
+	var newDOM = new XML(headerData);
+	
+	function mapRDF(text, rdfUri) {
+		if(text) {
+			model.addStatement(uri, rdfUri, text, true);
+		}
+	}
+	
+	mapRDF(newDOM.journal.text(), prefixDummy + "publication");
+	mapRDF(newDOM.volume.text(), prefixDummy + "volume");
+	mapRDF(newDOM.issue.text(), prefixDummy + "number");
+	mapRDF(newDOM.year.text(), prefixDummy + "year");
+	mapRDF(newDOM.pubdate.text(), prefixDC + "date");
+	mapRDF(newDOM.doctitle.text(), prefixDC + "title");
+	
+	// Do ISSN
+	var issn = newDOM.issn.text();
+	if(issn) {
+		model.addStatement(uri, prefixDC + "identifier", "ISSN "+issn.replace(/[^0-9]/g, ""), true);
+	}
+	
+	// Do pages
+	var fpage = newDOM.fpage.text();
+	var lpage = newDOM.lpage.text();
+	if(fpage != "") {
+		var pages = fpage;
+		if(lpage) {
+			pages += "-"+lpage;
+		}
+		model.addStatement(uri, prefixDummy + "pages", pages, true);
+	}
+	
+	// Do authors
+	var elmts = newDOM.docauthor;
+	for(i in elmts) {
+		var fname = elmts[i].fname.text();
+		var surname = elmts[i].surname.text();
+		model.addStatement(uri, prefixDC + "creator", fname+" "+surname, true);
+	}
+	
+	model.addStatement(uri, prefixRDF + "type", prefixDummy + "journalArticle", false);
+}');
 
 REPLACE INTO "scrapers" VALUES('fcf41bed-0cbc-3704-85c7-8062a0068a7a', '2006-06-25 00:56:00', 'PubMed Scraper', 'Simon Kornblith', '^http://www\.ncbi\.nlm\.nih\.gov/entrez/query\.fcgi\?(?:.*db=PubMed.*list_uids=[0-9]|.*list_uids=[0-9].*db=PubMed|.*db=PubMed.*CMD=search|.*CMD=search.*db=PubMed)', NULL, 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
