@@ -21,6 +21,116 @@ Scholar.Ingester.deleteHiddenBrowser = function(myBrowser) {
 
 /////////////////////////////////////////////////////////////////
 //
+// Scholar.Ingester.ProxyMonitor
+//
+/////////////////////////////////////////////////////////////////
+
+// A singleton for recognizing EZProxies and converting URLs such that databases
+// will work from outside them. Unfortunately, this only works with the ($495)
+// EZProxy software. If there are open source alternatives, we should support
+// them too.
+
+/*
+ * Precompile proxy regexps
+ */
+Scholar.Ingester.ProxyMonitor = new Object();
+Scholar.Ingester.ProxyMonitor._ezProxyRe = new RegExp();
+Scholar.Ingester.ProxyMonitor._ezProxyRe.compile("(https?://([^/:]+)(?:\:[0-9])?/login)\\?(?:.+&)?(url|qurl)=([^&]+)");
+Scholar.Ingester.ProxyMonitor._hostRe = new RegExp();
+Scholar.Ingester.ProxyMonitor._hostRe.compile("^https?://(([^/:]+)(\:[0-9]+)?)");
+
+/*
+ * Returns a page's proper url, adjusting for proxying
+ *
+ * This is a bit of a hack, in that it offers an opportunity for spoofing. Not
+ * really any way around this, but our scrapers should be sufficiently sandboxed
+ * that it won't be a problem.
+ */
+Scholar.Ingester.ProxyMonitor.proxyToProper = function(url) {
+	var m = Scholar.Ingester.ProxyMonitor._ezProxyRe.exec(url);
+	if(m) {
+		// EZProxy detected
+		var loginURL = m[1];
+		var host = m[2];
+		var arg = m[3];
+		var url = m[4];
+		
+		if(arg == "qurl") {
+			url = unescape(url);
+		}
+		
+		// FIXME - potential memory leak
+		Scholar.Ingester.ProxyMonitor._now = true;
+		Scholar.Ingester.ProxyMonitor._url = url;
+		Scholar.Ingester.ProxyMonitor._host = host;
+		Scholar.Ingester.ProxyMonitor._loginURL = loginURL;
+	} else if(Scholar.Ingester.ProxyMonitor._now) {
+		// EZProxying something
+		var m = Scholar.Ingester.ProxyMonitor._hostRe.exec(url);
+		
+		// EZProxy always runs on a higher port
+		if(url == Scholar.Ingester.ProxyMonitor._loginURL) {
+			Scholar.debug("EZProxy: detected wrong password; won't disable monitoring yet");
+		} else {
+			if(m) {
+				var hostAndPort = m[1];
+				var host = m[2];
+				var port = m[3];
+				
+				if(port) {
+					// Make sure our host is the same who we logged in under
+					if(host == Scholar.Ingester.ProxyMonitor._host) {
+						// Extract host information from the URL we're proxying
+						var m = Scholar.Ingester.ProxyMonitor._hostRe.exec(Scholar.Ingester.ProxyMonitor._url);
+						var properHostAndPort = m[1];
+						if(m) {
+							if(!Scholar.Ingester.ProxyMonitor._mapFromProxy) {
+								Scholar.Ingester.ProxyMonitor._mapFromProxy = new Object();
+								Scholar.Ingester.ProxyMonitor._mapToProxy = new Object();
+							}
+							Scholar.debug("EZProxy: host "+hostAndPort+" is really "+properHostAndPort);
+							Scholar.Ingester.ProxyMonitor._mapFromProxy[hostAndPort] = properHostAndPort;
+							Scholar.Ingester.ProxyMonitor._mapToProxy[properHostAndPort] = hostAndPort;
+							url = url.replace(hostAndPort, properHostAndPort);
+						}
+					}
+				}
+			}
+			Scholar.Ingester.ProxyMonitor._now = false;
+		}
+	} else if(Scholar.Ingester.ProxyMonitor._mapFromProxy) {
+		// EZProxy detection is active
+		
+		var m = Scholar.Ingester.ProxyMonitor._hostRe.exec(url);
+		if(m && Scholar.Ingester.ProxyMonitor._mapFromProxy[m[1]]) {
+			url = url.replace(m[1], Scholar.Ingester.ProxyMonitor._mapFromProxy[m[1]]);
+			Scholar.debug("EZProxy: proper url is "+url);
+		}
+	}
+	
+	return url;
+}
+
+/*
+ * Returns a page's proxied url from the proper url
+ */
+Scholar.Ingester.ProxyMonitor.properToProxy = function(url) {
+	if(Scholar.Ingester.ProxyMonitor._mapToProxy) {
+		// EZProxy detection is active
+		
+		var m = Scholar.Ingester.ProxyMonitor._hostRe.exec(url);
+		if(Scholar.Ingester.ProxyMonitor._mapToProxy[m[1]]) {
+			// Actually need to map
+			url = url.replace(m[1], Scholar.Ingester.ProxyMonitor._mapToProxy[m[1]]);
+			Scholar.debug("EZProxy: proxied url is "+url);
+		}
+	}
+	
+	return url;
+}
+
+/////////////////////////////////////////////////////////////////
+//
 // Scholar.Ingester.Model
 //
 /////////////////////////////////////////////////////////////////
@@ -63,8 +173,9 @@ Scholar.Ingester.Model.prototype.detachRepository = function() {}
 /////////////////////////////////////////////////////////////////
 // Scholar.Ingester.Utilities class, a set of methods to assist in data
 // extraction. Most code here was stolen directly from the Piggy Bank project.
-Scholar.Ingester.Utilities = function(myWindow) {
+Scholar.Ingester.Utilities = function(myWindow, proxiedURL) {
 	this.window = myWindow;
+	this.proxiedURL = proxiedURL;
 }
 
 // Adapter for Piggy Bank function to print debug messages; log level is
@@ -149,8 +260,11 @@ Scholar.Ingester.Utilities.prototype.processDocuments = function(browser, firstD
 		var doLoad = function() {
 			urlIndex++;
 			if (urlIndex < urls.length) {
+				url = urls[urlIndex];
+				if(this.proxiedURL) {
+					url = Scholar.Ingester.ProxyMonitor.properToProxy(url);
+				}
 				try {
-					url = urls[urlIndex];
 					Scholar.debug("loading "+url);
 					hiddenBrowser.loadURI(url);
 				} catch (e) {
@@ -477,11 +591,16 @@ Scholar.Ingester.Utilities.prototype.importMARCRecord = function(record, uri, mo
 // These are front ends for XMLHttpRequest. XMLHttpRequest can't actually be
 // accessed outside the sandbox, and even if it could, it wouldn't let scripts
 // access across domains, so everything's replicated here.
-Scholar.Ingester.HTTPUtilities = function(contentWindow) {
+Scholar.Ingester.HTTPUtilities = function(contentWindow, proxiedURL) {
 	this.window = contentWindow;
+	this.proxiedURL = proxiedURL;
 }
 
 Scholar.Ingester.HTTPUtilities.prototype.doGet = function(url, onStatus, onDone) {
+	if(this.proxiedURL) {
+		url = Scholar.Ingester.ProxyMonitor.properToProxy(url);
+	}
+	
 	var xmlhttp = new this.window.XMLHttpRequest();
 	
 	xmlhttp.open('GET', url, true);
@@ -495,6 +614,10 @@ Scholar.Ingester.HTTPUtilities.prototype.doGet = function(url, onStatus, onDone)
 }
 
 Scholar.Ingester.HTTPUtilities.prototype.doPost = function(url, body, onStatus, onDone) {
+	if(this.proxiedURL) {
+		url = Scholar.Ingester.ProxyMonitor.properToProxy(url);
+	}
+	
 	var xmlhttp = new this.window.XMLHttpRequest();
 	
 	xmlhttp.open('POST', url, true);
@@ -508,6 +631,10 @@ Scholar.Ingester.HTTPUtilities.prototype.doPost = function(url, body, onStatus, 
 }
 	
 Scholar.Ingester.HTTPUtilities.prototype.doOptions = function(url, body, onStatus, onDone) {
+	if(this.proxiedURL) {
+		url = Scholar.Ingester.ProxyMonitor.properToProxy(url);
+	}
+	
 	var xmlhttp = new this.window.XMLHttpRequest();
   
 	xmlhttp.open('OPTIONS', url, true);
@@ -519,9 +646,7 @@ Scholar.Ingester.HTTPUtilities.prototype.doOptions = function(url, body, onStatu
 	};
 	xmlhttp.send(body);
 }
-	
-// Possible point of failure; for some reason, this used to be a separate
-// class, so make sure it works
+
 Scholar.Ingester.HTTPUtilities.prototype.stateChange = function(xmlhttp, onStatus, onDone) {
 	switch (xmlhttp.readyState) {
 
@@ -564,6 +689,7 @@ Scholar.Ingester.HTTPUtilities.prototype.stateChange = function(xmlhttp, onStatu
 		break;
 	}
 }
+
 //////////////////////////////////////////////////////////////////////////////
 //
 // Scholar.Ingester.Document
@@ -597,6 +723,13 @@ Scholar.Ingester.Document = function(browserWindow, myWindow){
 	this.browser = browserWindow;
 	this.window = myWindow;
 	this.model = new Scholar.Ingester.Model();
+	
+	// Create separate URL to account for proxies
+	this.url = Scholar.Ingester.ProxyMonitor.proxyToProper(this.browser.contentDocument.location.href);
+	if(this.url != this.browser.contentDocument.location.href) {
+		this.proxiedURL = true;
+	}
+	
 	this.items = new Array();
 	this._appSvc = Cc["@mozilla.org/appshell/appShellService;1"]
 	             .getService(Ci.nsIAppShellService);
@@ -607,7 +740,8 @@ Scholar.Ingester.Document = function(browserWindow, myWindow){
  * Retrieves the best scraper to scrape a given page
  */
 Scholar.Ingester.Document.prototype.retrieveScraper = function() {
-	Scholar.debug("Retrieving scrapers for "+this.browser.contentDocument.location.href);
+	Scholar.debug("Retrieving scrapers for "+this.url);
+	
 	var sql = 'SELECT * FROM scrapers ORDER BY scraperDetectCode IS NULL DESC';
 	var scrapers = Scholar.DB.query(sql);
 	for(var i=0; i<scrapers.length; i++) {
@@ -625,14 +759,14 @@ Scholar.Ingester.Document.prototype.retrieveScraper = function() {
  * Check to see if _scraper_ can scrape this document
  */
 Scholar.Ingester.Document.prototype.canScrape = function(currentScraper) {
-		var canScrape = false;
+	var canScrape = false;
 	
 	// Test with regular expression
 	// If this is slow, we could preload all scrapers and compile regular
 	// expressions, so each check will be faster
 	if(currentScraper.urlPattern) {
 		var regularExpression = new RegExp(currentScraper.urlPattern, "i");
-		if(regularExpression.test(this.browser.contentDocument.location.href)) {
+		if(regularExpression.test(this.url)) {
 			canScrape = true;
 		}
 	}
@@ -672,7 +806,7 @@ Scholar.Ingester.Document.prototype.scrapePage = function(callback) {
 		this._scrapeCallback = callback;
 	}
 	
-	Scholar.debug("Scraping "+this.browser.contentDocument.location.href);
+	Scholar.debug("Scraping "+this.url);
 	
 	var scraperSandbox = this._sandbox;
 	try {
@@ -739,9 +873,10 @@ Scholar.Ingester.Document.prototype._scrapePageComplete = function(returnValue) 
 Scholar.Ingester.Document.prototype._generateSandbox = function() {
 	this._sandbox = new Components.utils.Sandbox(this.browser.contentDocument.location.href);
 	this._sandbox.browser = this.browser;
-	this._sandbox.doc = this._sandbox.browser.contentDocument;
-	this._sandbox.utilities = new Scholar.Ingester.Utilities(this.window);
-	this._sandbox.utilities.HTTPUtilities = new Scholar.Ingester.HTTPUtilities(this._appSvc.hiddenDOMWindow);
+	this._sandbox.doc = this.browser.contentDocument;
+	this._sandbox.url = this.url;
+	this._sandbox.utilities = new Scholar.Ingester.Utilities(this.window, this.proxiedURL);
+	this._sandbox.utilities.HTTPUtilities = new Scholar.Ingester.HTTPUtilities(this._appSvc.hiddenDOMWindow, this.proxiedURL);
 	this._sandbox.window = this.window;
 	this._sandbox.model = this.model;
 	this._sandbox.XPathResult = Components.interfaces.nsIDOMXPathResult;

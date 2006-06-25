@@ -27,8 +27,8 @@ Scholar_Ingester_Interface.init = function() {
 	Scholar_Ingester_Interface.browserDocuments = new Object();
 	Scholar_Ingester_Interface.browserUris = new Array();
 	
-    window.addEventListener("load", Scholar_Ingester_Interface.chromeLoad, false);
-    window.addEventListener("unload", Scholar_Ingester_Interface.chromeUnload, false);
+	window.addEventListener("load", Scholar_Ingester_Interface.chromeLoad, false);
+	window.addEventListener("unload", Scholar_Ingester_Interface.chromeUnload, false);
 }
 
 /*
@@ -39,12 +39,12 @@ Scholar_Ingester_Interface.chromeLoad = function() {
 	Scholar_Ingester_Interface.appContent = document.getElementById("appcontent");
 	Scholar_Ingester_Interface.statusImage = document.getElementById("scholar-status-image");
 	
-	// this gives us onLocationChange
+	// this gives us onLocationChange, for updating when tabs are switched/created
 	Scholar_Ingester_Interface.tabBrowser.addProgressListener(Scholar_Ingester_Interface.Listener,
 		Components.interfaces.nsIWebProgress.NOTIFY_LOCATION);
-	// let's use load instead of DOMContentLoaded
-    Scholar_Ingester_Interface.appContent.addEventListener("pageshow",
-    	Scholar_Ingester_Interface.contentLoad, true);
+	// this is for pageshow, for updating the status of the book icon
+	Scholar_Ingester_Interface.appContent.addEventListener("pageshow",
+		Scholar_Ingester_Interface.contentLoad, true);
 }
 
 /*
@@ -132,29 +132,29 @@ Scholar_Ingester_Interface.Listener.onStateChange = function() {}
  * appropriate status indicator for the current tab, and to free useless objects
  */
 Scholar_Ingester_Interface.Listener.onLocationChange = function(progressObject) {
-    var browsers = Scholar_Ingester_Interface.tabBrowser.browsers;
+	var browsers = Scholar_Ingester_Interface.tabBrowser.browsers;
 
-    // Remove document object of any browser that no longer exists
-    for (var i = 0; i < Scholar_Ingester_Interface.browsers.length; i++) {
-        var browser = Scholar_Ingester_Interface.browsers[i];
-        var exists = false;
+	// Remove document object of any browser that no longer exists
+	for (var i = 0; i < Scholar_Ingester_Interface.browsers.length; i++) {
+		var browser = Scholar_Ingester_Interface.browsers[i];
+		var exists = false;
 
-        for (var j = 0; j < browsers.length; j++) {
-            if (browser == browsers[j]) {
-                exists = true;
-                break;
-            }
-        }
+		for (var j = 0; j < browsers.length; j++) {
+			if (browser == browsers[j]) {
+				exists = true;
+				break;
+			}
+		}
 
-        if (!exists) {
-            Scholar_Ingester_Interface.browsers.splice(i,1);
+		if (!exists) {
+			Scholar_Ingester_Interface.browsers.splice(i,1);
 
-        	// To execute if document object does not exist
-            Scholar_Ingester_Interface._deleteDocument(browser);
-        }
-    }
+			// To execute if document object does not exist
+			Scholar_Ingester_Interface._deleteDocument(browser);
+		}
+	}
 
-    Scholar_Ingester_Interface.updateStatus();
+		Scholar_Ingester_Interface.updateStatus();
 }
 
 //////////////////////////////////////////////////////////////////////////////
