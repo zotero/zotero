@@ -1777,38 +1777,61 @@ Scholar.Creators = new function(){
 
 
 Scholar.CreatorTypes = new function(){
-	var _creatorTypes = new Array();
-	var _creatorTypesLoaded;
+	var _types = new Array();
+	var _typesLoaded;
 	var self = this;
 	
+	this.getName = getName;
+	this.getID = getID;
 	this.getTypes = getTypes;
-	this.getTypeName = getTypeName;
+	
+	
+	function getName(idOrName){
+		if (!_typesLoaded){
+			_load();
+		}
+		
+		if (!_types[idOrName]){
+			Scholar.debug('Invalid creator type ' + idOrName, 1);
+		}
+		
+		return _types[idOrName]['name'];
+	}
+	
+	
+	function getID(idOrName){
+		if (!_typesLoaded){
+			_load();
+		}
+		
+		if (!_types[idOrName]){
+			Scholar.debug('Invalid creator type ' + idOrName, 1);
+		}
+		
+		return _types[idOrName]['id'];
+	}
+	
 	
 	function getTypes(){
 		return Scholar.DB.query('SELECT creatorTypeID AS id, '
 			+ 'creatorType AS name FROM creatorTypes order BY creatorType');
 	}
 	
-	function getTypeName(creatorTypeID){
-		if (!_creatorTypesLoaded){
-			_load();
-		}
-		
-		if (!_creatorTypes[creatorTypeID]){
-			Scholar.debug('Invalid creator type ' + creatorTypeID, 1);
-		}
-		
-		return _creatorTypes[creatorTypeID];
-	}
 	
 	function _load(){
 		var types = self.getTypes();
 		
 		for (i in types){
-			_creatorTypes[types[i]['id']] = types[i]['name'];
+			// Store as both id and name for access by either
+			var typeData = {
+				id: types[i]['id'],
+				name: types[i]['name']
+			}
+			_types[types[i]['id']] = typeData;
+			_types[types[i]['name']] = _types[types[i]['id']];
 		}
 		
-		_creatorTypesLoaded = true;
+		_typesLoaded = true;
 	}
 }
 
@@ -1816,38 +1839,61 @@ Scholar.CreatorTypes = new function(){
 
 
 Scholar.ItemTypes = new function(){
-	var _itemTypes = new Array();
-	var _itemTypesLoaded;
+	var _types = new Array();
+	var _typesLoaded;
 	var self = this;
 	
+	this.getName = getName;
+	this.getID = getID;
 	this.getTypes = getTypes;
-	this.getTypeName = getTypeName;
+	
+	
+	function getName(idOrName){
+		if (!_typesLoaded){
+			_load();
+		}
+		
+		if (!_types[idOrName]){
+			Scholar.debug('Invalid item type ' + idOrName, 1);
+		}
+		
+		return _types[idOrName]['name'];
+	}
+	
+	
+	function getID(idOrName){
+		if (!_typesLoaded){
+			_load();
+		}
+		
+		if (!_types[idOrName]){
+			Scholar.debug('Invalid item type ' + idOrName, 1);
+		}
+		
+		return _types[idOrName]['id'];
+	}
+	
 	
 	function getTypes(){
 		return Scholar.DB.query('SELECT itemTypeID AS id, typeName AS name '
 			+ 'FROM itemTypes order BY typeName');
 	}
 	
-	function getTypeName(itemTypeID){
-		if (!_itemTypesLoaded){
-			_load();
-		}
-		
-		if (!_itemTypes[itemTypeID]){
-			Scholar.debug('Invalid item type ' + itemTypeID, 1);
-		}
-		
-		return _itemTypes[itemTypeID];
-	}
 	
 	function _load(){
 		var types = self.getTypes();
 		
 		for (i in types){
-			_itemTypes[types[i]['id']] = types[i]['name'];
+			// Store as both id and name for access by either
+			var typeData = {
+				id: types[i]['id'],
+				name: types[i]['name']
+			}
+			_types[types[i]['id']] = typeData;
+			_types[types[i]['name']] = _types[types[i]['id']];
 		}
 		
-		_itemTypesLoaded = true;
+		_typesLoaded = true;
 	}
 }
 

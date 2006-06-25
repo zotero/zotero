@@ -181,7 +181,7 @@ Scholar.ItemTreeView.prototype.getImageSrc = function(row, col)
 {
 	if(col.id == 'typeIcon')
 	{
-		var itemType = Scholar.ItemTypes.getTypeName(this._getItemAtRow(row).getType());
+		var itemType = Scholar.ItemTypes.getName(this._getItemAtRow(row).getType());
 		return "chrome://scholar/skin/treeitem-"+itemType+".png";
 	}
 }
@@ -232,8 +232,8 @@ Scholar.ItemTreeView.prototype.sort = function()
 	{
 		function columnSort(a,b)
 		{
-			var typeA = Scholar.getString('itemTypes.'+Scholar.ItemTypes.getTypeName(a.getType()));
-			var typeB = Scholar.getString('itemTypes.'+Scholar.ItemTypes.getTypeName(b.getType()));
+			var typeA = Scholar.getString('itemTypes.'+Scholar.ItemTypes.getName(a.getType()));
+			var typeB = Scholar.getString('itemTypes.'+Scholar.ItemTypes.getName(b.getType()));
 			
 			return (typeA > typeB) ? -1 : (typeA < typeB) ? 1 : 0;
 		}

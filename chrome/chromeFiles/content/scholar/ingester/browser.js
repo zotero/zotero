@@ -236,7 +236,7 @@ Scholar_Ingester_Interface._finishScraping = function(obj, returnValue) {
 			if(creators) {
 				for(var i=0; i<creators; i++) {
 					var creator = item1.getCreator(i);
-					var label = Scholar.getString("creatorTypes."+Scholar.CreatorTypes.getTypeName(creator.creatorTypeID)) + ":";
+					var label = Scholar.getString("creatorTypes."+Scholar.CreatorTypes.getName(creator.creatorTypeID)) + ":";
 					var data = creator.firstName + ' ' + creator.lastName;
 					Scholar_Ingester_Interface.scrapeProgress.addResult(label, data);
 				}

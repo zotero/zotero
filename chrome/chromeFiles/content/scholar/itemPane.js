@@ -155,7 +155,7 @@ ScholarItemPane = new function()
 		if(!lastName)
 			lastName = "(last)";
 		var label = document.createElement("label");
-		label.setAttribute("value",Scholar.getString('creatorTypes.'+Scholar.CreatorTypes.getTypeName(typeID))+":");
+		label.setAttribute("value",Scholar.getString('creatorTypes.'+Scholar.CreatorTypes.getName(typeID))+":");
 		label.setAttribute("popup","creatorTypeMenu");
 		label.setAttribute("fieldname",'creator-'+_creatorCount+'-typeID');
 		label.className = 'clicky';
