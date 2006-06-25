@@ -50,18 +50,26 @@ Scholar.Schema = new function(){
 	* 	since the last check
 	**/
 	function updateScrapersRemote(force){
-		// Determine the earliest local time that we'd query the repository again
-		var nextCheck = new Date();
-		nextCheck.setTime((parseInt(_getDBVersion('lastcheck'))
-			+ SCHOLAR_CONFIG['REPOSITORY_CHECK_INTERVAL']) * 1000); // JS uses ms
-		var now = new Date();
-		
-		// If enough time hasn't passed and it's not being forced, don't update
-		if (!force && now < nextCheck){
-			Scholar.debug('Not enough time since last update -- not checking repository', 4);
-			// Set the repository timer to the remaining time
-			_setRepositoryTimer(Math.round((nextCheck.getTime() - now.getTime()) / 1000));
-			return false;
+		if (!force){
+			// Check user preference for automatic updates
+			if (!Scholar.Prefs.get('automaticScraperUpdates')){
+				Scholar.debug('Automatic scraper updating disabled -- not checking repository', 4);
+				return false;
+			}
+			
+			// Determine the earliest local time that we'd query the repository again
+			var nextCheck = new Date();
+			nextCheck.setTime((parseInt(_getDBVersion('lastcheck'))
+				+ SCHOLAR_CONFIG['REPOSITORY_CHECK_INTERVAL']) * 1000); // JS uses ms
+			var now = new Date();
+			
+			// If enough time hasn't passed, don't update
+			if (now < nextCheck){
+				Scholar.debug('Not enough time since last update -- not checking repository', 4);
+				// Set the repository timer to the remaining time
+				_setRepositoryTimer(Math.round((nextCheck.getTime() - now.getTime()) / 1000));
+				return false;
+			}
 		}
 		
 		// Get the last timestamp we got from the server

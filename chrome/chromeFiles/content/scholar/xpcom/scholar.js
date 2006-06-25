@@ -369,8 +369,13 @@ Scholar.Prefs = new function(){
 		// subject is the nsIPrefBranch we're observing (after appropriate QI)
 		// data is the name of the pref that's been changed (relative to subject)
 		switch (data){
-			case "pref1":
-				// pref1 changed
+			case "automaticScraperUpdates":
+				if (this.get('automaticScraperUpdates')){
+					Scholar.Schema.updateScrapersRemote();
+				}
+				else {
+					Scholar.Schema.stopRepositoryTimer();
+				}
 				break;
 		}
 	}
