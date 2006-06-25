@@ -1,7 +1,7 @@
--- 16
+-- 17
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-06-24 13:31:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-06-25 00:56:00'));
 
 REPLACE INTO "scrapers" VALUES('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006-06-22 22:58:00', 'Amazon.com Scraper', 'Simon Kornblith', '^http://www\.amazon\.com/(?:gp/(?:product|search)/|exec/obidos/search-handle-url/)', NULL, 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
@@ -452,7 +452,7 @@ utilities.HTTPUtilities.doPost(''http://www.jstor.org/browse'', postData, null, 
 			}
 			
 			// Loop through again so that we can add with the stableURL
-			model.addStatement(stableURL, prefixRDF + "type", prefixDummy + "journal", false);
+			model.addStatement(stableURL, prefixRDF + "type", prefixDummy + "journalArticle", false);
 			for(i in data) {
 				if(data[i].length) {
 					for(j in data[i]) {
@@ -505,7 +505,7 @@ if(month && year) {
 	model.addStatement(uri, prefixDC + "date", month.getAttribute("content")+" "+year.getAttribute("content"), false);
 }
 
-model.addStatement(uri, prefixRDF + "type", prefixDummy + "journal", false);
+model.addStatement(uri, prefixRDF + "type", prefixDummy + "journalArticle", false);
 ');
 
 REPLACE INTO "scrapers" VALUES('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '2006-06-23 12:49:00', 'InnoPAC Scraper', 'Simon Kornblith', '^http://[^/]+/(?:search/|record=)',
@@ -898,9 +898,9 @@ for (var i = 0; i < elmts.length; i++) {
 			value = utilities.superCleanString(value.nodeValue).toLowerCase();
 			
 			if(value == "periodical") {
-				model.addStatement(uri, prefixRDF + "type", prefixDummy + "journal", false);
+				model.addStatement(uri, prefixRDF + "type", prefixDummy + "journalArticle", false);
 			} else if(value == "newspaper") {
-				model.addStatement(uri, prefixRDF + "type", prefixDummy + "newspaper", false);
+				model.addStatement(uri, prefixRDF + "type", prefixDummy + "newspaperArticle", false);
 			} else {
 				model.addStatement(uri, prefixRDF + "type", prefixDummy + "book", false);
 			}
@@ -990,7 +990,7 @@ for (var i = 0; i < elmts.length; i++) {
 		model.addStatement(uri, prefixDC + "creator", utilities.cleanAuthor(value), false);
 	}
 }
-model.addStatement(uri, prefixRDF + "type", prefixDummy + "journal", false);');
+model.addStatement(uri, prefixRDF + "type", prefixDummy + "journalArticle", false);');
 
 REPLACE INTO "scrapers" VALUES('b047a13c-fe5c-6604-c997-bef15e502b09', '2006-06-18 10:13:00', 'LexisNexis Scraper', 'Simon Kornblith', '^http://web\.lexis-nexis\.com/universe/document', NULL,
 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
@@ -1048,9 +1048,9 @@ if(m) {
 		m[1] = m[1].substring(3);
 	}
 	model.addStatement(uri, prefixDC + "creator", m[1], true);
-	model.addStatement(uri, prefixRDF + "type", prefixDummy + "newspaper", false);
+	model.addStatement(uri, prefixRDF + "type", prefixDummy + "newspaperArticle", false);
 } else {
-	model.addStatement(uri, prefixRDF + "type", prefixDummy + "journal", false);
+	model.addStatement(uri, prefixRDF + "type", prefixDummy + "journalArticle", false);
 }
 
 var authorRegexp = /\n(?:AUTHOR|NAME): ([^\n]+)\n/;
@@ -1745,9 +1745,9 @@ for(i in elmts) {
 	model.addStatement(uri, prefixDC + "creator", fname+" "+surname, true);
 }
 
-model.addStatement(uri, prefixRDF + "type", prefixDummy + "journal", false);');
+model.addStatement(uri, prefixRDF + "type", prefixDummy + "journalArticle", false);');
 
-REPLACE INTO "scrapers" VALUES('fcf41bed-0cbc-3704-85c7-8062a0068a7a', '2006-06-24 13:17:00', 'PubMed Scraper', 'Simon Kornblith', '^http://www\.ncbi\.nlm\.nih\.gov/entrez/query\.fcgi\?(?:.*db=PubMed.*list_uids=[0-9]|.*list_uids=[0-9].*db=PubMed|.*db=PubMed.*CMD=search|.*CMD=search.*db=PubMed)', NULL, 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
+REPLACE INTO "scrapers" VALUES('fcf41bed-0cbc-3704-85c7-8062a0068a7a', '2006-06-25 00:56:00', 'PubMed Scraper', 'Simon Kornblith', '^http://www\.ncbi\.nlm\.nih\.gov/entrez/query\.fcgi\?(?:.*db=PubMed.*list_uids=[0-9]|.*list_uids=[0-9].*db=PubMed|.*db=PubMed.*CMD=search|.*CMD=search.*db=PubMed)', NULL, 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
 var prefixDCMI = ''http://purl.org/dc/dcmitype/'';
 var prefixDummy = ''http://chnm.gmu.edu/firefox-scholar/'';
@@ -1832,7 +1832,20 @@ utilities.HTTPUtilities.doGet(newUri, null, function(text) {
 				mapRDF(uri, article.Journal.JournalIssue.Volume.text(), prefixDummy + "volume");
 				mapRDF(uri, article.Journal.JournalIssue.Issue.text(), prefixDummy + "number");
 				if(article.Journal.JournalIssue.PubDate.length()) {
-					model.addStatement(uri, prefixDC + "date", article.Journal.JournalIssue.PubDate.Day.text()+" "+article.Journal.JournalIssue.PubDate.Month.text()+" "+article.Journal.JournalIssue.PubDate.Year.text(), true);
+					if(article.Journal.JournalIssue.PubDate.Day.text().toString() != "") {
+						var date = article.Journal.JournalIssue.PubDate.Month.text()+" "+article.Journal.JournalIssue.PubDate.Day.text()+", "+article.Journal.JournalIssue.PubDate.Year.text();
+						var jsDate = new Date(date);
+						if(!isNaN(jsDate.valueOf())) {
+							date = utilities.dateToISO(date);
+						}
+					} else if(article.Journal.JournalIssue.PubDate.Month.text().toString() != "") {
+						var date = article.Journal.JournalIssue.PubDate.Month.text()+" "+article.Journal.JournalIssue.PubDate.Year.text();
+					} else if(article.Journal.JournalIssue.PubDate.Year.text().toString() != "") {
+						var date = article.Journal.JournalIssue.PubDate.Year.text();
+					}
+					if(date) {
+						model.addStatement(uri, prefixDC + "date", date, true);
+					}
 				}
 			}
 		}
@@ -1850,7 +1863,7 @@ utilities.HTTPUtilities.doGet(newUri, null, function(text) {
 				}
 			}
 		}
-		model.addStatement(uri, prefixRDF + "type", prefixDummy + "journal", false);
+		model.addStatement(uri, prefixRDF + "type", prefixDummy + "journalArticle", false);
 	}
 
 	done();

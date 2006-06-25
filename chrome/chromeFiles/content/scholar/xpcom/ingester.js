@@ -913,16 +913,14 @@ Scholar.Ingester.Document.prototype._updateDatabase = function() {
 	var prefixDCMI = 'http://purl.org/dc/dcmitype/';
 	var prefixDummy = 'http://chnm.gmu.edu/firefox-scholar/';
 	
-	var typeToTypeID = new Object();
-	typeToTypeID[prefixDummy + 'book'] = 1;
-	typeToTypeID[prefixDummy + 'journal'] = 3;
-	typeToTypeID[prefixDummy + 'newspaper'] = 5;
-	
 	try {
 		for(var uri in this.model.data) {
-			var typeID = typeToTypeID[this.model.data[uri][prefixRDF + 'type']];
-			if(!typeID) {
-				var typeID = 1;
+			// Get typeID, defaulting to "website"
+			try {
+				var type = this.model.data[uri][prefixRDF + 'type'][0].substr(prefixDummy.length);
+				var typeID = Scholar.ItemTypes.getID(type);
+			} catch(ex) {
+				var typeID = Scholar.ItemTypes.getID("website")
 			}
 			
 			var newItem = Scholar.Items.getNewItemByType(typeID);
