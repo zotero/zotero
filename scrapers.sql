@@ -1200,74 +1200,98 @@ for (var i = 0; i < elmts.length; i++) {
 }
 model.addStatement(uri, prefixRDF + "type", prefixDummy + "journalArticle", false);');
 
-REPLACE INTO "scrapers" VALUES('b047a13c-fe5c-6604-c997-bef15e502b09', '2006-06-18 10:13:00', 'LexisNexis Scraper', 'Simon Kornblith', '^http://web\.lexis-nexis\.com/universe/document', NULL,
+REPLACE INTO "scrapers" VALUES('b047a13c-fe5c-6604-c997-bef15e502b09', '2006-06-18 10:13:00', 'LexisNexis Scraper', 'Simon Kornblith', '^http://web\.lexis-nexis\.com/universe/(?:document|doclist)', NULL,
 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
 var prefixDCMI = ''http://purl.org/dc/dcmitype/'';
 var prefixDummy = ''http://chnm.gmu.edu/firefox-scholar/'';
 
-var uri = doc.location.href;
-
-var citationDataDiv;
-var divs = doc.getElementsByTagName("div");
-for(i in divs) {
-	if(divs[i].className == "bodytext") {
-		citationDataDiv = divs[i];
-		break;
+function scrape(doc) {
+	var uri = doc.location.href;
+	
+	var citationDataDiv;
+	var divs = doc.getElementsByTagName("div");
+	for(i in divs) {
+		if(divs[i].className == "bodytext") {
+			citationDataDiv = divs[i];
+			break;
+		}
+	}
+	
+	centerElements = citationDataDiv.getElementsByTagName("center");
+	var elementParts = centerElements[0].innerHTML.split(/<br[^>]*>/gi);
+	model.addStatement(uri, prefixDummy + "publication", elementParts[elementParts.length-1], true);
+	
+	var dateRegexp = /<br[^>]*>(?:<b>)?([A-Z][a-z]+)(?:<\/b>)? ([0-9]+, [0-9]{4})/;
+	var m = dateRegexp.exec(centerElements[centerElements.length-1].innerHTML);
+	if(m) {
+		var jsDate = new Date(m[1]+" "+m[2]);
+		model.addStatement(uri, prefixDC + "date", utilities.dateToISO(jsDate), true);
+	} else {
+		var elementParts = centerElements[centerElements.length-1].innerHTML.split(/<br[^>]*>/gi);
+		model.addStatement(uri, prefixDC + "date", elementParts[1], true);
+	}
+	
+	var cutIndex = citationDataDiv.innerHTML.indexOf("<b>BODY:</b>");
+	if(cutIndex < 0) {
+		cutIndex = citationDataDiv.innerHTML.indexOf("<b>TEXT:</b>");
+	}
+	if(cutIndex > 0) {
+		citationData = citationDataDiv.innerHTML.substring(0, cutIndex);
+	} else {
+		citationData = citationDataDiv.innerHTML;
+	}
+	
+	citationData = utilities.cleanTags(citationData);
+	
+	var headlineRegexp = /\n(?:HEADLINE|TITLE|ARTICLE): ([^\n]+)\n/;
+	var m = headlineRegexp.exec(citationData);
+	if(m) {
+		model.addStatement(uri, prefixDC + "title", utilities.cleanTags(m[1]), true);
+	}
+	
+	var bylineRegexp = /\nBYLINE:  *(\w[\w\- ]+)/;
+	var m = bylineRegexp.exec(citationData);
+	if(m) {
+		if(m[1].substring(0, 3).toLowerCase() == "by ") {
+			m[1] = m[1].substring(3);
+		}
+		model.addStatement(uri, prefixDC + "creator", m[1], true);
+		model.addStatement(uri, prefixRDF + "type", prefixDummy + "newspaperArticle", false);
+	} else {
+		model.addStatement(uri, prefixRDF + "type", prefixDummy + "journalArticle", false);
+	}
+	
+	var authorRegexp = /\n(?:AUTHOR|NAME): ([^\n]+)\n/;
+	var m = authorRegexp.exec(citationData);
+	if(m) {
+		var authors = m[1].split(/, (?:and )?/);
+		for(i in authors) {
+			model.addStatement(uri, prefixDC + "creator", authors[i].replace(" *", ""), true);
+		}
 	}
 }
 
-centerElements = citationDataDiv.getElementsByTagName("center");
-var elementParts = centerElements[0].innerHTML.split(/<br[^>]*>/gi);
-model.addStatement(uri, prefixDummy + "publication", elementParts[elementParts.length-1], true);
-
-var dateRegexp = /<br[^>]*>(?:<b>)?([A-Z][a-z]+)(?:<\/b>)? ([0-9]+, [0-9]{4})/;
-var m = dateRegexp.exec(centerElements[centerElements.length-1].innerHTML);
-if(m) {
-	var jsDate = new Date(m[1]+" "+m[2]);
-	model.addStatement(uri, prefixDC + "date", utilities.dateToISO(jsDate), true);
+var detailRe = new RegExp("^http://[^/]+/universe/document");
+if(detailRe.test(doc.location.href)) {
+	scrape(doc);
 } else {
-	var elementParts = centerElements[centerElements.length-1].innerHTML.split(/<br[^>]*>/gi);
-	model.addStatement(uri, prefixDC + "date", elementParts[1], true);
-}
-
-var cutIndex = citationDataDiv.innerHTML.indexOf("<b>BODY:</b>");
-if(cutIndex < 0) {
-	cutIndex = citationDataDiv.innerHTML.indexOf("<b>TEXT:</b>");
-}
-if(cutIndex > 0) {
-	citationData = citationDataDiv.innerHTML.substring(0, cutIndex);
-} else {
-	citationData = citationDataDiv.innerHTML;
-}
-
-citationData = utilities.cleanTags(citationData);
-
-var headlineRegexp = /\n(?:HEADLINE|TITLE|ARTICLE): ([^\n]+)\n/;
-var m = headlineRegexp.exec(citationData);
-if(m) {
-	model.addStatement(uri, prefixDC + "title", utilities.cleanTags(m[1]), true);
-}
-
-var bylineRegexp = /\nBYLINE:  *(\w[\w\- ]+)/;
-var m = bylineRegexp.exec(citationData);
-if(m) {
-	if(m[1].substring(0, 3).toLowerCase() == "by ") {
-		m[1] = m[1].substring(3);
+	var items = utilities.getItemArray(doc, doc, "^http://[^/]+/universe/document");
+	items = utilities.selectItems(items);
+	
+	if(!items) {
+		return true;
 	}
-	model.addStatement(uri, prefixDC + "creator", m[1], true);
-	model.addStatement(uri, prefixRDF + "type", prefixDummy + "newspaperArticle", false);
-} else {
-	model.addStatement(uri, prefixRDF + "type", prefixDummy + "journalArticle", false);
-}
-
-var authorRegexp = /\n(?:AUTHOR|NAME): ([^\n]+)\n/;
-var m = authorRegexp.exec(citationData);
-if(m) {
-	var authors = m[1].split(/, (?:and )?/);
-	for(i in authors) {
-		model.addStatement(uri, prefixDC + "creator", authors[i].replace(" *", ""), true);
+	
+	var uris = new Array();
+	for(i in items) {
+		uris.push(i);
 	}
+	
+	utilities.processDocuments(browser, null, uris, function(browser) { scrape(browser.contentDocument) },
+		function() { done(); }, function() {});
+	
+	wait();
 }');
 
 REPLACE INTO "scrapers" VALUES('cf87eca8-041d-b954-795a-2d86348999d5', '2006-06-23 13:34:00', 'Aleph Scraper', 'Simon Kornblith', '^http://[^/]+/F(?:/[A-Z0-9\-]+(?:\?.*)?$|\?func=find)',
