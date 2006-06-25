@@ -43,6 +43,7 @@ Scholar.Item.prototype.isPrimaryField = function(field){
 	if (!Scholar.Item.primaryFields){
 		Scholar.Item.primaryFields = Scholar.DB.getColumnHash('items');
 		Scholar.Item.primaryFields['firstCreator'] = true;
+		Scholar.Item.primaryFields['numNotes'] = true;
 	}
 	
 	return !!Scholar.Item.primaryFields[field];
@@ -64,9 +65,12 @@ Scholar.Item.prototype.isEditableField = function(field){
  * Build object from database
  */
 Scholar.Item.prototype.loadFromID = function(id){
+	// Should be the same as query in Scholar.Items.loadFromID, just
+	// without itemID clause
 	var sql = 'SELECT I.*, lastName || '
 		+ 'CASE ((SELECT COUNT(*) FROM itemCreators WHERE itemID=' + id + ')>1) '
-		+ "WHEN 0 THEN '' ELSE ' et al.' END AS firstCreator "
+		+ "WHEN 0 THEN '' ELSE ' et al.' END AS firstCreator, "
+		+ "(SELECT COUNT(*) FROM itemNotes WHERE itemID=I.itemID) AS numNotes "
 		+ 'FROM items I '
 		+ 'LEFT JOIN itemCreators IC ON (I.itemID=IC.itemID) '
 		+ 'LEFT JOIN creators C ON (IC.creatorID=C.creatorID) '
@@ -758,6 +762,7 @@ Scholar.Item.prototype.addNote = function(text){
 		[{'int':noteID}, {'int':this.getID()}, {'string':text}]
 	);
 	this.updateDateModified();
+	this._data['numNotes']++;
 	Scholar.DB.commitTransaction();
 	Scholar.Notifier.trigger('modify', 'item', this.getID());
 	return noteID;
@@ -770,7 +775,7 @@ Scholar.Item.prototype.updateNote = function(noteID, text){
 	Scholar.DB.beginTransaction();
 	var sql = "UPDATE itemNotes SET note=?, dateModified=CURRENT_TIMESTAMP "
 		+ "WHERE itemID=? AND noteID=?";
-	Scholar.DB.query(sql,
+	var updated = Scholar.DB.query(sql,
 		[{'string':text}, {'int':this.getID()}, {'int':noteID}]
 	);
 	this.updateDateModified();
@@ -785,8 +790,11 @@ Scholar.Item.prototype.removeNote = function(noteID){
 	Scholar.DB.beginTransaction();
 	var sql = "DELETE FROM itemNotes WHERE itemID=" + this.getID()
 		+ " AND noteID=" + noteID;
-	Scholar.DB.query(sql);
-	this.updateDateModified();
+	var deleted = Scholar.DB.query(sql);
+	if (deleted){
+		this.updateDateModified();
+		this._data['numNotes']--;
+	}
 	Scholar.DB.commitTransaction();
 	Scholar.Notifier.trigger('modify', 'item', this.getID());
 }
@@ -799,8 +807,7 @@ Scholar.Item.prototype.numNotes = function(){
 		return 0;
 	}
 	
-	var sql = "SELECT COUNT(*) FROM itemNotes WHERE itemID=" + this.getID();
-	return parseInt(Scholar.DB.valueQuery(sql));
+	return this._data['numNotes'];
 }
 
 /**
@@ -1129,7 +1136,8 @@ Scholar.Items = new function(){
 		// without itemID clause
 		var sql = 'SELECT I.*, lastName || '
 			+ 'CASE ((SELECT COUNT(*) FROM itemCreators WHERE itemID=I.itemID)>1) '
-			+ "WHEN 0 THEN '' ELSE ' et al.' END AS firstCreator "
+			+ "WHEN 0 THEN '' ELSE ' et al.' END AS firstCreator, "
+			+ "(SELECT COUNT(*) FROM itemNotes WHERE itemID=I.itemID) AS numNotes "
 			+ 'FROM items I '
 			+ 'LEFT JOIN itemCreators IC ON (I.itemID=IC.itemID) '
 			+ 'LEFT JOIN creators C ON (IC.creatorID=C.creatorID) '
