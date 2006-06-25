@@ -196,11 +196,11 @@ Scholar_Ingester_Interface._setDocument = function(browser) {
 	}
 	
 	// Only re-load the scraper if it's a new document
-	if(Scholar_Ingester_Interface.browserUris[key] != browser.contentDocument.location.href) {
+	//if(Scholar_Ingester_Interface.browserUris[key] != browser.contentDocument.location.href) {
 		Scholar_Ingester_Interface.browserUris[key] = browser.contentDocument.location.href;
 		Scholar_Ingester_Interface.browserDocuments[key] = new Scholar.Ingester.Document(browser, window);
 		Scholar_Ingester_Interface.browserDocuments[key].retrieveScraper();
-	}
+	//}
 }
 
 /*

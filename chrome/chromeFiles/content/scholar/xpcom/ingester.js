@@ -59,7 +59,6 @@ Scholar.Ingester.ProxyMonitor.proxyToProper = function(url) {
 			url = unescape(url);
 		}
 		
-		// FIXME - potential memory leak
 		Scholar.Ingester.ProxyMonitor._now = true;
 		Scholar.Ingester.ProxyMonitor._url = url;
 		Scholar.Ingester.ProxyMonitor._host = host;

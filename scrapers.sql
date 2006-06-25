@@ -1,7 +1,7 @@
--- 17
+-- 18
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-06-25 00:56:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-06-25 12:11:00'));
 
 REPLACE INTO "scrapers" VALUES('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006-06-22 22:58:00', 'Amazon.com Scraper', 'Simon Kornblith', '^http://www\.amazon\.com/(?:gp/(?:product|search)/|exec/obidos/search-handle-url/)', NULL, 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
@@ -71,7 +71,7 @@ function scrape(doc) {
 	model.addStatement(uri, prefixRDF + "type", prefixDummy + "book", false);
 }
 
-var searchRe = new RegExp(''http://www\.amazon\.com/(gp/search/|exec/obidos/search-handle-url/)'');
+var searchRe = new RegExp(''^http://www\.amazon\.com/(gp/search/|exec/obidos/search-handle-url/)'');
 var m = searchRe.exec(doc.location.href)
 if(m) {
 	// Why can''t amazon use the same stylesheets
@@ -83,7 +83,7 @@ if(m) {
 	}
 	
 	var searchresults = utilities.gatherElementsOnXPath(doc, doc, xpath, nsResolver);
-	var items = utilities.getItemArray(doc, searchresults, ''http://www\.amazon\.com/(gp/product/|exec/obidos/tg/detail/)'', ''^(Buy new|Hardcover|Paperback|Digital)$'');
+	var items = utilities.getItemArray(doc, searchresults, ''^http://www\.amazon\.com/(gp/product/|exec/obidos/tg/detail/)'', ''^(Buy new|Hardcover|Paperback|Digital)$'');
 	items = utilities.selectItems(items);
 	
 	if(!items) {
@@ -103,8 +103,8 @@ if(m) {
 	scrape(doc);
 }');
 
-REPLACE INTO "scrapers" VALUES('838d8849-4ffb-9f44-3d0d-aa8a0a079afe', '2006-06-18 11:02:00', 'WorldCat Scraper', 'Simon Kornblith', '^http://newfirstsearch\.oclc\.org/WebZ/',
-'if(doc.title == ''FirstSearch: WorldCat Detailed Record'') {
+REPLACE INTO "scrapers" VALUES('838d8849-4ffb-9f44-3d0d-aa8a0a079afe', '2006-06-25 12:11:00', 'WorldCat Scraper', 'Simon Kornblith', '^http://(?:new)?firstsearch\.oclc\.org/WebZ/',
+'if(doc.title == ''FirstSearch: WorldCat Detailed Record'' || doc.title == ''FirstSearch: WorldCat List of Records'') {
 	return true;
 }
 return false;',
@@ -116,36 +116,88 @@ var prefixDummy = ''http://chnm.gmu.edu/firefox-scholar/'';
 var sessionRegexp = /(?:\?|\:)sessionid=([^?:]+)(?:\?|\:|$)/;
 var numberRegexp = /(?:\?|\:)recno=([^?:]+)(?:\?|\:|$)/;
 var resultsetRegexp = /(?:\?|\:)resultset=([^?:]+)(?:\?|\:|$)/;
-var lineRegexp = /^([\w() ]+): *(.*)$/;
-var publisherRegexp = /^(.*), (.*?),?$/;
+var hostRegexp = new RegExp("http://([^/]+)/");
 
 var uri = doc.location.href;
-
+	
 var sMatch = sessionRegexp.exec(uri);
 var sessionid = sMatch[1];
 
-var nMatch = numberRegexp.exec(uri);
-if(nMatch) {
-	var number = nMatch[1];
+var hMatch = hostRegexp.exec(uri);
+var host = hMatch[1];
+
+var newUri, exportselect;
+
+if(doc.title == ''FirstSearch: WorldCat Detailed Record'') {
+	var publisherRegexp = /^(.*), (.*?),?$/;
+	
+	var nMatch = numberRegexp.exec(uri);
+	if(nMatch) {
+		var number = nMatch[1];
+	} else {
+		number = 1;
+	}
+	
+	var rMatch = resultsetRegexp.exec(uri);
+	if(rMatch) {
+		var resultset = rMatch[1];
+	} else {
+		// It''s in an XPCNativeWrapper, so we have to do this black magic
+		resultset = doc.forms.namedItem(''main'').elements.namedItem(''resultset'').value;
+	}
+	
+	exportselect = ''record'';
+	newUri = ''http://''+host+''/WebZ/DirectExport?numrecs=10:smartpage=directexport:entityexportnumrecs=10:entityexportresultset='' + resultset + '':entityexportrecno='' + number + '':sessionid='' + sessionid + '':entitypagenum=35:0'';
+	
+	var uris = new Array(newUri);
 } else {
-	number = 1;
+	var items = utilities.getItemArray(doc, doc, ''/WebZ/FSFETCH\\?fetchtype=fullrecord'', ''^(See more details for locating this item|Detailed Record)$'');
+	items = utilities.selectItems(items);
+	
+	if(!items) {
+		return true;
+	}
+	
+	// Set BookMark cookie
+	for(i in items) {	// Hack to get first item
+		var myCookie = sessionid+":";
+		var rMatch = resultsetRegexp.exec(i);
+		var resultset = rMatch[1];
+		break;
+	}
+	var uris = new Array();
+	for(i in items) {
+		var nMatch = numberRegexp.exec(i);
+		myCookie += resultset+"_"+nMatch[1]+",";
+		uris.push(i);
+	}
+	myCookie = myCookie.substr(0, myCookie.length-1);
+	doc.cookie = "BookMark="+myCookie;
+	
+	exportselect = ''marked'';
+	newUri = ''http://''+host+''/WebZ/DirectExport?numrecs=10:smartpage=directexport:entityexportnumrecs=10:entityexportresultset='' + resultset + '':entityexportrecno=1:sessionid='' + sessionid + '':entitypagenum=29:0'';
 }
 
-var rMatch = resultsetRegexp.exec(uri);
-if(rMatch) {
-	var resultset = rMatch[1];
-} else {
-	// It''s in an XPCNativeWrapper, so we have to do this black magic
-	resultset = doc.forms.namedItem(''main'').elements.namedItem(''resultset'').value;
-}
-
-var newUri = ''http://newfirstsearch.oclc.org/WebZ/DirectExport?numrecs=10:smartpage=directexport:entityexportnumrecs=10:entityexportresultset='' + resultset + '':entityexportrecno='' + number + '':sessionid='' + sessionid + '':entitypagenum=35:0'';
-
-utilities.HTTPUtilities.doPost(newUri, ''exportselect=record&exporttype=plaintext'', null, function(text) {
+utilities.HTTPUtilities.doPost(newUri, ''exportselect=''+exportselect+''&exporttype=plaintext'', null, function(text) {
+	var lineRegexp = new RegExp();
+	lineRegexp.compile("^([\\w() ]+): *(.*)$");
+	
+	var k = 0;
+	var uri = uris[k];
+	model.addStatement(uri, prefixRDF + "type", prefixDummy + "book", false);
+	
 	var lines = text.split(''\n'');
 	for(var i=0;i<lines.length;i++) {
 		match = lineRegexp.exec(lines[i]);
-		if(match) {
+		if(lines[i] == "--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------") {
+			k++;
+			if(uris[k]) {
+				uri = uris[k];
+				model.addStatement(uri, prefixRDF + "type", prefixDummy + "book", false);
+			} else {
+				break;
+			}
+		} else if(match) {
 			if(match[1] == ''Title'') {
 				var title = match[2];
 				if(!lineRegexp.test(lines[i+1])) {
@@ -204,7 +256,6 @@ utilities.HTTPUtilities.doPost(newUri, ''exportselect=record&exporttype=plaintex
 			}
 		}
 	}
-	model.addStatement(uri, prefixRDF + "type", prefixDummy + "book", false);
 	
 	done();
 })
@@ -582,7 +633,7 @@ if(newUri) {
 } else {	// Search results page
 	// Require link to match this
 	var tagRegexp = new RegExp();
-	tagRegexp.compile(''http://[^/]+/search/[^/]+/[^/]+/1\%2C[^/]+/frameset'');
+	tagRegexp.compile(''^http://[^/]+/search/[^/]+/[^/]+/1\%2C[^/]+/frameset'');
 	
 	var checkboxes = new Array();
 	var urls = new Array();
@@ -804,7 +855,7 @@ if(!scrape(doc)) {
 }
 ');
 
-REPLACE INTO "scrapers" VALUES('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '2006-06-18 09:58:00', 'ProQuest Scraper', 'Simon Kornblith', 'http://proquest\.umi\.com/pqdweb\?(?:.*\&)?did=', '',
+REPLACE INTO "scrapers" VALUES('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '2006-06-18 09:58:00', 'ProQuest Scraper', 'Simon Kornblith', '^http://proquest\.umi\.com/pqdweb\?(?:.*\&)?did=', '',
 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
 var prefixDCMI = ''http://purl.org/dc/dcmitype/'';
@@ -1062,7 +1113,7 @@ if(m) {
 	}
 }');
 
-REPLACE INTO "scrapers" VALUES('cf87eca8-041d-b954-795a-2d86348999d5', '2006-06-23 13:34:00', 'Aleph Scraper', 'Simon Kornblith', 'http://[^/]+/F(?:/[A-Z0-9\-]+(?:\?.*)?$|\?func=find)',
+REPLACE INTO "scrapers" VALUES('cf87eca8-041d-b954-795a-2d86348999d5', '2006-06-23 13:34:00', 'Aleph Scraper', 'Simon Kornblith', '^http://[^/]+/F(?:/[A-Z0-9\-]+(?:\?.*)?$|\?func=find)',
 'var singleRe = new RegExp("^http://[^/]+/F/[A-Z0-9\-]+\?.*func=full-set-set.*\&format=[0-9]{3}");
 
 if(singleRe.test(doc.location.href)) {
@@ -1223,7 +1274,7 @@ utilities.processDocuments(browser, null, uris, function(newBrowser) {
 
 wait();');
 
-REPLACE INTO "scrapers" VALUES('63a0a351-3131-18f4-21aa-f46b9ac51d87', '2006-06-23 15:21:00', 'VTLS Scraper', 'Simon Kornblith', '\/chameleon(?:\?|$)', 
+REPLACE INTO "scrapers" VALUES('63a0a351-3131-18f4-21aa-f46b9ac51d87', '2006-06-23 15:21:00', 'VTLS Scraper', 'Simon Kornblith', '/chameleon(?:\?|$)', 
 'var node = utilities.getNode(doc, doc, ''//a[text()="marc"]'', null);
 if(node) {
 	return true;
@@ -1905,7 +1956,7 @@ for(var i=0; i<metaTags.length; i++) {
 	}
 }');
 
-REPLACE INTO "scrapers" VALUES('3e684d82-73a3-9a34-095f-19b112d88bbf', '2006-06-24 13:31:00', 'Google Books Scraper', 'Simon Kornblith', 'http://books\.google\.com/books\?(.*vid=.*\&id=.*|.*q=.*)', NULL,
+REPLACE INTO "scrapers" VALUES('3e684d82-73a3-9a34-095f-19b112d88bbf', '2006-06-24 13:31:00', 'Google Books Scraper', 'Simon Kornblith', '^http://books\.google\.com/books\?(.*vid=.*\&id=.*|.*q=.*)', NULL,
 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
 var prefixDCMI = ''http://purl.org/dc/dcmitype/'';
@@ -1914,7 +1965,7 @@ var prefixDummy = ''http://chnm.gmu.edu/firefox-scholar/'';
 var uri = doc.location.href;
 var newUris = new Array();
 
-var re = new RegExp(''http://books\\.google\\.com/books\\?vid=([^&]+).*\\&id=([^&]+)'', ''i'');
+var re = new RegExp(''^http://books\\.google\\.com/books\\?vid=([^&]+).*\\&id=([^&]+)'', ''i'');
 var m = re.exec(uri);
 if(m) {
 	newUris.push(''http://books.google.com/books?vid=''+m[1]+''&id=''+m[2]);
