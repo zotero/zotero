@@ -1,7 +1,7 @@
--- 19
+-- 20
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-06-25 14:16:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-06-25 14:33:00'));
 
 REPLACE INTO "scrapers" VALUES('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006-06-22 22:58:00', 'Amazon.com Scraper', 'Simon Kornblith', '^http://www\.amazon\.com/(?:gp/(?:product|search)/|exec/obidos/search-handle-url/)', NULL, 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
@@ -468,18 +468,14 @@ if(doc.title == "JSTOR: Search Results") {
 
 function getList(urls, each, done, error) {
 	var url = urls.shift();
-	utilities.debugPrint("fetching "+url);
 	utilities.HTTPUtilities.doGet(url, null, function(text) {
-		utilities.debugPrint("got "+url);
 		if(each) {
 			each(text);
 		}
 		
 		if(urls.length) {
-			utilities.debugPrint("still more");
 			getList(urls, each, done, error);
 		} else if(done) {
-			utilities.debugPrint("done");
 			done(text);
 		}
 	}, error);
@@ -503,7 +499,6 @@ function newDataObject() {
 utilities.HTTPUtilities.doGet(''http://www.jstor.org/browse?citationAction=removeAll&confirmRemAll=on&viewCitations=1'', null, function() {	// clear marked
 	// Mark all our citations
 	getList(saveCitations, null, function() {						// mark this
-		utilities.debugPrint("getting citations");
 		utilities.HTTPUtilities.doGet(''http://www.jstor.org/browse/citations.txt?exportAction=Save+as+Text+File&exportFormat=cm&viewCitations=1'', null, function(text) {
 																						// get marked
 			var k = 0;
@@ -517,7 +512,6 @@ utilities.HTTPUtilities.doGet(''http://www.jstor.org/browse?citationAction=remov
 				if(lines[i].substring(0,3) == "<1>") {
 					haveStarted = true;
 				} else if(newItemRe.test(lines[i])) {
-					utilities.debugPrint("new item!");
 					if(!stableURL) {
 						if(ISSN) {
 							stableURL = "http://www.jstor.org/browse/"+ISSN;
@@ -608,44 +602,65 @@ utilities.HTTPUtilities.doGet(''http://www.jstor.org/browse?citationAction=remov
 
 wait();');
 
-REPLACE INTO "scrapers" VALUES('e85a3134-8c1a-8644-6926-584c8565f23e', '2006-06-18 11:02:00', 'History Cooperative Scraper', 'Simon Kornblith', '^http://www\.historycooperative\.org/journals/.+/.+/.+\.html', NULL, 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
+REPLACE INTO "scrapers" VALUES('e85a3134-8c1a-8644-6926-584c8565f23e', '2006-06-25 14:33:00', 'History Cooperative Scraper', 'Simon Kornblith', '^http://www\.historycooperative\.org/(?:journals/.+/.+/.+\.html$|cgi-bin/search.cgi)', NULL,
+'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
 var prefixDCMI = ''http://purl.org/dc/dcmitype/'';
 var prefixDummy = ''http://chnm.gmu.edu/firefox-scholar/'';
 
-var uri = doc.location.href;
-
-var month, year;
-
-var metaTags = doc.getElementsByTagName("meta");
-
-function associateMeta(field, rdfUri) {
+function associateMeta(uri, metaTags, field, rdfUri) {
 	var field = metaTags.namedItem(field);
 	if(field) {
 		model.addStatement(uri, rdfUri, field.getAttribute("content"), false);
 	}
 }
 
-associateMeta("Title", prefixDC + "title");
-associateMeta("Journal", prefixDummy + "publication");
-associateMeta("Volume", prefixDummy + "volume");
-associateMeta("Issue", prefixDummy + "number");
-
-var author = metaTags.namedItem("Author");
-if(author) {
-	var authors = author.getAttribute("content").split(" and ");
-	for(j in authors) {
-		model.addStatement(uri, prefixDC + "creator", authors[j], false);
+function scrape(doc) {
+	var uri = doc.location.href;
+	var month, year;
+	var metaTags = doc.getElementsByTagName("meta");
+	associateMeta(uri, metaTags, "Title", prefixDC + "title");
+	associateMeta(uri, metaTags, "Journal", prefixDummy + "publication");
+	associateMeta(uri, metaTags, "Volume", prefixDummy + "volume");
+	associateMeta(uri, metaTags, "Issue", prefixDummy + "number");
+	
+	var author = metaTags.namedItem("Author");
+	if(author) {
+		var authors = author.getAttribute("content").split(" and ");
+		for(j in authors) {
+			model.addStatement(uri, prefixDC + "creator", authors[j], false);
+		}
 	}
+	
+	var month = metaTags.namedItem("PublicationMonth");
+	var year = metaTags.namedItem("PublicationYear");
+	if(month && year) {
+		model.addStatement(uri, prefixDC + "date", month.getAttribute("content")+" "+year.getAttribute("content"), false);
+	}
+	
+	model.addStatement(uri, prefixRDF + "type", prefixDummy + "journalArticle", false);
 }
 
-var month = metaTags.namedItem("PublicationMonth");
-var year = metaTags.namedItem("PublicationYear");
-if(month && year) {
-	model.addStatement(uri, prefixDC + "date", month.getAttribute("content")+" "+year.getAttribute("content"), false);
+if(doc.title == "History Cooperative: Search Results") {
+	var items = utilities.getItemArray(doc, doc, ''^http://[^/]+/journals/.+/.+/.+\.html$'');
+	items = utilities.selectItems(items);
+	
+	if(!items) {
+		return true;
+	}
+	
+	var uris = new Array();
+	for(i in items) {
+		uris.push(i);
+	}
+	
+	utilities.processDocuments(browser, null, uris, function(browser) { scrape(browser.contentDocument) },
+		function() { done(); }, function() {});
+	
+	wait();
+} else {
+	scrape(doc);
 }
-
-model.addStatement(uri, prefixRDF + "type", prefixDummy + "journalArticle", false);
 ');
 
 REPLACE INTO "scrapers" VALUES('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '2006-06-23 12:49:00', 'InnoPAC Scraper', 'Simon Kornblith', '^http://[^/]+/(?:search/|record=)',
@@ -779,11 +794,8 @@ if(newUri) {
 	
 	
 	utilities.HTTPUtilities.doGet(clearUrl, null, function() {
-		utilities.debugPrint(clearUrl);
 		utilities.HTTPUtilities.doPost(postUrl, postString, null, function() {
-		utilities.debugPrint(postUrl + " " + postString);
 			utilities.HTTPUtilities.doPost(exportUrl, "ex_format=50&ex_device=45&SUBMIT=Submit", null, function(text) {
-		utilities.debugPrint(exportUrl);
 				var records = text.split("\x1D");
 				for(var i=0; i<(records.length-1); i++) {
 					var record = new MARC_Record();
