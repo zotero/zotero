@@ -7,26 +7,12 @@
 	<script src="itemPane.js"/>	
 	<tabbox id="scholar-view-item" height="1000">
 		<tabs>
-			<tab label="&tabs.notes.label;"/>
 			<tab label="&tabs.info.label;"/>
+			<tab label="&tabs.notes.label;"/>
 			<tab label="&tabs.tags.label;"/>
 			<tab label="&tabs.files.label;"/>
 		</tabs>
 		<tabpanels flex="1">
-			<vbox>
-				<hbox align="center">
-					<label id="scholar-notes-label"/>
-					<menulist flex="1" id="scholar-notes-menu" oncommand="ScholarItemPane.onNoteSelected();">
-						<menupopup/>
-					</menulist>
-					<label value="&scholar.minus;" class="clicky" onclick="ScholarItemPane.removeSelectedNote();"/>
-					<label value="&scholar.plus;" class="clicky" onclick="ScholarItemPane.addNote();"/>
-				</hbox>
-				<textbox id="scholar-notes-field"
-					type="timed" timeout="1000" oncommand="ScholarItemPane.modifySelectedNote();"
-					multiline="true" flex="1"
-					onblur="ScholarItemPane.modifySelectedNote();"/>
-			</vbox>
 			<vbox id="scholar-info" flex="1">
 				<popupset>
 					<popup id="creatorTypeMenu" position="after_start" oncommand="ScholarItemPane.modifyCreator(document.popupNode.getAttribute('fieldname').split('-')[1],'typeID',event.explicitOriginalTarget.getAttribute('typeid'));"/>
@@ -43,6 +29,20 @@
 					<rows id="editpane-dynamic-fields" flex="1">
 					</rows>
 				</grid>
+			</vbox>
+			<vbox>
+				<hbox align="center">
+					<label id="scholar-notes-label"/>
+					<menulist flex="1" id="scholar-notes-menu" oncommand="ScholarItemPane.onNoteSelected();">
+						<menupopup/>
+					</menulist>
+					<label value="&scholar.minus;" class="clicky" onclick="ScholarItemPane.removeSelectedNote();"/>
+					<label value="&scholar.plus;" class="clicky" onclick="ScholarItemPane.addNote();"/>
+				</hbox>
+				<textbox id="scholar-notes-field"
+					type="timed" timeout="1000" oncommand="ScholarItemPane.modifySelectedNote();"
+					multiline="true" flex="1"
+					onblur="ScholarItemPane.modifySelectedNote();"/>
 			</vbox>
 			<vbox align="center" pack="center">
 				<label value="Coming soon"/>

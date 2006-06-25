@@ -85,7 +85,8 @@ var ScholarPane = new function()
 		if(itemsView && itemsView._itemGroup.isCollection())
 			itemsView._itemGroup.ref.addItem(item.getID());
 			
-		document.getElementById('scholar-view-item').selectedIndex = 1;
+		//set to Info tab
+		document.getElementById('scholar-view-item').selectedIndex = 0;
 	}
 	
 	function newCollection()
