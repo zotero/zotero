@@ -1,7 +1,7 @@
--- 20
+-- 21
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-06-25 14:33:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-06-25 15:32:00'));
 
 REPLACE INTO "scrapers" VALUES('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006-06-22 22:58:00', 'Amazon.com Scraper', 'Simon Kornblith', '^http://www\.amazon\.com/(?:gp/(?:product|search)/|exec/obidos/search-handle-url/)', NULL, 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
@@ -660,8 +660,7 @@ if(doc.title == "History Cooperative: Search Results") {
 	wait();
 } else {
 	scrape(doc);
-}
-');
+}');
 
 REPLACE INTO "scrapers" VALUES('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '2006-06-23 12:49:00', 'InnoPAC Scraper', 'Simon Kornblith', '^http://[^/]+/(?:search/|record=)',
 '// First, check to see if the URL alone reveals InnoPAC, since some sites don''t reveal the MARC button
@@ -810,7 +809,7 @@ if(newUri) {
 
 wait();');
 
-REPLACE INTO "scrapers" VALUES('add7c71c-21f3-ee14-d188-caf9da12728b', '2006-06-23 12:17:00', 'SIRSI 2003+ Scraper', 'Simon Kornblith', '/uhtbin/cgisirsi',
+REPLACE INTO "scrapers" VALUES('add7c71c-21f3-ee14-d188-caf9da12728b', '2006-06-25 15:32:00', 'SIRSI 2003+ Scraper', 'Simon Kornblith', '/uhtbin/cgisirsi',
 'var namespace = doc.documentElement.namespaceURI;
 var nsResolver = namespace ? function(prefix) {
 	if (prefix == ''x'') return namespace; else return null;
@@ -956,7 +955,7 @@ if(!scrape(doc)) {
 }
 ');
 
-REPLACE INTO "scrapers" VALUES('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '2006-06-18 09:58:00', 'ProQuest Scraper', 'Simon Kornblith', '^http://proquest\.umi\.com/pqdweb\?(?:.*\&)?did=', '',
+REPLACE INTO "scrapers" VALUES('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '2006-06-18 09:58:00', 'ProQuest Scraper', 'Simon Kornblith', '^http://proquest\.umi\.com/pqdweb\?((?:.*\&)?did=.*&Fmt=[0-9]|(?:.*\&)Fmt=[0-9].*&did=|(?:.*\&)searchInterface=)', '',
 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
 var prefixDCMI = ''http://purl.org/dc/dcmitype/'';
@@ -967,110 +966,167 @@ var nsResolver = namespace ? function(prefix) {
 	if (prefix == ''x'') return namespace; else return null;
 } : null;
 
-var uri = doc.location.href;
-var data = new Object();
-
-// Title
-var xpath = ''/html/body/span[@class="textMedium"]/table/tbody/tr/td[@class="headerBlack"]/strong//text()'';
-var elmts = utilities.gatherElementsOnXPath(doc, doc, xpath, nsResolver);
-var title = "";
-for (var i = 0; i < elmts.length; i++) {
-	var elmt = elmts[i];
-	title += elmt.nodeValue;
-}
-if(title) {
-	model.addStatement(uri, prefixDC + ''title'', title, true);
-}
-
-// Authors
-var xpath = ''/html/body/span[@class="textMedium"]/table/tbody/tr/td[@class="textMedium"]/a/em'';
-var elmts = utilities.gatherElementsOnXPath(doc, doc, xpath, nsResolver);
-for (var i = 0; i < elmts.length; i++) {
-	var elmt = elmts[i];
+function scrape(doc) {
+	var uri = doc.location.href;
 	
-	// Dirty hack to fix highlighted words
-	var xpath = ''.//text()'';
-	var author = "";
-	var authorElmts = utilities.gatherElementsOnXPath(doc, elmt, xpath, nsResolver);
-	for (var j = 0; j < authorElmts.length; j++) {
-		var authorElmt = authorElmts[j];
-		author += authorElmt.nodeValue;
+	// Title
+	var xpath = ''/html/body/span[@class="textMedium"]/table/tbody/tr/td[@class="headerBlack"]/strong//text()'';
+	var elmts = utilities.gatherElementsOnXPath(doc, doc, xpath, nsResolver);
+	var title = "";
+	for (var i = 0; i < elmts.length; i++) {
+		var elmt = elmts[i];
+		title += elmt.nodeValue;
 	}
-	model.addStatement(uri, prefixDC + ''creator'', utilities.cleanAuthor(author), true);
+	if(title) {
+		model.addStatement(uri, prefixDC + ''title'', title, true);
+	}
+	
+	// Authors
+	var xpath = ''/html/body/span[@class="textMedium"]/table/tbody/tr/td[@class="textMedium"]/a/em'';
+	var elmts = utilities.gatherElementsOnXPath(doc, doc, xpath, nsResolver);
+	for (var i = 0; i < elmts.length; i++) {
+		var elmt = elmts[i];
+		
+		// Dirty hack to fix highlighted words
+		var xpath = ''.//text()'';
+		var author = "";
+		var authorElmts = utilities.gatherElementsOnXPath(doc, elmt, xpath, nsResolver);
+		for (var j = 0; j < authorElmts.length; j++) {
+			var authorElmt = authorElmts[j];
+			author += authorElmt.nodeValue;
+		}
+		model.addStatement(uri, prefixDC + ''creator'', utilities.cleanAuthor(author), true);
+	}
+	
+	// Other info
+	var xpath = ''/html/body/span[@class="textMedium"]/font/table/tbody/tr'';
+	var elmts = utilities.gatherElementsOnXPath(doc, doc, xpath, nsResolver);
+	for (var i = 0; i < elmts.length; i++) {
+		var elmt = elmts[i];
+		var field = utilities.superCleanString(utilities.getNode(doc, elmt, ''./TD[1]/text()[1]'', nsResolver).nodeValue).toLowerCase();
+		if(field == "publication title") {
+			var publication = utilities.getNode(doc, elmt, ''./TD[2]/A[1]/text()[1]'', nsResolver);
+			if(publication.nodeValue) {
+				model.addStatement(uri, prefixDummy + ''publication'', utilities.superCleanString(publication.nodeValue), true);
+			}
+			var place = utilities.getNode(doc, elmt, ''./TD[2]/text()[1]'', nsResolver);
+			if(place.nodeValue) {
+				model.addStatement(uri, prefixDummy + ''place'', utilities.superCleanString(place.nodeValue), true);
+			}
+			var date = utilities.getNode(doc, elmt, ''./TD[2]/A[2]/text()[1]'', nsResolver);		
+			if(date.nodeValue) {
+				date = date.nodeValue;
+				var jsDate = new Date(utilities.superCleanString(date));
+				if(!isNaN(jsDate.valueOf())) {
+					date = utilities.dateToISO(jsDate);
+				}
+				model.addStatement(uri, prefixDC + ''date'', date, true);
+			}
+			var moreInfo = utilities.getNode(doc, elmt, ''./TD[2]/text()[2]'', nsResolver);
+			if(moreInfo.nodeValue) {
+				moreInfo = utilities.superCleanString(moreInfo.nodeValue);
+				var parts = moreInfo.split(";\xA0");
+				
+				var issueRegexp = /^(\w+)\.(?: |\xA0)?(.+)$/
+				var issueInfo = parts[0].split(",\xA0");
+				for(j in issueInfo) {
+					var m = issueRegexp.exec(issueInfo[j]);
+					if(m) {
+						var info = m[1].toLowerCase();
+						if(info == "vol") {
+							model.addStatement(uri, prefixDummy + ''volume'', utilities.superCleanString(m[2]), true);
+						} else if(info == "iss" || info == "no") {
+							model.addStatement(uri, prefixDummy + ''number'', utilities.superCleanString(m[2]), true);
+						}
+					}
+				}
+				if(parts[1] && utilities.superCleanString(parts[1]).substring(0, 3).toLowerCase() == "pg.") {
+					var re = /[0-9\-]+/;
+					var m = re.exec(parts[1]);
+					
+					if(m) {
+						model.addStatement(uri, prefixDummy + ''pages'', m[0], true);
+					}
+				}
+			}
+		} else if(field == "source type") {
+			var value = utilities.getNode(doc, elmt, ''./TD[2]/text()[1]'', nsResolver);
+			if(value.nodeValue) {
+				value = utilities.superCleanString(value.nodeValue).toLowerCase();
+				utilities.debugPrint(value);
+				
+				if(value.indexOf("periodical") >= 0) {
+					model.addStatement(uri, prefixRDF + "type", prefixDummy + "magazineArticle", false);
+				} else if(value.indexOf("newspaper") >= 0) {
+					model.addStatement(uri, prefixRDF + "type", prefixDummy + "newspaperArticle", false);
+				} else {
+					model.addStatement(uri, prefixRDF + "type", prefixDummy + "book", false);
+				}
+			}
+		} else if(field == "isbn" || field == "issn" || field == "issn/isbn") {
+			var value = utilities.getNode(doc, elmt, ''./TD[2]/text()[1]'', nsResolver);
+			if(value) {
+				var type;
+				value = utilities.superCleanString(value.nodeValue);
+				if(value.length == 10 || value.length == 13) {
+					type = "ISBN";
+				} else if(value.length == 8) {
+					type = "ISSN";
+				}
+				if(type) {
+					model.addStatement(uri, prefixDC + "identifier", type+" "+value, false);
+				}
+			}
+		}
+	}
 }
 
-// Other info
-var xpath = ''/html/body/span[@class="textMedium"]/font/table/tbody/tr'';
-var elmts = utilities.gatherElementsOnXPath(doc, doc, xpath, nsResolver);
-for (var i = 0; i < elmts.length; i++) {
-	var elmt = elmts[i];
-	var field = utilities.superCleanString(utilities.getNode(doc, elmt, ''./TD[1]/text()[1]'', nsResolver).nodeValue).toLowerCase();
-	if(field == "publication title") {
-		var publication = utilities.getNode(doc, elmt, ''./TD[2]/A[1]/text()[1]'', nsResolver);
-		if(publication.nodeValue) {
-			model.addStatement(uri, prefixDummy + ''publication'', utilities.superCleanString(publication.nodeValue), true);
-		}
-		var place = utilities.getNode(doc, elmt, ''./TD[2]/text()[1]'', nsResolver);
-		if(place.nodeValue) {
-			model.addStatement(uri, prefixDummy + ''place'', utilities.superCleanString(place.nodeValue), true);
-		}
-		var date = utilities.getNode(doc, elmt, ''./TD[2]/A[2]/text()[1]'', nsResolver);		
-		if(date.nodeValue) {
-			var jsDate = new Date(utilities.superCleanString(date.nodeValue));
-			model.addStatement(uri, prefixDC + ''date'', utilities.dateToISO(jsDate), true);
-		}
-		var moreInfo = utilities.getNode(doc, elmt, ''./TD[2]/text()[2]'', nsResolver);
-		if(moreInfo.nodeValue) {
-			moreInfo = utilities.superCleanString(moreInfo.nodeValue);
-			var parts = moreInfo.split(";\xA0");
-			
-			var issueRegexp = /^(\w+)\.(?: |\xA0)?(.+)$/
-			var issueInfo = parts[0].split(",\xA0");
-			for(j in issueInfo) {
-				var m = issueRegexp.exec(issueInfo[j]);
-				var info = m[1].toLowerCase();
-				if(info == "vol") {
-					model.addStatement(uri, prefixDummy + ''volume'', utilities.superCleanString(m[2]), true);
-				} else if(info == "iss" || info == "no") {
-					model.addStatement(uri, prefixDummy + ''number'', utilities.superCleanString(m[2]), true);
+if(doc.title == "Results") {
+	var items = new Object();
+	
+	// Require link to match this
+	var tagRegexp = new RegExp();
+	tagRegexp.compile(''^http://[^/]+/pqdweb\\?((?:.*&)?did=.*&Fmt=[12]|(?:.*&)Fmt=[12].*&did=)'');
+	
+	var tableRows = utilities.gatherElementsOnXPath(doc, doc, ''/html/body/table/tbody/tr/td/table/tbody/tr/td/table/tbody/tr[@class="rowUnMarked"]/td[3][@class="textMedium"]'', nsResolver);
+	// Go through table rows
+	for(var i=0; i<tableRows.length; i++) {
+		var links = utilities.gatherElementsOnXPath(doc, tableRows[i], ''.//a'', nsResolver);
+		// Go through links
+		for(var j=0; j<links.length; j++) {
+			if(tagRegexp.test(links[j].href)) {
+				var text = utilities.getNode(doc, tableRows[i], ''./a[@class="bold"]/text()'', null);
+				if(text && text.nodeValue) {
+					text = utilities.cleanString(text.nodeValue);
+					items[links[j].href] = text;
 				}
-			}
-			if(parts[1] && utilities.superCleanString(parts[1]).substring(0, 3).toLowerCase() == "pg.") {
-				var re = /[0-9\-]+/;
-				var m = re.exec(parts[1]);
-				
-				if(m) {
-					model.addStatement(uri, prefixDummy + ''pages'', m[0], true);
-				}
+				break;
 			}
 		}
-	} else if(field == "source type") {
-		var value = utilities.getNode(doc, elmt, ''./TD[2]/text()[1]'', nsResolver);
-		if(value.nodeValue) {
-			value = utilities.superCleanString(value.nodeValue).toLowerCase();
-			
-			if(value == "periodical") {
-				model.addStatement(uri, prefixRDF + "type", prefixDummy + "journalArticle", false);
-			} else if(value == "newspaper") {
-				model.addStatement(uri, prefixRDF + "type", prefixDummy + "newspaperArticle", false);
-			} else {
-				model.addStatement(uri, prefixRDF + "type", prefixDummy + "book", false);
-			}
-		}
-	} else if(field == "isbn" || field == "issn" || field == "issn/isbn") {
-		var value = utilities.getNode(doc, elmt, ''./TD[2]/text()[1]'', nsResolver);
-		if(value) {
-			var type;
-			value = utilities.superCleanString(value.nodeValue);
-			if(value.length == 10 || value.length == 13) {
-				type = "ISBN";
-			} else if(value.length == 8) {
-				type = "ISSN";
-			}
-			if(type) {
-				model.addStatement(uri, prefixDC + "identifier", type+" "+value, false);
-			}
-		}
+	}
+	items = utilities.selectItems(items);
+	
+	if(!items) {
+		return true;
+	}
+	
+	var uris = new Array();
+	for(i in items) {
+		uris.push(i);
+	}
+	
+	utilities.processDocuments(browser, null, uris, function(browser) { scrape(browser.contentDocument) },
+		function() { done(); }, function() {});
+	
+	wait();
+} else {
+	var fmtCheck = /(?:\&|\?)Fmt=([0-9]+)/
+	var m = fmtCheck.exec(doc.location.href);
+	if(m && (m[1] == "1" || m[1] == "2")) {
+		scrape(doc);
+	} else if(m) {
+		utilities.loadDocument(doc.location.href.replace("Fmt="+m[1], "Fmt=1"), browser, function(browser) { scrape(browser.contentDocument); done(); }, function() {});
+		wait();
 	}
 }');
 
