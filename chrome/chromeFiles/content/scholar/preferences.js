@@ -1,5 +1,3 @@
-var prefManager = Components.classes["@mozilla.org/preferences-service;1"]
-                                .getService(Components.interfaces.nsIPrefBranch);
 var autoUpdateBox;
 
 /*
@@ -10,16 +8,19 @@ var autoUpdateBox;
 			b) add lines to init() function
 			c) add line to accept() function
 		3) add a control to prefs.xul
+		4) (Optional) To add an observer for a preference change,
+			add an appropriate case in the switch statement
+			in Scholar.Prefs.observe()
 */
 
 function init()
 {	
 	autoUpdateBox = document.getElementById('autoUpdateBox');
-	autoUpdateBox.checked = prefManager.getBoolPref('extensions.scholar.automaticScraperUpdates');
+	autoUpdateBox.checked = Scholar.Prefs.get('automaticScraperUpdates');
 
 }
 
 function accept()
 {
-	prefManager.setBoolPref('extensions.scholar.automaticScraperUpdates', autoUpdateBox.checked);
+	Scholar.Prefs.set('automaticScraperUpdates', autoUpdateBox.checked)
 }

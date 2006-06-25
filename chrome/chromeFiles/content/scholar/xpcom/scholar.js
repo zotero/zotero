@@ -39,6 +39,9 @@ var Scholar = new function(){
 			return false;
 		}
 		
+		// Load in the preferences branch for the extension
+		Scholar.Prefs.init();
+		
 		// Load in the extension version from the extension manager
 		var nsIUpdateItem = Components.interfaces.nsIUpdateItem;
 		var gExtensionManager =
@@ -279,6 +282,99 @@ var Scholar = new function(){
 	}
 };
 
+
+
+Scholar.Prefs = new function(){
+	// Privileged methods
+	this.init = init;
+	this.get = get;
+	this.set = set;
+	
+	this.register = register;
+	this.unregister = unregister;
+	this.observe = observe;
+	
+	// Public properties
+	this.prefBranch; // set in Scholar.init()
+	
+	function init(){
+		var prefs = Components.classes["@mozilla.org/preferences-service;1"]
+						.getService(Components.interfaces.nsIPrefService);
+		this.prefBranch = prefs.getBranch("extensions.scholar.");
+		
+		// Register observer to handle pref changes
+		this.register();
+	}
+	
+	
+	/**
+	* Retrieve a preference
+	**/
+	function get(pref){
+		try {
+			switch (this.prefBranch.getPrefType(pref)){
+				case this.prefBranch.PREF_BOOL:
+					return this.prefBranch.getBoolPref(pref);
+				case this.prefBranch.PREF_STRING:
+					return this.prefBranch.getCharPref(pref);
+				case this.prefBranch.PREF_INT:
+					return this.prefBranch.getIntPref(pref);
+			}
+		}
+		catch (e){
+			throw ("Invalid preference '" + pref + "'");
+		}
+	}
+	
+	
+	/**
+	* Set a preference
+	**/
+	function set(pref, value){
+		try {
+			switch (this.prefBranch.getPrefType(pref)){
+				case this.prefBranch.PREF_BOOL:
+					return this.prefBranch.setBoolPref(pref, value);
+				case this.prefBranch.PREF_STRING:
+					return this.prefBranch.setCharPref(pref, value);
+				case this.prefBranch.PREF_INT:
+					return this.prefBranch.setIntPref(pref, value);
+			}
+		}
+		catch (e){
+			throw ("Invalid preference '" + pref + "'");
+		}
+	}
+	
+	
+	//
+	// Methods to register a preferences observer
+	//
+	function register(){
+		this.prefBranch.QueryInterface(Components.interfaces.nsIPrefBranch2);
+		this.prefBranch.addObserver("", this, false);
+	}
+	
+	function unregister(){
+		if (!this.prefBranch){
+			return;
+		}
+		this.prefBranch.removeObserver("", this);
+	}
+	
+	function observe(subject, topic, data){
+		if(topic!="nsPref:changed"){
+			return;
+		}
+		// subject is the nsIPrefBranch we're observing (after appropriate QI)
+		// data is the name of the pref that's been changed (relative to subject)
+		switch (data){
+			case "pref1":
+				// pref1 changed
+				break;
+		}
+	}
+}
 
 
 
