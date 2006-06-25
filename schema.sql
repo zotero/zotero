@@ -1,4 +1,4 @@
--- 23
+-- 24
 
     DROP TABLE IF EXISTS version;
     CREATE TABLE version (
@@ -212,11 +212,11 @@
     INSERT INTO fields VALUES (15,'section',NULL);
     INSERT INTO fields VALUES (16,'thesisType',NULL);
     INSERT INTO fields VALUES (17,'accessionNumber',NULL);
-    
+    INSERT INTO fields VALUES (18,'callNumber',NULL);
     INSERT INTO fields VALUES (19,'archiveLocation',NULL);
     INSERT INTO fields VALUES (20,'medium',NULL);
     INSERT INTO fields VALUES (21,'distributor',NULL);
-    
+    INSERT INTO fields VALUES (22,'extra',NULL);
     INSERT INTO fields VALUES (23,'url',NULL);
     INSERT INTO fields VALUES (24,'type',NULL);
     
@@ -270,7 +270,7 @@
     INSERT INTO "itemTypeFields" VALUES(6, 16, 4);
     INSERT INTO "itemTypeFields" VALUES(6, 9, 5);
     INSERT INTO "itemTypeFields" VALUES(6, 10, 6);
-    INSERT INTO "itemTypeFields" VALUES(6, 17, 7);
+    INSERT INTO "itemTypeFields" VALUES(6, 17, 8);
     INSERT INTO "itemTypeFields" VALUES(7, 2, 1);
     INSERT INTO "itemTypeFields" VALUES(7, 24, 2);
     INSERT INTO "itemTypeFields" VALUES(7, 14, 3);
@@ -297,6 +297,39 @@
     INSERT INTO "itemTypeFields" VALUES(12, 2, 2);
     INSERT INTO "itemTypeFields" VALUES(12, 14, 3);
     INSERT INTO "itemTypeFields" VALUES(12, 23, 4);
+    INSERT INTO "itemTypeFields" VALUES(11, 18, 5);
+    INSERT INTO "itemTypeFields" VALUES(1, 18, 12);
+    INSERT INTO "itemTypeFields" VALUES(2, 18, 13);
+    INSERT INTO "itemTypeFields" VALUES(10, 18, 5);
+    INSERT INTO "itemTypeFields" VALUES(11, 17, 6);
+    INSERT INTO "itemTypeFields" VALUES(11, 22, 7);
+    INSERT INTO "itemTypeFields" VALUES(1, 17, 13);
+    INSERT INTO "itemTypeFields" VALUES(1, 22, 14);
+    INSERT INTO "itemTypeFields" VALUES(2, 17, 14);
+    INSERT INTO "itemTypeFields" VALUES(2, 22, 15);
+    INSERT INTO "itemTypeFields" VALUES(10, 17, 6);
+    INSERT INTO "itemTypeFields" VALUES(10, 22, 7);
+    INSERT INTO "itemTypeFields" VALUES(9, 17, 6);
+    INSERT INTO "itemTypeFields" VALUES(9, 18, 5);
+    INSERT INTO "itemTypeFields" VALUES(9, 22, 7);
+    INSERT INTO "itemTypeFields" VALUES(3, 17, 9);
+    INSERT INTO "itemTypeFields" VALUES(3, 18, 8);
+    INSERT INTO "itemTypeFields" VALUES(3, 22, 10);
+    INSERT INTO "itemTypeFields" VALUES(7, 17, 6);
+    INSERT INTO "itemTypeFields" VALUES(7, 18, 5);
+    INSERT INTO "itemTypeFields" VALUES(7, 22, 7);
+    INSERT INTO "itemTypeFields" VALUES(4, 17, 8);
+    INSERT INTO "itemTypeFields" VALUES(4, 18, 7);
+    INSERT INTO "itemTypeFields" VALUES(4, 22, 9);
+    INSERT INTO "itemTypeFields" VALUES(8, 17, 8);
+    INSERT INTO "itemTypeFields" VALUES(8, 18, 7);
+    INSERT INTO "itemTypeFields" VALUES(8, 22, 9);
+    INSERT INTO "itemTypeFields" VALUES(5, 17, 10);
+    INSERT INTO "itemTypeFields" VALUES(5, 18, 9);
+    INSERT INTO "itemTypeFields" VALUES(5, 22, 11);
+    INSERT INTO "itemTypeFields" VALUES(6, 18, 7);
+    INSERT INTO "itemTypeFields" VALUES(6, 22, 9);
+    INSERT INTO "itemTypeFields" VALUES(12, 22, 5);
     
     
     -- Some sample data
