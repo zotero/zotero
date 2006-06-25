@@ -1,7 +1,7 @@
--- 22
+-- 23
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-06-25 17:11:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-06-25 18:00:00'));
 
 REPLACE INTO "scrapers" VALUES('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006-06-22 22:58:00', 'Amazon.com Scraper', 'Simon Kornblith', '^http://www\.amazon\.com/(?:gp/(?:product|search)/|exec/obidos/search-handle-url/)', NULL, 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
@@ -1130,7 +1130,7 @@ if(doc.title == "Results") {
 	}
 }');
 
-REPLACE INTO "scrapers" VALUES('6773a9af-5375-3224-d148-d32793884dec', '2006-06-18 11:19:00', 'InfoTrac Scraper', 'Simon Kornblith', '^http://infotrac-college\.thomsonlearning\.com/itw/infomark/',
+REPLACE INTO "scrapers" VALUES('6773a9af-5375-3224-d148-d32793884dec', '2006-06-25 18:00:00', 'InfoTrac Scraper', 'Simon Kornblith', '^http://infotrac-college\.thomsonlearning\.com/itw/infomark/',
 'if(doc.title.substring(0, 8) == "Article " || doc.title.substring(0, 10) == "Citations ") {
 	return true;
 }
