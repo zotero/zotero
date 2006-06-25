@@ -80,12 +80,12 @@ Scholar.Schema = new function(){
 			+ 'version=' + Scholar.version;
 		
 		Scholar.debug('Checking repository for updates (' + url + ')');
-		var get = Scholar.HTTP.doGet(url, false, _updateScrapersRemoteCallback);
+		var get = Scholar.HTTP.doGet(url, _updateScrapersRemoteCallback);
 		
 		// TODO: instead, add an observer to start and stop timer on online state change
 		if (!get){
 			Scholar.debug('Browser is offline -- skipping check');
-			_setRepositoryTimer(SCHOLAR_CONFIG['REPOSITORY_CHECK_RETRY']);
+			_setRepositoryTimer(SCHOLAR_CONFIG['REPOSITORY_RETRY_INTERVAL']);
 		}
 	}
 	
@@ -279,7 +279,14 @@ Scholar.Schema = new function(){
 	* Process the response from the repository
 	**/
 	function _updateScrapersRemoteCallback(xmlhttp){
-		// TODO: error handling
+		if (!xmlhttp.responseXML){
+			if (!xmlhttp.noNetwork){
+				Scholar.debug('Invalid response from repository', 2);
+			}
+			_setRepositoryTimer(SCHOLAR_CONFIG['REPOSITORY_RETRY_INTERVAL']);
+			return false;
+		}
+		
 		var currentTime = xmlhttp.responseXML.
 			getElementsByTagName('currentTime')[0].firstChild.nodeValue;
 		var updates = xmlhttp.responseXML.getElementsByTagName('scraper');

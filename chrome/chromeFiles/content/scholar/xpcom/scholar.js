@@ -6,7 +6,7 @@ const SCHOLAR_CONFIG = {
 	DEBUG_TO_CONSOLE: true, // dump debug messages to console rather than (much slower) Debug Logger
 	REPOSITORY_URL: 'http://chnm.gmu.edu/firefoxscholar/repo',
 	REPOSITORY_CHECK_INTERVAL: 3600, // temp -- 86400, // 24 hours
-	REPOSITORY_CHECK_RETRY: 3600 // 1 hour
+	REPOSITORY_RETRY_INTERVAL: 3600 // 1 hour
 };
 
 /*
@@ -466,19 +466,20 @@ Scholar.HTTP = new function(){
 	*
 	* Returns false if browser is offline
 	**/
-	function doGet(url, onStatus, onDone){
+	function doGet(url, onDone){
 		if (this.browserIsOffline()){
 			return false;
 		}
 		
 		var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
-					.createInstance();
+						.createInstance();
 		
-		xmlhttp.open('GET', url, true);
+		var test = xmlhttp.open('GET', url, true);
 		
 		xmlhttp.onreadystatechange = function(){
-			_stateChange(xmlhttp, onStatus, onDone);
+			_stateChange(xmlhttp, onDone);
 		};
+		
 		xmlhttp.send(null);
 		
 		return true;
@@ -490,7 +491,7 @@ Scholar.HTTP = new function(){
 	*
 	* Returns false if browser is offline
 	**/
-	function doPost(url, body, onStatus, onDone){
+	function doPost(url, body, onDone){
 		if (this.browserIsOffline()){
 			return false;
 		}
@@ -501,8 +502,9 @@ Scholar.HTTP = new function(){
 		xmlhttp.open('POST', url, true);
 		
 		xmlhttp.onreadystatechange = function(){
-			_stateChange(xmlhttp, onStatus, onDone);
+			_stateChange(xmlhttp, onDone);
 		};
+		
 		xmlhttp.send(body);
 		
 		return true;
@@ -515,30 +517,28 @@ Scholar.HTTP = new function(){
 	}
 	
 	
-	function _stateChange(xmlhttp, onStatus, onDone){
+	function _stateChange(xmlhttp, onDone){
 		switch (xmlhttp.readyState){
-	
 			// Request not yet made
 			case 1:
 			break;
 	
 			// Contact established with server but nothing downloaded yet
 			case 2:
+				// Accessing status will throw an exception if no network connection
 				try {
-					// Check for HTTP status 200
-					if (xmlhttp.status != 200){
-						if (onStatus) {
-							onStatus(
-								xmlhttp.status,
-								xmlhttp.statusText,
-								xmlhttp
-							);
-							xmlhttp.abort();
-						}
-					}
+					xmlhttp.status;
 				}
 				catch (e){
-					Scholar.debug(e, 2);
+					Scholar.debug('No network connection');
+					xmlhttp.noNetwork = true;
+					return false;
+				}
+				
+				// Check for HTTP status 200
+				if (xmlhttp.status != 200){
+					Scholar.debug('XMLHTTPRequest received HTTP response code '
+						+ xmlhttp.status);
 				}
 			break;
 	
