@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://scholar/skin/scholar.css" type="text/css"?>
+
+<window
+    id="scholar-note-window"
+    title="Edit Note"
+    orient="vertical"
+	width="400"
+	height="250"
+    xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+	<script src="include.js"/>
+	<script src="note.js"/>
+	
+	<label id="info-label"/>
+	<textbox id="notes-box" flex="1" multiline="true" type="timed" timeout="1000" oncommand="save();"/>
+</window>

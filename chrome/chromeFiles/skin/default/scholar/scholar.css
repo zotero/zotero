@@ -1,0 +1,4 @@
+textbox[multiline="true"][type="timed"]
+{
+	-moz-binding: url('chrome://scholar/content/customControls.xml#timed-textarea');
+}

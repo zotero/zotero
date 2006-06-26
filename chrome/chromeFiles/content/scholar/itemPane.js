@@ -3,8 +3,7 @@ ScholarItemPane = new function()
 	var _dynamicFields;
 	var _creatorTypeMenu;
 	var _beforeRow;
-	var _notesMenu;
-	var _notesField;
+	var _notesList;
 	var _notesLabel;
 	
 	var _creatorCount;
@@ -30,9 +29,8 @@ ScholarItemPane = new function()
 		_dynamicFields = document.getElementById('editpane-dynamic-fields');
 		_itemTypeMenu = document.getElementById('editpane-type-menu');
 		_creatorTypeMenu = document.getElementById('creatorTypeMenu');
-		_notesMenu = document.getElementById('scholar-notes-menu');
-		_notesField = document.getElementById('scholar-notes-field');
-		_notesLabel = document.getElementById('scholar-notes-label');
+		_notesList = document.getElementById('editpane-dynamic-notes');
+		_notesLabel = document.getElementById('editpane-notes-label');
 		
 		var creatorTypes = Scholar.CreatorTypes.getTypes();
 		for(var i = 0; i < creatorTypes.length; i++)
@@ -56,10 +54,7 @@ ScholarItemPane = new function()
 	 * Loads an item 
 	 */
 	function viewItem(thisItem)
-	{
-		if(_itemBeingEdited && thisItem.getID() == _itemBeingEdited.getID())
-			return;
-			
+	{	
 		if(document.commandDispatcher.focusedElement)
 			document.commandDispatcher.focusedElement.blur();
 			
@@ -112,19 +107,25 @@ ScholarItemPane = new function()
 		}
 		
 		//NOTES:
-		_notesMenu.removeAllItems();
+		while(_notesList.hasChildNodes())
+			_notesList.removeChild(_notesList.firstChild);
 				
 		var notes = _itemBeingEdited.getNotes();
 		if(notes.length)
+		{
 			for(var i = 0; i < notes.length; i++)
-				_notesMenu.appendItem(_noteToTitle(_itemBeingEdited.getNote(notes[i])),notes[i]);
-		else
-			addNote();
-
+			{
+				var row = document.createElement('row');
+				var button = document.createElement('label');
+				button.setAttribute('value',_noteToTitle(_itemBeingEdited.getNote(notes[i])));
+				button.setAttribute('onclick',"window.open('chrome://scholar/content/note.xul?item="+_itemBeingEdited.getID()+"&note="+notes[i]+"','','chrome,resizable,centerscreen');");
+				button.setAttribute('class','clicky')
+				row.appendChild(button);
+				
+				_notesList.appendChild(row);
+			}
+		}
 		_updateNoteCount();
-		_notesMenu.selectedIndex = 0;
-		
-		onNoteSelected();
 	}
 	
 	function changeTypeTo(id)
@@ -347,12 +348,7 @@ ScholarItemPane = new function()
 	
 	function addNote()
 	{
-		modifySelectedNote();
-		_notesMenu.appendItem(Scholar.getString('pane.item.notes.untitled'),null);
-		_notesMenu.selectedIndex = _notesMenu.firstChild.childNodes.length-1;
-		
-		onNoteSelected();
-		_updateNoteCount();
+		window.open("chrome://scholar/content/note.xul?item="+_itemBeingEdited.getID(),'','chrome,resizable,centerscreen');
 	}
 	
 	function onNoteSelected()
@@ -390,7 +386,7 @@ ScholarItemPane = new function()
 	
 	function _updateNoteCount()
 	{
-		var c = _notesMenu.firstChild.childNodes.length;
+		var c = _notesList.childNodes.length;
 		
 		_notesLabel.value = Scholar.getString('pane.item.notes.count.'+(c != 1 ? "plural" : "singular")).replace('%1',c) + ":";
 	}

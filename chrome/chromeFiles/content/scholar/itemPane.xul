@@ -31,18 +31,14 @@
 				</grid>
 			</vbox>
 			<vbox>
-				<hbox align="center">
-					<label id="scholar-notes-label"/>
-					<menulist flex="1" id="scholar-notes-menu" oncommand="ScholarItemPane.onNoteSelected();">
-						<menupopup/>
-					</menulist>
-					<label value="&scholar.minus;" class="clicky" onclick="ScholarItemPane.removeSelectedNote();"/>
-					<label value="&scholar.plus;" class="clicky" onclick="ScholarItemPane.addNote();"/>
-				</hbox>
-				<textbox id="scholar-notes-field"
-					type="timed" timeout="1000" oncommand="ScholarItemPane.modifySelectedNote();"
-					multiline="true" flex="1"
-					onblur="ScholarItemPane.modifySelectedNote();"/>
+				<button label="New Note" oncommand="ScholarItemPane.addNote();"/>
+				<label id="editpane-notes-label"/>
+				<grid flex="1">
+					<columns>
+						<column flex="1"/>
+					</columns>
+					<rows id="editpane-dynamic-notes" flex="1"/>
+				</grid>
 			</vbox>
 			<vbox align="center" pack="center">
 				<label value="Coming soon"/>

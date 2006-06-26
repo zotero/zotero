@@ -120,11 +120,6 @@ vbox #scholar-pane
 	background: #666666;
 }
 
-textbox[multiline="true"][type="timed"]
-{
-	-moz-binding: url('chrome://scholar/content/customControls.xml#timed-textarea');
-}
-
 #scholar-splitter
 {
 	border-top: none;
