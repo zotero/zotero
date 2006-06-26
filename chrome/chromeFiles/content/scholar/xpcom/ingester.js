@@ -412,8 +412,8 @@ Scholar.Ingester.Utilities.prototype.cleanAuthor = function(author) {
  * Cleans whitespace off a string and replaces multiple spaces with one
  */
 Scholar.Ingester.Utilities.prototype.cleanString = function(s) {
-	s = this.trimString(s);
-	return s.replace(/[ \xA0]+/g, " ");
+	s = s.replace(/[ \xA0]+/g, " ");
+	return this.trimString(s);
 }
 
 /*
@@ -523,14 +523,18 @@ Scholar.Ingester.Utilities.prototype._MARCAssociateField = function(record, uri,
 	Scholar.debug('Found '+field.length+' matches for '+fieldNo+part);
 	if(field) {
 		for(i in field) {
-			if(field[i][part]) {
-				var value = field[i][part];
-				Scholar.debug(value);
-				if(fieldNo == '245') {	// special case - title + subtitle
-					if(field[i]['b']) {
-						value += ' '+field[i]['b'];
+			var value;
+			for(var j=0; j<part.length; j++) {
+				var myPart = part.substr(j, 1);
+				if(field[i][myPart]) {
+					if(value) {
+						value += " "+field[i][myPart];
+					} else {
+						value = field[i][myPart];
 					}
 				}
+			}
+			if(value) {
 				if(execMe) {
 					value = execMe(value);
 				}
@@ -550,6 +554,7 @@ Scholar.Ingester.Utilities.prototype.importMARCRecord = function(record, uri, mo
 	var prefixDC = 'http://purl.org/dc/elements/1.1/';
 	var prefixDCMI = 'http://purl.org/dc/dcmitype/';
 	var prefixDummy = 'http://chnm.gmu.edu/firefox-scholar/';
+	var prefixRDF = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#';
 	
 	// Extract ISBNs
 	model = this._MARCAssociateField(record, uri, model, '020', prefixDC + 'identifier', this._MARCCleanNumber, 'ISBN ');
@@ -570,7 +575,7 @@ Scholar.Ingester.Utilities.prototype.importMARCRecord = function(record, uri, mo
 		}
 	}
 	// Extract title
-	model = this._MARCAssociateField(record, uri, model, '245', prefixDC + 'title', this._MARCCleanString);
+	model = this._MARCAssociateField(record, uri, model, '245', prefixDC + 'title', this._MARCCleanString, '', 'ab');
 	// Extract edition
 	model = this._MARCAssociateField(record, uri, model, '250', prefixDC + 'hasVersion', this._MARCCleanString);
 	// Extract place info
@@ -581,6 +586,16 @@ Scholar.Ingester.Utilities.prototype.importMARCRecord = function(record, uri, mo
 	model = this._MARCAssociateField(record, uri, model, '260', prefixDC + 'year', this._MARCPullYear, '', 'c');
 	// Extract series
 	model = this._MARCAssociateField(record, uri, model, '440', prefixDummy + 'series', this._MARCCleanString);
+	// Extract call number
+	model = this._MARCAssociateField(record, uri, model, '050', prefixDC + 'identifier', this._MARCCleanString, 'LCC ', 'ab');
+	model = this._MARCAssociateField(record, uri, model, '060', prefixDC + 'identifier', this._MARCCleanString, 'NLM ', 'ab');
+	model = this._MARCAssociateField(record, uri, model, '070', prefixDC + 'identifier', this._MARCCleanString, 'NAL ', 'ab');
+	model = this._MARCAssociateField(record, uri, model, '080', prefixDC + 'identifier', this._MARCCleanString, 'UDC ', 'ab');
+	model = this._MARCAssociateField(record, uri, model, '082', prefixDC + 'identifier', this._MARCCleanString, 'DDC ', 'a');
+	model = this._MARCAssociateField(record, uri, model, '084', prefixDC + 'identifier', this._MARCCleanString, 'CN ', 'ab');
+	
+	// Set type
+	model = model.addStatement(uri, prefixRDF + 'type', prefixDummy + "book", true);
 }
 
 /*
@@ -912,6 +927,9 @@ Scholar.Ingester.Document.prototype._updateDatabase = function() {
 	var prefixDCMI = 'http://purl.org/dc/dcmitype/';
 	var prefixDummy = 'http://chnm.gmu.edu/firefox-scholar/';
 	
+	// Call number fields, in order of preference
+	var callNumbers = new Array("LCC", "DDC", "UDC", "NLM", "NAL", "CN");
+	
 	try {
 		for(var uri in this.model.data) {
 			// Get typeID, defaulting to "website"
@@ -991,22 +1009,29 @@ Scholar.Ingester.Document.prototype._updateDatabase = function() {
 				}
 			}
 			
-			// Handle ISBNs/ISSNs
+			// Handle ISBNs/ISSNs/Call Numbers
 			if(this.model.data[uri][prefixDC + 'identifier']) {
+				var oldIndex = -1;
 				var needISSN =  Scholar.ItemFields.isValidForType(Scholar.ItemFields.getID("ISSN"), typeID);
 				var needISBN =  Scholar.ItemFields.isValidForType(Scholar.ItemFields.getID("ISBN"), typeID);
-				if(needISSN || needISBN) {
-					for(i in this.model.data[uri][prefixDC + 'identifier']) {
-						firstFour = this.model.data[uri][prefixDC + 'identifier'][i].substring(0, 4);
-						if(needISSN && firstFour == 'ISSN') {
-							newItem.setField("ISSN", this.model.data[uri][prefixDC + 'identifier'][0].substring(5));
-							break;
-						}
-						if(needISBN && firstFour == 'ISBN') {
-							newItem.setField("ISBN", this.model.data[uri][prefixDC + 'identifier'][0].substring(5));
-							break;
-						}
+				for(i in this.model.data[uri][prefixDC + 'identifier']) {
+					prefix = this.model.data[uri][prefixDC + 'identifier'][i].substr(0, this.model.data[uri][prefixDC + 'identifier'][i].indexOf(" "));
+					if(needISSN && prefix == 'ISSN') {
+						newItem.setField("ISSN", this.model.data[uri][prefixDC + 'identifier'][i].substring(5));
+						needISSN = false;
 					}
+					if(needISBN && prefix == 'ISBN') {
+						newItem.setField("ISBN", this.model.data[uri][prefixDC + 'identifier'][i].substring(5));
+						needISBN = false;
+					}
+					var newIndex = Scholar.arraySearch(prefix, callNumbers);
+					if(newIndex && newIndex > oldIndex) {
+						oldIndex = newIndex;
+						var callNumber = this.model.data[uri][prefixDC + 'identifier'][i].substring(prefix.length+1);
+					}
+				}
+				if(callNumber) {
+					newItem.setField("callNumber", callNumber);
 				}
 			}
 			

@@ -1,7 +1,7 @@
--- 23
+-- 24
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-06-25 18:00:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-06-25 21:06:00'));
 
 REPLACE INTO "scrapers" VALUES('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006-06-22 22:58:00', 'Amazon.com Scraper', 'Simon Kornblith', '^http://www\.amazon\.com/(?:gp/(?:product|search)/|exec/obidos/search-handle-url/)', NULL, 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
@@ -809,7 +809,7 @@ if(newUri) {
 
 wait();');
 
-REPLACE INTO "scrapers" VALUES('add7c71c-21f3-ee14-d188-caf9da12728b', '2006-06-25 15:32:00', 'SIRSI 2003+ Scraper', 'Simon Kornblith', '/uhtbin/cgisirsi',
+REPLACE INTO "scrapers" VALUES('add7c71c-21f3-ee14-d188-caf9da12728b', '2006-06-25 21:06:00', 'SIRSI 2003+ Scraper', 'Simon Kornblith', '/uhtbin/cgisirsi',
 'var namespace = doc.documentElement.namespaceURI;
 var nsResolver = namespace ? function(prefix) {
 	if (prefix == ''x'') return namespace; else return null;
@@ -909,6 +909,11 @@ function scrape(doc) {
 				}
 			}
 		} catch (e) {}
+	}
+	
+	var callNumber = utilities.getNode(doc, doc, ''//tr/td[1][@class="holdingslist"]/text()'', nsResolver);
+	if(callNumber && callNumber.nodeValue) {
+		model.addStatement(uri, prefixDC + "identifier", "CN "+callNumber.nodeValue, true);
 	}
 	
 	model.addStatement(uri, prefixRDF + "type", prefixDummy + "book", false);
@@ -1343,7 +1348,7 @@ if(detailRe.test(doc.location.href)) {
 	wait();
 }');
 
-REPLACE INTO "scrapers" VALUES('cf87eca8-041d-b954-795a-2d86348999d5', '2006-06-23 13:34:00', 'Aleph Scraper', 'Simon Kornblith', '^http://[^/]+/F(?:/[A-Z0-9\-]+(?:\?.*)?$|\?func=find)',
+REPLACE INTO "scrapers" VALUES('cf87eca8-041d-b954-795a-2d86348999d5', '2006-06-25 20:51:00', 'Aleph Scraper', 'Simon Kornblith', '^http://[^/]+/F(?:/[A-Z0-9\-]+(?:\?.*)?$|\?func=find)',
 'var singleRe = new RegExp("^http://[^/]+/F/[A-Z0-9\-]+\?.*func=full-set-set.*\&format=[0-9]{3}");
 
 if(singleRe.test(doc.location.href)) {
@@ -1425,8 +1430,6 @@ utilities.processDocuments(browser, null, newUris, function(newBrowser) {
 			record.add_field(code, ind1, ind2, value);
 		}
 	}
-	
-	model.addStatement(uri, prefixRDF + "type", prefixDummy + "book", false);
 	utilities.importMARCRecord(record, uri, model);
 }, function() { done(); }, function() {});
 
