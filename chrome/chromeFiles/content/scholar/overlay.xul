@@ -97,12 +97,7 @@
 						flex="1">
 						<treecols>
 							<treecol
-								id="typeIcon"
-								label="&items.type_column;"
-								width="40" persist="width ordinal hidden sortActive sortDirection"/>
-							<splitter class="tree-splitter"/>
-							<treecol
-								id="title"
+								id="title" primary="true"
 								label="&items.title_column;"
 								flex="4" persist="width ordinal hidden sortActive sortDirection"/>
 							<splitter class="tree-splitter"/>
@@ -115,6 +110,11 @@
 								id="numNotes"
 								label="&items.numNotes_column;"
 								persist="width ordinal hidden sortActive sortDirection"/>
+							<splitter class="tree-splitter"/>
+							<treecol
+								id="typeIcon" hidden="true"
+								label="&items.type_column;"
+								width="40" persist="width ordinal hidden sortActive sortDirection"/>
 							<splitter class="tree-splitter"/>
 							<treecol
 								id="source" hidden="true"

@@ -125,7 +125,8 @@ var ScholarPane = new function()
 		{
 			var item = itemsView._getItemAtRow(itemsView.selection.currentIndex);
 			
-			ScholarItemPane.viewItem(item);
+			if(!item.isNote())
+				ScholarItemPane.viewItem(item.ref);
 
 			document.getElementById('scholar-view-item').hidden = false;
 			document.getElementById('scholar-view-selected-label').hidden = true;
