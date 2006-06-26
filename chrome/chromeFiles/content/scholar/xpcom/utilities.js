@@ -348,6 +348,13 @@ Scholar.Utilities.Ingester.prototype.getItemArray = function(doc, inHere, urlRe,
 	return availableItems;
 }
 
+/*
+ * Handles OAI-PMH requests
+ */
+Scholar.Utilities.Ingester.prototype.importOAIPMH = function(uri, model) {
+	
+}
+
 // These functions are for use by importMARCRecord. They're private, because,
 // while they are useful, it's also nice if as many of our scrapers as possible
 // are PiggyBank compatible, and if our scrapers used functions, that would

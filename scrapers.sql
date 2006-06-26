@@ -1,9 +1,16 @@
--- 25
+-- 26
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-06-25 21:15:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-06-26 16:01:00'));
 
-REPLACE INTO "scrapers" VALUES('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006-06-22 22:58:00', 'Amazon.com Scraper', 'Simon Kornblith', '^http://www\.amazon\.com/(?:gp/(?:product|search)/|exec/obidos/search-handle-url/)', NULL, 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
+REPLACE INTO "scrapers" VALUES('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006-06-26 16:01:00', 'Amazon.com Scraper', 'Simon Kornblith', '^http://www\.amazon\.com/(?:gp/(?:product|search)/|exec/obidos/search-handle-url/)', 
+'if(doc.title.indexOf("search") >= 0) {
+	return "multiple";
+} else {
+	return "book";
+}
+',
+'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
 var prefixDCMI = ''http://purl.org/dc/dcmitype/'';
 var prefixDummy = ''http://chnm.gmu.edu/firefox-scholar/'';
@@ -103,9 +110,11 @@ if(m) {
 	scrape(doc);
 }');
 
-REPLACE INTO "scrapers" VALUES('838d8849-4ffb-9f44-3d0d-aa8a0a079afe', '2006-06-25 12:11:00', 'WorldCat Scraper', 'Simon Kornblith', '^http://(?:new)?firstsearch\.oclc\.org/WebZ/',
-'if(doc.title == ''FirstSearch: WorldCat Detailed Record'' || doc.title == ''FirstSearch: WorldCat List of Records'') {
-	return true;
+REPLACE INTO "scrapers" VALUES('838d8849-4ffb-9f44-3d0d-aa8a0a079afe', '2006-06-26 16:01:00', 'WorldCat Scraper', 'Simon Kornblith', '^http://(?:new)?firstsearch\.oclc\.org/WebZ/',
+'if(doc.title == ''FirstSearch: WorldCat Detailed Record'') {
+	return "book";
+} else if(doc.title == ''FirstSearch: WorldCat List of Records'') {
+	return "multiple";
 }
 return false;',
 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
@@ -261,7 +270,7 @@ utilities.HTTPUtilities.doPost(newUri, ''exportselect=''+exportselect+''&exportt
 })
 wait();');
 
-REPLACE INTO "scrapers" VALUES('88915634-1af6-c134-0171-56fd198235ed', '2006-06-22 16:51:00', 'LOC/Voyager WebVoyage Scraper', 'Simon Kornblith', 'Pwebrecon\.cgi',
+REPLACE INTO "scrapers" VALUES('88915634-1af6-c134-0171-56fd198235ed', '2006-06-26 16:01:00', 'LOC/Voyager WebVoyage Scraper', 'Simon Kornblith', 'Pwebrecon\.cgi',
 'var export_options = doc.forms.namedItem(''frm'').elements.namedItem(''RD'').options;
 for(i in export_options) {
 	if(export_options[i].text == ''Latin1 MARC''
@@ -270,7 +279,11 @@ for(i in export_options) {
 	|| export_options[i].text == ''MARC (Unicode/UTF-8)''
 	|| export_options[i].text == ''MARC (non-Unicode/MARC-8)'') {
 		// We have an exportable single record
-		return true;
+		if(doc.forms.namedItem(''frm'').elements.namedItem(''RC'')) {
+			return "book";
+		} else {
+			return "multiple";
+		}
 	}
 }
 return false;',
@@ -384,7 +397,7 @@ utilities.HTTPUtilities.doGet(newUri+''?''+postString, null, function(text) {
 })
 wait();');
 
-REPLACE INTO "scrapers" VALUES('d921155f-0186-1684-615c-ca57682ced9b', '2006-06-25 14:16:00', 'JSTOR Scraper', 'Simon Kornblith', '^http://www\.jstor\.org/(?:view|browse|search/)', 
+REPLACE INTO "scrapers" VALUES('d921155f-0186-1684-615c-ca57682ced9b', '2006-06-26 16:01:00', 'JSTOR Scraper', 'Simon Kornblith', '^http://www\.jstor\.org/(?:view|browse|search/)', 
 'var namespace = doc.documentElement.namespaceURI;
 var nsResolver = namespace ? function(prefix) {
 	if (prefix == ''x'') return namespace; else return null;
@@ -392,7 +405,7 @@ var nsResolver = namespace ? function(prefix) {
 
 // See if this is a seach results page
 if(doc.title == "JSTOR: Search Results") {
-	return true;
+	return "multiple";
 }
 
 // If this is a view page, find the link to the citation
@@ -403,7 +416,7 @@ if(!elmts.length) {
 	var elmts = utilities.gatherElementsOnXPath(doc, doc, xpath, nsResolver);
 }
 if(elmts && elmts.length) {
-	return true;
+	return "journalArticle";
 }
 return false;', 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
@@ -602,7 +615,12 @@ utilities.HTTPUtilities.doGet(''http://www.jstor.org/browse?citationAction=remov
 
 wait();');
 
-REPLACE INTO "scrapers" VALUES('e85a3134-8c1a-8644-6926-584c8565f23e', '2006-06-25 14:33:00', 'History Cooperative Scraper', 'Simon Kornblith', '^http://www\.historycooperative\.org/(?:journals/.+/.+/.+\.html$|cgi-bin/search.cgi)', NULL,
+REPLACE INTO "scrapers" VALUES('e85a3134-8c1a-8644-6926-584c8565f23e', '2006-06-26 16:01:00', 'History Cooperative Scraper', 'Simon Kornblith', '^http://www\.historycooperative\.org/(?:journals/.+/.+/.+\.html$|cgi-bin/search.cgi)', 
+'if(doc.title == "History Cooperative: Search Results") {
+	return "multiple";
+} else {
+	return "journalArticle";
+}',
 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
 var prefixDCMI = ''http://purl.org/dc/dcmitype/'';
@@ -662,11 +680,11 @@ if(doc.title == "History Cooperative: Search Results") {
 	scrape(doc);
 }');
 
-REPLACE INTO "scrapers" VALUES('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '2006-06-23 12:49:00', 'InnoPAC Scraper', 'Simon Kornblith', '^http://[^/]+/(?:search/|record=)',
+REPLACE INTO "scrapers" VALUES('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '2006-06-26 16:01:00', 'InnoPAC Scraper', 'Simon Kornblith', '^http://[^/]+/(?:search/|record=)',
 '// First, check to see if the URL alone reveals InnoPAC, since some sites don''t reveal the MARC button
 var matchRegexp = new RegExp(''^(http://[^/]+/search/[^/]+/[^/]+/1\%2C[^/]+/)frameset(.+)$'');
 if(matchRegexp.test(doc.location.href)) {
-	return true;
+	return "book";
 }
 // Next, look for the MARC button
 var namespace = doc.documentElement.namespaceURI;
@@ -677,13 +695,13 @@ var nsResolver = namespace ? function(prefix) {
 var xpath = ''//a[img[@alt="MARC Display"]]'';
 var elmts = utilities.gatherElementsOnXPath(doc, doc, xpath, nsResolver);
 if(elmts.length) {
-	return true;
+	return "book";
 }
 // Also, check for links to an item display page
 var tags = doc.getElementsByTagName("a");
 for(i=0; i<tags.length; i++) {
 	if(matchRegexp.test(tags[i].href)) {
-		return true;
+		return "multiple";
 	}
 }
 return false;
@@ -809,7 +827,7 @@ if(newUri) {
 
 wait();');
 
-REPLACE INTO "scrapers" VALUES('add7c71c-21f3-ee14-d188-caf9da12728b', '2006-06-25 21:15:00', 'SIRSI 2003+ Scraper', 'Simon Kornblith', '/uhtbin/cgisirsi',
+REPLACE INTO "scrapers" VALUES('add7c71c-21f3-ee14-d188-caf9da12728b', '2006-06-26 16:01:00', 'SIRSI 2003+ Scraper', 'Simon Kornblith', '/uhtbin/cgisirsi',
 'var namespace = doc.documentElement.namespaceURI;
 var nsResolver = namespace ? function(prefix) {
 	if (prefix == ''x'') return namespace; else return null;
@@ -818,12 +836,12 @@ var nsResolver = namespace ? function(prefix) {
 var xpath = ''//tr[th[@class="viewmarctags"]][td[@class="viewmarctags"]]'';
 var elmts = utilities.gatherElementsOnXPath(doc, doc, xpath, nsResolver);
 if(elmts.length) {
-	return true;
+	return "book";
 }
 var xpath = ''//td[@class="searchsum"]/table'';
 var elmts = utilities.gatherElementsOnXPath(doc, doc, xpath, nsResolver);
 if(elmts.length) {
-	return true;
+	return "multiple";
 }
 
 return false;',
@@ -960,7 +978,12 @@ if(!scrape(doc)) {
 }
 ');
 
-REPLACE INTO "scrapers" VALUES('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '2006-06-18 09:58:00', 'ProQuest Scraper', 'Simon Kornblith', '^http://proquest\.umi\.com/pqdweb\?((?:.*\&)?did=.*&Fmt=[0-9]|(?:.*\&)Fmt=[0-9].*&did=|(?:.*\&)searchInterface=)', '',
+REPLACE INTO "scrapers" VALUES('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '2006-06-26 16:01:00', 'ProQuest Scraper', 'Simon Kornblith', '^http://proquest\.umi\.com/pqdweb\?((?:.*\&)?did=.*&Fmt=[0-9]|(?:.*\&)Fmt=[0-9].*&did=|(?:.*\&)searchInterface=)',
+'if(doc.title == "Results") {
+	return "magazineArticle";
+} else {
+	return "book";
+}',
 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
 var prefixDCMI = ''http://purl.org/dc/dcmitype/'';
@@ -1135,9 +1158,11 @@ if(doc.title == "Results") {
 	}
 }');
 
-REPLACE INTO "scrapers" VALUES('6773a9af-5375-3224-d148-d32793884dec', '2006-06-25 18:00:00', 'InfoTrac Scraper', 'Simon Kornblith', '^http://infotrac-college\.thomsonlearning\.com/itw/infomark/',
-'if(doc.title.substring(0, 8) == "Article " || doc.title.substring(0, 10) == "Citations ") {
-	return true;
+REPLACE INTO "scrapers" VALUES('6773a9af-5375-3224-d148-d32793884dec', '2006-06-26 16:01:00', 'InfoTrac Scraper', 'Simon Kornblith', '^http://infotrac-college\.thomsonlearning\.com/itw/infomark/',
+'if(doc.title.substring(0, 8) == "Article ") {
+	return "magazineArticle";
+} else doc.title.substring(0, 10) == "Citations ") {
+	return "multiple";
 }
 return false;',
 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
@@ -1254,7 +1279,13 @@ if(doc.title.substring(0, 8) == "Article ") {
 	}
 }');
 
-REPLACE INTO "scrapers" VALUES('b047a13c-fe5c-6604-c997-bef15e502b09', '2006-06-25 16:09:00', 'LexisNexis Scraper', 'Simon Kornblith', '^http://web\.lexis-nexis\.com/universe/(?:document|doclist)', NULL,
+REPLACE INTO "scrapers" VALUES('b047a13c-fe5c-6604-c997-bef15e502b09', '2006-06-26 16:01:00', 'LexisNexis Scraper', 'Simon Kornblith', '^http://web\.lexis-nexis\.com/universe/(?:document|doclist)',
+'var detailRe = new RegExp("^http://[^/]+/universe/document");
+if(detailRe.test(doc.location.href)) {
+	return "newspaperArticle";
+} else {
+	return "multiple";
+}',
 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
 var prefixDCMI = ''http://purl.org/dc/dcmitype/'';
@@ -1348,16 +1379,16 @@ if(detailRe.test(doc.location.href)) {
 	wait();
 }');
 
-REPLACE INTO "scrapers" VALUES('cf87eca8-041d-b954-795a-2d86348999d5', '2006-06-25 20:51:00', 'Aleph Scraper', 'Simon Kornblith', '^http://[^/]+/F(?:/[A-Z0-9\-]+(?:\?.*)?$|\?func=find)',
+REPLACE INTO "scrapers" VALUES('cf87eca8-041d-b954-795a-2d86348999d5', '2006-06-26 16:01:00', 'Aleph Scraper', 'Simon Kornblith', '^http://[^/]+/F(?:/[A-Z0-9\-]+(?:\?.*)?$|\?func=find)',
 'var singleRe = new RegExp("^http://[^/]+/F/[A-Z0-9\-]+\?.*func=full-set-set.*\&format=[0-9]{3}");
 
 if(singleRe.test(doc.location.href)) {
-	return true;
+	return "book";
 } else {
 	var tags = doc.getElementsByTagName("a");
 	for(var i=0; i<tags.length; i++) {
 		if(singleRe.test(tags[i].href)) {
-			return true;
+			return "multiple";
 		}
 	}
 }
@@ -1435,7 +1466,13 @@ utilities.processDocuments(browser, null, newUris, function(newBrowser) {
 
 wait();');
 
-REPLACE INTO "scrapers" VALUES('774d7dc2-3474-2684-392c-f787789ec63d', '2006-06-23 16:53:00', 'Dynix Scraper', 'Simon Kornblith', 'ipac\.jsp\?.*(?:uri=full=[0-9]|menu=search)', NULL,
+REPLACE INTO "scrapers" VALUES('774d7dc2-3474-2684-392c-f787789ec63d', '2006-06-26 16:01:00', 'Dynix Scraper', 'Simon Kornblith', 'ipac\.jsp\?.*(?:uri=full=[0-9]|menu=search)',
+'var detailsRe = new RegExp(''ipac\.jsp\?.*uri=full=[0-9]'');
+if(detailsRe.test(doc.location.href)) {
+	return "book";
+} else {
+	return "multiple";
+}',
 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
 var prefixDCMI = ''http://purl.org/dc/dcmitype/'';
@@ -1507,14 +1544,14 @@ utilities.processDocuments(browser, null, uris, function(newBrowser) {
 
 wait();');
 
-REPLACE INTO "scrapers" VALUES('63a0a351-3131-18f4-21aa-f46b9ac51d87', '2006-06-23 15:21:00', 'VTLS Scraper', 'Simon Kornblith', '/chameleon(?:\?|$)', 
+REPLACE INTO "scrapers" VALUES('63a0a351-3131-18f4-21aa-f46b9ac51d87', '2006-06-26 16:01:00', 'VTLS Scraper', 'Simon Kornblith', '/chameleon(?:\?|$)', 
 'var node = utilities.getNode(doc, doc, ''//a[text()="marc"]'', null);
 if(node) {
-	return true;
+	return "book";
 }
 var node = utilities.getNode(doc, doc, ''//tr[@class="intrRow"]/td/table/tbody/tr[th]'', null);
 if(node) {
-	return true;
+	return "multiple";
 }
 return false;',
 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
@@ -1608,7 +1645,12 @@ utilities.processDocuments(browser, null, newUris, function(newBrowser) {
 
 wait();');
 
-REPLACE INTO "scrapers" VALUES('fb12ae9e-f473-cab4-0546-27ab88c64101', '2006-06-23 16:09:00', 'DRA Scraper', 'Simon Kornblith', '/web2/tramp2\.exe/(?:see\_record/|authority\_hits/|goto/.*\?.*screen=Record\.html)', NULL,
+REPLACE INTO "scrapers" VALUES('fb12ae9e-f473-cab4-0546-27ab88c64101', '2006-06-26 16:01:00', 'DRA Scraper', 'Simon Kornblith', '/web2/tramp2\.exe/(?:see\_record/|authority\_hits/|goto/.*\?.*screen=Record\.html)',
+'if(doc.location.href.indexOf("/authority_hits") > 0) {
+	return "multiple";
+} else {
+	return "book";
+}',
 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
 var prefixDCMI = ''http://purl.org/dc/dcmitype/'';
@@ -1667,7 +1709,12 @@ for(i in uris) {
 wait();');
 
 
-REPLACE INTO "scrapers" VALUES('c0e6fda6-0ecd-e4f4-39ca-37a4de436e15', '2006-06-18 11:19:00', 'GEAC Scraper', 'Simon Kornblith', '/(?:GeacQUERY|(?:Geac)?FETCH[\:\?].*[&:]next=html/(?:record\.html|geacnffull\.html))', NULL,
+REPLACE INTO "scrapers" VALUES('c0e6fda6-0ecd-e4f4-39ca-37a4de436e15', '2006-06-26 16:01:00', 'GEAC Scraper', 'Simon Kornblith', '/(?:GeacQUERY|(?:Geac)?FETCH[\:\?].*[&:]next=html/(?:record\.html|geacnffull\.html))',
+'if(doc.location.href.indexOf("/GeacQUERY") > 0) {
+	return "multiple";
+} else {
+	return "book";
+}',
 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
 var prefixDCMI = ''http://purl.org/dc/dcmitype/'';
@@ -1746,7 +1793,7 @@ utilities.processDocuments(browser, null, uris, function(newBrowser) {
 
 wait();');
 
-REPLACE INTO "scrapers" VALUES('5287d20c-8a13-6004-4dcb-5bb2b66a9cc9', '2006-06-24 11:22:00', 'SIRSI -2003 Scraper', 'Simon Kornblith', '/uhtbin/cgisirsi',
+REPLACE INTO "scrapers" VALUES('5287d20c-8a13-6004-4dcb-5bb2b66a9cc9', '2006-06-26 16:01:00', 'SIRSI -2003 Scraper', 'Simon Kornblith', '/uhtbin/cgisirsi',
 'var namespace = doc.documentElement.namespaceURI;
 var nsResolver = namespace ? function(prefix) {
 	if (prefix == ''x'') return namespace; else return null;
@@ -1755,13 +1802,13 @@ var nsResolver = namespace ? function(prefix) {
 var elmts = utilities.gatherElementsOnXPath(doc, doc, ''/html/body/form/p/text()[1]'', nsResolver);
 for(i in elmts) {
 	if(utilities.superCleanString(elmts[i].nodeValue) == "Viewing record") {
-		return true;
+		return "book";
 	}
 }
 var xpath = ''//form[@name="hitlist"]/table/tbody/tr'';
 var elmts = utilities.gatherElementsOnXPath(doc, doc, xpath, nsResolver);
 if(elmts.length) {
-	return true;
+	return "multiple";
 }
 return false;',
 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
@@ -1878,7 +1925,13 @@ utilities.HTTPUtilities.doGet(newUri+''?marks=''+recNumbers.join(",")+''&shadow=
 
 wait();');
 
-REPLACE INTO "scrapers" VALUES('0f9fc2fc-306e-5204-1117-25bca009dffc', '2006-06-18 11:19:00', 'TLC/YouSeeMore Scraper', 'Simon Kornblith', 'TLCScripts/interpac\.dll\?(?:.*LabelDisplay.*RecordNumber=[0-9]|Search|ItemTitles)', NULL,
+REPLACE INTO "scrapers" VALUES('0f9fc2fc-306e-5204-1117-25bca009dffc', '2006-06-26 16:01:00', 'TLC/YouSeeMore Scraper', 'Simon Kornblith', 'TLCScripts/interpac\.dll\?(?:.*LabelDisplay.*RecordNumber=[0-9]|Search|ItemTitles)',
+'var detailRe = new RegExp("TLCScripts/interpac\.dll\?.*LabelDisplay.*RecordNumber=[0-9]");
+if(detailRe.test(doc.location.href)) {
+	return "book";
+} else {
+	return "multiple";
+}',
 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
 var prefixDCMI = ''http://purl.org/dc/dcmitype/'';
@@ -1966,7 +2019,13 @@ utilities.processDocuments(browser, null, newUris, function(newBrowser) {
 
 wait();');
 
-REPLACE INTO "scrapers" VALUES('c54d1932-73ce-dfd4-a943-109380e06574', '2006-06-25 17:11:00', 'Project MUSE Scraper', 'Simon Kornblith', '^http://muse\.jhu\.edu/(?:journals/[^/]+/[^/]+/[^/]+\.html|search/pia.cgi)', NULL, 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
+REPLACE INTO "scrapers" VALUES('c54d1932-73ce-dfd4-a943-109380e06574', '2006-06-26 16:01:00', 'Project MUSE Scraper', 'Simon Kornblith', '^http://muse\.jhu\.edu/(?:journals/[^/]+/[^/]+/[^/]+\.html|search/pia.cgi)',
+'var searchRe = new RegExp("^http://[^/]+/search/pia\.cgi");
+if(searchRe.test(doc.location.href)) {
+	return "multiple";
+} else {
+	return "journalArticle";
+}', 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
 var prefixDCMI = ''http://purl.org/dc/dcmitype/'';
 var prefixDummy = ''http://chnm.gmu.edu/firefox-scholar/'';
@@ -2137,7 +2196,12 @@ if(searchRe.test(doc.location.href)) {
 	model.addStatement(uri, prefixRDF + "type", prefixDummy + "journalArticle", false);
 }');
 
-REPLACE INTO "scrapers" VALUES('fcf41bed-0cbc-3704-85c7-8062a0068a7a', '2006-06-25 00:56:00', 'PubMed Scraper', 'Simon Kornblith', '^http://www\.ncbi\.nlm\.nih\.gov/entrez/query\.fcgi\?(?:.*db=PubMed.*list_uids=[0-9]|.*list_uids=[0-9].*db=PubMed|.*db=PubMed.*CMD=search|.*CMD=search.*db=PubMed)', NULL, 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
+REPLACE INTO "scrapers" VALUES('fcf41bed-0cbc-3704-85c7-8062a0068a7a', '2006-06-26 16:01:00', 'PubMed Scraper', 'Simon Kornblith', '^http://www\.ncbi\.nlm\.nih\.gov/entrez/query\.fcgi\?(?:.*db=PubMed.*list_uids=[0-9]|.*list_uids=[0-9].*db=PubMed|.*db=PubMed.*CMD=search|.*CMD=search.*db=PubMed)',
+'if(doc.location.href.indexOf("list_uids=") >= 0) {
+	return "journalArticle";
+} else {
+	return "multiple";
+}', 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
 var prefixDCMI = ''http://purl.org/dc/dcmitype/'';
 var prefixDummy = ''http://chnm.gmu.edu/firefox-scholar/'';
@@ -2261,7 +2325,8 @@ utilities.HTTPUtilities.doGet(newUri, null, function(text) {
 
 wait();');
 
-REPLACE INTO "scrapers" VALUES('951c027d-74ac-47d4-a107-9c3069ab7b48', '2006-06-20 10:52:00', 'Scraper for Dublin Core expressed as HTML META elements', 'Simon Kornblith', NULL,
+REPLACE INTO "scrapers" VALUES('951c027d-74ac-47d4-a107-9c3069ab7b48', '2006-06-26 16:01:00', 'Scraper for Dublin Core expressed as HTML META elements', 'Simon Kornblith',
+'return "website";',
 'var metaTags = doc.getElementsByTagName("meta");
 
 if(metaTags) {
@@ -2295,7 +2360,13 @@ for(var i=0; i<metaTags.length; i++) {
 	}
 }');
 
-REPLACE INTO "scrapers" VALUES('3e684d82-73a3-9a34-095f-19b112d88bbf', '2006-06-24 13:31:00', 'Google Books Scraper', 'Simon Kornblith', '^http://books\.google\.com/books\?(.*vid=.*\&id=.*|.*q=.*)', NULL,
+REPLACE INTO "scrapers" VALUES('3e684d82-73a3-9a34-095f-19b112d88bbf', '2006-06-26 16:01:00', 'Google Books Scraper', 'Simon Kornblith', '^http://books\.google\.com/books\?(.*vid=.*\&id=.*|.*q=.*)',
+'var re = new RegExp(''^http://books\\.google\\.com/books\\?vid=([^&]+).*\\&id=([^&]+)'', ''i'');
+if(re.test(doc.location.href)) {
+	return "book";
+} else {
+	return "multiple";
+}',
 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
 var prefixDCMI = ''http://purl.org/dc/dcmitype/'';

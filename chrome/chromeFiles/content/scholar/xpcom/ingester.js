@@ -176,6 +176,10 @@ Scholar.Ingester.Model.prototype.detachRepository = function() {}
  * model - data model for semantic scrapers
  * scraper - best scraper to use to scrape page
  * items - items returned after page is scraped
+ * window - window, for creating new hidden browsers
+ * url - url, as passed through proxy system
+ * type - type of item that will be scraped (set after retrieveScraper() is
+ *        called)
  *
  * Private properties:
  * _sandbox - sandbox for code execution
@@ -192,7 +196,7 @@ Scholar.Ingester.Model.prototype.detachRepository = function() {}
  * Constructor for Document object
  */
 Scholar.Ingester.Document = function(browserWindow, myWindow){
-	this.scraper = null;
+	this.scraper = this.type = null;
 	this.browser = browserWindow;
 	this.window = myWindow;
 	this.model = new Scholar.Ingester.Model();
@@ -258,11 +262,10 @@ Scholar.Ingester.Document.prototype.canScrape = function(currentScraper) {
 		}
 				
 		// scraperDetectCode returns an associative array (object) in the case of a search result
-		if(typeof(canScrape) == "object") {
-			Scholar.debug("scraperDetectCode returned a URL list");
-			this.scrapeURLList = canScrape;
+		if(canScrape.toString() != "") {
+			this.type = canScrape;
 		} else {
-			Scholar.debug("canScrape was a "+typeof(canScrape));
+			this.type = "website";
 		}
 	}
 	return canScrape;

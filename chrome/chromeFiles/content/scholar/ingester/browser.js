@@ -73,7 +73,13 @@ Scholar_Ingester_Interface.scrapeThisPage = function() {
 Scholar_Ingester_Interface.updateStatus = function() {
 	var documentObject = Scholar_Ingester_Interface._getDocument(Scholar_Ingester_Interface.tabBrowser.selectedBrowser);
 	if(documentObject && documentObject.scraper) {
-		//Scholar_Ingester_Interface.statusImage.src = "chrome://scholar/skin/treeitem-"+TYPE+".png";
+		if(documentObject.type == "multiple") {
+			// Use folder icon for multiple types, for now
+			Scholar_Ingester_Interface.statusImage.src = "chrome://scholar/skin/treesource-collection.png";
+		} else {
+			Scholar_Ingester_Interface.statusImage.src = "chrome://scholar/skin/treeitem-"+documentObject.type+".png";
+		}
+		Scholar.debug("status image is "+Scholar_Ingester_Interface.statusImage.src);
 		Scholar_Ingester_Interface.statusImage.hidden = false;
 	} else {
 		Scholar_Ingester_Interface.statusImage.hidden = true;
