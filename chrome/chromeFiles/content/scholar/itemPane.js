@@ -19,10 +19,8 @@ ScholarItemPane = new function()
 	this.hideEditor = hideEditor;
 	this.modifyField = modifyField;
 	this.modifyCreator = modifyCreator;
-	this.modifySelectedNote = modifySelectedNote;
-	this.removeSelectedNote = removeSelectedNote;
+	this.removeNote = removeNote;
 	this.addNote = addNote;
-	this.onNoteSelected = onNoteSelected;
 	
 	function onLoad()
 	{
@@ -115,12 +113,26 @@ ScholarItemPane = new function()
 		{
 			for(var i = 0; i < notes.length; i++)
 			{
-				var row = document.createElement('row');
+				var icon = document.createElement('image');
+				icon.setAttribute('src','chrome://scholar/skin/treeitem-note.png');
+				
 				var button = document.createElement('label');
 				button.setAttribute('value',_noteToTitle(_itemBeingEdited.getNote(notes[i])));
-				button.setAttribute('onclick',"window.open('chrome://scholar/content/note.xul?item="+_itemBeingEdited.getID()+"&note="+notes[i]+"','','chrome,resizable,centerscreen');");
-				button.setAttribute('class','clicky')
-				row.appendChild(button);
+				
+				box = document.createElement('box');
+				box.setAttribute('onclick',"window.open('chrome://scholar/content/note.xul?item="+_itemBeingEdited.getID()+"&note="+notes[i]+"','','chrome,resizable,centerscreen');");
+				box.setAttribute('class','clicky');
+				box.appendChild(icon);
+				box.appendChild(button);
+				
+				var removeButton = document.createElement('label');
+				removeButton.setAttribute("value","-");
+				removeButton.setAttribute("class","clicky");
+				removeButton.setAttribute("onclick","ScholarItemPane.removeNote("+notes[i]+")");
+				
+				var row = document.createElement('row');
+				row.appendChild(box);
+				row.appendChild(removeButton);
 				
 				_notesList.appendChild(row);
 			}
@@ -298,69 +310,19 @@ ScholarItemPane = new function()
 		_itemBeingEdited.save();
 	}
 	
-	function modifySelectedNote()
+	function removeNote(id)
 	{
-		if(_notesMenu.selectedIndex == -1)
-			return;
-		
-		var id = _selectedNoteID();
-		if(id)
-		{
-			_itemBeingEdited.updateNote(id,_notesField.value);
-		}
-		else if(_notesField.value)//new note
-		{
-			id = _itemBeingEdited.addNote(_notesField.value);
-			_notesMenu.selectedItem.setAttribute('value',id);
-		}
-		
-		var label = _noteToTitle(_notesField.value);
-		_notesMenu.selectedItem.label = label;		//sets the individual item label
-		_notesMenu.setAttribute('label', label);	//sets the 'overall' label of the menu... not usually updated unless the item is reselected
-	}
-	
-	function removeSelectedNote()
-	{
-		if(_notesField.value != "")
+		if(_itemBeingEdited.getNote(id) != "")
 			if(!confirm(Scholar.getString('pane.item.notes.delete.confirm')))
 				return;
 		
-		var id = _selectedNoteID();
 		if(id)
-		{
 			_itemBeingEdited.removeNote(id);
-		}
-		
-		var oldIndex = _notesMenu.selectedIndex;
-		_notesMenu.removeItemAt(oldIndex);
-		_notesMenu.selectedIndex = Math.max(oldIndex-1,0);
-		
-		if(_notesMenu.firstChild.childNodes.length == 0)
-		{
-			addNote();
-		}
-		else
-		{
-			onNoteSelected();
-			_updateNoteCount();
-		}
 	}
 	
 	function addNote()
 	{
 		window.open("chrome://scholar/content/note.xul?item="+_itemBeingEdited.getID(),'','chrome,resizable,centerscreen');
-	}
-	
-	function onNoteSelected()
-	{
-		var id = _selectedNoteID();
-		
-		Scholar.debug(id);
-		
-		if(id)
-			_notesField.value = _itemBeingEdited.getNote(id);
-		else
-			_notesField.value = "";
 	}
 	
 	function _noteToTitle(text)
@@ -389,11 +351,6 @@ ScholarItemPane = new function()
 		var c = _notesList.childNodes.length;
 		
 		_notesLabel.value = Scholar.getString('pane.item.notes.count.'+(c != 1 ? "plural" : "singular")).replace('%1',c) + ":";
-	}
-	
-	function _selectedNoteID()
-	{
-		return _notesMenu.selectedItem.getAttribute('value'); //for some reason, selectedItem.value is null sometimes.
 	}
 }
 

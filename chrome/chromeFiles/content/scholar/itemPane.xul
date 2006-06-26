@@ -36,6 +36,7 @@
 				<grid flex="1">
 					<columns>
 						<column flex="1"/>
+						<column/>
 					</columns>
 					<rows id="editpane-dynamic-notes" flex="1"/>
 				</grid>
