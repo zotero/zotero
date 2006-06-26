@@ -1,7 +1,7 @@
--- 26
+-- 27
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-06-26 16:01:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-06-26 16:41:00'));
 
 REPLACE INTO "scrapers" VALUES('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006-06-26 16:01:00', 'Amazon.com Scraper', 'Simon Kornblith', '^http://www\.amazon\.com/(?:gp/(?:product|search)/|exec/obidos/search-handle-url/)', 
 'if(doc.title.indexOf("search") >= 0) {
@@ -794,7 +794,6 @@ if(newUri) {
 	var m = urlRe.exec(urls[0]);
 	var clearUrl = m[0]+"?clear_saves=1";
 	var postUrl = m[0];
-	var exportUrl = m[1]+"++export/1,-1,-1,B/export";
 	var actionUrl = m[2]+m[3];
 	
 	var postString = "";
@@ -2325,40 +2324,54 @@ utilities.HTTPUtilities.doGet(newUri, null, function(text) {
 
 wait();');
 
-REPLACE INTO "scrapers" VALUES('951c027d-74ac-47d4-a107-9c3069ab7b48', '2006-06-26 16:01:00', 'Scraper for Dublin Core expressed as HTML META elements', 'Simon Kornblith',
+REPLACE INTO "scrapers" VALUES('951c027d-74ac-47d4-a107-9c3069ab7b48', '2006-06-26 16:41:00', 'Generic Scraper', 'Simon Kornblith', '',
 'return "website";',
-'var metaTags = doc.getElementsByTagName("meta");
-
-if(metaTags) {
-	for(var i=0; i<metaTags.length; i++) {
-		var tag = metaTags[i].getAttribute("name");
-		var value = metaTags[i].getAttribute("content");
-		if(tag && value && tag.substr(0, 3).toLowerCase() == "dc.") {
-			return true;
-		}
-	}
-}
-return false;', 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
+'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
 var prefixDCMI = ''http://purl.org/dc/dcmitype/'';
 var prefixDummy = ''http://chnm.gmu.edu/firefox-scholar/'';
 
 var uri = doc.location.href;
 
+// Eventually, we can grab a last modified date from the Last-Modified header,
+// but Piggy Bank will never be able to manage that
+
 var metaTags = doc.getElementsByTagName("meta");
 
+var foundCreator = false;	// Multiple creators encoded two different ways can screw us up
+var foundTitle = false;		// Can always figure this out on our own
 for(var i=0; i<metaTags.length; i++) {
 	var tag = metaTags[i].getAttribute("name");
 	var value = metaTags[i].getAttribute("content");
 	if(tag && value && tag.substr(0, 3).toLowerCase() == "dc.") {
 		var suffix = tag.substr(3);
-		if(suffix == "creator") {
+		if(suffix == "creator" && !foundCreator) {
 			// Everyone uses different methods of encoding the DC creator; clean them
 			value = utilities.cleanAuthor(value);
+			var foundCreator = true;
+		}
+		if(suffix == "title") {
+			foundTitle = true;
 		}
 		model.addStatement(uri, prefixDC + suffix, value, true);
+	} else if(tag && value && (tag == "author" || tag == "author-personal")) {
+		value = utilities.cleanAuthor(value);
+		var foundCreator = true;
+		model.addStatement(uri, prefixDC + "creator", value, true);
+	} else if(tag && value && tag == "author-corporate") {
+		var foundCreator = true;
+		model.addStatement(uri, prefixDC + "creator", value, true);
+	} else if(tag && value && tag == "title") {
+		var foundTitle = true;
+		model.addStatement(uri, prefixDC + "title", value, true);
 	}
-}');
+}
+
+if(!foundTitle) {
+	model.addStatement(uri, prefixDC + "title", doc.title, true);
+}
+
+model.addStatement(uri, prefixRDF + "type", prefixDummy + "website", false);');
 
 REPLACE INTO "scrapers" VALUES('3e684d82-73a3-9a34-095f-19b112d88bbf', '2006-06-26 16:01:00', 'Google Books Scraper', 'Simon Kornblith', '^http://books\.google\.com/books\?(.*vid=.*\&id=.*|.*q=.*)',
 'var re = new RegExp(''^http://books\\.google\\.com/books\\?vid=([^&]+).*\\&id=([^&]+)'', ''i'');
