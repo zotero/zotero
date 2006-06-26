@@ -179,8 +179,6 @@ Scholar.Ingester.Model.prototype.detachRepository = function() {}
  *
  * Private properties:
  * _sandbox - sandbox for code execution
- * _appSvc - AppShellService instance
- * _hiddenBrowser - hiden browser object
  * _scrapeCallback - callback function to be executed when scraping is complete
  */
 
@@ -206,8 +204,6 @@ Scholar.Ingester.Document = function(browserWindow, myWindow){
 	}
 	
 	this.items = new Array();
-	this._appSvc = Cc["@mozilla.org/appshell/appShellService;1"]
-	             .getService(Ci.nsIAppShellService);
 	this._generateSandbox();
 }
 
@@ -351,7 +347,7 @@ Scholar.Ingester.Document.prototype._generateSandbox = function() {
 	this._sandbox.doc = this.browser.contentDocument;
 	this._sandbox.url = this.url;
 	this._sandbox.utilities = new Scholar.Utilities.Ingester(this.window, this.proxiedURL);
-	this._sandbox.utilities.HTTPUtilities = new Scholar.Utilities.HTTP(this._appSvc.hiddenDOMWindow, this.proxiedURL);
+	this._sandbox.utilities.HTTPUtilities = new Scholar.Utilities.Ingester.HTTPUtilities(this.proxiedURL);
 	this._sandbox.window = this.window;
 	this._sandbox.model = this.model;
 	this._sandbox.XPathResult = Components.interfaces.nsIDOMXPathResult;
