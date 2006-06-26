@@ -19,6 +19,48 @@ Scholar.Ingester.deleteHiddenBrowser = function(myBrowser) {
 	Scholar.debug("deleted hidden browser");
 }
 
+/*
+ * Operates the ingester given only a URL
+ * url - URL to scrape
+ * complete - callback function to be executed if page grab completes
+ *            (will be passed document object; obj.items contains array of
+ *            *unsaved* items scraped; empty array indicates unscrapable page)
+ * error - callback function to be executed if an error occurred loading page
+ * myWindow - optional argument indicating window to attach a dialog to. if no
+ *            window is given, Firefox Scholar uses the hidden DOM window and
+ *            will simply avoid scraping multiple pages
+ */
+Scholar.Ingester.ingestURL = function(url, complete, error, myWindow) {
+	var isHidden = false;
+	if(!myWindow) {
+		var myWindow = Components.classes["@mozilla.org/appshell/appShellService;1"]
+					   .getService(Components.interfaces.nsIAppShellService)
+					   .hiddenDOMWindow;
+		var isHidden = true;
+	}
+				   
+	var succeeded = function(browser) {
+		var myDoc = new Scholar.Ingester.Document(browser, myWindow, isHidden);
+		myDoc.retrieveScraper();
+		if(myDoc.scraper) {
+			myDoc.scrapePage(function(myDoc) {
+				Scholar.Ingester.deleteHiddenBrowser(browser);
+				complete(myDoc);
+			});
+		} else {
+			Scholar.Ingester.deleteHiddenBrowser(browser);
+			complete(myDoc);
+		}
+	}
+	
+	var failed = function() {
+		Scholar.debug("Scholar.Ingester.ingestURL: could not ingest "+url);
+		error();
+	}
+	
+	Scholar.Utilities.HTTP.processDocuments(null, [ url ], succeeded, function() {}, failed, true);
+}
+
 /////////////////////////////////////////////////////////////////
 //
 // Scholar.Ingester.ProxyMonitor
@@ -195,10 +237,11 @@ Scholar.Ingester.Model.prototype.detachRepository = function() {}
 /*
  * Constructor for Document object
  */
-Scholar.Ingester.Document = function(browserWindow, myWindow){
-	this.scraper = this.type = null;
-	this.browser = browserWindow;
+Scholar.Ingester.Document = function(myBrowser, myWindow, isHidden) {
+	this.browser = myBrowser;
 	this.window = myWindow;
+	this.isHidden = isHidden;
+	this.scraper = this.type = null;
 	this.model = new Scholar.Ingester.Model();
 	
 	// Create separate URL to account for proxies
@@ -349,7 +392,7 @@ Scholar.Ingester.Document.prototype._generateSandbox = function() {
 	this._sandbox.browser = this.browser;
 	this._sandbox.doc = this.browser.contentDocument;
 	this._sandbox.url = this.url;
-	this._sandbox.utilities = new Scholar.Utilities.Ingester(this.window, this.proxiedURL);
+	this._sandbox.utilities = new Scholar.Utilities.Ingester(this.window, this.proxiedURL, this.isHidden);
 	this._sandbox.utilities.HTTPUtilities = new Scholar.Utilities.Ingester.HTTPUtilities(this.proxiedURL);
 	this._sandbox.window = this.window;
 	this._sandbox.model = this.model;

@@ -790,8 +790,8 @@ if(newUri) {
 		return true;
 	}
 	
-	var urlRe = new RegExp("^(http://[^/]+(/search/[^/]+/))([^\?]*)");
-	var m = urlRe.exec(uri);
+	var urlRe = new RegExp("^(http://[^/]+(/search/[^/]+/))");
+	var m = urlRe.exec(urls[0]);
 	var clearUrl = m[0]+"?clear_saves=1";
 	var postUrl = m[0];
 	var exportUrl = m[1]+"++export/1,-1,-1,B/export";
