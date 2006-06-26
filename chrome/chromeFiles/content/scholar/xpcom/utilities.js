@@ -968,8 +968,15 @@ Scholar.Utilities.HTTP = new function() {
 	* Send an HTTP GET request via XMLHTTPRequest
 	*
 	* Returns false if browser is offline
+	*
+	* doGet can be called as:
+	* Scholar.Utilities.HTTP.doGet(url, onDone)
+	* Scholar.Utilities.HTTP.doGet(url, onStatus, onDone)
+	*
+	* The status handler, which doesn't really serve a very noticeable purpose
+	* in our code, is required for compatiblity with the Piggy Bank project
 	**/
-	function doGet(url, onStatus, onDone) {
+	function doGet(url, callback1, callback2) {
 		if (this.browserIsOffline()){
 			return false;
 		}
@@ -980,7 +987,7 @@ Scholar.Utilities.HTTP = new function() {
 		var test = xmlhttp.open('GET', url, true);
 		
 		xmlhttp.onreadystatechange = function(){
-			_stateChange(xmlhttp, onStatus, onDone);
+			_stateChange(xmlhttp, callback1, callback2);
 		};
 		
 		xmlhttp.send(null);
@@ -993,13 +1000,17 @@ Scholar.Utilities.HTTP = new function() {
 	* Send an HTTP POST request via XMLHTTPRequest
 	*
 	* Returns false if browser is offline
+	*
+	* doPost can be called as:
+	* Scholar.Utilities.HTTP.doPost(url, body, onDone)
+	* Scholar.Utilities.HTTP.doPost(url, body, onStatus, onDone)
+	*
+	* The status handler, which doesn't really serve a very noticeable purpose
+	* in our code, is required for compatiblity with the Piggy Bank project
 	**/
-	function doPost(url, body, onStatus, onDone) {
+	function doPost(url, body, callback1, callback2) {
 		if (this.browserIsOffline()){
 			return false;
-		}
-		if(this.proxiedURL) {
-			url = Scholar.Ingester.ProxyMonitor.properToProxy(url);
 		}
 		
 		var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
@@ -1007,9 +1018,8 @@ Scholar.Utilities.HTTP = new function() {
 		
 		xmlhttp.open('POST', url, true);
 		
-		var me = this;
 		xmlhttp.onreadystatechange = function(){
-			_stateChange(xmlhttp, onStatus, onDone);
+			_stateChange(xmlhttp, callback1, callback2);
 		};
 		
 		xmlhttp.send(body);
@@ -1021,14 +1031,16 @@ Scholar.Utilities.HTTP = new function() {
 	/**
 	* Send an HTTP OPTIONS request via XMLHTTPRequest
 	*
-	* Returns false if browser is offline
+	* doOptions can be called as:
+	* Scholar.Utilities.HTTP.doOptions(url, body, onDone)
+	* Scholar.Utilities.HTTP.doOptions(url, body, onStatus, onDone)
+	*
+	* The status handler, which doesn't really serve a very noticeable purpose
+	* in our code, is required for compatiblity with the Piggy Bank project
 	**/
-	function doOptions(url, body, onStatus, onDone) {
+	function doOptions(url, body, callback1, callback2) {
 		if (this.browserIsOffline()){
 			return false;
-		}
-		if(this.proxiedURL) {
-			url = Scholar.Ingester.ProxyMonitor.properToProxy(url);
 		}
 		
 		var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
@@ -1036,9 +1048,8 @@ Scholar.Utilities.HTTP = new function() {
 		
 		xmlhttp.open('OPTIONS', url, true);
 		
-		var me = this;
 		xmlhttp.onreadystatechange = function(){
-			_stateChange(xmlhttp, onStatus, onDone);
+			_stateChange(xmlhttp, callback1, callback2);
 		};
 		
 		xmlhttp.send(body);
@@ -1053,10 +1064,13 @@ Scholar.Utilities.HTTP = new function() {
 	}
 	
 	
-	function _stateChange(xmlhttp, onStatus, onDone){
-		if(!onDone) {
+	function _stateChange(xmlhttp, callback1, callback2){
+		if(callback2) {
+			onStatus = callback1;
+			onDone = callback2;
+		} else {
+			onDone = callback1;
 			onStatus = null;
-			onDone = onStatus;
 		}
 		switch (xmlhttp.readyState){
 			// Request not yet made
