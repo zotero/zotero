@@ -6,6 +6,8 @@ var _notesField;
 function onLoad()
 {
 	_notesField = document.getElementById('notes-box');
+	_notesField.focus();
+	
 	var params = new Array();
 	var b = document.location.href.substr(document.location.href.indexOf('?')+1).split('&');
 	for(var i = 0; i < b.length; i++)
@@ -22,6 +24,11 @@ function onLoad()
 		_notesField.setAttribute('value',item.getNote(noteID));
 }
 
+function onUnload()
+{
+	save();
+}
+
 function save()
 {
 	if(noteID)
@@ -31,3 +38,4 @@ function save()
 }
 
 addEventListener("load", function(e) { onLoad(e); }, false);
+addEventListener("unload", function(e) { onUnload(e); }, false);

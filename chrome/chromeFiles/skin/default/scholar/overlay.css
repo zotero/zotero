@@ -90,7 +90,7 @@ vbox #scholar-pane
 	width: 150px;
 }
 
-#scholar-info
+#scholar-view-item vbox
 {
 	overflow: auto;
 }

@@ -12,6 +12,11 @@
 
 	<script src="include.js"/>
 	<script src="note.js"/>
+
+	<keyset>
+		<key id="key_close" key="W" modifiers="accel" command="cmd_close"/>
+	</keyset>
+	<command id="cmd_close" oncommand="window.close();"/>
 	
 	<label id="info-label"/>
 	<textbox id="notes-box" flex="1" multiline="true" type="timed" timeout="1000" oncommand="save();"/>

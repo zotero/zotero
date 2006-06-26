@@ -25,14 +25,14 @@
 						<column/>
 						<column flex="1"/>
 					</columns>
-					
-					<rows id="editpane-dynamic-fields" flex="1">
-					</rows>
+					<rows id="editpane-dynamic-fields" flex="1"/>
 				</grid>
 			</vbox>
-			<vbox>
-				<button label="New Note" oncommand="ScholarItemPane.addNote();"/>
-				<label id="editpane-notes-label"/>
+			<vbox flex="1">
+				<hbox align="center">
+					<label id="editpane-notes-label"/>
+					<button label="New Note" oncommand="ScholarItemPane.addNote();"/>
+				</hbox>
 				<grid flex="1">
 					<columns>
 						<column flex="1"/>

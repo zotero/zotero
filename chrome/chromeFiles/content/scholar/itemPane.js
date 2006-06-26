@@ -116,14 +116,15 @@ ScholarItemPane = new function()
 				var icon = document.createElement('image');
 				icon.setAttribute('src','chrome://scholar/skin/treeitem-note.png');
 				
-				var button = document.createElement('label');
-				button.setAttribute('value',_noteToTitle(_itemBeingEdited.getNote(notes[i])));
+				var label = document.createElement('label');
+				label.setAttribute('value',_noteToTitle(_itemBeingEdited.getNote(notes[i])));
+				label.setAttribute('crop','end');
 				
 				box = document.createElement('box');
 				box.setAttribute('onclick',"window.open('chrome://scholar/content/note.xul?item="+_itemBeingEdited.getID()+"&note="+notes[i]+"','','chrome,resizable,centerscreen');");
 				box.setAttribute('class','clicky');
 				box.appendChild(icon);
-				box.appendChild(button);
+				box.appendChild(label);
 				
 				var removeButton = document.createElement('label');
 				removeButton.setAttribute("value","-");
