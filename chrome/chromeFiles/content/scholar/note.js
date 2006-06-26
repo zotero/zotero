@@ -19,7 +19,7 @@ function onLoad()
 	item = Scholar.Items.get(params['item']);
 	noteID = params['note'];
 	
-	document.getElementById('info-label').setAttribute('value',item.getField('title'));
+	document.getElementById('info-label').appendChild(document.createTextNode(item.getField('title') + " by " + item.getField('firstCreator')));
 	if(noteID)
 		_notesField.setAttribute('value',item.getNote(noteID));
 }
