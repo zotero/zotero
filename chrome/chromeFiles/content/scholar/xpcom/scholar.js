@@ -156,7 +156,13 @@ var Scholar = new function(){
 	
 	
 	function getString(name){
-		return _localizedStringBundle.GetStringFromName(name);
+		try {
+			var l10n = _localizedStringBundle.GetStringFromName(name);
+		}
+		catch (e){
+			throw ('Localized string not available for ' + name);
+		}
+		return l10n;
 	}
 	
 	
