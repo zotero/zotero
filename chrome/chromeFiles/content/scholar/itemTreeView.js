@@ -116,7 +116,7 @@ Scholar.ItemTreeView.prototype.notify = function(action, type, ids)
 				
 		if((this._itemGroup.isLibrary() || item.inCollection(this._itemGroup.ref.getID())) && this._itemRowMap[ids] == null)
 		{
-			this._showItem(item,this.rowCount);
+			this._showItem(new Scholar.ItemTreeView.TreeRow('item',item,null,0,false),this.rowCount);
 			this._treebox.rowCountChanged(this.rowCount-1,1);
 	
 			madeChanges = true;
