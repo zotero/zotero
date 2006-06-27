@@ -751,58 +751,116 @@ Scholar.Item.prototype.updateDateModified = function(){
 //
 // save() is not required for note functions
 //
-/**
-* Add a new note to an item and return the noteID
-**/
-Scholar.Item.prototype.addNote = function(text){
-	Scholar.DB.beginTransaction();
-	var noteID = Scholar.getRandomID('itemNotes', 'noteID', 65535);
-	var sql = "INSERT INTO itemNotes (noteID, itemID, note) VALUES (?,?,?)";
-	Scholar.DB.query(sql,
-		[{'int':noteID}, {'int':this.getID()}, {'string':text}]
-	);
-	this.updateDateModified();
+Scholar.Item.prototype.incrementNoteCount = function(){
 	this._data['numNotes']++;
-	Scholar.DB.commitTransaction();
-	Scholar.Notifier.trigger('modify', 'item', this.getID());
-	return noteID;
 }
+
+
+Scholar.Item.prototype.decrementNoteCount = function(){
+	this._data['numNotes']--;
+}
+
+
+/**
+* Determine if an item is a note
+**/
+Scholar.Item.prototype.isNote = function(){
+	return Scholar.ItemTypes.getName(this.getType())=='note';
+}
+
 
 /**
 * Update an item note
+*
+* Note: This can only be called on note items.
 **/
-Scholar.Item.prototype.updateNote = function(noteID, text){
+Scholar.Item.prototype.updateNote = function(text){
+	if (!this.isNote()){
+		throw ("updateNote() can only be called on items of type 'note'");
+	}
+	
+	if (!this.getID()){
+		throw ("Cannot call updateNote() on unsaved note");
+	}
+	
 	Scholar.DB.beginTransaction();
-	var sql = "UPDATE itemNotes SET note=?, dateModified=CURRENT_TIMESTAMP "
-		+ "WHERE itemID=? AND noteID=?";
-	var updated = Scholar.DB.query(sql,
-		[{'string':text}, {'int':this.getID()}, {'int':noteID}]
-	);
-	this.updateDateModified();
-	Scholar.DB.commitTransaction();
-	Scholar.Notifier.trigger('modify', 'item', this.getID());
+	
+	var sql = "UPDATE itemNotes SET note=? WHERE itemID=?";
+	bindParams = [{string:text}, this.getID()];
+	var updated = Scholar.DB.query(sql, bindParams);
+	if (updated){
+		this.updateDateModified();
+		Scholar.DB.commitTransaction();
+		Scholar.Notifier.trigger('modify', 'item', this.getID());
+	}
+	else {
+		Scholar.DB.commitTransaction();
+	}
 }
 
-/**
-* Delete an item note
-**/
-Scholar.Item.prototype.removeNote = function(noteID){
-	Scholar.DB.beginTransaction();
-	var sql = "DELETE FROM itemNotes WHERE itemID=" + this.getID()
-		+ " AND noteID=" + noteID;
-	var deleted = Scholar.DB.query(sql);
-	if (deleted){
-		this.updateDateModified();
-		this._data['numNotes']--;
+
+Scholar.Item.prototype.setNoteSource = function(sourceItemID){
+	if (!this.isNote()){
+		throw ("updateNote() can only be called on items of type 'note'");
 	}
+	
+	if (!this.getID()){
+		throw ("Cannot call setNoteSource() on unsaved note");
+	}
+	
+	Scholar.DB.beginTransaction();
+	
+	var newItem = Scholar.Items.get(sourceItemID);
+	// FK check
+	if (sourceItemID && !newItem){
+		Scholar.DB.rollbackTransaction();
+		throw ("Cannot set note source to invalid item " + sourceItemID);
+	}
+	
+	// Get previous source item id
+	var sql = "SELECT sourceItemID FROM itemNotes WHERE item=" + this.getID();
+	var oldSourceItemID = Scholar.DB.valueQuery(sql);
+	
+	if (oldSourceItemID==sourceItemID){
+		Scholar.debug("Note source hasn't changed", 4);
+		Scholar.DB.commitTransaction();
+		return false;
+	}
+	
+	var oldItem = Scholar.Items.get(oldSourceItemID);
+	if (oldSourceItemID && !oldItem){
+		Scholar.debug("Old source item " + oldSourceItemID
+			+ "didn't exist in setNoteSource()", 2);
+	}
+	
+	var sql = "UPDATE itemNotes SET sourceItemID=? WHERE itemID=?";
+	var bindParams = [sourceItemID ? {int:sourceItemID} : null, this.getID()];
+	Scholar.DB.query(sql, bindParams);
+	this.updateDateModified();
 	Scholar.DB.commitTransaction();
-	Scholar.Notifier.trigger('modify', 'item', this.getID());
+	
+	// Update the note counts of the previous and new sources
+	if (oldItem){
+		oldItem.decrementNoteCount();
+		Scholar.Notifier.trigger('modify', 'item', oldSourceItemID);
+	}
+	if (newItem){
+		newItem.incrementNoteCount();
+		Scholar.Notifier.trigger('modify', 'item', sourceItemID);
+	}
+	
+	return true;
 }
+
 
 /**
 * Returns number of notes in item
 **/
 Scholar.Item.prototype.numNotes = function(){
+	if (this.isNote()){
+		throw ("numNotes() cannot be called on items of type 'note'");
+	}
+	
 	if (!this.getID()){
 		return 0;
 	}
@@ -810,25 +868,48 @@ Scholar.Item.prototype.numNotes = function(){
 	return this._data['numNotes'];
 }
 
+
 /**
 * Get the text of an item note
 **/
-Scholar.Item.prototype.getNote = function(noteID){
-	var sql = "SELECT note FROM itemNotes WHERE itemID=" + this.getID()
-		+ " AND noteID=" + noteID;
+Scholar.Item.prototype.getNote = function(){
+	if (!this.isNote()){
+		throw ("getNote() can only be called on items of type 'note'");
+	}
+	
+	var sql = "SELECT note FROM itemNotes WHERE itemID=" + this.getID();
 	return Scholar.DB.valueQuery(sql);
 }
 
+
 /**
-* Returns an array of noteIDs for this item
+* Get the itemID of the source item for a note
+**/
+Scholar.Item.prototype.getNoteSource = function(){
+	if (!this.isNote()){
+		throw ("getNoteSource() can only be called on items of type 'note'");
+	}
+	
+	var sql = "SELECT sourceItemID FROM itemNotes WHERE itemID=" + this.getID();
+	return Scholar.DB.valueQuery(sql);
+}
+
+
+/**
+* Returns an array of note itemIDs for this item
 **/
 Scholar.Item.prototype.getNotes = function(){
+	if (this.isNote()){
+		Scholar.debug('here');
+		throw ("getNotes() cannot be called on items of type 'note'");
+	}
+	
 	if (!this.getID()){
 		return [];
 	}
 	
-	var sql = "SELECT noteID FROM itemNotes WHERE itemID=" + this.getID()
-		+ " ORDER BY dateCreated";
+	var sql = "SELECT itemID FROM itemNotes NATURAL JOIN items "
+		+ "WHERE sourceItemID=" + this.getID() + " ORDER BY dateAdded";
 	return Scholar.DB.columnQuery(sql);
 }
 
@@ -851,6 +932,24 @@ Scholar.Item.prototype.erase = function(){
 		Scholar.Collections.get(parentCollectionIDs[i]).removeItem(this.getID());
 	}
 	
+	// If note, remove item from source notes
+	if (this.isNote()){
+		var sql = "SELECT sourceItemID FROM itemNotes WHERE itemID=" + this.getID();
+		var sourceItemID = Scholar.DB.valueQuery(sql);
+		if (sourceItemID){
+			var sourceItem = Scholar.Items.get(sourceItemID);
+			Scholar.debug(sourceItem);
+			sourceItem.decrementNoteCount();
+		}
+	}
+	// If not note, unassociate any notes for which this is a source
+	else {
+		var sql = "UPDATE itemNotes SET sourceItemID=NULL WHERE sourceItemID="
+			+ this.getID();
+	}
+	
+	// TODO: remove item from See Also table
+	
 	sql = 'DELETE FROM itemCreators WHERE itemID=' + this.getID() + ";\n";
 	sql += 'DELETE FROM itemNotes WHERE itemID=' + this.getID() + ";\n";
 	sql += 'DELETE FROM itemKeywords WHERE itemID=' + this.getID() + ";\n";
@@ -864,6 +963,9 @@ Scholar.Item.prototype.erase = function(){
 		Scholar.DB.commitTransaction();
 	}
 	catch (e){
+		if (sourceItem){
+			sourceItem.incrementNoteCount();
+		}
 		Scholar.DB.rollbackTransaction();
 		throw (e);
 	}
@@ -957,6 +1059,46 @@ Scholar.Item.prototype._loadItemData = function(){
 }
 
 
+
+Scholar.Notes = new function(){
+	this.add = add;
+	
+	/**
+	* Create a new item of type 'note' and add the note text to the itemNotes table
+	*
+	* Returns the itemID of the new note item
+	**/
+	function add(text, sourceItemID){
+		Scholar.DB.beginTransaction();
+		
+		if (sourceItemID){
+			var sourceItem = Scholar.Items.get(sourceItemID);
+			if (!sourceItem){
+				Scholar.DB.commitTransaction();
+				throw ("Cannot set note source to invalid item " + sourceItemID);
+			}
+		}
+		
+		var note = Scholar.Items.getNewItemByType(Scholar.ItemTypes.getID('note'));
+		note.save();
+		
+		var sql = "INSERT INTO itemNotes VALUES (?,?,?)";
+		var bindParams = [
+			note.getID(),
+			(sourceItemID ? {int:sourceItemID} : null),
+			{string:text}
+		];
+		Scholar.DB.query(sql, bindParams);
+		Scholar.DB.commitTransaction();
+		
+		sourceItem.incrementNoteCount();
+		
+		Scholar.Notifier.trigger('modify', 'item', sourceItemID);
+		Scholar.Notifier.trigger('add', 'item', note.getID());
+		
+		return note.getID();
+	}
+}
 
 
 
@@ -2114,7 +2256,8 @@ Scholar.getItems = function(parent){
 	var toReturn = new Array();
 	
 	if (!parent){
-		var sql = 'SELECT itemID FROM items';
+		var sql = "SELECT itemID FROM items LEFT JOIN itemNotes USING (itemID) "
+			+ "WHERE sourceItemID IS NULL";
 	}
 	else {
 		var sql = 'SELECT itemID FROM collectionItems '

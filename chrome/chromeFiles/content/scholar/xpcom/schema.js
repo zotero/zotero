@@ -385,7 +385,7 @@ Scholar.Schema = new function(){
 		//
 		// Change this value to match the schema version
 		//
-		var toVersion = 24;
+		var toVersion = 25;
 		
 		if (toVersion != _getSchemaSQLVersion()){
 			throw('Schema version does not match version in _migrateSchema()');
@@ -400,7 +400,7 @@ Scholar.Schema = new function(){
 		// Each block performs the changes necessary to move from the
 		// previous revision to that one.
 		for (var i=parseInt(fromVersion) + 1; i<=toVersion; i++){
-			if (i==24){
+			if (i==25){
 				_initializeSchema();
 			}
 		}
