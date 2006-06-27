@@ -1192,9 +1192,11 @@ Scholar.Notes = new function(){
 		Scholar.DB.query(sql, bindParams);
 		Scholar.DB.commitTransaction();
 		
-		sourceItem.incrementNoteCount();
+		if (sourceItemID){
+			sourceItem.incrementNoteCount();
+			Scholar.Notifier.trigger('modify', 'item', sourceItemID);
+		}
 		
-		Scholar.Notifier.trigger('modify', 'item', sourceItemID);
 		Scholar.Notifier.trigger('add', 'item', note.getID());
 		
 		return note.getID();
