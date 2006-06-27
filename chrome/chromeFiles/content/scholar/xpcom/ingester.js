@@ -75,99 +75,127 @@ Scholar.Ingester.ingestURL = function(url, complete, error, myWindow) {
 /*
  * Precompile proxy regexps
  */
-Scholar.Ingester.ProxyMonitor = new Object();
-Scholar.Ingester.ProxyMonitor._ezProxyRe = new RegExp();
-Scholar.Ingester.ProxyMonitor._ezProxyRe.compile("(https?://([^/:]+)(?:\:[0-9])?/login)\\?(?:.+&)?(url|qurl)=([^&]+)");
-Scholar.Ingester.ProxyMonitor._hostRe = new RegExp();
-Scholar.Ingester.ProxyMonitor._hostRe.compile("^https?://(([^/:]+)(\:[0-9]+)?)");
-
-/*
- * Returns a page's proper url, adjusting for proxying
- *
- * This is a bit of a hack, in that it offers an opportunity for spoofing. Not
- * really any way around this, but our scrapers should be sufficiently sandboxed
- * that it won't be a problem.
- */
-Scholar.Ingester.ProxyMonitor.proxyToProper = function(url) {
-	var m = Scholar.Ingester.ProxyMonitor._ezProxyRe.exec(url);
-	if(m) {
-		// EZProxy detected
-		var loginURL = m[1];
-		var host = m[2];
-		var arg = m[3];
-		var url = m[4];
-		
-		if(arg == "qurl") {
-			url = unescape(url);
+Scholar.Ingester.ProxyMonitor = new function() {
+	var _ezProxyRe = new RegExp();
+	_ezProxyRe.compile("\\?(?:.+&)?(url|qurl)=([^&]+)", "i");
+	/*var _hostRe = new RegExp();
+	_hostRe.compile("^https?://(([^/:]+)(?:\:([0-9]+))?)");*/
+	var ioService = Components.classes["@mozilla.org/network/io-service;1"]
+							  .getService(Components.interfaces.nsIIOService);
+	var on = false;
+	var _mapFromProxy = null;
+	var _mapToProxy = null;
+	
+	this.init = init;
+	this.proxyToProper = proxyToProper;
+	this.properToProxy = properToProxy;
+	this.observe = observe;
+	
+	function init() {
+		if(!on) {
+			var observerService = Components.classes["@mozilla.org/observer-service;1"]
+										.getService(Components.interfaces.nsIObserverService);
+			observerService.addObserver(this, "http-on-examine-response", false);
 		}
-		
-		Scholar.Ingester.ProxyMonitor._now = true;
-		Scholar.Ingester.ProxyMonitor._url = url;
-		Scholar.Ingester.ProxyMonitor._host = host;
-		Scholar.Ingester.ProxyMonitor._loginURL = loginURL;
-	} else if(Scholar.Ingester.ProxyMonitor._now) {
-		// EZProxying something
-		var m = Scholar.Ingester.ProxyMonitor._hostRe.exec(url);
-		
-		// EZProxy always runs on a higher port
-		if(url == Scholar.Ingester.ProxyMonitor._loginURL) {
-			Scholar.debug("EZProxy: detected wrong password; won't disable monitoring yet");
-		} else {
-			if(m) {
-				var hostAndPort = m[1];
-				var host = m[2];
-				var port = m[3];
-				
-				if(port) {
-					// Make sure our host is the same who we logged in under
-					if(host == Scholar.Ingester.ProxyMonitor._host) {
-						// Extract host information from the URL we're proxying
-						var m = Scholar.Ingester.ProxyMonitor._hostRe.exec(Scholar.Ingester.ProxyMonitor._url);
-						var properHostAndPort = m[1];
-						if(m) {
-							if(!Scholar.Ingester.ProxyMonitor._mapFromProxy) {
-								Scholar.Ingester.ProxyMonitor._mapFromProxy = new Object();
-								Scholar.Ingester.ProxyMonitor._mapToProxy = new Object();
-							}
-							Scholar.debug("EZProxy: host "+hostAndPort+" is really "+properHostAndPort);
-							Scholar.Ingester.ProxyMonitor._mapFromProxy[hostAndPort] = properHostAndPort;
-							Scholar.Ingester.ProxyMonitor._mapToProxy[properHostAndPort] = hostAndPort;
-							url = url.replace(hostAndPort, properHostAndPort);
-						}
-					}
-				}
+		on = true;
+	}
+	
+	function observe(channel) {
+		channel.QueryInterface(Components.interfaces.nsIHttpChannel);
+		if(channel.getResponseHeader("Server") == "EZproxy") {
+			// We're connected to an EZproxy
+			if(channel.responseStatus != "302") {
+				return;
 			}
-			Scholar.Ingester.ProxyMonitor._now = false;
-		}
-	} else if(Scholar.Ingester.ProxyMonitor._mapFromProxy) {
-		// EZProxy detection is active
-		
-		var m = Scholar.Ingester.ProxyMonitor._hostRe.exec(url);
-		if(m && Scholar.Ingester.ProxyMonitor._mapFromProxy[m[1]]) {
-			url = url.replace(m[1], Scholar.Ingester.ProxyMonitor._mapFromProxy[m[1]]);
-			Scholar.debug("EZProxy: proper url is "+url);
+			
+			Scholar.debug(channel.URI.spec);
+			// We should be able to scrape the URL out of this
+			var m = _ezProxyRe.exec(channel.URI.spec);
+			if(!m) {
+				return;
+			}
+			
+			// Found URL
+			var variable = m[1];
+			var properURL = m[2];
+			if(variable.toLowerCase() == "qurl") {
+				properURL = unescape(properURL);
+			}
+			var properURI = _parseURL(properURL);
+			if(!properURI) {
+				return;
+			}
+			
+			// Get the new URL
+			var newURL = channel.getResponseHeader("Location");
+			if(!newURL) {
+				return;
+			}
+			var newURI = _parseURL(newURL);
+			if(!newURI) {
+				return;
+			}
+			
+			if(channel.URI.host == newURI.host && channel.URI.port != newURI.port) {
+				// Different ports but the same server means EZproxy active
+				
+				Scholar.debug("EZProxy: host "+newURI.hostPort+" is really "+properURI.hostPort);
+				// Initialize variables here so people who never use EZProxies
+				// don't get the (very very minor) speed hit
+				if(!_mapFromProxy) {
+					_mapFromProxy = new Object();
+					_mapToProxy = new Object();
+				}
+				_mapFromProxy[newURI.hostPort] = properURI.hostPort;
+				_mapToProxy[properURI.hostPort] = newURI.hostPort;
+			}
 		}
 	}
 	
-	return url;
-}
-
-/*
- * Returns a page's proxied url from the proper url
- */
-Scholar.Ingester.ProxyMonitor.properToProxy = function(url) {
-	if(Scholar.Ingester.ProxyMonitor._mapToProxy) {
-		// EZProxy detection is active
-		
-		var m = Scholar.Ingester.ProxyMonitor._hostRe.exec(url);
-		if(Scholar.Ingester.ProxyMonitor._mapToProxy[m[1]]) {
-			// Actually need to map
-			url = url.replace(m[1], Scholar.Ingester.ProxyMonitor._mapToProxy[m[1]]);
-			Scholar.debug("EZProxy: proxied url is "+url);
+	/*
+	 * Returns a page's proper url, adjusting for proxying
+	 */
+	function proxyToProper(url) {
+		if(_mapFromProxy) {
+			// EZProxy detection is active
+			
+			var uri = _parseURL(url);
+			if(uri && _mapFromProxy[uri.hostPort]) {
+				url = url.replace(uri.hostPort, _mapFromProxy[uri.hostPort]);
+				Scholar.debug("EZProxy: proper url is "+url);
+			}
 		}
+		
+		return url;
 	}
 	
-	return url;
+	/*
+	 * Returns a page's proxied url from the proper url
+	 */
+	function properToProxy(url) {
+		if(_mapToProxy) {
+			// EZProxy detection is active
+			
+			var uri = _parseURL(url);
+			if(uri && _mapToProxy[uri.hostPort]) {
+				// Actually need to map
+				url = url.replace(uri.hostPort, _mapToProxy[uri.hostPort]);
+				Scholar.debug("EZProxy: proxied url is "+url);
+			}
+		}
+		
+		return url;
+	}
+	
+	/*
+	 * Parses a url into components (hostPort, port, host, and spec)
+	 */
+	function _parseURL(url) {
+		// create an nsIURI (not sure if this is faster than the regular
+		// expression, but it's at least more kosher)
+		var uri = ioService.newURI(url, null, null);
+		return uri;
+	}
 }
 
 /////////////////////////////////////////////////////////////////
