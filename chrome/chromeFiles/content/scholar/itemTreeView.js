@@ -14,8 +14,7 @@ Scholar.ItemTreeView = function(itemGroup)
 	this._itemGroup = itemGroup;
 	
 	this._treebox = null;
-	this._savedSelectionItems = null;
-	this._savedSelectionNotes = null;
+	this._savedSelection = null;
 	this.refresh();
 	
 	this._unregisterID = Scholar.Notifier.registerItemTree(this);
@@ -52,7 +51,7 @@ Scholar.ItemTreeView.prototype.refresh = function()
 	var newRows = this._itemGroup.getChildItems();
 	for(var i = 0; i < newRows.length; i++)
 		if(newRows[i])
-			this._showItem(new Scholar.ItemTreeView.TreeRow('item',newRows[i],null,0,false), i+1); //item ref, before row
+			this._showItem(new Scholar.ItemTreeView.TreeRow('item',newRows[i],0,false), i+1); //item ref, before row
 	
 	this._refreshHashMap();
 }
@@ -114,9 +113,9 @@ Scholar.ItemTreeView.prototype.notify = function(action, type, ids)
 	{
 		var item = Scholar.Items.get(ids);
 				
-		if((this._itemGroup.isLibrary() || item.inCollection(this._itemGroup.ref.getID())) && this._itemRowMap[ids] == null)
+		if((this._itemGroup.isLibrary() || item.inCollection(this._itemGroup.ref.getID())) && this._itemRowMap[ids] == null && !item.isNote())
 		{
-			this._showItem(new Scholar.ItemTreeView.TreeRow('item',item,null,0,false),this.rowCount);
+			this._showItem(new Scholar.ItemTreeView.TreeRow('item',item,0,false),this.rowCount);
 			this._treebox.rowCountChanged(this.rowCount-1,1);
 	
 			madeChanges = true;
@@ -195,11 +194,7 @@ Scholar.ItemTreeView.prototype.getImageSrc = function(row, col)
 {
 	if(col.id == 'title')
 	{
-		var itemType;
-		if(this._getItemAtRow(row).isNote())
-			itemType = 'note';
-		else
-			itemType = Scholar.ItemTypes.getName(this._getItemAtRow(row).getType());
+		var itemType = Scholar.ItemTypes.getName(this._getItemAtRow(row).getType());
 		
 		return "chrome://scholar/skin/treeitem-"+itemType+".png";
 	}
@@ -262,12 +257,12 @@ Scholar.ItemTreeView.prototype.toggleOpenState = function(row)
 	else
 	{
 		var item = this._getItemAtRow(row).ref;
-		var newRows = item.getNotes(); //Get children
+		var newRows = Scholar.Items.get(item.getNotes()); //Get children
 		
 		for(var i = 0; i < newRows.length; i++)
 		{
 			count++;
-			this._showItem(new Scholar.ItemTreeView.TreeRow('note',item,newRows[i],thisLevel+1,false), row+i+1); //item ref, before row
+			this._showItem(new Scholar.ItemTreeView.TreeRow('note',newRows[i],thisLevel+1,false), row+i+1); //item ref, before row
 		}	
 	}
 	
@@ -432,17 +427,10 @@ Scholar.ItemTreeView.prototype.deleteSelection = function()
 	this._treebox.beginUpdateBatch();
 	for (var i=0; i<items.length; i++)
 	{
-		if(items[i].isNote())
-		{
-			items[i].ref.removeNote(items[i].noteID);
-		}
-		else
-		{
-			if(this._itemGroup.isLibrary()) //erase item from DB
-				items[i].ref.erase();
-			else if(this._itemGroup.isCollection())
-				this._itemGroup.ref.removeItem(items[i].ref.getID());
-		}
+		if(this._itemGroup.isLibrary() || items[i].isNote()) //erase item from DB
+			items[i].ref.erase();
+		else if(this._itemGroup.isCollection())
+			this._itemGroup.ref.removeItem(items[i].ref.getID());
 	}
 	this._treebox.endUpdateBatch();
 }
@@ -502,14 +490,10 @@ Scholar.ItemTreeView.prototype._getItemAtRow = function(row)
 Scholar.ItemTreeView.prototype._refreshHashMap = function()
 {
 	this._itemRowMap = new Array();
-	this._noteRowMap = new Array();
 	for(var i=0; i < this.rowCount; i++)
 	{
 		var row = this._getItemAtRow(i);
-		if(row.isNote())
-			this._noteRowMap[row.noteID] = i;
-		else
-			this._itemRowMap[row.ref.getID()] = i;
+		this._itemRowMap[row.ref.getID()] = i;
 	}
 }
 
@@ -518,8 +502,7 @@ Scholar.ItemTreeView.prototype._refreshHashMap = function()
  */
 Scholar.ItemTreeView.prototype.saveSelection = function()
 {
-	this._savedSelectionItems = new Array();
-	this._savedSelectionNotes = new Array();
+	this._savedSelection = new Array();
 	
 	var start = new Object();
 	var end = new Object();
@@ -528,10 +511,7 @@ Scholar.ItemTreeView.prototype.saveSelection = function()
 		this.selection.getRangeAt(i,start,end);
 		for (var j=start.value; j<=end.value; j++)
 		{
-			if(this._getItemAtRow(j).isNote())				
-				this._savedSelectionNotes.push(this._getItemAtRow(j).noteID);
-			else
-				this._savedSelectionItems.push(this._getItemAtRow(j).ref.getID());
+			this._savedSelection.push(this._getItemAtRow(j).ref.getID());
 		}
 	}
 }
@@ -542,16 +522,10 @@ Scholar.ItemTreeView.prototype.saveSelection = function()
 Scholar.ItemTreeView.prototype.rememberSelection = function()
 {
 	this.selection.clearSelection();
-	for(var i=0; i < this._savedSelectionItems.length; i++)
+	for(var i=0; i < this._savedSelection.length; i++)
 	{
-		if(this._itemRowMap[this._savedSelectionItems[i]] != null)
-			this.selection.toggleSelect(this._itemRowMap[this._savedSelectionItems[i]]);
-	}
-	
-	for(var i=0; i < this._savedSelectionNotes.length; i++)
-	{
-		if(this._noteRowMap[this._savedSelectionNotes[i]] != null)
-			this.selection.toggleSelect(this._noteRowMap[this._savedSelectionNotes[i]]);
+		if(this._itemRowMap[this._savedSelection[i]] != null)
+			this.selection.toggleSelect(this._itemRowMap[this._savedSelection[i]]);
 	}
 }
 
@@ -569,7 +543,7 @@ Scholar.ItemTreeView.prototype.onDragStart = function (evt,transferData,action)
 { 
 	transferData.data=new TransferData();
 	this.saveSelection();
-	transferData.data.addDataForFlavour("scholar/item",this._savedSelectionItems);
+	transferData.data.addDataForFlavour("scholar/item",this._savedSelection);
 }
 
 /*
@@ -622,28 +596,29 @@ Scholar.ItemTreeView.prototype.getRowProperties = function(row, prop) 			{ }
 Scholar.ItemTreeView.prototype.getColumnProperties = function(col, prop) 		{ }
 Scholar.ItemTreeView.prototype.getCellProperties = function(row, col, prop) 	{ }
 
-Scholar.ItemTreeView.TreeRow = function(type, ref, noteID, level, isOpen)
+Scholar.ItemTreeView.TreeRow = function(type, ref, level, isOpen)
 {
 	this.type = type;		//either 'item' or 'note'
-	this.ref = ref;			//the item associated with this
-	this.noteID = noteID	//the note ID (if applicable)
+	this.ref = ref;			//the item/note associated with this
 	this.level = level;
 	this.isOpen = isOpen;
 }
 
 Scholar.ItemTreeView.TreeRow.prototype.isNote = function()
 {
-	return this.type == 'note';
+	return this.ref.isNote();
 }
 
 Scholar.ItemTreeView.TreeRow.prototype.getField = function(field)
 {
-	if(this.isNote())
+	if(this.isNote() && field == 'title')
 	{
-		if(field == 'title')
-		{
-			return this.ref.getNote(this.noteID);
-		}
+		var t = this.ref.getNote();
+		var n = t.indexOf("\n");
+		if(n > -1)
+			t = t.substring(0,n);
+		return t;
+	
 	}
 	else
 	{
@@ -654,10 +629,7 @@ Scholar.ItemTreeView.TreeRow.prototype.getField = function(field)
 
 Scholar.ItemTreeView.TreeRow.prototype.getType = function()
 {
-	if(this.isNote())
-		return 'note';
-	else
-		return this.ref.getType();
+	return this.ref.getType();
 }
 
 Scholar.ItemTreeView.TreeRow.prototype.numNotes = function()

@@ -125,18 +125,23 @@ var ScholarPane = new function()
 		{
 			var item = itemsView._getItemAtRow(itemsView.selection.currentIndex);
 			
-			if(!item.isNote())
+			if(item.isNote())
+			{
+				
+				document.getElementById('item-pane').selectedIndex = 2;
+			}
+			else
+			{
 				ScholarItemPane.viewItem(item.ref);
-
-			document.getElementById('scholar-view-item').hidden = false;
-			document.getElementById('scholar-view-selected-label').hidden = true;
+				document.getElementById('item-pane').selectedIndex = 1;
+			}
 		}
 		else
 		{
-			document.getElementById('scholar-view-item').hidden = true;
-			var label = document.getElementById('scholar-view-selected-label');
-			label.hidden = false;
+			document.getElementById('item-pane').selectedIndex = 0;
 			
+			var label = document.getElementById('scholar-view-selected-label');
+		
 			if(itemsView && itemsView.selection.count)
 				label.value = Scholar.getString('pane.item.selected.multiple').replace('%1', itemsView.selection.count);	
 			else

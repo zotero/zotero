@@ -140,10 +140,13 @@
 					</tree>
 				</vbox>
 				<splitter id="scholar-view-splitter" collapse="after" persist="state"><grippy/></splitter>
-				<box id="item-pane" pack="center" align="center">
-					<label id="scholar-view-selected-label"/>
-					<tabbox id="scholar-view-item" hidden="true" flex="1"/>
-				</box>
+				<deck id="item-pane" selectedIndex="0">
+					<box pack="center" align="center"><label id="scholar-view-selected-label"/></box>
+					<tabbox id="scholar-view-item" flex="1"/>
+					<vbox id="scholar-view-note" flex="1" pack="center" align="center">
+						<label>Inline editing: coming soon</label>
+					</vbox>
+				</deck>
 			</hbox>
 		</vbox>
 		<splitter id="scholar-splitter" resizebefore="closest" resizeafter="closest" position="2" persist="collapsed"/>

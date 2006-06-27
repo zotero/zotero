@@ -1,5 +1,4 @@
 var item;
-var noteID;
 var note;
 var _notesField;
 
@@ -17,11 +16,14 @@ function onLoad()
 		params[b[i].substr(0,mid)] = b[i].substr(mid+1);
 	}
 	item = Scholar.Items.get(params['item']);
-	noteID = params['note'];
+	var noteID = params['note'];
 	
 	document.getElementById('info-label').appendChild(document.createTextNode(item.getField('title') + " by " + item.getField('firstCreator')));
 	if(noteID)
-		_notesField.setAttribute('value',item.getNote(noteID));
+	{
+		note = Scholar.Items.get(noteID);
+		_notesField.setAttribute('value',note.getNote());
+	}
 }
 
 function onUnload()
@@ -31,10 +33,15 @@ function onUnload()
 
 function save()
 {
-	if(noteID)
-		item.updateNote(noteID,_notesField.value);
+	if(note)
+	{
+		note.updateNote(_notesField.value);
+	}
 	else
-		noteID = item.addNote(_notesField.value);
+ 	{
+		var noteID = Scholar.Notes.add(_notesField.value,item.getID());
+		note = Scholar.Items.get(noteID);
+	}
 }
 
 addEventListener("load", function(e) { onLoad(e); }, false);

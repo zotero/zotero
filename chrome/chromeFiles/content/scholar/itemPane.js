@@ -43,7 +43,8 @@ ScholarItemPane = new function()
 		
 		var itemTypes = Scholar.ItemTypes.getTypes();
 		for(var i = 0; i<itemTypes.length; i++)
-			_itemTypeMenu.appendItem(Scholar.getString("itemTypes."+itemTypes[i]['name']),itemTypes[i]['id']);
+			if(itemTypes[i]['id'] != 1)
+				_itemTypeMenu.appendItem(Scholar.getString("itemTypes."+itemTypes[i]['name']),itemTypes[i]['id']);
 		
 		return true;
 	}
@@ -108,7 +109,7 @@ ScholarItemPane = new function()
 		while(_notesList.hasChildNodes())
 			_notesList.removeChild(_notesList.firstChild);
 				
-		var notes = _itemBeingEdited.getNotes();
+		var notes = Scholar.Items.get(_itemBeingEdited.getNotes());
 		if(notes.length)
 		{
 			for(var i = 0; i < notes.length; i++)
@@ -117,11 +118,11 @@ ScholarItemPane = new function()
 				icon.setAttribute('src','chrome://scholar/skin/treeitem-note.png');
 				
 				var label = document.createElement('label');
-				label.setAttribute('value',_noteToTitle(_itemBeingEdited.getNote(notes[i])));
+				label.setAttribute('value',_noteToTitle(notes[i].getNote()));
 				label.setAttribute('crop','end');
 				
 				box = document.createElement('box');
-				box.setAttribute('onclick',"window.open('chrome://scholar/content/note.xul?item="+_itemBeingEdited.getID()+"&note="+notes[i]+"','','chrome,resizable,centerscreen');");
+				box.setAttribute('onclick',"window.open('chrome://scholar/content/note.xul?item="+_itemBeingEdited.getID()+"&note="+notes[i].getID()+"','','chrome,resizable,centerscreen');");
 				box.setAttribute('class','clicky');
 				box.appendChild(icon);
 				box.appendChild(label);
@@ -129,7 +130,7 @@ ScholarItemPane = new function()
 				var removeButton = document.createElement('label');
 				removeButton.setAttribute("value","-");
 				removeButton.setAttribute("class","clicky");
-				removeButton.setAttribute("onclick","ScholarItemPane.removeNote("+notes[i]+")");
+				removeButton.setAttribute("onclick","ScholarItemPane.removeNote("+notes[i].getID()+")");
 				
 				var row = document.createElement('row');
 				row.appendChild(box);
@@ -313,12 +314,10 @@ ScholarItemPane = new function()
 	
 	function removeNote(id)
 	{
-		if(_itemBeingEdited.getNote(id) != "")
-			if(!confirm(Scholar.getString('pane.item.notes.delete.confirm')))
-				return;
-		
-		if(id)
-			_itemBeingEdited.removeNote(id);
+		var note = Scholar.Items.get(id);
+		if(note)
+			if(confirm(Scholar.getString('pane.item.notes.delete.confirm')))
+				note.erase();
 	}
 	
 	function addNote()
