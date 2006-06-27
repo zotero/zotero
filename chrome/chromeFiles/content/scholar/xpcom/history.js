@@ -114,8 +114,8 @@ Scholar.History = new function(){
 	* key is a hyphen-delimited list of columns identifying the row
 	* 		e.g. 'itemID-creatorID'
 	*
-	* keyValues is a hyphen-delimited list of values matching the key parts
-	* 		e.g. '1-1'
+	* keyValues is an array or hyphen-delimited string of values matching
+	*	the key parts (e.g. [1, 1] or '1-1')
 	*
 	* _field_ is optional -- otherwise all fields are saved
 	**/
@@ -248,7 +248,7 @@ Scholar.History = new function(){
 			+ "transactions WHERE transactionSetID=" + (_currentID + 1));
 		
 		if (!min){
-			Scholar.DB.rollbackTransaction();
+			Scholar.DB.commitTransaction();
 			return;
 		}
 		
