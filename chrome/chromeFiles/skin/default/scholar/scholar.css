@@ -27,10 +27,20 @@ textbox[multiline="true"][type="timed"]
 
 .scholar-progress-item-label
 {
-	width: 220px;
+	width: 210px;
 }
 
 .scholar-progress-description
 {
-	width: 220px;
+	width: 210px;
+}
+
+.scholar-scrape-popup-library
+{
+	list-style-image: url('chrome://scholar/skin/treesource-library.png');
+}
+
+.scholar-scrape-popup-collection
+{
+	list-style-image: url('chrome://scholar/skin/treesource-collection.png');
 }

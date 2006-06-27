@@ -26,6 +26,7 @@ Scholar_Ingester_Interface.init = function() {
 	Scholar_Ingester_Interface.browsers = new Array();
 	Scholar_Ingester_Interface.browserDocuments = new Object();
 	Scholar_Ingester_Interface.browserUris = new Array();
+	Scholar_Ingester_Interface._scrapePopupShowing = new Array();
 	Scholar.Ingester.ProxyMonitor.init();
 	
 	window.addEventListener("load", Scholar_Ingester_Interface.chromeLoad, false);
@@ -59,11 +60,11 @@ Scholar_Ingester_Interface.chromeUnload = function() {
 /*
  * Scrapes a page (called when the capture icon is clicked)
  */
-Scholar_Ingester_Interface.scrapeThisPage = function() {
+Scholar_Ingester_Interface.scrapeThisPage = function(saveLocation) {
 	var documentObject = Scholar_Ingester_Interface._getDocument(Scholar_Ingester_Interface.tabBrowser.selectedBrowser);
 	if(documentObject.scraper) {
-		Scholar_Ingester_Interface.scrapeProgress = new Scholar_Ingester_Interface.Progress(window);
-		documentObject.scrapePage(Scholar_Ingester_Interface._finishScraping);
+		var scrapeProgress = new Scholar_Ingester_Interface.Progress(window);
+		documentObject.scrapePage(function(obj, returnValue) { Scholar_Ingester_Interface._finishScraping(obj, returnValue, scrapeProgress, saveLocation) });
 	}
 }
 
@@ -168,6 +169,47 @@ Scholar_Ingester_Interface.Listener.onLocationChange = function(progressObject) 
 	}
 }
 
+Scholar_Ingester_Interface.hidePopup = function(collectionID) {
+	Scholar_Ingester_Interface._scrapePopupShowing = false;
+}
+
+Scholar_Ingester_Interface.showPopup = function(collectionID, parentElement) {
+	if(Scholar_Ingester_Interface._scrapePopupShowing && parentElement.hasChildNodes()) {
+		return false;	// Don't dynamically reload popups that are already showing
+	}
+	Scholar_Ingester_Interface._scrapePopupShowing = true;
+	
+	while(parentElement.hasChildNodes()) {
+		parentElement.removeChild(parentElement.firstChild);
+	}
+	
+	if(collectionID == null) {	// show library
+		var newItem = document.createElement("menuitem");
+		newItem.setAttribute("label", Scholar.getString("pane.collections.library"));
+		newItem.setAttribute("class", "menuitem-iconic scholar-scrape-popup-library");
+		newItem.setAttribute("oncommand", 'Scholar_Ingester_Interface.scrapeThisPage()');
+		parentElement.appendChild(newItem);
+	}
+	
+	var childrenList = Scholar.getCollections(collectionID);
+	for(var i = 0; i < childrenList.length; i++) {
+		if(childrenList[i].hasChildCollections()) {
+			var newItem = document.createElement("menu");
+			var subMenu = document.createElement("menupopup");
+			subMenu.setAttribute("onpopupshowing", 'Scholar_Ingester_Interface.showPopup("'+childrenList[i].getID()+'", this)');
+			newItem.setAttribute("class", "menu-iconic scholar-scrape-popup-collection");
+			newItem.appendChild(subMenu);
+		} else {
+			var newItem = document.createElement("menuitem");
+			newItem.setAttribute("class", "menuitem-iconic scholar-scrape-popup-collection");
+		}
+		newItem.setAttribute("label", childrenList[i].getName());
+		newItem.setAttribute("oncommand", 'Scholar_Ingester_Interface.scrapeThisPage("'+childrenList[i].getID()+'")');
+		
+		parentElement.appendChild(newItem);
+	}
+}
+
 //////////////////////////////////////////////////////////////////////////////
 //
 // Private Scholar_Ingester_Interface methods
@@ -231,11 +273,11 @@ Scholar_Ingester_Interface._deleteDocument = function(browser) {
 /*
  * Callback to be executed when scraping is complete
  */
-Scholar_Ingester_Interface._finishScraping = function(obj, returnValue) {
+Scholar_Ingester_Interface._finishScraping = function(obj, returnValue, scrapeProgress, saveLocation) {
 	if(obj.items.length) {
 	try {		// Encased in a try block to fix a as-of-yet unresolved issue
 			
-			Scholar_Ingester_Interface.scrapeProgress.changeHeadline(Scholar.getString("ingester.scrapeComplete"));
+			scrapeProgress.changeHeadline(Scholar.getString("ingester.scrapeComplete"));
 			
 			// Display title and creators
 			var labels = new Array();
@@ -244,22 +286,30 @@ Scholar_Ingester_Interface._finishScraping = function(obj, returnValue) {
 				labels.push(obj.items[i].getField("title"));
 				icons.push("chrome://scholar/skin/treeitem-"+Scholar.ItemTypes.getName(obj.items[i].getField("itemTypeID"))+".png");
 			}
-			Scholar_Ingester_Interface.scrapeProgress.addLines(labels, icons);
+			scrapeProgress.addLines(labels, icons);
 		} catch(ex) {
 			Scholar.debug(ex);
 		}
 		
+		// Get collection if the user used the drop-down menu
+		if(saveLocation) {
+			var saveCollection = Scholar.Collections.get(saveLocation);
+		}
 		// Save items
 		for(i in obj.items) {
 			obj.items[i].save();
+			if(saveLocation) {
+				saveCollection.addItem(obj.items[i].getID());
+			}
 		}
-		setTimeout(function() { Scholar_Ingester_Interface.scrapeProgress.fade() }, 2500);
+		
+		setTimeout(function() { scrapeProgress.fade() }, 2500);
 	} else if(returnValue) {
-		Scholar_Ingester_Interface.scrapeProgress.kill();
+		scrapeProgress.kill();
 	} else {
-		Scholar_Ingester_Interface.scrapeProgress.changeHeadline(Scholar.getString("ingester.scrapeError"));
-		Scholar_Ingester_Interface.scrapeProgress.addDescription(Scholar.getString("ingester.scrapeErrorDescription"));
-		setTimeout(function() { Scholar_Ingester_Interface.scrapeProgress.fade() }, 2500);
+		scrapeProgress.changeHeadline(Scholar.getString("ingester.scrapeError"));
+		scrapeProgress.addDescription(Scholar.getString("ingester.scrapeErrorDescription"));
+		setTimeout(function() { scrapeProgress.fade() }, 2500);
 	}
 }
 
