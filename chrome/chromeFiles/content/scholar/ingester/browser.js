@@ -61,7 +61,7 @@ Scholar_Ingester_Interface.chromeUnload = function() {
 Scholar_Ingester_Interface.scrapeThisPage = function() {
 	var documentObject = Scholar_Ingester_Interface._getDocument(Scholar_Ingester_Interface.tabBrowser.selectedBrowser);
 	if(documentObject.scraper) {
-		Scholar_Ingester_Interface.scrapeProgress = new Scholar_Ingester_Interface.Progress(window, Scholar_Ingester_Interface.tabBrowser.selectedBrowser.contentDocument, Scholar.getString("ingester.scraping"));
+		Scholar_Ingester_Interface.scrapeProgress = new Scholar_Ingester_Interface.Progress(window);
 		documentObject.scrapePage(Scholar_Ingester_Interface._finishScraping);
 	}
 }
@@ -79,7 +79,6 @@ Scholar_Ingester_Interface.updateStatus = function() {
 		} else {
 			Scholar_Ingester_Interface.statusImage.src = "chrome://scholar/skin/treeitem-"+documentObject.type+".png";
 		}
-		Scholar.debug("status image is "+Scholar_Ingester_Interface.statusImage.src);
 		Scholar_Ingester_Interface.statusImage.hidden = false;
 	} else {
 		Scholar_Ingester_Interface.statusImage.hidden = true;
@@ -159,8 +158,13 @@ Scholar_Ingester_Interface.Listener.onLocationChange = function(progressObject) 
 			Scholar_Ingester_Interface._deleteDocument(browser);
 		}
 	}
-
-		Scholar_Ingester_Interface.updateStatus();
+	Scholar_Ingester_Interface.updateStatus();
+	
+	// Make sure scrape progress is gone
+	try {
+		Scholar_Ingester_Interface.scrapeProgress.kill();
+	} catch(ex) {
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -228,51 +232,33 @@ Scholar_Ingester_Interface._deleteDocument = function(browser) {
  */
 Scholar_Ingester_Interface._finishScraping = function(obj, returnValue) {
 	if(obj.items.length) {
-		try {		// Encased in a try block to fix a as-of-yet unresolved issue
-			var item1 = obj.items[0];
+	try {		// Encased in a try block to fix a as-of-yet unresolved issue
 			
 			Scholar_Ingester_Interface.scrapeProgress.changeHeadline(Scholar.getString("ingester.scrapeComplete"));
 			
-			var fields = Scholar.ItemFields.getItemTypeFields(item1.getField("itemTypeID"));
-			
 			// Display title and creators
-			var titleLabel = Scholar.getString("itemFields.title") + ":"
-			Scholar_Ingester_Interface.scrapeProgress.addResult(titleLabel, item1.getField("title"));
-			var creators = item1.numCreators();
-			if(creators) {
-				for(var i=0; i<creators; i++) {
-					var creator = item1.getCreator(i);
-					var label = Scholar.getString("creatorTypes."+Scholar.CreatorTypes.getName(creator.creatorTypeID)) + ":";
-					var data = creator.firstName + ' ' + creator.lastName;
-					Scholar_Ingester_Interface.scrapeProgress.addResult(label, data);
-				}
+			var labels = new Array();
+			var icons = new Array();
+			for(var i in obj.items) {
+				labels.push(obj.items[i].getField("title"));
+				icons.push("chrome://scholar/skin/treeitem-"+Scholar.ItemTypes.getName(obj.items[i].getField("itemTypeID"))+".png");
 			}
-			
-			// Add additional fields for display
-			for(i in fields) {
-				var data = item1.getField(fields[i]);
-				if(data) {
-					var name = Scholar.ItemFields.getName(fields[i]);
-					if(name != "source") {
-						var label = Scholar.getString("itemFields."+ name) + ":";
-						Scholar_Ingester_Interface.scrapeProgress.addResult(label, data);
-					}
-				}
-			}
+			Scholar_Ingester_Interface.scrapeProgress.addLines(labels, icons);
 		} catch(ex) {
+			Scholar.debug(ex);
 		}
 		
 		// Save items
-		for(i in obj.items) {
+		/*for(i in obj.items) {
 			obj.items[i].save();
-		}
-		setTimeout(function() { Scholar_Ingester_Interface.scrapeProgress.fade() }, 2000);
+		}*/
+		setTimeout(function() { Scholar_Ingester_Interface.scrapeProgress.fade() }, 2500);
 	} else if(returnValue) {
 		Scholar_Ingester_Interface.scrapeProgress.kill();
 	} else {
 		Scholar_Ingester_Interface.scrapeProgress.changeHeadline(Scholar.getString("ingester.scrapeError"));
 		Scholar_Ingester_Interface.scrapeProgress.addDescription(Scholar.getString("ingester.scrapeErrorDescription"));
-		setTimeout(function() { Scholar_Ingester_Interface.scrapeProgress.fade() }, 2000);
+		setTimeout(function() { Scholar_Ingester_Interface.scrapeProgress.fade() }, 2500);
 	}
 }
 
@@ -284,97 +270,96 @@ Scholar_Ingester_Interface._finishScraping = function(obj, returnValue) {
 
 // Handles the display of a div showing progress in scraping
 
-Scholar_Ingester_Interface.Progress = function(myWindow, myDocument, headline) {
-	this.window = myWindow;
-	this.document = myDocument;
-	this.div = this.document.createElement('div');
-	this.div.style.MozOpacity = '.9';
-	this.div.style.position = 'fixed';
-	this.div.style.right = '20px';
-	this.div.style.top = '20px';
-	this.div.style.width = '200px';
-	this.div.style.height = '150px';
-	this.div.style.backgroundColor = '#7eadd9'
-	this.div.style.color = '#000';
-	this.div.style.padding = '5px';
-	this.div.style.fontFamily = 'Arial, Geneva, Helvetica';
-	this.div.style.overflow = 'hidden';
-	this.div.id = 'firefoxScholarProgressDiv';
+Scholar_Ingester_Interface.Progress = function(myWindow) {
+	this.openerWindow = myWindow;
+	this.progressWindow = myWindow.openDialog("chrome://scholar/chrome/ingester/progress.xul", "", "chrome,dialog=no,titlebar=no,popup=yes");
+	var me = this;
+	this.progressWindow.addEventListener("load", function() { me.windowLoaded() }, false);
 	
-	this.headlineP = this.document.createElement("div");
-	this.headlineP.style.textAlign = 'center';
-	this.headlineP.style.fontSize = '22px';
-	this.headlineP.style.marginBottom = '5px';
-	if(!headline) {
-		headline = '&nbsp;';
+	this._loadDescription = null;
+	this._loadLines = new Array();
+	this._loadIcons = new Array();
+	this._loadHeadline = Scholar.getString("ingester.scraping");
+}
+
+Scholar_Ingester_Interface.Progress.prototype.windowLoaded = function() {
+	this._windowLoaded = true;
+	this._move();
+	
+	this.changeHeadline(this._loadHeadline);
+	this.addLines(this._loadLines, this._loadIcons);
+	if(this._loadDescription) {
+		this.addDescription(this._loadDescription);
 	}
-	var headlineNode = this.document.createTextNode(headline);
-	this.headlineP.appendChild(headlineNode);
-	this.div.appendChild(this.headlineP);
-	
-	this.bodyP = this.document.createElement("div");
-	this.table = this.document.createElement("table");
-	this.table.style.borderCollapse = 'collapse';
-	this.bodyP.appendChild(this.table);
-	this.div.appendChild(this.bodyP);
-	
-	this.document.body.appendChild(this.div);
 }
 
 Scholar_Ingester_Interface.Progress.prototype.changeHeadline = function(headline) {
-	this.headlineP.removeChild(this.headlineP.firstChild);
-	
-	var headlineNode = this.document.createTextNode(headline);
-	this.headlineP.appendChild(headlineNode);
+	if(this._windowLoaded) {
+		this.progressWindow.document.getElementById("scholar-progress-text-headline").value = headline;
+	} else {
+		this._loadHeadline = headline;
+	}
 }
 
-Scholar_Ingester_Interface.Progress.prototype.addResult = function(label, data) {
-	var labelNode = this.document.createTextNode(label);
-	var dataNode = this.document.createTextNode(data);
-	
-	var tr = this.document.createElement("tr");
-	var labelTd = this.document.createElement("td");
-	labelTd.style.fontSize = '10px';
-	labelTd.style.width = '60px';
-	var dataTd = this.document.createElement("td");
-	dataTd.style.fontSize = '10px';
-	
-	labelTd.appendChild(labelNode);
-	dataTd.appendChild(dataNode);
-	tr.appendChild(labelTd);
-	tr.appendChild(dataTd);
-	this.table.appendChild(tr);
+Scholar_Ingester_Interface.Progress.prototype.addLines = function(label, icon) {
+	if(this._windowLoaded) {
+		for(i in label) {
+			var newLabel = this.progressWindow.document.createElement("label");
+			newLabel.setAttribute("class", "scholar-progress-item-label");
+			newLabel.setAttribute("crop", "end");
+			newLabel.setAttribute("value", label[i]);
+			
+			var newImage = this.progressWindow.document.createElement("image");
+			newImage.setAttribute("class", "scholar-progress-item-icon");
+			newImage.setAttribute("src", icon[i]);
+			
+			var newHB = this.progressWindow.document.createElement("hbox");
+			newHB.setAttribute("class", "scholar-progress-item-hbox");
+			newHB.setAttribute("valign", "center");
+			newHB.appendChild(newImage);
+			newHB.appendChild(newLabel);
+			
+			this.progressWindow.document.getElementById("scholar-progress-text-box").appendChild(newHB);
+		}
+		
+		this._move();
+	} else {
+		this._loadLines = this._loadLines.concat(label);
+		this._loadIcons = this._loadIcons.concat(icon);
+	}
 }
 
-Scholar_Ingester_Interface.Progress.prototype.addDescription = function(description) {
-	var descriptionNode = this.document.createTextNode(description);
-	var tr = this.document.createElement("tr");
-	var descriptionTd = this.document.createElement("td");
-	descriptionTd.style.fontSize = '10px';
-	descriptionTd.style.colspan = '2';
-	
-	descriptionTd.appendChild(descriptionNode);
-	tr.appendChild(descriptionTd);
-	this.table.appendChild(tr);
+Scholar_Ingester_Interface.Progress.prototype.addDescription = function(text) {
+	if(this._windowLoaded) {
+		var newHB = this.progressWindow.document.createElement("hbox");
+		newHB.setAttribute("class", "scholar-progress-item-hbox");
+		var newDescription = this.progressWindow.document.createElement("description");
+		newDescription.setAttribute("class", "scholar-progress-description");
+		var newText = this.progressWindow.document.createTextNode(text);
+		
+		newDescription.appendChild(newText);
+		newHB.appendChild(newDescription);
+		this.progressWindow.document.getElementById("scholar-progress-text-box").appendChild(newHB);
+		
+		this._move();
+	} else {
+		this._loadDescription = text;
+	}
+}
+
+Scholar_Ingester_Interface.Progress.prototype._move = function() {
+	this.progressWindow.sizeToContent();
+	this.progressWindow.moveTo(
+		this.openerWindow.screenX + this.openerWindow.outerWidth - this.progressWindow.outerWidth - 30,
+		this.openerWindow.screenY + this.openerWindow.outerHeight - this.progressWindow.outerHeight
+	);
 }
 
 Scholar_Ingester_Interface.Progress.prototype.fade = function() {
-	// Icky, icky hack to keep objects
-	var me = this;
-	this._fader = function() {
-		if(me.div.style.MozOpacity <= 0) {
-			me.div.style.display = 'none';
-		} else {
-			me.div.style.MozOpacity -= .1;
-			setTimeout(me._fader, 100);
-		}
-	}
-	
-	// Begin fade
-	this._fader();
+	this.progressWindow.close();
 }
 
 Scholar_Ingester_Interface.Progress.prototype.kill = function() {
-	this.div.style.display = 'none';
+	this.progressWindow.close();
 }
 

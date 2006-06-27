@@ -1,7 +1,7 @@
--- 27
+-- 28
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-06-26 16:41:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-06-26 21:40:00'));
 
 REPLACE INTO "scrapers" VALUES('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006-06-26 16:01:00', 'Amazon.com Scraper', 'Simon Kornblith', '^http://www\.amazon\.com/(?:gp/(?:product|search)/|exec/obidos/search-handle-url/)', 
 'if(doc.title.indexOf("search") >= 0) {
@@ -270,7 +270,7 @@ utilities.HTTPUtilities.doPost(newUri, ''exportselect=''+exportselect+''&exportt
 })
 wait();');
 
-REPLACE INTO "scrapers" VALUES('88915634-1af6-c134-0171-56fd198235ed', '2006-06-26 16:01:00', 'LOC/Voyager WebVoyage Scraper', 'Simon Kornblith', 'Pwebrecon\.cgi',
+REPLACE INTO "scrapers" VALUES('88915634-1af6-c134-0171-56fd198235ed', '2006-06-26 21:40:00', 'LOC/Voyager WebVoyage Scraper', 'Simon Kornblith', 'Pwebrecon\.cgi',
 'var export_options = doc.forms.namedItem(''frm'').elements.namedItem(''RD'').options;
 for(i in export_options) {
 	if(export_options[i].text == ''Latin1 MARC''
@@ -280,9 +280,9 @@ for(i in export_options) {
 	|| export_options[i].text == ''MARC (non-Unicode/MARC-8)'') {
 		// We have an exportable single record
 		if(doc.forms.namedItem(''frm'').elements.namedItem(''RC'')) {
-			return "book";
-		} else {
 			return "multiple";
+		} else {
+			return "book";
 		}
 	}
 }

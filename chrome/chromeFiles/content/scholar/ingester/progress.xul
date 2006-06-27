@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://scholar/skin/scholar.css" type="text/css"?>
+
+<!DOCTYPE window SYSTEM "chrome://scholar/locale/scholar.dtd">
+
+<window id="scholar-progress-window"
+        xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+        windowtype="alert:alert"
+        align="start">
+
+	<hbox id="scholar-progress-box">
+		<vbox id="scholar-progress-text-box">
+			<label id="scholar-progress-text-headline" style="font-weight: bold;" />
+		</vbox>
+	</hbox>
+
+</window>
