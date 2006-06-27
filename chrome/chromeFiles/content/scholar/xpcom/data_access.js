@@ -193,6 +193,18 @@ Scholar.Item.prototype.getCreator = function(pos){
 
 
 /*
+ * Returns a multidimensional array of creators, or an empty array if none
+ */
+Scholar.Item.prototype.getCreators = function(){
+	var creators = [];
+	for (var i=0, len=this.numCreators(); i<len; i++){
+		creators.push(this.getCreator(i));
+	}
+	return creators;
+}
+
+
+/*
  * Set or update the creator at the specified position
  */
 Scholar.Item.prototype.setCreator = function(orderIndex, firstName, lastName, creatorTypeID){
@@ -1073,6 +1085,7 @@ Scholar.Item.prototype._loadItemData = function(){
 
 
 
+
 Scholar.Notes = new function(){
 	this.add = add;
 	
@@ -1112,6 +1125,7 @@ Scholar.Notes = new function(){
 		return note.getID();
 	}
 }
+
 
 
 
