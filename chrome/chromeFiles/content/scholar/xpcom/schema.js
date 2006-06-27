@@ -80,7 +80,7 @@ Scholar.Schema = new function(){
 			+ 'version=' + Scholar.version;
 		
 		Scholar.debug('Checking repository for updates (' + url + ')');
-		var get = Scholar.HTTP.doGet(url, _updateScrapersRemoteCallback);
+		var get = Scholar.Utilities.HTTP.doGet(url, _updateScrapersRemoteCallback);
 		
 		// TODO: instead, add an observer to start and stop timer on online state change
 		if (!get){
