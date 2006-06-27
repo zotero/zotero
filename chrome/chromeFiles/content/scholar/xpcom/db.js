@@ -171,17 +171,17 @@ Scholar.DB = new function(){
 		if (statement && params){
 			for (var i=0; i<params.length; i++){
 				// Integer
-				if (typeof params[i]['int'] != 'undefined'){
+				if (params[i]!==null && typeof params[i]['int'] != 'undefined'){
 					var type = 'int';
 					var value = params[i]['int'];
 				}
 				// String
-				else if (typeof params[i]['string'] != 'undefined'){
+				else if (params[i]!==null && typeof params[i]['string'] != 'undefined'){
 					var type = 'string';
 					var value = params[i]['string'];
 				}
 				// Null
-				else if (typeof params[i]['null'] != 'undefined'){
+				else if (params[i]!==null && typeof params[i]['null'] != 'undefined'){
 					var type = 'null';
 				}
 				// Automatic (trust the JS type)
@@ -195,8 +195,7 @@ Scholar.DB = new function(){
 							break;
 						// Object
 						default:
-							// Null value will show as object
-							if (!params[i]){
+							if (params[i]===null){
 								var type = 'null';
 							}
 							else {
