@@ -1014,6 +1014,81 @@ Scholar.Item.prototype.toString = function(){
 }
 
 
+/**
+* Convert the item data into a multidimensional associative array
+*	for use by the export functions
+**/
+Scholar.Item.prototype.toArray = function(){
+	if (this.getID() && !this._itemDataLoaded){
+		this._loadItemData();
+	}
+	
+	var arr = [];
+	
+	// Primary fields
+	for (var i in this._data){
+		switch (i){
+			case 'itemTypeID':
+				arr['itemType'] = Scholar.ItemTypes.getName(this._data[i]);
+				break;
+			
+			// Skip certain fields
+			case 'firstCreator':
+			case 'numNotes':
+				continue;
+			
+			// For the rest, just copy over
+			default:
+				arr[i] = this._data[i];
+		}
+	}
+	
+	// Item metadata
+	for (var i in this._itemData){
+		arr[Scholar.ItemFields.getName(i)] = this._itemData[i];
+	}
+	
+	if (!this.isNote()){
+		// Creators
+		arr['creators'] = this.getCreators();
+		// Convert creatorTypeIDs to text
+		for (var i in arr['creators']){
+			arr['creators'][i]['creatorType'] =
+				Scholar.CreatorTypes.getName(arr['creators'][i]['creatorTypeID']);
+			delete arr['creators'][i]['creatorTypeID'];
+		}
+	
+		// Source notes
+		arr['notes'] = []
+		var notes = this.getNotes();
+		for (var i in notes){
+			var note = Scholar.Items.get(notes[i]);
+			arr['notes'].push({
+				note: note.getNote(),
+				// TODO
+				tags: [],
+				seeAlso: []
+			});
+		}
+	}
+	
+	// Notes
+	else {
+		delete arr['title'];
+		arr['note'] = this.getNote();
+		if (this.getNoteSource()){
+			arr['sourceItemID'] = this.getNoteSource();
+		}
+	}
+	
+	// TODO
+	arr['tags'] = [];
+	arr['seeAlso'] = [];
+	
+	return arr;
+}
+
+
 
 //////////////////////////////////////////////////////////////////////////////
 //
