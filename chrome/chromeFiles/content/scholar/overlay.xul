@@ -70,6 +70,7 @@
 						<toolbarbutton id="tb-add" tooltiptext="&toolbar.newItem.label;" type="menu">
 							<menupopup/>
 						</toolbarbutton>
+						<toolbarbutton label="New Note" oncommand="ScholarPane.openNoteWindow();"/>
 						<spacer flex="1"/>
 						<toolbarbutton id="tb-item-menu" type="menu" menu="scholar-itemmenu"/>
 						<label value="&toolbar.search.label;" control="tb-search"/>
@@ -145,6 +146,7 @@
 					<tabbox id="scholar-view-item" flex="1"/>
 					<vbox id="scholar-view-note" flex="1" pack="center" align="center">
 						<label>Inline editing: coming soon</label>
+						<button label="Edit in a separate window" oncommand="ScholarPane.openNoteWindow(this.getAttribute('noteID'));"/>
 					</vbox>
 				</deck>
 			</hbox>

@@ -51,7 +51,7 @@ Scholar.ItemTreeView.prototype.refresh = function()
 	var newRows = this._itemGroup.getChildItems();
 	for(var i = 0; i < newRows.length; i++)
 		if(newRows[i])
-			this._showItem(new Scholar.ItemTreeView.TreeRow('item',newRows[i],0,false), i+1); //item ref, before row
+			this._showItem(new Scholar.ItemTreeView.TreeRow(newRows[i],0,false), i+1); //item ref, before row
 	
 	this._refreshHashMap();
 }
@@ -113,9 +113,9 @@ Scholar.ItemTreeView.prototype.notify = function(action, type, ids)
 	{
 		var item = Scholar.Items.get(ids);
 				
-		if((this._itemGroup.isLibrary() || item.inCollection(this._itemGroup.ref.getID())) && this._itemRowMap[ids] == null && !item.isNote())
+		if((this._itemGroup.isLibrary() || item.inCollection(this._itemGroup.ref.getID())) && this._itemRowMap[ids] == null && (!item.isNote() || !item.getNoteSource()))
 		{
-			this._showItem(new Scholar.ItemTreeView.TreeRow('item',item,0,false),this.rowCount);
+			this._showItem(new Scholar.ItemTreeView.TreeRow(item,0,false),this.rowCount);
 			this._treebox.rowCountChanged(this.rowCount-1,1);
 	
 			madeChanges = true;
@@ -262,7 +262,7 @@ Scholar.ItemTreeView.prototype.toggleOpenState = function(row)
 		for(var i = 0; i < newRows.length; i++)
 		{
 			count++;
-			this._showItem(new Scholar.ItemTreeView.TreeRow('note',newRows[i],thisLevel+1,false), row+i+1); //item ref, before row
+			this._showItem(new Scholar.ItemTreeView.TreeRow(newRows[i],thisLevel+1,false), row+i+1); //item ref, before row
 		}	
 	}
 	
@@ -596,9 +596,8 @@ Scholar.ItemTreeView.prototype.getRowProperties = function(row, prop) 			{ }
 Scholar.ItemTreeView.prototype.getColumnProperties = function(col, prop) 		{ }
 Scholar.ItemTreeView.prototype.getCellProperties = function(row, col, prop) 	{ }
 
-Scholar.ItemTreeView.TreeRow = function(type, ref, level, isOpen)
+Scholar.ItemTreeView.TreeRow = function(ref, level, isOpen)
 {
-	this.type = type;		//either 'item' or 'note'
 	this.ref = ref;			//the item/note associated with this
 	this.level = level;
 	this.isOpen = isOpen;
@@ -614,11 +613,13 @@ Scholar.ItemTreeView.TreeRow.prototype.getField = function(field)
 	if(this.isNote() && field == 'title')
 	{
 		var t = this.ref.getNote();
-		var n = t.indexOf("\n");
-		if(n > -1)
-			t = t.substring(0,n);
-		return t;
-	
+		if(t)
+		{
+			var n = t.indexOf("\n");
+			if(n > -1)
+				t = t.substring(0,n);
+			return t;
+		}
 	}
 	else
 	{

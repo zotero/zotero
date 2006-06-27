@@ -23,6 +23,7 @@ var ScholarPane = new function()
 	this.getItemsView = getItemsView;
 	this.buildCollectionContextMenu = buildCollectionContextMenu;
 	this.buildItemContextMenu = buildItemContextMenu;
+	this.openNoteWindow = openNoteWindow;
 	
 	/*
 	 * Called when the window is open
@@ -127,7 +128,7 @@ var ScholarPane = new function()
 			
 			if(item.isNote())
 			{
-				
+				document.getElementById('scholar-view-note').lastChild.setAttribute('noteID',item.ref.getID());
 				document.getElementById('item-pane').selectedIndex = 2;
 			}
 			else
@@ -228,6 +229,11 @@ var ScholarPane = new function()
 			menu.childNodes[2].setAttribute('label', Scholar.getString('pane.items.menu.remove.multiple'));
 		else
 			menu.childNodes[2].setAttribute('label', Scholar.getString('pane.items.menu.remove'));	
+	}
+	
+	function openNoteWindow(id)
+	{
+		window.open('chrome://scholar/content/note.xul?id='+id,'','chrome,resizable,centerscreen');
 	}
 }
 

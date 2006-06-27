@@ -122,7 +122,7 @@ ScholarItemPane = new function()
 				label.setAttribute('crop','end');
 				
 				box = document.createElement('box');
-				box.setAttribute('onclick',"window.open('chrome://scholar/content/note.xul?item="+_itemBeingEdited.getID()+"&note="+notes[i].getID()+"','','chrome,resizable,centerscreen');");
+				box.setAttribute('onclick',"ScholarPane.openNoteWindow("+notes[i].getID()+");");
 				box.setAttribute('class','clicky');
 				box.appendChild(icon);
 				box.appendChild(label);
@@ -322,7 +322,7 @@ ScholarItemPane = new function()
 	
 	function addNote()
 	{
-		window.open("chrome://scholar/content/note.xul?item="+_itemBeingEdited.getID(),'','chrome,resizable,centerscreen');
+		ScholarPane.openNoteWindow(_itemBeingEdited.getID());
 	}
 	
 	function _noteToTitle(text)
