@@ -839,6 +839,8 @@ Scholar.Item.prototype.setNoteSource = function(sourceItemID){
 	this.updateDateModified();
 	Scholar.DB.commitTransaction();
 	
+	Scholar.Notifier.trigger('modify', 'item', this.getID());
+	
 	// Update the note counts of the previous and new sources
 	if (oldItem){
 		oldItem.decrementNoteCount();
@@ -938,14 +940,20 @@ Scholar.Item.prototype.erase = function(){
 		var sourceItemID = Scholar.DB.valueQuery(sql);
 		if (sourceItemID){
 			var sourceItem = Scholar.Items.get(sourceItemID);
-			Scholar.debug(sourceItem);
 			sourceItem.decrementNoteCount();
+			Scholar.Notifier.trigger('modify', 'item', sourceItemID);
 		}
 	}
 	// If not note, unassociate any notes for which this is a source
 	else {
+		// TODO: option for deleting child notes instead of unlinking
+		
+		var sql = "SELECT itemID FROM itemNotes WHERE sourceItemID=" + this.getID();
+		var childNotes = Scholar.DB.columnQuery(sql);
+		
 		var sql = "UPDATE itemNotes SET sourceItemID=NULL WHERE sourceItemID="
 			+ this.getID();
+		Scholar.DB.query(sql);
 	}
 	
 	// TODO: remove item from See Also table
@@ -971,6 +979,11 @@ Scholar.Item.prototype.erase = function(){
 	}
 	
 	Scholar.Items.unload(this.getID());
+	
+	// Send notification of unlinked notes
+	if (childNotes){
+		Scholar.Notifier.trigger('modify', 'item', childNotes);
+	}
 	
 	// If we're not in the middle of a larger commit, trigger the notifier now
 	if (!Scholar.DB.transactionInProgress()){
