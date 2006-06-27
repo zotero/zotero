@@ -70,7 +70,7 @@ Scholar.Item.prototype.loadFromID = function(id){
 	var sql = 'SELECT I.*, lastName || '
 		+ 'CASE ((SELECT COUNT(*) FROM itemCreators WHERE itemID=' + id + ')>1) '
 		+ "WHEN 0 THEN '' ELSE ' et al.' END AS firstCreator, "
-		+ "(SELECT COUNT(*) FROM itemNotes WHERE itemID=I.itemID) AS numNotes "
+		+ "(SELECT COUNT(*) FROM itemNotes WHERE sourceItemID=I.itemID) AS numNotes "
 		+ 'FROM items I '
 		+ 'LEFT JOIN itemCreators IC ON (I.itemID=IC.itemID) '
 		+ 'LEFT JOIN creators C ON (IC.creatorID=C.creatorID) '
@@ -1279,7 +1279,7 @@ Scholar.Items = new function(){
 		var sql = 'SELECT I.*, lastName || '
 			+ 'CASE ((SELECT COUNT(*) FROM itemCreators WHERE itemID=I.itemID)>1) '
 			+ "WHEN 0 THEN '' ELSE ' et al.' END AS firstCreator, "
-			+ "(SELECT COUNT(*) FROM itemNotes WHERE itemID=I.itemID) AS numNotes "
+			+ "(SELECT COUNT(*) FROM itemNotes WHERE sourceItemID=I.itemID) AS numNotes "
 			+ 'FROM items I '
 			+ 'LEFT JOIN itemCreators IC ON (I.itemID=IC.itemID) '
 			+ 'LEFT JOIN creators C ON (IC.creatorID=C.creatorID) '
