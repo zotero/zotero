@@ -892,7 +892,8 @@ Scholar.Item.prototype.getNote = function(){
 	}
 	
 	var sql = "SELECT note FROM itemNotes WHERE itemID=" + this.getID();
-	return Scholar.DB.valueQuery(sql);
+	var note = Scholar.DB.valueQuery(sql);
+	return note ? note : '';
 }
 
 
