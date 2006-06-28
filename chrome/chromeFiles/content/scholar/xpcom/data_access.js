@@ -364,6 +364,10 @@ Scholar.Item.prototype.setField = function(field, value, loadIn){
 
 /*
  * Save changes back to database
+ *
+ * Note: Does not call notify() if transaction is in progress
+ *
+ * Returns true on item update or itemID of new item 
  */
 Scholar.Item.prototype.save = function(){
 	if (!this.hasChanged()){
@@ -739,11 +743,15 @@ Scholar.Item.prototype.save = function(){
 	Scholar.Items.reload(this.getID());
 	
 	if (isNew){
-		Scholar.Notifier.trigger('add', 'item', this.getID());
+		if (!Scholar.DB.transactionInProgress()){
+			Scholar.Notifier.trigger('add', 'item', this.getID());
+		}
 		return this.getID();
 	}
 	else {
-		Scholar.Notifier.trigger('modify', 'item', this.getID());
+		if (!Scholar.DB.transactionInProgress()){
+			Scholar.Notifier.trigger('modify', 'item', this.getID());
+		}
 		return true;
 	}
 }
