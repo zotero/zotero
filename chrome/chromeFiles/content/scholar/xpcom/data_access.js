@@ -1025,7 +1025,7 @@ Scholar.Item.prototype.erase = function(){
 	
 	sql = 'DELETE FROM itemCreators WHERE itemID=' + this.getID() + ";\n";
 	sql += 'DELETE FROM itemNotes WHERE itemID=' + this.getID() + ";\n";
-	sql += 'DELETE FROM itemKeywords WHERE itemID=' + this.getID() + ";\n";
+	sql += 'DELETE FROM itemTags WHERE itemID=' + this.getID() + ";\n";
 	sql += 'DELETE FROM itemData WHERE itemID=' + this.getID() + ";\n";
 	sql += 'DELETE FROM items WHERE itemID=' + this.getID() + ";\n";
 	
@@ -1351,8 +1351,8 @@ Scholar.Items = new function(){
 			+ "SELECT itemID FROM itemCreators WHERE creatorID IN "
 			+ "(SELECT creatorID FROM creators WHERE firstName LIKE ?1 "
 				+ "OR lastName LIKE ?1) UNION "
-			+ "SELECT itemID FROM itemKeywords WHERE keywordID IN "
-			+ "(SELECT keywordID FROM keywords WHERE keyword LIKE ?1) UNION "
+			+ "SELECT itemID FROM itemTags WHERE tagID IN "
+			+ "(SELECT tagID FROM tags WHERE tag LIKE ?1) UNION "
 			+ "SELECT itemID FROM itemNotes WHERE note LIKE ?1";
 		
 		var sqlParams = [{'string':'%' + text + '%'}];
