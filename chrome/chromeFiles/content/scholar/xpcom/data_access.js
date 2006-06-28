@@ -937,6 +937,48 @@ Scholar.Item.prototype.getNotes = function(){
 }
 
 
+//
+// Methods dealing with item tags
+//
+// save() is not required for tag functions
+//
+Scholar.Item.prototype.addTag = function(tag){
+	if (!this.getID()){
+		this.save();
+	}
+	
+	Scholar.DB.beginTransaction();
+	var tagID = Scholar.Tags.getID(tag);
+	if (!tagID){
+		var tagID = Scholar.Tags.add(tag);
+	}
+	
+	var sql = "INSERT OR IGNORE INTO itemTags VALUES (?,?)";
+	Scholar.DB.query(sql, [this.getID(), tagID]);
+	
+	Scholar.DB.commitTransaction();
+	Scholar.Notifier.trigger('modify', 'item', this.getID());
+}
+
+Scholar.Item.prototype.getTags = function(){
+	var sql = "SELECT tagID FROM itemTags WHERE itemID=" + this.getID();
+	return Scholar.DB.columnQuery(sql);
+}
+
+Scholar.Item.prototype.removeTag = function(tagID){
+	if (!this.getID()){
+		throw ('Cannot remove tag on unsaved item');
+	}
+	
+	Scholar.DB.beginTransaction();
+	var sql = "DELETE FROM itemTags WHERE itemID=? AND tagID=?";
+	Scholar.DB.query(sql, [this.getID(), tagID]);
+	Scholar.Tags.purge();
+	Scholar.DB.commitTransaction();
+	Scholar.Notifier.trigger('modify', 'item', this.getID());
+}
+
+
 /**
 * Delete item from database and clear from Scholar.Items internal array
 **/
@@ -1074,8 +1116,8 @@ Scholar.Item.prototype.toArray = function(){
 			var note = Scholar.Items.get(notes[i]);
 			arr['notes'].push({
 				note: note.getNote(),
+				tags: note.getTags(),
 				// TODO
-				tags: [],
 				seeAlso: []
 			});
 		}
@@ -1090,8 +1132,8 @@ Scholar.Item.prototype.toArray = function(){
 		}
 	}
 	
+	arr['tags'] = this.getTags();
 	// TODO
-	arr['tags'] = [];
 	arr['seeAlso'] = [];
 	
 	return arr;
@@ -1915,7 +1957,9 @@ Scholar.Collections = new function(){
 
 
 
-
+/*
+ * Same structure as Scholar.Tags -- make changes in both places if possible
+ */
 Scholar.Creators = new function(){
 	var _creators = new Array; // indexed by first%%%last hash
 	var _creatorsByID = new Array; // indexed by creatorID
@@ -1959,10 +2003,8 @@ Scholar.Creators = new function(){
 		
 		var sql = 'SELECT creatorID FROM creators '
 			+ 'WHERE firstName=? AND lastName=?';
-		var params = [
-			{'string': firstName}, {'string': lastName}
-		];
-		var creatorID = Scholar.DB.valueQuery(sql,params);
+		var params = [{string: firstName}, {string: lastName}];
+		var creatorID = Scholar.DB.valueQuery(sql, params);
 		
 		if (creatorID){
 			_creators[hash] = creatorID;
@@ -1982,15 +2024,9 @@ Scholar.Creators = new function(){
 		
 		Scholar.DB.beginTransaction();
 		
-		var sql = 'INSERT INTO creators '
-			+ 'VALUES (?,?,?)';
-		
+		var sql = 'INSERT INTO creators VALUES (?,?,?)';
 		var rnd = Scholar.getRandomID('creators', 'creatorID');
-		
-		var params = [
-			{'int': rnd}, {'string': firstName}, {'string': lastName}
-		];
-		
+		var params = [{int: rnd}, {string: firstName}, {string: lastName}];
 		Scholar.DB.query(sql, params);
 		
 		Scholar.DB.commitTransaction();
@@ -2037,8 +2073,110 @@ Scholar.Creators = new function(){
 }
 
 
+/*
+ * Same structure as Scholar.Creators -- make changes in both places if possible
+ */
+Scholar.Tags = new function(){
+	var _tags = new Array; // indexed by tag text
+	var _tagsByID = new Array; // indexed by tagID
+	
+	this.getName = getName;
+	this.getID = getID;
+	this.add = add;
+	this.purge = purge;
+	
+	/*
+	 * Returns a tag for a given tagID
+	 */
+	function getName(tagID){
+		if (_tagsByID[tagID]){
+			return _tagsByID[tagID];
+		}
+		
+		var sql = 'SELECT tag FROM tags WHERE tagID=' + tagID;
+		var result = Scholar.DB.valueQuery(sql);
+		
+		if (!result){
+			return false;
+		}
+		
+		_tagsByID[tagID] = result;
+		return result;
+	}
+	
+	
+	/*
+	 * Returns the tagID matching given tag
+	 */
+	function getID(tag){
+		if (_tags[tag]){
+			return _tags[tag];
+		}
+		
+		var sql = 'SELECT tagID FROM tags WHERE tag=?';
+		var tagID = Scholar.DB.valueQuery(sql, [{string:tag}]);
+		
+		if (tagID){
+			_tags[tag] = tagID;
+		}
+		
+		return tagID;
+	}
+	
+	
+	/*
+	 * Add a new tag to the database
+	 *
+	 * Returns new tagID
+	 */
+	function add(tag){
+		Scholar.debug('Adding new tag', 4);
+		
+		Scholar.DB.beginTransaction();
+		
+		var sql = 'INSERT INTO tags VALUES (?,?)';
+		var rnd = Scholar.getRandomID('tags', 'tagID');
+		Scholar.DB.query(sql, [{int: rnd}, {string: tag}]);
+		
+		Scholar.DB.commitTransaction();
+		return rnd;
+	}
+	
+	
+	/*
+	 * Delete obsolete tags from database and clear internal array entries
+	 *
+	 * Returns removed tagIDs on success
+	 */
+	function purge(){
+		var sql = 'SELECT tagID FROM tags WHERE tagID NOT IN '
+			+ '(SELECT tagID FROM itemTags);';
+		var toDelete = Scholar.DB.columnQuery(sql);
+		
+		if (!toDelete){
+			return false;
+		}
+		
+		// Clear tag entries in internal array
+		for (var i=0; i<toDelete.length; i++){
+			var tag = this.getName(toDelete[i]);
+			delete _tags[tag];
+			delete _tagsByID[toDelete[i]];
+		}
+		
+		sql = 'DELETE FROM tags WHERE tagID NOT IN '
+			+ '(SELECT tagID FROM itemTags);';
+		var result = Scholar.DB.query(sql);
+		
+		return toDelete;
+	}
+}
 
 
+
+/*
+ * Same structure as Scholar.ItemTypes -- make changes in both places if possible
+ */
 Scholar.CreatorTypes = new function(){
 	var _types = new Array();
 	var _typesLoaded;
@@ -2101,6 +2239,9 @@ Scholar.CreatorTypes = new function(){
 
 
 
+/*
+ * Same structure as Scholar.CreatorTypes -- make changes in both places if possible
+ */
 Scholar.ItemTypes = new function(){
 	var _types = new Array();
 	var _typesLoaded;

@@ -1,4 +1,4 @@
--- 25
+-- 26
 
     DROP TABLE IF EXISTS version;
     CREATE TABLE version (
@@ -71,24 +71,23 @@
     DROP INDEX IF EXISTS itemNotes_sourceItemID;
     CREATE INDEX itemNotes_sourceItemID ON itemNotes(sourceItemID);
     
-    DROP TABLE IF EXISTS keywords;
-    CREATE TABLE keywords (
-        keywordID INTEGER PRIMARY KEY,
-        keyword TEXT
+    DROP TABLE IF EXISTS tags;
+    CREATE TABLE tags (
+        tagID INT,
+        tag TEXT UNIQUE,
+        PRIMARY KEY (tagID)
     );
-    DROP INDEX IF EXISTS keyword;
-    CREATE INDEX keyword ON keywords(keyword);
     
-    DROP TABLE IF EXISTS itemKeywords;
-    CREATE TABLE itemKeywords (
+    DROP TABLE IF EXISTS itemTags;
+    CREATE TABLE itemTags (
         itemID INT,
-        keywordID INT,
-        PRIMARY KEY (itemID, keywordID),
+        tagID INT,
+        PRIMARY KEY (itemID, tagID),
         FOREIGN KEY (itemID) REFERENCES items(itemID),
-        FOREIGN KEY (keywordID) REFERENCES keywords(keywordID)
+        FOREIGN KEY (tagID) REFERENCES tags(tagID)
     );
-    DROP INDEX IF EXISTS keywordID;
-    CREATE INDEX keywordID ON itemKeywords(keywordID);
+    DROP INDEX IF EXISTS itemTags_tagID;
+    CREATE INDEX itemTags_tagID ON itemTags(tagID);
     
     DROP TABLE IF EXISTS creators;
     CREATE TABLE creators (
