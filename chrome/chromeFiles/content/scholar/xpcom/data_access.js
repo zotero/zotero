@@ -958,6 +958,8 @@ Scholar.Item.prototype.addTag = function(tag){
 	
 	Scholar.DB.commitTransaction();
 	Scholar.Notifier.trigger('modify', 'item', this.getID());
+	
+	return tagID;
 }
 
 Scholar.Item.prototype.getTags = function(){
