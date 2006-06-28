@@ -1214,55 +1214,6 @@ Scholar.Item.prototype._loadItemData = function(){
 
 
 
-Scholar.Notes = new function(){
-	this.add = add;
-	
-	/**
-	* Create a new item of type 'note' and add the note text to the itemNotes table
-	*
-	* Returns the itemID of the new note item
-	**/
-	function add(text, sourceItemID){
-		Scholar.DB.beginTransaction();
-		
-		if (sourceItemID){
-			var sourceItem = Scholar.Items.get(sourceItemID);
-			if (!sourceItem){
-				Scholar.DB.commitTransaction();
-				throw ("Cannot set note source to invalid item " + sourceItemID);
-			}
-			if (sourceItem.isNote()){
-				Scholar.DB.commitTransaction();
-				throw ("Cannot set note source to another note (" + sourceItemID + ")");
-			}
-		}
-		
-		var note = Scholar.Items.getNewItemByType(Scholar.ItemTypes.getID('note'));
-		note.save();
-		
-		var sql = "INSERT INTO itemNotes VALUES (?,?,?)";
-		var bindParams = [
-			note.getID(),
-			(sourceItemID ? {int:sourceItemID} : null),
-			{string:text}
-		];
-		Scholar.DB.query(sql, bindParams);
-		Scholar.DB.commitTransaction();
-		
-		if (sourceItemID){
-			sourceItem.incrementNoteCount();
-			Scholar.Notifier.trigger('modify', 'item', sourceItemID);
-		}
-		
-		Scholar.Notifier.trigger('add', 'item', note.getID());
-		
-		return note.getID();
-	}
-}
-
-
-
-
 /*
  * Primary interface for accessing Scholar items
  */
@@ -1467,6 +1418,55 @@ Scholar.Items = new function(){
 			}
 		}
 		return true;
+	}
+}
+
+
+
+
+Scholar.Notes = new function(){
+	this.add = add;
+	
+	/**
+	* Create a new item of type 'note' and add the note text to the itemNotes table
+	*
+	* Returns the itemID of the new note item
+	**/
+	function add(text, sourceItemID){
+		Scholar.DB.beginTransaction();
+		
+		if (sourceItemID){
+			var sourceItem = Scholar.Items.get(sourceItemID);
+			if (!sourceItem){
+				Scholar.DB.commitTransaction();
+				throw ("Cannot set note source to invalid item " + sourceItemID);
+			}
+			if (sourceItem.isNote()){
+				Scholar.DB.commitTransaction();
+				throw ("Cannot set note source to another note (" + sourceItemID + ")");
+			}
+		}
+		
+		var note = Scholar.Items.getNewItemByType(Scholar.ItemTypes.getID('note'));
+		note.save();
+		
+		var sql = "INSERT INTO itemNotes VALUES (?,?,?)";
+		var bindParams = [
+			note.getID(),
+			(sourceItemID ? {int:sourceItemID} : null),
+			{string:text}
+		];
+		Scholar.DB.query(sql, bindParams);
+		Scholar.DB.commitTransaction();
+		
+		if (sourceItemID){
+			sourceItem.incrementNoteCount();
+			Scholar.Notifier.trigger('modify', 'item', sourceItemID);
+		}
+		
+		Scholar.Notifier.trigger('add', 'item', note.getID());
+		
+		return note.getID();
 	}
 }
 
