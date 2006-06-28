@@ -4,7 +4,6 @@
 
 <window
     id="scholar-note-window"
-    title="Edit Note"
     orient="vertical"
 	width="400"
 	height="250"
@@ -18,6 +17,5 @@
 	</keyset>
 	<command id="cmd_close" oncommand="window.close();"/>
 	
-	<label id="info-label"/>
-	<textbox id="notes-box" flex="1" multiline="true" type="timed" timeout="1000" oncommand="save();"/>
+	<noteeditor id="note-editor" flex="1"/>
 </window>

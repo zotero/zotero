@@ -41,4 +41,73 @@
 			</handler>
 		</handlers>
 	</binding>
+	<binding id="note-editor">
+		<implementation>
+			<field name="itemRef"/>
+			<property name="item" onget="return this.itemRef;">
+				<setter>
+					<![CDATA[
+						this.itemRef = val;
+						
+						var citeLabel = document.getAnonymousNodes(this)[0].childNodes[0];
+						if(citeLabel.firstChild)
+							citeLabel.removeChild(citeLabel.firstChild);
+						
+						if(this.item)
+							citeLabel.appendChild(document.createTextNode(this.item.getField('title')));
+					]]>
+				</setter>
+			</property>
+			<field name="noteRef"/>
+			<property name="note" onget="return this.noteRef;">
+				<setter>
+					<![CDATA[
+						this.noteRef = val;
+						
+						if(this.note.getNoteSource())
+							this.item = Scholar.Items.get(this.note.getNoteSource());
+						
+						document.getAnonymousNodes(this)[0].childNodes[1].setAttribute('value',this.note.getNote());
+					]]>
+				</setter>
+			</property>
+			<property name="value" onget="return document.getAnonymousNodes(this)[0].childNodes[1].value;" onset="document.getAnonymousNodes(this)[0].childNodes[1].value = val;"/>
+			<method name="save">
+				<body>
+					<![CDATA[
+						var noteField = document.getAnonymousNodes(this)[0].childNodes[1];
+						if(this.note)	//Update note
+						{
+							this.note.updateNote(noteField.value);
+						}
+						else	//Create new note
+					 	{
+							if(this.item)
+								var noteID = Scholar.Notes.add(noteField.value,this.item.getID());	//attached to an item
+							else
+								var noteID = Scholar.Notes.add(noteField.value);				//independant note
+							this.note = Scholar.Items.get(noteID);
+						}
+					]]>
+				</body>
+			</method>
+			<method name="focus">
+				<body>
+					<![CDATA[
+						document.getAnonymousNodes(this)[0].childNodes[1].focus();
+					]]>
+				</body>
+			</method>
+		</implementation>
+		<handlers>
+		</handlers>
+		<content>
+			<xul:vbox xbl:inherits="flex">
+				<xul:label/>
+				<xul:textbox multiline="true" type="timed" timeout="1000" flex="1" oncommand="this.parentNode.parentNode.save();"/>
+				<xul:label value="See also: (coming soon)"/>
+				<xul:label value="Tags: (coming soon)"/>
+			</xul:vbox>
+		</content>
+	</binding>
 </bindings>

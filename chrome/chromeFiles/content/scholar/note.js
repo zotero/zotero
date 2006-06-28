@@ -1,11 +1,9 @@
-var item;
-var note;
-var _notesField;
+var noteEditor;
 
 function onLoad()
 {
-	_notesField = document.getElementById('notes-box');
-	_notesField.focus();
+	noteEditor = document.getElementById('note-editor');
+	noteEditor.focus();
 	
 	var params = new Array();
 	var b = document.location.href.substr(document.location.href.indexOf('?')+1).split('&');
@@ -22,41 +20,25 @@ function onLoad()
 		var ref = Scholar.Items.get(id);
 		if(ref.isNote())
 		{
-			note = ref;
-			if(note.getNoteSource())
-				item = Scholar.Items.get(note.getNoteSource());
-
-			_notesField.setAttribute('value',note.getNote());
+			noteEditor.note = ref;
+			window.title = "Edit Note";
 		}
 		else
 		{
-			item = ref;
+			noteEditor.item = ref;
+			window.title = "Add Note";
 		}
-		
-		if(item)
-			document.getElementById('info-label').appendChild(document.createTextNode(item.getField('title') + " by " + item.getField('firstCreator')));
+	}
+	else
+	{
+		window.title = "Edit Note";
 	}
 }
 
 function onUnload()
 {
-	save();
-}
-
-function save()
-{
-	if(note)	//Update note
-	{
-		note.updateNote(_notesField.value);
-	}
-	else	//Create new note
- 	{
-		if(item)
-			var noteID = Scholar.Notes.add(_notesField.value,item.getID());	//attached to an item
-		else
-			var noteID = Scholar.Notes.add(_notesField.value);				//independant note
-		note = Scholar.Items.get(noteID);
-	}
+	if(noteEditor && noteEditor.value)
+		noteEditor.save();
 }
 
 addEventListener("load", function(e) { onLoad(e); }, false);

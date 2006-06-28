@@ -3,6 +3,11 @@ textbox[multiline="true"][type="timed"]
 	-moz-binding: url('chrome://scholar/content/customControls.xml#timed-textarea');
 }
 
+noteeditor
+{
+	-moz-binding: url('chrome://scholar/content/customControls.xml#note-editor');
+}
+
 #scholar-progress-box
 {
 	border: 2px solid #7a0000;

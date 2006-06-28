@@ -139,6 +139,9 @@ var ScholarPane = new function()
 			
 			if(item.isNote())
 			{
+				var noteEditor = document.getElementById('scholar-note-editor');
+				noteEditor.item = null;
+				noteEditor.note = item.ref;
 				document.getElementById('scholar-view-note').lastChild.setAttribute('noteID',item.ref.getID());
 				document.getElementById('item-pane').selectedIndex = 2;
 			}
