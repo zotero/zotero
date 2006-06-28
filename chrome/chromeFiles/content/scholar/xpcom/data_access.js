@@ -1231,6 +1231,10 @@ Scholar.Notes = new function(){
 				Scholar.DB.commitTransaction();
 				throw ("Cannot set note source to invalid item " + sourceItemID);
 			}
+			if (sourceItem.isNote()){
+				Scholar.DB.commitTransaction();
+				throw ("Cannot set note source to another note (" + sourceItemID + ")");
+			}
 		}
 		
 		var note = Scholar.Items.getNewItemByType(Scholar.ItemTypes.getID('note'));
