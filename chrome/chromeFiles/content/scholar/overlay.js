@@ -37,6 +37,17 @@ var ScholarPane = new function()
 		//select Library
 		collectionsView.selection.select(0);
 		
+		if(window.opener)
+		{
+			var pane = window.opener.document.getElementById('scholar-pane');
+			if(pane)
+			{
+				var b = pane.getAttribute('collapsed');
+				if(b != document.getElementById('scholar-pane').getAttribute('collapsed'))
+					toggleDisplay();
+			}
+		}
+		
 		//Create the add menu with each item type
 		var addMenu = document.getElementById('tb-add').firstChild;
 		var itemTypes = Scholar.ItemTypes.getTypes();
