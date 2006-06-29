@@ -289,7 +289,7 @@ Scholar.Schema = new function(){
 		
 		var currentTime = xmlhttp.responseXML.
 			getElementsByTagName('currentTime')[0].firstChild.nodeValue;
-		var updates = xmlhttp.responseXML.getElementsByTagName('scraper');
+		var updates = xmlhttp.responseXML.getElementsByTagName('translator');
 		
 		Scholar.DB.beginTransaction();
 		
@@ -361,19 +361,24 @@ Scholar.Schema = new function(){
 	function _scraperXMLToDBQuery(xmlnode){
 		var sqlValues = [
 			{'string':xmlnode.getAttribute('id')},
-			{'string':centralLastUpdated = xmlnode.getAttribute('lastUpdated')},
+			{'string':xmlnode.getAttribute('lastUpdated')},
+			{'string':xmlnode.getAttribute('type')},
 			{'string':xmlnode.getElementsByTagName('label')[0].firstChild.nodeValue},
 			{'string':xmlnode.getElementsByTagName('creator')[0].firstChild.nodeValue},
-			{'string':xmlnode.getElementsByTagName('urlPattern')[0].firstChild.nodeValue},
-			// scraperDetectCode can not exist or be empty
-			(xmlnode.getElementsByTagName('scraperDetectCode').item(0) &&
-				xmlnode.getElementsByTagName('scraperDetectCode')[0].firstChild)
-				? {'string':xmlnode.getElementsByTagName('scraperDetectCode')[0].firstChild.nodeValue}
+			// target
+			(xmlnode.getElementsByTagName('target').item(0) &&
+				xmlnode.getElementsByTagName('target')[0].firstChild)
+				? {'string':xmlnode.getElementsByTagName('target')[0].firstChild.nodeValue}
 				: {'null':true},
-			{'string':xmlnode.getElementsByTagName('scraperJavaScript')[0].firstChild.nodeValue}
+			// detectCode can not exist or be empty
+			(xmlnode.getElementsByTagName('detectCode').item(0) &&
+				xmlnode.getElementsByTagName('detectCode')[0].firstChild)
+				? {'string':xmlnode.getElementsByTagName('detectCode')[0].firstChild.nodeValue}
+				: {'null':true},
+			{'string':xmlnode.getElementsByTagName('code')[0].firstChild.nodeValue}
 		]
 		
-		var sql = "REPLACE INTO scrapers VALUES (?,?,?,?,?,?,?)";
+		var sql = "REPLACE INTO translators VALUES (?,?,?,?,?,?,?,?)";
 		return Scholar.DB.query(sql, sqlValues);
 	}
 	
@@ -385,7 +390,7 @@ Scholar.Schema = new function(){
 		//
 		// Change this value to match the schema version
 		//
-		var toVersion = 28;
+		var toVersion = 29;
 		
 		if (toVersion != _getSchemaSQLVersion()){
 			throw('Schema version does not match version in _migrateSchema()');
@@ -399,8 +404,8 @@ Scholar.Schema = new function(){
 		//
 		// Each block performs the changes necessary to move from the
 		// previous revision to that one.
-		for (var i=parseInt(fromVersion) + 1; i<=toVersion; i++){
-			if (i==28){
+		for (var i=fromVersion + 1; i<=toVersion; i++){
+			if (i==29){
 				Scholar.DB.query("DROP TABLE IF EXISTS keywords");
 				Scholar.DB.query("DROP TABLE IF EXISTS itemKeywords");
 				Scholar.DB.query("DROP TABLE IF EXISTS scrapers");

@@ -1,4 +1,4 @@
--- 28
+-- 29
 
     DROP TABLE IF EXISTS version;
     CREATE TABLE version (
@@ -151,13 +151,15 @@
     CREATE TABLE translators (
         translatorID TEXT PRIMARY KEY,
         lastUpdated DATETIME,
-        type TEXT,
+        type INT,
         label TEXT,
         creator TEXT,
         target TEXT,
         detectCode TEXT,
         code TEXT
     );
+    DROP INDEX IF EXISTS translators_type;
+    CREATE INDEX translators_type ON translators(type);
     
     DROP TABLE IF EXISTS transactionSets;
     CREATE TABLE transactionSets (
