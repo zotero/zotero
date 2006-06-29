@@ -385,7 +385,7 @@ Scholar.Schema = new function(){
 		//
 		// Change this value to match the schema version
 		//
-		var toVersion = 27;
+		var toVersion = 28;
 		
 		if (toVersion != _getSchemaSQLVersion()){
 			throw('Schema version does not match version in _migrateSchema()');
@@ -400,10 +400,9 @@ Scholar.Schema = new function(){
 		// Each block performs the changes necessary to move from the
 		// previous revision to that one.
 		for (var i=parseInt(fromVersion) + 1; i<=toVersion; i++){
-			if (i==26){
+			if (i==28){
 				Scholar.DB.query("DROP TABLE IF EXISTS keywords");
 				Scholar.DB.query("DROP TABLE IF EXISTS itemKeywords");
-			} else if(i==27) {
 				Scholar.DB.query("DROP TABLE IF EXISTS scrapers");
 				_initializeSchema();
 			}

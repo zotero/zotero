@@ -981,6 +981,60 @@ Scholar.Item.prototype.removeTag = function(tagID){
 }
 
 
+//
+// Methods dealing with See Also links
+//
+// save() is not required for See Also functions
+//
+Scholar.Item.prototype.addSeeAlso = function(itemID){
+	if (itemID==this.getID()){
+		Scholar.debug('Cannot add item as See Also of itself', 2);
+		return false;
+	}
+	
+	Scholar.DB.beginTransaction();
+	
+	if (!Scholar.Items.get(itemID)){
+		Scholar.DB.commitTransaction();
+		throw ("Cannot add invalid item " + itemID + " as See Also");
+		return false;
+	}
+	
+	// Check both ways, using a UNION to take advantage of indexes
+	var sql = "SELECT (SELECT COUNT(*) FROM itemSeeAlso WHERE itemID=?1 AND "
+		+ "linkedItemID=?2) + (SELECT COUNT(*) FROM itemSeeAlso WHERE "
+		+ "linkedItemID=?1 AND itemID=?2)";
+	if (Scholar.DB.valueQuery(sql, [this.getID(), itemID])){
+		Scholar.DB.commitTransaction();
+		Scholar.debug("Item " + itemID + " already linked", 2);
+		return false;
+	}
+	
+	var sql = "INSERT INTO itemSeeAlso VALUES (?,?)";
+	Scholar.DB.query(sql, [this.getID(), {int:itemID}]);
+	Scholar.DB.commitTransaction();
+	Scholar.Notifier.trigger('modify', 'item', [this.getID(), itemID]);
+	return true;
+}
+
+Scholar.Item.prototype.removeSeeAlso = function(itemID){
+	Scholar.DB.beginTransaction();
+	var sql = "DELETE FROM itemSeeAlso WHERE itemID=? AND linkedItemID=?";
+	Scholar.DB.query(sql, [this.getID(), itemID]);
+	var sql = "DELETE FROM itemSeeAlso WHERE itemID=? AND linkedItemID=?";
+	Scholar.DB.query(sql, [itemID, this.getID()]);
+	Scholar.DB.commitTransaction();
+	Scholar.Notifier.trigger('modify', 'item', [this.getID(), itemID]);
+}
+
+Scholar.Item.prototype.getSeeAlso = function(){
+	// Check both ways, using a UNION to take advantage of indexes
+	var sql ="SELECT linkedItemID FROM itemSeeAlso WHERE itemID=?1 UNION "
+		+ "SELECT itemID FROM itemSeeAlso WHERE linkedItemID=?1";
+	return Scholar.DB.columnQuery(sql, this.getID());
+}
+
+
 /**
 * Delete item from database and clear from Scholar.Items internal array
 **/
@@ -990,7 +1044,9 @@ Scholar.Item.prototype.erase = function(){
 	}
 	
 	Scholar.debug('Deleting item ' + this.getID());
-		
+	
+	var changedItems = [];
+	
 	Scholar.DB.beginTransaction();
 	
 	// Remove item from parent collections
@@ -1006,7 +1062,7 @@ Scholar.Item.prototype.erase = function(){
 		if (sourceItemID){
 			var sourceItem = Scholar.Items.get(sourceItemID);
 			sourceItem.decrementNoteCount();
-			Scholar.Notifier.trigger('modify', 'item', sourceItemID);
+			changedItems.push(sourceItemID);
 		}
 	}
 	// If not note, unassociate any notes for which this is a source
@@ -1015,16 +1071,25 @@ Scholar.Item.prototype.erase = function(){
 		
 		var sql = "SELECT itemID FROM itemNotes WHERE sourceItemID=" + this.getID();
 		var childNotes = Scholar.DB.columnQuery(sql);
+		if (childNotes){
+			changedItems.push(childNotes);
+		}
 		
 		var sql = "UPDATE itemNotes SET sourceItemID=NULL WHERE sourceItemID="
 			+ this.getID();
 		Scholar.DB.query(sql);
 	}
 	
-	// TODO: remove item from See Also table
+	// Flag See Also links for notification
+	var seeAlso = this.getSeeAlso();
+	if (seeAlso){
+		changedItems = changedItems.concat(seeAlso);
+	}
 	
 	sql = 'DELETE FROM itemCreators WHERE itemID=' + this.getID() + ";\n";
 	sql += 'DELETE FROM itemNotes WHERE itemID=' + this.getID() + ";\n";
+	sql += 'DELETE FROM itemSeeAlso WHERE itemID=' + this.getID() + ";\n";
+	sql += 'DELETE FROM itemSeeAlso WHERE linkedItemID=' + this.getID() + ";\n";
 	sql += 'DELETE FROM itemTags WHERE itemID=' + this.getID() + ";\n";
 	sql += 'DELETE FROM itemData WHERE itemID=' + this.getID() + ";\n";
 	sql += 'DELETE FROM items WHERE itemID=' + this.getID() + ";\n";
@@ -1045,9 +1110,9 @@ Scholar.Item.prototype.erase = function(){
 	
 	Scholar.Items.unload(this.getID());
 	
-	// Send notification of unlinked notes
-	if (childNotes){
-		Scholar.Notifier.trigger('modify', 'item', childNotes);
+	// Send notification of changed items
+	if (changedItems.length){
+		Scholar.Notifier.trigger('modify', 'item', changedItems);
 	}
 	
 	// If we're not in the middle of a larger commit, trigger the notifier now

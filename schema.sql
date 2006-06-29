@@ -1,4 +1,4 @@
--- 27
+-- 28
 
     DROP TABLE IF EXISTS version;
     CREATE TABLE version (
@@ -88,6 +88,17 @@
     );
     DROP INDEX IF EXISTS itemTags_tagID;
     CREATE INDEX itemTags_tagID ON itemTags(tagID);
+    
+    DROP TABLE IF EXISTS itemSeeAlso;
+    CREATE TABLE itemSeeAlso (
+        itemID INT,
+        linkedItemID INT,
+        PRIMARY KEY (itemID, linkedItemID),
+        FOREIGN KEY (itemID) REFERENCES items(itemID),
+        FOREIGN KEY (linkedItemID) REFERENCES items(itemID)
+    );
+    DROP INDEX IF EXISTS itemSeeAlso_linkedItemID;
+    CREATE INDEX itemSeeAlso_linkedItemID ON itemSeeAlso(linkedItemID);
     
     DROP TABLE IF EXISTS creators;
     CREATE TABLE creators (
