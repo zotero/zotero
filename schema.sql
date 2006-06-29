@@ -1,4 +1,4 @@
--- 26
+-- 27
 
     DROP TABLE IF EXISTS version;
     CREATE TABLE version (
@@ -136,17 +136,17 @@
     DROP INDEX IF EXISTS itemID;
     CREATE INDEX itemID ON collectionItems(itemID);
     
-    DROP TABLE IF EXISTS scrapers;
-    CREATE TABLE scrapers (
-        scraperID TEXT PRIMARY KEY,
+    DROP TABLE IF EXISTS translators;
+    CREATE TABLE translators (
+        translatorID TEXT PRIMARY KEY,
         lastUpdated DATETIME,
+        type TEXT,
         label TEXT,
         creator TEXT,
-        urlPattern TEXT,
-        scraperDetectCode TEXT,
-        scraperJavaScript TEXT
+        target TEXT,
+        detectCode TEXT,
+        code TEXT
     );
-    
     
     DROP TABLE IF EXISTS transactionSets;
     CREATE TABLE transactionSets (

@@ -122,6 +122,25 @@ Scholar.Utilities.prototype.cleanTags = function(x) {
 }
 
 /*
+ * Test if a string is an integer
+ */
+Scholar.Utilities.prototype.isInt = function(x) {
+	if(parseInt(x) == x) {
+		return true;
+	}
+	return false;
+}
+
+/*
+ * Get current scholar version
+ */
+Scholar.Utilities.prototype.getVersion = function() {
+	return Scholar.version;
+}
+
+Scholar.Utilities.prototype.inArray = Scholar.inArray;
+
+/*
  * END SCHOLAR FOR FIREFOX EXTENSIONS
  */
 

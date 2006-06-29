@@ -1,9 +1,9 @@
--- 28
+-- 29
 
 -- Set the following timestamp to the most recent scraper update date
 REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-06-26 21:40:00'));
 
-REPLACE INTO "scrapers" VALUES('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006-06-26 16:01:00', 'Amazon.com Scraper', 'Simon Kornblith', '^http://www\.amazon\.com/(?:gp/(?:product|search)/|exec/obidos/search-handle-url/)', 
+REPLACE INTO "translators" VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006-06-26 16:01:00', 3, 'Amazon.com Scraper', 'Simon Kornblith', '^http://www\.amazon\.com/(?:gp/(?:product|search)/|exec/obidos/search-handle-url/)', 
 'if(doc.title.indexOf("search") >= 0) {
 	return "multiple";
 } else {
@@ -110,7 +110,7 @@ if(m) {
 	scrape(doc);
 }');
 
-REPLACE INTO "scrapers" VALUES('838d8849-4ffb-9f44-3d0d-aa8a0a079afe', '2006-06-26 16:01:00', 'WorldCat Scraper', 'Simon Kornblith', '^http://(?:new)?firstsearch\.oclc\.org/WebZ/',
+REPLACE INTO "translators" VALUES ('838d8849-4ffb-9f44-3d0d-aa8a0a079afe', '2006-06-26 16:01:00', 3, 'WorldCat Scraper', 'Simon Kornblith', '^http://(?:new)?firstsearch\.oclc\.org/WebZ/',
 'if(doc.title == ''FirstSearch: WorldCat Detailed Record'') {
 	return "book";
 } else if(doc.title == ''FirstSearch: WorldCat List of Records'') {
@@ -270,7 +270,7 @@ utilities.HTTPUtilities.doPost(newUri, ''exportselect=''+exportselect+''&exportt
 })
 wait();');
 
-REPLACE INTO "scrapers" VALUES('88915634-1af6-c134-0171-56fd198235ed', '2006-06-26 21:40:00', 'LOC/Voyager WebVoyage Scraper', 'Simon Kornblith', 'Pwebrecon\.cgi',
+REPLACE INTO "translators" VALUES ('88915634-1af6-c134-0171-56fd198235ed', '2006-06-26 21:40:00', 3, 'LOC/Voyager WebVoyage Scraper', 'Simon Kornblith', 'Pwebrecon\.cgi',
 'var export_options = doc.forms.namedItem(''frm'').elements.namedItem(''RD'').options;
 for(i in export_options) {
 	if(export_options[i].text == ''Latin1 MARC''
@@ -397,7 +397,7 @@ utilities.HTTPUtilities.doGet(newUri+''?''+postString, null, function(text) {
 })
 wait();');
 
-REPLACE INTO "scrapers" VALUES('d921155f-0186-1684-615c-ca57682ced9b', '2006-06-26 16:01:00', 'JSTOR Scraper', 'Simon Kornblith', '^http://www\.jstor\.org/(?:view|browse|search/)', 
+REPLACE INTO "translators" VALUES ('d921155f-0186-1684-615c-ca57682ced9b', '2006-06-26 16:01:00', 3, 'JSTOR Scraper', 'Simon Kornblith', '^http://www\.jstor\.org/(?:view|browse|search/)', 
 'var namespace = doc.documentElement.namespaceURI;
 var nsResolver = namespace ? function(prefix) {
 	if (prefix == ''x'') return namespace; else return null;
@@ -615,7 +615,7 @@ utilities.HTTPUtilities.doGet(''http://www.jstor.org/browse?citationAction=remov
 
 wait();');
 
-REPLACE INTO "scrapers" VALUES('e85a3134-8c1a-8644-6926-584c8565f23e', '2006-06-26 16:01:00', 'History Cooperative Scraper', 'Simon Kornblith', '^http://www\.historycooperative\.org/(?:journals/.+/.+/.+\.html$|cgi-bin/search.cgi)', 
+REPLACE INTO "translators" VALUES ('e85a3134-8c1a-8644-6926-584c8565f23e', '2006-06-26 16:01:00', 3, 'History Cooperative Scraper', 'Simon Kornblith', '^http://www\.historycooperative\.org/(?:journals/.+/.+/.+\.html$|cgi-bin/search.cgi)', 
 'if(doc.title == "History Cooperative: Search Results") {
 	return "multiple";
 } else {
@@ -680,7 +680,7 @@ if(doc.title == "History Cooperative: Search Results") {
 	scrape(doc);
 }');
 
-REPLACE INTO "scrapers" VALUES('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '2006-06-26 16:01:00', 'InnoPAC Scraper', 'Simon Kornblith', '^http://[^/]+/(?:search/|record=)',
+REPLACE INTO "translators" VALUES ('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '2006-06-26 16:01:00', 3, 'InnoPAC Scraper', 'Simon Kornblith', '^http://[^/]+/(?:search/|record=)',
 '// First, check to see if the URL alone reveals InnoPAC, since some sites don''t reveal the MARC button
 var matchRegexp = new RegExp(''^(http://[^/]+/search/[^/]+/[^/]+/1\%2C[^/]+/)frameset(.+)$'');
 if(matchRegexp.test(doc.location.href)) {
@@ -826,7 +826,7 @@ if(newUri) {
 
 wait();');
 
-REPLACE INTO "scrapers" VALUES('add7c71c-21f3-ee14-d188-caf9da12728b', '2006-06-26 16:01:00', 'SIRSI 2003+ Scraper', 'Simon Kornblith', '/uhtbin/cgisirsi',
+REPLACE INTO "translators" VALUES ('add7c71c-21f3-ee14-d188-caf9da12728b', '2006-06-26 16:01:00', 3, 'SIRSI 2003+ Scraper', 'Simon Kornblith', '/uhtbin/cgisirsi',
 'var namespace = doc.documentElement.namespaceURI;
 var nsResolver = namespace ? function(prefix) {
 	if (prefix == ''x'') return namespace; else return null;
@@ -977,7 +977,7 @@ if(!scrape(doc)) {
 }
 ');
 
-REPLACE INTO "scrapers" VALUES('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '2006-06-26 16:01:00', 'ProQuest Scraper', 'Simon Kornblith', '^http://proquest\.umi\.com/pqdweb\?((?:.*\&)?did=.*&Fmt=[0-9]|(?:.*\&)Fmt=[0-9].*&did=|(?:.*\&)searchInterface=)',
+REPLACE INTO "translators" VALUES ('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '2006-06-26 16:01:00', 3, 'ProQuest Scraper', 'Simon Kornblith', '^http://proquest\.umi\.com/pqdweb\?((?:.*\&)?did=.*&Fmt=[0-9]|(?:.*\&)Fmt=[0-9].*&did=|(?:.*\&)searchInterface=)',
 'if(doc.title == "Results") {
 	return "magazineArticle";
 } else {
@@ -1157,7 +1157,7 @@ if(doc.title == "Results") {
 	}
 }');
 
-REPLACE INTO "scrapers" VALUES('6773a9af-5375-3224-d148-d32793884dec', '2006-06-26 16:01:00', 'InfoTrac Scraper', 'Simon Kornblith', '^http://infotrac-college\.thomsonlearning\.com/itw/infomark/',
+REPLACE INTO "translators" VALUES ('6773a9af-5375-3224-d148-d32793884dec', '2006-06-26 16:01:00', 3, 'InfoTrac Scraper', 'Simon Kornblith', '^http://infotrac-college\.thomsonlearning\.com/itw/infomark/',
 'if(doc.title.substring(0, 8) == "Article ") {
 	return "magazineArticle";
 } else doc.title.substring(0, 10) == "Citations ") {
@@ -1278,7 +1278,7 @@ if(doc.title.substring(0, 8) == "Article ") {
 	}
 }');
 
-REPLACE INTO "scrapers" VALUES('b047a13c-fe5c-6604-c997-bef15e502b09', '2006-06-26 16:01:00', 'LexisNexis Scraper', 'Simon Kornblith', '^http://web\.lexis-nexis\.com/universe/(?:document|doclist)',
+REPLACE INTO "translators" VALUES ('b047a13c-fe5c-6604-c997-bef15e502b09', '2006-06-26 16:01:00', 3, 'LexisNexis Scraper', 'Simon Kornblith', '^http://web\.lexis-nexis\.com/universe/(?:document|doclist)',
 'var detailRe = new RegExp("^http://[^/]+/universe/document");
 if(detailRe.test(doc.location.href)) {
 	return "newspaperArticle";
@@ -1378,7 +1378,7 @@ if(detailRe.test(doc.location.href)) {
 	wait();
 }');
 
-REPLACE INTO "scrapers" VALUES('cf87eca8-041d-b954-795a-2d86348999d5', '2006-06-26 16:01:00', 'Aleph Scraper', 'Simon Kornblith', '^http://[^/]+/F(?:/[A-Z0-9\-]+(?:\?.*)?$|\?func=find)',
+REPLACE INTO "translators" VALUES ('cf87eca8-041d-b954-795a-2d86348999d5', '2006-06-26 16:01:00', 3, 'Aleph Scraper', 'Simon Kornblith', '^http://[^/]+/F(?:/[A-Z0-9\-]+(?:\?.*)?$|\?func=find)',
 'var singleRe = new RegExp("^http://[^/]+/F/[A-Z0-9\-]+\?.*func=full-set-set.*\&format=[0-9]{3}");
 
 if(singleRe.test(doc.location.href)) {
@@ -1465,7 +1465,7 @@ utilities.processDocuments(browser, null, newUris, function(newBrowser) {
 
 wait();');
 
-REPLACE INTO "scrapers" VALUES('774d7dc2-3474-2684-392c-f787789ec63d', '2006-06-26 16:01:00', 'Dynix Scraper', 'Simon Kornblith', 'ipac\.jsp\?.*(?:uri=full=[0-9]|menu=search)',
+REPLACE INTO "translators" VALUES ('774d7dc2-3474-2684-392c-f787789ec63d', '2006-06-26 16:01:00', 3, 'Dynix Scraper', 'Simon Kornblith', 'ipac\.jsp\?.*(?:uri=full=[0-9]|menu=search)',
 'var detailsRe = new RegExp(''ipac\.jsp\?.*uri=full=[0-9]'');
 if(detailsRe.test(doc.location.href)) {
 	return "book";
@@ -1543,7 +1543,7 @@ utilities.processDocuments(browser, null, uris, function(newBrowser) {
 
 wait();');
 
-REPLACE INTO "scrapers" VALUES('63a0a351-3131-18f4-21aa-f46b9ac51d87', '2006-06-26 16:01:00', 'VTLS Scraper', 'Simon Kornblith', '/chameleon(?:\?|$)', 
+REPLACE INTO "translators" VALUES ('63a0a351-3131-18f4-21aa-f46b9ac51d87', '2006-06-26 16:01:00', 3, 'VTLS Scraper', 'Simon Kornblith', '/chameleon(?:\?|$)', 
 'var node = utilities.getNode(doc, doc, ''//a[text()="marc"]'', null);
 if(node) {
 	return "book";
@@ -1644,7 +1644,7 @@ utilities.processDocuments(browser, null, newUris, function(newBrowser) {
 
 wait();');
 
-REPLACE INTO "scrapers" VALUES('fb12ae9e-f473-cab4-0546-27ab88c64101', '2006-06-26 16:01:00', 'DRA Scraper', 'Simon Kornblith', '/web2/tramp2\.exe/(?:see\_record/|authority\_hits/|goto/.*\?.*screen=Record\.html)',
+REPLACE INTO "translators" VALUES ('fb12ae9e-f473-cab4-0546-27ab88c64101', '2006-06-26 16:01:00', 3, 'DRA Scraper', 'Simon Kornblith', '/web2/tramp2\.exe/(?:see\_record/|authority\_hits/|goto/.*\?.*screen=Record\.html)',
 'if(doc.location.href.indexOf("/authority_hits") > 0) {
 	return "multiple";
 } else {
@@ -1708,7 +1708,7 @@ for(i in uris) {
 wait();');
 
 
-REPLACE INTO "scrapers" VALUES('c0e6fda6-0ecd-e4f4-39ca-37a4de436e15', '2006-06-26 16:01:00', 'GEAC Scraper', 'Simon Kornblith', '/(?:GeacQUERY|(?:Geac)?FETCH[\:\?].*[&:]next=html/(?:record\.html|geacnffull\.html))',
+REPLACE INTO "translators" VALUES ('c0e6fda6-0ecd-e4f4-39ca-37a4de436e15', '2006-06-26 16:01:00', 3, 'GEAC Scraper', 'Simon Kornblith', '/(?:GeacQUERY|(?:Geac)?FETCH[\:\?].*[&:]next=html/(?:record\.html|geacnffull\.html))',
 'if(doc.location.href.indexOf("/GeacQUERY") > 0) {
 	return "multiple";
 } else {
@@ -1792,7 +1792,7 @@ utilities.processDocuments(browser, null, uris, function(newBrowser) {
 
 wait();');
 
-REPLACE INTO "scrapers" VALUES('5287d20c-8a13-6004-4dcb-5bb2b66a9cc9', '2006-06-26 16:01:00', 'SIRSI -2003 Scraper', 'Simon Kornblith', '/uhtbin/cgisirsi',
+REPLACE INTO "translators" VALUES ('5287d20c-8a13-6004-4dcb-5bb2b66a9cc9', '2006-06-26 16:01:00', 3, 'SIRSI -2003 Scraper', 'Simon Kornblith', '/uhtbin/cgisirsi',
 'var namespace = doc.documentElement.namespaceURI;
 var nsResolver = namespace ? function(prefix) {
 	if (prefix == ''x'') return namespace; else return null;
@@ -1924,7 +1924,7 @@ utilities.HTTPUtilities.doGet(newUri+''?marks=''+recNumbers.join(",")+''&shadow=
 
 wait();');
 
-REPLACE INTO "scrapers" VALUES('0f9fc2fc-306e-5204-1117-25bca009dffc', '2006-06-26 16:01:00', 'TLC/YouSeeMore Scraper', 'Simon Kornblith', 'TLCScripts/interpac\.dll\?(?:.*LabelDisplay.*RecordNumber=[0-9]|Search|ItemTitles)',
+REPLACE INTO "translators" VALUES ('0f9fc2fc-306e-5204-1117-25bca009dffc', '2006-06-26 16:01:00', 3, 'TLC/YouSeeMore Scraper', 'Simon Kornblith', 'TLCScripts/interpac\.dll\?(?:.*LabelDisplay.*RecordNumber=[0-9]|Search|ItemTitles)',
 'var detailRe = new RegExp("TLCScripts/interpac\.dll\?.*LabelDisplay.*RecordNumber=[0-9]");
 if(detailRe.test(doc.location.href)) {
 	return "book";
@@ -2018,7 +2018,7 @@ utilities.processDocuments(browser, null, newUris, function(newBrowser) {
 
 wait();');
 
-REPLACE INTO "scrapers" VALUES('c54d1932-73ce-dfd4-a943-109380e06574', '2006-06-26 16:01:00', 'Project MUSE Scraper', 'Simon Kornblith', '^http://muse\.jhu\.edu/(?:journals/[^/]+/[^/]+/[^/]+\.html|search/pia.cgi)',
+REPLACE INTO "translators" VALUES ('c54d1932-73ce-dfd4-a943-109380e06574', '2006-06-26 16:01:00', 3, 'Project MUSE Scraper', 'Simon Kornblith', '^http://muse\.jhu\.edu/(?:journals/[^/]+/[^/]+/[^/]+\.html|search/pia.cgi)',
 'var searchRe = new RegExp("^http://[^/]+/search/pia\.cgi");
 if(searchRe.test(doc.location.href)) {
 	return "multiple";
@@ -2195,7 +2195,7 @@ if(searchRe.test(doc.location.href)) {
 	model.addStatement(uri, prefixRDF + "type", prefixDummy + "journalArticle", false);
 }');
 
-REPLACE INTO "scrapers" VALUES('fcf41bed-0cbc-3704-85c7-8062a0068a7a', '2006-06-26 16:01:00', 'PubMed Scraper', 'Simon Kornblith', '^http://www\.ncbi\.nlm\.nih\.gov/entrez/query\.fcgi\?(?:.*db=PubMed.*list_uids=[0-9]|.*list_uids=[0-9].*db=PubMed|.*db=PubMed.*CMD=search|.*CMD=search.*db=PubMed)',
+REPLACE INTO "translators" VALUES ('fcf41bed-0cbc-3704-85c7-8062a0068a7a', '2006-06-26 16:01:00', 3, 'PubMed Scraper', 'Simon Kornblith', '^http://www\.ncbi\.nlm\.nih\.gov/entrez/query\.fcgi\?(?:.*db=PubMed.*list_uids=[0-9]|.*list_uids=[0-9].*db=PubMed|.*db=PubMed.*CMD=search|.*CMD=search.*db=PubMed)',
 'if(doc.location.href.indexOf("list_uids=") >= 0) {
 	return "journalArticle";
 } else {
@@ -2324,7 +2324,7 @@ utilities.HTTPUtilities.doGet(newUri, null, function(text) {
 
 wait();');
 
-REPLACE INTO "scrapers" VALUES('951c027d-74ac-47d4-a107-9c3069ab7b48', '2006-06-26 16:41:00', 'Generic Scraper', 'Simon Kornblith', '',
+REPLACE INTO "translators" VALUES ('951c027d-74ac-47d4-a107-9c3069ab7b48', '2006-06-26 16:41:00', 3, 'Generic Scraper', 'Simon Kornblith', '',
 'return "website";',
 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
@@ -2373,7 +2373,7 @@ if(!foundTitle) {
 
 model.addStatement(uri, prefixRDF + "type", prefixDummy + "website", false);');
 
-REPLACE INTO "scrapers" VALUES('3e684d82-73a3-9a34-095f-19b112d88bbf', '2006-06-26 16:01:00', 'Google Books Scraper', 'Simon Kornblith', '^http://books\.google\.com/books\?(.*vid=.*\&id=.*|.*q=.*)',
+REPLACE INTO "translators" VALUES ('3e684d82-73a3-9a34-095f-19b112d88bbf', '2006-06-26 16:01:00', 3, 'Google Books Scraper', 'Simon Kornblith', '^http://books\.google\.com/books\?(.*vid=.*\&id=.*|.*q=.*)',
 'var re = new RegExp(''^http://books\\.google\\.com/books\\?vid=([^&]+).*\\&id=([^&]+)'', ''i'');
 if(re.test(doc.location.href)) {
 	return "book";
@@ -2463,3 +2463,270 @@ utilities.processDocuments(browser, null, newUris, function(newBrowser) {
 }, function() { done(); }, function() {});
 
 wait();');
+
+REPLACE INTO "translators" VALUES ('0e2235e7-babf-413c-9acf-f27cce5f059c', '2006-06-28 16:00:00', 2, 'Metadata Object Description Schema (MODS)', 'Simon Kornblith', 'xml',
+'options.add("Export project structure", "checkbox", "true");
+options.add("Export notes", "checkbox", "true");',
+'var partialItemTypes = ["bookSection", "journalArticle", "magazineArticle", "newspaperArticle"];
+
+function doExport(items) {
+	var modsCollection = <modsCollection xmlns="http://www.loc.gov/mods/v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-2.xsd" />;
+	
+	for(var i in items) {
+		var item = items[i];
+		
+		var isPartialItem = false;
+		if(utilities.inArray(item.itemType, partialItemTypes)) {
+			isPartialItem = true;
+		}
+		
+		var mods = <mods />;
+		mods.@ID = item.itemID;
+		
+		/** CORE FIELDS **/
+		
+		// XML tag titleInfo; object field title
+		mods.titleInfo.title = item.title;
+		
+		// XML tag typeOfResource/genre; object field type
+		var modsType, marcGenre;
+		if(item.itemType == "book" || item.itemType == "bookSection") {
+			modsType = "text";
+			marcGenre = "book";
+		} else if(item.itemType == "journalArticle" || item.itemType == "magazineArticle") {
+			modsType = "text";
+			marcGenre = "periodical";
+		} else if(item.itemType == "newspaperArticle") {
+			modsType = "text";
+			marcGenre = "newspaper";
+		} else if(item.itemType == "thesis") {
+			modsType = "text";
+			marcGenre = "theses";
+		} else if(item.itemType == "letter") {
+			modsType = "text";
+			marcGenre = "letter";
+		} else if(item.itemType == "manuscript") {
+			modsType = "text";
+			modsType.@manuscript = "yes";
+		} else if(item.itemType == "interview") {
+			modsType = "text";
+			modsType.@manuscript = "interview";
+		} else if(item.itemType == "film") {
+			modsType = "moving image";
+			marcGenre = "motion picture";
+		} else if(item.itemType == "artwork") {
+			modsType = "still image";
+			marcGenre = "art original";
+		} else if(item.itemType == "website") {
+			modsType = "multimedia";
+			marcGenre = "web site";
+		}
+		mods.typeOfResource = modsType;
+		mods.genre += <genre authority="local">{item.itemType}</genre>;
+		mods.genre += <genre authority="marcgt">{marcGenre}</genre>;
+		
+		// XML tag genre; object field thesisType, type
+		if(item.thesisType) {
+			mods.genre += <genre>{item.thesisType}</genre>;
+		}
+		if(item.type) {
+			mods.genre += <genre>{item.type}</genre>;
+		}
+		
+		// XML tag name; object field creators
+		for(var j in item.creators) {
+			var roleTerm = "";
+			if(item.creators[j].creatorType == "author") {
+				roleTerm = "aut";
+			} else if(item.creators[j].creatorType == "editor") {
+				roleTerm = "edt";
+			} else if(item.creators[j].creatorType == "creator") {
+				roleTerm = "ctb";
+			}
+			
+			// FIXME - currently all names are personal
+			mods.name += <name type="personal">
+				<namePart type="family">{item.creators[j].lastName}</namePart>
+				<namePart type="given">{item.creators[j].firstName}</namePart>
+				<role><roleTerm type="code" authority="marcrelator">{roleTerm}</roleTerm></role>
+				</name>;
+		}
+		
+		// XML tag recordInfo.recordOrigin; used to store our generator note
+		mods.recordInfo.recordOrigin = "Scholar for Firefox "+utilities.getVersion();
+		
+		/** FIELDS ON NEARLY EVERYTHING BUT NOT A PART OF THE CORE **/
+		
+		// XML tag recordInfo.recordContentSource; object field source
+		if(item.source) {
+			mods.recordInfo.recordContentSource = item.source;
+		}
+		// XML tag recordInfo.recordIdentifier; object field accessionNumber
+		if(item.accessionNumber) {
+			mods.recordInfo.recordIdentifier = item.accessionNumber;
+		}
+		
+		// XML tag accessCondition; object field rights
+		if(item.rights) {
+			mods.accessCondition = item.rights;
+		}
+		
+		/** SUPPLEMENTAL FIELDS **/
+		
+		// XML tag relatedItem.titleInfo; object field series
+		if(item.series) {
+			var series = <relatedItem type="series">
+					<titleInfo><title>{item.series}</title></titleInfo>
+					</relatedItem>;
+			
+			if(item.itemType == "bookSection") {
+				// For a book section, series info must go inside host tag
+				mods.relatedItem.relatedItem = series;
+			} else {
+				mods.relatedItem += series;
+			}
+		}
+		
+		// Make part its own tag so we can figure out where it goes later
+		var part = new XML();
+		
+		// XML tag detail; object field volume
+		if(item.volume) {
+			if(utilities.isInt(item.volume)) {
+				part += <detail type="volume"><number>{item.volume}</number></detail>;
+			} else {
+				part += <detail type="volume"><text>{item.volume}</text></detail>;
+			}
+		}
+		
+		// XML tag detail; object field number
+		if(item.number) {
+			if(utilities.isInt(item.number)) {
+				part += <detail type="issue"><number>{item.number}</number></detail>;
+			} else {
+				part += <detail type="issue"><text>{item.number}</text></detail>;
+			}
+		}
+		
+		// XML tag detail; object field section
+		if(item.section) {
+			if(utilities.isInt(item.section)) {
+				part += <detail type="section"><number>{item.section}</number></detail>;
+			} else {
+				part += <detail type="section"><text>{item.section}</text></detail>;
+			}
+		}
+		
+		// XML tag detail; object field pages
+		if(item.pages) {
+			var start, end;
+			
+			if(typeof(item.pages) == "string" && item.pages.indexOf("-")) {
+				// A page range
+				var pageNumbers = item.pages.split("-");
+				start = pageNumbers[0];
+				end = pageNumbers[1];
+			} else {
+				// Assume start and end are the same
+				start = item.pages;
+				end = item.pages;
+			}
+			part += <extent unit="pages"><start>{start}</start><end>{end}</end></extent>;
+		}
+		
+		// Assign part if something was assigned
+		if(part.length() != 1) {
+			if(isPartialItem) {
+				// For a journal article, bookSection, etc., the part is the host
+				mods.relatedItem.part += <part>{part}</part>;
+			} else {
+				mods.part += <part>{part}</part>;
+			}
+		}
+		
+		// XML tag originInfo; object fields edition, place, publisher, year, date
+		var originInfo = new XML();
+		if(item.edition) {
+			originInfo += <edition>{item.edition}</edition>;
+		}
+		if(item.place) {
+			originInfo += <place><placeTerm type="text">{item.place}</placeTerm></place>;
+		}
+		if(item.publisher) {
+			originInfo += <publisher>item.publisher</publisher>;
+		} else if(item.distributor) {
+			originInfo += <publisher>item.distributor</publisher>;
+		}
+		if(item.year) {
+			// Assume year is copyright date
+			originInfo += <copyrightDate encoding="iso8601">{item.year}</copyrightDate>;
+		}
+		if(item.date) {
+			if(inArray(item.itemType, ["magazineArticle", "newspaperArticle"])) {
+				// Assume date is date issued
+				var dateType = "dateIssued";
+			} else {
+				// Assume date is date created
+				var dateType = "dateCreated";
+			}
+			originInfo += <{dateType} encoding="iso8601">{item.date}</{dateType}>;
+		}
+		if(originInfo.length() != 1) {
+			if(isPartialItem) {
+				// For a journal article, bookSection, etc., this goes under the host
+				mods.relatedItem.originInfo += <originInfo>{originInfo}</originInfo>;
+			} else {
+				mods.originInfo += <originInfo>{originInfo}</originInfo>;
+			}
+		}
+		
+		// XML tag identifier; object fields ISBN, ISSN
+		var identifier = null;
+		if(item.ISBN) {
+			identifier = <identifier type="ISBN">{item.ISBN}</identifier>;
+		} else if(item.ISSN) {
+			identifier = <identifier type="ISSN">{item.ISSN}</identifier>;
+		}
+		if(identifier) {
+			if(isPartialItem) {
+					mods.relatedItem.identifier = identifier;
+			} else {
+				mods.identifier = identifier;
+			}
+		}
+		
+		// XML tag relatedItem.titleInfo; object field publication
+		if(item.publication) {
+			mods.relatedItem.titleInfo += <titleInfo>{item.publication}</titleInfo>;
+		}
+		
+		// XML tag classification; object field callNumber
+		if(item.callNumber) {
+			mods.classification = item.callNumber;
+		}
+		
+		// XML tag location.physicalLocation; object field archiveLocation
+		if(item.archiveLocation) {
+			mods.location.physicalLocation = item.archiveLocation;
+		}
+		
+		// XML tag location.url; object field archiveLocation
+		if(item.url) {
+			mods.location.url = item.url;
+		}
+		
+		if(mods.relatedItem.length() == 1 && isPartialItem) {
+			mods.relatedItem.@type = "host";
+		}
+		
+		/** NOTES **/
+		
+		for(var j in item.notes) {
+			mods.note += <note type="content">{item.notes[j].note}</note>;
+		}
+		
+		modsCollection.mods += mods;
+	}
+	
+	write(modsCollection.toString());
+}');

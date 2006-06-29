@@ -41,8 +41,7 @@ Scholar.Ingester.ingestURL = function(url, complete, error, myWindow) {
 				   
 	var succeeded = function(browser) {
 		var myDoc = new Scholar.Ingester.Document(browser, myWindow, isHidden);
-		myDoc.retrieveScraper();
-		if(myDoc.scraper) {
+		if(myDoc.retrieveTranslator()) {
 			myDoc.scrapePage(function(myDoc) {
 				Scholar.Ingester.deleteHiddenBrowser(browser);
 				complete(myDoc);
@@ -241,7 +240,11 @@ Scholar.Ingester.Model.prototype.detachRepository = function() {}
 //
 //////////////////////////////////////////////////////////////////////////////
 
-/* Public properties:
+/* THIS CODE IS GOING AWAY
+ * eventually, all ingesting will be part of a unified API in Scholar.Translate.
+ * until then, Scholar.Ingester.Document reigns supreme.
+ * 
+ * Public properties:
  * browser - browser window object of document
  * model - data model for semantic scrapers
  * scraper - best scraper to use to scrape page
@@ -288,7 +291,7 @@ Scholar.Ingester.Document = function(myBrowser, myWindow, isHidden) {
 Scholar.Ingester.Document.prototype.retrieveScraper = function() {
 	Scholar.debug("Retrieving scrapers for "+this.url);
 	
-	var sql = 'SELECT * FROM scrapers ORDER BY scraperDetectCode IS NULL DESC';
+	var sql = 'SELECT * FROM translators WHERE type = 3 ORDER BY detectCode IS NULL DESC';
 	var scrapers = Scholar.DB.query(sql);
 	for(var i=0; i<scrapers.length; i++) {
 		var currentScraper = scrapers[i];
@@ -310,8 +313,8 @@ Scholar.Ingester.Document.prototype.canScrape = function(currentScraper) {
 	// Test with regular expression
 	// If this is slow, we could preload all scrapers and compile regular
 	// expressions, so each check will be faster
-	if(currentScraper.urlPattern) {
-		var regularExpression = new RegExp(currentScraper.urlPattern, "i");
+	if(currentScraper.target) {
+		var regularExpression = new RegExp(currentScraper.target, "i");
 		if(regularExpression.test(this.url)) {
 			canScrape = true;
 		}
@@ -319,20 +322,20 @@ Scholar.Ingester.Document.prototype.canScrape = function(currentScraper) {
 	
 	// Test with JavaScript if available and didn't have a regular expression or
 	// passed regular expression test
-	if((!currentScraper.urlPattern || canScrape)
-	  && currentScraper.scraperDetectCode) {
-		Scholar.debug("Checking scraperDetectCode");
+	if((!currentScraper.target || canScrape)
+	  && currentScraper.detectCode) {
+		Scholar.debug("Checking detectCode");
 		var scraperSandbox = this._sandbox;
 		try {
 			canScrape = Components.utils.evalInSandbox("(function(){\n" +
-							   currentScraper.scraperDetectCode +
+							   currentScraper.detectCode +
 							   "\n})()", scraperSandbox);
 		} catch(e) {
-			Scholar.debug(e+' in scraperDetectCode for '+currentScraper.label);
+			Scholar.debug(e+' in detectCode for '+currentScraper.label);
 			return false;
 		}
 				
-		// scraperDetectCode returns an associative array (object) in the case of a search result
+		// detectCode returns text type
 		if(canScrape.toString() != "") {
 			this.type = canScrape;
 		} else {
@@ -356,10 +359,10 @@ Scholar.Ingester.Document.prototype.scrapePage = function(callback) {
 	var scraperSandbox = this._sandbox;
 	try {
 		var returnValue = Components.utils.evalInSandbox("(function(){\n" +
-							   this.scraper.scraperJavaScript +
+							   this.scraper.code +
 							   "\n})()", scraperSandbox);
 	} catch(e) {
-		Scholar.debug(e+' in scraperJavaScript for '+this.scraper.label);
+		Scholar.debug(e+' in code for '+this.scraper.label);
 		this._scrapePageComplete(false);
 		return;
 	}
