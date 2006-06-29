@@ -625,6 +625,10 @@ Scholar.Item.prototype.save = function(){
 		//
 		// Primary fields
 		//
+		sqlColumns.push('itemID');
+		var itemID = Scholar.getRandomID('items', 'itemID');
+		sqlValues.push(itemID);
+		
 		sqlColumns.push('itemTypeID');
 		sqlValues.push({'int':this.getField('itemTypeID')});
 		
@@ -651,8 +655,8 @@ Scholar.Item.prototype.save = function(){
 			}
 			sql = sql.substring(0,sql.length-1) + ")";
 			
-			// Save basic data to items table and get new ID
-			var itemID = Scholar.DB.query(sql,sqlValues);
+			// Save basic data to items table
+			Scholar.DB.query(sql, sqlValues);
 			this._data['itemID'] = itemID;
 			
 			Scholar.History.setAssociatedID(itemID);
