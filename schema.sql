@@ -356,6 +356,8 @@
     INSERT INTO "items" VALUES(13, 4, 'The computer conference: An altered state of communication', '2006-03-12 05:31:00', '2006-03-12 05:31:00');
     INSERT INTO "items" VALUES(14, 4, 'Computer Networks as Social Networks: Collaborative Work, Telework, and Community', '2006-03-12 05:31:17', '2006-03-12 05:31:17');
     INSERT INTO "items" VALUES(15, 2, 'The Internet in everyday life', '2006-03-12 05:31:41', '2006-03-12 05:31:41');
+    INSERT INTO "items" VALUES(16, 1, NULL, '2006-06-29 05:57:14', '2006-06-29 05:57:19');
+    INSERT INTO "items" VALUES(17, 1, NULL, '2006-06-29 05:58:14', '2006-06-29 05:58:19');
     
     INSERT INTO "itemData" VALUES(1, 9, 2001);
     INSERT INTO "itemData" VALUES(1, 7, 'Cresskill, N.J.');
@@ -403,6 +405,9 @@
     INSERT INTO "itemCreators" VALUES(7, 7, 1, 1);
     INSERT INTO "itemCreators" VALUES(7, 8, 1, 2);
     INSERT INTO "itemCreators" VALUES(9, 11, 1, 1);
+    
+    INSERT INTO "itemNotes" VALUES(16, 1, 'This item is note-worthy.');
+    INSERT INTO "itemNotes" VALUES(17, NULL, 'This is an independent note.');
     
     INSERT INTO collections VALUES (1241, 'Test Project', NULL);
     INSERT INTO collections VALUES (3262, 'Another Test Project', NULL);
