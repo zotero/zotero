@@ -1791,10 +1791,7 @@ Scholar.Collection.prototype.hasItem = function(itemID){
 Scholar.Collection.prototype.hasDescendent = function(type, id){
 	var descendents = this._getDescendents();
 	for (var i=0, len=descendents.length; i<len; i++){
-		// TODO: fix this to work with smart collections
-		if (((type=='collection' && descendents[i]['isCollection']) ||
-			(type=='item' && !descendents[i]['isCollection']))
-			&& id==descendents[i]['id']){
+		if (descendents[i]['type']==type && descendents[i]['id']==id){
 			return true;
 		}
 	}
@@ -1813,7 +1810,7 @@ Scholar.Collection.prototype.erase = function(deleteItems){
 	
 	for(var i=0, len=descendents.length; i<len; i++){
 		// Descendent collections
-		if (descendents[i]['isCollection']){
+		if (descendents[i]['type']=='collection'){
 			collections.push(descendents[i]['id']);
 		}
 		// Descendent items
@@ -1851,6 +1848,11 @@ Scholar.Collection.prototype.isCollection = function(){
 }
 
 
+Scholar.Collection.prototype.toArray = function(){
+	return this._getDescendents(true);
+}
+
+
 Scholar.Collection.prototype._loadChildItems = function(){
 	this._childItems = new Scholar.Hash();
 	
@@ -1869,36 +1871,50 @@ Scholar.Collection.prototype._loadChildItems = function(){
 
 
 /**
-* Returns an array of descendent collections and items (rows of 'id' and 'isCollection')
+* Returns an array of descendent collections and items
+* 	(rows of 'id', 'type' ('item' or 'collection'), and, if collection, 'name')
+*
+* nested: Return multidimensional array with 'children' nodes instead of flat array
 **/
-Scholar.Collection.prototype._getDescendents = function(){
+Scholar.Collection.prototype._getDescendents = function(nested){
 	var toReturn = new Array();
 	
+	// 0 == collection
+	// 1 == item
 	var children = Scholar.DB.query('SELECT collectionID AS id, '
-		+ '1 AS isCollection FROM collections '
-		+ 'WHERE parentCollectionID=' + this._id
-		+ ' UNION SELECT itemID AS id, 0 AS isCollection FROM collectionItems '
-		+ 'WHERE collectionID=' + this._id);
+		+ "0 AS type, collectionName AS collectionName "
+		+ 'FROM collections WHERE parentCollectionID=' + this._id
+		+ ' UNION SELECT itemID AS id, 1 AS type, NULL AS collectionName '
+		+ 'FROM collectionItems WHERE collectionID=' + this._id);
 	
 	for(var i=0, len=children.length; i<len; i++){
-		if (parseInt(children[i]['isCollection'])){
-			toReturn.push({
-				id: children[i]['id'],
-				isCollection: true
-			});
+		switch (children[i]['type']){
+			case 0:
+				toReturn.push({
+					id: children[i]['id'],
+					name: children[i]['collectionName'],
+					type: 'collection'
+				});
+				
+				var descendents =
+					Scholar.Collections.get(children[i]['id'])._getDescendents(nested);
+				
+				if (nested){
+					toReturn[toReturn.length-1]['children'] = descendents;
+				}
+				else {
+					for(var j=0, len2=descendents.length; j<len2; j++){
+						toReturn.push(descendents[j]);
+					}
+				}
+			break;
 			
-			var descendents =
-				Scholar.Collections.get(children[i]['id'])._getDescendents();
-			
-			for(var j=0, len2=descendents.length; j<len2; j++){
-				toReturn.push(descendents[j]);
-			}
-		}
-		else {
-			toReturn.push({
-				id: children[i]['id'],
-				isCollection: false
-			});
+			case 1:
+				toReturn.push({
+					id: children[i]['id'],
+					type: 'item'
+				});
+			break;
 		}
 	}
 	
