@@ -179,6 +179,8 @@ Scholar.Item.prototype.numCreators = function(){
 
 /*
  * Returns an array of the creator data at the given position, or false if none
+ *
+ * Note: Creator data array is returned by reference
  */
 Scholar.Item.prototype.getCreator = function(pos){
 	if (this.getID() && !this._creatorsLoaded){
@@ -194,6 +196,8 @@ Scholar.Item.prototype.getCreator = function(pos){
 
 /*
  * Returns a multidimensional array of creators, or an empty array if none
+ *
+ * Note: Creator data array is returned by reference
  */
 Scholar.Item.prototype.getCreators = function(){
 	var creators = [];
@@ -1168,30 +1172,34 @@ Scholar.Item.prototype.toArray = function(){
 	
 	if (!this.isNote()){
 		// Creators
-		arr['creators'] = this.getCreators();
-		// Convert creatorTypeIDs to text
-		for (var i in arr['creators']){
+		arr['creators'] = [];
+		var creators = this.getCreators();
+		for (var i in creators){
+			arr['creators'][i] = [];
+			arr['creators'][i]['firstName'] = creators[i]['firstName'];
+			arr['creators'][i]['lastName'] = creators[i]['lastName'];
+			// Convert creatorTypeIDs to text
 			arr['creators'][i]['creatorType'] =
-				Scholar.CreatorTypes.getName(arr['creators'][i]['creatorTypeID']);
-			delete arr['creators'][i]['creatorTypeID'];
+				Scholar.CreatorTypes.getName(creators[i]['creatorTypeID']);
 		}
-	
+		
 		// Source notes
 		arr['notes'] = []
 		var notes = this.getNotes();
 		for (var i in notes){
 			var note = Scholar.Items.get(notes[i]);
 			arr['notes'].push({
+				itemID: note.getID(),
 				note: note.getNote(),
 				tags: note.getTags(),
-				// TODO
-				seeAlso: []
+				seeAlso: note.getSeeAlso()
 			});
 		}
 	}
 	
 	// Notes
 	else {
+		// Don't need title for notes
 		delete arr['title'];
 		arr['note'] = this.getNote();
 		if (this.getNoteSource()){
@@ -1200,8 +1208,7 @@ Scholar.Item.prototype.toArray = function(){
 	}
 	
 	arr['tags'] = this.getTags();
-	// TODO
-	arr['seeAlso'] = [];
+	arr['seeAlso'] = this.getSeeAlso();
 	
 	return arr;
 }
