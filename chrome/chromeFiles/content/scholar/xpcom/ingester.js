@@ -411,6 +411,7 @@ Scholar.Ingester.Document.prototype._scrapePageComplete = function(returnValue) 
 	delete this.items;
 	this.model = new Scholar.Ingester.Model();
 	this.items = new Array();
+	this._waitForCompletion = false;
 	// This is perhaps a bit paranoid, but we need to get the model redone anyway
 	this._generateSandbox();
 }

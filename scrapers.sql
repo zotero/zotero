@@ -1,10 +1,10 @@
--- 30
+-- 31
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-06-28 22:52:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-06-28 23:08:00'));
 
-REPLACE INTO "translators" VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006-06-26 16:01:00', 3, 'Amazon.com Scraper', 'Simon Kornblith', '^http://www\.amazon\.com/(?:gp/(?:product|search)/|exec/obidos/search-handle-url/)', 
-'if(doc.title.indexOf("search") >= 0) {
+REPLACE INTO "translators" VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006-06-28 23:08:00', 3, 'Amazon.com Scraper', 'Simon Kornblith', '^http://www\.amazon\.com/(?:gp/(?:product|search)/|exec/obidos/search-handle-url/)', 
+'if(doc.location.href.indexOf("search") >= 0) {
 	return "multiple";
 } else {
 	return "book";

@@ -407,7 +407,7 @@ Scholar.Utilities.Ingester.prototype.loadDocument = function(url, browser, succe
 }
 Scholar.Utilities.Ingester.prototype.processDocuments = function(browser, firstDoc, urls, processor, done, exception) {
 	for(i in urls) {
-		urls[i] = Scholar.Ingester.ProxyMonitor.properToProxy(url);
+		urls[i] = Scholar.Ingester.ProxyMonitor.properToProxy(urls[i]);
 	}
 	Scholar.Utilities.HTTP.processDocuments(firstDoc, urls, processor, done, exception);
 }

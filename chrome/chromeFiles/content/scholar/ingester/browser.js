@@ -11,6 +11,7 @@
 // Class to interface with the browser when ingesting data
 
 Scholar_Ingester_Interface = function() {}
+Scholar_Ingester_Interface._scrapeProgress = new Array();
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -64,6 +65,7 @@ Scholar_Ingester_Interface.scrapeThisPage = function(saveLocation) {
 	var documentObject = Scholar_Ingester_Interface._getDocument(Scholar_Ingester_Interface.tabBrowser.selectedBrowser);
 	if(documentObject.scraper) {
 		var scrapeProgress = new Scholar_Ingester_Interface.Progress(window);
+		Scholar_Ingester_Interface._scrapeProgress.push(scrapeProgress);
 		documentObject.scrapePage(function(obj, returnValue) { Scholar_Ingester_Interface._finishScraping(obj, returnValue, scrapeProgress, saveLocation) });
 	}
 }
@@ -163,9 +165,9 @@ Scholar_Ingester_Interface.Listener.onLocationChange = function(progressObject) 
 	Scholar_Ingester_Interface.updateStatus();
 	
 	// Make sure scrape progress is gone
-	try {
-		Scholar_Ingester_Interface.scrapeProgress.kill();
-	} catch(ex) {
+	var scrapeProgress;
+	while(scrapeProgress = Scholar_Ingester_Interface._scrapeProgress.pop()) {
+		scrapeProgress.kill();
 	}
 }
 
@@ -275,21 +277,16 @@ Scholar_Ingester_Interface._deleteDocument = function(browser) {
  */
 Scholar_Ingester_Interface._finishScraping = function(obj, returnValue, scrapeProgress, saveLocation) {
 	if(obj.items.length) {
-	try {		// Encased in a try block to fix a as-of-yet unresolved issue
-			
-			scrapeProgress.changeHeadline(Scholar.getString("ingester.scrapeComplete"));
-			
-			// Display title and creators
-			var labels = new Array();
-			var icons = new Array();
-			for(var i in obj.items) {
-				labels.push(obj.items[i].getField("title"));
-				icons.push("chrome://scholar/skin/treeitem-"+Scholar.ItemTypes.getName(obj.items[i].getField("itemTypeID"))+".png");
-			}
-			scrapeProgress.addLines(labels, icons);
-		} catch(ex) {
-			Scholar.debug(ex);
+		scrapeProgress.changeHeadline(Scholar.getString("ingester.scrapeComplete"));
+		
+		// Display title and creators
+		var labels = new Array();
+		var icons = new Array();
+		for(var i in obj.items) {
+			labels.push(obj.items[i].getField("title"));
+			icons.push("chrome://scholar/skin/treeitem-"+Scholar.ItemTypes.getName(obj.items[i].getField("itemTypeID"))+".png");
 		}
+		scrapeProgress.addLines(labels, icons);
 		
 		// Get collection if the user used the drop-down menu
 		if(saveLocation) {
@@ -407,10 +404,12 @@ Scholar_Ingester_Interface.Progress.prototype._move = function() {
 }
 
 Scholar_Ingester_Interface.Progress.prototype.fade = function() {
-	this.progressWindow.close();
+	this.kill();
 }
 
 Scholar_Ingester_Interface.Progress.prototype.kill = function() {
-	this.progressWindow.close();
+	try {
+		this.progressWindow.close();
+	} catch(ex) {}
 }
 
