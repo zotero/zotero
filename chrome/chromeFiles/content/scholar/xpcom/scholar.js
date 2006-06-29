@@ -272,11 +272,11 @@ var Scholar = new function(){
 			max = 16383;
 		}
 		
-		var tries = 10; // # of tries to find a unique id
+		var tries = 3; // # of tries to find a unique id
 		do {
 			// If no luck after number of tries, try a larger range
 			if (!tries){
-				max = max * 2;
+				max = max * 128;
 			}
 			var rnd = Math.floor(Math.random()*max);
 			var exists = Scholar.DB.valueQuery(sql + rnd);
