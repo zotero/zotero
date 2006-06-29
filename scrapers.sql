@@ -1,7 +1,7 @@
--- 29
+-- 30
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-06-26 21:40:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-06-28 22:52:00'));
 
 REPLACE INTO "translators" VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006-06-26 16:01:00', 3, 'Amazon.com Scraper', 'Simon Kornblith', '^http://www\.amazon\.com/(?:gp/(?:product|search)/|exec/obidos/search-handle-url/)', 
 'if(doc.title.indexOf("search") >= 0) {
@@ -680,7 +680,7 @@ if(doc.title == "History Cooperative: Search Results") {
 	scrape(doc);
 }');
 
-REPLACE INTO "translators" VALUES ('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '2006-06-26 16:01:00', 3, 'InnoPAC Scraper', 'Simon Kornblith', '^http://[^/]+/(?:search/|record=)',
+REPLACE INTO "translators" VALUES ('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '2006-06-28 22:52:00', 3, 'InnoPAC Scraper', 'Simon Kornblith', '^http://[^/]+/(?:search/|record=)',
 '// First, check to see if the URL alone reveals InnoPAC, since some sites don''t reveal the MARC button
 var matchRegexp = new RegExp(''^(http://[^/]+/search/[^/]+/[^/]+/1\%2C[^/]+/)frameset(.+)$'');
 if(matchRegexp.test(doc.location.href)) {
@@ -794,7 +794,7 @@ if(newUri) {
 	var m = urlRe.exec(urls[0]);
 	var clearUrl = m[0]+"?clear_saves=1";
 	var postUrl = m[0];
-	var actionUrl = m[2]+m[3];
+	var exportUrl = m[1]+"++export/1,-1,-1,B/export";
 	
 	var postString = "";
 	for(i in items) {
