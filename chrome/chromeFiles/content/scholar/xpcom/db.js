@@ -169,6 +169,11 @@ Scholar.DB = new function(){
 		}
 		
 		if (statement && params){
+			// If single parameter, wrap in an array
+			if (!params.length){
+				params = [params];
+			}
+			
 			for (var i=0; i<params.length; i++){
 				// Integer
 				if (params[i]!==null && typeof params[i]['int'] != 'undefined'){
