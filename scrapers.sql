@@ -2324,7 +2324,7 @@ utilities.HTTPUtilities.doGet(newUri, null, function(text) {
 
 wait();');
 
-REPLACE INTO "translators" VALUES ('951c027d-74ac-47d4-a107-9c3069ab7b48', '2006-06-26 16:41:00', 3, 'Generic Scraper', 'Simon Kornblith', '',
+REPLACE INTO "translators" VALUES ('951c027d-74ac-47d4-a107-9c3069ab7b48', '2006-06-26 16:41:00', 3, 'Generic Scraper', 'Simon Kornblith', NULL,
 'return "website";',
 'var prefixRDF = ''http://www.w3.org/1999/02/22-rdf-syntax-ns#'';
 var prefixDC = ''http://purl.org/dc/elements/1.1/'';
@@ -2420,14 +2420,14 @@ utilities.processDocuments(browser, null, newUris, function(newBrowser) {
 	  if (prefix == ''x'') return namespace; else return null;
 	} : null;
 	
-	var xpath = ''/html/body/table/tbody/tr[3]/td[2][@class="content"]/div[@class="content"]/table/tbody/tr/td/p[@class="e"]/table/tbody/tr'';
+	var xpath = ''//table[@id="bib"]/tbody/tr'';
 	var elmts = utilities.gatherElementsOnXPath(newDoc, newDoc, xpath, nsResolver);
 	for(var i = 0; i<elmts.length; i++) {
 		var field = utilities.getNode(newDoc, elmts[i], ''./td[1]//text()'', nsResolver);
 		var value = utilities.getNode(newDoc, elmts[i], ''./td[2]//text()'', nsResolver);
 		
 		if(field && value) {
-			field = utilities.cleanString(field.nodeValue);
+			field = utilities.superCleanString(field.nodeValue);
 			value = utilities.cleanString(value.nodeValue);
 			if(field == "Title") {
 				model.addStatement(uri, prefixDC + ''title'', value);
@@ -2464,7 +2464,7 @@ utilities.processDocuments(browser, null, newUris, function(newBrowser) {
 
 wait();');
 
-REPLACE INTO "translators" VALUES ('0e2235e7-babf-413c-9acf-f27cce5f059c', '2006-06-28 16:00:00', 2, 'Metadata Object Description Schema (MODS)', 'Simon Kornblith', 'xml',
+REPLACE INTO "translators" VALUES ('0e2235e7-babf-413c-9acf-f27cce5f059c', '2006-06-28 16:00:00', 2, 'MODS', 'Simon Kornblith', 'xml',
 'options.add("Export project structure", "checkbox", "true");
 options.add("Export notes", "checkbox", "true");',
 'var partialItemTypes = ["bookSection", "journalArticle", "magazineArticle", "newspaperArticle"];
@@ -2730,3 +2730,4 @@ function doExport(items) {
 	
 	write(modsCollection.toString());
 }');
+

@@ -291,7 +291,7 @@ Scholar.Ingester.Document = function(myBrowser, myWindow, isHidden) {
 Scholar.Ingester.Document.prototype.retrieveScraper = function() {
 	Scholar.debug("Retrieving scrapers for "+this.url);
 	
-	var sql = 'SELECT * FROM translators WHERE type = 3 ORDER BY detectCode IS NULL DESC';
+	var sql = 'SELECT * FROM translators WHERE type = 3 ORDER BY target IS NULL ASC';
 	var scrapers = Scholar.DB.query(sql);
 	for(var i=0; i<scrapers.length; i++) {
 		var currentScraper = scrapers[i];
