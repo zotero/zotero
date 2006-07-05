@@ -84,8 +84,11 @@ Scholar.ItemTreeView.prototype.notify = function(action, type, ids)
 			for(var i=0, len=rows.length; i<len; i++)
 			{
 				var row = rows[i];
-				this._hideItem(row-i);
-				this._treebox.rowCountChanged(row-i,-1);
+				if(row != null)
+				{
+					this._hideItem(row-i);
+					this._treebox.rowCountChanged(row-i,-1);
+				}
 			}
 			
 			madeChanges = true;
