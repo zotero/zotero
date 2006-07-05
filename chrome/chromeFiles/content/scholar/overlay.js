@@ -11,6 +11,7 @@ var ScholarPane = new function()
 	this.onLoad = onLoad;
 	this.onUnload = onUnload;
 	this.toggleDisplay = toggleDisplay;
+	this.fullScreen = fullScreen;
 	this.newItem = newItem;
 	this.newCollection = newCollection;
 	this.onCollectionSelected = onCollectionSelected;
@@ -79,6 +80,15 @@ var ScholarPane = new function()
 		
 		document.getElementById('scholar-pane').setAttribute('collapsed',!visible);
 		document.getElementById('scholar-splitter').setAttribute('collapsed',!visible);
+		
+		if(!visible)
+			document.getElementById('content').setAttribute('collapsed', false);
+	}
+	
+	function fullScreen()
+	{
+		var visible = document.getElementById('content').getAttribute('collapsed') == 'true';
+		document.getElementById('content').setAttribute('collapsed', !visible);
 	}
 		
 	/*

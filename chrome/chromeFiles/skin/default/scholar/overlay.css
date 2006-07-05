@@ -60,6 +60,11 @@ vbox #scholar-pane
 	font-size: larger;
 }
 
+#tb-fullscreen
+{
+	list-style-image: url('chrome://scholar/skin/toolbar-fullscreen.png');
+}
+
 #tb-collection-add
 {
 	list-style-image: url('chrome://scholar/skin/toolbar-collection-add.png');

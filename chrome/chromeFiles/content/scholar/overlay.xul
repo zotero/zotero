@@ -21,7 +21,7 @@
 	
 	<vbox id="appcontent">
 		<splitter id="scholar-splitter" resizebefore="closest" resizeafter="closest" persist="collapsed"/>
-		<vbox id="scholar-pane" persist="height collapsed">
+		<vbox id="scholar-pane" flex="1" persist="height collapsed">
 			<popupset>
 				<popup id="scholar-collectionmenu" onpopupshowing="ScholarPane.buildCollectionContextMenu();">
 					<menuitem label="&toolbar.newCollection.label;" command="cmd_scholar_newCollection"/>
@@ -39,6 +39,7 @@
 				<label value="Scholar" id="scholar-toolbar-name"/>
 				<label value="1.0 Alpha"/>
 				<spacer flex="1"/>
+				<toolbarbutton id="tb-fullscreen" tooltiptext="Toggle Fullscreen" oncommand="ScholarPane.fullScreen();"/>
 				<toolbarbutton class="tabs-closebutton" oncommand="ScholarPane.toggleDisplay()"/>
 			</toolbar>
 			<hbox flex="1">

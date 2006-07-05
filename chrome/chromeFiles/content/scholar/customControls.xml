@@ -125,7 +125,7 @@
 				<xul:textbox multiline="true" type="timed" timeout="1000" flex="1" oncommand="this.parentNode.parentNode.save();"/>
 				<xul:label value="See also: (coming soon)"/>
 				<xul:label onclick="this.nextSibling.showPopup(this,-1,-1,'popup',0,0);"/>
-				<xul:popup width="300" onpopuphidden="this.updateTagsSummary();">
+				<xul:popup width="300" onpopuphidden="this.parentNode.parentNode.updateTagsSummary();">
 					<xul:tagsbox/>
 				</xul:popup>
 			</xul:vbox>
