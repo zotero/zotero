@@ -12,6 +12,7 @@
 	<script src="overlay.js"/>
     <script src="itemTreeView.js"/>
     <script src="collectionTreeView.js"/>
+    <script src="fileInterface.js"/>
 	
 	<commandset id="mainCommandSet">
 		<command id="cmd_scholar_newItem" oncommand="ScholarPane.newItem(1);"/>
