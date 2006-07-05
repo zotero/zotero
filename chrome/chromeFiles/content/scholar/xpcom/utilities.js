@@ -138,6 +138,23 @@ Scholar.Utilities.prototype.getVersion = function() {
 	return Scholar.version;
 }
 
+/*
+ * Get a page range, given a user-entered set of pages
+ */
+Scholar.Utilities.prototype._pageRangeRegexp = /^\s*([0-9]+)-([0-9]+)\s*$/
+Scholar.Utilities.prototype.getPageRange = function(pages) {
+	var pageNumbers;
+	var m = this._pageRangeRegexp.exec(pages);
+	if(m) {
+		// A page range
+		pageNumbers = [m[1], m[2]];
+	} else {
+		// Assume start and end are the same
+		pageNumbers = [pages, pages];
+	}
+	return pageNumbers;
+}
+
 Scholar.Utilities.prototype.inArray = Scholar.inArray;
 
 /*

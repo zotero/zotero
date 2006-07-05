@@ -2464,9 +2464,9 @@ utilities.processDocuments(browser, null, newUris, function(newBrowser) {
 
 wait();');
 
-REPLACE INTO "translators" VALUES ('0e2235e7-babf-413c-9acf-f27cce5f059c', '2006-06-28 16:00:00', 2, 'MODS', 'Simon Kornblith', 'xml',
-'options.add("Export project structure", "checkbox", "true");
-options.add("Export notes", "checkbox", "true");',
+REPLACE INTO "translators" VALUES ('0e2235e7-babf-413c-9acf-f27cce5f059c', '2006-06-28 16:00:00', 2, 'MODS (XML)', 'Simon Kornblith', 'xml',
+'addOption("exportNotes", true);
+addOption("exportFileData", true);',
 'var partialItemTypes = ["bookSection", "journalArticle", "magazineArticle", "newspaperArticle"];
 
 function doExport(items) {
@@ -2619,19 +2619,8 @@ function doExport(items) {
 		
 		// XML tag detail; object field pages
 		if(item.pages) {
-			var start, end;
-			
-			if(typeof(item.pages) == "string" && item.pages.indexOf("-")) {
-				// A page range
-				var pageNumbers = item.pages.split("-");
-				start = pageNumbers[0];
-				end = pageNumbers[1];
-			} else {
-				// Assume start and end are the same
-				start = item.pages;
-				end = item.pages;
-			}
-			part += <extent unit="pages"><start>{start}</start><end>{end}</end></extent>;
+			var range = utilities.getPageRange(item.pages);
+			part += <extent unit="pages"><start>{range[0]}</start><end>{range[1]}</end></extent>;
 		}
 		
 		// Assign part if something was assigned
@@ -2681,7 +2670,7 @@ function doExport(items) {
 		}
 		
 		// XML tag identifier; object fields ISBN, ISSN
-		var identifier = null;
+		var identifier = false;
 		if(item.ISBN) {
 			identifier = <identifier type="ISBN">{item.ISBN}</identifier>;
 		} else if(item.ISSN) {
@@ -2728,6 +2717,264 @@ function doExport(items) {
 		modsCollection.mods += mods;
 	}
 	
-	write(modsCollection.toString());
+	write(''<?xml version="1.0"?>''+"\n");
+	write(modsCollection.toXMLString());
 }');
 
+REPLACE INTO "translators" VALUES ('6e372642-ed9d-4934-b5d1-c11ac758ebb7', '2006-06-28 18:04:00', 2, 'Dublin Core (RDF/XML)', 'Simon Kornblith', 'xml', '',
+'function doExport(items) {
+	var addSubclass = new Object();
+	var partialItemTypes = ["bookSection", "journalArticle", "magazineArticle", "newspaperArticle"];
+	
+	var rdfDoc = <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://dublincore.org/documents/dcq-rdf-xml/" />;
+	var rdf = new Namespace("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
+	var dcterms = new Namespace("dcterms", "http://purl.org/dc/terms/");
+	var dc = new Namespace("dc", "http://purl.org/dc/elements/1.1/");
+	
+	for(var i in items) {
+		var item = items[i];
+		
+		if(item.itemType == "note") {
+			continue;
+		}
+		
+		var isPartialItem = false;
+		if(utilities.inArray(item.itemType, partialItemTypes)) {
+			isPartialItem = true;
+		}
+		
+		var description = <rdf:Description xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" rdf:about="" />;
+		if(item.ISBN) {
+			description.@rdf::about = "urn:isbn:"+item.ISBN;
+		} else if(item.ISSN) {
+			description.@rdf::about = "urn:issn:"+item.ISSN;
+		} else if(item.url) {
+			description.@rdf::about = item.url;
+		} else {
+			// generate a guid, bc that''s all we can do
+			description.@rdf::about = "urn:uuid:"+item.itemID;
+		}
+		
+		/** CORE FIELDS **/
+		
+		// XML tag titleInfo; object field title
+		description.dc::title = item.title;
+		
+		// XML tag typeOfResource/genre; object field type
+		var type;
+		if(item.itemType == "film") {
+			type = "MovingImage";
+		} else if(item.itemType == "artwork") {
+			type = "StillImage";
+		} else {
+			type = "Text";
+		}
+		description.dc::type.@rdf::resource = "http://purl.org/dc/dcmitype/"+type;
+		
+		// XML tag name; object field creators
+		for(var j in item.creators) {
+			// put creators in lastName, firstName format (although DC doesn''t specify)
+			var creator = item.creators[j].lastName;
+			if(item.creators[j].firstName) {
+				creator += ", "+item.creators[j].firstName;
+			}
+			
+			if(item.creators[j].creatorType == "author") {
+				description.dc::creator += <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">{creator}</dc:creator>;
+			} else {
+				description.dc::contributor.* += <dc:contributor xmlns:dc="http://purl.org/dc/elements/1.1/">{creator}</dc:contributor>;
+			}
+		}
+		
+		/** FIELDS ON NEARLY EVERYTHING BUT NOT A PART OF THE CORE **/
+		
+		// source
+		if(item.source) {
+			description.dc::source = item.source;
+		}
+		
+		// accessionNumber as generic ID
+		if(item.accessionNumber) {
+			description.dc::identifier = item.accessionNumber;
+		}
+		
+		// rights
+		if(item.rights) {
+			description.dc::rights = item.rights;
+		}
+		
+		/** SUPPLEMENTAL FIELDS **/
+		
+		// publication/series -> isPartOf
+		if(item.publication) {
+			description.dcterms::isPartOf = item.publication;
+			addSubclass.isPartOf = true;
+		} else if(item.series) {
+			description.dcterms::isPartOf = item.series;
+			addSubclass.isPartOf = true;
+		}
+		
+		// TODO - create text citation and OpenURL citation to handle volume, number, pages, issue, place
+		
+		// edition
+		if(item.edition) {
+			description.dcterms::hasVersion = item.edition;
+		}
+		// publisher/distributor
+		if(item.publisher) {
+			description.dc::publisher = item.publisher;
+		} else if(item.distributor) {
+			description.dc::publisher = item.distributor;
+		}
+		// date/year
+		if(item.date) {
+			description.dc::date = item.date;
+		} else if(item.year) {
+			description.dc::date = item.year;
+		}
+		
+		// ISBN/ISSN
+		var resource = false;
+		if(item.ISBN) {
+			resource = "urn:isbn:"+item.ISBN;
+		} else if(item.ISSN) {
+			resource = "urn:issn:"+item.ISSN;
+		}
+		if(resource) {
+			if(isPartialItem) {
+				description.dcterms::isPartOf.@rdf::resource = resource;
+				addSubclass.isPartOf = true;
+			} else {
+				description.dc::identifier.@rdf::resource = resource;
+			}
+		}
+		
+		// callNumber
+		if(item.callNumber) {
+			description.dc::identifier += <dc:identifier xmlns:dc="http://purl.org/dc/elements/1.1/">item.callNumber</dc:identifier>;
+		}
+		
+		// archiveLocation
+		if(item.archiveLocation) {
+			description.dc::coverage = item.archiveLocation;
+		}
+		
+		rdfDoc.rdf::Description += description;
+	}
+	
+	if(addSubclass.isPartOf) {
+		rdfDoc.rdf::Description += <rdf:Description rdf:about="http://purl.org/dc/terms/abstract" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+			<rdfs:subPropertyOf rdf:resource="http://purl.org/dc/elements/1.1/description"/>
+		  </rdf:Description>;
+	}
+	
+	write(''<?xml version="1.0"?>''+"\n");
+	write(rdfDoc.toXMLString());
+}');
+
+
+REPLACE INTO "translators" VALUES ('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7', '2006-06-30 15:36:00', 2, 'RIS', 'Simon Kornblith', 'ris',
+'addOption("exportNotes", true);
+addOption("exportFileData", true);',
+'function addTag(tag, value) {
+	if(value) {
+		write(tag+"  - "+value+"\r\n");
+	}
+}
+
+function doExport(items) {
+	for(var i in items) {
+		var item = items[i];
+		
+		// can''t store notes in RIS
+		if(item.itemType == "note") {
+			continue;
+		}
+		
+		// type
+		// TODO - figure out if these are the best types for letter, interview, website
+		if(item.itemType == "book") {
+			var risType = "BOOK";
+		} else if(item.itemType == "bookSection") {
+			var risType = "CHAP";
+		} else if(item.itemType == "journalArticle") {
+			var risType = "JOUR";
+		} else if(item.itemType == "magazineArticle") {
+			var risType = "MGZN";
+		} else if(item.itemType == "newspaperArticle") {
+			var risType = "NEWS";
+		} else if(item.itemType == "thesis") {
+			var risType = "THES";
+		} else if(item.itemType == "letter" || item.itemType == "interview") {
+			var risType = "PCOMM";
+		} else if(item.itemType == "film") {
+			var risType = "MPCT";
+		} else if(item.itemType == "artwork") {
+			var risType = "ART";
+		} else if(item.itemType == "website") {
+			var risType = "ICOMM";
+		}
+		addTag("TY", risType);
+		// ID
+		addTag("ID", item.itemID);
+		// primary title
+		addTag("T1", item.title);
+		// series title
+		addTag("T3", item.series);
+		// creators
+		for(var j in item.creators) {
+			// only two types, primary and secondary
+			var risTag = "A1"
+			if(item.creators[j].creatorType != "author") {
+				risTag = "A2";
+			}
+			
+			addTag(risTag, item.creators[j].lastName+","+item.creators[j].firstName);
+		}
+		// date
+		if(item.date) {
+			var isoDate = /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/;
+			if(isoDate.test(item.date)) {	// can directly accept ISO format with minor mods
+				addTag("Y1", item.date.replace("-", "/")+"/");
+			} else {						// otherwise, extract year and attach other data
+				var year = /^(.*?) *([0-9]{4})/;
+				var m = year.exec(item.date);
+				if(m) {
+					addTag("Y1", m[2]+"///"+m[1]);
+				}
+			}
+		} else if(item.year) {
+			addTag("Y1", item.year+"///");
+		}
+		// notes
+		for(var j in item.notes) {
+			addTag("N1", item.notes[j].note);
+		}
+		// publication
+		addTag("JF", item.publication);
+		// volume
+		addTag("VL", item.volume);
+		// number
+		addTag("IS", item.number);
+		// pages
+		if(item.pages) {
+			var range = utilities.getPageRange(item.pages);
+			addTag("SP", range[0]);
+			addTag("EP", range[1]);
+		}
+		// place
+		addTag("CP", item.place);
+		// publisher
+		addTag("PB", item.publisher);
+		// ISBN/ISSN
+		addTag("SN", item.ISBN);
+		addTag("SN", item.ISSN);
+		// URL
+		if(item.url) {
+			addTag("UR", item.url);
+		} else if(item.source && item.source.substr(0, 7) == "http://") {
+			addTag("UR", item.source);
+		}
+		write("\r\n");
+	}
+}');
