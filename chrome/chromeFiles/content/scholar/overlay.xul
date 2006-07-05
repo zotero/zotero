@@ -20,7 +20,8 @@
 	</commandset>
 	
 	<vbox id="appcontent">
-		<vbox id="scholar-pane" position="1" persist="height collapsed">
+		<splitter id="scholar-splitter" resizebefore="closest" resizeafter="closest" persist="collapsed"/>
+		<vbox id="scholar-pane" persist="height collapsed">
 			<popupset>
 				<popup id="scholar-collectionmenu" onpopupshowing="ScholarPane.buildCollectionContextMenu();">
 					<menuitem label="&toolbar.newCollection.label;" command="cmd_scholar_newCollection"/>
@@ -151,7 +152,6 @@
 				</deck>
 			</hbox>
 		</vbox>
-		<splitter id="scholar-splitter" resizebefore="closest" resizeafter="closest" position="2" persist="collapsed"/>
 	</vbox>
 	
 	<statusbar id="status-bar">
