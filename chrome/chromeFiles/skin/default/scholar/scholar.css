@@ -8,6 +8,12 @@ noteeditor
 	-moz-binding: url('chrome://scholar/content/customControls.xml#note-editor');
 }
 
+tagsbox
+{
+	-moz-binding: url('chrome://scholar/content/customControls.xml#tags-box');
+}
+
+
 #scholar-progress-box
 {
 	border: 2px solid #7a0000;

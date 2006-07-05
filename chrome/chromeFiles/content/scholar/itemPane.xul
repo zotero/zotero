@@ -42,18 +42,7 @@
 				</grid>
 			</vbox>
 			<vbox flex="1">
-				<hbox align="center">
-					<label id="editpane-tags-label"/>
-					<button label="Add Tag" oncommand="ScholarItemPane.addTag();"/>
-				</hbox>
-				<grid flex="1">
-					<columns>
-						<column/>
-						<column flex="1"/>
-						<column/>
-					</columns>
-					<rows id="editpane-dynamic-tags" flex="1"/>
-				</grid>
+				<tagsbox id="editpane-dynamic-tags" flex="1"/>
 			</vbox>
 			<vbox align="center" pack="center">
 				<label value="Coming soon"/>

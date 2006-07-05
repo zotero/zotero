@@ -22,8 +22,6 @@ ScholarItemPane = new function()
 	this.modifyCreator = modifyCreator;
 	this.removeNote = removeNote;
 	this.addNote = addNote;
-	this.removeTag = removeTag;
-	this.addTag = addTag;
 	
 	function onLoad()
 	{
@@ -147,34 +145,7 @@ ScholarItemPane = new function()
 		_updateNoteCount();
 		
 		//TAGS:
-		while(_tagsList.hasChildNodes())
-			_tagsList.removeChild(_tagsList.firstChild);
-		
-		var tags = _itemBeingEdited.getTags();
-		if(tags.length)
-		{
-			for(var i = 0; i < tags.length; i++)
-			{
-				var icon = document.createElement('image');
-				icon.setAttribute('src','chrome://scholar/skin/tag.png');
-				
-				var label = document.createElement('label');
-				label.setAttribute('value',Scholar.Tags.getName(tags[i]));
-				label.setAttribute('crop','end');
-				
-				var removeButton = document.createElement('label');
-				removeButton.setAttribute("value","-");
-				removeButton.setAttribute("class","clicky");
-				removeButton.setAttribute("onclick","ScholarItemPane.removeTag("+tags[i]+")");
-				
-				var row = document.createElement('row');
-				row.appendChild(icon);
-				row.appendChild(label);
-				row.appendChild(removeButton);
-				
-				_tagsList.appendChild(row);
-			}
-		}
+		_tagsList.item = _itemBeingEdited;
 	}
 	
 	function changeTypeTo(id)
@@ -386,18 +357,6 @@ ScholarItemPane = new function()
 		var c = _notesList.childNodes.length;
 		
 		_notesLabel.value = Scholar.getString('pane.item.notes.count.'+(c != 1 ? "plural" : "singular")).replace('%1',c) + ":";
-	}
-	
-	function removeTag(id)
-	{
-		_itemBeingEdited.removeTag(id);
-	}
-	
-	function addTag()
-	{
-		var t = prompt("Add Tag:");
-		if(t)
-			_itemBeingEdited.addTag(t);
 	}
 }
 

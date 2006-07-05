@@ -68,6 +68,8 @@
 							this.item = Scholar.Items.get(this.note.getNoteSource());
 						
 						document.getAnonymousNodes(this)[0].childNodes[1].setAttribute('value',this.note.getNote());
+						document.getAnonymousNodes(this)[0].lastChild.firstChild.item = this.note;
+						this.updateTagsSummary();
 					]]>
 				</setter>
 			</property>
@@ -98,6 +100,22 @@
 					]]>
 				</body>
 			</method>
+			<method name="updateTagsSummary">
+				<body>
+					<![CDATA[
+						var popup = document.getAnonymousNodes(this)[0].lastChild;
+						var label = popup.previousSibling;
+						var v = popup.firstChild.summary;
+						
+						if(!v || v == "")
+							v = "[click here]";
+							
+						while(label.hasChildNodes())
+							label.removeChild(label.firstChild);
+						label.appendChild(document.createTextNode("Tags: " + v));
+					]]>
+				</body>
+			</method>
 		</implementation>
 		<handlers>
 		</handlers>
@@ -106,7 +124,115 @@
 				<xul:label/>
 				<xul:textbox multiline="true" type="timed" timeout="1000" flex="1" oncommand="this.parentNode.parentNode.save();"/>
 				<xul:label value="See also: (coming soon)"/>
-				<xul:label value="Tags: (coming soon)"/>
+				<xul:label onclick="this.nextSibling.showPopup(this,-1,-1,'popup',0,0);"/>
+				<xul:popup width="300" onpopuphidden="this.updateTagsSummary();">
+					<xul:tagsbox/>
+				</xul:popup>
+			</xul:vbox>
+		</content>
+	</binding>
+	<binding id="tags-box">
+		<implementation>
+			<field name="itemRef"/>
+			<property name="item" onget="return this.itemRef;">
+				<setter>
+					<![CDATA[
+						this.itemRef = val;
+						
+						this.reloadTags();
+					]]>
+				</setter>
+			</property>
+			<property name="summary">
+				<getter>
+					<![CDATA[
+						var r = "";
+					
+						if(this.item)
+						{
+							var tags = this.item.getTags();
+							for(var i = 0; i < tags.length; i++)
+							{
+								r = r + Scholar.Tags.getName(tags[i]) + ", ";
+							}
+							r = r.substr(0,r.length-2);
+						}
+					
+						return r;
+					]]>
+				</getter>
+			</property>
+			<method name="reloadTags">
+				<body>
+					<![CDATA[
+						var rows = document.getAnonymousNodes(this)[0].lastChild.lastChild;
+						while(rows.hasChildNodes())
+							rows.removeChild(rows.firstChild);
+						
+						if(this.item)
+						{
+							var tags = this.item.getTags();
+							
+							for(var i = 0; i < tags.length; i++)
+							{
+								var icon= document.createElement("image");
+								icon.setAttribute('src','chrome://scholar/skin/tag.png');
+							
+								var label = document.createElement("label");
+								label.setAttribute('value', Scholar.Tags.getName(tags[i]));
+								
+								var remove = document.createElement("label");
+								remove.setAttribute('value','-');
+								remove.setAttribute('onclick',"this.parentNode.parentNode.parentNode.parentNode.parentNode.removeTag('"+tags[i]+"');");
+								remove.setAttribute('class','clicky');
+							
+								var row = document.createElement("row");
+								row.appendChild(icon);
+								row.appendChild(label);
+								row.appendChild(remove);
+							
+								rows.appendChild(row);		
+							}				
+						}
+					]]>
+				</body>
+			</method>
+			<method name="addTag">
+				<body>
+					<![CDATA[
+						t = prompt('Add Tag:');
+						if(t && this.item)
+						{
+							this.item.addTag(t);
+							this.reloadTags();
+						}
+					]]>
+				</body>
+			</method>
+			<method name="removeTag">
+				<parameter name="id"/>
+				<body>
+					<![CDATA[
+						if(id)
+						{
+							this.item.removeTag(id);
+							this.reloadTags();
+						}
+					]]>
+				</body>
+			</method>
+		</implementation>
+		<content>
+			<xul:vbox xbl:inherits="flex">
+				<xul:button label="Add Tag" oncommand="this.parentNode.parentNode.addTag();"/>
+				<xul:grid>
+					<xul:columns>
+						<xul:column/>
+						<xul:column flex="1"/>
+						<xul:column/>
+					</xul:columns>
+					<xul:rows/>
+				</xul:grid>
 			</xul:vbox>
 		</content>
 	</binding>
