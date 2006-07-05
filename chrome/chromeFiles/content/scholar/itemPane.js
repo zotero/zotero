@@ -4,6 +4,7 @@ ScholarItemPane = new function()
 	var _creatorTypeMenu;
 	var _beforeRow;
 	var _notesList;
+	var _tagsList;
 	var _notesLabel;
 	
 	var _creatorCount;
@@ -21,6 +22,8 @@ ScholarItemPane = new function()
 	this.modifyCreator = modifyCreator;
 	this.removeNote = removeNote;
 	this.addNote = addNote;
+	this.removeTag = removeTag;
+	this.addTag = addTag;
 	
 	function onLoad()
 	{
@@ -29,6 +32,7 @@ ScholarItemPane = new function()
 		_creatorTypeMenu = document.getElementById('creatorTypeMenu');
 		_notesList = document.getElementById('editpane-dynamic-notes');
 		_notesLabel = document.getElementById('editpane-notes-label');
+		_tagsList = document.getElementById('editpane-dynamic-tags');
 		
 		var creatorTypes = Scholar.CreatorTypes.getTypes();
 		for(var i = 0; i < creatorTypes.length; i++)
@@ -121,7 +125,7 @@ ScholarItemPane = new function()
 				label.setAttribute('value',_noteToTitle(notes[i].getNote()));
 				label.setAttribute('crop','end');
 				
-				box = document.createElement('box');
+				var box = document.createElement('box');
 				box.setAttribute('onclick',"ScholarPane.openNoteWindow("+notes[i].getID()+");");
 				box.setAttribute('class','clicky');
 				box.appendChild(icon);
@@ -139,7 +143,38 @@ ScholarItemPane = new function()
 				_notesList.appendChild(row);
 			}
 		}
+		
 		_updateNoteCount();
+		
+		//TAGS:
+		while(_tagsList.hasChildNodes())
+			_tagsList.removeChild(_tagsList.firstChild);
+		
+		var tags = _itemBeingEdited.getTags();
+		if(tags.length)
+		{
+			for(var i = 0; i < tags.length; i++)
+			{
+				var icon = document.createElement('image');
+				icon.setAttribute('src','chrome://scholar/skin/tag.png');
+				
+				var label = document.createElement('label');
+				label.setAttribute('value',Scholar.Tags.getName(tags[i]));
+				label.setAttribute('crop','end');
+				
+				var removeButton = document.createElement('label');
+				removeButton.setAttribute("value","-");
+				removeButton.setAttribute("class","clicky");
+				removeButton.setAttribute("onclick","ScholarItemPane.removeTag("+tags[i]+")");
+				
+				var row = document.createElement('row');
+				row.appendChild(icon);
+				row.appendChild(label);
+				row.appendChild(removeButton);
+				
+				_tagsList.appendChild(row);
+			}
+		}
 	}
 	
 	function changeTypeTo(id)
@@ -351,6 +386,18 @@ ScholarItemPane = new function()
 		var c = _notesList.childNodes.length;
 		
 		_notesLabel.value = Scholar.getString('pane.item.notes.count.'+(c != 1 ? "plural" : "singular")).replace('%1',c) + ":";
+	}
+	
+	function removeTag(id)
+	{
+		_itemBeingEdited.removeTag(id);
+	}
+	
+	function addTag()
+	{
+		var t = prompt("Add Tag:");
+		if(t)
+			_itemBeingEdited.addTag(t);
 	}
 }
 
