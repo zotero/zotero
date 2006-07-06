@@ -153,7 +153,7 @@
 							var tags = this.item.getTags();
 							for(var i = 0; i < tags.length; i++)
 							{
-								r = r + Scholar.Tags.getName(tags[i]) + ", ";
+								r = r + tags[i] + ", ";
 							}
 							r = r.substr(0,r.length-2);
 						}
@@ -179,12 +179,12 @@
 								icon.setAttribute('src','chrome://scholar/skin/tag.png');
 							
 								var label = document.createElement("label");
-								label.setAttribute('value', Scholar.Tags.getName(tags[i]));
+								label.setAttribute('value', tags[i]);
 								label.setAttribute('crop','end');
 								
 								var remove = document.createElement("label");
 								remove.setAttribute('value','-');
-								remove.setAttribute('onclick',"this.parentNode.parentNode.parentNode.parentNode.parentNode.removeTag('"+tags[i]+"');");
+								remove.setAttribute('onclick',"this.parentNode.parentNode.parentNode.parentNode.parentNode.removeTag('"+Scholar.Tags.getID(tags[i])+"');");
 								remove.setAttribute('class','clicky');
 							
 								var row = document.createElement("row");
