@@ -1,7 +1,7 @@
--- 31
+-- 32
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-06-28 23:08:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-07-05 23:40:00'));
 
 REPLACE INTO "translators" VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006-06-28 23:08:00', 3, 'Amazon.com Scraper', 'Simon Kornblith', '^http://www\.amazon\.com/(?:gp/(?:product|search)/|exec/obidos/search-handle-url/)', 
 'if(doc.location.href.indexOf("search") >= 0) {
@@ -2464,7 +2464,7 @@ utilities.processDocuments(browser, null, newUris, function(newBrowser) {
 
 wait();');
 
-REPLACE INTO "translators" VALUES ('0e2235e7-babf-413c-9acf-f27cce5f059c', '2006-06-28 16:00:00', 2, 'MODS (XML)', 'Simon Kornblith', 'xml',
+REPLACE INTO "translators" VALUES ('0e2235e7-babf-413c-9acf-f27cce5f059c', '2006-07-05 23:40:00', 2, 'MODS (XML)', 'Simon Kornblith', 'xml',
 'addOption("exportNotes", true);
 addOption("exportFileData", true);',
 'var partialItemTypes = ["bookSection", "journalArticle", "magazineArticle", "newspaperArticle"];
@@ -2808,7 +2808,7 @@ function doExport(items, collections) {
 	write(modsCollection.toXMLString());
 }');
 
-REPLACE INTO "translators" VALUES ('6e372642-ed9d-4934-b5d1-c11ac758ebb7', '2006-06-28 18:04:00', 2, 'Dublin Core (RDF/XML)', 'Simon Kornblith', 'xml', '',
+REPLACE INTO "translators" VALUES ('6e372642-ed9d-4934-b5d1-c11ac758ebb7', '2006-07-05 23:40:00', 2, 'Dublin Core (RDF/XML)', 'Simon Kornblith', 'xml', '',
 'function doExport(items) {
 	var addSubclass = new Object();
 	var partialItemTypes = ["bookSection", "journalArticle", "magazineArticle", "newspaperArticle"];
