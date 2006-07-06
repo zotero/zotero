@@ -16,7 +16,7 @@
     <em:developer>Dan Stillman</em:developer>
     <em:homepageURL>http://chnm.gmu.edu/tools/firefoxscholar/</em:homepageURL>
     <em:optionsURL>chrome://scholar/content/preferences.xul</em:optionsURL>
-    <!--<em:aboutURL>chrome://scholar/content/about.xul</em:aboutURL>-->
+    <em:aboutURL>chrome://scholar/content/about.xul</em:aboutURL>
     <!--<em:iconURL>chrome://scholar/skin/mainicon.png</em:iconURL>-->
     <em:updateURL>http://chnm.gmu.edu/firefoxscholar/download/update-svn.rdf</em:updateURL>
     <em:type>2</em:type> <!-- type=extension --> 

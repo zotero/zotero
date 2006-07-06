@@ -39,6 +39,7 @@
 			<toolbar align="end">
 				<label value="Scholar" id="scholar-toolbar-name"/>
 				<label value="1.0 Alpha"/>
+				<label class="text-link" value="About..." onclick="window.openDialog('chrome://scholar/content/about.xul','about','chrome,modal');"/>
 				<spacer flex="1"/>
 				<toolbarbutton id="tb-fullscreen" tooltiptext="Toggle Fullscreen" oncommand="ScholarPane.fullScreen();"/>
 				<toolbarbutton class="tabs-closebutton" oncommand="ScholarPane.toggleDisplay()"/>

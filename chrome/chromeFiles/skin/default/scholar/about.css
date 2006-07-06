@@ -1,0 +1,35 @@
+dialog
+{
+	padding-top: 0px;
+	padding-left: 0px;
+	padding-right: 0px;
+}
+
+#aboutcontent
+{
+	background: white;
+	padding: 10px;
+}
+
+#name
+{
+	font-size: large;
+	font-weight: bold;
+}
+
+#version
+{
+	color: gray;
+	margin-bottom: 5px;
+}
+
+.subhead
+{
+	margin-top: 5px;
+	font-weight: bold;
+}
+
+.subcontent
+{
+	margin-left: 10px;
+}
