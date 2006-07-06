@@ -2468,9 +2468,54 @@ REPLACE INTO "translators" VALUES ('0e2235e7-babf-413c-9acf-f27cce5f059c', '2006
 'addOption("exportNotes", true);
 addOption("exportFileData", true);',
 'var partialItemTypes = ["bookSection", "journalArticle", "magazineArticle", "newspaperArticle"];
+var rdf = new Namespace("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
+var rdfs = new Namespace("rdfs", "http://www.w3.org/2000/01/rdf-schema#");
 
-function doExport(items) {
-	var modsCollection = <modsCollection xmlns="http://www.loc.gov/mods/v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-2.xsd" />;
+/*
+ * handles the generation of RDF describing a single collection and its child
+ * collections
+ */
+function generateCollection(collection, rdfDoc) {
+	var description = <rdf:Description xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" />;
+	// specify collection ID, namespaced
+	description.@rdf::ID = "collection:"+collection.id;
+	// collection type is an RDF Bag. honestly, i''m not sure if this is the
+	// correct way of doing it, but it''s how the Mozilla Foundation did it. then
+	// again, the Mozilla Foundation also uses invalid URN namespaces, so who
+	// knows.
+	description.rdf::type.@resource = "http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag";
+	description.rdfs::label = collection.name;
+	
+	for(var i in collection.children) {
+		var child = collection.children[i];
+		// add child list items
+		var childID = child.type+":"+child.id;
+		description.rdf::li += <rdf:li xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:ID={childID} />;
+		
+		if(child.type == "collection") {
+			// do recursive processing of collections
+			generateCollection(child, rdfDoc);
+		}
+	}
+	rdfDoc.rdf::description += description;
+}
+
+/*
+ * handles the generation of RDF describing a see also item
+ */
+function generateSeeAlso(id, seeAlso, rdfDoc) {
+	var description = <rdf:Description xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" />;
+	description.@rdf::ID = "item:"+id;
+	for(var i in seeAlso) {
+		var seeID = "item:"+seeAlso[i];
+		description += <rdfs:seeAlso xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:ID={seeID} />;
+	}
+	rdfDoc.rdf::description += description;
+}
+
+function doExport(items, collections) {
+	var rdfDoc = <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" />;
+	var modsCollection = <modsCollection xmlns="http://www.loc.gov/mods/v3" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-2.xsd" />;
 	
 	for(var i in items) {
 		var item = items[i];
@@ -2481,12 +2526,16 @@ function doExport(items) {
 		}
 		
 		var mods = <mods />;
-		mods.@ID = item.itemID;
 		
 		/** CORE FIELDS **/
 		
+		// add ID
+		mods.@ID = "item:"+item.itemID;
+		
 		// XML tag titleInfo; object field title
-		mods.titleInfo.title = item.title;
+		if(item.title) {
+			mods.titleInfo.title = item.title;
+		}
 		
 		// XML tag typeOfResource/genre; object field type
 		var modsType, marcGenre;
@@ -2520,10 +2569,15 @@ function doExport(items) {
 		} else if(item.itemType == "website") {
 			modsType = "multimedia";
 			marcGenre = "web site";
+		} else if(item.itemType == "note") {
+			modsType = "text";
+			marcGenre = null;
 		}
 		mods.typeOfResource = modsType;
 		mods.genre += <genre authority="local">{item.itemType}</genre>;
-		mods.genre += <genre authority="marcgt">{marcGenre}</genre>;
+		if(marcGenre) {
+			mods.genre += <genre authority="marcgt">{marcGenre}</genre>;
+		}
 		
 		// XML tag genre; object field thesisType, type
 		if(item.thesisType) {
@@ -2553,7 +2607,7 @@ function doExport(items) {
 		}
 		
 		// XML tag recordInfo.recordOrigin; used to store our generator note
-		mods.recordInfo.recordOrigin = "Scholar for Firefox "+utilities.getVersion();
+		//mods.recordInfo.recordOrigin = "Scholar for Firefox "+utilities.getVersion();
 		
 		/** FIELDS ON NEARLY EVERYTHING BUT NOT A PART OF THE CORE **/
 		
@@ -2711,11 +2765,44 @@ function doExport(items) {
 		/** NOTES **/
 		
 		for(var j in item.notes) {
-			mods.note += <note type="content">{item.notes[j].note}</note>;
+			// Add note tag
+			var note = <note type="content">{item.notes[j].note}</note>;
+			note.@ID = "item:"+item.notes[j].itemID;
+			mods.note += note;
+			
+			// Add see also info to RDF
+			if(item.notes[j].seeAlso) {
+				rdfDoc.Description += generateSeeAlso(item.notes[j].itemID, item.notes[j].seeAlso);
+			}
+		}
+		
+		if(item.note) {
+			// Add note tag
+			var note = <note type="content">{item.note}</note>;
+			note.@ID = "item:"+item.itemID;
+			mods.note += note;
+		}
+		
+		/** TAGS **/
+		
+		for(var j in item.tags) {
+			mods.subject += <subject>{item.tags[j]}</subject>;
+		}
+		
+		/** RDF STRUCTURE **/
+		
+		// Add see also info to RDF
+		if(item.seeAlso) {
+			generateSeeAlso(item.itemID, item.seeAlso, rdfDoc);
 		}
 		
 		modsCollection.mods += mods;
 	}
+	
+	for(var i in collections) {
+		generateCollection(collections[i], rdfDoc);
+	}
+	modsCollection.rdf::RDF = rdfDoc;
 	
 	write(''<?xml version="1.0"?>''+"\n");
 	write(modsCollection.toXMLString());
@@ -2743,7 +2830,7 @@ REPLACE INTO "translators" VALUES ('6e372642-ed9d-4934-b5d1-c11ac758ebb7', '2006
 			isPartialItem = true;
 		}
 		
-		var description = <rdf:Description xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" rdf:about="" />;
+		var description = <rdf:Description xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" />;
 		if(item.ISBN) {
 			description.@rdf::about = "urn:isbn:"+item.ISBN;
 		} else if(item.ISSN) {
@@ -2751,8 +2838,8 @@ REPLACE INTO "translators" VALUES ('6e372642-ed9d-4934-b5d1-c11ac758ebb7', '2006
 		} else if(item.url) {
 			description.@rdf::about = item.url;
 		} else {
-			// generate a guid, bc that''s all we can do
-			description.@rdf::about = "urn:uuid:"+item.itemID;
+			// just specify a node ID
+			description.@rdf::nodeID = item.itemID;
 		}
 		
 		/** CORE FIELDS **/

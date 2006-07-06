@@ -219,6 +219,21 @@ Scholar.Translate.prototype._export = function() {
 	for(var i in itemObjects) {
 		itemArrays.push(itemObjects[i].toArray());
 	}
+	delete itemObjects;	// free memory
+	
+	// get collections
+	var collectionObjects = Scholar.getCollections();
+	var collectionArrays = new Array();
+	for(var i in collectionObjects) {
+		var collection = new Object();
+		collection.id = collectionObjects[i].getID();
+		collection.name = collectionObjects[i].getName();
+		collection.type = "collection";
+		collection.children = collectionObjects[i].toArray();
+		
+		collectionArrays.push(collection);
+	}
+	delete collectionObjects;	// free memory
 	
 	// open file
 	this.foStream = Components.classes["@mozilla.org/network/file-output-stream;1"]
@@ -227,7 +242,7 @@ Scholar.Translate.prototype._export = function() {
 	
 	
 	try {
-		return this._sandbox.doExport(itemArrays);
+		return this._sandbox.doExport(itemArrays, collectionArrays);
 	} catch(e) {
 		Scholar.debug(e+' in executing code for '+this.translator.label);
 		this._translationComplete(false);
