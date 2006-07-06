@@ -22,8 +22,29 @@
  * translatorObj.setFile(myNsILocalFile);
  * translatorObj.setTranslator(possibleTranslators[x]); // also accepts only an ID
  * translatorObj.setHandler("done", _translationDone);
- * translatorObj.translate()
+ * translatorObj.translate();
+ *
+ *
+ * PUBLIC PROPERTIES:
+ *
+ * type - the text type of translator (set by constructor)
+ * numeric type - the numeric type of translator (set by constructor)
+ * location - the location of the target (set by setLocation)
+ *            for import/export - this is an instance of nsILocalFile
+ *            for web - this is a browser object
+ * translator - the translator currently in use (set by setTranslator)
+ *
+ * PRIVATE PROPERTIES:
+ * 
+ * _handlers - handlers for various events (see setHandler)
+ * _configOptions - options set by translator modifying behavior of
+ *                  Scholar.Translate
+ * _displayOptions - options available to user for this specific translator
+ * _waitForCompletion - whether to wait for asynchronous completion, or return
+ *                      immediately when script has finished executing
+ * _sandbox - sandbox in which translators will be executed
  */
+
 Scholar.Translate = function(type) {
 	this.type = type;
 	
@@ -55,7 +76,7 @@ Scholar.Translate.prototype.getTranslators = function() {
 }
 
 /*
- * sets the file to be used file should be an nsILocalFile object
+ * sets the location to operate upon (file should be an nsILocalFile object)
  */
 Scholar.Translate.prototype.setLocation = function(file) {
 	this.location = file;
@@ -73,11 +94,18 @@ Scholar.Translate.prototype.setTranslator = function(translator) {
 	
 	var sql = 'SELECT * FROM translators WHERE translatorID = ? AND type = ?';
 	this.translator = Scholar.DB.rowQuery(sql, [translator, this.numericType]);
-	if(this.translator) {
-		Scholar.debug("got translator "+translator);
-		return true;
+	if(!this.translator) {
+		return false;
 	}
-	return false;
+	
+	if(this.type == "export") {
+		// for export, we need to execute the translator detectCode to get
+		// options; for other types, this has already been done
+		this._executeDetectCode(this.translator);
+	}
+
+	Scholar.debug("got translator "+translator);
+	return true;
 }
 
 /*
@@ -106,7 +134,10 @@ Scholar.Translate.prototype.setTranslator = function(translator) {
  *   returns: N/A
  */
 Scholar.Translate.prototype.setHandler = function(type, handler) {
-	this._handlers[type] = handler;
+	if(!this._handlers[type]) {
+		this._handlers[type] = new Array();
+	}
+	this._handlers[type].push(handler);
 }
 
 /*
@@ -114,15 +145,7 @@ Scholar.Translate.prototype.setHandler = function(type, handler) {
  *
  * NOT IMPLEMENTED
  */
-Scholar.Translate.prototype.getOptions = function() {
-}
-
-/*
- * sets translator options to be displayed in a dialog
- *
- * NOT IMPLEMENTED
- */
-Scholar.Translate.prototype.setOptions = function() {
+Scholar.Translate.prototype.displayOptions = function() {
 }
 
 /*
@@ -145,7 +168,7 @@ Scholar.Translate.prototype.translate = function() {
 	}
 	
 	// If synchronous, call _translationComplete();
-	if(!this._waitForCompletion && returnValue) {
+	if(!this._waitForCompletion) {
 		this._translationComplete(returnValue);
 	}
 }
@@ -173,14 +196,67 @@ Scholar.Translate.prototype._generateSandbox = function() {
 	
 	var me = this;
 	this._sandbox.wait = function() {me._enableAsynchronous() };
-	if(this.type == "export") {
-		this._sandbox.write = function(data) { me._exportWrite(data); };
+	this._sandbox.configure = function(option, value) {me._configure(option, value) };
+	this._sandbox.addOption = function(option, value) {me._addOption(option, value) };
+}
+
+/*
+ * executes translator detectCode, sandboxed
+ */
+Scholar.Translate.prototype._executeDetectCode = function(translator) {
+	this._configOptions = new Array();
+	this._displayOptions = new Array();
+	Scholar.debug("executing detect code");
+	
+	try {
+		return Components.utils.evalInSandbox(translator.detectCode, this._sandbox);
+	} catch(e) {
+		Scholar.debug(e+' in executing detectCode for '+translator.label);
+		return;
 	}
 }
 
 /*
+ * sets an option that modifies the way the translator is executed
+ * 
+ * called as configure() in translator detectCode
+ *
+ * current options:
+ *
+ * dataMode
+ *   valid: import, export
+ *   options: rdf, text
+ *   purpose: selects whether write/read behave as standard text functions or
+ *            using Mozilla's built-in support for RDF data sources
+ *
+ * getCollections
+ *   valid: export
+ *   options: true, false
+ *   purpose: selects whether export translator will receive an array of
+ *            collections and children in addition to the array of items and
+ *            children
+ */
+Scholar.Translate.prototype._configure = function(option, value) {
+	this._configOptions[option] = value;
+	Scholar.debug("setting configure option "+option+" to "+value);
+}
+
+/*
+ * adds translator options to be displayed in a dialog
+ *
+ * called as addOption() in detect code
+ *
+ */
+Scholar.Translate.prototype._addOption = function(option, value) {
+	this._displayOptions[option] = value;
+	Scholar.debug("setting display option "+option+" to "+value);
+}
+
+/*
  * makes translation API wait until done() has been called from the translator
- * before executing _translationComplete; called as wait()
+ * before executing _translationComplete
+ * 
+ * called as wait() in translator code
  */
 Scholar.Translate.prototype._enableAsynchronous = function() {
 	this._waitForCompletion = true;
@@ -198,13 +274,21 @@ Scholar.Translate.prototype._translationComplete = function(returnValue) {
 	if(!this._complete) {
 		this._complete = true;
 		
-		if(this.type == "export" || this.type == "import") {
-			this.foStream.close();
-		}
+		Scholar.debug("translation complete");
 		
 		// call handler
-		if(this._handlers.done) {
-			this._handlers.done(this, returnValue);
+		this._runHandler("done", returnValue);
+	}
+}
+
+/*
+ * calls a handler (see setHandler above)
+ */
+Scholar.Translate.prototype._runHandler = function(type, argument) {
+	if(this._handlers[type]) {
+		for(var i in this._handlers[type]) {
+			Scholar.debug("running handler "+i+" for "+type);
+			this._handlers[type][i](this, argument);
 		}
 	}
 }
@@ -213,6 +297,8 @@ Scholar.Translate.prototype._translationComplete = function(returnValue) {
  * does the actual export, after code has been loaded and parsed
  */
 Scholar.Translate.prototype._export = function() {
+	this._exportConfigureIO();
+	
 	// get items
 	var itemObjects = Scholar.getItems();
 	var itemArrays = new Array();
@@ -221,35 +307,88 @@ Scholar.Translate.prototype._export = function() {
 	}
 	delete itemObjects;	// free memory
 	
-	// get collections
-	var collectionObjects = Scholar.getCollections();
-	var collectionArrays = new Array();
-	for(var i in collectionObjects) {
-		var collection = new Object();
-		collection.id = collectionObjects[i].getID();
-		collection.name = collectionObjects[i].getName();
-		collection.type = "collection";
-		collection.children = collectionObjects[i].toArray();
-		
-		collectionArrays.push(collection);
+	// get collections, if requested
+	var collectionArrays;
+	if(this._configOptions.getCollections) {
+		var collectionObjects = Scholar.getCollections();
+		collectionArrays = new Array();
+		for(var i in collectionObjects) {
+			var collection = new Object();
+			collection.id = collectionObjects[i].getID();
+			collection.name = collectionObjects[i].getName();
+			collection.type = "collection";
+			collection.children = collectionObjects[i].toArray();
+			
+			collectionArrays.push(collection);
+		}
+		delete collectionObjects;	// free memory
 	}
-	delete collectionObjects;	// free memory
-	
-	// open file
-	this.foStream = Components.classes["@mozilla.org/network/file-output-stream;1"]
-	                         .createInstance(Components.interfaces.nsIFileOutputStream);
-	this.foStream.init(this.location, 0x02 | 0x08 | 0x20, 0664, 0); // write, create, truncate
-	
 	
 	try {
-		return this._sandbox.doExport(itemArrays, collectionArrays);
+		return this._sandbox.translate(itemArrays, collectionArrays);
 	} catch(e) {
 		Scholar.debug(e+' in executing code for '+this.translator.label);
 		this._translationComplete(false);
 	}
 }
 
-// TODO - allow writing in different character sets
-Scholar.Translate.prototype._exportWrite = function(data) {
-	this.foStream.write(data, data.length);
+/*
+ * configures IO for export
+ */
+Scholar.Translate.prototype._exportConfigureIO = function() {
+	// open file
+	var foStream = Components.classes["@mozilla.org/network/file-output-stream;1"]
+							 .createInstance(Components.interfaces.nsIFileOutputStream);
+	foStream.init(this.location, 0x02 | 0x08 | 0x20, 0664, 0); // write, create, truncate
+	
+	if(this._configOptions.dataMode == "rdf") {
+		/*** INITIALIZATION ***/
+		var RDFService = Components.classes['@mozilla.org/rdf/rdf-service;1'].getService(Components.interfaces.nsIRDFService);
+		var IOService = Components.classes['@mozilla.org/network/io-service;1'].getService(Components.interfaces.nsIIOService);
+		var AtomService = Components.classes["@mozilla.org/atom-service;1"].getService(Components.interfaces.nsIAtomService);
+		
+		// create data source
+		var dataSource = Components.classes["@mozilla.org/rdf/datasource;1?name=xml-datasource"].
+		                 createInstance(Components.interfaces.nsIRDFDataSource);
+		// create serializer
+		var serializer = Components.classes["@mozilla.org/rdf/xml-serializer;1"].
+		                 createInstance(Components.interfaces.nsIRDFXMLSerializer);
+		serializer.init(dataSource);
+		
+		/*** FUNCTIONS ***/
+		this._sandbox.model = new Object();
+		
+		// writes an RDF triple
+		this._sandbox.model.addStatement = function(about, relation, value, literal) {
+			if(!(about instanceof Components.interfaces.nsIRDFResource)) {
+				about = RDFService.GetResource(about);
+			}
+			dataSource.Assert(about, RDFService.GetResource(relation),
+			                       (literal ? RDFService.GetLiteral(value) : RDFService.GetResource(value)), true);
+		}
+		
+		// creates an anonymous resource
+		this._sandbox.model.newResource = function() { return RDFService.GetAnonymousResource() };
+		
+		// sets a namespace
+		this._sandbox.model.addNamespace = function(prefix, uri) {
+			serializer.addNameSpace(AtomService.getAtom(prefix), uri);
+		}
+		
+		this.setHandler("done", function() {
+			serializer.QueryInterface(Components.interfaces.nsIRDFXMLSource);
+			serializer.Serialize(foStream);
+			
+			delete dataSource, RDFService, IOService, AtomService;
+		});
+	} else {
+		/*** FUNCTIONS ***/
+		// write just writes to the file
+		this._sandbox.write = function(data) { foStream.write(data, data.length) };
+	}
+
+	this.setHandler("done", function() {
+		foStream.close();
+		delete foStream;
+	});
 }

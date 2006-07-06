@@ -2465,7 +2465,8 @@ utilities.processDocuments(browser, null, newUris, function(newBrowser) {
 wait();');
 
 REPLACE INTO "translators" VALUES ('0e2235e7-babf-413c-9acf-f27cce5f059c', '2006-07-05 23:40:00', 2, 'MODS (XML)', 'Simon Kornblith', 'xml',
-'addOption("exportNotes", true);
+'configure("getCollections", true);
+addOption("exportNotes", true);
 addOption("exportFileData", true);',
 'var partialItemTypes = ["bookSection", "journalArticle", "magazineArticle", "newspaperArticle"];
 var rdf = new Namespace("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
@@ -2513,7 +2514,7 @@ function generateSeeAlso(id, seeAlso, rdfDoc) {
 	rdfDoc.rdf::description += description;
 }
 
-function doExport(items, collections) {
+function translate(items, collections) {
 	var rdfDoc = <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" />;
 	var modsCollection = <modsCollection xmlns="http://www.loc.gov/mods/v3" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-2.xsd" />;
 	
@@ -2778,7 +2779,7 @@ function doExport(items, collections) {
 		
 		if(item.note) {
 			// Add note tag
-			var note = <note type="content">{item.note}</note>;
+			var note = <note>{item.note}</note>;
 			note.@ID = "item:"+item.itemID;
 			mods.note += note;
 		}
@@ -2808,15 +2809,15 @@ function doExport(items, collections) {
 	write(modsCollection.toXMLString());
 }');
 
-REPLACE INTO "translators" VALUES ('6e372642-ed9d-4934-b5d1-c11ac758ebb7', '2006-07-05 23:40:00', 2, 'Dublin Core (RDF/XML)', 'Simon Kornblith', 'xml', '',
-'function doExport(items) {
-	var addSubclass = new Object();
+REPLACE INTO "translators" VALUES ('6e372642-ed9d-4934-b5d1-c11ac758ebb7', '2006-07-05 23:40:00', 2, 'Dublin Core (RDF/XML)', 'Simon Kornblith', 'xml',
+'configure("dataMode", "rdf");',
+'function translate(items) {
 	var partialItemTypes = ["bookSection", "journalArticle", "magazineArticle", "newspaperArticle"];
 	
-	var rdfDoc = <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://dublincore.org/documents/dcq-rdf-xml/" />;
-	var rdf = new Namespace("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
-	var dcterms = new Namespace("dcterms", "http://purl.org/dc/terms/");
-	var dc = new Namespace("dc", "http://purl.org/dc/elements/1.1/");
+	var dcterms = "http://purl.org/dc/terms/";
+	var dc = "http://purl.org/dc/elements/1.1/";
+	model.addNamespace("dcterms", dcterms);
+	model.addNamespace("dc", dc);
 	
 	for(var i in items) {
 		var item = items[i];
@@ -2830,22 +2831,20 @@ REPLACE INTO "translators" VALUES ('6e372642-ed9d-4934-b5d1-c11ac758ebb7', '2006
 			isPartialItem = true;
 		}
 		
-		var description = <rdf:Description xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" />;
+		var resource;
 		if(item.ISBN) {
-			description.@rdf::about = "urn:isbn:"+item.ISBN;
-		} else if(item.ISSN) {
-			description.@rdf::about = "urn:issn:"+item.ISSN;
+			resource = "urn:isbn:"+item.ISBN;
 		} else if(item.url) {
-			description.@rdf::about = item.url;
+			resource = item.url;
 		} else {
 			// just specify a node ID
-			description.@rdf::nodeID = item.itemID;
+			resource = model.newResource();
 		}
 		
 		/** CORE FIELDS **/
 		
 		// XML tag titleInfo; object field title
-		description.dc::title = item.title;
+		model.addStatement(resource, dc+"title", item.title, true);
 		
 		// XML tag typeOfResource/genre; object field type
 		var type;
@@ -2856,7 +2855,7 @@ REPLACE INTO "translators" VALUES ('6e372642-ed9d-4934-b5d1-c11ac758ebb7', '2006
 		} else {
 			type = "Text";
 		}
-		description.dc::type.@rdf::resource = "http://purl.org/dc/dcmitype/"+type;
+		model.addStatement(resource, dc+"type", "http://purl.org/dc/dcmitype/"+type, false);
 		
 		// XML tag name; object field creators
 		for(var j in item.creators) {
@@ -2867,9 +2866,9 @@ REPLACE INTO "translators" VALUES ('6e372642-ed9d-4934-b5d1-c11ac758ebb7', '2006
 			}
 			
 			if(item.creators[j].creatorType == "author") {
-				description.dc::creator += <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">{creator}</dc:creator>;
+				model.addStatement(resource, dc+"creator", creator, true);
 			} else {
-				description.dc::contributor.* += <dc:contributor xmlns:dc="http://purl.org/dc/elements/1.1/">{creator}</dc:contributor>;
+				model.addStatement(resource, dc+"contributor", creator, true);
 			}
 		}
 		
@@ -2877,86 +2876,72 @@ REPLACE INTO "translators" VALUES ('6e372642-ed9d-4934-b5d1-c11ac758ebb7', '2006
 		
 		// source
 		if(item.source) {
-			description.dc::source = item.source;
+			model.addStatement(resource, dc+"source", item.source, true);
 		}
 		
 		// accessionNumber as generic ID
 		if(item.accessionNumber) {
-			description.dc::identifier = item.accessionNumber;
+			model.addStatement(resource, dc+"identifier", item.accessionNumber, true);
 		}
 		
 		// rights
 		if(item.rights) {
-			description.dc::rights = item.rights;
+			model.addStatement(resource, dc+"rights", item.rights, true);
 		}
 		
 		/** SUPPLEMENTAL FIELDS **/
 		
 		// publication/series -> isPartOf
 		if(item.publication) {
-			description.dcterms::isPartOf = item.publication;
-			addSubclass.isPartOf = true;
+			model.addStatement(resource, dcterms+"isPartOf", item.publication, true);
 		} else if(item.series) {
-			description.dcterms::isPartOf = item.series;
-			addSubclass.isPartOf = true;
+			model.addStatement(resource, dcterms+"isPartOf", item.series, true);
 		}
 		
 		// TODO - create text citation and OpenURL citation to handle volume, number, pages, issue, place
 		
 		// edition
 		if(item.edition) {
-			description.dcterms::hasVersion = item.edition;
+			model.addStatement(resource, dcterms+"hasVersion", item.edition, true);
 		}
 		// publisher/distributor
 		if(item.publisher) {
-			description.dc::publisher = item.publisher;
+			model.addStatement(resource, dc+"publisher", item.publisher, true);
 		} else if(item.distributor) {
-			description.dc::publisher = item.distributor;
+			model.addStatement(resource, dc+"publisher", item.distributor, true);
 		}
 		// date/year
 		if(item.date) {
-			description.dc::date = item.date;
+			model.addStatement(resource, dc+"date", item.date, true);
 		} else if(item.year) {
-			description.dc::date = item.year;
+			model.addStatement(resource, dc+"year", item.year, true);
 		}
 		
 		// ISBN/ISSN
-		var resource = false;
+		var identifier = false;
 		if(item.ISBN) {
-			resource = "urn:isbn:"+item.ISBN;
+			identifier = "urn:isbn:"+item.ISBN;
 		} else if(item.ISSN) {
-			resource = "urn:issn:"+item.ISSN;
+			identifier = "urn:issn:"+item.ISSN;
 		}
-		if(resource) {
+		if(identifier) {
 			if(isPartialItem) {
-				description.dcterms::isPartOf.@rdf::resource = resource;
-				addSubclass.isPartOf = true;
+				model.addStatement(resource, dc+"isPartOf", identifier, false);
 			} else {
-				description.dc::identifier.@rdf::resource = resource;
+				model.addStatement(resource, dc+"identifier", identifier, false);
 			}
 		}
 		
 		// callNumber
 		if(item.callNumber) {
-			description.dc::identifier += <dc:identifier xmlns:dc="http://purl.org/dc/elements/1.1/">item.callNumber</dc:identifier>;
+			model.addStatement(resource, dc+"identifier", item.callNumber, true);
 		}
 		
 		// archiveLocation
 		if(item.archiveLocation) {
-			description.dc::coverage = item.archiveLocation;
+			model.addStatement(resource, dc+"coverage", item.archiveLocation, true);
 		}
-		
-		rdfDoc.rdf::Description += description;
 	}
-	
-	if(addSubclass.isPartOf) {
-		rdfDoc.rdf::Description += <rdf:Description rdf:about="http://purl.org/dc/terms/abstract" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
-			<rdfs:subPropertyOf rdf:resource="http://purl.org/dc/elements/1.1/description"/>
-		  </rdf:Description>;
-	}
-	
-	write(''<?xml version="1.0"?>''+"\n");
-	write(rdfDoc.toXMLString());
 }');
 
 
@@ -2969,7 +2954,7 @@ addOption("exportFileData", true);',
 	}
 }
 
-function doExport(items) {
+function translate(items) {
 	for(var i in items) {
 		var item = items[i];
 		

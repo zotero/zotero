@@ -19,7 +19,7 @@ Scholar_File_Interface = new function() {
 		if (rv == nsIFilePicker.returnOK || rv == nsIFilePicker.returnReplace) {
 			translation.setLocation(fp.file);
 			translation.setTranslator(translators[fp.filterIndex]);
-			translation.setHandler("done", Scholar_Ingester_Interface.exportDone);
+			//translation.setHandler("done", _exportDone);
 			translation.translate();
 		}
 	}
