@@ -971,6 +971,12 @@ Scholar.Item.prototype.addTag = function(tag){
 }
 
 Scholar.Item.prototype.getTags = function(){
+	var sql = "SELECT tag FROM tags WHERE tagID IN "
+		+ "(SELECT tagID FROM itemTags WHERE itemID=" + this.getID() + ")";
+	return Scholar.DB.columnQuery(sql);
+}
+
+Scholar.Item.prototype.getTagIDs = function(){
 	var sql = "SELECT tagID FROM itemTags WHERE itemID=" + this.getID();
 	return Scholar.DB.columnQuery(sql);
 }
