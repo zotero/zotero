@@ -1,7 +1,7 @@
--- 32
+-- 33
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-07-05 23:40:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-07-07 12:44:00'));
 
 REPLACE INTO "translators" VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006-06-28 23:08:00', 3, 'Amazon.com Scraper', 'Simon Kornblith', '^http://www\.amazon\.com/(?:gp/(?:product|search)/|exec/obidos/search-handle-url/)', 
 'if(doc.location.href.indexOf("search") >= 0) {
@@ -2465,8 +2465,7 @@ utilities.processDocuments(browser, null, newUris, function(newBrowser) {
 wait();');
 
 REPLACE INTO "translators" VALUES ('0e2235e7-babf-413c-9acf-f27cce5f059c', '2006-07-05 23:40:00', 2, 'MODS (XML)', 'Simon Kornblith', 'xml',
-'configure("getCollections", true);
-addOption("exportNotes", true);
+'addOption("exportNotes", true);
 addOption("exportFileData", true);',
 'var partialItemTypes = ["bookSection", "journalArticle", "magazineArticle", "newspaperArticle"];
 var rdf = new Namespace("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
@@ -2515,7 +2514,7 @@ function generateSeeAlso(id, seeAlso, rdfDoc) {
 }
 
 function translate(items, collections) {
-	var rdfDoc = <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" />;
+	//var rdfDoc = <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" />;
 	var modsCollection = <modsCollection xmlns="http://www.loc.gov/mods/v3" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-2.xsd" />;
 	
 	for(var i in items) {
@@ -2772,9 +2771,9 @@ function translate(items, collections) {
 			mods.note += note;
 			
 			// Add see also info to RDF
-			if(item.notes[j].seeAlso) {
+			/*if(item.notes[j].seeAlso) {
 				rdfDoc.Description += generateSeeAlso(item.notes[j].itemID, item.notes[j].seeAlso);
-			}
+			}*/
 		}
 		
 		if(item.note) {
@@ -2793,30 +2792,359 @@ function translate(items, collections) {
 		/** RDF STRUCTURE **/
 		
 		// Add see also info to RDF
-		if(item.seeAlso) {
+		/*if(item.seeAlso) {
 			generateSeeAlso(item.itemID, item.seeAlso, rdfDoc);
-		}
+		}*/
 		
 		modsCollection.mods += mods;
 	}
 	
-	for(var i in collections) {
+	/*for(var i in collections) {
 		generateCollection(collections[i], rdfDoc);
 	}
-	modsCollection.rdf::RDF = rdfDoc;
+	modsCollection.rdf::RDF = rdfDoc;*/
 	
 	write(''<?xml version="1.0"?>''+"\n");
 	write(modsCollection.toXMLString());
 }');
 
-REPLACE INTO "translators" VALUES ('6e372642-ed9d-4934-b5d1-c11ac758ebb7', '2006-07-05 23:40:00', 2, 'Dublin Core (RDF/XML)', 'Simon Kornblith', 'xml',
+REPLACE INTO "translators" VALUES ('14763d24-8ba0-45df-8f52-b8d1108e7ac9', '2006-07-07 12:44:00', 2, 'Biblio/DC/FOAF/PRISM/VCard (RDF/XML)', 'Simon Kornblith', 'rdf',
+'configure("getCollections", true);
+configure("dataMode", "rdf");',
+'function generateSeeAlso(resource, seeAlso) {
+	for(var i in seeAlso) {
+		model.addStatement(resource, n.dc+"relation", itemResources[seeAlso[i]], false);
+	}
+}
+
+function generateCollection(collection) {
+	var collectionResource = "#collection:"+collection.id;
+	model.addStatement(collectionResource, rdf+"type", n.bib+"Collection", false);
+	
+	for(var i in collection.children) {
+		var child = collection.children[i];
+		
+		// add child list items
+		if(child.type == "collection") {
+			model.addStatement(collectionResource, n.dc+"hasPart", "#collection:"+child.id, false);
+			// do recursive processing of collections
+			generateCollection(child);
+		} else {
+			model.addStatement(collectionResource, n.dc+"hasPart", itemResources[child.id], false);
+		}
+	}
+}
+
+function getContainerIfExists() {
+	if(container) {
+		if(containerElement) {
+			return containerElement;
+		} else {
+			containerElement = model.newResource();
+			// attach container to section (if exists) or resource
+			model.addStatement((section ? section : resource), n.dcterms+"isPartOf", containerElement, false);
+			return containerElement;
+		}
+	} else {
+		return resource;
+	}
+}
+
+function translate(items, collections) {
+	rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
+	
+	n = {
+		bib:"http://purl.org/net/biblio#",
+		dc:"http://purl.org/dc/elements/1.1/",
+		dcterms:"http://purl.org/dc/terms/",
+		prism:"http://prismstandard.org/namespaces/1.2/basic/",
+		foaf:"http://xmlns.com/foaf/0.1/",
+		vcard:"http://nwalsh.com/rdf/vCard"
+	};
+	
+	// add namespaces
+	for(var i in n) {
+		model.addNamespace(i, n[i]);
+	}
+	
+	// leave as global
+	itemResources = new Array();
+	
+	// first, map each ID to a resource
+	for(var i in items) {
+		item = items[i];
+		
+		if(item.ISBN) {
+			itemResources[item.itemID] = "urn:isbn:"+item.ISBN;
+		} else if(item.url) {
+			itemResources[item.itemID] = item.url;
+		} else {
+			// just specify a node ID
+			itemResources[item.itemID] = "#item:"+item.itemID;
+		}
+		
+		for(var j in item.notes) {
+			itemResources[item.notes[j].itemID] = "#item:"+item.notes[j].itemID;
+		}
+	}
+	
+	for(var i in items) {
+		// these items are global
+		item = items[i];
+		resource = itemResources[item.itemID];
+		
+		container = null;
+		containerElement = null;
+		section = null;
+		
+		/** CORE FIELDS **/
+		
+		// title
+		if(item.title) {
+			model.addStatement(resource, n.dc+"title", item.title, true);
+		}
+		
+		// type
+		var type = null;
+		if(item.itemType == "book") {
+			type = "Book";
+		} else if (item.itemType == "bookSection") {
+			type = "BookSection";
+			container = "Book";
+		} else if(item.itemType == "journalArticle") {
+			type = "Article";
+			container = "Journal";
+		} else if(item.itemType == "magazineArticle") {
+			type = "Article";
+			container = "Periodical";
+		} else if(item.itemType == "newspaperArticle") {
+			type = "Article";
+			container = "Newspaper";
+		} else if(item.itemType == "thesis") {
+			type = "Thesis";
+		} else if(item.itemType == "letter") {
+			type = "Letter";
+		} else if(item.itemType == "manuscript") {
+			type = "Manuscript";
+		} else if(item.itemType == "interview") {
+			type = "Interview";
+		} else if(item.itemType == "film") {
+			type = "MotionPicture";
+		} else if(item.itemType == "artwork") {
+			type = "Illustration";
+		} else if(item.itemType == "website") {
+			type = "Document";
+		} else if(item.itemType == "note") {
+			type = "Memo";
+		}
+		if(type) {
+			model.addStatement(resource, rdf+"type", n.bib+type, false);
+		}
+		
+		// authors/editors/contributors
+		var creatorContainers = new Object();
+		for(var j in item.creators) {
+			var creator = model.newResource();
+			model.addStatement(creator, rdf+"type", n.foaf+"Person", false);
+			// gee. an entire vocabulary for describing people, and these aren''t even
+			// standardized in it. oh well. using them anyway.
+			model.addStatement(creator, n.foaf+"surname", item.creators[j].lastName, true);
+			model.addStatement(creator, n.foaf+"givenname", item.creators[j].firstName, true);
+			
+			// in addition, these tags are not yet in Biblio, but Bruce D''Arcus
+			// says they will be.
+			if(item.creators[j].creatorType == "author") {
+				var cTag = "authors";
+			} else if(item.creators[j].creatorType == "editor") {
+				var cTag = "editors";
+			} else {
+				var cTag = "contributors";
+			}
+			
+			if(!creatorContainers[cTag]) {
+				var creatorResource = model.newResource();
+				// create new seq for author type
+				creatorContainers[cTag] = model.newContainer("seq", creatorResource);
+				// attach container to resource
+				model.addStatement(resource, n.bib+cTag, creatorResource, false);
+			}
+			model.addContainerElement(creatorContainers[cTag], creator, true);
+		}
+		
+		/** FIELDS ON NEARLY EVERYTHING BUT NOT A PART OF THE CORE **/
+		
+		// source
+		if(item.source) {
+			model.addStatement(resource, n.dc+"source", item.source, true);
+		}
+		
+		// accessionNumber as generic ID
+		if(item.accessionNumber) {
+			model.addStatement(resource, n.dc+"identifier", item.accessionNumber, true);
+		}
+		
+		// rights
+		if(item.rights) {
+			model.addStatement(resource, n.dc+"rights", item.rights, true);
+		}
+		
+		/** SUPPLEMENTAL FIELDS **/
+		
+		// use section to set up another container element
+		if(item.section) {
+			section = model.newResource();				// leave as global
+			// set section type
+			model.addStatement(section, rdf+"type", n.bib+"Part", false);
+			// set section title
+			model.addStatement(section, n.dc+"title", item.section, true);
+			// add relationship to resource
+			model.addStatement(resource, n.dc+"isPartOf", section, false);
+		}
+		// use ISSN to set up container element
+		if(item.ISSN) {
+			containerElement = "urn:issn:"+item.ISSN;	// leave as global
+			// attach container to section (if exists) or resource
+			model.addStatement((section ? section : resource), n.dcterms+"isPartOf", containerElement, false);
+		}
+		
+		// publication gets linked to container via isPartOf
+		if(item.publication) {
+			model.addStatement(getContainerIfExists(), n.dc+"title", item.publication, true);
+		}
+		
+		// series also linked in
+		if(item.series) {
+			var series = model.newResource();
+			// set series type
+			model.addStatement(series, rdf+"type", n.bib+"Series", false);
+			// set series title
+			model.addStatement(series, n.dc+"title", item.series, true);
+			// add relationship to resource
+			model.addStatement(getContainerIfExists(), n.dcterms+"isPartOf", series, false);
+		}
+		
+		// volume
+		if(item.volume) {
+			model.addStatement(getContainerIfExists(), n.prism+"volume", item.volume, true);
+		}
+		// number
+		if(item.number) {
+			model.addStatement(getContainerIfExists(), n.prism+"number", item.number, true);
+		}
+		// edition
+		if(item.edition) {
+			model.addStatement(resource, n.prism+"edition", item.edition, true);
+		}
+		// publisher/distributor and place
+		if(item.publisher || item.distributor || item.place) {
+			var organization = model.newResource();
+			// set organization type
+			model.addStatement(organization, rdf+"type", n.foaf+"Organization", false);
+			// add relationship to resource
+			model.addStatement(resource, n.dc+"publisher", organization, false);
+			// add publisher/distributor
+			if(item.publisher) {
+				model.addStatement(organization, n.foaf+"name", item.publisher, true);
+			} else if(item.distributor) {
+				model.addStatement(organization, n.foaf+"name", item.distributor, true);
+			}
+			// add place
+			if(item.place) {
+				var address = model.newResource();
+				// set address type
+				model.addStatement(address, rdf+"type", n.vcard+"Address", false);
+				// set address locality
+				model.addStatement(address, n.vcard+"locality", item.place, true);
+				// add relationship to organization
+				model.addStatement(organization, n.vcard+"adr", address, false);
+			}
+		}
+		// date/year
+		if(item.date) {
+			model.addStatement(resource, n.dc+"date", item.date, true);
+		} else if(item.year) {
+			model.addStatement(resource, n.dc+"year", item.year, true);
+		}
+		
+		// callNumber
+		if(item.callNumber) {
+			var term = model.newResource();
+			// set term type
+			model.addStatement(term, rdf+"type", n.dcterms+"LCC", false);
+			// set callNumber value
+			model.addStatement(term, rdf+"value", item.callNumber, true);
+			// add relationship to resource
+			model.addStatement(resource, n.dc+"subject", term, false);
+		}
+		
+		// archiveLocation
+		if(item.archiveLocation) {
+			model.addStatement(resource, n.dc+"coverage", item.archiveLocation, true);
+		}
+		
+		// medium
+		if(item.medium) {
+			model.addStatement(resource, n.dc+"medium", item.medium, true);
+		}
+		
+		// type (not itemType)
+		if(item.type) {
+			model.addStatement(resource, n.dc+"type", item.type, true);
+		} else if(item.thesisType) {
+			model.addStatement(resource, n.dc+"type", item.thesisType, true);
+		}
+		
+		// THIS IS NOT YET IN THE BIBLIO NAMESPACE, BUT BRUCE D''ARCUS HAS SAID
+		// IT WILL BE SOON
+		if(item.pages) {
+			model.addStatement(resource, n.bib+"pages", item.pages, true);
+		}
+		
+		/** NOTES **/
+		
+		for(var j in item.notes) {
+			var noteResource = itemResources[item.notes[j].itemID];
+			
+			// add note tag
+			model.addStatement(noteResource, rdf+"type", n.bib+"Memo", false);
+			// add note description (sorry, couldn''t find a better way of
+			// representing this data in an existing ontology)
+			model.addStatement(noteResource, n.dc+"description", item.notes[j].note, true);
+			// add relationship between resource and note
+			model.addStatement(resource, n.dcterms+"isReferencedBy", noteResource, false);
+			
+			// Add see also info to RDF
+			generateSeeAlso(item.notes[j].itemID, item.notes[j].seeAlso);
+		}
+		
+		if(item.note) {
+			model.addStatement(resource, n.dc+"description", item.note, true);
+		}
+		
+		/** TAGS **/
+		
+		for(var j in item.tags) {
+			model.addStatement(resource, n.dc+"subject", item.tags[j], true);
+		}
+		
+		// Add see also info to RDF
+		generateSeeAlso(item.itemID, item.seeAlso);
+		
+		// ELEMENTS AMBIGUOUSLY ENCODED: callNumber, acccessionType
+	}
+	
+	/** RDF COLLECTION STRUCTURE **/
+	for(var i in collections) {
+		generateCollection(collections[i]);
+	}
+}');
+
+REPLACE INTO "translators" VALUES ('6e372642-ed9d-4934-b5d1-c11ac758ebb7', '2006-07-05 23:40:00', 2, 'Unqualified Dublin Core (RDF/XML)', 'Simon Kornblith', 'rdf',
 'configure("dataMode", "rdf");',
 'function translate(items) {
 	var partialItemTypes = ["bookSection", "journalArticle", "magazineArticle", "newspaperArticle"];
 	
-	var dcterms = "http://purl.org/dc/terms/";
 	var dc = "http://purl.org/dc/elements/1.1/";
-	model.addNamespace("dcterms", dcterms);
 	model.addNamespace("dc", dc);
 	
 	for(var i in items) {
@@ -2843,21 +3171,15 @@ REPLACE INTO "translators" VALUES ('6e372642-ed9d-4934-b5d1-c11ac758ebb7', '2006
 		
 		/** CORE FIELDS **/
 		
-		// XML tag titleInfo; object field title
-		model.addStatement(resource, dc+"title", item.title, true);
-		
-		// XML tag typeOfResource/genre; object field type
-		var type;
-		if(item.itemType == "film") {
-			type = "MovingImage";
-		} else if(item.itemType == "artwork") {
-			type = "StillImage";
-		} else {
-			type = "Text";
+		// title
+		if(item.title) {
+			model.addStatement(resource, dc+"title", item.title, true);
 		}
-		model.addStatement(resource, dc+"type", "http://purl.org/dc/dcmitype/"+type, false);
 		
-		// XML tag name; object field creators
+		// type
+		model.addStatement(resource, dc+"type", item.itemType, true);
+		
+		// creators
 		for(var j in item.creators) {
 			// put creators in lastName, firstName format (although DC doesn''t specify)
 			var creator = item.creators[j].lastName;
@@ -2891,19 +3213,8 @@ REPLACE INTO "translators" VALUES ('6e372642-ed9d-4934-b5d1-c11ac758ebb7', '2006
 		
 		/** SUPPLEMENTAL FIELDS **/
 		
-		// publication/series -> isPartOf
-		if(item.publication) {
-			model.addStatement(resource, dcterms+"isPartOf", item.publication, true);
-		} else if(item.series) {
-			model.addStatement(resource, dcterms+"isPartOf", item.series, true);
-		}
-		
 		// TODO - create text citation and OpenURL citation to handle volume, number, pages, issue, place
 		
-		// edition
-		if(item.edition) {
-			model.addStatement(resource, dcterms+"hasVersion", item.edition, true);
-		}
 		// publisher/distributor
 		if(item.publisher) {
 			model.addStatement(resource, dc+"publisher", item.publisher, true);
@@ -2918,18 +3229,10 @@ REPLACE INTO "translators" VALUES ('6e372642-ed9d-4934-b5d1-c11ac758ebb7', '2006
 		}
 		
 		// ISBN/ISSN
-		var identifier = false;
 		if(item.ISBN) {
-			identifier = "urn:isbn:"+item.ISBN;
+			model.addStatement(resource, dc+"identifier", "ISBN "+item.ISBN, true);
 		} else if(item.ISSN) {
-			identifier = "urn:issn:"+item.ISSN;
-		}
-		if(identifier) {
-			if(isPartialItem) {
-				model.addStatement(resource, dc+"isPartOf", identifier, false);
-			} else {
-				model.addStatement(resource, dc+"identifier", identifier, false);
-			}
+			model.addStatement(resource, dc+"identifier", "ISSN "+item.ISSN, true);
 		}
 		
 		// callNumber
@@ -2943,7 +3246,6 @@ REPLACE INTO "translators" VALUES ('6e372642-ed9d-4934-b5d1-c11ac758ebb7', '2006
 		}
 	}
 }');
-
 
 REPLACE INTO "translators" VALUES ('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7', '2006-06-30 15:36:00', 2, 'RIS', 'Simon Kornblith', 'ris',
 'addOption("exportNotes", true);

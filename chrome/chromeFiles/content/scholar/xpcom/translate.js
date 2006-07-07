@@ -346,7 +346,8 @@ Scholar.Translate.prototype._exportConfigureIO = function() {
 		var RDFService = Components.classes['@mozilla.org/rdf/rdf-service;1'].getService(Components.interfaces.nsIRDFService);
 		var IOService = Components.classes['@mozilla.org/network/io-service;1'].getService(Components.interfaces.nsIIOService);
 		var AtomService = Components.classes["@mozilla.org/atom-service;1"].getService(Components.interfaces.nsIAtomService);
-		
+		var RDFContainerUtils = Components.classes["@mozilla.org/rdf/container-utils;1"].getService(Components.interfaces.nsIRDFContainerUtils);
+
 		// create data source
 		var dataSource = Components.classes["@mozilla.org/rdf/datasource;1?name=xml-datasource"].
 		                 createInstance(Components.interfaces.nsIRDFDataSource);
@@ -360,15 +361,65 @@ Scholar.Translate.prototype._exportConfigureIO = function() {
 		
 		// writes an RDF triple
 		this._sandbox.model.addStatement = function(about, relation, value, literal) {
+			Scholar.debug("pre: model.addStatement("+about+", "+relation+", "+value+", "+literal+")");
+			
 			if(!(about instanceof Components.interfaces.nsIRDFResource)) {
 				about = RDFService.GetResource(about);
 			}
-			dataSource.Assert(about, RDFService.GetResource(relation),
-			                       (literal ? RDFService.GetLiteral(value) : RDFService.GetResource(value)), true);
+			if(!(value instanceof Components.interfaces.nsIRDFResource)) {
+				if(literal) {
+					value = RDFService.GetLiteral(value);
+				} else {
+					value = RDFService.GetResource(value);
+				}
+			}
+			
+			Scholar.debug("post: model.addStatement("+about+", "+relation+", "+value+", "+literal+")");
+			
+			dataSource.Assert(about, RDFService.GetResource(relation), value, true);
 		}
 		
 		// creates an anonymous resource
 		this._sandbox.model.newResource = function() { return RDFService.GetAnonymousResource() };
+		
+		// creates a new container
+		this._sandbox.model.newContainer = function(type, about) {
+			if(!(about instanceof Components.interfaces.nsIRDFResource)) {
+				about = RDFService.GetResource(about);
+			}
+			
+			type = type.toLowerCase();
+			if(type == "bag") {
+				return RDFContainerUtils.MakeBag(dataSource, about);
+			} else if(type == "seq") {
+				return RDFContainerUtils.MakeSeq(dataSource, about);
+			} else if(type == "alt") {
+				return RDFContainerUtils.MakeAlt(dataSource, about);
+			} else {
+				throw "Invalid container type in model.newContainer";
+			}
+		}
+		
+		// adds a new container (index optional)
+		this._sandbox.model.addContainerElement = function(about, element, index) {
+			if(!(about instanceof Components.interfaces.nsIRDFContainer)) {
+				if(!(about instanceof Components.interfaces.nsIRDFResource)) {
+					about = RDFService.GetResource(about);
+				}
+				var container = Components.classes["@mozilla.org/rdf/container;1"].
+				                createInstance(Components.interfaces.nsIRDFContainer);
+				container.Init(dataSource, about);
+			}
+			if(!(element instanceof Components.interfaces.nsIRDFResource)) {
+				element = RDFService.GetResource(element);
+			}
+			
+			if(index) {
+				about.InsertElementAt(element, index, true);
+			} else {
+				about.AppendElement(element);
+			}
+		}
 		
 		// sets a namespace
 		this._sandbox.model.addNamespace = function(prefix, uri) {
@@ -379,7 +430,7 @@ Scholar.Translate.prototype._exportConfigureIO = function() {
 			serializer.QueryInterface(Components.interfaces.nsIRDFXMLSource);
 			serializer.Serialize(foStream);
 			
-			delete dataSource, RDFService, IOService, AtomService;
+			delete dataSource, RDFService, IOService, AtomService, RDFContainerUtils;
 		});
 	} else {
 		/*** FUNCTIONS ***/
