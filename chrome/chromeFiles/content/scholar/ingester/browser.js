@@ -25,8 +25,7 @@ Scholar_Ingester_Interface._scrapeProgress = new Array();
  */
 Scholar_Ingester_Interface.init = function() {
 	Scholar_Ingester_Interface.browsers = new Array();
-	Scholar_Ingester_Interface.browserDocuments = new Object();
-	Scholar_Ingester_Interface.browserUris = new Array();
+	Scholar_Ingester_Interface.browserData = new Object();
 	Scholar_Ingester_Interface._scrapePopupShowing = false;
 	Scholar.Ingester.ProxyMonitor.init();
 	
@@ -54,7 +53,7 @@ Scholar_Ingester_Interface.chromeLoad = function() {
  * When chrome unloads, delete our document objects and remove our listeners
  */
 Scholar_Ingester_Interface.chromeUnload = function() {
-	delete Scholar_Ingester_Interface.browserDocuments;
+	delete Scholar_Ingester_Interface.browserData, Scholar_Ingester_Interface.browsers;
 	this.tabBrowser.removeProgressListener(this);
 }
 
@@ -62,30 +61,20 @@ Scholar_Ingester_Interface.chromeUnload = function() {
  * Scrapes a page (called when the capture icon is clicked)
  */
 Scholar_Ingester_Interface.scrapeThisPage = function(saveLocation) {
-	var documentObject = Scholar_Ingester_Interface._getDocument(Scholar_Ingester_Interface.tabBrowser.selectedBrowser);
-	if(documentObject.scraper) {
-		var scrapeProgress = new Scholar_Ingester_Interface.Progress(window);
-		Scholar_Ingester_Interface._scrapeProgress.push(scrapeProgress);
-		documentObject.scrapePage(function(obj, returnValue) { Scholar_Ingester_Interface._finishScraping(obj, returnValue, scrapeProgress, saveLocation) });
-	}
-}
-
-/*
- * Updates the status of the capture icon to reflect the scrapability or lack
- * thereof of the current page
- */
-Scholar_Ingester_Interface.updateStatus = function() {
-	var documentObject = Scholar_Ingester_Interface._getDocument(Scholar_Ingester_Interface.tabBrowser.selectedBrowser);
-	if(documentObject && documentObject.scraper) {
-		if(documentObject.type == "multiple") {
-			// Use folder icon for multiple types, for now
-			Scholar_Ingester_Interface.statusImage.src = "chrome://scholar/skin/treesource-collection.png";
-		} else {
-			Scholar_Ingester_Interface.statusImage.src = "chrome://scholar/skin/treeitem-"+documentObject.type+".png";
-		}
-		Scholar_Ingester_Interface.statusImage.hidden = false;
-	} else {
-		Scholar_Ingester_Interface.statusImage.hidden = true;
+	var browser = Scholar_Ingester_Interface.tabBrowser.selectedBrowser;
+	var data = Scholar_Ingester_Interface._getData(browser);
+	
+	if(data.translators && data.translators.length) {
+		Scholar_Ingester_Interface.Progress.show();
+		
+		var translate = new Scholar.Translate("web");
+		translate.setBrowser(browser);
+		// use first translator available
+		translate.setTranslator(data.translators[0]);
+		translate.setHandler("select", Scholar_Ingester_Interface._selectItems);
+		translate.setHandler("itemDone", Scholar_Ingester_Interface._itemDone);
+		translate.setHandler("done", Scholar_Ingester_Interface._finishScraping);
+		translate.translate();
 	}
 }
 
@@ -122,8 +111,14 @@ Scholar_Ingester_Interface.contentLoad = function(event) {
 			return;
 		}
 		
-		Scholar_Ingester_Interface._setDocument(browser);
-		Scholar_Ingester_Interface.updateStatus();
+		// get data object
+		var data = Scholar_Ingester_Interface._getData(browser);
+		// get translators
+		var translate = new Scholar.Translate("web");
+		translate.setBrowser(browser);
+		data.translators = translate.getTranslators();
+		// update status
+		Scholar_Ingester_Interface._updateStatus(data);
 	}
 }
 
@@ -162,13 +157,12 @@ Scholar_Ingester_Interface.Listener.onLocationChange = function(progressObject) 
 			Scholar_Ingester_Interface._deleteDocument(browser);
 		}
 	}
-	Scholar_Ingester_Interface.updateStatus();
+	
+	var data = Scholar_Ingester_Interface._getData(Scholar_Ingester_Interface.tabBrowser.selectedBrowser);
+	Scholar_Ingester_Interface._updateStatus(data);
 	
 	// Make sure scrape progress is gone
-	var scrapeProgress;
-	while(scrapeProgress = Scholar_Ingester_Interface._scrapeProgress.pop()) {
-		scrapeProgress.kill();
-	}
+	Scholar_Ingester_Interface.Progress.kill();
 }
 
 Scholar_Ingester_Interface.hidePopup = function(collectionID) {
@@ -219,53 +213,41 @@ Scholar_Ingester_Interface.showPopup = function(collectionID, parentElement) {
 //////////////////////////////////////////////////////////////////////////////
 
 /*
- * Gets a document object given a browser window object
+ * Gets a data object given a browser window object
  * 
  * NOTE: Browser objects are associated with document objects via keys generated
  * from the time the browser object is opened. I'm not sure if this is the
  * appropriate mechanism for handling this, but it's what PiggyBank used and it
  * appears to work.
+ *
+ * Currently, the data object contains only one property: "translators," which
+ * is an array of translators that should work with the given page as returned
+ * from Scholar.Translate.getTranslator()
  */
-Scholar_Ingester_Interface._getDocument = function(browser) {
+Scholar_Ingester_Interface._getData = function(browser) {
 	try {
 		var key = browser.getAttribute("scholar-key");
-		if(Scholar_Ingester_Interface.browserDocuments[key]) {
-			return Scholar_Ingester_Interface.browserDocuments[key];
+		if(Scholar_Ingester_Interface.browserData[key]) {
+			return Scholar_Ingester_Interface.browserData[key];
 		}
-	} finally {}
-	return false;
-}
-
-/*
- * Creates a new document object for a browser window object, attempts to
- * retrieve appropriate scraper
- */
-Scholar_Ingester_Interface._setDocument = function(browser) {
-	try {
-		var key = browser.getAttribute("scholar-key");
 	} finally {
 		if(!key) {
 			var key = (new Date()).getTime();
 			browser.setAttribute("scholar-key", key);
+			Scholar_Ingester_Interface.browserData[key] = new Array();
+			return Scholar_Ingester_Interface.browserData[key];
 		}
 	}
-	
-	// Only re-load the scraper if it's a new document
-	//if(Scholar_Ingester_Interface.browserUris[key] != browser.contentDocument.location.href) {
-		Scholar_Ingester_Interface.browserUris[key] = browser.contentDocument.location.href;
-		Scholar_Ingester_Interface.browserDocuments[key] = new Scholar.Ingester.Document(browser, window);
-		Scholar_Ingester_Interface.browserDocuments[key].retrieveScraper();
-	//}
 }
 
 /*
  * Deletes the document object associated with a given browser window object
  */
-Scholar_Ingester_Interface._deleteDocument = function(browser) {
+Scholar_Ingester_Interface._deleteData = function(browser) {
 	try {
 		var key = browser.getAttribute("scholar-key");
-		if(Scholar_Ingester_Interface.browserDocuments[key]) {
-			delete Scholar_Ingester_Interface.browserDocuments[key];
+		if(Scholar_Ingester_Interface.browserData[key]) {
+			delete Scholar_Ingester_Interface.browserData[key];
 			return true;
 		}
 	} finally {}
@@ -273,41 +255,59 @@ Scholar_Ingester_Interface._deleteDocument = function(browser) {
 }
 
 /*
+ * Updates the status of the capture icon to reflect the scrapability or lack
+ * thereof of the current page
+ */
+Scholar_Ingester_Interface._updateStatus = function(data) {
+	if(data.translators && data.translators.length) {
+		var itemType = data.translators[0].itemType;
+		if(itemType == "multiple") {
+			// Use folder icon for multiple types, for now
+			Scholar_Ingester_Interface.statusImage.src = "chrome://scholar/skin/treesource-collection.png";
+		} else {
+			Scholar_Ingester_Interface.statusImage.src = "chrome://scholar/skin/treeitem-"+itemType+".png";
+		}
+		Scholar_Ingester_Interface.statusImage.hidden = false;
+	} else {
+		Scholar_Ingester_Interface.statusImage.hidden = true;
+	}
+}
+
+/*
+ * Callback to be executed when an item has been finished
+ */
+Scholar_Ingester_Interface._itemDone = function(obj, item) {
+	var title = item.getField("title");
+	var icon = "chrome://scholar/skin/treeitem-"+Scholar.ItemTypes.getName(item.getField("itemTypeID"))+".png"
+	Scholar_Ingester_Interface.Progress.addLines([title], [icon]);
+	item.save();
+}
+
+/*
+ * called when a user is supposed to select items
+ */
+Scholar_Ingester_Interface._selectItems = function(obj, itemList) {
+	// this is kinda ugly, mozillazine made me do it! honest!
+	var io = { dataIn:itemList, dataOut:null }
+	var newDialog = window.openDialog("chrome://scholar/content/ingester/selectitems.xul",
+		"_blank","chrome,modal,centerscreen,resizable=yes", io);
+	
+	if(!io.dataOut) {	// user selected no items, so kill the progress indicatior
+		Scholar_Ingester_Interface.Progress.kill();
+	}
+	
+	return io.dataOut;
+}
+
+/*
  * Callback to be executed when scraping is complete
  */
-Scholar_Ingester_Interface._finishScraping = function(obj, returnValue, scrapeProgress, saveLocation) {
-	if(obj.items.length) {
-		scrapeProgress.changeHeadline(Scholar.getString("ingester.scrapeComplete"));
-		
-		// Display title and creators
-		var labels = new Array();
-		var icons = new Array();
-		for(var i in obj.items) {
-			labels.push(obj.items[i].getField("title"));
-			icons.push("chrome://scholar/skin/treeitem-"+Scholar.ItemTypes.getName(obj.items[i].getField("itemTypeID"))+".png");
-		}
-		scrapeProgress.addLines(labels, icons);
-		
-		// Get collection if the user used the drop-down menu
-		if(saveLocation) {
-			var saveCollection = Scholar.Collections.get(saveLocation);
-		}
-		// Save items
-		for(i in obj.items) {
-			obj.items[i].save();
-			if(saveLocation) {
-				saveCollection.addItem(obj.items[i].getID());
-			}
-		}
-		
-		setTimeout(function() { scrapeProgress.fade() }, 2500);
-	} else if(returnValue) {
-		scrapeProgress.kill();
-	} else {
-		scrapeProgress.changeHeadline(Scholar.getString("ingester.scrapeError"));
-		scrapeProgress.addDescription(Scholar.getString("ingester.scrapeErrorDescription"));
-		setTimeout(function() { scrapeProgress.fade() }, 2500);
+Scholar_Ingester_Interface._finishScraping = function(obj, returnValue) {
+	if(!returnValue) {
+		Scholar_Ingester_Interface.Progress.changeHeadline(Scholar.getString("ingester.scrapeError"));
+		Scholar_Ingester_Interface.Progress.addDescription(Scholar.getString("ingester.scrapeErrorDescription"));
 	}
+	Scholar_Ingester_Interface.Progress.fade();
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -317,99 +317,126 @@ Scholar_Ingester_Interface._finishScraping = function(obj, returnValue, scrapePr
 //////////////////////////////////////////////////////////////////////////////
 
 // Handles the display of a div showing progress in scraping
-
-Scholar_Ingester_Interface.Progress = function(myWindow) {
-	this.openerWindow = myWindow;
-	this.progressWindow = myWindow.openDialog("chrome://scholar/chrome/ingester/progress.xul", "", "chrome,dialog=no,titlebar=no,popup=yes");
-	var me = this;
-	this.progressWindow.addEventListener("load", function() { me.windowLoaded() }, false);
+Scholar_Ingester_Interface.Progress = new function() {
+	var _windowLoaded = false;
+	var _windowLoading = false;
+	// keep track of all of these things in case they're called before we're
+	// done loading the progress window
+	var _loadDescription = null;
+	var _loadLines = new Array();
+	var _loadIcons = new Array();
+	var _loadHeadline = Scholar.getString("ingester.scraping");
 	
-	this._loadDescription = null;
-	this._loadLines = new Array();
-	this._loadIcons = new Array();
-	this._loadHeadline = Scholar.getString("ingester.scraping");
-}
-
-Scholar_Ingester_Interface.Progress.prototype.windowLoaded = function() {
-	this._windowLoaded = true;
-	this._move();
+	this.show = show;
+	this.changeHeadline = changeHeadline;
+	this.addLines = addLines;
+	this.addDescription = addDescription;
+	this.fade = fade;
+	this.kill = kill;
 	
-	this.changeHeadline(this._loadHeadline);
-	this.addLines(this._loadLines, this._loadIcons);
-	if(this._loadDescription) {
-		this.addDescription(this._loadDescription);
+	function show() {
+		if(_windowLoading || _windowLoaded) {	// already loading or loaded
+			return false;
+		}
+		_progressWindow = window.openDialog("chrome://scholar/chrome/ingester/progress.xul", "", "chrome,dialog=no,titlebar=no,popup=yes");
+		_progressWindow.addEventListener("load", _onWindowLoaded, false);
+		_windowLoading = true;
 	}
-}
-
-Scholar_Ingester_Interface.Progress.prototype.changeHeadline = function(headline) {
-	if(this._windowLoaded) {
-		this.progressWindow.document.getElementById("scholar-progress-text-headline").value = headline;
-	} else {
-		this._loadHeadline = headline;
+	
+	function changeHeadline(headline) {
+		if(_windowLoaded) {
+			_progressWindow.document.getElementById("scholar-progress-text-headline").value = headline;
+		} else {
+			_loadHeadline = headline;
+		}
 	}
-}
-
-Scholar_Ingester_Interface.Progress.prototype.addLines = function(label, icon) {
-	if(this._windowLoaded) {
-		for(i in label) {
-			var newLabel = this.progressWindow.document.createElement("label");
-			newLabel.setAttribute("class", "scholar-progress-item-label");
-			newLabel.setAttribute("crop", "end");
-			newLabel.setAttribute("value", label[i]);
+	
+	function addLines(label, icon) {
+		if(_windowLoaded) {
+			for(i in label) {
+				var newLabel = _progressWindow.document.createElement("label");
+				newLabel.setAttribute("class", "scholar-progress-item-label");
+				newLabel.setAttribute("crop", "end");
+				newLabel.setAttribute("value", label[i]);
+				
+				var newImage = _progressWindow.document.createElement("image");
+				newImage.setAttribute("class", "scholar-progress-item-icon");
+				newImage.setAttribute("src", icon[i]);
+				
+				var newHB = _progressWindow.document.createElement("hbox");
+				newHB.setAttribute("class", "scholar-progress-item-hbox");
+				newHB.setAttribute("valign", "center");
+				newHB.appendChild(newImage);
+				newHB.appendChild(newLabel);
+				
+				_progressWindow.document.getElementById("scholar-progress-text-box").appendChild(newHB);
+			}
 			
-			var newImage = this.progressWindow.document.createElement("image");
-			newImage.setAttribute("class", "scholar-progress-item-icon");
-			newImage.setAttribute("src", icon[i]);
-			
-			var newHB = this.progressWindow.document.createElement("hbox");
+			_move();
+		} else {
+			_loadLines = _loadLines.concat(label);
+			_loadIcons = _loadIcons.concat(icon);
+		}
+	}
+	
+	function addDescription(text) {
+		if(_windowLoaded) {
+			var newHB = _progressWindow.document.createElement("hbox");
 			newHB.setAttribute("class", "scholar-progress-item-hbox");
-			newHB.setAttribute("valign", "center");
-			newHB.appendChild(newImage);
-			newHB.appendChild(newLabel);
+			var newDescription = _progressWindow.document.createElement("description");
+			newDescription.setAttribute("class", "scholar-progress-description");
+			var newText = _progressWindow.document.createTextNode(text);
 			
-			this.progressWindow.document.getElementById("scholar-progress-text-box").appendChild(newHB);
+			newDescription.appendChild(newText);
+			newHB.appendChild(newDescription);
+			_progressWindow.document.getElementById("scholar-progress-text-box").appendChild(newHB);
+			
+			_move();
+		} else {
+			_loadDescription = text;
+		}
+	}
+	
+	function fade() {
+		setTimeout(_timeout, 2500);
+	}
+	
+	function kill() {
+		_windowLoaded = false;
+		try {
+			_progressWindow.close();
+		} catch(ex) {}
+	}
+	
+	function _onWindowLoaded() {
+		_windowLoading = false;
+		_windowLoaded = true;
+		
+		_move();
+		// do things we delayed because the winodw was loading
+		changeHeadline(_loadHeadline);
+		addLines(_loadLines, _loadIcons);
+		if(_loadDescription) {
+			addDescription(_loadDescription);
 		}
 		
-		this._move();
-	} else {
-		this._loadLines = this._loadLines.concat(label);
-		this._loadIcons = this._loadIcons.concat(icon);
+		// reset parameters
+		_loadDescription = null;
+		_loadLines = new Array();
+		_loadIcons = new Array();
+		_loadHeadline = Scholar.getString("ingester.scraping")
+	}
+	
+	function _move() {
+		_progressWindow.sizeToContent();
+		_progressWindow.moveTo(
+			window.screenX + window.outerWidth - _progressWindow.outerWidth - 30,
+			window.screenY + window.outerHeight - _progressWindow.outerHeight
+		);
+	}
+	
+	function _timeout() {
+		kill();	// could check to see if we're really supposed to fade yet
+				// (in case multiple scrapers are operating at once)
 	}
 }
-
-Scholar_Ingester_Interface.Progress.prototype.addDescription = function(text) {
-	if(this._windowLoaded) {
-		var newHB = this.progressWindow.document.createElement("hbox");
-		newHB.setAttribute("class", "scholar-progress-item-hbox");
-		var newDescription = this.progressWindow.document.createElement("description");
-		newDescription.setAttribute("class", "scholar-progress-description");
-		var newText = this.progressWindow.document.createTextNode(text);
-		
-		newDescription.appendChild(newText);
-		newHB.appendChild(newDescription);
-		this.progressWindow.document.getElementById("scholar-progress-text-box").appendChild(newHB);
-		
-		this._move();
-	} else {
-		this._loadDescription = text;
-	}
-}
-
-Scholar_Ingester_Interface.Progress.prototype._move = function() {
-	this.progressWindow.sizeToContent();
-	this.progressWindow.moveTo(
-		this.openerWindow.screenX + this.openerWindow.outerWidth - this.progressWindow.outerWidth - 30,
-		this.openerWindow.screenY + this.openerWindow.outerHeight - this.progressWindow.outerHeight
-	);
-}
-
-Scholar_Ingester_Interface.Progress.prototype.fade = function() {
-	this.kill();
-}
-
-Scholar_Ingester_Interface.Progress.prototype.kill = function() {
-	try {
-		this.progressWindow.close();
-	} catch(ex) {}
-}
-

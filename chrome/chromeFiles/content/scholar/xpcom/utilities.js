@@ -82,19 +82,29 @@ Scholar.Utilities.prototype.dateToISO = function(jsDate) {
 /*
  * Cleans extraneous punctuation off an author name
  */
-Scholar.Utilities.prototype.cleanAuthor = function(author) {
+Scholar.Utilities.prototype.cleanAuthor = function(author, type, useComma) {
 	author = author.replace(/^[\s\.\,\/\[\]\:]+/, '');
 	author = author.replace(/[\s\,\/\[\]\:\.]+$/, '');
 	author = author.replace(/  +/, ' ');
-	// Add period for initials
-	if(author.substring(author.length-2, author.length-1) == " ") {
-		author += ".";
+	if(useComma) {
+		// Add period for initials
+		if(author.substr(author.length-2, 1) == " ") {
+			author += ".";
+		}
+		var splitNames = author.split(', ');
+		if(splitNames.length > 1) {
+			var lastName = splitNames[0];
+			var firstName = splitNames[1];
+		} else {
+			var lastName = author;
+		}
+	} else {
+		var spaceIndex = author.lastIndexOf(" ");
+		var lastName = author.substring(spaceIndex+1);
+		var firstName = author.substring(0, spaceIndex);
 	}
-	var splitNames = author.split(', ');
-	if(splitNames.length > 1) {
-		author = splitNames[1]+' '+splitNames[0];
-	}
-	return author;
+	// TODO: take type into account
+	return {firstName:firstName, lastName:lastName, creatorType:type};
 }
 
 /*
@@ -141,7 +151,7 @@ Scholar.Utilities.prototype.getVersion = function() {
 /*
  * Get a page range, given a user-entered set of pages
  */
-Scholar.Utilities.prototype._pageRangeRegexp = /^\s*([0-9]+)-([0-9]+)\s*$/
+Scholar.Utilities.prototype._pageRangeRegexp = /^\s*([0-9]+)-([0-9]+)\s*$/;
 Scholar.Utilities.prototype.getPageRange = function(pages) {
 	var pageNumbers;
 	var m = this._pageRangeRegexp.exec(pages);
@@ -155,7 +165,20 @@ Scholar.Utilities.prototype.getPageRange = function(pages) {
 	return pageNumbers;
 }
 
+/*
+ * provide inArray function
+ */
 Scholar.Utilities.prototype.inArray = Scholar.inArray;
+
+/*
+ * pads a number or other string with a given string on the left
+ */
+Scholar.Utilities.prototype.lpad = function(string, pad, length) {
+	while(string.length < length) {
+		string = pad + string;
+	}
+	return string;
+}
 
 /*
  * END SCHOLAR FOR FIREFOX EXTENSIONS
@@ -169,10 +192,8 @@ Scholar.Utilities.prototype.inArray = Scholar.inArray;
 // Scholar.Utilities.Ingester extends Scholar.Utilities, offering additional
 // classes relating to data extraction specifically from HTML documents.
 
-Scholar.Utilities.Ingester = function(myWindow, proxiedURL, isHidden) {
-	this.window = myWindow;
+Scholar.Utilities.Ingester = function(proxiedURL) {
 	this.proxiedURL = proxiedURL;
-	this.isHidden = isHidden;
 }
 
 Scholar.Utilities.Ingester.prototype = new Scholar.Utilities();
@@ -241,21 +262,6 @@ Scholar.Utilities.Ingester.prototype.getNodeString = function(doc, contextNode, 
 }
 
 /*
- * Allows a user to select which items to scrape
- */
-Scholar.Utilities.Ingester.prototype.selectItems = function(itemList) {
-	if(this.isHidden != true) {
-		// this is kinda ugly, mozillazine made me do it! honest!
-		var io = { dataIn:itemList, dataOut:null }
-		var newDialog = this.window.openDialog("chrome://scholar/content/ingester/selectitems.xul",
-			"_blank","chrome,modal,centerscreen,resizable=yes", io);
-		return io.dataOut;
-	} else {
-		return null;
-	}
-}
-
-/*
  * Grabs items based on URLs
  */
 Scholar.Utilities.Ingester.prototype.getItemArray = function(doc, inHere, urlRe, rejectRe) {
@@ -300,129 +306,19 @@ Scholar.Utilities.Ingester.prototype.getItemArray = function(doc, inHere, urlRe,
 	return availableItems;
 }
 
-// These functions are for use by importMARCRecord. They're private, because,
-// while they are useful, it's also nice if as many of our scrapers as possible
-// are PiggyBank compatible, and if our scrapers used functions, that would
-// break compatibility
-Scholar.Utilities.Ingester.prototype._MARCCleanString = function(author) {
-	author = author.replace(/^[\s\.\,\/\[\]\:]+/, '');
-	author = author.replace(/[\s\.\,\/\[\]\:]+$/, '');
-	return author.replace(/  +/, ' ');
-}
-
-Scholar.Utilities.Ingester.prototype._MARCCleanNumber = function(author) {
-	author = author.replace(/^[\s\.\,\/\[\]\:]+/, '');
-	author = author.replace(/[\s\.\,\/\[\]\:]+$/, '');
-	var regexp = /^[^ ]*/;
-	var m = regexp.exec(author);
-	if(m) {
-		return m[0];
-	}
-}
-Scholar.Utilities.Ingester.prototype._MARCPullYear = function(text) {
-	var pullRe = /[0-9]+/;
-	var m = pullRe.exec(text);
-	if(m) {
-		return m[0];
-	}
-}
-
-Scholar.Utilities.Ingester.prototype._MARCAssociateField = function(record, uri, model, fieldNo, rdfUri, execMe, prefix, part) {
-	if(!part) {
-		part = 'a';
-	}
-	var field = record.get_field_subfields(fieldNo);
-	Scholar.debug('Found '+field.length+' matches for '+fieldNo+part);
-	if(field) {
-		for(i in field) {
-			var value;
-			for(var j=0; j<part.length; j++) {
-				var myPart = part.substr(j, 1);
-				if(field[i][myPart]) {
-					if(value) {
-						value += " "+field[i][myPart];
-					} else {
-						value = field[i][myPart];
-					}
-				}
-			}
-			if(value) {
-				if(execMe) {
-					value = execMe(value);
-				}
-				if(prefix) {
-					value = prefix + value;
-				}
-				model.addStatement(uri, rdfUri, value);
-			}
-		}
-	}
-	return model;
-}
-
-// This is an extension to PiggyBank's architecture. It's here so that we don't
-// need an enormous library for each scraper that wants to use MARC records
-Scholar.Utilities.Ingester.prototype.importMARCRecord = function(record, uri, model) {
-	var prefixDC = 'http://purl.org/dc/elements/1.1/';
-	var prefixDCMI = 'http://purl.org/dc/dcmitype/';
-	var prefixDummy = 'http://chnm.gmu.edu/firefox-scholar/';
-	var prefixRDF = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#';
-	
-	// Extract ISBNs
-	model = this._MARCAssociateField(record, uri, model, '020', prefixDC + 'identifier', this._MARCCleanNumber, 'ISBN ');
-	// Extract ISSNs
-	model = this._MARCAssociateField(record, uri, model, '022', prefixDC + 'identifier', this._MARCCleanNumber, 'ISSN ');
-	// Extract creators
-	model = this._MARCAssociateField(record, uri, model, '100', prefixDC + 'creator', this.cleanAuthor);
-	model = this._MARCAssociateField(record, uri, model, '110', prefixDummy + 'corporateCreator', this._MARCCleanString);
-	model = this._MARCAssociateField(record, uri, model, '111', prefixDummy + 'corporateCreator', this._MARCCleanString);
-	model = this._MARCAssociateField(record, uri, model, '700', prefixDC + 'contributor', this.cleanAuthor);
-	model = this._MARCAssociateField(record, uri, model, '710', prefixDummy + 'corporateContributor', this._MARCCleanString);
-	model = this._MARCAssociateField(record, uri, model, '711', prefixDummy + 'corporateContributor', this._MARCCleanString);
-	if(!model.data[uri] || (!model.data[uri][prefixDC + 'creator'] && !model.data[uri][prefixDC + 'contributor'] && !model.data[uri][prefixDummy + 'corporateCreator'] && !model.data[uri][prefixDummy + 'corporateContributor'])) {
-		// some LOC entries have no listed author, but have the author in the person subject field as the first entry
-		var field = record.get_field_subfields('600');
-		if(field[0]) {
-			model.addStatement(uri, prefixDC + 'creator', this.cleanAuthor(field[0]['a']));	
-		}
-	}
-	// Extract title
-	model = this._MARCAssociateField(record, uri, model, '245', prefixDC + 'title', this._MARCCleanString, '', 'ab');
-	// Extract edition
-	model = this._MARCAssociateField(record, uri, model, '250', prefixDC + 'hasVersion', this._MARCCleanString);
-	// Extract place info
-	model = this._MARCAssociateField(record, uri, model, '260', prefixDummy + 'place', this._MARCCleanString, '', 'a');
-	// Extract publisher info
-	model = this._MARCAssociateField(record, uri, model, '260', prefixDC + 'publisher', this._MARCCleanString, '', 'b');
-	// Extract year
-	model = this._MARCAssociateField(record, uri, model, '260', prefixDC + 'year', this._MARCPullYear, '', 'c');
-	// Extract series
-	model = this._MARCAssociateField(record, uri, model, '440', prefixDummy + 'series', this._MARCCleanString);
-	// Extract call number
-	model = this._MARCAssociateField(record, uri, model, '050', prefixDC + 'identifier', this._MARCCleanString, 'LCC ', 'ab');
-	model = this._MARCAssociateField(record, uri, model, '060', prefixDC + 'identifier', this._MARCCleanString, 'NLM ', 'ab');
-	model = this._MARCAssociateField(record, uri, model, '070', prefixDC + 'identifier', this._MARCCleanString, 'NAL ', 'ab');
-	model = this._MARCAssociateField(record, uri, model, '080', prefixDC + 'identifier', this._MARCCleanString, 'UDC ', 'ab');
-	model = this._MARCAssociateField(record, uri, model, '082', prefixDC + 'identifier', this._MARCCleanString, 'DDC ', 'a');
-	model = this._MARCAssociateField(record, uri, model, '084', prefixDC + 'identifier', this._MARCCleanString, 'CN ', 'ab');
-	
-	// Set type
-	model = model.addStatement(uri, prefixRDF + 'type', prefixDummy + "book", true);
-}
-
 /*
  * END SCHOLAR FOR FIREFOX EXTENSIONS
  */
 
 // Ingester adapters for Scholar.Utilities.HTTP to handle proxies
 
-Scholar.Utilities.Ingester.prototype.loadDocument = function(url, browser, succeeded, failed) {
+Scholar.Utilities.Ingester.prototype.loadDocument = function(url, succeeded, failed) {
 	if(this.proxiedURL) {
 		url = Scholar.Ingester.ProxyMonitor.properToProxy(url);
 	}
 	Scholar.Utilities.HTTP.processDocuments(null, [ url ], succeeded, function() {}, failed);
 }
-Scholar.Utilities.Ingester.prototype.processDocuments = function(browser, firstDoc, urls, processor, done, exception) {
+Scholar.Utilities.Ingester.prototype.processDocuments = function(firstDoc, urls, processor, done, exception) {
 	for(i in urls) {
 		urls[i] = Scholar.Ingester.ProxyMonitor.properToProxy(urls[i]);
 	}
@@ -476,6 +372,7 @@ Scholar.Utilities.HTTP = new function() {
 	* in our code, is required for compatiblity with the Piggy Bank project
 	**/
 	function doGet(url, callback1, callback2) {
+		Scholar.debug("HTTP GET "+url);
 		if (this.browserIsOffline()){
 			return false;
 		}
@@ -508,6 +405,7 @@ Scholar.Utilities.HTTP = new function() {
 	* in our code, is required for compatiblity with the Piggy Bank project
 	**/
 	function doPost(url, body, callback1, callback2) {
+		Scholar.debug("HTTP POST "+body+" to "+url);
 		if (this.browserIsOffline()){
 			return false;
 		}
@@ -538,6 +436,7 @@ Scholar.Utilities.HTTP = new function() {
 	* in our code, is required for compatiblity with the Piggy Bank project
 	**/
 	function doOptions(url, body, callback1, callback2) {
+		Scholar.debug("HTTP OPTIONS "+url);
 		if (this.browserIsOffline()){
 			return false;
 		}
@@ -641,7 +540,6 @@ Scholar.Utilities.HTTP.processDocuments = function(firstDoc, urls, processor, do
 				   .hiddenDOMWindow;
 	var hiddenBrowser = Scholar.Ingester.createHiddenBrowser(myWindow);
 	var prevUrl, url;
-	Scholar.debug("processDocuments called");
 	
 	try {
 		if (urls.length == 0) {
@@ -690,14 +588,11 @@ Scholar.Utilities.HTTP.processDocuments = function(firstDoc, urls, processor, do
 			}
 		};
 		var init = function() {
-			Scholar.debug("init called");
 			hiddenBrowser.addEventListener("load", onLoad, true);
 			
 			if (firstDoc) {
-				Scholar.debug("processing");
 				processor(firstDoc, doLoad);
 			} else {
-				Scholar.debug("doing load");
 				doLoad();
 			}
 		}

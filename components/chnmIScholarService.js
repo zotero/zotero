@@ -45,10 +45,6 @@ Cc["@mozilla.org/moz/jssubscript-loader;1"]
 Cc["@mozilla.org/moz/jssubscript-loader;1"]
 	.getService(Ci.mozIJSSubScriptLoader)
 	.loadSubScript("chrome://scholar/content/xpcom/translate.js");
-
-Cc["@mozilla.org/moz/jssubscript-loader;1"]
-	.getService(Ci.mozIJSSubScriptLoader)
-	.loadSubScript("chrome://scholar/content/xpcom/marc.js");
 	
 Cc["@mozilla.org/moz/jssubscript-loader;1"]
 	.getService(Ci.mozIJSSubScriptLoader)
