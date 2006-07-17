@@ -15,14 +15,14 @@
     <script src="fileInterface.js"/>
 	
 	<commandset id="mainCommandSet">
-		<command id="cmd_scholar_newItem" oncommand="ScholarPane.newItem(1);"/>
+		<command id="cmd_scholar_newItem" oncommand="ScholarPane.newItem(2);"/>
 		<command id="cmd_scholar_newCollection" oncommand="ScholarPane.newCollection();"/>
 		<command id="cmd_scholar_search" oncommand="ScholarPane.search();"/>
 	</commandset>
 	
 	<vbox id="appcontent">
-		<splitter id="scholar-splitter" resizebefore="closest" resizeafter="closest" persist="collapsed"/>
-		<vbox id="scholar-pane" flex="1" persist="height collapsed">
+		<splitter id="scholar-splitter" resizebefore="closest" resizeafter="closest" hidden="true"/>
+		<hbox id="scholar-pane" hidden="true" flex="1">
 			<popupset>
 				<popup id="scholar-collectionmenu" onpopupshowing="ScholarPane.buildCollectionContextMenu();">
 					<menuitem label="&toolbar.newCollection.label;" command="cmd_scholar_newCollection"/>
@@ -36,129 +36,127 @@
 					<menuitem oncommand="ScholarPane.deleteSelectedItem();"/>
 				</popup>
 			</popupset>
-			<toolbar align="end">
-				<label value="Scholar" id="scholar-toolbar-name"/>
-				<label value="1.0 Alpha"/>
-				<label class="text-link" value="About..." onclick="window.openDialog('chrome://scholar/content/about.xul','about','chrome,modal');"/>
-				<spacer flex="1"/>
-				<toolbarbutton id="tb-fullscreen" tooltiptext="Toggle Fullscreen" oncommand="ScholarPane.fullScreen();"/>
-				<toolbarbutton class="tabs-closebutton" oncommand="ScholarPane.toggleDisplay()"/>
-			</toolbar>
-			<hbox flex="1">
-				<vbox id="collections-pane" persist="width">
-					<toolbar>
-						<toolbarbutton id="tb-collection-add" tooltiptext="&toolbar.newCollection.label;" command="cmd_scholar_newCollection"/>
-						<toolbarbutton id="tb-collection-rename" tooltiptext="&toolbar.renameCollection.label;" oncommand="ScholarPane.renameSelectedCollection();" disabled="true"/>
-						<spacer flex="1"/>
-						<toolbarbutton id="tb-collection-menu" type="menu">
-							<menupopup>
-								<menuitem label="Import..." oncommand="Scholar_File_Interface.importFile();"/>
-								<menuitem label="Export Library..." oncommand="Scholar_File_Interface.exportFile();"/>
-							</menupopup>
-						</toolbarbutton>
-					</toolbar>
-					<tree id="collections-tree" hidecolumnpicker="true" context="scholar-collectionmenu"
-						onselect="ScholarPane.onCollectionSelected();" seltype="single"
-						ondragdrop="nsDragAndDrop.drop(event,ScholarPane.getCollectionsView())"
-						ondraggesture="if (event.target.localName == 'treechildren') nsDragAndDrop.startDrag(event,ScholarPane.getCollectionsView());"
-						onkeypress="if(event.keyCode == event.DOM_VK_BACK_SPACE || event.keyCode == event.DOM_VK_DELETE){ ScholarPane.deleteSelectedCollection(); return false; }"
-						flex="1">
-						<treecols>
-							<treecol
-								id="name_column"
-								label="&collections.name_column;"
-								flex="1"
-								primary="true"/>
-						</treecols>
-						<treechildren/>
-					</tree>
-				</vbox>
-				<splitter id="scholar-tree-splitter" resizebefore="closest" resizeafter="closest"/>
-				<vbox id="items-pane" persist="width" flex="1">
-					<toolbar align="center">
-						<toolbarbutton id="tb-add" tooltiptext="&toolbar.newItem.label;" type="menu">
-							<menupopup/>
-						</toolbarbutton>
-						<toolbarbutton label="New Note" oncommand="ScholarPane.openNoteWindow();"/>
-						<spacer flex="1"/>
-						<label value="&toolbar.search.label;" control="tb-search"/>
-						<textbox id="tb-search" type="timed" timeout="250" command="cmd_scholar_search"/>
-					</toolbar>
-					<hbox id="scholar-search-options" hidden="true">
-						<hbox>
-							<toolbarbutton type="checkbox" label="Entire Item" checked="true" onclick="var b = this.parentNode.getElementsByAttribute('checked','true'); b[0].checked = false;" command="cmd_scholar_search"/>
-							<toolbarbutton type="checkbox" label="Info" onclick="var b = this.parentNode.getElementsByAttribute('checked','true'); b[0].checked = false;" command="cmd_scholar_search"/>
-							<toolbarbutton type="checkbox" label="Notes" onclick="var b = this.parentNode.getElementsByAttribute('checked','true'); b[0].checked = false;" command="cmd_scholar_search"/>
-							<toolbarbutton type="checkbox" label="Files" onclick="var b = this.parentNode.getElementsByAttribute('checked','true'); b[0].checked = false;" command="cmd_scholar_search"/>
-						</hbox>
-						<spacer flex="1"/>
-						<toolbarbutton label="Save"/>
-						<toolbarbutton label="&scholar.plus;"/>
+			<vbox id="collections-pane" persist="width" flex="1">
+				<toolbar>
+					<toolbarbutton id="tb-collection-add" tooltiptext="&toolbar.newCollection.label;" command="cmd_scholar_newCollection"/>
+					<toolbarbutton id="tb-collection-rename" tooltiptext="&toolbar.renameCollection.label;" oncommand="ScholarPane.renameSelectedCollection();" disabled="true"/>
+					<spacer flex="1"/>
+					<toolbarbutton id="tb-collection-menu" type="menu">
+						<menupopup>
+							<menuitem label="Import..." oncommand="Scholar_File_Interface.importFile();"/>
+							<menuitem label="Export Library..." oncommand="Scholar_File_Interface.exportFile();"/>
+						</menupopup>
+					</toolbarbutton>
+				</toolbar>
+				<tree id="collections-tree" hidecolumnpicker="true" context="scholar-collectionmenu"
+					onselect="ScholarPane.onCollectionSelected();" seltype="single"
+					ondragdrop="nsDragAndDrop.drop(event,ScholarPane.getCollectionsView())"
+					ondraggesture="if (event.target.localName == 'treechildren') nsDragAndDrop.startDrag(event,ScholarPane.getCollectionsView());"
+					onkeypress="if(event.keyCode == event.DOM_VK_BACK_SPACE || event.keyCode == event.DOM_VK_DELETE){ ScholarPane.deleteSelectedCollection(); return false; }"
+					flex="1">
+					<treecols>
+						<treecol
+							id="name_column"
+							label="&collections.name_column;"
+							flex="1"
+							primary="true"/>
+					</treecols>
+					<treechildren/>
+				</tree>
+			</vbox>
+			<splitter id="scholar-tree-splitter" resizebefore="closest" resizeafter="closest"/>
+			<vbox id="items-pane" persist="width" flex="1">
+				<toolbar align="center">
+					<toolbarbutton id="tb-add" tooltiptext="&toolbar.newItem.label;" type="menu">
+						<menupopup/>
+					</toolbarbutton>
+					<toolbarbutton label="New Note" oncommand="ScholarPane.openNoteWindow();"/>
+					<spacer flex="1"/>
+					<label value="&toolbar.search.label;" control="tb-search"/>
+					<textbox id="tb-search" type="timed" timeout="250" command="cmd_scholar_search"/>
+				</toolbar>
+				<hbox id="scholar-search-options" hidden="true">
+					<hbox>
+						<toolbarbutton type="checkbox" label="Entire Item" checked="true" onclick="var b = this.parentNode.getElementsByAttribute('checked','true'); b[0].checked = false;" command="cmd_scholar_search"/>
+						<toolbarbutton type="checkbox" label="Info" onclick="var b = this.parentNode.getElementsByAttribute('checked','true'); b[0].checked = false;" command="cmd_scholar_search"/>
+						<toolbarbutton type="checkbox" label="Notes" onclick="var b = this.parentNode.getElementsByAttribute('checked','true'); b[0].checked = false;" command="cmd_scholar_search"/>
+						<toolbarbutton type="checkbox" label="Files" onclick="var b = this.parentNode.getElementsByAttribute('checked','true'); b[0].checked = false;" command="cmd_scholar_search"/>
 					</hbox>
-					<tree 
-						id="items-tree" context="scholar-itemmenu"
-						enableColumnDrag="true" onkeypress="if(event.keyCode == event.DOM_VK_BACK_SPACE || event.keyCode == event.DOM_VK_DELETE){ ScholarPane.deleteSelectedItem(); return false; }"
-						onselect="ScholarPane.itemSelected();"
-						ondraggesture="if (event.target.localName == 'treechildren') nsDragAndDrop.startDrag(event,ScholarPane.getItemsView());"
-						ondragover="nsDragAndDrop.dragOver(event,ScholarPane.getItemsView())"
-						ondragdrop="nsDragAndDrop.drop(event,ScholarPane.getItemsView())"
-						ondblclick="document.getElementById('scholar-view-splitter').setAttribute('state','open');"
-						flex="1">
-						<treecols>
-							<treecol
-								id="title" primary="true"
-								label="&items.title_column;"
-								flex="4" persist="width ordinal hidden sortActive sortDirection"/>
-							<splitter class="tree-splitter"/>
-							<treecol
-								id="firstCreator"
-								label="&items.creator_column;"
-								flex="1" persist="width ordinal hidden sortActive sortDirection"/>
-							<splitter class="tree-splitter"/>
-							<treecol
-								id="numNotes"
-								label="&items.numNotes_column;"
-								persist="width ordinal hidden sortActive sortDirection"/>
-							<splitter class="tree-splitter"/>
-							<treecol
-								id="typeIcon" hidden="true"
-								label="&items.type_column;"
-								width="40" persist="width ordinal hidden sortActive sortDirection"/>
-							<splitter class="tree-splitter"/>
-							<treecol
-								id="source" hidden="true"
-								label="&items.source_column;"
-								flex="1" persist="width ordinal hidden sortActive sortDirection"/>
-							<splitter class="tree-splitter"/>
-							<treecol
-								id="rights" hidden="true"
-								label="&items.rights_column;"
-								flex="1" persist="width ordinal hidden sortActive sortDirection"/>
-							<splitter class="tree-splitter"/>
-							<treecol
-								id="dateAdded" hidden="true"
-								label="&items.dateAdded_column;"
-								flex="1" persist="width ordinal hidden sortActive sortDirection"/>
-							<splitter class="tree-splitter"/>
-							<treecol
-								id="dateModified" hidden="true"
-								label="&items.dateModified_column;"
-								flex="1" persist="width ordinal hidden sortActive sortDirection"/>
-						</treecols>				
-						<treechildren/>
-					</tree>
-				</vbox>
-				<splitter id="scholar-view-splitter" collapse="after" persist="state"><grippy/></splitter>
-				<deck id="item-pane" selectedIndex="0">
-					<box pack="center" align="center"><label id="scholar-view-selected-label"/></box>
+					<spacer flex="1"/>
+					<toolbarbutton label="Save"/>
+					<toolbarbutton label="&scholar.plus;"/>
+				</hbox>
+				<tree 
+					id="items-tree" context="scholar-itemmenu"
+					enableColumnDrag="true" onkeypress="if(event.keyCode == event.DOM_VK_BACK_SPACE || event.keyCode == event.DOM_VK_DELETE){ ScholarPane.deleteSelectedItem(); return false; }"
+					onselect="ScholarPane.itemSelected();"
+					ondraggesture="if (event.target.localName == 'treechildren') nsDragAndDrop.startDrag(event,ScholarPane.getItemsView());"
+					ondragover="nsDragAndDrop.dragOver(event,ScholarPane.getItemsView())"
+					ondragdrop="nsDragAndDrop.drop(event,ScholarPane.getItemsView())"
+					ondblclick="document.getElementById('scholar-view-splitter').setAttribute('state','open');"
+					flex="1">
+					<treecols>
+						<treecol
+							id="title" primary="true"
+							label="&items.title_column;"
+							flex="4" persist="width ordinal hidden sortActive sortDirection"/>
+						<splitter class="tree-splitter"/>
+						<treecol
+							id="firstCreator"
+							label="&items.creator_column;"
+							flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+						<splitter class="tree-splitter"/>
+						<treecol
+							id="numNotes"
+							label="&items.numNotes_column;"
+							persist="width ordinal hidden sortActive sortDirection"/>
+						<splitter class="tree-splitter"/>
+						<treecol
+							id="typeIcon" hidden="true"
+							label="&items.type_column;"
+							width="40" persist="width ordinal hidden sortActive sortDirection"/>
+						<splitter class="tree-splitter"/>
+						<treecol
+							id="source" hidden="true"
+							label="&items.source_column;"
+							flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+						<splitter class="tree-splitter"/>
+						<treecol
+							id="rights" hidden="true"
+							label="&items.rights_column;"
+							flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+						<splitter class="tree-splitter"/>
+						<treecol
+							id="dateAdded" hidden="true"
+							label="&items.dateAdded_column;"
+							flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+						<splitter class="tree-splitter"/>
+						<treecol
+							id="dateModified" hidden="true"
+							label="&items.dateModified_column;"
+							flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+					</treecols>				
+					<treechildren/>
+				</tree>
+			</vbox>
+			<splitter id="scholar-view-splitter" resizebefore="closest" resizeafter="closest"/>
+			<vbox>
+				<toolbar align="right">
+					<toolbarbutton id="tb-fullscreen" label="Toggle Fullscreen" oncommand="ScholarPane.fullScreen();"/>
+					<toolbarbutton class="tabs-closebutton" oncommand="ScholarPane.toggleDisplay()"/>
+				</toolbar>
+				<deck id="item-pane" selectedIndex="0" flex="1">
+					<box pack="center" align="center">
+						<label id="scholar-view-selected-label"/>
+					</box>
 					<tabbox id="scholar-view-item" flex="1"/>
 					<vbox id="scholar-view-note" flex="1">
 						<noteeditor id="scholar-note-editor" flex="1"/>
 						<button label="Edit in a separate window" oncommand="ScholarPane.openNoteWindow(this.getAttribute('noteID'));"/>
 					</vbox>
 				</deck>
-			</hbox>
-		</vbox>
+			</vbox>
+		</hbox>
 	</vbox>
 	
 	<statusbar id="status-bar">

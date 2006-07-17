@@ -34,10 +34,8 @@ var ScholarPane = new function()
 		//Initialize collections view
 		collectionsView = new Scholar.CollectionTreeView();
 		document.getElementById('collections-tree').view = collectionsView;
-
-		//select Library
-		collectionsView.selection.select(0);
 		
+		/*
 		if(window.opener)
 		{
 			var pane = window.opener.document.getElementById('scholar-pane');
@@ -48,6 +46,7 @@ var ScholarPane = new function()
 					toggleDisplay();
 			}
 		}
+		*/
 		
 		//Create the add menu with each item type
 		var addMenu = document.getElementById('tb-add').firstChild;
@@ -76,10 +75,10 @@ var ScholarPane = new function()
 	 */
 	function toggleDisplay()
 	{
-		var visible = document.getElementById('scholar-pane').getAttribute('collapsed') == 'true';
+		var visible = document.getElementById('scholar-pane').getAttribute('hidden') == 'true';
 		
-		document.getElementById('scholar-pane').setAttribute('collapsed',!visible);
-		document.getElementById('scholar-splitter').setAttribute('collapsed',!visible);
+		document.getElementById('scholar-pane').setAttribute('hidden',!visible);
+		document.getElementById('scholar-splitter').setAttribute('hidden',!visible);
 		
 		if(!visible)
 			document.getElementById('content').setAttribute('collapsed', false);
@@ -89,6 +88,7 @@ var ScholarPane = new function()
 	{
 		var visible = document.getElementById('content').getAttribute('collapsed') == 'true';
 		document.getElementById('content').setAttribute('collapsed', !visible);
+		document.getElementById('scholar-splitter').setAttribute('hidden', !visible);
 	}
 		
 	/*

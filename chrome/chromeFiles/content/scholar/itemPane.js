@@ -55,10 +55,7 @@ ScholarItemPane = new function()
 	 * Loads an item 
 	 */
 	function viewItem(thisItem)
-	{	
-		if(document.commandDispatcher.focusedElement)
-			document.commandDispatcher.focusedElement.blur();
-			
+	{
 		_itemBeingEdited = thisItem;
 		
 		reloadFields();
@@ -257,6 +254,7 @@ ScholarItemPane = new function()
 		t.setAttribute('value',value);
 		t.setAttribute('fieldname',fieldName);
 		t.setAttribute('flex','1');
+		t.className = 'fieldeditor';
 		
 		var box = elem.parentNode;
 		box.replaceChild(t,elem);

@@ -25,6 +25,8 @@ Scholar.CollectionTreeView.prototype.setTree = function(treebox)
 	if(this._treebox)
 		return;
 	this._treebox = treebox;
+	//select Library
+	this.selection.select(0);
 }
 
 /*

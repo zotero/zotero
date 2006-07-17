@@ -1,4 +1,4 @@
-vbox #scholar-pane
+#scholar-pane
 {
 	background: #f5f5f5;
 	min-height: 150px;
@@ -8,7 +8,6 @@ vbox #scholar-pane
 #collections-pane
 {
 	min-width: 150px;
-	max-width: 200px;
 	width: 150px;
 }
 
@@ -17,7 +16,7 @@ vbox #scholar-pane
 	margin-right: 5px;
 }
 
-#scholar-tree-splitter
+#scholar-pane splitter
 {
 	background: #f5f5f5;
 }
@@ -58,11 +57,6 @@ vbox #scholar-pane
 #scholar-toolbar-name
 {
 	font-size: larger;
-}
-
-#tb-fullscreen
-{
-	list-style-image: url('chrome://scholar/skin/toolbar-fullscreen.png');
 }
 
 #tb-collection-add

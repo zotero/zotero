@@ -5,7 +5,7 @@
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 	
 	<script src="itemPane.js"/>	
-	<tabbox id="scholar-view-item" height="1000">
+	<tabbox id="scholar-view-item" flex="1">
 		<tabs>
 			<tab label="&tabs.info.label;"/>
 			<tab label="&tabs.notes.label;"/>
