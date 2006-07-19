@@ -108,20 +108,10 @@
 {
 	margin-left: 5px;
 }
+
 #scholar-view-item tabpanels
 {
 	padding: 8px 0px 0px 0px;
-}
-
-#scholar-view-item .clicky
-{	
-	-moz-border-radius: 6px;
-}
-
-#scholar-view-item .clicky:hover
-{
-	color: white;
-	background: #666666;
 }
 
 #scholar-splitter

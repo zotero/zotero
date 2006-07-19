@@ -13,6 +13,16 @@ tagsbox
 	-moz-binding: url('chrome://scholar/content/customControls.xml#tags-box');
 }
 
+.clicky
+{	
+	-moz-border-radius: 6px;
+}
+
+.clicky:hover
+{
+	color: white;
+	background: #666666;
+}
 
 #scholar-progress-box
 {

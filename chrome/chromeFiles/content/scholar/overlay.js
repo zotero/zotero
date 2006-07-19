@@ -35,18 +35,29 @@ var ScholarPane = new function()
 		collectionsView = new Scholar.CollectionTreeView();
 		document.getElementById('collections-tree').view = collectionsView;
 		
-		/*
-		if(window.opener)
+		if(Scholar.Prefs.get("scholarPaneOnTop"))
 		{
-			var pane = window.opener.document.getElementById('scholar-pane');
-			if(pane)
-			{
-				var b = pane.getAttribute('collapsed');
-				if(b != document.getElementById('scholar-pane').getAttribute('collapsed'))
-					toggleDisplay();
-			}
+			var oldPane = document.getElementById('scholar-pane');
+			var oldSplitter = document.getElementById('scholar-splitter');
+			var appContent = document.getElementById('appcontent');
+			
+			var newPane = document.createElement('hbox');
+			newPane.setAttribute('id','scholar-pane');
+			newPane.setAttribute('collapsed',true);
+			newPane.setAttribute('flex','1');
+			while(oldPane.hasChildNodes())
+				newPane.appendChild(oldPane.firstChild);
+			appContent.removeChild(oldPane);
+			appContent.insertBefore(newPane, document.getElementById('content'));
+			
+			var newSplitter = document.createElement('splitter');
+			newSplitter.setAttribute('id','scholar-splitter');
+			newSplitter.setAttribute('collapsed',true);
+			newSplitter.setAttribute('resizebefore','closest');
+			newSplitter.setAttribute('resizeafter','closest');
+			appContent.removeChild(oldSplitter);
+			appContent.insertBefore(newSplitter, document.getElementById('content'));
 		}
-		*/
 		
 		//Create the add menu with each item type
 		var addMenu = document.getElementById('tb-add').firstChild;
@@ -75,10 +86,10 @@ var ScholarPane = new function()
 	 */
 	function toggleDisplay()
 	{
-		var visible = document.getElementById('scholar-pane').getAttribute('hidden') == 'true';
+		var visible = document.getElementById('scholar-pane').getAttribute('collapsed') == 'true';
 		
-		document.getElementById('scholar-pane').setAttribute('hidden',!visible);
-		document.getElementById('scholar-splitter').setAttribute('hidden',!visible);
+		document.getElementById('scholar-pane').setAttribute('collapsed',!visible);
+		document.getElementById('scholar-splitter').setAttribute('collapsed',!visible);
 		
 		if(!visible)
 			document.getElementById('content').setAttribute('collapsed', false);
@@ -88,7 +99,7 @@ var ScholarPane = new function()
 	{
 		var visible = document.getElementById('content').getAttribute('collapsed') == 'true';
 		document.getElementById('content').setAttribute('collapsed', !visible);
-		document.getElementById('scholar-splitter').setAttribute('hidden', !visible);
+		document.getElementById('scholar-splitter').setAttribute('collapsed', !visible);
 	}
 		
 	/*

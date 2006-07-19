@@ -21,8 +21,9 @@
 	</commandset>
 	
 	<vbox id="appcontent">
-		<splitter id="scholar-splitter" resizebefore="closest" resizeafter="closest" hidden="true"/>
-		<hbox id="scholar-pane" hidden="true" flex="1">
+		<!-- Changes to attributes of scholar-splitter and scholar-pane must be mirrored on overlay.js's onLoad() function -->
+		<splitter id="scholar-splitter" resizebefore="closest" resizeafter="closest" collapsed="true"/>
+		<hbox id="scholar-pane" collapsed="true" flex="1">
 			<popupset>
 				<popup id="scholar-collectionmenu" onpopupshowing="ScholarPane.buildCollectionContextMenu();">
 					<menuitem label="&toolbar.newCollection.label;" command="cmd_scholar_newCollection"/>

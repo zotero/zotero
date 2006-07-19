@@ -1,4 +1,5 @@
 var autoUpdateBox;
+var positionMenu;
 
 /*
 	To add a new preference:
@@ -17,10 +18,14 @@ function init()
 {	
 	autoUpdateBox = document.getElementById('autoUpdateBox');
 	autoUpdateBox.checked = Scholar.Prefs.get('automaticScraperUpdates');
+	
+	positionMenu = document.getElementById('positionMenu');
+	positionMenu.selectedIndex = Scholar.Prefs.get('scholarPaneOnTop') ? 0 : 1;
 
 }
 
 function accept()
 {
 	Scholar.Prefs.set('automaticScraperUpdates', autoUpdateBox.checked)
+	Scholar.Prefs.set('scholarPaneOnTop', positionMenu.selectedIndex == 0)
 }

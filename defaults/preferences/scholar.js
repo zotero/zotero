@@ -2,3 +2,4 @@
 
 // Display internal shortcut
 pref("extensions.scholar.automaticScraperUpdates",true);
+pref("extensions.scholar.scholarPaneOnTop",false);

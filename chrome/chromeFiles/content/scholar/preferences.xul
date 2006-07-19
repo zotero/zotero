@@ -14,5 +14,14 @@
 
 <checkbox id="autoUpdateBox" label="&scholar.preferences.autoUpdate.label;"/>
 
+<hbox>
+	<label value="Display Scholar:" control="positionMenu"/>
+	<menulist id="positionMenu">
+		<menupopup>
+			<menuitem label="Above browser content"/>
+			<menuitem label="Below browser content"/>
+		</menupopup>
+	</menulist>
+</hbox>
 
 </dialog>
