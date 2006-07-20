@@ -4,7 +4,7 @@ ScholarItemPane = new function()
 	var _creatorTypeMenu;
 	var _beforeRow;
 	var _notesList;
-	var _tagsList;
+	var _linksBox;
 	var _notesLabel;
 	
 	var _creatorCount;
@@ -30,7 +30,7 @@ ScholarItemPane = new function()
 		_creatorTypeMenu = document.getElementById('creatorTypeMenu');
 		_notesList = document.getElementById('editpane-dynamic-notes');
 		_notesLabel = document.getElementById('editpane-notes-label');
-		_tagsList = document.getElementById('editpane-dynamic-tags');
+		_linksBox = document.getElementById('editpane-links');
 		
 		var creatorTypes = Scholar.CreatorTypes.getTypes();
 		for(var i = 0; i < creatorTypes.length; i++)
@@ -142,7 +142,7 @@ ScholarItemPane = new function()
 		_updateNoteCount();
 		
 		//TAGS:
-		_tagsList.item = _itemBeingEdited;
+		_linksBox.item = _itemBeingEdited;
 	}
 	
 	function changeTypeTo(id)
@@ -156,7 +156,7 @@ ScholarItemPane = new function()
 	}
 	
 	function addDynamicRow(label, value, beforeElement)
-	{		
+	{
 		var row = document.createElement("row");
 		row.appendChild(label);
 		row.appendChild(value);

@@ -13,9 +13,33 @@ tagsbox
 	-moz-binding: url('chrome://scholar/content/customControls.xml#tags-box');
 }
 
+seealsobox
+{
+	-moz-binding: url('chrome://scholar/content/customControls.xml#seealso-box');
+}
+
+linksbox
+{
+	-moz-binding: url('chrome://scholar/content/customControls.xml#links-box');
+}
+
 .clicky
 {	
 	-moz-border-radius: 6px;
+}
+
+.clicky[value="-"]
+{
+	margin: 0px;
+	padding-left: 4px;
+	padding-right: 4px;
+}
+
+.clicky[value="+"]
+{
+	margin: 0px;
+	padding-left: 4px;
+	padding-right: 4px;
 }
 
 .clicky:hover

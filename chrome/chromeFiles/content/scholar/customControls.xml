@@ -49,7 +49,7 @@
 					<![CDATA[
 						this.itemRef = val;
 						
-						var citeLabel = document.getAnonymousNodes(this)[0].childNodes[0];
+						var citeLabel = this.id('citeLabel');
 						if(citeLabel.firstChild)
 							citeLabel.removeChild(citeLabel.firstChild);
 						
@@ -67,17 +67,16 @@
 						if(this.note.getNoteSource())
 							this.item = Scholar.Items.get(this.note.getNoteSource());
 						
-						document.getAnonymousNodes(this)[0].childNodes[1].setAttribute('value',this.note.getNote());
-						document.getAnonymousNodes(this)[0].lastChild.firstChild.item = this.note;
-						this.updateTagsSummary();
+						this.id('noteField').setAttribute('value',this.note.getNote());
+						this.id('links').item = this.note;
 					]]>
 				</setter>
 			</property>
-			<property name="value" onget="return document.getAnonymousNodes(this)[0].childNodes[1].value;" onset="document.getAnonymousNodes(this)[0].childNodes[1].value = val;"/>
+			<property name="value" onget="return this.id('noteField').value;" onset="this.id('noteField').value = val;"/>
 			<method name="save">
 				<body>
 					<![CDATA[
-						var noteField = document.getAnonymousNodes(this)[0].childNodes[1];
+						var noteField = this.id('noteField');
 						if(this.note)	//Update note
 						{
 							this.note.updateNote(noteField.value);
@@ -96,23 +95,15 @@
 			<method name="focus">
 				<body>
 					<![CDATA[
-						document.getAnonymousNodes(this)[0].childNodes[1].focus();
+						this.id('noteField').focus();
 					]]>
 				</body>
 			</method>
-			<method name="updateTagsSummary">
+			<method name="id">
+				<parameter name="id"/>
 				<body>
 					<![CDATA[
-						var popup = document.getAnonymousNodes(this)[0].lastChild;
-						var label = popup.previousSibling;
-						var v = popup.firstChild.summary;
-						
-						if(!v || v == "")
-							v = "[click here]";
-							
-						while(label.hasChildNodes())
-							label.removeChild(label.firstChild);
-						label.appendChild(document.createTextNode("Tags: " + v));
+						return document.getAnonymousNodes(this)[0].getElementsByAttribute('id',id)[0];
 					]]>
 				</body>
 			</method>
@@ -121,13 +112,96 @@
 		</handlers>
 		<content>
 			<xul:vbox xbl:inherits="flex">
-				<xul:label/>
-				<xul:textbox multiline="true" type="timed" timeout="1000" flex="1" oncommand="this.parentNode.parentNode.save();"/>
-				<xul:label value="See also: (coming soon)"/>
-				<xul:label onclick="this.nextSibling.showPopup(this,-1,-1,'popup',0,0);"/>
-				<xul:popup width="300" onpopuphidden="this.parentNode.parentNode.updateTagsSummary();">
-					<xul:tagsbox flex="1"/>
-				</xul:popup>
+				<xul:label id="citeLabel"/>
+				<xul:textbox id="noteField" multiline="true" type="timed" timeout="1000" flex="1" oncommand="this.parentNode.parentNode.save();"/>
+				<xul:hbox>
+					<xul:linksbox id="links" flex="1"/>
+				</xul:hbox>
+			</xul:vbox>
+		</content>
+	</binding>
+	<binding id="links-box">
+		<implementation>
+			<field name="itemRef"/>
+			<property name="item" onget="return this.itemRef;">
+				<setter>
+					<![CDATA[
+						this.itemRef = val;
+						
+						this.id('tags').item = this.item;
+						this.updateTagsSummary();
+						this.id('seeAlso').item = this.item;
+						this.updateSeeAlsoSummary();
+					]]>
+				</setter>
+			</property>
+			<method name="tagsClick">
+				<body>
+					<![CDATA[
+						var tagsList = this.item.getTags();
+						if(tagsList && tagsList.length > 0)
+							this.id('tagsPopup').showPopup(this.id('tagsLabel'),-1,-1,-1,'popup',0,0);
+						else
+							this.id('tags').add();
+					]]>
+				</body>
+			</method>
+			<method name="updateTagsSummary">
+				<body>
+					<![CDATA[
+						var v = this.id('tags').summary;
+						
+						if(!v || v == "")
+							v = "[click here]";
+							
+						this.id('tagsLabel').value = "Tags: " + v;
+					]]>
+				</body>
+			</method>
+			<method name="seeAlsoClick">
+				<body>
+					<![CDATA[
+						var seealsoList = this.item.getSeeAlso();
+						if(seealsoList && seealsoList.length > 0)
+							this.id('seeAlsoPopup').showPopup(this.id('seeAlsoLabel'),-1,-1,'popup',0,0);
+						else
+							this.id('seeAlso').add();
+					]]>
+				</body>
+			</method>
+			<method name="updateSeeAlsoSummary">
+				<body>
+					<![CDATA[
+						var v = this.id('seeAlso').summary;
+						
+						if(!v || v == "")
+							v = "[click here]";
+						
+						this.id('seeAlsoLabel').value = "Related: " + v;
+					]]>
+				</body>
+			</method>
+			<method name="id">
+				<parameter name="id"/>
+				<body>
+					<![CDATA[
+						return document.getAnonymousNodes(this)[0].getElementsByAttribute('id',id)[0];
+					]]>
+				</body>
+			</method>
+		</implementation>
+		<content>
+			<xul:vbox xbl:inherits="flex">
+				<xul:label id="seeAlsoLabel" class="clicky" crop="end" onclick="this.parentNode.parentNode.seeAlsoClick();"/>
+				<xul:label id="tagsLabel" class="clicky" crop="end" onclick="this.parentNode.parentNode.tagsClick();"/>
+				<xul:popupset>
+					<xul:popup id="seeAlsoPopup" width="300" onpopupshowing="this.firstChild.reload();" onpopuphiding="this.parentNode.parentNode.parentNode.updateSeeAlsoSummary();">
+						<xul:seealsobox id="seeAlso" flex="1"/>
+					</xul:popup>
+					<xul:popup id="tagsPopup" width="300" onpopupshowing="this.firstChild.reload();" onpopuphiding="this.parentNode.parentNode.parentNode.updateTagsSummary();">
+						<xul:tagsbox id="tags" flex="1"/>
+					</xul:popup>
+				</xul:popupset>
 			</xul:vbox>
 		</content>
 	</binding>
@@ -138,8 +212,6 @@
 				<setter>
 					<![CDATA[
 						this.itemRef = val;
-						
-						this.reloadTags();
 					]]>
 				</setter>
 			</property>
@@ -151,21 +223,24 @@
 						if(this.item)
 						{
 							var tags = this.item.getTags();
-							for(var i = 0; i < tags.length; i++)
+							if(tags)
 							{
-								r = r + tags[i] + ", ";
+								for(var i = 0; i < tags.length; i++)
+								{
+									r = r + tags[i] + ", ";
+								}
+								r = r.substr(0,r.length-2);
 							}
-							r = r.substr(0,r.length-2);
 						}
 					
 						return r;
 					]]>
 				</getter>
 			</property>
-			<method name="reloadTags">
+			<method name="reload">
 				<body>
 					<![CDATA[
-						var rows = document.getAnonymousNodes(this)[0].lastChild.lastChild;
+						var rows = this.id('tagRows');
 						while(rows.hasChildNodes())
 							rows.removeChild(rows.firstChild);
 						
@@ -173,66 +248,259 @@
 						{
 							var tags = this.item.getTags();
 							
-							for(var i = 0; i < tags.length; i++)
+							if(tags)
 							{
-								var icon= document.createElement("image");
-								icon.setAttribute('src','chrome://scholar/skin/tag.png');
+								for(var i = 0; i < tags.length; i++)
+								{
+									var id = Scholar.Tags.getID(tags[i]);
+									
+									var icon= document.createElement("image");
+									icon.setAttribute('src','chrome://scholar/skin/tag.png');
 							
-								var label = document.createElement("label");
-								label.setAttribute('value', tags[i]);
-								label.setAttribute('crop','end');
+									var label = document.createElement("label");
+									label.setAttribute('value', tags[i]);
+									label.setAttribute('crop','end');
 								
-								var remove = document.createElement("label");
-								remove.setAttribute('value','-');
-								remove.setAttribute('onclick',"this.parentNode.parentNode.parentNode.parentNode.parentNode.removeTag('"+Scholar.Tags.getID(tags[i])+"');");
-								remove.setAttribute('class','clicky');
+									var remove = document.createElement("label");
+									remove.setAttribute('value','-');
+									remove.setAttribute('onclick',"this.parentNode.parentNode.parentNode.parentNode.parentNode.remove('"+id+"');");
+									remove.setAttribute('class','clicky');
 							
-								var row = document.createElement("row");
-								row.appendChild(icon);
-								row.appendChild(label);
-								row.appendChild(remove);
+									var row = document.createElement("row");
+									row.appendChild(icon);
+									row.appendChild(label);
+									row.appendChild(remove);
+									row.setAttribute('id','tag-'+id);
 							
-								rows.appendChild(row);		
-							}				
+									rows.appendChild(row);		
+								}
+								this.updateCount(tags.length);
+							}
+							else
+							{
+								this.updateCount();
+							}
 						}
 					]]>
 				</body>
 			</method>
-			<method name="addTag">
+			<method name="add">
 				<body>
 					<![CDATA[
-						t = prompt('Add Tag:');
+						var t = prompt('Add Tag:');
 						if(t && this.item)
 						{
 							this.item.addTag(t);
-							this.reloadTags();
+							this.parentNode.parentNode.parentNode.parentNode.updateTagsSummary();
 						}
 					]]>
 				</body>
 			</method>
-			<method name="removeTag">
+			<method name="remove">
 				<parameter name="id"/>
 				<body>
 					<![CDATA[
 						if(id)
 						{
 							this.item.removeTag(id);
-							this.reloadTags();
+							var rows = this.id('tagRows');
+							rows.removeChild(this.id('tag-'+id));
+							this.updateCount();
 						}
+					]]>
+				</body>
+			</method>
+			<method name="updateCount">
+				<parameter name="count"/>
+				<body>
+					<![CDATA[
+						if(count == null)
+						{
+							tags = this.item.getTags();
+							if(tags)
+								count = tags.length;
+							else
+								count = 0;
+						}
+						
+						this.id('tagsNum').value = count + ' tags:';
+					]]>
+				</body>
+			</method>
+			<method name="id">
+				<parameter name="id"/>
+				<body>
+					<![CDATA[
+						return document.getAnonymousNodes(this)[0].getElementsByAttribute('id',id)[0];
 					]]>
 				</body>
 			</method>
 		</implementation>
 		<content>
 			<xul:vbox xbl:inherits="flex">
-				<xul:button label="Add Tag" oncommand="this.parentNode.parentNode.addTag();"/>
+				<xul:hbox align="center">
+					<xul:label id="tagsNum"/>
+					<xul:button label="Add" oncommand="this.parentNode.parentNode.parentNode.add();"/>
+				</xul:hbox>
 				<xul:grid>
 					<xul:columns>
 						<xul:column/>
 						<xul:column flex="1"/>
 						<xul:column/>
 					</xul:columns>
-					<xul:rows/>
+					<xul:rows id="tagRows"/>
+				</xul:grid>
+			</xul:vbox>
+		</content>
+	</binding>
+	<binding id="seealso-box">
+		<implementation>
+			<field name="itemRef"/>
+			<property name="item" onget="return this.itemRef;">
+				<setter>
+					<![CDATA[
+						this.itemRef = val;
+					]]>
+				</setter>
+			</property>
+			<property name="summary">
+				<getter>
+					<![CDATA[
+						var r = "";
+					
+						if(this.item)
+						{
+							var seealso = this.item.getSeeAlso();
+							if(seealso)
+							{
+								seealso = Scholar.Items.get(seealso);
+								for(var i = 0; i < seealso.length; i++)
+								{
+									r = r + seealso[i].getField('title') + ", ";
+								}
+								r = r.substr(0,r.length-2);
+							}
+						}
+					
+						return r;
+					]]>
+				</getter>
+			</property>
+			<method name="reload">
+				<body>
+					<![CDATA[
+						var rows = this.id('seeAlsoRows');
+						while(rows.hasChildNodes())
+							rows.removeChild(rows.firstChild);
+						
+						if(this.item)
+						{
+							var seealso = this.item.getSeeAlso();
+							
+							if(seealso)
+							{
+								seealso = Scholar.Items.get(seealso);
+								for(var i = 0; i < seealso.length; i++)
+								{
+									var icon= document.createElement("image");
+									icon.setAttribute('src','chrome://scholar/skin/treeitem-'+Scholar.ItemTypes.getName(seealso[i].getType())+'.png');
+							
+									var label = document.createElement("label");
+									label.setAttribute('value', seealso[i].getField('title'));
+									label.setAttribute('crop','end');
+								
+									var remove = document.createElement("label");
+									remove.setAttribute('value','-');
+									remove.setAttribute('onclick',"this.parentNode.parentNode.parentNode.parentNode.parentNode.remove('"+seealso[i].getID()+"');");
+									remove.setAttribute('class','clicky');
+							
+									var row = document.createElement("row");
+									row.appendChild(icon);
+									row.appendChild(label);
+									row.appendChild(remove);
+									row.setAttribute('id','seealso-'+seealso[i].getID());
+									rows.appendChild(row);		
+								}
+								this.updateCount(seealso.length);
+							}
+							else
+							{
+								this.updateCount();
+							}
+						}
+					]]>
+				</body>
+			</method>
+			<method name="add">
+				<body>
+					<![CDATA[
+						var io = {dataIn: null, dataOut: null};
+						window.openDialog('chrome://scholar/content/selectItemsDialog.xul','','chrome,modal',io);
+
+						if(io.dataOut && this.item)
+						{
+							for(var i = 0; i < io.dataOut.length; i++)
+							{
+								this.item.addSeeAlso(io.dataOut[i]);
+							}
+							this.parentNode.parentNode.parentNode.parentNode.updateSeeAlsoSummary();
+						}
+					]]>
+				</body>
+			</method>
+			<method name="remove">
+				<parameter name="id"/>
+				<body>
+					<![CDATA[
+						if(id)
+						{
+							this.item.removeSeeAlso(id);
+							var rows = this.id('seeAlsoRows');
+							rows.removeChild(this.id('seealso-'+id));
+							this.updateCount();
+						}
+					]]>
+				</body>
+			</method>
+			<method name="updateCount">
+				<parameter name="count"/>
+				<body>
+					<![CDATA[
+						if(count == null)
+						{
+							seealso = this.item.getSeeAlso();
+							if(seealso)
+								count = seealso.length;
+							else
+								count = 0;
+						}
+						
+						this.id('seeAlsoNum').value = count + ' related:';
+					]]>
+				</body>
+			</method>
+			<method name="id">
+				<parameter name="id"/>
+				<body>
+					<![CDATA[
+						return document.getAnonymousNodes(this)[0].getElementsByAttribute('id',id)[0];
+					]]>
+				</body>
+			</method>
+		</implementation>
+		<content>
+			<xul:vbox xbl:inherits="flex">
+				<xul:hbox>
+					<xul:label id="seeAlsoNum"/>
+					<xul:button label="Add" oncommand="this.parentNode.parentNode.parentNode.add();"/>
+				</xul:hbox>
+				<xul:grid>
+					<xul:columns>
+						<xul:column/>
+						<xul:column flex="1"/>
+						<xul:column/>
+					</xul:columns>
+					<xul:rows id="seeAlsoRows"/>
 				</xul:grid>
 			</xul:vbox>
 		</content>

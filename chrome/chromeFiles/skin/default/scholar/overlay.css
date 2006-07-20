@@ -97,11 +97,13 @@
 #scholar-view-item vbox
 {
 	overflow: auto;
+	background: #f5f5f5;
 }
 
-#scholar-notes-menu
+#editpane-dynamic-fields row > label:first-child
 {
-	-moz-user-focus: ignore;
+	text-align: right;
+	font-weight: bold;
 }
 
 #scholar-view-item

@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://scholar/skin/scholar.css" type="text/css"?>
+<?xml-stylesheet href="chrome://scholar/skin/overlay.css" type="text/css"?>
+<!DOCTYPE window SYSTEM "chrome://scholar/locale/scholar.dtd">
+
+<dialog
+	id="scholar-select-items-dialog"
+	title="Select"
+	orient="vertical"
+	width="600" height="450"
+	persist="width height screenX screenY"
+	buttons="cancel,accept"
+	ondialogaccept="doAccept();"
+	onload="doLoad();"
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	style="padding:2em">
+	
+	<script src="include.js"/>
+	<script src="collectionTreeView.js"/>
+	<script src="itemTreeView.js"/>
+	<script src="selectItemsDialog.js"/>
+	
+	<hbox flex="1">
+		<tree id="collections-tree"
+			style="width: 200px;" hidecolumnpicker="true" seltype="single"
+			onselect="onCollectionSelected();">
+			<treecols>
+				<treecol
+					id="name_column"
+					label="&collections.name_column;"
+					flex="1"
+					primary="true"/>
+			</treecols>
+			<treechildren/>
+		</tree>
+	
+		<tree id="items-tree"
+			flex="1" hidecolumnpicker="true" seltype="multiple"
+			onselect="onItemSelected();">
+			<treecols>
+				<treecol
+					id="title" primary="true"
+					label="&items.title_column;"
+					flex="4" persist="width ordinal hidden sortActive sortDirection"/>
+				<splitter class="tree-splitter"/>
+				<treecol
+					id="firstCreator"
+					label="&items.creator_column;"
+					flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+				<splitter class="tree-splitter"/>
+				<treecol
+					id="dateAdded" hidden="true"
+					label="&items.dateAdded_column;"
+					flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+				<splitter class="tree-splitter"/>
+				<treecol
+					id="dateModified" hidden="true"
+					label="&items.dateModified_column;"
+					flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+			</treecols>				
+			<treechildren/>
+		</tree>
+	</hbox>
+</dialog>

@@ -9,7 +9,6 @@
 		<tabs>
 			<tab label="&tabs.info.label;"/>
 			<tab label="&tabs.notes.label;"/>
-			<tab label="&tabs.tags.label;"/>
 			<tab label="&tabs.files.label;"/>
 		</tabs>
 		<tabpanels flex="1">
@@ -41,12 +40,10 @@
 					<rows id="editpane-dynamic-notes" flex="1"/>
 				</grid>
 			</vbox>
-			<vbox flex="1">
-				<tagsbox id="editpane-dynamic-tags" flex="1"/>
-			</vbox>
 			<vbox align="center" pack="center">
 				<label value="Coming soon"/>
 			</vbox>
 		</tabpanels>
+		<linksbox id="editpane-links"/>
 	</tabbox>
 </overlay>
