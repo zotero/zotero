@@ -44,6 +44,8 @@
 				<label value="Coming soon"/>
 			</vbox>
 		</tabpanels>
-		<linksbox id="editpane-links"/>
+		<hbox>
+			<linksbox id="editpane-links" flex="1"/>
+		</hbox>
 	</tabbox>
 </overlay>

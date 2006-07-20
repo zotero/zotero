@@ -13,6 +13,7 @@
 	buttons="cancel,accept"
 	ondialogaccept="doAccept();"
 	onload="doLoad();"
+	onunload="doUnload();"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	style="padding:2em">
 	

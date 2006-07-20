@@ -10,6 +10,13 @@ function doLoad()
 	document.getElementById('collections-tree').view = collectionsView;
 }
 
+function doUnload()
+{
+	collectionsView.unregister();
+	if(itemsView)
+		itemsView.unregister();
+}
+
 function onCollectionSelected()
 {
 	if(itemsView)

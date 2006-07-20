@@ -490,7 +490,7 @@
 		</implementation>
 		<content>
 			<xul:vbox xbl:inherits="flex">
-				<xul:hbox>
+				<xul:hbox align="center">
 					<xul:label id="seeAlsoNum"/>
 					<xul:button label="Add" oncommand="this.parentNode.parentNode.parentNode.add();"/>
 				</xul:hbox>
