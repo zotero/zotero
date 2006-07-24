@@ -22,6 +22,8 @@ var ScholarPane = new function()
 	this.search = search;
 	this.getCollectionsView = getCollectionsView;
 	this.getItemsView = getItemsView;
+	this.getSelectedCollection = getSelectedCollection;
+	this.getSelectedItem = getSelectedItem;
 	this.buildCollectionContextMenu = buildCollectionContextMenu;
 	this.buildItemContextMenu = buildItemContextMenu;
 	this.openNoteWindow = openNoteWindow;
@@ -134,7 +136,7 @@ var ScholarPane = new function()
 		
 		document.getElementById('tb-search').value = "";
 		document.getElementById('scholar-search-options').hidden = true;
-			
+		
 		if(collectionsView.selection.count == 1 && collectionsView.selection.currentIndex != -1)
 		{
 			var collection = collectionsView._getItemAtRow(collectionsView.selection.currentIndex);
@@ -202,7 +204,7 @@ var ScholarPane = new function()
 	{
 		if(collectionsView.selection.count > 0)
 		{
-			collection = collectionsView._getItemAtRow(collectionsView.selection.currentIndex);
+			var collection = collectionsView._getItemAtRow(collectionsView.selection.currentIndex);
 			
 			var newName = prompt(Scholar.getString('pane.collections.rename'),collection.getName());
 			if(newName)
@@ -233,6 +235,26 @@ var ScholarPane = new function()
 	function getItemsView()
 	{
 		return itemsView;
+	}
+	
+	function getSelectedCollection()
+	{
+		if(collectionsView.selection.count > 0 && collectionsView.selection.currentIndex != -1)
+		{
+			collection = collectionsView._getItemAtRow(collectionsView.selection.currentIndex);
+			if(collection && collection.isCollection())
+				return collection.ref;
+		}
+	}
+	
+	function getSelectedItem()
+	{
+		if(itemsView && itemsView.selection.count == 1 && itemsView.selection.currentIndex != -1)
+		{
+			var item = itemsView._getItemAtRow(itemsView.selection.currentIndex);
+			if(item)
+				return item.ref;
+		}
 	}
 	
 	function buildCollectionContextMenu()
