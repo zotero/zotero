@@ -195,10 +195,10 @@
 				<xul:label id="seeAlsoLabel" class="clicky" crop="end" onclick="this.parentNode.parentNode.seeAlsoClick();"/>
 				<xul:label id="tagsLabel" class="clicky" crop="end" onclick="this.parentNode.parentNode.tagsClick();"/>
 				<xul:popupset>
-					<xul:popup id="seeAlsoPopup" width="300" onpopupshowing="this.firstChild.reload();" onpopuphiding="this.parentNode.parentNode.parentNode.updateSeeAlsoSummary();">
+					<xul:popup id="seeAlsoPopup" width="300" onpopupshowing="this.firstChild.reload();">
 						<xul:seealsobox id="seeAlso" flex="1"/>
 					</xul:popup>
-					<xul:popup id="tagsPopup" width="300" onpopupshowing="this.firstChild.reload();" onpopuphiding="this.parentNode.parentNode.parentNode.updateTagsSummary();">
+					<xul:popup id="tagsPopup" width="300" onpopupshowing="this.firstChild.reload();">
 						<xul:tagsbox id="tags" flex="1"/>
 					</xul:popup>
 				</xul:popupset>
@@ -212,6 +212,7 @@
 				<setter>
 					<![CDATA[
 						this.itemRef = val;
+						this.reload();
 					]]>
 				</setter>
 			</property>
@@ -291,7 +292,6 @@
 						if(t && this.item)
 						{
 							this.item.addTag(t);
-							this.parentNode.parentNode.parentNode.parentNode.updateTagsSummary();
 						}
 					]]>
 				</body>
@@ -360,6 +360,7 @@
 				<setter>
 					<![CDATA[
 						this.itemRef = val;
+						this.reload();
 					]]>
 				</setter>
 			</property>
@@ -443,7 +444,6 @@
 							{
 								this.item.addSeeAlso(io.dataOut[i]);
 							}
-							this.parentNode.parentNode.parentNode.parentNode.updateSeeAlsoSummary();
 						}
 					]]>
 				</body>

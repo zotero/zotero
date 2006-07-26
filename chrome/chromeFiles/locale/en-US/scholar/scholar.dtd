@@ -2,8 +2,9 @@
 
 <!ENTITY tabs.info.label				"Info">
 <!ENTITY tabs.notes.label				"Notes">
-<!ENTITY tabs.tags.label				"Tags">
 <!ENTITY tabs.files.label				"Files">
+<!ENTITY tabs.tags.label				"Tags">
+<!ENTITY tabs.related.label				"Related">
 
 <!ENTITY scholar.minus					"-">
 <!ENTITY scholar.plus					"+">

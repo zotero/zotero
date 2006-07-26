@@ -9,10 +9,13 @@ ScholarItemPane = new function()
 	
 	var _creatorCount;
 	
+	var _loaded;
+	
 	var _itemBeingEdited;
 	
 	this.onLoad = onLoad;
 	this.viewItem = viewItem;
+	this.loadPane = loadPane;
 	this.changeTypeTo = changeTypeTo;
 	this.addCreatorRow = addCreatorRow;
 	this.removeCreator = removeCreator;
@@ -25,12 +28,14 @@ ScholarItemPane = new function()
 	
 	function onLoad()
 	{
+		_tabs = document.getElementById('scholar-view-tabs');
 		_dynamicFields = document.getElementById('editpane-dynamic-fields');
 		_itemTypeMenu = document.getElementById('editpane-type-menu');
 		_creatorTypeMenu = document.getElementById('creatorTypeMenu');
 		_notesList = document.getElementById('editpane-dynamic-notes');
 		_notesLabel = document.getElementById('editpane-notes-label');
-		_linksBox = document.getElementById('editpane-links');
+		_tagsBox = document.getElementById('editpane-tags');
+		_relatedBox = document.getElementById('editpane-related');
 		
 		var creatorTypes = Scholar.CreatorTypes.getTypes();
 		for(var i = 0; i < creatorTypes.length; i++)
@@ -58,91 +63,118 @@ ScholarItemPane = new function()
 	{
 		_itemBeingEdited = thisItem;
 		
-		reloadFields();
+		_loaded = new Array(5);
+		
+		loadPane(_tabs.selectedIndex);
 	}
 	
-	function reloadFields()
+	function loadPane(index)
 	{
-		while(_dynamicFields.hasChildNodes())
-			_dynamicFields.removeChild(_dynamicFields.firstChild);
+		if(_loaded[index])
+			return;
+		_loaded[index] = true;
 		
-		for(var i = 0, len = _itemTypeMenu.firstChild.childNodes.length; i < len; i++)
-			if(_itemTypeMenu.firstChild.childNodes[i].value == _itemBeingEdited.getType())
-				_itemTypeMenu.selectedIndex = i;
-		
-		var fieldNames = new Array("title","dateAdded","dateModified");
-		var fields = Scholar.ItemFields.getItemTypeFields(_itemBeingEdited.getField("itemTypeID"));
-		for(var i = 0; i<fields.length; i++)
-			fieldNames.push(Scholar.ItemFields.getName(fields[i]));
-		
-		for(var i = 0; i<fieldNames.length; i++)
+		if(index == 0)
 		{
-			var editable = (!_itemBeingEdited.isPrimaryField(fieldNames[i]) || _itemBeingEdited.isEditableField(fieldNames[i]));
-			
-			var valueElement = createValueElement(_itemBeingEdited.getField(fieldNames[i]), editable ? fieldNames[i] : null);
-			
-			var label = document.createElement("label");
-			label.setAttribute("value",Scholar.getString("itemFields."+fieldNames[i])+":");
-			label.setAttribute("onclick","this.nextSibling.blur();");
-			
-			addDynamicRow(label,valueElement);
-		}
+			Scholar.debug('loading FIELDS');
+			while(_dynamicFields.hasChildNodes())
+				_dynamicFields.removeChild(_dynamicFields.firstChild);
 		
-		//CREATORS:
-		_beforeRow = _dynamicFields.firstChild.nextSibling;
-		_creatorCount = 0;
-		if(_itemBeingEdited.numCreators() > 0)
-		{
-			for(var i = 0, len=_itemBeingEdited.numCreators(); i<len; i++)
+			for(var i = 0, len = _itemTypeMenu.firstChild.childNodes.length; i < len; i++)
+				if(_itemTypeMenu.firstChild.childNodes[i].value == _itemBeingEdited.getType())
+					_itemTypeMenu.selectedIndex = i;
+		
+			var fieldNames = new Array("title","dateAdded","dateModified");
+			var fields = Scholar.ItemFields.getItemTypeFields(_itemBeingEdited.getField("itemTypeID"));
+			for(var i = 0; i<fields.length; i++)
+				fieldNames.push(Scholar.ItemFields.getName(fields[i]));
+		
+			for(var i = 0; i<fieldNames.length; i++)
 			{
-				var creator = _itemBeingEdited.getCreator(i);
-				addCreatorRow(creator['firstName'], creator['lastName'], creator['creatorTypeID']);
+				var editable = (!_itemBeingEdited.isPrimaryField(fieldNames[i]) || _itemBeingEdited.isEditableField(fieldNames[i]));
+			
+				var valueElement = createValueElement(_itemBeingEdited.getField(fieldNames[i]), editable ? fieldNames[i] : null);
+			
+				var label = document.createElement("label");
+				label.setAttribute("value",Scholar.getString("itemFields."+fieldNames[i])+":");
+				label.setAttribute("onclick","this.nextSibling.blur();");
+			
+				addDynamicRow(label,valueElement);
+			}
+		
+			//CREATORS:
+			_beforeRow = _dynamicFields.firstChild.nextSibling;
+			_creatorCount = 0;
+			if(_itemBeingEdited.numCreators() > 0)
+			{
+				for(var i = 0, len=_itemBeingEdited.numCreators(); i<len; i++)
+				{
+					var creator = _itemBeingEdited.getCreator(i);
+					addCreatorRow(creator['firstName'], creator['lastName'], creator['creatorTypeID']);
+				}
+			}
+			else
+			{
+				addCreatorRow('', '', 1);
 			}
 		}
-		else
+		else if(index == 1)
 		{
-			addCreatorRow('', '', 1);
-		}
-		
-		//NOTES:
-		while(_notesList.hasChildNodes())
-			_notesList.removeChild(_notesList.firstChild);
+			Scholar.debug('loading NOTES');
+			//NOTES:
+			while(_notesList.hasChildNodes())
+				_notesList.removeChild(_notesList.firstChild);
 				
-		var notes = Scholar.Items.get(_itemBeingEdited.getNotes());
-		if(notes.length)
-		{
-			for(var i = 0; i < notes.length; i++)
+			var notes = Scholar.Items.get(_itemBeingEdited.getNotes());
+			if(notes.length)
 			{
-				var icon = document.createElement('image');
-				icon.setAttribute('src','chrome://scholar/skin/treeitem-note.png');
+				for(var i = 0; i < notes.length; i++)
+				{
+					var icon = document.createElement('image');
+					icon.setAttribute('src','chrome://scholar/skin/treeitem-note.png');
 				
-				var label = document.createElement('label');
-				label.setAttribute('value',_noteToTitle(notes[i].getNote()));
-				label.setAttribute('crop','end');
+					var label = document.createElement('label');
+					label.setAttribute('value',_noteToTitle(notes[i].getNote()));
+					label.setAttribute('crop','end');
 				
-				var box = document.createElement('box');
-				box.setAttribute('onclick',"ScholarPane.openNoteWindow("+notes[i].getID()+");");
-				box.setAttribute('class','clicky');
-				box.appendChild(icon);
-				box.appendChild(label);
+					var box = document.createElement('box');
+					box.setAttribute('onclick',"ScholarPane.openNoteWindow("+notes[i].getID()+");");
+					box.setAttribute('class','clicky');
+					box.appendChild(icon);
+					box.appendChild(label);
 				
-				var removeButton = document.createElement('label');
-				removeButton.setAttribute("value","-");
-				removeButton.setAttribute("class","clicky");
-				removeButton.setAttribute("onclick","ScholarItemPane.removeNote("+notes[i].getID()+")");
+					var removeButton = document.createElement('label');
+					removeButton.setAttribute("value","-");
+					removeButton.setAttribute("class","clicky");
+					removeButton.setAttribute("onclick","ScholarItemPane.removeNote("+notes[i].getID()+")");
 				
-				var row = document.createElement('row');
-				row.appendChild(box);
-				row.appendChild(removeButton);
+					var row = document.createElement('row');
+					row.appendChild(box);
+					row.appendChild(removeButton);
 				
-				_notesList.appendChild(row);
+					_notesList.appendChild(row);
+				}
 			}
+		
+			_updateNoteCount();
 		}
-		
-		_updateNoteCount();
-		
-		//TAGS:
-		_linksBox.item = _itemBeingEdited;
+		else if(index == 2)
+		{
+			Scholar.debug('loading FILES');
+			//FILES
+		}
+		else if(index == 3)
+		{
+			Scholar.debug('loading TAGS');
+			//TAGS:
+			_tagsBox.item = _itemBeingEdited;
+		}
+		else if(index == 4)
+		{
+			Scholar.debug('loading RELATED');
+			//RELATED
+			_relatedBox.item = _itemBeingEdited;
+		}
 	}
 	
 	function changeTypeTo(id)

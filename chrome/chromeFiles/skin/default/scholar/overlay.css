@@ -97,7 +97,6 @@
 #scholar-view-item vbox
 {
 	overflow: auto;
-	background: #f5f5f5;
 }
 
 #editpane-dynamic-fields row > label:first-child

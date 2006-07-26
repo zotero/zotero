@@ -33,10 +33,6 @@ var ScholarPane = new function()
 	 */
 	function onLoad()
 	{
-		//Initialize collections view
-		collectionsView = new Scholar.CollectionTreeView();
-		document.getElementById('collections-tree').view = collectionsView;
-		
 		if(Scholar.Prefs.get("scholarPaneOnTop"))
 		{
 			var oldPane = document.getElementById('scholar-pane');
@@ -60,6 +56,10 @@ var ScholarPane = new function()
 			appContent.removeChild(oldSplitter);
 			appContent.insertBefore(newSplitter, document.getElementById('content'));
 		}
+		
+		//Initialize collections view
+		collectionsView = new Scholar.CollectionTreeView();
+		document.getElementById('collections-tree').view = collectionsView;
 		
 		//Create the add menu with each item type
 		var addMenu = document.getElementById('tb-add').firstChild;
@@ -167,16 +167,19 @@ var ScholarPane = new function()
 				noteEditor.note = item.ref;
 				document.getElementById('scholar-view-note').lastChild.setAttribute('noteID',item.ref.getID());
 				document.getElementById('item-pane').selectedIndex = 2;
+				document.getElementById('scholar-view-tabs').setAttribute('hidden',true);
 			}
 			else
 			{
 				ScholarItemPane.viewItem(item.ref);
 				document.getElementById('item-pane').selectedIndex = 1;
+				document.getElementById('scholar-view-tabs').setAttribute('hidden',false);
 			}
 		}
 		else
 		{
 			document.getElementById('item-pane').selectedIndex = 0;
+				document.getElementById('scholar-view-tabs').setAttribute('hidden',true);
 			
 			var label = document.getElementById('scholar-view-selected-label');
 		

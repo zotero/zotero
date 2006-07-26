@@ -23,7 +23,7 @@
 	<vbox id="appcontent">
 		<!-- Changes to attributes of scholar-splitter and scholar-pane must be mirrored on overlay.js's onLoad() function -->
 		<splitter id="scholar-splitter" resizebefore="closest" resizeafter="closest" collapsed="true"/>
-		<hbox id="scholar-pane" collapsed="true" flex="1">
+		<hbox id="scholar-pane" persist="height" collapsed="true">
 			<popupset>
 				<popup id="scholar-collectionmenu" onpopupshowing="ScholarPane.buildCollectionContextMenu();">
 					<menuitem label="&toolbar.newCollection.label;" command="cmd_scholar_newCollection"/>
@@ -146,16 +146,27 @@
 					<toolbarbutton id="tb-fullscreen" label="Toggle Fullscreen" oncommand="ScholarPane.fullScreen();"/>
 					<toolbarbutton class="tabs-closebutton" oncommand="ScholarPane.toggleDisplay()"/>
 				</toolbar>
-				<deck id="item-pane" selectedIndex="0" flex="1">
-					<box pack="center" align="center">
-						<label id="scholar-view-selected-label"/>
-					</box>
-					<tabbox id="scholar-view-item" flex="1"/>
-					<vbox id="scholar-view-note" flex="1">
-						<noteeditor id="scholar-note-editor" flex="1"/>
-						<button label="Edit in a separate window" oncommand="ScholarPane.openNoteWindow(this.getAttribute('noteID'));"/>
-					</vbox>
-				</deck>
+				<groupbox flex="1">
+					<caption>
+						<tabs id="scholar-view-tabs" onselect="document.getElementById('scholar-view-item').selectedIndex = this.selectedIndex;" hidden="true">
+							<tab label="&tabs.info.label;"/>
+							<tab label="&tabs.notes.label;"/>
+							<tab label="&tabs.files.label;"/>
+							<tab label="&tabs.tags.label;"/>
+							<tab label="&tabs.related.label;"/>
+						</tabs>
+					</caption>
+					<deck id="item-pane" selectedIndex="0" flex="1">
+						<box pack="center" align="center">
+							<label id="scholar-view-selected-label"/>
+						</box>
+						<deck id="scholar-view-item" flex="1"/>
+						<vbox id="scholar-view-note" flex="1">
+							<noteeditor id="scholar-note-editor" flex="1"/>
+							<button label="Edit in a separate window" oncommand="ScholarPane.openNoteWindow(this.getAttribute('noteID'));"/>
+						</vbox>
+					</deck>
+				</groupbox>
 			</vbox>
 		</hbox>
 	</vbox>

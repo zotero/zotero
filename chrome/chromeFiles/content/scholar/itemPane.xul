@@ -5,13 +5,7 @@
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 	
 	<script src="itemPane.js"/>	
-	<tabbox id="scholar-view-item" flex="1">
-		<tabs>
-			<tab label="&tabs.info.label;"/>
-			<tab label="&tabs.notes.label;"/>
-			<tab label="&tabs.files.label;"/>
-		</tabs>
-		<tabpanels flex="1">
+	<deck id="scholar-view-item" flex="1" onselect="ScholarItemPane.loadPane(this.selectedIndex);">
 			<vbox id="scholar-info" flex="1">
 				<popupset>
 					<popup id="creatorTypeMenu" position="after_start" oncommand="ScholarItemPane.modifyCreator(document.popupNode.getAttribute('fieldname').split('-')[1],'typeID',event.explicitOriginalTarget.getAttribute('typeid'));"/>
@@ -43,9 +37,7 @@
 			<vbox align="center" pack="center">
 				<label value="Coming soon"/>
 			</vbox>
-		</tabpanels>
-		<hbox>
-			<linksbox id="editpane-links" flex="1"/>
-		</hbox>
-	</tabbox>
+			<tagsbox id="editpane-tags" flex="1"/>
+			<seealsobox id="editpane-related" flex="1"/>
+	</deck>
 </overlay>
