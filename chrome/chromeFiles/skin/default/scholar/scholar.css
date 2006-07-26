@@ -1,3 +1,43 @@
+#scholar-toolbar-button
+{
+	list-style-image: url('chrome://scholar/skin/toolbar-large.png');
+}
+
+#scholar-toolbar-button:active
+{
+	list-style-image: url('chrome://scholar/skin/toolbar-large-active.png');
+}
+
+#scholar-toolbar-button[disabled="true"]
+{
+	list-style-image: url('chrome://scholar/skin/toolbar-large-disabled.png');
+}
+
+toolbar[iconsize="small"] #scholar-toolbar-button
+{
+	list-style-image: url('chrome://scholar/skin/toolbar-small.png');
+}
+
+toolbar[iconsize="small"] #scholar-toolbar-button:active
+{
+	list-style-image: url('chrome://scholar/skin/toolbar-small-active.png');
+}
+
+toolbar[iconsize="small"] #scholar-toolbar-button[disabled="true"]
+{
+	list-style-image: url('chrome://scholar/skin/toolbar-small-disabled.png');
+}
+
+#scholar-toolbar-button
+{
+	list-style-image: url('chrome://scholar/skin/toolbar-large.png');
+}
+
+toolbar[iconsize="small"] #scholar-toolbar-button
+{
+	list-style-image: url('chrome://scholar/skin/toolbar-small.png');
+}
+
 textbox[multiline="true"][type="timed"]
 {
 	-moz-binding: url('chrome://scholar/content/bindings/timedtextarea.xml#timed-textarea');

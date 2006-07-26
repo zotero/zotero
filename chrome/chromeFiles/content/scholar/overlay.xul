@@ -19,7 +19,11 @@
 		<command id="cmd_scholar_newCollection" oncommand="ScholarPane.newCollection();"/>
 		<command id="cmd_scholar_search" oncommand="ScholarPane.search();"/>
 	</commandset>
-	
+	<toolbarpalette id="BrowserToolbarPalette">
+		<toolbarbutton id="scholar-toolbar-button" class="toolbarbutton-1"
+						label="&scholar.name;"
+						oncommand="ScholarPane.toggleDisplay();"/>
+	</toolbarpalette>
 	<vbox id="appcontent">
 		<!-- Changes to attributes of scholar-splitter and scholar-pane must be mirrored on overlay.js's onLoad() function -->
 		<splitter id="scholar-splitter" resizebefore="closest" resizeafter="closest" collapsed="true"/>
