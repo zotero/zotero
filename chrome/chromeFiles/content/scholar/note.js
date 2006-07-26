@@ -14,6 +14,7 @@ function onLoad()
 		params[b[i].substr(0,mid)] = b[i].substr(mid+1);
 	}
 	var id = params['id'];
+	var collectionID = params['coll'];
 	
 	if(id && id != '' && id != 'undefined')
 	{
@@ -31,7 +32,9 @@ function onLoad()
 	}
 	else
 	{
-		window.title = "Edit Note";
+		window.title = "Add Note";
+		if(collectionID && collectionID != '' && collectionID != 'undefined')
+			noteEditor.collection = Scholar.Collections.get(collectionID);
 	}
 }
 

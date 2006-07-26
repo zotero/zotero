@@ -71,7 +71,7 @@
 					<toolbarbutton id="tb-add" tooltiptext="&toolbar.newItem.label;" type="menu">
 						<menupopup/>
 					</toolbarbutton>
-					<toolbarbutton label="New Note" oncommand="ScholarPane.openNoteWindow();"/>
+					<toolbarbutton label="New Note" oncommand="ScholarPane.newNote();"/>
 					<spacer flex="1"/>
 					<label value="&toolbar.search.label;" control="tb-search"/>
 					<textbox id="tb-search" type="timed" timeout="250" command="cmd_scholar_search"/>

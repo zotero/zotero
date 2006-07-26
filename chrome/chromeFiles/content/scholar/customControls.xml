@@ -72,6 +72,8 @@
 					]]>
 				</setter>
 			</property>
+			<field name="collectionRef"/>
+			<property name="collection" onget="return this.collectionRef;" onset="this.collectionRef = val;"/>
 			<property name="value" onget="return this.id('noteField').value;" onset="this.id('noteField').value = val;"/>
 			<method name="save">
 				<body>
@@ -86,7 +88,12 @@
 							if(this.item)
 								var noteID = Scholar.Notes.add(noteField.value,this.item.getID());	//attached to an item
 							else
-								var noteID = Scholar.Notes.add(noteField.value);				//independant note
+							{
+								//independent note
+								var noteID = Scholar.Notes.add(noteField.value);
+								if(this.collection)
+									this.collection.addItem(noteID);
+							}
 							this.note = Scholar.Items.get(noteID);
 						}
 					]]>

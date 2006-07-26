@@ -27,6 +27,7 @@ var ScholarPane = new function()
 	this.buildCollectionContextMenu = buildCollectionContextMenu;
 	this.buildItemContextMenu = buildItemContextMenu;
 	this.openNoteWindow = openNoteWindow;
+	this.newNote = newNote;
 	
 	/*
 	 * Called when the window is open
@@ -291,9 +292,18 @@ var ScholarPane = new function()
 			menu.childNodes[2].setAttribute('label', Scholar.getString('pane.items.menu.remove'));	
 	}
 	
-	function openNoteWindow(id)
+	function newNote()
 	{
-		window.open('chrome://scholar/content/note.xul?id='+id,'','chrome,resizable,centerscreen');
+		var c = getSelectedCollection();
+		if(c)
+			openNoteWindow(null, c.getID());
+		else
+			openNoteWindow();
+	}
+	
+	function openNoteWindow(id, parent)
+	{
+		window.open('chrome://scholar/content/note.xul?v=1'+(id ? '&id='+id : '')+(parent ? '&coll='+parent : ''),'','chrome,resizable,centerscreen');
 	}
 }
 
