@@ -23,7 +23,7 @@ var ScholarPane = new function()
 	this.getCollectionsView = getCollectionsView;
 	this.getItemsView = getItemsView;
 	this.getSelectedCollection = getSelectedCollection;
-	this.getSelectedItem = getSelectedItem;
+	this.getSelectedItems = getSelectedItems;
 	this.buildCollectionContextMenu = buildCollectionContextMenu;
 	this.buildItemContextMenu = buildItemContextMenu;
 	this.openNoteWindow = openNoteWindow;
@@ -251,14 +251,21 @@ var ScholarPane = new function()
 		}
 	}
 	
-	function getSelectedItem()
+	function getSelectedItems()
 	{
-		if(itemsView && itemsView.selection.count == 1 && itemsView.selection.currentIndex != -1)
+		if(itemsView)
 		{
-			var item = itemsView._getItemAtRow(itemsView.selection.currentIndex);
-			if(item)
-				return item.ref;
+			var items = new Array();
+			var start = new Object();
+			var end = new Object();
+			for (var i=0, len=itemsView.selection.getRangeCount(); i<len; i++)
+			{
+				itemsView.selection.getRangeAt(i,start,end);
+				for (var j=start.value; j<=end.value; j++)
+					items.push(itemsView._getItemAtRow(j).ref);
+			}
 		}
+		return items;
 	}
 	
 	function buildCollectionContextMenu()
