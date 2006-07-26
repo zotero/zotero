@@ -276,11 +276,15 @@ var ScholarPane = new function()
 		{
 			menu.childNodes[2].removeAttribute('disabled');
 			menu.childNodes[3].removeAttribute('disabled');
+			menu.childNodes[5].removeAttribute('disabled');
+			menu.childNodes[6].removeAttribute('disabled');
 		}
 		else
 		{
 			menu.childNodes[2].setAttribute('disabled', true);
 			menu.childNodes[3].setAttribute('disabled', true);
+			menu.childNodes[5].setAttribute('disabled', true);
+			menu.childNodes[6].setAttribute('disabled', true);
 		}
 	}
 	
@@ -289,14 +293,30 @@ var ScholarPane = new function()
 		var menu = document.getElementById('scholar-itemmenu');
 		
 		if(itemsView && itemsView.selection.count > 0)
+		{
 			menu.childNodes[2].removeAttribute('disabled');
+			menu.childNodes[4].removeAttribute('disabled');
+			menu.childNodes[5].removeAttribute('disabled');
+		}
 		else
+		{
 			menu.childNodes[2].setAttribute('disabled', true);
+			menu.childNodes[4].setAttribute('disabled', true);
+			menu.childNodes[5].setAttribute('disabled', true);
+		}
 	
 		if(itemsView && itemsView.selection.count > 1)
+		{
 			menu.childNodes[2].setAttribute('label', Scholar.getString('pane.items.menu.remove.multiple'));
+			menu.childNodes[4].setAttribute('label', Scholar.getString('pane.items.menu.export.multiple'));
+			menu.childNodes[5].setAttribute('label', Scholar.getString('pane.items.menu.createBib.multiple'));
+		}
 		else
-			menu.childNodes[2].setAttribute('label', Scholar.getString('pane.items.menu.remove'));	
+		{
+			menu.childNodes[2].setAttribute('label', Scholar.getString('pane.items.menu.remove'));
+			menu.childNodes[4].setAttribute('label', Scholar.getString('pane.items.menu.export'));
+			menu.childNodes[5].setAttribute('label', Scholar.getString('pane.items.menu.createBib'));
+		}
 	}
 	
 	function newNote()

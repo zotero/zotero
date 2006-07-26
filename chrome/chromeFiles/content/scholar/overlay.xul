@@ -30,11 +30,17 @@
 					<menuseparator/>
 					<menuitem label="&toolbar.renameCollection.label;" oncommand="ScholarPane.renameSelectedCollection();"/>
 					<menuitem label="&toolbar.removeCollection.label;" oncommand="ScholarPane.deleteSelectedCollection();"/>
+					<menuseparator/>
+					<menuitem label="&toolbar.exportCollection.label;" oncommand="Scholar_File_Interface.exportProject();"/>
+					<menuitem label="&toolbar.createBibCollection.label;" oncommand="Scholar_File_Interface.bibliographyFromProject();"/>
 				</popup>
 				<popup id="scholar-itemmenu" onpopupshowing="ScholarPane.buildItemContextMenu();">
 					<menuitem label="&toolbar.newItem.label;" command="cmd_scholar_newItem"/>
 					<menuseparator/>
 					<menuitem oncommand="ScholarPane.deleteSelectedItem();"/>
+					<menuseparator/>
+					<menuitem oncommand="Scholar_File_Interface.exportItems();"/>
+					<menuitem oncommand="Scholar_File_Interface.bibliographyFromItems();"/>
 				</popup>
 			</popupset>
 			<vbox id="collections-pane" persist="width" flex="1">

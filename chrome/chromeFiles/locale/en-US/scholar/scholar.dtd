@@ -25,6 +25,8 @@
 <!ENTITY toolbar.newCollection.label   	"New Project">
 <!ENTITY toolbar.renameCollection.label   "Rename Project...">
 <!ENTITY toolbar.removeCollection.label   "Remove Project...">
+<!ENTITY toolbar.exportCollection.label   "Export Project...">
+<!ENTITY toolbar.createBibCollection.label   "Create Bibliography From Project...">
 <!ENTITY toolbar.search.label   			"Search:">
 
 <!ENTITY selectitems.title   			"Select Items">
