@@ -1,0 +1,177 @@
+<?xml version="1.0"?>
+<bindings 	xmlns="http://www.mozilla.org/xbl"
+			xmlns:xbl="http://www.mozilla.org/xbl"
+			xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	<binding id="note-editor">
+		<implementation>
+			<field name="itemRef"/>
+			<property name="item" onget="return this.itemRef;">
+				<setter>
+					<![CDATA[
+						this.itemRef = val;
+						
+						var citeLabel = this.id('citeLabel');
+						if(citeLabel.firstChild)
+							citeLabel.removeChild(citeLabel.firstChild);
+						
+						if(this.item)
+							citeLabel.appendChild(document.createTextNode(this.item.getField('title')));
+					]]>
+				</setter>
+			</property>
+			<field name="noteRef"/>
+			<property name="note" onget="return this.noteRef;">
+				<setter>
+					<![CDATA[
+						this.noteRef = val;
+						
+						if(this.note.getNoteSource())
+							this.item = Scholar.Items.get(this.note.getNoteSource());
+						
+						this.id('noteField').setAttribute('value',this.note.getNote());
+						this.id('links').item = this.note;
+					]]>
+				</setter>
+			</property>
+			<field name="collectionRef"/>
+			<property name="collection" onget="return this.collectionRef;" onset="this.collectionRef = val;"/>
+			<property name="value" onget="return this.id('noteField').value;" onset="this.id('noteField').value = val;"/>
+			<method name="save">
+				<body>
+					<![CDATA[
+						var noteField = this.id('noteField');
+						if(this.note)	//Update note
+						{
+							this.note.updateNote(noteField.value);
+						}
+						else	//Create new note
+					 	{
+							if(this.item)
+								var noteID = Scholar.Notes.add(noteField.value,this.item.getID());	//attached to an item
+							else
+							{
+								//independent note
+								var noteID = Scholar.Notes.add(noteField.value);
+								if(this.collection)
+									this.collection.addItem(noteID);
+							}
+							this.note = Scholar.Items.get(noteID);
+						}
+					]]>
+				</body>
+			</method>
+			<method name="focus">
+				<body>
+					<![CDATA[
+						this.id('noteField').focus();
+					]]>
+				</body>
+			</method>
+			<method name="id">
+				<parameter name="id"/>
+				<body>
+					<![CDATA[
+						return document.getAnonymousNodes(this)[0].getElementsByAttribute('id',id)[0];
+					]]>
+				</body>
+			</method>
+		</implementation>
+		<handlers>
+		</handlers>
+		<content>
+			<xul:vbox xbl:inherits="flex">
+				<xul:label id="citeLabel"/>
+				<xul:textbox id="noteField" multiline="true" type="timed" timeout="1000" flex="1" oncommand="this.parentNode.parentNode.save();"/>
+				<xul:hbox>
+					<xul:linksbox id="links" flex="1"/>
+				</xul:hbox>
+			</xul:vbox>
+		</content>
+	</binding>
+	
+	<binding id="links-box">
+		<implementation>
+			<field name="itemRef"/>
+			<property name="item" onget="return this.itemRef;">
+				<setter>
+					<![CDATA[
+						this.itemRef = val;
+						
+						this.id('tags').item = this.item;
+						this.updateTagsSummary();
+						this.id('seeAlso').item = this.item;
+						this.updateSeeAlsoSummary();
+					]]>
+				</setter>
+			</property>
+			<method name="tagsClick">
+				<body>
+					<![CDATA[
+						var tagsList = this.item.getTags();
+						if(tagsList && tagsList.length > 0)
+							this.id('tagsPopup').showPopup(this.id('tagsLabel'),-1,-1,-1,'popup',0,0);
+						else
+							this.id('tags').add();
+					]]>
+				</body>
+			</method>
+			<method name="updateTagsSummary">
+				<body>
+					<![CDATA[
+						var v = this.id('tags').summary;
+						
+						if(!v || v == "")
+							v = "[click here]";
+							
+						this.id('tagsLabel').value = "Tags: " + v;
+					]]>
+				</body>
+			</method>
+			<method name="seeAlsoClick">
+				<body>
+					<![CDATA[
+						var seealsoList = this.item.getSeeAlso();
+						if(seealsoList && seealsoList.length > 0)
+							this.id('seeAlsoPopup').showPopup(this.id('seeAlsoLabel'),-1,-1,'popup',0,0);
+						else
+							this.id('seeAlso').add();
+					]]>
+				</body>
+			</method>
+			<method name="updateSeeAlsoSummary">
+				<body>
+					<![CDATA[
+						var v = this.id('seeAlso').summary;
+						
+						if(!v || v == "")
+							v = "[click here]";
+						
+						this.id('seeAlsoLabel').value = "Related: " + v;
+					]]>
+				</body>
+			</method>
+			<method name="id">
+				<parameter name="id"/>
+				<body>
+					<![CDATA[
+						return document.getAnonymousNodes(this)[0].getElementsByAttribute('id',id)[0];
+					]]>
+				</body>
+			</method>
+		</implementation>
+		<content>
+			<xul:vbox xbl:inherits="flex">
+				<xul:label id="seeAlsoLabel" class="clicky" crop="end" onclick="this.parentNode.parentNode.seeAlsoClick();"/>
+				<xul:label id="tagsLabel" class="clicky" crop="end" onclick="this.parentNode.parentNode.tagsClick();"/>
+				<xul:popupset>
+					<xul:popup id="seeAlsoPopup" width="300" onpopupshowing="this.firstChild.reload();">
+						<xul:seealsobox id="seeAlso" flex="1"/>
+					</xul:popup>
+					<xul:popup id="tagsPopup" width="300" onpopupshowing="this.firstChild.reload();">
+						<xul:tagsbox id="tags" flex="1"/>
+					</xul:popup>
+				</xul:popupset>
+			</xul:vbox>
+		</content>
+	</binding>
+</bindings>

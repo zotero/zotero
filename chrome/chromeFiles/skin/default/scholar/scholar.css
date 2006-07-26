@@ -1,26 +1,26 @@
 textbox[multiline="true"][type="timed"]
 {
-	-moz-binding: url('chrome://scholar/content/customControls.xml#timed-textarea');
+	-moz-binding: url('chrome://scholar/content/bindings/timedtextarea.xml#timed-textarea');
 }
 
 noteeditor
 {
-	-moz-binding: url('chrome://scholar/content/customControls.xml#note-editor');
-}
-
-tagsbox
-{
-	-moz-binding: url('chrome://scholar/content/customControls.xml#tags-box');
-}
-
-seealsobox
-{
-	-moz-binding: url('chrome://scholar/content/customControls.xml#seealso-box');
+	-moz-binding: url('chrome://scholar/content/bindings/noteeditor.xml#note-editor');
 }
 
 linksbox
 {
-	-moz-binding: url('chrome://scholar/content/customControls.xml#links-box');
+	-moz-binding: url('chrome://scholar/content/bindings/noteeditor.xml#links-box');
+}
+
+tagsbox
+{
+	-moz-binding: url('chrome://scholar/content/bindings/tagsbox.xml#tags-box');
+}
+
+seealsobox
+{
+	-moz-binding: url('chrome://scholar/content/bindings/relatedbox.xml#seealso-box');
 }
 
 .clicky

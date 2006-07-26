@@ -1,0 +1,157 @@
+<?xml version="1.0"?>
+<bindings 	xmlns="http://www.mozilla.org/xbl"
+			xmlns:xbl="http://www.mozilla.org/xbl"
+			xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	<binding id="seealso-box">
+		<implementation>
+			<field name="itemRef"/>
+			<property name="item" onget="return this.itemRef;">
+				<setter>
+					<![CDATA[
+						this.itemRef = val;
+						this.reload();
+					]]>
+				</setter>
+			</property>
+			<property name="summary">
+				<getter>
+					<![CDATA[
+						var r = "";
+					
+						if(this.item)
+						{
+							var seealso = this.item.getSeeAlso();
+							if(seealso)
+							{
+								seealso = Scholar.Items.get(seealso);
+								for(var i = 0; i < seealso.length; i++)
+								{
+									r = r + seealso[i].getField('title') + ", ";
+								}
+								r = r.substr(0,r.length-2);
+							}
+						}
+					
+						return r;
+					]]>
+				</getter>
+			</property>
+			<method name="reload">
+				<body>
+					<![CDATA[
+						var rows = this.id('seeAlsoRows');
+						while(rows.hasChildNodes())
+							rows.removeChild(rows.firstChild);
+						
+						if(this.item)
+						{
+							var seealso = this.item.getSeeAlso();
+							
+							if(seealso)
+							{
+								seealso = Scholar.Items.get(seealso);
+								for(var i = 0; i < seealso.length; i++)
+								{
+									var icon= document.createElement("image");
+									icon.setAttribute('src','chrome://scholar/skin/treeitem-'+Scholar.ItemTypes.getName(seealso[i].getType())+'.png');
+							
+									var label = document.createElement("label");
+									label.setAttribute('value', seealso[i].getField('title'));
+									label.setAttribute('crop','end');
+								
+									var remove = document.createElement("label");
+									remove.setAttribute('value','-');
+									remove.setAttribute('onclick',"this.parentNode.parentNode.parentNode.parentNode.parentNode.remove('"+seealso[i].getID()+"');");
+									remove.setAttribute('class','clicky');
+							
+									var row = document.createElement("row");
+									row.appendChild(icon);
+									row.appendChild(label);
+									row.appendChild(remove);
+									row.setAttribute('id','seealso-'+seealso[i].getID());
+									rows.appendChild(row);		
+								}
+								this.updateCount(seealso.length);
+							}
+							else
+							{
+								this.updateCount();
+							}
+						}
+					]]>
+				</body>
+			</method>
+			<method name="add">
+				<body>
+					<![CDATA[
+						var io = {dataIn: null, dataOut: null};
+						window.openDialog('chrome://scholar/content/selectItemsDialog.xul','','chrome,modal',io);
+
+						if(io.dataOut && this.item)
+						{
+							for(var i = 0; i < io.dataOut.length; i++)
+							{
+								this.item.addSeeAlso(io.dataOut[i]);
+							}
+						}
+					]]>
+				</body>
+			</method>
+			<method name="remove">
+				<parameter name="id"/>
+				<body>
+					<![CDATA[
+						if(id)
+						{
+							this.item.removeSeeAlso(id);
+							var rows = this.id('seeAlsoRows');
+							rows.removeChild(this.id('seealso-'+id));
+							this.updateCount();
+						}
+					]]>
+				</body>
+			</method>
+			<method name="updateCount">
+				<parameter name="count"/>
+				<body>
+					<![CDATA[
+						if(count == null)
+						{
+							seealso = this.item.getSeeAlso();
+							if(seealso)
+								count = seealso.length;
+							else
+								count = 0;
+						}
+						
+						this.id('seeAlsoNum').value = count + ' related:';
+					]]>
+				</body>
+			</method>
+			<method name="id">
+				<parameter name="id"/>
+				<body>
+					<![CDATA[
+						return document.getAnonymousNodes(this)[0].getElementsByAttribute('id',id)[0];
+					]]>
+				</body>
+			</method>
+		</implementation>
+		<content>
+			<xul:vbox xbl:inherits="flex">
+				<xul:hbox align="center">
+					<xul:label id="seeAlsoNum"/>
+					<xul:button label="Add" oncommand="this.parentNode.parentNode.parentNode.add();"/>
+				</xul:hbox>
+				<xul:grid>
+					<xul:columns>
+						<xul:column/>
+						<xul:column flex="1"/>
+						<xul:column/>
+					</xul:columns>
+					<xul:rows id="seeAlsoRows"/>
+				</xul:grid>
+			</xul:vbox>
+		</content>
+	</binding>
+</bindings>

@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<bindings 	xmlns="http://www.mozilla.org/xbl"
+			xmlns:xbl="http://www.mozilla.org/xbl"
+			xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	<binding id="timed-textarea" extends="chrome://global/content/bindings/textbox.xml#textarea">
+		<implementation>
+			<field name="_timer">null</field>
+			<property name="timeout"
+					onset="this.setAttribute('timeout', val); return val;"
+					onget="return parseInt(this.getAttribute('timeout')) || 0;"/>
+			<property name="value">
+				<getter>
+				  return this.inputField.value;
+				</getter>
+				<setter>
+				  <![CDATA[
+					this.inputField.value = val;
+					if (this._timer)
+					  clearTimeout(this._timer);
+					return val;
+				  ]]>
+				</setter>
+			</property>
+			<method name="_fireCommand">
+				<parameter name="me"/>
+				<body>
+				  <![CDATA[
+					me._timer = null;
+					me.doCommand();
+				  ]]>
+				</body>
+			</method>
+		</implementation>
+		<handlers>
+			<handler event="input">
+				<![CDATA[
+				  if (this._timer)
+					clearTimeout(this._timer);
+				  this._timer = this.timeout && setTimeout(this._fireCommand, this.timeout, this);
+				]]>
+			</handler>
+		</handlers>
+	</binding>
+</bindings>
