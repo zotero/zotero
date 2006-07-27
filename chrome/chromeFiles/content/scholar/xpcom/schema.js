@@ -236,7 +236,8 @@ Scholar.Schema = new function(){
 			Scholar.DB.commitTransaction();
 		}
 		catch(e){
-			alert(e);
+			Scholar.debug(e, 1);
+			alert('Error initializing Scholar database'); // TODO: localize
 			Scholar.DB.rollbackTransaction();
 		}
 	}
@@ -390,7 +391,7 @@ Scholar.Schema = new function(){
 		//
 		// Change this value to match the schema version
 		//
-		var toVersion = 29;
+		var toVersion = 30;
 		
 		if (toVersion != _getSchemaSQLVersion()){
 			throw('Schema version does not match version in _migrateSchema()');
@@ -405,10 +406,18 @@ Scholar.Schema = new function(){
 		// Each block performs the changes necessary to move from the
 		// previous revision to that one.
 		for (var i=fromVersion + 1; i<=toVersion; i++){
-			if (i==29){
+			if (i==30){
 				Scholar.DB.query("DROP TABLE IF EXISTS keywords");
 				Scholar.DB.query("DROP TABLE IF EXISTS itemKeywords");
 				Scholar.DB.query("DROP TABLE IF EXISTS scrapers");
+				
+				// Remove old SQLite DB
+				var file = Scholar.getProfileDirectory();
+				file.append('scholar.sqlite');
+				if (file.exists()){
+					file.remove(null);
+				}
+				
 				_initializeSchema();
 			}
 		}

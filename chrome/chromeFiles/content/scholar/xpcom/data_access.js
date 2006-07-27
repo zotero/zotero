@@ -44,6 +44,7 @@ Scholar.Item.prototype.isPrimaryField = function(field){
 		Scholar.Item.primaryFields = Scholar.DB.getColumnHash('items');
 		Scholar.Item.primaryFields['firstCreator'] = true;
 		Scholar.Item.primaryFields['numNotes'] = true;
+		Scholar.Item.primaryFields['numFiles'] = true;
 	}
 	
 	return !!Scholar.Item.primaryFields[field];
@@ -70,7 +71,8 @@ Scholar.Item.prototype.loadFromID = function(id){
 	var sql = 'SELECT I.*, lastName || '
 		+ 'CASE ((SELECT COUNT(*) FROM itemCreators WHERE itemID=' + id + ')>1) '
 		+ "WHEN 0 THEN '' ELSE ' et al.' END AS firstCreator, "
-		+ "(SELECT COUNT(*) FROM itemNotes WHERE sourceItemID=I.itemID) AS numNotes "
+		+ "(SELECT COUNT(*) FROM itemNotes WHERE sourceItemID=I.itemID) AS numNotes, "
+		+ "(SELECT COUNT(*) FROM itemFiles WHERE sourceItemID=I.itemID) AS numFiles "
 		+ 'FROM items I '
 		+ 'LEFT JOIN itemCreators IC ON (I.itemID=IC.itemID) '
 		+ 'LEFT JOIN creators C ON (IC.creatorID=C.creatorID) '
@@ -774,11 +776,13 @@ Scholar.Item.prototype.updateDateModified = function(){
 }
 
 
+////////////////////////////////////////////////////////
 //
-// Methods dealing with item notes
+// Methods dealing with note items
 //
 // save() is not required for note functions
 //
+////////////////////////////////////////////////////////
 Scholar.Item.prototype.incrementNoteCount = function(){
 	this._data['numNotes']++;
 }
@@ -827,13 +831,21 @@ Scholar.Item.prototype.updateNote = function(text){
 }
 
 
-Scholar.Item.prototype.setNoteSource = function(sourceItemID){
-	if (!this.isNote()){
-		throw ("updateNote() can only be called on items of type 'note'");
+Scholar.Item.prototype.setSource = function(sourceItemID){
+	if (this.isNote()){
+		var type = 'note';
+		var Type = 'Note';
+	}
+	else if (this.isFile()){
+		var type = 'file';
+		var Type = 'file';
+	}
+	else {
+		throw ("setSource() can only be called on items of type 'note' or 'file'");
 	}
 	
 	if (!this.getID()){
-		throw ("Cannot call setNoteSource() on unsaved note");
+		throw ("Cannot call setSource() on unsaved " + type);
 	}
 	
 	Scholar.DB.beginTransaction();
@@ -842,15 +854,15 @@ Scholar.Item.prototype.setNoteSource = function(sourceItemID){
 	// FK check
 	if (sourceItemID && !newItem){
 		Scholar.DB.rollbackTransaction();
-		throw ("Cannot set note source to invalid item " + sourceItemID);
+		throw ("Cannot set " + type + " source to invalid item " + sourceItemID);
 	}
 	
 	// Get previous source item id
-	var sql = "SELECT sourceItemID FROM itemNotes WHERE item=" + this.getID();
+	var sql = "SELECT sourceItemID FROM item" + Type + "s WHERE item=" + this.getID();
 	var oldSourceItemID = Scholar.DB.valueQuery(sql);
 	
 	if (oldSourceItemID==sourceItemID){
-		Scholar.debug("Note source hasn't changed", 4);
+		Scholar.debug(Type + " source hasn't changed", 4);
 		Scholar.DB.commitTransaction();
 		return false;
 	}
@@ -858,10 +870,10 @@ Scholar.Item.prototype.setNoteSource = function(sourceItemID){
 	var oldItem = Scholar.Items.get(oldSourceItemID);
 	if (oldSourceItemID && !oldItem){
 		Scholar.debug("Old source item " + oldSourceItemID
-			+ "didn't exist in setNoteSource()", 2);
+			+ "didn't exist in setSource()", 2);
 	}
 	
-	var sql = "UPDATE itemNotes SET sourceItemID=? WHERE itemID=?";
+	var sql = "UPDATE item" + Type + "s SET sourceItemID=? WHERE itemID=?";
 	var bindParams = [sourceItemID ? {int:sourceItemID} : null, this.getID()];
 	Scholar.DB.query(sql, bindParams);
 	this.updateDateModified();
@@ -869,13 +881,27 @@ Scholar.Item.prototype.setNoteSource = function(sourceItemID){
 	
 	Scholar.Notifier.trigger('modify', 'item', this.getID());
 	
-	// Update the note counts of the previous and new sources
+	// Update the counts of the previous and new sources
 	if (oldItem){
-		oldItem.decrementNoteCount();
+		switch (type){
+			case 'note':
+				oldItem.decrementNoteCount();
+				break;
+			case 'file':
+				oldItem.decrementFileCount();
+				break;
+		}
 		Scholar.Notifier.trigger('modify', 'item', oldSourceItemID);
 	}
 	if (newItem){
-		newItem.incrementNoteCount();
+		switch (type){
+			case 'note':
+				newItem.incrementNoteCount();
+				break;
+			case 'file':
+				newItem.incrementFileCount();
+				break;
+		}
 		Scholar.Notifier.trigger('modify', 'item', sourceItemID);
 	}
 	
@@ -914,14 +940,20 @@ Scholar.Item.prototype.getNote = function(){
 
 
 /**
-* Get the itemID of the source item for a note
+* Get the itemID of the source item for a note or file
 **/
-Scholar.Item.prototype.getNoteSource = function(){
-	if (!this.isNote()){
-		throw ("getNoteSource() can only be called on items of type 'note'");
+Scholar.Item.prototype.getSource = function(){
+	if (this.isNote()){
+		var Type = 'Note';
+	}
+	else if (this.isFile()){
+		var Type = 'File';
+	}
+	else {
+		throw ("getSource() can only be called on items of type 'note' or 'file'");
 	}
 	
-	var sql = "SELECT sourceItemID FROM itemNotes WHERE itemID=" + this.getID();
+	var sql = "SELECT sourceItemID FROM item" + Type + "s WHERE itemID=" + this.getID();
 	return Scholar.DB.valueQuery(sql);
 }
 
@@ -943,6 +975,171 @@ Scholar.Item.prototype.getNotes = function(){
 		+ "WHERE sourceItemID=" + this.getID() + " ORDER BY dateAdded";
 	return Scholar.DB.columnQuery(sql);
 }
+
+
+
+////////////////////////////////////////////////////////
+//
+// Methods dealing with file items
+//
+// save() is not required for file functions
+//
+///////////////////////////////////////////////////////
+Scholar.Item.prototype.incrementFileCount = function(){
+	this._data['numFiles']++;
+}
+
+
+Scholar.Item.prototype.decrementFileCount = function(){
+	this._data['numFiles']--;
+}
+
+
+/**
+* Determine if an item is a file
+**/
+Scholar.Item.prototype.isFile = function(){
+	return Scholar.ItemTypes.getName(this.getType())=='file';
+}
+
+
+/**
+* Returns number of files in item
+**/
+Scholar.Item.prototype.numFiles = function(){
+	if (this.isFile()){
+		throw ("numFiles() cannot be called on items of type 'file'");
+	}
+	
+	if (!this.getID()){
+		return 0;
+	}
+	
+	return this._data['numFiles'];
+}
+
+
+/**
+* Get an nsILocalFile for the file item, or false if the associated file doesn't exist
+*
+* Note: Always returns false for items with LINK_MODE_LINKED_URL,
+* since they have no files -- use getFileURL() instead
+**/
+Scholar.Item.prototype.getFile = function(){
+	if (!this.isFile()){
+		throw ("getFile() can only be called on items of type 'file'");
+	}
+	
+	var sql = "SELECT linkMode, path FROM itemFiles WHERE itemID=" + this.getID();
+	var row = Scholar.DB.rowQuery(sql);
+	
+	if (!row){
+		throw ('File data not found for item ' + this.getID() + ' in getFile()');
+	}
+	
+	// No associated files for linked URLs
+	if (row['linkMode']==Scholar.Files.LINK_MODE_LINKED_URL){
+		return false;
+	}
+	
+	var file = Components.classes["@mozilla.org/file/local;1"].
+		createInstance(Components.interfaces.nsILocalFile);
+	
+	var refDir = (linkMode==this.LINK_MODE_LINKED_FILE)
+		? Scholar.getScholarDirectory() : Scholar.getStorageDirectory();
+	file.setRelativeDescriptor(refDir, row['path']);
+	
+	if (!file.exists()){
+		return false;
+	}
+	
+	return file;
+}
+
+
+Scholar.Item.prototype.getFileURL = function(){
+	if (!this.isFile()){
+		throw ("getFileURL() can only be called on items of type 'file'");
+	}
+	
+	var sql = "SELECT linkMode, path, originalPath FROM itemFiles "
+		+ "WHERE itemID=" + this.getID();
+	var row = Scholar.DB.rowQuery(sql);
+	
+	if (!row){
+		throw ('File data not found for item ' + this.getID() + ' in getFileURL()');
+	}
+	
+	switch (row['linkMode']){
+		case Scholar.Files.LINK_MODE_LINKED_URL:
+			return row['path'];
+		case Scholar.Files.LINK_MODE_IMPORTED_URL:
+			return row['originalPath'];
+		default:
+			throw ('getFileURL() cannot be called on files without associated URLs');
+	}
+}
+
+
+/**
+* Get the link mode of a file item
+*
+* Possible return values specified as constants in Scholar.Files
+* (e.g. Scholar.Files.LINK_MODE_LINKED_FILE)
+**/
+Scholar.Item.prototype.getFileLinkMode = function(){
+	if (!this.isFile()){
+		throw ("getFileLinkMode() can only be called on items of type 'file'");
+	}
+	
+	var sql = "SELECT linkMode FROM itemFiles WHERE itemID=" + this.getID();
+	return Scholar.DB.valueQuery(sql);
+}
+
+
+/**
+* Get the mime type of a file item (e.g. text/plain)
+**/
+Scholar.Item.prototype.getFileMimeType = function(){
+	if (!this.isFile()){
+		throw ("getFileData() can only be called on items of type 'file'");
+	}
+	
+	var sql = "SELECT mimeType FROM itemFiles WHERE itemID=" + this.getID();
+	return Scholar.DB.valueQuery(sql);
+}
+
+
+/**
+* Get the character set id of a file item
+**/
+Scholar.Item.prototype.getFileCharset = function(){
+	if (!this.isFile()){
+		throw ("getFileCharset() can only be called on items of type 'file'");
+	}
+	
+	var sql = "SELECT charsetID FROM itemFiles WHERE itemID=" + this.getID();
+	return Scholar.DB.valueQuery(sql);
+}
+
+
+/**
+* Returns an array of file itemIDs for this item
+**/
+Scholar.Item.prototype.getFiles = function(){
+	if (this.isFile()){
+		throw ("getFiles() cannot be called on items of type 'file'");
+	}
+	
+	if (!this.getID()){
+		return [];
+	}
+	
+	var sql = "SELECT itemID FROM itemFiles NATURAL JOIN items "
+		+ "WHERE sourceItemID=" + this.getID() + " ORDER BY dateAdded";
+	return Scholar.DB.columnQuery(sql);
+}
+
 
 
 //
@@ -1069,8 +1266,9 @@ Scholar.Item.prototype.erase = function(){
 		Scholar.Collections.get(parentCollectionIDs[i]).removeItem(this.getID());
 	}
 	
-	// If note, remove item from source notes
+	// Note
 	if (this.isNote()){
+		// Decrement note count of source items
 		var sql = "SELECT sourceItemID FROM itemNotes WHERE itemID=" + this.getID();
 		var sourceItemID = Scholar.DB.valueQuery(sql);
 		if (sourceItemID){
@@ -1079,17 +1277,53 @@ Scholar.Item.prototype.erase = function(){
 			changedItems.push(sourceItemID);
 		}
 	}
-	// If not note, unassociate any notes for which this is a source
+	// File
+	else if (this.isFile()){
+		// Decrement file count of source items
+		var sql = "SELECT sourceItemID FROM itemFiles WHERE itemID=" + this.getID();
+		var sourceItemID = Scholar.DB.valueQuery(sql);
+		if (sourceItemID){
+			var sourceItem = Scholar.Items.get(sourceItemID);
+			sourceItem.decrementFileCount();
+			changedItems.push(sourceItemID);
+		}
+		
+		// Delete associated files
+		var linkMode = this.getFileLinkMode();
+		switch (linkMode){
+			case Scholar.Files.LINK_MODE_LINKED_FILE:
+			case Scholar.Files.LINK_MODE_LINKED_URL:
+				// Links only -- nothing to delete
+				break;
+			default:
+				var file = Scholar.getStorageDirectory();
+				file.append(this.getID());
+				if (file.exists()){
+					file.remove(true);
+				}
+		}
+	}
+	// If regular item, unassociate any notes or files for which this is a source
 	else {
 		// TODO: option for deleting child notes instead of unlinking
 		
+		// Notes
 		var sql = "SELECT itemID FROM itemNotes WHERE sourceItemID=" + this.getID();
 		var childNotes = Scholar.DB.columnQuery(sql);
 		if (childNotes){
 			changedItems.push(childNotes);
 		}
-		
 		var sql = "UPDATE itemNotes SET sourceItemID=NULL WHERE sourceItemID="
+			+ this.getID();
+		Scholar.DB.query(sql);
+		
+		// Files
+		var sql = "SELECT itemID FROM itemFiles WHERE sourceItemID=" + this.getID();
+		var childFiles = Scholar.DB.columnQuery(sql);
+		if (childFiles){
+			changedItems.push(childFiles);
+		}
+		var sql = "UPDATE itemFiles SET sourceItemID=NULL WHERE sourceItemID="
 			+ this.getID();
 		Scholar.DB.query(sql);
 	}
@@ -1102,6 +1336,7 @@ Scholar.Item.prototype.erase = function(){
 	
 	sql = 'DELETE FROM itemCreators WHERE itemID=' + this.getID() + ";\n";
 	sql += 'DELETE FROM itemNotes WHERE itemID=' + this.getID() + ";\n";
+	sql += 'DELETE FROM itemFiles WHERE itemID=' + this.getID() + ";\n";
 	sql += 'DELETE FROM itemSeeAlso WHERE itemID=' + this.getID() + ";\n";
 	sql += 'DELETE FROM itemSeeAlso WHERE linkedItemID=' + this.getID() + ";\n";
 	sql += 'DELETE FROM itemTags WHERE itemID=' + this.getID() + ";\n";
@@ -1115,8 +1350,14 @@ Scholar.Item.prototype.erase = function(){
 		Scholar.DB.commitTransaction();
 	}
 	catch (e){
+		// On failure, reset count of source items
 		if (sourceItem){
-			sourceItem.incrementNoteCount();
+			if (this.isNote()){
+				sourceItem.incrementNoteCount();
+			}
+			else if (this.isFile()){
+				sourceItem.incrementFileCount();
+			}
 		}
 		Scholar.DB.rollbackTransaction();
 		throw (e);
@@ -1167,6 +1408,7 @@ Scholar.Item.prototype.toArray = function(){
 			// Skip certain fields
 			case 'firstCreator':
 			case 'numNotes':
+			case 'numFiles':
 				continue;
 			
 			// For the rest, just copy over
@@ -1180,7 +1422,7 @@ Scholar.Item.prototype.toArray = function(){
 		arr[Scholar.ItemFields.getName(i)] = this._itemData[i];
 	}
 	
-	if (!this.isNote()){
+	if (!this.isNote() && !this.isFile()){
 		// Creators
 		arr['creators'] = [];
 		var creators = this.getCreators();
@@ -1192,9 +1434,20 @@ Scholar.Item.prototype.toArray = function(){
 			arr['creators'][i]['creatorType'] =
 				Scholar.CreatorTypes.getName(creators[i]['creatorTypeID']);
 		}
-		
-		// Source notes
-		arr['notes'] = []
+	}
+	
+	// Notes
+	if (this.isNote()){
+		// Don't need title for notes
+		delete arr['title'];
+		arr['note'] = this.getNote();
+		if (this.getSource()){
+			arr['sourceItemID'] = this.getSource();
+		}
+	}
+	// If not note, append attached notes
+	else {
+		arr['notes'] = [];
 		var notes = this.getNotes();
 		for (var i in notes){
 			var note = Scholar.Items.get(notes[i]);
@@ -1207,15 +1460,33 @@ Scholar.Item.prototype.toArray = function(){
 		}
 	}
 	
-	// Notes
-	else {
-		// Don't need title for notes
+	// Append source files
+	if (this.isFile()){
+		arr['fileName'] = arr['title'];
 		delete arr['title'];
-		arr['note'] = this.getNote();
-		if (this.getNoteSource()){
-			arr['sourceItemID'] = this.getNoteSource();
+		
+		// TODO: file data
+		
+		if (this.getSource()){
+			arr['sourceItemID'] = this.getSource();
 		}
 	}
+	
+	// If not file, append attached files
+	else {
+		arr['files'] = [];
+		var files = this.getFiles();
+		for (var i in files){
+			var file = Scholar.Items.get(files[i]);
+			arr['files'].push({
+				itemID: file.getID(),
+				// TODO
+				tags: file.getTags(),
+				seeAlso: file.getSeeAlso()
+			});
+		}
+	}
+	
 	
 	arr['tags'] = this.getTags();
 	arr['seeAlso'] = this.getSeeAlso();
@@ -1473,7 +1744,8 @@ Scholar.Items = new function(){
 		var sql = 'SELECT I.*, lastName || '
 			+ 'CASE ((SELECT COUNT(*) FROM itemCreators WHERE itemID=I.itemID)>1) '
 			+ "WHEN 0 THEN '' ELSE ' et al.' END AS firstCreator, "
-			+ "(SELECT COUNT(*) FROM itemNotes WHERE sourceItemID=I.itemID) AS numNotes "
+			+ "(SELECT COUNT(*) FROM itemNotes WHERE sourceItemID=I.itemID) AS numNotes, "
+			+ "(SELECT COUNT(*) FROM itemFiles WHERE sourceItemID=I.itemID) AS numFiles "
 			+ 'FROM items I '
 			+ 'LEFT JOIN itemCreators IC ON (I.itemID=IC.itemID) '
 			+ 'LEFT JOIN creators C ON (IC.creatorID=C.creatorID) '
@@ -1554,7 +1826,231 @@ Scholar.Notes = new function(){
 
 
 
-
+Scholar.Files = new function(){
+	this.LINK_MODE_IMPORTED_FILE = 0;
+	this.LINK_MODE_IMPORTED_URL = 1;
+	this.LINK_MODE_LINKED_FILE = 2;
+	this.LINK_MODE_LINKED_URL = 3;
+	
+	this.importFromFile = importFromFile;
+	this.linkFromFile = linkFromFile;
+	this.linkFromDocument = linkFromDocument;
+	this.importFromDocument = importFromDocument;
+	
+	
+	function importFromFile(file, sourceItemID){
+		var title = file.leafName;
+		
+		Scholar.DB.beginTransaction();
+		
+		// Create a new file item
+		var fileItem = Scholar.Items.getNewItemByType(Scholar.ItemTypes.getID('file'));
+		fileItem.setField('title', title);
+		fileItem.save();
+		var itemID = fileItem.getID();
+		
+		// Create directory for item files within storage directory
+		var destDir = Scholar.getStorageDirectory();
+		destDir.append(itemID);
+		destDir.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0644);
+		
+		try {
+			file.copyTo(destDir, null);
+		}
+		catch (e){
+			// hmph
+			Scholar.DB.rollbackTransaction();
+			destDir.remove(true);
+			throw (e);
+		}
+		
+		// Point to copied file
+		var newFile = Components.classes["@mozilla.org/file/local;1"]
+						.createInstance(Components.interfaces.nsILocalFile);
+		newFile.initWithFile(destDir);
+		newFile.append(title);
+		
+		var mimeType = _getMIMETypeFromFile(newFile);
+		var charsetID = _getCharsetIDFromFile(newFile);
+		
+		_addToDB(newFile, null, null, this.LINK_MODE_IMPORTED_FILE, mimeType, charsetID, sourceItemID, itemID);
+		Scholar.DB.commitTransaction();
+		return itemID;
+	}
+	
+	
+	function linkFromFile(file, sourceItemID){
+		var title = file.leafName;
+		var mimeType = _getMIMETypeFromFile(file);
+		var charsetID = _getCharsetIDFromFile(file);
+		return _addToDB(file, null, title, this.LINK_MODE_LINKED_FILE, mimeType, charsetID, sourceItemID);
+	}
+	
+	
+	// TODO: what if called on file:// document?
+	function linkFromDocument(document, sourceItemID){
+		var url = document.location;
+		var title = document.title; // TODO: don't use Mozilla-generated title for images, etc.
+		var mimeType = document.contentType;
+		var charsetID = Scholar.CharacterSets.getID(document.characterSet);
+		
+		return _addToDB(null, url, title, this.LINK_MODE_LINKED_URL, mimeType, charsetID, sourceItemID);
+	}
+	
+	
+	function importFromDocument(document, sourceItemID){
+		var url = document.location;
+		var title = document.title;
+		var mimeType = document.contentType;
+		var charsetID = Scholar.CharacterSets.getID(document.characterSet);
+		
+		const nsIWBP = Components.interfaces.nsIWebBrowserPersist;
+		var wbp = Components
+			.classes["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"]
+			.createInstance(nsIWBP);
+		//wbp.persistFlags = nsIWBP.PERSIST_FLAGS...;
+		var encodingFlags = false;
+		
+		Scholar.DB.beginTransaction();
+		
+		// Create a new file item
+		var fileItem = Scholar.Items.getNewItemByType(Scholar.ItemTypes.getID('file'));
+		fileItem.setField('title', title);
+		fileItem.save();
+		var itemID = fileItem.getID();
+		
+		// Create a new folder for this item in the storage directory
+		var destDir = Scholar.getStorageDirectory();
+		destDir.append(itemID);
+		destDir.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0644);
+		
+		var file = Components.classes["@mozilla.org/file/local;1"].
+				createInstance(Components.interfaces.nsILocalFile);
+		file.initWithFile(destDir);
+		file.append(_getFileNameFromURL(url, mimeType));
+		
+		wbp.saveDocument(document, file, destDir, mimeType, encodingFlags, false);
+		
+		_addToDB(file, url, title, this.LINK_MODE_IMPORTED_URL, mimeType, charsetID, sourceItemID, itemID);
+		
+		Scholar.DB.commitTransaction();
+		return itemID;
+	}
+	
+	
+	// TODO: currently only uses file extension
+	function _getMIMETypeFromFile(file){
+		var ms = Components
+			.classes['@mozilla.org/uriloader/external-helper-app-service;1']
+			.getService(Components.interfaces.nsIMIMEService);
+		return ms.getTypeFromFile(file);
+	}
+	
+	
+	function _getCharsetIDFromFile(file){
+		// TODO: Not yet implemented
+		return null;
+	}
+	
+	
+	function _getFileNameFromURL(url, mimeType){
+		var nsIURL = Components.classes["@mozilla.org/network/standard-url;1"]
+					.createInstance(Components.interfaces.nsIURL);
+		nsIURL.spec = url;
+		
+		if (nsIURL.fileName){
+			return nsIURL.fileName;
+		}
+		
+		if (mimeType){
+			var ext = Components.classes["@mozilla.org/mime;1"]
+				.getService(Components.interfaces.nsIMIMEService)
+				.getPrimaryExtension(mimeType, nsIURL.fileExt ? nsIURL.fileExt : null);
+		}
+		
+		return nsIURL.host + (ext ? '.' + ext : '');
+	}
+	
+	
+	/**
+	* Create a new item of type 'file' and add the file link to the itemFiles table
+	*
+	* Passing an itemID causes it to skip new item creation and use the specified
+	* item instead -- used when importing files (since we have to know
+	* the itemID before copying in a file and don't want to update the DB before
+	* the file is saved)
+	*
+	* Returns the itemID of the new file item
+	**/
+	function _addToDB(file, url, title, linkMode, mimeType, charsetID, sourceItemID, itemID){
+		if (url){
+			var path = url;
+		}
+		
+		if (file){
+			if (linkMode==this.LINK_MODE_IMPORTED_URL){
+				var originalPath = path;
+			}
+			
+			// Path relative to Scholar directory for external files and relative
+			// to storage directory for imported files
+			var refDir = (linkMode==this.LINK_MODE_LINKED_FILE)
+				? Scholar.getScholarDirectory() : Scholar.getStorageDirectory();
+			var path = file.getRelativeDescriptor(refDir);
+		}
+		
+		Scholar.DB.beginTransaction();
+		
+		if (sourceItemID){
+			var sourceItem = Scholar.Items.get(sourceItemID);
+			if (!sourceItem){
+				Scholar.DB.commitTransaction();
+				throw ("Cannot set file source to invalid item " + sourceItemID);
+			}
+			if (sourceItem.isFile()){
+				Scholar.DB.commitTransaction();
+				throw ("Cannot set file source to another file (" + sourceItemID + ")");
+			}
+		}
+		
+		// If an itemID is provided, use that
+		if (itemID){
+			var fileItem = Scholar.Items.get(itemID);
+			if (!fileItem.isFile()){
+				throw ("Item " + itemID + " is not a valid file item in _addToDB()");
+			}
+		}
+		// Otherwise create a new file item
+		else {
+			var fileItem = Scholar.Items.getNewItemByType(Scholar.ItemTypes.getID('file'));
+			fileItem.setField('title', title);
+			fileItem.save();
+		}
+		
+		var sql = "INSERT INTO itemFiles (itemID, sourceItemID, linkMode, "
+			+ "mimeType, charsetID, path, originalPath) VALUES (?,?,?,?,?,?,?)";
+		var bindParams = [
+			fileItem.getID(),
+			(sourceItemID ? {int:sourceItemID} : null),
+			{int:linkMode},
+			{string:mimeType},
+			(charsetID ? {int:charsetID} : null),
+			{string:path},
+			(originalPath ? {string:originalPath} : null)
+		];
+		Scholar.DB.query(sql, bindParams);
+		Scholar.DB.commitTransaction();
+		
+		if (sourceItemID){
+			sourceItem.incrementNoteCount();
+			Scholar.Notifier.trigger('modify', 'item', sourceItemID);
+		}
+		
+		Scholar.Notifier.trigger('add', 'item', fileItem.getID());
+		
+		return fileItem.getID();
+	}
+}
 
 /*
  * Constructor for Collection object
@@ -2279,7 +2775,8 @@ Scholar.Tags = new function(){
 
 
 /*
- * Same structure as Scholar.ItemTypes -- make changes in both places if possible
+ * Same structure as Scholar.ItemTypes and FileTypes --
+ *		make changes in both places if possible
  */
 Scholar.CreatorTypes = new function(){
 	var _types = new Array();
@@ -2344,7 +2841,8 @@ Scholar.CreatorTypes = new function(){
 
 
 /*
- * Same structure as Scholar.CreatorTypes -- make changes in both places if possible
+ * Same structure as Scholar.CreatorTypes and FileTypes --
+ *		make changes in both places if possible
  */
 Scholar.ItemTypes = new function(){
 	var _types = new Array();
@@ -2405,6 +2903,162 @@ Scholar.ItemTypes = new function(){
 	}
 }
 
+
+
+
+
+/*
+ * Same structure as Scholar.ItemTypes and CreatorTypes --
+ * 		make changes in both places if possible
+ */
+Scholar.FileTypes = new function(){
+	var _types = new Array();
+	var _typesLoaded;
+	var self = this;
+	
+	this.getName = getName;
+	this.getID = getID;
+	this.getIDFromMIMEType = getIDFromMIMEType;
+	this.getTypes = getTypes;
+	
+	
+	function getName(idOrName){
+		if (!_typesLoaded){
+			_load();
+		}
+		
+		if (!_types[idOrName]){
+			Scholar.debug('Invalid file type ' + idOrName, 1);
+		}
+		
+		return _types[idOrName]['name'];
+	}
+	
+	
+	function getID(idOrName){
+		if (!_typesLoaded){
+			_load();
+		}
+		
+		if (!_types[idOrName]){
+			Scholar.debug('Invalid file type ' + idOrName, 1);
+		}
+		
+		return _types[idOrName]['id'];
+	}
+	
+	
+	function getIDFromMIMEType(mimeType){
+		// TODO
+	}
+	
+	
+	function getTypes(){
+		return Scholar.DB.query('SELECT fileTypeID AS id, '
+			+ 'fileType AS name FROM fileTypes order BY fileType');
+	}
+	
+	
+	function _load(){
+		var types = self.getTypes();
+		
+		for (i in types){
+			// Store as both id and name for access by either
+			var typeData = {
+				id: types[i]['id'],
+				name: types[i]['name']
+			}
+			_types[types[i]['id']] = typeData;
+			_types[types[i]['name']] = _types[types[i]['id']];
+		}
+		
+		_typesLoaded = true;
+	}
+}
+
+
+
+/*
+ * Same structure as Scholar.ItemTypes, CreatorTypes, etc. --
+ * 		make changes in all versions if possible
+ */
+Scholar.CharacterSets = new function(){
+	var _types = new Array();
+	var _typesLoaded;
+	var self = this;
+	
+	var _typeDesc = 'character set';
+	var _idCol = 'charsetID';
+	var _nameCol = 'charset';
+	var _table = 'charsets';
+	var _ignoreCase = true;
+	
+	this.getName = getName;
+	this.getID = getID;
+	this.getTypes = getTypes;
+	this.getAll = getAll;
+	
+	function getName(idOrName){
+		if (!_typesLoaded){
+			_load();
+		}
+		
+		if (_ignoreCase){
+			idOrName = idOrName.toLowerCase();
+		}
+		
+		if (!_types[idOrName]){
+			Scholar.debug('Invalid ' + _typeDesc + ' ' + idOrName, 1);
+		}
+		
+		return _types[idOrName]['name'];
+	}
+	
+	
+	function getID(idOrName){
+		if (!_typesLoaded){
+			_load();
+		}
+		
+		if (_ignoreCase){
+			idOrName = idOrName.toLowerCase();
+		}
+		
+		if (!_types[idOrName]){
+			Scholar.debug('Invalid ' + _typeDesc + ' ' + idOrName, 1);
+		}
+		
+		return _types[idOrName]['id'];
+	}
+	
+	
+	function getTypes(){
+		return Scholar.DB.query('SELECT ' + _idCol + ' AS id, '
+			+ _nameCol + ' AS name FROM ' + _table + ' order BY ' + _nameCol);
+	}
+	
+	
+	function getAll(){
+		return this.getTypes();
+	}
+	
+	
+	function _load(){
+		var types = self.getTypes();
+		
+		for (i in types){
+			// Store as both id and name for access by either
+			var typeData = {
+				id: types[i]['id'],
+				name: _ignoreCase ? types[i]['name'].toLowerCase() : types[i]['name']
+			}
+			_types[types[i]['id']] = typeData;
+			_types[types[i]['name']] = _types[types[i]['id']];
+		}
+		
+		_typesLoaded = true;
+	}
+}
 
 
 
