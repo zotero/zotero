@@ -18,6 +18,9 @@ var Scholar = new function(){
 	
 	// Privileged (public) methods
 	this.init = init;
+	this.getProfileDirectory = getProfileDirectory;
+	this.getScholarDirectory = getScholarDirectory;
+	this.getStorageDirectory = getStorageDirectory;
 	this.debug = debug;
 	this.varDump = varDump;
 	this.getString = getString;
@@ -51,6 +54,7 @@ var Scholar = new function(){
 		this.version
 			= gExtensionManager.getItemForID(SCHOLAR_CONFIG['GUID']).version;
 		
+		
 		// Load in the localization stringbundle for use by getString(name)
 		var src = 'chrome://scholar/locale/scholar.properties';
 		var localeService =
@@ -68,6 +72,37 @@ var Scholar = new function(){
 		
 		_initialized = true;
 		return true;
+	}
+	
+	
+	function getProfileDirectory(){
+		return Components.classes["@mozilla.org/file/directory_service;1"]
+			 .getService(Components.interfaces.nsIProperties)
+			 .get("ProfD", Components.interfaces.nsIFile);
+	}
+	
+	
+	function getScholarDirectory(){
+		var file = Scholar.getProfileDirectory();
+		
+		file.append('scholar');
+		// If it doesn't exist, create
+		if (!file.exists() || !file.isDirectory()){
+			file.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0664);
+		}
+		return file;
+	}
+	
+	
+	function getStorageDirectory(){
+		var file = Scholar.getScholarDirectory();
+		
+		file.append('storage');
+		// If it doesn't exist, create
+		if (!file.exists() || !file.isDirectory()){
+			file.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0664);
+		}
+		return file;
 	}
 	
 	

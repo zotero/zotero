@@ -359,12 +359,10 @@ Scholar.DB = new function(){
 		var store = Components.classes["@mozilla.org/storage/service;1"].
 			getService(Components.interfaces.mozIStorageService);
 		
-		// Get the profile directory
-		var file = Components.classes["@mozilla.org/file/directory_service;1"]
-			.getService(Components.interfaces.nsIProperties)
-			.get("ProfD", Components.interfaces.nsIFile);
+		// Get the storage directory
+		var file = Scholar.getScholarDirectory();
 		
-		// This makes file point to PROFILE_DIR/<scholar database file>
+		// This makes file point to PROFILE_DIR/<scholar dir>/<scholar database file>
 		file.append(SCHOLAR_CONFIG['DB_FILE']);
 		
 		_connection = store.openDatabase(file);
