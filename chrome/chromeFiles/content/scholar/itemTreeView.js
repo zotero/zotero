@@ -116,7 +116,9 @@ Scholar.ItemTreeView.prototype.notify = function(action, type, ids)
 	{
 		var item = Scholar.Items.get(ids);
 				
-		if((this._itemGroup.isLibrary() || item.inCollection(this._itemGroup.ref.getID())) && this._itemRowMap[ids] == null && (!item.isNote() || !item.getNoteSource()))
+		if((this._itemGroup.isLibrary() || item.inCollection(this._itemGroup.ref.getID())) 		//if the item belongs in this collection
+			&& this._itemRowMap[ids] == null 													//if we haven't already added it to our hash map
+			&& (item.isRegularItem() || !item.getSource()))										//if it's stand-alone
 		{
 			this._showItem(new Scholar.ItemTreeView.TreeRow(item,0,false),this.rowCount);
 			this._treebox.rowCountChanged(this.rowCount-1,1);
@@ -205,7 +207,7 @@ Scholar.ItemTreeView.prototype.getImageSrc = function(row, col)
 
 Scholar.ItemTreeView.prototype.isContainer = function(row)
 {
-	return !this._getItemAtRow(row).isNote();
+	return this._getItemAtRow(row).isRegularItem();
 }
 
 Scholar.ItemTreeView.prototype.isContainerOpen = function(row)
@@ -215,7 +217,7 @@ Scholar.ItemTreeView.prototype.isContainerOpen = function(row)
 
 Scholar.ItemTreeView.prototype.isContainerEmpty = function(row)
 {
-	return (this._getItemAtRow(row).numNotes() == 0);
+	return (this._getItemAtRow(row).numNotes() == 0 && this._getItemAtRow(row).numFiles() == 0);
 }
 
 Scholar.ItemTreeView.prototype.getLevel = function(row)
@@ -260,13 +262,25 @@ Scholar.ItemTreeView.prototype.toggleOpenState = function(row)
 	else
 	{
 		var item = this._getItemAtRow(row).ref;
-		var newRows = Scholar.Items.get(item.getNotes()); //Get children
+		//Get children
+		var files = item.getFiles();
+		var notes = item.getNotes();
+		
+		var newRows;
+		if(files && notes)
+			newRows = files.concat(notes);
+		else if(files)
+			newRows = files;
+		else if(notes)
+			newRows = notes;
+		
+		newRows = Scholar.Items.get(newRows); 
 		
 		for(var i = 0; i < newRows.length; i++)
 		{
 			count++;
 			this._showItem(new Scholar.ItemTreeView.TreeRow(newRows[i],thisLevel+1,false), row+i+1); //item ref, before row
-		}	
+		}
 	}
 	
 	this._treebox.beginUpdateBatch();
@@ -430,7 +444,7 @@ Scholar.ItemTreeView.prototype.deleteSelection = function()
 	this._treebox.beginUpdateBatch();
 	for (var i=0; i<items.length; i++)
 	{
-		if(this._itemGroup.isLibrary() || items[i].isNote()) //erase item from DB
+		if(this._itemGroup.isLibrary() || !items[i].isRegularItem()) //erase item from DB
 			items[i].ref.erase();
 		else if(this._itemGroup.isCollection())
 			this._itemGroup.ref.removeItem(items[i].ref.getID());
@@ -601,7 +615,7 @@ Scholar.ItemTreeView.prototype.getCellProperties = function(row, col, prop) 	{ }
 
 Scholar.ItemTreeView.TreeRow = function(ref, level, isOpen)
 {
-	this.ref = ref;			//the item/note associated with this
+	this.ref = ref;			//the item associated with this
 	this.level = level;
 	this.isOpen = isOpen;
 }
@@ -609,6 +623,16 @@ Scholar.ItemTreeView.TreeRow = function(ref, level, isOpen)
 Scholar.ItemTreeView.TreeRow.prototype.isNote = function()
 {
 	return this.ref.isNote();
+}
+
+Scholar.ItemTreeView.TreeRow.prototype.isFile = function()
+{
+	return this.ref.isFile();
+}
+
+Scholar.ItemTreeView.TreeRow.prototype.isRegularItem = function()
+{
+	return this.ref.isRegularItem();
 }
 
 Scholar.ItemTreeView.TreeRow.prototype.getField = function(field)
@@ -638,8 +662,16 @@ Scholar.ItemTreeView.TreeRow.prototype.getType = function()
 
 Scholar.ItemTreeView.TreeRow.prototype.numNotes = function()
 {
-	if(this.isNote())
-		return 0;
-	else
+	if(this.isRegularItem())
 		return this.ref.numNotes();
+	else
+		return 0;
+}
+
+Scholar.ItemTreeView.TreeRow.prototype.numFiles = function()
+{
+	if(this.isRegularItem())
+		return this.ref.numFiles();
+	else
+		return 0;
 }

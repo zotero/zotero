@@ -25,8 +25,8 @@
 					<![CDATA[
 						this.noteRef = val;
 						
-						if(this.note.getNoteSource())
-							this.item = Scholar.Items.get(this.note.getNoteSource());
+						if(this.note.getSource())
+							this.item = Scholar.Items.get(this.note.getSource());
 						
 						this.id('noteField').setAttribute('value',this.note.getNote());
 						this.id('links').item = this.note;

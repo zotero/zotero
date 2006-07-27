@@ -44,6 +44,7 @@ var ScholarPane = new function()
 			newPane.setAttribute('id','scholar-pane');
 			newPane.setAttribute('collapsed',true);
 			newPane.setAttribute('flex','1');
+			newPane.height = oldPane.height;
 			while(oldPane.hasChildNodes())
 				newPane.appendChild(oldPane.firstChild);
 			appContent.removeChild(oldPane);
@@ -168,19 +169,22 @@ var ScholarPane = new function()
 				noteEditor.note = item.ref;
 				document.getElementById('scholar-view-note').lastChild.setAttribute('noteID',item.ref.getID());
 				document.getElementById('item-pane').selectedIndex = 2;
-				document.getElementById('scholar-view-tabs').setAttribute('hidden',true);
+			}
+			else if(item.isFile())
+			{
+				document.getElementById('scholar-file-label').setAttribute('value',item.getField('title'));
+				document.getElementById('scholar-file-links').item = item.ref;
+				document.getElementById('item-pane').selectedIndex = 3;
 			}
 			else
 			{
 				ScholarItemPane.viewItem(item.ref);
 				document.getElementById('item-pane').selectedIndex = 1;
-				document.getElementById('scholar-view-tabs').setAttribute('hidden',false);
 			}
 		}
 		else
 		{
 			document.getElementById('item-pane').selectedIndex = 0;
-				document.getElementById('scholar-view-tabs').setAttribute('hidden',true);
 			
 			var label = document.getElementById('scholar-view-selected-label');
 		

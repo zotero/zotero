@@ -25,6 +25,9 @@ ScholarItemPane = new function()
 	this.modifyCreator = modifyCreator;
 	this.removeNote = removeNote;
 	this.addNote = addNote;
+	this.removeFile = removeFile;
+	this.addFileFromDialog = addFileFromDialog;
+	this.addFileFromPage = addFileFromPage;
 	
 	function onLoad()
 	{
@@ -34,6 +37,8 @@ ScholarItemPane = new function()
 		_creatorTypeMenu = document.getElementById('creatorTypeMenu');
 		_notesList = document.getElementById('editpane-dynamic-notes');
 		_notesLabel = document.getElementById('editpane-notes-label');
+		_filesList = document.getElementById('editpane-dynamic-files');
+		_filesLabel = document.getElementById('editpane-files-label');
 		_tagsBox = document.getElementById('editpane-tags');
 		_relatedBox = document.getElementById('editpane-related');
 		
@@ -50,7 +55,7 @@ ScholarItemPane = new function()
 		
 		var itemTypes = Scholar.ItemTypes.getTypes();
 		for(var i = 0; i<itemTypes.length; i++)
-			if(itemTypes[i]['id'] != 1)
+			if(itemTypes[i]['name'] != 'note' && itemTypes[i]['name'] != 'file')
 				_itemTypeMenu.appendItem(Scholar.getString("itemTypes."+itemTypes[i]['name']),itemTypes[i]['id']);
 		
 		return true;
@@ -76,7 +81,6 @@ ScholarItemPane = new function()
 		
 		if(index == 0)
 		{
-			Scholar.debug('loading FIELDS');
 			while(_dynamicFields.hasChildNodes())
 				_dynamicFields.removeChild(_dynamicFields.firstChild);
 		
@@ -120,7 +124,6 @@ ScholarItemPane = new function()
 		}
 		else if(index == 1)
 		{
-			Scholar.debug('loading NOTES');
 			//NOTES:
 			while(_notesList.hasChildNodes())
 				_notesList.removeChild(_notesList.firstChild);
@@ -160,18 +163,51 @@ ScholarItemPane = new function()
 		}
 		else if(index == 2)
 		{
-			Scholar.debug('loading FILES');
 			//FILES
+			while(_filesList.hasChildNodes())
+				_filesList.removeChild(_filesList.firstChild);
+				
+			var files = Scholar.Items.get(_itemBeingEdited.getFiles());
+			if(files.length)
+			{
+				for(var i = 0; i < files.length; i++)
+				{
+					var icon = document.createElement('image');
+					icon.setAttribute('src','chrome://scholar/skin/treeitem-file.png');
+				
+					var label = document.createElement('label');
+					label.setAttribute('value',files[i].getField('title'));
+					label.setAttribute('crop','end');
+				
+					var box = document.createElement('box');
+//					box.setAttribute('onclick',"ScholarPane.openNoteWindow("+files[i].getID()+");");
+					box.setAttribute('class','clicky');
+					box.appendChild(icon);
+					box.appendChild(label);
+				
+					var removeButton = document.createElement('label');
+					removeButton.setAttribute("value","-");
+					removeButton.setAttribute("class","clicky");
+					removeButton.setAttribute("onclick","ScholarItemPane.removeFile("+files[i].getID()+")");
+				
+					var row = document.createElement('row');
+					row.appendChild(box);
+					row.appendChild(removeButton);
+				
+					_filesList.appendChild(row);
+				}
+			}
+		
+			_updateFileCount();
+			
 		}
 		else if(index == 3)
 		{
-			Scholar.debug('loading TAGS');
 			//TAGS:
 			_tagsBox.item = _itemBeingEdited;
 		}
 		else if(index == 4)
 		{
-			Scholar.debug('loading RELATED');
 			//RELATED
 			_relatedBox.item = _itemBeingEdited;
 		}
@@ -387,6 +423,37 @@ ScholarItemPane = new function()
 		var c = _notesList.childNodes.length;
 		
 		_notesLabel.value = Scholar.getString('pane.item.notes.count.'+(c != 1 ? "plural" : "singular")).replace('%1',c) + ":";
+	}
+	
+	function _updateFileCount()
+	{
+		var c = _filesList.childNodes.length;
+		
+		_filesLabel.value = Scholar.getString('pane.item.files.count.'+(c != 1 ? "plural" : "singular")).replace('%1',c) + ":";
+	}
+	
+	function removeFile(id)
+	{
+		var file = Scholar.Items.get(id);
+		if(file)
+			if(confirm(Scholar.getString('pane.item.files.delete.confirm')))
+				file.erase();
+	}
+	
+	function addFileFromDialog()
+	{
+		var nsIFilePicker = Components.interfaces.nsIFilePicker;
+		var fp = Components.classes["@mozilla.org/filepicker;1"]
+        					.createInstance(nsIFilePicker);
+		fp.init(window, "Select a File", nsIFilePicker.modeOpen);
+		
+		if(fp.show() == nsIFilePicker.returnOK)
+			Scholar.Files.importFromFile(fp.file, _itemBeingEdited.getID());
+	}
+	
+	function addFileFromPage()
+	{
+		Scholar.Files.importFromDocument(window.document, _itemBeingEdited.getID());
 	}
 }
 

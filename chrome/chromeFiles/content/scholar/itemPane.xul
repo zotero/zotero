@@ -34,8 +34,19 @@
 					<rows id="editpane-dynamic-notes" flex="1"/>
 				</grid>
 			</vbox>
-			<vbox align="center" pack="center">
-				<label value="Coming soon"/>
+			<vbox flex="1">
+				<hbox align="center">
+					<label id="editpane-files-label"/>
+					<button label="Add File..." oncommand="ScholarItemPane.addFileFromDialog();"/>
+					<button label="Save Page" oncommand="ScholarItemPane.addFileFromPage();"/>
+				</hbox>
+				<grid flex="1">
+					<columns>
+						<column flex="1"/>
+						<column/>
+					</columns>
+					<rows id="editpane-dynamic-files" flex="1"/>
+				</grid>
 			</vbox>
 			<tagsbox id="editpane-tags" flex="1"/>
 			<seealsobox id="editpane-related" flex="1"/>
