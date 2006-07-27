@@ -776,6 +776,11 @@ Scholar.Item.prototype.updateDateModified = function(){
 }
 
 
+Scholar.Item.prototype.isRegularItem = function(){
+	return !(this.isNote() || this.isFile());
+}
+
+
 ////////////////////////////////////////////////////////
 //
 // Methods dealing with note items
