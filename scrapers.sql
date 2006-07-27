@@ -4024,12 +4024,12 @@ MARC_Record.prototype.translate = function(item) {
 	// Extract series
 	this._associateDBField(item, ''440'', ''a'', ''series'');
 	// Extract call number
-	this._associateDBField(item, ''050'', ''ab'', ''callNumber'');
-	this._associateDBField(item, ''060'', ''ab'', ''callNumber'');
-	this._associateDBField(item, ''070'', ''ab'', ''callNumber'');
-	this._associateDBField(item, ''080'', ''ab'', ''callNumber'');
-	this._associateDBField(item, ''082'', ''a'', ''callNumber'');
 	this._associateDBField(item, ''084'', ''ab'', ''callNumber'');
+	this._associateDBField(item, ''082'', ''a'', ''callNumber'');
+	this._associateDBField(item, ''080'', ''ab'', ''callNumber'');
+	this._associateDBField(item, ''070'', ''ab'', ''callNumber'');
+	this._associateDBField(item, ''060'', ''ab'', ''callNumber'');
+	this._associateDBField(item, ''050'', ''ab'', ''callNumber'');
 	
 	// Set type
 	item.itemType = "book";

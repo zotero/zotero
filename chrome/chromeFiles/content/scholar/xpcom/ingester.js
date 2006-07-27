@@ -4,21 +4,6 @@
 
 Scholar.Ingester = new Object();
 
-Scholar.Ingester.createHiddenBrowser = function(myWindow) {
-	// Create a hidden browser			
-	var newHiddenBrowser = myWindow.document.createElement("browser");
-	var windows = myWindow.document.getElementsByTagName("window");
-	windows[0].appendChild(newHiddenBrowser);
-	Scholar.debug("created hidden browser");
-	return newHiddenBrowser;
-}
-
-Scholar.Ingester.deleteHiddenBrowser = function(myBrowser) {			
-	// Delete a hidden browser
-	delete myBrowser;
-	Scholar.debug("deleted hidden browser");
-}
-
 /////////////////////////////////////////////////////////////////
 //
 // Scholar.Ingester.ProxyMonitor

@@ -33,3 +33,10 @@
 <!ENTITY selectitems.intro.label   		"Select which items you'd like to add to your library">
 <!ENTITY selectitems.cancel.label   	"Cancel">
 <!ENTITY selectitems.select.label   	"OK">
+
+<!ENTITY bibliography.title				"Create Bibliography">
+<!ENTITY bibliography.style.label		"Citation Style:">
+<!ENTITY bibliography.output.label		"Output Format:">
+<!ENTITY bibliography.saveAsHTML.label	"Save as HTML">
+<!ENTITY bibliography.copyToClipboard.label	"Copy to Clipboard">
+<!ENTITY bibliography.print.label		"Print">

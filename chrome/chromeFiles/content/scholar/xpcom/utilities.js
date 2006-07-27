@@ -535,10 +535,7 @@ Scholar.Utilities.HTTP = new function() {
 // saveBrowser - whether to save the hidden browser object; usually, you don't
 //               want to do this, because it makes it easier to leak memory
 Scholar.Utilities.HTTP.processDocuments = function(firstDoc, urls, processor, done, exception, saveBrowser) {
-	var myWindow = Components.classes["@mozilla.org/appshell/appShellService;1"]
-				   .getService(Components.interfaces.nsIAppShellService)
-				   .hiddenDOMWindow;
-	var hiddenBrowser = Scholar.Ingester.createHiddenBrowser(myWindow);
+	var hiddenBrowser = Scholar.Browser.createHiddenBrowser();
 	var prevUrl, url;
 	
 	try {
@@ -566,7 +563,7 @@ Scholar.Utilities.HTTP.processDocuments = function(firstDoc, urls, processor, do
 			} else {
 				hiddenBrowser.removeEventListener("load", onLoad, true);
 				if(!saveBrowser) {
-					Scholar.Ingester.deleteHiddenBrowser(hiddenBrowser);
+					Scholar.Browser.deleteHiddenBrowser(hiddenBrowser);
 				}
 				done();
 			}

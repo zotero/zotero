@@ -523,3 +523,30 @@ Scholar.Date = new function(){
 		}
 	}
 }
+
+Scholar.Browser = new function() {
+	this.createHiddenBrowser = createHiddenBrowser;
+	this.deleteHiddenBrowser = deleteHiddenBrowser;
+	
+	 function createHiddenBrowser(myWindow) {
+	 	if(!myWindow) {
+			var myWindow = Components.classes["@mozilla.org/appshell/appShellService;1"]
+				   .getService(Components.interfaces.nsIAppShellService)
+				   .hiddenDOMWindow;
+		}
+		
+		// Create a hidden browser			
+		var newHiddenBrowser = myWindow.document.createElement("browser");
+		var windows = myWindow.document.getElementsByTagName("window");
+		windows[0].appendChild(newHiddenBrowser);
+		Scholar.debug("created hidden browser");
+		return newHiddenBrowser;
+	}
+	
+	function deleteHiddenBrowser(myBrowser) {			
+		// Delete a hidden browser
+		myBrowser.parentNode.removeChild(myBrowser);
+		delete myBrowser;
+		Scholar.debug("deleted hidden browser");
+	}
+}

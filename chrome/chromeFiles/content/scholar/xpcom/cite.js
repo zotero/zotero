@@ -9,7 +9,7 @@ Scholar.Cite = new function() {
 	
 	function getStyles() {
 		// TODO: return key/values from database
-		return ["American Psychological Association"];
+		return {1:"American Psychological Association"};
 	}
 	
 	function getBibliography(style, items) { 
