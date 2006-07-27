@@ -99,7 +99,7 @@
 				</hbox>
 				<tree 
 					id="items-tree" context="scholar-itemmenu"
-					enableColumnDrag="true" onkeypress="if(event.keyCode == event.DOM_VK_BACK_SPACE || event.keyCode == event.DOM_VK_DELETE){ ScholarPane.deleteSelectedItem(); return false; }"
+					enableColumnDrag="true" onkeypress="if(event.keyCode == event.DOM_VK_BACK_SPACE || event.keyCode == event.DOM_VK_DELETE){ ScholarPane.deleteSelectedItem(); return false; } if(event.charCode == 97) if(event.metaKey){ this.view.selection.selectAll(); return false;}"
 					onselect="ScholarPane.itemSelected();"
 					ondraggesture="if (event.target.localName == 'treechildren') nsDragAndDrop.startDrag(event,ScholarPane.getItemsView());"
 					ondragover="nsDragAndDrop.dragOver(event,ScholarPane.getItemsView())"
