@@ -3273,8 +3273,9 @@ Scholar.getItems = function(parent){
 	var toReturn = new Array();
 	
 	if (!parent){
-		var sql = "SELECT itemID FROM items LEFT JOIN itemNotes USING (itemID) "
-			+ "WHERE sourceItemID IS NULL";
+		var sql = "SELECT A.itemID FROM items A LEFT JOIN itemNotes B USING (itemID) "
+			+ "LEFT JOIN itemFiles C ON (C.itemID=A.itemID) WHERE B.sourceItemID IS NULL"
+			+ " AND C.sourceItemID IS NULL";
 	}
 	else {
 		var sql = 'SELECT itemID FROM collectionItems '
