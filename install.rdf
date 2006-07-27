@@ -5,7 +5,7 @@
   <Description about="urn:mozilla:install-manifest">
   
     <em:id>scholar@chnm.gmu.edu</em:id>
-    <em:name>Scholar for Firefox</em:name>
+    <em:name>Scholar</em:name>
     <em:version>1.0a1.SVN</em:version>
     <em:description>A bibliographic management and note-taking tool</em:description>
     <em:creator>Center for History and New Media<br/>George Mason University</em:creator>
