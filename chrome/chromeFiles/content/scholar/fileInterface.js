@@ -143,6 +143,22 @@ Scholar_File_Interface = new function() {
 				
 				fStream.close();
 			}
+		} else if(io.output == "copy-to-clipboard") {
+			// copy to clipboard
+			var transferable = Components.classes["@mozilla.org/widget/transferable;1"].
+			                   createInstance(Components.interfaces.nsITransferable);
+			
+			var str = Components.classes["@mozilla.org/supports-string;1"].
+			          createInstance(Components.interfaces.nsISupportsString);
+			str.data = bibliography;
+			
+			// add data
+			transferable.addDataFlavor("text/html");
+			transferable.setTransferData("text/html", str, bibliography.length*2);
+			
+			var clipboardService = Components.classes["@mozilla.org/widget/clipboard;1"].
+			                       getService(Components.interfaces.nsIClipboard);
+			clipboardService.setData(transferable, null, Components.interfaces.nsIClipboard.kGlobalClipboard);
 		}
 	}
 }
