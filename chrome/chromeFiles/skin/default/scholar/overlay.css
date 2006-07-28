@@ -89,6 +89,26 @@
 	list-style-image: url('chrome://scholar/skin/toolbar-note-add.png');
 }
 
+#tb-item-files-add
+{
+	list-style-image: url('chrome://scholar/skin/item-files-add.png');
+}
+
+#tb-item-files-link
+{
+	list-style-image: url('chrome://scholar/skin/item-files-link.png');
+}
+
+#tb-item-files-snapshot
+{
+	list-style-image: url('chrome://scholar/skin/item-files-snapshot.png');
+}
+
+#tb-item-files-web-link
+{
+	list-style-image: url('chrome://scholar/skin/item-files-web-link.png');
+}
+
 #tb-item-menu
 {
 	list-style-image: url('chrome://scholar/skin/cog.png');

@@ -37,8 +37,10 @@
 			<vbox flex="1">
 				<hbox align="center">
 					<label id="editpane-files-label"/>
-					<button label="Add File..." oncommand="ScholarItemPane.addFileFromDialog();"/>
-					<button label="Save Page" oncommand="ScholarItemPane.addFileFromPage();"/>
+					<toolbarbutton id="tb-item-files-add" tooltiptext="Add File..." oncommand="ScholarItemPane.addFileFromDialog();"/>
+					<toolbarbutton id="tb-item-files-link" tooltiptext="Link to File..." oncommand="ScholarItemPane.addFileFromDialog(true);"/>
+					<toolbarbutton id="tb-item-files-snapshot" tooltiptext="Save Snapshot" oncommand="ScholarItemPane.addFileFromPage();"/>
+					<toolbarbutton id="tb-item-files-web-link" tooltiptext="Link to Page" oncommand="ScholarItemPane.addFileFromPage(true);"/>
 				</hbox>
 				<grid flex="1">
 					<columns>

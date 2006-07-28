@@ -180,7 +180,7 @@ ScholarItemPane = new function()
 					label.setAttribute('crop','end');
 				
 					var box = document.createElement('box');
-//					box.setAttribute('onclick',"ScholarPane.openNoteWindow("+files[i].getID()+");");
+//					box.setAttribute('onclick',"window.open('"+files[i].getFileURL()+"')");
 					box.setAttribute('class','clicky');
 					box.appendChild(icon);
 					box.appendChild(label);
@@ -440,7 +440,7 @@ ScholarItemPane = new function()
 				file.erase();
 	}
 	
-	function addFileFromDialog()
+	function addFileFromDialog(link)
 	{
 		var nsIFilePicker = Components.interfaces.nsIFilePicker;
 		var fp = Components.classes["@mozilla.org/filepicker;1"]
@@ -448,12 +448,20 @@ ScholarItemPane = new function()
 		fp.init(window, "Select a File", nsIFilePicker.modeOpen);
 		
 		if(fp.show() == nsIFilePicker.returnOK)
-			Scholar.Files.importFromFile(fp.file, _itemBeingEdited.getID());
+		{
+			if(link)
+				Scholar.Files.linkFromFile(fp.file, _itemBeingEdited.getID());
+			else
+				Scholar.Files.importFromFile(fp.file, _itemBeingEdited.getID());
+		}
 	}
 	
-	function addFileFromPage()
+	function addFileFromPage(link)
 	{
-		Scholar.Files.importFromDocument(window.content.document, _itemBeingEdited.getID());
+		if(link)
+			Scholar.Files.linkFromDocument(window.content.document, _itemBeingEdited.getID());
+		else
+			Scholar.Files.importFromDocument(window.content.document, _itemBeingEdited.getID());
 	}
 }
 
