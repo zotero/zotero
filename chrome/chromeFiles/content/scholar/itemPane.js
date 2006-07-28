@@ -453,7 +453,7 @@ ScholarItemPane = new function()
 	
 	function addFileFromPage()
 	{
-		Scholar.Files.importFromDocument(window.document, _itemBeingEdited.getID());
+		Scholar.Files.importFromDocument(window.content.document, _itemBeingEdited.getID());
 	}
 }
 
