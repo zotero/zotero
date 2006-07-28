@@ -1842,6 +1842,7 @@ Scholar.Files = new function(){
 	this.linkFromDocument = linkFromDocument;
 	this.importFromDocument = importFromDocument;
 	
+	var self = this;
 	
 	function importFromFile(file, sourceItemID){
 		var title = file.leafName;
@@ -1991,9 +1992,8 @@ Scholar.Files = new function(){
 		if (url){
 			var path = url;
 		}
-		
 		if (file){
-			if (linkMode==this.LINK_MODE_IMPORTED_URL){
+			if (linkMode==self.LINK_MODE_IMPORTED_URL){
 				var originalPath = path;
 			}
 			
