@@ -548,6 +548,41 @@ Scholar.ItemTreeView.prototype.rememberSelection = function()
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
+///  Command Controller:
+///		for Select All, etc.
+///
+////////////////////////////////////////////////////////////////////////////////
+
+Scholar.ItemTreeCommandController = function(tree)
+{
+	this.tree = tree;
+}
+
+Scholar.ItemTreeCommandController.prototype.supportsCommand = function(cmd)
+{
+	return (cmd == 'cmd_selectAll' || cmd == 'cmd_delete');
+}
+
+Scholar.ItemTreeCommandController.prototype.isCommandEnabled = function(cmd)
+{
+	return (cmd == 'cmd_selectAll' || (cmd == 'cmd_delete' && this.tree.view.selection.count > 0));
+}
+
+Scholar.ItemTreeCommandController.prototype.doCommand = function(cmd)
+{
+	if(cmd == 'cmd_selectAll')
+		this.tree.view.selection.selectAll();
+	else if(cmd == 'cmd_delete')
+		ScholarPane.deleteSelectedItem();
+}
+
+Scholar.ItemTreeCommandController.prototype.onEvent = function(evt)
+{
+	
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
 ///  Drag-and-drop functions:
 ///		for nsDragAndDrop.js + nsTransferable.js
 ///

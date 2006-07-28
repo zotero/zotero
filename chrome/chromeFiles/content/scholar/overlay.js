@@ -5,7 +5,6 @@ var ScholarPane = new function()
 {
 	var collectionsView;
 	var itemsView;
-	var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"].getService(Components.interfaces.nsIPromptService);
 	
 	//Privileged methods
 	this.onLoad = onLoad;
@@ -61,7 +60,12 @@ var ScholarPane = new function()
 		
 		//Initialize collections view
 		collectionsView = new Scholar.CollectionTreeView();
-		document.getElementById('collections-tree').view = collectionsView;
+		var collectionsTree = document.getElementById('collections-tree');
+		collectionsTree.view = collectionsView;
+		collectionsTree.controllers.appendController(new Scholar.CollectionTreeCommandController(collectionsTree));
+		
+		var itemsTree = document.getElementById('items-tree');
+		itemsTree.controllers.appendController(new Scholar.ItemTreeCommandController(itemsTree));
 		
 		//Create the add menu with each item type
 		var addMenu = document.getElementById('tb-add').firstChild;
