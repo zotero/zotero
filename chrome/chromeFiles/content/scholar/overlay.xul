@@ -81,7 +81,7 @@
 					<toolbarbutton id="tb-add" tooltiptext="&toolbar.newItem.label;" type="menu">
 						<menupopup/>
 					</toolbarbutton>
-					<toolbarbutton label="New Note" oncommand="ScholarPane.newNote();"/>
+					<toolbarbutton id="tb-note-add" tooltiptext="New Standalone Note" oncommand="ScholarPane.newNote();"/>
 					<spacer flex="1"/>
 					<label value="&toolbar.search.label;" control="tb-search"/>
 					<textbox id="tb-search" type="timed" timeout="250" command="cmd_scholar_search"/>
@@ -152,7 +152,7 @@
 			<splitter id="scholar-view-splitter" resizebefore="closest" resizeafter="closest"/>
 			<vbox>
 				<toolbar align="right">
-					<toolbarbutton id="tb-fullscreen" label="Toggle Fullscreen" oncommand="ScholarPane.fullScreen();"/>
+					<toolbarbutton id="tb-fullscreen" tooltiptext="Toggle Fullscreen Mode" oncommand="ScholarPane.fullScreen();"/>
 					<toolbarbutton class="tabs-closebutton" oncommand="ScholarPane.toggleDisplay()"/>
 				</toolbar>
 				<groupbox flex="1">

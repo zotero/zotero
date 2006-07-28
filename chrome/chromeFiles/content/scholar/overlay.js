@@ -56,6 +56,8 @@ var ScholarPane = new function()
 			newSplitter.setAttribute('resizeafter','closest');
 			appContent.removeChild(oldSplitter);
 			appContent.insertBefore(newSplitter, document.getElementById('content'));
+			
+			document.getElementById('tb-fullscreen').setAttribute('scholartop','true');
 		}
 		
 		//Initialize collections view
@@ -100,7 +102,10 @@ var ScholarPane = new function()
 		document.getElementById('scholar-splitter').setAttribute('collapsed',!visible);
 		
 		if(!visible)
+		{
 			document.getElementById('content').setAttribute('collapsed', false);
+			document.getElementById('tb-fullscreen').setAttribute('fullscreenmode', false);
+		}
 	}
 	
 	function fullScreen()
@@ -108,6 +113,7 @@ var ScholarPane = new function()
 		var visible = document.getElementById('content').getAttribute('collapsed') == 'true';
 		document.getElementById('content').setAttribute('collapsed', !visible);
 		document.getElementById('scholar-splitter').setAttribute('collapsed', !visible);
+		document.getElementById('tb-fullscreen').setAttribute('fullscreenmode', !visible);
 	}
 		
 	/*

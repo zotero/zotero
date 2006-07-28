@@ -84,9 +84,30 @@
 	list-style-image: url('chrome://scholar/skin/toolbar-item-add.png');
 }
 
+#tb-note-add
+{
+	list-style-image: url('chrome://scholar/skin/toolbar-note-add.png');
+}
+
 #tb-item-menu
 {
 	list-style-image: url('chrome://scholar/skin/cog.png');
+}
+
+#tb-fullscreen
+{
+	list-style-image: url('chrome://scholar/skin/toolbar-fullscreen-bottom.png');
+}
+
+#tb-fullscreen[scholartop="true"]
+{
+	list-style-image: url('chrome://scholar/skin/toolbar-fullscreen-top.png');
+}
+
+#tb-fullscreen[fullscreenmode="true"]
+{
+	background: #666666;
+	-moz-border-radius: 6px;
 }
 
 #tb-search
