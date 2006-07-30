@@ -91,6 +91,11 @@ Scholar.Item.prototype.loadFromRow = function(row){
 	for (col in row){
 		// Only accept primary field data through loadFromRow()
 		if (this.isPrimaryField(col)){
+			// Return first line of content for note items
+			if (col=='title' && this.isNote()){
+				row[col] = this._noteToTitle();
+			}
+			
 			this._data[col] = row[col];
 		}
 		else {
@@ -329,7 +334,9 @@ Scholar.Item.prototype.setField = function(field, value, loadIn){
 			return false;
 		}
 		this._data[field] = value;
-		this._changed.set(field);
+		if (!loadIn){
+			this._changed.set(field);
+		}
 		return true;
 	}
 	// Type-specific field
@@ -828,6 +835,8 @@ Scholar.Item.prototype.updateNote = function(text){
 	if (updated){
 		this.updateDateModified();
 		Scholar.DB.commitTransaction();
+		// Update title field
+		this.setField('title', this._noteToTitle(text), true);
 		Scholar.Notifier.trigger('modify', 'item', this.getID());
 	}
 	else {
@@ -1567,6 +1576,22 @@ Scholar.Item.prototype._loadItemData = function(){
 	else {
 		return false;
 	}
+}
+
+
+Scholar.Item.prototype._noteToTitle = function(note){
+	var MAX_LENGTH = 80;
+	
+	if (typeof note == 'undefined'){
+		note = this.getNote();
+	}
+	
+	var t = note.substring(0, MAX_LENGTH);
+	var ln = t.indexOf("\n");
+	if (ln>-1 && ln<MAX_LENGTH){
+		t = t.substring(0, ln);
+	}
+	return t;
 }
 
 
