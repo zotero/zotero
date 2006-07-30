@@ -26,6 +26,9 @@ Scholar.Item.prototype._init = function(){
 	this._changed = new Scholar.Hash();
 	this._changedCreators = new Scholar.Hash();
 	this._changedItemData = new Scholar.Hash();
+	
+	this._noteData = null;
+	this._noteDataAccessTime = null;
 }
 
 
@@ -835,8 +838,11 @@ Scholar.Item.prototype.updateNote = function(text){
 	if (updated){
 		this.updateDateModified();
 		Scholar.DB.commitTransaction();
-		// Update title field
-		this.setField('title', this._noteToTitle(text), true);
+		
+		// Update cached values
+		this._noteData = text ? text : '';
+		this.setField('title', this._noteToTitle(), true);
+		
 		Scholar.Notifier.trigger('modify', 'item', this.getID());
 	}
 	else {
@@ -947,8 +953,17 @@ Scholar.Item.prototype.getNote = function(){
 		throw ("getNote() can only be called on items of type 'note'");
 	}
 	
+	if (this._noteData !== null){
+		// Store access time for later garbage collection
+		this._noteDataAccessTime = new Date();
+		return this._noteData;
+	}
+	
 	var sql = "SELECT note FROM itemNotes WHERE itemID=" + this.getID();
 	var note = Scholar.DB.valueQuery(sql);
+	
+	this._noteData = note ? note : '';
+	
 	return note ? note : '';
 }
 
@@ -1396,11 +1411,6 @@ Scholar.Item.prototype.isCollection = function(){
 }
 
 
-Scholar.Item.prototype.toString = function(){
-	return this.getTitle();
-}
-
-
 /**
 * Convert the item data into a multidimensional associative array
 *	for use by the export functions
@@ -1579,14 +1589,13 @@ Scholar.Item.prototype._loadItemData = function(){
 }
 
 
-Scholar.Item.prototype._noteToTitle = function(note){
+/**
+* Return first line (or first MAX_LENGTH characters) of note content
+**/
+Scholar.Item.prototype._noteToTitle = function(){
 	var MAX_LENGTH = 80;
 	
-	if (typeof note == 'undefined'){
-		note = this.getNote();
-	}
-	
-	var t = note.substring(0, MAX_LENGTH);
+	var t = this.getNote().substring(0, MAX_LENGTH);
 	var ln = t.indexOf("\n");
 	if (ln>-1 && ln<MAX_LENGTH){
 		t = t.substring(0, ln);
