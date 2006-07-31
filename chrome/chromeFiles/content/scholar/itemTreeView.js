@@ -198,7 +198,28 @@ Scholar.ItemTreeView.prototype.getImageSrc = function(row, col)
 {
 	if(col.id == 'title')
 	{
-		var itemType = Scholar.ItemTypes.getName(this._getItemAtRow(row).getType());
+		var item = this._getItemAtRow(row);
+		var itemType = Scholar.ItemTypes.getName(item.getType());
+		if(itemType == 'file')
+		{
+			var linkMode = item.ref.getFileLinkMode();
+			if(linkMode == Scholar.Files.LINK_MODE_IMPORTED_FILE)
+			{
+				itemType = itemType + "-file";
+			}
+			else if(linkMode == Scholar.Files.LINK_MODE_LINKED_FILE)
+			{
+				itemType = itemType + "-link";
+			}
+			else if(linkMode == Scholar.Files.LINK_MODE_IMPORTED_URL)
+			{
+				itemType = itemType + "-snapshot";
+			}
+			else if(linkMode == Scholar.Files.LINK_MODE_LINKED_URL)
+			{
+				itemType = itemType + "-web-link";
+			}
+		}
 		
 		return "chrome://scholar/skin/treeitem-"+itemType+".png";
 	}

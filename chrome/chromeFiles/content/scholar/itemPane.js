@@ -142,7 +142,7 @@ ScholarItemPane = new function()
 					label.setAttribute('crop','end');
 				
 					var box = document.createElement('box');
-					box.setAttribute('onclick',"ScholarPane.openNoteWindow("+notes[i].getID()+");");
+					box.setAttribute('onclick',"ScholarPane.selectItem("+notes[i].getID()+");");
 					box.setAttribute('class','clicky');
 					box.appendChild(icon);
 					box.appendChild(label);
@@ -174,7 +174,24 @@ ScholarItemPane = new function()
 				for(var i = 0; i < files.length; i++)
 				{
 					var icon = document.createElement('image');
-					icon.setAttribute('src','chrome://scholar/skin/treeitem-file.png');
+					var linkMode = files[i].getFileLinkMode();
+					if(linkMode == Scholar.Files.LINK_MODE_IMPORTED_FILE)
+					{
+						itemType = "-file";
+					}
+					else if(linkMode == Scholar.Files.LINK_MODE_LINKED_FILE)
+					{
+						itemType = "-link";
+					}
+					else if(linkMode == Scholar.Files.LINK_MODE_IMPORTED_URL)
+					{
+						itemType = "-snapshot";
+					}
+					else if(linkMode == Scholar.Files.LINK_MODE_LINKED_URL)
+					{
+						itemType = "-web-link";
+					}
+					icon.setAttribute('src','chrome://scholar/skin/treeitem-file'+itemType+'.png');
 				
 					var label = document.createElement('label');
 					label.setAttribute('value',files[i].getField('title'));
@@ -182,7 +199,7 @@ ScholarItemPane = new function()
 					label.setAttribute('crop','end');
 				
 					var box = document.createElement('box');
-//					box.setAttribute('onclick',"window.open('"+files[i].getFileURL()+"')");
+					box.setAttribute('onclick',"ScholarPane.selectItem('"+files[i].getID()+"')");
 					box.setAttribute('class','clicky');
 					box.appendChild(icon);
 					box.appendChild(label);

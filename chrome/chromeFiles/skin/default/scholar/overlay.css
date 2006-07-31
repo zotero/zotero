@@ -96,27 +96,22 @@
 
 #tb-item-files-file
 {
-	list-style-image: url('chrome://scholar/skin/item-files-add.png');
+	list-style-image: url('chrome://scholar/skin/treeitem-file-file.png');
 }
 
 #tb-item-files-link
 {
-	list-style-image: url('chrome://scholar/skin/item-files-link.png');
+	list-style-image: url('chrome://scholar/skin/treeitem-file-link.png');
 }
 
 #tb-item-files-snapshot
 {
-	list-style-image: url('chrome://scholar/skin/item-files-snapshot.png');
+	list-style-image: url('chrome://scholar/skin/treeitem-file-snapshot.png');
 }
 
 #tb-item-files-web-link
 {
-	list-style-image: url('chrome://scholar/skin/item-files-web-link.png');
-}
-
-#tb-item-menu
-{
-	list-style-image: url('chrome://scholar/skin/cog.png');
+	list-style-image: url('chrome://scholar/skin/treeitem-file-web-link.png');
 }
 
 #tb-fullscreen
@@ -154,11 +149,6 @@
 #scholar-view-item
 {
 	margin-left: 5px;
-}
-
-#scholar-view-item tabpanels
-{
-	padding: 8px 0px 0px 0px;
 }
 
 #scholar-splitter
