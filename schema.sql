@@ -1,4 +1,4 @@
--- 30
+-- 31
 
     DROP TABLE IF EXISTS version;
     CREATE TABLE version (
@@ -261,7 +261,7 @@
     INSERT INTO fields VALUES (7,'place',NULL);
     INSERT INTO fields VALUES (8,'publisher',NULL);
     INSERT INTO fields VALUES (9,'year',3);
-    INSERT INTO fields VALUES (10,'pages',2);
+    INSERT INTO fields VALUES (10,'pages',NULL);
     INSERT INTO fields VALUES (11,'ISBN',NULL);
     INSERT INTO fields VALUES (12,'publication',NULL);
     INSERT INTO fields VALUES (13,'ISSN',NULL);
@@ -276,6 +276,8 @@
     INSERT INTO fields VALUES (22,'extra',NULL);
     INSERT INTO fields VALUES (23,'url',NULL);
     INSERT INTO fields VALUES (24,'type',NULL);
+    INSERT INTO fields VALUES (25,'journalAbbreviation',NULL);
+    INSERT INTO fields VALUES (26,'DOIName',NULL);
     
     INSERT INTO "itemTypeFields" VALUES(2, 1, 1);
     INSERT INTO "itemTypeFields" VALUES(2, 2, 2);
@@ -294,7 +296,7 @@
     INSERT INTO "itemTypeFields" VALUES(4, 4, 4);
     INSERT INTO "itemTypeFields" VALUES(4, 5, 5);
     INSERT INTO "itemTypeFields" VALUES(4, 10, 6);
-    INSERT INTO "itemTypeFields" VALUES(4, 13, 7);
+    INSERT INTO "itemTypeFields" VALUES(4, 13, 9);
     INSERT INTO "itemTypeFields" VALUES(3, 1, 1);
     INSERT INTO "itemTypeFields" VALUES(3, 2, 2);
     INSERT INTO "itemTypeFields" VALUES(3, 12, 3);
@@ -369,9 +371,9 @@
     INSERT INTO "itemTypeFields" VALUES(10, 17, 6);
     INSERT INTO "itemTypeFields" VALUES(10, 18, 5);
     INSERT INTO "itemTypeFields" VALUES(10, 22, 7);
-    INSERT INTO "itemTypeFields" VALUES(4, 17, 9);
-    INSERT INTO "itemTypeFields" VALUES(4, 18, 8);
-    INSERT INTO "itemTypeFields" VALUES(4, 22, 10);
+    INSERT INTO "itemTypeFields" VALUES(4, 17, 11);
+    INSERT INTO "itemTypeFields" VALUES(4, 18, 10);
+    INSERT INTO "itemTypeFields" VALUES(4, 22, 12);
     INSERT INTO "itemTypeFields" VALUES(8, 17, 6);
     INSERT INTO "itemTypeFields" VALUES(8, 18, 5);
     INSERT INTO "itemTypeFields" VALUES(8, 22, 7);
@@ -387,6 +389,8 @@
     INSERT INTO "itemTypeFields" VALUES(7, 18, 7);
     INSERT INTO "itemTypeFields" VALUES(7, 22, 9);
     INSERT INTO "itemTypeFields" VALUES(13, 22, 5);
+    INSERT INTO "itemTypeFields" VALUES(4, 25, 7);
+    INSERT INTO "itemTypeFields" VALUES(4, 26, 8);
     
     INSERT INTO "charsets" VALUES(1, 'utf-8');
     INSERT INTO "charsets" VALUES(2, 'ascii');
@@ -587,6 +591,7 @@
     INSERT INTO "creatorTypes" VALUES(1, "author");
     INSERT INTO "creatorTypes" VALUES(2, "contributor");
     INSERT INTO "creatorTypes" VALUES(3, "editor");
+    INSERT INTO "creatorTypes" VALUES(4, "translator");
     
     INSERT INTO "creators" VALUES(1, 'Susan B.', 'Barnes');
     INSERT INTO "creators" VALUES(2, 'J.S.', 'Bassard');
