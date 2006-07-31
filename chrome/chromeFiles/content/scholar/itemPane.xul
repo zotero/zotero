@@ -39,10 +39,10 @@
 					<label id="editpane-files-label"/>
 					<button id="tb-item-files-add" type="menu" label="Add">
 						<menupopup>
-							<menuitem class="menuitem-iconic" id="tb-item-files-file" label="Add File..." oncommand="ScholarPane.addFileFromDialog();"/>
-							<menuitem class="menuitem-iconic" id="tb-item-files-link" label="Add Linked File..." oncommand="ScholarPane.addFileFromDialog(true);"/>
-							<menuitem class="menuitem-iconic" id="tb-item-files-snapshot" label="Snapshot Current Page" oncommand="ScholarPane.addFileFromPage();"/>
-							<menuitem class="menuitem-iconic" id="tb-item-files-web-link" label="Link to Current Page" oncommand="ScholarPane.addFileFromPage(true);"/>
+							<menuitem class="menuitem-iconic" id="tb-item-files-file" label="Add File..." oncommand="ScholarItemPane.addFileFromDialog();"/>
+							<menuitem class="menuitem-iconic" id="tb-item-files-link" label="Add Linked File..." oncommand="ScholarItemPane.addFileFromDialog(true);"/>
+							<menuitem class="menuitem-iconic" id="tb-item-files-snapshot" label="Snapshot Current Page" oncommand="ScholarItemPane.addFileFromPage();"/>
+							<menuitem class="menuitem-iconic" id="tb-item-files-web-link" label="Link to Current Page" oncommand="ScholarItemPane.addFileFromPage(true);"/>
 						</menupopup>
 					</button>
 				</hbox>

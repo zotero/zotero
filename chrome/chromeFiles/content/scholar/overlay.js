@@ -21,6 +21,7 @@ var ScholarPane = new function()
 	this.search = search;
 	this.getCollectionsView = getCollectionsView;
 	this.getItemsView = getItemsView;
+	this.selectItem = selectItem;
 	this.getSelectedCollection = getSelectedCollection;
 	this.getSelectedItems = getSelectedItems;
 	this.buildCollectionContextMenu = buildCollectionContextMenu;
@@ -180,6 +181,10 @@ var ScholarPane = new function()
 				noteEditor.item = null;
 				noteEditor.note = item.ref;
 				document.getElementById('scholar-view-note').lastChild.setAttribute('noteID',item.ref.getID());
+				if(item.ref.getSource() != null)
+					document.getElementById('scholar-view-note').lastChild.setAttribute('sourceID',item.ref.getSource());
+				else
+					document.getElementById('scholar-view-note').lastChild.removeAttribute('sourceID');
 				document.getElementById('item-pane').selectedIndex = 2;
 			}
 			else if(item.isFile())
@@ -210,8 +215,15 @@ var ScholarPane = new function()
 	
 	function deleteSelectedItem()
 	{
-		if(itemsView && itemsView.selection.count > 0 && confirm(Scholar.getString('pane.items.delete')))
-			itemsView.deleteSelection();
+		if(itemsView && itemsView.selection.count > 0)
+		{
+			var eraseChildren = {};
+			var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+                    						.getService(Components.interfaces.nsIPromptService);
+
+			if(promptService.confirmCheck(window, 'Delete Item', Scholar.getString('pane.items.delete'), 'Erase attached notes and files', eraseChildren))
+				itemsView.deleteSelection(eraseChildren.value);
+		}
 	}
 	
 	function deleteSelectedCollection()
@@ -255,6 +267,28 @@ var ScholarPane = new function()
 	function getItemsView()
 	{
 		return itemsView;
+	}
+	
+	function selectItem(id)
+	{
+		if(itemsView)
+		{
+			if(!itemsView._itemGroup.isLibrary())
+			{
+				//select the Library if the item is not in the current collection
+				
+				var item = Scholar.Items.get(id);
+				var collectionID = itemsView._itemGroup.ref.getID();
+				if(!item.isRegularItem())
+				{ 
+					if(!Scholar.Items.get(item.getSource()).inCollection(collectionID))
+						collectionsView.selection.select(0);
+				}
+				else if(!item.inCollection(collectionID))
+					collectionsView.selection.select(0);
+			}
+			itemsView.selectItem(id);
+		}
 	}
 	
 	function getSelectedCollection()
@@ -358,19 +392,35 @@ var ScholarPane = new function()
 		
 		if(fp.show() == nsIFilePicker.returnOK)
 		{
+			var fileID;
 			if(link)
-				Scholar.Files.linkFromFile(fp.file, id);
+				fileID = Scholar.Files.linkFromFile(fp.file, id);
 			else
-				Scholar.Files.importFromFile(fp.file, id);
+				fileID = Scholar.Files.importFromFile(fp.file, id);
+		
+			if(fileID && !id)
+			{
+				var c = getSelectedCollection();
+				if(c)
+					c.addItem(fileID);
+			}
 		}
 	}
 	
 	function addFileFromPage(link, id)
 	{
+		var fileID;
 		if(link)
-			Scholar.Files.linkFromDocument(window.content.document, id);
+			fileID = Scholar.Files.linkFromDocument(window.content.document, id);
 		else
-			Scholar.Files.importFromDocument(window.content.document, id);
+			fileID = Scholar.Files.importFromDocument(window.content.document, id);
+		
+		if(fileID && !id)
+		{
+			var c = getSelectedCollection();
+			if(c)
+				c.addItem(fileID);
+		}
 	}
 }
 

@@ -141,8 +141,7 @@ Scholar.ItemTreeView.prototype.notify = function(action, type, ids)
 		
 		if(action == 'add')
 		{
-			this.selection.select(this._itemRowMap[item.getID()]);
-			this._treebox.ensureRowIsVisible(this._itemRowMap[item.getID()]);
+			this.selectItem(this._itemRowMap[item.getID()]);
 		}
 		else
 		{
@@ -416,9 +415,26 @@ Scholar.ItemTreeView.prototype.sort = function()
 ////////////////////////////////////////////////////////////////////////////////
 
 /*
+ *  Select an item
+ */
+Scholar.ItemTreeView.prototype.selectItem = function(id)
+{
+	var item = Scholar.Items.get(id);
+	var row = this._itemRowMap[item.getID()];
+	if(row == null)
+	{
+		this.toggleOpenState(this._itemRowMap[item.getSource()]); //opens the parent of the item
+		row = this._itemRowMap[item.getID()];
+	}
+		
+	this.selection.select(row);
+	this._treebox.ensureRowIsVisible(row);
+}
+
+/*
  *  Delete the selection
  */
-Scholar.ItemTreeView.prototype.deleteSelection = function()
+Scholar.ItemTreeView.prototype.deleteSelection = function(eraseChildren)
 {
 	if(this.selection.count == 0)
 		return;
@@ -445,7 +461,7 @@ Scholar.ItemTreeView.prototype.deleteSelection = function()
 	for (var i=0; i<items.length; i++)
 	{
 		if(this._itemGroup.isLibrary() || !items[i].isRegularItem()) //erase item from DB
-			items[i].ref.erase();
+			items[i].ref.erase(eraseChildren);
 		else if(this._itemGroup.isCollection())
 			this._itemGroup.ref.removeItem(items[i].ref.getID());
 	}
