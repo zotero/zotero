@@ -1278,7 +1278,7 @@ Scholar.Item.prototype.getSeeAlso = function(){
 /**
 * Delete item from database and clear from Scholar.Items internal array
 **/
-Scholar.Item.prototype.erase = function(){
+Scholar.Item.prototype.erase = function(deleteChildren){
 	if (!this.getID()){
 		return false;
 	}
@@ -1332,10 +1332,25 @@ Scholar.Item.prototype.erase = function(){
 				}
 		}
 	}
-	// If regular item, unassociate any notes or files for which this is a source
-	else {
-		// TODO: option for deleting child notes instead of unlinking
+	
+	// Regular item
+	
+	// Delete child notes and files
+	else if (deleteChildren){
+		var sql = "SELECT itemID FROM itemNotes WHERE sourceItemID=?1 UNION "
+			+ "SELECT itemID FROM itemFiles WHERE sourceItemID=?1";
+		var toDelete = Scholar.DB.columnQuery(sql, [this.getID()]);
 		
+		if (toDelete){
+			for (var i in toDelete){
+				var obj = Scholar.Items.get(toDelete[i]);
+				obj.erase(true);
+			}
+		}
+	}
+	
+	// Just unlink any child notes or files without deleting
+	else {
 		// Notes
 		var sql = "SELECT itemID FROM itemNotes WHERE sourceItemID=" + this.getID();
 		var childNotes = Scholar.DB.columnQuery(sql);
