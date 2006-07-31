@@ -37,10 +37,14 @@
 			<vbox flex="1">
 				<hbox align="center">
 					<label id="editpane-files-label"/>
-					<toolbarbutton id="tb-item-files-add" tooltiptext="Add File..." oncommand="ScholarItemPane.addFileFromDialog();"/>
-					<toolbarbutton id="tb-item-files-link" tooltiptext="Link to File..." oncommand="ScholarItemPane.addFileFromDialog(true);"/>
-					<toolbarbutton id="tb-item-files-snapshot" tooltiptext="Save Snapshot" oncommand="ScholarItemPane.addFileFromPage();"/>
-					<toolbarbutton id="tb-item-files-web-link" tooltiptext="Link to Page" oncommand="ScholarItemPane.addFileFromPage(true);"/>
+					<button id="tb-item-files-add" type="menu" label="Add">
+						<menupopup>
+							<menuitem class="menuitem-iconic" id="tb-item-files-file" label="Add File..." oncommand="ScholarPane.addFileFromDialog();"/>
+							<menuitem class="menuitem-iconic" id="tb-item-files-link" label="Add Linked File..." oncommand="ScholarPane.addFileFromDialog(true);"/>
+							<menuitem class="menuitem-iconic" id="tb-item-files-snapshot" label="Snapshot Current Page" oncommand="ScholarPane.addFileFromPage();"/>
+							<menuitem class="menuitem-iconic" id="tb-item-files-web-link" label="Link to Current Page" oncommand="ScholarPane.addFileFromPage(true);"/>
+						</menupopup>
+					</button>
 				</hbox>
 				<grid flex="1">
 					<columns>
