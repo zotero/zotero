@@ -27,6 +27,8 @@ var ScholarPane = new function()
 	this.buildItemContextMenu = buildItemContextMenu;
 	this.openNoteWindow = openNoteWindow;
 	this.newNote = newNote;
+	this.addFileFromDialog = addFileFromDialog;
+	this.addFileFromPage = addFileFromPage;
 	
 	/*
 	 * Called when the window is open
@@ -345,6 +347,30 @@ var ScholarPane = new function()
 	function openNoteWindow(id, parent)
 	{
 		window.open('chrome://scholar/content/note.xul?v=1'+(id ? '&id='+id : '')+(parent ? '&coll='+parent : ''),'','chrome,resizable,centerscreen');
+	}
+	
+	function addFileFromDialog(link, id)
+	{
+		var nsIFilePicker = Components.interfaces.nsIFilePicker;
+		var fp = Components.classes["@mozilla.org/filepicker;1"]
+        					.createInstance(nsIFilePicker);
+		fp.init(window, "Select a File", nsIFilePicker.modeOpen);
+		
+		if(fp.show() == nsIFilePicker.returnOK)
+		{
+			if(link)
+				Scholar.Files.linkFromFile(fp.file, id);
+			else
+				Scholar.Files.importFromFile(fp.file, id);
+		}
+	}
+	
+	function addFileFromPage(link, id)
+	{
+		if(link)
+			Scholar.Files.linkFromDocument(window.content.document, id);
+		else
+			Scholar.Files.importFromDocument(window.content.document, id);
 	}
 }
 

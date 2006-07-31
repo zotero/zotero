@@ -138,6 +138,7 @@ ScholarItemPane = new function()
 				
 					var label = document.createElement('label');
 					label.setAttribute('value',_noteToTitle(notes[i].getNote()));
+					label.setAttribute('flex','1');	//so that the long names will flex smaller
 					label.setAttribute('crop','end');
 				
 					var box = document.createElement('box');
@@ -177,6 +178,7 @@ ScholarItemPane = new function()
 				
 					var label = document.createElement('label');
 					label.setAttribute('value',files[i].getField('title'));
+					label.setAttribute('flex','1');	//so that the long names will flex smaller
 					label.setAttribute('crop','end');
 				
 					var box = document.createElement('box');
@@ -442,26 +444,12 @@ ScholarItemPane = new function()
 	
 	function addFileFromDialog(link)
 	{
-		var nsIFilePicker = Components.interfaces.nsIFilePicker;
-		var fp = Components.classes["@mozilla.org/filepicker;1"]
-        					.createInstance(nsIFilePicker);
-		fp.init(window, "Select a File", nsIFilePicker.modeOpen);
-		
-		if(fp.show() == nsIFilePicker.returnOK)
-		{
-			if(link)
-				Scholar.Files.linkFromFile(fp.file, _itemBeingEdited.getID());
-			else
-				Scholar.Files.importFromFile(fp.file, _itemBeingEdited.getID());
-		}
+		ScholarPane.addFileFromDialog(link, _itemBeingEdited.getID());
 	}
 	
 	function addFileFromPage(link)
 	{
-		if(link)
-			Scholar.Files.linkFromDocument(window.content.document, _itemBeingEdited.getID());
-		else
-			Scholar.Files.importFromDocument(window.content.document, _itemBeingEdited.getID());
+		ScholarPane.addFileFromPage(link, _itemBeingEdited.getID());
 	}
 }
 

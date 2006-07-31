@@ -89,6 +89,11 @@
 	list-style-image: url('chrome://scholar/skin/toolbar-note-add.png');
 }
 
+#tb-file-add
+{
+	list-style-image: url('chrome://scholar/skin/item-files-add.png');
+}
+
 #tb-item-files-add
 {
 	list-style-image: url('chrome://scholar/skin/item-files-add.png');

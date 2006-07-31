@@ -81,6 +81,14 @@
 					<toolbarbutton id="tb-add" tooltiptext="&toolbar.newItem.label;" type="menu">
 						<menupopup/>
 					</toolbarbutton>
+					<toolbarbutton id="tb-file-add" type="menu" tooltiptext="New Standalone File">
+						<menupopup>
+							<menuitem label="Add File..." oncommand="ScholarPane.addFileFromDialog();"/>
+							<menuitem label="Add Linked File..." oncommand="ScholarPane.addFileFromDialog(true);"/>
+							<menuitem label="Snapshot Current Page" oncommand="ScholarPane.addFileFromPage();"/>
+							<menuitem label="Link to Current Page" oncommand="ScholarPane.addFileFromPage(true);"/>
+						</menupopup>
+					</toolbarbutton>
 					<toolbarbutton id="tb-note-add" tooltiptext="New Standalone Note" oncommand="ScholarPane.newNote();"/>
 					<spacer flex="1"/>
 					<label value="&toolbar.search.label;" control="tb-search"/>
