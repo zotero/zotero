@@ -88,11 +88,12 @@ ScholarItemPane = new function()
 				if(_itemTypeMenu.firstChild.childNodes[i].value == _itemBeingEdited.getType())
 					_itemTypeMenu.selectedIndex = i;
 		
-			var fieldNames = new Array("title","dateAdded","dateModified");
+			var fieldNames = new Array("title");
 			var fields = Scholar.ItemFields.getItemTypeFields(_itemBeingEdited.getField("itemTypeID"));
 			for(var i = 0; i<fields.length; i++)
 				fieldNames.push(Scholar.ItemFields.getName(fields[i]));
-		
+			fieldNames.push("dateAdded","dateModified");
+			
 			for(var i = 0; i<fieldNames.length; i++)
 			{
 				var editable = (!_itemBeingEdited.isPrimaryField(fieldNames[i]) || _itemBeingEdited.isEditableField(fieldNames[i]));
