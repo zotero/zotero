@@ -23,6 +23,8 @@ var Scholar = new function(){
 	this.getProfileDirectory = getProfileDirectory;
 	this.getScholarDirectory = getScholarDirectory;
 	this.getStorageDirectory = getStorageDirectory;
+	this.getScholarDatabase = getScholarDatabase;
+	this.backupDatabase = backupDatabase;
 	this.debug = debug;
 	this.varDump = varDump;
 	this.getString = getString;
@@ -32,6 +34,7 @@ var Scholar = new function(){
 	this.arraySearch = arraySearch;
 	this.randomString = randomString;
 	this.getRandomID = getRandomID;
+	this.moveToUnique = moveToUnique;
 	
 	// Public properties
 	this.version;
@@ -93,6 +96,10 @@ var Scholar = new function(){
 		}
 		
 		_shutdown = true;
+		
+		Scholar.backupDatabase();
+		
+		return true;
 	}
 	
 	
@@ -124,6 +131,57 @@ var Scholar = new function(){
 			file.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0664);
 		}
 		return file;
+	}
+	
+	function getScholarDatabase(ext){
+		ext = ext ? '.' + ext : '';
+		
+		var file = Scholar.getScholarDirectory();
+		file.append(SCHOLAR_CONFIG['DB_FILE'] + ext);
+		return file;
+	}
+	
+	
+	/*
+	 * Back up the main database file
+	 *
+	 * This could probably create a corrupt file fairly easily if all changes
+	 * haven't been flushed to disk -- proceed with caution
+	 */
+	function backupDatabase(){
+		if (Scholar.DB.transactionInProgress()){
+			Scholar.debug('Transaction in progress--skipping DB backup', 2);
+			return false;
+		}
+		
+		Scholar.debug('Backing up database');
+		
+		var file = Scholar.getScholarDatabase();
+		var backupFile = Scholar.getScholarDatabase('bak');
+		
+		// Copy via a temporary file so we don't run into disk space issues
+		// after deleting the old backup file
+		var tmpFile = Scholar.getScholarDatabase('tmp');
+		if (tmpFile.exists()){
+			tmpFile.remove(null);
+		}
+		
+		try {
+			file.copyTo(file.parent, tmpFile.leafName);
+		}
+		catch (e){
+			// TODO: deal with low disk space
+			throw (e);
+		}
+		
+		// Remove old backup file
+		if (backupFile.exists()){
+			backupFile.remove(null);
+		}
+		
+		tmpFile.moveTo(tmpFile.parent, backupFile.leafName);
+		
+		return true;
 	}
 	
 	
@@ -342,6 +400,17 @@ var Scholar = new function(){
 		
 		return rnd;
 	}
+	
+	
+	function moveToUnique(file, newFile){
+		newFile.createUnique(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0644);
+		var newName = newFile.leafName;
+		newFile.remove(null);
+		
+		// Move file to unique name
+		file.moveTo(newFile.parent, newName);
+		return file;
+	}
 };
 
 
@@ -519,6 +588,8 @@ Scholar.Hash.prototype.has = function(in_key){
 
 Scholar.Date = new function(){
 	this.sqlToDate = sqlToDate;
+	this.getFileDateString = getFileDateString;
+	this.getFileTimeString = getFileTimeString;
 	
 	/**
 	* Convert an SQL date in the form '2006-06-13 11:03:05' into a JS Date object
@@ -542,6 +613,20 @@ Scholar.Date = new function(){
 			Scholar.debug(sqldate + ' is not a valid SQL date', 2)
 			return false;
 		}
+	}
+	
+	
+	function getFileDateString(file){
+		var date = new Date();
+		date.setTime(file.lastModifiedTime);
+		return date.toLocaleDateString();
+	}
+	
+	
+	function getFileTimeString(file){
+		var date = new Date();
+		date.setTime(file.lastModifiedTime);
+		return date.toLocaleTimeString();
 	}
 }
 

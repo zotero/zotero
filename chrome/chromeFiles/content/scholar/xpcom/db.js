@@ -7,7 +7,6 @@ Scholar.DB = new function(){
 	var _transactionRollback;
 	var _transactionNestingLevel = 0;
 	
-	// Privileged methods
 	this.query = query;
 	this.valueQuery = valueQuery;
 	this.rowQuery = rowQuery;
@@ -359,13 +358,80 @@ Scholar.DB = new function(){
 		var store = Components.classes["@mozilla.org/storage/service;1"].
 			getService(Components.interfaces.mozIStorageService);
 		
-		// Get the storage directory
-		var file = Scholar.getScholarDirectory();
+		var file = Scholar.getScholarDatabase();
+		var backupFile = Scholar.getScholarDatabase('bak');
 		
-		// This makes file point to PROFILE_DIR/<scholar dir>/<scholar database file>
-		file.append(SCHOLAR_CONFIG['DB_FILE']);
-		
-		_connection = store.openDatabase(file);
+		catchBlock: try {
+			_connection = store.openDatabase(file);
+		}
+		catch (e){
+			if (e.name=='NS_ERROR_FILE_CORRUPTED'){
+				Scholar.debug('Database file corrupted', 1);
+				
+				// No backup file! Eek!
+				if (!backupFile.exists()){
+					Scholar.debug('No backup file exists', 1);
+					
+					// Save damaged filed
+					Scholar.debug('Saving damaged DB file with .damaged extension', 1);
+					var damagedFile = Scholar.getScholarDatabase('damaged');
+					Scholar.moveToUnique(file, damagedFile);
+					
+					// Create new main database
+					var file = Scholar.getScholarDatabase();
+					_connection = store.openDatabase(file);
+					
+					alert(Scholar.getString('db.dbCorruptedNoBackup'));
+					break catchBlock;
+				}
+				
+				// Save damaged file
+				Scholar.debug('Saving damaged DB file with .damaged extension', 1);
+				var damagedFile = Scholar.getScholarDatabase('damaged');
+				Scholar.moveToUnique(file, damagedFile);
+				
+				// Test the backup file
+				try {
+					_connection = store.openDatabase(backupFile);
+				}
+				// Can't open backup either
+				catch (e){
+					// Create new main database
+					var file = Scholar.getScholarDatabase();
+					_connection = store.openDatabase(file);
+					
+					alert(Scholar.getString('db.dbRestoreFailed'));
+					break catchBlock;
+				}
+				
+				_connection = undefined;
+				
+				// Copy backup file to main DB file
+				Scholar.debug('Restoring main database from backup file', 1);
+				try {
+					backupFile.copyTo(backupFile.parent, SCHOLAR_CONFIG['DB_FILE']);
+				}
+				catch (e){
+					// TODO: deal with low disk space
+					throw (e);
+				}
+				
+				// Open restored database
+				var file = Scholar.getScholarDirectory();
+				file.append(SCHOLAR_CONFIG['DB_FILE']);
+				_connection = store.openDatabase(file);
+				Scholar.debug('Database restored', 1);
+				var msg = Scholar.getString('db.dbRestored');
+				msg = msg.replace('%1', Scholar.Date.getFileDateString(backupFile))
+				msg = msg.replace('%2', Scholar.Date.getFileTimeString(backupFile))
+				alert(msg);
+				
+				break catchBlock;
+			}
+			
+			// Some other error that we don't yet know how to deal with
+			throw (e);
+		}
 		
 		return _connection;
 	}
