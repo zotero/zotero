@@ -361,6 +361,18 @@ Scholar.DB = new function(){
 		var file = Scholar.getScholarDatabase();
 		var backupFile = Scholar.getScholarDatabase('bak');
 		
+		// DEBUG: Temporary check
+		// Test the backup file (to make sure the backup mechanism is working)
+		if (backupFile.exists()){
+			try {
+				_connection = store.openDatabase(backupFile);
+			}
+			catch (e){
+				Scholar.debug('Backup file was corrupt', 1);
+			}
+			_connection = undefined;
+		}
+		
 		catchBlock: try {
 			_connection = store.openDatabase(file);
 		}
