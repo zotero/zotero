@@ -255,6 +255,7 @@ var ScholarPane = new function()
 			//document.getElementById('scholar-search-options').getElementsByAttribute('checked','true')[0].label
 			
 			document.getElementById('scholar-search-options').hidden = searchVal == "";
+			document.getElementById('tb-search-cancel').hidden = searchVal == "";
 		}
 		
 	}

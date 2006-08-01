@@ -133,6 +133,19 @@
 #tb-search
 {
 	width: 150px;
+	height: 24px;
+	margin: 0px;
+	margin-bottom: 2px;
+	padding: 0px;
+	vertical-align: middle;
+	font-size: 12px; 
+}
+
+#tb-search-cancel
+{
+	margin: 0px;
+	padding: 0px;
+	cursor: pointer;
 }
 
 #scholar-view-item vbox

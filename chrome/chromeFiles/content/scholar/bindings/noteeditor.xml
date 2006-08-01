@@ -28,7 +28,7 @@
 						if(this.note.getSource())
 							this.item = Scholar.Items.get(this.note.getSource());
 						
-						this.id('noteField').setAttribute('value',this.note.getNote());
+						this.id('noteField').value = this.note.getNote();
 						this.id('links').item = this.note;
 					]]>
 				</setter>
