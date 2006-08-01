@@ -14,10 +14,12 @@ const SCHOLAR_CONFIG = {
  */
 var Scholar = new function(){
 	var _initialized = false;
+	var _shutdown = false;
 	var _localizedStringBundle;
 	
 	// Privileged (public) methods
 	this.init = init;
+	this.shutdown = shutdown;
 	this.getProfileDirectory = getProfileDirectory;
 	this.getScholarDirectory = getScholarDirectory;
 	this.getStorageDirectory = getStorageDirectory;
@@ -41,6 +43,15 @@ var Scholar = new function(){
 		if (_initialized){
 			return false;
 		}
+		
+		// Register shutdown handler to call Scholar.shutdown()
+		var observerService = Components.classes["@mozilla.org/observer-service;1"]
+			.getService(Components.interfaces.nsIObserverService);
+		observerService.addObserver({
+			observe: function(subject, topic, data){
+				Scholar.shutdown(subject, topic, data)
+			}
+		}, "xpcom-shutdown", false);
 		
 		// Load in the preferences branch for the extension
 		Scholar.Prefs.init();
@@ -72,6 +83,16 @@ var Scholar = new function(){
 		
 		_initialized = true;
 		return true;
+	}
+	
+	
+	function shutdown(subject, topic, data){
+		// Called twice otherwise, for some reason
+		if (_shutdown){
+			return false;
+		}
+		
+		_shutdown = true;
 	}
 	
 	
