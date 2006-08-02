@@ -26,6 +26,7 @@ var ScholarPane = new function()
 	this.getSelectedItems = getSelectedItems;
 	this.buildCollectionContextMenu = buildCollectionContextMenu;
 	this.buildItemContextMenu = buildItemContextMenu;
+	this.onDoubleClick = onDoubleClick;
 	this.openNoteWindow = openNoteWindow;
 	this.newNote = newNote;
 	this.addFileFromDialog = addFileFromDialog;
@@ -180,11 +181,11 @@ var ScholarPane = new function()
 				var noteEditor = document.getElementById('scholar-note-editor');
 				noteEditor.item = null;
 				noteEditor.note = item.ref;
-				document.getElementById('scholar-view-note').lastChild.setAttribute('noteID',item.ref.getID());
+				document.getElementById('scholar-view-note-button').setAttribute('noteID',item.ref.getID());
 				if(item.ref.getSource() != null)
-					document.getElementById('scholar-view-note').lastChild.setAttribute('sourceID',item.ref.getSource());
+					document.getElementById('scholar-view-note-button').setAttribute('sourceID',item.ref.getSource());
 				else
-					document.getElementById('scholar-view-note').lastChild.removeAttribute('sourceID');
+					document.getElementById('scholar-view-note-button').removeAttribute('sourceID');
 				document.getElementById('item-pane').selectedIndex = 2;
 			}
 			else if(item.isFile())
@@ -367,6 +368,24 @@ var ScholarPane = new function()
 			menu.childNodes[2].setAttribute('label', Scholar.getString('pane.items.menu.remove'));
 			menu.childNodes[4].setAttribute('label', Scholar.getString('pane.items.menu.export'));
 			menu.childNodes[5].setAttribute('label', Scholar.getString('pane.items.menu.createBib'));
+		}
+	}
+	
+	// Adapted from: http://www.xulplanet.com/references/elemref/ref_tree.html#cmnote-9
+	function onDoubleClick(event, tree)
+	{
+		if (event && tree && (event.type == "click" || event.type == "dblclick"))
+		{
+			var row = {}, col = {}, obj = {};
+			tree.treeBoxObject.getCellAt(event.clientX, event.clientY, row, col, obj);
+			if (obj.value && itemsView && itemsView.selection.currentIndex > -1)
+			{
+				var item = getSelectedItems()[0];
+				if(item && item.isNote())
+				{
+					document.getElementById('scholar-view-note-button').doCommand();
+				}
+			}
 		}
 	}
 	

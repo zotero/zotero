@@ -109,6 +109,7 @@
 				</hbox>
 				<tree 
 					id="items-tree" context="scholar-itemmenu"
+					ondblclick="ScholarPane.onDoubleClick(event, this);"
 					enableColumnDrag="true" onkeypress="if(event.keyCode == event.DOM_VK_BACK_SPACE){ ScholarPane.deleteSelectedItem(); return false; }"
 					onselect="ScholarPane.itemSelected();"
 					ondraggesture="if (event.target.localName == 'treechildren') nsDragAndDrop.startDrag(event,ScholarPane.getItemsView());"
@@ -182,7 +183,7 @@
 						<deck id="scholar-view-item" flex="1"/>
 						<vbox id="scholar-view-note" flex="1">
 							<noteeditor id="scholar-note-editor" flex="1"/>
-							<button label="Edit in a separate window" oncommand="ScholarPane.openNoteWindow(this.getAttribute('noteID')); if(this.hasAttribute('sourceID')) ScholarPane.selectItem(this.getAttribute('sourceID'));"/>
+							<button id="scholar-view-note-button" label="Edit in a separate window" oncommand="ScholarPane.openNoteWindow(this.getAttribute('noteID')); if(this.hasAttribute('sourceID')) ScholarPane.selectItem(this.getAttribute('sourceID'));"/>
 						</vbox>
 						<vbox id="scholar-view-file" flex="1">
 							<label id="scholar-file-label"/>
