@@ -11,7 +11,6 @@
 // Class to interface with the browser when ingesting data
 
 Scholar_Ingester_Interface = function() {}
-Scholar_Ingester_Interface._scrapeProgress = new Array();
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -58,7 +57,8 @@ Scholar_Ingester_Interface.chromeUnload = function() {
 }
 
 /*
- * Scrapes a page (called when the capture icon is clicked)
+ * Scrapes a page (called when the capture icon is clicked); takes a collection
+ * ID as the argument
  */
 Scholar_Ingester_Interface.scrapeThisPage = function(saveLocation) {
 	var browser = Scholar_Ingester_Interface.tabBrowser.selectedBrowser;
@@ -67,12 +67,20 @@ Scholar_Ingester_Interface.scrapeThisPage = function(saveLocation) {
 	if(data.translators && data.translators.length) {
 		Scholar_Ingester_Interface.Progress.show();
 		
+		if(saveLocation) {
+			saveLocation = Scholar.Collections.get(saveLocation);
+		} else { // save to currently selected project, if a project is selected
+			try {
+				saveLocation = ScholarPane.getSelectedCollection();
+			} catch(e) {}
+		}
+		
 		var translate = new Scholar.Translate("web");
 		translate.setBrowser(browser);
 		// use first translator available
 		translate.setTranslator(data.translators[0]);
 		translate.setHandler("select", Scholar_Ingester_Interface._selectItems);
-		translate.setHandler("itemDone", Scholar_Ingester_Interface._itemDone);
+		translate.setHandler("itemDone", function(obj, item) { Scholar_Ingester_Interface._itemDone(obj, item, saveLocation) });
 		translate.setHandler("done", Scholar_Ingester_Interface._finishScraping);
 		translate.translate();
 	}
@@ -276,11 +284,12 @@ Scholar_Ingester_Interface._updateStatus = function(data) {
 /*
  * Callback to be executed when an item has been finished
  */
-Scholar_Ingester_Interface._itemDone = function(obj, item) {
+Scholar_Ingester_Interface._itemDone = function(obj, item, collection) {
 	var title = item.getField("title");
 	var icon = "chrome://scholar/skin/treeitem-"+Scholar.ItemTypes.getName(item.getField("itemTypeID"))+".png"
 	Scholar_Ingester_Interface.Progress.addLines([title], [icon]);
-	item.save();
+	var item = item.save();
+	collection.addItem(item);
 }
 
 /*
