@@ -21,6 +21,7 @@
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 <?xml-stylesheet href="chrome://scholar/skin/scholar.css" type="text/css"?>
 <?xml-stylesheet href="chrome://scholar/skin/about.css" type="text/css"?>
+<!DOCTYPE window SYSTEM "chrome://scholar/locale/about.dtd">
 
 <dialog
     id="scholar-about"
@@ -43,25 +44,25 @@
 	</script>
 	
 	<vbox id="aboutcontent">
-		<label id="name" value="Scholar for Firefox"/>
-		<label id="version" value="version 1.0a1"/>
+		<label id="name" value="&scholar.name;"/>
+		<label id="version" value="&scholar.version;"/>
 		
-		<label class="subhead" value="Created by:"/>
+		<label class="subhead" value="&scholar.createdby;"/>
 		<vbox class="subcontent">
 			<label class="text-link" href="http://chnm.gmu.edu" value="Center for History and New Media"/>
 		</vbox>
-		<label class="subhead" value="Directors:"/>
+		<label class="subhead" value="&scholar.directors;"/>
 		<vbox class="subcontent">
 			<label value="Dan Cohen"/>
 			<label value="Josh Greenberg"/>
 		</vbox>
-		<label class="subhead" value="Developers:"/>
+		<label class="subhead" value="&scholar.developers;"/>
 		<vbox class="subcontent">
 			<label value="Dan Stillman"/>
 			<label value="David Norton"/>
 			<label value="Simon Kornblith"/>
 		</vbox>
-		<label class="subhead" value="Special Thanks:"/>
+		<label class="subhead" value="&scholar.thanks;"/>
 		<vbox class="subcontent">
 			<label class="text-link" href="http://www.imls.gov/" value="Institute of Museum and Library Services"/>
 			<label class="text-link" href="http://www.mozilla.org/" value="Mozilla Foundation"/>

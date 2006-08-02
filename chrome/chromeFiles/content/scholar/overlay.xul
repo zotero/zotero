@@ -73,8 +73,8 @@
 					<spacer flex="1"/>
 					<toolbarbutton id="tb-collection-menu" type="menu">
 						<menupopup>
-							<menuitem label="Import..." oncommand="Scholar_File_Interface.importFile();"/>
-							<menuitem label="Export Library..." oncommand="Scholar_File_Interface.exportFile();"/>
+							<menuitem label="&toolbar.import.label;" oncommand="Scholar_File_Interface.importFile();"/>
+							<menuitem label="&toolbar.export.label;" oncommand="Scholar_File_Interface.exportFile();"/>
 						</menupopup>
 					</toolbarbutton>
 				</toolbar>
@@ -100,15 +100,15 @@
 					<toolbarbutton id="tb-add" tooltiptext="&toolbar.newItem.label;" type="menu">
 						<menupopup/>
 					</toolbarbutton>
-					<toolbarbutton id="tb-file-add" type="menu" tooltiptext="New Standalone File">
+					<toolbarbutton id="tb-file-add" type="menu" tooltiptext="&toolbar.file.standalone;">
 						<menupopup>
-							<menuitem label="Add File..." oncommand="ScholarPane.addFileFromDialog();"/>
-							<menuitem label="Add Linked File..." oncommand="ScholarPane.addFileFromDialog(true);"/>
-							<menuitem label="Snapshot Current Page" oncommand="ScholarPane.addFileFromPage();"/>
-							<menuitem label="Link to Current Page" oncommand="ScholarPane.addFileFromPage(true);"/>
+							<menuitem label="&toolbar.file.add;" oncommand="ScholarPane.addFileFromDialog();"/>
+							<menuitem label="&toolbar.file.linked;" oncommand="ScholarPane.addFileFromDialog(true);"/>
+							<menuitem label="&toolbar.file.snapshot;" oncommand="ScholarPane.addFileFromPage();"/>
+							<menuitem label="&toolbar.file.weblink;" oncommand="ScholarPane.addFileFromPage(true);"/>
 						</menupopup>
 					</toolbarbutton>
-					<toolbarbutton id="tb-note-add" tooltiptext="New Standalone Note" oncommand="ScholarPane.newNote();"/>
+					<toolbarbutton id="tb-note-add" tooltiptext="&toolbar.note.standalone;" oncommand="ScholarPane.newNote();"/>
 					<spacer flex="1"/>
 					<label value="&toolbar.search.label;" control="tb-search"/>
 					<textbox id="tb-search" type="timed" timeout="250" command="cmd_scholar_search" dir="reverse" onkeypress="if(event.keyCode == event.DOM_VK_ESCAPE) { this.value = ''; this.doCommand('cmd_scholar_search'); return false; }">
@@ -124,7 +124,7 @@
 					</hbox>
 					<spacer flex="1"/>
 					<toolbarbutton label="Save"/>
-					<toolbarbutton label="&scholar.plus;"/>
+					<toolbarbutton label="+"/>
 				</hbox>
 				<tree 
 					id="items-tree" context="scholar-itemmenu"
@@ -182,7 +182,7 @@
 			<splitter id="scholar-view-splitter" resizebefore="closest" resizeafter="closest"/>
 			<vbox>
 				<toolbar align="right">
-					<toolbarbutton id="tb-fullscreen" tooltiptext="Toggle Fullscreen Mode" oncommand="ScholarPane.fullScreen();"/>
+					<toolbarbutton id="tb-fullscreen" tooltiptext="&toolbar.fullscreen.tooltip;" oncommand="ScholarPane.fullScreen();"/>
 					<toolbarbutton class="tabs-closebutton" oncommand="ScholarPane.toggleDisplay()"/>
 				</toolbar>
 				<groupbox flex="1">
@@ -202,7 +202,7 @@
 						<deck id="scholar-view-item" flex="1"/>
 						<vbox id="scholar-view-note" flex="1">
 							<noteeditor id="scholar-note-editor" flex="1"/>
-							<button id="scholar-view-note-button" label="Edit in a separate window" oncommand="ScholarPane.openNoteWindow(this.getAttribute('noteID')); if(this.hasAttribute('sourceID')) ScholarPane.selectItem(this.getAttribute('sourceID'));"/>
+							<button id="scholar-view-note-button" label="&notes.separate;" oncommand="ScholarPane.openNoteWindow(this.getAttribute('noteID')); if(this.hasAttribute('sourceID')) ScholarPane.selectItem(this.getAttribute('sourceID'));"/>
 						</vbox>
 						<vbox id="scholar-view-file" flex="1">
 							<label id="scholar-file-label"/>

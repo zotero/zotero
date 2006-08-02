@@ -5,9 +5,7 @@
 <!ENTITY tabs.files.label				"Files">
 <!ENTITY tabs.tags.label				"Tags">
 <!ENTITY tabs.related.label				"Related">
-
-<!ENTITY scholar.minus					"-">
-<!ENTITY scholar.plus					"+">
+<!ENTITY notes.separate					"Edit in a separate window">
 
 <!ENTITY items.type_column 				"Type">
 <!ENTITY items.title_column 			"Title">
@@ -26,8 +24,20 @@
 <!ENTITY toolbar.renameCollection.label   "Rename Project...">
 <!ENTITY toolbar.removeCollection.label   "Remove Project...">
 <!ENTITY toolbar.exportCollection.label   "Export Project...">
+<!ENTITY toolbar.import.label			"Import...">
+<!ENTITY toolbar.export.label			"Export Library...">
 <!ENTITY toolbar.createBibCollection.label   "Create Bibliography From Project...">
 <!ENTITY toolbar.search.label   			"Search:">
+<!ENTITY toolbar.fullscreen.tooltip		"Toggle Fullscreen Mode">
+
+<!ENTITY item.add						"Add">
+
+<!ENTITY toolbar.note.standalone		"New Standalone Note">
+<!ENTITY toolbar.file.standalone		"New Standalone File">
+<!ENTITY toolbar.file.add   			"Add File...">
+<!ENTITY toolbar.file.linked   			"Add Linked File...">
+<!ENTITY toolbar.file.snapshot 			"Snapshot Current Page">
+<!ENTITY toolbar.file.weblink  			"Link to Current Page">
 
 <!ENTITY selectitems.title   			"Select Items">
 <!ENTITY selectitems.intro.label   		"Select which items you'd like to add to your library">

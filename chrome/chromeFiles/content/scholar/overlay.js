@@ -242,7 +242,7 @@ var ScholarPane = new function()
 			var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
                     						.getService(Components.interfaces.nsIPromptService);
 
-			if(promptService.confirmCheck(window, 'Delete Item', Scholar.getString('pane.items.delete'), 'Erase attached notes and files', eraseChildren))
+			if(promptService.confirmCheck(window, Scholar.getString('pane.items.delete.title'), Scholar.getString('pane.items.delete'), Scholar.getString('pane.items.delete.attached'), eraseChildren))
 				itemsView.deleteSelection(eraseChildren.value);
 		}
 	}
@@ -428,7 +428,7 @@ var ScholarPane = new function()
 		var nsIFilePicker = Components.interfaces.nsIFilePicker;
 		var fp = Components.classes["@mozilla.org/filepicker;1"]
         					.createInstance(nsIFilePicker);
-		fp.init(window, "Select a File", nsIFilePicker.modeOpen);
+		fp.init(window, Scholar.getString('pane.item.files.select'), nsIFilePicker.modeOpen);
 		
 		if(fp.show() == nsIFilePicker.returnOK)
 		{
