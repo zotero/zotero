@@ -1,4 +1,6 @@
 Scholar_File_Interface = new function() {
+	var _unresponsiveScriptPreference;
+	
 	this.exportFile = exportFile;
 	this.importFile = importFile;
 	this.bibliographyFromProject = bibliographyFromProject;
@@ -21,10 +23,41 @@ Scholar_File_Interface = new function() {
 		if (rv == nsIFilePicker.returnOK || rv == nsIFilePicker.returnReplace) {
 			translation.setLocation(fp.file);
 			translation.setTranslator(translators[fp.filterIndex]);
-			//translation.setHandler("done", _exportDone);
-			translation.translate();
+			//translation.setHandler("itemCount", _exportItemCount);
+			//translation.setHandler("itemDone", _exportItemDone);
+			translation.setHandler("done", _exportDone);
+			_disableUnresponsive();
+			Scholar_File_Interface.Progress.show(
+				Scholar.getString("fileInterface.itemsExported"),
+				function() {
+					translation.translate();
+			});
 		}
 	}
+	
+	/*
+	 * set progress indicator length
+	 */
+	function _exportItemCount(obj, number) {
+		Scholar.debug("count called with "+number);
+		Scholar_File_Interface.Progress.setNumber(number);
+	}
+	
+	/*
+	 * Increment progress for each item exported
+	 */
+	function _exportItemDone(obj, item) {
+		Scholar_File_Interface.Progress.increment();
+	}
+	
+	/*
+	 * closes items exported indicator
+	 */
+	function _exportDone(obj) {
+		Scholar_File_Interface.Progress.close();
+		_restoreUnresponsive();
+	}
+	
 	
 	/*
 	 * Creates Scholar.Translate instance and shows file picker for file import
@@ -49,10 +82,54 @@ Scholar_File_Interface = new function() {
 			if(translators.length) {
 				// TODO: display a list of available translators
 				translation.setTranslator(translators[0]);
+				// show progress indicator
 				translation.setHandler("itemDone", _importItemDone);
-				translation.translate();
+				translation.setHandler("done", _importDone);
+				_disableUnresponsive();
+				Scholar_File_Interface.Progress.show(
+					Scholar.getString("fileInterface.itemsImported"),
+					function() {
+						translation.translate();
+				});
 			}
 		}
+	}
+	
+	/*
+	 * Saves items after they've been imported. We could have a nice little
+	 * "items imported" indicator, too.
+	 */
+	function _importItemDone(obj, item) {
+		//Scholar_File_Interface.Progress.increment();
+		item.save();
+	}
+	
+	/*
+	 * closes items imported indicator
+	 */
+	function _importDone(obj) {
+		Scholar_File_Interface.Progress.close();
+		_restoreUnresponsive();
+	}
+	
+	/*
+	 * disables the "unresponsive script" warning; necessary for import and
+	 * export, which can take quite a while to execute
+	 */
+	function _disableUnresponsive() {
+		var prefService = Components.classes["@mozilla.org/preferences-service;1"].
+		                  getService(Components.interfaces.nsIPrefBranch);
+		_unresponsiveScriptPreference = prefService.getIntPref("dom.max_script_run_time");
+		prefService.setIntPref("dom.max_script_run_time", 0);
+	}
+	 
+	/*
+	 * restores the "unresponsive script" warning
+	 */
+	function _restoreUnresponsive() {
+		var prefService = Components.classes["@mozilla.org/preferences-service;1"].
+		                  getService(Components.interfaces.nsIPrefBranch);
+		prefService.setIntPref("dom.max_script_run_time", _unresponsiveScriptPreference);
 	}
 	
 	/*
@@ -63,14 +140,6 @@ Scholar_File_Interface = new function() {
 		if(!collection) throw("error in bibliographyFromProject: no collection currently selected");
 		
 		_doBibliographyOptions(Scholar.getItems(collection.getID()));
-	}
-	
-	/*
-	 * Saves items after they've been imported. We could have a nice little
-	 * "items imported" indicator, too.
-	 */
-	function _importItemDone(obj, item) {
-		item.save();
 	}
 	
 	/*
@@ -159,6 +228,81 @@ Scholar_File_Interface = new function() {
 			var clipboardService = Components.classes["@mozilla.org/widget/clipboard;1"].
 			                       getService(Components.interfaces.nsIClipboard);
 			clipboardService.setData(transferable, null, Components.interfaces.nsIClipboard.kGlobalClipboard);
+		}
+	}
+}
+
+// Handles the display of a progress indicator
+Scholar_File_Interface.Progress = new function() {
+	var _windowLoaded = false;
+	var _windowLoading = false;
+	var _progressWindow;
+	// keep track of all of these things in case they're called before we're
+	// done loading the progress window
+	var _loadHeadline, _loadNumber, _outOf, _callback;
+	
+	this.show = show;
+	//this.setNumber = setNumber;
+	//this.increment = increment;
+	this.close = close;
+	
+	function show(headline, callback) {
+		if(_windowLoading || _windowLoaded) {	// already loading or loaded
+			return false;
+		}
+		_windowLoading = true;
+		
+		_loadHeadline = headline;
+		_loadNumber = 0;
+		_outOf = 0;
+		_callback = callback;
+		
+		_progressWindow = window.openDialog("chrome://scholar/chrome/fileProgress.xul", "", "chrome,resizable=no,close=no,dependent,dialog,centerscreen");
+		_progressWindow.addEventListener("pageshow", _onWindowLoaded, false);
+	}
+	
+	/*function setNumber(number) {
+		_outOf = number;
+		if(_windowLoaded) {
+			var progressMeter = _progressWindow.document.getElementById("progress-indicator");
+			progressMeter.mode = "normal";
+			progressMeter.value = "0%";
+		}
+	}
+	
+	function increment() {
+		_loadNumber++;
+		if(_windowLoaded) {
+			_progressWindow.document.getElementById("progress-items").value = _loadNumber;
+			if(_outOf) {
+				_progressWindow.document.getElementById("progress-indicator").value = ((_loadNumber/_outOf)*100).toString()+"%";
+			}
+			_progressWindow.getSelection();
+		}
+	}*/
+	
+	function close() {
+		_windowLoaded = false;
+		try {
+			_progressWindow.close();
+		} catch(ex) {}
+	}
+	
+	function _onWindowLoaded() {
+		_windowLoading = false;
+		_windowLoaded = true;
+		
+		// do things we delayed because the winodw was loading
+		/*if(_outOf) {
+			var progressMeter = _progressWindow.document.getElementById("progress-indicator");
+			progressMeter.mode = "normal";
+			progressMeter.value = ((_loadNumber/_outOf)*100).toString()+"%";
+		}
+		_progressWindow.document.getElementById("progress-items").value = _loadNumber;*/
+		_progressWindow.document.getElementById("progress-label").value = _loadHeadline;
+		
+		if(_callback) {
+			window.setTimeout(_callback, 1500);
 		}
 	}
 }

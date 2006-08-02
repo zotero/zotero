@@ -137,6 +137,12 @@ Scholar.Translate.prototype.setTranslator = function(translator) {
  *   returns: a numerically indexed array of ids, as extracted from the passed
  *            string
  *
+ * itemCount
+ *   valid: export
+ *   called: when the export 
+ *   passed: the number of items to be processed
+ *   returns: N/A
+ *
  * itemDone
  *   valid: web
  *   called: when an item has been processed; may be called asynchronously
@@ -146,7 +152,7 @@ Scholar.Translate.prototype.setTranslator = function(translator) {
  * done
  *   valid: all
  *   called: when all processing is finished
- *   passed: returns true if successful, false if an error occurred
+ *   passed: true if successful, false if an error occurred
  *   returns: N/A
  */
 Scholar.Translate.prototype.setHandler = function(type, handler) {
@@ -708,6 +714,8 @@ Scholar.Translate.prototype._export = function() {
 	
 	// get items
 	this._itemsLeft = Scholar.getItems();
+	// run handler for items available
+	this._runHandler("itemCount", this._itemsLeft.length);
 	
 	// get collections, if requested
 	if(this._configOptions.getCollections) {
@@ -760,8 +768,10 @@ Scholar.Translate.prototype._exportConfigureIO = function() {
 Scholar.Translate.prototype._exportGetItem = function() {
 	if(this._itemsLeft.length != 0) {
 		var returnItem = this._itemsLeft.shift();
+		this._runHandler("itemDone", returnItem);
 		return returnItem.toArray();
 	}
+	
 	return false;
 }
 

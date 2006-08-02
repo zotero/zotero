@@ -50,3 +50,5 @@
 <!ENTITY bibliography.saveAsHTML.label	"Save as HTML">
 <!ENTITY bibliography.copyToClipboard.label	"Copy to Clipboard">
 <!ENTITY bibliography.print.label		"Print">
+
+<!ENTITY progress.title					"Progress">
