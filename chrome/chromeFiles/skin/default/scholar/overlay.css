@@ -133,19 +133,19 @@
 #tb-search
 {
 	width: 150px;
-	height: 24px;
-	margin: 0px;
-	margin-bottom: 2px;
-	padding: 0px;
-	vertical-align: middle;
-	font-size: 12px; 
 }
 
 #tb-search-cancel
 {
 	margin: 0px;
 	padding: 0px;
-	cursor: pointer;
+	cursor: default;
+	list-style-image: url('chrome://scholar/skin/search-cancel.png');
+}
+
+#tb-search-cancel:hover:active
+{
+	list-style-image: url('chrome://scholar/skin/search-cancel-active.png');
 }
 
 #scholar-view-item vbox

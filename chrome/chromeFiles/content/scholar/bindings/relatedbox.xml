@@ -58,15 +58,22 @@
 									var label = document.createElement("label");
 									label.setAttribute('value', seealso[i].getField('title'));
 									label.setAttribute('crop','end');
-								
+									label.setAttribute('flex','1');
+									
+									var box = document.createElement('box');
+									box.setAttribute('onclick',"this.parentNode.parentNode.parentNode.parentNode.parentNode.showItem('"+seealso[i].getID()+"')");
+									box.setAttribute('class','clicky');
+									box.setAttribute('flex','1');
+									box.appendChild(icon);
+									box.appendChild(label);
+					
 									var remove = document.createElement("label");
 									remove.setAttribute('value','-');
 									remove.setAttribute('onclick',"this.parentNode.parentNode.parentNode.parentNode.parentNode.remove('"+seealso[i].getID()+"');");
 									remove.setAttribute('class','clicky');
 							
 									var row = document.createElement("row");
-									row.appendChild(icon);
-									row.appendChild(label);
+									row.appendChild(box);
 									row.appendChild(remove);
 									row.setAttribute('id','seealso-'+seealso[i].getID());
 									rows.appendChild(row);		
@@ -111,6 +118,42 @@
 					]]>
 				</body>
 			</method>
+			<method name="showItem">
+				<parameter name="id"/>
+				<body>
+					<![CDATA[
+						if(id)
+						{
+							var p;
+							if(window.ScholarPane)
+							{
+								p = window.ScholarPane;
+							}
+							else
+							{
+								var win;
+														
+								if(window.opener && window.opener.ScholarPane)
+								{
+									win = window.opener;
+								}
+								else
+								{
+									var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+														.getService(Components.interfaces.nsIWindowMediator);
+									win = wm.getMostRecentWindow('navigator:browser');
+									if(!win)
+										return;
+								}
+								
+								p = win.ScholarPane;
+							}
+								
+							p.selectItem(id);
+						}
+					]]>
+				</body>
+			</method>
 			<method name="updateCount">
 				<parameter name="count"/>
 				<body>
@@ -143,9 +186,8 @@
 					<xul:label id="seeAlsoNum"/>
 					<xul:button label="Add" oncommand="this.parentNode.parentNode.parentNode.add();"/>
 				</xul:hbox>
-				<xul:grid>
+				<xul:grid flex="1">
 					<xul:columns>
-						<xul:column/>
 						<xul:column flex="1"/>
 						<xul:column/>
 					</xul:columns>

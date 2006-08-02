@@ -141,7 +141,7 @@ Scholar.ItemTreeView.prototype.notify = function(action, type, ids)
 		
 		if(action == 'add')
 		{
-			this.selectItem(this._itemRowMap[item.getID()]);
+			this.selectItem(item.getID());
 		}
 		else
 		{
@@ -440,12 +440,12 @@ Scholar.ItemTreeView.prototype.sort = function()
  */
 Scholar.ItemTreeView.prototype.selectItem = function(id)
 {
-	var item = Scholar.Items.get(id);
-	var row = this._itemRowMap[item.getID()];
+	var row = this._itemRowMap[id];
 	if(row == null)
 	{
+		var item = Scholar.Items.get(id);
 		this.toggleOpenState(this._itemRowMap[item.getSource()]); //opens the parent of the item
-		row = this._itemRowMap[item.getID()];
+		row = this._itemRowMap[id];
 	}
 		
 	this.selection.select(row);

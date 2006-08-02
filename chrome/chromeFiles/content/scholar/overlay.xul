@@ -93,7 +93,7 @@
 					<spacer flex="1"/>
 					<label value="&toolbar.search.label;" control="tb-search"/>
 					<textbox id="tb-search" type="timed" timeout="250" command="cmd_scholar_search" dir="reverse" onkeypress="if(event.keyCode == event.DOM_VK_ESCAPE) { this.value = ''; this.doCommand('cmd_scholar_search'); return false; }">
-						<toolbarbutton id="tb-search-cancel" class="tabs-closebutton" oncommand="this.parentNode.value='';" hidden="true"/>
+						<toolbarbutton id="tb-search-cancel" oncommand="this.parentNode.value='';" hidden="true"/>
 					</textbox>
 				</toolbar>
 				<hbox id="scholar-search-options" hidden="true">
