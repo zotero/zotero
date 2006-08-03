@@ -80,7 +80,6 @@ Scholar_File_Interface = new function() {
 			// get translators again, bc now we can check against the file
 			translators = translation.getTranslators();
 			if(translators.length) {
-				// TODO: display a list of available translators
 				translation.setTranslator(translators[0]);
 				// show progress indicator
 				translation.setHandler("itemDone", _importItemDone);

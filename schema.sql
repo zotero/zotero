@@ -1,4 +1,4 @@
--- 31
+-- 32
 
     DROP TABLE IF EXISTS version;
     CREATE TABLE version (
@@ -230,6 +230,14 @@
         value NONE,
         PRIMARY KEY (transactionID, field, value),
         FOREIGN KEY (transactionID) REFERENCES transactions(transactionID)
+    );
+    
+    DROP TABLE IF EXISTS csl;
+    CREATE TABLE csl (
+        cslID TEXT PRIMARY KEY,
+        updated DATETIME,
+        title TEXT,
+        csl TEXT
     );
     
     

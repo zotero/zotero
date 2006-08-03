@@ -8,13 +8,23 @@ Scholar.Cite = new function() {
 	this.getStyles = getStyles;
 	
 	function getStyles() {
-		// TODO: return key/values from database
-		return {1:"American Psychological Association"};
+		// get styles
+		var sql = "SELECT cslID, title FROM csl ORDER BY title";
+		var styles = Scholar.DB.query(sql);
+		
+		// convert to associative array
+		var stylesObject = new Object();
+		for each(var style in styles) {
+			stylesObject[style.cslID] = style.title;
+		}
+		
+		return stylesObject;
 	}
 	
-	function getBibliography(style, items) { 
-		// TODO: retrieve style from the database
-		style = '<citationstyle xmlns="http://purl.org/net/xbiblio/csl" xml:lang="en">   <info>      <title>American Psychological Association</title>      <title-short>APA</title-short>      <edition>5</edition>      <author>         <name>Bruce DÕArcus</name>         <email>bdarcus@sourceforge.net</email>      </author>      <dateCreated>2005-05-18</dateCreated>      <dateModified>2006-07-09</dateModified>      <source         href="http://www.english.uiuc.edu/cws/wworkshop/writer_resources/citation_styles/apa/apa.htm"         >Citation Styles Handbook: APA</source>      <field>psychology</field>      <description>Style for the American Psychological      Association.</description>   </info>   <general>      <names and="text" sort-separator=", " initialize-with=".">         <original-script position="after" prefix=" "/>      </names>      <contributors>         <label position="before-unless-first" type="verb"/>      </contributors>      <locators>         <label position="before" form="short"/>      </locators>      <titles>         <original-script position="after" prefix=" "/>      </titles>      <dates format="year, month day" month="full">         <original position="after" prefix=" [" suffix="]"/>      </dates>      <publishers order="address-publisher" separator=":"/>      <access order="url-date" separator=", "/>   </general>   <citation delimiter=";" type="author-year" sort-order="author-date"      prefix="(" suffix=")">      <use-et_al min-authors="6" use-first="6" position="first"/>      <use-et_al min-authors="6" use-first="1" position="subsequent"/>      <item-layout>         <author form="short" suffix=", "/>         <year/>         <point-locator prefix=": " include-label="false"/>      </item-layout>   </citation>   <bibliography author-as-sort-order="all" author-shorten-with="ÑÑÑ."      sort-order="author-date">      <use-et_al min-authors="4" use-first="3"/>      <list-layout>         <heading label="references"/>      </list-layout>      <item-layout suffix=".">         <reftype name="book">            <author alternate="editor"/>            <year prefix=" (" suffix=")."/>            <title font-style="italic" prefix=" " suffix="."/>            <editor prefix=", "/>            <publisher/>            <access prefix=" "/>         </reftype>         <reftype name="chapter">            <author alternate="editor"/>            <year prefix=" (" suffix=")."/>            <title prefix=" "/>            <group class="container">               <text idref="in"/>               <editor/>               <title type="container" font-style="italic" prefix=" " suffix="."/>               <title type="series" prefix=" " suffix="."/>               <publisher/>            </group>            <access prefix=" "/>            <pages prefix=", "/>         </reftype>         <reftype name="article">            <author alternate="container-title"/>            <year prefix=" (" suffix=")."/>            <title prefix=" "/>            <group class="container">               <editor/>               <title type="container" font-style="italic" prefix=" " suffix="."/>            </group>            <access prefix=" "/>            <volume prefix=" "/>            <issue prefix="(" suffix=")"/>            <pages prefix=", "/>         </reftype>        <reftype name="legalcase">          <title/>          <year prefix=" (" suffix=")"/>          <access prefix=", "/>        </reftype>      </item-layout>   </bibliography></citationstyle>';
+	function getBibliography(cslID, items) {
+		// get style
+		var sql = "SELECT csl FROM csl WHERE cslID = ?";
+		var style = Scholar.DB.valueQuery(sql, [cslID]);
 		
 		// get item arrays
 		var itemArrays = new Array();
