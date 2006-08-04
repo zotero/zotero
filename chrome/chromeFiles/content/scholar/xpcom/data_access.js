@@ -2828,291 +2828,160 @@ Scholar.Tags = new function(){
 
 
 
+
 /*
- * Same structure as Scholar.ItemTypes and FileTypes --
- *		make changes in both places if possible
+ * Base function for retrieving ids and names of static types stored in the DB
+ * (e.g. creatorType, fileType, charset, itemType)
+ *
+ * Extend using the following code within a child constructor:
+ *
+ * 	Scholar.CachedTypes.apply(this, arguments);
+ *  this.constructor.prototype = new Scholar.CachedTypes();
+ *
+ * And the following properties:
+ *
+ *	this._typeDesc = 'c';
+ *	this._idCol = '';
+ *	this._nameCol = '';
+ *	this._table = '';
+ *	this._ignoreCase = true;
+ * 
  */
+Scholar.CachedTypes = function(){
+	var _types = new Array();
+	var _typesLoaded;
+	var self = this;
+	
+	// Override these variables in child classes
+	this._typeDesc = '';
+	this._idCol = '';
+	this._nameCol = '';
+	this._table = '';
+	this._ignoreCase = true;
+	
+	this.getName = getName;
+	this.getID = getID;
+	this.getTypes = getTypes;
+	
+	function getName(idOrName){
+		if (!_typesLoaded){
+			_load();
+		}
+		
+		idOrName = idOrName + '';
+		
+		if (this._ignoreCase){
+			idOrName = idOrName.toLowerCase();
+		}
+		
+		if (!_types[idOrName]){
+			Scholar.debug('Invalid ' + this._typeDesc + ' ' + idOrName, 1);
+		}
+		
+		return _types[idOrName]['name'];
+	}
+	
+	
+	function getID(idOrName){
+		if (!_typesLoaded){
+			_load();
+		}
+		
+		if (this._ignoreCase){
+			idOrName = idOrName.toLowerCase();
+		}
+		
+		if (!_types[idOrName]){
+			Scholar.debug('Invalid ' + this._typeDesc + ' ' + idOrName, 1);
+		}
+		
+		return _types[idOrName]['id'];
+	}
+	
+	
+	function getTypes(){
+		return Scholar.DB.query('SELECT ' + this._idCol + ' AS id, '
+			+ this._nameCol + ' AS name FROM ' + this._table + ' order BY ' + this._nameCol);
+	}
+	
+	
+	function _load(){
+		var types = self.getTypes();
+		
+		for (i in types){
+			// Store as both id and name for access by either
+			var typeData = {
+				id: types[i]['id'],
+				name: this._ignoreCase ? types[i]['name'].toLowerCase() : types[i]['name']
+			}
+			_types[types[i]['id']] = typeData;
+			_types[types[i]['name']] = _types[types[i]['id']];
+		}
+		
+		_typesLoaded = true;
+	}
+}
+
+
 Scholar.CreatorTypes = new function(){
-	var _types = new Array();
-	var _typesLoaded;
-	var self = this;
+	Scholar.CachedTypes.apply(this, arguments);
+	this.constructor.prototype = new Scholar.CachedTypes();
 	
-	this.getName = getName;
-	this.getID = getID;
-	this.getTypes = getTypes;
-	
-	
-	function getName(idOrName){
-		if (!_typesLoaded){
-			_load();
-		}
-		
-		if (!_types[idOrName]){
-			Scholar.debug('Invalid creator type ' + idOrName, 1);
-		}
-		
-		return _types[idOrName]['name'];
-	}
-	
-	
-	function getID(idOrName){
-		if (!_typesLoaded){
-			_load();
-		}
-		
-		if (!_types[idOrName]){
-			Scholar.debug('Invalid creator type ' + idOrName, 1);
-		}
-		
-		return _types[idOrName]['id'];
-	}
-	
-	
-	function getTypes(){
-		return Scholar.DB.query('SELECT creatorTypeID AS id, '
-			+ 'creatorType AS name FROM creatorTypes order BY creatorType');
-	}
-	
-	
-	function _load(){
-		var types = self.getTypes();
-		
-		for (i in types){
-			// Store as both id and name for access by either
-			var typeData = {
-				id: types[i]['id'],
-				name: types[i]['name']
-			}
-			_types[types[i]['id']] = typeData;
-			_types[types[i]['name']] = _types[types[i]['id']];
-		}
-		
-		_typesLoaded = true;
-	}
+	this._typeDesc = 'creator type';
+	this._idCol = 'creatorTypeID';
+	this._nameCol = 'creatorType';
+	this._table = 'creatorTypes';
+	this._ignoreCase = true;
 }
 
 
-
-
-/*
- * Same structure as Scholar.CreatorTypes and FileTypes --
- *		make changes in both places if possible
- */
 Scholar.ItemTypes = new function(){
-	var _types = new Array();
-	var _typesLoaded;
-	var self = this;
+	Scholar.CachedTypes.apply(this, arguments);
+	this.constructor.prototype = new Scholar.CachedTypes();
 	
-	this.getName = getName;
-	this.getID = getID;
-	this.getTypes = getTypes;
-	
-	
-	function getName(idOrName){
-		if (!_typesLoaded){
-			_load();
-		}
-		
-		if (!_types[idOrName]){
-			Scholar.debug('Invalid item type ' + idOrName, 1);
-		}
-		
-		return _types[idOrName]['name'];
-	}
-	
-	
-	function getID(idOrName){
-		if (!_typesLoaded){
-			_load();
-		}
-		
-		if (!_types[idOrName]){
-			Scholar.debug('Invalid item type ' + idOrName, 1);
-		}
-		
-		return _types[idOrName]['id'];
-	}
-	
-	
-	function getTypes(){
-		return Scholar.DB.query('SELECT itemTypeID AS id, typeName AS name '
-			+ 'FROM itemTypes order BY typeName');
-	}
-	
-	
-	function _load(){
-		var types = self.getTypes();
-		
-		for (i in types){
-			// Store as both id and name for access by either
-			var typeData = {
-				id: types[i]['id'],
-				name: types[i]['name']
-			}
-			_types[types[i]['id']] = typeData;
-			_types[types[i]['name']] = _types[types[i]['id']];
-		}
-		
-		_typesLoaded = true;
-	}
+	this._typeDesc = 'item type';
+	this._idCol = 'itemTypeID';
+	this._nameCol = 'typeName';
+	this._table = 'itemTypes';
+	this._ignoreCase = true;
 }
 
 
-
-
-
-/*
- * Same structure as Scholar.ItemTypes and CreatorTypes --
- * 		make changes in both places if possible
- */
 Scholar.FileTypes = new function(){
-	var _types = new Array();
-	var _typesLoaded;
-	var self = this;
+	Scholar.CachedTypes.apply(this, arguments);
+	this.constructor.prototype = new Scholar.CachedTypes();
 	
-	this.getName = getName;
-	this.getID = getID;
+	this._typeDesc = 'file type';
+	this._idCol = 'fileTypeID';
+	this._nameCol = 'fileType';
+	this._table = 'fileTypes';
+	this._ignoreCase = true;
+	
 	this.getIDFromMIMEType = getIDFromMIMEType;
-	this.getTypes = getTypes;
-	
-	
-	function getName(idOrName){
-		if (!_typesLoaded){
-			_load();
-		}
-		
-		if (!_types[idOrName]){
-			Scholar.debug('Invalid file type ' + idOrName, 1);
-		}
-		
-		return _types[idOrName]['name'];
-	}
-	
-	
-	function getID(idOrName){
-		if (!_typesLoaded){
-			_load();
-		}
-		
-		if (!_types[idOrName]){
-			Scholar.debug('Invalid file type ' + idOrName, 1);
-		}
-		
-		return _types[idOrName]['id'];
-	}
-	
 	
 	function getIDFromMIMEType(mimeType){
 		// TODO
 	}
-	
-	
-	function getTypes(){
-		return Scholar.DB.query('SELECT fileTypeID AS id, '
-			+ 'fileType AS name FROM fileTypes order BY fileType');
-	}
-	
-	
-	function _load(){
-		var types = self.getTypes();
-		
-		for (i in types){
-			// Store as both id and name for access by either
-			var typeData = {
-				id: types[i]['id'],
-				name: types[i]['name']
-			}
-			_types[types[i]['id']] = typeData;
-			_types[types[i]['name']] = _types[types[i]['id']];
-		}
-		
-		_typesLoaded = true;
-	}
 }
 
 
-
-/*
- * Same structure as Scholar.ItemTypes, CreatorTypes, etc. --
- * 		make changes in all versions if possible
- */
 Scholar.CharacterSets = new function(){
-	var _types = new Array();
-	var _typesLoaded;
-	var self = this;
+	Scholar.CachedTypes.apply(this, arguments);
+	this.constructor.prototype = new Scholar.CachedTypes();
 	
-	var _typeDesc = 'character set';
-	var _idCol = 'charsetID';
-	var _nameCol = 'charset';
-	var _table = 'charsets';
-	var _ignoreCase = true;
+	this._typeDesc = 'character sets';
+	this._idCol = 'charsetID';
+	this._nameCol = 'charset';
+	this._table = 'charsets';
+	this._ignoreCase = true;
 	
-	this.getName = getName;
-	this.getID = getID;
-	this.getTypes = getTypes;
 	this.getAll = getAll;
-	
-	function getName(idOrName){
-		if (!_typesLoaded){
-			_load();
-		}
-		
-		if (_ignoreCase){
-			idOrName = idOrName.toLowerCase();
-		}
-		
-		if (!_types[idOrName]){
-			Scholar.debug('Invalid ' + _typeDesc + ' ' + idOrName, 1);
-		}
-		
-		return _types[idOrName]['name'];
-	}
-	
-	
-	function getID(idOrName){
-		if (!_typesLoaded){
-			_load();
-		}
-		
-		if (_ignoreCase){
-			idOrName = idOrName.toLowerCase();
-		}
-		
-		if (!_types[idOrName]){
-			Scholar.debug('Invalid ' + _typeDesc + ' ' + idOrName, 1);
-		}
-		
-		return _types[idOrName]['id'];
-	}
-	
-	
-	function getTypes(){
-		return Scholar.DB.query('SELECT ' + _idCol + ' AS id, '
-			+ _nameCol + ' AS name FROM ' + _table + ' order BY ' + _nameCol);
-	}
-	
 	
 	function getAll(){
 		return this.getTypes();
 	}
-	
-	
-	function _load(){
-		var types = self.getTypes();
-		
-		for (i in types){
-			// Store as both id and name for access by either
-			var typeData = {
-				id: types[i]['id'],
-				name: _ignoreCase ? types[i]['name'].toLowerCase() : types[i]['name']
-			}
-			_types[types[i]['id']] = typeData;
-			_types[types[i]['name']] = _types[types[i]['id']];
-		}
-		
-		_typesLoaded = true;
-	}
 }
+
 
 
 
