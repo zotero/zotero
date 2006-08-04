@@ -2844,7 +2844,7 @@ Scholar.Tags = new function(){
  *	this._idCol = '';
  *	this._nameCol = '';
  *	this._table = '';
- *	this._ignoreCase = true;
+ *	this._ignoreCase = false;
  * 
  */
 Scholar.CachedTypes = function(){
@@ -2857,7 +2857,7 @@ Scholar.CachedTypes = function(){
 	this._idCol = '';
 	this._nameCol = '';
 	this._table = '';
-	this._ignoreCase = true;
+	this._ignoreCase = false;
 	
 	this.getName = getName;
 	this.getID = getID;
@@ -2868,14 +2868,14 @@ Scholar.CachedTypes = function(){
 			_load();
 		}
 		
-		idOrName = idOrName + '';
-		
 		if (this._ignoreCase){
+			idOrName = idOrName + '';
 			idOrName = idOrName.toLowerCase();
 		}
 		
 		if (!_types[idOrName]){
 			Scholar.debug('Invalid ' + this._typeDesc + ' ' + idOrName, 1);
+			return '';
 		}
 		
 		return _types[idOrName]['name'];
@@ -2888,11 +2888,13 @@ Scholar.CachedTypes = function(){
 		}
 		
 		if (this._ignoreCase){
+			idOrName = idOrName + '';
 			idOrName = idOrName.toLowerCase();
 		}
 		
 		if (!_types[idOrName]){
 			Scholar.debug('Invalid ' + this._typeDesc + ' ' + idOrName, 1);
+			return false;
 		}
 		
 		return _types[idOrName]['id'];
@@ -2912,10 +2914,15 @@ Scholar.CachedTypes = function(){
 			// Store as both id and name for access by either
 			var typeData = {
 				id: types[i]['id'],
-				name: this._ignoreCase ? types[i]['name'].toLowerCase() : types[i]['name']
+				name: types[i]['name']
 			}
 			_types[types[i]['id']] = typeData;
-			_types[types[i]['name']] = _types[types[i]['id']];
+			if (self._ignoreCase){
+				_types[types[i]['name'].toLowerCase()] = _types[types[i]['id']];
+			}
+			else {
+				_types[types[i]['name']] = _types[types[i]['id']];
+			}
 		}
 		
 		_typesLoaded = true;
@@ -2931,7 +2938,6 @@ Scholar.CreatorTypes = new function(){
 	this._idCol = 'creatorTypeID';
 	this._nameCol = 'creatorType';
 	this._table = 'creatorTypes';
-	this._ignoreCase = true;
 }
 
 
@@ -2943,7 +2949,6 @@ Scholar.ItemTypes = new function(){
 	this._idCol = 'itemTypeID';
 	this._nameCol = 'typeName';
 	this._table = 'itemTypes';
-	this._ignoreCase = true;
 }
 
 
@@ -2955,7 +2960,6 @@ Scholar.FileTypes = new function(){
 	this._idCol = 'fileTypeID';
 	this._nameCol = 'fileType';
 	this._table = 'fileTypes';
-	this._ignoreCase = true;
 	
 	this.getIDFromMIMEType = getIDFromMIMEType;
 	
