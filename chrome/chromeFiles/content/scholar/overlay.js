@@ -240,11 +240,22 @@ var ScholarPane = new function()
 	{
 		if(itemsView && itemsView.selection.count > 0)
 		{
-			var eraseChildren = {};
+			var eraseChildren = {value: true};
 			var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
                     						.getService(Components.interfaces.nsIPromptService);
+			var hasChildren;
+			
+			var start = new Object();
+			var end = new Object();
+			for (var i=0, len=itemsView.selection.getRangeCount(); i<len && !hasChildren; i++)
+			{
+				itemsView.selection.getRangeAt(i,start,end);
+				for (var j=start.value; j<=end.value && !hasChildren; j++)
+					if(itemsView._getItemAtRow(j).numNotes() || itemsView._getItemAtRow(j).numFiles())
+						hasChildren = true;
+			}
 
-			if(promptService.confirmCheck(window, Scholar.getString('pane.items.delete.title'), Scholar.getString('pane.items.delete'), Scholar.getString('pane.items.delete.attached'), eraseChildren))
+			if(promptService.confirmCheck(window, Scholar.getString('pane.items.delete.title'), Scholar.getString('pane.items.delete'), ( hasChildren ? Scholar.getString('pane.items.delete.attached') : ''), eraseChildren))
 				itemsView.deleteSelection(eraseChildren.value);
 		}
 	}
