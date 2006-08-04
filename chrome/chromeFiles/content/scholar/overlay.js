@@ -158,6 +158,8 @@ var ScholarPane = new function()
 			
 		//set to Info tab
 		document.getElementById('scholar-view-item').selectedIndex = 0;
+		
+		return item;
 	}
 	
 	function newCollection()
@@ -449,17 +451,31 @@ var ScholarPane = new function()
 	
 	function addFileFromPage(link, id)
 	{
+		var item;
+		if(id == null)
+		{
+			item = newItem(Scholar.ItemTypes.getID('website'));
+			if(item)
+				id = item.getID();
+		}
+		
 		var fileID;
 		if(link)
 			fileID = Scholar.Files.linkFromDocument(window.content.document, id);
 		else
 			fileID = Scholar.Files.importFromDocument(window.content.document, id);
 		
-		if(fileID && !id)
+		if(fileID)
 		{
-			var c = getSelectedCollection();
-			if(c)
-				c.addItem(fileID);
+			var file = Scholar.Items.get(fileID);
+			if(!item)
+				item = Scholar.Items.get(id);
+			
+			if(file && item)
+			{
+				item.setField('title',file.getField('title'));
+				item.save();
+			}
 		}
 	}
 }
