@@ -838,16 +838,20 @@ Scholar.Item.prototype.updateNote = function(text){
 	if (updated){
 		this.updateDateModified();
 		Scholar.DB.commitTransaction();
-		
-		// Update cached values
-		this._noteData = text ? text : '';
-		this.setField('title', this._noteToTitle(), true);
+		this.updateNoteCache(text);
 		
 		Scholar.Notifier.trigger('modify', 'item', this.getID());
 	}
 	else {
 		Scholar.DB.commitTransaction();
 	}
+}
+
+
+Scholar.Item.prototype.updateNoteCache = function(text){
+	// Update cached values
+	this._noteData = text ? text : '';
+	this.setField('title', this._noteToTitle(), true);
 }
 
 
@@ -992,7 +996,6 @@ Scholar.Item.prototype.getSource = function(){
 **/
 Scholar.Item.prototype.getNotes = function(){
 	if (this.isNote()){
-		Scholar.debug('here');
 		throw ("getNotes() cannot be called on items of type 'note'");
 	}
 	
@@ -1866,6 +1869,10 @@ Scholar.Notes = new function(){
 		];
 		Scholar.DB.query(sql, bindParams);
 		Scholar.DB.commitTransaction();
+		
+		// Switch to Scholar.Items version
+		var note = Scholar.Items.get(note.getID());
+		note.updateNoteCache(text);
 		
 		if (sourceItemID){
 			sourceItem.incrementNoteCount();
