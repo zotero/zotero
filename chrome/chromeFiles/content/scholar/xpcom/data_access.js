@@ -2349,7 +2349,7 @@ Scholar.Collection.prototype.hasItem = function(itemID){
 
 
 Scholar.Collection.prototype.hasDescendent = function(type, id){
-	var descendents = this._getDescendents();
+	var descendents = this.getDescendents();
 	for (var i=0, len=descendents.length; i<len; i++){
 		if (descendents[i]['type']==type && descendents[i]['id']==id){
 			return true;
@@ -2365,7 +2365,7 @@ Scholar.Collection.prototype.hasDescendent = function(type, id){
 Scholar.Collection.prototype.erase = function(deleteItems){
 	Scholar.DB.beginTransaction();
 	
-	var descendents = this._getDescendents();
+	var descendents = this.getDescendents();
 	var collections = [this.getID()], items = [];
 	
 	for(var i=0, len=descendents.length; i<len; i++){
@@ -2409,7 +2409,7 @@ Scholar.Collection.prototype.isCollection = function(){
 
 
 Scholar.Collection.prototype.toArray = function(){
-	return this._getDescendents(true);
+	return this.getDescendents(true);
 }
 
 
@@ -2436,7 +2436,7 @@ Scholar.Collection.prototype._loadChildItems = function(){
 *
 * nested: Return multidimensional array with 'children' nodes instead of flat array
 **/
-Scholar.Collection.prototype._getDescendents = function(nested){
+Scholar.Collection.prototype.getDescendents = function(nested, type){
 	var toReturn = new Array();
 	
 	// 0 == collection
@@ -2450,14 +2450,16 @@ Scholar.Collection.prototype._getDescendents = function(nested){
 	for(var i=0, len=children.length; i<len; i++){
 		switch (children[i]['type']){
 			case 0:
-				toReturn.push({
-					id: children[i]['id'],
-					name: children[i]['collectionName'],
-					type: 'collection'
-				});
+				if (!type || type=='collection'){
+					toReturn.push({
+						id: children[i]['id'],
+						name: children[i]['collectionName'],
+						type: 'collection'
+					});
+				}
 				
 				var descendents =
-					Scholar.Collections.get(children[i]['id'])._getDescendents(nested);
+					Scholar.Collections.get(children[i]['id']).getDescendents(nested, type);
 				
 				if (nested){
 					toReturn[toReturn.length-1]['children'] = descendents;
@@ -2470,10 +2472,12 @@ Scholar.Collection.prototype._getDescendents = function(nested){
 			break;
 			
 			case 1:
-				toReturn.push({
-					id: children[i]['id'],
-					type: 'item'
-				});
+				if (!type || type=='item'){
+					toReturn.push({
+						id: children[i]['id'],
+						type: 'item'
+					});
+				}
 			break;
 		}
 	}
