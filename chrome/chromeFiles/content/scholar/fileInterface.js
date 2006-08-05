@@ -1,5 +1,5 @@
 Scholar_File_Interface = new function() {
-	var _unresponsiveScriptPreference;
+	var _unresponsiveScriptPreference, _importCollection;
 	
 	this.exportFile = exportFile;
 	this.importFile = importFile;
@@ -80,11 +80,17 @@ Scholar_File_Interface = new function() {
 			// get translators again, bc now we can check against the file
 			translators = translation.getTranslators();
 			if(translators.length) {
+				// create a new collection to take in imported items
+				var date = new Date();
+				_importCollection = Scholar.Collections.add("Imported "+date.toLocaleString());
+				
+				// import items
 				translation.setTranslator(translators[0]);
-				// show progress indicator
 				translation.setHandler("itemDone", _importItemDone);
+				translation.setHandler("collectionDone", _importCollectionDone);
 				translation.setHandler("done", _importDone);
 				_disableUnresponsive();
+				// show progress indicator
 				Scholar_File_Interface.Progress.show(
 					Scholar.getString("fileInterface.itemsImported"),
 					function() {
@@ -100,7 +106,16 @@ Scholar_File_Interface = new function() {
 	 */
 	function _importItemDone(obj, item) {
 		//Scholar_File_Interface.Progress.increment();
-		item.save();
+		_importCollection.addItem(item.getID());
+	}
+	
+	/*
+	 * Saves collections after they've been imported. Input item is of the type
+	 * outputted by Scholar.Collection.toArray(); only receives top-level
+	 * collections
+	 */
+	function _importCollectionDone(obj, collection) {
+		collection.changeParent(_importCollection.getID());
 	}
 	
 	/*

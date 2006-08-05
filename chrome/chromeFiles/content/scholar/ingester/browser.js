@@ -288,8 +288,11 @@ Scholar_Ingester_Interface._itemDone = function(obj, item, collection) {
 	var title = item.getField("title");
 	var icon = "chrome://scholar/skin/treeitem-"+Scholar.ItemTypes.getName(item.getField("itemTypeID"))+".png"
 	Scholar_Ingester_Interface.Progress.addLines([title], [icon]);
-	var item = item.save();
-	collection.addItem(item);
+	
+	// add item to collection, if one was specified
+	if(collection) {
+		collection.addItem(item);
+	}
 }
 
 /*

@@ -2781,33 +2781,17 @@ Scholar.addOption("exportFileData", true);',
 function generateCollection(collection) {
 	var collectionResource = "#collection:"+collection.id;
 	Scholar.RDF.addStatement(collectionResource, rdf+"type", n.bib+"Collection", false);
+	Scholar.RDF.addStatement(collectionResource, n.dc+"title", collection.name, true);
 	
-	for(var i in collection.children) {
-		var child = collection.children[i];
-		
+	for each(var child in collection.children) {
 		// add child list items
 		if(child.type == "collection") {
-			Scholar.RDF.addStatement(collectionResource, n.dc+"hasPart", "#collection:"+child.id, false);
+			Scholar.RDF.addStatement(collectionResource, n.dcterms+"hasPart", "#collection:"+child.id, false);
 			// do recursive processing of collections
 			generateCollection(child);
 		} else {
-			Scholar.RDF.addStatement(collectionResource, n.dc+"hasPart", itemResources[child.id], false);
+			Scholar.RDF.addStatement(collectionResource, n.dcterms+"hasPart", itemResources[child.id], false);
 		}
-	}
-}
-
-function getContainerIfExists() {
-	if(container) {
-		if(containerElement) {
-			return containerElement;
-		} else {
-			containerElement = Scholar.RDF.newResource();
-			// attach container to section (if exists) or resource
-			Scholar.RDF.addStatement((section ? section : resource), n.dcterms+"isPartOf", containerElement, false);
-			return containerElement;
-		}
-	} else {
-		return resource;
 	}
 }
 
@@ -2831,14 +2815,22 @@ function doExport() {
 	// leave as global
 	itemResources = new Array();
 	
+	// keep track of resources already assigned (in case two book items have the
+	// same ISBN, or something like that)
+	var usedResources = new Array();
+	
+	var items = new Array();
+	
 	// first, map each ID to a resource
-	for(var i in items) {
-		item = items[i];
+	while(item = Scholar.nextItem()) {
+		items.push(item);
 		
-		if(item.ISBN) {
+		if(item.ISBN && !usedResources["urn:isbn:"+item.ISBN]) {
 			itemResources[item.itemID] = "urn:isbn:"+item.ISBN;
-		} else if(item.url) {
+			usedResources[itemResources[item.itemID]] = true;
+		} else if(item.url && !usedResources[item.url]) {
 			itemResources[item.itemID] = item.url;
+			usedResources[itemResources[item.itemID]] = true;
 		} else {
 			// just specify a node ID
 			itemResources[item.itemID] = "#item:"+item.itemID;
@@ -2849,10 +2841,8 @@ function doExport() {
 		}
 	}
 	
-	var item;
-	while(item = Scholar.nextItem()) {
+	for each(item in items) {
 		// these items are global
-		item = items[i];
 		resource = itemResources[item.itemID];
 		
 		container = null;
@@ -2930,7 +2920,7 @@ function doExport() {
 				// attach container to resource
 				Scholar.RDF.addStatement(resource, n.bib+cTag, creatorResource, false);
 			}
-			Scholar.RDF.addContainerElement(creatorContainers[cTag], creator, true);
+			Scholar.RDF.addContainerElement(creatorContainers[cTag], creator, false);
 		}
 		
 		/** FIELDS ON NEARLY EVERYTHING BUT NOT A PART OF THE CORE **/
@@ -2962,16 +2952,34 @@ function doExport() {
 			// add relationship to resource
 			Scholar.RDF.addStatement(resource, n.dc+"isPartOf", section, false);
 		}
-		// use ISSN to set up container element
-		if(item.ISSN) {
-			containerElement = "urn:issn:"+item.ISSN;	// leave as global
+		
+		// generate container
+		if(container) {
+			if(item.ISSN && !Scholar.RDF.getArcsIn("urn:issn:"+item.ISSN)) {
+				// use ISSN as container URI if no other item is
+				containerElement = "urn:issn:"+item.ISSN
+			} else {
+				containerElement = Scholar.RDF.newResource();
+			}
 			// attach container to section (if exists) or resource
 			Scholar.RDF.addStatement((section ? section : resource), n.dcterms+"isPartOf", containerElement, false);
+			// add container type
+			Scholar.RDF.addStatement(containerElement, rdf+"type", n.bib+container, false);
+		}
+		
+		// ISSN
+		if(item.ISSN) {
+			Scholar.RDF.addStatement((containerElement ? containerElement : resource), n.dc+"identifier", "ISSN "+item.ISSN, true);
+		}
+		
+		// ISBN
+		if(item.ISBN) {
+			Scholar.RDF.addStatement((containerElement ? containerElement : resource), n.dc+"identifier", "ISBN "+item.ISBN, true);
 		}
 		
 		// publication gets linked to container via isPartOf
 		if(item.publication) {
-			Scholar.RDF.addStatement(getContainerIfExists(), n.dc+"title", item.publication, true);
+			Scholar.RDF.addStatement((containerElement ? containerElement : resource), n.dc+"title", item.publication, true);
 		}
 		
 		// series also linked in
@@ -2982,16 +2990,16 @@ function doExport() {
 			// set series title
 			Scholar.RDF.addStatement(series, n.dc+"title", item.series, true);
 			// add relationship to resource
-			Scholar.RDF.addStatement(getContainerIfExists(), n.dcterms+"isPartOf", series, false);
+			Scholar.RDF.addStatement((containerElement ? containerElement : resource), n.dcterms+"isPartOf", series, false);
 		}
 		
 		// volume
 		if(item.volume) {
-			Scholar.RDF.addStatement(getContainerIfExists(), n.prism+"volume", item.volume, true);
+			Scholar.RDF.addStatement((containerElement ? containerElement : resource), n.prism+"volume", item.volume, true);
 		}
 		// number
 		if(item.number) {
-			Scholar.RDF.addStatement(getContainerIfExists(), n.prism+"number", item.number, true);
+			Scholar.RDF.addStatement((containerElement ? containerElement : resource), n.prism+"number", item.number, true);
 		}
 		// edition
 		if(item.edition) {
@@ -3069,18 +3077,17 @@ function doExport() {
 			
 			// add note tag
 			Scholar.RDF.addStatement(noteResource, rdf+"type", n.bib+"Memo", false);
-			// add note description (sorry, couldn''t find a better way of
-			// representing this data in an existing ontology)
-			Scholar.RDF.addStatement(noteResource, n.dc+"description", item.notes[j].note, true);
+			// add note value
+			Scholar.RDF.addStatement(noteResource, rdf+"value", item.notes[j].note, true);
 			// add relationship between resource and note
 			Scholar.RDF.addStatement(resource, n.dcterms+"isReferencedBy", noteResource, false);
 			
 			// Add see also info to RDF
-			generateSeeAlso(item.notes[j].itemID, item.notes[j].seeAlso);
+			generateSeeAlso(resource, item.notes[j].seeAlso);
 		}
 		
 		if(item.note) {
-			Scholar.RDF.addStatement(resource, n.dc+"description", item.note, true);
+			Scholar.RDF.addStatement(resource, rdf+"value", item.note, true);
 		}
 		
 		/** TAGS **/
@@ -3090,9 +3097,7 @@ function doExport() {
 		}
 		
 		// Add see also info to RDF
-		generateSeeAlso(item.itemID, item.seeAlso);
-		
-		// ELEMENTS AMBIGUOUSLY ENCODED: callNumber, acccessionType
+		generateSeeAlso(resource, item.seeAlso);
 	}
 	
 	/** RDF COLLECTION STRUCTURE **/
@@ -3204,14 +3209,18 @@ REPLACE INTO "translators" VALUES ('6e372642-ed9d-4934-b5d1-c11ac758ebb7', '2006
 
 REPLACE INTO "translators" VALUES ('5e3ad958-ac79-463d-812b-a86a9235c28f', '2006-07-15 17:09:00', 1, 'RDF', 'Simon Kornblith', 'rdf',
 'Scholar.configure("dataMode", "rdf");',
-'function getFirstResults(node, properties, onlyOneString) {
+'// gets the first result set for a property that can be encoded in multiple
+// ontologies
+function getFirstResults(node, properties, onlyOneString) {
 	for(var i=0; i<properties.length; i++) {
 		var result = Scholar.RDF.getTargets(node, properties[i]);
 		if(result) {
 			if(onlyOneString) {
 				// onlyOneString means we won''t return nsIRDFResources, only
 				// actual literals
-				return result[0];
+				if(typeof(result[0]) != "object") {
+					return result[0];
+				}
 			} else {
 				return result;
 			}
@@ -3220,7 +3229,93 @@ REPLACE INTO "translators" VALUES ('5e3ad958-ac79-463d-812b-a86a9235c28f', '2006
 	return;	// return undefined on failure
 }
 
+// adds creators to an item given a list of creator nodes
+function handleCreators(newItem, creators, creatorType) {
+	if(!creators) {
+		return;
+	}
+	
+	if(typeof(creators[0]) != "string") {	// see if creators are in a container
+		try {
+			var creators = Scholar.RDF.getContainerElements(creators[0]);
+		} catch(e) {}
+	}
+	
+	if(typeof(creators[0]) == "string") {	// support creators encoded as strings
+		for(var i in creators) {
+			if(typeof(creators[i]) != "object") {
+				newItem.creators.push(Scholar.Utilities.cleanAuthor(creators[i], creatorType, true));
+			}
+		}
+	} else {								// also support foaf
+		for(var i in creators) {
+			var type = Scholar.RDF.getTargets(creators[i], rdf+"type");
+			if(type) {
+				type = Scholar.RDF.getResourceURI(type[0]);
+				if(type == n.foaf+"Person") {	// author is FOAF type person
+					var creator = new Array();
+					creator.lastName = getFirstResults(creators[i],
+						[n.foaf+"surname", n.foaf+"family_name"], true);
+					creator.firstName = getFirstResults(creators[i],
+						[n.foaf+"givenname", n.foaf+"firstName"], true);
+					creator.creatorType = creatorType;
+					newItem.creators.push(creator);
+				}
+			}
+		}
+	}
+}
+
+// processes collections recursively
+function processCollection(node, collection) {
+	if(!collection) {
+		collection = new Array();
+	}
+	collection.type = "collection";
+	collection.name = getFirstResults(node, [n.dc+"title"], true);
+	collection.children = new Array();
+	
+	// check for children
+	var children = getFirstResults(node, [n.dcterms+"hasPart"]);
+	for each(var child in children) {
+		var type = Scholar.RDF.getTargets(child, rdf+"type");
+		if(type) {
+			type = Scholar.RDF.getResourceURI(type[0]);
+		}
+		
+		if(type == n.bib+"Collection") {
+			// for collections, process recursively
+			collection.children.push(processCollection(child));
+		} else {
+			// all other items are added by ID
+			collection.children.push({id:Scholar.RDF.getResourceURI(child), type:"item"});
+		}
+	}
+	
+	return collection;
+}
+
+// gets the node with a given type from an array
+function getNodeByType(nodes, type) {
+	if(!nodes) {
+		return false;
+	}
+	
+	for each(node in nodes) {
+		var nodeType = Scholar.RDF.getTargets(node, rdf+"type");
+		if(nodeType) {
+			nodeType = Scholar.RDF.getResourceURI(nodeType[0]);
+			if(nodeType == type) {	// we have a node of the correct type
+				return node;
+			}
+		}
+	}
+	return false;
+}
+
 function doImport() {
+	rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
+	
 	n = {
 		bib:"http://purl.org/net/biblio#",
 		dc:"http://purl.org/dc/elements/1.1/",
@@ -3230,37 +3325,104 @@ function doImport() {
 		vcard:"http://nwalsh.com/rdf/vCard"
 	};
 	
+	callNumberTypes = [
+		n.dcterms+"LCC", n.dcterms+"DDC", n.dcterms+"UDC"
+	];
+	
 	var nodes = Scholar.RDF.getAllResources();
 	if(!nodes) {
 		return false;
 	}
 	
-	for(var i in nodes) {
-		var node = nodes[i];
-		
-		if(Scholar.RDF.getArcsIn(node)) {
-			// root nodes only, please
-			continue;
-		}
+	// keep track of collections while we''re looping through
+	var collections = new Array();
 	
+	for each(var node in nodes) {
 		var newItem = new Scholar.Item();
+		newItem.itemID = Scholar.RDF.getResourceURI(node);
+		var container = undefined;
+		
+		// type
+		var type = Scholar.RDF.getTargets(node, rdf+"type");
+		// also deal with type detection based on parts, so we can differentiate
+		// magazine and journal articles, and find container elements
+		var isPartOf = getFirstResults(node, [n.dcterms+"isPartOf"]);
+		
+		if(type) {
+			type = Scholar.RDF.getResourceURI(type[0]);
+			
+			if(type == n.bib+"Book") {
+				newItem.itemType = "book";
+			} else if(type == n.bib+"BookSection") {
+				newItem.itemType = "bookSection";
+				container = getNodeByType(isPartOf, n.bib+"Book");
+			} else if(type == n.bib+"Article") {	// choose between journal,
+													// newspaper, and magazine
+													// articles
+				if(container = getNodeByType(isPartOf, n.bib+"Journal")) {
+					newItem.itemType = "journalArticle";
+				} else if(container = getNodeByType(isPartOf, n.bib+"Periodical")) {
+					newItem.itemType = "magazineArticle";
+				} else if(container = getNodeByType(isPartOf, n.bib+"Newspaper")) {
+					newItem.itemType = "newspaperArticle";
+				}
+			} else if(type == n.bib+"Thesis") {
+				newItem.itemType = "thesis";
+			} else if(type == n.bib+"Letter") {
+				newItem.itemType = "letter";
+			} else if(type == n.bib+"Manuscript") {
+				newItem.itemType = "manuscript";
+			} else if(type == n.bib+"Interview") {
+				newItem.itemType = "interview";
+			} else if(type == n.bib+"MotionPicture") {
+				newItem.itemType = "film";
+			} else if(type == n.bib+"Illustration") {
+				newItem.itemType = "illustration";
+			} else if(type == n.bib+"Document") {
+				newItem.itemType = "website";
+			} else if(type == n.bib+"Memo") {
+				// check to see if this note is independent
+				var arcs = Scholar.RDF.getArcsIn(node);
+				Scholar.Utilities.debugPrint("working on a note");
+				Scholar.Utilities.debugPrint(arcs);
+				var skip = false;
+				for each(var arc in arcs) {
+					arc = Scholar.RDF.getResourceURI(arc);
+					if(arc != n.dc+"relation" && arc != n.dcterms+"hasPart") {	
+						// related to another item by some arc besides see also
+						skip = true;
+					}
+				}
+				if(skip) {
+					continue;
+				}
+				
+				newItem.itemType = "note";
+			} else if(type == n.bib+"Collection") {
+				// skip collections until all the items are done
+				collections.push(node);
+				continue;
+			} else {	// default to book
+				newItem.itemType = "book";
+			}
+		}
 		
 		// title
 		newItem.title = getFirstResults(node, [n.dc+"title"], true);
-		if(!newItem.title) {	// require the title
+		if(newItem.itemType != "note" && !newItem.title) {	// require the title
+															// (if not a note)
 			continue;
 		}
 		
-		// creators
-		var creators = getFirstResults(node, [n.dc+"creator"]);
-		Scholar.Utilities.debugPrint(creators);
-		if(creators) {
-			for(var i in creators) {
-				if(typeof(creators[i]) != "object") {
-					newItem.creators.push(Scholar.Utilities.cleanAuthor(creators[i], "author", true));
-				}
-			}
-		}
+		// regular author-type creators
+		var creators = getFirstResults(node, [n.bib+"authors", n.dc+"creator"]);
+		handleCreators(newItem, creators, "author");
+		// editors
+		var creators = getFirstResults(node, [n.bib+"editors"]);
+		handleCreators(newItem, creators, "editor");
+		// contributors
+		var creators = getFirstResults(node, [n.bib+"contributors"]);
+		handleCreators(newItem, creators, "contributor");
 		
 		// source
 		newItem.source = getFirstResults(node, [n.dc+"source"], true);
@@ -3268,10 +3430,54 @@ function doImport() {
 		// rights
 		newItem.rights = getFirstResults(node, [n.dc+"rights"], true);
 		
+		// section
+		var section = getNodeByType(isPartOf, n.bib+"Part");
+		if(section) {
+			newItem.section = getFirstResults(section, [n.dc+"title"], true);
+		}
+		
+		// publication
+		if(container) {
+			newItem.publication = getFirstResults(container, [n.dc+"title"], true);
+		}
+		
+		// series
+		var series = getNodeByType(isPartOf, n.bib+"Series");
+		if(series) {
+			newItem.series = getFirstResults(container, [n.dc+"title"], true);
+		}
+		
+		// volume
+		newItem.volume = getFirstResults((container ? container : node), [n.prism+"volume"], true);
+		
+		// number
+		newItem.number = getFirstResults((container ? container : node), [n.prism+"number"], true);
+		
+		// edition
+		newItem.edition = getFirstResults(node, [n.prism+"edition"], true);
+		
 		// publisher
-		newItem.publisher = getFirstResults(node, [n.dc+"publisher"], true);
+		var publisher = getFirstResults(node, [n.dc+"publisher"]);
+		if(publisher) {
+			if(typeof(publisher[0]) == "string") {
+				newItem.publisher = publisher[0];
+			} else {
+				var type = Scholar.RDF.getTargets(publisher[0], rdf+"type");
+				if(type) {
+					type = Scholar.RDF.getResourceURI(type[0]);
+					if(type == n.foaf+"Organization") {	// handle foaf organizational publishers
+						newItem.publisher = getFirstResults(publisher[0], [n.foaf+"name"], true);
+						var place = getFirstResults(publisher[0], [n.vcard+"adr"]);
+						if(place) {
+							newItem.place = getFirstResults(place[0], [n.vcard+"locality"]);
+						}
+					}
+				}
+			}
+		}
+		
 		// (this will get ignored except for films, where we encode distributor as publisher)
-		newItem.distributor = getFirstResults(node, [n.dc+"publisher"], true);
+		newItem.distributor = newItem.publisher;
 		
 		// date
 		newItem.date = getFirstResults(node, [n.dc+"date"], true);
@@ -3281,6 +3487,18 @@ function doImport() {
 		
 		// identifier
 		var identifiers = getFirstResults(node, [n.dc+"identifier"]);
+		if(container) {
+			var containerIdentifiers = getFirstResults(container, [n.dc+"identifier"]);
+			// concatenate sets of identifiers
+			if(containerIdentifiers) {
+				if(identifiers) {
+					identifiers = identifiers.concat(containerIdentifiers);
+				} else {
+					identifiers = containerIdentifiers;
+				}
+			}
+		}
+		
 		if(identifiers) {
 			for(var i in identifiers) {
 				var firstFour = identifiers[i].substr(0, 4).toUpperCase();
@@ -3289,14 +3507,84 @@ function doImport() {
 					newItem.ISBN = identifiers[i].substr(5).toUpperCase();
 				} else if(firstFour == "ISSN") {
 					newItem.ISSN = identifiers[i].substr(5).toUpperCase();
+				} else if(!newItem.accessionNumber) {
+					newItem.accessionNumber = identifiers[i];
 				}
 			}
 		}
 		
-		// identifier
-		newItem.coverage = getFirstResults(node, [n.dc+"coverage"]);
+		// coverage
+		newItem.archiveLocation = getFirstResults(node, [n.dc+"coverage"], true);
+		
+		// medium
+		newItem.medium = getFirstResults(node, [n.dc+"medium"], true);
+		
+		// see also
+		var relations;
+		if(relations = getFirstResults(node, [n.dc+"relation"])) {
+			for each(var relation in relations) {
+				newItem.seeAlso.push(Scholar.RDF.getResourceURI(relation));
+			}
+		}
+	
+		/** NOTES **/
+		
+		var referencedBy = Scholar.RDF.getTargets(node, n.dcterms+"isReferencedBy");
+		for each(var referentNode in referencedBy) {
+			var type = Scholar.RDF.getTargets(referentNode, rdf+"type");
+			if(type && Scholar.RDF.getResourceURI(type[0]) == n.bib+"Memo") {
+				// if this is a memo
+				var note = new Array();
+				note.note = getFirstResults(referentNode, [rdf+"value", n.dc+"description"], true);
+				if(note.note != undefined) {
+					// handle see also
+					var relations;
+					if(relations = getFirstResults(referentNode, [n.dc+"relation"])) {
+						note.seeAlso = new Array();
+						for each(var relation in relations) {
+							note.seeAlso.push(Scholar.RDF.getResourceURI(relation));
+						}
+					}
+					
+					// add note
+					newItem.notes.push(note);
+				}
+			}
+		}
+		
+		if(newItem.itemType == "note") {
+			// add note for standalone
+			newItem.note = getFirstResults(node, [rdf+"value", n.dc+"description"], true);
+		}
+		
+		/** TAGS **/
+		
+		var subjects = getFirstResults(node, [n.dc+"subject"]);
+		for each(var subject in subjects) {
+			if(typeof(subject) == "string") {	// a regular tag
+				newItem.tags.push(subject);
+			} else {							// a call number
+				var type = Scholar.RDF.getTargets(subject, rdf+"type");
+				if(type) {
+					type = Scholar.RDF.getResourceURI(type[0]);
+					if(Scholar.Utilities.inArray(type, callNumberTypes)) {
+						newItem.callNumber = getFirstResults(subject, [rdf+"value"], true);
+					}
+				}
+			}
+		}
 		
 		newItem.complete();
+	}
+	
+	/* COLLECTIONS */
+	
+	for each(collection in collections) {
+		if(!Scholar.RDF.getArcsIn(collection)) {
+			var newCollection = new Scholar.Collection();
+			processCollection(collection, newCollection);
+			newCollection.complete();
+		}
 	}
 }');
 

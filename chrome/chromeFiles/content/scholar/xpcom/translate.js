@@ -48,6 +48,7 @@
  *                      immediately when script has finished executing
  * _sandbox - sandbox in which translators will be executed
  * _streams - streams that need to be closed when execution is complete
+ * _IDMap - a map from IDs as specified in Scholar.Item() to IDs of actual items
  *
  * WEB-ONLY PRIVATE PROPERTIES:
  *
@@ -144,9 +145,16 @@ Scholar.Translate.prototype.setTranslator = function(translator) {
  *   returns: N/A
  *
  * itemDone
- *   valid: web
+ *   valid: import, web
  *   called: when an item has been processed; may be called asynchronously
  *   passed: an item object (see Scholar.Item)
+ *   returns: N/A
+ *
+ * collectionDone
+ *   valid: import, web
+ *   called: when a collection has been processed, after all items have been
+ *           added; may be called asynchronously
+ *   passed: a collection object (see Scholar.Collection)
  *   returns: N/A
  * 
  * done
@@ -245,6 +253,7 @@ Scholar.Translate.prototype._loadTranslator = function() {
  * does the actual translation
  */
 Scholar.Translate.prototype.translate = function() {
+	this._IDMap = new Array();
 	
 	if(!this.location) {
 		throw("cannot translate: no location specified");
@@ -301,8 +310,13 @@ Scholar.Translate.prototype._generateSandbox = function() {
 	if(this.type == "web" || this.type == "import") {
 		// add routines to add new items
 		this._sandbox.Scholar.Item = Scholar.Translate.ScholarItem;
-		// attach the function to be run when an item is 
+		// attach the function to be run when an item is done
 		this._sandbox.Scholar.Item.prototype.complete = function() {me._itemDone(this)};
+		
+		// add routines to add new collections
+		this._sandbox.Scholar.Collection = Scholar.Translate.ScholarCollection;
+		// attach the function to be run when a collection is done
+		this._sandbox.Scholar.Collection.prototype.complete = function() {me._collectionDone(this)};
 	} else if(this.type == "export") {
 		// add routines to retrieve items and collections
 		this._sandbox.Scholar.nextItem = function() { return me._exportGetItem() };
@@ -532,69 +546,126 @@ Scholar.Translate.prototype._closeStreams = function() {
  * executed when an item is done and ready to be loaded into the database
  */
 Scholar.Translate.prototype._itemDone = function(item) {
+	Scholar.debug(item);
+	
 	// Get typeID, defaulting to "website"
 	var type = (item.itemType ? item.itemType : "website");
 	
-	// makes looping through easier
-	delete item.itemType, item.complete;
-	item.itemType = item.complete = undefined;
-	
-	var typeID = Scholar.ItemTypes.getID(type);
-	var newItem = Scholar.Items.getNewItemByType(typeID);
-	
-	if(item.date && !item.year) {
-		// date can serve as a year
-		var dateID = Scholar.ItemFields.getID("date");
-		var yearID = Scholar.ItemFields.getID("year");
-		if(!Scholar.ItemFields.isValidForType(dateID, typeID) && Scholar.ItemFields.isValidForType(yearID, typeID)) {
-			// year is valid but date is not
-			var yearRe = /[0-9]{4}/;
-			var m = yearRe.exec(item.date);
-			if(m) {
-				item.year = m[0]
-				item.date = undefined;
+	Scholar.debug("type is "+type);
+	if(type == "note") {	// handle notes differently
+		Scholar.debug("handling a note");
+		var myID = Scholar.Notes.add(item.note);
+		// re-retrieve the item
+		var newItem = Scholar.Items.get(myID);
+	} else {
+		// create new item
+		var typeID = Scholar.ItemTypes.getID(type);
+		var newItem = Scholar.Items.getNewItemByType(typeID);
+		
+		// makes looping through easier
+		item.itemType = item.complete = undefined;
+		
+		if(item.date && !item.year) {
+			// date can serve as a year
+			var dateID = Scholar.ItemFields.getID("date");
+			var yearID = Scholar.ItemFields.getID("year");
+			if(!Scholar.ItemFields.isValidForType(dateID, typeID) && Scholar.ItemFields.isValidForType(yearID, typeID)) {
+				// year is valid but date is not
+				var yearRe = /[0-9]{4}/;
+				var m = yearRe.exec(item.date);
+				if(m) {
+					item.year = m[0]
+					item.date = undefined;
+				}
+			}
+		} else if(!item.date && item.year) {
+			// the converse is also true
+			var dateID = Scholar.ItemFields.getID("date");
+			var yearID = Scholar.ItemFields.getID("year");
+			if(Scholar.ItemFields.isValidForType(dateID, typeID) && !Scholar.ItemFields.isValidForType(yearID, typeID)) {
+				// date is valid but year is not
+				item.date = item.year;
+				item.year = undefined;
 			}
 		}
-	} else if(!item.date && item.year) {
-		// the converse is also true
-		var dateID = Scholar.ItemFields.getID("date");
-		var yearID = Scholar.ItemFields.getID("year");
-		if(Scholar.ItemFields.isValidForType(dateID, typeID) && !Scholar.ItemFields.isValidForType(yearID, typeID)) {
-			// date is valid but year is not
-			item.date = item.year;
-			item.year = undefined;
+		
+		var fieldID, field;
+		for(var i in item) {
+			// loop through item fields
+			data = item[i];
+			
+			if(data) {						// if field has content
+				if(i == "creators") {		// creators are a special case
+					for(var j in data) {
+						var creatorType = 1;
+						// try to assign correct creator type
+						if(data[j].creatorType) {
+							try {
+								var creatorType = Scholar.CreatorTypes.getID(data[j].creatorType);
+							} catch(e) {
+								Scholar.debug("invalid creator type "+data[j].creatorType+" for creator index "+j);
+							}
+						}
+						
+						newItem.setCreator(j, data[j].firstName, data[j].lastName, creatorType);
+					}
+				} else if(i == "title") {	// skip checks for title
+					newItem.setField(i, data);
+				} else if(i == "tags") {	// add tags
+					for(var j in data) {
+						newItem.addTag(data[j]);
+					}
+				} else if(i == "seeAlso") {
+					newItem.translateSeeAlso = data;
+				} else if(i != "note" && i != "notes" && i != "itemID" && (fieldID = Scholar.ItemFields.getID(i))) {
+											// if field is in db
+					if(Scholar.ItemFields.isValidForType(fieldID, typeID)) {
+											// if field is valid for this type
+						// add field
+						newItem.setField(i, data);
+					} else {
+						Scholar.debug("discarded field "+i+" for item: field not valid for type "+type);
+					}
+				} else {
+					Scholar.debug("discarded field "+i+" for item: field does not exist");
+				}
+			}
+		}
+		
+		// save item
+		var myID = newItem.save();
+		if(myID == true) {
+			myID = newItem.getID();
+		}
+		
+		// handle notes
+		if(item.notes) {
+			for each(var note in item.notes) {
+				var noteID = Scholar.Notes.add(note.note, myID);
+				
+				// handle see also
+				if(note.seeAlso) {
+					var myNote = Scholar.Items.get(noteID);
+					
+					for each(var seeAlso in note.seeAlso) {
+						if(this._IDMap[seeAlso]) {
+							myNote.addSeeAlso(this._IDMap[seeAlso]);
+						}
+					}
+				}
+			}
 		}
 	}
 	
-	Scholar.debug(item);
+	if(item.itemID) {
+		this._IDMap[item.itemID] = myID;
+	}
 	
-	var fieldID, field;
-	for(var i in item) {
-		// loop through item fields
-		data = item[i];
-		
-		if(data) {						// if field has content
-			if(i == "creators") {		// creators are a special case
-				for(j in data) {
-					newItem.setCreator(j, data[j].firstName, data[j].lastName, 1);
-				}
-			} else if(i == "title") {	// skip checks for title
-				newItem.setField(i, data);
-			} else if(i == "tags") {	// add tags
-				for(j in data) {
-					newItem.addTag(data[j]);
-				}
-			} else if(fieldID = Scholar.ItemFields.getID(i)) {
-										// if field is in db
-				if(Scholar.ItemFields.isValidForType(fieldID, typeID)) {
-										// if field is valid for this type
-					// add field
-					newItem.setField(i, data);
-				} else {
-					Scholar.debug("discarded field "+i+" for item: field not valid for type "+type);
-				}
-			} else {
-				Scholar.debug("discarded field "+i+" for item: field does not exist");
+	// handle see also
+	if(item.seeAlso) {
+		for each(var seeAlso in item.seeAlso) {
+			if(this._IDMap[seeAlso]) {
+				newItem.addSeeAlso(this._IDMap[seeAlso]);
 			}
 		}
 	}
@@ -602,6 +673,40 @@ Scholar.Translate.prototype._itemDone = function(item) {
 	delete item;
 	
 	this._runHandler("itemDone", newItem);
+}
+
+/*
+ * executed when a collection is done and ready to be loaded into the database
+ */
+Scholar.Translate.prototype._collectionDone = function(collection) {
+	Scholar.debug(collection);
+	var newCollection = this._processCollection(collection, null);
+	
+	this._runHandler("collectionDone", newCollection);
+}
+
+/*
+ * recursively processes collections
+ */
+Scholar.Translate.prototype._processCollection = function(collection, parentID) {
+	var newCollection = Scholar.Collections.add(collection.name, parentID);
+	
+	for each(child in collection.children) {
+		if(child.type == "collection") {
+			// do recursive processing of collections
+			this._processCollection(child, newCollection.getID());
+		} else {
+			// add mapped items to collection
+			if(this._IDMap[child.id]) {
+				Scholar.debug("adding "+this._IDMap[child.id]);
+				newCollection.addItem(this._IDMap[child.id]);
+			} else {
+				Scholar.debug("could not map "+child.id+" to an imported item");
+			}
+		}
+	}
+	
+	return newCollection;
 }
 
 /*
@@ -791,7 +896,7 @@ Scholar.Translate.prototype._exportGetCollection = function() {
 		collection.type = "collection";
 		collection.children = returnItem.toArray();
 		
-		return returnItem;
+		return collection;
 	}
 }
 
@@ -881,12 +986,8 @@ Scholar.Translate.prototype._initializeInternalIO = function() {
 	}
 }
 
-/* Scholar.Translate.ScholarItem: a class for generating new item from
+/* Scholar.Translate.ScholarItem: a class for generating a new item from
  * inside scraper code
- *
- * (this must be part of the prototype because it must be able to access
- * methods relating to a specific instance of Scholar.Translate yet be called
- * as a class)
  */
  
 Scholar.Translate.ScholarItem = function(itemType) {
@@ -898,12 +999,20 @@ Scholar.Translate.ScholarItem = function(itemType) {
 	this.notes = new Array();
 	// generate tags array
 	this.tags = new Array();
+	// generate see also array
+	this.seeAlso = new Array();
 }
+
+/* Scholar.Translate.Collection: a class for generating a new top-level
+ * collection from inside scraper code
+ */
+ 
+Scholar.Translate.ScholarCollection = function() {}
 
 /* Scholar.Translate.RDF: a class for handling RDF IO
  *
  * If an import/export translator specifies dataMode RDF, this is the interface,
- * accessible from model.x
+ * accessible from model.
  * 
  * In order to simplify things, all classes take in their resource/container
  * as either the Mozilla native type or a string, but all
@@ -951,8 +1060,12 @@ Scholar.Translate.RDF.prototype._deEnumerate = function(enumerator) {
 
 // get a resource as an nsIRDFResource, instead of a string
 Scholar.Translate.RDF.prototype._getResource = function(about) {
-	if(!(about instanceof Components.interfaces.nsIRDFResource)) {
-		about = this._RDFService.GetResource(about);
+	try {
+		if(!(about instanceof Components.interfaces.nsIRDFResource)) {
+			about = this._RDFService.GetResource(about);
+		}
+	} catch(e) {
+		throw("invalid RDF resource: "+about);
 	}
 	return about;
 }
@@ -996,15 +1109,20 @@ Scholar.Translate.RDF.prototype.newContainer = function(type, about) {
 }
 
 // adds a new container element (index optional)
-Scholar.Translate.RDF.prototype.addContainerElement = function(about, element, index) {
+Scholar.Translate.RDF.prototype.addContainerElement = function(about, element, literal, index) {
 	if(!(about instanceof Components.interfaces.nsIRDFContainer)) {
 		about = this._getResource(about);
 		var container = Components.classes["@mozilla.org/rdf/container;1"].
 						createInstance(Components.interfaces.nsIRDFContainer);
 		container.Init(this._dataSource, about);
+		about = container;
 	}
 	if(!(element instanceof Components.interfaces.nsIRDFResource)) {
-		element = this._RDFService.GetResource(element);
+		if(literal) {
+			element = this._RDFService.GetLiteral(element);
+		} else {
+			element = this._RDFService.GetResource(element);
+		}
 	}
 	
 	if(index) {
@@ -1012,6 +1130,19 @@ Scholar.Translate.RDF.prototype.addContainerElement = function(about, element, i
 	} else {
 		about.AppendElement(element);
 	}
+}
+
+// gets container elements as an array
+Scholar.Translate.RDF.prototype.getContainerElements = function(about) {
+	if(!(about instanceof Components.interfaces.nsIRDFContainer)) {
+		about = this._getResource(about);
+		var container = Components.classes["@mozilla.org/rdf/container;1"].
+						createInstance(Components.interfaces.nsIRDFContainer);
+		container.Init(this._dataSource, about);
+		about = container;
+	}
+	
+	return this._deEnumerate(about.GetElements());
 }
 
 // sets a namespace
