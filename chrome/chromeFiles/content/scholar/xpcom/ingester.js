@@ -142,3 +142,173 @@ Scholar.Ingester.ProxyMonitor = new function() {
 		return uri;
 	}
 }
+
+Scholar.OpenURL = new function() {
+	this.resolve = resolve;
+	this.discoverResolvers = discoverResolvers;
+	this.createContextObject = createContextObject;
+	
+	/*
+	 * Returns a URL to look up an item in the OpenURL resolver
+	 */
+	function resolve(itemObject) {
+		var co = createContextObject(itemObject, Scholar.Prefs.get("openURL.version"));
+		if(co) {
+			return Scholar.Prefs.get("openURL.resolver")+"?"+co;
+		}
+		return false;
+	}
+	
+	/*
+	 * Queries OCLC's OpenURL resolver registry and returns an address and version
+	 */
+	function discoverResolvers() {
+		var req = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance();
+		req.open("GET", "http://worldcatlibraries.org/registry/lookup?IP=requestor", false);
+		req.send(null);
+		
+		if(!req.responseXML) {
+			throw "Could not access resolver registry";
+		}
+		
+		var resolverArray = new Array();
+		var resolvers = req.responseXML.getElementsByTagName("resolver");
+		for(var i=0; i<resolvers.length; i++) {
+			var resolver = resolvers[i];
+			
+			var name = resolver.parentNode.getElementsByTagName("institutionName");
+			if(!name.length) {
+				continue;
+			}
+			name = name[0].textContent;
+			
+			var url = resolver.getElementsByTagName("baseURL");
+			if(!url.length) {
+				continue;
+			}
+			url = url[0].textContent;
+			
+			if(resolver.getElementsByTagName("Z39.88-2004").length > 0) {
+				var version = "1.0";
+			} else if(resolver.getElementsByTagName("OpenUrl 0.1").length > 0) {
+				var version = "0.1";
+			} else {
+				continue;
+			}
+			
+			resolverArray[name] = [url, version];
+		}
+		
+		return resolverArray;
+	}
+	
+	/*
+	 * Generates an OpenURL ContextObject from an item
+	 */
+	function createContextObject(itemObject, version) {
+		var item = itemObject.toArray();
+		
+		var identifiers = new Array();
+		if(item.DOI) {
+			identifiers.push(item.DOI);
+		}
+		if(item.ISBN) {
+			identifiers.push("urn:isbn:");
+		}
+		
+		// encode ctx_ver (if available) and identifiers
+		if(version == "0.1") {
+			var co = "";
+			
+			for each(identifier in identifiers) {
+				co += "&id="+escape(identifier);
+			}
+		} else {
+			var co = "ctx_ver=Z39.88-2004";
+			
+			for each(identifier in identifiers) {
+				co += "&rft_id="+escape(identifier);
+			}
+		}
+		
+		// encode genre and item-specific data
+		if(item.itemType == "journalArticle") {
+			if(version == "0.1") {
+				co += "&genre=article";
+			} else {
+				co += "&rft_val_fmt=info%3Aofi%2Ffmt%3Akev%3Amtx%3Ajournal&rft.genre=article";
+			}
+			co += _mapTag(item.title, "atitle", version)		
+			co += _mapTag(item.publicationTitle, (version == "0.1" ? "title" : "jtitle"), version)		
+			co += _mapTag(item.journalAbbreviation, "stitle", version);
+			co += _mapTag(item.volume, "volume", version);
+			co += _mapTag(item.issue, "issue", version);
+		} else if(item.itemType == "book" || item.itemType == "bookitem") {
+			if(version == "0.1") {
+				co += "&genre=book";
+			} else {
+				co += "&rft_val_fmt=info%3Aofi%2Ffmt%3Akev%3Amtx%3Abook&rft.genre=book";
+			}
+			
+			if(item.itemType == "book") {
+				co += "&rft.genre=book";
+				co += _mapTag(item.title, (version == "0.1" ? "title" : "btitle"), version);
+			} else {
+				co += "&rft.genre=bookitem";
+				co += _mapTag(item.title, "atitle", version)		
+				co += _mapTag(item.publicationTitle, (version == "0.1" ? "title" : "btitle"), version);
+			}
+			
+			co += _mapTag(item.place, "place", version);
+			co += _mapTag(item.publisher, "publisher", version)		
+			co += _mapTag(item.edition, "edition", version);
+			co += _mapTag(item.seriesTitle, "series", version);
+		} else if(item.itemType == "thesis" && version == "1.0") {
+			co += "&rft_val_fmt=info%3Aofi%2Ffmt%3Akev%3Amtx%3Adissertation";
+			
+			_mapTag(item.title, "title", version);
+			_mapTag(item.publisher, "inst", version);
+			_mapTag(item.thesisType, "degree", version);
+		} else {
+			return false;
+		}
+		
+		// encode fields on all items
+		for each(creator in item.creators) {
+			if(creator.firstName) {
+				co += _mapTag(creator.firstName, "aufirst", version);
+				co += _mapTag(creator.lastName, "aulast", version);
+			} else {
+				co += _mapTag(creator.lastName, "aucorp", version);
+			}
+		}
+		
+		if(item.date) {
+			co += _mapTag(item.date, "date", version);
+		} else {
+			co += _mapTag(item.year, "date", version);
+		}
+		co += _mapTag(item.pages, "pages", version);
+		co += _mapTag(item.ISBN, "ISBN", version);
+		co += _mapTag(item.ISSN, "ISSN", version);
+		
+		if(version == "0.1") {
+			// chop off leading & sign if version is 0.1
+			co = co.substr(1);
+		}
+		
+		return co;
+	}
+	
+	function _mapTag(data, tag, version) {
+		if(data) {
+			if(version == "0.1") {
+				return "&"+tag+"="+escape(data);
+			} else {
+				return "&rft."+tag+"="+escape(data);
+			}
+		} else {
+			return "";
+		}
+	}
+}
