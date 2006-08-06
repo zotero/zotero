@@ -1,4 +1,4 @@
--- 34
+-- 35
 
 -- Set the following timestamp to the most recent scraper update date
 REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-07-07 12:44:00'));
@@ -550,13 +550,13 @@ function doWeb(doc, url) {
 								}
 							}
 						} else if(fieldCode == "SO") {
-							newItem.publication = fieldContent;
+							newItem.publicationTitle = fieldContent;
 						} else if(fieldCode == "VO") {
 							newItem.volume = fieldContent;
 						} else if(fieldCode == "NO") {
-							newItem.number = fieldContent;
+							newItem.issue = fieldContent;
 						} else if(fieldCode == "SE") {
-							newItem.series = fieldContent;
+							newItem.seriesTitle = fieldContent;
 						} else if(fieldCode == "DA") {
 							var date = new Date(fieldContent.replace(".", ""));
 							if(isNaN(date.valueOf())) {
@@ -1015,7 +1015,7 @@ REPLACE INTO "translators" VALUES ('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '2006
 		if(field == "publication title") {
 			var publication = Scholar.Utilities.getNode(doc, elmt, ''./TD[2]/A[1]/text()[1]'', nsResolver);
 			if(publication.nodeValue) {
-				newItem.publication = Scholar.Utilities.superCleanString(publication.nodeValue);
+				newItem.publicationTitle = Scholar.Utilities.superCleanString(publication.nodeValue);
 			}
 			
 			var place = Scholar.Utilities.getNode(doc, elmt, ''./TD[2]/text()[1]'', nsResolver);
@@ -1047,7 +1047,7 @@ REPLACE INTO "translators" VALUES ('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '2006
 						if(info == "vol") {
 							newItem.volume = Scholar.Utilities.superCleanString(m[2]);
 						} else if(info == "iss" || info == "no") {
-							newItem.number = Scholar.Utilities.superCleanString(m[2]);
+							newItem.issue = Scholar.Utilities.superCleanString(m[2]);
 						}
 					}
 				}
@@ -1170,7 +1170,7 @@ REPLACE INTO "translators" VALUES ('6773a9af-5375-3224-d148-d32793884dec', '2006
 		if(field == "title") {
 			newItem.title = Scholar.Utilities.superCleanString(value);
 		} else if(field == "journal") {
-			newItem.publication = value;
+			newItem.publicationTitle = value;
 		} else if(field == "pi") {
 			parts = value.split(" ");
 			var date = "";
@@ -1297,7 +1297,7 @@ REPLACE INTO "translators" VALUES ('b047a13c-fe5c-6604-c997-bef15e502b09', '2006
 	
 	centerElements = citationDataDiv.getElementsByTagName("center");
 	var elementParts = centerElements[0].innerHTML.split(/<br[^>]*>/gi);
-	newItem.publication = elementParts[elementParts.length-1];
+	newItem.publicationTitle = elementParts[elementParts.length-1];
 	
 	var dateRegexp = /<br[^>]*>(?:<b>)?([A-Z][a-z]+)(?:<\/b>)? ([0-9]+, [0-9]{4})/;
 	var m = dateRegexp.exec(centerElements[centerElements.length-1].innerHTML);
@@ -2134,9 +2134,9 @@ REPLACE INTO "translators" VALUES ('c54d1932-73ce-dfd4-a943-109380e06574', '2006
 			}
 		}
 		
-		newItem.publication = newDOM.journal.text();
+		newItem.publicationTitle = newDOM.journal.text();
 		newItem.volume = newDOM.volume.text();
-		newItem.number = newDOM.issue.text();
+		newItem.issue = newDOM.issue.text();
 		newItem.year = newDOM.year.text();
 		newItem.date = newDOM.pubdate.text();
 		newItem.title = newDOM.doctitle.text();
@@ -2238,14 +2238,14 @@ REPLACE INTO "translators" VALUES ('fcf41bed-0cbc-3704-85c7-8062a0068a7a', '2006
 				}
 				
 				if(article.Journal.Title.length()) {
-					newItem.publication = Scholar.Utilities.superCleanString(article.Journal.Title.text().toString());
+					newItem.publicationTitle = Scholar.Utilities.superCleanString(article.Journal.Title.text().toString());
 				} else if(citation.MedlineJournalInfo.MedlineTA.length()) {
-					newItem.publication = Scholar.Utilities.superCleanString(citation.MedlineJournalInfo.MedlineTA.text().toString());
+					newItem.publicationTitle = Scholar.Utilities.superCleanString(citation.MedlineJournalInfo.MedlineTA.text().toString());
 				}
 				
 				if(article.Journal.JournalIssue.length()) {
 					newItem.volume = article.Journal.JournalIssue.Volume.text();
-					newItem.number = article.Journal.JournalIssue.Issue.text();
+					newItem.issue = article.Journal.JournalIssue.Issue.text();
 					if(article.Journal.JournalIssue.PubDate.length()) {	// try to get the date
 						if(article.Journal.JournalIssue.PubDate.Day.text().toString() != "") {
 							var date = article.Journal.JournalIssue.PubDate.Month.text()+" "+article.Journal.JournalIssue.PubDate.Day.text()+", "+article.Journal.JournalIssue.PubDate.Year.text();
@@ -2535,9 +2535,9 @@ function doExport() {
 		/** SUPPLEMENTAL FIELDS **/
 		
 		// XML tag relatedItem.titleInfo; object field series
-		if(item.series) {
+		if(item.seriesTitle) {
 			var series = <relatedItem type="series">
-					<titleInfo><title>{item.series}</title></titleInfo>
+					<titleInfo><title>{item.seriesTitle}</title></titleInfo>
 					</relatedItem>;
 			
 			if(item.itemType == "bookSection") {
@@ -2561,11 +2561,11 @@ function doExport() {
 		}
 		
 		// XML tag detail; object field number
-		if(item.number) {
-			if(Scholar.Utilities.isInt(item.number)) {
-				part += <detail type="issue"><number>{item.number}</number></detail>;
+		if(item.issue) {
+			if(Scholar.Utilities.isInt(item.issue)) {
+				part += <detail type="issue"><number>{item.issue}</number></detail>;
 			} else {
-				part += <detail type="issue"><text>{item.number}</text></detail>;
+				part += <detail type="issue"><text>{item.issue}</text></detail>;
 			}
 		}
 		
@@ -2621,6 +2621,12 @@ function doExport() {
 			}
 			originInfo += <{dateType} encoding="iso8601">{item.date}</{dateType}>;
 		}
+		if(item.lastModified) {
+			originInfo += <dateModified encoding="iso8601">{item.lastModified}</dateModified>;
+		}
+		if(item.accessDate) {
+			originInfo += <dateCaptured encoding="iso8601">{item.accessDate}</dateCaptured>;
+		}
 		if(originInfo.length() != 1) {
 			if(isPartialItem) {
 				// For a journal article, bookSection, etc., this goes under the host
@@ -2631,23 +2637,24 @@ function doExport() {
 		}
 		
 		// XML tag identifier; object fields ISBN, ISSN
-		var identifier = false;
-		if(item.ISBN) {
-			identifier = <identifier type="ISBN">{item.ISBN}</identifier>;
-		} else if(item.ISSN) {
-			identifier = <identifier type="ISSN">{item.ISSN}</identifier>;
+		if(isPartialItem) {
+			var identifier = mods.relatedItem;
+		} else {
+			var identifier = mods;
 		}
-		if(identifier) {
-			if(isPartialItem) {
-					mods.relatedItem.identifier = identifier;
-			} else {
-				mods.identifier = identifier;
-			}
+		if(item.ISBN) {
+			identifier.identifier += <identifier type="isbn">{item.ISBN}</identifier>;
+		}
+		if(item.ISSN) {
+			identifier.identifier += <identifier type="issn">{item.ISSN}</identifier>;
+		}
+		if(item.DOI) {
+			identifier.identifier += <identifier type="doi">{item.DOI}</identifier>;
 		}
 		
 		// XML tag relatedItem.titleInfo; object field publication
-		if(item.publication) {
-			mods.relatedItem.titleInfo += <titleInfo>{item.publication}</titleInfo>;
+		if(item.publicationTitle) {
+			mods.relatedItem.titleInfo += <titleInfo><title>{item.publicationTitle}</title></titleInfo>;
 		}
 		
 		// XML tag classification; object field callNumber
@@ -2663,6 +2670,11 @@ function doExport() {
 		// XML tag location.url; object field archiveLocation
 		if(item.url) {
 			mods.location.url = item.url;
+		}
+		
+		// XML tag title.titleInfo; object field journalAbbreviation
+		if(item.journalAbbreviation) {
+			mods.relatedItem.titleInfo += <titleInfo type="abbreviated"><title>{item.journalAbbreviation}</title></titleInfo>;
 		}
 		
 		if(mods.relatedItem.length() == 1 && isPartialItem) {
@@ -2718,7 +2730,7 @@ function doImport() {
 		var newItem = new Scholar.Item();
 		
 		// title
-		newItem.title = mods.m::titleInfo.m::title;
+		newItem.title = mods.m::titleInfo.(m::title.@type!="abbreviated").m::title;
 		
 		// try to get genre from local genre
 		var localGenre = mods.m::genre.(@authority=="local").text().toString();
@@ -2788,9 +2800,9 @@ function doImport() {
 		
 		// series
 		if(newItem.itemType == "bookSection") {
-			newItem.series = mods.m::relatedItem.(@type=="host").m::relatedItem.(@type=="series").m::titleInfo.m::title.text().toString();
+			newItem.seriesTitle = mods.m::relatedItem.(@type=="host").m::relatedItem.(@type=="series").m::titleInfo.m::title.text().toString();
 		} else {
-			newItem.series = mods.m::relatedItem.(@type=="series").m::titleInfo.m::title.text().toString();
+			newItem.seriesTitle = mods.m::relatedItem.(@type=="series").m::titleInfo.m::title.text().toString();
 		}
 		
 		// get part
@@ -2811,9 +2823,9 @@ function doImport() {
 		}
 		
 		// number
-		newItem.number = part.m::detail.(@type=="issue").m::number.text().toString();
-		if(!newItem.number) {
-			newItem.number = part.m::detail.(@type=="issue").m::text.text().toString();
+		newItem.issue = part.m::detail.(@type=="issue").m::number.text().toString();
+		if(!newItem.issue) {
+			newItem.issue = part.m::detail.(@type=="issue").m::text.text().toString();
 		}
 		
 		// section
@@ -2847,19 +2859,26 @@ function doImport() {
 				newItem.date = originInfo.dateCreated.text().toString();
 			}
 		}
-		
+		// lastModified
+		newItem.lastModified = originInfo.m::dateModified.text().toString();
+		// accessDate
+		newItem.accessDate = originInfo.m::dateCaptured.text().toString();
 		// ISBN
-		newItem.ISBN = identifier.(@type=="ISBN").text().toString()
+		newItem.ISBN = identifier.(@type=="isbn").text().toString()
 		// ISSN
-		newItem.ISSN = identifier.(@type=="ISSN").text().toString()
+		newItem.ISSN = identifier.(@type=="issn").text().toString()
+		// DOI
+		newItem.DOI = identifier.(@type=="doi").text().toString()
 		// publication
-		newItem.publication = mods.m::relatedItem.m::publication.text().toString();
+		newItem.publicationTitle = mods.m::relatedItem.m::publication.text().toString();
 		// call number
 		newItem.callNumber = mods.m::classification.text().toString();
 		// archiveLocation
 		newItem.archiveLocation = mods.m::location.m::physicalLocation.text().toString();
 		// url
 		newItem.url = mods.m::location.m::url.text().toString();
+		// journalAbbreviation
+		newItem.journalAbbreviation = mods.m::relatedItem.(m::titleInfo.@type=="abbreviated").m::titleInfo.m::title.text().toString();
 		
 		/** NOTES **/
 		for each(var note in mods.m::note) {
@@ -3085,18 +3104,23 @@ function doExport() {
 			Scholar.RDF.addStatement((containerElement ? containerElement : resource), n.dc+"identifier", "ISBN "+item.ISBN, true);
 		}
 		
+		// DOI
+		if(item.DOI) {
+			Scholar.RDF.addStatement((containerElement ? containerElement : resource), n.dc+"identifier", "DOI "+item.DOI, true);
+		}
+		
 		// publication gets linked to container via isPartOf
 		if(item.publication) {
-			Scholar.RDF.addStatement((containerElement ? containerElement : resource), n.dc+"title", item.publication, true);
+			Scholar.RDF.addStatement((containerElement ? containerElement : resource), n.dc+"title", item.publicationTitle, true);
 		}
 		
 		// series also linked in
-		if(item.series) {
+		if(item.seriesTitle) {
 			var series = Scholar.RDF.newResource();
 			// set series type
 			Scholar.RDF.addStatement(series, rdf+"type", n.bib+"Series", false);
 			// set series title
-			Scholar.RDF.addStatement(series, n.dc+"title", item.series, true);
+			Scholar.RDF.addStatement(series, n.dc+"title", item.seriesTitle, true);
 			// add relationship to resource
 			Scholar.RDF.addStatement((containerElement ? containerElement : resource), n.dcterms+"isPartOf", series, false);
 		}
@@ -3106,8 +3130,8 @@ function doExport() {
 			Scholar.RDF.addStatement((containerElement ? containerElement : resource), n.prism+"volume", item.volume, true);
 		}
 		// number
-		if(item.number) {
-			Scholar.RDF.addStatement((containerElement ? containerElement : resource), n.prism+"number", item.number, true);
+		if(item.issue) {
+			Scholar.RDF.addStatement((containerElement ? containerElement : resource), n.prism+"number", item.issue, true);
 		}
 		// edition
 		if(item.edition) {
@@ -3141,7 +3165,13 @@ function doExport() {
 		if(item.date) {
 			Scholar.RDF.addStatement(resource, n.dc+"date", item.date, true);
 		} else if(item.year) {
-			Scholar.RDF.addStatement(resource, n.dc+"year", item.year, true);
+			Scholar.RDF.addStatement(resource, n.dc+"date", item.year, true);
+		}
+		if(item.accessDate) {	// use date submitted for access date?
+			Scholar.RDF.addStatement(resource, n.dcterms+"dateSubmitted", item.accessDate, true);
+		}
+		if(item.lastModified) {
+			Scholar.RDF.addStatement(resource, n.dcterms+"modified", item.lastModified, true);
 		}
 		
 		// callNumber
@@ -3160,11 +3190,6 @@ function doExport() {
 			Scholar.RDF.addStatement(resource, n.dc+"coverage", item.archiveLocation, true);
 		}
 		
-		// medium
-		if(item.medium) {
-			Scholar.RDF.addStatement(resource, n.dc+"medium", item.medium, true);
-		}
-		
 		// type (not itemType)
 		if(item.type) {
 			Scholar.RDF.addStatement(resource, n.dc+"type", item.type, true);
@@ -3176,6 +3201,11 @@ function doExport() {
 		// IT WILL BE SOON
 		if(item.pages) {
 			Scholar.RDF.addStatement(resource, n.bib+"pages", item.pages, true);
+		}
+		
+		// journalAbbreviation
+		if(item.journalAbbreviation) {
+			Scholar.RDF.addStatement((containerElement ? containerElement : resource), n.dcterms+"alternative", item.journalAbbreviation, true);
 		}
 		
 		/** NOTES **/
@@ -3293,14 +3323,20 @@ REPLACE INTO "translators" VALUES ('6e372642-ed9d-4934-b5d1-c11ac758ebb7', '2006
 		if(item.date) {
 			Scholar.RDF.addStatement(resource, dc+"date", item.date, true);
 		} else if(item.year) {
-			Scholar.RDF.addStatement(resource, dc+"year", item.year, true);
+			Scholar.RDF.addStatement(resource, dc+"date", item.year, true);
+		} else if(item.lastModified) {
+			Scholar.RDF.addStatement(resource, dc+"date", item.lastModified, true);
 		}
 		
-		// ISBN/ISSN
+		// ISBN/ISSN/DOI
 		if(item.ISBN) {
 			Scholar.RDF.addStatement(resource, dc+"identifier", "ISBN "+item.ISBN, true);
-		} else if(item.ISSN) {
+		}
+		if(item.ISSN) {
 			Scholar.RDF.addStatement(resource, dc+"identifier", "ISSN "+item.ISSN, true);
+		}
+		if(item.DOI) {
+			Scholar.RDF.addStatement(resource, dc+"identifier", "DOI "+item.DOI, true);
 		}
 		
 		// callNumber
@@ -3546,20 +3582,20 @@ function doImport() {
 		
 		// publication
 		if(container) {
-			newItem.publication = getFirstResults(container, [n.dc+"title"], true);
+			newItem.publicationTitle = getFirstResults(container, [n.dc+"title"], true);
 		}
 		
 		// series
 		var series = getNodeByType(isPartOf, n.bib+"Series");
 		if(series) {
-			newItem.series = getFirstResults(container, [n.dc+"title"], true);
+			newItem.seriesTitle = getFirstResults(container, [n.dc+"title"], true);
 		}
 		
 		// volume
 		newItem.volume = getFirstResults((container ? container : node), [n.prism+"volume"], true);
 		
 		// number
-		newItem.number = getFirstResults((container ? container : node), [n.prism+"number"], true);
+		newItem.issue = getFirstResults((container ? container : node), [n.prism+"number"], true);
 		
 		// edition
 		newItem.edition = getFirstResults(node, [n.prism+"edition"], true);
@@ -3589,9 +3625,10 @@ function doImport() {
 		
 		// date
 		newItem.date = getFirstResults(node, [n.dc+"date"], true);
-		
-		// year
-		newItem.year = getFirstResults(node, [n.dc+"year"], true);
+		// accessDate
+		newItem.accessDate = getFirstResults(node, [n.dcterms+"dateSubmitted"], true);
+		// lastModified
+		newItem.lastModified = getFirstResults(node, [n.dcterms+"modified"], true);
 		
 		// identifier
 		var identifiers = getFirstResults(node, [n.dc+"identifier"]);
@@ -3609,23 +3646,28 @@ function doImport() {
 		
 		if(identifiers) {
 			for(var i in identifiers) {
-				var firstFour = identifiers[i].substr(0, 4).toUpperCase();
+				var beforeSpace = identifiers[i].substr(0, identifiers[i].indexOf(" ")).toUpperCase();
 				
-				if(firstFour == "ISBN") {
+				if(beforeSpace == "ISBN") {
 					newItem.ISBN = identifiers[i].substr(5).toUpperCase();
-				} else if(firstFour == "ISSN") {
+				} else if(beforeSpace == "ISSN") {
 					newItem.ISSN = identifiers[i].substr(5).toUpperCase();
+				} else if(beforeSpace == "DOI") {
+					newItem.DOI = identifiers[i].substr(4);
 				} else if(!newItem.accessionNumber) {
 					newItem.accessionNumber = identifiers[i];
 				}
 			}
 		}
 		
-		// coverage
+		// archiveLocation
 		newItem.archiveLocation = getFirstResults(node, [n.dc+"coverage"], true);
 		
-		// medium
-		newItem.medium = getFirstResults(node, [n.dc+"medium"], true);
+		// type
+		newItem.type = newItem.thesisType = getFirstResults(node, [n.dc+"type"], true);
+		
+		// journalAbbreviation
+		newItem.journalAbbreviation = getFirstResults((container ? container : node), [n.dcterms+"alternative"], true);
 		
 		// see also
 		var relations;
@@ -3704,10 +3746,10 @@ Scholar.addOption("exportNotes", true);',
 var fieldMap = {
 	ID:"itemID",
 	T1:"title",
-	T3:"series",
-	JF:"publication",
+	T3:"seriesTitle",
+	JF:"publicationTitle",
 	VL:"volume",
-	IS:"number",
+	IS:"issue",
 	CP:"place",
 	PB:"publisher"
 };
@@ -3715,7 +3757,7 @@ var fieldMap = {
 var inputFieldMap = {
 	TI:"title",
 	CT:"title",
-	JO:"publication",
+	JO:"publicationTitle",
 	CY:"place"
 };
 
@@ -4417,7 +4459,7 @@ MARC_Record.prototype.translate = function(item) {
 	// Extract year
 	this._associateDBField(item, ''260'', ''c'', ''year'', _pullNumber);
 	// Extract series
-	this._associateDBField(item, ''440'', ''a'', ''series'');
+	this._associateDBField(item, ''440'', ''a'', ''seriesTitle'');
 	// Extract call number
 	this._associateDBField(item, ''084'', ''ab'', ''callNumber'');
 	this._associateDBField(item, ''082'', ''a'', ''callNumber'');
