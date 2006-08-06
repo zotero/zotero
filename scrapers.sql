@@ -2424,72 +2424,21 @@ REPLACE INTO "translators" VALUES ('3e684d82-73a3-9a34-095f-19b112d88bbf', '2006
 	Scholar.wait();
 }');
 
-REPLACE INTO "translators" VALUES ('0e2235e7-babf-413c-9acf-f27cce5f059c', '2006-07-05 23:40:00', 2, 'MODS (XML)', 'Simon Kornblith', 'xml',
+REPLACE INTO "translators" VALUES ('0e2235e7-babf-413c-9acf-f27cce5f059c', '2006-07-05 23:40:00', 3, 'MODS (XML)', 'Simon Kornblith', 'xml',
 'Scholar.addOption("exportNotes", true);
 Scholar.addOption("exportFileData", true);',
 'var partialItemTypes = ["bookSection", "journalArticle", "magazineArticle", "newspaperArticle"];
-var rdf = new Namespace("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
-var rdfs = new Namespace("rdfs", "http://www.w3.org/2000/01/rdf-schema#");
-
-/*
- * handles the generation of RDF describing a single collection and its child
- * collections
- */
-function generateCollection(collection, rdfDoc) {
-	var description = <rdf:Description xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" />;
-	// specify collection ID, namespaced
-	description.@rdf::ID = "collection:"+collection.id;
-	// collection type is an RDF Bag. honestly, i''m not sure if this is the
-	// correct way of doing it, but it''s how the Mozilla Foundation did it. then
-	// again, the Mozilla Foundation also uses invalid URN namespaces, so who
-	// knows.
-	description.rdf::type.@resource = "http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag";
-	description.rdfs::label = collection.name;
-	
-	for(var i in collection.children) {
-		var child = collection.children[i];
-		// add child list items
-		var childID = child.type+":"+child.id;
-		description.rdf::li += <rdf:li xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:ID={childID} />;
-		
-		if(child.type == "collection") {
-			// do recursive processing of collections
-			generateCollection(child, rdfDoc);
-		}
-	}
-	rdfDoc.rdf::description += description;
-}
-
-/*
- * handles the generation of RDF describing a see also item
- */
-function generateSeeAlso(id, seeAlso, rdfDoc) {
-	var description = <rdf:Description xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" />;
-	description.@rdf::ID = "item:"+id;
-	for(var i in seeAlso) {
-		var seeID = "item:"+seeAlso[i];
-		description += <rdfs:seeAlso xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:ID={seeID} />;
-	}
-	rdfDoc.rdf::description += description;
-}
 
 function doExport() {
-	//var rdfDoc = <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" />;
-	var modsCollection = <modsCollection xmlns="http://www.loc.gov/mods/v3" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-2.xsd" />;
+	var modsCollection = <modsCollection xmlns="http://www.loc.gov/mods/v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-2.xsd" />;
 	
 	var item;
 	while(item = Scholar.nextItem()) {
-		var isPartialItem = false;
-		if(Scholar.Utilities.inArray(item.itemType, partialItemTypes)) {
-			isPartialItem = true;
-		}
+		var isPartialItem = Scholar.Utilities.inArray(item.itemType, partialItemTypes);
 		
 		var mods = <mods />;
 		
 		/** CORE FIELDS **/
-		
-		// add ID
-		mods.@ID = "item:"+item.itemID;
 		
 		// XML tag titleInfo; object field title
 		if(item.title) {
@@ -2518,7 +2467,7 @@ function doExport() {
 			modsType.@manuscript = "yes";
 		} else if(item.itemType == "interview") {
 			modsType = "text";
-			modsType.@manuscript = "interview";
+			marcGenre = "interview";
 		} else if(item.itemType == "film") {
 			modsType = "moving image";
 			marcGenre = "motion picture";
@@ -2529,8 +2478,7 @@ function doExport() {
 			modsType = "multimedia";
 			marcGenre = "web site";
 		} else if(item.itemType == "note") {
-			modsType = "text";
-			marcGenre = null;
+			continue;
 		}
 		mods.typeOfResource = modsType;
 		mods.genre += <genre authority="local">{item.itemType}</genre>;
@@ -2655,9 +2603,9 @@ function doExport() {
 			originInfo += <place><placeTerm type="text">{item.place}</placeTerm></place>;
 		}
 		if(item.publisher) {
-			originInfo += <publisher>item.publisher</publisher>;
+			originInfo += <publisher>{item.publisher}</publisher>;
 		} else if(item.distributor) {
-			originInfo += <publisher>item.distributor</publisher>;
+			originInfo += <publisher>{item.distributor}</publisher>;
 		}
 		if(item.year) {
 			// Assume year is copyright date
@@ -2726,19 +2674,6 @@ function doExport() {
 		for(var j in item.notes) {
 			// Add note tag
 			var note = <note type="content">{item.notes[j].note}</note>;
-			note.@ID = "item:"+item.notes[j].itemID;
-			mods.note += note;
-			
-			// Add see also info to RDF
-			/*if(item.notes[j].seeAlso) {
-				rdfDoc.Description += generateSeeAlso(item.notes[j].itemID, item.notes[j].seeAlso);
-			}*/
-		}
-		
-		if(item.note) {
-			// Add note tag
-			var note = <note>{item.note}</note>;
-			note.@ID = "item:"+item.itemID;
 			mods.note += note;
 		}
 		
@@ -2748,23 +2683,196 @@ function doExport() {
 			mods.subject += <subject>{item.tags[j]}</subject>;
 		}
 		
-		/** RDF STRUCTURE **/
-		
-		// Add see also info to RDF
-		/*if(item.seeAlso) {
-			generateSeeAlso(item.itemID, item.seeAlso, rdfDoc);
-		}*/
-		
 		modsCollection.mods += mods;
 	}
 	
-	/*for(var i in collections) {
-		generateCollection(collections[i], rdfDoc);
-	}
-	modsCollection.rdf::RDF = rdfDoc;*/
-	
 	Scholar.write(''<?xml version="1.0"?>''+"\n");
 	Scholar.write(modsCollection.toXMLString());
+}
+
+function doImport() {
+	var text = "";
+	var read;
+	
+	// read in 16384 byte increments
+	while(read = Scholar.read(16384)) {
+		text += read;
+	}
+	Scholar.Utilities.debugPrint("read in");
+	
+	// eliminate <?xml ?> heading so we can parse as XML
+	text = text.replace(/<\?xml[^?]+\?>/, "");
+	
+	// parse with E4X
+	var m = new Namespace("http://www.loc.gov/mods/v3");
+	// why does this default namespace declaration not work!?
+	default xml namespace = m;
+	var xml = new XML(text);
+	
+	for each(var mods in xml.m::mods) {
+		Scholar.Utilities.debugPrint("item is: ");
+		for(var i in mods) {
+			Scholar.Utilities.debugPrint(i+" = "+mods[i].toString());
+		}
+		
+		var newItem = new Scholar.Item();
+		
+		// title
+		newItem.title = mods.m::titleInfo.m::title;
+		
+		// try to get genre from local genre
+		var localGenre = mods.m::genre.(@authority=="local").text().toString();
+		if(localGenre && Scholar.Utilities.itemTypeExists(localGenre)) {
+			newItem.itemType = localGenre;
+		} else {
+			// otherwise, look at the marc genre
+			var marcGenre = mods.m::genre.(@authority=="marcgt").text().toString();
+			if(marcGenre) {
+				if(marcGenre == "book") {
+					newItem.itemType = "book";
+				} else if(marcGenre == "periodical") {
+					newItem.itemType = "magazineArticle";
+				} else if(marcGenre == "newspaper") {
+					newItem.itemType = "newspaperArticle";
+				} else if(marcGenre == "theses") {
+					newItem.itemType = "thesis";
+				} else if(marcGenre == "letter") {
+					newItem.itemType = "letter";
+				} else if(marcGenre == "interview") {
+					newItem.itemType = "interview";
+				} else if(marcGenre == "motion picture") {
+					newItem.itemType = "film";
+				} else if(marcGenre == "art original") {
+					newItem.itemType = "artwork";
+				} else if(marcGenre == "web site") {
+					newItem.itemType = "website";
+				}
+			}
+			
+			if(!newItem.itemType) {
+				newItem.itemType = "book";
+			}
+		}
+		
+		var isPartialItem = Scholar.Utilities.inArray(newItem.itemType, partialItemTypes);
+		
+		// TODO: thesisType, type
+		
+		for each(var name in mods.m::name) {
+			// TODO: institutional authors
+			var creator = new Array();
+			creator.firstName = name.m::namePart.(@type=="given").text().toString();
+			creator.lastName = name.m::namePart.(@type=="family").text().toString();
+			
+			// look for roles
+			var role = name.m::role.m::roleTerm.(@type=="code").(@authority=="marcrelator").text().toString();
+			if(role == "edt") {
+				creator.creatorType = "editor";
+			} else if(role == "ctb") {
+				creator.creatorType = "contributor";
+			} else {
+				creator.creatorType = "author";
+			}
+			
+			newItem.creators.push(creator);
+		}
+		
+		// source
+		newItem.source = mods.m::recordInfo.m::recordContentSource.text().toString();
+		// accessionNumber
+		newItem.accessionNumber = mods.m::recordInfo.m::recordIdentifier.text().toString();
+		// rights
+		newItem.rights = mods.m::accessCondition.text().toString();
+		
+		/** SUPPLEMENTAL FIELDS **/
+		
+		// series
+		if(newItem.itemType == "bookSection") {
+			newItem.series = mods.m::relatedItem.(@type=="host").m::relatedItem.(@type=="series").m::titleInfo.m::title.text().toString();
+		} else {
+			newItem.series = mods.m::relatedItem.(@type=="series").m::titleInfo.m::title.text().toString();
+		}
+		
+		// get part
+		if(isPartialItem) {
+			var part = mods.m::relatedItem.m::part;
+			var originInfo = mods.m::relatedItem.m::originInfo;
+			var identifier = mods.m::relatedItem.m::identifier;
+		} else {
+			var part = mods.m::part;
+			var originInfo = mods.m::originInfo;
+			var identifier = mods.m::identifier;
+		}
+		
+		// volume
+		newItem.volume = part.m::detail.(@type=="volume").m::number.text().toString();
+		if(!newItem.volume) {
+			newItem.volume = part.m::detail.(@type=="volume").m::text.text().toString();
+		}
+		
+		// number
+		newItem.number = part.m::detail.(@type=="issue").m::number.text().toString();
+		if(!newItem.number) {
+			newItem.number = part.m::detail.(@type=="issue").m::text.text().toString();
+		}
+		
+		// section
+		newItem.section = part.m::detail.(@type=="section").m::number.text().toString();
+		if(!newItem.section) {
+			newItem.section = part.m::detail.(@type=="section").m::text.text().toString();
+		}
+		
+		// pages
+		var pagesStart = part.m::extent.(@unit=="pages").m::start.text().toString();
+		var pagesEnd = part.m::extent.(@unit=="pages").m::end.text().toString();
+		if(pagesStart || pagesEnd) {
+			if(pagesStart && pagesEnd && pagesStart != pagesEnd) {
+				newItem.pages = pagesStart+"-"+pagesEnd;
+			} else {
+				newItem.pages = pagesStart+pagesEnd;
+			}
+		}
+		
+		// edition
+		newItem.edition = originInfo.m::edition.text().toString();
+		// place
+		newItem.place = originInfo.m::place.m::placeTerm.text().toString();
+		// publisher/distributor
+		newItem.publisher = newItem.distributor = originInfo.m::publisher.text().toString();
+		// date
+		newItem.date = originInfo.m::copyrightDate.text().toString();
+		if(!newItem.date) {
+			newItem.date = originInfo.m::dateIssued.text().toString();
+			if(!newItem.date) {
+				newItem.date = originInfo.dateCreated.text().toString();
+			}
+		}
+		
+		// ISBN
+		newItem.ISBN = identifier.(@type=="ISBN").text().toString()
+		// ISSN
+		newItem.ISSN = identifier.(@type=="ISSN").text().toString()
+		// publication
+		newItem.publication = mods.m::relatedItem.m::publication.text().toString();
+		// call number
+		newItem.callNumber = mods.m::classification.text().toString();
+		// archiveLocation
+		newItem.archiveLocation = mods.m::location.m::physicalLocation.text().toString();
+		// url
+		newItem.url = mods.m::location.m::url.text().toString();
+		
+		/** NOTES **/
+		for each(var note in mods.m::note) {
+			newItem.notes.push({note:note.text().toString()});
+		}
+		
+		/** TAGS **/
+		for each(var subject in mods.m::subject) {
+			newItem.tags.push(subject.text().toString());
+		}
+		
+		newItem.complete();
+	}
 }');
 
 REPLACE INTO "translators" VALUES ('14763d24-8ba0-45df-8f52-b8d1108e7ac9', '2006-07-07 12:44:00', 2, 'Biblio/DC/FOAF/PRISM/VCard (RDF/XML)', 'Simon Kornblith', 'rdf',

@@ -181,6 +181,17 @@ Scholar.Utilities.prototype.lpad = function(string, pad, length) {
 }
 
 /*
+ * returns true if an item type exists, false if it does not
+ */
+Scholar.Utilities.prototype.itemTypeExists = function(type) {
+	if(Scholar.ItemTypes.getID(type)) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+/*
  * END SCHOLAR FOR FIREFOX EXTENSIONS
  */
 
