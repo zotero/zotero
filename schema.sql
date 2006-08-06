@@ -1,4 +1,4 @@
--- 32
+-- 33
 
     DROP TABLE IF EXISTS version;
     CREATE TABLE version (
@@ -262,16 +262,16 @@
     
     INSERT INTO fields VALUES (1,'source',NULL);
     INSERT INTO fields VALUES (2,'rights',NULL);
-    INSERT INTO fields VALUES (3,'series',NULL);
+    INSERT INTO fields VALUES (3,'seriesTitle',NULL);
     INSERT INTO fields VALUES (4,'volume',NULL);
-    INSERT INTO fields VALUES (5,'number',NULL);
+    INSERT INTO fields VALUES (5,'issue',NULL);
     INSERT INTO fields VALUES (6,'edition',NULL);
     INSERT INTO fields VALUES (7,'place',NULL);
     INSERT INTO fields VALUES (8,'publisher',NULL);
     INSERT INTO fields VALUES (9,'year',3);
     INSERT INTO fields VALUES (10,'pages',NULL);
     INSERT INTO fields VALUES (11,'ISBN',NULL);
-    INSERT INTO fields VALUES (12,'publication',NULL);
+    INSERT INTO fields VALUES (12,'publicationTitle',NULL);
     INSERT INTO fields VALUES (13,'ISSN',NULL);
     INSERT INTO fields VALUES (14,'date',NULL);
     INSERT INTO fields VALUES (15,'section',NULL);
@@ -285,7 +285,9 @@
     INSERT INTO fields VALUES (23,'url',NULL);
     INSERT INTO fields VALUES (24,'type',NULL);
     INSERT INTO fields VALUES (25,'journalAbbreviation',NULL);
-    INSERT INTO fields VALUES (26,'DOIName',NULL);
+    INSERT INTO fields VALUES (26,'DOI',NULL);
+    INSERT INTO fields VALUES (27,'accessDate',NULL);
+    INSERT INTO fields VALUES (28,'lastModified',NULL);
     
     INSERT INTO "itemTypeFields" VALUES(2, 1, 12);
     INSERT INTO "itemTypeFields" VALUES(2, 2, 13);
@@ -360,9 +362,8 @@
     INSERT INTO "itemTypeFields" VALUES(12, 2, 6);
     INSERT INTO "itemTypeFields" VALUES(12, 24, 1);
     INSERT INTO "itemTypeFields" VALUES(12, 14, 2);
-    INSERT INTO "itemTypeFields" VALUES(13, 1, 3);
-    INSERT INTO "itemTypeFields" VALUES(13, 2, 4);
-    INSERT INTO "itemTypeFields" VALUES(13, 14, 2);
+    INSERT INTO "itemTypeFields" VALUES(13, 1, 4);
+    INSERT INTO "itemTypeFields" VALUES(13, 2, 5);
     INSERT INTO "itemTypeFields" VALUES(13, 23, 1);
     INSERT INTO "itemTypeFields" VALUES(12, 18, 3);
     INSERT INTO "itemTypeFields" VALUES(2, 18, 10);
@@ -396,9 +397,11 @@
     INSERT INTO "itemTypeFields" VALUES(6, 22, 11);
     INSERT INTO "itemTypeFields" VALUES(7, 18, 5);
     INSERT INTO "itemTypeFields" VALUES(7, 22, 9);
-    INSERT INTO "itemTypeFields" VALUES(13, 22, 5);
+    INSERT INTO "itemTypeFields" VALUES(13, 22, 6);
     INSERT INTO "itemTypeFields" VALUES(4, 25, 5);
     INSERT INTO "itemTypeFields" VALUES(4, 26, 6);
+    INSERT INTO "itemTypeFields" VALUES(13, 27, 3);
+    INSERT INTO "itemTypeFields" VALUES(13, 28, 2);
     
     INSERT INTO "charsets" VALUES(1, 'utf-8');
     INSERT INTO "charsets" VALUES(2, 'ascii');
