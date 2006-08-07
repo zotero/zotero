@@ -1,7 +1,7 @@
--- 36
+-- 37
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-08-06 19:14:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-08-06 21:45:00'));
 
 REPLACE INTO "translators" VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006-06-28 23:08:00', 4, 'Amazon.com Scraper', 'Simon Kornblith', '^http://www\.amazon\.com/(?:gp/(?:product|search)/|exec/obidos/search-handle-url/|s/)', 
 'function detect(doc, url) {
@@ -656,7 +656,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO "translators" VALUES ('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '2006-06-28 22:52:00', 4, 'InnoPAC Scraper', 'Simon Kornblith', '^http://[^/]+/(?:search/|record=)',
+REPLACE INTO "translators" VALUES ('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '2006-08-06 21:45:00', 4, 'InnoPAC Scraper', 'Simon Kornblith', '^http://[^/]+/(?:search/|record=)',
 'function detect(doc, url) {
 	// First, check to see if the URL alone reveals InnoPAC, since some sites don''t reveal the MARC button
 	var matchRegexp = new RegExp(''^(http://[^/]+/search/[^/]+/[^/]+/1\%2C[^/]+/)frameset(.+)$'');
@@ -730,7 +730,6 @@ REPLACE INTO "translators" VALUES ('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '2006
 			var linee = text.split("\n");
 			for (var i=0; i<linee.length; i++) {
 				linee[i] = linee[i].replace(/\xA0|_|\t/g,'' '');
-				linee[i] = Scholar.Utilities.cleanString(linee[i]);
 				if (linee[i] == '''') continue; // jumps empty lines
 				var replacer = record.subfield_delimiter+''$1'';
 				linee[i]  = linee[i].replace(/\|(.)/g,replacer);
