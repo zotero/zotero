@@ -317,6 +317,14 @@ Scholar.Utilities.Ingester.prototype.getItemArray = function(doc, inHere, urlRe,
 	return availableItems;
 }
 
+Scholar.Utilities.Ingester.prototype.lookupContextObject = function(co, done, error) {
+	return Scholar.OpenURL.lookupContextObject(co, done, error);
+}
+
+Scholar.Utilities.Ingester.prototype.parseContextObject = function(co) {
+	return Scholar.OpenURL.parseContextObject(co);
+}
+
 /*
  * END SCHOLAR FOR FIREFOX EXTENSIONS
  */

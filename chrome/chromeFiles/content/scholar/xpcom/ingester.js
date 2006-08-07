@@ -147,6 +147,8 @@ Scholar.OpenURL = new function() {
 	this.resolve = resolve;
 	this.discoverResolvers = discoverResolvers;
 	this.createContextObject = createContextObject;
+	this.parseContextObject = parseContextObject;
+	this.lookupContextObject = lookupContextObject;
 	
 	/*
 	 * Returns a URL to look up an item in the OpenURL resolver
@@ -224,7 +226,7 @@ Scholar.OpenURL = new function() {
 				co += "&id="+escape(identifier);
 			}
 		} else {
-			var co = "ctx_ver=Z39.88-2004";
+			var co = "url_ver=Z39.88-2004&ctx_ver=Z39.88-2004";
 			
 			for each(identifier in identifiers) {
 				co += "&rft_id="+escape(identifier);
@@ -300,6 +302,298 @@ Scholar.OpenURL = new function() {
 		return co;
 	}
 	
+	/*
+	 * Generates an item in the format returned by item.fromArray() given an
+	 * OpenURL version 1.0 contextObject
+	 */
+	function parseContextObject(co) {
+		var coParts = co.split("&");
+		
+		var item = new Array();
+		item.creators = new Array();
+		
+		// get type
+		item.itemType = _determineResourceType(coParts);
+		if(!item.itemType) {
+			return false;
+		}
+		
+		var pagesKey = "";
+		
+		for each(part in coParts) {
+			var keyVal = part.split("=");
+			var key = keyVal[0];
+			var value = unescape(keyVal[1].replace(/\+|%2[bB]/g, " "));
+			if(!value) {
+				continue;
+			}
+			
+			if(key == "rft_id") {
+				var firstEight = value.substr(0, 8).toLowerCase();
+				if(firstEight == "info:doi") {
+					item.DOI = value;
+				} else if(firstEight == "urn:isbn") {
+					item.ISBN = value.substr(9);
+				}
+			} else if(key == "rft.btitle") {
+				if(item.itemType == "book") {
+					item.title = value;
+				} else if(item.itemType == "bookSection") {
+					item.publicationTitle = value;
+				}
+			} else if(key == "rft.atitle" && item.itemType != "book") {
+				item.title = value;
+			} else if(key == "rft.jtitle" && item.itemType == "journal") {
+				item.publcation = value;
+			} else if(key == "rft.stitle" && item.itemType == "journal") {
+				item.journalAbbreviation = value;
+			} else if(key == "rft.date") {
+				item.date = value;
+			} else if(key == "rft.volume") {
+				item.volume = value;
+			} else if(key == "rft.issue") {
+				item.issue = value;
+			} else if(key == "rft.pages") {
+				pagesKey = key;
+				item.pages = value;
+			} else if(key == "rft.spage") {
+				if(pagesKey != "rft.pages") {
+					pagesKey = key;
+					// make pages look like start-end
+					if(pagesKey == "rft.epage") {
+						if(value != item.pages) {
+							item.pages = value+"-"+item.pages;
+						}
+					} else {
+						item.pages = value;
+					}
+				}
+			} else if(key == "rft.epage") {
+				if(pagesKey != "rft.pages") {
+					pagesKey = key;
+					// make pages look like start-end
+					if(pagesKey == "rft.spage") {
+						if(value != item.pages) {
+							item.pages = +item.pages+"-"+value;
+						}
+					} else {
+						item.pages = value;
+					}
+				}
+			} else if(key == "issn" || (key == "eissn" && !item.ISSN)) {
+				item.ISSN = value;
+			} else if(key == "rft.aulast") {
+				var lastCreator = item.creators[item.creators.length-1];
+				if(item.creators.length && !lastCreator.lastName && !lastCreator.institutional) {
+					lastCreator.lastName = value;
+				} else {
+					item.creators.push({lastName:value});
+				}
+			} else if(key == "rft.aufirst") {
+				var lastCreator = item.creators[item.creators.length-1];
+				if(item.creators.length && !lastCreator.firstName && !lastCreator.institutional) {
+					lastCreator.firstName = value;
+				} else {
+					item.creators.push({firstName:value});
+				}
+			} else if(key == "rft.au") {
+				item.creators.push(Scholar.cleanAuthor(value, "author", true));
+			} else if(key == "rft.aucorp") {
+				item.creators.push({lastName:value, institutional:true});
+			} else if(key == "rft.isbn" && !item.ISBN) {
+				item.ISBN = value;
+			} else if(key == "rft.pub") {
+				item.publisher = value;
+			} else if(key == "rft.place") {
+				item.place = value;
+			} else if(key == "rft.edition") {
+				item.edition = value;
+			} else if(key == "rft.series") {
+				item.seriesTitle = value;
+			}
+		}
+		
+		return item;
+	}
+	
+	/*
+	 * Looks up additional information on an item in the format returned by
+	 * item.fromArray() in CrossRef or Open WorldCat given an OpenURL version
+	 * 1.0 contextObject
+	 */
+	function lookupContextObject(co, done, error) {
+		// CrossRef requires a url_ver to work right
+		if(co.indexOf("url_ver=Z39.88-2004") == -1) {
+			co = "url_ver=Z39.88-2004&"+co;
+		}
+		
+		var type = _determineResourceType(co.split("&"));
+		if(!type) {
+			return false;
+		}
+		
+		if(type == "journal") {
+			// look up journals in CrossRef
+			Scholar.Utilities.HTTP.doGet("http://www.crossref.org/openurl/?"+co+"&noredirect=true", null, function(req) {
+				var items = _processCrossRef(req.responseText);
+				done(items);
+			});
+		} else {
+			// look up books in Open WorldCat
+			Scholar.Utilities.HTTP.processDocuments(null, ["http://partneraccess.oclc.org/wcpa/servlet/OpenUrl?"+co], function(browser) {
+				var doc = browser.contentDocument;
+				// find new COinS in the Open WorldCat page
+				items = _processOWC(doc);
+				
+				if(items) {	// we got a single item page; return the item
+					done(items);
+				} else {	// assume we have a search results page
+					var items = new Array();
+					
+					var namespace = doc.documentElement.namespaceURI;
+					var nsResolver = namespace ? function(prefix) {
+						if (prefix == 'x') return namespace; else return null;
+					} : null;
+					
+					// first try to get only books
+					var elmts = doc.evaluate('//table[@class="tableLayout"]/tbody/tr/td[@class="content"]/table[@class="tableResults"]/tbody/tr[td/img[@alt="Book"]]/td/div[@class="title"]/a', doc, nsResolver, Components.interfaces.nsIDOMXPathResult.ANY_TYPE,null);
+					var elmt = elmts.iterateNext();
+					if(!elmt) {	// if that fails, look for other options
+						var elmts = doc.evaluate('//table[@class="tableLayout"]/tbody/tr/td[@class="content"]/table[@class="tableResults"]/tbody/tr[td/img[@alt="Book"]]/td/div[@class="title"]/a', doc, nsResolver, Components.interfaces.nsIDOMXPathResult.ANY_TYPE,null);
+						elmt = elmts.iterateNext()
+					}
+					
+					var urlsToProcess = new Array();
+					do {
+						urlsToProcess.push(elmt.href);
+					} while(elmt = elmts.iterateNext());
+					
+					Scholar.Utilities.HTTP.processDocuments(null, urlsToProcess, function(browser) {
+						// per URL
+						var newItems = _processOWC(browser.contentDocument);
+						if(newItems) {
+							items = items.concat(newItems);
+						}
+					}, function() {	// done
+						done(items);
+					}, function() {	// error
+						error();
+					});
+				}
+			}, null, function() {
+				error();
+			});
+		}
+	}
+	
+	/*
+	 * Processes the XML format returned by CrossRef
+	 */
+	function _processCrossRef(xmlOutput) {
+		xmlOutput = xmlOutput.replace(/<\?xml[^>]*\?>/, "");
+		
+		// parse XML with E4X
+		var qr = new Namespace("http://www.crossref.org/qrschema/2.0");
+		try {
+			var xml = new XML(xmlOutput);
+		} catch(e) {
+			return false;
+		}
+		
+		// ensure status is valid
+		var status = xml.qr::body.qr::query.@status.toString();
+		if(status != "resolved" && status != "multiresolved") {
+			return false;
+		}
+		
+		var query = xml.qr::body.qr::query;
+		var item = new Array();
+		item.creators = new Array();
+		
+		// try to get a DOI
+		item.DOI = query.qr::doi.(@type=="journal_article").toString();
+		if(!item.DOI) {
+			item.DOI = query.qr::doi.(@type=="book_title").toString();
+		}
+		if(!item.DOI) {
+			item.DOI = query.qr::doi.(@type=="book_content").toString();
+		}
+		
+		// try to get an ISSN (no print/electronic preferences)
+		item.ISSN = query.qr::issn.toString();
+		// get title
+		item.title = query.qr::article_title.toString();
+		// get publicationTitle
+		item.publicationTitle = query.qr::journal_title.toString();
+		// get author
+		item.creators.push(Scholar.Utilities.cleanAuthor(query.qr::author.toString(), "author", true));
+		// get volume
+		item.volume = query.qr::volume.toString();
+		// get issue
+		item.issue = query.qr::issue.toString();
+		// get year
+		item.date = query.qr::year.toString();
+		// get edition
+		item.edition = query.qr::edition_number.toString();
+		// get first page
+		item.pages = query.qr::first_page.toString();
+		
+		return [item];
+	}
+	
+	/*
+	 * Parses a document object referring to an Open WorldCat entry for its
+	 * OpenURL contextObject, then returns an item generated from this
+	 * contextObject
+	 */
+	function _processOWC(doc) {
+		var spanTags = doc.getElementsByTagName("span");
+		for(var i=0; i<spanTags.length; i++) {
+			var spanClass = spanTags[i].getAttribute("class");
+			if(spanClass) {
+				var spanClasses = spanClass.split(" ");
+				if(Scholar.inArray("Z3988", spanClasses)) {
+					var spanTitle = spanTags[i].getAttribute("title");
+					var item = parseContextObject(spanTitle);
+					if(item) {
+						return [item];
+					} else {
+						return false;
+					}
+				}
+			}
+		}
+		
+		return false;
+	}
+	
+	/*
+	 * Determines the type of an OpenURL contextObject
+	 */
+	function _determineResourceType(coParts) {
+		// determine resource type
+		var type = false;
+		for(var i in coParts) {
+			if(coParts[i].substr(0, 12) == "rft_val_fmt=") {
+				var format = unescape(coParts[i].substr(12));
+				if(format == "info:ofi/fmt:kev:mtx:journal") {
+					var type = "journal";
+				} else if(format == "info:ofi/fmt:kev:mtx:book") {
+					if(Scholar.inArray("rft.genre=bookitem", coParts)) {
+						var type = "bookSection";
+					} else {
+						var type = "book";
+					}
+					break;
+				}
+			}
+		}
+		return type;
+	}
+	
+	/*
+	 * Used to map tags for generating OpenURL contextObjects
+	 */
 	function _mapTag(data, tag, version) {
 		if(data) {
 			if(version == "0.1") {
