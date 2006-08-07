@@ -1,7 +1,7 @@
--- 35
+-- 36
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-07-07 12:44:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-08-06 19:14:00'));
 
 REPLACE INTO "translators" VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006-06-28 23:08:00', 4, 'Amazon.com Scraper', 'Simon Kornblith', '^http://www\.amazon\.com/(?:gp/(?:product|search)/|exec/obidos/search-handle-url/|s/)', 
 'function detect(doc, url) {
@@ -2333,6 +2333,182 @@ REPLACE INTO "translators" VALUES ('951c027d-74ac-47d4-a107-9c3069ab7b48', '2006
 	translator.doImport();
 }');
 
+REPLACE INTO "translators" VALUES ('05d07af9-105a-4572-99f6-a8e231c0daef', '2006-08-06 19:14:00', 4, 'COinS Scraper', 'Simon Kornblith', NULL,
+'function detect(doc, url) {
+	var spanTags = doc.getElementsByTagName("span");
+	
+	var encounteredType = false;
+	
+	for(var i=0; i<spanTags.length; i++) {
+		var spanClass = spanTags[i].getAttribute("class");
+		if(spanClass) {
+			var spanClasses = spanClass.split(" ");
+			if(Scholar.Utilities.inArray("Z3988", spanClasses)) {
+				var spanTitle = spanTags[i].getAttribute("title");
+				
+				if(spanTitle.indexOf("rft_val_fmt=info:ofi/fmt:kev:mtx:journal") != -1) {
+					var type = "journal";
+				} else if(spanTitle.indexOf("rft_val_fmt=info:ofi/fmt:kev:mtx:book") != -1) {
+					var type = "book";
+				} else {
+					continue;
+				}
+				
+				if(encounteredType) {
+					return "multiple";
+				} else {
+					encounteredType = type;
+				}
+			}
+		}
+	}
+	
+	return encounteredType;
+}',
+'function parseContextObject(co) {
+	if(co.indexOf("rft_val_fmt=info:ofi/fmt:kev:mtx:journal") != -1) {
+		var type = "journal";
+	} else {
+		if(co.indexOf("rft.genre=bookitem") != -1) {
+			var type = "bookSection";
+		} else {
+			var type = "book"
+		}
+	}
+	var item = new Scholar.Item(type);
+	
+	var pagesKey = "";
+	
+	var coParts = co.split("&");
+	for each(part in coParts) {
+		var keyVal = part.split("=");
+		var key = keyVal[0];
+		var value = unescape(keyVal[1].replace(/\+/g, " "));
+		if(!value) {
+			continue;
+		}
+		
+		if(key == "rft_id") {
+			var firstEight = value.substr(0, 8).toLowerCase();
+			if(firstEight == "info:doi") {
+				item.DOI = value;
+			} else if(firstEight == "urn:isbn") {
+				item.ISBN = value.substr(9);
+			}
+		} else if(key == "rft.btitle") {
+			if(item.itemType == "book") {
+				item.title = value;
+			} else if(item.itemType == "bookSection") {
+				item.publicationTitle = value;
+			}
+		} else if(key == "rft.atitle" && item.itemType != "book") {
+			item.title = value;
+		} else if(key == "rft.jtitle" && item.itemType == "journal") {
+			item.publcation = value;
+		} else if(key == "rft.stitle" && item.itemType == "journal") {
+			item.journalAbbreviation = value;
+		} else if(key == "rft.date") {
+			item.date = value;
+		} else if(key == "rft.volume") {
+			item.volume = value;
+		} else if(key == "rft.issue") {
+			item.issue = value;
+		} else if(key == "rft.pages") {
+			pagesKey = key;
+			item.pages = value;
+		} else if(key == "rft.spage") {
+			if(pagesKey != "rft.pages") {
+				pagesKey = key;
+				// make pages look like start-end
+				if(pagesKey == "rft.epage") {
+					if(value != item.pages) {
+						item.pages = value+"-"+item.pages;
+					}
+				} else {
+					item.pages = value;
+				}
+			}
+		} else if(key == "rft.epage") {
+			if(pagesKey != "rft.pages") {
+				pagesKey = key;
+				// make pages look like start-end
+				if(pagesKey == "rft.spage") {
+					if(value != item.pages) {
+						item.pages = +item.pages+"-"+value;
+					}
+				} else {
+					item.pages = value;
+				}
+			}
+		} else if(key == "issn" || (key == "eissn" && !item.ISSN)) {
+			item.ISSN = value;
+		} else if(key == "rft.aulast") {
+			var lastCreator = item.creators[item.creators.length-1];
+			if(item.creators.length && !lastCreator.lastName && !lastCreator.institutional) {
+				lastCreator.lastName = value;
+			} else {
+				item.creators.push({lastName:value});
+			}
+		} else if(key == "rft.aufirst") {
+			var lastCreator = item.creators[item.creators.length-1];
+			if(item.creators.length && !lastCreator.firstName && !lastCreator.institutional) {
+				lastCreator.firstName = value;
+			} else {
+				item.creators.push({firstName:value});
+			}
+		} else if(key == "rft.au") {
+			item.creators.push(Scholar.cleanAuthor(value, "author", true));
+		} else if(key == "rft.aucorp") {
+			item.creators.push({lastName:value, institutional:true});
+		} else if(key == "rft.isbn" && !item.ISBN) {
+			item.ISBN = value;
+		} else if(key == "rft.pub") {
+			item.publisher = value;
+		} else if(key == "rft.place") {
+			item.place = value;
+		} else if(key == "rft.edition") {
+			item.edition = value;
+		} else if(key == "rft.series") {
+			item.seriesTitle = value;
+		}
+	}
+	
+	return item;
+}
+
+function doWeb(doc, url) {
+	var newItems = new Array();
+	
+	var spanTags = doc.getElementsByTagName("span");
+	
+	for(var i=0; i<spanTags.length; i++) {
+		var spanClass = spanTags[i].getAttribute("class");
+		if(spanClass) {
+			var spanClasses = spanClass.split(" ");
+			if(Scholar.Utilities.inArray("Z3988", spanClasses)) {
+				var spanTitle = spanTags[i].getAttribute("title");
+				if(spanTitle.indexOf("rft_val_fmt=info:ofi/fmt:kev:mtx:journal") != -1
+				  || spanTitle.indexOf("rft_val_fmt=info:ofi/fmt:kev:mtx:book") != -1) {
+					newItems.push(parseContextObject(spanTitle));
+				}
+			}
+		}
+	}
+	
+	if(newItems.length > 1) {
+		var selectArray = new Array();
+		
+		for(var i in newItems) {
+			selectArray[i] = newItems.title;
+		}
+		selectArray = Scholar.selectItems(selectArray);
+		for(var i in selectArray) {
+			newItems[i].complete();
+		}
+	} else {
+		newItems[0].complete();
+	}
+}');
 REPLACE INTO "translators" VALUES ('3e684d82-73a3-9a34-095f-19b112d88bbf', '2006-06-26 16:01:00', 4, 'Google Books Scraper', 'Simon Kornblith', '^http://books\.google\.com/books\?(.*vid=.*\&id=.*|.*q=.*)',
 'function detect(doc, url) {
 	var re = new RegExp(''^http://books\\.google\\.com/books\\?vid=([^&]+).*\\&id=([^&]+)'', ''i'');
