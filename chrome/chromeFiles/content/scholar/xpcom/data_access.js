@@ -1895,6 +1895,8 @@ Scholar.Files = new function(){
 	
 	this.importFromFile = importFromFile;
 	this.linkFromFile = linkFromFile;
+	this.importFromURL = importFromURL;
+	this.linkFromURL = linkFromURL;
 	this.linkFromDocument = linkFromDocument;
 	this.importFromDocument = importFromDocument;
 	
@@ -1946,6 +1948,28 @@ Scholar.Files = new function(){
 		var mimeType = _getMIMETypeFromFile(file);
 		var charsetID = _getCharsetIDFromFile(file);
 		return _addToDB(file, null, title, this.LINK_MODE_LINKED_FILE, mimeType, charsetID, sourceItemID);
+	}
+	
+	
+	function importFromURL(url, sourceItemID){
+		var browser = Scholar.Browser.createHiddenBrowser();
+		browser.addEventListener("load", function(){
+			Scholar.Files.importFromDocument(browser.contentDocument, sourceItemID);
+			browser.removeEventListener("load", arguments.callee, true);
+			Scholar.Browser.deleteHiddenBrowser(browser);
+		}, true);
+		browser.loadURI(url, null, null, null, null);
+	}
+	
+	
+	function linkFromURL(url, sourceItemID){
+		var browser = Scholar.Browser.createHiddenBrowser();
+		browser.addEventListener("load", function(){
+			Scholar.Files.linkFromDocument(browser.contentDocument, sourceItemID);
+			browser.removeEventListener("load", arguments.callee, true);
+			Scholar.Browser.deleteHiddenBrowser(browser);
+		}, true);
+		browser.loadURI(url, null, null, null, null);
 	}
 	
 	
