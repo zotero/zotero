@@ -468,11 +468,17 @@ Scholar.Ingester.MIMEHandler = new function() {
 	 * registers URIContentListener to handle MIME types
 	 */
 	function init() {
-		if(!on && Scholar.Prefs.get("parseEndNoteMIMETypes")) {
+		var prefStatus = Scholar.Prefs.get("parseEndNoteMIMETypes");
+		if(!on && prefStatus) {
 			var uriLoader = Components.classes["@mozilla.org/uriloader;1"].
 			                getService(Components.interfaces.nsIURILoader);
 			uriLoader.registerContentListener(Scholar.Ingester.MIMEHandler.URIContentListener);
 			on = true;
+		} else if(on && !prefStatus) {
+			var uriLoader = Components.classes["@mozilla.org/uriloader;1"].
+			                getService(Components.interfaces.nsIURILoader);
+			uriLoader.unRegisterContentListener(Scholar.Ingester.MIMEHandler.URIContentListener);
+			on = false;			
 		}
 	}
 }
