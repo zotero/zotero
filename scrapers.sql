@@ -1,7 +1,7 @@
--- 38
+-- 39
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-08-07 01:09:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-08-07 21:55:00'));
 
 REPLACE INTO "translators" VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006-06-28 23:08:00', 4, 'Amazon.com Scraper', 'Simon Kornblith', '^http://www\.amazon\.com/(?:gp/(?:product|search)/|exec/obidos/search-handle-url/|s/)', 
 'function detectWeb(doc, url) {
@@ -2163,7 +2163,7 @@ REPLACE INTO "translators" VALUES ('c54d1932-73ce-dfd4-a943-109380e06574', '2006
 	}
 }');
 
-REPLACE INTO "translators" VALUES ('fcf41bed-0cbc-3704-85c7-8062a0068a7a', '2006-06-26 16:01:00', 12, 'PubMed Scraper', 'Simon Kornblith', '^http://www\.ncbi\.nlm\.nih\.gov/entrez/query\.fcgi\?(?:.*db=PubMed.*list_uids=[0-9]|.*list_uids=[0-9].*db=PubMed|.*db=PubMed.*CMD=search|.*CMD=search.*db=PubMed)',
+REPLACE INTO "translators" VALUES ('fcf41bed-0cbc-3704-85c7-8062a0068a7a', '2006-08-07 21:55:00', 12, 'PubMed Scraper', 'Simon Kornblith', '^http://www\.ncbi\.nlm\.nih\.gov/entrez/query\.fcgi\?(?:.*db=PubMed.*list_uids=[0-9]|.*list_uids=[0-9].*db=PubMed|.*db=PubMed.*CMD=search|.*CMD=search.*db=PubMed)',
 'function detectWeb(doc, url) {
 	if(doc.location.href.indexOf("list_uids=") >= 0) {
 		return "journalArticle";
@@ -2738,7 +2738,15 @@ function doSearch(item) {
 
 REPLACE INTO "translators" VALUES ('0e2235e7-babf-413c-9acf-f27cce5f059c', '2006-07-05 23:40:00', 3, 'MODS (XML)', 'Simon Kornblith', 'xml',
 'Scholar.addOption("exportNotes", true);
-Scholar.addOption("exportFileData", true);',
+Scholar.addOption("exportFileData", true);
+
+function detectImport() {
+	var read = Scholar.read(512);
+	var modsTagRegexp = /<mods[^>]+>/
+	if(modsTagRegexp.test(read)) {
+		return true;
+	}
+}',
 'var partialItemTypes = ["bookSection", "journalArticle", "magazineArticle", "newspaperArticle"];
 
 function doExport() {
@@ -3664,7 +3672,17 @@ REPLACE INTO "translators" VALUES ('6e372642-ed9d-4934-b5d1-c11ac758ebb7', '2006
 }');
 
 REPLACE INTO "translators" VALUES ('5e3ad958-ac79-463d-812b-a86a9235c28f', '2006-07-15 17:09:00', 1, 'RDF', 'Simon Kornblith', 'rdf',
-'Scholar.configure("dataMode", "rdf");',
+'Scholar.configure("dataMode", "rdf");
+
+function detectImport() {
+	// unfortunately, Mozilla will let you create a data source from any type
+	// of XML, so we need to make sure there are actually nodes
+	
+	var nodes = Scholar.RDF.getAllResources();
+	if(nodes) {
+		return true;
+	}
+}',
 '// gets the first result set for a property that can be encoded in multiple
 // ontologies
 function getFirstResults(node, properties, onlyOneString) {
@@ -4052,7 +4070,20 @@ function doImport() {
 
 REPLACE INTO "translators" VALUES ('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7', '2006-06-30 15:36:00', 3, 'RIS', 'Simon Kornblith', 'ris',
 'Scholar.configure("dataMode", "line");
-Scholar.addOption("exportNotes", true);',
+Scholar.addOption("exportNotes", true);
+
+function detectImport() {
+	var line
+	while(line = Scholar.read()) {
+		if(line.replace(/\s/g, "") != "") {
+			if(line.substr(0, 6) == "TY  - ") {
+				return true;
+			} else {
+				return false;
+			}
+		}
+	}
+}',
 'var itemsWithYears = ["book", "bookSection", "thesis", "film"];
 
 var fieldMap = {
@@ -4325,7 +4356,13 @@ function doExport() {
 }');
 
 REPLACE INTO "translators" VALUES ('a6ee60df-1ddc-4aae-bb25-45e0537be973', '2006-07-16 17:18:00', 1, 'MARC', 'Simon Kornblith', 'marc',
-NULL,
+'function detectImport() {
+	var marcRecordRegexp = /^[0-9]{5}[a-z ]{3}$/
+	var read = Scholar.read(8);
+	if(marcRecordRegexp.test(read)) {
+		return true;
+	}
+}',
 '/*
 * Original version of MARC record library copyright (C) 2005 Stefano Bargioni,
 * licensed under the LGPL
@@ -4801,7 +4838,6 @@ function doImport(url) {	// the URL is actually here for other translators
 	
 	while(text = Scholar.read(4096)) {	// read in 4096 byte increments
 		var records = text.split("\x1D");
-		Scholar.Utilities.debugPrint(records);
 		
 		if(records.length > 1) {
 			records[0] = holdOver + records[0];

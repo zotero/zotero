@@ -261,21 +261,7 @@ Scholar.Translate.prototype.getTranslators = function() {
 		Scholar.debug("searching for translators for "+this.path);
 		
 		// see which translators can translate
-		for(var i in translators) {
-			if(this._canTranslate(translators[i])) {
-				Scholar.debug("found translator "+translators[i].label);
-				
-				// for some reason, and i'm not quite sure what this reason is,
-				// we HAVE to do this to get things to work right; we can't
-				// just push a normal translator object from an SQL statement
-				var translator = {translatorID:translators[i].translatorID,
-						label:translators[i].label,
-						target:translators[i].target,
-						itemType:translators[i].itemType}
-				
-				possibleTranslators.push(translator);
-			}
-		}
+		var possibleTranslators = this._findTranslators(translators);
 		
 		return possibleTranslators;
 	}
@@ -287,6 +273,31 @@ Scholar.Translate.prototype.getTranslators = function() {
  * NOT IMPLEMENTED
  */
 Scholar.Translate.prototype.displayOptions = function() {
+}
+
+Scholar.Translate.prototype._findTranslators = function(translators, ignoreExtensions) {
+	var possibleTranslators = new Array();
+	for(var i in translators) {
+		if(this._canTranslate(translators[i], ignoreExtensions)) {
+			Scholar.debug("found translator "+translators[i].label);
+			
+			// for some reason, and i'm not quite sure what this reason is,
+			// we HAVE to do this to get things to work right; we can't
+			// just push a normal translator object from an SQL statement
+			var translator = {translatorID:translators[i].translatorID,
+					label:translators[i].label,
+					target:translators[i].target,
+					itemType:translators[i].itemType}
+			
+			possibleTranslators.push(translator);
+		}
+	}
+	if(!possibleTranslators.length && this.type == "import" && !ignoreExtensions) {
+		Scholar.debug("looking a second time");
+		// try search again, ignoring file extensions
+		return this._findTranslators(translators, true);
+	}
+	return possibleTranslators;
 }
 
 Scholar.Translate.prototype._loadTranslator = function() {
@@ -467,7 +478,7 @@ Scholar.Translate.prototype._generateSandbox = function() {
 /*
  * Check to see if _scraper_ can scrape this document
  */
-Scholar.Translate.prototype._canTranslate = function(translator) {	
+Scholar.Translate.prototype._canTranslate = function(translator, ignoreExtensions) {	
 	// Test location with regular expression
 	// If this is slow, we could preload all scrapers and compile regular
 	// expressions, so each check will be faster
@@ -481,6 +492,12 @@ Scholar.Translate.prototype._canTranslate = function(translator) {
 		
 		if(regularExpression.test(this.path)) {
 			canTranslate = true;
+		}
+		
+		if(ignoreExtensions) {
+			// if we're ignoring extensions, that means we already tried
+			// everything without ignoring extensions and it didn't work
+			canTranslate = !canTranslate;
 		}
 	} else {
 		var canTranslate = true;
@@ -917,7 +934,7 @@ Scholar.Translate.prototype._import = function() {
  * sets up import for IO
  */
 Scholar.Translate.prototype._importConfigureIO = function() {
-	if(this._configOptions.dataMode == "rdf") {			 
+	if(this._configOptions.dataMode == "rdf") {
 		var IOService = Components.classes['@mozilla.org/network/io-service;1']
 						.getService(Components.interfaces.nsIIOService);
 		var fileHandler = IOService.getProtocolHandler("file")
