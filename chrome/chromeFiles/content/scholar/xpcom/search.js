@@ -400,6 +400,9 @@ Scholar.SearchConditions = new function(){
 	this.getStandardConditions = getStandardConditions;
 	this.hasOperator = hasOperator;
 	
+	var _initialized = false;
+	var _conditions = [];
+	var _standardConditions = [];
 	
 	/*
 	 * Define the advanced search operators
@@ -424,100 +427,102 @@ Scholar.SearchConditions = new function(){
 	
 	
 	/*
-	 * Define the advanced search conditions
+	 * Define and set up the available advanced search conditions
 	 */
-	var _conditions = [
-		//
-		// Special conditions
-		//
-		
-		// Context (i.e. collection id to search within)
-		{
-			name: 'context'
-		},
-		
-		// Search recursively
-		{
-			name: 'recursive',
-			operators: {
-				true: true,
-				false: true
-			}
-		},
-		
-		// Join mode
-		{
-			name: 'joinMode',
-			operators: {
-				any: true,
-				all: true
-			}
-		},
-		
-		//
-		// Standard conditions
-		//
-		
-		{
-			name: 'title',
-			operators: {
-				contains: true,
-				doesNotContain: true
+	function _init(){
+		_conditions = [
+			//
+			// Special conditions
+			//
+			
+			// Context (i.e. collection id to search within)
+			{
+				name: 'context'
 			},
-			table: 'items',
-			field: 'title'
-		},
-		
-		{
-			name: 'itemType',
-			operators: {
-				is: true,
-				isNot: true
+			
+			// Search recursively
+			{
+				name: 'recursive',
+				operators: {
+					true: true,
+					false: true
+				}
 			},
-			table: 'items',
-			field: 'itemTypeID'
-		},
-		
-		{
-			name: 'field',
-			operators: {
-				is: true,
-				isNot: true,
-				contains: true,
-				doesNotContain: true
+			
+			// Join mode
+			{
+				name: 'joinMode',
+				operators: {
+					any: true,
+					all: true
+				}
 			},
-			table: 'itemData',
-			field: 'value',
-			aliases: Scholar.DB.columnQuery("SELECT fieldName FROM fields"),
-			template: true // mark for special handling
+			
+			//
+			// Standard conditions
+			//
+			
+			{
+				name: 'title',
+				operators: {
+					contains: true,
+					doesNotContain: true
+				},
+				table: 'items',
+				field: 'title'
+			},
+			
+			{
+				name: 'itemType',
+				operators: {
+					is: true,
+					isNot: true
+				},
+				table: 'items',
+				field: 'itemTypeID'
+			},
+			
+			{
+				name: 'field',
+				operators: {
+					is: true,
+					isNot: true,
+					contains: true,
+					doesNotContain: true
+				},
+				table: 'itemData',
+				field: 'value',
+				aliases: Scholar.DB.columnQuery("SELECT fieldName FROM fields"),
+				template: true // mark for special handling
+			}
+		];
+		
+		// Index conditions by name and aliases
+		for (var i in _conditions){
+			_conditions[_conditions[i]['name']] = _conditions[i];
+			if (_conditions[i]['aliases']){
+				for (var j in _conditions[i]['aliases']){
+					_conditions[_conditions[i]['aliases'][j]] = _conditions[i];
+				}
+			}
+			_conditions[_conditions[i]['name']] = _conditions[i];
+			delete _conditions[i];
 		}
-	];
-	
-	// Index conditions by name and aliases
-	for (var i in _conditions){
-		_conditions[_conditions[i]['name']] = _conditions[i];
-		if (_conditions[i]['aliases']){
-			for (var j in _conditions[i]['aliases']){
-				_conditions[_conditions[i]['aliases'][j]] = _conditions[i];
+		
+		// Separate standard conditions for menu display
+		for (var i in _conditions){
+			// Standard conditions a have associated tables
+			if (_conditions[i]['table'] &&
+				// If a template condition, not the original (e.g. 'field')
+				(!_conditions[i]['template'] || i!=_conditions[i]['name'])){
+				_standardConditions.push({
+					name: i,
+					operators: _conditions[i]['operators']
+				});
 			}
 		}
-		_conditions[_conditions[i]['name']] = _conditions[i];
-		delete _conditions[i];
-	}
-	
-	var _standardConditions = [];
-	
-	// Separate standard conditions for menu display
-	for (var i in _conditions){
-		// Standard conditions a have associated tables
-		if (_conditions[i]['table'] &&
-			// If a template condition, not the original (e.g. 'field')
-			(!_conditions[i]['template'] || i!=_conditions[i]['name'])){
-			_standardConditions.push({
-				name: i,
-				operators: _conditions[i]['operators']
-			});
-		}
+		
+		_initialized = true;
 	}
 	
 	
@@ -525,6 +530,10 @@ Scholar.SearchConditions = new function(){
 	 * Get condition data
 	 */
 	function get(condition){
+		if (!_initialized){
+			_init();
+		}
+		
 		return _conditions[condition];
 	}
 	
@@ -535,6 +544,10 @@ Scholar.SearchConditions = new function(){
 	 * Does not include special conditions, only ones that would show in a drop-down list
 	 */
 	function getStandardConditions(){
+		if (!_initialized){
+			_init();
+		}
+		
 		// TODO: return copy instead
 		return _standardConditions;
 	}
@@ -544,6 +557,10 @@ Scholar.SearchConditions = new function(){
 	 * Check if an operator is valid for a given condition
 	 */
 	function hasOperator(condition, operator){
+		if (!_initialized){
+			_init();
+		}
+		
 		if (!_conditions[condition]){
 			throw ("Invalid condition '" + condition + "' in hasOperator()");
 		}
