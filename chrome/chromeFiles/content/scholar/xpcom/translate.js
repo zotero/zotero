@@ -13,6 +13,7 @@
  * export
  * import
  * web
+ * search
  *
  * a typical export process:
  * var translatorObj = new Scholar.Translate();
@@ -35,7 +36,10 @@
  * location - the location of the target (read-only; set with setLocation)
  *            for import/export - this is an instance of nsILocalFile
  *            for web - this is a URL
+ * item - item to be used for searching (read-only; set with setItem)
  * path - the path to the target; for web, this is the same as location
+ * saveItem - whether new items should be saved to the database. defaults to
+ *            true; set using second argument of constructor.
  *
  * PRIVATE PROPERTIES:
  * 
@@ -49,6 +53,10 @@
  * _sandbox - sandbox in which translators will be executed
  * _streams - streams that need to be closed when execution is complete
  * _IDMap - a map from IDs as specified in Scholar.Item() to IDs of actual items
+ * _parentTranslator - set when a translator is called from another translator. 
+ *                     among other things, disables passing of the translate
+ *                     object to handlers and modifies complete() function on 
+ *                     returned items
  *
  * WEB-ONLY PRIVATE PROPERTIES:
  *
@@ -56,23 +64,41 @@
  *                      an EZProxy
  */
 
-Scholar.Translate = function(type) {
+Scholar.Translate = function(type, saveItem) {
 	this.type = type;
 	
-	// import = 001 = 1
-	// export = 010 = 2
-	// web    = 100 = 4
+	// import = 0001 = 1
+	// export = 0010 = 2
+	// web    = 0100 = 4
+	// search = 1000 = 8
 	
 	// combination types determined by addition or bitwise AND
 	// i.e., import+export = 1+2 = 3
-	if(type == "import") {
-		this._numericTypes = "1,3,5,7";
-	} else if(type == "export") {
-		this._numericTypes = "2,3,6,7";
-	} else if(type == "web") {
-		this._numericTypes = "4,5,6,7";
+	this._numericTypes = "";
+	for(var i=0; i<=1; i++) {
+		for(var j=0; j<=1; j++) {
+			for(var k=0; k<=1; k++) {
+				if(type == "import") {
+					this._numericTypes += ","+parseInt(i.toString()+j.toString()+k.toString()+"1", 2);
+				} else if(type == "export") {
+					this._numericTypes += ","+parseInt(i.toString()+j.toString()+"1"+k.toString(), 2);
+				} else if(type == "web") {
+					this._numericTypes += ","+parseInt(i.toString()+"1"+j.toString()+k.toString(), 2);
+				} else if(type == "search") {
+					this._numericTypes += ","+parseInt("1"+i.toString()+j.toString()+k.toString(), 2);
+				} else {
+					throw("invalid import type");
+				}
+			}
+		}
+	}
+	this._numericTypes = this._numericTypes.substr(1);
+	
+	if(saveItem === false) {	// three equals signs means if it's left
+								// undefined, this.saveItem will still be true
+		this.saveItem = false;
 	} else {
-		throw("invalid import type");
+		this.saveItem = true;
 	}
 	
 	this._handlers = new Array();
@@ -85,6 +111,13 @@ Scholar.Translate = function(type) {
 Scholar.Translate.prototype.setBrowser = function(browser) {
 	this.browser = browser;
 	this.setLocation(browser.contentDocument.location.href);
+}
+
+/*
+ * sets the item to be used for searching
+ */
+Scholar.Translate.prototype.setItem = function(item) {
+	this.item = item;
 }
 
 /*
@@ -112,12 +145,41 @@ Scholar.Translate.prototype.setLocation = function(location) {
  * accepts either the object from getTranslators() or an ID
  */
 Scholar.Translate.prototype.setTranslator = function(translator) {
-	if(typeof(translator) == "object") {	// passed an object and not an ID
-		translator = translator.translatorID;
+	if(!translator) {
+		throw("cannot set translator: invalid value");
 	}
 	
-	var sql = "SELECT * FROM translators WHERE translatorID = ? AND type IN ("+this._numericTypes+")";
-	this.translator = Scholar.DB.rowQuery(sql, [translator]);
+	if(typeof(translator) == "object") {	// passed an object and not an ID
+		if(translator.translatorID) {
+			translator = [translator.translatorID];
+		} else {
+			// we have an associative array of translators
+			if(this.type != "search") {
+				throw("cannot set translator: a single translator must be specified when doing "+this.type+" translation");
+			}
+			// accept a list of objects
+			for(var i in translator) {
+				if(typeof(translator[i]) == "object") {
+					if(translator[i].translatorID) {
+						translator[i] = translator[i].translatorID;
+					} else {
+						throw("cannot set translator: must specify a single translator or a list of translators"); 
+					}
+				}
+			}
+		}
+	} else {
+		translator = [translator];
+	}
+	
+	var where = "";
+	for(var i in translator) {
+		where += " OR translatorID = ?";
+	}
+	where = where.substr(4);
+	
+	var sql = "SELECT * FROM translators WHERE "+where+" AND type IN ("+this._numericTypes+")";
+	this.translator = Scholar.DB.query(sql, translator);
 	if(!this.translator) {
 		return false;
 	}
@@ -145,13 +207,13 @@ Scholar.Translate.prototype.setTranslator = function(translator) {
  *   returns: N/A
  *
  * itemDone
- *   valid: import, web
+ *   valid: import, web, search
  *   called: when an item has been processed; may be called asynchronously
  *   passed: an item object (see Scholar.Item)
  *   returns: N/A
  *
  * collectionDone
- *   valid: import, web
+ *   valid: import
  *   called: when a collection has been processed, after all items have been
  *           added; may be called asynchronously
  *   passed: a collection object (see Scholar.Collection)
@@ -187,7 +249,7 @@ Scholar.Translate.prototype.getTranslators = function() {
 	var sql = "SELECT translatorID, label, target, detectCode FROM translators WHERE type IN ("+this._numericTypes+") ORDER BY target IS NULL";
 	var translators = Scholar.DB.query(sql);
 	
-	if(!this.location) {
+	if(!this.location && !this.item) {
 		return translators;		// no need to see which can translate, because
 								// we don't have a location yet (for export or
 								// import dialog)
@@ -228,20 +290,21 @@ Scholar.Translate.prototype.displayOptions = function() {
 }
 
 Scholar.Translate.prototype._loadTranslator = function() {
-	if(!this._sandbox) {
-		// create a new sandbox if none exists
+	if(!this._sandbox || this.type == "search") {
+		// create a new sandbox if none exists, or for searching (so that it's
+		// bound to the correct url)
 		this._generateSandbox();
 	}
 	
 	// parse detect code for the translator
-	this._parseDetectCode(this.translator);
+	this._parseDetectCode(this.translator[0]);
 	
-	Scholar.debug("parsing code for "+this.translator.label);
+	Scholar.debug("parsing code for "+this.translator[0].label);
 	
 	try {
-		Components.utils.evalInSandbox(this.translator.code, this._sandbox);
+		Components.utils.evalInSandbox(this.translator[0].code, this._sandbox);
 	} catch(e) {
-		Scholar.debug(e+' in parsing code for '+this.translator.label);
+		Scholar.debug(e+' in parsing code for '+this.translator[0].label);
 		this._translationComplete(false);
 		return false;
 	}
@@ -254,16 +317,23 @@ Scholar.Translate.prototype._loadTranslator = function() {
  */
 Scholar.Translate.prototype.translate = function() {
 	this._IDMap = new Array();
+	this._complete = false;
 	
-	if(!this.location) {
-		throw("cannot translate: no location specified");
+	if(!this.translator || !this.translator.length) {
+		throw("cannot translate: no translator specified");
 	}
 	
-	this._complete = false;
+	if(!this.location && this.type != "search") {
+		// searches operate differently, because we could have an array of
+		// translators and have to go through each
+		throw("cannot translate: no location specified");
+	}
 	
 	if(!this._loadTranslator()) {
 		return;
 	}
+	
+	this._sandbox.Scholar.scraperName = this.translator[0].label;
 	
 	var returnValue;
 	if(this.type == "web") {
@@ -272,7 +342,10 @@ Scholar.Translate.prototype.translate = function() {
 		returnValue = this._import();
 	} else if(this.type == "export") {
 		returnValue = this._export();
+	} else if(this.type == "search") {
+		returnValue = this._search();
 	}
+	
 	if(!returnValue) {
 		// failure
 		this._translationComplete(false);
@@ -285,12 +358,31 @@ Scholar.Translate.prototype.translate = function() {
 /*
  * generates a sandbox for scraping/scraper detection
  */
+Scholar.Translate._searchSandboxRegexp = new RegExp();
+Scholar.Translate._searchSandboxRegexp.compile("^http://[\\w.]+/");
 Scholar.Translate.prototype._generateSandbox = function() {
 	var me = this;
 	
-	if(this.type == "web") {
-		// use real URL, not proxied version, to create sandbox
-		this._sandbox = new Components.utils.Sandbox(this.browser.contentDocument.location.href);
+	if(this.type == "web" || this.type == "search") {
+		// get sandbox URL
+		var sandboxURL = "";
+		if(this.type == "web") {
+			// use real URL, not proxied version, to create sandbox
+			sandboxURL = this.browser.contentDocument.location.href;
+		} else {
+			// generate sandbox for search by extracting domain from translator
+			// target, if one exists
+			if(this.translator && this.translator[0] && this.translator[0].target) {
+				// so that web translators work too
+				var tempURL = this.translator[0].target.replace(/\\/g, "").replace(/\^/g, "");
+				var m = Scholar.Translate._searchSandboxRegexp.exec(tempURL);
+				if(m) {
+					sandboxURL = m[0];
+				}
+			} 
+		}
+		Scholar.debug("binding sandbox to "+sandboxURL);
+		this._sandbox = new Components.utils.Sandbox(sandboxURL);
 		this._sandbox.Scholar = new Object();
 		
 		// add ingester utilities
@@ -300,27 +392,30 @@ Scholar.Translate.prototype._generateSandbox = function() {
 		// set up selectItems handler
 		this._sandbox.Scholar.selectItems = function(options) { return me._selectItems(options) };
 	} else {
-		// use null URL to create sanbox
+		// use null URL to create sandbox
 		this._sandbox = new Components.utils.Sandbox("");
 		this._sandbox.Scholar = new Object();
 		
 		this._sandbox.Scholar.Utilities = new Scholar.Utilities();
 	}
 	
-	if(this.type == "web" || this.type == "import") {
+	
+	if(this.type == "export") {
+		// add routines to retrieve items and collections
+		this._sandbox.Scholar.nextItem = function() { return me._exportGetItem() };
+		this._sandbox.Scholar.nextCollection = function() { return me._exportGetCollection() }
+	} else {
 		// add routines to add new items
 		this._sandbox.Scholar.Item = Scholar.Translate.ScholarItem;
 		// attach the function to be run when an item is done
 		this._sandbox.Scholar.Item.prototype.complete = function() {me._itemDone(this)};
 		
-		// add routines to add new collections
-		this._sandbox.Scholar.Collection = Scholar.Translate.ScholarCollection;
-		// attach the function to be run when a collection is done
-		this._sandbox.Scholar.Collection.prototype.complete = function() {me._collectionDone(this)};
-	} else if(this.type == "export") {
-		// add routines to retrieve items and collections
-		this._sandbox.Scholar.nextItem = function() { return me._exportGetItem() };
-		this._sandbox.Scholar.nextCollection = function() { return me._exportGetCollection() };
+		if(this.type == "import") {
+			// add routines to add new collections
+			this._sandbox.Scholar.Collection = Scholar.Translate.ScholarCollection;
+			// attach the function to be run when a collection is done
+			this._sandbox.Scholar.Collection.prototype.complete = function() {me._collectionDone(this)};
+		}
 	}
 	
 	this._sandbox.XPathResult = Components.interfaces.nsIDOMXPathResult;
@@ -334,33 +429,50 @@ Scholar.Translate.prototype._generateSandbox = function() {
 	this._sandbox.Scholar.addOption = function(option, value) {me._addOption(option, value) };
 	
 	// for loading other translators and accessing their methods
-	var me = this;
 	this._sandbox.Scholar.loadTranslator = function(type, translatorID) {
-		var translation = new Scholar.Translate(type);
-		// assign same handlers as for parent, because the done handler won't
-		// get called anyway, and the itemDone/selectItems handlers should be
-		// the same
-		translation._handlers = me._handlers;
-		// set the translator
-		translation.setTranslator(translatorID);
-		// load the translator into our sandbox
-		translation._loadTranslator();
-		// use internal io
-		translation._initializeInternalIO();
-		return translation._sandbox;
+		var translation = new Scholar.Translate(type, (translatorID ? true : false));
+		if(translatorID) {
+			// assign same handlers as for parent, because the done handler won't
+			// get called anyway, and the itemDone/selectItems handlers should be
+			// the same
+			translation._handlers = me._handlers;
+			// set the translator
+			translation.setTranslator(translatorID);
+			// load the translator into our sandbox
+			translation._loadTranslator();
+			// use internal io
+			translation._initializeInternalIO();
+			return translation._sandbox;
+		} else {
+			// create a safe translator object, so that scrapers can't get
+			// access to potentially harmful methods.
+			if(type == "import" || type == "export") {
+				throw("you must specify a translatorID for "+type+" translation");
+			}
+			
+			var safeTranslator = new Object();
+			safeTranslator.setItem = function(arg) { return translation.setItem(arg) };
+			safeTranslator.setBrowser = function(arg) { return translation.setBrowser(arg) };
+			safeTranslator.setHandler = function(arg1, arg2) { translation.setHandler(arg1, arg2) };
+			safeTranslator.setTranslator = function(arg) { return translation.setTranslator(arg) };
+			safeTranslator.getTranslators = function() { return translation.getTranslators() };
+			safeTranslator.translate = function() { return translation.translate() };
+			translation._parentTranslator = me;
+			
+			return safeTranslator;
+		}
 	}
 }
 
 /*
  * Check to see if _scraper_ can scrape this document
  */
-Scholar.Translate.prototype._canTranslate = function(translator) {
-	var canTranslate = false;
-	
+Scholar.Translate.prototype._canTranslate = function(translator) {	
 	// Test location with regular expression
 	// If this is slow, we could preload all scrapers and compile regular
 	// expressions, so each check will be faster
-	if(translator.target) {
+	if(translator.target && this.type != "search") {
+		var canTranslate = false;
 		if(this.type == "web") {
 			var regularExpression = new RegExp(translator.target, "i");
 		} else {
@@ -370,6 +482,8 @@ Scholar.Translate.prototype._canTranslate = function(translator) {
 		if(regularExpression.test(this.path)) {
 			canTranslate = true;
 		}
+	} else {
+		var canTranslate = true;
 	}
 	
 	// Test with JavaScript if available and didn't have a regular expression or
@@ -388,14 +502,21 @@ Scholar.Translate.prototype._canTranslate = function(translator) {
 			}
 		}
 		
-		if(this._sandbox.detect) {
+		if((this.type == "web" && this._sandbox.detectWeb) ||
+		   (this.type == "search" && this._sandbox.detectSearch) ||
+		   (this.type == "import" && this._sandbox.detectImport) ||
+		   (this.type == "export" && this._sandbox.detectExport)) {
 			var returnValue;
 			
 			try {
 				if(this.type == "web") {
-					returnValue = this._sandbox.detect(this.browser.contentDocument, this.location);
+					returnValue = this._sandbox.detectWeb(this.browser.contentDocument, this.location);
+				} else if(this.type == "search") {
+					returnValue = this._sandbox.detectSearch(this.item);
 				} else if(this.type == "import") {
-					returnValue = this._sandbox.detect();
+					returnValue = this._sandbox.detectImport();
+				} else if(this.type == "export") {
+					returnValue = this._sandbox.detectExport();
 				}
 			} catch(e) {
 				Scholar.debug(e+' in executing detectCode for '+translator.label);
@@ -476,7 +597,7 @@ Scholar.Translate.prototype._addOption = function(option, value) {
  * called as wait() in translator code
  */
 Scholar.Translate.prototype._enableAsynchronous = function() {
-	me = this;
+	var me = this;
 	this._waitForCompletion = true;
 	this._sandbox.Scholar.done = function() { me._translationComplete(true) };
 }
@@ -505,13 +626,20 @@ Scholar.Translate.prototype._translationComplete = function(returnValue) {
 	if(!this._complete) {
 		this._complete = true;
 		
-		Scholar.debug("translation complete");
-		
-		// call handler
-		this._runHandler("done", returnValue);
-		
-		// close open streams
-		this._closeStreams();
+		if(this.type == "search" && !this._itemsFound && this.translator.length > 1) {
+			// if we're performing a search and didn't get any results, go on
+			// to the next translator
+			this.translator.shift();
+			this.translate();
+		} else {
+			Scholar.debug("translation complete");
+			
+			// call handler
+			this._runHandler("done", returnValue);
+			
+			// close open streams
+			this._closeStreams();
+		}
 	}
 }
 
@@ -547,13 +675,23 @@ Scholar.Translate.prototype._closeStreams = function() {
  */
 Scholar.Translate.prototype._itemDone = function(item) {
 	Scholar.debug(item);
+	if(!this.saveItem) {	// if we're not supposed to save the item, just
+							// return the item array
+		
+		// if a parent sandbox exists, use complete() function from that sandbox
+		if(this._parentTranslator) {
+			var pt = this._parentTranslator;
+			item.complete = function() { pt._itemDone(this) };
+			Scholar.debug("done from parent sandbox");
+		}
+		this._runHandler("itemDone", item);
+		return;
+	}
 	
 	// Get typeID, defaulting to "website"
 	var type = (item.itemType ? item.itemType : "website");
 	
-	Scholar.debug("type is "+type);
 	if(type == "note") {	// handle notes differently
-		Scholar.debug("handling a note");
 		var myID = Scholar.Notes.add(item.note);
 		// re-retrieve the item
 		var newItem = Scholar.Items.get(myID);
@@ -718,7 +856,11 @@ Scholar.Translate.prototype._runHandler = function(type, argument) {
 		for(var i in this._handlers[type]) {
 			Scholar.debug("running handler "+i+" for "+type);
 			try {
-				returnValue = this._handlers[type][i](this, argument);
+				if(this._parentTranslator) {
+					returnValue = this._handlers[type][i](null, argument);
+				} else {
+					returnValue = this._handlers[type][i](this, argument);
+				}
 			} catch(e) {
 				Scholar.debug(e+' in handler '+i+' for '+type);
 			}
@@ -734,7 +876,21 @@ Scholar.Translate.prototype._web = function() {
 	try {
 		this._sandbox.doWeb(this.browser.contentDocument, this.location);
 	} catch(e) {
-		Scholar.debug(e+' in executing code for '+this.translator.label);
+		Scholar.debug(e+' in executing code for '+this.translator[0].label);
+		return false;
+	}
+	
+	return true;
+}
+
+/*
+ * does the actual search translation
+ */
+Scholar.Translate.prototype._search = function() {
+	try {
+		this._sandbox.doSearch(this.item);
+	} catch(e) {
+		Scholar.debug(e+' in executing code for '+this.translator[0].label);
 		return false;
 	}
 	
@@ -750,7 +906,7 @@ Scholar.Translate.prototype._import = function() {
 	try {
 		this._sandbox.doImport();
 	} catch(e) {
-		Scholar.debug(e+' in executing code for '+this.translator.label);
+		Scholar.debug(e+' in executing code for '+this.translator[0].label);
 		return false;
 	}
 	
@@ -830,7 +986,7 @@ Scholar.Translate.prototype._export = function() {
 	try {
 		this._sandbox.doExport();
 	} catch(e) {
-		Scholar.debug(e+' in executing code for '+this.translator.label);
+		Scholar.debug(e+' in executing code for '+this.translator[0].label);
 		return false;
 	}
 	

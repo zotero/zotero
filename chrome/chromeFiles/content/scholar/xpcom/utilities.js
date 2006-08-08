@@ -321,8 +321,8 @@ Scholar.Utilities.Ingester.prototype.lookupContextObject = function(co, done, er
 	return Scholar.OpenURL.lookupContextObject(co, done, error);
 }
 
-Scholar.Utilities.Ingester.prototype.parseContextObject = function(co) {
-	return Scholar.OpenURL.parseContextObject(co);
+Scholar.Utilities.Ingester.prototype.parseContextObject = function(co, item) {
+	return Scholar.OpenURL.parseContextObject(co, item);
 }
 
 /*
