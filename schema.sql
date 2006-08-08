@@ -1,4 +1,4 @@
--- 33
+-- 34
 
     DROP TABLE IF EXISTS version;
     CREATE TABLE version (
@@ -191,6 +191,24 @@
     );
     DROP INDEX IF EXISTS itemID;
     CREATE INDEX itemID ON collectionItems(itemID);
+    
+    DROP TABLE IF EXISTS savedSearches;
+    CREATE TABLE savedSearches (
+        savedSearchID INT,
+        savedSearchName TEXT,
+        PRIMARY KEY(savedSearchID)
+    );
+    
+    DROP TABLE IF EXISTS savedSearchConditions;
+    CREATE TABLE savedSearchConditions (
+        savedSearchID INT,
+        searchConditionID INT,
+        condition TEXT,
+        operator TEXT,
+        value TEXT,
+        PRIMARY KEY(savedSearchID, searchConditionID),
+        FOREIGN KEY (savedSearchID) REFERENCES savedSearches(savedSearchID)
+    );
     
     DROP TABLE IF EXISTS translators;
     CREATE TABLE translators (
