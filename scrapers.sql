@@ -1,7 +1,7 @@
--- 39
+-- 40
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-08-07 21:55:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-08-08 17:12:00'));
 
 REPLACE INTO "translators" VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006-06-28 23:08:00', 4, 'Amazon.com Scraper', 'Simon Kornblith', '^http://www\.amazon\.com/(?:gp/(?:product|search)/|exec/obidos/search-handle-url/|s/)', 
 'function detectWeb(doc, url) {
@@ -4068,12 +4068,12 @@ function doImport() {
 	}
 }');
 
-REPLACE INTO "translators" VALUES ('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7', '2006-06-30 15:36:00', 3, 'RIS', 'Simon Kornblith', 'ris',
+REPLACE INTO "translators" VALUES ('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7', '2006-08-08 17:12:00', 3, 'RIS', 'Simon Kornblith', 'ris',
 'Scholar.configure("dataMode", "line");
 Scholar.addOption("exportNotes", true);
 
 function detectImport() {
-	var line
+	var line;
 	while(line = Scholar.read()) {
 		if(line.replace(/\s/g, "") != "") {
 			if(line.substr(0, 6) == "TY  - ") {
@@ -4141,6 +4141,8 @@ var inputTypeMap = {
 function processTag(item, tag, value) {
 	if(fieldMap[tag]) {
 		item[fieldMap[tag]] = value;
+	} else if(inputFieldMap[tag]) {
+		item[inputFieldMap[tag]] = value;
 	} else if(tag == "TY") {
 		// look for type
 		

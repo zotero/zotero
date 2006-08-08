@@ -38,6 +38,7 @@
  *            for web - this is a URL
  * item - item to be used for searching (read-only; set with setItem)
  * path - the path to the target; for web, this is the same as location
+ * string - the string content to be used as a file.
  * saveItem - whether new items should be saved to the database. defaults to
  *            true; set using second argument of constructor.
  *
@@ -57,6 +58,8 @@
  *                     among other things, disables passing of the translate
  *                     object to handlers and modifies complete() function on 
  *                     returned items
+ * _storageStream - the storage stream to be used, if one is configured
+ * _storageStreamLength - the length of the storage stream
  *
  * WEB-ONLY PRIVATE PROPERTIES:
  *
@@ -135,8 +138,28 @@ Scholar.Translate.prototype.setLocation = function(location) {
 		this.path = this.location;
 	} else {
 		this.location = location;
-		this.path = location.path;
+		if(this.location instanceof Components.interfaces.nsIFile) {	// if a file
+			this.path = location.path;
+		} else {														// if a url
+			this.path = location;
+		}
 	}
+}
+
+/*
+ * sets the string to be used as a file
+ */
+Scholar.Translate.prototype.setString = function(string) {
+	this.string = string;
+	this._createStorageStream();
+	
+	Scholar.debug(string);
+	this._storageStreamLength = string.length;
+	
+	// write string
+	var fStream = this._storageStream.getOutputStream(0);
+	fStream.write(string, this._storageStreamLength);
+	fStream.close();
 }
 
 /*
@@ -672,7 +695,10 @@ Scholar.Translate.prototype._closeStreams = function() {
 			try {
 				stream.QueryInterface(Components.interfaces.nsIFileInputStream);
 			} catch(e) {
-				stream.QueryInterface(Components.interfaces.nsIFileOutputStream);
+				try {
+					stream.QueryInterface(Components.interfaces.nsIFileOutputStream);
+				} catch(e) {
+				}
 			}
 			
 			// encase close in try block, because it's possible it's already
@@ -934,52 +960,85 @@ Scholar.Translate.prototype._import = function() {
  * sets up import for IO
  */
 Scholar.Translate.prototype._importConfigureIO = function() {
-	if(this._configOptions.dataMode == "rdf") {
-		var IOService = Components.classes['@mozilla.org/network/io-service;1']
-						.getService(Components.interfaces.nsIIOService);
-		var fileHandler = IOService.getProtocolHandler("file")
-		                  .QueryInterface(Components.interfaces.nsIFileProtocolHandler);
-		var URL = fileHandler.getURLSpecFromFile(this.location);
-		delete fileHandler, IOService;
-		
-		var RDFService = Components.classes['@mozilla.org/rdf/rdf-service;1']
-						 .getService(Components.interfaces.nsIRDFService);
-		var dataSource = RDFService.GetDataSourceBlocking(URL);
-		
-		// make an instance of the RDF handler
-		this._sandbox.Scholar.RDF = new Scholar.Translate.RDF(dataSource);
-	} else {	
-		// open file
-		var fStream = Components.classes["@mozilla.org/network/file-input-stream;1"]
-								 .createInstance(Components.interfaces.nsIFileInputStream);
-		fStream.init(this.location, 0x01, 0664, 0);
-		this._streams.push(fStream);
-		
-		if(this._configOptions.dataMode == "line") {	// line by line reading
-			var notEof = true;
-			var lineData = new Object();
+	if(this._storageStream) {		
+		if(this._configOptions.dataMode == "rdf") {
+			// read string out of storage stream
+			var sStream = Components.classes["@mozilla.org/scriptableinputstream;1"].
+						  createInstance(Components.interfaces.nsIScriptableInputStream);
+			sStream.init(this._storageStream.newInputStream(0));
+			var str = sStream.read(this._storageStreamLength);
+			sStream.close();
 			
-			fStream.QueryInterface(Components.interfaces.nsILineInputStream);
+			var IOService = Components.classes['@mozilla.org/network/io-service;1']
+							.getService(Components.interfaces.nsIIOService);
+			var dataSource = Components.classes["@mozilla.org/rdf/datasource;1?name=in-memory-datasource"].
+							createInstance(Components.interfaces.nsIRDFDataSource);
+			var parser = Components.classes["@mozilla.org/rdf/xml-parser;1"].
+						 createInstance(Components.interfaces.nsIRDFXMLParser);
 			
-			this._sandbox.Scholar.read = function() {
-				if(notEof) {
-					notEof = fStream.readLine(lineData);
-					return lineData.value;
-				} else {
-					return false;
+			// get URI and parse
+			var baseURI = (this.location ? IOService.newURI(this.location, "utf-8", null) : null);
+			parser.parseString(dataSource, baseURI, str);
+			
+			// make an instance of the RDF handler
+			this._sandbox.Scholar.RDF = new Scholar.Translate.RDF(dataSource);
+		} else {
+			this._storageStreamFunctions(true);
+			
+			if(this._scriptableStream) {
+				// close scriptable stream so functions will be forced to get a
+				// new one
+				this._scriptableStream.close();
+				this._scriptableStream = undefined;
+			}
+		}
+	} else {
+		if(this._configOptions.dataMode == "rdf") {
+			var IOService = Components.classes['@mozilla.org/network/io-service;1']
+							.getService(Components.interfaces.nsIIOService);
+			var fileHandler = IOService.getProtocolHandler("file")
+							  .QueryInterface(Components.interfaces.nsIFileProtocolHandler);
+			var URL = fileHandler.getURLSpecFromFile(this.location);
+			
+			var RDFService = Components.classes['@mozilla.org/rdf/rdf-service;1']
+							 .getService(Components.interfaces.nsIRDFService);
+			var dataSource = RDFService.GetDataSourceBlocking(URL);
+			
+			// make an instance of the RDF handler
+			this._sandbox.Scholar.RDF = new Scholar.Translate.RDF(dataSource);
+		} else {
+			// open file and set read methods
+			var fStream = Components.classes["@mozilla.org/network/file-input-stream;1"]
+									 .createInstance(Components.interfaces.nsIFileInputStream);
+			fStream.init(this.location, 0x01, 0664, 0);
+			this._streams.push(fStream);
+			
+			if(this._configOptions.dataMode == "line") {	// line by line reading
+				var notEof = true;
+				var lineData = new Object();
+				
+				fStream.QueryInterface(Components.interfaces.nsILineInputStream);
+				
+				this._sandbox.Scholar.read = function() {
+					if(notEof) {
+						notEof = fStream.readLine(lineData);
+						return lineData.value;
+					} else {
+						return false;
+					}
 				}
+			} else {										// block reading
+				var sStream = Components.classes["@mozilla.org/scriptableinputstream;1"]
+							 .createInstance(Components.interfaces.nsIScriptableInputStream);
+				sStream.init(fStream);
+				
+				this._sandbox.Scholar.read = function(amount) {
+					return sStream.read(amount);
+				}
+				
+				// attach sStream to stack of streams to close
+				this._streams.push(sStream);
 			}
-		} else {										// block reading
-			var sStream = Components.classes["@mozilla.org/scriptableinputstream;1"]
-						 .createInstance(Components.interfaces.nsIScriptableInputStream);
-			sStream.init(fStream);
-			
-			this._sandbox.Scholar.read = function(amount) {
-				return sStream.read(amount);
-			}
-			
-			// attach sStream to stack of streams to close
-			this._streams.push(sStream);
 		}
 	}
 }
@@ -1087,73 +1146,90 @@ Scholar.Translate.prototype._initializeInternalIO = function() {
 			// make an instance of the RDF handler
 			this._sandbox.Scholar.RDF = new Scholar.Translate.RDF(dataSource);
 		} else {
-			// create a storage stream
-			var storageStream = Components.classes["@mozilla.org/storagestream;1"].
-			              createInstance(Components.interfaces.nsIStorageStream);
-			storageStream.init(4096, 4294967295, null);	// virtually no size limit
+			this._createStorageStream();
+			this._storageStreamFunctions(true, true);
+		}
+	}
+}
+
+/*
+ * creates and returns storage stream
+ */
+Scholar.Translate.prototype._createStorageStream = function() {
+	// create a storage stream
+	this._storageStream = Components.classes["@mozilla.org/storagestream;1"].
+				  createInstance(Components.interfaces.nsIStorageStream);
+	this._storageStream.init(4096, 4294967295, null);	// virtually no size limit
+}
+
+/*
+ * sets up functions for reading/writing to a storage stream
+ */
+Scholar.Translate.prototype._storageStreamFunctions =  function(read, write) {
+	var me = this;
+	if(write) {
+		// set up write() method
+		var fStream = _storageStream.getOutputStream(0);
+		this._sandbox.Scholar.write = function(data) { fStream.write(data, data.length) };		
+		
+		// set Scholar.eof() to close the storage stream
+		this._sandbox.Scholar.eof = function() {
+			this._storageStream.QueryInterface(Components.interfaces.nsIOutputStream);
+			this._storageStream.close();
+		}
+	}
+	
+	if(read) {
+		// set up read methods
+		if(this._configOptions.dataMode == "line") {	// line by line reading
+			var lastCharacter;
 			
-			// set up write() method
-			var fStream = storageStream.getOutputStream(0);
-			this._sandbox.Scholar.write = function(data) { fStream.write(data, data.length) };
+			this._sandbox.Scholar.read = function() {
+				if(!me._scriptableStream) {	// allocate an fStream and sStream on the fly
+								                // otherwise with no data we get an error
+					me._scriptableStream = Components.classes["@mozilla.org/scriptableinputstream;1"].
+								             createInstance(Components.interfaces.nsIScriptableInputStream);
+					me._scriptableStream.init(me._storageStream.newInputStream(0));
 			
-			// set up read methods
-			var sStream;
-			var me = this;
-			if(this._configOptions.dataMode == "line") {	// line by line reading
-				var lastCharacter;
-				
-				this._sandbox.Scholar.read = function() {
-					if(!sStream) {	// allocate an fStream and sStream on the fly
-									// otherwise with no data we get an error
-						sStream = Components.classes["@mozilla.org/scriptableinputstream;1"]
-									 .createInstance(Components.interfaces.nsIScriptableInputStream);
-						sStream.init(fStream.newInputStream(0));
-				
-						// attach sStream to stack of streams to close
-						me._streams.push(sStream);
-					}
-				
-					var character = sStream.read(1);
-					if(!character) {
-						return false;
-					}
-					var string = "";
-					
-					if(lastCharacter == "\r" && character == "\n") {
-						// if the last read got a cr, and this first char was
-						// an lf, ignore the lf
-						character = "";
-					}
-					
-					while(character != "\n" && character != "\r" && character) {
-						string += character;
-						character = sStream.read(1);
-					}
-					
-					lastCharacter = character;
-					
-					return string;
+					// attach sStream to stack of streams to close
+					me._streams.push(me._scriptableStream);
 				}
-			} else {									// block reading
-				this._sandbox.Scholar.read = function(amount) {
-					if(!sStream) {	// allocate an fStream and sStream on the fly
-									// otherwise with no data we get an error
-						sStream = Components.classes["@mozilla.org/scriptableinputstream;1"]
-									 .createInstance(Components.interfaces.nsIScriptableInputStream);
-						sStream.init(fStream.newInputStream(0));
-				
-						// attach sStream to stack of streams to close
-						me._streams.push(sStream);
-					}
-					
-					return sStream.read(amount);
+			
+				var character = me._scriptableStream.read(1);
+				if(!character) {
+					return false;
 				}
+				var string = "";
+				
+				if(lastCharacter == "\r" && character == "\n") {
+					// if the last read got a cr, and this first char was
+					// an lf, ignore the lf
+					character = "";
+				}
+				
+				while(character != "\n" && character != "\r" && character) {
+					string += character;
+					character = me._scriptableStream.read(1);
+				}
+				
+				lastCharacter = character;
+				
+				return string;
 			}
+		} else {								// block reading
+			this._sandbox.Scholar.read = function(amount) {
+				if(!me._scriptableStream) {	// allocate an fStream and
+										        // sStream on the fly; otherwise
+										        // with no data we get an error
+					me._scriptableStream = Components.classes["@mozilla.org/scriptableinputstream;1"].
+								             createInstance(Components.interfaces.nsIScriptableInputStream);
+					me._scriptableStream.init(me._storageStream.newInputStream(0));
 			
-			// set Scholar.eof() to close the storage stream
-			this._sandbox.Scholar.eof = function() {
-				storageStream.QueryInterface(Components.interfaces.nsIOutputStream);
-				storageStream.close();
+					// attach sStream to stack of streams to close
+					me._streams.push(me._scriptableStream);
+				}
+				
+				return me._scriptableStream.read(amount);
 			}
 		}
 	}

@@ -458,3 +458,154 @@ Scholar.OpenURL = new function() {
 		}
 	}
 }
+
+Scholar.Ingester.MIMEHandler = new function() {
+	var on = false;
+	
+	this.init = init;
+	
+	/*
+	 * registers URIContentListener to handle MIME types
+	 */
+	function init() {
+		if(!on && Scholar.Prefs.get("parseEndNoteMIMETypes")) {
+			var uriLoader = Components.classes["@mozilla.org/uriloader;1"].
+			                getService(Components.interfaces.nsIURILoader);
+			uriLoader.registerContentListener(Scholar.Ingester.MIMEHandler.URIContentListener);
+			on = true;
+		}
+	}
+}
+
+/*
+ * Scholar.Ingester.MIMEHandler.URIContentListener: implements
+ * nsIURIContentListener interface to grab MIME types
+ */
+Scholar.Ingester.MIMEHandler.URIContentListener = new function() {
+	var _desiredContentTypes = ["application/x-endnote-refer", "application/x-research-info-systems"];
+	
+	this.QueryInterface = QueryInterface;
+	this.canHandleContent = canHandleContent;
+	this.doContent = doContent;
+	this.isPreferred = isPreferred;
+	this.onStartURIOpen = onStartURIOpen;
+	
+	function QueryInterface(iid) {
+		if(iid.equals(Components.interfaces.nsISupports)
+		   || iid.equals(Components.interfaces.nsISupportsWeakReference)
+		   || iid.equals(Components.interfaces.nsIURIContentListener)) {
+			return this;
+		}
+		throw Components.results.NS_ERROR_NO_INTERFACE;
+	}
+	
+	function canHandleContent(contentType, isContentPreferred, desiredContentType) {
+		if(Scholar.inArray(contentType, _desiredContentTypes)) {
+			return true;
+		}
+		return false;
+	}
+	
+	function doContent(contentType, isContentPreferred, request, contentHandler) {
+		Scholar.debug("doing content for "+request.name);
+		contentHandler.value = new Scholar.Ingester.MIMEHandler.StreamListener(request, contentType);
+		return false;
+	}
+	
+	function isPreferred(contentType, desiredContentType) {
+		if(Scholar.inArray(contentType, _desiredContentTypes)) {
+			return true;
+		}
+		return false;
+	}
+	
+	function onStartURIOpen(URI) {
+		return true;
+	}
+}
+
+/*
+ * Scholar.Ingester.MIMEHandler.StreamListener: implements nsIStreamListener and
+ * nsIRequestObserver interfaces to download MIME types we've grabbed
+ */
+Scholar.Ingester.MIMEHandler.StreamListener = function(request, contentType) {
+	this._request = request;
+	this._contentType = contentType
+	this._readString = "";
+	this._scriptableStream = null;
+	this._scriptableStreamInput = null
+	
+	// get front window
+	var windowWatcher = Components.classes["@mozilla.org/embedcomp/window-watcher;1"].
+						getService(Components.interfaces.nsIWindowWatcher);
+	this._frontWindow = windowWatcher.activeWindow;
+	this._frontWindow.Scholar_Ingester_Interface.Progress.show();
+}
+
+Scholar.Ingester.MIMEHandler.StreamListener.prototype.QueryInterface = function(iid) {
+	if(iid.equals(Components.interfaces.nsISupports)
+	   || iid.equals(Components.interfaces.nsIRequestObserver)
+	   || iid.equals(Components.interfaces.nsIStreamListener)) {
+		return this;
+	}
+	throw Components.results.NS_ERROR_NO_INTERFACE;
+}
+
+Scholar.Ingester.MIMEHandler.StreamListener.prototype.onStartRequest = function(channel, context) {}
+
+/*
+ * called when there's data available; basicallly, we just want to collect this data
+ */
+Scholar.Ingester.MIMEHandler.StreamListener.prototype.onDataAvailable = function(request, context, inputStream, offset, count) {
+	Scholar.debug(count+" bytes available");
+	
+	if(inputStream != this._scriptableStreamInput) {	// get storage stream
+														// if there's not one
+		this._scriptableStream = Components.classes["@mozilla.org/scriptableinputstream;1"].
+					             createInstance(Components.interfaces.nsIScriptableInputStream);
+		this._scriptableStream.init(inputStream);
+		this._scriptableStreamInput = inputStream;
+	}
+	this._readString += this._scriptableStream.read(count);
+}
+
+/*
+ * called when the request is done
+ */
+Scholar.Ingester.MIMEHandler.StreamListener.prototype.onStopRequest = function(channel, context, status) {
+	Scholar.debug("request finished");
+	var externalHelperAppService = Components.classes["@mozilla.org/uriloader/external-helper-app-service;1"].
+	                               getService(Components.interfaces.nsIExternalHelperAppService);
+	
+	// attempt to import through Scholar.Translate
+	var translation = new Scholar.Translate("import");
+	translation.setLocation(this._request.name);
+	translation.setString(this._readString);
+	translation.setHandler("itemDone", this._frontWindow.Scholar_Ingester_Interface._itemDone);
+	translation.setHandler("done", this._frontWindow.Scholar_Ingester_Interface._finishScraping);
+	
+	// attempt to retrieve translators
+	var translators = translation.getTranslators();
+	if(!translators.length) {
+		// we lied. we can't really translate this file. call
+		// nsIExternalHelperAppService with the data
+		this._frontWindow.Scholar_Ingester_Interface.Progress.kill();
+
+		var streamListener;
+		if(streamListener = externalHelperAppService.doContent(this._contentType, this._request, this._frontWindow)) {
+			// create a string input stream
+			var inputStream = Components.classes["@mozilla.org/io/string-input-stream;1"].
+							  createInstance(Components.interfaces.nsIStringInputStream);
+			inputStream.setData(this._readString, this._readString.length);
+			
+			streamListener.onStartRequest(channel, context);
+			streamListener.onDataAvailable(this._request, context, inputStream, 0, this._readString.length);
+			streamListener.onStopRequest(channel, context, status);
+		}
+		return false;
+	}
+	
+	// translate using first available
+	translation.setTranslator(translators[0]);
+	translation.translate();
+}

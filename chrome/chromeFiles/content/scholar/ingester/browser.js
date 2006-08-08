@@ -27,6 +27,7 @@ Scholar_Ingester_Interface.init = function() {
 	Scholar_Ingester_Interface.browserData = new Object();
 	Scholar_Ingester_Interface._scrapePopupShowing = false;
 	Scholar.Ingester.ProxyMonitor.init();
+	Scholar.Ingester.MIMEHandler.init();
 	
 	window.addEventListener("load", Scholar_Ingester_Interface.chromeLoad, false);
 	window.addEventListener("unload", Scholar_Ingester_Interface.chromeUnload, false);

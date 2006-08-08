@@ -5,3 +5,4 @@ pref("extensions.scholar.automaticScraperUpdates",true);
 pref("extensions.scholar.scholarPaneOnTop",false);
 pref("extensions.scholar.openURL.resolver","http://athene.gmu.edu:8888/lfp/LinkFinderPlus/Display");
 pref("extensions.scholar.openURL.version","0.1");
+pref("extensions.scholar.parseEndNoteMIMETypes",true);
