@@ -23,8 +23,7 @@ Scholar_File_Interface = new function() {
 		if (rv == nsIFilePicker.returnOK || rv == nsIFilePicker.returnReplace) {
 			translation.setLocation(fp.file);
 			translation.setTranslator(translators[fp.filterIndex]);
-			//translation.setHandler("itemCount", _exportItemCount);
-			//translation.setHandler("itemDone", _exportItemDone);
+			translation.setHandler("options", _exportOptions);
 			translation.setHandler("done", _exportDone);
 			_disableUnresponsive();
 			Scholar_File_Interface.Progress.show(
@@ -36,18 +35,19 @@ Scholar_File_Interface = new function() {
 	}
 	
 	/*
-	 * set progress indicator length
+	 * closes items exported indicator
 	 */
-	function _exportItemCount(obj, number) {
-		Scholar.debug("count called with "+number);
-		Scholar_File_Interface.Progress.setNumber(number);
-	}
-	
-	/*
-	 * Increment progress for each item exported
-	 */
-	function _exportItemDone(obj, item) {
-		Scholar_File_Interface.Progress.increment();
+	function _exportOptions(obj, options) {
+		var io = {options:options}
+		window.openDialog("chrome://scholar/content/exportOptions.xul",
+			"_blank","chrome,modal,centerscreen", io);
+		if(io.options) {
+			// refocus dialog
+			Scholar_File_Interface.Progress.show();
+			return options;
+		} else {
+			return false;
+		}
 	}
 	
 	/*
@@ -57,7 +57,6 @@ Scholar_File_Interface = new function() {
 		Scholar_File_Interface.Progress.close();
 		_restoreUnresponsive();
 	}
-	
 	
 	/*
 	 * Creates Scholar.Translate instance and shows file picker for file import
@@ -105,7 +104,6 @@ Scholar_File_Interface = new function() {
 	 * "items imported" indicator, too.
 	 */
 	function _importItemDone(obj, item) {
-		//Scholar_File_Interface.Progress.increment();
 		_importCollection.addItem(item.getID());
 	}
 	
@@ -256,12 +254,11 @@ Scholar_File_Interface.Progress = new function() {
 	var _loadHeadline, _loadNumber, _outOf, _callback;
 	
 	this.show = show;
-	//this.setNumber = setNumber;
-	//this.increment = increment;
 	this.close = close;
 	
 	function show(headline, callback) {
 		if(_windowLoading || _windowLoaded) {	// already loading or loaded
+			_progressWindow.focus();
 			return false;
 		}
 		_windowLoading = true;
@@ -275,26 +272,6 @@ Scholar_File_Interface.Progress = new function() {
 		_progressWindow.addEventListener("pageshow", _onWindowLoaded, false);
 	}
 	
-	/*function setNumber(number) {
-		_outOf = number;
-		if(_windowLoaded) {
-			var progressMeter = _progressWindow.document.getElementById("progress-indicator");
-			progressMeter.mode = "normal";
-			progressMeter.value = "0%";
-		}
-	}
-	
-	function increment() {
-		_loadNumber++;
-		if(_windowLoaded) {
-			_progressWindow.document.getElementById("progress-items").value = _loadNumber;
-			if(_outOf) {
-				_progressWindow.document.getElementById("progress-indicator").value = ((_loadNumber/_outOf)*100).toString()+"%";
-			}
-			_progressWindow.getSelection();
-		}
-	}*/
-	
 	function close() {
 		_windowLoaded = false;
 		try {
@@ -307,12 +284,6 @@ Scholar_File_Interface.Progress = new function() {
 		_windowLoaded = true;
 		
 		// do things we delayed because the winodw was loading
-		/*if(_outOf) {
-			var progressMeter = _progressWindow.document.getElementById("progress-indicator");
-			progressMeter.mode = "normal";
-			progressMeter.value = ((_loadNumber/_outOf)*100).toString()+"%";
-		}
-		_progressWindow.document.getElementById("progress-items").value = _loadNumber;*/
 		_progressWindow.document.getElementById("progress-label").value = _loadHeadline;
 		
 		if(_callback) {

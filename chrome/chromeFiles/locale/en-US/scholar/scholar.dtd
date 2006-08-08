@@ -52,3 +52,5 @@
 <!ENTITY bibliography.print.label		"Print">
 
 <!ENTITY progress.title					"Progress">
+
+<!ENTITY exportOptions.title            "Export...">

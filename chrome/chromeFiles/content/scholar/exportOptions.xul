@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<!DOCTYPE window SYSTEM "chrome://scholar/locale/scholar.dtd">
+<dialog xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	title="&exportOptions.title;" buttons="cancel,accept"
+	ondialogaccept="Scholar_File_Interface_Export.accept()"
+	ondialogcancel="Scholar_File_Interface_Export.cancel()"
+	id="scholar-export-options"
+	onload="Scholar_File_Interface_Export.init()">
+
+<script src="include.js"/>
+<script src="exportOptions.js"/>
+
+</dialog>

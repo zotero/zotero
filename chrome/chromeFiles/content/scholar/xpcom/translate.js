@@ -216,6 +216,12 @@ Scholar.Translate.prototype.setTranslator = function(translator) {
  * as the first argument, all handlers will be passed the current function. the
  * second argument is dependent on the handler.
  * 
+ * options
+ *   valid: export
+ *   called: when options requiring user interaction are available
+ *   passed: an associative array of options and default values
+ *   returns: an associative array of options
+ *
  * select
  *   valid: web
  *   called: when the user needs to select from a list of available items
@@ -291,13 +297,10 @@ Scholar.Translate.prototype.getTranslators = function() {
 }
 
 /*
- * gets translator options to be displayed in a dialog
- *
- * NOT IMPLEMENTED
+ * finds applicable translators from a list. if the second argument is given,
+ * extension-based exclusion is inverted, so that only detectCode is used to
+ * determine if a translator can be run.
  */
-Scholar.Translate.prototype.displayOptions = function() {
-}
-
 Scholar.Translate.prototype._findTranslators = function(translators, ignoreExtensions) {
 	var possibleTranslators = new Array();
 	for(var i in translators) {
@@ -323,6 +326,9 @@ Scholar.Translate.prototype._findTranslators = function(translators, ignoreExten
 	return possibleTranslators;
 }
 
+/*
+ * loads a translator into a sandbox
+ */
 Scholar.Translate.prototype._loadTranslator = function() {
 	if(!this._sandbox || this.type == "search") {
 		// create a new sandbox if none exists, or for searching (so that it's
@@ -367,7 +373,16 @@ Scholar.Translate.prototype.translate = function() {
 		return;
 	}
 	
-	this._sandbox.Scholar.scraperName = this.translator[0].label;
+	
+	// hack to see if there are any options, bc length does not work on objects
+	for(var i in this._displayOptions) {
+		// run handler for options if there are any
+		if(!(this._displayOptions = this._runHandler("options", this._displayOptions))) {
+			this._translationComplete(true);
+			return false;
+		}
+		break;
+	}
 	
 	var returnValue;
 	if(this.type == "web") {
@@ -461,6 +476,8 @@ Scholar.Translate.prototype._generateSandbox = function() {
 	this._sandbox.Scholar.configure = function(option, value) {me._configure(option, value) };
 	// for adding displayed options
 	this._sandbox.Scholar.addOption = function(option, value) {me._addOption(option, value) };
+	// for getting the value of displayed options
+	this._sandbox.Scholar.getOption = function(option) { return me._getOption(option) };
 	
 	// for loading other translators and accessing their methods
 	this._sandbox.Scholar.loadTranslator = function(type, translatorID) {
@@ -488,6 +505,7 @@ Scholar.Translate.prototype._generateSandbox = function() {
 			safeTranslator.setItem = function(arg) { return translation.setItem(arg) };
 			safeTranslator.setBrowser = function(arg) { return translation.setBrowser(arg) };
 			safeTranslator.setHandler = function(arg1, arg2) { translation.setHandler(arg1, arg2) };
+			safeTranslator.setString = function(arg) { translation.setString(arg) };
 			safeTranslator.setTranslator = function(arg) { return translation.setTranslator(arg) };
 			safeTranslator.getTranslators = function() { return translation.getTranslators() };
 			safeTranslator.translate = function() { return translation.translate() };
@@ -521,6 +539,11 @@ Scholar.Translate.prototype._canTranslate = function(translator, ignoreExtension
 			// if we're ignoring extensions, that means we already tried
 			// everything without ignoring extensions and it didn't work
 			canTranslate = !canTranslate;
+			
+			// if a translator has no detectCode, don't offer it as an option
+			if(!translator.detectCode) {
+				return false;
+			}
 		}
 	} else {
 		var canTranslate = true;
@@ -628,6 +651,16 @@ Scholar.Translate.prototype._configure = function(option, value) {
 Scholar.Translate.prototype._addOption = function(option, value) {
 	this._displayOptions[option] = value;
 	Scholar.debug("setting display option "+option+" to "+value);
+}
+
+/*
+ * gets translator options that were displayed in a dialog
+ *
+ * called as getOption() in detect code
+ *
+ */
+Scholar.Translate.prototype._getOption = function(option) {
+	return this._displayOptions[option];
 }
 
 /*

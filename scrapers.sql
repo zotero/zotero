@@ -1,4 +1,4 @@
--- 40
+-- 41
 
 -- Set the following timestamp to the most recent scraper update date
 REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-08-08 17:12:00'));
@@ -2738,7 +2738,6 @@ function doSearch(item) {
 
 REPLACE INTO "translators" VALUES ('0e2235e7-babf-413c-9acf-f27cce5f059c', '2006-07-05 23:40:00', 3, 'MODS (XML)', 'Simon Kornblith', 'xml',
 'Scholar.addOption("exportNotes", true);
-Scholar.addOption("exportFileData", true);
 
 function detectImport() {
 	var read = Scholar.read(512);
@@ -3003,10 +3002,12 @@ function doExport() {
 		
 		/** NOTES **/
 		
-		for(var j in item.notes) {
-			// Add note tag
-			var note = <note type="content">{item.notes[j].note}</note>;
-			mods.note += note;
+		if(Scholar.getOption("exportNotes")) {
+			for(var j in item.notes) {
+				// Add note tag
+				var note = <note type="content">{item.notes[j].note}</note>;
+				mods.note += note;
+			}
 		}
 		
 		/** TAGS **/
@@ -3335,6 +3336,9 @@ function doExport() {
 			type = "Document";
 		} else if(item.itemType == "note") {
 			type = "Memo";
+			if(!Scholar.getOption("exportNotes")) {
+				continue;
+			}
 		}
 		if(type) {
 			Scholar.RDF.addStatement(resource, rdf+"type", n.bib+type, false);
@@ -3530,22 +3534,24 @@ function doExport() {
 		
 		/** NOTES **/
 		
-		for(var j in item.notes) {
-			var noteResource = itemResources[item.notes[j].itemID];
+		if(Scholar.getOption("exportNotes")) {
+			for(var j in item.notes) {
+				var noteResource = itemResources[item.notes[j].itemID];
+				
+				// add note tag
+				Scholar.RDF.addStatement(noteResource, rdf+"type", n.bib+"Memo", false);
+				// add note value
+				Scholar.RDF.addStatement(noteResource, rdf+"value", item.notes[j].note, true);
+				// add relationship between resource and note
+				Scholar.RDF.addStatement(resource, n.dcterms+"isReferencedBy", noteResource, false);
+				
+				// Add see also info to RDF
+				generateSeeAlso(resource, item.notes[j].seeAlso);
+			}
 			
-			// add note tag
-			Scholar.RDF.addStatement(noteResource, rdf+"type", n.bib+"Memo", false);
-			// add note value
-			Scholar.RDF.addStatement(noteResource, rdf+"value", item.notes[j].note, true);
-			// add relationship between resource and note
-			Scholar.RDF.addStatement(resource, n.dcterms+"isReferencedBy", noteResource, false);
-			
-			// Add see also info to RDF
-			generateSeeAlso(resource, item.notes[j].seeAlso);
-		}
-		
-		if(item.note) {
-			Scholar.RDF.addStatement(resource, rdf+"value", item.note, true);
+			if(item.note) {
+				Scholar.RDF.addStatement(resource, rdf+"value", item.note, true);
+			}
 		}
 		
 		/** TAGS **/
@@ -4326,8 +4332,10 @@ function doExport() {
 		}
 		
 		// notes
-		for(var j in item.notes) {
-			addTag("N1", item.notes[j].note);
+		if(Scholar.getOption("exportNotes")) {
+			for(var j in item.notes) {
+				addTag("N1", item.notes[j].note.replace(/[\r\n]/g, " "));
+			}
 		}
 		
 		// tags
