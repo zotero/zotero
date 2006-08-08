@@ -273,7 +273,9 @@ Scholar.Search.prototype._buildQuery = function(){
 		
 		for (i in tables){
 			for (var j in tables[i]){
+				//
 				// Special table handling
+				//
 				switch (i){
 					case 'items':
 						break;
@@ -282,10 +284,28 @@ Scholar.Search.prototype._buildQuery = function(){
 						var openParens = 2;
 				}
 				
+				
+				//
+				// Special field handling
+				//
+				
 				// For itemData fields, include fieldID
-				if (tables[i][j]['name']=='field'){
-					sql += 'fieldID=? AND ';
-					sqlParams.push(Scholar.ItemFields.getID(tables[i][j]['alias']));
+				switch (tables[i][j]['name']){
+					case 'field':
+						sql += 'fieldID=? AND ';
+						sqlParams.push(
+							Scholar.ItemFields.getID(tables[i][j]['alias'])
+						);
+						break;
+					case 'tag':
+						sql += "tagID IN (SELECT tagID FROM tags WHERE ";
+						openParens++;
+						break;
+					case 'creator':
+						sql += "creatorID IN (SELECT creatorID FROM creators "
+							+ "WHERE ";
+						openParens++;
+						break;
 				}
 				
 				sql += tables[i][j]['field'];
@@ -484,6 +504,50 @@ Scholar.SearchConditions = new function(){
 				},
 				table: 'items',
 				field: 'itemTypeID'
+			},
+			
+			{
+				name: 'tagID',
+				operators: {
+					is: true,
+					isNot: true
+				},
+				table: 'itemTags',
+				field: 'tagID'
+			},
+			
+			{
+				name: 'tag',
+				operators: {
+					is: true,
+					isNot: true,
+					contains: true,
+					doesNotContain: true
+				},
+				table: 'itemTags',
+				field: 'tag'
+			},
+			
+			{
+				name: 'note',
+				operators: {
+					contains: true,
+					doesNotContain: true
+				},
+				table: 'itemNotes',
+				field: 'note'
+			},
+			
+			{
+				name: 'creator',
+				operators: {
+					is: true,
+					isNot: true,
+					contains: true,
+					doesNotContain: true
+				},
+				table: 'itemCreators',
+				field: "firstName || ' ' || lastName"
 			},
 			
 			{
