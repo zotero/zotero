@@ -1,4 +1,4 @@
--- 34
+-- 35
 
     DROP TABLE IF EXISTS version;
     CREATE TABLE version (
@@ -90,8 +90,8 @@
     
     DROP TABLE IF EXISTS fileTypeMimeTypes;
     CREATE TABLE fileTypeMimeTypes (
-        fileTypeID,
-        mimeType,
+        fileTypeID INT,
+        mimeType TEXT,
         PRIMARY KEY (fileTypeID, mimeType),
         FOREIGN KEY (fileTypeID) REFERENCES fileTypes(fileTypeID)
     );
@@ -421,6 +421,52 @@
     INSERT INTO "itemTypeFields" VALUES(13, 27, 3);
     INSERT INTO "itemTypeFields" VALUES(13, 28, 2);
     
+    INSERT INTO "fileTypes" VALUES(1, 'webpage');
+    INSERT INTO "fileTypes" VALUES(2, 'image');
+    INSERT INTO "fileTypes" VALUES(3, 'pdf');
+    INSERT INTO "fileTypes" VALUES(4, 'audio');
+    INSERT INTO "fileTypes" VALUES(5, 'video');
+    INSERT INTO "fileTypes" VALUES(6, 'document');
+    INSERT INTO "fileTypes" VALUES(7, 'presentation');
+    
+    -- webpage
+    INSERT INTO "fileTypeMIMETypes" VALUES(1, 'text/html');
+    -- image
+    INSERT INTO "fileTypeMIMETypes" VALUES(2, 'image/');
+    INSERT INTO "fileTypeMIMETypes" VALUES(2, 'application/vnd.oasis.opendocument.graphics');
+    INSERT INTO "fileTypeMIMETypes" VALUES(2, 'application/vnd.oasis.opendocument.image');
+    -- pdf
+    INSERT INTO "fileTypeMIMETypes" VALUES(3, 'application/pdf');
+    -- audio
+    INSERT INTO "fileTypeMIMETypes" VALUES(4, 'audio/');
+    INSERT INTO "fileTypeMIMETypes" VALUES(4, 'x-pn-realaudio');
+    INSERT INTO "fileTypeMIMETypes" VALUES(4, 'application/ogg');
+    INSERT INTO "fileTypeMIMETypes" VALUES(4, 'application/x-killustrator');
+    -- video
+    INSERT INTO "fileTypeMIMETypes" VALUES(5, 'video/');
+    INSERT INTO "fileTypeMIMETypes" VALUES(5, 'application/x-shockwave-flash');
+    -- document
+    INSERT INTO "fileTypeMIMETypes" VALUES(6, 'text/plain');
+    INSERT INTO "fileTypeMIMETypes" VALUES(6, 'application/rtf');
+    INSERT INTO "fileTypeMIMETypes" VALUES(6, 'application/msword');
+    INSERT INTO "fileTypeMIMETypes" VALUES(6, 'text/xml');
+    INSERT INTO "fileTypeMIMETypes" VALUES(6, 'application/postscript');
+    INSERT INTO "fileTypeMIMETypes" VALUES(6, 'application/wordperfect5.1');
+    INSERT INTO "fileTypeMIMETypes" VALUES(6, 'application/x-latex');
+    INSERT INTO "fileTypeMIMETypes" VALUES(6, 'application/x-tex');
+    INSERT INTO "fileTypeMIMETypes" VALUES(6, 'application/x-kword');
+    INSERT INTO "fileTypeMIMETypes" VALUES(6, 'application/x-kspread');
+    INSERT INTO "fileTypeMIMETypes" VALUES(6, 'application/x-kchart');
+    INSERT INTO "fileTypeMIMETypes" VALUES(6, 'application/vnd.oasis.opendocument.chart');
+    INSERT INTO "fileTypeMIMETypes" VALUES(6, 'application/vnd.oasis.opendocument.database');
+    INSERT INTO "fileTypeMIMETypes" VALUES(6, 'application/vnd.oasis.opendocument.formula');
+    INSERT INTO "fileTypeMIMETypes" VALUES(6, 'application/vnd.oasis.opendocument.spreadsheet');
+    INSERT INTO "fileTypeMIMETypes" VALUES(6, 'application/vnd.oasis.opendocument.text');
+    -- presentation
+    INSERT INTO "fileTypeMIMETypes" VALUES(7, 'application/powerpoint');
+    INSERT INTO "fileTypeMIMETypes" VALUES(7, 'application/vnd.oasis.opendocument.presentation');
+    INSERT INTO "fileTypeMIMETypes" VALUES(7, 'application/x-kpresenter');
+    
     INSERT INTO "charsets" VALUES(1, 'utf-8');
     INSERT INTO "charsets" VALUES(2, 'ascii');
     INSERT INTO "charsets" VALUES(3, 'windows-1250');
@@ -659,15 +705,6 @@
     
     INSERT INTO "itemNotes" VALUES(16, 1, 'This item is note-worthy.');
     INSERT INTO "itemNotes" VALUES(17, NULL, 'This is an independent note.');
-    
-    INSERT INTO "fileTypes" VALUES(1, 'link');
-    INSERT INTO "fileTypes" VALUES(2, 'snapshot');
-    INSERT INTO "fileTypes" VALUES(3, 'image');
-    INSERT INTO "fileTypes" VALUES(4, 'pdf');
-    INSERT INTO "fileTypes" VALUES(5, 'audio');
-    INSERT INTO "fileTypes" VALUES(6, 'video');
-    INSERT INTO "fileTypes" VALUES(7, 'document');
-    INSERT INTO "fileTypes" VALUES(8, 'presentation');
     
     INSERT INTO collections VALUES (1241, 'Test Project', NULL);
     INSERT INTO collections VALUES (3262, 'Another Test Project', NULL);

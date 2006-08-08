@@ -2999,7 +2999,10 @@ Scholar.FileTypes = new function(){
 	this.getIDFromMIMEType = getIDFromMIMEType;
 	
 	function getIDFromMIMEType(mimeType){
-		// TODO
+		var sql = "SELECT fileTypeID FROM fileTypeMIMETypes "
+			+ "WHERE ? LIKE mimeType || '%'";
+			
+		return Scholar.DB.valueQuery(sql, [mimeType]);
 	}
 }
 
