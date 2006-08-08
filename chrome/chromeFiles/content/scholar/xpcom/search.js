@@ -47,6 +47,7 @@ Scholar.Search.prototype.load = function(savedSearchID){
 	
 	for (var i in conditions){
 		this._conditions[conditions[i]['searchConditionID']] = {
+			id: conditions[i]['searchConditionID'],
 			condition: conditions[i]['condition'],
 			operator: conditions[i]['operator'],
 			value: conditions[i]['value']
@@ -111,6 +112,7 @@ Scholar.Search.prototype.addCondition = function(condition, operator, value){
 	var searchConditionID = this._maxSearchConditionID++;
 	
 	this._conditions[searchConditionID] = {
+		id: searchConditionID,
 		condition: condition,
 		operator: operator,
 		value: value
@@ -132,6 +134,7 @@ Scholar.Search.prototype.updateCondition = function(searchConditionID, condition
 	}
 	
 	this._conditions[searchConditionID] = {
+		id: searchConditionID,
 		condition: condition,
 		operator: operator,
 		value: value
@@ -152,6 +155,7 @@ Scholar.Search.prototype.removeCondition = function(searchConditionID){
 	var i = searchConditionID + 1;
 	while (typeof this._conditions[i] != 'undefined'){
 		this._conditions[i-1] = this._conditions[i];
+		this._conditions[i-1]['id']--;
 		delete this._conditions[i];
 		i++;
 	}
