@@ -1955,7 +1955,7 @@ Scholar.Files = new function(){
 		var browser = Scholar.Browser.createHiddenBrowser();
 		browser.addEventListener("load", function(){
 			Scholar.Files.importFromDocument(browser.contentDocument, sourceItemID);
-			browser.removeEventListener("load", arguments.callee, true);
+			browser.removeEventListener("pageshow", arguments.callee, true);
 			Scholar.Browser.deleteHiddenBrowser(browser);
 		}, true);
 		browser.loadURI(url, null, null, null, null);
@@ -1966,7 +1966,7 @@ Scholar.Files = new function(){
 		var browser = Scholar.Browser.createHiddenBrowser();
 		browser.addEventListener("load", function(){
 			Scholar.Files.linkFromDocument(browser.contentDocument, sourceItemID);
-			browser.removeEventListener("load", arguments.callee, true);
+			browser.removeEventListener("pageshow", arguments.callee, true);
 			Scholar.Browser.deleteHiddenBrowser(browser);
 		}, true);
 		browser.loadURI(url, null, null, null, null);
