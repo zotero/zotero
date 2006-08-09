@@ -1962,7 +1962,19 @@ Scholar.Files = new function(){
 	}
 	
 	
-	function linkFromURL(url, sourceItemID){
+	function linkFromURL(url, sourceItemID, title, mimeType){
+		// If we're given the title and mime type, don't bother fetching the page
+		if (title && mimeType){
+			_addToDB(null, url, title, this.LINK_MODE_LINKED_URL, mimeType, null, sourceItemID);
+			return;
+		}
+		
+		// TODO: try to get title and content type without fetching the whole page
+		// 		- https://chnm.gmu.edu/trac/scholar/ticket/173
+		// (or, failing that, at least check the file size and don't load huge files)
+		//
+		// DEBUG: don't load images and other attached files
+		// 		- https://chnm.gmu.edu/trac/scholar/ticket/174
 		var browser = Scholar.Browser.createHiddenBrowser();
 		browser.addEventListener("pageshow", function(){
 			Scholar.Files.linkFromDocument(browser.contentDocument, sourceItemID);
