@@ -1969,26 +1969,24 @@ Scholar.Files = new function(){
 	}
 	
 	
-	function linkFromURL(url, sourceItemID, title, mimeType){
-		// If we're given the title and mime type, don't bother fetching the page
+	function linkFromURL(url, sourceItemID, mimeType, title){
+		// If no title provided, figure it out from the URL
+		if (!title){
+			title = url.substring(url.lastIndexOf('/')+1);
+		}
+		
+		// If we have the title and mime type, skip loading
 		if (title && mimeType){
-			_addToDB(null, url, title, this.LINK_MODE_LINKED_URL, mimeType, null, sourceItemID);
+			_addToDB(null, url, title, this.LINK_MODE_LINKED_URL, mimeType,
+				null, sourceItemID);
 			return;
 		}
 		
-		// TODO: try to get title and content type without fetching the whole page
-		// 		- https://chnm.gmu.edu/trac/scholar/ticket/173
-		// (or, failing that, at least check the file size and don't load huge files)
-		//
-		// DEBUG: don't load images and other attached files
-		// 		- https://chnm.gmu.edu/trac/scholar/ticket/174
-		var browser = Scholar.Browser.createHiddenBrowser();
-		browser.addEventListener("pageshow", function(){
-			Scholar.Files.linkFromDocument(browser.contentDocument, sourceItemID);
-			browser.removeEventListener("pageshow", arguments.callee, true);
-			Scholar.Browser.deleteHiddenBrowser(browser);
-		}, true);
-		browser.loadURI(url, null, null, null, null);
+		// Otherwise do a head request for the mime type
+		Scholar.Utilities.HTTP.doHead(url, function(obj){
+			_addToDB(null, url, title, Scholar.Files.LINK_MODE_LINKED_URL,
+				obj.channel.contentType, null, sourceItemID);
+		});
 	}
 	
 	

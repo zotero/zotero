@@ -375,8 +375,10 @@ Scholar.Utilities.Ingester.HTTPUtilities.prototype.doOptions = function(url, onS
 Scholar.Utilities.HTTP = new function() {
 	this.doGet = doGet;
 	this.doPost = doPost;
+	this.doHead = doHead;
 	this.doOptions = doOptions;
 	this.browserIsOffline = browserIsOffline;
+	
 	
 	/**
 	* Send an HTTP GET request via XMLHTTPRequest
@@ -439,6 +441,27 @@ Scholar.Utilities.HTTP = new function() {
 		};
 		
 		xmlhttp.send(body);
+		
+		return true;
+	}
+	
+	
+	function doHead(url, callback1, callback2) {
+		Scholar.debug("HTTP HEAD "+url);
+		if (this.browserIsOffline()){
+			return false;
+		}
+		
+		var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
+						.createInstance();
+		
+		var test = xmlhttp.open('HEAD', url, true);
+		
+		xmlhttp.onreadystatechange = function(){
+			_stateChange(xmlhttp, callback1, callback2);
+		};
+		
+		xmlhttp.send(null);
 		
 		return true;
 	}
