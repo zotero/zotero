@@ -29,6 +29,8 @@ Scholar.Item.prototype._init = function(){
 	
 	this._noteData = null;
 	this._noteDataAccessTime = null;
+	
+	this._fileLinkMode = null;
 }
 
 
@@ -1124,8 +1126,13 @@ Scholar.Item.prototype.getFileLinkMode = function(){
 		throw ("getFileLinkMode() can only be called on items of type 'file'");
 	}
 	
+	if (this._fileLinkMode!==null){
+		return this._fileLinkMode;
+	}
+	
 	var sql = "SELECT linkMode FROM itemFiles WHERE itemID=" + this.getID();
-	return Scholar.DB.valueQuery(sql);
+	this._fileLinkMode = Scholar.DB.valueQuery(sql);
+	return this._fileLinkMode;
 }
 
 
