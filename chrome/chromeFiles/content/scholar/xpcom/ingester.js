@@ -197,7 +197,7 @@ Scholar.OpenURL = new function() {
 				continue;
 			}
 			
-			resolverArray[name] = [url, version];
+			resolverArray.push({name:name, url:url, version:version});
 		}
 		
 		return resolverArray;
