@@ -186,7 +186,6 @@ var ScholarPane = new function()
 			itemsView.unregister();
 		
 		document.getElementById('tb-search').value = "";
-		document.getElementById('scholar-search-options').hidden = true;
 		
 		if(collectionsView.selection.count == 1 && collectionsView.selection.currentIndex != -1)
 		{
@@ -313,10 +312,6 @@ var ScholarPane = new function()
 			searchVal = document.getElementById('tb-search').value;
 			itemsView.searchText(searchVal);
 			
-			//do something about granularity
-			//document.getElementById('scholar-search-options').getElementsByAttribute('checked','true')[0].label
-			
-			document.getElementById('scholar-search-options').hidden = searchVal == "";
 			document.getElementById('tb-search-cancel').hidden = searchVal == "";
 		}
 		

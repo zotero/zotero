@@ -31,16 +31,37 @@
 
 <dialogheader id="header" title="&scholar.name;" description="&scholar.preferences.title;"/>
 
-<checkbox id="autoUpdateBox" label="&scholar.preferences.autoUpdate.label;"/>
-
-<hbox>
-	<label value="Display Scholar:" control="positionMenu"/>
+<hbox align="center">
+	<label value="&scholar.preferences.position.label;" control="positionMenu"/>
 	<menulist id="positionMenu">
 		<menupopup>
-			<menuitem label="Above browser content"/>
-			<menuitem label="Below browser content"/>
+			<menuitem label="&scholar.preferences.position.above;"/>
+			<menuitem label="&scholar.preferences.position.below;"/>
 		</menupopup>
 	</menulist>
+	<label value="&scholar.preferences.position.browser;"/>
 </hbox>
+
+<checkbox id="autoUpdateBox" label="&scholar.preferences.autoUpdate.label;"/>
+
+<checkbox id="parseEndnoteBox" label="&scholar.preferences.parseEndnote.label;"/>
+
+<groupbox>
+	<caption label="&scholar.preferences.openurl.caption;"/>
+	<hbox align="center">
+		<label value="&scholar.preferences.openurl.server;"/>
+		<textbox id="openURLServerField" flex="1"/>
+	</hbox>
+
+	<hbox align="center">
+		<label value="&scholar.preferences.openurl.version;"/>
+		<menulist id="openURLVersionMenu">
+			<menupopup>
+				<menuitem label="0.1" value="0.1"/>
+				<menuitem label="1.0" value="1.0"/>
+			</menupopup>
+		</menulist>
+	</hbox>
+</groupbox>
 
 </dialog>

@@ -29,6 +29,7 @@
 <!ENTITY toolbar.createBibCollection.label   "Create Bibliography From Project...">
 <!ENTITY toolbar.search.label   			"Search:">
 <!ENTITY toolbar.fullscreen.tooltip		"Toggle Fullscreen Mode">
+<!ENTITY toolbar.openurl.label    		"Find in your library's catalog">
 
 <!ENTITY item.add						"Add">
 

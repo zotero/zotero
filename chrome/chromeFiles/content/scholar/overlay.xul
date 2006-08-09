@@ -103,10 +103,10 @@
 					</toolbarbutton>
 					<toolbarbutton id="tb-file-add" type="menu" tooltiptext="&toolbar.file.standalone;">
 						<menupopup>
-							<menuitem label="&toolbar.file.add;" oncommand="ScholarPane.addFileFromDialog();"/>
 							<menuitem label="&toolbar.file.linked;" oncommand="ScholarPane.addFileFromDialog(true);"/>
-							<menuitem label="&toolbar.file.snapshot;" oncommand="ScholarPane.addFileFromPage();"/>
+							<menuitem label="&toolbar.file.add;" oncommand="ScholarPane.addFileFromDialog();"/>
 							<menuitem label="&toolbar.file.weblink;" oncommand="ScholarPane.addFileFromPage(true);"/>
+							<menuitem label="&toolbar.file.snapshot;" oncommand="ScholarPane.addFileFromPage();"/>
 						</menupopup>
 					</toolbarbutton>
 					<toolbarbutton id="tb-note-add" tooltiptext="&toolbar.note.standalone;" oncommand="ScholarPane.newNote();"/>
@@ -116,17 +116,6 @@
 						<toolbarbutton id="tb-search-cancel" oncommand="this.parentNode.value='';" hidden="true"/>
 					</textbox>
 				</toolbar>
-				<hbox id="scholar-search-options" hidden="true">
-					<hbox>
-						<toolbarbutton type="checkbox" label="Entire Item" checked="true" onclick="var b = this.parentNode.getElementsByAttribute('checked','true'); b[0].checked = false;" command="cmd_scholar_search"/>
-						<toolbarbutton type="checkbox" label="Info" onclick="var b = this.parentNode.getElementsByAttribute('checked','true'); b[0].checked = false;" command="cmd_scholar_search"/>
-						<toolbarbutton type="checkbox" label="Notes" onclick="var b = this.parentNode.getElementsByAttribute('checked','true'); b[0].checked = false;" command="cmd_scholar_search"/>
-						<toolbarbutton type="checkbox" label="Files" onclick="var b = this.parentNode.getElementsByAttribute('checked','true'); b[0].checked = false;" command="cmd_scholar_search"/>
-					</hbox>
-					<spacer flex="1"/>
-					<toolbarbutton label="Save"/>
-					<toolbarbutton label="+"/>
-				</hbox>
 				<tree 
 					id="items-tree" context="scholar-itemmenu"
 					ondblclick="ScholarPane.onDoubleClick(event, this);"

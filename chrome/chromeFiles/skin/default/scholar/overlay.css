@@ -148,6 +148,11 @@
 	list-style-image: url('chrome://scholar/skin/search-cancel-active.png');
 }
 
+#tb-openurl
+{
+	list-style-image: url('chrome://scholar/skin/toolbar-openurl.png');
+}
+
 #scholar-view-item vbox
 {
 	overflow: auto;

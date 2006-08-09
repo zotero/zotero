@@ -20,6 +20,9 @@
 
 var autoUpdateBox;
 var positionMenu;
+var parseEndnoteBox;
+var openURLServerField;
+var openURLVersionMenu;
 
 /*
 	To add a new preference:
@@ -41,11 +44,26 @@ function init()
 	
 	positionMenu = document.getElementById('positionMenu');
 	positionMenu.selectedIndex = Scholar.Prefs.get('scholarPaneOnTop') ? 0 : 1;
-
+	
+	parseEndnoteBox = document.getElementById('parseEndnoteBox');
+	parseEndnoteBox.checked = Scholar.Prefs.get('parseEndNoteMIMETypes');
+	
+	openURLServerField = document.getElementById('openURLServerField');
+	openURLServerField.value = Scholar.Prefs.get('openURL.resolver');
+	openURLVersionMenu = document.getElementById('openURLVersionMenu');
+	openURLVersionMenu.value = Scholar.Prefs.get('openURL.version');
 }
 
 function accept()
 {
-	Scholar.Prefs.set('automaticScraperUpdates', autoUpdateBox.checked)
-	Scholar.Prefs.set('scholarPaneOnTop', positionMenu.selectedIndex == 0)
+	Scholar.Prefs.set('automaticScraperUpdates', autoUpdateBox.checked);
+	Scholar.Prefs.set('scholarPaneOnTop', positionMenu.selectedIndex == 0);
+	
+	if(Scholar.Prefs.get('parseEndNoteMIMETypes') != parseEndnoteBox.checked)
+	{
+		Scholar.Prefs.set('parseEndNoteMIMETypes', parseEndnoteBox.checked);
+		Scholar.Ingester.MIMEHandler.init();
+	}
+	Scholar.Prefs.set('openURL.resolver', openURLServerField.value);
+	Scholar.Prefs.set('openURL.version', openURLVersionMenu.value);
 }

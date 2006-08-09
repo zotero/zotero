@@ -37,6 +37,7 @@ ScholarItemPane = new function()
 	this.viewItem = viewItem;
 	this.loadPane = loadPane;
 	this.changeTypeTo = changeTypeTo;
+	this.onOpenURLClick = onOpenURLClick;
 	this.addCreatorRow = addCreatorRow;
 	this.removeCreator = removeCreator;
 	this.showEditor = showEditor;
@@ -261,6 +262,11 @@ ScholarItemPane = new function()
 			_itemBeingEdited.save();
 			reloadFields();
 		}
+	}
+	
+	function onOpenURLClick()
+	{
+		window.open(Scholar.OpenURL.resolve(_itemBeingEdited));
 	}
 	
 	function addDynamicRow(label, value, beforeElement)

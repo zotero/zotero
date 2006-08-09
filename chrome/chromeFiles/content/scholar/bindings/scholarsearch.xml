@@ -35,24 +35,21 @@
 						
 						var conditions = this.search.getSearchConditions();
 						if(conditions.length)
-						{
 							for(var i = 0, len = conditions.length; i<len; i++)
-							{
-								this.addCondition(i);
-							}
-						}
+									this.addCondition(i);
+
 					]]>
 				</setter>
 			</property>
 			<method name="onAddClicked">
 				<body>
 					<![CDATA[
-						this.search.addCondition("itemType","is","1");
-						this.addCondition();
+						this.addCondition(this.search.addCondition("itemType","is","1"));
 					]]>
 				</body>
 			</method>
 			<method name="addCondition">
+				<parameter name="id"/>
 				<body>
 					<![CDATA[
 						var conditionsBox = this.id('conditions');
@@ -61,7 +58,7 @@
 						
 						conditionsBox.appendChild(condition);
 						
-						condition.initWithParentAndConditionID(this, conditionsBox.childNodes.length-1);
+						condition.initWithParentAndConditionID(this, id);
 						
 						conditionsBox.childNodes[0].id('remove').hidden = (conditionsBox.childNodes.length == 1);
 					]]>
@@ -78,6 +75,20 @@
 							conditionsBox.childNodes[i].conditionID = i;
 
 						conditionsBox.childNodes[0].id('remove').hidden = (conditionsBox.childNodes.length == 1);
+					]]>
+				</body>
+			</method>
+			<method name="save">
+				<body>
+					<![CDATA[
+						var conditionsBox = this.id('conditions');
+						
+						if(conditionsBox.hasChildNodes())
+							for(var i = 0, len=conditionsBox.childNodes.length; i < len; i++)
+								conditionsBox.childNodes[i].updateSearch();
+						
+						this.search.save();
+
 					]]>
 				</body>
 			</method>
@@ -104,7 +115,7 @@
 					</xul:menulist>
 					<xul:label value="of the following:"/>
 				</xul:caption>
-				<xul:vbox id="conditions" style="overflow: auto;"/>
+				<xul:vbox id="conditions"/>
 			</xul:groupbox>
 		</content>
 	</binding>
@@ -214,7 +225,7 @@
 				<xul:menulist id="conditionsmenu" oncommand="this.parentNode.parentNode.onConditionSelected();">
 					<xul:menupopup/>
 				</xul:menulist>
-				<xul:menulist id="operatorsmenu" oncommand="this.parentNode.parentNode.updateSearch();">
+				<xul:menulist id="operatorsmenu">
 					<xul:menupopup>
 						<xul:menuitem label="is" value="is"/>
 						<xul:menuitem label="isNot" value="isNot"/>
@@ -222,7 +233,7 @@
 						<xul:menuitem label="doesNotContain" value="doesNotContain"/>
 					</xul:menupopup>
 				</xul:menulist>
-				<xul:textbox id="valuefield" type="timed" timeout="1000" flex="1" oncommand="this.parentNode.parentNode.updateSearch();"/>
+				<xul:textbox id="valuefield" flex="1"/>
 				<xul:toolbarbutton id="remove" class="clicky" label="-" oncommand="this.parentNode.parentNode.onRemoveClicked();"/>
 				<xul:toolbarbutton id="add" class="clicky" label="+" oncommand="this.parentNode.parentNode.onAddClicked();"/>
 			</xul:hbox>

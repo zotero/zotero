@@ -27,8 +27,6 @@
 	id="scholar-search-dialog"
 	title="Search"
 	orient="vertical"
-	width="600" flex="1"
-	persist="width height screenX screenY"
 	buttons="cancel,accept"
 	ondialogaccept="doAccept();"
 	onload="doLoad();"
