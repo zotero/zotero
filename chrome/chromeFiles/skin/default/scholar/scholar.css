@@ -63,6 +63,16 @@ seealsobox
 	-moz-binding: url('chrome://scholar/content/bindings/relatedbox.xml#seealso-box');
 }
 
+scholarsearch
+{
+	-moz-binding: url('chrome://scholar/content/bindings/scholarsearch.xml#search-box');
+}
+
+searchcondition
+{
+	-moz-binding: url('chrome://scholar/content/bindings/scholarsearch.xml#search-condition');
+}
+
 .clicky
 {	
 	-moz-border-radius: 6px;

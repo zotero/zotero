@@ -70,6 +70,7 @@
 				<toolbar>
 					<toolbarbutton id="tb-collection-add" tooltiptext="&toolbar.newCollection.label;" command="cmd_scholar_newCollection"/>
 					<toolbarbutton id="tb-collection-rename" tooltiptext="&toolbar.renameCollection.label;" oncommand="ScholarPane.renameSelectedCollection();" disabled="true"/>
+					<toolbarbutton id="tb-collection-addsearch" label="Add Search" oncommand="ScholarPane.newSearch();"/>
 					<spacer flex="1"/>
 					<toolbarbutton id="tb-collection-menu" type="menu">
 						<menupopup>

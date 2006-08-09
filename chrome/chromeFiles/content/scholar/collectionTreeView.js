@@ -61,9 +61,42 @@ Scholar.CollectionTreeView.prototype.refresh = function()
 	
 	var newRows = Scholar.getCollections();
 	for(var i = 0; i < newRows.length; i++)
-		this._showItem(new Scholar.ItemGroup('collection',newRows[i]),  0, this._dataItems.length); //item ref, level, beforeRow
-		
+		this._showItem(new Scholar.ItemGroup('collection',newRows[i]),  0, this._dataItems.length); //itemgroup ref, level, beforeRow
+	
+	var savedSearches = Scholar.Searches.getAll();
+	for(var i = 0; i < savedSearches.length; i++)
+	{
+		this._showItem(new Scholar.ItemGroup('search',savedSearches[i]),  0, this._dataItems.length); //itemgroup ref, level, beforeRow
+		Scholar.debug(i);
+	}
+	
 	this._refreshHashMap();
+}
+
+/*
+ *  Redisplay everything
+ */
+Scholar.CollectionTreeView.prototype.reload = function()
+{
+	var openCollections = new Array();
+	
+	for(var i = 0; i < this.rowCount; i++)
+		if(this.isContainer(i) && this.isContainerOpen(i))
+			openCollections.push(this._getItemAtRow(i).ref.getID());
+	
+	var oldCount = this.rowCount;
+	this._treebox.beginUpdateBatch();
+	this.refresh();
+	this._treebox.rowCountChanged(0,this.rowCount - oldCount);
+	
+	for(var i = 0; i < openCollections.length; i++)
+	{
+		var row = this._collectionRowMap[openCollections[i]];
+		if(row != null)
+			this.toggleOpenState(row);
+	}
+	this._treebox.invalidate();
+	this._treebox.endUpdateBatch();
 }
 
 /*
@@ -101,25 +134,7 @@ Scholar.CollectionTreeView.prototype.notify = function(action, type, ids)
 	}
 	else if(action == 'move')
 	{
-		var openCollections = new Array();
-		
-		for(var i = 0; i < this.rowCount; i++)
-			if(this.isContainer(i) && this.isContainerOpen(i))
-				openCollections.push(this._getItemAtRow(i).ref.getID());
-		
-		var oldCount = this.rowCount;
-		this._treebox.beginUpdateBatch();
-		this.refresh();
-		this._treebox.rowCountChanged(0,this.rowCount - oldCount);
-		
-		for(var i = 0; i < openCollections.length; i++)
-		{
-			var row = this._collectionRowMap[openCollections[i]];
-			if(row != null)
-				this.toggleOpenState(row);
-		}
-		this._treebox.invalidate();
-		this._treebox.endUpdateBatch();
+		this.reload();
 	}
 	else if(action == 'modify')
 	{
@@ -291,7 +306,11 @@ Scholar.CollectionTreeView.prototype.deleteSelection = function()
 	for (var i=0; i<rows.length; i++)
 	{
 		//erase collection from DB:
-		this._getItemAtRow(rows[i]-i).ref.erase();
+		var group = this._getItemAtRow(rows[i]-i);
+		if(group.isCollection())
+			group.ref.erase();
+		else if(group.isSearch())
+			Scholar.Searches.erase(group.ref['id']);
 	}
 	this._treebox.endUpdateBatch();
 	
@@ -541,12 +560,19 @@ Scholar.ItemGroup.prototype.isCollection = function()
 	return this.type == 'collection';
 }
 
+Scholar.ItemGroup.prototype.isSearch = function()
+{
+	return this.type == 'search';
+}
+
 Scholar.ItemGroup.prototype.getName = function()
 {
 	if(this.isCollection())
 		return this.ref.getName();
 	else if(this.isLibrary())
 		return Scholar.getString('pane.collections.library');
+	else if(this.isSearch())
+		return this.ref['name'];
 	else
 		return "";
 }
@@ -563,6 +589,12 @@ Scholar.ItemGroup.prototype.getChildItems = function()
 			return Scholar.getItems(this.ref.getID());
 		else if(this.isLibrary())
 			return Scholar.getItems();
+		else if(this.isSearch())
+		{
+			var s = new Scholar.Search();
+			s.load(this.ref['id']);
+			return Scholar.Items.get(s.search());
+		}
 		else
 			return null;
 	}

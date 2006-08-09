@@ -1,0 +1,231 @@
+<?xml version="1.0"?>
+<!--
+	Scholar
+	Copyright (C) 2006   Center for History and New Media, George Mason University, Fairfax, VA
+	http://chnm.gmu.edu/
+	
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+-->
+<bindings 	xmlns="http://www.mozilla.org/xbl"
+			xmlns:xbl="http://www.mozilla.org/xbl"
+			xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	<binding id="search-box">
+		<implementation>
+			<field name="searchRef"/>
+			<property name="search" onget="return this.searchRef;">
+				<setter>
+					<![CDATA[
+						this.searchRef = val;
+						
+						var conditionsBox = this.id('conditions');
+						while(conditionsBox.hasChildNodes())
+							conditionsBox.removeChild(conditionsBox.firstChild);
+						
+						var conditions = this.search.getSearchConditions();
+						if(conditions.length)
+						{
+							for(var i = 0, len = conditions.length; i<len; i++)
+							{
+								this.addCondition(i);
+							}
+						}
+					]]>
+				</setter>
+			</property>
+			<method name="onAddClicked">
+				<body>
+					<![CDATA[
+						this.search.addCondition("itemType","is","1");
+						this.addCondition();
+					]]>
+				</body>
+			</method>
+			<method name="addCondition">
+				<body>
+					<![CDATA[
+						var conditionsBox = this.id('conditions');
+						var condition = document.createElement('searchcondition');
+						condition.setAttribute('flex','1');
+						
+						conditionsBox.appendChild(condition);
+						
+						condition.initWithParentAndConditionID(this, conditionsBox.childNodes.length-1);
+						
+						conditionsBox.childNodes[0].id('remove').hidden = (conditionsBox.childNodes.length == 1);
+					]]>
+				</body>
+			</method>
+			<method name="removeCondition">
+				<parameter name="idx"/>
+				<body>
+					<![CDATA[
+						var conditionsBox = this.id('conditions');
+						this.search.removeCondition(idx);
+						conditionsBox.removeChild(conditionsBox.childNodes[idx]);
+						for(var i = idx, len=conditionsBox.childNodes.length; i < len; i++)
+							conditionsBox.childNodes[i].conditionID = i;
+
+						conditionsBox.childNodes[0].id('remove').hidden = (conditionsBox.childNodes.length == 1);
+					]]>
+				</body>
+			</method>
+			<method name="id">
+				<parameter name="id"/>
+				<body>
+					<![CDATA[
+						return document.getAnonymousNodes(this)[0].getElementsByAttribute('id',id)[0];
+					]]>
+				</body>
+			</method>
+		</implementation>
+		<handlers>
+		</handlers>
+		<content>
+			<xul:groupbox xbl:inherits="flex">
+				<xul:caption align="center">
+					<xul:label value="Match"/>
+					<xul:menulist>
+						<xul:menupopup>
+							<xul:menuitem label="Any" value="any"/>
+							<xul:menuitem label="All" value="all"/>
+						</xul:menupopup>
+					</xul:menulist>
+					<xul:label value="of the following:"/>
+				</xul:caption>
+				<xul:vbox id="conditions" style="overflow: auto;"/>
+			</xul:groupbox>
+		</content>
+	</binding>
+	
+	<binding id="search-condition">
+		<implementation>
+			<constructor>
+				<![CDATA[
+					this.operators = new Array('is', 'isNot', 'contains', 'doesNotContain');
+					var conditionsList = this.id('conditionsmenu');
+					conditionsList.removeAllItems;
+					
+					var conditions = Scholar.SearchConditions.getStandardConditions();
+					
+					for(var i=0, len=conditions.length; i<len; i++)
+						conditionsList.appendItem(conditions[i]['name'], conditions[i]['name']);
+					conditionsList.selectedIndex = 0;
+				]]>
+			</constructor>
+			<method name="onConditionSelected">
+				<body>
+					<![CDATA[
+					var operatorsList = this.id('operatorsmenu');
+					
+					var condition = Scholar.SearchConditions.get(this.id('conditionsmenu').value);	
+					var operators = condition['operators'];
+					
+					var selectThis;
+					for(var i = 0, len = operatorsList.firstChild.childNodes.length; i < len; i++)
+					{
+						var hidden = !operators[operatorsList.firstChild.childNodes[i].value];
+						operatorsList.firstChild.childNodes[i].setAttribute('hidden', hidden);
+						if(selectThis == null && !hidden)
+							selectThis = i;
+					}
+					
+					operatorsList.selectedIndex = selectThis;
+					]]>
+				</body>
+			</method>
+			<field name="operators"/>
+			<field name="dontupdate"/>
+			<field name="parent"/>
+			<field name="conditionID"/>
+			<method name="initWithParentAndConditionID">
+				<parameter name="parent"/>
+				<parameter name="id"/>
+				<body>
+					<![CDATA[
+						this.parent = parent;
+						this.conditionID = id;
+						
+						if(this.parent.search)
+						{
+							this.dontupdate = true;	//so that the search doesn't get updated while we are creating controls.
+							var condition = this.parent.search.getSearchCondition(this.conditionID);
+							
+							this.id('conditionsmenu').value = condition['condition'];
+							this.id('operatorsmenu').value = condition['operator'];
+							this.id('valuefield').value = condition['value'];
+														
+							this.dontupdate = false;
+						}
+					]]>
+				</body>
+			</method>
+			<method name="updateSearch">
+				<body>
+					<![CDATA[
+						if(this.parent && this.parent.search && !this.dontupdate)
+						{
+							var condition = this.id('conditionsmenu').value;
+							var operator = this.id('operatorsmenu').value;
+							var value = this.id('valuefield').value;
+							this.parent.search.updateCondition(this.conditionID, condition, operator, value);
+						}
+					]]>
+				</body>
+			</method>
+			<method name="onRemoveClicked">
+				<body>
+					<![CDATA[
+						if(this.parent)
+							this.parent.removeCondition(this.conditionID);
+					]]>
+				</body>
+			</method>
+			<method name="onAddClicked">
+				<body>
+					<![CDATA[
+						if(this.parent)
+							this.parent.onAddClicked();
+					]]>
+				</body>
+			</method>
+			<method name="id">
+				<parameter name="id"/>
+				<body>
+					<![CDATA[
+						return document.getAnonymousNodes(this)[0].getElementsByAttribute('id',id)[0];
+					]]>
+				</body>
+			</method>
+		</implementation>
+		<content>
+			<xul:hbox xbl:inherits="flex">
+				<xul:menulist id="conditionsmenu" oncommand="this.parentNode.parentNode.onConditionSelected();">
+					<xul:menupopup/>
+				</xul:menulist>
+				<xul:menulist id="operatorsmenu" oncommand="this.parentNode.parentNode.updateSearch();">
+					<xul:menupopup>
+						<xul:menuitem label="is" value="is"/>
+						<xul:menuitem label="isNot" value="isNot"/>
+						<xul:menuitem label="contains" value="contains"/>
+						<xul:menuitem label="doesNotContain" value="doesNotContain"/>
+					</xul:menupopup>
+				</xul:menulist>
+				<xul:textbox id="valuefield" type="timed" timeout="1000" flex="1" oncommand="this.parentNode.parentNode.updateSearch();"/>
+				<xul:toolbarbutton id="remove" class="clicky" label="-" oncommand="this.parentNode.parentNode.onRemoveClicked();"/>
+				<xul:toolbarbutton id="add" class="clicky" label="+" oncommand="this.parentNode.parentNode.onAddClicked();"/>
+			</xul:hbox>
+		</content>
+	</binding>
+</bindings>

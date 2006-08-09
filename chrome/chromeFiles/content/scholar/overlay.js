@@ -33,6 +33,7 @@ var ScholarPane = new function()
 	this.fullScreen = fullScreen;
 	this.newItem = newItem;
 	this.newCollection = newCollection;
+	this.newSearch = newSearch;
 	this.onCollectionSelected = onCollectionSelected;
 	this.itemSelected = itemSelected;
 	this.deleteSelectedItem = deleteSelectedItem;
@@ -167,6 +168,18 @@ var ScholarPane = new function()
 		Scholar.Collections.add(Scholar.getString('pane.collections.untitled'));
 	}
 	
+	function newSearch()
+	{
+		var s = new Scholar.Search();
+		s.addCondition('title','contains','');
+		
+		var io = {dataIn: {search: s, name: 'Untitled'}, dataOut: null};
+		window.openDialog('chrome://scholar/content/searchDialog.xul','','chrome,modal',io);
+
+		if(io.dataOut)
+			getCollectionsView().reload();
+	}
+	
 	function onCollectionSelected()
 	{
 		if(itemsView)
@@ -177,12 +190,12 @@ var ScholarPane = new function()
 		
 		if(collectionsView.selection.count == 1 && collectionsView.selection.currentIndex != -1)
 		{
-			var collection = collectionsView._getItemAtRow(collectionsView.selection.currentIndex);
-			collection.setSearch('');
+			var itemgroup = collectionsView._getItemAtRow(collectionsView.selection.currentIndex);
+			itemgroup.setSearch('');
 			
-			itemsView = new Scholar.ItemTreeView(collection);
+			itemsView = new Scholar.ItemTreeView(itemgroup);
 			document.getElementById('items-tree').view = itemsView;
-			document.getElementById('tb-collection-rename').disabled = collection.isLibrary();
+			document.getElementById('tb-collection-rename').disabled = itemgroup.isLibrary();
 			itemsView.selection.clearSelection();
 		}
 		else
@@ -275,9 +288,21 @@ var ScholarPane = new function()
 		{
 			var collection = collectionsView._getItemAtRow(collectionsView.selection.currentIndex);
 			
-			var newName = prompt(Scholar.getString('pane.collections.rename'),collection.getName());
-			if(newName)
-				collection.ref.rename(newName);
+			if(collection.isCollection())
+			{
+				var newName = prompt(Scholar.getString('pane.collections.rename'),collection.getName());
+				if(newName)
+					collection.ref.rename(newName);
+			}
+			else
+			{
+				var s = new Scholar.Search();
+				s.load(collection.ref['id']);
+				var io = {dataIn: {search: s, name: collection.getName()}, dataOut: null};
+				window.openDialog('chrome://scholar/content/searchDialog.xul','','chrome,modal',io);
+				if(io.dataOut)
+					onCollectionSelected();
+			}
 		}
 	}
 	

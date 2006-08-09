@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<!--
+	Scholar
+	Copyright (C) 2006   Center for History and New Media, George Mason University, Fairfax, VA
+	http://chnm.gmu.edu/
+	
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+-->
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://scholar/skin/scholar.css" type="text/css"?>
+<?xml-stylesheet href="chrome://scholar/skin/overlay.css" type="text/css"?>
+<!DOCTYPE window SYSTEM "chrome://scholar/locale/scholar.dtd">
+
+<dialog
+	id="scholar-search-dialog"
+	title="Search"
+	orient="vertical"
+	width="600" flex="1"
+	persist="width height screenX screenY"
+	buttons="cancel,accept"
+	ondialogaccept="doAccept();"
+	onload="doLoad();"
+	onunload="doUnload();"
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	style="padding:2em">
+	
+	<script src="include.js"/>
+	<script src="searchDialog.js"/>
+	
+	<hbox align="center"><label value="Name:"/><textbox id="search-name" flex="1"/></hbox>
+	<scholarsearch id="search-box" flex="1"/>
+</dialog>
