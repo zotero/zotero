@@ -1202,13 +1202,13 @@ Scholar.Translate.prototype._storageStreamFunctions =  function(read, write) {
 	var me = this;
 	if(write) {
 		// set up write() method
-		var fStream = _storageStream.getOutputStream(0);
+		var fStream = this._storageStream.getOutputStream(0);
 		this._sandbox.Scholar.write = function(data) { fStream.write(data, data.length) };		
 		
 		// set Scholar.eof() to close the storage stream
 		this._sandbox.Scholar.eof = function() {
-			this._storageStream.QueryInterface(Components.interfaces.nsIOutputStream);
-			this._storageStream.close();
+			fStream.QueryInterface(Components.interfaces.nsIOutputStream);
+			fStream.close();
 		}
 	}
 	
