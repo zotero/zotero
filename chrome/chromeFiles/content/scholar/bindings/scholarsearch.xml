@@ -34,9 +34,18 @@
 							conditionsBox.removeChild(conditionsBox.firstChild);
 						
 						var conditions = this.search.getSearchConditions();
-						if(conditions.length)
-							for(var i = 0, len = conditions.length; i<len; i++)
-									this.addCondition(i);
+						for(var id in conditions)
+						{
+							if(conditions[id]['condition'] == 'joinMode')
+							{
+								this.id('joinModeMenu').setAttribute('condition',id);
+								this.id('joinModeMenu').value = conditions[id]['operator'];
+							}
+							else
+							{
+								this.addCondition(conditions[id]);
+							}
+						}
 
 					]]>
 				</setter>
@@ -44,12 +53,12 @@
 			<method name="onAddClicked">
 				<body>
 					<![CDATA[
-						this.addCondition(this.search.addCondition("itemType","is","1"));
+						this.addCondition(this.search.getSearchCondition(this.search.addCondition("title","contains","")));
 					]]>
 				</body>
 			</method>
 			<method name="addCondition">
-				<parameter name="id"/>
+				<parameter name="ref"/>
 				<body>
 					<![CDATA[
 						var conditionsBox = this.id('conditions');
@@ -58,23 +67,39 @@
 						
 						conditionsBox.appendChild(condition);
 						
-						condition.initWithParentAndConditionID(this, id);
+						condition.initWithParentAndCondition(this, ref);
 						
 						conditionsBox.childNodes[0].id('remove').hidden = (conditionsBox.childNodes.length == 1);
 					]]>
 				</body>
 			</method>
 			<method name="removeCondition">
-				<parameter name="idx"/>
+				<parameter name="id"/>
 				<body>
 					<![CDATA[
 						var conditionsBox = this.id('conditions');
-						this.search.removeCondition(idx);
-						conditionsBox.removeChild(conditionsBox.childNodes[idx]);
-						for(var i = idx, len=conditionsBox.childNodes.length; i < len; i++)
-							conditionsBox.childNodes[i].conditionID = i;
-
+						this.search.removeCondition(id);
+						
+						for(var i = 0, len=conditionsBox.childNodes.length; i < len; i++)
+							if(conditionsBox.childNodes[i].conditionID == id)
+							{
+								conditionsBox.removeChild(conditionsBox.childNodes[i]);
+								
+								i = len;
+							}
+						
 						conditionsBox.childNodes[0].id('remove').hidden = (conditionsBox.childNodes.length == 1);
+					]]>
+				</body>
+			</method>
+			<method name="updateJoinMode">
+				<body>
+					<![CDATA[
+						var menu = this.id('joinModeMenu');
+						if(menu.hasAttribute('condition'))
+							this.search.updateCondition(menu.getAttribute('condition'),'joinMode',menu.value,null);
+						else
+							menu.setAttribute('condition', this.search.addCondition('joinMode',menu.value,null));
 					]]>
 				</body>
 			</method>
@@ -87,8 +112,7 @@
 							for(var i = 0, len=conditionsBox.childNodes.length; i < len; i++)
 								conditionsBox.childNodes[i].updateSearch();
 						
-						this.search.save();
-
+						return this.search.save();
 					]]>
 				</body>
 			</method>
@@ -107,10 +131,10 @@
 			<xul:groupbox xbl:inherits="flex">
 				<xul:caption align="center">
 					<xul:label value="Match"/>
-					<xul:menulist>
+					<xul:menulist id="joinModeMenu" oncommand="this.parentNode.parentNode.parentNode.updateJoinMode();">
 						<xul:menupopup>
 							<xul:menuitem label="Any" value="any"/>
-							<xul:menuitem label="All" value="all"/>
+							<xul:menuitem label="All" value="all" selected="true"/>
 						</xul:menupopup>
 					</xul:menulist>
 					<xul:label value="of the following:"/>
@@ -124,10 +148,12 @@
 		<implementation>
 			<constructor>
 				<![CDATA[
-					this.operators = new Array('is', 'isNot', 'contains', 'doesNotContain');
+					var operators = new Array('is', 'isNot', 'contains', 'doesNotContain', 'lessThan', 'greaterThan', 'isBefore', 'isAfter');
+					var operatorsList = this.id('operatorsmenu');
+					for(i in operators)
+						operatorsList.appendItem(Scholar.getString('searchOperator.'+operators[i]),operators[i]);
+						
 					var conditionsList = this.id('conditionsmenu');
-					conditionsList.removeAllItems;
-					
 					var conditions = Scholar.SearchConditions.getStandardConditions();
 					
 					for(var i=0, len=conditions.length; i<len; i++)
@@ -156,22 +182,20 @@
 					]]>
 				</body>
 			</method>
-			<field name="operators"/>
 			<field name="dontupdate"/>
 			<field name="parent"/>
 			<field name="conditionID"/>
-			<method name="initWithParentAndConditionID">
+			<method name="initWithParentAndCondition">
 				<parameter name="parent"/>
-				<parameter name="id"/>
+				<parameter name="condition"/>
 				<body>
 					<![CDATA[
 						this.parent = parent;
-						this.conditionID = id;
+						this.conditionID = condition['id'];
 						
 						if(this.parent.search)
 						{
 							this.dontupdate = true;	//so that the search doesn't get updated while we are creating controls.
-							var condition = this.parent.search.getSearchCondition(this.conditionID);
 							
 							this.id('conditionsmenu').value = condition['condition'];
 							this.id('operatorsmenu').value = condition['operator'];
@@ -226,12 +250,7 @@
 					<xul:menupopup/>
 				</xul:menulist>
 				<xul:menulist id="operatorsmenu">
-					<xul:menupopup>
-						<xul:menuitem label="is" value="is"/>
-						<xul:menuitem label="isNot" value="isNot"/>
-						<xul:menuitem label="contains" value="contains"/>
-						<xul:menuitem label="doesNotContain" value="doesNotContain"/>
-					</xul:menupopup>
+					<xul:menupopup/>
 				</xul:menulist>
 				<xul:textbox id="valuefield" flex="1"/>
 				<xul:toolbarbutton id="remove" class="clicky" label="-" oncommand="this.parentNode.parentNode.onRemoveClicked();"/>

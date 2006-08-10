@@ -177,7 +177,7 @@ var ScholarPane = new function()
 		window.openDialog('chrome://scholar/content/searchDialog.xul','','chrome,modal',io);
 
 		if(io.dataOut)
-			getCollectionsView().reload();
+			getCollectionsView().reload(); //we don't have notification support for searches
 	}
 	
 	function onCollectionSelected()
@@ -300,7 +300,7 @@ var ScholarPane = new function()
 				var io = {dataIn: {search: s, name: collection.getName()}, dataOut: null};
 				window.openDialog('chrome://scholar/content/searchDialog.xul','','chrome,modal',io);
 				if(io.dataOut)
-					onCollectionSelected();
+					onCollectionSelected(); //reload itemsView
 			}
 		}
 	}

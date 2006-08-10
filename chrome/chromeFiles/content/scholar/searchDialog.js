@@ -39,6 +39,5 @@ function doUnload()
 function doAccept()
 {
 	document.getElementById('search-box').search.setName(document.getElementById('search-name').value);
-	document.getElementById('search-box').save();
-	io.dataOut = true;
+	io.dataOut = document.getElementById('search-box').save();
 }

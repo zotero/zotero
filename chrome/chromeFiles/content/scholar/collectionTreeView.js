@@ -65,10 +65,7 @@ Scholar.CollectionTreeView.prototype.refresh = function()
 	
 	var savedSearches = Scholar.Searches.getAll();
 	for(var i = 0; i < savedSearches.length; i++)
-	{
 		this._showItem(new Scholar.ItemGroup('search',savedSearches[i]),  0, this._dataItems.length); //itemgroup ref, level, beforeRow
-		Scholar.debug(i);
-	}
 	
 	this._refreshHashMap();
 }
@@ -105,6 +102,8 @@ Scholar.CollectionTreeView.prototype.reload = function()
 Scholar.CollectionTreeView.prototype.notify = function(action, type, ids)
 {
 	var madeChanges = false;
+	
+	Scholar.debug(action+', '+type+', '+ids);
 	
 	if(action == 'remove')
 	{
@@ -310,7 +309,10 @@ Scholar.CollectionTreeView.prototype.deleteSelection = function()
 		if(group.isCollection())
 			group.ref.erase();
 		else if(group.isSearch())
+		{
 			Scholar.Searches.erase(group.ref['id']);
+			this._hideItem(rows[i]-i); //we don't have the notification system set up with searches.
+		}
 	}
 	this._treebox.endUpdateBatch();
 	

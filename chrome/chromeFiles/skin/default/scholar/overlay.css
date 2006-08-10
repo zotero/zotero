@@ -135,6 +135,11 @@
 	width: 150px;
 }
 
+#tb-collection-addsearch
+{
+	list-style-image: url('chrome://scholar/skin/treesource-search.png');
+}
+
 #tb-search-cancel
 {
 	margin: 0px;

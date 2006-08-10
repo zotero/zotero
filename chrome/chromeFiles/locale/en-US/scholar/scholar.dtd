@@ -19,8 +19,9 @@
 <!ENTITY collections.name_column		"Name">
 
 <!ENTITY toolbar.newItem.label    		"New Item">
-<!ENTITY toolbar.removeItem.label   "Remove Item...">
+<!ENTITY toolbar.removeItem.label 		  "Remove Item...">
 <!ENTITY toolbar.newCollection.label   	"New Project">
+<!ENTITY toolbar.newSearch.label   		"New Search">
 <!ENTITY toolbar.renameCollection.label   "Rename Project...">
 <!ENTITY toolbar.removeCollection.label   "Remove Project...">
 <!ENTITY toolbar.exportCollection.label   "Export Project...">
