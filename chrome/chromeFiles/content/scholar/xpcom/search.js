@@ -47,6 +47,12 @@ Scholar.Search.prototype.load = function(savedSearchID){
 		+ "WHERE savedSearchID=" + savedSearchID + " ORDER BY searchConditionID");
 	
 	for (var i in conditions){
+		if (!Scholar.SearchConditions.get(conditions[i]['condition'])){
+			Scholar.debug("Invalid saved search condition '"
+				+ conditions[i]['condition'] + "' -- skipping", 2);
+			continue;
+		}
+		
 		this._conditions[conditions[i]['searchConditionID']] = {
 			id: conditions[i]['searchConditionID'],
 			condition: conditions[i]['condition'],
@@ -193,8 +199,15 @@ Scholar.Search.prototype.getSQL = function(){
 	if (!this._sql){
 		this._buildQuery();
 	}
-	
 	return this._sql;
+}
+
+
+Scholar.Search.prototype.getSQLParams = function(){
+	if (!this._sql){
+		this._buildQuery();
+	}
+	return this._sqlParams;
 }
 
 
@@ -231,11 +244,6 @@ Scholar.Search.prototype._buildQuery = function(){
 		// Handle special conditions
 		else {
 			switch (data['name']){
-				// Collection to search in
-				case 'context':
-					var parentCollectionID = this._conditions[i]['value'];
-					continue;
-					
 				// Search subfolders
 				case 'recursive':
 					var recursive = this._conditions[i]['operator']=='true';
@@ -263,25 +271,27 @@ Scholar.Search.prototype._buildQuery = function(){
 			var binOp = ' AND ';
 		}
 		
-		for (i in tables){
+		for (var i in tables){
 			for (var j in tables[i]){
+				var openParens = 0;
+				var skipOperators = false;
+				
 				//
 				// Special table handling
 				//
 				switch (i){
 					case 'items':
+					case 'savedSearches':
 						break;
 					default:
 						sql += 'itemID IN (SELECT itemID FROM ' + i + ' WHERE (';
-						var openParens = 2;
+						openParens = 2;
 				}
 				
 				
 				//
-				// Special field handling
+				// Special condition handling
 				//
-				
-				// For itemData fields, include fieldID
 				switch (tables[i][j]['name']){
 					case 'field':
 						sql += 'fieldID=? AND ';
@@ -289,10 +299,57 @@ Scholar.Search.prototype._buildQuery = function(){
 							Scholar.ItemFields.getID(tables[i][j]['alias'])
 						);
 						break;
+					
+					case 'collectionID':
+						sql += "collectionID ";
+						if (tables[i][j]['operator']=='isNot'){
+							sql += "NOT ";
+						}
+						// Add given collection id
+						sql += "IN (?,";
+						sqlParams.push({int:tables[i][j]['value']});
+						
+						// And descendents if recursive search
+						if (recursive){
+							var col = Scholar.Collections.get(tables[i][j]['value']);
+							var descendents = col.getDescendents(false, 'collection');
+							if (descendents){
+								for (var k in descendents){
+									sql += '?,';
+									sqlParams.push(descendents[k]['id']);
+								}
+							}
+						}
+						
+						// Strip final comma
+						sql = sql.substring(0, sql.length-1) + ")";
+						
+						skipOperators = true;
+						break;
+					
+					case 'savedSearchID':
+						sql += "itemID ";
+						if (tables[i][j]['operator']=='isNot'){
+							sql += "NOT ";
+						}
+						sql += "IN (";
+						var search = new Scholar.Search();
+						search.load(tables[i][j]['value']);
+						sql += search.getSQL();
+						var subpar = search.getSQLParams();
+						for (var k in subpar){
+							sqlParams.push(subpar[k]);
+						}
+						sql += ")";
+						
+						skipOperators = true;
+						break;
+					
 					case 'tag':
 						sql += "tagID IN (SELECT tagID FROM tags WHERE ";
 						openParens++;
 						break;
+					
 					case 'creator':
 						sql += "creatorID IN (SELECT creatorID FROM creators "
 							+ "WHERE ";
@@ -300,49 +357,51 @@ Scholar.Search.prototype._buildQuery = function(){
 						break;
 				}
 				
-				sql += tables[i][j]['field'];
-				switch (tables[i][j]['operator']){
-					case 'contains':
-						sql += ' LIKE ?';
-						sqlParams.push('%' + tables[i][j]['value'] + '%');
-						break;
+				if (!skipOperators){
+					sql += tables[i][j]['field'];
+					switch (tables[i][j]['operator']){
+						case 'contains':
+							sql += ' LIKE ?';
+							sqlParams.push('%' + tables[i][j]['value'] + '%');
+							break;
+							
+						case 'doesNotContain':
+							sql += ' NOT LIKE ?';
+							sqlParams.push('%' + tables[i][j]['value'] + '%');
+							break;
+							
+						case 'is':
+							sql += '=?';
+							sqlParams.push(tables[i][j]['value']);
+							break;
+							
+						case 'isNot':
+							sql += '!=?';
+							sqlParams.push(tables[i][j]['value']);
+							break;
+							
+						case 'greaterThan':
+							sql += '>?';
+							sqlParams.push({int:tables[i][j]['value']});
+							break;
+							
+						case 'lessThan':
+							sql += '<?';
+							sqlParams.push({int:tables[i][j]['value']});
+							break;
 						
-					case 'doesNotContain':
-						sql += ' NOT LIKE ?';
-						sqlParams.push('%' + tables[i][j]['value'] + '%');
-						break;
+						case 'isBefore':
+							// TODO
+							break;
 						
-					case 'is':
-						sql += '=?';
-						sqlParams.push(tables[i][j]['value']);
-						break;
-						
-					case 'isNot':
-						sql += '!=?';
-						sqlParams.push(tables[i][j]['value']);
-						break;
-						
-					case 'greaterThan':
-						sql += '>?';
-						sqlParams.push({int:tables[i][j]['value']});
-						break;
-						
-					case 'lessThan':
-						sql += '<?';
-						sqlParams.push({int:tables[i][j]['value']});
-						break;
-					
-					case 'isBefore':
-						// TODO
-						break;
-					
-					case 'isAfter':
-						// TODO
-						break;
+						case 'isAfter':
+							// TODO
+							break;
+					}
 				}
 				
 				// Close open parentheses
-				for (k=openParens; k>0; k--){
+				for (var k=openParens; k>0; k--){
 					sql += ')';
 				}
 				
@@ -351,28 +410,6 @@ Scholar.Search.prototype._buildQuery = function(){
 		}
 		
 		sql = sql.substring(0, sql.length-binOp.length);
-	}
-	
-	if (parentCollectionID){
-		sql = "SELECT itemID FROM (" + sql + ") WHERE itemID IN "
-			+ "(SELECT itemID FROM collectionItems WHERE collectionID IN ("
-		
-		sql += "?,";
-		sqlParams.push({int:parentCollectionID});
-		
-		if (recursive){
-			var col = Scholar.Collections.get(parentCollectionID);
-			var descendents = col.getDescendents(false, 'collection');
-			if (descendents){
-				for (var i in descendents){
-					sql += '?,';
-					sqlParams.push(descendents[i]['id']);
-				}
-			}
-		}
-		
-		// Strip final comma
-		sql = sql.substring(0, sql.length-1) + "))";
 	}
 	
 	this._sql = sql;
@@ -451,11 +488,6 @@ Scholar.SearchConditions = new function(){
 			// Special conditions
 			//
 			
-			// Context (i.e. collection id to search within)
-			{
-				name: 'context'
-			},
-			
 			// Search recursively
 			{
 				name: 'recursive',
@@ -477,6 +509,28 @@ Scholar.SearchConditions = new function(){
 			//
 			// Standard conditions
 			//
+			
+			// Collection id to search within
+			{
+				name: 'collectionID',
+				operators: {
+					is: true,
+					isNot: true
+				},
+				table: 'collectionItems',
+				field: 'collectionID'
+			},
+			
+			// Saved search to search within
+			{
+				name: 'savedSearchID',
+				operators: {
+					is: true,
+					isNot: true
+				},
+				table: 'savedSearches',
+				field: 'savedSearchID'
+			},
 			
 			{
 				name: 'title',
