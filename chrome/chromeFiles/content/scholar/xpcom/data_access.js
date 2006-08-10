@@ -1079,7 +1079,7 @@ Scholar.Item.prototype.getFile = function(){
 	var file = Components.classes["@mozilla.org/file/local;1"].
 		createInstance(Components.interfaces.nsILocalFile);
 	
-	var refDir = (linkMode==this.LINK_MODE_LINKED_FILE)
+	var refDir = (row['linkMode']==this.LINK_MODE_LINKED_FILE)
 		? Scholar.getScholarDirectory() : Scholar.getStorageDirectory();
 	file.setRelativeDescriptor(refDir, row['path']);
 	
