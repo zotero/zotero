@@ -203,7 +203,8 @@ Scholar.DB = new function(){
 								var type = 'null';
 							}
 							else {
-								throw('Invalid bound parameter ' + params[i]);
+								throw('Invalid bound parameter ' + params[i] +
+									' in ' + Scholar.varDump(params));
 							}
 					}
 					var value = params[i];

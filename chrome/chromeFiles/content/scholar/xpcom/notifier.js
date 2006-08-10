@@ -40,7 +40,7 @@ Scholar.Notifier = new function(){
 				var treeType = 'columnTree';
 				break;
 			default:
-				throw('Invalid type in Notifier.trigger()');
+				throw('Invalid type ' + type + ' in Notifier.trigger()');
 		}
 		
 		Scholar.debug("Notifier.trigger('" + event + "', '" + type + "', "
