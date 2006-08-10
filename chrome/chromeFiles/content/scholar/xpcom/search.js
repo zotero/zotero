@@ -109,7 +109,7 @@ Scholar.Search.prototype.addCondition = function(condition, operator, value){
 		throw ("Invalid operator '" + operator + "' for condition " + condition);
 	}
 	
-	var searchConditionID = this._maxSearchConditionID++;
+	var searchConditionID = ++this._maxSearchConditionID;
 	
 	this._conditions[searchConditionID] = {
 		id: searchConditionID,
