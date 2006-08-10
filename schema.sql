@@ -8,6 +8,7 @@
     DROP INDEX IF EXISTS schema;
     CREATE INDEX schema ON version(schema);
     
+    -- The foundational table; every item collected has a unique record here
     DROP TABLE IF EXISTS items;
     CREATE TABLE items (
         itemID INTEGER PRIMARY KEY,
@@ -17,12 +18,15 @@
         dateModified DATETIME DEFAULT CURRENT_TIMESTAMP
     );
     
+    -- Valid item types ("book," "journalArticle," etc.)
     DROP TABLE IF EXISTS itemTypes;
     CREATE TABLE itemTypes (
         itemTypeID INTEGER PRIMARY KEY,
         typeName TEXT
     );
     
+    -- Describes various types of fields and their format restrictions,
+    -- and indicates whether data should be stored as strings or integers
     DROP TABLE IF EXISTS fieldFormats;
     CREATE TABLE fieldFormats (
         fieldFormatID INTEGER PRIMARY KEY,
@@ -30,6 +34,7 @@
         isInteger INT
     );
     
+    -- Field types for item metadata
     DROP TABLE IF EXISTS fields;
     CREATE TABLE fields (
         fieldID INTEGER PRIMARY KEY,
@@ -38,6 +43,7 @@
         FOREIGN KEY (fieldFormatID) REFERENCES fieldFormat(fieldFormatID)
     );
     
+    -- Defines valid fields for each itemType and their display order
     DROP TABLE IF EXISTS itemTypeFields;
     CREATE TABLE itemTypeFields (
         itemTypeID INT,
@@ -48,6 +54,7 @@
         FOREIGN KEY (fieldID) REFERENCES itemTypes(itemTypeID)
     );
     
+    -- Type-specific data for individual items
     DROP TABLE IF EXISTS itemData;
     CREATE TABLE itemData (
         itemID INT,
@@ -60,6 +67,7 @@
     DROP INDEX IF EXISTS value;
     CREATE INDEX value ON itemData(value);
     
+    -- Note data for note items
     DROP TABLE IF EXISTS itemNotes;
     CREATE TABLE itemNotes (
         itemID INT,
@@ -98,6 +106,7 @@
     DROP INDEX IF EXISTS fileTypeMimeTypes_mimeType;
     CREATE INDEX fileTypeMimeTypes_mimeType ON fileTypeMimeTypes(mimeType);
     
+    -- File data for file items
     DROP TABLE IF EXISTS itemFiles;
     CREATE TABLE itemFiles (
         itemID INT,
@@ -116,6 +125,7 @@
     DROP INDEX IF EXISTS itemFiles_mimeType;
     CREATE INDEX itemFiles_mimeType ON itemFiles(mimeType);
     
+    -- Individual entries for each tag
     DROP TABLE IF EXISTS tags;
     CREATE TABLE tags (
         tagID INT,
@@ -123,6 +133,7 @@
         PRIMARY KEY (tagID)
     );
     
+    -- Associates items with keywords
     DROP TABLE IF EXISTS itemTags;
     CREATE TABLE itemTags (
         itemID INT,
@@ -145,6 +156,7 @@
     DROP INDEX IF EXISTS itemSeeAlso_linkedItemID;
     CREATE INDEX itemSeeAlso_linkedItemID ON itemSeeAlso(linkedItemID);
     
+    -- Names of each individual "creator" (inc. authors, editors, etc.)
     DROP TABLE IF EXISTS creators;
     CREATE TABLE creators (
         creatorID INT,
@@ -153,12 +165,14 @@
         PRIMARY KEY (creatorID)
     );
     
+    -- Defines the possible creator types (contributor, editor, author)
     DROP TABLE IF EXISTS creatorTypes;
     CREATE TABLE creatorTypes (
         creatorTypeID INTEGER PRIMARY KEY,
         creatorType TEXT
     );
     
+    -- Associates single or multiple creators to items
     DROP TABLE IF EXISTS itemCreators;
     CREATE TABLE itemCreators (
         itemID INT,
@@ -171,6 +185,7 @@
         FOREIGN KEY (creatorTypeID) REFERENCES creatorTypes(creatorTypeID)
     );
     
+    -- Collections (a.k.a. "projects") for holding items
     DROP TABLE IF EXISTS collections;
     CREATE TABLE collections (
         collectionID INT,
@@ -180,6 +195,7 @@
         FOREIGN KEY (parentCollectionID) REFERENCES collections(collectionID)
     );
     
+    -- Associates items with the various collections they belong to
     DROP TABLE IF EXISTS collectionItems;
     CREATE TABLE collectionItems (
         collectionID INT,
