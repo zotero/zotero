@@ -1,4 +1,4 @@
--- 35
+-- 36
 
     DROP TABLE IF EXISTS version;
     CREATE TABLE version (
@@ -206,6 +206,7 @@
         condition TEXT,
         operator TEXT,
         value TEXT,
+        required NONE,
         PRIMARY KEY(savedSearchID, searchConditionID),
         FOREIGN KEY (savedSearchID) REFERENCES savedSearches(savedSearchID)
     );

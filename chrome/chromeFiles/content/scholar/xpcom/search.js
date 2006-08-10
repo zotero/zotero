@@ -57,7 +57,8 @@ Scholar.Search.prototype.load = function(savedSearchID){
 			id: conditions[i]['searchConditionID'],
 			condition: conditions[i]['condition'],
 			operator: conditions[i]['operator'],
-			value: conditions[i]['value']
+			value: conditions[i]['value'],
+			required: conditions[i]['required']
 		};
 	}
 }
@@ -95,13 +96,18 @@ Scholar.Search.prototype.save = function(){
 	// TODO: use proper bound parameters once DB class is updated
 	for (var i in this._conditions){
 		var sql = "INSERT INTO savedSearchConditions (savedSearchID, "
-			+ "searchConditionID, condition, operator, value) VALUES (?,?,?,?,?)";
+			+ "searchConditionID, condition, operator, value, required) "
+			+ "VALUES (?,?,?,?,?,?)";
 		
-		var sqlParams = [this._savedSearchID, i, this._conditions[i]['condition'],
+		var sqlParams = [
+			this._savedSearchID, i, this._conditions[i]['condition'],
 			this._conditions[i]['operator']
 				? this._conditions[i]['operator'] : null,
 			this._conditions[i]['value']
-				? this._conditions[i]['value'] : null];
+				? this._conditions[i]['value'] : null,
+			this._conditions[i]['required']
+				? 1 : null
+		];
 		Scholar.DB.query(sql, sqlParams);
 	}
 	
@@ -111,7 +117,7 @@ Scholar.Search.prototype.save = function(){
 }
 
 
-Scholar.Search.prototype.addCondition = function(condition, operator, value){
+Scholar.Search.prototype.addCondition = function(condition, operator, value, required){
 	if (!Scholar.SearchConditions.hasOperator(condition, operator)){
 		throw ("Invalid operator '" + operator + "' for condition " + condition);
 	}
@@ -122,7 +128,8 @@ Scholar.Search.prototype.addCondition = function(condition, operator, value){
 		id: searchConditionID,
 		condition: condition,
 		operator: operator,
-		value: value
+		value: value,
+		required: required
 	};
 	
 	this._sql = null;
@@ -131,7 +138,7 @@ Scholar.Search.prototype.addCondition = function(condition, operator, value){
 }
 
 
-Scholar.Search.prototype.updateCondition = function(searchConditionID, condition, operator, value){
+Scholar.Search.prototype.updateCondition = function(searchConditionID, condition, operator, value, required){
 	if (typeof this._conditions[searchConditionID] == 'undefined'){
 		throw ('Invalid searchConditionID ' + searchConditionID + ' in updateCondition()');
 	}
@@ -144,7 +151,8 @@ Scholar.Search.prototype.updateCondition = function(searchConditionID, condition
 		id: searchConditionID,
 		condition: condition,
 		operator: operator,
-		value: value
+		value: value,
+		required: required
 	};
 	
 	this._sql = null;
@@ -162,7 +170,7 @@ Scholar.Search.prototype.removeCondition = function(searchConditionID){
 
 
 /*
- * Returns an array with 'condition', 'operator', and 'value'
+ * Returns an array with 'condition', 'operator', 'value', 'required'
  * for the given searchConditionID
  */
 Scholar.Search.prototype.getSearchCondition = function(searchConditionID){
@@ -217,6 +225,9 @@ Scholar.Search.prototype.getSQLParams = function(){
 Scholar.Search.prototype._buildQuery = function(){
 	var sql = 'SELECT itemID FROM items';
 	var sqlParams = [];
+	// Separate ANY conditions for 'required' condition support
+	var anySQL = '';
+	var anySQLParams = [];
 	
 	var tables = [];
 	
@@ -235,7 +246,8 @@ Scholar.Search.prototype._buildQuery = function(){
 					? this._conditions[i]['condition'] : false,
 				field: data['field'],
 				operator: this._conditions[i]['operator'],
-				value: this._conditions[i]['value']
+				value: this._conditions[i]['value'],
+				required: this._conditions[i]['required']
 			});
 			
 			var hasConditions = true;
@@ -262,19 +274,12 @@ Scholar.Search.prototype._buildQuery = function(){
 	if (hasConditions){
 		sql += " WHERE ";
 		
-		// Join conditions using appropriate operator
-		if (joinMode=='ANY'){
-			var binOp = ' OR ';
-		}
-		// Default to AND
-		else {
-			var binOp = ' AND ';
-		}
-		
 		for (var i in tables){
 			for (var j in tables[i]){
 				var openParens = 0;
 				var skipOperators = false;
+				var condSQL = '';
+				var condSQLParams = [];
 				
 				//
 				// Special table handling
@@ -284,7 +289,7 @@ Scholar.Search.prototype._buildQuery = function(){
 					case 'savedSearches':
 						break;
 					default:
-						sql += 'itemID IN (SELECT itemID FROM ' + i + ' WHERE (';
+						condSQL += 'itemID IN (SELECT itemID FROM ' + i + ' WHERE (';
 						openParens = 2;
 				}
 				
@@ -294,20 +299,20 @@ Scholar.Search.prototype._buildQuery = function(){
 				//
 				switch (tables[i][j]['name']){
 					case 'field':
-						sql += 'fieldID=? AND ';
-						sqlParams.push(
+						condSQL += 'fieldID=? AND ';
+						condSQLParams.push(
 							Scholar.ItemFields.getID(tables[i][j]['alias'])
 						);
 						break;
 					
 					case 'collectionID':
-						sql += "collectionID ";
+						condSQL += "collectionID ";
 						if (tables[i][j]['operator']=='isNot'){
 							sql += "NOT ";
 						}
 						// Add given collection id
-						sql += "IN (?,";
-						sqlParams.push({int:tables[i][j]['value']});
+						condSQL += "IN (?,";
+						condSQLParams.push({int:tables[i][j]['value']});
 						
 						// And descendents if recursive search
 						if (recursive){
@@ -315,79 +320,79 @@ Scholar.Search.prototype._buildQuery = function(){
 							var descendents = col.getDescendents(false, 'collection');
 							if (descendents){
 								for (var k in descendents){
-									sql += '?,';
-									sqlParams.push(descendents[k]['id']);
+									condSQL += '?,';
+									condSQLParams.push(descendents[k]['id']);
 								}
 							}
 						}
 						
 						// Strip final comma
-						sql = sql.substring(0, sql.length-1) + ")";
+						condSQL = condSQL.substring(0, condSQL.length-1) + ")";
 						
 						skipOperators = true;
 						break;
 					
 					case 'savedSearchID':
-						sql += "itemID ";
+						condSQL += "itemID ";
 						if (tables[i][j]['operator']=='isNot'){
-							sql += "NOT ";
+							condSQL += "NOT ";
 						}
-						sql += "IN (";
+						condSQL += "IN (";
 						var search = new Scholar.Search();
 						search.load(tables[i][j]['value']);
-						sql += search.getSQL();
+						condSQL += search.getSQL();
 						var subpar = search.getSQLParams();
 						for (var k in subpar){
-							sqlParams.push(subpar[k]);
+							condSQLParams.push(subpar[k]);
 						}
-						sql += ")";
+						condSQL += ")";
 						
 						skipOperators = true;
 						break;
 					
 					case 'tag':
-						sql += "tagID IN (SELECT tagID FROM tags WHERE ";
+						condSQL += "tagID IN (SELECT tagID FROM tags WHERE ";
 						openParens++;
 						break;
 					
 					case 'creator':
-						sql += "creatorID IN (SELECT creatorID FROM creators "
+						condSQL += "creatorID IN (SELECT creatorID FROM creators "
 							+ "WHERE ";
 						openParens++;
 						break;
 				}
 				
 				if (!skipOperators){
-					sql += tables[i][j]['field'];
+					condSQL += tables[i][j]['field'];
 					switch (tables[i][j]['operator']){
 						case 'contains':
-							sql += ' LIKE ?';
-							sqlParams.push('%' + tables[i][j]['value'] + '%');
+							condSQL += ' LIKE ?';
+							condSQLParams.push('%' + tables[i][j]['value'] + '%');
 							break;
 							
 						case 'doesNotContain':
-							sql += ' NOT LIKE ?';
-							sqlParams.push('%' + tables[i][j]['value'] + '%');
+							condSQL += ' NOT LIKE ?';
+							condSQLParams.push('%' + tables[i][j]['value'] + '%');
 							break;
 							
 						case 'is':
 							sql += '=?';
-							sqlParams.push(tables[i][j]['value']);
+							condSQLParams.push(tables[i][j]['value']);
 							break;
 							
 						case 'isNot':
-							sql += '!=?';
-							sqlParams.push(tables[i][j]['value']);
+							condSQL += '!=?';
+							condSQLParams.push(tables[i][j]['value']);
 							break;
 							
 						case 'greaterThan':
 							sql += '>?';
-							sqlParams.push({int:tables[i][j]['value']});
+							condSQLParams.push({int:tables[i][j]['value']});
 							break;
 							
 						case 'lessThan':
-							sql += '<?';
-							sqlParams.push({int:tables[i][j]['value']});
+							condSQL += '<?';
+							condSQLParams.push({int:tables[i][j]['value']});
 							break;
 						
 						case 'isBefore':
@@ -402,14 +407,33 @@ Scholar.Search.prototype._buildQuery = function(){
 				
 				// Close open parentheses
 				for (var k=openParens; k>0; k--){
-					sql += ')';
+					condSQL += ')';
 				}
 				
-				sql += binOp;
+				// Keep non-required conditions separate if in ANY mode
+				if (!tables[i][j]['required'] && joinMode=='ANY'){
+					condSQL += ' OR ';
+					anySQL += condSQL;
+					anySQLParams = anySQLParams.concat(condSQLParams);
+				}
+				else {
+					condSQL += ' AND ';
+					sql += condSQL;
+					sqlParams = sqlParams.concat(condSQLParams);
+				}
 			}
 		}
 		
-		sql = sql.substring(0, sql.length-binOp.length);
+		// Add on ANY conditions
+		if (anySQL){
+			sql += '(' + anySQL;
+			sqlParams = sqlParams.concat(anySQLParams);
+			sql = sql.substring(0, sql.length-4); // remove last ' OR '
+			sql += ')';
+		}
+		else {
+			sql = sql.substring(0, sql.length-5); // remove last ' AND '
+		}
 	}
 	
 	this._sql = sql;

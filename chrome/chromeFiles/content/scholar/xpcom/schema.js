@@ -391,7 +391,7 @@ Scholar.Schema = new function(){
 		//
 		// Change this value to match the schema version
 		//
-		var toVersion = 35;
+		var toVersion = 36;
 		
 		if (toVersion != _getSchemaSQLVersion()){
 			throw('Schema version does not match version in _migrateSchema()');
@@ -415,7 +415,7 @@ Scholar.Schema = new function(){
 				}
 			}
 			
-			if (i==35){
+			if (i==36){
 				_initializeSchema();
 			}
 		}
