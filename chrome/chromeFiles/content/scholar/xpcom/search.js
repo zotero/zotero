@@ -27,8 +27,9 @@ Scholar.Search.prototype.setName = function(name){
  */
 Scholar.Search.prototype.load = function(savedSearchID){
 	var sql = "SELECT savedSearchName, MAX(searchConditionID) AS maxID "
-		+ "FROM savedSearches NATURAL JOIN savedSearchConditions "
-		+ "WHERE savedSearchID=" + savedSearchID + " GROUP BY savedSearchID";
+		+ "FROM savedSearches LEFT JOIN savedSearchConditions "
+		+ "USING (savedSearchID) WHERE savedSearchID=" + savedSearchID
+		+ " GROUP BY savedSearchID";
 	var row = Scholar.DB.rowQuery(sql);
 	
 	if (!row){
@@ -151,16 +152,6 @@ Scholar.Search.prototype.removeCondition = function(searchConditionID){
 	}
 	
 	delete this._conditions[searchConditionID];
-	
-	var i = searchConditionID + 1;
-	while (typeof this._conditions[i] != 'undefined'){
-		this._conditions[i-1] = this._conditions[i];
-		this._conditions[i-1]['id']--;
-		delete this._conditions[i];
-		i++;
-	}
-	
-	this._maxSearchConditionID--;
 }
 
 
@@ -264,11 +255,12 @@ Scholar.Search.prototype._buildQuery = function(){
 		sql += " WHERE ";
 		
 		// Join conditions using appropriate operator
-		if (joinMode=='ALL'){
-			var binOp = ' AND ';
-		}
-		else {
+		if (joinMode=='ANY'){
 			var binOp = ' OR ';
+		}
+		// Default to AND
+		else {
+			var binOp = ' AND ';
 		}
 		
 		for (i in tables){
