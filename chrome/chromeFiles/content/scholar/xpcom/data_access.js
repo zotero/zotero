@@ -223,7 +223,7 @@ Scholar.Item.prototype.getCreators = function(){
 /*
  * Set or update the creator at the specified position
  */
-Scholar.Item.prototype.setCreator = function(orderIndex, firstName, lastName, creatorTypeID){
+Scholar.Item.prototype.setCreator = function(orderIndex, firstName, lastName, creatorTypeID, isInstitution){
 	if (this.getID() && !this._creatorsLoaded){
 		this._loadCreators();
 	}
@@ -236,11 +236,14 @@ Scholar.Item.prototype.setCreator = function(orderIndex, firstName, lastName, cr
 		lastName = '';
 	}
 	
+	isInstitution = !!isInstitution;
+	
 	// If creator at this position hasn't changed, cancel
 	if (this._creators.has(orderIndex) &&
 		this._creators.get(orderIndex)['firstName']==firstName &&
 		this._creators.get(orderIndex)['lastName']==lastName &&
-		this._creators.get(orderIndex)['creatorTypeID']==creatorTypeID){
+		this._creators.get(orderIndex)['creatorTypeID']==creatorTypeID &&
+		this._creators.get(orderIndex)['isInstitution']==isInstitution){
 		return false;
 	}
 	
@@ -252,6 +255,7 @@ Scholar.Item.prototype.setCreator = function(orderIndex, firstName, lastName, cr
 	creator['firstName'] = firstName;
 	creator['lastName'] = lastName;
 	creator['creatorTypeID'] = creatorTypeID;
+	creator['isInstitution'] = isInstitution;
 	
 	this._creators.set(orderIndex, creator);
 	this._changedCreators.set(orderIndex);
@@ -283,7 +287,7 @@ Scholar.Item.prototype.removeCreator = function(orderIndex){
 }
 
 
-Scholar.Item.prototype.creatorExists = function(firstName, lastName, creatorTypeID, skipIndex){
+Scholar.Item.prototype.creatorExists = function(firstName, lastName, creatorTypeID, isInstitution, skipIndex){
 	for (var j=0, len=this.numCreators(); j<len; j++){
 		if (typeof skipIndex!='undefined' && skipIndex==j){
 			continue;
@@ -292,7 +296,8 @@ Scholar.Item.prototype.creatorExists = function(firstName, lastName, creatorType
 		
 		if (firstName==creator2['firstName'] &&
 			lastName==creator2['lastName'] &&
-			creatorTypeID==creator2['creatorTypeID']){
+			creatorTypeID==creator2['creatorTypeID'] &&
+			isInstitution==creator2['isInstitution']){
 			return true;
 		}
 	}
@@ -439,7 +444,8 @@ Scholar.Item.prototype.save = function(){
 				for (var i=0, len=this.numCreators(); i<len; i++){
 					var creator = this.getCreator(i);
 					if (this.creatorExists(creator['firstName'],
-							creator['lastName'], creator['creatorTypeID'], i)){
+							creator['lastName'], creator['creatorTypeID'],
+							creator['isInstitution'], i)){
 						throw('Cannot add duplicate creator/creatorType '
 							+ 'to item ' + this.getID());
 					}
@@ -467,14 +473,16 @@ Scholar.Item.prototype.save = function(){
 					// See if this is an existing creator
 					var creatorID = Scholar.Creators.getID(
 							creator['firstName'],
-							creator['lastName']
+							creator['lastName'],
+							creator['isInstitution']
 					);
 					
 					// If not, add it
 					if (!creatorID){
 						creatorID = Scholar.Creators.add(
 							creator['firstName'],
-							creator['lastName']
+							creator['lastName'],
+							creator['isInstitution']
 						);
 						Scholar.History.add('creators', 'creatorID', creatorID);
 					}
@@ -724,14 +732,16 @@ Scholar.Item.prototype.save = function(){
 					// See if this is an existing creator
 					var creatorID = Scholar.Creators.getID(
 							creator['firstName'],
-							creator['lastName']
+							creator['lastName'],
+							creator['isInstitution']
 					);
 					
 					// If not, add it
 					if (!creatorID){
 						creatorID = Scholar.Creators.add(
 							creator['firstName'],
-							creator['lastName']
+							creator['lastName'],
+							creator['isInstitution']
 						);
 						Scholar.History.add('creators', 'creatorID', creatorID);
 					}
@@ -1479,6 +1489,7 @@ Scholar.Item.prototype.toArray = function(){
 			arr['creators'][i] = [];
 			arr['creators'][i]['firstName'] = creators[i]['firstName'];
 			arr['creators'][i]['lastName'] = creators[i]['lastName'];
+			arr['creators'][i]['isInstitution'] = creators[i]['isInstitution'];
 			// Convert creatorTypeIDs to text
 			arr['creators'][i]['creatorType'] =
 				Scholar.CreatorTypes.getName(creators[i]['creatorTypeID']);
@@ -1576,6 +1587,7 @@ Scholar.Item.prototype._loadCreators = function(){
 		var creator = new Array();
 		creator['firstName'] = creators[i]['firstName'];
 		creator['lastName'] = creators[i]['lastName'];
+		creator['isInstitution'] = creators[i]['isInstitution'];
 		creator['creatorTypeID'] = creators[i]['creatorTypeID'];
 		// Save creator data into Hash, indexed by orderIndex
 		this._creators.set(creators[i]['orderIndex'], creator);
@@ -2667,7 +2679,7 @@ Scholar.Collections = new function(){
  * Same structure as Scholar.Tags -- make changes in both places if possible
  */
 Scholar.Creators = new function(){
-	var _creators = new Array; // indexed by first%%%last hash
+	var _creators = new Array; // indexed by first%%%last%%%isInstitution hash
 	var _creatorsByID = new Array; // indexed by creatorID
 	
 	this.get = get;
@@ -2700,16 +2712,24 @@ Scholar.Creators = new function(){
 	/*
 	 * Returns the creatorID matching given name and type
 	 */
-	function getID(firstName, lastName){
-		var hash = firstName + '%%%' + lastName;
+	function getID(firstName, lastName, isInstitution){
+		if (isInstitution){
+			firstName = '';
+			isInstitution = 1;
+		}
+		else {
+			isInstitution = 0;
+		}
+		
+		var hash = firstName + '%%%' + lastName + '%%%' + isInstitution;
 		
 		if (_creators[hash]){
 			return _creators[hash];
 		}
 		
 		var sql = 'SELECT creatorID FROM creators '
-			+ 'WHERE firstName=? AND lastName=?';
-		var params = [{string: firstName}, {string: lastName}];
+			+ 'WHERE firstName=? AND lastName=? AND isInstitution=?';
+		var params = [{string: firstName}, {string: lastName}, isInstitution];
 		var creatorID = Scholar.DB.valueQuery(sql, params);
 		
 		if (creatorID){
@@ -2725,14 +2745,17 @@ Scholar.Creators = new function(){
 	 *
 	 * Returns new creatorID
 	 */
-	function add(firstName, lastName){
+	function add(firstName, lastName, isInstitution){
 		Scholar.debug('Adding new creator', 4);
 		
 		Scholar.DB.beginTransaction();
 		
-		var sql = 'INSERT INTO creators VALUES (?,?,?)';
+		var sql = 'INSERT INTO creators VALUES (?,?,?,?)';
 		var rnd = Scholar.getRandomID('creators', 'creatorID');
-		var params = [{int: rnd}, {string: firstName}, {string: lastName}];
+		var params = [
+			rnd, isInstitution ? '' : {string: firstName}, {string: lastName},
+			isInstitution ? 1 : 0
+		];
 		Scholar.DB.query(sql, params);
 		
 		Scholar.DB.commitTransaction();
@@ -2774,7 +2797,8 @@ Scholar.Creators = new function(){
 		if (!creator){
 			return false;
 		}
-		return creator['firstName'] + '%%%' + creator['lastName'];
+		return creator['firstName'] + '%%%' + creator['lastName'] + '%%%' +
+			creator['isInstitution'];
 	}
 }
 

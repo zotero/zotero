@@ -1,4 +1,4 @@
--- 36
+-- 37
 
     DROP TABLE IF EXISTS version;
     CREATE TABLE version (
@@ -162,6 +162,7 @@
         creatorID INT,
         firstName TEXT,
         lastName TEXT,
+        isInstitution INT,
         PRIMARY KEY (creatorID)
     );
     
@@ -685,21 +686,21 @@
     INSERT INTO "creatorTypes" VALUES(3, "editor");
     INSERT INTO "creatorTypes" VALUES(4, "translator");
     
-    INSERT INTO "creators" VALUES(1, 'Susan B.', 'Barnes');
-    INSERT INTO "creators" VALUES(2, 'J.S.', 'Bassard');
-    INSERT INTO "creators" VALUES(3, 'Mary', 'Chayko');
-    INSERT INTO "creators" VALUES(4, 'Michael', 'Civin');
-    INSERT INTO "creators" VALUES(5, 'Paul', 'DiMaggio');
-    INSERT INTO "creators" VALUES(6, 'Leon', 'Festinger');
-    INSERT INTO "creators" VALUES(7, 'Stanley', 'Schachter');
-    INSERT INTO "creators" VALUES(8, 'Kurt', 'Back');
-    INSERT INTO "creators" VALUES(9, 'Steven G.', 'Jones');
-    INSERT INTO "creators" VALUES(10, 'J.C.R.', 'Licklider');
-    INSERT INTO "creators" VALUES(11, 'Robert W.', 'Taylor');
-    INSERT INTO "creators" VALUES(12, 'Yuliang', 'Lui');
-    INSERT INTO "creators" VALUES(13, 'Sherry', 'Turkle');
-    INSERT INTO "creators" VALUES(14, 'J.', 'Vallee');
-    INSERT INTO "creators" VALUES(15, 'Barry', 'Wellman');
+    INSERT INTO "creators" VALUES(1, 'Susan B.', 'Barnes', NULL);
+    INSERT INTO "creators" VALUES(2, 'J.S.', 'Bassard', NULL);
+    INSERT INTO "creators" VALUES(3, 'Mary', 'Chayko', NULL);
+    INSERT INTO "creators" VALUES(4, 'Michael', 'Civin', NULL);
+    INSERT INTO "creators" VALUES(5, 'Paul', 'DiMaggio', NULL);
+    INSERT INTO "creators" VALUES(6, 'Leon', 'Festinger', NULL);
+    INSERT INTO "creators" VALUES(7, 'Stanley', 'Schachter', NULL);
+    INSERT INTO "creators" VALUES(8, 'Kurt', 'Back', NULL);
+    INSERT INTO "creators" VALUES(9, 'Steven G.', 'Jones', NULL);
+    INSERT INTO "creators" VALUES(10, 'J.C.R.', 'Licklider', NULL);
+    INSERT INTO "creators" VALUES(11, 'Robert W.', 'Taylor', NULL);
+    INSERT INTO "creators" VALUES(12, 'Yuliang', 'Lui', NULL);
+    INSERT INTO "creators" VALUES(13, 'Sherry', 'Turkle', NULL);
+    INSERT INTO "creators" VALUES(14, 'J.', 'Vallee', NULL);
+    INSERT INTO "creators" VALUES(15, 'Barry', 'Wellman', NULL);
     
     INSERT INTO "itemCreators" VALUES(1, 1, 1, 0);
     INSERT INTO "itemCreators" VALUES(2, 1, 1, 0);
