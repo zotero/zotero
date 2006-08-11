@@ -1,9 +1,9 @@
--- 41
+-- 42
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-08-08 17:12:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-08-11 11:18:00'));
 
-REPLACE INTO "translators" VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006-06-28 23:08:00', 4, 'Amazon.com Scraper', 'Simon Kornblith', '^http://www\.amazon\.com/(?:gp/(?:product|search)/|exec/obidos/search-handle-url/|s/)', 
+REPLACE INTO "translators" VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006-08-11 11:18:00', 4, 'Amazon.com', 'Simon Kornblith', '^http://www\.amazon\.com/(?:gp/(?:product|search)/|exec/obidos/search-handle-url/|s/)', 
 'function detectWeb(doc, url) {
 	var searchRe = new RegExp(''^http://www\.amazon\.com/(gp/search/|exec/obidos/search-handle-url/|s/)'');
 	if(searchRe.test(doc.location.href)) {
@@ -28,7 +28,7 @@ REPLACE INTO "translators" VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006
 		var elmts = Scholar.Utilities.gatherElementsOnXPath(doc, doc, xpath, nsResolver);
 		for (var i = 0; i < elmts.length; i++) {
 			var elmt = elmts[i];
-			var author = Scholar.Utilities.getNode(doc, elmt, ''./text()[1]'', nsResolver).nodeValue;
+			var author = doc.evaluate(''./text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
 			
 			newItem.creators.push(Scholar.Utilities.cleanAuthor(author, "author"));
 		}
@@ -40,15 +40,15 @@ REPLACE INTO "translators" VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006
 	for (var i = 0; i < elmts.length; i++) {
 		try {
 			var elmt = elmts[i];
-			var attribute = Scholar.Utilities.cleanString(Scholar.Utilities.getNode(doc, elmt, ''./B[1]/text()[1]'', nsResolver).nodeValue);
-			if(Scholar.Utilities.getNode(doc, elmt, ''./text()[1]'', nsResolver)) {
-				var value = Scholar.Utilities.cleanString(Scholar.Utilities.getNode(doc, elmt, ''./text()[1]'', nsResolver).nodeValue);
+			var attribute = Scholar.Utilities.cleanString(doc.evaluate(''./B[1]/text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue);
+			if(doc.evaluate(''./text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+				var value = Scholar.Utilities.cleanString(doc.evaluate(''./text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue);
 				if(attribute == "Publisher:") {
 					if(value.lastIndexOf("(") != -1) {
 						var date = value.substring(value.lastIndexOf("(")+1, value.length-1);
 						jsDate = new Date(date);
 						if(!isNaN(jsDate.valueOf())) {
-							date = Scholar.Utilities.dateToISO(jsDate);
+							date = Scholar.Utilities.dateToSQL(jsDate);
 						}
 						newItem.date = date;
 						
@@ -74,7 +74,7 @@ REPLACE INTO "translators" VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006
 	
 	var xpath = ''/html/body/table/tbody/tr/td[2]/form/div[@class="buying"]/b[@class="sans"]'';
 	var elmts = Scholar.Utilities.gatherElementsOnXPath(doc, doc, xpath, nsResolver);
-	var title = Scholar.Utilities.cleanString(Scholar.Utilities.getNode(doc, elmts[0], ''./text()[1]'', nsResolver).nodeValue);
+	var title = Scholar.Utilities.cleanString(doc.evaluate(''./text()[1]'', elmts[0], nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue);
 	if(title.lastIndexOf("(") != -1 && title.lastIndexOf(")") == title.length-1) {
 		title = title.substring(0, title.lastIndexOf("(")-1);
 	}
@@ -113,7 +113,7 @@ function doWeb(doc, url) {
 			uris.push(i);
 		}
 		
-		Scholar.Utilities.processDocuments(null, uris, function(browser) { scrape(browser.contentDocument) },
+		Scholar.Utilities.processDocuments(uris, function(doc) { scrape(doc) },
 			function() { Scholar.done(); }, function() {});
 		
 		Scholar.wait();
@@ -122,7 +122,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO "translators" VALUES ('838d8849-4ffb-9f44-3d0d-aa8a0a079afe', '2006-06-26 16:01:00', 4, 'WorldCat Scraper', 'Simon Kornblith', '^http://(?:new)?firstsearch\.oclc\.org/WebZ/',
+REPLACE INTO "translators" VALUES ('838d8849-4ffb-9f44-3d0d-aa8a0a079afe', '2006-06-26 16:01:00', 4, 'WorldCat', 'Simon Kornblith', '^http://(?:new)?firstsearch\.oclc\.org/WebZ/',
 'function detectWeb(doc, url) {
 	if(doc.title == ''FirstSearch: WorldCat Detailed Record'') {
 		return "book";
@@ -195,7 +195,7 @@ REPLACE INTO "translators" VALUES ('838d8849-4ffb-9f44-3d0d-aa8a0a079afe', '2006
 	}
 	
 	Scholar.Utilities.HTTPUtilities.doPost(newUri, ''exportselect=''+exportselect+''&exporttype=plaintext'', null, function(text) {
-		Scholar.Utilities.debugPrint(text);
+		Scholar.Utilities.debug(text);
 		var lineRegexp = new RegExp();
 		lineRegexp.compile("^([\\w() ]+): *(.*)$");
 		
@@ -240,17 +240,17 @@ REPLACE INTO "translators" VALUES ('838d8849-4ffb-9f44-3d0d-aa8a0a079afe', '2006
 							newItem.creators.push(Scholar.Utilities.cleanAuthor(authors[j], "author", true));
 						}
 					} else {
-							newItem.creators.push(Scholar.Utilities.trimString(match[2]));
+							newItem.creators.push(Scholar.Utilities.cleanString(match[2]));
 					}
 				} else if(match[1] == ''Publication'') {
 					// Don''t even try to deal with this. The WorldCat metadata is of poor enough quality that this isn''t worth it.
-					match[2] = Scholar.Utilities.trimString(match[2]);
+					match[2] = Scholar.Utilities.cleanString(match[2]);
 					if(match[2].substring(match[2].length-1) == '','') {
 							match[2] = match[2].substring(0, match[2].length-1);
 					}
 					newItem.publisher = match[2];
 				/*} else if(match[1] == ''Language'') {
-					.addStatement(uri, prefixDC + ''language'', Scholar.Utilities.trimString(match[2]));*/
+					.addStatement(uri, prefixDC + ''language'', Scholar.Utilities.cleanString(match[2]));*/
 				} else if(match[1] == ''Standard No'') {
 					var identifiers = match[2].split(/ +/);
 					var j=0;
@@ -287,7 +287,7 @@ REPLACE INTO "translators" VALUES ('838d8849-4ffb-9f44-3d0d-aa8a0a079afe', '2006
 	Scholar.wait();
 }');
 
-REPLACE INTO "translators" VALUES ('88915634-1af6-c134-0171-56fd198235ed', '2006-06-26 21:40:00', 4, 'LOC/Voyager WebVoyage Scraper', 'Simon Kornblith', 'Pwebrecon\.cgi',
+REPLACE INTO "translators" VALUES ('88915634-1af6-c134-0171-56fd198235ed', '2006-06-26 21:40:00', 4, 'LOC/Voyager WebVoyage', 'Simon Kornblith', 'Pwebrecon\.cgi',
 'function detectWeb(doc, url) {
 	var export_options = doc.forms.namedItem(''frm'').elements.namedItem(''RD'').options;
 	for(var i in export_options) {
@@ -335,7 +335,7 @@ REPLACE INTO "translators" VALUES ('88915634-1af6-c134-0171-56fd198235ed', '2006
 		// Go through table rows
 		for(var i=0; i<tableRows.length; i++) {
 			// CHK is what we need to get it all as one file
-			var input = Scholar.Utilities.getNode(doc, tableRows[i], ''./td/input[@name="CHK"]'', nsResolver);
+			var input = doc.evaluate(''./td/input[@name="CHK"]'', tableRows[i], nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 			checkboxes[i] = input.value;
 			var links = Scholar.Utilities.gatherElementsOnXPath(doc, tableRows[i], ''.//a'', nsResolver);
 			urls[i] = links[0].href;
@@ -414,7 +414,7 @@ REPLACE INTO "translators" VALUES ('88915634-1af6-c134-0171-56fd198235ed', '2006
 	Scholar.wait();
 }');
 
-REPLACE INTO "translators" VALUES ('d921155f-0186-1684-615c-ca57682ced9b', '2006-06-26 16:01:00', 4, 'JSTOR Scraper', 'Simon Kornblith', '^http://www\.jstor\.org/(?:view|browse|search/)', 
+REPLACE INTO "translators" VALUES ('d921155f-0186-1684-615c-ca57682ced9b', '2006-06-26 16:01:00', 4, 'JSTOR', 'Simon Kornblith', '^http://www\.jstor\.org/(?:view|browse|search/)', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -484,7 +484,7 @@ function doWeb(doc, url) {
 			// Go through links
 			for(var j=0; j<links.length; j++) {
 				if(tagRegexp.test(links[j].href)) {
-					var text = Scholar.Utilities.getNode(doc, tableRows[i], ''.//strong/text()'', null);
+					var text = doc.evaluate(''.//strong/text()'', tableRows[i], null, XPathResult.ANY_TYPE, null).iterateNext();
 					if(text && text.nodeValue) {
 						text = Scholar.Utilities.cleanString(text.nodeValue);
 						if(availableItems[links[j].href]) {
@@ -562,7 +562,7 @@ function doWeb(doc, url) {
 							if(isNaN(date.valueOf())) {
 								newItem.date = fieldContent;
 							} else {
-								newItem.date = Scholar.Utilities.dateToISO(date);
+								newItem.date = Scholar.Utilities.dateToSQL(date);
 							}
 						} else if(fieldCode == "PP") {
 							newItem.pages = fieldContent;
@@ -589,7 +589,7 @@ function doWeb(doc, url) {
 	Scholar.wait();
 }');
 
-REPLACE INTO "translators" VALUES ('e85a3134-8c1a-8644-6926-584c8565f23e', '2006-06-26 16:01:00', 4, 'History Cooperative Scraper', 'Simon Kornblith', '^http://www\.historycooperative\.org/(?:journals/.+/.+/.+\.html$|cgi-bin/search.cgi)', 
+REPLACE INTO "translators" VALUES ('e85a3134-8c1a-8644-6926-584c8565f23e', '2006-06-26 16:01:00', 4, 'History Cooperative', 'Simon Kornblith', '^http://www\.historycooperative\.org/(?:journals/.+/.+/.+\.html$|cgi-bin/search.cgi)', 
 'function detectWeb(doc, url) {
 	if(doc.title == "History Cooperative: Search Results") {
 		return "multiple";
@@ -647,7 +647,7 @@ function doWeb(doc, url) {
 			uris.push(i);
 		}
 		
-		Scholar.Utilities.processDocuments(null, uris, function(browser) { scrape(browser.contentDocument) },
+		Scholar.Utilities.processDocuments(uris, function(doc) { scrape(doc) },
 			function() { Scholar.done(); }, function() {});
 		
 		Scholar.wait();
@@ -656,7 +656,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO "translators" VALUES ('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '2006-08-06 21:45:00', 4, 'InnoPAC Scraper', 'Simon Kornblith', '^http://[^/]+/(?:search/|record=)',
+REPLACE INTO "translators" VALUES ('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '2006-08-06 21:45:00', 4, 'InnoPAC', 'Simon Kornblith', '^http://[^/]+/(?:search/|record=)',
 'function detectWeb(doc, url) {
 	// First, check to see if the URL alone reveals InnoPAC, since some sites don''t reveal the MARC button
 	var matchRegexp = new RegExp(''^(http://[^/]+/search/[^/]+/[^/]+/1\%2C[^/]+/)frameset(.+)$'');
@@ -709,9 +709,7 @@ REPLACE INTO "translators" VALUES ('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '2006
 	var marc = Scholar.loadTranslator("import", "a6ee60df-1ddc-4aae-bb25-45e0537be973");
 	
 	if(newUri) {	// single page
-		Scholar.Utilities.loadDocument(newUri, function(newBrowser) {
-			newDoc = newBrowser.contentDocument;
-			
+		Scholar.Utilities.loadDocument(newUri, function(newDoc) {
 			var namespace = newDoc.documentElement.namespaceURI;
 			var nsResolver = namespace ? function(prefix) {
 			  if (prefix == ''x'') return namespace; else return null;
@@ -720,7 +718,7 @@ REPLACE INTO "translators" VALUES ('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '2006
 			var xpath = ''//pre'';
 			var elmts = Scholar.Utilities.gatherElementsOnXPath(newDoc, newDoc, xpath, nsResolver);
 			
-			var text = Scholar.Utilities.getNode(doc, elmts[0], ''./text()[1]'', nsResolver).nodeValue;
+			var text = doc.evaluate(''./text()[1]'', elmts[0], nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
 			
 			var newItem = new Scholar.Item();
 			newItem.source = uri;
@@ -781,7 +779,7 @@ REPLACE INTO "translators" VALUES ('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '2006
 		// Go through table rows
 		for(var i=0; i<tableRows.length; i++) {
 			// CHK is what we need to get it all as one file
-			var input = Scholar.Utilities.getNode(doc, tableRows[i], ''./td/input[@type="checkbox"]'', nsResolver);
+			var input = doc.evaluate(''./td/input[@type="checkbox"]'', tableRows[i], nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 			checkboxes[i] = input.name+"="+escape(input.value);
 			var links = Scholar.Utilities.gatherElementsOnXPath(doc, tableRows[i], ''.//a'', nsResolver);
 			urls[i] = links[0].href;
@@ -836,7 +834,7 @@ REPLACE INTO "translators" VALUES ('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '2006
 	Scholar.wait();
 }');
 
-REPLACE INTO "translators" VALUES ('add7c71c-21f3-ee14-d188-caf9da12728b', '2006-06-26 16:01:00', 4, 'SIRSI 2003+ Scraper', 'Simon Kornblith', '/uhtbin/cgisirsi',
+REPLACE INTO "translators" VALUES ('add7c71c-21f3-ee14-d188-caf9da12728b', '2006-06-26 16:01:00', 4, 'SIRSI 2003+', 'Simon Kornblith', '/uhtbin/cgisirsi',
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -872,12 +870,12 @@ REPLACE INTO "translators" VALUES ('add7c71c-21f3-ee14-d188-caf9da12728b', '2006
 	for (var i = 0; i < elmts.length; i++) {
 		var elmt = elmts[i];
 		try {
-			var node = Scholar.Utilities.getNode(doc, elmt, ''./TD[1]/A[1]/text()[1]'', nsResolver);
+			var node = doc.evaluate(''./TD[1]/A[1]/text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 			if(!node) {
-				var node = Scholar.Utilities.getNode(doc, elmt, ''./TD[1]/text()[1]'', nsResolver);
+				var node = doc.evaluate(''./TD[1]/text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 			}
 			if(node) {
-				var field = Scholar.Utilities.superCleanString(Scholar.Utilities.getNode(doc, elmt, ''./TH[1]/text()[1]'', nsResolver).nodeValue);
+				var field = Scholar.Utilities.superCleanString(doc.evaluate(''./TH[1]/text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue);
 				field = field.toLowerCase();
 				var value = Scholar.Utilities.superCleanString(node.nodeValue);
 				if(field == "publisher") {
@@ -907,7 +905,7 @@ REPLACE INTO "translators" VALUES ('add7c71c-21f3-ee14-d188-caf9da12728b', '2006
 		} catch (e) {}
 	}
 	
-	var callNumber = Scholar.Utilities.getNode(doc, doc, ''//tr/td[1][@class="holdingslist"]/text()'', nsResolver);
+	var callNumber = doc.evaluate(''//tr/td[1][@class="holdingslist"]/text()'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 	if(callNumber && callNumber.nodeValue) {
 		newItem.callNumber = callNumber.nodeValue;
 	}
@@ -930,7 +928,7 @@ function doWeb(doc, url) {
 		var tableRows = Scholar.Utilities.gatherElementsOnXPath(doc, doc, ''//td[@class="searchsum"]/table[//input[@value="Details"]]'', nsResolver);
 		// Go through table rows
 		for(var i=1; i<tableRows.length; i++) {
-			var input = Scholar.Utilities.getNode(doc, tableRows[i], ''.//input[@value="Details"]'', nsResolver);
+			var input = doc.evaluate(''.//input[@value="Details"]'', tableRows[i], nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 			checkboxes[i] = input.name;
 			var text = Scholar.Utilities.getNodeString(doc, tableRows[i], ''.//label/strong//text()'', nsResolver);
 			if(text) {
@@ -948,14 +946,14 @@ function doWeb(doc, url) {
 		var m = hostRe.exec(doc.location.href);
 		var hitlist = doc.forms.namedItem("hitlist");
 		var baseUrl = m[0]+hitlist.getAttribute("action")+"?first_hit="+hitlist.elements.namedItem("first_hit").value+"&last_hit="+hitlist.elements.namedItem("last_hit").value;
-		Scholar.Utilities.debugPrint(baseUrl);
+		Scholar.Utilities.debug(baseUrl);
 		
 		var uris = new Array();
 		for(var i in items) {
 			uris.push(baseUrl+"&"+checkboxes[i]+"=Details");
 		}
 		
-		Scholar.Utilities.processDocuments(null, uris, function(browser) { scrape(browser.contentDocument) },
+		Scholar.Utilities.processDocuments(uris, function(doc) { scrape(doc) },
 			function() { Scholar.done() }, function() {});
 		
 		Scholar.wait();
@@ -963,7 +961,7 @@ function doWeb(doc, url) {
 }
 ');
 
-REPLACE INTO "translators" VALUES ('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '2006-06-26 16:01:00', 4, 'ProQuest Scraper', 'Simon Kornblith', '^http://proquest\.umi\.com/pqdweb\?((?:.*\&)?did=.*&Fmt=[0-9]|(?:.*\&)Fmt=[0-9].*&did=|(?:.*\&)searchInterface=)',
+REPLACE INTO "translators" VALUES ('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '2006-06-26 16:01:00', 4, 'ProQuest', 'Simon Kornblith', '^http://proquest\.umi\.com/pqdweb\?((?:.*\&)?did=.*&Fmt=[0-9]|(?:.*\&)Fmt=[0-9].*&did=|(?:.*\&)searchInterface=)',
 'function detectWeb(doc, url) {
 	if(doc.title == "Results") {
 		return "magazineArticle";
@@ -1010,29 +1008,29 @@ REPLACE INTO "translators" VALUES ('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '2006
 	var elmts = Scholar.Utilities.gatherElementsOnXPath(doc, doc, xpath, nsResolver);
 	for (var i = 0; i < elmts.length; i++) {
 		var elmt = elmts[i];
-		var field = Scholar.Utilities.superCleanString(Scholar.Utilities.getNode(doc, elmt, ''./TD[1]/text()[1]'', nsResolver).nodeValue).toLowerCase();
+		var field = Scholar.Utilities.superCleanString(doc.evaluate(''./TD[1]/text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue).toLowerCase();
 		if(field == "publication title") {
-			var publication = Scholar.Utilities.getNode(doc, elmt, ''./TD[2]/A[1]/text()[1]'', nsResolver);
+			var publication = doc.evaluate(''./TD[2]/A[1]/text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 			if(publication.nodeValue) {
 				newItem.publicationTitle = Scholar.Utilities.superCleanString(publication.nodeValue);
 			}
 			
-			var place = Scholar.Utilities.getNode(doc, elmt, ''./TD[2]/text()[1]'', nsResolver);
+			var place = doc.evaluate(''./TD[2]/text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 			if(place.nodeValue) {
 				newItem.place = Scholar.Utilities.superCleanString(place.nodeValue);
 			}
 			
-			var date = Scholar.Utilities.getNode(doc, elmt, ''./TD[2]/A[2]/text()[1]'', nsResolver);		
+			var date = doc.evaluate(''./TD[2]/A[2]/text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();		
 			if(date.nodeValue) {
 				date = date.nodeValue;
 				var jsDate = new Date(Scholar.Utilities.superCleanString(date));
 				if(!isNaN(jsDate.valueOf())) {
-					date = Scholar.Utilities.dateToISO(jsDate);
+					date = Scholar.Utilities.dateToSQL(jsDate);
 				}
 				newItem.date = date;
 			}
 			
-			var moreInfo = Scholar.Utilities.getNode(doc, elmt, ''./TD[2]/text()[2]'', nsResolver);
+			var moreInfo = doc.evaluate(''./TD[2]/text()[2]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 			if(moreInfo.nodeValue) {
 				moreInfo = Scholar.Utilities.superCleanString(moreInfo.nodeValue);
 				var parts = moreInfo.split(";\xA0");
@@ -1060,10 +1058,10 @@ REPLACE INTO "translators" VALUES ('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '2006
 				}
 			}
 		} else if(field == "source type") {
-			var value = Scholar.Utilities.getNode(doc, elmt, ''./TD[2]/text()[1]'', nsResolver);
+			var value = doc.evaluate(''./TD[2]/text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 			if(value.nodeValue) {
 				value = Scholar.Utilities.superCleanString(value.nodeValue).toLowerCase();
-				Scholar.Utilities.debugPrint(value);
+				Scholar.Utilities.debug(value);
 				
 				if(value.indexOf("periodical") >= 0) {
 					newItem.itemType = "magazineArticle";
@@ -1074,7 +1072,7 @@ REPLACE INTO "translators" VALUES ('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '2006
 				}
 			}
 		} else if(field == "isbn" || field == "issn" || field == "issn/isbn") {
-			var value = Scholar.Utilities.getNode(doc, elmt, ''./TD[2]/text()[1]'', nsResolver);
+			var value = doc.evaluate(''./TD[2]/text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 			if(value) {
 				var type;
 				value = Scholar.Utilities.superCleanString(value.nodeValue);
@@ -1110,7 +1108,7 @@ function doWeb(doc, url) {
 			// Go through links
 			for(var j=0; j<links.length; j++) {
 				if(tagRegexp.test(links[j].href)) {
-					var text = Scholar.Utilities.getNode(doc, tableRows[i], ''./a[@class="bold"]/text()'', null);
+					var text = doc.evaluate(''./a[@class="bold"]/text()'', tableRows[i], null, XPathResult.ANY_TYPE, null).iterateNext();
 					if(text && text.nodeValue) {
 						text = Scholar.Utilities.cleanString(text.nodeValue);
 						items[links[j].href] = text;
@@ -1130,7 +1128,7 @@ function doWeb(doc, url) {
 			uris.push(i);
 		}
 		
-		Scholar.Utilities.processDocuments(null, uris, function(browser) { scrape(browser.contentDocument) },
+		Scholar.Utilities.processDocuments(uris, function(doc) { scrape(doc) },
 			function() { Scholar.done(); }, function() {});
 		
 		Scholar.wait();
@@ -1140,13 +1138,13 @@ function doWeb(doc, url) {
 		if(m && (m[1] == "1" || m[1] == "2")) {
 			scrape(doc);
 		} else if(m) {
-			Scholar.Utilities.loadDocument(doc.location.href.replace("Fmt="+m[1], "Fmt=1"), function(browser) { scrape(browser.contentDocument); Scholar.done(); }, function() {});
+			Scholar.Utilities.loadDocument(doc.location.href.replace("Fmt="+m[1], "Fmt=1"), function(doc) { scrape(doc); Scholar.done(); }, function() {});
 			Scholar.wait();
 		}
 	}
 }');
 
-REPLACE INTO "translators" VALUES ('6773a9af-5375-3224-d148-d32793884dec', '2006-06-26 16:01:00', 4, 'InfoTrac Scraper', 'Simon Kornblith', '^http://infotrac-college\.thomsonlearning\.com/itw/infomark/',
+REPLACE INTO "translators" VALUES ('6773a9af-5375-3224-d148-d32793884dec', '2006-06-26 16:01:00', 4, 'InfoTrac', 'Simon Kornblith', '^http://infotrac-college\.thomsonlearning\.com/itw/infomark/',
 'function detectWeb(doc, url) {
 	if(doc.title.substring(0, 8) == "Article ") {
 		return "magazineArticle";
@@ -1249,9 +1247,9 @@ function doWeb(doc, url) {
 		var tableRows = Scholar.Utilities.gatherElementsOnXPath(doc, doc, ''/html/body//table/tbody/tr/td[a/b]'', nsResolver);
 		// Go through table rows
 		for(var i=0; i<tableRows.length; i++) {
-			var link = Scholar.Utilities.getNode(doc, tableRows[i], ''./a'', nsResolver);
+			var link = doc.evaluate(''./a'', tableRows[i], nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 			uris[i] = link.href;
-			var article = Scholar.Utilities.getNode(doc, link, ''./b/text()'', nsResolver);
+			var article = doc.evaluate(''./b/text()'', link, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 			items[i] = article.nodeValue;
 			// Chop off final period
 			if(items[i].substr(items[i].length-1) == ".") {
@@ -1272,7 +1270,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO "translators" VALUES ('b047a13c-fe5c-6604-c997-bef15e502b09', '2006-06-26 16:01:00', 4, 'LexisNexis Scraper', 'Simon Kornblith', '^http://web\.lexis-nexis\.com/universe/(?:document|doclist)',
+REPLACE INTO "translators" VALUES ('b047a13c-fe5c-6604-c997-bef15e502b09', '2006-06-26 16:01:00', 4, 'LexisNexis', 'Simon Kornblith', '^http://web\.lexis-nexis\.com/universe/(?:document|doclist)',
 'function detectWeb(doc, url) {
 	var detailRe = new RegExp("^http://[^/]+/universe/document");
 	if(detailRe.test(doc.location.href)) {
@@ -1302,7 +1300,7 @@ REPLACE INTO "translators" VALUES ('b047a13c-fe5c-6604-c997-bef15e502b09', '2006
 	var m = dateRegexp.exec(centerElements[centerElements.length-1].innerHTML);
 	if(m) {
 		var jsDate = new Date(m[1]+" "+m[2]);
-		newItem.date = Scholar.Utilities.dateToISO(jsDate);
+		newItem.date = Scholar.Utilities.dateToSQL(jsDate);
 	} else {
 		var elementParts = centerElements[centerElements.length-1].innerHTML.split(/<br[^>]*>/gi);
 		newItem.date = elementParts[1];
@@ -1369,14 +1367,14 @@ function doWeb(doc, url) {
 			uris.push(i);
 		}
 		
-		Scholar.Utilities.processDocuments(null, uris, function(browser) { scrape(browser.contentDocument) },
+		Scholar.Utilities.processDocuments(uris, function(doc) { scrape(doc) },
 			function() { Scholar.done(); }, function() {});
 		
 		Scholar.wait();
 	}
 }');
 
-REPLACE INTO "translators" VALUES ('cf87eca8-041d-b954-795a-2d86348999d5', '2006-06-26 16:01:00', 4, 'Aleph Scraper', 'Simon Kornblith', '^http://[^/]+/F(?:/[A-Z0-9\-]+(?:\?.*)?$|\?func=find)',
+REPLACE INTO "translators" VALUES ('cf87eca8-041d-b954-795a-2d86348999d5', '2006-06-26 16:01:00', 4, 'Aleph', 'Simon Kornblith', '^http://[^/]+/F(?:/[A-Z0-9\-]+(?:\?.*)?$|\?func=find)',
 'function detectWeb(doc, url) {
 	var singleRe = new RegExp("^http://[^/]+/F/[A-Z0-9\-]+\?.*func=full-set-set.*\&format=[0-9]{3}");
 	
@@ -1425,8 +1423,7 @@ REPLACE INTO "translators" VALUES ('cf87eca8-041d-b954-795a-2d86348999d5', '2006
 	}
 	
 	var marc = Scholar.loadTranslator("import", "a6ee60df-1ddc-4aae-bb25-45e0537be973");
-	Scholar.Utilities.processDocuments(null, newUris, function(newBrowser) {
-		var newDoc = newBrowser.contentDocument;
+	Scholar.Utilities.processDocuments(newUris, function(newDoc) {
 		var uri = newDoc.location.href;
 		
 		var namespace = newDoc.documentElement.namespaceURI;
@@ -1440,7 +1437,7 @@ REPLACE INTO "translators" VALUES ('cf87eca8-041d-b954-795a-2d86348999d5', '2006
 		var record = new marc.MARC_Record();
 		for(var i=0; i<elmts.length; i++) {
 			var elmt = elmts[i];
-			var field = Scholar.Utilities.superCleanString(Scholar.Utilities.getNode(doc, elmt, ''./TD[1]/text()[1]'', nsResolver).nodeValue);
+			var field = Scholar.Utilities.superCleanString(doc.evaluate(''./TD[1]/text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue);
 			var value = Scholar.Utilities.getNodeString(doc, elmt, ''./TD[2]//text()'', nsResolver);
 			var value = value.replace(/\|([a-z]) /g, record.subfield_delimiter+"$1");
 			
@@ -1467,7 +1464,7 @@ REPLACE INTO "translators" VALUES ('cf87eca8-041d-b954-795a-2d86348999d5', '2006
 	Scholar.wait();
 }');
 
-REPLACE INTO "translators" VALUES ('774d7dc2-3474-2684-392c-f787789ec63d', '2006-06-26 16:01:00', 4, 'Dynix Scraper', 'Simon Kornblith', 'ipac\.jsp\?.*(?:uri=full=[0-9]|menu=search)',
+REPLACE INTO "translators" VALUES ('774d7dc2-3474-2684-392c-f787789ec63d', '2006-06-26 16:01:00', 4, 'Dynix', 'Simon Kornblith', 'ipac\.jsp\?.*(?:uri=full=[0-9]|menu=search)',
 'function detectWeb(doc, url) {
 	var detailsRe = new RegExp(''ipac\.jsp\?.*uri=full=[0-9]'');
 	if(detailsRe.test(doc.location.href)) {
@@ -1511,8 +1508,7 @@ REPLACE INTO "translators" VALUES ('774d7dc2-3474-2684-392c-f787789ec63d', '2006
 	
 	var marc = Scholar.loadTranslator("import", "a6ee60df-1ddc-4aae-bb25-45e0537be973");
 	
-	Scholar.Utilities.processDocuments(null, uris, function(newBrowser) {
-		var newDoc = newBrowser.contentDocument;
+	Scholar.Utilities.processDocuments(uris, function(newDoc) {
 		var uri = newDoc.location.href;
 		
 		var namespace = newDoc.documentElement.namespaceURI;
@@ -1526,7 +1522,7 @@ REPLACE INTO "translators" VALUES ('774d7dc2-3474-2684-392c-f787789ec63d', '2006
 		var record = new marc.MARC_Record();		
 		for(var i=0; i<elmts.length; i++) {
 			var elmt = elmts[i];
-			var field = Scholar.Utilities.superCleanString(Scholar.Utilities.getNode(newDoc, elmt, ''./TD[1]/A[1]/text()[1]'', nsResolver).nodeValue);
+			var field = Scholar.Utilities.superCleanString(newDoc.evaluate(''./TD[1]/A[1]/text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue);
 			var value = Scholar.Utilities.getNodeString(newDoc, elmt, ''./TD[2]/TABLE[1]/TBODY[1]/TR[1]/TD[1]/A[1]//text()'', nsResolver);
 			value = value.replace(/\$([a-z]) /g, record.subfield_delimiter+"$1");
 			
@@ -1555,13 +1551,13 @@ REPLACE INTO "translators" VALUES ('774d7dc2-3474-2684-392c-f787789ec63d', '2006
 	Scholar.wait();
 }');
 
-REPLACE INTO "translators" VALUES ('63a0a351-3131-18f4-21aa-f46b9ac51d87', '2006-06-26 16:01:00', 4, 'VTLS Scraper', 'Simon Kornblith', '/chameleon(?:\?|$)', 
+REPLACE INTO "translators" VALUES ('63a0a351-3131-18f4-21aa-f46b9ac51d87', '2006-06-26 16:01:00', 4, 'VTLS', 'Simon Kornblith', '/chameleon(?:\?|$)', 
 'function detectWeb(doc, url) {
-	var node = Scholar.Utilities.getNode(doc, doc, ''//tr[@class="intrRow"]/td/table/tbody/tr[th]'', null);
+	var node = doc.evaluate(''//tr[@class="intrRow"]/td/table/tbody/tr[th]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 	if(node) {
 		return "multiple";
 	}
-	var node = Scholar.Utilities.getNode(doc, doc, ''//a[text()="marc"]'', null);
+	var node = doc.evaluate(''//a[text()="marc"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 	if(node) {
 		return "book";
 	}
@@ -1602,7 +1598,7 @@ REPLACE INTO "translators" VALUES ('63a0a351-3131-18f4-21aa-f46b9ac51d87', '2006
 				// Collect title information
 				var fields = Scholar.Utilities.gatherElementsOnXPath(doc, tableRows[i], ''./td/table/tbody/tr[th]'', nsResolver);
 				for(var j=0; j<fields.length; j++) {
-					var field = Scholar.Utilities.getNode(doc, fields[j], ''./th/text()'', nsResolver);
+					var field = doc.evaluate(''./th/text()'', fields[j], nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 					if(field.nodeValue == "Title") {
 						var value = Scholar.Utilities.getNodeString(doc, fields[j], ''./td//text()'', nsResolver);
 						if(value) {
@@ -1620,15 +1616,14 @@ REPLACE INTO "translators" VALUES ('63a0a351-3131-18f4-21aa-f46b9ac51d87', '2006
 		}
 		
 		for(var i in items) {
-			Scholar.Utilities.debugPrint(i.replace(/function=[A-Z]{7}/, "function=MARCSCR"));
+			Scholar.Utilities.debug(i.replace(/function=[A-Z]{7}/, "function=MARCSCR"));
 			newUris.push(i.replace(/function=[A-Z]{7}/, "function=MARCSCR"));
 		}
 	}
 	
 	var marc = Scholar.loadTranslator("import", "a6ee60df-1ddc-4aae-bb25-45e0537be973");
 	
-	Scholar.Utilities.processDocuments(null, newUris, function(newBrowser) {
-		var newDoc = newBrowser.contentDocument;
+	Scholar.Utilities.processDocuments(newUris, function(newDoc) {
 		var uri = newDoc.location.href
 		
 		var namespace = newDoc.documentElement.namespaceURI;
@@ -1641,10 +1636,10 @@ REPLACE INTO "translators" VALUES ('63a0a351-3131-18f4-21aa-f46b9ac51d87', '2006
 		var record = new marc.MARC_Record();		
 		for(var i=0; i<elmts.length; i++) {
 			var elmt = elmts[i];
-			var field = Scholar.Utilities.getNode(doc, elmt, ''./TD[1]/text()[1]'', nsResolver).nodeValue;
-			var ind1 = Scholar.Utilities.getNode(doc, elmt, ''./TD[2]/text()[1]'', nsResolver).nodeValue;
-			var ind2 = Scholar.Utilities.getNode(doc, elmt, ''./TD[3]/text()[1]'', nsResolver).nodeValue;
-			var value = Scholar.Utilities.getNode(doc, elmt, ''./TD[4]/text()[1]'', nsResolver).nodeValue;
+			var field = doc.evaluate(''./TD[1]/text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
+			var ind1 = doc.evaluate(''./TD[2]/text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
+			var ind2 = doc.evaluate(''./TD[3]/text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
+			var value = doc.evaluate(''./TD[4]/text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
 			value = value.replace(/\\([a-z]) /g, record.subfield_delimiter+"$1");
 			
 			record.add_field(field, ind1, ind2, value);
@@ -1659,7 +1654,7 @@ REPLACE INTO "translators" VALUES ('63a0a351-3131-18f4-21aa-f46b9ac51d87', '2006
 	Scholar.wait();
 }');
 
-REPLACE INTO "translators" VALUES ('fb12ae9e-f473-cab4-0546-27ab88c64101', '2006-06-26 16:01:00', 4, 'DRA Scraper', 'Simon Kornblith', '/web2/tramp2\.exe/(?:see\_record/|authority\_hits/|goto/.*\?.*screen=Record\.html)',
+REPLACE INTO "translators" VALUES ('fb12ae9e-f473-cab4-0546-27ab88c64101', '2006-06-26 16:01:00', 4, 'DRA', 'Simon Kornblith', '/web2/tramp2\.exe/(?:see\_record/|authority\_hits/|goto/.*\?.*screen=Record\.html)',
 'function detectWeb(doc, url) {
 	if(doc.location.href.indexOf("/authority_hits") > 0) {
 		return "multiple";
@@ -1729,7 +1724,7 @@ REPLACE INTO "translators" VALUES ('fb12ae9e-f473-cab4-0546-27ab88c64101', '2006
 }');
 
 
-REPLACE INTO "translators" VALUES ('c0e6fda6-0ecd-e4f4-39ca-37a4de436e15', '2006-06-26 16:01:00', 4, 'GEAC Scraper', 'Simon Kornblith', '/(?:GeacQUERY|(?:Geac)?FETCH[\:\?].*[&:]next=html/(?:record\.html|geacnffull\.html))',
+REPLACE INTO "translators" VALUES ('c0e6fda6-0ecd-e4f4-39ca-37a4de436e15', '2006-06-26 16:01:00', 4, 'GEAC', 'Simon Kornblith', '/(?:GeacQUERY|(?:Geac)?FETCH[\:\?].*[&:]next=html/(?:record\.html|geacnffull\.html))',
 'function detectWeb(doc, url) {
 	if(doc.location.href.indexOf("/GeacQUERY") > 0) {
 		return "multiple";
@@ -1764,8 +1759,7 @@ REPLACE INTO "translators" VALUES ('c0e6fda6-0ecd-e4f4-39ca-37a4de436e15', '2006
 	
 	var marc = Scholar.loadTranslator("import", "a6ee60df-1ddc-4aae-bb25-45e0537be973");
 	
-	Scholar.Utilities.processDocuments(null, uris, function(newBrowser) {
-		var newDoc = newBrowser.contentDocument;
+	Scholar.Utilities.processDocuments(uris, function(newDoc) {
 		var uri = newDoc.location.href;
 		
 		var namespace = newDoc.documentElement.namespaceURI;
@@ -1817,7 +1811,7 @@ REPLACE INTO "translators" VALUES ('c0e6fda6-0ecd-e4f4-39ca-37a4de436e15', '2006
 	Scholar.wait();
 }');
 
-REPLACE INTO "translators" VALUES ('5287d20c-8a13-6004-4dcb-5bb2b66a9cc9', '2006-06-26 16:01:00', 4, 'SIRSI -2003 Scraper', 'Simon Kornblith', '/uhtbin/cgisirsi',
+REPLACE INTO "translators" VALUES ('5287d20c-8a13-6004-4dcb-5bb2b66a9cc9', '2006-06-26 16:01:00', 4, 'SIRSI -2003', 'Simon Kornblith', '/uhtbin/cgisirsi',
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -1870,7 +1864,7 @@ REPLACE INTO "translators" VALUES ('5287d20c-8a13-6004-4dcb-5bb2b66a9cc9', '2006
 			var links = Scholar.Utilities.gatherElementsOnXPath(doc, elmts[i], ''.//a'', nsResolver);
 			
 			// Collect title
-			var myTd = Scholar.Utilities.getNode(doc, elmts[i], "./td[2]", nsResolver);
+			var myTd = doc.evaluate("./td[2]", elmts[i], nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 			var m = titleRe.exec(myTd.innerHTML);
 			var title = unescapeHTML(m[1]);
 			
@@ -1895,9 +1889,9 @@ REPLACE INTO "translators" VALUES ('5287d20c-8a13-6004-4dcb-5bb2b66a9cc9', '2006
 		var elmts = Scholar.Utilities.gatherElementsOnXPath(doc, doc, ''/html/body/form/p'', nsResolver);
 		for(var i=0; i<elmts.length; i++) {
 			var elmt = elmts[i];
-			var initialText = Scholar.Utilities.getNode(doc, elmt, ''./text()[1]'', nsResolver);
+			var initialText = doc.evaluate(''./text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 			if(initialText && initialText.nodeValue && Scholar.Utilities.superCleanString(initialText.nodeValue) == "Viewing record") {
-				recNumbers.push(Scholar.Utilities.getNode(doc, elmt, ''./b[1]/text()[1]'', nsResolver).nodeValue);
+				recNumbers.push(doc.evaluate(''./b[1]/text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue);
 				break;
 			}
 		}
@@ -1953,7 +1947,7 @@ REPLACE INTO "translators" VALUES ('5287d20c-8a13-6004-4dcb-5bb2b66a9cc9', '2006
 	Scholar.wait();
 }');
 
-REPLACE INTO "translators" VALUES ('0f9fc2fc-306e-5204-1117-25bca009dffc', '2006-06-26 16:01:00', 4, 'TLC/YouSeeMore Scraper', 'Simon Kornblith', 'TLCScripts/interpac\.dll\?(?:.*LabelDisplay.*RecordNumber=[0-9]|Search|ItemTitles)',
+REPLACE INTO "translators" VALUES ('0f9fc2fc-306e-5204-1117-25bca009dffc', '2006-06-26 16:01:00', 4, 'TLC/YouSeeMore', 'Simon Kornblith', 'TLCScripts/interpac\.dll\?(?:.*LabelDisplay.*RecordNumber=[0-9]|Search|ItemTitles)',
 'function detectWeb(doc, url) {
 	var detailRe = new RegExp("TLCScripts/interpac\.dll\?.*LabelDisplay.*RecordNumber=[0-9]");
 	if(detailRe.test(doc.location.href)) {
@@ -1989,8 +1983,7 @@ REPLACE INTO "translators" VALUES ('0f9fc2fc-306e-5204-1117-25bca009dffc', '2006
 	
 	var marc = Scholar.loadTranslator("import", "a6ee60df-1ddc-4aae-bb25-45e0537be973");
 	
-	Scholar.Utilities.processDocuments(null, newUris, function(newBrowser) {
-		var newDoc = newBrowser.contentDocument;
+	Scholar.Utilities.processDocuments(newUris, function(newDoc) {
 		var uri = newDoc.location.href;
 		
 		var namespace = newDoc.documentElement.namespaceURI;
@@ -2006,8 +1999,8 @@ REPLACE INTO "translators" VALUES ('0f9fc2fc-306e-5204-1117-25bca009dffc', '2006
 		for(var i=0; i<elmts.length; i++) {
 			var elmt = elmts[i];
 			
-			tag = Scholar.Utilities.getNode(newDoc, elmt, ''./td[2]/tt[1]/text()[1]'', nsResolver).nodeValue;
-			var inds = Scholar.Utilities.getNode(newDoc, elmt, ''./td[3]/tt[1]/text()[1]'', nsResolver).nodeValue;
+			tag = newDoc.evaluate(''./td[2]/tt[1]/text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
+			var inds = newDoc.evaluate(''./td[3]/tt[1]/text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
 			
 			tag = tag.replace(/[\r\n]/g, "");
 			if(tag.length == 1) {
@@ -2051,7 +2044,7 @@ REPLACE INTO "translators" VALUES ('0f9fc2fc-306e-5204-1117-25bca009dffc', '2006
 	Scholar.wait();
 }');
 
-REPLACE INTO "translators" VALUES ('c54d1932-73ce-dfd4-a943-109380e06574', '2006-06-26 16:01:00', 4, 'Project MUSE Scraper', 'Simon Kornblith', '^http://muse\.jhu\.edu/(?:journals/[^/]+/[^/]+/[^/]+\.html|search/pia.cgi)',
+REPLACE INTO "translators" VALUES ('c54d1932-73ce-dfd4-a943-109380e06574', '2006-06-26 16:01:00', 4, 'Project MUSE', 'Simon Kornblith', '^http://muse\.jhu\.edu/(?:journals/[^/]+/[^/]+/[^/]+\.html|search/pia.cgi)',
 'function detectWeb(doc, url) {
 	var searchRe = new RegExp("^http://[^/]+/search/pia\.cgi");
 	if(searchRe.test(url)) {
@@ -2073,8 +2066,8 @@ REPLACE INTO "translators" VALUES ('c54d1932-73ce-dfd4-a943-109380e06574', '2006
 		// Go through table rows
 		for(var i=0; i<tableRows.length; i++) {
 			// article_id is what we need to get it all as one file
-			var input = Scholar.Utilities.getNode(doc, tableRows[i], ''./tbody/tr/td/input[@name="article_id"]'', nsResolver);
-			var link = Scholar.Utilities.getNode(doc, tableRows[i], ''.//b/i/a/text()'', nsResolver);
+			var input = doc.evaluate(''./tbody/tr/td/input[@name="article_id"]'', tableRows[i], nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+			var link = doc.evaluate(''.//b/i/a/text()'', tableRows[i], nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 			if(input && input.value && link && link.nodeValue) {
 				items[input.value] = link.nodeValue;
 			}
@@ -2163,7 +2156,7 @@ REPLACE INTO "translators" VALUES ('c54d1932-73ce-dfd4-a943-109380e06574', '2006
 	}
 }');
 
-REPLACE INTO "translators" VALUES ('fcf41bed-0cbc-3704-85c7-8062a0068a7a', '2006-08-07 21:55:00', 12, 'PubMed Scraper', 'Simon Kornblith', '^http://www\.ncbi\.nlm\.nih\.gov/entrez/query\.fcgi\?(?:.*db=PubMed.*list_uids=[0-9]|.*list_uids=[0-9].*db=PubMed|.*db=PubMed.*CMD=search|.*CMD=search.*db=PubMed)',
+REPLACE INTO "translators" VALUES ('fcf41bed-0cbc-3704-85c7-8062a0068a7a', '2006-08-07 21:55:00', 12, 'PubMed', 'Simon Kornblith', '^http://www\.ncbi\.nlm\.nih\.gov/entrez/query\.fcgi\?(?:.*db=PubMed.*list_uids=[0-9]|.*list_uids=[0-9].*db=PubMed|.*db=PubMed.*CMD=search|.*CMD=search.*db=PubMed)',
 'function detectWeb(doc, url) {
 	if(doc.location.href.indexOf("list_uids=") >= 0) {
 		return "journalArticle";
@@ -2239,7 +2232,7 @@ function detectSearch(item) {
 							var date = article.Journal.JournalIssue.PubDate.Month.text()+" "+article.Journal.JournalIssue.PubDate.Day.text()+", "+article.Journal.JournalIssue.PubDate.Year.text();
 							var jsDate = new Date(date);
 							if(!isNaN(jsDate.valueOf())) {
-								date = Scholar.Utilities.dateToISO(jsDate);
+								date = Scholar.Utilities.dateToSQL(jsDate);
 							}
 						} else if(article.Journal.JournalIssue.PubDate.Month.text().toString() != "") {
 							var date = article.Journal.JournalIssue.PubDate.Month.text()+" "+article.Journal.JournalIssue.PubDate.Year.text();
@@ -2293,8 +2286,8 @@ function doWeb(doc, url) {
 		var tableRows = Scholar.Utilities.gatherElementsOnXPath(doc, doc, ''//div[@class="ResultSet"]/table/tbody'', nsResolver);
 		// Go through table rows
 		for(var i=0; i<tableRows.length; i++) {
-			var link = Scholar.Utilities.getNode(doc, tableRows[i], ''.//a'', nsResolver);
-			var article = Scholar.Utilities.getNode(doc, tableRows[i], ''./tr[2]/td[2]/text()[1]'', nsResolver);
+			var link = doc.evaluate(''.//a'', tableRows[i], nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+			var article = doc.evaluate(''./tr[2]/td[2]/text()[1]'', tableRows[i], nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 			items[link.href] = article.nodeValue;
 		}
 		
@@ -2318,7 +2311,7 @@ function doSearch(item) {
 	lookupPMIDs([getPMID(item.contextObject)]);
 }');
 
-REPLACE INTO "translators" VALUES ('951c027d-74ac-47d4-a107-9c3069ab7b48', '2006-06-26 16:41:00', 4, 'Embedded RDF Scraper', 'Simon Kornblith', NULL,
+REPLACE INTO "translators" VALUES ('951c027d-74ac-47d4-a107-9c3069ab7b48', '2006-06-26 16:41:00', 4, 'Embedded RDF', 'Simon Kornblith', NULL,
 'function detectWeb(doc, url) {
 	var metaTags = doc.getElementsByTagName("meta");
 	
@@ -2347,7 +2340,7 @@ REPLACE INTO "translators" VALUES ('951c027d-74ac-47d4-a107-9c3069ab7b48', '2006
 				foundTitle = true;
 			}
 			translator.Scholar.RDF.addStatement(url, dc + tag.substr(3), value, true);
-			Scholar.Utilities.debugPrint(tag.substr(3) + " = " + value);
+			Scholar.Utilities.debug(tag.substr(3) + " = " + value);
 		} else if(tag && value && (tag == "author" || tag == "author-personal")) {
 			translator.Scholar.RDF.addStatement(url, dc + "creator", value, true);
 		} else if(tag && value && tag == "author-corporate") {
@@ -2362,7 +2355,7 @@ REPLACE INTO "translators" VALUES ('951c027d-74ac-47d4-a107-9c3069ab7b48', '2006
 	translator.doImport();
 }');
 
-REPLACE INTO "translators" VALUES ('05d07af9-105a-4572-99f6-a8e231c0daef', '2006-08-07 01:09:00', 4, 'COinS Scraper', 'Simon Kornblith', NULL,
+REPLACE INTO "translators" VALUES ('05d07af9-105a-4572-99f6-a8e231c0daef', '2006-08-07 01:09:00', 4, 'COinS', 'Simon Kornblith', NULL,
 'function detectWeb(doc, url) {
 	var spanTags = doc.getElementsByTagName("span");
 	
@@ -2413,7 +2406,7 @@ function retrieveNextCOinS(needFullItems, newItems) {
 	if(needFullItems.length) {
 		var item = needFullItems.shift();
 		
-		Scholar.Utilities.debugPrint("looking up contextObject");
+		Scholar.Utilities.debug("looking up contextObject");
 		var search = Scholar.loadTranslator("search");
 		search.setHandler("itemDone", function(obj, item) {
 			newItems.push(item);
@@ -2490,7 +2483,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO "translators" VALUES ('3e684d82-73a3-9a34-095f-19b112d88bbf', '2006-06-26 16:01:00', 4, 'Google Books Scraper', 'Simon Kornblith', '^http://books\.google\.com/books\?(.*vid=.*\&id=.*|.*q=.*)',
+REPLACE INTO "translators" VALUES ('3e684d82-73a3-9a34-095f-19b112d88bbf', '2006-06-26 16:01:00', 4, 'Google Books', 'Simon Kornblith', '^http://books\.google\.com/books\?(.*vid=.*\&id=.*|.*q=.*)',
 'function detectWeb(doc, url) {
 	var re = new RegExp(''^http://books\\.google\\.com/books\\?vid=([^&]+).*\\&id=([^&]+)'', ''i'');
 	if(re.test(doc.location.href)) {
@@ -2526,8 +2519,7 @@ REPLACE INTO "translators" VALUES ('3e684d82-73a3-9a34-095f-19b112d88bbf', '2006
 		}
 	}
 	
-	Scholar.Utilities.processDocuments(null, newUris, function(newBrowser) {
-		var newDoc = newBrowser.contentDocument;
+	Scholar.Utilities.processDocuments(newUris, function(newDoc) {
 		var newItem = new Scholar.Item("book");
 		newItem.source = newDoc.location.href;
 		
@@ -2539,8 +2531,8 @@ REPLACE INTO "translators" VALUES ('3e684d82-73a3-9a34-095f-19b112d88bbf', '2006
 		var xpath = ''//table[@id="bib"]/tbody/tr'';
 		var elmts = Scholar.Utilities.gatherElementsOnXPath(newDoc, newDoc, xpath, nsResolver);
 		for(var i = 0; i<elmts.length; i++) {
-			var field = Scholar.Utilities.getNode(newDoc, elmts[i], ''./td[1]//text()'', nsResolver);
-			var value = Scholar.Utilities.getNode(newDoc, elmts[i], ''./td[2]//text()'', nsResolver);
+			var field = newDoc.evaluate(''./td[1]//text()'', elmts[i], nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+			var value = newDoc.evaluate(''./td[2]//text()'', elmts[i], nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 			
 			if(field && value) {
 				field = Scholar.Utilities.superCleanString(field.nodeValue);
@@ -2564,7 +2556,7 @@ REPLACE INTO "translators" VALUES ('3e684d82-73a3-9a34-095f-19b112d88bbf', '2006
 					
 					jsDate = new Date(value);
 					if(!isNaN(jsDate.valueOf())) {
-						date = Scholar.Utilities.dateToISO(jsDate);
+						date = Scholar.Utilities.dateToSQL(jsDate);
 					}
 					
 					newItem.date = date;
@@ -2618,8 +2610,7 @@ function doSearch(item) {
 		var co = Scholar.Utilities.createContextObject(item);
 	}
 	
-	Scholar.Utilities.processDocuments(null, ["http://partneraccess.oclc.org/wcpa/servlet/OpenUrl?"+co], function(browser) {
-		var doc = browser.contentDocument;
+	Scholar.Utilities.loadDocument("http://partneraccess.oclc.org/wcpa/servlet/OpenUrl?"+co, function(doc) {
 		// find new COinS in the Open WorldCat page
 		if(processOWC(doc)) {	// we got a single item page
 			Scholar.done();
@@ -2644,16 +2635,16 @@ function doSearch(item) {
 				urlsToProcess.push(elmt.href);
 			} while(elmt = elmts.iterateNext());
 			
-			Scholar.Utilities.processDocuments(null, urlsToProcess, function(browser) {
+			Scholar.Utilities.processDocuments(urlsToProcess, function(doc) {
 				// per URL
-				processOWC(browser.contentDocument);
+				processOWC(doc);
 			}, function() {	// done
 				Scholar.done();
 			}, function() {	// error
 				Scholar.done(false);
 			});
 		}
-	}, null, function() {
+	}, function() {
 		error();
 	});
 	
@@ -3031,7 +3022,7 @@ function doImport() {
 	while(read = Scholar.read(16384)) {
 		text += read;
 	}
-	Scholar.Utilities.debugPrint("read in");
+	Scholar.Utilities.debug("read in");
 	
 	// eliminate <?xml ?> heading so we can parse as XML
 	text = text.replace(/<\?xml[^?]+\?>/, "");
@@ -3043,9 +3034,9 @@ function doImport() {
 	var xml = new XML(text);
 	
 	for each(var mods in xml.m::mods) {
-		Scholar.Utilities.debugPrint("item is: ");
+		Scholar.Utilities.debug("item is: ");
 		for(var i in mods) {
-			Scholar.Utilities.debugPrint(i+" = "+mods[i].toString());
+			Scholar.Utilities.debug(i+" = "+mods[i].toString());
 		}
 		
 		var newItem = new Scholar.Item();
@@ -3863,8 +3854,8 @@ function doImport() {
 			} else if(type == n.bib+"Memo") {
 				// check to see if this note is independent
 				var arcs = Scholar.RDF.getArcsIn(node);
-				Scholar.Utilities.debugPrint("working on a note");
-				Scholar.Utilities.debugPrint(arcs);
+				Scholar.Utilities.debug("working on a note");
+				Scholar.Utilities.debug(arcs);
 				var skip = false;
 				for each(var arc in arcs) {
 					arc = Scholar.RDF.getResourceURI(arc);
@@ -4239,7 +4230,7 @@ function doImport() {
 	var tag = data = false;
 	do {	// first valid line is type
 		line = Scholar.read();
-		Scholar.Utilities.debugPrint(line);
+		Scholar.Utilities.debug(line);
 	} while(line !== false && line.substr(0, 6) != "TY  - ");
 	
 	var item = new Scholar.Item();
@@ -4258,7 +4249,7 @@ function doImport() {
 			tag = line.substr(0,2);
 			data = line.substr(6);
 			
-			Scholar.Utilities.debugPrint("tag: ''"+tag+"''; data: ''"+data+"''");
+			Scholar.Utilities.debug("tag: ''"+tag+"''; data: ''"+data+"''");
 			
 			if(tag == "ER") {		// ER signals end of reference			
 				// unset info
@@ -4692,7 +4683,7 @@ MARC_Record.prototype._associateDBField = function(item, fieldNo, part, fieldNam
 		part = ''a'';
 	}
 	var field = this.get_field_subfields(fieldNo);
-	Scholar.Utilities.debugPrint(''Found ''+field.length+'' matches for ''+fieldNo+part);
+	Scholar.Utilities.debug(''Found ''+field.length+'' matches for ''+fieldNo+part);
 	if(field) {
 		for(var i in field) {
 			var value = false;

@@ -1,61 +1,21 @@
 // Scholar for Firefox Utilities
-// Utilities based on code taken from Piggy Bank 2.1.1 (BSD-licensed)
-// This code is licensed according to the GPL
 
 /////////////////////////////////////////////////////////////////
 //
 // Scholar.Utilities
 //
 /////////////////////////////////////////////////////////////////
-// Scholar.Utilities class, a set of methods to assist in data
-// extraction. Some of the code here was stolen directly from the Piggy Bank
-// project.
 
 Scholar.Utilities = function () {}
 
-// Adapter for Piggy Bank function to print debug messages; log level is
-// fixed at 4 (could change this)
-Scholar.Utilities.prototype.debugPrint = function(msg) {
+Scholar.Utilities.prototype.debug = function(msg) {
 	Scholar.debug(msg, 4);
 }
 
-// Appears to trim a string, chopping of newlines/spacing
-Scholar.Utilities.prototype.trimString = function(s) {
-	var i = 0;
-	var spaceChars = " \n\r\t" + String.fromCharCode(160) /* &nbsp; */;
-	while (i < s.length) {
-		var c = s.charAt(i);
-		if (spaceChars.indexOf(c) < 0) {
-			break;
-		}
-		i++;
-	}
-	
-	s = s.substring(i);
-	
-	i = s.length;
-	while (i > 0) {
-		var c = s.charAt(i - 1);
-		if (spaceChars.indexOf(c) < 0) {
-			break;
-		}
-		i--;
-	}
-	
-	return s.substring(0, i);
-}
-
 /*
- * BEGIN SCHOLAR FOR FIREFOX EXTENSIONS
- * Functions below this point are extensions to the utilities provided by
- * Piggy Bank. When used in external code, the repository will need to add
- * a function definition when exporting in Piggy Bank format.
+ * Converts a JavaScript date object to an SQL-style date
  */
-
-/*
- * Converts a JavaScript date object to an ISO-style date
- */
-Scholar.Utilities.prototype.dateToISO = function(jsDate) {
+Scholar.Utilities.prototype.dateToSQL = function(jsDate) {
 	var date = "";
 	var year = jsDate.getFullYear().toString();
 	var month = (jsDate.getMonth()+1).toString();
@@ -112,7 +72,8 @@ Scholar.Utilities.prototype.cleanAuthor = function(author, type, useComma) {
  */
 Scholar.Utilities.prototype.cleanString = function(s) {
 	s = s.replace(/[ \xA0]+/g, " ");
-	return this.trimString(s);
+	s = s.replace(/^\s+/, "");
+	return s.replace(/\s+$/, "");
 }
 
 /*
@@ -223,43 +184,6 @@ Scholar.Utilities.Ingester.prototype.gatherElementsOnXPath = function(doc, paren
 	return elmts;
 }
 
-// Appears to look for links in a document containing a certain substring (kind
-// of like getItemArray, only with NO REGEXP FUNCTIONALITY)
-Scholar.Utilities.Ingester.prototype.collectURLsWithSubstring = function(doc, substring) {
-	var urls = [];
-	var addedURLs = [];
-	
-	var aElements = doc.evaluate("//a", doc, null, Components.interfaces.nsIDOMXPathResult.ANY_TYPE,null);
-	var aElement = aElements.iterateNext();
-	while (aElement) {
-		var href = aElement.href;
-		if (href.indexOf(substring) >= 0 && !(addedURLs[href])) {
-			urls.unshift(href);
-			addedURLs[href] = true;
-		}
-		aElement = aElements.iterateNext();
-	}
-	return urls;
-}
-
-// For now, we're going to skip the getLLsFromAddresses function (which gets
-// latitude and longitude pairs from a series of addresses, but requires the
-// big mess of Java code that is the Piggy Bank server) and the geoHelper
-// tools (which rely on getLLsFromAddresses) since these are probably not
-// essential components for Scholar and would take a great deal of effort to
-// implement. We can, however, always implement them later.
-
-/*
- * BEGIN SCHOLAR FOR FIREFOX EXTENSIONS
- */
-
-/*
- * Gets a given node (assumes only one value)
- */
-Scholar.Utilities.Ingester.prototype.getNode = function(doc, contextNode, xpath, nsResolver) {
-	return doc.evaluate(xpath, contextNode, nsResolver, Components.interfaces.nsIDOMXPathResult.ANY_TYPE, null).iterateNext();
-}
-
 /*
  * Gets a given node as a string containing all child nodes
  */
@@ -325,10 +249,6 @@ Scholar.Utilities.Ingester.prototype.parseContextObject = function(co, item) {
 	return Scholar.OpenURL.parseContextObject(co, item);
 }
 
-/*
- * END SCHOLAR FOR FIREFOX EXTENSIONS
- */
-
 // Ingester adapters for Scholar.Utilities.HTTP to handle proxies
 
 Scholar.Utilities.Ingester.prototype.loadDocument = function(url, succeeded, failed) {
@@ -337,11 +257,13 @@ Scholar.Utilities.Ingester.prototype.loadDocument = function(url, succeeded, fai
 	}
 	Scholar.Utilities.HTTP.processDocuments(null, [ url ], succeeded, function() {}, failed);
 }
-Scholar.Utilities.Ingester.prototype.processDocuments = function(firstDoc, urls, processor, done, exception) {
-	for(i in urls) {
-		urls[i] = Scholar.Ingester.ProxyMonitor.properToProxy(urls[i]);
+Scholar.Utilities.Ingester.prototype.processDocuments = function(urls, processor, done, exception) {
+	if(this.proxiedURL) {
+		for(i in urls) {
+			urls[i] = Scholar.Ingester.ProxyMonitor.properToProxy(urls[i]);
+		}
 	}
-	Scholar.Utilities.HTTP.processDocuments(firstDoc, urls, processor, done, exception);
+	Scholar.Utilities.HTTP.processDocuments(null, urls, processor, done, exception);
 }
 
 Scholar.Utilities.Ingester.HTTPUtilities = function(proxiedURL) {
@@ -615,10 +537,7 @@ Scholar.Utilities.HTTP.processDocuments = function(firstDoc, urls, processor, do
 			if(hiddenBrowser.contentDocument.location.href != prevUrl) {	// Just in case it fires too many times
 				prevUrl = hiddenBrowser.contentDocument.location.href;
 				try {
-					var newHiddenBrowser = new Object();
-					newHiddenBrowser.contentDocument = hiddenBrowser.contentDocument;
-					newHiddenBrowser.contentWindow = hiddenBrowser.contentWindow;
-					processor(newHiddenBrowser);
+					processor(hiddenBrowser.contentDocument);
 				} catch (e) {
 					Scholar.debug("Scholar.Utilities.Ingester.processDocuments onLoad: " + e, 2);
 					exception(e);
