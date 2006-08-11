@@ -1,4 +1,4 @@
--- 37
+-- 38
 
     DROP TABLE IF EXISTS version;
     CREATE TABLE version (
@@ -180,7 +180,7 @@
         creatorID INT,
         creatorTypeID INT DEFAULT 1,
         orderIndex INT DEFAULT 0,
-        PRIMARY KEY (itemID, creatorID, creatorTypeID),
+        PRIMARY KEY (itemID, creatorID, creatorTypeID, orderIndex),
         FOREIGN KEY (itemID) REFERENCES items(itemID),
         FOREIGN KEY (creatorID) REFERENCES creators(creatorID)
         FOREIGN KEY (creatorTypeID) REFERENCES creatorTypes(creatorTypeID)

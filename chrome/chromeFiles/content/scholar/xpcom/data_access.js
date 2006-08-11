@@ -228,7 +228,7 @@ Scholar.Item.prototype.setCreator = function(orderIndex, firstName, lastName, cr
 		this._loadCreators();
 	}
 	
-	if (!firstName){
+	if (isInstitution || !firstName){
 		firstName = '';
 	}
 	
@@ -287,11 +287,23 @@ Scholar.Item.prototype.removeCreator = function(orderIndex){
 }
 
 
+// Currently unused
 Scholar.Item.prototype.creatorExists = function(firstName, lastName, creatorTypeID, isInstitution, skipIndex){
+	if (isInstitution || !firstName){
+		firstName = '';
+	}
+	
+	if (!lastName){
+		lastName = '';
+	}
+	
+	isInstitution = !!isInstitution;
+	
 	for (var j=0, len=this.numCreators(); j<len; j++){
 		if (typeof skipIndex!='undefined' && skipIndex==j){
 			continue;
 		}
+		
 		var creator2 = this.getCreator(j);
 		
 		if (firstName==creator2['firstName'] &&
@@ -441,16 +453,6 @@ Scholar.Item.prototype.save = function(){
 			// Creators
 			//
 			if (this._changedCreators.length){
-				for (var i=0, len=this.numCreators(); i<len; i++){
-					var creator = this.getCreator(i);
-					if (this.creatorExists(creator['firstName'],
-							creator['lastName'], creator['creatorTypeID'],
-							creator['isInstitution'], i)){
-						throw('Cannot add duplicate creator/creatorType '
-							+ 'to item ' + this.getID());
-					}
-				}
-				
 				for (orderIndex in this._changedCreators.items){
 					Scholar.debug('Creator ' + orderIndex + ' has changed', 4);
 					
@@ -492,44 +494,21 @@ Scholar.Item.prototype.save = function(){
 						+ ' WHERE itemID=' + this.getID()
 						+ ' AND creatorID=' + creatorID
 						+ ' AND creatorTypeID=' + creator['creatorTypeID'];
+						
+					sql = "INSERT INTO itemCreators VALUES (?,?,?,?)";
 					
-					// If this creator and creatorType exists elsewhere, move it
-					if (Scholar.DB.valueQuery(sql2)){
-						Scholar.History.modify('itemCreators',
-							'itemID-creatorID-creatorTypeID',
-							[this.getID(), creatorID, creator['creatorTypeID']]);
-						
-						sql = 'UPDATE itemCreators SET orderIndex=? '
-							+ "WHERE itemID=? AND creatorID=? AND "
-							+ "creatorTypeID=?";
-							
-						sqlValues = [
-							{'int':orderIndex},
-							{'int':this.getID()},
-							{'int':creatorID},
-							{'int':creator['creatorTypeID']}
-						];
-						
-						Scholar.DB.query(sql, sqlValues);
-					}
+					sqlValues = [
+						{'int':itemID},
+						{'int':creatorID},
+						{'int':creator['creatorTypeID']},
+						{'int':orderIndex}
+					];
 					
-					// Otherwise insert
-					else {
-						sql = "INSERT INTO itemCreators VALUES (?,?,?,?)";
-						
-						sqlValues = [
-							{'int':itemID},
-							{'int':creatorID},
-							{'int':creator['creatorTypeID']},
-							{'int':orderIndex}
-						];
-						
-						Scholar.DB.query(sql, sqlValues);
-						
-						Scholar.History.add('itemCreators',
-							'itemID-creatorID-creatorTypeID',
-							[this.getID(), creatorID, creator['creatorTypeID']]);
-					}
+					Scholar.DB.query(sql, sqlValues);
+					
+					Scholar.History.add('itemCreators',
+						'itemID-creatorID-creatorTypeID',
+						[this.getID(), creatorID, creator['creatorTypeID']]);
 				}
 				
 				// Delete obsolete creators
