@@ -72,6 +72,13 @@ Scholar.Schema = new function(){
 			}
 		}
 		
+		// If transaction already in progress, delay by a few seconds
+		if (Scholar.DB.transactionInProgress()){
+			Scholar.debug('Transaction in progress -- delaying repository check', 4)
+			_setRepositoryTimer(30);
+			return false;
+		}
+		
 		// Get the last timestamp we got from the server
 		var lastUpdated = _getDBVersion('repository');
 		
