@@ -1,4 +1,4 @@
--- 42
+-- 43
 
 -- Set the following timestamp to the most recent scraper update date
 REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-08-11 11:18:00'));
@@ -24,22 +24,20 @@ REPLACE INTO "translators" VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006
 	
 	// Retrieve authors
 	try {
-		var xpath = ''/html/body/table/tbody/tr/td[2]/form/div[@class="buying"]/a'';
-		var elmts = Scholar.Utilities.gatherElementsOnXPath(doc, doc, xpath, nsResolver);
-		for (var i = 0; i < elmts.length; i++) {
-			var elmt = elmts[i];
-			var author = doc.evaluate(''./text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
-			
-			newItem.creators.push(Scholar.Utilities.cleanAuthor(author, "author"));
+		var xpath = ''/html/body/table/tbody/tr/td[2]/form/div[@class="buying"]/a/text()[1]'';
+		var elmts = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var elmt;
+		while(elmt = elmts.iterateNext()) {
+			newItem.creators.push(Scholar.Utilities.cleanAuthor(elmt.nodeValue, "author"));
 		}
-	} catch(ex) {}
+	} catch(ex) {Scholar.Utilities.debug(ex);}
 	
 	// Retrieve data from "Product Details" box
 	var xpath = ''/html/body/table/tbody/tr/td[2]/table/tbody/tr/td[@class="bucket"]/div[@class="content"]/ul/li'';
-	var elmts = Scholar.Utilities.gatherElementsOnXPath(doc, doc, xpath, nsResolver);
-	for (var i = 0; i < elmts.length; i++) {
+	var elmts = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+	var elmt;
+	while(elmt = elmts.iterateNext()) {
 		try {
-			var elmt = elmts[i];
 			var attribute = Scholar.Utilities.cleanString(doc.evaluate(''./B[1]/text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue);
 			if(doc.evaluate(''./text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
 				var value = Scholar.Utilities.cleanString(doc.evaluate(''./text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue);
@@ -72,9 +70,9 @@ REPLACE INTO "translators" VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006
 		} catch(ex) {}
 	}
 	
-	var xpath = ''/html/body/table/tbody/tr/td[2]/form/div[@class="buying"]/b[@class="sans"]'';
-	var elmts = Scholar.Utilities.gatherElementsOnXPath(doc, doc, xpath, nsResolver);
-	var title = Scholar.Utilities.cleanString(doc.evaluate(''./text()[1]'', elmts[0], nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue);
+	var xpath = ''/html/body/table/tbody/tr/td[2]/form/div[@class="buying"]/b[@class="sans"]/text()[1]'';
+	var title = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
+	title = Scholar.Utilities.cleanString(title);
 	if(title.lastIndexOf("(") != -1 && title.lastIndexOf(")") == title.length-1) {
 		title = title.substring(0, title.lastIndexOf("(")-1);
 	}
@@ -194,7 +192,7 @@ REPLACE INTO "translators" VALUES ('838d8849-4ffb-9f44-3d0d-aa8a0a079afe', '2006
 		newUri = ''http://''+host+''/WebZ/DirectExport?numrecs=10:smartpage=directexport:entityexportnumrecs=10:entityexportresultset='' + resultset + '':entityexportrecno=1:sessionid='' + sessionid + '':entitypagenum=29:0'';
 	}
 	
-	Scholar.Utilities.HTTPUtilities.doPost(newUri, ''exportselect=''+exportselect+''&exporttype=plaintext'', null, function(text) {
+	Scholar.Utilities.HTTP.doPost(newUri, ''exportselect=''+exportselect+''&exporttype=plaintext'', null, function(text) {
 		Scholar.Utilities.debug(text);
 		var lineRegexp = new RegExp();
 		lineRegexp.compile("^([\\w() ]+): *(.*)$");
@@ -402,7 +400,7 @@ REPLACE INTO "translators" VALUES ('88915634-1af6-c134-0171-56fd198235ed', '2006
 	postString += ''RD=''+rd+''&MAILADDY=&SAVE=Press+to+SAVE+or+PRINT'';
 	
 	// No idea why this doesn''t work as post
-	Scholar.Utilities.HTTPUtilities.doGet(newUri+''?''+postString, null, function(text) {	
+	Scholar.Utilities.HTTP.doGet(newUri+''?''+postString, null, function(text) {	
 		// load translator for MARC
 		var marc = Scholar.loadTranslator("import", "a6ee60df-1ddc-4aae-bb25-45e0537be973");
 		marc.Scholar.write(text);
@@ -439,7 +437,7 @@ REPLACE INTO "translators" VALUES ('d921155f-0186-1684-615c-ca57682ced9b', '2006
 }',
 'function getList(urls, each, done, error) {
 	var url = urls.shift();
-	Scholar.Utilities.HTTPUtilities.doGet(url, null, function(text) {
+	Scholar.Utilities.HTTP.doGet(url, null, function(text) {
 		if(each) {
 			each(text);
 		}
@@ -518,10 +516,10 @@ function doWeb(doc, url) {
 		saveCitations.push(saveCitation.replace(''citationAction=remove'', ''citationAction=save''));
 	}
 	
-	Scholar.Utilities.HTTPUtilities.doGet(''http://www.jstor.org/browse?citationAction=removeAll&confirmRemAll=on&viewCitations=1'', null, function() {	// clear marked
+	Scholar.Utilities.HTTP.doGet(''http://www.jstor.org/browse?citationAction=removeAll&confirmRemAll=on&viewCitations=1'', null, function() {	// clear marked
 		// Mark all our citations
 		getList(saveCitations, null, function() {						// mark this
-			Scholar.Utilities.HTTPUtilities.doGet(''http://www.jstor.org/browse/citations.txt?exportAction=Save+as+Text+File&exportFormat=cm&viewCitations=1'', null, function(text) {
+			Scholar.Utilities.HTTP.doGet(''http://www.jstor.org/browse/citations.txt?exportAction=Save+as+Text+File&exportFormat=cm&viewCitations=1'', null, function(text) {
 																							// get marked
 				var k = 0;
 				var lines = text.split("\n");
@@ -818,9 +816,9 @@ REPLACE INTO "translators" VALUES ('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '2006
 		postString += "save_func=save_marked";
 		
 		
-		Scholar.Utilities.HTTPUtilities.doGet(clearUrl, null, function() {
-			Scholar.Utilities.HTTPUtilities.doPost(postUrl, postString, null, function() {
-				Scholar.Utilities.HTTPUtilities.doPost(exportUrl, "ex_format=50&ex_device=45&SUBMIT=Submit", null, function(text) {
+		Scholar.Utilities.HTTP.doGet(clearUrl, null, function() {
+			Scholar.Utilities.HTTP.doPost(postUrl, postString, null, function() {
+				Scholar.Utilities.HTTP.doPost(exportUrl, "ex_format=50&ex_device=45&SUBMIT=Submit", null, function(text) {
 					marc.Scholar.write(text);
 					marc.Scholar.eof();
 					marc.doImport(url);
@@ -1705,7 +1703,7 @@ REPLACE INTO "translators" VALUES ('fb12ae9e-f473-cab4-0546-27ab88c64101', '2006
 		
 		var marc = Scholar.loadTranslator("import", "a6ee60df-1ddc-4aae-bb25-45e0537be973");
 		
-		Scholar.Utilities.HTTPUtilities.doGet(newUri, null, function(text) {
+		Scholar.Utilities.HTTP.doGet(newUri, null, function(text) {
 			var record = new marc.MARC_Record();
 			record.load(text, "binary");
 			
@@ -1899,7 +1897,7 @@ REPLACE INTO "translators" VALUES ('5287d20c-8a13-6004-4dcb-5bb2b66a9cc9', '2006
 	
 	var marc = Scholar.loadTranslator("import", "a6ee60df-1ddc-4aae-bb25-45e0537be973");
 	
-	Scholar.Utilities.HTTPUtilities.doGet(newUri+''?marks=''+recNumbers.join(",")+''&shadow=NO&format=FLAT+ASCII&sort=TITLE&vopt_elst=ALL&library=ALL&display_rule=ASCENDING&duedate_code=l&holdcount_code=t&DOWNLOAD_x=22&DOWNLOAD_y=12&address=&form_type='', null, function(text) {
+	Scholar.Utilities.HTTP.doGet(newUri+''?marks=''+recNumbers.join(",")+''&shadow=NO&format=FLAT+ASCII&sort=TITLE&vopt_elst=ALL&library=ALL&display_rule=ASCENDING&duedate_code=l&holdcount_code=t&DOWNLOAD_x=22&DOWNLOAD_y=12&address=&form_type='', null, function(text) {
 		var texts = text.split("<PRE>");
 		texts = texts[1].split("</PRE>");
 		text = unescapeHTML(texts[0]);
@@ -2089,8 +2087,8 @@ REPLACE INTO "translators" VALUES ('c54d1932-73ce-dfd4-a943-109380e06574', '2006
 		}
 		var savePostString = "actiontype=save&search_id="+search_id+articleString;
 		
-		Scholar.Utilities.HTTPUtilities.doGet("http://muse.jhu.edu/search/save.cgi?"+savePostString, null, function() {
-			Scholar.Utilities.HTTPUtilities.doGet("http://muse.jhu.edu/search/export.cgi?exporttype=endnote"+articleString, null, function(text) {
+		Scholar.Utilities.HTTP.doGet("http://muse.jhu.edu/search/save.cgi?"+savePostString, null, function() {
+			Scholar.Utilities.HTTP.doGet("http://muse.jhu.edu/search/export.cgi?exporttype=endnote"+articleString, null, function(text) {
 				// load translator for RIS
 				var translator = Scholar.loadTranslator("import", "32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 				// feed in data
@@ -2189,7 +2187,7 @@ function detectSearch(item) {
 	Scholar.wait();
 	
 	var newUri = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=PubMed&retmode=xml&rettype=citation&id="+ids.join(",");
-	Scholar.Utilities.HTTPUtilities.doGet(newUri, null, function(text) {
+	Scholar.Utilities.HTTP.doGet(newUri, null, function(text) {
 		// Remove xml parse instruction and doctype
 		text = text.replace(/<!DOCTYPE[^>]*>/, "").replace(/<\?xml[^>]*\?>/, "");
 		
@@ -2719,7 +2717,7 @@ function doSearch(item) {
 		var co = Scholar.Utilities.createContextObject(item);
 	}
 	
-	Scholar.Utilities.HTTPUtilities.doGet("http://www.crossref.org/openurl/?"+co+"&noredirect=true", null, function(responseText) {
+	Scholar.Utilities.HTTP.doGet("http://www.crossref.org/openurl/?"+co+"&noredirect=true", null, function(responseText) {
 		processCrossRef(responseText);
 		Scholar.done();
 	});

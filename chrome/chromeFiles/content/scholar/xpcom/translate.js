@@ -436,7 +436,7 @@ Scholar.Translate.prototype._generateSandbox = function() {
 		
 		// add ingester utilities
 		this._sandbox.Scholar.Utilities = new Scholar.Utilities.Ingester(this.locationIsProxied);
-		this._sandbox.Scholar.Utilities.HTTPUtilities = new Scholar.Utilities.Ingester.HTTPUtilities(this.locationIsProxied);
+		this._sandbox.Scholar.Utilities.HTTP = new Scholar.Utilities.Ingester.HTTP(this.locationIsProxied);
 		
 		// set up selectItems handler
 		this._sandbox.Scholar.selectItems = function(options) { return me._selectItems(options) };

@@ -266,25 +266,25 @@ Scholar.Utilities.Ingester.prototype.processDocuments = function(urls, processor
 	Scholar.Utilities.HTTP.processDocuments(null, urls, processor, done, exception);
 }
 
-Scholar.Utilities.Ingester.HTTPUtilities = function(proxiedURL) {
+Scholar.Utilities.Ingester.HTTP = function(proxiedURL) {
 	this.proxiedURL = proxiedURL;
 }
 
-Scholar.Utilities.Ingester.HTTPUtilities.prototype.doGet = function(url, onStatus, onDone) {
+Scholar.Utilities.Ingester.HTTP.prototype.doGet = function(url, onStatus, onDone) {
 	if(this.proxiedURL) {
 		url = Scholar.Ingester.ProxyMonitor.properToProxy(url);
 	}
 	Scholar.Utilities.HTTP.doGet(url, onStatus, function(xmlhttp) { onDone(xmlhttp.responseText, xmlhttp) })
 }
 
-Scholar.Utilities.Ingester.HTTPUtilities.prototype.doPost = function(url, body, onStatus, onDone) {
+Scholar.Utilities.Ingester.HTTP.prototype.doPost = function(url, body, onStatus, onDone) {
 	if(this.proxiedURL) {
 		url = Scholar.Ingester.ProxyMonitor.properToProxy(url);
 	}
 	Scholar.Utilities.HTTP.doPost(url, body, onStatus, function(xmlhttp) { onDone(xmlhttp.responseText, xmlhttp) })
 }
 
-Scholar.Utilities.Ingester.HTTPUtilities.prototype.doOptions = function(url, onStatus, onDone) {
+Scholar.Utilities.Ingester.HTTP.prototype.doOptions = function(url, onStatus, onDone) {
 	if(this.proxiedURL) {
 		url = Scholar.Ingester.ProxyMonitor.properToProxy(url);
 	}
