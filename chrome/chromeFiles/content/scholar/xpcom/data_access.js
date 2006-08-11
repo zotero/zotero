@@ -1080,6 +1080,9 @@ Scholar.Item.prototype.getFile = function(){
 }
 
 
+/*
+ * Return the URL string associated with a linked or imported URL
+ */
 Scholar.Item.prototype.getFileURL = function(){
 	if (!this.isFile()){
 		throw ("getFileURL() can only be called on items of type 'file'");
@@ -1101,6 +1104,23 @@ Scholar.Item.prototype.getFileURL = function(){
 		default:
 			throw ('getFileURL() cannot be called on files without associated URLs');
 	}
+}
+
+
+/*
+ * Return a file:/// URL path to files and snapshots
+ */
+Scholar.Item.prototype.getLocalFileURL = function(){
+	if (!this.isFile){
+		throw ("getLocalFileURL() can only be called on items of type 'file'");
+	}
+	
+	var file = this.getFile();
+	
+	var nsIFPH = Components.classes["@mozilla.org/network/protocol;1?name=file"]
+			.getService(Components.interfaces.nsIFileProtocolHandler);
+	
+	return nsIFPH.getURLSpecFromFile(file);
 }
 
 
