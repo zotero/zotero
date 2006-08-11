@@ -260,7 +260,7 @@ ScholarItemPane = new function()
 		{
 			_itemBeingEdited.setType(id);
 			_itemBeingEdited.save();
-			reloadFields();
+			loadPane(0);
 		}
 	}
 	
@@ -345,7 +345,7 @@ ScholarItemPane = new function()
 	{
 		_itemBeingEdited.removeCreator(index);
 		_itemBeingEdited.save();
-		reloadFields();
+		loadPane(0);
 	}
 	
 	function showEditor(elem)

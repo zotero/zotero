@@ -196,6 +196,7 @@
 						</vbox>
 						<vbox id="scholar-view-file" flex="1">
 							<label id="scholar-file-label"/>
+							<button id="scholar-file-view" label="View File" oncommand="ScholarPane.viewSelectedFile();"/>
 							<linksbox id="scholar-file-links" flex="1"/>
 						</vbox>
 					</deck>

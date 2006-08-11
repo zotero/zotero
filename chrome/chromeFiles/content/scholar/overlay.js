@@ -52,6 +52,7 @@ var ScholarPane = new function()
 	this.newNote = newNote;
 	this.addFileFromDialog = addFileFromDialog;
 	this.addFileFromPage = addFileFromPage;
+	this.viewSelectedFile = viewSelectedFile;
 	
 	/*
 	 * Called when the window is open
@@ -225,6 +226,7 @@ var ScholarPane = new function()
 			else if(item.isFile())
 			{
 				document.getElementById('scholar-file-label').setAttribute('value',item.getField('title'));
+				document.getElementById('scholar-file-view').setAttribute('disabled', item.ref.getFileLinkMode() == Scholar.Files.LINK_MODE_LINKED_URL);
 				document.getElementById('scholar-file-links').item = item.ref;
 				document.getElementById('item-pane').selectedIndex = 3;
 			}
@@ -441,6 +443,10 @@ var ScholarPane = new function()
 				{
 					document.getElementById('scholar-view-note-button').doCommand();
 				}
+				else if(item && item.isFile())
+				{
+					viewSelectedFile();
+				}
 			}
 		}
 	}
@@ -490,7 +496,12 @@ var ScholarPane = new function()
 		{
 			item = newItem(Scholar.ItemTypes.getID('website'));
 			if(item)
+			{
 				id = item.getID();
+				var c = getSelectedCollection();
+				if(c)
+					c.addItem(id);
+			}
 		}
 		
 		var fileID;
@@ -499,16 +510,30 @@ var ScholarPane = new function()
 		else
 			fileID = Scholar.Files.importFromDocument(window.content.document, id);
 		
-		if(fileID)
-		{
+		if(fileID && item)
+		{			
 			var file = Scholar.Items.get(fileID);
-			if(!item)
-				item = Scholar.Items.get(id);
-			
-			if(file && item)
+			if(file)
 			{
 				item.setField('title',file.getField('title'));
 				item.save();
+			}
+		}
+	}
+	
+	function viewSelectedFile()
+	{
+		if(itemsView && itemsView.selection.count == 1)
+		{
+			var file = getSelectedItems()[0];
+			
+			if(file.getFileLinkMode() != Scholar.Files.LINK_MODE_LINKED_URL)
+			{
+				window.loadURI(file.getLocalFileURL());
+			}
+			else
+			{
+				window.loadURI(file.getFileURL());
 			}
 		}
 	}
