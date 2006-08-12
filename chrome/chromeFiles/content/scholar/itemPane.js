@@ -46,9 +46,9 @@ ScholarItemPane = new function()
 	this.modifyCreator = modifyCreator;
 	this.removeNote = removeNote;
 	this.addNote = addNote;
-	this.removeFile = removeFile;
-	this.addFileFromDialog = addFileFromDialog;
-	this.addFileFromPage = addFileFromPage;
+	this.removeAttachment = removeAttachment;
+	this.addAttachmentFromDialog = addAttachmentFromDialog;
+	this.addAttachmentFromPage = addAttachmentFromPage;
 	
 	function onLoad()
 	{
@@ -58,8 +58,8 @@ ScholarItemPane = new function()
 		_creatorTypeMenu = document.getElementById('creatorTypeMenu');
 		_notesList = document.getElementById('editpane-dynamic-notes');
 		_notesLabel = document.getElementById('editpane-notes-label');
-		_filesList = document.getElementById('editpane-dynamic-files');
-		_filesLabel = document.getElementById('editpane-files-label');
+		_attachmentsList = document.getElementById('editpane-dynamic-attachments');
+		_attachmentsLabel = document.getElementById('editpane-attachments-label');
 		_tagsBox = document.getElementById('editpane-tags');
 		_relatedBox = document.getElementById('editpane-related');
 		
@@ -76,7 +76,7 @@ ScholarItemPane = new function()
 		
 		var itemTypes = Scholar.ItemTypes.getTypes();
 		for(var i = 0; i<itemTypes.length; i++)
-			if(itemTypes[i]['name'] != 'note' && itemTypes[i]['name'] != 'file')
+			if(itemTypes[i]['name'] != 'note' && itemTypes[i]['name'] != 'attachment')
 				_itemTypeMenu.appendItem(Scholar.getString("itemTypes."+itemTypes[i]['name']),itemTypes[i]['id']);
 		
 		return true;
@@ -186,42 +186,42 @@ ScholarItemPane = new function()
 		}
 		else if(index == 2)
 		{
-			//FILES
-			while(_filesList.hasChildNodes())
-				_filesList.removeChild(_filesList.firstChild);
+			//ATTACHMENTS
+			while(_attachmentsList.hasChildNodes())
+				_attachmentsList.removeChild(_attachmentsList.firstChild);
 				
-			var files = Scholar.Items.get(_itemBeingEdited.getFiles());
-			if(files.length)
+			var attachments = Scholar.Items.get(_itemBeingEdited.getAttachments());
+			if(attachments.length)
 			{
-				for(var i = 0; i < files.length; i++)
+				for(var i = 0; i < attachments.length; i++)
 				{
 					var icon = document.createElement('image');
-					var linkMode = files[i].getFileLinkMode();
-					if(linkMode == Scholar.Files.LINK_MODE_IMPORTED_FILE)
+					var linkMode = attachments[i].getAttachmentLinkMode();
+					if(linkMode == Scholar.Attachments.LINK_MODE_IMPORTED_FILE)
 					{
 						itemType = "-file";
 					}
-					else if(linkMode == Scholar.Files.LINK_MODE_LINKED_FILE)
+					else if(linkMode == Scholar.Attachments.LINK_MODE_LINKED_FILE)
 					{
 						itemType = "-link";
 					}
-					else if(linkMode == Scholar.Files.LINK_MODE_IMPORTED_URL)
+					else if(linkMode == Scholar.Attachments.LINK_MODE_IMPORTED_URL)
 					{
 						itemType = "-snapshot";
 					}
-					else if(linkMode == Scholar.Files.LINK_MODE_LINKED_URL)
+					else if(linkMode == Scholar.Attachments.LINK_MODE_LINKED_URL)
 					{
 						itemType = "-web-link";
 					}
 					icon.setAttribute('src','chrome://scholar/skin/treeitem-file'+itemType+'.png');
 				
 					var label = document.createElement('label');
-					label.setAttribute('value',files[i].getField('title'));
+					label.setAttribute('value',attachments[i].getField('title'));
 					label.setAttribute('flex','1');	//so that the long names will flex smaller
 					label.setAttribute('crop','end');
 				
 					var box = document.createElement('box');
-					box.setAttribute('onclick',"ScholarPane.selectItem('"+files[i].getID()+"')");
+					box.setAttribute('onclick',"ScholarPane.selectItem('"+attachments[i].getID()+"')");
 					box.setAttribute('class','clicky');
 					box.appendChild(icon);
 					box.appendChild(label);
@@ -229,17 +229,17 @@ ScholarItemPane = new function()
 					var removeButton = document.createElement('label');
 					removeButton.setAttribute("value","-");
 					removeButton.setAttribute("class","clicky");
-					removeButton.setAttribute("onclick","ScholarItemPane.removeFile("+files[i].getID()+")");
+					removeButton.setAttribute("onclick","ScholarItemPane.removeAttachment("+attachments[i].getID()+")");
 				
 					var row = document.createElement('row');
 					row.appendChild(box);
 					row.appendChild(removeButton);
 				
-					_filesList.appendChild(row);
+					_attachmentsList.appendChild(row);
 				}
 			}
 		
-			_updateFileCount();
+			_updateAttachmentCount();
 			
 		}
 		else if(index == 3)
@@ -471,29 +471,29 @@ ScholarItemPane = new function()
 		_notesLabel.value = Scholar.getString('pane.item.notes.count.'+(c != 1 ? "plural" : "singular")).replace('%1',c) + ":";
 	}
 	
-	function _updateFileCount()
+	function _updateAttachmentCount()
 	{
-		var c = _filesList.childNodes.length;
+		var c = _attachmentsList.childNodes.length;
 		
-		_filesLabel.value = Scholar.getString('pane.item.files.count.'+(c != 1 ? "plural" : "singular")).replace('%1',c) + ":";
+		_attachmentsLabel.value = Scholar.getString('pane.item.attachments.count.'+(c != 1 ? "plural" : "singular")).replace('%1',c) + ":";
 	}
 	
-	function removeFile(id)
+	function removeAttachment(id)
 	{
-		var file = Scholar.Items.get(id);
-		if(file)
-			if(confirm(Scholar.getString('pane.item.files.delete.confirm')))
-				file.erase();
+		var attachment = Scholar.Items.get(id);
+		if(attachment)
+			if(confirm(Scholar.getString('pane.item.attachments.delete.confirm')))
+				attachment.erase();
 	}
 	
-	function addFileFromDialog(link)
+	function addAttachmentFromDialog(link)
 	{
-		ScholarPane.addFileFromDialog(link, _itemBeingEdited.getID());
+		ScholarPane.addAttachmentFromDialog(link, _itemBeingEdited.getID());
 	}
 	
-	function addFileFromPage(link)
+	function addAttachmentFromPage(link)
 	{
-		ScholarPane.addFileFromPage(link, _itemBeingEdited.getID());
+		ScholarPane.addAttachmentFromPage(link, _itemBeingEdited.getID());
 	}
 }
 

@@ -144,7 +144,7 @@ Scholar.ItemTreeView.prototype.notify = function(action, type, ids)
 				
 				if(!item.getSource())
 				{
-					//most likely, the note or file's parent was removed.
+					//most likely, the note or attachment's parent was removed.
 					this._showItem(new Scholar.ItemTreeView.TreeRow(item,0,false),this.rowCount);
 					this._treebox.rowCountChanged(this.rowCount-1,1);
 					madeChanges = true;
@@ -240,22 +240,22 @@ Scholar.ItemTreeView.prototype.getImageSrc = function(row, col)
 	{
 		var item = this._getItemAtRow(row);
 		var itemType = Scholar.ItemTypes.getName(item.getType());
-		if(itemType == 'file')
+		if(itemType == 'attachment')
 		{
-			var linkMode = item.ref.getFileLinkMode();
-			if(linkMode == Scholar.Files.LINK_MODE_IMPORTED_FILE)
+			var linkMode = item.ref.getAttachmentLinkMode();
+			if(linkMode == Scholar.Attachments.LINK_MODE_IMPORTED_FILE)
 			{
 				itemType = itemType + "-file";
 			}
-			else if(linkMode == Scholar.Files.LINK_MODE_LINKED_FILE)
+			else if(linkMode == Scholar.Attachments.LINK_MODE_LINKED_FILE)
 			{
 				itemType = itemType + "-link";
 			}
-			else if(linkMode == Scholar.Files.LINK_MODE_IMPORTED_URL)
+			else if(linkMode == Scholar.Attachments.LINK_MODE_IMPORTED_URL)
 			{
 				itemType = itemType + "-snapshot";
 			}
-			else if(linkMode == Scholar.Files.LINK_MODE_LINKED_URL)
+			else if(linkMode == Scholar.Attachments.LINK_MODE_LINKED_URL)
 			{
 				itemType = itemType + "-web-link";
 			}
@@ -277,7 +277,7 @@ Scholar.ItemTreeView.prototype.isContainerOpen = function(row)
 
 Scholar.ItemTreeView.prototype.isContainerEmpty = function(row)
 {
-	return (this._getItemAtRow(row).numNotes() == 0 && this._getItemAtRow(row).numFiles() == 0);
+	return (this._getItemAtRow(row).numNotes() == 0 && this._getItemAtRow(row).numAttachments() == 0);
 }
 
 Scholar.ItemTreeView.prototype.getLevel = function(row)
@@ -323,14 +323,14 @@ Scholar.ItemTreeView.prototype.toggleOpenState = function(row)
 	{
 		var item = this._getItemAtRow(row).ref;
 		//Get children
-		var files = item.getFiles();
+		var attachments = item.getAttachments();
 		var notes = item.getNotes();
 		
 		var newRows;
-		if(files && notes)
-			newRows = files.concat(notes);
-		else if(files)
-			newRows = files;
+		if(attachments && notes)
+			newRows = attachments.concat(notes);
+		else if(attachments)
+			newRows = attachments;
 		else if(notes)
 			newRows = notes;
 		
@@ -737,9 +737,9 @@ Scholar.ItemTreeView.TreeRow.prototype.isNote = function()
 	return this.ref.isNote();
 }
 
-Scholar.ItemTreeView.TreeRow.prototype.isFile = function()
+Scholar.ItemTreeView.TreeRow.prototype.isAttachment = function()
 {
-	return this.ref.isFile();
+	return this.ref.isAttachment();
 }
 
 Scholar.ItemTreeView.TreeRow.prototype.isRegularItem = function()
@@ -780,10 +780,10 @@ Scholar.ItemTreeView.TreeRow.prototype.numNotes = function()
 		return 0;
 }
 
-Scholar.ItemTreeView.TreeRow.prototype.numFiles = function()
+Scholar.ItemTreeView.TreeRow.prototype.numAttachments = function()
 {
 	if(this.isRegularItem())
-		return this.ref.numFiles();
+		return this.ref.numAttachments();
 	else
 		return 0;
 }

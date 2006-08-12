@@ -1,4 +1,4 @@
--- 38
+-- 39
 
     DROP TABLE IF EXISTS version;
     CREATE TABLE version (
@@ -106,9 +106,9 @@
     DROP INDEX IF EXISTS fileTypeMimeTypes_mimeType;
     CREATE INDEX fileTypeMimeTypes_mimeType ON fileTypeMimeTypes(mimeType);
     
-    -- File data for file items
-    DROP TABLE IF EXISTS itemFiles;
-    CREATE TABLE itemFiles (
+    -- Metadata for attachment items
+    DROP TABLE IF EXISTS itemAttachments;
+    CREATE TABLE itemAttachments (
         itemID INT,
         sourceItemID INT,
         linkMode INT,
@@ -120,10 +120,10 @@
         FOREIGN KEY (itemID) REFERENCES items(itemID),
         FOREIGN KEY (sourceItemID) REFERENCES items(sourceItemID)
     );
-    DROP INDEX IF EXISTS itemFiles_sourceItemID;
-    CREATE INDEX itemFiles_sourceItemID ON itemFiles(sourceItemID);
-    DROP INDEX IF EXISTS itemFiles_mimeType;
-    CREATE INDEX itemFiles_mimeType ON itemFiles(mimeType);
+    DROP INDEX IF EXISTS itemAttachments_sourceItemID;
+    CREATE INDEX itemAttachments_sourceItemID ON itemAttachments(sourceItemID);
+    DROP INDEX IF EXISTS itemAttachments_mimeType;
+    CREATE INDEX itemAttachments_mimeType ON itemAttachments(mimeType);
     
     -- Individual entries for each tag
     DROP TABLE IF EXISTS tags;
@@ -290,7 +290,7 @@
     INSERT INTO itemTypes VALUES (11,'film');
     INSERT INTO itemTypes VALUES (12,'artwork');
     INSERT INTO itemTypes VALUES (13,'website');
-    INSERT INTO itemTypes VALUES (14,'file');
+    INSERT INTO itemTypes VALUES (14,'attachment');
     
     INSERT INTO "fieldFormats" VALUES(1, '.*', 0);
     INSERT INTO "fieldFormats" VALUES(2, '[0-9]*', 1);

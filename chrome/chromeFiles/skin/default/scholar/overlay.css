@@ -89,29 +89,29 @@
 	list-style-image: url('chrome://scholar/skin/toolbar-note-add.png');
 }
 
-#tb-file-add
+#tb-attachment-add
 {
-	list-style-image: url('chrome://scholar/skin/item-files-add.png');
+	list-style-image: url('chrome://scholar/skin/item-attachments-add.png');
 }
 
-#tb-item-files-file
+#tb-item-attachments-file
 {
-	list-style-image: url('chrome://scholar/skin/treeitem-file-file.png');
+	list-style-image: url('chrome://scholar/skin/treeitem-attachment-file.png');
 }
 
-#tb-item-files-link
+#tb-item-attachments-link
 {
-	list-style-image: url('chrome://scholar/skin/treeitem-file-link.png');
+	list-style-image: url('chrome://scholar/skin/treeitem-attachment-link.png');
 }
 
-#tb-item-files-snapshot
+#tb-item-attachments-snapshot
 {
-	list-style-image: url('chrome://scholar/skin/treeitem-file-snapshot.png');
+	list-style-image: url('chrome://scholar/skin/treeitem-attachment-snapshot.png');
 }
 
-#tb-item-files-web-link
+#tb-item-attachments-web-link
 {
-	list-style-image: url('chrome://scholar/skin/treeitem-file-web-link.png');
+	list-style-image: url('chrome://scholar/skin/treeitem-attachment-web-link.png');
 }
 
 #tb-fullscreen

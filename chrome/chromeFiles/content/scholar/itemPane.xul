@@ -58,13 +58,13 @@
 			</vbox>
 			<vbox flex="1">
 				<hbox align="center">
-					<label id="editpane-files-label"/>
-					<button id="tb-item-files-add" type="menu" label="&item.add;">
+					<label id="editpane-attachments-label"/>
+					<button id="tb-item-attachments-add" type="menu" label="&item.add;">
 						<menupopup>
-							<menuitem class="menuitem-iconic" id="tb-item-files-link" label="&toolbar.file.linked;" oncommand="ScholarItemPane.addFileFromDialog(true);"/>
-							<menuitem class="menuitem-iconic" id="tb-item-files-file" label="&toolbar.file.add;" oncommand="ScholarItemPane.addFileFromDialog();"/>
-							<menuitem class="menuitem-iconic" id="tb-item-files-web-link" label="&toolbar.file.weblink;" oncommand="ScholarItemPane.addFileFromPage(true);"/>
-							<menuitem class="menuitem-iconic" id="tb-item-files-snapshot" label="&toolbar.file.snapshot;" oncommand="ScholarItemPane.addFileFromPage();"/>
+							<menuitem class="menuitem-iconic" id="tb-item-attachments-link" label="&toolbar.attachment.linked;" oncommand="ScholarItemPane.addAttachmentFromDialog(true);"/>
+							<menuitem class="menuitem-iconic" id="tb-item-attachments-file" label="&toolbar.attachment.add;" oncommand="ScholarItemPane.addAttachmentFromDialog();"/>
+							<menuitem class="menuitem-iconic" id="tb-item-attachments-web-link" label="&toolbar.attachment.weblink;" oncommand="ScholarItemPane.addAttachmentFromPage(true);"/>
+							<menuitem class="menuitem-iconic" id="tb-item-attachments-snapshot" label="&toolbar.attachment.snapshot;" oncommand="ScholarItemPane.addAttachmentFromPage();"/>
 						</menupopup>
 					</button>
 				</hbox>
@@ -73,7 +73,7 @@
 						<column flex="1"/>
 						<column/>
 					</columns>
-					<rows id="editpane-dynamic-files" flex="1"/>
+					<rows id="editpane-dynamic-attachments" flex="1"/>
 				</grid>
 			</vbox>
 			<tagsbox id="editpane-tags" flex="1"/>

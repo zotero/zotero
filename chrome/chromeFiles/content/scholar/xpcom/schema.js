@@ -398,7 +398,7 @@ Scholar.Schema = new function(){
 		//
 		// Change this value to match the schema version
 		//
-		var toVersion = 38;
+		var toVersion = 39;
 		
 		if (toVersion != _getSchemaSQLVersion()){
 			throw('Schema version does not match version in _migrateSchema()');
@@ -422,7 +422,12 @@ Scholar.Schema = new function(){
 				}
 			}
 			
-			if (i==38){
+			if (i==39){
+				// Clear storage directory
+				var file = Scholar.getStorageDirectory();
+				if (file.exists()){
+					file.remove(true);
+				}
 				_initializeSchema();
 			}
 		}

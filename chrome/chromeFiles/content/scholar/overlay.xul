@@ -101,12 +101,12 @@
 					<toolbarbutton id="tb-add" tooltiptext="&toolbar.newItem.label;" type="menu">
 						<menupopup/>
 					</toolbarbutton>
-					<toolbarbutton id="tb-file-add" type="menu" tooltiptext="&toolbar.file.standalone;">
+					<toolbarbutton id="tb-attachment-add" type="menu" tooltiptext="&toolbar.attachment.standalone;">
 						<menupopup>
-							<menuitem label="&toolbar.file.linked;" oncommand="ScholarPane.addFileFromDialog(true);"/>
-							<menuitem label="&toolbar.file.add;" oncommand="ScholarPane.addFileFromDialog();"/>
-							<menuitem label="&toolbar.file.weblink;" oncommand="ScholarPane.addFileFromPage(true);"/>
-							<menuitem label="&toolbar.file.snapshot;" oncommand="ScholarPane.addFileFromPage();"/>
+							<menuitem label="&toolbar.attachment.linked;" oncommand="ScholarPane.addAttachmentFromDialog(true);"/>
+							<menuitem label="&toolbar.attachment.add;" oncommand="ScholarPane.addAttachmentFromDialog();"/>
+							<menuitem label="&toolbar.attachment.weblink;" oncommand="ScholarPane.addAttachmentFromPage(true);"/>
+							<menuitem label="&toolbar.attachment.snapshot;" oncommand="ScholarPane.addAttachmentFromPage();"/>
 						</menupopup>
 					</toolbarbutton>
 					<toolbarbutton id="tb-note-add" tooltiptext="&toolbar.note.standalone;" oncommand="ScholarPane.newNote();"/>
@@ -180,7 +180,7 @@
 						<tabs id="scholar-view-tabs" onselect="document.getElementById('scholar-view-item').selectedIndex = this.selectedIndex;" hidden="true">
 							<tab label="&tabs.info.label;"/>
 							<tab label="&tabs.notes.label;"/>
-							<tab label="&tabs.files.label;"/>
+							<tab label="&tabs.attachments.label;"/>
 							<tab label="&tabs.tags.label;"/>
 							<tab label="&tabs.related.label;"/>
 						</tabs>
@@ -194,10 +194,10 @@
 							<noteeditor id="scholar-note-editor" flex="1"/>
 							<button id="scholar-view-note-button" label="&notes.separate;" oncommand="ScholarPane.openNoteWindow(this.getAttribute('noteID')); if(this.hasAttribute('sourceID')) ScholarPane.selectItem(this.getAttribute('sourceID'));"/>
 						</vbox>
-						<vbox id="scholar-view-file" flex="1">
-							<label id="scholar-file-label"/>
-							<button id="scholar-file-view" label="View File" oncommand="ScholarPane.viewSelectedFile();"/>
-							<linksbox id="scholar-file-links" flex="1"/>
+						<vbox id="scholar-view-attachment" flex="1">
+							<label id="scholar-attachment-label"/>
+							<button id="scholar-attachment-view" label="View Attachment" oncommand="ScholarPane.viewSelectedAttachment();"/>
+							<linksbox id="scholar-attachment-links" flex="1"/>
 						</vbox>
 					</deck>
 				</groupbox>

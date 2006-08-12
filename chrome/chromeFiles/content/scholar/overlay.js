@@ -50,9 +50,9 @@ var ScholarPane = new function()
 	this.onDoubleClick = onDoubleClick;
 	this.openNoteWindow = openNoteWindow;
 	this.newNote = newNote;
-	this.addFileFromDialog = addFileFromDialog;
-	this.addFileFromPage = addFileFromPage;
-	this.viewSelectedFile = viewSelectedFile;
+	this.addAttachmentFromDialog = addAttachmentFromDialog;
+	this.addAttachmentFromPage = addAttachmentFromPage;
+	this.viewSelectedAttachment = viewSelectedAttachment;
 	
 	/*
 	 * Called when the window is open
@@ -223,11 +223,11 @@ var ScholarPane = new function()
 					document.getElementById('scholar-view-note-button').removeAttribute('sourceID');
 				document.getElementById('item-pane').selectedIndex = 2;
 			}
-			else if(item.isFile())
+			else if(item.isAttachment())
 			{
-				document.getElementById('scholar-file-label').setAttribute('value',item.getField('title'));
-				document.getElementById('scholar-file-view').setAttribute('disabled', item.ref.getFileLinkMode() == Scholar.Files.LINK_MODE_LINKED_URL);
-				document.getElementById('scholar-file-links').item = item.ref;
+				document.getElementById('scholar-attachment-label').setAttribute('value',item.getField('title'));
+				document.getElementById('scholar-attachment-view').setAttribute('disabled', item.ref.getAttachmentLinkMode() == Scholar.Attachments.LINK_MODE_LINKED_URL);
+				document.getElementById('scholar-attachment-links').item = item.ref;
 				document.getElementById('item-pane').selectedIndex = 3;
 			}
 			else
@@ -267,7 +267,7 @@ var ScholarPane = new function()
 				{
 					itemsView.selection.getRangeAt(i,start,end);
 					for (var j=start.value; j<=end.value && !hasChildren; j++)
-						if(itemsView._getItemAtRow(j).numNotes() || itemsView._getItemAtRow(j).numFiles())
+						if(itemsView._getItemAtRow(j).numNotes() || itemsView._getItemAtRow(j).numAttachments())
 							hasChildren = true;
 				}
 			}
@@ -443,9 +443,9 @@ var ScholarPane = new function()
 				{
 					document.getElementById('scholar-view-note-button').doCommand();
 				}
-				else if(item && item.isFile())
+				else if(item && item.isAttachment())
 				{
-					viewSelectedFile();
+					viewSelectedAttachment();
 				}
 			}
 		}
@@ -465,31 +465,31 @@ var ScholarPane = new function()
 		window.open('chrome://scholar/content/note.xul?v=1'+(id ? '&id='+id : '')+(parent ? '&coll='+parent : ''),'','chrome,resizable,centerscreen');
 	}
 	
-	function addFileFromDialog(link, id)
+	function addAttachmentFromDialog(link, id)
 	{
 		var nsIFilePicker = Components.interfaces.nsIFilePicker;
 		var fp = Components.classes["@mozilla.org/filepicker;1"]
         					.createInstance(nsIFilePicker);
-		fp.init(window, Scholar.getString('pane.item.files.select'), nsIFilePicker.modeOpen);
+		fp.init(window, Scholar.getString('pane.item.attachments.select'), nsIFilePicker.modeOpen);
 		
 		if(fp.show() == nsIFilePicker.returnOK)
 		{
-			var fileID;
+			var attachmentID;
 			if(link)
-				fileID = Scholar.Files.linkFromFile(fp.file, id);
+				attachmentID = Scholar.Attachments.linkFromFile(fp.file, id);
 			else
-				fileID = Scholar.Files.importFromFile(fp.file, id);
+				attachmentID = Scholar.Attachments.importFromFile(fp.file, id);
 		
-			if(fileID && !id)
+			if(attachmentID && !id)
 			{
 				var c = getSelectedCollection();
 				if(c)
-					c.addItem(fileID);
+					c.addItem(attachmentID);
 			}
 		}
 	}
 	
-	function addFileFromPage(link, id)
+	function addAttachmentFromPage(link, id)
 	{
 		var item;
 		if(id == null)
@@ -504,36 +504,36 @@ var ScholarPane = new function()
 			}
 		}
 		
-		var fileID;
+		var attachmentID;
 		if(link)
-			fileID = Scholar.Files.linkFromDocument(window.content.document, id);
+			attachmentID = Scholar.Attachments.linkFromDocument(window.content.document, id);
 		else
-			fileID = Scholar.Files.importFromDocument(window.content.document, id);
+			attachmentID = Scholar.Attachments.importFromDocument(window.content.document, id);
 		
-		if(fileID && item)
+		if(attachmentID && item)
 		{			
-			var file = Scholar.Items.get(fileID);
-			if(file)
+			var attachment = Scholar.Items.get(attachmentID);
+			if(attachment)
 			{
-				item.setField('title',file.getField('title'));
+				item.setField('title',attachment.getField('title'));
 				item.save();
 			}
 		}
 	}
 	
-	function viewSelectedFile()
+	function viewSelectedAttachment()
 	{
 		if(itemsView && itemsView.selection.count == 1)
 		{
-			var file = getSelectedItems()[0];
+			var attachment = getSelectedItems()[0];
 			
-			if(file.getFileLinkMode() != Scholar.Files.LINK_MODE_LINKED_URL)
+			if(attachment.getAttachmentLinkMode() != Scholar.Attachments.LINK_MODE_LINKED_URL)
 			{
-				window.loadURI(file.getLocalFileURL());
+				window.loadURI(attachment.getLocalFileURL());
 			}
 			else
 			{
-				window.loadURI(file.getFileURL());
+				window.loadURI(attachment.getURL());
 			}
 		}
 	}

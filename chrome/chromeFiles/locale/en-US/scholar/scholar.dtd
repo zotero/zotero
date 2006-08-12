@@ -2,7 +2,7 @@
 
 <!ENTITY tabs.info.label				"Info">
 <!ENTITY tabs.notes.label				"Notes">
-<!ENTITY tabs.files.label				"Files">
+<!ENTITY tabs.attachments.label				"Attachments">
 <!ENTITY tabs.tags.label				"Tags">
 <!ENTITY tabs.related.label				"Related">
 <!ENTITY notes.separate					"Edit in a separate window">
@@ -35,11 +35,11 @@
 <!ENTITY item.add						"Add">
 
 <!ENTITY toolbar.note.standalone		"New Standalone Note">
-<!ENTITY toolbar.file.standalone		"New Standalone File">
-<!ENTITY toolbar.file.add   			"Add File...">
-<!ENTITY toolbar.file.linked   			"Add Linked File...">
-<!ENTITY toolbar.file.snapshot 			"Snapshot Current Page">
-<!ENTITY toolbar.file.weblink  			"Link to Current Page">
+<!ENTITY toolbar.attachment.standalone		"New Standalone Attachment">
+<!ENTITY toolbar.attachment.add   			"Add File...">
+<!ENTITY toolbar.attachment.linked   			"Add Linked File...">
+<!ENTITY toolbar.attachment.snapshot 			"Snapshot Current Page">
+<!ENTITY toolbar.attachment.weblink  			"Link to Current Page">
 
 <!ENTITY selectitems.title   			"Select Items">
 <!ENTITY selectitems.intro.label   		"Select which items you'd like to add to your library">

@@ -49,7 +49,7 @@ Scholar.Item.prototype.isPrimaryField = function(field){
 		Scholar.Item.primaryFields = Scholar.DB.getColumnHash('items');
 		Scholar.Item.primaryFields['firstCreator'] = true;
 		Scholar.Item.primaryFields['numNotes'] = true;
-		Scholar.Item.primaryFields['numFiles'] = true;
+		Scholar.Item.primaryFields['numAttachments'] = true;
 	}
 	
 	return !!Scholar.Item.primaryFields[field];
@@ -77,7 +77,7 @@ Scholar.Item.prototype.loadFromID = function(id){
 		+ 'CASE ((SELECT COUNT(*) FROM itemCreators WHERE itemID=' + id + ')>1) '
 		+ "WHEN 0 THEN '' ELSE ' et al.' END AS firstCreator, "
 		+ "(SELECT COUNT(*) FROM itemNotes WHERE sourceItemID=I.itemID) AS numNotes, "
-		+ "(SELECT COUNT(*) FROM itemFiles WHERE sourceItemID=I.itemID) AS numFiles "
+		+ "(SELECT COUNT(*) FROM itemAttachments WHERE sourceItemID=I.itemID) AS numAttachments "
 		+ 'FROM items I '
 		+ 'LEFT JOIN itemCreators IC ON (I.itemID=IC.itemID) '
 		+ 'LEFT JOIN creators C ON (IC.creatorID=C.creatorID) '
@@ -778,7 +778,7 @@ Scholar.Item.prototype.updateDateModified = function(){
 
 
 Scholar.Item.prototype.isRegularItem = function(){
-	return !(this.isNote() || this.isFile());
+	return !(this.isNote() || this.isAttachment());
 }
 
 
@@ -851,12 +851,12 @@ Scholar.Item.prototype.setSource = function(sourceItemID){
 		var type = 'note';
 		var Type = 'Note';
 	}
-	else if (this.isFile()){
-		var type = 'file';
-		var Type = 'file';
+	else if (this.isAttachment()){
+		var type = 'attachment';
+		var Type = 'Attachment';
 	}
 	else {
-		throw ("setSource() can only be called on items of type 'note' or 'file'");
+		throw ("setSource() can only be called on items of type 'note' or 'attachment'");
 	}
 	
 	if (!this.getID()){
@@ -902,8 +902,8 @@ Scholar.Item.prototype.setSource = function(sourceItemID){
 			case 'note':
 				oldItem.decrementNoteCount();
 				break;
-			case 'file':
-				oldItem.decrementFileCount();
+			case 'attachment':
+				oldItem.decrementAttachmentCount();
 				break;
 		}
 		Scholar.Notifier.trigger('modify', 'item', oldSourceItemID);
@@ -913,8 +913,8 @@ Scholar.Item.prototype.setSource = function(sourceItemID){
 			case 'note':
 				newItem.incrementNoteCount();
 				break;
-			case 'file':
-				newItem.incrementFileCount();
+			case 'attachment':
+				newItem.incrementAttachmentCount();
 				break;
 		}
 		Scholar.Notifier.trigger('modify', 'item', sourceItemID);
@@ -970,11 +970,11 @@ Scholar.Item.prototype.getSource = function(){
 	if (this.isNote()){
 		var Type = 'Note';
 	}
-	else if (this.isFile()){
-		var Type = 'File';
+	else if (this.isAttachment()){
+		var Type = 'Attachment';
 	}
 	else {
-		throw ("getSource() can only be called on items of type 'note' or 'file'");
+		throw ("getSource() can only be called on items of type 'note' or 'attachment'");
 	}
 	
 	var sql = "SELECT sourceItemID FROM item" + Type + "s WHERE itemID=" + this.getID();
@@ -1003,65 +1003,66 @@ Scholar.Item.prototype.getNotes = function(){
 
 ////////////////////////////////////////////////////////
 //
-// Methods dealing with file items
+// Methods dealing with attachments
 //
-// save() is not required for file functions
+// save() is not required for attachment functions
 //
 ///////////////////////////////////////////////////////
-Scholar.Item.prototype.incrementFileCount = function(){
-	this._data['numFiles']++;
+Scholar.Item.prototype.incrementAttachmentCount = function(){
+	this._data['numAttachments']++;
 }
 
 
-Scholar.Item.prototype.decrementFileCount = function(){
-	this._data['numFiles']--;
+Scholar.Item.prototype.decrementAttachmentCount = function(){
+	this._data['numAttachments']--;
 }
 
 
 /**
-* Determine if an item is a file
+* Determine if an item is an attachment
 **/
-Scholar.Item.prototype.isFile = function(){
-	return Scholar.ItemTypes.getName(this.getType())=='file';
+Scholar.Item.prototype.isAttachment = function(){
+	return Scholar.ItemTypes.getName(this.getType())=='attachment';
 }
 
 
 /**
 * Returns number of files in item
 **/
-Scholar.Item.prototype.numFiles = function(){
-	if (this.isFile()){
-		throw ("numFiles() cannot be called on items of type 'file'");
+Scholar.Item.prototype.numAttachments = function(){
+	if (this.isAttachment()){
+		throw ("numAttachments() cannot be called on items of type 'attachment'");
 	}
 	
 	if (!this.getID()){
 		return 0;
 	}
 	
-	return this._data['numFiles'];
+	return this._data['numAttachments'];
 }
 
 
 /**
-* Get an nsILocalFile for the file item, or false if the associated file doesn't exist
+* Get an nsILocalFile for the attachment, or false if the associated file
+* doesn't exist
 *
 * Note: Always returns false for items with LINK_MODE_LINKED_URL,
-* since they have no files -- use getFileURL() instead
+* since they have no files -- use getURL() instead
 **/
 Scholar.Item.prototype.getFile = function(){
-	if (!this.isFile()){
-		throw ("getFile() can only be called on items of type 'file'");
+	if (!this.isAttachment()){
+		throw ("getFile() can only be called on items of type 'attachment'");
 	}
 	
-	var sql = "SELECT linkMode, path FROM itemFiles WHERE itemID=" + this.getID();
+	var sql = "SELECT linkMode, path FROM itemAttachments WHERE itemID=" + this.getID();
 	var row = Scholar.DB.rowQuery(sql);
 	
 	if (!row){
-		throw ('File data not found for item ' + this.getID() + ' in getFile()');
+		throw ('Attachment data not found for item ' + this.getID() + ' in getFile()');
 	}
 	
 	// No associated files for linked URLs
-	if (row['linkMode']==Scholar.Files.LINK_MODE_LINKED_URL){
+	if (row['linkMode']==Scholar.Attachments.LINK_MODE_LINKED_URL){
 		return false;
 	}
 	
@@ -1083,26 +1084,26 @@ Scholar.Item.prototype.getFile = function(){
 /*
  * Return the URL string associated with a linked or imported URL
  */
-Scholar.Item.prototype.getFileURL = function(){
-	if (!this.isFile()){
-		throw ("getFileURL() can only be called on items of type 'file'");
+Scholar.Item.prototype.getURL = function(){
+	if (!this.isAttachment()){
+		throw ("getURL() can only be called on items of type 'attachment'");
 	}
 	
-	var sql = "SELECT linkMode, path, originalPath FROM itemFiles "
+	var sql = "SELECT linkMode, path, originalPath FROM itemAttachments "
 		+ "WHERE itemID=" + this.getID();
 	var row = Scholar.DB.rowQuery(sql);
 	
 	if (!row){
-		throw ('File data not found for item ' + this.getID() + ' in getFileURL()');
+		throw ('Attachment data not found for item ' + this.getID() + ' in getURL()');
 	}
 	
 	switch (row['linkMode']){
-		case Scholar.Files.LINK_MODE_LINKED_URL:
+		case Scholar.Attachments.LINK_MODE_LINKED_URL:
 			return row['path'];
-		case Scholar.Files.LINK_MODE_IMPORTED_URL:
+		case Scholar.Attachments.LINK_MODE_IMPORTED_URL:
 			return row['originalPath'];
 		default:
-			throw ('getFileURL() cannot be called on files without associated URLs');
+			throw ('getURL() cannot be called on attachments without associated URLs');
 	}
 }
 
@@ -1111,8 +1112,8 @@ Scholar.Item.prototype.getFileURL = function(){
  * Return a file:/// URL path to files and snapshots
  */
 Scholar.Item.prototype.getLocalFileURL = function(){
-	if (!this.isFile){
-		throw ("getLocalFileURL() can only be called on items of type 'file'");
+	if (!this.isAttachment){
+		throw ("getLocalFileURL() can only be called on items of type 'attachment'");
 	}
 	
 	var file = this.getFile();
@@ -1125,65 +1126,65 @@ Scholar.Item.prototype.getLocalFileURL = function(){
 
 
 /**
-* Get the link mode of a file item
+* Get the link mode of an attachment
 *
-* Possible return values specified as constants in Scholar.Files
-* (e.g. Scholar.Files.LINK_MODE_LINKED_FILE)
+* Possible return values specified as constants in Scholar.Attachments
+* (e.g. Scholar.Attachments.LINK_MODE_LINKED_FILE)
 **/
-Scholar.Item.prototype.getFileLinkMode = function(){
-	if (!this.isFile()){
-		throw ("getFileLinkMode() can only be called on items of type 'file'");
+Scholar.Item.prototype.getAttachmentLinkMode = function(){
+	if (!this.isAttachment()){
+		throw ("getAttachmentLinkMode() can only be called on items of type 'attachment'");
 	}
 	
 	if (this._fileLinkMode!==null){
 		return this._fileLinkMode;
 	}
 	
-	var sql = "SELECT linkMode FROM itemFiles WHERE itemID=" + this.getID();
+	var sql = "SELECT linkMode FROM itemAttachments WHERE itemID=" + this.getID();
 	this._fileLinkMode = Scholar.DB.valueQuery(sql);
 	return this._fileLinkMode;
 }
 
 
 /**
-* Get the mime type of a file item (e.g. text/plain)
+* Get the mime type of an attachment (e.g. text/plain)
 **/
-Scholar.Item.prototype.getFileMimeType = function(){
-	if (!this.isFile()){
-		throw ("getFileData() can only be called on items of type 'file'");
+Scholar.Item.prototype.getAttachmentMimeType = function(){
+	if (!this.isAttachment()){
+		throw ("getAttachmentMIMEType() can only be called on items of type 'attachment'");
 	}
 	
-	var sql = "SELECT mimeType FROM itemFiles WHERE itemID=" + this.getID();
+	var sql = "SELECT mimeType FROM itemAttachments WHERE itemID=" + this.getID();
 	return Scholar.DB.valueQuery(sql);
 }
 
 
 /**
-* Get the character set id of a file item
+* Get the character set id of an attachment
 **/
-Scholar.Item.prototype.getFileCharset = function(){
-	if (!this.isFile()){
-		throw ("getFileCharset() can only be called on items of type 'file'");
+Scholar.Item.prototype.getAttachmentCharset = function(){
+	if (!this.isAttachment()){
+		throw ("getAttachmentCharset() can only be called on items of type 'attachment'");
 	}
 	
-	var sql = "SELECT charsetID FROM itemFiles WHERE itemID=" + this.getID();
+	var sql = "SELECT charsetID FROM itemAttachments WHERE itemID=" + this.getID();
 	return Scholar.DB.valueQuery(sql);
 }
 
 
 /**
-* Returns an array of file itemIDs for this item
+* Returns an array of attachment itemIDs that have this item as a source
 **/
-Scholar.Item.prototype.getFiles = function(){
-	if (this.isFile()){
-		throw ("getFiles() cannot be called on items of type 'file'");
+Scholar.Item.prototype.getAttachments = function(){
+	if (this.isAttachment()){
+		throw ("getAttachments() cannot be called on items of type 'attachment'");
 	}
 	
 	if (!this.getID()){
 		return [];
 	}
 	
-	var sql = "SELECT itemID FROM itemFiles NATURAL JOIN items "
+	var sql = "SELECT itemID FROM itemAttachments NATURAL JOIN items "
 		+ "WHERE sourceItemID=" + this.getID() + " ORDER BY dateAdded";
 	return Scholar.DB.columnQuery(sql);
 }
@@ -1325,22 +1326,22 @@ Scholar.Item.prototype.erase = function(deleteChildren){
 			changedItems.push(sourceItemID);
 		}
 	}
-	// File
-	else if (this.isFile()){
+	// Attachment
+	else if (this.isAttachment()){
 		// Decrement file count of source items
-		var sql = "SELECT sourceItemID FROM itemFiles WHERE itemID=" + this.getID();
+		var sql = "SELECT sourceItemID FROM itemAttachments WHERE itemID=" + this.getID();
 		var sourceItemID = Scholar.DB.valueQuery(sql);
 		if (sourceItemID){
 			var sourceItem = Scholar.Items.get(sourceItemID);
-			sourceItem.decrementFileCount();
+			sourceItem.decrementAttachmentCount();
 			changedItems.push(sourceItemID);
 		}
 		
 		// Delete associated files
-		var linkMode = this.getFileLinkMode();
+		var linkMode = this.getAttachmentLinkMode();
 		switch (linkMode){
-			case Scholar.Files.LINK_MODE_LINKED_FILE:
-			case Scholar.Files.LINK_MODE_LINKED_URL:
+			case Scholar.Attachments.LINK_MODE_LINKED_FILE:
+			case Scholar.Attachments.LINK_MODE_LINKED_URL:
 				// Links only -- nothing to delete
 				break;
 			default:
@@ -1357,7 +1358,7 @@ Scholar.Item.prototype.erase = function(deleteChildren){
 	// Delete child notes and files
 	else if (deleteChildren){
 		var sql = "SELECT itemID FROM itemNotes WHERE sourceItemID=?1 UNION "
-			+ "SELECT itemID FROM itemFiles WHERE sourceItemID=?1";
+			+ "SELECT itemID FROM itemAttachments WHERE sourceItemID=?1";
 		var toDelete = Scholar.DB.columnQuery(sql, [this.getID()]);
 		
 		if (toDelete){
@@ -1380,13 +1381,13 @@ Scholar.Item.prototype.erase = function(deleteChildren){
 			+ this.getID();
 		Scholar.DB.query(sql);
 		
-		// Files
-		var sql = "SELECT itemID FROM itemFiles WHERE sourceItemID=" + this.getID();
-		var childFiles = Scholar.DB.columnQuery(sql);
-		if (childFiles){
-			changedItems.push(childFiles);
+		// Attachments
+		var sql = "SELECT itemID FROM itemAttachments WHERE sourceItemID=" + this.getID();
+		var childAttachments = Scholar.DB.columnQuery(sql);
+		if (childAttachments){
+			changedItems.push(childAttachments);
 		}
-		var sql = "UPDATE itemFiles SET sourceItemID=NULL WHERE sourceItemID="
+		var sql = "UPDATE itemAttachments SET sourceItemID=NULL WHERE sourceItemID="
 			+ this.getID();
 		Scholar.DB.query(sql);
 	}
@@ -1399,7 +1400,7 @@ Scholar.Item.prototype.erase = function(deleteChildren){
 	
 	sql = 'DELETE FROM itemCreators WHERE itemID=' + this.getID() + ";\n";
 	sql += 'DELETE FROM itemNotes WHERE itemID=' + this.getID() + ";\n";
-	sql += 'DELETE FROM itemFiles WHERE itemID=' + this.getID() + ";\n";
+	sql += 'DELETE FROM itemAttachments WHERE itemID=' + this.getID() + ";\n";
 	sql += 'DELETE FROM itemSeeAlso WHERE itemID=' + this.getID() + ";\n";
 	sql += 'DELETE FROM itemSeeAlso WHERE linkedItemID=' + this.getID() + ";\n";
 	sql += 'DELETE FROM itemTags WHERE itemID=' + this.getID() + ";\n";
@@ -1418,8 +1419,8 @@ Scholar.Item.prototype.erase = function(deleteChildren){
 			if (this.isNote()){
 				sourceItem.incrementNoteCount();
 			}
-			else if (this.isFile()){
-				sourceItem.incrementFileCount();
+			else if (this.isAttachment()){
+				sourceItem.incrementAttachmentCount();
 			}
 		}
 		Scholar.DB.rollbackTransaction();
@@ -1466,7 +1467,7 @@ Scholar.Item.prototype.toArray = function(){
 			// Skip certain fields
 			case 'firstCreator':
 			case 'numNotes':
-			case 'numFiles':
+			case 'numAttachments':
 				continue;
 			
 			// For the rest, just copy over
@@ -1480,7 +1481,7 @@ Scholar.Item.prototype.toArray = function(){
 		arr[Scholar.ItemFields.getName(i)] = this._itemData[i];
 	}
 	
-	if (!this.isNote() && !this.isFile()){
+	if (!this.isNote() && !this.isAttachment()){
 		// Creators
 		arr['creators'] = [];
 		var creators = this.getCreators();
@@ -1519,11 +1520,8 @@ Scholar.Item.prototype.toArray = function(){
 		}
 	}
 	
-	// Append source files
-	if (this.isFile()){
-		arr['fileName'] = arr['title'];
-		delete arr['title'];
-		
+	// Attachments
+	if (this.isAttachment()){
 		// TODO: file data
 		
 		if (this.getSource()){
@@ -1531,13 +1529,13 @@ Scholar.Item.prototype.toArray = function(){
 		}
 	}
 	
-	// If not file, append attached files
+	// If not file, append child attachments
 	else {
-		arr['files'] = [];
-		var files = this.getFiles();
+		arr['attachments'] = [];
+		var files = this.getAttachments();
 		for (var i in files){
 			var file = Scholar.Items.get(files[i]);
-			arr['files'].push({
+			arr['attachments'].push({
 				itemID: file.getID(),
 				// TODO
 				tags: file.getTags(),
@@ -1820,7 +1818,7 @@ Scholar.Items = new function(){
 			+ 'CASE ((SELECT COUNT(*) FROM itemCreators WHERE itemID=I.itemID)>1) '
 			+ "WHEN 0 THEN '' ELSE ' et al.' END AS firstCreator, "
 			+ "(SELECT COUNT(*) FROM itemNotes WHERE sourceItemID=I.itemID) AS numNotes, "
-			+ "(SELECT COUNT(*) FROM itemFiles WHERE sourceItemID=I.itemID) AS numFiles "
+			+ "(SELECT COUNT(*) FROM itemAttachments WHERE sourceItemID=I.itemID) AS numAttachments "
 			+ 'FROM items I '
 			+ 'LEFT JOIN itemCreators IC ON (I.itemID=IC.itemID) '
 			+ 'LEFT JOIN creators C ON (IC.creatorID=C.creatorID) '
@@ -1905,7 +1903,7 @@ Scholar.Notes = new function(){
 
 
 
-Scholar.Files = new function(){
+Scholar.Attachments = new function(){
 	this.LINK_MODE_IMPORTED_FILE = 0;
 	this.LINK_MODE_IMPORTED_URL = 1;
 	this.LINK_MODE_LINKED_FILE = 2;
@@ -1925,13 +1923,13 @@ Scholar.Files = new function(){
 		
 		Scholar.DB.beginTransaction();
 		
-		// Create a new file item
-		var fileItem = Scholar.Items.getNewItemByType(Scholar.ItemTypes.getID('file'));
-		fileItem.setField('title', title);
-		fileItem.save();
-		var itemID = fileItem.getID();
+		// Create a new attachment
+		var attachmentItem = Scholar.Items.getNewItemByType(Scholar.ItemTypes.getID('attachment'));
+		attachmentItem.setField('title', title);
+		attachmentItem.save();
+		var itemID = attachmentItem.getID();
 		
-		// Create directory for item files within storage directory
+		// Create directory for attachment files within storage directory
 		var destDir = Scholar.getStorageDirectory();
 		destDir.append(itemID);
 		destDir.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0644);
@@ -1972,7 +1970,7 @@ Scholar.Files = new function(){
 	function importFromURL(url, sourceItemID){
 		var browser = Scholar.Browser.createHiddenBrowser();
 		browser.addEventListener("pageshow", function(){
-			Scholar.Files.importFromDocument(browser.contentDocument, sourceItemID);
+			Scholar.Attachments.importFromDocument(browser.contentDocument, sourceItemID);
 			browser.removeEventListener("pageshow", arguments.callee, true);
 			Scholar.Browser.deleteHiddenBrowser(browser);
 		}, true);
@@ -1995,7 +1993,7 @@ Scholar.Files = new function(){
 		
 		// Otherwise do a head request for the mime type
 		Scholar.Utilities.HTTP.doHead(url, function(obj){
-			_addToDB(null, url, title, Scholar.Files.LINK_MODE_LINKED_URL,
+			_addToDB(null, url, title, Scholar.Attachments.LINK_MODE_LINKED_URL,
 				obj.channel.contentType, null, sourceItemID);
 		});
 	}
@@ -2027,11 +2025,11 @@ Scholar.Files = new function(){
 		
 		Scholar.DB.beginTransaction();
 		
-		// Create a new file item
-		var fileItem = Scholar.Items.getNewItemByType(Scholar.ItemTypes.getID('file'));
-		fileItem.setField('title', title);
-		fileItem.save();
-		var itemID = fileItem.getID();
+		// Create a new attachment
+		var attachmentItem = Scholar.Items.getNewItemByType(Scholar.ItemTypes.getID('attachment'));
+		attachmentItem.setField('title', title);
+		attachmentItem.save();
+		var itemID = attachmentItem.getID();
 		
 		// Create a new folder for this item in the storage directory
 		var destDir = Scholar.getStorageDirectory();
@@ -2087,14 +2085,14 @@ Scholar.Files = new function(){
 	
 	
 	/**
-	* Create a new item of type 'file' and add the file link to the itemFiles table
+	* Create a new item of type 'attachment' and add to the itemAttachments table
 	*
 	* Passing an itemID causes it to skip new item creation and use the specified
 	* item instead -- used when importing files (since we have to know
 	* the itemID before copying in a file and don't want to update the DB before
 	* the file is saved)
 	*
-	* Returns the itemID of the new file item
+	* Returns the itemID of the new attachment
 	**/
 	function _addToDB(file, url, title, linkMode, mimeType, charsetID, sourceItemID, itemID){
 		if (url){
@@ -2118,32 +2116,32 @@ Scholar.Files = new function(){
 			var sourceItem = Scholar.Items.get(sourceItemID);
 			if (!sourceItem){
 				Scholar.DB.commitTransaction();
-				throw ("Cannot set file source to invalid item " + sourceItemID);
+				throw ("Cannot set attachment source to invalid item " + sourceItemID);
 			}
-			if (sourceItem.isFile()){
+			if (sourceItem.isAttachment()){
 				Scholar.DB.commitTransaction();
-				throw ("Cannot set file source to another file (" + sourceItemID + ")");
+				throw ("Cannot set attachment source to another file (" + sourceItemID + ")");
 			}
 		}
 		
 		// If an itemID is provided, use that
 		if (itemID){
-			var fileItem = Scholar.Items.get(itemID);
-			if (!fileItem.isFile()){
-				throw ("Item " + itemID + " is not a valid file item in _addToDB()");
+			var attachmentItem = Scholar.Items.get(itemID);
+			if (!attachmentItem.isAttachment()){
+				throw ("Item " + itemID + " is not a valid attachment in _addToDB()");
 			}
 		}
-		// Otherwise create a new file item
+		// Otherwise create a new attachment
 		else {
-			var fileItem = Scholar.Items.getNewItemByType(Scholar.ItemTypes.getID('file'));
-			fileItem.setField('title', title);
-			fileItem.save();
+			var attachmentItem = Scholar.Items.getNewItemByType(Scholar.ItemTypes.getID('attachment'));
+			attachmentItem.setField('title', title);
+			attachmentItem.save();
 		}
 		
-		var sql = "INSERT INTO itemFiles (itemID, sourceItemID, linkMode, "
+		var sql = "INSERT INTO itemAttachments (itemID, sourceItemID, linkMode, "
 			+ "mimeType, charsetID, path, originalPath) VALUES (?,?,?,?,?,?,?)";
 		var bindParams = [
-			fileItem.getID(),
+			attachmentItem.getID(),
 			(sourceItemID ? {int:sourceItemID} : null),
 			{int:linkMode},
 			{string:mimeType},
@@ -2159,9 +2157,9 @@ Scholar.Files = new function(){
 			Scholar.Notifier.trigger('modify', 'item', sourceItemID);
 		}
 		
-		Scholar.Notifier.trigger('add', 'item', fileItem.getID());
+		Scholar.Notifier.trigger('add', 'item', attachmentItem.getID());
 		
-		return fileItem.getID();
+		return attachmentItem.getID();
 	}
 }
 
@@ -3274,7 +3272,7 @@ Scholar.getItems = function(parent){
 	
 	if (!parent){
 		var sql = "SELECT A.itemID FROM items A LEFT JOIN itemNotes B USING (itemID) "
-			+ "LEFT JOIN itemFiles C ON (C.itemID=A.itemID) WHERE B.sourceItemID IS NULL"
+			+ "LEFT JOIN itemAttachments C ON (C.itemID=A.itemID) WHERE B.sourceItemID IS NULL"
 			+ " AND C.sourceItemID IS NULL";
 	}
 	else {
