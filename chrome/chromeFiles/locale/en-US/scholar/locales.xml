@@ -1,0 +1,114 @@
+<terms>
+  <locale xml:lang="en">
+    <term name="in">in</term>
+    <term name="ibid">ibid</term>
+    <term name="accessed">accessed</term>
+    <term name="forthcoming">forthcoming</term>
+    <term name="references">References</term>
+    <term name="and">and</term>
+    <term name="page">
+      <single>page</single>
+      <multiple>pages</multiple>
+    </term>
+    <term name="page-short">
+      <single>p</single>
+      <multiple>pp</multiple>
+    </term>
+    <term name="editor">
+      <single>editor</single>
+      <multiple>editors</multiple>
+    </term>
+    <term name="editor-short">
+      <single>ed</single>
+      <multiple>eds</multiple>
+    </term>
+    <term name="translator">
+      <single>translator</single>
+      <multiple>translators</multiple>
+    </term>
+    <term name="translator-short">
+      <single>tran</single>
+      <multiple>trans</multiple>
+    </term>
+    <term name="month-01">January</term>
+    <term name="month-02">February</term>
+    <term name="month-03">March</term>
+    <term name="month-04">April</term>
+    <term name="month-05">May</term>
+    <term name="month-06">June</term>
+    <term name="month-07">July</term>
+    <term name="month-08">August</term>
+    <term name="month-09">September</term>
+    <term name="month-10">October</term>
+    <term name="month-11">November</term>
+    <term name="month-12">December</term>
+    <term name="month-01-short">Jan</term>
+    <term name="month-02-short">Feb</term>
+    <term name="month-03-short">Mar</term>
+    <term name="month-04-short">Apr</term>
+    <term name="month-05-short">May</term>
+    <term name="month-06-short">Jun</term>
+    <term name="month-07-short">Jul</term>
+    <term name="month-08-short">Aug</term>
+    <term name="month-09-short">Sep</term>
+    <term name="month-10-short">Oct</term>
+    <term name="month-11-short">Nov</term>
+    <term name="month-12-short">Dec</term>
+  </locale>
+  <locale xml:lang="nl">
+    <term name="in">in</term>
+    <term name="ibid">ibid</term>
+    <term name="accessed">benaderd</term>
+    <term name="forthcoming">in voorbereiding</term>
+    <term name="references">Referenties</term>
+    <term name="and">en</term>
+    <term name="page">
+      <single>pagina</single>
+      <multiple>pagina's</multiple>
+    </term>
+    <term name="page-short">
+      <single>p</single>
+      <multiple>pp</multiple>
+    </term>
+    <term name="editor">
+      <single>redacteur</single>
+      <multiple>redacteurs</multiple>
+    </term>
+    <term name="editor-short">
+      <single>red</single>
+      <multiple>reds</multiple>
+    </term>
+    <term name="translator">
+      <single>vertaler</single>
+      <multiple>vertalers</multiple>
+    </term>
+    <term name="translator-short">
+      <single>vert</single>
+      <multiple>verts</multiple>
+    </term>
+    <term name="month-01">januari</term>
+    <term name="month-02">februari</term>
+    <term name="month-03">maart</term>
+    <term name="month-04">april</term>
+    <term name="month-05">mei</term>
+    <term name="month-06">juni</term>
+    <term name="month-07">juli</term>
+    <term name="month-08">augustus</term>
+    <term name="month-09">september</term>
+    <term name="month-10">oktober</term>
+    <term name="month-11">november</term>
+    <term name="month-12">december</term>
+    <term name="month-01-short">jan</term>
+    <term name="month-02-short">feb</term>
+    <term name="month-03-short">maa</term>
+    <term name="month-04-short">apr</term>
+    <term name="month-05-short">mei</term>
+    <term name="month-06-short">jun</term>
+    <term name="month-07-short">jul</term>
+    <term name="month-08-short">aug</term>
+    <term name="month-09-short">sep</term>
+    <term name="month-10-short">okt</term>
+    <term name="month-11-short">nov</term>
+    <term name="month-12-short">dec</term>
+  </locale>
+</terms>
