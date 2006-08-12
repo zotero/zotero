@@ -148,8 +148,13 @@ Scholar.File = new function(){
 			return true;
 		}
 		
-		for (var i in navigator.mimeTypes){
-			if (navigator.mimeTypes[i].type==mimeType){
+		// Is there a better way to get to navigator?
+		var types = Components.classes["@mozilla.org/appshell/appShellService;1"]
+				.getService(Components.interfaces.nsIAppShellService)
+				.hiddenDOMWindow.navigator.mimeTypes;
+		
+		for (var i in types){
+			if (types[i].type==mimeType){
 				Scholar.debug('MIME type ' + mimeType + ' can be handled by plugins');
 				return true;
 			}

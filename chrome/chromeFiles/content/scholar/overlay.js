@@ -529,7 +529,15 @@ var ScholarPane = new function()
 			
 			if(attachment.getAttachmentLinkMode() != Scholar.Attachments.LINK_MODE_LINKED_URL)
 			{
-				window.loadURI(attachment.getLocalFileURL());
+				var file = attachment.getFile();
+				if (attachment.getAttachmentLinkMode() == Scholar.Attachments.LINK_MODE_IMPORTED_URL
+					|| Scholar.File.hasInternalHandler(file))
+				{
+					window.loadURI(attachment.getLocalFileURL());
+				}
+				else {
+					file.launch();
+				}
 			}
 			else
 			{
