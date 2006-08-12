@@ -1,4 +1,4 @@
--- 43
+-- 44
 
 -- Set the following timestamp to the most recent scraper update date
 REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-08-11 11:18:00'));
