@@ -270,25 +270,25 @@ Scholar.Utilities.Ingester.HTTP = function(proxiedURL) {
 	this.proxiedURL = proxiedURL;
 }
 
-Scholar.Utilities.Ingester.HTTP.prototype.doGet = function(url, onStatus, onDone) {
+Scholar.Utilities.Ingester.HTTP.prototype.doGet = function(url, onDone) {
 	if(this.proxiedURL) {
 		url = Scholar.Ingester.ProxyMonitor.properToProxy(url);
 	}
-	Scholar.Utilities.HTTP.doGet(url, onStatus, function(xmlhttp) { onDone(xmlhttp.responseText, xmlhttp) })
+	Scholar.Utilities.HTTP.doGet(url, function(xmlhttp) { onDone(xmlhttp.responseText, xmlhttp) })
 }
 
-Scholar.Utilities.Ingester.HTTP.prototype.doPost = function(url, body, onStatus, onDone) {
+Scholar.Utilities.Ingester.HTTP.prototype.doPost = function(url, body, onDone) {
 	if(this.proxiedURL) {
 		url = Scholar.Ingester.ProxyMonitor.properToProxy(url);
 	}
-	Scholar.Utilities.HTTP.doPost(url, body, onStatus, function(xmlhttp) { onDone(xmlhttp.responseText, xmlhttp) })
+	Scholar.Utilities.HTTP.doPost(url, body, function(xmlhttp) { onDone(xmlhttp.responseText, xmlhttp) })
 }
 
-Scholar.Utilities.Ingester.HTTP.prototype.doOptions = function(url, onStatus, onDone) {
+Scholar.Utilities.Ingester.HTTP.prototype.doOptions = function(url, onDone) {
 	if(this.proxiedURL) {
 		url = Scholar.Ingester.ProxyMonitor.properToProxy(url);
 	}
-	Scholar.Utilities.HTTP.doOptions(url, onStatus, function(xmlhttp) { onDone(xmlhttp.responseText, xmlhttp) })
+	Scholar.Utilities.HTTP.doOptions(url, function(xmlhttp) { onDone(xmlhttp.responseText, xmlhttp) })
 }
 
 // These are front ends for XMLHttpRequest. XMLHttpRequest can't actually be
@@ -309,12 +309,8 @@ Scholar.Utilities.HTTP = new function() {
 	*
 	* doGet can be called as:
 	* Scholar.Utilities.HTTP.doGet(url, onDone)
-	* Scholar.Utilities.HTTP.doGet(url, onStatus, onDone)
-	*
-	* The status handler, which doesn't really serve a very noticeable purpose
-	* in our code, is required for compatiblity with the Piggy Bank project
 	**/
-	function doGet(url, callback1, callback2) {
+	function doGet(url, onDone) {
 		Scholar.debug("HTTP GET "+url);
 		if (this.browserIsOffline()){
 			return false;
@@ -326,7 +322,7 @@ Scholar.Utilities.HTTP = new function() {
 		var test = xmlhttp.open('GET', url, true);
 		
 		xmlhttp.onreadystatechange = function(){
-			_stateChange(xmlhttp, callback1, callback2);
+			_stateChange(xmlhttp, onDone);
 		};
 		
 		xmlhttp.send(null);
@@ -342,12 +338,8 @@ Scholar.Utilities.HTTP = new function() {
 	*
 	* doPost can be called as:
 	* Scholar.Utilities.HTTP.doPost(url, body, onDone)
-	* Scholar.Utilities.HTTP.doPost(url, body, onStatus, onDone)
-	*
-	* The status handler, which doesn't really serve a very noticeable purpose
-	* in our code, is required for compatiblity with the Piggy Bank project
 	**/
-	function doPost(url, body, callback1, callback2) {
+	function doPost(url, body, onDone) {
 		Scholar.debug("HTTP POST "+body+" to "+url);
 		if (this.browserIsOffline()){
 			return false;
@@ -359,7 +351,7 @@ Scholar.Utilities.HTTP = new function() {
 		xmlhttp.open('POST', url, true);
 		
 		xmlhttp.onreadystatechange = function(){
-			_stateChange(xmlhttp, callback1, callback2);
+			_stateChange(xmlhttp, onDone);
 		};
 		
 		xmlhttp.send(body);
@@ -368,7 +360,7 @@ Scholar.Utilities.HTTP = new function() {
 	}
 	
 	
-	function doHead(url, callback1, callback2) {
+	function doHead(url, onDone) {
 		Scholar.debug("HTTP HEAD "+url);
 		if (this.browserIsOffline()){
 			return false;
@@ -394,12 +386,11 @@ Scholar.Utilities.HTTP = new function() {
 	*
 	* doOptions can be called as:
 	* Scholar.Utilities.HTTP.doOptions(url, body, onDone)
-	* Scholar.Utilities.HTTP.doOptions(url, body, onStatus, onDone)
 	*
 	* The status handler, which doesn't really serve a very noticeable purpose
 	* in our code, is required for compatiblity with the Piggy Bank project
 	**/
-	function doOptions(url, body, callback1, callback2) {
+	function doOptions(url, body, onDone) {
 		Scholar.debug("HTTP OPTIONS "+url);
 		if (this.browserIsOffline()){
 			return false;
@@ -411,7 +402,7 @@ Scholar.Utilities.HTTP = new function() {
 		xmlhttp.open('OPTIONS', url, true);
 		
 		xmlhttp.onreadystatechange = function(){
-			_stateChange(xmlhttp, callback1, callback2);
+			_stateChange(xmlhttp, onDone);
 		};
 		
 		xmlhttp.send(body);
@@ -426,47 +417,10 @@ Scholar.Utilities.HTTP = new function() {
 	}
 	
 	
-	function _stateChange(xmlhttp, callback1, callback2){
-		if(callback2) {
-			onStatus = callback1;
-			onDone = callback2;
-		} else {
-			onDone = callback1;
-			onStatus = null;
-		}
+	function _stateChange(xmlhttp, onDone){
 		switch (xmlhttp.readyState){
 			// Request not yet made
 			case 1:
-			break;
-	
-			// Contact established with server but nothing downloaded yet
-			case 2:
-				// Accessing status will throw an exception if no network connection
-				try {
-					xmlhttp.status;
-				}
-				catch (e){
-					Scholar.debug('No network connection');
-					xmlhttp.noNetwork = true;
-					return false;
-				}
-				
-				// Check for HTTP status 200
-				if (xmlhttp.status != 200){
-					Scholar.debug('XMLHTTPRequest received HTTP response code '
-						+ xmlhttp.status);
-					if(onStatus) {
-						try {
-							onStatus(
-								xmlhttp.status,
-								xmlhttp.statusText,
-								xmlhttp
-							);
-						} catch (e) {
-							Scholar.debug(e, 2);
-						}
-					}
-				}
 			break;
 	
 			// Called multiple while downloading in progress
