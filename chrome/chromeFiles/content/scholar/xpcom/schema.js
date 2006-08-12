@@ -288,7 +288,10 @@ Scholar.Schema = new function(){
 	**/
 	function _updateScrapersRemoteCallback(xmlhttp){
 		if (!xmlhttp.responseXML){
-			if (!xmlhttp.noNetwork){
+			if (xmlhttp.status>1000){
+				Scholar.debug('No network connection', 2);
+			}
+			else {
 				Scholar.debug('Invalid response from repository', 2);
 			}
 			_setRepositoryTimer(SCHOLAR_CONFIG['REPOSITORY_RETRY_INTERVAL']);
