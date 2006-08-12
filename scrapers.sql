@@ -1,4 +1,4 @@
--- 44
+-- 45
 
 -- Set the following timestamp to the most recent scraper update date
 REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-08-11 11:18:00'));
@@ -4859,101 +4859,138 @@ function doImport(url) {	// the URL is actually here for other translators
 	}
 }');
 
-REPLACE INTO "csl" VALUES('id-not-yet-given', '2006-08-03 00:33:00', 'American Psychological Association',
-'<citationstyle xmlns="http://purl.org/net/xbiblio/csl" xml:lang="en">
-   <info>
-      <title>American Psychological Association</title>
-      <title-short>APA</title-short>
-      <edition>5</edition>
-      <author>
-         <name>Bruce DÕArcus</name>
-         <email>bdarcus@sourceforge.net</email>
-      </author>
-      <dateCreated>2005-05-18</dateCreated>
-      <dateModified>2006-07-09</dateModified>
-      <source
-         href="http://www.english.uiuc.edu/cws/wworkshop/writer_resources/citation_styles/apa/apa.htm"
-         >Citation Styles Handbook: APA</source>
-      <field>psychology</field>
-      <description>Style for the American Psychological
-      Association.</description>
-   </info>
-   <general>
-      <names and="text" sort-separator=", " initialize-with=".">
-         <original-script position="after" prefix=" "/>
-      </names>
-      <contributors>
-         <label position="before-unless-first" type="verb"/>
-      </contributors>
-      <locators>
-         <label position="before" form="short"/>
-      </locators>
-      <titles>
-         <original-script position="after" prefix=" "/>
-      </titles>
-      <dates format="year, month day" month="full">
-         <original position="after" prefix=" [" suffix="]"/>
-      </dates>
-      <publishers order="address-publisher" separator=":"/>
-      <access order="url-date" separator=", "/>
-   </general>
-   <citation delimiter=";" type="author-year" sort-order="author-date"
-      prefix="(" suffix=")">
-      <use-et_al min-authors="6" use-first="6" position="first"/>
-      <use-et_al min-authors="6" use-first="1" position="subsequent"/>
-      <item-layout>
-         <author form="short" suffix=", "/>
-         <year/>
-         <point-locator prefix=": " include-label="false"/>
-      </item-layout>
-   </citation>
-   <bibliography author-as-sort-order="all" author-shorten-with="ÑÑÑ."
-      sort-order="author-date">
-      <use-et_al min-authors="4" use-first="3"/>
-      <list-layout>
-         <heading label="references"/>
-      </list-layout>
-      <item-layout suffix=".">
-         <reftype name="book">
-            <author alternate="editor"/>
-            <year prefix=" (" suffix=")."/>
-            <title font-style="italic" prefix=" " suffix="."/>
-            <editor prefix=", "/>
-            <publisher/>
-            <access prefix=" "/>
-         </reftype>
-         <reftype name="chapter">
-            <author alternate="editor"/>
-            <year prefix=" (" suffix=")."/>
-            <title prefix=" "/>
-            <group class="container">
-               <text idref="in"/>
-               <editor/>
-               <title type="container" font-style="italic" prefix=" " suffix="."/>
-               <title type="series" prefix=" " suffix="."/>
-               <publisher/>
+REPLACE INTO "csl" VALUES('id-not-yet-given', '2006-08-12 19:22:00', 'American Psychological Association',
+'<?xml version="1.0" encoding="UTF-8"?>
+<?oxygen RNGSchema="file:/Users/darcusb/xbiblio/csl/schema/trunk/csl-alt.rnc" type="compact"?>
+<style xmlns="http://purl.org/net/xbiblio/csl" class="author-date" xml:lang="en">
+  <info>
+    <title>American Psychological Association</title>
+    <id>http://purl.org/net/xbiblio/csl/styles/apa.csl</id>
+    <link>http://purl.org/net/xbiblio/csl/styles/apa.csl</link>
+    <author>
+      <name>Bruce Dâ€™Arcus</name>
+      <email>bdarcus@sourceforge.net</email>
+    </author>
+    <updated>2006-08-03T11:01:30-05:00</updated>
+  </info>
+  <defaults>
+    <contributor>
+      <name and="symbol" sort-separator=", " initialize-with="."/>
+      <role prefix=", " />
+    </contributor>
+    <author>
+      <substitute>
+        <choose>
+          <editor>
+            <name and="symbol" sort-separator=", " initialize-with="."/>
+            <role prefix=" (" suffix=")" />
+          </editor>
+          <translator>
+            <name and="symbol" sort-separator=", " initialize-with="."/>
+            <role prefix=" (" suffix=")" />
+          </translator>
+          <titles relation="container" font-style="italic"/>
+          <titles>
+            <name form="short"/>
+          </titles>
+        </choose>
+       </substitute>
+    </author>
+    <locator>
+      <number/>
+    </locator>
+    <identifier>
+      <number/>
+    </identifier>
+    <titles>
+      <title/>
+    </titles>
+    <date>
+      <year/>
+      <month prefix=", "/>
+      <day prefix=" "/>
+    </date>
+    <publisher>
+      <place suffix=": "/>
+      <name/>
+    </publisher>
+    <access>
+      <url/>
+      <date prefix=", "/>
+    </access>
+  </defaults>
+  <citation prefix="(" suffix=")" delimiter="; ">
+    <et-al min-authors="6" use-first="6" position="first"/>
+    <et-al min-authors="6" use-first="1" position="subsequent"/>
+    <layout>
+      <item>
+        <author form="short" suffix=", "/>
+        <date>
+          <year/>
+        </date>
+        <locator prefix=": " include-label="false"/>
+      </item>
+    </layout>
+  </citation>
+  <bibliography author-as-sort-order="all" hanging-indent="true">
+    <sort algorithm="author-date"/>
+    <et-al min-authors="4" use-first="3"/>
+    <layout>
+      <list>
+        <heading>
+          <text term-name="references"/>
+        </heading>
+      </list>
+      <item suffix=".">
+        <choose>
+          <type name="book">
+            <author/>
+            <date prefix=" (" suffix=").">
+              <year/>
+            </date>
+            <group suffix=".">
+              <titles font-style="italic" prefix=" "/>
+              <editor prefix=" (" suffix=")"/>
             </group>
+            <publisher prefix=" "/>
             <access prefix=" "/>
-            <pages prefix=", "/>
-         </reftype>
-         <reftype name="article">
-            <author alternate="container-title"/>
-            <year prefix=" (" suffix=")."/>
-            <title prefix=" "/>
+          </type>
+          <type name="chapter">
+            <author/>
+            <date prefix=" (" suffix=").">
+              <year/>
+            </date>
+            <titles prefix=" "/>
             <group class="container">
-               <editor/>
-               <title type="container" font-style="italic" prefix=" " suffix="."/>
+              <text term-name="in"/>
+              <editor prefix=" "/>
+              <titles relation="container" font-style="italic" prefix=" " suffix="."/>
+              <titles relation="collection" prefix=" " suffix="."/>
+              <publisher prefix=" "/>
+              <access prefix=" "/>
+              <pages prefix=", "/>
             </group>
-            <access prefix=" "/>
-            <volume prefix=" "/>
-            <issue prefix="(" suffix=")"/>
-            <pages prefix=", "/>
-         </reftype>
-        <reftype name="legalcase">
-          <title/>
-          <year prefix=" (" suffix=")"/>
-          <access prefix=", "/>
-        </reftype>
-      </item-layout>
-   </bibliography>
-</citationstyle>');
+          </type>
+          <type name="article">
+            <author/>
+            <date prefix=" (" suffix=").">
+              <year/>
+            </date>
+            <group suffix=".">
+              <titles font-style="italic" prefix=" "/>
+              <editor prefix=" (" suffix=")"/>
+            </group>
+            <group class="container" prefix=" " suffix=".">
+              <titles relation="container" font-style="italic" prefix=" "/>
+			  <access prefix=" "/>
+			  <volume prefix=", " font-style="italic"/>
+			  <issue prefix="(" suffix=")"/>
+			  <pages prefix=", "/>
+            </group>
+          </type>
+        </choose>
+      </item>
+    </layout>
+  </bibliography>
+</style>
+');
