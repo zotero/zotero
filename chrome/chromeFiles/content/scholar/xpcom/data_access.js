@@ -1950,7 +1950,7 @@ Scholar.Attachments = new function(){
 		newFile.initWithFile(destDir);
 		newFile.append(title);
 		
-		var mimeType = _getMIMETypeFromFile(newFile);
+		var mimeType = Scholar.File.getMIMETypeFromFile(newFile);
 		var charsetID = _getCharsetIDFromFile(newFile);
 		
 		_addToDB(newFile, null, null, this.LINK_MODE_IMPORTED_FILE, mimeType, charsetID, sourceItemID, itemID);
@@ -1961,7 +1961,7 @@ Scholar.Attachments = new function(){
 	
 	function linkFromFile(file, sourceItemID){
 		var title = file.leafName;
-		var mimeType = _getMIMETypeFromFile(file);
+		var mimeType = Scholar.File.getMIMETypeFromFile(file);
 		var charsetID = _getCharsetIDFromFile(file);
 		return _addToDB(file, null, title, this.LINK_MODE_LINKED_FILE, mimeType, charsetID, sourceItemID);
 	}
@@ -2047,15 +2047,6 @@ Scholar.Attachments = new function(){
 		
 		Scholar.DB.commitTransaction();
 		return itemID;
-	}
-	
-	
-	// TODO: currently only uses file extension
-	function _getMIMETypeFromFile(file){
-		var ms = Components
-			.classes['@mozilla.org/uriloader/external-helper-app-service;1']
-			.getService(Components.interfaces.nsIMIMEService);
-		return ms.getTypeFromFile(file);
 	}
 	
 	
