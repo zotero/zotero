@@ -1,4 +1,4 @@
--- 39
+-- 40
 
     DROP TABLE IF EXISTS version;
     CREATE TABLE version (
@@ -298,13 +298,13 @@
     
     INSERT INTO fields VALUES (1,'source',NULL);
     INSERT INTO fields VALUES (2,'rights',NULL);
-    INSERT INTO fields VALUES (3,'seriesTitle',NULL);
+    INSERT INTO fields VALUES (3,'series',NULL);
     INSERT INTO fields VALUES (4,'volume',NULL);
     INSERT INTO fields VALUES (5,'issue',NULL);
     INSERT INTO fields VALUES (6,'edition',NULL);
     INSERT INTO fields VALUES (7,'place',NULL);
     INSERT INTO fields VALUES (8,'publisher',NULL);
-    INSERT INTO fields VALUES (9,'year',3);
+    
     INSERT INTO fields VALUES (10,'pages',NULL);
     INSERT INTO fields VALUES (11,'ISBN',NULL);
     INSERT INTO fields VALUES (12,'publicationTitle',NULL);
@@ -323,38 +323,38 @@
     INSERT INTO fields VALUES (25,'journalAbbreviation',NULL);
     INSERT INTO fields VALUES (26,'DOI',NULL);
     INSERT INTO fields VALUES (27,'accessDate',NULL);
-    INSERT INTO fields VALUES (28,'lastModified',NULL);
+    INSERT INTO fields VALUES (28,'seriesTitle',NULL);
+    INSERT INTO fields VALUES (29,'seriesText',NULL);
+    INSERT INTO fields VALUES (30,'seriesNumber',NULL);
     
-    INSERT INTO "itemTypeFields" VALUES(2, 1, 12);
-    INSERT INTO "itemTypeFields" VALUES(2, 2, 13);
+    INSERT INTO "itemTypeFields" VALUES(2, 1, 13);
+    INSERT INTO "itemTypeFields" VALUES(2, 2, 14);
     INSERT INTO "itemTypeFields" VALUES(2, 3, 1);
-    INSERT INTO "itemTypeFields" VALUES(2, 4, 2);
-    INSERT INTO "itemTypeFields" VALUES(2, 5, 3);
-    INSERT INTO "itemTypeFields" VALUES(2, 6, 4);
-    INSERT INTO "itemTypeFields" VALUES(2, 7, 5);
-    INSERT INTO "itemTypeFields" VALUES(2, 8, 6);
-    INSERT INTO "itemTypeFields" VALUES(2, 9, 7);
-    INSERT INTO "itemTypeFields" VALUES(2, 10, 8);
-    INSERT INTO "itemTypeFields" VALUES(2, 11, 9);
-    INSERT INTO "itemTypeFields" VALUES(4, 1, 10);
-    INSERT INTO "itemTypeFields" VALUES(4, 2, 11);
+    INSERT INTO "itemTypeFields" VALUES(2, 4, 3);
+    INSERT INTO "itemTypeFields" VALUES(2, 5, 4);
+    INSERT INTO "itemTypeFields" VALUES(2, 6, 5);
+    INSERT INTO "itemTypeFields" VALUES(2, 7, 6);
+    INSERT INTO "itemTypeFields" VALUES(2, 8, 7);
+    INSERT INTO "itemTypeFields" VALUES(2, 10, 9);
+    INSERT INTO "itemTypeFields" VALUES(2, 11, 10);
+    INSERT INTO "itemTypeFields" VALUES(4, 1, 14);
+    INSERT INTO "itemTypeFields" VALUES(4, 2, 15);
     INSERT INTO "itemTypeFields" VALUES(4, 12, 1);
     INSERT INTO "itemTypeFields" VALUES(4, 4, 2);
     INSERT INTO "itemTypeFields" VALUES(4, 5, 3);
     INSERT INTO "itemTypeFields" VALUES(4, 10, 4);
-    INSERT INTO "itemTypeFields" VALUES(4, 13, 7);
-    INSERT INTO "itemTypeFields" VALUES(3, 1, 13);
-    INSERT INTO "itemTypeFields" VALUES(3, 2, 14);
+    INSERT INTO "itemTypeFields" VALUES(4, 13, 11);
+    INSERT INTO "itemTypeFields" VALUES(3, 1, 14);
+    INSERT INTO "itemTypeFields" VALUES(3, 2, 15);
     INSERT INTO "itemTypeFields" VALUES(3, 12, 1);
     INSERT INTO "itemTypeFields" VALUES(3, 3, 2);
-    INSERT INTO "itemTypeFields" VALUES(3, 4, 3);
-    INSERT INTO "itemTypeFields" VALUES(3, 5, 4);
-    INSERT INTO "itemTypeFields" VALUES(3, 6, 5);
-    INSERT INTO "itemTypeFields" VALUES(3, 7, 6);
-    INSERT INTO "itemTypeFields" VALUES(3, 8, 7);
-    INSERT INTO "itemTypeFields" VALUES(3, 9, 8);
-    INSERT INTO "itemTypeFields" VALUES(3, 10, 9);
-    INSERT INTO "itemTypeFields" VALUES(3, 11, 10);
+    INSERT INTO "itemTypeFields" VALUES(3, 4, 4);
+    INSERT INTO "itemTypeFields" VALUES(3, 5, 5);
+    INSERT INTO "itemTypeFields" VALUES(3, 6, 6);
+    INSERT INTO "itemTypeFields" VALUES(3, 7, 7);
+    INSERT INTO "itemTypeFields" VALUES(3, 8, 8);
+    INSERT INTO "itemTypeFields" VALUES(3, 10, 10);
+    INSERT INTO "itemTypeFields" VALUES(3, 11, 11);
     INSERT INTO "itemTypeFields" VALUES(5, 1, 7);
     INSERT INTO "itemTypeFields" VALUES(5, 2, 8);
     INSERT INTO "itemTypeFields" VALUES(5, 12, 1);
@@ -373,7 +373,6 @@
     INSERT INTO "itemTypeFields" VALUES(7, 2, 8);
     INSERT INTO "itemTypeFields" VALUES(7, 8, 1);
     INSERT INTO "itemTypeFields" VALUES(7, 16, 2);
-    INSERT INTO "itemTypeFields" VALUES(7, 9, 3);
     INSERT INTO "itemTypeFields" VALUES(7, 10, 4);
     INSERT INTO "itemTypeFields" VALUES(7, 17, 6);
     INSERT INTO "itemTypeFields" VALUES(8, 2, 6);
@@ -393,7 +392,6 @@
     INSERT INTO "itemTypeFields" VALUES(11, 1, 5);
     INSERT INTO "itemTypeFields" VALUES(11, 2, 6);
     INSERT INTO "itemTypeFields" VALUES(11, 21, 1);
-    INSERT INTO "itemTypeFields" VALUES(11, 9, 2);
     INSERT INTO "itemTypeFields" VALUES(12, 1, 5);
     INSERT INTO "itemTypeFields" VALUES(12, 2, 6);
     INSERT INTO "itemTypeFields" VALUES(12, 24, 1);
@@ -402,23 +400,23 @@
     INSERT INTO "itemTypeFields" VALUES(13, 2, 5);
     INSERT INTO "itemTypeFields" VALUES(13, 23, 1);
     INSERT INTO "itemTypeFields" VALUES(12, 18, 3);
-    INSERT INTO "itemTypeFields" VALUES(2, 18, 10);
-    INSERT INTO "itemTypeFields" VALUES(3, 18, 11);
+    INSERT INTO "itemTypeFields" VALUES(2, 18, 11);
+    INSERT INTO "itemTypeFields" VALUES(3, 18, 12);
     INSERT INTO "itemTypeFields" VALUES(11, 18, 3);
     INSERT INTO "itemTypeFields" VALUES(12, 17, 4);
     INSERT INTO "itemTypeFields" VALUES(12, 22, 7);
-    INSERT INTO "itemTypeFields" VALUES(2, 17, 11);
-    INSERT INTO "itemTypeFields" VALUES(2, 22, 14);
-    INSERT INTO "itemTypeFields" VALUES(3, 17, 12);
-    INSERT INTO "itemTypeFields" VALUES(3, 22, 15);
+    INSERT INTO "itemTypeFields" VALUES(2, 17, 12);
+    INSERT INTO "itemTypeFields" VALUES(2, 22, 15);
+    INSERT INTO "itemTypeFields" VALUES(3, 17, 13);
+    INSERT INTO "itemTypeFields" VALUES(3, 22, 16);
     INSERT INTO "itemTypeFields" VALUES(11, 17, 4);
     INSERT INTO "itemTypeFields" VALUES(11, 22, 7);
     INSERT INTO "itemTypeFields" VALUES(10, 17, 5);
     INSERT INTO "itemTypeFields" VALUES(10, 18, 4);
     INSERT INTO "itemTypeFields" VALUES(10, 22, 7);
-    INSERT INTO "itemTypeFields" VALUES(4, 17, 9);
-    INSERT INTO "itemTypeFields" VALUES(4, 18, 8);
-    INSERT INTO "itemTypeFields" VALUES(4, 22, 12);
+    INSERT INTO "itemTypeFields" VALUES(4, 17, 13);
+    INSERT INTO "itemTypeFields" VALUES(4, 18, 12);
+    INSERT INTO "itemTypeFields" VALUES(4, 22, 16);
     INSERT INTO "itemTypeFields" VALUES(8, 17, 5);
     INSERT INTO "itemTypeFields" VALUES(8, 18, 4);
     INSERT INTO "itemTypeFields" VALUES(8, 22, 7);
@@ -434,10 +432,20 @@
     INSERT INTO "itemTypeFields" VALUES(7, 18, 5);
     INSERT INTO "itemTypeFields" VALUES(7, 22, 9);
     INSERT INTO "itemTypeFields" VALUES(13, 22, 6);
-    INSERT INTO "itemTypeFields" VALUES(4, 25, 5);
-    INSERT INTO "itemTypeFields" VALUES(4, 26, 6);
+    INSERT INTO "itemTypeFields" VALUES(4, 25, 9);
+    INSERT INTO "itemTypeFields" VALUES(4, 26, 10);
     INSERT INTO "itemTypeFields" VALUES(13, 27, 3);
-    INSERT INTO "itemTypeFields" VALUES(13, 28, 2);
+    INSERT INTO "itemTypeFields" VALUES(13, 14, 2);
+    INSERT INTO "itemTypeFields" VALUES(4, 14, 5);
+    INSERT INTO "itemTypeFields" VALUES(2, 14, 8);
+    INSERT INTO "itemTypeFields" VALUES(3, 14, 9);
+    INSERT INTO "itemTypeFields" VALUES(11, 14, 2);
+    INSERT INTO "itemTypeFields" VALUES(7, 14, 3);
+    INSERT INTO "itemTypeFields" VALUES(2, 30, 2);
+    INSERT INTO "itemTypeFields" VALUES(3, 30, 3);
+    INSERT INTO "itemTypeFields" VALUES(4, 3, 6);
+    INSERT INTO "itemTypeFields" VALUES(4, 29, 8);
+    INSERT INTO "itemTypeFields" VALUES(4, 28, 7);
     
     INSERT INTO "fileTypes" VALUES(1, 'webpage');
     INSERT INTO "fileTypes" VALUES(2, 'image');
@@ -673,10 +681,10 @@
     INSERT INTO "items" VALUES(16, 1, NULL, '2006-06-29 05:57:14', '2006-06-29 05:57:19');
     INSERT INTO "items" VALUES(17, 1, NULL, '2006-06-29 05:58:14', '2006-06-29 05:58:19');
     
-    INSERT INTO "itemData" VALUES(1, 9, 2001);
+    INSERT INTO "itemData" VALUES(1, 14, 2001);
     INSERT INTO "itemData" VALUES(1, 7, 'Cresskill, N.J.');
     INSERT INTO "itemData" VALUES(1, 8, 'Hampton Press');
-    INSERT INTO "itemData" VALUES(2, 9, 2002);
+    INSERT INTO "itemData" VALUES(2, 14, 2002);
     INSERT INTO "itemData" VALUES(2, 8, 'Allyn & Bacon Publishers');
     INSERT INTO "itemData" VALUES(2, 10, 347);
     INSERT INTO "itemData" VALUES(2, 11, '0-205-32145-3');

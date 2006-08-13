@@ -425,7 +425,7 @@ Scholar.Schema = new function(){
 				}
 			}
 			
-			if (i==39){
+			if (i==40){
 				// Clear storage directory
 				var file = Scholar.getStorageDirectory();
 				if (file.exists()){
