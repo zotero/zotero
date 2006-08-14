@@ -47,7 +47,6 @@ Scholar.Cite = new function() {
  * want to use the Scholar data model, but does want to use CSL in JavaScript
  */
 CSL = function(csl) {
-	Scholar.debug(csl);
 	this._csl = new XML(this._cleanXML(csl));
 	
 	// initialize CSL
@@ -72,12 +71,13 @@ CSL = function(csl) {
 	
 	// load options
 	this._opt = this._parseOptions(this._csl.bibliography);
-	Scholar.debug(this._opt);
 	
 	// create an associative array of available types
 	this._types = new Object();
+	this._serializations = new Object();
 	for each(var type in this._csl.bibliography.layout.item.choose.type) {
 		this._types[type.@name] = true;
+		this._serializations[type.@name] = new Object();
 	}
 }
 
@@ -90,12 +90,10 @@ CSL.prototype.createBibliography = function(items, format) {
 	this._preprocessItems(items);
 	
 	// sort by sort order
-	Scholar.debug("sorting items");
 	var me = this;
 	items.sort(function(a, b) {
 		return me._compareItem(a, b);
 	});
-	Scholar.debug(items);
 	
 	// disambiguate items
 	this._disambiguateItems(items);
@@ -374,7 +372,7 @@ CSL.prototype._parseFieldDefaults = function(ref) {
 /*
  * parses a list of fields into an array of objects
  */
-CSL.prototype._parseFields = function(ref, useDefaults) {
+CSL.prototype._parseFields = function(ref, type) {
 	var typeDesc = new Array();
 	for each(var element in ref) {
 		if(element.namespace() == CSL.ns) {	// ignore elements in other namespaces
@@ -384,17 +382,31 @@ CSL.prototype._parseFields = function(ref, useDefaults) {
 			// parse attributes on this field
 			this._parseFieldAttrChildren(element, itemDesc);
 			
-			// add defaults
-			if(useDefaults) {
+			// add defaults, but only if we're parsing as a reference type
+			if(type) {
 				var fieldDefaults = this._getFieldDefaults(itemDesc.name);
 				itemDesc = this._merge(fieldDefaults, itemDesc);
 				itemDesc = this._merge(this._opt.format, itemDesc);
+			
+				// create serialized representation
+				itemDesc._serialized = this._serializeElement(itemDesc.name, itemDesc);
+				// add to serialization for type
+				this._serializations[itemDesc._serialized] = itemDesc;
 			}
 			
 			// parse group children
 			if(itemDesc.name == "group" && itemDesc.children) {
 				for(var i in itemDesc.children) {
-					itemDesc.children[i] = this._merge(this._getFieldDefaults(itemDesc.children[i].name), itemDesc.children[i]);
+					// don't bother merging fieldDefaults
+					itemDesc.children[i] = this._merge(this._getFieldDefaults(itemDesc.children[i].name),
+					                                   itemDesc.children[i]);
+					if(type) {
+						// serialize children
+						itemDesc.children[i]._serialized = this._serializeElement(itemDesc.children[i].name,
+						                                   itemDesc.children[i]);
+						// add to serialization for type
+						this._serializations[itemDesc._serialized] = itemDesc;
+					}
 				}
 			}
 			
@@ -420,18 +432,6 @@ CSL.prototype._parseOptions = function(bibliography) {
 	// hanging indent
 	if(bibliography['@hanging-indent']) {
 		opt.hangingIndent = true;
-	}
-	
-	// author as sort order
-	// for our purposes, this controls whether an author is last, first or
-	// first last (although for internationalized names it means something
-	// different)
-	if(bibliography['@author-as-sort-order']) {
-		if(bibliography['@author-as-sort-order'] == "first-author") {
-			opt.authorAsSortOrder = "first-author";
-		} else if(bibliography['@author-as-sort-order'] == "all") {
-			opt.authorAsSortOrder = "all";
-		}
 	}
 	
 	// sort order
@@ -483,7 +483,7 @@ CSL.prototype._parseOptions = function(bibliography) {
  */
 CSL.prototype._parseReferenceType = function(reftype) {
 	var ref = this._csl.bibliography.layout.item.choose.type.(@name==reftype).children();
-	this._types[reftype] = this._parseFields(ref, true);
+	this._types[reftype] = this._parseFields(ref, reftype);
 }
 
 /*
@@ -549,13 +549,19 @@ CSL.prototype._getTerm = function(term, plural) {
  */
 CSL.prototype._processDate = function(string) {
 	var date = new Object();
-
+	
 	var dateRe = /^([0-9]{4})-([0-9]{2})-([0-9]{2})$/;
 	var m = dateRe.exec(string);
 	if(m) {		// sql date
 		var jsDate = new Date(m[1], m[2]-1, m[3], false, false, false);
 	} else {	// not an sql date
-		var jsDate = new Date(string);
+		var yearRe = /^[0-9]+$/;
+		if(yearRe) {	// is a year
+			date.year = string;
+			return date;
+		} else {		// who knows what this is
+			var jsDate = new Date(string)
+		}
 	}
 	
 	if(isNaN(jsDate.valueOf())) { // couldn't parse
@@ -580,15 +586,24 @@ CSL.prototype._processDate = function(string) {
  * formats a string according to the cs-format attributes on element
  */
 CSL.prototype._formatString = function(element, string, format) {
-	if(format != "compare" && element.prefix) {
-		string = element.prefix+string;
+	if(element["text-transform"]) {
+		if(element["text-transform"] == "lowercase") {
+			// all lowercase
+			string = string.toLowerCase();
+		} else if(element["text-transform"] == "uppercase") {
+			// all uppercase
+			string = string.toUpperCase();
+		} else if(element["text-transform"] == "capitalize") {
+			// capitalize first
+			string = string[0].toUpperCase()+string.substr(1);
+		}
 	}
 	
 	if(format == "HTML") {
 		var style = "";
 		
 		var cssAttributes = ["font-family", "font-style", "font-variant",
-							 "font-weight", "text-transform"];
+							 "font-weight"];
 		for(var j in cssAttributes) {
 			if(element[cssAttributes[j]] && element[cssAttributes[j]].indexOf('"') == -1) {
 				style += cssAttributes[j]+":"+element[cssAttributes[j]];
@@ -600,6 +615,9 @@ CSL.prototype._formatString = function(element, string, format) {
 		}
 	}
 	
+	if(format != "compare" && element.prefix) {
+		string = element.prefix+string;
+	}
 	if(format != "compare" && element.suffix &&
 	   (element.suffix.length != 1 || string[string.length-1] != element.suffix)) {
 		// skip if suffix is the same as the last char
@@ -610,9 +628,10 @@ CSL.prototype._formatString = function(element, string, format) {
 }
 
 /*
- * formats a locator (pages, volume, issue)
+ * formats a locator (pages, volume, issue) or an identifier (isbn, doi)
+ * note that label should be null for an identifier
  */
-CSL.prototype._formatLocator = function(element, number, format) {
+CSL.prototype._formatLocator = function(identifier, element, number, format) {
 	var data = "";
 	
 	if(number) {
@@ -623,8 +642,12 @@ CSL.prototype._formatLocator = function(element, number, format) {
 			if(child.name == "number") {
 				string = number;
 			} else if(child.name == "text") {
-				var plural = (item.pages.indexOf(",") != -1 || item.pages.indexOf("-") != -1);
+				var plural = (identifier && (number.indexOf(",") != -1
+				              || number.indexOf("-") != -1));
 				string = this._getTerm(child["term-name"], plural);
+			} else if(identifier && child.name == "label") {
+				var plural = (number.indexOf(",") != -1 || number.indexOf("-") != -1);
+				string = this._getTerm(identifier, plural);
 			}
 				
 			if(string) {
@@ -688,6 +711,21 @@ CSL.prototype._formatDate = function(element, date, format) {
 }
 
 /*
+ * serializes an element into a string suitable to prevent substitutes from
+ * recurring in the same style
+ */
+CSL.prototype._serializeElement = function(name, element) {
+	var string = name;
+	if(element.relation) {
+		string += " relation:"+element.relation;
+	}
+	if(element.role) {
+		string += " role"+element.role;
+	}
+	return string;
+}
+
+/*
  * pads a number or other string with a given string on the left
  */
 CSL.prototype._lpad = function(string, pad, length) {
@@ -730,12 +768,6 @@ CSL.prototype._preprocessItems = function(items) {
 		// parse 
 		if(item.date) {		// specific date
 			item._csl.date = CSL.prototype._processDate(item.date);
-		} else {			// no real date, but might salvage a year 
-			item._csl.date = new Object();
-			
-			if(item.year) {
-				item._csl.date.year = item.year;
-			}
 		}
 	}
 }
@@ -759,10 +791,8 @@ CSL.prototype._disambiguateItems = function(items) {
 			var citation = author+" "+this._getFieldValue("date",
 												this._getFieldDefaults("date"),
 												item, "disambiguate");
-			Scholar.debug(citation);
 			
 			if(usedCitations[citation]) {
-				Scholar.debug("disambiguation necessary");
 				if(!usedCitations[citation]._csl.date.disambiguation) {
 					usedCitations[citation]._csl.date.disambiguation = "a";
 					item._csl.date.disambiguation = "b";
@@ -848,8 +878,11 @@ CSL.prototype._processCreators = function(type, element, creators, format) {
 			var authorStrings = [];
 			var firstName, lastName;
 			for(var i=0; i<maxCreators; i++) {
-				if(child["initialize-with"]) {
-					// use firist initials
+				if(typeof(child["initialize-with"]) == "string") {
+					// even if initialize-with is simply an empty string, use
+					// initials
+					
+					// use first initials
 					var firstName = "";
 					var firstNames = creators[i].firstName.split(" ");
 					for(var j in firstNames) {
@@ -863,8 +896,8 @@ CSL.prototype._processCreators = function(type, element, creators, format) {
 				}
 				lastName = creators[i].lastName;
 				
-				if(((i == 0 && this._opt.authorAsSortOrder == "first-author")
-				  || this._opt.authorAsSortOrder == "all")
+				if(((i == 0 && element["name-as-sort-order"] == "first-author")
+				  || element["name-as-sort-order"] == "all")
 				  && child["sort-separator"]) {
 					// if this is the first author and author-as-sort-order="first-author"
 					// or if this is a subsequent author and author-as-sort-order="all"
@@ -899,7 +932,7 @@ CSL.prototype._processCreators = function(type, element, creators, format) {
 				}
 			}
 			string = authorStrings.join(joinString);
-		} else if(child.name == "role") {
+		} else if(child.name == "label") {
 			string = this._getTerm(type, (maxCreators != 1));
 		}
 		
@@ -920,11 +953,8 @@ CSL.prototype._processCreators = function(type, element, creators, format) {
 CSL.prototype._getFieldValue = function(name, element, item, format, typeName) {
 	var data = "";
 	
-	// make sure we're not supposed to ignore this (bc it's already substituted)
-	for(var i in item._csl.ignore) {
-		if(item._csl.ignore[i] == element) {
-			return "";
-		}
+	if(item._csl.ignore[element._serialized] == true) {
+		return "";
 	}
 	
 	if(name == "author") {
@@ -1008,28 +1038,36 @@ CSL.prototype._getFieldValue = function(name, element, item, format, typeName) {
 			data = "";
 		}
 	} else if(name == "volume") {
-		data = this._formatLocator(element, item.volume, format);
+		data = this._formatLocator("volume", element, item.volume, format);
 	} else if(name == "issue") {
-		data = this._formatLocator(element, item.issue, format);
+		data = this._formatLocator("issue", element, item.issue, format);
 	} else if(name == "pages") {
-		data = this._formatLocator(element, item.pages, format);
+		data = this._formatLocator("page", element, item.pages, format);
 	} else if(name == "edition") {
 		data = item.edition;
 	} else if(name == "genre") {
 		data = (item.type ? item.type : item.thesisType);
 	} else if(name == "group") {
+		var childData = new Array();
 		for(var i in element.children) {
+			// get data for each child element
 			var child = element.children[i];
-			data += this._getFieldValue(child.name, child, item, format, typeName);
+			
+			var string = this._getFieldValue(child.name, child, item,
+			                                 format, typeName);
+			if(string) {
+				childData.push(string);
+			}
 		}
+		
+		// implode with delimiter
+		data = childData.join((element["delimiter"] ? element["delimiter"] : ""));
 	} else if(name == "text") {
-		string = this._getTerm(child["term-name"]);
+		data = this._getTerm(element["term-name"]);
 	} else if(name == "isbn") {
-		data = this._formatLocator(element, item.ISBN, format);
+		data = this._formatLocator(null, element, item.ISBN, format);
 	} else if(name == "doi") {
-		data = this._formatLocator(element, item.DOI, format);
-	} else {
-		data = name;
+		data = this._formatLocator(null, element, item.DOI, format);
 	}
 	
 	if(data) {
@@ -1038,35 +1076,42 @@ CSL.prototype._getFieldValue = function(name, element, item, format, typeName) {
 		// try each substitute element until one returns something
 		for(var i in element.substitute) {
 			var substituteElement = element.substitute[i];
+			var serialization = this._serializeElement(substituteElement.name,
+			                                           substituteElement);
 			
-			var defaultElement;
-			// first try to get from the type
-			if(typeName && this._types[typeName]) {
-				for(var i in this._types[typeName]) {
-					var field = this._types[typeName][i];
-					if(field.name == substituteElement.name
-					  && (!substituteElement.relation
-					  || field.relation == substituteElement.relation)
-					  && (!substituteElement.role
-					  || field.role == substituteElement.role)) {
-						defaultElement = field;
-						
-						// flag to be ignored later
-						item._csl.ignore.push(defaultElement);
-					}
+			var inheritElement;
+			if(CSL._inherit[substituteElement.name] == CSL._inherit[name]) {
+				// if both substituteElement and the parent element inheirt from
+				// the same base element, apply styles here
+				inheritElement = element;
+			} else {
+				// search for elements with the same serialization
+				if(typeName && this._serializations[typeName]
+				   && this._serializations[typeName][serialization]) {
+					inheritElement = this._serializations[typeName][serialization];
+				} else {
+					// otherwise, use defaults
+					inheritElement = this._getFieldDefaults(substituteElement.name);
 				}
 			}
-			// otherwise, get default
-			if(!defaultElement) {
-				defaultElement = this._getFieldDefaults(substituteElement.name);
-			}
-			// copy prefix and suffix
+			
+			// merge inheritElement and element
+			substituteElement = this._merge(inheritElement, substituteElement);
+			// regardless of inheritance pathway, make sure substitute inherits
+			// general prefix and suffix from the element it's substituting for
 			substituteElement.prefix = element.prefix;
 			substituteElement.suffix = element.suffix;
+			// clear substitute element off of the element we're substituting
+			substituteElement.substitute = undefined;
 			
+			// ignore elements with the same serialization
+			item._csl.ignore[serialization] = true;
+			
+			// get field value
 			data = this._getFieldValue(substituteElement.name,
-			       this._merge(defaultElement, substituteElement), item, format);
-			
+			                           substituteElement, item, format);
+			// return field value, if there is one; otherwise, keep processing
+			// the data
 			if(data) {
 				return data;
 			}

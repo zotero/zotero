@@ -1,4 +1,4 @@
--- 45
+-- 46
 
 -- Set the following timestamp to the most recent scraper update date
 REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-08-11 11:18:00'));
@@ -273,7 +273,7 @@ REPLACE INTO "translators" VALUES ('838d8849-4ffb-9f44-3d0d-aa8a0a079afe', '2006
 							}
 					}
 				} else if(match[1] == ''Year'') {
-					newItem.year = match[2];
+					newItem.date = match[2];
 				}
 			}
 		}
@@ -881,7 +881,7 @@ REPLACE INTO "translators" VALUES ('add7c71c-21f3-ee14-d188-caf9da12728b', '2006
 				} else if(field == "pub date") {
 					var re = /[0-9]+/;
 					var m = re.exec(value);
-					newItem.year = m[0];
+					newItem.date = m[0];
 				} else if(field == "isbn") {
 					var re = /^[0-9](?:[0-9X]+)/;
 					var m = re.exec(value);
@@ -2127,8 +2127,10 @@ REPLACE INTO "translators" VALUES ('c54d1932-73ce-dfd4-a943-109380e06574', '2006
 		newItem.publicationTitle = newDOM.journal.text();
 		newItem.volume = newDOM.volume.text();
 		newItem.issue = newDOM.issue.text();
-		newItem.year = newDOM.year.text();
-		newItem.date = newDOM.pubdate.text();
+		newItem.date = newDOM.pubdate.text().toString();
+		if(!newItem.date) {
+			newItem.date = newDOM.year.text();
+		}
 		newItem.title = newDOM.doctitle.text();
 		newItem.ISSN = newDOM.issn.text();
 		
@@ -2915,11 +2917,11 @@ function doExport() {
 		} else if(item.distributor) {
 			originInfo += <publisher>{item.distributor}</publisher>;
 		}
-		if(item.year) {
-			// Assume year is copyright date
-			originInfo += <copyrightDate encoding="iso8601">{item.year}</copyrightDate>;
-		}
 		if(item.date) {
+			if(inArray(item.itemType, ["book", "bookSection"]) {
+				// Assume year is copyright date
+				originInfo += <copyrightDate encoding="iso8601">{item.year}</copyrightDate>;
+			}
 			if(inArray(item.itemType, ["magazineArticle", "newspaperArticle"])) {
 				// Assume date is date issued
 				var dateType = "dateIssued";
@@ -3477,14 +3479,9 @@ function doExport() {
 		// date/year
 		if(item.date) {
 			Scholar.RDF.addStatement(resource, n.dc+"date", item.date, true);
-		} else if(item.year) {
-			Scholar.RDF.addStatement(resource, n.dc+"date", item.year, true);
 		}
 		if(item.accessDate) {	// use date submitted for access date?
 			Scholar.RDF.addStatement(resource, n.dcterms+"dateSubmitted", item.accessDate, true);
-		}
-		if(item.lastModified) {
-			Scholar.RDF.addStatement(resource, n.dcterms+"modified", item.lastModified, true);
 		}
 		
 		// callNumber
@@ -3637,10 +3634,6 @@ REPLACE INTO "translators" VALUES ('6e372642-ed9d-4934-b5d1-c11ac758ebb7', '2006
 		// date/year
 		if(item.date) {
 			Scholar.RDF.addStatement(resource, dc+"date", item.date, true);
-		} else if(item.year) {
-			Scholar.RDF.addStatement(resource, dc+"date", item.year, true);
-		} else if(item.lastModified) {
-			Scholar.RDF.addStatement(resource, dc+"date", item.lastModified, true);
 		}
 		
 		// ISBN/ISSN/DOI
@@ -4306,7 +4299,7 @@ function doExport() {
 		
 		// date
 		if(item.date) {
-			var isoDate = /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/;
+			var isoDate = /^[0-9]{4}(-[0-9]{2}-[0-9]{2})?$/;
 			if(isoDate.test(item.date)) {	// can directly accept ISO format with minor mods
 				addTag("Y1", item.date.replace("-", "/")+"/");
 			} else {						// otherwise, extract year and attach other data
@@ -4316,8 +4309,6 @@ function doExport() {
 					addTag("Y1", m[2]+"///"+m[1]);
 				}
 			}
-		} else if(item.year) {
-			addTag("Y1", item.year+"///");
 		}
 		
 		// notes
@@ -4805,7 +4796,7 @@ MARC_Record.prototype.translate = function(item) {
 	// Extract publisher info
 	this._associateDBField(item, ''260'', ''b'', ''publisher'');
 	// Extract year
-	this._associateDBField(item, ''260'', ''c'', ''year'', _pullNumber);
+	this._associateDBField(item, ''260'', ''c'', ''date'', _pullNumber);
 	// Extract series
 	this._associateDBField(item, ''440'', ''a'', ''seriesTitle'');
 	// Extract call number
@@ -4871,30 +4862,27 @@ REPLACE INTO "csl" VALUES('id-not-yet-given', '2006-08-12 19:22:00', 'American P
       <name>Bruce D’Arcus</name>
       <email>bdarcus@sourceforge.net</email>
     </author>
-    <updated>2006-08-03T11:01:30-05:00</updated>
+    <author>
+      <name>Simon Kornblith</name>
+      <email>simon@simonster.com</email>
+    </author>
+    <updated>2006-08-13T23:28:00-05:00</updated>
   </info>
   <defaults>
-    <contributor>
+    <contributors name-as-sort-order="no">
+      <name and="symbol" initialize-with="."/>
+      <label prefix=", " text-transform="capitalize"/>
+    </contributors>
+    <author name-as-sort-order="all">
       <name and="symbol" sort-separator=", " initialize-with="."/>
-      <role prefix=", " />
-    </contributor>
-    <author>
+      <label prefix=" (" suffix=")" text-transform="capitalize"/>
       <substitute>
         <choose>
-          <editor>
-            <name and="symbol" sort-separator=", " initialize-with="."/>
-            <role prefix=" (" suffix=")" />
-          </editor>
-          <translator>
-            <name and="symbol" sort-separator=", " initialize-with="."/>
-            <role prefix=" (" suffix=")" />
-          </translator>
-          <titles relation="container" font-style="italic"/>
-          <titles>
-            <name form="short"/>
-          </titles>
+          <editor/>
+          <translator/>
+          <titles/>
         </choose>
-       </substitute>
+      </substitute>
     </author>
     <locator>
       <number/>
@@ -4915,6 +4903,13 @@ REPLACE INTO "csl" VALUES('id-not-yet-given', '2006-08-12 19:22:00', 'American P
       <name/>
     </publisher>
     <access>
+      <text term-name="retrieved" text-transform="capitalize"/>
+      <date suffix=", ">
+        <month/>
+        <day suffix=", "/>
+        <year/>
+      </date>
+      <text term-name="from"/>
       <url/>
       <date prefix=", "/>
     </access>
@@ -4928,11 +4923,11 @@ REPLACE INTO "csl" VALUES('id-not-yet-given', '2006-08-12 19:22:00', 'American P
         <date>
           <year/>
         </date>
-        <locator prefix=": " include-label="false"/>
+        <locator prefix=": "/>
       </item>
     </layout>
   </citation>
-  <bibliography author-as-sort-order="all" hanging-indent="true">
+  <bibliography hanging-indent="true">
     <sort algorithm="author-date"/>
     <et-al min-authors="4" use-first="3"/>
     <layout>
@@ -4950,7 +4945,10 @@ REPLACE INTO "csl" VALUES('id-not-yet-given', '2006-08-12 19:22:00', 'American P
             </date>
             <group suffix=".">
               <titles font-style="italic" prefix=" "/>
-              <editor prefix=" (" suffix=")"/>
+              <group prefix=" (" suffix=")" delimiter=", ">
+                <editor/>
+                <translator/>
+              </group>
             </group>
             <publisher prefix=" "/>
             <access prefix=" "/>
@@ -4960,16 +4958,26 @@ REPLACE INTO "csl" VALUES('id-not-yet-given', '2006-08-12 19:22:00', 'American P
             <date prefix=" (" suffix=").">
               <year/>
             </date>
-            <titles prefix=" "/>
-            <group class="container">
-              <text term-name="in"/>
-              <editor prefix=" "/>
+            <titles font-style="italic" prefix=" "/>
+            <group class="container" prefix=" ">
+              <text term-name="in" text-transform="capitalize"/>
+              <editor prefix=" " suffix=",">
+                <name and="symbol" sort-separator=", " initialize-with="."/>
+                <label prefix=" (" suffix=")" text-transform="capitalize"/>
+              </editor>
+              <translator prefix=" " suffix=",">
+                <name and="symbol" sort-separator=", " initialize-with="."/>
+                <label prefix=" (" suffix=")" text-transform="capitalize"/>
+              </translator>
               <titles relation="container" font-style="italic" prefix=" " suffix="."/>
               <titles relation="collection" prefix=" " suffix="."/>
               <publisher prefix=" "/>
-              <access prefix=" "/>
-              <pages prefix=", "/>
+              <pages prefix=" (" suffix=")">
+                <label text-transform="capitalize" suffix=". "/>
+                <number/>
+              </pages>
             </group>
+             <access prefix=" "/>
           </type>
           <type name="article">
             <author/>
@@ -4977,20 +4985,22 @@ REPLACE INTO "csl" VALUES('id-not-yet-given', '2006-08-12 19:22:00', 'American P
               <year/>
             </date>
             <group suffix=".">
-              <titles font-style="italic" prefix=" "/>
-              <editor prefix=" (" suffix=")"/>
+              <titles prefix=" "/>
+              <group prefix=" (" suffix=")" delimiter=", ">
+                <editor/>
+                <translator/>
+              </group>
             </group>
             <group class="container" prefix=" " suffix=".">
               <titles relation="container" font-style="italic" prefix=" "/>
-			  <access prefix=" "/>
-			  <volume prefix=", " font-style="italic"/>
-			  <issue prefix="(" suffix=")"/>
-			  <pages prefix=", "/>
+              <volume prefix=", " font-style="italic"/>
+              <issue prefix="(" suffix=")"/>
+              <pages prefix=", "/>
             </group>
+            <access prefix=" "/>
           </type>
         </choose>
       </item>
     </layout>
   </bibliography>
-</style>
-');
+</style>');

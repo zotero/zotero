@@ -292,7 +292,7 @@ Scholar_Ingester_Interface._itemDone = function(obj, item, collection) {
 	
 	// add item to collection, if one was specified
 	if(collection) {
-		collection.addItem(item);
+		collection.addItem(item.getID());
 	}
 }
 

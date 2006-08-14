@@ -779,30 +779,6 @@ Scholar.Translate.prototype._itemDone = function(item) {
 		// makes looping through easier
 		item.itemType = item.complete = undefined;
 		
-		if(item.date && !item.year) {
-			// date can serve as a year
-			var dateID = Scholar.ItemFields.getID("date");
-			var yearID = Scholar.ItemFields.getID("year");
-			if(!Scholar.ItemFields.isValidForType(dateID, typeID) && Scholar.ItemFields.isValidForType(yearID, typeID)) {
-				// year is valid but date is not
-				var yearRe = /[0-9]{4}/;
-				var m = yearRe.exec(item.date);
-				if(m) {
-					item.year = m[0]
-					item.date = undefined;
-				}
-			}
-		} else if(!item.date && item.year) {
-			// the converse is also true
-			var dateID = Scholar.ItemFields.getID("date");
-			var yearID = Scholar.ItemFields.getID("year");
-			if(Scholar.ItemFields.isValidForType(dateID, typeID) && !Scholar.ItemFields.isValidForType(yearID, typeID)) {
-				// date is valid but year is not
-				item.date = item.year;
-				item.year = undefined;
-			}
-		}
-		
 		var fieldID, field;
 		for(var i in item) {
 			// loop through item fields
