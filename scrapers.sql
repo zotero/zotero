@@ -2920,7 +2920,7 @@ function doExport() {
 		if(item.date) {
 			if(inArray(item.itemType, ["book", "bookSection"]) {
 				// Assume year is copyright date
-				originInfo += <copyrightDate encoding="iso8601">{item.year}</copyrightDate>;
+				originInfo += <copyrightDate encoding="iso8601">{item.date}</copyrightDate>;
 			}
 			if(inArray(item.itemType, ["magazineArticle", "newspaperArticle"])) {
 				// Assume date is date issued
