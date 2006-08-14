@@ -10,7 +10,7 @@
 
 // Class to interface with the browser when ingesting data
 
-Scholar_Ingester_Interface = function() {}
+var Scholar_Ingester_Interface = function() {}
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -213,6 +213,8 @@ Scholar_Ingester_Interface.showPopup = function(collectionID, parentElement) {
 		
 		parentElement.appendChild(newItem);
 	}
+	
+	return true;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -247,6 +249,7 @@ Scholar_Ingester_Interface._getData = function(browser) {
 			return Scholar_Ingester_Interface.browserData[key];
 		}
 	}
+	return false;
 }
 
 /*

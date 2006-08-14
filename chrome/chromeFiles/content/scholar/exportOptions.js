@@ -6,7 +6,7 @@
 
 // Class to provide options for export
 
-Scholar_File_Interface_Export = new function() {
+var Scholar_File_Interface_Export = new function() {
 	var _options;
 	
 	this.init = init;

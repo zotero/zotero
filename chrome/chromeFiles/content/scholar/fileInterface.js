@@ -1,4 +1,4 @@
-Scholar_File_Interface = new function() {
+var Scholar_File_Interface = new function() {
 	var _unresponsiveScriptPreference, _importCollection;
 	
 	this.exportFile = exportFile;
@@ -331,6 +331,8 @@ Scholar_File_Interface.Progress = new function() {
 		
 		_progressWindow = window.openDialog("chrome://scholar/chrome/fileProgress.xul", "", "chrome,resizable=no,close=no,dependent,dialog,centerscreen");
 		_progressWindow.addEventListener("pageshow", _onWindowLoaded, false);
+		
+		return true;
 	}
 	
 	function close() {

@@ -6,7 +6,7 @@
 
 // Class to provide options for bibliography
 
-Scholar_File_Interface_Bibliography = new function() {
+var Scholar_File_Interface_Bibliography = new function() {
 	var _io;
 	
 	this.init = init;

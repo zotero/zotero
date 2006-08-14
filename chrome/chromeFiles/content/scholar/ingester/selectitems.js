@@ -6,7 +6,7 @@
 
 // Class to interface with the browser when ingesting data
 
-Scholar_Ingester_Interface_SelectItems = function() {}
+var Scholar_Ingester_Interface_SelectItems = function() {}
 
 //////////////////////////////////////////////////////////////////////////////
 //

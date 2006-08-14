@@ -709,15 +709,17 @@ CSL.prototype._processDate = function(string) {
  * formats a string according to the cs-format attributes on element
  */
 CSL.prototype._formatString = function(element, string, format) {
-	if(element["text-transform"] == "lowercase") {
-		// all lowercase
-		string = string.toLowerCase();
-	} else if(element["text-transform"] == "uppercase") {
-		// all uppercase
-		string = string.toUpperCase();
-	} else if(element["text-transform"] == "capitalize") {
-		// capitalize first
-		string = string[0].toUpperCase()+string.substr(1);
+	if(element["text-transform"]) {
+		if(element["text-transform"] == "lowercase") {
+			// all lowercase
+			string = string.toLowerCase();
+		} else if(element["text-transform"] == "uppercase") {
+			// all uppercase
+			string = string.toUpperCase();
+		} else if(element["text-transform"] == "capitalize") {
+			// capitalize first
+			string = string[0].toUpperCase()+string.substr(1);
+		}
 	}
 	
 	if(format == "HTML") {
@@ -735,13 +737,13 @@ CSL.prototype._formatString = function(element, string, format) {
 			string = '<span style="'+style+'">'+string+'</span>';
 		}
 	} else if(format == "RTF") {
-		if(element["font-style"] == "oblique" || element["font-style"] == "italic") {
+		if(element["font-style"] && (element["font-style"] == "oblique" || element["font-style"] == "italic")) {
 			string = "\\i "+string+"\\i0 ";
 		}
-		if(element["font-variant"] == "small-caps") {
+		if(element["font-variant"] && element["font-variant"] == "small-caps") {
 			string = "\\scaps "+string+"\\scaps0 ";
 		}
-		if(element["font-weight"] == "bold") {
+		if(element["font-weight"] && element["font-weight"] == "bold") {
 			string = "\\b "+string+"\\b0 ";
 		}
 	}
@@ -991,6 +993,9 @@ CSL.prototype._processCreators = function(type, element, creators, format) {
 		// for disambiguation, return only the last name of the first creator
 		return creators[0].lastName;;
 	}
+	if(!element.children) {
+		return "";
+	}
 	
 	var data = "";
 	for(var i in element.children) {
@@ -1028,7 +1033,8 @@ CSL.prototype._processCreators = function(type, element, creators, format) {
 				}
 				lastName = creators[i].lastName;
 				
-				if(((i == 0 && element["name-as-sort-order"] == "first")
+				if(element["name-as-sort-order"]
+				  && ((i == 0 && element["name-as-sort-order"] == "first")
 				  || element["name-as-sort-order"] == "all")
 				  && child["sort-separator"]) {
 					// if this is the first author and name-as-sort="first"
@@ -1057,8 +1063,10 @@ CSL.prototype._processCreators = function(type, element, creators, format) {
 						authorStrings[maxCreators-1] = and+" "+authorStrings[maxCreators-1];
 						// skip the comma if there are only two creators and no
 						// et al, and name as sort is no
-						if(maxCreators == 2 && element["name-as-sort"] != "first"
-						   && element["name-as-sort"] != "all") {
+						if(maxCreators == 2 &&
+						   (!element["name-as-sort-order"]
+						    || (element["name-as-sort-order"] != "first"
+						    && element["name-as-sort-order"] != "all"))) {
 							joinString = " ";
 						}
 					}
@@ -1086,7 +1094,7 @@ CSL.prototype._processCreators = function(type, element, creators, format) {
 CSL.prototype._getFieldValue = function(name, element, item, format, typeName) {
 	var data = "";
 	
-	if(item._csl.ignore[element._serialized] == true) {
+	if(element._serialized && item._csl.ignore[element._serialized]) {
 		return "";
 	}
 	
@@ -1151,9 +1159,13 @@ CSL.prototype._getFieldValue = function(name, element, item, format, typeName) {
 					string = item.url;
 				}
 			} else if(child.name == "date") {
-				string = this._formatDate(child, this._processDate(item.accessDate), format);
+				if(item.accessDate) {
+					string = this._formatDate(child, this._processDate(item.accessDate), format);
+				}
 			} else if(child.name == "physicalLocation") {
-				string = item.archiveLocation;
+				if(item.archiveLocation) {
+					string = item.archiveLocation;
+				}
 			} else if(child.name == "text") {
 				string = this._getTerm(child["term-name"]);
 			}
@@ -1171,15 +1183,25 @@ CSL.prototype._getFieldValue = function(name, element, item, format, typeName) {
 			data = "";
 		}
 	} else if(name == "volume") {
-		data = this._formatLocator("volume", element, item.volume, format);
+		if(item.volume) {
+			data = this._formatLocator("volume", element, item.volume, format);
+		}
 	} else if(name == "issue") {
-		data = this._formatLocator("issue", element, item.issue, format);
+		if(item.issue) {
+			data = this._formatLocator("issue", element, item.issue, format);
+		}
 	} else if(name == "pages") {
-		data = this._formatLocator("page", element, item.pages, format);
+		if(item.pages) {
+			data = this._formatLocator("page", element, item.pages, format);
+		}
 	} else if(name == "edition") {
-		data = item.edition;
+		if(item.edition) {
+			data = item.edition;
+		}
 	} else if(name == "genre") {
-		data = (item.type ? item.type : item.thesisType);
+		if(item.type || item.thesisType) {
+			data = (item.type ? item.type : item.thesisType);
+		}
 	} else if(name == "group") {
 		var childData = new Array();
 		for(var i in element.children) {
@@ -1198,9 +1220,13 @@ CSL.prototype._getFieldValue = function(name, element, item, format, typeName) {
 	} else if(name == "text") {
 		data = this._getTerm(element["term-name"]);
 	} else if(name == "isbn") {
-		data = this._formatLocator(null, element, item.ISBN, format);
+		if(item.ISBN) {
+			data = this._formatLocator(null, element, item.ISBN, format);
+		}
 	} else if(name == "doi") {
-		data = this._formatLocator(null, element, item.DOI, format);
+		if(item.DOI) {
+			data = this._formatLocator(null, element, item.DOI, format);
+		}
 	} else if(name == "number") {
 		data = this._csl.number;
 	}
@@ -1215,7 +1241,8 @@ CSL.prototype._getFieldValue = function(name, element, item, format, typeName) {
 			                                           substituteElement);
 			
 			var inheritElement;
-			if(CSL._inherit[substituteElement.name] == CSL._inherit[name]) {
+			if(CSL._inherit[substituteElement.name] && CSL._inherit[name]
+			   && CSL._inherit[substituteElement.name] == CSL._inherit[name]) {
 				// if both substituteElement and the parent element inheirt from
 				// the same base element, apply styles here
 				inheritElement = element;
