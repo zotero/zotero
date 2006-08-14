@@ -2918,20 +2918,19 @@ function doExport() {
 			originInfo += <publisher>{item.distributor}</publisher>;
 		}
 		if(item.date) {
-			if(inArray(item.itemType, ["book", "bookSection"]) {
+			if(Scholar.Utilities.inArray(item.itemType, ["book", "bookSection"])) {
 				// Assume year is copyright date
 				var dateType = "copyrightDate";
-			} else if(inArray(item.itemType, ["journalArticle", "magazineArticle", "newspaperArticle"])) {
+			} else if(Scholar.Utilities.inArray(item.itemType, ["journalArticle", "magazineArticle", "newspaperArticle"])) {
 				// Assume date is date issued
 				var dateType = "dateIssued";
 			} else {
 				// Assume date is date created
 				var dateType = "dateCreated";
 			}
-			originInfo += <{dateType} encoding="iso8601">{item.date}</{dateType}>;
-		}
-		if(item.lastModified) {
-			originInfo += <dateModified encoding="iso8601">{item.lastModified}</dateModified>;
+			var tag = <{dateType}>{item.date}</{dateType}>;
+			tag.@encoding = "iso8601";
+			originInfo += tag;
 		}
 		if(item.accessDate) {
 			originInfo += <dateCaptured encoding="iso8601">{item.accessDate}</dateCaptured>;
