@@ -896,10 +896,8 @@ CSL.prototype._preprocessItems = function(items) {
 			}
 		}
 		
-		// parse 
-		if(item.date) {		// specific date
-			item._csl.date = CSL.prototype._processDate(item.date);
-		}
+		// parse date
+		item._csl.date = CSL.prototype._processDate(item.date);
 	}
 }
 
