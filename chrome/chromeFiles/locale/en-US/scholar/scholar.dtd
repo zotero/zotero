@@ -48,7 +48,8 @@
 
 <!ENTITY bibliography.title				"Create Bibliography">
 <!ENTITY bibliography.style.label		"Citation Style:">
-<!ENTITY bibliography.output.label		"Output Format:">
+<!ENTITY bibliography.output.label		"Output Format">
+<!ENTITY bibliography.saveAsRTF.label	"Save as RTF">
 <!ENTITY bibliography.saveAsHTML.label	"Save as HTML">
 <!ENTITY bibliography.copyToClipboard.label	"Copy to Clipboard">
 <!ENTITY bibliography.print.label		"Print">

@@ -23,7 +23,7 @@ Scholar.Cite = new function() {
 		return stylesObject;
 	}
 	
-	function getBibliography(cslID, items) {
+	function getBibliography(cslID, items, format) {
 		// get style
 		var sql = "SELECT csl FROM csl WHERE cslID = ?";
 		var style = Scholar.DB.valueQuery(sql, [cslID]);
@@ -37,7 +37,7 @@ Scholar.Cite = new function() {
 		// create a CSL instance
 		var cslInstance = new CSL(style);
 		// return bibliography
-		return cslInstance.createBibliography(itemArrays, "HTML");
+		return cslInstance.createBibliography(itemArrays, format);
 	}
 }
 
@@ -68,7 +68,6 @@ CSL = function(csl) {
 	}
 	// load defaults from CSL
 	this._parseFieldDefaults(this._csl.defaults);
-	Scholar.debug(this._defaults);
 	
 	// decide whether to parse bibliography, or, if none exists, citation
 	if(this._csl.bibliography.length()) {
@@ -106,8 +105,6 @@ CSL = function(csl) {
 		this._serializations[0] = new Object();
 		this._types[0] = this._parseFields(this._itemElement.children(), 0);
 	}
-	
-	Scholar.debug(this._types);
 }
 
 /*
@@ -131,6 +128,19 @@ CSL.prototype.createBibliography = function(items, format) {
 	
 	// process items
 	var output = "";
+	
+	if(format == "HTML") {
+		var style = ""; 
+		if(this._opt.hangingIndent) {
+			style = "margin-left:0.5in;text-indent:-0.5in;";
+		}
+	} else if(format == "RTF") {
+		output += "{\\rtf\\mac\\ansicpg10000{\\fonttbl\\f0\\froman Times New Roman;}{\\colortbl;\\red255\\green255\\blue255;}\\pard\\f0";
+		if(this._opt.hangingIndent) {
+			output += "\\li720\\fi-720";
+		}
+	}
+	
 	for(var i in items) {
 		var item = items[i];
 		if(item.itemType == "note" || item.itemType == "file") {
@@ -185,17 +195,29 @@ CSL.prototype.createBibliography = function(items, format) {
 				string = string + this._opt.format.suffix;
 			}
 		}
-		
-		if(format == "HTML") {
-			output += '<p style="margin-left:0.5in;text-indent:-0.5in">';
 			
-			if(this._class == "note") {
-				// add superscript number for footnotes
-				output += (parseInt(i)+1).toString()+". ";
+		if(this._class == "note") {
+			// add superscript number for footnotes
+			string += (parseInt(i)+1).toString()+". ";
+		}
+		
+		// add line feeds
+		if(format == "HTML") {
+			output += "<p";
+			
+			if(style) {
+				output += ' style="'+style+'"';
 			}
 			
-			output += string+'</p>';
+			output += ">"+string+"</p>";
+		} else if(format == "RTF") {
+			output += string+"\\\r\n\\\r\n";
 		}
+	}
+	
+	if(format == "RTF") {
+		// drop last 6 characters of output (last two returns)
+		output = output.substr(0, output.length-6)+"}";
 	}
 	
 	return output;
@@ -687,17 +709,15 @@ CSL.prototype._processDate = function(string) {
  * formats a string according to the cs-format attributes on element
  */
 CSL.prototype._formatString = function(element, string, format) {
-	if(element["text-transform"]) {
-		if(element["text-transform"] == "lowercase") {
-			// all lowercase
-			string = string.toLowerCase();
-		} else if(element["text-transform"] == "uppercase") {
-			// all uppercase
-			string = string.toUpperCase();
-		} else if(element["text-transform"] == "capitalize") {
-			// capitalize first
-			string = string[0].toUpperCase()+string.substr(1);
-		}
+	if(element["text-transform"] == "lowercase") {
+		// all lowercase
+		string = string.toLowerCase();
+	} else if(element["text-transform"] == "uppercase") {
+		// all uppercase
+		string = string.toUpperCase();
+	} else if(element["text-transform"] == "capitalize") {
+		// capitalize first
+		string = string[0].toUpperCase()+string.substr(1);
 	}
 	
 	if(format == "HTML") {
@@ -713,6 +733,16 @@ CSL.prototype._formatString = function(element, string, format) {
 		
 		if(style) {
 			string = '<span style="'+style+'">'+string+'</span>';
+		}
+	} else if(format == "RTF") {
+		if(element["font-style"] == "oblique" || element["font-style"] == "italic") {
+			string = "\\i "+string+"\\i0 ";
+		}
+		if(element["font-variant"] == "small-caps") {
+			string = "\\scaps "+string+"\\scaps0 ";
+		}
+		if(element["font-weight"] == "bold") {
+			string = "\\b "+string+"\\b0 ";
 		}
 	}
 	

@@ -1,4 +1,4 @@
--- 47
+-- 48
 
 -- Set the following timestamp to the most recent scraper update date
 REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-08-11 11:18:00'));
@@ -4990,7 +4990,7 @@ REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '200
               </group>
             </group>
             <group class="container" prefix=" " suffix=".">
-              <titles relation="container" font-style="italic" prefix=" "/>
+              <titles relation="container" font-style="italic"/>
               <volume prefix=", " font-style="italic"/>
               <issue prefix="(" suffix=")"/>
               <pages prefix=", "/>

@@ -20,7 +20,8 @@
 <groupbox>
 	<caption label="&bibliography.output.label;"/>
 	<radiogroup id="output-radio">
-		<radio id="save-as-html" selected="true" label="&bibliography.saveAsHTML.label;"/>
+		<radio id="save-as-rtf" selected="true" label="&bibliography.saveAsRTF.label;"/>
+		<radio id="save-as-html" label="&bibliography.saveAsHTML.label;"/>
 		<radio id="copy-to-clipboard" label="&bibliography.copyToClipboard.label;"/>
 		<radio id="print" label="&bibliography.print.label;"/>
 	</radiogroup>

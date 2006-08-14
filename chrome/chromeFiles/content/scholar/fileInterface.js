@@ -198,8 +198,14 @@ Scholar_File_Interface = new function() {
 		var newDialog = window.openDialog("chrome://scholar/content/bibliography.xul",
 			"_blank","chrome,modal,centerscreen", io);
 		
+		// determine output format
+		var format = "HTML";
+		if(io.output == "save-as-rtf") {
+			format = "RTF";
+		}
+		
 		// generate bibliography
-		var bibliography = Scholar.Cite.getBibliography(io.style, items);
+		var bibliography = Scholar.Cite.getBibliography(io.style, items, format);
 		
 		if(io.output == "print") {
 			// printable bibliography, using a hidden browser
@@ -232,19 +238,8 @@ Scholar_File_Interface = new function() {
 			Scholar.Browser.deleteHiddenBrowser(browser);
 			bibliographyStream.close();
 		} else if(io.output == "save-as-html") {
-			// savable bibliography, using a file stream
-			const nsIFilePicker = Components.interfaces.nsIFilePicker;
-			var fp = Components.classes["@mozilla.org/filepicker;1"]
-					.createInstance(nsIFilePicker);
-			fp.init(window, "Save Bibliography", nsIFilePicker.modeSave);
-			fp.appendFilters(nsIFilePicker.filterHTML);
-			var rv = fp.show();
-			if (rv == nsIFilePicker.returnOK || rv == nsIFilePicker.returnReplace) {				
-				// open file
-				var fStream = Components.classes["@mozilla.org/network/file-output-stream;1"].
-				              createInstance(Components.interfaces.nsIFileOutputStream);
-				fStream.init(fp.file, 0x02 | 0x08 | 0x20, 0664, 0); // write, create, truncate
-				
+			var fStream = _saveBibliography("HTML");
+			if(fStream !== false) {
 				var html = "";
 				html +='<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">\n';
 				html +='<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">\n';
@@ -257,7 +252,12 @@ Scholar_File_Interface = new function() {
 				html +='</body>\n';
 				html +='</html>\n';
 				fStream.write(html, html.length);
-				
+				fStream.close();
+			}
+		} else if(io.output == "save-as-rtf") {
+			var fStream = _saveBibliography("RTF");
+			if(fStream !== false) {
+				fStream.write(bibliography, bibliography.length);
 				fStream.close();
 			}
 		} else if(io.output == "copy-to-clipboard") {
@@ -276,6 +276,31 @@ Scholar_File_Interface = new function() {
 			var clipboardService = Components.classes["@mozilla.org/widget/clipboard;1"].
 			                       getService(Components.interfaces.nsIClipboard);
 			clipboardService.setData(transferable, null, Components.interfaces.nsIClipboard.kGlobalClipboard);
+		}
+	}
+	
+	function _saveBibliography(format) {	
+		// savable bibliography, using a file stream
+		const nsIFilePicker = Components.interfaces.nsIFilePicker;
+		var fp = Components.classes["@mozilla.org/filepicker;1"]
+				.createInstance(nsIFilePicker);
+		fp.init(window, "Save Bibliography", nsIFilePicker.modeSave);
+		
+		if(format == "RTF") {
+			fp.appendFilter("RTF", "*.rtf");
+		} else {
+			fp.appendFilters(nsIFilePicker.filterHTML);
+		}
+		
+		var rv = fp.show();
+		if (rv == nsIFilePicker.returnOK || rv == nsIFilePicker.returnReplace) {				
+			// open file
+			var fStream = Components.classes["@mozilla.org/network/file-output-stream;1"].
+						  createInstance(Components.interfaces.nsIFileOutputStream);
+			fStream.init(fp.file, 0x02 | 0x08 | 0x20, 0664, 0); // write, create, truncate
+			return fStream;
+		} else {
+			return false;
 		}
 	}
 }
