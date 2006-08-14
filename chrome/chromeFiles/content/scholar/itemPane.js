@@ -118,9 +118,16 @@ ScholarItemPane = new function()
 			for(var i = 0; i<fieldNames.length; i++)
 			{
 				var editable = (!_itemBeingEdited.isPrimaryField(fieldNames[i]) || _itemBeingEdited.isEditableField(fieldNames[i]));
-			
-				var valueElement = createValueElement(_itemBeingEdited.getField(fieldNames[i]), editable ? fieldNames[i] : null);
-			
+				
+				var val = _itemBeingEdited.getField(fieldNames[i]);
+				
+				// Convert dates from UTC
+				if (fieldNames[i]=='dateAdded' || fieldNames[i]=='dateModified'){
+					val = Scholar.Date.sqlToDate(val, true).toLocaleString();
+				}
+				
+				var valueElement = createValueElement(val, editable ? fieldNames[i] : null);
+				
 				var label = document.createElement("label");
 				label.setAttribute("value",Scholar.getString("itemFields."+fieldNames[i])+":");
 				label.setAttribute("onclick","this.nextSibling.blur();");

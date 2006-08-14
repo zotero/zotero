@@ -596,7 +596,7 @@ Scholar.Date = new function(){
 	*
 	* Can also accept just the date part (e.g. '2006-06-13')
 	**/
-	function sqlToDate(sqldate){
+	function sqlToDate(sqldate, isUTC){
 		try {
 			var datetime = sqldate.split(' ');
 			var dateparts = datetime[0].split('-');
@@ -606,6 +606,12 @@ Scholar.Date = new function(){
 			else {
 				timeparts = [false, false, false];
 			}
+			
+			if (isUTC){
+				return new Date(Date.UTC(dateparts[0], dateparts[1]-1, dateparts[2],
+					timeparts[0], timeparts[1], timeparts[2]));
+			}
+			
 			return new Date(dateparts[0], dateparts[1]-1, dateparts[2],
 				timeparts[0], timeparts[1], timeparts[2]);
 		}
