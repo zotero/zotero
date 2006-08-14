@@ -1,4 +1,4 @@
--- 46
+-- 47
 
 -- Set the following timestamp to the most recent scraper update date
 REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-08-11 11:18:00'));
@@ -2414,7 +2414,7 @@ function retrieveNextCOinS(needFullItems, newItems) {
 		search.setHandler("done", function() {
 			retrieveNextCOinS(needFullItems, newItems);
 		});
-		search.setItem(item);
+		search.setSearch(item);
 		
 		// look for translators
 		var translators = search.getTranslators();
@@ -4848,7 +4848,7 @@ function doImport(url) {	// the URL is actually here for other translators
 	}
 }');
 
-REPLACE INTO "csl" VALUES('id-not-yet-given', '2006-08-12 19:22:00', 'American Psychological Association',
+REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '2006-08-12 19:22:00', 'APA',
 '<?xml version="1.0" encoding="UTF-8"?>
 <?oxygen RNGSchema="file:/Users/darcusb/xbiblio/csl/schema/trunk/csl-alt.rnc" type="compact"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="author-date" xml:lang="en">
@@ -5001,4 +5001,110 @@ REPLACE INTO "csl" VALUES('id-not-yet-given', '2006-08-12 19:22:00', 'American P
       </item>
     </layout>
   </bibliography>
+</style>');
+
+REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/chicago-note.csl', '2006-08-12 19:22:00', 'Chicago (Footnote)',
+'<?xml version="1.0" encoding="UTF-8"?>
+<?oxygen RNGSchema="../schema/trunk/csl.rnc" type="compact"?>
+<style xmlns="http://purl.org/net/xbiblio/csl" class="note" xml:lang="en">
+  <info>
+    <title>Chicago Note Sans Reference List</title>
+    <id>http://purl.org/net/xbiblio/csl/styles/chicago-note.csl</id>
+    <author>
+      <name>Bruce D’Arcus</name>
+      <email>bdarcus@sourceforge.net</email>
+    </author>
+    <updated>2006-08-03T04:35:20-07:00</updated>
+    <summary>The note-without-bibliography variant of the Chicago style.</summary>
+  </info>
+  <defaults>
+    <contributor>
+      <label suffix=". " text-transform="lowercase"/>
+      <name and="text"/>
+    </contributor>
+    <author>
+      <name and="text"/>
+      <label prefix = ", " suffix="." text-transform="lowercase"/>
+      <substitute>
+        <choose>
+          <editor/>
+          <translator/>
+        </choose>
+      </substitute>
+    </author>
+    <locator>
+      <number/>
+    </locator>
+    <titles>
+      <title/>
+    </titles>
+    <date>
+      <year/>
+    </date>
+    <publisher>
+      <place suffix=": "/>
+      <name/>
+    </publisher>
+    <access>
+      <url/>
+      <date prefix=" "/>
+    </access>
+  </defaults>
+  <citation suffix=".">
+    <et-al min-authors="4" use-first="1"/>
+    <layout>
+      <item>
+        <choose>
+          <type name="book">
+            <author suffix=", "/>
+            <titles font-style="italic"/>
+            <editor prefix=", "/>
+            <translator prefix=", "/>
+            <group prefix=" (" suffix=")" delimiter=", ">
+              <publisher/>
+              <date/>
+            </group>
+            <pages prefix=", "/>
+          </type>
+          <type name="chapter">
+            <author suffix=", "/>
+            <titles prefix="&#8220;" suffix=",&#8221; "/>
+            <group class="container">
+              <text term-name="in" text-transform="lowercase"/>
+              <titles relation="container" prefix=" " font-style="italic"/>
+              <editor prefix=", "/>
+              <translator prefix=", "/>
+              <pages prefix=", "/>
+              <group prefix=" (" suffix=")" delimiter=", ">
+                <publisher/>
+                <date/>
+              </group>
+            </group>
+          </type>
+          <type name="journal-article">
+            <author suffix=", "/>
+            <titles prefix="&#8220;" suffix=",&#8221; "/>
+            <titles relation="container" font-style="italic"/>
+            <volume prefix=" "/>
+            <issue prefix=" (" suffix=")"/>
+            <pages prefix=": "/>
+          </type>
+          <type name="article">
+            <author suffix=", "/>
+            <titles prefix="&#8220;" suffix=",&#8221; "/>
+            <titles relation="container" font-style="italic"/>
+            <date prefix=", ">
+              <day suffix=" "/>
+              <month suffix=" " text-transform="capitalize"/>
+              <year/>
+            </date>
+          </type>
+        </choose>
+      </item>
+      <item position="subsequent" ibid="true">
+        <author/>
+        <title prefix=", "/>
+      </item>
+    </layout>
+  </citation>
 </style>');

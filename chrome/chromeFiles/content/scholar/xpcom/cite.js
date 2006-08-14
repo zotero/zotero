@@ -68,17 +68,46 @@ CSL = function(csl) {
 	}
 	// load defaults from CSL
 	this._parseFieldDefaults(this._csl.defaults);
+	Scholar.debug(this._defaults);
 	
-	// load options
-	this._opt = this._parseOptions(this._csl.bibliography);
+	// decide whether to parse bibliography, or, if none exists, citation
+	if(this._csl.bibliography.length()) {
+		var cite = this._csl.bibliography;
+		this._parseBibliographyOptions();
+		
+		this._itemElement = this._csl.bibliography.layout.item;
+	} else {
+		var cite = this._csl.citation;
+		this._parseCitationOptions();
+		
+		// find the type item without position="subsequent"
+		var itemElements = this._csl.citation.layout.item;
+		for each(var itemElement in itemElements) {
+			if(itemElement.@position.toString() != "subsequent") {
+				this._itemElement = itemElement;
+				break;
+			}
+		}
+		if(!this._itemElement) {
+			throw("no primary item found in citation. cannot cite.");
+		}
+	}
 	
 	// create an associative array of available types
-	this._types = new Object();
-	this._serializations = new Object();
-	for each(var type in this._csl.bibliography.layout.item.choose.type) {
-		this._types[type.@name] = true;
-		this._serializations[type.@name] = new Object();
+	if(this._itemElement.choose) {
+		this._types = new Object();
+		this._serializations = new Object();
+		for each(var type in this._itemElement.choose.type) {
+			this._types[type.@name] = true;
+			this._serializations[type.@name] = new Object();
+		}
+	} else {
+		// if there's only one type, bind it to index 0
+		this._serializations[0] = new Object();
+		this._types[0] = this._parseFields(this._itemElement.children(), 0);
 	}
+	
+	Scholar.debug(this._types);
 }
 
 /*
@@ -90,10 +119,12 @@ CSL.prototype.createBibliography = function(items, format) {
 	this._preprocessItems(items);
 	
 	// sort by sort order
-	var me = this;
-	items.sort(function(a, b) {
-		return me._compareItem(a, b);
-	});
+	if(this._opt.sortOrder) {
+		var me = this;
+		items.sort(function(a, b) {
+			return me._compareItem(a, b);
+		});
+	}
 	
 	// disambiguate items
 	this._disambiguateItems(items);
@@ -108,31 +139,62 @@ CSL.prototype.createBibliography = function(items, format) {
 		}
 		
 		// determine mapping
-		if(CSL._optionalTypeMappings[item.itemType]
-		   && this._types[CSL._optionalTypeMappings[item.itemType]]) {
-			if(this._types[CSL._optionalTypeMappings[item.itemType]] === true) {
-				// exists but not yet processed
-				this._parseReferenceType(CSL._optionalTypeMappings[item.itemType]);
+		if(!this._types[0]) {	// multiple types
+			if(CSL._optionalTypeMappings[item.itemType]
+			   && this._types[CSL._optionalTypeMappings[item.itemType]]) {
+			   	// try preferred types first
+				if(this._types[CSL._optionalTypeMappings[item.itemType]] === true) {
+					// exists but not yet processed
+					this._parseReferenceType(CSL._optionalTypeMappings[item.itemType]);
+				}
+				
+				var typeName = CSL._optionalTypeMappings[item.itemType];
+			} else {
+				// otherwise, use fallback types
+				if(this._types[CSL._fallbackTypeMappings[item.itemType]] === true) {
+					this._parseReferenceType(CSL._fallbackTypeMappings[item.itemType]);
+				}
+				
+				var typeName = CSL._fallbackTypeMappings[item.itemType];
 			}
-			
-			var typeName = CSL._optionalTypeMappings[item.itemType];
-		} else {
-			if(this._types[CSL._fallbackTypeMappings[item.itemType]] === true) {
-				this._parseReferenceType(CSL._fallbackTypeMappings[item.itemType]);
-			}
-			
-			var typeName = CSL._fallbackTypeMappings[item.itemType];
+		} else {		// only one element
+			var typeName = 0;
 		}
 		
 		var type = this._types[typeName];
 		
 		var string = "";
-		for(var i in type) {
-			string += this._getFieldValue(type[i].name, type[i], item, format, typeName);
+		for(var j in type) {
+			var value = this._getFieldValue(type[j].name, type[j], item, format, typeName);
+			
+			if(this._opt.format && this._opt.format.delimiter && string && value) {
+				// add delimiter before if one exists, and this isn't the first
+				// element with content
+				string += this._opt.format.delimiter;
+			}
+			string += value;
+		}
+			
+		if(this._opt.format) {
+			// add citation prefix or suffix
+			if(this._opt.format.prefix) {
+				string = string + this._opt.format.prefix;
+			}
+			
+			if(this._opt.format.suffix) {
+				string = string + this._opt.format.suffix;
+			}
 		}
 		
 		if(format == "HTML") {
-			output += '<p style="margin-left:0.5in;text-indent:-0.5in">'+string+'</p>';
+			output += '<p style="margin-left:0.5in;text-indent:-0.5in">';
+			
+			if(this._class == "note") {
+				// add superscript number for footnotes
+				output += (parseInt(i)+1).toString()+". ";
+			}
+			
+			output += string+'</p>';
 		}
 	}
 	
@@ -383,15 +445,17 @@ CSL.prototype._parseFields = function(ref, type) {
 			this._parseFieldAttrChildren(element, itemDesc);
 			
 			// add defaults, but only if we're parsing as a reference type
-			if(type) {
+			if(type != undefined) {
 				var fieldDefaults = this._getFieldDefaults(itemDesc.name);
 				itemDesc = this._merge(fieldDefaults, itemDesc);
-				itemDesc = this._merge(this._opt.format, itemDesc);
+				if(this._opt.inheritFormat) {
+					itemDesc = this._merge(this._opt.inheritFormat, itemDesc);
+				}
 			
 				// create serialized representation
 				itemDesc._serialized = this._serializeElement(itemDesc.name, itemDesc);
 				// add to serialization for type
-				this._serializations[itemDesc._serialized] = itemDesc;
+				this._serializations[type][itemDesc._serialized] = itemDesc;
 			}
 			
 			// parse group children
@@ -400,12 +464,12 @@ CSL.prototype._parseFields = function(ref, type) {
 					// don't bother merging fieldDefaults
 					itemDesc.children[i] = this._merge(this._getFieldDefaults(itemDesc.children[i].name),
 					                                   itemDesc.children[i]);
-					if(type) {
+					if(type != undefined) {
 						// serialize children
 						itemDesc.children[i]._serialized = this._serializeElement(itemDesc.children[i].name,
 						                                   itemDesc.children[i]);
 						// add to serialization for type
-						this._serializations[itemDesc._serialized] = itemDesc;
+						this._serializations[type][itemDesc._serialized] = itemDesc;
 					}
 				}
 			}
@@ -416,22 +480,61 @@ CSL.prototype._parseFields = function(ref, type) {
 	return typeDesc;
 }
 
+CSL.prototype._parseEtAl = function(etAl) {
+	if(etAl.length()) {
+		this._opt.etAl = new Object();
+		
+		if(etAl.length() > 1) {
+			// separate first and subsequent et als
+			for each(var etAlElement in etAl) {
+				if(etAlElement.@position == "subsequent") {
+					this._opt.subsequentEtAl = new Object();
+					this._opt.subsequentEtAl.minCreators = parseInt(etAlElement['@min-authors']);
+					this._opt.subsequentEtAl.useFirst = parseInt(etAlElement['@use-first']);
+				} else {
+					var parseElement = etAlElement;
+				}
+			}
+		} else {
+			var parseElement = etAl;
+		}
+		
+		this._opt.etAl.minCreators = parseInt(parseElement['@min-authors']);
+		this._opt.etAl.useFirst = parseInt(parseElement['@use-first']);
+	}
+}
+
 /*
  * parses cs-format attributes into just a prefix and a suffix; accepts an
  * optional array of cs-format
  */
-CSL.prototype._parseOptions = function(bibliography) {
-	var opt = new Object();
+CSL.prototype._parseBibliographyOptions = function() {
+	var bibliography = this._csl.bibliography;
+	this._opt = new Object();
+	
+	// global prefix and suffix format information
+	this._opt.inheritFormat = new Array();
+	for each(var attribute in bibliography.layout.item.attributes()) {
+		this._opt.inheritFormat[attribute.name()] = attribute.toString();
+	}
+	
+	// sections (TODO)
+	this._opt.sections = [{groupBy:"default",
+		heading:bibliography.layout.heading.text["@term-name"].toString()}];
+	for each(var section in bibliography.layout.section) {
+		this._opt.sections.push([{groupBy:section["@group-by"].toString(),
+			heading:section.heading.text["@term-name"].toString()}]);
+	}
 	
 	// subsequent author substitute
 	// replaces subsequent occurances of an author with a given string
 	if(bibliography['@subsequent-author-substitute']) {
-		opt.subsequentAuthorSubstitute = bibliography['@subsequent-author-substitute'].toString();
+		this._opt.subsequentAuthorSubstitute = bibliography['@subsequent-author-substitute'].toString();
 	}
 	
 	// hanging indent
 	if(bibliography['@hanging-indent']) {
-		opt.hangingIndent = true;
+		this._opt.hangingIndent = true;
 	}
 	
 	// sort order
@@ -439,50 +542,48 @@ CSL.prototype._parseOptions = function(bibliography) {
 	if(algorithm) {
 		// for classes, use the sort order that 
 		if(algorithm == "author-date") {
-			opt.sortOrder = [this._getFieldDefaults("author"),
+			this._opt.sortOrder = [this._getFieldDefaults("author"),
 			                 this._getFieldDefaults("date")];
-			opt.sortOrder[0].name = "author";
-			opt.sortOrder[1].name = "date";
+			this._opt.sortOrder[0].name = "author";
+			this._opt.sortOrder[1].name = "date";
 		} else if(algorithm == "label") {
-			opt.sortOrder = [this._getFieldDefaults("label")];
-			opt.sortOrder[0].name = "label";
+			this._opt.sortOrder = [this._getFieldDefaults("label")];
+			this._opt.sortOrder[0].name = "label";
 		} else if(algorithm == "cited") {
-			opt.sortOrder = [this._getFieldDefaults("cited")];
-			opt.sortOrder[0].name = "cited";
+			this._opt.sortOrder = [this._getFieldDefaults("cited")];
+			this._opt.sortOrder[0].name = "cited";
 		}
 	} else {
-		opt.sortOrder = this._parseFields(bibliography.sort, false);
+		this._opt.sortOrder = this._parseFields(bibliography.sort, false);
 	}
 	
-	// et al
-	if(bibliography['use-et_al'].length()) {
-		opt.etAl = new Object();
-		opt.etAl.minCreators = parseInt(bibliography['use-et_al']['@min-authors']);
-		opt.etAl.useFirst = parseInt(bibliography['use-et_al']['@use-first']);
-	}
+	// parse et al
+	this._parseEtAl(bibliography["use-et_al"]);
+}
+
+/*
+ * parses cs-format attributes into just a prefix and a suffix; accepts an
+ * optional array of cs-format
+ */
+CSL.prototype._parseCitationOptions = function() {
+	var citation = this._csl.citation;
+	this._opt = new Object();
 	
-	// sections (TODO)
-	opt.sections = [{groupBy:"default",
-		heading:bibliography.layout.heading.text["@term-name"].toString()}];
-	for each(var section in bibliography.layout.section) {
-		opt.sections.push([{groupBy:section["@group-by"].toString(),
-			heading:section.heading.text["@term-name"].toString()}]);
-	}
+	// parse et al
+	this._parseEtAl(citation["use-et_al"]);
 	
-	// global prefix and suffix format information
-	opt.format = new Array();
-	for each(var attribute in bibliography.layout.item.attributes()) {
-		opt.format[attribute.name()] = attribute.toString();
+	// global format information
+	this._opt.format = new Array();
+	for each(var attribute in citation.attributes()) {
+		this._opt.format[attribute.name()] = attribute.toString();
 	}
-	
-	return opt;
 }
 
 /*
  * convert reference types to native structures for speed
  */
 CSL.prototype._parseReferenceType = function(reftype) {
-	var ref = this._csl.bibliography.layout.item.choose.type.(@name==reftype).children();
+	var ref = this._itemElement.choose.type.(@name==reftype).children();
 	this._types[reftype] = this._parseFields(ref, reftype);
 }
 
@@ -819,6 +920,9 @@ CSL.prototype._disambiguateItems = function(items) {
 			usedCitations[citation] = item;
 		}
 		
+		// add numbers to each
+		item._csl.number = i;
+		
 		// handle subsequent author substitutes
 		if(this._opt.subsequentAuthorSubstitute && lastAuthor == author) {
 			item._csl.subsequentAuthorSubstitute = true;
@@ -896,11 +1000,11 @@ CSL.prototype._processCreators = function(type, element, creators, format) {
 				}
 				lastName = creators[i].lastName;
 				
-				if(((i == 0 && element["name-as-sort-order"] == "first-author")
+				if(((i == 0 && element["name-as-sort-order"] == "first")
 				  || element["name-as-sort-order"] == "all")
 				  && child["sort-separator"]) {
-					// if this is the first author and author-as-sort-order="first-author"
-					// or if this is a subsequent author and author-as-sort-order="all"
+					// if this is the first author and name-as-sort="first"
+					// or if this is a subsequent author and name-as-sort="all"
 					// then the name gets inverted
 					authorStrings.push(lastName+child["sort-separator"]+firstName);
 				} else {
@@ -924,8 +1028,9 @@ CSL.prototype._processCreators = function(type, element, creators, format) {
 						
 						authorStrings[maxCreators-1] = and+" "+authorStrings[maxCreators-1];
 						// skip the comma if there are only two creators and no
-						// et al
-						if(maxCreators == 2) {
+						// et al, and name as sort is no
+						if(maxCreators == 2 && element["name-as-sort"] != "first"
+						   && element["name-as-sort"] != "all") {
 							joinString = " ";
 						}
 					}
@@ -1068,6 +1173,8 @@ CSL.prototype._getFieldValue = function(name, element, item, format, typeName) {
 		data = this._formatLocator(null, element, item.ISBN, format);
 	} else if(name == "doi") {
 		data = this._formatLocator(null, element, item.DOI, format);
+	} else if(name == "number") {
+		data = this._csl.number;
 	}
 	
 	if(data) {
@@ -1086,7 +1193,7 @@ CSL.prototype._getFieldValue = function(name, element, item, format, typeName) {
 				inheritElement = element;
 			} else {
 				// search for elements with the same serialization
-				if(typeName && this._serializations[typeName]
+				if(typeName != undefined && this._serializations[typeName]
 				   && this._serializations[typeName][serialization]) {
 					inheritElement = this._serializations[typeName][serialization];
 				} else {

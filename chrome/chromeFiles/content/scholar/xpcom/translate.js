@@ -36,7 +36,11 @@
  * location - the location of the target (read-only; set with setLocation)
  *            for import/export - this is an instance of nsILocalFile
  *            for web - this is a URL
- * item - item to be used for searching (read-only; set with setItem)
+ * search - item (in toArray() format) to extrapolate data for (read-only; set
+ *          with setSearch).
+ * items - items (in Scholar.Item format) to be exported. if this is empty,
+ *         Scholar will export all items in the library (read-only; set with
+ *         setItems). setting items disables export of collections.
  * path - the path to the target; for web, this is the same as location
  * string - the string content to be used as a file.
  * saveItem - whether new items should be saved to the database. defaults to
@@ -119,8 +123,15 @@ Scholar.Translate.prototype.setBrowser = function(browser) {
 /*
  * sets the item to be used for searching
  */
-Scholar.Translate.prototype.setItem = function(item) {
-	this.item = item;
+Scholar.Translate.prototype.setSearch = function(search) {
+	this.search = search;
+}
+
+/*
+ * sets the item to be used for export
+ */
+Scholar.Translate.prototype.setItems = function(items) {
+	this.items = items;
 }
 
 /*
@@ -278,7 +289,7 @@ Scholar.Translate.prototype.getTranslators = function() {
 	var sql = "SELECT translatorID, label, target, detectCode FROM translators WHERE type IN ("+this._numericTypes+") ORDER BY target IS NULL";
 	var translators = Scholar.DB.query(sql);
 	
-	if(!this.location && !this.item) {
+	if(!this.location && !this.search) {
 		return translators;		// no need to see which can translate, because
 								// we don't have a location yet (for export or
 								// import dialog)
@@ -575,7 +586,7 @@ Scholar.Translate.prototype._canTranslate = function(translator, ignoreExtension
 				if(this.type == "web") {
 					returnValue = this._sandbox.detectWeb(this.browser.contentDocument, this.location);
 				} else if(this.type == "search") {
-					returnValue = this._sandbox.detectSearch(this.item);
+					returnValue = this._sandbox.detectSearch(this.search);
 				} else if(this.type == "import") {
 					returnValue = this._sandbox.detectImport();
 				} else if(this.type == "export") {
@@ -707,11 +718,28 @@ Scholar.Translate.prototype._translationComplete = function(returnValue) {
 		} else {
 			Scholar.debug("translation complete");
 			
-			// call handler
-			this._runHandler("done", returnValue);
+			// serialize RDF and unregister dataSource
+			if(this._rdf) {
+				if(this._rdf.serializer) {
+					this._rdf.serializer.Serialize(this._streams[0]);
+				}
+				
+				try {
+					var rdfService = Components.classes["@mozilla.org/rdf/rdf-service;1"].
+									 getService(Components.interfaces.nsIRDFService);
+					rdfService.UnregisterDataSource(this._rdf.dataSource);
+				} catch(e) {
+					Scholar.debug("could not unregister data source");
+				}
+				
+				delete this._rdf.dataSource;
+			}
 			
 			// close open streams
 			this._closeStreams();
+			
+			// call handlers
+			this._runHandler("done", returnValue);
 		}
 	}
 }
@@ -940,7 +968,7 @@ Scholar.Translate.prototype._web = function() {
  */
 Scholar.Translate.prototype._search = function() {
 	try {
-		this._sandbox.doSearch(this.item);
+		this._sandbox.doSearch(this.search);
 	} catch(e) {
 		Scholar.debug(e+' in executing code for '+this.translator[0].label);
 		return false;
@@ -971,6 +999,8 @@ Scholar.Translate.prototype._import = function() {
 Scholar.Translate.prototype._importConfigureIO = function() {
 	if(this._storageStream) {		
 		if(this._configOptions.dataMode == "rdf") {
+			this._rdf = new Object();
+			
 			// read string out of storage stream
 			var sStream = Components.classes["@mozilla.org/scriptableinputstream;1"].
 						  createInstance(Components.interfaces.nsIScriptableInputStream);
@@ -980,7 +1010,7 @@ Scholar.Translate.prototype._importConfigureIO = function() {
 			
 			var IOService = Components.classes['@mozilla.org/network/io-service;1']
 							.getService(Components.interfaces.nsIIOService);
-			var dataSource = Components.classes["@mozilla.org/rdf/datasource;1?name=in-memory-datasource"].
+			this._rdf.dataSource = Components.classes["@mozilla.org/rdf/datasource;1?name=in-memory-datasource"].
 							createInstance(Components.interfaces.nsIRDFDataSource);
 			var parser = Components.classes["@mozilla.org/rdf/xml-parser;1"].
 						 createInstance(Components.interfaces.nsIRDFXMLParser);
@@ -990,7 +1020,7 @@ Scholar.Translate.prototype._importConfigureIO = function() {
 			parser.parseString(dataSource, baseURI, str);
 			
 			// make an instance of the RDF handler
-			this._sandbox.Scholar.RDF = new Scholar.Translate.RDF(dataSource);
+			this._sandbox.Scholar.RDF = new Scholar.Translate.RDF(this._rdf.dataSource);
 		} else {
 			this._storageStreamFunctions(true);
 			
@@ -1003,6 +1033,8 @@ Scholar.Translate.prototype._importConfigureIO = function() {
 		}
 	} else {
 		if(this._configOptions.dataMode == "rdf") {
+			this._rdf = new Object()
+			
 			var IOService = Components.classes['@mozilla.org/network/io-service;1']
 							.getService(Components.interfaces.nsIIOService);
 			var fileHandler = IOService.getProtocolHandler("file")
@@ -1011,10 +1043,10 @@ Scholar.Translate.prototype._importConfigureIO = function() {
 			
 			var RDFService = Components.classes['@mozilla.org/rdf/rdf-service;1']
 							 .getService(Components.interfaces.nsIRDFService);
-			var dataSource = RDFService.GetDataSourceBlocking(URL);
+			this._rdf.dataSource = RDFService.GetDataSourceBlocking(URL);
 			
 			// make an instance of the RDF handler
-			this._sandbox.Scholar.RDF = new Scholar.Translate.RDF(dataSource);
+			this._sandbox.Scholar.RDF = new Scholar.Translate.RDF(this._rdf.dataSource);
 		} else {
 			// open file and set read methods
 			var fStream = Components.classes["@mozilla.org/network/file-input-stream;1"]
@@ -1059,12 +1091,16 @@ Scholar.Translate.prototype._export = function() {
 	this._exportConfigureIO();
 	
 	// get items
-	this._itemsLeft = Scholar.getItems();
+	if(this.items) {
+		this._itemsLeft = this.items;
+	} else {
+		this._itemsLeft = Scholar.getItems();
+	}
 	// run handler for items available
 	this._runHandler("itemCount", this._itemsLeft.length);
 	
 	// get collections, if requested
-	if(this._configOptions.getCollections) {
+	if(this._configOptions.getCollections && !this.items) {
 		this._collectionsLeft = Scholar.getCollections();
 	}
 	
@@ -1090,19 +1126,19 @@ Scholar.Translate.prototype._exportConfigureIO = function() {
 	this._streams.push(fStream);
 	
 	if(this._configOptions.dataMode == "rdf") {	// rdf io
+		this._rdf = new Object();
+		
 		// create data source
-		var dataSource = Components.classes["@mozilla.org/rdf/datasource;1?name=xml-datasource"].
+		this._rdf.dataSource = Components.classes["@mozilla.org/rdf/datasource;1?name=xml-datasource"].
 		                 createInstance(Components.interfaces.nsIRDFDataSource);
 		// create serializer
-		var serializer = Components.classes["@mozilla.org/rdf/xml-serializer;1"].
+		this._rdf.serializer = Components.classes["@mozilla.org/rdf/xml-serializer;1"].
 		                 createInstance(Components.interfaces.nsIRDFXMLSerializer);
-		serializer.init(dataSource);
-		serializer.QueryInterface(Components.interfaces.nsIRDFXMLSource);
+		this._rdf.serializer.init(this._rdf.dataSource);
+		this._rdf.serializer.QueryInterface(Components.interfaces.nsIRDFXMLSource);
 		
 		// make an instance of the RDF handler
-		this._sandbox.Scholar.RDF = new Scholar.Translate.RDF(dataSource, serializer);
-		
-		this.setHandler("done", function() { serializer.Serialize(fStream) });
+		this._sandbox.Scholar.RDF = new Scholar.Translate.RDF(this._rdf.dataSource, this._rdf.serializer);
 	} else {						// regular io; write just writes to file
 		this._sandbox.Scholar.write = function(data) { fStream.write(data, data.length) };
 	}
@@ -1125,11 +1161,11 @@ Scholar.Translate.prototype._exportGetItem = function() {
  * gets the next item to collection (called as Scholar.nextCollection() from code)
  */
 Scholar.Translate.prototype._exportGetCollection = function() {
-	if(!this._collectionsLeft) {
+	if(!this._configOptions.getCollections) {
 		throw("getCollections configure option not set; cannot retrieve collection");
 	}
 	
-	if(this._collectionsLeft.length != 0) {
+	if(this._collectionsLeft && this._collectionsLeft.length != 0) {
 		var returnItem = this._collectionsLeft.shift();
 		var collection = new Object();
 		collection.id = returnItem.getID();
@@ -1149,11 +1185,11 @@ Scholar.Translate.prototype._initializeInternalIO = function() {
 	if(this.type == "import" || this.type == "export") {
 		if(this._configOptions.dataMode == "rdf") {
 			// use an in-memory data source for internal IO
-			var dataSource = Components.classes["@mozilla.org/rdf/datasource;1?name=in-memory-datasource"].
+			this._rdf.dataSource = Components.classes["@mozilla.org/rdf/datasource;1?name=in-memory-datasource"].
 							 createInstance(Components.interfaces.nsIRDFDataSource);
 			
 			// make an instance of the RDF handler
-			this._sandbox.Scholar.RDF = new Scholar.Translate.RDF(dataSource);
+			this._sandbox.Scholar.RDF = new Scholar.Translate.RDF(this._rdf.dataSource);
 		} else {
 			this._createStorageStream();
 			this._storageStreamFunctions(true, true);

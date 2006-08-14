@@ -2,13 +2,16 @@ Scholar_File_Interface = new function() {
 	var _unresponsiveScriptPreference, _importCollection;
 	
 	this.exportFile = exportFile;
+	this.exportProject = exportProject;
+	this.exportItems = exportItems;
 	this.importFile = importFile;
 	this.bibliographyFromProject = bibliographyFromProject;
+	this.bibliographyFromItems = bibliographyFromItems;
 	
 	/*
 	 * Creates Scholar.Translate instance and shows file picker for file export
 	 */
-	function exportFile() {
+	function exportFile(items) {
 		var translation = new Scholar.Translate("export");
 		var translators = translation.getTranslators();
 		
@@ -21,6 +24,9 @@ Scholar_File_Interface = new function() {
 		}
 		var rv = fp.show();
 		if (rv == nsIFilePicker.returnOK || rv == nsIFilePicker.returnReplace) {
+			if(items) {
+				translation.setItems(items);
+			}
 			translation.setLocation(fp.file);
 			translation.setTranslator(translators[fp.filterIndex]);
 			translation.setHandler("options", _exportOptions);
@@ -32,6 +38,26 @@ Scholar_File_Interface = new function() {
 					translation.translate();
 			});
 		}
+	}
+	
+	/*
+	 * exports a collection
+	 */
+	function exportProject() {
+		var collection = ScholarPane.getSelectedCollection();
+		if(!collection) throw("no collection currently selected");
+		
+		exportFile(Scholar.getItems(collection.getID()));
+	}
+	
+	/*
+	 * exports items
+	 */
+	function exportItems() {
+		var items = ScholarPane.getSelectedItems();
+		if(!items || !items.length) throw("no items currently selected");
+		
+		exportFile(items);
 	}
 	
 	/*
@@ -145,13 +171,23 @@ Scholar_File_Interface = new function() {
 	}
 	
 	/*
-	 * Creates a bibliography
+	 * Creates a bibliography from a project
 	 */
 	function bibliographyFromProject() {
 		var collection = ScholarPane.getSelectedCollection();
-		if(!collection) throw("error in bibliographyFromProject: no collection currently selected");
+		if(!collection) throw("no collection currently selected");
 		
 		_doBibliographyOptions(Scholar.getItems(collection.getID()));
+	}
+	
+	/*
+	 * Creates a bibliography from a items
+	 */
+	function bibliographyFromItems() {
+		var items = ScholarPane.getSelectedItems();
+		if(!items || !items.length) throw("no items currently selected");
+		
+		_doBibliographyOptions(items);
 	}
 	
 	/*
