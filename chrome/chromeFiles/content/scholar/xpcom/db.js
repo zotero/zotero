@@ -104,7 +104,9 @@ Scholar.DB = new function(){
 			var statement = statementQuery(sql,params);
 		}
 		catch (e){
-			throw(db.lastErrorString);
+			var dberr = (db.lastErrorString!='not an error')
+				? ' [ERROR: ' + db.lastErrorString + ']' : '';
+			throw(e + ' [QUERY: ' + sql + ']' + dberr);
 		}
 		
 		// No rows
