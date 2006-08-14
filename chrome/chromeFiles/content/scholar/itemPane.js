@@ -43,6 +43,7 @@ ScholarItemPane = new function()
 	this.showEditor = showEditor;
 	this.hideEditor = hideEditor;
 	this.modifyField = modifyField;
+	this.getCreatorFields = getCreatorFields;
 	this.modifyCreator = modifyCreator;
 	this.removeNote = removeNote;
 	this.addNote = addNote;
@@ -100,6 +101,7 @@ ScholarItemPane = new function()
 			return;
 		_loaded[index] = true;
 		
+		// Info pane
 		if(index == 0)
 		{
 			while(_dynamicFields.hasChildNodes())
@@ -148,7 +150,7 @@ ScholarItemPane = new function()
 			}
 			else
 			{
-				addCreatorRow('', '', 1);
+				addCreatorRow('', '', 1, true, true);
 			}
 		}
 		else if(index == 1)
@@ -287,7 +289,7 @@ ScholarItemPane = new function()
 			_dynamicFields.appendChild(row);		
 	}
 	
-	function addCreatorRow(firstName, lastName, typeID)
+	function addCreatorRow(firstName, lastName, typeID, unsaved, defaultRow)
 	{
 		if(!firstName)
 			firstName = "(first)";
@@ -299,6 +301,7 @@ ScholarItemPane = new function()
 		label.setAttribute("fieldname",'creator-'+_creatorCount+'-typeID');
 		label.className = 'clicky';
 		
+		// getCreatorFields() needs to be adjusted if the DOM changes
 		var row = document.createElement("hbox");
 		
 		var firstlast = document.createElement("hbox");
@@ -309,14 +312,28 @@ ScholarItemPane = new function()
 		
 		var removeButton = document.createElement('label');
 		removeButton.setAttribute("value","-");
-		removeButton.setAttribute("class","clicky");
-		removeButton.setAttribute("onclick","ScholarItemPane.removeCreator("+_creatorCount+")");
+		if (defaultRow){
+			removeButton.setAttribute("disabled",true);
+			removeButton.setAttribute("class","unclicky");
+		}
+		else {
+			removeButton.setAttribute("class","clicky");
+			removeButton.setAttribute("onclick","ScholarItemPane.removeCreator("+_creatorCount+", this.parentNode.parentNode)");
+		}
 		row.appendChild(removeButton);
 		
 		var addButton = document.createElement('label');
 		addButton.setAttribute("value","+");
-		addButton.setAttribute("class","clicky");
-		addButton.setAttribute("onclick","ScholarItemPane.addCreatorRow('','',1);");
+		if (unsaved)
+		{
+			addButton.setAttribute("disabled",true);
+			addButton.setAttribute("class","unclicky");
+		}
+		else
+		{
+			addButton.setAttribute("class","clicky");
+			addButton.setAttribute("onclick","ScholarItemPane.addCreatorRow('','',1,true);");
+		}
 		row.appendChild(addButton);
 		
 		_creatorCount++;
@@ -348,8 +365,14 @@ ScholarItemPane = new function()
 		return valueElement;
 	}
 	
-	function removeCreator(index)
+	function removeCreator(index, labelToDelete)
 	{
+		// If unsaved row, just remove element
+		if (!_itemBeingEdited.hasCreatorAt(index)){
+			labelToDelete.parentNode.removeChild(labelToDelete);
+			_creatorCount--;
+			return;
+		}
 		_itemBeingEdited.removeCreator(index);
 		_itemBeingEdited.save();
 		loadPane(0);
@@ -398,7 +421,11 @@ ScholarItemPane = new function()
 			if(saveChanges)
 				modifyCreator(creatorFields[1],creatorFields[2],value);
 			
-			elem = createValueElement(_itemBeingEdited.getCreator(creatorFields[1])[creatorFields[2]], fieldName);
+			var val = _itemBeingEdited.getCreator(creatorFields[1])[creatorFields[2]];
+			if (creatorFields[2]=='lastName'){
+				val += ',';
+			}
+			elem = createValueElement(val, fieldName);
 		}
 		else
 		{
@@ -419,12 +446,34 @@ ScholarItemPane = new function()
 		_itemBeingEdited.save();
 	}
 	
-	function modifyCreator(index, field, value)
+	function getCreatorFields(row){
+		var label1 = row.getElementsByTagName('hbox')[0].firstChild.firstChild;
+		var label2 = label1.nextSibling;
+		
+		// doesn't currently return creator type, since we don't need it anywhere
+		return {
+			lastName: label1.firstChild ? label1.firstChild.nodeValue
+				// Strip trailing comma
+				.substr(0, label1.firstChild.nodeValue.length-1): label1.value,
+			firstName: label2.firstChild ? label2.firstChild.nodeValue
+				: label2.value,
+			isInstitution: null // placeholder
+		}
+	}
+	
+	function modifyCreator(index, field, value, otherFields)
 	{
-		var creator = _itemBeingEdited.getCreator(index);
-		var firstName = creator['firstName'];
-		var lastName = creator['lastName'];
-		var typeID = creator['typeID'];
+		if (otherFields){
+			var firstName = otherFields.firstName;
+			var lastName = otherFields.lastName;
+			// var isInstitution = otherFields.isInstitution;
+		}
+		else {
+			var creator = _itemBeingEdited.getCreator(index);
+			var firstName = creator['firstName'];
+			var lastName = creator['lastName'];
+			var typeID = creator['creatorTypeID'];
+		}
 		
 		if(field == 'firstName')
 			firstName = value;

@@ -189,6 +189,15 @@ Scholar.Item.prototype.numCreators = function(){
 }
 
 
+Scholar.Item.prototype.hasCreatorAt = function(pos){
+	if (this.getID() && !this._creatorsLoaded){
+		this._loadCreators();
+	}
+	
+	return this._creators.has(pos);
+}
+
+
 /*
  * Returns an array of the creator data at the given position, or false if none
  *
@@ -468,7 +477,8 @@ Scholar.Item.prototype.save = function(){
 					Scholar.DB.query(sql2);
 					
 					// If empty, move on
-					if (!creator['firstName'] && !creator['lastName']){
+					if (typeof creator['firstName'] == 'undefined'
+						&& typeof creator['lastName'] == 'undefined'){
 						continue;
 					}
 					
@@ -2701,6 +2711,13 @@ Scholar.Creators = new function(){
 	 * Returns the creatorID matching given name and type
 	 */
 	function getID(firstName, lastName, isInstitution){
+		if (!firstName){
+			firstName = '';
+		}
+		if (!lastName){
+			lastName = '';
+		}
+		
 		if (isInstitution){
 			firstName = '';
 			isInstitution = 1;

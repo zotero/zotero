@@ -73,19 +73,13 @@ searchcondition
 	-moz-binding: url('chrome://scholar/content/bindings/scholarsearch.xml#search-condition');
 }
 
-.clicky
+.clicky, .unclicky
 {	
 	-moz-border-radius: 6px;
 }
 
-.clicky[value="-"]
-{
-	margin: 0px;
-	padding-left: 4px;
-	padding-right: 4px;
-}
-
-.clicky[value="+"]
+.clicky[value="-"], .clicky[value="+"],
+.unclicky[value="-"], .unclicky[value="+"]
 {
 	margin: 0px;
 	padding-left: 4px;
