@@ -2214,6 +2214,7 @@ Scholar.Collection.prototype.loadFromRow = function(row){
 	this._parent = row['parentCollectionID'];
 	this._hasChildCollections = row['hasChildCollections'];
 	this._hasChildItems = row['hasChildItems'];
+	this._loadChildItems();
 }
 
 
@@ -2348,6 +2349,7 @@ Scholar.Collection.prototype.addItem = function(itemID){
 	// If this was previously empty, update and send a notification to the tree
 	if (!this._hasChildItems){
 		this._hasChildItems = true;
+		// DEBUG: is this necessary?
 		Scholar.Notifier.trigger('modify', 'collection', this.getID());
 	}
 	
@@ -2388,6 +2390,7 @@ Scholar.Collection.prototype.removeItem = function(itemID){
 	// If this was the last item, set collection to empty
 	if (!this._childItems.length){
 		this._hasChildItems = false;
+		// DEBUG: is this necessary?
 		Scholar.Notifier.trigger('modify', 'collection', this.getID());
 	}
 	
