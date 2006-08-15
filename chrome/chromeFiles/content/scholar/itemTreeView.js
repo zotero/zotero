@@ -154,16 +154,18 @@ Scholar.ItemTreeView.prototype.notify = function(action, type, ids)
 	}
 	else if(action == 'add')
 	{
-		var item = Scholar.Items.get(ids);
-				
-		if((this._itemGroup.isLibrary() || item.inCollection(this._itemGroup.ref.getID())) 		//if the item belongs in this collection
-			&& this._itemRowMap[ids] == null 													//if we haven't already added it to our hash map
-			&& (item.isRegularItem() || !item.getSource()))										//if it's stand-alone
-		{
-			this._showItem(new Scholar.ItemTreeView.TreeRow(item,0,false),this.rowCount);
-			this._treebox.rowCountChanged(this.rowCount-1,1);
-	
-			madeChanges = true;
+		var items = Scholar.Items.get(ids);
+		
+		for (var i in items){
+			if((this._itemGroup.isLibrary() || items[i].inCollection(this._itemGroup.ref.getID()))	// if the item belongs in this collection
+				&& this._itemRowMap[items[i].getID()] == null											// if we haven't already added it to our hash map
+				&& (items[i].isRegularItem() || !items[i].getSource()))								// if it's stand-alone
+			{
+				this._showItem(new Scholar.ItemTreeView.TreeRow(items[i],0,false),this.rowCount);
+				this._treebox.rowCountChanged(this.rowCount-1,1);
+		
+				madeChanges = true;
+			}
 		}
 	}
 	
