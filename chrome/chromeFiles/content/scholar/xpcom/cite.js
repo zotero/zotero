@@ -746,6 +746,7 @@ CSL.prototype._formatString = function(element, string, format, dontEscape) {
 		string = string.toString();
 	}
 	
+	// handle text transformation
 	if(element["text-transform"]) {
 		if(element["text-transform"] == "lowercase") {
 			// all lowercase
@@ -756,6 +757,20 @@ CSL.prototype._formatString = function(element, string, format, dontEscape) {
 		} else if(element["text-transform"] == "capitalize") {
 			// capitalize first
 			string = string[0].toUpperCase()+string.substr(1);
+		}
+	}
+	
+	// special rule: if a field ends in a punctuation mark, and the suffix
+	// begins with a period, chop the period off the suffix
+	var suffix;
+	if(element.suffix) {
+		suffix = element.suffix;	// copy so as to leave original intact
+		
+		if(suffix[0] == ".") {
+			var lastChar = string[string.length-1];
+			if(lastChar == "." || lastChar == "?" || lastChar == "!") {
+				suffix = suffix.substr(1);
+			}
 		}
 	}
 	
@@ -792,10 +807,8 @@ CSL.prototype._formatString = function(element, string, format, dontEscape) {
 	if(format != "compare" && element.prefix) {
 		string = this._escapeString(element.prefix, format)+string;
 	}
-	if(format != "compare" && element.suffix &&
-	   (element.suffix.length != 1 || string[string.length-1] != element.suffix)) {
-		// skip if suffix is the same as the last char
-		string += this._escapeString(element.suffix, format);
+	if(format != "compare" && suffix) {
+		string += this._escapeString(suffix, format);
 	}
 	
 	return string;
