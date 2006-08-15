@@ -1,5 +1,6 @@
 Scholar.Notifier = new function(){
 	var _observers = new Array();
+	var _disabled = false;
 	_observers['columnTree'] = new Scholar.Hash();
 	_observers['itemTree'] = new Scholar.Hash();
 	
@@ -8,6 +9,8 @@ Scholar.Notifier = new function(){
 	this.unregisterColumnTree = unregisterColumnTree;
 	this.unregisterItemTree = unregisterItemTree;
 	this.trigger = trigger;
+	this.disable = disable;
+	this.enable = enable;
 	
 	function registerColumnTree(ref){
 		return _register('columnTree', ref);
@@ -27,16 +30,20 @@ Scholar.Notifier = new function(){
 	
 	/**
 	* event - 'add', 'remove', 'modify'
-	* type - 'collection', 'smartcollection', 'item'
+	* type - 'collection', 'search', 'item'
 	* ids - single id or array of ids
 	**/
 	function trigger(event, type, ids){
+		if (_disabled){
+			return false;
+		}
+		
 		switch (type){
 			case 'item':
 				var treeType = 'itemTree';
 				break;
 			case 'collection':
-			case 'smartcollection':
+			case 'search':
 				var treeType = 'columnTree';
 				break;
 			default:
@@ -53,11 +60,25 @@ Scholar.Notifier = new function(){
 				+ i + "'", 4);
 			_observers[treeType].get(i).notify(event, type, ids);
 		}
+		
+		return true;
+	}
+	
+	
+	function disable(){
+		Scholar.debug('Disabling Notifier notifications');
+		_disabled = true;
+	}
+	
+	
+	function enable(){
+		Scholar.debug('Enabling Notifier notifications');
+		_disabled = false;
 	}
 	
 	
 	function _register(type, ref){
-		var len = 6;
+		var len = 2;
 		var tries = 10;
 		do {
 			// Increase the hash length if we can't find a unique key
