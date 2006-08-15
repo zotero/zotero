@@ -308,7 +308,7 @@ Scholar.Search.prototype._buildQuery = function(){
 					case 'collectionID':
 						condSQL += "collectionID ";
 						if (tables[i][j]['operator']=='isNot'){
-							sql += "NOT ";
+							condSQL += "NOT ";
 						}
 						// Add given collection id
 						condSQL += "IN (?,";
@@ -376,7 +376,7 @@ Scholar.Search.prototype._buildQuery = function(){
 							break;
 							
 						case 'is':
-							sql += '=?';
+							condSQL += '=?';
 							condSQLParams.push(tables[i][j]['value']);
 							break;
 							
@@ -386,7 +386,7 @@ Scholar.Search.prototype._buildQuery = function(){
 							break;
 							
 						case 'greaterThan':
-							sql += '>?';
+							condSQL += '>?';
 							condSQLParams.push({int:tables[i][j]['value']});
 							break;
 							
