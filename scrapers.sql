@@ -1,7 +1,7 @@
--- 48
+-- 49
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-08-11 11:18:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-08-15 15:42:00'));
 
 REPLACE INTO "translators" VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006-08-11 11:18:00', 4, 'Amazon.com', 'Simon Kornblith', '^http://www\.amazon\.com/(?:gp/(?:product|search)/|exec/obidos/search-handle-url/|s/)', 
 'function detectWeb(doc, url) {
@@ -112,7 +112,7 @@ function doWeb(doc, url) {
 		}
 		
 		Scholar.Utilities.processDocuments(uris, function(doc) { scrape(doc) },
-			function() { Scholar.done(); }, function() {});
+			function() { Scholar.done(); }, null);
 		
 		Scholar.wait();
 	} else {
@@ -646,7 +646,7 @@ function doWeb(doc, url) {
 		}
 		
 		Scholar.Utilities.processDocuments(uris, function(doc) { scrape(doc) },
-			function() { Scholar.done(); }, function() {});
+			function() { Scholar.done(); }, null);
 		
 		Scholar.wait();
 	} else {
@@ -763,7 +763,7 @@ REPLACE INTO "translators" VALUES ('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '2006
 			newItem.complete();
 			
 			Scholar.done();
-		}, function() {});
+		}, null);
 	} else {	// Search results page
 		// Require link to match this
 		var tagRegexp = new RegExp();
@@ -952,7 +952,7 @@ function doWeb(doc, url) {
 		}
 		
 		Scholar.Utilities.processDocuments(uris, function(doc) { scrape(doc) },
-			function() { Scholar.done() }, function() {});
+			function() { Scholar.done() }, null);
 		
 		Scholar.wait();
 	}
@@ -1127,7 +1127,7 @@ function doWeb(doc, url) {
 		}
 		
 		Scholar.Utilities.processDocuments(uris, function(doc) { scrape(doc) },
-			function() { Scholar.done(); }, function() {});
+			function() { Scholar.done(); }, null);
 		
 		Scholar.wait();
 	} else {
@@ -1136,7 +1136,7 @@ function doWeb(doc, url) {
 		if(m && (m[1] == "1" || m[1] == "2")) {
 			scrape(doc);
 		} else if(m) {
-			Scholar.Utilities.loadDocument(doc.location.href.replace("Fmt="+m[1], "Fmt=1"), function(doc) { scrape(doc); Scholar.done(); }, function() {});
+			Scholar.Utilities.loadDocument(doc.location.href.replace("Fmt="+m[1], "Fmt=1"), function(doc) { scrape(doc); Scholar.done(); }, null);
 			Scholar.wait();
 		}
 	}
@@ -1366,7 +1366,7 @@ function doWeb(doc, url) {
 		}
 		
 		Scholar.Utilities.processDocuments(uris, function(doc) { scrape(doc) },
-			function() { Scholar.done(); }, function() {});
+			function() { Scholar.done(); }, null);
 		
 		Scholar.wait();
 	}
@@ -1457,7 +1457,7 @@ REPLACE INTO "translators" VALUES ('cf87eca8-041d-b954-795a-2d86348999d5', '2006
 		newItem.source = uri;
 		record.translate(newItem);
 		newItem.complete();
-	}, function() { Scholar.done(); }, function() {});
+	}, function() { Scholar.done(); }, null);
 	
 	Scholar.wait();
 }');
@@ -1544,7 +1544,7 @@ REPLACE INTO "translators" VALUES ('774d7dc2-3474-2684-392c-f787789ec63d', '2006
 		newItem.source = uri;
 		record.translate(newItem);
 		newItem.complete();
-	}, function() { Scholar.done() }, function() {});
+	}, function() { Scholar.done() }, null);
 	
 	Scholar.wait();
 }');
@@ -1647,7 +1647,7 @@ REPLACE INTO "translators" VALUES ('63a0a351-3131-18f4-21aa-f46b9ac51d87', '2006
 		newItem.source = uri;
 		record.translate(newItem);
 		newItem.complete();
-	}, function(){ Scholar.done(); }, function() {});
+	}, function(){ Scholar.done(); }, null);
 	
 	Scholar.wait();
 }');
@@ -1721,8 +1721,7 @@ REPLACE INTO "translators" VALUES ('fb12ae9e-f473-cab4-0546-27ab88c64101', '2006
 	Scholar.wait();
 }');
 
-
-REPLACE INTO "translators" VALUES ('c0e6fda6-0ecd-e4f4-39ca-37a4de436e15', '2006-06-26 16:01:00', 4, 'GEAC', 'Simon Kornblith', '/(?:GeacQUERY|(?:Geac)?FETCH[\:\?].*[&:]next=html/(?:record\.html|geacnffull\.html))',
+REPLACE INTO "translators" VALUES ('c0e6fda6-0ecd-e4f4-39ca-37a4de436e15', '2006-06-26 16:01:00', 4, 'GEAC', 'Simon Kornblith', '/(?:GeacQUERY|GeacFETCH[\:\?].*[&:]next=html/(?:record\.html|geacnffull\.html))',
 'function detectWeb(doc, url) {
 	if(doc.location.href.indexOf("/GeacQUERY") > 0) {
 		return "multiple";
@@ -1804,7 +1803,7 @@ REPLACE INTO "translators" VALUES ('c0e6fda6-0ecd-e4f4-39ca-37a4de436e15', '2006
 		newItem.source = uri;
 		record.translate(newItem);
 		newItem.complete();
-	}, function() { Scholar.done(); }, function() {});
+	}, function() { Scholar.done(); }, null);
 	
 	Scholar.wait();
 }');
@@ -2037,7 +2036,7 @@ REPLACE INTO "translators" VALUES ('0f9fc2fc-306e-5204-1117-25bca009dffc', '2006
 		newItem.source = uri;
 		record.translate(newItem);
 		newItem.complete();
-	}, function() {Scholar.done(); }, function() {});
+	}, function() {Scholar.done(); }, null);
 	
 	Scholar.wait();
 }');
@@ -2568,7 +2567,79 @@ REPLACE INTO "translators" VALUES ('3e684d82-73a3-9a34-095f-19b112d88bbf', '2006
 			}
 		}
 		newItem.complete();
-	}, function() { Scholar.done(); }, function() {});
+	}, function() { Scholar.done(); }, null);
+	
+	Scholar.wait();
+}');
+
+REPLACE INTO "translators" VALUES ('9c335444-a562-4f88-b291-607e8f46a9bb', '2006-08-15 15:42:00', 4, 'Berkeley Library', 'Simon Kornblith', '^http://[^/]*berkeley.edu[^/]*/WebZ/(?:html/results.html|FETCH)\?.*sessionid=',
+'function detectWeb(doc, url) {
+	var resultsRegexp = /\/WebZ\/html\/results.html/i
+	if(resultsRegexp.test(url)) {
+		return "multiple";
+	} else {
+		return "book";
+	}
+}',
+'function reformURL(url) {
+	return url.replace(/fmtclass=[^&]*/, "")+":fmtclass=marc";
+}
+
+function doWeb(doc, url) {
+	var resultsRegexp = /\/WebZ\/html\/results.html/i
+	
+	if(resultsRegexp.test(url)) {
+		var items = Scholar.Utilities.getItemArray(doc, doc, "/WebZ/FETCH", "^[0-9]*$");
+		items = Scholar.selectItems(items);
+		
+		if(!items) {
+			return true;
+		}
+		
+		var urls = new Array();
+		for(var i in items) {
+			urls.push(reformURL(i));
+		}
+	} else {
+		var urls = [reformURL(url)];
+	}
+	
+	var marc = Scholar.loadTranslator("import", "a6ee60df-1ddc-4aae-bb25-45e0537be973");
+	
+	Scholar.Utilities.processDocuments(urls, function(newDoc) {
+		Scholar.Utilities.debug(newDoc.getElementsByTagName("body")[0].innerHTML);
+		var uri = newDoc.location.href;
+		
+		var namespace = newDoc.documentElement.namespaceURI;
+		var nsResolver = namespace ? function(prefix) {
+		  if (prefix == ''x'') return namespace; else return null;
+		} : null;
+		
+		var elmts = newDoc.evaluate(''//table/tbody/tr[@valign="top"]'',
+		                         newDoc, nsResolver, XPathResult.ANY_TYPE, null);
+		
+		var record = new marc.MARC_Record();
+		while(elmt = elmts.iterateNext()) {
+			var field = Scholar.Utilities.superCleanString(doc.evaluate(''./TD[1]/text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue);
+			var value = doc.evaluate(''./TD[2]/text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
+			var ind1 = value[4];
+			var ind2 = value[6];
+			value = Scholar.Utilities.cleanString(value.substr(6)).
+			        replace(/\$([a-z0-9]) /g, record.subfield_delimiter+"$1");
+			if(value[0] != record.subfield_delimiter) {
+				value = record.subfield_delimiter+"a"+value;
+			}
+			
+			if(field != 0) {
+				record.add_field(field, ind1, ind2, value);
+			}
+		}
+		
+		var newItem = new Scholar.Item();
+		newItem.source = uri;
+		record.translate(newItem);
+		newItem.complete();
+	}, function() { Scholar.done(); }, null);
 	
 	Scholar.wait();
 }');
@@ -2644,9 +2715,7 @@ function doSearch(item) {
 				Scholar.done(false);
 			});
 		}
-	}, function() {
-		error();
-	});
+	}, null);
 	
 	Scholar.wait();
 }');
@@ -4604,7 +4673,16 @@ MARC_Record.prototype.get_field_subfields = function(tag) { // returns a two-dim
 }
 
 MARC_Record.prototype.add_field = function(tag,ind1,ind2,value) { // adds a field to the record
-	if (tag.length != 3) { return false; }
+	/*if(tag.length != 3) {
+		return false;
+	}*/
+	
+	if (tag.length < 3) {
+		tag = Scholar.Utilities.lpad(tag.toString(),"0",3);
+	} else if(tag.length > 3) {
+		return false;
+	}
+	
 	var F = new this.MARC_field(this,tag,ind1,ind2,value);
 	// adds pointer to list of fields
 	this.variable_fields[this.variable_fields.length] = F;
@@ -4666,9 +4744,11 @@ MARC_Record.prototype._clean = function(value) {
 }
 
 MARC_Record.prototype._associateDBField = function(item, fieldNo, part, fieldName, execMe, arg1, arg2) {
+	
 	if(!part) {
 		part = ''a'';
 	}
+	
 	var field = this.get_field_subfields(fieldNo);
 	Scholar.Utilities.debug(''Found ''+field.length+'' matches for ''+fieldNo+part);
 	if(field) {
@@ -4685,6 +4765,7 @@ MARC_Record.prototype._associateDBField = function(item, fieldNo, part, fieldNam
 				}
 			}
 			if(value) {	
+				this._gotField = true;
 				value = this._clean(value);
 				
 				if(execMe) {
@@ -4807,6 +4888,10 @@ MARC_Record.prototype.translate = function(item) {
 	
 	// Set type
 	item.itemType = "book";
+	
+	if(!this._gotField) {
+		throw("tried to create a marc record with no fields!");
+	}
 }
 
 MARC_Record.prototype._trim = function(s) { // eliminates blanks from both sides

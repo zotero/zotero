@@ -29,8 +29,8 @@
  * PUBLIC PROPERTIES:
  *
  * type - the text type of translator (set by constructor, should be read only)
- * browser - the browser object to be used for web scraping (read-only; set
- *           with setBrowser)
+ * document - the document object to be used for web scraping (read-only; set
+ *           with setDocument)
  * translator - the translator currently in use (read-only; set with
  *               setTranslator)
  * location - the location of the target (read-only; set with setLocation)
@@ -115,9 +115,9 @@ Scholar.Translate = function(type, saveItem) {
 /*
  * sets the browser to be used for web translation; also sets the location
  */
-Scholar.Translate.prototype.setBrowser = function(browser) {
-	this.browser = browser;
-	this.setLocation(browser.contentDocument.location.href);
+Scholar.Translate.prototype.setDocument = function(doc) {
+	this.document = doc;
+	this.setLocation(doc.location.href);
 }
 
 /*
@@ -428,7 +428,7 @@ Scholar.Translate.prototype._generateSandbox = function() {
 		var sandboxURL = "";
 		if(this.type == "web") {
 			// use real URL, not proxied version, to create sandbox
-			sandboxURL = this.browser.contentDocument.location.href;
+			sandboxURL = this.document.location.href;
 		} else {
 			// generate sandbox for search by extracting domain from translator
 			// target, if one exists
@@ -446,8 +446,8 @@ Scholar.Translate.prototype._generateSandbox = function() {
 		this._sandbox.Scholar = new Object();
 		
 		// add ingester utilities
-		this._sandbox.Scholar.Utilities = new Scholar.Utilities.Ingester(this.locationIsProxied);
-		this._sandbox.Scholar.Utilities.HTTP = new Scholar.Utilities.Ingester.HTTP(this.locationIsProxied);
+		this._sandbox.Scholar.Utilities = new Scholar.Utilities.Ingester(this);
+		this._sandbox.Scholar.Utilities.HTTP = new Scholar.Utilities.Ingester.HTTP(this);
 		
 		// set up selectItems handler
 		this._sandbox.Scholar.selectItems = function(options) { return me._selectItems(options) };
@@ -584,7 +584,7 @@ Scholar.Translate.prototype._canTranslate = function(translator, ignoreExtension
 			
 			try {
 				if(this.type == "web") {
-					returnValue = this._sandbox.detectWeb(this.browser.contentDocument, this.location);
+					returnValue = this._sandbox.detectWeb(this.document, this.location);
 				} else if(this.type == "search") {
 					returnValue = this._sandbox.detectSearch(this.search);
 				} else if(this.type == "import") {
@@ -954,7 +954,7 @@ Scholar.Translate.prototype._runHandler = function(type, argument) {
  */
 Scholar.Translate.prototype._web = function() {
 	try {
-		this._sandbox.doWeb(this.browser.contentDocument, this.location);
+		this._sandbox.doWeb(this.document, this.location);
 	} catch(e) {
 		Scholar.debug(e+' in executing code for '+this.translator[0].label);
 		return false;

@@ -164,8 +164,8 @@ Scholar.Utilities.prototype.itemTypeExists = function(type) {
 // Scholar.Utilities.Ingester extends Scholar.Utilities, offering additional
 // classes relating to data extraction specifically from HTML documents.
 
-Scholar.Utilities.Ingester = function(proxiedURL) {
-	this.proxiedURL = proxiedURL;
+Scholar.Utilities.Ingester = function(translate, proxiedURL) {
+	this.translate = translate;
 }
 
 Scholar.Utilities.Ingester.prototype = new Scholar.Utilities();
@@ -252,43 +252,62 @@ Scholar.Utilities.Ingester.prototype.parseContextObject = function(co, item) {
 // Ingester adapters for Scholar.Utilities.HTTP to handle proxies
 
 Scholar.Utilities.Ingester.prototype.loadDocument = function(url, succeeded, failed) {
-	if(this.proxiedURL) {
-		url = Scholar.Ingester.ProxyMonitor.properToProxy(url);
-	}
-	Scholar.Utilities.HTTP.processDocuments(null, [ url ], succeeded, function() {}, failed);
+	this.processDocuments([ url ], succeeded, null, failed);
 }
 Scholar.Utilities.Ingester.prototype.processDocuments = function(urls, processor, done, exception) {
-	if(this.proxiedURL) {
+	if(this.translate.locationIsProxied) {
 		for(i in urls) {
 			urls[i] = Scholar.Ingester.ProxyMonitor.properToProxy(urls[i]);
 		}
 	}
+	
+	// unless the translator has proposed some way to handle an error, handle it
+	// by throwing a "scraping error" message
+	if(!exception) {
+		var translate = this.translate;
+		exception = function(e) {
+			Scholar.debug("an error occurred in code called by processDocuments: "+e);
+			translate._translationComplete(false);
+		}
+	}
+	
 	Scholar.Utilities.HTTP.processDocuments(null, urls, processor, done, exception);
 }
 
-Scholar.Utilities.Ingester.HTTP = function(proxiedURL) {
-	this.proxiedURL = proxiedURL;
+Scholar.Utilities.Ingester.HTTP = function(translate) {
+	this.translate = translate;
 }
 
 Scholar.Utilities.Ingester.HTTP.prototype.doGet = function(url, onDone) {
-	if(this.proxiedURL) {
+	if(this.translate.locationIsProxied) {
 		url = Scholar.Ingester.ProxyMonitor.properToProxy(url);
 	}
-	Scholar.Utilities.HTTP.doGet(url, function(xmlhttp) { onDone(xmlhttp.responseText, xmlhttp) })
+	
+	var translate = this.translate;
+	Scholar.Utilities.HTTP.doGet(url, function(xmlhttp) {
+		try {
+			onDone(xmlhttp.responseText, xmlhttp);
+		} catch(e) {
+			Scholar.debug("an error occurred in code called by doGet: "+e);
+			translate._translationComplete(false);
+		}
+	})
 }
 
 Scholar.Utilities.Ingester.HTTP.prototype.doPost = function(url, body, onDone) {
-	if(this.proxiedURL) {
+	if(this.translate.locationIsProxied) {
 		url = Scholar.Ingester.ProxyMonitor.properToProxy(url);
 	}
-	Scholar.Utilities.HTTP.doPost(url, body, function(xmlhttp) { onDone(xmlhttp.responseText, xmlhttp) })
-}
-
-Scholar.Utilities.Ingester.HTTP.prototype.doOptions = function(url, onDone) {
-	if(this.proxiedURL) {
-		url = Scholar.Ingester.ProxyMonitor.properToProxy(url);
-	}
-	Scholar.Utilities.HTTP.doOptions(url, function(xmlhttp) { onDone(xmlhttp.responseText, xmlhttp) })
+	
+	var translate = this.translate;
+	Scholar.Utilities.HTTP.doPost(url, body, function(xmlhttp) {
+		try {
+			onDone(xmlhttp.responseText, xmlhttp);
+		} catch(e) {
+			Scholar.debug("an error occurred in code called by doPost: "+e);
+			translate._translationComplete(false);
+		}
+	})
 }
 
 // These are front ends for XMLHttpRequest. XMLHttpRequest can't actually be
@@ -310,7 +329,7 @@ Scholar.Utilities.HTTP = new function() {
 	* doGet can be called as:
 	* Scholar.Utilities.HTTP.doGet(url, onDone)
 	**/
-	function doGet(url, onDone) {
+	function doGet(url, onDone, onError) {
 		Scholar.debug("HTTP GET "+url);
 		if (this.browserIsOffline()){
 			return false;
@@ -429,17 +448,14 @@ Scholar.Utilities.HTTP = new function() {
 	
 			// Download complete
 			case 4:
-				try {
-					if (onDone){
-						onDone(xmlhttp);
-					}
-				}
-				catch (e){
-					Scholar.debug(e, 2);
+				if(onDone){
+					onDone(xmlhttp);
 				}
 			break;
 		}
 	}
+	
+	
 }
 
 // Downloads and processes documents with processor()
@@ -455,63 +471,71 @@ Scholar.Utilities.HTTP = new function() {
 Scholar.Utilities.HTTP.processDocuments = function(firstDoc, urls, processor, done, exception, saveBrowser) {
 	var hiddenBrowser = Scholar.Browser.createHiddenBrowser();
 	var prevUrl, url;
-	
-	try {
-		if (urls.length == 0) {
-			if(firstDoc) {
-				processor(firstDoc, done);
-			} else {
-				done();
-			}
-			return;
+
+	if (urls.length == 0) {
+		if(firstDoc) {
+			processor(firstDoc, done);
+		} else {
+			done();
 		}
-		
-		var urlIndex = -1;
-		var doLoad = function() {
-			urlIndex++;
-			if (urlIndex < urls.length) {
-				url = urls[urlIndex];
-				try {
-					Scholar.debug("loading "+url);
-					hiddenBrowser.loadURI(url);
-				} catch (e) {
-					Scholar.debug("Scholar.Utilities.Ingester.processDocuments doLoad: " + e, 2);
-					exception(e);
-				}
-			} else {
-				hiddenBrowser.removeEventListener("load", onLoad, true);
-				if(!saveBrowser) {
-					Scholar.Browser.deleteHiddenBrowser(hiddenBrowser);
-				}
-				done();
-			}
-		};
-		var onLoad = function() {
-			Scholar.debug(hiddenBrowser.contentDocument.location.href+" has been loaded");
-			if(hiddenBrowser.contentDocument.location.href != prevUrl) {	// Just in case it fires too many times
-				prevUrl = hiddenBrowser.contentDocument.location.href;
-				try {
-					processor(hiddenBrowser.contentDocument);
-				} catch (e) {
-					Scholar.debug("Scholar.Utilities.Ingester.processDocuments onLoad: " + e, 2);
-					exception(e);
-				}
-				doLoad();
-			}
-		};
-		var init = function() {
-			hiddenBrowser.addEventListener("load", onLoad, true);
-			
-			if (firstDoc) {
-				processor(firstDoc, doLoad);
-			} else {
-				doLoad();
-			}
-		}
-		
-		init();
-	} catch (e) {
-		Scholar.debug("processDocuments: " + e);
-		exception(e);
+		return;
 	}
+	var urlIndex = -1;
+	
+	var removeListeners = function() {
+		hiddenBrowser.removeEventListener("load", onLoad, true);
+		if(!saveBrowser) {
+			Scholar.Browser.deleteHiddenBrowser(hiddenBrowser);
+		}
+	}
+	var doLoad = function() {
+		urlIndex++;
+		if (urlIndex < urls.length) {
+			url = urls[urlIndex];
+			try {
+				Scholar.debug("loading "+url);
+				hiddenBrowser.loadURI(url);
+			} catch (e) {
+				removeListeners();
+				if(exception) {
+					exception(e);
+					return;
+				} else {
+					throw(e);
+				}
+			}
+		} else {
+			removeListeners();
+			done();
+		}
+	};
+	var onLoad = function() {
+		Scholar.debug(hiddenBrowser.contentDocument.location.href+" has been loaded");
+		if(hiddenBrowser.contentDocument.location.href != prevUrl) {	// Just in case it fires too many times
+			prevUrl = hiddenBrowser.contentDocument.location.href;
+			try {
+				processor(hiddenBrowser.contentDocument);
+			} catch (e) {
+				removeListeners();
+				if(exception) {
+					exception(e);
+					return;
+				} else {
+					throw(e);
+				}
+			}
+			doLoad();
+		}
+	};
+	var init = function() {
+		hiddenBrowser.addEventListener("load", onLoad, true);
+		
+		if (firstDoc) {
+			processor(firstDoc, doLoad);
+		} else {
+			doLoad();
+		}
+	}
+	
+	init();
 }

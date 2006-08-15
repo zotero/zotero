@@ -23,7 +23,6 @@ var Scholar_Ingester_Interface = function() {}
  * loading
  */
 Scholar_Ingester_Interface.init = function() {
-	Scholar_Ingester_Interface.browsers = new Array();
 	Scholar_Ingester_Interface.browserData = new Object();
 	Scholar_Ingester_Interface._scrapePopupShowing = false;
 	Scholar.Ingester.ProxyMonitor.init();
@@ -42,8 +41,10 @@ Scholar_Ingester_Interface.chromeLoad = function() {
 	Scholar_Ingester_Interface.statusImage = document.getElementById("scholar-status-image");
 	
 	// this gives us onLocationChange, for updating when tabs are switched/created
-	Scholar_Ingester_Interface.tabBrowser.addProgressListener(Scholar_Ingester_Interface.Listener,
-		Components.interfaces.nsIWebProgress.NOTIFY_LOCATION);
+	Scholar_Ingester_Interface.tabBrowser.addEventListener("TabClose",
+	    Scholar_Ingester_Interface.tabClose, false);
+	Scholar_Ingester_Interface.tabBrowser.addEventListener("TabSelect",
+	    Scholar_Ingester_Interface.tabSelect, false);
 	// this is for pageshow, for updating the status of the book icon
 	Scholar_Ingester_Interface.appContent.addEventListener("pageshow",
 		Scholar_Ingester_Interface.contentLoad, true);
@@ -53,8 +54,7 @@ Scholar_Ingester_Interface.chromeLoad = function() {
  * When chrome unloads, delete our document objects and remove our listeners
  */
 Scholar_Ingester_Interface.chromeUnload = function() {
-	delete Scholar_Ingester_Interface.browserData, Scholar_Ingester_Interface.browsers;
-	this.tabBrowser.removeProgressListener(this);
+	delete Scholar_Ingester_Interface.browserData;
 }
 
 /*
@@ -77,7 +77,7 @@ Scholar_Ingester_Interface.scrapeThisPage = function(saveLocation) {
 		}
 		
 		var translate = new Scholar.Translate("web");
-		translate.setBrowser(browser);
+		translate.setDocument(data.document);
 		// use first translator available
 		translate.setTranslator(data.translators[0]);
 		translate.setHandler("select", Scholar_Ingester_Interface._selectItems);
@@ -90,86 +90,69 @@ Scholar_Ingester_Interface.scrapeThisPage = function(saveLocation) {
 /*
  * An event handler called when a new document is loaded. Creates a new document
  * object, and updates the status of the capture icon
-
  */
 Scholar_Ingester_Interface.contentLoad = function(event) {
-	if (event.originalTarget instanceof HTMLDocument) {
-		// Stolen off the Mozilla extension developer's website, a routine to
-		// determine the root document loaded from a frameset
-		if (event.originalTarget.defaultView.frameElement) {
-			var doc = event.originalTarget;
-			while (doc.defaultView.frameElement) {
-				doc=doc.defaultView.frameElement.ownerDocument;
-			}
-			// Frame within a tab was loaded. doc is the root document of the frameset
-		} else {
-			var doc = event.originalTarget;
-			// Page was loaded. doc is the document that loaded.
+	if(event.originalTarget instanceof HTMLDocument) {
+		var doc = event.originalTarget;
+		var rootDoc = doc;
+		
+		// get the appropriate root document to check which browser we're on
+		Scholar.debug("getting root document");
+		while(rootDoc.defaultView.frameElement) {
+			rootDoc = rootDoc.defaultView.frameElement.ownerDocument;
 		}
 		
 		// Figure out what browser this contentDocument is associated with
 		var browser;
+		Scholar.debug("getting browser");
 		for(var i=0; i<Scholar_Ingester_Interface.tabBrowser.browsers.length; i++) {
-			if(doc == Scholar_Ingester_Interface.tabBrowser.browsers[i].contentDocument) {
+			if(rootDoc == Scholar_Ingester_Interface.tabBrowser.browsers[i].contentDocument) {
 				browser = Scholar_Ingester_Interface.tabBrowser.browsers[i];
 				break;
 			}
 		}
 		if(!browser) {
-			Scholar.debug("Could not find browser!");
 			return;
 		}
 		
+		Scholar.debug("getting data");
 		// get data object
 		var data = Scholar_Ingester_Interface._getData(browser);
+		
+		// if there's already a scrapable page in the browser window, and it's
+		// still there, return
+		if(data.translators && data.translators.length && data.document.location) {
+			return;
+		}
+		
+		Scholar.debug("translating");
 		// get translators
 		var translate = new Scholar.Translate("web");
-		translate.setBrowser(browser);
+		translate.setDocument(doc);
 		data.translators = translate.getTranslators();
 		// update status
 		Scholar_Ingester_Interface._updateStatus(data);
+		// add document
+		if(data.translators && data.translators.length) {
+			data.document = doc;
+		}
 	}
 }
 
 /*
- * Dummy event handlers for all the events we don't care about
+ * called when a tab is closed
  */
-Scholar_Ingester_Interface.Listener = function() {}
-Scholar_Ingester_Interface.Listener.onStatusChange = function() {}
-Scholar_Ingester_Interface.Listener.onSecurityChange = function() {}
-Scholar_Ingester_Interface.Listener.onProgressChange = function() {}
-Scholar_Ingester_Interface.Listener.onStateChange = function() {}
+Scholar_Ingester_Interface.tabClose = function(event) {
+	// To execute if document object does not exist
+	Scholar_Ingester_Interface._deleteData(event.target.linkedBrowser);
+}
 
 /*
- * onLocationChange is called when tabs are switched. Use it to retrieve the
- * appropriate status indicator for the current tab, and to free useless objects
+ * called when a tab is switched
  */
-Scholar_Ingester_Interface.Listener.onLocationChange = function(progressObject) {
-	var browsers = Scholar_Ingester_Interface.tabBrowser.browsers;
-
-	// Remove document object of any browser that no longer exists
-	for (var i = 0; i < Scholar_Ingester_Interface.browsers.length; i++) {
-		var browser = Scholar_Ingester_Interface.browsers[i];
-		var exists = false;
-
-		for (var j = 0; j < browsers.length; j++) {
-			if (browser == browsers[j]) {
-				exists = true;
-				break;
-			}
-		}
-
-		if (!exists) {
-			Scholar_Ingester_Interface.browsers.splice(i,1);
-
-			// To execute if document object does not exist
-			Scholar_Ingester_Interface._deleteDocument(browser);
-		}
-	}
-	
+Scholar_Ingester_Interface.tabSelect = function(event) {
 	var data = Scholar_Ingester_Interface._getData(Scholar_Ingester_Interface.tabBrowser.selectedBrowser);
 	Scholar_Ingester_Interface._updateStatus(data);
-	
 	// Make sure scrape progress is gone
 	Scholar_Ingester_Interface.Progress.kill();
 }
