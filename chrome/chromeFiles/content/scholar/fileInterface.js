@@ -256,7 +256,7 @@ var Scholar_File_Interface = new function() {
 				// create UTF-8 output stream
 				var os = Components.classes["@mozilla.org/intl/converter-output-stream;1"].
 						 createInstance(Components.interfaces.nsIConverterOutputStream);
-				os.init(fStream, "UTF-8", 0, "¥");
+				os.init(fStream, "UTF-8", 0, "?");
 
 				os.writeString(html);
 				
