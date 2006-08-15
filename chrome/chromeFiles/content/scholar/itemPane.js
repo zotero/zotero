@@ -97,6 +97,7 @@ ScholarItemPane = new function()
 	
 	function loadPane(index)
 	{
+		//Scholar.debug('Loading item pane ' + index);
 		if(_loaded[index])
 			return;
 		_loaded[index] = true;
@@ -292,9 +293,9 @@ ScholarItemPane = new function()
 	function addCreatorRow(firstName, lastName, typeID, unsaved, defaultRow)
 	{
 		if(!firstName)
-			firstName = "(first)";
+			firstName = "(" + Scholar.getString('pane.item.defaultFirstName') + ")";
 		if(!lastName)
-			lastName = "(last)";
+			lastName = "(" + Scholar.getString('pane.item.defaultLastName') + ")";
 		var label = document.createElement("label");
 		label.setAttribute("value",Scholar.getString('creatorTypes.'+Scholar.CreatorTypes.getName(typeID))+":");
 		label.setAttribute("popup","creatorTypeMenu");
@@ -380,6 +381,7 @@ ScholarItemPane = new function()
 	
 	function showEditor(elem)
 	{
+		//Scholar.debug('Showing editor');
 		var fieldName = elem.getAttribute('fieldname');
 		var value = '';
 		var creatorFields = fieldName.split('-');
@@ -410,6 +412,7 @@ ScholarItemPane = new function()
 	
 	function hideEditor(t, saveChanges)
 	{
+		//Scholar.debug('Hiding editor');
 		var textbox = t.parentNode.parentNode;
 		var fieldName = textbox.getAttribute('fieldname');
 		var value = t.value;
@@ -418,13 +421,29 @@ ScholarItemPane = new function()
 		var creatorFields = fieldName.split('-');
 		if(creatorFields[0] == 'creator')
 		{
-			if(saveChanges)
-				modifyCreator(creatorFields[1],creatorFields[2],value);
+			if (saveChanges){
+				var otherFields =
+					this.getCreatorFields(textbox.parentNode.parentNode.parentNode);
+				modifyCreator(creatorFields[1], creatorFields[2], value, otherFields);
+			}
 			
 			var val = _itemBeingEdited.getCreator(creatorFields[1])[creatorFields[2]];
+			
+			if (!val){
+				// Reset to '(first)' or '(last)'
+				if (creatorFields[2]=='lastName'){
+					val = "(" + Scholar.getString('pane.item.defaultLastName') + ")";
+				}
+				else if (creatorFields[2]=='firstName'){
+					val = "(" + Scholar.getString('pane.item.defaultFirstName') + ")";
+				}
+			}
+			
+			// Add trailing comma
 			if (creatorFields[2]=='lastName'){
 				val += ',';
 			}
+			
 			elem = createValueElement(val, fieldName);
 		}
 		else
@@ -437,7 +456,6 @@ ScholarItemPane = new function()
 		
 		var box = textbox.parentNode;
 		box.replaceChild(elem,textbox);
-		
 	}
 	
 	function modifyField(field, value)
@@ -447,6 +465,7 @@ ScholarItemPane = new function()
 	}
 	
 	function getCreatorFields(row){
+		var type = row.getElementsByTagName('label')[0].getAttribute('value');
 		var label1 = row.getElementsByTagName('hbox')[0].firstChild.firstChild;
 		var label2 = label1.nextSibling;
 		
@@ -457,6 +476,7 @@ ScholarItemPane = new function()
 				.substr(0, label1.firstChild.nodeValue.length-1): label1.value,
 			firstName: label2.firstChild ? label2.firstChild.nodeValue
 				: label2.value,
+			typeID: Scholar.CreatorTypes.getID(type.substr(0, type.length-1).toLowerCase()),
 			isInstitution: null // placeholder
 		}
 	}
@@ -466,21 +486,40 @@ ScholarItemPane = new function()
 		if (otherFields){
 			var firstName = otherFields.firstName;
 			var lastName = otherFields.lastName;
+			var typeID = otherFields.typeID;
 			// var isInstitution = otherFields.isInstitution;
+			
+			// Ignore '(first)' and '(last)'
+			if (firstName == "(" + Scholar.getString('pane.item.defaultFirstName') + ")"){
+				firstName = '';
+			}
+			if (lastName == "(" + Scholar.getString('pane.item.defaultLastName') + ")"){
+				lastName = '';
+			}
 		}
 		else {
 			var creator = _itemBeingEdited.getCreator(index);
 			var firstName = creator['firstName'];
 			var lastName = creator['lastName'];
 			var typeID = creator['creatorTypeID'];
+			// var isInstitution = creator['isInstitution'];
 		}
 		
-		if(field == 'firstName')
-			firstName = value;
-		else if(field == 'lastName')
-			lastName = value;
-		else if(field == 'typeID')
-			typeID = value;
+		if (!_itemBeingEdited.hasCreatorAt(index) && !firstName && !lastName){
+			return;
+		}
+		
+		switch (field){
+			case 'firstName':
+				firstName = value;
+				break;
+			case 'lastName':
+				lastName = value;
+				break;
+			case 'typeID':
+				typeID = value;
+				break;
+		}
 		
 		_itemBeingEdited.setCreator(index, firstName, lastName, typeID);
 		_itemBeingEdited.save();

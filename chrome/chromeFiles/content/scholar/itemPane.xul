@@ -29,8 +29,11 @@
 				<popupset>
 					<popup id="creatorTypeMenu" position="after_start"
 						oncommand="var otherFields = ScholarItemPane.getCreatorFields(document.popupNode.parentNode);
+							var typeID = event.explicitOriginalTarget.getAttribute('typeid');
+							document.popupNode.setAttribute('value',
+								Scholar.getString('creatorTypes.' + Scholar.CreatorTypes.getName(typeID)) + ':');
 							ScholarItemPane.modifyCreator(document.popupNode.getAttribute('fieldname').split('-')[1],
-								'typeID', event.explicitOriginalTarget.getAttribute('typeid'), otherFields)"/>
+								'typeID', typeID, otherFields)"/>
 				</popupset>
 				<hbox align="center">
 					<menulist id="editpane-type-menu" oncommand="ScholarItemPane.changeTypeTo(this.value)" flex="1">
