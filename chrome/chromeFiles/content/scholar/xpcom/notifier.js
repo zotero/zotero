@@ -11,6 +11,7 @@ Scholar.Notifier = new function(){
 	this.trigger = trigger;
 	this.disable = disable;
 	this.enable = enable;
+	this.isEnabled = isEnabled;
 	
 	function registerColumnTree(ref){
 		return _register('columnTree', ref);
@@ -74,6 +75,11 @@ Scholar.Notifier = new function(){
 	function enable(){
 		Scholar.debug('Enabling Notifier notifications');
 		_disabled = false;
+	}
+	
+	
+	function isEnabled(){
+		return !_disabled;
 	}
 	
 	
