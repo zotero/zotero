@@ -135,7 +135,7 @@ CSL.prototype.createBibliography = function(items, format) {
 			style = "margin-left:0.5in;text-indent:-0.5in;";
 		}
 	} else if(format == "RTF") {
-		output += "{\\rtf\\mac\\ansicpg10000{\\fonttbl\\f0\\froman Times New Roman;}{\\colortbl;\\red255\\green255\\blue255;}\\pard\\f0";
+		output += "{\\rtf\\ansi{\\fonttbl\\f0\\froman Times New Roman;}{\\colortbl;\\red255\\green255\\blue255;}\\pard\\f0";
 		if(this._opt.hangingIndent) {
 			output += "\\li720\\fi-720";
 		}
@@ -706,9 +706,46 @@ CSL.prototype._processDate = function(string) {
 }
 
 /*
+ * escapes a string for a given format
+ */
+CSL.prototype._escapeString = function(string, format) {
+	if(format == "HTML") {
+		// replace HTML entities
+		string = string.replace(/&/g, "&amp;");
+		string = string.replace(/</g, "&lt;");
+		string = string.replace(/>/g, "&gt;");
+		
+		return string;
+	} else if(format == "RTF") {
+		var newString = "";
+		
+		// go through and fix up unicode entities
+		for(i=0; i<string.length; i++) {
+			var charCode = string.charCodeAt(i);
+			if(charCode > 127) {			// encode unicode
+				newString += "\\uc0\\u"+charCode.toString()+" ";
+			} else if(charCode == 92) {		// double backslashes
+				newString += "\\\\";
+			} else {
+				newString += string[i];
+			}
+		}
+		
+		return newString;
+	} else {
+		return string;
+	}
+}
+
+/*
  * formats a string according to the cs-format attributes on element
  */
-CSL.prototype._formatString = function(element, string, format) {
+CSL.prototype._formatString = function(element, string, format, dontEscape) {
+	if(!string) return "";
+	if(typeof(string) != "string") {
+		string = string.toString();
+	}
+	
 	if(element["text-transform"]) {
 		if(element["text-transform"] == "lowercase") {
 			// all lowercase
@@ -720,6 +757,10 @@ CSL.prototype._formatString = function(element, string, format) {
 			// capitalize first
 			string = string[0].toUpperCase()+string.substr(1);
 		}
+	}
+	
+	if(!dontEscape) {
+		string = this._escapeString(string, format);
 	}
 	
 	if(format == "HTML") {
@@ -749,12 +790,12 @@ CSL.prototype._formatString = function(element, string, format) {
 	}
 	
 	if(format != "compare" && element.prefix) {
-		string = element.prefix+string;
+		string = this._escapeString(element.prefix, format)+string;
 	}
 	if(format != "compare" && element.suffix &&
 	   (element.suffix.length != 1 || string[string.length-1] != element.suffix)) {
 		// skip if suffix is the same as the last char
-		string += element.suffix;
+		string += this._escapeString(element.suffix, format);
 	}
 	
 	return string;
@@ -1098,6 +1139,9 @@ CSL.prototype._getFieldValue = function(name, element, item, format, typeName) {
 		return "";
 	}
 	
+	// controls whether formatted strings need to be escaped a second time
+	var dontEscape = true;
+	
 	if(name == "author") {
 		if(item._csl.subsequentAuthorSubstitute) {
 			// handle subsequent author substitute behavior
@@ -1198,10 +1242,12 @@ CSL.prototype._getFieldValue = function(name, element, item, format, typeName) {
 		if(item.edition) {
 			data = item.edition;
 		}
+		dontEscape = false;
 	} else if(name == "genre") {
 		if(item.type || item.thesisType) {
 			data = (item.type ? item.type : item.thesisType);
 		}
+		dontEscape = false;
 	} else if(name == "group") {
 		var childData = new Array();
 		for(var i in element.children) {
@@ -1219,6 +1265,7 @@ CSL.prototype._getFieldValue = function(name, element, item, format, typeName) {
 		data = childData.join((element["delimiter"] ? element["delimiter"] : ""));
 	} else if(name == "text") {
 		data = this._getTerm(element["term-name"]);
+		dontEscape = false;
 	} else if(name == "isbn") {
 		if(item.ISBN) {
 			data = this._formatLocator(null, element, item.ISBN, format);
@@ -1229,10 +1276,11 @@ CSL.prototype._getFieldValue = function(name, element, item, format, typeName) {
 		}
 	} else if(name == "number") {
 		data = this._csl.number;
+		dontEscape = false;
 	}
 	
 	if(data) {
-		return this._formatString(element, data, format); 
+		return this._formatString(element, data, format, dontEscape); 
 	} else if(element.substitute) {
 		// try each substitute element until one returns something
 		for(var i in element.substitute) {

@@ -239,19 +239,28 @@ var Scholar_File_Interface = new function() {
 			bibliographyStream.close();
 		} else if(io.output == "save-as-html") {
 			var fStream = _saveBibliography("HTML");
-			if(fStream !== false) {
+			
+			if(fStream !== false) {			
 				var html = "";
 				html +='<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">\n';
 				html +='<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">\n';
 				html +='<head>\n';
-				html +='<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />\n';
+				html +='<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>\n';
 				html +='<title>Bibliography</title>\n';
 				html +='</head>\n';
 				html +='<body>\n';
 				html += bibliography;
 				html +='</body>\n';
 				html +='</html>\n';
-				fStream.write(html, html.length);
+				
+				// create UTF-8 output stream
+				var os = Components.classes["@mozilla.org/intl/converter-output-stream;1"].
+						 createInstance(Components.interfaces.nsIConverterOutputStream);
+				os.init(fStream, "UTF-8", 0, "¥");
+
+				os.writeString(html);
+				
+				os.close();
 				fStream.close();
 			}
 		} else if(io.output == "save-as-rtf") {
