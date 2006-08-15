@@ -84,10 +84,11 @@ Scholar.ItemTreeView.prototype.notify = function(action, type, ids)
 		
 	this.selection.selectEventsSuppressed = true;
 	var savedSelection = this.saveSelection();
-
+	
+	ids = Scholar.flattenArguments(ids);
+	
 	if((action == 'remove' && !this._itemGroup.isLibrary()) || (action == 'delete' && this._itemGroup.isLibrary()))
 	{
-		ids = Scholar.flattenArguments(ids);
 		//Since a remove involves shifting of rows, we have to do it in order
 		
 		//sort the ids by row
@@ -116,8 +117,6 @@ Scholar.ItemTreeView.prototype.notify = function(action, type, ids)
 	}
 	else if(action == 'modify') 	//must check for null because it could legitimately be 0
 	{
-		ids = Scholar.flattenArguments(ids);
-		
 		for(var i=0, len=ids.length; i<len; i++)
 		{
 			var row = this._itemRowMap[ids[i]];
@@ -183,7 +182,9 @@ Scholar.ItemTreeView.prototype.notify = function(action, type, ids)
 		
 		if(action == 'add')
 		{
-			this.selectItem(item.getID());
+			if (ids.length===1){
+				this.selectItem(ids[0]);
+			}
 		}
 		else
 		{
