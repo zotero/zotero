@@ -45,6 +45,8 @@
  * string - the string content to be used as a file.
  * saveItem - whether new items should be saved to the database. defaults to
  *            true; set using second argument of constructor.
+ * newItems - items created when translate() was called
+ * newCollections - collections created when translate() was called
  *
  * PRIVATE PROPERTIES:
  * 
@@ -367,6 +369,8 @@ Scholar.Translate.prototype._loadTranslator = function() {
  * does the actual translation
  */
 Scholar.Translate.prototype.translate = function() {
+	this.newItems = new Array();
+	this.newCollections = new Array();
 	this._IDMap = new Array();
 	this._complete = false;
 	
@@ -504,6 +508,10 @@ Scholar.Translate.prototype._generateSandbox = function() {
 			translation._loadTranslator();
 			// use internal io
 			translation._initializeInternalIO();
+			// when a new item is added, we should be notified
+			translation.newItems = me.newItems;
+			translation.newCollections = me.newCollections;
+			
 			return translation._sandbox;
 		} else {
 			// create a safe translator object, so that scrapers can't get
@@ -738,6 +746,17 @@ Scholar.Translate.prototype._translationComplete = function(returnValue) {
 			// close open streams
 			this._closeStreams();
 			
+			if(Scholar.Notifier.isEnabled()) {
+				// notify itemTreeView about updates
+				if(this.newItems.length) {
+					Scholar.Notifier.trigger("add", "item", this.newItems);
+				}
+				// notify collectionTreeView about updates
+				if(this.newCollections.length) {
+					Scholar.Notifier.trigger("add", "collection", this.newCollections);
+				}
+			}
+			
 			// call handlers
 			this._runHandler("done", returnValue);
 		}
@@ -790,6 +809,11 @@ Scholar.Translate.prototype._itemDone = function(item) {
 		}
 		this._runHandler("itemDone", item);
 		return;
+	}
+	
+	var notifierStatus = Scholar.Notifier.isEnabled();
+	if(notifierStatus) {
+		Scholar.Notifier.disable();
 	}
 	
 	// Get typeID, defaulting to "website"
@@ -878,6 +902,7 @@ Scholar.Translate.prototype._itemDone = function(item) {
 	if(item.itemID) {
 		this._IDMap[item.itemID] = myID;
 	}
+	this.newItems.push(myID);
 	
 	// handle see also
 	if(item.seeAlso) {
@@ -890,6 +915,10 @@ Scholar.Translate.prototype._itemDone = function(item) {
 	
 	delete item;
 	
+	// only re-enable if notifier was enabled at the beginning of scraping
+	if(notifierStatus) {
+		Scholar.Notifier.enable();
+	}
 	this._runHandler("itemDone", newItem);
 }
 
@@ -908,11 +937,14 @@ Scholar.Translate.prototype._collectionDone = function(collection) {
  */
 Scholar.Translate.prototype._processCollection = function(collection, parentID) {
 	var newCollection = Scholar.Collections.add(collection.name, parentID);
+	var myID = newCollection.getID();
+	
+	this.newCollections.push(myID);
 	
 	for each(child in collection.children) {
 		if(child.type == "collection") {
 			// do recursive processing of collections
-			this._processCollection(child, newCollection.getID());
+			this._processCollection(child, myID);
 		} else {
 			// add mapped items to collection
 			if(this._IDMap[child.id]) {
@@ -1150,6 +1182,7 @@ Scholar.Translate.prototype._exportConfigureIO = function() {
 Scholar.Translate.prototype._exportGetItem = function() {
 	if(this._itemsLeft.length != 0) {
 		var returnItem = this._itemsLeft.shift();
+		Scholar.debug("getting info on "+returnItem.getID());
 		this._runHandler("itemDone", returnItem);
 		return returnItem.toArray();
 	}

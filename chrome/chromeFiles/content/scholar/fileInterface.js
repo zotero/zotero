@@ -1,5 +1,5 @@
 var Scholar_File_Interface = new function() {
-	var _unresponsiveScriptPreference, _importCollection;
+	var _unresponsiveScriptPreference, _importCollection, _notifyItem, _notifyCollection;
 	
 	this.exportFile = exportFile;
 	this.exportProject = exportProject;
@@ -12,6 +12,8 @@ var Scholar_File_Interface = new function() {
 	 * Creates Scholar.Translate instance and shows file picker for file export
 	 */
 	function exportFile(items) {
+		Scholar.debug(items);
+		
 		var translation = new Scholar.Translate("export");
 		var translators = translation.getTranslators();
 		
@@ -111,10 +113,13 @@ var Scholar_File_Interface = new function() {
 				
 				// import items
 				translation.setTranslator(translators[0]);
-				translation.setHandler("itemDone", _importItemDone);
 				translation.setHandler("collectionDone", _importCollectionDone);
 				translation.setHandler("done", _importDone);
 				_disableUnresponsive();
+				
+				// disable notifier
+				Scholar.Notifier.disable();
+				
 				// show progress indicator
 				Scholar_File_Interface.Progress.show(
 					Scholar.getString("fileInterface.itemsImported"),
@@ -126,26 +131,33 @@ var Scholar_File_Interface = new function() {
 	}
 	
 	/*
-	 * Saves items after they've been imported. We could have a nice little
-	 * "items imported" indicator, too.
-	 */
-	function _importItemDone(obj, item) {
-		_importCollection.addItem(item.getID());
-	}
-	
-	/*
 	 * Saves collections after they've been imported. Input item is of the type
 	 * outputted by Scholar.Collection.toArray(); only receives top-level
 	 * collections
 	 */
 	function _importCollectionDone(obj, collection) {
+		Scholar.Notifier.enable();
+		Scholar.Notifier.trigger("add", "collection", collection.getID());
 		collection.changeParent(_importCollection.getID());
+		Scholar.Notifier.disable();
 	}
 	
 	/*
 	 * closes items imported indicator
 	 */
 	function _importDone(obj) {
+		// add items to import collection
+		for each(var itemID in obj.newItems) {
+			_importCollection.addItem(itemID);
+		}
+		
+		// run notify
+		Scholar.Notifier.enable();
+		if(obj.newItems.length) {
+			Scholar.Notifier.trigger("add", "item", obj.newItems);
+			Scholar.Notifier.trigger("modify", "collection", _importCollection.getID());
+		}
+		
 		Scholar_File_Interface.Progress.close();
 		_restoreUnresponsive();
 	}

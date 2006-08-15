@@ -82,7 +82,7 @@ Scholar_Ingester_Interface.scrapeThisPage = function(saveLocation) {
 		translate.setTranslator(data.translators[0]);
 		translate.setHandler("select", Scholar_Ingester_Interface._selectItems);
 		translate.setHandler("itemDone", function(obj, item) { Scholar_Ingester_Interface._itemDone(obj, item, saveLocation) });
-		translate.setHandler("done", Scholar_Ingester_Interface._finishScraping);
+		translate.setHandler("done", function(obj, item) { Scholar_Ingester_Interface._finishScraping(obj, item, saveLocation) });
 		translate.translate();
 	}
 }
@@ -278,7 +278,9 @@ Scholar_Ingester_Interface._itemDone = function(obj, item, collection) {
 	
 	// add item to collection, if one was specified
 	if(collection) {
+		Scholar.Notifier.disable();
 		collection.addItem(item.getID());
+		Scholar.Notifier.enable();
 	}
 }
 
@@ -301,11 +303,17 @@ Scholar_Ingester_Interface._selectItems = function(obj, itemList) {
 /*
  * Callback to be executed when scraping is complete
  */
-Scholar_Ingester_Interface._finishScraping = function(obj, returnValue) {
+Scholar_Ingester_Interface._finishScraping = function(obj, returnValue, collection) {
 	if(!returnValue) {
 		Scholar_Ingester_Interface.Progress.changeHeadline(Scholar.getString("ingester.scrapeError"));
 		Scholar_Ingester_Interface.Progress.addDescription(Scholar.getString("ingester.scrapeErrorDescription"));
 	}
+	
+	if(collection) {
+		// notify about modified items
+		Scholar.Notifier.trigger("modify", "collection", collection.getID());
+	}
+	
 	Scholar_Ingester_Interface.Progress.fade();
 }
 
