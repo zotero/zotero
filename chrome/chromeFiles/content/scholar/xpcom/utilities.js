@@ -71,7 +71,7 @@ Scholar.Utilities.prototype.cleanAuthor = function(author, type, useComma) {
  * Cleans whitespace off a string and replaces multiple spaces with one
  */
 Scholar.Utilities.prototype.cleanString = function(s) {
-	s = s.replace(/[ \xA0]+/g, " ");
+	s = s.replace(/[ \xA0\r\n]+/g, " ");
 	s = s.replace(/^\s+/, "");
 	return s.replace(/\s+$/, "");
 }

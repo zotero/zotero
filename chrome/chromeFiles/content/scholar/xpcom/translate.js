@@ -71,6 +71,8 @@
  *
  * _locationIsProxied - whether the URL being scraped is going through
  *                      an EZProxy
+ * _downloadAssociatedFiles - whether to download content, according to
+ *                            preferences
  */
 
 Scholar.Translate = function(type, saveItem) {
@@ -166,7 +168,6 @@ Scholar.Translate.prototype.setString = function(string) {
 	this.string = string;
 	this._createStorageStream();
 	
-	Scholar.debug(string);
 	this._storageStreamLength = string.length;
 	
 	// write string
@@ -497,6 +498,8 @@ Scholar.Translate.prototype._generateSandbox = function() {
 	// for loading other translators and accessing their methods
 	this._sandbox.Scholar.loadTranslator = function(type, translatorID) {
 		var translation = new Scholar.Translate(type, (translatorID ? true : false));
+		translation._parentTranslator = me;
+		
 		if(translatorID) {
 			// assign same handlers as for parent, because the done handler won't
 			// get called anyway, and the itemDone/selectItems handlers should be
@@ -521,7 +524,7 @@ Scholar.Translate.prototype._generateSandbox = function() {
 			}
 			
 			var safeTranslator = new Object();
-			safeTranslator.setItem = function(arg) { return translation.setItem(arg) };
+			safeTranslator.setSearch = function(arg) { return translation.setSearch(arg) };
 			safeTranslator.setBrowser = function(arg) { return translation.setBrowser(arg) };
 			safeTranslator.setHandler = function(arg1, arg2) { translation.setHandler(arg1, arg2) };
 			safeTranslator.setString = function(arg) { translation.setString(arg) };
@@ -797,7 +800,6 @@ Scholar.Translate.prototype._closeStreams = function() {
  * executed when an item is done and ready to be loaded into the database
  */
 Scholar.Translate.prototype._itemDone = function(item) {
-	Scholar.debug(item);
 	if(!this.saveItem) {	// if we're not supposed to save the item, just
 							// return the item array
 		
@@ -809,6 +811,14 @@ Scholar.Translate.prototype._itemDone = function(item) {
 		}
 		this._runHandler("itemDone", item);
 		return;
+	} else if(this._parentTranslator) {
+		// run done on parent
+		this._parentTranslator._itemDone(item);
+		return;
+	}
+	
+	if(!item.title) {
+		throw("item has no title");
 	}
 	
 	var notifierStatus = Scholar.Notifier.isEnabled();
@@ -897,6 +907,48 @@ Scholar.Translate.prototype._itemDone = function(item) {
 				}
 			}
 		}
+		
+		// handle attachments
+		if(item.attachments) {
+			for each(var attachment in item.attachments) {
+				if(!attachment.url && (this.type != "web" || !attachment.document)) {
+					Scholar.debug("not adding attachment: no URL specified");
+				} else if(this.type == "web") {
+					if(attachment.downloadable && this._downloadAssociatedFiles) {
+						if(attachment.document) {
+							var attachmentID = Scholar.Attachments.importFromDocument(attachment.document, myID);
+							
+							// change title, if a different one was specified
+							if(attachment.title && (!attachment.document.title
+							   || attachment.title != attachment.document.title)) {
+								var attachmentItem = Scholar.Items.get(attachmentID);
+								attachmentItem.setField("title", attachment.title);
+							}
+						} else {
+							Scholar.Attachments.importFromURL(attachment.url, myID,
+									(attachment.mimeType ? attachment.mimeType : undefined),
+									(attachment.title ? attachment.title : undefined));
+						}
+					} else {
+						if(attachment.document) {
+							Scholar.Attachments.linkFromURL(attachment.document.location.href, myID,
+									(attachment.mimeType ? attachment.mimeType : attachment.document.contentType),
+									(attachment.title ? attachment.title : attachment.document.title));
+						} else {
+							if(!attachment.mimeType || attachment.title) {
+								Scholar.debug("notice: either mimeType or title is missing; attaching file will be slower");
+							}
+							
+							Scholar.Attachments.linkFromURL(attachment.url, myID,
+									(attachment.mimeType ? attachment.mimeType : undefined),
+									(attachment.title ? attachment.title : undefined));
+						}
+					}
+				} else if(this.type == "import") {
+					// TODO
+				}
+			}
+		}
 	}
 	
 	if(item.itemID) {
@@ -926,7 +978,6 @@ Scholar.Translate.prototype._itemDone = function(item) {
  * executed when a collection is done and ready to be loaded into the database
  */
 Scholar.Translate.prototype._collectionDone = function(collection) {
-	Scholar.debug(collection);
 	var newCollection = this._processCollection(collection, null);
 	
 	this._runHandler("collectionDone", newCollection);
@@ -985,6 +1036,8 @@ Scholar.Translate.prototype._runHandler = function(type, argument) {
  * does the actual web translation
  */
 Scholar.Translate.prototype._web = function() {
+	this._downloadAssociatedFiles = Scholar.Prefs.get("downloadAssociatedFiles");
+	
 	try {
 		this._sandbox.doWeb(this.document, this.location);
 	} catch(e) {
@@ -1049,7 +1102,7 @@ Scholar.Translate.prototype._importConfigureIO = function() {
 			
 			// get URI and parse
 			var baseURI = (this.location ? IOService.newURI(this.location, "utf-8", null) : null);
-			parser.parseString(dataSource, baseURI, str);
+			parser.parseString(this._rdf.dataSource, baseURI, str);
 			
 			// make an instance of the RDF handler
 			this._sandbox.Scholar.RDF = new Scholar.Translate.RDF(this._rdf.dataSource);
@@ -1182,7 +1235,6 @@ Scholar.Translate.prototype._exportConfigureIO = function() {
 Scholar.Translate.prototype._exportGetItem = function() {
 	if(this._itemsLeft.length != 0) {
 		var returnItem = this._itemsLeft.shift();
-		Scholar.debug("getting info on "+returnItem.getID());
 		this._runHandler("itemDone", returnItem);
 		return returnItem.toArray();
 	}
@@ -1328,6 +1380,8 @@ Scholar.Translate.ScholarItem = function(itemType) {
 	this.tags = new Array();
 	// generate see also array
 	this.seeAlso = new Array();
+	// generate file array
+	this.attachments = new Array();
 }
 
 /* Scholar.Translate.Collection: a class for generating a new top-level

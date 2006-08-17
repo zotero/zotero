@@ -97,14 +97,12 @@ Scholar_Ingester_Interface.contentLoad = function(event) {
 		var rootDoc = doc;
 		
 		// get the appropriate root document to check which browser we're on
-		Scholar.debug("getting root document");
 		while(rootDoc.defaultView.frameElement) {
 			rootDoc = rootDoc.defaultView.frameElement.ownerDocument;
 		}
 		
 		// Figure out what browser this contentDocument is associated with
 		var browser;
-		Scholar.debug("getting browser");
 		for(var i=0; i<Scholar_Ingester_Interface.tabBrowser.browsers.length; i++) {
 			if(rootDoc == Scholar_Ingester_Interface.tabBrowser.browsers[i].contentDocument) {
 				browser = Scholar_Ingester_Interface.tabBrowser.browsers[i];
@@ -115,7 +113,6 @@ Scholar_Ingester_Interface.contentLoad = function(event) {
 			return;
 		}
 		
-		Scholar.debug("getting data");
 		// get data object
 		var data = Scholar_Ingester_Interface._getData(browser);
 		
@@ -125,13 +122,14 @@ Scholar_Ingester_Interface.contentLoad = function(event) {
 			return;
 		}
 		
-		Scholar.debug("translating");
 		// get translators
 		var translate = new Scholar.Translate("web");
 		translate.setDocument(doc);
 		data.translators = translate.getTranslators();
 		// update status
-		Scholar_Ingester_Interface._updateStatus(data);
+		if(Scholar_Ingester_Interface.tabBrowser.selectedBrowser == browser) {
+			Scholar_Ingester_Interface._updateStatus(data);
+		}
 		// add document
 		if(data.translators && data.translators.length) {
 			data.document = doc;
@@ -412,6 +410,7 @@ Scholar_Ingester_Interface.Progress = new function() {
 	
 	function kill() {
 		_windowLoaded = false;
+		_windowLoading = false;
 		try {
 			_progressWindow.close();
 		} catch(ex) {}

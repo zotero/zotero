@@ -12,8 +12,6 @@ var Scholar_File_Interface = new function() {
 	 * Creates Scholar.Translate instance and shows file picker for file export
 	 */
 	function exportFile(items) {
-		Scholar.debug(items);
-		
 		var translation = new Scholar.Translate("export");
 		var translators = translation.getTranslators();
 		
