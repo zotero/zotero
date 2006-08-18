@@ -456,7 +456,7 @@ Scholar.DB = new function(){
 		var type = statement.getTypeOfIndex(i);
 		switch (type){
 			case statement.VALUE_TYPE_INTEGER:
-				var func = statement.getInt32;
+				var func = statement.getInt64;
 				break;
 			case statement.VALUE_TYPE_TEXT:
 				var func = statement.getUTF8String;
