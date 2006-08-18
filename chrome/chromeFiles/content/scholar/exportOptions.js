@@ -52,7 +52,7 @@ var Scholar_File_Interface_Export = new function() {
 			var defValue = _options[option];
 			var element = document.getElementById(option);
 			
-			if(typeof(defValue) == "bool") {
+			if(typeof(defValue) == "boolean") {
 				if(element.checked == "true") {
 					_options[option] = true;
 				} else {

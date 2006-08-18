@@ -1,6 +1,4 @@
-// Scholar for Firefox Translate
-// Utilities based on code taken from Piggy Bank 2.1.1 (BSD-licensed)
-// This code is licensed according to the GPL
+// Scholar for Firefox Translate Engine
 
 /*
  * Scholar.Translate: a class for translation of Scholar metadata from and to
@@ -66,6 +64,7 @@
  *                     returned items
  * _storageStream - the storage stream to be used, if one is configured
  * _storageStreamLength - the length of the storage stream
+ * _exportFileDirectory - the directory to which files will be exported
  *
  * WEB-ONLY PRIVATE PROPERTIES:
  *
@@ -648,7 +647,7 @@ Scholar.Translate.prototype._parseDetectCode = function(translator) {
  *
  * dataMode
  *   valid: import, export
- *   options: rdf, text
+ *   options: rdf, block, line
  *   purpose: selects whether write/read behave as standard text functions or
  *            using Mozilla's built-in support for RDF data sources
  *
@@ -669,6 +668,7 @@ Scholar.Translate.prototype._configure = function(option, value) {
  *
  * called as addOption() in detect code
  *
+ * current options are exportNotes and exportFileData
  */
 Scholar.Translate.prototype._addOption = function(option, value) {
 	this._displayOptions[option] = value;
@@ -797,6 +797,45 @@ Scholar.Translate.prototype._closeStreams = function() {
 }
 
 /*
+ * imports an attachment from the disk
+ */
+Scholar.Translate.prototype._itemImportAttachment = function(attachment, sourceID) {
+	Scholar.debug(attachment);
+	
+	if(!attachment.path) {
+		// create from URL
+		if(attachment.url) {
+			var attachmentID = Scholar.Attachments.linkFromURL(attachment.url, sourceID,
+					(attachment.mimeType ? attachment.mimeType : undefined),
+					(attachment.title ? attachment.title : undefined));
+		} else {
+			Scholar.debug("not adding attachment: no path or url specified");
+		}
+	} else {
+		if(attachment.url) {
+			Scholar.debug("not adding attachment: snapshot import not yet implemented");
+		} else {
+			// generate nsIFile
+			var IOService = Components.classes["@mozilla.org/network/io-service;1"].
+			                getService(Components.interfaces.nsIIOService);
+			var uri = IOService.newURI(attachment.path, "", null);
+			var file = uri.QueryInterface(Components.interfaces.nsIFileURL).file;
+			
+			// import from nsIFile
+			var attachmentID = Scholar.Attachments.importFromFile(file, sourceID);
+			// get attachment item
+			var myAttachmentItem = Scholar.Items.get(attachmentID);
+			if(attachment.title) {
+				// set title
+				myAttachmentItem.setField("title", attachment.title);
+			}
+		}		
+	}
+	
+	return attachmentID;
+}
+
+/*
  * executed when an item is done and ready to be loaded into the database
  */
 Scholar.Translate.prototype._itemDone = function(item) {
@@ -833,6 +872,8 @@ Scholar.Translate.prototype._itemDone = function(item) {
 		var myID = Scholar.Notes.add(item.note);
 		// re-retrieve the item
 		var newItem = Scholar.Items.get(myID);
+	} else if(type == "attachment") {
+		var myID = this._itemImportAttachment(item, null);
 	} else {
 		// create new item
 		var typeID = Scholar.ItemTypes.getID(type);
@@ -911,9 +952,11 @@ Scholar.Translate.prototype._itemDone = function(item) {
 		// handle attachments
 		if(item.attachments) {
 			for each(var attachment in item.attachments) {
-				if(!attachment.url && (this.type != "web" || !attachment.document)) {
-					Scholar.debug("not adding attachment: no URL specified");
-				} else if(this.type == "web") {
+				if(this.type == "web") {
+					if(!attachment.url && !attachment.document) {
+						Scholar.debug("not adding attachment: no URL specified");
+					}
+					
 					if(attachment.downloadable && this._downloadAssociatedFiles) {
 						if(attachment.document) {
 							var attachmentID = Scholar.Attachments.importFromDocument(attachment.document, myID);
@@ -925,9 +968,7 @@ Scholar.Translate.prototype._itemDone = function(item) {
 								attachmentItem.setField("title", attachment.title);
 							}
 						} else {
-							Scholar.Attachments.importFromURL(attachment.url, myID,
-									(attachment.mimeType ? attachment.mimeType : undefined),
-									(attachment.title ? attachment.title : undefined));
+							Scholar.Attachments.importFromURL(attachment.url, myID);
 						}
 					} else {
 						if(attachment.document) {
@@ -945,7 +986,7 @@ Scholar.Translate.prototype._itemDone = function(item) {
 						}
 					}
 				} else if(this.type == "import") {
-					// TODO
+					this._itemImportAttachment(attachment, myID);
 				}
 			}
 		}
@@ -1173,7 +1214,6 @@ Scholar.Translate.prototype._importConfigureIO = function() {
  * does the actual export, after code has been loaded and parsed
  */
 Scholar.Translate.prototype._export = function() {
-	this._exportConfigureIO();
 	
 	// get items
 	if(this.items) {
@@ -1181,6 +1221,7 @@ Scholar.Translate.prototype._export = function() {
 	} else {
 		this._itemsLeft = Scholar.getItems();
 	}
+	
 	// run handler for items available
 	this._runHandler("itemCount", this._itemsLeft.length);
 	
@@ -1188,6 +1229,45 @@ Scholar.Translate.prototype._export = function() {
 	if(this._configOptions.getCollections && !this.items) {
 		this._collectionsLeft = Scholar.getCollections();
 	}
+	
+	Scholar.debug(this._displayOptions);
+	
+	// export file data, if requested
+	if(this._displayOptions["exportFileData"]) {
+		// generate directory
+		var directory = Components.classes["@mozilla.org/file/local;1"].
+		                createInstance(Components.interfaces.nsILocalFile);
+		directory.initWithFile(this.location.parent);
+		
+		// get name
+		var name = this.location.leafName;
+		var extensionMatch = /^(.*)\.[a-zA-Z0-9]+$/
+		var m = extensionMatch.exec(name);
+		if(m) {
+			name = m[0];
+		}
+		directory.append(name);
+		
+		// create directory
+		directory.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0700);
+		
+		// generate a new location
+		var originalName = this.location.leafName;
+		this.location = Components.classes["@mozilla.org/file/local;1"].
+		                createInstance(Components.interfaces.nsILocalFile);
+		this.location.initWithFile(directory);
+		this.location.append(originalName);
+		
+		// create files directory
+		this._exportFileDirectory = Components.classes["@mozilla.org/file/local;1"].
+		                            createInstance(Components.interfaces.nsILocalFile);
+		this._exportFileDirectory.initWithFile(directory);
+		this._exportFileDirectory.append("files");
+		this._exportFileDirectory.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0700);
+	}
+	
+	// configure IO
+	this._exportConfigureIO();
 	
 	try {
 		this._sandbox.doExport();
@@ -1230,13 +1310,97 @@ Scholar.Translate.prototype._exportConfigureIO = function() {
 }
 
 /*
+ * copies attachment and returns data, given an attachment object
+ */
+Scholar.Translate.prototype._exportGetAttachment = function(attachment) {
+	var attachmentArray = new Object();
+	
+	var attachmentID = attachment.getID();
+	var linkMode = attachment.getAttachmentLinkMode();
+	
+	// get url if one exists
+	if(linkMode == Scholar.Attachments.LINK_MODE_LINKED_URL ||
+	   linkMode == Scholar.Attachments.LINK_MODE_IMPORTED_URL) {
+		var url = attachment.getURL()
+		attachmentArray.url = url;
+	} else if(!this._displayOptions["exportFileData"]) {
+		// only export urls, not files, if exportFileData is off
+		return false;
+	}
+	// add item ID
+	attachmentArray.itemID = attachmentID;
+	// get title
+	attachmentArray.title = attachment.getField("title");
+	// get mime type
+	attachmentArray.mimeType = attachment.getAttachmentMimeType();
+	
+	if(linkMode != Scholar.Attachments.LINK_MODE_LINKED_URL &&
+	   this._displayOptions["exportFileData"]) {
+		// add path and filename if not an internet link
+		attachmentArray.path = "files/"+attachmentID+"/";
+		var file = attachment.getFile();
+		attachmentArray.filename = file.leafName;
+		
+		if(linkMode == Scholar.Attachments.LINK_MODE_LINKED_FILE) {
+			// create a new directory
+			var directory = Components.classes["@mozilla.org/file/local;1"].
+							createInstance(Components.interfaces.nsILocalFile);
+			directory.initWithFile(this._exportFileDirectory);
+			directory.append(attachmentID);
+			directory.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0700);
+			// copy file
+			file.copyTo(directory, attachmentArray.filename);
+		} else {
+			// copy imported files from the Scholar directory
+			var directory = Scholar.getStorageDirectory();
+			directory.append(attachmentID);
+			directory.copyTo(this._exportFileDirectory, attachmentID);
+		}
+	}
+	
+	Scholar.debug(attachmentArray);
+	
+	return attachmentArray;
+}
+
+/*
  * gets the next item to process (called as Scholar.nextItem() from code)
  */
 Scholar.Translate.prototype._exportGetItem = function() {
 	if(this._itemsLeft.length != 0) {
 		var returnItem = this._itemsLeft.shift();
+		
+		// skip files if exportFileData is off, or if the file isn't standalone
+		if(returnItem.isAttachment() &&
+		  (!this._displayOptions["exportFileData"] ||
+		  returnItem.getSource())) {
+			return this._exportGetItem();
+		}
+		
+		// export file data for single files
+		if(returnItem.isAttachment()) {		// an independent attachment
+			var returnItemArray = this._exportGetAttachment(returnItem);
+			returnItemArray.itemType = "attachment";
+			return returnItemArray;
+		} else {
+			var returnItemArray = returnItem.toArray();
+			// get attachments, although only urls will be passed if exportFileData
+			// is off
+			returnItemArray.attachments = new Array();
+			var attachments = returnItem.getAttachments();
+			for each(attachmentID in attachments) {
+				var attachment = Scholar.Items.get(attachmentID);
+				var attachmentInfo = this._exportGetAttachment(attachment);
+				
+				if(attachmentInfo) {
+					returnItemArray.attachments.push(attachmentInfo);
+				}
+			}
+		}
+		
 		this._runHandler("itemDone", returnItem);
-		return returnItem.toArray();
+		
+		return returnItemArray;
 	}
 	
 	return false;

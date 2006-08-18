@@ -254,10 +254,19 @@ Scholar.Utilities.Ingester.prototype.parseContextObject = function(co, item) {
 Scholar.Utilities.Ingester.prototype.loadDocument = function(url, succeeded, failed) {
 	this.processDocuments([ url ], succeeded, null, failed);
 }
+
+Scholar.Utilities.Ingester._protocolRe = new RegExp();
+Scholar.Utilities.Ingester._protocolRe.compile("^(?:(?:http|https|ftp):|[^:]*/)", "i");
 Scholar.Utilities.Ingester.prototype.processDocuments = function(urls, processor, done, exception) {
 	if(this.translate.locationIsProxied) {
 		for(i in urls) {
-			urls[i] = Scholar.Ingester.ProxyMonitor.properToProxy(urls[i]);
+			if(this.translate.locationIsProxied) {
+				urls[i] = Scholar.Ingester.ProxyMonitor.properToProxy(urls[i]);
+			}
+			// check for a protocol colon
+			if(!Scholar.Utilities.Ingester._protocolRe.test(uris[i])) {
+				throw("invalid URL in processDocuments");
+			}
 		}
 	}
 	
@@ -282,6 +291,9 @@ Scholar.Utilities.Ingester.HTTP.prototype.doGet = function(url, onDone) {
 	if(this.translate.locationIsProxied) {
 		url = Scholar.Ingester.ProxyMonitor.properToProxy(url);
 	}
+	if(!Scholar.Utilities.Ingester._protocolRe.test(url)) {
+		throw("invalid URL in processDocuments");
+	}
 	
 	var translate = this.translate;
 	Scholar.Utilities.HTTP.doGet(url, function(xmlhttp) {
@@ -297,6 +309,9 @@ Scholar.Utilities.Ingester.HTTP.prototype.doGet = function(url, onDone) {
 Scholar.Utilities.Ingester.HTTP.prototype.doPost = function(url, body, onDone) {
 	if(this.translate.locationIsProxied) {
 		url = Scholar.Ingester.ProxyMonitor.properToProxy(url);
+	}
+	if(!Scholar.Utilities.Ingester._protocolRe.test(url)) {
+		throw("invalid URL in processDocuments");
 	}
 	
 	var translate = this.translate;

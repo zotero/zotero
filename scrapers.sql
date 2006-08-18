@@ -1,4 +1,4 @@
--- 50
+-- 51
 
 -- Set the following timestamp to the most recent scraper update date
 REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-08-15 15:42:00'));
@@ -3548,10 +3548,37 @@ function generateCollection(collection) {
 			Scholar.RDF.addStatement(collectionResource, n.dcterms+"hasPart", "#collection:"+child.id, false);
 			// do recursive processing of collections
 			generateCollection(child);
-		} else {
+		} else if(itemResources[child.id]) {
 			Scholar.RDF.addStatement(collectionResource, n.dcterms+"hasPart", itemResources[child.id], false);
 		}
 	}
+}
+
+function handleAttachment(attachmentResource, attachment) {
+	Scholar.RDF.addStatement(attachmentResource, rdf+"type", n.fs+"File", false);
+	
+	if(attachment.url) {
+		// add url as identifier
+		var term = Scholar.RDF.newResource();
+		// set term type
+		Scholar.RDF.addStatement(term, rdf+"type", n.dcterms+"URI", false);
+		// set url value
+		Scholar.RDF.addStatement(term, rdf+"value", attachment.url, true);
+		// add relationship to resource
+		Scholar.RDF.addStatement(attachmentResource, n.dc+"identifier", term, false);
+	}
+	
+	// add mime type
+	var term = Scholar.RDF.newResource();
+	// set term type
+	Scholar.RDF.addStatement(term, rdf+"type", n.dcterms+"IMT", false);
+	// set mime type value
+	Scholar.RDF.addStatement(term, rdf+"value", attachment.mimeType, true);
+	// add relationship to resource
+	Scholar.RDF.addStatement(attachmentResource, n.dc+"format", term, false);
+	
+	// add title
+	Scholar.RDF.addStatement(attachmentResource, n.dc+"title", attachment.title, true);
 }
 
 function doExport() {
@@ -3563,7 +3590,8 @@ function doExport() {
 		dcterms:"http://purl.org/dc/terms/",
 		prism:"http://prismstandard.org/namespaces/1.2/basic/",
 		foaf:"http://xmlns.com/foaf/0.1/",
-		vcard:"http://nwalsh.com/rdf/vCard"
+		vcard:"http://nwalsh.com/rdf/vCard#",
+		fs:"http://chnm.gmu.edu/firefoxscholar/rdf#"
 	};
 	
 	// add namespaces
@@ -3584,7 +3612,10 @@ function doExport() {
 	while(item = Scholar.nextItem()) {
 		items.push(item);
 		
-		if(item.ISBN && !usedResources["urn:isbn:"+item.ISBN]) {
+		if(item.itemType == "attachment" && item.path) {
+			// file is stored locally (paths are always unique)
+			itemResources[item.itemID] = item.path+item.filename;
+		} else if(item.ISBN && !usedResources["urn:isbn:"+item.ISBN]) {
 			itemResources[item.itemID] = "urn:isbn:"+item.ISBN;
 			usedResources[itemResources[item.itemID]] = true;
 		} else if(item.url && !usedResources[item.url]) {
@@ -3597,6 +3628,20 @@ function doExport() {
 		
 		for(var j in item.notes) {
 			itemResources[item.notes[j].itemID] = "#item:"+item.notes[j].itemID;
+		}
+		
+		for each(var attachment in item.attachments) {
+			if(attachment.path) {
+				// file is stored locally (paths are always unique)
+				itemResources[attachment.itemID] = attachment.path+attachment.filename;
+			} else if(!usedResources[attachment.url]) {
+				// file is referenced via url, and no other item has this url
+				itemResources[attachment.itemID] = attachment.url;
+				usedResources[attachment.url] = true;
+			} else {
+				// just specify a node ID
+				itemResources[attachment.itemID] = "#item:"+attachment.itemID;
+			}
 		}
 	}
 	
@@ -3650,6 +3695,9 @@ function doExport() {
 			if(!Scholar.getOption("exportNotes")) {
 				continue;
 			}
+		} else if(item.itemType == "attachment") {
+			handleAttachment(resource, item);
+			continue;
 		}
 		if(type) {
 			Scholar.RDF.addStatement(resource, rdf+"type", n.bib+type, false);
@@ -3690,6 +3738,18 @@ function doExport() {
 		// source
 		if(item.source) {
 			Scholar.RDF.addStatement(resource, n.dc+"source", item.source, true);
+		}
+		
+		// url		
+		if(item.url) {
+			// add url as identifier
+			var term = Scholar.RDF.newResource();
+			// set term type
+			Scholar.RDF.addStatement(term, rdf+"type", n.dcterms+"URI", false);
+			// set url value
+			Scholar.RDF.addStatement(term, rdf+"value", attachment.url, true);
+			// add relationship to resource
+			Scholar.RDF.addStatement(resource, n.dc+"identifier", term, false);
 		}
 		
 		// accessionNumber as generic ID
@@ -3745,7 +3805,7 @@ function doExport() {
 		}
 		
 		// publication gets linked to container via isPartOf
-		if(item.publication) {
+		if(item.publicationTitle) {
 			Scholar.RDF.addStatement((containerElement ? containerElement : resource), n.dc+"title", item.publicationTitle, true);
 		}
 		
@@ -3858,6 +3918,14 @@ function doExport() {
 			if(item.note) {
 				Scholar.RDF.addStatement(resource, rdf+"value", item.note, true);
 			}
+		}
+		
+		/** FILES **/
+		
+		for each(var attachment in item.attachments) {
+			var attachmentResource = itemResources[attachment.itemID];
+			Scholar.RDF.addStatement(resource, n.dc+"relation", attachmentResource, false);
+			handleAttachment(attachmentResource, attachment);
 		}
 		
 		/** TAGS **/
@@ -4048,6 +4116,54 @@ function handleCreators(newItem, creators, creatorType) {
 	}
 }
 
+// gets attachment info
+function handleAttachment(node, attachment) {
+	if(!attachment) {
+		attachment = new Array();
+	}
+	
+	attachment.title = getFirstResults(node, [n.dc+"title"], true);
+	
+	var identifiers = getFirstResults(node, [n.dc+"identifier"]);
+	for each(var identifier in identifiers) {
+		if(typeof(identifier) != "string") {
+			var identifierType = Scholar.RDF.getTargets(identifier, rdf+"type");
+			if(identifierType) {
+				identifierType = Scholar.RDF.getResourceURI(identifierType[0]);
+				
+				if(identifierType == n.dcterms+"URI") {	// uri is url
+					attachment.url = getFirstResults(identifier, [rdf+"value"], true);
+				}
+			}
+		}
+	}
+	
+	var formats = getFirstResults(node, [n.dc+"format"]);
+	for each(var format in formats) {
+		if(typeof(format) != "string") {
+			var formatType = Scholar.RDF.getTargets(format, rdf+"type");
+			if(formatType) {
+				formatType = Scholar.RDF.getResourceURI(formatType[0]);
+				
+				if(formatType == n.dcterms+"IMT") {	// uri is url
+					attachment.mimeType = getFirstResults(format, [rdf+"value"], true);
+				}
+			}
+		}
+	}
+	
+	var stringNode = node;
+	if(typeof(stringNode) != "string") {
+		stringNode = Scholar.RDF.getResourceURI(stringNode);
+	}
+	if(stringNode.substr(0, 8) == "file:///") {
+		// not a protocol specifier; we have a path name
+		attachment.path = stringNode;
+	}
+	
+	return attachment;
+}
+
 // processes collections recursively
 function processCollection(node, collection) {
 	if(!collection) {
@@ -4104,7 +4220,8 @@ function doImport() {
 		dcterms:"http://purl.org/dc/terms/",
 		prism:"http://prismstandard.org/namespaces/1.2/basic/",
 		foaf:"http://xmlns.com/foaf/0.1/",
-		vcard:"http://nwalsh.com/rdf/vCard"
+		vcard:"http://nwalsh.com/rdf/vCard#",
+		fs:"http://chnm.gmu.edu/firefoxscholar/rdf#"
 	};
 	
 	callNumberTypes = [
@@ -4165,8 +4282,6 @@ function doImport() {
 			} else if(type == n.bib+"Memo") {
 				// check to see if this note is independent
 				var arcs = Scholar.RDF.getArcsIn(node);
-				Scholar.Utilities.debug("working on a note");
-				Scholar.Utilities.debug(arcs);
 				var skip = false;
 				for each(var arc in arcs) {
 					arc = Scholar.RDF.getResourceURI(arc);
@@ -4183,6 +4298,19 @@ function doImport() {
 			} else if(type == n.bib+"Collection") {
 				// skip collections until all the items are done
 				collections.push(node);
+				continue;
+			} else if(type == n.fs+"File") {
+				// check to see if file is independent
+				var arcs = Scholar.RDF.getArcsIn(node);
+				if(arcs.length) {
+					continue;
+				}
+				
+				// process as file
+				newItem.itemType = "attachment";
+				handleAttachment(node, newItem);
+				Scholar.Utilities.debug(newItem);
+				newItem.complete();
 				continue;
 			} else {	// default to book
 				newItem.itemType = "book";
@@ -4361,13 +4489,25 @@ function doImport() {
 				}
 			}
 		}
+	
+		/* ATTACHMENTS */
+		var relations = getFirstResults(node, [n.dc+"relation"]);
+		for each(var relation in relations) {
+			var type = Scholar.RDF.getTargets(relation, rdf+"type");
+			if(type) {
+				type = Scholar.RDF.getResourceURI(type[0]);
+				if(type == n.fs+"File") {
+					newItem.attachments.push(handleAttachment(relation));
+				}
+			}
+		}
 		
 		newItem.complete();
 	}
 	
 	/* COLLECTIONS */
 	
-	for each(collection in collections) {
+	for each(var collection in collections) {
 		if(!Scholar.RDF.getArcsIn(collection)) {
 			var newCollection = new Scholar.Collection();
 			processCollection(collection, newCollection);
