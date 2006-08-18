@@ -2049,7 +2049,19 @@ Scholar.Attachments = new function(){
 		var file = Components.classes["@mozilla.org/file/local;1"].
 				createInstance(Components.interfaces.nsILocalFile);
 		file.initWithFile(destDir);
-		file.append(_getFileNameFromURL(url, mimeType));
+		var fileName = _getFileNameFromURL(url, mimeType);
+		
+		// This is a hack to make sure the file is opened in the browser when
+		// we use loadURI(), since Firefox's internal detection mechanisms seem
+		// to sometimes get confused
+		// 		(see #192, https://chnm.gmu.edu/trac/scholar/ticket/192)
+		if (mimeType=='text/html' &&
+				(fileName.substr(0, fileName.length-5)!='.html'
+					|| fileName.substr(0, fileName.length-4)!='.htm')){
+			fileName += '.html';
+		}
+		
+		file.append(fileName);
 		
 		wbp.saveDocument(document, file, destDir, mimeType, encodingFlags, false);
 		
