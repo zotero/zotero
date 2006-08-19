@@ -1,4 +1,4 @@
--- 51
+-- 52
 
 -- Set the following timestamp to the most recent scraper update date
 REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-08-15 15:42:00'));
@@ -66,7 +66,6 @@ REPLACE INTO "translators" VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006
 				} else if(value.substring(value.indexOf(" ")+1, value.length) == "pages") {
 					newItem.pages = value.substring(0, value.indexOf(" "));
 				} else if(attribute != "Average Customer Review:") {
-					Scholar.Utilities.debug(''"''+attribute+''"'');
 					if(attribute == "In-Print Editions:") {
 						value = value.replace(" | All Editions", "");
 					} else {
@@ -79,7 +78,6 @@ REPLACE INTO "translators" VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006
 		} catch(ex) {}
 	}
 	
-	Scholar.Utilities.debug(newItem.extra);
 	if(newItem.extra) {
 		newItem.extra = newItem.extra.substr(0, newItem.extra.length-1);
 	}
@@ -154,7 +152,6 @@ REPLACE INTO "translators" VALUES ('838d8849-4ffb-9f44-3d0d-aa8a0a079afe', '2006
 	
 	Scholar.Utilities.HTTP.doPost(newUrl,
 	''exportselect=record&exporttype=plaintext'', function(text) {
-		Scholar.Utilities.debug(text);
 		var lineRegexp = new RegExp();
 		lineRegexp.compile("^([\\w() ]+): *(.*)$");
 		
@@ -437,10 +434,10 @@ REPLACE INTO "translators" VALUES ('88915634-1af6-c134-0171-56fd198235ed', '2006
 	// No idea why this doesn''t work as post
 	Scholar.Utilities.HTTP.doGet(newUri+''?''+postString, function(text) {	
 		// load translator for MARC
-		var marc = Scholar.loadTranslator("import", "a6ee60df-1ddc-4aae-bb25-45e0537be973");
-		marc.Scholar.write(text);
-		marc.Scholar.eof();
-		marc.doImport(url);
+		var marc = Scholar.loadTranslator("import");
+		marc.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
+		marc.setString(text);
+		marc.translate();
 		
 		Scholar.done();
 	})
@@ -583,7 +580,6 @@ function doWeb(doc, url) {
 		getList(saveCitations, null, function() {						// mark this
 			Scholar.Utilities.HTTP.doGet(''http://www.jstor.org/browse/citations.txt?exportAction=Save+as+Text+File&exportFormat=cm&viewCitations=1'', function(text) {
 																							// get marked
-				Scholar.Utilities.debug(text);
 				var k = 0;
 				var lines = text.split("\n");
 				var haveStarted = false;
@@ -765,44 +761,51 @@ REPLACE INTO "translators" VALUES ('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '2006
 	var xpath = ''//pre/text()[1]'';
 	var text = newDoc.evaluate(xpath, newDoc, nsResolver,
 			   XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
-	var newItem = new Scholar.Item();
 	
-	var record = new marc.MARC_Record();
+	var newItem = new Scholar.Item();
+	var record = new marc.record();
 	
 	var linee = text.split("\n");
 	for (var i=0; i<linee.length; i++) {
-		linee[i] = linee[i].replace(/\xA0|_|\t/g,'' '');
-		if (linee[i] == '''') continue; // jumps empty lines
-		var replacer = record.subfield_delimiter+''$1'';
-		linee[i]  = linee[i].replace(/\|(.)/g,replacer);
-		linee[i]  = linee[i].replace(/\|/g,this.subfield_delimiter);
-		var tag   = linee[i].substr(0,3);
-		var ind1  = linee[i].substr(4,1);
-		var ind2  = linee[i].substr(5,1);
-		var value = record.subfield_delimiter+''a''+linee[i].substr(7);
-		if(linee[i].substr(0, 6) == "LEADER") {
-			value = linee[i].substr(7);
-			record.leader.record_length = ''00000'';
-			record.leader.record_status = value.substr(5,1);
-			record.leader.type_of_record = value.substr(6,1);
-			record.leader.bibliographic_level = value.substr(7,1);
-			record.leader.type_of_control = value.substr(8,1);
-			record.leader.character_coding_scheme = value.substr(9,1);
-			record.leader.indicator_count = ''2'';
-			record.leader.subfield_code_length = ''2'';
-			record.leader.base_address_of_data = ''00000'';
-			record.leader.encoding_level = value.substr(17,1);
-			record.leader.descriptive_cataloging_form = value.substr(18,1);
-			record.leader.linked_record_requirement = value.substr(19,1);
-			record.leader.entry_map = ''4500'';
-			
-			record.directory = '''';
-			record.directory_terminator = record.field_terminator;
-			record.variable_fields = new Array();
+		if(!linee[i]) {
+			continue;
 		}
-		else if (tag > ''008'' && tag < ''899'') { // jumps low and high tags
-			if (tag != ''040'') record.add_field(tag,ind1,ind2,value);
+		
+		linee[i] = linee[i].replace(/[\xA0_\t]/g, " ");
+		var value = linee[i].substr(7);
+		
+		if(linee[i].substr(0, 6) == "      ") {
+			// add this onto previous value
+			tagValue += value;
+		} else {
+			if(linee[i].substr(0, 6) == "LEADER") {
+				// trap leader
+				record.leader = value;
+			} else {
+				if(tagValue) {	// finish last tag
+					tagValue = tagValue.replace(/\|(.)/g, marc.subfieldDelimiter+"$1");
+					if(tagValue[0] != marc.subfieldDelimiter) {
+						tagValue = marc.subfieldDelimiter+"a"+tagValue;
+					}
+					
+					// add previous tag
+					record.addField(tag, ind, tagValue);
+				}
+				
+				var tag = linee[i].substr(0, 3);
+				var ind  = linee[i].substr(4, 2);
+				var tagValue = value;
+			}
 		}
+	}	
+	if(tagValue) {
+		tagValue = tagValue.replace(/\|(.)/g, marc.subfieldDelimiter+"$1");
+		if(tagValue[0] != marc.subfieldDelimiter) {
+			tagValue = marc.subfieldDelimiter+"a"+tagValue;
+		}
+		
+		// add previous tag
+		record.addField(tag, ind, tagValue);
 	}
 	
 	record.translate(newItem);
@@ -811,16 +814,16 @@ REPLACE INTO "translators" VALUES ('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '2006
 
 function pageByPage(marc, urls) {
 	Scholar.Utilities.processDocuments(urls, function(newDoc) {
-		scrape(marc, newDoc);
+		scrape(marc.getTranslatorObject(), newDoc);
 	}, function() { Scholar.done() });
 }
 
 function doWeb(doc, url) {
 	var uri = doc.location.href;
 	var newUri;
-	
 	// load translator for MARC
-	var marc = Scholar.loadTranslator("import", "a6ee60df-1ddc-4aae-bb25-45e0537be973");
+	var marc = Scholar.loadTranslator("import");
+	marc.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
 	
 	var matchRegexp = new RegExp(''^(http://[^/]+/search/[^/]+/[^/]+/1\%2C[^/]+/)frameset(.+)$'');
 	var m = matchRegexp.exec(uri);
@@ -840,7 +843,7 @@ function doWeb(doc, url) {
 			var xpath = ''//a[img[@src="/screens/regdisp.gif" or @alt="REGULAR RECORD DISPLAY"]]'';
 			var aTag = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 			if(aTag) {
-				scrape(marc, doc);
+				scrape(marc.getTranslatorObject(), doc);
 				return;
 			}
 		}
@@ -862,7 +865,6 @@ function doWeb(doc, url) {
 		// Go through table rows
 		var i = 0;
 		while(tableRow = tableRows.iterateNext()) {
-			Scholar.Utilities.debug("row");
 			// CHK is what we need to get it all as one file
 			var input = doc.evaluate(''./td/input[@type="checkbox"]'', tableRow,
 						nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
@@ -885,7 +887,6 @@ function doWeb(doc, url) {
 				// Go through links
 				while(link) {
 					if(tagRegexp.test(link.href)) {
-						Scholar.Utilities.debug("hello");
 						var text = Scholar.Utilities.getNodeString(doc, link,
 																   ".//text()", null);
 						if(text) {
@@ -909,9 +910,12 @@ function doWeb(doc, url) {
 		if(!items) {
 			return true;
 		}
-		
-		var urlRe = new RegExp("^(http://[^/]+(/search/[^/]+/))");
+		var urlRe = new RegExp("^(https?://[^/]+(/search/[^/]+(?:/|$)))");
 		var m = urlRe.exec(urls[0]);
+		if(!m) {
+			throw("urlRe choked on "+urls[0]);
+		}
+		
 		var clearUrl = m[0]+"?clear_saves=1";
 		var postUrl = m[0];
 		var exportUrl = m[1]+"++export/1,-1,-1,B/export";
@@ -925,6 +929,9 @@ function doWeb(doc, url) {
 				number++;
 			}
 			var m = matchRegexp.exec(urls[i]);
+			if(!m) {
+				throw("matchRegexp choked on "+urls[i]);
+			}
 			newUrls.push(m[1]+"marc"+m[2]);
 		}
 		
@@ -937,9 +944,8 @@ function doWeb(doc, url) {
 					Scholar.Utilities.HTTP.doPost(exportUrl, "ex_format=50&ex_device=45&SUBMIT=Submit", function(text) {
 						var notSpace = /[^\s]/
 						if(notSpace.test(text)) {
-							marc.Scholar.write(text);
-							marc.Scholar.eof();
-							marc.doImport();
+							marc.setString(text);
+							marc.translate();
 							
 							Scholar.done();
 						} else {
@@ -1081,7 +1087,6 @@ function doWeb(doc, url) {
 		var m = hostRe.exec(doc.location.href);
 		var hitlist = doc.forms.namedItem("hitlist");
 		var baseUrl = m[0]+hitlist.getAttribute("action")+"?first_hit="+hitlist.elements.namedItem("first_hit").value+"&last_hit="+hitlist.elements.namedItem("last_hit").value;
-		Scholar.Utilities.debug(baseUrl);
 		
 		var uris = new Array();
 		for(var i in items) {
@@ -1104,8 +1109,6 @@ REPLACE INTO "translators" VALUES ('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '2006
 	}
 }',
 'function scrape(doc) {
-	Scholar.Utilities.debug("hello");
-	
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == ''x'') return namespace; else return null;
@@ -1186,7 +1189,6 @@ REPLACE INTO "translators" VALUES ('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '2006
 			var value = doc.evaluate(''./TD[2]/text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 			if(value.nodeValue) {
 				value = Scholar.Utilities.superCleanString(value.nodeValue).toLowerCase();
-				Scholar.Utilities.debug(value);
 				
 				if(value.indexOf("periodical") >= 0) {
 					newItem.itemType = "magazineArticle";
@@ -1223,7 +1225,6 @@ REPLACE INTO "translators" VALUES ('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '2006
 			while(currentSubject = subjects.iterateNext()) {
 				var subjectValue = Scholar.Utilities.getNodeString(doc, currentSubject, ".//text()", nsResolver);
 				subjectValue = Scholar.Utilities.superCleanString(subjectValue);
-				Scholar.Utilities.debug("tag: "+subjectValue);
 				if(subjectValue) {
 					newItem.tags.push(subjectValue);
 				}
@@ -1247,7 +1248,6 @@ REPLACE INTO "translators" VALUES ('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '2006
 		var item = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 		if(item) {
 			var title = attachArray[xpath];
-			Scholar.Utilities.debug(title);
 			
 			if(item.parentNode.tagName.toLowerCase() == "a") {
 				// item is not this page
@@ -1618,7 +1618,9 @@ REPLACE INTO "translators" VALUES ('cf87eca8-041d-b954-795a-2d86348999d5', '2006
 	}
 	}
 	
-	var marc = Scholar.loadTranslator("import", "a6ee60df-1ddc-4aae-bb25-45e0537be973");
+	var translator = Scholar.loadTranslator("import");
+	translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
+	var marc = translator.getTranslatorObject();
 	Scholar.Utilities.processDocuments(newUris, function(newDoc) {
 		var uri = newDoc.location.href;
 		
@@ -1628,26 +1630,29 @@ REPLACE INTO "translators" VALUES ('cf87eca8-041d-b954-795a-2d86348999d5', '2006
 		} : null;
 		
 		var xpath = ''/html/body/table/tbody/tr[td[1][@id="bold"]][td[2]]'';
-		var elmts = Scholar.Utilities.gatherElementsOnXPath(newDoc, newDoc, xpath, nsResolver);
+		var elmts = newDoc.evaluate(xpath, newDoc, nsResolver, XPathResult.ANY_TYPE, null);
+		var elmt;
 		
-		var record = new marc.MARC_Record();
-		for(var i=0; i<elmts.length; i++) {
-			var elmt = elmts[i];
+		var record = new marc.record();
+		while(elmt = elmts.iterateNext()) {
 			var field = Scholar.Utilities.superCleanString(doc.evaluate(''./TD[1]/text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue);
 			var value = Scholar.Utilities.getNodeString(doc, elmt, ''./TD[2]//text()'', nsResolver);
-			var value = value.replace(/\|([a-z]) /g, record.subfield_delimiter+"$1");
 			
-			if(field != "FMT" && field != "LDR") {
-				var ind1 = "";
-				var ind2 = "";
+			if(field == "LDR") {
+				record.leader = value;
+			} else if(field != "FMT") {
+				value = value.replace(/\|([a-z]) /g, marc.subfieldDelimiter+"$1");
+				
 				var code = field.substring(0, 3);
+				var ind = "";
 				if(field.length > 3) {
-					var ind1 = field.charAt(3);
+					ind = field[3];
 					if(field.length > 4) {
-						var ind2 = field.charAt(4);
+						ind += field[4];
 					}
 				}
-				record.add_field(code, ind1, ind2, value);
+				
+				record.addField(code, ind, value);
 			}
 		}
 		
@@ -1668,7 +1673,7 @@ REPLACE INTO "translators" VALUES ('774d7dc2-3474-2684-392c-f787789ec63d', '2006
 		return "multiple";
 	}
 }',
-'function scrape(doc, url) {
+'function doWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == ''x'') return namespace; else return null;
@@ -1701,7 +1706,9 @@ REPLACE INTO "translators" VALUES ('774d7dc2-3474-2684-392c-f787789ec63d', '2006
 		}
 	}
 	
-	var marc = Scholar.loadTranslator("import", "a6ee60df-1ddc-4aae-bb25-45e0537be973");
+	var translator = Scholar.loadTranslator("import");
+	translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
+	var marc = translator.getTranslatorObject();
 	
 	Scholar.Utilities.processDocuments(uris, function(newDoc) {
 		var uri = newDoc.location.href;
@@ -1712,28 +1719,29 @@ REPLACE INTO "translators" VALUES ('774d7dc2-3474-2684-392c-f787789ec63d', '2006
 		} : null;
 		
 		var xpath = ''//form/table[@class="tableBackground"]/tbody/tr/td/table[@class="tableBackground"]/tbody/tr[td[1]/a[@class="normalBlackFont1"]]'';
-		var elmts = Scholar.Utilities.gatherElementsOnXPath(newDoc, newDoc, xpath, nsResolver);
+		var elmts = newDoc.evaluate(xpath, newDoc, nsResolver, XPathResult.ANY_TYPE, null);
+		var elmt;
 		
-		var record = new marc.MARC_Record();		
-		for(var i=0; i<elmts.length; i++) {
-			var elmt = elmts[i];
+		var record = new marc.record();		
+		while(elmt = elmts.iterateNext()) {
 			var field = Scholar.Utilities.superCleanString(newDoc.evaluate(''./TD[1]/A[1]/text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue);
 			var value = Scholar.Utilities.getNodeString(newDoc, elmt, ''./TD[2]/TABLE[1]/TBODY[1]/TR[1]/TD[1]/A[1]//text()'', nsResolver);
-			value = value.replace(/\$([a-z]) /g, record.subfield_delimiter+"$1");
 			
-			if(field != "FMT" && field != "LDR") {
-				var ind1 = "";
-				var ind2 = "";
-				var valRegexp = /^([0-9])([0-9])? (.*)$/;
-				var m = valRegexp.exec(value);
-				if(m) {
-					ind1 = m[1];
-					if(ind2) {
-						ind2 = m[2]
+			if(field == "LDR") {
+				record.leader = value;
+			} else if(field != "FMT") {
+				value = value.replace(/\$([a-z]) /g, marc.subfieldDelimiter+"$1");
+				
+				var code = field.substring(0, 3);
+				var ind = "";
+				if(field.length > 3) {
+					ind = field[3];
+					if(field.length > 4) {
+						ind += field[4];
 					}
-					value = m[3];
 				}
-				marc.add_field(field, ind1, ind2, value);
+				
+				record.addField(code, ind, value);
 			}
 		}
 		
@@ -1765,10 +1773,12 @@ REPLACE INTO "translators" VALUES ('63a0a351-3131-18f4-21aa-f46b9ac51d87', '2006
 	var uri = doc.location.href;
 	var newUris = new Array();
 	
-	var marcs = Scholar.Utilities.gatherElementsOnXPath(doc, doc, ''//a[text()="marc"]'', nsResolver);
+	var marcs = doc.evaluate(''//a[text()="marc"]'', doc, nsResolver,
+	                         XPathResult.ANY_TYPE, null);
+	var record = marcs.iterateNext();
 	
-	if(marcs.length == 1) {
-		newUris.push(marcs[0].href)
+	if(record && !marcs.iterateNext()) {
+		newUris.push(record.href);
 	} else {
 		// Require link to match this
 		var tagRegexp = new RegExp();
@@ -1776,10 +1786,12 @@ REPLACE INTO "translators" VALUES ('63a0a351-3131-18f4-21aa-f46b9ac51d87', '2006
 		
 		var items = new Array();
 		
-		var tableRows = Scholar.Utilities.gatherElementsOnXPath(doc, doc, ''//tr[@class="intrRow"]'', nsResolver);
+		var tableRows = doc.evaluate(''//tr[@class="intrRow"]'', doc, nsResolver,
+		                             XPathResult.ANY_TYPE, null);
+		var tableRow
 		// Go through table rows
-		for(var i=0; i<tableRows.length; i++) {
-			var links = Scholar.Utilities.gatherElementsOnXPath(doc, tableRows[i], ''.//a'', nsResolver);
+		while(tableRow = tableRows.iterateNext()) {
+			var links = tableRow.getElementsByTagName("a");
 			// Go through links
 			var url;
 			for(var j=0; j<links.length; j++) {
@@ -1790,10 +1802,13 @@ REPLACE INTO "translators" VALUES ('63a0a351-3131-18f4-21aa-f46b9ac51d87', '2006
 			}
 			if(url) {
 				// Collect title information
-				var fields = Scholar.Utilities.gatherElementsOnXPath(doc, tableRows[i], ''./td/table/tbody/tr[th]'', nsResolver);
-				for(var j=0; j<fields.length; j++) {
-					var field = doc.evaluate(''./th/text()'', fields[j], nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-					if(field.nodeValue == "Title") {
+				var fields = doc.evaluate(''./td/table/tbody/tr[th]'', tableRow,
+				                          nsResolver, XPathResult.ANY_TYPE, null);
+				var field;
+				while(field = fields.iterateNext()) {
+					var header = doc.evaluate(''./th/text()'', fields[j], nsResolver,
+					                          XPathResult.ANY_TYPE, null).iterateNext();
+					if(header.nodeValue == "Title") {
 						var value = Scholar.Utilities.getNodeString(doc, fields[j], ''./td//text()'', nsResolver);
 						if(value) {
 							items[url] = Scholar.Utilities.cleanString(value);
@@ -1815,7 +1830,9 @@ REPLACE INTO "translators" VALUES ('63a0a351-3131-18f4-21aa-f46b9ac51d87', '2006
 		}
 	}
 	
-	var marc = Scholar.loadTranslator("import", "a6ee60df-1ddc-4aae-bb25-45e0537be973");
+	var translator = Scholar.loadTranslator("import");
+	translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
+	var marc = translator.getTranslatorObject();
 	
 	Scholar.Utilities.processDocuments(newUris, function(newDoc) {
 		var uri = newDoc.location.href
@@ -1825,18 +1842,20 @@ REPLACE INTO "translators" VALUES ('63a0a351-3131-18f4-21aa-f46b9ac51d87', '2006
 		  if (prefix == ''x'') return namespace; else return null;
 		} : null;
 		
+		var record = new marc.record();
+		
 		var xpath = ''//table[@class="outertable"]/tbody/tr[td[4]]'';
-		var elmts = Scholar.Utilities.gatherElementsOnXPath(newDoc, newDoc, xpath, nsResolver);
-		var record = new marc.MARC_Record();		
-		for(var i=0; i<elmts.length; i++) {
-			var elmt = elmts[i];
+		var elmts = newDoc.evaluate(xpath, newDoc, nsResolver,
+		                            XPathResult.ANY_TYPE, null);
+		
+		while(elmt = elmts.iterateNext()) {
 			var field = doc.evaluate(''./TD[1]/text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
 			var ind1 = doc.evaluate(''./TD[2]/text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
 			var ind2 = doc.evaluate(''./TD[3]/text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
 			var value = doc.evaluate(''./TD[4]/text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
-			value = value.replace(/\\([a-z]) /g, record.subfield_delimiter+"$1");
+			value = value.replace(/\\([a-z]) /g, marc.subfieldDelimiter+"$1");
 			
-			record.add_field(field, ind1, ind2, value);
+			record.addField(field, ind1+ind2, value);
 		}
 		
 		var newItem = new Scholar.Item();
@@ -1896,15 +1915,12 @@ REPLACE INTO "translators" VALUES ('fb12ae9e-f473-cab4-0546-27ab88c64101', '2006
 		// Keep track of how many requests have been completed
 		var j = 0;
 		
-		var marc = Scholar.loadTranslator("import", "a6ee60df-1ddc-4aae-bb25-45e0537be973");
+		var translator = Scholar.loadTranslator("import");
+		translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
 		
 		Scholar.Utilities.HTTP.doGet(newUri, function(text) {
-			var record = new marc.MARC_Record();
-			record.load(text, "binary");
-			
-			var newItem = new Scholar.Item();
-			record.translate(record, newItem);
-			newItem.complete();
+			translator.setString(text);
+			translator.translate();
 			
 			j++;
 			if(j == uris.length) {
@@ -1948,7 +1964,9 @@ REPLACE INTO "translators" VALUES ('c0e6fda6-0ecd-e4f4-39ca-37a4de436e15', '2006
 		uris.push(newUri);
 	}
 	
-	var marc = Scholar.loadTranslator("import", "a6ee60df-1ddc-4aae-bb25-45e0537be973");
+	var translator = Scholar.loadTranslator("import");
+	translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
+	var marc = translator.getTranslatorObject();
 	
 	Scholar.Utilities.processDocuments(uris, function(newDoc) {
 		var uri = newDoc.location.href;
@@ -1958,37 +1976,38 @@ REPLACE INTO "translators" VALUES ('c0e6fda6-0ecd-e4f4-39ca-37a4de436e15', '2006
 		  if (prefix == ''x'') return namespace; else return null;
 		} : null;
 		
-		var record = new marc.MARC_Record();
+		var record = new marc.record();
 		
-		var elmts = Scholar.Utilities.gatherElementsOnXPath(newDoc, newDoc, ''//pre/text()'', nsResolver);
-		var tag, ind1, ind2, content;
+		var elmts = newDoc.evaluate(''//pre/text()'', newDoc, nsResolver,
+		                            XPathResult.ANY_TYPE, null);
+		var elmt, tag, content;
+		var ind = "";
 		
-		for(var i=0; i<elmts.length; i++) {
-			var line = elmts[i].nodeValue;
+		while(elmt = elmts.iterateNext()) {
+			var line = elmt.nodeValue;
 			
 			if(line.substring(0, 6) == "       ") {
 				content += " "+line.substring(6);
 				continue;
 			} else {
 				if(tag) {
-					record.add_field(tag, ind1, ind2, content);
+					record.addField(tag, ind, content);
 				}
 			}
 			
-			line = line.replace(/\xA0/g," "); // nbsp
-			line = line.replace(/_/g," ");
-			line = line.replace(/\t/g,"");
+			line = line.replace(/[_\t\xA0]/g," "); // nbsp
 			
-			tag = line.substring(0, 3);
-			if(parseInt(tag) > 10) {
-				ind1 = line.substring(4, 5);
-				ind2 = line.substring(5, 6);
-				content = line.substring(7);
-				content = content.replace(/\$([a-z])(?: |$)/g, record.subfield_delimiter+"$1");
+			tag = line.substr(0, 3);
+			if(tag[0] != "0" || tag[1] != "0") {
+				ind = line.substr(4, 2);
+				content = line.substr(7).replace(/\$([a-z])(?: |$)/g, marc.subfieldDelimiter+"$1");
 			} else {
-				ind1 = "";
-				ind2 = "";
-				content = line.substring(4);
+				if(tag == "000") {
+					tag = undefined;
+					record.leader = "00000"+line.substr(4);
+				} else {
+					content = line.substr(4);
+				}
 			}
 			
 		}
@@ -2008,15 +2027,18 @@ REPLACE INTO "translators" VALUES ('5287d20c-8a13-6004-4dcb-5bb2b66a9cc9', '2006
 		if (prefix == ''x'') return namespace; else return null;
 	} : null;
 	
-	var elmts = Scholar.Utilities.gatherElementsOnXPath(doc, doc, ''/html/body/form/p/text()[1]'', nsResolver);
-	for(var i=0; i<elmts.length; i++) {
-		if(Scholar.Utilities.superCleanString(elmts[i].nodeValue) == "Viewing record") {
+	var elmts = doc.evaluate(''/html/body/form/p/text()[1]'', doc, nsResolver,
+	                         XPathResult.ANY_TYPE, null);
+	var elmt;
+	while(elmt = elmts.iterateNext()) {
+		if(Scholar.Utilities.superCleanString(elmt.nodeValue) == "Viewing record") {
 			return "book";
 		}
 	}
+	
 	var xpath = ''//form[@name="hitlist"]/table/tbody/tr'';
-	var elmts = Scholar.Utilities.gatherElementsOnXPath(doc, doc, xpath, nsResolver);
-	if(elmts.length) {
+	var elmts = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+	if(elmts.iterateNext()) {
 		return "multiple";
 	}
 }',
@@ -2026,21 +2048,14 @@ REPLACE INTO "translators" VALUES ('5287d20c-8a13-6004-4dcb-5bb2b66a9cc9', '2006
 		if (prefix == ''x'') return namespace; else return null;
 	} : null;
 	
-	// Cheap hack to convert HTML entities
-	function unescapeHTML(text) {
-		var div = doc.createElement("div");
-		div.innerHTML = Scholar.Utilities.cleanTags(text);
-		var text = div.childNodes[0] ? div.childNodes[0].nodeValue : null;
-		delete div;
-		return text;
-	}
-	
 	var uri = doc.location.href;
 	var recNumbers = new Array();
 	
 	var xpath = ''//form[@name="hitlist"]/table/tbody/tr'';
-	var elmts = Scholar.Utilities.gatherElementsOnXPath(doc, doc, xpath, nsResolver);
-	if(elmts.length) {	// Search results page
+	var elmts = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+	var elmt = elmts.iterateNext();
+	
+	if(elmt) {	// Search results page
 		var uriRegexp = /^http:\/\/[^\/]+/;
 		var m = uriRegexp.exec(uri);
 		var postAction = doc.forms.namedItem("hitlist").getAttribute("action");
@@ -2050,16 +2065,16 @@ REPLACE INTO "translators" VALUES ('5287d20c-8a13-6004-4dcb-5bb2b66a9cc9', '2006
 		
 		var items = new Array();
 		
-		for(var i=0; i<elmts.length; i++) {
-			var links = Scholar.Utilities.gatherElementsOnXPath(doc, elmts[i], ''.//a'', nsResolver);
-			
+		do {
+			var checkbox = doc.evaluate(''.//input[@type="checkbox"]'', elmt, nsResolver,
+			                            XPathResult.ANY_TYPE, null).iterateNext();
 			// Collect title
-			var myTd = doc.evaluate("./td[2]", elmts[i], nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-			var m = titleRe.exec(myTd.innerHTML);
-			var title = unescapeHTML(m[1]);
+			var title = Scholar.Utilities.getNodeString(doc, elmt, "./td[2]/text()", nsResolver);
 			
-			items[i] = title;
-		}
+			if(checkbox && title) {
+				items[checkbox.name] = Scholar.Utilities.cleanString(title);
+			}
+		} while(elmt = elmts.iterateNext());
 		
 		
 		items = Scholar.selectItems(items);
@@ -2069,16 +2084,16 @@ REPLACE INTO "translators" VALUES ('5287d20c-8a13-6004-4dcb-5bb2b66a9cc9', '2006
 		}
 		
 		for(var i in items) {
-			recNumbers.push(parseInt(i)+1);
+			recNumbers.push(i);
 		}
 	} else {		// Normal page
 		var uriRegexp = /^(.*)(\/[0-9]+)$/;
 		var m = uriRegexp.exec(uri);
 		var newUri = m[1]+"/40"
 		
-		var elmts = Scholar.Utilities.gatherElementsOnXPath(doc, doc, ''/html/body/form/p'', nsResolver);
-		for(var i=0; i<elmts.length; i++) {
-			var elmt = elmts[i];
+		var elmts = doc.evaluate(''/html/body/form/p'', doc, nsResolver,
+		                         XPathResult.ANY_TYPE, null);
+		while(elmt = elmts.iterateNext()) {
 			var initialText = doc.evaluate(''./text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 			if(initialText && initialText.nodeValue && Scholar.Utilities.superCleanString(initialText.nodeValue) == "Viewing record") {
 				recNumbers.push(doc.evaluate(''./b[1]/text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue);
@@ -2087,42 +2102,48 @@ REPLACE INTO "translators" VALUES ('5287d20c-8a13-6004-4dcb-5bb2b66a9cc9', '2006
 		}
 	}
 	
-	var marc = Scholar.loadTranslator("import", "a6ee60df-1ddc-4aae-bb25-45e0537be973");
+	var translator = Scholar.loadTranslator("import");
+	translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
+	var marc = translator.getTranslatorObject();
 	
-	Scholar.Utilities.HTTP.doGet(newUri+''?marks=''+recNumbers.join(",")+''&shadow=NO&format=FLAT+ASCII&sort=TITLE&vopt_elst=ALL&library=ALL&display_rule=ASCENDING&duedate_code=l&holdcount_code=t&DOWNLOAD_x=22&DOWNLOAD_y=12&address=&form_type='', function(text) {
-		var texts = text.split("<PRE>");
-		texts = texts[1].split("</PRE>");
-		text = unescapeHTML(texts[0]);
+	Scholar.Utilities.loadDocument(newUri+''?marks=''+recNumbers.join(",")+''&shadow=NO&format=FLAT+ASCII&sort=TITLE&vopt_elst=ALL&library=ALL&display_rule=ASCENDING&duedate_code=l&holdcount_code=t&DOWNLOAD_x=22&DOWNLOAD_y=12&address=&form_type='', function(doc) {
+		var pre = doc.getElementsByTagName("pre");
+		var text = pre[0].textContent;
+		
 		var documents = text.split("*** DOCUMENT BOUNDARY ***");
 		
 		for(var j=1; j<documents.length; j++) {
 			var uri = newUri+"?marks="+recNumbers[j]+"&shadow=NO&format=FLAT+ASCII&sort=TITLE&vopt_elst=ALL&library=ALL&display_rule=ASCENDING&duedate_code=l&holdcount_code=t&DOWNLOAD_x=22&DOWNLOAD_y=12&address=&form_type=";
 			var lines = documents[j].split("\n");
-			var record = new marc.MARC_Record();
-			var tag, ind1, ind2, content;
+			var record = new marc.record();
+			var tag, content;
+			var ind = "";
+			
 			for(var i=0; i<lines.length; i++) {
 				var line = lines[i];
 				
-				if(line.substr(0, 1) == "." && line.substr(4,2) == ". ") {
+				if(line[0] == "." && line.substr(4,2) == ". ") {
 					if(tag) {
-						content = content.replace(/\|([a-z])/g, record.subfield_delimiter+"$1");
-						record.add_field(tag, ind1, ind2, content);
+						content = content.replace(/\|([a-z])/g, marc.subfieldDelimiter+"$1");
+						record.addField(tag, ind, content);
 					}
 				} else {
-					content += " "+line.substring(6);
+					content += " "+line.substr(6);
 					continue;
 				}
 				
 				tag = line.substr(1, 3);
 				
-				if(parseInt(tag) > 10) {
-					ind1 = line.substr(6, 1);
-					ind2 = line.substr(7, 1);
+				if(tag[0] != "0" || tag[1] != "0") {
+					ind = line.substr(6, 2);
 					content = line.substr(8);
 				} else {
-					ind1 = "";
-					ind2 = "";
-					content = line.substring(6);
+					content = line.substr(7);
+					if(tag == "000") {
+						tag = undefined;
+						record.leader = "00000"+content;
+						Scholar.Utilities.debug("the leader is: "+record.leader);
+					}
 				}
 			}
 			
@@ -2170,7 +2191,9 @@ REPLACE INTO "translators" VALUES ('0f9fc2fc-306e-5204-1117-25bca009dffc', '2006
 		}
 	}
 	
-	var marc = Scholar.loadTranslator("import", "a6ee60df-1ddc-4aae-bb25-45e0537be973");
+	var translator = Scholar.loadTranslator("import");
+	translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
+	var marc = translator.getTranslatorObject();
 	
 	Scholar.Utilities.processDocuments(newUris, function(newDoc) {
 		var uri = newDoc.location.href;
@@ -2180,48 +2203,40 @@ REPLACE INTO "translators" VALUES ('0f9fc2fc-306e-5204-1117-25bca009dffc', '2006
 		  if (prefix == ''x'') return namespace; else return null;
 		} : null;
 		
-		var record = new marc.MARC_Record();
+		var record = new marc.record();
 		
-		var elmts = Scholar.Utilities.gatherElementsOnXPath(newDoc, newDoc, ''/html/body/table/tbody/tr[td[4]]'', nsResolver);
-		var tag, ind1, ind2, content;
+		var elmts = newDoc.evaluate(''/html/body/table/tbody/tr[td[4]]'', newDoc, nsResolver,
+		                            XPathResult.ANY_TYPE, null);
+		var tag, ind, content, elmt;
 		
-		for(var i=0; i<elmts.length; i++) {
-			var elmt = elmts[i];
-			
+		while(elmt = elmts.iterateNext()) {
 			tag = newDoc.evaluate(''./td[2]/tt[1]/text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
 			var inds = newDoc.evaluate(''./td[3]/tt[1]/text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
 			
 			tag = tag.replace(/[\r\n]/g, "");
-			if(tag.length == 1) {
-				tag = "00"+tag;
-			} else if(tag.length == 2) {
-				tag = "0"+tag;
-			}
-			inds = inds.replace(/[\r\n]/g, "");
+			inds = inds.replace(/[\r\n\xA0]/g, "");
 			
-			// Get indicators, fix possible problems with &nbsp;s
-			ind1 = inds.substr(0, 1);
-			ind2 = inds.substr(1, 1);
-			if(ind1 == "\xA0") {
-				ind1 = "";
-			}
-			if(ind2 == "\xA0") {
-				ind2 = "";
-			}
+			var children = newDoc.evaluate(''./td[4]/tt[1]//text()'', elmt, nsResolver,
+			                               XPathResult.ANY_TYPE, null);
+			var subfield = children.iterateNext();
+			var fieldContent = children.iterateNext();
 			
-			var children = Scholar.Utilities.gatherElementsOnXPath(newDoc, elmt, ''./td[4]/tt[1]//text()'', nsResolver);
-			content = "";
-			if(children.length == 1) {
-				content = children[0].nodeValue;
+			if(tag == "LDR") {
+				record.leader = "00000"+subfield.nodeValue;
 			} else {
-				for(var j=0; j<children.length; j+=2) {
-					var subfield = children[j].nodeValue.substr(1, 1);
-					var fieldContent = children[j+1].nodeValue;
-					content += record.subfield_delimiter+subfield+fieldContent;
+				content = "";
+				if(!fieldContent) {
+					content = subfield.nodeValue;
+				} else {
+					while(subfield && fieldContent) {
+						content += marc.subfieldDelimiter+subfield.nodeValue.substr(1, 1)+fieldContent.nodeValue;
+						var subfield = children.iterateNext();
+						var fieldContent = children.iterateNext();
+					}
 				}
+				
+				record.addField(tag, inds, content);
 			}
-			
-			record.add_field(tag, ind1, ind2, content);
 		}
 		
 		var newItem = new Scholar.Item();
@@ -2307,12 +2322,22 @@ REPLACE INTO "translators" VALUES ('c54d1932-73ce-dfd4-a943-109380e06574', '2006
 			Scholar.Utilities.HTTP.doGet("http://muse.jhu.edu/search/export.cgi?exporttype=endnote"+articleString, function(text) {
 				Scholar.Utilities.debug(text);
 				// load translator for RIS
-				var translator = Scholar.loadTranslator("import", "32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-				// feed in data
-				translator.Scholar.write(text);
-				translator.Scholar.eof();
-				// translate
-				translator.doImport(newAttachments);
+				var translator = Scholar.loadTranslator("import");
+				translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+				translator.setString(text);
+				translator.setHandler("itemDone", function(obj, item) {
+					if(item.notes && item.notes[0]) {
+						Scholar.Utilities.debug(item.notes);
+						item.extra = item.notes[0].note;
+						
+						delete item.notes;
+						item.notes = undefined;
+					}
+					item.attachments = newAttachments.shift();
+					Scholar.Utilities.debug(item.attachments);
+					item.complete();
+				});
+				translator.translate();
 				Scholar.done();
 			}, function() {});
 		}, function() {});
@@ -2857,10 +2882,11 @@ function doWeb(doc, url) {
 		var urls = [reformURL(url)];
 	}
 	
-	var marc = Scholar.loadTranslator("import", "a6ee60df-1ddc-4aae-bb25-45e0537be973");
+	var translator = Scholar.loadTranslator("import");
+	translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
+	var marc = translator.getTranslatorObject();
 	
 	Scholar.Utilities.processDocuments(urls, function(newDoc) {
-		Scholar.Utilities.debug(newDoc.getElementsByTagName("body")[0].innerHTML);
 		var uri = newDoc.location.href;
 		
 		var namespace = newDoc.documentElement.namespaceURI;
@@ -2871,28 +2897,193 @@ function doWeb(doc, url) {
 		var elmts = newDoc.evaluate(''//table/tbody/tr[@valign="top"]'',
 		                         newDoc, nsResolver, XPathResult.ANY_TYPE, null);
 		
-		var record = new marc.MARC_Record();
+		var record = new marc.record();
 		while(elmt = elmts.iterateNext()) {
 			var field = Scholar.Utilities.superCleanString(doc.evaluate(''./TD[1]/text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue);
 			var value = doc.evaluate(''./TD[2]/text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
-			var ind1 = value[4];
-			var ind2 = value[6];
-			value = Scholar.Utilities.cleanString(value.substr(6)).
-			        replace(/\$([a-z0-9]) /g, record.subfield_delimiter+"$1");
-			if(value[0] != record.subfield_delimiter) {
-				value = record.subfield_delimiter+"a"+value;
-			}
 			
-			if(field != 0) {
-				record.add_field(field, ind1, ind2, value);
+			// remove spacing
+			value = value.replace(/^\s+/, "");
+			value = value.replace(/\s+$/, "");
+			
+			if(field == 0) {
+				record.leader = "00000"+value;
+			} else {
+				var ind = value[3]+value[5];
+				value = Scholar.Utilities.cleanString(value.substr(5)).
+						replace(/\$([a-z0-9]) /g, marc.subfieldDelimiter+"$1");
+				if(value[0] != marc.subfieldDelimiter) {
+					value = marc.subfieldDelimiter+"a"+value;
+				}
+				record.addField(field, ind, value);
 			}
 		}
 		
 		var newItem = new Scholar.Item();
-		newItem.source = uri;
 		record.translate(newItem);
 		newItem.complete();
 	}, function() { Scholar.done(); }, null);
+	
+	Scholar.wait();
+}');
+
+REPLACE INTO "translators" VALUES ('d0b1914a-11f1-4dd7-8557-b32fe8a3dd47', '2006-08-18 18:03:00', 4, 'EBSCOhost', 'Simon Kornblith', '^http://web\.ebscohost\.com/ehost/(?:results|detail)', 
+'function detectWeb(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	var searchRe = new RegExp("^http://web\\.ebscohost\\.com/ehost/results", "i");
+	
+	// See if this is a seach results page
+	if(searchRe.test(url)) {
+		return "multiple";
+	} else {
+		var persistentLink = doc.evaluate(''//tr[td[@class="left-content-ft"]/text() = "Persistent link to this record:"]/td[@class="right-content-ft"]'',
+		                                  doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+		if(persistentLink) {
+			return "journalArticle";
+		}
+	}
+}',
+'function fullEscape(text) {
+	return escape(text).replace(/\//g, "%2F").replace(/\+/g, "%2B");
+}
+
+function doWeb(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	var queryRe = /\?(.*)$/;
+	var m = queryRe.exec(url);
+	var queryString = m[1];
+		
+	var eventValidation = doc.evaluate(''//input[@name="__EVENTVALIDATION"]'', doc, nsResolver,
+	                                   XPathResult.ANY_TYPE, null).iterateNext();		
+	eventValidation = fullEscape(eventValidation.value);
+	var viewState = doc.evaluate(''//input[@name="__VIEWSTATE"]'', doc, nsResolver,
+								 XPathResult.ANY_TYPE, null).iterateNext();
+	viewState = fullEscape(viewState.value);
+	
+	var searchRe = new RegExp("^http://web\\.ebscohost\\.com/ehost/results", "i");
+	if(searchRe.test(url)) {
+		var items = new Object();
+		
+		var tableRows = doc.evaluate(''//table[@class="cluster-result-record-table"]/tbody/tr'',
+		                             doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var tableRow;
+		// Go through table rows
+		while(tableRow = tableRows.iterateNext()) {
+			var title = doc.evaluate(''.//a[@class="title-link"]'', tableRow, nsResolver,
+			                         XPathResult.ANY_TYPE, null).iterateNext();
+			var addLink = doc.evaluate(''.//a[substring(@id, 1, 11)="addToFolder"]'', tableRow, nsResolver,
+			                           XPathResult.ANY_TYPE, null).iterateNext();
+			if(title && addLink) {
+				items[addLink.href] = title.textContent;
+			}
+		}
+		
+		var items = Scholar.selectItems(items);
+		if(!items) {
+			return true;
+		}
+		
+		var citations = new Array();
+		var argRe = /''([^'']+)''/;
+		for(var i in items) {
+			var m = argRe.exec(i);
+			citations.push(m[1]);
+		}
+		var saveString = "__EVENTTARGET=FolderItem:AddItem&IsCallBack=true&SearchTerm1=test&listDatabaseGroupings=pdh&SortOptionDropDown=date&__EVENTVALIDATION="+eventValidation+"&__EVENTARGUMENT="+citations.join(",")+"&";
+		
+		
+	} else {
+		// If this is a view page, find the link to the citation
+		var xpath = ''/html/body/div[@class="indent"]/center//a[@class="nav"]'';
+		var elmts = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var saveCitation = elmts.iterateNext();
+		var viewSavedCitations = elmts.iterateNext();
+		
+		var saveString = "__EVENTTARGET=ctl00%24ctl00%24MainContentArea%24MainContentArea%24topAddToFolderControl%24lnkAddToFolder&__EVENTARGUMENT=&__VIEWSTATE="+viewState+"&__EVENTVALIDATION="+eventValidation;
+	}
+	
+	var folderString = "__EVENTTARGET=ctl00%24ctl00%24ToolbarArea%24toolbar%24folderControl%24lnkFolder&__EVENTARGUMENT=&__VIEWSTATE="+viewState+"&__EVENTVALIDATION="+eventValidation;
+	var getString = "__EVENTTARGET=Tabs&IsCallBack=true&chkRemoveFromFolder=true&chkIncludeHTMLFT=true&chkIncludeHTMLLinks=true&CitationFormat=standard&lstFormatStandard=1&lstFormatIndustry=4&cfCommonAb=false&cfCommonAu=true&cfCommonTypDoc=true&cfCommonID=true&cfCommonISSN=true&cfCommonNote=false&cfCommonRevInfo=false&cfCommonSrc=true&cfCommonTi=true&__EVENTARGUMENT=1&"
+	
+	var viewStateMatch = /<input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="([^"]+)" \/>/
+	var eventValidationMatch = /<input type="hidden" name="__EVENTVALIDATION" id="__EVENTVALIDATION" value="([^"]+)" \/>/
+	
+	Scholar.Utilities.HTTP.doPost(url, saveString, function() {				// mark records
+		Scholar.Utilities.HTTP.doPost(url, folderString, function(text) {
+			var postLocation = /<form name="aspnetForm" method="post" action="([^"]+)"/
+			var m = postLocation.exec(text);
+			var folderURL = m[1].replace(/&amp;/g, "&");
+			
+			m = viewStateMatch.exec(text);
+			var folderViewState = m[1];
+			var folderBase = "__EVENTARGUMENT=&__VIEWSTATE="+fullEscape(folderViewState);
+			m = eventValidationMatch.exec(text);
+			var folderEventValidation = m[1];
+			folderBase += "&__EVENTVALIDATION="+fullEscape(folderEventValidation);
+			var deliverString = "__EVENTTARGET=ctl00%24ctl00%24MainContentArea%24MainContentArea%24btnDelivery%24lnkSave&"+folderBase
+			
+			Scholar.Utilities.HTTP.doPost("http://web.ebscohost.com/ehost/"+folderURL,
+										  deliverString, function(text) {
+				var postLocation = /<form name="aspnetForm" method="post" action="([^"]+)"/
+				var m = postLocation.exec(text);
+				var deliveryURL = m[1].replace(/&amp;/g, "&");
+
+				var m = viewStateMatch.exec(text);
+				var downloadString = "__EVENTTARGET=&__EVENTARGUMENT=&__VIEWSTATE="+fullEscape(m[1])+"&ctl00%24ctl00%24MainContentArea%24MainContentArea%24ctl01%24chkRemoveFromFolder=on&ctl00%24ctl00%24MainContentArea%24MainContentArea%24ctl01%24btnSubmit=Save&ctl00%24ctl00%24MainContentArea%24MainContentArea%24ctl01%24BibFormat=1";
+
+				Scholar.Utilities.HTTP.doPost("http://web.ebscohost.com/ehost/"+deliveryURL,
+				                         getString, function(text) {					
+					Scholar.Utilities.HTTP.doPost("http://web.ebscohost.com/ehost/"+deliveryURL,
+												 downloadString, function(text) {	// get marked
+						var form = doc.createElement("form");
+						form.setAttribute("method", "post");
+						form.setAttribute("action", "http://web.ebscohost.com/ehost/"+folderURL);
+						var args = [
+							["__EVENTARGUMENT", ""],
+							["__VIEWSTATE", folderViewState],
+							["__EVENTVALIDATION", folderEventValidation],
+							["__EVENTTARGET", "ctl00$ctl00$MainContentArea$MainContentArea$btnBack$lnkBack"]
+						];
+						for(var i in args) {
+							var input = doc.createElement("input");
+							input.setAttribute("type", "hidden");
+							input.setAttribute("name", args[i][0]);
+							input.setAttribute("value", args[i][1]);
+							form.appendChild(input);
+						}
+						var body = doc.getElementsByTagName("body");
+						body[0].appendChild(form);
+						form.submit();
+						
+						// load translator for RIS
+						var translator = Scholar.loadTranslator("import");
+						translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+						translator.setString(text);
+						translator.setHandler("itemDone", function(obj, item) {
+							if(item.notes && item.notes[0]) {
+								item.extra = item.notes[0].note;
+								
+								delete item.notes;
+								item.notes = undefined;
+							}
+							item.complete();
+						});
+						translator.translate();
+						
+						Scholar.done();
+					});
+				});
+			});
+		});
+	});
 	
 	Scholar.wait();
 }');
@@ -4526,6 +4717,7 @@ function detectImport() {
 		if(line.replace(/\s/g, "") != "") {
 			if(line.substr(0, 6) == "TY  - ") {
 				return true;
+				Scholar.Utilities.debug("YES!");
 			} else {
 				return false;
 			}
@@ -4616,11 +4808,11 @@ function processTag(item, tag, value) {
 		}
 	} else if(tag == "A1" || tag == "AU") {
 		// primary author
-		var names = value.split(",");
+		var names = value.split(/, ?/);
 		item.creators.push({lastName:names[0], firstName:names[1], creatorType:"author"});
 	} else if(tag == "A2" || tag == "ED") {
 		// contributing author
-		var names = value.split(",");
+		var names = value.split(/, ?/);
 		item.creators.push({lastName:names[0], firstName:names[1], creatorType:"contributor"});
 	} else if(tag == "Y1" || tag == "PY") {
 		// year or date
@@ -4677,9 +4869,12 @@ function processTag(item, tag, value) {
 }
 
 function doImport(attachments) {
+	Scholar.Utilities.debug("hello");
+	
 	var line = true;
 	var tag = data = false;
 	do {	// first valid line is type
+		Scholar.Utilities.debug("ignoring "+line);
 		line = Scholar.read();
 		Scholar.Utilities.debug(line);
 	} while(line !== false && line.substr(0, 6) != "TY  - ");
@@ -4692,7 +4887,6 @@ function doImport(attachments) {
 	
 	var tag = "TY";
 	var data = line.substr(6);
-	
 	while((line = Scholar.read()) !== false) {	// until EOF
 		if(line.substr(2, 4) == "  - ") {
 			// if this line is a tag, take a look at the previous line to map
@@ -4822,320 +5016,21 @@ REPLACE INTO "translators" VALUES ('a6ee60df-1ddc-4aae-bb25-45e0537be973', '2006
 		return true;
 	}
 }',
-'/*
-* Original version of MARC record library copyright (C) 2005 Stefano Bargioni,
-* licensed under the LGPL
-*
-* (Available at http://www.pusc.it/bib/mel/Scholar.Ingester.MARC_Record.js)
-*
-* This library is free software; you can redistribute it or
-* modify it under the terms of the GNU General Public
-* License as published by the Free Software Foundation; either
-* version 2 of the License, or (at your option) any later version.
-*
-* This library is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-* General Public License for more details.
-*/
+'var fieldTerminator = "\x1E";
+var recordTerminator = "\x1D";
+var subfieldDelimiter = "\x1F";
 
-var MARC_Record = function() { // new MARC record
-	this.leader = {
-		record_length:''00000'',
-		record_status:''n'', // acdnp
-		type_of_record:'' '',
-		bibliographic_level:'' '',
-		type_of_control:'' '',
-		character_coding_scheme:'' '',
-		indicator_count:''2'',
-		subfield_code_length:''2'',
-		base_address_of_data:''00000'',
-		encoding_level:'' '',
-		descriptive_cataloging_form:'' '',
-		linked_record_requirement:'' '',
-		entry_map:''4500''
-	}; // 24 chars
+/*
+ * CLEANING FUNCTIONS
+ */
 
-	this.field_terminator   = ''\x1E'';
-	this.record_terminator  = ''\x1D'';
-	this.subfield_delimiter = ''\x1F'';
-	this.directory = '''';
-	this.directory_terminator = this.field_terminator;
-	this.variable_fields = new Array();
-};
-
-MARC_Record.prototype.load = function(s,f) { // loads record s passed in format f
-	if (f == ''binary'') {
-		this.leader.record_length = ''00000'';
-		this.leader.record_status = s.substr(5,1);
-		this.leader.type_of_record = s.substr(6,1);
-		this.leader.bibliographic_level = s.substr(7,1);
-		this.leader.type_of_control = s.substr(8,1);
-		this.leader.character_coding_scheme = s.substr(9,1);
-		this.leader.indicator_count = ''2'';
-		this.leader.subfield_code_length = ''2'';
-		this.leader.base_address_of_data = ''00000'';
-		this.leader.encoding_level = s.substr(17,1);
-		this.leader.descriptive_cataloging_form = s.substr(18,1);
-		this.leader.linked_record_requirement = s.substr(19,1);
-		this.leader.entry_map = ''4500'';
-		
-		this.directory = '''';
-		this.directory_terminator = this.field_terminator;
-		this.variable_fields = new Array();
-	
-		// loads fields
-		var campi = s.split(this.field_terminator);
-		var k;
-		for (k=1; k<-1+campi.length; k++) { // the first and the last are unuseful
-			// the first is the header + directory, the last is the this.record_terminator
-			var tag = campi[0].substr(24+(k-1)*12,3);
-			var ind1 = ''''; var ind2 = ''''; var value = campi[k];
-			if (tag.substr(0,2) != ''00'') {
-				ind1  = campi[k].substr(0,1);
-				ind2  = campi[k].substr(1,1);
-				value = campi[k].substr(2);
-			}
-			this.add_field(tag,ind1,ind2,value);
-		}
-	}
-	
-	this.update_record_length();
-	this.update_base_address_of_data();
-	return this;
-}
-
-MARC_Record.prototype.update_base_address_of_data = function() { // updates the base_address
-	this.leader.base_address_of_data = this._zero_fill(24+this.variable_fields.length*12+1,5);
-	return this.leader.base_address_of_data;
-}
-
-MARC_Record.prototype.update_displacements = function() { // rebuilds the directory
-	var displ = 0;
-	this.directory = '''';
-	for (var i=0; i<this.variable_fields.length; i++) {
-		var len = this.variable_fields[i].value.length + 1 +
-				 this.variable_fields[i].ind1.length  +
-				 this.variable_fields[i].ind2.length;
-		this.directory += this.variable_fields[i].tag +
-						  this._zero_fill(len,4) + this._zero_fill(displ,5);
-		displ += len;
-	}
-	return true;
-}
-MARC_Record.prototype.update_record_length = function() { // updates total record length
-	var fields_total_length = 0; var f;
-	for (f=0; f<this.variable_fields.length;f++) {
-		fields_total_length += this.variable_fields[f].ind1.length+this.variable_fields[f].ind2.length+this.variable_fields[f].value.length + 1;
-	}
-	var rl = 24+this.directory.length+1+fields_total_length+1;
-	this.leader.record_length = this._zero_fill(rl,5);
-}
-
-MARC_Record.prototype.sort_directory = function() { // sorts directory and array variable_fields by tag and occ
-	// ordinamento della directory
-	if (this.directory.length <= 12) { return true; } // already sorted
-	var directory_entries = new Array();
-	var i;
-	for (i=0; i<this.directory.length; i=i+12) {
-		directory_entries[directory_entries.length] = this.directory.substr(i,12);
-	}
-	directory_entries.sort();
-	this.directory = directory_entries.join('''');
-	// sorts array variable_fields
-	this.variable_fields.sort(function(a,b) { return a.tag - b.tag + a.occ - b.occ; });
-	return true;
-}
-
-MARC_Record.prototype.show_leader = function() {
-	var leader = ''''; var f;
-	for (f in this.leader) { leader += this.leader[f]; }
-	return leader;
-}
-
-MARC_Record.prototype.show_fields = function() {
-	var fields = ''''; var f;
-	for (f=0; f<this.variable_fields.length;f++) {
-		fields += this.variable_fields[f].ind1  +
-				  this.variable_fields[f].ind2  +
-				  this.variable_fields[f].value +
-				  this.field_terminator;
-	}
-	return fields;
-}
-
-MARC_Record.prototype.show_directory = function() {
-	var d = '''';
-	for (var i = 0; i<this.directory.length; i+=12) {
-		d += this.directory.substr(i,3)   + '' '' +
-			 this.directory.substr(i+3,4) + '' '' +
-			 this.directory.substr(i+7,5) + ''\n'';
-	}
-	return d;
-}
-
-MARC_Record.prototype.add_field_005 = function() {
-	var now = new Date();
-	now = now.getFullYear() + 
-		  this._zero_fill(now.getMonth()+1,2) + 
-		  this._zero_fill(now.getDate(),2) +
-		  this._zero_fill(now.getHours(),2) + 
-		  this._zero_fill(now.getMinutes(),2) +
-		  this._zero_fill(now.getSeconds(),2) + ''.0'';
-	this.add_field(''005'','''','''',now);
-	return now;
-}
-
-MARC_Record.prototype.count_occ = function(tag) { // counts occ of tag
-	var n = 0;
-	for (var i=0; i<this.variable_fields.length; i++) {
-		if (this.variable_fields[i].tag == tag) { n++; }
-	}
-	return n;
-}
-
-MARC_Record.prototype.exists = function(tag) { // field existence
-	if (this.count_occ(tag) > 0) return true;
-	return false;
-}
-
-MARC_Record.prototype.MARC_field = function(rec,tag,ind1,ind2,value) { // new MARC field
-	this.tag = tag;
-	this.occ = rec.count_occ(tag)+1; // occurrence order no.
-	this.ind1 = ind1; if (this.ind1 == '''') this.ind1 = '' '';
-	this.ind2 = ind2; if (this.ind2 == '''') this.ind2 = '' '';
-	if (tag.substr(0,2) == ''00'') {
-		this.ind1 = ''''; this.ind2 = '''';
-	}
-	this.value = value;
-	return this;
-}
-
-MARC_Record.prototype.display = function(type) { // displays record in format type
-	type = type.toLowerCase();
-	if (type == ''binary'') return this.show_leader() +
-								 this.directory     +
-								 this.field_terminator   +
-								 this.show_fields() +
-								 this.record_terminator;
-	if (type == ''xml'') {
-		s = '''';
-		s += ''<?xml version="1.0" encoding="iso-8859-1"?><collection xmlns="http://www.loc.gov/MARC21/slim"><record>'';
-		s += ''<leader>''+this.show_leader()+''</leader>'';
-		// var i;
-		for (i=0; i<this.variable_fields.length; i++) {
-			ind1 = this.variable_fields[i].ind1; if (ind1 != '''') ind1 = '' ind1="''+ind1+''"'';
-			ind2 = this.variable_fields[i].ind2; if (ind2 != '''') ind2 = '' ind2="''+ind2+''"'';
-			if (this.variable_fields[i].tag.substr(0,2) == ''00'') s += ''<controlfield tag="''+this.variable_fields[i].tag+''">''+this.variable_fields[i].value+''</controlfield>'';
-			else {
-				var subfields = this.variable_fields[i].value.split(this.subfield_delimiter);
-				// alert(this.variable_fields[i].value+'' ''+subfields.length); // test
-				if (subfields.length == 1) subfields[1] = ''?''+this.variable_fields[i].value;
-				var sf = '''';
-				for (var j=1; j<subfields.length; j++) {
-					sf += ''<subfield code="''+subfields[j].substr(0,1)+''">''+subfields[j].substr(1)+''</subfield>'';
-				}
-				s += ''<datafield tag="'' + this.variable_fields[i].tag + ''"'' + ind1 + ind2 + ''>'' + sf + ''</datafield>'';
-			}
-		}
-		s += ''</record></collection>'';
-		return s;
-	}
-	return false;
-}
-
-MARC_Record.prototype.get_field = function(tag) { // returns an array of values, one for each occurrence
-	var v = new Array(); var i;
-	for (i=0; i<this.variable_fields.length; i++) {
-		if (this.variable_fields[i].tag == tag) {
-			v[v.length] = this.variable_fields[i].ind1 +
-			this.variable_fields[i].ind2 + 
-			this.variable_fields[i].value;
-		}
-	}
-	return v;
-}
-
-// This function added by Simon Kornblith
-MARC_Record.prototype.get_field_subfields = function(tag) { // returns a two-dimensional array of values
-	var field = this.get_field(tag);
-	var return_me = new Array();
-	for(var i in field) {
-		return_me[i] = new Object();
-		var subfields = field[i].split(this.subfield_delimiter);
-		if (subfields.length == 1) {
-			return_me[i][''?''] = field[i];
-		} else {
-			for (var j=1; j<subfields.length; j++) {
-				return_me[i][subfields[j].substr(0,1)] = subfields[j].substr(1);
-			}
-		}
-	}
-	return return_me;
-}
-
-MARC_Record.prototype.add_field = function(tag,ind1,ind2,value) { // adds a field to the record
-	/*if(tag.length != 3) {
-		return false;
-	}*/
-	
-	if (tag.length < 3) {
-		tag = Scholar.Utilities.lpad(tag.toString(),"0",3);
-	} else if(tag.length > 3) {
-		return false;
-	}
-	
-	var F = new this.MARC_field(this,tag,ind1,ind2,value);
-	// adds pointer to list of fields
-	this.variable_fields[this.variable_fields.length] = F;
-	// adds the entry to the directory
-	this.directory += F.tag+this._zero_fill(F.ind1.length+F.ind2.length+F.value.length+1,4)+''00000'';
-	// sorts the directory
-	this.sort_directory();
-	// updates lengths
-	this.update_base_address_of_data();
-	this.update_displacements();
-	this.update_record_length();
-	return F;
-}
-
-MARC_Record.prototype.delete_field = function(tag,occurrence) {
-	// lookup and delete the occurrence from array variable_fields
-	var i;
-	for (i=0; i<this.variable_fields.length; i++) {
-		if (this.variable_fields[i].tag == tag && this.variable_fields[i].occ == occurrence) break;
-	}
-	if (i==this.variable_fields.length) return false; // campo non trovato
-	// deletes the occ. i from array variable_fields scaling next values
-	var j;
-	for (j=i+1; j<this.variable_fields.length; j++) {
-		this.variable_fields[i++]=this.variable_fields[j];
-	}
-	this.variable_fields.length--; // deletes last element
-	// lookup and delete the occurrence from directory (must exist; no sort is needed)
-	var nocc = 0;
-	// var i;
-	for (i=0; i<this.directory.length;i=i+12) {
-		if (this.directory.substr(i,3) == tag) nocc++;
-		if (occurrence == nocc) { // occ found
-			break;
-		}
-	}
-	if (i >= this.directory.length) alert(''Internal error!'');
-	this.directory = this.directory.substr(0,i) + this.directory.substr(i+12);
-	// updates lengths
-	this.update_base_address_of_data();
-	this.update_displacements();
-	this.update_record_length();
-	return true;
-}
-
-MARC_Record.prototype._clean = function(value) {
+// general purpose cleaning
+function clean(value) {
 	value = value.replace(/^[\s\.\,\/\:]+/, '''');
 	value = value.replace(/[\s\.\,\/\:]+$/, '''');
 	value = value.replace(/ +/g, '' '');
 	
-	var char1 = value[1];
+	var char1 = value[0];
 	var char2 = value[value.length-1];
 	if((char1 == "[" && char2 == "]") || (char1 == "(" && char2 == ")")) {
 		// chop of extraneous characters
@@ -5145,14 +5040,147 @@ MARC_Record.prototype._clean = function(value) {
 	return value;
 }
 
-MARC_Record.prototype._associateDBField = function(item, fieldNo, part, fieldName, execMe, arg1, arg2) {
+// number extraction
+function pullNumber(text) {
+	var pullRe = /[0-9]+/;
+	var m = pullRe.exec(text);
+	if(m) {
+		return m[0];
+	}
+}
+
+// ISBN extraction
+function pullISBN(text) {
+	var pullRe = /[0-9X\-]+/;
+	var m = pullRe.exec(text);
+	if(m) {
+		return m[0];
+	}
+}
+
+// corporate author extraction
+function corpAuthor(author) {
+	return {lastName:author};
+}
+
+// regular author extraction
+function author(author, type, useComma) {
+	return Scholar.Utilities.cleanAuthor(author, type, useComma);
+}
+
+/*
+ * END CLEANING FUNCTIONS
+ */
+
+var record = function() {
+	this.directory = new Object();
+	this.leader = "";
+	this.content = "";
 	
-	if(!part) {
-		part = ''a'';
+	// defaults
+	this.indicatorLength = 2;
+	this.subfieldCodeLength = 2;
+}
+
+// import a binary MARC record into this record
+record.prototype.importBinary = function(record) {
+	// get directory and leader
+	var directory = record.substr(0, record.indexOf(fieldTerminator));
+	this.leader = directory.substr(0, 24);
+	var directory = directory.substr(24);
+	
+	// get various data
+	this.indicatorLength = parseInt(this.leader[10], 10);
+	this.subfieldCodeLength = parseInt(this.leader[11], 10);
+	var baseAddress = parseInt(this.leader.substr(12, 5), 10);
+	
+	// get record data
+	this.content = record.substr(baseAddress);
+	
+	// read directory
+	for(var i=0; i<directory.length; i+=12) {
+		var tag = parseInt(directory.substr(i, 3), 10);
+		var fieldLength = parseInt(directory.substr(i+3, 4), 10);
+		var fieldPosition = parseInt(directory.substr(i+7, 5), 10);
+		
+		if(!this.directory[tag]) {
+			this.directory[tag] = new Array();
+		}
+		this.directory[tag].push([fieldPosition, fieldLength]);
+	}
+}
+
+// add a field to this record
+record.prototype.addField = function(field, indicator, value) {
+	// make sure indicator is the right length
+	if(indicator.length > this.indicatorLength) {
+		indicator = indicator.substr(0, this.indicatorLength);
+	} else if(indicator.length != this.indicatorLength) {
+		indicator = Scholar.Utilities.lpad(indicator, " ", this.indicatorLength);
 	}
 	
-	var field = this.get_field_subfields(fieldNo);
-	Scholar.Utilities.debug(''Found ''+field.length+'' matches for ''+fieldNo+part);
+	// add terminator
+	value = indicator+value+fieldTerminator;
+	
+	// add field to directory
+	if(!this.directory[field]) {
+		this.directory[field] = new Array();
+	}
+	this.directory[field].push([this.content.length, value.length]);
+	
+	// add field to record
+	this.content += value;
+}
+
+// get all fields with a certain field number
+record.prototype.getField = function(field) {
+	var fields = new Array();
+	
+	// make sure fields exist
+	if(!this.directory[field]) {
+		return fields;
+	}
+	
+	// get fields
+	for(var i in this.directory[field]) {
+		var location = this.directory[field][i];
+		
+		// add to array
+		fields.push([this.content.substr(location[0], this.indicatorLength),
+		             this.content.substr(location[0]+this.indicatorLength,
+		                                 location[1]-this.indicatorLength-1)]);
+	}
+	
+	return fields;
+}
+
+// get subfields from a field
+record.prototype.getFieldSubfields = function(tag) { // returns a two-dimensional array of values
+	var fields = this.getField(tag);
+	var returnFields = new Array();
+	
+	for(var i in fields) {
+		returnFields[i] = new Object();
+		
+		var subfields = fields[i][1].split(subfieldDelimiter);
+		if (subfields.length == 1) {
+			returnFields[i]["?"] = fields[i][1];
+		} else {
+			for(var j in subfields) {
+				if(subfields[j]) {
+					returnFields[i][subfields[j].substr(0, this.subfieldCodeLength-1)] = subfields[j].substr(this.subfieldCodeLength-1);
+				}
+			}
+		}
+	}
+	
+	return returnFields;
+}
+
+// add field to DB
+record.prototype._associateDBField = function(item, fieldNo, part, fieldName, execMe, arg1, arg2) {
+	var field = this.getFieldSubfields(fieldNo);
+	Scholar.Utilities.debug(''found ''+field.length+'' matches for ''+fieldNo+part);
 	if(field) {
 		for(var i in field) {
 			var value = false;
@@ -5166,9 +5194,8 @@ MARC_Record.prototype._associateDBField = function(item, fieldNo, part, fieldNam
 					}
 				}
 			}
-			if(value) {	
-				this._gotField = true;
-				value = this._clean(value);
+			if(value) {
+				value = clean(value);
 				
 				if(execMe) {
 					value = execMe(value, arg1, arg2);
@@ -5184,57 +5211,54 @@ MARC_Record.prototype._associateDBField = function(item, fieldNo, part, fieldNam
 	}
 }
 
-MARC_Record.prototype._associateTags = function(item, fieldNo, part) {
-	var field = this.get_field_subfields(fieldNo);
+// add field to DB as tags
+record.prototype._associateTags = function(item, fieldNo, part) {
+	var field = this.getFieldSubfields(fieldNo);
 	
 	for(var i in field) {
 		for(var j=0; j<part.length; j++) {
 			var myPart = part[j];
 			if(field[i][myPart]) {
-				item.tags.push(this._clean(field[i][myPart]));
+				item.tags.push(clean(field[i][myPart]));
 			}
 		}
 	}
 }
 
 // this function loads a MARC record into our database
-MARC_Record.prototype.translate = function(item) {
-	// cleaning functions - use a closure to improve readability because they''ll
-	// only be called once per record anyway
-	function _pullNumber(text) {
-		var pullRe = /[0-9]+/;
-		var m = pullRe.exec(text);
-		if(m) {
-			return m[0];
+record.prototype.translate = function(item) {
+	// get item type
+	if(this.leader) {
+		var marcType = this.leader[6];
+		if(marcType == "g") {
+			item.itemType = "film";
+		} else if(marcType == "k" || marcType == "e" || marcType == "f") {
+			item.itemType = "artwork";
+		} else if(marcType == "t") {
+			item.itemType = "manuscript";
+		} else {
+			item.itemType = "book";
 		}
+	} else {
+		item.itemType = "book";
 	}
 	
-	function _corpAuthor(author) {
-		return {lastName:author};
-	}
-	
-	// not sure why this is necessary, but without it, this code is inaccessible
-	// from other translators
-	function _author(author, type, useComma) {
-		return Scholar.Utilities.cleanAuthor(author, type, useComma);
-	}
-
 	// Extract ISBNs
-	this._associateDBField(item, ''020'', ''a'', ''ISBN'', _pullNumber);
+	this._associateDBField(item, "020", "a", "ISBN", pullISBN);
 	// Extract ISSNs
-	this._associateDBField(item, ''022'', ''a'', ''ISSN'', _pullNumber);
+	this._associateDBField(item, "022", "a", "ISSN", pullISBN);
 	// Extract creators
-	this._associateDBField(item, ''100'', ''a'', ''creator'', _author, ''author'', true);
-	this._associateDBField(item, ''110'', ''a'', ''creator'', _corpAuthor, ''author'');
-	this._associateDBField(item, ''111'', ''a'', ''creator'', _corpAuthor, ''author'');
-	this._associateDBField(item, ''700'', ''a'', ''creator'', _author, ''contributor'', true);
-	this._associateDBField(item, ''710'', ''a'', ''creator'', _corpAuthor, ''contributor'');
-	this._associateDBField(item, ''711'', ''a'', ''creator'', _corpAuthor, ''contributor'');
+	this._associateDBField(item, "100", "a", "creator", author, "author", true);
+	this._associateDBField(item, "110", "a", "creator", corpAuthor, "author");
+	this._associateDBField(item, "111", "a", "creator", corpAuthor, "author");
+	this._associateDBField(item, "700", "a", "creator", author, "contributor", true);
+	this._associateDBField(item, "710", "a", "creator", corpAuthor, "contributor");
+	this._associateDBField(item, "711", "a", "creator", corpAuthor, "contributor");
 	if(!item.creators.length) {
 		// some LOC entries have no listed author, but have the author in the person subject field as the first entry
-		var field = this.get_field_subfields(''600'');
+		var field = this.getFieldSubfields("600");
 		if(field[0]) {
-			item.creators.push(this.cleanAuthor(field[0][''a''], true));	
+			item.creators.push(cleanAuthor(field[0]["a"], true));	
 		}
 	}
 	
@@ -5269,47 +5293,35 @@ MARC_Record.prototype.translate = function(item) {
 	this._associateTags(item, "662", "abcdfgh");
 	
 	// Extract title
-	this._associateDBField(item, ''245'', ''ab'', ''title'');
+	this._associateDBField(item, "245", "ab", "title");
 	// Extract edition
-	this._associateDBField(item, ''250'', ''a'', ''edition'');
+	this._associateDBField(item, "250", "a", "edition");
 	// Extract place info
-	this._associateDBField(item, ''260'', ''a'', ''place'');
-	// Extract publisher info
-	this._associateDBField(item, ''260'', ''b'', ''publisher'');
-	// Extract year
-	this._associateDBField(item, ''260'', ''c'', ''date'', _pullNumber);
-	// Extract pages
-	this._associateDBField(item, ''300'', ''a'', ''pages'', _pullNumber);
-	// Extract series
-	this._associateDBField(item, ''440'', ''a'', ''seriesTitle'');
-	// Extract call number
-	this._associateDBField(item, ''084'', ''ab'', ''callNumber'');
-	this._associateDBField(item, ''082'', ''a'', ''callNumber'');
-	this._associateDBField(item, ''080'', ''ab'', ''callNumber'');
-	this._associateDBField(item, ''070'', ''ab'', ''callNumber'');
-	this._associateDBField(item, ''060'', ''ab'', ''callNumber'');
-	this._associateDBField(item, ''050'', ''ab'', ''callNumber'');
+	this._associateDBField(item, "260", "a", "place");
 	
-	// Set type
-	item.itemType = "book";
-	
-	if(!this._gotField) {
-		throw("tried to create a marc record with no fields!");
+	// Extract publisher/distributor
+	if(item.itemType == "film") {
+		this._associateDBField(item, "260", "b", "distributor");
+	} else {
+		this._associateDBField(item, "260", "b", "publisher");
 	}
+	
+	// Extract year
+	this._associateDBField(item, "260", "c", "date", pullNumber);
+	// Extract pages
+	this._associateDBField(item, "300", "a", "pages", pullNumber);
+	// Extract series
+	this._associateDBField(item, "440", "a", "seriesTitle");
+	// Extract call number
+	this._associateDBField(item, "084", "ab", "callNumber");
+	this._associateDBField(item, "082", "a", "callNumber");
+	this._associateDBField(item, "080", "ab", "callNumber");
+	this._associateDBField(item, "070", "ab", "callNumber");
+	this._associateDBField(item, "060", "ab", "callNumber");
+	this._associateDBField(item, "050", "ab", "callNumber");
 }
 
-MARC_Record.prototype._trim = function(s) { // eliminates blanks from both sides
-	s = s.replace(/\s+$/,'''');
-	return s.replace(/^\s+/,'''');
-}
-
-MARC_Record.prototype._zero_fill = function(s,l) { // left ''0'' padding of s, up to l (l<=15)
-	var t = ''000000000000000'';
-	t = t+s;
-	return t.substr(t.length-l,l);
-}
-
-function doImport(url) {	// the URL is actually here for other translators
+function doImport() {
 	var text;
 	var holdOver = "";	// part of the text held over from the last loop
 	
@@ -5322,12 +5334,11 @@ function doImport(url) {	// the URL is actually here for other translators
 			
 			for(var i in records) {
 				var newItem = new Scholar.Item();
-				newItem.source = url;
 				
 				// create new record
-				var record = new MARC_Record();	
-				record.load(records[i], "binary");
-				record.translate(newItem);
+				var rec = new record();	
+				rec.importBinary(records[i]);
+				rec.translate(newItem);
 				
 				newItem.complete();
 			}

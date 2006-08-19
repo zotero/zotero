@@ -116,6 +116,81 @@ Scholar.Translate = function(type, saveItem) {
 }
 
 /*
+ * (singleton) initializes scrapers, loading from the database and separating
+ * into types
+ */
+Scholar.Translate.init = function() {
+	if(!Scholar.Translate.cache) {
+		var cachePref = Scholar.Prefs.get("cacheTranslatorData");
+		
+		if(cachePref) {
+			// fetch translator list
+			var translators = Scholar.DB.query("SELECT translatorID, type, label, target, detectCode IS NULL as noDetectCode FROM translators ORDER BY target IS NULL");
+			var detectCodes = Scholar.DB.query("SELECT translatorID, detectCode FROM translators WHERE target IS NULL");
+			
+			Scholar.Translate.cache = new Object();
+			Scholar.Translate.cache["import"] = new Array();
+			Scholar.Translate.cache["export"] = new Array();
+			Scholar.Translate.cache["web"] = new Array();
+			Scholar.Translate.cache["search"] = new Array();
+			
+			for each(translator in translators) {
+				var type = translator.type;
+				
+				// not sure why this is necessary
+				var wrappedTranslator = {translatorID:translator.translatorID,
+				                         label:translator.label,
+				                         target:translator.target}
+				
+				if(translator.noDetectCode) {
+					wrappedTranslator.noDetectCode = true;
+				}
+				
+				// import translator
+				var mod = type % 2;
+				if(mod) {
+					var regexp = new RegExp();
+					regexp.compile("\."+translator.target+"$", "i");
+					wrappedTranslator.importRegexp = regexp;
+					Scholar.Translate.cache["import"].push(wrappedTranslator);
+					type -= mod;
+				}
+				// search translator
+				var mod = type % 4;
+				if(mod) {
+					Scholar.Translate.cache["export"].push(wrappedTranslator);
+					type -= mod;
+				}
+				// web translator
+				var mod = type % 8;
+				if(mod) {
+					var regexp = new RegExp();
+					regexp.compile(translator.target, "i");
+					wrappedTranslator.webRegexp = regexp;
+					Scholar.Translate.cache["web"].push(wrappedTranslator);
+					
+					if(!translator.target) {
+						for each(var detectCode in detectCodes) {
+							if(detectCode.translatorID == translator.translatorID) {
+								wrappedTranslator.detectCode = detectCode.detectCode;
+							}
+						}
+					}
+					type -= mod;
+				}
+				// search translator
+				var mod = type % 16;
+				if(mod) {
+					Scholar.Translate.cache["search"].push(wrappedTranslator);
+					type -= mod;
+				}
+			}
+		}
+		
+	}
+}
+
+/*
  * sets the browser to be used for web translation; also sets the location
  */
 Scholar.Translate.prototype.setDocument = function(doc) {
@@ -288,8 +363,12 @@ Scholar.Translate.prototype.setHandler = function(type, handler) {
  * itemType - the type of item this scraper says it will scrape
  */
 Scholar.Translate.prototype.getTranslators = function() {
-	var sql = "SELECT translatorID, label, target, detectCode FROM translators WHERE type IN ("+this._numericTypes+") ORDER BY target IS NULL";
-	var translators = Scholar.DB.query(sql);
+	if(Scholar.Translate.cache) {
+		var translators = Scholar.Translate.cache[this.type];
+	} else {
+		var sql = "SELECT translatorID, label, target, detectCode IS NULL as noDetectCode FROM translators WHERE type IN ("+this._numericTypes+") ORDER BY target IS NULL";
+		var translators = Scholar.DB.query(sql);
+	}
 	
 	if(!this.location && !this.search) {
 		return translators;		// no need to see which can translate, because
@@ -369,6 +448,8 @@ Scholar.Translate.prototype._loadTranslator = function() {
  * does the actual translation
  */
 Scholar.Translate.prototype.translate = function() {
+	Scholar.debug("translate called");
+	
 	this.newItems = new Array();
 	this.newCollections = new Array();
 	this._IDMap = new Array();
@@ -378,7 +459,7 @@ Scholar.Translate.prototype.translate = function() {
 		throw("cannot translate: no translator specified");
 	}
 	
-	if(!this.location && this.type != "search") {
+	if(!this.location && this.type != "search" && !this._storageStream) {
 		// searches operate differently, because we could have an array of
 		// translators and have to go through each
 		throw("cannot translate: no location specified");
@@ -388,15 +469,16 @@ Scholar.Translate.prototype.translate = function() {
 		return;
 	}
 	
-	
 	// hack to see if there are any options, bc length does not work on objects
-	for(var i in this._displayOptions) {
-		// run handler for options if there are any
-		if(!(this._displayOptions = this._runHandler("options", this._displayOptions))) {
-			this._translationComplete(true);
-			return false;
+	if(this.type == "export") {
+		for(var i in this._displayOptions) {
+			// run handler for options if there are any
+			if(!(this._displayOptions = this._runHandler("options", this._displayOptions))) {
+				this._translationComplete(true);
+				return false;
+			}
+			break;
 		}
-		break;
 	}
 	
 	var returnValue;
@@ -495,45 +577,65 @@ Scholar.Translate.prototype._generateSandbox = function() {
 	this._sandbox.Scholar.getOption = function(option) { return me._getOption(option) };
 	
 	// for loading other translators and accessing their methods
-	this._sandbox.Scholar.loadTranslator = function(type, translatorID) {
-		var translation = new Scholar.Translate(type, (translatorID ? true : false));
+	this._sandbox.Scholar.loadTranslator = function(type) {
+		var translation = new Scholar.Translate(type, false);
 		translation._parentTranslator = me;
 		
-		if(translatorID) {
-			// assign same handlers as for parent, because the done handler won't
-			// get called anyway, and the itemDone/selectItems handlers should be
-			// the same
-			translation._handlers = me._handlers;
-			// set the translator
-			translation.setTranslator(translatorID);
-			// load the translator into our sandbox
-			translation._loadTranslator();
-			// use internal io
-			translation._initializeInternalIO();
-			// when a new item is added, we should be notified
-			translation.newItems = me.newItems;
-			translation.newCollections = me.newCollections;
-			
-			return translation._sandbox;
-		} else {
-			// create a safe translator object, so that scrapers can't get
-			// access to potentially harmful methods.
-			if(type == "import" || type == "export") {
-				throw("you must specify a translatorID for "+type+" translation");
+		if(type == "export" && (this.type == "web" || this.type == "search")) {
+			throw("for security reasons, web and search translators may not call export translators");
+		}
+		
+		// for security reasons, safeTranslator wraps the translator object.
+		// note that setLocation() is not allowed
+		var safeTranslator = new Object();
+		safeTranslator.setSearch = function(arg) { return translation.setSearch(arg) };
+		safeTranslator.setBrowser = function(arg) { return translation.setBrowser(arg) };
+		safeTranslator.setHandler = function(arg1, arg2) { translation.setHandler(arg1, arg2) };
+		safeTranslator.setString = function(arg) { translation.setString(arg) };
+		safeTranslator.setTranslator = function(arg) { return translation.setTranslator(arg) };
+		safeTranslator.getTranslators = function() { return translation.getTranslators() };
+		safeTranslator.translate = function() {
+			var noHandlers = true;
+			for(var i in translation._handlers) {
+				noHandlers = false;
+				break;
+			}
+			if(noHandlers) {
+				if(type != "export") {
+					translation.setHandler("itemDone", function(obj, item) { item.complete() });
+				}
+				if(type == "web") {
+					translation.setHandler("selectItems", me._handlers["selectItems"]);
+				}
 			}
 			
-			var safeTranslator = new Object();
-			safeTranslator.setSearch = function(arg) { return translation.setSearch(arg) };
-			safeTranslator.setBrowser = function(arg) { return translation.setBrowser(arg) };
-			safeTranslator.setHandler = function(arg1, arg2) { translation.setHandler(arg1, arg2) };
-			safeTranslator.setString = function(arg) { translation.setString(arg) };
-			safeTranslator.setTranslator = function(arg) { return translation.setTranslator(arg) };
-			safeTranslator.getTranslators = function() { return translation.getTranslators() };
-			safeTranslator.translate = function() { return translation.translate() };
-			translation._parentTranslator = me;
+			return translation.translate()
+		};
+		safeTranslator.getTranslatorObject = function() {
+			// load the translator into our sandbox
+			translation._loadTranslator();
+			// initialize internal IO
+			translation._initializeInternalIO();
 			
-			return safeTranslator;
-		}
+			var noHandlers = true;
+			for(var i in translation._handlers) {
+				noHandlers = false;
+				break;
+			}
+			if(noHandlers) {
+				if(type != "export") {
+					translation.setHandler("itemDone", function(obj, item) { item.complete() });
+				}
+				if(type == "web") {
+					translation.setHandler("selectItems", me._handlers["selectItems"]);
+				}
+			}
+			
+			// return sandbox
+			return translation._sandbox;
+		};
+		
+		return safeTranslator;
 	}
 }
 
@@ -542,14 +644,21 @@ Scholar.Translate.prototype._generateSandbox = function() {
  */
 Scholar.Translate.prototype._canTranslate = function(translator, ignoreExtensions) {	
 	// Test location with regular expression
-	// If this is slow, we could preload all scrapers and compile regular
-	// expressions, so each check will be faster
-	if(translator.target && this.type != "search") {
+	if(translator.target && (this.type == "import" || this.type == "web")) {
 		var canTranslate = false;
+		
 		if(this.type == "web") {
-			var regularExpression = new RegExp(translator.target, "i");
+			if(translator.webRegexp) {
+				var regularExpression = translator.webRegexp;
+			} else {
+				var regularExpression = new RegExp(translator.target, "i");
+			}
 		} else {
-			var regularExpression = new RegExp("\."+translator.target+"$", "i");
+			if(translator.importRegexp) {
+				var regularExpression = translator.importRegexp;
+			} else {
+				var regularExpression = new RegExp("\."+translator.target+"$", "i");
+			}
 		}
 		
 		if(regularExpression.test(this.path)) {
@@ -562,7 +671,7 @@ Scholar.Translate.prototype._canTranslate = function(translator, ignoreExtension
 			canTranslate = !canTranslate;
 			
 			// if a translator has no detectCode, don't offer it as an option
-			if(!translator.detectCode) {
+			if(translator.noDetectCode) {
 				return false;
 			}
 		}
@@ -572,8 +681,7 @@ Scholar.Translate.prototype._canTranslate = function(translator, ignoreExtension
 	
 	// Test with JavaScript if available and didn't have a regular expression or
 	// passed regular expression test
-	if((!translator.target || canTranslate)
-	  && translator.detectCode) {
+	if(!translator.target || canTranslate) {
 	  	// parse the detect code and execute
 		this._parseDetectCode(translator);
 		
@@ -629,8 +737,16 @@ Scholar.Translate.prototype._parseDetectCode = function(translator) {
 	this._displayOptions = new Array();
 	
 	if(translator.detectCode) {
+		var detectCode = translator.detectCode;
+	} else if(!translator.noDetectCode) {
+		// get detect code from database
+		var detectCode = Scholar.DB.valueQuery("SELECT detectCode FROM translators WHERE translatorID = ?",
+		                                       [translator.translatorID]);
+	}
+	
+	if(detectCode) {
 		try {
-			Components.utils.evalInSandbox(translator.detectCode, this._sandbox);
+			Components.utils.evalInSandbox(detectCode, this._sandbox);
 		} catch(e) {
 			Scholar.debug(e+' in parsing detectCode for '+translator.label);
 			return;
@@ -850,10 +966,6 @@ Scholar.Translate.prototype._itemDone = function(item) {
 		}
 		this._runHandler("itemDone", item);
 		return;
-	} else if(this._parentTranslator) {
-		// run done on parent
-		this._parentTranslator._itemDone(item);
-		return;
 	}
 	
 	if(!item.title) {
@@ -968,11 +1080,13 @@ Scholar.Translate.prototype._itemDone = function(item) {
 								attachmentItem.setField("title", attachment.title);
 							}
 						} else {
-							Scholar.Attachments.importFromURL(attachment.url, myID);
+							Scholar.Attachments.importFromURL(attachment.url, myID,
+									(attachment.mimeType ? attachment.mimeType : attachment.document.contentType),
+									(attachment.title ? attachment.title : attachment.document.title));
 						}
 					} else {
 						if(attachment.document) {
-							Scholar.Attachments.linkFromURL(attachment.document.location.href, myID,
+							var attachmentID = Scholar.Attachments.linkFromURL(attachment.document.location.href, myID,
 									(attachment.mimeType ? attachment.mimeType : attachment.document.contentType),
 									(attachment.title ? attachment.title : attachment.document.title));
 						} else {
@@ -980,7 +1094,7 @@ Scholar.Translate.prototype._itemDone = function(item) {
 								Scholar.debug("notice: either mimeType or title is missing; attaching file will be slower");
 							}
 							
-							Scholar.Attachments.linkFromURL(attachment.url, myID,
+							var attachmentID = Scholar.Attachments.linkFromURL(attachment.url, myID,
 									(attachment.mimeType ? attachment.mimeType : undefined),
 									(attachment.title ? attachment.title : undefined));
 						}

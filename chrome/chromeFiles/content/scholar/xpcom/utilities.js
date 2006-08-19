@@ -383,6 +383,7 @@ Scholar.Utilities.HTTP = new function() {
 					.createInstance();
 		
 		xmlhttp.open('POST', url, true);
+		xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 		
 		xmlhttp.onreadystatechange = function(){
 			_stateChange(xmlhttp, onDone);
