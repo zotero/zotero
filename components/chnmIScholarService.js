@@ -32,10 +32,6 @@ Cc["@mozilla.org/moz/jssubscript-loader;1"]
 
 Cc["@mozilla.org/moz/jssubscript-loader;1"]
 	.getService(Ci.mozIJSSubScriptLoader)
-	.loadSubScript("chrome://scholar/content/xpcom/file.js");
-	
-Cc["@mozilla.org/moz/jssubscript-loader;1"]
-	.getService(Ci.mozIJSSubScriptLoader)
 	.loadSubScript("chrome://scholar/content/xpcom/notifier.js");
 
 Cc["@mozilla.org/moz/jssubscript-loader;1"]
@@ -61,6 +57,14 @@ Cc["@mozilla.org/moz/jssubscript-loader;1"]
 Cc["@mozilla.org/moz/jssubscript-loader;1"]
 	.getService(Ci.mozIJSSubScriptLoader)
 	.loadSubScript("chrome://scholar/content/xpcom/utilities.js");
+
+Cc["@mozilla.org/moz/jssubscript-loader;1"]
+	.getService(Ci.mozIJSSubScriptLoader)
+	.loadSubScript("chrome://scholar/content/xpcom/file.js");
+
+Cc["@mozilla.org/moz/jssubscript-loader;1"]
+	.getService(Ci.mozIJSSubScriptLoader)
+	.loadSubScript("chrome://scholar/content/xpcom/mime.js");
 
 /********************************************************************/
 

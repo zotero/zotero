@@ -1978,13 +1978,70 @@ Scholar.Attachments = new function(){
 	
 	
 	function importFromURL(url, sourceItemID){
-		var browser = Scholar.Browser.createHiddenBrowser();
-		browser.addEventListener("pageshow", function(){
-			Scholar.Attachments.importFromDocument(browser.contentDocument, sourceItemID);
-			browser.removeEventListener("pageshow", arguments.callee, true);
-			Scholar.Browser.deleteHiddenBrowser(browser);
-		}, true);
-		browser.loadURI(url, null, null, null, null);
+		Scholar.Utilities.HTTP.doHead(url, function(obj){
+			var mimeType = obj.channel.contentType;
+			
+			var nsIURL = Components.classes["@mozilla.org/network/standard-url;1"]
+						.createInstance(Components.interfaces.nsIURL);
+			nsIURL.spec = url;
+			var ext = nsIURL.fileExtension;
+			
+			// If we can load this internally, use a hidden browser (so we can
+			// get the charset and title)
+			if (Scholar.MIME.hasInternalHandler(mimeType, ext)){
+				var browser = Scholar.Browser.createHiddenBrowser();
+				browser.addEventListener("pageshow", function(){
+					Scholar.Attachments.importFromDocument(browser.contentDocument, sourceItemID);
+					browser.removeEventListener("pageshow", arguments.callee, true);
+					Scholar.Browser.deleteHiddenBrowser(browser);
+				}, true);
+				browser.loadURI(url, null, null, null, null);
+			}
+			
+			// Otherwise use a remote web page persist
+			else {
+				var fileName = _getFileNameFromURL(url, mimeType);
+				var title = fileName;
+				
+				const nsIWBP = Components.interfaces.nsIWebBrowserPersist;
+				var wbp = Components
+					.classes["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"]
+					.createInstance(nsIWBP);
+				//wbp.persistFlags = nsIWBP.PERSIST_FLAGS...;
+				var encodingFlags = false;
+				
+				Scholar.DB.beginTransaction();
+				
+				try {
+					// Create a new attachment
+					var attachmentItem = Scholar.Items.getNewItemByType(Scholar.ItemTypes.getID('attachment'));
+					attachmentItem.setField('title', title);
+					attachmentItem.save();
+					var itemID = attachmentItem.getID();
+					
+					// Create a new folder for this item in the storage directory
+					var destDir = Scholar.getStorageDirectory();
+					destDir.append(itemID);
+					destDir.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0644);
+					
+					var file = Components.classes["@mozilla.org/file/local;1"].
+							createInstance(Components.interfaces.nsILocalFile);
+					file.initWithFile(destDir);
+					file.append(fileName);
+					
+					wbp.saveURI(nsIURL, null, null, null, null, file);	
+					
+					_addToDB(file, url, title, Scholar.Attachments.LINK_MODE_IMPORTED_URL,
+						mimeType, null, sourceItemID, itemID);
+					
+					Scholar.DB.commitTransaction();
+				}
+				catch (e){
+					Scholar.DB.rollbackTransaction();
+					throw (e);
+				}
+			}
+		});
 	}
 	
 	

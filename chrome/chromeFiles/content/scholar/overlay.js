@@ -530,8 +530,7 @@ var ScholarPane = new function()
 			if(attachment.getAttachmentLinkMode() != Scholar.Attachments.LINK_MODE_LINKED_URL)
 			{
 				var file = attachment.getFile();
-				if (attachment.getAttachmentLinkMode() == Scholar.Attachments.LINK_MODE_IMPORTED_URL
-					|| Scholar.File.hasInternalHandler(file))
+				if (Scholar.MIME.fileHasInternalHandler(file))
 				{
 					window.loadURI(attachment.getLocalFileURL());
 				}
