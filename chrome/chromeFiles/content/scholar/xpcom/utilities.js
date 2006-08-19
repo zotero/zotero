@@ -407,7 +407,7 @@ Scholar.Utilities.HTTP = new function() {
 		var test = xmlhttp.open('HEAD', url, true);
 		
 		xmlhttp.onreadystatechange = function(){
-			_stateChange(xmlhttp, callback1, callback2);
+			_stateChange(xmlhttp, onDone);
 		};
 		
 		xmlhttp.send(null);
