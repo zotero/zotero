@@ -53,7 +53,7 @@ CSL = function(csl) {
 	this._init();
 	
 	// load localizations
-	this._terms = this._parseTerms(this._csl.terms);
+	this._terms = this._parseLocales(this._csl.terms);
 	
 	// load class defaults
 	this._class =  this._csl["@class"].toString();
@@ -130,15 +130,18 @@ CSL.prototype.createBibliography = function(items, format) {
 	var output = "";
 	
 	if(format == "HTML") {
-		var style = ""; 
-		if(this._opt.hangingIndent) {
-			style = "margin-left:0.5in;text-indent:-0.5in;";
+		if(this._class == "note") {
+			output += '<ol>\r\n';
+		} else if(this._opt.hangingIndent) {
+			output += '<div style="margin-left:0.5in;text-indent:-0.5in;">\r\n';
 		}
 	} else if(format == "RTF") {
+		var index = 0;
 		output += "{\\rtf\\ansi{\\fonttbl\\f0\\froman Times New Roman;}{\\colortbl;\\red255\\green255\\blue255;}\\pard\\f0";
 		if(this._opt.hangingIndent) {
 			output += "\\li720\\fi-720";
 		}
+		output += "\r\n";
 	}
 	
 	for(var i in items) {
@@ -195,27 +198,33 @@ CSL.prototype.createBibliography = function(items, format) {
 				string = string + this._opt.format.suffix;
 			}
 		}
-			
-		if(this._class == "note") {
-			// add superscript number for footnotes
-			string += (parseInt(i)+1).toString()+". ";
-		}
 		
 		// add line feeds
 		if(format == "HTML") {
-			output += "<p";
+			var coins = Scholar.OpenURL.createContextObject(item, "1.0");
+			string += '<span class="Z3988" title="'+coins+'"></span>';
 			
-			if(style) {
-				output += ' style="'+style+'"';
+			if(this._class == "note") {
+				output += "<li>"+string+"</li>\r\n";
+			} else {
+				output += "<p>"+string+"</p>\r\n";
 			}
-			
-			output += ">"+string+"</p>";
 		} else if(format == "RTF") {
+			if(this._class == "note") {
+				index++;
+				output += index+". ";
+			}
 			output += string+"\\\r\n\\\r\n";
 		}
 	}
 	
-	if(format == "RTF") {
+	if(format == "HTML") {
+		if(this._class == "note") {
+			output += '</ol>';
+		} else if(this._opt.hangingIndent) {
+			output += '</div>';
+		}
+	} else if(format == "RTF") {
 		// drop last 6 characters of output (last two returns)
 		output = output.substr(0, output.length-6)+"}";
 	}
@@ -304,12 +313,12 @@ CSL.prototype._init = function() {
 		req.send(null);
 		
 		// get default terms
-		var terms = new XML(this._cleanXML(req.responseText));
-		CSL._defaultTerms = this._parseTerms(terms);
+		var locales = new XML(this._cleanXML(req.responseText));
+		CSL._defaultTerms = this._parseLocales(locales);
 	}
 }
 
-CSL.prototype._parseTerms = function(termXML) {
+CSL.prototype._parseLocales = function(termXML) {
 	// return defaults if there are no terms
 	if(!termXML.length()) {
 		return (CSL._defaultTerms ? CSL._defaultTerms : {});
@@ -328,21 +337,42 @@ CSL.prototype._parseTerms = function(termXML) {
 		return (CSL._defaultTerms ? CSL._defaultTerms : {});
 	}
 	
-	var termArray = new Array();
+	var termArray = new Object();
+	termArray["default"] = new Object();
+	
 	if(CSL._defaultTerms) {
 		// ugh. copy default array. javascript dumb.
 		for(var i in CSL._defaultTerms) {
-			if(typeof(CSL._defaultTerms[i]) == "object") {
-				termArray[i] = [CSL._defaultTerms[i][0],
-				                CSL._defaultTerms[i][1]];
-			} else {
-				termArray[i] = CSL._defaultTerms[i];
+			termArray[i] = new Object();
+			for(var j in CSL._defaulTerms[i]) {
+				if(typeof(CSL._defaultTerms[i]) == "object") {
+					termArray[i][j] = [CSL._defaultTerms[i][j][0],
+									CSL._defaultTerms[i][j][1]];
+				} else {
+					termArray[i][j] = CSL._defaultTerms[i][j];
+				}
 			}
 		}
 	}
 	
 	// loop through terms
-	for each(var term in locale.term) {
+	this._parseTerms(locale.term, termArray["default"]);
+	// loop through term sets
+	locale._termSets = new Object();
+	for each(var termSet in locale["term-set"]) {
+		var name = termSet.@name.toString();
+		if(!termArray[name]) {
+			termArray[name] = new Object();
+		}
+		
+		this._parseTerms(termSet.term, termArray[name]);
+	}
+	
+	return termArray;
+}
+
+CSL.prototype._parseTerms = function(terms, termArray) {
+	for each(var term in terms) {
 		var name = term.@name.toString();
 		if(!name) {
 			throw("citations cannot be generated: no name defined on term in CSL");
@@ -370,14 +400,12 @@ CSL.prototype._parseTerms = function(termXML) {
 			termArray[name] = term.text().toString();
 		}
 	}
-	
-	return termArray;
 }
 
 /*
  * parses attributes and children for a CSL field
  */
-CSL.prototype._parseFieldAttrChildren = function(element, desc) {
+CSL.prototype._parseFieldAttrChildren = function(element, desc, ignoreChildren) {
 	if(!desc) {
 		var desc = new Object();
 	}
@@ -389,43 +417,45 @@ CSL.prototype._parseFieldAttrChildren = function(element, desc) {
 	}
 	
 	var children = element.children();
-	if(children.length()) {
-		// parse children
-		
-		if(children.length() > element.substitute.length()) {
-			// if there are non-substitute children, clear the current children
-			// array
-			desc.children = new Array();
-		}
-		
-		// add children to children array
-		for each(var child in children) {
-			if(child.namespace() == CSL.ns) {	// ignore elements in other
-												// namespaces
-				// parse recursively
-				var name = child.localName();
-				if(name == "substitute") {
-					// place substitutes in their own key, so that they're
-					// overridden separately
-					if(child.choose.length) {	// choose
-						desc.substitute = new Array();
-						
-						var chooseChildren = child.choose.children();
-						for each(var choose in chooseChildren) {
-							if(choose.namespace() == CSL.ns) {
-								var option = new Object();
-								option.name = choose.localName();
-								this._parseFieldAttrChildren(choose, option);
-								desc.substitute.push(option);
+	if(!ignoreChildren) {
+		if(children.length()) {
+			// parse children
+			
+			if(children.length() > element.substitute.length()) {
+				// if there are non-substitute children, clear the current children
+				// array
+				desc.children = new Array();
+			}
+			
+			// add children to children array
+			for each(var child in children) {
+				if(child.namespace() == CSL.ns) {	// ignore elements in other
+													// namespaces
+					// parse recursively
+					var name = child.localName();
+					if(name == "substitute") {
+						// place substitutes in their own key, so that they're
+						// overridden separately
+						if(child.choose.length) {	// choose
+							desc.substitute = new Array();
+							
+							var chooseChildren = child.choose.children();
+							for each(var choose in chooseChildren) {
+								if(choose.namespace() == CSL.ns) {
+									var option = new Object();
+									option.name = choose.localName();
+									this._parseFieldAttrChildren(choose, option);
+									desc.substitute.push(option);
+								}
 							}
+						} else {					// don't choose
+							desc.substitute = child.text().toString();
 						}
-					} else {					// don't choose
-						desc.substitute = child.text().toString();
+					} else {
+						var childDesc = this._parseFieldAttrChildren(child);
+						childDesc.name = name;
+						desc.children.push(childDesc);
 					}
-				} else {
-					var childDesc = this._parseFieldAttrChildren(child);
-					childDesc.name = name;
-					desc.children.push(childDesc);
 				}
 			}
 		}
@@ -456,21 +486,18 @@ CSL.prototype._parseFieldDefaults = function(ref) {
 /*
  * parses a list of fields into an array of objects
  */
-CSL.prototype._parseFields = function(ref, type) {
+CSL.prototype._parseFields = function(ref, type, noInherit) {
 	var typeDesc = new Array();
 	for each(var element in ref) {
 		if(element.namespace() == CSL.ns) {	// ignore elements in other namespaces
 			var itemDesc = new Object();
 			itemDesc.name = element.localName();
 			
-			// parse attributes on this field
-			this._parseFieldAttrChildren(element, itemDesc);
-			
 			// add defaults, but only if we're parsing as a reference type
 			if(type != undefined) {
 				var fieldDefaults = this._getFieldDefaults(itemDesc.name);
 				itemDesc = this._merge(fieldDefaults, itemDesc);
-				if(this._opt.inheritFormat) {
+				if(!noInherit) {
 					itemDesc = this._merge(this._opt.inheritFormat, itemDesc);
 				}
 			
@@ -481,19 +508,17 @@ CSL.prototype._parseFields = function(ref, type) {
 			}
 			
 			// parse group children
-			if(itemDesc.name == "group" && itemDesc.children) {
-				for(var i in itemDesc.children) {
-					// don't bother merging fieldDefaults
-					itemDesc.children[i] = this._merge(this._getFieldDefaults(itemDesc.children[i].name),
-					                                   itemDesc.children[i]);
-					if(type != undefined) {
-						// serialize children
-						itemDesc.children[i]._serialized = this._serializeElement(itemDesc.children[i].name,
-						                                   itemDesc.children[i]);
-						// add to serialization for type
-						this._serializations[type][itemDesc._serialized] = itemDesc;
-					}
+			if(itemDesc.name == "group") {
+				// parse attributes on this field, but ignore children
+				this._parseFieldAttrChildren(element, itemDesc, true);
+				
+				var children = element.children();
+				if(children.length()) {
+					itemDesc.children = this._parseFields(children, type, true);
 				}
+			} else {
+				// parse attributes on this field
+				this._parseFieldAttrChildren(element, itemDesc);
 			}
 			
 			typeDesc.push(itemDesc);
@@ -650,21 +675,24 @@ CSL.prototype._getFieldDefaults = function(elementName) {
 /*
  * gets a term, in singular or plural form
  */
-CSL.prototype._getTerm = function(term, plural) {
-	if(!this._terms[term]) {
+CSL.prototype._getTerm = function(term, plural, termSet) {
+	if(!termSet) {
+		termSet = "default";
+	}
+	if(!this._terms[termSet][term]) {
 		return "";
 	}
 	
-	if(typeof(this._terms[term]) == "object") {	// singular and plural forms
-	                                            // are available
+	if(typeof(this._terms[termSet][term]) == "object") {	// singular and plural forms
+	                                                        // are available
 		if(plural) {
-			return this._terms[term][1];
+			return this._terms[termSet][term][1];
 		} else {
-			return this._terms[term][0];
+			return this._terms[termSet][term][0];
 		}
 	}
 	
-	return this._terms[term];
+	return this._terms[termSet][term];
 }
 
 /*
@@ -834,7 +862,7 @@ CSL.prototype._formatLocator = function(identifier, element, number, format) {
 				string = this._getTerm(child["term-name"], plural);
 			} else if(identifier && child.name == "label") {
 				var plural = (number.indexOf(",") != -1 || number.indexOf("-") != -1);
-				string = this._getTerm(identifier, plural);
+				string = this._getTerm(identifier, plural, child["term-set"]);
 			}
 				
 			if(string) {
@@ -1128,7 +1156,7 @@ CSL.prototype._processCreators = function(type, element, creators, format) {
 			}
 			string = authorStrings.join(joinString);
 		} else if(child.name == "label") {
-			string = this._getTerm(type, (maxCreators != 1));
+			string = this._getTerm(type, (maxCreators != 1), child["term-set"]);
 		}
 		
 		

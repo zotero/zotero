@@ -5360,20 +5360,20 @@ REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '200
       <name>Bruce D’Arcus</name>
       <email>bdarcus@sourceforge.net</email>
     </author>
-    <author>
+    <contributor>
       <name>Simon Kornblith</name>
       <email>simon@simonster.com</email>
-    </author>
-    <updated>2006-08-13T23:28:00-05:00</updated>
+    </contributor>
+    <updated>2006-08-19T17:12:00-05:00</updated>
   </info>
   <defaults>
-    <contributors name-as-sort-order="no">
+    <contributor name-as-sort-order="no">
       <name and="symbol" initialize-with="."/>
-      <label prefix=", " text-transform="capitalize"/>
-    </contributors>
+      <label term-set="roles-short" prefix=", " text-transform="capitalize" suffix="."/>
+    </contributor>
     <author name-as-sort-order="all">
       <name and="symbol" sort-separator=", " initialize-with="."/>
-      <label prefix=" (" suffix=")" text-transform="capitalize"/>
+      <label term-set="roles-short" prefix=" (" suffix=".)" text-transform="capitalize"/>
       <substitute>
         <choose>
           <editor/>
@@ -5461,17 +5461,17 @@ REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '200
               <text term-name="in" text-transform="capitalize"/>
               <editor prefix=" " suffix=",">
                 <name and="symbol" sort-separator=", " initialize-with="."/>
-                <label prefix=" (" suffix=")" text-transform="capitalize"/>
+                <label term-set="roles-short" prefix=" (" suffix=")" text-transform="capitalize"/>
               </editor>
               <translator prefix=" " suffix=",">
                 <name and="symbol" sort-separator=", " initialize-with="."/>
-                <label prefix=" (" suffix=")" text-transform="capitalize"/>
+                <label term-set="roles-short" prefix=" (" suffix=")" text-transform="capitalize"/>
               </translator>
               <titles relation="container" font-style="italic" prefix=" " suffix="."/>
               <titles relation="collection" prefix=" " suffix="."/>
               <publisher prefix=" "/>
               <pages prefix=" (" suffix=")">
-                <label text-transform="capitalize" suffix=". "/>
+                <label term-set="locators-short" text-transform="capitalize" suffix=". "/>
                 <number/>
               </pages>
             </group>
@@ -5514,17 +5514,21 @@ REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/chicago-note.c
       <name>Bruce D’Arcus</name>
       <email>bdarcus@sourceforge.net</email>
     </author>
-    <updated>2006-08-03T04:35:20-07:00</updated>
+    <contributor>
+      <name>Simon Kornblith</name>
+      <email>simon@simonster.com</email>
+    </contributor>
+    <updated>2006-08-19T17:12:00-05:00</updated>
     <summary>The note-without-bibliography variant of the Chicago style.</summary>
   </info>
   <defaults>
     <contributor>
-      <label suffix=". " text-transform="lowercase"/>
+      <label term-set="roles-short" suffix=". " text-transform="lowercase"/>
       <name and="text"/>
     </contributor>
     <author>
       <name and="text"/>
-      <label prefix = ", " suffix="." text-transform="lowercase"/>
+      <label term-set="roles-short" prefix=", " suffix="." text-transform="lowercase"/>
       <substitute>
         <choose>
           <editor/>

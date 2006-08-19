@@ -206,8 +206,10 @@ Scholar.OpenURL = new function() {
 	/*
 	 * Generates an OpenURL ContextObject from an item
 	 */
-	function createContextObject(itemObject, version) {
-		var item = itemObject.toArray();
+	function createContextObject(item, version) {
+		if(item.toArray) {
+			item = itemObject.toArray();
+		}
 		
 		var identifiers = new Array();
 		if(item.DOI) {
@@ -308,22 +310,36 @@ Scholar.OpenURL = new function() {
 	 * accepts an item array to fill, or creates and returns a new item array
 	 */
 	function parseContextObject(co, item) {
-		var coParts = co.split("&");
-		
 		if(!item) {
 			var item = new Array();
 			item.creators = new Array();
 		}
 		
+		var coParts = co.split("&");
+		
 		// get type
-		item.itemType = _determineResourceType(coParts);
+		for each(var part in coParts) {
+			if(part.substr(0, 12) == "rft_val_fmt=") {
+				var format = unescape(part.substr(12));
+				if(format == "info:ofi/fmt:kev:mtx:journal") {
+					item.itemType = "journalArticle";
+				} else if(format == "info:ofi/fmt:kev:mtx:book") {
+					if(Scholar.inArray("rft.genre=bookitem", coParts)) {
+						item.itemType = "bookSection";
+					} else {
+						item.itemType = "book";
+					}
+					break;
+				}
+			}
+		}
 		if(!item.itemType) {
 			return false;
 		}
 		
 		var pagesKey = "";
 		
-		for each(part in coParts) {
+		for each(var part in coParts) {
 			var keyVal = part.split("=");
 			var key = keyVal[0];
 			var value = unescape(keyVal[1].replace(/\+|%2[bB]/g, " "));
@@ -417,30 +433,6 @@ Scholar.OpenURL = new function() {
 		}
 		
 		return item;
-	}
-	
-	/*
-	 * Determines the type of an OpenURL contextObject
-	 */
-	function _determineResourceType(coParts) {
-		// determine resource type
-		var type = false;
-		for(var i in coParts) {
-			if(coParts[i].substr(0, 12) == "rft_val_fmt=") {
-				var format = unescape(coParts[i].substr(12));
-				if(format == "info:ofi/fmt:kev:mtx:journal") {
-					var type = "journal";
-				} else if(format == "info:ofi/fmt:kev:mtx:book") {
-					if(Scholar.inArray("rft.genre=bookitem", coParts)) {
-						var type = "bookSection";
-					} else {
-						var type = "book";
-					}
-					break;
-				}
-			}
-		}
-		return type;
 	}
 	
 	/*
