@@ -1921,6 +1921,7 @@ Scholar.Attachments = new function(){
 	
 	this.importFromFile = importFromFile;
 	this.linkFromFile = linkFromFile;
+	this.importSnapshotFromFile = importSnapshotFromFile;
 	this.importFromURL = importFromURL;
 	this.linkFromURL = linkFromURL;
 	this.linkFromDocument = linkFromDocument;
@@ -1933,38 +1934,48 @@ Scholar.Attachments = new function(){
 		
 		Scholar.DB.beginTransaction();
 		
-		// Create a new attachment
-		var attachmentItem = Scholar.Items.getNewItemByType(Scholar.ItemTypes.getID('attachment'));
-		attachmentItem.setField('title', title);
-		attachmentItem.save();
-		var itemID = attachmentItem.getID();
-		
-		// Create directory for attachment files within storage directory
-		var destDir = Scholar.getStorageDirectory();
-		destDir.append(itemID);
-		destDir.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0644);
-		
 		try {
+			// Create a new attachment
+			var attachmentItem = Scholar.Items.getNewItemByType(Scholar.ItemTypes.getID('attachment'));
+			attachmentItem.setField('title', title);
+			attachmentItem.save();
+			var itemID = attachmentItem.getID();
+			
+			// Create directory for attachment files within storage directory
+			var destDir = Scholar.getStorageDirectory();
+			destDir.append(itemID);
+			destDir.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0644);
+			
 			file.copyTo(destDir, null);
+			
+			// Point to copied file
+			var newFile = Components.classes["@mozilla.org/file/local;1"]
+							.createInstance(Components.interfaces.nsILocalFile);
+			newFile.initWithFile(destDir);
+			newFile.append(title);
+			
+			var mimeType = Scholar.File.getMIMETypeFromFile(newFile);
+			var charsetID = _getCharsetIDFromFile(newFile);
+			
+			_addToDB(newFile, null, null, this.LINK_MODE_IMPORTED_FILE,
+				mimeType, charsetID, sourceItemID, itemID);
+			
+			Scholar.DB.commitTransaction();
 		}
 		catch (e){
 			// hmph
 			Scholar.DB.rollbackTransaction();
-			destDir.remove(true);
+			
+			// Clean up
+			if (itemID){
+				var itemDir = Scholar.getStorageDirectory();
+				itemDir.append(itemID);
+				if (itemDir.exists()){
+					itemDir.remove(true);
+				}
+			}
 			throw (e);
 		}
-		
-		// Point to copied file
-		var newFile = Components.classes["@mozilla.org/file/local;1"]
-						.createInstance(Components.interfaces.nsILocalFile);
-		newFile.initWithFile(destDir);
-		newFile.append(title);
-		
-		var mimeType = Scholar.File.getMIMETypeFromFile(newFile);
-		var charsetID = _getCharsetIDFromFile(newFile);
-		
-		_addToDB(newFile, null, null, this.LINK_MODE_IMPORTED_FILE, mimeType, charsetID, sourceItemID, itemID);
-		Scholar.DB.commitTransaction();
 		return itemID;
 	}
 	
@@ -1974,6 +1985,49 @@ Scholar.Attachments = new function(){
 		var mimeType = Scholar.File.getMIMETypeFromFile(file);
 		var charsetID = _getCharsetIDFromFile(file);
 		return _addToDB(file, null, title, this.LINK_MODE_LINKED_FILE, mimeType, charsetID, sourceItemID);
+	}
+	
+	
+	function importSnapshotFromFile(file, url, title, mimeType, charset, sourceItemID){
+		var charsetID = Scholar.CharacterSets.getID(charset);
+		
+		Scholar.DB.beginTransaction();
+		
+		try {
+			// Create a new attachment
+			var attachmentItem = Scholar.Items.getNewItemByType(Scholar.ItemTypes.getID('attachment'));
+			attachmentItem.setField('title', title);
+			attachmentItem.save();
+			var itemID = attachmentItem.getID();
+			
+			var storageDir = Scholar.getStorageDirectory();
+			file.parent.copyTo(storageDir, itemID);
+			
+			// Point to copied file
+			var newFile = Components.classes["@mozilla.org/file/local;1"]
+							.createInstance(Components.interfaces.nsILocalFile);
+			newFile.initWithFile(storageDir);
+			newFile.append(itemID);
+			newFile.append(file.leafName);
+			
+			_addToDB(newFile, url, null, this.LINK_MODE_IMPORTED_URL, mimeType,
+				charsetID, sourceItemID, itemID);
+			Scholar.DB.commitTransaction();
+		}
+		catch (e){
+			Scholar.DB.rollbackTransaction();
+			
+			// Clean up
+			if (itemID){
+				var itemDir = Scholar.getStorageDirectory();
+				itemDir.append(itemID);
+				if (itemDir.exists()){
+					itemDir.remove(true);
+				}
+			}
+			throw (e);
+		}
+		return itemID;
 	}
 	
 	
