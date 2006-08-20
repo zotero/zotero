@@ -150,8 +150,11 @@
 				<![CDATA[
 					var operators = new Array('is', 'isNot', 'contains', 'doesNotContain', 'lessThan', 'greaterThan', 'isBefore', 'isAfter');
 					var operatorsList = this.id('operatorsmenu');
-					for(i in operators)
+					
+					for(var i in operators)
+					{
 						operatorsList.appendItem(Scholar.getString('searchOperator.'+operators[i]),operators[i]);
+					}
 						
 					var conditionsList = this.id('conditionsmenu');
 					var conditions = Scholar.SearchConditions.getStandardConditions();
@@ -172,7 +175,7 @@
 					var selectThis;
 					for(var i = 0, len = operatorsList.firstChild.childNodes.length; i < len; i++)
 					{
-						var hidden = !operators[operatorsList.firstChild.childNodes[i].value];
+						var hidden = !operators[operatorsList.firstChild.childNodes[i].getAttribute('value')];
 						operatorsList.firstChild.childNodes[i].setAttribute('hidden', hidden);
 						if(selectThis == null && !hidden)
 							selectThis = i;
@@ -203,6 +206,8 @@
 														
 							this.dontupdate = false;
 						}
+						
+						this.onConditionSelected();
 					]]>
 				</body>
 			</method>
