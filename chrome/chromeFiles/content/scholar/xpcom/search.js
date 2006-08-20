@@ -289,7 +289,14 @@ Scholar.Search.prototype._buildQuery = function(){
 					case 'savedSearches':
 						break;
 					default:
-						condSQL += 'itemID IN (SELECT itemID FROM ' + i + ' WHERE (';
+						condSQL += 'itemID '
+						switch (tables[i][j]['operator']){
+							case 'isNot':
+							case 'doesNotContain':
+								condSQL += 'NOT ';
+								break;
+						}
+						condSQL += 'IN (SELECT itemID FROM ' + i + ' WHERE (';
 						openParens = 2;
 				}
 				
@@ -366,22 +373,14 @@ Scholar.Search.prototype._buildQuery = function(){
 					condSQL += tables[i][j]['field'];
 					switch (tables[i][j]['operator']){
 						case 'contains':
+						case 'doesNotContain': // excluded with NOT IN above
 							condSQL += ' LIKE ?';
 							condSQLParams.push('%' + tables[i][j]['value'] + '%');
 							break;
 							
-						case 'doesNotContain':
-							condSQL += ' NOT LIKE ?';
-							condSQLParams.push('%' + tables[i][j]['value'] + '%');
-							break;
-							
 						case 'is':
+						case 'isNot': // excluded with NOT IN above
 							condSQL += '=?';
-							condSQLParams.push(tables[i][j]['value']);
-							break;
-							
-						case 'isNot':
-							condSQL += '!=?';
 							condSQLParams.push(tables[i][j]['value']);
 							break;
 							
