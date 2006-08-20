@@ -53,14 +53,13 @@ var Scholar_File_Interface_Export = new function() {
 			var element = document.getElementById(option);
 			
 			if(typeof(defValue) == "boolean") {
-				if(element.checked == "true") {
+				if(element.checked == true) {
 					_options[option] = true;
 				} else {
 					_options[option] = false;
 				}
 			}
 		}
-		Scholar.debug(_options);
 	}
 	
 	/*

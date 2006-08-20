@@ -916,39 +916,64 @@ Scholar.Translate.prototype._closeStreams = function() {
  * imports an attachment from the disk
  */
 Scholar.Translate.prototype._itemImportAttachment = function(attachment, sourceID) {
-	Scholar.debug(attachment);
-	
 	if(!attachment.path) {
 		// create from URL
 		if(attachment.url) {
 			var attachmentID = Scholar.Attachments.linkFromURL(attachment.url, sourceID,
 					(attachment.mimeType ? attachment.mimeType : undefined),
 					(attachment.title ? attachment.title : undefined));
+			var attachmentItem = Scholar.Items.get(attachmentID);
 		} else {
 			Scholar.debug("not adding attachment: no path or url specified");
+			return false;
 		}
 	} else {
+		// generate nsIFile
+		var IOService = Components.classes["@mozilla.org/network/io-service;1"].
+						getService(Components.interfaces.nsIIOService);
+		var uri = IOService.newURI(attachment.path, "", null);
+		var file = uri.QueryInterface(Components.interfaces.nsIFileURL).file;
+		
 		if(attachment.url) {
-			Scholar.debug("not adding attachment: snapshot import not yet implemented");
+			// import from nsIFile
+			var attachmentID = Scholar.Attachments.importSnapshotFromFile(file,
+				attachment.url, attachment.title, attachment.mimeType,
+				(attachment.charset ? attachment.charset : null), sourceID);
+			var attachmentItem = Scholar.Items.get(attachmentID);
 		} else {
-			// generate nsIFile
-			var IOService = Components.classes["@mozilla.org/network/io-service;1"].
-			                getService(Components.interfaces.nsIIOService);
-			var uri = IOService.newURI(attachment.path, "", null);
-			var file = uri.QueryInterface(Components.interfaces.nsIFileURL).file;
-			
 			// import from nsIFile
 			var attachmentID = Scholar.Attachments.importFromFile(file, sourceID);
 			// get attachment item
-			var myAttachmentItem = Scholar.Items.get(attachmentID);
+			var attachmentItem = Scholar.Items.get(attachmentID);
 			if(attachment.title) {
 				// set title
-				myAttachmentItem.setField("title", attachment.title);
+				attachmentItem.setField("title", attachment.title);
 			}
 		}		
 	}
 	
-	return attachmentID;
+	return attachmentItem;
+}
+
+/*
+ * handles tags and see also data for notes and attachments
+ */
+Scholar.Translate.prototype._itemTagsAndSeeAlso = function(item, newItem) {
+	Scholar.debug("handling notes and see also");
+	// add to ID map
+	if(item.itemID) {
+		this._IDMap[item.itemID] = newItem.getID();
+	}
+	// add see alsos
+	for each(var seeAlso in item.seeAlso) {
+		if(this._IDMap[seeAlso]) {
+			newItem.addSeeAlso(this._IDMap[seeAlso]);
+		}
+	}
+	
+	for each(var tag in item.tags) {
+		newItem.addTag(tag);
+	}
 }
 
 /*
@@ -968,9 +993,6 @@ Scholar.Translate.prototype._itemDone = function(item) {
 		return;
 	}
 	
-	if(!item.title) {
-		throw("item has no title");
-	}
 	
 	var notifierStatus = Scholar.Notifier.isEnabled();
 	if(notifierStatus) {
@@ -985,8 +1007,18 @@ Scholar.Translate.prototype._itemDone = function(item) {
 		// re-retrieve the item
 		var newItem = Scholar.Items.get(myID);
 	} else if(type == "attachment") {
-		var myID = this._itemImportAttachment(item, null);
+		if(this.type == "import") {
+			var newItem = this._itemImportAttachment(item, null);
+			var myID = newItem.getID();
+		} else {
+			Scholar.debug("discarding standalone attachment");
+			return false;
+		}
 	} else {
+		if(!item.title) {
+			throw("item has no title");
+		}
+		
 		// create new item
 		var typeID = Scholar.ItemTypes.getID(type);
 		var newItem = Scholar.Items.getNewItemByType(typeID);
@@ -1016,13 +1048,11 @@ Scholar.Translate.prototype._itemDone = function(item) {
 					}
 				} else if(i == "title") {	// skip checks for title
 					newItem.setField(i, data);
-				} else if(i == "tags") {	// add tags
-					for(var j in data) {
-						newItem.addTag(data[j]);
-					}
 				} else if(i == "seeAlso") {
 					newItem.translateSeeAlso = data;
-				} else if(i != "note" && i != "notes" && i != "itemID" && (fieldID = Scholar.ItemFields.getID(i))) {
+				} else if(i != "note" && i != "notes" && i != "itemID" &&
+				          i != "attachments" && i != "tags" &&
+				          (fieldID = Scholar.ItemFields.getID(i))) {
 											// if field is in db
 					if(Scholar.ItemFields.isValidForType(fieldID, typeID)) {
 											// if field is valid for this type
@@ -1049,15 +1079,8 @@ Scholar.Translate.prototype._itemDone = function(item) {
 				var noteID = Scholar.Notes.add(note.note, myID);
 				
 				// handle see also
-				if(note.seeAlso) {
-					var myNote = Scholar.Items.get(noteID);
-					
-					for each(var seeAlso in note.seeAlso) {
-						if(this._IDMap[seeAlso]) {
-							myNote.addSeeAlso(this._IDMap[seeAlso]);
-						}
-					}
-				}
+				var myNote = Scholar.Items.get(noteID);
+				this._itemTagsAndSeeAlso(note, myNote);
 			}
 		}
 		
@@ -1071,7 +1094,7 @@ Scholar.Translate.prototype._itemDone = function(item) {
 					
 					if(attachment.downloadable && this._downloadAssociatedFiles) {
 						if(attachment.document) {
-							var attachmentID = Scholar.Attachments.importFromDocument(attachment.document, myID);
+							attachmentID = Scholar.Attachments.importFromDocument(attachment.document, myID);
 							
 							// change title, if a different one was specified
 							if(attachment.title && (!attachment.document.title
@@ -1086,7 +1109,7 @@ Scholar.Translate.prototype._itemDone = function(item) {
 						}
 					} else {
 						if(attachment.document) {
-							var attachmentID = Scholar.Attachments.linkFromURL(attachment.document.location.href, myID,
+							attachmentID = Scholar.Attachments.linkFromURL(attachment.document.location.href, myID,
 									(attachment.mimeType ? attachment.mimeType : attachment.document.contentType),
 									(attachment.title ? attachment.title : attachment.document.title));
 						} else {
@@ -1094,13 +1117,16 @@ Scholar.Translate.prototype._itemDone = function(item) {
 								Scholar.debug("notice: either mimeType or title is missing; attaching file will be slower");
 							}
 							
-							var attachmentID = Scholar.Attachments.linkFromURL(attachment.url, myID,
+							attachmentID = Scholar.Attachments.linkFromURL(attachment.url, myID,
 									(attachment.mimeType ? attachment.mimeType : undefined),
 									(attachment.title ? attachment.title : undefined));
 						}
 					}
 				} else if(this.type == "import") {
-					this._itemImportAttachment(attachment, myID);
+					var attachmentItem = this._itemImportAttachment(attachment, myID);
+					if(attachmentItem) {
+						this._itemTagsAndSeeAlso(attachment, attachmentItem);
+					}
 				}
 			}
 		}
@@ -1117,6 +1143,12 @@ Scholar.Translate.prototype._itemDone = function(item) {
 			if(this._IDMap[seeAlso]) {
 				newItem.addSeeAlso(this._IDMap[seeAlso]);
 			}
+		}
+	}
+	
+	if(item.tags) {
+		for each(var tag in item.tags) {
+			newItem.addTag(tag);
 		}
 	}
 	
@@ -1358,7 +1390,7 @@ Scholar.Translate.prototype._export = function() {
 		var extensionMatch = /^(.*)\.[a-zA-Z0-9]+$/
 		var m = extensionMatch.exec(name);
 		if(m) {
-			name = m[0];
+			name = m[1];
 		}
 		directory.append(name);
 		
@@ -1447,13 +1479,18 @@ Scholar.Translate.prototype._exportGetAttachment = function(attachment) {
 	attachmentArray.title = attachment.getField("title");
 	// get mime type
 	attachmentArray.mimeType = attachment.getAttachmentMimeType();
+	// get charset
+	attachmentArray.charset = attachment.getAttachmentCharset();
+	// get seeAlso
+	attachmentArray.seeAlso = attachment.getSeeAlso();
+	// get tags
+	attachmentArray.tags = attachment.getTags();
 	
 	if(linkMode != Scholar.Attachments.LINK_MODE_LINKED_URL &&
 	   this._displayOptions["exportFileData"]) {
 		// add path and filename if not an internet link
-		attachmentArray.path = "files/"+attachmentID+"/";
 		var file = attachment.getFile();
-		attachmentArray.filename = file.leafName;
+		attachmentArray.path = "files/"+attachmentID+"/"+file.leafName;
 		
 		if(linkMode == Scholar.Attachments.LINK_MODE_LINKED_FILE) {
 			// create a new directory
@@ -1847,7 +1884,7 @@ Scholar.Translate.RDF.prototype.getSources = function(resource, property) {
 	property = this._getResource(property);
 	resource = this._getResource(resource);
 	
-	var enumerator = this._dataSource.GetSources(resource, property, true);
+	var enumerator = this._dataSource.GetSources(property, resource, true);
 	return this._deEnumerate(enumerator);
 }
 

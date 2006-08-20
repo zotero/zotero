@@ -202,7 +202,7 @@ CSL.prototype.createBibliography = function(items, format) {
 		// add line feeds
 		if(format == "HTML") {
 			var coins = Scholar.OpenURL.createContextObject(item, "1.0");
-			string += '<span class="Z3988" title="'+coins+'"></span>';
+			string += '<span class="Z3988" title="'+coins.replace("&", "&amp;")+'"></span>';
 			
 			if(this._class == "note") {
 				output += "<li>"+string+"</li>\r\n";
