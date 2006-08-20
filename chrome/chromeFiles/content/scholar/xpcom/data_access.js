@@ -1706,6 +1706,9 @@ Scholar.Items = new function(){
 		
 		// Otherwise, build return array
 		for (i=0; i<ids.length; i++){
+			if (!_items[ids[i]]){
+				Scholar.debug("Item " + ids[i] + " not loaded -- this shouldn't happen", 2);
+			}
 			loaded.push(_items[ids[i]]);
 		}
 		
@@ -2300,13 +2303,13 @@ Scholar.Collection.prototype._init = function(){
 	//
 	// Public members for access by public methods -- do not access directly
 	//
-	this._id;
-	this._name;
-	this._parent;
-	this._hasChildCollections;
-	this._hasChildItems;
+	this._id = null;
+	this._name = null;
+	this._parent = null;
+	this._hasChildCollections = false;
+	this._hasChildItems = false;
 	this._childItems = new Scholar.Hash();
-	this._childItemsLoaded;
+	this._childItemsLoaded = false;
 }
 
 /*
@@ -2603,13 +2606,15 @@ Scholar.Collection.prototype._loadChildItems = function(){
 	var sql = "SELECT itemID FROM collectionItems WHERE collectionID=" + this._id;
 	var itemIDs = Scholar.DB.columnQuery(sql);
 	
-	if (!itemIDs){
+	if (itemIDs){
+		for (var i=0; i<itemIDs.length; i++){
+			this._childItems.set(itemIDs[i]);
+		}
+	}
+	else {
 		Scholar.debug('Collection ' + this._id + ' has no child items');
 	}
 	
-	for (var i=0; i<itemIDs.length; i++){
-		this._childItems.set(itemIDs[i]);
-	}
 	this._childItemsLoaded = true;
 }
 
