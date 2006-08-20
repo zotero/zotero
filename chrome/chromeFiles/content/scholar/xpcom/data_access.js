@@ -1954,7 +1954,7 @@ Scholar.Attachments = new function(){
 			newFile.initWithFile(destDir);
 			newFile.append(title);
 			
-			var mimeType = Scholar.File.getMIMETypeFromFile(newFile);
+			var mimeType = Scholar.MIME.getMIMETypeFromFile(newFile);
 			var charsetID = _getCharsetIDFromFile(newFile);
 			
 			_addToDB(newFile, null, null, this.LINK_MODE_IMPORTED_FILE,
@@ -1982,7 +1982,7 @@ Scholar.Attachments = new function(){
 	
 	function linkFromFile(file, sourceItemID){
 		var title = file.leafName;
-		var mimeType = Scholar.File.getMIMETypeFromFile(file);
+		var mimeType = Scholar.MIME.getMIMETypeFromFile(file);
 		var charsetID = _getCharsetIDFromFile(file);
 		return _addToDB(file, null, title, this.LINK_MODE_LINKED_FILE, mimeType, charsetID, sourceItemID);
 	}
