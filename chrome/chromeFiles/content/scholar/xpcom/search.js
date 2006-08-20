@@ -112,7 +112,7 @@ Scholar.Search.prototype.save = function(){
 	}
 	
 	Scholar.DB.commitTransaction();
-	
+	Scholar.Notifier.trigger('modify', 'search', this._savedSearchID);
 	return this._savedSearchID;
 }
 
@@ -442,8 +442,17 @@ Scholar.Search.prototype._buildQuery = function(){
 
 
 Scholar.Searches = new function(){
+	this.get = get;
 	this.getAll = getAll;
 	this.erase = erase;
+	
+	
+	function get(id){
+		var sql = "SELECT savedSearchID AS id, savedSearchName AS name "
+			+ "FROM savedSearches WHERE savedSearchID=?";
+		return Scholar.DB.rowQuery(sql, [id]);
+	}
+	
 	
 	/*
 	 * Returns an array of saved searches with 'id' and 'name', ordered by name
@@ -468,6 +477,8 @@ Scholar.Searches = new function(){
 			+ savedSearchID;
 		Scholar.DB.query(sql);
 		Scholar.DB.commitTransaction();
+		
+		Scholar.Notifier.trigger('remove', 'search', savedSearchID);
 	}
 }
 

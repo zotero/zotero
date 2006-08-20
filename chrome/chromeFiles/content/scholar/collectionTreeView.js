@@ -102,19 +102,33 @@ Scholar.CollectionTreeView.prototype.reload = function()
 Scholar.CollectionTreeView.prototype.notify = function(action, type, ids)
 {
 	var madeChanges = false;
-	
-	Scholar.debug(action+', '+type+', '+ids);
+	var ids = Scholar.flattenArguments(ids);
 	
 	if(action == 'remove')
 	{
-		ids = Scholar.flattenArguments(ids);
 		//Since a remove involves shifting of rows, we have to do it in order
 		
 		//sort the ids by row
 		var rows = new Array();
-		for(var i=0, len=ids.length; i<len; i++)
-			if(this._collectionRowMap[ids[i]] != null)
-				rows.push(this._collectionRowMap[ids[i]]);
+		for (var i in ids)
+		{
+			switch (type)
+			{
+				case 'collection':
+					if(this._collectionRowMap[ids[i]] != null)
+					{
+						rows.push(this._collectionRowMap[ids[i]]);
+					}
+					break;
+				
+				case 'search':
+					if(this._searchRowMap[ids[i]] != null)
+					{
+						rows.push(this._searchRowMap[ids[i]]);
+					}
+					break;
+			}
+		}
 		
 		if(rows.length > 0)
 		{
@@ -137,12 +151,35 @@ Scholar.CollectionTreeView.prototype.notify = function(action, type, ids)
 	}
 	else if(action == 'modify')
 	{
-		var row = this._collectionRowMap[ids];
-		if(row != null)
-			this._treebox.invalidateRow(row);
+		for (var i in ids)
+		{
+			switch (type)
+			{
+				case 'collection':
+					if (this._collectionRowMap[ids[i]] != null)
+					{
+						this._treebox.invalidateRow(this._collectionRowMap[ids[i]]);
+					}
+					break;
+					
+				case 'search':
+					if (this._searchRowMap[ids[i]] != null)
+					{
+						// Search rows aren't mapped to native objects, so we
+						// have to pull the new data manually
+						this._getItemAtRow(this._searchRowMap[ids[i]]).ref =
+							Scholar.Searches.get(ids[i]);
+						this._treebox.invalidateRow(this._searchRowMap[ids[i]]);
+					}
+					break;
+			}
+		}
 	}
 	else if(action == 'add')
 	{
+		// Multiple adds not currently supported
+		ids = ids[0];
+		
 		var item = Scholar.Collections.get(ids);
 		
 		this._showItem(new Scholar.ItemGroup('collection',item), 0, this.rowCount);
@@ -162,6 +199,22 @@ Scholar.CollectionTreeView.prototype.unregister = function()
 {
 	Scholar.Notifier.unregisterColumnTree(this._unregisterID);
 }
+
+Scholar.CollectionTreeView.prototype.isLibrary = function(row)
+{
+	return this._getItemAtRow(row).isLibrary();
+}
+
+Scholar.CollectionTreeView.prototype.isCollection = function(row)
+{
+	return this._getItemAtRow(row).isCollection();
+}
+
+Scholar.CollectionTreeView.prototype.isSearch = function(row)
+{
+	return this._getItemAtRow(row).isSearch();
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -307,11 +360,12 @@ Scholar.CollectionTreeView.prototype.deleteSelection = function()
 		//erase collection from DB:
 		var group = this._getItemAtRow(rows[i]-i);
 		if(group.isCollection())
+		{
 			group.ref.erase();
+		}
 		else if(group.isSearch())
 		{
 			Scholar.Searches.erase(group.ref['id']);
-			this._hideItem(rows[i]-i); //we don't have the notification system set up with searches.
 		}
 	}
 	this._treebox.endUpdateBatch();
@@ -351,17 +405,21 @@ Scholar.CollectionTreeView.prototype._getItemAtRow = function(row)
 }
 
 /*
- * Creates hash map of collection ids to row indexes
+ * Creates hash map of collection and search ids to row indexes
  * e.g., var rowForID = this._collectionRowMap[]
  */
 Scholar.CollectionTreeView.prototype._refreshHashMap = function()
 {	
-	this._collectionRowMap = new Array();
-	for(var i=0; i < this.rowCount; i++)
-		if (this.isContainer(i))
+	this._collectionRowMap = [];
+	this._searchRowMap = [];
+	for(var i=0; i < this.rowCount; i++){
+		if (this.isCollection(i)){
 			this._collectionRowMap[this._getItemAtRow(i).ref.getID()] = i;
-		
-	
+		}
+		else if (this.isSearch(i)){
+			this._searchRowMap[this._getItemAtRow(i).ref.id] = i;
+		}
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -541,8 +599,8 @@ Scholar.CollectionTreeView.prototype.cycleHeader = function(column)					{ }
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-///  Scholar ItemGroup -- a sort of "super class" for Collection, library, 
-///  	and eventually smartSearch
+///  Scholar ItemGroup -- a sort of "super class" for collection, library,
+///  	and saved search
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
