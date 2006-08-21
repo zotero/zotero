@@ -563,7 +563,8 @@ Scholar.SearchConditions = new function(){
 					isNot: true
 				},
 				table: 'savedSearches',
-				field: 'savedSearchID'
+				field: 'savedSearchID',
+				special: true
 			},
 			
 			{
@@ -577,7 +578,7 @@ Scholar.SearchConditions = new function(){
 			},
 			
 			{
-				name: 'itemType',
+				name: 'itemTypeID',
 				operators: {
 					is: true,
 					isNot: true
@@ -593,7 +594,8 @@ Scholar.SearchConditions = new function(){
 					isNot: true
 				},
 				table: 'itemTags',
-				field: 'tagID'
+				field: 'tagID',
+				special: true
 			},
 			
 			{
@@ -657,17 +659,36 @@ Scholar.SearchConditions = new function(){
 			delete _conditions[i];
 		}
 		
+		var sortKeys = [];
+		var sortValues = [];
+		
 		// Separate standard conditions for menu display
 		for (var i in _conditions){
 			// Standard conditions a have associated tables
-			if (_conditions[i]['table'] &&
+			if (_conditions[i]['table'] && !_conditions[i]['special'] &&
 				// If a template condition, not the original (e.g. 'field')
 				(!_conditions[i]['template'] || i!=_conditions[i]['name'])){
-				_standardConditions.push({
+				
+				try {
+					var localized = Scholar.getString('searchConditions.' + i)
+				}
+				catch (e){
+					var localized = Scholar.getString('itemFields.' + i);
+				}
+				
+				sortKeys.push(localized);
+				sortValues[localized] = {
 					name: i,
+					localized: localized,
 					operators: _conditions[i]['operators']
-				});
+				};
 			}
+		}
+		
+		// Alphabetize by localized name
+		sortKeys = sortKeys.sort();
+		for each(var i in sortKeys){
+			_standardConditions.push(sortValues[i]);
 		}
 		
 		_initialized = true;

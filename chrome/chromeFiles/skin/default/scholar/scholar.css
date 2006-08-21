@@ -66,11 +66,17 @@ seealsobox
 scholarsearch
 {
 	-moz-binding: url('chrome://scholar/content/bindings/scholarsearch.xml#search-box');
+	width:60em;
 }
 
 searchcondition
 {
 	-moz-binding: url('chrome://scholar/content/bindings/scholarsearch.xml#search-condition');
+}
+
+searchcondition menulist[id="operatorsmenu"]
+{
+	width:15em;
 }
 
 .clicky, .unclicky

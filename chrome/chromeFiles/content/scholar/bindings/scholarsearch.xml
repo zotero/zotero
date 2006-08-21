@@ -110,7 +110,9 @@
 						
 						if(conditionsBox.hasChildNodes())
 							for(var i = 0, len=conditionsBox.childNodes.length; i < len; i++)
+							{
 								conditionsBox.childNodes[i].updateSearch();
+							}
 						
 						return this.search.save();
 					]]>
@@ -133,8 +135,8 @@
 					<xul:label value="Match"/>
 					<xul:menulist id="joinModeMenu" oncommand="this.parentNode.parentNode.parentNode.updateJoinMode();">
 						<xul:menupopup>
-							<xul:menuitem label="Any" value="any"/>
-							<xul:menuitem label="All" value="all" selected="true"/>
+							<xul:menuitem label="any" value="any"/>
+							<xul:menuitem label="all" value="all" selected="true"/>
 						</xul:menupopup>
 					</xul:menulist>
 					<xul:label value="of the following:"/>
@@ -160,18 +162,28 @@
 					var conditions = Scholar.SearchConditions.getStandardConditions();
 					
 					for(var i=0, len=conditions.length; i<len; i++)
-						conditionsList.appendItem(conditions[i]['name'], conditions[i]['name']);
+					{
+						conditionsList.appendItem(conditions[i]['localized'], conditions[i]['name']);
+					}
 					conditionsList.selectedIndex = 0;
 				]]>
 			</constructor>
+			<field name="selectedCondition"/>
 			<method name="onConditionSelected">
 				<body>
 					<![CDATA[
+					// Skip if already selected
+					if (this.id('conditionsmenu').value==this.selectedCondition){
+						return;
+					}
+					this.selectedCondition = this.id('conditionsmenu').value;
+					
 					var operatorsList = this.id('operatorsmenu');
 					
 					var condition = Scholar.SearchConditions.get(this.id('conditionsmenu').value);	
 					var operators = condition['operators'];
 					
+					// Display appropriate operators for condition
 					var selectThis;
 					for(var i = 0, len = operatorsList.firstChild.childNodes.length; i < len; i++)
 					{
@@ -182,12 +194,79 @@
 					}
 					
 					operatorsList.selectedIndex = selectThis;
+					
+					// Generate drop-down menus for certain conditions
+					switch (this.id('conditionsmenu').value){
+						case 'collectionID':
+							var merged = [];
+							var searches = Scholar.Searches.getAll();
+							var cols = Scholar.getCollections();
+							for (var i in cols)
+							{
+								merged.push([cols[i].getName(), 'C' + cols[i].getID()]);
+							}
+							for (var i in searches)
+							{
+								merged.push([searches[i]['name'], 'S' + searches[i]['id']]);
+							}
+							
+							this.createValueMenu(merged);
+							break;
+						
+						case 'itemTypeID':
+							var types = Scholar.ItemTypes.getTypes();
+							for (var i in types)
+							{
+								types[i][0] = Scholar.getString('itemTypes.' + types[i]['name']);
+								types[i][1] = types[i]['id'];
+								delete types[i]['name'];
+								delete types[i]['id'];
+							}
+							this.createValueMenu(types);
+							break;
+						
+						default:
+							// If switching between menu and textbox, clear value
+							if (this.id('valuefield').hidden){
+								this.value = '';
+								this.id('valuefield').value = '';
+							}
+							else {
+								this.id('valuefield').value = this.value;
+							}
+							
+							this.id('valuefield').hidden = false;
+							this.id('valuemenu').hidden = true;
+							break;
+					}
+					]]>
+				</body>
+			</method>
+			<method name="createValueMenu">
+				<parameter name="values"/>
+				<body>
+					<![CDATA[
+						while (this.id('valuemenu').hasChildNodes()){
+							this.id('valuemenu').removeChild(this.id('valuemenu').firstChild);
+						}
+						
+						if (values.length){
+							for (var i in values){
+								this.id('valuemenu').appendItem(values[i][0], values[i][1]);
+							}
+							this.id('valuemenu').selectedIndex = 0;
+						}
+						
+						this.id('valuemenu').value = this.value;
+						this.id('valuefield').hidden = true;
+						this.id('valuemenu').hidden = false;
 					]]>
 				</body>
 			</method>
 			<field name="dontupdate"/>
 			<field name="parent"/>
 			<field name="conditionID"/>
+			<field name="value"/>
 			<method name="initWithParentAndCondition">
 				<parameter name="parent"/>
 				<parameter name="condition"/>
@@ -200,10 +279,28 @@
 						{
 							this.dontupdate = true;	//so that the search doesn't get updated while we are creating controls.
 							
-							this.id('conditionsmenu').value = condition['condition'];
+							// Handle collectionID/savedSearchID
+							switch (condition['condition'])
+							{
+								case 'savedSearchID':
+									this.id('conditionsmenu').value = 'collectionID';
+									var prefix = 'S';
+									break;
+								
+								case 'collectionID':
+									this.id('conditionsmenu').value = 'collectionID';
+									var prefix = 'C';
+									
+									// fall through
+									
+								default:
+									this.id('conditionsmenu').value = condition['condition'];
+									var prefix = '';
+							}
+							
 							this.id('operatorsmenu').value = condition['operator'];
-							this.id('valuefield').value = condition['value'];
-														
+							this.value = prefix + condition['value'];
+							
 							this.dontupdate = false;
 						}
 						
@@ -218,7 +315,35 @@
 						{
 							var condition = this.id('conditionsmenu').value;
 							var operator = this.id('operatorsmenu').value;
-							var value = this.id('valuefield').value;
+							
+							// Regular text field
+							if (!this.id('valuefield').hidden)
+							{
+								var value = this.id('valuefield').value;
+							}
+							
+							// Handle special C1234 and S5678 form for
+							// collections and searches
+							else if (this.id('conditionsmenu').value=='collectionID')
+							{
+								var letter = this.id('valuemenu').value.substr(0,1);
+								if (letter=='C')
+								{
+									condition = 'collectionID';
+								}
+								else if (letter=='S')
+								{
+									condition = 'savedSearchID';
+								}
+								var value = this.id('valuemenu').value.substr(1);
+							}
+							
+							// Regular drop-down menu
+							else
+							{
+								var value = this.id('valuemenu').value;
+							}
+							
 							this.parent.search.updateCondition(this.conditionID, condition, operator, value);
 						}
 					]]>
@@ -258,6 +383,9 @@
 					<xul:menupopup/>
 				</xul:menulist>
 				<xul:textbox id="valuefield" flex="1"/>
+				<xul:menulist id="valuemenu" flex="1" hidden="true">
+					<xul:menupopup/>
+				</xul:menulist>
 				<xul:toolbarbutton id="remove" class="clicky" label="-" oncommand="this.parentNode.parentNode.onRemoveClicked();"/>
 				<xul:toolbarbutton id="add" class="clicky" label="+" oncommand="this.parentNode.parentNode.onAddClicked();"/>
 			</xul:hbox>
