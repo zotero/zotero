@@ -169,6 +169,7 @@
 				]]>
 			</constructor>
 			<field name="selectedCondition"/>
+			<field name="selectedOperator"/>
 			<method name="onConditionSelected">
 				<body>
 					<![CDATA[
@@ -176,9 +177,10 @@
 					if (this.id('conditionsmenu').value==this.selectedCondition){
 						return;
 					}
-					this.selectedCondition = this.id('conditionsmenu').value;
-					
 					var operatorsList = this.id('operatorsmenu');
+					
+					this.selectedCondition = this.id('conditionsmenu').value;
+					this.selectedOperator = operatorsList.value;
 					
 					var condition = Scholar.SearchConditions.get(this.id('conditionsmenu').value);	
 					var operators = condition['operators'];
@@ -187,12 +189,14 @@
 					var selectThis;
 					for(var i = 0, len = operatorsList.firstChild.childNodes.length; i < len; i++)
 					{
-						var hidden = !operators[operatorsList.firstChild.childNodes[i].getAttribute('value')];
+						var val = operatorsList.firstChild.childNodes[i].getAttribute('value');
+						var hidden = !operators[val];
 						operatorsList.firstChild.childNodes[i].setAttribute('hidden', hidden);
-						if(selectThis == null && !hidden)
+						if (!hidden && (selectThis == null || this.selectedOperator == val))
+						{
 							selectThis = i;
+						}
 					}
-					
 					operatorsList.selectedIndex = selectThis;
 					
 					// Generate drop-down menus for certain conditions
