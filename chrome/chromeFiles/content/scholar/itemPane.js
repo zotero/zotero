@@ -90,7 +90,7 @@ ScholarItemPane = new function()
 	{
 		_itemBeingEdited = thisItem;
 		
-		_loaded = new Array(5);
+		_loaded = {};
 		
 		loadPane(_tabs.selectedIndex);
 	}
@@ -99,7 +99,9 @@ ScholarItemPane = new function()
 	{
 		//Scholar.debug('Loading item pane ' + index);
 		if(_loaded[index])
+		{
 			return;
+		}
 		_loaded[index] = true;
 		
 		// Info pane
