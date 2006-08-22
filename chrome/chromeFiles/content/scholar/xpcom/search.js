@@ -122,6 +122,17 @@ Scholar.Search.prototype.addCondition = function(condition, operator, value, req
 		throw ("Invalid operator '" + operator + "' for condition " + condition);
 	}
 	
+	// Shortcut to add a condition on every table -- does not return an id
+	if (condition=='fulltext'){
+		this.addCondition('joinMode', 'any');
+		this.addCondition('title', operator, value, false);
+		this.addCondition('field', operator, value, false);
+		this.addCondition('creator', operator, value, false);
+		this.addCondition('tag', operator, value, false);
+		this.addCondition('note', operator, value, false);
+		return false;
+	}
+	
 	var searchConditionID = ++this._maxSearchConditionID;
 	
 	this._conditions[searchConditionID] = {
@@ -285,7 +296,6 @@ Scholar.Search.prototype._buildQuery = function(){
 				// Special table handling
 				//
 				switch (i){
-					case 'items':
 					case 'savedSearches':
 						break;
 					default:
@@ -306,6 +316,9 @@ Scholar.Search.prototype._buildQuery = function(){
 				//
 				switch (tables[i][j]['name']){
 					case 'field':
+						if (!tables[i][j]['alias']){
+							break;
+						}
 						condSQL += 'fieldID=? AND ';
 						condSQLParams.push(
 							Scholar.ItemFields.getID(tables[i][j]['alias'])
@@ -313,12 +326,7 @@ Scholar.Search.prototype._buildQuery = function(){
 						break;
 					
 					case 'collectionID':
-						condSQL += "collectionID ";
-						if (tables[i][j]['operator']=='isNot'){
-							condSQL += "NOT ";
-						}
-						// Add given collection id
-						condSQL += "IN (?,";
+						condSQL += "collectionID IN (?,";
 						condSQLParams.push({int:tables[i][j]['value']});
 						
 						// And descendents if recursive search
@@ -540,6 +548,28 @@ Scholar.SearchConditions = new function(){
 				}
 			},
 			
+			// Saved search to search within
+			{
+				name: 'savedSearchID',
+				operators: {
+					is: true,
+					isNot: true
+				},
+				table: 'savedSearches',
+				field: 'savedSearchID',
+				special: true
+			},
+			
+			{
+				name: 'fulltext',
+				operators: {
+					is: true,
+					isNot: true,
+					contains: true,
+					doesNotContain: true
+				}
+			},
+			
 			//
 			// Standard conditions
 			//
@@ -553,18 +583,6 @@ Scholar.SearchConditions = new function(){
 				},
 				table: 'collectionItems',
 				field: 'collectionID'
-			},
-			
-			// Saved search to search within
-			{
-				name: 'savedSearchID',
-				operators: {
-					is: true,
-					isNot: true
-				},
-				table: 'savedSearches',
-				field: 'savedSearchID',
-				special: true
 			},
 			
 			{
