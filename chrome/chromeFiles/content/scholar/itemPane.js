@@ -39,6 +39,7 @@ ScholarItemPane = new function()
 	this.changeTypeTo = changeTypeTo;
 	this.onOpenURLClick = onOpenURLClick;
 	this.addCreatorRow = addCreatorRow;
+	this.disableButton = disableButton;
 	this.removeCreator = removeCreator;
 	this.showEditor = showEditor;
 	this.hideEditor = hideEditor;
@@ -153,12 +154,14 @@ ScholarItemPane = new function()
 			}
 			else
 			{
+				// Add default row
 				addCreatorRow('', '', 1, true, true);
 			}
 		}
+		
+		// Notes pane
 		else if(index == 1)
 		{
-			//NOTES:
 			while(_notesList.hasChildNodes())
 				_notesList.removeChild(_notesList.firstChild);
 				
@@ -196,9 +199,10 @@ ScholarItemPane = new function()
 		
 			_updateNoteCount();
 		}
+		
+		// Attachments pane
 		else if(index == 2)
 		{
-			//ATTACHMENTS
 			while(_attachmentsList.hasChildNodes())
 				_attachmentsList.removeChild(_attachmentsList.firstChild);
 				
@@ -254,14 +258,16 @@ ScholarItemPane = new function()
 			_updateAttachmentCount();
 			
 		}
+		
+		// Tags pane
 		else if(index == 3)
 		{
-			//TAGS:
 			_tagsBox.item = _itemBeingEdited;
 		}
+		
+		// Related pane
 		else if(index == 4)
 		{
-			//RELATED
 			_relatedBox.item = _itemBeingEdited;
 		}
 	}
@@ -294,6 +300,12 @@ ScholarItemPane = new function()
 	
 	function addCreatorRow(firstName, lastName, typeID, unsaved, defaultRow)
 	{
+		// Disable the "+" button on previous rows
+		var elems = _dynamicFields.getElementsByAttribute('value', '+');
+		if (elems.length){
+			ScholarItemPane.disableButton(elems[elems.length-1]);
+		}
+		
 		if(!firstName)
 			firstName = "(" + Scholar.getString('pane.item.defaultFirstName') + ")";
 		if(!lastName)
@@ -304,7 +316,7 @@ ScholarItemPane = new function()
 		label.setAttribute("fieldname",'creator-'+_creatorCount+'-typeID');
 		label.className = 'clicky';
 		
-		// getCreatorFields() needs to be adjusted if the DOM changes
+		// getCreatorFields() needs to be adjusted if this DOM structure changes
 		var row = document.createElement("hbox");
 		
 		var firstlast = document.createElement("hbox");
@@ -315,9 +327,9 @@ ScholarItemPane = new function()
 		
 		var removeButton = document.createElement('label');
 		removeButton.setAttribute("value","-");
+		// If default first row, don't let user remove it
 		if (defaultRow){
-			removeButton.setAttribute("disabled",true);
-			removeButton.setAttribute("class","unclicky");
+			disableButton(removeButton);
 		}
 		else {
 			removeButton.setAttribute("class","clicky");
@@ -327,21 +339,34 @@ ScholarItemPane = new function()
 		
 		var addButton = document.createElement('label');
 		addButton.setAttribute("value","+");
+		// If row isn't saved, don't let user add more
 		if (unsaved)
 		{
-			addButton.setAttribute("disabled",true);
-			addButton.setAttribute("class","unclicky");
+			disableButton(addButton);
 		}
 		else
 		{
-			addButton.setAttribute("class","clicky");
-			addButton.setAttribute("onclick","ScholarItemPane.addCreatorRow('','',1,true);");
+			_enablePlusButton(addButton);
 		}
 		row.appendChild(addButton);
 		
 		_creatorCount++;
 		
 		addDynamicRow(label, row, true);
+	}
+	
+	function disableButton(button)
+	{
+		button.setAttribute('disabled', true);
+		button.setAttribute('class', 'unclicky');
+		button.setAttribute('onclick', false); 
+	}
+	
+	function _enablePlusButton(button)
+	{
+		button.setAttribute('disabled', false);
+		button.setAttribute("class","clicky");
+		button.setAttribute("onclick","ScholarItemPane.disableButton(this); ScholarItemPane.addCreatorRow('','',1,true);");
 	}
 	
 	function createValueElement(valueText, fieldName)
@@ -373,6 +398,11 @@ ScholarItemPane = new function()
 		// If unsaved row, just remove element
 		if (!_itemBeingEdited.hasCreatorAt(index)){
 			labelToDelete.parentNode.removeChild(labelToDelete);
+			
+			// Enable the "+" button on the previous row
+			var elems = _dynamicFields.getElementsByAttribute('value', '+');
+			_enablePlusButton(elems[elems.length-1]);
+			
 			_creatorCount--;
 			return;
 		}
@@ -471,7 +501,6 @@ ScholarItemPane = new function()
 		var label1 = row.getElementsByTagName('hbox')[0].firstChild.firstChild;
 		var label2 = label1.nextSibling;
 		
-		// doesn't currently return creator type, since we don't need it anywhere
 		return {
 			lastName: label1.firstChild ? label1.firstChild.nodeValue
 				// Strip trailing comma
