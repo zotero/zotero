@@ -24,7 +24,7 @@
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 	
 	<script src="itemPane.js"/>	
-	<deck id="scholar-view-item" flex="1">
+	<deck id="scholar-view-item" flex="1" onselect="ScholarItemPane.loadPane(this.selectedIndex)">
 			<vbox id="scholar-info" flex="1">
 				<popupset>
 					<popup id="creatorTypeMenu" position="after_start"
