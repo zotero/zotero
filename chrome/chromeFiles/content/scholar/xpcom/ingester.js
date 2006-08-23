@@ -208,7 +208,7 @@ Scholar.OpenURL = new function() {
 	 */
 	function createContextObject(item, version) {
 		if(item.toArray) {
-			item = itemObject.toArray();
+			item = item.toArray();
 		}
 		
 		var identifiers = new Array();
