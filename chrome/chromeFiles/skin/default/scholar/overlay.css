@@ -138,6 +138,7 @@
 #tb-collection-addsearch
 {
 	list-style-image: url('chrome://scholar/skin/treesource-search.png');
+	margin-bottom:-5px;
 }
 
 #tb-search-cancel
