@@ -88,6 +88,17 @@ Scholar_Ingester_Interface.scrapeThisPage = function(saveLocation) {
 	}
 }
 
+Scholar_Ingester_Interface.searchFrames = function(rootDoc, searchDoc) {
+	for each(var frame in rootDoc.frames) {
+		if(frame.document == searchDoc ||
+		   (frame.document.frames && searchFrames(frame, searchDoc))) {
+			return true;
+		}
+	}
+	
+	return false;
+}
+
 /*
  * An event handler called when a new document is loaded. Creates a new document
  * object, and updates the status of the capture icon
@@ -118,9 +129,13 @@ Scholar_Ingester_Interface.contentLoad = function(event) {
 		var data = Scholar_Ingester_Interface._getData(browser);
 		
 		// if there's already a scrapable page in the browser window, and it's
-		// still there, return
+		// still there, ensure it is actually part of the page, then return
 		if(data.translators && data.translators.length && data.document.location) {
-			return;
+			if(Scholar_Ingester_Interface.searchFrames(rootDoc, data.document)) {
+				return;
+			} else {
+				data.document = null;
+			}
 		}
 		
 		// get translators

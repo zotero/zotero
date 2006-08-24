@@ -1,4 +1,4 @@
--- 54
+-- 55
 
 -- Set the following timestamp to the most recent scraper update date
 REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-08-15 15:42:00'));
@@ -1100,15 +1100,25 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO "translators" VALUES ('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '2006-06-26 16:01:00', 4, 'ProQuest', 'Simon Kornblith', '^http://proquest\.umi\.com/pqdweb\?((?:.*\&)?did=.*&Fmt=[0-9]|(?:.*\&)Fmt=[0-9].*&did=|(?:.*\&)searchInterface=)',
+REPLACE INTO "translators" VALUES ('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '2006-06-26 16:01:00', 4, 'ProQuest', 'Simon Kornblith', '^http://[^/]+/pqdweb\?((?:.*\&)?did=.*&Fmt=[0-9]|(?:.*\&)Fmt=[0-9].*&did=|(?:.*\&)searchInterface=)',
 'function detectWeb(doc, url) {
-	if(doc.title == "Results") {
-		return "multiple";
-	} else {
-		return "magazineArticle";
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	if(doc.evaluate(''//img[substring(@src, string-length(@src)-32) = "/images/common/logo_proquest.gif" or substring(@src, string-length(@src)-38) = "/images/common/logo_proquest_small.gif"]'',
+	                doc, nsResolver, XPathResult.ANY_TYPE, null)) {
+		if(doc.title == "Results") {
+			return "multiple";
+		} else {
+			return "magazineArticle";
+		}
 	}
 }',
 'function scrape(doc) {
+	Scholar.Utilities.debug(doc.getElementsByTagName("body")[0].innerHTML);
+	
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == ''x'') return namespace; else return null;
@@ -1128,7 +1138,7 @@ REPLACE INTO "translators" VALUES ('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '2006
 		// there are sometimes additional tags representing higlighting
 		var author = Scholar.Utilities.getNodeString(doc, elmt, ''.//text()'', nsResolver);
 		if(author) {
-			newItem.creators.push(Scholar.Utilities.cleanAuthor(author, "author", true));
+			newItem.creators.push(Scholar.Utilities.cleanAuthor(author, "author"));
 		}
 	}
 	
@@ -1275,7 +1285,7 @@ function doWeb(doc, url) {
 		
 		// Require link to match this
 		var tagRegexp = new RegExp();
-		tagRegexp.compile(''^http://[^/]+/pqdweb\\?((?:.*&)?did=.*&Fmt=[12]|(?:.*&)Fmt=[12].*&did=)'');
+		tagRegexp.compile(''^http://[^/]+/pqdweb\\?((?:.*&)?did=.*&Fmt=[12][^0-9]|(?:.*&)Fmt=[12][^0-9].*&did=)'');
 		
 		var tableRows = doc.evaluate(''//tr[@class="rowUnMarked"]'',
 		                doc, nsResolver, XPathResult.ANY_TYPE, null);
@@ -1301,22 +1311,23 @@ function doWeb(doc, url) {
 			return true;
 		}
 		
-		var uris = new Array();
+		var urls = new Array();
 		for(var i in items) {
-			uris.push(i);
+			urls.push(i);
 		}
 		
-		Scholar.Utilities.processDocuments(uris, function(doc) { scrape(doc) },
+		Scholar.Utilities.processDocuments(urls, function(doc) { scrape(doc) },
 			function() { Scholar.done(); }, null);
 		
 		Scholar.wait();
 	} else {
-		var fmtCheck = /(?:\&|\?)Fmt=([0-9]+)/i
-		var m = fmtCheck.exec(doc.location.href);
-		if(m && (m[1] == "1" || m[1] == "2" || m[1] == "3")) {
+		if(doc.evaluate(''/html/body/span[@class="textMedium"]/table/tbody/tr/td[@class="headerBlack"]/strong//text()'',
+						doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
 			scrape(doc);
-		} else if(m) {
-			Scholar.Utilities.loadDocument(doc.location.href.replace("Fmt="+m[1], "Fmt=1"), function(doc) { scrape(doc); Scholar.done(); }, null);
+		} else {
+			var newURL = doc.location.href.replace(/RQT=[0-9]+/i, "RQT=309");
+			newURL = newURL.replace(/Fmt=[0-9]+/i, "Fmt=1");
+			Scholar.Utilities.loadDocument(newURL, function(doc) { scrape(doc); Scholar.done(); }, null);
 			Scholar.wait();
 		}
 	}

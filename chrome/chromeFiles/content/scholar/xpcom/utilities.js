@@ -259,12 +259,12 @@ Scholar.Utilities.Ingester._protocolRe = new RegExp();
 Scholar.Utilities.Ingester._protocolRe.compile("^(?:(?:http|https|ftp):|[^:]*/)", "i");
 Scholar.Utilities.Ingester.prototype.processDocuments = function(urls, processor, done, exception) {
 	if(this.translate.locationIsProxied) {
-		for(i in urls) {
+		for(var i in urls) {
 			if(this.translate.locationIsProxied) {
 				urls[i] = Scholar.Ingester.ProxyMonitor.properToProxy(urls[i]);
 			}
 			// check for a protocol colon
-			if(!Scholar.Utilities.Ingester._protocolRe.test(uris[i])) {
+			if(!Scholar.Utilities.Ingester._protocolRe.test(urls[i])) {
 				throw("invalid URL in processDocuments");
 			}
 		}
