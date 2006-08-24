@@ -71,7 +71,7 @@ Scholar_Ingester_Interface.scrapeThisPage = function(saveLocation) {
 		
 		if(saveLocation) {
 			saveLocation = Scholar.Collections.get(saveLocation);
-		} else { // save to currently selected project, if a project is selected
+		} else { // save to currently selected collection, if a collection is selected
 			try {
 				saveLocation = ScholarPane.getSelectedCollection();
 			} catch(e) {}

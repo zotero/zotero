@@ -2,10 +2,10 @@ var Scholar_File_Interface = new function() {
 	var _unresponsiveScriptPreference, _importCollection, _notifyItem, _notifyCollection;
 	
 	this.exportFile = exportFile;
-	this.exportProject = exportProject;
+	this.exportCollection = exportCollection;
 	this.exportItems = exportItems;
 	this.importFile = importFile;
-	this.bibliographyFromProject = bibliographyFromProject;
+	this.bibliographyFromCollection = bibliographyFromCollection;
 	this.bibliographyFromItems = bibliographyFromItems;
 	
 	/*
@@ -43,7 +43,7 @@ var Scholar_File_Interface = new function() {
 	/*
 	 * exports a collection
 	 */
-	function exportProject() {
+	function exportCollection() {
 		var collection = ScholarPane.getSelectedCollection();
 		if(!collection) throw("no collection currently selected");
 		
@@ -181,9 +181,9 @@ var Scholar_File_Interface = new function() {
 	}
 	
 	/*
-	 * Creates a bibliography from a project
+	 * Creates a bibliography from a collection
 	 */
-	function bibliographyFromProject() {
+	function bibliographyFromCollection() {
 		var collection = ScholarPane.getSelectedCollection();
 		if(!collection) throw("no collection currently selected");
 		

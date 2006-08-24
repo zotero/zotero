@@ -186,7 +186,7 @@
         FOREIGN KEY (creatorTypeID) REFERENCES creatorTypes(creatorTypeID)
     );
     
-    -- Collections (a.k.a. "projects") for holding items
+    -- Collections for holding items
     DROP TABLE IF EXISTS collections;
     CREATE TABLE collections (
         collectionID INT,
@@ -732,11 +732,11 @@
     INSERT INTO "itemNotes" VALUES(16, 1, 'This item is note-worthy.');
     INSERT INTO "itemNotes" VALUES(17, NULL, 'This is an independent note.');
     
-    INSERT INTO collections VALUES (1241, 'Test Project', NULL);
-    INSERT INTO collections VALUES (3262, 'Another Test Project', NULL);
-    INSERT INTO collections VALUES (6856, 'Yet Another Project', NULL);
-    INSERT INTO collections VALUES (7373, 'A Sub-project!', 6856);
-    INSERT INTO collections VALUES (9233, 'A Sub-sub-project!', 7373);
+    INSERT INTO collections VALUES (1241, 'Test Collection', NULL);
+    INSERT INTO collections VALUES (3262, 'Another Test Collection', NULL);
+    INSERT INTO collections VALUES (6856, 'Yet Another Collection', NULL);
+    INSERT INTO collections VALUES (7373, 'A Sub-collection!', 6856);
+    INSERT INTO collections VALUES (9233, 'A Sub-sub-collection!', 7373);
     
     INSERT INTO collectionItems VALUES (6856, 14, 0);
     INSERT INTO collectionItems VALUES (6856, 13, 1);

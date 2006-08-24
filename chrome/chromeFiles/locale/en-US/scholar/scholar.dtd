@@ -20,14 +20,14 @@
 
 <!ENTITY toolbar.newItem.label    		"New Item">
 <!ENTITY toolbar.removeItem.label 		  "Remove Item...">
-<!ENTITY toolbar.newCollection.label   	"New Project">
+<!ENTITY toolbar.newCollection.label   	"New Collection">
 <!ENTITY toolbar.newSearch.label   		"New Search">
-<!ENTITY toolbar.renameCollection.label   "Rename Project...">
-<!ENTITY toolbar.removeCollection.label   "Remove Project...">
-<!ENTITY toolbar.exportCollection.label   "Export Project...">
+<!ENTITY toolbar.renameCollection.label   "Rename Collection...">
+<!ENTITY toolbar.removeCollection.label   "Remove Collection...">
+<!ENTITY toolbar.exportCollection.label   "Export Collection...">
 <!ENTITY toolbar.import.label			"Import...">
 <!ENTITY toolbar.export.label			"Export Library...">
-<!ENTITY toolbar.createBibCollection.label   "Create Bibliography From Project...">
+<!ENTITY toolbar.createBibCollection.label   "Create Bibliography From Collection...">
 <!ENTITY toolbar.search.label   			"Search:">
 <!ENTITY toolbar.fullscreen.tooltip		"Toggle Fullscreen Mode">
 <!ENTITY toolbar.openurl.label    		"Find in your library's catalog">

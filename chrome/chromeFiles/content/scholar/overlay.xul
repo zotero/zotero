@@ -54,8 +54,8 @@
 					<menuitem label="&toolbar.renameCollection.label;" oncommand="ScholarPane.renameSelectedCollection();"/>
 					<menuitem label="&toolbar.removeCollection.label;" oncommand="ScholarPane.deleteSelectedCollection();"/>
 					<menuseparator/>
-					<menuitem label="&toolbar.exportCollection.label;" oncommand="Scholar_File_Interface.exportProject();"/>
-					<menuitem label="&toolbar.createBibCollection.label;" oncommand="Scholar_File_Interface.bibliographyFromProject();"/>
+					<menuitem label="&toolbar.exportCollection.label;" oncommand="Scholar_File_Interface.exportCollection();"/>
+					<menuitem label="&toolbar.createBibCollection.label;" oncommand="Scholar_File_Interface.bibliographyFromCollection();"/>
 				</popup>
 				<popup id="scholar-itemmenu" onpopupshowing="ScholarPane.buildItemContextMenu();">
 					<menuitem label="&toolbar.newItem.label;" command="cmd_scholar_newItem"/>
