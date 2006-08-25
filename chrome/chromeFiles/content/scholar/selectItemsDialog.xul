@@ -37,8 +37,6 @@
 	style="padding:2em">
 	
 	<script src="include.js"/>
-	<script src="collectionTreeView.js"/>
-	<script src="itemTreeView.js"/>
 	<script src="selectItemsDialog.js"/>
 	
 	<hbox flex="1">

@@ -295,8 +295,10 @@ var Scholar = new function(){
 		
 		for (var i=0; i<args.length; i++){
 			if (typeof args[i]=='object'){
-				for (var j=0; j<args[i].length; j++){
-					returns.push(args[i][j]);
+				if(args[i]) {
+					for (var j=0; j<args[i].length; j++){
+						returns.push(args[i][j]);
+					}
 				}
 			}
 			else {

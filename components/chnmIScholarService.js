@@ -66,6 +66,22 @@ Cc["@mozilla.org/moz/jssubscript-loader;1"]
 	.getService(Ci.mozIJSSubScriptLoader)
 	.loadSubScript("chrome://scholar/content/xpcom/mime.js");
 
+Cc["@mozilla.org/moz/jssubscript-loader;1"]
+	.getService(Ci.mozIJSSubScriptLoader)
+	.loadSubScript("chrome://scholar/content/xpcom/itemTreeView.js");
+
+Cc["@mozilla.org/moz/jssubscript-loader;1"]
+	.getService(Ci.mozIJSSubScriptLoader)
+	.loadSubScript("chrome://scholar/content/xpcom/collectionTreeView.js");
+
+Cc["@mozilla.org/moz/jssubscript-loader;1"]
+	.getService(Ci.mozIJSSubScriptLoader)
+	.loadSubScript("chrome://global/content/nsTransferable.js");
+
+Cc["@mozilla.org/moz/jssubscript-loader;1"]
+	.getService(Ci.mozIJSSubScriptLoader)
+	.loadSubScript("chrome://global/content/nsDragAndDrop.js");
+
 /********************************************************************/
 
 

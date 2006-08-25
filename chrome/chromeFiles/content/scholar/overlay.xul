@@ -29,8 +29,6 @@
 	<script src="include.js"/>
 	
 	<script src="overlay.js"/>
-    <script src="itemTreeView.js"/>
-    <script src="collectionTreeView.js"/>
     <script src="fileInterface.js"/>
 	
 	<commandset id="mainCommandSet">

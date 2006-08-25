@@ -52,7 +52,6 @@ Scholar.Ingester.ProxyMonitor = new function() {
 					return;
 				}
 				
-				Scholar.debug(channel.URI.spec);
 				// We should be able to scrape the URL out of this
 				var m = _ezProxyRe.exec(channel.URI.spec);
 				if(!m) {
