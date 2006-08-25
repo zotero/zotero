@@ -57,3 +57,8 @@
 <!ENTITY progress.title					"Progress">
 
 <!ENTITY exportOptions.title            "Export...">
+
+<!ENTITY search.match					"Match">
+<!ENTITY search.any						"any">
+<!ENTITY search.all						"all">
+<!ENTITY search.following				"of the following">
