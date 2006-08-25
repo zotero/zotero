@@ -2280,7 +2280,7 @@ Scholar.Attachments = new function(){
 		Scholar.DB.commitTransaction();
 		
 		if (sourceItemID){
-			sourceItem.incrementNoteCount();
+			sourceItem.incrementAttachmentCount();
 			Scholar.Notifier.trigger('modify', 'item', sourceItemID);
 		}
 		
