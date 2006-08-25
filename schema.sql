@@ -1,4 +1,4 @@
--- 41
+-- 42
 
     DROP TABLE IF EXISTS version;
     CREATE TABLE version (
@@ -398,7 +398,6 @@
     INSERT INTO "itemTypeFields" VALUES(12, 14, 2);
     INSERT INTO "itemTypeFields" VALUES(13, 1, 5);
     INSERT INTO "itemTypeFields" VALUES(13, 2, 4);
-    INSERT INTO "itemTypeFields" VALUES(13, 23, 1);
     INSERT INTO "itemTypeFields" VALUES(12, 18, 3);
     INSERT INTO "itemTypeFields" VALUES(2, 18, 11);
     INSERT INTO "itemTypeFields" VALUES(3, 18, 12);
