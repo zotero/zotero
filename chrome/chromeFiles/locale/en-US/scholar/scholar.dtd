@@ -12,7 +12,7 @@
 <!ENTITY items.creator_column 			"Creator">
 <!ENTITY items.source_column 			"Source">
 <!ENTITY items.rights_column 			"Rights">
-<!ENTITY items.numNotes_column 			"Notes">
+<!ENTITY items.numChildren_column 		"#">
 <!ENTITY items.dateAdded_column 		"Date Added">
 <!ENTITY items.dateModified_column	 	"Date Modified">
 

@@ -214,9 +214,9 @@ Scholar.ItemTreeView.prototype.getCellText = function(row, column)
 	var obj = this._getItemAtRow(row);
 	var val;
 	
-	if(column.id == "numNotes")
+	if(column.id == "numChildren")
 	{
-		var c = obj.numNotes();
+		var c = obj.numChildren();
 		if(c)	//don't display '0'
 			val = c;
 	}
@@ -280,7 +280,7 @@ Scholar.ItemTreeView.prototype.isContainerOpen = function(row)
 
 Scholar.ItemTreeView.prototype.isContainerEmpty = function(row)
 {
-	return (this._getItemAtRow(row).numNotes() == 0 && this._getItemAtRow(row).numAttachments() == 0);
+	return this._getItemAtRow(row).numChildren() == 0;
 }
 
 Scholar.ItemTreeView.prototype.getLevel = function(row)
@@ -407,11 +407,11 @@ Scholar.ItemTreeView.prototype.sort = function()
 			return (typeA > typeB) ? -1 : (typeA < typeB) ? 1 : 0;
 		}
 	}
-	else if(column.id == 'numNotes')
+	else if(column.id == 'numChildren')
 	{
 		function columnSort(a,b)
 		{
-			return b.numNotes() - a.numNotes();
+			return b.numChildren() - a.numChildren();
 		}
 	}
 	else
@@ -775,18 +775,10 @@ Scholar.ItemTreeView.TreeRow.prototype.getType = function()
 	return this.ref.getType();
 }
 
-Scholar.ItemTreeView.TreeRow.prototype.numNotes = function()
+Scholar.ItemTreeView.TreeRow.prototype.numChildren = function()
 {
 	if(this.isRegularItem())
-		return this.ref.numNotes();
-	else
-		return 0;
-}
-
-Scholar.ItemTreeView.TreeRow.prototype.numAttachments = function()
-{
-	if(this.isRegularItem())
-		return this.ref.numAttachments();
+		return this.ref.numChildren();
 	else
 		return 0;
 }

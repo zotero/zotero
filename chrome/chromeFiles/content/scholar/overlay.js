@@ -267,7 +267,7 @@ var ScholarPane = new function()
 				{
 					itemsView.selection.getRangeAt(i,start,end);
 					for (var j=start.value; j<=end.value && !hasChildren; j++)
-						if(itemsView._getItemAtRow(j).numNotes() || itemsView._getItemAtRow(j).numAttachments())
+						if(itemsView._getItemAtRow(j).numChildren())
 							hasChildren = true;
 				}
 			}
@@ -436,6 +436,8 @@ var ScholarPane = new function()
 		{
 			var row = {}, col = {}, obj = {};
 			tree.treeBoxObject.getCellAt(event.clientX, event.clientY, row, col, obj);
+			// obj.value == cell/text/image
+			// TODO: handle collection double-click
 			if (obj.value && itemsView && itemsView.selection.currentIndex > -1)
 			{
 				var item = getSelectedItems()[0];

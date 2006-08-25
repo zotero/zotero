@@ -792,6 +792,11 @@ Scholar.Item.prototype.isRegularItem = function(){
 }
 
 
+Scholar.Item.prototype.numChildren = function(){
+	return this.numNotes() + this.numAttachments();
+}
+
+
 ////////////////////////////////////////////////////////
 //
 // Methods dealing with note items
