@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
 <?xml-stylesheet href="chrome://scholar/skin/scholar.css" type="text/css"?>
+<?xml-stylesheet href="chrome://scholar/content/admin/itemTypeManager.css" type="text/css"?>
 <!DOCTYPE window SYSTEM "chrome://scholar/locale/scholar.dtd">
 
 <window
@@ -32,7 +33,7 @@
 				</listhead>
 			</listbox>
 			
-			<listbox id="item-type-fields-list" onselect="">
+			<listbox id="item-type-fields-list" onkeypress="Scholar_ItemTypeManager.handleShowHide(this, event)">
 				<listhead>
 					<listheader label="Used Fields"/>
 				</listhead>
@@ -43,7 +44,7 @@
 				<button label="Move down" oncommand="Scholar_ItemTypeManager.moveSelectedFieldDown()" />
 			</groupbox>
 			
-			<listbox id="fields-list" onselect="" context="scholar-remove-field-menu">
+			<listbox id="fields-list" context="scholar-remove-field-menu">
 				<listhead>
 					<listheader label="Unused Fields"/>
 				</listhead>
@@ -51,15 +52,25 @@
 		</hbox>
 		
 		<hbox style="margin:1em 0 0 .2em">
-			<label control="add-type" style="width:7em; text-align:right">Add item type:</label>
-			<textbox id="add-type" onkeypress="return Scholar_ItemTypeManager.handleAddType(this, event)"/>
-			<label id="add-type-status" style="color:red"/>
+			<hbox style="-moz-box-align:baseline">
+				<label control="add-type" style="width:7em; text-align:right">Add item type:</label>
+				<textbox id="add-type" onkeypress="return Scholar_ItemTypeManager.handleAddType(this, event)"/>
+			</hbox>
+		
+			<hbox style="-moz-box-align:baseline">
+				<label control="add-field" style="width:7em; text-align:right">Add field:</label>
+				<textbox id="add-field" onkeypress="return Scholar_ItemTypeManager.handleAddField(this, event)"/>
+			</hbox>
 		</hbox>
 		
-		<hbox style="margin:1em 0 0 .2em">
-			<label control="add-field" style="width:7em; text-align:right">Add field:</label>
-			<textbox id="add-field" onkeypress="return Scholar_ItemTypeManager.handleAddField(this, event)"/>
-			<label id="add-field-status" style="color:red"/>
-		</hbox>
+		<label style="margin:1em 0; color:red" id="status-line"></label>
+		
+		<description style="font-size:small; margin:.5em 0">
+			Double-click a field to add it to or remove it from the currently selected item type.
+		</description>
+		
+		<description style="font-size:small; margin:.5em 0">
+			Hit Return on a mapped field to toggle its default visibility. (Light blue fields are hidden.)
+		</description>
 	</vbox>
 </window>

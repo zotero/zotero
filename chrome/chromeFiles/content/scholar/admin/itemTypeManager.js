@@ -3,6 +3,7 @@ var Scholar_ItemTypeManager = new function(){
 	this.handleTypeSelect = handleTypeSelect;
 	this.addFieldToType = addFieldToType;
 	this.removeFieldFromType = removeFieldFromType;
+	this.handleShowHide = handleShowHide;
 	this.moveSelectedFieldUp = moveSelectedFieldUp;
 	this.moveSelectedFieldDown = moveSelectedFieldDown;
 	this.handleAddType = handleAddType;
@@ -31,13 +32,8 @@ var Scholar_ItemTypeManager = new function(){
 		
 		var types = Scholar.ItemTypes.getTypes();
 		
-		while (_typesList.hasChildNodes){
-			if (_typesList.lastChild.tagName=='listitem'){
-				_typesList.removeChild(_typesList.lastChild);
-			}
-			else {
-				break;
-			}
+		while (_typesList.getRowCount()){
+			_typesList.removeItemAt(0);
 		}
 		
 		for (var i in types){
@@ -84,8 +80,8 @@ var Scholar_ItemTypeManager = new function(){
 			+ "WHERE itemTypeID=?";
 		var nextIndex = Scholar.DB.valueQuery(sql, [_getCurrentTypeID()]);
 		
-		var sql = "INSERT INTO itemTypeFields VALUES (?,?,?)";
-		Scholar.DB.query(sql, [_getCurrentTypeID(), item.value, nextIndex]);
+		var sql = "INSERT INTO itemTypeFields VALUES (?,?,?,?)";
+		Scholar.DB.query(sql, [_getCurrentTypeID(), item.value, null, nextIndex]);
 		
 		Scholar.DB.commitTransaction();
 		
@@ -112,9 +108,39 @@ var Scholar_ItemTypeManager = new function(){
 	}
 	
 	
+	function handleShowHide(listbox, event){
+		if (event.keyCode!=event.DOM_VK_RETURN && listbox.selectedIndex>-1){
+			return true;
+		}
+		
+		var typeID = _getCurrentTypeID();
+		
+		Scholar.DB.beginTransaction();
+		
+		var sql = "SELECT fieldID FROM fields WHERE fieldName=?";
+		var fieldID = Scholar.DB.valueQuery(sql, [listbox.selectedItem.label]);
+		
+		var sql = "SELECT hide FROM itemTypeFields WHERE itemTypeID=? AND "
+			+ "fieldID=?";
+		var hidden = Scholar.DB.valueQuery(sql, [typeID, fieldID]);
+		
+		var sql = "UPDATE itemTypeFields SET hide=? WHERE itemTypeID=? AND "
+			+ "fieldID=?";
+		Scholar.DB.query(sql, [hidden ? null : 1, typeID, fieldID]);
+		
+		Scholar.DB.commitTransaction();
+		
+		listbox.selectedItem.setAttribute('isHidden', !hidden);
+		
+		_setStatus();
+		return true;
+	}
+	
+	
 	function moveSelectedFieldUp(){
 		if (_typeFieldsList.selectedItem){
 			_moveFieldUp(_typeFieldsList.selectedItem);
+			_setStatus();
 		}
 	}
 	
@@ -122,6 +148,7 @@ var Scholar_ItemTypeManager = new function(){
 	function moveSelectedFieldDown(){
 		if (_typeFieldsList.selectedItem){
 			_moveFieldDown(_typeFieldsList.selectedItem);
+			_setStatus();
 		}
 	}
 	
@@ -141,7 +168,7 @@ var Scholar_ItemTypeManager = new function(){
 			var idCol = 'itemTypeID';
 			var nameCol = 'typeName';
 			var table = 'itemTypes';
-			var Target = 'Type';
+			var Target = 'Item type';
 		}
 		else if (target=='field'){
 			var existsFunc = _fieldExists;
@@ -157,18 +184,8 @@ var Scholar_ItemTypeManager = new function(){
 		
 		var name = box.value;
 		
-		_clearStatus();
-		var status = document.getElementById('add-' + target + '-status');
-		
 		if (existsFunc(name)){
-			var str = Target + " '" + name + "' already exists";
-			
-			if (!status.hasChildNodes){
-				status.appendChild(document.createTextNode(str));
-			}
-			else {
-				status.value = str;
-			}
+			_setStatus(Target + " '" + name + "' already exists");
 			
 			box.value = "";
 			return true;
@@ -183,7 +200,7 @@ var Scholar_ItemTypeManager = new function(){
 		init();
 		
 		box.value = "";
-		status.value = Target + " '" + name + "' added";
+		_setStatus(Target + " '" + name + "' added");
 		return true;
 	}
 	
@@ -197,7 +214,7 @@ var Scholar_ItemTypeManager = new function(){
 		var type = obj.label;
 		
 		if (!_typeExists(type)){
-			Scholar.debug("Type '" + type + "' does not exist", 1);
+			_setStatus("Type '" + type + "' does not exist");
 			return true;
 		}
 		
@@ -216,7 +233,7 @@ var Scholar_ItemTypeManager = new function(){
 		
 		this.init();
 		
-		Scholar.debug("Item type '" + type + "' removed");
+		_setStatus("Item type '" + type + "' removed");
 		return true;
 	}
 	
@@ -253,7 +270,7 @@ var Scholar_ItemTypeManager = new function(){
 		
 		this.init();
 		
-		Scholar.debug("Field '" + field + "' removed");
+		_setStatus("Field '" + field + "' removed");
 		return true;
 	}
 	
@@ -279,9 +296,9 @@ var Scholar_ItemTypeManager = new function(){
 	* Populate the listbox of fields used by this item type
 	**/
 	function _populateTypeFieldsList(itemTypeID){
-		var sql = 'SELECT fieldID FROM itemTypeFields '
+		var sql = 'SELECT fieldID, hide FROM itemTypeFields '
 			+ 'WHERE itemTypeID=' + itemTypeID + ' ORDER BY orderIndex';
-		var fields = Scholar.DB.columnQuery(sql);
+		var fields = Scholar.DB.query(sql);
 		
 		// Clear fields box
 		while (_typeFieldsList.getRowCount()){
@@ -289,12 +306,15 @@ var Scholar_ItemTypeManager = new function(){
 		}
 		
 		for (var i in fields){
-			var item = _typeFieldsList.appendItem(_getFieldName(fields[i]), fields[i]);
+			var item = _typeFieldsList.appendItem(_getFieldName(fields[i]['fieldID']), fields[i]['fieldID']);
+			
 			item.addEventListener('dblclick', new function(){
 				return function(){
 					Scholar_ItemTypeManager.removeFieldFromType(this);
 				}
 			}, true);
+			
+			item.setAttribute('isHidden', !!fields[i]['hide']);
 		}
 	}
 	
@@ -303,8 +323,8 @@ var Scholar_ItemTypeManager = new function(){
 	* Populate the listbox of fields NOT used by this item type
 	**/
 	function _populateFieldsList(itemTypeID){
-		var sql = "SELECT fieldID FROM fields ORDER BY fieldName COLLATE NOCASE";
-		var fields = Scholar.DB.columnQuery(sql);
+		var sql = "SELECT fieldID, fieldName FROM fields ORDER BY fieldName COLLATE NOCASE";
+		var fields = Scholar.DB.query(sql);
 		
 		// Clear fields box
 		while (_fieldsList.getRowCount()){
@@ -313,7 +333,7 @@ var Scholar_ItemTypeManager = new function(){
 		
 		// Add all fields to listbox
 		for (var i in fields){
-			var item = _fieldsList.appendItem(_getFieldName(fields[i]), fields[i]);
+			var item = _fieldsList.appendItem(fields[i]['fieldName'], fields[i]['fieldID']);
 			item.addEventListener('dblclick', new function(){
 				return function(){
 					Scholar_ItemTypeManager.addFieldToType(this);
@@ -328,7 +348,9 @@ var Scholar_ItemTypeManager = new function(){
 		
 		// Remove fields that are already used
 		for (var i=0; i<_fieldsList.getRowCount(); i++){
-			if (!Scholar.inArray(_fieldsList.getItemAtIndex(i).value, unusedFields)){
+			// N.B. Some values at the end of list can only be accessed via getAttribute()
+			// in BonEcho, though .value works for all in Minefield
+			if (!Scholar.inArray(_fieldsList.getItemAtIndex(i).getAttribute('value'), unusedFields)){
 				_fieldsList.removeItemAt(i);
 				i--;
 			}
@@ -437,9 +459,9 @@ var Scholar_ItemTypeManager = new function(){
 	}
 	
 	
-	function _clearStatus(){
-		document.getElementById('add-type-status').value = '';
-		document.getElementById('add-field-status').value = '';
+	function _setStatus(str){
+		str = str ? str : '';
+		document.getElementById('status-line').value = str;
 	}
 }
 
