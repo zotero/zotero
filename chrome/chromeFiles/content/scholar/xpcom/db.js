@@ -294,7 +294,7 @@ Scholar.DB = new function(){
 			catch(e){
 				var dberr = (db.lastErrorString!='not an error')
 					? ' [ERROR: ' + db.lastErrorString + ']' : '';
-				throw(e + ' [QUERY: ' + sql + ']' + dberr);
+				throw(e + dberr);
 			}
 		}
 	}
