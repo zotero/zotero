@@ -1,4 +1,4 @@
--- 56
+-- 57
 
 -- Set the following timestamp to the most recent scraper update date
 REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-08-15 15:42:00'));
@@ -136,9 +136,12 @@ function doWeb(doc, url) {
 
 REPLACE INTO "translators" VALUES ('838d8849-4ffb-9f44-3d0d-aa8a0a079afe', '2006-06-26 16:01:00', 4, 'WorldCat', 'Simon Kornblith', '^http://(?:new)?firstsearch\.oclc\.org/WebZ/',
 'function detectWeb(doc, url) {
-	if(doc.title == ''FirstSearch: WorldCat Detailed Record'') {
+	var detailRe = /FirstSearch: [\w ]+ Detailed Record/;
+	var searchRe = /FirstSearch: [\w ]+ List of Records/;
+	
+	if(detailRe.test(doc.title)) {
 		return "book";
-	} else if(doc.title == ''FirstSearch: WorldCat List of Records'') {
+	} else if(searchRe.test(doc.title)) {
 		return "multiple";
 	}
 }',
@@ -202,6 +205,8 @@ REPLACE INTO "translators" VALUES ('838d8849-4ffb-9f44-3d0d-aa8a0a079afe', '2006
 							match[2] = match[2].substring(0, match[2].length-1);
 					}
 					newItem.publisher = match[2];
+				} else if(match[1] == ''Institution'') {
+					newItem.publisher = match[2];
 				} else if(match[1] == ''Standard No'') {
 					var identifiers = match[2].split(/ +/);
 					var j=0;
@@ -238,7 +243,16 @@ REPLACE INTO "translators" VALUES ('838d8849-4ffb-9f44-3d0d-aa8a0a079afe', '2006
 					}
 				} else if(match[1] == "Accession No") {
 					newItem.accessionNumber = Scholar.Utilities.superCleanString(match[2]);
-				} else if(match[1] != "Database") {
+				} else if(match[1] == "Degree") {
+					newItem.itemType = "thesis";
+					newItem.thesisType = match[2];
+				} else if(match[1] == "DOI") {
+					newItem.DOI = match[2];
+				} else if(match[1] == "Database") {
+					if(match[2].substr(0, 8) != "WorldCat") {
+						newItem.itemType = "journalArticle";
+					}
+				} else {
 					newItem.extra += match[1]+": "+match[2]+"\n";
 				}
 			} else {
@@ -271,7 +285,8 @@ function doWeb(doc, url) {
 	
 	var newUri, exportselect;
 	
-	if(doc.title == ''FirstSearch: WorldCat Detailed Record'') {
+	var detailRe = /FirstSearch: [\w ]+ Detailed Record/;
+	if(detailRe.test(doc.title)) {
 		var publisherRegexp = /^(.*), (.*?),?$/;
 		
 		var nMatch = numberRegexp.exec(url);
