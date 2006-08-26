@@ -25,7 +25,7 @@
 	
 	
 	<vbox>
-		<hbox style="height:30em">
+		<hbox style="height:25em">
 			<listbox id="item-type-list" seltype="single" context="scholar-remove-type-menu"
 				onselect="Scholar_ItemTypeManager.handleTypeSelect()">
 				<listhead>
@@ -63,14 +63,17 @@
 			</hbox>
 		</hbox>
 		
-		<label style="margin:1em 0; color:red" id="status-line"></label>
+		<label style="margin:.5em 0; color:red" id="status-line"></label>
 		
-		<description style="font-size:small; margin:.5em 0">
+		<description style="font-size:small; margin:.4em 0 .3em">
 			Double-click a field to add it to or remove it from the currently selected item type.
 		</description>
 		
-		<description style="font-size:small; margin:.5em 0">
+		<description style="font-size:small; margin:.3em 0 .8em">
 			Hit Return on a mapped field to toggle its default visibility. (Light blue fields are hidden.)
 		</description>
+		
+		<button label="Generate SQL" oncommand="document.getElementById('sql-dump').value=Scholar_ItemTypeManager.createSQLDump()"/>
+		<textbox id="sql-dump" multiline="true" cols="100" rows="6"/>
 	</vbox>
 </window>

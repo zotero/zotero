@@ -10,6 +10,7 @@ var Scholar_ItemTypeManager = new function(){
 	this.handleAddField = handleAddField;
 	this.removeField = removeField;
 	this.removeType = removeType;
+	this.createSQLDump = createSQLDump;
 	
 	var _typesList;
 	var _fieldsList;
@@ -272,6 +273,41 @@ var Scholar_ItemTypeManager = new function(){
 		
 		_setStatus("Field '" + field + "' removed");
 		return true;
+	}
+	
+	
+	function createSQLDump(){
+		var types = Scholar.DB.query("SELECT * FROM itemTypes ORDER BY itemTypeID");
+		var fields = Scholar.DB.query("SELECT * FROM fields ORDER BY fieldID");
+		var itemTypeFields = Scholar.DB.query("SELECT * FROM itemTypeFields ORDER BY itemTypeID, orderIndex");
+		
+		var prefix = "     ";
+		var sql = '';
+		
+		for (var i in types){
+			sql += prefix + "INSERT INTO itemTypes VALUES ("
+				+ types[i]['itemTypeID'] + ",'" + types[i]['typeName'] + "');\n"
+		}
+		
+		sql += "\n";
+		
+		for (var i in fields){
+			sql += prefix + "INSERT INTO fields VALUES ("
+				+ fields[i]['fieldID'] + ",'" + fields[i]['fieldName'] + "',"
+				+ (fields[i]['fieldFormatID'] ? fields[i]['fieldFormatID'] : 'NULL')
+				+ ");\n";
+		}
+		
+		sql += "\n";
+		
+		for (var i in itemTypeFields){
+			sql += prefix + "INSERT INTO itemTypeFields VALUES ("
+				+ itemTypeFields[i]['itemTypeID'] + "," + itemTypeFields[i]['fieldID'] + ","
+				+ (itemTypeFields[i]['hide'] ? itemTypeFields[i]['hide'] : 'NULL') + ","
+				+ itemTypeFields[i]['orderIndex'] + ");\n";
+		}
+		
+		return sql;
 	}
 	
 	
