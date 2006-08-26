@@ -1,10 +1,14 @@
 var Scholar_ItemTypeManager = new function(){
 	this.init = init;
 	this.handleTypeSelect = handleTypeSelect;
-	this.addField = addField;
-	this.removeField = removeField;
+	this.addFieldToType = addFieldToType;
+	this.removeFieldFromType = removeFieldFromType;
 	this.moveSelectedFieldUp = moveSelectedFieldUp;
 	this.moveSelectedFieldDown = moveSelectedFieldDown;
+	this.handleAddType = handleAddType;
+	this.handleAddField = handleAddField;
+	this.removeField = removeField;
+	this.removeType = removeType;
 	
 	var _typesList;
 	var _fieldsList;
@@ -16,11 +20,37 @@ var Scholar_ItemTypeManager = new function(){
 		_typeFieldsList = document.getElementById('item-type-fields-list');
 		_fieldsList = document.getElementById('fields-list');
 		
+		if (_typesList.selectedItem){
+			var selectedType = _typesList.selectedItem.label;
+		}
+		else {
+			var selectedType = false;
+		}
+			
+		_typesList.selectedIndex = -1;
+		
 		var types = Scholar.ItemTypes.getTypes();
+		
+		while (_typesList.hasChildNodes){
+			if (_typesList.lastChild.tagName=='listitem'){
+				_typesList.removeChild(_typesList.lastChild);
+			}
+			else {
+				break;
+			}
+		}
 		
 		for (var i in types){
 			_typesList.appendItem(types[i]['name'], types[i]['id']);
+			if (_typesList.lastChild.label==selectedType){
+				_typesList.lastChild.click();
+			}
 		}
+		
+		if (_typesList.selectedIndex==-1){
+			_typesList.selectedIndex=0;
+		}
+		_typesList.selectedItem.parentNode.focus();
 	}
 	
 	
@@ -28,6 +58,10 @@ var Scholar_ItemTypeManager = new function(){
 	* Update the used and unused fields listboxes when an item type is selected
 	**/
 	function handleTypeSelect(){
+		if (_typesList.selectedIndex==-1){
+			return false;
+		}
+		
 		var id = _typesList.selectedItem.value;
 		_populateTypeFieldsList(id);
 		_populateFieldsList(id);
@@ -39,7 +73,7 @@ var Scholar_ItemTypeManager = new function(){
 	*
 	* _item_ is a listitem in the _fieldsList listbox
 	**/
-	function addField(item){
+	function addFieldToType(item){
 		Scholar.debug('Adding field ' + item.value + ' to item type '
 			+ _getCurrentTypeID());
 		
@@ -66,26 +100,11 @@ var Scholar_ItemTypeManager = new function(){
 	*
 	* _item_ is a listitem in the _typeFieldsList listbox
 	**/
-	function removeField(item){
+	function removeFieldFromType(item){
 		Scholar.debug('Removing field ' + item.value + ' from item type '
 			+ _getCurrentTypeID());
 		
-		Scholar.DB.beginTransaction();
-		
-		// Get the old position
-		var sql = "SELECT orderIndex FROM itemTypeFields WHERE itemTypeID=? "
-			+ "AND fieldID=?";
-		var orderIndex = Scholar.DB.valueQuery(sql, [_getCurrentTypeID(), item.value]);
-		
-		var sql = "DELETE FROM itemTypeFields WHERE itemTypeID=? AND fieldID=?";
-		Scholar.DB.query(sql, [_getCurrentTypeID(), item.value]);
-		
-		// Shift other fields down
-		var sql = "UPDATE itemTypeFields SET orderIndex=orderIndex-1 WHERE "
-			+ "itemTypeID=? AND orderIndex>?";
-		Scholar.DB.query(sql, [_getCurrentTypeID(), orderIndex]);
-		
-		Scholar.DB.commitTransaction();
+		_DBUnmapField(_getCurrentTypeID(), item.value);
 		
 		var pos = _typeFieldsList.getIndexOfItem(item);
 		_typeFieldsList.removeItemAt(pos);
@@ -106,6 +125,137 @@ var Scholar_ItemTypeManager = new function(){
 		}
 	}
 	
+	
+	function handleAddType(box, event){
+		return _handleAddEvent(box, event, 'type');
+	}
+	
+	function handleAddField(box, event){
+		return _handleAddEvent(box, event, 'field');
+	}
+	
+	
+	function _handleAddEvent(box, event, target){
+		if (target=='type'){
+			var existsFunc = _typeExists;
+			var idCol = 'itemTypeID';
+			var nameCol = 'typeName';
+			var table = 'itemTypes';
+			var Target = 'Type';
+		}
+		else if (target=='field'){
+			var existsFunc = _fieldExists;
+			var idCol = 'fieldID';
+			var nameCol = 'fieldName';
+			var table = 'fields';
+			var Target = 'Field';
+		}
+		
+		if (event.keyCode!=event.DOM_VK_RETURN || !box.value){
+			return true;
+		}
+		
+		var name = box.value;
+		
+		_clearStatus();
+		var status = document.getElementById('add-' + target + '-status');
+		
+		if (existsFunc(name)){
+			var str = Target + " '" + name + "' already exists";
+			
+			if (!status.hasChildNodes){
+				status.appendChild(document.createTextNode(str));
+			}
+			else {
+				status.value = str;
+			}
+			
+			box.value = "";
+			return true;
+		}
+		
+		var nextID = Scholar.DB.getNextID(table, idCol);
+		
+		var sql = "INSERT INTO " + table + " (" + idCol + ", "
+			+ nameCol + ") VALUES (?,?)";
+		Scholar.DB.query(sql, [nextID, name]);
+		
+		init();
+		
+		box.value = "";
+		status.value = Target + " '" + name + "' added";
+		return true;
+	}
+	
+	
+	/*
+	 * Remove an item type from the DB
+	 *
+	 * Takes a listitem containing the item type to delete
+	 */
+	function removeType(obj){
+		var type = obj.label;
+		
+		if (!_typeExists(type)){
+			Scholar.debug("Type '" + type + "' does not exist", 1);
+			return true;
+		}
+		
+		Scholar.DB.beginTransaction();
+		
+		var sql = "SELECT itemTypeID FROM itemTypes WHERE typeName=?";
+		var id = Scholar.DB.valueQuery(sql, [type]);
+		
+		var sql = "DELETE FROM itemTypeFields WHERE itemTypeID=?";
+		Scholar.DB.query(sql, [id]);
+		
+		var sql = "DELETE FROM itemTypes WHERE itemTypeID=?";
+		Scholar.DB.query(sql, [id]);
+		
+		Scholar.DB.commitTransaction();
+		
+		this.init();
+		
+		Scholar.debug("Item type '" + type + "' removed");
+		return true;
+	}
+	
+	
+	/*
+	 * Remove a field from the DB
+	 *
+	 * Takes a listitem containing the field to delete
+	 */
+	function removeField(obj){
+		var field = obj.label;
+		
+		if (!_fieldExists(field)){
+			Scholar.debug("Field '" + field + "' does not exist", 1);
+			return true;
+		}
+		
+		Scholar.DB.beginTransaction();
+		
+		var sql = "SELECT fieldID FROM fields WHERE fieldName=?";
+		var id = Scholar.DB.valueQuery(sql, [field]);
+		
+		var sql = "SELECT itemTypeID FROM itemTypeFields WHERE fieldID=?";
+		var types = Scholar.DB.columnQuery(sql, [id]);
+		
+		for (var i in types){
+			_DBUnmapField(types[i], id);
+		}
+		
+		var sql = "DELETE FROM fields WHERE fieldID=?";
+		Scholar.DB.query(sql, [id]);
+		
+		Scholar.DB.commitTransaction();
+		
+		this.init();
+		
+		Scholar.debug("Field '" + field + "' removed");
+		return true;
+	}
 	
 	
 	/**
@@ -142,7 +292,7 @@ var Scholar_ItemTypeManager = new function(){
 			var item = _typeFieldsList.appendItem(_getFieldName(fields[i]), fields[i]);
 			item.addEventListener('dblclick', new function(){
 				return function(){
-					Scholar_ItemTypeManager.removeField(this);
+					Scholar_ItemTypeManager.removeFieldFromType(this);
 				}
 			}, true);
 		}
@@ -166,7 +316,7 @@ var Scholar_ItemTypeManager = new function(){
 			var item = _fieldsList.appendItem(_getFieldName(fields[i]), fields[i]);
 			item.addEventListener('dblclick', new function(){
 				return function(){
-					Scholar_ItemTypeManager.addField(this);
+					Scholar_ItemTypeManager.addFieldToType(this);
 				}
 			}, true);
 		}
@@ -183,6 +333,29 @@ var Scholar_ItemTypeManager = new function(){
 				i--;
 			}
 		}
+	}
+	
+	
+	/*
+	 * Unmap a field from an item type in the DB
+	 */
+	function _DBUnmapField(itemTypeID, fieldID){
+		Scholar.DB.beginTransaction();
+		
+		// Get the old position
+		var sql = "SELECT orderIndex FROM itemTypeFields WHERE itemTypeID=? "
+			+ "AND fieldID=?";
+		var orderIndex = Scholar.DB.valueQuery(sql, [itemTypeID, fieldID]);
+		
+		var sql = "DELETE FROM itemTypeFields WHERE itemTypeID=? AND fieldID=?";
+		Scholar.DB.query(sql, [itemTypeID, fieldID]);
+		
+		// Shift other fields down
+		var sql = "UPDATE itemTypeFields SET orderIndex=orderIndex-1 WHERE "
+			+ "itemTypeID=? AND orderIndex>?";
+		Scholar.DB.query(sql, [itemTypeID, orderIndex]);
+		
+		Scholar.DB.commitTransaction();
 	}
 	
 	
@@ -249,6 +422,24 @@ var Scholar_ItemTypeManager = new function(){
 		_typeFieldsList.selectItem(newItem);
 		
 		Scholar.DB.commitTransaction();
+	}
+	
+	
+	function _typeExists(type){
+		return !!Scholar.DB.valueQuery("SELECT COUNT(*) FROM itemTypes WHERE "
+			+ "typeName=?", [type])
+	}
+	
+	
+	function _fieldExists(field){
+		return !!Scholar.DB.valueQuery("SELECT COUNT(*) FROM fields WHERE "
+			+ "fieldName=?", [field])
+	}
+	
+	
+	function _clearStatus(){
+		document.getElementById('add-type-status').value = '';
+		document.getElementById('add-field-status').value = '';
 	}
 }
 

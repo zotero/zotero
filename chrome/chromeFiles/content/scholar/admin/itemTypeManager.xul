@@ -12,9 +12,21 @@
 	<script src="../include.js"/>
 	<script src="itemTypeManager.js"/>
 	
+	
+	<popupset>
+		<popup id="scholar-remove-type-menu">
+			 <menuitem label="Remove item type" oncommand="Scholar_ItemTypeManager.removeType(document.popupNode)"/>
+		</popup>
+		<popup id="scholar-remove-field-menu">
+			 <menuitem label="Remove field" oncommand="Scholar_ItemTypeManager.removeField(document.popupNode)"/>
+		</popup>
+	</popupset>
+	
+	
 	<vbox>
-		<hbox style="height:38em">
-			<listbox id="item-type-list" seltype="single" onselect="Scholar_ItemTypeManager.handleTypeSelect()" >
+		<hbox style="height:30em">
+			<listbox id="item-type-list" seltype="single" context="scholar-remove-type-menu"
+				onselect="Scholar_ItemTypeManager.handleTypeSelect()">
 				<listhead>
 					<listheader label="Item Types"/>
 				</listhead>
@@ -31,15 +43,23 @@
 				<button label="Move down" oncommand="Scholar_ItemTypeManager.moveSelectedFieldDown()" />
 			</groupbox>
 			
-			<listbox id="fields-list" onselect="">
+			<listbox id="fields-list" onselect="" context="scholar-remove-field-menu">
 				<listhead>
 					<listheader label="Unused Fields"/>
 				</listhead>
 			</listbox>
 		</hbox>
 		
-		<hbox style="margin:1em 0 0 .2em; font-size:small">
-			<description>Double-click a field to add or remove it from an item type.</description>
+		<hbox style="margin:1em 0 0 .2em">
+			<label control="add-type" style="width:7em; text-align:right">Add item type:</label>
+			<textbox id="add-type" onkeypress="return Scholar_ItemTypeManager.handleAddType(this, event)"/>
+			<label id="add-type-status" style="color:red"/>
+		</hbox>
+		
+		<hbox style="margin:1em 0 0 .2em">
+			<label control="add-field" style="width:7em; text-align:right">Add field:</label>
+			<textbox id="add-field" onkeypress="return Scholar_ItemTypeManager.handleAddField(this, event)"/>
+			<label id="add-field-status" style="color:red"/>
 		</hbox>
 	</vbox>
 </window>
