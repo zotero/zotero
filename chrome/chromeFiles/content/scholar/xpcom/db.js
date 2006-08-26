@@ -14,6 +14,7 @@ Scholar.DB = new function(){
 	this.statementQuery = statementQuery;
 	this.getColumns = getColumns;
 	this.getColumnHash = getColumnHash;
+	this.getNextID = getNextID;
 	this.beginTransaction = beginTransaction;
 	this.commitTransaction = commitTransaction;
 	this.rollbackTransaction = rollbackTransaction;
@@ -340,6 +341,35 @@ Scholar.DB = new function(){
 		}
 		return hash;
 	}
+	
+	
+	/**
+	* Find the lowest unused integer >0 in a table column
+	*
+	* Note: This retrieves all the rows of the column, so it's not really
+	*	meant for particularly large tables.
+	**/
+	function getNextID(table, column){
+		var sql = 'SELECT ' + column + ' FROM ' + table + ' ORDER BY ' + column;
+		var vals = Scholar.DB.columnQuery(sql);
+		
+		if (!vals){
+			return 1;
+		}
+		
+		if (vals[0] === '0'){
+			vals.shift();
+		}
+		
+		for (var i=0, len=vals.length; i<len; i++){
+			if (vals[i] != i+1){
+				break;
+			}
+		}
+		
+		return i+1;
+	}
+	
 	
 	
 	
