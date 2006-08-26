@@ -421,7 +421,9 @@ Scholar_Ingester_Interface.Progress = new function() {
 	}
 	
 	function fade() {
-		setTimeout(_timeout, 2500);
+		if(_windowLoaded || _windowLoading) {
+			setTimeout(_timeout, 2500);
+		}
 	}
 	
 	function kill() {

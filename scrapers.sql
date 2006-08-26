@@ -1,4 +1,4 @@
--- 55
+-- 56
 
 -- Set the following timestamp to the most recent scraper update date
 REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-08-15 15:42:00'));
@@ -1285,7 +1285,7 @@ function doWeb(doc, url) {
 		
 		// Require link to match this
 		var tagRegexp = new RegExp();
-		tagRegexp.compile(''^http://[^/]+/pqdweb\\?((?:.*&)?did=.*&Fmt=[12][^0-9]|(?:.*&)Fmt=[12][^0-9].*&did=)'');
+		tagRegexp.compile(''^http://[^/]+/pqdweb\\?((?:.*&)?did=.*&Fmt=[12](?:[^0-9]|$)|(?:.*&)Fmt=[12][^0-9].*&did=)'');
 		
 		var tableRows = doc.evaluate(''//tr[@class="rowUnMarked"]'',
 		                doc, nsResolver, XPathResult.ANY_TYPE, null);
@@ -1474,6 +1474,125 @@ function doWeb(doc, url) {
 			extractCitation(uris[i], elmts[i], items[i]);
 		}
 	}
+}');
+
+REPLACE INTO "translators" VALUES ('63c25c45-6257-4985-9169-35b785a2995e', '2006-08-24 14:11:00', 4, 'InfoTrac OneFile', 'Simon Kornblith', '^https?://[^/]+/itx/(?:[a-z]+Search|retrieve|paginate|tab)\.do',
+'function detectWeb(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	if(doc.evaluate(''//img[@alt="Thomson Gale"]'', doc, nsResolver,
+	                XPathResult.ANY_TYPE, null).iterateNext()) {
+		if(doc.evaluate(''//table[@class="resultstable"][tbody/tr[@class="unselectedRow"]]'',
+		                doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+			return "multiple";
+		} else {
+			return "journalArticle";
+		}
+	}
+}',
+'function infoTracRIS(text) {
+	// load translator for RIS
+	var translator = Scholar.loadTranslator("import");
+	translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+	translator.setString(text);
+	translator.setHandler("itemDone", function(obj, item) {
+		if(item.notes && item.notes[0]) {
+			item.extra = item.notes[0].note;
+			
+			delete item.notes;
+			item.notes = undefined;
+		}
+		
+		// get underscored terms (term headings?) out of tags
+		for(var i in item.tags) {
+			var index = item.tags[i].indexOf("_");
+			if(index != -1) {
+				item.tags[i] = item.tags[i].substr(0, index);
+			}
+		}
+		
+		// add names to attachments
+		for(var i in item.attachments) {
+			if(!item.attachments[i].title) {
+				item.attachments[i] = undefined;
+			} else {
+				item.attachments[i].title = "InfoTrac OneFile "+item.attachments[i].title;
+			}
+		}
+		
+		//item.attachments = newAttachments.shift();
+		//Scholar.Utilities.debug(item.attachments);
+		item.complete();
+	});
+	translator.translate();
+	Scholar.done();
+}
+
+function readEncoded(url) {
+	var newArray = new Array();
+	
+	var parts = url.split(/[?&]/);
+	for each(var part in parts) {
+		var index = part.indexOf("=");
+		if(index !== -1) {
+			newArray[part.substr(0, index)] = part.substr(index+1);
+		}
+	}
+	
+	return newArray;
+}
+
+function doWeb(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	var hostRe = new RegExp("^https?://[^/]+/");
+	var host = hostRe.exec(doc.location.href)[0];
+	
+	if(doc.evaluate(''//table[@class="resultstable"][tbody/tr[@class="unselectedRow"]]'',
+	                doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+		var items = Scholar.Utilities.getItemArray(doc, doc, ''^http://[^/]+/itx/retrieve\\.do\\?.*docId='');
+		items = Scholar.selectItems(items);
+		
+		if(!items) {
+			return true;
+		}
+
+		// parse things out of URLs
+		var time = new Date();
+		time = time.getTime();
+		var markedString = "";
+		for(var i in items) {
+			var postVal = readEncoded(i);
+			markedString += postVal.tabID+"_"+postVal.docId+"_1_0_"+postVal.contentSet+"_srcprod="+postVal.prodId+"|^";
+		}
+		
+		var postData = "inPS=true&ts="+time+"&prodId="+postVal.prodId+"&actionCmd=UPDATE_MARK_LIST&userGroupName="+postVal.userGroupName+"&markedString="+markedString+"&a="+time;
+		Scholar.Utilities.HTTP.doGet(host+"itx/marklist.do?inPS=true&ts="+time+"&prodId="+postVal.prodId+"&actionCmd=CLEAR_MARK_LIST&userGroupName="+postVal.userGroupName,
+		                             function(text) {			// clear marked
+			Scholar.Utilities.HTTP.doPost(host+"itx/marklist.do", postData,
+			                              function(text) {		// mark
+				Scholar.Utilities.HTTP.doGet(host+"itx/generateCitation.do?contentSet="+postVal.contentSet+"&inPS=true&tabID=T-ALL&prodId="+postVal.prodId+"&docId=&actionString=FormatCitation&userGroupName="+postVal.userGroupName+"&citationFormat=ENDNOTE",
+			                                 function(text) {	// get marked
+					infoTracRIS(text);
+				});
+			});
+		});
+	} else {
+		// just extract from single page
+		var postVal = readEncoded(url);
+		Scholar.Utilities.HTTP.doGet(host+"itx/generateCitation.do?contentSet="+postVal.contentSet+"&inPS=true&tabID="+postVal.tabID+"&prodId="+postVal.prodId+"&docId="+postVal.docId+"&actionString=FormatCitation&citationFormat=ENDNOTE",
+		                             function(text) {
+			infoTracRIS(text);
+		});
+	}
+	
+	Scholar.wait();
 }');
 
 REPLACE INTO "translators" VALUES ('b047a13c-fe5c-6604-c997-bef15e502b09', '2006-06-26 16:01:00', 4, 'LexisNexis', 'Simon Kornblith', '^http://web\.lexis-?nexis\.com/universe/(?:document|doclist)',
@@ -1910,7 +2029,7 @@ REPLACE INTO "translators" VALUES ('fb12ae9e-f473-cab4-0546-27ab88c64101', '2006
 			uris.push(i);
 		}
 	} else {
-		var uris = new Array(doc.location.href);
+		var ug = new Array(doc.location.href);
 	}
 	
 	for(var i in uris) {
@@ -4736,10 +4855,10 @@ Scholar.addOption("exportNotes", true);
 function detectImport() {
 	var line;
 	while(line = Scholar.read()) {
-		if(line.replace(/\s/g, "") != "") {
+		line = line.replace(/^\s+/, "");
+		if(line != "") {
 			if(line.substr(0, 6) == "TY  - ") {
 				return true;
-				Scholar.Utilities.debug("YES!");
 			} else {
 				return false;
 			}
@@ -4884,9 +5003,24 @@ function processTag(item, tag, value) {
 		if(!item.ISSN) {
 			item.ISSN = value;
 		}
-	} else if(tag == "UR") {
+	} else if(tag == "UR" || tag == "L1" || tag == "L2" || tag == "L4") {
 		// URL
-		item.url = value;
+		if(!item.url) {
+			item.url = value;
+		}
+		
+		if(tag == "UR") {
+			item.attachments.push({url:value});
+		} else if(tag == "L1") {
+			item.attachments.push({url:value, mimeType:"application/pdf",
+				title:"Full Text (PDF)", downloadable:true});
+		} else if(tag == "L2") {
+			item.attachments.push({url:value, mimeType:"text/html",
+				title:"Full Text (HTML)", downloadable:true});
+		} else if(tag == "L4") {
+			item.attachments.push({url:value,
+				title:"Image", downloadable:true});
+		}
 	}
 }
 
@@ -4898,7 +5032,7 @@ function doImport(attachments) {
 	do {	// first valid line is type
 		Scholar.Utilities.debug("ignoring "+line);
 		line = Scholar.read();
-		Scholar.Utilities.debug(line);
+		line = line.replace(/^\s+/, "");
 	} while(line !== false && line.substr(0, 6) != "TY  - ");
 	
 	var item = new Scholar.Item();
@@ -4910,6 +5044,7 @@ function doImport(attachments) {
 	var tag = "TY";
 	var data = line.substr(6);
 	while((line = Scholar.read()) !== false) {	// until EOF
+		line = line.replace(/^\s+/, "");
 		if(line.substr(2, 4) == "  - ") {
 			// if this line is a tag, take a look at the previous line to map
 			// its tag
