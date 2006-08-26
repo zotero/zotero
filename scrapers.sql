@@ -1,4 +1,4 @@
--- 57
+-- 58
 
 -- Set the following timestamp to the most recent scraper update date
 REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-08-15 15:42:00'));
@@ -2991,6 +2991,115 @@ REPLACE INTO "translators" VALUES ('3e684d82-73a3-9a34-095f-19b112d88bbf', '2006
 		
 		newItem.complete();
 	}, function() { Scholar.done(); }, null);
+	
+	Scholar.wait();
+}');
+
+REPLACE INTO "translators" VALUES ('57a00950-f0d1-4b41-b6ba-44ff0fc30289', '2006-08-26 1:10:00', 4, 'Google Scholar', 'Simon Kornblith', '^http://scholar\.google\.com/scholar',
+'function detectWeb(doc, url) {
+	return "multiple";
+}',
+'function getList(urls, each, done) {
+	var url = urls.shift();
+	Scholar.Utilities.HTTP.doGet(url, function(text) {
+		if(each) {
+			each(text);
+		}
+		
+		if(urls.length) {
+			getList(urls, each, done);
+		} else if(done) {
+			done(text);
+		}
+	});
+}
+
+function doWeb(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+	  if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	var items = new Array();
+	var relatedLinks = new Array();
+	var links = new Array();
+	var types = new Array();
+	
+	var itemTypes = new Array();
+	var attachments = new Array();
+	
+	var elmts = doc.evaluate(''//p[@class="g"]'', doc, nsResolver,
+	                         XPathResult.ANY_TYPE, null);
+	var elmt;
+	var i=0;
+	while(elmt = elmts.iterateNext()) {
+		var isCitation = doc.evaluate("./font[1]/b[1]/text()[1]", elmt, nsResolver,
+		                              XPathResult.ANY_TYPE, null).iterateNext();
+		var relatedLink = doc.evaluate(''.//a[font/text() = "Related Articles"]'',
+									   elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+		if(relatedLink) {
+			relatedLinks[i] = relatedLink.href;
+			if(isCitation && isCitation.nodeValue == "[CITATION]") {
+				items[i] = Scholar.Utilities.getNodeString(doc, elmt, ''./text()|./b/text()'', nsResolver);
+			} else if(isCitation && isCitation.nodeValue == "[BOOK]") {
+				items[i] = Scholar.Utilities.getNodeString(doc, elmt, ''./text()|./b/text()'', nsResolver);
+				types[i] = "book";
+			} else {		
+				var link = doc.evaluate(''.//span[@class="w"]/a'', elmt, nsResolver,
+										XPathResult.ANY_TYPE, null).iterateNext();
+				if(link) {
+					items[i] = link.textContent;
+					links[i] = link.href;
+				}
+			}
+			
+			if(items[i]) {
+				i++;
+			}
+		}
+	}
+	
+	items = Scholar.selectItems(items);
+	if(!items) {
+		return true;
+	}
+	
+	var relatedMatch = /[&?]q=related:([^&]+)/;
+	
+	var urls = new Array();
+	for(var i in items) {
+		var m = relatedMatch.exec(relatedLinks[i]);
+		urls.push("http://scholar.google.com/scholar.ris?hl=en&lr=&q=info:"+m[1]+"&output=citation&oi=citation");
+		if(links[i]) {
+			attachments.push([{title:"Google Scholar Linked Page", type:"text/html",
+			                  url:links[i]}]);
+		} else {
+			attachments.push([]);
+		}
+		
+		if(types[i]) {	// for books
+			itemTypes.push(types[i]);
+		} else {
+			itemTypes.push(null);
+		}
+	}
+	
+	var translator = Scholar.loadTranslator("import");
+	translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+	translator.setHandler("itemDone", function(obj, item) {
+		var itemType = itemTypes.shift();
+		if(itemType) {
+			item.itemType = itemType;
+		}
+		
+		item.attachments = attachments.shift();
+		item.complete();
+	});
+	
+	getList(urls, function(text) {
+		translator.setString(text);
+		translator.translate();
+	}, function() { Scholar.done() });
 	
 	Scholar.wait();
 }');
