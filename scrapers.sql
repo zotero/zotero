@@ -1,4 +1,4 @@
--- 60
+-- 61
 
 -- Set the following timestamp to the most recent scraper update date
 REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-08-15 15:42:00'));
@@ -3560,21 +3560,16 @@ REPLACE INTO "translators" VALUES ('a07bb62a-4d2d-4d43-ba08-d9679a0122f8', '2006
 		}
 	}
 	
-	// get cookie
-	var cookies = doc.cookie.split(/; */);
-	for each(var cookie in cookies) {
-		if(cookie.substr(0, 21) == "ABC-Clio-Serials_v4.1") {
-			var cookieName = cookie.substr(22);
-		} else {
-			throw("Could not get cookie name!");
-		}
-	}
-	
 	Scholar.Utilities.HTTP.doPost(url, postString, function(text) {
 		Scholar.Utilities.HTTP.doPost(url, "_appname=serials&_defaultoperation=Download+Documents&_formname=download&download_format=citation&download_which=tagged&download_where=ris&mailto=&mailreplyto=&mailsubject=&mailmessage=",
-		                              function(text) {
-			Scholar.Utilities.HTTP.doGet("http://serials.abc-clio.com/active/resource/download/"+cookieName+".ris",
-										 function(text) {
+		                              function(text) {	
+			// get link
+			var linkRe = /<a\s+class="button"\s+href="([^"]+)"\s+id="resource_link"/i;
+			var m = linkRe.exec(text);
+			if(!m) {
+				throw("regular expression failed!");
+			}			
+			Scholar.Utilities.HTTP.doGet(m[1], function(text) {
 				// load translator for RIS
 				var translator = Scholar.loadTranslator("import");
 				translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
@@ -3605,6 +3600,13 @@ REPLACE INTO "translators" VALUES ('a07bb62a-4d2d-4d43-ba08-d9679a0122f8', '2006
 						
 						if(item.creators[i].firstName[nameLength-1] == ".") {
 							item.creators[i].firstName = item.creators[i].firstName.substr(0, nameLength-1);
+						}
+					}
+					for(var i in item.tags) {
+						var tagLength = item.tags[i].length;
+						
+						if(item.tags[i][tagLength-1] == ".") {
+							item.tags[i] = item.tags[i].substr(0, tagLength-1);
 						}
 					}
 					
