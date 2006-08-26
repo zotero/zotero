@@ -1,4 +1,4 @@
--- 58
+-- 59
 
 -- Set the following timestamp to the most recent scraper update date
 REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-08-15 15:42:00'));
@@ -3019,6 +3019,8 @@ function doWeb(doc, url) {
 	var nsResolver = namespace ? function(prefix) {
 	  if (prefix == ''x'') return namespace; else return null;
 	} : null;
+	
+	doc.cookie = "GSP=ID=deadbeefdeadbeef:IN=ebe89f7e83a8fe75+7e6cc990821af63:CF=2; domain=.scholar.google.com";
 	
 	var items = new Array();
 	var relatedLinks = new Array();
