@@ -703,17 +703,16 @@ function scrape(doc) {
 		}
 	}
 	
-	newItem.attachments.push({document:doc, title:"History Cooperative Full Text",
-	                          downloadable:true});
-	
-	newItem.complete();
-	
-	// don''t actually need date info for a journal article
 	var month = metaTags.namedItem("PublicationMonth");
 	var year = metaTags.namedItem("PublicationYear");
 	if(month && year) {
 		newItem.date = month.getAttribute("content")+" "+year.getAttribute("content");
 	}
+	
+	newItem.attachments.push({document:doc, title:"History Cooperative Full Text",
+	                          downloadable:true});
+	
+	newItem.complete();
 }
 
 function doWeb(doc, url) {
@@ -3342,6 +3341,161 @@ function doWeb(doc, url) {
 	});
 	
 	Scholar.wait();
+}');
+
+REPLACE INTO "translators" VALUES ('ce7a3727-d184-407f-ac12-52837f3361ff', '2006-08-26 14:21:00', 4, 'New York Times', 'Simon Kornblith', '^(?:http://query.nytimes.com/search/query|http://www.nytimes.com/.+)', 
+'function getList(urls, each, done) {
+	var url = urls.shift();
+	Scholar.Utilities.HTTP.doGet(url, function(text) {
+		if(each) {
+			each(text, url);
+		}
+		
+		if(urls.length) {
+			getList(urls, each, done);
+		} else if(done) {
+			done(text);
+		}
+	});
+}
+
+function detectWeb(doc, url) {
+	if(doc.title.substr(0, 30) == "The New York Times: Search for") {
+		var namespace = doc.documentElement.namespaceURI;
+		var nsResolver = namespace ? function(prefix) {
+			if (prefix == ''x'') return namespace; else return null;
+		} : null;
+		
+		var result = doc.evaluate(''//div[@id="srchContent"]'', doc, nsResolver,
+		             XPathResult.ANY_TYPE, null).iterateNext();
+		if(result) {
+			return "multiple";
+		}
+	} else {
+		var metaTags = doc.getElementsByTagName("meta");
+		if(metaTags.namedItem("hdl") && metaTags.namedItem("byl")) {
+			return "newspaperArticle";
+		}
+	}
+}',
+'function associateMeta(newItem, metaTags, field, scholarField) {
+	if(metaTags[field]) {
+		newItem[scholarField] = metaTags[field];
+	}
+}
+
+function scrape(doc, url) {
+	var newItem = new Scholar.Item("newspaperArticle");
+	newItem.publicationTitle = "The New York Times";
+	newItem.ISSN = "0362-4331";
+	
+	var metaTags = new Object();
+	if(url != undefined) {
+		newItem.url = url;
+		var metaTagRe = /<meta[^>]*>/gi;
+		var nameRe = /name="([^"]+)"/i;
+		var contentRe = /content="([^"]+)"/i;
+		var m = doc.match(metaTagRe);
+		
+		if(!m) {
+			return;
+		}
+		
+		for(var i=0; i<m.length; i++) {
+			var name = nameRe.exec(m[i]);
+			var content = contentRe.exec(m[i]);
+			if(name && content) {
+				metaTags[name[1]] = content[1];
+			}
+		}
+		
+		if(!metaTags["hdl"]) {
+			return;
+		}
+		
+		newItem.attachments.push({url:url, title:"New York Times Article",
+	 	                          mimeType:"text/html", downloadable:true});
+	} else {
+		newItem.url = doc.location.href;
+		var metaTagHTML = doc.getElementsByTagName("meta");
+		for(var i=0; i<metaTagHTML.length; i++) {
+			var key = metaTagHTML[i].getAttribute("name");
+			var value = metaTagHTML[i].getAttribute("content");
+			if(key && value) {
+				metaTags[key] = value;
+			}
+		}
+	
+		newItem.attachments.push({document:doc, title:"New York Times Article",
+		                          downloadable:true});
+	}
+	
+	associateMeta(newItem, metaTags, "dat", "date");
+	associateMeta(newItem, metaTags, "hdl", "title");
+	associateMeta(newItem, metaTags, "dsk", "section");
+	associateMeta(newItem, metaTags, "articleid", "accessionNumber");
+	
+	if(metaTags["byl"]) {
+		var author = metaTags["byl"];
+		if(author.substr(0, 3).toLowerCase() == "by ") {
+			author = author.substr(3);
+		}
+		
+		var authors = author.split(" and ");
+		for each(var author in authors) {
+			// fix capitalization
+			var words = author.split(" ");
+			for(var i in words) {
+				words[i] = words[i][0].toUpperCase()+words[i].substr(1).toLowerCase();
+			}
+			author = words.join(" ");
+			
+			if(words[0] == "The") {
+				newItem.creators.push({lastName:author, creatorType:"author"});
+			} else {
+				newItem.creators.push(Scholar.Utilities.cleanAuthor(author, "author"));
+			}
+		}
+	}
+	
+	if(metaTags["keywords"]) {
+		var keywords = metaTags["keywords"];
+		newItem.tags = keywords.split(",");
+		for(var i in newItem.tags) {
+			newItem.tags[i] = newItem.tags[i].replace("  ", ", ");
+		}
+	}
+	
+	newItem.complete();
+}
+
+function doWeb(doc, url) {
+	if(doc.title.substr(0, 30) == "The New York Times: Search for") {
+		var namespace = doc.documentElement.namespaceURI;
+		var nsResolver = namespace ? function(prefix) {
+			if (prefix == ''x'') return namespace; else return null;
+		} : null;
+		
+		var result = doc.evaluate(''//div[@id="srchContent"]'', doc, nsResolver,
+		             XPathResult.ANY_TYPE, null).iterateNext();
+		var items = Scholar.Utilities.getItemArray(doc, result, ''^http://www.nytimes.com/.*\.html$'');
+		items = Scholar.selectItems(items);
+			
+		if(!items) {
+			return true;
+		}
+		
+		var urls = new Array();
+		for(var i in items) {
+			urls.push(i);
+		}
+		
+		getList(urls, scrape, function() { Scholar.done(); }, null);
+		
+		Scholar.wait();
+	} else {
+		scrape(doc);
+	}
 }');
 
 REPLACE INTO "translators" VALUES ('e07e9b8c-0e98-4915-bb5a-32a08cb2f365', '2006-08-07 11:36:00', 8, 'Open WorldCat', 'Simon Kornblith', 'http://partneraccess.oclc.org/',
