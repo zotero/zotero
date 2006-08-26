@@ -553,7 +553,7 @@ Scholar.Hash = function(){
 }
 
 Scholar.Hash.prototype.get = function(in_key){
-	return this.items[in_key];
+	return this.items[in_key] ? this.items[in_key] : false;
 }
 
 Scholar.Hash.prototype.set = function(in_key, in_value){
