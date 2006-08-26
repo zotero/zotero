@@ -1,4 +1,4 @@
--- 59
+-- 60
 
 -- Set the following timestamp to the most recent scraper update date
 REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-08-15 15:42:00'));
@@ -3343,23 +3343,8 @@ function doWeb(doc, url) {
 	Scholar.wait();
 }');
 
-REPLACE INTO "translators" VALUES ('ce7a3727-d184-407f-ac12-52837f3361ff', '2006-08-26 14:21:00', 4, 'New York Times', 'Simon Kornblith', '^(?:http://query.nytimes.com/search/query|http://www.nytimes.com/.+)', 
-'function getList(urls, each, done) {
-	var url = urls.shift();
-	Scholar.Utilities.HTTP.doGet(url, function(text) {
-		if(each) {
-			each(text, url);
-		}
-		
-		if(urls.length) {
-			getList(urls, each, done);
-		} else if(done) {
-			done(text);
-		}
-	});
-}
-
-function detectWeb(doc, url) {
+REPLACE INTO "translators" VALUES ('ce7a3727-d184-407f-ac12-52837f3361ff', '2006-08-26 14:21:00', 4, 'New York Times', 'Simon Kornblith', '^http://(?:query\.nytimes\.com/search/query|www\.nytimes\.com/.+)', 
+'function detectWeb(doc, url) {
 	if(doc.title.substr(0, 30) == "The New York Times: Search for") {
 		var namespace = doc.documentElement.namespaceURI;
 		var nsResolver = namespace ? function(prefix) {
@@ -3378,7 +3363,22 @@ function detectWeb(doc, url) {
 		}
 	}
 }',
-'function associateMeta(newItem, metaTags, field, scholarField) {
+'function getList(urls, each, done) {
+	var url = urls.shift();
+	Scholar.Utilities.HTTP.doGet(url, function(text) {
+		if(each) {
+			each(text, url);
+		}
+		
+		if(urls.length) {
+			getList(urls, each, done);
+		} else if(done) {
+			done(text);
+		}
+	});
+}
+
+function associateMeta(newItem, metaTags, field, scholarField) {
 	if(metaTags[field]) {
 		newItem[scholarField] = metaTags[field];
 	}
@@ -3496,6 +3496,133 @@ function doWeb(doc, url) {
 	} else {
 		scrape(doc);
 	}
+}');
+
+REPLACE INTO "translators" VALUES ('a07bb62a-4d2d-4d43-ba08-d9679a0122f8', '2006-08-26 16:14:00', 4, 'ABC-CLIO', 'Simon Kornblith', '^http://serials\.abc-clio\.com/active/go/ABC-Clio-Serials_v4.1$', 
+'function detectWeb(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	var result = doc.evaluate(''//table[@class="rc_main"]'', doc, nsResolver,
+				 XPathResult.ANY_TYPE, null).iterateNext();
+	if(result) {
+		return "multiple";
+	}
+}',
+'function doWeb(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	var availableItems = new Array();
+	var availableAttachments = new Array();
+		
+	var elmts = doc.evaluate(''//table[@class="rc_main"]'', doc, nsResolver,
+	                         XPathResult.ANY_TYPE, null);
+	var elmt;
+	while(elmt = elmts.iterateNext()) {
+		var title = doc.evaluate(''./tbody/tr/td[b/text() = "Title:"]'',
+		                         elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+		var checkbox = doc.evaluate(''.//input[@type = "checkbox"]'',
+		                         elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();			
+		if(title, checkbox) {
+			checkbox = checkbox.name;
+			availableItems[checkbox] = Scholar.Utilities.cleanString(title.textContent).substr(6);
+			
+			var links = doc.evaluate(''./tbody/tr/td[b/text() = "Fulltext: ["]/a'',
+									 elmt, nsResolver, XPathResult.ANY_TYPE, null);
+			var link;
+			
+			var attach = new Array();
+			while(link = links.iterateNext()) {
+				attach.push({url:link.href, title:Scholar.Utilities.cleanString(link.textContent)+" Full Text",
+				             mimeType:"text/html"});
+			}
+			availableAttachments[checkbox] = attach;
+		}
+	}
+	
+	var items = Scholar.selectItems(availableItems);
+	
+	if(!items) {
+		return true;
+	}
+	
+	var postString = "_defaultoperation=Download+Options&research_field=&research_value=&jumpto=";
+	var attachments = new Array();
+	for(var i in availableItems) {
+		postString += "&_checkboxname="+i+(items[i] ? "&"+i+"=1" : "");
+		if(items[i]) {
+			attachments.push(availableAttachments[i]);
+		}
+	}
+	
+	// get cookie
+	var cookies = doc.cookie.split(/; */);
+	for each(var cookie in cookies) {
+		if(cookie.substr(0, 21) == "ABC-Clio-Serials_v4.1") {
+			var cookieName = cookie.substr(22);
+		} else {
+			throw("Could not get cookie name!");
+		}
+	}
+	
+	Scholar.Utilities.HTTP.doPost(url, postString, function(text) {
+		Scholar.Utilities.HTTP.doPost(url, "_appname=serials&_defaultoperation=Download+Documents&_formname=download&download_format=citation&download_which=tagged&download_where=ris&mailto=&mailreplyto=&mailsubject=&mailmessage=",
+		                              function(text) {
+			Scholar.Utilities.HTTP.doGet("http://serials.abc-clio.com/active/resource/download/"+cookieName+".ris",
+										 function(text) {
+				// load translator for RIS
+				var translator = Scholar.loadTranslator("import");
+				translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+				translator.setString(text);
+				translator.setHandler("itemDone", function(obj, item) {
+					if(item.notes && item.notes[0]) {
+						item.extra = item.notes[0].note;
+						
+						delete item.notes;
+						item.notes = undefined;
+					}
+					
+					// grab uni data from thesis
+					if(item.itemType == "thesis") {
+						var re = /^(.+?) ([0-9]{4})\. ([0-9]+) pp\.(.*)$/;
+						var m = re.exec(item.extra);
+						if(m) {
+							item.publisher = m[1];
+							item.date = m[2];
+							item.pages = m[3];
+							item.extra = m[4];
+						}
+					}
+					
+					// fix periods
+					for(var i in item.creators) {
+						var nameLength = item.creators[i].firstName.length;
+						
+						if(item.creators[i].firstName[nameLength-1] == ".") {
+							item.creators[i].firstName = item.creators[i].firstName.substr(0, nameLength-1);
+						}
+					}
+					
+					// fix title
+					item.title = Scholar.Utilities.superCleanString(item.title);
+					
+					// add attachments
+					item.attachments = attachments.shift();
+					
+					item.complete();
+				});
+				translator.translate();
+				Scholar.done();
+			});
+		});
+	});
+	
+	Scholar.wait();
 }');
 
 REPLACE INTO "translators" VALUES ('e07e9b8c-0e98-4915-bb5a-32a08cb2f365', '2006-08-07 11:36:00', 8, 'Open WorldCat', 'Simon Kornblith', 'http://partneraccess.oclc.org/',

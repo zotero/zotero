@@ -283,6 +283,10 @@ Scholar.Translate.prototype.setTranslator = function(translator) {
 		translator = [translator];
 	}
 	
+	if(!translator.length) {
+		return false;
+	}
+	
 	var where = "";
 	for(var i in translator) {
 		where += " OR translatorID = ?";
