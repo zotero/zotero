@@ -48,6 +48,7 @@ Scholar.Item.prototype.isPrimaryField = function(field){
 	if (!Scholar.Item.primaryFields){
 		Scholar.Item.primaryFields = Scholar.DB.getColumnHash('items');
 		Scholar.Item.primaryFields['firstCreator'] = true;
+		Scholar.Item.primaryFields['numChildren'] = true;
 		Scholar.Item.primaryFields['numNotes'] = true;
 		Scholar.Item.primaryFields['numAttachments'] = true;
 	}
