@@ -116,7 +116,7 @@ var Scholar = new function(){
 		file.append('scholar');
 		// If it doesn't exist, create
 		if (!file.exists() || !file.isDirectory()){
-			file.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0664);
+			file.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0755);
 		}
 		return file;
 	}
@@ -128,7 +128,7 @@ var Scholar = new function(){
 		file.append('storage');
 		// If it doesn't exist, create
 		if (!file.exists() || !file.isDirectory()){
-			file.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0664);
+			file.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0755);
 		}
 		return file;
 	}
