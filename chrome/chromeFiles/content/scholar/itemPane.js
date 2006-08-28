@@ -33,6 +33,13 @@ ScholarItemPane = new function()
 	
 	var _itemBeingEdited;
 	
+	var _lastTabIndex;
+	var _tabDirection;
+	var _tabIndexMinCreators = 10;
+	var _tabIndexMaxCreators = 0;
+	var _tabIndexMinFields = 1000;
+	var _tabIndexMaxFields = 0;
+	
 	this.onLoad = onLoad;
 	this.viewItem = viewItem;
 	this.loadPane = loadPane;
@@ -42,6 +49,7 @@ ScholarItemPane = new function()
 	this.disableButton = disableButton;
 	this.removeCreator = removeCreator;
 	this.showEditor = showEditor;
+	this.handleKeyPress = handleKeyPress;
 	this.hideEditor = hideEditor;
 	this.modifyField = modifyField;
 	this.getCreatorFields = getCreatorFields;
@@ -51,6 +59,7 @@ ScholarItemPane = new function()
 	this.removeAttachment = removeAttachment;
 	this.addAttachmentFromDialog = addAttachmentFromDialog;
 	this.addAttachmentFromPage = addAttachmentFromPage;
+	
 	
 	function onLoad()
 	{
@@ -96,9 +105,11 @@ ScholarItemPane = new function()
 		loadPane(_tabs.selectedIndex);
 	}
 	
+	
 	function loadPane(index)
 	{
 		//Scholar.debug('Loading item pane ' + index);
+		
 		if(_loaded[index])
 		{
 			return;
@@ -132,7 +143,14 @@ ScholarItemPane = new function()
 					val = Scholar.Date.sqlToDate(val, true).toLocaleString();
 				}
 				
-				var valueElement = createValueElement(val, editable ? fieldNames[i] : null);
+				// Start tabindex at 1000 after creators
+				var tabindex = editable ? (i>0 ? _tabIndexMinFields + i : 1) : 0;
+				
+				var valueElement = createValueElement(
+					val, editable ? fieldNames[i] : null, tabindex
+				);
+				
+				_tabIndexMaxFields = Math.max(_tabIndexMaxFields, tabindex);
 				
 				var label = document.createElement("label");
 				label.setAttribute("value",Scholar.getString("itemFields."+fieldNames[i])+":");
@@ -156,6 +174,12 @@ ScholarItemPane = new function()
 			{
 				// Add default row
 				addCreatorRow('', '', 1, true, true);
+			}
+			
+			// Move to next or previous field if (shift-)tab was pressed
+			if (_tabDirection)
+			{
+				_focusNextField(_lastTabIndex, _tabDirection==-1);
 			}
 		}
 		
@@ -314,6 +338,7 @@ ScholarItemPane = new function()
 		label.setAttribute("value",Scholar.getString('creatorTypes.'+Scholar.CreatorTypes.getName(typeID))+":");
 		label.setAttribute("popup","creatorTypeMenu");
 		label.setAttribute("fieldname",'creator-'+_creatorCount+'-typeID');
+		
 		label.className = 'clicky';
 		
 		// getCreatorFields() needs to be adjusted if this DOM structure changes
@@ -321,8 +346,24 @@ ScholarItemPane = new function()
 		
 		var firstlast = document.createElement("hbox");
 		firstlast.setAttribute("flex","1");
-		firstlast.appendChild(createValueElement(lastName+",", 'creator-'+_creatorCount+'-lastName'));
-		firstlast.appendChild(createValueElement(firstName, 'creator-'+_creatorCount+'-firstName'));
+		
+		var tabindex = _tabIndexMinCreators + (_creatorCount * 2);
+		firstlast.appendChild(
+			createValueElement(
+				lastName + ",",
+				'creator-' + _creatorCount + '-lastName',
+				tabindex
+			)
+		);
+		firstlast.appendChild(
+			createValueElement(
+				firstName,
+				'creator-' + _creatorCount + '-firstName',
+				tabindex + 1
+			)
+		);
+		_tabIndexMaxCreators = Math.max(_tabIndexMaxCreators, tabindex + 1);
+		
 		row.appendChild(firstlast);
 		
 		var removeButton = document.createElement('label');
@@ -369,12 +410,13 @@ ScholarItemPane = new function()
 		button.setAttribute("onclick","ScholarItemPane.disableButton(this); ScholarItemPane.addCreatorRow('','',1,true);");
 	}
 	
-	function createValueElement(valueText, fieldName)
+	function createValueElement(valueText, fieldName, tabindex)
 	{
 	 	var valueElement = document.createElement("label");
 		if(fieldName)
 		{
 			valueElement.setAttribute('fieldname',fieldName);
+			valueElement.setAttribute('tabindex', tabindex);
 			valueElement.setAttribute('onclick', 'ScholarItemPane.showEditor(this);');
 			valueElement.className = 'clicky';
 		}
@@ -389,7 +431,10 @@ ScholarItemPane = new function()
 			valueElement.setAttribute('value',valueText);
 		}
 		else
+		{
+			// Wrap to multiple lines
 			valueElement.appendChild(document.createTextNode(valueText));
+		}
 		return valueElement;
 	}
 	
@@ -414,7 +459,9 @@ ScholarItemPane = new function()
 	function showEditor(elem)
 	{
 		//Scholar.debug('Showing editor');
+		
 		var fieldName = elem.getAttribute('fieldname');
+		var tabindex = elem.getAttribute('tabindex');
 		var value = '';
 		var creatorFields = fieldName.split('-');
 		if(creatorFields[0] == 'creator')
@@ -431,6 +478,7 @@ ScholarItemPane = new function()
 		var t = document.createElement("textbox");
 		t.setAttribute('value',value);
 		t.setAttribute('fieldname',fieldName);
+		t.setAttribute('tabindex', tabindex);
 		t.setAttribute('flex','1');
 		t.className = 'fieldeditor';
 		
@@ -438,8 +486,32 @@ ScholarItemPane = new function()
 		box.replaceChild(t,elem);
 		
 		t.select();
+		
 		t.setAttribute('onblur',"ScholarItemPane.hideEditor(this, true);");
-		t.setAttribute('onkeypress','if(event.keyCode == event.DOM_VK_RETURN) document.commandDispatcher.focusedElement.blur(); else if(event.keyCode == event.DOM_VK_ESCAPE) ScholarItemPane.hideEditor(document.commandDispatcher.focusedElement, false);'); //for some reason I can't just say this.blur();
+		t.setAttribute('onkeypress',"return ScholarItemPane.handleKeyPress(event)");
+		
+		_tabDirection = false;
+		_lastTabIndex = tabindex;
+	}
+	
+	
+	function handleKeyPress(event){
+		switch (event.keyCode)
+		{
+			case event.DOM_VK_RETURN:
+				document.commandDispatcher.focusedElement.blur();
+				break;
+				
+			case event.DOM_VK_ESCAPE:
+				ScholarItemPane.hideEditor(document.commandDispatcher.focusedElement, false);
+				break;
+				
+			case event.DOM_VK_TAB:
+				_tabDirection = event.shiftKey ? -1 : 1;
+				break;
+		}
+		
+		return true;
 	}
 	
 	function hideEditor(t, saveChanges)
@@ -447,6 +519,7 @@ ScholarItemPane = new function()
 		//Scholar.debug('Hiding editor');
 		var textbox = t.parentNode.parentNode;
 		var fieldName = textbox.getAttribute('fieldname');
+		var tabindex = textbox.getAttribute('tabindex');
 		var value = t.value;
 		
 		var elem;
@@ -476,18 +549,23 @@ ScholarItemPane = new function()
 				val += ',';
 			}
 			
-			elem = createValueElement(val, fieldName);
+			elem = createValueElement(val, fieldName, tabindex);
 		}
 		else
 		{
 			if(saveChanges)
 				modifyField(fieldName,value);
 		
-			elem = createValueElement(_itemBeingEdited.getField(fieldName),fieldName);
+			elem = createValueElement(_itemBeingEdited.getField(fieldName), fieldName, tabindex);
 		}
 		
 		var box = textbox.parentNode;
 		box.replaceChild(elem,textbox);
+		
+		if (_tabDirection)
+		{
+			_focusNextField(_lastTabIndex, _tabDirection==-1);
+		}
 	}
 	
 	function modifyField(field, value)
@@ -620,6 +698,73 @@ ScholarItemPane = new function()
 	function addAttachmentFromPage(link)
 	{
 		ScholarPane.addAttachmentFromPage(link, _itemBeingEdited.getID());
+	}
+	
+	
+	/*
+	 * Advance the field focus forward or backward
+	 *
+	 * Note: We're basically replicating the built-in tabindex functionality,
+	 * which doesn't work well with the weird label/textbox stuff we're doing.
+	 * (The textbox being tabbed away from is deleted before the blur()
+	 * completes, so it doesn't know where it's supposed to go next.)
+	 *
+	 * Use of the 'tabindex' attribute is arbitrary.
+	 */
+	function _focusNextField(tabindex, back){
+		tabindex = parseInt(tabindex);
+		if (back)
+		{
+			switch (tabindex)
+			{
+				case 1:
+					//Scholar.debug('At beginning');
+					return false;
+				
+				case _tabIndexMinCreators:
+					var nextIndex = 1;
+					break;
+				
+				case _tabIndexMinFields:
+					var nextIndex = _tabIndexMaxCreators;
+					break;
+				
+				default:
+					var nextIndex = tabindex - 1;
+			}
+		}
+		else
+		{
+			switch (tabindex)
+			{
+				case 1:
+					var nextIndex = _tabIndexMinCreators;
+					break;
+				
+				case _tabIndexMaxCreators:
+					var nextIndex = _tabIndexMinFields;
+					break;
+				
+				case _tabIndexMaxFields:
+					//Scholar.debug('At end');
+					return false;
+				
+				default:
+					var nextIndex = tabindex + 1;
+			}
+		}
+		
+		//Scholar.debug('Looking for tabindex ' + nextIndex);
+		var next = _dynamicFields.getElementsByAttribute('tabindex', nextIndex);
+		
+		if (!next[0])
+		{
+			//Scholar.debug("Next field not found");
+			return _focusNextField(nextIndex, back);
+		}
+		
+		next[0].click();
+		return true;
 	}
 }
 

@@ -79,6 +79,17 @@ searchcondition menulist[id="operatorsmenu"]
 	width:15em;
 }
 
+#editpane-dynamic-fields row
+{
+	margin:0 0 1px;
+}
+
+#editpane-dynamic-fields textbox
+{
+	margin-top:0;
+	margin-bottom:-1px;
+}
+
 .clicky, .unclicky
 {	
 	-moz-border-radius: 6px;
