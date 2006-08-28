@@ -68,9 +68,16 @@ Scholar.ItemTreeView.prototype.refresh = function()
 	this.rowCount = 0;
 	
 	var newRows = this._itemGroup.getChildItems();
-	for(var i = 0; i < newRows.length; i++)
-		if(newRows[i])
-			this._showItem(new Scholar.ItemTreeView.TreeRow(newRows[i],0,false), i+1); //item ref, before row
+	if (newRows.length)
+	{
+		for(var i = 0, len = newRows.length; i < len; i++)
+		{
+			if(newRows[i])
+			{
+				this._showItem(new Scholar.ItemTreeView.TreeRow(newRows[i],0,false), i+1); //item ref, before row
+			}
+		}
+	}
 	
 	this._refreshHashMap();
 }

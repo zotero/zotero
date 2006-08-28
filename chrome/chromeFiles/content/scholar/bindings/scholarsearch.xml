@@ -150,7 +150,7 @@
 		<implementation>
 			<constructor>
 				<![CDATA[
-					var operators = new Array('is', 'isNot', 'contains', 'doesNotContain', 'lessThan', 'greaterThan', 'isBefore', 'isAfter');
+					var operators = new Array('is', 'isNot', 'contains', 'doesNotContain', 'isLessThan', 'isGreaterThan', 'isBefore', 'isAfter');
 					var operatorsList = this.id('operatorsmenu');
 					
 					for(var i in operators)

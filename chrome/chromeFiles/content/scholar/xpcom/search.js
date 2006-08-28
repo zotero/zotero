@@ -316,6 +316,7 @@ Scholar.Search.prototype._buildQuery = function(){
 				//
 				switch (tables[i][j]['name']){
 					case 'field':
+					case 'datefield':
 						if (!tables[i][j]['alias']){
 							break;
 						}
@@ -392,22 +393,24 @@ Scholar.Search.prototype._buildQuery = function(){
 							condSQLParams.push(tables[i][j]['value']);
 							break;
 							
-						case 'greaterThan':
+						case 'isLessThan':
+							condSQL += '<?';
+							condSQLParams.push({int:tables[i][j]['value']});
+							break;
+							
+						case 'isGreaterThan':
 							condSQL += '>?';
 							condSQLParams.push({int:tables[i][j]['value']});
 							break;
 							
-						case 'lessThan':
-							condSQL += '<?';
-							condSQLParams.push({int:tables[i][j]['value']});
-							break;
-						
 						case 'isBefore':
-							// TODO
+							condSQL += '<?';
+							condSQLParams.push({string:tables[i][j]['value']});
 							break;
-						
+							
 						case 'isAfter':
-							// TODO
+							condSQL += '>?';
+							condSQLParams.push({string:tables[i][j]['value']});
 							break;
 					}
 				}
@@ -503,13 +506,13 @@ Scholar.SearchConditions = new function(){
 	 * Define the advanced search operators
 	 */
 	var _operators = {
-		// Standard
+		// Standard -- these need to match those in scholarsearch.xml
 		is: true,
 		isNot: true,
 		contains: true,
 		doesNotContain: true,
-		lessThan: true,
-		greaterThan: true,
+		isLessThan: true,
+		isGreaterThan: true,
 		isBefore: true,
 		isAfter: true,
 		
@@ -596,6 +599,30 @@ Scholar.SearchConditions = new function(){
 			},
 			
 			{
+				name: 'dateAdded',
+				operators: {
+					is: true,
+					isNot: true,
+					isBefore: true,
+					isAfter: true
+				},
+				table: 'items',
+				field: 'DATE(dateAdded)'
+			},
+			
+			{
+				name: 'dateModified',
+				operators: {
+					is: true,
+					isNot: true,
+					isBefore: true,
+					isAfter: true
+				},
+				table: 'items',
+				field: 'DATE(dateModified)'
+			},
+			
+			{
 				name: 'itemTypeID',
 				operators: {
 					is: true,
@@ -660,7 +687,40 @@ Scholar.SearchConditions = new function(){
 				},
 				table: 'itemData',
 				field: 'value',
-				aliases: Scholar.DB.columnQuery("SELECT fieldName FROM fields"),
+				aliases: Scholar.DB.columnQuery("SELECT fieldName FROM fields " +
+					"WHERE fieldName NOT IN ('accessDate', 'date', 'pages', " +
+					"'section','accessionNumber','seriesNumber','issue')"),
+				template: true // mark for special handling
+			},
+			
+			{
+				name: 'datefield',
+				operators: {
+					is: true,
+					isNot: true,
+					isBefore: true,
+					isAfter: true
+				},
+				table: 'itemData',
+				field: 'DATE(value)',
+				aliases: ['accessDate', 'date'],
+				template: true // mark for special handling
+			},
+			
+			{
+				name: 'numberfield',
+				operators: {
+					is: true,
+					isNot: true,
+					contains: true,
+					doesNotContain: true,
+					isLessThan: true,
+					isGreaterThan: true
+				},
+				table: 'itemData',
+				field: 'value',
+				aliases: ['pages', 'section', 'accessionNumber',
+					'seriesNumber','issue'],
 				template: true // mark for special handling
 			}
 		];
@@ -734,7 +794,7 @@ Scholar.SearchConditions = new function(){
 		if (!_initialized){
 			_init();
 		}
-		
+		Scholar.debug(_standardConditions);
 		// TODO: return copy instead
 		return _standardConditions;
 	}
