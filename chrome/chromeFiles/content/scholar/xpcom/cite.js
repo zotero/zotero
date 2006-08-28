@@ -202,7 +202,9 @@ CSL.prototype.createBibliography = function(items, format) {
 		// add line feeds
 		if(format == "HTML") {
 			var coins = Scholar.OpenURL.createContextObject(item, "1.0");
-			string += '<span class="Z3988" title="'+coins.replace("&", "&amp;")+'"></span>';
+			if(coins) {
+				string += '<span class="Z3988" title="'+coins.replace("&", "&amp;")+'"></span>';
+			}
 			
 			if(this._class == "note") {
 				output += "<li>"+string+"</li>\r\n";
@@ -215,6 +217,8 @@ CSL.prototype.createBibliography = function(items, format) {
 				output += index+". ";
 			}
 			output += string+"\\\r\n\\\r\n";
+		} else if(format == "Integration") {
+			output += string+"\r\n\r\n";
 		}
 	}
 	
@@ -760,6 +764,8 @@ CSL.prototype._escapeString = function(string, format) {
 		}
 		
 		return newString;
+	} else if(format == "Integration") {
+		return string.replace(/\\/g, "\\\\");
 	} else {
 		return string;
 	}
@@ -820,7 +826,7 @@ CSL.prototype._formatString = function(element, string, format, dontEscape) {
 		if(style) {
 			string = '<span style="'+style+'">'+string+'</span>';
 		}
-	} else if(format == "RTF") {
+	} else if(format == "RTF" || format == "Integration") {
 		if(element["font-style"] && (element["font-style"] == "oblique" || element["font-style"] == "italic")) {
 			string = "\\i "+string+"\\i0 ";
 		}
