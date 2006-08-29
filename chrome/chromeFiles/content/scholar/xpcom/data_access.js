@@ -2642,8 +2642,22 @@ Scholar.Collection.prototype.getDescendents = function(nested, type){
 		+ ' UNION SELECT itemID AS id, 1 AS type, NULL AS collectionName '
 		+ 'FROM collectionItems WHERE collectionID=' + this._id);
 	
+	if (type){
+		switch (type){
+			case 'item':
+			case 'collection':
+				break;
+			default:
+				throw ("Invalid type '" + type + "' in Collection.getDescendents()");
+		}
+	}
+	
 	for(var i=0, len=children.length; i<len; i++){
-		switch (children[i]['type']){
+		// This seems to not work without parseInt() even though
+		// typeof children[i]['type'] == 'number' and
+		// children[i]['type'] === parseInt(children[i]['type']),
+		// which sure seems like a bug to me
+		switch (parseInt(children[i]['type'])){
 			case 0:
 				if (!type || type=='collection'){
 					toReturn.push({
@@ -3374,7 +3388,7 @@ Scholar.ItemFields = new function(){
  * Takes parent collectionID as optional parameter;
  * by default, returns root collections
  */
-Scholar.getCollections = function(parent){
+Scholar.getCollections = function(parent, recursive){
 	var toReturn = new Array();
 	
 	if (!parent){
@@ -3400,6 +3414,19 @@ Scholar.getCollections = function(parent){
 		}
 		
 		toReturn.push(obj);
+		
+		// If recursive, get descendents
+		if (recursive){
+			var desc = obj.getDescendents(false, 'collection');
+			for (var j in desc){
+				var obj2 = Scholar.Collections.get(desc[j]['id']);
+				if (!obj2){
+					throw ('Collection ' + desc[j] + ' not found');
+				}
+				
+				toReturn.push(obj2);
+			}
+		}
 	}
 	
 	return toReturn;
