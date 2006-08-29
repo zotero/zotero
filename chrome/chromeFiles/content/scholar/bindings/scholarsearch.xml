@@ -177,12 +177,13 @@
 					if (this.id('conditionsmenu').value==this.selectedCondition){
 						return;
 					}
+					var conditionsMenu = this.id('conditionsmenu');
 					var operatorsList = this.id('operatorsmenu');
 					
-					this.selectedCondition = this.id('conditionsmenu').value;
+					this.selectedCondition = conditionsMenu.value;
 					this.selectedOperator = operatorsList.value;
 					
-					var condition = Scholar.SearchConditions.get(this.id('conditionsmenu').value);	
+					var condition = Scholar.SearchConditions.get(conditionsMenu.value);
 					var operators = condition['operators'];
 					
 					// Display appropriate operators for condition
@@ -200,18 +201,23 @@
 					operatorsList.selectedIndex = selectThis;
 					
 					// Generate drop-down menus for certain conditions
-					switch (this.id('conditionsmenu').value){
+					switch (conditionsMenu.value){
 						case 'collectionID':
 							var merged = [];
-							var searches = Scholar.Searches.getAll();
-							var cols = Scholar.getCollections();
+							
+							var cols = Scholar.getCollections(false, true);
 							for (var i in cols)
 							{
 								merged.push([cols[i].getName(), 'C' + cols[i].getID()]);
 							}
+							
+							var searches = Scholar.Searches.getAll();
 							for (var i in searches)
 							{
-								merged.push([searches[i]['name'], 'S' + searches[i]['id']]);
+								if (searches[i]['id'] != this.parent.search.getID())
+								{
+									merged.push([searches[i]['name'], 'S' + searches[i]['id']]);
+								}
 							}
 							
 							this.createValueMenu(merged);
@@ -261,7 +267,10 @@
 							this.id('valuemenu').selectedIndex = 0;
 						}
 						
-						this.id('valuemenu').value = this.value;
+						if (this.value)
+						{
+							this.id('valuemenu').value = this.value;
+						}
 						this.id('valuefield').hidden = true;
 						this.id('valuemenu').hidden = false;
 					]]>
@@ -282,29 +291,26 @@
 						if(this.parent.search)
 						{
 							this.dontupdate = true;	//so that the search doesn't get updated while we are creating controls.
+							var prefix = '';
 							
 							// Handle collectionID/savedSearchID
 							switch (condition['condition'])
 							{
 								case 'savedSearchID':
 									this.id('conditionsmenu').value = 'collectionID';
-									var prefix = 'S';
+									prefix = 'S';
 									break;
 								
 								case 'collectionID':
-									this.id('conditionsmenu').value = 'collectionID';
-									var prefix = 'C';
-									
+									prefix = 'C';
 									// fall through
 									
 								default:
 									this.id('conditionsmenu').value = condition['condition'];
-									var prefix = '';
 							}
 							
 							this.id('operatorsmenu').value = condition['operator'];
 							this.value = prefix + condition['value'];
-							
 							this.dontupdate = false;
 						}
 						

@@ -64,6 +64,11 @@ Scholar.Search.prototype.load = function(savedSearchID){
 }
 
 
+Scholar.Search.prototype.getID = function(){
+	return this._savedSearchID;
+}
+
+
 /*
  * Save the search to the DB and return a savedSearchID
  *
@@ -84,6 +89,8 @@ Scholar.Search.prototype.save = function(){
 			+ "WHERE savedSearchID=" + this._savedSearchID);
 	}
 	else {
+		var isNew = true;
+		
 		this._savedSearchID
 			= Scholar.getRandomID('savedSearches', 'savedSearchID');
 		
@@ -112,7 +119,9 @@ Scholar.Search.prototype.save = function(){
 	}
 	
 	Scholar.DB.commitTransaction();
-	Scholar.Notifier.trigger('modify', 'search', this._savedSearchID);
+	Scholar.Notifier.trigger(
+		(isNew ? 'add' : 'modify'), 'search', this._savedSearchID
+	);
 	return this._savedSearchID;
 }
 

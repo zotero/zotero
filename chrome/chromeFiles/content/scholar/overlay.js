@@ -174,11 +174,9 @@ var ScholarPane = new function()
 		var s = new Scholar.Search();
 		s.addCondition('title','contains','');
 		
+		// TODO: add integer to 'Untitled' if more than one
 		var io = {dataIn: {search: s, name: 'Untitled'}, dataOut: null};
 		window.openDialog('chrome://scholar/content/searchDialog.xul','','chrome,modal',io);
-
-		if(io.dataOut)
-			getCollectionsView().reload(); //we don't have notification support for searches
 	}
 	
 	function onCollectionSelected()

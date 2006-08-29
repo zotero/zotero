@@ -180,11 +180,21 @@ Scholar.CollectionTreeView.prototype.notify = function(action, type, ids)
 		// Multiple adds not currently supported
 		ids = ids[0];
 		
-		var item = Scholar.Collections.get(ids);
+		switch (type)
+		{
+			case 'collection':
+				var item = Scholar.Collections.get(ids);
+				this._showItem(new Scholar.ItemGroup('collection',item), 0, this.rowCount);
+				break;
+				
+			case 'search':
+				var search = Scholar.Searches.get(ids);
+				this._showItem(new Scholar.ItemGroup('search', search), 0, this.rowCount);
+				break;
+		}
 		
-		this._showItem(new Scholar.ItemGroup('collection',item), 0, this.rowCount);
 		this._treebox.rowCountChanged(this.rowCount-1,1);
-	
+		this.selection.select(this.rowCount-1);
 		madeChanges = true;
 	}
 	
