@@ -127,6 +127,7 @@ Scholar.Search.prototype.addCondition = function(condition, operator, value, req
 		this.addCondition('joinMode', 'any');
 		this.addCondition('title', operator, value, false);
 		this.addCondition('field', operator, value, false);
+		this.addCondition('numberfield', operator, value, false);
 		this.addCondition('creator', operator, value, false);
 		this.addCondition('tag', operator, value, false);
 		this.addCondition('note', operator, value, false);
@@ -794,7 +795,7 @@ Scholar.SearchConditions = new function(){
 		if (!_initialized){
 			_init();
 		}
-		Scholar.debug(_standardConditions);
+		
 		// TODO: return copy instead
 		return _standardConditions;
 	}

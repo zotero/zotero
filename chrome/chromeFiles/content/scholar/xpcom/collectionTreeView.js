@@ -641,7 +641,17 @@ Scholar.ItemGroup.prototype.getChildItems = function()
 {
 	if(this.searchText)
 	{
-		return Scholar.Items.get(Scholar.Items.search(this.searchText,(this.isCollection() ? this.ref.getID() : null)));
+		var s = new Scholar.Search();
+		if (this.isCollection())
+		{
+			s.addCondition('collectionID', 'is', this.ref.getID(), true);
+		}
+		else if (this.isSearch())
+		{
+			s.addCondition('savedSearchID', 'is', this.ref['id'], true);
+		}
+		s.addCondition('fulltext', 'contains', this.searchText);
+		return Scholar.Items.get(s.search());
 	}
 	else
 	{

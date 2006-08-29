@@ -311,7 +311,7 @@ var ScholarPane = new function()
 	{
 		if(itemsView)
 		{
-			searchVal = document.getElementById('tb-search').value;
+			var searchVal = document.getElementById('tb-search').value;
 			itemsView.searchText(searchVal);
 			
 			document.getElementById('tb-search-cancel').hidden = searchVal == "";
