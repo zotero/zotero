@@ -782,6 +782,14 @@ Scholar.ItemTreeView.TreeRow.prototype.getType = function()
 	return this.ref.getType();
 }
 
+Scholar.ItemTreeView.TreeRow.prototype.numChildren = function()
+{
+	if(this.isRegularItem())
+		return this.ref.numChildren();
+	else
+		return 0;
+}
+
 Scholar.ItemTreeView.TreeRow.prototype.numNotes = function()
 {
 	if(this.isRegularItem())
