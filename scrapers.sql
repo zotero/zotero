@@ -5930,15 +5930,19 @@ REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '200
       <name>Simon Kornblith</name>
       <email>simon@simonster.com</email>
     </contributor>
-    <updated>2006-08-19T17:12:00-05:00</updated>
+    <contributor>
+      <name>Johan Kool</name>
+      <email>johankool@users.sourceforge.net</email>
+    </contributor>
+    <updated>2006-08-24T16:30:00+01:00</updated>
   </info>
   <defaults>
     <contributor name-as-sort-order="no">
-      <name and="symbol" initialize-with="."/>
+      <name and="symbol" initialize-with="." delimiter=", "/>
       <label term-set="roles-short" prefix=", " text-transform="capitalize" suffix="."/>
     </contributor>
     <author name-as-sort-order="all">
-      <name and="symbol" sort-separator=", " initialize-with="."/>
+      <name and="symbol" sort-separator=", " initialize-with="." delimiter=", "/>
       <label term-set="roles-short" prefix=" (" suffix=".)" text-transform="capitalize"/>
       <substitute>
         <choose>

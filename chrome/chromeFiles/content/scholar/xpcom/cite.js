@@ -108,9 +108,19 @@ CSL = function(csl) {
  * set items - convert to array and pre-process
  */
 CSL.prototype.setItems = function(items) {
+	// create a serialized string of all of the unique items
 	var serializedItemString = "";
+	
+	this._items = items;
+	this._uniqueItems = new Array();
+	var existingItems = new Object();
 	for each(var item in items) {
-		serializedItemString += item.getID()+",";
+		var itemID = item.getID();
+		if(!existingItems[itemID]) {
+			existingItems[itemID] = true;
+			this._uniqueItems.push(item);
+			serializedItemString += itemID+",";
+		}
 	}
 	
 	Scholar.debug("CSL: items set to "+serializedItemString);
@@ -118,7 +128,6 @@ CSL.prototype.setItems = function(items) {
 	if(serializedItemString != this._serializedItemString) {
 		// only re-process if there are new items
 		this._serializedItemString = serializedItemString;
-		this._items = items;
 		this._preprocessItems();
 	}
 }
@@ -192,8 +201,8 @@ CSL.prototype.createBibliography = function(format) {
 		output += "\r\n";
 	}
 	
-	for(var i in this._items) {
-		var item = this._items[i];
+	for(var i in this._uniqueItems) {
+		var item = this._uniqueItems[i];
 		
 		var string = this._getCitation(item, format, this._bib);
 		
@@ -991,8 +1000,8 @@ CSL.prototype._lpad = function(string, pad, length) {
  */
 CSL.prototype._preprocessItems = function() {
 	// get data necessary to generate citations before sorting
-	for(var i in this._items) {
-		var item = this._items[i];
+	for(var i in this._uniqueItems) {
+		var item = this._uniqueItems[i];
 		
 		if(!item._csl) {
 			// namespace everything in item._csl so there's no chance of overlap
@@ -1016,9 +1025,9 @@ CSL.prototype._preprocessItems = function() {
 	
 	// sort by sort order
 	if(this._bib.sortOrder) {
-		Scholar.debug("CSL: sorting this._items");
+		Scholar.debug("CSL: sorting items");
 		var me = this;
-		this._items.sort(function(a, b) {
+		this._uniqueItems.sort(function(a, b) {
 			return me._compareItem(a, b);
 		});
 	}
@@ -1027,8 +1036,8 @@ CSL.prototype._preprocessItems = function() {
 	var usedCitations = new Array();
 	var lastAuthor;
 	
-	for(var i in this._items) {
-		var item = this._items[i];
+	for(var i in this._uniqueItems) {
+		var item = this._uniqueItems[i];
 		
 		var author = this._getFieldValue("author",
 										   this._getFieldDefaults("author"),
