@@ -54,6 +54,8 @@
 <!ENTITY bibliography.copyToClipboard.label	"Copy to Clipboard">
 <!ENTITY bibliography.print.label		"Print">
 
+<!ENTITY integration.docPrefs.title		"Document Preferences">
+
 <!ENTITY progress.title					"Progress">
 
 <!ENTITY exportOptions.title            "Export...">

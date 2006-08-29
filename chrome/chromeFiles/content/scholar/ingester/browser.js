@@ -359,7 +359,8 @@ Scholar_Ingester_Interface.Progress = new function() {
 		if(_windowLoading || _windowLoaded) {	// already loading or loaded
 			return false;
 		}
-		_progressWindow = window.openDialog("chrome://scholar/chrome/ingester/progress.xul", "", "chrome,dialog=no,titlebar=no,popup=yes");
+		_progressWindow = window.openDialog("chrome://scholar/chrome/ingester/progress.xul",
+		                                    "", "chrome,dialog=no,titlebar=no,popup=yes");
 		_progressWindow.addEventListener("load", _onWindowLoaded, false);
 		_windowLoading = true;
 		

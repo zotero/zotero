@@ -293,19 +293,24 @@ Scholar.Integration.DataListener.prototype._requestFinished = function(response)
 }
 
 Scholar.Integration.SOAP = new function() {
-	this.getCitation = getCitation;
-	this.getBibliography = getBibliography;
-	
-	function getCitation(vars) {
-		// get items
-		
-		var myWindow = Components.classes["@mozilla.org/appshell/appShellService;1"]
+	var window = Components.classes["@mozilla.org/appshell/appShellService;1"]
 				   .getService(Components.interfaces.nsIAppShellService)
 				   .hiddenDOMWindow;
-		
+	
+	this.getCitation = getCitation;
+	this.getBibliography = getBibliography;
+	this.setDocPrefs = setDocPrefs;
+	
+	/*
+	 * generates a new citation for a given item
+	 * ACCEPTS: style[, itemString, newItemIndex]
+	 * RETURNS: (newItem, citation)
+	 */
+	function getCitation(vars) {
+		// get items		
 		var io = {dataIn: null, dataOut: null};
-		myWindow.openDialog('chrome://scholar/content/selectItemsDialog.xul','',
-		                    'chrome,popup,modal,centerscreen,titlebar=no',io);
+		window.openDialog('chrome://scholar/content/selectItemsDialog.xul','',
+		                    'chrome,popup,modal,centerscreen',io);
 		
 		if(io.dataOut) {	// cancel was not pressed
 			var selectedItemIDs = io.dataOut;
@@ -341,12 +346,34 @@ Scholar.Integration.SOAP = new function() {
 		}
 	}
 	
+	/*
+	 * gets a bibliography
+	 * ACCEPTS: style, itemString
+	 * RETURNS: bibliography
+	 */
 	function getBibliography(vars) {
 		// get items
 		var itemIDs = vars[1].split("_");
 		var items = Scholar.Items.get(itemIDs);
 		
 		return Scholar.Cite.getBibliography(vars[0], items, "Integration");
+	}
+	
+	/*
+	 * sets document preferences
+	 * ACCEPTS: [currentStyle]
+	 * RETURNS: (style, styleClass)
+	 */
+	function setDocPrefs(vars) {
+		var io = new Object();
+		if(vars && vars[0]) {
+			io.style = vars[0];
+		}
+		
+		window.openDialog('chrome://scholar/content/integrationDocPrefs.xul','',
+		                    'chrome,popup,modal,centerscreen',io);
+		var styleClass = Scholar.Cite.getStyleClass(io.style);
+		return [io.style, styleClass];
 	}
 }
 

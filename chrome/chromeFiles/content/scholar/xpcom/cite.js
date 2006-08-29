@@ -9,10 +9,14 @@ Scholar.Cite = new function() {
 	var _lastCSL = null;
 	var _lastStyle = null;
 	
+	this.getStyles = getStyles;
+	this.getStyleClass = getStyleClass;
 	this.getBibliography = getBibliography;
 	this.getCitation = getCitation;
-	this.getStyles = getStyles;
 	
+	/*
+	 * returns an associative array of cslID => styleName pairs
+	 */
 	function getStyles() {
 		// get styles
 		var sql = "SELECT cslID, title FROM csl ORDER BY title";
@@ -25,6 +29,14 @@ Scholar.Cite = new function() {
 		}
 		
 		return stylesObject;
+	}
+	
+	/*
+	 * returns the class of a given style
+	 */
+	function getStyleClass(cslID) {
+		var csl = _getCSL(cslID);
+		return csl.class;
 	}
 	
 	/*
@@ -86,13 +98,13 @@ CSL = function(csl) {
 	this._terms = this._parseLocales(this._csl.terms);
 	
 	// load class defaults
-	this._class =  this._csl["@class"].toString();
-	Scholar.debug("CSL: style class is "+this._class);
+	this.class =  this._csl["@class"].toString();
+	Scholar.debug("CSL: style class is "+this.class);
 	
 	this._defaults = new Object();
 	// load class defaults
-	if(CSL._classDefaults[this._class]) {
-		var classDefaults = CSL._classDefaults[this._class];
+	if(CSL._classDefaults[this.class]) {
+		var classDefaults = CSL._classDefaults[this.class];
 		for(var i in classDefaults) {
 			this._defaults[i] = classDefaults[i];
 		}
@@ -187,7 +199,7 @@ CSL.prototype.createBibliography = function(format) {
 	var output = "";
 	
 	if(format == "HTML") {
-		if(this._class == "note") {
+		if(this.class == "note") {
 			output += '<ol>\r\n';
 		} else if(this._bib.hangingIndent) {
 			output += '<div style="margin-left:0.5in;text-indent:-0.5in;">\r\n';
@@ -213,13 +225,13 @@ CSL.prototype.createBibliography = function(format) {
 				string += '<span class="Z3988" title="'+coins.replace("&", "&amp;")+'"></span>';
 			}
 			
-			if(this._class == "note") {
+			if(this.class == "note") {
 				output += "<li>"+string+"</li>\r\n";
 			} else {
 				output += "<p>"+string+"</p>\r\n";
 			}
 		} else if(format == "RTF") {
-			if(this._class == "note") {
+			if(this.class == "note") {
 				index++;
 				output += index+". ";
 			}
@@ -230,7 +242,7 @@ CSL.prototype.createBibliography = function(format) {
 	}
 	
 	if(format == "HTML") {
-		if(this._class == "note") {
+		if(this.class == "note") {
 			output += '</ol>';
 		} else if(this._bib.hangingIndent) {
 			output += '</div>';
@@ -1044,7 +1056,7 @@ CSL.prototype._preprocessItems = function() {
 										   item, "disambiguate", this._bib);
 		
 		// handle (2006a) disambiguation for author-date styles
-		if(this._class == "author-date") {
+		if(this.class == "author-date") {
 			var citation = author+" "+this._getFieldValue("date",
 												this._getFieldDefaults("date"),
 												item, "disambiguate", this._bib);

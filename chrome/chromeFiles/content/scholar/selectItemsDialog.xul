@@ -28,7 +28,6 @@
 	title="Select"
 	orient="vertical"
 	width="600" height="450"
-	persist="width height screenX screenY"
 	buttons="cancel,accept"
 	ondialogaccept="doAccept();"
 	onload="doLoad();"

@@ -20,28 +20,32 @@ var Scholar_File_Interface_Bibliography = new function() {
 		_io = window.arguments[0];
 		
 		var listbox = document.getElementById("style-popup");
+		var styleMenu = document.getElementById("style-menu");
 		var styles = Scholar.Cite.getStyles();
 		
-		var firstItem = true;
+		// add styles to list
 		for(i in styles) {
 			var itemNode = document.createElement("menuitem");
 			itemNode.setAttribute("value", i);
 			itemNode.setAttribute("label", styles[i]);
 			listbox.appendChild(itemNode);
+			
+			if(i == _io.style) {
+				styleMenu.selectedItem = itemNode;
+			}
 		}
 		
 		// select first item by default
-		document.getElementById("style-menu").selectedIndex = 0;
-		
-		if(navigator.userAgent.toLowerCase().indexOf("mac") != -1) {
-			// hack to eliminate clipboard option for mac users
-			document.getElementById("output-radio").removeChild(document.getElementById("copy-to-clipboard"));
+		if(styleMenu.selectedIndex == -1) {
+			styleMenu.selectedIndex = 0;
 		}
 	}
 
 	function acceptSelection() {
 		// collect code
 		_io.style = document.getElementById("style-menu").selectedItem.value;
-		_io.output = document.getElementById("output-radio").selectedItem.id;
+		if(document.getElementById("output-radio")) {
+			_io.output = document.getElementById("output-radio").selectedItem.id;
+		}
 	}
 }
