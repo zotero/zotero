@@ -24,22 +24,13 @@ Scholar.Integration = new function() {
 	}
 	
 	/*
-	 * registers a SOAP method
-	 */
-	function registerSOAP(name, callback) {
-		_registeredSOAP[name] = callback;
-	}
-	
-	/*
 	 * handles an HTTP request
 	 */
 	function handleHeader(header) {
 		// get first line of request (all we care about for now)
-		var spaceIndex = header.indexOf(" ");
-		var method = header.substr(0, spaceIndex);
-		var uri = header.substr(spaceIndex+1);
+		var method = header.substr(0, header.indexOf(" "));
 		
-		if(!method || !uri) {
+		if(!method) {
 			return _generateResponse("400 Bad Request");
 		}
 		
@@ -60,7 +51,7 @@ Scholar.Integration = new function() {
 	 * handles a SOAP envelope
 	 */
 	function handleEnvelope(envelope) {
-		Scholar.debug("Got SOAP envelope");
+		Scholar.debug("Integration: got SOAP envelope");
 		Scholar.debug(envelope);
 		envelope = envelope.replace(_XMLRe, "");
 		
@@ -68,11 +59,13 @@ Scholar.Integration = new function() {
 		var xml = new XML(envelope);
 		var request = xml.env::Body.children()[0];
 		if(request.namespace() != this.ns) {
-			Scholar.debug("SOAP method not supported: invalid namespace");
+			Scholar.debug("Integration: SOAP method not supported: invalid namespace");
 		} else {
 			var name = request.localName();
 			if(Scholar.Integration.SOAP[name]) {
 				if(request.input.length()) {
+					// split apart passed parameters (same colon-escaped format
+					// as we pass)
 					var input = request.input.toString();
 					var vars = new Array();
 					vars[0] = "";
@@ -80,7 +73,6 @@ Scholar.Integration = new function() {
 					
 					colonIndex = input.indexOf(":");
 					while(colonIndex != -1) {
-						Scholar.debug(input);
 						if(input[colonIndex+1] == ":") {	// escaped
 							vars[i] += input.substr(0, colonIndex+1);
 							input = input.substr(colonIndex+2);
@@ -128,7 +120,7 @@ Scholar.Integration = new function() {
 				return _generateResponse("200 OK", 'text/xml; charset="utf-8"',
 				                         responseEnvelope.toXMLString());
 			} else {
-				Scholar.debug("SOAP method not supported");
+				Scholar.debug("Integration: SOAP method not supported");
 			}
 		}
 	}
@@ -304,7 +296,9 @@ Scholar.Integration.SOAP = new function() {
 	this.getCitation = getCitation;
 	this.getBibliography = getBibliography;
 	
-	function getCitation(parameters) {
+	function getCitation(vars) {
+		// get items
+		
 		var myWindow = Components.classes["@mozilla.org/appshell/appShellService;1"]
 				   .getService(Components.interfaces.nsIAppShellService)
 				   .hiddenDOMWindow;
@@ -313,28 +307,47 @@ Scholar.Integration.SOAP = new function() {
 		myWindow.openDialog('chrome://scholar/content/selectItemsDialog.xul','',
 		                    'chrome,popup,modal,centerscreen,titlebar=no',io);
 		
-		if(io.dataOut && io.dataOut[0]) {
-			var item = Scholar.Items.get(io.dataOut[0]);
-			var creator = item.getCreator(0);
-			return [io.dataOut[0], "{{"+creator.lastName+"}}"]
+		if(io.dataOut) {	// cancel was not pressed
+			var selectedItemIDs = io.dataOut;
+			var selectedItems = Scholar.Items.get(selectedItemIDs);
+			
+			var style = vars[0];
+			if(vars[1]) {	// some items already exist in the document
+				var itemString = vars[1];		// underscore-delimited string
+				
+				var newItemIndex = parseInt(vars[2]);	// index at which the
+														// item belongs in
+														// itemString
+				
+				// splice in the new item ID
+				if(newItemIndex == -1) {	// at beginning
+					var items = selectedItems.concat(Scholar.Items.get(itemString.split("_")));
+				} else {					// at newItemIndex
+					var items = Scholar.Items.get(itemString.substr(0, newItemIndex).split("_")).
+					            concat(selectedItems);
+					
+					if(newItemIndex != itemString.length) {	// not at the end
+						items = items.concat(Scholar.Items.get(itemString.substr(newItemIndex+1).split("_")))
+					}
+				}
+			} else {		// this is the first item and the only item to worry
+							// about
+				var items = selectedItems;
+			}
+			
+			var citation = Scholar.Cite.getCitation(style, selectedItems, items, "Integration");
+			
+			return [selectedItemIDs.join("_"), citation];
 		}
 	}
 	
 	function getBibliography(vars) {
 		// get items
-		var itemIDs = vars[1].split(",");
+		var itemIDs = vars[1].split("_");
 		var items = Scholar.Items.get(itemIDs);
 		
 		return Scholar.Cite.getBibliography(vars[0], items, "Integration");
 	}
 }
-
-/*Scholar.Integration.registerURL("/", "text/plain", function(vars) {
-	return "Hi there! The HTTP server is working!";
-});
-Scholar.Integration.registerURL("/getBibliography", "text/html",
-        function(vars) { return Scholar.Integration.Cite.getBibliography(vars) });
-Scholar.Integration.registerURL("/getCitation", "text/html",
-        function(vars) { return Scholar.Integration.Cite.getCitation(vars) });*/
 
 Scholar.Integration.init();
