@@ -26,6 +26,7 @@
 #scholar-pane splitter
 {
 	background: #f5f5f5;
+	border:0;
 }
 
 #items-tree treechildren::-moz-tree-image
