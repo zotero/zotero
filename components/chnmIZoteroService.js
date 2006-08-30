@@ -1,7 +1,7 @@
-const SCHOLAR_CONTRACTID = '@chnm.gmu.edu/Scholar;1';
-const SCHOLAR_CLASSNAME = 'Scholar for Firefox';
+const SCHOLAR_CONTRACTID = '@chnm.gmu.edu/Zotero;1';
+const SCHOLAR_CLASSNAME = 'Zotero';
 const SCHOLAR_CID = Components.ID('{e4c61080-ec2d-11da-8ad9-0800200c9a66}');
-const SCHOLAR_IID = Components.interfaces.chnmIScholarService;
+const SCHOLAR_IID = Components.interfaces.chnmIZoteroService;
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;

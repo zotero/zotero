@@ -4,17 +4,17 @@
 
   <Description about="urn:mozilla:install-manifest">
   
-    <em:id>scholar@chnm.gmu.edu</em:id>
-    <em:name>Scholar</em:name>
-    <em:version>1.0a1.SVN</em:version>
-    <em:description>A bibliographic management and note-taking tool</em:description>
+    <em:id>zotero@chnm.gmu.edu</em:id>
+    <em:name>Zotero</em:name>
+    <em:version>1.0b1.SVN</em:version>
+    <em:description>The Next-Generation Research Tool</em:description>
     <em:creator>Center for History and New Media<br/>George Mason University</em:creator>
 	<em:contributor>Dan Cohen</em:contributor>
 	<em:contributor>Josh Greenberg</em:contributor>
     <em:developer>Simon Kornblith</em:developer>
     <em:developer>David Norton</em:developer>
     <em:developer>Dan Stillman</em:developer>
-    <em:homepageURL>http://chnm.gmu.edu/tools/firefoxscholar/</em:homepageURL>
+    <em:homepageURL>http://chnm.gmu.edu/tools/zotero/</em:homepageURL>
     <em:optionsURL>chrome://scholar/content/preferences.xul</em:optionsURL>
     <em:aboutURL>chrome://scholar/content/about.xul</em:aboutURL>
     <em:iconURL>chrome://scholar/skin/mainicon.png</em:iconURL>

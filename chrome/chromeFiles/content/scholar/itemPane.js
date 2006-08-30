@@ -4,7 +4,7 @@
 	http://chnm.gmu.edu/
 */
 
-ScholarItemPane = new function()
+var ScholarItemPane = new function()
 {
 	var _dynamicFields;
 	var _creatorTypeMenu;

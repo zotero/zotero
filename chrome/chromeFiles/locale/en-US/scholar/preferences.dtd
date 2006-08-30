@@ -1,11 +1,11 @@
-<!ENTITY scholar.name					"Scholar">
-<!ENTITY scholar.preferences.title		"Scholar Preferences">
+<!ENTITY scholar.name					"Zotero">
+<!ENTITY scholar.preferences.title		"Zotero Preferences">
 <!ENTITY scholar.preferences.autoUpdate.label		"Automatically check for updated scrapers">
-<!ENTITY scholar.preferences.position.label			"Display Scholar">
+<!ENTITY scholar.preferences.position.label			"Display Zotero">
 <!ENTITY scholar.preferences.position.above			"above">
 <!ENTITY scholar.preferences.position.below			"below">
 <!ENTITY scholar.preferences.position.browser		"browser content">
-<!ENTITY scholar.preferences.parseEndnote.label		"Use Scholar for downloaded EndNote files">
+<!ENTITY scholar.preferences.parseEndnote.label		"Use Zotero for downloaded EndNote files">
 <!ENTITY scholar.preferences.openurl.caption		"OpenURL">
 <!ENTITY scholar.preferences.openurl.server			"Resolver:">
 <!ENTITY scholar.preferences.openurl.version		"Version:">

@@ -29,13 +29,19 @@
 		]]>
 	</script>
 	
+	<script src="include.js"/>
+	
 	<vbox id="aboutcontent">
 		<label id="name" value="&scholar.name;"/>
-		<label id="version" value="&scholar.version;"/>
-		
+		<label id="version" value="&scholar.version; "/>
+		<script>
+			document.getElementById('version').value += Scholar.version;
+		</script>
 		<label class="subhead" value="&scholar.createdby;"/>
 		<vbox class="subcontent">
 			<label class="text-link" href="http://chnm.gmu.edu" value="Center for History and New Media"/>
+			<label value="George Mason University"/>
+			<label value="Fairfax, VA"/>
 		</vbox>
 		<label class="subhead" value="&scholar.directors;"/>
 		<vbox class="subcontent">

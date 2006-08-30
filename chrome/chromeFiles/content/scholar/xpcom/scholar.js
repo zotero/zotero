@@ -1,6 +1,6 @@
 const SCHOLAR_CONFIG = {
-	GUID: 'scholar@chnm.gmu.edu',
-	DB_FILE: 'scholar.sqlite',
+	GUID: 'zotero@chnm.gmu.edu',
+	DB_FILE: 'zotero.sqlite',
 	DB_REBUILD: false, // erase DB and recreate from schema
 	DEBUG_LOGGING: true,
 	DEBUG_TO_CONSOLE: true, // dump debug messages to console rather than (much slower) Debug Logger
@@ -117,7 +117,7 @@ var Scholar = new function(){
 	function getScholarDirectory(){
 		var file = Scholar.getProfileDirectory();
 		
-		file.append('scholar');
+		file.append('zotero');
 		// If it doesn't exist, create
 		if (!file.exists() || !file.isDirectory()){
 			file.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0755);
@@ -216,7 +216,7 @@ var Scholar = new function(){
 				var logManager =
 				Components.classes["@mozmonkey.com/debuglogger/manager;1"]
 				.getService(Components.interfaces.nsIDebugLoggerManager);
-				var logger = logManager.registerLogger("Scholar for Firefox");
+				var logger = logManager.registerLogger("Zotero");
 			}
 			catch (e){}
 		}
@@ -225,7 +225,7 @@ var Scholar = new function(){
 			logger.log(level, message);
 		}
 		else {
-			dump('scholar(' + level + '): ' + message + "\n\n");
+			dump('zotero(' + level + '): ' + message + "\n\n");
 		}
 		return true;
 	}
