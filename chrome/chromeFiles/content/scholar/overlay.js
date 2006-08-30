@@ -265,17 +265,27 @@ var ScholarPane = new function()
 			{
 				var start = new Object();
 				var end = new Object();
-				for (var i=0, len=itemsView.selection.getRangeCount(); i<len && !hasChildren; i++)
+				for (var i=0, len=itemsView.selection.getRangeCount(); i<len; i++)
 				{
 					itemsView.selection.getRangeAt(i,start,end);
-					for (var j=start.value; j<=end.value && !hasChildren; j++)
-						if(itemsView._getItemAtRow(j).numChildren())
+					for (var j=start.value; j<=end.value; j++)
+						if (itemsView._getItemAtRow(j).numChildren())
+						{
 							hasChildren = true;
+							break;
+						}
 				}
 			}
 
-			if(promptService.confirmCheck(window, Scholar.getString('pane.items.delete.title'), Scholar.getString('pane.items.delete'), ( hasChildren ? Scholar.getString('pane.items.delete.attached') : ''), eraseChildren))
+			if (promptService.confirmCheck(
+				window,
+				Scholar.getString('pane.items.delete.title'),
+				Scholar.getString('pane.items.delete' + (itemsView.selection.count>1 ? '.multiple' : '')),
+				hasChildren ? Scholar.getString('pane.items.delete.attached') : '',
+				eraseChildren))
+			{
 				itemsView.deleteSelection(eraseChildren.value);
+			}
 		}
 	}
 	
