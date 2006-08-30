@@ -16,7 +16,7 @@
 <!ENTITY items.dateAdded_column 		"Date Added">
 <!ENTITY items.dateModified_column	 	"Date Modified">
 
-<!ENTITY collections.name_column		"Name">
+<!ENTITY collections.name_column		"Collections">
 
 <!ENTITY toolbar.newItem.label    		"New Item">
 <!ENTITY toolbar.removeItem.label 		  "Remove Item...">
