@@ -21,7 +21,6 @@
     </RDF:Seq>
   </updates>
 </RDF:Description>
-</RDF:RDF>
 
 <!-- This is just to accommodate users of the alpha before the guid changed -->
 <RDF:Description about="urn:mozilla:extension:scholar@chnm.gmu.edu">
