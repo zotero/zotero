@@ -1003,160 +1003,167 @@ Scholar.Translate.prototype._itemDone = function(item) {
 		Scholar.Notifier.disable();
 	}
 	
-	// Get typeID, defaulting to "website"
-	var type = (item.itemType ? item.itemType : "website");
-	
-	if(type == "note") {	// handle notes differently
-		var myID = Scholar.Notes.add(item.note);
-		// re-retrieve the item
-		var newItem = Scholar.Items.get(myID);
-	} else if(type == "attachment") {
-		if(this.type == "import") {
-			var newItem = this._itemImportAttachment(item, null);
-			var myID = newItem.getID();
+	try {	// make sure notifier gets turned back on when done
+		// Get typeID, defaulting to "website"
+		var type = (item.itemType ? item.itemType : "website");
+		
+		if(type == "note") {	// handle notes differently
+			var myID = Scholar.Notes.add(item.note);
+			// re-retrieve the item
+			var newItem = Scholar.Items.get(myID);
+		} else if(type == "attachment") {
+			if(this.type == "import") {
+				var newItem = this._itemImportAttachment(item, null);
+				var myID = newItem.getID();
+			} else {
+				Scholar.debug("discarding standalone attachment");
+				return false;
+			}
 		} else {
-			Scholar.debug("discarding standalone attachment");
-			return false;
-		}
-	} else {
-		if(!item.title) {
-			throw("item has no title");
-		}
-		
-		// create new item
-		var typeID = Scholar.ItemTypes.getID(type);
-		var newItem = Scholar.Items.getNewItemByType(typeID);
-		
-		// makes looping through easier
-		item.itemType = item.complete = undefined;
-		
-		var fieldID, field;
-		for(var i in item) {
-			// loop through item fields
-			data = item[i];
+			if(!item.title) {
+				throw("item has no title");
+			}
 			
-			if(data) {						// if field has content
-				if(i == "creators") {		// creators are a special case
-					for(var j in data) {
-						var creatorType = 1;
-						// try to assign correct creator type
-						if(data[j].creatorType) {
-							try {
-								var creatorType = Scholar.CreatorTypes.getID(data[j].creatorType);
-							} catch(e) {
-								Scholar.debug("invalid creator type "+data[j].creatorType+" for creator index "+j);
+			// create new item
+			var typeID = Scholar.ItemTypes.getID(type);
+			var newItem = Scholar.Items.getNewItemByType(typeID);
+			
+			// makes looping through easier
+			item.itemType = item.complete = undefined;
+			
+			var fieldID, field;
+			for(var i in item) {
+				// loop through item fields
+				data = item[i];
+				
+				if(data) {						// if field has content
+					if(i == "creators") {		// creators are a special case
+						for(var j in data) {
+							var creatorType = 1;
+							// try to assign correct creator type
+							if(data[j].creatorType) {
+								try {
+									var creatorType = Scholar.CreatorTypes.getID(data[j].creatorType);
+								} catch(e) {
+									Scholar.debug("invalid creator type "+data[j].creatorType+" for creator index "+j);
+								}
 							}
+							
+							newItem.setCreator(j, data[j].firstName, data[j].lastName, creatorType);
+						}
+					} else if(i == "title") {	// skip checks for title
+						newItem.setField(i, data);
+					} else if(i == "seeAlso") {
+						newItem.translateSeeAlso = data;
+					} else if(i != "note" && i != "notes" && i != "itemID" &&
+							  i != "attachments" && i != "tags" &&
+							  (fieldID = Scholar.ItemFields.getID(i))) {
+												// if field is in db
+						if(Scholar.ItemFields.isValidForType(fieldID, typeID)) {
+												// if field is valid for this type
+							// add field
+							newItem.setField(i, data);
+						} else {
+							Scholar.debug("discarded field "+i+" for item: field not valid for type "+type);
+						}
+					} else {
+						Scholar.debug("discarded field "+i+" for item: field does not exist");
+					}
+				}
+			}
+			
+			// save item
+			var myID = newItem.save();
+			if(myID == true) {
+				myID = newItem.getID();
+			}
+			
+			// handle notes
+			if(item.notes) {
+				for each(var note in item.notes) {
+					var noteID = Scholar.Notes.add(note.note, myID);
+					
+					// handle see also
+					var myNote = Scholar.Items.get(noteID);
+					this._itemTagsAndSeeAlso(note, myNote);
+				}
+			}
+			
+			// handle attachments
+			if(item.attachments) {
+				for each(var attachment in item.attachments) {
+					if(this.type == "web") {
+						if(!attachment.url && !attachment.document) {
+							Scholar.debug("not adding attachment: no URL specified");
 						}
 						
-						newItem.setCreator(j, data[j].firstName, data[j].lastName, creatorType);
+						if(attachment.downloadable && this._downloadAssociatedFiles) {
+							if(attachment.document) {
+								attachmentID = Scholar.Attachments.importFromDocument(attachment.document, myID);
+								
+								// change title, if a different one was specified
+								if(attachment.title && (!attachment.document.title
+								   || attachment.title != attachment.document.title)) {
+									var attachmentItem = Scholar.Items.get(attachmentID);
+									attachmentItem.setField("title", attachment.title);
+								}
+							} else {
+								Scholar.Attachments.importFromURL(attachment.url, myID,
+										(attachment.mimeType ? attachment.mimeType : attachment.document.contentType),
+										(attachment.title ? attachment.title : attachment.document.title));
+							}
+						} else {
+							if(attachment.document) {
+								attachmentID = Scholar.Attachments.linkFromURL(attachment.document.location.href, myID,
+										(attachment.mimeType ? attachment.mimeType : attachment.document.contentType),
+										(attachment.title ? attachment.title : attachment.document.title));
+							} else {
+								if(!attachment.mimeType || attachment.title) {
+									Scholar.debug("notice: either mimeType or title is missing; attaching file will be slower");
+								}
+								
+								attachmentID = Scholar.Attachments.linkFromURL(attachment.url, myID,
+										(attachment.mimeType ? attachment.mimeType : undefined),
+										(attachment.title ? attachment.title : undefined));
+							}
+						}
+					} else if(this.type == "import") {
+						var attachmentItem = this._itemImportAttachment(attachment, myID);
+						if(attachmentItem) {
+							this._itemTagsAndSeeAlso(attachment, attachmentItem);
+						}
 					}
-				} else if(i == "title") {	// skip checks for title
-					newItem.setField(i, data);
-				} else if(i == "seeAlso") {
-					newItem.translateSeeAlso = data;
-				} else if(i != "note" && i != "notes" && i != "itemID" &&
-				          i != "attachments" && i != "tags" &&
-				          (fieldID = Scholar.ItemFields.getID(i))) {
-											// if field is in db
-					if(Scholar.ItemFields.isValidForType(fieldID, typeID)) {
-											// if field is valid for this type
-						// add field
-						newItem.setField(i, data);
-					} else {
-						Scholar.debug("discarded field "+i+" for item: field not valid for type "+type);
-					}
-				} else {
-					Scholar.debug("discarded field "+i+" for item: field does not exist");
 				}
 			}
 		}
 		
-		// save item
-		var myID = newItem.save();
-		if(myID == true) {
-			myID = newItem.getID();
+		if(item.itemID) {
+			this._IDMap[item.itemID] = myID;
 		}
+		this.newItems.push(myID);
 		
-		// handle notes
-		if(item.notes) {
-			for each(var note in item.notes) {
-				var noteID = Scholar.Notes.add(note.note, myID);
-				
-				// handle see also
-				var myNote = Scholar.Items.get(noteID);
-				this._itemTagsAndSeeAlso(note, myNote);
-			}
-		}
-		
-		// handle attachments
-		if(item.attachments) {
-			for each(var attachment in item.attachments) {
-				if(this.type == "web") {
-					if(!attachment.url && !attachment.document) {
-						Scholar.debug("not adding attachment: no URL specified");
-					}
-					
-					if(attachment.downloadable && this._downloadAssociatedFiles) {
-						if(attachment.document) {
-							attachmentID = Scholar.Attachments.importFromDocument(attachment.document, myID);
-							
-							// change title, if a different one was specified
-							if(attachment.title && (!attachment.document.title
-							   || attachment.title != attachment.document.title)) {
-								var attachmentItem = Scholar.Items.get(attachmentID);
-								attachmentItem.setField("title", attachment.title);
-							}
-						} else {
-							Scholar.Attachments.importFromURL(attachment.url, myID,
-									(attachment.mimeType ? attachment.mimeType : attachment.document.contentType),
-									(attachment.title ? attachment.title : attachment.document.title));
-						}
-					} else {
-						if(attachment.document) {
-							attachmentID = Scholar.Attachments.linkFromURL(attachment.document.location.href, myID,
-									(attachment.mimeType ? attachment.mimeType : attachment.document.contentType),
-									(attachment.title ? attachment.title : attachment.document.title));
-						} else {
-							if(!attachment.mimeType || attachment.title) {
-								Scholar.debug("notice: either mimeType or title is missing; attaching file will be slower");
-							}
-							
-							attachmentID = Scholar.Attachments.linkFromURL(attachment.url, myID,
-									(attachment.mimeType ? attachment.mimeType : undefined),
-									(attachment.title ? attachment.title : undefined));
-						}
-					}
-				} else if(this.type == "import") {
-					var attachmentItem = this._itemImportAttachment(attachment, myID);
-					if(attachmentItem) {
-						this._itemTagsAndSeeAlso(attachment, attachmentItem);
-					}
+		// handle see also
+		if(item.seeAlso) {
+			for each(var seeAlso in item.seeAlso) {
+				if(this._IDMap[seeAlso]) {
+					newItem.addSeeAlso(this._IDMap[seeAlso]);
 				}
 			}
 		}
-	}
-	
-	if(item.itemID) {
-		this._IDMap[item.itemID] = myID;
-	}
-	this.newItems.push(myID);
-	
-	// handle see also
-	if(item.seeAlso) {
-		for each(var seeAlso in item.seeAlso) {
-			if(this._IDMap[seeAlso]) {
-				newItem.addSeeAlso(this._IDMap[seeAlso]);
+		
+		if(item.tags) {
+			for each(var tag in item.tags) {
+				newItem.addTag(tag);
 			}
 		}
-	}
-	
-	if(item.tags) {
-		for each(var tag in item.tags) {
-			newItem.addTag(tag);
+		
+		delete item;
+	} catch(e) {
+		if(notifierStatus) {
+			Scholar.Notifier.enable();
 		}
+		throw(e);
 	}
-	
-	delete item;
 	
 	// only re-enable if notifier was enabled at the beginning of scraping
 	if(notifierStatus) {
