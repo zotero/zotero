@@ -385,6 +385,15 @@ var ScholarPane = new function()
 		{
 			var hide = [4,6,9,11,12];
 			var show = [3,5,7,8,10];
+			if (itemsView.rowCount>0)
+			{
+				var enable = [8,10];
+			}
+			else
+			{
+				var disable = [8,10];
+			}
+		
 		}
 		// Saved Search
 		else if (collectionsView.selection.count == 1 &&
@@ -392,12 +401,30 @@ var ScholarPane = new function()
 		{
 			var hide = [3,5,8,10,12];
 			var show = [4,6,7,9,11];
+			if (itemsView.rowCount>0)
+			{
+				var enable = [9,11];
+			}
+			else
+			{
+				var disable = [9,11];
+			}
 		}
 		// Library
 		else
 		{
 			var hide = [3,4,5,6,7,8,9,10,11];
 			var show = [12];
+		}
+		
+		for (var i in disable)
+		{
+			menu.childNodes[disable[i]].setAttribute('disabled', true);
+		}
+		
+		for (var i in enable)
+		{
+			menu.childNodes[enable[i]].setAttribute('disabled', false);
 		}
 		
 		for (var i in hide)
