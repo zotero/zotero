@@ -69,6 +69,11 @@ Scholar.Search.prototype.getID = function(){
 }
 
 
+Scholar.Search.prototype.getName = function(){
+	return this._savedSearchName;
+}
+
+
 /*
  * Save the search to the DB and return a savedSearchID
  *
