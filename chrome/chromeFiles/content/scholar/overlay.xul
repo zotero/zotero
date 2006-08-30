@@ -212,13 +212,16 @@
 	</vbox>
 	
 	<statusbar id="status-bar">
-		<statusbarpanel id="scholar-load-status" label="Scholar is NOT loaded" onclick="ScholarPane.toggleDisplay();"/>
+		<statusbarpanel id="scholar-status-bar-icon"
+			src="chrome://scholar/skin/zotero_logo_14px.png"
+			class="statusbarpanel-iconic" onclick="ScholarPane.toggleDisplay();"
+			hidden="true"/>
 	</statusbar>
 	
 	<script>
 	window.addEventListener('load', function(e){
 		if (Scholar){
-			document.getElementById('scholar-load-status').setAttribute('label', 'Scholar is loaded');
+			document.getElementById('scholar-status-bar-icon').setAttribute('hidden', 'false');
 		}
 	}, false);
 	</script>
