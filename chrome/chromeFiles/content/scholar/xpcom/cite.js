@@ -89,13 +89,13 @@ Scholar.Cite = new function() {
  * want to use the Scholar data model, but does want to use CSL in JavaScript
  */
 CSL = function(csl) {
-	this._csl = new XML(this._cleanXML(csl));
+	this._csl = new XML(CSL._cleanXML(csl));
 	
 	// initialize CSL
-	this._init();
+	CSL.init();
 	
 	// load localizations
-	this._terms = this._parseLocales(this._csl.terms);
+	this._terms = CSL._parseLocales(this._csl.terms);
 	
 	// load class defaults
 	this.class =  this._csl["@class"].toString();
@@ -272,12 +272,6 @@ CSL.prototype.createBibliography = function(format) {
 	return output;
 }
 
-
-CSL._months = ["January", "February", "March", "April", "May", "June", "July",
-               "August", "September", "October", "November", "December"];
-CSL._monthsShort = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
-                    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
 // for elements that inherit defaults from each other
 CSL._inherit = {
 	author:"contributor",
@@ -307,11 +301,10 @@ CSL._classDefaults["author-date"] = {
 
 CSL.ns = "http://purl.org/net/xbiblio/csl";
 
-CSL.prototype._cleanXML = function(xml) {
-	return xml.replace(/<\?[^>]*\?>/g, "");
-}
-
-CSL.prototype._init = function() {
+/*
+ * initializes CSL interpreter
+ */
+CSL.init = function() {
 	if(!CSL._xmlLang) {
 		// get XML lang
 		var localeService = Components.classes['@mozilla.org/intl/nslocaleservice;1'].
@@ -326,12 +319,30 @@ CSL.prototype._init = function() {
 		req.send(null);
 		
 		// get default terms
-		var locales = new XML(this._cleanXML(req.responseText));
-		CSL._defaultTerms = this._parseLocales(locales);
+		var locales = new XML(CSL._cleanXML(req.responseText));
+		CSL._defaultTerms = CSL._parseLocales(locales);
 	}
 }
 
-CSL.prototype._parseLocales = function(termXML) {
+/*
+ * returns an array of short or long month strings
+ */
+CSL.getMonthStrings = function(form) {
+	CSL.init();
+	return CSL._defaultTerms[form]["_months"];
+}
+
+/*
+ * removes parse instructions from XML
+ */
+CSL._cleanXML = function(xml) {
+	return xml.replace(/<\?[^>]*\?>/g, "");
+}
+
+/*
+ * parses locale strings into CSL._defaultTerms
+ */
+CSL._parseLocales = function(termXML) {
 	// return defaults if there are no terms
 	if(!termXML.length()) {
 		return (CSL._defaultTerms ? CSL._defaultTerms : {});
@@ -403,7 +414,17 @@ CSL.prototype._parseLocales = function(termXML) {
 				}
 			}
 		} else {
-			termArray[form][name] = term.text().toString();
+			if(name.substr(0, 6) == "month-") {
+				// place months into separate array
+				if(!termArray[form]["_months"]) {
+					termArray[form]["_months"] = new Array();
+				}				
+				var monthIndex = parseInt(name.substr(6),10)-1;
+				var term = term.text().toString();
+				termArray[form]["_months"][monthIndex] = term[0].toUpperCase()+term.substr(1).toLowerCase();
+			} else {
+				termArray[form][name] = term.text().toString();
+			}
 		}
 	}
 	
@@ -550,8 +571,8 @@ CSL.prototype._parseEtAl = function(etAl, bibCitElement) {
 			for each(var etAlElement in etAl) {
 				if(etAlElement.@position == "subsequent") {
 					bibCitElement.subsequentEtAl = new Object();
-					bibCitElement.subsequentEtAl.minCreators = parseInt(etAlElement['@min-authors']);
-					bibCitElement.subsequentEtAl.useFirst = parseInt(etAlElement['@use-first']);
+					bibCitElement.subsequentEtAl.minCreators = parseInt(etAlElement['@min-authors'], 10);
+					bibCitElement.subsequentEtAl.useFirst = parseInt(etAlElement['@use-first'], 10);
 				} else {
 					var parseElement = etAlElement;
 				}
@@ -560,8 +581,8 @@ CSL.prototype._parseEtAl = function(etAl, bibCitElement) {
 			var parseElement = etAl;
 		}
 		
-		bibCitElement.etAl.minCreators = parseInt(parseElement['@min-authors']);
-		bibCitElement.etAl.useFirst = parseInt(parseElement['@use-first']);
+		bibCitElement.etAl.minCreators = parseInt(parseElement['@min-authors'], 10);
+		bibCitElement.etAl.useFirst = parseInt(parseElement['@use-first'], 10);
 	}
 }
 
@@ -765,46 +786,6 @@ CSL.prototype._getTerm = function(term, plural, form) {
 }
 
 /*
- * process the date "string" into a useful object
- */
-CSL.prototype._processDate = function(string) {
-	var date = new Object();
-	
-	var dateRe = /^([0-9]{4})-([0-9]{2})-([0-9]{2})$/;
-	var m = dateRe.exec(string);
-	if(m) {		// sql date
-		var jsDate = new Date(m[1], m[2]-1, m[3], false, false, false);
-	} else {	// not an sql date
-		var yearRe = /^[0-9]+$/;
-		if(yearRe.test(string)) {	// is a year
-			date.year = string;
-			return date;
-		} else {					// who knows what this is
-			var jsDate = new Date(string)
-		}
-	}
-	
-	if(isNaN(jsDate.valueOf())) { // couldn't parse
-		// get year and say other parts are month
-		var yearRe = /^(.*)([0-9]{4})(.*)$/
-		var m = yearRe.exec(string);
-		
-		if(m) {
-			date.year = m[2];
-			date.month = m[1];
-			if(m[2] && m[3]) date.month += " ";
-			date.month += m[3];
-		}
-	} else {
-		date.year = jsDate.getFullYear();
-		date.month = jsDate.getMonth();
-		date.day = jsDate.getDay();
-	}
-	
-	return date;
-}
-
-/*
  * escapes a string for a given format
  */
 CSL.prototype._escapeString = function(string, format) {
@@ -972,15 +953,19 @@ CSL.prototype._formatDate = function(element, date, format) {
 					string += date.disambiguation;
 				}
 			}
-		} else if(child.name == "month" && date.month) {
-			if(format == "compare") {
-				string = this._lpad(date.month+1, "0", 2);
-			} else {
-				if(element.form == "short") {
-					string = CSL._monthsShort[date.month];
+		} else if(child.name == "month") {
+			if(date.month) {
+				if(format == "compare") {
+					string = this._lpad(date.month+1, "0", 2);
 				} else {
-					string = CSL._months[date.month];
+					if(element.form == "short") {
+						string = this._terms["short"]["_months"][date.month];
+					} else {
+						string = this._terms["long"]["_months"][date.month];
+					}
 				}
+			} else if(date.part && format != "compare") {
+				string = date.part;
 			}
 		} else if(child.name == "day" && date.day) {
 			if(format == "compare") {
@@ -1518,6 +1503,9 @@ CSL.prototype._getTypeFromItem = function(item) {
 	return [CSL._optionalTypeMappings[scholarType], CSL._fallbackTypeMappings[scholarType]];
 }
 
+/*
+ * separate creators object into authors, editors, and translators
+ */
 CSL.prototype._separateItemCreators = function(item) {
 	var authors = new Array();
 	var editors = new Array();
@@ -1542,6 +1530,13 @@ CSL.prototype._separateItemCreators = function(item) {
 	}
 	
 	return [authors, editors, translators];
+}
+
+/*
+ * return an object containing year, month, and day
+ */
+CSL.prototype._processDate = function(string) {
+	return Scholar.strToDate(string);
 }
 /*
  * END SCHOLAR-SPECIFIC CODE

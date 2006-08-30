@@ -1,4 +1,4 @@
--- 65
+-- 66
 
 -- Set the following timestamp to the most recent scraper update date
 REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-08-15 15:42:00'));
@@ -6076,7 +6076,7 @@ REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '200
   </bibliography>
 </style>');
 
-REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/chicago-note.csl', '2006-08-29 23:05:00', 'Chicago Manual of Style (Note)',
+REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/chicago-note.csl', '2006-08-30 17:40:00', 'Chicago Manual of Style (Note)',
 '<?xml version="1.0" encoding="UTF-8"?>
 <?oxygen RNGSchema="../schema/trunk/csl.rnc" type="compact"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="note" xml:lang="en">
@@ -6173,8 +6173,8 @@ REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/chicago-note.c
           <type name="article">
             <author suffix=", "/>
             <titles prefix="&#8220;" suffix=",&#8221; "/>
-            <titles relation="container" font-style="italic"/>
-            <date prefix=", ">
+            <titles relation="container" font-style="italic" suffix=", "/>
+            <date>
               <day suffix=" "/>
               <month suffix=" " text-transform="capitalize"/>
               <year/>

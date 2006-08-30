@@ -35,10 +35,12 @@ var Scholar = new function(){
 	this.randomString = randomString;
 	this.getRandomID = getRandomID;
 	this.moveToUnique = moveToUnique;
+	this.strToDate = strToDate;
 	
 	// Public properties
 	this.version;
 	this.platform;
+	this.isMac;
 	
 	/*
 	 * Initialize the extension
@@ -423,6 +425,91 @@ var Scholar = new function(){
 		// Move file to unique name
 		file.moveTo(newFile.parent, newName);
 		return file;
+	}
+	
+	/*
+	 * converts a string to an object containing:
+	 *    day: integer form of the day
+	 *    month: integer form of the month (indexed from 0, not 1)
+	 *    year: 4 digit year (or, year + BC/AD/etc.)
+	 *    part: anything that does not fall under any of the above categories
+	 *          (e.g., "Summer," etc.)
+	 */
+	function strToDate(string) {
+		var date = new Object();
+		
+		// skip empty things
+		if(!string) {
+			return date;
+		}
+		
+		// get short month strings from CSL interpreter
+		var months = CSL.getMonthStrings("short");
+		
+		string = string.replace(/^\s+/, "").replace(/\s+$/, "").replace(/\s+/, " ");
+		
+		var dateRe = /^([0-9]{4})[\-\/]([0-9]{2})[\-\/]([0-9]{2})$/;
+		var m = dateRe.exec(string);
+		if(m) {		// sql date
+			Scholar.debug("DATE: used form 1: SQL");
+			var jsDate = new Date(m[1], m[2]-1, m[3], false, false, false);
+		} else {	// not an sql date
+			var yearRe = /^((?:circa |around |about |c\.? ?)[0-9]{1,4}(?: ?B\.? ?C\.?(?: ?E\.?)?| ?C\.? ?E\.?| ?A\.? ?D\.?)|[0-9]{4})$/i;
+			if(yearRe.test(string)) {
+				// is just a year
+				Scholar.debug("DATE: used form 2: year-only");
+				date.year = string;
+				return date;
+			}
+			
+			// who knows what this is, but try JavaScript's date handling first
+			var jsDate = new Date(string)
+		}
+		
+		if(!isNaN(jsDate.valueOf())) {
+			Scholar.debug("DATE: retrieved from JavaScript");
+			// got a javascript date
+			date.year = jsDate.getFullYear();
+			date.month = jsDate.getMonth();
+			date.day = jsDate.getDate();
+			return date;
+		}
+		
+		// no javascript date. time for cruder things.
+		
+		// first, see if we have anything resembling a year
+		var yearRe = /^(.*)\b((?:circa |around |about |c\.? ?)[0-9]{1,4}(?: ?B\.? ?C\.?(?: ?E\.?)?| ?C\.? ?E\.?| ?A\.? ?D\.?)|[0-9]{4})\b(.*)$/i;
+		
+		var m = yearRe.exec(string);
+		if(m) {
+			date.year = m[2];
+			date.part = m[1]+m[3];
+			Scholar.debug("DATE: got year ("+date.year+", "+date.part+")");
+			
+			// then, see if have anything resembling a month anywhere
+			var monthRe = new RegExp("^(.*)\\b("+months.join("|")+")[^ ]* (.*)$", "i");
+			var m = monthRe.exec(date.part);
+			if(m) {
+				date.month = months.indexOf(m[2][0].toUpperCase()+m[2].substr(1).toLowerCase());
+				date.part = m[1]+m[3];
+				Scholar.debug("DATE: got month ("+date.month+", "+date.part+")");
+				
+				// then, see if there's a day 
+				var dayRe = /^(.*)\b([0-9]{1,2})\b(.*)$/i;
+				var m = dayRe.exec(date.part);
+				if(m) {
+					date.day = m[2];
+					date.part = m[1]+m[3];
+					Scholar.debug("DATE: got day ("+date.day+", "+date.part+")");
+				}
+			}
+		}
+		
+		if(date.part) {
+			date.part = date.part.replace(/^[^A-Za-z0-9]+/, "").replace(/[^A-Za-z0-9]+$/, "");
+		}
+		
+		return date;
 	}
 };
 

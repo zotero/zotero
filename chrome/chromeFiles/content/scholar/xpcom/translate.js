@@ -1035,6 +1035,11 @@ Scholar.Translate.prototype._itemDone = function(item) {
 			// makes looping through easier
 			item.itemType = item.complete = undefined;
 			
+			// automatically set access date if URL is set
+			if(item.url && !item.accessDate) {
+				item.accessDate = (new Date()).toLocaleString();
+			}
+			
 			var fieldID, field;
 			for(var i in item) {
 				// loop through item fields
