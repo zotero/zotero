@@ -281,7 +281,7 @@ var Scholar_ItemTypeManager = new function(){
 		var fields = Scholar.DB.query("SELECT * FROM fields ORDER BY fieldID");
 		var itemTypeFields = Scholar.DB.query("SELECT * FROM itemTypeFields ORDER BY itemTypeID, orderIndex");
 		
-		var prefix = "     ";
+		var prefix = "    ";
 		var sql = '';
 		
 		for (var i in types){
@@ -302,8 +302,8 @@ var Scholar_ItemTypeManager = new function(){
 		
 		for (var i in itemTypeFields){
 			sql += prefix + "INSERT INTO itemTypeFields VALUES ("
-				+ itemTypeFields[i]['itemTypeID'] + "," + itemTypeFields[i]['fieldID'] + ","
-				+ (itemTypeFields[i]['hide'] ? itemTypeFields[i]['hide'] : 'NULL') + ","
+				+ itemTypeFields[i]['itemTypeID'] + ", " + itemTypeFields[i]['fieldID'] + ", "
+				+ (itemTypeFields[i]['hide'] ? itemTypeFields[i]['hide'] : 'NULL') + ", "
 				+ itemTypeFields[i]['orderIndex'] + ");\n";
 		}
 		
