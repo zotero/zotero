@@ -27,6 +27,7 @@
 <!ENTITY toolbar.exportCollection.label   "Export Collection...">
 <!ENTITY toolbar.import.label			"Import...">
 <!ENTITY toolbar.export.label			"Export Library...">
+<!ENTITY toolbar.preferences.label		"Preferences...">
 <!ENTITY toolbar.createBibCollection.label   "Create Bibliography From Collection...">
 <!ENTITY toolbar.search.label   			"Search:">
 <!ENTITY toolbar.fullscreen.tooltip		"Toggle Fullscreen Mode">
