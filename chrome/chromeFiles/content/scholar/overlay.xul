@@ -221,7 +221,7 @@
   
 	<keyset id="mainKeyset">
 		<key id="key_openScholar"
-			 key="S" 
+			 key="Z" 
 			 oncommand="ScholarPane.toggleDisplay();"
 			 modifiers="shift accel" />
 	</keyset>
