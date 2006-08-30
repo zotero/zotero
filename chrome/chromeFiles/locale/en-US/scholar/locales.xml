@@ -71,7 +71,7 @@
     <term name="month-11">November</term>
     <term name="month-12">December</term>
     
-    <!-- SHORT MOTH FORMS -->
+    <!-- SHORT MONTH FORMS -->
     <term name="month-01" form="short">Jan</term>
     <term name="month-02" form="short">Feb</term>
     <term name="month-03" form="short">Mar</term>
