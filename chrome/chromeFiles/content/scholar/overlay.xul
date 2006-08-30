@@ -198,10 +198,18 @@
 	</vbox>
 	
 	<statusbar id="status-bar">
-		<statusbarpanel id="scholar-status-bar-icon"
+		<statusbarpanel id="scholar-status-bar-icon1"
 			src="chrome://scholar/skin/zotero_logo_20px.png"
 			class="statusbarpanel-iconic" onclick="ScholarPane.toggleDisplay();"
-			hidden="true"/>
+			hidden="false"/>
+		<statusbarpanel id="scholar-status-bar-icon2"
+			src="chrome://scholar/skin/zotero_logo_20px_2.png"
+			class="statusbarpanel-iconic" onclick="ScholarPane.toggleDisplay();"
+			hidden="false"/>
+		<statusbarpanel id="scholar-status-bar-icon3"
+			src="chrome://scholar/skin/zotero_logo_20px_3.png"
+			class="statusbarpanel-iconic scholar-status-bar-icon" onclick="ScholarPane.toggleDisplay();"
+			hidden="false"/>
 	</statusbar>
 	
 	<script>
