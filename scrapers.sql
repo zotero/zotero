@@ -1,4 +1,4 @@
--- 63
+-- 64
 
 -- Set the following timestamp to the most recent scraper update date
 REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-08-15 15:42:00'));
@@ -6188,4 +6188,130 @@ REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/chicago-note.c
       </item>
     </layout>
   </citation>
+</style>');
+
+REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/mla.csl', '2006-08-29 23:05:00', 'Modern Language Association',
+'<?xml version="1.0" encoding="UTF-8"?>
+<?oxygen RNGSchema="../schema/trunk/csl.rnc" type="compact"?>
+<style xmlns="http://purl.org/net/xbiblio/csl" class="author" xml:lang="en">
+  <info>
+    <title>Modern Language Association</title>
+    <id>http://purl.org/net/xbiblio/csl/styles/mla.csl</id>
+    <link>http://purl.org/net/xbiblio/csl/styles/mla.csl</link>
+    <author>
+      <name>Bruce D’Arcus</name>
+      <email>bdarcus@sourceforge.net</email>
+    </author>
+    <contributor>
+      <name>Johan Kool</name>
+      <email>johankool@users.sourceforge.net</email>
+    </contributor>
+    <contributor>
+      <name>Simon Kornblith</name>
+      <email>simon@simonster.com</email>
+    </contributor>
+    <updated>2006-08-29T23:05:00+05:00</updated>
+  </info>
+  <defaults>
+    <contributor name-as-sort-order="first">
+      <name and="text" sort-separator=", " delimiter=", "/>
+      <label form="short" suffix="."/>
+    </contributor>
+    <author>
+      <substitute>
+        <choose>
+          <editor/>
+          <titles/>
+        </choose>
+      </substitute>
+    </author>
+    <locator>
+      <number/>
+    </locator>
+    <titles>
+      <title/>
+    </titles>
+    <date>
+      <year/>
+    </date>
+    <publisher>
+      <place suffix=": "/>
+      <name/>
+    </publisher>
+    <access>
+      <date>
+        <day suffix=" "/>
+        <month suffix=" "/>
+        <year/>
+      </date>
+      <url prefix=" <" suffix=">"/>
+    </access>
+  </defaults>
+  <citation prefix="(" suffix=")" delimiter="; ">
+    <et-al min-authors="6" use-first="6" position="first"/>
+    <et-al min-authors="6" use-first="1" position="subsequent"/>
+    <layout>
+      <item>
+        <author form="short"/>
+        <title form="short" when-multiple-author-items="true" prefix="“" suffix="”"/>
+        <locator prefix=" "/>
+      </item>
+    </layout>
+  </citation>
+  <bibliography subsequent-author-substitute="---">
+    <sort algorithm="author-date"/>
+    <et-al min-authors="4" use-first="1"/>
+    <layout>
+      <list>
+        <heading>
+          <text term-name="references"/>
+        </heading>
+      </list>
+      <item>
+        <choose>
+          <type name="book">
+            <author suffix="."/>
+            <titles font-style="italic" prefix=" " suffix="."/>
+            <group prefix=" " suffix="." delimiter=", ">
+              <edition/>
+              <publisher/>
+              <date/>
+            </group>
+            <access prefix=" " suffix="."/>
+          </type>
+          <type name="chapter">
+            <author suffix="."/>
+            <titles prefix=" &#8220;" suffix=".&#8221;"/>
+            <group class="container" prefix=" " suffix=".">
+              <titles relation="container" font-style="italic" suffix="."/>
+              <editor prefix=" " suffix=".">
+      	        <label form="short" suffix=". " text-transform="capitalize"/>
+                <name and="text" delimiter=", "/>
+      	      </editor>
+              <titles relation="collection" prefix=" " suffix="."/>
+              <publisher prefix=" "/>
+              <date prefix=", "/>
+            </group>
+            <pages prefix=" " suffix="."/>
+            <access prefix=" " suffix="."/>
+          </type>
+          <type name="article">
+            <author suffix="."/>
+            <titles prefix=" &#8220;" suffix=".&#8221;"/>
+            <group class="container">
+              <editor prefix=" " suffix="."/>
+              <titles relation="container" font-style="italic" prefix=" " suffix="."/>
+            </group>
+            <volume prefix=" "/>
+            <issue prefix="."/>
+            <group prefix=" " suffix=".">
+              <date prefix=" (" suffix=")"/>
+              <pages prefix=": "/>
+            </group>
+            <access prefix=" " suffix="."/>
+          </type>
+        </choose>
+      </item>
+    </layout>
+  </bibliography>
 </style>');

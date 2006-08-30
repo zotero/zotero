@@ -39,6 +39,10 @@ var Scholar_File_Interface_Bibliography = new function() {
 		if(styleMenu.selectedIndex == -1) {
 			styleMenu.selectedIndex = 0;
 		}
+		
+		if(document.getElementById("copy-to-clipboard") && navigator.appVersion.indexOf('Mac') != -1) {
+			document.getElementById("copy-to-clipboard").hidden = "true";
+		}
 	}
 
 	function acceptSelection() {

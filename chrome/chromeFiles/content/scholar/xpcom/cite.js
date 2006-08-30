@@ -197,6 +197,7 @@ CSL.prototype.createBibliography = function(format) {
 	// process this._items
 	var output = "";
 	
+	var index = 0;
 	if(format == "HTML") {
 		if(this.class == "note") {
 			output += '<ol>\r\n';
@@ -204,7 +205,6 @@ CSL.prototype.createBibliography = function(format) {
 			output += '<div style="margin-left:0.5in;text-indent:-0.5in;">\r\n';
 		}
 	} else if(format == "RTF") {
-		var index = 0;
 		output += "{\\rtf\\ansi{\\fonttbl\\f0\\froman Times New Roman;}{\\colortbl;\\red255\\green255\\blue255;}\\pard\\f0";
 		if(this._bib.hangingIndent) {
 			output += "\\li720\\fi-720";
@@ -216,6 +216,17 @@ CSL.prototype.createBibliography = function(format) {
 		var item = this._uniqueItems[i];
 		
 		var string = this._getCitation(item, format, this._bib);
+	
+		// add format
+		if(this._bib.format) {
+			// add citation prefix or suffix
+			if(this._bib.format.prefix) {
+				string = this._bib.format.prefix + string ;
+			}
+			if(this._bib.format.suffix) {
+				string += this._bib.format.suffix;
+			}
+		}
 		
 		// add line feeds
 		if(format == "HTML") {
@@ -235,7 +246,11 @@ CSL.prototype.createBibliography = function(format) {
 				output += index+". ";
 			}
 			output += string+"\\\r\n\\\r\n";
-		} else if(format == "Integration") {
+		} else {
+			if(format == "Text" && this.class == "note") {
+				index++;
+				output += index+". ";
+			}
 			output += string+"\r\n\r\n";
 		}
 	}
@@ -249,6 +264,9 @@ CSL.prototype.createBibliography = function(format) {
 	} else if(format == "RTF") {
 		// drop last 6 characters of output (last two returns)
 		output = output.substr(0, output.length-6)+"}";
+	} else {
+		// drop last 4 characters (last two returns)
+		output = output.substr(0, output.length-4);
 	}
 	
 	return output;
@@ -726,6 +744,7 @@ CSL.prototype._getFieldDefaults = function(elementName) {
  * gets a term, in singular or plural form
  */
 CSL.prototype._getTerm = function(term, plural, form) {
+	Scholar.debug("CSL: looking up term "+term);
 	if(!form) {
 		form = "long";
 	}
@@ -1012,11 +1031,13 @@ CSL.prototype._preprocessItems = function() {
 	// get data necessary to generate citations before sorting
 	for(var i in this._uniqueItems) {
 		var item = this._uniqueItems[i];
+		var dateModified = item.getField("dateModified");
 		
-		if(!item._csl) {
+		if(!item._csl || item._csl.dateModified != dateModified) {
 			// namespace everything in item._csl so there's no chance of overlap
 			item._csl = new Object();
 			item._csl.ignore = new Array();
+			item._csl.dateModified = dateModified;
 			
 			// separate item into authors, editors, translators
 			var creators = this._separateItemCreators(item);
@@ -1187,8 +1208,8 @@ CSL.prototype._processCreators = function(type, element, creators, format, bibCi
 			}
 			
 			// figure out if we need an "and" or an "et al"
-			var joinString = ", ";
-			if(maxCreators > 1) {
+			var joinString = (child["delimiter"] ? child["delimiter"] : ", ");
+			if(creators.length > 1) {
 				if(useEtAl) {	// multiple creators and need et al
 					authorStrings.push(this._getTerm("et-al"));
 				} else {		// multiple creators but no et al
@@ -1196,7 +1217,7 @@ CSL.prototype._processCreators = function(type, element, creators, format, bibCi
 					if(child["and"]) {
 						if(child["and"] == "symbol") {
 							var and = "&"
-						} else {
+						} else if(child["and"] == "text") {
 							var and = this._getTerm("and");
 						}
 						
@@ -1342,7 +1363,7 @@ CSL.prototype._getFieldValue = function(name, element, item, format, bibCitEleme
 			} else if(child.name == "physicalLocation") {
 				string = item.getField("archiveLocation");
 			} else if(child.name == "text") {
-				string = this._getTerm(child["term-name"]);
+				string = this._getTerm(child["term-name"], false, child["form"]);
 			}
 				
 			if(string) {
@@ -1392,7 +1413,7 @@ CSL.prototype._getFieldValue = function(name, element, item, format, bibCitEleme
 		// implode with delimiter
 		data = childData.join((element["delimiter"] ? element["delimiter"] : ""));
 	} else if(name == "text") {
-		data = this._getTerm(element["term-name"]);
+		data = this._getTerm(element["term-name"], false, element["form"]);
 		dontEscape = false;
 	} else if(name == "isbn" || name == "doi") {
 		var field = item.getField(name.toUpperCase());
