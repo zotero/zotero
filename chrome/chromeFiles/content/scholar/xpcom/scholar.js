@@ -38,6 +38,7 @@ var Scholar = new function(){
 	
 	// Public properties
 	this.version;
+	this.platform;
 	
 	/*
 	 * Initialize the extension
@@ -68,6 +69,11 @@ var Scholar = new function(){
 		this.version
 			= gExtensionManager.getItemForID(SCHOLAR_CONFIG['GUID']).version;
 		
+		// OS platform
+		var win = Components.classes["@mozilla.org/appshell/appShellService;1"]
+			   .getService(Components.interfaces.nsIAppShellService)
+			   .hiddenDOMWindow;
+		this.platform = win.navigator.platform;
 		
 		// Load in the localization stringbundle for use by getString(name)
 		var src = 'chrome://scholar/locale/scholar.properties';
