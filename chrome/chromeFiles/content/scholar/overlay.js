@@ -38,12 +38,13 @@ var ScholarPane = new function()
 	this.itemSelected = itemSelected;
 	this.deleteSelectedItem = deleteSelectedItem;
 	this.deleteSelectedCollection = deleteSelectedCollection;
-	this.renameSelectedCollection = renameSelectedCollection;
+	this.editSelectedCollection = editSelectedCollection;
 	this.search = search;
 	this.getCollectionsView = getCollectionsView;
 	this.getItemsView = getItemsView;
 	this.selectItem = selectItem;
 	this.getSelectedCollection = getSelectedCollection;
+	this.getSelectedSavedSearch = getSelectedSavedSearch;
 	this.getSelectedItems = getSelectedItems;
 	this.buildCollectionContextMenu = buildCollectionContextMenu;
 	this.buildItemContextMenu = buildItemContextMenu;
@@ -281,7 +282,7 @@ var ScholarPane = new function()
 			collectionsView.deleteSelection();
 	}
 	
-	function renameSelectedCollection()
+	function editSelectedCollection()
 	{
 		if(collectionsView.selection.count > 0)
 		{
@@ -359,6 +360,18 @@ var ScholarPane = new function()
 		}
 	}
 	
+	function getSelectedSavedSearch()
+	{
+		if(collectionsView.selection.count > 0 && collectionsView.selection.currentIndex != -1)
+		{
+			collection = collectionsView._getItemAtRow(collectionsView.selection.currentIndex);
+			if(collection && collection.isSearch())
+			{
+				return collection.ref;
+			}
+		}
+	}
+	
 	function getSelectedItems()
 	{
 		if(itemsView)
@@ -380,19 +393,35 @@ var ScholarPane = new function()
 	{
 		var menu = document.getElementById('scholar-collectionmenu');
 		
-		if(collectionsView.selection.count == 1 && !collectionsView._getItemAtRow(collectionsView.selection.currentIndex).isLibrary())
+		// Collection
+		if (collectionsView.selection.count == 1 &&
+			collectionsView._getItemAtRow(collectionsView.selection.currentIndex).isCollection())
 		{
-			menu.childNodes[2].removeAttribute('disabled');
-			menu.childNodes[3].removeAttribute('disabled');
-			menu.childNodes[5].removeAttribute('disabled');
-			menu.childNodes[6].removeAttribute('disabled');
+			var hide = [4,6,9,11,12];
+			var show = [3,5,7,8,10];
 		}
+		// Saved Search
+		else if (collectionsView.selection.count == 1 &&
+			collectionsView._getItemAtRow(collectionsView.selection.currentIndex).isSearch())
+		{
+			var hide = [3,5,8,10,12];
+			var show = [4,6,7,9,11];
+		}
+		// Library
 		else
 		{
-			menu.childNodes[2].setAttribute('disabled', true);
-			menu.childNodes[3].setAttribute('disabled', true);
-			menu.childNodes[5].setAttribute('disabled', true);
-			menu.childNodes[6].setAttribute('disabled', true);
+			var hide = [3,4,5,6,7,8,9,10,11];
+			var show = [12];
+		}
+		
+		for (var i in hide)
+		{
+			menu.childNodes[hide[i]].setAttribute('hidden', true);
+		}
+		
+		for (var i in show)
+		{
+			menu.childNodes[show[i]].setAttribute('hidden', false);
 		}
 	}
 	

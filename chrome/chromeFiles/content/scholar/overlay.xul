@@ -48,12 +48,18 @@
 			<popupset>
 				<popup id="scholar-collectionmenu" onpopupshowing="ScholarPane.buildCollectionContextMenu();">
 					<menuitem label="&toolbar.newCollection.label;" command="cmd_scholar_newCollection"/>
+					<menuitem label="&toolbar.newSavedSearch.label;" oncommand="ScholarPane.newSearch()"/>
 					<menuseparator/>
-					<menuitem label="&toolbar.renameCollection.label;" oncommand="ScholarPane.renameSelectedCollection();"/>
+					<menuitem label="&toolbar.renameCollection.label;" oncommand="ScholarPane.editSelectedCollection();"/>
+					<menuitem label="&toolbar.renameSavedSearch.label;" oncommand="ScholarPane.editSelectedCollection()"/>
 					<menuitem label="&toolbar.removeCollection.label;" oncommand="ScholarPane.deleteSelectedCollection();"/>
+					<menuitem label="&toolbar.removeSavedSearch.label;" oncommand="ScholarPane.deleteSelectedCollection()"/>
 					<menuseparator/>
 					<menuitem label="&toolbar.exportCollection.label;" oncommand="Scholar_File_Interface.exportCollection();"/>
+					<menuitem label="&toolbar.exportSavedSearch.label;" oncommand="Scholar_File_Interface.exportCollection()"/>
 					<menuitem label="&toolbar.createBibCollection.label;" oncommand="Scholar_File_Interface.bibliographyFromCollection();"/>
+					<menuitem label="&toolbar.createBibSavedSearch.label;" oncommand="Scholar_File_Interface.bibliographyFromCollection()"/>
+					<menuitem label="&toolbar.export.label;" oncommand="Scholar_File_Interface.exportFile()"/>
 				</popup>
 				<popup id="scholar-itemmenu" onpopupshowing="ScholarPane.buildItemContextMenu();">
 					<menuitem label="&toolbar.newItem.label;" command="cmd_scholar_newItem"/>
@@ -67,8 +73,8 @@
 			<vbox id="collections-pane" persist="width" flex="1">
 				<toolbar>
 					<toolbarbutton id="tb-collection-add" tooltiptext="&toolbar.newCollection.label;" command="cmd_scholar_newCollection"/>
-					<toolbarbutton id="tb-collection-addsearch" tooltiptext="&toolbar.newSearch.label;" oncommand="ScholarPane.newSearch();"/>
-					<toolbarbutton id="tb-collection-rename" tooltiptext="&toolbar.renameCollection.label;" oncommand="ScholarPane.renameSelectedCollection();" disabled="true"/>
+					<toolbarbutton id="tb-collection-addsearch" tooltiptext="&toolbar.newSavedSearch.label;" oncommand="ScholarPane.newSearch();"/>
+					<toolbarbutton id="tb-collection-rename" tooltiptext="&toolbar.renameCollection.label;" oncommand="ScholarPane.editSelectedCollection();" disabled="true"/>
 					<spacer flex="1"/>
 					<toolbarbutton id="tb-collection-menu" type="menu">
 						<menupopup>

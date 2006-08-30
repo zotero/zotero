@@ -41,14 +41,28 @@ var Scholar_File_Interface = new function() {
 	}
 	
 	/*
-	 * exports a collection
+	 * exports a collection or saved search
 	 */
 	function exportCollection() {
 		var collection = ScholarPane.getSelectedCollection();
-		if(!collection) throw("no collection currently selected");
+		if (collection)
+		{
+			exportFile(Scholar.getItems(collection.getID()));
+			return;
+		}
 		
-		exportFile(Scholar.getItems(collection.getID()));
+		var searchRef = ScholarPane.getSelectedSavedSearch();
+		if (searchRef)
+		{
+			var search = new Scholar.Search();
+			search.load(searchRef['id']);
+			exportFile(Scholar.Items.get(search.search()));
+			return;
+		}
+		
+		throw ("No collection or saved search currently selected");
 	}
+	
 	
 	/*
 	 * exports items
@@ -181,13 +195,26 @@ var Scholar_File_Interface = new function() {
 	}
 	
 	/*
-	 * Creates a bibliography from a collection
+	 * Creates a bibliography from a collection or saved search
 	 */
 	function bibliographyFromCollection() {
 		var collection = ScholarPane.getSelectedCollection();
-		if(!collection) throw("no collection currently selected");
+		if (collection)
+		{
+			_doBibliographyOptions(Scholar.getItems(collection.getID()));
+			return;
+		}
 		
-		_doBibliographyOptions(Scholar.getItems(collection.getID()));
+		var searchRef = ScholarPane.getSelectedSavedSearch();
+		if (searchRef)
+		{
+			var search = new Scholar.Search();
+			search.load(searchRef['id']);
+			_doBibliographyOptions(Scholar.Items.get(search.search()));
+			return;
+		}
+		
+		throw ("No collection or saved search currently selected");
 	}
 	
 	/*
