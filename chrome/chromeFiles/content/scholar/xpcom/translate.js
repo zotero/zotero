@@ -1095,9 +1095,7 @@ Scholar.Translate.prototype._itemDone = function(item) {
 					if(this.type == "web") {
 						if(!attachment.url && !attachment.document) {
 							Scholar.debug("not adding attachment: no URL specified");
-						}
-						
-						if(attachment.downloadable && this._downloadAssociatedFiles) {
+						} else if(attachment.downloadable && this._downloadAssociatedFiles) {
 							if(attachment.document) {
 								attachmentID = Scholar.Attachments.importFromDocument(attachment.document, myID);
 								
@@ -1223,7 +1221,16 @@ Scholar.Translate.prototype._runHandler = function(type, argument) {
 					returnValue = this._handlers[type][i](this, argument);
 				}
 			} catch(e) {
-				Scholar.debug(e+' in handler '+i+' for '+type);
+				if(this._parentTranslator) {
+					// throw handler errors if they occur when a translator is
+					// called from another translator, so that the
+					// "Could Not Translate" dialog will appear if necessary
+					throw(e+' in handler '+i+' for '+type);
+				} else {
+					// otherwise, fail silently, so as not to interfere with
+					// interface cleanup
+					Scholar.debug(e+' in handler '+i+' for '+type);
+				}
 			}
 		}
 	}

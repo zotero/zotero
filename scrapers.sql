@@ -1773,7 +1773,7 @@ REPLACE INTO "translators" VALUES ('cf87eca8-041d-b954-795a-2d86348999d5', '2006
 		  if (prefix == ''x'') return namespace; else return null;
 		} : null;
 		
-		var xpath = ''/html/body/table/tbody/tr[td[1][@id="bold"]][td[2]]'';
+		var xpath = ''//table/tbody/tr[td[1][@id="bold"] or td[@class="recordTD"]][td[2]]'';
 		var elmts = newDoc.evaluate(xpath, newDoc, nsResolver, XPathResult.ANY_TYPE, null);
 		var elmt;
 		
