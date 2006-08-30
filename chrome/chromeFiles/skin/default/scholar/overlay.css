@@ -1,7 +1,8 @@
 #scholar-status-bar-icon
 {
 	width: 49px;
-	margin:0 5px -1px;
+	margin:0 0 -1px;
+	padding:0 5px;
 }
 
 #scholar-pane

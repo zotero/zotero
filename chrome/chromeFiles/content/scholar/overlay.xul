@@ -199,7 +199,7 @@
 	
 	<statusbar id="status-bar">
 		<statusbarpanel id="scholar-status-bar-icon"
-			src="chrome://scholar/skin/zotero_logo_14px.png"
+			src="chrome://scholar/skin/zotero_logo_20px.png"
 			class="statusbarpanel-iconic" onclick="ScholarPane.toggleDisplay();"
 			hidden="true"/>
 	</statusbar>
