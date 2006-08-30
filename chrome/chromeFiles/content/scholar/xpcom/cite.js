@@ -1536,7 +1536,7 @@ CSL.prototype._separateItemCreators = function(item) {
  * return an object containing year, month, and day
  */
 CSL.prototype._processDate = function(string) {
-	return Scholar.strToDate(string);
+	return Scholar.Date.strToDate(string);
 }
 /*
  * END SCHOLAR-SPECIFIC CODE
