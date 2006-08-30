@@ -11,17 +11,32 @@ var Scholar_File_Interface = new function() {
 	/*
 	 * Creates Scholar.Translate instance and shows file picker for file export
 	 */
-	function exportFile(items) {
+	function exportFile(name, items) {
 		var translation = new Scholar.Translate("export");
 		var translators = translation.getTranslators();
 		
 		const nsIFilePicker = Components.interfaces.nsIFilePicker;
 		var fp = Components.classes["@mozilla.org/filepicker;1"]
 				.createInstance(nsIFilePicker);
-		fp.init(window, "Export", nsIFilePicker.modeSave);
+		
+		fp.init(window, Scholar.getString("fileInterface.export"), nsIFilePicker.modeSave);
+		
+		// set file name and extension.
+		name = (name ? name : Scholar.getString("pane.collections.library"));
+		fp.defaultString = name+"."+translators[0].target;
+		
+		// add save filters
 		for(var i in translators) {
-			fp.appendFilter(translators[i].label, translators[i].target);
+			var label = translators[i].label;
+			
+			// put extensions in parentheses if Mac (Windows users already
+			// get extension)
+			label += " (."+translators[i].target+")";
+			
+			fp.appendFilter(label, "*."+translators[i].target);
 		}
+		
+		
 		var rv = fp.show();
 		if (rv == nsIFilePicker.returnOK || rv == nsIFilePicker.returnReplace) {
 			if(items) {
@@ -47,7 +62,7 @@ var Scholar_File_Interface = new function() {
 		var collection = ScholarPane.getSelectedCollection();
 		if (collection)
 		{
-			exportFile(Scholar.getItems(collection.getID()));
+			exportFile(collection.getName(), Scholar.getItems(collection.getID()));
 			return;
 		}
 		
@@ -56,7 +71,7 @@ var Scholar_File_Interface = new function() {
 		{
 			var search = new Scholar.Search();
 			search.load(searchRef['id']);
-			exportFile(Scholar.Items.get(search.search()));
+			exportFile(search.getName(), Scholar.Items.get(search.search()));
 			return;
 		}
 		
@@ -71,7 +86,7 @@ var Scholar_File_Interface = new function() {
 		var items = ScholarPane.getSelectedItems();
 		if(!items || !items.length) throw("no items currently selected");
 		
-		exportFile(items);
+		exportFile(Scholar.getString("fileInterface.exportedItems"), items);
 	}
 	
 	/*
@@ -93,7 +108,7 @@ var Scholar_File_Interface = new function() {
 	/*
 	 * closes items exported indicator
 	 */
-	function _exportDone(obj) {
+	function _exportDone(obj, worked) {
 		Scholar_File_Interface.Progress.close();
 		_restoreUnresponsive();
 	}
@@ -108,7 +123,9 @@ var Scholar_File_Interface = new function() {
 		const nsIFilePicker = Components.interfaces.nsIFilePicker;
 		var fp = Components.classes["@mozilla.org/filepicker;1"]
 				.createInstance(nsIFilePicker);
-		fp.init(window, "Import", nsIFilePicker.modeOpen);
+		fp.init(window, Scholar.getString("fileInterface.import"), nsIFilePicker.modeOpen);
+		
+		fp.appendFilters(nsIFilePicker.filterAll);
 		for(var i in translators) {
 			fp.appendFilter(translators[i].label, "*."+translators[i].target);
 		}
@@ -121,7 +138,7 @@ var Scholar_File_Interface = new function() {
 			if(translators.length) {
 				// create a new collection to take in imported items
 				var date = new Date();
-				_importCollection = Scholar.Collections.add("Imported "+date.toLocaleString());
+				_importCollection = Scholar.Collections.add(Scholar.getString("fileInterface.imported")+" "+date.toLocaleString());
 				
 				// import items
 				translation.setTranslator(translators[0]);
@@ -138,6 +155,8 @@ var Scholar_File_Interface = new function() {
 					function() {
 						translation.translate();
 				});
+			} else {
+				window.alert(Scholar.getString("fileInterface.fileFormatUnsupported"));
 			}
 		}
 	}
@@ -172,6 +191,10 @@ var Scholar_File_Interface = new function() {
 		
 		Scholar_File_Interface.Progress.close();
 		_restoreUnresponsive();
+		
+		if(!worked) {
+			window.alert(Scholar.getString("fileInterface.importError"));
+		}
 	}
 	
 	/*
@@ -201,7 +224,7 @@ var Scholar_File_Interface = new function() {
 		var collection = ScholarPane.getSelectedCollection();
 		if (collection)
 		{
-			_doBibliographyOptions(Scholar.getItems(collection.getID()));
+			_doBibliographyOptions(collection.getName(), Scholar.getItems(collection.getID()));
 			return;
 		}
 		
@@ -210,7 +233,7 @@ var Scholar_File_Interface = new function() {
 		{
 			var search = new Scholar.Search();
 			search.load(searchRef['id']);
-			_doBibliographyOptions(Scholar.Items.get(search.search()));
+			_doBibliographyOptions(search.getName(), Scholar.Items.get(search.search()));
 			return;
 		}
 		
@@ -224,13 +247,13 @@ var Scholar_File_Interface = new function() {
 		var items = ScholarPane.getSelectedItems();
 		if(!items || !items.length) throw("no items currently selected");
 		
-		_doBibliographyOptions(items);
+		_doBibliographyOptions(Scholar.getString("fileInterface.untitledBibliography"), items);
 	}
 	
 	/*
 	 * Shows bibliography options and creates a bibliography
 	 */
-	function _doBibliographyOptions(items) {
+	function _doBibliographyOptions(name, items) {
 		var io = new Object();
 		var newDialog = window.openDialog("chrome://scholar/content/bibliography.xul",
 			"_blank","chrome,modal,centerscreen", io);
@@ -275,7 +298,7 @@ var Scholar_File_Interface = new function() {
 			Scholar.Browser.deleteHiddenBrowser(browser);
 			bibliographyStream.close();
 		} else if(io.output == "save-as-html") {
-			var fStream = _saveBibliography("HTML");
+			var fStream = _saveBibliography(name, "HTML");
 			
 			if(fStream !== false) {			
 				var html = "";
@@ -283,7 +306,7 @@ var Scholar_File_Interface = new function() {
 				html +='<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">\n';
 				html +='<head>\n';
 				html +='<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>\n';
-				html +='<title>Bibliography</title>\n';
+				html +='<title>'+Scholar.getString("fileInterface.bibliographyHTMLTitle")+'</title>\n';
 				html +='</head>\n';
 				html +='<body>\n';
 				html += bibliography;
@@ -301,7 +324,7 @@ var Scholar_File_Interface = new function() {
 				fStream.close();
 			}
 		} else if(io.output == "save-as-rtf") {
-			var fStream = _saveBibliography("RTF");
+			var fStream = _saveBibliography(name, "RTF");
 			if(fStream !== false) {
 				fStream.write(bibliography, bibliography.length);
 				fStream.close();
@@ -331,7 +354,7 @@ var Scholar_File_Interface = new function() {
 		}
 	}
 	
-	function _saveBibliography(format) {	
+	function _saveBibliography(name, format) {	
 		// savable bibliography, using a file stream
 		const nsIFilePicker = Components.interfaces.nsIFilePicker;
 		var fp = Components.classes["@mozilla.org/filepicker;1"]
@@ -339,10 +362,14 @@ var Scholar_File_Interface = new function() {
 		fp.init(window, "Save Bibliography", nsIFilePicker.modeSave);
 		
 		if(format == "RTF") {
+			var extension = "rtf";
 			fp.appendFilter("RTF", "*.rtf");
 		} else {
+			var extension = "html";
 			fp.appendFilters(nsIFilePicker.filterHTML);
 		}
+		
+		fp.defaultString = name+"."+extension;
 		
 		var rv = fp.show();
 		if (rv == nsIFilePicker.returnOK || rv == nsIFilePicker.returnReplace) {				

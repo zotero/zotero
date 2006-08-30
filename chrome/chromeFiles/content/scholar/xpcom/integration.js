@@ -1,7 +1,7 @@
 Scholar.Integration = new function() {
 	var _contentLengthRe = /[\r\n]Content-Length: *([0-9]+)/i;
 	var _XMLRe = /<\?[^>]+\?>/;
-	this.ns = "http://chnm.gmu.edu/firefoxscholar/soap";
+	this.ns = "http://www.zotero.org/namespaces/SOAP";
 	
 	this.init = init;
 	this.handleHeader = handleHeader;

@@ -1,4 +1,4 @@
--- 64
+-- 65
 
 -- Set the following timestamp to the most recent scraper update date
 REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-08-15 15:42:00'));
@@ -3779,7 +3779,7 @@ function doSearch(item) {
 	Scholar.wait();
 }');
 
-REPLACE INTO "translators" VALUES ('0e2235e7-babf-413c-9acf-f27cce5f059c', '2006-07-05 23:40:00', 3, 'MODS (XML)', 'Simon Kornblith', 'xml',
+REPLACE INTO "translators" VALUES ('0e2235e7-babf-413c-9acf-f27cce5f059c', '2006-07-05 23:40:00', 3, 'MODS', 'Simon Kornblith', 'xml',
 'Scholar.addOption("exportNotes", true);
 
 function detectImport() {
@@ -4256,7 +4256,7 @@ function doImport() {
 	}
 }');
 
-REPLACE INTO "translators" VALUES ('14763d24-8ba0-45df-8f52-b8d1108e7ac9', '2006-07-07 12:44:00', 2, 'Biblio/DC/FOAF/PRISM/VCard (RDF/XML)', 'Simon Kornblith', 'rdf',
+REPLACE INTO "translators" VALUES ('14763d24-8ba0-45df-8f52-b8d1108e7ac9', '2006-08-30 11:37:00', 2, 'Zotero RDF', 'Simon Kornblith', 'rdf',
 'Scholar.configure("getCollections", true);
 Scholar.configure("dataMode", "rdf");
 Scholar.addOption("exportNotes", true);
@@ -4334,7 +4334,7 @@ function doExport() {
 		foaf:"http://xmlns.com/foaf/0.1/",
 		vcard:"http://nwalsh.com/rdf/vCard#",
 		link:"http://purl.org/rss/1.0/modules/link/",
-		fs:"http://chnm.gmu.edu/firefoxscholar/rdf#"
+		fs:"http://www.zotero.org/namespaces/export#"
 	};
 	
 	// add namespaces
@@ -4673,7 +4673,7 @@ function doExport() {
 	}
 }');
 
-REPLACE INTO "translators" VALUES ('6e372642-ed9d-4934-b5d1-c11ac758ebb7', '2006-07-05 23:40:00', 2, 'Unqualified Dublin Core (RDF/XML)', 'Simon Kornblith', 'rdf',
+REPLACE INTO "translators" VALUES ('6e372642-ed9d-4934-b5d1-c11ac758ebb7', '2006-07-05 23:40:00', 2, 'Unqualified Dublin Core RDF', 'Simon Kornblith', 'rdf',
 'Scholar.configure("dataMode", "rdf");',
 'function doExport() {
 	var dc = "http://purl.org/dc/elements/1.1/";
@@ -4977,7 +4977,7 @@ function doImport() {
 		foaf:"http://xmlns.com/foaf/0.1/",
 		vcard:"http://nwalsh.com/rdf/vCard#",
 		link:"http://purl.org/rss/1.0/modules/link/",
-		fs:"http://chnm.gmu.edu/firefoxscholar/rdf#"
+		fs:"http://www.zotero.org/namespaces/export#"
 	};
 	
 	callNumberTypes = [

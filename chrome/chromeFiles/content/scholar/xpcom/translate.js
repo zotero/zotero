@@ -125,7 +125,9 @@ Scholar.Translate.init = function() {
 		
 		if(cachePref) {
 			// fetch translator list
-			var translators = Scholar.DB.query("SELECT translatorID, type, label, target, detectCode IS NULL as noDetectCode FROM translators ORDER BY target IS NULL");
+			var translators = Scholar.DB.query("SELECT translatorID, type, label, "+
+				"target, detectCode IS NULL as noDetectCode FROM translators "+
+				"ORDER BY target IS NULL, translatorID = '14763d24-8ba0-45df-8f52-b8d1108e7ac9' DESC");
 			var detectCodes = Scholar.DB.query("SELECT translatorID, detectCode FROM translators WHERE target IS NULL");
 			
 			Scholar.Translate.cache = new Object();
@@ -370,7 +372,9 @@ Scholar.Translate.prototype.getTranslators = function() {
 	if(Scholar.Translate.cache) {
 		var translators = Scholar.Translate.cache[this.type];
 	} else {
-		var sql = "SELECT translatorID, label, target, detectCode IS NULL as noDetectCode FROM translators WHERE type IN ("+this._numericTypes+") ORDER BY target IS NULL";
+		var sql = "SELECT translatorID, label, target, detectCode IS NULL as "+
+			"noDetectCode FROM translators WHERE type IN ("+this._numericTypes+") "+
+			"ORDER BY target IS NULL, translatorID = '14763d24-8ba0-45df-8f52-b8d1108e7ac9' DESC";
 		var translators = Scholar.DB.query(sql);
 	}
 	

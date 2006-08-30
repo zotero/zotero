@@ -40,7 +40,7 @@ var Scholar_File_Interface_Bibliography = new function() {
 			styleMenu.selectedIndex = 0;
 		}
 		
-		if(document.getElementById("copy-to-clipboard") && navigator.appVersion.indexOf('Mac') != -1) {
+		if(Scholar.isMac && document.getElementById("copy-to-clipboard")) {
 			document.getElementById("copy-to-clipboard").hidden = "true";
 		}
 	}

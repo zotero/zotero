@@ -74,6 +74,7 @@ var Scholar = new function(){
 			   .getService(Components.interfaces.nsIAppShellService)
 			   .hiddenDOMWindow;
 		this.platform = win.navigator.platform;
+		this.isMac = (this.platform.substr(0, 3) == "Mac");
 		
 		// Load in the localization stringbundle for use by getString(name)
 		var src = 'chrome://scholar/locale/scholar.properties';
