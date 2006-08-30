@@ -74,6 +74,8 @@
 						<menupopup>
 							<menuitem label="&toolbar.import.label;" oncommand="Scholar_File_Interface.importFile();"/>
 							<menuitem label="&toolbar.export.label;" oncommand="Scholar_File_Interface.exportFile();"/>
+							<menuseparator/>
+							<menuitem label="&toolbar.preferences.label;" oncommand="window.openDialog('chrome://scholar/content/preferences.xul','prefs','chrome,modal')"/>
 						</menupopup>
 					</toolbarbutton>
 				</toolbar>
