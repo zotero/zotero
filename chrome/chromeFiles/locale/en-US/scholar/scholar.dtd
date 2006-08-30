@@ -20,7 +20,7 @@
 
 <!ENTITY toolbar.newItem.label    		"New Item">
 <!ENTITY toolbar.removeItem.label 		  "Remove Item...">
-<!ENTITY toolbar.newCollection.label   	"New Collection">
+<!ENTITY toolbar.newCollection.label   	"New Collection...">
 <!ENTITY toolbar.newSavedSearch.label   	"New Saved Search...">
 <!ENTITY toolbar.renameCollection.label   "Rename Collection...">
 <!ENTITY toolbar.removeCollection.label   "Remove Collection...">

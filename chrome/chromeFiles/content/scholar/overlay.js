@@ -153,7 +153,24 @@ var ScholarPane = new function()
 	
 	function newCollection()
 	{
-		Scholar.Collections.add(Scholar.getString('pane.collections.untitled'));
+		var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+								.getService(Components.interfaces.nsIPromptService);
+		
+		var newName = { value: Scholar.getString('pane.collections.untitled') };
+		var result = promptService.prompt(window, "",
+			Scholar.getString('pane.collections.name'), newName, "", {});
+		
+		if (!result)
+		{
+			return false;
+		}
+		
+		if (!newName.value)
+		{
+			newName.value = Scholar.getString('pane.collections.untitled');
+		}
+		
+		Scholar.Collections.add(newName.value);
 	}
 	
 	function newSearch()
@@ -276,9 +293,17 @@ var ScholarPane = new function()
 			
 			if(collection.isCollection())
 			{
-				var newName = prompt(Scholar.getString('pane.collections.rename'),collection.getName());
-				if(newName)
-					collection.ref.rename(newName);
+				var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+										.getService(Components.interfaces.nsIPromptService);
+				
+				var newName = { value: collection.getName() };
+				var result = promptService.prompt(window, "",
+					Scholar.getString('pane.collections.rename'), newName, "", {});
+				
+				if (result && newName.value)
+				{
+					collection.ref.rename(newName.value);
+				}
 			}
 			else
 			{
