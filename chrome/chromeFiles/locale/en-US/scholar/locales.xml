@@ -8,77 +8,81 @@
     <term name="references">References</term>
     <term name="and">and</term>
     <term name="et-al">et al.</term>
-    <term-set name="locators">
-      <term name="page">
-        <single>page</single>
-        <multiple>pages</multiple>
-      </term>
-      <term name="paragraph">
-        <single>paragraph</single>
-        <multiple>paragraph</multiple>
-      </term>
-    </term-set>
-    <term-set name="locators-short">
-      <term name="page">
-        <single>p</single>
-        <multiple>pp</multiple>
-      </term>
-      <term name="paragraph">
-        <single>¶</single>
-        <multiple>¶¶</multiple>
-      </term>
-    </term-set>
-    <term-set name="roles">
-      <term name="editor">
-        <single>editor</single>
-        <multiple>editors</multiple>
-      </term>
-      <term name="translator">
-        <single>translator</single>
-        <multiple>translators</multiple>
-      </term>
-    </term-set>
-    <term-set name="roles-short">
-      <term name="editor">
-        <single>ed</single>
-        <multiple>eds</multiple>
-      </term>
-      <term name="translator">
-        <single>tran</single>
-        <multiple>trans</multiple>
-      </term>
-    </term-set>
-    <term-set name="roles-verb">
-      <term name="editor">edited by</term>
-      <term name="translator">translated by</term>
-    </term-set>
-    <term-set name="months">
-      <term name="month-01">January</term>
-      <term name="month-02">February</term>
-      <term name="month-03">March</term>
-      <term name="month-04">April</term>
-      <term name="month-05">May</term>
-      <term name="month-06">June</term>
-      <term name="month-07">July</term>
-      <term name="month-08">August</term>
-      <term name="month-09">September</term>
-      <term name="month-10">October</term>
-      <term name="month-11">November</term>
-      <term name="month-12">December</term>
-    </term-set>
-    <term-set name="months-short">
-      <term name="month-01">Jan</term>
-      <term name="month-02">Feb</term>
-      <term name="month-03">Mar</term>
-      <term name="month-04">Apr</term>
-      <term name="month-05">May</term>
-      <term name="month-06">Jun</term>
-      <term name="month-07">Jul</term>
-      <term name="month-08">Aug</term>
-      <term name="month-09">Sep</term>
-      <term name="month-10">Oct</term>
-      <term name="month-11">Nov</term>
-      <term name="month-12">Dec</term>
-    </term-set>
+    
+    <!-- LONG LOCATOR FORMS -->
+    <term name="page">
+      <single>page</single>
+      <multiple>pages</multiple>
+    </term>
+    <term name="paragraph">
+      <single>paragraph</single>
+      <multiple>paragraph</multiple>
+    </term>
+    <term name="volume">volume</term>
+    <term name="issue">issue</term>
+    
+    <!-- SHORT LOCATOR FORMS -->
+    <term name="page" form="short">
+      <single>p</single>
+      <multiple>pp</multiple>
+    </term>
+    <term name="paragraph" form="short">
+      <single>¶</single>
+      <multiple>¶¶</multiple>
+    </term>
+    <term name="volume" form="short">vol</term>
+    <term name="issue" form="short">iss</term>
+    
+    <!-- LONG ROLE FORMS -->
+    <term name="editor">
+      <single>editor</single>
+      <multiple>editors</multiple>
+    </term>
+    <term name="translator">
+      <single>translator</single>
+      <multiple>translators</multiple>
+    </term>
+    
+    <!-- SHORT ROLE FORMS -->
+    <term name="editor" form="short">
+      <single>ed</single>
+      <multiple>eds</multiple>
+    </term>
+    <term name="translator" form="short">
+      <single>tran</single>
+      <multiple>trans</multiple>
+    </term>
+    
+    <!-- VERB ROLE FORMS -->
+    <term name="editor" form="verb">edited by</term>
+    <term name="translator" form="verb">translated by</term>
+    
+    <!-- LONG MONTH FORMS -->
+    <term name="month-01">January</term>
+    <term name="month-02">February</term>
+    <term name="month-03">March</term>
+    <term name="month-04">April</term>
+    <term name="month-05">May</term>
+    <term name="month-06">June</term>
+    <term name="month-07">July</term>
+    <term name="month-08">August</term>
+    <term name="month-09">September</term>
+    <term name="month-10">October</term>
+    <term name="month-11">November</term>
+    <term name="month-12">December</term>
+    
+    <!-- SHORT MOTH FORMS -->
+    <term name="month-01" form="short">Jan</term>
+    <term name="month-02" form="short">Feb</term>
+    <term name="month-03" form="short">Mar</term>
+    <term name="month-04" form="short">Apr</term>
+    <term name="month-05" form="short">May</term>
+    <term name="month-06" form="short">Jun</term>
+    <term name="month-07" form="short">Jul</term>
+    <term name="month-08" form="short">Aug</term>
+    <term name="month-09" form="short">Sep</term>
+    <term name="month-10" form="short">Oct</term>
+    <term name="month-11" form="short">Nov</term>
+    <term name="month-12" form="short">Dec</term>
   </locale>
 </terms>

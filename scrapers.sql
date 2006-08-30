@@ -1,4 +1,4 @@
--- 62
+-- 63
 
 -- Set the following timestamp to the most recent scraper update date
 REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-08-15 15:42:00'));
@@ -5914,7 +5914,7 @@ function doImport() {
 	}
 }');
 
-REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '2006-08-12 19:22:00', 'APA',
+REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '2006-08-29 23:05:00', 'American Psychological Association',
 '<?xml version="1.0" encoding="UTF-8"?>
 <?oxygen RNGSchema="file:/Users/darcusb/xbiblio/csl/schema/trunk/csl-alt.rnc" type="compact"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="author-date" xml:lang="en">
@@ -5934,16 +5934,16 @@ REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '200
       <name>Johan Kool</name>
       <email>johankool@users.sourceforge.net</email>
     </contributor>
-    <updated>2006-08-24T16:30:00+01:00</updated>
+    <updated>2006-08-29T23:05:00+05:00</updated>
   </info>
   <defaults>
     <contributor name-as-sort-order="no">
-      <name and="symbol" initialize-with="." delimiter=", "/>
-      <label term-set="roles-short" prefix=", " text-transform="capitalize" suffix="."/>
+      <name and="symbol" initialize-with="." delimiter=", " delimiter-precedes-last="always"/>
+      <label form="short" prefix=", " text-transform="capitalize" suffix="."/>
     </contributor>
     <author name-as-sort-order="all">
-      <name and="symbol" sort-separator=", " initialize-with="." delimiter=", "/>
-      <label term-set="roles-short" prefix=" (" suffix=".)" text-transform="capitalize"/>
+      <name and="symbol" sort-separator=", " initialize-with="." delimiter=", " delimiter-precedes-last="always"/>
+      <label form="short" prefix=" (" suffix=".)" text-transform="capitalize"/>
       <substitute>
         <choose>
           <editor/>
@@ -5987,7 +5987,10 @@ REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '200
     <et-al min-authors="6" use-first="1" position="subsequent"/>
     <layout>
       <item>
-        <author form="short"/>
+        <author form="short">
+        	<name and="symbol" delimiter=", "/>
+        	<label form="short" prefix=", " text-transform="capitalize" suffix="."/>
+        </author>
         <date prefix=", ">
           <year/>
         </date>
@@ -6031,17 +6034,17 @@ REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '200
               <text term-name="in" text-transform="capitalize"/>
               <editor prefix=" " suffix=",">
                 <name and="symbol" sort-separator=", " initialize-with="."/>
-                <label term-set="roles-short" prefix=" (" suffix=")" text-transform="capitalize"/>
+                <label form="short" prefix=" (" suffix=")" text-transform="capitalize"/>
               </editor>
               <translator prefix=" " suffix=",">
                 <name and="symbol" sort-separator=", " initialize-with="."/>
-                <label term-set="roles-short" prefix=" (" suffix=")" text-transform="capitalize"/>
+                <label form="short" prefix=" (" suffix=")" text-transform="capitalize"/>
               </translator>
               <titles relation="container" font-style="italic" prefix=" " suffix="."/>
               <titles relation="collection" prefix=" " suffix="."/>
               <publisher prefix=" "/>
               <pages prefix=" (" suffix=")">
-                <label term-set="locators-short" text-transform="capitalize" suffix=". "/>
+                <label form="short" text-transform="capitalize" suffix=". "/>
                 <number/>
               </pages>
             </group>
@@ -6073,7 +6076,7 @@ REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '200
   </bibliography>
 </style>');
 
-REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/chicago-note.csl', '2006-08-12 19:22:00', 'Chicago (Footnote)',
+REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/chicago-note.csl', '2006-08-29 23:05:00', 'Chicago Manual of Style (Note)',
 '<?xml version="1.0" encoding="UTF-8"?>
 <?oxygen RNGSchema="../schema/trunk/csl.rnc" type="compact"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="note" xml:lang="en">
@@ -6088,17 +6091,21 @@ REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/chicago-note.c
       <name>Simon Kornblith</name>
       <email>simon@simonster.com</email>
     </contributor>
-    <updated>2006-08-19T17:12:00-05:00</updated>
+    <contributor>
+      <name>Johan Kool</name>
+      <email>johankool@users.sourceforge.net</email>
+    </contributor>
+    <updated>2006-08-24T16:30:00+01:00</updated>
     <summary>The note-without-bibliography variant of the Chicago style.</summary>
   </info>
   <defaults>
     <contributor>
-      <label term-set="roles-short" suffix=". " text-transform="lowercase"/>
-      <name and="text"/>
+      <label form="short" suffix=". " text-transform="lowercase"/>
+      <name and="text" delimiter=", "/>
     </contributor>
     <author>
-      <name and="text"/>
-      <label term-set="roles-short" prefix=", " suffix="." text-transform="lowercase"/>
+      <name and="text" delimiter=", "/>
+      <label form="short" prefix=", " suffix="." text-transform="lowercase"/>
       <substitute>
         <choose>
           <editor/>

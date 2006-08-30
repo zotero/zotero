@@ -70,7 +70,7 @@ Scholar.Cite = new function() {
 	 * from the cache
 	 */
 	function _getCSL(cslID) {
-		if(_lastStyle != cslID) {
+		if(_lastStyle != cslID || Scholar.Prefs.get("cacheTranslatorData") == false) {
 			// get style
 			var sql = "SELECT csl FROM csl WHERE cslID = ?";
 			var style = Scholar.DB.valueQuery(sql, [cslID]);
@@ -114,6 +114,14 @@ CSL = function(csl) {
 	// parse bibliography options, since these will be necessary for
 	// disambiguation purposes even for citations
 	this._parseBibliographyOptions();
+	// if no bibliography exists, parse citation element as bibliography
+	if(!this._bib) {
+		Scholar.debug("CSL: using citation element");
+		if(!this._cit) {
+			this._parseCitationOptions();
+		}
+		this._bib = this._cit;
+	}
 }
 
 /*
@@ -137,11 +145,11 @@ CSL.prototype.setItems = function(items) {
 	
 	Scholar.debug("CSL: items set to "+serializedItemString);
 	
-	if(serializedItemString != this._serializedItemString) {
+	//if(serializedItemString != this._serializedItemString) {
 		// only re-process if there are new items
 		this._serializedItemString = serializedItemString;
 		this._preprocessItems();
-	}
+	//}
 }
 
 /*
@@ -182,15 +190,6 @@ CSL.prototype.createCitation = function(items, format) {
  * (items is expected to be an array of items)
  */
 CSL.prototype.createBibliography = function(format) {
-	if(!this._bib) {
-		// decide whether to parse bibliography, or, if none exists, citation
-		Scholar.debug("CSL: using citation element");
-		if(!this._cit) {
-			this._parseCitationOptions();
-		}
-		this._bib = this._cit;
-	}
-	
 	// preprocess this._items
 	Scholar.debug("CSL: preprocessing items");
 	this._preprocessItems();
@@ -340,7 +339,7 @@ CSL.prototype._parseLocales = function(termXML) {
 		// ugh. copy default array. javascript dumb.
 		for(var i in CSL._defaultTerms) {
 			termArray[i] = new Object();
-			for(var j in CSL._defaulTerms[i]) {
+			for(var j in CSL._defaultTerms[i]) {
 				if(typeof(CSL._defaultTerms[i]) == "object") {
 					termArray[i][j] = [CSL._defaultTerms[i][j][0],
 									CSL._defaultTerms[i][j][1]];
@@ -352,50 +351,45 @@ CSL.prototype._parseLocales = function(termXML) {
 	}
 	
 	// loop through terms
-	this._parseTerms(locale.term, termArray["default"]);
-	// loop through term sets
-	locale._termSets = new Object();
-	for each(var termSet in locale["term-set"]) {
-		var name = termSet.@name.toString();
-		if(!termArray[name]) {
-			termArray[name] = new Object();
-		}
-		
-		this._parseTerms(termSet.term, termArray[name]);
-	}
-	
-	return termArray;
-}
-
-CSL.prototype._parseTerms = function(terms, termArray) {
-	for each(var term in terms) {
+	for each(var term in locale.term) {
 		var name = term.@name.toString();
 		if(!name) {
 			throw("citations cannot be generated: no name defined on term in CSL");
+		}
+		// unless otherwise specified, assume "long" form
+		var form = term.@form.toString();
+		if(!form) {
+			var form = "long";
+		}
+		if(!termArray[form]) {
+			termArray[form] = new Object();
 		}
 		
 		var single = term.single.text().toString();
 		var multiple = term.multiple.text().toString();
 		if(single || multiple) {
-			if((single && multiple)		// if there's both elements or
-			  || !termArray[name]) {	// no previously defined value
-				termArray[name] = [single, multiple];
+			if((single && multiple)			// if there's both elements or
+			  || !termArray[form][name]) {	// no previously defined value
+				termArray[form][name] = [single, multiple];
 			} else {
 				if(typeof(termArray[name]) != "object") {
-					termArray[name] = [termArray[name], termArray[name]];
+					// if old object was just a single value, make it two copies
+					termArray[form][name] = [termArray[form][name], termArray[form][name]];
 				}
 				
 				// redefine either single or multiple
 				if(single) {
-					termArray[name][0] = single;
+					termArray[form][name][0] = single;
 				} else {
-					termArray[name][1] = multiple;
+					termArray[form][name][1] = multiple;
 				}
 			}
 		} else {
-			termArray[name] = term.text().toString();
+			termArray[form][name] = term.text().toString();
 		}
 	}
+	
+	return termArray;
 }
 
 /*
@@ -558,6 +552,10 @@ CSL.prototype._parseEtAl = function(etAl, bibCitElement) {
  * optional array of cs-format
  */
 CSL.prototype._parseBibliographyOptions = function() {
+	if(!this._csl.bibliography.length()) {
+		return;
+	}
+	
 	var bibliography = this._csl.bibliography;
 	this._bib = new Object();
 	
@@ -727,24 +725,24 @@ CSL.prototype._getFieldDefaults = function(elementName) {
 /*
  * gets a term, in singular or plural form
  */
-CSL.prototype._getTerm = function(term, plural, termSet) {
-	if(!termSet) {
-		termSet = "default";
+CSL.prototype._getTerm = function(term, plural, form) {
+	if(!form) {
+		form = "long";
 	}
-	if(!this._terms[termSet][term]) {
+	if(!this._terms[form][term]) {
 		return "";
 	}
 	
-	if(typeof(this._terms[termSet][term]) == "object") {	// singular and plural forms
-	                                                        // are available
+	if(typeof(this._terms[form][term]) == "object") {	// singular and plural forms
+	                                                    // are available
 		if(plural) {
-			return this._terms[termSet][term][1];
+			return this._terms[form][term][1];
 		} else {
-			return this._terms[termSet][term][0];
+			return this._terms[form][term][0];
 		}
 	}
 	
-	return this._terms[termSet][term];
+	return this._terms[form][term];
 }
 
 /*
@@ -915,10 +913,10 @@ CSL.prototype._formatLocator = function(identifier, element, number, format) {
 			} else if(child.name == "text") {
 				var plural = (identifier && (number.indexOf(",") != -1
 				              || number.indexOf("-") != -1));
-				string = this._getTerm(child["term-name"], plural);
+				string = this._getTerm(child["term-name"], plural, child["form"]);
 			} else if(identifier && child.name == "label") {
 				var plural = (number.indexOf(",") != -1 || number.indexOf("-") != -1);
-				string = this._getTerm(identifier, plural, child["term-set"]);
+				string = this._getTerm(identifier, plural, child["form"]);
 			}
 				
 			if(string) {
@@ -1216,7 +1214,7 @@ CSL.prototype._processCreators = function(type, element, creators, format, bibCi
 			}
 			string = authorStrings.join(joinString);
 		} else if(child.name == "label") {
-			string = this._getTerm(type, (maxCreators != 1), child["term-set"]);
+			string = this._getTerm(type, (maxCreators != 1), child["form"]);
 		}
 		
 		
