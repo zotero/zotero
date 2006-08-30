@@ -293,13 +293,18 @@ Scholar.Integration.DataListener.prototype._requestFinished = function(response)
 }
 
 Scholar.Integration.SOAP = new function() {
-	var window = Components.classes["@mozilla.org/appshell/appShellService;1"]
-				   .getService(Components.interfaces.nsIAppShellService)
-				   .hiddenDOMWindow;
-	
+	this.init = init;
 	this.getCitation = getCitation;
 	this.getBibliography = getBibliography;
 	this.setDocPrefs = setDocPrefs;
+	
+	var window;
+	
+	function init() {
+		window = Components.classes["@mozilla.org/appshell/appShellService;1"]
+					   .getService(Components.interfaces.nsIAppShellService)
+					   .hiddenDOMWindow;
+	}
 	
 	/*
 	 * generates a new citation for a given item
@@ -376,5 +381,3 @@ Scholar.Integration.SOAP = new function() {
 		return [io.style, styleClass];
 	}
 }
-
-Scholar.Integration.init();

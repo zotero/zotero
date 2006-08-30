@@ -84,6 +84,10 @@ var Scholar = new function(){
 		Scholar.Schema.updateSchema();
 		Scholar.Schema.updateScrapersRemote();
 		
+		// Initialize integration web server
+		Scholar.Integration.SOAP.init();
+		Scholar.Integration.init();
+		
 		_initialized = true;
 		return true;
 	}
