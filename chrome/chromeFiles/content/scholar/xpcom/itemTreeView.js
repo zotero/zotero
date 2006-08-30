@@ -221,9 +221,9 @@ Scholar.ItemTreeView.prototype.getCellText = function(row, column)
 	var obj = this._getItemAtRow(row);
 	var val;
 	
-	if(column.id == "numNotes")
+	if(column.id == "numChildren")
 	{
-		var c = obj.numNotes();
+		var c = obj.numChildren();
 		if(c)	//don't display '0'
 			val = c;
 	}
