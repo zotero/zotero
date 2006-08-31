@@ -1,4 +1,4 @@
--- 67
+-- 68
 
 -- Set the following timestamp to the most recent scraper update date
 REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-08-15 15:42:00'));
@@ -5659,6 +5659,7 @@ record.prototype.importBinary = function(record) {
 
 // add a field to this record
 record.prototype.addField = function(field, indicator, value) {
+	field = parseInt(field, 10);
 	// make sure indicator is the right length
 	if(indicator.length > this.indicatorLength) {
 		indicator = indicator.substr(0, this.indicatorLength);
@@ -5681,6 +5682,7 @@ record.prototype.addField = function(field, indicator, value) {
 
 // get all fields with a certain field number
 record.prototype.getField = function(field) {
+	field = parseInt(field, 10);
 	var fields = new Array();
 	
 	// make sure fields exist
