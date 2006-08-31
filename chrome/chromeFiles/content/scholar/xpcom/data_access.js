@@ -2800,10 +2800,6 @@ Scholar.Collections = new function(){
 		
 		var result = Scholar.DB.query(sql);
 		
-		if (!result){
-			throw ('No collections found');
-		}
-		
 		for (var i=0; i<result.length; i++){
 			var collectionID = result[i]['collectionID'];
 			
