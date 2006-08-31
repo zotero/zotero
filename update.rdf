@@ -13,7 +13,7 @@
               <id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</id>
               <minVersion>2.0a1+</minVersion>
               <maxVersion>3.0+</maxVersion>
-              <updateLink>http://chnm.gmu.edu/firefoxscholar/download/zotero.xpi</updateLink>
+              <updateLink>http://www.zotero.org/download/zotero.xpi</updateLink>
             </RDF:Description>
           </targetApplication>
         </RDF:Description>
@@ -34,7 +34,7 @@
               <id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</id>
               <minVersion>2.0a1+</minVersion>
               <maxVersion>3.0+</maxVersion>
-              <updateLink>http://chnm.gmu.edu/firefoxscholar/download/scholar-dev.xpi</updateLink>
+              <updateLink>http://www.zotero.org/download/scholar-dev.xpi</updateLink>
             </RDF:Description>
           </targetApplication>
         </RDF:Description>

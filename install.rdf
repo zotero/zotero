@@ -14,11 +14,11 @@
     <em:developer>Simon Kornblith</em:developer>
     <em:developer>David Norton</em:developer>
     <em:developer>Dan Stillman</em:developer>
-    <em:homepageURL>http://chnm.gmu.edu/tools/zotero/</em:homepageURL>
+    <em:homepageURL>http://www.zotero.org</em:homepageURL>
     <em:optionsURL>chrome://scholar/content/preferences.xul</em:optionsURL>
     <em:aboutURL>chrome://scholar/content/about.xul</em:aboutURL>
     <em:iconURL>chrome://scholar/skin/zotero_z_32px.png</em:iconURL>
-    <em:updateURL>http://chnm.gmu.edu/firefoxscholar/download/update-svn.rdf</em:updateURL>
+    <em:updateURL>http://www.zotero.org/download/update-svn.rdf</em:updateURL>
     <em:type>2</em:type> <!-- type=extension --> 
     
     <!-- Firefox -->
