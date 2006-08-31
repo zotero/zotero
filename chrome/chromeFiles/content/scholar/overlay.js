@@ -87,6 +87,11 @@ var ScholarPane = new function()
 		var itemTypes = Scholar.ItemTypes.getTypes();
 		for(var i = 0; i<itemTypes.length; i++)
 		{
+			// Don't allow new attachments through this menu
+			if (itemTypes[i]['name']=='attachment')
+			{
+				continue;
+			}
 			var menuitem = document.createElement("menuitem");
 			menuitem.setAttribute("label", Scholar.getString("itemTypes."+itemTypes[i]['name']));
 			menuitem.setAttribute("oncommand","ScholarPane.newItem("+itemTypes[i]['id']+")");
