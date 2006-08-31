@@ -1,4 +1,4 @@
--- 46
+-- 47
 
     DROP TABLE IF EXISTS version;
     CREATE TABLE version (
@@ -672,83 +672,10 @@
     INSERT INTO "charsets" VALUES(167, 'x0201');
     INSERT INTO "charsets" VALUES(168, 'x0212');
     
-    -- Some sample data
-    INSERT INTO "items" VALUES(1, 2, 'Online connections: Internet interpersonal relationships', '2006-03-12 05:24:40', '2006-03-12 05:24:40');
-    INSERT INTO "items" VALUES(2, 2, 'Computer-Mediated Communication: Human-to-Human Communication Across the Internet', '2006-03-12 05:25:50', '2006-03-12 05:25:50');
-    INSERT INTO "items" VALUES(3, 4, 'Residential propinquity as a factor in marriage selection', '2006-03-12 05:26:37', '2006-03-12 05:26:37');
-    INSERT INTO "items" VALUES(4, 2, 'Connecting: how we form social bonds and communities in the Internet age', '2006-03-12 05:27:15', '2006-03-12 05:27:15');
-    INSERT INTO "items" VALUES(5, 2, 'Male, Female, Email: The Struggle for Relatedness in a Paranoid Society', '2006-03-12 05:27:36', '2006-06-26 16:26:53');
-    INSERT INTO "items" VALUES(6, 4, 'Social Implications of Sociology', '2006-03-12 05:27:53', '2006-03-12 05:27:53');
-    INSERT INTO "items" VALUES(7, 2, 'Social Pressures in Informal Groups: A Study of Human Factors in Housing', '2006-03-12 05:28:05', '2006-03-12 05:28:05');
-    INSERT INTO "items" VALUES(8, 2, 'Cybersociety 2.0: Revisiting Computer-Mediated Community and Technology', '2006-03-12 05:28:37', '2006-03-12 05:28:37');
-    INSERT INTO "items" VALUES(9, 4, 'The Computer as a Communication Device', '2006-03-12 05:29:03', '2006-03-12 05:29:03');
-    INSERT INTO "items" VALUES(10, 4, 'What Does Research Say about the Nature of Computer-mediated Communication: Task-Oriented, Social-Emotion-Oriented, or Both?', '2006-03-12 05:29:12', '2006-03-12 05:29:12');
-    INSERT INTO "items" VALUES(11, 2, 'The second self: computers and the human spirit', '2006-03-12 05:30:38', '2006-03-12 05:30:38');
-    INSERT INTO "items" VALUES(12, 2, 'Life on the screen: identity in the age of the Internet', '2006-03-12 05:30:49', '2006-03-12 05:30:49');
-    INSERT INTO "items" VALUES(13, 4, 'The computer conference: An altered state of communication', '2006-03-12 05:31:00', '2006-03-12 05:31:00');
-    INSERT INTO "items" VALUES(14, 4, 'Computer Networks as Social Networks: Collaborative Work, Telework, and Community', '2006-03-12 05:31:17', '2006-03-12 05:31:17');
-    INSERT INTO "items" VALUES(15, 2, 'The Internet in everyday life', '2006-03-12 05:31:41', '2006-03-12 05:31:41');
-    INSERT INTO "items" VALUES(16, 1, NULL, '2006-06-29 05:57:14', '2006-06-29 05:57:19');
-    INSERT INTO "items" VALUES(17, 1, NULL, '2006-06-29 05:58:14', '2006-06-29 05:58:19');
-    
-    INSERT INTO "itemData" VALUES(1, 14, 2001);
-    INSERT INTO "itemData" VALUES(1, 7, 'Cresskill, N.J.');
-    INSERT INTO "itemData" VALUES(1, 8, 'Hampton Press');
-    INSERT INTO "itemData" VALUES(2, 14, 2002);
-    INSERT INTO "itemData" VALUES(2, 8, 'Allyn & Bacon Publishers');
-    INSERT INTO "itemData" VALUES(2, 10, 347);
-    INSERT INTO "itemData" VALUES(2, 11, '0-205-32145-3');
-    
     INSERT INTO "creatorTypes" VALUES(1, "author");
     INSERT INTO "creatorTypes" VALUES(2, "contributor");
     INSERT INTO "creatorTypes" VALUES(3, "editor");
     INSERT INTO "creatorTypes" VALUES(4, "translator");
     
-    INSERT INTO "creators" VALUES(1, 'Susan B.', 'Barnes', NULL);
-    INSERT INTO "creators" VALUES(2, 'J.S.', 'Bassard', NULL);
-    INSERT INTO "creators" VALUES(3, 'Mary', 'Chayko', NULL);
-    INSERT INTO "creators" VALUES(4, 'Michael', 'Civin', NULL);
-    INSERT INTO "creators" VALUES(5, 'Paul', 'DiMaggio', NULL);
-    INSERT INTO "creators" VALUES(6, 'Leon', 'Festinger', NULL);
-    INSERT INTO "creators" VALUES(7, 'Stanley', 'Schachter', NULL);
-    INSERT INTO "creators" VALUES(8, 'Kurt', 'Back', NULL);
-    INSERT INTO "creators" VALUES(9, 'Steven G.', 'Jones', NULL);
-    INSERT INTO "creators" VALUES(10, 'J.C.R.', 'Licklider', NULL);
-    INSERT INTO "creators" VALUES(11, 'Robert W.', 'Taylor', NULL);
-    INSERT INTO "creators" VALUES(12, 'Yuliang', 'Lui', NULL);
-    INSERT INTO "creators" VALUES(13, 'Sherry', 'Turkle', NULL);
-    INSERT INTO "creators" VALUES(14, 'J.', 'Vallee', NULL);
-    INSERT INTO "creators" VALUES(15, 'Barry', 'Wellman', NULL);
-    
-    INSERT INTO "itemCreators" VALUES(1, 1, 1, 0);
-    INSERT INTO "itemCreators" VALUES(2, 1, 1, 0);
-    INSERT INTO "itemCreators" VALUES(3, 2, 1, 0);
-    INSERT INTO "itemCreators" VALUES(4, 3, 1, 0);
-    INSERT INTO "itemCreators" VALUES(5, 4, 1, 0);
-    INSERT INTO "itemCreators" VALUES(6, 5, 1, 0);
-    INSERT INTO "itemCreators" VALUES(7, 6, 1, 0);
-    INSERT INTO "itemCreators" VALUES(8, 9, 1, 0);
-    INSERT INTO "itemCreators" VALUES(9, 10, 1, 0);
-    INSERT INTO "itemCreators" VALUES(10, 12, 1, 0);
-    INSERT INTO "itemCreators" VALUES(11, 13, 1, 0);
-    INSERT INTO "itemCreators" VALUES(12, 13, 1, 0);
-    INSERT INTO "itemCreators" VALUES(13, 14, 1, 0);
-    INSERT INTO "itemCreators" VALUES(14, 15, 1, 0);
-    INSERT INTO "itemCreators" VALUES(15, 15, 1, 0);
-    INSERT INTO "itemCreators" VALUES(7, 7, 1, 1);
-    INSERT INTO "itemCreators" VALUES(7, 8, 1, 2);
-    INSERT INTO "itemCreators" VALUES(9, 11, 1, 1);
-    
-    INSERT INTO "itemNotes" VALUES(16, 1, 'This item is note-worthy.');
-    INSERT INTO "itemNotes" VALUES(17, NULL, 'This is an independent note.');
-    
-    INSERT INTO collections VALUES (1241, 'Test Collection', NULL);
-    INSERT INTO collections VALUES (3262, 'Another Test Collection', NULL);
-    INSERT INTO collections VALUES (6856, 'Yet Another Collection', NULL);
-    INSERT INTO collections VALUES (7373, 'A Sub-collection!', 6856);
-    INSERT INTO collections VALUES (9233, 'A Sub-sub-collection!', 7373);
-    
-    INSERT INTO collectionItems VALUES (6856, 14, 0);
-    INSERT INTO collectionItems VALUES (6856, 13, 1);
-    INSERT INTO collectionItems VALUES (7373, 15, 0);
-    INSERT INTO collectionItems VALUES (1241, 12, 0);
+    INSERT INTO "items" VALUES(1233, 14, 'Zotero - Quick Start Guide', '2006-08-31 20:00:00', '2006-08-31 20:00:00');
+    INSERT INTO "itemAttachments" VALUES(1233, NULL, 3, 'text/html', 25, 'http://www.zotero.org/docs/quick_start_guide.php', NULL);
