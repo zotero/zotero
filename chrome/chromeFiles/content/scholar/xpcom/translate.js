@@ -241,15 +241,9 @@ Scholar.Translate.prototype.setLocation = function(location) {
  * sets the string to be used as a file
  */
 Scholar.Translate.prototype.setString = function(string) {
-	this.string = string;
-	this._createStorageStream();
-	
-	this._storageStreamLength = string.length;
-	
-	// write string
-	var fStream = this._storageStream.getOutputStream(0);
-	fStream.write(string, this._storageStreamLength);
-	fStream.close();
+	this._storage = string;
+	this._storageLength = string.length;
+	this._storagePointer = 0;
 }
 
 /*
@@ -467,7 +461,7 @@ Scholar.Translate.prototype.translate = function() {
 		throw("cannot translate: no translator specified");
 	}
 	
-	if(!this.location && this.type != "search" && !this._storageStream) {
+	if(!this.location && this.type != "search" && !this._storage) {
 		// searches operate differently, because we could have an array of
 		// translators and have to go through each
 		throw("cannot translate: no location specified");
@@ -475,6 +469,12 @@ Scholar.Translate.prototype.translate = function() {
 	
 	if(!this._loadTranslator()) {
 		return;
+	}
+	
+	if(this._storage) {
+		// enable reading from storage, which we can't do until the translator
+		// is loaded
+		this._storageFunctions(true);
 	}
 	
 	// hack to see if there are any options, bc length does not work on objects
@@ -1296,17 +1296,11 @@ Scholar.Translate.prototype._import = function() {
  * sets up import for IO
  */
 Scholar.Translate.prototype._importConfigureIO = function() {
-	if(this._storageStream) {		
+	if(this._storage) {
 		if(this._configOptions.dataMode == "rdf") {
 			this._rdf = new Object();
 			
 			// read string out of storage stream
-			var sStream = Components.classes["@mozilla.org/scriptableinputstream;1"].
-						  createInstance(Components.interfaces.nsIScriptableInputStream);
-			sStream.init(this._storageStream.newInputStream(0));
-			var str = sStream.read(this._storageStreamLength);
-			sStream.close();
-			
 			var IOService = Components.classes['@mozilla.org/network/io-service;1']
 							.getService(Components.interfaces.nsIIOService);
 			this._rdf.dataSource = Components.classes["@mozilla.org/rdf/datasource;1?name=in-memory-datasource"].
@@ -1316,19 +1310,13 @@ Scholar.Translate.prototype._importConfigureIO = function() {
 			
 			// get URI and parse
 			var baseURI = (this.location ? IOService.newURI(this.location, "utf-8", null) : null);
-			parser.parseString(this._rdf.dataSource, baseURI, str);
+			parser.parseString(this._rdf.dataSource, baseURI, this._storage);
 			
 			// make an instance of the RDF handler
 			this._sandbox.Scholar.RDF = new Scholar.Translate.RDF(this._rdf.dataSource);
 		} else {
-			this._storageStreamFunctions(true);
-			
-			if(this._scriptableStream) {
-				// close scriptable stream so functions will be forced to get a
-				// new one
-				this._scriptableStream.close();
-				this._scriptableStream = undefined;
-			}
+			this._storageFunctions(true);
+			this._storagePointer = 0;
 		}
 	} else {
 		if(this._configOptions.dataMode == "rdf") {
@@ -1619,37 +1607,25 @@ Scholar.Translate.prototype._initializeInternalIO = function() {
 			// make an instance of the RDF handler
 			this._sandbox.Scholar.RDF = new Scholar.Translate.RDF(this._rdf.dataSource);
 		} else {
-			this._createStorageStream();
-			this._storageStreamFunctions(true, true);
+			this._storage = "";
+			this._storageLength = 0;
+			this._storagePointer = 0;
+			this._storageFunctions(true, true);
 		}
 	}
 }
 
 /*
- * creates and returns storage stream
- */
-Scholar.Translate.prototype._createStorageStream = function() {
-	// create a storage stream
-	this._storageStream = Components.classes["@mozilla.org/storagestream;1"].
-				  createInstance(Components.interfaces.nsIStorageStream);
-	this._storageStream.init(4096, 4294967295, null);	// virtually no size limit
-}
-
-/*
  * sets up functions for reading/writing to a storage stream
  */
-Scholar.Translate.prototype._storageStreamFunctions =  function(read, write) {
+Scholar.Translate.prototype._storageFunctions =  function(read, write) {
 	var me = this;
 	if(write) {
 		// set up write() method
-		var fStream = this._storageStream.getOutputStream(0);
-		this._sandbox.Scholar.write = function(data) { fStream.write(data, data.length) };		
-		
-		// set Scholar.eof() to close the storage stream
-		this._sandbox.Scholar.eof = function() {
-			fStream.QueryInterface(Components.interfaces.nsIOutputStream);
-			fStream.close();
-		}
+		this._sandbox.Scholar.write = function(data) {
+			me._storage += data;
+			me._storageLength += data.length;
+		};		
 	}
 	
 	if(read) {
@@ -1658,51 +1634,45 @@ Scholar.Translate.prototype._storageStreamFunctions =  function(read, write) {
 			var lastCharacter;
 			
 			this._sandbox.Scholar.read = function() {
-				if(!me._scriptableStream) {	// allocate an fStream and sStream on the fly
-								                // otherwise with no data we get an error
-					me._scriptableStream = Components.classes["@mozilla.org/scriptableinputstream;1"].
-								             createInstance(Components.interfaces.nsIScriptableInputStream);
-					me._scriptableStream.init(me._storageStream.newInputStream(0));
-			
-					// attach sStream to stack of streams to close
-					me._streams.push(me._scriptableStream);
-				}
-			
-				var character = me._scriptableStream.read(1);
-				if(!character) {
+				if(me._storagePointer >= me._storageLength) {
 					return false;
 				}
-				var string = "";
 				
-				if(lastCharacter == "\r" && character == "\n") {
-					// if the last read got a cr, and this first char was
-					// an lf, ignore the lf
-					character = "";
+				var oldPointer = me._storagePointer;
+				var lfIndex = me._storage.indexOf("\n", me._storagePointer);
+				
+				if(lfIndex != -1) {
+					// in case we have a CRLF
+					me._storagePointer = lfIndex+1;
+					if(me._storageLength > lfIndex && me._storage[lfIndex-1] == "\r") {
+						lfIndex--;
+					}
+					return me._storage.substr(oldPointer, lfIndex-oldPointer);					
 				}
 				
-				while(character != "\n" && character != "\r" && character) {
-					string += character;
-					character = me._scriptableStream.read(1);
+				var crIndex = me._storage.indexOf("\r", me._storagePointer);
+				if(crIndex != -1) {
+					me._storagePointer = crIndex+1;
+					return me._storage.substr(oldPointer, crIndex-oldPointer-1);
 				}
 				
-				lastCharacter = character;
-				
-				return string;
+				me._storagePointer = me._storageLength;
+				return me._storage;
 			}
-		} else {								// block reading
+		} else {									// block reading
 			this._sandbox.Scholar.read = function(amount) {
-				if(!me._scriptableStream) {	// allocate an fStream and
-										        // sStream on the fly; otherwise
-										        // with no data we get an error
-					me._scriptableStream = Components.classes["@mozilla.org/scriptableinputstream;1"].
-								             createInstance(Components.interfaces.nsIScriptableInputStream);
-					me._scriptableStream.init(me._storageStream.newInputStream(0));
-			
-					// attach sStream to stack of streams to close
-					me._streams.push(me._scriptableStream);
+				if(me._storagePointer >= me._storageLength) {
+					return false;
 				}
 				
-				return me._scriptableStream.read(amount);
+				if((me._storagePointer+amount) <= me._storageLength) {
+					me._storagePointer = me._storageLength;
+					return me._storage;
+				}
+				
+				var oldPointer = me._storagePointer;
+				me._storagePointer += amount;
+				return me._storage.substr(oldPointer, amount);
 			}
 		}
 	}

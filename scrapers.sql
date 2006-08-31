@@ -1,4 +1,4 @@
--- 68
+-- 69
 
 -- Set the following timestamp to the most recent scraper update date
 REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-08-15 15:42:00'));
@@ -3038,7 +3038,7 @@ function doWeb(doc, url) {
 	var urls = new Array();
 	for(var i in items) {
 		var m = relatedMatch.exec(relatedLinks[i]);
-		urls.push("http://scholar.google.com/scholar.ris?hl=en&lr=&q=info:"+m[1]+"&output=citation&oi=citation");
+		urls.push("http://scholar.google.com/scholar.ris?hl=en&lr=&q=info:"+m[1]+"&oe=UTF-8&output=citation&oi=citation");
 		if(links[i]) {
 			attachments.push([{title:"Google Scholar Linked Page", type:"text/html",
 			                  url:links[i]}]);
@@ -3150,24 +3150,24 @@ function doWeb(doc, url) {
 	Scholar.wait();
 }');
 
-REPLACE INTO "translators" VALUES ('d0b1914a-11f1-4dd7-8557-b32fe8a3dd47', '2006-08-18 18:03:00', 4, 'EBSCOhost', 'Simon Kornblith', '^http://web\.ebscohost\.com/ehost/(?:results|detail)', 
+REPLACE INTO "translators" VALUES ('d0b1914a-11f1-4dd7-8557-b32fe8a3dd47', '2006-08-18 18:03:00', 4, 'EBSCOhost', 'Simon Kornblith', '^http://[^/]+/ehost/(?:results|detail)', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == ''x'') return namespace; else return null;
 	} : null;
 	
-	var searchRe = new RegExp("^http://web\\.ebscohost\\.com/ehost/results", "i");
-	
 	// See if this is a seach results page
-	if(searchRe.test(url)) {
+	var searchResult = doc.evaluate(''//table[@class="result-list-inner"]'', doc, nsResolver,
+	                                XPathResult.ANY_TYPE, null).iterateNext();
+	if(searchResult) {
 		return "multiple";
-	} else {
-		var persistentLink = doc.evaluate(''//tr[td[@class="left-content-ft"]/text() = "Persistent link to this record:"]/td[@class="right-content-ft"]'',
-		                                  doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-		if(persistentLink) {
-			return "journalArticle";
-		}
+	}
+
+	var persistentLink = doc.evaluate(''//tr[td[@class="left-content-ft"]/text() = "Persistent link to this record:"]/td[@class="right-content-ft"]'',
+									  doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+	if(persistentLink) {
+		return "journalArticle";
 	}
 }',
 'function fullEscape(text) {
@@ -3180,6 +3180,10 @@ function doWeb(doc, url) {
 		if (prefix == ''x'') return namespace; else return null;
 	} : null;
 	
+	var hostRe = new RegExp("^http://([^/]+)/");
+	var m = hostRe.exec(url);
+	var host = m[1];
+	
 	var queryRe = /\?(.*)$/;
 	var m = queryRe.exec(url);
 	var queryString = m[1];
@@ -3191,8 +3195,9 @@ function doWeb(doc, url) {
 								 XPathResult.ANY_TYPE, null).iterateNext();
 	viewState = fullEscape(viewState.value);
 	
-	var searchRe = new RegExp("^http://web\\.ebscohost\\.com/ehost/results", "i");
-	if(searchRe.test(url)) {
+	var searchResult = doc.evaluate(''//table[@class="result-list-inner"]'', doc, nsResolver,
+	                                XPathResult.ANY_TYPE, null).iterateNext();
+	if(searchResult) {
 		var items = new Object();
 		
 		var tableRows = doc.evaluate(''//table[@class="cluster-result-record-table"]/tbody/tr'',
@@ -3253,7 +3258,7 @@ function doWeb(doc, url) {
 			folderBase += "&__EVENTVALIDATION="+fullEscape(folderEventValidation);
 			var deliverString = "__EVENTTARGET=ctl00%24ctl00%24MainContentArea%24MainContentArea%24btnDelivery%24lnkSave&"+folderBase
 			
-			Scholar.Utilities.HTTP.doPost("http://web.ebscohost.com/ehost/"+folderURL,
+			Scholar.Utilities.HTTP.doPost("http://"+host+"/ehost/"+folderURL,
 										  deliverString, function(text) {
 				var postLocation = /<form name="aspnetForm" method="post" action="([^"]+)"/
 				var m = postLocation.exec(text);
@@ -3262,13 +3267,13 @@ function doWeb(doc, url) {
 				var m = viewStateMatch.exec(text);
 				var downloadString = "__EVENTTARGET=&__EVENTARGUMENT=&__VIEWSTATE="+fullEscape(m[1])+"&ctl00%24ctl00%24MainContentArea%24MainContentArea%24ctl01%24chkRemoveFromFolder=on&ctl00%24ctl00%24MainContentArea%24MainContentArea%24ctl01%24btnSubmit=Save&ctl00%24ctl00%24MainContentArea%24MainContentArea%24ctl01%24BibFormat=1";
 
-				Scholar.Utilities.HTTP.doPost("http://web.ebscohost.com/ehost/"+deliveryURL,
+				Scholar.Utilities.HTTP.doPost("http://"+host+"/ehost/"+deliveryURL,
 				                         getString, function(text) {					
-					Scholar.Utilities.HTTP.doPost("http://web.ebscohost.com/ehost/"+deliveryURL,
+					Scholar.Utilities.HTTP.doPost("http://"+host+"/ehost/"+deliveryURL,
 												 downloadString, function(text) {	// get marked
 						var form = doc.createElement("form");
 						form.setAttribute("method", "post");
-						form.setAttribute("action", "http://web.ebscohost.com/ehost/"+folderURL);
+						form.setAttribute("action", "http://"+host+"/ehost/"+folderURL);
 						var args = [
 							["__EVENTARGUMENT", ""],
 							["__VIEWSTATE", folderViewState],

@@ -737,7 +737,7 @@ Scholar.Date = new function(){
 			var months = CSL.getMonthStrings("long");
 			string += months[date.month];
 			if(date.day) {
-				string += ", "+date.day;
+				string += " "+parseInt(date.day, 10).toString()+", ";
 			} else {
 				string += " ";
 			}
