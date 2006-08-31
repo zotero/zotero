@@ -661,7 +661,7 @@ Scholar.Date = new function(){
 			Scholar.debug("DATE: used form 1: SQL");
 			var jsDate = new Date(m[1], m[2]-1, m[3], false, false, false);
 		} else {	// not an sql date
-			var yearRe = /^((?:circa |around |about |c\.? ?)[0-9]{1,4}(?: ?B\.? ?C\.?(?: ?E\.?)?| ?C\.? ?E\.?| ?A\.? ?D\.?)|[0-9]{4})$/i;
+			var yearRe = /^[0-9]+$/i;
 			if(yearRe.test(string)) {
 				// is just a year
 				Scholar.debug("DATE: used form 2: year-only");
@@ -685,7 +685,7 @@ Scholar.Date = new function(){
 		// no javascript date. time for cruder things.
 		
 		// first, see if we have anything resembling a year
-		var yearRe = /^(.*)\b((?:circa |around |about |c\.? ?)[0-9]{1,4}(?: ?B\.? ?C\.?(?: ?E\.?)?| ?C\.? ?E\.?| ?A\.? ?D\.?)|[0-9]{4})\b(.*)$/i;
+		var yearRe = /^(.*)\b((?:circa |around |about |c\.? ?)?[0-9]{1,4}(?: ?B\.? ?C\.?(?: ?E\.?)?| ?C\.? ?E\.?| ?A\.? ?D\.?)|[0-9]{3,4})\b(.*)$/i;
 		
 		var m = yearRe.exec(string);
 		if(m) {
@@ -705,7 +705,7 @@ Scholar.Date = new function(){
 				Scholar.debug("DATE: got month ("+date.month+", "+date.part+")");
 				
 				// then, see if there's a day 
-				var dayRe = /^(.*)\b([0-9]{1,2})\b(.*)$/i;
+				var dayRe = /^(.*)\b([0-9]{1,2})(?:st|nd|rd|th)?\b(.*)$/i;
 				var m = dayRe.exec(date.part);
 				if(m) {
 					date.day = m[2];
