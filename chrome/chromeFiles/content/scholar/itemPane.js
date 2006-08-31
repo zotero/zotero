@@ -84,6 +84,17 @@ var ScholarItemPane = new function()
 	 */
 	function viewItem(thisItem)
 	{
+		// Force blur() when clicking off a textbox to another item in middle
+		// pane, since for some reason it's not being called automatically
+		if (_itemBeingEdited && _itemBeingEdited!=thisItem)
+		{
+			var boxes = _dynamicFields.getElementsByTagName('textbox');
+			if (boxes.length==1)
+			{
+				boxes[0].inputField.blur();
+			}
+		}
+		
 		_itemBeingEdited = thisItem;
 		
 		_loaded = {};
