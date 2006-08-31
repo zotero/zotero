@@ -2,7 +2,7 @@ const SCHOLAR_CONFIG = {
 	GUID: 'zotero@chnm.gmu.edu',
 	DB_FILE: 'zotero.sqlite',
 	DB_REBUILD: false, // erase DB and recreate from schema
-	DEBUG_LOGGING: true,
+	DEBUG_LOGGING: false,
 	DEBUG_TO_CONSOLE: true, // dump debug messages to console rather than (much slower) Debug Logger
 	REPOSITORY_URL: 'http://www.zotero.org/repo',
 	REPOSITORY_CHECK_INTERVAL: 86400, // 24 hours
