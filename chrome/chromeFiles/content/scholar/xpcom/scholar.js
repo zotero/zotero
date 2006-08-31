@@ -653,7 +653,7 @@ Scholar.Date = new function(){
 			return date;
 		}
 		
-		string = string.replace(/^\s+/, "").replace(/\s+$/, "").replace(/\s+/, " ");
+		string = string.toString().replace(/^\s+/, "").replace(/\s+$/, "").replace(/\s+/, " ");
 		
 		var dateRe = /^([0-9]{4})[\-\/]([0-9]{2})[\-\/]([0-9]{2})$/;
 		var m = dateRe.exec(string);
