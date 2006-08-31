@@ -62,8 +62,8 @@
  *                     among other things, disables passing of the translate
  *                     object to handlers and modifies complete() function on 
  *                     returned items
- * _storageStream - the storage stream to be used, if one is configured
- * _storageStreamLength - the length of the storage stream
+ * _storage - the stored string to be treated as input
+ * _storageLength - the length of the stored string
  * _exportFileDirectory - the directory to which files will be exported
  *
  * WEB-ONLY PRIVATE PROPERTIES:
