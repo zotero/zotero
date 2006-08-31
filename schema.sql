@@ -1,4 +1,4 @@
--- 45
+-- 46
 
     DROP TABLE IF EXISTS version;
     CREATE TABLE version (
@@ -60,7 +60,7 @@
     CREATE TABLE itemData (
         itemID INT,
         fieldID INT,
-        value NONE,
+        value,
         PRIMARY KEY (itemID, fieldID),
         FOREIGN KEY (itemID) REFERENCES items(itemID),
         FOREIGN KEY (fieldID) REFERENCES fields(fieldID)
