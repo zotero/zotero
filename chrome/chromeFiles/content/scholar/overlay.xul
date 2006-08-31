@@ -189,7 +189,7 @@
 						</vbox>
 						<vbox id="scholar-view-attachment" flex="1">
 							<label id="scholar-attachment-label"/>
-							<button id="scholar-attachment-view" label="View Attachment" oncommand="ScholarPane.viewSelectedAttachment();"/>
+							<button id="scholar-attachment-view" oncommand="ScholarPane.viewSelectedAttachment();"/>
 							<linksbox id="scholar-attachment-links" flex="1"/>
 						</vbox>
 					</deck>

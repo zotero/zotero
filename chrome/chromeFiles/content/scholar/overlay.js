@@ -228,7 +228,16 @@ var ScholarPane = new function()
 			else if(item.isAttachment())
 			{
 				document.getElementById('scholar-attachment-label').setAttribute('value',item.getField('title'));
-				document.getElementById('scholar-attachment-view').setAttribute('disabled', item.ref.getAttachmentLinkMode() == Scholar.Attachments.LINK_MODE_LINKED_URL);
+				if (item.ref.getAttachmentLinkMode() == Scholar.Attachments.LINK_MODE_LINKED_URL
+					|| item.ref.getAttachmentLinkMode() == Scholar.Attachments.LINK_MODE_IMPORTED_URL)
+				{
+					var str = Scholar.getString('pane.item.attachments.view.link');
+				}
+				else
+				{
+					var str = Scholar.getString('pane.item.attachments.view.file');
+				}
+				document.getElementById('scholar-attachment-view').setAttribute('label', str);
 				document.getElementById('scholar-attachment-links').item = item.ref;
 				document.getElementById('item-pane').selectedIndex = 3;
 			}
