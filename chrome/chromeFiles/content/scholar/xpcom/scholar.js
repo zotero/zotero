@@ -603,6 +603,7 @@ Scholar.Hash.prototype.has = function(in_key){
 Scholar.Date = new function(){
 	this.sqlToDate = sqlToDate;
 	this.strToDate = strToDate;
+	this.formatDate = formatDate;
 	this.getFileDateString = getFileDateString;
 	this.getFileTimeString = getFileTimeString;
 	
@@ -652,9 +653,6 @@ Scholar.Date = new function(){
 			return date;
 		}
 		
-		// get short month strings from CSL interpreter
-		var months = CSL.getMonthStrings("short");
-		
 		string = string.replace(/^\s+/, "").replace(/\s+$/, "").replace(/\s+/, " ");
 		
 		var dateRe = /^([0-9]{4})[\-\/]([0-9]{2})[\-\/]([0-9]{2})$/;
@@ -695,6 +693,9 @@ Scholar.Date = new function(){
 			date.part = m[1]+m[3];
 			Scholar.debug("DATE: got year ("+date.year+", "+date.part+")");
 			
+			// get short month strings from CSL interpreter
+			var months = CSL.getMonthStrings("short");
+			
 			// then, see if have anything resembling a month anywhere
 			var monthRe = new RegExp("^(.*)\\b("+months.join("|")+")[^ ]* (.*)$", "i");
 			var m = monthRe.exec(date.part);
@@ -719,6 +720,34 @@ Scholar.Date = new function(){
 		}
 		
 		return date;
+	}
+	
+	/*
+	 * does pretty formatting of a date object returned by strToDate()
+	 */
+	function formatDate(date) {
+		var string = "";
+		
+		if(date.part) {
+			string += date.part+" ";
+		}
+		
+		if(date.month) {
+			// get short month strings from CSL interpreter
+			var months = CSL.getMonthStrings("long");
+			string += months[date.month];
+			if(date.day) {
+				string += ", "+date.day;
+			} else {
+				string += " ";
+			}
+		}
+		
+		if(date.year) {
+			string += date.year;
+		}
+		
+		return string;
 	}
 	
 	function getFileDateString(file){

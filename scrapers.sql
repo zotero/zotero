@@ -1,4 +1,4 @@
--- 66
+-- 67
 
 -- Set the following timestamp to the most recent scraper update date
 REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-08-15 15:42:00'));
@@ -46,12 +46,7 @@ REPLACE INTO "translators" VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006
 				
 				if(attribute == "Publisher:") {
 					if(value.lastIndexOf("(") != -1) {
-						var date = value.substring(value.lastIndexOf("(")+1, value.length-1);
-						jsDate = new Date(date);
-						if(!isNaN(jsDate.valueOf())) {
-							date = Scholar.Utilities.dateToSQL(jsDate);
-						}
-						newItem.date = date;
+						newItem.date = value.substring(value.lastIndexOf("(")+1, value.length-1);
 						
 						value = value.substring(0, value.lastIndexOf("(")-1);
 					}
@@ -638,12 +633,7 @@ function doWeb(doc, url) {
 						} else if(fieldCode == "SE") {
 							newItem.seriesTitle = fieldContent;
 						} else if(fieldCode == "DA") {
-							var date = new Date(fieldContent.replace(".", ""));
-							if(isNaN(date.valueOf())) {
-								newItem.date = fieldContent;
-							} else {
-								newItem.date = Scholar.Utilities.dateToSQL(date);
-							}
+							newItem.date = fieldContent;
 						} else if(fieldCode == "PP") {
 							newItem.pages = fieldContent;
 						} else if(fieldCode == "EI") {
@@ -1131,8 +1121,6 @@ REPLACE INTO "translators" VALUES ('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '2006
 	}
 }',
 'function scrape(doc) {
-	Scholar.Utilities.debug(doc.getElementsByTagName("body")[0].innerHTML);
-	
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == ''x'') return namespace; else return null;
@@ -1174,12 +1162,7 @@ REPLACE INTO "translators" VALUES ('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '2006
 			
 			var date = doc.evaluate(''./TD[2]/A[2]/text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();		
 			if(date.nodeValue) {
-				date = date.nodeValue;
-				var jsDate = new Date(Scholar.Utilities.superCleanString(date));
-				if(!isNaN(jsDate.valueOf())) {
-					date = Scholar.Utilities.dateToSQL(jsDate);
-				}
-				newItem.date = date;
+				newItem.date = date.nodeValue;
 			}
 			
 			var moreInfo = doc.evaluate(''./TD[2]/text()[2]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
@@ -1639,8 +1622,7 @@ REPLACE INTO "translators" VALUES ('b047a13c-fe5c-6604-c997-bef15e502b09', '2006
 	var dateRegexp = /<br[^>]*>(?:<b>)?([A-Z][a-z]+)(?:<\/b>)? ([0-9]+, [0-9]{4})/;
 	var m = dateRegexp.exec(centerElements[centerElements.length-1].innerHTML);
 	if(m) {
-		var jsDate = new Date(m[1]+" "+m[2]);
-		newItem.date = Scholar.Utilities.dateToSQL(jsDate);
+		newItem.date = m[1]+" "+m[2];
 	} else {
 		var elementParts = centerElements[centerElements.length-1].innerHTML.split(/<br[^>]*>/gi);
 		newItem.date = elementParts[1];
@@ -2619,10 +2601,11 @@ function detectSearch(item) {
 					newItem.ISSN = issn.replace(/[^0-9]/g, "");
 				}
 				
+				newItem.journalAbbreviation = Scholar.Utilities.superCleanString(citation.MedlineJournalInfo.MedlineTA.text().toString());
 				if(article.Journal.Title.length()) {
 					newItem.publicationTitle = Scholar.Utilities.superCleanString(article.Journal.Title.text().toString());
 				} else if(citation.MedlineJournalInfo.MedlineTA.length()) {
-					newItem.publicationTitle = Scholar.Utilities.superCleanString(citation.MedlineJournalInfo.MedlineTA.text().toString());
+					newItem.publicationTitle = newItem.journalAbbreviation;
 				}
 				
 				if(article.Journal.JournalIssue.length()) {
@@ -2630,19 +2613,11 @@ function detectSearch(item) {
 					newItem.issue = article.Journal.JournalIssue.Issue.text();
 					if(article.Journal.JournalIssue.PubDate.length()) {	// try to get the date
 						if(article.Journal.JournalIssue.PubDate.Day.text().toString() != "") {
-							var date = article.Journal.JournalIssue.PubDate.Month.text()+" "+article.Journal.JournalIssue.PubDate.Day.text()+", "+article.Journal.JournalIssue.PubDate.Year.text();
-							var jsDate = new Date(date);
-							if(!isNaN(jsDate.valueOf())) {
-								date = Scholar.Utilities.dateToSQL(jsDate);
-							}
+							newItem.date = article.Journal.JournalIssue.PubDate.Month.text()+" "+article.Journal.JournalIssue.PubDate.Day.text()+", "+article.Journal.JournalIssue.PubDate.Year.text();
 						} else if(article.Journal.JournalIssue.PubDate.Month.text().toString() != "") {
-							var date = article.Journal.JournalIssue.PubDate.Month.text()+" "+article.Journal.JournalIssue.PubDate.Year.text();
+							newItem.date = article.Journal.JournalIssue.PubDate.Month.text()+" "+article.Journal.JournalIssue.PubDate.Year.text();
 						} else if(article.Journal.JournalIssue.PubDate.Year.text().toString() != "") {
-							var date = article.Journal.JournalIssue.PubDate.Year.text();
-						}
-						
-						if(date) {
-							newItem.date = date;
+							newItem.date = article.Journal.JournalIssue.PubDate.Year.text();
 						}
 					}
 				}
@@ -2733,7 +2708,9 @@ REPLACE INTO "translators" VALUES ('951c027d-74ac-47d4-a107-9c3069ab7b48', '2006
 	var dc = "http://purl.org/dc/elements/1.1/";
 
 	// load RDF translator
-	var translator = Scholar.loadTranslator("import", "5e3ad958-ac79-463d-812b-a86a9235c28f");
+	var translator = Scholar.loadTranslator("import");
+	translator.setTranslator("5e3ad958-ac79-463d-812b-a86a9235c28f");
+	var rdf = translator.getTranslatorObject();
 	
 	var metaTags = doc.getElementsByTagName("meta");
 	var foundTitle = false;		// We can use the page title if necessary
@@ -2744,20 +2721,20 @@ REPLACE INTO "translators" VALUES ('951c027d-74ac-47d4-a107-9c3069ab7b48', '2006
 			if(tag == "dc.title") {
 				foundTitle = true;
 			}
-			translator.Scholar.RDF.addStatement(url, dc + tag.substr(3), value, true);
+			rdf.Scholar.RDF.addStatement(url, dc + tag.substr(3), value, true);
 			Scholar.Utilities.debug(tag.substr(3) + " = " + value);
 		} else if(tag && value && (tag == "author" || tag == "author-personal")) {
-			translator.Scholar.RDF.addStatement(url, dc + "creator", value, true);
+			rdf.Scholar.RDF.addStatement(url, dc + "creator", value, true);
 		} else if(tag && value && tag == "author-corporate") {
-			translator.Scholar.RDF.addStatement(url, dc + "creator", value, true);
+			rdf.Scholar.RDF.addStatement(url, dc + "creator", value, true);
 		}
 	}
 	
 	if(!foundTitle) {
-		translator.Scholar.RDF.addStatement(url, dc + "title", doc.title, true);
+		rdf.Scholar.RDF.addStatement(url, dc + "title", doc.title, true);
 	}
 	
-	translator.doImport();
+	rdf.doImport();
 }');
 
 REPLACE INTO "translators" VALUES ('05d07af9-105a-4572-99f6-a8e231c0daef', '2006-08-07 01:09:00', 4, 'COinS', 'Simon Kornblith', NULL,
@@ -2964,16 +2941,7 @@ REPLACE INTO "translators" VALUES ('3e684d82-73a3-9a34-095f-19b112d88bbf', '2006
 				} else if(field == "Publisher") {
 					newItem.publisher = value;
 				} else if(field == "Publication Date") {
-					var date = value;
-					
-					jsDate = new Date(value);
-					if(!isNaN(jsDate.valueOf())) {
-						date = Scholar.Utilities.dateToSQL(jsDate);
-					}
-					
-					newItem.date = date;
-				/*} else if(field == "Format") {
-					.addStatement(uri, prefixDC + ''medium'', value);*/
+					newItem.date = value;
 				} else if(field == "ISBN") {
 					newItem.ISBN = value;
 				} else if(field == "Pages") {
@@ -3981,11 +3949,10 @@ function doExport() {
 				var dateType = "dateCreated";
 			}
 			var tag = <{dateType}>{item.date}</{dateType}>;
-			tag.@encoding = "iso8601";
 			originInfo += tag;
 		}
 		if(item.accessDate) {
-			originInfo += <dateCaptured encoding="iso8601">{item.accessDate}</dateCaptured>;
+			originInfo += <dateCaptured>{item.accessDate}</dateCaptured>;
 		}
 		if(originInfo.length() != 1) {
 			if(isPartialItem) {
@@ -4629,6 +4596,11 @@ function doExport() {
 			Scholar.RDF.addStatement((containerElement ? containerElement : resource), n.dcterms+"alternative", item.journalAbbreviation, true);
 		}
 		
+		// extra
+		if(item.extra) {
+			Scholar.RDF.addStatement(resource, n.dc+"description", item.extra, true);
+		}
+		
 		/** NOTES **/
 		
 		if(Scholar.getOption("exportNotes")) {
@@ -5190,6 +5162,9 @@ function doImport() {
 		
 		// see also
 		processSeeAlso(node, newItem);
+		
+		// description
+		newItem.extra = getFirstResults(node, [n.dc+"description"], true);
 	
 		/** NOTES **/
 		
@@ -5371,13 +5346,19 @@ function processTag(item, tag, value) {
 		if(dateParts.length == 1) {
 			// technically, if there''s only one date part, the file isn''t valid
 			// RIS, but EndNote accepts this, so we have to too
-			item.date = value+"-00-00";
-		} else if(dateParts[1].length == 0 && dateParts[2].length == 0 && dateParts[3] && dateParts[3].length != 0) {
-			// in the case that we have a year and other data, format that way
-			item.date = dateParts[3]+(dateParts[0] ? " "+dateParts[0] : "");
+			item.date = value;
 		} else {
-			// standard YMD data
-			item.date = Scholar.Utilities.lpad(dateParts[0], "0", 4)+"-"+Scholar.Utilities.lpad(dateParts[1], "0", 2)+"-"+Scholar.Utilities.lpad(dateParts[2], "0", 2);
+			// in the case that we have a year and other data, format that way
+			
+			var month = parseInt(dateParts[1]);
+			if(month) {
+				month--;
+			}
+			
+			item.date = Scholar.Utilities.formatDate({year:dateParts[0],
+			                                          month:month,
+			                                          day:dateParts[2],
+			                                          part:dateParts[3]});
 		}
 	} else if(tag == "N1" || tag == "AB") {
 		// notes

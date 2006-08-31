@@ -15,28 +15,8 @@ Scholar.Utilities.prototype.debug = function(msg) {
 /*
  * Converts a JavaScript date object to an SQL-style date
  */
-Scholar.Utilities.prototype.dateToSQL = function(jsDate) {
-	var date = "";
-	var year = jsDate.getFullYear().toString();
-	var month = (jsDate.getMonth()+1).toString();
-	var day = jsDate.getDate().toString();
-	
-	for(var i = year.length; i<4; i++) {
-		date += "0";
-	}
-	date += year+"-";
-	
-	if(month.length == 1) {
-		date += "0";
-	}
-	date += month+"-";
-	
-	if(day.length == 1) {
-		date += "0";
-	}
-	date += day;
-	
-	return date;
+Scholar.Utilities.prototype.formatDate = function(date) {
+	return Scholar.Date.formatDate(date);
 }
 
 /*

@@ -1611,6 +1611,7 @@ Scholar.Translate.prototype._exportGetCollection = function() {
 Scholar.Translate.prototype._initializeInternalIO = function() {
 	if(this.type == "import" || this.type == "export") {
 		if(this._configOptions.dataMode == "rdf") {
+			this._rdf = new Object();
 			// use an in-memory data source for internal IO
 			this._rdf.dataSource = Components.classes["@mozilla.org/rdf/datasource;1?name=in-memory-datasource"].
 							 createInstance(Components.interfaces.nsIRDFDataSource);
