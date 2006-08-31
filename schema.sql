@@ -311,7 +311,6 @@
     INSERT INTO fields VALUES (13,'ISSN',NULL);
     INSERT INTO fields VALUES (14,'date',NULL);
     INSERT INTO fields VALUES (15,'section',NULL);
-    INSERT INTO fields VALUES (16,'thesisType',NULL);
     INSERT INTO fields VALUES (17,'accessionNumber',NULL);
     INSERT INTO fields VALUES (18,'callNumber',NULL);
     INSERT INTO fields VALUES (19,'archiveLocation',NULL);
@@ -399,7 +398,7 @@
     INSERT INTO itemTypeFields VALUES (6, 27, NULL, 11);
     INSERT INTO itemTypeFields VALUES (6, 22, NULL, 12);
     INSERT INTO itemTypeFields VALUES (7, 8, NULL, 1);
-    INSERT INTO itemTypeFields VALUES (7, 16, NULL, 2);
+    INSERT INTO itemTypeFields VALUES (7, 24, NULL, 2);
     INSERT INTO itemTypeFields VALUES (7, 14, NULL, 3);
     INSERT INTO itemTypeFields VALUES (7, 10, NULL, 4);
     INSERT INTO itemTypeFields VALUES (7, 18, NULL, 5);
