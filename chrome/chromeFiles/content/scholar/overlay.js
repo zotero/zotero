@@ -291,8 +291,26 @@ var ScholarPane = new function()
 	
 	function deleteSelectedCollection()
 	{
-		if(collectionsView.selection.count > 0 && confirm(Scholar.getString('pane.collections.delete')))
-			collectionsView.deleteSelection();
+		if (collectionsView.selection.count == 1)
+		{
+			var row =
+				collectionsView._getItemAtRow(collectionsView.selection.currentIndex);
+			
+			if (row.isCollection())
+			{
+				if (confirm(Scholar.getString('pane.collections.delete')))
+				{
+					collectionsView.deleteSelection();
+				}
+			}
+			else if (row.isSearch())
+			{
+				if (confirm(Scholar.getString('pane.collections.deleteSearch')))
+				{
+					collectionsView.deleteSelection();
+				}
+			}
+		}
 	}
 	
 	function editSelectedCollection()
