@@ -634,20 +634,18 @@ Scholar.ItemTreeCommandController = function(tree)
 
 Scholar.ItemTreeCommandController.prototype.supportsCommand = function(cmd)
 {
-	return (cmd == 'cmd_selectAll' || cmd == 'cmd_delete');
+	return (cmd == 'cmd_selectAll');
 }
 
 Scholar.ItemTreeCommandController.prototype.isCommandEnabled = function(cmd)
 {
-	return (cmd == 'cmd_selectAll' || (cmd == 'cmd_delete' && this.tree.view.selection.count > 0));
+	return (cmd == 'cmd_selectAll');
 }
 
 Scholar.ItemTreeCommandController.prototype.doCommand = function(cmd)
 {
 	if(cmd == 'cmd_selectAll')
 		this.tree.view.selection.selectAll();
-	else if(cmd == 'cmd_delete')
-		ScholarPane.deleteSelectedItem();
 }
 
 Scholar.ItemTreeCommandController.prototype.onEvent = function(evt)

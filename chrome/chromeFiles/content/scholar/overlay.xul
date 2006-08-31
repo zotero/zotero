@@ -75,7 +75,7 @@
 					onselect="ScholarPane.onCollectionSelected();" seltype="single"
 					ondragdrop="nsDragAndDrop.drop(event,ScholarPane.getCollectionsView())"
 					ondraggesture="if (event.target.localName == 'treechildren') nsDragAndDrop.startDrag(event,ScholarPane.getCollectionsView());"
-					onkeypress="if(event.keyCode == event.DOM_VK_BACK_SPACE){ ScholarPane.deleteSelectedCollection(); return false; }"
+					onkeypress="if (event.keyCode == event.DOM_VK_BACK_SPACE || event.keyCode == event.DOM_VK_DELETE){ ScholarPane.deleteSelectedCollection(); return false; }"
 					flex="1">
 					<treecols>
 						<treecol
@@ -111,7 +111,8 @@
 				<tree 
 					id="items-tree" context="scholar-itemmenu"
 					ondblclick="ScholarPane.onDoubleClick(event, this);"
-					enableColumnDrag="true" onkeypress="if(event.keyCode == event.DOM_VK_BACK_SPACE){ ScholarPane.deleteSelectedItem(); return false; }"
+					enableColumnDrag="true"
+					onkeypress="if (event.keyCode == event.DOM_VK_BACK_SPACE || event.keyCode == event.DOM_VK_DELETE){ ScholarPane.deleteSelectedItem(); return false; }"
 					onselect="ScholarPane.itemSelected();"
 					ondraggesture="if (event.target.localName == 'treechildren') nsDragAndDrop.startDrag(event,ScholarPane.getItemsView());"
 					ondragover="nsDragAndDrop.dragOver(event,ScholarPane.getItemsView())"

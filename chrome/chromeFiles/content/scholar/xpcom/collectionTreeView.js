@@ -432,23 +432,18 @@ Scholar.CollectionTreeCommandController = function(tree)
 
 Scholar.CollectionTreeCommandController.prototype.supportsCommand = function(cmd)
 {
-	return (cmd == 'cmd_delete');
 }
 
 Scholar.CollectionTreeCommandController.prototype.isCommandEnabled = function(cmd)
 {
-	return (cmd == 'cmd_delete' && this.tree.view.selection.count > 0);
 }
 
 Scholar.CollectionTreeCommandController.prototype.doCommand = function(cmd)
 {
-	if(cmd == 'cmd_delete')
-		ScholarPane.deleteSelectedCollection();
 }
 
 Scholar.CollectionTreeCommandController.prototype.onEvent = function(evt)
 {
-	
 }
 
 ////////////////////////////////////////////////////////////////////////////////
