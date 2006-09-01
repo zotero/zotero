@@ -1,7 +1,7 @@
--- 70
+-- 71
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-08-15 15:42:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-08-31 22:44:00'));
 
 REPLACE INTO "translators" VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006-08-11 11:18:00', 4, 'Amazon.com', 'Simon Kornblith', '^http://www\.amazon\.com/', 
 'function detectWeb(doc, url) {
@@ -3324,7 +3324,7 @@ function doWeb(doc, url) {
 	Scholar.wait();
 }');
 
-REPLACE INTO "translators" VALUES ('ce7a3727-d184-407f-ac12-52837f3361ff', '2006-08-26 14:21:00', 4, 'New York Times', 'Simon Kornblith', '^http://(?:query\.nytimes\.com/search/query|www\.nytimes\.com/.+)', 
+REPLACE INTO "translators" VALUES ('ce7a3727-d184-407f-ac12-52837f3361ff', '2006-08-31 22:44:00', 4, 'New York Times', 'Simon Kornblith', '^http://(?:query\.nytimes\.com/search/query|www\.nytimes\.com/.+)', 
 'function detectWeb(doc, url) {
 	if(doc.title.substr(0, 30) == "The New York Times: Search for") {
 		var namespace = doc.documentElement.namespaceURI;
@@ -3417,7 +3417,7 @@ function scrape(doc, url) {
 	associateMeta(newItem, metaTags, "articleid", "accessionNumber");
 	
 	if(metaTags["byl"]) {
-		var author = metaTags["byl"];
+		var author = Scholar.Utilities.cleanString(metaTags["byl"]);
 		if(author.substr(0, 3).toLowerCase() == "by ") {
 			author = author.substr(3);
 		}
