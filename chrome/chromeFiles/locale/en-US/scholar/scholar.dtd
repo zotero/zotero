@@ -41,10 +41,10 @@
 
 <!ENTITY toolbar.note.standalone		"New Standalone Note">
 <!ENTITY toolbar.attachment.standalone		"New Standalone Attachment">
-<!ENTITY toolbar.attachment.add   			"Add File...">
-<!ENTITY toolbar.attachment.linked   			"Add Linked File...">
-<!ENTITY toolbar.attachment.snapshot 			"Snapshot Current Page">
-<!ENTITY toolbar.attachment.weblink  			"Link to Current Page">
+<!ENTITY toolbar.attachment.add   			"Add file...">
+<!ENTITY toolbar.attachment.linked   			"Add Link to File...">
+<!ENTITY toolbar.attachment.snapshot 			"Add Snapshot of Current Page">
+<!ENTITY toolbar.attachment.weblink  			"Add Link to Current Page">
 
 <!ENTITY selectitems.title   			"Select Items">
 <!ENTITY selectitems.intro.label   		"Select which items you'd like to add to your library">
