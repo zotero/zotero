@@ -70,7 +70,7 @@
 		</description>
 		
 		<description style="font-size:small; margin:.3em 0 .8em">
-			Hit Return on a mapped field to toggle its default visibility. (Light blue fields are hidden.)
+			Hit Return on a mapped field to toggle its default visibility. (Light blue fields are hidden.) 
 		</description>
 		
 		<button label="Generate SQL" oncommand="document.getElementById('sql-dump').value=Scholar_ItemTypeManager.createSQLDump()"/>
