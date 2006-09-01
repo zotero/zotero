@@ -164,10 +164,15 @@
 			</vbox>
 			<splitter id="scholar-view-splitter" resizebefore="closest" resizeafter="closest"/>
 			<vbox>
-				<toolbar align="right">
-					<toolbarbutton id="tb-fullscreen" tooltiptext="&toolbar.fullscreen.tooltip;" oncommand="ScholarPane.fullScreen();"/>
-					<toolbarbutton class="tabs-closebutton" oncommand="ScholarPane.toggleDisplay()"/>
-				</toolbar>
+				<hbox align="right">
+					<hbox align="center">
+						<label id="scholar-version-label" value="1.0 Beta 1" style="margin:1px 10px 0 0"/>
+						<toolbar align="right">
+							<toolbarbutton id="tb-fullscreen" tooltiptext="&toolbar.fullscreen.tooltip;" oncommand="ScholarPane.fullScreen();"/>
+							<toolbarbutton class="tabs-closebutton" oncommand="ScholarPane.toggleDisplay()"/>
+						</toolbar>
+					</hbox>
+				</hbox>
 				<groupbox flex="1">
 					<caption>
 						<tabs id="scholar-view-tabs" onselect="document.getElementById('scholar-view-item').selectedIndex = this.selectedIndex;" hidden="true">
