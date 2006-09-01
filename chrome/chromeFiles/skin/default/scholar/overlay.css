@@ -82,6 +82,22 @@
 	list-style-image: url('chrome://scholar/skin/toolbar-collection-edit-gray.png');
 }
 
+
+/* These three fix a rendering bug in Fx2.0b2 */
+#scholar-pane .toolbarbutton-text
+{
+	margin:0 2px;
+}
+#scholar-pane .toolbarbutton-menu-dropmarker
+{
+	margin-right:4px;
+}
+#tb-fullscreen .toolbarbutton-text
+{
+	margin:0;
+}
+
+
 #tb-collection-menu
 {
 	list-style-image: url('chrome://scholar/skin/cog.png');
