@@ -180,10 +180,7 @@ Scholar_Ingester_Interface.showPopup = function(collectionID, parentElement) {
 		return false;	// Don't dynamically reload popups that are already showing
 	}
 	Scholar_Ingester_Interface._scrapePopupShowing = true;
-	
-	while(parentElement.hasChildNodes()) {
-		parentElement.removeChild(parentElement.firstChild);
-	}
+	parentElement.removeAllItems();
 	
 	if(collectionID == null) {	// show library
 		var newItem = document.createElement("menuitem");

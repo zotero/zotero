@@ -247,6 +247,14 @@ Scholar.Translate.prototype.setString = function(string) {
 }
 
 /*
+ * sets translator display options. you can also pass a translator (not ID) to
+ * setTranslator that includes a displayOptions argument
+ */
+Scholar.Translate.prototype.setDisplayOptions = function(displayOptions) {
+	this._setDisplayOptions = displayOptions;
+}
+
+/*
  * sets the translator to be used for import/export
  *
  * accepts either the object from getTranslators() or an ID
@@ -256,8 +264,14 @@ Scholar.Translate.prototype.setTranslator = function(translator) {
 		throw("cannot set translator: invalid value");
 	}
 	
+	this._setDisplayOptions = null;
+	
 	if(typeof(translator) == "object") {	// passed an object and not an ID
 		if(translator.translatorID) {
+			if(translator.displayOptions) {
+				this._setDisplayOptions = translator.displayOptions;
+			}
+			
 			translator = [translator.translatorID];
 		} else {
 			// we have an associative array of translators
@@ -303,12 +317,6 @@ Scholar.Translate.prototype.setTranslator = function(translator) {
  * 
  * as the first argument, all handlers will be passed the current function. the
  * second argument is dependent on the handler.
- * 
- * options
- *   valid: export
- *   called: when options requiring user interaction are available
- *   passed: an associative array of options and default values
- *   returns: an associative array of options
  *
  * select
  *   valid: web
@@ -372,22 +380,16 @@ Scholar.Translate.prototype.getTranslators = function() {
 		var translators = Scholar.DB.query(sql);
 	}
 	
-	if(!this.location && !this.search) {
-		return translators;		// no need to see which can translate, because
-								// we don't have a location yet (for export or
-								// import dialog)
-	} else {
-		// create a new sandbox
-		this._generateSandbox();
-		
-		var possibleTranslators = new Array();
-		Scholar.debug("searching for translators for "+this.path);
-		
-		// see which translators can translate
-		var possibleTranslators = this._findTranslators(translators);
-		
-		return possibleTranslators;
-	}
+	// create a new sandbox
+	this._generateSandbox();
+	
+	var possibleTranslators = new Array();
+	Scholar.debug("searching for translators for "+(this.path ? this.path : "an undisclosed location"));
+	
+	// see which translators can translate
+	var possibleTranslators = this._findTranslators(translators);
+	
+	return possibleTranslators;
 }
 
 /*
@@ -408,6 +410,9 @@ Scholar.Translate.prototype._findTranslators = function(translators, ignoreExten
 					label:translators[i].label,
 					target:translators[i].target,
 					itemType:translators[i].itemType}
+			if(this.type == "export") {
+				translator.displayOptions = this._displayOptions;
+			}
 			
 			possibleTranslators.push(translator);
 		}
@@ -471,22 +476,14 @@ Scholar.Translate.prototype.translate = function() {
 		return;
 	}
 	
+	if(this._setDisplayOptions) {
+		this._displayOptions = this._setDisplayOptions;
+	}
+	
 	if(this._storage) {
 		// enable reading from storage, which we can't do until the translator
 		// is loaded
 		this._storageFunctions(true);
-	}
-	
-	// hack to see if there are any options, bc length does not work on objects
-	if(this.type == "export") {
-		for(var i in this._displayOptions) {
-			// run handler for options if there are any
-			if(!(this._displayOptions = this._runHandler("options", this._displayOptions))) {
-				this._translationComplete(true);
-				return false;
-			}
-			break;
-		}
 	}
 	
 	var returnValue;

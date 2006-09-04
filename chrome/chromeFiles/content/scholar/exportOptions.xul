@@ -10,5 +10,14 @@
 
 <script src="include.js"/>
 <script src="exportOptions.js"/>
-
+<hbox>
+	<label value="&exportOptions.format.label;" control="format-menu"/>
+	<menulist id="format-menu" oncommand="Scholar_File_Interface_Export.updateOptions()">
+		<menupopup id="format-popup">
+		</menupopup>
+	</menulist>
+</hbox>
+<groupbox id="translator-options">
+	<caption label="&exportOptions.translatorOptions.label;"/>
+</groupbox>
 </dialog>

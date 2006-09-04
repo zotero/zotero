@@ -64,6 +64,8 @@
 <!ENTITY progress.title					"Progress">
 
 <!ENTITY exportOptions.title            "Export...">
+<!ENTITY exportOptions.format.label     "Format:">
+<!ENTITY exportOptions.translatorOptions.label     "Translator Options">
 
 <!ENTITY search.match					"Match">
 <!ENTITY search.any						"any">

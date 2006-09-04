@@ -15,27 +15,24 @@ var Scholar_File_Interface = new function() {
 		var translation = new Scholar.Translate("export");
 		var translators = translation.getTranslators();
 		
+		// present options dialog
+		var io = {translators:translators}
+		window.openDialog("chrome://scholar/content/exportOptions.xul",
+			"_blank", "chrome,modal,centerscreen", io);
+		if(!io.selectedTranslator) {
+			return false;
+		}
+		
 		const nsIFilePicker = Components.interfaces.nsIFilePicker;
 		var fp = Components.classes["@mozilla.org/filepicker;1"]
 				.createInstance(nsIFilePicker);
 		
 		fp.init(window, Scholar.getString("fileInterface.export"), nsIFilePicker.modeSave);
 		
-		// set file name and extension.
+		// set file name and extension
 		name = (name ? name : Scholar.getString("pane.collections.library"));
-		fp.defaultString = name+"."+translators[0].target;
-		
-		// add save filters
-		for(var i in translators) {
-			var label = translators[i].label;
-			
-			// put extensions in parentheses if Mac (Windows users already
-			// get extension)
-			label += " (."+translators[i].target+")";
-			
-			fp.appendFilter(label, "*."+translators[i].target);
-		}
-		
+		fp.defaultString = name+"."+io.selectedTranslator.target;
+		fp.appendFilter(io.selectedTranslator.label, "*."+io.selectedTranslator.target);
 		
 		var rv = fp.show();
 		if (rv == nsIFilePicker.returnOK || rv == nsIFilePicker.returnReplace) {
@@ -43,8 +40,7 @@ var Scholar_File_Interface = new function() {
 				translation.setItems(items);
 			}
 			translation.setLocation(fp.file);
-			translation.setTranslator(translators[fp.filterIndex]);
-			translation.setHandler("options", _exportOptions);
+			translation.setTranslator(io.selectedTranslator);
 			translation.setHandler("done", _exportDone);
 			_disableUnresponsive();
 			Scholar_File_Interface.Progress.show(
@@ -87,22 +83,6 @@ var Scholar_File_Interface = new function() {
 		if(!items || !items.length) throw("no items currently selected");
 		
 		exportFile(Scholar.getString("fileInterface.exportedItems"), items);
-	}
-	
-	/*
-	 * closes items exported indicator
-	 */
-	function _exportOptions(obj, options) {
-		var io = {options:options}
-		window.openDialog("chrome://scholar/content/exportOptions.xul",
-			"_blank","chrome,modal,centerscreen", io);
-		if(io.options) {
-			// refocus dialog
-			Scholar_File_Interface.Progress.show();
-			return options;
-		} else {
-			return false;
-		}
 	}
 	
 	/*
