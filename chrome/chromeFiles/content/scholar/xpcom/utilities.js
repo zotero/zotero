@@ -28,10 +28,10 @@ Scholar.Utilities.prototype.cleanAuthor = function(author, type, useComma) {
 	author = author.replace(/  +/, ' ');
 	if(useComma) {
 		// Add period for initials
-		if(author.substr(author.length-2, 1) == " ") {
+		if(author.substr(author.length-2, 1) == " " || author.substr(author.length-2, 1) == ".") {
 			author += ".";
 		}
-		var splitNames = author.split(', ');
+		var splitNames = author.split(/, ?/);
 		if(splitNames.length > 1) {
 			var lastName = splitNames[0];
 			var firstName = splitNames[1];

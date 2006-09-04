@@ -1860,6 +1860,10 @@ Scholar.Translate.RDF.prototype.addNamespace = function(prefix, uri) {
 
 // gets a resource's URI
 Scholar.Translate.RDF.prototype.getResourceURI = function(resource) {
+	if(typeof(resource) == "string") {
+		return resource;
+	}
+	
 	resource.QueryInterface(Components.interfaces.nsIRDFResource);
 	return resource.ValueUTF8;
 }

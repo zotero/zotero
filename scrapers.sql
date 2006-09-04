@@ -1,4 +1,4 @@
--- 76
+-- 77
 
 -- Set the following timestamp to the most recent scraper update date
 REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-08-31 22:44:00'));
@@ -2723,6 +2723,17 @@ REPLACE INTO "translators" VALUES ('951c027d-74ac-47d4-a107-9c3069ab7b48', '2006
 	// load RDF translator
 	var translator = Scholar.loadTranslator("import");
 	translator.setTranslator("5e3ad958-ac79-463d-812b-a86a9235c28f");
+	translator.setHandler("itemDone", function(obj, newItem) {
+		// use document title if none given in dublin core
+		if(!newItem.title) {
+			newItem.title = doc.title;
+		}
+		// add attachment
+		newItem.attachments.push({document:doc});
+		// add url
+		newItem.url = doc.location.href;
+		newItem.complete();
+	});
 	var rdf = translator.getTranslatorObject();
 	
 	var metaTags = doc.getElementsByTagName("meta");
@@ -2734,17 +2745,12 @@ REPLACE INTO "translators" VALUES ('951c027d-74ac-47d4-a107-9c3069ab7b48', '2006
 			if(tag == "dc.title") {
 				foundTitle = true;
 			}
-			rdf.Scholar.RDF.addStatement(url, dc + tag.substr(3), value, true);
-			Scholar.Utilities.debug(tag.substr(3) + " = " + value);
+			rdf.Scholar.RDF.addStatement(url, dc + tag.substr(3).toLowerCase(), value, true);
 		} else if(tag && value && (tag == "author" || tag == "author-personal")) {
 			rdf.Scholar.RDF.addStatement(url, dc + "creator", value, true);
 		} else if(tag && value && tag == "author-corporate") {
 			rdf.Scholar.RDF.addStatement(url, dc + "creator", value, true);
 		}
-	}
-	
-	if(!foundTitle) {
-		rdf.Scholar.RDF.addStatement(url, dc + "title", doc.title, true);
 	}
 	
 	rdf.doImport();
