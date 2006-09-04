@@ -1,4 +1,4 @@
--- 72
+-- 73
 
 -- Set the following timestamp to the most recent scraper update date
 REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-08-31 22:44:00'));
@@ -116,7 +116,7 @@ function doWeb(doc, url) {
 		}
 		
 		var searchresults = Scholar.Utilities.gatherElementsOnXPath(doc, doc, xpath, nsResolver);
-		var items = Scholar.Utilities.getItemArray(doc, searchresults, ''^http://www\.amazon\.com/(gp/product/|exec/obidos/tg/detail/)'', ''^(Buy new|Hardcover|Paperback|Digital)$'');
+		var items = Scholar.Utilities.getItemArray(doc, searchresults, ''^http://www\.amazon\.com/(gp/product/|exec/obidos/tg/detail/|[^/]+/dp/)'', ''^(Buy new|Hardcover|Paperback|Digital)$'');
 		items = Scholar.selectItems(items);
 		
 		if(!items) {

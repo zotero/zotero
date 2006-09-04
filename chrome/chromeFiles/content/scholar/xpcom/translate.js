@@ -827,6 +827,17 @@ Scholar.Translate.prototype._enableAsynchronous = function() {
  * called as selectItems() in translator code
  */
 Scholar.Translate.prototype._selectItems = function(options) {
+	// hack to see if there are options
+	var haveOptions = false;
+	for(var i in options) {
+		haveOptions = true;
+		break;
+	}
+	
+	if(!haveOptions) {
+		throw "translator called select items with no items";
+	}
+	
 	if(this._handlers.select) {
 		return this._runHandler("select", options);
 	} else {	// no handler defined; assume they want all of them
