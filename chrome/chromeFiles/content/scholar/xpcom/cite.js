@@ -10,9 +10,7 @@ Scholar.Cite = new function() {
 	var _lastStyle = null;
 	
 	this.getStyles = getStyles;
-	this.getStyleClass = getStyleClass;
-	this.getBibliography = getBibliography;
-	this.getCitation = getCitation;
+	this.getStyle = getStyle;
 	
 	/*
 	 * returns an associative array of cslID => styleName pairs
@@ -30,46 +28,11 @@ Scholar.Cite = new function() {
 		
 		return stylesObject;
 	}
-	
-	/*
-	 * returns the class of a given style
-	 */
-	function getStyleClass(cslID) {
-		var csl = _getCSL(cslID);
-		return csl.class;
-	}
-	
-	/*
-	 * generates a bibliography
-	 */
-	function getBibliography(cslID, items, format) {		
-		var csl = _getCSL(cslID);
-		
-		// set items
-		csl.setItems(items);
-		
-		// generate bibliography
-		return csl.createBibliography(format);
-	}
-	
-	/*
-	 * generates a bibliography
-	 */
-	function getCitation(cslID, item, items, format) {
-		var csl = _getCSL(cslID);
-		
-		// set items
-		csl.setItems(items);
-		
-		// generate bibliography
-		return csl.createCitation(item, format);
-	}
-	
 	/*
 	 * gets CSL from the database, or, if it's the most recently used style,
 	 * from the cache
 	 */
-	function _getCSL(cslID) {
+	function getStyle(cslID) {
 		if(_lastStyle != cslID || Scholar.Prefs.get("cacheTranslatorData") == false) {
 			// get style
 			var sql = "SELECT csl FROM csl WHERE cslID = ?";
@@ -111,64 +74,135 @@ CSL = function(csl) {
 	}
 	// load defaults from CSL
 	this._parseFieldDefaults(this._csl.defaults);
-	// parse bibliography options, since these will be necessary for
-	// disambiguation purposes even for citations
+	// parse bibliography and citation options
 	this._parseBibliographyOptions();
+	this._parseCitationOptions();
 	// if no bibliography exists, parse citation element as bibliography
 	if(!this._bib) {
-		Scholar.debug("CSL: using citation element");
-		if(!this._cit) {
-			this._parseCitationOptions();
-		}
+		Scholar.debug("CSL: using citation element for bibliography");
 		this._bib = this._cit;
 	}
 }
 
 /*
- * set items - convert to array and pre-process
+ * preprocess items, separating authors, editors, and translators arrays into
+ * separate properties
+ *
+ * must be called prior to generating citations or bibliography with a new set
+ * of items
  */
-CSL.prototype.setItems = function(items) {
-	// create a serialized string of all of the unique items
-	var serializedItemString = "";
+CSL.prototype.preprocessItems = function(items) {
+	Scholar.debug("CSL: preprocessing items");
 	
-	this._items = items;
-	this._uniqueItems = new Array();
-	var existingItems = new Object();
-	for each(var item in items) {
-		var itemID = item.getID();
-		if(!existingItems[itemID]) {
-			existingItems[itemID] = true;
-			this._uniqueItems.push(item);
-			serializedItemString += itemID+",";
+	// get data necessary to generate citations before sorting
+	for(var i in items) {
+		var item = items[i];
+		var dateModified = item.getField("dateModified");
+		
+		if(!item._csl || item._csl.dateModified != dateModified) {
+			// namespace everything in item._csl so there's no chance of overlap
+			item._csl = new Object();
+			item._csl.ignore = new Array();
+			item._csl.dateModified = dateModified;
+			
+			// separate item into authors, editors, translators
+			var creators = this._separateItemCreators(item);
+			item._csl.authors = creators[0];
+			item._csl.editors = creators[1];
+			item._csl.translators = creators[2];
+			
+			// parse date
+			item._csl.date = CSL.prototype._processDate(item.getField("date"));
+		} else {
+			// clear disambiguation and subsequent author substitute
+			if(item._csl.disambiguation) item._csl.date.disambiguation = undefined;
+			if(item._csl.subsequentAuthorSubstitute) item._csl.subsequentAuthorSubstitute = undefined;
 		}
 	}
 	
-	Scholar.debug("CSL: items set to "+serializedItemString);
+	// sort by sort order
+	if(this._bib.sortOrder) {
+		Scholar.debug("CSL: sorting items");
+		var me = this;
+		items.sort(function(a, b) {
+			return me._compareItem(a, b);
+		});
+	}
 	
-	//if(serializedItemString != this._serializedItemString) {
-		// only re-process if there are new items
-		this._serializedItemString = serializedItemString;
-		this._preprocessItems();
-	//}
+	// disambiguate items after preprocessing and sorting
+	var usedCitations = new Array();
+	var lastAuthor;
+	
+	for(var i in items) {
+		var item = items[i];
+		
+		var author = this._getFieldValue("author",
+										   this._getFieldDefaults("author"),
+										   item, "disambiguate", this._bib);
+		
+		// handle (2006a) disambiguation for author-date styles
+		if(this.class == "author-date") {
+			var citation = author+" "+this._getFieldValue("date",
+												this._getFieldDefaults("date"),
+												item, "disambiguate", this._bib);
+			
+			if(usedCitations[citation]) {
+				if(!usedCitations[citation]._csl.date.disambiguation) {
+					usedCitations[citation]._csl.date.disambiguation = "a";
+					item._csl.date.disambiguation = "b";
+				} else {
+					// get all but last character
+					var oldLetter = usedCitations[citation]._csl.date.disambiguation;
+					if(oldLetter.length > 1) {
+						item._csl.date.disambiguation = oldLetter.substr(0, oldLetter.length-1);
+					} else {
+						item._csl.date.disambiguation = "";
+					}
+					
+					var charCode = oldLetter.charCodeAt(oldLetter.length-1);
+					if(charCode == 122) {
+						// item is z; add another letter
+						item._csl.date.disambiguation += "za";
+					} else {
+						// next lowercase letter
+						item._csl.date.disambiguation += String.fromCharCode(charCode+1);
+					}
+				}
+			}
+			
+			usedCitations[citation] = item;
+		}
+		
+		// add numbers to each
+		item._csl.number = i;
+		
+		// handle subsequent author substitutes
+		if(this._bib.subsequentAuthorSubstitute && lastAuthor == author) {
+			item._csl.subsequentAuthorSubstitute = true;
+		}
+		lastAuthor = author;
+	}
 }
 
 /*
  * create a citation (in-text or footnote)
  */
-CSL.prototype.createCitation = function(items, format) {
+CSL.prototype.createCitation = function(items, types, format) {
 	Scholar.debug("CSL: creating citation for item "+items[0].getID());
-	if(!this._cit) {
-		this._parseCitationOptions();
-	}
 	
-	var string = "";
-	for(var i in items) {
-		if(this._cit.format && this._cit.format.delimiter && string) {
-			// add delimiter if one exists, and this isn't the first element
-			// with content
-			string += this._cit.format.delimiter;
+	if(types == 2) {
+		var string = this._getTerm("ibid", (items.length > 1 ? true : false));
+		string = string[0].toUpperCase()+string.substr(1);
+	} else {
+		var string = "";
+		for(var i in items) {
+			if(this._cit.format && this._cit.format.delimiter && string) {
+				// add delimiter if one exists, and this isn't the first element
+				// with content
+				string += this._cit.format.delimiter;
+			}
+			string += this._getCitation(items[i], (types[i] == 1 ? "first" : "subsequent"), format, this._cit);
 		}
-		string += this._getCitation(items[i], format, this._cit);
 	}
 	
 	// add format
@@ -189,11 +223,7 @@ CSL.prototype.createCitation = function(items, format) {
  * create a bibliography
  * (items is expected to be an array of items)
  */
-CSL.prototype.createBibliography = function(format) {
-	// preprocess this._items
-	Scholar.debug("CSL: preprocessing items");
-	this._preprocessItems();
-	
+CSL.prototype.createBibliography = function(items, format) {
 	// process this._items
 	var output = "";
 	
@@ -212,10 +242,10 @@ CSL.prototype.createBibliography = function(format) {
 		output += "\r\n";
 	}
 	
-	for(var i in this._uniqueItems) {
-		var item = this._uniqueItems[i];
+	for(var i in items) {
+		var item = items[i];
 		
-		var string = this._getCitation(item, format, this._bib);
+		var string = this._getCitation(item, "first", format, this._bib);
 	
 		// add format
 		if(this._bib.format) {
@@ -516,7 +546,7 @@ CSL.prototype._parseFieldDefaults = function(ref) {
 /*
  * parses a list of fields into an array of objects
  */
-CSL.prototype._parseFields = function(ref, type, bibCitElement, inheritFormat) {
+CSL.prototype._parseFields = function(ref, position, type, bibCitElement, inheritFormat) {
 	var typeDesc = new Array();
 	for each(var element in ref) {
 		if(element.namespace() == CSL.ns) {	// ignore elements in other namespaces
@@ -535,7 +565,7 @@ CSL.prototype._parseFields = function(ref, type, bibCitElement, inheritFormat) {
 				itemDesc._serialized = this._serializeElement(itemDesc.name, itemDesc);
 				// add to serialization for type
 				if(bibCitElement) {
-					bibCitElement._serializations[type][itemDesc._serialized] = itemDesc;
+					bibCitElement._serializations[position][type][itemDesc._serialized] = itemDesc;
 				}
 			}
 			
@@ -546,7 +576,7 @@ CSL.prototype._parseFields = function(ref, type, bibCitElement, inheritFormat) {
 				
 				var children = element.children();
 				if(children.length()) {
-					itemDesc.children = this._parseFields(children, type, bibCitElement);
+					itemDesc.children = this._parseFields(children, position, type, bibCitElement);
 				}
 			} else {
 				// parse attributes on this field
@@ -640,7 +670,7 @@ CSL.prototype._parseBibliographyOptions = function() {
 			this._bib.sortOrder[0].name = "cited";
 		}
 	} else {
-		this._bib.sortOrder = this._parseFields(bibliography.sort, false, this._bib);
+		this._bib.sortOrder = this._parseFields(bibliography.sort, "first", false, this._bib);
 	}
 	
 	// parse et al
@@ -683,22 +713,32 @@ CSL.prototype._parseTypes = function(itemElements, bibCitElement) {
 	
 	// find the type item without position="subsequent"
 	for each(var itemElement in itemElements) {
-		if(itemElement.@position.toString() == "subsequent") {
-			// bind subsequent element to position 1
-			bibCitElement._types[1] = itemElement;
-			bibCitElement._serializations[1] = new Object();
-		} else {
-			// create an associative array of available types
-			if(itemElement.choose.length()) {
-				for each(var type in itemElement.choose.type) {
-					bibCitElement._types[type.@name] = type;
-					bibCitElement._serializations[type.@name] = new Object();
-				}
-			} else {
-				// if there's only one type, bind it to index 0
-				bibCitElement._types[0] = itemElement;
-				bibCitElement._serializations[0] = new Object();
+		var position = itemElement.@position.toString();
+		if(position) {
+			// handle ibids
+			if(position == "subsequent" &&
+			   itemElement.@ibid.toString() == "true") {
+				this.ibid = true;
 			}
+		} else {
+			position = "first";
+		}
+		
+		if(!bibCitElement._types[position]) {
+			bibCitElement._types[position] = new Object();
+			bibCitElement._serializations[position] = new Object();
+		}
+		
+		// create an associative array of available types
+		if(itemElement.choose.length()) {
+			for each(var type in itemElement.choose.type) {
+				bibCitElement._types[position][type.@name] = type;
+				bibCitElement._serializations[position][type.@name] = new Object();
+			}
+		} else {
+			// if there's only one type, bind it to index 0
+			bibCitElement._types[position][0] = itemElement;
+			bibCitElement._serializations[position][0] = new Object();
 		}
 	}
 }
@@ -706,21 +746,22 @@ CSL.prototype._parseTypes = function(itemElements, bibCitElement) {
 /*
  * convert reference types to native structures for speed
  */
-CSL.prototype._getTypeObject = function(reftype, bibCitElement) {
-	if(!bibCitElement._types[reftype]) {
+CSL.prototype._getTypeObject = function(position, reftype, bibCitElement) {
+	if(!bibCitElement._types[position][reftype]) {
 		// no type available
 		return false;
 	}
 	
 	// parse type if necessary
-	if(typeof(bibCitElement._types[reftype]) == "xml") {
+	if(typeof(bibCitElement._types[position][reftype]) == "xml") {
 		Scholar.debug("CSL: parsing XML for "+reftype);
-		bibCitElement._types[reftype] = this._parseFields(bibCitElement._types[reftype].children(),
-		                                                  reftype, bibCitElement, true);
+		bibCitElement._types[position][reftype] = this._parseFields(
+		                                          bibCitElement._types[position][reftype].children(),
+		                                          position, reftype, bibCitElement, true);
 	}
 	
 	Scholar.debug("CSL: got object for "+reftype);
-	return bibCitElement._types[reftype];
+	return bibCitElement._types[position][reftype];
 }
 
 /*
@@ -1009,101 +1050,6 @@ CSL.prototype._lpad = function(string, pad, length) {
 }
 
 /*
- * preprocess items, separating authors, editors, and translators arrays into
- * separate properties
- */
-CSL.prototype._preprocessItems = function() {
-	// get data necessary to generate citations before sorting
-	for(var i in this._uniqueItems) {
-		var item = this._uniqueItems[i];
-		var dateModified = item.getField("dateModified");
-		
-		if(!item._csl || item._csl.dateModified != dateModified) {
-			// namespace everything in item._csl so there's no chance of overlap
-			item._csl = new Object();
-			item._csl.ignore = new Array();
-			item._csl.dateModified = dateModified;
-			
-			// separate item into authors, editors, translators
-			var creators = this._separateItemCreators(item);
-			item._csl.authors = creators[0];
-			item._csl.editors = creators[1];
-			item._csl.translators = creators[2];
-			
-			// parse date
-			item._csl.date = CSL.prototype._processDate(item.getField("date"));
-		} else {
-			// clear disambiguation and subsequent author substitute
-			if(item._csl.disambiguation) item._csl.disambiguation = undefined;
-			if(item._csl.subsequentAuthorSubstitute) item._csl.subsequentAuthorSubstitute = undefined;
-		}
-	}
-	
-	// sort by sort order
-	if(this._bib.sortOrder) {
-		Scholar.debug("CSL: sorting items");
-		var me = this;
-		this._uniqueItems.sort(function(a, b) {
-			return me._compareItem(a, b);
-		});
-	}
-	
-	// disambiguate items after preprocessing and sorting
-	var usedCitations = new Array();
-	var lastAuthor;
-	
-	for(var i in this._uniqueItems) {
-		var item = this._uniqueItems[i];
-		
-		var author = this._getFieldValue("author",
-										   this._getFieldDefaults("author"),
-										   item, "disambiguate", this._bib);
-		
-		// handle (2006a) disambiguation for author-date styles
-		if(this.class == "author-date") {
-			var citation = author+" "+this._getFieldValue("date",
-												this._getFieldDefaults("date"),
-												item, "disambiguate", this._bib);
-			
-			if(usedCitations[citation]) {
-				if(!usedCitations[citation]._csl.date.disambiguation) {
-					usedCitations[citation]._csl.date.disambiguation = "a";
-					item._csl.date.disambiguation = "b";
-				} else {
-					// get all but last character
-					var oldLetter = usedCitations[citation]._csl.date.disambiguation;
-					if(oldLetter.length > 1) {
-						item._csl.date.disambiguation = oldLetter.substr(0, oldLetter.length-1);
-					} else {
-						item._csl.date.disambiguation = "";
-					}
-					
-					var charCode = oldLetter.charCodeAt(oldLetter.length-1);
-					if(charCode == 122) {
-						// item is z; add another letter
-						item._csl.date.disambiguation += "za";
-					} else {
-						// next lowercase letter
-						item._csl.date.disambiguation += String.fromCharCode(charCode+1);
-					}
-				}
-			}
-			
-			usedCitations[citation] = item;
-		}
-		
-		// add numbers to each
-		item._csl.number = i;
-		
-		// handle subsequent author substitutes
-		if(this._bib.subsequentAuthorSubstitute && lastAuthor == author) {
-			item._csl.subsequentAuthorSubstitute = true;
-		}
-		lastAuthor = author;
-	}
-}
-
-/*
  * handles sorting of items
  */
 CSL.prototype._compareItem = function(a, b, opt) {
@@ -1209,11 +1155,10 @@ CSL.prototype._processCreators = function(type, element, creators, format, bibCi
 						authorStrings[maxCreators-1] = and+" "+authorStrings[maxCreators-1];
 						// skip the comma if there are only two creators and no
 						// et al, and name as sort is no
-						if(maxCreators == 2 &&
-						   (!element["name-as-sort-order"]
-						    || (element["name-as-sort-order"] != "first"
-						    && element["name-as-sort-order"] != "all"))) {
-							joinString = " ";
+						if((maxCreators == 2 && child["delimiter-precedes-last"] != "always") ||
+						   (maxCreators > 2 && child["delimiter-precedes-last"] == "never")) {
+						   	var lastString = authorStrings.pop();
+							authorStrings[maxCreators-2] = authorStrings[maxCreators-2]+" "+lastString;
 						}
 					}
 				}
@@ -1237,18 +1182,22 @@ CSL.prototype._processCreators = function(type, element, creators, format, bibCi
 /*
  * get a citation, given an item and bibCitElement
  */
-CSL.prototype._getCitation = function(item, format, bibCitElement) {
+CSL.prototype._getCitation = function(item, position, format, bibCitElement) {
 	Scholar.debug("CSL: generating citation for item "+item.getID());
 	
+	if(!bibCitElement._types[position]) {
+		position = "first";
+	}
+	
 	// determine mapping
-	if(bibCitElement._types[0]) {
+	if(bibCitElement._types[position][0]) {
 		// only one element
 		var typeName = 0;
-		var type = this._getTypeObject(typeName, bibCitElement);
+		var type = this._getTypeObject(position, typeName, bibCitElement);
 	} else {
 		var typeNames = this._getTypeFromItem(item);
 		for each(var typeName in typeNames) {
-			var type = this._getTypeObject(typeName, bibCitElement);
+			var type = this._getTypeObject(position, typeName, bibCitElement);
 			if(type) {
 				break;
 			}
@@ -1263,7 +1212,7 @@ CSL.prototype._getCitation = function(item, format, bibCitElement) {
 	var string = "";
 	for(var j in type) {
 		var value = this._getFieldValue(type[j].name, type[j], item, format,
-										bibCitElement, typeName);
+										bibCitElement, position, typeName);
 		string += value;
 	}
 	
@@ -1273,7 +1222,7 @@ CSL.prototype._getCitation = function(item, format, bibCitElement) {
 /*
  * processes an element from a (pre-processed) item into text
  */
-CSL.prototype._getFieldValue = function(name, element, item, format, bibCitElement, typeName) {
+CSL.prototype._getFieldValue = function(name, element, item, format, bibCitElement, position, typeName) {
 	var data = "";
 	
 	if(element._serialized && item._csl.ignore[element._serialized]) {
@@ -1389,7 +1338,8 @@ CSL.prototype._getFieldValue = function(name, element, item, format, bibCitEleme
 			var child = element.children[i];
 			
 			var string = this._getFieldValue(child.name, child, item,
-			                                 format, typeName, bibCitElement);
+			                                 format, bibCitElement, position,
+			                                 typeName);
 			if(string) {
 				childData.push(string);
 			}
@@ -1427,9 +1377,10 @@ CSL.prototype._getFieldValue = function(name, element, item, format, bibCitEleme
 				inheritElement = element;
 			} else {
 				// search for elements with the same serialization
-				if(typeName != undefined && bibCitElement._serializations[typeName]
-				   && bibCitElement._serializations[typeName][serialization]) {
-					inheritElement = bibCitElement._serializations[typeName][serialization];
+				if(typeName != undefined && bibCitElement._serializations[position]
+				   && bibCitElement._serializations[position][typeName]
+				   && bibCitElement._serializations[position][typeName][serialization]) {
+					inheritElement = bibCitElement._serializations[position][typeName][serialization];
 				} else {
 					// otherwise, use defaults
 					inheritElement = this._getFieldDefaults(substituteElement.name);

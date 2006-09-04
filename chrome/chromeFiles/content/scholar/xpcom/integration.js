@@ -51,8 +51,7 @@ Scholar.Integration = new function() {
 	 * handles a SOAP envelope
 	 */
 	function handleEnvelope(envelope) {
-		Scholar.debug("Integration: got SOAP envelope");
-		Scholar.debug(envelope);
+		Scholar.debug("Integration: SOAP Request\n"+envelope);
 		envelope = envelope.replace(_XMLRe, "");
 		
 		var env = new Namespace("http://schemas.xmlsoap.org/soap/envelope/");
@@ -116,9 +115,12 @@ Scholar.Integration = new function() {
 					</SOAP-ENV:Body>
 				</SOAP-ENV:Envelope>;
 				
+				var response = responseEnvelope.toXMLString();
+				Scholar.debug("Integration: SOAP Response\n"+response);
+				
 				// return OK
 				return _generateResponse("200 OK", 'text/xml; charset="utf-8"',
-				                         responseEnvelope.toXMLString());
+				                         response);
 			} else {
 				Scholar.debug("Integration: SOAP method not supported");
 			}
@@ -294,10 +296,11 @@ Scholar.Integration.DataListener.prototype._requestFinished = function(response)
 
 Scholar.Integration.SOAP = new function() {
 	this.init = init;
-	this.getCitation = getCitation;
-	this.getBibliography = getBibliography;
+	this.update = update;
+	this.restoreSession = restoreSession;
 	this.setDocPrefs = setDocPrefs;
 	
+	var _sessions = new Array();
 	var window;
 	
 	function init() {
@@ -308,76 +311,304 @@ Scholar.Integration.SOAP = new function() {
 	
 	/*
 	 * generates a new citation for a given item
-	 * ACCEPTS: style[, itemString, newItemIndex]
-	 * RETURNS: (newItem, citation)
+	 * ACCEPTS: sessionID, bibliographyMode, citationMode(, fieldIndex, fieldName)+
+	 * RETURNS: bibliography(, fieldIndex, fieldRename, fieldContent)+
 	 */
-	function getCitation(vars) {
-		// get items		
-		var io = {dataIn: null, dataOut: null};
-		window.openDialog('chrome://scholar/content/selectItemsDialog.xul','',
-		                    'chrome,popup,modal,centerscreen',io);
-		
-		if(io.dataOut) {	// cancel was not pressed
-			var selectedItemIDs = io.dataOut;
-			var selectedItems = Scholar.Items.get(selectedItemIDs);
-			
-			var style = vars[0];
-			if(vars[1]) {	// some items already exist in the document
-				var itemString = vars[1];		// underscore-delimited string
-				
-				var newItemIndex = parseInt(vars[2]);	// index at which the
-														// item belongs in
-														// itemString
-				
-				// splice in the new item ID
-				if(newItemIndex == -1) {	// at beginning
-					var items = selectedItems.concat(Scholar.Items.get(itemString.split("_")));
-				} else {					// at newItemIndex
-					var items = Scholar.Items.get(itemString.substr(0, newItemIndex).split("_")).
-					            concat(selectedItems);
-					
-					if(newItemIndex != itemString.length) {	// not at the end
-						items = items.concat(Scholar.Items.get(itemString.substr(newItemIndex+1).split("_")))
-					}
-				}
-			} else {		// this is the first item and the only item to worry
-							// about
-				var items = selectedItems;
-			}
-			
-			var citation = Scholar.Cite.getCitation(style, selectedItems, items, "Integration");
-			
-			return [selectedItemIDs.join("_"), citation];
+	function update(vars) {
+		if(!_sessions[vars[0]]) {
+			return "ERROR:sessionExpired";
 		}
+		var session = _sessions[vars[0]];
+		var returnString = "";
+		
+		var bibliographyMode = vars[1];
+		var citationMode = vars[2];
+		
+		var style = Scholar.Cite.getStyle(session.styleID);
+		
+		var encounteredItem = new Object();
+		var newField = new Object();
+		var regenerate = new Object();
+		
+		var newFieldArrayIndex = vars.indexOf("X", 2);
+		if(newFieldArrayIndex != -1) {
+			var newFieldIndex = vars[newFieldArrayIndex-1];
+			
+			// get items		
+			var io = {dataIn: null, dataOut: null};
+			window.openDialog('chrome://scholar/content/selectItemsDialog.xul','',
+								'chrome,popup,modal,centerscreen',io);
+
+			if(io.dataOut) {	// cancel was not pressed
+				var field = (io.dataOut.join(","))+"_"+Scholar.randomString();
+				
+				// set so that itemID works
+				vars[newFieldArrayIndex] = field;
+				// set so that field name will get changed
+				newField[newFieldIndex] = field;
+			} else {
+				vars[newFieldArrayIndex] = "!";
+				newField[newFieldIndex] = "!";
+			}
+		}
+		
+		var regenerateItemList = _inspectCitationPairs(vars, 3, session, style,
+		                         encounteredItem, newField, regenerate,
+		                         (citationMode == "all"));
+		
+		if(!regenerateItemList) {
+			// if we're not already regenerating the item list, ensure no
+			// citations have been deleted
+			for(var i in session.encounteredItem) {
+				if(!encounteredItem[i]) {
+					regenerateItemList = true;
+				}
+			}
+		}
+		
+		var output = new Array();
+		
+		if(regenerateItemList || bibliographyMode == "true") {
+			Scholar.debug("Integration: Regenerating Item List");
+			
+			// need to re-process items
+			var items = new Array();
+			for(var i in encounteredItem) {
+				items.push(Scholar.Items.get(i));
+			}
+			style.preprocessItems(items);
+			
+			// EBNF: bibliography-data
+			if(bibliographyMode != "false") {
+				output.push(style.createBibliography(items, "Integration"));
+			} else {
+				output.push("!");
+			}
+		} else {
+			// EBNF: bibliography-data
+			output.push("!");
+		}
+		
+		// state which citations to update
+		// EBNF: citation-output-triple
+		for(var i in regenerate) {
+			// EBNF: citation-index
+			output.push(i);
+			
+			if(regenerate[i] === false) {
+				// if marked for deletion, delete
+				output.push("!");
+				output.push("!");
+			} else if(regenerate[i] === true) {
+				// if marked for name change, change name
+				output.push(newField[i]);
+				output.push("!");
+			} else {
+				// EBNF: citation-field
+				if(newField[i]) {
+					output.push(newField[i]);
+				} else {
+					output.push("!");
+				}
+				
+				// EBNF: citation-data
+				var items = Scholar.Items.get(regenerate[i][0]);
+				output.push(style.createCitation(items, regenerate[i][1], "Integration"));
+			}
+		}
+		
+		session.encounteredItem = encounteredItem;
+		
+		return output;
 	}
 	
 	/*
-	 * gets a bibliography
-	 * ACCEPTS: style, itemString
-	 * RETURNS: bibliography
+	 * restores a session, given all citations
+	 * ACCEPTS: styleID(, fieldIndex, fieldName)+
+	 * RETURNS: sessionID
 	 */
-	function getBibliography(vars) {
-		// get items
-		var itemIDs = vars[1].split("_");
-		var items = Scholar.Items.get(itemIDs);
+	function restoreSession(vars) {
+		var sessionID = Scholar.randomString();
+		var session = _generateSession(sessionID);
+		session.styleID = vars[0];
 		
-		return Scholar.Cite.getBibliography(vars[0], items, "Integration");
+		var style = Scholar.Cite.getStyle(session.styleID);
+		
+		var encounteredItem = new Object();
+		var newField = new Object();
+		var regenerate = new Object();
+		
+		_inspectCitationPairs(vars, 1, session, style);
+		
+		return [sessionID];
 	}
 	
 	/*
 	 * sets document preferences
-	 * ACCEPTS: [currentStyle]
-	 * RETURNS: (style, styleClass)
+	 * ACCEPTS: (sessionID)?
+	 * RETURNS: sessionID, styleID, style-class
 	 */
 	function setDocPrefs(vars) {
 		var io = new Object();
-		if(vars && vars[0]) {
-			io.style = vars[0];
+		
+		if(!vars || vars[0] == "!") {
+			// no session ID; generate a new one
+			var sessionID = Scholar.randomString();
+			var session = _generateSession(sessionID);
+		} else {
+			// session ID exists
+			var sessionID = vars[0];
+			var session = _sessions[sessionID];
+			var originalStyle = session.styleID;
+			io.style = originalStyle;
 		}
 		
 		window.openDialog('chrome://scholar/content/integrationDocPrefs.xul','',
 		                    'chrome,popup,modal,centerscreen',io);
-		var styleClass = Scholar.Cite.getStyleClass(io.style);
-		return [io.style, styleClass];
+		session.styleID = io.style;
+		var style = Scholar.Cite.getStyle(io.style);
+		
+		return [sessionID, io.style, style.class];
+	}
+	
+	/*
+	 * inspects citation pairs to determine which are in need of an update
+	 * 
+	 * vars - the set of variables
+	 *
+	 * startIndex - the place in the set of variables at which the citations
+	 *              begin
+	 *
+	 * session - the session variable (see _generateSession())
+	 * 
+	 * encounteredItem - an object representing whether a given item ID has been
+	 *                   encountered, in the format itemID => true
+	 *
+	 * newField - an object representing whether a given field needs to be
+	 *            renamed, in the format fieldIndex => newFieldName
+	 * 
+	 * regenerate - an object representing whether the contents of a given field
+	 *              need to be modified, in the format:
+	 *                  index => [[itemID1, itemID2], ([format1, format2] | "2")]
+	 *              formats are as follows:
+	 *                  1 => first occurance of a given item. use full citation.
+	 *                  2 => item occurred directly previously. use ibid. (never
+	 *                       used as an array, only a single item)
+	 *                  3 => subsequent entry.
+	 */
+	 
+	function _inspectCitationPairs(vars, startIndex, session, style, encounteredItem, newField, regenerate, regenerateAll) {
+		var newItemFound = false;	
+		var encounteredField = new Object();// keep track of field names, to see
+											// if there are duplicates
+		
+		if(!encounteredItem) {
+			encounteredItem = new Object();
+		}
+		
+		var lastItemIDString = null;
+		var index, field, lastItemID, itemIDs, itemID, itemSetValue;
+		for(var i=startIndex; i<vars.length; i+=2) {
+			index = vars[i];
+			field = vars[i+1];
+			if(regenerate && field == "!") {
+				// mark for deletion if necessary
+				Scholar.debug("Integration: Marking "+index+" for deletion");
+				regenerate[index] = false;
+				continue;
+			}
+			
+			itemIDString = field.substr(0, field.indexOf("_"));
+			itemIDs = itemIDString.split(",");
+			
+			itemSetValue = null;
+			if(itemIDString == lastItemIDString && style.ibid) {
+				// use ibid if possible
+				itemSetValue = 2;
+			} else {
+				// loop through to see which are first citations
+				itemSetValue = new Array();
+				for each(itemID in itemIDs) {
+					if(!encounteredItem[itemID]) {
+						encounteredItem[itemID] = true;
+						itemSetValue.push(1);
+
+						if(!session.encounteredItem[itemID]) {
+							newItemFound = true;
+						}
+					} else {
+						itemSetValue.push(3);
+					}
+				}
+			}
+			
+			if(regenerateAll) {
+				// regenerate all citations if requested
+				var update = true;
+			} else {
+				// test to see if this itemSetValue is different from the
+				// version stored in the session
+				var update = false;
+				if(typeof(itemSetValue) == "object" &&
+				   typeof(session.itemSet[field]) == "object") {
+					// loop through, looking for differences
+					for(var j in itemSetValue) {
+						if(itemSetValue[j] != session.itemSet[field][j]) {
+							update = true;
+							break;
+						}
+					}
+				} else if(itemSetValue != session.itemSet[field]) {
+					update = true;
+				}
+			}
+			
+			if(update) {
+				Scholar.debug("Integration: field "+field+" at index "+index+" was "+(session.itemSet[field] ? session.itemSet[field].toSource() : "undefined")+" but is now "+itemSetValue.toSource());
+				// positioning has changed
+				if(encounteredField[field]) {
+					if(regenerate) {
+						// someone copy and pasted a citation from this document,
+						// since this field appears twice. and we have to change it.
+						newField[index] = itemIDString+"_"+Scholar.randomString();
+						session.itemSet[newField[index]] = itemSetValue;
+					}
+				} else {
+					session.itemSet[field] = itemSetValue;
+				}
+				
+				if(regenerate) {
+					// regenerate citation
+					regenerate[index] = [itemIDs, itemSetValue];
+				}
+			} else if(encounteredField[field]) {
+				// someone copy and pasted a citation from this document,
+				// since this field appears twice. we don't have to change it,
+				// but we do need to change its name
+				session.itemSet[newField[index]] = itemSetValue;
+				
+				if(regenerate) {
+					newField[index] = itemIDString+"_"+Scholar.randomString();
+					regenerate[index] = true;	// true means name change without
+												// field value change
+				}
+			}
+			
+			encounteredField[field] = true;
+			lastItemIDString = itemIDString;
+		}
+		
+		return newItemFound;
+	}
+	
+	/*
+	 * generates, stores, and returns a new session object
+	 */
+	function _generateSession(sessionID) {
+		var session = _sessions[sessionID] = new Object();
+		session.encounteredItem = new Object();
+		session.itemSet = new Object();
+		
+		return session;
 	}
 }

@@ -5969,7 +5969,7 @@ REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '200
     <access>
       <text term-name="retrieved" text-transform="capitalize"/>
       <date suffix=", ">
-        <month/>
+        <month suffix=" "/>
         <day suffix=", "/>
         <year/>
       </date>

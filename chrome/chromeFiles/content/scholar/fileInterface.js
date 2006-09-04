@@ -265,7 +265,9 @@ var Scholar_File_Interface = new function() {
 		}
 		
 		// generate bibliography
-		var bibliography = Scholar.Cite.getBibliography(io.style, items, format);
+		var csl = Scholar.Cite.getStyle(io.style);
+		csl.preprocessItems(items);
+		var bibliography = csl.createBibliography(items, format);
 		
 		if(io.output == "print") {
 			// printable bibliography, using a hidden browser
@@ -343,7 +345,7 @@ var Scholar_File_Interface = new function() {
 			transferable.addDataFlavor("text/html");
 			transferable.setTransferData("text/html", str, bibliography.length*2);
 			// add text
-			var bibliography = Scholar.Cite.getBibliography(io.style, items, "Text");
+			var bibliography = csl.createBibliography(items, "Text");
 			var str = Components.classes["@mozilla.org/supports-string;1"].
 			          createInstance(Components.interfaces.nsISupportsString);
 			str.data = bibliography;
