@@ -133,6 +133,39 @@ Scholar.Utilities.prototype.itemTypeExists = function(type) {
 }
 
 /*
+ * Cleans a title, capitalizing the proper words and replacing " :" with ":"
+ */
+Scholar.Utilities.capitalizeSkipWords = ["but", "or", "yet", "so", "for", "and",
+"nor", "a", "an", "the", "at", "by", "from", "in", "into", "of", "on", "to",
+"with", "up", "down"];
+Scholar.Utilities.prototype.capitalizeTitle = function(title) {
+	title = title.replace(/ : /g, ": ");	
+	var words = title.split(" ");
+	
+	// always capitalize first
+	words[0] = words[0][0].toUpperCase() + words[0].substr(1);
+	if(words.length > 1) {
+		var lastWordIndex = words.length-1;
+		// always capitalize last
+		words[lastWordIndex] = words[lastWordIndex][0].toUpperCase() + words[lastWordIndex].substr(1);
+		
+		if(words.length > 2) {
+			for(var i=1; i<lastWordIndex; i++) {
+				// if not a skip word
+				if(Scholar.Utilities.capitalizeSkipWords.indexOf(words[i].toLowerCase()) == -1 ||
+				   words[i-1][words[i-1].length-1] == ":") {
+					words[i] = words[i][0].toUpperCase() + words[i].substr(1);
+				} else {
+					words[i] = words[i].toLowerCase();
+				}
+			}
+		}
+	}
+	
+	return words.join(" ");
+}
+
+/*
  * END SCHOLAR FOR FIREFOX EXTENSIONS
  */
 

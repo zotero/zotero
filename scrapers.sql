@@ -1,4 +1,4 @@
--- 74
+-- 75
 
 -- Set the following timestamp to the most recent scraper update date
 REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-08-31 22:44:00'));
@@ -185,7 +185,7 @@ REPLACE INTO "translators" VALUES ('838d8849-4ffb-9f44-3d0d-aa8a0a079afe', '2006
 					if(title.substring(title.length-2) == " /") {
 						title = title.substring(0, title.length-2);
 					}
-					newItem.title = title;
+					newItem.title = Scholar.Utilities.capitalizeTitle(title);
 				} else if(match[1] == ''Author(s)'') {
 					var yearRegexp = /[0-9]{4}-([0-9]{4})?/;
 					
@@ -1029,7 +1029,7 @@ REPLACE INTO "translators" VALUES ('add7c71c-21f3-ee14-d188-caf9da12728b', '2006
 					newItem.ISBN = m[0];
 				} else if(field == "title") {
 					var titleParts = value.split(" / ");
-					newItem.title = titleParts[0];
+					newItem.title = Scholar.Utilities.capitalizeTitle(titleParts[0]);
 				} else if(field == "publication info") {
 					var pubParts = value.split(" : ");
 					newItem.place = pubParts[0];
@@ -3679,6 +3679,9 @@ function processOWC(doc) {
 				var spanTitle = spanTags[i].getAttribute("title");
 				var item = new Scholar.Item();
 				if(Scholar.Utilities.parseContextObject(spanTitle, item)) {
+					if(item.title) {
+						item.title = Scholar.Utilities.capitalizeTitle(item.title);
+					}
 					item.complete();
 					return true;
 				} else {
@@ -5934,6 +5937,10 @@ record.prototype.translate = function(item) {
 	this._associateDBField(item, "070", "ab", "callNumber");
 	this._associateDBField(item, "060", "ab", "callNumber");
 	this._associateDBField(item, "050", "ab", "callNumber");
+	
+	if(item.title) {
+		item.title = Scholar.Utilities.capitalizeTitle(item.title);
+	}
 }
 
 function doImport() {
