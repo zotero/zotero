@@ -415,7 +415,7 @@ Scholar.OpenURL = new function() {
 					item.creators.push({firstName:value});
 				}
 			} else if(key == "rft.au") {
-				item.creators.push(Scholar.cleanAuthor(value, "author", true));
+				item.creators.push(Scholar.Utilities.prototype.cleanAuthor(value, "author", true));
 			} else if(key == "rft.aucorp") {
 				item.creators.push({lastName:value, institutional:true});
 			} else if(key == "rft.isbn" && !item.ISBN) {
