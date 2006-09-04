@@ -777,7 +777,6 @@ Scholar.Browser = new function() {
 		
 		// Create a hidden browser			
 		var newHiddenBrowser = myWindow.document.createElement("browser");
-		Scholar.debug(myWindow.document.documentElement.nodeName);
 		myWindow.document.documentElement.appendChild(newHiddenBrowser);
 		Scholar.debug("created hidden browser");
 		return newHiddenBrowser;
