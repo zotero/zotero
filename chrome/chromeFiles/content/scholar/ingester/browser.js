@@ -457,8 +457,8 @@ Scholar_Ingester_Interface.Progress = new function() {
 	function _move() {
 		_progressWindow.sizeToContent();
 		_progressWindow.moveTo(
-			window.screenX + window.outerWidth - _progressWindow.outerWidth - 30,
-			window.screenY + window.outerHeight - _progressWindow.outerHeight - 10
+			window.screenX + window.innerWidth - _progressWindow.outerWidth - 30,
+			window.screenY + window.innerHeight - _progressWindow.outerHeight - 10
 		);
 	}
 	

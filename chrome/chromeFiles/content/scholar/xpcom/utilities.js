@@ -499,6 +499,7 @@ Scholar.Utilities.HTTP = new function() {
 //               want to do this, because it makes it easier to leak memory
 Scholar.Utilities.HTTP.processDocuments = function(firstDoc, urls, processor, done, exception, saveBrowser) {
 	var hiddenBrowser = Scholar.Browser.createHiddenBrowser();
+	hiddenBrowser.docShell.allowImages = false;
 	var prevUrl, url;
 
 	if (urls.length == 0) {

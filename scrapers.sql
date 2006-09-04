@@ -5,7 +5,7 @@ REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-08-31 22:44:00
 
 REPLACE INTO "translators" VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006-08-11 11:18:00', 4, 'Amazon.com', 'Simon Kornblith', '^http://www\.amazon\.com/', 
 'function detectWeb(doc, url) {
-	var searchRe = new RegExp(''^http://www\.amazon\.com/(gp/search/|exec/obidos/search-handle-url/|s/)'');
+	var searchRe = new RegExp(''^http://(?:www\.)?amazon\.com/(gp/search/|exec/obidos/search-handle-url/|s/)'');
 	if(searchRe.test(doc.location.href)) {
 		return "multiple";
 	} else {
@@ -1704,9 +1704,9 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO "translators" VALUES ('cf87eca8-041d-b954-795a-2d86348999d5', '2006-06-26 16:01:00', 4, 'Aleph', 'Simon Kornblith', '^http://[^/]+/F(?:/[A-Z0-9\-]+(?:\?.*)?$|\?func=find)',
+REPLACE INTO "translators" VALUES ('cf87eca8-041d-b954-795a-2d86348999d5', '2006-06-26 16:01:00', 4, 'Aleph', 'Simon Kornblith', '^http://[^/]+/F(?:/[A-Z0-9\-]+(?:\?.*)?$|\?func=find|\?func=scan)',
 'function detectWeb(doc, url) {
-	var singleRe = new RegExp("^http://[^/]+/F/[A-Z0-9\-]+\?.*func=full-set-set.*\&format=[0-9]{3}");
+	var singleRe = new RegExp("^http://[^/]+/F/[A-Z0-9\-]+\?.*(?:func=full-set-set.*\&format=[0-9]{3}|func=direct)");
 	
 	if(singleRe.test(doc.location.href)) {
 		return "book";
@@ -1720,36 +1720,41 @@ REPLACE INTO "translators" VALUES ('cf87eca8-041d-b954-795a-2d86348999d5', '2006
 	}
 }',
 'function doWeb(doc, url) {
-	var detailRe = new RegExp("^http://[^/]+/F/[A-Z0-9\-]+\?.*func=full-set-set.*\&format=[0-9]{3}");
+	var detailRe = new RegExp("^http://[^/]+/F/[A-Z0-9\-]+\?.*(?:func=full-set-set.*\&format=[0-9]{3}|func=direct)");
 	var uri = doc.location.href;
 	var newUris = new Array();
 	
 	if(detailRe.test(uri)) {
 	newUris.push(uri.replace(/\&format=[0-9]{3}/, "&format=001"))
 	} else {
-	var items = Scholar.Utilities.getItemArray(doc, doc, ''^http://[^/]+/F/[A-Z0-9\-]+\?.*func=full-set-set.*\&format=999'', ''^[0-9]+$'');
-	
-	// ugly hack to see if we have any items
-	var haveItems = false;
-	for(var i in items) {
-		haveItems = true;
-		break;
-	}
-	
-	// If we don''t have any items otherwise, let us use the numbers
-	if(!haveItems) {
-		var items = Scholar.Utilities.getItemArray(doc, doc, ''^http://[^/]+/F/[A-Z0-9\-]+\?.*func=full-set-set.*\&format=999'');
-	}
-	
-	items = Scholar.selectItems(items);
-	
-	if(!items) {
-		return true;
-	}
-	
-	for(var i in items) {
-		newUris.push(i.replace("&format=999", "&format=001"));
-	}
+		var itemRegexp = ''^http://[^/]+/F/[A-Z0-9\-]+\?.*(?:func=full-set-set.*\&format=999|func=direct)''
+		var items = Scholar.Utilities.getItemArray(doc, doc, itemRegexp, ''^[0-9]+$'');
+		
+		// ugly hack to see if we have any items
+		var haveItems = false;
+		for(var i in items) {
+			haveItems = true;
+			break;
+		}
+		
+		// If we don''t have any items otherwise, let us use the numbers
+		if(!haveItems) {
+			var items = Scholar.Utilities.getItemArray(doc, doc, itemRegexp);
+		}
+		
+		items = Scholar.selectItems(items);
+		
+		if(!items) {
+			return true;
+		}
+		
+		for(var i in items) {
+			var newUri = i.replace("&format=999", "&format=001");
+			if(newUri == i) {
+				newUri += "&format=001";
+			}
+			newUris.push(newUri);
+		}
 	}
 	
 	var translator = Scholar.loadTranslator("import");
@@ -5728,6 +5733,7 @@ record.prototype.importBinary = function(record) {
 
 // add a field to this record
 record.prototype.addField = function(field, indicator, value) {
+	Scholar.Utilities.debug("adding field "+field+": "+value);
 	field = parseInt(field, 10);
 	// make sure indicator is the right length
 	if(indicator.length > this.indicatorLength) {

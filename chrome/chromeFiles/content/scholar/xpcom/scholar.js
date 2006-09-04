@@ -770,15 +770,15 @@ Scholar.Browser = new function() {
 	
 	 function createHiddenBrowser(myWindow) {
 	 	if(!myWindow) {
-			var myWindow = Components.classes["@mozilla.org/appshell/appShellService;1"]
-				   .getService(Components.interfaces.nsIAppShellService)
-				   .hiddenDOMWindow;
+			var myWindow = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+			                   .getService(Components.interfaces.nsIWindowMediator)
+			                   .getMostRecentWindow("navigator:browser");
 		}
 		
 		// Create a hidden browser			
 		var newHiddenBrowser = myWindow.document.createElement("browser");
-		var windows = myWindow.document.getElementsByTagName("window");
-		windows[0].appendChild(newHiddenBrowser);
+		Scholar.debug(myWindow.document.documentElement.nodeName);
+		myWindow.document.documentElement.appendChild(newHiddenBrowser);
 		Scholar.debug("created hidden browser");
 		return newHiddenBrowser;
 	}
