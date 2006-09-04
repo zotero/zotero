@@ -43,6 +43,13 @@ var Scholar_File_Interface_Bibliography = new function() {
 		if(Scholar.isMac && document.getElementById("copy-to-clipboard")) {
 			document.getElementById("copy-to-clipboard").hidden = "true";
 		}
+		
+		// move to center of screen
+		window.sizeToContent();
+		window.moveTo(
+			(self.screen.width-window.innerWidth)/2,
+			(self.screen.height-window.innerHeight)/2
+		);
 	}
 
 	function acceptSelection() {

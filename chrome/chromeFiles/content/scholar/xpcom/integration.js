@@ -337,7 +337,7 @@ Scholar.Integration.SOAP = new function() {
 			// get items		
 			var io = {dataIn: null, dataOut: null};
 			window.openDialog('chrome://scholar/content/selectItemsDialog.xul','',
-								'chrome,popup,modal,centerscreen',io);
+								'chrome,popup,modal',io);
 
 			if(io.dataOut) {	// cancel was not pressed
 				var field = (io.dataOut.join(","))+"_"+Scholar.randomString();
@@ -451,20 +451,21 @@ Scholar.Integration.SOAP = new function() {
 	function setDocPrefs(vars) {
 		var io = new Object();
 		
-		if(!vars || vars[0] == "!") {
+		if(!vars || !vars[0] || vars[0] == "!") {
 			// no session ID; generate a new one
 			var sessionID = Scholar.randomString();
 			var session = _generateSession(sessionID);
 		} else {
 			// session ID exists
 			var sessionID = vars[0];
+			Scholar.debug(vars.toSource());
 			var session = _sessions[sessionID];
 			var originalStyle = session.styleID;
 			io.style = originalStyle;
 		}
 		
 		window.openDialog('chrome://scholar/content/integrationDocPrefs.xul','',
-		                    'chrome,popup,modal,centerscreen',io);
+		                    'chrome,popup,modal',io);
 		session.styleID = io.style;
 		var style = Scholar.Cite.getStyle(io.style);
 		

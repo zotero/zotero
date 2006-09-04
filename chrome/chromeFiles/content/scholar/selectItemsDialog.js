@@ -14,6 +14,13 @@ function doLoad()
 	
 	collectionsView = new Scholar.CollectionTreeView();
 	document.getElementById('collections-tree').view = collectionsView;
+
+	// move to center of screen
+	window.sizeToContent()
+	window.moveTo(
+		(self.screen.width-window.innerWidth)/2,
+		(self.screen.height-window.innerHeight)/2
+	);
 }
 
 function doUnload()
