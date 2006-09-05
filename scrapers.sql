@@ -1,4 +1,4 @@
--- 78
+-- 79
 
 -- Set the following timestamp to the most recent scraper update date
 REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-08-31 22:44:00'));
@@ -450,7 +450,7 @@ REPLACE INTO "translators" VALUES ('88915634-1af6-c134-0171-56fd198235ed', '2006
 	postString += ''RD=''+rd+''&MAILADDY=&SAVE=Press+to+SAVE+or+PRINT'';
 	
 	// No idea why this doesn''t work as post
-	Scholar.Utilities.HTTP.doGet(newUri+''?''+postString, function(text) {	
+	Scholar.Utilities.HTTP.doGet(newUri+''?''+postString, function(text) {
 		// load translator for MARC
 		var marc = Scholar.loadTranslator("import");
 		marc.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
@@ -5722,7 +5722,22 @@ record.prototype.importBinary = function(record) {
 	var baseAddress = parseInt(this.leader.substr(12, 5), 10);
 	
 	// get record data
-	this.content = record.substr(baseAddress);
+	var contentTmp = record.substr(baseAddress);
+	
+	// MARC wants one-byte characters, so when we have multi-byte UTF-8
+	// sequences, add null characters so that the directory shows up right. we
+	// can strip the nulls later.
+	this.content = "";
+	for(i=0; i<contentTmp.length; i++) {
+		this.content += contentTmp[i];
+		if(contentTmp.charCodeAt(i) > 0x00FFFF) {
+			this.content += "\x00\x00\x00";
+		} else if(contentTmp.charCodeAt(i) > 0x0007FF) {
+			this.content += "\x00\x00";
+		} else if(contentTmp.charCodeAt(i) > 0x00007F) {
+			this.content += "\x00";
+		}
+	}
 	
 	// read directory
 	for(var i=0; i<directory.length; i+=12) {
@@ -5775,10 +5790,10 @@ record.prototype.getField = function(field) {
 	for(var i in this.directory[field]) {
 		var location = this.directory[field][i];
 		
-		// add to array
+		// add to array, replacing null characters
 		fields.push([this.content.substr(location[0], this.indicatorLength),
 		             this.content.substr(location[0]+this.indicatorLength,
-		                                 location[1]-this.indicatorLength-1)]);
+		               location[1]-this.indicatorLength-1).replace(/\x00/g, "")]);
 	}
 	
 	return fields;
