@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<terms>
+<terms xmlns="http://purl.org/net/xbiblio/csl">
   <locale xml:lang="en">
     <term name="in">in</term>
     <term name="ibid">ibid</term>
     <term name="accessed">accessed</term>
     <term name="forthcoming">forthcoming</term>
     <term name="references">References</term>
+    <term name="no date">nd</term>
     <term name="and">and</term>
     <term name="et-al">et al.</term>
     
@@ -19,7 +20,7 @@
       <multiple>paragraph</multiple>
     </term>
     <term name="volume">volume</term>
-    <term name="issue">issue</term>
+    <term name="issue">number</term>
     
     <!-- SHORT LOCATOR FORMS -->
     <term name="page" form="short">
@@ -31,7 +32,7 @@
       <multiple>¶¶</multiple>
     </term>
     <term name="volume" form="short">vol</term>
-    <term name="issue" form="short">iss</term>
+    <term name="issue" form="short">no</term>
     
     <!-- LONG ROLE FORMS -->
     <term name="editor">

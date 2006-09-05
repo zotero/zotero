@@ -1,4 +1,4 @@
--- 77
+-- 78
 
 -- Set the following timestamp to the most recent scraper update date
 REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-08-31 22:44:00'));
@@ -5982,9 +5982,9 @@ function doImport() {
 	}
 }');
 
-REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '2006-08-29 23:05:00', 'American Psychological Association',
+REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '2006-09-04 20:14:00', 'American Psychological Association',
 '<?xml version="1.0" encoding="UTF-8"?>
-<?oxygen RNGSchema="file:/Users/darcusb/xbiblio/csl/schema/trunk/csl-alt.rnc" type="compact"?>
+<?oxygen RNGSchema="../schema/trunk/csl.rnc" type="compact"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="author-date" xml:lang="en">
   <info>
     <title>American Psychological Association</title>
@@ -6002,7 +6002,7 @@ REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '200
       <name>Johan Kool</name>
       <email>johankool@users.sourceforge.net</email>
     </contributor>
-    <updated>2006-08-29T23:05:00+05:00</updated>
+    <updated>2006-09-04T20:14:00+05:00</updated>
   </info>
   <defaults>
     <contributor name-as-sort-order="no">
@@ -6047,7 +6047,6 @@ REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '200
       </date>
       <text term-name="from"/>
       <url/>
-      <date prefix=", "/>
     </access>
   </defaults>
   <citation prefix="(" suffix=")" delimiter="; ">
@@ -6144,7 +6143,7 @@ REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '200
   </bibliography>
 </style>');
 
-REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/chicago-note.csl', '2006-08-30 17:40:00', 'Chicago Manual of Style (Note)',
+REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/chicago-note.csl', '2006-09-04 20:27:00', 'Chicago Manual of Style (Note)',
 '<?xml version="1.0" encoding="UTF-8"?>
 <?oxygen RNGSchema="../schema/trunk/csl.rnc" type="compact"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="note" xml:lang="en">
@@ -6163,7 +6162,7 @@ REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/chicago-note.c
       <name>Johan Kool</name>
       <email>johankool@users.sourceforge.net</email>
     </contributor>
-    <updated>2006-08-24T16:30:00+01:00</updated>
+    <updated>2006-09-04T20:27:00+05:00</updated>
     <summary>The note-without-bibliography variant of the Chicago style.</summary>
   </info>
   <defaults>
@@ -6188,6 +6187,8 @@ REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/chicago-note.c
       <title/>
     </titles>
     <date>
+      <month suffix=" " text-transform="capitalize"/>
+      <day suffix=", "/>
       <year/>
     </date>
     <publisher>
@@ -6196,10 +6197,15 @@ REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/chicago-note.c
     </publisher>
     <access>
       <url/>
-      <date prefix=" "/>
+      <date prefix=" (" suffix=")">
+        <text term-name="accessed" suffix=" "/>
+        <month suffix=" " text-transform="capitalize"/>
+        <day suffix=", "/>
+        <year/>
+      </date>
     </access>
   </defaults>
-  <citation suffix=".">
+  <citation suffix="." delimiter="; ">
     <et-al min-authors="4" use-first="1"/>
     <layout>
       <item>
@@ -6209,11 +6215,15 @@ REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/chicago-note.c
             <titles font-style="italic"/>
             <editor prefix=", "/>
             <translator prefix=", "/>
+            <titles relation="container" prefix=" "/>
             <group prefix=" (" suffix=")" delimiter=", ">
               <publisher/>
-              <date/>
+              <date>
+                <year/>
+              </date>
             </group>
             <pages prefix=", "/>
+            <access prefix=", "/>
           </type>
           <type name="chapter">
             <author suffix=", "/>
@@ -6223,30 +6233,37 @@ REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/chicago-note.c
               <titles relation="container" prefix=" " font-style="italic"/>
               <editor prefix=", "/>
               <translator prefix=", "/>
-              <pages prefix=", "/>
               <group prefix=" (" suffix=")" delimiter=", ">
                 <publisher/>
-                <date/>
+                <date>
+                  <year/>
+                </date>
               </group>
+              <pages prefix=", "/>
+              <access prefix=", "/>
             </group>
-          </type>
-          <type name="journal-article">
-            <author suffix=", "/>
-            <titles prefix="&#8220;" suffix=",&#8221; "/>
-            <titles relation="container" font-style="italic"/>
-            <volume prefix=" "/>
-            <issue prefix=" (" suffix=")"/>
-            <pages prefix=": "/>
           </type>
           <type name="article">
             <author suffix=", "/>
             <titles prefix="&#8220;" suffix=",&#8221; "/>
             <titles relation="container" font-style="italic" suffix=", "/>
-            <date>
-              <day suffix=" "/>
-              <month suffix=" " text-transform="capitalize"/>
-              <year/>
-            </date>
+            <group delimiter=", ">
+              <date/>
+              <access/>
+            </group>
+          </type>
+          <type name="article-journal">
+            <author suffix=", "/>
+            <titles prefix="&#8220;" suffix=",&#8221; "/>
+            <titles relation="container" font-style="italic"/>
+            <volume prefix=" "/>
+            <issue prefix=", ">
+              <label form="short" text-transform="lowercase" suffix=". "/>
+              <number/>
+            </issue>
+            <date prefix=" (" suffix=")"/>
+            <pages prefix=": "/>
+            <access prefix=", "/>
           </type>
         </choose>
       </item>
@@ -6258,7 +6275,7 @@ REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/chicago-note.c
   </citation>
 </style>');
 
-REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/mla.csl', '2006-08-29 23:05:00', 'Modern Language Association',
+REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/mla.csl', '2006-09-04 20:28:00', 'Modern Language Association',
 '<?xml version="1.0" encoding="UTF-8"?>
 <?oxygen RNGSchema="../schema/trunk/csl.rnc" type="compact"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="author" xml:lang="en">
@@ -6278,11 +6295,11 @@ REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/mla.csl', '200
       <name>Simon Kornblith</name>
       <email>simon@simonster.com</email>
     </contributor>
-    <updated>2006-08-29T23:05:00+05:00</updated>
+    <updated>2006-09-04T20:28:00+05:00</updated>
   </info>
   <defaults>
     <contributor name-as-sort-order="first">
-      <name and="text" sort-separator=", " delimiter=", "/>
+      <name and="text" sort-separator=", " delimiter=", " delimiter-precedes-last="always"/>
       <label form="short" suffix="."/>
     </contributor>
     <author>
@@ -6312,7 +6329,7 @@ REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/mla.csl', '200
         <month suffix=" "/>
         <year/>
       </date>
-      <url prefix=" <" suffix=">"/>
+      <url prefix=" &lt;" suffix="&gt;"/>
     </access>
   </defaults>
   <citation prefix="(" suffix=")" delimiter="; ">

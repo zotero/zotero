@@ -1014,6 +1014,8 @@ CSL.prototype._formatDate = function(element, date, format) {
 			} else {
 				string = date.day.toString();
 			}
+		} else if(child.name == "text") {
+			string = this._getTerm(child["term-name"], false, child["form"]);
 		}
 		
 		if(string) {
@@ -1318,9 +1320,11 @@ CSL.prototype._getFieldValue = function(name, element, item, format, bibCitEleme
 			data = this._formatLocator(name, element, field, format);
 		}
 	} else if(name == "pages") {
-		var field = item.getField("pages");
-		if(field) {
-			data = this._formatLocator("page", element, field, format);
+		if(typeName != "book") {
+			var field = item.getField("pages");
+			if(field) {
+				data = this._formatLocator("page", element, field, format);
+			}
 		}
 	} else if(name == "edition") {
 		data = item.getField("edition");
