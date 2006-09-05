@@ -673,7 +673,6 @@ Scholar.Translate.prototype._canTranslate = function(translator, ignoreExtension
 				var regularExpression = new RegExp("\\."+translator.target+"$", "i");
 			}
 		}
-		Scholar.debug("path is "+this.path);
 		
 		if(regularExpression.test(this.path)) {
 			canTranslate = true;

@@ -6005,7 +6005,6 @@ function doImport() {
 	var text;
 	var holdOver = "";	// part of the text held over from the last loop
 	
-	Scholar.Utilities.debug("doing import: about to set character set");
 	Scholar.setCharacterSet("utf-8");
 	
 	while(text = Scholar.read(4096)) {	// read in 4096 byte increments
