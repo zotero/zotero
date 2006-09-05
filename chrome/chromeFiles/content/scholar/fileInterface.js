@@ -91,6 +91,10 @@ var Scholar_File_Interface = new function() {
 	function _exportDone(obj, worked) {
 		Scholar_File_Interface.Progress.close();
 		_restoreUnresponsive();
+		
+		if(!worked) {
+			window.alert(Scholar.getString("fileInterface.exportError"));
+		}
 	}
 	
 	/*
@@ -156,7 +160,7 @@ var Scholar_File_Interface = new function() {
 	/*
 	 * closes items imported indicator
 	 */
-	function _importDone(obj) {
+	function _importDone(obj, worked) {
 		// add items to import collection
 		for each(var itemID in obj.newItems) {
 			_importCollection.addItem(itemID);
@@ -234,6 +238,20 @@ var Scholar_File_Interface = new function() {
 	 * Shows bibliography options and creates a bibliography
 	 */
 	function _doBibliographyOptions(name, items) {
+		// make sure at least one item is not a standalone note or attachment
+		var haveNonNote = false;
+		for(var i in items) {
+			var type = Scholar.ItemTypes.getName(items[i].getType());
+			if(type != "note" && type != "attachment") {
+				haveNonNote = true;
+				break;
+			}
+		}
+		if(!haveNonNote) {
+			window.alert(Scholar.getString("fileInterface.noReferencesError"));
+			return;
+		}
+		
 		var io = new Object();
 		var newDialog = window.openDialog("chrome://scholar/content/bibliography.xul",
 			"_blank","chrome,modal,centerscreen", io);
@@ -245,9 +263,15 @@ var Scholar_File_Interface = new function() {
 		}
 		
 		// generate bibliography
-		var csl = Scholar.Cite.getStyle(io.style);
-		csl.preprocessItems(items);
-		var bibliography = csl.createBibliography(items, format);
+		try {
+			var csl = Scholar.Cite.getStyle(io.style);
+			csl.preprocessItems(items);
+			var bibliography = csl.createBibliography(items, format);
+		} catch(e) {
+			window.alert(Scholar.getString("fileInterface.bibliographyGenerationError"));
+			throw(e);
+			return;
+		}
 		
 		if(io.output == "print") {
 			// printable bibliography, using a hidden browser
@@ -278,7 +302,6 @@ var Scholar_File_Interface = new function() {
 			}
 			
 			Scholar.Browser.deleteHiddenBrowser(browser);
-			bibliographyStream.close();
 		} else if(io.output == "save-as-html") {
 			var fStream = _saveBibliography(name, "HTML");
 			

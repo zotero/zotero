@@ -246,7 +246,10 @@ CSL.prototype.createBibliography = function(items, format) {
 		var item = items[i];
 		
 		var string = this._getCitation(item, "first", format, this._bib);
-	
+		if(!string) {
+			continue;
+		}
+		
 		// add format
 		if(this._bib.format) {
 			// add citation prefix or suffix
@@ -1207,7 +1210,7 @@ CSL.prototype._getCitation = function(item, position, format, bibCitElement) {
 	}
 	
 	if(!type) {
-		throw("CSL: ERROR: no type found for item");
+		return false;
 	}
 	Scholar.debug("CSL: using CSL type "+typeName);
 	
