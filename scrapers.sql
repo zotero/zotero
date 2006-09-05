@@ -1,4 +1,4 @@
--- 79
+-- 80
 
 -- Set the following timestamp to the most recent scraper update date
 REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-08-31 22:44:00'));
@@ -3840,6 +3840,7 @@ function detectImport() {
 'var partialItemTypes = ["bookSection", "journalArticle", "magazineArticle", "newspaperArticle"];
 
 function doExport() {
+	Scholar.setCharacterSet("utf-8");
 	var modsCollection = <modsCollection xmlns="http://www.loc.gov/mods/v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-2.xsd" />;
 	
 	var item;
@@ -4115,14 +4116,38 @@ function doImport() {
 	var text = "";
 	var read;
 	
+	// read until we see if the file begins with a parse instruction
+	read = " ";
+	while(read == " " || read == "\n" || read == "\r") {
+		read = Scholar.read(1);
+	}
+	
+	var firstPart = read + Scholar.read(4);
+	if(firstPart == "<?xml") {
+		// got a parse instruction, read until it ends
+		read = true;
+		while((read !== false) && (read !== ">")) {
+			read = Scholar.read(1);
+			firstPart += read;
+		}
+		var encodingRe = /encoding=[''"]([^''"]+)[''"]/;
+		var m = encodingRe.exec(firstPart);
+		// set character set
+		try {
+			Scholar.setCharacterSet(m[1]);
+		} catch(e) {
+			Scholar.setCharacterSet("utf-8");
+		}
+	} else {
+		Scholar.setCharacterSet("utf-8");
+		text += firstPart;
+	}
+	
 	// read in 16384 byte increments
 	while(read = Scholar.read(16384)) {
 		text += read;
 	}
 	Scholar.Utilities.debug("read in");
-	
-	// eliminate <?xml ?> heading so we can parse as XML
-	text = text.replace(/<\?xml[^?]+\?>/, "");
 	
 	// parse with E4X
 	var m = new Namespace("http://www.loc.gov/mods/v3");
@@ -5495,7 +5520,9 @@ function processTag(item, tag, value) {
 }
 
 function doImport(attachments) {
-	Scholar.Utilities.debug("hello");
+	// this is apparently the proper character set for RIS, although i''m not
+	// sure how many people follow this
+	Scholar.setCharacterSet("IBM850");
 	
 	var line = true;
 	var tag = data = false;
@@ -5560,6 +5587,10 @@ function addTag(tag, value) {
 }
 
 function doExport() {
+	// this is apparently the proper character set for RIS, although i''m not
+	// sure how many people follow this
+	Scholar.setCharacterSet("IBM850");
+	
 	var item;
 	
 	while(item = Scholar.nextItem()) {
@@ -5973,6 +6004,9 @@ record.prototype.translate = function(item) {
 function doImport() {
 	var text;
 	var holdOver = "";	// part of the text held over from the last loop
+	
+	Scholar.Utilities.debug("doing import: about to set character set");
+	Scholar.setCharacterSet("utf-8");
 	
 	while(text = Scholar.read(4096)) {	// read in 4096 byte increments
 		var records = text.split("\x1D");

@@ -389,6 +389,8 @@ Scholar.Translate.prototype.getTranslators = function() {
 	// see which translators can translate
 	var possibleTranslators = this._findTranslators(translators);
 	
+	this._closeStreams();
+	
 	return possibleTranslators;
 }
 
@@ -647,7 +649,13 @@ Scholar.Translate.prototype._generateSandbox = function() {
 /*
  * Check to see if _scraper_ can scrape this document
  */
-Scholar.Translate.prototype._canTranslate = function(translator, ignoreExtensions) {	
+Scholar.Translate.prototype._canTranslate = function(translator, ignoreExtensions) {
+	if((this.type == "import" || this.type == "web") && !this.location) {
+		// if no location yet (e.g., getting list of possible web translators),
+		// just return true
+		return true;
+	}
+	
 	// Test location with regular expression
 	if(translator.target && (this.type == "import" || this.type == "web")) {
 		var canTranslate = false;
@@ -662,9 +670,10 @@ Scholar.Translate.prototype._canTranslate = function(translator, ignoreExtension
 			if(translator.importRegexp) {
 				var regularExpression = translator.importRegexp;
 			} else {
-				var regularExpression = new RegExp("\."+translator.target+"$", "i");
+				var regularExpression = new RegExp("\\."+translator.target+"$", "i");
 			}
 		}
+		Scholar.debug("path is "+this.path);
 		
 		if(regularExpression.test(this.path)) {
 			canTranslate = true;
@@ -861,23 +870,6 @@ Scholar.Translate.prototype._translationComplete = function(returnValue) {
 		} else {
 			Scholar.debug("translation complete");
 			
-			// serialize RDF and unregister dataSource
-			if(this._rdf) {
-				if(this._rdf.serializer) {
-					this._rdf.serializer.Serialize(this._streams[0]);
-				}
-				
-				try {
-					var rdfService = Components.classes["@mozilla.org/rdf/rdf-service;1"].
-									 getService(Components.interfaces.nsIRDFService);
-					rdfService.UnregisterDataSource(this._rdf.dataSource);
-				} catch(e) {
-					Scholar.debug("could not unregister data source");
-				}
-				
-				delete this._rdf.dataSource;
-			}
-			
 			// close open streams
 			this._closeStreams();
 			
@@ -902,6 +894,21 @@ Scholar.Translate.prototype._translationComplete = function(returnValue) {
  * closes open file streams, if any exist
  */
 Scholar.Translate.prototype._closeStreams = function() {
+	// serialize RDF and unregister dataSource
+	if(this._rdf) {
+		if(this._rdf.serializer) {
+			this._rdf.serializer.Serialize(this._streams[0]);
+		}
+		
+		try {
+			var rdfService = Components.classes["@mozilla.org/rdf/rdf-service;1"].
+							 getService(Components.interfaces.nsIRDFService);
+			rdfService.UnregisterDataSource(this._rdf.dataSource);
+		} catch(e) {}
+		
+		delete this._rdf.dataSource;
+	}
+	
 	if(this._streams.length) {
 		for(var i in this._streams) {
 			var stream = this._streams[i];
@@ -924,8 +931,10 @@ Scholar.Translate.prototype._closeStreams = function() {
 			}
 		}
 	}
+	
 	delete this._streams;
 	this._streams = new Array();
+	this._inputStream = null;
 }
 
 /*
@@ -1327,49 +1336,105 @@ Scholar.Translate.prototype._importConfigureIO = function() {
 			this._storagePointer = 0;
 		}
 	} else {
+		var me = this;
+		
 		if(this._configOptions.dataMode == "rdf") {
-			this._rdf = new Object()
-			
-			var IOService = Components.classes['@mozilla.org/network/io-service;1']
-							.getService(Components.interfaces.nsIIOService);
-			var fileHandler = IOService.getProtocolHandler("file")
-							  .QueryInterface(Components.interfaces.nsIFileProtocolHandler);
-			var URL = fileHandler.getURLSpecFromFile(this.location);
-			
-			var RDFService = Components.classes['@mozilla.org/rdf/rdf-service;1']
-							 .getService(Components.interfaces.nsIRDFService);
-			this._rdf.dataSource = RDFService.GetDataSourceBlocking(URL);
-			
-			// make an instance of the RDF handler
-			this._sandbox.Scholar.RDF = new Scholar.Translate.RDF(this._rdf.dataSource);
+			if(!this._rdf) {
+				this._rdf = new Object()
+				
+				var IOService = Components.classes['@mozilla.org/network/io-service;1']
+								.getService(Components.interfaces.nsIIOService);
+				var fileHandler = IOService.getProtocolHandler("file")
+								  .QueryInterface(Components.interfaces.nsIFileProtocolHandler);
+				var URL = fileHandler.getURLSpecFromFile(this.location);
+				
+				var RDFService = Components.classes['@mozilla.org/rdf/rdf-service;1']
+								 .getService(Components.interfaces.nsIRDFService);
+				this._rdf.dataSource = RDFService.GetDataSourceBlocking(URL);
+				
+				// make an instance of the RDF handler
+				this._sandbox.Scholar.RDF = new Scholar.Translate.RDF(this._rdf.dataSource);
+			}
 		} else {
 			// open file and set read methods
-			var fStream = Components.classes["@mozilla.org/network/file-input-stream;1"]
-									 .createInstance(Components.interfaces.nsIFileInputStream);
-			fStream.init(this.location, 0x01, 0664, 0);
-			this._streams.push(fStream);
+			if(this._inputStream) {
+				this._inputStream.QueryInterface(Components.interfaces.nsISeekableStream)
+				             .seek(Components.interfaces.nsISeekableStream.NS_SEEK_SET, 0);
+				this._inputStream.QueryInterface(Components.interfaces.nsIFileInputStream);
+			} else {
+				this._inputStream = Components.classes["@mozilla.org/network/file-input-stream;1"]
+										  .createInstance(Components.interfaces.nsIFileInputStream);
+				this._inputStream.init(this.location, 0x01, 0664, 0);
+				this._streams.push(this._inputStream);
+			}
 			
-			if(this._configOptions.dataMode == "line") {	// line by line reading
-				var notEof = true;
-				var lineData = new Object();
+			var intlStream = null;
+			var filePosition = 0;
+			
+			// allow translator to set charset
+			this._sandbox.Scholar.setCharacterSet = function(charset) {
+				// seek
+				if(filePosition != 0) {
+					me._inputStream.QueryInterface(Components.interfaces.nsISeekableStream)
+					             .seek(Components.interfaces.nsISeekableStream.NS_SEEK_SET, filePosition);
+					me._inputStream.QueryInterface(Components.interfaces.nsIFileInputStream);
+				}
 				
-				fStream.QueryInterface(Components.interfaces.nsILineInputStream);
+				intlStream = Components.classes["@mozilla.org/intl/converter-input-stream;1"]
+				                       .createInstance(Components.interfaces.nsIConverterInputStream);
+				try {
+					intlStream.init(me._inputStream, charset, 1024,
+						Components.interfaces.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER);
+				} catch(e) {
+					throw "Text encoding not supported";
+				}
+				me._streams.push(intlStream);
+			}
+			
+			var str = new Object();
+			if(this._configOptions.dataMode == "line") {	// line by line reading	
+				this._inputStream.QueryInterface(Components.interfaces.nsILineInputStream);
 				
 				this._sandbox.Scholar.read = function() {
-					if(notEof) {
-						notEof = fStream.readLine(lineData);
-						return lineData.value;
+					if(intlStream && intlStream instanceof Components.interfaces.nsIUnicharLineInputStream) {
+						var amountRead = intlStream.readLine(str);
+					} else {
+						var amountRead = me._inputStream.readLine(str);
+					}
+					if(amountRead) {
+						filePosition += amountRead;
+						return str.value;
 					} else {
 						return false;
 					}
 				}
 			} else {										// block reading
-				var sStream = Components.classes["@mozilla.org/scriptableinputstream;1"]
-							 .createInstance(Components.interfaces.nsIScriptableInputStream);
-				sStream.init(fStream);
+				var sStream;
 				
 				this._sandbox.Scholar.read = function(amount) {
-					return sStream.read(amount);
+					if(intlStream) {
+						// read from international stream, if one is available
+						var amountRead = intlStream.readString(amount, str);
+						
+						if(amountRead) {
+							filePosition += amountRead;
+							return str.value;
+						} else {
+							return false;
+						}
+					} else {
+						// allocate sStream on the fly
+						if(!sStream) {
+							sStream = Components.classes["@mozilla.org/scriptableinputstream;1"]
+										 .createInstance(Components.interfaces.nsIScriptableInputStream);
+							sStream.init(me._inputStream);
+						}
+						
+						// read from the scriptable input stream
+						var string = sStream.read(amount);
+						filePosition += string.length;
+						return string;
+					}
 				}
 				
 				// attach sStream to stack of streams to close
@@ -1473,8 +1538,24 @@ Scholar.Translate.prototype._exportConfigureIO = function() {
 		
 		// make an instance of the RDF handler
 		this._sandbox.Scholar.RDF = new Scholar.Translate.RDF(this._rdf.dataSource, this._rdf.serializer);
-	} else {						// regular io; write just writes to file
-		this._sandbox.Scholar.write = function(data) { fStream.write(data, data.length) };
+	} else {
+		// regular io; write just writes to file
+		var intlStream = null;
+		
+		// allow setting of character sets
+		this._sandbox.Scholar.setCharacterSet = function(charset) {
+			intlStream = Components.classes["@mozilla.org/intl/converter-output-stream;1"]
+			                       .createInstance(Components.interfaces.nsIConverterOutputStream);
+			intlStream.init(fStream, charset, 1024, "?".charCodeAt(0));
+		};
+		
+		this._sandbox.Scholar.write = function(data) {
+			if(intlStream) {
+				intlStream.writeString(data);
+			} else {
+				fStream.write(data, data.length);
+			}
+		};
 	}
 }
 
@@ -1628,6 +1709,10 @@ Scholar.Translate.prototype._initializeInternalIO = function() {
  */
 Scholar.Translate.prototype._storageFunctions =  function(read, write) {
 	var me = this;
+	
+	// add setCharacterSet method that does nothing
+	this._sandbox.Scholar.setCharacterSet = function() {}
+	
 	if(write) {
 		// set up write() method
 		this._sandbox.Scholar.write = function(data) {
