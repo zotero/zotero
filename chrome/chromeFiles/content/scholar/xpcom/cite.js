@@ -342,9 +342,7 @@ CSL.ns = "http://purl.org/net/xbiblio/csl";
 CSL.init = function() {
 	if(!CSL._xmlLang) {
 		// get XML lang
-		var localeService = Components.classes['@mozilla.org/intl/nslocaleservice;1'].
-							getService(Components.interfaces.nsILocaleService);
-		CSL._xmlLang = localeService.getLocaleComponentForUserAgent();
+		CSL._xmlLang = Scholar.locale;
 		
 		// read locales.xml from directory
 		var req = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"].
@@ -1001,7 +999,7 @@ CSL.prototype._formatDate = function(element, date, format) {
 				}
 			}
 		} else if(child.name == "month") {
-			if(date.month) {
+			if(date.month != undefined) {
 				if(format == "compare") {
 					string = this._lpad(date.month+1, "0", 2);
 				} else {

@@ -39,6 +39,7 @@ var Scholar = new function(){
 	// Public properties
 	this.version;
 	this.platform;
+	this.locale;
 	this.isMac;
 	
 	/*
@@ -76,6 +77,11 @@ var Scholar = new function(){
 			   .hiddenDOMWindow;
 		this.platform = win.navigator.platform;
 		this.isMac = (this.platform.substr(0, 3) == "Mac");
+		
+		// Locale		
+		var localeService = Components.classes['@mozilla.org/intl/nslocaleservice;1'].
+							getService(Components.interfaces.nsILocaleService);
+		this.locale = localeService.getLocaleComponentForUserAgent();
 		
 		// Load in the localization stringbundle for use by getString(name)
 		var src = 'chrome://scholar/locale/scholar.properties';
@@ -645,6 +651,10 @@ Scholar.Date = new function(){
 	 *    part: anything that does not fall under any of the above categories
 	 *          (e.g., "Summer," etc.)
 	 */
+	var _slashRe = /\b([0-9]{1,4})([\-\/\.\u5e74])([0-9]{1,2})([\-\/\.\u6708])([0-9]{1,4})\b/
+	var _yearRe = /^(.*)\b((?:circa |around |about |c\.? ?)?[0-9]{1,4}(?: ?B\.? ?C\.?(?: ?E\.?)?| ?C\.? ?E\.?| ?A\.? ?D\.?)|[0-9]{3,4})\b(.*)$/i;
+	var _monthRe = null;
+	var _dayRe = null;
 	function strToDate(string) {
 		var date = new Object();
 		
@@ -655,39 +665,68 @@ Scholar.Date = new function(){
 		
 		string = string.toString().replace(/^\s+/, "").replace(/\s+$/, "").replace(/\s+/, " ");
 		
-		var dateRe = /^([0-9]{4})[\-\/]([0-9]{2})[\-\/]([0-9]{2})$/;
-		var m = dateRe.exec(string);
-		if(m) {		// sql date
-			Scholar.debug("DATE: used form 1: SQL");
-			var jsDate = new Date(m[1], m[2]-1, m[3], false, false, false);
-		} else {	// not an sql date
-			var yearRe = /^[0-9]+$/i;
-			if(yearRe.test(string)) {
-				// is just a year
-				Scholar.debug("DATE: used form 2: year-only");
-				date.year = string;
-				return date;
+		// first, directly inspect the string
+		var m = _slashRe.exec(string);
+		if(m && (m[2] == m[4] || (m[2] == "\u5e74" && m[4] == "\u6708"))) {
+			// figure out date based on parts
+			if(m[1].length == 4 || m[2] == "\u5e74") {
+				// ISO 8601 style date (big endian)
+				date.year = m[1];
+				date.month = m[3];
+				date.day = m[5];
+			} else {
+				// local style date (middle or little endian)
+				date.year = m[5];
+				var country = Scholar.locale.substr(3);
+				if(country == "US" ||	// The United States
+				   country == "FM" ||	// The Federated States of Micronesia
+				   country == "PW" ||	// Palau
+				   country == "PH") {	// The Philippines
+					date.month = m[1];
+					date.day = m[3];
+				} else {
+					date.month = m[3];
+					date.day = m[1];
+				}
 			}
 			
-			// who knows what this is, but try JavaScript's date handling first
-			var jsDate = new Date(string)
+			date.year = parseInt(date.year, 10);
+			date.month = parseInt(date.month, 10);
+			date.day = parseInt(date.day, 10);
+			
+			if(date.month > 12) {
+				// swap day and month
+				var tmp = date.day;
+				date.day = date.month
+				date.month = tmp;
+			}
+			
+			if(date.month <= 12) {
+				if(date.year < 100) {	// for two digit years, determine proper
+										// four digit year
+					var today = new Date();
+					var year = today.getFullYear();
+					var twoDigitYear = year % 100;
+					var century = year - twoDigitYear;
+					
+					if(date.year <= twoDigitYear) {
+						// assume this date is from our century
+						date.year = century + date.year;
+					} else {
+						// assume this date is from the previous century
+						date.year = century - 100 + date.year;
+					}
+				}
+				
+				date.month--;		// subtract one for JS style
+				Scholar.debug("DATE: retrieved with algorithms: "+date.toSource());
+				return date;
+			}
 		}
 		
-		if(!isNaN(jsDate.valueOf())) {
-			Scholar.debug("DATE: retrieved from JavaScript");
-			// got a javascript date
-			date.year = jsDate.getFullYear();
-			date.month = jsDate.getMonth();
-			date.day = jsDate.getDate();
-			return date;
-		}
-		
-		// no javascript date. time for cruder things.
-		
+		// couldn't use algorithms; use regexp
 		// first, see if we have anything resembling a year
-		var yearRe = /^(.*)\b((?:circa |around |about |c\.? ?)?[0-9]{1,4}(?: ?B\.? ?C\.?(?: ?E\.?)?| ?C\.? ?E\.?| ?A\.? ?D\.?)|[0-9]{3,4})\b(.*)$/i;
-		
-		var m = yearRe.exec(string);
+		var m = _yearRe.exec(string);
 		if(m) {
 			date.year = m[2];
 			date.part = m[1]+m[3];
@@ -695,18 +734,23 @@ Scholar.Date = new function(){
 			
 			// get short month strings from CSL interpreter
 			var months = CSL.getMonthStrings("short");
+			if(!_monthRe) {
+				// then, see if have anything resembling a month anywhere
+				_monthRe = new RegExp("^(.*)\\b("+months.join("|")+")[^ ]* (.*)$", "i");
+			}
 			
-			// then, see if have anything resembling a month anywhere
-			var monthRe = new RegExp("^(.*)\\b("+months.join("|")+")[^ ]* (.*)$", "i");
-			var m = monthRe.exec(date.part);
+			var m = _monthRe.exec(date.part);
 			if(m) {
 				date.month = months.indexOf(m[2][0].toUpperCase()+m[2].substr(1).toLowerCase());
 				date.part = m[1]+m[3];
 				Scholar.debug("DATE: got month ("+date.month+", "+date.part+")");
 				
 				// then, see if there's a day 
-				var dayRe = /^(.*)\b([0-9]{1,2})(?:st|nd|rd|th)?\b(.*)$/i;
-				var m = dayRe.exec(date.part);
+				if(!_dayRe) {
+					var daySuffixes = Scholar.getString("date.daySuffixes").replace(/, ?/g, "|");
+					_dayRe = new RegExp("^(.*)\\b([0-9]{1,2})(?:"+daySuffixes+")?\\b(.*)$", "i");
+				}
+				var m = _dayRe.exec(date.part);
 				if(m) {
 					date.day = parseInt(m[2], 10);
 					date.part = m[1]+m[3];
@@ -739,7 +783,7 @@ Scholar.Date = new function(){
 			// get short month strings from CSL interpreter
 			var months = CSL.getMonthStrings("long");
 			string += months[date.month];
-			if(date.day) {
+			if(date.day != undefined) {
 				string += " "+date.day+", ";
 			} else {
 				string += " ";
