@@ -1,4 +1,4 @@
--- 80
+-- 81
 
 -- Set the following timestamp to the most recent scraper update date
 REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-08-31 22:44:00'));
@@ -5364,7 +5364,8 @@ var fieldMap = {
 	VL:"volume",
 	IS:"issue",
 	CP:"place",
-	PB:"publisher"
+	PB:"publisher",
+	JA:"journalAbbreviation"
 };
 
 var inputFieldMap = {
@@ -5435,7 +5436,11 @@ function processTag(item, tag, value) {
 		// ignore, unless this is a book or unpublished work, as per spec
 		if(item.itemType == "book" || item.itemType == "manuscript") {
 			item.title = value;
+		} else {
+			item.backupPublicationTitle = value;
 		}
+	} else if(tag == "T2") {
+		item.backupPublicationTitle = value;
 	} else if(tag == "A1" || tag == "AU") {
 		// primary author
 		var names = value.split(/, ?/);
@@ -5450,7 +5455,7 @@ function processTag(item, tag, value) {
 		
 		if(dateParts.length == 1) {
 			// technically, if there''s only one date part, the file isn''t valid
-			// RIS, but EndNote accepts this, so we have to too
+			// RIS, but EndNote writes this, so we have to too
 			item.date = value;
 		} else {
 			// in the case that we have a year and other data, format that way
@@ -5465,9 +5470,23 @@ function processTag(item, tag, value) {
 			                                          day:dateParts[2],
 			                                          part:dateParts[3]});
 		}
+	} else if(tag == "Y2") {
+		// the secondary date field can mean two things, a secondary date, or an
+		// invalid EndNote-style date. let''s see which one this is.
+		var dateParts = value.split("/");
+		if(dateParts.length != 4) {
+			// an invalid date. it''s from EndNote.
+			if(item.date && value.indexOf(item.date) == -1) {
+				// append existing year
+				value += " " + item.date;
+			}
+			item.date = value;
+		}
 	} else if(tag == "N1" || tag == "AB") {
 		// notes
-		item.notes.push({note:value});
+		if(value != item.title) {	// why does EndNote do this!?
+			item.notes.push({note:value});
+		}
 	} else if(tag == "KW") {
 		// keywords/tags
 		item.tags.push(value);
@@ -5483,10 +5502,9 @@ function processTag(item, tag, value) {
 	} else if(tag == "EP") {
 		// end page
 		if(value) {
-			if(!item.pages || value != item.pages) {
-				if(!item.pages) {
-					item.pages = "";
-				}
+			if(!item.pages) {
+				item.pages = value;
+			} else if(value != item.pages) {
 				item.pages += "-"+value;
 			}
 		}
@@ -5576,6 +5594,16 @@ function doImport(attachments) {
 	
 	if(tag) {	// save any unprocessed tags
 		processTag(item, tag, data);
+		
+		// if backup publication title exists but not proper, use backup
+		// (hack to get newspaper titles from EndNote)
+		if(item.backupPublicationTitle) {
+			if(!item.publicationTitle) {
+				item.publicationTitle = item.backupPublicationTitle;
+			}
+			item.backupPublicationTitle = undefined;
+		}
+		
 		item.complete();
 	}
 }
@@ -5620,16 +5648,24 @@ function doExport() {
 		
 		// date
 		if(item.date) {
-			var isoDate = /^[0-9]{4}(-[0-9]{2}-[0-9]{2})?$/;
-			if(isoDate.test(item.date)) {	// can directly accept ISO format with minor mods
-				addTag("Y1", item.date.replace("-", "/")+"/");
-			} else {						// otherwise, extract year and attach other data
-				var year = /^(.*?) *([0-9]{4})/;
-				var m = year.exec(item.date);
-				if(m) {
-					addTag("Y1", m[2]+"///"+m[1]);
-				}
+			var date = Scholar.Utilities.strToDate(item.date);
+			var string = date.year+"/";
+			if(date.month != undefined) {
+				// deal with javascript months
+				date.month++;
+				if(date.month < 10) string += "0";
+				string += date.month;
 			}
+			string += "/";
+			if(date.day != undefined) {
+				if(date.day < 10) string += "0";
+				string += date.day;
+			}
+			string += "/";
+			if(date.part != undefined) {
+				string += date.part;
+			}
+			addTag("PY", string);
 		}
 		
 		// notes
@@ -5646,9 +5682,13 @@ function doExport() {
 		
 		// pages
 		if(item.pages) {
-			var range = Scholar.Utilities.getPageRange(item.pages);
-			addTag("SP", range[0]);
-			addTag("EP", range[1]);
+			if(item.itemType == "book") {
+				addTag("EP", item.pages);
+			} else {
+				var range = Scholar.Utilities.getPageRange(item.pages);
+				addTag("SP", range[0]);
+				addTag("EP", range[1]);
+			}
 		}
 		
 		// ISBN/ISSN

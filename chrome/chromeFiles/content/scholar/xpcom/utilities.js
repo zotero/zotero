@@ -20,6 +20,13 @@ Scholar.Utilities.prototype.formatDate = function(date) {
 }
 
 /*
+ * Converts a JavaScript date object to an SQL-style date
+ */
+Scholar.Utilities.prototype.strToDate = function(date) {
+	return Scholar.Date.strToDate(date);
+}
+
+/*
  * Cleans extraneous punctuation off an author name
  */
 Scholar.Utilities.prototype.cleanAuthor = function(author, type, useComma) {

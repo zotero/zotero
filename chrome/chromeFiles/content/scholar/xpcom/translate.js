@@ -1044,7 +1044,7 @@ Scholar.Translate.prototype._itemDone = function(item) {
 				return false;
 			}
 		} else {
-			if(!item.title) {
+			if(!item.title && this.type == "web") {
 				throw("item has no title");
 			}
 			

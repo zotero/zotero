@@ -708,7 +708,7 @@ Scholar.Date = new function(){
 				var dayRe = /^(.*)\b([0-9]{1,2})(?:st|nd|rd|th)?\b(.*)$/i;
 				var m = dayRe.exec(date.part);
 				if(m) {
-					date.day = m[2];
+					date.day = parseInt(m[2], 10);
 					date.part = m[1]+m[3];
 					Scholar.debug("DATE: got day ("+date.day+", "+date.part+")");
 				}
@@ -717,6 +717,9 @@ Scholar.Date = new function(){
 		
 		if(date.part) {
 			date.part = date.part.replace(/^[^A-Za-z0-9]+/, "").replace(/[^A-Za-z0-9]+$/, "");
+			if(!date.part.length) {
+				date.part = undefined;
+			}
 		}
 		
 		return date;
@@ -728,22 +731,22 @@ Scholar.Date = new function(){
 	function formatDate(date) {
 		var string = "";
 		
-		if(date.part) {
+		if(date.part != undefined) {
 			string += date.part+" ";
 		}
 		
-		if(date.month) {
+		if(date.month != undefined) {
 			// get short month strings from CSL interpreter
 			var months = CSL.getMonthStrings("long");
 			string += months[date.month];
 			if(date.day) {
-				string += " "+parseInt(date.day, 10).toString()+", ";
+				string += " "+date.day+", ";
 			} else {
 				string += " ";
 			}
 		}
 		
-		if(date.year) {
+		if(date.year != undefined) {
 			string += date.year;
 		}
 		
