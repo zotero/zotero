@@ -41,7 +41,7 @@
 
 <!ENTITY toolbar.note.standalone		"New Standalone Note">
 <!ENTITY toolbar.attachment.standalone		"New Standalone Attachment">
-<!ENTITY toolbar.attachment.add   			"Add file...">
+<!ENTITY toolbar.attachment.add   			"Add File...">
 <!ENTITY toolbar.attachment.linked   			"Add Link to File...">
 <!ENTITY toolbar.attachment.snapshot 			"Add Snapshot of Current Page">
 <!ENTITY toolbar.attachment.weblink  			"Add Link to Current Page">
