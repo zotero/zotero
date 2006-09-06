@@ -13,15 +13,11 @@ Scholar.Utilities.prototype.debug = function(msg) {
 }
 
 /*
- * Converts a JavaScript date object to an SQL-style date
+ * See Scholar.Date
  */
 Scholar.Utilities.prototype.formatDate = function(date) {
 	return Scholar.Date.formatDate(date);
 }
-
-/*
- * Converts a JavaScript date object to an SQL-style date
- */
 Scholar.Utilities.prototype.strToDate = function(date) {
 	return Scholar.Date.strToDate(date);
 }
