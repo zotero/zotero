@@ -50,7 +50,7 @@ Scholar.Integration = new function() {
 	/*
 	 * handles a SOAP envelope
 	 */
-	function handleEnvelope(envelope) {
+	function handleEnvelope(envelope, encoding) {
 		Scholar.debug("Integration: SOAP Request\n"+envelope);
 		envelope = envelope.replace(_XMLRe, "");
 		
@@ -115,11 +115,11 @@ Scholar.Integration = new function() {
 					</SOAP-ENV:Body>
 				</SOAP-ENV:Envelope>;
 				
-				var response = responseEnvelope.toXMLString();
+				var response = '<?xml version="1.0" encoding="'+encoding+'"?>\n'+responseEnvelope.toXMLString();
 				Scholar.debug("Integration: SOAP Response\n"+response);
 				
 				// return OK
-				return _generateResponse("200 OK", 'text/xml; charset="utf-8"',
+				return _generateResponse("200 OK", 'text/xml; charset="'+encoding+'"',
 				                         response);
 			} else {
 				Scholar.debug("Integration: SOAP method not supported");
@@ -275,20 +275,54 @@ Scholar.Integration.DataListener.prototype._bodyData = function() {
 			this.body = this.body.substr(0, this.bodyLength);
 		}
 		
-		var output = Scholar.Integration.handleEnvelope(this.body);
-		this._requestFinished(output);
+		// UTF-8 crashes AppleScript
+		var encoding = (this.header.indexOf("\nUser-Agent: Mac OS X") !== -1 ? "macintosh" : "UTF-8");
+		var output = Scholar.Integration.handleEnvelope(this.body, encoding);
+		this._requestFinished(output, encoding);
 	}
 }
 
 /*
  * returns HTTP data from a request
  */
-Scholar.Integration.DataListener.prototype._requestFinished = function(response) {
+Scholar.Integration.DataListener.prototype._requestFinished = function(response, encoding) {
 	// close input stream
 	this.iStream.close();
 	
-	// write response
-	this.oStream.write(response, response.length);
+	if(encoding == "macintosh") {
+		// double percent signs
+		response = response.replace(/%/g, "%%");
+		// replace line endings with percent signs
+		response = response.replace(/\n/g, " %!");
+		response = response.replace(/\r/g, "");
+
+		// convert Unicode to Mac Roman
+		var converter = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"] 
+								  .createInstance(Components.interfaces.nsIScriptableUnicodeConverter); 
+		converter.charset = "macintosh";
+		// convert text
+		response = converter.ConvertFromUnicode(response);
+		// fix returns
+		response = response.replace(/ %!/g, "\n");
+		// fix percent signs
+		response = response.replace(/%%/g, "%"); 
+		response = response + converter.Finish();
+	
+		// write
+		this.oStream.write(response, response.length); 
+	} else if(encoding) {
+		// open UTF-8 converter for output stream	
+		var intlStream = Components.classes["@mozilla.org/intl/converter-output-stream;1"]
+								   .createInstance(Components.interfaces.nsIConverterOutputStream);
+		intlStream.init(this.oStream, encoding, 1024, "?".charCodeAt(0));
+		
+		// write response
+		intlStream.writeString(response);
+		intlStream.close();
+	} else {
+		// write
+		this.oStream.write(response, response.length);
+	}
 	
 	// close output stream
 	this.oStream.close();
@@ -458,8 +492,10 @@ Scholar.Integration.SOAP = new function() {
 		} else {
 			// session ID exists
 			var sessionID = vars[0];
-			Scholar.debug(vars.toSource());
 			var session = _sessions[sessionID];
+			if(!session) {
+				return "ERROR:sessionExpired";
+			}
 			var originalStyle = session.styleID;
 			io.style = originalStyle;
 		}

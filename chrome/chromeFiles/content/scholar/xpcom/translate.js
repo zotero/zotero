@@ -745,6 +745,10 @@ Scholar.Translate.prototype._canTranslate = function(translator, ignoreExtension
 	
 	return canTranslate;
 }
+
+/*
+ * parses translator detect code
+ */
 Scholar.Translate.prototype._parseDetectCode = function(translator) {
 	this._configOptions = new Array();
 	this._displayOptions = new Array();

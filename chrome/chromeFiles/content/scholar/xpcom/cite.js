@@ -94,6 +94,8 @@ CSL = function(csl) {
 CSL.prototype.preprocessItems = function(items) {
 	Scholar.debug("CSL: preprocessing items");
 	
+	this._ignore = null;
+	
 	// get data necessary to generate citations before sorting
 	for(var i in items) {
 		var item = items[i];
@@ -563,13 +565,6 @@ CSL.prototype._parseFields = function(ref, position, type, bibCitElement, inheri
 				if(bibCitElement && inheritFormat) {
 					itemDesc = this._merge(bibCitElement.inheritFormat, itemDesc);
 				}
-			
-				// create serialized representation
-				itemDesc._serialized = this._serializeElement(itemDesc.name, itemDesc);
-				// add to serialization for type
-				if(bibCitElement) {
-					bibCitElement._serializations[position][type][itemDesc._serialized] = itemDesc;
-				}
 			}
 			
 			// parse group children
@@ -584,6 +579,15 @@ CSL.prototype._parseFields = function(ref, position, type, bibCitElement, inheri
 			} else {
 				// parse attributes on this field
 				this._parseFieldAttrChildren(element, itemDesc);
+			}
+			
+			if(type != undefined) {
+				// create serialized representation
+				itemDesc._serialized = this._serializeElement(itemDesc.name, itemDesc);
+				// add to serialization for type
+				if(bibCitElement) {
+					bibCitElement._serializations[position][type][itemDesc._serialized] = itemDesc;
+				}
 			}
 			
 			typeDesc.push(itemDesc);
@@ -809,7 +813,6 @@ CSL.prototype._getFieldDefaults = function(elementName) {
  * gets a term, in singular or plural form
  */
 CSL.prototype._getTerm = function(term, plural, form) {
-	Scholar.debug("CSL: looking up term "+term);
 	if(!form) {
 		form = "long";
 	}
@@ -1039,7 +1042,7 @@ CSL.prototype._serializeElement = function(name, element) {
 		string += " relation:"+element.relation;
 	}
 	if(element.role) {
-		string += " role"+element.role;
+		string += " role:"+element.role;
 	}
 	return string;
 }
@@ -1214,6 +1217,8 @@ CSL.prototype._getCitation = function(item, position, format, bibCitElement) {
 	}
 	Scholar.debug("CSL: using CSL type "+typeName);
 	
+	// remove previous ignore entries from list
+	this._ignore = new Array();
 	var string = "";
 	for(var j in type) {
 		var value = this._getFieldValue(type[j].name, type[j], item, format,
@@ -1230,7 +1235,8 @@ CSL.prototype._getCitation = function(item, position, format, bibCitElement) {
 CSL.prototype._getFieldValue = function(name, element, item, format, bibCitElement, position, typeName) {
 	var data = "";
 	
-	if(element._serialized && item._csl.ignore[element._serialized]) {
+	var itemID = item.getID();
+	if(element._serialized && this._ignore && this._ignore[itemID] && this._ignore[itemID][element._serialized]) {
 		return "";
 	}
 	
@@ -1403,13 +1409,17 @@ CSL.prototype._getFieldValue = function(name, element, item, format, bibCitEleme
 			// clear substitute element off of the element we're substituting
 			substituteElement.substitute = undefined;
 			
-			// ignore elements with the same serialization
-			item._csl.ignore[serialization] = true;
-			
 			// get field value
 			data = this._getFieldValue(substituteElement.name,
 			                           substituteElement, item, format,
-			                           bibCitElement);
+			                           bibCitElement, position, typeName);
+			
+			// ignore elements with the same serialization
+			if(this._ignore) {	// array might not exist if doing disambiguation
+				if(!this._ignore[itemID]) this._ignore[itemID] = new Array();
+				this._ignore[itemID][substituteElement._serialized] = true;
+			}
+			
 			// return field value, if there is one; otherwise, keep processing
 			// the data
 			if(data) {
