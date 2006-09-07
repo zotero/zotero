@@ -1,4 +1,4 @@
--- 82
+-- 83
 
 -- Set the following timestamp to the most recent scraper update date
 REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-08-31 22:44:00'));
@@ -5589,7 +5589,7 @@ var inputFieldMap = {
 	CY:"place"
 };
 
-// TODO: figure out if these are the best types for letter, interview, website, manuscript
+// TODO: figure out if these are the best types for letter, interview, website
 var typeMap = {
 	book:"BOOK",
 	bookSection:"CHAP",
@@ -5598,7 +5598,7 @@ var typeMap = {
 	newspaperArticle:"NEWS",
 	thesis:"THES",
 	letter:"PCOMM",
-	manuscript:"UNPB",
+	manuscript:"PAMP",
 	interview:"PCOMM",
 	film:"MPCT",
 	artwork:"ART",
@@ -5677,6 +5677,8 @@ function processTag(item, tag, value) {
 			var month = parseInt(dateParts[1]);
 			if(month) {
 				month--;
+			} else {
+				month = undefined;
 			}
 			
 			item.date = Scholar.Utilities.formatDate({year:dateParts[0],
@@ -5920,6 +5922,460 @@ function doExport() {
 	}
 }');
 
+REPLACE INTO "translators" VALUES ('9cb70025-a888-4a29-a210-93ec52da40d4', '2006-09-06 21:28:00', 3, 'BibTeX', 'Simon Kornblith', 'bib',
+'Scholar.configure("dataMode", "block");
+
+function detectImport() {
+	var block = "";
+	var read;
+	// read 20 chars out of the file
+	while(read = Scholar.read(1)) {
+		if(read == "%") {
+			// read until next newline
+			block = "";
+			while(Scholar.read(1) != "\n") {}
+		} else if(read == "\n" && block) {
+			break;
+		} else if(" \n\r\t".indexOf(read) == -1) {
+			block += read;
+		}
+	}
+	
+	var re = /^@[a-zA-Z]+[\(\{]/;
+	if(re.test(block)) {
+		return true;
+	}
+}',
+'var fieldMap = {
+	address:"place",
+	chapter:"section",
+	edition:"edition",
+	number:"issue",
+	type:"type",
+	series:"series",
+	title:"title",
+	volume:"volume",
+	copyright:"rights",
+	isbn:"ISBN",
+	issn:"ISSN",
+	location:"archiveLocation",
+	url:"url"
+};
+
+var inputFieldMap = {
+	booktitle :"publicationTitle",
+	journal:"publicationTitle",
+	school:"publisher",
+	publisher:"publisher"
+};
+
+// TODO: figure out if these are the best types for letter, interview, website
+var typeMap = {
+	book:"book",
+	bookSection:"inbook",
+	journalArticle:"article",
+	magazineArticle:"article",
+	newspaperArticle:"article",
+	thesis:"phdthesis",
+	letter:"misc",
+	manuscript:"unpublished",
+	interview:"misc",
+	film:"misc",
+	artwork:"misc",
+	website:"misc"
+};
+
+// supplements outputTypeMap for importing
+// TODO: conference, inproceedings, techreport
+var inputTypeMap = {
+	booklet:"book",
+	incollection:"bookSection",
+	manual:"book",
+	mastersthesis:"thesis",
+	misc:"book",
+	proceedings:"book"
+};
+
+/*
+ * three-letter month abbreviations. i assume these are the same ones that the
+ * docs say are defined in some appendix of the LaTeX book. (i don''t have the
+ * LaTeX book.)
+ */
+var months = ["jan", "feb", "mar", "apr", "may", "jun",
+              "jul", "aug", "sep", "oct", "nov", "dec"]
+
+/*
+ * this is the character table for converting TeX to Unicode. sorry, Czech
+ * speakers; you''ll have to add your own (or stop using BibTeX!)
+ */
+var accentedCharacters = {
+	// grave accents
+	192:"\\`A", 224:"\\`a",
+	200:"\\`E", 232:"\\`e",
+	204:"\\`I", 236:"\\`i",
+	210:"\\`O", 242:"\\`o",
+	217:"\\`U", 249:"\\`u",
+	// acute accents
+	193:"\\''A", 225:"\\''a",
+	201:"\\''E", 233:"\\''e",
+	205:"\\''I", 237:"\\''i",
+	211:"\\''O", 243:"\\''o",
+	218:"\\''U", 250:"\\''u",
+	// circumflexes
+	194:"\\^A", 226:"\\^a",
+	202:"\\^E", 234:"\\^e",
+	206:"\\^I", 238:"\\^i",
+	212:"\\^O", 244:"\\^o",
+	219:"\\^U", 251:"\\^u",
+	// tildes
+	195:"\\~A", 227:"\\~a",
+	213:"\\~O", 245:"\\~o",
+	209:"\\~N", 241:"\\~n",
+	// umlauts
+	196:''\\"A'', 228:''\\"a'',
+	203:''\\"E'', 235:''\\"e'',
+	207:''\\"I'', 239:''\\"i'',
+	214:''\\"O'', 246:''\\"o'',
+	220:''\\"U'', 252:''\\"u'',
+	// cidillas
+	191:"\\c{C}", 231:"\\c{c}",
+	// AE norwegian tings
+	198:"{\\AE}", 230:"{\\ae}",
+	// o norwegian things
+	216:"{\\o}", 248:"{\\O}",
+	// a norweigan things
+	197:"{\\AA}", 229:"{\\aa}"
+};
+
+function processField(item, field, value) {
+	if(fieldMap[field]) {
+		item[fieldMap[field]] = value;
+	} else if(inputFieldMap[field]) {
+		item[inputFieldMap[field]] = value;
+	} else if(field == "author" || field == "editor") {
+		// parse authors/editors
+		var names = value.split(" and ");
+		for each(var name in names) {
+			item.creators.push(Scholar.Utilities.cleanAuthor(name, field,
+			                                  (name.indexOf(",") != -1)));
+		}
+	} else if(field == "institution" || field == "organization") {
+		item.backupPublisher = value;
+	} else if(field == "month") {
+		var monthIndex = months.indexOf(value.toLowerCase());
+		if(monthIndex != -1) {
+			value = Scholar.Utilities.formatDate({month:monthIndex});
+		} else {
+			value += " ";
+		}
+		
+		if(item.date) {
+			if(value.indexOf(item.date) != -1) {
+				// value contains year and more
+				item.date = value;
+			} else {
+				item.date = value+item.date;
+			}
+		} else {
+			item.date = value;
+		}
+	} else if(field == "year") {
+		if(item.date) {
+			if(item.date.indexOf(value) == -1) {
+				// date does not already contain year
+				item.date += value;
+			}
+		} else {
+			item.date = value;
+		}
+	} else if(field == "pages") {
+		item.pages = value.replace(/--/g, "-");
+	} else if(field == "note" || field == "annote") {
+		item.extra += "\n"+value;
+	} else if(field == "howpublished") {
+		item.extra += "\nPublished: "+value;
+	} else if(field == "keywords") {
+		if(value.indexOf(",") == -1) {
+			// keywords/tags
+			item.tags = value.split(" ");
+		} else {
+			item.tags = value.split(/, ?/g);
+		}
+	}
+}
+
+function getFieldValue() {
+	// read whitespace
+	var read = Scholar.read(1);
+	while(" \n\r\t".indexOf(read) != -1) {
+		read = Scholar.read(1);
+	}
+	
+	var value = "";
+	// now, we have the first character of the field
+	if("0123456789".indexOf(read) != -1) {
+		// character is a number
+		while((read = Scholar.read(1)) && ("0123456789".indexOf(read) != -1)) {
+			value += read;
+		}
+	} else if(read == "{") {
+		// character is a brace
+		var openBraces = 1;
+		while(read = Scholar.read(1)) {
+			if(read == "{" && value[value.length-1] != "\\") {
+				openBraces++;
+				value += "{";
+			} else if(read == "}" && value[value.length-1] != "\\") {
+				openBraces--;
+				if(openBraces == 0) {
+					break;
+				} else {
+					value += "}";
+				}
+			} else {
+				value += read;
+			}
+		}
+	} else if(read == ''"'') {
+		var openBraces = 0;
+		while(read = Scholar.read(1)) {
+			if(read == "{" && value[value.length-1] != "\\") {
+				openBraces++;
+				value += "{";
+			} else if(read == "}" && value[value.length-1] != "\\") {
+				openBraces--;
+				value += "}";
+			} else if(read == ''"'' && openBraces == 0) {
+				break;
+			} else {
+				value += read;
+			}
+		}
+	}
+	
+	if(value.length > 1) {
+		// replace accented characters (yucky slow)
+		for(var i in accentedCharacters) {
+			value = value.replace(accentedCharacters[i], i);
+		}
+		
+		// kill braces
+		value = value.replace(/([^\\])[{}]+/g, "$1");
+		if(value[0] == "{") {
+			value = value.substr(1);
+		}
+		
+		// chop off backslashes
+		value = value.replace(/([^\\])\\([#$%&~_^\\{}])/g, "$1$2");
+		value = value.replace(/([^\\])\\([#$%&~_^\\{}])/g, "$1$2");
+		if(value[0] == "\\" && "#$%&~_^\\{}".indexOf(value[1]) != -1) {
+			value = value.substr(1);
+		}
+		if(value[value.length-1] == "\\" &&  "#$%&~_^\\{}".indexOf(value[value.length-2]) != -1) {
+			value = value.substr(0, value.length-1);
+		}
+		value = value.replace(/\\\\/g, "\\");
+		value = value.replace(/\s+/g, " ");
+	}
+	
+	return value;
+}
+
+function beginRecord(type, closeChar) {
+	type = type.toLowerCase()
+	if(inputTypeMap[type]) {
+		var item = new Scholar.Item(inputTypeMap[type]);
+	} else {
+		for(var i in typeMap) {
+			if(typeMap[i] == type) {
+				var item = new Scholar.Item(i);
+				break;
+			}
+		}
+		if(!item) {
+			Scholar.Utilities.debug("discarded item from BibTeX; type was "+type);
+		}
+	}
+	
+	var field = "";
+	while(read = Scholar.read(1)) {
+		if(read == "=") {								// equals begin a field
+			var value = getFieldValue();
+			if(item) {
+				processField(item, field.toLowerCase(), value);
+			}
+			field = "";
+		} else if(read == ",") {						// commas reset
+			field = "";
+		} else if(read == closeChar) {
+			if(item) {
+				if(item.extra) item.extra = item.extra.substr(1); // chop \n
+				item.complete();
+			}
+			return;
+		} else if(" \n\r\t".indexOf(read) == -1) {		// skip whitespace
+			field += read;
+		}
+	}
+}
+
+function doImport(attachments) {
+	// make regular expressions out of values
+	var newArray = new Array();
+	for(var i in accentedCharacters) {
+		newArray[String.fromCharCode(i)] = new RegExp(accentedCharacters[i].replace(/\\/g, "\\\\"), "g");
+	}
+	accentedCharacters = newArray;
+	
+	var read = "", text = "", recordCloseElement = false;
+	var type = false;
+	
+	while(read = Scholar.read(1)) {
+		if(read == "@") {
+			type = "";
+		} else if(type !== false) {
+			if(read == "{") {				// possible open character
+				beginRecord(type, "}");
+				type = false;
+			} else if(read == "(") {		// possible open character
+				beginRecord(type, ")");
+				type = false;
+			} else {
+				type += read;
+			}
+		}
+	}
+}
+
+function writeField(field, value) {
+	if(!value) return;
+	
+	value = value.toString();
+	// replace naughty chars
+	value = value.replace(/([#$%&~_^\\{}])/g, "\\$1");
+	
+	// replace accented characters	
+	for(var i in accentedCharacters) {
+		value = value.replace(accentedCharacters[i], i);
+	}
+	// replace other accented characters
+	value = value.replace(/[\u0080-\uFFFF]/g, "?")
+	
+	// write
+	Scholar.write(",\n\t"+field+" = {"+value+"}");
+}
+
+var numberRe = /^[0-9]+/;
+function doExport() {
+	// switch keys and values of accented characters
+	var newArray = new Array();
+	for(var i in accentedCharacters) {
+		newArray["{"+accentedCharacters[i]+"}"] = new RegExp(String.fromCharCode(i), "g");
+	}
+	accentedCharacters = newArray;
+	
+	Scholar.write("% BibTeX export generated by Zotero "+Scholar.Utilities.getVersion());
+	
+	var first = true;
+	var citekeys = new Object();
+	var item;
+	while(item = Scholar.nextItem()) {
+		// determine type
+		if(!typeMap[item.itemType]) {
+			continue;
+		}
+		
+		// create a unique citation key
+		var basekey = "";
+		if(item.creators && item.creators[0] && item.creators[0].lastName) {
+			basekey = item.creators[0].lastName.toLowerCase();
+		}
+		if(item.date) {
+			var date = Scholar.Utilities.strToDate(item.date);
+			if(date.year && numberRe.test(date.year)) {
+				basekey += date.year;
+			}
+		}
+		
+		var citekey = basekey;
+		var i = 0;
+		while(citekeys[citekey]) {
+			i++;
+			citekey = basekey+"-"+i;
+		}
+		citekeys[citekey] = true;
+		
+		// write citation key
+		Scholar.write((first ? "" : ",") + "\n\n@"+typeMap[item.itemType]+"{"+citekey);
+		first = false;
+		
+		for(var field in fieldMap) {
+			if(item[fieldMap[field]]) {
+				writeField(field, item[fieldMap[field]]);
+			}
+		}
+		
+		if(item.publicationTitle) {
+			if(item.itemType == "chapter") {
+				writeField("booktitle", item.publicationTitle);
+			} else {
+				writeField("journal", item.publicationTitle);
+			}
+		}
+		
+		if(item.publisher) {
+			if(item.itemType == "thesis") {
+				writeField("school", item.publisher);
+			} else {
+				writeField("publisher", item.publisher);
+			}
+		}
+		
+		if(item.creators && item.creators.length) {
+			// split creators into subcategories
+			var author = "";
+			var editor = "";
+			for each(var creator in item.creators) {
+				var creatorString = creator.lastName;
+				if(creator.firstName) creatorString += ", "+creator.firstName;
+				
+				if(creator.creatorType == "editor") {
+					author += " and "+creatorString;
+				} else {
+					editor += " and "+creatorString;
+				}
+			}
+			
+			if(author) {
+				writeField("author", author.substr(5));
+			}
+			if(editor) {
+				writeField("author", editor.substr(5));
+			}
+		}
+		
+		if(item.date) {
+			// need to use non-localized abbreviation
+			if(date.month) {
+				writeField("month", months[date.month]);
+			}
+			if(date.year) {
+				writeField("year", date.year);
+			}
+		}
+		
+		if(item.extra) {
+			writeField("note", item.extra);
+		}
+		
+		if(item.tags && item.tags.length) {
+			writeField("keywords", item.tags.join(","));
+		}
+		
+		Scholar.write("\n}");
+	}
+}');
+
 REPLACE INTO "translators" VALUES ('a6ee60df-1ddc-4aae-bb25-45e0537be973', '2006-07-16 17:18:00', 1, 'MARC', 'Simon Kornblith', 'marc',
 'function detectImport() {
 	var marcRecordRegexp = /^[0-9]{5}[a-z ]{3}$/
@@ -6039,7 +6495,6 @@ record.prototype.importBinary = function(record) {
 
 // add a field to this record
 record.prototype.addField = function(field, indicator, value) {
-	Scholar.Utilities.debug("adding field "+field+": "+value);
 	field = parseInt(field, 10);
 	// make sure indicator is the right length
 	if(indicator.length > this.indicatorLength) {

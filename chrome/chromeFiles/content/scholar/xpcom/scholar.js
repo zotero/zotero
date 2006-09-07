@@ -787,22 +787,22 @@ Scholar.Date = new function(){
 	function formatDate(date) {
 		var string = "";
 		
-		if(date.part != undefined) {
+		if(date.part) {
 			string += date.part+" ";
 		}
 		
-		if(date.month != undefined) {
+		if(date.month != undefined && months[date.month]) {
 			// get short month strings from CSL interpreter
 			var months = CSL.getMonthStrings("long");
 			string += months[date.month];
-			if(date.day != undefined) {
+			if(date.day) {
 				string += " "+date.day+", ";
 			} else {
 				string += " ";
 			}
 		}
 		
-		if(date.year != undefined) {
+		if(date.year) {
 			string += date.year;
 		}
 		

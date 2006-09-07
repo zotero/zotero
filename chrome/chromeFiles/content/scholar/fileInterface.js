@@ -188,8 +188,8 @@ var Scholar_File_Interface = new function() {
 	function _disableUnresponsive() {
 		var prefService = Components.classes["@mozilla.org/preferences-service;1"].
 		                  getService(Components.interfaces.nsIPrefBranch);
-		_unresponsiveScriptPreference = prefService.getIntPref("dom.max_script_run_time");
-		prefService.setIntPref("dom.max_script_run_time", 0);
+		_unresponsiveScriptPreference = prefService.getIntPref("dom.max_chrome_script_run_time");
+		prefService.setIntPref("dom.max_chrome_script_run_time", 0);
 	}
 	 
 	/*
@@ -198,7 +198,7 @@ var Scholar_File_Interface = new function() {
 	function _restoreUnresponsive() {
 		var prefService = Components.classes["@mozilla.org/preferences-service;1"].
 		                  getService(Components.interfaces.nsIPrefBranch);
-		prefService.setIntPref("dom.max_script_run_time", _unresponsiveScriptPreference);
+		prefService.setIntPref("dom.max_chrome_script_run_time", _unresponsiveScriptPreference);
 	}
 	
 	/*
