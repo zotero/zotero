@@ -1,4 +1,4 @@
--- 81
+-- 82
 
 -- Set the following timestamp to the most recent scraper update date
 REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-08-31 22:44:00'));
@@ -3458,7 +3458,7 @@ function scrape(doc, url) {
 			return;
 		}
 		
-		newItem.attachments.push({url:url, title:"New York Times Article",
+		newItem.attachments.push({url:url, title:"Article (HTML)",
 	 	                          mimeType:"text/html", downloadable:true});
 	} else {
 		newItem.url = doc.location.href;
@@ -3471,7 +3471,7 @@ function scrape(doc, url) {
 			}
 		}
 	
-		newItem.attachments.push({document:doc, title:"New York Times Article",
+		newItem.attachments.push({document:doc, title:"Article (HTML)",
 		                          downloadable:true});
 	}
 	
@@ -3540,6 +3540,220 @@ function doWeb(doc, url) {
 		Scholar.wait();
 	} else {
 		scrape(doc);
+	}
+}');
+
+REPLACE INTO "translators" VALUES ('1e6d1529-246f-4429-84e2-1f1b180b250d', '2006-09-06 17:54:00', 4, 'Chronicle of Higher Education', 'Simon Kornblith', '^http://chronicle\.com/', 
+'function detectWeb(doc, url) {
+	var articleRegexp = /^http:\/\/chronicle\.com\/(?:daily|weekly)\/[^/]+\//
+	if(articleRegexp.test(url)) {
+		if(doc.location.href.indexOf("weekly") != -1) {
+			return "magazineArticle";
+		} else {
+			return "website";
+		}
+	} else {
+		var aTags = doc.getElementsByTagName("a");
+		for(var i=0; i<aTags.length; i++) {
+			if(articleRegexp.test(aTags[i].href)) {
+				return "multiple";
+			}
+		}
+	}
+}',
+'function associateMeta(newItem, metaTags, field, scholarField) {
+	if(metaTags.namedItem(field)) {
+		newItem[scholarField] = Scholar.Utilities.cleanString(metaTags.namedItem(field).getAttribute("content"));
+	}
+}
+
+function scrape(doc) {
+	if(doc.location.href.indexOf("weekly") != -1) {
+		var newItem = new Scholar.Item("magazineArticle");
+		
+		var namespace = doc.documentElement.namespaceURI;
+		var nsResolver = namespace ? function(prefix) {
+			if (prefix == ''x'') return namespace; else return null;
+		} : null;
+		
+		// go in search of pages
+		var content = doc.evaluate(''/html/body/table[@class="layout"]/tbody/tr[1]/td[@class="content"]'',
+		                           doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+		if(content) {
+			var pagesRegexp = /http:\/\/chronicle.com\nSection: [^\n]+\nVolume [0-9]+, Issue [0-9]+, Pages? ([A-Z0-9\-]+)/;
+			var m = pagesRegexp.exec(content.textContent);
+			if(m) {
+				newItem.pages = m[1];
+			}
+		}
+	} else {
+		var newItem = new Scholar.Item("website");
+	}
+	newItem.publicationTitle = "The Chronicle of Higher Education";
+	newItem.ISSN = "0009-5982";
+	
+	newItem.url = doc.location.href;
+	var metaTags = doc.getElementsByTagName("meta");
+
+	newItem.attachments.push({document:doc, title:"Article (HTML)",
+							  downloadable:true});
+	
+	associateMeta(newItem, metaTags, "published_date", "date");
+	associateMeta(newItem, metaTags, "headline", "title");
+	associateMeta(newItem, metaTags, "section", "section");
+	associateMeta(newItem, metaTags, "volume", "volume");
+	associateMeta(newItem, metaTags, "issue", "issue");
+	
+	if(metaTags.namedItem("byline")) {
+		var author = Scholar.Utilities.cleanString(metaTags.namedItem("byline").getAttribute("content"));
+		if(author.substr(0, 3).toLowerCase() == "by ") {
+			author = author.substr(3);
+		}
+		
+		var authors = author.split(" and ");
+		for each(var author in authors) {
+			// fix capitalization
+			var words = author.split(" ");
+			for(var i in words) {
+				words[i] = words[i][0].toUpperCase()+words[i].substr(1).toLowerCase();
+			}
+			author = words.join(" ");
+			
+			if(words[0] == "The") {
+				newItem.creators.push({lastName:author, creatorType:"author"});
+			} else {
+				newItem.creators.push(Scholar.Utilities.cleanAuthor(author, "author"));
+			}
+		}
+	}
+	
+	newItem.complete();
+}
+
+function doWeb(doc, url) {
+	var articleRegexp = /^http:\/\/chronicle\.com\/(?:daily|weekly)\/[^/]+\//;
+	if(articleRegexp.test(url)) {
+		scrape(doc);
+	} else {
+		var namespace = doc.documentElement.namespaceURI;
+		var nsResolver = namespace ? function(prefix) {
+			if (prefix == ''x'') return namespace; else return null;
+		} : null;
+		
+		var items = Scholar.Utilities.getItemArray(doc, doc, ''^http://chronicle\\.com/(?:daily|weekly)/[^/]+/'');
+		items = Scholar.selectItems(items);
+			
+		if(!items) {
+			return true;
+		}
+		
+		var urls = new Array();
+		for(var i in items) {
+			urls.push(i);
+		}
+		
+		Scholar.Utilities.processDocuments(urls, scrape, function() { Scholar.done(); });
+		Scholar.wait();
+	}
+}');
+
+REPLACE INTO "translators" VALUES ('4c164cc8-be7b-4d02-bfbf-37a5622dfd56', '2006-09-06 18:54:00', 4, 'New York Review of Books', 'Simon Kornblith', '^http://www\.nybooks\.com/', 
+'function detectWeb(doc, url) {
+	var articleRegexp = /^http:\/\/www\.nybooks\.com\/articles\/[0-9]+/
+	if(articleRegexp.test(url)) {
+		return "journalArticle";
+	} else {
+		var aTags = doc.getElementsByTagName("a");
+		for(var i=0; i<aTags.length; i++) {
+			if(articleRegexp.test(aTags[i].href)) {
+				return "multiple";
+			}
+		}
+	}
+}',
+'function associateMeta(newItem, metaTags, field, scholarField) {
+	if(metaTags.namedItem(field)) {
+		newItem[scholarField] = Scholar.Utilities.cleanString(metaTags.namedItem(field).getAttribute("content"));
+	}
+}
+
+function scrape(doc) {
+	var newItem = new Scholar.Item("journalArticle");
+	newItem.publicationTitle = "The New York Review of Books";
+	newItem.ISSN = "0028-7504";
+	
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	newItem.url = doc.location.href;
+	var metaTags = doc.getElementsByTagName("meta");
+
+	newItem.attachments.push({document:doc, title:"Review (HTML)",
+							  downloadable:true});
+	
+	associateMeta(newItem, metaTags, "dc.title", "title");
+	
+	var info = doc.evaluate(''//div[@id="center-content"]/h4[@class="date"]'',
+	                            doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+	
+	if(info) {
+		// get date (which is in an a tag)
+		newItem.date = doc.evaluate("./a", info, nsResolver, XPathResult.ANY_TYPE,
+		                           null).iterateNext();
+		if(newItem.date) {
+			newItem.date = newItem.date.textContent;
+		}
+		
+		info = Scholar.Utilities.cleanString(info.textContent);
+		
+		// get volume and issue
+		var infoRe = /Volume ([0-9]+), Number ([0-9]+)/;
+		var m = infoRe.exec(info);
+		if(m) {
+			newItem.volume = m[1];
+			newItem.issue = m[2];
+		}
+	}
+	
+	
+	var authors = doc.evaluate(''//div[@id="center-content"]/h4/a[substring(@href, 1, 9) = "/authors/"]'',
+	                           doc, nsResolver, XPathResult.ANY_TYPE, null);
+	
+	
+	var author;
+	while(author = authors.iterateNext()) {
+		newItem.creators.push(Scholar.Utilities.cleanAuthor(author.textContent, "author", false));
+	}
+	
+	newItem.complete();
+}
+
+function doWeb(doc, url) {
+	var articleRegexp = /^http:\/\/www\.nybooks\.com\/articles\/[0-9]+/
+	if(articleRegexp.test(url)) {
+		scrape(doc);
+	} else {
+		var namespace = doc.documentElement.namespaceURI;
+		var nsResolver = namespace ? function(prefix) {
+			if (prefix == ''x'') return namespace; else return null;
+		} : null;
+		
+		var items = Scholar.Utilities.getItemArray(doc, doc, "^http://www\\.nybooks\\.com/articles/[0-9]+/");
+		items = Scholar.selectItems(items);
+			
+		if(!items) {
+			return true;
+		}
+		
+		var urls = new Array();
+		for(var i in items) {
+			urls.push(i);
+		}
+		
+		Scholar.Utilities.processDocuments(urls, scrape, function() { Scholar.done(); });
+		Scholar.wait();
 	}
 }');
 
@@ -5401,7 +5615,7 @@ var inputTypeMap = {
 	INPR:"manuscript",
 	JFULL:"journalArticle",
 	MAP:"artwork",
-	PAMP:"book",
+	PAMP:"manuscript",
 	RPRT:"book",
 	SER:"book",
 	SLIDE:"artwork",

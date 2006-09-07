@@ -26,6 +26,10 @@ Scholar.Utilities.prototype.strToDate = function(date) {
  * Cleans extraneous punctuation off an author name
  */
 Scholar.Utilities.prototype.cleanAuthor = function(author, type, useComma) {
+	if(typeof(author) != "string") {
+		throw "cleanAuthor: author must be a string";
+	}
+	
 	author = author.replace(/^[\s\.\,\/\[\]\:]+/, '');
 	author = author.replace(/[\s\,\/\[\]\:\.]+$/, '');
 	author = author.replace(/  +/, ' ');
@@ -54,6 +58,10 @@ Scholar.Utilities.prototype.cleanAuthor = function(author, type, useComma) {
  * Cleans whitespace off a string and replaces multiple spaces with one
  */
 Scholar.Utilities.prototype.cleanString = function(s) {
+	if(typeof(s) != "string") {
+		throw "cleanString: argument must be a string";
+	}
+	
 	s = s.replace(/[ \xA0\r\n]+/g, " ");
 	s = s.replace(/^\s+/, "");
 	return s.replace(/\s+$/, "");
@@ -63,6 +71,10 @@ Scholar.Utilities.prototype.cleanString = function(s) {
  * Cleans any non-word non-parenthesis characters off the ends of a string
  */
 Scholar.Utilities.prototype.superCleanString = function(x) {
+	if(typeof(s) != "string") {
+		throw "superCleanString: argument must be a string";
+	}
+	
 	var x = x.replace(/^[^\w(]+/, "");
 	return x.replace(/[^\w)]+$/, "");
 }
@@ -71,6 +83,10 @@ Scholar.Utilities.prototype.superCleanString = function(x) {
  * Eliminates HTML tags, replacing <br>s with /ns
  */
 Scholar.Utilities.prototype.cleanTags = function(x) {
+	if(typeof(s) != "string") {
+		throw "cleanTags: argument must be a string";
+	}
+	
 	x = x.replace(/<br[^>]*>/gi, "\n");
 	return x.replace(/<[^>]+>/g, "");
 }
@@ -118,6 +134,10 @@ Scholar.Utilities.prototype.inArray = Scholar.inArray;
  * pads a number or other string with a given string on the left
  */
 Scholar.Utilities.prototype.lpad = function(string, pad, length) {
+	if(typeof(s) != "string") {
+		throw "lpad: argument must be a string";
+	}
+	
 	while(string.length < length) {
 		string = pad + string;
 	}

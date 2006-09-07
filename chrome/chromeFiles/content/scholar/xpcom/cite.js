@@ -104,7 +104,6 @@ CSL.prototype.preprocessItems = function(items) {
 		if(!item._csl || item._csl.dateModified != dateModified) {
 			// namespace everything in item._csl so there's no chance of overlap
 			item._csl = new Object();
-			item._csl.ignore = new Array();
 			item._csl.dateModified = dateModified;
 			
 			// separate item into authors, editors, translators
@@ -115,11 +114,10 @@ CSL.prototype.preprocessItems = function(items) {
 			
 			// parse date
 			item._csl.date = CSL.prototype._processDate(item.getField("date"));
-		} else {
-			// clear disambiguation and subsequent author substitute
-			if(item._csl.disambiguation) item._csl.date.disambiguation = undefined;
-			if(item._csl.subsequentAuthorSubstitute) item._csl.subsequentAuthorSubstitute = undefined;
 		}
+		// clear disambiguation and subsequent author substitute
+		if(item._csl.disambiguation) item._csl.date.disambiguation = undefined;
+		if(item._csl.subsequentAuthorSubstitute) item._csl.subsequentAuthorSubstitute = undefined;
 	}
 	
 	// sort by sort order
@@ -179,7 +177,7 @@ CSL.prototype.preprocessItems = function(items) {
 		item._csl.number = i;
 		
 		// handle subsequent author substitutes
-		if(this._bib.subsequentAuthorSubstitute && lastAuthor == author) {
+		if(lastAuthor == author) {
 			item._csl.subsequentAuthorSubstitute = true;
 		}
 		lastAuthor = author;
