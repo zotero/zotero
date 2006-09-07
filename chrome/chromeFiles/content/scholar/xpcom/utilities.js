@@ -71,7 +71,7 @@ Scholar.Utilities.prototype.cleanString = function(s) {
  * Cleans any non-word non-parenthesis characters off the ends of a string
  */
 Scholar.Utilities.prototype.superCleanString = function(x) {
-	if(typeof(s) != "string") {
+	if(typeof(x) != "string") {
 		throw "superCleanString: argument must be a string";
 	}
 	
@@ -83,7 +83,7 @@ Scholar.Utilities.prototype.superCleanString = function(x) {
  * Eliminates HTML tags, replacing <br>s with /ns
  */
 Scholar.Utilities.prototype.cleanTags = function(x) {
-	if(typeof(s) != "string") {
+	if(typeof(x) != "string") {
 		throw "cleanTags: argument must be a string";
 	}
 	
@@ -134,10 +134,6 @@ Scholar.Utilities.prototype.inArray = Scholar.inArray;
  * pads a number or other string with a given string on the left
  */
 Scholar.Utilities.prototype.lpad = function(string, pad, length) {
-	if(typeof(s) != "string") {
-		throw "lpad: argument must be a string";
-	}
-	
 	while(string.length < length) {
 		string = pad + string;
 	}
