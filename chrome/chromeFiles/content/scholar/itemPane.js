@@ -33,11 +33,11 @@ var ScholarItemPane = new function()
 	this.onOpenURLClick = onOpenURLClick;
 	this.addCreatorRow = addCreatorRow;
 	this.disableButton = disableButton;
+	this.createValueElement = createValueElement;
 	this.removeCreator = removeCreator;
 	this.showEditor = showEditor;
 	this.handleKeyPress = handleKeyPress;
 	this.hideEditor = hideEditor;
-	this.modifyField = modifyField;
 	this.getCreatorFields = getCreatorFields;
 	this.modifyCreator = modifyCreator;
 	this.removeNote = removeNote;
@@ -50,6 +50,13 @@ var ScholarItemPane = new function()
 	function onLoad()
 	{
 		_tabs = document.getElementById('scholar-view-tabs');
+		
+		// Not in item pane, so skip the introductions
+		if (!_tabs)
+		{
+			return false;
+		}
+		
 		_dynamicFields = document.getElementById('editpane-dynamic-fields');
 		_itemTypeMenu = document.getElementById('editpane-type-menu');
 		_creatorTypeMenu = document.getElementById('creatorTypeMenu');
@@ -88,7 +95,19 @@ var ScholarItemPane = new function()
 		// pane, since for some reason it's not being called automatically
 		if (_itemBeingEdited && _itemBeingEdited!=thisItem)
 		{
-			var boxes = _dynamicFields.getElementsByTagName('textbox');
+			switch (_tabs.selectedIndex)
+			{
+				// Info
+				case 0:
+					var boxes = _dynamicFields.getElementsByTagName('textbox');
+					break;
+					
+				// Tags
+				case 3:
+					var boxes = document.getAnonymousNodes(_tagsBox)[0].getElementsByTagName('textbox');
+					break;
+			}
+			
 			if (boxes.length==1)
 			{
 				boxes[0].inputField.blur();
@@ -459,25 +478,33 @@ var ScholarItemPane = new function()
 		
 		var fieldName = elem.getAttribute('fieldname');
 		var tabindex = elem.getAttribute('tabindex');
-		var value = '';
 		var creatorFields = fieldName.split('-');
 		if(creatorFields[0] == 'creator')
 		{
 			var c = _itemBeingEdited.getCreator(creatorFields[1]);
-			if(c)
-				value = c[creatorFields[2]];
+			var value = c ? c[creatorFields[2]] : '';
+			var itemID = _itemBeingEdited.getID();
+		}
+		else if (fieldName=='tag')
+		{
+			var tagID = elem.parentNode.getAttribute('id').split('-')[1];
+			var value = tagID ? Scholar.Tags.getName(tagID) : '';
+			var itemID = Scholar.getAncestorByTagName(elem, 'tagsbox').item.getID();
 		}
 		else
 		{
-			value = _itemBeingEdited.getField(fieldName);
+			var value = _itemBeingEdited.getField(fieldName);
+			var itemID = _itemBeingEdited.getID();
 		}
 		
 		var t = document.createElement("textbox");
+		t.setAttribute('type', 'autocomplete');
+		t.setAttribute('autocompletesearch', 'zotero');
+		t.setAttribute('autocompletesearchparam', fieldName + (itemID ? '/' + itemID : ''));
 		t.setAttribute('value',value);
-		t.setAttribute('fieldname',fieldName);
+		t.setAttribute('fieldname', fieldName);
 		t.setAttribute('tabindex', tabindex);
 		t.setAttribute('flex','1');
-		t.className = 'fieldeditor';
 		
 		var box = elem.parentNode;
 		box.replaceChild(t,elem);
@@ -514,18 +541,24 @@ var ScholarItemPane = new function()
 	function hideEditor(t, saveChanges)
 	{
 		//Scholar.debug('Hiding editor');
-		var textbox = t.parentNode.parentNode;
+		var textbox = Scholar.getAncestorByTagName(t, 'textbox');
+		if (!textbox){
+			Scholar.debug('Textbox not found in hideEditor');
+			return;
+		}
 		var fieldName = textbox.getAttribute('fieldname');
 		var tabindex = textbox.getAttribute('tabindex');
 		var value = t.value;
 		
 		var elem;
 		var creatorFields = fieldName.split('-');
+		
+		// Creator fields
 		if(creatorFields[0] == 'creator')
 		{
 			if (saveChanges){
 				var otherFields =
-					this.getCreatorFields(textbox.parentNode.parentNode.parentNode);
+					getCreatorFields(textbox.parentNode.parentNode.parentNode);
 				modifyCreator(creatorFields[1], creatorFields[2], value, otherFields);
 			}
 			
@@ -548,6 +581,58 @@ var ScholarItemPane = new function()
 			
 			elem = createValueElement(val, fieldName, tabindex);
 		}
+		
+		// Tags
+		else if (fieldName=='tag')
+		{
+			var tagsbox = Scholar.getAncestorByTagName(textbox, 'tagsbox');
+			if (!tagsbox)
+			{
+				Scholar.debug('Tagsbox not found', 1);
+				return;
+			}
+			
+			var row = textbox.parentNode;
+			var rows = row.parentNode;
+			
+			// Tag id encoded as 'tag-1234'
+			var id = row.getAttribute('id').split('-')[1];
+			
+			if (saveChanges)
+			{
+				if (id)
+				{
+					if (value)
+					{
+						tagsbox.replace(id, value);
+						return;
+					}
+					else
+					{
+						tagsbox.remove(id);
+						return;
+					}
+				}
+				else
+				{
+					var id = tagsbox.add(value);
+				}
+			}
+			
+			if (id)
+			{
+				elem = createValueElement(value, 'tag', tabindex);
+			}
+			else
+			{
+				// Just remove the row
+				var row = rows.removeChild(row);
+				tagsbox.fixPopup();
+				return;
+			}
+		}
+			
+		// Fields
 		else
 		{
 			if(saveChanges)

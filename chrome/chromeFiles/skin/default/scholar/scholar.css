@@ -58,6 +58,11 @@ tagsbox
 	-moz-binding: url('chrome://scholar/content/bindings/tagsbox.xml#tags-box');
 }
 
+tagsbox row
+{
+	-moz-box-align:center;
+}
+
 seealsobox
 {
 	-moz-binding: url('chrome://scholar/content/bindings/relatedbox.xml#seealso-box');
@@ -79,12 +84,12 @@ searchcondition menulist[id="operatorsmenu"]
 	width:15em;
 }
 
-#editpane-dynamic-fields row
+#editpane-dynamic-fields row, tagsbox row
 {
 	margin:0 0 1px;
 }
 
-#editpane-dynamic-fields textbox
+#editpane-dynamic-fields textbox, tagsbox textbox
 {
 	margin-top:0;
 	margin-bottom:-1px;

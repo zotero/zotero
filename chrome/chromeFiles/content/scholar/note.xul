@@ -15,6 +15,7 @@
     xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
 	<script src="include.js"/>
+	<script src="itemPane.js"/>
 	<script src="note.js"/>
 
 	<keyset>

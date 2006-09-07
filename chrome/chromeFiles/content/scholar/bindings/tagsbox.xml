@@ -18,6 +18,7 @@
 					]]>
 				</setter>
 			</property>
+			<property name="count"/>
 			<property name="summary">
 				<getter>
 					<![CDATA[
@@ -43,58 +44,109 @@
 			<method name="reload">
 				<body>
 					<![CDATA[
+						//Scholar.debug('Reloading tags');
+						
 						var rows = this.id('tagRows');
 						while(rows.hasChildNodes())
 							rows.removeChild(rows.firstChild);
 						
-						if(this.item)
+						var tags = this.item.getTags();
+						
+						if(tags)
 						{
-							var tags = this.item.getTags();
-							
-							if(tags)
+							for(var i = 0; i < tags.length; i++)
 							{
-								for(var i = 0; i < tags.length; i++)
-								{
-									var id = Scholar.Tags.getID(tags[i]);
-									
-									var icon= document.createElement("image");
-									icon.setAttribute('src','chrome://scholar/skin/tag.png');
-							
-									var label = document.createElement("label");
-									label.setAttribute('value', tags[i]);
-									label.setAttribute('crop','end');
-								
-									var remove = document.createElement("label");
-									remove.setAttribute('value','-');
-									remove.setAttribute('onclick',"this.parentNode.parentNode.parentNode.parentNode.parentNode.remove('"+id+"');");
-									remove.setAttribute('class','clicky');
-							
-									var row = document.createElement("row");
-									row.appendChild(icon);
-									row.appendChild(label);
-									row.appendChild(remove);
-									row.setAttribute('id','tag-'+id);
-							
-									rows.appendChild(row);		
-								}
-								this.updateCount(tags.length);
+								this.addDynamicRow(tags[i], i);
 							}
-							else
-							{
-								this.updateCount();
-							}
+							this.updateCount(tags.length);
+							
+							this.fixPopup();
+							
+							return tags.length;
 						}
+						
+						this.updateCount();
+						return 0;
+					]]>
+				</body>
+			</method>
+			<method name="addDynamicRow">
+				<parameter name="tag"/>
+				<parameter name="tabindex"/>
+				<body>
+					<![CDATA[
+						var id = tag ? Scholar.Tags.getID(tag) : null;
+						tag = tag ? tag : '';
+						tabindex = tabindex ? tabindex : null;
+						
+						var icon= document.createElement("image");
+						icon.setAttribute('src','chrome://scholar/skin/tag.png');
+						// DEBUG: Why won't just this.nextSibling.blur() work?
+						icon.setAttribute('onclick','if (this.nextSibling.inputField){ this.nextSibling.inputField.blur() }');
+						
+						var label = ScholarItemPane.createValueElement(tag, 'tag', tabindex);
+						
+						var remove = document.createElement("label");
+						remove.setAttribute('value','-');
+						if (id)
+						{
+							remove.setAttribute('onclick',"this.parentNode.parentNode.parentNode.parentNode.parentNode.remove('"+id+"');");
+							remove.setAttribute('class','clicky');
+						}
+						else
+						{
+							remove.setAttribute('disabled', true);
+							remove.setAttribute('class', 'unclicky');
+						}
+						
+						var row = document.createElement("row");
+						row.appendChild(icon);
+						row.appendChild(label);
+						row.appendChild(remove);
+						if (id)
+						{
+							row.setAttribute('id','tag-'+id);
+						}
+						
+						this.id('tagRows').appendChild(row);
+						return row;
+					]]>
+				</body>
+			</method>
+			<method name="new">
+				<body>
+					<![CDATA[
+						var row = this.addDynamicRow();
+						row.firstChild.nextSibling.click();
 					]]>
 				</body>
 			</method>
 			<method name="add">
+				<parameter name="value"/>
 				<body>
 					<![CDATA[
-						var t = prompt('Add Tag:');
-						if(t && this.item)
+						if (value)
 						{
-							this.item.addTag(t);
+							return this.item.addTag(value);
 						}
+						return false;
+					]]>
+				</body>
+			</method>
+			<method name="replace">
+				<parameter name="oldTagID"/>
+				<parameter name="newTag"/>
+				<body>
+					<![CDATA[
+						if(oldTagID && newTag)
+						{
+							var oldTag = Scholar.Tags.getName(oldTagID);
+							if (oldTag!=newTag)
+							{
+								return this.item.replaceTag(oldTagID, newTag);
+							}
+						}
+						return false;
 					]]>
 				</body>
 			</method>
@@ -102,13 +154,7 @@
 				<parameter name="id"/>
 				<body>
 					<![CDATA[
-						if(id)
-						{
-							this.item.removeTag(id);
-							var rows = this.id('tagRows');
-							rows.removeChild(this.id('tag-'+id));
-							this.updateCount();
-						}
+						this.item.removeTag(id);
 					]]>
 				</body>
 			</method>
@@ -118,7 +164,7 @@
 					<![CDATA[
 						if(count == null)
 						{
-							tags = this.item.getTags();
+							var tags = this.item.getTags();
 							if(tags)
 								count = tags.length;
 							else
@@ -126,6 +172,7 @@
 						}
 						
 						this.id('tagsNum').value = count + ' tags:';
+						this.count = count;
 					]]>
 				</body>
 			</method>
@@ -137,12 +184,31 @@
 					]]>
 				</body>
 			</method>
+			<method name="fixPopup">
+				<body>
+					<![CDATA[
+						// Hack to fix popup close problems after using
+						// autocomplete -- something to do with the popup used
+						// in the XBL autocomplete binding?
+						//
+						// We reset the popup manually if it's showing
+						if (this.parentNode.getAttribute('showing')=='true'){
+							//Scholar.debug('Fixing popup');
+							// The target element is 'tagsLabel', so change the
+							// path if the XUL DOM in the note editor XBL changes
+							this.parentNode.showPopup(
+								this.parentNode.parentNode.previousSibling,
+								-1, -1, 'popup');
+						}
+					]]>
+				</body>
+			</method>
 		</implementation>
 		<content>
 			<xul:vbox xbl:inherits="flex">
 				<xul:hbox align="center">
 					<xul:label id="tagsNum"/>
-					<xul:button label="Add" oncommand="this.parentNode.parentNode.parentNode.add();"/>
+					<xul:button label="Add" oncommand="this.parentNode.parentNode.parentNode.new();"/>
 				</xul:hbox>
 				<xul:grid>
 					<xul:columns>

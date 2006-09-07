@@ -112,17 +112,15 @@
 			<method name="tagsClick">
 				<body>
 					<![CDATA[
-						var tagsList = this.item.getTags();
-						if(tagsList && tagsList.length > 0)
-							this.id('tagsPopup').showPopup(this.id('tagsLabel'),-1,-1,-1,'popup',0,0);
-						else
-							this.id('tags').add();
+						this.id('tags').reload();
+						this.id('tagsPopup').showPopup(this.id('tagsLabel'),-1,-1,'popup');
 					]]>
 				</body>
 			</method>
 			<method name="updateTagsSummary">
 				<body>
 					<![CDATA[
+						// TODO: localize
 						var v = this.id('tags').summary;
 						
 						if(!v || v == "")
@@ -172,7 +170,18 @@
 					<xul:popup id="seeAlsoPopup" width="300" onpopupshowing="this.firstChild.reload();">
 						<xul:seealsobox id="seeAlso" flex="1"/>
 					</xul:popup>
-					<xul:popup id="tagsPopup" width="300" onpopupshowing="this.firstChild.reload();">
+					<!-- The onpopup* stuff is an ugly hack to keep track of when the
+					popup is open (and not the descendent autocomplete popup, which also
+					seems to get triggered by these events for reasons that are less than
+					clear) so that we can manually refresh the popup if it's open after
+					autocomplete is used to prevent it from becoming unresponsive
+					
+					Note: Code in tagsbox.xml is dependent on the DOM path between the
+					tagsbox and tagsLabel above, so be sure to update fixPopup() if it changes
+					-->
+					<xul:popup id="tagsPopup" ignorekeys="true" width="300"
+							onpopupshown="if (!document.commandDispatcher.focusedElement || document.commandDispatcher.focusedElement.tagName=='xul:label'){ /* DEBUG: it would be nice to make this work -- if (this.firstChild.count==0){ this.firstChild.new(); } */ this.setAttribute('showing', 'true'); }"
+							onpopuphidden="if (!document.commandDispatcher.focusedElement || document.commandDispatcher.focusedElement.tagName=='xul:label'){ this.setAttribute('showing', 'false'); }">
 						<xul:tagsbox id="tags" flex="1"/>
 					</xul:popup>
 				</xul:popupset>

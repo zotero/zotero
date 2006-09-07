@@ -5,6 +5,7 @@
 */
 
 var noteEditor;
+var notifierUnregisterID;
 
 function onLoad()
 {
@@ -42,12 +43,22 @@ function onLoad()
 		if(collectionID && collectionID != '' && collectionID != 'undefined')
 			noteEditor.collection = Scholar.Collections.get(collectionID);
 	}
+	
+	notifierUnregisterID = Scholar.Notifier.registerItemTree(NotifyCallback);
 }
 
 function onUnload()
 {
 	if(noteEditor && noteEditor.value)
 		noteEditor.save();
+	
+	Scholar.Notifier.unregisterItemTree(notifierUnregisterID);
+}
+
+var NotifyCallback = {
+	notify: function(){
+		noteEditor.id('links').id('tags').reload();
+	}
 }
 
 addEventListener("load", function(e) { onLoad(e); }, false);

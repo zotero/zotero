@@ -355,6 +355,10 @@ Scholar.Item.prototype.getField = function(field){
  * Field can be passed as fieldID or fieldName
  */
 Scholar.Item.prototype.setField = function(field, value, loadIn){
+	if (!field){
+		throw ("Field not specified in Item.setField()");
+	}
+	
 	// Primary field
 	if (this.isPrimaryField(field)){
 		if (!this.isEditableField(field)){
@@ -1217,6 +1221,11 @@ Scholar.Item.prototype.addTag = function(tag){
 		this.save();
 	}
 	
+	if (!tag){
+		Scholar.debug('Not saving empty tag', 2);
+		return false;
+	}
+	
 	Scholar.DB.beginTransaction();
 	var tagID = Scholar.Tags.getID(tag);
 	if (!tagID){
@@ -1227,20 +1236,49 @@ Scholar.Item.prototype.addTag = function(tag){
 	Scholar.DB.query(sql, [this.getID(), tagID]);
 	
 	Scholar.DB.commitTransaction();
-	Scholar.Notifier.trigger('modify', 'item', this.getID());
+	
+	if (!Scholar.DB.transactionInProgress()){
+		Scholar.Notifier.trigger('modify', 'item', this.getID());
+	}
 	
 	return tagID;
 }
 
 Scholar.Item.prototype.getTags = function(){
 	var sql = "SELECT tag FROM tags WHERE tagID IN "
-		+ "(SELECT tagID FROM itemTags WHERE itemID=" + this.getID() + ")";
+		+ "(SELECT tagID FROM itemTags WHERE itemID=" + this.getID() + ") "
+		+ "ORDER BY tag COLLATE NOCASE";
 	return Scholar.DB.columnQuery(sql);
 }
 
 Scholar.Item.prototype.getTagIDs = function(){
 	var sql = "SELECT tagID FROM itemTags WHERE itemID=" + this.getID();
 	return Scholar.DB.columnQuery(sql);
+}
+
+Scholar.Item.prototype.replaceTag = function(oldTagID, newTag){
+	if (!this.getID()){
+		throw ('Cannot replace tag on unsaved item');
+	}
+	
+	if (!newTag){
+		Scholar.debug('Not replacing with empty tag', 2);
+		return false;
+	}
+	
+	Scholar.DB.beginTransaction();
+	
+	var oldTag = Scholar.Tags.getName(oldTagID);
+	if (oldTag==newTag){
+		Scholar.DB.commitTransaction();
+		return false;
+	}
+	
+	this.removeTag(oldTagID);
+	var id = this.addTag(newTag);
+	Scholar.DB.commitTransaction();
+	Scholar.Notifier.trigger('modify', 'item', this.getID());
+	return id;
 }
 
 Scholar.Item.prototype.removeTag = function(tagID){
@@ -1253,7 +1291,10 @@ Scholar.Item.prototype.removeTag = function(tagID){
 	Scholar.DB.query(sql, [this.getID(), tagID]);
 	Scholar.Tags.purge();
 	Scholar.DB.commitTransaction();
-	Scholar.Notifier.trigger('modify', 'item', this.getID());
+	
+	if (!Scholar.DB.transactionInProgress()){
+		Scholar.Notifier.trigger('modify', 'item', this.getID());
+	}
 }
 
 

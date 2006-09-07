@@ -29,6 +29,7 @@ var Scholar = new function(){
 	this.varDump = varDump;
 	this.getString = getString;
 	this.flattenArguments = flattenArguments;
+	this.getAncestorByTagName = getAncestorByTagName;
 	this.join = join;
 	this.inArray = inArray;
 	this.arraySearch = arraySearch;
@@ -325,6 +326,17 @@ var Scholar = new function(){
 		}
 		
 		return returns;
+	}
+	
+	
+	function getAncestorByTagName(elem, tagName){
+		while (elem.parentNode){
+			elem = elem.parentNode;
+			if (elem.tagName==tagName || elem.tagName=='xul:' + tagName){
+				return elem;
+			}
+		}
+		return false;
 	}
 	
 	
