@@ -57,7 +57,7 @@ function onUnload()
 
 var NotifyCallback = {
 	notify: function(){
-		noteEditor.id('links').id('tags').reload();
+		noteEditor.note = noteEditor.note;
 	}
 }
 
