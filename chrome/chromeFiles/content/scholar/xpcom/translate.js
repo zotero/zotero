@@ -558,14 +558,13 @@ Scholar.Translate.prototype._generateSandbox = function() {
 		this._sandbox.Scholar.nextItem = function() { return me._exportGetItem() };
 		this._sandbox.Scholar.nextCollection = function() { return me._exportGetCollection() }
 	} else {
-		// add routines to add new items
-		this._sandbox.Scholar.Item = Scholar.Translate.ScholarItem;
-		// attach the function to be run when an item is done
+		// copy routines to add new items
+		this._sandbox.Scholar.Item = Scholar.Translate.GenerateScholarItemClass();
 		this._sandbox.Scholar.Item.prototype.complete = function() {me._itemDone(this)};
 		
 		if(this.type == "import") {
 			// add routines to add new collections
-			this._sandbox.Scholar.Collection = Scholar.Translate.ScholarCollection;
+			this._sandbox.Scholar.Collection = Scholar.Translate.GenerateScholarItemClass();
 			// attach the function to be run when a collection is done
 			this._sandbox.Scholar.Collection.prototype.complete = function() {me._collectionDone(this)};
 		}
@@ -882,7 +881,7 @@ Scholar.Translate.prototype._translationComplete = function(returnValue) {
 					Scholar.Notifier.trigger("add", "item", this.newItems);
 				}
 				// notify collectionTreeView about updates
-				if(this.newCollections.length) {
+				if(this.newCollections && this.newCollections.length) {
 					Scholar.Notifier.trigger("add", "collection", this.newCollections);
 				}
 			}
@@ -1007,7 +1006,7 @@ Scholar.Translate.prototype._itemTagsAndSeeAlso = function(item, newItem) {
 /*
  * executed when an item is done and ready to be loaded into the database
  */
-Scholar.Translate.prototype._itemDone = function(item) {
+Scholar.Translate.prototype._itemDone = function(item) {	
 	if(!this.saveItem) {	// if we're not supposed to save the item, just
 							// return the item array
 		
@@ -1056,7 +1055,7 @@ Scholar.Translate.prototype._itemDone = function(item) {
 			item.itemType = item.complete = undefined;
 			
 			// automatically set access date if URL is set
-			if(item.url && !item.accessDate) {
+			if(item.url && !item.accessDate && this.type == "web") {
 				item.accessDate = (new Date()).toLocaleString();
 			}
 			
@@ -1778,26 +1777,34 @@ Scholar.Translate.prototype._storageFunctions =  function(read, write) {
  * inside scraper code
  */
  
-Scholar.Translate.ScholarItem = function(itemType) {
-	// assign item type
-	this.itemType = itemType;
-	// generate creators array
-	this.creators = new Array();
-	// generate notes array
-	this.notes = new Array();
-	// generate tags array
-	this.tags = new Array();
-	// generate see also array
-	this.seeAlso = new Array();
-	// generate file array
-	this.attachments = new Array();
+Scholar.Translate.GenerateScholarItemClass = function() {
+	var ScholarItem = function(itemType) {
+		// assign item type
+		this.itemType = itemType;
+		// generate creators array
+		this.creators = new Array();
+		// generate notes array
+		this.notes = new Array();
+		// generate tags array
+		this.tags = new Array();
+		// generate see also array
+		this.seeAlso = new Array();
+		// generate file array
+		this.attachments = new Array();
+	};
+	
+	return ScholarItem;
 }
 
 /* Scholar.Translate.Collection: a class for generating a new top-level
  * collection from inside scraper code
  */
- 
-Scholar.Translate.ScholarCollection = function() {}
+
+Scholar.Translate.GenerateScholarCollectionClass = function() {
+	var ScholarCollection = Scholar.Translate.ScholarCollection = function() {};
+	
+	return ScholarCollection;
+}
 
 /* Scholar.Translate.RDF: a class for handling RDF IO
  *

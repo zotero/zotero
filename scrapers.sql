@@ -1,4 +1,4 @@
--- 84
+-- 85
 
 -- Set the following timestamp to the most recent scraper update date
 REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-08-31 22:44:00'));
@@ -186,7 +186,15 @@ REPLACE INTO "translators" VALUES ('838d8849-4ffb-9f44-3d0d-aa8a0a079afe', '2006
 						title = title.substring(0, title.length-2);
 					}
 					newItem.title = Scholar.Utilities.capitalizeTitle(title);
-				} else if(match[1] == ''Author(s)'') {
+				} else if(match[1] == "Series") {
+					newItem.series = match[2];
+				} else if(match[1] == "Description") {
+					var pageMatch = /([0-9]+) p\.?/
+					var m = pageMatch.exec(match[2]);
+					if(m) {
+						newItem.pages = m[1];
+					}
+				} else if(match[1] == ''Author(s)'' || match[1] == "Corp Author(s)") {
 					var yearRegexp = /[0-9]{4}-([0-9]{4})?/;
 					
 					var authors = match[2].split('';'');
@@ -195,44 +203,33 @@ REPLACE INTO "translators" VALUES ('838d8849-4ffb-9f44-3d0d-aa8a0a079afe', '2006
 						for(var j=1; j<authors.length; j+=2) {
 							if(authors[j-1].substring(0, 1) != ''('' && !yearRegexp.test(authors[j])) {
 								// ignore places where there are parentheses		
-								newItem.creators.push(Scholar.Utilities.cleanAuthor(authors[j], "author", true));
+								newItem.creators.push({lastName:authors[j], creatorType:"author", isInstitution:true});
 							}
 						}
 					} else {
 						newItem.creators.push(Scholar.Utilities.cleanString(match[2]));
 					}
 				} else if(match[1] == ''Publication'') {
-					// Don''t even try to deal with this. The WorldCat metadata is of poor enough quality that this isn''t worth it.
 					match[2] = Scholar.Utilities.cleanString(match[2]);
 					if(match[2].substring(match[2].length-1) == '','') {
-							match[2] = match[2].substring(0, match[2].length-1);
+						match[2] = match[2].substring(0, match[2].length-1);
 					}
-					newItem.publisher = match[2];
+					
+					// most, but not all, WorldCat publisher/places are
+					// colon delimited
+					var parts = match[2].split(/ ?: ?/);
+					if(parts.length == 2) {
+						newItem.place = parts[0];
+						newItem.publisher = parts[1];
+					} else {
+						newItem.publisher = match[2];
+					}
 				} else if(match[1] == ''Institution'') {
 					newItem.publisher = match[2];
 				} else if(match[1] == ''Standard No'') {
-					var identifiers = match[2].split(/ +/);
-					var j=0;
-					while(j<(identifiers.length-1)) {
-							var type = identifiers[j].substring(0, identifiers[j].length-1);
-							var lastChar;
-							var value;
-	
-							j++;
-							while(j<identifiers.length && (lastChar = identifiers[j].substring(identifiers[j].length-1)) != '':'') {
-								if(identifiers[j].substring(0, 1) != ''('') {
-									if(lastChar == '';'') {
-										value = identifiers[j].substring(0, identifiers[j].length-1);
-									} else {
-										value = identifiers[j];
-									}
-									if(type == "ISBN" || type == "ISSN") {
-										newItem[type] = value;
-									}
-								}
-								j++;
-							}
-					}
+					var ISBNRe = /ISBN:\s*([0-9X]+)/
+					var m = ISBNRe.exec(match[2]);
+					if(m) newItem.ISBN = m[1];
 				} else if(match[1] == ''Year'') {
 					newItem.date = match[2];
 				} else if(match[1] == "Descriptor") {
@@ -255,7 +252,9 @@ REPLACE INTO "translators" VALUES ('838d8849-4ffb-9f44-3d0d-aa8a0a079afe', '2006
 					if(match[2].substr(0, 8) != "WorldCat") {
 						newItem.itemType = "journalArticle";
 					}
-				} else {
+				} else if(match[1] != "Availability" &&
+				          match[1] != "Find Items About" &&
+				          match[1] != "Document Type") {
 					newItem.extra += match[1]+": "+match[2]+"\n";
 				}
 			} else {
@@ -3635,11 +3634,6 @@ function doWeb(doc, url) {
 	if(articleRegexp.test(url)) {
 		scrape(doc);
 	} else {
-		var namespace = doc.documentElement.namespaceURI;
-		var nsResolver = namespace ? function(prefix) {
-			if (prefix == ''x'') return namespace; else return null;
-		} : null;
-		
 		var items = Scholar.Utilities.getItemArray(doc, doc, ''^http://chronicle\\.com/(?:daily|weekly)/[^/]+/'');
 		items = Scholar.selectItems(items);
 			
@@ -3735,14 +3729,116 @@ function doWeb(doc, url) {
 	if(articleRegexp.test(url)) {
 		scrape(doc);
 	} else {
-		var namespace = doc.documentElement.namespaceURI;
-		var nsResolver = namespace ? function(prefix) {
-			if (prefix == ''x'') return namespace; else return null;
-		} : null;
-		
 		var items = Scholar.Utilities.getItemArray(doc, doc, "^http://www\\.nybooks\\.com/articles/[0-9]+/");
 		items = Scholar.selectItems(items);
 			
+		if(!items) {
+			return true;
+		}
+		
+		var urls = new Array();
+		for(var i in items) {
+			urls.push(i);
+		}
+		
+		Scholar.Utilities.processDocuments(urls, scrape, function() { Scholar.done(); });
+		Scholar.wait();
+	}
+}');
+
+REPLACE INTO "translators" VALUES ('d1bf1c29-4432-4ada-8893-2e29fc88fd9e', '2006-09-06 23:27:00', 4, 'Washington Post', 'Simon Kornblith', '^http://www\.washingtonpost\.com/', 
+'function detectWeb(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	// don''t say we can scrape when we can''t; make sure user is logged in
+	var signedIn = doc.evaluate(''//a[text() = "Sign out" or text() = "Sign Out"]'',
+							   doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+	if(!signedIn) {
+		return;
+	}
+	
+	var articleRegexp = /http:\/\/www\.washingtonpost\.com\/wp-dyn\/content\/article\/[0-9]+\/[0-9]+\/[0-9]+\/[^\/]+\.html/
+	if(articleRegexp.test(url)) {
+		return "newspaperArticle";
+	} else {
+		var aTags = doc.getElementsByTagName("a");
+		for(var i=0; i<aTags.length; i++) {
+			if(articleRegexp.test(aTags[i].href)) {
+				return "multiple";
+			}
+		}
+	}
+}',
+'function scrape(doc) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	var newItem = new Scholar.Item("newspaperArticle");
+	newItem.publicationTitle = "The Washington Post";
+	newItem.ISSN = "0740-5421";
+	
+	newItem.url = doc.location.href;
+	var metaTags = doc.getElementsByTagName("meta");
+	
+	newItem.attachments.push({document:doc, title:"Article (HTML)",
+							  downloadable:true});
+	
+	// grab title from doc title
+	newItem.title = doc.title;
+	
+	var byline = doc.evaluate(''//div[@id="byline"]'', doc, nsResolver,
+	                        XPathResult.ANY_TYPE, null).iterateNext();	
+	// grab authors from byline
+	if(byline) {
+		var authors = byline.textContent.substr(3).split(" and ");
+		for each(var author in authors) {
+			newItem.creators.push(Scholar.Utilities.cleanAuthor(author, "author"));
+		}
+	}
+	
+	var fonts = doc.evaluate(''//div[@id="article"]/p/font/text()'', doc, nsResolver,
+	                        XPathResult.ANY_TYPE, null);
+	var font;
+	while(font = fonts.iterateNext()) {
+		var pageRe = /([^;]+);([\xA0 ]+Pages?[\xA0 ]+([A-Z0-9\-]+))?/
+		// grab pages and date
+		Scholar.Utilities.debug(Scholar.Utilities.cleanString(font.nodeValue));
+		var m = pageRe.exec(font.nodeValue);
+		if(m) {
+			newItem.date = m[1];
+			newItem.pages = m[2];
+			break;
+		}
+	}
+	
+	// grab tags from meta tag
+	var keywords = doc.getElementsByTagName("meta");
+	if(keywords) {
+		keywords = keywords.namedItem("keywords");
+		if(keywords) {
+			keywords = keywords.getAttribute("content");
+			if(keywords) {
+				newItem.tags = keywords.split(/, ?/);
+			}
+		}
+	}
+	
+	newItem.complete();
+}
+
+function doWeb(doc, url) {
+	var articleRegexp = /http:\/\/www\.washingtonpost\.com\/wp-dyn\/content\/article\/[0-9]+\/[0-9]+\/[0-9]+\/[^\/]+\.html/
+	if(articleRegexp.test(url)) {
+		scrape(doc);
+	} else {
+		var items = Scholar.Utilities.getItemArray(doc, doc, articleRegexp);
+		items = Scholar.selectItems(items);
+		
 		if(!items) {
 			return true;
 		}

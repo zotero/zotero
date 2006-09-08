@@ -167,8 +167,6 @@ Scholar_Ingester_Interface.tabClose = function(event) {
 Scholar_Ingester_Interface.tabSelect = function(event) {
 	var data = Scholar_Ingester_Interface._getData(Scholar_Ingester_Interface.tabBrowser.selectedBrowser);
 	Scholar_Ingester_Interface._updateStatus(data);
-	// Make sure scrape progress is gone
-	Scholar_Ingester_Interface.Progress.kill();
 }
 
 Scholar_Ingester_Interface.hidePopup = function(collectionID) {

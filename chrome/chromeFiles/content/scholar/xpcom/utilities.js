@@ -62,7 +62,7 @@ Scholar.Utilities.prototype.cleanString = function(s) {
 		throw "cleanString: argument must be a string";
 	}
 	
-	s = s.replace(/[ \xA0\r\n]+/g, " ");
+	s = s.replace(/[\xA0\r\n\s]+/g, " ");
 	s = s.replace(/^\s+/, "");
 	return s.replace(/\s+$/, "");
 }
@@ -236,13 +236,21 @@ Scholar.Utilities.Ingester.prototype.getItemArray = function(doc, inHere, urlRe,
 	
 	// Require link to match this
 	if(urlRe) {
-		var urlRegexp = new RegExp();
-		urlRegexp.compile(urlRe, "i");
+		if(urlRe.exec) {
+			var urlRegexp = urlRe;
+		} else {
+			var urlRegexp = new RegExp();
+			urlRegexp.compile(urlRe, "i");
+		}
 	}
 	// Do not allow text to match this
 	if(rejectRe) {
-		var rejectRegexp = new RegExp();
-		rejectRegexp.compile(rejectRe, "i");
+		if(rejectRe.exec) {
+			var rejectRegexp = rejectRe;
+		} else {
+			var rejectRegexp = new RegExp();
+			rejectRegexp.compile(rejectRe, "i");
+		}
 	}
 	
 	if(!inHere.length) {
@@ -253,7 +261,7 @@ Scholar.Utilities.Ingester.prototype.getItemArray = function(doc, inHere, urlRe,
 		var links = inHere[j].getElementsByTagName("a");
 		for(var i=0; i<links.length; i++) {
 			if(!urlRe || urlRegexp.test(links[i].href)) {
-				var text = this.getNodeString(doc, links[i], './/text()', null);
+				var text = links[i].textContent;
 				if(text) {
 					text = this.cleanString(text);
 					if(!rejectRe || !rejectRegexp.test(text)) {
