@@ -74,11 +74,20 @@ Scholar.ItemTreeView.prototype.refresh = function()
 Scholar.ItemTreeView.prototype.notify = function(action, type, ids)
 {
 	var madeChanges = false;
-		
 	this.selection.selectEventsSuppressed = true;
 	var savedSelection = this.saveSelection();
 	
 	ids = Scholar.flattenArguments(ids);
+	
+	// See if we're in the active window
+	var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+		.getService(Components.interfaces.nsIWindowMediator);
+	if (wm.getMostRecentWindow("navigator:browser") ==
+			this._treebox.treeBody.ownerDocument.defaultView){
+		var activeWindow = true;
+	}
+	
+	var quicksearch = this._treebox.treeBody.ownerDocument.getElementById('tb-search');
 	
 	if((action == 'remove' && !this._itemGroup.isLibrary()) || (action == 'delete' && this._itemGroup.isLibrary()))
 	{
@@ -110,54 +119,81 @@ Scholar.ItemTreeView.prototype.notify = function(action, type, ids)
 	}
 	else if(action == 'modify') 	//must check for null because it could legitimately be 0
 	{
-		for(var i=0, len=ids.length; i<len; i++)
+		// If no quicksearch, process modifications manually
+		if (quicksearch.value == '')
 		{
-			var row = this._itemRowMap[ids[i]];
-			if( row != null)
+			for(var i=0, len=ids.length; i<len; i++)
 			{
-				if(this.isContainer(row) && this.isContainerOpen(row))
+				var row = this._itemRowMap[ids[i]];
+				if( row != null)
 				{
-					this.toggleOpenState(row);
-					this.toggleOpenState(row);
-				}
-				else if(this.getParentIndex(row))
-				{
-					
-				}
-				else
-				{
-					this._treebox.invalidateRow(row);
-				}
-				madeChanges = true;
-			}
-			else if(this._itemGroup.isLibrary() || this._itemGroup.ref.hasItem(ids[i]))
-			{
-				var item = Scholar.Items.get(ids[i]);
-				
-				if(!item.getSource())
-				{
-					//most likely, the note or attachment's parent was removed.
-					this._showItem(new Scholar.ItemTreeView.TreeRow(item,0,false),this.rowCount);
-					this._treebox.rowCountChanged(this.rowCount-1,1);
+					if(this.isContainer(row) && this.isContainerOpen(row))
+					{
+						this.toggleOpenState(row);
+						this.toggleOpenState(row);
+					}
+					else if(this.getParentIndex(row))
+					{
+						
+					}
+					else
+					{
+						this._treebox.invalidateRow(row);
+					}
 					madeChanges = true;
 				}
+				else if(this._itemGroup.isLibrary() || this._itemGroup.ref.hasItem(ids[i]))
+				{
+					var item = Scholar.Items.get(ids[i]);
+					
+					if(!item.getSource())
+					{
+						//most likely, the note or attachment's parent was removed.
+						this._showItem(new Scholar.ItemTreeView.TreeRow(item,0,false),this.rowCount);
+						this._treebox.rowCountChanged(this.rowCount-1,1);
+						madeChanges = true;
+					}
+				}
 			}
+		}
+		
+		// If quicksearch, re-run it, since the results may have changed
+		else
+		{
+			quicksearch.doCommand();
+			madeChanges = true;
 		}
 	}
 	else if(action == 'add')
 	{
-		var items = Scholar.Items.get(ids);
-		
-		for (var i in items){
-			if((this._itemGroup.isLibrary() || items[i].inCollection(this._itemGroup.ref.getID()))	// if the item belongs in this collection
-				&& this._itemRowMap[items[i].getID()] == null											// if we haven't already added it to our hash map
-				&& (items[i].isRegularItem() || !items[i].getSource()))								// if it's stand-alone
+		// If no quicksearch, process new items manually
+		if (quicksearch.value == '')
+		{
+			var items = Scholar.Items.get(ids);
+			
+			for (var i in items)
 			{
-				this._showItem(new Scholar.ItemTreeView.TreeRow(items[i],0,false),this.rowCount);
-				this._treebox.rowCountChanged(this.rowCount-1,1);
-		
-				madeChanges = true;
+				if((this._itemGroup.isLibrary() || items[i].inCollection(this._itemGroup.ref.getID()))	// if the item belongs in this collection
+					&& this._itemRowMap[items[i].getID()] == null											// if we haven't already added it to our hash map
+					&& (items[i].isRegularItem() || !items[i].getSource()))								// if it's stand-alone
+				{
+					this._showItem(new Scholar.ItemTreeView.TreeRow(items[i],0,false),this.rowCount);
+					this._treebox.rowCountChanged(this.rowCount-1,1);
+			
+					madeChanges = true;
+				}
 			}
+		}
+		// Otherwise rerun the search, which refreshes the item list
+		else
+		{
+			// If active window, clear search first
+			if (activeWindow)
+			{
+				quicksearch.value = '';
+			}
+			quicksearch.doCommand();
+			madeChanges = true;
 		}
 	}
 	
@@ -173,15 +209,14 @@ Scholar.ItemTreeView.prototype.notify = function(action, type, ids)
 			this._refreshHashMap();
 		}
 		
-		if(action == 'add')
+		// If adding and this is the active window, select the item
+		if(action == 'add' && ids.length===1 && activeWindow)
 		{
-			if (ids.length===1){
-				// Reset to Info tab
-				this._treebox.treeBody.ownerDocument.
-					getElementById('scholar-view-tabs').selectedIndex = 0;
-					
-				this.selectItem(ids[0]);
-			}
+			// Reset to Info tab
+			this._treebox.treeBody.ownerDocument.
+			getElementById('scholar-view-tabs').selectedIndex = 0;
+			
+			this.selectItem(ids[0]);
 		}
 		else
 		{

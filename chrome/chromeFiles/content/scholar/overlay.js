@@ -139,12 +139,6 @@ var ScholarPane = new function()
 	 */
 	function newItem(typeID)
 	{
-		if(document.getElementById('tb-search').value != "")
-		{
-			document.getElementById('tb-search').value = "";
-			document.getElementById('tb-search').doCommand();
-		}
-		
 		var item = new Scholar.Item(typeID);
 		item.save();
 		if(itemsView && itemsView._itemGroup.isCollection())
