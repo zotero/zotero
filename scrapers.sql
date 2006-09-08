@@ -1,4 +1,4 @@
--- 83
+-- 84
 
 -- Set the following timestamp to the most recent scraper update date
 REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-08-31 22:44:00'));
@@ -3886,6 +3886,100 @@ REPLACE INTO "translators" VALUES ('a07bb62a-4d2d-4d43-ba08-d9679a0122f8', '2006
 	Scholar.wait();
 }');
 
+REPLACE INTO "translators" VALUES ('fa396dd4-7d04-4f99-95e1-93d6f355441d', '2006-09-07 18:30:00', 4, 'CiteSeer', 'Simon Kornblith', '^http://(?:citeseer\.ist\.psu\.edu/|citeseer\.csail\.mit\.edu/|citeseer\.ifi\.unizh\.ch/|citeseer\.comp\.nus\.edu\.sg/)', 
+'function detectWeb(doc, url) {
+	var searchRe = /http:\/\/[^\/]+\/ci?s/;
+	if(searchRe.test(url)) {
+		return "multiple";
+	} else {
+		var namespace = doc.documentElement.namespaceURI;
+		var nsResolver = namespace ? function(prefix) {
+			if (prefix == ''x'') return namespace; else return null;
+		} : null;
+		
+		if(doc.evaluate(''/html/body/span[@class="m"]/pre'', doc, nsResolver,
+		                XPathResult.ANY_TYPE, null).iterateNext()) {
+			return "journalArticle";
+		}
+	}
+}',
+'function scrape(doc) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	// figure out what attachments to add
+	var attachments = new Array();
+	var results = doc.evaluate(''/html/body/span[@class="m"]/table[@class="h"]/tbody/tr/td[4]/center/font/a'',
+	                       doc, nsResolver, XPathResult.ANY_TYPE, null);
+	var elmt;
+	
+	var acceptableTypes = ["PDF", "PS", "PS.gz"];
+	var mimeTypes = ["application/pdf", "application/postscript", "application/gzip"];
+	while(elmt = results.iterateNext()) {
+		var kind = elmt.textContent.toString();
+		var index = acceptableTypes.indexOf(kind);
+		if(index != -1) {
+			var attachment = {url:elmt.href, mimeType:mimeTypes[index],
+			                  title:"Full Text "+kind};
+			if(kind == "PDF") {
+				attachment.downloadable = true;
+			}
+			attachments.push(attachment);
+		}
+	}
+	
+	var bibtex = doc.evaluate(''/html/body/span[@class="m"]/pre/text()'', doc, nsResolver,
+		                XPathResult.ANY_TYPE, null).iterateNext();
+	if(bibtex) {
+		var translator = Scholar.loadTranslator("import");
+		translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
+		translator.setString(bibtex.nodeValue.toString());
+		translator.setHandler("itemDone", function(obj, item) {
+			if(item.url) {	// add http to url
+				item.url = "http://"+item.url;
+			}
+			item.attachments = attachments;
+			item.attachments.push({document:doc, downloadable:false,
+			                       title:"CiteSeer Abstract"});
+			
+			item.complete();
+		});
+		translator.translate();
+	} else {
+		throw "No BibTeX found!";
+	}
+}
+
+function doWeb(doc, url) {
+	var searchRe = /http:\/\/([^\/]+)\/ci?s/;
+	var m = searchRe.exec(doc.location.href);
+	if(m) {
+		var namespace = doc.documentElement.namespaceURI;
+		var nsResolver = namespace ? function(prefix) {
+			if (prefix == ''x'') return namespace; else return null;
+		} : null;
+		
+		var items = Scholar.Utilities.getItemArray(doc, doc, "^http://"+m[1]+"/[^/]+.html");
+		items = Scholar.selectItems(items);
+			
+		if(!items) {
+			return true;
+		}
+		
+		var urls = new Array();
+		for(var i in items) {
+			urls.push(i);
+		}
+		
+		Scholar.Utilities.processDocuments(urls, scrape, function() { Scholar.done(); });
+		Scholar.wait();
+	} else {
+		scrape(doc);
+	}
+}');
+
 REPLACE INTO "translators" VALUES ('e07e9b8c-0e98-4915-bb5a-32a08cb2f365', '2006-08-07 11:36:00', 8, 'Open WorldCat', 'Simon Kornblith', 'http://partneraccess.oclc.org/',
 'function detectSearch(item) {
 	if(item.itemType == "book" || item.itemType == "bookSection") {
@@ -5969,7 +6063,6 @@ var inputFieldMap = {
 	publisher:"publisher"
 };
 
-// TODO: figure out if these are the best types for letter, interview, website
 var typeMap = {
 	book:"book",
 	bookSection:"inbook",
@@ -5986,8 +6079,10 @@ var typeMap = {
 };
 
 // supplements outputTypeMap for importing
-// TODO: conference, inproceedings, techreport
 var inputTypeMap = {
+	inproceedings:"journalArticle",
+	conference:"journalArticle",
+	techreport:"book",
 	booklet:"book",
 	incollection:"bookSection",
 	manual:"book",
@@ -6219,7 +6314,7 @@ function beginRecord(type, closeChar) {
 	}
 }
 
-function doImport(attachments) {
+function doImport() {
 	// make regular expressions out of values
 	var newArray = new Array();
 	for(var i in accentedCharacters) {

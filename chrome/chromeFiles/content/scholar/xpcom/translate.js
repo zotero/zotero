@@ -1756,13 +1756,13 @@ Scholar.Translate.prototype._storageFunctions =  function(read, write) {
 				return me._storage;
 			}
 		} else {									// block reading
-			this._sandbox.Scholar.read = function(amount) {
+			this._sandbox.Scholar.read = function(amount) {;
 				if(me._storagePointer >= me._storageLength) {
 					return false;
 				}
 				
-				if((me._storagePointer+amount) <= me._storageLength) {
-					me._storagePointer = me._storageLength;
+				if((me._storagePointer+amount) > me._storageLength) {
+					me._storagePointer = me._storageLength+1;
 					return me._storage;
 				}
 				
