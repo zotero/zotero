@@ -108,7 +108,7 @@ var ScholarItemPane = new function()
 					break;
 			}
 			
-			if (boxes.length==1)
+			if (boxes && boxes.length==1)
 			{
 				boxes[0].inputField.blur();
 			}

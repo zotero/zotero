@@ -176,6 +176,10 @@ Scholar.ItemTreeView.prototype.notify = function(action, type, ids)
 		if(action == 'add')
 		{
 			if (ids.length===1){
+				// Reset to Info tab
+				this._treebox.treeBody.ownerDocument.
+					getElementById('scholar-view-tabs').selectedIndex = 0;
+					
 				this.selectItem(ids[0]);
 			}
 		}
