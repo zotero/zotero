@@ -745,7 +745,9 @@ Scholar.Date = new function(){
 			Scholar.debug("DATE: got year ("+date.year+", "+date.part+")");
 			
 			// get short month strings from CSL interpreter
-			var months = CSL.getMonthStrings("short");
+			if(!months) {
+				var months = CSL.getMonthStrings("short");
+			}
 			if(!_monthRe) {
 				// then, see if have anything resembling a month anywhere
 				_monthRe = new RegExp("^(.*)\\b("+months.join("|")+")[^ ]* (.*)$", "i");
@@ -791,6 +793,9 @@ Scholar.Date = new function(){
 			string += date.part+" ";
 		}
 		
+		if(!months) {
+			var months = CSL.getMonthStrings("short");
+		}
 		if(date.month != undefined && months[date.month]) {
 			// get short month strings from CSL interpreter
 			var months = CSL.getMonthStrings("long");

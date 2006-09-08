@@ -1,4 +1,4 @@
--- 85
+-- 86
 
 -- Set the following timestamp to the most recent scraper update date
 REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-08-31 22:44:00'));
@@ -5747,7 +5747,7 @@ Scholar.addOption("exportNotes", true);
 
 function detectImport() {
 	var line;
-	while(line = Scholar.read()) {
+	while((line = Scholar.read()) !== "false") {
 		line = line.replace(/^\s+/, "");
 		if(line != "") {
 			if(line.substr(0, 6) == "TY  - ") {

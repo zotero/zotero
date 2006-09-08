@@ -46,6 +46,20 @@ Scholar.Ingester.ProxyMonitor = new function() {
 	function observe(channel) {
 		channel.QueryInterface(Components.interfaces.nsIHttpChannel);
 		try {
+			// remove content-disposition headers for endnote, etc.
+			var contentType = channel.getResponseHeader("Content-Type").toLowerCase();
+			for each(var desiredContentType in Scholar.Ingester.MIMEHandler.URIContentListener.desiredContentTypes) {
+				if(contentType.length < desiredContentType.length) {
+					break;
+				} else {
+					if(contentType.substr(0, desiredContentType.length) == desiredContentType) {
+						channel.setResponseHeader("Content-Disposition", "", false);
+						break;
+					}
+				}
+			}
+			
+			// find ezproxies
 			if(channel.getResponseHeader("Server") == "EZproxy") {
 				// We're connected to an EZproxy
 				if(channel.responseStatus != "302") {
@@ -479,7 +493,10 @@ Scholar.Ingester.MIMEHandler = new function() {
  * nsIURIContentListener interface to grab MIME types
  */
 Scholar.Ingester.MIMEHandler.URIContentListener = new function() {
-	var _desiredContentTypes = ["application/x-endnote-refer", "application/x-research-info-systems"];
+	// list of content types to capture
+	// NOTE: must be from shortest to longest length
+	this.desiredContentTypes = ["application/x-endnote-refer",
+	                           "application/x-research-info-systems"];
 	
 	this.QueryInterface = QueryInterface;
 	this.canHandleContent = canHandleContent;
@@ -497,7 +514,7 @@ Scholar.Ingester.MIMEHandler.URIContentListener = new function() {
 	}
 	
 	function canHandleContent(contentType, isContentPreferred, desiredContentType) {
-		if(Scholar.inArray(contentType, _desiredContentTypes)) {
+		if(Scholar.inArray(contentType, this.desiredContentTypes)) {
 			return true;
 		}
 		return false;
@@ -510,7 +527,7 @@ Scholar.Ingester.MIMEHandler.URIContentListener = new function() {
 	}
 	
 	function isPreferred(contentType, desiredContentType) {
-		if(Scholar.inArray(contentType, _desiredContentTypes)) {
+		if(Scholar.inArray(contentType, this.desiredContentTypes)) {
 			return true;
 		}
 		return false;
@@ -537,6 +554,8 @@ Scholar.Ingester.MIMEHandler.StreamListener = function(request, contentType) {
 						getService(Components.interfaces.nsIWindowWatcher);
 	this._frontWindow = windowWatcher.activeWindow;
 	this._frontWindow.Scholar_Ingester_Interface.Progress.show();
+	
+	Scholar.debug("EndNote prepared to grab content type "+contentType);
 }
 
 Scholar.Ingester.MIMEHandler.StreamListener.prototype.QueryInterface = function(iid) {
