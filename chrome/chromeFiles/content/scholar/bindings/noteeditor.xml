@@ -28,6 +28,8 @@
 			<property name="note" onget="return this.noteRef;">
 				<setter>
 					<![CDATA[
+						var scrollPos = this.id('noteField').inputField.scrollTop;
+						
 						this.noteRef = val;
 						
 						if(this.note.getSource())
@@ -35,6 +37,8 @@
 						
 						this.id('noteField').value = this.note.getNote();
 						this.id('links').item = this.note;
+						
+						this.id('noteField').inputField.scrollTop = scrollPos;
 					]]>
 				</setter>
 			</property>
