@@ -65,6 +65,7 @@
  * _storage - the stored string to be treated as input
  * _storageLength - the length of the stored string
  * _exportFileDirectory - the directory to which files will be exported
+ * _hasBOM - whether the given file ready to be imported has a BOM or not
  *
  * WEB-ONLY PRIVATE PROPERTIES:
  *
@@ -371,6 +372,9 @@ Scholar.Translate.prototype.setHandler = function(type, handler) {
  * itemType - the type of item this scraper says it will scrape
  */
 Scholar.Translate.prototype.getTranslators = function() {
+	// clear BOM
+	this._hasBOM = null;
+	
 	if(Scholar.Translate.cache) {
 		var translators = Scholar.Translate.cache[this.type];
 	} else {
@@ -445,9 +449,14 @@ Scholar.Translate.prototype._loadTranslator = function() {
 	try {
 		Components.utils.evalInSandbox(this.translator[0].code, this._sandbox);
 	} catch(e) {
-		Scholar.debug(e+' in parsing code for '+this.translator[0].label);
-		this._translationComplete(false);
-		return false;
+		var error = e+' in parsing code for '+this.translator[0].label;
+		if(this._parentTranslator) {
+			throw error;
+		} else {
+			Scholar.debug(error);
+			this._translationComplete(false);
+			return false;
+		}
 	}
 	
 	return true;
@@ -459,10 +468,14 @@ Scholar.Translate.prototype._loadTranslator = function() {
 Scholar.Translate.prototype.translate = function() {
 	Scholar.debug("translate called");
 	
+	/*
+	 * initialize properties
+	 */
 	this.newItems = new Array();
 	this.newCollections = new Array();
 	this._IDMap = new Array();
 	this._complete = false;
+	this._hasBOM = null;
 	
 	if(!this.translator || !this.translator.length) {
 		throw("cannot translate: no translator specified");
@@ -1274,8 +1287,13 @@ Scholar.Translate.prototype._web = function() {
 	try {
 		this._sandbox.doWeb(this.document, this.location);
 	} catch(e) {
-		Scholar.debug(e+' in executing code for '+this.translator[0].label);
-		return false;
+		var error = e+' in executing code for '+this.translator[0].label;
+		if(this._parentTranslator) {
+			throw error;
+		} else {
+			Scholar.debug();
+			return false;
+		}
 	}
 	
 	return true;
@@ -1304,8 +1322,14 @@ Scholar.Translate.prototype._import = function() {
 	try {
 		this._sandbox.doImport();
 	} catch(e) {
-		Scholar.debug(e+' in executing code for '+this.translator[0].label);
-		return false;
+		Scholar.debug(e.toSource());
+		var error = e+' in executing code for '+this.translator[0].label;
+		if(this._parentTranslator) {
+			throw error;
+		} else {
+			Scholar.debug(error);
+			return false;
+		}
 	}
 	
 	return true;
@@ -1370,27 +1394,32 @@ Scholar.Translate.prototype._importConfigureIO = function() {
 				this._streams.push(this._inputStream);
 			}
 			
-			var intlStream = null;
 			var filePosition = 0;
-			
-			// allow translator to set charset
-			this._sandbox.Scholar.setCharacterSet = function(charset) {
-				// seek
-				if(filePosition != 0) {
-					me._inputStream.QueryInterface(Components.interfaces.nsISeekableStream)
-					             .seek(Components.interfaces.nsISeekableStream.NS_SEEK_SET, filePosition);
-					me._inputStream.QueryInterface(Components.interfaces.nsIFileInputStream);
+			var intlStream = this._importDefuseBOM();
+			if(intlStream) {
+				// found a UTF BOM at the beginning of the file; don't allow
+				// translator to set the character set
+				this._sandbox.Scholar.setCharacterSet = function() {}
+			} else {
+				// allow translator to set charset
+				this._sandbox.Scholar.setCharacterSet = function(charset) {
+					// seek
+					if(filePosition != 0) {
+						me._inputStream.QueryInterface(Components.interfaces.nsISeekableStream)
+									 .seek(Components.interfaces.nsISeekableStream.NS_SEEK_SET, filePosition);
+						me._inputStream.QueryInterface(Components.interfaces.nsIFileInputStream);
+					}
+					
+					intlStream = Components.classes["@mozilla.org/intl/converter-input-stream;1"]
+										   .createInstance(Components.interfaces.nsIConverterInputStream);
+					try {
+						intlStream.init(me._inputStream, charset, 1024,
+							Components.interfaces.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER);
+					} catch(e) {
+						throw "Text encoding not supported";
+					}
+					me._streams.push(intlStream);
 				}
-				
-				intlStream = Components.classes["@mozilla.org/intl/converter-input-stream;1"]
-				                       .createInstance(Components.interfaces.nsIConverterInputStream);
-				try {
-					intlStream.init(me._inputStream, charset, 1024,
-						Components.interfaces.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER);
-				} catch(e) {
-					throw "Text encoding not supported";
-				}
-				me._streams.push(intlStream);
 			}
 			
 			var str = new Object();
@@ -1398,7 +1427,8 @@ Scholar.Translate.prototype._importConfigureIO = function() {
 				this._inputStream.QueryInterface(Components.interfaces.nsILineInputStream);
 				
 				this._sandbox.Scholar.read = function() {
-					if(intlStream && intlStream instanceof Components.interfaces.nsIUnicharLineInputStream) {
+					if(intlStream && intlStream instanceof Components.interfaces.nsIUnicharLineInputStream) {	
+						Scholar.debug("using intlStream");
 						var amountRead = intlStream.readLine(str);
 					} else {
 						var amountRead = me._inputStream.readLine(str);
@@ -1444,6 +1474,85 @@ Scholar.Translate.prototype._importConfigureIO = function() {
 			}
 		}
 	}
+}
+
+/*
+ * searches for a UTF BOM at the beginning of the input stream. if one is found,
+ * returns an appropriate converter-input-stream for the UTF type, and sets
+ * _hasBOM to the UTF type.  if one is not found, returns false, and sets
+ * _hasBOM to false to prevent further checking.
+ */
+Scholar.Translate.prototype._importDefuseBOM = function() {
+	// if already found not to have a BOM, skip
+	if(this._hasBOM === false) {
+		return;
+	}
+	
+	if(!this._hasBOM) {
+		// if not checked for a BOM, open a binary input stream and read
+		var binStream = Components.classes["@mozilla.org/binaryinputstream;1"].
+		                           createInstance(Components.interfaces.nsIBinaryInputStream);
+		binStream.setInputStream(this._inputStream);
+		
+		// read the first byte
+		var byte1 = binStream.read8();
+		
+		// at the moment, we don't support UTF-32 or UTF-7. while mozilla
+		// supports these encodings, they add slight additional complexity to
+		// the function and anyone using them for storing bibliographic metadata
+		// is insane.
+		if(byte1 == 0xEF) {			// UTF-8: EF BB BF
+			var byte2 = binStream.read8();
+			if(byte2 == 0xBB) {
+				var byte3 = binStream.read8();
+				if(byte3 == 0xBF) {
+					this._hasBOM = "UTF-8";
+				}
+			}
+		} else if(byte1 == 0xFE) {	// UTF-16BE: FE FF
+			var byte2 = binStream.read8();
+			if(byte2 == 0xFF) {
+				this._hasBOM = "UTF-16BE";
+			}
+		} else if(byte1 == 0xFF) {	// UTF-16LE: FF FE
+			var byte2 = binStream.read8();
+			if(byte2 == 0xFE) {
+				this._hasBOM = "UTF16-LE";
+			}
+		}
+		
+		if(!this._hasBOM) {
+			// seek back to begining of file
+			this._inputStream.QueryInterface(Components.interfaces.nsISeekableStream)
+						     .seek(Components.interfaces.nsISeekableStream.NS_SEEK_SET, 0);
+			this._inputStream.QueryInterface(Components.interfaces.nsIFileInputStream);
+			
+			// say there's no BOM
+			this._hasBOM = false;
+			
+			return false;
+		}
+	} else {
+		// if it had a BOM the last time, it has one this time, too. seek to the
+		// correct position.
+		
+		if(this._hasBOM == "UTF-8") {
+			var seekPosition = 3;
+		} else {
+			var seekPosition = 2;
+		}
+		
+		this._inputStream.QueryInterface(Components.interfaces.nsISeekableStream)
+					     .seek(Components.interfaces.nsISeekableStream.NS_SEEK_SET, seekPosition);
+		this._inputStream.QueryInterface(Components.interfaces.nsIFileInputStream);
+	}
+	
+	// if we know what kind of BOM it has, generate an input stream	
+	intlStream = Components.classes["@mozilla.org/intl/converter-input-stream;1"]
+						   .createInstance(Components.interfaces.nsIConverterInputStream);
+	intlStream.init(this._inputStream, this._hasBOM, 1024,
+		Components.interfaces.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER);
+	return intlStream;
 }
 
 /*
