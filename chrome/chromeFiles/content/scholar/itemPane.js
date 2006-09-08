@@ -26,12 +26,20 @@ var ScholarItemPane = new function()
 	var _tabIndexMinFields = 1000;
 	var _tabIndexMaxFields = 0;
 	
+	const _defaultFirstName =
+		'(' + Scholar.getString('pane.item.defaultFirstName') + ')';
+	const _defaultLastName =
+		'(' + Scholar.getString('pane.item.defaultLastName') + ')';
+	const _defaultFullName =
+		'(' + Scholar.getString('pane.item.defaultFullName') + ')';
+	
 	this.onLoad = onLoad;
 	this.viewItem = viewItem;
 	this.loadPane = loadPane;
 	this.changeTypeTo = changeTypeTo;
 	this.onOpenURLClick = onOpenURLClick;
 	this.addCreatorRow = addCreatorRow;
+	this.switchCreatorMode = switchCreatorMode;
 	this.disableButton = disableButton;
 	this.createValueElement = createValueElement;
 	this.removeCreator = removeCreator;
@@ -183,13 +191,13 @@ var ScholarItemPane = new function()
 				for(var i = 0, len=_itemBeingEdited.numCreators(); i<len; i++)
 				{
 					var creator = _itemBeingEdited.getCreator(i);
-					addCreatorRow(creator['firstName'], creator['lastName'], creator['creatorTypeID']);
+					addCreatorRow(creator['firstName'], creator['lastName'], creator['creatorTypeID'], creator['isInstitution']);
 				}
 			}
 			else
 			{
 				// Add default row
-				addCreatorRow('', '', 1, true, true);
+				addCreatorRow('', '', 1, false, true, true);
 			}
 			
 			// Move to next or previous field if (shift-)tab was pressed
@@ -338,7 +346,7 @@ var ScholarItemPane = new function()
 			_dynamicFields.appendChild(row);		
 	}
 	
-	function addCreatorRow(firstName, lastName, typeID, unsaved, defaultRow)
+	function addCreatorRow(firstName, lastName, typeID, singleField, unsaved, defaultRow)
 	{
 		// Disable the "+" button on previous rows
 		var elems = _dynamicFields.getElementsByAttribute('value', '+');
@@ -346,27 +354,43 @@ var ScholarItemPane = new function()
 			ScholarItemPane.disableButton(elems[elems.length-1]);
 		}
 		
-		if(!firstName)
-			firstName = "(" + Scholar.getString('pane.item.defaultFirstName') + ")";
-		if(!lastName)
-			lastName = "(" + Scholar.getString('pane.item.defaultLastName') + ")";
+		if (singleField)
+		{
+			if (!lastName)
+			{
+				lastName = _defaultFullName;
+			}
+		}
+		else
+		{
+			if (!firstName)
+			{
+				firstName = _defaultFirstName;
+			}
+			if (!lastName)
+			{
+				lastName = _defaultLastName;
+			}
+		}
+		
 		var label = document.createElement("label");
 		label.setAttribute("value",Scholar.getString('creatorTypes.'+Scholar.CreatorTypes.getName(typeID))+":");
 		label.setAttribute("popup","creatorTypeMenu");
 		label.setAttribute("fieldname",'creator-'+_creatorCount+'-typeID');
-		
 		label.className = 'clicky';
 		
-		// getCreatorFields() needs to be adjusted if this DOM structure changes
-		var row = document.createElement("hbox");
+		// getCreatorFields() and switchCreatorMode() may need need to be
+		// adjusted if this DOM structure changes
+		var hbox = document.createElement("hbox");
 		
+		// Name
 		var firstlast = document.createElement("hbox");
 		firstlast.setAttribute("flex","1");
 		
 		var tabindex = _tabIndexMinCreators + (_creatorCount * 2);
 		firstlast.appendChild(
 			createValueElement(
-				lastName + ",",
+				lastName,
 				'creator-' + _creatorCount + '-lastName',
 				tabindex
 			)
@@ -378,10 +402,21 @@ var ScholarItemPane = new function()
 				tabindex + 1
 			)
 		);
-		_tabIndexMaxCreators = Math.max(_tabIndexMaxCreators, tabindex + 1);
+		if (singleField)
+		{
+			firstlast.lastChild.setAttribute('hidden', true);
+		}
+		_tabIndexMaxCreators = Math.max(_tabIndexMaxCreators, tabindex);
 		
-		row.appendChild(firstlast);
+		hbox.appendChild(firstlast);
 		
+		// Single/double field toggle
+		var toggleButton = document.createElement('toolbarbutton');
+		toggleButton.setAttribute('fieldname', 'creator-' + _creatorCount + '-singleField');
+		toggleButton.className = 'clicky';
+		hbox.appendChild(toggleButton);
+		
+		// Minus (-) button
 		var removeButton = document.createElement('label');
 		removeButton.setAttribute("value","-");
 		// If default first row, don't let user remove it
@@ -392,8 +427,9 @@ var ScholarItemPane = new function()
 			removeButton.setAttribute("class","clicky");
 			removeButton.setAttribute("onclick","ScholarItemPane.removeCreator("+_creatorCount+", this.parentNode.parentNode)");
 		}
-		row.appendChild(removeButton);
+		hbox.appendChild(removeButton);
 		
+		// Plus (+) button
 		var addButton = document.createElement('label');
 		addButton.setAttribute("value","+");
 		// If row isn't saved, don't let user add more
@@ -405,11 +441,111 @@ var ScholarItemPane = new function()
 		{
 			_enablePlusButton(addButton);
 		}
-		row.appendChild(addButton);
+		hbox.appendChild(addButton);
 		
 		_creatorCount++;
 		
-		addDynamicRow(label, row, true);
+		addDynamicRow(label, hbox, true);
+		
+		// Set single/double field toggle mode
+		if (singleField)
+		{
+			switchCreatorMode(hbox.parentNode, true, true);
+		}
+		else
+		{
+			switchCreatorMode(hbox.parentNode, false, true);
+		}
+	}
+	
+	function switchCreatorMode(row, singleField, initial)
+	{
+		// Change if button position changes
+		// row->hbox->label->label->toolbarbutton
+		var button = row.lastChild.lastChild.previousSibling.previousSibling;
+		var hbox = button.previousSibling;
+		var lastName = hbox.firstChild;
+		var firstName = hbox.lastChild;
+		
+		// Switch to single-field mode
+		if (singleField)
+		{
+			button.setAttribute('image', 'chrome://scholar/skin/textfield-dual.png');
+			button.setAttribute('tooltiptext', 'Switch to two fields');
+			lastName.setAttribute('singleField', 'true');
+			button.setAttribute('onclick', "ScholarItemPane.switchCreatorMode(this.parentNode.parentNode, false)");
+			
+			// Remove firstname field from tabindex
+			var tab = parseInt(firstName.getAttribute('tabindex'));
+			firstName.setAttribute('tabindex', -1);
+			if (_tabIndexMaxCreators==tab)
+			{
+				_tabIndexMaxCreators--;
+			}
+			
+			// Hide first name field and prepend to last name field
+			firstName.setAttribute('hidden', true);
+			var first = _getFieldValue(firstName);
+			if (first && first != _defaultFirstName)
+			{
+				var last = _getFieldValue(lastName);
+				_setFieldValue(lastName, first + ' ' + last);
+			}
+			
+			if (_getFieldValue(lastName) == _defaultLastName)
+			{
+				_setFieldValue(lastName, _defaultFullName);
+			}
+		}
+		// Switch to two-field mode
+		else
+		{
+			button.setAttribute('image', 'chrome://scholar/skin/textfield-single.png');
+			button.setAttribute('tooltiptext', 'Switch to single field');
+			lastName.setAttribute('singleField', 'false');
+			button.setAttribute('onclick', "ScholarItemPane.switchCreatorMode(this.parentNode.parentNode, true)");
+			
+			// Add firstname field to tabindex
+			var tab = parseInt(lastName.getAttribute('tabindex'));
+			firstName.setAttribute('tabindex', tab + 1);
+			if (_tabIndexMaxCreators==tab)
+			{
+				_tabIndexMaxCreators++;
+			}
+			
+			// Move all but last word to first name field and show it
+			var last = _getFieldValue(lastName);
+			if (last && last != _defaultFullName)
+			{
+				var lastNameRE = /(.*?)[ ]*([^ ]+[ ]*)$/;
+				var parts = lastNameRE.exec(last);
+				if (parts[2] && parts[2] != last)
+				{
+					_setFieldValue(lastName, parts[2]);
+					_setFieldValue(firstName, parts[1]);
+				}
+			}
+			
+			if (!_getFieldValue(firstName))
+			{
+				_setFieldValue(firstName, _defaultFirstName);
+			}
+			
+			if (_getFieldValue(lastName) == _defaultFullName)
+			{
+				_setFieldValue(lastName, _defaultLastName);
+			}
+			
+			firstName.setAttribute('hidden', false);
+		}
+		
+		if (!initial)
+		{
+			var [, index, field] = button.getAttribute('fieldname').split('-');
+			
+			var otherFields = getCreatorFields(row); // row
+			modifyCreator(index, field, !!singleField, otherFields);
+		}
 	}
 	
 	function disableButton(button)
@@ -423,7 +559,7 @@ var ScholarItemPane = new function()
 	{
 		button.setAttribute('disabled', false);
 		button.setAttribute("class","clicky");
-		button.setAttribute("onclick","ScholarItemPane.disableButton(this); ScholarItemPane.addCreatorRow('','',1,true);");
+		button.setAttribute("onclick","ScholarItemPane.disableButton(this); ScholarItemPane.addCreatorRow('','',1,false,true);");
 	}
 	
 	function createValueElement(valueText, fieldName, tabindex)
@@ -478,11 +614,11 @@ var ScholarItemPane = new function()
 		
 		var fieldName = elem.getAttribute('fieldname');
 		var tabindex = elem.getAttribute('tabindex');
-		var creatorFields = fieldName.split('-');
-		if(creatorFields[0] == 'creator')
+		var [field, creatorIndex, creatorField] = fieldName.split('-');
+		if (field == 'creator')
 		{
-			var c = _itemBeingEdited.getCreator(creatorFields[1]);
-			var value = c ? c[creatorFields[2]] : '';
+			var c = _itemBeingEdited.getCreator(creatorIndex);
+			var value = c ? c[creatorField] : '';
 			var itemID = _itemBeingEdited.getID();
 		}
 		else if (fieldName=='tag')
@@ -505,6 +641,10 @@ var ScholarItemPane = new function()
 		t.setAttribute('fieldname', fieldName);
 		t.setAttribute('tabindex', tabindex);
 		t.setAttribute('flex','1');
+		if (creatorField=='lastName')
+		{
+			t.setAttribute('singleField', elem.getAttribute('singleField'));
+		}
 		
 		var box = elem.parentNode;
 		box.replaceChild(t,elem);
@@ -551,35 +691,45 @@ var ScholarItemPane = new function()
 		var value = t.value;
 		
 		var elem;
-		var creatorFields = fieldName.split('-');
+		var [field, creatorIndex, creatorField] = fieldName.split('-');
 		
 		// Creator fields
-		if(creatorFields[0] == 'creator')
+		if (field == 'creator')
 		{
+			var row = textbox.parentNode.parentNode.parentNode;
+			
+			var otherFields = getCreatorFields(row);
+			
 			if (saveChanges){
-				var otherFields =
-					getCreatorFields(textbox.parentNode.parentNode.parentNode);
-				modifyCreator(creatorFields[1], creatorFields[2], value, otherFields);
+				modifyCreator(creatorIndex, creatorField, value, otherFields);
 			}
 			
-			var val = _itemBeingEdited.getCreator(creatorFields[1])[creatorFields[2]];
+			var val = _itemBeingEdited.getCreator(creatorIndex)[creatorField];
 			
 			if (!val){
-				// Reset to '(first)' or '(last)'
-				if (creatorFields[2]=='lastName'){
-					val = "(" + Scholar.getString('pane.item.defaultLastName') + ")";
+				// Reset to '(first)'/'(last)'/'(name)'
+				if (creatorField=='lastName')
+				{
+					val = otherFields['singleField']
+						? _defaultFullName : _defaultLastName;
 				}
-				else if (creatorFields[2]=='firstName'){
-					val = "(" + Scholar.getString('pane.item.defaultFirstName') + ")";
+				else if (creatorField=='firstName')
+				{
+					val = _defaultFirstName;
 				}
-			}
-			
-			// Add trailing comma
-			if (creatorFields[2]=='lastName'){
-				val += ',';
 			}
 			
 			elem = createValueElement(val, fieldName, tabindex);
+			
+			// Reset creator mode settings
+			if (otherFields['singleField'])
+			{
+				switchCreatorMode(row, true, true);
+			}
+			else
+			{
+				switchCreatorMode(row, false, true);
+			}
 		}
 		
 		// Tags
@@ -656,6 +806,24 @@ var ScholarItemPane = new function()
 		_itemBeingEdited.save();
 	}
 	
+	function _getFieldValue(field)
+	{
+		return field.firstChild
+			? field.firstChild.nodeValue : field.value;
+	}
+	
+	function _setFieldValue(field, value)
+	{
+		if (field.firstChild)
+		{
+			field.firstChild.nodeValue = value;
+		}
+		else
+		{
+			field.value = value;
+		}
+	}
+	
 	function getCreatorFields(row){
 		var type = row.getElementsByTagName('label')[0].getAttribute('value');
 		var label1 = row.getElementsByTagName('hbox')[0].firstChild.firstChild;
@@ -663,12 +831,11 @@ var ScholarItemPane = new function()
 		
 		return {
 			lastName: label1.firstChild ? label1.firstChild.nodeValue
-				// Strip trailing comma
-				.substr(0, label1.firstChild.nodeValue.length-1): label1.value,
+				: label1.value,
 			firstName: label2.firstChild ? label2.firstChild.nodeValue
 				: label2.value,
 			typeID: Scholar.CreatorTypes.getID(type.substr(0, type.length-1).toLowerCase()),
-			isInstitution: null // placeholder
+			singleField: label1.getAttribute('singleField') == 'true'
 		}
 	}
 	
@@ -678,13 +845,14 @@ var ScholarItemPane = new function()
 			var firstName = otherFields.firstName;
 			var lastName = otherFields.lastName;
 			var typeID = otherFields.typeID;
-			// var isInstitution = otherFields.isInstitution;
+			var singleField = otherFields.singleField;
 			
-			// Ignore '(first)' and '(last)'
-			if (firstName == "(" + Scholar.getString('pane.item.defaultFirstName') + ")"){
+			// Ignore '(first)'/'(last)' or '(name)'
+			if (singleField || firstName == _defaultFirstName){
 				firstName = '';
 			}
-			if (lastName == "(" + Scholar.getString('pane.item.defaultLastName') + ")"){
+			
+			if (lastName==_defaultFullName || lastName == _defaultLastName){
 				lastName = '';
 			}
 		}
@@ -693,9 +861,10 @@ var ScholarItemPane = new function()
 			var firstName = creator['firstName'];
 			var lastName = creator['lastName'];
 			var typeID = creator['creatorTypeID'];
-			// var isInstitution = creator['isInstitution'];
+			var singleField = creator['isInstitution'];
 		}
 		
+		// Don't save empty creators
 		if (!_itemBeingEdited.hasCreatorAt(index) && !firstName && !lastName){
 			return;
 		}
@@ -710,9 +879,12 @@ var ScholarItemPane = new function()
 			case 'typeID':
 				typeID = value;
 				break;
+			case 'singleField':
+				singleField = value;
+				break;
 		}
 		
-		_itemBeingEdited.setCreator(index, firstName, lastName, typeID);
+		_itemBeingEdited.setCreator(index, firstName, lastName, typeID, singleField);
 		_itemBeingEdited.save();
 	}
 	

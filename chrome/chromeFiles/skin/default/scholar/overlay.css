@@ -83,7 +83,7 @@
 }
 
 
-/* These three fix a rendering bug in Fx2.0b2 */
+/* These fix a rendering bug in Fx2.0b2 */
 #scholar-pane .toolbarbutton-text
 {
 	margin:0 2px;
@@ -92,7 +92,7 @@
 {
 	margin-right:4px;
 }
-#tb-fullscreen .toolbarbutton-text
+#tb-fullscreen .toolbarbutton-text, #editpane-dynamic-fields .toolbarbutton-text
 {
 	margin:0;
 }
@@ -181,6 +181,12 @@
 #tb-openurl
 {
 	list-style-image: url('chrome://scholar/skin/toolbar-openurl.png');
+}
+
+/* creator switch button */
+#editpane-dynamic-fields row hbox toolbarbutton
+{
+	margin-right:5px;
 }
 
 #scholar-view-item vbox
