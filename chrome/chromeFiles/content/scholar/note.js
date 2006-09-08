@@ -57,7 +57,9 @@ function onUnload()
 
 var NotifyCallback = {
 	notify: function(){
-		noteEditor.note = noteEditor.note;
+		if (noteEditor.note){
+			noteEditor.note = noteEditor.note;
+		}
 	}
 }
 
