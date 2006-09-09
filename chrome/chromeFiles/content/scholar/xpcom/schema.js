@@ -401,7 +401,7 @@ Scholar.Schema = new function(){
 		//
 		// Change this value to match the schema version
 		//
-		var toVersion = 47;
+		var toVersion = 48;
 		
 		if (toVersion != _getSchemaSQLVersion()){
 			throw('Schema version does not match version in _migrateSchema()');
@@ -432,6 +432,22 @@ Scholar.Schema = new function(){
 					file.remove(true);
 				}
 				_initializeSchema();
+			}
+			
+			if(i==48) {
+				Scholar.DB.query('DROP TABLE IF EXISTS translators;\n'
+					+'CREATE TABLE translators (\n'
+					+'	translatorID TEXT PRIMARY KEY,\n'
+					+'	lastUpdated DATETIME,\n'
+					+'	inRepository INT,\n'
+					+'	priority INT,\n'
+					+'	translatorType INT,\n'
+					+'	label TEXT,\n'
+					+'	creator TEXT,\n'
+					+'	target TEXT,\n'
+					+'	detectCode TEXT,\n'
+					+'	code TEXT\n'
+					+');');
 			}
 		}
 		

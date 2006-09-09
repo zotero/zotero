@@ -126,9 +126,9 @@ Scholar.Translate.init = function() {
 		
 		if(cachePref) {
 			// fetch translator list
-			var translators = Scholar.DB.query("SELECT translatorID, type, label, "+
+			var translators = Scholar.DB.query("SELECT translatorID, translatorType, label, "+
 				"target, detectCode IS NULL as noDetectCode FROM translators "+
-				"ORDER BY target IS NULL, translatorID = '14763d24-8ba0-45df-8f52-b8d1108e7ac9' DESC");
+				"ORDER BY target IS NULL, priority, label");
 			var detectCodes = Scholar.DB.query("SELECT translatorID, detectCode FROM translators WHERE target IS NULL");
 			
 			Scholar.Translate.cache = new Object();
@@ -138,7 +138,7 @@ Scholar.Translate.init = function() {
 			Scholar.Translate.cache["search"] = new Array();
 			
 			for each(translator in translators) {
-				var type = translator.type;
+				var type = translator.translatorType;
 				
 				// not sure why this is necessary
 				var wrappedTranslator = {translatorID:translator.translatorID,
@@ -304,7 +304,7 @@ Scholar.Translate.prototype.setTranslator = function(translator) {
 	}
 	where = where.substr(4);
 	
-	var sql = "SELECT * FROM translators WHERE "+where+" AND type IN ("+this._numericTypes+")";
+	var sql = "SELECT * FROM translators WHERE "+where+" AND translatorType IN ("+this._numericTypes+")";
 	this.translator = Scholar.DB.query(sql, translator);
 	if(!this.translator) {
 		return false;
@@ -379,8 +379,8 @@ Scholar.Translate.prototype.getTranslators = function() {
 		var translators = Scholar.Translate.cache[this.type];
 	} else {
 		var sql = "SELECT translatorID, label, target, detectCode IS NULL as "+
-			"noDetectCode FROM translators WHERE type IN ("+this._numericTypes+") "+
-			"ORDER BY target IS NULL, translatorID = '14763d24-8ba0-45df-8f52-b8d1108e7ac9' DESC";
+			"noDetectCode FROM translators WHERE translatorType IN ("+this._numericTypes+") "+
+			"ORDER BY target IS NULL, priority, label";
 		var translators = Scholar.DB.query(sql);
 	}
 	
@@ -415,7 +415,7 @@ Scholar.Translate.prototype._findTranslators = function(translators, ignoreExten
 			var translator = {translatorID:translators[i].translatorID,
 					label:translators[i].label,
 					target:translators[i].target,
-					itemType:translators[i].itemType}
+					itemType:translators[i].itemType};
 			if(this.type == "export") {
 				translator.displayOptions = this._displayOptions;
 			}
@@ -449,12 +449,11 @@ Scholar.Translate.prototype._loadTranslator = function() {
 	try {
 		Components.utils.evalInSandbox(this.translator[0].code, this._sandbox);
 	} catch(e) {
-		var error = e+' in parsing code for '+this.translator[0].label;
 		if(this._parentTranslator) {
-			throw error;
+			throw(e);
 		} else {
-			Scholar.debug(error);
-			this._translationComplete(false);
+			Scholar.debug(e+' in parsing code for '+this.translator[0].label);
+			this._translationComplete(false, e);
 			return false;
 		}
 	}
@@ -512,10 +511,7 @@ Scholar.Translate.prototype.translate = function() {
 		returnValue = this._search();
 	}
 	
-	if(!returnValue) {
-		// failure
-		this._translationComplete(false);
-	} else if(!this._waitForCompletion) {
+	if(returnValue && !this._waitForCompletion) {
 		// if synchronous, call _translationComplete();
 		this._translationComplete(true);
 	}
@@ -872,7 +868,7 @@ Scholar.Translate.prototype._selectItems = function(options) {
  *
  * finishes things up and calls callback function(s)
  */
-Scholar.Translate.prototype._translationComplete = function(returnValue) {
+Scholar.Translate.prototype._translationComplete = function(returnValue, error) {
 	// to make sure this isn't called twice
 	if(!this._complete) {
 		this._complete = true;
@@ -883,8 +879,6 @@ Scholar.Translate.prototype._translationComplete = function(returnValue) {
 			this.translator.shift();
 			this.translate();
 		} else {
-			Scholar.debug("translation complete");
-			
 			// close open streams
 			this._closeStreams();
 			
@@ -901,7 +895,47 @@ Scholar.Translate.prototype._translationComplete = function(returnValue) {
 			
 			// call handlers
 			this._runHandler("done", returnValue);
+			
+			if(!returnValue) {
+				var errorString = "";
+				if(typeof(error) == "string") {
+					errorString = "\nthrown exception => "+error;
+				} else {
+					for(var i in error) {
+						if(typeof(error[i]) != "object") {
+							errorString += "\n"+i+' => '+error[i];
+						}
+					}
+				}
+				
+				errorString += "\nurl => "+this.path
+					+ "\nextensions.zotero.cacheTranslatorData => "+Scholar.Prefs.get("cacheTranslatorData")
+					+ "\nextensions.zotero.downloadAssociatedFiles => "+Scholar.Prefs.get("downloadAssociatedFiles");
+				
+				errorString = errorString.substr(1);
+				
+				Scholar.debug("translation using "+this.translator[0].label+" failed: \n"+errorString);
+				
+				if(this.type == "web") {
+					// report translation error for websites
+					this._reportTranslationFailure(errorString);
+				}
+			} else {
+				Scholar.debug("translation successful");
+			}
 		}
+	}
+}
+
+/*
+ * runs an HTTP request to report a translation error
+ */
+Scholar.Translate.prototype._reportTranslationFailure = function(errorData) {
+	if(Scholar.Prefs.get("reportTranslationFailure")) {
+		var postBody = "id="+escape(this.translator[0].translatorID)+
+					   "&lastUpdated="+escape(this.translator[0].lastUpdated)+
+					   "&errorData="+escape(errorData);
+		Scholar.Utilities.HTTP.doPost("http://www.zotero.org/repo/report", postBody);
 	}
 }
 
@@ -1287,11 +1321,10 @@ Scholar.Translate.prototype._web = function() {
 	try {
 		this._sandbox.doWeb(this.document, this.location);
 	} catch(e) {
-		var error = e+' in executing code for '+this.translator[0].label;
 		if(this._parentTranslator) {
-			throw error;
+			throw(e);
 		} else {
-			Scholar.debug();
+			this._translationComplete(false, e);
 			return false;
 		}
 	}
@@ -1306,7 +1339,7 @@ Scholar.Translate.prototype._search = function() {
 	try {
 		this._sandbox.doSearch(this.search);
 	} catch(e) {
-		Scholar.debug(e+' in executing code for '+this.translator[0].label);
+		this._translationComplete(false, e);
 		return false;
 	}
 	
@@ -1322,12 +1355,10 @@ Scholar.Translate.prototype._import = function() {
 	try {
 		this._sandbox.doImport();
 	} catch(e) {
-		Scholar.debug(e.toSource());
-		var error = e+' in executing code for '+this.translator[0].label;
 		if(this._parentTranslator) {
-			throw error;
+			throw(e);
 		} else {
-			Scholar.debug(error);
+			this._translationComplete(false, e);
 			return false;
 		}
 	}

@@ -8,3 +8,4 @@ pref("extensions.scholar.openURL.resolver","http://athene.gmu.edu:8888/lfp/LinkF
 pref("extensions.scholar.openURL.version","0.1");
 pref("extensions.scholar.parseEndNoteMIMETypes",true);
 pref("extensions.scholar.downloadAssociatedFiles",false);
+pref("extensions.scholar.reportTranslationFailure",true);

@@ -315,8 +315,7 @@ Scholar.Utilities.Ingester.prototype.processDocuments = function(urls, processor
 	if(!exception) {
 		var translate = this.translate;
 		exception = function(e) {
-			Scholar.debug("an error occurred in code called by processDocuments: "+e);
-			translate._translationComplete(false);
+			translate._translationComplete(false, e);
 		}
 	}
 	
@@ -340,8 +339,7 @@ Scholar.Utilities.Ingester.HTTP.prototype.doGet = function(url, onDone) {
 		try {
 			onDone(xmlhttp.responseText, xmlhttp);
 		} catch(e) {
-			Scholar.debug("an error occurred in code called by doGet: "+e);
-			translate._translationComplete(false);
+			translate._translationComplete(false, e);
 		}
 	})
 }
@@ -359,8 +357,7 @@ Scholar.Utilities.Ingester.HTTP.prototype.doPost = function(url, body, onDone) {
 		try {
 			onDone(xmlhttp.responseText, xmlhttp);
 		} catch(e) {
-			Scholar.debug("an error occurred in code called by doPost: "+e);
-			translate._translationComplete(false);
+			translate._translationComplete(false, e);
 		}
 	})
 }
