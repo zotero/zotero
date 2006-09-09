@@ -1,4 +1,4 @@
--- 88
+-- 89
 
 -- Set the following timestamp to the most recent scraper update date
 REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-08-31 22:44:00'));
@@ -4292,7 +4292,7 @@ function doExport() {
 		} else if(item.itemType == "website") {
 			modsType = "multimedia";
 			marcGenre = "web site";
-		} else if(item.itemType == "note") {
+		} else if(item.itemType == "note" || item.itemType == "attachment") {
 			continue;
 		}
 		mods.typeOfResource = modsType;
@@ -5162,7 +5162,7 @@ REPLACE INTO "translators" VALUES ('6e372642-ed9d-4934-b5d1-c11ac758ebb7', '2006
 	
 	var item;
 	while(item = Scholar.nextItem()) {
-		if(item.itemType == "note") {
+		if(item.itemType == "note" || item.itemType == "attachment") {
 			continue;
 		}
 		
@@ -5758,9 +5758,7 @@ function detectImport() {
 		}
 	}
 }',
-'var itemsWithYears = ["book", "bookSection", "thesis", "film"];
-
-var fieldMap = {
+'var fieldMap = {
 	ID:"itemID",
 	T1:"title",
 	T3:"seriesTitle",
@@ -5943,6 +5941,19 @@ function processTag(item, tag, value) {
 	}
 }
 
+function completeItem(item) {
+	// if backup publication title exists but not proper, use backup
+	// (hack to get newspaper titles from EndNote)
+	if(item.backupPublicationTitle) {
+		if(!item.publicationTitle) {
+			item.publicationTitle = item.backupPublicationTitle;
+		}
+		item.backupPublicationTitle = undefined;
+	}
+	
+	item.complete();
+}
+
 function doImport(attachments) {
 	// this is apparently the proper character set for RIS, although i''m not
 	// sure how many people follow this
@@ -5983,7 +5994,7 @@ function doImport(attachments) {
 				// unset info
 				tag = data = false;
 				// new item
-				item.complete();
+				completeItem(item);
 				item = new Scholar.Item();
 				i++;
 				if(attachments && attachments[i]) {
@@ -5993,24 +6004,18 @@ function doImport(attachments) {
 		} else {
 			// otherwise, assume this is data from the previous line continued
 			if(tag) {
-				data += line;
+				if(data[data.length-1] == " ") {
+					data += line;
+				} else {
+					data += " "+line;
+				}
 			}
 		}
 	}
 	
 	if(tag) {	// save any unprocessed tags
 		processTag(item, tag, data);
-		
-		// if backup publication title exists but not proper, use backup
-		// (hack to get newspaper titles from EndNote)
-		if(item.backupPublicationTitle) {
-			if(!item.publicationTitle) {
-				item.publicationTitle = item.backupPublicationTitle;
-			}
-			item.backupPublicationTitle = undefined;
-		}
-		
-		item.complete();
+		completeItem(item);
 	}
 }
 
@@ -6029,7 +6034,7 @@ function doExport() {
 	
 	while(item = Scholar.nextItem()) {
 		// can''t store independent notes in RIS
-		if(item.itemType == "note") {
+		if(item.itemType == "note" || item.itemType == "attachment") {
 			continue;
 		}
 		
@@ -6109,6 +6114,240 @@ function doExport() {
 		}
 		
 		Scholar.write("ER  - \r\n\r\n");
+	}
+}');
+
+REPLACE INTO "translators" VALUES ('881f60f2-0802-411a-9228-ce5f47b64c7d', '2006-08-09 17:13:00', 1, 100, 3, 'Refer/BibIX', 'Simon Kornblith', 'txt',
+'Scholar.configure("dataMode", "line");
+
+function detectImport() {
+	var lineRe = /%[A-Z0-9\*\$] .+/;
+	var line;
+	var matched = 0;
+	while((line = Scholar.read()) !== "false") {
+		line = line.replace(/^\s+/, "");
+		if(line != "") {
+			if(lineRe.test(line)) {
+				matched++;
+				if(matched == 2) {
+					// threshold is two lines
+					return true;
+				}
+			} else {
+				return false;
+			}
+		}
+	}
+}',
+'var fieldMap = {
+	T:"title",
+	S:"seriesTitle",
+	V:"volume",
+	N:"issue",
+	C:"place",
+	I:"publisher",
+	R:"type",
+	P:"pages",
+	W:"archiveLocation",
+	"*":"rights",
+	"@":"ISBN",
+	L:"callNumber",
+	M:"accessionNumber",
+	U:"url",
+	7:"edition"
+};
+
+var inputFieldMap = {
+	J:"publicationTitle",
+	B:"publicationTitle",
+	9:"type"
+};
+
+// TODO: figure out if these are the best types for personal communication
+var typeMap = {
+	book:"Book",
+	bookSection:"Book Section",
+	journalArticle:"Journal Article",
+	magazineArticle:"Magazine Article",
+	newspaperArticle:"Newspaper Article",
+	thesis:"Thesis",
+	letter:"Personal Communication",
+	manuscript:"Unpublished Work",
+	interview:"Personal Communication",
+	film:"Audiovisual Material",
+	artwork:"Artwork",
+	website:"Electronic Source"
+};
+
+// supplements outputTypeMap for importing
+// TODO: BILL, CASE, COMP, CONF, DATA, HEAR, MUSIC, PAT, SOUND, STAT
+var inputTypeMap = {
+	"Generic":"book"
+};
+
+var isEndNote = false;
+
+function processTag(item, tag, value) {
+	if(fieldMap[tag]) {
+		item[fieldMap[tag]] = value;
+	} else if(inputFieldMap[tag]) {
+		item[inputFieldMap[tag]] = value;
+	} else if(tag == "0") {
+		// EndNote type
+		isEndNote = true;
+		// first check typeMap
+		for(var i in typeMap) {
+			if(value == typeMap[i]) {
+				item.itemType = i;
+			}
+		}
+		// then check inputTypeMap
+		if(!item.itemType) {
+			if(inputTypeMap[value]) {
+				item.itemType = inputTypeMap[value];
+			} else {
+				// default to generic from inputTypeMap
+				item.itemType = inputTypeMap["Generic"];
+			}
+		}
+	} else if(tag == "A" || tag == "E" || tag == "?") {
+		if(tag == "A") {
+			var type = "author";
+		} else if(tag == "E") {
+			var type = "editor";
+		} else if(tag == "?") {
+			var type = "translator";
+		}
+		
+		// use comma only if EndNote format
+		if(isEndNote) {
+			item.creators.push(Scholar.Utilities.cleanAuthor(value, type, true));
+		} else {
+			item.creators.push(Scholar.Utilities.cleanAuthor(value, type));
+		}
+	} else if(tag == "Q") {
+		item.creators.push({creatorType:"author", lastName:value, isInstitution:true});
+	} else if(tag == "H" || tag == "O") {
+		item.extra += "\n"+value;
+	} else if(tag == "Z") {
+		item.notes.push({note:value});
+	} else if(tag == "D") {
+		if(item.date) {
+			if(item.date.indexOf(value) == -1) {
+				item.date += " "+value;
+			}
+		} else {
+			item.date = value;
+		}
+	} else if(tag == "8") {
+		if(item.date) {
+			if(value.indexOf(item.date) == -1) {
+				item.date += " "+value;
+			}
+		} else {
+			item.date = value;
+		}
+	} else if(tag == "K") {
+		item.tags = value.split("\n");
+	}
+}
+
+function doImport() {
+	// no character set is defined for this format. we use UTF-8.
+	Scholar.setCharacterSet("UTF-8");
+	
+	var line = true;
+	var tag = data = false;
+	do {	// first valid line is type
+		Scholar.Utilities.debug("ignoring "+line);
+		line = Scholar.read();
+		line = line.replace(/^\s+/, "");
+	} while(line !== false && line[0] != "%");
+	
+	var item = new Scholar.Item();
+	
+	var tag = line[1];
+	var data = line.substr(3);
+	while((line = Scholar.read()) !== false) {	// until EOF
+		line = line.replace(/^\s+/, "");
+		if(!line) {
+			if(tag) {
+				processTag(item, tag, data);
+				// unset info
+				tag = data = readRecordEntry = false;
+				// new item
+				item.complete();
+				item = new Scholar.Item();
+			}
+		} else if(line[0] == "%" && line[2] == " ") {
+			// if this line is a tag, take a look at the previous line to map
+			// its tag
+			if(tag) {
+				processTag(item, tag, data);
+			}
+			
+			// then fetch the tag and data from this line
+			tag = line[1];
+			data = line.substr(3);
+		} else {
+			// otherwise, assume this is data from the previous line continued
+			if(tag) {
+				data += "\n"+line;
+			}
+		}
+	}
+	
+	if(tag) {	// save any unprocessed tags
+		processTag(item, tag, data);
+		item.complete();
+	}
+}
+
+function addTag(tag, value) {
+	if(value) {
+		Scholar.write("%"+tag+" "+value+"\r\n");
+	}
+}
+
+function doExport() {
+	// use UTF-8 to export
+	Scholar.setCharacterSet("UTF-8");
+	
+	var item;
+	while(item = Scholar.nextItem()) {
+		// can''t store independent notes in RIS
+		if(item.itemType == "note" || item.itemType == "attachment") {
+			continue;
+		}
+		
+		// type
+		addTag("0", typeMap[item.itemType]);
+		
+		// use field map
+		for(var j in fieldMap) {
+			addTag(j, item[fieldMap[j]]);
+		}
+		
+		// creators
+		for(var j in item.creators) {
+			var referTag = "A";
+			if(item.creators[j].creatorType == "editor") {
+				referTag = "E";
+			} else if(item.creators[j].creatorType == "translator") {
+				referTag = "?";
+			}
+			
+			addTag(referTag, item.creators[j].lastName+(item.creators[j].firstName ? ", "+item.creators[j].firstName : ""));
+		}
+		
+		// date
+		addTag("D", item.date);
+		
+		// tags
+		if(item.tags) {
+			addTag("K", item.tags.join("\r\n"));
+		}
+		Scholar.write("\r\n");
 	}
 }');
 
@@ -6909,6 +7148,7 @@ function doImport() {
 	
 	while(text = Scholar.read(4096)) {	// read in 4096 byte increments
 		var records = text.split("\x1D");
+		Scholar.Utilities.debug(records);
 		
 		if(records.length > 1) {
 			records[0] = holdOver + records[0];

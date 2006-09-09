@@ -1300,7 +1300,7 @@ Scholar.Translate.prototype._runHandler = function(type, argument) {
 					// throw handler errors if they occur when a translator is
 					// called from another translator, so that the
 					// "Could Not Translate" dialog will appear if necessary
-					throw(e+' in handler '+i+' for '+type);
+					throw(e);
 				} else {
 					// otherwise, fail silently, so as not to interfere with
 					// interface cleanup
@@ -1648,7 +1648,7 @@ Scholar.Translate.prototype._export = function() {
 	try {
 		this._sandbox.doExport();
 	} catch(e) {
-		Scholar.debug(e+' in executing code for '+this.translator[0].label);
+		this._translationComplete(false, e);
 		return false;
 	}
 	
@@ -1895,14 +1895,15 @@ Scholar.Translate.prototype._storageFunctions =  function(read, write) {
 				return me._storage;
 			}
 		} else {									// block reading
-			this._sandbox.Scholar.read = function(amount) {;
+			this._sandbox.Scholar.read = function(amount) {
 				if(me._storagePointer >= me._storageLength) {
 					return false;
 				}
 				
 				if((me._storagePointer+amount) > me._storageLength) {
+					var oldPointer = me._storagePointer;
 					me._storagePointer = me._storageLength+1;
-					return me._storage;
+					return me._storage.substr(oldPointer);
 				}
 				
 				var oldPointer = me._storagePointer;
