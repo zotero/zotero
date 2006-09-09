@@ -876,6 +876,8 @@ Scholar.Translate.prototype._translationComplete = function(returnValue, error) 
 		if(this.type == "search" && !this._itemsFound && this.translator.length > 1) {
 			// if we're performing a search and didn't get any results, go on
 			// to the next translator
+			Scholar.debug("could not find a result using "+this.translator[0].label+": \n"
+			              +this._generateErrorString(error));
 			this.translator.shift();
 			this.translate();
 		} else {
@@ -897,23 +899,7 @@ Scholar.Translate.prototype._translationComplete = function(returnValue, error) 
 			this._runHandler("done", returnValue);
 			
 			if(!returnValue) {
-				var errorString = "";
-				if(typeof(error) == "string") {
-					errorString = "\nthrown exception => "+error;
-				} else {
-					for(var i in error) {
-						if(typeof(error[i]) != "object") {
-							errorString += "\n"+i+' => '+error[i];
-						}
-					}
-				}
-				
-				errorString += "\nurl => "+this.path
-					+ "\nextensions.zotero.cacheTranslatorData => "+Scholar.Prefs.get("cacheTranslatorData")
-					+ "\nextensions.zotero.downloadAssociatedFiles => "+Scholar.Prefs.get("downloadAssociatedFiles");
-				
-				errorString = errorString.substr(1);
-				
+				var errorString = this._generateErrorString(error);
 				Scholar.debug("translation using "+this.translator[0].label+" failed: \n"+errorString);
 				
 				if(this.type == "web") {
@@ -925,6 +911,27 @@ Scholar.Translate.prototype._translationComplete = function(returnValue, error) 
 			}
 		}
 	}
+}
+
+/*
+ * generates a useful error string, for submitting and debugging purposes
+ */
+Scholar.Translate.prototype._generateErrorString = function(error) {
+	var errorString = "";
+	if(typeof(error) == "string") {
+		errorString = "\nthrown exception => "+error;
+	} else {
+		for(var i in error) {
+			if(typeof(error[i]) != "object") {
+				errorString += "\n"+i+' => '+error[i];
+			}
+		}
+	}
+	
+	errorString += "\nurl => "+this.path
+		+ "\nextensions.zotero.cacheTranslatorData => "+Scholar.Prefs.get("cacheTranslatorData")
+		+ "\nextensions.zotero.downloadAssociatedFiles => "+Scholar.Prefs.get("downloadAssociatedFiles");
+	return errorString.substr(1);
 }
 
 /*

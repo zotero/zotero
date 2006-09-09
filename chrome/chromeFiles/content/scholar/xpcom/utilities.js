@@ -158,6 +158,7 @@ Scholar.Utilities.capitalizeSkipWords = ["but", "or", "yet", "so", "for", "and",
 "nor", "a", "an", "the", "at", "by", "from", "in", "into", "of", "on", "to",
 "with", "up", "down"];
 Scholar.Utilities.prototype.capitalizeTitle = function(title) {
+	title = this.cleanString(title);
 	title = title.replace(/ : /g, ": ");	
 	var words = title.split(" ");
 	
@@ -172,7 +173,7 @@ Scholar.Utilities.prototype.capitalizeTitle = function(title) {
 			for(var i=1; i<lastWordIndex; i++) {
 				// if not a skip word
 				if(Scholar.Utilities.capitalizeSkipWords.indexOf(words[i].toLowerCase()) == -1 ||
-				   words[i-1][words[i-1].length-1] == ":") {
+				   (words[i-1].length && words[i-1][words[i-1].length-1] == ":")) {
 					words[i] = words[i][0].toUpperCase() + words[i].substr(1);
 				} else {
 					words[i] = words[i].toLowerCase();
@@ -560,7 +561,9 @@ Scholar.Utilities.HTTP.processDocuments = function(firstDoc, urls, processor, do
 			}
 		} else {
 			removeListeners();
-			done();
+			if(done) {
+				done();
+			}
 		}
 	};
 	var onLoad = function() {

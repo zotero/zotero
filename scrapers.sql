@@ -4094,9 +4094,7 @@ function processOWC(doc) {
 				var spanTitle = spanTags[i].getAttribute("title");
 				var item = new Scholar.Item();
 				if(Scholar.Utilities.parseContextObject(spanTitle, item)) {
-					if(item.title) {
-						item.title = Scholar.Utilities.capitalizeTitle(item.title);
-					}
+					item.title = Scholar.Utilities.capitalizeTitle(item.title);
 					item.complete();
 					return true;
 				} else {
@@ -4146,8 +4144,6 @@ function doSearch(item) {
 				processOWC(doc);
 			}, function() {	// done
 				Scholar.done();
-			}, function() {	// error
-				Scholar.done(false);
 			});
 		}
 	}, null);
