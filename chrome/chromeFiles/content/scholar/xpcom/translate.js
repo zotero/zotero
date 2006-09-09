@@ -931,8 +931,8 @@ Scholar.Translate.prototype._translationComplete = function(returnValue, error) 
  * runs an HTTP request to report a translation error
  */
 Scholar.Translate.prototype._reportTranslationFailure = function(errorData) {
-	if(Scholar.Prefs.get("reportTranslationFailure")) {
-		var postBody = "id="+escape(this.translator[0].translatorID)+
+	if(this.translator[0].inRepository && Scholar.Prefs.get("reportTranslationFailure")) {
+		var postBody = "ids[]="+escape(this.translator[0].translatorID)+
 					   "&lastUpdated="+escape(this.translator[0].lastUpdated)+
 					   "&errorData="+escape(errorData);
 		Scholar.Utilities.HTTP.doPost("http://www.zotero.org/repo/report", postBody);

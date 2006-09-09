@@ -1,4 +1,4 @@
--- 87
+-- 88
 
 -- Set the following timestamp to the most recent scraper update date
 REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-08-31 22:44:00'));
@@ -3805,7 +3805,7 @@ REPLACE INTO "translators" VALUES ('d1bf1c29-4432-4ada-8893-2e29fc88fd9e', '2006
 	                        XPathResult.ANY_TYPE, null);
 	var font;
 	while(font = fonts.iterateNext()) {
-		var pageRe = /([^;]+);([\xA0 ]+Pages?[\xA0 ]+([A-Z0-9\-]+))?/
+		var pageRe = /([^;]+);(?:[\xA0 ]+Pages?[\xA0 ]+([A-Z0-9\-]+))?/
 		// grab pages and date
 		Scholar.Utilities.debug(Scholar.Utilities.cleanString(font.nodeValue));
 		var m = pageRe.exec(font.nodeValue);
