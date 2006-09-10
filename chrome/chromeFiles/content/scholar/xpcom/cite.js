@@ -187,7 +187,7 @@ CSL.prototype.preprocessItems = function(items) {
 /*
  * create a citation (in-text or footnote)
  */
-CSL.prototype.createCitation = function(items, types, format) {
+CSL.prototype.createCitation = function(items, types, locators, format) {
 	Scholar.debug("CSL: creating citation for item "+items[0].getID());
 	
 	if(types == 2) {

@@ -1,4 +1,4 @@
--- 89
+-- 90
 
 -- Set the following timestamp to the most recent scraper update date
 REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-08-31 22:44:00'));
@@ -870,19 +870,13 @@ function doWeb(doc, url) {
 		var checkboxes = new Array();
 		var urls = new Array();
 		var availableItems = new Array();
+		var firstURL = false;
 		
 		var tableRows = doc.evaluate(''//table[@class="browseScreen"]//tr[@class="browseEntry" or @class="briefCitRow" or td/input[@type="checkbox"]]'',
 		                             doc, nsResolver, XPathResult.ANY_TYPE, null);
 		// Go through table rows
 		var i = 0;
 		while(tableRow = tableRows.iterateNext()) {
-			// CHK is what we need to get it all as one file
-			var input = doc.evaluate(''./td/input[@type="checkbox"]'', tableRow,
-						nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-			if(input) {
-				checkboxes[i] = input.name+"="+escape(input.value);
-			}
-			
 			// get link
 			var links = doc.evaluate(''.//span[@class="briefcitTitle"]/a'', tableRow,
 									 nsResolver, XPathResult.ANY_TYPE, null);
@@ -894,35 +888,51 @@ function doWeb(doc, url) {
 			}
 			
 			if(link) {
-				urls[i] = link.href;
+				if(!checkboxes[link.href]) {
+					// CHK is what we need to get it all as one file
+					var input = doc.evaluate(''./td/input[@type="checkbox"]'', tableRow,
+								nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+					if(input) {
+						checkboxes[link.href] = input.name+"="+escape(input.value);
+					}
+				}
+				if(availableItems[link.href]) {
+					continue;
+				}
+					
+				
 				// Go through links
 				while(link) {
 					if(tagRegexp.test(link.href)) {
+						if(!firstURL) firstURL = link.href;
+						
 						var text = Scholar.Utilities.getNodeString(doc, link,
 																   ".//text()", null);
 						if(text) {
 							text = Scholar.Utilities.cleanString(text);
-							if(availableItems[i]) {
-								availableItems[i] += " "+text;
+							if(availableItems[link.href]) {
+								availableItems[link.href] += " "+text;
 							} else {
-								availableItems[i] = text;
+								availableItems[link.href] = text;
 							}
 						}
 					}
 					link = links.iterateNext();
 				}
+				i++;
 			}
-			
-			i++;
 		};
 		
+		Scholar.Utilities.debug(urls);
+		Scholar.Utilities.debug(availableItems);
 		var items = Scholar.selectItems(availableItems);
+		Scholar.Utilities.debug(items);
 		
 		if(!items) {
 			return true;
 		}
 		var urlRe = new RegExp("^(https?://[^/]+(/search/[^/]+(?:/|$)))");
-		var m = urlRe.exec(urls[0]);
+		var m = urlRe.exec(firstURL);
 		if(!m) {
 			throw("urlRe choked on "+urls[0]);
 		}
@@ -934,14 +944,14 @@ function doWeb(doc, url) {
 		var newUrls = new Array();
 		var postString = "";
 		var number = 0;
-		for(var i in items) {
-			if(checkboxes[i]) {
-				postString += checkboxes[i]+"&";
+		for(var url in items) {
+			if(checkboxes[url]) {
+				postString += checkboxes[url]+"&";
 				number++;
 			}
-			var m = matchRegexp.exec(urls[i]);
+			var m = matchRegexp.exec(url);
 			if(!m) {
-				throw("matchRegexp choked on "+urls[i]);
+				throw("matchRegexp choked on "+url);
 			}
 			newUrls.push(m[1]+"marc"+m[2]);
 		}

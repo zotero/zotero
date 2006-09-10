@@ -8,6 +8,11 @@ var itemsView;
 var collectionsView;
 var io;
 
+/*
+ * window takes two arguments:
+ * io - used for input/output (dataOut is list of item IDs)
+ * sourcesOnly - whether only sources should be shown in the window
+ */
 function doLoad()
 {
 	io = window.arguments[0];
@@ -40,10 +45,21 @@ function onCollectionSelected()
 		var collection = collectionsView._getItemAtRow(collectionsView.selection.currentIndex);
 		collection.setSearch('');
 
-		itemsView = new Scholar.ItemTreeView(collection);
+		itemsView = new Scholar.ItemTreeView(collection, (window.arguments[1] ? true : false));
 		document.getElementById('items-tree').view = itemsView;
 	}
 
+}
+
+function onSearch()
+{
+	if(itemsView)
+	{
+		var searchVal = document.getElementById('tb-search').value;
+		itemsView.searchText(searchVal);
+		
+		document.getElementById('tb-search-cancel').hidden = searchVal == "";
+	}
 }
 
 function onItemSelected()

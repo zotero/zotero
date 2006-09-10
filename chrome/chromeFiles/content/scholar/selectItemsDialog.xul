@@ -24,6 +24,13 @@
 	<script src="include.js"/>
 	<script src="selectItemsDialog.js"/>
 	
+	<hbox align="center" pack="end">
+		<label value="&toolbar.search.label;" control="tb-search"/>
+		<textbox id="tb-search" type="timed" timeout="250" oncommand="onSearch()" dir="reverse" onkeypress="if(event.keyCode == event.DOM_VK_ESCAPE) { this.value = ''; this.doCommand('cmd_scholar_search'); return false; }">
+			<toolbarbutton id="tb-search-cancel" oncommand="this.parentNode.value='';" hidden="true"/>
+		</textbox>
+	</hbox>
+	
 	<hbox flex="1">
 		<tree id="collections-tree"
 			style="width: 200px;" hidecolumnpicker="true" seltype="single"

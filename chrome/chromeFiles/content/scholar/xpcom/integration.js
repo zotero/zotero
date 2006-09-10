@@ -354,67 +354,84 @@ Scholar.Integration.SOAP = new function() {
 		}
 		var session = _sessions[vars[0]];
 		var returnString = "";
-		
 		var bibliographyMode = vars[1];
 		var citationMode = vars[2];
 		
-		var style = Scholar.Cite.getStyle(session.styleID);
+		var regenerateAll = (citationMode == "all");
+		var citationSet = new Scholar.Integration.CitationSet(session.style);
+		var updatedCitations = new Object();
 		
-		var encounteredItem = new Object();
-		var newField = new Object();
-		var regenerate = new Object();
-		
-		var newFieldArrayIndex = vars.indexOf("X", 2);
-		if(newFieldArrayIndex != -1) {
-			var newFieldIndex = vars[newFieldArrayIndex-1];
-			
-			// get items		
-			var io = {dataIn: null, dataOut: null};
-			window.openDialog('chrome://scholar/content/selectItemsDialog.xul','',
-								'chrome,popup,modal',io);
-
-			if(io.dataOut) {	// cancel was not pressed
-				var field = (io.dataOut.join(","))+"_"+Scholar.randomString();
-				
-				// set so that itemID works
-				vars[newFieldArrayIndex] = field;
-				// set so that field name will get changed
-				newField[newFieldIndex] = field;
-			} else {
-				vars[newFieldArrayIndex] = "!";
-				newField[newFieldIndex] = "!";
-			}
-		}
-		
-		var regenerateItemList = _inspectCitationPairs(vars, 3, session, style,
-		                         encounteredItem, newField, regenerate,
-		                         (citationMode == "all"));
-		
-		if(!regenerateItemList) {
-			// if we're not already regenerating the item list, ensure no
-			// citations have been deleted
-			for(var i in session.encounteredItem) {
-				if(!encounteredItem[i]) {
-					regenerateItemList = true;
+		var citation, update;
+		for(var i=3; i<vars.length; i+=2) {
+			if(vars[i+1] == "X") {
+				// get a new citation for a field with an X
+				var io = {dataIn: null, dataOut: null};
+				window.openDialog('chrome://scholar/content/selectItemsDialog.xul','',
+									'chrome,popup,modal', io, true);
+	
+				if(io.dataOut) {	// cancel was not pressed
+					citation = new Scholar.Integration.Citation(vars[i],
+						io.dataOut.join(",")+"_"+Scholar.randomString());
+					updatedCitations[citation.index] = true;
+					citation.updateField = true;
+				} else {			// cancel pressed
+					citation = new Scholar.Integration.Citation(vars[i], "!");
+					updatedCitations[citation.index] = true;
+					citation.deleteCitation = true;
+					continue;
 				}
+			} else {
+				// load an existing citation
+				citation = new Scholar.Integration.Citation(vars[i], vars[i+1]);
+			}
+			
+			var isDuplicate = citationSet.addCitation(citation);
+			if(regenerateAll) {
+				// regenerate all citations if requested
+				updatedCitations[citation.index] = true;
+				citation.updateText = true;
+			} else {
+				// test to see if this citationType is different from the
+				// version stored in the session
+				var oldCitation = session.citationSet.citationsByField[citation.field];
+				
+				if(!oldCitation) {
+					// if no stored version, definitely needs update
+					citation.updateText = true;
+					updatedCitations[citation.index] = true;
+				} else if(typeof(citation.citationType) == "object" &&
+				          typeof(oldCitation.citationType) == "object") {
+					// loop through, looking for differences; we can safely
+					// assume IDs have not been changed or added
+					for(var j in citation.citationType) {
+						if(citation.citationType[j] != oldCitation.citationType[j]) {
+							citation.updateText = true;
+							updatedCitations[citation.index] = true;
+							break;
+						}
+					}
+				} else if(citation.citationType != oldCitation.citationType) {
+					citation.updateText = true;
+					updatedCitations[citation.index] = true;
+				}
+			}
+			
+			if(isDuplicate || citation.field == "X") {
+				// generate a new field name for duplicated fields
+				citation.field = itemIDString+"_"+Scholar.randomString();
+				updatedCitations[citation.index] = true;
+				citation.updateField = true;
 			}
 		}
 		
 		var output = new Array();
 		
-		if(regenerateItemList || bibliographyMode == "true") {
-			Scholar.debug("Integration: Regenerating Item List");
-			
-			// need to re-process items
-			var items = new Array();
-			for(var i in encounteredItem) {
-				items.push(Scholar.Items.get(i));
-			}
-			style.preprocessItems(items);
-			
+		var itemsChanged = session.citationFactory.updateItems(citationSet, session, updatedCitations);
+		if(itemsChanged || bibliographyMode == "true") {
+			Scholar.debug("Integration: Regenerating bibliography");
 			// EBNF: bibliography-data
 			if(bibliographyMode != "false") {
-				output.push(style.createBibliography(items, "Integration"));
+				output.push(session.style.createBibliography(session.citationFactory.items, "Integration"));
 			} else {
 				output.push("!");
 			}
@@ -425,34 +442,32 @@ Scholar.Integration.SOAP = new function() {
 		
 		// state which citations to update
 		// EBNF: citation-output-triple
-		for(var i in regenerate) {
+		for(var i in updatedCitations) {		
 			// EBNF: citation-index
 			output.push(i);
-			
-			if(regenerate[i] === false) {
-				// if marked for deletion, delete
-				output.push("!");
-				output.push("!");
-			} else if(regenerate[i] === true) {
-				// if marked for name change, change name
-				output.push(newField[i]);
-				output.push("!");
-			} else {
-				// EBNF: citation-field
-				if(newField[i]) {
-					output.push(newField[i]);
+			if(citationSet.citationsByIndex[i]) {
+				var citation = citationSet.citationsByIndex[i];
+				
+				// if renamed
+				if(citation.updateField) {
+					output.push(citation.field);
 				} else {
 					output.push("!");
 				}
 				
-				// EBNF: citation-data
-				var items = Scholar.Items.get(regenerate[i][0]);
-				output.push(style.createCitation(items, regenerate[i][1], "Integration"));
+				// if needs text change
+				if(citation.updateText) {
+					output.push(session.citationFactory.getCitation(citation));
+				} else {
+					output.push("!");
+				}
+			} else {
+				output.push("!");
+				output.push("!");
 			}
 		}
 		
-		session.encounteredItem = encounteredItem;
-		
+		session.citationSet = citationSet;
 		return output;
 	}
 	
@@ -463,16 +478,23 @@ Scholar.Integration.SOAP = new function() {
 	 */
 	function restoreSession(vars) {
 		var sessionID = Scholar.randomString();
-		var session = _generateSession(sessionID);
-		session.styleID = vars[0];
-		
-		var style = Scholar.Cite.getStyle(session.styleID);
+		var session = _sessions[sessionID] = new Scholar.Integration.Session(vars[0]);
 		
 		var encounteredItem = new Object();
 		var newField = new Object();
 		var regenerate = new Object();
 		
-		_inspectCitationPairs(vars, 1, session, style);
+		for(var i=1; i<vars.length; i+=2) {
+			var citation = new Scholar.Integration.Citation(vars[i], vars[i+1]);
+			session.citationSet.addCitation(citation);		// add to see when refresh is necessary
+		}
+		
+		session.citationFactory.updateItems(session.citationSet);
+		
+		// regenerate citations for internal use
+		for each(var citation in session.citationSet.citationsByIndex) {
+			session.citationFactory.getCitation(citation);
+		}
 		
 		return [sessionID];
 	}
@@ -488,7 +510,7 @@ Scholar.Integration.SOAP = new function() {
 		if(!vars || !vars[0] || vars[0] == "!") {
 			// no session ID; generate a new one
 			var sessionID = Scholar.randomString();
-			var session = _generateSession(sessionID);
+			var session = _sessions[sessionID] = new Scholar.Integration.Session();
 		} else {
 			// session ID exists
 			var sessionID = vars[0];
@@ -502,150 +524,222 @@ Scholar.Integration.SOAP = new function() {
 		
 		window.openDialog('chrome://scholar/content/integrationDocPrefs.xul','',
 		                    'chrome,popup,modal',io);
-		session.styleID = io.style;
-		var style = Scholar.Cite.getStyle(io.style);
+		session.setStyle(io.style);
 		
-		return [sessionID, io.style, style.class];
+		return [sessionID, io.style, session.style.class];
 	}
-	
-	/*
-	 * inspects citation pairs to determine which are in need of an update
-	 * 
-	 * vars - the set of variables
-	 *
-	 * startIndex - the place in the set of variables at which the citations
-	 *              begin
-	 *
-	 * session - the session variable (see _generateSession())
-	 * 
-	 * encounteredItem - an object representing whether a given item ID has been
-	 *                   encountered, in the format itemID => true
-	 *
-	 * newField - an object representing whether a given field needs to be
-	 *            renamed, in the format fieldIndex => newFieldName
-	 * 
-	 * regenerate - an object representing whether the contents of a given field
-	 *              need to be modified, in the format:
-	 *                  index => [[itemID1, itemID2], ([format1, format2] | "2")]
-	 *              formats are as follows:
-	 *                  1 => first occurance of a given item. use full citation.
-	 *                  2 => item occurred directly previously. use ibid. (never
-	 *                       used as an array, only a single item)
-	 *                  3 => subsequent entry.
-	 */
-	 
-	function _inspectCitationPairs(vars, startIndex, session, style, encounteredItem, newField, regenerate, regenerateAll) {
-		var newItemFound = false;	
-		var encounteredField = new Object();// keep track of field names, to see
-											// if there are duplicates
-		
-		if(!encounteredItem) {
-			encounteredItem = new Object();
-		}
-		
-		var lastItemIDString = null;
-		var index, field, lastItemID, itemIDs, itemID, itemSetValue;
-		for(var i=startIndex; i<vars.length; i+=2) {
-			index = vars[i];
-			field = vars[i+1];
-			if(regenerate && field == "!") {
-				// mark for deletion if necessary
-				Scholar.debug("Integration: Marking "+index+" for deletion");
-				regenerate[index] = false;
-				continue;
-			}
-			
-			itemIDString = field.substr(0, field.indexOf("_"));
-			itemIDs = itemIDString.split(",");
-			
-			itemSetValue = null;
-			if(itemIDString == lastItemIDString && style.ibid) {
-				// use ibid if possible
-				itemSetValue = 2;
-			} else {
-				// loop through to see which are first citations
-				itemSetValue = new Array();
-				for each(itemID in itemIDs) {
-					if(!encounteredItem[itemID]) {
-						encounteredItem[itemID] = true;
-						itemSetValue.push(1);
+}
 
-						if(!session.encounteredItem[itemID]) {
-							newItemFound = true;
-						}
-					} else {
-						itemSetValue.push(3);
-					}
-				}
-			}
-			
-			if(regenerateAll) {
-				// regenerate all citations if requested
-				var update = true;
-			} else {
-				// test to see if this itemSetValue is different from the
-				// version stored in the session
-				var update = false;
-				if(typeof(itemSetValue) == "object" &&
-				   typeof(session.itemSet[field]) == "object") {
-					// loop through, looking for differences
-					for(var j in itemSetValue) {
-						if(itemSetValue[j] != session.itemSet[field][j]) {
-							update = true;
-							break;
-						}
-					}
-				} else if(itemSetValue != session.itemSet[field]) {
-					update = true;
-				}
-			}
-			
-			if(update) {
-				Scholar.debug("Integration: field "+field+" at index "+index+" was "+(session.itemSet[field] ? session.itemSet[field].toSource() : "undefined")+" but is now "+itemSetValue.toSource());
-				// positioning has changed
-				if(encounteredField[field]) {
-					if(regenerate) {
-						// someone copy and pasted a citation from this document,
-						// since this field appears twice. and we have to change it.
-						newField[index] = itemIDString+"_"+Scholar.randomString();
-						session.itemSet[newField[index]] = itemSetValue;
-					}
-				} else {
-					session.itemSet[field] = itemSetValue;
-				}
-				
-				if(regenerate) {
-					// regenerate citation
-					regenerate[index] = [itemIDs, itemSetValue];
-				}
-			} else if(encounteredField[field]) {
-				// someone copy and pasted a citation from this document,
-				// since this field appears twice. we don't have to change it,
-				// but we do need to change its name
-				session.itemSet[newField[index]] = itemSetValue;
-				
-				if(regenerate) {
-					newField[index] = itemIDString+"_"+Scholar.randomString();
-					regenerate[index] = true;	// true means name change without
-												// field value change
-				}
-			}
-			
-			encounteredField[field] = true;
-			lastItemIDString = itemIDString;
+Scholar.Integration.Session = function(styleID) {
+	this.styleID = styleID;
+	this.style = Scholar.Cite.getStyle(this.styleID);
+	this.citationSet = new Scholar.Integration.CitationSet(this.style);
+	this.citationFactory = new Scholar.Integration.CitationFactory(this.style);
+}
+
+Scholar.Integration.Session.prototype.setStyle = function(styleID) {
+	this.styleID = styleID;
+	this.citationSet.style = this.citationFactory.style = this.style =  Scholar.Cite.getStyle(styleID);
+	this.citationFactory.clearCache();
+}
+
+/*
+ * a class to keep track of citation objects in a document
+ */
+Scholar.Integration.Citation = function(index, field) {
+	this.index = index;
+	this.field = field;
+	if(field != "!") {
+		var underscoreIndex = field.indexOf("_");
+		this.itemIDString = field.substr(0, underscoreIndex);
+		
+		var lastIndex = field.lastIndexOf("_");
+		if(lastIndex != underscoreIndex) {
+			this.locators = field.substr(underscoreIndex+1, lastIndex-underscoreIndex-1).split(",");
+		} else {
+			this.locators = false;
 		}
 		
-		return newItemFound;
+		this.itemIDs = this.itemIDString.split(",");
+	}
+	if(field != "_") {
+		
+	}
+}
+
+/*
+ * a class to complement Scholar.Integration.Citation, to keep track of the
+ * order of citations
+ */
+Scholar.Integration.CitationSet = function(style) {
+	this.citationsByID = new Object();
+	this.citationsByField = new Object();
+	this.citationsByIndex = new Object();
+	this.lastItemID = null;
+	
+	this.style = style;
+}
+
+/*
+ * adds a citation. returns true if this citation duplicates another that has
+ * already been added.
+ */
+Scholar.Integration.CitationSet.prototype.addCitation = function(citation) {
+	var isDuplicate = false;
+	var itemID;
+	
+	if(this.style.ibid && citation.itemIDs.length == 1 &&	// if using ibid
+	   citation.itemIDString == this.lastItemIDString) {	// and is same as last
+		// use ibid if possible
+		citation.citationType = 2;
+		citation.serializedType = "2";
+		for each(itemID in citation.itemIDs) {
+			this.citationsByID[itemID].push(citation);
+		}
+		
+		this.citationsByField[citation.field] = citation;
+	} else {
+		// loop through to see which are first citations
+		citation.citationType = new Array();
+		for each(itemID in citation.itemIDs) {
+			if(!this.citationsByID[itemID]) {
+				this.citationsByID[itemID] = new Array(citation);
+				citation.citationType.push(1);
+			} else {
+				this.citationsByID[itemID].push(citation);
+				citation.citationType.push(3);
+			}
+		}
+		citation.serializedType = citation.citationType.join(",");
+		
+		// see if this duplicates another citation
+		if(this.citationsByField[citation.field]) {
+			isDuplicate = true;
+		} else {
+			this.citationsByField[citation.field] = citation;
+		}
 	}
 	
-	/*
-	 * generates, stores, and returns a new session object
-	 */
-	function _generateSession(sessionID) {
-		var session = _sessions[sessionID] = new Object();
-		session.encounteredItem = new Object();
-		session.itemSet = new Object();
+	this.lastItemID = (citation.itemIDs.length == 1 ? citation.itemIDString : null);
+	this.citationsByIndex[citation.index] = citation;
+	
+	return isDuplicate;
+}
+
+/*
+ * a class to generate and cache citations
+ */
+Scholar.Integration.CitationFactory = function(style) {
+	this.style = style;
+	this.cache = new Object();
+	this.dateModified = new Object();
+	this.items = new Array();
+}
+
+Scholar.Integration.CitationFactory.prototype.updateItems = function(citationSet, session, updateCitations) {
+	if(session) {
+		// check to see if an update is really necessary
+		var regenerateItemList = false;
+		var item, itemID;
+		for(var i in this.items) {
+			item = this.items[i]
+			itemID = item.getID();
+			
+			// see if old items were deleted or changed
+			if(!citationSet.citationsByID[itemID] ||
+			 (this.dateModified[itemID] != item.getField("dateModified"))) {
+				regenerateItemList = true;
+				break;
+			}
+		}
+		if(!regenerateItemList) {
+			for(var i in citationSet.citationsByID) {
+				// see if new items were added
+				if(!session.citationSet.citationsByID[i]) {
+					regenerateItemList = true;
+					break;
+				}
+			}
+		}
 		
-		return session;
+		// leave if it's not
+		if(!regenerateItemList) {
+			return false;
+		}
 	}
+	
+	this.items = new Array();
+	var updateCheck = new Array();
+	var disambiguation = new Array();
+	
+	for(var i in citationSet.citationsByID) {
+		var item = Scholar.Items.get(i);
+		this.items.push(item);
+		
+		if(this.dateModified[i] && this.dateModified[i] != item.getField("dateModified")) {
+			// so that we can update modified this.items
+			updateCheck[i] = true;
+		}
+		
+		if(item._csl && item._csl.date.disambiguation) {
+			// keep track of disambiguation data
+			disambiguation[i] = item._csl.date.disambiguation;
+		}
+	}
+	
+	Scholar.debug(disambiguation);
+	this.style.preprocessItems(this.items);
+	
+	var tempCache = new Object();
+	for(var i in this.items) {
+		var itemID = this.items[i].getID();
+		this.dateModified[itemID] = this.items[i].getField("dateModified");
+		
+		if(session) {
+			// check to see if disambiguation has changed
+			if(this.items[i]._csl.date.disambiguation != disambiguation[itemID]) {
+				for each(var citation in citationSet.citationsByID[itemID]) {
+					updateCitations[citation.index] = true;
+					citation.updateText = true;
+					this.cache[citation.itemIDString] = null;
+				}
+			} else if(updateCheck[itemID]) {
+				// check against cache to see if updated item has changed
+				for each(var citation in citationSet.citationsByID[itemID]) {
+					if(this.cache[citation.itemIDString][citation.serializedType]) {
+						var citationText = this.getCitation(citation, tempCache);
+						if(citationText != this.cache[citation.itemIDString][citation.serializedType]) {
+							updateCitations[citation.index] = true;
+							citation.updateText = true;
+							this.cache[citation.itemIDString][citation.serializedType] = citationText;
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	return true;
+}
+
+Scholar.Integration.CitationFactory.prototype.getCitation = function(citation, usingCache) {
+	if(!usingCache) usingCache = this.cache;
+	
+	if(usingCache[citation.itemIDString] && usingCache[citation.itemIDString][citation.serializedType]) {
+		return usingCache[citation.itemIDString][citation.serializedType];
+	}
+	
+	var citationText = this.style.createCitation(Scholar.Items.get(citation.itemIDs), citation.citationType, citation.locators, "Integration");
+	
+	if(!usingCache[citation.itemIDString]) {
+		usingCache[citation.itemIDString] = new Object();
+	}
+	usingCache[citation.itemIDString][citation.serializedType] = citationText;
+	
+	return citationText;
+}
+
+Scholar.Integration.CitationFactory.prototype.clearCache = function() {
+	this.cache = new Object();
+	this.dateModified = new Object();
 }

@@ -15,9 +15,10 @@
 /*
  *  Constructor the the ItemTreeView object
  */
-Scholar.ItemTreeView = function(itemGroup)
+Scholar.ItemTreeView = function(itemGroup, sourcesOnly)
 {
 	this._itemGroup = itemGroup;
+	this._sourcesOnly = sourcesOnly;
 	
 	this._treebox = null;
 	this.refresh();
@@ -58,7 +59,8 @@ Scholar.ItemTreeView.prototype.refresh = function()
 	{
 		for(var i = 0, len = newRows.length; i < len; i++)
 		{
-			if(newRows[i])
+			if(newRows[i] &&
+			  (!this._sourcesOnly || (!newRows[i].isAttachment() && !newRows[i].isNote())))
 			{
 				this._showItem(new Scholar.ItemTreeView.TreeRow(newRows[i],0,false), i+1); //item ref, before row
 			}
@@ -312,7 +314,11 @@ Scholar.ItemTreeView.prototype.isContainerOpen = function(row)
 
 Scholar.ItemTreeView.prototype.isContainerEmpty = function(row)
 {
-	return (this._getItemAtRow(row).numNotes() == 0 && this._getItemAtRow(row).numAttachments() == 0);
+	if(this._sourcesOnly) {
+		return true;
+	} else {
+		return (this._getItemAtRow(row).numNotes() == 0 && this._getItemAtRow(row).numAttachments() == 0);
+	}
 }
 
 Scholar.ItemTreeView.prototype.getLevel = function(row)
