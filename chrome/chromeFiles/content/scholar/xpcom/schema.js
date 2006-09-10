@@ -11,35 +11,51 @@ Scholar.Schema = new function(){
 	 * Checks if the DB schema exists and is up-to-date, updating if necessary
 	 */
 	function updateSchema(){
-		var dbVersion = _getDBVersion();
-		var schemaVersion = _getSchemaSQLVersion();
-		
-		if (dbVersion == schemaVersion){
-			if (SCHOLAR_CONFIG['DB_REBUILD']){
-				if (confirm('Erase all data and recreate database from schema?')){
-					_initializeSchema();
-					return;
-				}
-			}
-			
-			_updateScrapersLocal();
-			return;
-		}
-		// If DB version is less than schema file, create or update
-		else if (dbVersion < schemaVersion){
-			if (!dbVersion){
-				Scholar.debug('Database does not exist -- creating\n');
+		if (SCHOLAR_CONFIG['DB_REBUILD']){
+			if (confirm('Erase all user data and recreate database from schema?')){
 				_initializeSchema();
 				return;
 			}
-			
-			_migrateSchema(dbVersion);
-			_updateScrapersLocal();
+		}
+		
+		var dbVersion = _getDBVersion('user');
+		
+		// 'schema' check is for old (<= 1.0b1) schema system
+		if (!dbVersion && !_getDBVersion('schema')){
+			Scholar.debug('Database does not exist -- creating\n');
+			_initializeSchema();
 			return;
 		}
-		else {
-			throw("Scholar DB version is newer than schema version");
+		
+		// Old schema system
+		if (!dbVersion){
+			dbVersion = 0;
 		}
+		
+		var schemaVersion = _getSchemaSQLVersion('user');
+		
+		if (dbVersion > schemaVersion){
+			throw("Zotero user DB version is newer than SQL file");
+		}
+		
+		Scholar.DB.beginTransaction();
+		
+		try {
+			// If user DB version is less than schema file, create or update
+			if (dbVersion < schemaVersion){
+				_migrateUserSchema(dbVersion);
+			}
+			
+			_updateSchema('system');
+			_updateSchema('scrapers');
+			Scholar.DB.commitTransaction();
+		}
+		catch(e){
+			Scholar.debug(e);
+			Scholar.DB.rollbackTransaction();
+			throw(e);
+		}
+		return;
 	}
 	
 	
@@ -126,20 +142,8 @@ Scholar.Schema = new function(){
 		}
 		
 		if (Scholar.DB.tableExists('version')){
-			try {
-				var dbVersion = Scholar.DB.valueQuery("SELECT version FROM "
-					+ "version WHERE schema='" + schema + "'");
-			}
-			// DEBUG: this is temporary to handle version table schema change
-			catch(e){
-				if (e=='no such column: schema'){
-					Scholar.debug(e, 1);
-					return false;
-				}
-				
-				// If some other problem, bail
-				throw(e);
-			}
+			var dbVersion = Scholar.DB.valueQuery("SELECT version FROM "
+				+ "version WHERE schema='" + schema + "'");
 			_dbVersions[schema] = dbVersion;
 			return dbVersion;
 		}
@@ -151,9 +155,8 @@ Scholar.Schema = new function(){
 	 * Retrieve the version from the top line of the schema SQL file
 	 */
 	function _getSchemaSQLVersion(schema){
-		// Default to schema.sql
 		if (!schema){
-			schema = 'schema';
+			throw ('Schema type not provided to _getSchemaSQLVersion()');
 		}
 		
 		var schemaFile = schema + '.sql';
@@ -189,12 +192,11 @@ Scholar.Schema = new function(){
 	/*
 	 * Load in SQL schema
 	 *
-	 * Returns an _array_ of SQL statements for feeding into query()
+	 * Returns the contents of an SQL file for feeding into query()
 	 */
 	function _getSchemaSQL(schema){
-		// Default to schema.sql
 		if (!schema){
-			schema = 'schema';
+			throw ('Schema type not provided to _getSchemaSQL()');
 		}
 		
 		var schemaFile = schema + '.sql';
@@ -234,18 +236,21 @@ Scholar.Schema = new function(){
 	 * Create new DB schema
 	 */
 	function _initializeSchema(){
+		Scholar.DB.beginTransaction();
 		try {
-			Scholar.DB.beginTransaction();
-			Scholar.DB.query(_getSchemaSQL());
-			_updateDBVersion('schema', _getSchemaSQLVersion());
+			Scholar.DB.query(_getSchemaSQL('user'));
+			_updateDBVersion('user', _getSchemaSQLVersion('user'));
+			Scholar.DB.query(_getSchemaSQL('system'));
+			_updateDBVersion('system', _getSchemaSQLVersion('system'));
 			Scholar.DB.query(_getSchemaSQL('scrapers'));
 			_updateDBVersion('scrapers', _getSchemaSQLVersion('scrapers'));
 			Scholar.DB.commitTransaction();
 		}
 		catch(e){
 			Scholar.debug(e, 1);
-			alert('Error initializing Scholar database'); // TODO: localize
 			Scholar.DB.rollbackTransaction();
+			alert('Error initializing Zotero database'); // TODO: localize
+			throw(e);
 		}
 	}
 	
@@ -260,25 +265,30 @@ Scholar.Schema = new function(){
 	}
 	
 	
-	/*
-	 * Update the scrapers in the DB to the latest bundled versions
-	 */
-	function _updateScrapersLocal(){
-		var dbVersion = _getDBVersion('scrapers');
-		var schemaVersion = _getSchemaSQLVersion('scrapers');
+	function _updateSchema(schema){
+		var dbVersion = _getDBVersion(schema);
+		var schemaVersion = _getSchemaSQLVersion(schema);
 		
 		if (dbVersion == schemaVersion){
 			return;
 		}
 		else if (dbVersion < schemaVersion){
 			Scholar.DB.beginTransaction();
-			Scholar.DB.query(_getSchemaSQL('scrapers'));
-			_updateDBVersion('scrapers', schemaVersion);
-			Scholar.DB.commitTransaction();
+			try {
+				Scholar.DB.query(_getSchemaSQL(schema));
+				_updateDBVersion(schema, schemaVersion);
+				Scholar.DB.commitTransaction();
+			}
+			catch (e){
+				Scholar.debug(e, 1);
+				Scholar.DB.rollbackTransaction();
+				alert('Error updating Zotero database'); // TODO: localize
+				throw(e);
+			}
 			return;
 		}
 		else {
-			throw("Scraper set in DB is newer than schema version");
+			throw("Zotero '" + schema + "' DB version is newer than SQL file");
 		}
 	}
 	
@@ -395,63 +405,40 @@ Scholar.Schema = new function(){
 	
 	
 	/*
-	 * Migrate schema from an older version, preserving data
+	 * Migrate user schema from an older version, preserving data
 	 */
-	function _migrateSchema(fromVersion){
+	function _migrateUserSchema(fromVersion){
 		//
 		// Change this value to match the schema version
 		//
-		var toVersion = 48;
+		var toVersion = 1;
 		
-		if (toVersion != _getSchemaSQLVersion()){
-			throw('Schema version does not match version in _migrateSchema()');
+		if (toVersion != _getSchemaSQLVersion('user')){
+			throw('User schema file version does not match version in _migrateUserSchema()');
 		}
 		
-		Scholar.debug('Updating DB from version ' + fromVersion + ' to ' + toVersion + '\n');
+		Scholar.debug('Updating user tables from version ' + fromVersion + ' to ' + toVersion);
 		
 		Scholar.DB.beginTransaction();
 		
-		// Step through version changes until we reach the current version
-		//
-		// Each block performs the changes necessary to move from the
-		// previous revision to that one.
-		for (var i=fromVersion + 1; i<=toVersion; i++){
-			if (i==30){
-				// Remove old SQLite DB
-				var file = Scholar.getProfileDirectory();
-				file.append('scholar.sqlite');
-				if (file.exists()){
-					file.remove(null);
+		try {
+			// Step through version changes until we reach the current version
+			//
+			// Each block performs the changes necessary to move from the
+			// previous revision to that one.
+			for (var i=fromVersion + 1; i<=toVersion; i++){
+				if (i==1){
+					Scholar.DB.query("DELETE FROM version WHERE schema='schema'");
 				}
 			}
 			
-			if (i==47){
-				// Clear storage directory
-				var file = Scholar.getStorageDirectory();
-				if (file.exists()){
-					file.remove(true);
-				}
-				_initializeSchema();
-			}
-			
-			if(i==48) {
-				Scholar.DB.query('DROP TABLE IF EXISTS translators;\n'
-					+'CREATE TABLE translators (\n'
-					+'	translatorID TEXT PRIMARY KEY,\n'
-					+'	lastUpdated DATETIME,\n'
-					+'	inRepository INT,\n'
-					+'	priority INT,\n'
-					+'	translatorType INT,\n'
-					+'	label TEXT,\n'
-					+'	creator TEXT,\n'
-					+'	target TEXT,\n'
-					+'	detectCode TEXT,\n'
-					+'	code TEXT\n'
-					+');');
-			}
+			_updateDBVersion('user', i-1);
+			Scholar.DB.commitTransaction();
 		}
-		
-		_updateDBVersion('schema', i-1);
-		Scholar.DB.commitTransaction();
+		catch(e){
+			Scholar.debug(e);
+			alert('Error migrating Zotero database');
+			throw(e);
+		}
 	}
 }
