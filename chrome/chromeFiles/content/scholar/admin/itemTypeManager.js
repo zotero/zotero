@@ -192,11 +192,8 @@ var Scholar_ItemTypeManager = new function(){
 			return true;
 		}
 		
-		var nextID = Scholar.DB.getNextID(table, idCol);
-		
-		var sql = "INSERT INTO " + table + " (" + idCol + ", "
-			+ nameCol + ") VALUES (?,?)";
-		Scholar.DB.query(sql, [nextID, name]);
+		var sql = "INSERT INTO " + table + " (" + nameCol + ") VALUES (?)";
+		Scholar.DB.query(sql, name);
 		
 		init();
 		
