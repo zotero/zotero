@@ -1,4 +1,4 @@
--- 90
+-- 91
 
 -- Set the following timestamp to the most recent scraper update date
 REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-08-31 22:44:00'));
@@ -2779,29 +2779,14 @@ REPLACE INTO "translators" VALUES ('05d07af9-105a-4572-99f6-a8e231c0daef', '2006
 				var spanTitle = spanTags[i].getAttribute("title");
 				
 				// determine if it''s a valid type
-				var coParts = spanTitle.split("&");
-				var type = null
-				for(var j in coParts) {
-					if(coParts[j].substr(0, 12) == "rft_val_fmt=") {
-						var format = unescape(coParts[j].substr(12));
-						if(format == "info:ofi/fmt:kev:mtx:journal") {
-							var type = "journalArticle";
-						} else if(format == "info:ofi/fmt:kev:mtx:book") {
-							if(Scholar.Utilities.inArray("rft.genre=bookitem", coParts)) {
-								var type = "bookSection";
-							} else {
-								var type = "book";
-							}
-							break;
-						}
-					}
-				}
+				var item = new Scholar.Item;
+				var success = Scholar.Utilities.parseContextObject(spanTitle, item);
 				
-				if(type) {
+				if(item.itemType) {
 					if(encounteredType) {
 						return "multiple";
 					} else {
-						encounteredType = type;
+						encounteredType = item.itemType;
 					}
 				}
 			}

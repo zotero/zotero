@@ -226,10 +226,10 @@ Scholar.OpenURL = new function() {
 		
 		var identifiers = new Array();
 		if(item.DOI) {
-			identifiers.push(item.DOI);
+			identifiers.push("info:doi/"+item.DOI);
 		}
 		if(item.ISBN) {
-			identifiers.push("urn:isbn:");
+			identifiers.push("urn:isbn:"+item.ISBN);
 		}
 		
 		// encode ctx_ver (if available) and identifiers
@@ -284,7 +284,7 @@ Scholar.OpenURL = new function() {
 			
 			_mapTag(item.title, "title", version);
 			_mapTag(item.publisher, "inst", version);
-			_mapTag(item.thesisType, "degree", version);
+			_mapTag(item.type, "degree", version);
 		} else {
 			return false;
 		}
@@ -305,8 +305,8 @@ Scholar.OpenURL = new function() {
 			co += _mapTag(item.year, "date", version);
 		}
 		co += _mapTag(item.pages, "pages", version);
-		co += _mapTag(item.ISBN, "ISBN", version);
-		co += _mapTag(item.ISSN, "ISSN", version);
+		co += _mapTag(item.ISBN, "isbn", version);
+		co += _mapTag(item.ISSN, "issn", version);
 		
 		if(version == "0.1") {
 			// chop off leading & sign if version is 0.1
@@ -336,12 +336,16 @@ Scholar.OpenURL = new function() {
 				var format = unescape(part.substr(12));
 				if(format == "info:ofi/fmt:kev:mtx:journal") {
 					item.itemType = "journalArticle";
+					break;
 				} else if(format == "info:ofi/fmt:kev:mtx:book") {
 					if(Scholar.inArray("rft.genre=bookitem", coParts)) {
 						item.itemType = "bookSection";
 					} else {
 						item.itemType = "book";
 					}
+					break;
+				} else if(format == "info:ofi/fmt:kev:mtx:dissertation") {
+					item.itemType = "thesis";
 					break;
 				}
 			}
@@ -363,9 +367,12 @@ Scholar.OpenURL = new function() {
 			if(key == "rft_id") {
 				var firstEight = value.substr(0, 8).toLowerCase();
 				if(firstEight == "info:doi") {
-					item.DOI = value;
+					item.DOI = value.substr(9);
 				} else if(firstEight == "urn:isbn") {
 					item.ISBN = value.substr(9);
+				} else if(value.substr(0, 7) == "http://") {
+					item.url = value;
+					item.accessDate = "";
 				}
 			} else if(key == "rft.btitle") {
 				if(item.itemType == "book") {
@@ -373,12 +380,19 @@ Scholar.OpenURL = new function() {
 				} else if(item.itemType == "bookSection") {
 					item.publicationTitle = value;
 				}
-			} else if(key == "rft.atitle" && item.itemType != "book") {
+			} else if(key == "rft.atitle" && (item.itemType == "journalArticle" ||
+			                                  item.itemType == "bookSection")) {
 				item.title = value;
-			} else if(key == "rft.jtitle" && item.itemType == "journal") {
-				item.publcation = value;
-			} else if(key == "rft.stitle" && item.itemType == "journal") {
+			} else if(key == "rft.jtitle" && item.itemType == "journalArticle") {
+				item.publicationTitle = value;
+			} else if(key == "rft.stitle" && item.itemType == "journalArticle") {
 				item.journalAbbreviation = value;
+			} else if(key == "rft.title") {
+				if(item.itemType == "journalArticle" || item.itemType == "bookSection") {
+					item.publicationTitle = value;
+				} else {
+					item.title = value;
+				}
 			} else if(key == "rft.date") {
 				item.date = value;
 			} else if(key == "rft.volume") {
@@ -390,7 +404,6 @@ Scholar.OpenURL = new function() {
 				item.pages = value;
 			} else if(key == "rft.spage") {
 				if(pagesKey != "rft.pages") {
-					pagesKey = key;
 					// make pages look like start-end
 					if(pagesKey == "rft.epage") {
 						if(value != item.pages) {
@@ -399,20 +412,21 @@ Scholar.OpenURL = new function() {
 					} else {
 						item.pages = value;
 					}
+					pagesKey = key;
 				}
 			} else if(key == "rft.epage") {
 				if(pagesKey != "rft.pages") {
-					pagesKey = key;
 					// make pages look like start-end
 					if(pagesKey == "rft.spage") {
 						if(value != item.pages) {
-							item.pages = +item.pages+"-"+value;
+							item.pages = item.pages+"-"+value;
 						}
 					} else {
 						item.pages = value;
 					}
+					pagesKey = key;
 				}
-			} else if(key == "issn" || (key == "eissn" && !item.ISSN)) {
+			} else if(key == "rft.issn" || (key == "rft.eissn" && !item.ISSN)) {
 				item.ISSN = value;
 			} else if(key == "rft.aulast") {
 				var lastCreator = item.creators[item.creators.length-1];
@@ -431,7 +445,7 @@ Scholar.OpenURL = new function() {
 			} else if(key == "rft.au") {
 				item.creators.push(Scholar.Utilities.prototype.cleanAuthor(value, "author", true));
 			} else if(key == "rft.aucorp") {
-				item.creators.push({lastName:value, institutional:true});
+				item.creators.push({lastName:value, isInstitution:true});
 			} else if(key == "rft.isbn" && !item.ISBN) {
 				item.ISBN = value;
 			} else if(key == "rft.pub") {
@@ -442,6 +456,12 @@ Scholar.OpenURL = new function() {
 				item.edition = value;
 			} else if(key == "rft.series") {
 				item.seriesTitle = value;
+			} else if(item.itemType == "thesis") {
+				if(key == "rft.inst") {
+					item.publisher = value;
+				} else if(key == "rft.degree") {
+					item.type = value;
+				}
 			}
 		}
 		
