@@ -746,7 +746,7 @@ Scholar.Date = new function(){
 			
 			// get short month strings from CSL interpreter
 			if(!months) {
-				var months = CSL.getMonthStrings("short");
+				var months = Scholar.CSL.getMonthStrings("short");
 			}
 			if(!_monthRe) {
 				// then, see if have anything resembling a month anywhere
@@ -762,12 +762,21 @@ Scholar.Date = new function(){
 				// then, see if there's a day 
 				if(!_dayRe) {
 					var daySuffixes = Scholar.getString("date.daySuffixes").replace(/, ?/g, "|");
-					_dayRe = new RegExp("^(.*)\\b([0-9]{1,2})(?:"+daySuffixes+")?\\b(.*)$", "i");
+					_dayRe = new RegExp("\\b([0-9]{1,2})(?:"+daySuffixes+")?\\b(.*)", "i");
 				}
 				var m = _dayRe.exec(date.part);
 				if(m) {
-					date.day = parseInt(m[2], 10);
-					date.part = m[1]+m[3];
+					date.day = parseInt(m[1], 10);
+					
+					if(m.index > 0) {
+						date.part = date.part.substr(0, m.index);
+						if(m[2]) {
+							date.part += " "+m[2];;
+						}
+					} else {
+						date.part = m[2];
+					}
+					
 					Scholar.debug("DATE: got day ("+date.day+", "+date.part+")");
 				}
 			}
@@ -794,11 +803,11 @@ Scholar.Date = new function(){
 		}
 		
 		if(!months) {
-			var months = CSL.getMonthStrings("short");
+			var months = Scholar.CSL.getMonthStrings("short");
 		}
 		if(date.month != undefined && months[date.month]) {
 			// get short month strings from CSL interpreter
-			var months = CSL.getMonthStrings("long");
+			var months = Scholar.CSL.getMonthStrings("long");
 			string += months[date.month];
 			if(date.day) {
 				string += " "+date.day+", ";

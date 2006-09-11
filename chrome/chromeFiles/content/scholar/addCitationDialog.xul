@@ -1,0 +1,124 @@
+<?xml version="1.0"?>
+<!--
+	Zotero
+	Copyright (C) 2006   Center for History and New Media, George Mason University, Fairfax, VA
+	http://chnm.gmu.edu/
+-->
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://scholar/skin/scholar.css" type="text/css"?>
+<?xml-stylesheet href="chrome://scholar/skin/overlay.css" type="text/css"?>
+<?xml-stylesheet href="chrome://scholar/skin/addCitationDialog.css" type="text/css"?>
+<!DOCTYPE window SYSTEM "chrome://scholar/locale/scholar.dtd">
+
+<dialog
+	id="add-citation-dialog"
+	orient="vertical"
+	title="Add Citation"
+	width="600" height="450"
+	onload="Scholar_Citation_Dialog.load();"
+	onunload="doUnload();"
+	ondialogaccept="Scholar_Citation_Dialog.accept();"
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	style="padding:2em">
+	
+	<script src="include.js"/>
+	<script src="selectItemsDialog.js"/>
+	<script src="addCitationDialog.js"/>
+	
+	<hbox flex="1">
+		<vbox flex="1">
+			<hbox align="center" pack="end">
+				<label value="&toolbar.search.label;" control="tb-search"/>
+				<textbox id="tb-search" type="timed" timeout="250" oncommand="onSearch()" dir="reverse" onkeypress="if(event.keyCode == event.DOM_VK_ESCAPE) { this.value = ''; this.doCommand('cmd_scholar_search'); return false; }">
+					<toolbarbutton id="tb-search-cancel" oncommand="this.parentNode.value='';" hidden="true"/>
+				</textbox>
+			</hbox>
+			
+			<hbox flex="1">
+				<tree id="collections-tree"
+					style="width: 200px;" hidecolumnpicker="true" seltype="single"
+					onselect="onCollectionSelected();">
+					<treecols>
+						<treecol
+							id="name_column"
+							label="&collections.name_column;"
+							flex="1"
+							primary="true"/>
+					</treecols>
+					<treechildren/>
+				</tree>
+			
+				<tree id="items-tree"
+					flex="1" hidecolumnpicker="true" seltype="single"
+					onselect="Scholar_Citation_Dialog.treeItemSelected();">
+					<treecols>
+						<treecol
+							id="title" primary="true"
+							label="&items.title_column;"
+							flex="4" persist="width ordinal hidden sortActive sortDirection"/>
+						<splitter class="tree-splitter"/>
+						<treecol
+							id="firstCreator"
+							label="&items.creator_column;"
+							flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+						<splitter class="tree-splitter"/>
+						<treecol
+							id="dateAdded" hidden="true"
+							label="&items.dateAdded_column;"
+							flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+						<splitter class="tree-splitter"/>
+						<treecol
+							id="dateModified" hidden="true"
+							label="&items.dateModified_column;"
+							flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+					</treecols>				
+					<treechildren/>
+				</tree>
+			</hbox>
+			
+			<hbox>
+				<menulist id="tree-locator-type">
+					<menupopup id="tree-locator-type-popup">
+						<menuitem value="p" label="&citation.page;" selected="1"/>
+						<menuitem value="g" label="&citation.paragraph;"/>
+						<menuitem value="l" label="&citation.line;"/>
+					</menupopup>
+				</menulist>
+				<textbox id="tree-locator" flex="1"/>
+			</hbox>
+		</vbox>
+		
+		<hbox hidden="true" id="multiple-sources">
+			<vbox pack="center">
+				<toolbarbutton id="citation-add" oncommand="Scholar_Citation_Dialog.addCitation()" disabled="true"/>
+				<toolbarbutton id="citation-delete" oncommand="Scholar_Citation_Dialog.deleteCitation()" disabled="true"/>
+			</vbox>
+			<vbox>
+				<listbox id="citation-list" flex="1" seltype="single"
+					onselect="Scholar_Citation_Dialog.listItemSelected();"></listbox>
+				<hbox>				
+					<menulist id="item-locator-type" disabled="true">
+						<menupopup id="item-locator-type-popup">
+							<menuitem value="p" label="&citation.page;"/>
+							<menuitem value="g" label="&citation.paragraph;"/>
+							<menuitem value="l" label="&citation.line;"/>
+						</menupopup>
+					</menulist>
+					<textbox id="item-locator"/>
+				</hbox>
+			</vbox>
+		</hbox>
+	</hbox>
+	
+	<hbox>
+		<vbox>
+			<button id="multiple-sources-button" oncommand="Scholar_Citation_Dialog.toggleMultipleSources()"/>
+		</vbox>
+		<vbox flex="1" align="end">
+			<hbox>
+				<button dlgtype="cancel"/>
+				<button dlgtype="accept"/>
+			</hbox>
+		</vbox>
+	</hbox>
+</dialog>

@@ -365,18 +365,18 @@ Scholar.Integration.SOAP = new function() {
 		for(var i=3; i<vars.length; i+=2) {
 			if(vars[i+1] == "X") {
 				// get a new citation for a field with an X
-				var io = {dataIn: null, dataOut: null};
-				window.openDialog('chrome://scholar/content/selectItemsDialog.xul','',
+				var io = new Object();
+				window.openDialog('chrome://scholar/content/addCitationDialog.xul','',
 									'chrome,popup,modal', io, true);
+				
+				citation = new Scholar.Integration.Citation(vars[i], "!");
+				updatedCitations[citation.index] = true;
 	
-				if(io.dataOut) {	// cancel was not pressed
-					citation = new Scholar.Integration.Citation(vars[i],
-						io.dataOut.join(",")+"_"+Scholar.randomString());
-					updatedCitations[citation.index] = true;
+				if(io.items) {		// cancel was not pressed
+					citation.setData(io.items, io.locators, io.locatorTypes);
+					citation.regenerateFieldName();
 					citation.updateField = true;
 				} else {			// cancel pressed
-					citation = new Scholar.Integration.Citation(vars[i], "!");
-					updatedCitations[citation.index] = true;
 					citation.deleteCitation = true;
 					continue;
 				}
@@ -416,9 +416,9 @@ Scholar.Integration.SOAP = new function() {
 				}
 			}
 			
-			if(isDuplicate || citation.field == "X") {
+			if(isDuplicate) {
 				// generate a new field name for duplicated fields
-				citation.field = itemIDString+"_"+Scholar.randomString();
+				citation.regenerateFieldName();
 				updatedCitations[citation.index] = true;
 				citation.updateField = true;
 			}
@@ -554,16 +554,55 @@ Scholar.Integration.Citation = function(index, field) {
 		this.itemIDString = field.substr(0, underscoreIndex);
 		
 		var lastIndex = field.lastIndexOf("_");
-		if(lastIndex != underscoreIndex) {
-			this.locators = field.substr(underscoreIndex+1, lastIndex-underscoreIndex-1).split(",");
+		if(lastIndex != underscoreIndex+1) {
+			this.locatorString = field.substr(underscoreIndex+1, lastIndex-underscoreIndex-1);
 		} else {
-			this.locators = false;
+			this.locatorString = false;
 		}
 		
-		this.itemIDs = this.itemIDString.split(",");
-	}
-	if(field != "_") {
+		this.serialization = this.itemIDString+"_"+this.locatorString;
 		
+		this.itemIDs = this.itemIDString.split("|");
+	}
+}
+/*
+ * generates a new field name based on available information
+ */
+Scholar.Integration.Citation.prototype.regenerateFieldName = function() {
+	this.field = this.itemIDString+"_"+this.locatorString+"_"+Scholar.randomString();
+}
+
+/*
+ * updates itemIDString and locatorString based on data
+ */
+Scholar.Integration.Citation.prototype.setData = function(itemIDs, locators, locatorTypes) {
+	this.itemIDs = itemIDs;
+	this.itemIDString = itemIDs.join("|");
+	
+	this.locators = locators;
+	this.locatorTypes = locatorTypes;
+	
+	this.locatorString = "";
+	for(var i in locators) {
+		this.locatorString += locatorTypes[i]+locators[i].replace("|", "");
+	}
+	
+	this.serialization = this.itemIDString+"_"+this.locatorString;
+}
+
+/*
+ * loads locators from locatorString, if not already loaded
+ */
+Scholar.Integration.Citation.prototype.loadLocators = function() {
+	if(this.locators) return;
+	
+	this.locators = new Array();
+	this.locatorTypes = new Array();
+	
+	var locators = this.locatorString.split("|");
+	for each(var locator in locators) {
+		this.locatorTypes.push(locator[0]);
+		this.locators.push(locator.substr(1));
 	}
 }
 
@@ -701,17 +740,17 @@ Scholar.Integration.CitationFactory.prototype.updateItems = function(citationSet
 				for each(var citation in citationSet.citationsByID[itemID]) {
 					updateCitations[citation.index] = true;
 					citation.updateText = true;
-					this.cache[citation.itemIDString] = null;
+					this.cache[citation.serialization] = null;
 				}
 			} else if(updateCheck[itemID]) {
 				// check against cache to see if updated item has changed
 				for each(var citation in citationSet.citationsByID[itemID]) {
-					if(this.cache[citation.itemIDString][citation.serializedType]) {
+					if(this.cache[citation.serializedType][citation.serialization]) {
 						var citationText = this.getCitation(citation, tempCache);
-						if(citationText != this.cache[citation.itemIDString][citation.serializedType]) {
+						if(citationText != this.cache[citation.serializedType][citation.serialization]) {
 							updateCitations[citation.index] = true;
 							citation.updateText = true;
-							this.cache[citation.itemIDString][citation.serializedType] = citationText;
+							this.cache[citation.serializedType][citation.serialization] = citationText;
 						}
 					}
 				}
@@ -725,16 +764,17 @@ Scholar.Integration.CitationFactory.prototype.updateItems = function(citationSet
 Scholar.Integration.CitationFactory.prototype.getCitation = function(citation, usingCache) {
 	if(!usingCache) usingCache = this.cache;
 	
-	if(usingCache[citation.itemIDString] && usingCache[citation.itemIDString][citation.serializedType]) {
-		return usingCache[citation.itemIDString][citation.serializedType];
+	if(usingCache[citation.serializedType] && usingCache[citation.serializedType][citation.serialization]) {
+		return usingCache[citation.serializedType][citation.serialization];
 	}
 	
-	var citationText = this.style.createCitation(Scholar.Items.get(citation.itemIDs), citation.citationType, citation.locators, "Integration");
+	citation.loadLocators();
+	var citationText = this.style.createCitation(citation, "Integration");
 	
-	if(!usingCache[citation.itemIDString]) {
-		usingCache[citation.itemIDString] = new Object();
+	if(!usingCache[citation.serializedType]) {
+		usingCache[citation.serializedType] = new Object();
 	}
-	usingCache[citation.itemIDString][citation.serializedType] = citationText;
+	usingCache[citation.serializedType][citation.serialization] = citationText;
 	
 	return citationText;
 }

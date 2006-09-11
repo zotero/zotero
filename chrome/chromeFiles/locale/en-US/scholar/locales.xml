@@ -19,6 +19,10 @@
       <single>paragraph</single>
       <multiple>paragraph</multiple>
     </term>
+    <term name="line">
+      <single>line</single>
+      <multiple>line</multiple>
+    </term>
     <term name="volume">volume</term>
     <term name="issue">number</term>
     
@@ -30,6 +34,10 @@
     <term name="paragraph" form="short">
       <single>¶</single>
       <multiple>¶¶</multiple>
+    </term>
+    <term name="line" form="short">
+      <single>line</single>
+      <multiple>line</multiple>
     </term>
     <term name="volume" form="short">vol</term>
     <term name="issue" form="short">no</term>

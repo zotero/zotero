@@ -71,3 +71,7 @@
 <!ENTITY search.any						"any">
 <!ENTITY search.all						"all">
 <!ENTITY search.following				"of the following">
+
+<!ENTITY citation.page					"Page">
+<!ENTITY citation.paragraph				"Paragraph">
+<!ENTITY citation.line					"Line">

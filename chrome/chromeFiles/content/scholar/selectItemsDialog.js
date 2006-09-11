@@ -21,7 +21,7 @@ function doLoad()
 	document.getElementById('collections-tree').view = collectionsView;
 
 	// move to center of screen
-	window.sizeToContent()
+	window.sizeToContent();
 	window.moveTo(
 		(self.screen.width-window.innerWidth)/2,
 		(self.screen.height-window.innerHeight)/2
@@ -67,18 +67,28 @@ function onItemSelected()
 	
 }
 
-function doAccept()
-{
+function getSelectedItems(byID) {
 	var start = new Object();
 	var end = new Object();
-	io.dataOut = new Array();
+	var returnArray = new Array();
 	
 	for(var i = 0, rangeCount = itemsView.selection.getRangeCount(); i < rangeCount; i++)
 	{
 		itemsView.selection.getRangeAt(i,start,end);
 		for(var j = start.value; j <= end.value; j++)
 		{
-			io.dataOut.push(itemsView._getItemAtRow(j).ref.getID());
+			if(byID) {
+				returnArray.push(itemsView._getItemAtRow(j).ref.getID());
+			} else {
+				returnArray.push(itemsView._getItemAtRow(j).ref);
+			}
 		}
 	}
+	
+	return returnArray;
+}
+
+function doAccept()
+{
+	io.dataOut = getSelectedItems(true);
 }

@@ -39,7 +39,7 @@ Scholar.Cite = new function() {
 			var style = Scholar.DB.valueQuery(sql, [cslID]);
 			
 			// create a CSL instance
-			_lastCSL = new CSL(style);
+			_lastCSL = new Scholar.CSL(style);
 			_lastStyle = cslID;
 		}
 		return _lastCSL;
@@ -51,14 +51,14 @@ Scholar.Cite = new function() {
  * this is abstracted as a separate class for the benefit of anyone who doesn't
  * want to use the Scholar data model, but does want to use CSL in JavaScript
  */
-CSL = function(csl) {
-	this._csl = new XML(CSL._cleanXML(csl));
+Scholar.CSL = function(csl) {
+	this._csl = new XML(Scholar.CSL._cleanXML(csl));
 	
 	// initialize CSL
-	CSL.init();
+	Scholar.CSL.init();
 	
 	// load localizations
-	this._terms = CSL._parseLocales(this._csl.terms);
+	this._terms = Scholar.CSL._parseLocales(this._csl.terms);
 	
 	// load class defaults
 	this.class =  this._csl["@class"].toString();
@@ -66,8 +66,8 @@ CSL = function(csl) {
 	
 	this._defaults = new Object();
 	// load class defaults
-	if(CSL._classDefaults[this.class]) {
-		var classDefaults = CSL._classDefaults[this.class];
+	if(Scholar.CSL._classDefaults[this.class]) {
+		var classDefaults = Scholar.CSL._classDefaults[this.class];
 		for(var i in classDefaults) {
 			this._defaults[i] = classDefaults[i];
 		}
@@ -91,7 +91,7 @@ CSL = function(csl) {
  * must be called prior to generating citations or bibliography with a new set
  * of items
  */
-CSL.prototype.preprocessItems = function(items) {
+Scholar.CSL.prototype.preprocessItems = function(items) {
 	Scholar.debug("CSL: preprocessing items");
 	
 	this._ignore = null;
@@ -113,7 +113,7 @@ CSL.prototype.preprocessItems = function(items) {
 			item._csl.translators = creators[2];
 			
 			// parse date
-			item._csl.date = CSL.prototype._processDate(item.getField("date"));
+			item._csl.date = Scholar.CSL.prototype._processDate(item.getField("date"));
 		}
 		// clear disambiguation and subsequent author substitute
 		if(item._csl.disambiguation) item._csl.date.disambiguation = undefined;
@@ -187,21 +187,36 @@ CSL.prototype.preprocessItems = function(items) {
 /*
  * create a citation (in-text or footnote)
  */
-CSL.prototype.createCitation = function(items, types, locators, format) {
-	Scholar.debug("CSL: creating citation for item "+items[0].getID());
-	
-	if(types == 2) {
-		var string = this._getTerm("ibid", (items.length > 1 ? true : false));
+Scholar.CSL.prototype.createCitation = function(citation, format) {
+	if(citation.citationType == 2) {
+		var string = this._getTerm("ibid");
 		string = string[0].toUpperCase()+string.substr(1);
 	} else {
 		var string = "";
-		for(var i in items) {
+		for(var i in citation.itemIDs) {
 			if(this._cit.format && this._cit.format.delimiter && string) {
 				// add delimiter if one exists, and this isn't the first element
 				// with content
 				string += this._cit.format.delimiter;
 			}
-			string += this._getCitation(items[i], (types[i] == 1 ? "first" : "subsequent"), format, this._cit);
+			
+			var locatorType = false;
+			var locator = false;
+			if(citation.locators) {
+				if(citation.locatorTypes[i] == "p") {
+					locatorType = "page";
+				} else if(citation.locatorTypes[i] == "g") {
+					locatorType = "paragraph";
+				} else if(citation.locatorTypes[i] == "l") {
+					locatorType = "line";
+				}
+				
+				locator = citation.locators[i];
+			}
+			
+			string += this._getCitation(Scholar.Items.get(citation.itemIDs[i]),
+				(citation.citationType[i] == 1 ? "first" : "subsequent"),
+				locatorType, locator, format, this._cit);
 		}
 	}
 	
@@ -223,7 +238,7 @@ CSL.prototype.createCitation = function(items, types, locators, format) {
  * create a bibliography
  * (items is expected to be an array of items)
  */
-CSL.prototype.createBibliography = function(items, format) {
+Scholar.CSL.prototype.createBibliography = function(items, format) {
 	// process this._items
 	var output = "";
 	
@@ -245,7 +260,7 @@ CSL.prototype.createBibliography = function(items, format) {
 	for(var i in items) {
 		var item = items[i];
 		
-		var string = this._getCitation(item, "first", format, this._bib);
+		var string = this._getCitation(item, "first", false, false, format, this._bib);
 		if(!string) {
 			continue;
 		}
@@ -306,7 +321,7 @@ CSL.prototype.createBibliography = function(items, format) {
 }
 
 // for elements that inherit defaults from each other
-CSL._inherit = {
+Scholar.CSL._inherit = {
 	author:"contributor",
 	editor:"contributor",
 	translator:"contributor",
@@ -318,8 +333,8 @@ CSL._inherit = {
 	edition:"version"
 }
 // for class definitions
-CSL._classDefaults = new Object();
-CSL._classDefaults["author-date"] = {
+Scholar.CSL._classDefaults = new Object();
+Scholar.CSL._classDefaults["author-date"] = {
 	author:{
 		substitute:[
 			{name:"editor"},
@@ -332,15 +347,15 @@ CSL._classDefaults["author-date"] = {
 	}
 };
 
-CSL.ns = "http://purl.org/net/xbiblio/csl";
+Scholar.CSL.ns = "http://purl.org/net/xbiblio/csl";
 
 /*
  * initializes CSL interpreter
  */
-CSL.init = function() {
-	if(!CSL._xmlLang) {
+Scholar.CSL.init = function() {
+	if(!Scholar.CSL._xmlLang) {
 		// get XML lang
-		CSL._xmlLang = Scholar.locale;
+		Scholar.CSL._xmlLang = Scholar.locale;
 		
 		// read locales.xml from directory
 		var req = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"].
@@ -350,61 +365,61 @@ CSL.init = function() {
 		req.send(null);
 		
 		// get default terms
-		var locales = new XML(CSL._cleanXML(req.responseText));
-		CSL._defaultTerms = CSL._parseLocales(locales);
+		var locales = new XML(Scholar.CSL._cleanXML(req.responseText));
+		Scholar.CSL._defaultTerms = Scholar.CSL._parseLocales(locales);
 	}
 }
 
 /*
  * returns an array of short or long month strings
  */
-CSL.getMonthStrings = function(form) {
-	CSL.init();
-	return CSL._defaultTerms[form]["_months"];
+Scholar.CSL.getMonthStrings = function(form) {
+	Scholar.CSL.init();
+	return Scholar.CSL._defaultTerms[form]["_months"];
 }
 
 /*
  * removes parse instructions from XML
  */
-CSL._cleanXML = function(xml) {
+Scholar.CSL._cleanXML = function(xml) {
 	return xml.replace(/<\?[^>]*\?>/g, "");
 }
 
 /*
- * parses locale strings into CSL._defaultTerms
+ * parses locale strings into Scholar.CSL._defaultTerms
  */
-CSL._parseLocales = function(termXML) {
+Scholar.CSL._parseLocales = function(termXML) {
 	// return defaults if there are no terms
 	if(!termXML.length()) {
-		return (CSL._defaultTerms ? CSL._defaultTerms : {});
+		return (Scholar.CSL._defaultTerms ? Scholar.CSL._defaultTerms : {});
 	}
 	
 	var xml = new Namespace("http://www.w3.org/XML/1998/namespace");
 	
 	// get proper locale
-	var locale = termXML.locale.(@xml::lang == CSL._xmlLang);
+	var locale = termXML.locale.(@xml::lang == Scholar.CSL._xmlLang);
 	if(!locale.length()) {
-		var xmlLang = CSL._xmlLang.substr(0, 2);
+		var xmlLang = Scholar.CSL._xmlLang.substr(0, 2);
 		locale = termXML.locale.(@xml::lang == xmlLang);
 	}
 	if(!locale.length()) {
 		// return defaults if there are no locales
-		return (CSL._defaultTerms ? CSL._defaultTerms : {});
+		return (Scholar.CSL._defaultTerms ? Scholar.CSL._defaultTerms : {});
 	}
 	
 	var termArray = new Object();
 	termArray["default"] = new Object();
 	
-	if(CSL._defaultTerms) {
+	if(Scholar.CSL._defaultTerms) {
 		// ugh. copy default array. javascript dumb.
-		for(var i in CSL._defaultTerms) {
+		for(var i in Scholar.CSL._defaultTerms) {
 			termArray[i] = new Object();
-			for(var j in CSL._defaultTerms[i]) {
-				if(typeof(CSL._defaultTerms[i]) == "object") {
-					termArray[i][j] = [CSL._defaultTerms[i][j][0],
-									CSL._defaultTerms[i][j][1]];
+			for(var j in Scholar.CSL._defaultTerms[i]) {
+				if(typeof(Scholar.CSL._defaultTerms[i]) == "object") {
+					termArray[i][j] = [Scholar.CSL._defaultTerms[i][j][0],
+									Scholar.CSL._defaultTerms[i][j][1]];
 				} else {
-					termArray[i][j] = CSL._defaultTerms[i][j];
+					termArray[i][j] = Scholar.CSL._defaultTerms[i][j];
 				}
 			}
 		}
@@ -465,7 +480,7 @@ CSL._parseLocales = function(termXML) {
 /*
  * parses attributes and children for a CSL field
  */
-CSL.prototype._parseFieldAttrChildren = function(element, desc, ignoreChildren) {
+Scholar.CSL.prototype._parseFieldAttrChildren = function(element, desc, ignoreChildren) {
 	if(!desc) {
 		var desc = new Object();
 	}
@@ -489,7 +504,7 @@ CSL.prototype._parseFieldAttrChildren = function(element, desc, ignoreChildren) 
 			
 			// add children to children array
 			for each(var child in children) {
-				if(child.namespace() == CSL.ns) {	// ignore elements in other
+				if(child.namespace() == Scholar.CSL.ns) {	// ignore elements in other
 													// namespaces
 					// parse recursively
 					var name = child.localName();
@@ -501,7 +516,7 @@ CSL.prototype._parseFieldAttrChildren = function(element, desc, ignoreChildren) 
 							
 							var chooseChildren = child.choose.children();
 							for each(var choose in chooseChildren) {
-								if(choose.namespace() == CSL.ns) {
+								if(choose.namespace() == Scholar.CSL.ns) {
 									var option = new Object();
 									option.name = choose.localName();
 									this._parseFieldAttrChildren(choose, option);
@@ -527,9 +542,9 @@ CSL.prototype._parseFieldAttrChildren = function(element, desc, ignoreChildren) 
 /*
  * parses a list of fields into a defaults associative array
  */
-CSL.prototype._parseFieldDefaults = function(ref) {
+Scholar.CSL.prototype._parseFieldDefaults = function(ref) {
 	for each(var element in ref.children()) {
-		if(element.namespace() == CSL.ns) {	// ignore elements in other namespaces
+		if(element.namespace() == Scholar.CSL.ns) {	// ignore elements in other namespaces
 			var name = element.localName();
 			Scholar.debug("CSL: parsing field defaults for "+name);
 			var fieldDesc = this._parseFieldAttrChildren(element);
@@ -547,10 +562,10 @@ CSL.prototype._parseFieldDefaults = function(ref) {
 /*
  * parses a list of fields into an array of objects
  */
-CSL.prototype._parseFields = function(ref, position, type, bibCitElement, inheritFormat) {
+Scholar.CSL.prototype._parseFields = function(ref, position, type, bibCitElement, inheritFormat) {
 	var typeDesc = new Array();
 	for each(var element in ref) {
-		if(element.namespace() == CSL.ns) {	// ignore elements in other namespaces
+		if(element.namespace() == Scholar.CSL.ns) {	// ignore elements in other namespaces
 			var itemDesc = new Object();
 			itemDesc.name = element.localName();
 			
@@ -595,7 +610,7 @@ CSL.prototype._parseFields = function(ref, position, type, bibCitElement, inheri
 /*
  * parses an et al field
  */
-CSL.prototype._parseEtAl = function(etAl, bibCitElement) {
+Scholar.CSL.prototype._parseEtAl = function(etAl, bibCitElement) {
 	if(etAl.length()) {
 		bibCitElement.etAl = new Object();
 		
@@ -623,7 +638,7 @@ CSL.prototype._parseEtAl = function(etAl, bibCitElement) {
  * parses cs-format attributes into just a prefix and a suffix; accepts an
  * optional array of cs-format
  */
-CSL.prototype._parseBibliographyOptions = function() {
+Scholar.CSL.prototype._parseBibliographyOptions = function() {
 	if(!this._csl.bibliography.length()) {
 		return;
 	}
@@ -687,7 +702,7 @@ CSL.prototype._parseBibliographyOptions = function() {
  * parses cs-format attributes into just a prefix and a suffix; accepts an
  * optional array of cs-format
  */
-CSL.prototype._parseCitationOptions = function() {
+Scholar.CSL.prototype._parseCitationOptions = function() {
 	var citation = this._csl.citation;
 	this._cit = new Object();
 	
@@ -708,7 +723,7 @@ CSL.prototype._parseCitationOptions = function() {
  * determine available reference types and add their XML objects to the tree
  * (they will be parsed on the fly when necessary; see _parseReferenceType)
  */
-CSL.prototype._parseTypes = function(itemElements, bibCitElement) {
+Scholar.CSL.prototype._parseTypes = function(itemElements, bibCitElement) {
 	Scholar.debug("CSL: parsing item elements");
 	
 	bibCitElement._types = new Object();
@@ -749,7 +764,7 @@ CSL.prototype._parseTypes = function(itemElements, bibCitElement) {
 /*
  * convert reference types to native structures for speed
  */
-CSL.prototype._getTypeObject = function(position, reftype, bibCitElement) {
+Scholar.CSL.prototype._getTypeObject = function(position, reftype, bibCitElement) {
 	if(!bibCitElement._types[position][reftype]) {
 		// no type available
 		return false;
@@ -770,7 +785,7 @@ CSL.prototype._getTypeObject = function(position, reftype, bibCitElement) {
 /*
  * merges two elements, letting the second override the first
  */
-CSL.prototype._merge = function(element1, element2) {
+Scholar.CSL.prototype._merge = function(element1, element2) {
 	var mergedElement = new Object();
 	for(var i in element1) {
 		mergedElement[i] = element1[i];
@@ -785,11 +800,11 @@ CSL.prototype._merge = function(element1, element2) {
  * gets defaults for a specific element; handles various inheritance rules
  * (contributor, locator)
  */
-CSL.prototype._getFieldDefaults = function(elementName) {
+Scholar.CSL.prototype._getFieldDefaults = function(elementName) {
 	// first, see if there are specific defaults
 	if(this._defaults[elementName]) {
-		if(CSL._inherit[elementName]) {
-			var inheritedDefaults = this._getFieldDefaults(CSL._inherit[elementName]);
+		if(Scholar.CSL._inherit[elementName]) {
+			var inheritedDefaults = this._getFieldDefaults(Scholar.CSL._inherit[elementName]);
 			for(var i in inheritedDefaults) {	// will only be called if there
 												// is merging necessary
 				return this._merge(inheritedDefaults, this._defaults[elementName]);
@@ -798,8 +813,8 @@ CSL.prototype._getFieldDefaults = function(elementName) {
 		return this._defaults[elementName];
 	}
 	// next, try to get defaults from the item from which this item inherits
-	if(CSL._inherit[elementName]) {
-		return this._getFieldDefaults(CSL._inherit[elementName]);
+	if(Scholar.CSL._inherit[elementName]) {
+		return this._getFieldDefaults(Scholar.CSL._inherit[elementName]);
 	}
 	// finally, return an empty object
 	return {};
@@ -808,7 +823,7 @@ CSL.prototype._getFieldDefaults = function(elementName) {
 /*
  * gets a term, in singular or plural form
  */
-CSL.prototype._getTerm = function(term, plural, form) {
+Scholar.CSL.prototype._getTerm = function(term, plural, form) {
 	if(!form) {
 		form = "long";
 	}
@@ -831,7 +846,7 @@ CSL.prototype._getTerm = function(term, plural, form) {
 /*
  * escapes a string for a given format
  */
-CSL.prototype._escapeString = function(string, format) {
+Scholar.CSL.prototype._escapeString = function(string, format) {
 	if(format == "HTML") {
 		// replace HTML entities
 		string = string.replace(/&/g, "&amp;");
@@ -865,7 +880,7 @@ CSL.prototype._escapeString = function(string, format) {
 /*
  * formats a string according to the cs-format attributes on element
  */
-CSL.prototype._formatString = function(element, string, format, dontEscape) {
+Scholar.CSL.prototype._formatString = function(element, string, format, dontEscape) {
 	if(!string) return "";
 	if(typeof(string) != "string") {
 		string = string.toString();
@@ -943,7 +958,7 @@ CSL.prototype._formatString = function(element, string, format, dontEscape) {
  * formats a locator (pages, volume, issue) or an identifier (isbn, doi)
  * note that label should be null for an identifier
  */
-CSL.prototype._formatLocator = function(identifier, element, number, format) {
+Scholar.CSL.prototype._formatLocator = function(identifier, element, number, format) {
 	var data = "";
 	
 	if(number) {
@@ -975,7 +990,7 @@ CSL.prototype._formatLocator = function(identifier, element, number, format) {
  * format the date in format supplied by element from the date object
  * returned by this._processDate
  */
-CSL.prototype._formatDate = function(element, date, format) {
+Scholar.CSL.prototype._formatDate = function(element, date, format) {
 	if(format == "disambiguate") {
 		// for disambiguation, return only the year
 		return date.year;
@@ -1032,7 +1047,7 @@ CSL.prototype._formatDate = function(element, date, format) {
  * serializes an element into a string suitable to prevent substitutes from
  * recurring in the same style
  */
-CSL.prototype._serializeElement = function(name, element) {
+Scholar.CSL.prototype._serializeElement = function(name, element) {
 	var string = name;
 	if(element.relation) {
 		string += " relation:"+element.relation;
@@ -1046,7 +1061,7 @@ CSL.prototype._serializeElement = function(name, element) {
 /*
  * pads a number or other string with a given string on the left
  */
-CSL.prototype._lpad = function(string, pad, length) {
+Scholar.CSL.prototype._lpad = function(string, pad, length) {
 	while(string.length < length) {
 		string = pad + string;
 	}
@@ -1056,7 +1071,7 @@ CSL.prototype._lpad = function(string, pad, length) {
 /*
  * handles sorting of items
  */
-CSL.prototype._compareItem = function(a, b, opt) {
+Scholar.CSL.prototype._compareItem = function(a, b, opt) {
 	for(var i in this._bib.sortOrder) {
 		var sortElement = this._bib.sortOrder[i];
 		
@@ -1079,7 +1094,7 @@ CSL.prototype._compareItem = function(a, b, opt) {
  * process creator objects; if someone had a creator model that handled
  * non-Western names better than ours, this would be the function to change
  */
-CSL.prototype._processCreators = function(type, element, creators, format, bibCitElement) {
+Scholar.CSL.prototype._processCreators = function(type, element, creators, format, bibCitElement) {
 	var maxCreators = creators.length;
 	if(!maxCreators) return;
 	
@@ -1186,7 +1201,7 @@ CSL.prototype._processCreators = function(type, element, creators, format, bibCi
 /*
  * get a citation, given an item and bibCitElement
  */
-CSL.prototype._getCitation = function(item, position, format, bibCitElement) {
+Scholar.CSL.prototype._getCitation = function(item, position, locatorType, locator, format, bibCitElement) {
 	Scholar.debug("CSL: generating citation for item "+item.getID());
 	
 	if(!bibCitElement._types[position]) {
@@ -1218,7 +1233,8 @@ CSL.prototype._getCitation = function(item, position, format, bibCitElement) {
 	var string = "";
 	for(var j in type) {
 		var value = this._getFieldValue(type[j].name, type[j], item, format,
-										bibCitElement, position, typeName);
+										bibCitElement, position, locatorType,
+										locator, typeName);
 		string += value;
 	}
 	
@@ -1228,7 +1244,9 @@ CSL.prototype._getCitation = function(item, position, format, bibCitElement) {
 /*
  * processes an element from a (pre-processed) item into text
  */
-CSL.prototype._getFieldValue = function(name, element, item, format, bibCitElement, position, typeName) {
+Scholar.CSL.prototype._getFieldValue = function(name, element, item, format,
+                                                bibCitElement, position,
+                                                locatorType, locator, typeName) {
 	var data = "";
 	
 	var itemID = item.getID();
@@ -1325,11 +1343,18 @@ CSL.prototype._getFieldValue = function(name, element, item, format, bibCitEleme
 			data = this._formatLocator(name, element, field, format);
 		}
 	} else if(name == "pages") {
-		if(typeName != "book") {
+		if(locatorType == "page") {
+			var field = locator;
+		} else if(typeName != "book") {
 			var field = item.getField("pages");
-			if(field) {
-				data = this._formatLocator("page", element, field, format);
-			}
+		}
+		
+		if(field) {
+			data = this._formatLocator("page", element, field, format);
+		}
+	} else if(name == "locator") {
+		if(locator) {
+			data = this._formatLocator(locatorType, element, locator, format);
 		}
 	} else if(name == "edition") {
 		data = item.getField("edition");
@@ -1379,8 +1404,8 @@ CSL.prototype._getFieldValue = function(name, element, item, format, bibCitEleme
 			                                           substituteElement);
 			
 			var inheritElement;
-			if(CSL._inherit[substituteElement.name] && CSL._inherit[name]
-			   && CSL._inherit[substituteElement.name] == CSL._inherit[name]) {
+			if(Scholar.CSL._inherit[substituteElement.name] && Scholar.CSL._inherit[name]
+			   && Scholar.CSL._inherit[substituteElement.name] == Scholar.CSL._inherit[name]) {
 				// if both substituteElement and the parent element inherit from
 				// the same base element, apply styles here
 				inheritElement = element;
@@ -1431,7 +1456,7 @@ CSL.prototype._getFieldValue = function(name, element, item, format, bibCitEleme
  * THE FOLLOWING CODE IS SCHOLAR-SPECIFIC
  * gets a list of possible CSL types, in order of preference, for an item
  */
- CSL._optionalTypeMappings = {
+ Scholar.CSL._optionalTypeMappings = {
 	journalArticle:"article-journal",
 	magazineArticle:"article-magazine",
 	newspaperArticle:"article-newspaper",
@@ -1444,7 +1469,7 @@ CSL.prototype._getFieldValue = function(name, element, item, format, bibCitEleme
 	website:"webpage"
 };
 // TODO: check with Elena/APA/MLA on this
-CSL._fallbackTypeMappings = {
+Scholar.CSL._fallbackTypeMappings = {
 	book:"book",
 	bookSection:"chapter",
 	journalArticle:"article",
@@ -1459,18 +1484,18 @@ CSL._fallbackTypeMappings = {
 	website:"article"
 };
 
-CSL.prototype._getTypeFromItem = function(item) {
+Scholar.CSL.prototype._getTypeFromItem = function(item) {
 	var scholarType = Scholar.ItemTypes.getName(item.getType());
 
 	// get type
 	Scholar.debug("CSL: parsing item of Scholar type "+scholarType);
-	return [CSL._optionalTypeMappings[scholarType], CSL._fallbackTypeMappings[scholarType]];
+	return [Scholar.CSL._optionalTypeMappings[scholarType], Scholar.CSL._fallbackTypeMappings[scholarType]];
 }
 
 /*
  * separate creators object into authors, editors, and translators
  */
-CSL.prototype._separateItemCreators = function(item) {
+Scholar.CSL.prototype._separateItemCreators = function(item) {
 	var authors = new Array();
 	var editors = new Array();
 	var translators = new Array();
@@ -1499,7 +1524,7 @@ CSL.prototype._separateItemCreators = function(item) {
 /*
  * return an object containing year, month, and day
  */
-CSL.prototype._processDate = function(string) {
+Scholar.CSL.prototype._processDate = function(string) {
 	return Scholar.Date.strToDate(string);
 }
 /*
