@@ -183,26 +183,22 @@
 	list-style-image: url('chrome://scholar/skin/toolbar-openurl.png');
 }
 
+#scholar-view-item > vbox
+{
+	overflow: auto;
+	margin-left: 5px;
+}
+
 /* creator switch button */
 #editpane-dynamic-fields row hbox toolbarbutton
 {
 	margin-right:5px;
 }
 
-#scholar-view-item vbox
-{
-	overflow: auto;
-}
-
 #editpane-dynamic-fields row > label:first-child
 {
 	text-align: right;
 	font-weight: bold;
-}
-
-#scholar-view-item
-{
-	margin-left: 5px;
 }
 
 #scholar-splitter

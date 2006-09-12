@@ -564,7 +564,15 @@ var ScholarItemPane = new function()
 	
 	function createValueElement(valueText, fieldName, tabindex)
 	{
-	 	var valueElement = document.createElement("label");
+		if (fieldName=='extra')
+		{
+			var valueElement = document.createElement("vbox");
+		}
+		else
+		{
+			var valueElement = document.createElement("label");
+		}
+		
 		if(fieldName)
 		{
 			valueElement.setAttribute('fieldname',fieldName);
@@ -576,8 +584,20 @@ var ScholarItemPane = new function()
 		var firstSpace;		
 		if(typeof valueText == 'string')
 			firstSpace = valueText.indexOf(" ");
-
-		if((firstSpace == -1 && valueText.length > 29 ) || firstSpace > 29)
+		
+		// To support newlines in 'extra' fields, we use multiple
+		// <description> elements inside a vbox
+		if (fieldName=='extra')
+		{
+			var lines = valueText.split("\n");
+			for (var i = 0; i < lines.length; i++) {
+				var descriptionNode = document.createElement("description");
+				var linetext = document.createTextNode(lines[i]);
+				descriptionNode.appendChild(linetext);
+				valueElement.appendChild(descriptionNode);
+			}
+		}
+		else if ((firstSpace == -1 && valueText.length > 29 ) || firstSpace > 29)
 		{
 			valueElement.setAttribute('crop', 'end');
 			valueElement.setAttribute('value',valueText);
@@ -634,16 +654,26 @@ var ScholarItemPane = new function()
 		}
 		
 		var t = document.createElement("textbox");
-		t.setAttribute('type', 'autocomplete');
-		t.setAttribute('autocompletesearch', 'zotero');
-		t.setAttribute('autocompletesearchparam', fieldName + (itemID ? '/' + itemID : ''));
 		t.setAttribute('value',value);
 		t.setAttribute('fieldname', fieldName);
 		t.setAttribute('tabindex', tabindex);
 		t.setAttribute('flex','1');
+		
 		if (creatorField=='lastName')
 		{
 			t.setAttribute('singleField', elem.getAttribute('singleField'));
+		}
+		
+		if (fieldName=='extra')
+		{
+			t.setAttribute('multiline', true);
+			t.setAttribute('rows', 8);
+		}
+		else
+		{
+			t.setAttribute('type', 'autocomplete');
+			t.setAttribute('autocompletesearch', 'zotero');
+			t.setAttribute('autocompletesearchparam', fieldName + (itemID ? '/' + itemID : ''));
 		}
 		
 		var box = elem.parentNode;
@@ -663,6 +693,12 @@ var ScholarItemPane = new function()
 		switch (event.keyCode)
 		{
 			case event.DOM_VK_RETURN:
+				// Use shift-enter as the save action for the 'extra' field
+				if (document.commandDispatcher.focusedElement.parentNode.
+					parentNode.getAttribute('fieldname')=='extra' && !event.shiftKey)
+				{
+					break;
+				}
 				document.commandDispatcher.focusedElement.blur();
 				break;
 				
