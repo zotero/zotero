@@ -3331,6 +3331,12 @@ Scholar.ItemFields = new function(){
 			return _itemTypeFields[itemTypeID];
 		}
 		
+		if (!itemTypeID){
+			Scholar.debug("Invalid item type id '" + itemTypeID
+				+ "' provided to getItemTypeFields()", 1);
+			return [];
+		}
+		
 		var sql = 'SELECT fieldID FROM itemTypeFields '
 			+ 'WHERE itemTypeID=' + itemTypeID + ' ORDER BY orderIndex';
 		
