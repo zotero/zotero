@@ -306,7 +306,7 @@ var Scholar = new function(){
 	 */
 	function flattenArguments(args){
 		// Put passed scalar values into an array
-		if (typeof args!='object'){
+		if (typeof args!='object' || args===null){
 			args = [args];
 		}
 		

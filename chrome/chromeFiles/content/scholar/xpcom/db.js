@@ -172,7 +172,7 @@ Scholar.DB = new function(){
 		
 		if (statement && params){
 			// If single parameter, wrap in an array
-			if (!params.length){
+			if (typeof params != 'object' || params===null){
 				params = [params];
 			}
 			
