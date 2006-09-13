@@ -34,18 +34,10 @@ Scholar.Schema = new function(){
 		
 		var schemaVersion = _getSchemaSQLVersion('user');
 		
-		if (dbVersion > schemaVersion){
-			throw("Zotero user DB version is newer than SQL file");
-		}
-		
 		Scholar.DB.beginTransaction();
 		
 		try {
-			// If user DB version is less than schema file, create or update
-			if (dbVersion < schemaVersion){
-				_migrateUserSchema(dbVersion);
-			}
-			
+			_migrateUserSchema(dbVersion);
 			_updateSchema('system');
 			_updateSchema('scrapers');
 			Scholar.DB.commitTransaction();
@@ -233,17 +225,90 @@ Scholar.Schema = new function(){
 	
 	
 	/*
+	 * Determine the SQL statements necessary to drop the tables and indexed
+	 * in a given schema file
+	 *
+	 * NOTE: This is not currently used.
+	 *
+	 * Returns the SQL statements as a string for feeding into query()
+	 */
+	function _getDropCommands(schema){
+		if (!schema){
+			throw ('Schema type not provided to _getSchemaSQL()');
+		}
+		
+		var schemaFile = schema + '.sql';
+		
+		// We pull the schema from an external file so we only have to process
+		// it when necessary
+		var file = Components.classes["@mozilla.org/extensions/manager;1"]
+                    .getService(Components.interfaces.nsIExtensionManager)
+                    .getInstallLocation(SCHOLAR_CONFIG['GUID'])
+                    .getItemLocation(SCHOLAR_CONFIG['GUID']); 
+		file.append(schemaFile);
+		
+		// Open an input stream from file
+		var istream = Components.classes["@mozilla.org/network/file-input-stream;1"]
+			.createInstance(Components.interfaces.nsIFileInputStream);
+		istream.init(file, 0x01, 0444, 0);
+		istream.QueryInterface(Components.interfaces.nsILineInputStream);
+		
+		var line = {}, str = '', hasmore;
+		
+		// Skip the first line, which contains the schema version
+		istream.readLine(line);
+		
+		do {
+			hasmore = istream.readLine(line);
+			var matches =
+				line.value.match(/CREATE (TABLE|INDEX) IF NOT EXISTS ([^\s]+)/);
+			if (matches){
+				str += "DROP " + matches[1] + " IF EXISTS " + matches[2] + ";\n";
+			}
+		} while(hasmore);
+		
+		istream.close();
+		
+		return str;
+	}
+	
+	
+	/*
 	 * Create new DB schema
 	 */
 	function _initializeSchema(){
+		// Delete existing Zotero database
+		var file = Scholar.getScholarDatabase();
+		if (file.exists()){
+			file.remove(null);
+		}
+		
+		// Delete existing storage folder
+		var dir = Scholar.getStorageDirectory();
+		if (dir.exists()){
+			dir.remove(true);
+		}
+		
 		Scholar.DB.beginTransaction();
 		try {
 			Scholar.DB.query(_getSchemaSQL('user'));
 			_updateDBVersion('user', _getSchemaSQLVersion('user'));
+			
 			Scholar.DB.query(_getSchemaSQL('system'));
 			_updateDBVersion('system', _getSchemaSQLVersion('system'));
+			
 			Scholar.DB.query(_getSchemaSQL('scrapers'));
 			_updateDBVersion('scrapers', _getSchemaSQLVersion('scrapers'));
+			
+			var sql = "INSERT INTO items VALUES(1233, 14, "
+				+ "'Zotero - Quick Start Guide', '2006-08-31 20:00:00', "
+				+ "'2006-08-31 20:00:00')";
+			Scholar.DB.query(sql);
+			var sql = "INSERT INTO itemAttachments VALUES(1233, NULL, 3, "
+				+ "'text/html', 25, "
+				+ "'http://www.zotero.org/docs/quick_start_guide.php', NULL)";
+			Scholar.DB.query(sql);
+			
 			Scholar.DB.commitTransaction();
 		}
 		catch(e){
@@ -408,13 +473,14 @@ Scholar.Schema = new function(){
 	 * Migrate user schema from an older version, preserving data
 	 */
 	function _migrateUserSchema(fromVersion){
-		//
-		// Change this value to match the schema version
-		//
-		var toVersion = 1;
+		toVersion = _getSchemaSQLVersion('user');
 		
-		if (toVersion != _getSchemaSQLVersion('user')){
-			throw('User schema file version does not match version in _migrateUserSchema()');
+		if (fromVersion==toVersion){
+			return false;
+		}
+		
+		if (fromVersion > toVersion){
+			throw("Zotero user DB version is newer than SQL file");
 		}
 		
 		Scholar.debug('Updating user tables from version ' + fromVersion + ' to ' + toVersion);
@@ -432,7 +498,7 @@ Scholar.Schema = new function(){
 				}
 			}
 			
-			_updateDBVersion('user', i-1);
+			_updateSchema('user');
 			Scholar.DB.commitTransaction();
 		}
 		catch(e){

@@ -1,21 +1,20 @@
 -- 1
 
--- This file creates tables containing user-specific data -- any changes made
--- here must be mirrored in transition steps in schema.js::_migrateSchema(),
--- as this file will only be used for new users.
+-- This file creates tables containing user-specific data -- any changes
+-- to existing tables made here must be mirrored in transition steps in
+-- schema.js::_migrateSchema() -- however, new tables can be added by simply
+-- adding a CREATE TABLE IF NOT EXISTS statement and incrementing the version
+-- number above
 
 
-DROP TABLE IF EXISTS version;
-CREATE TABLE version (
+CREATE TABLE IF NOT EXISTS version (
     schema TEXT PRIMARY KEY,
     version INT NOT NULL
 );
-DROP INDEX IF EXISTS schema;
-CREATE INDEX schema ON version(schema);
+CREATE INDEX IF NOT EXISTS schema ON version(schema);
 
 -- The foundational table; every item collected has a unique record here
-DROP TABLE IF EXISTS items;
-CREATE TABLE items (
+CREATE TABLE IF NOT EXISTS items (
     itemID INTEGER PRIMARY KEY,
     itemTypeID INT,
     title TEXT,
@@ -24,8 +23,7 @@ CREATE TABLE items (
 );
 
 -- Type-specific data for individual items
-DROP TABLE IF EXISTS itemData;
-CREATE TABLE itemData (
+CREATE TABLE IF NOT EXISTS itemData (
     itemID INT,
     fieldID INT,
     value,
@@ -33,12 +31,10 @@ CREATE TABLE itemData (
     FOREIGN KEY (itemID) REFERENCES items(itemID),
     FOREIGN KEY (fieldID) REFERENCES fields(fieldID)
 );
-DROP INDEX IF EXISTS value;
-CREATE INDEX value ON itemData(value);
+CREATE INDEX IF NOT EXISTS value ON itemData(value);
 
 -- Note data for note items
-DROP TABLE IF EXISTS itemNotes;
-CREATE TABLE itemNotes (
+CREATE TABLE IF NOT EXISTS itemNotes (
     itemID INT,
     sourceItemID INT,
     note TEXT,
@@ -46,12 +42,10 @@ CREATE TABLE itemNotes (
     FOREIGN KEY (itemID) REFERENCES items(itemID),
     FOREIGN KEY (sourceItemID) REFERENCES items(itemID)
 );
-DROP INDEX IF EXISTS itemNotes_sourceItemID;
-CREATE INDEX itemNotes_sourceItemID ON itemNotes(sourceItemID);
+CREATE INDEX IF NOT EXISTS itemNotes_sourceItemID ON itemNotes(sourceItemID);
 
 -- Metadata for attachment items
-DROP TABLE IF EXISTS itemAttachments;
-CREATE TABLE itemAttachments (
+CREATE TABLE IF NOT EXISTS itemAttachments (
     itemID INT,
     sourceItemID INT,
     linkMode INT,
@@ -63,45 +57,37 @@ CREATE TABLE itemAttachments (
     FOREIGN KEY (itemID) REFERENCES items(itemID),
     FOREIGN KEY (sourceItemID) REFERENCES items(sourceItemID)
 );
-DROP INDEX IF EXISTS itemAttachments_sourceItemID;
-CREATE INDEX itemAttachments_sourceItemID ON itemAttachments(sourceItemID);
-DROP INDEX IF EXISTS itemAttachments_mimeType;
-CREATE INDEX itemAttachments_mimeType ON itemAttachments(mimeType);
+CREATE INDEX IF NOT EXISTS itemAttachments_sourceItemID ON itemAttachments(sourceItemID);
+CREATE INDEX IF NOT EXISTS itemAttachments_mimeType ON itemAttachments(mimeType);
 
 -- Individual entries for each tag
-DROP TABLE IF EXISTS tags;
-CREATE TABLE tags (
+CREATE TABLE IF NOT EXISTS tags (
     tagID INT,
     tag TEXT UNIQUE,
     PRIMARY KEY (tagID)
 );
 
 -- Associates items with keywords
-DROP TABLE IF EXISTS itemTags;
-CREATE TABLE itemTags (
+CREATE TABLE IF NOT EXISTS itemTags (
     itemID INT,
     tagID INT,
     PRIMARY KEY (itemID, tagID),
     FOREIGN KEY (itemID) REFERENCES items(itemID),
     FOREIGN KEY (tagID) REFERENCES tags(tagID)
 );
-DROP INDEX IF EXISTS itemTags_tagID;
-CREATE INDEX itemTags_tagID ON itemTags(tagID);
+CREATE INDEX IF NOT EXISTS itemTags_tagID ON itemTags(tagID);
 
-DROP TABLE IF EXISTS itemSeeAlso;
-CREATE TABLE itemSeeAlso (
+CREATE TABLE IF NOT EXISTS itemSeeAlso (
     itemID INT,
     linkedItemID INT,
     PRIMARY KEY (itemID, linkedItemID),
     FOREIGN KEY (itemID) REFERENCES items(itemID),
     FOREIGN KEY (linkedItemID) REFERENCES items(itemID)
 );
-DROP INDEX IF EXISTS itemSeeAlso_linkedItemID;
-CREATE INDEX itemSeeAlso_linkedItemID ON itemSeeAlso(linkedItemID);
+CREATE INDEX IF NOT EXISTS itemSeeAlso_linkedItemID ON itemSeeAlso(linkedItemID);
 
 -- Names of each individual "creator" (inc. authors, editors, etc.)
-DROP TABLE IF EXISTS creators;
-CREATE TABLE creators (
+CREATE TABLE IF NOT EXISTS creators (
     creatorID INT,
     firstName TEXT,
     lastName TEXT,
@@ -110,8 +96,7 @@ CREATE TABLE creators (
 );
 
 -- Associates single or multiple creators to items
-DROP TABLE IF EXISTS itemCreators;
-CREATE TABLE itemCreators (
+CREATE TABLE IF NOT EXISTS itemCreators (
     itemID INT,
     creatorID INT,
     creatorTypeID INT DEFAULT 1,
@@ -123,8 +108,7 @@ CREATE TABLE itemCreators (
 );
 
 -- Collections for holding items
-DROP TABLE IF EXISTS collections;
-CREATE TABLE collections (
+CREATE TABLE IF NOT EXISTS collections (
     collectionID INT,
     collectionName TEXT,
     parentCollectionID INT,
@@ -133,8 +117,7 @@ CREATE TABLE collections (
 );
 
 -- Associates items with the various collections they belong to
-DROP TABLE IF EXISTS collectionItems;
-CREATE TABLE collectionItems (
+CREATE TABLE IF NOT EXISTS collectionItems (
     collectionID INT,
     itemID INT,
     orderIndex INT DEFAULT 0,
@@ -142,18 +125,15 @@ CREATE TABLE collectionItems (
     FOREIGN KEY (collectionID) REFERENCES collections(collectionID),
     FOREIGN KEY (itemID) REFERENCES items(itemID)
 );
-DROP INDEX IF EXISTS itemID;
-CREATE INDEX itemID ON collectionItems(itemID);
+CREATE INDEX IF NOT EXISTS itemID ON collectionItems(itemID);
 
-DROP TABLE IF EXISTS savedSearches;
-CREATE TABLE savedSearches (
+CREATE TABLE IF NOT EXISTS savedSearches (
     savedSearchID INT,
     savedSearchName TEXT,
     PRIMARY KEY(savedSearchID)
 );
 
-DROP TABLE IF EXISTS savedSearchConditions;
-CREATE TABLE savedSearchConditions (
+CREATE TABLE IF NOT EXISTS savedSearchConditions (
     savedSearchID INT,
     searchConditionID INT,
     condition TEXT,
@@ -163,7 +143,3 @@ CREATE TABLE savedSearchConditions (
     PRIMARY KEY(savedSearchID, searchConditionID),
     FOREIGN KEY (savedSearchID) REFERENCES savedSearches(savedSearchID)
 );
-
-INSERT INTO "items" VALUES(1233, 14, 'Zotero - Quick Start Guide', '2006-08-31 20:00:00', '2006-08-31 20:00:00');
-INSERT INTO "itemAttachments" VALUES(1233, NULL, 3, 'text/html', 25, 'http://www.zotero.org/docs/quick_start_guide.php', NULL);
-
