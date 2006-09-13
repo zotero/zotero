@@ -1,4 +1,4 @@
--- 1
+-- 2
 
 -- This file creates tables containing user-specific data -- any changes
 -- to existing tables made here must be mirrored in transition steps in
@@ -12,6 +12,39 @@ CREATE TABLE IF NOT EXISTS version (
     version INT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS schema ON version(schema);
+
+-- Show or hide pre-mapped fields for system item types
+CREATE TABLE IF NOT EXISTS userFieldMask (
+    itemTypeID INT,
+    fieldID INT,
+    hide INT,
+    PRIMARY KEY (itemTypeID, fieldID),
+    FOREIGN KEY (itemTypeID, fieldID) REFERENCES itemTypeFields(itemTypeID, fieldID)
+);
+
+-- User-defined item types -- itemTypeIDs must be >= 1000
+CREATE TABLE IF NOT EXISTS userItemTypes (
+    itemTypeID INT,
+    typeName TEXT,
+    templateItemTypeID INT,
+    PRIMARY KEY (itemTypeID)
+);
+
+-- User-defined fields
+CREATE TABLE IF NOT EXISTS userFields (
+    userFieldID INT,
+    fieldName TEXT,
+    PRIMARY KEY (userFieldID)
+);
+
+-- Map custom fields to system and custom item types
+CREATE TABLE IF NOT EXISTS userItemTypeFields (
+    itemTypeID INT,
+    userFieldID INT,
+    orderIndex INT,
+    PRIMARY KEY (itemTypeID, userFieldID),
+    FOREIGN KEY (userFieldID) REFERENCES userFields(userFieldID)
+);
 
 -- The foundational table; every item collected has a unique record here
 CREATE TABLE IF NOT EXISTS items (

@@ -15,18 +15,28 @@
 	
 	
 	<popupset>
-		<popup id="scholar-remove-type-menu">
-			 <menuitem label="Remove item type" oncommand="Scholar_ItemTypeManager.removeType(document.popupNode)"/>
+		<popup id="scholar-type-menu"
+				onpopupshowing="Scholar_ItemTypeManager.buildTypeContextMenu()"
+				onpopuphidden="Scholar_ItemTypeManager.init()">
+			<menuitem label="Remove item type" oncommand="Scholar_ItemTypeManager.removeType(document.popupNode)"/>
+			<menuseparator/>
+			<menu label="Template">
+				<menupopup id="scholar-type-template-menu">
+					<menuitem type="checkbox" label="None" oncommand="Scholar_ItemTypeManager.setTemplate(document.popupNode.value, this.value)"/>
+					<menuseparator/>
+				</menupopup>
+			</menu>
 		</popup>
+		
 		<popup id="scholar-remove-field-menu">
-			 <menuitem label="Remove field" oncommand="Scholar_ItemTypeManager.removeField(document.popupNode)"/>
+			<menuitem label="Remove field" oncommand="Scholar_ItemTypeManager.removeField(document.popupNode)"/>
 		</popup>
 	</popupset>
 	
 	
 	<vbox>
 		<hbox style="height:25em">
-			<listbox id="item-type-list" seltype="single" context="scholar-remove-type-menu"
+			<listbox id="item-type-list" seltype="single" context="scholar-type-menu"
 				onselect="Scholar_ItemTypeManager.handleTypeSelect()">
 				<listhead>
 					<listheader label="Item Types"/>
@@ -66,11 +76,10 @@
 		<label style="margin:.5em 0; color:red" id="status-line"></label>
 		
 		<description style="font-size:small; margin:.4em 0 .3em">
-			Double-click a field to add it to or remove it from the currently selected item type.
+			Double-click a field to add it to or remove it from the currently selected item type. Hit Return on a mapped field to toggle its default visibility.
 		</description>
-		
-		<description style="font-size:small; margin:.3em 0 .8em">
-			Hit Return on a mapped field to toggle its default visibility. (Light blue fields are hidden.) 
+		<description style="font-size:small; margin:.4em 0 .3em">
+			Light blue fields are hidden. Brown fields are template fields and can only be removed by changing the template.
 		</description>
 		
 		<button label="Generate SQL" oncommand="document.getElementById('sql-dump').value=Scholar_ItemTypeManager.createSQLDump()"/>

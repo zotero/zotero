@@ -1,6 +1,8 @@
 var Scholar_ItemTypeManager = new function(){
 	this.init = init;
 	this.handleTypeSelect = handleTypeSelect;
+	this.buildTypeContextMenu = buildTypeContextMenu;
+	this.setTemplate = setTemplate;
 	this.addFieldToType = addFieldToType;
 	this.removeFieldFromType = removeFieldFromType;
 	this.handleShowHide = handleShowHide;
@@ -13,12 +15,14 @@ var Scholar_ItemTypeManager = new function(){
 	this.createSQLDump = createSQLDump;
 	
 	var _typesList;
+	var _typeTemplates;
+	var _typeFieldsList;
 	var _fieldsList;
-	
 	
 	function init(){
 		// Populate the listbox with item types
 		_typesList = document.getElementById('item-type-list');
+		_typeTemplates = document.getElementById('scholar-type-template-menu');
 		_typeFieldsList = document.getElementById('item-type-fields-list');
 		_fieldsList = document.getElementById('fields-list');
 		
@@ -44,6 +48,19 @@ var Scholar_ItemTypeManager = new function(){
 			}
 		}
 		
+		// Update the context menu
+		while (_typeTemplates.childNodes[2]){
+			_typeTemplates.removeChild(_typeTemplates.childNodes[2]);
+		}
+		for (var i in types){
+			var item = document.createElement('menuitem');
+			item.setAttribute('label', types[i]['name']);
+			item.setAttribute('value', types[i]['id']);
+			item.setAttribute('type', 'checkbox');
+			item.setAttribute('oncommand', "Scholar_ItemTypeManager.setTemplate(document.popupNode.value, this.value)");
+			_typeTemplates.appendChild(item);
+		}
+		
 		if (_typesList.selectedIndex==-1){
 			_typesList.selectedIndex=0;
 		}
@@ -64,6 +81,87 @@ var Scholar_ItemTypeManager = new function(){
 		_populateFieldsList(id);
 	}
 	
+	function buildTypeContextMenu(){
+		var id = _typesList.selectedItem.value;
+		var template = _getItemTypeTemplate(id);
+		
+		if (!template){
+			_typeTemplates.childNodes[0].setAttribute('checked', true);
+		}
+		else {
+			_typeTemplates.childNodes[0].setAttribute('checked', false);
+		}
+		
+		for (var i=2, len=_typeTemplates.childNodes.length; i<len; i++){
+			var item = _typeTemplates.childNodes[i];
+			
+			if (item.getAttribute('value')==id){
+				item.setAttribute('hidden', true);
+			}
+			else {
+				item.setAttribute('hidden', false);
+			}
+			
+			if (item.getAttribute('value')==template){
+				item.setAttribute('checked', true);
+			}
+			else {
+				item.setAttribute('checked', false);
+			}
+		}
+	}
+	
+	
+	function setTemplate(itemTypeID, templateItemTypeID){
+		var currentTemplateItemTypeID = _getItemTypeTemplate(itemTypeID);
+		
+		if (itemTypeID<1000){
+			var typesTable = 'itemTypes';
+		}
+		else {
+			var typesTable = 'userItemTypes';
+		}
+		
+		// If currently from a template, clear the template fields
+		if (currentTemplateItemTypeID){
+			var sql = "SELECT fieldID FROM itemTypeFields WHERE itemTypeID=?";
+			var fields = Scholar.DB.columnQuery(sql, currentTemplateItemTypeID);
+			
+			for (var i in fields){
+				_DBUnmapField(itemTypeID, fields[i]);
+			}
+		}
+		
+		if (templateItemTypeID){
+			// Add the new template fields
+			var sql = "SELECT fieldID FROM itemTypeFields WHERE itemTypeID=? "
+				+ "ORDER BY orderIndex";
+			var fields = Scholar.DB.columnQuery(sql, templateItemTypeID);
+			Scholar.debug('--------');
+			Scholar.debug(fields);
+			Scholar.debug('--------');
+			for (var i in fields){
+				_DBMapField(itemTypeID, fields[i]);
+			}
+		}
+		else {
+			templateItemTypeID = null;
+		}
+		
+		var sql = "UPDATE " + typesTable + " SET templateItemTypeID=? WHERE "
+			+ "itemTypeID=?";
+		
+		return Scholar.DB.query(sql, [templateItemTypeID, itemTypeID]);
+	}
+	
+	
+	function _getItemTypeTemplate(itemTypeID){
+		var table = itemTypeID>=1000 ? 'userItemTypes' : 'itemTypes';
+		var sql = "SELECT templateItemTypeID FROM " + table
+		sql += " WHERE itemTypeID=?";
+		return Scholar.DB.valueQuery(sql, itemTypeID);
+	}
+	
 	
 	/**
 	* Add a field to an item type
@@ -74,17 +172,7 @@ var Scholar_ItemTypeManager = new function(){
 		Scholar.debug('Adding field ' + item.value + ' to item type '
 			+ _getCurrentTypeID());
 		
-		Scholar.DB.beginTransaction();
-		
-		// Get the next available position
-		var sql = "SELECT IFNULL(MAX(orderIndex)+1,1) FROM itemTypeFields "
-			+ "WHERE itemTypeID=?";
-		var nextIndex = Scholar.DB.valueQuery(sql, [_getCurrentTypeID()]);
-		
-		var sql = "INSERT INTO itemTypeFields VALUES (?,?,?,?)";
-		Scholar.DB.query(sql, [_getCurrentTypeID(), item.value, null, nextIndex]);
-		
-		Scholar.DB.commitTransaction();
+		_DBMapField(_getCurrentTypeID(), item.value);
 		
 		var pos = _fieldsList.getIndexOfItem(item);
 		_fieldsList.removeItemAt(pos);
@@ -161,7 +249,6 @@ var Scholar_ItemTypeManager = new function(){
 	function handleAddField(box, event){
 		return _handleAddEvent(box, event, 'field');
 	}
-	
 	
 	function _handleAddEvent(box, event, target){
 		if (target=='type'){
@@ -283,7 +370,10 @@ var Scholar_ItemTypeManager = new function(){
 		
 		for (var i in types){
 			sql += prefix + "INSERT INTO itemTypes VALUES ("
-				+ types[i]['itemTypeID'] + ",'" + types[i]['typeName'] + "');\n"
+				+ types[i]['itemTypeID'] + ", '" + types[i]['typeName'] + "', "
+				+ (types[i]['templateItemTypeID']
+					? types[i]['templateItemTypeID'] : 'NULL')
+				+ ");\n"
 		}
 		
 		sql += "\n";
@@ -329,9 +419,14 @@ var Scholar_ItemTypeManager = new function(){
 	* Populate the listbox of fields used by this item type
 	**/
 	function _populateTypeFieldsList(itemTypeID){
-		var sql = 'SELECT fieldID, hide FROM itemTypeFields '
-			+ 'WHERE itemTypeID=' + itemTypeID + ' ORDER BY orderIndex';
-		var fields = Scholar.DB.query(sql);
+		// TODO: show template fields for user types
+		
+		var sql = "SELECT fieldID, hide, "
+			+ "(fieldID IN (SELECT fieldID FROM itemTypeFields WHERE itemTypeID="
+			+ "(SELECT templateItemTypeID FROM itemTypes WHERE itemTypeID=?1))) "
+			+ "AS isTemplateField FROM itemTypeFields ITF WHERE itemTypeID=?1 "
+			+ "ORDER BY orderIndex";
+		var fields = Scholar.DB.query(sql, itemTypeID);
 		
 		// Clear fields box
 		while (_typeFieldsList.getRowCount()){
@@ -341,11 +436,21 @@ var Scholar_ItemTypeManager = new function(){
 		for (var i in fields){
 			var item = _typeFieldsList.appendItem(_getFieldName(fields[i]['fieldID']), fields[i]['fieldID']);
 			
-			item.addEventListener('dblclick', new function(){
-				return function(){
-					Scholar_ItemTypeManager.removeFieldFromType(this);
-				}
-			}, true);
+			if (fields[i]['isTemplateField']){
+				item.setAttribute('isTemplateField', true);
+				item.addEventListener('dblclick', new function(){
+					return function(){
+						alert('You cannot remove template fields.');
+					}
+				}, true);
+			}
+			else {
+				item.addEventListener('dblclick', new function(){
+					return function(){
+						Scholar_ItemTypeManager.removeFieldFromType(this);
+					}
+				}, true);
+			}
 			
 			item.setAttribute('isHidden', !!fields[i]['hide']);
 		}
@@ -388,6 +493,24 @@ var Scholar_ItemTypeManager = new function(){
 				i--;
 			}
 		}
+	}
+	
+	
+	/*
+	 * Map a field to an item type in the DB
+	 */
+	function _DBMapField(itemTypeID, fieldID){
+		Scholar.DB.beginTransaction();
+		
+		// Get the next available position
+		var sql = "SELECT IFNULL(MAX(orderIndex)+1,1) FROM itemTypeFields "
+			+ "WHERE itemTypeID=?";
+		var nextIndex = Scholar.DB.valueQuery(sql, itemTypeID);
+		
+		var sql = "INSERT INTO itemTypeFields VALUES (?,?,?,?)";
+		Scholar.DB.query(sql, [itemTypeID, fieldID, null, nextIndex]);
+		
+		Scholar.DB.commitTransaction();
 	}
 	
 	
