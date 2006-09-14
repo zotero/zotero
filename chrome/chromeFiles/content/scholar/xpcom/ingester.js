@@ -58,7 +58,9 @@ Scholar.Ingester.ProxyMonitor = new function() {
 					}
 				}
 			}
-			
+		} catch(e) {}
+		
+		try {
 			// find ezproxies
 			if(channel.getResponseHeader("Server") == "EZproxy") {
 				// We're connected to an EZproxy
@@ -93,7 +95,9 @@ Scholar.Ingester.ProxyMonitor = new function() {
 					return;
 				}
 				
-				if(channel.URI.host == newURI.host && channel.URI.port != newURI.port) {
+				if((channel.URI.host == newURI.host && channel.URI.port != newURI.port) ||
+				   (newURI.host != channel.URI.host &&
+				    newURI.hostPort.substr(newURI.hostPort.length-channel.URI.hostPort.length) == channel.URI.hostPort)) {
 					// Different ports but the same server means EZproxy active
 					
 					Scholar.debug("EZProxy: host "+newURI.hostPort+" is really "+properURI.hostPort);

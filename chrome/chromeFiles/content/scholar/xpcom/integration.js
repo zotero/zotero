@@ -531,8 +531,11 @@ Scholar.Integration.SOAP = new function() {
 }
 
 Scholar.Integration.Session = function(styleID) {
-	this.styleID = styleID;
-	this.style = Scholar.Cite.getStyle(this.styleID);
+	if(styleID) {
+		this.styleID = styleID;
+		this.style = Scholar.Cite.getStyle(this.styleID);
+	}
+	
 	this.citationSet = new Scholar.Integration.CitationSet(this.style);
 	this.citationFactory = new Scholar.Integration.CitationFactory(this.style);
 }
@@ -616,7 +619,7 @@ Scholar.Integration.CitationSet = function(style) {
 	this.citationsByIndex = new Object();
 	this.lastItemID = null;
 	
-	this.style = style;
+	if(style) this.style = style;
 }
 
 /*
@@ -669,7 +672,7 @@ Scholar.Integration.CitationSet.prototype.addCitation = function(citation) {
  * a class to generate and cache citations
  */
 Scholar.Integration.CitationFactory = function(style) {
-	this.style = style;
+	if(style) this.style = style;
 	this.cache = new Object();
 	this.dateModified = new Object();
 	this.items = new Array();
