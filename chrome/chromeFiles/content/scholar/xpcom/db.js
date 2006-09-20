@@ -171,8 +171,10 @@ Scholar.DB = new function(){
 		}
 		
 		if (statement && params){
-			// If single parameter, wrap in an array
-			if (typeof params != 'object' || params===null){
+			// If single scalar value or single object, wrap in an array
+			if ((typeof params != 'object' || params===null) ||
+				(params && typeof params == 'object' &&
+				 params.constructor != Array)){
 				params = [params];
 			}
 			
@@ -231,6 +233,7 @@ Scholar.DB = new function(){
 						Scholar.debug('Binding parameter ' + (i+1)
 							+ ' of type NULL', 5);
 						statement.bindNullParameter(i);
+						break;
 				}
 			}
 		}
