@@ -394,6 +394,21 @@ Scholar.DB = new function(){
 		var file = Scholar.getScholarDatabase();
 		var backupFile = Scholar.getScholarDatabase('bak');
 		
+		if (SCHOLAR_CONFIG['DB_REBUILD']){
+			if (confirm('Erase all user data and recreate database from schema?')){
+				// Delete existing Zotero database
+				if (file.exists()){
+					file.remove(null);
+				}
+				
+				// Delete existing storage folder
+				var dir = Scholar.getStorageDirectory();
+				if (dir.exists()){
+					dir.remove(true);
+				}
+			}
+		}
+		
 		// DEBUG: Temporary check
 		// Test the backup file (to make sure the backup mechanism is working)
 		if (backupFile.exists()){

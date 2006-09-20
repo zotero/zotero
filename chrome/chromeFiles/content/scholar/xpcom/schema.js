@@ -11,13 +11,6 @@ Scholar.Schema = new function(){
 	 * Checks if the DB schema exists and is up-to-date, updating if necessary
 	 */
 	function updateSchema(){
-		if (SCHOLAR_CONFIG['DB_REBUILD']){
-			if (confirm('Erase all user data and recreate database from schema?')){
-				_initializeSchema();
-				return;
-			}
-		}
-		
 		var dbVersion = _getDBVersion('user');
 		
 		// 'schema' check is for old (<= 1.0b1) schema system
@@ -277,18 +270,6 @@ Scholar.Schema = new function(){
 	 * Create new DB schema
 	 */
 	function _initializeSchema(){
-		// Delete existing Zotero database
-		var file = Scholar.getScholarDatabase();
-		if (file.exists()){
-			file.remove(null);
-		}
-		
-		// Delete existing storage folder
-		var dir = Scholar.getStorageDirectory();
-		if (dir.exists()){
-			dir.remove(true);
-		}
-		
 		Scholar.DB.beginTransaction();
 		try {
 			Scholar.DB.query(_getSchemaSQL('user'));
