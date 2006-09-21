@@ -68,6 +68,10 @@ Cc["@mozilla.org/moz/jssubscript-loader;1"]
 
 Cc["@mozilla.org/moz/jssubscript-loader;1"]
 	.getService(Ci.mozIJSSubScriptLoader)
+	.loadSubScript("chrome://scholar/content/xpcom/fulltext.js");
+
+Cc["@mozilla.org/moz/jssubscript-loader;1"]
+	.getService(Ci.mozIJSSubScriptLoader)
 	.loadSubScript("chrome://scholar/content/xpcom/mime.js");
 
 Cc["@mozilla.org/moz/jssubscript-loader;1"]
@@ -121,6 +125,19 @@ function confirm(msg){
 		.getService(Ci.nsIPromptService)
 		.confirm(null, "", msg);
 }
+
+
+/**
+* Convenience method to replicate window.setTimeout()
+**/
+function setTimeout(func, ms){
+	var timer = Components.classes["@mozilla.org/timer;1"].
+		createInstance(Components.interfaces.nsITimer);
+	// {} implements nsITimerCallback
+	timer.initWithCallback({notify:func}, ms,
+		Components.interfaces.nsITimer.TYPE_ONE_SHOT);
+}
+
 
 //
 // XPCOM goop

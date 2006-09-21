@@ -134,6 +134,13 @@
 	
 	<binding id="search-condition">
 		<implementation>
+			<field name="conditionID"/>
+			<field name="selectedCondition"/>
+			<field name="mode"/>
+			<field name="selectedOperator"/>
+			<field name="value"/>
+			<field name="parent"/>
+			<field name="dontupdate"/>
 			<constructor>
 				<![CDATA[
 					var operators = new Array('is', 'isNot', 'contains', 'doesNotContain', 'isLessThan', 'isGreaterThan', 'isBefore', 'isAfter');
@@ -154,8 +161,6 @@
 					conditionsList.selectedIndex = 0;
 				]]>
 			</constructor>
-			<field name="selectedCondition"/>
-			<field name="selectedOperator"/>
 			<method name="onConditionSelected">
 				<body>
 					<![CDATA[
@@ -207,7 +212,7 @@
 							}
 							
 							this.createValueMenu(merged);
-							break;
+							return;
 						
 						case 'itemTypeID':
 							var types = Scholar.ItemTypes.getTypes();
@@ -219,22 +224,25 @@
 								delete types[i]['id'];
 							}
 							this.createValueMenu(types);
-							break;
-						
-						default:
-							// If switching between menu and textbox, clear value
-							if (this.id('valuefield').hidden){
-								this.value = '';
-								this.id('valuefield').value = '';
-							}
-							else {
-								this.id('valuefield').value = this.value;
-							}
-							
-							this.id('valuefield').hidden = false;
-							this.id('valuemenu').hidden = true;
-							break;
+							return;
 					}
+					
+					// Otherwise use a text field
+					
+					// If switching between menu and textbox, clear value
+					if (this.id('valuefield').hidden){
+						this.value = '';
+						this.id('valuefield').value = '';
+					}
+					else {
+						this.id('valuefield').value = this.value;
+					}
+					
+					// Update field drop-down if applicable
+					this.id('valuefield').update(conditionsMenu.value, this.mode);
+					
+					this.id('valuefield').hidden = false;
+					this.id('valuemenu').hidden = true;
 					]]>
 				</body>
 			</method>
@@ -262,10 +270,6 @@
 					]]>
 				</body>
 			</method>
-			<field name="dontupdate"/>
-			<field name="parent"/>
-			<field name="conditionID"/>
-			<field name="value"/>
 			<method name="initWithParentAndCondition">
 				<parameter name="parent"/>
 				<parameter name="condition"/>
@@ -279,7 +283,7 @@
 							this.dontupdate = true;	//so that the search doesn't get updated while we are creating controls.
 							var prefix = '';
 							
-							// Handle collectionID/savedSearchID
+							// Handle special conditions
 							switch (condition['condition'])
 							{
 								case 'savedSearchID':
@@ -295,6 +299,7 @@
 									this.id('conditionsmenu').value = condition['condition'];
 							}
 							
+							this.mode = condition['mode'];
 							this.id('operatorsmenu').value = condition['operator'];
 							this.value = prefix + condition['value'];
 							this.dontupdate = false;
@@ -316,6 +321,10 @@
 							if (!this.id('valuefield').hidden)
 							{
 								var value = this.id('valuefield').value;
+								// Append mode to condition
+								if (this.id('valuefield').mode){
+									condition += '/' + this.id('valuefield').mode;
+								}
 							}
 							
 							// Handle special C1234 and S5678 form for
@@ -378,7 +387,7 @@
 				<xul:menulist id="operatorsmenu">
 					<xul:menupopup/>
 				</xul:menulist>
-				<xul:textbox id="valuefield" flex="1"/>
+				<xul:zoterosearchtextbox id="valuefield" flex="1"/>
 				<xul:menulist id="valuemenu" flex="1" hidden="true">
 					<xul:menupopup/>
 				</xul:menulist>

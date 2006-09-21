@@ -84,6 +84,33 @@ searchcondition menulist[id="operatorsmenu"]
 	width:15em;
 }
 
+zoterosearchtextbox
+{
+	-moz-binding: url('chrome://scholar/content/bindings/searchtextbox.xml#zotero-search-textbox');
+}
+
+zoterosearchtextbox toolbarbutton
+{
+	padding:0;
+	cursor:default;
+}
+
+zoterosearchtextbox:not([hasOptions=true]) toolbarbutton
+{
+	display:none;
+}
+
+zoterosearchtextbox .toolbarbutton-text
+{
+	margin:0;
+	padding:0;
+}
+
+zoterosearchtextbox .toolbarbutton-menu-dropmarker
+{
+	padding:0 2px;
+}
+
 #editpane-dynamic-fields row, tagsbox row
 {
 	margin:0 0 1px;

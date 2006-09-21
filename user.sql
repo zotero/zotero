@@ -1,4 +1,4 @@
--- 2
+-- 3
 
 -- This file creates tables containing user-specific data -- any changes
 -- to existing tables made here must be mirrored in transition steps in
@@ -176,3 +176,16 @@ CREATE TABLE IF NOT EXISTS savedSearchConditions (
     PRIMARY KEY(savedSearchID, searchConditionID),
     FOREIGN KEY (savedSearchID) REFERENCES savedSearches(savedSearchID)
 );
+
+CREATE TABLE IF NOT EXISTS fulltextWords (
+    wordID INTEGER PRIMARY KEY,
+    word TEXT UNIQUE
+);
+CREATE INDEX IF NOT EXISTS fulltextWords_word ON fulltextWords(word);
+
+CREATE TABLE IF NOT EXISTS fulltextItems (
+    wordID INT,
+    itemID INT,
+    PRIMARY KEY (wordID, itemID)
+);
+CREATE INDEX IF NOT EXISTS fulltextItems_itemID ON fulltextItems(itemID);

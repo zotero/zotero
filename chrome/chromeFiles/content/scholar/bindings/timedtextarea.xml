@@ -1,8 +1,11 @@
 <?xml version="1.0"?>
 <!--
-	Zotero
-	Copyright (C) 2006   Center for History and New Media, George Mason University, Fairfax, VA
-	http://chnm.gmu.edu/
+	Mozilla timed-textbox binding applied to the XBL #textarea rather than
+	#textbox, with the Return key event handler removed
+	
+	Note: It would be much nicer if a) Mozilla offered this natively or b) we
+	just extended the timed-textbox binding directly, but since it's based on
+	html:input rather than html:textarea, doing so breaks things in various ways
 -->
 <bindings 	xmlns="http://www.mozilla.org/xbl"
 			xmlns:xbl="http://www.mozilla.org/xbl"

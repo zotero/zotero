@@ -1,0 +1,4 @@
+<!ENTITY scholar.search.textModes.phrase	"Phrase">
+<!ENTITY scholar.search.textModes.phraseBinary	"Phrase (incl. binary files)">
+<!ENTITY scholar.search.textModes.regexp	"Regexp">
+<!ENTITY scholar.search.textModes.regexpCS	"Regexp (case-sensitive)">

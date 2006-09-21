@@ -47,15 +47,20 @@ Scholar.Search.prototype.load = function(savedSearchID){
 		+ "WHERE savedSearchID=" + savedSearchID + " ORDER BY searchConditionID");
 	
 	for (var i in conditions){
-		if (!Scholar.SearchConditions.get(conditions[i]['condition'])){
+		// Parse "condition[/mode]"
+		var [condition, mode] =
+			Scholar.SearchConditions.parseCondition(conditions[i]['condition']);
+		
+		if (!Scholar.SearchConditions.get(condition)){
 			Scholar.debug("Invalid saved search condition '"
-				+ conditions[i]['condition'] + "' -- skipping", 2);
+				+ condition + "' -- skipping", 2);
 			continue;
 		}
 		
 		this._conditions[conditions[i]['searchConditionID']] = {
 			id: conditions[i]['searchConditionID'],
-			condition: conditions[i]['condition'],
+			condition: condition,
+			mode: mode,
 			operator: conditions[i]['operator'],
 			value: conditions[i]['value'],
 			required: conditions[i]['required']
@@ -111,8 +116,13 @@ Scholar.Search.prototype.save = function(){
 			+ "searchConditionID, condition, operator, value, required) "
 			+ "VALUES (?,?,?,?,?,?)";
 		
+		// Convert condition and mode to "condition[/mode]"
+		var condition = this._conditions[i]['mode'] ?
+			this._conditions[i]['condition'] + '/' + this._conditions[i]['mode'] :
+			this._conditions[i]['condition']
+		
 		var sqlParams = [
-			this._savedSearchID, i, this._conditions[i]['condition'],
+			this._savedSearchID, i, condition,
 			this._conditions[i]['operator']
 				? this._conditions[i]['operator'] : null,
 			this._conditions[i]['value']
@@ -137,22 +147,33 @@ Scholar.Search.prototype.addCondition = function(condition, operator, value, req
 	}
 	
 	// Shortcut to add a condition on every table -- does not return an id
-	if (condition=='fulltext'){
+	if (condition=='quicksearch'){
 		this.addCondition('joinMode', 'any');
-		this.addCondition('title', operator, value, false);
-		this.addCondition('field', operator, value, false);
-		this.addCondition('numberfield', operator, value, false);
-		this.addCondition('creator', operator, value, false);
-		this.addCondition('tag', operator, value, false);
-		this.addCondition('note', operator, value, false);
+		
+		// Quicksearch words don't need to be phrases
+		var words = Scholar.Fulltext.semanticSplitter(value);
+		for each(var i in words){
+			this.addCondition('blockStart');
+			this.addCondition('title', operator, i, false);
+			this.addCondition('field', operator, i, false);
+			this.addCondition('numberfield', operator, i, false);
+			this.addCondition('creator', operator, i, false);
+			this.addCondition('tag', operator, i, false);
+			this.addCondition('note', operator, i, false);
+			this.addCondition('fulltextWord', operator, i, false);
+			this.addCondition('blockEnd');
+		}
 		return false;
 	}
 	
 	var searchConditionID = ++this._maxSearchConditionID;
 	
+	var [condition, mode] = Scholar.SearchConditions.parseCondition(condition);
+	
 	this._conditions[searchConditionID] = {
 		id: searchConditionID,
 		condition: condition,
+		mode: mode,
 		operator: operator,
 		value: value,
 		required: required
@@ -222,7 +243,45 @@ Scholar.Search.prototype.search = function(){
 		this._buildQuery();
 	}
 	
-	return Scholar.DB.columnQuery(this._sql, this._sqlParams);
+	var ids = Scholar.DB.columnQuery(this._sql, this._sqlParams);
+	
+	if (!ids){
+		return false;
+	}
+	
+	// Filter results with fulltext search
+	for each(var condition in this._conditions){
+		if (condition['condition']=='fulltextContent'){
+			var fulltextIDs = Scholar.Fulltext.findTextInItems(ids,
+				condition['value'],	condition['mode']);
+			
+			var hash = {};
+			for each(var val in fulltextIDs){
+				hash[val.id] = true;
+			}
+			
+			switch (condition['operator']){
+				case 'contains':
+					var filter = function(val,  index, array){
+						return hash[val] ? true : false;
+					}
+					break;
+				
+				case 'doesNotContain':
+					var filter = function(val,  index, array){
+						return hash[val] ? false : true;
+					}
+					break;
+					
+				default:
+					continue;
+			}
+			
+			var ids = ids.filter(filter);
+		}
+	}
+	
+	return ids;
 }
 
 
@@ -255,21 +314,17 @@ Scholar.Search.prototype._buildQuery = function(){
 	var anySQL = '';
 	var anySQLParams = [];
 	
-	var tables = [];
+	var conditions = [];
 	
 	for (var i in this._conditions){
 		var data = Scholar.SearchConditions.get(this._conditions[i]['condition']);
 		
-		// Group standard conditions by table
 		if (data['table']){
-			if (!tables[data['table']]){
-				tables[data['table']] = [];
-			}
-			
-			tables[data['table']].push({
+			conditions.push({
 				name: data['name'],
 				alias: data['name']!=this._conditions[i]['condition']
 					? this._conditions[i]['condition'] : false,
+				table: data['table'],
 				field: data['field'],
 				operator: this._conditions[i]['operator'],
 				value: this._conditions[i]['value'],
@@ -291,6 +346,18 @@ Scholar.Search.prototype._buildQuery = function(){
 				case 'joinMode':
 					var joinMode = this._conditions[i]['operator'].toUpperCase();
 					continue;
+				
+				case 'fulltextContent':
+					// Handled in Search.search()
+					continue;
+				
+				// For quicksearch block markers
+				case 'blockStart':
+					conditions.push({name:'blockStart'});
+					continue;
+				case 'blockEnd':
+					conditions.push({name:'blockEnd'});
+					continue;
 			}
 			
 			throw ('Unhandled special condition ' + this._conditions[i]['condition']);
@@ -300,8 +367,7 @@ Scholar.Search.prototype._buildQuery = function(){
 	if (hasConditions){
 		sql += " WHERE ";
 		
-		for (var i in tables){
-			for (var j in tables[i]){
+		for each(var condition in conditions){
 				var openParens = 0;
 				var skipOperators = false;
 				var condSQL = '';
@@ -310,44 +376,46 @@ Scholar.Search.prototype._buildQuery = function(){
 				//
 				// Special table handling
 				//
-				switch (i){
-					case 'savedSearches':
-						break;
-					default:
-						condSQL += 'itemID '
-						switch (tables[i][j]['operator']){
-							case 'isNot':
-							case 'doesNotContain':
-								condSQL += 'NOT ';
-								break;
-						}
-						condSQL += 'IN (SELECT itemID FROM ' + i + ' WHERE (';
-						openParens = 2;
+				if (condition['table']){
+					switch (condition['table']){
+						case 'savedSearches':
+							break;
+						default:
+							condSQL += 'itemID '
+							switch (condition['operator']){
+								case 'isNot':
+								case 'doesNotContain':
+									condSQL += 'NOT ';
+									break;
+							}
+							condSQL += 'IN (SELECT itemID FROM ' +
+								condition['table'] + ' WHERE (';
+							openParens = 2;
+					}
 				}
-				
 				
 				//
 				// Special condition handling
 				//
-				switch (tables[i][j]['name']){
+				switch (condition['name']){
 					case 'field':
 					case 'datefield':
-						if (!tables[i][j]['alias']){
+						if (!condition['alias']){
 							break;
 						}
 						condSQL += 'fieldID=? AND ';
 						condSQLParams.push(
-							Scholar.ItemFields.getID(tables[i][j]['alias'])
+							Scholar.ItemFields.getID(condition['alias'])
 						);
 						break;
 					
 					case 'collectionID':
 						condSQL += "collectionID IN (?,";
-						condSQLParams.push({int:tables[i][j]['value']});
+						condSQLParams.push({int:condition['value']});
 						
 						// And descendents if recursive search
 						if (recursive){
-							var col = Scholar.Collections.get(tables[i][j]['value']);
+							var col = Scholar.Collections.get(condition['value']);
 							var descendents = col.getDescendents(false, 'collection');
 							if (descendents){
 								for (var k in descendents){
@@ -365,16 +433,36 @@ Scholar.Search.prototype._buildQuery = function(){
 					
 					case 'savedSearchID':
 						condSQL += "itemID ";
-						if (tables[i][j]['operator']=='isNot'){
+						if (condition['operator']=='isNot'){
 							condSQL += "NOT ";
 						}
 						condSQL += "IN (";
 						var search = new Scholar.Search();
-						search.load(tables[i][j]['value']);
-						condSQL += search.getSQL();
-						var subpar = search.getSQLParams();
-						for (var k in subpar){
-							condSQLParams.push(subpar[k]);
+						search.load(condition['value']);
+						
+						// Check if there are any post-search filters
+						var subconds = search.getSearchConditions();
+						var hasFilter;
+						for each(var k in subconds){
+							if (k.condition == 'fulltextContent'){
+								hasFilter = true;
+								break;
+							}
+						}
+						// This is an ugly and inefficient way of doing a
+						// subsearch, but it's necessary if there are any
+						// post-search filters (e.g. fulltext scanning)
+						if (hasFilter){
+							var subids = search.search();
+							condSQL += subids.join();
+						}
+						// Otherwise just put the SQL in a subquery
+						else {
+							condSQL += search.getSQL();
+							var subpar = search.getSQLParams();
+							for (var k in subpar){
+								condSQLParams.push(subpar[k]);
+							}
 						}
 						condSQL += ")";
 						
@@ -391,41 +479,60 @@ Scholar.Search.prototype._buildQuery = function(){
 							+ "WHERE ";
 						openParens++;
 						break;
+					
+					case 'fulltextWord':
+						condSQL += "wordID IN (SELECT wordID FROM fulltextWords "
+							+ "WHERE ";
+						openParens++;
+						break;
+					
+					// For quicksearch blocks
+					case 'blockStart':
+					case 'blockEnd':
+						skipOperators = true;
+						break;
 				}
 				
 				if (!skipOperators){
-					condSQL += tables[i][j]['field'];
-					switch (tables[i][j]['operator']){
+					condSQL += condition['field'];
+					switch (condition['operator']){
 						case 'contains':
 						case 'doesNotContain': // excluded with NOT IN above
 							condSQL += ' LIKE ?';
-							condSQLParams.push('%' + tables[i][j]['value'] + '%');
+							condSQLParams.push('%' + condition['value'] + '%');
 							break;
 							
 						case 'is':
 						case 'isNot': // excluded with NOT IN above
 							condSQL += '=?';
-							condSQLParams.push(tables[i][j]['value']);
+							condSQLParams.push(condition['value']);
 							break;
-							
+						
+						/*
+						case 'beginsWith':
+							condSQL += '=?';
+							condSQLParams.push(condition['value'] + '%');
+							break;
+						*/
+						
 						case 'isLessThan':
 							condSQL += '<?';
-							condSQLParams.push({int:tables[i][j]['value']});
+							condSQLParams.push({int:condition['value']});
 							break;
 							
 						case 'isGreaterThan':
 							condSQL += '>?';
-							condSQLParams.push({int:tables[i][j]['value']});
+							condSQLParams.push({int:condition['value']});
 							break;
 							
 						case 'isBefore':
 							condSQL += '<?';
-							condSQLParams.push({string:tables[i][j]['value']});
+							condSQLParams.push({string:condition['value']});
 							break;
 							
 						case 'isAfter':
 							condSQL += '>?';
-							condSQLParams.push({string:tables[i][j]['value']});
+							condSQLParams.push({string:condition['value']});
 							break;
 					}
 				}
@@ -436,8 +543,19 @@ Scholar.Search.prototype._buildQuery = function(){
 				}
 				
 				// Keep non-required conditions separate if in ANY mode
-				if (!tables[i][j]['required'] && joinMode=='ANY'){
-					condSQL += ' OR ';
+				if (!condition['required'] && joinMode=='ANY'){
+					// Little hack to allow multiple quicksearch words
+					if (condition['name'] == 'blockStart'){
+						condSQL += '(';
+					}
+					else if (condition['name'] == 'blockEnd'){
+						// Strip ' OR ' from last condition
+						anySQL = anySQL.substring(0, anySQL.length-4);
+						condSQL += ') AND ';
+					}
+					else {
+						condSQL += ' OR ';
+					}
 					anySQL += condSQL;
 					anySQLParams = anySQLParams.concat(condSQLParams);
 				}
@@ -446,14 +564,15 @@ Scholar.Search.prototype._buildQuery = function(){
 					sql += condSQL;
 					sqlParams = sqlParams.concat(condSQLParams);
 				}
-			}
 		}
 		
 		// Add on ANY conditions
 		if (anySQL){
 			sql += '(' + anySQL;
 			sqlParams = sqlParams.concat(anySQLParams);
-			sql = sql.substring(0, sql.length-4); // remove last ' OR '
+			// If we ended with a block, remove ' AND ', otherwise ' OR '
+			var remlen = condition['name']=='blockEnd' ? 5 : 4;
+			sql = sql.substring(0, sql.length-remlen);
 			sql += ')';
 		}
 		else {
@@ -512,6 +631,7 @@ Scholar.SearchConditions = new function(){
 	this.get = get;
 	this.getStandardConditions = getStandardConditions;
 	this.hasOperator = hasOperator;
+	this.parseCondition = parseCondition;
 	
 	var _initialized = false;
 	var _conditions = [];
@@ -579,13 +699,22 @@ Scholar.SearchConditions = new function(){
 			},
 			
 			{
-				name: 'fulltext',
+				name: 'quicksearch',
 				operators: {
 					is: true,
 					isNot: true,
 					contains: true,
 					doesNotContain: true
 				}
+			},
+			
+			// Quicksearch block markers
+			{
+				name: 'blockStart'
+			},
+			
+			{
+				name: 'blockEnd'
 			},
 			
 			//
@@ -737,7 +866,29 @@ Scholar.SearchConditions = new function(){
 				aliases: ['pages', 'section', 'accessionNumber',
 					'seriesNumber','issue'],
 				template: true // mark for special handling
+			},
+			
+			{
+				name: 'fulltextWord',
+				operators: {
+					contains: true,
+					doesNotContain: true
+				},
+				table: 'fulltextItems',
+				field: 'word',
+				special: true
+			},
+			
+			
+			{
+				name: 'fulltextContent',
+				operators: {
+					contains: true,
+					doesNotContain: true
+				},
+				special: false
 			}
+
 		];
 		
 		// Index conditions by name and aliases
@@ -757,25 +908,28 @@ Scholar.SearchConditions = new function(){
 		
 		// Separate standard conditions for menu display
 		for (var i in _conditions){
-			// Standard conditions a have associated tables
-			if (_conditions[i]['table'] && !_conditions[i]['special'] &&
-				// If a template condition, not the original (e.g. 'field')
-				(!_conditions[i]['template'] || i!=_conditions[i]['name'])){
-				
-				try {
-					var localized = Scholar.getString('searchConditions.' + i)
-				}
-				catch (e){
-					var localized = Scholar.getString('itemFields.' + i);
-				}
-				
-				sortKeys.push(localized);
-				sortValues[localized] = {
-					name: i,
-					localized: localized,
-					operators: _conditions[i]['operators']
-				};
+			// If explicitly special or a template master (e.g. 'field') or
+			// no table and not explicitly unspecial, skip
+			if (_conditions[i]['special'] ||
+				(_conditions[i]['template'] && i==_conditions[i]['name']) ||
+				(!_conditions[i]['table'] &&
+					typeof _conditions[i]['special'] == 'undefined')){
+				continue;
 			}
+			
+			try {
+				var localized = Scholar.getString('searchConditions.' + i)
+			}
+			catch (e){
+				var localized = Scholar.getString('itemFields.' + i);
+			}
+			
+			sortKeys.push(localized);
+			sortValues[localized] = {
+				name: i,
+				localized: localized,
+				operators: _conditions[i]['operators']
+			};
 		}
 		
 		// Alphabetize by localized name
@@ -823,6 +977,8 @@ Scholar.SearchConditions = new function(){
 			_init();
 		}
 		
+		var [condition, mode] = this.parseCondition(condition);
+		
 		if (!_conditions[condition]){
 			throw ("Invalid condition '" + condition + "' in hasOperator()");
 		}
@@ -832,5 +988,17 @@ Scholar.SearchConditions = new function(){
 		}
 		
 		return !!_conditions[condition]['operators'][operator];
+	}
+	
+	
+	function parseCondition(condition){
+		var mode = false;
+		var pos = condition.indexOf('/');
+		if (pos != -1){
+			mode = condition.substr(pos+1);
+			condition = condition.substr(0, pos);
+		}
+		
+		return [condition, mode];
 	}
 }

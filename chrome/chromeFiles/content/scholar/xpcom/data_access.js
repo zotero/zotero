@@ -844,7 +844,7 @@ Scholar.Item.prototype.updateNote = function(text){
 	Scholar.DB.beginTransaction();
 	
 	var sql = "UPDATE itemNotes SET note=? WHERE itemID=?";
-	bindParams = [{string:text}, this.getID()];
+	var bindParams = [{string:text}, this.getID()];
 	var updated = Scholar.DB.query(sql, bindParams);
 	if (updated){
 		this.updateDateModified();
@@ -1066,19 +1066,25 @@ Scholar.Item.prototype.numAttachments = function(){
 * Get an nsILocalFile for the attachment, or false if the associated file
 * doesn't exist
 *
+* _row_ is optional itemAttachments row if available to skip query
+*
 * Note: Always returns false for items with LINK_MODE_LINKED_URL,
 * since they have no files -- use getURL() instead
 **/
-Scholar.Item.prototype.getFile = function(){
+Scholar.Item.prototype.getFile = function(row){
 	if (!this.isAttachment()){
 		throw ("getFile() can only be called on items of type 'attachment'");
 	}
 	
-	var sql = "SELECT linkMode, path FROM itemAttachments WHERE itemID=" + this.getID();
-	var row = Scholar.DB.rowQuery(sql);
+	if (!row){
+		var sql = "SELECT linkMode, path FROM itemAttachments WHERE itemID="
+			+ this.getID();
+		var row = Scholar.DB.rowQuery(sql);
+	}
 	
 	if (!row){
-		throw ('Attachment data not found for item ' + this.getID() + ' in getFile()');
+		throw ('Attachment data not found for item ' + this.getID()
+			+ ' in getFile()');
 	}
 	
 	// No associated files for linked URLs
@@ -1454,6 +1460,11 @@ Scholar.Item.prototype.erase = function(deleteChildren){
 	if (seeAlso){
 		changedItems = changedItems.concat(seeAlso);
 	}
+	
+	// Clear fulltext cache
+	Scholar.Fulltext.clearItemWords(this.getID());
+	Scholar.Fulltext.clearItemContent(this.getID());
+	Scholar.Fulltext.purgeUnusedWords();
 	
 	sql = 'DELETE FROM itemCreators WHERE itemID=' + this.getID() + ";\n";
 	sql += 'DELETE FROM itemNotes WHERE itemID=' + this.getID() + ";\n";
@@ -2005,12 +2016,14 @@ Scholar.Attachments = new function(){
 			newFile.append(title);
 			
 			var mimeType = Scholar.MIME.getMIMETypeFromFile(newFile);
-			var charsetID = _getCharsetIDFromFile(newFile);
 			
 			_addToDB(newFile, null, null, this.LINK_MODE_IMPORTED_FILE,
-				mimeType, charsetID, sourceItemID, itemID);
+				mimeType, null, sourceItemID, itemID);
 			
 			Scholar.DB.commitTransaction();
+			
+			// Determine charset and build fulltext index
+			_postProcessFile(itemID, newFile, mimeType);
 		}
 		catch (e){
 			// hmph
@@ -2033,8 +2046,14 @@ Scholar.Attachments = new function(){
 	function linkFromFile(file, sourceItemID){
 		var title = file.leafName;
 		var mimeType = Scholar.MIME.getMIMETypeFromFile(file);
-		var charsetID = _getCharsetIDFromFile(file);
-		return _addToDB(file, null, title, this.LINK_MODE_LINKED_FILE, mimeType, charsetID, sourceItemID);
+		
+		var itemID = _addToDB(file, null, title, this.LINK_MODE_LINKED_FILE, mimeType,
+			null, sourceItemID);
+		
+		// Determine charset and build fulltext index
+		_postProcessFile(itemID, file, mimeType);
+		
+		return itemID;
 	}
 	
 	
@@ -2063,6 +2082,9 @@ Scholar.Attachments = new function(){
 			_addToDB(newFile, url, null, this.LINK_MODE_IMPORTED_URL, mimeType,
 				charsetID, sourceItemID, itemID);
 			Scholar.DB.commitTransaction();
+			
+			// Determine charset and build fulltext index
+			_postProcessFile(itemID, newFile, mimeType);
 		}
 		catch (e){
 			Scholar.DB.rollbackTransaction();
@@ -2099,7 +2121,7 @@ Scholar.Attachments = new function(){
 					browser.removeEventListener("pageshow", arguments.callee, true);
 					Scholar.Browser.deleteHiddenBrowser(browser);
 				}, true);
-				browser.loadURI(url, null, null, null, null);
+				browser.loadURI(url);
 			}
 			
 			// Otherwise use a remote web page persist
@@ -2177,7 +2199,16 @@ Scholar.Attachments = new function(){
 		var mimeType = document.contentType;
 		var charsetID = Scholar.CharacterSets.getID(document.characterSet);
 		
-		return _addToDB(null, url, title, this.LINK_MODE_LINKED_URL, mimeType, charsetID, sourceItemID);
+		var itemID = _addToDB(null, url, title, this.LINK_MODE_LINKED_URL,
+			mimeType, charsetID, sourceItemID);
+		
+		// Run the fulltext indexer asynchronously (actually, it hangs the UI
+		// thread, but at least it lets the menu close)
+		setTimeout(function(){
+			Scholar.Fulltext.indexDocument(document, itemID);
+		}, 50);
+		
+		return itemID;
 	}
 	
 	
@@ -2226,16 +2257,18 @@ Scholar.Attachments = new function(){
 		
 		wbp.saveDocument(document, file, destDir, mimeType, encodingFlags, false);
 		
-		_addToDB(file, url, title, this.LINK_MODE_IMPORTED_URL, mimeType, charsetID, sourceItemID, itemID);
+		_addToDB(file, url, title, this.LINK_MODE_IMPORTED_URL, mimeType,
+			charsetID, sourceItemID, itemID);
 		
 		Scholar.DB.commitTransaction();
+		
+		// Run the fulltext indexer asynchronously (actually, it hangs the UI
+		// thread, but at least it lets the menu close)
+		setTimeout(function(){
+			Scholar.Fulltext.indexDocument(document, itemID);
+		}, 50);
+		
 		return itemID;
-	}
-	
-	
-	function _getCharsetIDFromFile(file){
-		// TODO: Not yet implemented
-		return null;
 	}
 	
 	
@@ -2334,6 +2367,44 @@ Scholar.Attachments = new function(){
 		Scholar.Notifier.trigger('add', 'item', attachmentItem.getID());
 		
 		return attachmentItem.getID();
+	}
+	
+	
+	/*
+	 * Since we have to load the content into the browser to get the
+	 * character set (at least until we figure out a better way to get
+	 * at the native detectors), we create the item above and update
+	 * asynchronously after the fact
+	 */
+	function _postProcessFile(itemID, file, mimeType){
+		var ext = Scholar.File.getExtension(file);
+		if (mimeType.substr(0, 5)!='text/' ||
+			!Scholar.MIME.hasInternalHandler(mimeType, ext)){
+			return false;
+		}
+		
+		var browser = Scholar.Browser.createHiddenBrowser();
+		
+		Scholar.File.addCharsetListener(browser, new function(){
+			return function(charset, id){
+				var charsetID = Scholar.CharacterSets.getID(charset);
+				if (charsetID){
+					var sql = "UPDATE itemAttachments SET charsetID=" + charsetID
+						+ " WHERE itemID=" + itemID;
+					Scholar.DB.query(sql);
+				}
+				
+				// Chain fulltext indexer inside the charset callback,
+				// since it's asynchronous and a prerequisite
+				Scholar.Fulltext.indexDocument(browser.contentDocument, itemID);
+				Scholar.Browser.deleteHiddenBrowser(browser);
+			}
+		}, itemID);
+		
+		var url = Components.classes["@mozilla.org/network/protocol;1?name=file"]
+					.getService(Components.interfaces.nsIFileProtocolHandler)
+					.getURLSpecFromFile(file);
+		browser.loadURI(url);
 	}
 }
 
@@ -3486,6 +3557,7 @@ Scholar.getItems = function(parent){
 	var toReturn = new Array();
 	
 	if (!parent){
+		// Not child items
 		var sql = "SELECT A.itemID FROM items A LEFT JOIN itemNotes B USING (itemID) "
 			+ "LEFT JOIN itemAttachments C ON (C.itemID=A.itemID) WHERE B.sourceItemID IS NULL"
 			+ " AND C.sourceItemID IS NULL";
@@ -3508,4 +3580,15 @@ Scholar.getItems = function(parent){
 	}
 	
 	return Scholar.Items.get(children);
+}
+
+
+Scholar.getAttachments = function(){
+	var toReturn = [];
+	
+	var sql = "SELECT A.itemID FROM items A JOIN itemAttachments B ON "
+		+ "(B.itemID=A.itemID) WHERE B.sourceItemID IS NULL";
+	var items = Scholar.DB.query(itemAttachments);
+	
+	return Scholar.Items.get(items);
 }

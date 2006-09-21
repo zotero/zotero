@@ -33,6 +33,7 @@ var Scholar = new function(){
 	this.join = join;
 	this.inArray = inArray;
 	this.arraySearch = arraySearch;
+	this.arrayToHash = arrayToHash;
 	this.randomString = randomString;
 	this.getRandomID = getRandomID;
 	this.moveToUnique = moveToUnique;
@@ -380,6 +381,17 @@ var Scholar = new function(){
 			}
 		}
 		return false;
+	}
+	
+	
+	function arrayToHash(array){
+		var hash = {};
+		
+		for each(var val in array){
+			hash[val] = true;
+		}
+		
+		return hash;
 	}
 	
 	
@@ -841,17 +853,18 @@ Scholar.Browser = new function() {
 	this.createHiddenBrowser = createHiddenBrowser;
 	this.deleteHiddenBrowser = deleteHiddenBrowser;
 	
-	 function createHiddenBrowser(myWindow) {
+	function createHiddenBrowser(myWindow) {
 	 	if(!myWindow) {
 			var myWindow = Components.classes["@mozilla.org/appshell/window-mediator;1"]
 			                   .getService(Components.interfaces.nsIWindowMediator)
 			                   .getMostRecentWindow("navigator:browser");
 		}
 		
-		// Create a hidden browser			
+		// Create a hidden browser
 		var newHiddenBrowser = myWindow.document.createElement("browser");
 		myWindow.document.documentElement.appendChild(newHiddenBrowser);
-		Scholar.debug("created hidden browser");
+		Scholar.debug("created hidden browser ("
+			+ myWindow.document.getElementsByTagName('browser').length + ")");
 		return newHiddenBrowser;
 	}
 	

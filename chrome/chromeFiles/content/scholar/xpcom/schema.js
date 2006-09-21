@@ -33,6 +33,11 @@ Scholar.Schema = new function(){
 			_migrateUserSchema(dbVersion);
 			_updateSchema('system');
 			_updateSchema('scrapers');
+			
+			// Rebuild fulltext cache if necessary
+			if (Scholar.Fulltext.cacheIsOutdated()){
+				Scholar.Fulltext.rebuildCache();
+			}
 			Scholar.DB.commitTransaction();
 		}
 		catch(e){
