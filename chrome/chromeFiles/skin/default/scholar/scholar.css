@@ -147,7 +147,7 @@ zoterosearchtextbox .toolbarbutton-menu-dropmarker
 	background: #666666;
 }
 
-#scholar-progress-box
+#zotero-progress-box, #scholar-progress-box
 {
 	border: 2px solid #7a0000;
 	margin: 0;
@@ -156,13 +156,13 @@ zoterosearchtextbox .toolbarbutton-menu-dropmarker
 	padding-bottom: 3px;
 }
 
-.scholar-progress-item-icon
+.zotero-progress-item-icon, .scholar-progress-item-icon
 {
 	width: 16px;
 	height: 16px;
 }
 
-.scholar-progress-item-hbox
+.zotero-progress-item-hbox, .scholar-progress-item-hbox
 {
 	padding-left: 5px;
 	margin-top: 3px;

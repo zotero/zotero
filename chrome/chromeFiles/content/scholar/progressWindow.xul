@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://scholar/skin/scholar.css" type="text/css"?>
+
+<window id="zotero-progress-window"
+        xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+        windowtype="alert:alert"
+        align="start">
+
+	<hbox id="zotero-progress-box">
+		<vbox id="zotero-progress-text-box">
+			<label id="zotero-progress-text-headline" style="font-weight: bold;" />
+		</vbox>
+	</hbox>
+
+</window>
