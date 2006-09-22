@@ -534,9 +534,11 @@ Scholar.ItemTreeView.prototype.selectItem = function(id)
 }
 
 /*
- *  Delete the selection
+ * Delete the selection
+ *
+ * _force_ deletes item from DB even if removing from a collection
  */
-Scholar.ItemTreeView.prototype.deleteSelection = function(eraseChildren)
+Scholar.ItemTreeView.prototype.deleteSelection = function(eraseChildren, force)
 {
 	if(this.selection.count == 0)
 		return;
@@ -562,7 +564,7 @@ Scholar.ItemTreeView.prototype.deleteSelection = function(eraseChildren)
 	this._treebox.beginUpdateBatch();
 	for (var i=0; i<items.length; i++)
 	{
-		if(this._itemGroup.isLibrary()) //erase item from DB
+		if(this._itemGroup.isLibrary() || force) //erase item from DB
 			items[i].ref.erase(eraseChildren);
 		else if(this._itemGroup.isCollection())
 			this._itemGroup.ref.removeItem(items[i].ref.getID());

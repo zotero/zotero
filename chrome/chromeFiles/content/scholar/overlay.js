@@ -260,16 +260,21 @@ var ScholarPane = new function()
 
 	}
 	
-	function deleteSelectedItem()
+	/*
+	 *  _force_ deletes item from DB even if removing from a collection or search
+	 */
+	function deleteSelectedItem(force)
 	{
 		if(itemsView && itemsView.selection.count > 0)
 		{
-			if (itemsView._itemGroup.isCollection()){
-				var noPrompt = true;
-			}
-			// Do nothing in search view
-			else if (itemsView._itemGroup.isSearch()){
-				return;
+			if (!force){
+				if (itemsView._itemGroup.isCollection()){
+					var noPrompt = true;
+				}
+				// Do nothing in search view
+				else if (itemsView._itemGroup.isSearch()){
+					return;
+				}
 			}
 			
 			var eraseChildren = {value: true};
@@ -300,7 +305,7 @@ var ScholarPane = new function()
 				hasChildren ? Scholar.getString('pane.items.delete.attached') : '',
 				eraseChildren))
 			{
-				itemsView.deleteSelection(eraseChildren.value);
+				itemsView.deleteSelection(eraseChildren.value, force);
 			}
 		}
 	}
@@ -514,28 +519,33 @@ var ScholarPane = new function()
 		if(itemsView && itemsView.selection.count > 0)
 		{
 			menu.childNodes[2].removeAttribute('disabled');
-			menu.childNodes[4].removeAttribute('disabled');
+			menu.childNodes[3].removeAttribute('disabled');
 			menu.childNodes[5].removeAttribute('disabled');
+			menu.childNodes[6].removeAttribute('disabled');
 		}
 		else
 		{
 			menu.childNodes[2].setAttribute('disabled', true);
-			menu.childNodes[4].setAttribute('disabled', true);
+			menu.childNodes[3].setAttribute('disabled', true);
 			menu.childNodes[5].setAttribute('disabled', true);
+			menu.childNodes[6].setAttribute('disabled', true);
 		}
-	
-		if(itemsView && itemsView.selection.count > 1)
+		
+		var multiple = (itemsView && itemsView.selection.count > 1) ? '.multiple' : '';
+		
+		if (itemsView._itemGroup.isCollection())
 		{
-			menu.childNodes[2].setAttribute('label', Scholar.getString('pane.items.menu.remove.multiple'));
-			menu.childNodes[4].setAttribute('label', Scholar.getString('pane.items.menu.export.multiple'));
-			menu.childNodes[5].setAttribute('label', Scholar.getString('pane.items.menu.createBib.multiple'));
+			menu.childNodes[2].setAttribute('label', Scholar.getString('pane.items.menu.remove' + multiple));
+			menu.childNodes[2].setAttribute('hidden', false);
 		}
 		else
 		{
-			menu.childNodes[2].setAttribute('label', Scholar.getString('pane.items.menu.remove'));
-			menu.childNodes[4].setAttribute('label', Scholar.getString('pane.items.menu.export'));
-			menu.childNodes[5].setAttribute('label', Scholar.getString('pane.items.menu.createBib'));
+			menu.childNodes[2].setAttribute('hidden', true);
 		}
+		
+		menu.childNodes[3].setAttribute('label', Scholar.getString('pane.items.menu.erase' + multiple));
+		menu.childNodes[5].setAttribute('label', Scholar.getString('pane.items.menu.export' + multiple));
+		menu.childNodes[6].setAttribute('label', Scholar.getString('pane.items.menu.createBib' + multiple));
 	}
 	
 	// Adapted from: http://www.xulplanet.com/references/elemref/ref_tree.html#cmnote-9

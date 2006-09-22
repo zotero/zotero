@@ -51,6 +51,7 @@
 					<menuitem label="&toolbar.newItem.label;" command="cmd_scholar_newItem"/>
 					<menuseparator/>
 					<menuitem oncommand="ScholarPane.deleteSelectedItem();"/>
+					<menuitem oncommand="ScholarPane.deleteSelectedItem(true);"/>
 					<menuseparator/>
 					<menuitem oncommand="Scholar_File_Interface.exportItems();"/>
 					<menuitem oncommand="Scholar_File_Interface.bibliographyFromItems();"/>
