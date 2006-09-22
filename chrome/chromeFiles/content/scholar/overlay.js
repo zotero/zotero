@@ -264,6 +264,14 @@ var ScholarPane = new function()
 	{
 		if(itemsView && itemsView.selection.count > 0)
 		{
+			if (itemsView._itemGroup.isCollection()){
+				var noPrompt = true;
+			}
+			// Do nothing in search view
+			else if (itemsView._itemGroup.isSearch()){
+				return;
+			}
+			
 			var eraseChildren = {value: true};
 			var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
                     						.getService(Components.interfaces.nsIPromptService);
@@ -284,8 +292,8 @@ var ScholarPane = new function()
 						}
 				}
 			}
-
-			if (promptService.confirmCheck(
+			
+			if (noPrompt || promptService.confirmCheck(
 				window,
 				Scholar.getString('pane.items.delete.title'),
 				Scholar.getString('pane.items.delete' + (itemsView.selection.count>1 ? '.multiple' : '')),
