@@ -1374,8 +1374,10 @@ Scholar.Item.prototype.erase = function(deleteChildren){
 	
 	// Remove item from parent collections
 	var parentCollectionIDs = this.getCollections();
-	for (var i=0; i<parentCollectionIDs.length; i++){
-		Scholar.Collections.get(parentCollectionIDs[i]).removeItem(this.getID());
+	if (parentCollectionIDs){
+		for (var i=0; i<parentCollectionIDs.length; i++){
+			Scholar.Collections.get(parentCollectionIDs[i]).removeItem(this.getID());
+		}
 	}
 	
 	// Note

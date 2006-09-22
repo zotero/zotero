@@ -155,7 +155,11 @@ var ScholarPane = new function()
 		var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 								.getService(Components.interfaces.nsIPromptService);
 		
-		var newName = { value: Scholar.getString('pane.collections.untitled') };
+		var untitled = Scholar.getString('pane.collections.untitled');
+		untitled = Scholar.DB.getNextName('collections', 'collectionName',
+			Scholar.getString('pane.collections.untitled'));
+		
+		var newName = { value: untitled };
 		var result = promptService.prompt(window, "",
 			Scholar.getString('pane.collections.name'), newName, "", {});
 		
@@ -166,7 +170,7 @@ var ScholarPane = new function()
 		
 		if (!newName.value)
 		{
-			newName.value = Scholar.getString('pane.collections.untitled');
+			newName.value = untitled;
 		}
 		
 		Scholar.Collections.add(newName.value);
@@ -177,8 +181,10 @@ var ScholarPane = new function()
 		var s = new Scholar.Search();
 		s.addCondition('title','contains','');
 		
-		// TODO: add integer to 'Untitled' if more than one
-		var io = {dataIn: {search: s, name: 'Untitled'}, dataOut: null};
+		var untitled = Scholar.getString('pane.collections.untitled');
+		untitled = Scholar.DB.getNextName('savedSearches', 'savedSearchName',
+			Scholar.getString('pane.collections.untitled'));
+		var io = {dataIn: {search: s, name: untitled}, dataOut: null};
 		window.openDialog('chrome://scholar/content/searchDialog.xul','','chrome,modal',io);
 	}
 	

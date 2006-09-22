@@ -15,6 +15,7 @@ Scholar.DB = new function(){
 	this.getColumns = getColumns;
 	this.getColumnHash = getColumnHash;
 	this.getNextID = getNextID;
+	this.getNextName = getNextName;
 	this.beginTransaction = beginTransaction;
 	this.commitTransaction = commitTransaction;
 	this.rollbackTransaction = rollbackTransaction;
@@ -373,6 +374,39 @@ Scholar.DB = new function(){
 		return i+1;
 	}
 	
+	
+	/**
+	* Find the next lowest numeric suffix for a value in table column
+	*
+	* For example, if "Untitled" and "Untitled 2" and "Untitled 4",
+	* returns "Untitled 3"
+	*
+	* If _name_ alone is available, returns that
+	**/
+	function getNextName(table, field, name)
+	{
+		var sql = "SELECT " + field + " FROM " + table + " WHERE " + field
+			+ " LIKE ? ORDER BY " + field;
+		var untitleds = Scholar.DB.columnQuery(sql, name + '%');
+		
+		if (!untitleds || untitleds[0]!=name){
+			return name;
+		}
+		
+		var i = 1;
+		var num = 2;
+		while (untitleds[i] && untitleds[i]==(name + ' ' + num)){
+			while (untitleds[i+1] && untitleds[i]==untitleds[i+1]){
+				Scholar.debug('Next ' + i + ' is ' + untitleds[i]);
+				i++;
+			}
+			
+			i++;
+			num++;
+		}
+		
+		return name + ' ' + num;
+	}
 	
 	
 	
