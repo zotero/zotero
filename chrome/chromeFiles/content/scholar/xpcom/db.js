@@ -12,15 +12,18 @@ Scholar.DB = new function(){
 	this.rowQuery = rowQuery;
 	this.columnQuery = columnQuery;
 	this.statementQuery = statementQuery;
-	this.getColumns = getColumns;
-	this.getColumnHash = getColumnHash;
-	this.getNextID = getNextID;
-	this.getNextName = getNextName;
+	this.getStatement = getStatement;
+	this.getLastInsertID = getLastInsertID;
+	this.getLastErrorString = getLastErrorString;
 	this.beginTransaction = beginTransaction;
 	this.commitTransaction = commitTransaction;
 	this.rollbackTransaction = rollbackTransaction;
 	this.transactionInProgress = transactionInProgress;
 	this.tableExists = tableExists;
+	this.getColumns = getColumns;
+	this.getColumnHash = getColumnHash;
+	this.getNextID = getNextID;
+	this.getNextName = getNextName;
 	
 	/////////////////////////////////////////////////////////////////
 	//
@@ -239,6 +242,47 @@ Scholar.DB = new function(){
 			}
 		}
 		return statement;
+	}
+	
+	
+	/*
+	 * Get a raw mozStorage statement from the DB for manual processing
+	 *
+	 * This should only be needed for manual parameter binding for
+	 * large repeated queries
+	 */
+	function getStatement(sql){
+		var db = _getDBConnection();
+		
+		try {
+			Scholar.debug(sql,5);
+			var statement = db.createStatement(sql);
+		}
+		catch (e){
+			var dberr = (db.lastErrorString!='not an error')
+				? ' [ERROR: ' + db.lastErrorString + ']' : '';
+			throw(e + ' [QUERY: ' + sql + ']' + dberr);
+		}
+		
+		return statement;
+	}
+	
+	
+	/*
+	 * Only for use with getStatement()
+	 */
+	function getLastInsertID(){
+		var db = _getDBConnection();
+		return db.lastInsertRowID;
+	}
+	
+	
+	/*
+	 * Only for use with getStatement()
+	 */
+	function getLastErrorString(){
+		var db = _getDBConnection();
+		return db.lastErrorString;
 	}
 	
 	

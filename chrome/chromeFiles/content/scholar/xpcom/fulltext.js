@@ -10,7 +10,7 @@ Scholar.Fulltext = new function(){
 	this.cacheIsOutdated = cacheIsOutdated;
 	this.rebuildCache = rebuildCache;
 	this.clearItemWords = clearItemWords;
-	this.clearItemContent = clearItemContent;
+	//this.clearItemContent = clearItemContent;
 	this.purgeUnusedWords = purgeUnusedWords;
 	this.HTMLToText = HTMLToText;
 	this.semanticSplitter = semanticSplitter;
@@ -32,7 +32,7 @@ Scholar.Fulltext = new function(){
 		
 		var sql = "SELECT itemID FROM itemAttachments";
 		var items = Scholar.DB.columnQuery(sql);
-		this.indexItems(items);
+		indexItems(items);
 		
 		Scholar.DB.commitTransaction();
 	}
@@ -63,7 +63,7 @@ Scholar.Fulltext = new function(){
 	 * Index multiple words at once
 	 */
 	function indexWords(itemID, words){
-		if (!words.length){
+		if (!words || !words.length){
 			return false;
 		}
 		
@@ -87,31 +87,39 @@ Scholar.Fulltext = new function(){
 			existing['_' + wordIDs[i]['word']] = wordIDs[i]['wordID'];
 		}
 		
-		// TODO: use repeated bound statements once db.js supports it
+		// Handle bound parameters manually for optimal speed
+		var statement1 = Scholar.DB.getStatement("INSERT INTO fulltextWords (word) VALUES (?)");
+		var statement2 = Scholar.DB.getStatement("INSERT OR IGNORE INTO fulltextItems VALUES (?,?)");
+		statement2.bindInt32Parameter(1, itemID);
+		
 		for each(var word in words){
 			if (existing['_' + word]){
 				var wordID = existing['_' + word];
 			}
 			else {
-				var sql = "INSERT INTO fulltextWords (word) VALUES (?)";
-				var wordID = Scholar.DB.query(sql, {string:word});
+				statement1.bindUTF8StringParameter(0, word);
+				statement1.execute()
+				var wordID = Scholar.DB.getLastInsertID();
 			}
 			
-			var sql = "INSERT OR IGNORE INTO fulltextItems VALUES (?,?)";
-			Scholar.DB.query(sql, [{int:wordID}, {int:itemID}]);
+			statement2.bindInt32Parameter(0, wordID);
+			statement2.execute();
 		}
+		
+		statement1.reset();
+		statement2.reset();
 		
 		Scholar.DB.commitTransaction();
 	}
 	
 	
 	function indexString(text, charset, itemID){
-		var words = this.semanticSplitter(text, charset);
+		var words = semanticSplitter(text, charset);
 		
 		Scholar.DB.beginTransaction();
 		
-		this.clearItemWords(itemID);
-		this.indexWords(itemID, words);
+		clearItemWords(itemID);
+		indexWords(itemID, words);
 		
 		/*
 		var sql = "REPLACE INTO fulltextContent (itemID, textContent) VALUES (?,?)";
@@ -129,9 +137,9 @@ Scholar.Fulltext = new function(){
 		
 		Scholar.debug("Indexing document '" + document.title + "'");
 		
-		_separateElements(document.body);
-		var text = this.HTMLToText(document.body.innerHTML);
-		this.indexString(text, document.characterSet, itemID);
+		var text = document.body.innerHTML.replace(/(>)/g, '$1 ');
+		text = HTMLToText(text);
+		indexString(text, document.characterSet, itemID);
 	}
 	
 	
@@ -154,8 +162,8 @@ Scholar.Fulltext = new function(){
 		var text = Scholar.File.getContents(file, charset);
 		// Split elements to avoid word concatentation
 		text = text.replace(/(>)/g, '$1 ');
-		text = this.HTMLToText(text);
-		this.indexString(text, charset, itemID);
+		text = HTMLToText(text);
+		indexString(text, charset, itemID);
 	}
 	
 	
@@ -175,7 +183,7 @@ Scholar.Fulltext = new function(){
 				continue;
 			}
 			
-			this.indexFile(file, i.getAttachmentMimeType(),
+			indexFile(file, i.getAttachmentMimeType(),
 				i.getAttachmentCharset(), i.getID());
 		}
 		
@@ -208,7 +216,7 @@ Scholar.Fulltext = new function(){
 			str = str.replace(/(>)/g, '$1 ');
 			
 			// Parse to avoid searching on HTML
-			str = this.HTMLToText(str);
+			str = HTMLToText(str);
 		}
 		
 		switch (mode){
@@ -294,7 +302,7 @@ Scholar.Fulltext = new function(){
 			
 			var charset = i.getAttachmentCharset();
 			
-			var match = this.findTextInFile(file, charset, searchText, mode);
+			var match = findTextInFile(file, charset, searchText, mode);
 			
 			if (match != -1){
 				found.push({id:i.getID(), match:match});
@@ -310,9 +318,11 @@ Scholar.Fulltext = new function(){
 	}
 	
 	
+	/*
 	function clearItemContent(itemID){
 		Scholar.DB.query("DELETE FROM fulltextContent WHERE itemID=" + itemID);
 	}
+	*/
 	
 	
 	function purgeUnusedWords(){
@@ -389,7 +399,9 @@ Scholar.Fulltext = new function(){
 	
 	
 	/*
-	 * Add spaces between elements, since body.textContent doesn't
+	 * Add spaces between elements, since HTMLToText doesn't
+	 *
+	 * NOTE: SLOW AND NOT USED!
 	 */
 	function _separateElements(node){
 		var next = node;
