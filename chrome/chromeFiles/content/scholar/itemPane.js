@@ -395,6 +395,13 @@ var ScholarItemPane = new function()
 				tabindex
 			)
 		);
+		
+		// Comma
+		var comma = document.createElement('label');
+		comma.setAttribute('value', ',');
+		comma.className = 'comma';
+		firstlast.appendChild(comma);
+		
 		firstlast.appendChild(
 			createValueElement(
 				firstName,
@@ -465,6 +472,7 @@ var ScholarItemPane = new function()
 		var button = row.lastChild.lastChild.previousSibling.previousSibling;
 		var hbox = button.previousSibling;
 		var lastName = hbox.firstChild;
+		var comma = hbox.firstChild.nextSibling;
 		var firstName = hbox.lastChild;
 		
 		// Switch to single-field mode
@@ -485,6 +493,7 @@ var ScholarItemPane = new function()
 			
 			// Hide first name field and prepend to last name field
 			firstName.setAttribute('hidden', true);
+			comma.setAttribute('hidden', true);
 			var first = _getFieldValue(firstName);
 			if (first && first != _defaultFirstName)
 			{
@@ -537,6 +546,7 @@ var ScholarItemPane = new function()
 			}
 			
 			firstName.setAttribute('hidden', false);
+			comma.setAttribute('hidden', false);
 		}
 		
 		if (!initial)
@@ -863,7 +873,7 @@ var ScholarItemPane = new function()
 	function getCreatorFields(row){
 		var type = row.getElementsByTagName('label')[0].getAttribute('value');
 		var label1 = row.getElementsByTagName('hbox')[0].firstChild.firstChild;
-		var label2 = label1.nextSibling;
+		var label2 = label1.parentNode.lastChild;
 		
 		return {
 			lastName: label1.firstChild ? label1.firstChild.nodeValue

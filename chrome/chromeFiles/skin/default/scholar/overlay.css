@@ -201,6 +201,17 @@
 	font-weight: bold;
 }
 
+/* no space between last name and comma */
+#editpane-dynamic-fields row hbox label:first-child
+{
+	margin-right:1px;
+}
+
+#editpane-dynamic-fields row hbox label.comma
+{
+	margin-left:0;
+}
+
 #scholar-splitter
 {
 	border-top: none;
