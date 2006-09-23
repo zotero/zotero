@@ -1465,7 +1465,7 @@ Scholar.Item.prototype.erase = function(deleteChildren){
 	
 	// Clear fulltext cache
 	Scholar.Fulltext.clearItemWords(this.getID());
-	Scholar.Fulltext.clearItemContent(this.getID());
+	//Scholar.Fulltext.clearItemContent(this.getID());
 	Scholar.Fulltext.purgeUnusedWords();
 	
 	sql = 'DELETE FROM itemCreators WHERE itemID=' + this.getID() + ";\n";
