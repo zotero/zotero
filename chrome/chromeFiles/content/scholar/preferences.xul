@@ -19,7 +19,7 @@
 
 <hbox align="center">
 	<label value="&scholar.preferences.position.label;" control="positionMenu"/>
-	<menulist id="positionMenu">
+	<menulist id="positionMenu" oncommand="onPositionChange()">
 		<menupopup>
 			<menuitem label="&scholar.preferences.position.above;"/>
 			<menuitem label="&scholar.preferences.position.below;"/>
@@ -57,5 +57,7 @@
 		</menulist>
 	</hbox>
 </groupbox>
+
+<label id="statusLine" value="" style="color:red"/>
 
 </dialog>

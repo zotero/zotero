@@ -11,6 +11,7 @@ var openURLMenu;
 var openURLResolvers;
 var openURLServerField;
 var openURLVersionMenu;
+var scholarPaneOnTopInitial;
 
 /*
 	To add a new preference:
@@ -28,7 +29,7 @@ var openURLVersionMenu;
 function init()
 {	
 	autoUpdateBox = document.getElementById('autoUpdateBox');
-	autoUpdateBox.checked = Scholar.Prefs.get('automaticScraperUpdates');
+	autoUpdateBox.checked = scholarPaneOnTopInitial = Scholar.Prefs.get('automaticScraperUpdates');
 	
 	positionMenu = document.getElementById('positionMenu');
 	positionMenu.selectedIndex = Scholar.Prefs.get('scholarPaneOnTop') ? 0 : 1;
@@ -83,4 +84,17 @@ function onOpenURLSelected()
 function onOpenURLCustomized()
 {
 	openURLMenu.value = "custom";
+}
+
+function onPositionChange()
+{
+	var statusLine = document.getElementById('statusLine');
+	if ((positionMenu.selectedIndex == 0) != scholarPaneOnTopInitial)
+	{
+		statusLine.value = Scholar.getString('scholar.preferences.status.positionChange');
+	}
+	else
+	{
+		statusLine.value = '';
+	}
 }
