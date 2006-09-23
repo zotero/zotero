@@ -4,6 +4,13 @@
  * Pass the active window into the constructor
  */
 Scholar.ProgressWindow = function(_window){
+	if (!_window){
+		var _window =
+			Components.classes["@mozilla.org/embedcomp/window-watcher;1"].
+				getService(Components.interfaces.nsIWindowWatcher).
+				activeWindow;
+	}
+	
 	var _progressWindow = null;
 	var _windowLoaded = false;
 	var _windowLoading = false;
@@ -20,6 +27,7 @@ Scholar.ProgressWindow = function(_window){
 	this.addDescription = addDescription;
 	this.fade = fade;
 	this.kill = kill;
+	
 	
 	function show() {
 		if(_windowLoading || _windowLoaded) {	// already loading or loaded
