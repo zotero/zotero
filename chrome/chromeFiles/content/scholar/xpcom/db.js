@@ -175,10 +175,9 @@ Scholar.DB = new function(){
 		}
 		
 		if (statement && params){
-			// If single scalar value or single object, wrap in an array
-			if ((typeof params != 'object' || params===null) ||
-				(params && typeof params == 'object' &&
-				 params.constructor != Array)){
+			// If single scalar value or single non-array object, wrap in an array
+			if (typeof params != 'object' || params===null ||
+				(params && typeof params == 'object' && !params.length)){
 				params = [params];
 			}
 			
