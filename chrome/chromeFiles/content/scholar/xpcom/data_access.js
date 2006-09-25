@@ -1238,7 +1238,15 @@ Scholar.Item.prototype.addTag = function(tag){
 		var tagID = Scholar.Tags.add(tag);
 	}
 	
-	var sql = "INSERT OR IGNORE INTO itemTags VALUES (?,?)";
+	// If INSERT OR IGNORE gave us affected rows, we wouldn't need this...
+	var sql = "SELECT COUNT(*) FROM itemTags WHERE itemID=? AND tagID=?";
+	var exists = Scholar.DB.valueQuery(sql, [this.getID(), tagID]);
+	if (exists){
+		Scholar.DB.commitTransaction();
+		return false;
+	}
+	
+	var sql = "INSERT INTO itemTags VALUES (?,?)";
 	Scholar.DB.query(sql, [this.getID(), tagID]);
 	
 	Scholar.DB.commitTransaction();
