@@ -1,7 +1,7 @@
 const ZOTERO_AC_CONTRACTID = '@mozilla.org/autocomplete/search;1?name=zotero';
 const ZOTERO_AC_CLASSNAME = 'Zotero AutoComplete';
 const ZOTERO_AC_CID = Components.ID('{06a2ed11-d0a4-4ff0-a56f-a44545eee6ea}');
-const ZOTERO_AC_IID = Components.interfaces.chnmIZoteroAutoComplete;
+//const ZOTERO_AC_IID = Components.interfaces.chnmIZoteroAutoComplete;
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
@@ -90,12 +90,18 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParam,
 		+ searchParam + "'" + " with string '" + searchString + "'");
 	*/
 	
+	var results = [];
+	var comments = [];
+	
 	// Allow extra parameters to be passed in
 	var pos = searchParam.indexOf('/');
 	if (pos!=-1){
 		var extra = searchParam.substr(pos + 1);
 		var searchParam = searchParam.substr(0, pos);
 	}
+	
+	var searchParts = searchParam.split('-');
+	searchParam = searchParts[0];
 	
 	switch (searchParam){
 		case 'tag':
@@ -106,23 +112,50 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParam,
 					+ "itemID = ?)";
 				sqlParams.push(extra);
 			}
+			sql += " ORDER BY tag";
 			var results = this._zotero.DB.columnQuery(sql, sqlParams);
 			var resultCode = Ci.nsIAutoCompleteResult.RESULT_SUCCESS;
 			break;
+		
+		case 'creator':
+			var [singleField, itemID] = extra.split('-');
 			
+			var sql = "SELECT "
+				// Full name not currently returned
+				//+ "lastName" + (!singleField ? '' : "|| ', ' || firstName")
+				+ searchParts[2]
+				+ " AS name, creatorID "
+				+ "FROM creators WHERE " + searchParts[2] + " LIKE ? "
+				+ "AND isInstitution=?";
+			var sqlParams = [searchString + '%', parseInt(singleField)];
+			if (itemID){
+				sql += " AND creatorID NOT IN (SELECT creatorID FROM "
+					+ "itemCreators WHERE itemID = ?)";
+				sqlParams.push(itemID);
+			}
+			sql += " ORDER BY " + searchParts[2];
+			var rows = this._zotero.DB.query(sql, sqlParams);
+			for each(var row in rows){
+				results.push(row['name']);
+				// No currently used
+				//comments.push(row['creatorID'])
+			}
+			var resultCode = Ci.nsIAutoCompleteResult.RESULT_SUCCESS;
+			break;
+		
 		default:
 			this._zotero.debug("'" + searchParam + "' is not a valid autocomplete scope", 1);
-			var results = []
+			var results = [];
 			var resultCode = Ci.nsIAutoCompleteResult.RESULT_IGNORED;
 	}
 	
-	if (results===false){
+	if (!results || !results.length){
 		var results = [];
 		var resultCode = Ci.nsIAutoCompleteResult.RESULT_NOMATCH;
 	}
 	
 	var result = new ZoteroAutoCompleteResult(searchString,
-		resultCode, 0, "", results, []);
+		resultCode, 0, "", results, comments);
 	
 	listener.onSearchResult(this, result);
 }

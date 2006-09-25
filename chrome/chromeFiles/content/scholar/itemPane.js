@@ -707,9 +707,10 @@ var ScholarItemPane = new function()
 		{
 			t.setAttribute('type', 'autocomplete');
 			t.setAttribute('autocompletesearch', 'zotero');
-			t.setAttribute('autocompletesearchparam', fieldName + (itemID ? '/' + itemID : ''));
+			t.setAttribute('autocompletesearchparam', fieldName + '/' + 
+				(elem.getAttribute('singleField')=='true' ? '1' : '0') +
+				'-' + (itemID ? itemID : ''));
 		}
-		
 		var box = elem.parentNode;
 		box.replaceChild(t,elem);
 		
@@ -721,7 +722,6 @@ var ScholarItemPane = new function()
 		_tabDirection = false;
 		_lastTabIndex = tabindex;
 	}
-	
 	
 	function handleKeyPress(event){
 		var target = document.commandDispatcher.focusedElement;

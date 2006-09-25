@@ -596,3 +596,24 @@ Scholar.Utilities.HTTP.processDocuments = function(firstDoc, urls, processor, do
 	
 	init();
 }
+
+
+/*
+ * This would probably be better as a separate XPCOM service
+ */
+Scholar.Utilities.AutoComplete = new function(){
+	this.getResultComment = getResultComment;
+	
+	function getResultComment(textbox){
+		var controller = textbox.controller;
+		
+		for (var i=0; i<controller.matchCount; i++)
+		{
+			if (controller.getValueAt(i) == textbox.value)
+			{
+				return controller.getCommentAt(i);
+			}
+		}
+		return false;
+	}
+}
