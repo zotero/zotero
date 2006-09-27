@@ -1,41 +1,31 @@
-#scholar-toolbar-button
+#zotero-toolbar-button
 {
-	list-style-image: url('chrome://scholar/skin/toolbar-large.png');
+	list-style-image: url('chrome://scholar/skin/zotero-z-24px.png');
 }
 
-#scholar-toolbar-button:active
+#zotero-toolbar-button:hover
 {
-	list-style-image: url('chrome://scholar/skin/toolbar-large-active.png');
+	list-style-image: url('chrome://scholar/skin/zotero-z-24px-hover.png');
 }
 
-#scholar-toolbar-button[disabled="true"]
+#zotero-toolbar-button:active
 {
-	list-style-image: url('chrome://scholar/skin/toolbar-large-disabled.png');
+	list-style-image: url('chrome://scholar/skin/zotero-z-24px-active.png');
 }
 
-toolbar[iconsize="small"] #scholar-toolbar-button
+toolbar[iconsize="small"] #zotero-toolbar-button
 {
-	list-style-image: url('chrome://scholar/skin/toolbar-small.png');
+	list-style-image: url('chrome://scholar/skin/zotero-z-16px.png');
 }
 
-toolbar[iconsize="small"] #scholar-toolbar-button:active
+toolbar[iconsize="small"] #zotero-toolbar-button:hover
 {
-	list-style-image: url('chrome://scholar/skin/toolbar-small-active.png');
+	list-style-image: url('chrome://scholar/skin/zotero-z-16px-hover.png');
 }
 
-toolbar[iconsize="small"] #scholar-toolbar-button[disabled="true"]
+toolbar[iconsize="small"] #zotero-toolbar-button:active
 {
-	list-style-image: url('chrome://scholar/skin/toolbar-small-disabled.png');
-}
-
-#scholar-toolbar-button
-{
-	list-style-image: url('chrome://scholar/skin/toolbar-large.png');
-}
-
-toolbar[iconsize="small"] #scholar-toolbar-button
-{
-	list-style-image: url('chrome://scholar/skin/toolbar-small.png');
+	list-style-image: url('chrome://scholar/skin/zotero-z-16px-active.png');
 }
 
 textbox[multiline="true"][type="timed"]

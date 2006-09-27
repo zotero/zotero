@@ -23,7 +23,7 @@
 		<command id="cmd_scholar_search" oncommand="ScholarPane.search();"/>
 	</commandset>
 	<toolbarpalette id="BrowserToolbarPalette">
-		<toolbarbutton id="scholar-toolbar-button" class="toolbarbutton-1"
+		<toolbarbutton id="zotero-toolbar-button" class="toolbarbutton-1"
 						label="&scholar.name;"
 						oncommand="ScholarPane.toggleDisplay();"/>
 	</toolbarpalette>
