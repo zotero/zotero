@@ -372,7 +372,8 @@ var Scholar_ItemTypeManager = new function(){
 			sql += prefix + "INSERT INTO itemTypes VALUES ("
 				+ types[i]['itemTypeID'] + ", '" + types[i]['typeName'] + "', "
 				+ (types[i]['templateItemTypeID']
-					? types[i]['templateItemTypeID'] : 'NULL')
+					? types[i]['templateItemTypeID'] : 'NULL') + ", ",
+				+ types[i]['display']
 				+ ");\n"
 		}
 		

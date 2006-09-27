@@ -556,12 +556,20 @@ Scholar.Item.prototype.save = function(){
 							Scholar.History.modify('itemData', 'itemID-fieldID',
 								[this.getID(), fieldID]);
 							
-							sql = "UPDATE itemData SET value=?";
+							sql = "UPDATE itemData SET value=";
+							
+							if (Scholar.ItemFields.getID('accessDate')==fieldID
+								&& this.getField(fieldID)=='CURRENT_TIMESTAMP')
+							{
+								sql += "CURRENT_TIMESTAMP";
+							}
 							// Take advantage of SQLite's manifest typing
-							if (Scholar.ItemFields.isInteger(fieldID)){
+							else if (Scholar.ItemFields.isInteger(fieldID)){
+								sql += '?'
 								sqlValues.push({'int':this.getField(fieldID)});
 							}
 							else {
+								sql += '?'
 								sqlValues.push({'string':this.getField(fieldID)});
 							}
 							sql += " WHERE itemID=? AND fieldID=?";
@@ -586,7 +594,13 @@ Scholar.Item.prototype.save = function(){
 								{'int':fieldID},
 							];
 							
-							if (Scholar.ItemFields.isInteger(fieldID)){
+							if (Scholar.ItemFields.getID('accessDate')==fieldID
+								&& this.getField(fieldID)=='CURRENT_TIMESTAMP')
+							{
+								sql = "INSERT INTO itemData VALUES "
+									+ "(?,?,CURRENT_TIMESTAMP)";
+							}
+							else if (Scholar.ItemFields.isInteger(fieldID)){
 								sqlValues.push({'int':this.getField(fieldID)});
 							}
 							else {
@@ -697,7 +711,12 @@ Scholar.Item.prototype.save = function(){
 						{'int':fieldID}
 					];
 					
-					if (Scholar.ItemFields.isInteger(fieldID)){
+					if (Scholar.ItemFields.getID('accessDate')==fieldID
+						&& this.getField(fieldID)=='CURRENT_TIMESTAMP')
+					{
+						sql = "INSERT INTO itemData VALUES (?,?,CURRENT_TIMESTAMP)";
+					}
+					else if (Scholar.ItemFields.isInteger(fieldID)){
 						sqlValues.push({'int':this.getField(fieldID)});
 					}
 					else {
@@ -3251,9 +3270,10 @@ Scholar.CachedTypes = function(){
 	}
 	
 	
-	function getTypes(){
+	function getTypes(where){
 		return Scholar.DB.query('SELECT ' + this._idCol + ' AS id, '
-			+ this._nameCol + ' AS name FROM ' + this._table + ' order BY ' + this._nameCol);
+			+ this._nameCol + ' AS name FROM ' + this._table
+			+ (where ? ' ' + where : '') + ' ORDER BY ' + this._nameCol);
 	}
 	
 	
@@ -3295,10 +3315,26 @@ Scholar.ItemTypes = new function(){
 	Scholar.CachedTypes.apply(this, arguments);
 	this.constructor.prototype = new Scholar.CachedTypes();
 	
+	this.getPrimaryTypes = getPrimaryTypes;
+	this.getSecondaryTypes = getSecondaryTypes;
+	this.getHiddenTypes = getHiddenTypes;
+	
 	this._typeDesc = 'item type';
 	this._idCol = 'itemTypeID';
 	this._nameCol = 'typeName';
 	this._table = 'itemTypes';
+
+	function getPrimaryTypes(){
+		return this.getTypes('WHERE display=2');
+	}
+
+	function getSecondaryTypes(){
+		return this.getTypes('WHERE display=1');
+	}
+	
+	function getHiddenTypes(){
+		return this.getTypes('WHERE display=0');
+	}
 }
 
 

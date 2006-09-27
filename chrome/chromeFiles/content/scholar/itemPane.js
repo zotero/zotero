@@ -39,6 +39,7 @@ var ScholarItemPane = new function()
 	this.viewItem = viewItem;
 	this.loadPane = loadPane;
 	this.changeTypeTo = changeTypeTo;
+	this.onGoToURLClick = onGoToURLClick;
 	this.onOpenURLClick = onOpenURLClick;
 	this.addCreatorRow = addCreatorRow;
 	this.switchCreatorMode = switchCreatorMode;
@@ -127,7 +128,6 @@ var ScholarItemPane = new function()
 		}
 		
 		_itemBeingEdited = thisItem;
-		
 		_loaded = {};
 		
 		loadPane(_tabs.selectedIndex);
@@ -154,6 +154,39 @@ var ScholarItemPane = new function()
 		// Info pane
 		if(index == 0)
 		{
+			// Enable/disable "View =>" button
+			testView: try
+			{
+				var validURI = false;
+				var spec = _itemBeingEdited.getField('url');
+				if (!spec)
+				{
+					break testView;
+				}
+				var uri = Components.classes["@mozilla.org/network/io-service;1"]
+							.getService(Components.interfaces.nsIIOService)
+							.newURI(spec, null, null);
+				validURI = uri.scheme && uri.host;
+			}
+			catch (e){}
+			document.getElementById('tb-go-to-url').setAttribute('disabled', !validURI);
+			
+			// Enable/disable "Locate =>" (OpenURL) button
+			switch (_itemBeingEdited.getType())
+			{
+				// DEBUG: handle descendents of these types as well?
+				case Scholar.ItemTypes.getID('book'):
+				case Scholar.ItemTypes.getID('bookSection'):
+				case Scholar.ItemTypes.getID('journalArticle'):
+				case Scholar.ItemTypes.getID('thesis'):
+					var openURL = true;
+					break;
+				
+				default:
+					var openURL = false;
+			}
+			document.getElementById('tb-openurl').setAttribute('disabled', !openURL);
+			
 			while(_dynamicFields.hasChildNodes())
 				_dynamicFields.removeChild(_dynamicFields.firstChild);
 		
@@ -174,8 +207,10 @@ var ScholarItemPane = new function()
 				var val = _itemBeingEdited.getField(fieldNames[i]);
 				
 				// Convert dates from UTC
-				if (fieldNames[i]=='dateAdded' || fieldNames[i]=='dateModified'){
-					val = Scholar.Date.sqlToDate(val, true).toLocaleString();
+				if (fieldNames[i]=='dateAdded' || fieldNames[i]=='dateModified'
+					|| fieldNames[i]=='accessDate'){
+					var date = Scholar.Date.sqlToDate(val, true);
+					val = date ? date.toLocaleString() : '';
 				}
 				
 				// Start tabindex at 1000 after creators
@@ -347,9 +382,18 @@ var ScholarItemPane = new function()
 		}
 	}
 	
+	function onGoToURLClick()
+	{
+		window.loadURI(_itemBeingEdited.getField('url'));
+	}
+	
 	function onOpenURLClick()
 	{
-		window.open(Scholar.OpenURL.resolve(_itemBeingEdited));
+		var url = Scholar.OpenURL.resolve(_itemBeingEdited);
+		if (url)
+		{
+			window.loadURI(Scholar.OpenURL.resolve(_itemBeingEdited));
+		}
 	}
 	
 	function addDynamicRow(label, value, beforeElement)

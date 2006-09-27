@@ -92,16 +92,19 @@
 			<vbox id="items-pane" persist="width" flex="1">
 				<toolbar align="center">
 					<toolbarbutton id="tb-add" tooltiptext="&toolbar.newItem.label;" type="menu">
-						<menupopup/>
-					</toolbarbutton>
-					<toolbarbutton id="tb-attachment-add" type="menu" tooltiptext="&toolbar.attachment.standalone;">
+						<!-- Built in overlay.js::onLoad() -->
 						<menupopup>
+							<menuseparator/>
 							<menuitem label="&toolbar.attachment.linked;" oncommand="ScholarPane.addAttachmentFromDialog(true);"/>
 							<menuitem label="&toolbar.attachment.add;" oncommand="ScholarPane.addAttachmentFromDialog();"/>
-							<menuitem label="&toolbar.attachment.weblink;" oncommand="ScholarPane.addAttachmentFromPage(true);"/>
-							<menuitem label="&toolbar.attachment.snapshot;" oncommand="ScholarPane.addAttachmentFromPage();"/>
+							<menuseparator/>
+							<menu label="&toolbar.moreItemTypes.label;">
+								<menupopup id="tb-add-more"/>
+							</menu>
 						</menupopup>
 					</toolbarbutton>
+					<toolbarbutton id="tb-item-from-page" tooltiptext="&toolbar.newItemFromPage.label;" oncommand="ScholarPane.addItemFromPage()"/>
+					<toolbarbutton id="tb-snapshot-page" tooltiptext="&toolbar.attachment.snapshot;" oncommand="ScholarPane.addAttachmentFromPage()"/>
 					<toolbarbutton id="tb-note-add" tooltiptext="&toolbar.note.standalone;" oncommand="ScholarPane.newNote();"/>
 					<spacer flex="1"/>
 					<label value="&toolbar.search.label;" control="tb-search"/>

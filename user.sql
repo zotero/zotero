@@ -1,4 +1,4 @@
--- 3
+-- 4
 
 -- This file creates tables containing user-specific data -- any changes
 -- to existing tables made here must be mirrored in transition steps in
@@ -27,6 +27,13 @@ CREATE TABLE IF NOT EXISTS userItemTypes (
     itemTypeID INT,
     typeName TEXT,
     templateItemTypeID INT,
+    PRIMARY KEY (itemTypeID)
+);
+
+-- Control visibility and placement of system and user item types
+CREATE TABLE IF NOT EXISTS userItemTypeMask (
+    itemTypeID INT,
+    display INT, -- 0 == hide, 1 == show, 2 == primary
     PRIMARY KEY (itemTypeID)
 );
 

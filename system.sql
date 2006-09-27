@@ -1,4 +1,4 @@
--- 2
+-- 3
 
 -- This file creates system tables that can be safely wiped and reinitialized
 -- at any time, as long as existing ids are preserved.
@@ -9,7 +9,8 @@
     CREATE TABLE itemTypes (
         itemTypeID INTEGER PRIMARY KEY,
         typeName TEXT,
-        templateItemTypeID INT
+        templateItemTypeID INT,
+        display INT DEFAULT 1 -- 0 == hide, 1 == display, 2 == primary
     );
     
     -- Describes various types of fields and their format restrictions,
@@ -130,20 +131,20 @@
     INSERT INTO "fieldFormats" VALUES(2, '[0-9]*', 1);
     INSERT INTO "fieldFormats" VALUES(3, '[0-9]{4}', 1);
     
-    INSERT INTO itemTypes VALUES (1,'note',NULL);
-    INSERT INTO itemTypes VALUES (2,'book',NULL);
-    INSERT INTO itemTypes VALUES (3,'bookSection',2);
-    INSERT INTO itemTypes VALUES (4,'journalArticle',NULL);
-    INSERT INTO itemTypes VALUES (5,'magazineArticle',NULL);
-    INSERT INTO itemTypes VALUES (6,'newspaperArticle',NULL);
-    INSERT INTO itemTypes VALUES (7,'thesis',NULL);
-    INSERT INTO itemTypes VALUES (8,'letter',NULL);
-    INSERT INTO itemTypes VALUES (9,'manuscript',NULL);
-    INSERT INTO itemTypes VALUES (10,'interview',NULL);
-    INSERT INTO itemTypes VALUES (11,'film',NULL);
-    INSERT INTO itemTypes VALUES (12,'artwork',NULL);
-    INSERT INTO itemTypes VALUES (13,'website',NULL);
-    INSERT INTO itemTypes VALUES (14,'attachment',NULL);
+    INSERT INTO itemTypes VALUES (1,'note',NULL,2);
+    INSERT INTO itemTypes VALUES (2,'book',NULL,2);
+    INSERT INTO itemTypes VALUES (3,'bookSection',2,2);
+    INSERT INTO itemTypes VALUES (4,'journalArticle',NULL,2);
+    INSERT INTO itemTypes VALUES (5,'magazineArticle',NULL,2);
+    INSERT INTO itemTypes VALUES (6,'newspaperArticle',NULL,2);
+    INSERT INTO itemTypes VALUES (7,'thesis',NULL,1);
+    INSERT INTO itemTypes VALUES (8,'letter',NULL,1);
+    INSERT INTO itemTypes VALUES (9,'manuscript',NULL,1);
+    INSERT INTO itemTypes VALUES (10,'interview',NULL,1);
+    INSERT INTO itemTypes VALUES (11,'film',NULL,1);
+    INSERT INTO itemTypes VALUES (12,'artwork',NULL,1);
+    INSERT INTO itemTypes VALUES (13,'website',NULL,2);
+    INSERT INTO itemTypes VALUES (14,'attachment',NULL,0);
 
     INSERT INTO fields VALUES (1,'url',NULL);
     INSERT INTO fields VALUES (2,'rights',NULL);

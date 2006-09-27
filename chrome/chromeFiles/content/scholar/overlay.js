@@ -37,6 +37,7 @@ var ScholarPane = new function()
 	this.onDoubleClick = onDoubleClick;
 	this.openNoteWindow = openNoteWindow;
 	this.newNote = newNote;
+	this.addItemFromPage = addItemFromPage;
 	this.addAttachmentFromDialog = addAttachmentFromDialog;
 	this.addAttachmentFromPage = addAttachmentFromPage;
 	this.viewSelectedAttachment = viewSelectedAttachment;
@@ -82,20 +83,26 @@ var ScholarPane = new function()
 		var itemsTree = document.getElementById('items-tree');
 		itemsTree.controllers.appendController(new Scholar.ItemTreeCommandController(itemsTree));
 		
-		//Create the add menu with each item type
+		// Create the add menu with each item type
 		var addMenu = document.getElementById('tb-add').firstChild;
-		var itemTypes = Scholar.ItemTypes.getTypes();
+		var separator = document.getElementById('tb-add').firstChild.firstChild;
+		var moreMenu = document.getElementById('tb-add-more');
+		var itemTypes = Scholar.ItemTypes.getPrimaryTypes();
 		for(var i = 0; i<itemTypes.length; i++)
 		{
-			// Don't allow new attachments through this menu
-			if (itemTypes[i]['name']=='attachment')
-			{
-				continue;
-			}
 			var menuitem = document.createElement("menuitem");
 			menuitem.setAttribute("label", Scholar.getString("itemTypes."+itemTypes[i]['name']));
 			menuitem.setAttribute("oncommand","ScholarPane.newItem("+itemTypes[i]['id']+")");
-			addMenu.appendChild(menuitem);
+			addMenu.insertBefore(menuitem, separator);
+		}
+		// Create submenu for secondary item types
+		var itemTypes = Scholar.ItemTypes.getSecondaryTypes();
+		for(var i = 0; i<itemTypes.length; i++)
+		{
+			var menuitem = document.createElement("menuitem");
+			menuitem.setAttribute("label", Scholar.getString("itemTypes."+itemTypes[i]['name']));
+			menuitem.setAttribute("oncommand","ScholarPane.newItem("+itemTypes[i]['id']+")");
+			moreMenu.appendChild(menuitem);
 		}
 	}
 	
@@ -136,10 +143,18 @@ var ScholarPane = new function()
 		
 	/*
 	 * Create a new item
+	 *
+	 * _data_ is an optional object with field:value for itemData
 	 */
-	function newItem(typeID)
+	function newItem(typeID, data)
 	{
 		var item = new Scholar.Item(typeID);
+		
+		for (var i in data)
+		{
+			item.setField(i, data[i]);
+		}
+		
 		item.save();
 		if(itemsView && itemsView._itemGroup.isCollection())
 			itemsView._itemGroup.ref.addItem(item.getID());
@@ -616,36 +631,25 @@ var ScholarPane = new function()
 		}
 	}
 	
+	
+	function addItemFromPage()
+	{
+		var data = {
+			title: window.content.document.title,
+			url: window.content.document.location.href,
+			accessDate: "CURRENT_TIMESTAMP"
+		}
+		
+		newItem(Scholar.ItemTypes.getID('website'), data);
+	}
+	
+	
 	function addAttachmentFromPage(link, id)
 	{
-		var item;
-		if(id == null)
-		{
-			item = newItem(Scholar.ItemTypes.getID('website'));
-			if(item)
-			{
-				id = item.getID();
-				var c = getSelectedCollection();
-				if(c)
-					c.addItem(id);
-			}
-		}
-		
-		var attachmentID;
 		if(link)
-			attachmentID = Scholar.Attachments.linkFromDocument(window.content.document, id);
+			Scholar.Attachments.linkFromDocument(window.content.document, id);
 		else
-			attachmentID = Scholar.Attachments.importFromDocument(window.content.document, id);
-		
-		if(attachmentID && item)
-		{			
-			var attachment = Scholar.Items.get(attachmentID);
-			if(attachment)
-			{
-				item.setField('title',attachment.getField('title'));
-				item.save();
-			}
-		}
+			Scholar.Attachments.importFromDocument(window.content.document, id);
 	}
 	
 	function viewSelectedAttachment()

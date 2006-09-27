@@ -19,6 +19,8 @@
 <!ENTITY collections.name_column		"Collections">
 
 <!ENTITY toolbar.newItem.label    		"New Item">
+<!ENTITY toolbar.moreItemTypes.label	"More">
+<!ENTITY toolbar.newItemFromPage.label		"Create New Item from Current Page">
 <!ENTITY toolbar.removeItem.label 		  "Remove Item...">
 <!ENTITY toolbar.newCollection.label   	"New Collection...">
 <!ENTITY toolbar.newSavedSearch.label   	"New Saved Search...">
@@ -35,16 +37,17 @@
 <!ENTITY toolbar.createBibSavedSearch.label   "Create Bibliography From Saved Search...">
 <!ENTITY toolbar.search.label   			"Search:">
 <!ENTITY toolbar.fullscreen.tooltip		"Toggle Fullscreen Mode">
-<!ENTITY toolbar.openurl.label    		"Find in your library's catalog">
+<!ENTITY toolbar.goToURL.label   		"View">
+<!ENTITY toolbar.goToURL.tooltip  		"Go to this item online">
+<!ENTITY toolbar.openURL.label 	  	"Locate">
+<!ENTITY toolbar.openURL.tooltip   	"Find through your local library">
 
 <!ENTITY item.add						"Add">
 
 <!ENTITY toolbar.note.standalone		"New Standalone Note">
-<!ENTITY toolbar.attachment.standalone		"New Standalone Attachment">
-<!ENTITY toolbar.attachment.add   			"Add File...">
-<!ENTITY toolbar.attachment.linked   			"Add Link to File...">
-<!ENTITY toolbar.attachment.snapshot 			"Add Snapshot of Current Page">
-<!ENTITY toolbar.attachment.weblink  			"Add Link to Current Page">
+<!ENTITY toolbar.attachment.linked   	"Link to File...">
+<!ENTITY toolbar.attachment.add   		"Store Copy of File...">
+<!ENTITY toolbar.attachment.snapshot 	"Take Snapshot of Current Page">
 
 <!ENTITY selectitems.title   			"Select Items">
 <!ENTITY selectitems.intro.label   		"Select which items you'd like to add to your library">

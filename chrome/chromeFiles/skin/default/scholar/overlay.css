@@ -52,11 +52,6 @@
 	height: 24px;
 }
 
-#scholar-pane toolbar toolbarbutton
-{
-	
-}
-
 #scholar-pane toolbar .toggler
 {
 	margin: 4px;
@@ -84,7 +79,7 @@
 
 
 /* These fix a rendering bug in Fx2.0b2 */
-#scholar-pane .toolbarbutton-text
+#scholar-pane toolbarbutton .toolbarbutton-text
 {
 	margin:0 2px;
 }
@@ -108,14 +103,19 @@
 	list-style-image: url('chrome://scholar/skin/toolbar-item-add.png');
 }
 
+#tb-item-from-page
+{
+	list-style-image: url('chrome://scholar/skin/toolbar-item-from-page.png');
+}
+
+#tb-snapshot-page
+{
+	list-style-image: url('chrome://scholar/skin/toolbar-snapshot-add.png');
+}
+
 #tb-note-add
 {
 	list-style-image: url('chrome://scholar/skin/toolbar-note-add.png');
-}
-
-#tb-attachment-add
-{
-	list-style-image: url('chrome://scholar/skin/item-attachments-add.png');
 }
 
 #tb-item-attachments-file
@@ -178,9 +178,15 @@
 	list-style-image: url('chrome://scholar/skin/search-cancel-active.png');
 }
 
-#tb-openurl
+#tb-go-to-url, #tb-openurl
 {
-	list-style-image: url('chrome://scholar/skin/toolbar-openurl.png');
+	list-style-image: url('chrome://scholar/skin/toolbar-go-arrow.png');
+	-moz-box-direction: reverse;
+}
+
+#tb-go-to-url[disabled=true], #tb-openurl[disabled=true]
+{
+	list-style-image: url('chrome://scholar/skin/toolbar-go-arrow-disabled.png');
 }
 
 #scholar-view-item > vbox

@@ -22,10 +22,13 @@
 								'typeID', typeID, otherFields)"/>
 				</popupset>
 				<hbox align="center">
+					<button id="tb-go-to-url" label="&toolbar.goToURL.label;" tooltiptext="&toolbar.goToURL.tooltip;" flex="1" oncommand="ScholarItemPane.onGoToURLClick();" disabled="false"/>
+					<button id="tb-openurl" label="&toolbar.openURL.label;" tooltiptext="&toolbar.openURL.tooltip;" flex="1" oncommand="ScholarItemPane.onOpenURLClick();"/>
+				</hbox>
+				<hbox align="center">
 					<menulist id="editpane-type-menu" oncommand="ScholarItemPane.changeTypeTo(this.value)" flex="1">
 						<menupopup/>
 					</menulist>
-					<toolbarbutton id="tb-openurl" tooltiptext="&toolbar.openurl.label;" oncommand="ScholarItemPane.onOpenURLClick();"/>
 				</hbox>
 				<grid flex="1">
 					<columns>
@@ -55,7 +58,6 @@
 						<menupopup>
 							<menuitem class="menuitem-iconic" id="tb-item-attachments-link" label="&toolbar.attachment.linked;" oncommand="ScholarItemPane.addAttachmentFromDialog(true);"/>
 							<menuitem class="menuitem-iconic" id="tb-item-attachments-file" label="&toolbar.attachment.add;" oncommand="ScholarItemPane.addAttachmentFromDialog();"/>
-							<menuitem class="menuitem-iconic" id="tb-item-attachments-web-link" label="&toolbar.attachment.weblink;" oncommand="ScholarItemPane.addAttachmentFromPage(true);"/>
 							<menuitem class="menuitem-iconic" id="tb-item-attachments-snapshot" label="&toolbar.attachment.snapshot;" oncommand="ScholarItemPane.addAttachmentFromPage();"/>
 						</menupopup>
 					</button>

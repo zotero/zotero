@@ -653,6 +653,11 @@ Scholar.Date = new function(){
 				timeparts = [false, false, false];
 			}
 			
+			// Invalid date part
+			if (dateparts.length==1){
+				return false;
+			}
+			
 			if (isUTC){
 				return new Date(Date.UTC(dateparts[0], dateparts[1]-1, dateparts[2],
 					timeparts[0], timeparts[1], timeparts[2]));
