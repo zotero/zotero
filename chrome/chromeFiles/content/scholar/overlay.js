@@ -247,7 +247,26 @@ var ScholarPane = new function()
 			}
 			else if(item.isAttachment())
 			{
-				document.getElementById('scholar-attachment-label').setAttribute('value',item.getField('title'));
+				// Wrap title to multiple lines if necessary
+				var label = document.getElementById('scholar-attachment-label');
+				while (label.hasChildNodes())
+				{
+					label.removeChild(label.firstChild);
+				}
+				var val = item.getField('title');
+				var firstSpace = val.indexOf(" ");
+				// Crop long uninterrupted text
+				if ((firstSpace == -1 && val.length > 29 ) || firstSpace > 29)
+				{
+					label.setAttribute('crop', 'end');
+					label.setAttribute('value', val);
+				}
+				// Create a <description> element, essentially
+				else
+				{
+					label.appendChild(document.createTextNode(val));
+				}
+				
 				if (item.ref.getAttachmentLinkMode() == Scholar.Attachments.LINK_MODE_LINKED_URL
 					|| item.ref.getAttachmentLinkMode() == Scholar.Attachments.LINK_MODE_IMPORTED_URL)
 				{
