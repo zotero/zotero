@@ -542,44 +542,53 @@ Scholar.Item.prototype.save = function(){
 			//
 			if (this._changedItemData.length){
 				var del = new Array();
+				
+				sql = "SELECT COUNT(*) FROM itemData WHERE itemID=? AND fieldID=?";
+				var countStatement = Scholar.DB.getStatement(sql);
+				countStatement.bindInt32Parameter(0, this.getID());
+				
+				sql = "UPDATE itemData SET value=? WHERE itemID=? AND fieldID=?";
+				var updateStatement = Scholar.DB.getStatement(sql);
+				updateStatement.bindInt32Parameter(1, this.getID());
+				
+				sql = "INSERT INTO itemData VALUES (?,?,?)";
+				var insertStatement = Scholar.DB.getStatement(sql);
+				insertStatement.bindInt32Parameter(0, this.getID());
+				
 				for (fieldID in this._changedItemData.items){
 					if (this.getField(fieldID)){
 						// Oh, for an INSERT...ON DUPLICATE KEY UPDATE
-						sql2 = 'SELECT COUNT(*) FROM itemData '
-							+ 'WHERE itemID=' + this.getID()
-							+ ' AND fieldID=' + fieldID;
+						countStatement.bindInt32Parameter(1, fieldID);
+						countStatement.executeStep();
+						var exists = countStatement.getInt64(0);
 						
 						// Update
-						if (Scholar.DB.valueQuery(sql2)){
-							sqlValues = [];
-							
+						if (exists){
 							Scholar.History.modify('itemData', 'itemID-fieldID',
 								[this.getID(), fieldID]);
 							
-							sql = "UPDATE itemData SET value=";
-							
+							// Don't bind CURRENT_TIMESTAMP as string
 							if (Scholar.ItemFields.getID('accessDate')==fieldID
 								&& this.getField(fieldID)=='CURRENT_TIMESTAMP')
 							{
-								sql += "CURRENT_TIMESTAMP";
-							}
-							// Take advantage of SQLite's manifest typing
-							else if (Scholar.ItemFields.isInteger(fieldID)){
-								sql += '?'
-								sqlValues.push({'int':this.getField(fieldID)});
+								sql = "UPDATE itemData SET value=CURRENT_TIMESTAMP"
+									+ " WHERE itemID=? AND fieldID=?";
+								Scholar.DB.query(sql,
+									[{int:this.getID()}, {int:fieldID}]);
 							}
 							else {
-								sql += '?'
-								sqlValues.push({'string':this.getField(fieldID)});
+								// Take advantage of SQLite's manifest typing
+								if (Scholar.ItemFields.isInteger(fieldID)){
+									updateStatement.bindInt32Parameter(0,
+										this.getField(fieldID));
+								}
+								else {
+									updateStatement.bindUTF8StringParameter(0,
+										this.getField(fieldID));
+								}
+								updateStatement.bindInt32Parameter(2, fieldID);
+								updateStatement.execute();
 							}
-							sql += " WHERE itemID=? AND fieldID=?";
-							
-							sqlValues.push(
-								{'int':this.getID()},
-								{'int':fieldID}
-							);
-							
-							Scholar.DB.query(sql, sqlValues);
 						}
 						
 						// Insert
@@ -587,27 +596,29 @@ Scholar.Item.prototype.save = function(){
 							Scholar.History.add('itemData', 'itemID-fieldID',
 								[this.getID(), fieldID]);
 							
-							sql = "INSERT INTO itemData VALUES (?,?,?)";
-							
-							sqlValues = [
-								{'int':this.getID()},
-								{'int':fieldID},
-							];
+							insertStatement.bindInt32Parameter(1, fieldID);
 							
 							if (Scholar.ItemFields.getID('accessDate')==fieldID
 								&& this.getField(fieldID)=='CURRENT_TIMESTAMP')
 							{
 								sql = "INSERT INTO itemData VALUES "
 									+ "(?,?,CURRENT_TIMESTAMP)";
-							}
-							else if (Scholar.ItemFields.isInteger(fieldID)){
-								sqlValues.push({'int':this.getField(fieldID)});
+								
+								Scholar.DB.query(sql,
+									[{int:this.getID()}, {int:fieldID}]);
 							}
 							else {
-								sqlValues.push({'string':this.getField(fieldID)});
+								if (Scholar.ItemFields.isInteger(fieldID)){
+									insertStatement.bindInt32Parameter(2,
+										this.getField(fieldID));
+								}
+								else {
+									insertStatement.bindUTF8StringParameter(2,
+										this.getField(fieldID));
+								}
+								
+								insertStatement.execute();
 							}
-							
-							Scholar.DB.query(sql, sqlValues);
 						}
 					}
 					
@@ -616,6 +627,10 @@ Scholar.Item.prototype.save = function(){
 						del.push(fieldID);
 					}
 				}
+				
+				countStatement.reset();
+				updateStatement.reset();
+				insertStatement.reset();
 				
 				// Delete blank fields
 				if (del.length){
@@ -696,38 +711,39 @@ Scholar.Item.prototype.save = function(){
 			// ItemData
 			//
 			if (this._changedItemData.length){
+				// Use manual bound parameters to speed things up
+				var statement =
+					Scholar.DB.getStatement("INSERT INTO itemData VALUES (?,?,?)");
+				statement.bindInt32Parameter(0, this.getID());
+				
 				for (fieldID in this._changedItemData.items){
 					if (!this.getField(fieldID)){
 						continue;
 					}
 					
-					// TODO: update DB methods so that this can be
-					// implemented as a prepared statement that gets
-					// called multiple times
-					sql = "INSERT INTO itemData VALUES (?,?,?)";
-					
-					sqlValues = [
-						{'int':itemID},
-						{'int':fieldID}
-					];
+					statement.bindInt32Parameter(1, fieldID);
 					
 					if (Scholar.ItemFields.getID('accessDate')==fieldID
 						&& this.getField(fieldID)=='CURRENT_TIMESTAMP')
 					{
 						sql = "INSERT INTO itemData VALUES (?,?,CURRENT_TIMESTAMP)";
-					}
-					else if (Scholar.ItemFields.isInteger(fieldID)){
-						sqlValues.push({'int':this.getField(fieldID)});
+						Scholar.DB.query(sql, [{int:this.getID()}, {int:fieldID}])
 					}
 					else {
-						sqlValues.push({'string':this.getField(fieldID)});
+						if (Scholar.ItemFields.isInteger(fieldID)){
+							statement.bindInt32Parameter(2, this.getField(fieldID));
+						}
+						else {
+							statement.bindUTF8StringParameter(2, this.getField(fieldID));
+						}
+						statement.execute();
 					}
-					
-					Scholar.DB.query(sql, sqlValues);
 					
 					Scholar.History.add('itemData', 'itemID-fieldID',
 						[itemID, fieldID]);
 				}
+				
+				statement.reset();
 			}
 			
 			//
