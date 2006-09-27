@@ -11,7 +11,6 @@ Scholar.DB = new function(){
 	this.valueQuery = valueQuery;
 	this.rowQuery = rowQuery;
 	this.columnQuery = columnQuery;
-	this.statementQuery = statementQuery;
 	this.getStatement = getStatement;
 	this.getLastInsertID = getLastInsertID;
 	this.getLastErrorString = getLastErrorString;
@@ -58,7 +57,7 @@ Scholar.DB = new function(){
 				// Until the native dataset methods work (or at least exist),
 				// we build a multi-dimensional associative array manually
 				
-				var statement = statementQuery(sql,params);
+				var statement = getStatement(sql, params);
 				
 				var dataset = new Array();
 				while (statement.executeStep()){
@@ -75,7 +74,7 @@ Scholar.DB = new function(){
 			}
 			else {
 				if (params){
-					var statement = statementQuery(sql,params);
+					var statement = getStatement(sql, params);
 					statement.execute();
 				}
 				else {
@@ -104,15 +103,7 @@ Scholar.DB = new function(){
 	 * Query a single value and return it
 	 */
 	function valueQuery(sql,params){
-		var db = _getDBConnection();
-		try {
-			var statement = statementQuery(sql,params);
-		}
-		catch (e){
-			var dberr = (db.lastErrorString!='not an error')
-				? ' [ERROR: ' + db.lastErrorString + ']' : '';
-			throw(e + ' [QUERY: ' + sql + ']' + dberr);
-		}
+		var statement = getStatement(sql, params);
 		
 		// No rows
 		if (!statement.executeStep()){
@@ -141,7 +132,7 @@ Scholar.DB = new function(){
 	 * Run a query and return the first column as a numerically-indexed array
 	 */
 	function columnQuery(sql,params){
-		var statement = statementQuery(sql,params);
+		var statement = getStatement(sql, params);
 		
 		if (statement){
 			var column = new Array();
@@ -156,12 +147,16 @@ Scholar.DB = new function(){
 	
 	
 	/*
-	 * Run a query, returning a mozIStorageStatement for direct manipulation
+	/*
+	 * Get a raw mozStorage statement from the DB for manual processing
+	 *
+	 * This should only be used externally for manual parameter binding for
+	 * large repeated queries
 	 *
 	 *  Optional _params_ is an array of bind parameters in the form
 	 *		[1,"hello",3] or [{'int':2},{'string':'foobar'}]
 	 */
-	function statementQuery(sql,params){
+	function getStatement(sql, params){
 		var db = _getDBConnection();
 		
 		try {
@@ -174,7 +169,7 @@ Scholar.DB = new function(){
 			throw(e + ' [QUERY: ' + sql + ']' + dberr);
 		}
 		
-		if (statement && params){
+		if (params){
 			// If single scalar value or single non-array object, wrap in an array
 			if (typeof params != 'object' || params===null ||
 				(params && typeof params == 'object' && !params.length)){
@@ -245,30 +240,7 @@ Scholar.DB = new function(){
 	
 	
 	/*
-	 * Get a raw mozStorage statement from the DB for manual processing
-	 *
-	 * This should only be needed for manual parameter binding for
-	 * large repeated queries
-	 */
-	function getStatement(sql){
-		var db = _getDBConnection();
-		
-		try {
-			Scholar.debug(sql,5);
-			var statement = db.createStatement(sql);
-		}
-		catch (e){
-			var dberr = (db.lastErrorString!='not an error')
-				? ' [ERROR: ' + db.lastErrorString + ']' : '';
-			throw(e + ' [QUERY: ' + sql + ']' + dberr);
-		}
-		
-		return statement;
-	}
-	
-	
-	/*
-	 * Only for use with getStatement()
+	 * Only for use externally with getStatement()
 	 */
 	function getLastInsertID(){
 		var db = _getDBConnection();
@@ -277,7 +249,7 @@ Scholar.DB = new function(){
 	
 	
 	/*
-	 * Only for use with getStatement()
+	 * Only for use externally with getStatement()
 	 */
 	function getLastErrorString(){
 		var db = _getDBConnection();
@@ -363,12 +335,12 @@ Scholar.DB = new function(){
 		
 		try {
 			var sql = "SELECT * FROM " + table + " LIMIT 1";
-			var statement = statementQuery(sql);
-			
+			var statement = getStatement(sql);
 			var cols = new Array();
 			for (var i=0,len=statement.columnCount; i<len; i++){
 				cols.push(statement.getColumnName(i));
 			}
+			statement.reset();
 			return cols;
 		}
 		catch (e){
