@@ -473,9 +473,9 @@ Scholar.CollectionTreeView.prototype.canDrop = function(row, orient)
 		nsDragAndDrop.mDragSession = nsDragAndDrop.mDragService.getCurrentSession();
 		return false;
 	}
+	
 	var data = dataSet.first.first;
 	var dataType = data.flavour.contentType;
-	
 	
 	//Highlight the rows correctly on drag:
 	if(orient == 1 && row == 0 && dataType == 'scholar/collection') //for dropping collections into root level
@@ -487,7 +487,24 @@ Scholar.CollectionTreeView.prototype.canDrop = function(row, orient)
 		var rowCollection = this._getItemAtRow(row).ref; //the collection we are dragging over
 		
 		if(dataType == 'scholar/item' || dataType == "text/x-moz-url")
-			return true;	//items can be dropped on anything
+		{
+			var ids = data.data.split(',');
+			for each(var id in ids)
+			{
+				var item = Scholar.Items.get(id);
+				// Can only drag top-level items into collections
+				if (item.isRegularItem() || !item.getSource())
+				{
+					// Make sure there's at least one item that's not already
+					// in this collection
+					if (!rowCollection.hasItem(id))
+					{
+						return true;
+					}
+				}
+			}
+			return false;
+		}
 		else if(dataType='scholar/collection' && data.data != rowCollection.getID() && !Scholar.Collections.get(data.data).hasDescendent('collection',rowCollection.getID()) )
 			return true;	//collections cannot be dropped on themselves, nor in their children
 	}
@@ -527,8 +544,15 @@ Scholar.CollectionTreeView.prototype.drop = function(row, orient)
 	{
 		var ids = data.data.split(',');
 		var targetCollection = this._getItemAtRow(row).ref;
-		for(var i = 0; i<ids.length; i++)
-			targetCollection.addItem(ids[i]);
+		for each(var id in ids)
+		{
+			var item = Scholar.Items.get(id);
+			// Only accept top-level items
+			if (item.isRegularItem() || !item.getSource())
+			{
+				targetCollection.addItem(id);
+			}
+		}
 	}
 	else if(dataType == 'text/x-moz-url' && this.canDrop(row, orient))
 	{

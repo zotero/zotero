@@ -127,28 +127,45 @@ Scholar.ItemTreeView.prototype.notify = function(action, type, ids)
 			for(var i=0, len=ids.length; i<len; i++)
 			{
 				var row = this._itemRowMap[ids[i]];
+				// Item already exists in this view
 				if( row != null)
 				{
-					if(this.isContainer(row) && this.isContainerOpen(row))
+					if (this.isContainer(row) && this.isContainerOpen(row))
 					{
 						this.toggleOpenState(row);
 						this.toggleOpenState(row);
 					}
-					else if(this.getParentIndex(row))
+					// If item moved from top-level to under another item,
+					// remove the old row
+					else if (!this.isContainer(row) && this.getParentIndex(row)==-1
+						&& this._getItemAtRow(row).ref.getSource())
 					{
-						
+							Scholar.debug('row is here2');
+							this._hideItem(row);
+							this._treebox.rowCountChanged(row+1, -1)
+					}
+					// If 
+					else if (!this.isContainer(row) && this.getParentIndex(row)!=-1
+						&& !this._getItemAtRow(row).ref.getSource())
+					{
+						var item = Scholar.Items.get(ids[i]);
+						this._showItem(new Scholar.ItemTreeView.TreeRow(item, 0, false), this.rowCount);
+						this._treebox.rowCountChanged(this.rowCount-1, 1);
 					}
 					else
 					{
+						Scholar.debug('row is here3');
 						this._treebox.invalidateRow(row);
 					}
 					madeChanges = true;
 				}
-				else if(this._itemGroup.isLibrary() || this._itemGroup.ref.hasItem(ids[i]))
+				
+				//else if(this._itemGroup.isLibrary() || this._itemGroup.ref.hasItem(ids[i]))
+				else
 				{
 					var item = Scholar.Items.get(ids[i]);
 					
-					if(!item.getSource())
+					if(item.isRegularItem() || !item.getSource())
 					{
 						//most likely, the note or attachment's parent was removed.
 						this._showItem(new Scholar.ItemTreeView.TreeRow(item,0,false),this.rowCount);
@@ -175,9 +192,12 @@ Scholar.ItemTreeView.prototype.notify = function(action, type, ids)
 			
 			for (var i in items)
 			{
-				if((this._itemGroup.isLibrary() || items[i].inCollection(this._itemGroup.ref.getID()))	// if the item belongs in this collection
-					&& this._itemRowMap[items[i].getID()] == null											// if we haven't already added it to our hash map
-					&& (items[i].isRegularItem() || !items[i].getSource()))								// if it's stand-alone
+				// if the item belongs in this collection
+				if((this._itemGroup.isLibrary() || items[i].inCollection(this._itemGroup.ref.getID()))
+					// if we haven't already added it to our hash map
+					&& this._itemRowMap[items[i].getID()] == null
+					// Regular item or standalone note/attachment
+					&& (items[i].isRegularItem() || !items[i].getSource()))
 				{
 					this._showItem(new Scholar.ItemTreeView.TreeRow(items[i],0,false),this.rowCount);
 					this._treebox.rowCountChanged(this.rowCount-1,1);
@@ -206,7 +226,8 @@ Scholar.ItemTreeView.prototype.notify = function(action, type, ids)
 			this.sort();				//this also refreshes the hash map
 			this._treebox.invalidate();
 		}
-		else if(action != 'modify') //no need to update this if we modified
+		//else if(action != 'modify') //no need to update this if we modified
+		else //no need to update this if we modified
 		{
 			this._refreshHashMap();
 		}
@@ -326,8 +347,13 @@ Scholar.ItemTreeView.prototype.getLevel = function(row)
 	return this._getItemAtRow(row).level;
 }
 
+// Gets the index of the row's container, or -1 if none (container itself or top-level)
 Scholar.ItemTreeView.prototype.getParentIndex = function(row)
 {
+	if (row==-1)
+	{
+		return -1;
+	}
 	var thisLevel = this.getLevel(row);
 	if(thisLevel == 0) return -1;
 	for(var i = row - 1; i >= 0; i--)
@@ -639,7 +665,7 @@ Scholar.ItemTreeView.prototype._refreshHashMap = function()
  */
 Scholar.ItemTreeView.prototype.saveSelection = function()
 {
-	savedSelection = new Array();
+	var savedSelection = new Array();
 	
 	var start = new Object();
 	var end = new Object();
@@ -713,7 +739,7 @@ Scholar.ItemTreeCommandController.prototype.onEvent = function(evt)
 Scholar.ItemTreeView.prototype.onDragStart = function (evt,transferData,action)
 { 
 	transferData.data=new TransferData();
-	transferData.data.addDataForFlavour("scholar/item",this.saveSelection());
+	transferData.data.addDataForFlavour("scholar/item", this.saveSelection());
 }
 
 /*
@@ -727,20 +753,192 @@ Scholar.ItemTreeView.prototype.getSupportedFlavours = function ()
 	return flavors; 
 }
 
-/*
- *  Called by nsDragAndDrop.js for any sort of drop on the tree
- */
-Scholar.ItemTreeView.prototype.onDrop = function (evt,data,session)
+Scholar.ItemTreeView.prototype.canDrop = function(row, orient)
 {
+	try
+	{
+		var dataSet = nsTransferable.get(this.getSupportedFlavours(),
+			nsDragAndDrop.getDragData, true);
+	}
+	catch (e)
+	{
+		// A work around a limitation in nsDragAndDrop.js -- the mDragSession
+		// is not set until the drag moves over another control.
+		// (This will only happen if the first drag is from the item list.)
+		nsDragAndDrop.mDragSession = nsDragAndDrop.mDragService.getCurrentSession();
+		return false;
+	}
+	
+	var data = dataSet.first.first;
+	var dataType = data.flavour.contentType;
+	var ids = data.data.split(','); // ids of rows we are dragging in
+	
+	if (row==-1 && orient==-1)
+	{
+		return true;
+	}
+	
+	// workaround... two different services call canDrop
+	// (nsDragAndDrop, and the tree) -- this is for the former,
+	// used when dragging between windows
+	if (typeof row == 'object')
+	{
+		// If drag to different window
+		if (nsDragAndDrop.mDragSession.sourceNode!=row.target)
+		{
+			// Check if at least one item (or parent item for children) doesn't
+			// already exist in target
+			for each(var id in ids)
+			{
+				var item = Scholar.Items.get(id);
+				
+				// Skip non-top-level items
+				if (!item.isRegularItem() && item.getSource())
+				{
+					continue;
+				}
+				// DISABLED: move parent on child drag
+				//var source = item.isRegularItem() ? false : item.getSource();
+				//if (!this._itemGroup.ref.hasItem(source ? source : id))
+				if (!this._itemGroup.ref.hasItem(id))
+				{
+					return true;
+				}
+			}
+		}
+		
+		return false;
+	}
+	
+	//Scholar.debug('row is ' + row);
+	//Scholar.debug('orient is ' + orient);
+	
+	// Highlight the rows correctly on drag
+	
+	var rowItem = this._getItemAtRow(row).ref; //the item we are dragging over
+	if (dataType == 'scholar/item')
+	{
+		// Directly on a row
+		if (orient == 0)
+		{
+			for each(var id in ids)
+			{
+				var item = Scholar.Items.get(id);
+				// Only allow dragging of notes and attachments
+				// that aren't already children of the item
+				if (!item.isRegularItem() && item.getSource()!=rowItem.getID())
+				{
+					return true;
+				}
+			}
+		}
+		
+		// In library, allow children to be dragged out of parent
+		else if (this._itemGroup.isLibrary())
+		{
+			for each(var id in ids)
+			{
+				// Don't allow drag if any top-level items
+				var item = Scholar.Items.get(id);
+				if (item.isRegularItem() || !item.getSource())
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+		
+		return false;
+	}
+	/*
+	else if (dataType == "text/x-moz-url")
+	{
+		return true;
+	}
+	*/
+	
+	return false;
+}
+
+/*
+ *  Called when something's been dropped on or next to a row
+ */
+Scholar.ItemTreeView.prototype.drop = function(row, orient)
+{
+	try
+	{
+		var dataSet = nsTransferable.get(this.getSupportedFlavours(),
+			nsDragAndDrop.getDragData, true);
+	}
+	catch (e)
+	{
+		// A work around a limitation in nsDragAndDrop.js -- the mDragSession
+		// is not set until the drag moves over another control.
+		// (This will only happen if the first drag is from the item list.)
+		nsDragAndDrop.mDragSession = nsDragAndDrop.mDragService.getCurrentSession();
+		var dataSet = nsTransferable.get(this.getSupportedFlavours(),
+			nsDragAndDrop.getDragData, true);
+	}
+	
+	var data = dataSet.first.first;
 	var dataType = data.flavour.contentType;
 	
-	if(dataType == 'scholar/item')
+	if (dataType == 'scholar/item' && this.canDrop(row, orient))
 	{
-		var ids = data.data.split(',');
-		for(var i = 0; i<ids.length; i++)
-			this._itemGroup.ref.addItem(ids[i]);
+		var ids = data.data.split(','); // ids of rows we are dragging in
+		
+		// Dropped directly on a row
+		if (orient == 0)
+		{
+			// If item was a top-level item and it exists in a collection,
+			// replace it in collections with the parent item
+			rowItem = this._getItemAtRow(row).ref; // the item we are dragging over
+			for each(var id in ids)
+			{
+				var item = Scholar.Items.get(id);
+				item.setSource(rowItem.getID());
+			}
+		}
+		
+		// Dropped outside of a row
+		else
+		{
+			// Remove from parent and make top-level
+			if (this._itemGroup.isLibrary())
+			{
+				for each(var id in ids)
+				{
+					var item = Scholar.Items.get(id);
+					if (!item.isRegularItem())
+					{
+						item.setSource();
+					}
+				}
+			}
+			// Add to collection
+			else
+			{
+				for each(var id in ids)
+				{
+					var item = Scholar.Items.get(id);
+					var source = item.isRegularItem() ? false : item.getSource();
+					
+					// Top-level item
+					if (!source)
+					{
+						this._itemGroup.ref.addItem(id);
+					}
+					// Non-top-level item - currently unused
+					else
+					{
+						// TODO: Prompt before moving source item to collection
+						this._itemGroup.ref.addItem(source);
+					}
+				}
+			}
+		}
 	}
-	else if(dataType == 'text/x-moz-url')
+	else if (dataType == 'text/x-moz-url' && this.canDrop(row, orient))
 	{
 		var url = data.data.split("\n")[0];
 		
@@ -748,10 +946,15 @@ Scholar.ItemTreeView.prototype.onDrop = function (evt,data,session)
 		var newItem = Scholar.Ingester.scrapeURL(url);
 		
 		if(newItem)
-			this._itemGroup.ref.addItem(newItem.getID());
+			this._getItemAtRow(row).ref.addItem(newItem.getID());
 		*/
 	}
 }
+
+/*
+ * Called by nsDragAndDrop.js for any sort of drop on the tree
+ */
+Scholar.ItemTreeView.prototype.onDrop = function (evt,dropdata,session){ }
 
 Scholar.ItemTreeView.prototype.onDragOver = function (evt,dropdata,session) { }
 

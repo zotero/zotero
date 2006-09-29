@@ -927,9 +927,7 @@ Scholar.Item.prototype.setSource = function(sourceItemID){
 		throw ("Cannot set " + type + " source to invalid item " + sourceItemID);
 	}
 	
-	// Get previous source item id
-	var sql = "SELECT sourceItemID FROM item" + Type + "s WHERE item=" + this.getID();
-	var oldSourceItemID = Scholar.DB.valueQuery(sql);
+	var oldSourceItemID = this.getSource();
 	
 	if (oldSourceItemID==sourceItemID){
 		Scholar.debug(Type + " source hasn't changed", 4);
@@ -941,6 +939,24 @@ Scholar.Item.prototype.setSource = function(sourceItemID){
 	if (oldSourceItemID && !oldItem){
 		Scholar.debug("Old source item " + oldSourceItemID
 			+ "didn't exist in setSource()", 2);
+	}
+	
+	// If this was an independent item, remove from any collections where it
+	// existed previously and add source instead if there is one
+	if (!oldSourceItemID){
+		var sql = "SELECT collectionID FROM collectionItems WHERE itemID=?";
+		var changedCollections = Scholar.DB.columnQuery(sql, this.getID());
+		if (changedCollections){
+			if (sourceItemID){
+				var sql = "UPDATE OR REPLACE collectionItems "
+					+ "SET itemID=? WHERE itemID=?";
+				Scholar.DB.query(sql, [sourceItemID, this.getID()]);
+			}
+			else {
+				var sql = "DELETE FROM collectionItems WHERE itemID=?";
+				Scholar.DB.query(sql, this.getID());
+			}
+		}
 	}
 	
 	var sql = "UPDATE item" + Type + "s SET sourceItemID=? WHERE itemID=?";
