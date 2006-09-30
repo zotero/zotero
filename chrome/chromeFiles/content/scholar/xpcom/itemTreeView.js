@@ -993,22 +993,7 @@ Scholar.ItemTreeView.TreeRow.prototype.isRegularItem = function()
 
 Scholar.ItemTreeView.TreeRow.prototype.getField = function(field)
 {
-	if(this.isNote() && field == 'title')
-	{
-		var t = this.ref.getNote();
-		if(t)
-		{
-			var n = t.indexOf("\n");
-			if(n > -1)
-				t = t.substring(0,n);
-			return t;
-		}
-	}
-	else
-	{
-		return this.ref.getField(field);
-	}
-	
+	return this.ref.getField(field);
 }
 
 Scholar.ItemTreeView.TreeRow.prototype.getType = function()
