@@ -104,6 +104,9 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParam,
 	searchParam = searchParts[0];
 	
 	switch (searchParam){
+		case '':
+			break;
+		
 		case 'tag':
 			var sql = "SELECT tag FROM tags WHERE tag LIKE ?";
 			var sqlParams = [searchString + '%'];
@@ -114,44 +117,90 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParam,
 			}
 			sql += " ORDER BY tag";
 			var results = this._zotero.DB.columnQuery(sql, sqlParams);
-			var resultCode = Ci.nsIAutoCompleteResult.RESULT_SUCCESS;
 			break;
 		
 		case 'creator':
-			var [singleField, itemID] = extra.split('-');
+			// Valid fieldMode values:
+			// 		0 == search two-field creators
+			// 		1 == search single-field creators
+			// 		2 == search both
+			var [fieldMode, itemID] = extra.split('-');
 			
-			var sql = "SELECT "
-				// Full name not currently returned
-				//+ "lastName" + (!singleField ? '' : "|| ', ' || firstName")
-				+ searchParts[2]
-				+ " AS name, creatorID "
-				+ "FROM creators WHERE " + searchParts[2] + " LIKE ? "
-				+ "AND isInstitution=?";
-			var sqlParams = [searchString + '%', parseInt(singleField)];
-			if (itemID){
-				sql += " AND creatorID NOT IN (SELECT creatorID FROM "
-					+ "itemCreators WHERE itemID = ?)";
-				sqlParams.push(itemID);
+			if (fieldMode==2)
+			{
+				var sql = "SELECT DISTINCT CASE isInstitution WHEN 1 THEN lastName "
+					+ "WHEN 0 THEN firstName || ' ' || lastName END AS name "
+					+ "FROM creators WHERE CASE isInstitution "
+					+ "WHEN 1 THEN lastName "
+					+ "WHEN 0 THEN firstName || ' ' || lastName END "
+					+ "LIKE ? ORDER BY name";
+				var sqlParams = searchString + '%';
 			}
-			sql += " ORDER BY " + searchParts[2];
+			else
+			{
+				var sql = "SELECT "
+					// Full name not currently returned
+					//+ "lastName" + (!singleField ? '' : "|| ', ' || firstName")
+					+ searchParts[2]
+					+ " AS name, creatorID "
+					+ "FROM creators WHERE " + searchParts[2] + " LIKE ? "
+					+ "AND isInstitution=?";
+				var sqlParams = [searchString + '%', parseInt(fieldMode)];
+				if (itemID){
+					sql += " AND creatorID NOT IN (SELECT creatorID FROM "
+						+ "itemCreators WHERE itemID = ?)";
+					sqlParams.push(itemID);
+				}
+				sql += " ORDER BY " + searchParts[2];
+			}
+			
 			var rows = this._zotero.DB.query(sql, sqlParams);
 			for each(var row in rows){
 				results.push(row['name']);
-				// No currently used
+				// Not currently used
 				//comments.push(row['creatorID'])
 			}
-			var resultCode = Ci.nsIAutoCompleteResult.RESULT_SUCCESS;
+			break;
+		
+		case 'title':
+		// DEBUG: These two probably won't be necesary once there's a better
+		// date entry method
+		case 'dateModified':
+		case 'dateAdded':
+			var sql = "SELECT DISTINCT " + searchParam + " FROM items "
+				+ "WHERE " + searchParam + " LIKE ? ORDER BY " + searchParam;
+			var results = this._zotero.DB.columnQuery(sql, searchString + '%');
 			break;
 		
 		default:
-			this._zotero.debug("'" + searchParam + "' is not a valid autocomplete scope", 1);
-			var results = [];
-			var resultCode = Ci.nsIAutoCompleteResult.RESULT_IGNORED;
+			var sql = "SELECT fieldID FROM fields WHERE fieldName=?";
+			var fieldID = this._zotero.DB.valueQuery(sql, {string:searchParam});
+			
+			if (!fieldID){
+				this._zotero.debug("'" + searchParam + "' is not a valid autocomplete scope", 1);
+				var results = [];
+				var resultCode = Ci.nsIAutoCompleteResult.RESULT_IGNORED;
+				break;
+			}
+			
+			var sql = "SELECT DISTINCT value FROM itemData WHERE fieldID=?1 AND "
+				+ "value LIKE ?2 "
+			var sqlParams = [fieldID, searchString + '%'];
+			if (extra){
+				sql += "AND value NOT IN (SELECT value FROM itemData "
+				+ "WHERE fieldID=?1 AND itemID=?3) ";
+				sqlParams.push(extra);
+			}
+			sql += "ORDER BY value";
+			var results = this._zotero.DB.columnQuery(sql, sqlParams);
 	}
 	
 	if (!results || !results.length){
 		var results = [];
 		var resultCode = Ci.nsIAutoCompleteResult.RESULT_NOMATCH;
+	}
+	else if (typeof resultCode == 'undefined'){
+		var resultCode = Ci.nsIAutoCompleteResult.RESULT_SUCCESS;
 	}
 	
 	var result = new ZoteroAutoCompleteResult(searchString,
