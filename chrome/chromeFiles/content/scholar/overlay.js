@@ -666,9 +666,20 @@ var ScholarPane = new function()
 	function addAttachmentFromPage(link, id)
 	{
 		if(link)
-			Scholar.Attachments.linkFromDocument(window.content.document, id);
+		{
+			var attachmentID =
+				Scholar.Attachments.linkFromDocument(window.content.document, id);
+		}
 		else
-			Scholar.Attachments.importFromDocument(window.content.document, id);
+		{
+			var attachmentID =
+				Scholar.Attachments.importFromDocument(window.content.document, id);
+		}
+		
+		if (attachmentID && itemsView && itemsView._itemGroup.isCollection())
+		{
+			itemsView._itemGroup.ref.addItem(attachmentID);
+		}
 	}
 	
 	function viewSelectedAttachment()
