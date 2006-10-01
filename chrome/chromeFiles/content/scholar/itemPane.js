@@ -746,14 +746,33 @@ var ScholarItemPane = new function()
 			t.setAttribute('multiline', true);
 			t.setAttribute('rows', 8);
 		}
-		// TODO: only have autocomplete on a few fields
 		else
 		{
-			t.setAttribute('type', 'autocomplete');
-			t.setAttribute('autocompletesearch', 'zotero');
-			t.setAttribute('autocompletesearchparam', fieldName + '/' + 
-				(elem.getAttribute('singleField')=='true' ? '1' : '0') +
-				'-' + (itemID ? itemID : ''));
+			// Add auto-complete for certain fields
+			switch (field)
+			{
+				case 'creator':
+				case 'publisher':
+				case 'place':
+				case 'publicationTitle':
+				case 'journalAbbreviation':
+				case 'seriesTitle':
+				case 'seriesText':
+				// DEBUG: should have type and medium, but they need to be
+				// broken out first into multiple fields (artworkType,
+				// interviewMedium, etc.)
+					t.setAttribute('type', 'autocomplete');
+					t.setAttribute('autocompletesearch', 'zotero');
+					var suffix = itemID ? itemID : '';
+					if (field=='creator')
+					{
+						suffix = (elem.getAttribute('singleField')=='true'
+							? '1' : '0') + '-' + suffix;
+					}
+					t.setAttribute('autocompletesearchparam',
+						fieldName + '/' + suffix);
+					break;
+			}
 		}
 		var box = elem.parentNode;
 		box.replaceChild(t,elem);

@@ -14,7 +14,7 @@
 		<implementation>
 			<property name="value"
 				onget="return document.getAnonymousNodes(this)[0].value"
-				onset="document.getAnonymousNodes(this)[0].value = val; return val"/>
+				onset="document.getAnonymousNodes(this)[0].setAttribute('value', val); return val"/>
 			<property name="mode">
 				<getter>
 					<![CDATA[
@@ -95,6 +95,39 @@
 								
 							default:
 								this.setAttribute('hasOptions', false);
+								
+								// Set textbox to autocomplete mode
+								switch (condition)
+								{
+									// Skip autocomplete for these fields
+									case 'note':
+									case 'extra':
+										break;
+									
+									default:
+									
+										var textbox = document.getAnonymousNodes(this)[0];
+										textbox.setAttribute('type', 'autocomplete');
+										textbox.setAttribute('autocompletesearch', 'zotero');
+										
+										if (condition=='creator')
+										{
+											// 2 searches both single- and double-field creators
+											var autocompleteCondition = condition + '/2'
+										}
+										else
+										{
+											var autocompleteCondition = condition;
+										}
+										
+										textbox.setAttribute('autocompletesearchparam', autocompleteCondition);
+								}
+						}
+						
+						if (!autocompleteCondition)
+						{
+							var textbox = document.getAnonymousNodes(this)[0];
+							textbox.removeAttribute('type');
 						}
 					]]>
 				</body>
