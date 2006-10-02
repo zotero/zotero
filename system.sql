@@ -1,4 +1,4 @@
--- 4
+-- 5
 
 -- This file creates system tables that can be safely wiped and reinitialized
 -- at any time, as long as existing ids are preserved.
@@ -115,7 +115,7 @@
     INSERT INTO "fieldFormats" VALUES(2, '[0-9]*', 1);
     INSERT INTO "fieldFormats" VALUES(3, '[0-9]{4}', 1);
     
-    INSERT INTO itemTypes VALUES (1,'note',NULL,2);
+    INSERT INTO itemTypes VALUES (1,'note',NULL,0);
     INSERT INTO itemTypes VALUES (2,'book',NULL,2);
     INSERT INTO itemTypes VALUES (3,'bookSection',2,2);
     INSERT INTO itemTypes VALUES (4,'journalArticle',NULL,2);

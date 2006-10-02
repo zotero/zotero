@@ -92,7 +92,7 @@
 			<vbox id="items-pane" persist="width" flex="1">
 				<toolbar align="center">
 					<toolbarbutton id="tb-add" tooltiptext="&toolbar.newItem.label;" type="menu">
-						<!-- Built in overlay.js::onLoad() -->
+						<!-- New Item drop-down built in overlay.js::onLoad() -->
 						<menupopup>
 							<menuseparator/>
 							<menuitem label="&toolbar.attachment.linked;" oncommand="ScholarPane.addAttachmentFromDialog(true);"/>
@@ -107,7 +107,7 @@
 					<toolbarseparator/>
 					<toolbarbutton id="tb-link-page" tooltiptext="&toolbar.attachment.weblink;" oncommand="ScholarPane.addAttachmentFromPage(true)"/>
 					<toolbarbutton id="tb-snapshot-page" tooltiptext="&toolbar.attachment.snapshot;" oncommand="ScholarPane.addAttachmentFromPage()"/>
-					<toolbarbutton id="tb-note-add" tooltiptext="&toolbar.note.standalone;" oncommand="ScholarPane.newNote();"/>
+					<toolbarbutton id="tb-note-add" tooltiptext="&toolbar.note.standalone;" oncommand="ScholarPane.newNote(event.shiftKey);"/>
 					<spacer flex="1"/>
 					<label value="&toolbar.search.label;" control="tb-search"/>
 					<textbox id="tb-search" type="timed" timeout="250" command="cmd_scholar_search" dir="reverse" onkeypress="if(event.keyCode == event.DOM_VK_ESCAPE) { this.value = ''; this.doCommand('cmd_scholar_search'); return false; }">

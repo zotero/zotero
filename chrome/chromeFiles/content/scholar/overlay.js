@@ -84,7 +84,7 @@ var ScholarPane = new function()
 		var itemsTree = document.getElementById('items-tree');
 		itemsTree.controllers.appendController(new Scholar.ItemTreeCommandController(itemsTree));
 		
-		// Create the add menu with each item type
+		// Create the New Item (+) menu with each item type
 		var addMenu = document.getElementById('tb-add').firstChild;
 		var separator = document.getElementById('tb-add').firstChild.firstChild;
 		var moreMenu = document.getElementById('tb-add-more');
@@ -643,13 +643,25 @@ var ScholarPane = new function()
 		}
 	}
 	
-	function newNote()
+	function newNote(popup)
 	{
-		var c = getSelectedCollection();
-		if(c)
-			openNoteWindow(null, c.getID());
+		if (!popup)
+		{
+			var item = this.newItem(Scholar.ItemTypes.getID('note'));
+			document.getElementById('scholar-note-editor').focus();
+		}
 		else
-			openNoteWindow();
+		{
+			var c = getSelectedCollection();
+			if (c)
+			{
+				openNoteWindow(null, c.getID());
+			}
+			else
+			{
+				openNoteWindow();
+			}
+		}
 	}
 	
 	function openNoteWindow(id, parent)
