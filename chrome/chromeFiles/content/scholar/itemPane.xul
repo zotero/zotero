@@ -4,29 +4,29 @@
 	Copyright (C) 2006   Center for History and New Media, George Mason University, Fairfax, VA
 	http://chnm.gmu.edu/
 -->
-<!DOCTYPE window SYSTEM "chrome://scholar/locale/scholar.dtd">
+<!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
 
 <overlay 
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 	
 	<script src="itemPane.js"/>	
-	<deck id="scholar-view-item" flex="1" onselect="if (this.selectedIndex!==''){ ScholarItemPane.loadPane(this.selectedIndex) }">
-			<vbox id="scholar-info" flex="1">
+	<deck id="zotero-view-item" flex="1" onselect="if (this.selectedIndex!==''){ ZoteroItemPane.loadPane(this.selectedIndex) }">
+			<vbox id="zotero-info" flex="1">
 				<popupset>
 					<popup id="creatorTypeMenu" position="after_start"
-						oncommand="var otherFields = ScholarItemPane.getCreatorFields(document.popupNode.parentNode);
+						oncommand="var otherFields = ZoteroItemPane.getCreatorFields(document.popupNode.parentNode);
 							var typeID = event.explicitOriginalTarget.getAttribute('typeid');
 							document.popupNode.setAttribute('value',
-								Scholar.getString('creatorTypes.' + Scholar.CreatorTypes.getName(typeID)) + ':');
-							ScholarItemPane.modifyCreator(document.popupNode.getAttribute('fieldname').split('-')[1],
+								Zotero.getString('creatorTypes.' + Zotero.CreatorTypes.getName(typeID)) + ':');
+							ZoteroItemPane.modifyCreator(document.popupNode.getAttribute('fieldname').split('-')[1],
 								'typeID', typeID, otherFields)"/>
 				</popupset>
 				<hbox align="center">
-					<button id="tb-go-to-url" label="&toolbar.goToURL.label;" tooltiptext="&toolbar.goToURL.tooltip;" flex="1" oncommand="ScholarItemPane.onGoToURLClick();" disabled="false"/>
-					<button id="tb-openurl" label="&toolbar.openURL.label;" tooltiptext="&toolbar.openURL.tooltip;" flex="1" oncommand="ScholarItemPane.onOpenURLClick();"/>
+					<button id="tb-go-to-url" label="&toolbar.goToURL.label;" tooltiptext="&toolbar.goToURL.tooltip;" flex="1" oncommand="ZoteroItemPane.onGoToURLClick();" disabled="false"/>
+					<button id="tb-openurl" label="&toolbar.openURL.label;" tooltiptext="&toolbar.openURL.tooltip;" flex="1" oncommand="ZoteroItemPane.onOpenURLClick();"/>
 				</hbox>
 				<hbox align="center">
-					<menulist id="editpane-type-menu" oncommand="ScholarItemPane.changeTypeTo(this.value)" flex="1">
+					<menulist id="editpane-type-menu" oncommand="ZoteroItemPane.changeTypeTo(this.value)" flex="1">
 						<menupopup/>
 					</menulist>
 				</hbox>
@@ -41,7 +41,7 @@
 			<vbox flex="1">
 				<hbox align="center">
 					<label id="editpane-notes-label"/>
-					<button label="&item.add;" oncommand="ScholarItemPane.addNote();"/>
+					<button label="&item.add;" oncommand="ZoteroItemPane.addNote();"/>
 				</hbox>
 				<grid flex="1">
 					<columns>
@@ -56,10 +56,10 @@
 					<label id="editpane-attachments-label"/>
 					<button id="tb-item-attachments-add" type="menu" label="&item.add;">
 						<menupopup>
-							<menuitem class="menuitem-iconic" id="tb-item-attachments-link" label="&toolbar.attachment.linked;" oncommand="ScholarItemPane.addAttachmentFromDialog(true);"/>
-							<menuitem class="menuitem-iconic" id="tb-item-attachments-file" label="&toolbar.attachment.add;" oncommand="ScholarItemPane.addAttachmentFromDialog();"/>
-							<menuitem class="menuitem-iconic" id="tb-item-attachments-web-link" label="&toolbar.attachment.weblink;" oncommand="ScholarItemPane.addAttachmentFromPage(true);"/>
-							<menuitem class="menuitem-iconic" id="tb-item-attachments-snapshot" label="&toolbar.attachment.snapshot;" oncommand="ScholarItemPane.addAttachmentFromPage();"/>
+							<menuitem class="menuitem-iconic" id="tb-item-attachments-link" label="&toolbar.attachment.linked;" oncommand="ZoteroItemPane.addAttachmentFromDialog(true);"/>
+							<menuitem class="menuitem-iconic" id="tb-item-attachments-file" label="&toolbar.attachment.add;" oncommand="ZoteroItemPane.addAttachmentFromDialog();"/>
+							<menuitem class="menuitem-iconic" id="tb-item-attachments-web-link" label="&toolbar.attachment.weblink;" oncommand="ZoteroItemPane.addAttachmentFromPage(true);"/>
+							<menuitem class="menuitem-iconic" id="tb-item-attachments-snapshot" label="&toolbar.attachment.snapshot;" oncommand="ZoteroItemPane.addAttachmentFromPage();"/>
 						</menupopup>
 					</button>
 				</hbox>

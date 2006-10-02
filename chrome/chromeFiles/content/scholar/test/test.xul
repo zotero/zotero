@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
-<?xml-stylesheet href="chrome://scholar/skin/scholar.css" type="text/css"?>
-<!DOCTYPE window SYSTEM "chrome://scholar/locale/scholar.dtd">
+<?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
+<!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
 
 
 <window
@@ -13,5 +13,5 @@
 	<script src="../include.js"/>
 	<script src="test.js"/>
 	
-	<hbox><label>This is only a test...page.</label></hbox>
+	<hbox><label>This is a test page.</label></hbox>
 </window>

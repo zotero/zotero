@@ -1,4 +1,4 @@
-Scholar.Search = function(){
+Zotero.Search = function(){
 	this._sql = null;
 	this._sqlParams = null;
 	this._maxSearchConditionID = 0;
@@ -13,7 +13,7 @@ Scholar.Search = function(){
  *
  * Must be called before save() for new searches
  */
-Scholar.Search.prototype.setName = function(name){
+Zotero.Search.prototype.setName = function(name){
 	if (!name){
 		throw("Invalid saved search name '" + name + '"');
 	}
@@ -25,12 +25,12 @@ Scholar.Search.prototype.setName = function(name){
 /*
  * Load a saved search from the DB
  */
-Scholar.Search.prototype.load = function(savedSearchID){
+Zotero.Search.prototype.load = function(savedSearchID){
 	var sql = "SELECT savedSearchName, MAX(searchConditionID) AS maxID "
 		+ "FROM savedSearches LEFT JOIN savedSearchConditions "
 		+ "USING (savedSearchID) WHERE savedSearchID=" + savedSearchID
 		+ " GROUP BY savedSearchID";
-	var row = Scholar.DB.rowQuery(sql);
+	var row = Zotero.DB.rowQuery(sql);
 	
 	if (!row){
 		throw('Saved search ' + savedSearchID + ' does not exist');
@@ -43,16 +43,16 @@ Scholar.Search.prototype.load = function(savedSearchID){
 	this._savedSearchID = savedSearchID;
 	this._savedSearchName = row['savedSearchName'];
 	
-	var conditions = Scholar.DB.query("SELECT * FROM savedSearchConditions "
+	var conditions = Zotero.DB.query("SELECT * FROM savedSearchConditions "
 		+ "WHERE savedSearchID=" + savedSearchID + " ORDER BY searchConditionID");
 	
 	for (var i in conditions){
 		// Parse "condition[/mode]"
 		var [condition, mode] =
-			Scholar.SearchConditions.parseCondition(conditions[i]['condition']);
+			Zotero.SearchConditions.parseCondition(conditions[i]['condition']);
 		
-		if (!Scholar.SearchConditions.get(condition)){
-			Scholar.debug("Invalid saved search condition '"
+		if (!Zotero.SearchConditions.get(condition)){
+			Zotero.debug("Invalid saved search condition '"
 				+ condition + "' -- skipping", 2);
 			continue;
 		}
@@ -69,12 +69,12 @@ Scholar.Search.prototype.load = function(savedSearchID){
 }
 
 
-Scholar.Search.prototype.getID = function(){
+Zotero.Search.prototype.getID = function(){
 	return this._savedSearchID;
 }
 
 
-Scholar.Search.prototype.getName = function(){
+Zotero.Search.prototype.getName = function(){
 	return this._savedSearchName;
 }
 
@@ -84,29 +84,29 @@ Scholar.Search.prototype.getName = function(){
  *
  * For new searches, setName() must be called before saving
  */
-Scholar.Search.prototype.save = function(){
+Zotero.Search.prototype.save = function(){
 	if (!this._savedSearchName){
 		throw('Name not provided for saved search');
 	}
 	
-	Scholar.DB.beginTransaction();
+	Zotero.DB.beginTransaction();
 	
 	if (this._savedSearchID){
 		var sql = "UPDATE savedSearches SET savedSearchName=? WHERE savedSearchID=?";
-		Scholar.DB.query(sql, [this._savedSearchName, this._savedSearchID]);
+		Zotero.DB.query(sql, [this._savedSearchName, this._savedSearchID]);
 		
-		Scholar.DB.query("DELETE FROM savedSearchConditions "
+		Zotero.DB.query("DELETE FROM savedSearchConditions "
 			+ "WHERE savedSearchID=" + this._savedSearchID);
 	}
 	else {
 		var isNew = true;
 		
 		this._savedSearchID
-			= Scholar.getRandomID('savedSearches', 'savedSearchID');
+			= Zotero.getRandomID('savedSearches', 'savedSearchID');
 		
 		var sql = "INSERT INTO savedSearches (savedSearchID, savedSearchName) "
 			+ "VALUES (?,?)";
-		Scholar.DB.query(sql,
+		Zotero.DB.query(sql,
 			[this._savedSearchID, {string: this._savedSearchName}]);
 	}
 	
@@ -130,19 +130,19 @@ Scholar.Search.prototype.save = function(){
 			this._conditions[i]['required']
 				? 1 : null
 		];
-		Scholar.DB.query(sql, sqlParams);
+		Zotero.DB.query(sql, sqlParams);
 	}
 	
-	Scholar.DB.commitTransaction();
-	Scholar.Notifier.trigger(
+	Zotero.DB.commitTransaction();
+	Zotero.Notifier.trigger(
 		(isNew ? 'add' : 'modify'), 'search', this._savedSearchID
 	);
 	return this._savedSearchID;
 }
 
 
-Scholar.Search.prototype.addCondition = function(condition, operator, value, required){
-	if (!Scholar.SearchConditions.hasOperator(condition, operator)){
+Zotero.Search.prototype.addCondition = function(condition, operator, value, required){
+	if (!Zotero.SearchConditions.hasOperator(condition, operator)){
 		throw ("Invalid operator '" + operator + "' for condition " + condition);
 	}
 	
@@ -151,7 +151,7 @@ Scholar.Search.prototype.addCondition = function(condition, operator, value, req
 		this.addCondition('joinMode', 'any');
 		
 		// Quicksearch words don't need to be phrases
-		var words = Scholar.Fulltext.semanticSplitter(value);
+		var words = Zotero.Fulltext.semanticSplitter(value);
 		for each(var i in words){
 			this.addCondition('blockStart');
 			this.addCondition('title', operator, i, false);
@@ -168,7 +168,7 @@ Scholar.Search.prototype.addCondition = function(condition, operator, value, req
 	
 	var searchConditionID = ++this._maxSearchConditionID;
 	
-	var [condition, mode] = Scholar.SearchConditions.parseCondition(condition);
+	var [condition, mode] = Zotero.SearchConditions.parseCondition(condition);
 	
 	this._conditions[searchConditionID] = {
 		id: searchConditionID,
@@ -185,12 +185,12 @@ Scholar.Search.prototype.addCondition = function(condition, operator, value, req
 }
 
 
-Scholar.Search.prototype.updateCondition = function(searchConditionID, condition, operator, value, required){
+Zotero.Search.prototype.updateCondition = function(searchConditionID, condition, operator, value, required){
 	if (typeof this._conditions[searchConditionID] == 'undefined'){
 		throw ('Invalid searchConditionID ' + searchConditionID + ' in updateCondition()');
 	}
 	
-	if (!Scholar.SearchConditions.hasOperator(condition, operator)){
+	if (!Zotero.SearchConditions.hasOperator(condition, operator)){
 		throw ("Invalid operator '" + operator + "' for condition " + condition);
 	}
 	
@@ -207,7 +207,7 @@ Scholar.Search.prototype.updateCondition = function(searchConditionID, condition
 }
 
 
-Scholar.Search.prototype.removeCondition = function(searchConditionID){
+Zotero.Search.prototype.removeCondition = function(searchConditionID){
 	if (typeof this._conditions[searchConditionID] == 'undefined'){
 		throw ('Invalid searchConditionID ' + searchConditionID + ' in removeCondition()');
 	}
@@ -220,7 +220,7 @@ Scholar.Search.prototype.removeCondition = function(searchConditionID){
  * Returns an array with 'condition', 'operator', 'value', 'required'
  * for the given searchConditionID
  */
-Scholar.Search.prototype.getSearchCondition = function(searchConditionID){
+Zotero.Search.prototype.getSearchCondition = function(searchConditionID){
 	return this._conditions[searchConditionID];
 }
 
@@ -229,7 +229,7 @@ Scholar.Search.prototype.getSearchCondition = function(searchConditionID){
  * Returns a multidimensional array of conditions/operator/value sets
  * used in the search, indexed by searchConditionID
  */
-Scholar.Search.prototype.getSearchConditions = function(){
+Zotero.Search.prototype.getSearchConditions = function(){
 	// TODO: make copy
 	return this._conditions;
 }
@@ -238,12 +238,12 @@ Scholar.Search.prototype.getSearchConditions = function(){
 /*
  * Run the search and return an array of item ids for results
  */
-Scholar.Search.prototype.search = function(){
+Zotero.Search.prototype.search = function(){
 	if (!this._sql){
 		this._buildQuery();
 	}
 	
-	var ids = Scholar.DB.columnQuery(this._sql, this._sqlParams);
+	var ids = Zotero.DB.columnQuery(this._sql, this._sqlParams);
 	
 	if (!ids){
 		return false;
@@ -252,7 +252,7 @@ Scholar.Search.prototype.search = function(){
 	// Filter results with fulltext search
 	for each(var condition in this._conditions){
 		if (condition['condition']=='fulltextContent'){
-			var fulltextIDs = Scholar.Fulltext.findTextInItems(ids,
+			var fulltextIDs = Zotero.Fulltext.findTextInItems(ids,
 				condition['value'],	condition['mode']);
 			
 			var hash = {};
@@ -288,7 +288,7 @@ Scholar.Search.prototype.search = function(){
 /*
  * Get the SQL string for the search
  */
-Scholar.Search.prototype.getSQL = function(){
+Zotero.Search.prototype.getSQL = function(){
 	if (!this._sql){
 		this._buildQuery();
 	}
@@ -296,7 +296,7 @@ Scholar.Search.prototype.getSQL = function(){
 }
 
 
-Scholar.Search.prototype.getSQLParams = function(){
+Zotero.Search.prototype.getSQLParams = function(){
 	if (!this._sql){
 		this._buildQuery();
 	}
@@ -307,7 +307,7 @@ Scholar.Search.prototype.getSQLParams = function(){
 /*
  * Build the SQL query for the search
  */
-Scholar.Search.prototype._buildQuery = function(){
+Zotero.Search.prototype._buildQuery = function(){
 	var sql = 'SELECT itemID FROM items';
 	var sqlParams = [];
 	// Separate ANY conditions for 'required' condition support
@@ -317,7 +317,7 @@ Scholar.Search.prototype._buildQuery = function(){
 	var conditions = [];
 	
 	for (var i in this._conditions){
-		var data = Scholar.SearchConditions.get(this._conditions[i]['condition']);
+		var data = Zotero.SearchConditions.get(this._conditions[i]['condition']);
 		
 		if (data['table']){
 			conditions.push({
@@ -405,7 +405,7 @@ Scholar.Search.prototype._buildQuery = function(){
 						}
 						condSQL += 'fieldID=? AND ';
 						condSQLParams.push(
-							Scholar.ItemFields.getID(condition['alias'])
+							Zotero.ItemFields.getID(condition['alias'])
 						);
 						break;
 					
@@ -415,7 +415,7 @@ Scholar.Search.prototype._buildQuery = function(){
 						
 						// And descendents if recursive search
 						if (recursive){
-							var col = Scholar.Collections.get(condition['value']);
+							var col = Zotero.Collections.get(condition['value']);
 							var descendents = col.getDescendents(false, 'collection');
 							if (descendents){
 								for (var k in descendents){
@@ -437,7 +437,7 @@ Scholar.Search.prototype._buildQuery = function(){
 							condSQL += "NOT ";
 						}
 						condSQL += "IN (";
-						var search = new Scholar.Search();
+						var search = new Zotero.Search();
 						search.load(condition['value']);
 						
 						// Check if there are any post-search filters
@@ -585,7 +585,7 @@ Scholar.Search.prototype._buildQuery = function(){
 }
 
 
-Scholar.Searches = new function(){
+Zotero.Searches = new function(){
 	this.get = get;
 	this.getAll = getAll;
 	this.erase = erase;
@@ -594,7 +594,7 @@ Scholar.Searches = new function(){
 	function get(id){
 		var sql = "SELECT savedSearchID AS id, savedSearchName AS name "
 			+ "FROM savedSearches WHERE savedSearchID=?";
-		return Scholar.DB.rowQuery(sql, [id]);
+		return Zotero.DB.rowQuery(sql, [id]);
 	}
 	
 	
@@ -604,7 +604,7 @@ Scholar.Searches = new function(){
 	function getAll(){
 		var sql = "SELECT savedSearchID AS id, savedSearchName AS name "
 			+ "FROM savedSearches ORDER BY name";
-		return Scholar.DB.query(sql);
+		return Zotero.DB.query(sql);
 	}
 	
 	
@@ -612,22 +612,22 @@ Scholar.Searches = new function(){
 	 * Delete a given saved search from the DB
 	 */
 	function erase(savedSearchID){
-		Scholar.DB.beginTransaction();
+		Zotero.DB.beginTransaction();
 		var sql = "DELETE FROM savedSearchConditions WHERE savedSearchID="
 			+ savedSearchID;
-		Scholar.DB.query(sql);
+		Zotero.DB.query(sql);
 		
 		var sql = "DELETE FROM savedSearches WHERE savedSearchID="
 			+ savedSearchID;
-		Scholar.DB.query(sql);
-		Scholar.DB.commitTransaction();
+		Zotero.DB.query(sql);
+		Zotero.DB.commitTransaction();
 		
-		Scholar.Notifier.trigger('remove', 'search', savedSearchID);
+		Zotero.Notifier.trigger('remove', 'search', savedSearchID);
 	}
 }
 
 
-Scholar.SearchConditions = new function(){
+Zotero.SearchConditions = new function(){
 	this.get = get;
 	this.getStandardConditions = getStandardConditions;
 	this.hasOperator = hasOperator;
@@ -641,7 +641,7 @@ Scholar.SearchConditions = new function(){
 	 * Define the advanced search operators
 	 */
 	var _operators = {
-		// Standard -- these need to match those in scholarsearch.xml
+		// Standard -- these need to match those in zoterosearch.xml
 		is: true,
 		isNot: true,
 		contains: true,
@@ -831,7 +831,7 @@ Scholar.SearchConditions = new function(){
 				},
 				table: 'itemData',
 				field: 'value',
-				aliases: Scholar.DB.columnQuery("SELECT fieldName FROM fields " +
+				aliases: Zotero.DB.columnQuery("SELECT fieldName FROM fields " +
 					"WHERE fieldName NOT IN ('accessDate', 'date', 'pages', " +
 					"'section','accessionNumber','seriesNumber','issue')"),
 				template: true // mark for special handling
@@ -918,10 +918,10 @@ Scholar.SearchConditions = new function(){
 			}
 			
 			try {
-				var localized = Scholar.getString('searchConditions.' + i)
+				var localized = Zotero.getString('searchConditions.' + i)
 			}
 			catch (e){
-				var localized = Scholar.getString('itemFields.' + i);
+				var localized = Zotero.getString('itemFields.' + i);
 			}
 			
 			sortKeys.push(localized);

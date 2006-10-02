@@ -11,11 +11,11 @@ var openURLMenu;
 var openURLResolvers;
 var openURLServerField;
 var openURLVersionMenu;
-var scholarPaneOnTopInitial;
+var zoteroPaneOnTopInitial;
 
 /*
 	To add a new preference:
-		1) modify defaults/preferences/scholar.js
+		1) modify defaults/preferences/zotero.js
 		2) in this document:
 			a) add var above
 			b) add lines to init() function
@@ -23,49 +23,49 @@ var scholarPaneOnTopInitial;
 		3) add a control to prefs.xul
 		4) (Optional) To add an observer for a preference change,
 			add an appropriate case in the switch statement
-			in Scholar.Prefs.observe()
+			in Zotero.Prefs.observe()
 */
 
 function init()
 {	
 	autoUpdateBox = document.getElementById('autoUpdateBox');
-	autoUpdateBox.checked = scholarPaneOnTopInitial = Scholar.Prefs.get('automaticScraperUpdates');
+	autoUpdateBox.checked = zoteroPaneOnTopInitial = Zotero.Prefs.get('automaticScraperUpdates');
 	
 	positionMenu = document.getElementById('positionMenu');
-	positionMenu.selectedIndex = Scholar.Prefs.get('scholarPaneOnTop') ? 0 : 1;
+	positionMenu.selectedIndex = Zotero.Prefs.get('zoteroPaneOnTop') ? 0 : 1;
 	
 	parseEndnoteBox = document.getElementById('parseEndnoteBox');
-	parseEndnoteBox.checked = Scholar.Prefs.get('parseEndNoteMIMETypes');
+	parseEndnoteBox.checked = Zotero.Prefs.get('parseEndNoteMIMETypes');
 	
 	openURLServerField = document.getElementById('openURLServerField');
-	openURLServerField.value = Scholar.Prefs.get('openURL.resolver');
+	openURLServerField.value = Zotero.Prefs.get('openURL.resolver');
 	openURLVersionMenu = document.getElementById('openURLVersionMenu');
-	openURLVersionMenu.value = Scholar.Prefs.get('openURL.version');
+	openURLVersionMenu.value = Zotero.Prefs.get('openURL.version');
 
 	openURLMenu = document.getElementById('openURLMenu');
 
-	openURLResolvers = Scholar.OpenURL.discoverResolvers();
+	openURLResolvers = Zotero.OpenURL.discoverResolvers();
 	for(var i in openURLResolvers)
 	{
 		openURLMenu.insertItemAt(i,openURLResolvers[i]['name']);
-		if(openURLResolvers[i]['url'] == Scholar.Prefs.get('openURL.resolver') && openURLResolvers[i]['version'] == Scholar.Prefs.get('openURL.version'))
+		if(openURLResolvers[i]['url'] == Zotero.Prefs.get('openURL.resolver') && openURLResolvers[i]['version'] == Zotero.Prefs.get('openURL.version'))
 			openURLMenu.selectedIndex = i;
 	}
 }
 
 function accept()
 {
-	Scholar.Prefs.set('automaticScraperUpdates', autoUpdateBox.checked);
-	Scholar.Prefs.set('scholarPaneOnTop', positionMenu.selectedIndex == 0);
+	Zotero.Prefs.set('automaticScraperUpdates', autoUpdateBox.checked);
+	Zotero.Prefs.set('zoteroPaneOnTop', positionMenu.selectedIndex == 0);
 	
-	if(Scholar.Prefs.get('parseEndNoteMIMETypes') != parseEndnoteBox.checked)
+	if(Zotero.Prefs.get('parseEndNoteMIMETypes') != parseEndnoteBox.checked)
 	{
-		Scholar.Prefs.set('parseEndNoteMIMETypes', parseEndnoteBox.checked);
-		Scholar.Ingester.MIMEHandler.init();
+		Zotero.Prefs.set('parseEndNoteMIMETypes', parseEndnoteBox.checked);
+		Zotero.Ingester.MIMEHandler.init();
 	}
 	
-	Scholar.Prefs.set('openURL.resolver', openURLServerField.value);
-	Scholar.Prefs.set('openURL.version', openURLVersionMenu.value);
+	Zotero.Prefs.set('openURL.resolver', openURLServerField.value);
+	Zotero.Prefs.set('openURL.version', openURLVersionMenu.value);
 }
 
 function onOpenURLSelected()
@@ -89,9 +89,9 @@ function onOpenURLCustomized()
 function onPositionChange()
 {
 	var statusLine = document.getElementById('statusLine');
-	if ((positionMenu.selectedIndex == 0) != scholarPaneOnTopInitial)
+	if ((positionMenu.selectedIndex == 0) != zoteroPaneOnTopInitial)
 	{
-		statusLine.value = Scholar.getString('scholar.preferences.status.positionChange');
+		statusLine.value = Zotero.getString('zotero.preferences.status.positionChange');
 	}
 	else
 	{

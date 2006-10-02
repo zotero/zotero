@@ -35,7 +35,7 @@
 						this.noteRef = val;
 						
 						if(this.note.getSource())
-							this.item = Scholar.Items.get(this.note.getSource());
+							this.item = Zotero.Items.get(this.note.getSource());
 						
 						this.id('noteField').value = this.note.getNote();
 						this.id('links').item = this.note;
@@ -58,15 +58,15 @@
 						else	//Create new note
 					 	{
 							if(this.item)
-								var noteID = Scholar.Notes.add(noteField.value,this.item.getID());	//attached to an item
+								var noteID = Zotero.Notes.add(noteField.value,this.item.getID());	//attached to an item
 							else
 							{
 								//independent note
-								var noteID = Scholar.Notes.add(noteField.value);
+								var noteID = Zotero.Notes.add(noteField.value);
 								if(this.collection)
 									this.collection.addItem(noteID);
 							}
-							this.note = Scholar.Items.get(noteID);
+							this.note = Zotero.Items.get(noteID);
 						}
 					]]>
 				</body>

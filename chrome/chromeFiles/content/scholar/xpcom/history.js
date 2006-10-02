@@ -1,4 +1,4 @@
-Scholar.History = new function(){
+Zotero.History = new function(){
 	this.begin = begin;
 	this.setAssociatedID = setAssociatedID;
 	this.add = add;
@@ -27,7 +27,7 @@ Scholar.History = new function(){
 	*		'collection-modify', 'collection-delete'...
 	*
 	* id: An id or array of ids that will be passed to
-	* 		Scholar.Notifier.trigger() on an undo or redo
+	* 		Zotero.Notifier.trigger() on an undo or redo
 	**/
 	function begin(event, id){
 		if (_activeID){
@@ -41,7 +41,7 @@ Scholar.History = new function(){
 			this.clearAfter();
 		}
 		
-		Scholar.debug('Beginning history transaction set ' + event);
+		Zotero.debug('Beginning history transaction set ' + event);
 		var sql = "INSERT INTO transactionSets (event, id) VALUES "
 			+ "('" + event + "', ";
 		if (!id){
@@ -56,8 +56,8 @@ Scholar.History = new function(){
 		}
 		sql += ")";
 		
-		Scholar.DB.beginTransaction();
-		_activeID = Scholar.DB.query(sql);
+		Zotero.DB.beginTransaction();
+		_activeID = Zotero.DB.query(sql);
 		_activeEvent = event;
 	}
 	
@@ -67,7 +67,7 @@ Scholar.History = new function(){
 	* 	for use if the ids weren't available at when begin() was called
 	*
 	* id: An id or array of ids that will be passed to
-	* 		Scholar.Notifier.trigger() on an undo or redo
+	* 		Zotero.Notifier.trigger() on an undo or redo
 	**/
 	function setAssociatedID(id){
 		if (!_activeID){
@@ -86,7 +86,7 @@ Scholar.History = new function(){
 			sql += id;
 		}
 		sql += " WHERE transactionSetID=" + _activeID;
-		Scholar.DB.query(sql);
+		Zotero.DB.query(sql);
 	}
 	
 	
@@ -144,8 +144,8 @@ Scholar.History = new function(){
 	* Commit the current transaction set
 	**/
 	function commit(){
-		Scholar.debug('Committing history transaction set ' + _activeEvent);
-		Scholar.DB.commitTransaction();
+		Zotero.debug('Committing history transaction set ' + _activeEvent);
+		Zotero.DB.commitTransaction();
 		_currentID = _activeID;
 		_maxID = _activeID;
 		_activeID = null;
@@ -157,8 +157,8 @@ Scholar.History = new function(){
 	* Cancel the current transaction set
 	**/
 	function cancel(){
-		Scholar.debug('Cancelling history transaction set ' + _activeEvent);
-		Scholar.DB.rollbackTransaction();
+		Zotero.debug('Cancelling history transaction set ' + _activeEvent);
+		Zotero.DB.rollbackTransaction();
 		_activeID = null;
 		_activeEvent = null;
 	}
@@ -174,7 +174,7 @@ Scholar.History = new function(){
 		
 		var sql = "SELECT event FROM transactionSets WHERE transactionSetID="
 			+ _currentID;
-		return Scholar.DB.valueQuery(sql);
+		return Zotero.DB.valueQuery(sql);
 	}
 	
 	
@@ -184,7 +184,7 @@ Scholar.History = new function(){
 	function getNextEvent(){
 		var sql = "SELECT event FROM transactionSets WHERE transactionSetID="
 			+ (_currentID + 1);
-		return Scholar.DB.valueQuery(sql);
+		return Zotero.DB.valueQuery(sql);
 	}
 	
 	
@@ -198,11 +198,11 @@ Scholar.History = new function(){
 		}
 		
 		var id = _currentID;
-		Scholar.debug('Undoing transaction set ' + id);
-		Scholar.DB.beginTransaction();
+		Zotero.debug('Undoing transaction set ' + id);
+		Zotero.DB.beginTransaction();
 		var undone = _do('undo');
 		_currentID--;
-		Scholar.DB.commitTransaction();
+		Zotero.DB.commitTransaction();
 		_reloadAndNotify(id);
 		return true;
 	}
@@ -213,11 +213,11 @@ Scholar.History = new function(){
 	**/
 	function redo(){
 		var id = _currentID + 1;
-		Scholar.debug('Redoing transaction set ' + id);
-		Scholar.DB.beginTransaction();
+		Zotero.debug('Redoing transaction set ' + id);
+		Zotero.DB.beginTransaction();
 		var redone = _do('redo');
 		_currentID++;
-		Scholar.DB.commitTransaction();
+		Zotero.DB.commitTransaction();
 		_reloadAndNotify(id, true);
 		return redone;
 	}
@@ -227,15 +227,15 @@ Scholar.History = new function(){
 	* Clear the entire history
 	**/
 	function clear(){
-		Scholar.DB.beginTransaction();
-		Scholar.DB.query("DELETE FROM transactionSets");
-		Scholar.DB.query("DELETE FROM transactions");
-		Scholar.DB.query("DELETE FROM transactionLog");
+		Zotero.DB.beginTransaction();
+		Zotero.DB.query("DELETE FROM transactionSets");
+		Zotero.DB.query("DELETE FROM transactions");
+		Zotero.DB.query("DELETE FROM transactionLog");
 		_currentID = null;
 		_activeID = null;
 		_activeEvent = null;
 		_maxID = null;
-		Scholar.DB.commitTransaction();
+		Zotero.DB.commitTransaction();
 	}
 	
 	
@@ -243,25 +243,25 @@ Scholar.History = new function(){
 	* Clear all transactions in history after the current one
 	**/
 	function clearAfter(){
-		Scholar.DB.beginTransaction();
-		var min = Scholar.DB.valueQuery("SELECT MIN(transactionID) FROM "
+		Zotero.DB.beginTransaction();
+		var min = Zotero.DB.valueQuery("SELECT MIN(transactionID) FROM "
 			+ "transactions WHERE transactionSetID=" + (_currentID + 1));
 		
 		if (!min){
-			Scholar.DB.commitTransaction();
+			Zotero.DB.commitTransaction();
 			return;
 		}
 		
-		Scholar.DB.query("DELETE FROM transactionLog "
+		Zotero.DB.query("DELETE FROM transactionLog "
 			+ "WHERE transactionID>=" + min);
-		Scholar.DB.query("DELETE FROM transactions "
+		Zotero.DB.query("DELETE FROM transactions "
 			+ "WHERE transactionID>=" + min);
-		Scholar.DB.query("DELETE FROM transactionSets "
+		Zotero.DB.query("DELETE FROM transactionSets "
 			+ "WHERE transactionSetID>" + _currentID);
 		
 		_maxID = _currentID;
 		_activeID = null;
-		Scholar.DB.commitTransaction();
+		Zotero.DB.commitTransaction();
 		return;
 	}
 	
@@ -287,7 +287,7 @@ Scholar.History = new function(){
 			+ "VALUES (" + _activeID + ", '" + contextString
 			+ "', '" + action + "')";
 			
-		var transactionID = Scholar.DB.query(sql);
+		var transactionID = Zotero.DB.query(sql);
 		
 		switch (action){
 			case 'add':
@@ -299,24 +299,24 @@ Scholar.History = new function(){
 				if (field){
 					var sql = "INSERT INTO transactionLog SELECT " + transactionID
 						+ ", '" + field + "', " + field + fromClause;
-					Scholar.DB.query(sql);
+					Zotero.DB.query(sql);
 					break;
 				}
 				// Fall through if no field specified and save all
 			case 'remove':
-				var cols = Scholar.DB.getColumns(table);
+				var cols = Zotero.DB.getColumns(table);
 				for (var i in cols){
 					// If column is not part of the key, log it
-					if (!Scholar.inArray(cols[i], context['keys'])){
+					if (!Zotero.inArray(cols[i], context['keys'])){
 						var sql = "INSERT INTO transactionLog "
 							+ "SELECT " + transactionID + ", '" + cols[i]
 							+ "', " + cols[i] + fromClause;
-						Scholar.DB.query(sql);
+						Zotero.DB.query(sql);
 					}
 				}
 				break;
 			default:
-				Scholar.DB.rollbackTransaction();
+				Zotero.DB.rollbackTransaction();
 				throw("Invalid history action '" + action + "'");
 		}
 	}
@@ -334,7 +334,7 @@ Scholar.History = new function(){
 		
 		var sql = "SELECT transactionID, context, action FROM transactions "
 			+ "WHERE transactionSetID=" + id;
-		var transactions = Scholar.DB.query(sql);
+		var transactions = Zotero.DB.query(sql);
 		
 		if (!transactions){
 			throw('Transaction set not found for '
@@ -362,31 +362,31 @@ Scholar.History = new function(){
 					var fromClause = _contextToSQLFrom(context);
 					
 					// First, store the row we're about to delete for later redo
-					var cols = Scholar.DB.getColumns(context['table']);
+					var cols = Zotero.DB.getColumns(context['table']);
 					for (var i in cols){
 						// If column is not part of the key, log it
-						if (!Scholar.inArray(cols[i], context['keys'])){
+						if (!Zotero.inArray(cols[i], context['keys'])){
 							var sql = "INSERT INTO transactionLog "
 								+ "SELECT " + transactionID + ", '" + cols[i]
 								+ "', " + cols[i] + fromClause;
-							Scholar.DB.query(sql);
+							Zotero.DB.query(sql);
 						}
 					}
 					
 					// And delete the row
 					var sql = "DELETE" + fromClause;
-					Scholar.DB.query(sql);
+					Zotero.DB.query(sql);
 					break;
 					
 				case 'modify':
 					// Retrieve old values
 					var sql = "SELECT field, value FROM transactionLog "
 						+ "WHERE transactionID=" + transactionID;
-					var oldFieldValues = Scholar.DB.query(sql);
+					var oldFieldValues = Zotero.DB.query(sql);
 					
 					// Retrieve new values
 					var sql = "SELECT *" + _contextToSQLFrom(context);
-					var newValues = Scholar.DB.rowQuery(sql);
+					var newValues = Zotero.DB.rowQuery(sql);
 					
 					// Update row with old values
 					var sql = "UPDATE " + context['table'] + " SET ";
@@ -396,14 +396,14 @@ Scholar.History = new function(){
 						values.push(oldFieldValues[i]['value']);
 					}
 					sql = sql.substr(0, sql.length-2) + _contextToSQLWhere(context);
-					Scholar.DB.query(sql, values);
+					Zotero.DB.query(sql, values);
 					
 					// Update log with new values for later redo
 					for (var i in newValues){
-						if (!Scholar.inArray(i, context['keys'])){
+						if (!Zotero.inArray(i, context['keys'])){
 							var sql = "UPDATE transactionLog SET "
 								+ "value=? WHERE transactionID=? AND field=?";
-							Scholar.DB.query(sql, [i, newValues[i], transactionID]);
+							Zotero.DB.query(sql, [i, newValues[i], transactionID]);
 						}
 					}
 					break;
@@ -412,7 +412,7 @@ Scholar.History = new function(){
 					// Retrieve old values
 					var sql = "SELECT field, value FROM transactionLog "
 						+ "WHERE transactionID=" + transactionID;
-					var oldFieldValues = Scholar.DB.query(sql);
+					var oldFieldValues = Zotero.DB.query(sql);
 					
 					// Add key to parameters
 					var fields = [], values = [], marks = [];
@@ -432,12 +432,12 @@ Scholar.History = new function(){
 					// Insert old values into table
 					var sql = "INSERT INTO " + context['table'] + "("
 						+ fields.join() + ") VALUES (" + marks.join() + ")";
-					Scholar.DB.query(sql, values);
+					Zotero.DB.query(sql, values);
 					
 					// Delete restored data from transactionLog
 					var sql = "DELETE FROM transactionLog WHERE transactionID="
 						+ transactionID;
-					Scholar.DB.query(sql);
+					Zotero.DB.query(sql);
 					break;
 			}
 		}
@@ -481,7 +481,7 @@ Scholar.History = new function(){
 	function _getSetData(transactionSetID){
 		var sql = "SELECT event, id FROM transactionSets WHERE transactionSetID="
 			+ transactionSetID;
-		return Scholar.DB.rowQuery(sql);
+		return Zotero.DB.rowQuery(sql);
 	}
 	
 	
@@ -500,10 +500,10 @@ Scholar.History = new function(){
 		}
 		switch (eventParts[1]){
 			case 'item':
-				Scholar.Items.reload(data['id']);
+				Zotero.Items.reload(data['id']);
 				break;
 		}
 		
-		Scholar.Notifier.trigger(eventParts[0], eventParts[1], data['id']);
+		Zotero.Notifier.trigger(eventParts[0], eventParts[1], data['id']);
 	}
 }

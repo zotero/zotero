@@ -1,12 +1,12 @@
 //////////////////////////////////////////////////////////////////////////////
 //
-// Scholar_File_Interface_Export
+// Zotero_File_Interface_Export
 //
 //////////////////////////////////////////////////////////////////////////////
 
 // Class to provide options for export
 
-var Scholar_File_Interface_Export = new function() {
+var Zotero_File_Interface_Export = new function() {
 	this.init = init;
 	this.updateOptions = updateOptions;
 	this.accept = accept;
@@ -36,7 +36,7 @@ var Scholar_File_Interface_Export = new function() {
 												// presented to the user
 					// get readable name for option
 					try {
-						var optionLabel = Scholar.getString("exportOptions."+option);
+						var optionLabel = Zotero.getString("exportOptions."+option);
 					} catch(e) {
 						var optionLabel = option;
 					}

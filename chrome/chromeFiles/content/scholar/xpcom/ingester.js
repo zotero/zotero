@@ -1,12 +1,12 @@
-// Scholar for Firefox Ingester
+// Zotero for Firefox Ingester
 // Utilities based on code taken from Piggy Bank 2.1.1 (BSD-licensed)
 // This code is licensed according to the GPL
 
-Scholar.Ingester = new Object();
+Zotero.Ingester = new Object();
 
 /////////////////////////////////////////////////////////////////
 //
-// Scholar.Ingester.ProxyMonitor
+// Zotero.Ingester.ProxyMonitor
 //
 /////////////////////////////////////////////////////////////////
 
@@ -18,7 +18,7 @@ Scholar.Ingester = new Object();
 /*
  * Precompile proxy regexps
  */
-Scholar.Ingester.ProxyMonitor = new function() {
+Zotero.Ingester.ProxyMonitor = new function() {
 	var _ezProxyRe = new RegExp();
 	_ezProxyRe.compile("\\?(?:.+&)?(url|qurl)=([^&]+)", "i");
 	/*var _hostRe = new RegExp();
@@ -48,7 +48,7 @@ Scholar.Ingester.ProxyMonitor = new function() {
 		try {
 			// remove content-disposition headers for endnote, etc.
 			var contentType = channel.getResponseHeader("Content-Type").toLowerCase();
-			for each(var desiredContentType in Scholar.Ingester.MIMEHandler.URIContentListener.desiredContentTypes) {
+			for each(var desiredContentType in Zotero.Ingester.MIMEHandler.URIContentListener.desiredContentTypes) {
 				if(contentType.length < desiredContentType.length) {
 					break;
 				} else {
@@ -100,7 +100,7 @@ Scholar.Ingester.ProxyMonitor = new function() {
 				    newURI.hostPort.substr(newURI.hostPort.length-channel.URI.hostPort.length) == channel.URI.hostPort)) {
 					// Different ports but the same server means EZproxy active
 					
-					Scholar.debug("EZProxy: host "+newURI.hostPort+" is really "+properURI.hostPort);
+					Zotero.debug("EZProxy: host "+newURI.hostPort+" is really "+properURI.hostPort);
 					// Initialize variables here so people who never use EZProxies
 					// don't get the (very very minor) speed hit
 					if(!_mapFromProxy) {
@@ -124,7 +124,7 @@ Scholar.Ingester.ProxyMonitor = new function() {
 			var uri = _parseURL(url);
 			if(uri && _mapFromProxy[uri.hostPort]) {
 				url = url.replace(uri.hostPort, _mapFromProxy[uri.hostPort]);
-				Scholar.debug("EZProxy: proper url is "+url);
+				Zotero.debug("EZProxy: proper url is "+url);
 			}
 		}
 		
@@ -142,7 +142,7 @@ Scholar.Ingester.ProxyMonitor = new function() {
 			if(uri && _mapToProxy[uri.hostPort]) {
 				// Actually need to map
 				url = url.replace(uri.hostPort, _mapToProxy[uri.hostPort]);
-				Scholar.debug("EZProxy: proxied url is "+url);
+				Zotero.debug("EZProxy: proxied url is "+url);
 			}
 		}
 		
@@ -160,7 +160,7 @@ Scholar.Ingester.ProxyMonitor = new function() {
 	}
 }
 
-Scholar.OpenURL = new function() {
+Zotero.OpenURL = new function() {
 	this.resolve = resolve;
 	this.discoverResolvers = discoverResolvers;
 	this.createContextObject = createContextObject;
@@ -170,9 +170,9 @@ Scholar.OpenURL = new function() {
 	 * Returns a URL to look up an item in the OpenURL resolver
 	 */
 	function resolve(itemObject) {
-		var co = createContextObject(itemObject, Scholar.Prefs.get("openURL.version"));
+		var co = createContextObject(itemObject, Zotero.Prefs.get("openURL.version"));
 		if(co) {
-			return Scholar.Prefs.get("openURL.resolver")+"?"+co;
+			return Zotero.Prefs.get("openURL.resolver")+"?"+co;
 		}
 		return false;
 	}
@@ -342,7 +342,7 @@ Scholar.OpenURL = new function() {
 					item.itemType = "journalArticle";
 					break;
 				} else if(format == "info:ofi/fmt:kev:mtx:book") {
-					if(Scholar.inArray("rft.genre=bookitem", coParts)) {
+					if(Zotero.inArray("rft.genre=bookitem", coParts)) {
 						item.itemType = "bookSection";
 					} else {
 						item.itemType = "book";
@@ -447,7 +447,7 @@ Scholar.OpenURL = new function() {
 					item.creators.push({firstName:value});
 				}
 			} else if(key == "rft.au") {
-				item.creators.push(Scholar.Utilities.prototype.cleanAuthor(value, "author", true));
+				item.creators.push(Zotero.Utilities.prototype.cleanAuthor(value, "author", true));
 			} else if(key == "rft.aucorp") {
 				item.creators.push({lastName:value, isInstitution:true});
 			} else if(key == "rft.isbn" && !item.ISBN) {
@@ -488,7 +488,7 @@ Scholar.OpenURL = new function() {
 	}
 }
 
-Scholar.Ingester.MIMEHandler = new function() {
+Zotero.Ingester.MIMEHandler = new function() {
 	var on = false;
 	
 	this.init = init;
@@ -497,26 +497,26 @@ Scholar.Ingester.MIMEHandler = new function() {
 	 * registers URIContentListener to handle MIME types
 	 */
 	function init() {
-		var prefStatus = Scholar.Prefs.get("parseEndNoteMIMETypes");
+		var prefStatus = Zotero.Prefs.get("parseEndNoteMIMETypes");
 		if(!on && prefStatus) {
 			var uriLoader = Components.classes["@mozilla.org/uriloader;1"].
 			                getService(Components.interfaces.nsIURILoader);
-			uriLoader.registerContentListener(Scholar.Ingester.MIMEHandler.URIContentListener);
+			uriLoader.registerContentListener(Zotero.Ingester.MIMEHandler.URIContentListener);
 			on = true;
 		} else if(on && !prefStatus) {
 			var uriLoader = Components.classes["@mozilla.org/uriloader;1"].
 			                getService(Components.interfaces.nsIURILoader);
-			uriLoader.unRegisterContentListener(Scholar.Ingester.MIMEHandler.URIContentListener);
+			uriLoader.unRegisterContentListener(Zotero.Ingester.MIMEHandler.URIContentListener);
 			on = false;			
 		}
 	}
 }
 
 /*
- * Scholar.Ingester.MIMEHandler.URIContentListener: implements
+ * Zotero.Ingester.MIMEHandler.URIContentListener: implements
  * nsIURIContentListener interface to grab MIME types
  */
-Scholar.Ingester.MIMEHandler.URIContentListener = new function() {
+Zotero.Ingester.MIMEHandler.URIContentListener = new function() {
 	// list of content types to capture
 	// NOTE: must be from shortest to longest length
 	this.desiredContentTypes = ["application/x-endnote-refer",
@@ -538,20 +538,20 @@ Scholar.Ingester.MIMEHandler.URIContentListener = new function() {
 	}
 	
 	function canHandleContent(contentType, isContentPreferred, desiredContentType) {
-		if(Scholar.inArray(contentType, this.desiredContentTypes)) {
+		if(Zotero.inArray(contentType, this.desiredContentTypes)) {
 			return true;
 		}
 		return false;
 	}
 	
 	function doContent(contentType, isContentPreferred, request, contentHandler) {
-		Scholar.debug("doing content for "+request.name);
-		contentHandler.value = new Scholar.Ingester.MIMEHandler.StreamListener(request, contentType);
+		Zotero.debug("doing content for "+request.name);
+		contentHandler.value = new Zotero.Ingester.MIMEHandler.StreamListener(request, contentType);
 		return false;
 	}
 	
 	function isPreferred(contentType, desiredContentType) {
-		if(Scholar.inArray(contentType, this.desiredContentTypes)) {
+		if(Zotero.inArray(contentType, this.desiredContentTypes)) {
 			return true;
 		}
 		return false;
@@ -563,10 +563,10 @@ Scholar.Ingester.MIMEHandler.URIContentListener = new function() {
 }
 
 /*
- * Scholar.Ingester.MIMEHandler.StreamListener: implements nsIStreamListener and
+ * Zotero.Ingester.MIMEHandler.StreamListener: implements nsIStreamListener and
  * nsIRequestObserver interfaces to download MIME types we've grabbed
  */
-Scholar.Ingester.MIMEHandler.StreamListener = function(request, contentType) {
+Zotero.Ingester.MIMEHandler.StreamListener = function(request, contentType) {
 	this._request = request;
 	this._contentType = contentType
 	this._readString = "";
@@ -577,12 +577,12 @@ Scholar.Ingester.MIMEHandler.StreamListener = function(request, contentType) {
 	var windowWatcher = Components.classes["@mozilla.org/embedcomp/window-watcher;1"].
 						getService(Components.interfaces.nsIWindowWatcher);
 	this._frontWindow = windowWatcher.activeWindow;
-	this._frontWindow.Scholar_Ingester_Interface.Progress.show();
+	this._frontWindow.Zotero_Ingester_Interface.Progress.show();
 	
-	Scholar.debug("EndNote prepared to grab content type "+contentType);
+	Zotero.debug("EndNote prepared to grab content type "+contentType);
 }
 
-Scholar.Ingester.MIMEHandler.StreamListener.prototype.QueryInterface = function(iid) {
+Zotero.Ingester.MIMEHandler.StreamListener.prototype.QueryInterface = function(iid) {
 	if(iid.equals(Components.interfaces.nsISupports)
 	   || iid.equals(Components.interfaces.nsIRequestObserver)
 	   || iid.equals(Components.interfaces.nsIStreamListener)) {
@@ -591,13 +591,13 @@ Scholar.Ingester.MIMEHandler.StreamListener.prototype.QueryInterface = function(
 	throw Components.results.NS_ERROR_NO_INTERFACE;
 }
 
-Scholar.Ingester.MIMEHandler.StreamListener.prototype.onStartRequest = function(channel, context) {}
+Zotero.Ingester.MIMEHandler.StreamListener.prototype.onStartRequest = function(channel, context) {}
 
 /*
  * called when there's data available; basicallly, we just want to collect this data
  */
-Scholar.Ingester.MIMEHandler.StreamListener.prototype.onDataAvailable = function(request, context, inputStream, offset, count) {
-	Scholar.debug(count+" bytes available");
+Zotero.Ingester.MIMEHandler.StreamListener.prototype.onDataAvailable = function(request, context, inputStream, offset, count) {
+	Zotero.debug(count+" bytes available");
 	
 	if(inputStream != this._scriptableStreamInput) {	// get storage stream
 														// if there's not one
@@ -612,24 +612,24 @@ Scholar.Ingester.MIMEHandler.StreamListener.prototype.onDataAvailable = function
 /*
  * called when the request is done
  */
-Scholar.Ingester.MIMEHandler.StreamListener.prototype.onStopRequest = function(channel, context, status) {
-	Scholar.debug("request finished");
+Zotero.Ingester.MIMEHandler.StreamListener.prototype.onStopRequest = function(channel, context, status) {
+	Zotero.debug("request finished");
 	var externalHelperAppService = Components.classes["@mozilla.org/uriloader/external-helper-app-service;1"].
 	                               getService(Components.interfaces.nsIExternalHelperAppService);
 	
-	// attempt to import through Scholar.Translate
-	var translation = new Scholar.Translate("import");
+	// attempt to import through Zotero.Translate
+	var translation = new Zotero.Translate("import");
 	translation.setLocation(this._request.name);
 	translation.setString(this._readString);
-	translation.setHandler("itemDone", this._frontWindow.Scholar_Ingester_Interface._itemDone);
-	translation.setHandler("done", this._frontWindow.Scholar_Ingester_Interface._finishScraping);
+	translation.setHandler("itemDone", this._frontWindow.Zotero_Ingester_Interface._itemDone);
+	translation.setHandler("done", this._frontWindow.Zotero_Ingester_Interface._finishScraping);
 	
 	// attempt to retrieve translators
 	var translators = translation.getTranslators();
 	if(!translators.length) {
 		// we lied. we can't really translate this file. call
 		// nsIExternalHelperAppService with the data
-		this._frontWindow.Scholar_Ingester_Interface.Progress.kill();
+		this._frontWindow.Zotero_Ingester_Interface.Progress.kill();
 
 		var streamListener;
 		if(streamListener = externalHelperAppService.doContent(this._contentType, this._request, this._frontWindow)) {

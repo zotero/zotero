@@ -1,12 +1,12 @@
 //////////////////////////////////////////////////////////////////////////////
 //
-// Scholar_File_Interface_Bibliography
+// Zotero_File_Interface_Bibliography
 //
 //////////////////////////////////////////////////////////////////////////////
 
 // Class to provide options for bibliography
 
-var Scholar_File_Interface_Bibliography = new function() {
+var Zotero_File_Interface_Bibliography = new function() {
 	var _io;
 	
 	this.init = init;
@@ -21,7 +21,7 @@ var Scholar_File_Interface_Bibliography = new function() {
 		
 		var listbox = document.getElementById("style-popup");
 		var styleMenu = document.getElementById("style-menu");
-		var styles = Scholar.Cite.getStyles();
+		var styles = Zotero.Cite.getStyles();
 		
 		// add styles to list
 		for(i in styles) {
@@ -40,7 +40,7 @@ var Scholar_File_Interface_Bibliography = new function() {
 			styleMenu.selectedIndex = 0;
 		}
 		
-		if(Scholar.isMac && document.getElementById("copy-to-clipboard")) {
+		if(Zotero.isMac && document.getElementById("copy-to-clipboard")) {
 			document.getElementById("copy-to-clipboard").hidden = "true";
 		}
 		

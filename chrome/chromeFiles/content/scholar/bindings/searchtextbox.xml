@@ -5,7 +5,7 @@
 	http://chnm.gmu.edu/
 -->
 
-<!DOCTYPE bindings SYSTEM "chrome://scholar/locale/searchbox.dtd">
+<!DOCTYPE bindings SYSTEM "chrome://zotero/locale/searchbox.dtd">
 
 <bindings 	xmlns="http://www.mozilla.org/xbl"
 			xmlns:xbl="http://www.mozilla.org/xbl"
@@ -146,10 +146,10 @@
 			<xul:textbox xbl:inherits="flex">
 				<xul:popupset>
 					<xul:menupopup id="textbox-fulltext-menu">
-						<xul:menuitem type="radio" checked="true" label="&scholar.search.textModes.phrase;"/>
-						<xul:menuitem type="radio" label="&scholar.search.textModes.phraseBinary;"/>
-						<xul:menuitem type="radio" label="&scholar.search.textModes.regexp;"/>
-						<xul:menuitem type="radio" label="&scholar.search.textModes.regexpCS;"/>
+						<xul:menuitem type="radio" checked="true" label="&zotero.search.textModes.phrase;"/>
+						<xul:menuitem type="radio" label="&zotero.search.textModes.phraseBinary;"/>
+						<xul:menuitem type="radio" label="&zotero.search.textModes.regexp;"/>
+						<xul:menuitem type="radio" label="&zotero.search.textModes.regexpCS;"/>
 					</xul:menupopup>
 				</xul:popupset>
 				

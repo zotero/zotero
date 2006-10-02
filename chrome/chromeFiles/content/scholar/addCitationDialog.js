@@ -4,7 +4,7 @@
 	http://chnm.gmu.edu/
 */
 
-var Scholar_Citation_Dialog = new function () {
+var Zotero_Citation_Dialog = new function () {
 	var _itemLocators = new Object();
 	var _itemLocatorTypes = new Object();
 	var _multipleSourcesOn = false;
@@ -19,7 +19,7 @@ var Scholar_Citation_Dialog = new function () {
 	this.accept = accept;
 	
 	function load() {
-		document.getElementById("multiple-sources-button").label = Scholar.getString("citation.multipleSources");
+		document.getElementById("multiple-sources-button").label = Zotero.getString("citation.multipleSources");
 		
 		// load (from selectItemsDialog.js)
 		doLoad();
@@ -29,13 +29,13 @@ var Scholar_Citation_Dialog = new function () {
 		if(_multipleSourcesOn) {
 			document.getElementById("multiple-sources").hidden = true;
 			document.getElementById("add-citation-dialog").width = "600";
-			document.getElementById("multiple-sources-button").label = Scholar.getString("citation.multipleSources");			
+			document.getElementById("multiple-sources-button").label = Zotero.getString("citation.multipleSources");			
 			window.sizeToContent();
 			window.moveTo((window.screenX+75), window.screenY);
 		} else {
 			document.getElementById("multiple-sources").hidden = undefined;
 			document.getElementById("add-citation-dialog").width = "750";
-			document.getElementById("multiple-sources-button").label = Scholar.getString("citation.singleSource");			
+			document.getElementById("multiple-sources-button").label = Zotero.getString("citation.singleSource");			
 			window.sizeToContent();
 			window.moveTo((window.screenX-75), window.screenY);
 		}
@@ -87,7 +87,7 @@ var Scholar_Citation_Dialog = new function () {
 		itemNode.setAttribute("value", itemID);
 		itemNode.setAttribute("label", item.getField("title"));
 		itemNode.setAttribute("class", "listitem-iconic");
-		itemNode.setAttribute("image", "chrome://scholar/skin/treeitem-"+Scholar.ItemTypes.getName(item.getType())+".png");
+		itemNode.setAttribute("image", "chrome://zotero/skin/treeitem-"+Zotero.ItemTypes.getName(item.getType())+".png");
 		document.getElementById("citation-list").appendChild(itemNode);
 		
 		// don't let someone select it again

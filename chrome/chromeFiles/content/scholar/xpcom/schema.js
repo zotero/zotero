@@ -1,4 +1,4 @@
-Scholar.Schema = new function(){
+Zotero.Schema = new function(){
 	var _dbVersions = [];
 	var _schemaVersions = [];
 	var _repositoryTimer;
@@ -15,7 +15,7 @@ Scholar.Schema = new function(){
 		
 		// 'schema' check is for old (<= 1.0b1) schema system
 		if (!dbVersion && !_getDBVersion('schema')){
-			Scholar.debug('Database does not exist -- creating\n');
+			Zotero.debug('Database does not exist -- creating\n');
 			_initializeSchema();
 			return;
 		}
@@ -27,7 +27,7 @@ Scholar.Schema = new function(){
 		
 		var schemaVersion = _getSchemaSQLVersion('user');
 		
-		Scholar.DB.beginTransaction();
+		Zotero.DB.beginTransaction();
 		
 		try {
 			_migrateUserSchema(dbVersion);
@@ -35,14 +35,14 @@ Scholar.Schema = new function(){
 			_updateSchema('scrapers');
 			
 			// Rebuild fulltext cache if necessary
-			if (Scholar.Fulltext.cacheIsOutdated()){
-				Scholar.Fulltext.rebuildCache();
+			if (Zotero.Fulltext.cacheIsOutdated()){
+				Zotero.Fulltext.rebuildCache();
 			}
-			Scholar.DB.commitTransaction();
+			Zotero.DB.commitTransaction();
 		}
 		catch(e){
-			Scholar.debug(e);
-			Scholar.DB.rollbackTransaction();
+			Zotero.debug(e);
+			Zotero.DB.rollbackTransaction();
 			throw(e);
 		}
 		return;
@@ -58,20 +58,20 @@ Scholar.Schema = new function(){
 	function updateScrapersRemote(force){
 		if (!force){
 			// Check user preference for automatic updates
-			if (!Scholar.Prefs.get('automaticScraperUpdates')){
-				Scholar.debug('Automatic scraper updating disabled -- not checking repository', 4);
+			if (!Zotero.Prefs.get('automaticScraperUpdates')){
+				Zotero.debug('Automatic scraper updating disabled -- not checking repository', 4);
 				return false;
 			}
 			
 			// Determine the earliest local time that we'd query the repository again
 			var nextCheck = new Date();
 			nextCheck.setTime((parseInt(_getDBVersion('lastcheck'))
-				+ SCHOLAR_CONFIG['REPOSITORY_CHECK_INTERVAL']) * 1000); // JS uses ms
+				+ ZOTERO_CONFIG['REPOSITORY_CHECK_INTERVAL']) * 1000); // JS uses ms
 			var now = new Date();
 			
 			// If enough time hasn't passed, don't update
 			if (now < nextCheck){
-				Scholar.debug('Not enough time since last update -- not checking repository', 4);
+				Zotero.debug('Not enough time since last update -- not checking repository', 4);
 				// Set the repository timer to the remaining time
 				_setRepositoryTimer(Math.round((nextCheck.getTime() - now.getTime()) / 1000));
 				return false;
@@ -79,8 +79,8 @@ Scholar.Schema = new function(){
 		}
 		
 		// If transaction already in progress, delay by a few seconds
-		if (Scholar.DB.transactionInProgress()){
-			Scholar.debug('Transaction in progress -- delaying repository check', 4)
+		if (Zotero.DB.transactionInProgress()){
+			Zotero.debug('Transaction in progress -- delaying repository check', 4)
 			_setRepositoryTimer(30);
 			return false;
 		}
@@ -88,24 +88,24 @@ Scholar.Schema = new function(){
 		// Get the last timestamp we got from the server
 		var lastUpdated = _getDBVersion('repository');
 		
-		var url = SCHOLAR_CONFIG['REPOSITORY_URL'] + '/updated?'
+		var url = ZOTERO_CONFIG['REPOSITORY_URL'] + '/updated?'
 			+ (lastUpdated ? 'last=' + lastUpdated + '&' : '')
-			+ 'version=' + Scholar.version;
+			+ 'version=' + Zotero.version;
 		
-		Scholar.debug('Checking repository for updates (' + url + ')');
-		var get = Scholar.Utilities.HTTP.doGet(url, _updateScrapersRemoteCallback);
+		Zotero.debug('Checking repository for updates (' + url + ')');
+		var get = Zotero.Utilities.HTTP.doGet(url, _updateScrapersRemoteCallback);
 		
 		// TODO: instead, add an observer to start and stop timer on online state change
 		if (!get){
-			Scholar.debug('Browser is offline -- skipping check');
-			_setRepositoryTimer(SCHOLAR_CONFIG['REPOSITORY_RETRY_INTERVAL']);
+			Zotero.debug('Browser is offline -- skipping check');
+			_setRepositoryTimer(ZOTERO_CONFIG['REPOSITORY_RETRY_INTERVAL']);
 		}
 	}
 	
 	
 	function stopRepositoryTimer(){
 		if (_repositoryTimer){
-			Scholar.debug('Stopping repository check timer');
+			Zotero.debug('Stopping repository check timer');
 			_repositoryTimer.cancel();
 		}
 	}
@@ -131,8 +131,8 @@ Scholar.Schema = new function(){
 			return _dbVersions[schema];
 		}
 		
-		if (Scholar.DB.tableExists('version')){
-			var dbVersion = Scholar.DB.valueQuery("SELECT version FROM "
+		if (Zotero.DB.tableExists('version')){
+			var dbVersion = Zotero.DB.valueQuery("SELECT version FROM "
 				+ "version WHERE schema='" + schema + "'");
 			_dbVersions[schema] = dbVersion;
 			return dbVersion;
@@ -157,8 +157,8 @@ Scholar.Schema = new function(){
 		
 		var file = Components.classes["@mozilla.org/extensions/manager;1"]
                     .getService(Components.interfaces.nsIExtensionManager)
-                    .getInstallLocation(SCHOLAR_CONFIG['GUID'])
-                    .getItemLocation(SCHOLAR_CONFIG['GUID']); 
+                    .getInstallLocation(ZOTERO_CONFIG['GUID'])
+                    .getItemLocation(ZOTERO_CONFIG['GUID']); 
 		file.append(schemaFile);
 		
 		// Open an input stream from file
@@ -195,8 +195,8 @@ Scholar.Schema = new function(){
 		// it when necessary
 		var file = Components.classes["@mozilla.org/extensions/manager;1"]
                     .getService(Components.interfaces.nsIExtensionManager)
-                    .getInstallLocation(SCHOLAR_CONFIG['GUID'])
-                    .getItemLocation(SCHOLAR_CONFIG['GUID']); 
+                    .getInstallLocation(ZOTERO_CONFIG['GUID'])
+                    .getItemLocation(ZOTERO_CONFIG['GUID']); 
 		file.append(schemaFile);
 		
 		// Open an input stream from file
@@ -241,8 +241,8 @@ Scholar.Schema = new function(){
 		// it when necessary
 		var file = Components.classes["@mozilla.org/extensions/manager;1"]
                     .getService(Components.interfaces.nsIExtensionManager)
-                    .getInstallLocation(SCHOLAR_CONFIG['GUID'])
-                    .getItemLocation(SCHOLAR_CONFIG['GUID']); 
+                    .getInstallLocation(ZOTERO_CONFIG['GUID'])
+                    .getItemLocation(ZOTERO_CONFIG['GUID']); 
 		file.append(schemaFile);
 		
 		// Open an input stream from file
@@ -275,31 +275,31 @@ Scholar.Schema = new function(){
 	 * Create new DB schema
 	 */
 	function _initializeSchema(){
-		Scholar.DB.beginTransaction();
+		Zotero.DB.beginTransaction();
 		try {
-			Scholar.DB.query(_getSchemaSQL('user'));
+			Zotero.DB.query(_getSchemaSQL('user'));
 			_updateDBVersion('user', _getSchemaSQLVersion('user'));
 			
-			Scholar.DB.query(_getSchemaSQL('system'));
+			Zotero.DB.query(_getSchemaSQL('system'));
 			_updateDBVersion('system', _getSchemaSQLVersion('system'));
 			
-			Scholar.DB.query(_getSchemaSQL('scrapers'));
+			Zotero.DB.query(_getSchemaSQL('scrapers'));
 			_updateDBVersion('scrapers', _getSchemaSQLVersion('scrapers'));
 			
 			var sql = "INSERT INTO items VALUES(1233, 14, "
 				+ "'Zotero - Quick Start Guide', '2006-08-31 20:00:00', "
 				+ "'2006-08-31 20:00:00')";
-			Scholar.DB.query(sql);
+			Zotero.DB.query(sql);
 			var sql = "INSERT INTO itemAttachments VALUES(1233, NULL, 3, "
 				+ "'text/html', 25, "
 				+ "'http://www.zotero.org/docs/quick_start_guide.php', NULL)";
-			Scholar.DB.query(sql);
+			Zotero.DB.query(sql);
 			
-			Scholar.DB.commitTransaction();
+			Zotero.DB.commitTransaction();
 		}
 		catch(e){
-			Scholar.debug(e, 1);
-			Scholar.DB.rollbackTransaction();
+			Zotero.debug(e, 1);
+			Zotero.DB.rollbackTransaction();
 			alert('Error initializing Zotero database'); // TODO: localize
 			throw(e);
 		}
@@ -312,7 +312,7 @@ Scholar.Schema = new function(){
 	function _updateDBVersion(schema, version){
 		_dbVersions[schema] = version;
 		var sql = "REPLACE INTO version (schema,version) VALUES (?,?)";
-		return Scholar.DB.query(sql, [{'string':schema},{'int':version}]);
+		return Zotero.DB.query(sql, [{'string':schema},{'int':version}]);
 	}
 	
 	
@@ -324,15 +324,15 @@ Scholar.Schema = new function(){
 			return;
 		}
 		else if (dbVersion < schemaVersion){
-			Scholar.DB.beginTransaction();
+			Zotero.DB.beginTransaction();
 			try {
-				Scholar.DB.query(_getSchemaSQL(schema));
+				Zotero.DB.query(_getSchemaSQL(schema));
 				_updateDBVersion(schema, schemaVersion);
-				Scholar.DB.commitTransaction();
+				Zotero.DB.commitTransaction();
 			}
 			catch (e){
-				Scholar.debug(e, 1);
-				Scholar.DB.rollbackTransaction();
+				Zotero.debug(e, 1);
+				Zotero.DB.rollbackTransaction();
 				alert('Error updating Zotero database'); // TODO: localize
 				throw(e);
 			}
@@ -350,12 +350,12 @@ Scholar.Schema = new function(){
 	function _updateScrapersRemoteCallback(xmlhttp){
 		if (!xmlhttp.responseXML){
 			if (xmlhttp.status>1000){
-				Scholar.debug('No network connection', 2);
+				Zotero.debug('No network connection', 2);
 			}
 			else {
-				Scholar.debug('Invalid response from repository', 2);
+				Zotero.debug('Invalid response from repository', 2);
 			}
-			_setRepositoryTimer(SCHOLAR_CONFIG['REPOSITORY_RETRY_INTERVAL']);
+			_setRepositoryTimer(ZOTERO_CONFIG['REPOSITORY_RETRY_INTERVAL']);
 			return false;
 		}
 		
@@ -363,7 +363,7 @@ Scholar.Schema = new function(){
 			getElementsByTagName('currentTime')[0].firstChild.nodeValue;
 		var updates = xmlhttp.responseXML.getElementsByTagName('translator');
 		
-		Scholar.DB.beginTransaction();
+		Zotero.DB.beginTransaction();
 		
 		// Store the timestamp provided by the server
 		_updateDBVersion('repository', currentTime);
@@ -373,9 +373,9 @@ Scholar.Schema = new function(){
 		_updateDBVersion('lastcheck', Math.round(d.getTime()/1000)); // JS uses ms
 		
 		if (!updates.length){
-			Scholar.debug('All scrapers are up-to-date');
-			Scholar.DB.commitTransaction();
-			_setRepositoryTimer(SCHOLAR_CONFIG['REPOSITORY_CHECK_INTERVAL']);
+			Zotero.debug('All scrapers are up-to-date');
+			Zotero.DB.commitTransaction();
+			_setRepositoryTimer(ZOTERO_CONFIG['REPOSITORY_CHECK_INTERVAL']);
 			return false;
 		}
 		
@@ -384,16 +384,16 @@ Scholar.Schema = new function(){
 				_scraperXMLToDBQuery(updates[i]);
 			}
 			catch (e) {
-				Scholar.debug(e, 1);
-				Scholar.DB.rollbackTransaction();
+				Zotero.debug(e, 1);
+				Zotero.DB.rollbackTransaction();
 				var breakout = true;
 				break;
 			}
 		}
 		
 		if (!breakout){
-			Scholar.DB.commitTransaction();
-			_setRepositoryTimer(SCHOLAR_CONFIG['REPOSITORY_CHECK_INTERVAL']);
+			Zotero.DB.commitTransaction();
+			_setRepositoryTimer(ZOTERO_CONFIG['REPOSITORY_CHECK_INTERVAL']);
 		}
 	}
 	
@@ -405,7 +405,7 @@ Scholar.Schema = new function(){
 	**/
 	function _setRepositoryTimer(interval){
 		if (!interval){
-			interval = SCHOLAR_CONFIG['REPOSITORY_CHECK_INTERVAL'];
+			interval = ZOTERO_CONFIG['REPOSITORY_CHECK_INTERVAL'];
 		}
 		
 		var fudge = 2; // two seconds
@@ -413,13 +413,13 @@ Scholar.Schema = new function(){
 		var interval = (interval + fudge) * 1000; // convert to ms
 		
 		if (!_repositoryTimer || _repositoryTimer.delay!=interval){
-			Scholar.debug('Setting repository check interval to ' + displayInterval + ' seconds');
+			Zotero.debug('Setting repository check interval to ' + displayInterval + ' seconds');
 			_repositoryTimer = Components.classes["@mozilla.org/timer;1"].
 				createInstance(Components.interfaces.nsITimer);
 			_repositoryTimer.initWithCallback({
 				// implements nsITimerCallback
 				notify: function(timer){
-					Scholar.Schema.updateScrapersRemote();
+					Zotero.Schema.updateScrapersRemote();
 				}
 			}, interval, Components.interfaces.nsITimer.TYPE_REPEATING_SLACK);
 		}
@@ -451,7 +451,7 @@ Scholar.Schema = new function(){
 		]
 		
 		var sql = "REPLACE INTO translators VALUES (?,?,?,?,?,?,?,?)";
-		return Scholar.DB.query(sql, sqlValues);
+		return Zotero.DB.query(sql, sqlValues);
 	}
 	
 	
@@ -469,9 +469,9 @@ Scholar.Schema = new function(){
 			throw("Zotero user DB version is newer than SQL file");
 		}
 		
-		Scholar.debug('Updating user tables from version ' + fromVersion + ' to ' + toVersion);
+		Zotero.debug('Updating user tables from version ' + fromVersion + ' to ' + toVersion);
 		
-		Scholar.DB.beginTransaction();
+		Zotero.DB.beginTransaction();
 		
 		try {
 			// Step through version changes until we reach the current version
@@ -480,24 +480,24 @@ Scholar.Schema = new function(){
 			// previous revision to that one.
 			for (var i=fromVersion + 1; i<=toVersion; i++){
 				if (i==1){
-					Scholar.DB.query("DELETE FROM version WHERE schema='schema'");
+					Zotero.DB.query("DELETE FROM version WHERE schema='schema'");
 				}
 				
 				if (i==5){
-					Scholar.DB.query("REPLACE INTO itemData SELECT itemID, 1, originalPath FROM itemAttachments WHERE linkMode=1");
-					Scholar.DB.query("REPLACE INTO itemData SELECT itemID, 1, path FROM itemAttachments WHERE linkMode=3");
-					Scholar.DB.query("REPLACE INTO itemData SELECT itemID, 27, dateAdded FROM items NATURAL JOIN itemAttachments WHERE linkMode IN (1,3)");
-					Scholar.DB.query("UPDATE itemAttachments SET originalPath=NULL WHERE linkMode=1");
-					Scholar.DB.query("UPDATE itemAttachments SET path=NULL WHERE linkMode=3");
-					try { Scholar.DB.query("DELETE FROM fulltextItems WHERE itemID IS NULL"); } catch(e){}
+					Zotero.DB.query("REPLACE INTO itemData SELECT itemID, 1, originalPath FROM itemAttachments WHERE linkMode=1");
+					Zotero.DB.query("REPLACE INTO itemData SELECT itemID, 1, path FROM itemAttachments WHERE linkMode=3");
+					Zotero.DB.query("REPLACE INTO itemData SELECT itemID, 27, dateAdded FROM items NATURAL JOIN itemAttachments WHERE linkMode IN (1,3)");
+					Zotero.DB.query("UPDATE itemAttachments SET originalPath=NULL WHERE linkMode=1");
+					Zotero.DB.query("UPDATE itemAttachments SET path=NULL WHERE linkMode=3");
+					try { Zotero.DB.query("DELETE FROM fulltextItems WHERE itemID IS NULL"); } catch(e){}
 				}
 			}
 			
 			_updateSchema('user');
-			Scholar.DB.commitTransaction();
+			Zotero.DB.commitTransaction();
 		}
 		catch(e){
-			Scholar.debug(e);
+			Zotero.debug(e);
 			alert('Error migrating Zotero database');
 			throw(e);
 		}

@@ -4,7 +4,7 @@
 	http://chnm.gmu.edu/
 */
 
-var ScholarItemPane = new function()
+var ZoteroItemPane = new function()
 {
 	var _dynamicFields;
 	var _creatorTypeMenu;
@@ -29,11 +29,11 @@ var ScholarItemPane = new function()
 	var _tabIndexMaxTagsFields = 0;
 	
 	const _defaultFirstName =
-		'(' + Scholar.getString('pane.item.defaultFirstName') + ')';
+		'(' + Zotero.getString('pane.item.defaultFirstName') + ')';
 	const _defaultLastName =
-		'(' + Scholar.getString('pane.item.defaultLastName') + ')';
+		'(' + Zotero.getString('pane.item.defaultLastName') + ')';
 	const _defaultFullName =
-		'(' + Scholar.getString('pane.item.defaultFullName') + ')';
+		'(' + Zotero.getString('pane.item.defaultFullName') + ')';
 	
 	this.onLoad = onLoad;
 	this.viewItem = viewItem;
@@ -60,7 +60,7 @@ var ScholarItemPane = new function()
 	
 	function onLoad()
 	{
-		_tabs = document.getElementById('scholar-view-tabs');
+		_tabs = document.getElementById('zotero-view-tabs');
 		
 		// Not in item pane, so skip the introductions
 		if (!_tabs)
@@ -78,21 +78,21 @@ var ScholarItemPane = new function()
 		_tagsBox = document.getElementById('editpane-tags');
 		_relatedBox = document.getElementById('editpane-related');
 		
-		var creatorTypes = Scholar.CreatorTypes.getTypes();
+		var creatorTypes = Zotero.CreatorTypes.getTypes();
 		for(var i = 0; i < creatorTypes.length; i++)
 		{
 			var menuitem = document.createElement("menuitem");
-			menuitem.setAttribute("label",Scholar.getString('creatorTypes.'+creatorTypes[i]['name']));
+			menuitem.setAttribute("label",Zotero.getString('creatorTypes.'+creatorTypes[i]['name']));
 			menuitem.setAttribute("typeid",creatorTypes[i]['id']);
 			if(creatorTypes[i]['id'] == 0)
 				menuitem.setAttribute("selected",true);
 			_creatorTypeMenu.appendChild(menuitem);
 		}
 		
-		var itemTypes = Scholar.ItemTypes.getTypes();
+		var itemTypes = Zotero.ItemTypes.getTypes();
 		for(var i = 0; i<itemTypes.length; i++)
 			if(itemTypes[i]['name'] != 'note' && itemTypes[i]['name'] != 'attachment')
-				_itemTypeMenu.appendItem(Scholar.getString("itemTypes."+itemTypes[i]['name']),itemTypes[i]['id']);
+				_itemTypeMenu.appendItem(Zotero.getString("itemTypes."+itemTypes[i]['name']),itemTypes[i]['id']);
 		
 		return true;
 	}
@@ -102,7 +102,7 @@ var ScholarItemPane = new function()
 	 */
 	function viewItem(thisItem)
 	{
-		//Scholar.debug('Viewing item');
+		//Zotero.debug('Viewing item');
 		
 		// Force blur() when clicking off a textbox to another item in middle
 		// pane, since for some reason it's not being called automatically
@@ -136,7 +136,7 @@ var ScholarItemPane = new function()
 	
 	function loadPane(index)
 	{
-		//Scholar.debug('Loading item pane ' + index);
+		//Zotero.debug('Loading item pane ' + index);
 		
 		// Clear the tab index when switching panes
 		if (_lastPane!=index)
@@ -175,10 +175,10 @@ var ScholarItemPane = new function()
 			switch (_itemBeingEdited.getType())
 			{
 				// DEBUG: handle descendents of these types as well?
-				case Scholar.ItemTypes.getID('book'):
-				case Scholar.ItemTypes.getID('bookSection'):
-				case Scholar.ItemTypes.getID('journalArticle'):
-				case Scholar.ItemTypes.getID('thesis'):
+				case Zotero.ItemTypes.getID('book'):
+				case Zotero.ItemTypes.getID('bookSection'):
+				case Zotero.ItemTypes.getID('journalArticle'):
+				case Zotero.ItemTypes.getID('thesis'):
 					var openURL = true;
 					break;
 				
@@ -195,9 +195,9 @@ var ScholarItemPane = new function()
 					_itemTypeMenu.selectedIndex = i;
 		
 			var fieldNames = new Array("title");
-			var fields = Scholar.ItemFields.getItemTypeFields(_itemBeingEdited.getField("itemTypeID"));
+			var fields = Zotero.ItemFields.getItemTypeFields(_itemBeingEdited.getField("itemTypeID"));
 			for(var i = 0; i<fields.length; i++)
-				fieldNames.push(Scholar.ItemFields.getName(fields[i]));
+				fieldNames.push(Zotero.ItemFields.getName(fields[i]));
 			fieldNames.push("dateAdded","dateModified");
 			
 			for(var i = 0; i<fieldNames.length; i++)
@@ -209,7 +209,7 @@ var ScholarItemPane = new function()
 				// Convert dates from UTC
 				if (fieldNames[i]=='dateAdded' || fieldNames[i]=='dateModified'
 					|| fieldNames[i]=='accessDate'){
-					var date = Scholar.Date.sqlToDate(val, true);
+					var date = Zotero.Date.sqlToDate(val, true);
 					val = date ? date.toLocaleString() : '';
 				}
 				
@@ -223,7 +223,7 @@ var ScholarItemPane = new function()
 				_tabIndexMaxInfoFields = Math.max(_tabIndexMaxInfoFields, tabindex);
 				
 				var label = document.createElement("label");
-				label.setAttribute("value",Scholar.getString("itemFields."+fieldNames[i])+":");
+				label.setAttribute("value",Zotero.getString("itemFields."+fieldNames[i])+":");
 				label.setAttribute("onclick","this.nextSibling.blur();");
 			
 				addDynamicRow(label,valueElement);
@@ -256,13 +256,13 @@ var ScholarItemPane = new function()
 			while(_notesList.hasChildNodes())
 				_notesList.removeChild(_notesList.firstChild);
 				
-			var notes = Scholar.Items.get(_itemBeingEdited.getNotes());
+			var notes = Zotero.Items.get(_itemBeingEdited.getNotes());
 			if(notes.length)
 			{
 				for(var i = 0; i < notes.length; i++)
 				{
 					var icon = document.createElement('image');
-					icon.setAttribute('src','chrome://scholar/skin/treeitem-note.png');
+					icon.setAttribute('src','chrome://zotero/skin/treeitem-note.png');
 				
 					var label = document.createElement('label');
 					label.setAttribute('value',_noteToTitle(notes[i].getNote()));
@@ -270,7 +270,7 @@ var ScholarItemPane = new function()
 					label.setAttribute('crop','end');
 				
 					var box = document.createElement('box');
-					box.setAttribute('onclick',"ScholarPane.selectItem("+notes[i].getID()+");");
+					box.setAttribute('onclick',"ZoteroPane.selectItem("+notes[i].getID()+");");
 					box.setAttribute('class','clicky');
 					box.appendChild(icon);
 					box.appendChild(label);
@@ -278,7 +278,7 @@ var ScholarItemPane = new function()
 					var removeButton = document.createElement('label');
 					removeButton.setAttribute("value","-");
 					removeButton.setAttribute("class","clicky");
-					removeButton.setAttribute("onclick","ScholarItemPane.removeNote("+notes[i].getID()+")");
+					removeButton.setAttribute("onclick","ZoteroItemPane.removeNote("+notes[i].getID()+")");
 				
 					var row = document.createElement('row');
 					row.appendChild(box);
@@ -297,30 +297,30 @@ var ScholarItemPane = new function()
 			while(_attachmentsList.hasChildNodes())
 				_attachmentsList.removeChild(_attachmentsList.firstChild);
 				
-			var attachments = Scholar.Items.get(_itemBeingEdited.getAttachments());
+			var attachments = Zotero.Items.get(_itemBeingEdited.getAttachments());
 			if(attachments.length)
 			{
 				for(var i = 0; i < attachments.length; i++)
 				{
 					var icon = document.createElement('image');
 					var linkMode = attachments[i].getAttachmentLinkMode();
-					if(linkMode == Scholar.Attachments.LINK_MODE_IMPORTED_FILE)
+					if(linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_FILE)
 					{
 						itemType = "-file";
 					}
-					else if(linkMode == Scholar.Attachments.LINK_MODE_LINKED_FILE)
+					else if(linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE)
 					{
 						itemType = "-link";
 					}
-					else if(linkMode == Scholar.Attachments.LINK_MODE_IMPORTED_URL)
+					else if(linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_URL)
 					{
 						itemType = "-snapshot";
 					}
-					else if(linkMode == Scholar.Attachments.LINK_MODE_LINKED_URL)
+					else if(linkMode == Zotero.Attachments.LINK_MODE_LINKED_URL)
 					{
 						itemType = "-web-link";
 					}
-					icon.setAttribute('src','chrome://scholar/skin/treeitem-file'+itemType+'.png');
+					icon.setAttribute('src','chrome://zotero/skin/treeitem-file'+itemType+'.png');
 				
 					var label = document.createElement('label');
 					label.setAttribute('value',attachments[i].getField('title'));
@@ -328,7 +328,7 @@ var ScholarItemPane = new function()
 					label.setAttribute('crop','end');
 				
 					var box = document.createElement('box');
-					box.setAttribute('onclick',"ScholarPane.selectItem('"+attachments[i].getID()+"')");
+					box.setAttribute('onclick',"ZoteroPane.selectItem('"+attachments[i].getID()+"')");
 					box.setAttribute('class','clicky');
 					box.appendChild(icon);
 					box.appendChild(label);
@@ -336,7 +336,7 @@ var ScholarItemPane = new function()
 					var removeButton = document.createElement('label');
 					removeButton.setAttribute("value","-");
 					removeButton.setAttribute("class","clicky");
-					removeButton.setAttribute("onclick","ScholarItemPane.removeAttachment("+attachments[i].getID()+")");
+					removeButton.setAttribute("onclick","ZoteroItemPane.removeAttachment("+attachments[i].getID()+")");
 				
 					var row = document.createElement('row');
 					row.appendChild(box);
@@ -374,7 +374,7 @@ var ScholarItemPane = new function()
 	
 	function changeTypeTo(id)
 	{
-		if(id != _itemBeingEdited.getType() && confirm(Scholar.getString('pane.item.changeType')))
+		if(id != _itemBeingEdited.getType() && confirm(Zotero.getString('pane.item.changeType')))
 		{
 			_itemBeingEdited.setType(id);
 			_itemBeingEdited.save();
@@ -389,10 +389,10 @@ var ScholarItemPane = new function()
 	
 	function onOpenURLClick()
 	{
-		var url = Scholar.OpenURL.resolve(_itemBeingEdited);
+		var url = Zotero.OpenURL.resolve(_itemBeingEdited);
 		if (url)
 		{
-			window.loadURI(Scholar.OpenURL.resolve(_itemBeingEdited));
+			window.loadURI(Zotero.OpenURL.resolve(_itemBeingEdited));
 		}
 	}
 	
@@ -412,7 +412,7 @@ var ScholarItemPane = new function()
 		// Disable the "+" button on previous rows
 		var elems = _dynamicFields.getElementsByAttribute('value', '+');
 		if (elems.length){
-			ScholarItemPane.disableButton(elems[elems.length-1]);
+			ZoteroItemPane.disableButton(elems[elems.length-1]);
 		}
 		
 		if (singleField)
@@ -435,7 +435,7 @@ var ScholarItemPane = new function()
 		}
 		
 		var label = document.createElement("label");
-		label.setAttribute("value",Scholar.getString('creatorTypes.'+Scholar.CreatorTypes.getName(typeID))+":");
+		label.setAttribute("value",Zotero.getString('creatorTypes.'+Zotero.CreatorTypes.getName(typeID))+":");
 		label.setAttribute("popup","creatorTypeMenu");
 		label.setAttribute("fieldname",'creator-'+_creatorCount+'-typeID');
 		label.className = 'clicky';
@@ -493,7 +493,7 @@ var ScholarItemPane = new function()
 		}
 		else {
 			removeButton.setAttribute("class","clicky");
-			removeButton.setAttribute("onclick","ScholarItemPane.removeCreator("+_creatorCount+", this.parentNode.parentNode)");
+			removeButton.setAttribute("onclick","ZoteroItemPane.removeCreator("+_creatorCount+", this.parentNode.parentNode)");
 		}
 		hbox.appendChild(removeButton);
 		
@@ -539,10 +539,10 @@ var ScholarItemPane = new function()
 		// Switch to single-field mode
 		if (singleField)
 		{
-			button.setAttribute('image', 'chrome://scholar/skin/textfield-dual.png');
+			button.setAttribute('image', 'chrome://zotero/skin/textfield-dual.png');
 			button.setAttribute('tooltiptext', 'Switch to two fields');
 			lastName.setAttribute('singleField', 'true');
-			button.setAttribute('onclick', "ScholarItemPane.switchCreatorMode(this.parentNode.parentNode, false)");
+			button.setAttribute('onclick', "ZoteroItemPane.switchCreatorMode(this.parentNode.parentNode, false)");
 			
 			// Remove firstname field from tabindex
 			var tab = parseInt(firstName.getAttribute('tabindex'));
@@ -570,10 +570,10 @@ var ScholarItemPane = new function()
 		// Switch to two-field mode
 		else
 		{
-			button.setAttribute('image', 'chrome://scholar/skin/textfield-single.png');
+			button.setAttribute('image', 'chrome://zotero/skin/textfield-single.png');
 			button.setAttribute('tooltiptext', 'Switch to single field');
 			lastName.setAttribute('singleField', 'false');
-			button.setAttribute('onclick', "ScholarItemPane.switchCreatorMode(this.parentNode.parentNode, true)");
+			button.setAttribute('onclick', "ZoteroItemPane.switchCreatorMode(this.parentNode.parentNode, true)");
 			
 			// Add firstname field to tabindex
 			var tab = parseInt(lastName.getAttribute('tabindex'));
@@ -630,7 +630,7 @@ var ScholarItemPane = new function()
 	{
 		button.setAttribute('disabled', false);
 		button.setAttribute("class","clicky");
-		button.setAttribute("onclick","ScholarItemPane.disableButton(this); ScholarItemPane.addCreatorRow('','',1,false,true);");
+		button.setAttribute("onclick","ZoteroItemPane.disableButton(this); ZoteroItemPane.addCreatorRow('','',1,false,true);");
 	}
 	
 	function createValueElement(valueText, fieldName, tabindex)
@@ -648,7 +648,7 @@ var ScholarItemPane = new function()
 		{
 			valueElement.setAttribute('fieldname',fieldName);
 			valueElement.setAttribute('tabindex', tabindex);
-			valueElement.setAttribute('onclick', 'ScholarItemPane.showEditor(this)');
+			valueElement.setAttribute('onclick', 'ZoteroItemPane.showEditor(this)');
 			valueElement.className = 'clicky';
 			
 			if (fieldName=='tag')
@@ -706,7 +706,7 @@ var ScholarItemPane = new function()
 	
 	function showEditor(elem)
 	{
-		//Scholar.debug('Showing editor');
+		//Zotero.debug('Showing editor');
 		
 		var fieldName = elem.getAttribute('fieldname');
 		var tabindex = elem.getAttribute('tabindex');
@@ -721,8 +721,8 @@ var ScholarItemPane = new function()
 		else if (fieldName=='tag')
 		{
 			var tagID = elem.parentNode.getAttribute('id').split('-')[1];
-			var value = tagID ? Scholar.Tags.getName(tagID) : '';
-			var itemID = Scholar.getAncestorByTagName(elem, 'tagsbox').item.getID();
+			var value = tagID ? Zotero.Tags.getName(tagID) : '';
+			var itemID = Zotero.getAncestorByTagName(elem, 'tagsbox').item.getID();
 		}
 		else
 		{
@@ -779,8 +779,8 @@ var ScholarItemPane = new function()
 		
 		t.select();
 		
-		t.setAttribute('onblur',"ScholarItemPane.hideEditor(this, true)");
-		t.setAttribute('onkeypress',"return ScholarItemPane.handleKeyPress(event)");
+		t.setAttribute('onblur',"ZoteroItemPane.hideEditor(this, true)");
+		t.setAttribute('onkeypress',"return ZoteroItemPane.handleKeyPress(event)");
 		
 		_tabDirection = false;
 		_lastTabIndex = tabindex;
@@ -827,10 +827,10 @@ var ScholarItemPane = new function()
 	
 	function hideEditor(t, saveChanges)
 	{
-		//Scholar.debug('Hiding editor');
-		var textbox = Scholar.getAncestorByTagName(t, 'textbox');
+		//Zotero.debug('Hiding editor');
+		var textbox = Zotero.getAncestorByTagName(t, 'textbox');
 		if (!textbox){
-			Scholar.debug('Textbox not found in hideEditor');
+			Zotero.debug('Textbox not found in hideEditor');
 			return;
 		}
 		var fieldName = textbox.getAttribute('fieldname');
@@ -883,10 +883,10 @@ var ScholarItemPane = new function()
 		// Tags
 		else if (fieldName=='tag')
 		{
-			var tagsbox = Scholar.getAncestorByTagName(textbox, 'tagsbox');
+			var tagsbox = Zotero.getAncestorByTagName(textbox, 'tagsbox');
 			if (!tagsbox)
 			{
-				Scholar.debug('Tagsbox not found', 1);
+				Zotero.debug('Tagsbox not found', 1);
 				return;
 			}
 			
@@ -906,7 +906,7 @@ var ScholarItemPane = new function()
 						// (which causes a delete of the row),
 						// clear the tab direction so we don't advance
 						// when the notifier kicks in
-						var existing = Scholar.Tags.getID(value);
+						var existing = Zotero.Tags.getID(value);
 						if (existing && id != existing)
 						{
 							_tabDirection = false;
@@ -1003,7 +1003,7 @@ var ScholarItemPane = new function()
 				: label1.value,
 			firstName: label2.firstChild ? label2.firstChild.nodeValue
 				: label2.value,
-			typeID: Scholar.CreatorTypes.getID(type.substr(0, type.length-1).toLowerCase()),
+			typeID: Zotero.CreatorTypes.getID(type.substr(0, type.length-1).toLowerCase()),
 			singleField: label1.getAttribute('singleField') == 'true'
 		}
 	}
@@ -1059,15 +1059,15 @@ var ScholarItemPane = new function()
 	
 	function removeNote(id)
 	{
-		var note = Scholar.Items.get(id);
+		var note = Zotero.Items.get(id);
 		if(note)
-			if(confirm(Scholar.getString('pane.item.notes.delete.confirm')))
+			if(confirm(Zotero.getString('pane.item.notes.delete.confirm')))
 				note.erase();
 	}
 	
 	function addNote()
 	{
-		ScholarPane.openNoteWindow(_itemBeingEdited.getID());
+		ZoteroPane.openNoteWindow(_itemBeingEdited.getID());
 	}
 	
 	function _noteToTitle(text)
@@ -1083,7 +1083,7 @@ var ScholarItemPane = new function()
 		
 		if(t == "")
 		{
-			return Scholar.getString('pane.item.notes.untitled');
+			return Zotero.getString('pane.item.notes.untitled');
 		}
 		else
 		{
@@ -1095,32 +1095,32 @@ var ScholarItemPane = new function()
 	{
 		var c = _notesList.childNodes.length;
 		
-		_notesLabel.value = Scholar.getString('pane.item.notes.count.'+(c != 1 ? "plural" : "singular")).replace('%1',c) + ":";
+		_notesLabel.value = Zotero.getString('pane.item.notes.count.'+(c != 1 ? "plural" : "singular")).replace('%1',c) + ":";
 	}
 	
 	function _updateAttachmentCount()
 	{
 		var c = _attachmentsList.childNodes.length;
 		
-		_attachmentsLabel.value = Scholar.getString('pane.item.attachments.count.'+(c != 1 ? "plural" : "singular")).replace('%1',c) + ":";
+		_attachmentsLabel.value = Zotero.getString('pane.item.attachments.count.'+(c != 1 ? "plural" : "singular")).replace('%1',c) + ":";
 	}
 	
 	function removeAttachment(id)
 	{
-		var attachment = Scholar.Items.get(id);
+		var attachment = Zotero.Items.get(id);
 		if(attachment)
-			if(confirm(Scholar.getString('pane.item.attachments.delete.confirm')))
+			if(confirm(Zotero.getString('pane.item.attachments.delete.confirm')))
 				attachment.erase();
 	}
 	
 	function addAttachmentFromDialog(link)
 	{
-		ScholarPane.addAttachmentFromDialog(link, _itemBeingEdited.getID());
+		ZoteroPane.addAttachmentFromDialog(link, _itemBeingEdited.getID());
 	}
 	
 	function addAttachmentFromPage(link)
 	{
-		ScholarPane.addAttachmentFromPage(link, _itemBeingEdited.getID());
+		ZoteroPane.addAttachmentFromPage(link, _itemBeingEdited.getID());
 	}
 	
 	
@@ -1143,7 +1143,7 @@ var ScholarItemPane = new function()
 				switch (tabindex)
 				{
 					case 1:
-						//Scholar.debug('At beginning');
+						//Zotero.debug('At beginning');
 						return false;
 					
 					case _tabIndexMinCreators:
@@ -1185,7 +1185,7 @@ var ScholarItemPane = new function()
 						break;
 					
 					case _tabIndexMaxInfoFields:
-						//Scholar.debug('At end');
+						//Zotero.debug('At end');
 						return false;
 					
 					default:
@@ -1207,14 +1207,14 @@ var ScholarItemPane = new function()
 			}
 		}
 		
-		Scholar.debug('Looking for tabindex ' + nextIndex, 4);
+		Zotero.debug('Looking for tabindex ' + nextIndex, 4);
 		switch (mode)
 		{
 			case 'info':
 				var next = box.getElementsByAttribute('tabindex', nextIndex);
 				if (!next[0])
 				{
-					//Scholar.debug("Next field not found");
+					//Zotero.debug("Next field not found");
 					return _focusNextField(mode, box, nextIndex, back);
 				}
 				break;
@@ -1234,4 +1234,4 @@ var ScholarItemPane = new function()
 	}
 }
 
-addEventListener("load", function(e) { ScholarItemPane.onLoad(e); }, false);
+addEventListener("load", function(e) { ZoteroItemPane.onLoad(e); }, false);

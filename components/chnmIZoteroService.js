@@ -1,13 +1,13 @@
-const SCHOLAR_CONTRACTID = '@chnm.gmu.edu/Zotero;1';
-const SCHOLAR_CLASSNAME = 'Zotero';
-const SCHOLAR_CID = Components.ID('{e4c61080-ec2d-11da-8ad9-0800200c9a66}');
-const SCHOLAR_IID = Components.interfaces.chnmIZoteroService;
+const ZOTERO_CONTRACTID = '@chnm.gmu.edu/Zotero;1';
+const ZOTERO_CLASSNAME = 'Zotero';
+const ZOTERO_CID = Components.ID('{e4c61080-ec2d-11da-8ad9-0800200c9a66}');
+const ZOTERO_IID = Components.interfaces.chnmIZoteroService;
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
 // Assign the global scope to a variable to passed via wrappedJSObject
-var ScholarWrapped = this;
+var ZoteroWrapped = this;
 
 
 /********************************************************************
@@ -101,17 +101,17 @@ Cc["@mozilla.org/moz/jssubscript-loader;1"]
 /********************************************************************/
 
 
-// Initialize the Scholar service
+// Initialize the Zotero service
 //
-// This runs when ScholarService is first requested.
+// This runs when ZoteroService is first requested.
 // Calls to other XPCOM components must be in here rather than in top-level
 // code, as other components may not have yet been initialized.
 function setupService(){
-	Scholar.init();
+	Zotero.init();
 }
 
-function ScholarService(){
-	this.wrappedJSObject = ScholarWrapped.Scholar;
+function ZoteroService(){
+	this.wrappedJSObject = ZoteroWrapped.Zotero;
 	setupService();
 }
 
@@ -150,10 +150,10 @@ function setTimeout(func, ms){
 //
 // XPCOM goop
 //
-ScholarService.prototype = {
+ZoteroService.prototype = {
 	QueryInterface: function(iid){
 		if (!iid.equals(Components.interfaces.nsISupports) &&
-			!iid.equals(SCHOLAR_IID)){
+			!iid.equals(ZOTERO_IID)){
 			throw Components.results.NS_ERROR_NO_INTERFACE;
 		}
 		return this;
@@ -161,17 +161,17 @@ ScholarService.prototype = {
 };
 
 
-var ScholarFactory = {
+var ZoteroFactory = {
 	createInstance: function(outer, iid){
 		if (outer != null){
 			throw Components.results.NS_ERROR_NO_AGGREGATION;
 		}
-		return new ScholarService().QueryInterface(iid);
+		return new ZoteroService().QueryInterface(iid);
 	}
 };
 
 
-var ScholarModule = {
+var ZoteroModule = {
 	_firstTime: true,
 	
 	registerSelf: function(compMgr, fileSpec, location, type){
@@ -183,9 +183,9 @@ var ScholarModule = {
 		compMgr =
 			compMgr.QueryInterface(Components.interfaces.nsIComponentRegistrar);
 		
-		compMgr.registerFactoryLocation(SCHOLAR_CID,
-										SCHOLAR_CLASSNAME,
-										SCHOLAR_CONTRACTID,
+		compMgr.registerFactoryLocation(ZOTERO_CID,
+										ZOTERO_CLASSNAME,
+										ZOTERO_CONTRACTID,
 										fileSpec,
 										location,
 										type);
@@ -194,20 +194,20 @@ var ScholarModule = {
 	unregisterSelf: function(compMgr, location, type){
 		compMgr =
 			compMgr.QueryInterface(Components.interfaces.nsIComponentRegistrar);
-		compMgr.unregisterFactoryLocation(SCHOLAR_CID, location);
+		compMgr.unregisterFactoryLocation(ZOTERO_CID, location);
 	},
 	
 	getClassObject: function(compMgr, cid, iid){
-		if (!cid.equals(SCHOLAR_CID)){
+		if (!cid.equals(ZOTERO_CID)){
 			throw Components.results.NS_ERROR_NO_INTERFACE;
 		}
 		if (!iid.equals(Components.interfaces.nsIFactory)){
 			throw Components.results.NS_ERROR_NOT_IMPLEMENTED;
 		}
-		return ScholarFactory;
+		return ZoteroFactory;
 	},
 	
 	canUnload: function(compMgr){ return true; }
 };
 
-function NSGetModule(comMgr, fileSpec){ return ScholarModule; }
+function NSGetModule(comMgr, fileSpec){ return ZoteroModule; }

@@ -1,18 +1,18 @@
 <?xml version="1.0"?>
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
-<!DOCTYPE window SYSTEM "chrome://scholar/locale/scholar.dtd">
+<!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
 <dialog xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	title="&exportOptions.title;" buttons="cancel,accept"
-	ondialogaccept="Scholar_File_Interface_Export.accept()"
-	ondialogcancel="Scholar_File_Interface_Export.cancel()"
-	id="scholar-export-options"
-	onload="Scholar_File_Interface_Export.init()">
+	ondialogaccept="Zotero_File_Interface_Export.accept()"
+	ondialogcancel="Zotero_File_Interface_Export.cancel()"
+	id="zotero-export-options"
+	onload="Zotero_File_Interface_Export.init()">
 
 <script src="include.js"/>
 <script src="exportOptions.js"/>
 <hbox>
 	<label value="&exportOptions.format.label;" control="format-menu"/>
-	<menulist id="format-menu" oncommand="Scholar_File_Interface_Export.updateOptions()">
+	<menulist id="format-menu" oncommand="Zotero_File_Interface_Export.updateOptions()">
 		<menupopup id="format-popup">
 		</menupopup>
 	</menulist>

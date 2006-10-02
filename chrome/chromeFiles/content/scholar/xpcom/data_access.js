@@ -1,9 +1,9 @@
 /*
  * Constructor for Item object
  *
- * Generally should be called through Scholar.Items rather than directly
+ * Generally should be called through Zotero.Items rather than directly
  */
-Scholar.Item = function(){
+Zotero.Item = function(){
 	this._init();
 	
 	// Accept itemTypeID in constructor
@@ -12,20 +12,20 @@ Scholar.Item = function(){
 	}
 }
 
-Scholar.Item.prototype._init = function(){
+Zotero.Item.prototype._init = function(){
 	//
 	// Public members for access by public methods -- do not access directly
 	//
 	this._data = new Array();
-	this._creators = new Scholar.Hash();
+	this._creators = new Zotero.Hash();
 	this._itemData = new Array();
 	
 	this._creatorsLoaded = false;
 	this._itemDataLoaded = false;
 	
-	this._changed = new Scholar.Hash();
-	this._changedCreators = new Scholar.Hash();
-	this._changedItemData = new Scholar.Hash();
+	this._changed = new Zotero.Hash();
+	this._changedCreators = new Zotero.Hash();
+	this._changedItemData = new Zotero.Hash();
 	
 	this._noteData = null;
 	this._noteDataAccessTime = null;
@@ -36,43 +36,43 @@ Scholar.Item.prototype._init = function(){
 
 //////////////////////////////////////////////////////////////////////////////
 //
-// Public Scholar.Item methods
+// Public Zotero.Item methods
 //
 //////////////////////////////////////////////////////////////////////////////
 
 /*
  * Check if the specified field is a primary field from the items table
  */
-Scholar.Item.prototype.isPrimaryField = function(field){
+Zotero.Item.prototype.isPrimaryField = function(field){
 	// Create primaryFields hash array if not yet created
-	if (!Scholar.Item.primaryFields){
-		Scholar.Item.primaryFields = Scholar.DB.getColumnHash('items');
-		Scholar.Item.primaryFields['firstCreator'] = true;
-		Scholar.Item.primaryFields['numChildren'] = true;
-		Scholar.Item.primaryFields['numNotes'] = true;
-		Scholar.Item.primaryFields['numAttachments'] = true;
+	if (!Zotero.Item.primaryFields){
+		Zotero.Item.primaryFields = Zotero.DB.getColumnHash('items');
+		Zotero.Item.primaryFields['firstCreator'] = true;
+		Zotero.Item.primaryFields['numChildren'] = true;
+		Zotero.Item.primaryFields['numNotes'] = true;
+		Zotero.Item.primaryFields['numAttachments'] = true;
 	}
 	
-	return !!Scholar.Item.primaryFields[field];
+	return !!Zotero.Item.primaryFields[field];
 }
 
-Scholar.Item.editableFields = {
+Zotero.Item.editableFields = {
 	title: true
 };
 
 /*
  * Check if the specified primary field can be changed with setField()
  */
-Scholar.Item.prototype.isEditableField = function(field){
-	return !!Scholar.Item.editableFields[field];
+Zotero.Item.prototype.isEditableField = function(field){
+	return !!Zotero.Item.editableFields[field];
 }
 
 
 /*
  * Build object from database
  */
-Scholar.Item.prototype.loadFromID = function(id){
-	// Should be the same as query in Scholar.Items.loadFromID, just
+Zotero.Item.prototype.loadFromID = function(id){
+	// Should be the same as query in Zotero.Items.loadFromID, just
 	// without itemID clause
 	var sql = 'SELECT I.*, lastName || '
 		+ 'CASE ((SELECT COUNT(*) FROM itemCreators WHERE itemID=' + id + ')>1) '
@@ -84,7 +84,7 @@ Scholar.Item.prototype.loadFromID = function(id){
 		+ 'LEFT JOIN creators C ON (IC.creatorID=C.creatorID) '
 		+ 'WHERE itemID=' + id
 		+ ' AND (IC.orderIndex=0 OR IC.orderIndex IS NULL)'; // first creator
-	var row = Scholar.DB.rowQuery(sql);
+	var row = Zotero.DB.rowQuery(sql);
 	this.loadFromRow(row);
 }
 
@@ -92,7 +92,7 @@ Scholar.Item.prototype.loadFromID = function(id){
 /*
  * Populate basic item data from a database row
  */
-Scholar.Item.prototype.loadFromRow = function(row){
+Zotero.Item.prototype.loadFromRow = function(row){
 	this._init();
 	for (col in row){
 		// Only accept primary field data through loadFromRow()
@@ -105,7 +105,7 @@ Scholar.Item.prototype.loadFromRow = function(row){
 			this._data[col] = row[col];
 		}
 		else {
-			Scholar.debug(col + ' is not a valid primary field');
+			Zotero.debug(col + ' is not a valid primary field');
 		}
 	}
 	return true;
@@ -115,18 +115,18 @@ Scholar.Item.prototype.loadFromRow = function(row){
 /*
  * Check if any data fields have changed since last save
  */
-Scholar.Item.prototype.hasChanged = function(){
+Zotero.Item.prototype.hasChanged = function(){
 	return (this._changed.length || this._changedCreators.length ||
 		this._changedItemData.length);
 }
 
 
-Scholar.Item.prototype.getID = function(){
+Zotero.Item.prototype.getID = function(){
 	return this._data['itemID'] ? this._data['itemID'] : false;
 }
 
 
-Scholar.Item.prototype.getType = function(){
+Zotero.Item.prototype.getType = function(){
 	return this._data['itemTypeID'] ? this._data['itemTypeID'] : false;
 }
 
@@ -134,7 +134,7 @@ Scholar.Item.prototype.getType = function(){
 /*
  * Set or change the item's type
  */
-Scholar.Item.prototype.setType = function(itemTypeID){
+Zotero.Item.prototype.setType = function(itemTypeID){
 	if (itemTypeID==this.getType()){
 		return true;
 	}
@@ -145,7 +145,7 @@ Scholar.Item.prototype.setType = function(itemTypeID){
 			+ 'WHERE itemTypeID=' + this.getType() + ' AND fieldID NOT IN '
 			+ '(SELECT fieldID FROM itemTypeFields WHERE itemTypeID='
 			+ itemTypeID + ')';
-		var obsoleteFields = Scholar.DB.columnQuery(sql);
+		var obsoleteFields = Zotero.DB.columnQuery(sql);
 		
 		if (obsoleteFields){
 			for (var i=0; i<obsoleteFields.length; i++){
@@ -163,8 +163,8 @@ Scholar.Item.prototype.setType = function(itemTypeID){
 /**
 * Return an array of collectionIDs for all collections the item belongs to
 **/
-Scholar.Item.prototype.getCollections = function(){
-	return Scholar.DB.columnQuery("SELECT collectionID FROM collectionItems "
+Zotero.Item.prototype.getCollections = function(){
+	return Zotero.DB.columnQuery("SELECT collectionID FROM collectionItems "
 		+ "WHERE itemID=" + this.getID());
 }
 
@@ -172,8 +172,8 @@ Scholar.Item.prototype.getCollections = function(){
 /**
 * Determine whether the item belongs to a given collectionID
 **/
-Scholar.Item.prototype.inCollection = function(collectionID){
-	return !!parseInt(Scholar.DB.valueQuery("SELECT COUNT(*) collectionID "
+Zotero.Item.prototype.inCollection = function(collectionID){
+	return !!parseInt(Zotero.DB.valueQuery("SELECT COUNT(*) collectionID "
 		+ "FROM collectionItems WHERE collectionID=" + collectionID + " AND "
 		+ "itemID=" + this.getID()));
 }
@@ -182,7 +182,7 @@ Scholar.Item.prototype.inCollection = function(collectionID){
 /*
  * Returns the number of creators for this item
  */
-Scholar.Item.prototype.numCreators = function(){
+Zotero.Item.prototype.numCreators = function(){
 	if (this.getID() && !this._creatorsLoaded){
 		this._loadCreators();
 	}
@@ -190,7 +190,7 @@ Scholar.Item.prototype.numCreators = function(){
 }
 
 
-Scholar.Item.prototype.hasCreatorAt = function(pos){
+Zotero.Item.prototype.hasCreatorAt = function(pos){
 	if (this.getID() && !this._creatorsLoaded){
 		this._loadCreators();
 	}
@@ -204,7 +204,7 @@ Scholar.Item.prototype.hasCreatorAt = function(pos){
  *
  * Note: Creator data array is returned by reference
  */
-Scholar.Item.prototype.getCreator = function(pos){
+Zotero.Item.prototype.getCreator = function(pos){
 	if (this.getID() && !this._creatorsLoaded){
 		this._loadCreators();
 	}
@@ -221,7 +221,7 @@ Scholar.Item.prototype.getCreator = function(pos){
  *
  * Note: Creator data array is returned by reference
  */
-Scholar.Item.prototype.getCreators = function(){
+Zotero.Item.prototype.getCreators = function(){
 	var creators = [];
 	for (var i=0, len=this.numCreators(); i<len; i++){
 		creators.push(this.getCreator(i));
@@ -233,7 +233,7 @@ Scholar.Item.prototype.getCreators = function(){
 /*
  * Set or update the creator at the specified position
  */
-Scholar.Item.prototype.setCreator = function(orderIndex, firstName, lastName, creatorTypeID, isInstitution){
+Zotero.Item.prototype.setCreator = function(orderIndex, firstName, lastName, creatorTypeID, isInstitution){
 	if (this.getID() && !this._creatorsLoaded){
 		this._loadCreators();
 	}
@@ -276,7 +276,7 @@ Scholar.Item.prototype.setCreator = function(orderIndex, firstName, lastName, cr
 /*
  * Remove a creator and shift others down
  */
-Scholar.Item.prototype.removeCreator = function(orderIndex){
+Zotero.Item.prototype.removeCreator = function(orderIndex){
 	if (this.getID() && !this._creatorsLoaded){
 		this._loadCreators();
 	}
@@ -298,7 +298,7 @@ Scholar.Item.prototype.removeCreator = function(orderIndex){
 
 
 // Currently unused
-Scholar.Item.prototype.creatorExists = function(firstName, lastName, creatorTypeID, isInstitution, skipIndex){
+Zotero.Item.prototype.creatorExists = function(firstName, lastName, creatorTypeID, isInstitution, skipIndex){
 	if (isInstitution || !firstName){
 		firstName = '';
 	}
@@ -332,8 +332,8 @@ Scholar.Item.prototype.creatorExists = function(firstName, lastName, creatorType
  *
  * Field can be passed as fieldID or fieldName
  */
-Scholar.Item.prototype.getField = function(field){
-	//Scholar.debug('Requesting field ' + field + ' for item ' + this.getID(), 4);
+Zotero.Item.prototype.getField = function(field){
+	//Zotero.debug('Requesting field ' + field + ' for item ' + this.getID(), 4);
 	if (this.isPrimaryField(field)){
 		return this._data[field] ? this._data[field] : '';
 	}
@@ -342,7 +342,7 @@ Scholar.Item.prototype.getField = function(field){
 			this._loadItemData();
 		}
 		
-		var fieldID = Scholar.ItemFields.getID(field);
+		var fieldID = Zotero.ItemFields.getID(field);
 		
 		return this._itemData[fieldID] ? this._itemData[fieldID] : '';
 	}
@@ -354,7 +354,7 @@ Scholar.Item.prototype.getField = function(field){
  *
  * Field can be passed as fieldID or fieldName
  */
-Scholar.Item.prototype.setField = function(field, value, loadIn){
+Zotero.Item.prototype.setField = function(field, value, loadIn){
 	if (!field){
 		throw ("Field not specified in Item.setField()");
 	}
@@ -387,13 +387,13 @@ Scholar.Item.prototype.setField = function(field, value, loadIn){
 			this._loadItemData();
 		}
 		
-		var fieldID = Scholar.ItemFields.getID(field);
+		var fieldID = Zotero.ItemFields.getID(field);
 		
 		if (!fieldID){
 			throw (field + ' is not a valid itemData field.');
 		}
 		
-		if (!Scholar.ItemFields.isValidForType(fieldID, this.getType())){
+		if (!Zotero.ItemFields.isValidForType(fieldID, this.getType())){
 			throw (field + ' is not a valid field for this type.');
 		}
 		
@@ -418,9 +418,9 @@ Scholar.Item.prototype.setField = function(field, value, loadIn){
  *
  * Returns true on item update or itemID of new item 
  */
-Scholar.Item.prototype.save = function(){
+Zotero.Item.prototype.save = function(){
 	if (!this.hasChanged()){
-		Scholar.debug('Item ' + this.getID() + ' has not changed', 4);
+		Zotero.debug('Item ' + this.getID() + ' has not changed', 4);
 		return !!this.getID();
 	}
 	
@@ -428,20 +428,20 @@ Scholar.Item.prototype.save = function(){
 	// Existing item, update
 	//
 	if (this.getID()){
-		Scholar.debug('Updating database with new item data', 4);
+		Zotero.debug('Updating database with new item data', 4);
 		
 		var itemID = this.getID();
 		
 		try {
-			Scholar.DB.beginTransaction();
+			Zotero.DB.beginTransaction();
 			
 			// Begin history transaction
-			Scholar.History.begin('modify-item', this.getID());
+			Zotero.History.begin('modify-item', this.getID());
 			
 			//
 			// Primary fields
 			//
-			Scholar.History.modify('items', 'itemID', this.getID());
+			Zotero.History.modify('items', 'itemID', this.getID());
 			
 			var sql = "UPDATE items SET ";
 			var sql2;
@@ -461,25 +461,25 @@ Scholar.Item.prototype.save = function(){
 			sql += "WHERE itemID=?";
 			sqlValues.push({'int':this.getID()});
 			
-			Scholar.DB.query(sql, sqlValues);
+			Zotero.DB.query(sql, sqlValues);
 			
 			//
 			// Creators
 			//
 			if (this._changedCreators.length){
 				for (orderIndex in this._changedCreators.items){
-					Scholar.debug('Creator ' + orderIndex + ' has changed', 4);
+					Zotero.debug('Creator ' + orderIndex + ' has changed', 4);
 					
 					var creator = this.getCreator(orderIndex);
 					
 					// Delete at position
-					Scholar.History.remove('itemCreators', 'itemID-orderIndex',
+					Zotero.History.remove('itemCreators', 'itemID-orderIndex',
 						[this.getID(), orderIndex]);
 					
 					sql2 = 'DELETE FROM itemCreators'
 						+ ' WHERE itemID=' + this.getID()
 						+ ' AND orderIndex=' + orderIndex;
-					Scholar.DB.query(sql2);
+					Zotero.DB.query(sql2);
 					
 					// If empty, move on
 					if (typeof creator['firstName'] == 'undefined'
@@ -488,7 +488,7 @@ Scholar.Item.prototype.save = function(){
 					}
 					
 					// See if this is an existing creator
-					var creatorID = Scholar.Creators.getID(
+					var creatorID = Zotero.Creators.getID(
 							creator['firstName'],
 							creator['lastName'],
 							creator['isInstitution']
@@ -496,12 +496,12 @@ Scholar.Item.prototype.save = function(){
 					
 					// If not, add it
 					if (!creatorID){
-						creatorID = Scholar.Creators.add(
+						creatorID = Zotero.Creators.add(
 							creator['firstName'],
 							creator['lastName'],
 							creator['isInstitution']
 						);
-						Scholar.History.add('creators', 'creatorID', creatorID);
+						Zotero.History.add('creators', 'creatorID', creatorID);
 					}
 					
 					
@@ -519,19 +519,19 @@ Scholar.Item.prototype.save = function(){
 						{'int':orderIndex}
 					];
 					
-					Scholar.DB.query(sql, sqlValues);
+					Zotero.DB.query(sql, sqlValues);
 					
-					Scholar.History.add('itemCreators',
+					Zotero.History.add('itemCreators',
 						'itemID-creatorID-creatorTypeID',
 						[this.getID(), creatorID, creator['creatorTypeID']]);
 				}
 				
 				// Delete obsolete creators
 				var deleted;
-				if (deleted = Scholar.Creators.purge()){
+				if (deleted = Zotero.Creators.purge()){
 					for (var i in deleted){
 						// Add purged creators to history
-						Scholar.History.remove('creators', 'creatorID', i);
+						Zotero.History.remove('creators', 'creatorID', i);
 					}
 				}
 			}
@@ -544,13 +544,13 @@ Scholar.Item.prototype.save = function(){
 				var del = new Array();
 				
 				sql = "SELECT COUNT(*) FROM itemData WHERE itemID=? AND fieldID=?";
-				var countStatement = Scholar.DB.getStatement(sql);
+				var countStatement = Zotero.DB.getStatement(sql);
 				
 				sql = "UPDATE itemData SET value=? WHERE itemID=? AND fieldID=?";
-				var updateStatement = Scholar.DB.getStatement(sql);
+				var updateStatement = Zotero.DB.getStatement(sql);
 				
 				sql = "INSERT INTO itemData VALUES (?,?,?)";
-				var insertStatement = Scholar.DB.getStatement(sql);
+				var insertStatement = Zotero.DB.getStatement(sql);
 				
 				for (fieldID in this._changedItemData.items){
 					if (this.getField(fieldID)){
@@ -565,21 +565,21 @@ Scholar.Item.prototype.save = function(){
 						if (exists){
 							updateStatement.bindInt32Parameter(1, this.getID());
 							
-							Scholar.History.modify('itemData', 'itemID-fieldID',
+							Zotero.History.modify('itemData', 'itemID-fieldID',
 								[this.getID(), fieldID]);
 							
 							// Don't bind CURRENT_TIMESTAMP as string
-							if (Scholar.ItemFields.getID('accessDate')==fieldID
+							if (Zotero.ItemFields.getID('accessDate')==fieldID
 								&& this.getField(fieldID)=='CURRENT_TIMESTAMP')
 							{
 								sql = "UPDATE itemData SET value=CURRENT_TIMESTAMP"
 									+ " WHERE itemID=? AND fieldID=?";
-								Scholar.DB.query(sql,
+								Zotero.DB.query(sql,
 									[{int:this.getID()}, {int:fieldID}]);
 							}
 							else {
 								// Take advantage of SQLite's manifest typing
-								if (Scholar.ItemFields.isInteger(fieldID)){
+								if (Zotero.ItemFields.isInteger(fieldID)){
 									updateStatement.bindInt32Parameter(0,
 										this.getField(fieldID));
 								}
@@ -594,23 +594,23 @@ Scholar.Item.prototype.save = function(){
 						
 						// Insert
 						else {
-							Scholar.History.add('itemData', 'itemID-fieldID',
+							Zotero.History.add('itemData', 'itemID-fieldID',
 								[this.getID(), fieldID]);
 							
 							insertStatement.bindInt32Parameter(0, this.getID());
 							insertStatement.bindInt32Parameter(1, fieldID);
 							
-							if (Scholar.ItemFields.getID('accessDate')==fieldID
+							if (Zotero.ItemFields.getID('accessDate')==fieldID
 								&& this.getField(fieldID)=='CURRENT_TIMESTAMP')
 							{
 								sql = "INSERT INTO itemData VALUES "
 									+ "(?,?,CURRENT_TIMESTAMP)";
 								
-								Scholar.DB.query(sql,
+								Zotero.DB.query(sql,
 									[{int:this.getID()}, {int:fieldID}]);
 							}
 							else {
-								if (Scholar.ItemFields.isInteger(fieldID)){
+								if (Zotero.ItemFields.isInteger(fieldID)){
 									insertStatement.bindInt32Parameter(2,
 										this.getField(fieldID));
 								}
@@ -638,23 +638,23 @@ Scholar.Item.prototype.save = function(){
 				if (del.length){
 					// Add to history
 					for (var i in del){
-						Scholar.History.remove('itemData', 'itemID-fieldID',
+						Zotero.History.remove('itemData', 'itemID-fieldID',
 							[this.getID(), del[i]]);
 					}
 					
 					sql = 'DELETE from itemData '
 						+ 'WHERE itemID=' + this.getID() + ' '
 						+ 'AND fieldID IN (' + del.join() + ")";
-					Scholar.DB.query(sql);
+					Zotero.DB.query(sql);
 				}
 			}
 			
-			Scholar.History.commit();
-			Scholar.DB.commitTransaction();
+			Zotero.History.commit();
+			Zotero.DB.commitTransaction();
 		}
 		catch (e){
-			Scholar.History.cancel();
-			Scholar.DB.rollbackTransaction();
+			Zotero.History.cancel();
+			Zotero.DB.rollbackTransaction();
 			throw(e);
 		}
 	}
@@ -663,7 +663,7 @@ Scholar.Item.prototype.save = function(){
 	// New item, insert and return id
 	//
 	else {
-		Scholar.debug('Saving data for new item to database');
+		Zotero.debug('Saving data for new item to database');
 		
 		var isNew = true;
 		var sqlColumns = new Array();
@@ -673,7 +673,7 @@ Scholar.Item.prototype.save = function(){
 		// Primary fields
 		//
 		sqlColumns.push('itemID');
-		var itemID = Scholar.getRandomID('items', 'itemID');
+		var itemID = Zotero.getRandomID('items', 'itemID');
 		sqlValues.push(itemID);
 		
 		sqlColumns.push('itemTypeID');
@@ -685,11 +685,11 @@ Scholar.Item.prototype.save = function(){
 		}
 		
 		try {
-			Scholar.DB.beginTransaction();
+			Zotero.DB.beginTransaction();
 			
 			// Begin history transaction
 			// No associated id yet, so we use false
-			Scholar.History.begin('add-item', false);
+			Zotero.History.begin('add-item', false);
 			
 			//
 			// Primary fields
@@ -703,11 +703,11 @@ Scholar.Item.prototype.save = function(){
 			sql = sql.substring(0,sql.length-1) + ")";
 			
 			// Save basic data to items table
-			Scholar.DB.query(sql, sqlValues);
+			Zotero.DB.query(sql, sqlValues);
 			this._data['itemID'] = itemID;
 			
-			Scholar.History.setAssociatedID(itemID);
-			Scholar.History.add('items', 'itemID', itemID);
+			Zotero.History.setAssociatedID(itemID);
+			Zotero.History.add('items', 'itemID', itemID);
 			
 			//
 			// ItemData
@@ -715,7 +715,7 @@ Scholar.Item.prototype.save = function(){
 			if (this._changedItemData.length){
 				// Use manual bound parameters to speed things up
 				var statement =
-					Scholar.DB.getStatement("INSERT INTO itemData VALUES (?,?,?)");
+					Zotero.DB.getStatement("INSERT INTO itemData VALUES (?,?,?)");
 				
 				for (fieldID in this._changedItemData.items){
 					if (!this.getField(fieldID)){
@@ -725,14 +725,14 @@ Scholar.Item.prototype.save = function(){
 					statement.bindInt32Parameter(0, this.getID());
 					statement.bindInt32Parameter(1, fieldID);
 					
-					if (Scholar.ItemFields.getID('accessDate')==fieldID
+					if (Zotero.ItemFields.getID('accessDate')==fieldID
 						&& this.getField(fieldID)=='CURRENT_TIMESTAMP')
 					{
 						sql = "INSERT INTO itemData VALUES (?,?,CURRENT_TIMESTAMP)";
-						Scholar.DB.query(sql, [{int:this.getID()}, {int:fieldID}])
+						Zotero.DB.query(sql, [{int:this.getID()}, {int:fieldID}])
 					}
 					else {
-						if (Scholar.ItemFields.isInteger(fieldID)){
+						if (Zotero.ItemFields.isInteger(fieldID)){
 							statement.bindInt32Parameter(2, this.getField(fieldID));
 						}
 						else {
@@ -741,7 +741,7 @@ Scholar.Item.prototype.save = function(){
 						statement.execute();
 					}
 					
-					Scholar.History.add('itemData', 'itemID-fieldID',
+					Zotero.History.add('itemData', 'itemID-fieldID',
 						[itemID, fieldID]);
 				}
 				
@@ -761,7 +761,7 @@ Scholar.Item.prototype.save = function(){
 					}
 					
 					// See if this is an existing creator
-					var creatorID = Scholar.Creators.getID(
+					var creatorID = Zotero.Creators.getID(
 							creator['firstName'],
 							creator['lastName'],
 							creator['isInstitution']
@@ -769,72 +769,72 @@ Scholar.Item.prototype.save = function(){
 					
 					// If not, add it
 					if (!creatorID){
-						creatorID = Scholar.Creators.add(
+						creatorID = Zotero.Creators.add(
 							creator['firstName'],
 							creator['lastName'],
 							creator['isInstitution']
 						);
-						Scholar.History.add('creators', 'creatorID', creatorID);
+						Zotero.History.add('creators', 'creatorID', creatorID);
 					}
 					
 					sql = 'INSERT INTO itemCreators VALUES ('
 						+ itemID + ',' + creatorID + ','
 						+ creator['creatorTypeID'] + ', ' + orderIndex
 						+ ")";
-					Scholar.DB.query(sql);
+					Zotero.DB.query(sql);
 					
-					Scholar.History.add('itemCreators',
+					Zotero.History.add('itemCreators',
 						'itemID-creatorID-creatorTypeID',
 						[this.getID(), creatorID, creator['creatorTypeID']]);
 				}
 			}
 			
-			Scholar.History.commit();
-			Scholar.DB.commitTransaction();
+			Zotero.History.commit();
+			Zotero.DB.commitTransaction();
 			
 			// Reload collection to update isEmpty,
 			// in case this was the first item in a collection
-			Scholar.Collections.reloadAll();
+			Zotero.Collections.reloadAll();
 		}
 		catch (e){
-			Scholar.History.cancel();
-			Scholar.DB.rollbackTransaction();
+			Zotero.History.cancel();
+			Zotero.DB.rollbackTransaction();
 			throw(e);
 		}
 	}
 	
-	Scholar.Items.reload(this.getID());
+	Zotero.Items.reload(this.getID());
 	
 	if (isNew){
-		if (!Scholar.DB.transactionInProgress()){
-			Scholar.Notifier.trigger('add', 'item', this.getID());
+		if (!Zotero.DB.transactionInProgress()){
+			Zotero.Notifier.trigger('add', 'item', this.getID());
 		}
 		return this.getID();
 	}
 	else {
-		if (!Scholar.DB.transactionInProgress()){
-			Scholar.Notifier.trigger('modify', 'item', this.getID());
+		if (!Zotero.DB.transactionInProgress()){
+			Zotero.Notifier.trigger('modify', 'item', this.getID());
 		}
 		return true;
 	}
 }
 
 
-Scholar.Item.prototype.updateDateModified = function(){
-	Scholar.DB.query("UPDATE items SET dateModified=CURRENT_TIMESTAMP "
+Zotero.Item.prototype.updateDateModified = function(){
+	Zotero.DB.query("UPDATE items SET dateModified=CURRENT_TIMESTAMP "
 		+ "WHERE itemID=" + this.getID());
-	var date = Scholar.DB.valueQuery("SELECT dateModified FROM items "
+	var date = Zotero.DB.valueQuery("SELECT dateModified FROM items "
 		+ "WHERE itemID=" + this.getID());
 	this._data['dateModified'] = date;
 }
 
 
-Scholar.Item.prototype.isRegularItem = function(){
+Zotero.Item.prototype.isRegularItem = function(){
 	return !(this.isNote() || this.isAttachment());
 }
 
 
-Scholar.Item.prototype.numChildren = function(){
+Zotero.Item.prototype.numChildren = function(){
 	return this.numNotes() + this.numAttachments();
 }
 
@@ -846,12 +846,12 @@ Scholar.Item.prototype.numChildren = function(){
 // save() is not required for note functions
 //
 ////////////////////////////////////////////////////////
-Scholar.Item.prototype.incrementNoteCount = function(){
+Zotero.Item.prototype.incrementNoteCount = function(){
 	this._data['numNotes']++;
 }
 
 
-Scholar.Item.prototype.decrementNoteCount = function(){
+Zotero.Item.prototype.decrementNoteCount = function(){
 	this._data['numNotes']--;
 }
 
@@ -859,8 +859,8 @@ Scholar.Item.prototype.decrementNoteCount = function(){
 /**
 * Determine if an item is a note
 **/
-Scholar.Item.prototype.isNote = function(){
-	return Scholar.ItemTypes.getName(this.getType())=='note';
+Zotero.Item.prototype.isNote = function(){
+	return Zotero.ItemTypes.getName(this.getType())=='note';
 }
 
 
@@ -869,7 +869,7 @@ Scholar.Item.prototype.isNote = function(){
 *
 * Note: This can only be called on note items.
 **/
-Scholar.Item.prototype.updateNote = function(text){
+Zotero.Item.prototype.updateNote = function(text){
 	if (!this.isNote() && !this.isAttachment()){
 		throw ("updateNote() can only be called on items of type 'note'");
 	}
@@ -878,7 +878,7 @@ Scholar.Item.prototype.updateNote = function(text){
 		throw ("Cannot call updateNote() on unsaved note");
 	}
 	
-	Scholar.DB.beginTransaction();
+	Zotero.DB.beginTransaction();
 	
 	if (this.isNote()){
 		var sql = "UPDATE itemNotes SET note=? WHERE itemID=?";
@@ -887,21 +887,21 @@ Scholar.Item.prototype.updateNote = function(text){
 		var sql = "REPLACE INTO itemNotes (note, itemID) VALUES (?,?)";
 	}
 	var bindParams = [{string:text}, this.getID()];
-	var updated = Scholar.DB.query(sql, bindParams);
+	var updated = Zotero.DB.query(sql, bindParams);
 	if (updated){
 		this.updateDateModified();
-		Scholar.DB.commitTransaction();
+		Zotero.DB.commitTransaction();
 		this.updateNoteCache(text);
 		
-		Scholar.Notifier.trigger('modify', 'item', this.getID());
+		Zotero.Notifier.trigger('modify', 'item', this.getID());
 	}
 	else {
-		Scholar.DB.commitTransaction();
+		Zotero.DB.commitTransaction();
 	}
 }
 
 
-Scholar.Item.prototype.updateNoteCache = function(text){
+Zotero.Item.prototype.updateNoteCache = function(text){
 	// Update cached values
 	this._noteData = text ? text : '';
 	if (this.isNote()){
@@ -910,7 +910,7 @@ Scholar.Item.prototype.updateNoteCache = function(text){
 }
 
 
-Scholar.Item.prototype.setSource = function(sourceItemID){
+Zotero.Item.prototype.setSource = function(sourceItemID){
 	if (this.isNote()){
 		var type = 'note';
 		var Type = 'Note';
@@ -927,26 +927,26 @@ Scholar.Item.prototype.setSource = function(sourceItemID){
 		throw ("Cannot call setSource() on unsaved " + type);
 	}
 	
-	Scholar.DB.beginTransaction();
+	Zotero.DB.beginTransaction();
 	
-	var newItem = Scholar.Items.get(sourceItemID);
+	var newItem = Zotero.Items.get(sourceItemID);
 	// FK check
 	if (sourceItemID && !newItem){
-		Scholar.DB.rollbackTransaction();
+		Zotero.DB.rollbackTransaction();
 		throw ("Cannot set " + type + " source to invalid item " + sourceItemID);
 	}
 	
 	var oldSourceItemID = this.getSource();
 	
 	if (oldSourceItemID==sourceItemID){
-		Scholar.debug(Type + " source hasn't changed", 4);
-		Scholar.DB.commitTransaction();
+		Zotero.debug(Type + " source hasn't changed", 4);
+		Zotero.DB.commitTransaction();
 		return false;
 	}
 	
-	var oldItem = Scholar.Items.get(oldSourceItemID);
+	var oldItem = Zotero.Items.get(oldSourceItemID);
 	if (oldSourceItemID && !oldItem){
-		Scholar.debug("Old source item " + oldSourceItemID
+		Zotero.debug("Old source item " + oldSourceItemID
 			+ "didn't exist in setSource()", 2);
 	}
 	
@@ -954,27 +954,27 @@ Scholar.Item.prototype.setSource = function(sourceItemID){
 	// existed previously and add source instead if there is one
 	if (!oldSourceItemID){
 		var sql = "SELECT collectionID FROM collectionItems WHERE itemID=?";
-		var changedCollections = Scholar.DB.columnQuery(sql, this.getID());
+		var changedCollections = Zotero.DB.columnQuery(sql, this.getID());
 		if (changedCollections){
 			if (sourceItemID){
 				var sql = "UPDATE OR REPLACE collectionItems "
 					+ "SET itemID=? WHERE itemID=?";
-				Scholar.DB.query(sql, [sourceItemID, this.getID()]);
+				Zotero.DB.query(sql, [sourceItemID, this.getID()]);
 			}
 			else {
 				var sql = "DELETE FROM collectionItems WHERE itemID=?";
-				Scholar.DB.query(sql, this.getID());
+				Zotero.DB.query(sql, this.getID());
 			}
 		}
 	}
 	
 	var sql = "UPDATE item" + Type + "s SET sourceItemID=? WHERE itemID=?";
 	var bindParams = [sourceItemID ? {int:sourceItemID} : null, this.getID()];
-	Scholar.DB.query(sql, bindParams);
+	Zotero.DB.query(sql, bindParams);
 	this.updateDateModified();
-	Scholar.DB.commitTransaction();
+	Zotero.DB.commitTransaction();
 	
-	Scholar.Notifier.trigger('modify', 'item', this.getID());
+	Zotero.Notifier.trigger('modify', 'item', this.getID());
 	
 	// Update the counts of the previous and new sources
 	if (oldItem){
@@ -986,7 +986,7 @@ Scholar.Item.prototype.setSource = function(sourceItemID){
 				oldItem.decrementAttachmentCount();
 				break;
 		}
-		Scholar.Notifier.trigger('modify', 'item', oldSourceItemID);
+		Zotero.Notifier.trigger('modify', 'item', oldSourceItemID);
 	}
 	if (newItem){
 		switch (type){
@@ -997,7 +997,7 @@ Scholar.Item.prototype.setSource = function(sourceItemID){
 				newItem.incrementAttachmentCount();
 				break;
 		}
-		Scholar.Notifier.trigger('modify', 'item', sourceItemID);
+		Zotero.Notifier.trigger('modify', 'item', sourceItemID);
 	}
 	
 	return true;
@@ -1007,7 +1007,7 @@ Scholar.Item.prototype.setSource = function(sourceItemID){
 /**
 * Returns number of notes in item
 **/
-Scholar.Item.prototype.numNotes = function(){
+Zotero.Item.prototype.numNotes = function(){
 	if (this.isNote()){
 		throw ("numNotes() cannot be called on items of type 'note'");
 	}
@@ -1023,7 +1023,7 @@ Scholar.Item.prototype.numNotes = function(){
 /**
 * Get the text of an item note
 **/
-Scholar.Item.prototype.getNote = function(){
+Zotero.Item.prototype.getNote = function(){
 	if (!this.isNote() && !this.isAttachment()){
 		throw ("getNote() can only be called on notes and attachments");
 	}
@@ -1035,7 +1035,7 @@ Scholar.Item.prototype.getNote = function(){
 	}
 	
 	var sql = "SELECT note FROM itemNotes WHERE itemID=" + this.getID();
-	var note = Scholar.DB.valueQuery(sql);
+	var note = Zotero.DB.valueQuery(sql);
 	
 	this._noteData = note ? note : '';
 	
@@ -1046,7 +1046,7 @@ Scholar.Item.prototype.getNote = function(){
 /**
 * Get the itemID of the source item for a note or file
 **/
-Scholar.Item.prototype.getSource = function(){
+Zotero.Item.prototype.getSource = function(){
 	if (this.isNote()){
 		var Type = 'Note';
 	}
@@ -1058,14 +1058,14 @@ Scholar.Item.prototype.getSource = function(){
 	}
 	
 	var sql = "SELECT sourceItemID FROM item" + Type + "s WHERE itemID=" + this.getID();
-	return Scholar.DB.valueQuery(sql);
+	return Zotero.DB.valueQuery(sql);
 }
 
 
 /**
 * Returns an array of note itemIDs for this item
 **/
-Scholar.Item.prototype.getNotes = function(){
+Zotero.Item.prototype.getNotes = function(){
 	if (this.isNote()){
 		throw ("getNotes() cannot be called on items of type 'note'");
 	}
@@ -1076,7 +1076,7 @@ Scholar.Item.prototype.getNotes = function(){
 	
 	var sql = "SELECT itemID FROM itemNotes NATURAL JOIN items "
 		+ "WHERE sourceItemID=" + this.getID() + " ORDER BY dateAdded";
-	return Scholar.DB.columnQuery(sql);
+	return Zotero.DB.columnQuery(sql);
 }
 
 
@@ -1088,12 +1088,12 @@ Scholar.Item.prototype.getNotes = function(){
 // save() is not required for attachment functions
 //
 ///////////////////////////////////////////////////////
-Scholar.Item.prototype.incrementAttachmentCount = function(){
+Zotero.Item.prototype.incrementAttachmentCount = function(){
 	this._data['numAttachments']++;
 }
 
 
-Scholar.Item.prototype.decrementAttachmentCount = function(){
+Zotero.Item.prototype.decrementAttachmentCount = function(){
 	this._data['numAttachments']--;
 }
 
@@ -1101,15 +1101,15 @@ Scholar.Item.prototype.decrementAttachmentCount = function(){
 /**
 * Determine if an item is an attachment
 **/
-Scholar.Item.prototype.isAttachment = function(){
-	return Scholar.ItemTypes.getName(this.getType())=='attachment';
+Zotero.Item.prototype.isAttachment = function(){
+	return Zotero.ItemTypes.getName(this.getType())=='attachment';
 }
 
 
 /**
 * Returns number of files in item
 **/
-Scholar.Item.prototype.numAttachments = function(){
+Zotero.Item.prototype.numAttachments = function(){
 	if (this.isAttachment()){
 		throw ("numAttachments() cannot be called on items of type 'attachment'");
 	}
@@ -1131,7 +1131,7 @@ Scholar.Item.prototype.numAttachments = function(){
 * Note: Always returns false for items with LINK_MODE_LINKED_URL,
 * since they have no files -- use getField('url') instead
 **/
-Scholar.Item.prototype.getFile = function(row){
+Zotero.Item.prototype.getFile = function(row){
 	if (!this.isAttachment()){
 		throw ("getFile() can only be called on items of type 'attachment'");
 	}
@@ -1139,7 +1139,7 @@ Scholar.Item.prototype.getFile = function(row){
 	if (!row){
 		var sql = "SELECT linkMode, path FROM itemAttachments WHERE itemID="
 			+ this.getID();
-		var row = Scholar.DB.rowQuery(sql);
+		var row = Zotero.DB.rowQuery(sql);
 	}
 	
 	if (!row){
@@ -1148,7 +1148,7 @@ Scholar.Item.prototype.getFile = function(row){
 	}
 	
 	// No associated files for linked URLs
-	if (row['linkMode']==Scholar.Attachments.LINK_MODE_LINKED_URL){
+	if (row['linkMode']==Zotero.Attachments.LINK_MODE_LINKED_URL){
 		return false;
 	}
 	
@@ -1156,7 +1156,7 @@ Scholar.Item.prototype.getFile = function(row){
 		createInstance(Components.interfaces.nsILocalFile);
 	
 	var refDir = (row['linkMode']==this.LINK_MODE_LINKED_FILE)
-		? Scholar.getScholarDirectory() : Scholar.getStorageDirectory();
+		? Zotero.getZoteroDirectory() : Zotero.getStorageDirectory();
 	file.setRelativeDescriptor(refDir, row['path']);
 	
 	if (!file.exists()){
@@ -1170,7 +1170,7 @@ Scholar.Item.prototype.getFile = function(row){
 /*
  * Return a file:/// URL path to files and snapshots
  */
-Scholar.Item.prototype.getLocalFileURL = function(){
+Zotero.Item.prototype.getLocalFileURL = function(){
 	if (!this.isAttachment){
 		throw ("getLocalFileURL() can only be called on items of type 'attachment'");
 	}
@@ -1187,10 +1187,10 @@ Scholar.Item.prototype.getLocalFileURL = function(){
 /**
 * Get the link mode of an attachment
 *
-* Possible return values specified as constants in Scholar.Attachments
-* (e.g. Scholar.Attachments.LINK_MODE_LINKED_FILE)
+* Possible return values specified as constants in Zotero.Attachments
+* (e.g. Zotero.Attachments.LINK_MODE_LINKED_FILE)
 **/
-Scholar.Item.prototype.getAttachmentLinkMode = function(){
+Zotero.Item.prototype.getAttachmentLinkMode = function(){
 	if (!this.isAttachment()){
 		throw ("getAttachmentLinkMode() can only be called on items of type 'attachment'");
 	}
@@ -1200,7 +1200,7 @@ Scholar.Item.prototype.getAttachmentLinkMode = function(){
 	}
 	
 	var sql = "SELECT linkMode FROM itemAttachments WHERE itemID=" + this.getID();
-	this._fileLinkMode = Scholar.DB.valueQuery(sql);
+	this._fileLinkMode = Zotero.DB.valueQuery(sql);
 	return this._fileLinkMode;
 }
 
@@ -1208,33 +1208,33 @@ Scholar.Item.prototype.getAttachmentLinkMode = function(){
 /**
 * Get the mime type of an attachment (e.g. text/plain)
 **/
-Scholar.Item.prototype.getAttachmentMimeType = function(){
+Zotero.Item.prototype.getAttachmentMimeType = function(){
 	if (!this.isAttachment()){
 		throw ("getAttachmentMIMEType() can only be called on items of type 'attachment'");
 	}
 	
 	var sql = "SELECT mimeType FROM itemAttachments WHERE itemID=" + this.getID();
-	return Scholar.DB.valueQuery(sql);
+	return Zotero.DB.valueQuery(sql);
 }
 
 
 /**
 * Get the character set id of an attachment
 **/
-Scholar.Item.prototype.getAttachmentCharset = function(){
+Zotero.Item.prototype.getAttachmentCharset = function(){
 	if (!this.isAttachment()){
 		throw ("getAttachmentCharset() can only be called on items of type 'attachment'");
 	}
 	
 	var sql = "SELECT charsetID FROM itemAttachments WHERE itemID=" + this.getID();
-	return Scholar.DB.valueQuery(sql);
+	return Zotero.DB.valueQuery(sql);
 }
 
 
 /**
 * Returns an array of attachment itemIDs that have this item as a source
 **/
-Scholar.Item.prototype.getAttachments = function(){
+Zotero.Item.prototype.getAttachments = function(){
 	if (this.isAttachment()){
 		throw ("getAttachments() cannot be called on items of type 'attachment'");
 	}
@@ -1245,7 +1245,7 @@ Scholar.Item.prototype.getAttachments = function(){
 	
 	var sql = "SELECT itemID FROM itemAttachments NATURAL JOIN items "
 		+ "WHERE sourceItemID=" + this.getID() + " ORDER BY dateAdded";
-	return Scholar.DB.columnQuery(sql);
+	return Zotero.DB.columnQuery(sql);
 }
 
 
@@ -1255,92 +1255,92 @@ Scholar.Item.prototype.getAttachments = function(){
 //
 // save() is not required for tag functions
 //
-Scholar.Item.prototype.addTag = function(tag){
+Zotero.Item.prototype.addTag = function(tag){
 	if (!this.getID()){
 		this.save();
 	}
 	
 	if (!tag){
-		Scholar.debug('Not saving empty tag', 2);
+		Zotero.debug('Not saving empty tag', 2);
 		return false;
 	}
 	
-	Scholar.DB.beginTransaction();
-	var tagID = Scholar.Tags.getID(tag);
+	Zotero.DB.beginTransaction();
+	var tagID = Zotero.Tags.getID(tag);
 	if (!tagID){
-		var tagID = Scholar.Tags.add(tag);
+		var tagID = Zotero.Tags.add(tag);
 	}
 	
 	// If INSERT OR IGNORE gave us affected rows, we wouldn't need this...
 	var sql = "SELECT COUNT(*) FROM itemTags WHERE itemID=? AND tagID=?";
-	var exists = Scholar.DB.valueQuery(sql, [this.getID(), tagID]);
+	var exists = Zotero.DB.valueQuery(sql, [this.getID(), tagID]);
 	if (exists){
-		Scholar.DB.commitTransaction();
+		Zotero.DB.commitTransaction();
 		return false;
 	}
 	
 	var sql = "INSERT INTO itemTags VALUES (?,?)";
-	Scholar.DB.query(sql, [this.getID(), tagID]);
+	Zotero.DB.query(sql, [this.getID(), tagID]);
 	
-	Scholar.DB.commitTransaction();
+	Zotero.DB.commitTransaction();
 	
-	if (!Scholar.DB.transactionInProgress()){
-		Scholar.Notifier.trigger('modify', 'item', this.getID());
+	if (!Zotero.DB.transactionInProgress()){
+		Zotero.Notifier.trigger('modify', 'item', this.getID());
 	}
 	
 	return tagID;
 }
 
-Scholar.Item.prototype.getTags = function(){
+Zotero.Item.prototype.getTags = function(){
 	var sql = "SELECT tag FROM tags WHERE tagID IN "
 		+ "(SELECT tagID FROM itemTags WHERE itemID=" + this.getID() + ") "
 		+ "ORDER BY tag COLLATE NOCASE";
-	return Scholar.DB.columnQuery(sql);
+	return Zotero.DB.columnQuery(sql);
 }
 
-Scholar.Item.prototype.getTagIDs = function(){
+Zotero.Item.prototype.getTagIDs = function(){
 	var sql = "SELECT tagID FROM itemTags WHERE itemID=" + this.getID();
-	return Scholar.DB.columnQuery(sql);
+	return Zotero.DB.columnQuery(sql);
 }
 
-Scholar.Item.prototype.replaceTag = function(oldTagID, newTag){
+Zotero.Item.prototype.replaceTag = function(oldTagID, newTag){
 	if (!this.getID()){
 		throw ('Cannot replace tag on unsaved item');
 	}
 	
 	if (!newTag){
-		Scholar.debug('Not replacing with empty tag', 2);
+		Zotero.debug('Not replacing with empty tag', 2);
 		return false;
 	}
 	
-	Scholar.DB.beginTransaction();
+	Zotero.DB.beginTransaction();
 	
-	var oldTag = Scholar.Tags.getName(oldTagID);
+	var oldTag = Zotero.Tags.getName(oldTagID);
 	if (oldTag==newTag){
-		Scholar.DB.commitTransaction();
+		Zotero.DB.commitTransaction();
 		return false;
 	}
 	
 	this.removeTag(oldTagID);
 	var id = this.addTag(newTag);
-	Scholar.DB.commitTransaction();
-	Scholar.Notifier.trigger('modify', 'item', this.getID());
+	Zotero.DB.commitTransaction();
+	Zotero.Notifier.trigger('modify', 'item', this.getID());
 	return id;
 }
 
-Scholar.Item.prototype.removeTag = function(tagID){
+Zotero.Item.prototype.removeTag = function(tagID){
 	if (!this.getID()){
 		throw ('Cannot remove tag on unsaved item');
 	}
 	
-	Scholar.DB.beginTransaction();
+	Zotero.DB.beginTransaction();
 	var sql = "DELETE FROM itemTags WHERE itemID=? AND tagID=?";
-	Scholar.DB.query(sql, [this.getID(), tagID]);
-	Scholar.Tags.purge();
-	Scholar.DB.commitTransaction();
+	Zotero.DB.query(sql, [this.getID(), tagID]);
+	Zotero.Tags.purge();
+	Zotero.DB.commitTransaction();
 	
-	if (!Scholar.DB.transactionInProgress()){
-		Scholar.Notifier.trigger('modify', 'item', this.getID());
+	if (!Zotero.DB.transactionInProgress()){
+		Zotero.Notifier.trigger('modify', 'item', this.getID());
 	}
 }
 
@@ -1350,16 +1350,16 @@ Scholar.Item.prototype.removeTag = function(tagID){
 //
 // save() is not required for See Also functions
 //
-Scholar.Item.prototype.addSeeAlso = function(itemID){
+Zotero.Item.prototype.addSeeAlso = function(itemID){
 	if (itemID==this.getID()){
-		Scholar.debug('Cannot add item as See Also of itself', 2);
+		Zotero.debug('Cannot add item as See Also of itself', 2);
 		return false;
 	}
 	
-	Scholar.DB.beginTransaction();
+	Zotero.DB.beginTransaction();
 	
-	if (!Scholar.Items.get(itemID)){
-		Scholar.DB.commitTransaction();
+	if (!Zotero.Items.get(itemID)){
+		Zotero.DB.commitTransaction();
 		throw ("Cannot add invalid item " + itemID + " as See Also");
 		return false;
 	}
@@ -1368,56 +1368,56 @@ Scholar.Item.prototype.addSeeAlso = function(itemID){
 	var sql = "SELECT (SELECT COUNT(*) FROM itemSeeAlso WHERE itemID=?1 AND "
 		+ "linkedItemID=?2) + (SELECT COUNT(*) FROM itemSeeAlso WHERE "
 		+ "linkedItemID=?1 AND itemID=?2)";
-	if (Scholar.DB.valueQuery(sql, [this.getID(), itemID])){
-		Scholar.DB.commitTransaction();
-		Scholar.debug("Item " + itemID + " already linked", 2);
+	if (Zotero.DB.valueQuery(sql, [this.getID(), itemID])){
+		Zotero.DB.commitTransaction();
+		Zotero.debug("Item " + itemID + " already linked", 2);
 		return false;
 	}
 	
 	var sql = "INSERT INTO itemSeeAlso VALUES (?,?)";
-	Scholar.DB.query(sql, [this.getID(), {int:itemID}]);
-	Scholar.DB.commitTransaction();
-	Scholar.Notifier.trigger('modify', 'item', [this.getID(), itemID]);
+	Zotero.DB.query(sql, [this.getID(), {int:itemID}]);
+	Zotero.DB.commitTransaction();
+	Zotero.Notifier.trigger('modify', 'item', [this.getID(), itemID]);
 	return true;
 }
 
-Scholar.Item.prototype.removeSeeAlso = function(itemID){
-	Scholar.DB.beginTransaction();
+Zotero.Item.prototype.removeSeeAlso = function(itemID){
+	Zotero.DB.beginTransaction();
 	var sql = "DELETE FROM itemSeeAlso WHERE itemID=? AND linkedItemID=?";
-	Scholar.DB.query(sql, [this.getID(), itemID]);
+	Zotero.DB.query(sql, [this.getID(), itemID]);
 	var sql = "DELETE FROM itemSeeAlso WHERE itemID=? AND linkedItemID=?";
-	Scholar.DB.query(sql, [itemID, this.getID()]);
-	Scholar.DB.commitTransaction();
-	Scholar.Notifier.trigger('modify', 'item', [this.getID(), itemID]);
+	Zotero.DB.query(sql, [itemID, this.getID()]);
+	Zotero.DB.commitTransaction();
+	Zotero.Notifier.trigger('modify', 'item', [this.getID(), itemID]);
 }
 
-Scholar.Item.prototype.getSeeAlso = function(){
+Zotero.Item.prototype.getSeeAlso = function(){
 	// Check both ways, using a UNION to take advantage of indexes
 	var sql ="SELECT linkedItemID FROM itemSeeAlso WHERE itemID=?1 UNION "
 		+ "SELECT itemID FROM itemSeeAlso WHERE linkedItemID=?1";
-	return Scholar.DB.columnQuery(sql, this.getID());
+	return Zotero.DB.columnQuery(sql, this.getID());
 }
 
 
 /**
-* Delete item from database and clear from Scholar.Items internal array
+* Delete item from database and clear from Zotero.Items internal array
 **/
-Scholar.Item.prototype.erase = function(deleteChildren){
+Zotero.Item.prototype.erase = function(deleteChildren){
 	if (!this.getID()){
 		return false;
 	}
 	
-	Scholar.debug('Deleting item ' + this.getID());
+	Zotero.debug('Deleting item ' + this.getID());
 	
 	var changedItems = [];
 	
-	Scholar.DB.beginTransaction();
+	Zotero.DB.beginTransaction();
 	
 	// Remove item from parent collections
 	var parentCollectionIDs = this.getCollections();
 	if (parentCollectionIDs){
 		for (var i=0; i<parentCollectionIDs.length; i++){
-			Scholar.Collections.get(parentCollectionIDs[i]).removeItem(this.getID());
+			Zotero.Collections.get(parentCollectionIDs[i]).removeItem(this.getID());
 		}
 	}
 	
@@ -1425,9 +1425,9 @@ Scholar.Item.prototype.erase = function(deleteChildren){
 	if (this.isNote()){
 		// Decrement note count of source items
 		var sql = "SELECT sourceItemID FROM itemNotes WHERE itemID=" + this.getID();
-		var sourceItemID = Scholar.DB.valueQuery(sql);
+		var sourceItemID = Zotero.DB.valueQuery(sql);
 		if (sourceItemID){
-			var sourceItem = Scholar.Items.get(sourceItemID);
+			var sourceItem = Zotero.Items.get(sourceItemID);
 			sourceItem.decrementNoteCount();
 			changedItems.push(sourceItemID);
 		}
@@ -1436,9 +1436,9 @@ Scholar.Item.prototype.erase = function(deleteChildren){
 	else if (this.isAttachment()){
 		// Decrement file count of source items
 		var sql = "SELECT sourceItemID FROM itemAttachments WHERE itemID=" + this.getID();
-		var sourceItemID = Scholar.DB.valueQuery(sql);
+		var sourceItemID = Zotero.DB.valueQuery(sql);
 		if (sourceItemID){
-			var sourceItem = Scholar.Items.get(sourceItemID);
+			var sourceItem = Zotero.Items.get(sourceItemID);
 			sourceItem.decrementAttachmentCount();
 			changedItems.push(sourceItemID);
 		}
@@ -1446,12 +1446,12 @@ Scholar.Item.prototype.erase = function(deleteChildren){
 		// Delete associated files
 		var linkMode = this.getAttachmentLinkMode();
 		switch (linkMode){
-			case Scholar.Attachments.LINK_MODE_LINKED_FILE:
-			case Scholar.Attachments.LINK_MODE_LINKED_URL:
+			case Zotero.Attachments.LINK_MODE_LINKED_FILE:
+			case Zotero.Attachments.LINK_MODE_LINKED_URL:
 				// Links only -- nothing to delete
 				break;
 			default:
-				var file = Scholar.getStorageDirectory();
+				var file = Zotero.getStorageDirectory();
 				file.append(this.getID());
 				if (file.exists()){
 					file.remove(true);
@@ -1465,11 +1465,11 @@ Scholar.Item.prototype.erase = function(deleteChildren){
 	else if (deleteChildren){
 		var sql = "SELECT itemID FROM itemNotes WHERE sourceItemID=?1 UNION "
 			+ "SELECT itemID FROM itemAttachments WHERE sourceItemID=?1";
-		var toDelete = Scholar.DB.columnQuery(sql, [this.getID()]);
+		var toDelete = Zotero.DB.columnQuery(sql, [this.getID()]);
 		
 		if (toDelete){
 			for (var i in toDelete){
-				var obj = Scholar.Items.get(toDelete[i]);
+				var obj = Zotero.Items.get(toDelete[i]);
 				obj.erase(true);
 			}
 		}
@@ -1479,23 +1479,23 @@ Scholar.Item.prototype.erase = function(deleteChildren){
 	else {
 		// Notes
 		var sql = "SELECT itemID FROM itemNotes WHERE sourceItemID=" + this.getID();
-		var childNotes = Scholar.DB.columnQuery(sql);
+		var childNotes = Zotero.DB.columnQuery(sql);
 		if (childNotes){
 			changedItems.push(childNotes);
 		}
 		var sql = "UPDATE itemNotes SET sourceItemID=NULL WHERE sourceItemID="
 			+ this.getID();
-		Scholar.DB.query(sql);
+		Zotero.DB.query(sql);
 		
 		// Attachments
 		var sql = "SELECT itemID FROM itemAttachments WHERE sourceItemID=" + this.getID();
-		var childAttachments = Scholar.DB.columnQuery(sql);
+		var childAttachments = Zotero.DB.columnQuery(sql);
 		if (childAttachments){
 			changedItems.push(childAttachments);
 		}
 		var sql = "UPDATE itemAttachments SET sourceItemID=NULL WHERE sourceItemID="
 			+ this.getID();
-		Scholar.DB.query(sql);
+		Zotero.DB.query(sql);
 	}
 	
 	// Flag See Also links for notification
@@ -1505,9 +1505,9 @@ Scholar.Item.prototype.erase = function(deleteChildren){
 	}
 	
 	// Clear fulltext cache
-	Scholar.Fulltext.clearItemWords(this.getID());
-	//Scholar.Fulltext.clearItemContent(this.getID());
-	Scholar.Fulltext.purgeUnusedWords();
+	Zotero.Fulltext.clearItemWords(this.getID());
+	//Zotero.Fulltext.clearItemContent(this.getID());
+	Zotero.Fulltext.purgeUnusedWords();
 	
 	sql = 'DELETE FROM itemCreators WHERE itemID=' + this.getID() + ";\n";
 	sql += 'DELETE FROM itemNotes WHERE itemID=' + this.getID() + ";\n";
@@ -1518,11 +1518,11 @@ Scholar.Item.prototype.erase = function(deleteChildren){
 	sql += 'DELETE FROM itemData WHERE itemID=' + this.getID() + ";\n";
 	sql += 'DELETE FROM items WHERE itemID=' + this.getID() + ";\n";
 	
-	Scholar.DB.query(sql);
-	Scholar.Creators.purge();
+	Zotero.DB.query(sql);
+	Zotero.Creators.purge();
 	
 	try {
-		Scholar.DB.commitTransaction();
+		Zotero.DB.commitTransaction();
 	}
 	catch (e){
 		// On failure, reset count of source items
@@ -1534,25 +1534,25 @@ Scholar.Item.prototype.erase = function(deleteChildren){
 				sourceItem.incrementAttachmentCount();
 			}
 		}
-		Scholar.DB.rollbackTransaction();
+		Zotero.DB.rollbackTransaction();
 		throw (e);
 	}
 	
-	Scholar.Items.unload(this.getID());
+	Zotero.Items.unload(this.getID());
 	
 	// Send notification of changed items
 	if (changedItems.length){
-		Scholar.Notifier.trigger('modify', 'item', changedItems);
+		Zotero.Notifier.trigger('modify', 'item', changedItems);
 	}
 	
 	// If we're not in the middle of a larger commit, trigger the notifier now
-	if (!Scholar.DB.transactionInProgress()){
-		Scholar.Notifier.trigger('delete', 'item', this.getID());
+	if (!Zotero.DB.transactionInProgress()){
+		Zotero.Notifier.trigger('delete', 'item', this.getID());
 	}
 }
 
 
-Scholar.Item.prototype.isCollection = function(){
+Zotero.Item.prototype.isCollection = function(){
 	return false;
 }
 
@@ -1561,7 +1561,7 @@ Scholar.Item.prototype.isCollection = function(){
 * Convert the item data into a multidimensional associative array
 *	for use by the export functions
 **/
-Scholar.Item.prototype.toArray = function(){
+Zotero.Item.prototype.toArray = function(){
 	if (this.getID() && !this._itemDataLoaded){
 		this._loadItemData();
 	}
@@ -1572,7 +1572,7 @@ Scholar.Item.prototype.toArray = function(){
 	for (var i in this._data){
 		switch (i){
 			case 'itemTypeID':
-				arr['itemType'] = Scholar.ItemTypes.getName(this._data[i]);
+				arr['itemType'] = Zotero.ItemTypes.getName(this._data[i]);
 				break;
 			
 			// Skip certain fields
@@ -1589,7 +1589,7 @@ Scholar.Item.prototype.toArray = function(){
 	
 	// Item metadata
 	for (var i in this._itemData){
-		arr[Scholar.ItemFields.getName(i)] = this._itemData[i];
+		arr[Zotero.ItemFields.getName(i)] = this._itemData[i];
 	}
 	
 	if (!this.isNote() && !this.isAttachment()){
@@ -1603,7 +1603,7 @@ Scholar.Item.prototype.toArray = function(){
 			arr['creators'][i]['isInstitution'] = creators[i]['isInstitution'];
 			// Convert creatorTypeIDs to text
 			arr['creators'][i]['creatorType'] =
-				Scholar.CreatorTypes.getName(creators[i]['creatorTypeID']);
+				Zotero.CreatorTypes.getName(creators[i]['creatorTypeID']);
 		}
 	}
 	
@@ -1621,7 +1621,7 @@ Scholar.Item.prototype.toArray = function(){
 		arr['notes'] = [];
 		var notes = this.getNotes();
 		for (var i in notes){
-			var note = Scholar.Items.get(notes[i]);
+			var note = Zotero.Items.get(notes[i]);
 			arr['notes'].push({
 				itemID: note.getID(),
 				note: note.getNote(),
@@ -1645,7 +1645,7 @@ Scholar.Item.prototype.toArray = function(){
 		arr['attachments'] = [];
 		var files = this.getAttachments();
 		for (var i in files){
-			var file = Scholar.Items.get(files[i]);
+			var file = Zotero.Items.get(files[i]);
 			arr['attachments'].push({
 				itemID: file.getID(),
 				// TODO
@@ -1666,14 +1666,14 @@ Scholar.Item.prototype.toArray = function(){
 
 //////////////////////////////////////////////////////////////////////////////
 //
-// Private Scholar.Item methods
+// Private Zotero.Item methods
 //
 //////////////////////////////////////////////////////////////////////////////
 
 /*
  * Load in the creators from the database
  */
-Scholar.Item.prototype._loadCreators = function(){
+Zotero.Item.prototype._loadCreators = function(){
 	if (!this.getID()){
 		throw ('ItemID not set for item before attempting to load creators');
 	}
@@ -1682,7 +1682,7 @@ Scholar.Item.prototype._loadCreators = function(){
 		+ 'FROM itemCreators IC '
 		+ 'LEFT JOIN creators C USING (creatorID) '
 		+ 'WHERE itemID=' + this.getID() + ' ORDER BY orderIndex';
-	var creators = Scholar.DB.query(sql);
+	var creators = Zotero.DB.query(sql);
 	
 	this._creatorsLoaded = true;
 	
@@ -1690,7 +1690,7 @@ Scholar.Item.prototype._loadCreators = function(){
 		return true;
 	}
 	
-	this._creators = new Scholar.Hash();
+	this._creators = new Zotero.Hash();
 	for (var i=0; i<creators.length; i++){
 		var creator = new Array();
 		creator['firstName'] = creators[i]['firstName'];
@@ -1708,7 +1708,7 @@ Scholar.Item.prototype._loadCreators = function(){
 /*
  * Load in the field data from the database
  */
-Scholar.Item.prototype._loadItemData = function(){
+Zotero.Item.prototype._loadItemData = function(){
 	if (!this.getID()){
 		throw ('ItemID not set for object before attempting to load data');
 	}
@@ -1718,7 +1718,7 @@ Scholar.Item.prototype._loadItemData = function(){
 		+ 'items WHERE itemID=?1) AND ITF.fieldID=ID.fieldID) '
 		+ 'WHERE itemID=?1 ORDER BY orderIndex';
 		
-	var result = Scholar.DB.query(sql,[{'int':this._data['itemID']}]);
+	var result = Zotero.DB.query(sql,[{'int':this._data['itemID']}]);
 	
 	this._itemDataLoaded = true;
 	
@@ -1737,7 +1737,7 @@ Scholar.Item.prototype._loadItemData = function(){
 /**
 * Return first line (or first MAX_LENGTH characters) of note content
 **/
-Scholar.Item.prototype._noteToTitle = function(){
+Zotero.Item.prototype._noteToTitle = function(){
 	var MAX_LENGTH = 80;
 	
 	var t = this.getNote().substring(0, MAX_LENGTH);
@@ -1752,9 +1752,9 @@ Scholar.Item.prototype._noteToTitle = function(){
 
 
 /*
- * Primary interface for accessing Scholar items
+ * Primary interface for accessing Zotero items
  */
-Scholar.Items = new function(){
+Zotero.Items = new function(){
 	// Private members
 	var _items = new Array();
 	
@@ -1781,11 +1781,11 @@ Scholar.Items = new function(){
 		var loaded = new Array();
 		
 		if (!arguments[0]){
-			Scholar.debug('No arguments provided to Items.get()');
+			Zotero.debug('No arguments provided to Items.get()');
 			return false;
 		}
 		
-		var ids = Scholar.flattenArguments(arguments);
+		var ids = Zotero.flattenArguments(arguments);
 		
 		for (var i=0; i<ids.length; i++){
 			// Check if already loaded
@@ -1808,7 +1808,7 @@ Scholar.Items = new function(){
 		// Otherwise, build return array
 		for (i=0; i<ids.length; i++){
 			if (!_items[ids[i]]){
-				Scholar.debug("Item " + ids[i] + " not loaded -- this shouldn't happen", 2);
+				Zotero.debug("Item " + ids[i] + " not loaded -- this shouldn't happen", 2);
 			}
 			loaded.push(_items[ids[i]]);
 		}
@@ -1824,7 +1824,7 @@ Scholar.Items = new function(){
 		var sql = 'SELECT itemID FROM items';
 		// DEBUG: default order?
 		
-		var ids = Scholar.DB.columnQuery(sql);
+		var ids = Zotero.DB.columnQuery(sql);
 		return this.get(ids);
 	}
 	
@@ -1839,8 +1839,8 @@ Scholar.Items = new function(){
 			return false;
 		}
 		
-		var ids = Scholar.flattenArguments(arguments);
-		Scholar.debug('Reloading ' + ids);
+		var ids = Zotero.flattenArguments(arguments);
+		Zotero.debug('Reloading ' + ids);
 		_load(ids);
 		
 		return true;
@@ -1857,14 +1857,14 @@ Scholar.Items = new function(){
 	
 	
 	function getNewItemByType(itemTypeID){
-		return new Scholar.Item(itemTypeID);
+		return new Zotero.Item(itemTypeID);
 	}
 	
 	
 	function add(data, itemTypeID){
 		var insert = new Array();
 		
-		var obj = new Scholar.Item(itemTypeID);
+		var obj = new Zotero.Item(itemTypeID);
 		
 		for (field in data){
 			obj.setField(data[field]);
@@ -1903,7 +1903,7 @@ Scholar.Items = new function(){
 			sqlParams.push({'int':parentCollectionID});
 		}
 		
-		return Scholar.DB.columnQuery(sql, sqlParams);
+		return Zotero.DB.columnQuery(sql, sqlParams);
 	}
 	
 	
@@ -1918,7 +1918,7 @@ Scholar.Items = new function(){
 	
 	
 	/**
-	* Clear item from internal array (used by Scholar.Item.erase())
+	* Clear item from internal array (used by Zotero.Item.erase())
 	**/
 	function unload(id){
 		delete _items[id];
@@ -1926,7 +1926,7 @@ Scholar.Items = new function(){
 	
 	
 	function _load(){
-		// Should be the same as query in Scholar.Item.loadFromID, just
+		// Should be the same as query in Zotero.Item.loadFromID, just
 		// without itemID clause
 		var sql = 'SELECT I.*, lastName || '
 			+ 'CASE ((SELECT COUNT(*) FROM itemCreators WHERE itemID=I.itemID)>1) '
@@ -1939,16 +1939,16 @@ Scholar.Items = new function(){
 			+ 'WHERE (IC.orderIndex=0 OR IC.orderIndex IS NULL)';
 		
 		if (arguments[0]){
-			sql += ' AND I.itemID IN (' + Scholar.join(arguments,',') + ')';
+			sql += ' AND I.itemID IN (' + Zotero.join(arguments,',') + ')';
 		}
 		
-		var result = Scholar.DB.query(sql);
+		var result = Zotero.DB.query(sql);
 		
 		if (result){
 			for (var i=0,len=result.length; i<len; i++){
 				// Item doesn't exist -- create new object and stuff in array
 				if (!_items[result[i]['itemID']]){
-					var obj = new Scholar.Item();
+					var obj = new Zotero.Item();
 					obj.loadFromRow(result[i]);
 					_items[result[i]['itemID']] = obj;
 				}
@@ -1965,7 +1965,7 @@ Scholar.Items = new function(){
 
 
 
-Scholar.Notes = new function(){
+Zotero.Notes = new function(){
 	this.add = add;
 	
 	/**
@@ -1974,21 +1974,21 @@ Scholar.Notes = new function(){
 	* Returns the itemID of the new note item
 	**/
 	function add(text, sourceItemID){
-		Scholar.DB.beginTransaction();
+		Zotero.DB.beginTransaction();
 		
 		if (sourceItemID){
-			var sourceItem = Scholar.Items.get(sourceItemID);
+			var sourceItem = Zotero.Items.get(sourceItemID);
 			if (!sourceItem){
-				Scholar.DB.commitTransaction();
+				Zotero.DB.commitTransaction();
 				throw ("Cannot set note source to invalid item " + sourceItemID);
 			}
 			if (sourceItem.isNote()){
-				Scholar.DB.commitTransaction();
+				Zotero.DB.commitTransaction();
 				throw ("Cannot set note source to another note (" + sourceItemID + ")");
 			}
 		}
 		
-		var note = Scholar.Items.getNewItemByType(Scholar.ItemTypes.getID('note'));
+		var note = Zotero.Items.getNewItemByType(Zotero.ItemTypes.getID('note'));
 		note.save();
 		
 		var sql = "INSERT INTO itemNotes VALUES (?,?,?)";
@@ -1997,19 +1997,19 @@ Scholar.Notes = new function(){
 			(sourceItemID ? {int:sourceItemID} : null),
 			{string:text}
 		];
-		Scholar.DB.query(sql, bindParams);
-		Scholar.DB.commitTransaction();
+		Zotero.DB.query(sql, bindParams);
+		Zotero.DB.commitTransaction();
 		
-		// Switch to Scholar.Items version
-		var note = Scholar.Items.get(note.getID());
+		// Switch to Zotero.Items version
+		var note = Zotero.Items.get(note.getID());
 		note.updateNoteCache(text);
 		
 		if (sourceItemID){
 			sourceItem.incrementNoteCount();
-			Scholar.Notifier.trigger('modify', 'item', sourceItemID);
+			Zotero.Notifier.trigger('modify', 'item', sourceItemID);
 		}
 		
-		Scholar.Notifier.trigger('add', 'item', note.getID());
+		Zotero.Notifier.trigger('add', 'item', note.getID());
 		
 		return note.getID();
 	}
@@ -2021,13 +2021,13 @@ Scholar.Notes = new function(){
 /*
  * Constructor for Collection object
  *
- * Generally should be called from Scholar.Collection rather than directly
+ * Generally should be called from Zotero.Collection rather than directly
  */
-Scholar.Collection = function(){
+Zotero.Collection = function(){
 	 this._init();
 }
 
-Scholar.Collection.prototype._init = function(){
+Zotero.Collection.prototype._init = function(){
 	//
 	// Public members for access by public methods -- do not access directly
 	//
@@ -2036,15 +2036,15 @@ Scholar.Collection.prototype._init = function(){
 	this._parent = null;
 	this._hasChildCollections = false;
 	this._hasChildItems = false;
-	this._childItems = new Scholar.Hash();
+	this._childItems = new Zotero.Hash();
 	this._childItemsLoaded = false;
 }
 
 /*
  * Build collection from database
  */
-Scholar.Collection.prototype.loadFromID = function(id){
-	// Should be same as query in Scholar.Collections, just with collectionID
+Zotero.Collection.prototype.loadFromID = function(id){
+	// Should be same as query in Zotero.Collections, just with collectionID
 	var sql = "SELECT collectionID, collectionName, parentCollectionID, "
 		+ "(SELECT COUNT(*) FROM collections WHERE "
 		+ "parentCollectionID=C.collectionID)!=0 AS hasChildCollections, "
@@ -2053,7 +2053,7 @@ Scholar.Collection.prototype.loadFromID = function(id){
 		+ "FROM collections C "
 		+ "WHERE collectionID=" + id;
 	
-	var row = Scholar.DB.rowQuery(sql);
+	var row = Zotero.DB.rowQuery(sql);
 	this.loadFromRow(row);
 }
 
@@ -2061,7 +2061,7 @@ Scholar.Collection.prototype.loadFromID = function(id){
 /*
  * Populate collection data from a database row
  */
-Scholar.Collection.prototype.loadFromRow = function(row){
+Zotero.Collection.prototype.loadFromRow = function(row){
 	this._init();
 	this._id = row['collectionID'];
 	this._name = row['collectionName'];
@@ -2072,31 +2072,31 @@ Scholar.Collection.prototype.loadFromRow = function(row){
 }
 
 
-Scholar.Collection.prototype.getID = function(){
+Zotero.Collection.prototype.getID = function(){
 	return this._id;
 }
 
-Scholar.Collection.prototype.getName = function(){
+Zotero.Collection.prototype.getName = function(){
 	return this._name;
 }
 
 /**
 * Returns collectionID of the parent collection
 **/
-Scholar.Collection.prototype.getParent = function(){
+Zotero.Collection.prototype.getParent = function(){
 	return this._parent;
 }
 
 
-Scholar.Collection.prototype.isEmpty = function(){
+Zotero.Collection.prototype.isEmpty = function(){
 	return !(parseInt(this._hasChildCollections)) && !(parseInt(this._hasChildItems));
 }
 
-Scholar.Collection.prototype.hasChildCollections = function(){
+Zotero.Collection.prototype.hasChildCollections = function(){
 	return !!(parseInt(this._hasChildCollections));
 }
 
-Scholar.Collection.prototype.hasChildItems = function(){
+Zotero.Collection.prototype.hasChildItems = function(){
 	return !!(parseInt(this._hasChildItems));
 }
 
@@ -2107,17 +2107,17 @@ Scholar.Collection.prototype.hasChildItems = function(){
 *
 * Returns true on success, or false on error
 **/
-Scholar.Collection.prototype.rename = function(name){
+Zotero.Collection.prototype.rename = function(name){
 	if (!name){
 		return false;
 	}
 	
 	var sql = "UPDATE collections SET collectionName=? "
 		+ "WHERE collectionID=?";
-	Scholar.DB.query(sql, [{'string':name},{'int':this.getID()}]);
+	Zotero.DB.query(sql, [{'string':name},{'int':this.getID()}]);
 	this._name = name;
 	
-	Scholar.Notifier.trigger('modify', 'collection', this.getID());
+	Zotero.Notifier.trigger('modify', 'collection', this.getID());
 	return true;
 }
 
@@ -2127,7 +2127,7 @@ Scholar.Collection.prototype.rename = function(name){
 *
 * Returns TRUE on success, FALSE on error
 **/
-Scholar.Collection.prototype.changeParent = function(parent){
+Zotero.Collection.prototype.changeParent = function(parent){
 	if (!parent){
 		parent = null;
 	}
@@ -2135,23 +2135,23 @@ Scholar.Collection.prototype.changeParent = function(parent){
 	var previousParent = this.getParent();
 	
 	if (parent==previousParent){
-		Scholar.debug('Collection ' + this.getID() + ' is already in '
+		Zotero.debug('Collection ' + this.getID() + ' is already in '
 			+ (parent ? 'collection ' + parent : 'root collection'), 2);
 		return false;
 	}
 	
-	if (parent && !Scholar.Collections.get(parent)){
+	if (parent && !Zotero.Collections.get(parent)){
 		throw('Invalid parentCollectionID ' + parent + ' in changeParent()');
 	}
 	
 	if (parent && parent==this.getID()){
-		Scholar.debug('Cannot move collection into itself!', 2);
+		Zotero.debug('Cannot move collection into itself!', 2);
 		return false;
 	}
 	
 	if (parent){
 		if (this.hasDescendent('collection', parent)){
-			Scholar.debug('Cannot move collection into one of its own '
+			Zotero.debug('Cannot move collection into one of its own '
 				+ 'descendents!', 2);
 			return false;
 		}
@@ -2162,7 +2162,7 @@ Scholar.Collection.prototype.changeParent = function(parent){
 	var sql = "UPDATE collections SET parentCollectionID=? "
 		+ "WHERE collectionID=?";
 	
-	Scholar.DB.query(sql, [parentParam, {'int':this.getID()}]);
+	Zotero.DB.query(sql, [parentParam, {'int':this.getID()}]);
 	this._parent = parent;
 	
 	var notifyIDs = [
@@ -2172,8 +2172,8 @@ Scholar.Collection.prototype.changeParent = function(parent){
 	];
 	
 	// TODO: only reload the necessary ones
-	Scholar.Collections.reloadAll();
-	Scholar.Notifier.trigger('move', 'collection', notifyIDs);
+	Zotero.Collections.reloadAll();
+	Zotero.Notifier.trigger('move', 'collection', notifyIDs);
 	return true;
 }
 
@@ -2181,22 +2181,22 @@ Scholar.Collection.prototype.changeParent = function(parent){
 /**
 * Add an item to the collection
 **/
-Scholar.Collection.prototype.addItem = function(itemID){
-	Scholar.DB.beginTransaction();
+Zotero.Collection.prototype.addItem = function(itemID){
+	Zotero.DB.beginTransaction();
 	
-	if (!Scholar.Items.get(itemID)){
-		Scholar.DB.rollbackTransaction();	
+	if (!Zotero.Items.get(itemID)){
+		Zotero.DB.rollbackTransaction();	
 		throw(itemID + ' is not a valid item id');
 	}
 	
-	var nextOrderIndex = Scholar.DB.valueQuery("SELECT IFNULL(MAX(orderIndex)+1, 0) "
+	var nextOrderIndex = Zotero.DB.valueQuery("SELECT IFNULL(MAX(orderIndex)+1, 0) "
 		+ "FROM collectionItems WHERE collectionID=" + this._id);
 	
 	var sql = "INSERT OR IGNORE INTO collectionItems VALUES "
 		+ "(" + this._id + ", " + itemID + ", " + nextOrderIndex + ")";
 	
-	Scholar.DB.query(sql);
-	Scholar.DB.commitTransaction();
+	Zotero.DB.query(sql);
+	Zotero.DB.commitTransaction();
 	
 	this._childItems.set(itemID);
 	
@@ -2204,58 +2204,58 @@ Scholar.Collection.prototype.addItem = function(itemID){
 	if (!this._hasChildItems){
 		this._hasChildItems = true;
 		// DEBUG: is this necessary?
-		Scholar.Notifier.trigger('modify', 'collection', this.getID());
+		Zotero.Notifier.trigger('modify', 'collection', this.getID());
 	}
 	
-	Scholar.Notifier.trigger('add', 'item', itemID);
+	Zotero.Notifier.trigger('add', 'item', itemID);
 }
 
 
 /**
 * Remove an item from the collection (does not delete item from library)
 **/
-Scholar.Collection.prototype.removeItem = function(itemID){
-	Scholar.DB.beginTransaction();
+Zotero.Collection.prototype.removeItem = function(itemID){
+	Zotero.DB.beginTransaction();
 	
 	var sql = "SELECT orderIndex FROM collectionItems "
 		+ "WHERE collectionID=" + this._id + " AND itemID=" + itemID;
-	var orderIndex = Scholar.DB.valueQuery(sql);
+	var orderIndex = Zotero.DB.valueQuery(sql);
 	
 	if (orderIndex===false){
-		Scholar.debug('Item ' + itemID + ' is not a child of collection '
+		Zotero.debug('Item ' + itemID + ' is not a child of collection '
 			+ this._id);
-		Scholar.DB.rollbackTransaction();
+		Zotero.DB.rollbackTransaction();
 		return false;
 	}
 	
 	var sql = "DELETE FROM collectionItems WHERE collectionID=" + this._id
 		+ " AND itemID=" + itemID;
-	Scholar.DB.query(sql);
+	Zotero.DB.query(sql);
 	
 	// Move down items above deleted item in collection
 	sql = 'UPDATE collectionItems SET orderIndex=orderIndex-1 '
 		+ 'WHERE collectionID=' + this._id
 		+ ' AND orderIndex>' + orderIndex;
-	Scholar.DB.query(sql);
+	Zotero.DB.query(sql);
 	
-	Scholar.DB.commitTransaction();
+	Zotero.DB.commitTransaction();
 	this._childItems.remove(itemID);
 	
 	// If this was the last item, set collection to empty
 	if (!this._childItems.length){
 		this._hasChildItems = false;
 		// DEBUG: is this necessary?
-		Scholar.Notifier.trigger('modify', 'collection', this.getID());
+		Zotero.Notifier.trigger('modify', 'collection', this.getID());
 	}
 	
-	Scholar.Notifier.trigger('remove', 'item', itemID);
+	Zotero.Notifier.trigger('remove', 'item', itemID);
 }
 
 
 /**
 * Check if an item belongs to the collection
 **/
-Scholar.Collection.prototype.hasItem = function(itemID){
+Zotero.Collection.prototype.hasItem = function(itemID){
 	if (!this._childItemsLoaded){
 		this._loadChildItems();
 	}
@@ -2263,7 +2263,7 @@ Scholar.Collection.prototype.hasItem = function(itemID){
 }
 
 
-Scholar.Collection.prototype.hasDescendent = function(type, id){
+Zotero.Collection.prototype.hasDescendent = function(type, id){
 	var descendents = this.getDescendents();
 	for (var i=0, len=descendents.length; i<len; i++){
 		if (descendents[i]['type']==type && descendents[i]['id']==id){
@@ -2277,8 +2277,8 @@ Scholar.Collection.prototype.hasDescendent = function(type, id){
 /**
 * Deletes collection and all descendent collections and items
 **/
-Scholar.Collection.prototype.erase = function(deleteItems){
-	Scholar.DB.beginTransaction();
+Zotero.Collection.prototype.erase = function(deleteItems){
+	Zotero.DB.beginTransaction();
 	
 	var descendents = this.getDescendents();
 	var collections = [this.getID()], items = [];
@@ -2292,47 +2292,47 @@ Scholar.Collection.prototype.erase = function(deleteItems){
 		else {
 			if (deleteItems){
 				// Delete items from DB
-				Scholar.Items.get(descendents[i]['id']).erase();
+				Zotero.Items.get(descendents[i]['id']).erase();
 				items.push(descendents[i]['id']);
 			}
 		}
 	}
 	
 	// Remove item associations for all descendent collections
-	Scholar.DB.query('DELETE FROM collectionItems WHERE collectionID IN ('
+	Zotero.DB.query('DELETE FROM collectionItems WHERE collectionID IN ('
 		+ collections.join() + ')');
 	
 	// And delete all descendent collections
-	Scholar.DB.query('DELETE FROM collections WHERE collectionID IN ('
+	Zotero.DB.query('DELETE FROM collections WHERE collectionID IN ('
 		+ collections.join() + ')');
 	
-	Scholar.DB.commitTransaction();
+	Zotero.DB.commitTransaction();
 	
 	// Clear deleted collection from internal memory
-	Scholar.Collections.unload(collections);
+	Zotero.Collections.unload(collections);
 	
-	Scholar.Notifier.trigger('remove', 'collection', collections);
+	Zotero.Notifier.trigger('remove', 'collection', collections);
 	if (items.length){
-		Scholar.Notifier.trigger('delete', 'item', items);
+		Zotero.Notifier.trigger('delete', 'item', items);
 	}
 }
 
 
-Scholar.Collection.prototype.isCollection = function(){
+Zotero.Collection.prototype.isCollection = function(){
 	return true;
 }
 
 
-Scholar.Collection.prototype.toArray = function(){
+Zotero.Collection.prototype.toArray = function(){
 	return this.getDescendents(true);
 }
 
 
-Scholar.Collection.prototype._loadChildItems = function(){
-	this._childItems = new Scholar.Hash();
+Zotero.Collection.prototype._loadChildItems = function(){
+	this._childItems = new Zotero.Hash();
 	
 	var sql = "SELECT itemID FROM collectionItems WHERE collectionID=" + this._id;
-	var itemIDs = Scholar.DB.columnQuery(sql);
+	var itemIDs = Zotero.DB.columnQuery(sql);
 	
 	if (itemIDs){
 		for (var i=0; i<itemIDs.length; i++){
@@ -2340,7 +2340,7 @@ Scholar.Collection.prototype._loadChildItems = function(){
 		}
 	}
 	else {
-		Scholar.debug('Collection ' + this._id + ' has no child items');
+		Zotero.debug('Collection ' + this._id + ' has no child items');
 	}
 	
 	this._childItemsLoaded = true;
@@ -2353,12 +2353,12 @@ Scholar.Collection.prototype._loadChildItems = function(){
 *
 * nested: Return multidimensional array with 'children' nodes instead of flat array
 **/
-Scholar.Collection.prototype.getDescendents = function(nested, type){
+Zotero.Collection.prototype.getDescendents = function(nested, type){
 	var toReturn = new Array();
 	
 	// 0 == collection
 	// 1 == item
-	var children = Scholar.DB.query('SELECT collectionID AS id, '
+	var children = Zotero.DB.query('SELECT collectionID AS id, '
 		+ "0 AS type, collectionName AS collectionName "
 		+ 'FROM collections WHERE parentCollectionID=' + this._id
 		+ ' UNION SELECT itemID AS id, 1 AS type, NULL AS collectionName '
@@ -2390,7 +2390,7 @@ Scholar.Collection.prototype.getDescendents = function(nested, type){
 				}
 				
 				var descendents =
-					Scholar.Collections.get(children[i]['id']).getDescendents(nested, type);
+					Zotero.Collections.get(children[i]['id']).getDescendents(nested, type);
 				
 				if (nested){
 					toReturn[toReturn.length-1]['children'] = descendents;
@@ -2420,9 +2420,9 @@ Scholar.Collection.prototype.getDescendents = function(nested, type){
 
 
 /*
- * Primary interface for accessing Scholar collection
+ * Primary interface for accessing Zotero collection
  */
-Scholar.Collections = new function(){
+Zotero.Collections = new function(){
 	var _collections = new Array();
 	var _collectionsLoaded = false;
 	
@@ -2432,7 +2432,7 @@ Scholar.Collections = new function(){
 	this.unload = unload;
 	
 	/*
-	 * Returns a Scholar.Collection object for a collectionID
+	 * Returns a Zotero.Collection object for a collectionID
 	 */
 	function get(id){
 		if (!_collectionsLoaded){
@@ -2455,25 +2455,25 @@ Scholar.Collections = new function(){
 			return false;
 		}
 		
-		Scholar.DB.beginTransaction();
+		Zotero.DB.beginTransaction();
 		
 		if (parent && !this.get(parent)){
-			Scholar.DB.rollbackTransaction();
+			Zotero.DB.rollbackTransaction();
 			throw('Cannot add collection to invalid parent ' + parent);
 		}
 		
 		var parentParam = parent ? {'int':parent} : {'null':true};
 		
-		var rnd = Scholar.getRandomID('collections', 'collectionID');
+		var rnd = Zotero.getRandomID('collections', 'collectionID');
 		
 		var sql = "INSERT INTO collections VALUES (?,?,?)";
 		var sqlValues = [ {'int':rnd}, {'string':name}, parentParam ];
-		Scholar.DB.query(sql, sqlValues);
+		Zotero.DB.query(sql, sqlValues);
 		
-		Scholar.DB.commitTransaction();
+		Zotero.DB.commitTransaction();
 		
 		_load(rnd);
-		Scholar.Notifier.trigger('add', 'collection', rnd);
+		Zotero.Notifier.trigger('add', 'collection', rnd);
 		
 		return this.get(rnd);
 	}
@@ -2489,12 +2489,12 @@ Scholar.Collections = new function(){
 	
 	
 	/**
-	* Clear collection from internal cache (used by Scholar.Collection.erase())
+	* Clear collection from internal cache (used by Zotero.Collection.erase())
 	*
 	* Can be passed ids as individual parameters or as an array of ids, or both
 	**/
 	function unload(){
-		var ids = Scholar.flattenArguments(arguments);
+		var ids = Zotero.flattenArguments(arguments);
 		
 		for(var i=0; i<ids.length; i++){
 			delete _collections[ids[i]];
@@ -2506,7 +2506,7 @@ Scholar.Collections = new function(){
 	* Loads collection data from DB and adds to internal cache
 	**/
 	function _load(){
-		// This should be the same as the query in Scholar.Collection.loadFromID,
+		// This should be the same as the query in Zotero.Collection.loadFromID,
 		// just without a specific collectionID
 		var sql = "SELECT collectionID, collectionName, parentCollectionID, "
 			+ "(SELECT COUNT(*) FROM collections WHERE "
@@ -2515,19 +2515,19 @@ Scholar.Collections = new function(){
 			+ "collectionID=C.collectionID)!=0 AS hasChildItems "
 			+ "FROM collections C";
 		
-		var ids = Scholar.flattenArguments(arguments)
+		var ids = Zotero.flattenArguments(arguments)
 		if (ids.length){
 			sql += " WHERE collectionID IN (" + ids.join() + ")";
 		}
 		
-		var result = Scholar.DB.query(sql);
+		var result = Zotero.DB.query(sql);
 		
 		for (var i=0; i<result.length; i++){
 			var collectionID = result[i]['collectionID'];
 			
 			// If collection doesn't exist, create new object and stuff in array
 			if (!_collections[collectionID]){
-				var collection = new Scholar.Collection();
+				var collection = new Zotero.Collection();
 				collection.loadFromRow(result[i]);
 				_collections[collectionID] = collection;
 			}
@@ -2543,9 +2543,9 @@ Scholar.Collections = new function(){
 
 
 /*
- * Same structure as Scholar.Tags -- make changes in both places if possible
+ * Same structure as Zotero.Tags -- make changes in both places if possible
  */
-Scholar.Creators = new function(){
+Zotero.Creators = new function(){
 	var _creators = new Array; // indexed by first%%%last%%%isInstitution hash
 	var _creatorsByID = new Array; // indexed by creatorID
 	
@@ -2565,7 +2565,7 @@ Scholar.Creators = new function(){
 		}
 		
 		var sql = 'SELECT * FROM creators WHERE creatorID=' + creatorID;
-		var result = Scholar.DB.rowQuery(sql);
+		var result = Zotero.DB.rowQuery(sql);
 		
 		if (!result){
 			return false;
@@ -2604,7 +2604,7 @@ Scholar.Creators = new function(){
 		var sql = 'SELECT creatorID FROM creators '
 			+ 'WHERE firstName=? AND lastName=? AND isInstitution=?';
 		var params = [{string: firstName}, {string: lastName}, isInstitution];
-		var creatorID = Scholar.DB.valueQuery(sql, params);
+		var creatorID = Zotero.DB.valueQuery(sql, params);
 		
 		if (creatorID){
 			_creators[hash] = creatorID;
@@ -2620,19 +2620,19 @@ Scholar.Creators = new function(){
 	 * Returns new creatorID
 	 */
 	function add(firstName, lastName, isInstitution){
-		Scholar.debug('Adding new creator', 4);
+		Zotero.debug('Adding new creator', 4);
 		
-		Scholar.DB.beginTransaction();
+		Zotero.DB.beginTransaction();
 		
 		var sql = 'INSERT INTO creators VALUES (?,?,?,?)';
-		var rnd = Scholar.getRandomID('creators', 'creatorID');
+		var rnd = Zotero.getRandomID('creators', 'creatorID');
 		var params = [
 			rnd, isInstitution ? '' : {string: firstName}, {string: lastName},
 			isInstitution ? 1 : 0
 		];
-		Scholar.DB.query(sql, params);
+		Zotero.DB.query(sql, params);
 		
-		Scholar.DB.commitTransaction();
+		Zotero.DB.commitTransaction();
 		return rnd;
 	}
 	
@@ -2645,7 +2645,7 @@ Scholar.Creators = new function(){
 	function purge(){
 		var sql = 'SELECT creatorID FROM creators WHERE creatorID NOT IN '
 			+ '(SELECT creatorID FROM itemCreators);';
-		var toDelete = Scholar.DB.columnQuery(sql);
+		var toDelete = Zotero.DB.columnQuery(sql);
 		
 		if (!toDelete){
 			return false;
@@ -2660,7 +2660,7 @@ Scholar.Creators = new function(){
 		
 		sql = 'DELETE FROM creators WHERE creatorID NOT IN '
 			+ '(SELECT creatorID FROM itemCreators);';
-		var result = Scholar.DB.query(sql);
+		var result = Zotero.DB.query(sql);
 		
 		return toDelete;
 	}
@@ -2678,9 +2678,9 @@ Scholar.Creators = new function(){
 
 
 /*
- * Same structure as Scholar.Creators -- make changes in both places if possible
+ * Same structure as Zotero.Creators -- make changes in both places if possible
  */
-Scholar.Tags = new function(){
+Zotero.Tags = new function(){
 	var _tags = new Array; // indexed by tag text
 	var _tagsByID = new Array; // indexed by tagID
 	
@@ -2698,7 +2698,7 @@ Scholar.Tags = new function(){
 		}
 		
 		var sql = 'SELECT tag FROM tags WHERE tagID=' + tagID;
-		var result = Scholar.DB.valueQuery(sql);
+		var result = Zotero.DB.valueQuery(sql);
 		
 		if (!result){
 			return false;
@@ -2718,7 +2718,7 @@ Scholar.Tags = new function(){
 		}
 		
 		var sql = 'SELECT tagID FROM tags WHERE tag=?';
-		var tagID = Scholar.DB.valueQuery(sql, [{string:tag}]);
+		var tagID = Zotero.DB.valueQuery(sql, [{string:tag}]);
 		
 		if (tagID){
 			_tags[tag] = tagID;
@@ -2734,15 +2734,15 @@ Scholar.Tags = new function(){
 	 * Returns new tagID
 	 */
 	function add(tag){
-		Scholar.debug('Adding new tag', 4);
+		Zotero.debug('Adding new tag', 4);
 		
-		Scholar.DB.beginTransaction();
+		Zotero.DB.beginTransaction();
 		
 		var sql = 'INSERT INTO tags VALUES (?,?)';
-		var rnd = Scholar.getRandomID('tags', 'tagID');
-		Scholar.DB.query(sql, [{int: rnd}, {string: tag}]);
+		var rnd = Zotero.getRandomID('tags', 'tagID');
+		Zotero.DB.query(sql, [{int: rnd}, {string: tag}]);
 		
-		Scholar.DB.commitTransaction();
+		Zotero.DB.commitTransaction();
 		return rnd;
 	}
 	
@@ -2755,7 +2755,7 @@ Scholar.Tags = new function(){
 	function purge(){
 		var sql = 'SELECT tagID FROM tags WHERE tagID NOT IN '
 			+ '(SELECT tagID FROM itemTags);';
-		var toDelete = Scholar.DB.columnQuery(sql);
+		var toDelete = Zotero.DB.columnQuery(sql);
 		
 		if (!toDelete){
 			return false;
@@ -2770,7 +2770,7 @@ Scholar.Tags = new function(){
 		
 		sql = 'DELETE FROM tags WHERE tagID NOT IN '
 			+ '(SELECT tagID FROM itemTags);';
-		var result = Scholar.DB.query(sql);
+		var result = Zotero.DB.query(sql);
 		
 		return toDelete;
 	}
@@ -2785,8 +2785,8 @@ Scholar.Tags = new function(){
  *
  * Extend using the following code within a child constructor:
  *
- * 	Scholar.CachedTypes.apply(this, arguments);
- *  this.constructor.prototype = new Scholar.CachedTypes();
+ * 	Zotero.CachedTypes.apply(this, arguments);
+ *  this.constructor.prototype = new Zotero.CachedTypes();
  *
  * And the following properties:
  *
@@ -2797,7 +2797,7 @@ Scholar.Tags = new function(){
  *	this._ignoreCase = false;
  * 
  */
-Scholar.CachedTypes = function(){
+Zotero.CachedTypes = function(){
 	var _types = new Array();
 	var _typesLoaded;
 	var self = this;
@@ -2824,7 +2824,7 @@ Scholar.CachedTypes = function(){
 		}
 		
 		if (!_types[idOrName]){
-			Scholar.debug('Invalid ' + this._typeDesc + ' ' + idOrName, 1);
+			Zotero.debug('Invalid ' + this._typeDesc + ' ' + idOrName, 1);
 			return '';
 		}
 		
@@ -2843,7 +2843,7 @@ Scholar.CachedTypes = function(){
 		}
 		
 		if (!_types[idOrName]){
-			Scholar.debug('Invalid ' + this._typeDesc + ' ' + idOrName, 1);
+			Zotero.debug('Invalid ' + this._typeDesc + ' ' + idOrName, 1);
 			return false;
 		}
 		
@@ -2852,7 +2852,7 @@ Scholar.CachedTypes = function(){
 	
 	
 	function getTypes(where){
-		return Scholar.DB.query('SELECT ' + this._idCol + ' AS id, '
+		return Zotero.DB.query('SELECT ' + this._idCol + ' AS id, '
 			+ this._nameCol + ' AS name FROM ' + this._table
 			+ (where ? ' ' + where : '') + ' ORDER BY ' + this._nameCol);
 	}
@@ -2881,9 +2881,9 @@ Scholar.CachedTypes = function(){
 }
 
 
-Scholar.CreatorTypes = new function(){
-	Scholar.CachedTypes.apply(this, arguments);
-	this.constructor.prototype = new Scholar.CachedTypes();
+Zotero.CreatorTypes = new function(){
+	Zotero.CachedTypes.apply(this, arguments);
+	this.constructor.prototype = new Zotero.CachedTypes();
 	
 	this._typeDesc = 'creator type';
 	this._idCol = 'creatorTypeID';
@@ -2892,9 +2892,9 @@ Scholar.CreatorTypes = new function(){
 }
 
 
-Scholar.ItemTypes = new function(){
-	Scholar.CachedTypes.apply(this, arguments);
-	this.constructor.prototype = new Scholar.CachedTypes();
+Zotero.ItemTypes = new function(){
+	Zotero.CachedTypes.apply(this, arguments);
+	this.constructor.prototype = new Zotero.CachedTypes();
 	
 	this.getPrimaryTypes = getPrimaryTypes;
 	this.getSecondaryTypes = getSecondaryTypes;
@@ -2919,9 +2919,9 @@ Scholar.ItemTypes = new function(){
 }
 
 
-Scholar.FileTypes = new function(){
-	Scholar.CachedTypes.apply(this, arguments);
-	this.constructor.prototype = new Scholar.CachedTypes();
+Zotero.FileTypes = new function(){
+	Zotero.CachedTypes.apply(this, arguments);
+	this.constructor.prototype = new Zotero.CachedTypes();
 	
 	this._typeDesc = 'file type';
 	this._idCol = 'fileTypeID';
@@ -2934,14 +2934,14 @@ Scholar.FileTypes = new function(){
 		var sql = "SELECT fileTypeID FROM fileTypeMIMETypes "
 			+ "WHERE ? LIKE mimeType || '%'";
 			
-		return Scholar.DB.valueQuery(sql, [mimeType]);
+		return Zotero.DB.valueQuery(sql, [mimeType]);
 	}
 }
 
 
-Scholar.CharacterSets = new function(){
-	Scholar.CachedTypes.apply(this, arguments);
-	this.constructor.prototype = new Scholar.CachedTypes();
+Zotero.CharacterSets = new function(){
+	Zotero.CachedTypes.apply(this, arguments);
+	this.constructor.prototype = new Zotero.CachedTypes();
 	
 	this._typeDesc = 'character sets';
 	this._idCol = 'charsetID';
@@ -2959,7 +2959,7 @@ Scholar.CharacterSets = new function(){
 
 
 
-Scholar.ItemFields = new function(){
+Zotero.ItemFields = new function(){
 	// Private members
 	var _fields = new Array();
 	var _fieldFormats = new Array();
@@ -3030,7 +3030,7 @@ Scholar.ItemFields = new function(){
 		}
 		
 		if (!itemTypeID){
-			Scholar.debug("Invalid item type id '" + itemTypeID
+			Zotero.debug("Invalid item type id '" + itemTypeID
 				+ "' provided to getItemTypeFields()", 1);
 			return [];
 		}
@@ -3038,7 +3038,7 @@ Scholar.ItemFields = new function(){
 		var sql = 'SELECT fieldID FROM itemTypeFields '
 			+ 'WHERE itemTypeID=' + itemTypeID + ' ORDER BY orderIndex';
 		
-		_itemTypeFields[itemTypeID] = Scholar.DB.columnQuery(sql);
+		_itemTypeFields[itemTypeID] = Zotero.DB.columnQuery(sql);
 		return _itemTypeFields[itemTypeID];
 	}
 	
@@ -3063,7 +3063,7 @@ Scholar.ItemFields = new function(){
 	function _getFieldItemTypes(){
 		var sql = 'SELECT fieldID, itemTypeID FROM itemTypeFields';
 		
-		var results = Scholar.DB.query(sql);
+		var results = Zotero.DB.query(sql);
 		
 		if (!results){
 			throw ('No fields in itemTypeFields!');
@@ -3085,7 +3085,7 @@ Scholar.ItemFields = new function(){
 	function _loadFields(){
 		var i,len;
 		
-		var result = Scholar.DB.query('SELECT * FROM fieldFormats');
+		var result = Zotero.DB.query('SELECT * FROM fieldFormats');
 		
 		for (i=0; i<result.length; i++){
 			_fieldFormats[result[i]['fieldFormatID']] = {
@@ -3094,7 +3094,7 @@ Scholar.ItemFields = new function(){
 			};
 		}
 		
-		result = Scholar.DB.query('SELECT * FROM fields');
+		result = Zotero.DB.query('SELECT * FROM fields');
 		
 		if (!result.length){
 			throw ('No fields in database!');
@@ -3121,15 +3121,15 @@ Scholar.ItemFields = new function(){
 
 
 /*
- * Scholar.getCollections(parent)
+ * Zotero.getCollections(parent)
  *
  * Returns an array of all collections are children of a collection
- * as Scholar.Collection instances
+ * as Zotero.Collection instances
  *
  * Takes parent collectionID as optional parameter;
  * by default, returns root collections
  */
-Scholar.getCollections = function(parent, recursive){
+Zotero.getCollections = function(parent, recursive){
 	var toReturn = new Array();
 	
 	if (!parent){
@@ -3141,15 +3141,15 @@ Scholar.getCollections = function(parent, recursive){
 	
 	sql += ' ORDER BY collectionName';
 	
-	var children = Scholar.DB.columnQuery(sql);
+	var children = Zotero.DB.columnQuery(sql);
 	
 	if (!children){
-		Scholar.debug('No child collections of collection ' + parent, 5);
+		Zotero.debug('No child collections of collection ' + parent, 5);
 		return toReturn;
 	}
 	
 	for (var i=0, len=children.length; i<len; i++){
-		var obj = Scholar.Collections.get(children[i]);
+		var obj = Zotero.Collections.get(children[i]);
 		if (!obj){
 			throw ('Collection ' + children[i] + ' not found');
 		}
@@ -3160,7 +3160,7 @@ Scholar.getCollections = function(parent, recursive){
 		if (recursive){
 			var desc = obj.getDescendents(false, 'collection');
 			for (var j in desc){
-				var obj2 = Scholar.Collections.get(desc[j]['id']);
+				var obj2 = Zotero.Collections.get(desc[j]['id']);
 				if (!obj2){
 					throw ('Collection ' + desc[j] + ' not found');
 				}
@@ -3175,12 +3175,12 @@ Scholar.getCollections = function(parent, recursive){
 
 
 /*
- * Scholar.getItems(parent)
+ * Zotero.getItems(parent)
  *
  * Returns an array of all items that are children of a collection--or all
- * items if no parent provided--as Scholar.Item instances
+ * items if no parent provided--as Zotero.Item instances
  */
-Scholar.getItems = function(parent){
+Zotero.getItems = function(parent){
 	var toReturn = new Array();
 	
 	if (!parent){
@@ -3194,28 +3194,28 @@ Scholar.getItems = function(parent){
 			+ 'WHERE collectionID=' + parent;
 	}
 	
-	var children = Scholar.DB.columnQuery(sql);
+	var children = Zotero.DB.columnQuery(sql);
 	
 	if (!children){
 		if (!parent){
-			Scholar.debug('No items in library', 5);
+			Zotero.debug('No items in library', 5);
 		}
 		else {
-			Scholar.debug('No child items of collection ' + parent, 5);
+			Zotero.debug('No child items of collection ' + parent, 5);
 		}
 		return toReturn;
 	}
 	
-	return Scholar.Items.get(children);
+	return Zotero.Items.get(children);
 }
 
 
-Scholar.getAttachments = function(){
+Zotero.getAttachments = function(){
 	var toReturn = [];
 	
 	var sql = "SELECT A.itemID FROM items A JOIN itemAttachments B ON "
 		+ "(B.itemID=A.itemID) WHERE B.sourceItemID IS NULL";
-	var items = Scholar.DB.query(itemAttachments);
+	var items = Zotero.DB.query(itemAttachments);
 	
-	return Scholar.Items.get(items);
+	return Zotero.Items.get(items);
 }

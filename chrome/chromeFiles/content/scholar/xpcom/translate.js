@@ -1,10 +1,10 @@
-// Scholar for Firefox Translate Engine
+// Zotero for Firefox Translate Engine
 
 /*
- * Scholar.Translate: a class for translation of Scholar metadata from and to
+ * Zotero.Translate: a class for translation of Zotero metadata from and to
  * other formats
  *
- * eventually, Scholar.Ingester may be rolled in here (i.e., after we get rid
+ * eventually, Zotero.Ingester may be rolled in here (i.e., after we get rid
  * of RDF)
  *
  * type can be: 
@@ -14,7 +14,7 @@
  * search
  *
  * a typical export process:
- * var translatorObj = new Scholar.Translate();
+ * var translatorObj = new Zotero.Translate();
  * var possibleTranslators = translatorObj.getTranslators();
  * // do something involving nsIFilePicker; remember, each possibleTranslator
  * // object has properties translatorID, label, and targetID
@@ -36,8 +36,8 @@
  *            for web - this is a URL
  * search - item (in toArray() format) to extrapolate data for (read-only; set
  *          with setSearch).
- * items - items (in Scholar.Item format) to be exported. if this is empty,
- *         Scholar will export all items in the library (read-only; set with
+ * items - items (in Zotero.Item format) to be exported. if this is empty,
+ *         Zotero will export all items in the library (read-only; set with
  *         setItems). setting items disables export of collections.
  * path - the path to the target; for web, this is the same as location
  * string - the string content to be used as a file.
@@ -51,13 +51,13 @@
  * _numericTypes - possible numeric types as a comma-delimited string
  * _handlers - handlers for various events (see setHandler)
  * _configOptions - options set by translator modifying behavior of
- *                  Scholar.Translate
+ *                  Zotero.Translate
  * _displayOptions - options available to user for this specific translator
  * _waitForCompletion - whether to wait for asynchronous completion, or return
  *                      immediately when script has finished executing
  * _sandbox - sandbox in which translators will be executed
  * _streams - streams that need to be closed when execution is complete
- * _IDMap - a map from IDs as specified in Scholar.Item() to IDs of actual items
+ * _IDMap - a map from IDs as specified in Zotero.Item() to IDs of actual items
  * _parentTranslator - set when a translator is called from another translator. 
  *                     among other things, disables passing of the translate
  *                     object to handlers and modifies complete() function on 
@@ -75,7 +75,7 @@
  *                            preferences
  */
 
-Scholar.Translate = function(type, saveItem) {
+Zotero.Translate = function(type, saveItem) {
 	this.type = type;
 	
 	// import = 0001 = 1
@@ -120,22 +120,22 @@ Scholar.Translate = function(type, saveItem) {
  * (singleton) initializes scrapers, loading from the database and separating
  * into types
  */
-Scholar.Translate.init = function() {
-	if(!Scholar.Translate.cache) {
-		var cachePref = Scholar.Prefs.get("cacheTranslatorData");
+Zotero.Translate.init = function() {
+	if(!Zotero.Translate.cache) {
+		var cachePref = Zotero.Prefs.get("cacheTranslatorData");
 		
 		if(cachePref) {
 			// fetch translator list
-			var translators = Scholar.DB.query("SELECT translatorID, translatorType, label, "+
+			var translators = Zotero.DB.query("SELECT translatorID, translatorType, label, "+
 				"target, detectCode IS NULL as noDetectCode FROM translators "+
 				"ORDER BY target IS NULL, priority, label");
-			var detectCodes = Scholar.DB.query("SELECT translatorID, detectCode FROM translators WHERE target IS NULL");
+			var detectCodes = Zotero.DB.query("SELECT translatorID, detectCode FROM translators WHERE target IS NULL");
 			
-			Scholar.Translate.cache = new Object();
-			Scholar.Translate.cache["import"] = new Array();
-			Scholar.Translate.cache["export"] = new Array();
-			Scholar.Translate.cache["web"] = new Array();
-			Scholar.Translate.cache["search"] = new Array();
+			Zotero.Translate.cache = new Object();
+			Zotero.Translate.cache["import"] = new Array();
+			Zotero.Translate.cache["export"] = new Array();
+			Zotero.Translate.cache["web"] = new Array();
+			Zotero.Translate.cache["search"] = new Array();
 			
 			for each(translator in translators) {
 				var type = translator.translatorType;
@@ -155,13 +155,13 @@ Scholar.Translate.init = function() {
 					var regexp = new RegExp();
 					regexp.compile("\."+translator.target+"$", "i");
 					wrappedTranslator.importRegexp = regexp;
-					Scholar.Translate.cache["import"].push(wrappedTranslator);
+					Zotero.Translate.cache["import"].push(wrappedTranslator);
 					type -= mod;
 				}
 				// search translator
 				var mod = type % 4;
 				if(mod) {
-					Scholar.Translate.cache["export"].push(wrappedTranslator);
+					Zotero.Translate.cache["export"].push(wrappedTranslator);
 					type -= mod;
 				}
 				// web translator
@@ -170,7 +170,7 @@ Scholar.Translate.init = function() {
 					var regexp = new RegExp();
 					regexp.compile(translator.target, "i");
 					wrappedTranslator.webRegexp = regexp;
-					Scholar.Translate.cache["web"].push(wrappedTranslator);
+					Zotero.Translate.cache["web"].push(wrappedTranslator);
 					
 					if(!translator.target) {
 						for each(var detectCode in detectCodes) {
@@ -184,7 +184,7 @@ Scholar.Translate.init = function() {
 				// search translator
 				var mod = type % 16;
 				if(mod) {
-					Scholar.Translate.cache["search"].push(wrappedTranslator);
+					Zotero.Translate.cache["search"].push(wrappedTranslator);
 					type -= mod;
 				}
 			}
@@ -196,7 +196,7 @@ Scholar.Translate.init = function() {
 /*
  * sets the browser to be used for web translation; also sets the location
  */
-Scholar.Translate.prototype.setDocument = function(doc) {
+Zotero.Translate.prototype.setDocument = function(doc) {
 	this.document = doc;
 	this.setLocation(doc.location.href);
 }
@@ -204,14 +204,14 @@ Scholar.Translate.prototype.setDocument = function(doc) {
 /*
  * sets the item to be used for searching
  */
-Scholar.Translate.prototype.setSearch = function(search) {
+Zotero.Translate.prototype.setSearch = function(search) {
 	this.search = search;
 }
 
 /*
  * sets the item to be used for export
  */
-Scholar.Translate.prototype.setItems = function(items) {
+Zotero.Translate.prototype.setItems = function(items) {
 	this.items = items;
 }
 
@@ -219,10 +219,10 @@ Scholar.Translate.prototype.setItems = function(items) {
  * sets the location to operate upon (file should be an nsILocalFile object or
  * web address)
  */
-Scholar.Translate.prototype.setLocation = function(location) {
+Zotero.Translate.prototype.setLocation = function(location) {
 	if(this.type == "web") {
 		// account for proxies
-		this.location = Scholar.Ingester.ProxyMonitor.proxyToProper(location);
+		this.location = Zotero.Ingester.ProxyMonitor.proxyToProper(location);
 		if(this.location != location) {
 			// figure out if this URL is being proxies
 			this.locationIsProxied = true;
@@ -241,7 +241,7 @@ Scholar.Translate.prototype.setLocation = function(location) {
 /*
  * sets the string to be used as a file
  */
-Scholar.Translate.prototype.setString = function(string) {
+Zotero.Translate.prototype.setString = function(string) {
 	this._storage = string;
 	this._storageLength = string.length;
 	this._storagePointer = 0;
@@ -251,7 +251,7 @@ Scholar.Translate.prototype.setString = function(string) {
  * sets translator display options. you can also pass a translator (not ID) to
  * setTranslator that includes a displayOptions argument
  */
-Scholar.Translate.prototype.setDisplayOptions = function(displayOptions) {
+Zotero.Translate.prototype.setDisplayOptions = function(displayOptions) {
 	this._setDisplayOptions = displayOptions;
 }
 
@@ -260,7 +260,7 @@ Scholar.Translate.prototype.setDisplayOptions = function(displayOptions) {
  *
  * accepts either the object from getTranslators() or an ID
  */
-Scholar.Translate.prototype.setTranslator = function(translator) {
+Zotero.Translate.prototype.setTranslator = function(translator) {
 	if(!translator) {
 		throw("cannot set translator: invalid value");
 	}
@@ -305,7 +305,7 @@ Scholar.Translate.prototype.setTranslator = function(translator) {
 	where = where.substr(4);
 	
 	var sql = "SELECT * FROM translators WHERE "+where+" AND translatorType IN ("+this._numericTypes+")";
-	this.translator = Scholar.DB.query(sql, translator);
+	this.translator = Zotero.DB.query(sql, translator);
 	if(!this.translator) {
 		return false;
 	}
@@ -335,14 +335,14 @@ Scholar.Translate.prototype.setTranslator = function(translator) {
  * itemDone
  *   valid: import, web, search
  *   called: when an item has been processed; may be called asynchronously
- *   passed: an item object (see Scholar.Item)
+ *   passed: an item object (see Zotero.Item)
  *   returns: N/A
  *
  * collectionDone
  *   valid: import
  *   called: when a collection has been processed, after all items have been
  *           added; may be called asynchronously
- *   passed: a collection object (see Scholar.Collection)
+ *   passed: a collection object (see Zotero.Collection)
  *   returns: N/A
  * 
  * done
@@ -351,7 +351,7 @@ Scholar.Translate.prototype.setTranslator = function(translator) {
  *   passed: true if successful, false if an error occurred
  *   returns: N/A
  */
-Scholar.Translate.prototype.setHandler = function(type, handler) {
+Zotero.Translate.prototype.setHandler = function(type, handler) {
 	if(!this._handlers[type]) {
 		this._handlers[type] = new Array();
 	}
@@ -371,24 +371,24 @@ Scholar.Translate.prototype.setHandler = function(type, handler) {
  * label - the name of the translator
  * itemType - the type of item this scraper says it will scrape
  */
-Scholar.Translate.prototype.getTranslators = function() {
+Zotero.Translate.prototype.getTranslators = function() {
 	// clear BOM
 	this._hasBOM = null;
 	
-	if(Scholar.Translate.cache) {
-		var translators = Scholar.Translate.cache[this.type];
+	if(Zotero.Translate.cache) {
+		var translators = Zotero.Translate.cache[this.type];
 	} else {
 		var sql = "SELECT translatorID, label, target, detectCode IS NULL as "+
 			"noDetectCode FROM translators WHERE translatorType IN ("+this._numericTypes+") "+
 			"ORDER BY target IS NULL, priority, label";
-		var translators = Scholar.DB.query(sql);
+		var translators = Zotero.DB.query(sql);
 	}
 	
 	// create a new sandbox
 	this._generateSandbox();
 	
 	var possibleTranslators = new Array();
-	Scholar.debug("searching for translators for "+(this.path ? this.path : "an undisclosed location"));
+	Zotero.debug("searching for translators for "+(this.path ? this.path : "an undisclosed location"));
 	
 	// see which translators can translate
 	var possibleTranslators = this._findTranslators(translators);
@@ -403,11 +403,11 @@ Scholar.Translate.prototype.getTranslators = function() {
  * extension-based exclusion is inverted, so that only detectCode is used to
  * determine if a translator can be run.
  */
-Scholar.Translate.prototype._findTranslators = function(translators, ignoreExtensions) {
+Zotero.Translate.prototype._findTranslators = function(translators, ignoreExtensions) {
 	var possibleTranslators = new Array();
 	for(var i in translators) {
 		if(this._canTranslate(translators[i], ignoreExtensions)) {
-			Scholar.debug("found translator "+translators[i].label);
+			Zotero.debug("found translator "+translators[i].label);
 			
 			// for some reason, and i'm not quite sure what this reason is,
 			// we HAVE to do this to get things to work right; we can't
@@ -424,7 +424,7 @@ Scholar.Translate.prototype._findTranslators = function(translators, ignoreExten
 		}
 	}
 	if(!possibleTranslators.length && this.type == "import" && !ignoreExtensions) {
-		Scholar.debug("looking a second time");
+		Zotero.debug("looking a second time");
 		// try search again, ignoring file extensions
 		return this._findTranslators(translators, true);
 	}
@@ -434,7 +434,7 @@ Scholar.Translate.prototype._findTranslators = function(translators, ignoreExten
 /*
  * loads a translator into a sandbox
  */
-Scholar.Translate.prototype._loadTranslator = function() {
+Zotero.Translate.prototype._loadTranslator = function() {
 	if(!this._sandbox || this.type == "search") {
 		// create a new sandbox if none exists, or for searching (so that it's
 		// bound to the correct url)
@@ -444,7 +444,7 @@ Scholar.Translate.prototype._loadTranslator = function() {
 	// parse detect code for the translator
 	this._parseDetectCode(this.translator[0]);
 	
-	Scholar.debug("parsing code for "+this.translator[0].label);
+	Zotero.debug("parsing code for "+this.translator[0].label);
 	
 	try {
 		Components.utils.evalInSandbox(this.translator[0].code, this._sandbox);
@@ -452,7 +452,7 @@ Scholar.Translate.prototype._loadTranslator = function() {
 		if(this._parentTranslator) {
 			throw(e);
 		} else {
-			Scholar.debug(e+' in parsing code for '+this.translator[0].label);
+			Zotero.debug(e+' in parsing code for '+this.translator[0].label);
 			this._translationComplete(false, e);
 			return false;
 		}
@@ -464,8 +464,8 @@ Scholar.Translate.prototype._loadTranslator = function() {
 /*
  * does the actual translation
  */
-Scholar.Translate.prototype.translate = function() {
-	Scholar.debug("translate called");
+Zotero.Translate.prototype.translate = function() {
+	Zotero.debug("translate called");
 	
 	/*
 	 * initialize properties
@@ -520,9 +520,9 @@ Scholar.Translate.prototype.translate = function() {
 /*
  * generates a sandbox for scraping/scraper detection
  */
-Scholar.Translate._searchSandboxRegexp = new RegExp();
-Scholar.Translate._searchSandboxRegexp.compile("^http://[\\w.]+/");
-Scholar.Translate.prototype._generateSandbox = function() {
+Zotero.Translate._searchSandboxRegexp = new RegExp();
+Zotero.Translate._searchSandboxRegexp.compile("^http://[\\w.]+/");
+Zotero.Translate.prototype._generateSandbox = function() {
 	var me = this;
 	
 	if(this.type == "web" || this.type == "search") {
@@ -537,45 +537,45 @@ Scholar.Translate.prototype._generateSandbox = function() {
 			if(this.translator && this.translator[0] && this.translator[0].target) {
 				// so that web translators work too
 				var tempURL = this.translator[0].target.replace(/\\/g, "").replace(/\^/g, "");
-				var m = Scholar.Translate._searchSandboxRegexp.exec(tempURL);
+				var m = Zotero.Translate._searchSandboxRegexp.exec(tempURL);
 				if(m) {
 					sandboxURL = m[0];
 				}
 			} 
 		}
-		Scholar.debug("binding sandbox to "+sandboxURL);
+		Zotero.debug("binding sandbox to "+sandboxURL);
 		this._sandbox = new Components.utils.Sandbox(sandboxURL);
-		this._sandbox.Scholar = new Object();
+		this._sandbox.Zotero = new Object();
 		
 		// add ingester utilities
-		this._sandbox.Scholar.Utilities = new Scholar.Utilities.Ingester(this);
-		this._sandbox.Scholar.Utilities.HTTP = new Scholar.Utilities.Ingester.HTTP(this);
+		this._sandbox.Zotero.Utilities = new Zotero.Utilities.Ingester(this);
+		this._sandbox.Zotero.Utilities.HTTP = new Zotero.Utilities.Ingester.HTTP(this);
 		
 		// set up selectItems handler
-		this._sandbox.Scholar.selectItems = function(options) { return me._selectItems(options) };
+		this._sandbox.Zotero.selectItems = function(options) { return me._selectItems(options) };
 	} else {
 		// use null URL to create sandbox
 		this._sandbox = new Components.utils.Sandbox("");
-		this._sandbox.Scholar = new Object();
+		this._sandbox.Zotero = new Object();
 		
-		this._sandbox.Scholar.Utilities = new Scholar.Utilities();
+		this._sandbox.Zotero.Utilities = new Zotero.Utilities();
 	}
 	
 	
 	if(this.type == "export") {
 		// add routines to retrieve items and collections
-		this._sandbox.Scholar.nextItem = function() { return me._exportGetItem() };
-		this._sandbox.Scholar.nextCollection = function() { return me._exportGetCollection() }
+		this._sandbox.Zotero.nextItem = function() { return me._exportGetItem() };
+		this._sandbox.Zotero.nextCollection = function() { return me._exportGetCollection() }
 	} else {
 		// copy routines to add new items
-		this._sandbox.Scholar.Item = Scholar.Translate.GenerateScholarItemClass();
-		this._sandbox.Scholar.Item.prototype.complete = function() {me._itemDone(this)};
+		this._sandbox.Zotero.Item = Zotero.Translate.GenerateZoteroItemClass();
+		this._sandbox.Zotero.Item.prototype.complete = function() {me._itemDone(this)};
 		
 		if(this.type == "import") {
 			// add routines to add new collections
-			this._sandbox.Scholar.Collection = Scholar.Translate.GenerateScholarItemClass();
+			this._sandbox.Zotero.Collection = Zotero.Translate.GenerateZoteroItemClass();
 			// attach the function to be run when a collection is done
-			this._sandbox.Scholar.Collection.prototype.complete = function() {me._collectionDone(this)};
+			this._sandbox.Zotero.Collection.prototype.complete = function() {me._collectionDone(this)};
 		}
 	}
 	
@@ -583,17 +583,17 @@ Scholar.Translate.prototype._generateSandbox = function() {
 	
 	// for asynchronous operation, use wait()
 	// done() is implemented after wait() is called
-	this._sandbox.Scholar.wait = function() { me._enableAsynchronous() };
+	this._sandbox.Zotero.wait = function() { me._enableAsynchronous() };
 	// for adding configuration options
-	this._sandbox.Scholar.configure = function(option, value) {me._configure(option, value) };
+	this._sandbox.Zotero.configure = function(option, value) {me._configure(option, value) };
 	// for adding displayed options
-	this._sandbox.Scholar.addOption = function(option, value) {me._addOption(option, value) };
+	this._sandbox.Zotero.addOption = function(option, value) {me._addOption(option, value) };
 	// for getting the value of displayed options
-	this._sandbox.Scholar.getOption = function(option) { return me._getOption(option) };
+	this._sandbox.Zotero.getOption = function(option) { return me._getOption(option) };
 	
 	// for loading other translators and accessing their methods
-	this._sandbox.Scholar.loadTranslator = function(type) {
-		var translation = new Scholar.Translate(type, false);
+	this._sandbox.Zotero.loadTranslator = function(type) {
+		var translation = new Zotero.Translate(type, false);
 		translation._parentTranslator = me;
 		
 		if(type == "export" && (this.type == "web" || this.type == "search")) {
@@ -657,7 +657,7 @@ Scholar.Translate.prototype._generateSandbox = function() {
 /*
  * Check to see if _scraper_ can scrape this document
  */
-Scholar.Translate.prototype._canTranslate = function(translator, ignoreExtensions) {
+Zotero.Translate.prototype._canTranslate = function(translator, ignoreExtensions) {
 	if((this.type == "import" || this.type == "web") && !this.location) {
 		// if no location yet (e.g., getting list of possible web translators),
 		// just return true
@@ -710,7 +710,7 @@ Scholar.Translate.prototype._canTranslate = function(translator, ignoreExtension
 			try {
 				this._importConfigureIO();	// so it can read
 			} catch(e) {
-				Scholar.debug(e+' in opening IO for '+translator.label);
+				Zotero.debug(e+' in opening IO for '+translator.label);
 				return false;
 			}
 		}
@@ -732,11 +732,11 @@ Scholar.Translate.prototype._canTranslate = function(translator, ignoreExtension
 					returnValue = this._sandbox.detectExport();
 				}
 			} catch(e) {
-				Scholar.debug(e+' in executing detectCode for '+translator.label);
+				Zotero.debug(e+' in executing detectCode for '+translator.label);
 				return false;
 			}
 			
-			Scholar.debug("executed detectCode for "+translator.label);
+			Zotero.debug("executed detectCode for "+translator.label);
 					
 			// detectCode returns text type
 			if(returnValue) {
@@ -757,7 +757,7 @@ Scholar.Translate.prototype._canTranslate = function(translator, ignoreExtension
 /*
  * parses translator detect code
  */
-Scholar.Translate.prototype._parseDetectCode = function(translator) {
+Zotero.Translate.prototype._parseDetectCode = function(translator) {
 	this._configOptions = new Array();
 	this._displayOptions = new Array();
 	
@@ -765,7 +765,7 @@ Scholar.Translate.prototype._parseDetectCode = function(translator) {
 		var detectCode = translator.detectCode;
 	} else if(!translator.noDetectCode) {
 		// get detect code from database
-		var detectCode = Scholar.DB.valueQuery("SELECT detectCode FROM translators WHERE translatorID = ?",
+		var detectCode = Zotero.DB.valueQuery("SELECT detectCode FROM translators WHERE translatorID = ?",
 		                                       [translator.translatorID]);
 	}
 	
@@ -773,7 +773,7 @@ Scholar.Translate.prototype._parseDetectCode = function(translator) {
 		try {
 			Components.utils.evalInSandbox(detectCode, this._sandbox);
 		} catch(e) {
-			Scholar.debug(e+' in parsing detectCode for '+translator.label);
+			Zotero.debug(e+' in parsing detectCode for '+translator.label);
 			return;
 		}
 	}
@@ -799,9 +799,9 @@ Scholar.Translate.prototype._parseDetectCode = function(translator) {
  *            collections and children in addition to the array of items and
  *            children
  */
-Scholar.Translate.prototype._configure = function(option, value) {
+Zotero.Translate.prototype._configure = function(option, value) {
 	this._configOptions[option] = value;
-	Scholar.debug("setting configure option "+option+" to "+value);
+	Zotero.debug("setting configure option "+option+" to "+value);
 }
 
 /*
@@ -811,9 +811,9 @@ Scholar.Translate.prototype._configure = function(option, value) {
  *
  * current options are exportNotes and exportFileData
  */
-Scholar.Translate.prototype._addOption = function(option, value) {
+Zotero.Translate.prototype._addOption = function(option, value) {
 	this._displayOptions[option] = value;
-	Scholar.debug("setting display option "+option+" to "+value);
+	Zotero.debug("setting display option "+option+" to "+value);
 }
 
 /*
@@ -822,7 +822,7 @@ Scholar.Translate.prototype._addOption = function(option, value) {
  * called as getOption() in detect code
  *
  */
-Scholar.Translate.prototype._getOption = function(option) {
+Zotero.Translate.prototype._getOption = function(option) {
 	return this._displayOptions[option];
 }
 
@@ -832,10 +832,10 @@ Scholar.Translate.prototype._getOption = function(option) {
  * 
  * called as wait() in translator code
  */
-Scholar.Translate.prototype._enableAsynchronous = function() {
+Zotero.Translate.prototype._enableAsynchronous = function() {
 	var me = this;
 	this._waitForCompletion = true;
-	this._sandbox.Scholar.done = function() { me._translationComplete(true) };
+	this._sandbox.Zotero.done = function() { me._translationComplete(true) };
 }
 
 /*
@@ -843,7 +843,7 @@ Scholar.Translate.prototype._enableAsynchronous = function() {
  * 
  * called as selectItems() in translator code
  */
-Scholar.Translate.prototype._selectItems = function(options) {
+Zotero.Translate.prototype._selectItems = function(options) {
 	// hack to see if there are options
 	var haveOptions = false;
 	for(var i in options) {
@@ -868,7 +868,7 @@ Scholar.Translate.prototype._selectItems = function(options) {
  *
  * finishes things up and calls callback function(s)
  */
-Scholar.Translate.prototype._translationComplete = function(returnValue, error) {
+Zotero.Translate.prototype._translationComplete = function(returnValue, error) {
 	// to make sure this isn't called twice
 	if(!this._complete) {
 		this._complete = true;
@@ -876,7 +876,7 @@ Scholar.Translate.prototype._translationComplete = function(returnValue, error) 
 		if(this.type == "search" && !this._itemsFound && this.translator.length > 1) {
 			// if we're performing a search and didn't get any results, go on
 			// to the next translator
-			Scholar.debug("could not find a result using "+this.translator[0].label+": \n"
+			Zotero.debug("could not find a result using "+this.translator[0].label+": \n"
 			              +this._generateErrorString(error));
 			this.translator.shift();
 			this.translate();
@@ -884,14 +884,14 @@ Scholar.Translate.prototype._translationComplete = function(returnValue, error) 
 			// close open streams
 			this._closeStreams();
 			
-			if(Scholar.Notifier.isEnabled()) {
+			if(Zotero.Notifier.isEnabled()) {
 				// notify itemTreeView about updates
 				if(this.newItems.length) {
-					Scholar.Notifier.trigger("add", "item", this.newItems);
+					Zotero.Notifier.trigger("add", "item", this.newItems);
 				}
 				// notify collectionTreeView about updates
 				if(this.newCollections && this.newCollections.length) {
-					Scholar.Notifier.trigger("add", "collection", this.newCollections);
+					Zotero.Notifier.trigger("add", "collection", this.newCollections);
 				}
 			}
 			
@@ -900,14 +900,14 @@ Scholar.Translate.prototype._translationComplete = function(returnValue, error) 
 			
 			if(!returnValue) {
 				var errorString = this._generateErrorString(error);
-				Scholar.debug("translation using "+this.translator[0].label+" failed: \n"+errorString);
+				Zotero.debug("translation using "+this.translator[0].label+" failed: \n"+errorString);
 				
 				if(this.type == "web") {
 					// report translation error for webpages
 					this._reportTranslationFailure(errorString);
 				}
 			} else {
-				Scholar.debug("translation successful");
+				Zotero.debug("translation successful");
 			}
 		}
 	}
@@ -916,7 +916,7 @@ Scholar.Translate.prototype._translationComplete = function(returnValue, error) 
 /*
  * generates a useful error string, for submitting and debugging purposes
  */
-Scholar.Translate.prototype._generateErrorString = function(error) {
+Zotero.Translate.prototype._generateErrorString = function(error) {
 	var errorString = "";
 	if(typeof(error) == "string") {
 		errorString = "\nthrown exception => "+error;
@@ -929,27 +929,27 @@ Scholar.Translate.prototype._generateErrorString = function(error) {
 	}
 	
 	errorString += "\nurl => "+this.path
-		+ "\nextensions.zotero.cacheTranslatorData => "+Scholar.Prefs.get("cacheTranslatorData")
-		+ "\nextensions.zotero.downloadAssociatedFiles => "+Scholar.Prefs.get("downloadAssociatedFiles");
+		+ "\nextensions.zotero.cacheTranslatorData => "+Zotero.Prefs.get("cacheTranslatorData")
+		+ "\nextensions.zotero.downloadAssociatedFiles => "+Zotero.Prefs.get("downloadAssociatedFiles");
 	return errorString.substr(1);
 }
 
 /*
  * runs an HTTP request to report a translation error
  */
-Scholar.Translate.prototype._reportTranslationFailure = function(errorData) {
-	if(this.translator[0].inRepository && Scholar.Prefs.get("reportTranslationFailure")) {
+Zotero.Translate.prototype._reportTranslationFailure = function(errorData) {
+	if(this.translator[0].inRepository && Zotero.Prefs.get("reportTranslationFailure")) {
 		var postBody = "ids[]="+escape(this.translator[0].translatorID)+
 					   "&lastUpdated="+escape(this.translator[0].lastUpdated)+
 					   "&errorData="+escape(errorData);
-		Scholar.Utilities.HTTP.doPost("http://www.zotero.org/repo/report", postBody);
+		Zotero.Utilities.HTTP.doPost("http://www.zotero.org/repo/report", postBody);
 	}
 }
 
 /*
  * closes open file streams, if any exist
  */
-Scholar.Translate.prototype._closeStreams = function() {
+Zotero.Translate.prototype._closeStreams = function() {
 	// serialize RDF and unregister dataSource
 	if(this._rdf) {
 		if(this._rdf.serializer) {
@@ -996,16 +996,16 @@ Scholar.Translate.prototype._closeStreams = function() {
 /*
  * imports an attachment from the disk
  */
-Scholar.Translate.prototype._itemImportAttachment = function(attachment, sourceID) {
+Zotero.Translate.prototype._itemImportAttachment = function(attachment, sourceID) {
 	if(!attachment.path) {
 		// create from URL
 		if(attachment.url) {
-			var attachmentID = Scholar.Attachments.linkFromURL(attachment.url, sourceID,
+			var attachmentID = Zotero.Attachments.linkFromURL(attachment.url, sourceID,
 					(attachment.mimeType ? attachment.mimeType : undefined),
 					(attachment.title ? attachment.title : undefined));
-			var attachmentItem = Scholar.Items.get(attachmentID);
+			var attachmentItem = Zotero.Items.get(attachmentID);
 		} else {
-			Scholar.debug("not adding attachment: no path or url specified");
+			Zotero.debug("not adding attachment: no path or url specified");
 			return false;
 		}
 	} else {
@@ -1017,15 +1017,15 @@ Scholar.Translate.prototype._itemImportAttachment = function(attachment, sourceI
 		
 		if(attachment.url) {
 			// import from nsIFile
-			var attachmentID = Scholar.Attachments.importSnapshotFromFile(file,
+			var attachmentID = Zotero.Attachments.importSnapshotFromFile(file,
 				attachment.url, attachment.title, attachment.mimeType,
 				(attachment.charset ? attachment.charset : null), sourceID);
-			var attachmentItem = Scholar.Items.get(attachmentID);
+			var attachmentItem = Zotero.Items.get(attachmentID);
 		} else {
 			// import from nsIFile
-			var attachmentID = Scholar.Attachments.importFromFile(file, sourceID);
+			var attachmentID = Zotero.Attachments.importFromFile(file, sourceID);
 			// get attachment item
-			var attachmentItem = Scholar.Items.get(attachmentID);
+			var attachmentItem = Zotero.Items.get(attachmentID);
 			if(attachment.title) {
 				// set title
 				attachmentItem.setField("title", attachment.title);
@@ -1039,8 +1039,8 @@ Scholar.Translate.prototype._itemImportAttachment = function(attachment, sourceI
 /*
  * handles tags and see also data for notes and attachments
  */
-Scholar.Translate.prototype._itemTagsAndSeeAlso = function(item, newItem) {
-	Scholar.debug("handling notes and see also");
+Zotero.Translate.prototype._itemTagsAndSeeAlso = function(item, newItem) {
+	Zotero.debug("handling notes and see also");
 	// add to ID map
 	if(item.itemID) {
 		this._IDMap[item.itemID] = newItem.getID();
@@ -1060,7 +1060,7 @@ Scholar.Translate.prototype._itemTagsAndSeeAlso = function(item, newItem) {
 /*
  * executed when an item is done and ready to be loaded into the database
  */
-Scholar.Translate.prototype._itemDone = function(item) {	
+Zotero.Translate.prototype._itemDone = function(item) {	
 	if(!this.saveItem) {	// if we're not supposed to save the item, just
 							// return the item array
 		
@@ -1068,16 +1068,16 @@ Scholar.Translate.prototype._itemDone = function(item) {
 		if(this._parentTranslator) {
 			var pt = this._parentTranslator;
 			item.complete = function() { pt._itemDone(this) };
-			Scholar.debug("done from parent sandbox");
+			Zotero.debug("done from parent sandbox");
 		}
 		this._runHandler("itemDone", item);
 		return;
 	}
 	
 	
-	var notifierStatus = Scholar.Notifier.isEnabled();
+	var notifierStatus = Zotero.Notifier.isEnabled();
 	if(notifierStatus) {
-		Scholar.Notifier.disable();
+		Zotero.Notifier.disable();
 	}
 	
 	try {	// make sure notifier gets turned back on when done
@@ -1085,15 +1085,15 @@ Scholar.Translate.prototype._itemDone = function(item) {
 		var type = (item.itemType ? item.itemType : "webpage");
 		
 		if(type == "note") {	// handle notes differently
-			var myID = Scholar.Notes.add(item.note);
+			var myID = Zotero.Notes.add(item.note);
 			// re-retrieve the item
-			var newItem = Scholar.Items.get(myID);
+			var newItem = Zotero.Items.get(myID);
 		} else if(type == "attachment") {
 			if(this.type == "import") {
 				var newItem = this._itemImportAttachment(item, null);
 				var myID = newItem.getID();
 			} else {
-				Scholar.debug("discarding standalone attachment");
+				Zotero.debug("discarding standalone attachment");
 				return false;
 			}
 		} else {
@@ -1102,8 +1102,8 @@ Scholar.Translate.prototype._itemDone = function(item) {
 			}
 			
 			// create new item
-			var typeID = Scholar.ItemTypes.getID(type);
-			var newItem = Scholar.Items.getNewItemByType(typeID);
+			var typeID = Zotero.ItemTypes.getID(type);
+			var newItem = Zotero.Items.getNewItemByType(typeID);
 			
 			// makes looping through easier
 			item.itemType = item.complete = undefined;
@@ -1125,9 +1125,9 @@ Scholar.Translate.prototype._itemDone = function(item) {
 							// try to assign correct creator type
 							if(data[j].creatorType) {
 								try {
-									var creatorType = Scholar.CreatorTypes.getID(data[j].creatorType);
+									var creatorType = Zotero.CreatorTypes.getID(data[j].creatorType);
 								} catch(e) {
-									Scholar.debug("invalid creator type "+data[j].creatorType+" for creator index "+j);
+									Zotero.debug("invalid creator type "+data[j].creatorType+" for creator index "+j);
 								}
 							}
 							
@@ -1139,17 +1139,17 @@ Scholar.Translate.prototype._itemDone = function(item) {
 						newItem.translateSeeAlso = data;
 					} else if(i != "note" && i != "notes" && i != "itemID" &&
 							  i != "attachments" && i != "tags" &&
-							  (fieldID = Scholar.ItemFields.getID(i))) {
+							  (fieldID = Zotero.ItemFields.getID(i))) {
 												// if field is in db
-						if(Scholar.ItemFields.isValidForType(fieldID, typeID)) {
+						if(Zotero.ItemFields.isValidForType(fieldID, typeID)) {
 												// if field is valid for this type
 							// add field
 							newItem.setField(i, data);
 						} else {
-							Scholar.debug("discarded field "+i+" for item: field not valid for type "+type);
+							Zotero.debug("discarded field "+i+" for item: field not valid for type "+type);
 						}
 					} else {
-						Scholar.debug("discarded field "+i+" for item: field does not exist");
+						Zotero.debug("discarded field "+i+" for item: field does not exist");
 					}
 				}
 			}
@@ -1163,10 +1163,10 @@ Scholar.Translate.prototype._itemDone = function(item) {
 			// handle notes
 			if(item.notes) {
 				for each(var note in item.notes) {
-					var noteID = Scholar.Notes.add(note.note, myID);
+					var noteID = Zotero.Notes.add(note.note, myID);
 					
 					// handle see also
-					var myNote = Scholar.Items.get(noteID);
+					var myNote = Zotero.Items.get(noteID);
 					this._itemTagsAndSeeAlso(note, myNote);
 				}
 			}
@@ -1176,33 +1176,33 @@ Scholar.Translate.prototype._itemDone = function(item) {
 				for each(var attachment in item.attachments) {
 					if(this.type == "web") {
 						if(!attachment.url && !attachment.document) {
-							Scholar.debug("not adding attachment: no URL specified");
+							Zotero.debug("not adding attachment: no URL specified");
 						} else if(attachment.downloadable && this._downloadAssociatedFiles) {
 							if(attachment.document) {
-								attachmentID = Scholar.Attachments.importFromDocument(attachment.document, myID);
+								attachmentID = Zotero.Attachments.importFromDocument(attachment.document, myID);
 								
 								// change title, if a different one was specified
 								if(attachment.title && (!attachment.document.title
 								   || attachment.title != attachment.document.title)) {
-									var attachmentItem = Scholar.Items.get(attachmentID);
+									var attachmentItem = Zotero.Items.get(attachmentID);
 									attachmentItem.setField("title", attachment.title);
 								}
 							} else {
-								Scholar.Attachments.importFromURL(attachment.url, myID,
+								Zotero.Attachments.importFromURL(attachment.url, myID,
 										(attachment.mimeType ? attachment.mimeType : attachment.document.contentType),
 										(attachment.title ? attachment.title : attachment.document.title));
 							}
 						} else {
 							if(attachment.document) {
-								attachmentID = Scholar.Attachments.linkFromURL(attachment.document.location.href, myID,
+								attachmentID = Zotero.Attachments.linkFromURL(attachment.document.location.href, myID,
 										(attachment.mimeType ? attachment.mimeType : attachment.document.contentType),
 										(attachment.title ? attachment.title : attachment.document.title));
 							} else {
 								if(!attachment.mimeType || attachment.title) {
-									Scholar.debug("notice: either mimeType or title is missing; attaching file will be slower");
+									Zotero.debug("notice: either mimeType or title is missing; attaching file will be slower");
 								}
 								
-								attachmentID = Scholar.Attachments.linkFromURL(attachment.url, myID,
+								attachmentID = Zotero.Attachments.linkFromURL(attachment.url, myID,
 										(attachment.mimeType ? attachment.mimeType : undefined),
 										(attachment.title ? attachment.title : undefined));
 							}
@@ -1240,14 +1240,14 @@ Scholar.Translate.prototype._itemDone = function(item) {
 		delete item;
 	} catch(e) {
 		if(notifierStatus) {
-			Scholar.Notifier.enable();
+			Zotero.Notifier.enable();
 		}
 		throw(e);
 	}
 	
 	// only re-enable if notifier was enabled at the beginning of scraping
 	if(notifierStatus) {
-		Scholar.Notifier.enable();
+		Zotero.Notifier.enable();
 	}
 	this._runHandler("itemDone", newItem);
 }
@@ -1255,7 +1255,7 @@ Scholar.Translate.prototype._itemDone = function(item) {
 /*
  * executed when a collection is done and ready to be loaded into the database
  */
-Scholar.Translate.prototype._collectionDone = function(collection) {
+Zotero.Translate.prototype._collectionDone = function(collection) {
 	var newCollection = this._processCollection(collection, null);
 	
 	this._runHandler("collectionDone", newCollection);
@@ -1264,8 +1264,8 @@ Scholar.Translate.prototype._collectionDone = function(collection) {
 /*
  * recursively processes collections
  */
-Scholar.Translate.prototype._processCollection = function(collection, parentID) {
-	var newCollection = Scholar.Collections.add(collection.name, parentID);
+Zotero.Translate.prototype._processCollection = function(collection, parentID) {
+	var newCollection = Zotero.Collections.add(collection.name, parentID);
 	var myID = newCollection.getID();
 	
 	this.newCollections.push(myID);
@@ -1277,10 +1277,10 @@ Scholar.Translate.prototype._processCollection = function(collection, parentID) 
 		} else {
 			// add mapped items to collection
 			if(this._IDMap[child.id]) {
-				Scholar.debug("adding "+this._IDMap[child.id]);
+				Zotero.debug("adding "+this._IDMap[child.id]);
 				newCollection.addItem(this._IDMap[child.id]);
 			} else {
-				Scholar.debug("could not map "+child.id+" to an imported item");
+				Zotero.debug("could not map "+child.id+" to an imported item");
 			}
 		}
 	}
@@ -1291,11 +1291,11 @@ Scholar.Translate.prototype._processCollection = function(collection, parentID) 
 /*
  * calls a handler (see setHandler above)
  */
-Scholar.Translate.prototype._runHandler = function(type, argument) {
+Zotero.Translate.prototype._runHandler = function(type, argument) {
 	var returnValue;
 	if(this._handlers[type]) {
 		for(var i in this._handlers[type]) {
-			Scholar.debug("running handler "+i+" for "+type);
+			Zotero.debug("running handler "+i+" for "+type);
 			try {
 				if(this._parentTranslator) {
 					returnValue = this._handlers[type][i](null, argument);
@@ -1311,7 +1311,7 @@ Scholar.Translate.prototype._runHandler = function(type, argument) {
 				} else {
 					// otherwise, fail silently, so as not to interfere with
 					// interface cleanup
-					Scholar.debug(e+' in handler '+i+' for '+type);
+					Zotero.debug(e+' in handler '+i+' for '+type);
 				}
 			}
 		}
@@ -1322,8 +1322,8 @@ Scholar.Translate.prototype._runHandler = function(type, argument) {
 /*
  * does the actual web translation
  */
-Scholar.Translate.prototype._web = function() {
-	this._downloadAssociatedFiles = Scholar.Prefs.get("downloadAssociatedFiles");
+Zotero.Translate.prototype._web = function() {
+	this._downloadAssociatedFiles = Zotero.Prefs.get("downloadAssociatedFiles");
 	
 	try {
 		this._sandbox.doWeb(this.document, this.location);
@@ -1342,7 +1342,7 @@ Scholar.Translate.prototype._web = function() {
 /*
  * does the actual search translation
  */
-Scholar.Translate.prototype._search = function() {
+Zotero.Translate.prototype._search = function() {
 	try {
 		this._sandbox.doSearch(this.search);
 	} catch(e) {
@@ -1356,7 +1356,7 @@ Scholar.Translate.prototype._search = function() {
 /*
  * does the actual import translation
  */
-Scholar.Translate.prototype._import = function() {
+Zotero.Translate.prototype._import = function() {
 	this._importConfigureIO();
 	
 	try {
@@ -1376,7 +1376,7 @@ Scholar.Translate.prototype._import = function() {
 /*
  * sets up import for IO
  */
-Scholar.Translate.prototype._importConfigureIO = function() {
+Zotero.Translate.prototype._importConfigureIO = function() {
 	if(this._storage) {
 		if(this._configOptions.dataMode == "rdf") {
 			this._rdf = new Object();
@@ -1394,7 +1394,7 @@ Scholar.Translate.prototype._importConfigureIO = function() {
 			parser.parseString(this._rdf.dataSource, baseURI, this._storage);
 			
 			// make an instance of the RDF handler
-			this._sandbox.Scholar.RDF = new Scholar.Translate.RDF(this._rdf.dataSource);
+			this._sandbox.Zotero.RDF = new Zotero.Translate.RDF(this._rdf.dataSource);
 		} else {
 			this._storageFunctions(true);
 			this._storagePointer = 0;
@@ -1417,7 +1417,7 @@ Scholar.Translate.prototype._importConfigureIO = function() {
 				this._rdf.dataSource = RDFService.GetDataSourceBlocking(URL);
 				
 				// make an instance of the RDF handler
-				this._sandbox.Scholar.RDF = new Scholar.Translate.RDF(this._rdf.dataSource);
+				this._sandbox.Zotero.RDF = new Zotero.Translate.RDF(this._rdf.dataSource);
 			}
 		} else {
 			// open file and set read methods
@@ -1437,10 +1437,10 @@ Scholar.Translate.prototype._importConfigureIO = function() {
 			if(intlStream) {
 				// found a UTF BOM at the beginning of the file; don't allow
 				// translator to set the character set
-				this._sandbox.Scholar.setCharacterSet = function() {}
+				this._sandbox.Zotero.setCharacterSet = function() {}
 			} else {
 				// allow translator to set charset
-				this._sandbox.Scholar.setCharacterSet = function(charset) {
+				this._sandbox.Zotero.setCharacterSet = function(charset) {
 					// seek
 					if(filePosition != 0) {
 						me._inputStream.QueryInterface(Components.interfaces.nsISeekableStream)
@@ -1464,9 +1464,9 @@ Scholar.Translate.prototype._importConfigureIO = function() {
 			if(this._configOptions.dataMode == "line") {	// line by line reading	
 				this._inputStream.QueryInterface(Components.interfaces.nsILineInputStream);
 				
-				this._sandbox.Scholar.read = function() {
+				this._sandbox.Zotero.read = function() {
 					if(intlStream && intlStream instanceof Components.interfaces.nsIUnicharLineInputStream) {	
-						Scholar.debug("using intlStream");
+						Zotero.debug("using intlStream");
 						var amountRead = intlStream.readLine(str);
 					} else {
 						var amountRead = me._inputStream.readLine(str);
@@ -1481,7 +1481,7 @@ Scholar.Translate.prototype._importConfigureIO = function() {
 			} else {										// block reading
 				var sStream;
 				
-				this._sandbox.Scholar.read = function(amount) {
+				this._sandbox.Zotero.read = function(amount) {
 					if(intlStream) {
 						// read from international stream, if one is available
 						var amountRead = intlStream.readString(amount, str);
@@ -1520,7 +1520,7 @@ Scholar.Translate.prototype._importConfigureIO = function() {
  * _hasBOM to the UTF type.  if one is not found, returns false, and sets
  * _hasBOM to false to prevent further checking.
  */
-Scholar.Translate.prototype._importDefuseBOM = function() {
+Zotero.Translate.prototype._importDefuseBOM = function() {
 	// if already found not to have a BOM, skip
 	if(this._hasBOM === false) {
 		return;
@@ -1596,13 +1596,13 @@ Scholar.Translate.prototype._importDefuseBOM = function() {
 /*
  * does the actual export, after code has been loaded and parsed
  */
-Scholar.Translate.prototype._export = function() {
+Zotero.Translate.prototype._export = function() {
 	
 	// get items
 	if(this.items) {
 		this._itemsLeft = this.items;
 	} else {
-		this._itemsLeft = Scholar.getItems();
+		this._itemsLeft = Zotero.getItems();
 	}
 	
 	// run handler for items available
@@ -1610,10 +1610,10 @@ Scholar.Translate.prototype._export = function() {
 	
 	// get collections, if requested
 	if(this._configOptions.getCollections && !this.items) {
-		this._collectionsLeft = Scholar.getCollections();
+		this._collectionsLeft = Zotero.getCollections();
 	}
 	
-	Scholar.debug(this._displayOptions);
+	Zotero.debug(this._displayOptions);
 	
 	// export file data, if requested
 	if(this._displayOptions["exportFileData"]) {
@@ -1665,7 +1665,7 @@ Scholar.Translate.prototype._export = function() {
 /*
  * configures IO for export
  */
-Scholar.Translate.prototype._exportConfigureIO = function() {
+Zotero.Translate.prototype._exportConfigureIO = function() {
 	// open file
 	var fStream = Components.classes["@mozilla.org/network/file-output-stream;1"]
 							 .createInstance(Components.interfaces.nsIFileOutputStream);
@@ -1686,19 +1686,19 @@ Scholar.Translate.prototype._exportConfigureIO = function() {
 		this._rdf.serializer.QueryInterface(Components.interfaces.nsIRDFXMLSource);
 		
 		// make an instance of the RDF handler
-		this._sandbox.Scholar.RDF = new Scholar.Translate.RDF(this._rdf.dataSource, this._rdf.serializer);
+		this._sandbox.Zotero.RDF = new Zotero.Translate.RDF(this._rdf.dataSource, this._rdf.serializer);
 	} else {
 		// regular io; write just writes to file
 		var intlStream = null;
 		
 		// allow setting of character sets
-		this._sandbox.Scholar.setCharacterSet = function(charset) {
+		this._sandbox.Zotero.setCharacterSet = function(charset) {
 			intlStream = Components.classes["@mozilla.org/intl/converter-output-stream;1"]
 			                       .createInstance(Components.interfaces.nsIConverterOutputStream);
 			intlStream.init(fStream, charset, 1024, "?".charCodeAt(0));
 		};
 		
-		this._sandbox.Scholar.write = function(data) {
+		this._sandbox.Zotero.write = function(data) {
 			if(intlStream) {
 				intlStream.writeString(data);
 			} else {
@@ -1711,15 +1711,15 @@ Scholar.Translate.prototype._exportConfigureIO = function() {
 /*
  * copies attachment and returns data, given an attachment object
  */
-Scholar.Translate.prototype._exportGetAttachment = function(attachment) {
+Zotero.Translate.prototype._exportGetAttachment = function(attachment) {
 	var attachmentArray = new Object();
 	
 	var attachmentID = attachment.getID();
 	var linkMode = attachment.getAttachmentLinkMode();
 	
 	// get URL and accessDate if they exist
-	if(linkMode == Scholar.Attachments.LINK_MODE_LINKED_URL ||
-	   linkMode == Scholar.Attachments.LINK_MODE_IMPORTED_URL) {
+	if(linkMode == Zotero.Attachments.LINK_MODE_LINKED_URL ||
+	   linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_URL) {
 		attachmentArray.url = attachment.getField('url');
 		attachmentArray.accessDate = attachment.getField('accessDate');
 	} else if(!this._displayOptions["exportFileData"]) {
@@ -1739,13 +1739,13 @@ Scholar.Translate.prototype._exportGetAttachment = function(attachment) {
 	// get tags
 	attachmentArray.tags = attachment.getTags();
 	
-	if(linkMode != Scholar.Attachments.LINK_MODE_LINKED_URL &&
+	if(linkMode != Zotero.Attachments.LINK_MODE_LINKED_URL &&
 	   this._displayOptions["exportFileData"]) {
 		// add path and filename if not an internet link
 		var file = attachment.getFile();
 		attachmentArray.path = "files/"+attachmentID+"/"+file.leafName;
 		
-		if(linkMode == Scholar.Attachments.LINK_MODE_LINKED_FILE) {
+		if(linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
 			// create a new directory
 			var directory = Components.classes["@mozilla.org/file/local;1"].
 							createInstance(Components.interfaces.nsILocalFile);
@@ -1755,22 +1755,22 @@ Scholar.Translate.prototype._exportGetAttachment = function(attachment) {
 			// copy file
 			file.copyTo(directory, attachmentArray.filename);
 		} else {
-			// copy imported files from the Scholar directory
-			var directory = Scholar.getStorageDirectory();
+			// copy imported files from the Zotero directory
+			var directory = Zotero.getStorageDirectory();
 			directory.append(attachmentID);
 			directory.copyTo(this._exportFileDirectory, attachmentID);
 		}
 	}
 	
-	Scholar.debug(attachmentArray);
+	Zotero.debug(attachmentArray);
 	
 	return attachmentArray;
 }
 
 /*
- * gets the next item to process (called as Scholar.nextItem() from code)
+ * gets the next item to process (called as Zotero.nextItem() from code)
  */
-Scholar.Translate.prototype._exportGetItem = function() {
+Zotero.Translate.prototype._exportGetItem = function() {
 	if(this._itemsLeft.length != 0) {
 		var returnItem = this._itemsLeft.shift();
 		
@@ -1793,7 +1793,7 @@ Scholar.Translate.prototype._exportGetItem = function() {
 			returnItemArray.attachments = new Array();
 			var attachments = returnItem.getAttachments();
 			for each(attachmentID in attachments) {
-				var attachment = Scholar.Items.get(attachmentID);
+				var attachment = Zotero.Items.get(attachmentID);
 				var attachmentInfo = this._exportGetAttachment(attachment);
 				
 				if(attachmentInfo) {
@@ -1811,9 +1811,9 @@ Scholar.Translate.prototype._exportGetItem = function() {
 }
 
 /*
- * gets the next item to collection (called as Scholar.nextCollection() from code)
+ * gets the next item to collection (called as Zotero.nextCollection() from code)
  */
-Scholar.Translate.prototype._exportGetCollection = function() {
+Zotero.Translate.prototype._exportGetCollection = function() {
 	if(!this._configOptions.getCollections) {
 		throw("getCollections configure option not set; cannot retrieve collection");
 	}
@@ -1834,7 +1834,7 @@ Scholar.Translate.prototype._exportGetCollection = function() {
  * sets up internal IO in such a way that both reading and writing are possible
  * (for inter-scraper communications)
  */
-Scholar.Translate.prototype._initializeInternalIO = function() {
+Zotero.Translate.prototype._initializeInternalIO = function() {
 	if(this.type == "import" || this.type == "export") {
 		if(this._configOptions.dataMode == "rdf") {
 			this._rdf = new Object();
@@ -1843,7 +1843,7 @@ Scholar.Translate.prototype._initializeInternalIO = function() {
 							 createInstance(Components.interfaces.nsIRDFDataSource);
 			
 			// make an instance of the RDF handler
-			this._sandbox.Scholar.RDF = new Scholar.Translate.RDF(this._rdf.dataSource);
+			this._sandbox.Zotero.RDF = new Zotero.Translate.RDF(this._rdf.dataSource);
 		} else {
 			this._storage = "";
 			this._storageLength = 0;
@@ -1856,15 +1856,15 @@ Scholar.Translate.prototype._initializeInternalIO = function() {
 /*
  * sets up functions for reading/writing to a storage stream
  */
-Scholar.Translate.prototype._storageFunctions =  function(read, write) {
+Zotero.Translate.prototype._storageFunctions =  function(read, write) {
 	var me = this;
 	
 	// add setCharacterSet method that does nothing
-	this._sandbox.Scholar.setCharacterSet = function() {}
+	this._sandbox.Zotero.setCharacterSet = function() {}
 	
 	if(write) {
 		// set up write() method
-		this._sandbox.Scholar.write = function(data) {
+		this._sandbox.Zotero.write = function(data) {
 			me._storage += data;
 			me._storageLength += data.length;
 		};		
@@ -1875,7 +1875,7 @@ Scholar.Translate.prototype._storageFunctions =  function(read, write) {
 		if(this._configOptions.dataMode == "line") {	// line by line reading
 			var lastCharacter;
 			
-			this._sandbox.Scholar.read = function() {
+			this._sandbox.Zotero.read = function() {
 				if(me._storagePointer >= me._storageLength) {
 					return false;
 				}
@@ -1902,7 +1902,7 @@ Scholar.Translate.prototype._storageFunctions =  function(read, write) {
 				return me._storage;
 			}
 		} else {									// block reading
-			this._sandbox.Scholar.read = function(amount) {
+			this._sandbox.Zotero.read = function(amount) {
 				if(me._storagePointer >= me._storageLength) {
 					return false;
 				}
@@ -1921,12 +1921,12 @@ Scholar.Translate.prototype._storageFunctions =  function(read, write) {
 	}
 }
 
-/* Scholar.Translate.ScholarItem: a class for generating a new item from
+/* Zotero.Translate.ZoteroItem: a class for generating a new item from
  * inside scraper code
  */
  
-Scholar.Translate.GenerateScholarItemClass = function() {
-	var ScholarItem = function(itemType) {
+Zotero.Translate.GenerateZoteroItemClass = function() {
+	var ZoteroItem = function(itemType) {
 		// assign item type
 		this.itemType = itemType;
 		// generate creators array
@@ -1941,20 +1941,20 @@ Scholar.Translate.GenerateScholarItemClass = function() {
 		this.attachments = new Array();
 	};
 	
-	return ScholarItem;
+	return ZoteroItem;
 }
 
-/* Scholar.Translate.Collection: a class for generating a new top-level
+/* Zotero.Translate.Collection: a class for generating a new top-level
  * collection from inside scraper code
  */
 
-Scholar.Translate.GenerateScholarCollectionClass = function() {
-	var ScholarCollection = Scholar.Translate.ScholarCollection = function() {};
+Zotero.Translate.GenerateZoteroCollectionClass = function() {
+	var ZoteroCollection = Zotero.Translate.ZoteroCollection = function() {};
 	
-	return ScholarCollection;
+	return ZoteroCollection;
 }
 
-/* Scholar.Translate.RDF: a class for handling RDF IO
+/* Zotero.Translate.RDF: a class for handling RDF IO
  *
  * If an import/export translator specifies dataMode RDF, this is the interface,
  * accessible from model.
@@ -1965,7 +1965,7 @@ Scholar.Translate.GenerateScholarCollectionClass = function() {
  * convert)
  */
 
-Scholar.Translate.RDF = function(dataSource, serializer) {
+Zotero.Translate.RDF = function(dataSource, serializer) {
 	this._RDFService = Components.classes['@mozilla.org/rdf/rdf-service;1']
 					 .getService(Components.interfaces.nsIRDFService);
 	this._AtomService = Components.classes["@mozilla.org/atom-service;1"]
@@ -1978,7 +1978,7 @@ Scholar.Translate.RDF = function(dataSource, serializer) {
 }
 
 // turn an nsISimpleEnumerator into an array
-Scholar.Translate.RDF.prototype._deEnumerate = function(enumerator) {
+Zotero.Translate.RDF.prototype._deEnumerate = function(enumerator) {
 	if(!(enumerator instanceof Components.interfaces.nsISimpleEnumerator)) {
 		return false;
 	}
@@ -2004,7 +2004,7 @@ Scholar.Translate.RDF.prototype._deEnumerate = function(enumerator) {
 }
 
 // get a resource as an nsIRDFResource, instead of a string
-Scholar.Translate.RDF.prototype._getResource = function(about) {
+Zotero.Translate.RDF.prototype._getResource = function(about) {
 	try {
 		if(!(about instanceof Components.interfaces.nsIRDFResource)) {
 			about = this._RDFService.GetResource(about);
@@ -2018,7 +2018,7 @@ Scholar.Translate.RDF.prototype._getResource = function(about) {
 // USED FOR OUTPUT
 
 // writes an RDF triple
-Scholar.Translate.RDF.prototype.addStatement = function(about, relation, value, literal) {
+Zotero.Translate.RDF.prototype.addStatement = function(about, relation, value, literal) {
 	about = this._getResource(about);
 	
 	if(!(value instanceof Components.interfaces.nsIRDFResource)) {
@@ -2033,12 +2033,12 @@ Scholar.Translate.RDF.prototype.addStatement = function(about, relation, value, 
 }
 		
 // creates an anonymous resource
-Scholar.Translate.RDF.prototype.newResource = function() {
+Zotero.Translate.RDF.prototype.newResource = function() {
 	return this._RDFService.GetAnonymousResource()
 };
 		
 // creates a new container
-Scholar.Translate.RDF.prototype.newContainer = function(type, about) {
+Zotero.Translate.RDF.prototype.newContainer = function(type, about) {
 	about = this._getResource(about);
 	
 	type = type.toLowerCase();
@@ -2054,7 +2054,7 @@ Scholar.Translate.RDF.prototype.newContainer = function(type, about) {
 }
 
 // adds a new container element (index optional)
-Scholar.Translate.RDF.prototype.addContainerElement = function(about, element, literal, index) {
+Zotero.Translate.RDF.prototype.addContainerElement = function(about, element, literal, index) {
 	if(!(about instanceof Components.interfaces.nsIRDFContainer)) {
 		about = this._getResource(about);
 		var container = Components.classes["@mozilla.org/rdf/container;1"].
@@ -2078,7 +2078,7 @@ Scholar.Translate.RDF.prototype.addContainerElement = function(about, element, l
 }
 
 // gets container elements as an array
-Scholar.Translate.RDF.prototype.getContainerElements = function(about) {
+Zotero.Translate.RDF.prototype.getContainerElements = function(about) {
 	if(!(about instanceof Components.interfaces.nsIRDFContainer)) {
 		about = this._getResource(about);
 		var container = Components.classes["@mozilla.org/rdf/container;1"].
@@ -2091,7 +2091,7 @@ Scholar.Translate.RDF.prototype.getContainerElements = function(about) {
 }
 
 // sets a namespace
-Scholar.Translate.RDF.prototype.addNamespace = function(prefix, uri) {
+Zotero.Translate.RDF.prototype.addNamespace = function(prefix, uri) {
 	if(this._serializer) {	// silently fail, in case the reason the scraper
 							// is failing is that we're using internal IO
 		this._serializer.addNameSpace(this._AtomService.getAtom(prefix), uri);
@@ -2099,7 +2099,7 @@ Scholar.Translate.RDF.prototype.addNamespace = function(prefix, uri) {
 }
 
 // gets a resource's URI
-Scholar.Translate.RDF.prototype.getResourceURI = function(resource) {
+Zotero.Translate.RDF.prototype.getResourceURI = function(resource) {
 	if(typeof(resource) == "string") {
 		return resource;
 	}
@@ -2111,13 +2111,13 @@ Scholar.Translate.RDF.prototype.getResourceURI = function(resource) {
 // USED FOR INPUT
 
 // gets all RDF resources
-Scholar.Translate.RDF.prototype.getAllResources = function() {
+Zotero.Translate.RDF.prototype.getAllResources = function() {
 	var resourceEnumerator = this._dataSource.GetAllResources();
 	return this._deEnumerate(resourceEnumerator);
 }
 
 // gets arcs going in
-Scholar.Translate.RDF.prototype.getArcsIn = function(resource) {
+Zotero.Translate.RDF.prototype.getArcsIn = function(resource) {
 	resource = this._getResource(resource);
 	
 	var arcEnumerator = this._dataSource.ArcLabelsIn(resource);
@@ -2125,7 +2125,7 @@ Scholar.Translate.RDF.prototype.getArcsIn = function(resource) {
 }
 
 // gets arcs going out
-Scholar.Translate.RDF.prototype.getArcsOut = function(resource) {
+Zotero.Translate.RDF.prototype.getArcsOut = function(resource) {
 	resource = this._getResource(resource);
 	
 	var arcEnumerator = this._dataSource.ArcLabelsOut(resource);
@@ -2133,7 +2133,7 @@ Scholar.Translate.RDF.prototype.getArcsOut = function(resource) {
 }
 
 // gets source resources
-Scholar.Translate.RDF.prototype.getSources = function(resource, property) {
+Zotero.Translate.RDF.prototype.getSources = function(resource, property) {
 	property = this._getResource(property);
 	resource = this._getResource(resource);
 	
@@ -2142,7 +2142,7 @@ Scholar.Translate.RDF.prototype.getSources = function(resource, property) {
 }
 
 // gets target resources
-Scholar.Translate.RDF.prototype.getTargets = function(resource, property) {
+Zotero.Translate.RDF.prototype.getTargets = function(resource, property) {
 	property = this._getResource(property);
 	resource = this._getResource(resource);
 	

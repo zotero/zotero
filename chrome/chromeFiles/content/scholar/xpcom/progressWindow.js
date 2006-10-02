@@ -3,7 +3,7 @@
  *
  * Pass the active window into the constructor
  */
-Scholar.ProgressWindow = function(_window){
+Zotero.ProgressWindow = function(_window){
 	if (!_window){
 		var _window =
 			Components.classes["@mozilla.org/embedcomp/window-watcher;1"].
@@ -33,7 +33,7 @@ Scholar.ProgressWindow = function(_window){
 		if(_windowLoading || _windowLoaded) {	// already loading or loaded
 			return false;
 		}
-		_progressWindow = _window.openDialog("chrome://scholar/chrome/progressWindow.xul",
+		_progressWindow = _window.openDialog("chrome://zotero/chrome/progressWindow.xul",
 		                                    "", "chrome,dialog=no,titlebar=no,popup=yes");
 		_progressWindow.addEventListener("load", _onWindowLoaded, false);
 		_windowLoading = true;

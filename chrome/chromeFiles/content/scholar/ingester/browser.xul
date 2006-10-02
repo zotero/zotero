@@ -1,20 +1,20 @@
 <?xml version="1.0"?>
 <!-- Note: Contains Firefox-specific overlay -->
-<overlay id="scholar-ingester-overlay" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+<overlay id="zotero-ingester-overlay" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
 	<script src="../include.js"/>
     <script src="browser.js"/>
     
 	<script type="application/x-javascript">
-		Scholar_Ingester_Interface.init();
+		Zotero_Ingester_Interface.init();
 	</script>
 		
 	<hbox id="urlbar-icons">
 		<popupset>
-		  <popup id="scholar-scrape-popup" onpopupshowing="Scholar_Ingester_Interface.showPopup(null, this)" onpopuphidden="Scholar_Ingester_Interface.hidePopup(null, this)">
+		  <popup id="zotero-scrape-popup" onpopupshowing="Zotero_Ingester_Interface.showPopup(null, this)" onpopuphidden="Zotero_Ingester_Interface.hidePopup(null, this)">
 		  </popup>
 		</popupset>
 
-		<image src="chrome://scholar/skin/treeitem-book.png" id="scholar-status-image" onclick="Scholar_Ingester_Interface.scrapeThisPage()" position="1" hidden="true" context="scholar-scrape-popup" />
+		<image src="chrome://zotero/skin/treeitem-book.png" id="zotero-status-image" onclick="Zotero_Ingester_Interface.scrapeThisPage()" position="1" hidden="true" context="zotero-scrape-popup" />
 	</hbox>
 </overlay>

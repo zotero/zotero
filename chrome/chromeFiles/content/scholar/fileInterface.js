@@ -1,4 +1,4 @@
-var Scholar_File_Interface = new function() {
+var Zotero_File_Interface = new function() {
 	var _unresponsiveScriptPreference, _importCollection, _notifyItem, _notifyCollection;
 	
 	this.exportFile = exportFile;
@@ -9,15 +9,15 @@ var Scholar_File_Interface = new function() {
 	this.bibliographyFromItems = bibliographyFromItems;
 	
 	/*
-	 * Creates Scholar.Translate instance and shows file picker for file export
+	 * Creates Zotero.Translate instance and shows file picker for file export
 	 */
 	function exportFile(name, items) {
-		var translation = new Scholar.Translate("export");
+		var translation = new Zotero.Translate("export");
 		var translators = translation.getTranslators();
 		
 		// present options dialog
 		var io = {translators:translators}
-		window.openDialog("chrome://scholar/content/exportOptions.xul",
+		window.openDialog("chrome://zotero/content/exportOptions.xul",
 			"_blank", "chrome,modal,centerscreen", io);
 		if(!io.selectedTranslator) {
 			return false;
@@ -27,10 +27,10 @@ var Scholar_File_Interface = new function() {
 		var fp = Components.classes["@mozilla.org/filepicker;1"]
 				.createInstance(nsIFilePicker);
 		
-		fp.init(window, Scholar.getString("fileInterface.export"), nsIFilePicker.modeSave);
+		fp.init(window, Zotero.getString("fileInterface.export"), nsIFilePicker.modeSave);
 		
 		// set file name and extension
-		name = (name ? name : Scholar.getString("pane.collections.library"));
+		name = (name ? name : Zotero.getString("pane.collections.library"));
 		fp.defaultString = name+"."+io.selectedTranslator.target;
 		fp.appendFilter(io.selectedTranslator.label, "*."+io.selectedTranslator.target);
 		
@@ -43,8 +43,8 @@ var Scholar_File_Interface = new function() {
 			translation.setTranslator(io.selectedTranslator);
 			translation.setHandler("done", _exportDone);
 			_disableUnresponsive();
-			Scholar_File_Interface.Progress.show(
-				Scholar.getString("fileInterface.itemsExported"),
+			Zotero_File_Interface.Progress.show(
+				Zotero.getString("fileInterface.itemsExported"),
 				function() {
 					translation.translate();
 			});
@@ -55,19 +55,19 @@ var Scholar_File_Interface = new function() {
 	 * exports a collection or saved search
 	 */
 	function exportCollection() {
-		var collection = ScholarPane.getSelectedCollection();
+		var collection = ZoteroPane.getSelectedCollection();
 		if (collection)
 		{
-			exportFile(collection.getName(), Scholar.getItems(collection.getID()));
+			exportFile(collection.getName(), Zotero.getItems(collection.getID()));
 			return;
 		}
 		
-		var searchRef = ScholarPane.getSelectedSavedSearch();
+		var searchRef = ZoteroPane.getSelectedSavedSearch();
 		if (searchRef)
 		{
-			var search = new Scholar.Search();
+			var search = new Zotero.Search();
 			search.load(searchRef['id']);
-			exportFile(search.getName(), Scholar.Items.get(search.search()));
+			exportFile(search.getName(), Zotero.Items.get(search.search()));
 			return;
 		}
 		
@@ -79,35 +79,35 @@ var Scholar_File_Interface = new function() {
 	 * exports items
 	 */
 	function exportItems() {
-		var items = ScholarPane.getSelectedItems();
+		var items = ZoteroPane.getSelectedItems();
 		if(!items || !items.length) throw("no items currently selected");
 		
-		exportFile(Scholar.getString("fileInterface.exportedItems"), items);
+		exportFile(Zotero.getString("fileInterface.exportedItems"), items);
 	}
 	
 	/*
 	 * closes items exported indicator
 	 */
 	function _exportDone(obj, worked) {
-		Scholar_File_Interface.Progress.close();
+		Zotero_File_Interface.Progress.close();
 		_restoreUnresponsive();
 		
 		if(!worked) {
-			window.alert(Scholar.getString("fileInterface.exportError"));
+			window.alert(Zotero.getString("fileInterface.exportError"));
 		}
 	}
 	
 	/*
-	 * Creates Scholar.Translate instance and shows file picker for file import
+	 * Creates Zotero.Translate instance and shows file picker for file import
 	 */
 	function importFile() {
-		var translation = new Scholar.Translate("import");
+		var translation = new Zotero.Translate("import");
 		var translators = translation.getTranslators();
 		
 		const nsIFilePicker = Components.interfaces.nsIFilePicker;
 		var fp = Components.classes["@mozilla.org/filepicker;1"]
 				.createInstance(nsIFilePicker);
-		fp.init(window, Scholar.getString("fileInterface.import"), nsIFilePicker.modeOpen);
+		fp.init(window, Zotero.getString("fileInterface.import"), nsIFilePicker.modeOpen);
 		
 		fp.appendFilters(nsIFilePicker.filterAll);
 		for(var i in translators) {
@@ -122,7 +122,7 @@ var Scholar_File_Interface = new function() {
 			if(translators.length) {
 				// create a new collection to take in imported items
 				var date = new Date();
-				_importCollection = Scholar.Collections.add(Scholar.getString("fileInterface.imported")+" "+date.toLocaleString());
+				_importCollection = Zotero.Collections.add(Zotero.getString("fileInterface.imported")+" "+date.toLocaleString());
 				
 				// import items
 				translation.setTranslator(translators[0]);
@@ -131,30 +131,30 @@ var Scholar_File_Interface = new function() {
 				_disableUnresponsive();
 				
 				// disable notifier
-				Scholar.Notifier.disable();
+				Zotero.Notifier.disable();
 				
 				// show progress indicator
-				Scholar_File_Interface.Progress.show(
-					Scholar.getString("fileInterface.itemsImported"),
+				Zotero_File_Interface.Progress.show(
+					Zotero.getString("fileInterface.itemsImported"),
 					function() {
 						translation.translate();
 				});
 			} else {
-				window.alert(Scholar.getString("fileInterface.fileFormatUnsupported"));
+				window.alert(Zotero.getString("fileInterface.fileFormatUnsupported"));
 			}
 		}
 	}
 	
 	/*
 	 * Saves collections after they've been imported. Input item is of the type
-	 * outputted by Scholar.Collection.toArray(); only receives top-level
+	 * outputted by Zotero.Collection.toArray(); only receives top-level
 	 * collections
 	 */
 	function _importCollectionDone(obj, collection) {
-		Scholar.Notifier.enable();
-		Scholar.Notifier.trigger("add", "collection", collection.getID());
+		Zotero.Notifier.enable();
+		Zotero.Notifier.trigger("add", "collection", collection.getID());
 		collection.changeParent(_importCollection.getID());
-		Scholar.Notifier.disable();
+		Zotero.Notifier.disable();
 	}
 	
 	/*
@@ -167,17 +167,17 @@ var Scholar_File_Interface = new function() {
 		}
 		
 		// run notify
-		Scholar.Notifier.enable();
+		Zotero.Notifier.enable();
 		if(obj.newItems.length) {
-			Scholar.Notifier.trigger("add", "item", obj.newItems);
-			Scholar.Notifier.trigger("modify", "collection", _importCollection.getID());
+			Zotero.Notifier.trigger("add", "item", obj.newItems);
+			Zotero.Notifier.trigger("modify", "collection", _importCollection.getID());
 		}
 		
-		Scholar_File_Interface.Progress.close();
+		Zotero_File_Interface.Progress.close();
 		_restoreUnresponsive();
 		
 		if(!worked) {
-			window.alert(Scholar.getString("fileInterface.importError"));
+			window.alert(Zotero.getString("fileInterface.importError"));
 		}
 	}
 	
@@ -205,19 +205,19 @@ var Scholar_File_Interface = new function() {
 	 * Creates a bibliography from a collection or saved search
 	 */
 	function bibliographyFromCollection() {
-		var collection = ScholarPane.getSelectedCollection();
+		var collection = ZoteroPane.getSelectedCollection();
 		if (collection)
 		{
-			_doBibliographyOptions(collection.getName(), Scholar.getItems(collection.getID()));
+			_doBibliographyOptions(collection.getName(), Zotero.getItems(collection.getID()));
 			return;
 		}
 		
-		var searchRef = ScholarPane.getSelectedSavedSearch();
+		var searchRef = ZoteroPane.getSelectedSavedSearch();
 		if (searchRef)
 		{
-			var search = new Scholar.Search();
+			var search = new Zotero.Search();
 			search.load(searchRef['id']);
-			_doBibliographyOptions(search.getName(), Scholar.Items.get(search.search()));
+			_doBibliographyOptions(search.getName(), Zotero.Items.get(search.search()));
 			return;
 		}
 		
@@ -228,10 +228,10 @@ var Scholar_File_Interface = new function() {
 	 * Creates a bibliography from a items
 	 */
 	function bibliographyFromItems() {
-		var items = ScholarPane.getSelectedItems();
+		var items = ZoteroPane.getSelectedItems();
 		if(!items || !items.length) throw("no items currently selected");
 		
-		_doBibliographyOptions(Scholar.getString("fileInterface.untitledBibliography"), items);
+		_doBibliographyOptions(Zotero.getString("fileInterface.untitledBibliography"), items);
 	}
 	
 	/*
@@ -241,19 +241,19 @@ var Scholar_File_Interface = new function() {
 		// make sure at least one item is not a standalone note or attachment
 		var haveNonNote = false;
 		for(var i in items) {
-			var type = Scholar.ItemTypes.getName(items[i].getType());
+			var type = Zotero.ItemTypes.getName(items[i].getType());
 			if(type != "note" && type != "attachment") {
 				haveNonNote = true;
 				break;
 			}
 		}
 		if(!haveNonNote) {
-			window.alert(Scholar.getString("fileInterface.noReferencesError"));
+			window.alert(Zotero.getString("fileInterface.noReferencesError"));
 			return;
 		}
 		
 		var io = new Object();
-		var newDialog = window.openDialog("chrome://scholar/content/bibliography.xul",
+		var newDialog = window.openDialog("chrome://zotero/content/bibliography.xul",
 			"_blank","chrome,modal,centerscreen", io);
 		
 		// determine output format
@@ -264,18 +264,18 @@ var Scholar_File_Interface = new function() {
 		
 		// generate bibliography
 		try {
-			var csl = Scholar.Cite.getStyle(io.style);
+			var csl = Zotero.Cite.getStyle(io.style);
 			csl.preprocessItems(items);
 			var bibliography = csl.createBibliography(items, format);
 		} catch(e) {
-			window.alert(Scholar.getString("fileInterface.bibliographyGenerationError"));
+			window.alert(Zotero.getString("fileInterface.bibliographyGenerationError"));
 			throw(e);
 			return;
 		}
 		
 		if(io.output == "print") {
 			// printable bibliography, using a hidden browser
-			var browser = Scholar.Browser.createHiddenBrowser(window);
+			var browser = Zotero.Browser.createHiddenBrowser(window);
 			browser.contentDocument.write(bibliography);
 			
 			// this is kinda nasty, but we have to temporarily modify the user's
@@ -301,7 +301,7 @@ var Scholar_File_Interface = new function() {
 				prefService.setCharPref(prefsToClear[i], oldPrefs[i]);
 			}
 			
-			Scholar.Browser.deleteHiddenBrowser(browser);
+			Zotero.Browser.deleteHiddenBrowser(browser);
 		} else if(io.output == "save-as-html") {
 			var fStream = _saveBibliography(name, "HTML");
 			
@@ -311,7 +311,7 @@ var Scholar_File_Interface = new function() {
 				html +='<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">\n';
 				html +='<head>\n';
 				html +='<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>\n';
-				html +='<title>'+Scholar.getString("fileInterface.bibliographyHTMLTitle")+'</title>\n';
+				html +='<title>'+Zotero.getString("fileInterface.bibliographyHTMLTitle")+'</title>\n';
 				html +='</head>\n';
 				html +='<body>\n';
 				html += bibliography;
@@ -390,7 +390,7 @@ var Scholar_File_Interface = new function() {
 }
 
 // Handles the display of a progress indicator
-Scholar_File_Interface.Progress = new function() {
+Zotero_File_Interface.Progress = new function() {
 	var _windowLoaded = false;
 	var _windowLoading = false;
 	var _progressWindow;
@@ -413,7 +413,7 @@ Scholar_File_Interface.Progress = new function() {
 		_outOf = 0;
 		_callback = callback;
 		
-		_progressWindow = window.openDialog("chrome://scholar/chrome/fileProgress.xul", "", "chrome,resizable=no,close=no,dependent,dialog,centerscreen");
+		_progressWindow = window.openDialog("chrome://zotero/chrome/fileProgress.xul", "", "chrome,resizable=no,close=no,dependent,dialog,centerscreen");
 		_progressWindow.addEventListener("pageshow", _onWindowLoaded, false);
 		
 		return true;

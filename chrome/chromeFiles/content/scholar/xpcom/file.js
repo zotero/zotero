@@ -1,4 +1,4 @@
-Scholar.File = new function(){
+Zotero.File = new function(){
 	this.getExtension = getExtension;
 	this.getSample = getSample;
 	this.getContents = getContents;
@@ -39,7 +39,7 @@ Scholar.File = new function(){
 		fis.init(file, false, false, false);
 		
 		if (charset){
-			charset = Scholar.CharacterSets.getName(charset);
+			charset = Zotero.CharacterSets.getName(charset);
 		}
 		
 		if (!charset){
@@ -88,11 +88,11 @@ Scholar.File = new function(){
 		}
 		
 		if (mimeType.substr(0, 5)!='text/' ||
-			!Scholar.MIME.hasInternalHandler(mimeType, this.getExtension(file))){
+			!Zotero.MIME.hasInternalHandler(mimeType, this.getExtension(file))){
 			return false;
 		}
 		
-		var browser = Scholar.Browser.createHiddenBrowser();
+		var browser = Zotero.Browser.createHiddenBrowser();
 		
 		var url = Components.classes["@mozilla.org/network/protocol;1?name=file"]
 				.getService(Components.interfaces.nsIFileProtocolHandler)
@@ -118,23 +118,23 @@ Scholar.File = new function(){
 							.getService(Components.interfaces.nsIPrefBranch);
 		var oldPref = prefService.getCharPref('intl.charset.detector');
 		var newPref = 'universal_charset_detector';
-		//Scholar.debug("Default character detector is " + (oldPref ? oldPref : '(none)'));
+		//Zotero.debug("Default character detector is " + (oldPref ? oldPref : '(none)'));
 		
 		if (oldPref != newPref){
-			//Scholar.debug('Setting character detector to universal_charset_detector');
+			//Zotero.debug('Setting character detector to universal_charset_detector');
 			prefService.setCharPref('intl.charset.detector', 'universal_charset_detector');
 		}
 		
 		browser.addEventListener("pageshow", function(){
 			var charset = browser.contentDocument.characterSet;
-			Scholar.debug("Detected character set '" + charset + "'");
+			Zotero.debug("Detected character set '" + charset + "'");
 			
-			//Scholar.debug('Resetting character detector to ' + (oldPref ? oldPref : '(none)'));
+			//Zotero.debug('Resetting character detector to ' + (oldPref ? oldPref : '(none)'));
 			prefService.setCharPref('intl.charset.detector', oldPref);
 			
 			callback(charset, args);
 			
-			Scholar.Browser.deleteHiddenBrowser(browser);
+			Zotero.Browser.deleteHiddenBrowser(browser);
 		}, false);
 	}
 }

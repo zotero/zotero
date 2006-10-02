@@ -25,7 +25,7 @@ function onLoad()
 	
 	if(id && id != '' && id != 'undefined')
 	{
-		var ref = Scholar.Items.get(id);
+		var ref = Zotero.Items.get(id);
 		if(ref.isNote())
 		{
 			noteEditor.note = ref;
@@ -41,10 +41,10 @@ function onLoad()
 	{
 		window.title = "Add Note";
 		if(collectionID && collectionID != '' && collectionID != 'undefined')
-			noteEditor.collection = Scholar.Collections.get(collectionID);
+			noteEditor.collection = Zotero.Collections.get(collectionID);
 	}
 	
-	notifierUnregisterID = Scholar.Notifier.registerItemTree(NotifyCallback);
+	notifierUnregisterID = Zotero.Notifier.registerItemTree(NotifyCallback);
 }
 
 function onUnload()
@@ -52,7 +52,7 @@ function onUnload()
 	if(noteEditor && noteEditor.value)
 		noteEditor.save();
 	
-	Scholar.Notifier.unregisterItemTree(notifierUnregisterID);
+	Zotero.Notifier.unregisterItemTree(notifierUnregisterID);
 }
 
 var NotifyCallback = {

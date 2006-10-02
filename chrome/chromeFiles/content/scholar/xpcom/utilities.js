@@ -1,31 +1,31 @@
-// Scholar for Firefox Utilities
+// Zotero for Firefox Utilities
 
 /////////////////////////////////////////////////////////////////
 //
-// Scholar.Utilities
+// Zotero.Utilities
 //
 /////////////////////////////////////////////////////////////////
 
-Scholar.Utilities = function () {}
+Zotero.Utilities = function () {}
 
-Scholar.Utilities.prototype.debug = function(msg) {
-	Scholar.debug(msg, 4);
+Zotero.Utilities.prototype.debug = function(msg) {
+	Zotero.debug(msg, 4);
 }
 
 /*
- * See Scholar.Date
+ * See Zotero.Date
  */
-Scholar.Utilities.prototype.formatDate = function(date) {
-	return Scholar.Date.formatDate(date);
+Zotero.Utilities.prototype.formatDate = function(date) {
+	return Zotero.Date.formatDate(date);
 }
-Scholar.Utilities.prototype.strToDate = function(date) {
-	return Scholar.Date.strToDate(date);
+Zotero.Utilities.prototype.strToDate = function(date) {
+	return Zotero.Date.strToDate(date);
 }
 
 /*
  * Cleans extraneous punctuation off an author name
  */
-Scholar.Utilities.prototype.cleanAuthor = function(author, type, useComma) {
+Zotero.Utilities.prototype.cleanAuthor = function(author, type, useComma) {
 	if(typeof(author) != "string") {
 		throw "cleanAuthor: author must be a string";
 	}
@@ -57,7 +57,7 @@ Scholar.Utilities.prototype.cleanAuthor = function(author, type, useComma) {
 /*
  * Cleans whitespace off a string and replaces multiple spaces with one
  */
-Scholar.Utilities.prototype.cleanString = function(s) {
+Zotero.Utilities.prototype.cleanString = function(s) {
 	if(typeof(s) != "string") {
 		throw "cleanString: argument must be a string";
 	}
@@ -70,7 +70,7 @@ Scholar.Utilities.prototype.cleanString = function(s) {
 /*
  * Cleans any non-word non-parenthesis characters off the ends of a string
  */
-Scholar.Utilities.prototype.superCleanString = function(x) {
+Zotero.Utilities.prototype.superCleanString = function(x) {
 	if(typeof(x) != "string") {
 		throw "superCleanString: argument must be a string";
 	}
@@ -82,7 +82,7 @@ Scholar.Utilities.prototype.superCleanString = function(x) {
 /*
  * Eliminates HTML tags, replacing <br>s with /ns
  */
-Scholar.Utilities.prototype.cleanTags = function(x) {
+Zotero.Utilities.prototype.cleanTags = function(x) {
 	if(typeof(x) != "string") {
 		throw "cleanTags: argument must be a string";
 	}
@@ -94,7 +94,7 @@ Scholar.Utilities.prototype.cleanTags = function(x) {
 /*
  * Test if a string is an integer
  */
-Scholar.Utilities.prototype.isInt = function(x) {
+Zotero.Utilities.prototype.isInt = function(x) {
 	if(parseInt(x) == x) {
 		return true;
 	}
@@ -102,17 +102,17 @@ Scholar.Utilities.prototype.isInt = function(x) {
 }
 
 /*
- * Get current scholar version
+ * Get current zotero version
  */
-Scholar.Utilities.prototype.getVersion = function() {
-	return Scholar.version;
+Zotero.Utilities.prototype.getVersion = function() {
+	return Zotero.version;
 }
 
 /*
  * Get a page range, given a user-entered set of pages
  */
-Scholar.Utilities.prototype._pageRangeRegexp = /^\s*([0-9]+)-([0-9]+)\s*$/;
-Scholar.Utilities.prototype.getPageRange = function(pages) {
+Zotero.Utilities.prototype._pageRangeRegexp = /^\s*([0-9]+)-([0-9]+)\s*$/;
+Zotero.Utilities.prototype.getPageRange = function(pages) {
 	var pageNumbers;
 	var m = this._pageRangeRegexp.exec(pages);
 	if(m) {
@@ -128,12 +128,12 @@ Scholar.Utilities.prototype.getPageRange = function(pages) {
 /*
  * provide inArray function
  */
-Scholar.Utilities.prototype.inArray = Scholar.inArray;
+Zotero.Utilities.prototype.inArray = Zotero.inArray;
 
 /*
  * pads a number or other string with a given string on the left
  */
-Scholar.Utilities.prototype.lpad = function(string, pad, length) {
+Zotero.Utilities.prototype.lpad = function(string, pad, length) {
 	while(string.length < length) {
 		string = pad + string;
 	}
@@ -143,8 +143,8 @@ Scholar.Utilities.prototype.lpad = function(string, pad, length) {
 /*
  * returns true if an item type exists, false if it does not
  */
-Scholar.Utilities.prototype.itemTypeExists = function(type) {
-	if(Scholar.ItemTypes.getID(type)) {
+Zotero.Utilities.prototype.itemTypeExists = function(type) {
+	if(Zotero.ItemTypes.getID(type)) {
 		return true;
 	} else {
 		return false;
@@ -154,10 +154,10 @@ Scholar.Utilities.prototype.itemTypeExists = function(type) {
 /*
  * Cleans a title, capitalizing the proper words and replacing " :" with ":"
  */
-Scholar.Utilities.capitalizeSkipWords = ["but", "or", "yet", "so", "for", "and",
+Zotero.Utilities.capitalizeSkipWords = ["but", "or", "yet", "so", "for", "and",
 "nor", "a", "an", "the", "at", "by", "from", "in", "into", "of", "on", "to",
 "with", "up", "down"];
-Scholar.Utilities.prototype.capitalizeTitle = function(title) {
+Zotero.Utilities.prototype.capitalizeTitle = function(title) {
 	title = this.cleanString(title);
 	title = title.replace(/ : /g, ": ");	
 	var words = title.split(" ");
@@ -172,7 +172,7 @@ Scholar.Utilities.prototype.capitalizeTitle = function(title) {
 		if(words.length > 2) {
 			for(var i=1; i<lastWordIndex; i++) {
 				// if not a skip word
-				if(Scholar.Utilities.capitalizeSkipWords.indexOf(words[i].toLowerCase()) == -1 ||
+				if(Zotero.Utilities.capitalizeSkipWords.indexOf(words[i].toLowerCase()) == -1 ||
 				   (words[i-1].length && words[i-1][words[i-1].length-1] == ":")) {
 					words[i] = words[i][0].toUpperCase() + words[i].substr(1);
 				} else {
@@ -186,25 +186,25 @@ Scholar.Utilities.prototype.capitalizeTitle = function(title) {
 }
 
 /*
- * END SCHOLAR FOR FIREFOX EXTENSIONS
+ * END ZOTERO FOR FIREFOX EXTENSIONS
  */
 
 /////////////////////////////////////////////////////////////////
 //
-// Scholar.Utilities.Ingester
+// Zotero.Utilities.Ingester
 //
 /////////////////////////////////////////////////////////////////
-// Scholar.Utilities.Ingester extends Scholar.Utilities, offering additional
+// Zotero.Utilities.Ingester extends Zotero.Utilities, offering additional
 // classes relating to data extraction specifically from HTML documents.
 
-Scholar.Utilities.Ingester = function(translate, proxiedURL) {
+Zotero.Utilities.Ingester = function(translate, proxiedURL) {
 	this.translate = translate;
 }
 
-Scholar.Utilities.Ingester.prototype = new Scholar.Utilities();
+Zotero.Utilities.Ingester.prototype = new Zotero.Utilities();
 
 // Takes an XPath query and returns the results
-Scholar.Utilities.Ingester.prototype.gatherElementsOnXPath = function(doc, parentNode, xpath, nsResolver) {
+Zotero.Utilities.Ingester.prototype.gatherElementsOnXPath = function(doc, parentNode, xpath, nsResolver) {
 	var elmts = [];
 	
 	var iterator = doc.evaluate(xpath, parentNode, nsResolver, Components.interfaces.nsIDOMXPathResult.ANY_TYPE,null);
@@ -220,7 +220,7 @@ Scholar.Utilities.Ingester.prototype.gatherElementsOnXPath = function(doc, paren
 /*
  * Gets a given node as a string containing all child nodes
  */
-Scholar.Utilities.Ingester.prototype.getNodeString = function(doc, contextNode, xpath, nsResolver) {
+Zotero.Utilities.Ingester.prototype.getNodeString = function(doc, contextNode, xpath, nsResolver) {
 	var elmts = this.gatherElementsOnXPath(doc, contextNode, xpath, nsResolver);
 	var returnVar = "";
 	for(var i=0; i<elmts.length; i++) {
@@ -232,7 +232,7 @@ Scholar.Utilities.Ingester.prototype.getNodeString = function(doc, contextNode, 
 /*
  * Grabs items based on URLs
  */
-Scholar.Utilities.Ingester.prototype.getItemArray = function(doc, inHere, urlRe, rejectRe) {
+Zotero.Utilities.Ingester.prototype.getItemArray = function(doc, inHere, urlRe, rejectRe) {
 	var availableItems = new Object();	// Technically, associative arrays are objects
 	
 	// Require link to match this
@@ -282,30 +282,30 @@ Scholar.Utilities.Ingester.prototype.getItemArray = function(doc, inHere, urlRe,
 	return availableItems;
 }
 
-Scholar.Utilities.Ingester.prototype.lookupContextObject = function(co, done, error) {
-	return Scholar.OpenURL.lookupContextObject(co, done, error);
+Zotero.Utilities.Ingester.prototype.lookupContextObject = function(co, done, error) {
+	return Zotero.OpenURL.lookupContextObject(co, done, error);
 }
 
-Scholar.Utilities.Ingester.prototype.parseContextObject = function(co, item) {
-	return Scholar.OpenURL.parseContextObject(co, item);
+Zotero.Utilities.Ingester.prototype.parseContextObject = function(co, item) {
+	return Zotero.OpenURL.parseContextObject(co, item);
 }
 
-// Ingester adapters for Scholar.Utilities.HTTP to handle proxies
+// Ingester adapters for Zotero.Utilities.HTTP to handle proxies
 
-Scholar.Utilities.Ingester.prototype.loadDocument = function(url, succeeded, failed) {
+Zotero.Utilities.Ingester.prototype.loadDocument = function(url, succeeded, failed) {
 	this.processDocuments([ url ], succeeded, null, failed);
 }
 
-Scholar.Utilities.Ingester._protocolRe = new RegExp();
-Scholar.Utilities.Ingester._protocolRe.compile("^(?:(?:http|https|ftp):|[^:]*/)", "i");
-Scholar.Utilities.Ingester.prototype.processDocuments = function(urls, processor, done, exception) {
+Zotero.Utilities.Ingester._protocolRe = new RegExp();
+Zotero.Utilities.Ingester._protocolRe.compile("^(?:(?:http|https|ftp):|[^:]*/)", "i");
+Zotero.Utilities.Ingester.prototype.processDocuments = function(urls, processor, done, exception) {
 	if(this.translate.locationIsProxied) {
 		for(var i in urls) {
 			if(this.translate.locationIsProxied) {
-				urls[i] = Scholar.Ingester.ProxyMonitor.properToProxy(urls[i]);
+				urls[i] = Zotero.Ingester.ProxyMonitor.properToProxy(urls[i]);
 			}
 			// check for a protocol colon
-			if(!Scholar.Utilities.Ingester._protocolRe.test(urls[i])) {
+			if(!Zotero.Utilities.Ingester._protocolRe.test(urls[i])) {
 				throw("invalid URL in processDocuments");
 			}
 		}
@@ -320,23 +320,23 @@ Scholar.Utilities.Ingester.prototype.processDocuments = function(urls, processor
 		}
 	}
 	
-	Scholar.Utilities.HTTP.processDocuments(null, urls, processor, done, exception);
+	Zotero.Utilities.HTTP.processDocuments(null, urls, processor, done, exception);
 }
 
-Scholar.Utilities.Ingester.HTTP = function(translate) {
+Zotero.Utilities.Ingester.HTTP = function(translate) {
 	this.translate = translate;
 }
 
-Scholar.Utilities.Ingester.HTTP.prototype.doGet = function(url, onDone) {
+Zotero.Utilities.Ingester.HTTP.prototype.doGet = function(url, onDone) {
 	if(this.translate.locationIsProxied) {
-		url = Scholar.Ingester.ProxyMonitor.properToProxy(url);
+		url = Zotero.Ingester.ProxyMonitor.properToProxy(url);
 	}
-	if(!Scholar.Utilities.Ingester._protocolRe.test(url)) {
+	if(!Zotero.Utilities.Ingester._protocolRe.test(url)) {
 		throw("invalid URL in processDocuments");
 	}
 	
 	var translate = this.translate;
-	Scholar.Utilities.HTTP.doGet(url, function(xmlhttp) {
+	Zotero.Utilities.HTTP.doGet(url, function(xmlhttp) {
 		try {
 			onDone(xmlhttp.responseText, xmlhttp);
 		} catch(e) {
@@ -345,16 +345,16 @@ Scholar.Utilities.Ingester.HTTP.prototype.doGet = function(url, onDone) {
 	})
 }
 
-Scholar.Utilities.Ingester.HTTP.prototype.doPost = function(url, body, onDone) {
+Zotero.Utilities.Ingester.HTTP.prototype.doPost = function(url, body, onDone) {
 	if(this.translate.locationIsProxied) {
-		url = Scholar.Ingester.ProxyMonitor.properToProxy(url);
+		url = Zotero.Ingester.ProxyMonitor.properToProxy(url);
 	}
-	if(!Scholar.Utilities.Ingester._protocolRe.test(url)) {
+	if(!Zotero.Utilities.Ingester._protocolRe.test(url)) {
 		throw("invalid URL in processDocuments");
 	}
 	
 	var translate = this.translate;
-	Scholar.Utilities.HTTP.doPost(url, body, function(xmlhttp) {
+	Zotero.Utilities.HTTP.doPost(url, body, function(xmlhttp) {
 		try {
 			onDone(xmlhttp.responseText, xmlhttp);
 		} catch(e) {
@@ -366,7 +366,7 @@ Scholar.Utilities.Ingester.HTTP.prototype.doPost = function(url, body, onDone) {
 // These are front ends for XMLHttpRequest. XMLHttpRequest can't actually be
 // accessed outside the sandbox, and even if it could, it wouldn't let scripts
 // access across domains, so everything's replicated here.
-Scholar.Utilities.HTTP = new function() {
+Zotero.Utilities.HTTP = new function() {
 	this.doGet = doGet;
 	this.doPost = doPost;
 	this.doHead = doHead;
@@ -380,10 +380,10 @@ Scholar.Utilities.HTTP = new function() {
 	* Returns false if browser is offline
 	*
 	* doGet can be called as:
-	* Scholar.Utilities.HTTP.doGet(url, onDone)
+	* Zotero.Utilities.HTTP.doGet(url, onDone)
 	**/
 	function doGet(url, onDone, onError) {
-		Scholar.debug("HTTP GET "+url);
+		Zotero.debug("HTTP GET "+url);
 		if (this.browserIsOffline()){
 			return false;
 		}
@@ -409,10 +409,10 @@ Scholar.Utilities.HTTP = new function() {
 	* Returns false if browser is offline
 	*
 	* doPost can be called as:
-	* Scholar.Utilities.HTTP.doPost(url, body, onDone)
+	* Zotero.Utilities.HTTP.doPost(url, body, onDone)
 	**/
 	function doPost(url, body, onDone) {
-		Scholar.debug("HTTP POST "+body+" to "+url);
+		Zotero.debug("HTTP POST "+body+" to "+url);
 		if (this.browserIsOffline()){
 			return false;
 		}
@@ -434,7 +434,7 @@ Scholar.Utilities.HTTP = new function() {
 	
 	
 	function doHead(url, onDone) {
-		Scholar.debug("HTTP HEAD "+url);
+		Zotero.debug("HTTP HEAD "+url);
 		if (this.browserIsOffline()){
 			return false;
 		}
@@ -458,13 +458,13 @@ Scholar.Utilities.HTTP = new function() {
 	* Send an HTTP OPTIONS request via XMLHTTPRequest
 	*
 	* doOptions can be called as:
-	* Scholar.Utilities.HTTP.doOptions(url, body, onDone)
+	* Zotero.Utilities.HTTP.doOptions(url, body, onDone)
 	*
 	* The status handler, which doesn't really serve a very noticeable purpose
 	* in our code, is required for compatiblity with the Piggy Bank project
 	**/
 	function doOptions(url, body, onDone) {
-		Scholar.debug("HTTP OPTIONS "+url);
+		Zotero.debug("HTTP OPTIONS "+url);
 		if (this.browserIsOffline()){
 			return false;
 		}
@@ -519,11 +519,11 @@ Scholar.Utilities.HTTP = new function() {
 // processor - a function to execute to process each document
 // done - a function to execute when all document processing is complete
 // exception - a function to execute if an exception occurs (exceptions are
-//             also logged in the Scholar for Firefox log)
+//             also logged in the Zotero for Firefox log)
 // saveBrowser - whether to save the hidden browser object; usually, you don't
 //               want to do this, because it makes it easier to leak memory
-Scholar.Utilities.HTTP.processDocuments = function(firstDoc, urls, processor, done, exception, saveBrowser) {
-	var hiddenBrowser = Scholar.Browser.createHiddenBrowser();
+Zotero.Utilities.HTTP.processDocuments = function(firstDoc, urls, processor, done, exception, saveBrowser) {
+	var hiddenBrowser = Zotero.Browser.createHiddenBrowser();
 	hiddenBrowser.docShell.allowImages = false;
 	var prevUrl, url;
 
@@ -540,7 +540,7 @@ Scholar.Utilities.HTTP.processDocuments = function(firstDoc, urls, processor, do
 	var removeListeners = function() {
 		hiddenBrowser.removeEventListener("load", onLoad, true);
 		if(!saveBrowser) {
-			Scholar.Browser.deleteHiddenBrowser(hiddenBrowser);
+			Zotero.Browser.deleteHiddenBrowser(hiddenBrowser);
 		}
 	}
 	var doLoad = function() {
@@ -548,7 +548,7 @@ Scholar.Utilities.HTTP.processDocuments = function(firstDoc, urls, processor, do
 		if (urlIndex < urls.length) {
 			url = urls[urlIndex];
 			try {
-				Scholar.debug("loading "+url);
+				Zotero.debug("loading "+url);
 				hiddenBrowser.loadURI(url);
 			} catch (e) {
 				removeListeners();
@@ -567,7 +567,7 @@ Scholar.Utilities.HTTP.processDocuments = function(firstDoc, urls, processor, do
 		}
 	};
 	var onLoad = function() {
-		Scholar.debug(hiddenBrowser.contentDocument.location.href+" has been loaded");
+		Zotero.debug(hiddenBrowser.contentDocument.location.href+" has been loaded");
 		if(hiddenBrowser.contentDocument.location.href != prevUrl) {	// Just in case it fires too many times
 			prevUrl = hiddenBrowser.contentDocument.location.href;
 			try {
@@ -601,7 +601,7 @@ Scholar.Utilities.HTTP.processDocuments = function(firstDoc, urls, processor, do
 /*
  * This would probably be better as a separate XPCOM service
  */
-Scholar.Utilities.AutoComplete = new function(){
+Zotero.Utilities.AutoComplete = new function(){
 	this.getResultComment = getResultComment;
 	
 	function getResultComment(textbox){

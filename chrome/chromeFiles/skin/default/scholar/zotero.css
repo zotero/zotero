@@ -1,51 +1,51 @@
 #zotero-toolbar-button
 {
-	list-style-image: url('chrome://scholar/skin/zotero-z-24px.png');
+	list-style-image: url('chrome://zotero/skin/zotero-z-24px.png');
 }
 
 #zotero-toolbar-button:hover
 {
-	list-style-image: url('chrome://scholar/skin/zotero-z-24px-hover.png');
+	list-style-image: url('chrome://zotero/skin/zotero-z-24px-hover.png');
 }
 
 #zotero-toolbar-button:active
 {
-	list-style-image: url('chrome://scholar/skin/zotero-z-24px-active.png');
+	list-style-image: url('chrome://zotero/skin/zotero-z-24px-active.png');
 }
 
 toolbar[iconsize="small"] #zotero-toolbar-button
 {
-	list-style-image: url('chrome://scholar/skin/zotero-z-16px.png');
+	list-style-image: url('chrome://zotero/skin/zotero-z-16px.png');
 }
 
 toolbar[iconsize="small"] #zotero-toolbar-button:hover
 {
-	list-style-image: url('chrome://scholar/skin/zotero-z-16px-hover.png');
+	list-style-image: url('chrome://zotero/skin/zotero-z-16px-hover.png');
 }
 
 toolbar[iconsize="small"] #zotero-toolbar-button:active
 {
-	list-style-image: url('chrome://scholar/skin/zotero-z-16px-active.png');
+	list-style-image: url('chrome://zotero/skin/zotero-z-16px-active.png');
 }
 
 textbox[multiline="true"][type="timed"]
 {
-	-moz-binding: url('chrome://scholar/content/bindings/timedtextarea.xml#timed-textarea');
+	-moz-binding: url('chrome://zotero/content/bindings/timedtextarea.xml#timed-textarea');
 }
 
 noteeditor
 {
-	-moz-binding: url('chrome://scholar/content/bindings/noteeditor.xml#note-editor');
+	-moz-binding: url('chrome://zotero/content/bindings/noteeditor.xml#note-editor');
 }
 
 linksbox
 {
-	-moz-binding: url('chrome://scholar/content/bindings/noteeditor.xml#links-box');
+	-moz-binding: url('chrome://zotero/content/bindings/noteeditor.xml#links-box');
 }
 
 tagsbox
 {
-	-moz-binding: url('chrome://scholar/content/bindings/tagsbox.xml#tags-box');
+	-moz-binding: url('chrome://zotero/content/bindings/tagsbox.xml#tags-box');
 }
 
 tagsbox row
@@ -55,18 +55,18 @@ tagsbox row
 
 seealsobox
 {
-	-moz-binding: url('chrome://scholar/content/bindings/relatedbox.xml#seealso-box');
+	-moz-binding: url('chrome://zotero/content/bindings/relatedbox.xml#seealso-box');
 }
 
-scholarsearch
+zoterosearch
 {
-	-moz-binding: url('chrome://scholar/content/bindings/scholarsearch.xml#search-box');
+	-moz-binding: url('chrome://zotero/content/bindings/zoterosearch.xml#search-box');
 	width:60em;
 }
 
 searchcondition
 {
-	-moz-binding: url('chrome://scholar/content/bindings/scholarsearch.xml#search-condition');
+	-moz-binding: url('chrome://zotero/content/bindings/zoterosearch.xml#search-condition');
 }
 
 searchcondition menulist[id="operatorsmenu"]
@@ -76,7 +76,7 @@ searchcondition menulist[id="operatorsmenu"]
 
 zoterosearchtextbox
 {
-	-moz-binding: url('chrome://scholar/content/bindings/searchtextbox.xml#zotero-search-textbox');
+	-moz-binding: url('chrome://zotero/content/bindings/searchtextbox.xml#zotero-search-textbox');
 }
 
 zoterosearchtextbox toolbarbutton
@@ -138,7 +138,7 @@ zoterosearchtextbox .toolbarbutton-menu-dropmarker
 	background: #666666;
 }
 
-#zotero-progress-box, #scholar-progress-box
+#zotero-progress-box, #zotero-progress-box
 {
 	border: 2px solid #7a0000;
 	margin: 0;
@@ -147,35 +147,35 @@ zoterosearchtextbox .toolbarbutton-menu-dropmarker
 	padding-bottom: 3px;
 }
 
-.zotero-progress-item-icon, .scholar-progress-item-icon
+.zotero-progress-item-icon, .zotero-progress-item-icon
 {
 	width: 16px;
 	height: 16px;
 }
 
-.zotero-progress-item-hbox, .scholar-progress-item-hbox
+.zotero-progress-item-hbox, .zotero-progress-item-hbox
 {
 	padding-left: 5px;
 	margin-top: 3px;
 	margin-bottom: 3px;
 }
 
-.scholar-progress-item-label
+.zotero-progress-item-label
 {
 	width: 210px;
 }
 
-.scholar-progress-description
+.zotero-progress-description
 {
 	width: 220px;
 }
 
-.scholar-scrape-popup-library
+.zotero-scrape-popup-library
 {
-	list-style-image: url('chrome://scholar/skin/treesource-library.png');
+	list-style-image: url('chrome://zotero/skin/treesource-library.png');
 }
 
-.scholar-scrape-popup-collection
+.zotero-scrape-popup-collection
 {
-	list-style-image: url('chrome://scholar/skin/treesource-collection.png');
+	list-style-image: url('chrome://zotero/skin/treesource-collection.png');
 }

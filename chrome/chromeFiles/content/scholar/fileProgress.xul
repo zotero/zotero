@@ -1,10 +1,10 @@
 <?xml version="1.0" ?>
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
-<!DOCTYPE window SYSTEM "chrome://scholar/locale/scholar.dtd">
+<!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
 
 <window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	title="&progress.title;" width="300" height="30"
-	id="scholar-progress">
+	id="zotero-progress">
 	<vbox style="padding:10px">
 		<hbox align="stretch">
 			<label id="progress-label" flex="1" />

@@ -44,7 +44,7 @@
 			<method name="reload">
 				<body>
 					<![CDATA[
-						//Scholar.debug('Reloading tags');
+						//Zotero.debug('Reloading tags');
 						
 						var rows = this.id('tagRows');
 						while(rows.hasChildNodes())
@@ -75,7 +75,7 @@
 				<parameter name="tabindex"/>
 				<body>
 					<![CDATA[
-						var id = tag ? Scholar.Tags.getID(tag) : null;
+						var id = tag ? Zotero.Tags.getID(tag) : null;
 						tag = tag ? tag : '';
 						
 						if (!tabindex)
@@ -91,11 +91,11 @@
 						}
 						
 						var icon= document.createElement("image");
-						icon.setAttribute('src','chrome://scholar/skin/tag.png');
+						icon.setAttribute('src','chrome://zotero/skin/tag.png');
 						// DEBUG: Why won't just this.nextSibling.blur() work?
 						icon.setAttribute('onclick','if (this.nextSibling.inputField){ this.nextSibling.inputField.blur() }');
 						
-						var label = ScholarItemPane.createValueElement(tag, 'tag', tabindex);
+						var label = ZoteroItemPane.createValueElement(tag, 'tag', tabindex);
 						
 						var remove = document.createElement("label");
 						remove.setAttribute('value','-');
@@ -152,7 +152,7 @@
 					<![CDATA[
 						if(oldTagID && newTag)
 						{
-							var oldTag = Scholar.Tags.getName(oldTagID);
+							var oldTag = Zotero.Tags.getName(oldTagID);
 							if (oldTag!=newTag)
 							{
 								return this.item.replaceTag(oldTagID, newTag);
@@ -205,7 +205,7 @@
 						//
 						// We reset the popup manually if it's showing
 						if (this.parentNode.getAttribute('showing')=='true'){
-							//Scholar.debug('Fixing popup');
+							//Zotero.debug('Fixing popup');
 							// The target element is 'tagsLabel', so change the
 							// path if the XUL DOM in the note editor XBL changes
 							this.parentNode.showPopup(

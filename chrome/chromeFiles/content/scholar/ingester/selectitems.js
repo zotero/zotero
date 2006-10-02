@@ -1,16 +1,16 @@
 //////////////////////////////////////////////////////////////////////////////
 //
-// Scholar_Ingester_Interface_SelectItems
+// Zotero_Ingester_Interface_SelectItems
 //
 //////////////////////////////////////////////////////////////////////////////
 
 // Class to interface with the browser when ingesting data
 
-var Scholar_Ingester_Interface_SelectItems = function() {}
+var Zotero_Ingester_Interface_SelectItems = function() {}
 
 //////////////////////////////////////////////////////////////////////////////
 //
-// Public Scholar_Ingester_Interface_SelectItems methods
+// Public Zotero_Ingester_Interface_SelectItems methods
 //
 //////////////////////////////////////////////////////////////////////////////
 
@@ -18,10 +18,10 @@ var Scholar_Ingester_Interface_SelectItems = function() {}
  * Initialize some variables and prepare event listeners for when chrome is done
  * loading
  */
-Scholar_Ingester_Interface_SelectItems.init = function() {
+Zotero_Ingester_Interface_SelectItems.init = function() {
 	this.io = window.arguments[0];
-	this.Scholar_Ingester_Interface = window.arguments[1];
-	var listbox = document.getElementById("scholar-selectitems-links");
+	this.Zotero_Ingester_Interface = window.arguments[1];
+	var listbox = document.getElementById("zotero-selectitems-links");
 	
 	for(i in this.io.dataIn) {	// we could use a tree for this if we wanted to
 		var itemNode = document.createElement("listitem");
@@ -33,8 +33,8 @@ Scholar_Ingester_Interface_SelectItems.init = function() {
 	}
 }
 
-Scholar_Ingester_Interface_SelectItems.acceptSelection = function() {
-	var listbox = document.getElementById("scholar-selectitems-links");
+Zotero_Ingester_Interface_SelectItems.acceptSelection = function() {
+	var listbox = document.getElementById("zotero-selectitems-links");
 	
 	var returnObject = false;
 	this.io.dataOut = new Object();

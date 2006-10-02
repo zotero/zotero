@@ -15,9 +15,9 @@
     <em:developer>David Norton</em:developer>
     <em:developer>Dan Stillman</em:developer>
     <em:homepageURL>http://www.zotero.org</em:homepageURL>
-    <em:optionsURL>chrome://scholar/content/preferences.xul</em:optionsURL>
-    <em:aboutURL>chrome://scholar/content/about.xul</em:aboutURL>
-    <em:iconURL>chrome://scholar/skin/zotero_z_32px.png</em:iconURL>
+    <em:optionsURL>chrome://zotero/content/preferences.xul</em:optionsURL>
+    <em:aboutURL>chrome://zotero/content/about.xul</em:aboutURL>
+    <em:iconURL>chrome://zotero/skin/zotero_z_32px.png</em:iconURL>
     <em:updateURL>http://www.zotero.org/download/update-svn.rdf</em:updateURL>
     <em:type>2</em:type> <!-- type=extension --> 
     

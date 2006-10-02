@@ -1,8 +1,8 @@
-content	scholar				chrome/chromeFiles/content/scholar/
-locale	scholar	en-US		chrome/chromeFiles/locale/en-US/scholar/
-skin	scholar	default		chrome/chromeFiles/skin/default/scholar/
+content	zotero				chrome/chromeFiles/content/zotero/
+locale	zotero	en-US		chrome/chromeFiles/locale/en-US/zotero/
+skin	zotero	default		chrome/chromeFiles/skin/default/zotero/
 
-overlay	chrome://browser/content/browser.xul	chrome://scholar/content/overlay.xul
-overlay	chrome://browser/content/browser.xul	chrome://scholar/content/ingester/browser.xul
-style	chrome://browser/content/browser.xul	chrome://scholar/skin/scholar.css
-style	chrome://global/content/customizeToolbar.xul	chrome://scholar/skin/scholar.css
+overlay	chrome://browser/content/browser.xul	chrome://zotero/content/overlay.xul
+overlay	chrome://browser/content/browser.xul	chrome://zotero/content/ingester/browser.xul
+style	chrome://browser/content/browser.xul	chrome://zotero/skin/zotero.css
+style	chrome://global/content/customizeToolbar.xul	chrome://zotero/skin/zotero.css

@@ -1,4 +1,4 @@
-Scholar.MIME = new function(){
+Zotero.MIME = new function(){
 	this.isExternalTextExtension = isExternalTextExtension;
 	this.sniffForMIMEType = sniffForMIMEType;
 	this.sniffForBinary = sniffForBinary;
@@ -81,19 +81,19 @@ Scholar.MIME = new function(){
 	function getMIMETypeFromData(str, ext){
 		var mimeType = this.sniffForMIMEType(str);
 		if (mimeType){
-			Scholar.debug('Detected MIME type ' + mimeType);
+			Zotero.debug('Detected MIME type ' + mimeType);
 			return mimeType;
 		}
 		
 		try {
 			var mimeType = Components.classes["@mozilla.org/uriloader/external-helper-app-service;1"]
 				.getService(Components.interfaces.nsIMIMEService).getTypeFromExtension(ext);
-			Scholar.debug('Got MIME type ' + mimeType + ' from extension');
+			Zotero.debug('Got MIME type ' + mimeType + ' from extension');
 			return mimeType;
 		}
 		catch (e){
 			var mimeType = this.sniffForBinary(str);
-			Scholar.debug('Cannot determine MIME type -- settling for ' + mimeType);
+			Zotero.debug('Cannot determine MIME type -- settling for ' + mimeType);
 			return mimeType;
 		}
 	}
@@ -104,8 +104,8 @@ Scholar.MIME = new function(){
 	 * techniques
 	 */
 	function getMIMETypeFromFile(file){
-		var str = Scholar.File.getSample(file);
-		var ext = Scholar.File.getExtension(file);
+		var str = Zotero.File.getSample(file);
+		var ext = Zotero.File.getExtension(file);
 		
 		return this.getMIMETypeFromData(str, ext);
 	}
@@ -127,14 +127,14 @@ Scholar.MIME = new function(){
 	function hasInternalHandler(mimeType, ext){
 		if (mimeType=='text/plain'){
 			if (this.isExternalTextExtension(ext)){
-				Scholar.debug('text/plain file has extension that should be handled externally');
+				Zotero.debug('text/plain file has extension that should be handled externally');
 				return false;
 			}
 			return true;
 		}
 		
 		if (_nativeMIMETypes[mimeType]){
-			Scholar.debug('MIME type ' + mimeType + ' can be handled natively');
+			Zotero.debug('MIME type ' + mimeType + ' can be handled natively');
 			return true;
 		}
 		
@@ -145,19 +145,19 @@ Scholar.MIME = new function(){
 		
 		for (var i in types){
 			if (types[i].type==mimeType){
-				Scholar.debug('MIME type ' + mimeType + ' can be handled by plugins');
+				Zotero.debug('MIME type ' + mimeType + ' can be handled by plugins');
 				return true;
 			}
 		}
 		
-		Scholar.debug('MIME type ' + mimeType + ' cannot be handled natively');
+		Zotero.debug('MIME type ' + mimeType + ' cannot be handled natively');
 		return false;
 	}
 	
 	
 	function fileHasInternalHandler(file){
 		var mimeType = this.getMIMETypeFromFile(file);
-		var ext = Scholar.File.getExtension(file);
+		var ext = Zotero.File.getExtension(file);
 		return this.hasInternalHandler(mimeType, ext);
 	}
 	

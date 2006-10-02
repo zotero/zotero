@@ -1,20 +1,20 @@
-// Scholar for Firefox Ingester Browser Functions
+// Zotero for Firefox Ingester Browser Functions
 // Based on code taken from Greasemonkey and PiggyBank
 // This code is licensed according to the GPL
 
 //////////////////////////////////////////////////////////////////////////////
 //
-// Scholar_Ingester_Interface
+// Zotero_Ingester_Interface
 //
 //////////////////////////////////////////////////////////////////////////////
 
 // Class to interface with the browser when ingesting data
 
-var Scholar_Ingester_Interface = function() {}
+var Zotero_Ingester_Interface = function() {}
 
 //////////////////////////////////////////////////////////////////////////////
 //
-// Public Scholar_Ingester_Interface methods
+// Public Zotero_Ingester_Interface methods
 //
 //////////////////////////////////////////////////////////////////////////////
 
@@ -22,73 +22,73 @@ var Scholar_Ingester_Interface = function() {}
  * Initialize some variables and prepare event listeners for when chrome is done
  * loading
  */
-Scholar_Ingester_Interface.init = function() {
-	Scholar_Ingester_Interface.browserData = new Object();
-	Scholar_Ingester_Interface._scrapePopupShowing = false;
-	Scholar.Ingester.ProxyMonitor.init();
-	Scholar.Ingester.MIMEHandler.init();
-	Scholar.Translate.init();
+Zotero_Ingester_Interface.init = function() {
+	Zotero_Ingester_Interface.browserData = new Object();
+	Zotero_Ingester_Interface._scrapePopupShowing = false;
+	Zotero.Ingester.ProxyMonitor.init();
+	Zotero.Ingester.MIMEHandler.init();
+	Zotero.Translate.init();
 	
-	window.addEventListener("load", Scholar_Ingester_Interface.chromeLoad, false);
-	window.addEventListener("unload", Scholar_Ingester_Interface.chromeUnload, false);
+	window.addEventListener("load", Zotero_Ingester_Interface.chromeLoad, false);
+	window.addEventListener("unload", Zotero_Ingester_Interface.chromeUnload, false);
 }
 
 /*
  * When chrome loads, register our event handlers with the appropriate interfaces
  */
-Scholar_Ingester_Interface.chromeLoad = function() {
-	Scholar_Ingester_Interface.tabBrowser = document.getElementById("content");
-	Scholar_Ingester_Interface.appContent = document.getElementById("appcontent");
-	Scholar_Ingester_Interface.statusImage = document.getElementById("scholar-status-image");
+Zotero_Ingester_Interface.chromeLoad = function() {
+	Zotero_Ingester_Interface.tabBrowser = document.getElementById("content");
+	Zotero_Ingester_Interface.appContent = document.getElementById("appcontent");
+	Zotero_Ingester_Interface.statusImage = document.getElementById("zotero-status-image");
 	
 	// this gives us onLocationChange, for updating when tabs are switched/created
-	Scholar_Ingester_Interface.tabBrowser.addEventListener("TabClose",
-	    Scholar_Ingester_Interface.tabClose, false);
-	Scholar_Ingester_Interface.tabBrowser.addEventListener("TabSelect",
-	    Scholar_Ingester_Interface.tabSelect, false);
+	Zotero_Ingester_Interface.tabBrowser.addEventListener("TabClose",
+	    Zotero_Ingester_Interface.tabClose, false);
+	Zotero_Ingester_Interface.tabBrowser.addEventListener("TabSelect",
+	    Zotero_Ingester_Interface.tabSelect, false);
 	// this is for pageshow, for updating the status of the book icon
-	Scholar_Ingester_Interface.appContent.addEventListener("pageshow",
-		Scholar_Ingester_Interface.contentLoad, true);
+	Zotero_Ingester_Interface.appContent.addEventListener("pageshow",
+		Zotero_Ingester_Interface.contentLoad, true);
 }
 
 /*
  * When chrome unloads, delete our document objects and remove our listeners
  */
-Scholar_Ingester_Interface.chromeUnload = function() {
-	delete Scholar_Ingester_Interface.browserData;
+Zotero_Ingester_Interface.chromeUnload = function() {
+	delete Zotero_Ingester_Interface.browserData;
 }
 
 /*
  * Scrapes a page (called when the capture icon is clicked); takes a collection
  * ID as the argument
  */
-Scholar_Ingester_Interface.scrapeThisPage = function(saveLocation) {
-	var browser = Scholar_Ingester_Interface.tabBrowser.selectedBrowser;
-	var data = Scholar_Ingester_Interface._getData(browser);
+Zotero_Ingester_Interface.scrapeThisPage = function(saveLocation) {
+	var browser = Zotero_Ingester_Interface.tabBrowser.selectedBrowser;
+	var data = Zotero_Ingester_Interface._getData(browser);
 	
 	if(data.translators && data.translators.length) {
-		Scholar_Ingester_Interface.Progress.show();
+		Zotero_Ingester_Interface.Progress.show();
 		
 		if(saveLocation) {
-			saveLocation = Scholar.Collections.get(saveLocation);
+			saveLocation = Zotero.Collections.get(saveLocation);
 		} else { // save to currently selected collection, if a collection is selected
 			try {
-				saveLocation = ScholarPane.getSelectedCollection();
+				saveLocation = ZoteroPane.getSelectedCollection();
 			} catch(e) {}
 		}
 		
-		var translate = new Scholar.Translate("web");
+		var translate = new Zotero.Translate("web");
 		translate.setDocument(data.document);
 		// use first translator available
 		translate.setTranslator(data.translators[0]);
-		translate.setHandler("select", Scholar_Ingester_Interface._selectItems);
-		translate.setHandler("itemDone", function(obj, item) { Scholar_Ingester_Interface._itemDone(obj, item, saveLocation) });
-		translate.setHandler("done", function(obj, item) { Scholar_Ingester_Interface._finishScraping(obj, item, saveLocation) });
+		translate.setHandler("select", Zotero_Ingester_Interface._selectItems);
+		translate.setHandler("itemDone", function(obj, item) { Zotero_Ingester_Interface._itemDone(obj, item, saveLocation) });
+		translate.setHandler("done", function(obj, item) { Zotero_Ingester_Interface._finishScraping(obj, item, saveLocation) });
 		translate.translate();
 	}
 }
 
-Scholar_Ingester_Interface.searchFrames = function(rootDoc, searchDoc) {
+Zotero_Ingester_Interface.searchFrames = function(rootDoc, searchDoc) {
 	for each(var frame in rootDoc.frames) {
 		if(frame.document == searchDoc ||
 		   (frame.document.frames && searchFrames(frame, searchDoc))) {
@@ -103,7 +103,7 @@ Scholar_Ingester_Interface.searchFrames = function(rootDoc, searchDoc) {
  * An event handler called when a new document is loaded. Creates a new document
  * object, and updates the status of the capture icon
  */
-Scholar_Ingester_Interface.contentLoad = function(event) {
+Zotero_Ingester_Interface.contentLoad = function(event) {
 	if(event.originalTarget instanceof HTMLDocument) {
 		var doc = event.originalTarget;
 		var rootDoc = doc;
@@ -115,9 +115,9 @@ Scholar_Ingester_Interface.contentLoad = function(event) {
 		
 		// Figure out what browser this contentDocument is associated with
 		var browser;
-		for(var i=0; i<Scholar_Ingester_Interface.tabBrowser.browsers.length; i++) {
-			if(rootDoc == Scholar_Ingester_Interface.tabBrowser.browsers[i].contentDocument) {
-				browser = Scholar_Ingester_Interface.tabBrowser.browsers[i];
+		for(var i=0; i<Zotero_Ingester_Interface.tabBrowser.browsers.length; i++) {
+			if(rootDoc == Zotero_Ingester_Interface.tabBrowser.browsers[i].contentDocument) {
+				browser = Zotero_Ingester_Interface.tabBrowser.browsers[i];
 				break;
 			}
 		}
@@ -126,12 +126,12 @@ Scholar_Ingester_Interface.contentLoad = function(event) {
 		}
 		
 		// get data object
-		var data = Scholar_Ingester_Interface._getData(browser);
+		var data = Zotero_Ingester_Interface._getData(browser);
 		
 		// if there's already a scrapable page in the browser window, and it's
 		// still there, ensure it is actually part of the page, then return
 		if(data.translators && data.translators.length && data.document.location) {
-			if(Scholar_Ingester_Interface.searchFrames(rootDoc, data.document)) {
+			if(Zotero_Ingester_Interface.searchFrames(rootDoc, data.document)) {
 				return;
 			} else {
 				data.document = null;
@@ -139,12 +139,12 @@ Scholar_Ingester_Interface.contentLoad = function(event) {
 		}
 		
 		// get translators
-		var translate = new Scholar.Translate("web");
+		var translate = new Zotero.Translate("web");
 		translate.setDocument(doc);
 		data.translators = translate.getTranslators();
 		// update status
-		if(Scholar_Ingester_Interface.tabBrowser.selectedBrowser == browser) {
-			Scholar_Ingester_Interface._updateStatus(data);
+		if(Zotero_Ingester_Interface.tabBrowser.selectedBrowser == browser) {
+			Zotero_Ingester_Interface._updateStatus(data);
 		}
 		// add document
 		if(data.translators && data.translators.length) {
@@ -156,52 +156,52 @@ Scholar_Ingester_Interface.contentLoad = function(event) {
 /*
  * called when a tab is closed
  */
-Scholar_Ingester_Interface.tabClose = function(event) {
+Zotero_Ingester_Interface.tabClose = function(event) {
 	// To execute if document object does not exist
-	Scholar_Ingester_Interface._deleteData(event.target.linkedBrowser);
+	Zotero_Ingester_Interface._deleteData(event.target.linkedBrowser);
 }
 
 /*
  * called when a tab is switched
  */
-Scholar_Ingester_Interface.tabSelect = function(event) {
-	var data = Scholar_Ingester_Interface._getData(Scholar_Ingester_Interface.tabBrowser.selectedBrowser);
-	Scholar_Ingester_Interface._updateStatus(data);
+Zotero_Ingester_Interface.tabSelect = function(event) {
+	var data = Zotero_Ingester_Interface._getData(Zotero_Ingester_Interface.tabBrowser.selectedBrowser);
+	Zotero_Ingester_Interface._updateStatus(data);
 }
 
-Scholar_Ingester_Interface.hidePopup = function(collectionID) {
-	Scholar_Ingester_Interface._scrapePopupShowing = false;
+Zotero_Ingester_Interface.hidePopup = function(collectionID) {
+	Zotero_Ingester_Interface._scrapePopupShowing = false;
 }
 
-Scholar_Ingester_Interface.showPopup = function(collectionID, parentElement) {
-	if(Scholar_Ingester_Interface._scrapePopupShowing && parentElement.hasChildNodes()) {
+Zotero_Ingester_Interface.showPopup = function(collectionID, parentElement) {
+	if(Zotero_Ingester_Interface._scrapePopupShowing && parentElement.hasChildNodes()) {
 		return false;	// Don't dynamically reload popups that are already showing
 	}
-	Scholar_Ingester_Interface._scrapePopupShowing = true;
+	Zotero_Ingester_Interface._scrapePopupShowing = true;
 	parentElement.removeAllItems();
 	
 	if(collectionID == null) {	// show library
 		var newItem = document.createElement("menuitem");
-		newItem.setAttribute("label", Scholar.getString("pane.collections.library"));
-		newItem.setAttribute("class", "menuitem-iconic scholar-scrape-popup-library");
-		newItem.setAttribute("oncommand", 'Scholar_Ingester_Interface.scrapeThisPage()');
+		newItem.setAttribute("label", Zotero.getString("pane.collections.library"));
+		newItem.setAttribute("class", "menuitem-iconic zotero-scrape-popup-library");
+		newItem.setAttribute("oncommand", 'Zotero_Ingester_Interface.scrapeThisPage()');
 		parentElement.appendChild(newItem);
 	}
 	
-	var childrenList = Scholar.getCollections(collectionID);
+	var childrenList = Zotero.getCollections(collectionID);
 	for(var i = 0; i < childrenList.length; i++) {
 		if(childrenList[i].hasChildCollections()) {
 			var newItem = document.createElement("menu");
 			var subMenu = document.createElement("menupopup");
-			subMenu.setAttribute("onpopupshowing", 'Scholar_Ingester_Interface.showPopup("'+childrenList[i].getID()+'", this)');
-			newItem.setAttribute("class", "menu-iconic scholar-scrape-popup-collection");
+			subMenu.setAttribute("onpopupshowing", 'Zotero_Ingester_Interface.showPopup("'+childrenList[i].getID()+'", this)');
+			newItem.setAttribute("class", "menu-iconic zotero-scrape-popup-collection");
 			newItem.appendChild(subMenu);
 		} else {
 			var newItem = document.createElement("menuitem");
-			newItem.setAttribute("class", "menuitem-iconic scholar-scrape-popup-collection");
+			newItem.setAttribute("class", "menuitem-iconic zotero-scrape-popup-collection");
 		}
 		newItem.setAttribute("label", childrenList[i].getName());
-		newItem.setAttribute("oncommand", 'Scholar_Ingester_Interface.scrapeThisPage("'+childrenList[i].getID()+'")');
+		newItem.setAttribute("oncommand", 'Zotero_Ingester_Interface.scrapeThisPage("'+childrenList[i].getID()+'")');
 		
 		parentElement.appendChild(newItem);
 	}
@@ -211,7 +211,7 @@ Scholar_Ingester_Interface.showPopup = function(collectionID, parentElement) {
 
 //////////////////////////////////////////////////////////////////////////////
 //
-// Private Scholar_Ingester_Interface methods
+// Private Zotero_Ingester_Interface methods
 //
 //////////////////////////////////////////////////////////////////////////////
 
@@ -225,20 +225,20 @@ Scholar_Ingester_Interface.showPopup = function(collectionID, parentElement) {
  *
  * Currently, the data object contains only one property: "translators," which
  * is an array of translators that should work with the given page as returned
- * from Scholar.Translate.getTranslator()
+ * from Zotero.Translate.getTranslator()
  */
-Scholar_Ingester_Interface._getData = function(browser) {
+Zotero_Ingester_Interface._getData = function(browser) {
 	try {
-		var key = browser.getAttribute("scholar-key");
-		if(Scholar_Ingester_Interface.browserData[key]) {
-			return Scholar_Ingester_Interface.browserData[key];
+		var key = browser.getAttribute("zotero-key");
+		if(Zotero_Ingester_Interface.browserData[key]) {
+			return Zotero_Ingester_Interface.browserData[key];
 		}
 	} finally {
 		if(!key) {
 			var key = (new Date()).getTime();
-			browser.setAttribute("scholar-key", key);
-			Scholar_Ingester_Interface.browserData[key] = new Array();
-			return Scholar_Ingester_Interface.browserData[key];
+			browser.setAttribute("zotero-key", key);
+			Zotero_Ingester_Interface.browserData[key] = new Array();
+			return Zotero_Ingester_Interface.browserData[key];
 		}
 	}
 	return false;
@@ -247,11 +247,11 @@ Scholar_Ingester_Interface._getData = function(browser) {
 /*
  * Deletes the document object associated with a given browser window object
  */
-Scholar_Ingester_Interface._deleteData = function(browser) {
+Zotero_Ingester_Interface._deleteData = function(browser) {
 	try {
-		var key = browser.getAttribute("scholar-key");
-		if(Scholar_Ingester_Interface.browserData[key]) {
-			delete Scholar_Ingester_Interface.browserData[key];
+		var key = browser.getAttribute("zotero-key");
+		if(Zotero_Ingester_Interface.browserData[key]) {
+			delete Zotero_Ingester_Interface.browserData[key];
 			return true;
 		}
 	} finally {}
@@ -262,48 +262,48 @@ Scholar_Ingester_Interface._deleteData = function(browser) {
  * Updates the status of the capture icon to reflect the scrapability or lack
  * thereof of the current page
  */
-Scholar_Ingester_Interface._updateStatus = function(data) {
+Zotero_Ingester_Interface._updateStatus = function(data) {
 	if(data.translators && data.translators.length) {
 		var itemType = data.translators[0].itemType;
 		if(itemType == "multiple") {
 			// Use folder icon for multiple types, for now
-			Scholar_Ingester_Interface.statusImage.src = "chrome://scholar/skin/treesource-collection.png";
+			Zotero_Ingester_Interface.statusImage.src = "chrome://zotero/skin/treesource-collection.png";
 		} else {
-			Scholar_Ingester_Interface.statusImage.src = "chrome://scholar/skin/treeitem-"+itemType+".png";
+			Zotero_Ingester_Interface.statusImage.src = "chrome://zotero/skin/treeitem-"+itemType+".png";
 		}
-		Scholar_Ingester_Interface.statusImage.hidden = false;
+		Zotero_Ingester_Interface.statusImage.hidden = false;
 	} else {
-		Scholar_Ingester_Interface.statusImage.hidden = true;
+		Zotero_Ingester_Interface.statusImage.hidden = true;
 	}
 }
 
 /*
  * Callback to be executed when an item has been finished
  */
-Scholar_Ingester_Interface._itemDone = function(obj, item, collection) {
+Zotero_Ingester_Interface._itemDone = function(obj, item, collection) {
 	var title = item.getField("title");
-	var icon = "chrome://scholar/skin/treeitem-"+Scholar.ItemTypes.getName(item.getField("itemTypeID"))+".png"
-	Scholar_Ingester_Interface.Progress.addLines([title], [icon]);
+	var icon = "chrome://zotero/skin/treeitem-"+Zotero.ItemTypes.getName(item.getField("itemTypeID"))+".png"
+	Zotero_Ingester_Interface.Progress.addLines([title], [icon]);
 	
 	// add item to collection, if one was specified
 	if(collection) {
-		Scholar.Notifier.disable();
+		Zotero.Notifier.disable();
 		collection.addItem(item.getID());
-		Scholar.Notifier.enable();
+		Zotero.Notifier.enable();
 	}
 }
 
 /*
  * called when a user is supposed to select items
  */
-Scholar_Ingester_Interface._selectItems = function(obj, itemList) {
+Zotero_Ingester_Interface._selectItems = function(obj, itemList) {
 	// this is kinda ugly, mozillazine made me do it! honest!
 	var io = { dataIn:itemList, dataOut:null }
-	var newDialog = window.openDialog("chrome://scholar/content/ingester/selectitems.xul",
+	var newDialog = window.openDialog("chrome://zotero/content/ingester/selectitems.xul",
 		"_blank","chrome,modal,centerscreen,resizable=yes", io);
 	
 	if(!io.dataOut) {	// user selected no items, so kill the progress indicatior
-		Scholar_Ingester_Interface.Progress.kill();
+		Zotero_Ingester_Interface.Progress.kill();
 	}
 	
 	return io.dataOut;
@@ -312,28 +312,28 @@ Scholar_Ingester_Interface._selectItems = function(obj, itemList) {
 /*
  * Callback to be executed when scraping is complete
  */
-Scholar_Ingester_Interface._finishScraping = function(obj, returnValue, collection) {
+Zotero_Ingester_Interface._finishScraping = function(obj, returnValue, collection) {
 	if(!returnValue) {
-		Scholar_Ingester_Interface.Progress.changeHeadline(Scholar.getString("ingester.scrapeError"));
-		Scholar_Ingester_Interface.Progress.addDescription(Scholar.getString("ingester.scrapeErrorDescription"));
+		Zotero_Ingester_Interface.Progress.changeHeadline(Zotero.getString("ingester.scrapeError"));
+		Zotero_Ingester_Interface.Progress.addDescription(Zotero.getString("ingester.scrapeErrorDescription"));
 	}
 	
 	if(collection) {
 		// notify about modified items
-		Scholar.Notifier.trigger("modify", "collection", collection.getID());
+		Zotero.Notifier.trigger("modify", "collection", collection.getID());
 	}
 	
-	Scholar_Ingester_Interface.Progress.fade();
+	Zotero_Ingester_Interface.Progress.fade();
 }
 
 //////////////////////////////////////////////////////////////////////////////
 //
-// Scholar.Ingester.Progress
+// Zotero.Ingester.Progress
 //
 //////////////////////////////////////////////////////////////////////////////
 
 // Handles the display of a div showing progress in scraping
-Scholar_Ingester_Interface.Progress = new function() {
+Zotero_Ingester_Interface.Progress = new function() {
 	var _windowLoaded = false;
 	var _windowLoading = false;
 	// keep track of all of these things in case they're called before we're
@@ -341,7 +341,7 @@ Scholar_Ingester_Interface.Progress = new function() {
 	var _loadDescription = null;
 	var _loadLines = new Array();
 	var _loadIcons = new Array();
-	var _loadHeadline = Scholar.getString("ingester.scraping");
+	var _loadHeadline = Zotero.getString("ingester.scraping");
 	
 	this.show = show;
 	this.changeHeadline = changeHeadline;
@@ -354,7 +354,7 @@ Scholar_Ingester_Interface.Progress = new function() {
 		if(_windowLoading || _windowLoaded) {	// already loading or loaded
 			return false;
 		}
-		_progressWindow = window.openDialog("chrome://scholar/chrome/ingester/progress.xul",
+		_progressWindow = window.openDialog("chrome://zotero/chrome/ingester/progress.xul",
 		                                    "", "chrome,dialog=no,titlebar=no,popup=yes");
 		_progressWindow.addEventListener("load", _onWindowLoaded, false);
 		_windowLoading = true;
@@ -364,7 +364,7 @@ Scholar_Ingester_Interface.Progress = new function() {
 	
 	function changeHeadline(headline) {
 		if(_windowLoaded) {
-			_progressWindow.document.getElementById("scholar-progress-text-headline").value = headline;
+			_progressWindow.document.getElementById("zotero-progress-text-headline").value = headline;
 		} else {
 			_loadHeadline = headline;
 		}
@@ -374,21 +374,21 @@ Scholar_Ingester_Interface.Progress = new function() {
 		if(_windowLoaded) {
 			for(i in label) {
 				var newLabel = _progressWindow.document.createElement("label");
-				newLabel.setAttribute("class", "scholar-progress-item-label");
+				newLabel.setAttribute("class", "zotero-progress-item-label");
 				newLabel.setAttribute("crop", "end");
 				newLabel.setAttribute("value", label[i]);
 				
 				var newImage = _progressWindow.document.createElement("image");
-				newImage.setAttribute("class", "scholar-progress-item-icon");
+				newImage.setAttribute("class", "zotero-progress-item-icon");
 				newImage.setAttribute("src", icon[i]);
 				
 				var newHB = _progressWindow.document.createElement("hbox");
-				newHB.setAttribute("class", "scholar-progress-item-hbox");
+				newHB.setAttribute("class", "zotero-progress-item-hbox");
 				newHB.setAttribute("valign", "center");
 				newHB.appendChild(newImage);
 				newHB.appendChild(newLabel);
 				
-				_progressWindow.document.getElementById("scholar-progress-text-box").appendChild(newHB);
+				_progressWindow.document.getElementById("zotero-progress-text-box").appendChild(newHB);
 			}
 			
 			_move();
@@ -401,14 +401,14 @@ Scholar_Ingester_Interface.Progress = new function() {
 	function addDescription(text) {
 		if(_windowLoaded) {
 			var newHB = _progressWindow.document.createElement("hbox");
-			newHB.setAttribute("class", "scholar-progress-item-hbox");
+			newHB.setAttribute("class", "zotero-progress-item-hbox");
 			var newDescription = _progressWindow.document.createElement("description");
-			newDescription.setAttribute("class", "scholar-progress-description");
+			newDescription.setAttribute("class", "zotero-progress-description");
 			var newText = _progressWindow.document.createTextNode(text);
 			
 			newDescription.appendChild(newText);
 			newHB.appendChild(newDescription);
-			_progressWindow.document.getElementById("scholar-progress-text-box").appendChild(newHB);
+			_progressWindow.document.getElementById("zotero-progress-text-box").appendChild(newHB);
 			
 			_move();
 		} else {
@@ -446,7 +446,7 @@ Scholar_Ingester_Interface.Progress = new function() {
 		_loadDescription = null;
 		_loadLines = new Array();
 		_loadIcons = new Array();
-		_loadHeadline = Scholar.getString("ingester.scraping")
+		_loadHeadline = Zotero.getString("ingester.scraping")
 	}
 	
 	function _move() {

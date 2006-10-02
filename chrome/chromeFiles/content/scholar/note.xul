@@ -5,10 +5,10 @@
 	http://chnm.gmu.edu/
 -->
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
-<?xml-stylesheet href="chrome://scholar/skin/scholar.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
 
 <window
-    id="scholar-note-window"
+    id="zotero-note-window"
     orient="vertical"
 	width="400"
 	height="250"

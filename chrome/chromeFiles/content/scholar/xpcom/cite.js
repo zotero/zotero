@@ -1,11 +1,11 @@
 /*
- * Scholar.Cite: a class for creating bibliographies from within Scholar
+ * Zotero.Cite: a class for creating bibliographies from within Zotero
  * this class handles pulling the CSL file and item data out of the database,
  * while CSL, below, handles the actual generation of the bibliography
  */
 default xml namespace = "http://purl.org/net/xbiblio/csl";
 
-Scholar.Cite = new function() {
+Zotero.Cite = new function() {
 	var _lastCSL = null;
 	var _lastStyle = null;
 	
@@ -18,7 +18,7 @@ Scholar.Cite = new function() {
 	function getStyles() {
 		// get styles
 		var sql = "SELECT cslID, title FROM csl ORDER BY title";
-		var styles = Scholar.DB.query(sql);
+		var styles = Zotero.DB.query(sql);
 		
 		// convert to associative array
 		var stylesObject = new Object();
@@ -33,13 +33,13 @@ Scholar.Cite = new function() {
 	 * from the cache
 	 */
 	function getStyle(cslID) {
-		if(_lastStyle != cslID || Scholar.Prefs.get("cacheTranslatorData") == false) {
+		if(_lastStyle != cslID || Zotero.Prefs.get("cacheTranslatorData") == false) {
 			// get style
 			var sql = "SELECT csl FROM csl WHERE cslID = ?";
-			var style = Scholar.DB.valueQuery(sql, [cslID]);
+			var style = Zotero.DB.valueQuery(sql, [cslID]);
 			
 			// create a CSL instance
-			_lastCSL = new Scholar.CSL(style);
+			_lastCSL = new Zotero.CSL(style);
 			_lastStyle = cslID;
 		}
 		return _lastCSL;
@@ -49,25 +49,25 @@ Scholar.Cite = new function() {
 /*
  * CSL: a class for creating bibliographies from CSL files
  * this is abstracted as a separate class for the benefit of anyone who doesn't
- * want to use the Scholar data model, but does want to use CSL in JavaScript
+ * want to use the Zotero data model, but does want to use CSL in JavaScript
  */
-Scholar.CSL = function(csl) {
-	this._csl = new XML(Scholar.CSL._cleanXML(csl));
+Zotero.CSL = function(csl) {
+	this._csl = new XML(Zotero.CSL._cleanXML(csl));
 	
 	// initialize CSL
-	Scholar.CSL.init();
+	Zotero.CSL.init();
 	
 	// load localizations
-	this._terms = Scholar.CSL._parseLocales(this._csl.terms);
+	this._terms = Zotero.CSL._parseLocales(this._csl.terms);
 	
 	// load class defaults
 	this.class =  this._csl["@class"].toString();
-	Scholar.debug("CSL: style class is "+this.class);
+	Zotero.debug("CSL: style class is "+this.class);
 	
 	this._defaults = new Object();
 	// load class defaults
-	if(Scholar.CSL._classDefaults[this.class]) {
-		var classDefaults = Scholar.CSL._classDefaults[this.class];
+	if(Zotero.CSL._classDefaults[this.class]) {
+		var classDefaults = Zotero.CSL._classDefaults[this.class];
 		for(var i in classDefaults) {
 			this._defaults[i] = classDefaults[i];
 		}
@@ -79,7 +79,7 @@ Scholar.CSL = function(csl) {
 	this._parseCitationOptions();
 	// if no bibliography exists, parse citation element as bibliography
 	if(!this._bib) {
-		Scholar.debug("CSL: using citation element for bibliography");
+		Zotero.debug("CSL: using citation element for bibliography");
 		this._bib = this._cit;
 	}
 }
@@ -91,8 +91,8 @@ Scholar.CSL = function(csl) {
  * must be called prior to generating citations or bibliography with a new set
  * of items
  */
-Scholar.CSL.prototype.preprocessItems = function(items) {
-	Scholar.debug("CSL: preprocessing items");
+Zotero.CSL.prototype.preprocessItems = function(items) {
+	Zotero.debug("CSL: preprocessing items");
 	
 	this._ignore = null;
 	
@@ -113,7 +113,7 @@ Scholar.CSL.prototype.preprocessItems = function(items) {
 			item._csl.translators = creators[2];
 			
 			// parse date
-			item._csl.date = Scholar.CSL.prototype._processDate(item.getField("date"));
+			item._csl.date = Zotero.CSL.prototype._processDate(item.getField("date"));
 		}
 		// clear disambiguation and subsequent author substitute
 		if(item._csl.disambiguation) item._csl.date.disambiguation = undefined;
@@ -122,7 +122,7 @@ Scholar.CSL.prototype.preprocessItems = function(items) {
 	
 	// sort by sort order
 	if(this._bib.sortOrder) {
-		Scholar.debug("CSL: sorting items");
+		Zotero.debug("CSL: sorting items");
 		var me = this;
 		items.sort(function(a, b) {
 			return me._compareItem(a, b);
@@ -187,7 +187,7 @@ Scholar.CSL.prototype.preprocessItems = function(items) {
 /*
  * create a citation (in-text or footnote)
  */
-Scholar.CSL.prototype.createCitation = function(citation, format) {
+Zotero.CSL.prototype.createCitation = function(citation, format) {
 	if(citation.citationType == 2) {
 		var string = this._getTerm("ibid");
 		string = string[0].toUpperCase()+string.substr(1);
@@ -214,7 +214,7 @@ Scholar.CSL.prototype.createCitation = function(citation, format) {
 				locator = citation.locators[i];
 			}
 			
-			string += this._getCitation(Scholar.Items.get(citation.itemIDs[i]),
+			string += this._getCitation(Zotero.Items.get(citation.itemIDs[i]),
 				(citation.citationType[i] == 1 ? "first" : "subsequent"),
 				locatorType, locator, format, this._cit);
 		}
@@ -238,7 +238,7 @@ Scholar.CSL.prototype.createCitation = function(citation, format) {
  * create a bibliography
  * (items is expected to be an array of items)
  */
-Scholar.CSL.prototype.createBibliography = function(items, format) {
+Zotero.CSL.prototype.createBibliography = function(items, format) {
 	// process this._items
 	var output = "";
 	
@@ -278,7 +278,7 @@ Scholar.CSL.prototype.createBibliography = function(items, format) {
 		
 		// add line feeds
 		if(format == "HTML") {
-			var coins = Scholar.OpenURL.createContextObject(item, "1.0");
+			var coins = Zotero.OpenURL.createContextObject(item, "1.0");
 			if(coins) {
 				string += '<span class="Z3988" title="'+coins.replace("&", "&amp;")+'"></span>';
 			}
@@ -321,7 +321,7 @@ Scholar.CSL.prototype.createBibliography = function(items, format) {
 }
 
 // for elements that inherit defaults from each other
-Scholar.CSL._inherit = {
+Zotero.CSL._inherit = {
 	author:"contributor",
 	editor:"contributor",
 	translator:"contributor",
@@ -333,8 +333,8 @@ Scholar.CSL._inherit = {
 	edition:"version"
 }
 // for class definitions
-Scholar.CSL._classDefaults = new Object();
-Scholar.CSL._classDefaults["author-date"] = {
+Zotero.CSL._classDefaults = new Object();
+Zotero.CSL._classDefaults["author-date"] = {
 	author:{
 		substitute:[
 			{name:"editor"},
@@ -347,79 +347,79 @@ Scholar.CSL._classDefaults["author-date"] = {
 	}
 };
 
-Scholar.CSL.ns = "http://purl.org/net/xbiblio/csl";
+Zotero.CSL.ns = "http://purl.org/net/xbiblio/csl";
 
 /*
  * initializes CSL interpreter
  */
-Scholar.CSL.init = function() {
-	if(!Scholar.CSL._xmlLang) {
+Zotero.CSL.init = function() {
+	if(!Zotero.CSL._xmlLang) {
 		// get XML lang
-		Scholar.CSL._xmlLang = Scholar.locale;
+		Zotero.CSL._xmlLang = Zotero.locale;
 		
 		// read locales.xml from directory
 		var req = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"].
 				  createInstance();
-		req.open("GET", "chrome://scholar/locale/locales.xml", false);
+		req.open("GET", "chrome://zotero/locale/locales.xml", false);
 		req.overrideMimeType("text/plain");
 		req.send(null);
 		
 		// get default terms
-		var locales = new XML(Scholar.CSL._cleanXML(req.responseText));
-		Scholar.CSL._defaultTerms = Scholar.CSL._parseLocales(locales);
+		var locales = new XML(Zotero.CSL._cleanXML(req.responseText));
+		Zotero.CSL._defaultTerms = Zotero.CSL._parseLocales(locales);
 	}
 }
 
 /*
  * returns an array of short or long month strings
  */
-Scholar.CSL.getMonthStrings = function(form) {
-	Scholar.CSL.init();
-	return Scholar.CSL._defaultTerms[form]["_months"];
+Zotero.CSL.getMonthStrings = function(form) {
+	Zotero.CSL.init();
+	return Zotero.CSL._defaultTerms[form]["_months"];
 }
 
 /*
  * removes parse instructions from XML
  */
-Scholar.CSL._cleanXML = function(xml) {
+Zotero.CSL._cleanXML = function(xml) {
 	return xml.replace(/<\?[^>]*\?>/g, "");
 }
 
 /*
- * parses locale strings into Scholar.CSL._defaultTerms
+ * parses locale strings into Zotero.CSL._defaultTerms
  */
-Scholar.CSL._parseLocales = function(termXML) {
+Zotero.CSL._parseLocales = function(termXML) {
 	// return defaults if there are no terms
 	if(!termXML.length()) {
-		return (Scholar.CSL._defaultTerms ? Scholar.CSL._defaultTerms : {});
+		return (Zotero.CSL._defaultTerms ? Zotero.CSL._defaultTerms : {});
 	}
 	
 	var xml = new Namespace("http://www.w3.org/XML/1998/namespace");
 	
 	// get proper locale
-	var locale = termXML.locale.(@xml::lang == Scholar.CSL._xmlLang);
+	var locale = termXML.locale.(@xml::lang == Zotero.CSL._xmlLang);
 	if(!locale.length()) {
-		var xmlLang = Scholar.CSL._xmlLang.substr(0, 2);
+		var xmlLang = Zotero.CSL._xmlLang.substr(0, 2);
 		locale = termXML.locale.(@xml::lang == xmlLang);
 	}
 	if(!locale.length()) {
 		// return defaults if there are no locales
-		return (Scholar.CSL._defaultTerms ? Scholar.CSL._defaultTerms : {});
+		return (Zotero.CSL._defaultTerms ? Zotero.CSL._defaultTerms : {});
 	}
 	
 	var termArray = new Object();
 	termArray["default"] = new Object();
 	
-	if(Scholar.CSL._defaultTerms) {
+	if(Zotero.CSL._defaultTerms) {
 		// ugh. copy default array. javascript dumb.
-		for(var i in Scholar.CSL._defaultTerms) {
+		for(var i in Zotero.CSL._defaultTerms) {
 			termArray[i] = new Object();
-			for(var j in Scholar.CSL._defaultTerms[i]) {
-				if(typeof(Scholar.CSL._defaultTerms[i]) == "object") {
-					termArray[i][j] = [Scholar.CSL._defaultTerms[i][j][0],
-									Scholar.CSL._defaultTerms[i][j][1]];
+			for(var j in Zotero.CSL._defaultTerms[i]) {
+				if(typeof(Zotero.CSL._defaultTerms[i]) == "object") {
+					termArray[i][j] = [Zotero.CSL._defaultTerms[i][j][0],
+									Zotero.CSL._defaultTerms[i][j][1]];
 				} else {
-					termArray[i][j] = Scholar.CSL._defaultTerms[i][j];
+					termArray[i][j] = Zotero.CSL._defaultTerms[i][j];
 				}
 			}
 		}
@@ -480,7 +480,7 @@ Scholar.CSL._parseLocales = function(termXML) {
 /*
  * parses attributes and children for a CSL field
  */
-Scholar.CSL.prototype._parseFieldAttrChildren = function(element, desc, ignoreChildren) {
+Zotero.CSL.prototype._parseFieldAttrChildren = function(element, desc, ignoreChildren) {
 	if(!desc) {
 		var desc = new Object();
 	}
@@ -504,7 +504,7 @@ Scholar.CSL.prototype._parseFieldAttrChildren = function(element, desc, ignoreCh
 			
 			// add children to children array
 			for each(var child in children) {
-				if(child.namespace() == Scholar.CSL.ns) {	// ignore elements in other
+				if(child.namespace() == Zotero.CSL.ns) {	// ignore elements in other
 													// namespaces
 					// parse recursively
 					var name = child.localName();
@@ -516,7 +516,7 @@ Scholar.CSL.prototype._parseFieldAttrChildren = function(element, desc, ignoreCh
 							
 							var chooseChildren = child.choose.children();
 							for each(var choose in chooseChildren) {
-								if(choose.namespace() == Scholar.CSL.ns) {
+								if(choose.namespace() == Zotero.CSL.ns) {
 									var option = new Object();
 									option.name = choose.localName();
 									this._parseFieldAttrChildren(choose, option);
@@ -542,11 +542,11 @@ Scholar.CSL.prototype._parseFieldAttrChildren = function(element, desc, ignoreCh
 /*
  * parses a list of fields into a defaults associative array
  */
-Scholar.CSL.prototype._parseFieldDefaults = function(ref) {
+Zotero.CSL.prototype._parseFieldDefaults = function(ref) {
 	for each(var element in ref.children()) {
-		if(element.namespace() == Scholar.CSL.ns) {	// ignore elements in other namespaces
+		if(element.namespace() == Zotero.CSL.ns) {	// ignore elements in other namespaces
 			var name = element.localName();
-			Scholar.debug("CSL: parsing field defaults for "+name);
+			Zotero.debug("CSL: parsing field defaults for "+name);
 			var fieldDesc = this._parseFieldAttrChildren(element);
 			
 			if(this._defaults[name]) {		// inherit from existing defaults
@@ -562,10 +562,10 @@ Scholar.CSL.prototype._parseFieldDefaults = function(ref) {
 /*
  * parses a list of fields into an array of objects
  */
-Scholar.CSL.prototype._parseFields = function(ref, position, type, bibCitElement, inheritFormat) {
+Zotero.CSL.prototype._parseFields = function(ref, position, type, bibCitElement, inheritFormat) {
 	var typeDesc = new Array();
 	for each(var element in ref) {
-		if(element.namespace() == Scholar.CSL.ns) {	// ignore elements in other namespaces
+		if(element.namespace() == Zotero.CSL.ns) {	// ignore elements in other namespaces
 			var itemDesc = new Object();
 			itemDesc.name = element.localName();
 			
@@ -610,7 +610,7 @@ Scholar.CSL.prototype._parseFields = function(ref, position, type, bibCitElement
 /*
  * parses an et al field
  */
-Scholar.CSL.prototype._parseEtAl = function(etAl, bibCitElement) {
+Zotero.CSL.prototype._parseEtAl = function(etAl, bibCitElement) {
 	if(etAl.length()) {
 		bibCitElement.etAl = new Object();
 		
@@ -638,7 +638,7 @@ Scholar.CSL.prototype._parseEtAl = function(etAl, bibCitElement) {
  * parses cs-format attributes into just a prefix and a suffix; accepts an
  * optional array of cs-format
  */
-Scholar.CSL.prototype._parseBibliographyOptions = function() {
+Zotero.CSL.prototype._parseBibliographyOptions = function() {
 	if(!this._csl.bibliography.length()) {
 		return;
 	}
@@ -702,7 +702,7 @@ Scholar.CSL.prototype._parseBibliographyOptions = function() {
  * parses cs-format attributes into just a prefix and a suffix; accepts an
  * optional array of cs-format
  */
-Scholar.CSL.prototype._parseCitationOptions = function() {
+Zotero.CSL.prototype._parseCitationOptions = function() {
 	var citation = this._csl.citation;
 	this._cit = new Object();
 	
@@ -723,8 +723,8 @@ Scholar.CSL.prototype._parseCitationOptions = function() {
  * determine available reference types and add their XML objects to the tree
  * (they will be parsed on the fly when necessary; see _parseReferenceType)
  */
-Scholar.CSL.prototype._parseTypes = function(itemElements, bibCitElement) {
-	Scholar.debug("CSL: parsing item elements");
+Zotero.CSL.prototype._parseTypes = function(itemElements, bibCitElement) {
+	Zotero.debug("CSL: parsing item elements");
 	
 	bibCitElement._types = new Object();
 	bibCitElement._serializations = new Object();
@@ -764,7 +764,7 @@ Scholar.CSL.prototype._parseTypes = function(itemElements, bibCitElement) {
 /*
  * convert reference types to native structures for speed
  */
-Scholar.CSL.prototype._getTypeObject = function(position, reftype, bibCitElement) {
+Zotero.CSL.prototype._getTypeObject = function(position, reftype, bibCitElement) {
 	if(!bibCitElement._types[position][reftype]) {
 		// no type available
 		return false;
@@ -772,20 +772,20 @@ Scholar.CSL.prototype._getTypeObject = function(position, reftype, bibCitElement
 	
 	// parse type if necessary
 	if(typeof(bibCitElement._types[position][reftype]) == "xml") {
-		Scholar.debug("CSL: parsing XML for "+reftype);
+		Zotero.debug("CSL: parsing XML for "+reftype);
 		bibCitElement._types[position][reftype] = this._parseFields(
 		                                          bibCitElement._types[position][reftype].children(),
 		                                          position, reftype, bibCitElement, true);
 	}
 	
-	Scholar.debug("CSL: got object for "+reftype);
+	Zotero.debug("CSL: got object for "+reftype);
 	return bibCitElement._types[position][reftype];
 }
 
 /*
  * merges two elements, letting the second override the first
  */
-Scholar.CSL.prototype._merge = function(element1, element2) {
+Zotero.CSL.prototype._merge = function(element1, element2) {
 	var mergedElement = new Object();
 	for(var i in element1) {
 		mergedElement[i] = element1[i];
@@ -800,11 +800,11 @@ Scholar.CSL.prototype._merge = function(element1, element2) {
  * gets defaults for a specific element; handles various inheritance rules
  * (contributor, locator)
  */
-Scholar.CSL.prototype._getFieldDefaults = function(elementName) {
+Zotero.CSL.prototype._getFieldDefaults = function(elementName) {
 	// first, see if there are specific defaults
 	if(this._defaults[elementName]) {
-		if(Scholar.CSL._inherit[elementName]) {
-			var inheritedDefaults = this._getFieldDefaults(Scholar.CSL._inherit[elementName]);
+		if(Zotero.CSL._inherit[elementName]) {
+			var inheritedDefaults = this._getFieldDefaults(Zotero.CSL._inherit[elementName]);
 			for(var i in inheritedDefaults) {	// will only be called if there
 												// is merging necessary
 				return this._merge(inheritedDefaults, this._defaults[elementName]);
@@ -813,8 +813,8 @@ Scholar.CSL.prototype._getFieldDefaults = function(elementName) {
 		return this._defaults[elementName];
 	}
 	// next, try to get defaults from the item from which this item inherits
-	if(Scholar.CSL._inherit[elementName]) {
-		return this._getFieldDefaults(Scholar.CSL._inherit[elementName]);
+	if(Zotero.CSL._inherit[elementName]) {
+		return this._getFieldDefaults(Zotero.CSL._inherit[elementName]);
 	}
 	// finally, return an empty object
 	return {};
@@ -823,7 +823,7 @@ Scholar.CSL.prototype._getFieldDefaults = function(elementName) {
 /*
  * gets a term, in singular or plural form
  */
-Scholar.CSL.prototype._getTerm = function(term, plural, form) {
+Zotero.CSL.prototype._getTerm = function(term, plural, form) {
 	if(!form) {
 		form = "long";
 	}
@@ -846,7 +846,7 @@ Scholar.CSL.prototype._getTerm = function(term, plural, form) {
 /*
  * escapes a string for a given format
  */
-Scholar.CSL.prototype._escapeString = function(string, format) {
+Zotero.CSL.prototype._escapeString = function(string, format) {
 	if(format == "HTML") {
 		// replace HTML entities
 		string = string.replace(/&/g, "&amp;");
@@ -880,7 +880,7 @@ Scholar.CSL.prototype._escapeString = function(string, format) {
 /*
  * formats a string according to the cs-format attributes on element
  */
-Scholar.CSL.prototype._formatString = function(element, string, format, dontEscape) {
+Zotero.CSL.prototype._formatString = function(element, string, format, dontEscape) {
 	if(!string) return "";
 	if(typeof(string) != "string") {
 		string = string.toString();
@@ -958,7 +958,7 @@ Scholar.CSL.prototype._formatString = function(element, string, format, dontEsca
  * formats a locator (pages, volume, issue) or an identifier (isbn, doi)
  * note that label should be null for an identifier
  */
-Scholar.CSL.prototype._formatLocator = function(identifier, element, number, format) {
+Zotero.CSL.prototype._formatLocator = function(identifier, element, number, format) {
 	var data = "";
 	
 	if(number) {
@@ -990,7 +990,7 @@ Scholar.CSL.prototype._formatLocator = function(identifier, element, number, for
  * format the date in format supplied by element from the date object
  * returned by this._processDate
  */
-Scholar.CSL.prototype._formatDate = function(element, date, format) {
+Zotero.CSL.prototype._formatDate = function(element, date, format) {
 	if(format == "disambiguate") {
 		// for disambiguation, return only the year
 		return date.year;
@@ -1047,7 +1047,7 @@ Scholar.CSL.prototype._formatDate = function(element, date, format) {
  * serializes an element into a string suitable to prevent substitutes from
  * recurring in the same style
  */
-Scholar.CSL.prototype._serializeElement = function(name, element) {
+Zotero.CSL.prototype._serializeElement = function(name, element) {
 	var string = name;
 	if(element.relation) {
 		string += " relation:"+element.relation;
@@ -1061,7 +1061,7 @@ Scholar.CSL.prototype._serializeElement = function(name, element) {
 /*
  * pads a number or other string with a given string on the left
  */
-Scholar.CSL.prototype._lpad = function(string, pad, length) {
+Zotero.CSL.prototype._lpad = function(string, pad, length) {
 	while(string.length < length) {
 		string = pad + string;
 	}
@@ -1071,7 +1071,7 @@ Scholar.CSL.prototype._lpad = function(string, pad, length) {
 /*
  * handles sorting of items
  */
-Scholar.CSL.prototype._compareItem = function(a, b, opt) {
+Zotero.CSL.prototype._compareItem = function(a, b, opt) {
 	for(var i in this._bib.sortOrder) {
 		var sortElement = this._bib.sortOrder[i];
 		
@@ -1094,7 +1094,7 @@ Scholar.CSL.prototype._compareItem = function(a, b, opt) {
  * process creator objects; if someone had a creator model that handled
  * non-Western names better than ours, this would be the function to change
  */
-Scholar.CSL.prototype._processCreators = function(type, element, creators, format, bibCitElement) {
+Zotero.CSL.prototype._processCreators = function(type, element, creators, format, bibCitElement) {
 	var maxCreators = creators.length;
 	if(!maxCreators) return;
 	
@@ -1201,8 +1201,8 @@ Scholar.CSL.prototype._processCreators = function(type, element, creators, forma
 /*
  * get a citation, given an item and bibCitElement
  */
-Scholar.CSL.prototype._getCitation = function(item, position, locatorType, locator, format, bibCitElement) {
-	Scholar.debug("CSL: generating citation for item "+item.getID());
+Zotero.CSL.prototype._getCitation = function(item, position, locatorType, locator, format, bibCitElement) {
+	Zotero.debug("CSL: generating citation for item "+item.getID());
 	
 	if(!bibCitElement._types[position]) {
 		position = "first";
@@ -1226,7 +1226,7 @@ Scholar.CSL.prototype._getCitation = function(item, position, locatorType, locat
 	if(!type) {
 		return false;
 	}
-	Scholar.debug("CSL: using CSL type "+typeName);
+	Zotero.debug("CSL: using CSL type "+typeName);
 	
 	// remove previous ignore entries from list
 	this._ignore = new Array();
@@ -1244,7 +1244,7 @@ Scholar.CSL.prototype._getCitation = function(item, position, locatorType, locat
 /*
  * processes an element from a (pre-processed) item into text
  */
-Scholar.CSL.prototype._getFieldValue = function(name, element, item, format,
+Zotero.CSL.prototype._getFieldValue = function(name, element, item, format,
                                                 bibCitElement, position,
                                                 locatorType, locator, typeName) {
 	var data = "";
@@ -1404,8 +1404,8 @@ Scholar.CSL.prototype._getFieldValue = function(name, element, item, format,
 			                                           substituteElement);
 			
 			var inheritElement;
-			if(Scholar.CSL._inherit[substituteElement.name] && Scholar.CSL._inherit[name]
-			   && Scholar.CSL._inherit[substituteElement.name] == Scholar.CSL._inherit[name]) {
+			if(Zotero.CSL._inherit[substituteElement.name] && Zotero.CSL._inherit[name]
+			   && Zotero.CSL._inherit[substituteElement.name] == Zotero.CSL._inherit[name]) {
 				// if both substituteElement and the parent element inherit from
 				// the same base element, apply styles here
 				inheritElement = element;
@@ -1453,10 +1453,10 @@ Scholar.CSL.prototype._getFieldValue = function(name, element, item, format,
 }
 
 /*
- * THE FOLLOWING CODE IS SCHOLAR-SPECIFIC
+ * THE FOLLOWING CODE IS ZOTERO-SPECIFIC
  * gets a list of possible CSL types, in order of preference, for an item
  */
- Scholar.CSL._optionalTypeMappings = {
+ Zotero.CSL._optionalTypeMappings = {
 	journalArticle:"article-journal",
 	magazineArticle:"article-magazine",
 	newspaperArticle:"article-newspaper",
@@ -1469,7 +1469,7 @@ Scholar.CSL.prototype._getFieldValue = function(name, element, item, format,
 	webpage:"webpage"
 };
 // TODO: check with Elena/APA/MLA on this
-Scholar.CSL._fallbackTypeMappings = {
+Zotero.CSL._fallbackTypeMappings = {
 	book:"book",
 	bookSection:"chapter",
 	journalArticle:"article",
@@ -1484,25 +1484,25 @@ Scholar.CSL._fallbackTypeMappings = {
 	webpage:"article"
 };
 
-Scholar.CSL.prototype._getTypeFromItem = function(item) {
-	var scholarType = Scholar.ItemTypes.getName(item.getType());
+Zotero.CSL.prototype._getTypeFromItem = function(item) {
+	var zoteroType = Zotero.ItemTypes.getName(item.getType());
 
 	// get type
-	Scholar.debug("CSL: parsing item of Scholar type "+scholarType);
-	return [Scholar.CSL._optionalTypeMappings[scholarType], Scholar.CSL._fallbackTypeMappings[scholarType]];
+	Zotero.debug("CSL: parsing item of Zotero type "+zoteroType);
+	return [Zotero.CSL._optionalTypeMappings[zoteroType], Zotero.CSL._fallbackTypeMappings[zoteroType]];
 }
 
 /*
  * separate creators object into authors, editors, and translators
  */
-Scholar.CSL.prototype._separateItemCreators = function(item) {
+Zotero.CSL.prototype._separateItemCreators = function(item) {
 	var authors = new Array();
 	var editors = new Array();
 	var translators = new Array();
 	
-	var authorID = Scholar.CreatorTypes.getID("author");
-	var editorID = Scholar.CreatorTypes.getID("editor");
-	var translatorID = Scholar.CreatorTypes.getID("translator");
+	var authorID = Zotero.CreatorTypes.getID("author");
+	var editorID = Zotero.CreatorTypes.getID("editor");
+	var translatorID = Zotero.CreatorTypes.getID("translator");
 	
 	var creators = item.getCreators();
 	for(var j in creators) {
@@ -1524,9 +1524,9 @@ Scholar.CSL.prototype._separateItemCreators = function(item) {
 /*
  * return an object containing year, month, and day
  */
-Scholar.CSL.prototype._processDate = function(string) {
-	return Scholar.Date.strToDate(string);
+Zotero.CSL.prototype._processDate = function(string) {
+	return Zotero.Date.strToDate(string);
 }
 /*
- * END SCHOLAR-SPECIFIC CODE
+ * END ZOTERO-SPECIFIC CODE
  */

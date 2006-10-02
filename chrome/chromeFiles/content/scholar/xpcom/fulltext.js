@@ -1,4 +1,4 @@
-Scholar.Fulltext = new function(){
+Zotero.Fulltext = new function(){
 	this.indexWord = indexWord;
 	this.indexWords = indexWords;
 	this.indexDocument = indexDocument;
@@ -20,21 +20,21 @@ Scholar.Fulltext = new function(){
 	
 	function cacheIsOutdated(){
 		var sql = "SELECT version FROM version WHERE schema='fulltext'";
-		return Scholar.DB.valueQuery(sql) < FULLTEXT_VERSION;
+		return Zotero.DB.valueQuery(sql) < FULLTEXT_VERSION;
 	}
 	
 	
 	function rebuildCache(){
-		Scholar.DB.beginTransaction();
-		Scholar.DB.query("DELETE FROM fulltextWords");
-		Scholar.DB.query("DELETE FROM fulltextItems");
-		//Scholar.DB.query("DELETE FROM fulltextContent");
+		Zotero.DB.beginTransaction();
+		Zotero.DB.query("DELETE FROM fulltextWords");
+		Zotero.DB.query("DELETE FROM fulltextItems");
+		//Zotero.DB.query("DELETE FROM fulltextContent");
 		
 		var sql = "SELECT itemID FROM itemAttachments";
-		var items = Scholar.DB.columnQuery(sql);
+		var items = Zotero.DB.columnQuery(sql);
 		indexItems(items);
 		
-		Scholar.DB.commitTransaction();
+		Zotero.DB.commitTransaction();
 	}
 	
 	
@@ -42,20 +42,20 @@ Scholar.Fulltext = new function(){
 	 * Index a single word
 	 */
 	function indexWord(itemID, word){
-		Scholar.DB.beginTransaction();
+		Zotero.DB.beginTransaction();
 		
 		var sql = "SELECT wordID FROM fulltextWords WHERE word=?";
-		var wordID = Scholar.DB.valueQuery(sql, {string:word});
+		var wordID = Zotero.DB.valueQuery(sql, {string:word});
 		
 		if (!wordID){
 			var sql = "INSERT INTO fulltextWords (word) VALUES (?)";
-			var wordID = Scholar.DB.query(sql, {string:word});
+			var wordID = Zotero.DB.query(sql, {string:word});
 		}
 		
 		var sql = "INSERT OR IGNORE INTO fulltextItems VALUES (?,?)";
-		Scholar.DB.query(sql, [wordID, itemID]);
+		Zotero.DB.query(sql, [wordID, itemID]);
 		
-		Scholar.DB.commitTransaction();
+		Zotero.DB.commitTransaction();
 	}
 	
 	
@@ -75,11 +75,11 @@ Scholar.Fulltext = new function(){
 			sqlParams.push({string:word});
 		}
 		
-		Scholar.DB.beginTransaction();
+		Zotero.DB.beginTransaction();
 		
 		var sql = "SELECT word, wordID from fulltextWords WHERE word IN ("
 		sql += sqlQues.join() + ")";
-		var wordIDs = Scholar.DB.query(sql, sqlParams);
+		var wordIDs = Zotero.DB.query(sql, sqlParams);
 		
 		var existing = [];
 		for (var i in wordIDs){
@@ -88,8 +88,8 @@ Scholar.Fulltext = new function(){
 		}
 		
 		// Handle bound parameters manually for optimal speed
-		var statement1 = Scholar.DB.getStatement("INSERT INTO fulltextWords (word) VALUES (?)");
-		var statement2 = Scholar.DB.getStatement("INSERT OR IGNORE INTO fulltextItems VALUES (?,?)");
+		var statement1 = Zotero.DB.getStatement("INSERT INTO fulltextWords (word) VALUES (?)");
+		var statement2 = Zotero.DB.getStatement("INSERT OR IGNORE INTO fulltextItems VALUES (?,?)");
 		
 		for each(var word in words){
 			if (existing['_' + word]){
@@ -98,7 +98,7 @@ Scholar.Fulltext = new function(){
 			else {
 				statement1.bindUTF8StringParameter(0, word);
 				statement1.execute()
-				var wordID = Scholar.DB.getLastInsertID();
+				var wordID = Zotero.DB.getLastInsertID();
 			}
 			
 			statement2.bindInt32Parameter(0, wordID);
@@ -109,24 +109,24 @@ Scholar.Fulltext = new function(){
 		statement1.reset();
 		statement2.reset();
 		
-		Scholar.DB.commitTransaction();
+		Zotero.DB.commitTransaction();
 	}
 	
 	
 	function indexString(text, charset, itemID){
 		var words = semanticSplitter(text, charset);
 		
-		Scholar.DB.beginTransaction();
+		Zotero.DB.beginTransaction();
 		
 		clearItemWords(itemID);
 		indexWords(itemID, words);
 		
 		/*
 		var sql = "REPLACE INTO fulltextContent (itemID, textContent) VALUES (?,?)";
-		Scholar.DB.query(sql, [itemID, {string:text}]);
+		Zotero.DB.query(sql, [itemID, {string:text}]);
 		*/
 		
-		Scholar.DB.commitTransaction();
+		Zotero.DB.commitTransaction();
 	}
 	
 	
@@ -135,7 +135,7 @@ Scholar.Fulltext = new function(){
 			throw ('Item ID not provided to indexDocument()');
 		}
 		
-		Scholar.debug("Indexing document '" + document.title + "'");
+		Zotero.debug("Indexing document '" + document.title + "'");
 		
 		var text = document.body.innerHTML.replace(/(>)/g, '$1 ');
 		text = HTMLToText(text);
@@ -145,7 +145,7 @@ Scholar.Fulltext = new function(){
 	
 	function indexFile(file, mimeType, charset, itemID){
 		if (!file.exists()){
-			Scholar.debug('File not found in indexFile()', 2);
+			Zotero.debug('File not found in indexFile()', 2);
 			return false;
 		}
 		
@@ -153,13 +153,13 @@ Scholar.Fulltext = new function(){
 		if (!mimeType){ throw ('MIME type not provided to indexFile()'); }
 		
 		if (mimeType.substr(0, 5)!='text/'){
-			Scholar.debug('File is not text in indexFile()', 2);
+			Zotero.debug('File is not text in indexFile()', 2);
 			return false;
 		}
 		
 		if (!charset){ throw ('Charset not provided to indexFile()'); }
 		
-		var text = Scholar.File.getContents(file, charset);
+		var text = Zotero.File.getContents(file, charset);
 		// Split elements to avoid word concatentation
 		text = text.replace(/(>)/g, '$1 ');
 		text = HTMLToText(text);
@@ -168,10 +168,10 @@ Scholar.Fulltext = new function(){
 	
 	
 	function indexItems(items){
-		var items = Scholar.Items.get(items);
+		var items = Zotero.Items.get(items);
 		var found = [];
 		
-		Scholar.DB.beginTransaction();
+		Zotero.DB.beginTransaction();
 		
 		for each(var i in items){
 			if (!i.isAttachment()){
@@ -188,9 +188,9 @@ Scholar.Fulltext = new function(){
 		}
 		
 		var sql = "REPLACE INTO version (schema,version) VALUES (?,?)";
-		Scholar.DB.query(sql, ['fulltext', FULLTEXT_VERSION]);
+		Zotero.DB.query(sql, ['fulltext', FULLTEXT_VERSION]);
 		
-		Scholar.DB.commitTransaction();
+		Zotero.DB.commitTransaction();
 	}
 	
 	
@@ -206,9 +206,9 @@ Scholar.Fulltext = new function(){
 	 * - Slashes in regex are optional
 	 */
 	function findTextInFile(file, charset, searchText, mode){
-		Scholar.debug("Searching for text '" + searchText + "' in " + file.path);
+		Zotero.debug("Searching for text '" + searchText + "' in " + file.path);
 		
-		var str = Scholar.File.getContents(file, charset);
+		var str = Zotero.File.getContents(file, charset);
 		
 		// If not binary mode, convert HTML to text
 		if (!mode || mode.indexOf('Binary')==-1){
@@ -240,7 +240,7 @@ Scholar.Fulltext = new function(){
 				var re = new RegExp(searchText, flags);
 				var matches = re(str);
 				if (matches){
-					Scholar.debug("Text found");
+					Zotero.debug("Text found");
 					return str.substr(matches.index, 50);
 				}
 				
@@ -253,7 +253,7 @@ Scholar.Fulltext = new function(){
 				
 				var pos = str.indexOf(searchText);
 				if (pos!=-1){
-					Scholar.debug('Text found');
+					Zotero.debug('Text found');
 					return str.substr(pos, 50);
 				}
 		}
@@ -280,7 +280,7 @@ Scholar.Fulltext = new function(){
 			return [];
 		}
 		
-		var items = Scholar.Items.get(items);
+		var items = Zotero.Items.get(items);
 		var found = [];
 		
 		for each(var i in items){
@@ -314,13 +314,13 @@ Scholar.Fulltext = new function(){
 	
 	
 	function clearItemWords(itemID){
-		Scholar.DB.query("DELETE FROM fulltextItems WHERE itemID=" + itemID);
+		Zotero.DB.query("DELETE FROM fulltextItems WHERE itemID=" + itemID);
 	}
 	
 	
 	/*
 	function clearItemContent(itemID){
-		Scholar.DB.query("DELETE FROM fulltextContent WHERE itemID=" + itemID);
+		Zotero.DB.query("DELETE FROM fulltextContent WHERE itemID=" + itemID);
 	}
 	*/
 	
@@ -328,7 +328,7 @@ Scholar.Fulltext = new function(){
 	function purgeUnusedWords(){
 		var sql = "DELETE FROM fulltextWords WHERE wordID NOT IN "
 			+ "(SELECT wordID FROM fulltextItems)";
-		Scholar.DB.query(sql);
+		Zotero.DB.query(sql);
 	}
 	
 	
@@ -347,7 +347,7 @@ Scholar.Fulltext = new function(){
 			return to.toString();
 		}
 		catch(e){
-			Scholar.debug(e, 1);
+			Zotero.debug(e, 1);
 			return text;
 		}
 	}
@@ -355,7 +355,7 @@ Scholar.Fulltext = new function(){
 	
 	function semanticSplitter(text, charset){
 		if (!text){
-			Scholar.debug('No text to index');
+			Zotero.debug('No text to index');
 			return;
 		}
 		

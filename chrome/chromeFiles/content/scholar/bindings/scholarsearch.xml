@@ -148,11 +148,11 @@
 					
 					for(var i in operators)
 					{
-						operatorsList.appendItem(Scholar.getString('searchOperator.'+operators[i]),operators[i]);
+						operatorsList.appendItem(Zotero.getString('searchOperator.'+operators[i]),operators[i]);
 					}
 						
 					var conditionsList = this.id('conditionsmenu');
-					var conditions = Scholar.SearchConditions.getStandardConditions();
+					var conditions = Zotero.SearchConditions.getStandardConditions();
 					
 					for(var i=0, len=conditions.length; i<len; i++)
 					{
@@ -174,7 +174,7 @@
 					this.selectedCondition = conditionsMenu.value;
 					this.selectedOperator = operatorsList.value;
 					
-					var condition = Scholar.SearchConditions.get(conditionsMenu.value);
+					var condition = Zotero.SearchConditions.get(conditionsMenu.value);
 					var operators = condition['operators'];
 					
 					// Display appropriate operators for condition
@@ -196,13 +196,13 @@
 						case 'collectionID':
 							var merged = [];
 							
-							var cols = Scholar.getCollections(false, true);
+							var cols = Zotero.getCollections(false, true);
 							for (var i in cols)
 							{
 								merged.push([cols[i].getName(), 'C' + cols[i].getID()]);
 							}
 							
-							var searches = Scholar.Searches.getAll();
+							var searches = Zotero.Searches.getAll();
 							for (var i in searches)
 							{
 								if (searches[i]['id'] != this.parent.search.getID())
@@ -215,10 +215,10 @@
 							return;
 						
 						case 'itemTypeID':
-							var types = Scholar.ItemTypes.getTypes();
+							var types = Zotero.ItemTypes.getTypes();
 							for (var i in types)
 							{
-								types[i][0] = Scholar.getString('itemTypes.' + types[i]['name']);
+								types[i][0] = Zotero.getString('itemTypes.' + types[i]['name']);
 								types[i][1] = types[i]['id'];
 								delete types[i]['name'];
 								delete types[i]['id'];

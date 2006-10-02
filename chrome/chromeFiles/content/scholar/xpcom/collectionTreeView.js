@@ -15,18 +15,18 @@
 /*
  *  Constructor the the CollectionTreeView object
  */
-Scholar.CollectionTreeView = function()
+Zotero.CollectionTreeView = function()
 {
 	this._treebox = null;
 	this.refresh();
 	
-	this._unregisterID = Scholar.Notifier.registerColumnTree(this);
+	this._unregisterID = Zotero.Notifier.registerColumnTree(this);
 }
 
 /*
  *  Called by the tree itself
  */
-Scholar.CollectionTreeView.prototype.setTree = function(treebox)
+Zotero.CollectionTreeView.prototype.setTree = function(treebox)
 {
 	if(this._treebox)
 		return;
@@ -39,19 +39,19 @@ Scholar.CollectionTreeView.prototype.setTree = function(treebox)
  *  Reload the rows from the data access methods
  *  (doesn't call the tree.invalidate methods, etc.)
  */
-Scholar.CollectionTreeView.prototype.refresh = function()
+Zotero.CollectionTreeView.prototype.refresh = function()
 {
 	this._dataItems = new Array();
 	this.rowCount = 0;
-	this._showItem(new Scholar.ItemGroup('library',null),0,1);
+	this._showItem(new Zotero.ItemGroup('library',null),0,1);
 	
-	var newRows = Scholar.getCollections();
+	var newRows = Zotero.getCollections();
 	for(var i = 0; i < newRows.length; i++)
-		this._showItem(new Scholar.ItemGroup('collection',newRows[i]),  0, this._dataItems.length); //itemgroup ref, level, beforeRow
+		this._showItem(new Zotero.ItemGroup('collection',newRows[i]),  0, this._dataItems.length); //itemgroup ref, level, beforeRow
 	
-	var savedSearches = Scholar.Searches.getAll();
+	var savedSearches = Zotero.Searches.getAll();
 	for(var i = 0; i < savedSearches.length; i++)
-		this._showItem(new Scholar.ItemGroup('search',savedSearches[i]),  0, this._dataItems.length); //itemgroup ref, level, beforeRow
+		this._showItem(new Zotero.ItemGroup('search',savedSearches[i]),  0, this._dataItems.length); //itemgroup ref, level, beforeRow
 	
 	this._refreshHashMap();
 }
@@ -59,7 +59,7 @@ Scholar.CollectionTreeView.prototype.refresh = function()
 /*
  *  Redisplay everything
  */
-Scholar.CollectionTreeView.prototype.reload = function()
+Zotero.CollectionTreeView.prototype.reload = function()
 {
 	var openCollections = new Array();
 	
@@ -83,12 +83,12 @@ Scholar.CollectionTreeView.prototype.reload = function()
 }
 
 /*
- *  Called by Scholar.Notifier on any changes to collections in the data layer
+ *  Called by Zotero.Notifier on any changes to collections in the data layer
  */
-Scholar.CollectionTreeView.prototype.notify = function(action, type, ids)
+Zotero.CollectionTreeView.prototype.notify = function(action, type, ids)
 {
 	var madeChanges = false;
-	var ids = Scholar.flattenArguments(ids);
+	var ids = Zotero.flattenArguments(ids);
 	
 	if(action == 'remove')
 	{
@@ -154,7 +154,7 @@ Scholar.CollectionTreeView.prototype.notify = function(action, type, ids)
 						// Search rows aren't mapped to native objects, so we
 						// have to pull the new data manually
 						this._getItemAtRow(this._searchRowMap[ids[i]]).ref =
-							Scholar.Searches.get(ids[i]);
+							Zotero.Searches.get(ids[i]);
 						this._treebox.invalidateRow(this._searchRowMap[ids[i]]);
 					}
 					break;
@@ -169,13 +169,13 @@ Scholar.CollectionTreeView.prototype.notify = function(action, type, ids)
 		switch (type)
 		{
 			case 'collection':
-				var item = Scholar.Collections.get(ids);
-				this._showItem(new Scholar.ItemGroup('collection',item), 0, this.rowCount);
+				var item = Zotero.Collections.get(ids);
+				this._showItem(new Zotero.ItemGroup('collection',item), 0, this.rowCount);
 				break;
 				
 			case 'search':
-				var search = Scholar.Searches.get(ids);
-				this._showItem(new Scholar.ItemGroup('search', search), 0, this.rowCount);
+				var search = Zotero.Searches.get(ids);
+				this._showItem(new Zotero.ItemGroup('search', search), 0, this.rowCount);
 				break;
 		}
 		
@@ -189,24 +189,24 @@ Scholar.CollectionTreeView.prototype.notify = function(action, type, ids)
 }
 
 /*
- *  Unregisters view from Scholar.Notifier (called on window close)
+ *  Unregisters view from Zotero.Notifier (called on window close)
  */
-Scholar.CollectionTreeView.prototype.unregister = function()
+Zotero.CollectionTreeView.prototype.unregister = function()
 {
-	Scholar.Notifier.unregisterColumnTree(this._unregisterID);
+	Zotero.Notifier.unregisterColumnTree(this._unregisterID);
 }
 
-Scholar.CollectionTreeView.prototype.isLibrary = function(row)
+Zotero.CollectionTreeView.prototype.isLibrary = function(row)
 {
 	return this._getItemAtRow(row).isLibrary();
 }
 
-Scholar.CollectionTreeView.prototype.isCollection = function(row)
+Zotero.CollectionTreeView.prototype.isCollection = function(row)
 {
 	return this._getItemAtRow(row).isCollection();
 }
 
-Scholar.CollectionTreeView.prototype.isSearch = function(row)
+Zotero.CollectionTreeView.prototype.isSearch = function(row)
 {
 	return this._getItemAtRow(row).isSearch();
 }
@@ -219,7 +219,7 @@ Scholar.CollectionTreeView.prototype.isSearch = function(row)
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
-Scholar.CollectionTreeView.prototype.getCellText = function(row, column)
+Zotero.CollectionTreeView.prototype.getCellText = function(row, column)
 {
 	var obj = this._getItemAtRow(row);
 	
@@ -229,23 +229,23 @@ Scholar.CollectionTreeView.prototype.getCellText = function(row, column)
 		return "";
 }
 
-Scholar.CollectionTreeView.prototype.getImageSrc = function(row, col)
+Zotero.CollectionTreeView.prototype.getImageSrc = function(row, col)
 {
 	var collectionType = this._getItemAtRow(row).type;
-	return "chrome://scholar/skin/treesource-" + collectionType + ".png";
+	return "chrome://zotero/skin/treesource-" + collectionType + ".png";
 }
 
-Scholar.CollectionTreeView.prototype.isContainer = function(row)
+Zotero.CollectionTreeView.prototype.isContainer = function(row)
 {
 	return this._getItemAtRow(row).isCollection();
 }
 
-Scholar.CollectionTreeView.prototype.isContainerOpen = function(row)
+Zotero.CollectionTreeView.prototype.isContainerOpen = function(row)
 {
 	return this._dataItems[row][1];
 }
 
-Scholar.CollectionTreeView.prototype.isContainerEmpty = function(row)
+Zotero.CollectionTreeView.prototype.isContainerEmpty = function(row)
 {
 	//NOTE: this returns true if the collection has no child collections
 	
@@ -256,12 +256,12 @@ Scholar.CollectionTreeView.prototype.isContainerEmpty = function(row)
 		return true;
 }
 
-Scholar.CollectionTreeView.prototype.getLevel = function(row)
+Zotero.CollectionTreeView.prototype.getLevel = function(row)
 {
 	return this._dataItems[row][2];
 }
 
-Scholar.CollectionTreeView.prototype.getParentIndex = function(row)
+Zotero.CollectionTreeView.prototype.getParentIndex = function(row)
 {
 	var thisLevel = this.getLevel(row);
 	if(thisLevel == 0) return -1;
@@ -271,7 +271,7 @@ Scholar.CollectionTreeView.prototype.getParentIndex = function(row)
 	return -1;
 }
 
-Scholar.CollectionTreeView.prototype.hasNextSibling = function(row, afterIndex)
+Zotero.CollectionTreeView.prototype.hasNextSibling = function(row, afterIndex)
 {
 	var thisLevel = this.getLevel(row);
 	for(var i = afterIndex + 1; i < this.rowCount; i++)
@@ -285,7 +285,7 @@ Scholar.CollectionTreeView.prototype.hasNextSibling = function(row, afterIndex)
 /*
  *  Opens/closes the specified row
  */
-Scholar.CollectionTreeView.prototype.toggleOpenState = function(row)
+Zotero.CollectionTreeView.prototype.toggleOpenState = function(row)
 {
 	var count = 0;		//used to tell the tree how many rows were added/removed
 	var thisLevel = this.getLevel(row);
@@ -301,12 +301,12 @@ Scholar.CollectionTreeView.prototype.toggleOpenState = function(row)
 	}
 	else
 	{
-		var newRows = Scholar.getCollections(this._getItemAtRow(row).ref.getID()); //Get children
+		var newRows = Zotero.getCollections(this._getItemAtRow(row).ref.getID()); //Get children
 		
 		for(var i = 0; i < newRows.length; i++)
 		{
 			count++;
-			this._showItem(new Scholar.ItemGroup('collection',newRows[i]), thisLevel+1, row+i+1); //insert new row
+			this._showItem(new Zotero.ItemGroup('collection',newRows[i]), thisLevel+1, row+i+1); //insert new row
 		}
 	}
 	this._dataItems[row][1] = !this._dataItems[row][1];  //toggle container open value
@@ -326,7 +326,7 @@ Scholar.CollectionTreeView.prototype.toggleOpenState = function(row)
 /*
  *  Delete the selection
  */
-Scholar.CollectionTreeView.prototype.deleteSelection = function()
+Zotero.CollectionTreeView.prototype.deleteSelection = function()
 {
 	if(this.selection.count == 0)
 		return;
@@ -361,7 +361,7 @@ Scholar.CollectionTreeView.prototype.deleteSelection = function()
 		}
 		else if(group.isSearch())
 		{
-			Scholar.Searches.erase(group.ref['id']);
+			Zotero.Searches.erase(group.ref['id']);
 		}
 	}
 	this._treebox.endUpdateBatch();
@@ -379,7 +379,7 @@ Scholar.CollectionTreeView.prototype.deleteSelection = function()
  *  	level:	the indent level of the row
  *      beforeRow:	row index to insert new row before
  */
-Scholar.CollectionTreeView.prototype._showItem = function(itemGroup, level, beforeRow)
+Zotero.CollectionTreeView.prototype._showItem = function(itemGroup, level, beforeRow)
 {
 	this._dataItems.splice(beforeRow, 0, [itemGroup, false, level]); this.rowCount++;
 }
@@ -387,15 +387,15 @@ Scholar.CollectionTreeView.prototype._showItem = function(itemGroup, level, befo
 /*
  *  Called by view to hide specified row
  */
-Scholar.CollectionTreeView.prototype._hideItem = function(row)
+Zotero.CollectionTreeView.prototype._hideItem = function(row)
 {
 	this._dataItems.splice(row,1); this.rowCount--;
 }
 
 /*
- *  Returns a reference to the collection at row (see Scholar.Collection in data_access.js)
+ *  Returns a reference to the collection at row (see Zotero.Collection in data_access.js)
  */
-Scholar.CollectionTreeView.prototype._getItemAtRow = function(row)
+Zotero.CollectionTreeView.prototype._getItemAtRow = function(row)
 {
 	return this._dataItems[row][0];
 }
@@ -404,7 +404,7 @@ Scholar.CollectionTreeView.prototype._getItemAtRow = function(row)
  * Creates hash map of collection and search ids to row indexes
  * e.g., var rowForID = this._collectionRowMap[]
  */
-Scholar.CollectionTreeView.prototype._refreshHashMap = function()
+Zotero.CollectionTreeView.prototype._refreshHashMap = function()
 {	
 	this._collectionRowMap = [];
 	this._searchRowMap = [];
@@ -425,24 +425,24 @@ Scholar.CollectionTreeView.prototype._refreshHashMap = function()
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
-Scholar.CollectionTreeCommandController = function(tree)
+Zotero.CollectionTreeCommandController = function(tree)
 {
 	this.tree = tree;
 }
 
-Scholar.CollectionTreeCommandController.prototype.supportsCommand = function(cmd)
+Zotero.CollectionTreeCommandController.prototype.supportsCommand = function(cmd)
 {
 }
 
-Scholar.CollectionTreeCommandController.prototype.isCommandEnabled = function(cmd)
+Zotero.CollectionTreeCommandController.prototype.isCommandEnabled = function(cmd)
 {
 }
 
-Scholar.CollectionTreeCommandController.prototype.doCommand = function(cmd)
+Zotero.CollectionTreeCommandController.prototype.doCommand = function(cmd)
 {
 }
 
-Scholar.CollectionTreeCommandController.prototype.onEvent = function(evt)
+Zotero.CollectionTreeCommandController.prototype.onEvent = function(evt)
 {
 }
 
@@ -457,7 +457,7 @@ Scholar.CollectionTreeCommandController.prototype.onEvent = function(evt)
 /*
  *  Called while a drag is over the tree.
  */
-Scholar.CollectionTreeView.prototype.canDrop = function(row, orient)
+Zotero.CollectionTreeView.prototype.canDrop = function(row, orient)
 {
 	if(typeof row == 'object')	//workaround... two different services call canDrop (nsDragAndDrop, and the tree)
 		return false;
@@ -478,7 +478,7 @@ Scholar.CollectionTreeView.prototype.canDrop = function(row, orient)
 	var dataType = data.flavour.contentType;
 	
 	//Highlight the rows correctly on drag:
-	if(orient == 1 && row == 0 && dataType == 'scholar/collection') //for dropping collections into root level
+	if(orient == 1 && row == 0 && dataType == 'zotero/collection') //for dropping collections into root level
 	{
 		return true;
 	}
@@ -486,12 +486,12 @@ Scholar.CollectionTreeView.prototype.canDrop = function(row, orient)
 	{
 		var rowCollection = this._getItemAtRow(row).ref; //the collection we are dragging over
 		
-		if(dataType == 'scholar/item' || dataType == "text/x-moz-url")
+		if(dataType == 'zotero/item' || dataType == "text/x-moz-url")
 		{
 			var ids = data.data.split(',');
 			for each(var id in ids)
 			{
-				var item = Scholar.Items.get(id);
+				var item = Zotero.Items.get(id);
 				// Can only drag top-level items into collections
 				if (item.isRegularItem() || !item.getSource())
 				{
@@ -505,7 +505,7 @@ Scholar.CollectionTreeView.prototype.canDrop = function(row, orient)
 			}
 			return false;
 		}
-		else if(dataType='scholar/collection' && data.data != rowCollection.getID() && !Scholar.Collections.get(data.data).hasDescendent('collection',rowCollection.getID()) )
+		else if(dataType='zotero/collection' && data.data != rowCollection.getID() && !Zotero.Collections.get(data.data).hasDescendent('collection',rowCollection.getID()) )
 			return true;	//collections cannot be dropped on themselves, nor in their children
 	}
 	return false;
@@ -514,20 +514,20 @@ Scholar.CollectionTreeView.prototype.canDrop = function(row, orient)
 /*
  *  Called when something's been dropped on or next to a row
  */
-Scholar.CollectionTreeView.prototype.drop = function(row, orient)
+Zotero.CollectionTreeView.prototype.drop = function(row, orient)
 {
 	var dataSet = nsTransferable.get(this.getSupportedFlavours(),nsDragAndDrop.getDragData, true);
 	var data = dataSet.first.first;
 	var dataType = data.flavour.contentType;
 	
-	if(dataType == 'scholar/collection')
+	if(dataType == 'zotero/collection')
 	{
 		var oldCount = this.rowCount;
 		
 		var targetCollectionID;
 		if(this._getItemAtRow(row).isCollection())
 			targetCollectionID = this._getItemAtRow(row).ref.getID();
-		var droppedCollection = Scholar.Collections.get(data.data);
+		var droppedCollection = Zotero.Collections.get(data.data);
 		droppedCollection.changeParent(targetCollectionID);
 		
 		var selectRow = this._collectionRowMap[data.data];
@@ -540,13 +540,13 @@ Scholar.CollectionTreeView.prototype.drop = function(row, orient)
 		this.selection.selectEventsSuppressed = false;
 			
 	}
-	else if(dataType == 'scholar/item' && this.canDrop(row, orient))
+	else if(dataType == 'zotero/item' && this.canDrop(row, orient))
 	{
 		var ids = data.data.split(',');
 		var targetCollection = this._getItemAtRow(row).ref;
 		for each(var id in ids)
 		{
-			var item = Scholar.Items.get(id);
+			var item = Zotero.Items.get(id);
 			// Only accept top-level items
 			if (item.isRegularItem() || !item.getSource())
 			{
@@ -559,7 +559,7 @@ Scholar.CollectionTreeView.prototype.drop = function(row, orient)
 		var url = data.data.split("\n")[0];
 		
 		/* WAITING FOR INGESTER SUPPORT
-		var newItem = Scholar.Ingester.scrapeURL(url);
+		var newItem = Zotero.Ingester.scrapeURL(url);
 		
 		if(newItem)
 			this._getItemAtRow(row).ref.addItem(newItem.getID());
@@ -570,30 +570,30 @@ Scholar.CollectionTreeView.prototype.drop = function(row, orient)
 /*
  *  Begin a drag
  */
-Scholar.CollectionTreeView.prototype.onDragStart = function(evt,transferData,action)
+Zotero.CollectionTreeView.prototype.onDragStart = function(evt,transferData,action)
 {
 	transferData.data=new TransferData();
 	
 	//attach ID
-	transferData.data.addDataForFlavour("scholar/collection",this._getItemAtRow(this.selection.currentIndex).ref.getID());
+	transferData.data.addDataForFlavour("zotero/collection",this._getItemAtRow(this.selection.currentIndex).ref.getID());
 }
 
 /*
  *  Returns the supported drag flavors
  */
-Scholar.CollectionTreeView.prototype.getSupportedFlavours = function () 
+Zotero.CollectionTreeView.prototype.getSupportedFlavours = function () 
 { 
 	var flavors = new FlavourSet();
 	flavors.appendFlavour("text/x-moz-url");
-	flavors.appendFlavour("scholar/item");
-	flavors.appendFlavour("scholar/collection");
+	flavors.appendFlavour("zotero/item");
+	flavors.appendFlavour("zotero/collection");
 	return flavors; 
 }
 
 /*
  *  Called by nsDragAndDrop.js for any sort of drop on the tree
  */
-Scholar.CollectionTreeView.prototype.onDrop = function (evt,dropdata,session) { }
+Zotero.CollectionTreeView.prototype.onDrop = function (evt,dropdata,session) { }
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -601,62 +601,62 @@ Scholar.CollectionTreeView.prototype.onDrop = function (evt,dropdata,session) { 
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
-Scholar.CollectionTreeView.prototype.isSorted = function() 							{ return false; }
-Scholar.CollectionTreeView.prototype.isSeparator = function(row) 					{ return false; }
-Scholar.CollectionTreeView.prototype.isEditable = function(row, idx) 				{ return false; }
-Scholar.CollectionTreeView.prototype.getRowProperties = function(row, prop) 		{ }
-Scholar.CollectionTreeView.prototype.getColumnProperties = function(col, prop) 		{ }
-Scholar.CollectionTreeView.prototype.getCellProperties = function(row, col, prop) 	{ }
-Scholar.CollectionTreeView.prototype.performAction = function(action) 				{ }
-Scholar.CollectionTreeView.prototype.performActionOnCell = function(action, row, col)	{ }
-Scholar.CollectionTreeView.prototype.getProgressMode = function(row, col) 			{ }
-Scholar.CollectionTreeView.prototype.cycleHeader = function(column)					{ }
+Zotero.CollectionTreeView.prototype.isSorted = function() 							{ return false; }
+Zotero.CollectionTreeView.prototype.isSeparator = function(row) 					{ return false; }
+Zotero.CollectionTreeView.prototype.isEditable = function(row, idx) 				{ return false; }
+Zotero.CollectionTreeView.prototype.getRowProperties = function(row, prop) 		{ }
+Zotero.CollectionTreeView.prototype.getColumnProperties = function(col, prop) 		{ }
+Zotero.CollectionTreeView.prototype.getCellProperties = function(row, col, prop) 	{ }
+Zotero.CollectionTreeView.prototype.performAction = function(action) 				{ }
+Zotero.CollectionTreeView.prototype.performActionOnCell = function(action, row, col)	{ }
+Zotero.CollectionTreeView.prototype.getProgressMode = function(row, col) 			{ }
+Zotero.CollectionTreeView.prototype.cycleHeader = function(column)					{ }
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-///  Scholar ItemGroup -- a sort of "super class" for collection, library,
+///  Zotero ItemGroup -- a sort of "super class" for collection, library,
 ///  	and saved search
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
-Scholar.ItemGroup = function(type, ref)
+Zotero.ItemGroup = function(type, ref)
 {
 	this.type = type;
 	this.ref = ref;
 }
 
-Scholar.ItemGroup.prototype.isLibrary = function()
+Zotero.ItemGroup.prototype.isLibrary = function()
 {
 	return this.type == 'library';
 }
 
-Scholar.ItemGroup.prototype.isCollection = function()
+Zotero.ItemGroup.prototype.isCollection = function()
 {
 	return this.type == 'collection';
 }
 
-Scholar.ItemGroup.prototype.isSearch = function()
+Zotero.ItemGroup.prototype.isSearch = function()
 {
 	return this.type == 'search';
 }
 
-Scholar.ItemGroup.prototype.getName = function()
+Zotero.ItemGroup.prototype.getName = function()
 {
 	if(this.isCollection())
 		return this.ref.getName();
 	else if(this.isLibrary())
-		return Scholar.getString('pane.collections.library');
+		return Zotero.getString('pane.collections.library');
 	else if(this.isSearch())
 		return this.ref['name'];
 	else
 		return "";
 }
 
-Scholar.ItemGroup.prototype.getChildItems = function()
+Zotero.ItemGroup.prototype.getChildItems = function()
 {
 	if(this.searchText)
 	{
-		var s = new Scholar.Search();
+		var s = new Zotero.Search();
 		if (this.isCollection())
 		{
 			s.addCondition('collectionID', 'is', this.ref.getID(), true);
@@ -666,26 +666,26 @@ Scholar.ItemGroup.prototype.getChildItems = function()
 			s.addCondition('savedSearchID', 'is', this.ref['id'], true);
 		}
 		s.addCondition('quicksearch', 'contains', this.searchText);
-		return Scholar.Items.get(s.search());
+		return Zotero.Items.get(s.search());
 	}
 	else
 	{
 		if(this.isCollection())
-			return Scholar.getItems(this.ref.getID());
+			return Zotero.getItems(this.ref.getID());
 		else if(this.isLibrary())
-			return Scholar.getItems();
+			return Zotero.getItems();
 		else if(this.isSearch())
 		{
-			var s = new Scholar.Search();
+			var s = new Zotero.Search();
 			s.load(this.ref['id']);
-			return Scholar.Items.get(s.search());
+			return Zotero.Items.get(s.search());
 		}
 		else
 			return null;
 	}
 }
 
-Scholar.ItemGroup.prototype.setSearch = function(searchText)
+Zotero.ItemGroup.prototype.setSearch = function(searchText)
 {
 	this.searchText = searchText;
 }

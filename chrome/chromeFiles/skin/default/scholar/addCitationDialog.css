@@ -1,15 +1,15 @@
 #citation-add {
-	list-style-image: url('chrome://scholar/skin/citation-add.png');
+	list-style-image: url('chrome://zotero/skin/citation-add.png');
 }
 #citation-add[disabled="true"] {
-	list-style-image: url('chrome://scholar/skin/citation-add-gray.png');
+	list-style-image: url('chrome://zotero/skin/citation-add-gray.png');
 }
 
 #citation-delete {
-	list-style-image: url('chrome://scholar/skin/citation-delete.png');
+	list-style-image: url('chrome://zotero/skin/citation-delete.png');
 }
 #citation-delete[disabled="true"] {
-	list-style-image: url('chrome://scholar/skin/citation-delete-gray.png');
+	list-style-image: url('chrome://zotero/skin/citation-delete-gray.png');
 }
 
 #item-locator {

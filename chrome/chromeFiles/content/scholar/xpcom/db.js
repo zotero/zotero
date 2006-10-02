@@ -1,7 +1,7 @@
 /*
  * DB connection and schema management class
  */
-Scholar.DB = new function(){
+Zotero.DB = new function(){
 	// Private members
 	var _connection;
 	var _transactionRollback;
@@ -78,7 +78,7 @@ Scholar.DB = new function(){
 					statement.execute();
 				}
 				else {
-					Scholar.debug(sql,5);
+					Zotero.debug(sql,5);
 					db.executeSimpleSQL(sql);
 				}
 				
@@ -160,7 +160,7 @@ Scholar.DB = new function(){
 		var db = _getDBConnection();
 		
 		try {
-			Scholar.debug(sql,5);
+			Zotero.debug(sql,5);
 			var statement = db.createStatement(sql);
 		}
 		catch (e){
@@ -207,7 +207,7 @@ Scholar.DB = new function(){
 							}
 							else {
 								throw('Invalid bound parameter ' + params[i] +
-									' in ' + Scholar.varDump(params));
+									' in ' + Zotero.varDump(params));
 							}
 					}
 					var value = params[i];
@@ -216,19 +216,19 @@ Scholar.DB = new function(){
 				// Bind the parameter as the correct type
 				switch (type){
 					case 'int':
-						Scholar.debug('Binding parameter ' + (i+1)
+						Zotero.debug('Binding parameter ' + (i+1)
 							+ ' of type int: ' + value, 5);
 						statement.bindInt32Parameter(i, value);
 						break;
 						
 					case 'string':
-						Scholar.debug('Binding parameter ' + (i+1)
+						Zotero.debug('Binding parameter ' + (i+1)
 							+ ' of type string: "' + value + '"', 5);
 						statement.bindUTF8StringParameter(i, value);
 						break;
 						
 					case 'null':
-						Scholar.debug('Binding parameter ' + (i+1)
+						Zotero.debug('Binding parameter ' + (i+1)
 							+ ' of type NULL', 5);
 						statement.bindNullParameter(i);
 						break;
@@ -262,11 +262,11 @@ Scholar.DB = new function(){
 		
 		if (db.transactionInProgress){
 			_transactionNestingLevel++;
-			Scholar.debug('Transaction in progress -- increasing level to '
+			Zotero.debug('Transaction in progress -- increasing level to '
 				+ _transactionNestingLevel, 5);
 		}
 		else {
-			Scholar.debug('Beginning DB transaction', 5);
+			Zotero.debug('Beginning DB transaction', 5);
 			db.beginTransaction();
 		}
 	}
@@ -277,14 +277,14 @@ Scholar.DB = new function(){
 		
 		if (_transactionNestingLevel){
 			_transactionNestingLevel--;
-			Scholar.debug('Decreasing transaction level to ' + _transactionNestingLevel, 5);
+			Zotero.debug('Decreasing transaction level to ' + _transactionNestingLevel, 5);
 		}
 		else if (_transactionRollback){
-			Scholar.debug('Rolling back previously flagged transaction', 5);
+			Zotero.debug('Rolling back previously flagged transaction', 5);
 			db.rollbackTransaction();
 		}
 		else {
-			Scholar.debug('Committing transaction',5);
+			Zotero.debug('Committing transaction',5);
 			try {
 				db.commitTransaction();
 			}
@@ -301,11 +301,11 @@ Scholar.DB = new function(){
 		var db = _getDBConnection();
 		
 		if (_transactionNestingLevel){
-			Scholar.debug('Flagging nested transaction for rollback', 5);
+			Zotero.debug('Flagging nested transaction for rollback', 5);
 			_transactionRollback = true;
 		}
 		else {
-			Scholar.debug('Rolling back transaction', 5);
+			Zotero.debug('Rolling back transaction', 5);
 			_transactionRollback = false;
 			try {
 				db.rollbackTransaction();
@@ -344,7 +344,7 @@ Scholar.DB = new function(){
 			return cols;
 		}
 		catch (e){
-			Scholar.debug(e,1);
+			Zotero.debug(e,1);
 			return false;
 		}
 	}
@@ -370,7 +370,7 @@ Scholar.DB = new function(){
 	**/
 	function getNextID(table, column){
 		var sql = 'SELECT ' + column + ' FROM ' + table + ' ORDER BY ' + column;
-		var vals = Scholar.DB.columnQuery(sql);
+		var vals = Zotero.DB.columnQuery(sql);
 		
 		if (!vals){
 			return 1;
@@ -402,7 +402,7 @@ Scholar.DB = new function(){
 	{
 		var sql = "SELECT " + field + " FROM " + table + " WHERE " + field
 			+ " LIKE ? ORDER BY " + field;
-		var untitleds = Scholar.DB.columnQuery(sql, name + '%');
+		var untitleds = Zotero.DB.columnQuery(sql, name + '%');
 		
 		if (!untitleds || untitleds[0]!=name){
 			return name;
@@ -412,7 +412,7 @@ Scholar.DB = new function(){
 		var num = 2;
 		while (untitleds[i] && untitleds[i]==(name + ' ' + num)){
 			while (untitleds[i+1] && untitleds[i]==untitleds[i+1]){
-				Scholar.debug('Next ' + i + ' is ' + untitleds[i]);
+				Zotero.debug('Next ' + i + ' is ' + untitleds[i]);
 				i++;
 			}
 			
@@ -443,10 +443,10 @@ Scholar.DB = new function(){
 		var store = Components.classes["@mozilla.org/storage/service;1"].
 			getService(Components.interfaces.mozIStorageService);
 		
-		var file = Scholar.getScholarDatabase();
-		var backupFile = Scholar.getScholarDatabase('bak');
+		var file = Zotero.getZoteroDatabase();
+		var backupFile = Zotero.getZoteroDatabase('bak');
 		
-		if (SCHOLAR_CONFIG['DB_REBUILD']){
+		if (ZOTERO_CONFIG['DB_REBUILD']){
 			if (confirm('Erase all user data and recreate database from schema?')){
 				// Delete existing Zotero database
 				if (file.exists()){
@@ -454,7 +454,7 @@ Scholar.DB = new function(){
 				}
 				
 				// Delete existing storage folder
-				var dir = Scholar.getStorageDirectory();
+				var dir = Zotero.getStorageDirectory();
 				if (dir.exists()){
 					dir.remove(true);
 				}
@@ -468,7 +468,7 @@ Scholar.DB = new function(){
 				_connection = store.openDatabase(backupFile);
 			}
 			catch (e){
-				Scholar.debug('Backup file was corrupt', 1);
+				Zotero.debug('Backup file was corrupt', 1);
 			}
 			_connection = undefined;
 		}
@@ -478,29 +478,29 @@ Scholar.DB = new function(){
 		}
 		catch (e){
 			if (e.name=='NS_ERROR_FILE_CORRUPTED'){
-				Scholar.debug('Database file corrupted', 1);
+				Zotero.debug('Database file corrupted', 1);
 				
 				// No backup file! Eek!
 				if (!backupFile.exists()){
-					Scholar.debug('No backup file exists', 1);
+					Zotero.debug('No backup file exists', 1);
 					
 					// Save damaged filed
-					Scholar.debug('Saving damaged DB file with .damaged extension', 1);
-					var damagedFile = Scholar.getScholarDatabase('damaged');
-					Scholar.moveToUnique(file, damagedFile);
+					Zotero.debug('Saving damaged DB file with .damaged extension', 1);
+					var damagedFile = Zotero.getZoteroDatabase('damaged');
+					Zotero.moveToUnique(file, damagedFile);
 					
 					// Create new main database
-					var file = Scholar.getScholarDatabase();
+					var file = Zotero.getZoteroDatabase();
 					_connection = store.openDatabase(file);
 					
-					alert(Scholar.getString('db.dbCorruptedNoBackup'));
+					alert(Zotero.getString('db.dbCorruptedNoBackup'));
 					break catchBlock;
 				}
 				
 				// Save damaged file
-				Scholar.debug('Saving damaged DB file with .damaged extension', 1);
-				var damagedFile = Scholar.getScholarDatabase('damaged');
-				Scholar.moveToUnique(file, damagedFile);
+				Zotero.debug('Saving damaged DB file with .damaged extension', 1);
+				var damagedFile = Zotero.getZoteroDatabase('damaged');
+				Zotero.moveToUnique(file, damagedFile);
 				
 				// Test the backup file
 				try {
@@ -509,19 +509,19 @@ Scholar.DB = new function(){
 				// Can't open backup either
 				catch (e){
 					// Create new main database
-					var file = Scholar.getScholarDatabase();
+					var file = Zotero.getZoteroDatabase();
 					_connection = store.openDatabase(file);
 					
-					alert(Scholar.getString('db.dbRestoreFailed'));
+					alert(Zotero.getString('db.dbRestoreFailed'));
 					break catchBlock;
 				}
 				
 				_connection = undefined;
 				
 				// Copy backup file to main DB file
-				Scholar.debug('Restoring main database from backup file', 1);
+				Zotero.debug('Restoring main database from backup file', 1);
 				try {
-					backupFile.copyTo(backupFile.parent, SCHOLAR_CONFIG['DB_FILE']);
+					backupFile.copyTo(backupFile.parent, ZOTERO_CONFIG['DB_FILE']);
 				}
 				catch (e){
 					// TODO: deal with low disk space
@@ -529,13 +529,13 @@ Scholar.DB = new function(){
 				}
 				
 				// Open restored database
-				var file = Scholar.getScholarDirectory();
-				file.append(SCHOLAR_CONFIG['DB_FILE']);
+				var file = Zotero.getZoteroDirectory();
+				file.append(ZOTERO_CONFIG['DB_FILE']);
 				_connection = store.openDatabase(file);
-				Scholar.debug('Database restored', 1);
-				var msg = Scholar.getString('db.dbRestored');
-				msg = msg.replace('%1', Scholar.Date.getFileDateString(backupFile))
-				msg = msg.replace('%2', Scholar.Date.getFileTimeString(backupFile))
+				Zotero.debug('Database restored', 1);
+				var msg = Zotero.getString('db.dbRestored');
+				msg = msg.replace('%1', Zotero.Date.getFileDateString(backupFile))
+				msg = msg.replace('%2', Zotero.Date.getFileTimeString(backupFile))
 				alert(msg);
 				
 				break catchBlock;

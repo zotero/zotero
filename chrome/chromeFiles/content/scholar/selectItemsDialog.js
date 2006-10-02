@@ -17,7 +17,7 @@ function doLoad()
 {
 	io = window.arguments[0];
 	
-	collectionsView = new Scholar.CollectionTreeView();
+	collectionsView = new Zotero.CollectionTreeView();
 	document.getElementById('collections-tree').view = collectionsView;
 
 	// move to center of screen
@@ -45,7 +45,7 @@ function onCollectionSelected()
 		var collection = collectionsView._getItemAtRow(collectionsView.selection.currentIndex);
 		collection.setSearch('');
 
-		itemsView = new Scholar.ItemTreeView(collection, (window.arguments[1] ? true : false));
+		itemsView = new Zotero.ItemTreeView(collection, (window.arguments[1] ? true : false));
 		document.getElementById('items-tree').view = itemsView;
 	}
 

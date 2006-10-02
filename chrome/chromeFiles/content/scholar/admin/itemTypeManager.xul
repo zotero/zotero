@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
-<?xml-stylesheet href="chrome://scholar/skin/scholar.css" type="text/css"?>
-<?xml-stylesheet href="chrome://scholar/content/admin/itemTypeManager.css" type="text/css"?>
-<!DOCTYPE window SYSTEM "chrome://scholar/locale/scholar.dtd">
+<?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/content/admin/itemTypeManager.css" type="text/css"?>
+<!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
 
 <window
 	id="item-type-manager"
@@ -15,46 +15,46 @@
 	
 	
 	<popupset>
-		<popup id="scholar-type-menu"
-				onpopupshowing="Scholar_ItemTypeManager.buildTypeContextMenu()"
-				onpopuphidden="Scholar_ItemTypeManager.init()">
-			<menuitem label="Remove item type" oncommand="Scholar_ItemTypeManager.removeType(document.popupNode)"/>
+		<popup id="zotero-type-menu"
+				onpopupshowing="Zotero_ItemTypeManager.buildTypeContextMenu()"
+				onpopuphidden="Zotero_ItemTypeManager.init()">
+			<menuitem label="Remove item type" oncommand="Zotero_ItemTypeManager.removeType(document.popupNode)"/>
 			<menuseparator/>
 			<menu label="Template">
-				<menupopup id="scholar-type-template-menu">
-					<menuitem type="checkbox" label="None" oncommand="Scholar_ItemTypeManager.setTemplate(document.popupNode.value, this.value)"/>
+				<menupopup id="zotero-type-template-menu">
+					<menuitem type="checkbox" label="None" oncommand="Zotero_ItemTypeManager.setTemplate(document.popupNode.value, this.value)"/>
 					<menuseparator/>
 				</menupopup>
 			</menu>
 		</popup>
 		
-		<popup id="scholar-remove-field-menu">
-			<menuitem label="Remove field" oncommand="Scholar_ItemTypeManager.removeField(document.popupNode)"/>
+		<popup id="zotero-remove-field-menu">
+			<menuitem label="Remove field" oncommand="Zotero_ItemTypeManager.removeField(document.popupNode)"/>
 		</popup>
 	</popupset>
 	
 	
 	<vbox>
 		<hbox style="height:25em">
-			<listbox id="item-type-list" seltype="single" context="scholar-type-menu"
-				onselect="Scholar_ItemTypeManager.handleTypeSelect()">
+			<listbox id="item-type-list" seltype="single" context="zotero-type-menu"
+				onselect="Zotero_ItemTypeManager.handleTypeSelect()">
 				<listhead>
 					<listheader label="Item Types"/>
 				</listhead>
 			</listbox>
 			
-			<listbox id="item-type-fields-list" onkeypress="Scholar_ItemTypeManager.handleShowHide(this, event)">
+			<listbox id="item-type-fields-list" onkeypress="Zotero_ItemTypeManager.handleShowHide(this, event)">
 				<listhead>
 					<listheader label="Used Fields"/>
 				</listhead>
 			</listbox>
 			
 			<groupbox>
-				<button label="Move up" oncommand="Scholar_ItemTypeManager.moveSelectedFieldUp()" />
-				<button label="Move down" oncommand="Scholar_ItemTypeManager.moveSelectedFieldDown()" />
+				<button label="Move up" oncommand="Zotero_ItemTypeManager.moveSelectedFieldUp()" />
+				<button label="Move down" oncommand="Zotero_ItemTypeManager.moveSelectedFieldDown()" />
 			</groupbox>
 			
-			<listbox id="fields-list" context="scholar-remove-field-menu">
+			<listbox id="fields-list" context="zotero-remove-field-menu">
 				<listhead>
 					<listheader label="Unused Fields"/>
 				</listhead>
@@ -64,12 +64,12 @@
 		<hbox style="margin:1em 0 0 .2em">
 			<hbox style="-moz-box-align:baseline">
 				<label control="add-type" style="width:7em; text-align:right">Add item type:</label>
-				<textbox id="add-type" onkeypress="return Scholar_ItemTypeManager.handleAddType(this, event)"/>
+				<textbox id="add-type" onkeypress="return Zotero_ItemTypeManager.handleAddType(this, event)"/>
 			</hbox>
 		
 			<hbox style="-moz-box-align:baseline">
 				<label control="add-field" style="width:7em; text-align:right">Add field:</label>
-				<textbox id="add-field" onkeypress="return Scholar_ItemTypeManager.handleAddField(this, event)"/>
+				<textbox id="add-field" onkeypress="return Zotero_ItemTypeManager.handleAddField(this, event)"/>
 			</hbox>
 		</hbox>
 		
@@ -82,7 +82,7 @@
 			Light blue fields are hidden. Brown fields are template fields and can only be removed by changing the template.
 		</description>
 		
-		<button label="Generate SQL" oncommand="document.getElementById('sql-dump').value=Scholar_ItemTypeManager.createSQLDump()"/>
+		<button label="Generate SQL" oncommand="document.getElementById('sql-dump').value=Zotero_ItemTypeManager.createSQLDump()"/>
 		<textbox id="sql-dump" multiline="true" cols="100" rows="6"/>
 	</vbox>
 </window>

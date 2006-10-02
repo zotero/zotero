@@ -28,7 +28,7 @@
 							var seealso = this.item.getSeeAlso();
 							if(seealso)
 							{
-								seealso = Scholar.Items.get(seealso);
+								seealso = Zotero.Items.get(seealso);
 								for(var i = 0; i < seealso.length; i++)
 								{
 									r = r + seealso[i].getField('title') + ", ";
@@ -54,11 +54,11 @@
 							
 							if(seealso)
 							{
-								seealso = Scholar.Items.get(seealso);
+								seealso = Zotero.Items.get(seealso);
 								for(var i = 0; i < seealso.length; i++)
 								{
 									var icon= document.createElement("image");
-									icon.setAttribute('src','chrome://scholar/skin/treeitem-'+Scholar.ItemTypes.getName(seealso[i].getType())+'.png');
+									icon.setAttribute('src','chrome://zotero/skin/treeitem-'+Zotero.ItemTypes.getName(seealso[i].getType())+'.png');
 							
 									var label = document.createElement("label");
 									label.setAttribute('value', seealso[i].getField('title'));
@@ -97,7 +97,7 @@
 				<body>
 					<![CDATA[
 						var io = {dataIn: null, dataOut: null};
-						window.openDialog('chrome://scholar/content/selectItemsDialog.xul','','chrome,modal',io);
+						window.openDialog('chrome://zotero/content/selectItemsDialog.xul','','chrome,modal',io);
 
 						if(io.dataOut && this.item)
 						{
@@ -130,15 +130,15 @@
 						if(id)
 						{
 							var p;
-							if(window.ScholarPane)
+							if(window.ZoteroPane)
 							{
-								p = window.ScholarPane;
+								p = window.ZoteroPane;
 							}
 							else
 							{
 								var win;
 														
-								if(window.opener && window.opener.ScholarPane)
+								if(window.opener && window.opener.ZoteroPane)
 								{
 									win = window.opener;
 								}
@@ -151,7 +151,7 @@
 										return;
 								}
 								
-								p = win.ScholarPane;
+								p = win.ZoteroPane;
 							}
 								
 							p.selectItem(id);

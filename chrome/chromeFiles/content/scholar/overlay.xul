@@ -4,10 +4,10 @@
 	Copyright (C) 2006   Center for History and New Media, George Mason University, Fairfax, VA
 	http://chnm.gmu.edu/
 -->
-<?xml-stylesheet href="chrome://scholar/skin/overlay.css" type="text/css"?>
-<!DOCTYPE window SYSTEM "chrome://scholar/locale/scholar.dtd">
+<?xml-stylesheet href="chrome://zotero/skin/overlay.css" type="text/css"?>
+<!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
 
-<overlay id="scholar"
+<overlay id="zotero"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 	<?xul-overlay href="itemPane.xul" ?>
 	
@@ -18,65 +18,65 @@
     <script src="fileInterface.js"/>
 	
 	<commandset id="mainCommandSet">
-		<command id="cmd_scholar_newItem" oncommand="ScholarPane.newItem(2);"/>
-		<command id="cmd_scholar_newCollection" oncommand="ScholarPane.newCollection();"/>
-		<command id="cmd_scholar_search" oncommand="ScholarPane.search();"/>
+		<command id="cmd_zotero_newItem" oncommand="ZoteroPane.newItem(2);"/>
+		<command id="cmd_zotero_newCollection" oncommand="ZoteroPane.newCollection();"/>
+		<command id="cmd_zotero_search" oncommand="ZoteroPane.search();"/>
 	</commandset>
 	<toolbarpalette id="BrowserToolbarPalette">
 		<toolbarbutton id="zotero-toolbar-button" class="toolbarbutton-1"
-						label="&scholar.name;"
-						oncommand="ScholarPane.toggleDisplay();"/>
+						label="&zotero.name;"
+						oncommand="ZoteroPane.toggleDisplay();"/>
 	</toolbarpalette>
 	<vbox id="appcontent">
-		<!-- Changes to attributes of scholar-splitter and scholar-pane must be mirrored on overlay.js's onLoad() function -->
-		<splitter id="scholar-splitter" resizebefore="closest" resizeafter="closest" collapsed="true"/>
-		<hbox id="scholar-pane" persist="height" collapsed="true" flex="1">
+		<!-- Changes to attributes of zotero-splitter and zotero-pane must be mirrored on overlay.js's onLoad() function -->
+		<splitter id="zotero-splitter" resizebefore="closest" resizeafter="closest" collapsed="true"/>
+		<hbox id="zotero-pane" persist="height" collapsed="true" flex="1">
 			<popupset>
-				<popup id="scholar-collectionmenu" onpopupshowing="ScholarPane.buildCollectionContextMenu();">
-					<menuitem label="&toolbar.newCollection.label;" command="cmd_scholar_newCollection"/>
-					<menuitem label="&toolbar.newSavedSearch.label;" oncommand="ScholarPane.newSearch()"/>
+				<popup id="zotero-collectionmenu" onpopupshowing="ZoteroPane.buildCollectionContextMenu();">
+					<menuitem label="&toolbar.newCollection.label;" command="cmd_zotero_newCollection"/>
+					<menuitem label="&toolbar.newSavedSearch.label;" oncommand="ZoteroPane.newSearch()"/>
 					<menuseparator/>
-					<menuitem label="&toolbar.renameCollection.label;" oncommand="ScholarPane.editSelectedCollection();"/>
-					<menuitem label="&toolbar.renameSavedSearch.label;" oncommand="ScholarPane.editSelectedCollection()"/>
-					<menuitem label="&toolbar.removeCollection.label;" oncommand="ScholarPane.deleteSelectedCollection();"/>
-					<menuitem label="&toolbar.removeSavedSearch.label;" oncommand="ScholarPane.deleteSelectedCollection()"/>
+					<menuitem label="&toolbar.renameCollection.label;" oncommand="ZoteroPane.editSelectedCollection();"/>
+					<menuitem label="&toolbar.renameSavedSearch.label;" oncommand="ZoteroPane.editSelectedCollection()"/>
+					<menuitem label="&toolbar.removeCollection.label;" oncommand="ZoteroPane.deleteSelectedCollection();"/>
+					<menuitem label="&toolbar.removeSavedSearch.label;" oncommand="ZoteroPane.deleteSelectedCollection()"/>
 					<menuseparator/>
-					<menuitem label="&toolbar.exportCollection.label;" oncommand="Scholar_File_Interface.exportCollection();"/>
-					<menuitem label="&toolbar.exportSavedSearch.label;" oncommand="Scholar_File_Interface.exportCollection()"/>
-					<menuitem label="&toolbar.createBibCollection.label;" oncommand="Scholar_File_Interface.bibliographyFromCollection();"/>
-					<menuitem label="&toolbar.createBibSavedSearch.label;" oncommand="Scholar_File_Interface.bibliographyFromCollection()"/>
-					<menuitem label="&toolbar.export.label;" oncommand="Scholar_File_Interface.exportFile()"/>
+					<menuitem label="&toolbar.exportCollection.label;" oncommand="Zotero_File_Interface.exportCollection();"/>
+					<menuitem label="&toolbar.exportSavedSearch.label;" oncommand="Zotero_File_Interface.exportCollection()"/>
+					<menuitem label="&toolbar.createBibCollection.label;" oncommand="Zotero_File_Interface.bibliographyFromCollection();"/>
+					<menuitem label="&toolbar.createBibSavedSearch.label;" oncommand="Zotero_File_Interface.bibliographyFromCollection()"/>
+					<menuitem label="&toolbar.export.label;" oncommand="Zotero_File_Interface.exportFile()"/>
 				</popup>
-				<popup id="scholar-itemmenu" onpopupshowing="ScholarPane.buildItemContextMenu();">
-					<menuitem label="&toolbar.newItem.label;" command="cmd_scholar_newItem"/>
+				<popup id="zotero-itemmenu" onpopupshowing="ZoteroPane.buildItemContextMenu();">
+					<menuitem label="&toolbar.newItem.label;" command="cmd_zotero_newItem"/>
 					<menuseparator/>
-					<menuitem oncommand="ScholarPane.deleteSelectedItem();"/>
-					<menuitem oncommand="ScholarPane.deleteSelectedItem(true);"/>
+					<menuitem oncommand="ZoteroPane.deleteSelectedItem();"/>
+					<menuitem oncommand="ZoteroPane.deleteSelectedItem(true);"/>
 					<menuseparator/>
-					<menuitem oncommand="Scholar_File_Interface.exportItems();"/>
-					<menuitem oncommand="Scholar_File_Interface.bibliographyFromItems();"/>
+					<menuitem oncommand="Zotero_File_Interface.exportItems();"/>
+					<menuitem oncommand="Zotero_File_Interface.bibliographyFromItems();"/>
 				</popup>
 			</popupset>
 			<vbox id="collections-pane" persist="width" flex="1">
 				<toolbar>
-					<toolbarbutton id="tb-collection-add" tooltiptext="&toolbar.newCollection.label;" command="cmd_scholar_newCollection"/>
-					<toolbarbutton id="tb-collection-addsearch" tooltiptext="&toolbar.newSavedSearch.label;" oncommand="ScholarPane.newSearch();"/>
-					<toolbarbutton id="tb-collection-rename" tooltiptext="&toolbar.renameCollection.label;" oncommand="ScholarPane.editSelectedCollection();" disabled="true"/>
+					<toolbarbutton id="tb-collection-add" tooltiptext="&toolbar.newCollection.label;" command="cmd_zotero_newCollection"/>
+					<toolbarbutton id="tb-collection-addsearch" tooltiptext="&toolbar.newSavedSearch.label;" oncommand="ZoteroPane.newSearch();"/>
+					<toolbarbutton id="tb-collection-rename" tooltiptext="&toolbar.renameCollection.label;" oncommand="ZoteroPane.editSelectedCollection();" disabled="true"/>
 					<spacer flex="1"/>
 					<toolbarbutton id="tb-collection-menu" type="menu">
 						<menupopup>
-							<menuitem label="&toolbar.import.label;" oncommand="Scholar_File_Interface.importFile();"/>
-							<menuitem label="&toolbar.export.label;" oncommand="Scholar_File_Interface.exportFile();"/>
+							<menuitem label="&toolbar.import.label;" oncommand="Zotero_File_Interface.importFile();"/>
+							<menuitem label="&toolbar.export.label;" oncommand="Zotero_File_Interface.exportFile();"/>
 							<menuseparator/>
-							<menuitem label="&toolbar.preferences.label;" oncommand="window.openDialog('chrome://scholar/content/preferences.xul','prefs','chrome,modal')"/>
+							<menuitem label="&toolbar.preferences.label;" oncommand="window.openDialog('chrome://zotero/content/preferences.xul','prefs','chrome,modal')"/>
 						</menupopup>
 					</toolbarbutton>
 				</toolbar>
-				<tree id="collections-tree" hidecolumnpicker="true" context="scholar-collectionmenu"
-					onselect="ScholarPane.onCollectionSelected();" seltype="single"
-					ondragdrop="nsDragAndDrop.drop(event,ScholarPane.getCollectionsView())"
-					ondraggesture="if (event.target.localName == 'treechildren') nsDragAndDrop.startDrag(event,ScholarPane.getCollectionsView());"
-					onkeypress="if (event.keyCode == event.DOM_VK_BACK_SPACE || event.keyCode == event.DOM_VK_DELETE){ ScholarPane.deleteSelectedCollection(); return false; }"
+				<tree id="collections-tree" hidecolumnpicker="true" context="zotero-collectionmenu"
+					onselect="ZoteroPane.onCollectionSelected();" seltype="single"
+					ondragdrop="nsDragAndDrop.drop(event,ZoteroPane.getCollectionsView())"
+					ondraggesture="if (event.target.localName == 'treechildren') nsDragAndDrop.startDrag(event,ZoteroPane.getCollectionsView());"
+					onkeypress="if (event.keyCode == event.DOM_VK_BACK_SPACE || event.keyCode == event.DOM_VK_DELETE){ ZoteroPane.deleteSelectedCollection(); return false; }"
 					flex="1">
 					<treecols>
 						<treecol
@@ -88,41 +88,41 @@
 					<treechildren/>
 				</tree>
 			</vbox>
-			<splitter id="scholar-tree-splitter" resizebefore="closest" resizeafter="closest"/>
+			<splitter id="zotero-tree-splitter" resizebefore="closest" resizeafter="closest"/>
 			<vbox id="items-pane" persist="width" flex="1">
 				<toolbar align="center">
 					<toolbarbutton id="tb-add" tooltiptext="&toolbar.newItem.label;" type="menu">
 						<!-- New Item drop-down built in overlay.js::onLoad() -->
 						<menupopup>
 							<menuseparator/>
-							<menuitem label="&toolbar.attachment.linked;" oncommand="ScholarPane.addAttachmentFromDialog(true);"/>
-							<menuitem label="&toolbar.attachment.add;" oncommand="ScholarPane.addAttachmentFromDialog();"/>
+							<menuitem label="&toolbar.attachment.linked;" oncommand="ZoteroPane.addAttachmentFromDialog(true);"/>
+							<menuitem label="&toolbar.attachment.add;" oncommand="ZoteroPane.addAttachmentFromDialog();"/>
 							<menuseparator/>
 							<menu label="&toolbar.moreItemTypes.label;">
 								<menupopup id="tb-add-more"/>
 							</menu>
 						</menupopup>
 					</toolbarbutton>
-					<toolbarbutton id="tb-item-from-page" tooltiptext="&toolbar.newItemFromPage.label;" oncommand="ScholarPane.addItemFromPage()"/>
+					<toolbarbutton id="tb-item-from-page" tooltiptext="&toolbar.newItemFromPage.label;" oncommand="ZoteroPane.addItemFromPage()"/>
 					<toolbarseparator/>
-					<toolbarbutton id="tb-link-page" tooltiptext="&toolbar.attachment.weblink;" oncommand="ScholarPane.addAttachmentFromPage(true)"/>
-					<toolbarbutton id="tb-snapshot-page" tooltiptext="&toolbar.attachment.snapshot;" oncommand="ScholarPane.addAttachmentFromPage()"/>
-					<toolbarbutton id="tb-note-add" tooltiptext="&toolbar.note.standalone;" oncommand="ScholarPane.newNote(event.shiftKey);"/>
+					<toolbarbutton id="tb-link-page" tooltiptext="&toolbar.attachment.weblink;" oncommand="ZoteroPane.addAttachmentFromPage(true)"/>
+					<toolbarbutton id="tb-snapshot-page" tooltiptext="&toolbar.attachment.snapshot;" oncommand="ZoteroPane.addAttachmentFromPage()"/>
+					<toolbarbutton id="tb-note-add" tooltiptext="&toolbar.note.standalone;" oncommand="ZoteroPane.newNote(event.shiftKey);"/>
 					<spacer flex="1"/>
 					<label value="&toolbar.search.label;" control="tb-search"/>
-					<textbox id="tb-search" type="timed" timeout="250" command="cmd_scholar_search" dir="reverse" onkeypress="if(event.keyCode == event.DOM_VK_ESCAPE) { this.value = ''; this.doCommand('cmd_scholar_search'); return false; }">
+					<textbox id="tb-search" type="timed" timeout="250" command="cmd_zotero_search" dir="reverse" onkeypress="if(event.keyCode == event.DOM_VK_ESCAPE) { this.value = ''; this.doCommand('cmd_zotero_search'); return false; }">
 						<toolbarbutton id="tb-search-cancel" oncommand="this.parentNode.value='';" hidden="true"/>
 					</textbox>
 				</toolbar>
 				<tree 
-					id="items-tree" context="scholar-itemmenu"
-					ondblclick="ScholarPane.onDoubleClick(event, this);"
+					id="items-tree" context="zotero-itemmenu"
+					ondblclick="ZoteroPane.onDoubleClick(event, this);"
 					enableColumnDrag="true"
-					onkeypress="if (event.keyCode == event.DOM_VK_BACK_SPACE || event.keyCode == event.DOM_VK_DELETE){ ScholarPane.deleteSelectedItem(); return false; }"
-					onselect="ScholarPane.itemSelected();"
-					ondraggesture="if (event.target.localName == 'treechildren') nsDragAndDrop.startDrag(event,ScholarPane.getItemsView());"
-					ondragover="nsDragAndDrop.dragOver(event,ScholarPane.getItemsView())"
-					ondragdrop="nsDragAndDrop.drop(event,ScholarPane.getItemsView())"
+					onkeypress="if (event.keyCode == event.DOM_VK_BACK_SPACE || event.keyCode == event.DOM_VK_DELETE){ ZoteroPane.deleteSelectedItem(); return false; }"
+					onselect="ZoteroPane.itemSelected();"
+					ondraggesture="if (event.target.localName == 'treechildren') nsDragAndDrop.startDrag(event,ZoteroPane.getItemsView());"
+					ondragover="nsDragAndDrop.dragOver(event,ZoteroPane.getItemsView())"
+					ondragdrop="nsDragAndDrop.drop(event,ZoteroPane.getItemsView())"
 					flex="1">
 					<treecols>
 						<treecol
@@ -168,15 +168,15 @@
 					<treechildren/>
 				</tree>
 			</vbox>
-			<splitter id="scholar-view-splitter" resizebefore="closest" resizeafter="closest"/>
+			<splitter id="zotero-view-splitter" resizebefore="closest" resizeafter="closest"/>
 			<vbox>
 				<toolbar align="right">
-					<toolbarbutton id="tb-fullscreen" tooltiptext="&toolbar.fullscreen.tooltip;" oncommand="ScholarPane.fullScreen();"/>
-					<toolbarbutton class="tabs-closebutton" oncommand="ScholarPane.toggleDisplay()"/>
+					<toolbarbutton id="tb-fullscreen" tooltiptext="&toolbar.fullscreen.tooltip;" oncommand="ZoteroPane.fullScreen();"/>
+					<toolbarbutton class="tabs-closebutton" oncommand="ZoteroPane.toggleDisplay()"/>
 				</toolbar>
 				<groupbox flex="1">
 					<caption>
-						<tabs id="scholar-view-tabs" onselect="document.getElementById('scholar-view-item').selectedIndex = this.selectedIndex;" hidden="true">
+						<tabs id="zotero-view-tabs" onselect="document.getElementById('zotero-view-item').selectedIndex = this.selectedIndex;" hidden="true">
 							<tab label="&tabs.info.label;"/>
 							<tab label="&tabs.notes.label;"/>
 							<tab label="&tabs.attachments.label;"/>
@@ -184,28 +184,28 @@
 							<tab label="&tabs.related.label;"/>
 						</tabs>
 					</caption>
-					<deck id="item-pane" selectedIndex="0" flex="1" onselect="document.getElementById('scholar-view-tabs').setAttribute('hidden',(this.selectedIndex != 1));">
+					<deck id="item-pane" selectedIndex="0" flex="1" onselect="document.getElementById('zotero-view-tabs').setAttribute('hidden',(this.selectedIndex != 1));">
 						<box pack="center" align="center">
-							<label id="scholar-view-selected-label"/>
+							<label id="zotero-view-selected-label"/>
 						</box>
-						<deck id="scholar-view-item" flex="1"/>
+						<deck id="zotero-view-item" flex="1"/>
 						<!-- Note info pane -->
-						<vbox id="scholar-view-note" flex="1">
-							<noteeditor id="scholar-note-editor" flex="1"/>
-							<button id="scholar-view-note-button" label="&notes.separate;" oncommand="ScholarPane.openNoteWindow(this.getAttribute('noteID')); if(this.hasAttribute('sourceID')) ScholarPane.selectItem(this.getAttribute('sourceID'));"/>
+						<vbox id="zotero-view-note" flex="1">
+							<noteeditor id="zotero-note-editor" flex="1"/>
+							<button id="zotero-view-note-button" label="&notes.separate;" oncommand="ZoteroPane.openNoteWindow(this.getAttribute('noteID')); if(this.hasAttribute('sourceID')) ZoteroPane.selectItem(this.getAttribute('sourceID'));"/>
 						</vbox>
 						<!-- Attachment info pane -->
-						<vbox id="scholar-view-attachment" flex="1">
-							<label id="scholar-attachment-label"/>
+						<vbox id="zotero-view-attachment" flex="1">
+							<label id="zotero-attachment-label"/>
 							<hbox>
-								<button id="scholar-attachment-view" flex="1" oncommand="ScholarPane.viewSelectedAttachment();"/>
-								<button id="scholar-attachment-show" label="&item.attachment.file.show;" flex="1" oncommand="ScholarPane.showSelectedAttachmentInFilesystem()"/>
+								<button id="zotero-attachment-view" flex="1" oncommand="ZoteroPane.viewSelectedAttachment();"/>
+								<button id="zotero-attachment-show" label="&item.attachment.file.show;" flex="1" oncommand="ZoteroPane.showSelectedAttachmentInFilesystem()"/>
 							</hbox>
 							<vbox>
-								<label id="scholar-attachment-url" class="text-link" crop="end" onclick="window.loadURI(this.value)"/>
-								<label id="scholar-attachment-accessed"/>
+								<label id="zotero-attachment-url" class="text-link" crop="end" onclick="window.loadURI(this.value)"/>
+								<label id="zotero-attachment-accessed"/>
 							</vbox>
-							<noteeditor id="scholar-attachment-note-editor" notitle="1" flex="1"/>
+							<noteeditor id="zotero-attachment-note-editor" notitle="1" flex="1"/>
 						</vbox>
 					</deck>
 				</groupbox>
@@ -214,31 +214,31 @@
 	</vbox>
 	
 	<statusbar id="status-bar">
-		<statusbarpanel id="scholar-status-bar-icon"
-			src="chrome://scholar/skin/zotero_logo_18px.png"
-			class="statusbarpanel-iconic" onclick="ScholarPane.toggleDisplay();"
+		<statusbarpanel id="zotero-status-bar-icon"
+			src="chrome://zotero/skin/zotero_logo_18px.png"
+			class="statusbarpanel-iconic" onclick="ZoteroPane.toggleDisplay();"
 			hidden="true"/>
 	</statusbar>
 	
 	<script>
 	window.addEventListener('load', function(e){
-		if (Scholar){
-			document.getElementById('scholar-status-bar-icon').setAttribute('hidden', 'false');
+		if (Zotero){
+			document.getElementById('zotero-status-bar-icon').setAttribute('hidden', 'false');
 		}
 	}, false);
 	</script>
 	
 	<menupopup id="menu_ToolsPopup">
-		<menuseparator id="scholarSeparator" insertbefore="devToolsSeparator"/>
-		<menuitem id="tools-scholar" insertbefore="devToolsSeparator"
-			oncommand="ScholarPane.toggleDisplay();" label="&scholar.name;"
-			key="key_openScholar"/>
+		<menuseparator id="zoteroSeparator" insertbefore="devToolsSeparator"/>
+		<menuitem id="tools-zotero" insertbefore="devToolsSeparator"
+			oncommand="ZoteroPane.toggleDisplay();" label="&zotero.name;"
+			key="key_openZotero"/>
 	</menupopup>
   
 	<keyset id="mainKeyset">
-		<key id="key_openScholar"
+		<key id="key_openZotero"
 			 key="Z" 
-			 oncommand="ScholarPane.toggleDisplay();"
+			 oncommand="ZoteroPane.toggleDisplay();"
 			 modifiers="shift accel" />
 	</keyset>
 </overlay>

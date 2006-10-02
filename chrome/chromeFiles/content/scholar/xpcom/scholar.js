@@ -1,4 +1,4 @@
-const SCHOLAR_CONFIG = {
+const ZOTERO_CONFIG = {
 	GUID: 'zotero@chnm.gmu.edu',
 	DB_FILE: 'zotero.sqlite',
 	DB_REBUILD: false, // erase DB and recreate from schema
@@ -12,7 +12,7 @@ const SCHOLAR_CONFIG = {
 /*
  * Core functions
  */
-var Scholar = new function(){
+var Zotero = new function(){
 	var _initialized = false;
 	var _shutdown = false;
 	var _localizedStringBundle;
@@ -21,9 +21,9 @@ var Scholar = new function(){
 	this.init = init;
 	this.shutdown = shutdown;
 	this.getProfileDirectory = getProfileDirectory;
-	this.getScholarDirectory = getScholarDirectory;
+	this.getZoteroDirectory = getZoteroDirectory;
 	this.getStorageDirectory = getStorageDirectory;
-	this.getScholarDatabase = getScholarDatabase;
+	this.getZoteroDatabase = getZoteroDatabase;
 	this.backupDatabase = backupDatabase;
 	this.debug = debug;
 	this.varDump = varDump;
@@ -52,17 +52,17 @@ var Scholar = new function(){
 			return false;
 		}
 		
-		// Register shutdown handler to call Scholar.shutdown()
+		// Register shutdown handler to call Zotero.shutdown()
 		var observerService = Components.classes["@mozilla.org/observer-service;1"]
 			.getService(Components.interfaces.nsIObserverService);
 		observerService.addObserver({
 			observe: function(subject, topic, data){
-				Scholar.shutdown(subject, topic, data)
+				Zotero.shutdown(subject, topic, data)
 			}
 		}, "xpcom-shutdown", false);
 		
 		// Load in the preferences branch for the extension
-		Scholar.Prefs.init();
+		Zotero.Prefs.init();
 		
 		// Load in the extension version from the extension manager
 		var nsIUpdateItem = Components.interfaces.nsIUpdateItem;
@@ -71,7 +71,7 @@ var Scholar = new function(){
 				.getService(Components.interfaces.nsIExtensionManager);
 		var itemType = nsIUpdateItem.TYPE_EXTENSION;
 		this.version
-			= gExtensionManager.getItemForID(SCHOLAR_CONFIG['GUID']).version;
+			= gExtensionManager.getItemForID(ZOTERO_CONFIG['GUID']).version;
 		
 		// OS platform
 		var win = Components.classes["@mozilla.org/appshell/appShellService;1"]
@@ -86,7 +86,7 @@ var Scholar = new function(){
 		this.locale = localeService.getLocaleComponentForUserAgent();
 		
 		// Load in the localization stringbundle for use by getString(name)
-		var src = 'chrome://scholar/locale/scholar.properties';
+		var src = 'chrome://zotero/locale/zotero.properties';
 		var localeService =
 			Components.classes["@mozilla.org/intl/nslocaleservice;1"]
 			.getService(Components.interfaces.nsILocaleService);
@@ -97,12 +97,12 @@ var Scholar = new function(){
 		_localizedStringBundle = stringBundleService.createBundle(src, appLocale);
 		
 		// Trigger updating of schema and scrapers
-		Scholar.Schema.updateSchema();
-		Scholar.Schema.updateScrapersRemote();
+		Zotero.Schema.updateSchema();
+		Zotero.Schema.updateScrapersRemote();
 		
 		// Initialize integration web server
-		Scholar.Integration.SOAP.init();
-		Scholar.Integration.init();
+		Zotero.Integration.SOAP.init();
+		Zotero.Integration.init();
 		
 		_initialized = true;
 		return true;
@@ -117,7 +117,7 @@ var Scholar = new function(){
 		
 		_shutdown = true;
 		
-		Scholar.backupDatabase();
+		Zotero.backupDatabase();
 		
 		return true;
 	}
@@ -130,8 +130,8 @@ var Scholar = new function(){
 	}
 	
 	
-	function getScholarDirectory(){
-		var file = Scholar.getProfileDirectory();
+	function getZoteroDirectory(){
+		var file = Zotero.getProfileDirectory();
 		
 		file.append('zotero');
 		// If it doesn't exist, create
@@ -143,7 +143,7 @@ var Scholar = new function(){
 	
 	
 	function getStorageDirectory(){
-		var file = Scholar.getScholarDirectory();
+		var file = Zotero.getZoteroDirectory();
 		
 		file.append('storage');
 		// If it doesn't exist, create
@@ -153,11 +153,11 @@ var Scholar = new function(){
 		return file;
 	}
 	
-	function getScholarDatabase(ext){
+	function getZoteroDatabase(ext){
 		ext = ext ? '.' + ext : '';
 		
-		var file = Scholar.getScholarDirectory();
-		file.append(SCHOLAR_CONFIG['DB_FILE'] + ext);
+		var file = Zotero.getZoteroDirectory();
+		file.append(ZOTERO_CONFIG['DB_FILE'] + ext);
 		return file;
 	}
 	
@@ -169,19 +169,19 @@ var Scholar = new function(){
 	 * haven't been flushed to disk -- proceed with caution
 	 */
 	function backupDatabase(){
-		if (Scholar.DB.transactionInProgress()){
-			Scholar.debug('Transaction in progress--skipping DB backup', 2);
+		if (Zotero.DB.transactionInProgress()){
+			Zotero.debug('Transaction in progress--skipping DB backup', 2);
 			return false;
 		}
 		
-		Scholar.debug('Backing up database');
+		Zotero.debug('Backing up database');
 		
-		var file = Scholar.getScholarDatabase();
-		var backupFile = Scholar.getScholarDatabase('bak');
+		var file = Zotero.getZoteroDatabase();
+		var backupFile = Zotero.getZoteroDatabase('bak');
 		
 		// Copy via a temporary file so we don't run into disk space issues
 		// after deleting the old backup file
-		var tmpFile = Scholar.getScholarDatabase('tmp');
+		var tmpFile = Zotero.getZoteroDatabase('tmp');
 		if (tmpFile.exists()){
 			tmpFile.remove(null);
 		}
@@ -215,19 +215,19 @@ var Scholar = new function(){
 	 * Defaults to log level 3 if level not provided
 	 */
 	function debug(message, level) {
-		if (!SCHOLAR_CONFIG['DEBUG_LOGGING']){
+		if (!ZOTERO_CONFIG['DEBUG_LOGGING']){
 			return false;
 		}
 		
 		if (typeof message!='string'){
-			message = Scholar.varDump(message);
+			message = Zotero.varDump(message);
 		}
 		
 		if (!level){
 			level = 3;
 		}
 		
-		if (!SCHOLAR_CONFIG['DEBUG_TO_CONSOLE']){
+		if (!ZOTERO_CONFIG['DEBUG_TO_CONSOLE']){
 			try {
 				var logManager =
 				Components.classes["@mozmonkey.com/debuglogger/manager;1"]
@@ -437,7 +437,7 @@ var Scholar = new function(){
 				max = max * 128;
 			}
 			var rnd = Math.floor(Math.random()*max);
-			var exists = Scholar.DB.valueQuery(sql + rnd);
+			var exists = Zotero.DB.valueQuery(sql + rnd);
 			tries--;
 		}
 		while (exists);
@@ -459,7 +459,7 @@ var Scholar = new function(){
 
 
 
-Scholar.Prefs = new function(){
+Zotero.Prefs = new function(){
 	// Privileged methods
 	this.init = init;
 	this.get = get;
@@ -470,12 +470,12 @@ Scholar.Prefs = new function(){
 	this.observe = observe;
 	
 	// Public properties
-	this.prefBranch; // set in Scholar.init()
+	this.prefBranch; // set in Zotero.init()
 	
 	function init(){
 		var prefs = Components.classes["@mozilla.org/preferences-service;1"]
 						.getService(Components.interfaces.nsIPrefService);
-		this.prefBranch = prefs.getBranch("extensions.scholar.");
+		this.prefBranch = prefs.getBranch("extensions.zotero.");
 		
 		// Register observer to handle pref changes
 		this.register();
@@ -546,10 +546,10 @@ Scholar.Prefs = new function(){
 		switch (data){
 			case "automaticScraperUpdates":
 				if (this.get('automaticScraperUpdates')){
-					Scholar.Schema.updateScrapersRemote();
+					Zotero.Schema.updateScrapersRemote();
 				}
 				else {
-					Scholar.Schema.stopRepositoryTimer();
+					Zotero.Schema.stopRepositoryTimer();
 				}
 				break;
 		}
@@ -563,7 +563,7 @@ Scholar.Prefs = new function(){
 *
 *   Hashes can be created in the constructor by alternating key and val:
 *
-*   var hasharray = new Scholar.Hash('foo','foovalue','bar','barvalue');
+*   var hasharray = new Zotero.Hash('foo','foovalue','bar','barvalue');
 *
 *   Or using hasharray.set(key, val)
 *
@@ -580,7 +580,7 @@ Scholar.Prefs = new function(){
 * (c) Mojavelinux, Inc.
 * License: Creative Commons
 **/
-Scholar.Hash = function(){
+Zotero.Hash = function(){
 	this.length = 0;
 	this.items = new Array();
 	
@@ -594,11 +594,11 @@ Scholar.Hash = function(){
 	}
 }
 
-Scholar.Hash.prototype.get = function(in_key){
+Zotero.Hash.prototype.get = function(in_key){
 	return this.items[in_key] ? this.items[in_key] : false;
 }
 
-Scholar.Hash.prototype.set = function(in_key, in_value){
+Zotero.Hash.prototype.set = function(in_key, in_value){
 	// Default to a boolean hash if value not provided
 	if (typeof(in_value) == 'undefined'){
 		in_value = true;
@@ -613,7 +613,7 @@ Scholar.Hash.prototype.set = function(in_key, in_value){
 	return in_value;
 }
 
-Scholar.Hash.prototype.remove = function(in_key){
+Zotero.Hash.prototype.remove = function(in_key){
 	var tmp_value;
 	if (typeof(this.items[in_key]) != 'undefined') {
 		this.length--;
@@ -624,13 +624,13 @@ Scholar.Hash.prototype.remove = function(in_key){
 	return tmp_value;
 }
 
-Scholar.Hash.prototype.has = function(in_key){
+Zotero.Hash.prototype.has = function(in_key){
 	return typeof(this.items[in_key]) != 'undefined';
 }
 
 
 
-Scholar.Date = new function(){
+Zotero.Date = new function(){
 	this.sqlToDate = sqlToDate;
 	this.strToDate = strToDate;
 	this.formatDate = formatDate;
@@ -667,7 +667,7 @@ Scholar.Date = new function(){
 				timeparts[0], timeparts[1], timeparts[2]);
 		}
 		catch (e){
-			Scholar.debug(sqldate + ' is not a valid SQL date', 2)
+			Zotero.debug(sqldate + ' is not a valid SQL date', 2)
 			return false;
 		}
 	}
@@ -706,7 +706,7 @@ Scholar.Date = new function(){
 			} else {
 				// local style date (middle or little endian)
 				date.year = m[5];
-				var country = Scholar.locale.substr(3);
+				var country = Zotero.locale.substr(3);
 				if(country == "US" ||	// The United States
 				   country == "FM" ||	// The Federated States of Micronesia
 				   country == "PW" ||	// Palau
@@ -748,7 +748,7 @@ Scholar.Date = new function(){
 				}
 				
 				date.month--;		// subtract one for JS style
-				Scholar.debug("DATE: retrieved with algorithms: "+date.toSource());
+				Zotero.debug("DATE: retrieved with algorithms: "+date.toSource());
 				return date;
 			}
 		}
@@ -759,11 +759,11 @@ Scholar.Date = new function(){
 		if(m) {
 			date.year = m[2];
 			date.part = m[1]+m[3];
-			Scholar.debug("DATE: got year ("+date.year+", "+date.part+")");
+			Zotero.debug("DATE: got year ("+date.year+", "+date.part+")");
 			
 			// get short month strings from CSL interpreter
 			if(!months) {
-				var months = Scholar.CSL.getMonthStrings("short");
+				var months = Zotero.CSL.getMonthStrings("short");
 			}
 			if(!_monthRe) {
 				// then, see if have anything resembling a month anywhere
@@ -774,11 +774,11 @@ Scholar.Date = new function(){
 			if(m) {
 				date.month = months.indexOf(m[2][0].toUpperCase()+m[2].substr(1).toLowerCase());
 				date.part = m[1]+m[3];
-				Scholar.debug("DATE: got month ("+date.month+", "+date.part+")");
+				Zotero.debug("DATE: got month ("+date.month+", "+date.part+")");
 				
 				// then, see if there's a day 
 				if(!_dayRe) {
-					var daySuffixes = Scholar.getString("date.daySuffixes").replace(/, ?/g, "|");
+					var daySuffixes = Zotero.getString("date.daySuffixes").replace(/, ?/g, "|");
 					_dayRe = new RegExp("\\b([0-9]{1,2})(?:"+daySuffixes+")?\\b(.*)", "i");
 				}
 				var m = _dayRe.exec(date.part);
@@ -794,7 +794,7 @@ Scholar.Date = new function(){
 						date.part = m[2];
 					}
 					
-					Scholar.debug("DATE: got day ("+date.day+", "+date.part+")");
+					Zotero.debug("DATE: got day ("+date.day+", "+date.part+")");
 				}
 			}
 		}
@@ -820,11 +820,11 @@ Scholar.Date = new function(){
 		}
 		
 		if(!months) {
-			var months = Scholar.CSL.getMonthStrings("short");
+			var months = Zotero.CSL.getMonthStrings("short");
 		}
 		if(date.month != undefined && months[date.month]) {
 			// get short month strings from CSL interpreter
-			var months = Scholar.CSL.getMonthStrings("long");
+			var months = Zotero.CSL.getMonthStrings("long");
 			string += months[date.month];
 			if(date.day) {
 				string += " "+date.day+", ";
@@ -854,7 +854,7 @@ Scholar.Date = new function(){
 	}
 }
 
-Scholar.Browser = new function() {
+Zotero.Browser = new function() {
 	this.createHiddenBrowser = createHiddenBrowser;
 	this.deleteHiddenBrowser = deleteHiddenBrowser;
 	
@@ -868,7 +868,7 @@ Scholar.Browser = new function() {
 		// Create a hidden browser
 		var newHiddenBrowser = myWindow.document.createElement("browser");
 		myWindow.document.documentElement.appendChild(newHiddenBrowser);
-		Scholar.debug("created hidden browser ("
+		Zotero.debug("created hidden browser ("
 			+ myWindow.document.getElementsByTagName('browser').length + ")");
 		return newHiddenBrowser;
 	}
@@ -877,6 +877,6 @@ Scholar.Browser = new function() {
 		// Delete a hidden browser
 		myBrowser.parentNode.removeChild(myBrowser);
 		delete myBrowser;
-		Scholar.debug("deleted hidden browser");
+		Zotero.debug("deleted hidden browser");
 	}
 }

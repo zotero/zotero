@@ -5,12 +5,12 @@
 	http://chnm.gmu.edu/
 -->
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
-<?xml-stylesheet href="chrome://scholar/skin/scholar.css" type="text/css"?>
-<?xml-stylesheet href="chrome://scholar/skin/about.css" type="text/css"?>
-<!DOCTYPE window SYSTEM "chrome://scholar/locale/about.dtd">
+<?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/about.css" type="text/css"?>
+<!DOCTYPE window SYSTEM "chrome://zotero/locale/about.dtd">
 
 <dialog
-    id="scholar-about"
+    id="zotero-about"
     xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
     orient="vertical"
 	buttons="accept"
@@ -32,29 +32,29 @@
 	<script src="include.js"/>
 	
 	<vbox id="aboutcontent">
-		<label id="name" value="&scholar.name;"/>
-		<label id="version" value="&scholar.version; "/>
+		<label id="name" value="&zotero.name;"/>
+		<label id="version" value="&zotero.version; "/>
 		<script>
-			document.getElementById('version').value += Scholar.version;
+			document.getElementById('version').value += Zotero.version;
 		</script>
-		<label class="subhead" value="&scholar.createdby;"/>
+		<label class="subhead" value="&zotero.createdby;"/>
 		<vbox class="subcontent">
 			<label class="text-link" href="http://chnm.gmu.edu" value="Center for History and New Media"/>
 			<label value="George Mason University"/>
 			<label value="Fairfax, VA"/>
 		</vbox>
-		<label class="subhead" value="&scholar.directors;"/>
+		<label class="subhead" value="&zotero.directors;"/>
 		<vbox class="subcontent">
 			<label value="Dan Cohen"/>
 			<label value="Josh Greenberg"/>
 		</vbox>
-		<label class="subhead" value="&scholar.developers;"/>
+		<label class="subhead" value="&zotero.developers;"/>
 		<vbox class="subcontent">
 			<label value="Dan Stillman"/>
 			<label value="David Norton"/>
 			<label value="Simon Kornblith"/>
 		</vbox>
-		<label class="subhead" value="&scholar.thanks;"/>
+		<label class="subhead" value="&zotero.thanks;"/>
 		<vbox class="subcontent">
 			<label class="text-link" href="http://www.imls.gov/" value="Institute of Museum and Library Services"/>
 			<label class="text-link" href="http://www.mozilla.org/" value="Mozilla Foundation"/>

@@ -1,18 +1,18 @@
 <?xml version="1.0"?>
 
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
-<?xml-stylesheet href="chrome://scholar/skin/scholar.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
 
-<!DOCTYPE window SYSTEM "chrome://scholar/locale/scholar.dtd">
+<!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
 
-<window id="scholar-progress-window"
+<window id="zotero-progress-window"
         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
         windowtype="alert:alert"
         align="start">
 
-	<hbox id="scholar-progress-box">
-		<vbox id="scholar-progress-text-box">
-			<label id="scholar-progress-text-headline" style="font-weight: bold;" />
+	<hbox id="zotero-progress-box">
+		<vbox id="zotero-progress-text-box">
+			<label id="zotero-progress-text-headline" style="font-weight: bold;" />
 		</vbox>
 	</hbox>
 

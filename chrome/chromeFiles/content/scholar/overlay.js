@@ -7,7 +7,7 @@
 /*
  * This object contains the various functions for the interface
  */
-var ScholarPane = new function()
+var ZoteroPane = new function()
 {
 	var collectionsView;
 	var itemsView;
@@ -48,14 +48,14 @@ var ScholarPane = new function()
 	 */
 	function onLoad()
 	{
-		if(Scholar.Prefs.get("scholarPaneOnTop"))
+		if(Zotero.Prefs.get("zoteroPaneOnTop"))
 		{
-			var oldPane = document.getElementById('scholar-pane');
-			var oldSplitter = document.getElementById('scholar-splitter');
+			var oldPane = document.getElementById('zotero-pane');
+			var oldSplitter = document.getElementById('zotero-splitter');
 			var appContent = document.getElementById('appcontent');
 			
 			var newPane = document.createElement('hbox');
-			newPane.setAttribute('id','scholar-pane');
+			newPane.setAttribute('id','zotero-pane');
 			newPane.setAttribute('collapsed',true);
 			newPane.setAttribute('flex','1');
 			newPane.height = oldPane.height;
@@ -65,44 +65,44 @@ var ScholarPane = new function()
 			appContent.insertBefore(newPane, document.getElementById('content'));
 			
 			var newSplitter = document.createElement('splitter');
-			newSplitter.setAttribute('id','scholar-splitter');
+			newSplitter.setAttribute('id','zotero-splitter');
 			newSplitter.setAttribute('collapsed',true);
 			newSplitter.setAttribute('resizebefore','closest');
 			newSplitter.setAttribute('resizeafter','closest');
 			appContent.removeChild(oldSplitter);
 			appContent.insertBefore(newSplitter, document.getElementById('content'));
 			
-			document.getElementById('tb-fullscreen').setAttribute('scholartop','true');
+			document.getElementById('tb-fullscreen').setAttribute('zoterotop','true');
 		}
 		
 		//Initialize collections view
-		collectionsView = new Scholar.CollectionTreeView();
+		collectionsView = new Zotero.CollectionTreeView();
 		var collectionsTree = document.getElementById('collections-tree');
 		collectionsTree.view = collectionsView;
-		collectionsTree.controllers.appendController(new Scholar.CollectionTreeCommandController(collectionsTree));
+		collectionsTree.controllers.appendController(new Zotero.CollectionTreeCommandController(collectionsTree));
 		
 		var itemsTree = document.getElementById('items-tree');
-		itemsTree.controllers.appendController(new Scholar.ItemTreeCommandController(itemsTree));
+		itemsTree.controllers.appendController(new Zotero.ItemTreeCommandController(itemsTree));
 		
 		// Create the New Item (+) menu with each item type
 		var addMenu = document.getElementById('tb-add').firstChild;
 		var separator = document.getElementById('tb-add').firstChild.firstChild;
 		var moreMenu = document.getElementById('tb-add-more');
-		var itemTypes = Scholar.ItemTypes.getPrimaryTypes();
+		var itemTypes = Zotero.ItemTypes.getPrimaryTypes();
 		for(var i = 0; i<itemTypes.length; i++)
 		{
 			var menuitem = document.createElement("menuitem");
-			menuitem.setAttribute("label", Scholar.getString("itemTypes."+itemTypes[i]['name']));
-			menuitem.setAttribute("oncommand","ScholarPane.newItem("+itemTypes[i]['id']+")");
+			menuitem.setAttribute("label", Zotero.getString("itemTypes."+itemTypes[i]['name']));
+			menuitem.setAttribute("oncommand","ZoteroPane.newItem("+itemTypes[i]['id']+")");
 			addMenu.insertBefore(menuitem, separator);
 		}
 		// Create submenu for secondary item types
-		var itemTypes = Scholar.ItemTypes.getSecondaryTypes();
+		var itemTypes = Zotero.ItemTypes.getSecondaryTypes();
 		for(var i = 0; i<itemTypes.length; i++)
 		{
 			var menuitem = document.createElement("menuitem");
-			menuitem.setAttribute("label", Scholar.getString("itemTypes."+itemTypes[i]['name']));
-			menuitem.setAttribute("oncommand","ScholarPane.newItem("+itemTypes[i]['id']+")");
+			menuitem.setAttribute("label", Zotero.getString("itemTypes."+itemTypes[i]['name']));
+			menuitem.setAttribute("oncommand","ZoteroPane.newItem("+itemTypes[i]['id']+")");
 			moreMenu.appendChild(menuitem);
 		}
 	}
@@ -118,14 +118,14 @@ var ScholarPane = new function()
 	}
 
 	/*
-	 * Hides/displays the Scholar interface
+	 * Hides/displays the Zotero interface
 	 */
 	function toggleDisplay()
 	{
-		var visible = document.getElementById('scholar-pane').getAttribute('collapsed') == 'true';
+		var visible = document.getElementById('zotero-pane').getAttribute('collapsed') == 'true';
 		
-		document.getElementById('scholar-pane').setAttribute('collapsed',!visible);
-		document.getElementById('scholar-splitter').setAttribute('collapsed',!visible);
+		document.getElementById('zotero-pane').setAttribute('collapsed',!visible);
+		document.getElementById('zotero-splitter').setAttribute('collapsed',!visible);
 		
 		if(!visible)
 		{
@@ -138,7 +138,7 @@ var ScholarPane = new function()
 	{
 		var visible = document.getElementById('content').getAttribute('collapsed') == 'true';
 		document.getElementById('content').setAttribute('collapsed', !visible);
-		document.getElementById('scholar-splitter').setAttribute('collapsed', !visible);
+		document.getElementById('zotero-splitter').setAttribute('collapsed', !visible);
 		document.getElementById('tb-fullscreen').setAttribute('fullscreenmode', !visible);
 	}
 		
@@ -149,7 +149,7 @@ var ScholarPane = new function()
 	 */
 	function newItem(typeID, data)
 	{
-		var item = new Scholar.Item(typeID);
+		var item = new Zotero.Item(typeID);
 		
 		for (var i in data)
 		{
@@ -161,7 +161,7 @@ var ScholarPane = new function()
 			itemsView._itemGroup.ref.addItem(item.getID());
 			
 		//set to Info tab
-		document.getElementById('scholar-view-item').selectedIndex = 0;
+		document.getElementById('zotero-view-item').selectedIndex = 0;
 		
 		return item;
 	}
@@ -171,13 +171,13 @@ var ScholarPane = new function()
 		var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 								.getService(Components.interfaces.nsIPromptService);
 		
-		var untitled = Scholar.getString('pane.collections.untitled');
-		untitled = Scholar.DB.getNextName('collections', 'collectionName',
-			Scholar.getString('pane.collections.untitled'));
+		var untitled = Zotero.getString('pane.collections.untitled');
+		untitled = Zotero.DB.getNextName('collections', 'collectionName',
+			Zotero.getString('pane.collections.untitled'));
 		
 		var newName = { value: untitled };
 		var result = promptService.prompt(window, "",
-			Scholar.getString('pane.collections.name'), newName, "", {});
+			Zotero.getString('pane.collections.name'), newName, "", {});
 		
 		if (!result)
 		{
@@ -189,19 +189,19 @@ var ScholarPane = new function()
 			newName.value = untitled;
 		}
 		
-		Scholar.Collections.add(newName.value);
+		Zotero.Collections.add(newName.value);
 	}
 	
 	function newSearch()
 	{
-		var s = new Scholar.Search();
+		var s = new Zotero.Search();
 		s.addCondition('title','contains','');
 		
-		var untitled = Scholar.getString('pane.collections.untitled');
-		untitled = Scholar.DB.getNextName('savedSearches', 'savedSearchName',
-			Scholar.getString('pane.collections.untitled'));
+		var untitled = Zotero.getString('pane.collections.untitled');
+		untitled = Zotero.DB.getNextName('savedSearches', 'savedSearchName',
+			Zotero.getString('pane.collections.untitled'));
 		var io = {dataIn: {search: s, name: untitled}, dataOut: null};
-		window.openDialog('chrome://scholar/content/searchDialog.xul','','chrome,modal',io);
+		window.openDialog('chrome://zotero/content/searchDialog.xul','','chrome,modal',io);
 	}
 	
 	function onCollectionSelected()
@@ -216,7 +216,7 @@ var ScholarPane = new function()
 			var itemgroup = collectionsView._getItemAtRow(collectionsView.selection.currentIndex);
 			itemgroup.setSearch('');
 			
-			itemsView = new Scholar.ItemTreeView(itemgroup);
+			itemsView = new Zotero.ItemTreeView(itemgroup);
 			document.getElementById('items-tree').view = itemsView;
 			document.getElementById('tb-collection-rename').disabled = itemgroup.isLibrary();
 			itemsView.selection.clearSelection();
@@ -236,20 +236,20 @@ var ScholarPane = new function()
 			
 			if(item.isNote())
 			{
-				var noteEditor = document.getElementById('scholar-note-editor');
+				var noteEditor = document.getElementById('zotero-note-editor');
 				noteEditor.item = null;
 				noteEditor.note = item.ref;
-				document.getElementById('scholar-view-note-button').setAttribute('noteID',item.ref.getID());
+				document.getElementById('zotero-view-note-button').setAttribute('noteID',item.ref.getID());
 				if(item.ref.getSource() != null)
-					document.getElementById('scholar-view-note-button').setAttribute('sourceID',item.ref.getSource());
+					document.getElementById('zotero-view-note-button').setAttribute('sourceID',item.ref.getSource());
 				else
-					document.getElementById('scholar-view-note-button').removeAttribute('sourceID');
+					document.getElementById('zotero-view-note-button').removeAttribute('sourceID');
 				document.getElementById('item-pane').selectedIndex = 2;
 			}
 			else if(item.isAttachment())
 			{
 				// Wrap title to multiple lines if necessary
-				var label = document.getElementById('scholar-attachment-label');
+				var label = document.getElementById('zotero-attachment-label');
 				while (label.hasChildNodes())
 				{
 					label.removeChild(label.firstChild);
@@ -269,43 +269,43 @@ var ScholarPane = new function()
 				}
 				
 				// Metadata for URL's
-				if (item.ref.getAttachmentLinkMode() == Scholar.Attachments.LINK_MODE_LINKED_URL
-					|| item.ref.getAttachmentLinkMode() == Scholar.Attachments.LINK_MODE_IMPORTED_URL)
+				if (item.ref.getAttachmentLinkMode() == Zotero.Attachments.LINK_MODE_LINKED_URL
+					|| item.ref.getAttachmentLinkMode() == Zotero.Attachments.LINK_MODE_IMPORTED_URL)
 				{
 					// "View Page"/"View Snapshot" label
-					if (item.ref.getAttachmentLinkMode() == Scholar.Attachments.LINK_MODE_IMPORTED_URL)
+					if (item.ref.getAttachmentLinkMode() == Zotero.Attachments.LINK_MODE_IMPORTED_URL)
 					{
-						var str = Scholar.getString('pane.item.attachments.view.snapshot');
+						var str = Zotero.getString('pane.item.attachments.view.snapshot');
 					}
 					else
 					{
-						var str = Scholar.getString('pane.item.attachments.view.link');
+						var str = Zotero.getString('pane.item.attachments.view.link');
 					}
 					
-					document.getElementById('scholar-attachment-show').setAttribute('hidden', true);
+					document.getElementById('zotero-attachment-show').setAttribute('hidden', true);
 					
 					// URL
-					document.getElementById('scholar-attachment-url').setAttribute('value', item.getField('url'));
-					document.getElementById('scholar-attachment-url').setAttribute('hidden', false);
+					document.getElementById('zotero-attachment-url').setAttribute('value', item.getField('url'));
+					document.getElementById('zotero-attachment-url').setAttribute('hidden', false);
 					
 					// Access date
-					document.getElementById('scholar-attachment-accessed').setAttribute('value',
-						Scholar.getString('itemFields.accessDate') + ': '
-						+ Scholar.Date.sqlToDate(item.getField('accessDate')).toLocaleString());
-					document.getElementById('scholar-attachment-accessed').setAttribute('hidden', false);
+					document.getElementById('zotero-attachment-accessed').setAttribute('value',
+						Zotero.getString('itemFields.accessDate') + ': '
+						+ Zotero.Date.sqlToDate(item.getField('accessDate')).toLocaleString());
+					document.getElementById('zotero-attachment-accessed').setAttribute('hidden', false);
 				}
 				// Metadata for files
 				else
 				{
-					var str = Scholar.getString('pane.item.attachments.view.file');
-					document.getElementById('scholar-attachment-show').setAttribute('hidden', false);
-					document.getElementById('scholar-attachment-url').setAttribute('hidden', true);
-					document.getElementById('scholar-attachment-accessed').setAttribute('hidden', true);
+					var str = Zotero.getString('pane.item.attachments.view.file');
+					document.getElementById('zotero-attachment-show').setAttribute('hidden', false);
+					document.getElementById('zotero-attachment-url').setAttribute('hidden', true);
+					document.getElementById('zotero-attachment-accessed').setAttribute('hidden', true);
 				}
 				
-				document.getElementById('scholar-attachment-view').setAttribute('label', str);
+				document.getElementById('zotero-attachment-view').setAttribute('label', str);
 				
-				var noteEditor = document.getElementById('scholar-attachment-note-editor');
+				var noteEditor = document.getElementById('zotero-attachment-note-editor');
 				noteEditor.item = null;
 				noteEditor.note = item.ref;
 				
@@ -313,7 +313,7 @@ var ScholarPane = new function()
 			}
 			else
 			{
-				ScholarItemPane.viewItem(item.ref);
+				ZoteroItemPane.viewItem(item.ref);
 				document.getElementById('item-pane').selectedIndex = 1;
 			}
 		}
@@ -321,12 +321,12 @@ var ScholarPane = new function()
 		{
 			document.getElementById('item-pane').selectedIndex = 0;
 			
-			var label = document.getElementById('scholar-view-selected-label');
+			var label = document.getElementById('zotero-view-selected-label');
 		
 			if(itemsView && itemsView.selection.count)
-				label.value = Scholar.getString('pane.item.selected.multiple').replace('%1', itemsView.selection.count);	
+				label.value = Zotero.getString('pane.item.selected.multiple').replace('%1', itemsView.selection.count);	
 			else
-				label.value = Scholar.getString('pane.item.selected.zero');
+				label.value = Zotero.getString('pane.item.selected.zero');
 		}
 
 	}
@@ -371,9 +371,9 @@ var ScholarPane = new function()
 			
 			if (noPrompt || promptService.confirmCheck(
 				window,
-				Scholar.getString('pane.items.delete.title'),
-				Scholar.getString('pane.items.delete' + (itemsView.selection.count>1 ? '.multiple' : '')),
-				hasChildren ? Scholar.getString('pane.items.delete.attached') : '',
+				Zotero.getString('pane.items.delete.title'),
+				Zotero.getString('pane.items.delete' + (itemsView.selection.count>1 ? '.multiple' : '')),
+				hasChildren ? Zotero.getString('pane.items.delete.attached') : '',
 				eraseChildren))
 			{
 				itemsView.deleteSelection(eraseChildren.value, force);
@@ -390,14 +390,14 @@ var ScholarPane = new function()
 			
 			if (row.isCollection())
 			{
-				if (confirm(Scholar.getString('pane.collections.delete')))
+				if (confirm(Zotero.getString('pane.collections.delete')))
 				{
 					collectionsView.deleteSelection();
 				}
 			}
 			else if (row.isSearch())
 			{
-				if (confirm(Scholar.getString('pane.collections.deleteSearch')))
+				if (confirm(Zotero.getString('pane.collections.deleteSearch')))
 				{
 					collectionsView.deleteSelection();
 				}
@@ -418,7 +418,7 @@ var ScholarPane = new function()
 				
 				var newName = { value: collection.getName() };
 				var result = promptService.prompt(window, "",
-					Scholar.getString('pane.collections.rename'), newName, "", {});
+					Zotero.getString('pane.collections.rename'), newName, "", {});
 				
 				if (result && newName.value)
 				{
@@ -427,10 +427,10 @@ var ScholarPane = new function()
 			}
 			else
 			{
-				var s = new Scholar.Search();
+				var s = new Zotero.Search();
 				s.load(collection.ref['id']);
 				var io = {dataIn: {search: s, name: collection.getName()}, dataOut: null};
-				window.openDialog('chrome://scholar/content/searchDialog.xul','','chrome,modal',io);
+				window.openDialog('chrome://zotero/content/searchDialog.xul','','chrome,modal',io);
 				if(io.dataOut)
 					onCollectionSelected(); //reload itemsView
 			}
@@ -467,11 +467,11 @@ var ScholarPane = new function()
 			{
 				//select the Library if the item is not in the current collection
 				
-				var item = Scholar.Items.get(id);
+				var item = Zotero.Items.get(id);
 				var collectionID = itemsView._itemGroup.ref.getID();
 				if(!item.isRegularItem())
 				{ 
-					if(!Scholar.Items.get(item.getSource()).inCollection(collectionID))
+					if(!Zotero.Items.get(item.getSource()).inCollection(collectionID))
 						collectionsView.selection.select(0);
 				}
 				else if(!item.inCollection(collectionID))
@@ -522,7 +522,7 @@ var ScholarPane = new function()
 	
 	function buildCollectionContextMenu()
 	{
-		var menu = document.getElementById('scholar-collectionmenu');
+		var menu = document.getElementById('zotero-collectionmenu');
 		
 		// Collection
 		if (collectionsView.selection.count == 1 &&
@@ -585,7 +585,7 @@ var ScholarPane = new function()
 	
 	function buildItemContextMenu()
 	{
-		var menu = document.getElementById('scholar-itemmenu');
+		var menu = document.getElementById('zotero-itemmenu');
 		
 		if(itemsView && itemsView.selection.count > 0)
 		{
@@ -606,7 +606,7 @@ var ScholarPane = new function()
 		
 		if (itemsView._itemGroup.isCollection())
 		{
-			menu.childNodes[2].setAttribute('label', Scholar.getString('pane.items.menu.remove' + multiple));
+			menu.childNodes[2].setAttribute('label', Zotero.getString('pane.items.menu.remove' + multiple));
 			menu.childNodes[2].setAttribute('hidden', false);
 		}
 		else
@@ -614,9 +614,9 @@ var ScholarPane = new function()
 			menu.childNodes[2].setAttribute('hidden', true);
 		}
 		
-		menu.childNodes[3].setAttribute('label', Scholar.getString('pane.items.menu.erase' + multiple));
-		menu.childNodes[5].setAttribute('label', Scholar.getString('pane.items.menu.export' + multiple));
-		menu.childNodes[6].setAttribute('label', Scholar.getString('pane.items.menu.createBib' + multiple));
+		menu.childNodes[3].setAttribute('label', Zotero.getString('pane.items.menu.erase' + multiple));
+		menu.childNodes[5].setAttribute('label', Zotero.getString('pane.items.menu.export' + multiple));
+		menu.childNodes[6].setAttribute('label', Zotero.getString('pane.items.menu.createBib' + multiple));
 	}
 	
 	// Adapted from: http://www.xulplanet.com/references/elemref/ref_tree.html#cmnote-9
@@ -633,7 +633,7 @@ var ScholarPane = new function()
 				var item = getSelectedItems()[0];
 				if(item && item.isNote())
 				{
-					document.getElementById('scholar-view-note-button').doCommand();
+					document.getElementById('zotero-view-note-button').doCommand();
 				}
 				else if(item && item.isAttachment())
 				{
@@ -647,8 +647,8 @@ var ScholarPane = new function()
 	{
 		if (!popup)
 		{
-			var item = this.newItem(Scholar.ItemTypes.getID('note'));
-			document.getElementById('scholar-note-editor').focus();
+			var item = this.newItem(Zotero.ItemTypes.getID('note'));
+			document.getElementById('zotero-note-editor').focus();
 		}
 		else
 		{
@@ -666,7 +666,7 @@ var ScholarPane = new function()
 	
 	function openNoteWindow(id, parent)
 	{
-		window.open('chrome://scholar/content/note.xul?v=1'+(id ? '&id='+id : '')+(parent ? '&coll='+parent : ''),'','chrome,resizable,centerscreen');
+		window.open('chrome://zotero/content/note.xul?v=1'+(id ? '&id='+id : '')+(parent ? '&coll='+parent : ''),'','chrome,resizable,centerscreen');
 	}
 	
 	function addAttachmentFromDialog(link, id)
@@ -674,15 +674,15 @@ var ScholarPane = new function()
 		var nsIFilePicker = Components.interfaces.nsIFilePicker;
 		var fp = Components.classes["@mozilla.org/filepicker;1"]
         					.createInstance(nsIFilePicker);
-		fp.init(window, Scholar.getString('pane.item.attachments.select'), nsIFilePicker.modeOpen);
+		fp.init(window, Zotero.getString('pane.item.attachments.select'), nsIFilePicker.modeOpen);
 		
 		if(fp.show() == nsIFilePicker.returnOK)
 		{
 			var attachmentID;
 			if(link)
-				attachmentID = Scholar.Attachments.linkFromFile(fp.file, id);
+				attachmentID = Zotero.Attachments.linkFromFile(fp.file, id);
 			else
-				attachmentID = Scholar.Attachments.importFromFile(fp.file, id);
+				attachmentID = Zotero.Attachments.importFromFile(fp.file, id);
 		
 			if(attachmentID && !id)
 			{
@@ -702,7 +702,7 @@ var ScholarPane = new function()
 			accessDate: "CURRENT_TIMESTAMP"
 		}
 		
-		newItem(Scholar.ItemTypes.getID('webpage'), data);
+		newItem(Zotero.ItemTypes.getID('webpage'), data);
 	}
 	
 	
@@ -711,12 +711,12 @@ var ScholarPane = new function()
 		if(link)
 		{
 			var attachmentID =
-				Scholar.Attachments.linkFromDocument(window.content.document, id);
+				Zotero.Attachments.linkFromDocument(window.content.document, id);
 		}
 		else
 		{
 			var attachmentID =
-				Scholar.Attachments.importFromDocument(window.content.document, id);
+				Zotero.Attachments.importFromDocument(window.content.document, id);
 		}
 		
 		if (attachmentID && itemsView && itemsView._itemGroup.isCollection())
@@ -732,10 +732,10 @@ var ScholarPane = new function()
 		{
 			var attachment = getSelectedItems()[0];
 			
-			if(attachment.getAttachmentLinkMode() != Scholar.Attachments.LINK_MODE_LINKED_URL)
+			if(attachment.getAttachmentLinkMode() != Zotero.Attachments.LINK_MODE_LINKED_URL)
 			{
 				var file = attachment.getFile();
-				if (Scholar.MIME.fileHasInternalHandler(file))
+				if (Zotero.MIME.fileHasInternalHandler(file))
 				{
 					window.loadURI(attachment.getLocalFileURL());
 				}
@@ -757,7 +757,7 @@ var ScholarPane = new function()
 		{
 			var attachment = getSelectedItems()[0];
 			
-			if (attachment.getAttachmentLinkMode() != Scholar.Attachments.LINK_MODE_LINKED_URL)
+			if (attachment.getAttachmentLinkMode() != Zotero.Attachments.LINK_MODE_LINKED_URL)
 			{
 				var file = attachment.getFile();
 				file.reveal();
@@ -766,5 +766,5 @@ var ScholarPane = new function()
 	}
 }
 
-window.addEventListener("load", function(e) { ScholarPane.onLoad(e); }, false);
-window.addEventListener("unload", function(e) { ScholarPane.onUnload(e); }, false);
+window.addEventListener("load", function(e) { ZoteroPane.onLoad(e); }, false);
+window.addEventListener("unload", function(e) { ZoteroPane.onUnload(e); }, false);

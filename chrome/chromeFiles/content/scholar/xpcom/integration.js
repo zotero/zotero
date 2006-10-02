@@ -1,4 +1,4 @@
-Scholar.Integration = new function() {
+Zotero.Integration = new function() {
 	var _contentLengthRe = /[\r\n]Content-Length: *([0-9]+)/i;
 	var _XMLRe = /<\?[^>]+\?>/;
 	this.ns = "http://www.zotero.org/namespaces/SOAP";
@@ -18,9 +18,9 @@ Scholar.Integration = new function() {
 		
 		// bind to a random port on loopback only
 		serv.init(50001, true, -1);
-		serv.asyncListen(Scholar.Integration.SocketListener);
+		serv.asyncListen(Zotero.Integration.SocketListener);
 		
-		Scholar.debug("Integration HTTP server listening on 127.0.0.1:"+serv.port);
+		Zotero.debug("Integration HTTP server listening on 127.0.0.1:"+serv.port);
 	}
 	
 	/*
@@ -51,17 +51,17 @@ Scholar.Integration = new function() {
 	 * handles a SOAP envelope
 	 */
 	function handleEnvelope(envelope, encoding) {
-		Scholar.debug("Integration: SOAP Request\n"+envelope);
+		Zotero.debug("Integration: SOAP Request\n"+envelope);
 		envelope = envelope.replace(_XMLRe, "");
 		
 		var env = new Namespace("http://schemas.xmlsoap.org/soap/envelope/");
 		var xml = new XML(envelope);
 		var request = xml.env::Body.children()[0];
 		if(request.namespace() != this.ns) {
-			Scholar.debug("Integration: SOAP method not supported: invalid namespace");
+			Zotero.debug("Integration: SOAP method not supported: invalid namespace");
 		} else {
 			var name = request.localName();
-			if(Scholar.Integration.SOAP[name]) {
+			if(Zotero.Integration.SOAP[name]) {
 				if(request.input.length()) {
 					// split apart passed parameters (same colon-escaped format
 					// as we pass)
@@ -89,7 +89,7 @@ Scholar.Integration = new function() {
 				}
 				
 				// execute request
-				var output = Scholar.Integration.SOAP[name](vars);
+				var output = Zotero.Integration.SOAP[name](vars);
 				
 				// ugh: we can't use real SOAP, since AppleScript VBA can't pass
 				// objects, so implode arrays
@@ -116,13 +116,13 @@ Scholar.Integration = new function() {
 				</SOAP-ENV:Envelope>;
 				
 				var response = '<?xml version="1.0" encoding="'+encoding+'"?>\n'+responseEnvelope.toXMLString();
-				Scholar.debug("Integration: SOAP Response\n"+response);
+				Zotero.debug("Integration: SOAP Response\n"+response);
 				
 				// return OK
 				return _generateResponse("200 OK", 'text/xml; charset="'+encoding+'"',
 				                         response);
 			} else {
-				Scholar.debug("Integration: SOAP method not supported");
+				Zotero.debug("Integration: SOAP method not supported");
 			}
 		}
 	}
@@ -146,7 +146,7 @@ Scholar.Integration = new function() {
 	}
 }
 
-Scholar.Integration.SocketListener = new function() {
+Zotero.Integration.SocketListener = new function() {
 	this.onSocketAccepted = onSocketAccepted;
 	
 	/*
@@ -157,7 +157,7 @@ Scholar.Integration.SocketListener = new function() {
 		var iStream = transport.openInputStream(0, 0, 0);
 		var oStream = transport.openOutputStream(0, 0, 0);
 		
-		var dataListener = new Scholar.Integration.DataListener(iStream, oStream);
+		var dataListener = new Zotero.Integration.DataListener(iStream, oStream);
 		var pump = Components.classes["@mozilla.org/network/input-stream-pump;1"]
 							 .createInstance(Components.interfaces.nsIInputStreamPump);
 		pump.init(iStream, -1, -1, 0, 0, false);
@@ -168,7 +168,7 @@ Scholar.Integration.SocketListener = new function() {
 /*
  * handles the actual acquisition of data
  */
-Scholar.Integration.DataListener = function(iStream, oStream) {
+Zotero.Integration.DataListener = function(iStream, oStream) {
 	this.header = "";
 	this.headerFinished = false;
 	
@@ -188,12 +188,12 @@ Scholar.Integration.DataListener = function(iStream, oStream) {
  * called when a request begins (although the request should have begun before
  * the DataListener was generated)
  */
-Scholar.Integration.DataListener.prototype.onStartRequest = function(request, context) {}
+Zotero.Integration.DataListener.prototype.onStartRequest = function(request, context) {}
 
 /*
  * called when a request stops
  */
-Scholar.Integration.DataListener.prototype.onStopRequest = function(request, context, status) {
+Zotero.Integration.DataListener.prototype.onStopRequest = function(request, context, status) {
 	this.iStream.close();
 	this.oStream.close();
 }
@@ -201,7 +201,7 @@ Scholar.Integration.DataListener.prototype.onStopRequest = function(request, con
 /*
  * called when new data is available
  */
-Scholar.Integration.DataListener.prototype.onDataAvailable = function(request, context,
+Zotero.Integration.DataListener.prototype.onDataAvailable = function(request, context,
                                                              inputStream, offset, count) {
 	var readData = this.sStream.read(count);
 	
@@ -251,9 +251,9 @@ Scholar.Integration.DataListener.prototype.onDataAvailable = function(request, c
 /*
  * processes an HTTP header and decides what to do
  */
-Scholar.Integration.DataListener.prototype._headerFinished = function() {
+Zotero.Integration.DataListener.prototype._headerFinished = function() {
 	this.headerFinished = true;
-	var output = Scholar.Integration.handleHeader(this.header);
+	var output = Zotero.Integration.handleHeader(this.header);
 	
 	if(typeof(output) == "number") {
 		this.bodyLength = output;
@@ -268,7 +268,7 @@ Scholar.Integration.DataListener.prototype._headerFinished = function() {
  * checks to see if Content-Length bytes of body have been read and, if they
  * have, processes the body
  */
-Scholar.Integration.DataListener.prototype._bodyData = function() {
+Zotero.Integration.DataListener.prototype._bodyData = function() {
 	if(this.body.length >= this.bodyLength) {
 		if(this.body.length > this.bodyLength) {
 			// truncate
@@ -277,7 +277,7 @@ Scholar.Integration.DataListener.prototype._bodyData = function() {
 		
 		// UTF-8 crashes AppleScript
 		var encoding = (this.header.indexOf("\nUser-Agent: Mac OS X") !== -1 ? "macintosh" : "UTF-8");
-		var output = Scholar.Integration.handleEnvelope(this.body, encoding);
+		var output = Zotero.Integration.handleEnvelope(this.body, encoding);
 		this._requestFinished(output, encoding);
 	}
 }
@@ -285,7 +285,7 @@ Scholar.Integration.DataListener.prototype._bodyData = function() {
 /*
  * returns HTTP data from a request
  */
-Scholar.Integration.DataListener.prototype._requestFinished = function(response, encoding) {
+Zotero.Integration.DataListener.prototype._requestFinished = function(response, encoding) {
 	// close input stream
 	this.iStream.close();
 	
@@ -328,7 +328,7 @@ Scholar.Integration.DataListener.prototype._requestFinished = function(response,
 	this.oStream.close();
 }
 
-Scholar.Integration.SOAP = new function() {
+Zotero.Integration.SOAP = new function() {
 	this.init = init;
 	this.update = update;
 	this.restoreSession = restoreSession;
@@ -358,7 +358,7 @@ Scholar.Integration.SOAP = new function() {
 		var citationMode = vars[2];
 		
 		var regenerateAll = (citationMode == "all");
-		var citationSet = new Scholar.Integration.CitationSet(session.style);
+		var citationSet = new Zotero.Integration.CitationSet(session.style);
 		var updatedCitations = new Object();
 		
 		var citation, update;
@@ -366,10 +366,10 @@ Scholar.Integration.SOAP = new function() {
 			if(vars[i+1] == "X") {
 				// get a new citation for a field with an X
 				var io = new Object();
-				window.openDialog('chrome://scholar/content/addCitationDialog.xul','',
+				window.openDialog('chrome://zotero/content/addCitationDialog.xul','',
 									'chrome,popup,modal', io, true);
 				
-				citation = new Scholar.Integration.Citation(vars[i], "!");
+				citation = new Zotero.Integration.Citation(vars[i], "!");
 				updatedCitations[citation.index] = true;
 	
 				if(io.items) {		// cancel was not pressed
@@ -382,7 +382,7 @@ Scholar.Integration.SOAP = new function() {
 				}
 			} else {
 				// load an existing citation
-				citation = new Scholar.Integration.Citation(vars[i], vars[i+1]);
+				citation = new Zotero.Integration.Citation(vars[i], vars[i+1]);
 			}
 			
 			var isDuplicate = citationSet.addCitation(citation);
@@ -428,7 +428,7 @@ Scholar.Integration.SOAP = new function() {
 		
 		var itemsChanged = session.citationFactory.updateItems(citationSet, session, updatedCitations);
 		if(itemsChanged || bibliographyMode == "true") {
-			Scholar.debug("Integration: Regenerating bibliography");
+			Zotero.debug("Integration: Regenerating bibliography");
 			// EBNF: bibliography-data
 			if(bibliographyMode != "false") {
 				output.push(session.style.createBibliography(session.citationFactory.items, "Integration"));
@@ -477,15 +477,15 @@ Scholar.Integration.SOAP = new function() {
 	 * RETURNS: sessionID
 	 */
 	function restoreSession(vars) {
-		var sessionID = Scholar.randomString();
-		var session = _sessions[sessionID] = new Scholar.Integration.Session(vars[0]);
+		var sessionID = Zotero.randomString();
+		var session = _sessions[sessionID] = new Zotero.Integration.Session(vars[0]);
 		
 		var encounteredItem = new Object();
 		var newField = new Object();
 		var regenerate = new Object();
 		
 		for(var i=1; i<vars.length; i+=2) {
-			var citation = new Scholar.Integration.Citation(vars[i], vars[i+1]);
+			var citation = new Zotero.Integration.Citation(vars[i], vars[i+1]);
 			session.citationSet.addCitation(citation);		// add to see when refresh is necessary
 		}
 		
@@ -509,8 +509,8 @@ Scholar.Integration.SOAP = new function() {
 		
 		if(!vars || !vars[0] || vars[0] == "!") {
 			// no session ID; generate a new one
-			var sessionID = Scholar.randomString();
-			var session = _sessions[sessionID] = new Scholar.Integration.Session();
+			var sessionID = Zotero.randomString();
+			var session = _sessions[sessionID] = new Zotero.Integration.Session();
 		} else {
 			// session ID exists
 			var sessionID = vars[0];
@@ -522,7 +522,7 @@ Scholar.Integration.SOAP = new function() {
 			io.style = originalStyle;
 		}
 		
-		window.openDialog('chrome://scholar/content/integrationDocPrefs.xul','',
+		window.openDialog('chrome://zotero/content/integrationDocPrefs.xul','',
 		                    'chrome,popup,modal',io);
 		session.setStyle(io.style);
 		
@@ -530,26 +530,26 @@ Scholar.Integration.SOAP = new function() {
 	}
 }
 
-Scholar.Integration.Session = function(styleID) {
+Zotero.Integration.Session = function(styleID) {
 	if(styleID) {
 		this.styleID = styleID;
-		this.style = Scholar.Cite.getStyle(this.styleID);
+		this.style = Zotero.Cite.getStyle(this.styleID);
 	}
 	
-	this.citationSet = new Scholar.Integration.CitationSet(this.style);
-	this.citationFactory = new Scholar.Integration.CitationFactory(this.style);
+	this.citationSet = new Zotero.Integration.CitationSet(this.style);
+	this.citationFactory = new Zotero.Integration.CitationFactory(this.style);
 }
 
-Scholar.Integration.Session.prototype.setStyle = function(styleID) {
+Zotero.Integration.Session.prototype.setStyle = function(styleID) {
 	this.styleID = styleID;
-	this.citationSet.style = this.citationFactory.style = this.style =  Scholar.Cite.getStyle(styleID);
+	this.citationSet.style = this.citationFactory.style = this.style =  Zotero.Cite.getStyle(styleID);
 	this.citationFactory.clearCache();
 }
 
 /*
  * a class to keep track of citation objects in a document
  */
-Scholar.Integration.Citation = function(index, field) {
+Zotero.Integration.Citation = function(index, field) {
 	this.index = index;
 	this.field = field;
 	if(field != "!") {
@@ -571,14 +571,14 @@ Scholar.Integration.Citation = function(index, field) {
 /*
  * generates a new field name based on available information
  */
-Scholar.Integration.Citation.prototype.regenerateFieldName = function() {
-	this.field = this.itemIDString+"_"+this.locatorString+"_"+Scholar.randomString();
+Zotero.Integration.Citation.prototype.regenerateFieldName = function() {
+	this.field = this.itemIDString+"_"+this.locatorString+"_"+Zotero.randomString();
 }
 
 /*
  * updates itemIDString and locatorString based on data
  */
-Scholar.Integration.Citation.prototype.setData = function(itemIDs, locators, locatorTypes) {
+Zotero.Integration.Citation.prototype.setData = function(itemIDs, locators, locatorTypes) {
 	this.itemIDs = itemIDs;
 	this.itemIDString = itemIDs.join("|");
 	
@@ -596,7 +596,7 @@ Scholar.Integration.Citation.prototype.setData = function(itemIDs, locators, loc
 /*
  * loads locators from locatorString, if not already loaded
  */
-Scholar.Integration.Citation.prototype.loadLocators = function() {
+Zotero.Integration.Citation.prototype.loadLocators = function() {
 	if(this.locators) return;
 	
 	this.locators = new Array();
@@ -610,10 +610,10 @@ Scholar.Integration.Citation.prototype.loadLocators = function() {
 }
 
 /*
- * a class to complement Scholar.Integration.Citation, to keep track of the
+ * a class to complement Zotero.Integration.Citation, to keep track of the
  * order of citations
  */
-Scholar.Integration.CitationSet = function(style) {
+Zotero.Integration.CitationSet = function(style) {
 	this.citationsByID = new Object();
 	this.citationsByField = new Object();
 	this.citationsByIndex = new Object();
@@ -626,7 +626,7 @@ Scholar.Integration.CitationSet = function(style) {
  * adds a citation. returns true if this citation duplicates another that has
  * already been added.
  */
-Scholar.Integration.CitationSet.prototype.addCitation = function(citation) {
+Zotero.Integration.CitationSet.prototype.addCitation = function(citation) {
 	var isDuplicate = false;
 	var itemID;
 	
@@ -671,14 +671,14 @@ Scholar.Integration.CitationSet.prototype.addCitation = function(citation) {
 /*
  * a class to generate and cache citations
  */
-Scholar.Integration.CitationFactory = function(style) {
+Zotero.Integration.CitationFactory = function(style) {
 	if(style) this.style = style;
 	this.cache = new Object();
 	this.dateModified = new Object();
 	this.items = new Array();
 }
 
-Scholar.Integration.CitationFactory.prototype.updateItems = function(citationSet, session, updateCitations) {
+Zotero.Integration.CitationFactory.prototype.updateItems = function(citationSet, session, updateCitations) {
 	if(session) {
 		// check to see if an update is really necessary
 		var regenerateItemList = false;
@@ -715,7 +715,7 @@ Scholar.Integration.CitationFactory.prototype.updateItems = function(citationSet
 	var disambiguation = new Array();
 	
 	for(var i in citationSet.citationsByID) {
-		var item = Scholar.Items.get(i);
+		var item = Zotero.Items.get(i);
 		this.items.push(item);
 		
 		if(this.dateModified[i] && this.dateModified[i] != item.getField("dateModified")) {
@@ -729,7 +729,7 @@ Scholar.Integration.CitationFactory.prototype.updateItems = function(citationSet
 		}
 	}
 	
-	Scholar.debug(disambiguation);
+	Zotero.debug(disambiguation);
 	this.style.preprocessItems(this.items);
 	
 	var tempCache = new Object();
@@ -764,7 +764,7 @@ Scholar.Integration.CitationFactory.prototype.updateItems = function(citationSet
 	return true;
 }
 
-Scholar.Integration.CitationFactory.prototype.getCitation = function(citation, usingCache) {
+Zotero.Integration.CitationFactory.prototype.getCitation = function(citation, usingCache) {
 	if(!usingCache) usingCache = this.cache;
 	
 	if(usingCache[citation.serializedType] && usingCache[citation.serializedType][citation.serialization]) {
@@ -782,7 +782,7 @@ Scholar.Integration.CitationFactory.prototype.getCitation = function(citation, u
 	return citationText;
 }
 
-Scholar.Integration.CitationFactory.prototype.clearCache = function() {
+Zotero.Integration.CitationFactory.prototype.clearCache = function() {
 	this.cache = new Object();
 	this.dateModified = new Object();
 }

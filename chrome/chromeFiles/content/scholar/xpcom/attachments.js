@@ -1,4 +1,4 @@
-Scholar.Attachments = new function(){
+Zotero.Attachments = new function(){
 	this.LINK_MODE_IMPORTED_FILE = 0;
 	this.LINK_MODE_IMPORTED_URL = 1;
 	this.LINK_MODE_LINKED_FILE = 2;
@@ -17,17 +17,17 @@ Scholar.Attachments = new function(){
 	function importFromFile(file, sourceItemID){
 		var title = file.leafName;
 		
-		Scholar.DB.beginTransaction();
+		Zotero.DB.beginTransaction();
 		
 		try {
 			// Create a new attachment
-			var attachmentItem = Scholar.Items.getNewItemByType(Scholar.ItemTypes.getID('attachment'));
+			var attachmentItem = Zotero.Items.getNewItemByType(Zotero.ItemTypes.getID('attachment'));
 			attachmentItem.setField('title', title);
 			attachmentItem.save();
 			var itemID = attachmentItem.getID();
 			
 			// Create directory for attachment files within storage directory
-			var destDir = Scholar.getStorageDirectory();
+			var destDir = Zotero.getStorageDirectory();
 			destDir.append(itemID);
 			destDir.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0644);
 			
@@ -39,23 +39,23 @@ Scholar.Attachments = new function(){
 			newFile.initWithFile(destDir);
 			newFile.append(title);
 			
-			var mimeType = Scholar.MIME.getMIMETypeFromFile(newFile);
+			var mimeType = Zotero.MIME.getMIMETypeFromFile(newFile);
 			
 			_addToDB(newFile, null, null, this.LINK_MODE_IMPORTED_FILE,
 				mimeType, null, sourceItemID, itemID);
 			
-			Scholar.DB.commitTransaction();
+			Zotero.DB.commitTransaction();
 			
 			// Determine charset and build fulltext index
 			_postProcessFile(itemID, newFile, mimeType);
 		}
 		catch (e){
 			// hmph
-			Scholar.DB.rollbackTransaction();
+			Zotero.DB.rollbackTransaction();
 			
 			// Clean up
 			if (itemID){
-				var itemDir = Scholar.getStorageDirectory();
+				var itemDir = Zotero.getStorageDirectory();
 				itemDir.append(itemID);
 				if (itemDir.exists()){
 					itemDir.remove(true);
@@ -69,7 +69,7 @@ Scholar.Attachments = new function(){
 	
 	function linkFromFile(file, sourceItemID){
 		var title = file.leafName;
-		var mimeType = Scholar.MIME.getMIMETypeFromFile(file);
+		var mimeType = Zotero.MIME.getMIMETypeFromFile(file);
 		
 		var itemID = _addToDB(file, null, title, this.LINK_MODE_LINKED_FILE, mimeType,
 			null, sourceItemID);
@@ -82,20 +82,20 @@ Scholar.Attachments = new function(){
 	
 	
 	function importSnapshotFromFile(file, url, title, mimeType, charset, sourceItemID){
-		var charsetID = Scholar.CharacterSets.getID(charset);
+		var charsetID = Zotero.CharacterSets.getID(charset);
 		
-		Scholar.DB.beginTransaction();
+		Zotero.DB.beginTransaction();
 		
 		try {
 			// Create a new attachment
-			var attachmentItem = Scholar.Items.getNewItemByType(Scholar.ItemTypes.getID('attachment'));
+			var attachmentItem = Zotero.Items.getNewItemByType(Zotero.ItemTypes.getID('attachment'));
 			attachmentItem.setField('title', title);
 			attachmentItem.setField('url', url);
 			// TODO: access date
 			attachmentItem.save();
 			var itemID = attachmentItem.getID();
 			
-			var storageDir = Scholar.getStorageDirectory();
+			var storageDir = Zotero.getStorageDirectory();
 			file.parent.copyTo(storageDir, itemID);
 			
 			// Point to copied file
@@ -107,17 +107,17 @@ Scholar.Attachments = new function(){
 			
 			_addToDB(newFile, url, null, this.LINK_MODE_IMPORTED_URL, mimeType,
 				charsetID, sourceItemID, itemID);
-			Scholar.DB.commitTransaction();
+			Zotero.DB.commitTransaction();
 			
 			// Determine charset and build fulltext index
 			_postProcessFile(itemID, newFile, mimeType);
 		}
 		catch (e){
-			Scholar.DB.rollbackTransaction();
+			Zotero.DB.rollbackTransaction();
 			
 			// Clean up
 			if (itemID){
-				var itemDir = Scholar.getStorageDirectory();
+				var itemDir = Zotero.getStorageDirectory();
 				itemDir.append(itemID);
 				if (itemDir.exists()){
 					itemDir.remove(true);
@@ -130,7 +130,7 @@ Scholar.Attachments = new function(){
 	
 	
 	function importFromURL(url, sourceItemID){
-		Scholar.Utilities.HTTP.doHead(url, function(obj){
+		Zotero.Utilities.HTTP.doHead(url, function(obj){
 			var mimeType = obj.channel.contentType;
 			
 			var nsIURL = Components.classes["@mozilla.org/network/standard-url;1"]
@@ -140,12 +140,12 @@ Scholar.Attachments = new function(){
 			
 			// If we can load this internally, use a hidden browser (so we can
 			// get the charset and title)
-			if (Scholar.MIME.hasInternalHandler(mimeType, ext)){
-				var browser = Scholar.Browser.createHiddenBrowser();
+			if (Zotero.MIME.hasInternalHandler(mimeType, ext)){
+				var browser = Zotero.Browser.createHiddenBrowser();
 				browser.addEventListener("pageshow", function(){
-					Scholar.Attachments.importFromDocument(browser.contentDocument, sourceItemID);
+					Zotero.Attachments.importFromDocument(browser.contentDocument, sourceItemID);
 					browser.removeEventListener("pageshow", arguments.callee, true);
-					Scholar.Browser.deleteHiddenBrowser(browser);
+					Zotero.Browser.deleteHiddenBrowser(browser);
 				}, true);
 				browser.loadURI(url);
 			}
@@ -162,11 +162,11 @@ Scholar.Attachments = new function(){
 				//wbp.persistFlags = nsIWBP.PERSIST_FLAGS...;
 				var encodingFlags = false;
 				
-				Scholar.DB.beginTransaction();
+				Zotero.DB.beginTransaction();
 				
 				try {
 					// Create a new attachment
-					var attachmentItem = Scholar.Items.getNewItemByType(Scholar.ItemTypes.getID('attachment'));
+					var attachmentItem = Zotero.Items.getNewItemByType(Zotero.ItemTypes.getID('attachment'));
 					attachmentItem.setField('title', title);
 					attachmentItem.setField('url', url);
 					attachmentItem.setField('accessDate', "CURRENT_TIMESTAMP");
@@ -174,7 +174,7 @@ Scholar.Attachments = new function(){
 					var itemID = attachmentItem.getID();
 					
 					// Create a new folder for this item in the storage directory
-					var destDir = Scholar.getStorageDirectory();
+					var destDir = Zotero.getStorageDirectory();
 					destDir.append(itemID);
 					destDir.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0644);
 					
@@ -185,13 +185,13 @@ Scholar.Attachments = new function(){
 					
 					wbp.saveURI(nsIURL, null, null, null, null, file);	
 					
-					_addToDB(file, url, title, Scholar.Attachments.LINK_MODE_IMPORTED_URL,
+					_addToDB(file, url, title, Zotero.Attachments.LINK_MODE_IMPORTED_URL,
 						mimeType, null, sourceItemID, itemID);
 					
-					Scholar.DB.commitTransaction();
+					Zotero.DB.commitTransaction();
 				}
 				catch (e){
-					Scholar.DB.rollbackTransaction();
+					Zotero.DB.rollbackTransaction();
 					throw (e);
 				}
 			}
@@ -213,8 +213,8 @@ Scholar.Attachments = new function(){
 		}
 		
 		// Otherwise do a head request for the mime type
-		Scholar.Utilities.HTTP.doHead(url, function(obj){
-			_addToDB(null, url, title, Scholar.Attachments.LINK_MODE_LINKED_URL,
+		Zotero.Utilities.HTTP.doHead(url, function(obj){
+			_addToDB(null, url, title, Zotero.Attachments.LINK_MODE_LINKED_URL,
 				obj.channel.contentType, null, sourceItemID);
 		});
 	}
@@ -225,7 +225,7 @@ Scholar.Attachments = new function(){
 		var url = document.location;
 		var title = document.title; // TODO: don't use Mozilla-generated title for images, etc.
 		var mimeType = document.contentType;
-		var charsetID = Scholar.CharacterSets.getID(document.characterSet);
+		var charsetID = Zotero.CharacterSets.getID(document.characterSet);
 		
 		var itemID = _addToDB(null, url, title, this.LINK_MODE_LINKED_URL,
 			mimeType, charsetID, sourceItemID);
@@ -233,7 +233,7 @@ Scholar.Attachments = new function(){
 		// Run the fulltext indexer asynchronously (actually, it hangs the UI
 		// thread, but at least it lets the menu close)
 		setTimeout(function(){
-			Scholar.Fulltext.indexDocument(document, itemID);
+			Zotero.Fulltext.indexDocument(document, itemID);
 		}, 50);
 		
 		return itemID;
@@ -244,7 +244,7 @@ Scholar.Attachments = new function(){
 		var url = document.location;
 		var title = document.title;
 		var mimeType = document.contentType;
-		var charsetID = Scholar.CharacterSets.getID(document.characterSet);
+		var charsetID = Zotero.CharacterSets.getID(document.characterSet);
 		
 		const nsIWBP = Components.interfaces.nsIWebBrowserPersist;
 		var wbp = Components
@@ -253,10 +253,10 @@ Scholar.Attachments = new function(){
 		//wbp.persistFlags = nsIWBP.PERSIST_FLAGS...;
 		var encodingFlags = false;
 		
-		Scholar.DB.beginTransaction();
+		Zotero.DB.beginTransaction();
 		
 		// Create a new attachment
-		var attachmentItem = Scholar.Items.getNewItemByType(Scholar.ItemTypes.getID('attachment'));
+		var attachmentItem = Zotero.Items.getNewItemByType(Zotero.ItemTypes.getID('attachment'));
 		attachmentItem.setField('title', title);
 		attachmentItem.setField('url', url);
 		attachmentItem.setField('accessDate', "CURRENT_TIMESTAMP");
@@ -264,7 +264,7 @@ Scholar.Attachments = new function(){
 		var itemID = attachmentItem.getID();
 		
 		// Create a new folder for this item in the storage directory
-		var destDir = Scholar.getStorageDirectory();
+		var destDir = Zotero.getStorageDirectory();
 		destDir.append(itemID);
 		destDir.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0644);
 		
@@ -276,7 +276,7 @@ Scholar.Attachments = new function(){
 		// This is a hack to make sure the file is opened in the browser when
 		// we use loadURI(), since Firefox's internal detection mechanisms seem
 		// to sometimes get confused
-		// 		(see #192, https://chnm.gmu.edu/trac/scholar/ticket/192)
+		// 		(see #192, https://chnm.gmu.edu/trac/zotero/ticket/192)
 		if (mimeType=='text/html' &&
 				(fileName.substr(fileName.length-5)!='.html'
 					&& fileName.substr(fileName.length-4)!='.htm')){
@@ -290,12 +290,12 @@ Scholar.Attachments = new function(){
 		_addToDB(file, url, title, this.LINK_MODE_IMPORTED_URL, mimeType,
 			charsetID, sourceItemID, itemID);
 		
-		Scholar.DB.commitTransaction();
+		Zotero.DB.commitTransaction();
 		
 		// Run the fulltext indexer asynchronously (actually, it hangs the UI
 		// thread, but at least it lets the menu close)
 		setTimeout(function(){
-			Scholar.Fulltext.indexDocument(document, itemID);
+			Zotero.Fulltext.indexDocument(document, itemID);
 		}, 50);
 		
 		return itemID;
@@ -333,37 +333,37 @@ Scholar.Attachments = new function(){
 	**/
 	function _addToDB(file, url, title, linkMode, mimeType, charsetID, sourceItemID, itemID){
 		if (file){
-			// Path relative to Scholar directory for external files and relative
+			// Path relative to Zotero directory for external files and relative
 			// to storage directory for imported files
 			var refDir = (linkMode==this.LINK_MODE_LINKED_FILE)
-				? Scholar.getScholarDirectory() : Scholar.getStorageDirectory();
+				? Zotero.getZoteroDirectory() : Zotero.getStorageDirectory();
 			var path = file.getRelativeDescriptor(refDir);
 		}
 		
-		Scholar.DB.beginTransaction();
+		Zotero.DB.beginTransaction();
 		
 		if (sourceItemID){
-			var sourceItem = Scholar.Items.get(sourceItemID);
+			var sourceItem = Zotero.Items.get(sourceItemID);
 			if (!sourceItem){
-				Scholar.DB.commitTransaction();
+				Zotero.DB.commitTransaction();
 				throw ("Cannot set attachment source to invalid item " + sourceItemID);
 			}
 			if (sourceItem.isAttachment()){
-				Scholar.DB.commitTransaction();
+				Zotero.DB.commitTransaction();
 				throw ("Cannot set attachment source to another file (" + sourceItemID + ")");
 			}
 		}
 		
 		// If an itemID is provided, use that
 		if (itemID){
-			var attachmentItem = Scholar.Items.get(itemID);
+			var attachmentItem = Zotero.Items.get(itemID);
 			if (!attachmentItem.isAttachment()){
 				throw ("Item " + itemID + " is not a valid attachment in _addToDB()");
 			}
 		}
 		// Otherwise create a new attachment
 		else {
-			var attachmentItem = Scholar.Items.getNewItemByType(Scholar.ItemTypes.getID('attachment'));
+			var attachmentItem = Zotero.Items.getNewItemByType(Zotero.ItemTypes.getID('attachment'));
 			attachmentItem.setField('title', title);
 			if (linkMode==self.LINK_MODE_IMPORTED_URL
 				|| linkMode==self.LINK_MODE_LINKED_URL){
@@ -383,15 +383,15 @@ Scholar.Attachments = new function(){
 			(charsetID ? {int:charsetID} : null),
 			(path ? {string:path} : null)
 		];
-		Scholar.DB.query(sql, bindParams);
-		Scholar.DB.commitTransaction();
+		Zotero.DB.query(sql, bindParams);
+		Zotero.DB.commitTransaction();
 		
 		if (sourceItemID){
 			sourceItem.incrementAttachmentCount();
-			Scholar.Notifier.trigger('modify', 'item', sourceItemID);
+			Zotero.Notifier.trigger('modify', 'item', sourceItemID);
 		}
 		
-		Scholar.Notifier.trigger('add', 'item', attachmentItem.getID());
+		Zotero.Notifier.trigger('add', 'item', attachmentItem.getID());
 		
 		return attachmentItem.getID();
 	}
@@ -404,27 +404,27 @@ Scholar.Attachments = new function(){
 	 * asynchronously after the fact
 	 */
 	function _postProcessFile(itemID, file, mimeType){
-		var ext = Scholar.File.getExtension(file);
+		var ext = Zotero.File.getExtension(file);
 		if (mimeType.substr(0, 5)!='text/' ||
-			!Scholar.MIME.hasInternalHandler(mimeType, ext)){
+			!Zotero.MIME.hasInternalHandler(mimeType, ext)){
 			return false;
 		}
 		
-		var browser = Scholar.Browser.createHiddenBrowser();
+		var browser = Zotero.Browser.createHiddenBrowser();
 		
-		Scholar.File.addCharsetListener(browser, new function(){
+		Zotero.File.addCharsetListener(browser, new function(){
 			return function(charset, id){
-				var charsetID = Scholar.CharacterSets.getID(charset);
+				var charsetID = Zotero.CharacterSets.getID(charset);
 				if (charsetID){
 					var sql = "UPDATE itemAttachments SET charsetID=" + charsetID
 						+ " WHERE itemID=" + itemID;
-					Scholar.DB.query(sql);
+					Zotero.DB.query(sql);
 				}
 				
 				// Chain fulltext indexer inside the charset callback,
 				// since it's asynchronous and a prerequisite
-				Scholar.Fulltext.indexDocument(browser.contentDocument, itemID);
-				Scholar.Browser.deleteHiddenBrowser(browser);
+				Zotero.Fulltext.indexDocument(browser.contentDocument, itemID);
+				Zotero.Browser.deleteHiddenBrowser(browser);
 			}
 		}, itemID);
 		
