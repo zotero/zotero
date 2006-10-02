@@ -102,14 +102,6 @@
         FOREIGN KEY (transactionID) REFERENCES transactions(transactionID)
     );
     
-    DROP TABLE IF EXISTS csl;
-    CREATE TABLE csl (
-        cslID TEXT PRIMARY KEY,
-        updated DATETIME,
-        title TEXT,
-        csl TEXT
-    );
-    
     
     INSERT INTO "fieldFormats" VALUES(1, '.*', 0);
     INSERT INTO "fieldFormats" VALUES(2, '[0-9]*', 1);
