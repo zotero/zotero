@@ -2297,8 +2297,8 @@ Scholar.Attachments = new function(){
 		// to sometimes get confused
 		// 		(see #192, https://chnm.gmu.edu/trac/scholar/ticket/192)
 		if (mimeType=='text/html' &&
-				(fileName.substr(0, fileName.length-5)!='.html'
-					|| fileName.substr(0, fileName.length-4)!='.htm')){
+				(fileName.substr(fileName.length-5)!='.html'
+					&& fileName.substr(fileName.length-4)!='.htm')){
 			fileName += '.html';
 		}
 		
