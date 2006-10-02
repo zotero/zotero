@@ -52,6 +52,10 @@
 	height: 24px;
 }
 
+#scholar-pane toolbarseparator {
+	height:24px;
+}
+
 #scholar-pane toolbar .toggler
 {
 	margin: 4px;
@@ -106,6 +110,11 @@
 #tb-item-from-page
 {
 	list-style-image: url('chrome://scholar/skin/toolbar-item-from-page.png');
+}
+
+#tb-link-page
+{
+	list-style-image: url('chrome://scholar/skin/toolbar-link-add.png');
 }
 
 #tb-snapshot-page

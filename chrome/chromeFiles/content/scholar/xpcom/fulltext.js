@@ -63,7 +63,7 @@ Scholar.Fulltext = new function(){
 	 * Index multiple words at once
 	 */
 	function indexWords(itemID, words){
-		if (!words || !words.length){
+		if (!words || !words.length || !itemID){
 			return false;
 		}
 		
@@ -98,12 +98,12 @@ Scholar.Fulltext = new function(){
 			}
 			else {
 				statement1.bindUTF8StringParameter(0, word);
-				statement1.execute()
+				statement1.executeStep()
 				var wordID = Scholar.DB.getLastInsertID();
 			}
 			
 			statement2.bindInt32Parameter(0, wordID);
-			statement2.execute();
+			statement2.executeStep();
 		}
 		
 		statement1.reset();

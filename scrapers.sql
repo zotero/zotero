@@ -1,7 +1,7 @@
--- 91
+-- 92
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-08-31 22:44:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-10-01 17:00:00'));
 
 REPLACE INTO "translators" VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006-08-11 11:18:00', 1, 100, 4, 'Amazon.com', 'Simon Kornblith', '^http://www\.amazon\.com/', 
 'function detectWeb(doc, url) {
@@ -2713,14 +2713,14 @@ function doSearch(item) {
 	lookupPMIDs([getPMID(item.contextObject)]);
 }');
 
-REPLACE INTO "translators" VALUES ('951c027d-74ac-47d4-a107-9c3069ab7b48', '2006-06-26 16:41:00', 1, 100, 4, 'Embedded RDF', 'Simon Kornblith', NULL,
+REPLACE INTO "translators" VALUES ('951c027d-74ac-47d4-a107-9c3069ab7b48', '2006-10-01 17:00:00', 1, 100, 4, 'Embedded RDF', 'Simon Kornblith', NULL,
 'function detectWeb(doc, url) {
 	var metaTags = doc.getElementsByTagName("meta");
 	
 	for(var i=0; i<metaTags.length; i++) {
 		var tag = metaTags[i].getAttribute("name");
 		if(tag && tag.substr(0, 3).toLowerCase() == "dc.") {
-			return "website";
+			return "webpage";
 		}
 	}
 	
@@ -3537,14 +3537,14 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO "translators" VALUES ('1e6d1529-246f-4429-84e2-1f1b180b250d', '2006-09-06 17:54:00', 1, 100, 4, 'Chronicle of Higher Education', 'Simon Kornblith', '^http://chronicle\.com/', 
+REPLACE INTO "translators" VALUES ('1e6d1529-246f-4429-84e2-1f1b180b250d', '2006-10-01 17:00:00', 1, 100, 4, 'Chronicle of Higher Education', 'Simon Kornblith', '^http://chronicle\.com/', 
 'function detectWeb(doc, url) {
 	var articleRegexp = /^http:\/\/chronicle\.com\/(?:daily|weekly)\/[^/]+\//
 	if(articleRegexp.test(url)) {
 		if(doc.location.href.indexOf("weekly") != -1) {
 			return "magazineArticle";
 		} else {
-			return "website";
+			return "webpage";
 		}
 	} else {
 		var aTags = doc.getElementsByTagName("a");
@@ -3581,7 +3581,7 @@ function scrape(doc) {
 			}
 		}
 	} else {
-		var newItem = new Scholar.Item("website");
+		var newItem = new Scholar.Item("webpage");
 	}
 	newItem.publicationTitle = "The Chronicle of Higher Education";
 	newItem.ISSN = "0009-5982";
@@ -4222,7 +4222,7 @@ function doSearch(item) {
 	Scholar.wait();
 }');
 
-REPLACE INTO "translators" VALUES ('0e2235e7-babf-413c-9acf-f27cce5f059c', '2006-07-05 23:40:00', 1, 50, 3, 'MODS', 'Simon Kornblith', 'xml',
+REPLACE INTO "translators" VALUES ('0e2235e7-babf-413c-9acf-f27cce5f059c', '2006-10-01 17:00:00', 1, 50, 3, 'MODS', 'Simon Kornblith', 'xml',
 'Scholar.addOption("exportNotes", true);
 
 function detectImport() {
@@ -4280,7 +4280,7 @@ function doExport() {
 		} else if(item.itemType == "artwork") {
 			modsType = "still image";
 			marcGenre = "art original";
-		} else if(item.itemType == "website") {
+		} else if(item.itemType == "webpage") {
 			modsType = "multimedia";
 			marcGenre = "web site";
 		} else if(item.itemType == "note" || item.itemType == "attachment") {
@@ -4586,7 +4586,7 @@ function doImport() {
 				} else if(marcGenre == "art original") {
 					newItem.itemType = "artwork";
 				} else if(marcGenre == "web site") {
-					newItem.itemType = "website";
+					newItem.itemType = "webpage";
 				}
 			}
 			
@@ -4723,7 +4723,7 @@ function doImport() {
 	}
 }');
 
-REPLACE INTO "translators" VALUES ('14763d24-8ba0-45df-8f52-b8d1108e7ac9', '2006-08-30 11:37:00', 1, 25, 2, 'Zotero RDF', 'Simon Kornblith', 'rdf',
+REPLACE INTO "translators" VALUES ('14763d24-8ba0-45df-8f52-b8d1108e7ac9', '2006-10-01 17:00:00', 1, 25, 2, 'Zotero RDF', 'Simon Kornblith', 'rdf',
 'Scholar.configure("getCollections", true);
 Scholar.configure("dataMode", "rdf");
 Scholar.addOption("exportNotes", true);
@@ -4886,7 +4886,7 @@ function doExport() {
 			type = "MotionPicture";
 		} else if(item.itemType == "artwork") {
 			type = "Illustration";
-		} else if(item.itemType == "website") {
+		} else if(item.itemType == "webpage") {
 			type = "Document";
 		} else if(item.itemType == "note") {
 			type = "Memo";
@@ -5247,7 +5247,7 @@ REPLACE INTO "translators" VALUES ('6e372642-ed9d-4934-b5d1-c11ac758ebb7', '2006
 	}
 }');
 
-REPLACE INTO "translators" VALUES ('5e3ad958-ac79-463d-812b-a86a9235c28f', '2006-07-15 17:09:00', 1, 100, 1, 'RDF', 'Simon Kornblith', 'rdf',
+REPLACE INTO "translators" VALUES ('5e3ad958-ac79-463d-812b-a86a9235c28f', '2006-10-01 17:00:00', 1, 100, 1, 'RDF', 'Simon Kornblith', 'rdf',
 'Scholar.configure("dataMode", "rdf");
 
 function detectImport() {
@@ -5513,7 +5513,7 @@ function doImport() {
 			} else if(type == n.bib+"Illustration") {
 				newItem.itemType = "illustration";
 			} else if(type == n.bib+"Document") {
-				newItem.itemType = "website";
+				newItem.itemType = "webpage";
 			} else if(type == n.bib+"Memo") {
 				// check to see if this note is independent
 				if(isPart(node)) {
@@ -5732,7 +5732,7 @@ function doImport() {
 	}
 }');
 
-REPLACE INTO "translators" VALUES ('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7', '2006-08-08 17:12:00', 1, 100, 3, 'RIS', 'Simon Kornblith', 'ris',
+REPLACE INTO "translators" VALUES ('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7', '2006-10-01 17:00:00', 1, 100, 3, 'RIS', 'Simon Kornblith', 'ris',
 'Scholar.configure("dataMode", "line");
 Scholar.addOption("exportNotes", true);
 
@@ -5768,7 +5768,7 @@ var inputFieldMap = {
 	CY:"place"
 };
 
-// TODO: figure out if these are the best types for letter, interview, website
+// TODO: figure out if these are the best types for letter, interview, webpage
 var typeMap = {
 	book:"BOOK",
 	bookSection:"CHAP",
@@ -5781,7 +5781,7 @@ var typeMap = {
 	interview:"PCOMM",
 	film:"MPCT",
 	artwork:"ART",
-	website:"ELEC"
+	webpage:"ELEC"
 };
 
 // supplements outputTypeMap for importing
@@ -6108,7 +6108,7 @@ function doExport() {
 	}
 }');
 
-REPLACE INTO "translators" VALUES ('881f60f2-0802-411a-9228-ce5f47b64c7d', '2006-08-09 17:13:00', 1, 100, 3, 'Refer/BibIX', 'Simon Kornblith', 'txt',
+REPLACE INTO "translators" VALUES ('881f60f2-0802-411a-9228-ce5f47b64c7d', '2006-10-01 17:00:00', 1, 100, 3, 'Refer/BibIX', 'Simon Kornblith', 'txt',
 'Scholar.configure("dataMode", "line");
 
 function detectImport() {
@@ -6167,7 +6167,7 @@ var typeMap = {
 	interview:"Personal Communication",
 	film:"Audiovisual Material",
 	artwork:"Artwork",
-	website:"Electronic Source"
+	webpage:"Electronic Source"
 };
 
 // supplements outputTypeMap for importing
@@ -6342,7 +6342,7 @@ function doExport() {
 	}
 }');
 
-REPLACE INTO "translators" VALUES ('9cb70025-a888-4a29-a210-93ec52da40d4', '2006-09-06 21:28:00', 1, 100, 3, 'BibTeX', 'Simon Kornblith', 'bib',
+REPLACE INTO "translators" VALUES ('9cb70025-a888-4a29-a210-93ec52da40d4', '2006-10-01 17:00:00', 1, 100, 3, 'BibTeX', 'Simon Kornblith', 'bib',
 'Scholar.configure("dataMode", "block");
 
 function detectImport() {
@@ -6401,7 +6401,7 @@ var typeMap = {
 	interview:"misc",
 	film:"misc",
 	artwork:"misc",
-	website:"misc"
+	webpage:"misc"
 };
 
 // supplements outputTypeMap for importing

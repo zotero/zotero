@@ -58,6 +58,7 @@
 						<menupopup>
 							<menuitem class="menuitem-iconic" id="tb-item-attachments-link" label="&toolbar.attachment.linked;" oncommand="ScholarItemPane.addAttachmentFromDialog(true);"/>
 							<menuitem class="menuitem-iconic" id="tb-item-attachments-file" label="&toolbar.attachment.add;" oncommand="ScholarItemPane.addAttachmentFromDialog();"/>
+							<menuitem class="menuitem-iconic" id="tb-item-attachments-web-link" label="&toolbar.attachment.weblink;" oncommand="ScholarItemPane.addAttachmentFromPage(true);"/>
 							<menuitem class="menuitem-iconic" id="tb-item-attachments-snapshot" label="&toolbar.attachment.snapshot;" oncommand="ScholarItemPane.addAttachmentFromPage();"/>
 						</menupopup>
 					</button>

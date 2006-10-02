@@ -1,4 +1,4 @@
--- 3
+-- 4
 
 -- This file creates system tables that can be safely wiped and reinitialized
 -- at any time, as long as existing ids are preserved.
@@ -143,7 +143,7 @@
     INSERT INTO itemTypes VALUES (10,'interview',NULL,1);
     INSERT INTO itemTypes VALUES (11,'film',NULL,1);
     INSERT INTO itemTypes VALUES (12,'artwork',NULL,1);
-    INSERT INTO itemTypes VALUES (13,'website',NULL,2);
+    INSERT INTO itemTypes VALUES (13,'webpage',NULL,0);
     INSERT INTO itemTypes VALUES (14,'attachment',NULL,0);
 
     INSERT INTO fields VALUES (1,'url',NULL);
@@ -305,6 +305,8 @@
     INSERT INTO itemTypeFields VALUES (13, 27, NULL, 4);
     INSERT INTO itemTypeFields VALUES (13, 2, NULL, 5);
     INSERT INTO itemTypeFields VALUES (13, 22, NULL, 6);
+    INSERT INTO itemTypeFields VALUES (14, 27, NULL, 1);
+    INSERT INTO itemTypeFields VALUES (14, 1, NULL, 2);
     
     INSERT INTO "fileTypes" VALUES(1, 'webpage');
     INSERT INTO "fileTypes" VALUES(2, 'image');

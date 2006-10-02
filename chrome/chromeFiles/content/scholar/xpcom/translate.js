@@ -903,7 +903,7 @@ Scholar.Translate.prototype._translationComplete = function(returnValue, error) 
 				Scholar.debug("translation using "+this.translator[0].label+" failed: \n"+errorString);
 				
 				if(this.type == "web") {
-					// report translation error for websites
+					// report translation error for webpages
 					this._reportTranslationFailure(errorString);
 				}
 			} else {
@@ -1081,8 +1081,8 @@ Scholar.Translate.prototype._itemDone = function(item) {
 	}
 	
 	try {	// make sure notifier gets turned back on when done
-		// Get typeID, defaulting to "website"
-		var type = (item.itemType ? item.itemType : "website");
+		// Get typeID, defaulting to "webpage"
+		var type = (item.itemType ? item.itemType : "webpage");
 		
 		if(type == "note") {	// handle notes differently
 			var myID = Scholar.Notes.add(item.note);
@@ -1717,11 +1717,11 @@ Scholar.Translate.prototype._exportGetAttachment = function(attachment) {
 	var attachmentID = attachment.getID();
 	var linkMode = attachment.getAttachmentLinkMode();
 	
-	// get url if one exists
+	// get URL and accessDate if they exist
 	if(linkMode == Scholar.Attachments.LINK_MODE_LINKED_URL ||
 	   linkMode == Scholar.Attachments.LINK_MODE_IMPORTED_URL) {
-		var url = attachment.getURL()
-		attachmentArray.url = url;
+		attachmentArray.url = attachment.getField('url');
+		attachmentArray.accessDate = attachment.getField('accessDate');
 	} else if(!this._displayOptions["exportFileData"]) {
 		// only export urls, not files, if exportFileData is off
 		return false;

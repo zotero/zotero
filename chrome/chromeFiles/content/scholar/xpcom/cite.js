@@ -1466,7 +1466,7 @@ Scholar.CSL.prototype._getFieldValue = function(name, element, item, format,
 	interview:"interview",
 	film:"motion picture",
 	artwork:"graphic",
-	website:"webpage"
+	webpage:"webpage"
 };
 // TODO: check with Elena/APA/MLA on this
 Scholar.CSL._fallbackTypeMappings = {
@@ -1481,7 +1481,7 @@ Scholar.CSL._fallbackTypeMappings = {
 	interview:"book",
 	film:"book",
 	artwork:"book",
-	website:"article"
+	webpage:"article"
 };
 
 Scholar.CSL.prototype._getTypeFromItem = function(item) {

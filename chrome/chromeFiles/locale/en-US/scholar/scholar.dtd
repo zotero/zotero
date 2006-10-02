@@ -43,10 +43,12 @@
 <!ENTITY toolbar.openURL.tooltip   	"Find through your local library">
 
 <!ENTITY item.add						"Add">
+<!ENTITY item.attachment.file.show		"Show File">
 
 <!ENTITY toolbar.note.standalone		"New Standalone Note">
 <!ENTITY toolbar.attachment.linked   	"Link to File...">
 <!ENTITY toolbar.attachment.add   		"Store Copy of File...">
+<!ENTITY toolbar.attachment.weblink 	"Save Link to Current Page">
 <!ENTITY toolbar.attachment.snapshot 	"Take Snapshot of Current Page">
 
 <!ENTITY selectitems.title   			"Select Items">

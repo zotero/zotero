@@ -587,7 +587,7 @@ Scholar.Item.prototype.save = function(){
 										this.getField(fieldID));
 								}
 								updateStatement.bindInt32Parameter(2, fieldID);
-								updateStatement.execute();
+								updateStatement.executeStep();
 							}
 						}
 						
@@ -617,7 +617,7 @@ Scholar.Item.prototype.save = function(){
 										this.getField(fieldID));
 								}
 								
-								insertStatement.execute();
+								insertStatement.executeStep();
 							}
 						}
 					}
@@ -736,7 +736,7 @@ Scholar.Item.prototype.save = function(){
 						else {
 							statement.bindUTF8StringParameter(2, this.getField(fieldID));
 						}
-						statement.execute();
+						statement.executeStep();
 					}
 					
 					Scholar.History.add('itemData', 'itemID-fieldID',
@@ -868,7 +868,7 @@ Scholar.Item.prototype.isNote = function(){
 * Note: This can only be called on note items.
 **/
 Scholar.Item.prototype.updateNote = function(text){
-	if (!this.isNote()){
+	if (!this.isNote() && !this.isAttachment()){
 		throw ("updateNote() can only be called on items of type 'note'");
 	}
 	
@@ -878,7 +878,12 @@ Scholar.Item.prototype.updateNote = function(text){
 	
 	Scholar.DB.beginTransaction();
 	
-	var sql = "UPDATE itemNotes SET note=? WHERE itemID=?";
+	if (this.isNote()){
+		var sql = "UPDATE itemNotes SET note=? WHERE itemID=?";
+	}
+	else {
+		var sql = "REPLACE INTO itemNotes (note, itemID) VALUES (?,?)";
+	}
 	var bindParams = [{string:text}, this.getID()];
 	var updated = Scholar.DB.query(sql, bindParams);
 	if (updated){
@@ -897,7 +902,9 @@ Scholar.Item.prototype.updateNote = function(text){
 Scholar.Item.prototype.updateNoteCache = function(text){
 	// Update cached values
 	this._noteData = text ? text : '';
-	this.setField('title', this._noteToTitle(), true);
+	if (this.isNote()){
+		this.setField('title', this._noteToTitle(), true);
+	}
 }
 
 
@@ -1015,8 +1022,8 @@ Scholar.Item.prototype.numNotes = function(){
 * Get the text of an item note
 **/
 Scholar.Item.prototype.getNote = function(){
-	if (!this.isNote()){
-		throw ("getNote() can only be called on items of type 'note'");
+	if (!this.isNote() && !this.isAttachment()){
+		throw ("getNote() can only be called on notes and attachments");
 	}
 	
 	if (this._noteData !== null){
@@ -1120,7 +1127,7 @@ Scholar.Item.prototype.numAttachments = function(){
 * _row_ is optional itemAttachments row if available to skip query
 *
 * Note: Always returns false for items with LINK_MODE_LINKED_URL,
-* since they have no files -- use getURL() instead
+* since they have no files -- use getField('url') instead
 **/
 Scholar.Item.prototype.getFile = function(row){
 	if (!this.isAttachment()){
@@ -1155,33 +1162,6 @@ Scholar.Item.prototype.getFile = function(row){
 	}
 	
 	return file;
-}
-
-
-/*
- * Return the URL string associated with a linked or imported URL
- */
-Scholar.Item.prototype.getURL = function(){
-	if (!this.isAttachment()){
-		throw ("getURL() can only be called on items of type 'attachment'");
-	}
-	
-	var sql = "SELECT linkMode, path, originalPath FROM itemAttachments "
-		+ "WHERE itemID=" + this.getID();
-	var row = Scholar.DB.rowQuery(sql);
-	
-	if (!row){
-		throw ('Attachment data not found for item ' + this.getID() + ' in getURL()');
-	}
-	
-	switch (row['linkMode']){
-		case Scholar.Attachments.LINK_MODE_LINKED_URL:
-			return row['path'];
-		case Scholar.Attachments.LINK_MODE_IMPORTED_URL:
-			return row['originalPath'];
-		default:
-			throw ('getURL() cannot be called on attachments without associated URLs');
-	}
 }
 
 
@@ -1479,7 +1459,7 @@ Scholar.Item.prototype.erase = function(deleteChildren){
 	
 	// Regular item
 	
-	// Delete child notes and files
+	// If flag given, delete child notes and files
 	else if (deleteChildren){
 		var sql = "SELECT itemID FROM itemNotes WHERE sourceItemID=?1 UNION "
 			+ "SELECT itemID FROM itemAttachments WHERE sourceItemID=?1";
@@ -1493,7 +1473,7 @@ Scholar.Item.prototype.erase = function(deleteChildren){
 		}
 	}
 	
-	// Just unlink any child notes or files without deleting
+	// Otherwise just unlink any child notes or files without deleting
 	else {
 		// Notes
 		var sql = "SELECT itemID FROM itemNotes WHERE sourceItemID=" + this.getID();
@@ -2127,6 +2107,8 @@ Scholar.Attachments = new function(){
 			// Create a new attachment
 			var attachmentItem = Scholar.Items.getNewItemByType(Scholar.ItemTypes.getID('attachment'));
 			attachmentItem.setField('title', title);
+			attachmentItem.setField('url', url);
+			// TODO: access date
 			attachmentItem.save();
 			var itemID = attachmentItem.getID();
 			
@@ -2203,6 +2185,8 @@ Scholar.Attachments = new function(){
 					// Create a new attachment
 					var attachmentItem = Scholar.Items.getNewItemByType(Scholar.ItemTypes.getID('attachment'));
 					attachmentItem.setField('title', title);
+					attachmentItem.setField('url', url);
+					attachmentItem.setField('accessDate', "CURRENT_TIMESTAMP");
 					attachmentItem.save();
 					var itemID = attachmentItem.getID();
 					
@@ -2291,6 +2275,8 @@ Scholar.Attachments = new function(){
 		// Create a new attachment
 		var attachmentItem = Scholar.Items.getNewItemByType(Scholar.ItemTypes.getID('attachment'));
 		attachmentItem.setField('title', title);
+		attachmentItem.setField('url', url);
+		attachmentItem.setField('accessDate', "CURRENT_TIMESTAMP");
 		attachmentItem.save();
 		var itemID = attachmentItem.getID();
 		
@@ -2363,14 +2349,7 @@ Scholar.Attachments = new function(){
 	* Returns the itemID of the new attachment
 	**/
 	function _addToDB(file, url, title, linkMode, mimeType, charsetID, sourceItemID, itemID){
-		if (url){
-			var path = url;
-		}
 		if (file){
-			if (linkMode==self.LINK_MODE_IMPORTED_URL){
-				var originalPath = path;
-			}
-			
 			// Path relative to Scholar directory for external files and relative
 			// to storage directory for imported files
 			var refDir = (linkMode==this.LINK_MODE_LINKED_FILE)
@@ -2403,19 +2382,23 @@ Scholar.Attachments = new function(){
 		else {
 			var attachmentItem = Scholar.Items.getNewItemByType(Scholar.ItemTypes.getID('attachment'));
 			attachmentItem.setField('title', title);
+			if (linkMode==self.LINK_MODE_IMPORTED_URL
+				|| linkMode==self.LINK_MODE_LINKED_URL){
+				attachmentItem.setField('url', url);
+				attachmentItem.setField('accessDate', "CURRENT_TIMESTAMP");
+			}
 			attachmentItem.save();
 		}
 		
 		var sql = "INSERT INTO itemAttachments (itemID, sourceItemID, linkMode, "
-			+ "mimeType, charsetID, path, originalPath) VALUES (?,?,?,?,?,?,?)";
+			+ "mimeType, charsetID, path) VALUES (?,?,?,?,?,?)";
 		var bindParams = [
 			attachmentItem.getID(),
 			(sourceItemID ? {int:sourceItemID} : null),
 			{int:linkMode},
 			{string:mimeType},
 			(charsetID ? {int:charsetID} : null),
-			{string:path},
-			(originalPath ? {string:originalPath} : null)
+			(path ? {string:path} : null)
 		];
 		Scholar.DB.query(sql, bindParams);
 		Scholar.DB.commitTransaction();

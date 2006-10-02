@@ -41,6 +41,7 @@ var ScholarPane = new function()
 	this.addAttachmentFromDialog = addAttachmentFromDialog;
 	this.addAttachmentFromPage = addAttachmentFromPage;
 	this.viewSelectedAttachment = viewSelectedAttachment;
+	this.showSelectedAttachmentInFilesystem = showSelectedAttachmentInFilesystem;
 	
 	/*
 	 * Called when the window is open
@@ -267,17 +268,47 @@ var ScholarPane = new function()
 					label.appendChild(document.createTextNode(val));
 				}
 				
+				// Metadata for URL's
 				if (item.ref.getAttachmentLinkMode() == Scholar.Attachments.LINK_MODE_LINKED_URL
 					|| item.ref.getAttachmentLinkMode() == Scholar.Attachments.LINK_MODE_IMPORTED_URL)
 				{
-					var str = Scholar.getString('pane.item.attachments.view.link');
+					// "View Page"/"View Snapshot" label
+					if (item.ref.getAttachmentLinkMode() == Scholar.Attachments.LINK_MODE_IMPORTED_URL)
+					{
+						var str = Scholar.getString('pane.item.attachments.view.snapshot');
+					}
+					else
+					{
+						var str = Scholar.getString('pane.item.attachments.view.link');
+					}
+					
+					document.getElementById('scholar-attachment-show').setAttribute('hidden', true);
+					
+					// URL
+					document.getElementById('scholar-attachment-url').setAttribute('value', item.getField('url'));
+					document.getElementById('scholar-attachment-url').setAttribute('hidden', false);
+					
+					// Access date
+					document.getElementById('scholar-attachment-accessed').setAttribute('value',
+						Scholar.getString('itemFields.accessDate') + ': '
+						+ Scholar.Date.sqlToDate(item.getField('accessDate')).toLocaleString());
+					document.getElementById('scholar-attachment-accessed').setAttribute('hidden', false);
 				}
+				// Metadata for files
 				else
 				{
 					var str = Scholar.getString('pane.item.attachments.view.file');
+					document.getElementById('scholar-attachment-show').setAttribute('hidden', false);
+					document.getElementById('scholar-attachment-url').setAttribute('hidden', true);
+					document.getElementById('scholar-attachment-accessed').setAttribute('hidden', true);
 				}
+				
 				document.getElementById('scholar-attachment-view').setAttribute('label', str);
-				document.getElementById('scholar-attachment-links').item = item.ref;
+				
+				var noteEditor = document.getElementById('scholar-attachment-note-editor');
+				noteEditor.item = null;
+				noteEditor.note = item.ref;
+				
 				document.getElementById('item-pane').selectedIndex = 3;
 			}
 			else
@@ -454,7 +485,7 @@ var ScholarPane = new function()
 	{
 		if(collectionsView.selection.count > 0 && collectionsView.selection.currentIndex != -1)
 		{
-			collection = collectionsView._getItemAtRow(collectionsView.selection.currentIndex);
+			var collection = collectionsView._getItemAtRow(collectionsView.selection.currentIndex);
 			if(collection && collection.isCollection())
 				return collection.ref;
 		}
@@ -464,7 +495,7 @@ var ScholarPane = new function()
 	{
 		if(collectionsView.selection.count > 0 && collectionsView.selection.currentIndex != -1)
 		{
-			collection = collectionsView._getItemAtRow(collectionsView.selection.currentIndex);
+			var collection = collectionsView._getItemAtRow(collectionsView.selection.currentIndex);
 			if(collection && collection.isSearch())
 			{
 				return collection.ref;
@@ -659,7 +690,7 @@ var ScholarPane = new function()
 			accessDate: "CURRENT_TIMESTAMP"
 		}
 		
-		newItem(Scholar.ItemTypes.getID('website'), data);
+		newItem(Scholar.ItemTypes.getID('webpage'), data);
 	}
 	
 	
@@ -682,6 +713,7 @@ var ScholarPane = new function()
 		}
 	}
 	
+	
 	function viewSelectedAttachment()
 	{
 		if(itemsView && itemsView.selection.count == 1)
@@ -701,7 +733,22 @@ var ScholarPane = new function()
 			}
 			else
 			{
-				window.loadURI(attachment.getURL());
+				window.loadURI(attachment.getField('url'));
+			}
+		}
+	}
+	
+	
+	function showSelectedAttachmentInFilesystem()
+	{
+		if(itemsView && itemsView.selection.count == 1)
+		{
+			var attachment = getSelectedItems()[0];
+			
+			if (attachment.getAttachmentLinkMode() != Scholar.Attachments.LINK_MODE_LINKED_URL)
+			{
+				var file = attachment.getFile();
+				file.reveal();
 			}
 		}
 	}

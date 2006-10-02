@@ -482,6 +482,15 @@ Scholar.Schema = new function(){
 				if (i==1){
 					Scholar.DB.query("DELETE FROM version WHERE schema='schema'");
 				}
+				
+				if (i==5){
+					Scholar.DB.query("REPLACE INTO itemData SELECT itemID, 1, originalPath FROM itemAttachments WHERE linkMode=1");
+					Scholar.DB.query("REPLACE INTO itemData SELECT itemID, 1, path FROM itemAttachments WHERE linkMode=3");
+					Scholar.DB.query("REPLACE INTO itemData SELECT itemID, 27, dateAdded FROM items NATURAL JOIN itemAttachments WHERE linkMode IN (1,3)");
+					Scholar.DB.query("UPDATE itemAttachments SET originalPath=NULL WHERE linkMode=1");
+					Scholar.DB.query("UPDATE itemAttachments SET path=NULL WHERE linkMode=3");
+					try { Scholar.DB.query("DELETE FROM fulltextItems WHERE itemID IS NULL"); } catch(e){}
+				}
 			}
 			
 			_updateSchema('user');

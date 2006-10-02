@@ -104,6 +104,8 @@
 						</menupopup>
 					</toolbarbutton>
 					<toolbarbutton id="tb-item-from-page" tooltiptext="&toolbar.newItemFromPage.label;" oncommand="ScholarPane.addItemFromPage()"/>
+					<toolbarseparator/>
+					<toolbarbutton id="tb-link-page" tooltiptext="&toolbar.attachment.weblink;" oncommand="ScholarPane.addAttachmentFromPage(true)"/>
 					<toolbarbutton id="tb-snapshot-page" tooltiptext="&toolbar.attachment.snapshot;" oncommand="ScholarPane.addAttachmentFromPage()"/>
 					<toolbarbutton id="tb-note-add" tooltiptext="&toolbar.note.standalone;" oncommand="ScholarPane.newNote();"/>
 					<spacer flex="1"/>
@@ -187,14 +189,23 @@
 							<label id="scholar-view-selected-label"/>
 						</box>
 						<deck id="scholar-view-item" flex="1"/>
+						<!-- Note info pane -->
 						<vbox id="scholar-view-note" flex="1">
 							<noteeditor id="scholar-note-editor" flex="1"/>
 							<button id="scholar-view-note-button" label="&notes.separate;" oncommand="ScholarPane.openNoteWindow(this.getAttribute('noteID')); if(this.hasAttribute('sourceID')) ScholarPane.selectItem(this.getAttribute('sourceID'));"/>
 						</vbox>
+						<!-- Attachment info pane -->
 						<vbox id="scholar-view-attachment" flex="1">
 							<label id="scholar-attachment-label"/>
-							<button id="scholar-attachment-view" oncommand="ScholarPane.viewSelectedAttachment();"/>
-							<linksbox id="scholar-attachment-links" flex="1"/>
+							<hbox>
+								<button id="scholar-attachment-view" flex="1" oncommand="ScholarPane.viewSelectedAttachment();"/>
+								<button id="scholar-attachment-show" label="&item.attachment.file.show;" flex="1" oncommand="ScholarPane.showSelectedAttachmentInFilesystem()"/>
+							</hbox>
+							<vbox>
+								<label id="scholar-attachment-url" class="text-link" crop="end" onclick="window.loadURI(this.value)"/>
+								<label id="scholar-attachment-accessed"/>
+							</vbox>
+							<noteeditor id="scholar-attachment-note-editor" notitle="1" flex="1"/>
 						</vbox>
 					</deck>
 				</groupbox>

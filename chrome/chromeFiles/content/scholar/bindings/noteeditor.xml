@@ -19,8 +19,10 @@
 						if(citeLabel.firstChild)
 							citeLabel.removeChild(citeLabel.firstChild);
 						
-						if(this.item)
+						if(this.item && !this.getAttribute('notitle')=='1')
+						{
 							citeLabel.appendChild(document.createTextNode(this.item.getField('title')));
+						}
 					]]>
 				</setter>
 			</property>

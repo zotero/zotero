@@ -112,11 +112,12 @@ zoterosearchtextbox .toolbarbutton-menu-dropmarker
 	margin-bottom:-1px;
 }
 
-/* DEBUG: this doesn't seem to work, unfortunately */
+/* DEBUG: this doesn't seem to work, unfortunately
 #editpane-dynamic-fields label[singleField=false]:after
 {
 	content:",";
 }
+*/
 
 .clicky, .unclicky
 {	
