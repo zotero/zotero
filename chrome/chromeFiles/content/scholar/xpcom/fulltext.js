@@ -90,7 +90,6 @@ Scholar.Fulltext = new function(){
 		// Handle bound parameters manually for optimal speed
 		var statement1 = Scholar.DB.getStatement("INSERT INTO fulltextWords (word) VALUES (?)");
 		var statement2 = Scholar.DB.getStatement("INSERT OR IGNORE INTO fulltextItems VALUES (?,?)");
-		statement2.bindInt32Parameter(1, itemID);
 		
 		for each(var word in words){
 			if (existing['_' + word]){
@@ -98,12 +97,13 @@ Scholar.Fulltext = new function(){
 			}
 			else {
 				statement1.bindUTF8StringParameter(0, word);
-				statement1.executeStep()
+				statement1.execute()
 				var wordID = Scholar.DB.getLastInsertID();
 			}
 			
 			statement2.bindInt32Parameter(0, wordID);
-			statement2.executeStep();
+			statement2.bindInt32Parameter(1, itemID);
+			statement2.execute();
 		}
 		
 		statement1.reset();

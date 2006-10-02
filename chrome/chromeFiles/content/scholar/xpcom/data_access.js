@@ -545,25 +545,26 @@ Scholar.Item.prototype.save = function(){
 				
 				sql = "SELECT COUNT(*) FROM itemData WHERE itemID=? AND fieldID=?";
 				var countStatement = Scholar.DB.getStatement(sql);
-				countStatement.bindInt32Parameter(0, this.getID());
 				
 				sql = "UPDATE itemData SET value=? WHERE itemID=? AND fieldID=?";
 				var updateStatement = Scholar.DB.getStatement(sql);
-				updateStatement.bindInt32Parameter(1, this.getID());
 				
 				sql = "INSERT INTO itemData VALUES (?,?,?)";
 				var insertStatement = Scholar.DB.getStatement(sql);
-				insertStatement.bindInt32Parameter(0, this.getID());
 				
 				for (fieldID in this._changedItemData.items){
 					if (this.getField(fieldID)){
 						// Oh, for an INSERT...ON DUPLICATE KEY UPDATE
+						countStatement.bindInt32Parameter(0, this.getID());
 						countStatement.bindInt32Parameter(1, fieldID);
 						countStatement.executeStep();
 						var exists = countStatement.getInt64(0);
+						countStatement.reset();
 						
 						// Update
 						if (exists){
+							updateStatement.bindInt32Parameter(1, this.getID());
+							
 							Scholar.History.modify('itemData', 'itemID-fieldID',
 								[this.getID(), fieldID]);
 							
@@ -587,7 +588,7 @@ Scholar.Item.prototype.save = function(){
 										this.getField(fieldID));
 								}
 								updateStatement.bindInt32Parameter(2, fieldID);
-								updateStatement.executeStep();
+								updateStatement.execute();
 							}
 						}
 						
@@ -596,6 +597,7 @@ Scholar.Item.prototype.save = function(){
 							Scholar.History.add('itemData', 'itemID-fieldID',
 								[this.getID(), fieldID]);
 							
+							insertStatement.bindInt32Parameter(0, this.getID());
 							insertStatement.bindInt32Parameter(1, fieldID);
 							
 							if (Scholar.ItemFields.getID('accessDate')==fieldID
@@ -617,7 +619,7 @@ Scholar.Item.prototype.save = function(){
 										this.getField(fieldID));
 								}
 								
-								insertStatement.executeStep();
+								insertStatement.execute();
 							}
 						}
 					}
@@ -714,13 +716,13 @@ Scholar.Item.prototype.save = function(){
 				// Use manual bound parameters to speed things up
 				var statement =
 					Scholar.DB.getStatement("INSERT INTO itemData VALUES (?,?,?)");
-				statement.bindInt32Parameter(0, this.getID());
 				
 				for (fieldID in this._changedItemData.items){
 					if (!this.getField(fieldID)){
 						continue;
 					}
 					
+					statement.bindInt32Parameter(0, this.getID());
 					statement.bindInt32Parameter(1, fieldID);
 					
 					if (Scholar.ItemFields.getID('accessDate')==fieldID
@@ -736,7 +738,7 @@ Scholar.Item.prototype.save = function(){
 						else {
 							statement.bindUTF8StringParameter(2, this.getField(fieldID));
 						}
-						statement.executeStep();
+						statement.execute();
 					}
 					
 					Scholar.History.add('itemData', 'itemID-fieldID',
