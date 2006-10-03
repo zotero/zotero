@@ -1,4 +1,4 @@
--- 96
+-- 97
 
 DROP TABLE IF EXISTS translators;
 CREATE TABLE translators (
@@ -3408,7 +3408,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO "translators" VALUES ('ce7a3727-d184-407f-ac12-52837f3361ff', '2006-10-02 17:00:00', 1, 100, 4, 'New York Times', 'Simon Kornblith', '^http://(?:query\.nytimes\.com/search/query|www\.nytimes\.com/.+)', 
+REPLACE INTO "translators" VALUES ('ce7a3727-d184-407f-ac12-52837f3361ff', '2006-10-02 17:00:00', 1, 100, 4, 'New York Times', 'Simon Kornblith', '^http://(?:query\.nytimes\.com/search/query|(?:www\.)?nytimes\.com/.+)', 
 'function detectWeb(doc, url) {
 	if(doc.title.substr(0, 30) == "The New York Times: Search for") {
 		var namespace = doc.documentElement.namespaceURI;
@@ -3810,7 +3810,7 @@ REPLACE INTO "translators" VALUES ('d1bf1c29-4432-4ada-8893-2e29fc88fd9e', '2006
 							  downloadable:true});
 	
 	// grab title from doc title
-	newItem.title = doc.title;
+	newItem.title = doc.title.replace(" - washingtonpost.com", "");
 	
 	var byline = doc.evaluate(''//div[@id="byline"]'', doc, nsResolver,
 	                        XPathResult.ANY_TYPE, null).iterateNext();	
@@ -4971,7 +4971,7 @@ function doExport() {
 			// set term type
 			Zotero.RDF.addStatement(term, rdf+"type", n.dcterms+"URI", false);
 			// set url value
-			Zotero.RDF.addStatement(term, rdf+"value", attachment.url, true);
+			Zotero.RDF.addStatement(term, rdf+"value", item.url, true);
 			// add relationship to resource
 			Zotero.RDF.addStatement(resource, n.dc+"identifier", term, false);
 		}
@@ -4996,7 +4996,7 @@ function doExport() {
 			// set section title
 			Zotero.RDF.addStatement(section, n.dc+"title", item.section, true);
 			// add relationship to resource
-			Zotero.RDF.addStatement(resource, n.dc+"isPartOf", section, false);
+			Zotero.RDF.addStatement(resource, n.dcterms+"isPartOf", section, false);
 		}
 		
 		// generate container
@@ -5504,13 +5504,22 @@ function doImport() {
 		
 		// type
 		var type = Zotero.RDF.getTargets(node, rdf+"type");
+		
 		// also deal with type detection based on parts, so we can differentiate
 		// magazine and journal articles, and find container elements
 		var isPartOf = getFirstResults(node, [n.dcterms+"isPartOf"]);
 		
-		if(type) {
-			type = Zotero.RDF.getResourceURI(type[0]);
-			
+		// get parts of parts, because parts are sections of wholes.
+		if(isPartOf) {
+			for(var i=0; i<isPartOf.length; i++) {
+				var subParts = getFirstResults(isPartOf[i], [n.dcterms+"isPartOf"]);
+				if(subParts) {
+					isPartOf = isPartOf.concat(subParts);
+				}
+			}
+		}
+		
+		if(type && (type = Zotero.RDF.getResourceURI(type[0]))) {
 			if(type == n.bib+"Book") {
 				newItem.itemType = "book";
 			} else if(type == n.bib+"BookSection") {
@@ -5663,16 +5672,25 @@ function doImport() {
 		
 		if(identifiers) {
 			for(var i in identifiers) {
-				var beforeSpace = identifiers[i].substr(0, identifiers[i].indexOf(" ")).toUpperCase();
-				
-				if(beforeSpace == "ISBN") {
-					newItem.ISBN = identifiers[i].substr(5).toUpperCase();
-				} else if(beforeSpace == "ISSN") {
-					newItem.ISSN = identifiers[i].substr(5).toUpperCase();
-				} else if(beforeSpace == "DOI") {
-					newItem.DOI = identifiers[i].substr(4);
-				} else if(!newItem.accessionNumber) {
-					newItem.accessionNumber = identifiers[i];
+				if(typeof(identifiers[i]) == "string") {
+					// grab other things
+					var beforeSpace = identifiers[i].substr(0, identifiers[i].indexOf(" ")).toUpperCase();
+					
+					if(beforeSpace == "ISBN") {
+						newItem.ISBN = identifiers[i].substr(5).toUpperCase();
+					} else if(beforeSpace == "ISSN") {
+						newItem.ISSN = identifiers[i].substr(5).toUpperCase();
+					} else if(beforeSpace == "DOI") {
+						newItem.DOI = identifiers[i].substr(4);
+					} else if(!newItem.accessionNumber) {
+						newItem.accessionNumber = identifiers[i];
+					}
+				} else {
+					// grab URLs
+					var type = Zotero.RDF.getTargets(identifiers[i], rdf+"type");
+					if(type && (type = Zotero.RDF.getResourceURI(type[0])) && type == n.dcterms+"URI") {
+						newItem.url = getFirstResults(identifiers[i], [rdf+"value"], true);
+					}
 				}
 			}
 		}

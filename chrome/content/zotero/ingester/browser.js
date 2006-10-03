@@ -12,6 +12,13 @@
 
 var Zotero_Ingester_Interface = function() {}
 
+Zotero_Ingester_Interface.blacklist = [
+	"googlesyndication.com",
+	"doubleclick.net",
+	"questionmarket.com",
+	"atdmt.com"
+];
+
 //////////////////////////////////////////////////////////////////////////////
 //
 // Public Zotero_Ingester_Interface methods
@@ -135,6 +142,13 @@ Zotero_Ingester_Interface.contentLoad = function(event) {
 				return;
 			} else {
 				data.document = null;
+			}
+		}
+		
+		for each(var blacklistedURL in Zotero_Ingester_Interface.blacklist) {
+			if(doc.domain.substr(doc.domain.length-blacklistedURL.length) == blacklistedURL) {
+				Zotero.debug("Ignoring blacklisted URL "+document.location);
+				return;
 			}
 		}
 		
