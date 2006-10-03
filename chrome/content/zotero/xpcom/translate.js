@@ -1194,7 +1194,8 @@ Zotero.Translate.prototype._itemDone = function(item) {
 										(attachment.title ? attachment.title : attachment.document.title));
 							}
 						} else {
-							if(attachment.document) {
+							// links no longer exist, so just don't save them
+							/*if(attachment.document) {
 								attachmentID = Zotero.Attachments.linkFromURL(attachment.document.location.href, myID,
 										(attachment.mimeType ? attachment.mimeType : attachment.document.contentType),
 										(attachment.title ? attachment.title : attachment.document.title));
@@ -1206,7 +1207,7 @@ Zotero.Translate.prototype._itemDone = function(item) {
 								attachmentID = Zotero.Attachments.linkFromURL(attachment.url, myID,
 										(attachment.mimeType ? attachment.mimeType : undefined),
 										(attachment.title ? attachment.title : undefined));
-							}
+							}*/
 						}
 					} else if(this.type == "import") {
 						var attachmentItem = this._itemImportAttachment(attachment, myID);

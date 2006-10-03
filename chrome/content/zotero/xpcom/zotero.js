@@ -763,7 +763,7 @@ Zotero.Date = new function(){
 			
 			// get short month strings from CSL interpreter
 			if(!months) {
-				var months = Zotero.CSL.getMonthStrings("short");
+				var months = Zotero.CSL.Global.getMonthStrings("short");
 			}
 			if(!_monthRe) {
 				// then, see if have anything resembling a month anywhere
@@ -820,11 +820,11 @@ Zotero.Date = new function(){
 		}
 		
 		if(!months) {
-			var months = Zotero.CSL.getMonthStrings("short");
+			var months = Zotero.CSL.Global.getMonthStrings("short");
 		}
 		if(date.month != undefined && months[date.month]) {
 			// get short month strings from CSL interpreter
-			var months = Zotero.CSL.getMonthStrings("long");
+			var months = Zotero.CSL.Global.getMonthStrings("long");
 			string += months[date.month];
 			if(date.day) {
 				string += " "+date.day+", ";

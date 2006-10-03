@@ -16,11 +16,15 @@ Zotero.Integration = new function() {
 		serv = sock.createInstance();
 		serv = serv.QueryInterface(Components.interfaces.nsIServerSocket);
 		
-		// bind to a random port on loopback only
-		serv.init(50001, true, -1);
-		serv.asyncListen(Zotero.Integration.SocketListener);
-		
-		Zotero.debug("Integration HTTP server listening on 127.0.0.1:"+serv.port);
+		try {
+			// bind to a random port on loopback only
+			serv.init(50001, true, -1);
+			serv.asyncListen(Zotero.Integration.SocketListener);
+			
+			Zotero.debug("Integration HTTP server listening on 127.0.0.1:"+serv.port);
+		} catch(e) {
+			Zotero.debug("Not initializing integration HTTP");
+		}
 	}
 	
 	/*
