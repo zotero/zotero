@@ -165,7 +165,7 @@
 					<![CDATA[
 						if(count == null)
 						{
-							seealso = this.item.getSeeAlso();
+							var seealso = this.item.getSeeAlso();
 							if(seealso)
 								count = seealso.length;
 							else
