@@ -1110,8 +1110,8 @@ Zotero.Translate.prototype._itemDone = function(item) {
 			item.itemType = item.complete = undefined;
 			
 			// automatically set access date if URL is set
-			if(item.url && item.accessDate == undefined && this.type == "web") {
-				item.accessDate = (new Date()).toLocaleString();
+			if(item.url && !item.accessDate && this.type == "web") {
+				item.accessDate = "CURRENT_TIMESTAMP";
 			}
 			
 			var fieldID, field;
