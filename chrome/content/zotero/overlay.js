@@ -122,6 +122,7 @@ var ZoteroPane = new function()
 	 */
 	function toggleDisplay()
 	{
+		// Visible == target visibility
 		var visible = document.getElementById('zotero-pane').getAttribute('collapsed') == 'true';
 		
 		document.getElementById('zotero-pane').setAttribute('collapsed',!visible);
@@ -131,6 +132,9 @@ var ZoteroPane = new function()
 		{
 			document.getElementById('content').setAttribute('collapsed', false);
 			document.getElementById('tb-fullscreen').setAttribute('fullscreenmode', false);
+			
+			// Return focus to the browser content pane
+			window.content.window.focus();
 		}
 	}
 	
