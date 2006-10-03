@@ -941,6 +941,7 @@ Zotero.Translate.prototype._reportTranslationFailure = function(errorData) {
 	if(this.translator[0].inRepository && Zotero.Prefs.get("reportTranslationFailure")) {
 		var postBody = "ids[]="+escape(this.translator[0].translatorID)+
 					   "&lastUpdated="+escape(this.translator[0].lastUpdated)+
+					   "&extVersion="+escape(Zotero.version)+
 					   "&errorData="+escape(errorData);
 		Zotero.Utilities.HTTP.doPost("http://www.zotero.org/repo/report", postBody);
 	}
