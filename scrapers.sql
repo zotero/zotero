@@ -1,4 +1,4 @@
--- 95
+-- 96
 
 DROP TABLE IF EXISTS translators;
 CREATE TABLE translators (
@@ -1073,7 +1073,7 @@ REPLACE INTO "translators" VALUES ('add7c71c-21f3-ee14-d188-caf9da12728b', '2006
 				} else if(field == "added author") {
 					newItem.creators.push(Zotero.Utilities.cleanAuthor(value, "contributor", true));
 				} else if(field == "corporate author") {
-					newItem.creators.push({lastName:author});
+					newItem.creators.push({lastName:author, isInstitution:true});
 				} else if(field == "subject term" || field == "corporate subject" || field == "geographic term") {
 					var subjects = value.split("--");
 					newItem.tags = newItem.tags.concat(subjects);
@@ -3516,7 +3516,7 @@ function scrape(doc, url) {
 			author = words.join(" ");
 			
 			if(words[0] == "The") {
-				newItem.creators.push({lastName:author, creatorType:"author"});
+				newItem.creators.push({lastName:author, creatorType:"author", isInstitution:true});
 			} else {
 				newItem.creators.push(Zotero.Utilities.cleanAuthor(author, "author"));
 			}
@@ -3640,7 +3640,7 @@ function scrape(doc) {
 			author = words.join(" ");
 			
 			if(words[0] == "The") {
-				newItem.creators.push({lastName:author, creatorType:"author"});
+				newItem.creators.push({lastName:author, creatorType:"author", isInstitution:true});
 			} else {
 				newItem.creators.push(Zotero.Utilities.cleanAuthor(author, "author"));
 			}
@@ -6875,7 +6875,7 @@ function pullISBN(text) {
 
 // corporate author extraction
 function corpAuthor(author) {
-	return {lastName:author};
+	return {lastName:author, isInstitution:true};
 }
 
 // regular author extraction
@@ -7086,11 +7086,11 @@ record.prototype.translate = function(item) {
 	this._associateDBField(item, "700", "a", "creator", author, "contributor", true);
 	this._associateDBField(item, "710", "a", "creator", corpAuthor, "contributor");
 	this._associateDBField(item, "711", "a", "creator", corpAuthor, "contributor");
-	if(!item.creators.length) {
+	if(item.itemType == "book" && !item.creators.length) {
 		// some LOC entries have no listed author, but have the author in the person subject field as the first entry
 		var field = this.getFieldSubfields("600");
 		if(field[0]) {
-			item.creators.push(cleanAuthor(field[0]["a"], true));	
+			item.creators.push(Scholar.Utilities.cleanAuthor(field[0]["a"], true));	
 		}
 	}
 	
@@ -7416,11 +7416,12 @@ REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/chicago-note.c
       <item>
         <choose>
           <type name="book">
-            <author suffix=", "/>
-            <titles font-style="italic"/>
-            <editor prefix=", "/>
-            <translator prefix=", "/>
-            <titles relation="container" prefix=" "/>
+            <group delimiter=", ">
+              <author/>
+              <titles font-style="italic"/>
+              <editor/>
+              <translator/>
+            </group>
             <group prefix=" (" suffix=")" delimiter=", ">
               <publisher/>
               <date>
@@ -7431,13 +7432,17 @@ REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/chicago-note.c
             <access prefix=", "/>
           </type>
           <type name="chapter">
-            <author suffix=", "/>
-            <titles prefix="&#8220;" suffix=",&#8221; "/>
+            <group delimiter=", ">
+              <author/>
+              <titles quotes="true"/>
+            </group>
             <group class="container">
               <text term-name="in" text-transform="lowercase"/>
-              <titles relation="container" prefix=" " font-style="italic"/>
-              <editor prefix=", "/>
-              <translator prefix=", "/>
+              <group delimiter=", ">
+                <titles relation="container" prefix=" " font-style="italic"/>
+                <editor/>
+                <translator/>
+              </group>
               <group prefix=" (" suffix=")" delimiter=", ">
                 <publisher/>
                 <date>
@@ -7449,18 +7454,20 @@ REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/chicago-note.c
             </group>
           </type>
           <type name="article">
-            <author suffix=", "/>
-            <titles prefix="&#8220;" suffix=",&#8221; "/>
-            <titles relation="container" font-style="italic" suffix=", "/>
             <group delimiter=", ">
+              <author/>
+              <titles quotes="true"/>
+              <titles relation="container" font-style="italic"/>
               <date/>
               <access/>
             </group>
           </type>
           <type name="article-journal">
-            <author suffix=", "/>
-            <titles prefix="&#8220;" suffix=",&#8221; "/>
-            <titles relation="container" font-style="italic"/>
+            <group delimiter=", ">
+              <author/>
+              <titles quotes="true"/>
+              <titles relation="container" font-style="italic"/>
+            </group>
             <volume prefix=" "/>
             <issue prefix=", ">
               <label form="short" text-transform="lowercase" suffix=". "/>
