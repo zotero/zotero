@@ -1616,48 +1616,37 @@ Zotero.Item.prototype.toArray = function(){
 			arr['sourceItemID'] = this.getSource();
 		}
 	}
-	// If not note, append attached notes
-	else {
-		arr['notes'] = [];
-		var notes = this.getNotes();
-		for (var i in notes){
-			var note = Zotero.Items.get(notes[i]);
-			arr['notes'].push({
-				itemID: note.getID(),
-				note: note.getNote(),
-				tags: note.getTags(),
-				seeAlso: note.getSeeAlso()
-			});
-		}
-	}
 	
 	// Attachments
 	if (this.isAttachment()){
-		// TODO: file data
+		// Attachments can have embedded notes
+		arr['note'] = this.getNote();
 		
 		if (this.getSource()){
 			arr['sourceItemID'] = this.getSource();
 		}
 	}
 	
-	// If not file, append child attachments
-	else {
-		arr['attachments'] = [];
-		var files = this.getAttachments();
-		for (var i in files){
-			var file = Zotero.Items.get(files[i]);
-			arr['attachments'].push({
-				itemID: file.getID(),
-				// TODO
-				tags: file.getTags(),
-				seeAlso: file.getSeeAlso()
-			});
-		}
-	}
-	
-	
 	arr['tags'] = this.getTags();
 	arr['seeAlso'] = this.getSeeAlso();
+	
+	// Attach children of regular items
+	if (this.isRegularItem()){
+		// Append attached notes
+		arr['notes'] = [];
+		var notes = this.getNotes();
+		for (var i in notes){
+			var note = Zotero.Items.get(notes[i]);
+			arr['notes'].push(note.toArray());
+		}
+		
+		arr['attachments'] = [];
+		var attachments = this.getAttachments();
+		for (var i in attachments){
+			var attachment = Zotero.Items.get(attachments[i]);
+			arr['attachments'].push(attachment.toArray());
+		}
+	}
 	
 	return arr;
 }
