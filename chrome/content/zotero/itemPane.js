@@ -48,6 +48,7 @@ var ZoteroItemPane = new function()
 	this.removeCreator = removeCreator;
 	this.showEditor = showEditor;
 	this.handleKeyPress = handleKeyPress;
+	this.handleCreatorAutoCompleteSelect = handleCreatorAutoCompleteSelect;
 	this.hideEditor = hideEditor;
 	this.getCreatorFields = getCreatorFields;
 	this.modifyCreator = modifyCreator;
@@ -440,8 +441,8 @@ var ZoteroItemPane = new function()
 		label.setAttribute("fieldname",'creator-'+_creatorCount+'-typeID');
 		label.className = 'clicky';
 		
-		// getCreatorFields() and switchCreatorMode() may need need to be
-		// adjusted if this DOM structure changes
+		// getCreatorFields(), switchCreatorMode() and handleCreatorAutoCompleteSelect()
+		// may need need to be adjusted if this DOM structure changes
 		var hbox = document.createElement("hbox");
 		
 		// Name
@@ -673,6 +674,7 @@ var ZoteroItemPane = new function()
 				valueElement.appendChild(descriptionNode);
 			}
 		}
+		// 29 == arbitary length at which to chop uninterrupted text
 		else if ((firstSpace == -1 && valueText.length > 29 ) || firstSpace > 29)
 		{
 			valueElement.setAttribute('crop', 'end');
@@ -771,6 +773,8 @@ var ZoteroItemPane = new function()
 					}
 					t.setAttribute('autocompletesearchparam',
 						fieldName + '/' + suffix);
+					t.setAttribute('ontextentered',
+							'ZoteroItemPane.handleCreatorAutoCompleteSelect(this)');
 					break;
 			}
 		}
@@ -784,6 +788,41 @@ var ZoteroItemPane = new function()
 		
 		_tabDirection = false;
 		_lastTabIndex = tabindex;
+	}
+	
+	
+	/*
+	 * Save a multiple-field selection for the creator autocomplete
+	 * (e.g. "Shakespeare, William")
+	 */
+	function handleCreatorAutoCompleteSelect(textbox, creatorField)
+	{
+		var comment = Zotero.Utilities.AutoComplete.getResultComment(textbox);
+		if (!comment)
+		{
+			return false;
+		}
+		
+		var [creatorID, numFields] = comment.split('-');
+		
+		// If result uses two fields, save both
+		if (numFields==2)
+		{
+			var [field, creatorIndex, creatorField] =
+				textbox.getAttribute('fieldname').split('-');
+			
+			var creator = Zotero.Creators.get(creatorID);
+			
+			var row = textbox.parentNode.parentNode.parentNode;
+			var otherFields = ZoteroItemPane.getCreatorFields(row);
+			var otherField = creatorField=='lastName' ? 'firstName' : 'lastName';
+			otherFields[otherField] = creator[otherField];
+			
+			ZoteroItemPane.modifyCreator(creatorIndex, creatorField,
+				creator[creatorField], otherFields);
+		}
+		
+		// Otherwise let the autocomplete popup handle matters
 	}
 	
 	function handleKeyPress(event){

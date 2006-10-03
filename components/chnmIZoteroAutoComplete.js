@@ -138,27 +138,52 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParam,
 			}
 			else
 			{
-				var sql = "SELECT "
-					// Full name not currently returned
-					//+ "lastName" + (!singleField ? '' : "|| ', ' || firstName")
-					+ searchParts[2]
-					+ " AS name, creatorID "
-					+ "FROM creators WHERE " + searchParts[2] + " LIKE ? "
-					+ "AND isInstitution=?";
+				var sql = "SELECT DISTINCT ";
+				if (fieldMode==1){
+					sql += "lastName AS name, creatorID || '-1' AS creatorID";
+				}
+				// Retrieve the matches in the specified field
+				// as well as any full names using the name
+				//
+				// e.g. "Shakespeare" and "Shakespeare, William"
+				//
+				// creatorID is in the format "12345-1" or "12345-2",
+				// 		- 1 means the row uses only the specified field
+				// 		- 2 means it uses both
+				else {
+					sql += "CASE WHEN firstName='' OR firstName IS NULL THEN lastName "
+						+ "ELSE lastName || ', ' || firstName END AS name, "
+						+ "creatorID || '-' || CASE "
+						+ "WHEN (firstName = '' OR firstName IS NULL) THEN 1 "
+						+ "ELSE 2 END AS creatorID";
+				}
+				
+				var fromSQL = " FROM creators WHERE " + searchParts[2]
+					+ " LIKE ?1 " + "AND isInstitution=?2";
 				var sqlParams = [searchString + '%', parseInt(fieldMode)];
 				if (itemID){
-					sql += " AND creatorID NOT IN (SELECT creatorID FROM "
-						+ "itemCreators WHERE itemID = ?)";
+					fromSQL += " AND creatorID NOT IN (SELECT creatorID FROM "
+						+ "itemCreators WHERE itemID=?3)";
 					sqlParams.push(itemID);
 				}
-				sql += " ORDER BY " + searchParts[2];
+				
+				sql += fromSQL;
+				
+				// If double-field mode, include matches for just this field
+				// as well (i.e. "Shakespeare"), and group to collapse repeats
+				if (fieldMode!=1){
+					sql = "SELECT * FROM (" + sql + " UNION SELECT DISTINCT "
+						+ searchParts[2] + " AS name, creatorID || '-1' AS creatorID"
+						+ fromSQL + ") GROUP BY name";
+				}
+				
+				sql += " ORDER BY name";
 			}
 			
 			var rows = this._zotero.DB.query(sql, sqlParams);
 			for each(var row in rows){
 				results.push(row['name']);
-				// Not currently used
-				//comments.push(row['creatorID'])
+				comments.push(row['creatorID'])
 			}
 			break;
 		
