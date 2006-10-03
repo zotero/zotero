@@ -287,11 +287,10 @@ var ZoteroPane = new function()
 					// URL
 					document.getElementById('zotero-attachment-url').setAttribute('value', item.getField('url'));
 					document.getElementById('zotero-attachment-url').setAttribute('hidden', false);
-					
 					// Access date
 					document.getElementById('zotero-attachment-accessed').setAttribute('value',
 						Zotero.getString('itemFields.accessDate') + ': '
-						+ Zotero.Date.sqlToDate(item.getField('accessDate')).toLocaleString());
+						+ Zotero.Date.sqlToDate(item.getField('accessDate'), true).toLocaleString());
 					document.getElementById('zotero-attachment-accessed').setAttribute('hidden', false);
 				}
 				// Metadata for files
