@@ -58,7 +58,29 @@
 								for(var i = 0; i < seealso.length; i++)
 								{
 									var icon= document.createElement("image");
-									icon.setAttribute('src','chrome://zotero/skin/treeitem-'+Zotero.ItemTypes.getName(seealso[i].getType())+'.png');
+									var type = Zotero.ItemTypes.getName(seealso[i].getType());
+									if (type=='attachment')
+									{
+										switch (seealso[i].getAttachmentLinkMode())
+										{
+											case Zotero.Attachments.LINK_MODE_LINKED_URL:
+												type += '-web-link';
+												break;
+											
+											case Zotero.Attachments.LINK_MODE_IMPORTED_URL:
+												type += '-snapshot';
+												break;
+											
+											case Zotero.Attachments.LINK_MODE_LINKED_FILE:
+												type += '-link';
+												break;
+											
+											case Zotero.Attachments.LINK_MODE_IMPORTED_FILE:
+												type += '-file';
+												break;
+										}
+									}
+									icon.setAttribute('src','chrome://zotero/skin/treeitem-' + type + '.png');
 							
 									var label = document.createElement("label");
 									label.setAttribute('value', seealso[i].getField('title'));
