@@ -29,10 +29,10 @@ var zoteroPaneOnTopInitial;
 function init()
 {	
 	autoUpdateBox = document.getElementById('autoUpdateBox');
-	autoUpdateBox.checked = zoteroPaneOnTopInitial = Zotero.Prefs.get('automaticScraperUpdates');
+	autoUpdateBox.checked = Zotero.Prefs.get('automaticScraperUpdates');
 	
 	positionMenu = document.getElementById('positionMenu');
-	positionMenu.selectedIndex = Zotero.Prefs.get('zoteroPaneOnTop') ? 0 : 1;
+	positionMenu.selectedIndex = zoteroPaneOnTopInitial = Zotero.Prefs.get('zoteroPaneOnTop') ? 0 : 1;
 	
 	parseEndnoteBox = document.getElementById('parseEndnoteBox');
 	parseEndnoteBox.checked = Zotero.Prefs.get('parseEndNoteMIMETypes');
@@ -89,7 +89,7 @@ function onOpenURLCustomized()
 function onPositionChange()
 {
 	var statusLine = document.getElementById('statusLine');
-	if ((positionMenu.selectedIndex == 0) != zoteroPaneOnTopInitial)
+	if (positionMenu.selectedIndex != zoteroPaneOnTopInitial)
 	{
 		statusLine.value = Zotero.getString('zotero.preferences.status.positionChange');
 	}
