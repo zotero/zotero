@@ -1,6 +1,6 @@
-content	zotero				chrome/chromeFiles/content/zotero/
-locale	zotero	en-US		chrome/chromeFiles/locale/en-US/zotero/
-skin	zotero	default		chrome/chromeFiles/skin/default/zotero/
+content	zotero				chrome/content/zotero/
+locale	zotero	en-US		chrome/locale/en-US/zotero/
+skin	zotero	default		chrome/skin/default/zotero/
 
 overlay	chrome://browser/content/browser.xul	chrome://zotero/content/overlay.xul
 overlay	chrome://browser/content/browser.xul	chrome://zotero/content/ingester/browser.xul

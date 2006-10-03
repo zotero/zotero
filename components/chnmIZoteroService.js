@@ -16,79 +16,79 @@ var ZoteroWrapped = this;
 
 Cc["@mozilla.org/moz/jssubscript-loader;1"]
 	.getService(Ci.mozIJSSubScriptLoader)
-	.loadSubScript("chrome://scholar/content/xpcom/scholar.js");
+	.loadSubScript("chrome://zotero/content/xpcom/zotero.js");
 
 Cc["@mozilla.org/moz/jssubscript-loader;1"]
 	.getService(Ci.mozIJSSubScriptLoader)
-	.loadSubScript("chrome://scholar/content/xpcom/db.js");
+	.loadSubScript("chrome://zotero/content/xpcom/db.js");
 
 Cc["@mozilla.org/moz/jssubscript-loader;1"]
 	.getService(Ci.mozIJSSubScriptLoader)
-	.loadSubScript("chrome://scholar/content/xpcom/schema.js");
+	.loadSubScript("chrome://zotero/content/xpcom/schema.js");
 
 Cc["@mozilla.org/moz/jssubscript-loader;1"]
 	.getService(Ci.mozIJSSubScriptLoader)
-	.loadSubScript("chrome://scholar/content/xpcom/data_access.js");
+	.loadSubScript("chrome://zotero/content/xpcom/data_access.js");
 
 Cc["@mozilla.org/moz/jssubscript-loader;1"]
 	.getService(Ci.mozIJSSubScriptLoader)
-	.loadSubScript("chrome://scholar/content/xpcom/attachments.js");
+	.loadSubScript("chrome://zotero/content/xpcom/attachments.js");
 
 Cc["@mozilla.org/moz/jssubscript-loader;1"]
 	.getService(Ci.mozIJSSubScriptLoader)
-	.loadSubScript("chrome://scholar/content/xpcom/notifier.js");
+	.loadSubScript("chrome://zotero/content/xpcom/notifier.js");
 
 Cc["@mozilla.org/moz/jssubscript-loader;1"]
 	.getService(Ci.mozIJSSubScriptLoader)
-	.loadSubScript("chrome://scholar/content/xpcom/history.js");
+	.loadSubScript("chrome://zotero/content/xpcom/history.js");
 
 Cc["@mozilla.org/moz/jssubscript-loader;1"]
 	.getService(Ci.mozIJSSubScriptLoader)
-	.loadSubScript("chrome://scholar/content/xpcom/search.js");
+	.loadSubScript("chrome://zotero/content/xpcom/search.js");
 
 Cc["@mozilla.org/moz/jssubscript-loader;1"]
 	.getService(Ci.mozIJSSubScriptLoader)
-	.loadSubScript("chrome://scholar/content/xpcom/ingester.js");
+	.loadSubScript("chrome://zotero/content/xpcom/ingester.js");
 	
 Cc["@mozilla.org/moz/jssubscript-loader;1"]
 	.getService(Ci.mozIJSSubScriptLoader)
-	.loadSubScript("chrome://scholar/content/xpcom/translate.js");
+	.loadSubScript("chrome://zotero/content/xpcom/translate.js");
 	
 Cc["@mozilla.org/moz/jssubscript-loader;1"]
 	.getService(Ci.mozIJSSubScriptLoader)
-	.loadSubScript("chrome://scholar/content/xpcom/cite.js");
+	.loadSubScript("chrome://zotero/content/xpcom/cite.js");
 	
 Cc["@mozilla.org/moz/jssubscript-loader;1"]
 	.getService(Ci.mozIJSSubScriptLoader)
-	.loadSubScript("chrome://scholar/content/xpcom/utilities.js");
+	.loadSubScript("chrome://zotero/content/xpcom/utilities.js");
 
 Cc["@mozilla.org/moz/jssubscript-loader;1"]
 	.getService(Ci.mozIJSSubScriptLoader)
-	.loadSubScript("chrome://scholar/content/xpcom/integration.js");
+	.loadSubScript("chrome://zotero/content/xpcom/integration.js");
 
 Cc["@mozilla.org/moz/jssubscript-loader;1"]
 	.getService(Ci.mozIJSSubScriptLoader)
-	.loadSubScript("chrome://scholar/content/xpcom/file.js");
+	.loadSubScript("chrome://zotero/content/xpcom/file.js");
 
 Cc["@mozilla.org/moz/jssubscript-loader;1"]
 	.getService(Ci.mozIJSSubScriptLoader)
-	.loadSubScript("chrome://scholar/content/xpcom/fulltext.js");
+	.loadSubScript("chrome://zotero/content/xpcom/fulltext.js");
 
 Cc["@mozilla.org/moz/jssubscript-loader;1"]
 	.getService(Ci.mozIJSSubScriptLoader)
-	.loadSubScript("chrome://scholar/content/xpcom/mime.js");
+	.loadSubScript("chrome://zotero/content/xpcom/mime.js");
 
 Cc["@mozilla.org/moz/jssubscript-loader;1"]
 	.getService(Ci.mozIJSSubScriptLoader)
-	.loadSubScript("chrome://scholar/content/xpcom/itemTreeView.js");
+	.loadSubScript("chrome://zotero/content/xpcom/itemTreeView.js");
 
 Cc["@mozilla.org/moz/jssubscript-loader;1"]
 	.getService(Ci.mozIJSSubScriptLoader)
-	.loadSubScript("chrome://scholar/content/xpcom/collectionTreeView.js");
+	.loadSubScript("chrome://zotero/content/xpcom/collectionTreeView.js");
 
 Cc["@mozilla.org/moz/jssubscript-loader;1"]
 	.getService(Ci.mozIJSSubScriptLoader)
-	.loadSubScript("chrome://scholar/content/xpcom/progressWindow.js");
+	.loadSubScript("chrome://zotero/content/xpcom/progressWindow.js");
 
 Cc["@mozilla.org/moz/jssubscript-loader;1"]
 	.getService(Ci.mozIJSSubScriptLoader)
