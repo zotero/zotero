@@ -632,6 +632,7 @@ Zotero.Hash.prototype.has = function(in_key){
 
 Zotero.Date = new function(){
 	this.sqlToDate = sqlToDate;
+	this.dateToSQL = dateToSQL;
 	this.strToDate = strToDate;
 	this.formatDate = formatDate;
 	this.getFileDateString = getFileDateString;
@@ -671,6 +672,50 @@ Zotero.Date = new function(){
 			return false;
 		}
 	}
+	
+	
+	/**
+	* Convert a JS Date object to an SQL date in the form '2006-06-13 11:03:05'
+	*
+	* If _toUTC_ is true, creates a UTC date
+	**/
+	function dateToSQL(date, toUTC)
+	{
+		try {
+			if (toUTC){
+				var year = date.getUTCFullYear();
+				var month = date.getUTCMonth();
+				var day = date.getUTCDate();
+				var hours = date.getUTCHours();
+				var minutes = date.getUTCMinutes();
+				var seconds = date.getUTCSeconds();
+			}
+			else {
+				var year = date.getFullYear();
+				var month = date.getMonth();
+				var day = date.getDate();
+				var hours = date.getHours();
+				var minutes = date.getMinutes();
+				var seconds = date.getSeconds();
+			}
+			
+			var utils = new Zotero.Utilities();
+			year = utils.lpad(year, '0', 4);
+			month = utils.lpad(month + 1, '0', 2);
+			day = utils.lpad(day, '0', 2);
+			hours = utils.lpad(hours, '0', 2);
+			minutes = utils.lpad(minutes, '0', 2);
+			seconds = utils.lpad(seconds, '0', 2);
+			
+			return year + '-' + month + '-' + day + ' '
+				+ hours + ':' + minutes + ':' + seconds;
+		}
+		catch (e){
+			Zotero.debug(date + ' is not a valid JS date', 2);
+			return '';
+		}
+	}
+	
 	
 	/*
 	 * converts a string to an object containing:

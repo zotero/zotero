@@ -421,7 +421,7 @@ Zotero.Item.prototype.setField = function(field, value, loadIn){
 Zotero.Item.prototype.save = function(){
 	if (!this.hasChanged()){
 		Zotero.debug('Item ' + this.getID() + ' has not changed', 4);
-		return !!this.getID();
+		return false;
 	}
 	
 	//

@@ -207,13 +207,6 @@ var ZoteroItemPane = new function()
 				
 				var val = _itemBeingEdited.getField(fieldNames[i]);
 				
-				// Convert dates from UTC
-				if (fieldNames[i]=='dateAdded' || fieldNames[i]=='dateModified'
-					|| fieldNames[i]=='accessDate'){
-					var date = Zotero.Date.sqlToDate(val, true);
-					val = date ? date.toLocaleString() : '';
-				}
-				
 				// Start tabindex at 1000 after creators
 				var tabindex = editable ? (i>0 ? _tabIndexMinFields + i : 1) : 0;
 				
@@ -652,9 +645,19 @@ var ZoteroItemPane = new function()
 			valueElement.setAttribute('onclick', 'ZoteroItemPane.showEditor(this)');
 			valueElement.className = 'clicky';
 			
-			if (fieldName=='tag')
+			switch (fieldName)
 			{
-				_tabIndexMaxTagsFields = Math.max(_tabIndexMaxTagsFields, tabindex);
+				case 'tag':
+					_tabIndexMaxTagsFields = Math.max(_tabIndexMaxTagsFields, tabindex);
+					break;
+				
+				// Convert dates from UTC
+				case 'dateAdded':
+				case 'dateModified':
+				case 'accessDate':
+					var date = Zotero.Date.sqlToDate(valueText, true);
+					valueText = date ? date.toLocaleString() : '';
+					break;
 			}
 		}
 		
@@ -730,6 +733,13 @@ var ZoteroItemPane = new function()
 		{
 			var value = _itemBeingEdited.getField(fieldName);
 			var itemID = _itemBeingEdited.getID();
+			
+			// Access date needs to be converted from UTC
+			if (fieldName=='accessDate')
+			{
+				var localDate = Zotero.Date.sqlToDate(value, true);
+				var value = Zotero.Date.dateToSQL(localDate);
+			}
 		}
 		
 		var t = document.createElement("textbox");
@@ -988,9 +998,16 @@ var ZoteroItemPane = new function()
 		// Fields
 		else
 		{
+			// Access date needs to be converted to UTC
+			if (fieldName=='accessDate')
+			{
+				var localDate = Zotero.Date.sqlToDate(value);
+				var value = Zotero.Date.dateToSQL(localDate, true);
+			}
+			
 			if(saveChanges)
 				modifyField(fieldName,value);
-		
+			
 			elem = createValueElement(_itemBeingEdited.getField(fieldName), fieldName, tabindex);
 		}
 		
@@ -1011,7 +1028,7 @@ var ZoteroItemPane = new function()
 	function modifyField(field, value)
 	{
 		_itemBeingEdited.setField(field,value);
-		_itemBeingEdited.save();
+		return _itemBeingEdited.save();
 	}
 	
 	function _getFieldValue(field)
