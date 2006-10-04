@@ -204,29 +204,6 @@
 	margin-left: 5px;
 }
 
-/* creator switch button */
-#editpane-dynamic-fields row hbox toolbarbutton
-{
-	margin-right:5px;
-}
-
-#editpane-dynamic-fields row > label:first-child
-{
-	text-align: right;
-	font-weight: bold;
-}
-
-/* no space between last name and comma */
-#editpane-dynamic-fields row hbox label:first-child
-{
-	margin-right:1px;
-}
-
-#editpane-dynamic-fields row hbox label.comma
-{
-	margin-left:0;
-}
-
 #zotero-splitter
 {
 	border-top: none;

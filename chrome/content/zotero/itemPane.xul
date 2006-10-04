@@ -16,7 +16,7 @@
 					<popup id="creatorTypeMenu" position="after_start"
 						oncommand="var otherFields = ZoteroItemPane.getCreatorFields(document.popupNode.parentNode);
 							var typeID = event.explicitOriginalTarget.getAttribute('typeid');
-							document.popupNode.setAttribute('value',
+							document.popupNode.setAttribute('label',
 								Zotero.getString('creatorTypes.' + Zotero.CreatorTypes.getName(typeID)) + ':');
 							ZoteroItemPane.modifyCreator(document.popupNode.getAttribute('fieldname').split('-')[1],
 								'typeID', typeID, otherFields)"/>

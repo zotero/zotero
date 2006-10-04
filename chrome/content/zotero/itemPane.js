@@ -428,8 +428,8 @@ var ZoteroItemPane = new function()
 			}
 		}
 		
-		var label = document.createElement("label");
-		label.setAttribute("value",Zotero.getString('creatorTypes.'+Zotero.CreatorTypes.getName(typeID))+":");
+		var label = document.createElement("toolbarbutton");
+		label.setAttribute("label",Zotero.getString('creatorTypes.'+Zotero.CreatorTypes.getName(typeID))+":");
 		label.setAttribute("popup","creatorTypeMenu");
 		label.setAttribute("fieldname",'creator-'+_creatorCount+'-typeID');
 		label.className = 'clicky';
@@ -1056,7 +1056,7 @@ var ZoteroItemPane = new function()
 	}
 	
 	function getCreatorFields(row){
-		var type = row.getElementsByTagName('label')[0].getAttribute('value');
+		var type = row.getElementsByTagName('toolbarbutton')[0].getAttribute('label');
 		var label1 = row.getElementsByTagName('hbox')[0].firstChild.firstChild;
 		var label2 = label1.parentNode.lastChild;
 		

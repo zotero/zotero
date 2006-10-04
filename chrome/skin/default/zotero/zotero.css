@@ -119,6 +119,51 @@ zoterosearchtextbox .toolbarbutton-menu-dropmarker
 }
 */
 
+/* creator switch button */
+#editpane-dynamic-fields row hbox toolbarbutton
+{
+	margin-right:5px;
+}
+
+/* metadata field names */
+#editpane-dynamic-fields row > label:first-child,
+#editpane-dynamic-fields row > toolbarbutton .toolbarbutton-text /* creator type menu */
+{
+	text-align: right;
+	font-weight: bold;
+}
+
+ /* creator type menu */
+#editpane-dynamic-fields row > toolbarbutton 
+{
+	margin: 0;
+	padding: 0;
+	list-style-image: url("chrome://browser/skin/dropmark-nav-small.png");
+	-moz-image-region: rect(0px, 14px, 16px, 0px);
+}
+#editpane-dynamic-fields row > toolbarbutton .toolbarbutton-text
+{
+	margin-top: -1px;
+}
+#editpane-dynamic-fields row > toolbarbutton .toolbarbutton-icon,
+#editpane-dynamic-fields row > toolbarbutton .toolbarbutton-menu-dropmarker
+{
+	margin: 0;
+	padding: 0;
+}
+
+
+/* no space between last name and comma */
+#editpane-dynamic-fields row hbox label:first-child
+{
+	margin-right:1px;
+}
+
+#editpane-dynamic-fields row hbox label.comma
+{
+	margin-left:0;
+}
+
 .clicky, .unclicky
 {	
 	-moz-border-radius: 6px;
