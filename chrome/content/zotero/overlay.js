@@ -743,7 +743,13 @@ var ZoteroPane = new function()
 			accessDate: "CURRENT_TIMESTAMP"
 		}
 		
-		newItem(Zotero.ItemTypes.getID('webpage'), data);
+		var item = newItem(Zotero.ItemTypes.getID('webpage'), data);
+		
+		// Automatically save snapshot if pref set
+		if (item.getID() && Zotero.Prefs.get('automaticSnapshots'))
+		{
+			addAttachmentFromPage(false, item.getID());
+		}
 	}
 	
 	

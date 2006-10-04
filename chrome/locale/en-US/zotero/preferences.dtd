@@ -6,6 +6,7 @@
 <!ENTITY zotero.preferences.position.below			"below">
 <!ENTITY zotero.preferences.position.browser		"browser content">
 <!ENTITY zotero.preferences.parseEndnote.label		"Use Zotero for downloaded EndNote files">
+<!ENTITY zotero.preferences.automaticSnapshots.label	"Automatically take snapshots when creating items from web pages">
 <!ENTITY zotero.preferences.openurl.caption		"OpenURL">
 <!ENTITY zotero.preferences.openurl.server			"Resolver:">
 <!ENTITY zotero.preferences.openurl.version		"Version:">

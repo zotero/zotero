@@ -23,6 +23,7 @@
 var autoUpdateBox;
 var positionMenu;
 var parseEndnoteBox;
+var automaticSnapshots;
 var openURLMenu;
 var openURLResolvers;
 var openURLServerField;
@@ -53,6 +54,9 @@ function init()
 	parseEndnoteBox = document.getElementById('parseEndnoteBox');
 	parseEndnoteBox.checked = Zotero.Prefs.get('parseEndNoteMIMETypes');
 	
+	automaticSnapshots = document.getElementById('automaticSnapshots');
+	automaticSnapshots.checked = Zotero.Prefs.get('automaticSnapshots');
+	
 	openURLServerField = document.getElementById('openURLServerField');
 	openURLServerField.value = Zotero.Prefs.get('openURL.resolver');
 	openURLVersionMenu = document.getElementById('openURLVersionMenu');
@@ -79,6 +83,8 @@ function accept()
 		Zotero.Prefs.set('parseEndNoteMIMETypes', parseEndnoteBox.checked);
 		Zotero.Ingester.MIMEHandler.init();
 	}
+	
+	Zotero.Prefs.set('automaticSnapshots', automaticSnapshots.checked);
 	
 	Zotero.Prefs.set('openURL.resolver', openURLServerField.value);
 	Zotero.Prefs.set('openURL.version', openURLVersionMenu.value);

@@ -24,6 +24,7 @@
 
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 
+<!-- TODO: change to prefWindow? -->
 <dialog id="winMain" title="&zotero.preferences.title;" style="min-width:400px;"
 		onload="init();" ondialogaccept="accept()"
 		xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
@@ -47,6 +48,8 @@
 <checkbox id="autoUpdateBox" label="&zotero.preferences.autoUpdate.label;"/>
 
 <checkbox id="parseEndnoteBox" label="&zotero.preferences.parseEndnote.label;"/>
+
+<checkbox id="automaticSnapshots" label="&zotero.preferences.automaticSnapshots.label;"/>
 
 <groupbox>
 	<caption label="&zotero.preferences.openurl.caption;"/>
