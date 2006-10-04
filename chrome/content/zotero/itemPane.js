@@ -655,8 +655,11 @@ var ZoteroItemPane = new function()
 				case 'dateAdded':
 				case 'dateModified':
 				case 'accessDate':
-					var date = Zotero.Date.sqlToDate(valueText, true);
-					valueText = date ? date.toLocaleString() : '';
+					if (valueText)
+					{
+						var date = Zotero.Date.sqlToDate(valueText, true);
+						valueText = date ? date.toLocaleString() : '';
+					}
 					break;
 			}
 		}
@@ -735,7 +738,7 @@ var ZoteroItemPane = new function()
 			var itemID = _itemBeingEdited.getID();
 			
 			// Access date needs to be converted from UTC
-			if (fieldName=='accessDate')
+			if (fieldName=='accessDate' && value!='')
 			{
 				var localDate = Zotero.Date.sqlToDate(value, true);
 				var value = Zotero.Date.dateToSQL(localDate);
@@ -770,6 +773,7 @@ var ZoteroItemPane = new function()
 				case 'journalAbbreviation':
 				case 'seriesTitle':
 				case 'seriesText':
+				case 'tag':
 				// DEBUG: should have type and medium, but they need to be
 				// broken out first into multiple fields (artworkType,
 				// interviewMedium, etc.)
@@ -860,6 +864,8 @@ var ZoteroItemPane = new function()
 				return false;
 				
 			case event.DOM_VK_ESCAPE:
+				// Reset field to original value
+				target.value = target.getAttribute('value');
 				target.blur();
 				return false;
 				
@@ -999,7 +1005,7 @@ var ZoteroItemPane = new function()
 		else
 		{
 			// Access date needs to be converted to UTC
-			if (fieldName=='accessDate')
+			if (fieldName=='accessDate' && value!='')
 			{
 				var localDate = Zotero.Date.sqlToDate(value);
 				var value = Zotero.Date.dateToSQL(localDate, true);
