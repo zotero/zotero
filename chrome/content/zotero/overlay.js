@@ -244,14 +244,22 @@ var ZoteroPane = new function()
 				noteEditor.item = null;
 				noteEditor.note = item.ref;
 				document.getElementById('zotero-view-note-button').setAttribute('noteID',item.ref.getID());
-				if(item.ref.getSource() != null)
+				if(item.ref.getSource())
+				{
 					document.getElementById('zotero-view-note-button').setAttribute('sourceID',item.ref.getSource());
+				}
 				else
+				{
 					document.getElementById('zotero-view-note-button').removeAttribute('sourceID');
+				}
 				document.getElementById('item-pane').selectedIndex = 2;
 			}
 			else if(item.isAttachment())
 			{
+				// DEBUG: this is annoying -- we really want to use an abstracted
+				// version of createValueElement() from itemPane.js
+				// (ideally in an XBL binding)
+				
 				// Wrap title to multiple lines if necessary
 				var label = document.getElementById('zotero-attachment-label');
 				while (label.hasChildNodes())
@@ -259,6 +267,7 @@ var ZoteroPane = new function()
 					label.removeChild(label.firstChild);
 				}
 				var val = item.getField('title');
+				
 				var firstSpace = val.indexOf(" ");
 				// Crop long uninterrupted text
 				if ((firstSpace == -1 && val.length > 29 ) || firstSpace > 29)
@@ -271,6 +280,18 @@ var ZoteroPane = new function()
 				{
 					label.appendChild(document.createTextNode(val));
 				}
+				
+				// For the time being, use a silly little popup
+				label.className = 'clicky';
+				label.onclick = function(event){
+					var newTitle = prompt(Zotero.getString('itemFields.title') + ':', val);
+					if (newTitle && newTitle != val)
+					{
+						item.ref.setField('title', newTitle);
+						item.ref.save();
+					}
+				}
+				
 				
 				// Metadata for URL's
 				if (item.ref.getAttachmentLinkMode() == Zotero.Attachments.LINK_MODE_LINKED_URL
@@ -333,6 +354,7 @@ var ZoteroPane = new function()
 		}
 
 	}
+	
 	
 	/*
 	 *  _force_ deletes item from DB even if removing from a collection or search

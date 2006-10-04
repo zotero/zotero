@@ -29,17 +29,17 @@ function onLoad()
 		if(ref.isNote())
 		{
 			noteEditor.note = ref;
-			window.title = "Edit Note";
+			document.title = "Edit Note";
 		}
 		else
 		{
 			noteEditor.item = ref;
-			window.title = "Add Note";
+			document.title = "Add Note";
 		}
 	}
 	else
 	{
-		window.title = "Add Note";
+		document.title = "Add Note";
 		if(collectionID && collectionID != '' && collectionID != 'undefined')
 			noteEditor.collection = Zotero.Collections.get(collectionID);
 	}
