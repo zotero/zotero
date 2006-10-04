@@ -1,9 +1,3 @@
-/*
-	Zotero
-	Copyright (C) 2006   Center for History and New Media, George Mason University, Fairfax, VA
-	http://chnm.gmu.edu/
-*/
-
 var itemsView;
 var collectionsView;
 var io;
