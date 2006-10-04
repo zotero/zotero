@@ -33,26 +33,38 @@ Zotero.Schema = new function(){
 	 * Checks if the DB schema exists and is up-to-date, updating if necessary
 	 */
 	function updateSchema(){
-		var dbVersion = _getDBVersion('user');
+		var dbVersion = _getDBVersion('userdata');
 		
-		// 'schema' check is for old (<= 1.0b1) schema system
-		if (!dbVersion && !_getDBVersion('schema')){
+		// 'schema' check is for old (<= 1.0b1) schema system,
+		// 'user' is for pre-1.0b2 'user' table
+		if (!dbVersion && !_getDBVersion('schema') && !_getDBVersion('user')){
 			Zotero.debug('Database does not exist -- creating\n');
 			_initializeSchema();
 			return;
 		}
 		
-		// Old schema system
-		if (!dbVersion){
-			dbVersion = 0;
-		}
-		
-		var schemaVersion = _getSchemaSQLVersion('user');
+		var schemaVersion = _getSchemaSQLVersion('userdata');
 		
 		Zotero.DB.beginTransaction();
 		
 		try {
-			_migrateUserSchema(dbVersion);
+			// Old schema system
+			if (!dbVersion){
+				// Check for pre-1.0b2 'user' table
+				 var user = _getDBVersion('user');
+				 if (user)
+				 {
+					 dbVersion = user;
+					 var sql = "UPDATE version SET schema=? WHERE schema=?";
+					 Zotero.DB.query(sql, ['userdata', 'user']);
+				 }
+				 else
+				 {
+					 dbVersion = 0;
+				 }
+			}
+			
+			_migrateUserDataSchema(dbVersion);
 			_updateSchema('system');
 			_updateSchema('scrapers');
 			
@@ -299,8 +311,8 @@ Zotero.Schema = new function(){
 	function _initializeSchema(){
 		Zotero.DB.beginTransaction();
 		try {
-			Zotero.DB.query(_getSchemaSQL('user'));
-			_updateDBVersion('user', _getSchemaSQLVersion('user'));
+			Zotero.DB.query(_getSchemaSQL('userdata'));
+			_updateDBVersion('userdata', _getSchemaSQLVersion('userdata'));
 			
 			Zotero.DB.query(_getSchemaSQL('system'));
 			_updateDBVersion('system', _getSchemaSQLVersion('system'));
@@ -478,20 +490,20 @@ Zotero.Schema = new function(){
 	
 	
 	/*
-	 * Migrate user schema from an older version, preserving data
+	 * Migrate user data schema from an older version, preserving data
 	 */
-	function _migrateUserSchema(fromVersion){
-		toVersion = _getSchemaSQLVersion('user');
+	function _migrateUserDataSchema(fromVersion){
+		toVersion = _getSchemaSQLVersion('userdata');
 		
 		if (fromVersion==toVersion){
 			return false;
 		}
 		
 		if (fromVersion > toVersion){
-			throw("Zotero user DB version is newer than SQL file");
+			throw("Zotero user data DB version is newer than SQL file");
 		}
 		
-		Zotero.debug('Updating user tables from version ' + fromVersion + ' to ' + toVersion);
+		Zotero.debug('Updating user data tables from version ' + fromVersion + ' to ' + toVersion);
 		
 		Zotero.DB.beginTransaction();
 		
@@ -515,7 +527,7 @@ Zotero.Schema = new function(){
 				}
 			}
 			
-			_updateSchema('user');
+			_updateSchema('userdata');
 			Zotero.DB.commitTransaction();
 		}
 		catch(e){
