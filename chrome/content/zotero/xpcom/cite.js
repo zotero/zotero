@@ -1243,7 +1243,7 @@ Zotero.CSL.prototype._getFieldValue = function(name, element, item, formattedStr
 						status = true;
 					}
 				} else if(condition.field) {
-					var formattedString = new Scholar.CSL.FormattedString(this, "Text");
+					var formattedString = new Zotero.CSL.FormattedString(this, "Text");
 					status = this._getFieldValue(condition.field, this._getFieldDefaults(condition.field), item,
 		                                formattedString, bibCitElement);
 				}

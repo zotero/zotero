@@ -7108,7 +7108,7 @@ record.prototype.translate = function(item) {
 		// some LOC entries have no listed author, but have the author in the person subject field as the first entry
 		var field = this.getFieldSubfields("600");
 		if(field[0]) {
-			item.creators.push(Scholar.Utilities.cleanAuthor(field[0]["a"], true));	
+			item.creators.push(Zotero.Utilities.cleanAuthor(field[0]["a"], true));	
 		}
 	}
 	
