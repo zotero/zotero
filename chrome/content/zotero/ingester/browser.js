@@ -147,7 +147,7 @@ Zotero_Ingester_Interface.contentLoad = function(event) {
 		
 		for each(var blacklistedURL in Zotero_Ingester_Interface.blacklist) {
 			if(doc.domain.substr(doc.domain.length-blacklistedURL.length) == blacklistedURL) {
-				Zotero.debug("Ignoring blacklisted URL "+document.location);
+				Zotero.debug("Ignoring blacklisted URL "+doc.location);
 				return;
 			}
 		}
