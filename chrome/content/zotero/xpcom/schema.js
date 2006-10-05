@@ -534,6 +534,15 @@ Zotero.Schema = new function(){
 					Zotero.DB.query("INSERT INTO creators SELECT * FROM creatorsTemp");
 					Zotero.DB.query("DROP TABLE creatorsTemp");
 				}
+				
+				if (i==7){
+					Zotero.DB.query("DELETE FROM itemData WHERE fieldID=17");
+					Zotero.DB.query("UPDATE itemData SET fieldID=64 WHERE fieldID=20");
+					Zotero.DB.query("UPDATE itemData SET fieldID=69 WHERE fieldID=24 AND itemID IN (SELECT itemID FROM items WHERE itemTypeID=7)");
+					Zotero.DB.query("UPDATE itemData SET fieldID=65 WHERE fieldID=24 AND itemID IN (SELECT itemID FROM items WHERE itemTypeID=8)");
+					Zotero.DB.query("UPDATE itemData SET fieldID=66 WHERE fieldID=24 AND itemID IN (SELECT itemID FROM items WHERE itemTypeID=9)");
+					Zotero.DB.query("UPDATE itemData SET fieldID=59 WHERE fieldID=24 AND itemID IN (SELECT itemID FROM items WHERE itemTypeID=12)");
+				}
 			}
 			
 			_updateSchema('userdata');

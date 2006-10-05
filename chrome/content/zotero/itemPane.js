@@ -94,17 +94,6 @@ var ZoteroItemPane = new function()
 		_tagsBox = document.getElementById('editpane-tags');
 		_relatedBox = document.getElementById('editpane-related');
 		
-		var creatorTypes = Zotero.CreatorTypes.getTypes();
-		for(var i = 0; i < creatorTypes.length; i++)
-		{
-			var menuitem = document.createElement("menuitem");
-			menuitem.setAttribute("label",Zotero.getString('creatorTypes.'+creatorTypes[i]['name']));
-			menuitem.setAttribute("typeid",creatorTypes[i]['id']);
-			if(creatorTypes[i]['id'] == 0)
-				menuitem.setAttribute("selected",true);
-			_creatorTypeMenu.appendChild(menuitem);
-		}
-		
 		var itemTypes = Zotero.ItemTypes.getTypes();
 		for(var i = 0; i<itemTypes.length; i++)
 			if(itemTypes[i]['name'] != 'note' && itemTypes[i]['name'] != 'attachment')
@@ -216,6 +205,32 @@ var ZoteroItemPane = new function()
 			}
 			document.getElementById('tb-openurl').setAttribute('disabled', !openURL);
 			
+			// Clear and rebuild creator type menu
+			while(_creatorTypeMenu.hasChildNodes())
+			{
+				_creatorTypeMenu.removeChild(_creatorTypeMenu.firstChild);
+			}
+			
+			var creatorTypes = Zotero.CreatorTypes.getTypesForItemType(_itemBeingEdited.getType());
+			var localized = [];
+			for (var i in creatorTypes)
+			{
+				localized[creatorTypes[i]['name']]
+					= Zotero.getString('creatorTypes.' + creatorTypes[i]['name']);
+			}
+			
+			for (var i in localized)
+			{
+				var menuitem = document.createElement("menuitem");
+				menuitem.setAttribute("label", localized[i]);
+				menuitem.setAttribute("typeid", Zotero.CreatorTypes.getID(i));
+				_creatorTypeMenu.appendChild(menuitem);
+			}
+			
+			
+			//
+			// Clear and rebuild metadata fields
+			//
 			while(_dynamicFields.hasChildNodes())
 				_dynamicFields.removeChild(_dynamicFields.firstChild);
 		
@@ -265,7 +280,7 @@ var ZoteroItemPane = new function()
 			else
 			{
 				// Add default row
-				addCreatorRow('', '', 1, false, true, true);
+				addCreatorRow('', '', false, false, true, true);
 			}
 			
 			var focusMode = 'info';
@@ -451,6 +466,12 @@ var ZoteroItemPane = new function()
 			}
 		}
 		
+		// Use the first entry in the drop-down for the default type
+		if (!typeID)
+		{
+			typeID = _creatorTypeMenu.childNodes[0].getAttribute('typeid');
+		}
+		
 		var label = document.createElement("toolbarbutton");
 		label.setAttribute("label",Zotero.getString('creatorTypes.'+Zotero.CreatorTypes.getName(typeID))+":");
 		label.setAttribute("popup","creatorTypeMenu");
@@ -524,7 +545,7 @@ var ZoteroItemPane = new function()
 		}
 		else
 		{
-			_enablePlusButton(addButton);
+			_enablePlusButton(addButton, typeID);
 		}
 		hbox.appendChild(addButton);
 		
@@ -643,11 +664,12 @@ var ZoteroItemPane = new function()
 		button.setAttribute('onclick', false); 
 	}
 	
-	function _enablePlusButton(button)
+	function _enablePlusButton(button, creatorTypeID)
 	{
 		button.setAttribute('disabled', false);
 		button.setAttribute("class","clicky");
-		button.setAttribute("onclick","ZoteroItemPane.disableButton(this); ZoteroItemPane.addCreatorRow('','',1,false,true);");
+		button.setAttribute("onclick",
+			"ZoteroItemPane.disableButton(this); ZoteroItemPane.addCreatorRow('',''," + (creatorTypeID ? creatorTypeID : 'false') + ",false,true);");
 	}
 	
 	function createValueElement(valueText, fieldName, tabindex)

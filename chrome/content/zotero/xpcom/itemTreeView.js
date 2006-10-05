@@ -335,7 +335,30 @@ Zotero.ItemTreeView.prototype.getImageSrc = function(row, col)
 			}
 		}
 		
-		return "chrome://zotero/skin/treeitem-"+itemType+".png";
+		// DEBUG: only have icons for some types so far
+		switch (itemType)
+		{
+			case 'attachment-file':
+			case 'attachment-link':
+			case 'attachment-snapshot':
+			case 'attachment-web-link':
+			case 'artwork':
+			case 'book':
+			case 'bookSection':
+			case 'film':
+			case 'interview':
+			case 'journalArticle':
+			case 'letter':
+			case 'magazineArticle':
+			case 'manuscript':
+			case 'newspaperArticle':
+			case 'note':
+			case 'thesis':
+			case 'webpage':
+				return "chrome://zotero/skin/treeitem-"+itemType+".png";
+		}
+		
+		return "chrome://zotero/skin/treeitem.png";
 	}
 }
 

@@ -113,7 +113,9 @@ Zotero.Attachments = new function(){
 			var attachmentItem = Zotero.Items.getNewItemByType(Zotero.ItemTypes.getID('attachment'));
 			attachmentItem.setField('title', title);
 			attachmentItem.setField('url', url);
-			// TODO: access date
+			// DEBUG: this should probably insert access date too so as to
+			// create a proper item, but at the moment this is only called by
+			// translate.js, which sets the metadata fields itself
 			attachmentItem.save();
 			var itemID = attachmentItem.getID();
 			

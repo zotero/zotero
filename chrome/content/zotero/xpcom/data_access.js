@@ -2909,10 +2909,28 @@ Zotero.CreatorTypes = new function(){
 	Zotero.CachedTypes.apply(this, arguments);
 	this.constructor.prototype = new Zotero.CachedTypes();
 	
+	this.getTypesForItemType = getTypesForItemType;
+	this.getPrimaryIDForType = getPrimaryIDForType;
+	
 	this._typeDesc = 'creator type';
 	this._idCol = 'creatorTypeID';
 	this._nameCol = 'creatorType';
 	this._table = 'creatorTypes';
+	
+	function getTypesForItemType(itemTypeID){
+		var sql = "SELECT creatorTypeID AS id, creatorType AS name "
+			+ "FROM itemTypeCreatorTypes NATURAL JOIN creatorTypes "
+			// DEBUG: sort needs to be on localized strings in itemPane.js
+			// (though still put primary field at top)
+			+ "WHERE itemTypeID=? ORDER BY primaryField=1 DESC, name";
+		return Zotero.DB.query(sql, itemTypeID);
+	}
+	
+	function getPrimaryIDForType(itemTypeID){
+		var sql = "SELECT creatorTypeID FROM itemTypeCreatorTypes "
+			+ "WHERE itemTypeID=? AND primaryField=1";
+		return Zotero.DB.valueQuery(sql, itemTypeID);
+	}
 }
 
 
