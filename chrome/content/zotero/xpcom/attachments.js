@@ -229,9 +229,8 @@ Zotero.Attachments = new function(){
 		
 		// If we have the title and mime type, skip loading
 		if (title && mimeType){
-			_addToDB(null, url, title, this.LINK_MODE_LINKED_URL, mimeType,
+			return _addToDB(null, url, title, this.LINK_MODE_LINKED_URL, mimeType,
 				null, sourceItemID);
-			return;
 		}
 		
 		// Otherwise do a head request for the mime type
@@ -239,6 +238,8 @@ Zotero.Attachments = new function(){
 			_addToDB(null, url, title, Zotero.Attachments.LINK_MODE_LINKED_URL,
 				obj.channel.contentType, null, sourceItemID);
 		});
+		
+		return true;
 	}
 	
 	
