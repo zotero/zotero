@@ -21,6 +21,8 @@
     ***** END LICENSE BLOCK *****
 -->
 
+<!DOCTYPE bindings SYSTEM "chrome://zotero/locale/searchbox.dtd">
+
 <bindings 	xmlns="http://www.mozilla.org/xbl"
 			xmlns:xbl="http://www.mozilla.org/xbl"
 			xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
@@ -43,6 +45,11 @@
 							{
 								this.id('joinModeMenu').setAttribute('condition',id);
 								this.id('joinModeMenu').value = conditions[id]['operator'];
+							}
+							else if(conditions[id]['condition'] == 'recursive')
+							{
+								this.id('recursiveCheckbox').setAttribute('condition',id);
+								this.id('recursiveCheckbox').checked = (conditions[id]['operator']=='true');
 							}
 							else
 							{
@@ -106,6 +113,24 @@
 					]]>
 				</body>
 			</method>
+			<method name="updateRecursive">
+				<body>
+					<![CDATA[
+						var checkbox = this.id('recursiveCheckbox');
+						var value = checkbox.checked ? 'true' : 'false';
+						if(checkbox.hasAttribute('condition'))
+						{
+							this.search.updateCondition(checkbox.getAttribute('condition'),
+								'recursive', value, null);
+						}
+						else
+						{
+							checkbox.setAttribute('condition',
+								this.search.addCondition('recursive', value, null));
+						}
+					]]>
+				</body>
+			</method>
 			<method name="save">
 				<body>
 					<![CDATA[
@@ -133,19 +158,22 @@
 		<handlers>
 		</handlers>
 		<content>
-			<xul:groupbox xbl:inherits="flex">
-				<xul:caption align="center">
-					<xul:label value="Match"/>
-					<xul:menulist id="joinModeMenu" oncommand="this.parentNode.parentNode.parentNode.updateJoinMode();">
-						<xul:menupopup>
-							<xul:menuitem label="any" value="any"/>
-							<xul:menuitem label="all" value="all" selected="true"/>
-						</xul:menupopup>
-					</xul:menulist>
-					<xul:label value="of the following:"/>
-				</xul:caption>
-				<xul:vbox id="conditions"/>
-			</xul:groupbox>
+			<xul:vbox flex="1">
+				<xul:groupbox xbl:inherits="flex">
+					<xul:caption align="center">
+						<xul:label value="&zotero.search.joinMode.match;"/>
+						<xul:menulist id="joinModeMenu" oncommand="this.parentNode.parentNode.parentNode.parentNode.updateJoinMode()">
+							<xul:menupopup>
+								<xul:menuitem label="&zotero.search.joinMode.any;" value="any"/>
+								<xul:menuitem label="&zotero.search.joinMode.all;" value="all" selected="true"/>
+							</xul:menupopup>
+						</xul:menulist>
+						<xul:label value="&zotero.search.joinMode.ofTheFollowing;:"/>
+					</xul:caption>
+					<xul:vbox id="conditions"/>
+				</xul:groupbox>
+				<xul:checkbox id="recursiveCheckbox" label="&zotero.search.recursive.label;" oncommand="this.parentNode.parentNode.updateRecursive()"/>
+			</xul:vbox>
 		</content>
 	</binding>
 	
