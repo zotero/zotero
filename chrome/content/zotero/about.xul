@@ -9,6 +9,7 @@
     xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
     orient="vertical"
 	buttons="accept"
+	buttonlabelaccept="&zotero.about.close;"
 	onload="onLoad();"
 	ondialogaccept="return true;">
 	
@@ -28,6 +29,7 @@
 	
 	<vbox id="aboutcontent">
 		<label id="name" value="&zotero.name;"/>
+		<label class="text-link" href="http://www.zotero.org" value="http://www.zotero.org"/>
 		<label id="version" value="&zotero.version; "/>
 		<script>
 			document.getElementById('version').value += Zotero.version;

@@ -86,6 +86,7 @@
 							<menuitem label="&toolbar.export.label;" oncommand="Zotero_File_Interface.exportFile();"/>
 							<menuseparator/>
 							<menuitem label="&toolbar.preferences.label;" oncommand="window.openDialog('chrome://zotero/content/preferences.xul','prefs','chrome,modal')"/>
+							<menuitem label="&toolbar.about.label;" oncommand="window.openDialog('chrome://zotero/content/about.xul','about','chrome,left=' + (window.screenX + 200) + ',top=' + (window.screenY + 100))"/>
 						</menupopup>
 					</toolbarbutton>
 				</toolbar>

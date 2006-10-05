@@ -33,6 +33,7 @@
 <!ENTITY toolbar.import.label			"Import...">
 <!ENTITY toolbar.export.label			"Export Library...">
 <!ENTITY toolbar.preferences.label		"Preferences...">
+<!ENTITY toolbar.about.label			"About Zotero...">
 <!ENTITY toolbar.createBibCollection.label   "Create Bibliography From Collection...">
 <!ENTITY toolbar.createBibSavedSearch.label   "Create Bibliography From Saved Search...">
 <!ENTITY toolbar.search.label   			"Search:">
