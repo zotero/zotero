@@ -954,7 +954,11 @@ Zotero.Translate.prototype._generateErrorString = function(error) {
 	
 	errorString += "\nurl => "+this.path
 		+ "\nextensions.zotero.cacheTranslatorData => "+Zotero.Prefs.get("cacheTranslatorData")
-		+ "\nextensions.zotero.downloadAssociatedFiles => "+Zotero.Prefs.get("downloadAssociatedFiles");
+		// TODO: Currently using automaticSnapshots pref for everything
+		// Eventually downloadAssociatedFiles may be a separate pref
+		// for PDFs and other large files
+		//+ "\nextensions.zotero.downloadAssociatedFiles => "+Zotero.Prefs.get("downloadAssociatedFiles");
+		+ "\nextensions.zotero.automaticSnapshots => "+Zotero.Prefs.get("automaticSnapshots");
 	return errorString.substr(1);
 }
 
@@ -1360,7 +1364,9 @@ Zotero.Translate.prototype._runHandler = function(type, argument) {
  * does the actual web translation
  */
 Zotero.Translate.prototype._web = function() {
-	this._downloadAssociatedFiles = Zotero.Prefs.get("downloadAssociatedFiles");
+	// TODO: Currently using automaticSnapshots for everything
+	//this._downloadAssociatedFiles = Zotero.Prefs.get("downloadAssociatedFiles");
+	this._downloadAssociatedFiles = Zotero.Prefs.get("automaticSnapshots");
 	
 	try {
 		this._sandbox.doWeb(this.document, this.location);
