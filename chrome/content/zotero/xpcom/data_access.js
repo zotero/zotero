@@ -161,8 +161,9 @@ Zotero.Item.prototype.setType = function(itemTypeID){
 		return true;
 	}
 	
-	// If existing type, clear fields from old type that aren't in new one
+	// If existing type
 	if (this.getType()){
+		// Clear fields from old type that aren't in new one
 		var sql = 'SELECT fieldID FROM itemTypeFields '
 			+ 'WHERE itemTypeID=' + this.getType() + ' AND fieldID NOT IN '
 			+ '(SELECT fieldID FROM itemTypeFields WHERE itemTypeID='
@@ -172,6 +173,19 @@ Zotero.Item.prototype.setType = function(itemTypeID){
 		if (obsoleteFields){
 			for (var i=0; i<obsoleteFields.length; i++){
 				this.setField(obsoleteFields[i],false);
+			}
+		}
+		
+		// And reset custom creator types to the default
+		var creators = this.getCreators();
+		if (creators){
+			for each(var creator in creators){
+				if (!Zotero.CreatorTypes.isValidForItemType(creator['creatorTypeID'], itemTypeID))
+				{
+					// Reset to contributor (creatorTypeID 2), which exists in all
+					this.setCreator(orderIndex, creator['firstName'],
+						creator['lastName'], 2, creator['fieldMode']);
+				}
 			}
 		}
 	}
@@ -2910,6 +2924,7 @@ Zotero.CreatorTypes = new function(){
 	this.constructor.prototype = new Zotero.CachedTypes();
 	
 	this.getTypesForItemType = getTypesForItemType;
+	this.isValidForItemType = isValidForItemType;
 	this.getPrimaryIDForType = getPrimaryIDForType;
 	
 	this._typeDesc = 'creator type';
@@ -2925,6 +2940,14 @@ Zotero.CreatorTypes = new function(){
 			+ "WHERE itemTypeID=? ORDER BY primaryField=1 DESC, name";
 		return Zotero.DB.query(sql, itemTypeID);
 	}
+	
+	
+	function isValidForItemType(creatorTypeID, itemTypeID){
+		var sql = "SELECT COUNT(*) FROM itemTypeCreatorTypes "
+			+ "WHERE itemTypeID=? AND creatorTypeID=?";
+		return !!Zotero.DB.valueQuery(sql, [itemTypeID, creatorTypeID]);
+	}
+	
 	
 	function getPrimaryIDForType(itemTypeID){
 		var sql = "SELECT creatorTypeID FROM itemTypeCreatorTypes "
