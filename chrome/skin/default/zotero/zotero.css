@@ -164,6 +164,11 @@ zoterosearchtextbox .toolbarbutton-menu-dropmarker
 	margin-left:0;
 }
 
+#editpane-dynamic-fields row vbox[fieldname=extra]
+{
+	margin-left:6px;
+}
+
 .clicky, .unclicky
 {	
 	-moz-border-radius: 6px;
