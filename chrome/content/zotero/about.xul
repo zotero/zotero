@@ -48,8 +48,8 @@
 		<label class="subhead" value="&zotero.developers;"/>
 		<vbox class="subcontent">
 			<label value="Dan Stillman"/>
-			<label value="David Norton"/>
 			<label value="Simon Kornblith"/>
+			<label value="David Norton"/>
 		</vbox>
 		<label class="subhead" value="&zotero.thanks;"/>
 		<vbox class="subcontent">
