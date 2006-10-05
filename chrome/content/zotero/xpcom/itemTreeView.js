@@ -39,7 +39,7 @@ Zotero.ItemTreeView = function(itemGroup, sourcesOnly)
 	this._treebox = null;
 	this.refresh();
 	
-	this._unregisterID = Zotero.Notifier.registerItemTree(this);
+	this._unregisterID = Zotero.Notifier.registerItemObserver(this);
 }
 
 /*
@@ -270,7 +270,7 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids)
  */
 Zotero.ItemTreeView.prototype.unregister = function()
 {
-	Zotero.Notifier.unregisterItemTree(this._unregisterID);
+	Zotero.Notifier.unregisterItemObserver(this._unregisterID);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

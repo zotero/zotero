@@ -60,7 +60,7 @@ function onLoad()
 			noteEditor.collection = Zotero.Collections.get(collectionID);
 	}
 	
-	notifierUnregisterID = Zotero.Notifier.registerItemTree(NotifyCallback);
+	notifierUnregisterID = Zotero.Notifier.registerItemObserver(NotifyCallback);
 }
 
 function onUnload()
@@ -68,7 +68,7 @@ function onUnload()
 	if(noteEditor && noteEditor.value)
 		noteEditor.save();
 	
-	Zotero.Notifier.unregisterItemTree(notifierUnregisterID);
+	Zotero.Notifier.unregisterItemObserver(notifierUnregisterID);
 }
 
 var NotifyCallback = {

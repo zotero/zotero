@@ -23,32 +23,32 @@
 Zotero.Notifier = new function(){
 	var _observers = new Array();
 	var _disabled = false;
-	_observers['columnTree'] = new Zotero.Hash();
-	_observers['itemTree'] = new Zotero.Hash();
+	_observers['collectionObserver'] = new Zotero.Hash();
+	_observers['itemObserver'] = new Zotero.Hash();
 	
-	this.registerColumnTree = registerColumnTree;
-	this.registerItemTree = registerItemTree;
-	this.unregisterColumnTree = unregisterColumnTree;
-	this.unregisterItemTree = unregisterItemTree;
+	this.registerCollectionObserver = registerCollectionObserver;
+	this.registerItemObserver = registerItemObserver;
+	this.unregisterCollectionObserver = unregisterCollectionObserver;
+	this.unregisterItemObserver = unregisterItemObserver;
 	this.trigger = trigger;
 	this.disable = disable;
 	this.enable = enable;
 	this.isEnabled = isEnabled;
 	
-	function registerColumnTree(ref){
-		return _register('columnTree', ref);
+	function registerCollectionObserver(ref){
+		return _register('collectionObserver', ref);
 	}
 	
-	function registerItemTree(ref){
-		return _register('itemTree', ref);
+	function registerItemObserver(ref){
+		return _register('itemObserver', ref);
 	}
 	
-	function unregisterColumnTree(hash){
-		_unregister('columnTree', hash);
+	function unregisterCollectionObserver(hash){
+		_unregister('collectionObserver', hash);
 	}
 	
-	function unregisterItemTree(hash){
-		_unregister('itemTree', hash);
+	function unregisterItemObserver(hash){
+		_unregister('itemObserver', hash);
 	}
 	
 	/**
@@ -63,11 +63,11 @@ Zotero.Notifier = new function(){
 		
 		switch (type){
 			case 'item':
-				var treeType = 'itemTree';
+				var observerType = 'itemObserver';
 				break;
 			case 'collection':
 			case 'search':
-				var treeType = 'columnTree';
+				var observerType = 'collectionObserver';
 				break;
 			default:
 				throw('Invalid type ' + type + ' in Notifier.trigger()');
@@ -75,13 +75,13 @@ Zotero.Notifier = new function(){
 		
 		Zotero.debug("Notifier.trigger('" + event + "', '" + type + "', "
 			+ (typeof ids=='object' ? '[' + ids.join() + ']' : ids) + ") called "
-			+ "[column trees: " + _observers['columnTree'].length
-			+ ", item trees: " + _observers['itemTree'].length + "]");
+			+ "[collection observers: " + _observers['collectionObserver'].length
+			+ ", item observers: " + _observers['itemObserver'].length + "]");
 		
-		for (i in _observers[treeType].items){
-			Zotero.debug("Calling notify() on " + treeType + " with hash '"
+		for (i in _observers[observerType].items){
+			Zotero.debug("Calling notify() on " + observerType + " with hash '"
 				+ i + "'", 4);
-			_observers[treeType].get(i).notify(event, type, ids);
+			_observers[observerType].get(i).notify(event, type, ids);
 		}
 		
 		return true;
