@@ -55,7 +55,6 @@ var ZoteroItemPane = new function()
 	this.viewItem = viewItem;
 	this.loadPane = loadPane;
 	this.changeTypeTo = changeTypeTo;
-	this.onGoToURLClick = onGoToURLClick;
 	this.onOpenURLClick = onOpenURLClick;
 	this.addCreatorRow = addCreatorRow;
 	this.switchCreatorMode = switchCreatorMode;
@@ -175,7 +174,17 @@ var ZoteroItemPane = new function()
 			testView: try
 			{
 				var validURI = false;
-				var spec = _itemBeingEdited.getField('url');
+				
+				var snapID = _itemBeingEdited.getBestSnapshot();
+				if (snapID)
+				{
+					var spec = Zotero.Items.get(snapID).getLocalFileURL();
+				}
+				else
+				{
+					var spec = _itemBeingEdited.getField('url');
+				}
+				
 				if (!spec)
 				{
 					break testView;
@@ -183,7 +192,10 @@ var ZoteroItemPane = new function()
 				var uri = Components.classes["@mozilla.org/network/io-service;1"]
 							.getService(Components.interfaces.nsIIOService)
 							.newURI(spec, null, null);
-				validURI = uri.scheme && uri.host;
+				
+				validURI = uri.scheme && (uri.host || uri.scheme=='file');
+				
+				document.getElementById('tb-go-to-url').setAttribute('viewURL', spec);
 			}
 			catch (e){}
 			document.getElementById('tb-go-to-url').setAttribute('disabled', !validURI);
@@ -390,11 +402,6 @@ var ZoteroItemPane = new function()
 			_itemBeingEdited.save();
 			loadPane(0);
 		}
-	}
-	
-	function onGoToURLClick()
-	{
-		window.loadURI(_itemBeingEdited.getField('url'));
 	}
 	
 	function onOpenURLClick()

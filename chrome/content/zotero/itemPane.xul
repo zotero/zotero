@@ -38,7 +38,7 @@
 								'typeID', typeID, otherFields)"/>
 				</popupset>
 				<hbox align="center">
-					<button id="tb-go-to-url" label="&toolbar.goToURL.label;" tooltiptext="&toolbar.goToURL.tooltip;" flex="1" oncommand="ZoteroItemPane.onGoToURLClick();" disabled="false"/>
+					<button id="tb-go-to-url" label="&toolbar.goToURL.label;" tooltiptext="&toolbar.goToURL.tooltip;" flex="1" oncommand="window.loadURI(this.getAttribute('viewURL'))" disabled="false"/>
 					<button id="tb-openurl" label="&toolbar.openURL.label;" tooltiptext="&toolbar.openURL.tooltip;" flex="1" oncommand="ZoteroItemPane.onOpenURLClick();"/>
 				</hbox>
 				<hbox align="center">

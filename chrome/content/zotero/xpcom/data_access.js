@@ -879,15 +879,15 @@ Zotero.Item.prototype.isNote = function(){
 /**
 * Update an item note
 *
-* Note: This can only be called on note items.
+* Note: This can only be called on notes and attachments
 **/
 Zotero.Item.prototype.updateNote = function(text){
 	if (!this.isNote() && !this.isAttachment()){
-		throw ("updateNote() can only be called on items of type 'note'");
+		throw ("updateNote() can only be called on notes and attachments");
 	}
 	
 	if (!this.getID()){
-		throw ("Cannot call updateNote() on unsaved note");
+		throw ("Cannot call updateNote() on unsaved item");
 	}
 	
 	Zotero.DB.beginTransaction();
@@ -1260,6 +1260,28 @@ Zotero.Item.prototype.getAttachments = function(){
 	return Zotero.DB.columnQuery(sql);
 }
 
+
+/*
+ * Returns the itemID of the latest child snapshot of this item with the
+ * same URL as the item itself, or false if none
+ */
+Zotero.Item.prototype.getBestSnapshot = function(){
+	if (!this.isRegularItem()){
+		throw ("getBestSnapshot() can only be called on regular items");
+	}
+	
+	if (!this.getField('url')){
+		return false;
+	}
+	
+	var sql = "SELECT IA.itemID FROM itemAttachments IA NATURAL JOIN items I "
+		+ "LEFT JOIN itemData ID ON (IA.itemID=ID.itemID AND fieldID=1) "
+		+ "WHERE sourceItemID=? AND linkMode=? AND value=? "
+		+ "ORDER BY dateAdded DESC LIMIT 1";
+		
+	return Zotero.DB.valueQuery(sql, [this.getID(),
+		Zotero.Attachments.LINK_MODE_IMPORTED_URL, {string:this.getField('url')}]);
+}
 
 
 //
