@@ -150,9 +150,9 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParam,
 			
 			if (fieldMode==2)
 			{
-				var sql = "SELECT DISTINCT CASE isInstitution WHEN 1 THEN lastName "
+				var sql = "SELECT DISTINCT CASE fieldMode WHEN 1 THEN lastName "
 					+ "WHEN 0 THEN firstName || ' ' || lastName END AS name "
-					+ "FROM creators WHERE CASE isInstitution "
+					+ "FROM creators WHERE CASE fieldMode "
 					+ "WHEN 1 THEN lastName "
 					+ "WHEN 0 THEN firstName || ' ' || lastName END "
 					+ "LIKE ? ORDER BY name";
@@ -181,7 +181,7 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParam,
 				}
 				
 				var fromSQL = " FROM creators WHERE " + searchParts[2]
-					+ " LIKE ?1 " + "AND isInstitution=?2";
+					+ " LIKE ?1 " + "AND fieldMode=?2";
 				var sqlParams = [searchString + '%', parseInt(fieldMode)];
 				if (itemID){
 					fromSQL += " AND creatorID NOT IN (SELECT creatorID FROM "

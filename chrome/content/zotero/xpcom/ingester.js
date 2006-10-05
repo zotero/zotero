@@ -471,7 +471,7 @@ Zotero.OpenURL = new function() {
 			} else if(key == "rft.au") {
 				item.creators.push(Zotero.Utilities.prototype.cleanAuthor(value, "author", true));
 			} else if(key == "rft.aucorp") {
-				item.creators.push({lastName:value, isInstitution:true});
+				item.creators.push({lastName:value, fieldMode:true});
 			} else if(key == "rft.isbn" && !item.ISBN) {
 				item.ISBN = value;
 			} else if(key == "rft.pub") {

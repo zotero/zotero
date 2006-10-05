@@ -255,12 +255,12 @@ Zotero.Item.prototype.getCreators = function(){
 /*
  * Set or update the creator at the specified position
  */
-Zotero.Item.prototype.setCreator = function(orderIndex, firstName, lastName, creatorTypeID, isInstitution){
+Zotero.Item.prototype.setCreator = function(orderIndex, firstName, lastName, creatorTypeID, fieldMode){
 	if (this.getID() && !this._creatorsLoaded){
 		this._loadCreators();
 	}
 	
-	if (isInstitution || !firstName){
+	if (fieldMode==1 || !firstName){
 		firstName = '';
 	}
 	
@@ -268,14 +268,12 @@ Zotero.Item.prototype.setCreator = function(orderIndex, firstName, lastName, cre
 		lastName = '';
 	}
 	
-	isInstitution = !!isInstitution;
-	
 	// If creator at this position hasn't changed, cancel
 	if (this._creators.has(orderIndex) &&
 		this._creators.get(orderIndex)['firstName']==firstName &&
 		this._creators.get(orderIndex)['lastName']==lastName &&
 		this._creators.get(orderIndex)['creatorTypeID']==creatorTypeID &&
-		this._creators.get(orderIndex)['isInstitution']==isInstitution){
+		this._creators.get(orderIndex)['fieldMode']==fieldMode){
 		return false;
 	}
 	
@@ -287,7 +285,7 @@ Zotero.Item.prototype.setCreator = function(orderIndex, firstName, lastName, cre
 	creator['firstName'] = firstName;
 	creator['lastName'] = lastName;
 	creator['creatorTypeID'] = creatorTypeID;
-	creator['isInstitution'] = isInstitution;
+	creator['fieldMode'] = fieldMode;
 	
 	this._creators.set(orderIndex, creator);
 	this._changedCreators.set(orderIndex);
@@ -320,16 +318,14 @@ Zotero.Item.prototype.removeCreator = function(orderIndex){
 
 
 // Currently unused
-Zotero.Item.prototype.creatorExists = function(firstName, lastName, creatorTypeID, isInstitution, skipIndex){
-	if (isInstitution || !firstName){
+Zotero.Item.prototype.creatorExists = function(firstName, lastName, creatorTypeID, fieldMode, skipIndex){
+	if (fieldMode==1 || !firstName){
 		firstName = '';
 	}
 	
 	if (!lastName){
 		lastName = '';
 	}
-	
-	isInstitution = !!isInstitution;
 	
 	for (var j=0, len=this.numCreators(); j<len; j++){
 		if (typeof skipIndex!='undefined' && skipIndex==j){
@@ -341,7 +337,7 @@ Zotero.Item.prototype.creatorExists = function(firstName, lastName, creatorTypeI
 		if (firstName==creator2['firstName'] &&
 			lastName==creator2['lastName'] &&
 			creatorTypeID==creator2['creatorTypeID'] &&
-			isInstitution==creator2['isInstitution']){
+			fieldMode==creator2['fieldMode']){
 			return true;
 		}
 	}
@@ -513,7 +509,7 @@ Zotero.Item.prototype.save = function(){
 					var creatorID = Zotero.Creators.getID(
 							creator['firstName'],
 							creator['lastName'],
-							creator['isInstitution']
+							creator['fieldMode']
 					);
 					
 					// If not, add it
@@ -521,17 +517,11 @@ Zotero.Item.prototype.save = function(){
 						creatorID = Zotero.Creators.add(
 							creator['firstName'],
 							creator['lastName'],
-							creator['isInstitution']
+							creator['fieldMode']
 						);
 						Zotero.History.add('creators', 'creatorID', creatorID);
 					}
 					
-					
-					sql2 = 'SELECT COUNT(*) FROM itemCreators'
-						+ ' WHERE itemID=' + this.getID()
-						+ ' AND creatorID=' + creatorID
-						+ ' AND creatorTypeID=' + creator['creatorTypeID'];
-						
 					sql = "INSERT INTO itemCreators VALUES (?,?,?,?)";
 					
 					sqlValues = [
@@ -786,7 +776,7 @@ Zotero.Item.prototype.save = function(){
 					var creatorID = Zotero.Creators.getID(
 							creator['firstName'],
 							creator['lastName'],
-							creator['isInstitution']
+							creator['fieldMode']
 					);
 					
 					// If not, add it
@@ -794,7 +784,7 @@ Zotero.Item.prototype.save = function(){
 						creatorID = Zotero.Creators.add(
 							creator['firstName'],
 							creator['lastName'],
-							creator['isInstitution']
+							creator['fieldMode']
 						);
 						Zotero.History.add('creators', 'creatorID', creatorID);
 					}
@@ -1622,7 +1612,7 @@ Zotero.Item.prototype.toArray = function(){
 			arr['creators'][i] = [];
 			arr['creators'][i]['firstName'] = creators[i]['firstName'];
 			arr['creators'][i]['lastName'] = creators[i]['lastName'];
-			arr['creators'][i]['isInstitution'] = creators[i]['isInstitution'];
+			arr['creators'][i]['fieldMode'] = creators[i]['fieldMode'];
 			// Convert creatorTypeIDs to text
 			arr['creators'][i]['creatorType'] =
 				Zotero.CreatorTypes.getName(creators[i]['creatorTypeID']);
@@ -1706,7 +1696,7 @@ Zotero.Item.prototype._loadCreators = function(){
 		var creator = new Array();
 		creator['firstName'] = creators[i]['firstName'];
 		creator['lastName'] = creators[i]['lastName'];
-		creator['isInstitution'] = creators[i]['isInstitution'];
+		creator['fieldMode'] = creators[i]['fieldMode'];
 		creator['creatorTypeID'] = creators[i]['creatorTypeID'];
 		// Save creator data into Hash, indexed by orderIndex
 		this._creators.set(creators[i]['orderIndex'], creator);
@@ -2557,7 +2547,7 @@ Zotero.Collections = new function(){
  * Same structure as Zotero.Tags -- make changes in both places if possible
  */
 Zotero.Creators = new function(){
-	var _creators = new Array; // indexed by first%%%last%%%isInstitution hash
+	var _creators = new Array; // indexed by first%%%last%%%fieldMode hash
 	var _creatorsByID = new Array; // indexed by creatorID
 	
 	this.get = get;
@@ -2590,7 +2580,7 @@ Zotero.Creators = new function(){
 	/*
 	 * Returns the creatorID matching given name and type
 	 */
-	function getID(firstName, lastName, isInstitution){
+	function getID(firstName, lastName, fieldMode){
 		if (!firstName){
 			firstName = '';
 		}
@@ -2598,23 +2588,24 @@ Zotero.Creators = new function(){
 			lastName = '';
 		}
 		
-		if (isInstitution){
+		// Only two modes for now
+		if (fieldMode){
 			firstName = '';
-			isInstitution = 1;
+			fieldMode = 1;
 		}
 		else {
-			isInstitution = 0;
+			fieldMode = 0;
 		}
 		
-		var hash = firstName + '%%%' + lastName + '%%%' + isInstitution;
+		var hash = firstName + '%%%' + lastName + '%%%' + fieldMode;
 		
 		if (_creators[hash]){
 			return _creators[hash];
 		}
 		
 		var sql = 'SELECT creatorID FROM creators '
-			+ 'WHERE firstName=? AND lastName=? AND isInstitution=?';
-		var params = [{string: firstName}, {string: lastName}, isInstitution];
+			+ 'WHERE firstName=? AND lastName=? AND fieldMode=?';
+		var params = [{string: firstName}, {string: lastName}, fieldMode];
 		var creatorID = Zotero.DB.valueQuery(sql, params);
 		
 		if (creatorID){
@@ -2630,7 +2621,7 @@ Zotero.Creators = new function(){
 	 *
 	 * Returns new creatorID
 	 */
-	function add(firstName, lastName, isInstitution){
+	function add(firstName, lastName, fieldMode){
 		Zotero.debug('Adding new creator', 4);
 		
 		Zotero.DB.beginTransaction();
@@ -2638,8 +2629,8 @@ Zotero.Creators = new function(){
 		var sql = 'INSERT INTO creators VALUES (?,?,?,?)';
 		var rnd = Zotero.getRandomID('creators', 'creatorID');
 		var params = [
-			rnd, isInstitution ? '' : {string: firstName}, {string: lastName},
-			isInstitution ? 1 : 0
+			rnd, fieldMode ? '' : {string: firstName}, {string: lastName},
+			fieldMode ? 1 : 0
 		];
 		Zotero.DB.query(sql, params);
 		
@@ -2683,7 +2674,7 @@ Zotero.Creators = new function(){
 			return false;
 		}
 		return creator['firstName'] + '%%%' + creator['lastName'] + '%%%' +
-			creator['isInstitution'];
+			creator['fieldMode'];
 	}
 }
 

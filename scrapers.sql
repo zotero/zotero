@@ -1,4 +1,4 @@
--- 97
+-- 98
 
 DROP TABLE IF EXISTS translators;
 CREATE TABLE translators (
@@ -229,7 +229,7 @@ REPLACE INTO "translators" VALUES ('838d8849-4ffb-9f44-3d0d-aa8a0a079afe', '2006
 						for(var j=1; j<authors.length; j+=2) {
 							if(authors[j-1].substring(0, 1) != ''('' && !yearRegexp.test(authors[j])) {
 								// ignore places where there are parentheses		
-								newItem.creators.push({lastName:authors[j], creatorType:"author", isInstitution:true});
+								newItem.creators.push({lastName:authors[j], creatorType:"author", fieldMode:true});
 							}
 						}
 					} else {
@@ -1073,7 +1073,7 @@ REPLACE INTO "translators" VALUES ('add7c71c-21f3-ee14-d188-caf9da12728b', '2006
 				} else if(field == "added author") {
 					newItem.creators.push(Zotero.Utilities.cleanAuthor(value, "contributor", true));
 				} else if(field == "corporate author") {
-					newItem.creators.push({lastName:author, isInstitution:true});
+					newItem.creators.push({lastName:author, fieldMode:true});
 				} else if(field == "subject term" || field == "corporate subject" || field == "geographic term") {
 					var subjects = value.split("--");
 					newItem.tags = newItem.tags.concat(subjects);
@@ -3516,7 +3516,7 @@ function scrape(doc, url) {
 			author = words.join(" ");
 			
 			if(words[0] == "The") {
-				newItem.creators.push({lastName:author, creatorType:"author", isInstitution:true});
+				newItem.creators.push({lastName:author, creatorType:"author", fieldMode:true});
 			} else {
 				newItem.creators.push(Zotero.Utilities.cleanAuthor(author, "author"));
 			}
@@ -3640,7 +3640,7 @@ function scrape(doc) {
 			author = words.join(" ");
 			
 			if(words[0] == "The") {
-				newItem.creators.push({lastName:author, creatorType:"author", isInstitution:true});
+				newItem.creators.push({lastName:author, creatorType:"author", fieldMode:true});
 			} else {
 				newItem.creators.push(Zotero.Utilities.cleanAuthor(author, "author"));
 			}
@@ -6261,7 +6261,7 @@ function processTag(item, tag, value) {
 			item.creators.push(Zotero.Utilities.cleanAuthor(value, type));
 		}
 	} else if(tag == "Q") {
-		item.creators.push({creatorType:"author", lastName:value, isInstitution:true});
+		item.creators.push({creatorType:"author", lastName:value, fieldMode:true});
 	} else if(tag == "H" || tag == "O") {
 		item.extra += "\n"+value;
 	} else if(tag == "Z") {
@@ -6893,7 +6893,7 @@ function pullISBN(text) {
 
 // corporate author extraction
 function corpAuthor(author) {
-	return {lastName:author, isInstitution:true};
+	return {lastName:author, fieldMode:true};
 }
 
 // regular author extraction

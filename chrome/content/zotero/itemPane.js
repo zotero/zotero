@@ -247,7 +247,7 @@ var ZoteroItemPane = new function()
 				for(var i = 0, len=_itemBeingEdited.numCreators(); i<len; i++)
 				{
 					var creator = _itemBeingEdited.getCreator(i);
-					addCreatorRow(creator['firstName'], creator['lastName'], creator['creatorTypeID'], creator['isInstitution']);
+					addCreatorRow(creator['firstName'], creator['lastName'], creator['creatorTypeID'], creator['fieldMode']);
 				}
 			}
 			else
@@ -1108,7 +1108,7 @@ var ZoteroItemPane = new function()
 			var firstName = creator['firstName'];
 			var lastName = creator['lastName'];
 			var typeID = creator['creatorTypeID'];
-			var singleField = creator['isInstitution'];
+			var singleField = creator['singleField'];
 		}
 		
 		// Don't save empty creators

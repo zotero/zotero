@@ -525,6 +525,15 @@ Zotero.Schema = new function(){
 					Zotero.DB.query("UPDATE itemAttachments SET path=NULL WHERE linkMode=3");
 					try { Zotero.DB.query("DELETE FROM fulltextItems WHERE itemID IS NULL"); } catch(e){}
 				}
+				
+				if (i==6){
+					Zotero.DB.query("CREATE TABLE creatorsTemp (creatorID INT, firstName INT, lastName INT, fieldMode INT)");
+					Zotero.DB.query("INSERT INTO creatorsTemp SELECT * FROM creators");
+					Zotero.DB.query("DROP TABLE creators");
+					Zotero.DB.query("CREATE TABLE creators (\n    creatorID INT,\n    firstName INT,\n    lastName INT,\n    fieldMode INT,\n    PRIMARY KEY (creatorID)\n);");
+					Zotero.DB.query("INSERT INTO creators SELECT * FROM creatorsTemp");
+					Zotero.DB.query("DROP TABLE creatorsTemp");
+				}
 			}
 			
 			_updateSchema('userdata');
