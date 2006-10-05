@@ -628,36 +628,74 @@ var ZoteroPane = new function()
 	{
 		var menu = document.getElementById('zotero-itemmenu');
 		
+		var enable = [], disable = [], show = [], hide = [], multiple = '';
+		
 		if(itemsView && itemsView.selection.count > 0)
 		{
-			menu.childNodes[2].removeAttribute('disabled');
-			menu.childNodes[3].removeAttribute('disabled');
-			menu.childNodes[5].removeAttribute('disabled');
-			menu.childNodes[6].removeAttribute('disabled');
+			enable.push(3,4,5,7);
+			
+			// Multiple items selected
+			if (itemsView.selection.count > 1)
+			{
+				var multiple =  '.multiple';
+			}
+			// Single item selected
+			else
+			{
+				var item = itemsView._getItemAtRow(itemsView.selection.currentIndex);
+				if (item.ref.isRegularItem())
+				{
+					var itemID = item.ref.getID();
+					menu.setAttribute('itemID', itemID);
+					
+					show.push(0,1,2);
+				}
+				else
+				{
+					hide.push(0,1,2);
+				}
+			}
 		}
 		else
 		{
-			menu.childNodes[2].setAttribute('disabled', true);
-			menu.childNodes[3].setAttribute('disabled', true);
-			menu.childNodes[5].setAttribute('disabled', true);
-			menu.childNodes[6].setAttribute('disabled', true);
+			disable.push(3,4,6,7);
 		}
 		
-		var multiple = (itemsView && itemsView.selection.count > 1) ? '.multiple' : '';
-		
+		// Remove from collection
 		if (itemsView._itemGroup.isCollection())
 		{
-			menu.childNodes[2].setAttribute('label', Zotero.getString('pane.items.menu.remove' + multiple));
-			menu.childNodes[2].setAttribute('hidden', false);
+			menu.childNodes[3].setAttribute('label', Zotero.getString('pane.items.menu.remove' + multiple));
+			show.push(3);
 		}
 		else
 		{
-			menu.childNodes[2].setAttribute('hidden', true);
+			hide.push(3);
 		}
 		
-		menu.childNodes[3].setAttribute('label', Zotero.getString('pane.items.menu.erase' + multiple));
-		menu.childNodes[5].setAttribute('label', Zotero.getString('pane.items.menu.export' + multiple));
-		menu.childNodes[6].setAttribute('label', Zotero.getString('pane.items.menu.createBib' + multiple));
+		// Plural if necessary
+		menu.childNodes[4].setAttribute('label', Zotero.getString('pane.items.menu.erase' + multiple));
+		menu.childNodes[6].setAttribute('label', Zotero.getString('pane.items.menu.export' + multiple));
+		menu.childNodes[7].setAttribute('label', Zotero.getString('pane.items.menu.createBib' + multiple));
+		
+		for (var i in disable)
+		{
+			menu.childNodes[disable[i]].setAttribute('disabled', true);
+		}
+		
+		for (var i in enable)
+		{
+			menu.childNodes[enable[i]].setAttribute('disabled', false);
+		}
+		
+		for (var i in hide)
+		{
+			menu.childNodes[hide[i]].setAttribute('hidden', true);
+		}
+		
+		for (var i in show)
+		{
+			menu.childNodes[show[i]].setAttribute('hidden', false);
+		}
 	}
 	
 	// Adapted from: http://www.xulplanet.com/references/elemref/ref_tree.html#cmnote-9

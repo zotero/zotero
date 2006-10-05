@@ -16,6 +16,9 @@
 <!ENTITY items.dateAdded_column 		"Date Added">
 <!ENTITY items.dateModified_column	 	"Date Modified">
 
+<!ENTITY items.menu.attach.snapshot 	"Attach Snapshot of Current Page">
+<!ENTITY items.menu.attach.link	 	"Attach Link to Current Page">
+
 <!ENTITY collections.name_column		"Collections">
 
 <!ENTITY toolbar.newItem.label    		"New Item">

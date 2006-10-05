@@ -65,7 +65,8 @@
 					<menuitem label="&toolbar.export.label;" oncommand="Zotero_File_Interface.exportFile()"/>
 				</popup>
 				<popup id="zotero-itemmenu" onpopupshowing="ZoteroPane.buildItemContextMenu();">
-					<menuitem label="&toolbar.newItem.label;" command="cmd_zotero_newItem"/>
+					<menuitem label="&items.menu.attach.snapshot;" oncommand="ZoteroPane.addAttachmentFromPage(false, this.parentNode.getAttribute('itemID'));"/>
+					<menuitem label="&items.menu.attach.link;" oncommand="ZoteroPane.addAttachmentFromPage(true, this.parentNode.getAttribute('itemID'));"/>
 					<menuseparator/>
 					<menuitem oncommand="ZoteroPane.deleteSelectedItem();"/>
 					<menuitem oncommand="ZoteroPane.deleteSelectedItem(true);"/>
