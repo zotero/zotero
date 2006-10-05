@@ -196,3 +196,24 @@ CREATE TABLE IF NOT EXISTS fulltextItems (
     PRIMARY KEY (wordID, itemID)
 );
 CREATE INDEX IF NOT EXISTS fulltextItems_itemID ON fulltextItems(itemID);
+
+CREATE TABLE IF NOT EXISTS translators (
+    translatorID TEXT PRIMARY KEY,
+    lastUpdated DATETIME,
+    inRepository INT,
+    priority INT,
+    translatorType INT,
+    label TEXT,
+    creator TEXT,
+    target TEXT,
+    detectCode TEXT,
+    code TEXT
+);
+CREATE INDEX IF NOT EXISTS translators_type ON translators(translatorType);
+
+CREATE TABLE IF NOT EXISTS csl (
+    cslID TEXT PRIMARY KEY,
+    updated DATETIME,
+    title TEXT,
+    csl TEXT
+);

@@ -21,32 +21,6 @@
 --  ***** END LICENSE BLOCK *****
 
 
-DROP TABLE IF EXISTS translators;
-CREATE TABLE translators (
-    translatorID TEXT PRIMARY KEY,
-    lastUpdated DATETIME,
-    inRepository INT,
-    priority INT,
-    translatorType INT,
-    label TEXT,
-    creator TEXT,
-    target TEXT,
-    detectCode TEXT,
-    code TEXT
-);
-DROP INDEX IF EXISTS translators_type;
-CREATE INDEX translators_type ON translators(translatorType);
-
-
-DROP TABLE IF EXISTS csl;
-CREATE TABLE csl (
-    cslID TEXT PRIMARY KEY,
-    updated DATETIME,
-    title TEXT,
-    csl TEXT
-);
-
-
 -- Set the following timestamp to the most recent scraper update date
 REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-10-02 17:00:00'));
 
