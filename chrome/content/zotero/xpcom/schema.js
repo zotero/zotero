@@ -320,14 +320,17 @@ Zotero.Schema = new function(){
 			Zotero.DB.query(_getSchemaSQL('scrapers'));
 			_updateDBVersion('scrapers', _getSchemaSQLVersion('scrapers'));
 			
-			var sql = "INSERT INTO items VALUES(1233, 14, "
-				+ "'Zotero - Quick Start Guide', '2006-08-31 20:00:00', "
-				+ "'2006-08-31 20:00:00')";
+			var sql = "INSERT INTO items VALUES(123456789, 14, 'Zotero - Quick Start Guide', '2006-10-05 14:00:00', '2006-10-05 14:00:00')";
 			Zotero.DB.query(sql);
-			var sql = "INSERT INTO itemAttachments VALUES(1233, NULL, 3, "
-				+ "'text/html', 25, "
-				+ "'http://www.zotero.org/docs/quick_start_guide.php', NULL)";
+			var sql = "INSERT INTO itemAttachments VALUES(123456789, NULL, 3, 'text/html', 25, NULL, NULL)";
 			Zotero.DB.query(sql);
+			var sql = "INSERT INTO itemData VALUES(123456789, 1, 'http://www.zotero.org/documentation/doku.php?id=quick_start_guide')";
+			Zotero.DB.query(sql);
+			var sql = "INSERT INTO itemData VALUES(123456789, 27, '2006-10-05 14:00:00')";
+			Zotero.DB.query(sql);
+			var sql = "INSERT INTO itemNotes VALUES(123456789, NULL, ?)";
+			var msg = "Welcome to Zotero! Click the \"View Page\" button above to visit our Quick Start Guide and learn how to get started collecting, managing, and citing your research.\n\nThanks for trying Zotero, and be sure to tell your friends about it.";
+			Zotero.DB.query(sql, msg);
 			
 			Zotero.DB.commitTransaction();
 		}
