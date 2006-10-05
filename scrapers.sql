@@ -1,4 +1,4 @@
--- 98
+-- 99
 
 DROP TABLE IF EXISTS translators;
 CREATE TABLE translators (
@@ -664,7 +664,7 @@ function doWeb(doc, url) {
 						} else if(fieldCode == "NO") {
 							newItem.issue = fieldContent;
 						} else if(fieldCode == "SE") {
-							newItem.seriesTitle = fieldContent;
+							newItem.series = fieldContent;
 						} else if(fieldCode == "DA") {
 							newItem.date = fieldContent;
 						} else if(fieldCode == "PP") {
@@ -4366,20 +4366,6 @@ function doExport() {
 		
 		/** SUPPLEMENTAL FIELDS **/
 		
-		// XML tag relatedItem.titleInfo; object field series
-		if(item.seriesTitle) {
-			var series = <relatedItem type="series">
-					<titleInfo><title>{item.seriesTitle}</title></titleInfo>
-					</relatedItem>;
-			
-			if(item.itemType == "bookSection") {
-				// For a book section, series info must go inside host tag
-				mods.relatedItem.relatedItem = series;
-			} else {
-				mods.relatedItem += series;
-			}
-		}
-		
 		// Make part its own tag so we can figure out where it goes later
 		var part = new XML();
 		
@@ -4523,7 +4509,37 @@ function doExport() {
 		/** TAGS **/
 		
 		for(var j in item.tags) {
-			mods.subject += <subject>{item.tags[j]}</subject>;
+			mods.subject += <subject><topic>{item.tags[j]}</topic></subject>;
+		}
+		
+		
+		// XML tag relatedItem.titleInfo; object field series
+		if(item.seriesTitle || item.series || item.seriesNumber || item.seriesText) {
+			var series = <relatedItem type="series"/>;
+			
+			if(item.series) {
+				series.titleInfo.title = item.series;
+			}
+			
+			if(item.seriesTitle) {
+				series.titleInfo.partTitle = item.seriesTitle;
+			}
+			
+			if(item.seriesText) {
+				series.titleInfo.subTitle = item.seriesText;
+			}
+			
+			if(item.seriesNumber) {
+				series.titleInfo.partNumber = item.seriesNumber;
+			}
+			
+			// TODO: make this work in import
+			/*if(item.itemType == "bookSection") {
+				// For a book section, series info must go inside host tag
+				mods.relatedItem.relatedItem = series;
+			} else {*/
+				mods.relatedItem += series;
+			//}
 		}
 		
 		modsCollection.mods += mods;
@@ -4568,7 +4584,6 @@ function doImport() {
 	while(read = Zotero.read(16384)) {
 		text += read;
 	}
-	Zotero.Utilities.debug("read in");
 	
 	// parse with E4X
 	var m = new Namespace("http://www.loc.gov/mods/v3");
@@ -4576,25 +4591,28 @@ function doImport() {
 	default xml namespace = m;
 	var xml = new XML(text);
 	
-	for each(var mods in xml.m::mods) {
-		Zotero.Utilities.debug("item is: ");
-		for(var i in mods) {
-			Zotero.Utilities.debug(i+" = "+mods[i].toString());
-		}
-		
+	if(xml.m::mods.length()) {
+		var modsElements = xml.m::mods;
+	} else {
+		var modsElements = [xml];
+	}
+	
+	for each(var mods in modsElements) {
 		var newItem = new Zotero.Item();
 		
 		// title
-		newItem.title = mods.m::titleInfo.(m::title.@type!="abbreviated").m::title;
+		for each(var titleInfo in mods.m::titleInfo) {
+			if(titleInfo.@type != "abbreviated") {
+				newItem.title = titleInfo.m::title;
+			}
+		}
 		
 		// try to get genre from local genre
-		var localGenre = mods.m::genre.(@authority=="local").text().toString();
-		if(localGenre && Zotero.Utilities.itemTypeExists(localGenre)) {
-			newItem.itemType = localGenre;
-		} else {
-			// otherwise, look at the marc genre
-			var marcGenre = mods.m::genre.(@authority=="marcgt").text().toString();
-			if(marcGenre) {
+		for each(var genre in mods.m::genre) {
+			if(genre.@authority == "local" && Zotero.Utilities.itemTypeExists(genre)) {
+				newItem.itemType = genre.text().toString();
+			} else if(!newItem.itemType && genre.@authority == "marcgt") {
+				// otherwise, look at the marc genre
 				if(marcGenre == "book") {
 					newItem.itemType = "book";
 				} else if(marcGenre == "periodical") {
@@ -4615,10 +4633,10 @@ function doImport() {
 					newItem.itemType = "webpage";
 				}
 			}
-			
-			if(!newItem.itemType) {
-				newItem.itemType = "book";
-			}
+		}
+		
+		if(!newItem.itemType) {
+			newItem.itemType = "book";
 		}
 		
 		var isPartialItem = Zotero.Utilities.inArray(newItem.itemType, partialItemTypes);
@@ -4628,18 +4646,33 @@ function doImport() {
 		for each(var name in mods.m::name) {
 			// TODO: institutional authors
 			var creator = new Array();
-			creator.firstName = name.m::namePart.(@type=="given").text().toString();
-			creator.lastName = name.m::namePart.(@type=="family").text().toString();
+			for each(var namePart in name.m::namePart) {
+				if(namePart.@type == "given") {
+					creator.firstName = namePart.text().toString();
+				} else if(namePart.@type == "family") {
+					creator.lastName = namePart.text().toString();
+				} else {
+					var backupName = namePart.text().toString();
+				}
+			}
+			
+			if(backupName && !creator.firstName && !creator.lastName) {
+				creator = Zotero.Utilities.cleanAuthor(backupName, "author", true);
+			}
 			
 			// look for roles
-			var role = name.m::role.m::roleTerm.(@type=="code").(@authority=="marcrelator").text().toString();
-			if(role == "edt") {
-				creator.creatorType = "editor";
-			} else if(role == "ctb") {
-				creator.creatorType = "contributor";
-			} else {
-				creator.creatorType = "author";
+			for(var role in name.m::role.m::roleTerm) {
+				if(role.@type == "code" && role.@authority == "marcrelator") {
+					if(role == "edt") {
+						creator.creatorType = "editor";
+					} else if(role == "ctb") {
+						creator.creatorType = "contributor";
+					} else if(role == "trl") {
+						creator.creatorType = "translator";
+					}
+				}
 			}
+			if(!creator.creatorType) creator.creatorType = "author";
 			
 			newItem.creators.push(creator);
 		}
@@ -4653,87 +4686,123 @@ function doImport() {
 		
 		/** SUPPLEMENTAL FIELDS **/
 		
+		var part = false, originInfo = false, identifier = false;
+		
 		// series
-		if(newItem.itemType == "bookSection") {
-			newItem.seriesTitle = mods.m::relatedItem.(@type=="host").m::relatedItem.(@type=="series").m::titleInfo.m::title.text().toString();
-		} else {
-			newItem.seriesTitle = mods.m::relatedItem.(@type=="series").m::titleInfo.m::title.text().toString();
+		for each(var relatedItem in mods.m::relatedItem) {
+			if(relatedItem.@type == "host") {
+				for each(var titleInfo in relatedItem.m::titleInfo) {
+					if(titleInfo.@type == "abbreviated") {
+						newItem.journalAbbreviation = titleInfo.m::title.text().toString()
+					} else {
+						newItem.publicationTitle = titleInfo.m::title.text().toString();
+					}
+				}
+				part = relatedItem.m::part;
+				originInfo = relatedItem.m::originInfo;
+				identifier = relatedItem.m::identifier;
+			} else if(relatedItem.@type == "series") {
+				newItem.series = relatedItem.m::titleInfo.m::title.text().toString();
+				newItem.seriesTitle = relatedItem.m::titleInfo.m::partTitle.text().toString();
+				newItem.seriesText = relatedItem.m::titleInfo.m::subTitle.text().toString();
+				newItem.seriesNumber = relatedItem.m::titleInfo.m::partNumber.text().toString();
+			}
 		}
 		
 		// get part
-		if(isPartialItem) {
-			var part = mods.m::relatedItem.m::part;
-			var originInfo = mods.m::relatedItem.m::originInfo;
-			var identifier = mods.m::relatedItem.m::identifier;
-		} else {
-			var part = mods.m::part;
-			var originInfo = mods.m::originInfo;
-			var identifier = mods.m::identifier;
+		if(!part) {
+			part = mods.m::part;
+			originInfo = mods.m::originInfo;
+			identifier = mods.m::identifier;
 		}
 		
-		// volume
-		newItem.volume = part.m::detail.(@type=="volume").m::number.text().toString();
-		if(!newItem.volume) {
-			newItem.volume = part.m::detail.(@type=="volume").m::text.text().toString();
-		}
-		
-		// number
-		newItem.issue = part.m::detail.(@type=="issue").m::number.text().toString();
-		if(!newItem.issue) {
-			newItem.issue = part.m::detail.(@type=="issue").m::text.text().toString();
-		}
-		
-		// section
-		newItem.section = part.m::detail.(@type=="section").m::number.text().toString();
-		if(!newItem.section) {
-			newItem.section = part.m::detail.(@type=="section").m::text.text().toString();
-		}
-		
-		// pages
-		var pagesStart = part.m::extent.(@unit=="pages").m::start.text().toString();
-		var pagesEnd = part.m::extent.(@unit=="pages").m::end.text().toString();
-		if(pagesStart || pagesEnd) {
-			if(pagesStart && pagesEnd && pagesStart != pagesEnd) {
-				newItem.pages = pagesStart+"-"+pagesEnd;
-			} else {
-				newItem.pages = pagesStart+pagesEnd;
+		if(part) {
+			for each(var detail in part.m::detail) {
+				// volume
+				if(detail.@type == "volume") {
+					newItem.volume = detail.m::number.text().toString();
+					if(!newItem.volume) {
+						newItem.volume = detail.m::text.text().toString();
+					}
+				}
+				
+				// number
+				if(detail.@type == "issue") {
+					newItem.issue = detail.m::number.text().toString();
+					if(!newItem.issue) {
+						newItem.issue = detail.m::text.text().toString();
+					}
+				}
+				
+				// section
+				if(detail.@type == "section") {
+					newItem.section = detail.m::number.text().toString();
+					if(!newItem.section) {
+						newItem.section = detail.m::text.text().toString();
+					}
+				}
+			}
+			
+			// pages
+			for each(var extent in part.m::extent) {
+				if(extent.@unit == "pages") {
+					var pagesStart = extent.m::start.text().toString();
+					var pagesEnd = extent.m::end.text().toString();
+					if(pagesStart || pagesEnd) {
+						if(pagesStart == pagesEnd) {
+							newItem.pages = pagesStart;
+						} else if(pagesStart && pagesEnd) {
+							newItem.pages = pagesStart+"-"+pagesEnd;
+						} else {
+							newItem.pages = pagesStart+pagesEnd;
+						}
+					}
+				}
 			}
 		}
 		
 		// edition
 		newItem.edition = originInfo.m::edition.text().toString();
 		// place
-		newItem.place = originInfo.m::place.m::placeTerm.text().toString();
-		// publisher/distributor
-		newItem.publisher = newItem.distributor = originInfo.m::publisher.text().toString();
-		// date
-		newItem.date = originInfo.m::copyrightDate.text().toString();
-		if(!newItem.date) {
-			newItem.date = originInfo.m::dateIssued.text().toString();
-			if(!newItem.date) {
-				newItem.date = originInfo.dateCreated.text().toString();
+		for each(var placeTerm in originInfo.m::place.m::placeTerm) {
+			if(placeTerm.@type == "text") {
+				newItem.place = placeTerm.text().toString();
 			}
+		}
+		// publisher/distributor
+		if(originInfo.m::publisher.length()) {
+			newItem.publisher = newItem.distributor = originInfo.m::publisher[0].text().toString();
+		}
+		// date
+		if(originInfo.m::copyrightDate.length()) {
+			newItem.date = originInfo.m::copyrightDate[0].text().toString();
+		} else if(originInfo.m::dateIssued.length()) {
+			newItem.date = originInfo.m::dateIssued[0].text().toString();
+		} else if(originInfo.m::dateCreated.length()) {
+			newItem.date = originInfo.m::dateCreated[0].text().toString();
 		}
 		// lastModified
 		newItem.lastModified = originInfo.m::dateModified.text().toString();
 		// accessDate
 		newItem.accessDate = originInfo.m::dateCaptured.text().toString();
-		// ISBN
-		newItem.ISBN = identifier.(@type=="isbn").text().toString()
-		// ISSN
-		newItem.ISSN = identifier.(@type=="issn").text().toString()
-		// DOI
-		newItem.DOI = identifier.(@type=="doi").text().toString()
-		// publication
-		newItem.publicationTitle = mods.m::relatedItem.m::publication.text().toString();
+		
+		// identifiers
+		for each(var myIdentifier in identifier) {
+			if(myIdentifier.@type == "isbn") {
+				newItem.ISBN = myIdentifier.text().toString()
+			} else if(myIdentifier.@type == "issn") {
+				newItem.ISSN = myIdentifier.text().toString()
+			} else if(myIdentifier.@type == "doi") {
+				newItem.DOI = myIdentifier.text().toString()
+			}
+		}
+		
 		// call number
 		newItem.callNumber = mods.m::classification.text().toString();
 		// archiveLocation
 		newItem.archiveLocation = mods.m::location.m::physicalLocation.text().toString();
 		// url
 		newItem.url = mods.m::location.m::url.text().toString();
-		// journalAbbreviation
-		newItem.journalAbbreviation = mods.m::relatedItem.(m::titleInfo.@type=="abbreviated").m::titleInfo.m::title.text().toString();
 		
 		/** NOTES **/
 		for each(var note in mods.m::note) {
@@ -4741,9 +4810,11 @@ function doImport() {
 		}
 		
 		/** TAGS **/
-		for each(var subject in mods.m::subject) {
+		for each(var subject in mods.m::subject.m::topic) {
 			newItem.tags.push(subject.text().toString());
 		}
+		
+		Zotero.Utilities.debug(newItem);
 		
 		newItem.complete();
 	}
@@ -4785,35 +4856,333 @@ function generateCollection(collection) {
 	}
 }
 
-function handleAttachment(attachmentResource, attachment) {
-	Zotero.RDF.addStatement(attachmentResource, rdf+"type", n.fs+"Attachment", false);
+function generateItem(item, zoteroType, resource) {
+	container = null;
+	containerElement = null;
+	section = null;
 	
-	if(attachment.path) {
-		Zotero.RDF.addStatement(attachmentResource, rdf+"resource", attachment.path, false);
+	/** CORE FIELDS **/
+	
+	// title
+	if(item.title) {
+		Zotero.RDF.addStatement(resource, n.dc+"title", item.title, true);
 	}
 	
-	if(attachment.url) {
+	// type
+	var type = null;
+	if(zoteroType == "book") {
+		type = n.bib+"Book";
+	} else if (zoteroType == "bookSection") {
+		type = n.bib+"BookSection";
+		container = "Book";
+	} else if(zoteroType == "journalArticle") {
+		type = n.bib+"Article";
+		container = "Journal";
+	} else if(zoteroType == "magazineArticle") {
+		type = n.bib+"Article";
+		container = "Periodical";
+	} else if(zoteroType == "newspaperArticle") {
+		type = n.bib+"Article";
+		container = "Newspaper";
+	} else if(zoteroType == "thesis") {
+		type = n.bib+"Thesis";
+	} else if(zoteroType == "letter") {
+		type = n.bib+"Letter";
+	} else if(zoteroType == "manuscript") {
+		type = n.bib+"Manuscript";
+	} else if(zoteroType == "interview") {
+		type = n.bib+"Interview";
+	} else if(zoteroType == "film") {
+		type = n.bib+"MotionPicture";
+	} else if(zoteroType == "artwork") {
+		type = n.bib+"Illustration";
+	} else if(zoteroType == "webpage") {
+		type = n.bib+"Document";
+	} else if(zoteroType == "note") {
+		type = n.bib+"Memo";
+		if(!Zotero.getOption("exportNotes")) {
+			return;
+		}
+	} else if(zoteroType == "attachment") {
+		type = n.fs+"Attachment";
+		
+		// set path
+		if(item.path) {
+			Zotero.RDF.addStatement(resource, rdf+"resource", item.path, false);
+		}
+		// set mime type value
+		Zotero.RDF.addStatement(resource, n.link+"type", item.mimeType, true);
+		// set charset value
+		if(item.charset) {
+			Zotero.RDF.addStatement(resource, n.link+"charset", item.charset, true);
+		}
+	}
+	
+	if(type) {
+		Zotero.RDF.addStatement(resource, rdf+"type", type, false);
+	}
+	
+	// authors/editors/contributors
+	var creatorContainers = new Object();
+	for(var j in item.creators) {
+		var creator = Zotero.RDF.newResource();
+		Zotero.RDF.addStatement(creator, rdf+"type", n.foaf+"Person", false);
+		// gee. an entire vocabulary for describing people, and these aren''t even
+		// standardized in it. oh well. using them anyway.
+		Zotero.RDF.addStatement(creator, n.foaf+"surname", item.creators[j].lastName, true);
+		Zotero.RDF.addStatement(creator, n.foaf+"givenname", item.creators[j].firstName, true);
+		
+		// in addition, these tags are not yet in Biblio, but Bruce D''Arcus
+		// says they will be.
+		if(item.creators[j].creatorType == "author") {
+			var cTag = "authors";
+		} else if(item.creators[j].creatorType == "editor") {
+			var cTag = "editors";
+		} else {
+			var cTag = "contributors";
+		}
+		
+		if(!creatorContainers[cTag]) {
+			var creatorResource = Zotero.RDF.newResource();
+			// create new seq for author type
+			creatorContainers[cTag] = Zotero.RDF.newContainer("seq", creatorResource);
+			// attach container to resource
+			Zotero.RDF.addStatement(resource, n.bib+cTag, creatorResource, false);
+		}
+		Zotero.RDF.addContainerElement(creatorContainers[cTag], creator, false);
+	}
+	
+	/** FIELDS ON NEARLY EVERYTHING BUT NOT A PART OF THE CORE **/
+	
+	// source
+	if(item.source) {
+		Zotero.RDF.addStatement(resource, n.dc+"source", item.source, true);
+	}
+	
+	// url		
+	if(item.url) {
 		// add url as identifier
 		var term = Zotero.RDF.newResource();
 		// set term type
 		Zotero.RDF.addStatement(term, rdf+"type", n.dcterms+"URI", false);
 		// set url value
-		Zotero.RDF.addStatement(term, rdf+"value", attachment.url, true);
+		Zotero.RDF.addStatement(term, rdf+"value", item.url, true);
 		// add relationship to resource
-		Zotero.RDF.addStatement(attachmentResource, n.dc+"identifier", term, false);
+		Zotero.RDF.addStatement(resource, n.dc+"identifier", term, false);
 	}
 	
-	// set mime type value
-	Zotero.RDF.addStatement(attachmentResource, n.link+"type", attachment.mimeType, true);
-	// set charset value
-	if(attachment.charset) {
-		Zotero.RDF.addStatement(attachmentResource, n.link+"charset", attachment.charset, true);
+	// accessionNumber as generic ID
+	if(item.accessionNumber) {
+		Zotero.RDF.addStatement(resource, n.dc+"identifier", item.accessionNumber, true);
 	}
-	// add title
-	Zotero.RDF.addStatement(attachmentResource, n.dc+"title", attachment.title, true);
-	// Add see also info to RDF
-	generateSeeAlso(attachmentResource, attachment.seeAlso);
-	generateTags(attachmentResource, attachment.tags);
+	
+	// rights
+	if(item.rights) {
+		Zotero.RDF.addStatement(resource, n.dc+"rights", item.rights, true);
+	}
+	
+	/** SUPPLEMENTAL FIELDS **/
+	
+	// use section to set up another container element
+	if(item.section) {
+		section = Zotero.RDF.newResource();				// leave as global
+		// set section type
+		Zotero.RDF.addStatement(section, rdf+"type", n.bib+"Part", false);
+		// set section title
+		Zotero.RDF.addStatement(section, n.dc+"title", item.section, true);
+		// add relationship to resource
+		Zotero.RDF.addStatement(resource, n.dcterms+"isPartOf", section, false);
+	}
+	
+	// generate container
+	if(container) {
+		if(item.ISSN && !Zotero.RDF.getArcsIn("urn:issn:"+item.ISSN)) {
+			// use ISSN as container URI if no other item is
+			containerElement = "urn:issn:"+item.ISSN
+		} else {
+			containerElement = Zotero.RDF.newResource();
+		}
+		// attach container to section (if exists) or resource
+		Zotero.RDF.addStatement((section ? section : resource), n.dcterms+"isPartOf", containerElement, false);
+		// add container type
+		Zotero.RDF.addStatement(containerElement, rdf+"type", n.bib+container, false);
+	}
+	
+	// ISSN
+	if(item.ISSN) {
+		Zotero.RDF.addStatement((containerElement ? containerElement : resource), n.dc+"identifier", "ISSN "+item.ISSN, true);
+	}
+	
+	// ISBN
+	if(item.ISBN) {
+		Zotero.RDF.addStatement((containerElement ? containerElement : resource), n.dc+"identifier", "ISBN "+item.ISBN, true);
+	}
+	
+	// DOI
+	if(item.DOI) {
+		Zotero.RDF.addStatement((containerElement ? containerElement : resource), n.dc+"identifier", "DOI "+item.DOI, true);
+	}
+	
+	// publication gets linked to container via isPartOf
+	if(item.publicationTitle) {
+		Zotero.RDF.addStatement((containerElement ? containerElement : resource), n.dc+"title", item.publicationTitle, true);
+	}
+	
+	// series also linked in
+	if(item.series || item.seriesTitle || item.seriesText || item.seriesNumber) {
+		var series = Zotero.RDF.newResource();
+		// set series type
+		Zotero.RDF.addStatement(series, rdf+"type", n.bib+"Series", false);
+		// add relationship to resource
+		Zotero.RDF.addStatement((containerElement ? containerElement : resource), n.dcterms+"isPartOf", series, false);
+		
+		if(item.series) {
+			// as far as I know, these are never defined for the same types
+			Zotero.RDF.addStatement(series, n.dc+"title", item.series, true);
+		}
+		
+		if(item.seriesTitle) {
+			// as far as I know, these are never defined for the same types
+			Zotero.RDF.addStatement(series, n.dcterms+"alternative", item.seriesTitle, true);
+		}
+		
+		if(item.seriesText) {
+			Zotero.RDF.addStatement(series, n.dc+"description", item.seriesText, true);
+		}
+		
+		if(item.seriesNumber) {
+			Zotero.RDF.addStatement(series, n.dc+"identifier", item.seriesNumber, true);
+		}
+	}
+	
+	// volume
+	if(item.volume) {
+		Zotero.RDF.addStatement((containerElement ? containerElement : resource), n.prism+"volume", item.volume, true);
+	}
+	// number
+	if(item.issue) {
+		Zotero.RDF.addStatement((containerElement ? containerElement : resource), n.prism+"number", item.issue, true);
+	}
+	// edition
+	if(item.edition) {
+		Zotero.RDF.addStatement(resource, n.prism+"edition", item.edition, true);
+	}
+	// publisher/distributor and place
+	if(item.publisher || item.distributor || item.place) {
+		var organization = Zotero.RDF.newResource();
+		// set organization type
+		Zotero.RDF.addStatement(organization, rdf+"type", n.foaf+"Organization", false);
+		// add relationship to resource
+		Zotero.RDF.addStatement(resource, n.dc+"publisher", organization, false);
+		// add publisher/distributor
+		if(item.publisher) {
+			Zotero.RDF.addStatement(organization, n.foaf+"name", item.publisher, true);
+		} else if(item.distributor) {
+			Zotero.RDF.addStatement(organization, n.foaf+"name", item.distributor, true);
+		}
+		// add place
+		if(item.place) {
+			var address = Zotero.RDF.newResource();
+			// set address type
+			Zotero.RDF.addStatement(address, rdf+"type", n.vcard+"Address", false);
+			// set address locality
+			Zotero.RDF.addStatement(address, n.vcard+"locality", item.place, true);
+			// add relationship to organization
+			Zotero.RDF.addStatement(organization, n.vcard+"adr", address, false);
+		}
+	}
+	// date/year
+	if(item.date) {
+		Zotero.RDF.addStatement(resource, n.dc+"date", item.date, true);
+	}
+	if(item.accessDate) {	// use date submitted for access date?
+		Zotero.RDF.addStatement(resource, n.dcterms+"dateSubmitted", item.accessDate, true);
+	}
+	
+	// callNumber
+	if(item.callNumber) {
+		var term = Zotero.RDF.newResource();
+		// set term type
+		Zotero.RDF.addStatement(term, rdf+"type", n.dcterms+"LCC", false);
+		// set callNumber value
+		Zotero.RDF.addStatement(term, rdf+"value", item.callNumber, true);
+		// add relationship to resource
+		Zotero.RDF.addStatement(resource, n.dc+"subject", term, false);
+	}
+	
+	// archiveLocation
+	if(item.archiveLocation) {
+		Zotero.RDF.addStatement(resource, n.dc+"coverage", item.archiveLocation, true);
+	}
+	
+	// archiveLocation
+	if(item.medium) {
+		Zotero.RDF.addStatement(resource, n.dcterms+"medium", item.medium, true);
+	}
+	
+	// type (not itemType)
+	if(item.type) {
+		Zotero.RDF.addStatement(resource, n.dc+"type", item.type, true);
+	} else if(item.thesisType) {
+		Zotero.RDF.addStatement(resource, n.dc+"type", item.thesisType, true);
+	}
+	
+	// THIS IS NOT YET IN THE BIBLIO NAMESPACE, BUT BRUCE D''ARCUS HAS SAID
+	// IT WILL BE SOON
+	if(item.pages) {
+		Zotero.RDF.addStatement(resource, n.bib+"pages", item.pages, true);
+	}
+	
+	// journalAbbreviation
+	if(item.journalAbbreviation) {
+		Zotero.RDF.addStatement((containerElement ? containerElement : resource), n.dcterms+"alternative", item.journalAbbreviation, true);
+	}
+	
+	// extra
+	if(item.extra) {
+		Zotero.RDF.addStatement(resource, n.dc+"description", item.extra, true);
+	}
+	
+	/** NOTES **/
+	
+	if(Zotero.getOption("exportNotes")) {
+		// attachment note
+		if(item.itemType == "attachment" && item.note) {
+			Zotero.RDF.addStatement(resource, n.dc+"description", item.note, true);
+		}
+		
+		for(var j in item.notes) {
+			var noteResource = itemResources[item.notes[j].itemID];
+			
+			// add note tag
+			Zotero.RDF.addStatement(noteResource, rdf+"type", n.bib+"Memo", false);
+			// add note value
+			Zotero.RDF.addStatement(noteResource, rdf+"value", item.notes[j].note, true);
+			// add relationship between resource and note
+			Zotero.RDF.addStatement(resource, n.dcterms+"isReferencedBy", noteResource, false);
+			
+			// Add see also info to RDF
+			generateSeeAlso(noteResource, item.notes[j].seeAlso);
+			generateTags(noteResource, item.notes[j].tags);
+		}
+		
+		if(item.itemType == "note" && item.note) {
+			Zotero.RDF.addStatement(resource, rdf+"value", item.note, true);
+		}
+	}
+	
+	/** FILES **/
+	
+	for each(var attachment in item.attachments) {
+		var attachmentResource = itemResources[attachment.itemID];
+		Zotero.RDF.addStatement(resource, n.link+"link", attachmentResource, false);
+		generateItem(attachment, "attachment", attachmentResource);
+	}
+	
+	/** SEE ALSO AND TAGS **/
+	
+	generateSeeAlso(resource, item.seeAlso);
+	generateTags(resource, item.tags);
 }
 
 function doExport() {
@@ -4871,297 +5240,7 @@ function doExport() {
 	
 	for each(item in items) {
 		// these items are global
-		resource = itemResources[item.itemID];
-		
-		container = null;
-		containerElement = null;
-		section = null;
-		
-		/** CORE FIELDS **/
-		
-		// title
-		if(item.title) {
-			Zotero.RDF.addStatement(resource, n.dc+"title", item.title, true);
-		}
-		
-		// type
-		var type = null;
-		if(item.itemType == "book") {
-			type = "Book";
-		} else if (item.itemType == "bookSection") {
-			type = "BookSection";
-			container = "Book";
-		} else if(item.itemType == "journalArticle") {
-			type = "Article";
-			container = "Journal";
-		} else if(item.itemType == "magazineArticle") {
-			type = "Article";
-			container = "Periodical";
-		} else if(item.itemType == "newspaperArticle") {
-			type = "Article";
-			container = "Newspaper";
-		} else if(item.itemType == "thesis") {
-			type = "Thesis";
-		} else if(item.itemType == "letter") {
-			type = "Letter";
-		} else if(item.itemType == "manuscript") {
-			type = "Manuscript";
-		} else if(item.itemType == "interview") {
-			type = "Interview";
-		} else if(item.itemType == "film") {
-			type = "MotionPicture";
-		} else if(item.itemType == "artwork") {
-			type = "Illustration";
-		} else if(item.itemType == "webpage") {
-			type = "Document";
-		} else if(item.itemType == "note") {
-			type = "Memo";
-			if(!Zotero.getOption("exportNotes")) {
-				continue;
-			}
-		} else if(item.itemType == "attachment") {
-			handleAttachment(resource, item);
-			continue;
-		}
-		if(type) {
-			Zotero.RDF.addStatement(resource, rdf+"type", n.bib+type, false);
-		}
-		
-		// authors/editors/contributors
-		var creatorContainers = new Object();
-		for(var j in item.creators) {
-			var creator = Zotero.RDF.newResource();
-			Zotero.RDF.addStatement(creator, rdf+"type", n.foaf+"Person", false);
-			// gee. an entire vocabulary for describing people, and these aren''t even
-			// standardized in it. oh well. using them anyway.
-			Zotero.RDF.addStatement(creator, n.foaf+"surname", item.creators[j].lastName, true);
-			Zotero.RDF.addStatement(creator, n.foaf+"givenname", item.creators[j].firstName, true);
-			
-			// in addition, these tags are not yet in Biblio, but Bruce D''Arcus
-			// says they will be.
-			if(item.creators[j].creatorType == "author") {
-				var cTag = "authors";
-			} else if(item.creators[j].creatorType == "editor") {
-				var cTag = "editors";
-			} else {
-				var cTag = "contributors";
-			}
-			
-			if(!creatorContainers[cTag]) {
-				var creatorResource = Zotero.RDF.newResource();
-				// create new seq for author type
-				creatorContainers[cTag] = Zotero.RDF.newContainer("seq", creatorResource);
-				// attach container to resource
-				Zotero.RDF.addStatement(resource, n.bib+cTag, creatorResource, false);
-			}
-			Zotero.RDF.addContainerElement(creatorContainers[cTag], creator, false);
-		}
-		
-		/** FIELDS ON NEARLY EVERYTHING BUT NOT A PART OF THE CORE **/
-		
-		// source
-		if(item.source) {
-			Zotero.RDF.addStatement(resource, n.dc+"source", item.source, true);
-		}
-		
-		// url		
-		if(item.url) {
-			// add url as identifier
-			var term = Zotero.RDF.newResource();
-			// set term type
-			Zotero.RDF.addStatement(term, rdf+"type", n.dcterms+"URI", false);
-			// set url value
-			Zotero.RDF.addStatement(term, rdf+"value", item.url, true);
-			// add relationship to resource
-			Zotero.RDF.addStatement(resource, n.dc+"identifier", term, false);
-		}
-		
-		// accessionNumber as generic ID
-		if(item.accessionNumber) {
-			Zotero.RDF.addStatement(resource, n.dc+"identifier", item.accessionNumber, true);
-		}
-		
-		// rights
-		if(item.rights) {
-			Zotero.RDF.addStatement(resource, n.dc+"rights", item.rights, true);
-		}
-		
-		/** SUPPLEMENTAL FIELDS **/
-		
-		// use section to set up another container element
-		if(item.section) {
-			section = Zotero.RDF.newResource();				// leave as global
-			// set section type
-			Zotero.RDF.addStatement(section, rdf+"type", n.bib+"Part", false);
-			// set section title
-			Zotero.RDF.addStatement(section, n.dc+"title", item.section, true);
-			// add relationship to resource
-			Zotero.RDF.addStatement(resource, n.dcterms+"isPartOf", section, false);
-		}
-		
-		// generate container
-		if(container) {
-			if(item.ISSN && !Zotero.RDF.getArcsIn("urn:issn:"+item.ISSN)) {
-				// use ISSN as container URI if no other item is
-				containerElement = "urn:issn:"+item.ISSN
-			} else {
-				containerElement = Zotero.RDF.newResource();
-			}
-			// attach container to section (if exists) or resource
-			Zotero.RDF.addStatement((section ? section : resource), n.dcterms+"isPartOf", containerElement, false);
-			// add container type
-			Zotero.RDF.addStatement(containerElement, rdf+"type", n.bib+container, false);
-		}
-		
-		// ISSN
-		if(item.ISSN) {
-			Zotero.RDF.addStatement((containerElement ? containerElement : resource), n.dc+"identifier", "ISSN "+item.ISSN, true);
-		}
-		
-		// ISBN
-		if(item.ISBN) {
-			Zotero.RDF.addStatement((containerElement ? containerElement : resource), n.dc+"identifier", "ISBN "+item.ISBN, true);
-		}
-		
-		// DOI
-		if(item.DOI) {
-			Zotero.RDF.addStatement((containerElement ? containerElement : resource), n.dc+"identifier", "DOI "+item.DOI, true);
-		}
-		
-		// publication gets linked to container via isPartOf
-		if(item.publicationTitle) {
-			Zotero.RDF.addStatement((containerElement ? containerElement : resource), n.dc+"title", item.publicationTitle, true);
-		}
-		
-		// series also linked in
-		if(item.seriesTitle) {
-			var series = Zotero.RDF.newResource();
-			// set series type
-			Zotero.RDF.addStatement(series, rdf+"type", n.bib+"Series", false);
-			// set series title
-			Zotero.RDF.addStatement(series, n.dc+"title", item.seriesTitle, true);
-			// add relationship to resource
-			Zotero.RDF.addStatement((containerElement ? containerElement : resource), n.dcterms+"isPartOf", series, false);
-		}
-		
-		// volume
-		if(item.volume) {
-			Zotero.RDF.addStatement((containerElement ? containerElement : resource), n.prism+"volume", item.volume, true);
-		}
-		// number
-		if(item.issue) {
-			Zotero.RDF.addStatement((containerElement ? containerElement : resource), n.prism+"number", item.issue, true);
-		}
-		// edition
-		if(item.edition) {
-			Zotero.RDF.addStatement(resource, n.prism+"edition", item.edition, true);
-		}
-		// publisher/distributor and place
-		if(item.publisher || item.distributor || item.place) {
-			var organization = Zotero.RDF.newResource();
-			// set organization type
-			Zotero.RDF.addStatement(organization, rdf+"type", n.foaf+"Organization", false);
-			// add relationship to resource
-			Zotero.RDF.addStatement(resource, n.dc+"publisher", organization, false);
-			// add publisher/distributor
-			if(item.publisher) {
-				Zotero.RDF.addStatement(organization, n.foaf+"name", item.publisher, true);
-			} else if(item.distributor) {
-				Zotero.RDF.addStatement(organization, n.foaf+"name", item.distributor, true);
-			}
-			// add place
-			if(item.place) {
-				var address = Zotero.RDF.newResource();
-				// set address type
-				Zotero.RDF.addStatement(address, rdf+"type", n.vcard+"Address", false);
-				// set address locality
-				Zotero.RDF.addStatement(address, n.vcard+"locality", item.place, true);
-				// add relationship to organization
-				Zotero.RDF.addStatement(organization, n.vcard+"adr", address, false);
-			}
-		}
-		// date/year
-		if(item.date) {
-			Zotero.RDF.addStatement(resource, n.dc+"date", item.date, true);
-		}
-		if(item.accessDate) {	// use date submitted for access date?
-			Zotero.RDF.addStatement(resource, n.dcterms+"dateSubmitted", item.accessDate, true);
-		}
-		
-		// callNumber
-		if(item.callNumber) {
-			var term = Zotero.RDF.newResource();
-			// set term type
-			Zotero.RDF.addStatement(term, rdf+"type", n.dcterms+"LCC", false);
-			// set callNumber value
-			Zotero.RDF.addStatement(term, rdf+"value", item.callNumber, true);
-			// add relationship to resource
-			Zotero.RDF.addStatement(resource, n.dc+"subject", term, false);
-		}
-		
-		// archiveLocation
-		if(item.archiveLocation) {
-			Zotero.RDF.addStatement(resource, n.dc+"coverage", item.archiveLocation, true);
-		}
-		
-		// type (not itemType)
-		if(item.type) {
-			Zotero.RDF.addStatement(resource, n.dc+"type", item.type, true);
-		} else if(item.thesisType) {
-			Zotero.RDF.addStatement(resource, n.dc+"type", item.thesisType, true);
-		}
-		
-		// THIS IS NOT YET IN THE BIBLIO NAMESPACE, BUT BRUCE D''ARCUS HAS SAID
-		// IT WILL BE SOON
-		if(item.pages) {
-			Zotero.RDF.addStatement(resource, n.bib+"pages", item.pages, true);
-		}
-		
-		// journalAbbreviation
-		if(item.journalAbbreviation) {
-			Zotero.RDF.addStatement((containerElement ? containerElement : resource), n.dcterms+"alternative", item.journalAbbreviation, true);
-		}
-		
-		// extra
-		if(item.extra) {
-			Zotero.RDF.addStatement(resource, n.dc+"description", item.extra, true);
-		}
-		
-		/** NOTES **/
-		
-		if(Zotero.getOption("exportNotes")) {
-			for(var j in item.notes) {
-				var noteResource = itemResources[item.notes[j].itemID];
-				
-				// add note tag
-				Zotero.RDF.addStatement(noteResource, rdf+"type", n.bib+"Memo", false);
-				// add note value
-				Zotero.RDF.addStatement(noteResource, rdf+"value", item.notes[j].note, true);
-				// add relationship between resource and note
-				Zotero.RDF.addStatement(resource, n.dcterms+"isReferencedBy", noteResource, false);
-				
-				// Add see also info to RDF
-				generateSeeAlso(noteResource, item.notes[j].seeAlso);
-				generateTags(noteResource, item.notes[j].tags);
-			}
-			
-			if(item.note) {
-				Zotero.RDF.addStatement(resource, rdf+"value", item.note, true);
-			}
-		}
-		
-		/** FILES **/
-		
-		for each(var attachment in item.attachments) {
-			var attachmentResource = itemResources[attachment.itemID];
-			Zotero.RDF.addStatement(resource, n.link+"link", attachmentResource, false);
-			handleAttachment(attachmentResource, attachment);
-		}
-		
-		/** SEE ALSO AND TAGS **/
-		
-		generateSeeAlso(resource, item.seeAlso);
-		generateTags(resource, item.tags);
+		generateItem(item, item.itemType, itemResources[item.itemID]);
 	}
 	
 	/** RDF COLLECTION STRUCTURE **/
@@ -5270,6 +5349,11 @@ REPLACE INTO "translators" VALUES ('6e372642-ed9d-4934-b5d1-c11ac758ebb7', '2006
 		if(item.archiveLocation) {
 			Zotero.RDF.addStatement(resource, dc+"coverage", item.archiveLocation, true);
 		}
+		
+		// medium
+		if(item.medium) {
+			Zotero.RDF.addStatement(resource, dcterms+"medium", item.medium, true);
+		}
 	}
 }');
 
@@ -5342,41 +5426,6 @@ function handleCreators(newItem, creators, creatorType) {
 	}
 }
 
-// gets attachment info
-function handleAttachment(node, attachment) {
-	if(!attachment) {
-		attachment = new Array();
-	}
-	
-	attachment.title = getFirstResults(node, [n.dc+"title"], true);
-	var path = getFirstResults(node, [rdf+"resource"]);
-	if(path) {
-		attachment.path = Zotero.RDF.getResourceURI(path[0]);
-	}
-	attachment.charset = getFirstResults(node, [n.link+"charset"], true);
-	attachment.mimeType = getFirstResults(node, [n.link+"type"], true);
-	
-	var identifiers = getFirstResults(node, [n.dc+"identifier"]);
-	for each(var identifier in identifiers) {
-		if(typeof(identifier) != "string") {
-			var identifierType = Zotero.RDF.getTargets(identifier, rdf+"type");
-			if(identifierType) {
-				identifierType = Zotero.RDF.getResourceURI(identifierType[0]);
-				
-				if(identifierType == n.dcterms+"URI") {	// uri is url
-					attachment.url = getFirstResults(identifier, [rdf+"value"], true);
-				}
-			}
-		}
-	}
-	
-	// get seeAlso and tags
-	processSeeAlso(node, attachment);
-	processTags(node, attachment);
-	
-	return attachment;
-}
-
 // processes collections recursively
 function processCollection(node, collection) {
 	if(!collection) {
@@ -5435,7 +5484,7 @@ function getNodeByType(nodes, type) {
 		return false;
 	}
 	
-	for each(node in nodes) {
+	for each(var node in nodes) {
 		var nodeType = Zotero.RDF.getTargets(node, rdf+"type");
 		if(nodeType) {
 			nodeType = Zotero.RDF.getResourceURI(nodeType[0]);
@@ -5462,6 +5511,278 @@ function isPart(node) {
 		}
 	}
 	return skip;
+}
+
+function importItem(newItem, node, type) {
+	var container = undefined;
+	
+	// also deal with type detection based on parts, so we can differentiate
+	// magazine and journal articles, and find container elements
+	var isPartOf = getFirstResults(node, [n.dcterms+"isPartOf"]);
+	
+	// get parts of parts, because parts are sections of wholes.
+	if(isPartOf) {
+		for(var i=0; i<isPartOf.length; i++) {
+			var subParts = getFirstResults(isPartOf[i], [n.dcterms+"isPartOf"]);
+			if(subParts) {
+				isPartOf = isPartOf.concat(subParts);
+			}
+		}
+	}
+	
+	if(type) {
+		if(type == n.bib+"Book") {
+			newItem.itemType = "book";
+		} else if(type == n.bib+"BookSection") {
+			newItem.itemType = "bookSection";
+			container = getNodeByType(isPartOf, n.bib+"Book");
+		} else if(type == n.bib+"Article") {	// choose between journal,
+												// newspaper, and magazine
+												// articles
+			// use of container = (not container ==) is intentional
+			if(container = getNodeByType(isPartOf, n.bib+"Journal")) {
+				newItem.itemType = "journalArticle";
+			} else if(container = getNodeByType(isPartOf, n.bib+"Periodical")) {
+				newItem.itemType = "magazineArticle";
+			} else if(container = getNodeByType(isPartOf, n.bib+"Newspaper")) {
+				newItem.itemType = "newspaperArticle";
+			}
+		} else if(type == n.bib+"Thesis") {
+			newItem.itemType = "thesis";
+		} else if(type == n.bib+"Letter") {
+			newItem.itemType = "letter";
+		} else if(type == n.bib+"Manuscript") {
+			newItem.itemType = "manuscript";
+		} else if(type == n.bib+"Interview") {
+			newItem.itemType = "interview";
+		} else if(type == n.bib+"MotionPicture") {
+			newItem.itemType = "film";
+		} else if(type == n.bib+"Illustration") {
+			newItem.itemType = "artwork";
+		} else if(type == n.bib+"Document") {
+			newItem.itemType = "webpage";
+		} else if(type == n.bib+"Memo") {
+			newItem.itemType = "note";
+		} else if(type == n.fs+"Attachment") {
+			// unless processing of independent attachment is intended, don''t
+			// process
+			
+			// process as file
+			newItem.itemType = "attachment";
+
+			var path = getFirstResults(node, [rdf+"resource"]);
+			if(path) {
+				newItem.path = Zotero.RDF.getResourceURI(path[0]);
+			}
+			newItem.charset = getFirstResults(node, [n.link+"charset"], true);
+			newItem.mimeType = getFirstResults(node, [n.link+"type"], true);
+		}
+	}
+	
+	// title
+	newItem.title = getFirstResults(node, [n.dc+"title"], true);
+	if(!newItem.itemType && !newItem.title) {			// require the title
+														// (if not a known type)
+		return false;
+	}
+	
+	if(!newItem.itemType) {
+		newItem.itemType = "book";
+	}
+	
+	// regular author-type creators
+	var creators = getFirstResults(node, [n.bib+"authors", n.dc+"creator"]);
+	handleCreators(newItem, creators, "author");
+	// editors
+	var creators = getFirstResults(node, [n.bib+"editors"]);
+	handleCreators(newItem, creators, "editor");
+	// contributors
+	var creators = getFirstResults(node, [n.bib+"contributors"]);
+	handleCreators(newItem, creators, "contributor");
+	
+	// source
+	newItem.source = getFirstResults(node, [n.dc+"source"], true);
+	
+	// rights
+	newItem.rights = getFirstResults(node, [n.dc+"rights"], true);
+	
+	// section
+	var section = getNodeByType(isPartOf, n.bib+"Part");
+	if(section) {
+		newItem.section = getFirstResults(section, [n.dc+"title"], true);
+	}
+	
+	// publication
+	if(container) {
+		newItem.publicationTitle = getFirstResults(container, [n.dc+"title"], true);
+	}
+	
+	// series
+	var series = getNodeByType(isPartOf, n.bib+"Series");
+	if(series) {
+		newItem.series = getFirstResults(series, [n.dc+"title"], true);
+		newItem.seriesTitle = getFirstResults(series, [n.dcterms+"alternative"], true);
+		newItem.seriesText = getFirstResults(series, [n.dc+"description"], true);
+		newItem.seriesNumber = getFirstResults(series, [n.dc+"identifier"], true);
+	}
+	
+	// volume
+	newItem.volume = getFirstResults((container ? container : node), [n.prism+"volume"], true);
+	
+	// number
+	newItem.issue = getFirstResults((container ? container : node), [n.prism+"number"], true);
+	
+	// edition
+	newItem.edition = getFirstResults(node, [n.prism+"edition"], true);
+	
+	// pages
+	newItem.pages = getFirstResults(node, [n.bib+"pages"], true);
+	
+	// mediums
+	newItem.medium = getFirstResults(node, [n.dcterms+"medium"], true);
+	
+	// publisher
+	var publisher = getFirstResults(node, [n.dc+"publisher"]);
+	if(publisher) {
+		if(typeof(publisher[0]) == "string") {
+			newItem.publisher = publisher[0];
+		} else {
+			var type = Zotero.RDF.getTargets(publisher[0], rdf+"type");
+			if(type) {
+				type = Zotero.RDF.getResourceURI(type[0]);
+				if(type == n.foaf+"Organization") {	// handle foaf organizational publishers
+					newItem.publisher = getFirstResults(publisher[0], [n.foaf+"name"], true);
+					var place = getFirstResults(publisher[0], [n.vcard+"adr"]);
+					if(place) {
+						newItem.place = getFirstResults(place[0], [n.vcard+"locality"]);
+					}
+				}
+			}
+		}
+	}
+	
+	// (this will get ignored except for films, where we encode distributor as publisher)
+	newItem.distributor = newItem.publisher;
+	
+	// date
+	newItem.date = getFirstResults(node, [n.dc+"date"], true);
+	// accessDate
+	newItem.accessDate = getFirstResults(node, [n.dcterms+"dateSubmitted"], true);
+	// lastModified
+	newItem.lastModified = getFirstResults(node, [n.dcterms+"modified"], true);
+	
+	// identifier
+	var identifiers = getFirstResults(node, [n.dc+"identifier"]);
+	if(container) {
+		var containerIdentifiers = getFirstResults(container, [n.dc+"identifier"]);
+		// concatenate sets of identifiers
+		if(containerIdentifiers) {
+			if(identifiers) {
+				identifiers = identifiers.concat(containerIdentifiers);
+			} else {
+				identifiers = containerIdentifiers;
+			}
+		}
+	}
+	
+	if(identifiers) {
+		for(var i in identifiers) {
+			if(typeof(identifiers[i]) == "string") {
+				// grab other things
+				var beforeSpace = identifiers[i].substr(0, identifiers[i].indexOf(" ")).toUpperCase();
+				
+				if(beforeSpace == "ISBN") {
+					newItem.ISBN = identifiers[i].substr(5).toUpperCase();
+				} else if(beforeSpace == "ISSN") {
+					newItem.ISSN = identifiers[i].substr(5).toUpperCase();
+				} else if(beforeSpace == "DOI") {
+					newItem.DOI = identifiers[i].substr(4);
+				} else if(!newItem.accessionNumber) {
+					newItem.accessionNumber = identifiers[i];
+				}
+			} else {
+				// grab URLs
+				var type = Zotero.RDF.getTargets(identifiers[i], rdf+"type");
+				if(type && (type = Zotero.RDF.getResourceURI(type[0])) && type == n.dcterms+"URI") {
+					newItem.url = getFirstResults(identifiers[i], [rdf+"value"], true);
+				}
+			}
+		}
+	}
+	
+	// archiveLocation
+	newItem.archiveLocation = getFirstResults(node, [n.dc+"coverage"], true);
+	
+	// type
+	newItem.type = getFirstResults(node, [n.dc+"type"], true);
+	
+	// journalAbbreviation
+	newItem.journalAbbreviation = getFirstResults((container ? container : node), [n.dcterms+"alternative"], true);
+	
+	// see also
+	processSeeAlso(node, newItem);
+	
+	// description/attachment note
+	if(newItem.itemType == "attachment") {
+		newItem.note = getFirstResults(node, [n.dc+"description"], true);
+	} else {
+		newItem.extra = getFirstResults(node, [n.dc+"description"], true);
+	}
+	
+	/** NOTES **/
+	
+	var referencedBy = Zotero.RDF.getTargets(node, n.dcterms+"isReferencedBy");
+	for each(var referentNode in referencedBy) {
+		var type = Zotero.RDF.getTargets(referentNode, rdf+"type");
+		if(type && Zotero.RDF.getResourceURI(type[0]) == n.bib+"Memo") {
+			// if this is a memo
+			var note = new Array();
+			note.note = getFirstResults(referentNode, [rdf+"value", n.dc+"description"], true);
+			if(note.note != undefined) {
+				// handle see also
+				processSeeAlso(referentNode, note);
+				processTags(referentNode, note);
+				
+				// add note
+				newItem.notes.push(note);
+			}
+		}
+	}
+	
+	if(newItem.itemType == "note") {
+		// add note for standalone
+		newItem.note = getFirstResults(node, [rdf+"value", n.dc+"description"], true);
+	}
+	
+	/** TAGS **/
+	
+	var subjects = getFirstResults(node, [n.dc+"subject"]);
+	for each(var subject in subjects) {
+		if(typeof(subject) == "string") {	// a regular tag
+			newItem.tags.push(subject);
+		} else {							// a call number
+			var type = Zotero.RDF.getTargets(subject, rdf+"type");
+			if(type) {
+				type = Zotero.RDF.getResourceURI(type[0]);
+				if(Zotero.Utilities.inArray(type, callNumberTypes)) {
+					newItem.callNumber = getFirstResults(subject, [rdf+"value"], true);
+				}
+			}
+		}
+	}
+	
+	/** ATTACHMENTS **/
+	var relations = getFirstResults(node, [n.link+"link"]);
+	for each(var relation in relations) {			
+		var type = Zotero.RDF.getTargets(relation, rdf+"type");
+		if(Zotero.RDF.getResourceURI(type[0]) == n.fs+"Attachment") {
+			var attachment = new Object();
+			newItem.attachments.push(attachment);
+			importItem(attachment, relation, n.fs+"Attachment");
+		}
+	}
+	
+	return true;
 }
 
 function doImport() {
@@ -5493,7 +5814,6 @@ function doImport() {
 	for each(var node in nodes) {
 		var newItem = new Zotero.Item();
 		newItem.itemID = Zotero.RDF.getResourceURI(node);
-		var container = undefined;
 		
 		// figure out if this is a part of another resource, or a linked
 		// attachment
@@ -5504,265 +5824,24 @@ function doImport() {
 		
 		// type
 		var type = Zotero.RDF.getTargets(node, rdf+"type");
-		
-		// also deal with type detection based on parts, so we can differentiate
-		// magazine and journal articles, and find container elements
-		var isPartOf = getFirstResults(node, [n.dcterms+"isPartOf"]);
-		
-		// get parts of parts, because parts are sections of wholes.
-		if(isPartOf) {
-			for(var i=0; i<isPartOf.length; i++) {
-				var subParts = getFirstResults(isPartOf[i], [n.dcterms+"isPartOf"]);
-				if(subParts) {
-					isPartOf = isPartOf.concat(subParts);
-				}
-			}
-		}
-		
-		if(type && (type = Zotero.RDF.getResourceURI(type[0]))) {
-			if(type == n.bib+"Book") {
-				newItem.itemType = "book";
-			} else if(type == n.bib+"BookSection") {
-				newItem.itemType = "bookSection";
-				container = getNodeByType(isPartOf, n.bib+"Book");
-			} else if(type == n.bib+"Article") {	// choose between journal,
-													// newspaper, and magazine
-													// articles
-				if(container = getNodeByType(isPartOf, n.bib+"Journal")) {
-					newItem.itemType = "journalArticle";
-				} else if(container = getNodeByType(isPartOf, n.bib+"Periodical")) {
-					newItem.itemType = "magazineArticle";
-				} else if(container = getNodeByType(isPartOf, n.bib+"Newspaper")) {
-					newItem.itemType = "newspaperArticle";
-				}
-			} else if(type == n.bib+"Thesis") {
-				newItem.itemType = "thesis";
-			} else if(type == n.bib+"Letter") {
-				newItem.itemType = "letter";
-			} else if(type == n.bib+"Manuscript") {
-				newItem.itemType = "manuscript";
-			} else if(type == n.bib+"Interview") {
-				newItem.itemType = "interview";
-			} else if(type == n.bib+"MotionPicture") {
-				newItem.itemType = "film";
-			} else if(type == n.bib+"Illustration") {
-				newItem.itemType = "illustration";
-			} else if(type == n.bib+"Document") {
-				newItem.itemType = "webpage";
-			} else if(type == n.bib+"Memo") {
-				// check to see if this note is independent
-				if(isPart(node)) {
-					continue;
-				}
-				
-				newItem.itemType = "note";
+		if(type) {
+			type = Zotero.RDF.getResourceURI(type[0]);
+			
+			// skip if this is not an independent attachment,
+			if((type == n.fs+"Attachment" || type == n.bib+"Memo") && isPart(node)) {
+				continue;
 			} else if(type == n.bib+"Collection") {
 				// skip collections until all the items are done
 				collections.push(node);
 				continue;
-			} else if(type == n.fs+"Attachment") {
-				// check to see if file is independent
-				if(isPart(node)) {
-					continue;
-				}
-				
-				// process as file
-				newItem.itemType = "attachment";
-				handleAttachment(node, newItem);
-				Zotero.Utilities.debug(newItem);
-				newItem.complete();
-				continue;
-			} else {	// default to book
-				newItem.itemType = "book";
 			}
+		} else {
+			type = false;
 		}
 		
-		// title
-		newItem.title = getFirstResults(node, [n.dc+"title"], true);
-		if(newItem.itemType != "note" && !newItem.title) {	// require the title
-															// (if not a note)
-			continue;
+		if(importItem(newItem, node, type)) {
+			newItem.complete();
 		}
-		
-		// regular author-type creators
-		var creators = getFirstResults(node, [n.bib+"authors", n.dc+"creator"]);
-		handleCreators(newItem, creators, "author");
-		// editors
-		var creators = getFirstResults(node, [n.bib+"editors"]);
-		handleCreators(newItem, creators, "editor");
-		// contributors
-		var creators = getFirstResults(node, [n.bib+"contributors"]);
-		handleCreators(newItem, creators, "contributor");
-		
-		// source
-		newItem.source = getFirstResults(node, [n.dc+"source"], true);
-		
-		// rights
-		newItem.rights = getFirstResults(node, [n.dc+"rights"], true);
-		
-		// section
-		var section = getNodeByType(isPartOf, n.bib+"Part");
-		if(section) {
-			newItem.section = getFirstResults(section, [n.dc+"title"], true);
-		}
-		
-		// publication
-		if(container) {
-			newItem.publicationTitle = getFirstResults(container, [n.dc+"title"], true);
-		}
-		
-		// series
-		var series = getNodeByType(isPartOf, n.bib+"Series");
-		if(series) {
-			newItem.seriesTitle = getFirstResults(container, [n.dc+"title"], true);
-		}
-		
-		// volume
-		newItem.volume = getFirstResults((container ? container : node), [n.prism+"volume"], true);
-		
-		// number
-		newItem.issue = getFirstResults((container ? container : node), [n.prism+"number"], true);
-		
-		// edition
-		newItem.edition = getFirstResults(node, [n.prism+"edition"], true);
-		
-		// publisher
-		var publisher = getFirstResults(node, [n.dc+"publisher"]);
-		if(publisher) {
-			if(typeof(publisher[0]) == "string") {
-				newItem.publisher = publisher[0];
-			} else {
-				var type = Zotero.RDF.getTargets(publisher[0], rdf+"type");
-				if(type) {
-					type = Zotero.RDF.getResourceURI(type[0]);
-					if(type == n.foaf+"Organization") {	// handle foaf organizational publishers
-						newItem.publisher = getFirstResults(publisher[0], [n.foaf+"name"], true);
-						var place = getFirstResults(publisher[0], [n.vcard+"adr"]);
-						if(place) {
-							newItem.place = getFirstResults(place[0], [n.vcard+"locality"]);
-						}
-					}
-				}
-			}
-		}
-		
-		// (this will get ignored except for films, where we encode distributor as publisher)
-		newItem.distributor = newItem.publisher;
-		
-		// date
-		newItem.date = getFirstResults(node, [n.dc+"date"], true);
-		// accessDate
-		newItem.accessDate = getFirstResults(node, [n.dcterms+"dateSubmitted"], true);
-		// lastModified
-		newItem.lastModified = getFirstResults(node, [n.dcterms+"modified"], true);
-		
-		// identifier
-		var identifiers = getFirstResults(node, [n.dc+"identifier"]);
-		if(container) {
-			var containerIdentifiers = getFirstResults(container, [n.dc+"identifier"]);
-			// concatenate sets of identifiers
-			if(containerIdentifiers) {
-				if(identifiers) {
-					identifiers = identifiers.concat(containerIdentifiers);
-				} else {
-					identifiers = containerIdentifiers;
-				}
-			}
-		}
-		
-		if(identifiers) {
-			for(var i in identifiers) {
-				if(typeof(identifiers[i]) == "string") {
-					// grab other things
-					var beforeSpace = identifiers[i].substr(0, identifiers[i].indexOf(" ")).toUpperCase();
-					
-					if(beforeSpace == "ISBN") {
-						newItem.ISBN = identifiers[i].substr(5).toUpperCase();
-					} else if(beforeSpace == "ISSN") {
-						newItem.ISSN = identifiers[i].substr(5).toUpperCase();
-					} else if(beforeSpace == "DOI") {
-						newItem.DOI = identifiers[i].substr(4);
-					} else if(!newItem.accessionNumber) {
-						newItem.accessionNumber = identifiers[i];
-					}
-				} else {
-					// grab URLs
-					var type = Zotero.RDF.getTargets(identifiers[i], rdf+"type");
-					if(type && (type = Zotero.RDF.getResourceURI(type[0])) && type == n.dcterms+"URI") {
-						newItem.url = getFirstResults(identifiers[i], [rdf+"value"], true);
-					}
-				}
-			}
-		}
-		
-		// archiveLocation
-		newItem.archiveLocation = getFirstResults(node, [n.dc+"coverage"], true);
-		
-		// type
-		newItem.type = newItem.thesisType = getFirstResults(node, [n.dc+"type"], true);
-		
-		// journalAbbreviation
-		newItem.journalAbbreviation = getFirstResults((container ? container : node), [n.dcterms+"alternative"], true);
-		
-		// see also
-		processSeeAlso(node, newItem);
-		
-		// description
-		newItem.extra = getFirstResults(node, [n.dc+"description"], true);
-	
-		/** NOTES **/
-		
-		var referencedBy = Zotero.RDF.getTargets(node, n.dcterms+"isReferencedBy");
-		for each(var referentNode in referencedBy) {
-			var type = Zotero.RDF.getTargets(referentNode, rdf+"type");
-			if(type && Zotero.RDF.getResourceURI(type[0]) == n.bib+"Memo") {
-				// if this is a memo
-				var note = new Array();
-				note.note = getFirstResults(referentNode, [rdf+"value", n.dc+"description"], true);
-				if(note.note != undefined) {
-					// handle see also
-					processSeeAlso(referentNode, note);
-					processTags(referentNode, note);
-					
-					// add note
-					newItem.notes.push(note);
-				}
-			}
-		}
-		
-		if(newItem.itemType == "note") {
-			// add note for standalone
-			newItem.note = getFirstResults(node, [rdf+"value", n.dc+"description"], true);
-		}
-		
-		/** TAGS **/
-		
-		var subjects = getFirstResults(node, [n.dc+"subject"]);
-		for each(var subject in subjects) {
-			if(typeof(subject) == "string") {	// a regular tag
-				newItem.tags.push(subject);
-			} else {							// a call number
-				var type = Zotero.RDF.getTargets(subject, rdf+"type");
-				if(type) {
-					type = Zotero.RDF.getResourceURI(type[0]);
-					if(Zotero.Utilities.inArray(type, callNumberTypes)) {
-						newItem.callNumber = getFirstResults(subject, [rdf+"value"], true);
-					}
-				}
-			}
-		}
-	
-		/** ATTACHMENTS **/
-		var relations = getFirstResults(node, [n.link+"link"]);
-		for each(var relation in relations) {			
-			var type = Zotero.RDF.getTargets(relation, rdf+"type");
-			if(Zotero.RDF.getResourceURI(type[0]) == n.fs+"Attachment") {
-				newItem.attachments.push(handleAttachment(relation));
-			}
-		}
-		
-		Zotero.Utilities.debug(newItem);
-		newItem.complete();
 	}
 	
 	/* COLLECTIONS */

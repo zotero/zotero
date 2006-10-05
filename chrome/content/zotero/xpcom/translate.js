@@ -1019,49 +1019,6 @@ Zotero.Translate.prototype._closeStreams = function() {
 }
 
 /*
- * imports an attachment from the disk
- */
-Zotero.Translate.prototype._itemImportAttachment = function(attachment, sourceID) {
-	if(!attachment.path) {
-		// create from URL
-		if(attachment.url) {
-			var attachmentID = Zotero.Attachments.linkFromURL(attachment.url, sourceID,
-					(attachment.mimeType ? attachment.mimeType : undefined),
-					(attachment.title ? attachment.title : undefined));
-			var attachmentItem = Zotero.Items.get(attachmentID);
-		} else {
-			Zotero.debug("not adding attachment: no path or url specified");
-			return false;
-		}
-	} else {
-		// generate nsIFile
-		var IOService = Components.classes["@mozilla.org/network/io-service;1"].
-						getService(Components.interfaces.nsIIOService);
-		var uri = IOService.newURI(attachment.path, "", null);
-		var file = uri.QueryInterface(Components.interfaces.nsIFileURL).file;
-		
-		if(attachment.url) {
-			// import from nsIFile
-			var attachmentID = Zotero.Attachments.importSnapshotFromFile(file,
-				attachment.url, attachment.title, attachment.mimeType,
-				(attachment.charset ? attachment.charset : null), sourceID);
-			var attachmentItem = Zotero.Items.get(attachmentID);
-		} else {
-			// import from nsIFile
-			var attachmentID = Zotero.Attachments.importFromFile(file, sourceID);
-			// get attachment item
-			var attachmentItem = Zotero.Items.get(attachmentID);
-			if(attachment.title) {
-				// set title
-				attachmentItem.setField("title", attachment.title);
-			}
-		}		
-	}
-	
-	return attachmentItem;
-}
-
-/*
  * handles tags and see also data for notes and attachments
  */
 Zotero.Translate.prototype._itemTagsAndSeeAlso = function(item, newItem) {
@@ -1085,7 +1042,7 @@ Zotero.Translate.prototype._itemTagsAndSeeAlso = function(item, newItem) {
 /*
  * executed when an item is done and ready to be loaded into the database
  */
-Zotero.Translate.prototype._itemDone = function(item) {	
+Zotero.Translate.prototype._itemDone = function(item, attachedTo) {	
 	if(!this.saveItem) {	// if we're not supposed to save the item, just
 							// return the item array
 		
@@ -1099,10 +1056,11 @@ Zotero.Translate.prototype._itemDone = function(item) {
 		return;
 	}
 	
-	
-	var notifierStatus = Zotero.Notifier.isEnabled();
-	if(notifierStatus) {
-		Zotero.Notifier.disable();
+	if(!attachedTo) {
+		var notifierStatus = Zotero.Notifier.isEnabled();
+		if(notifierStatus) {
+			Zotero.Notifier.disable();
+		}
 	}
 	
 	try {	// make sure notifier gets turned back on when done
@@ -1113,22 +1071,69 @@ Zotero.Translate.prototype._itemDone = function(item) {
 			var myID = Zotero.Notes.add(item.note);
 			// re-retrieve the item
 			var newItem = Zotero.Items.get(myID);
-		} else if(type == "attachment") {
-			if(this.type == "import") {
-				var newItem = this._itemImportAttachment(item, null);
-				var myID = newItem.getID();
-			} else {
-				Zotero.debug("discarding standalone attachment");
-				return false;
-			}
 		} else {
 			if(!item.title && this.type == "web") {
 				throw("item has no title");
 			}
 			
 			// create new item
-			var typeID = Zotero.ItemTypes.getID(type);
-			var newItem = Zotero.Items.getNewItemByType(typeID);
+			if(type == "attachment") {
+				if(this.type != "import") {
+					Zotero.debug("discarding standalone attachment");
+					return;
+				}
+				
+				Zotero.debug("adding attachment");
+				Zotero.debug(item);
+				
+				if(!item.path) {
+					// create from URL
+					if(item.url) {
+						var myID = Zotero.Attachments.linkFromURL(item.url, attachedTo,
+								(item.mimeType ? item.mimeType : undefined),
+								(item.title ? item.title : undefined));
+						Zotero.debug("created attachment; id is "+myID);
+						if(!myID) {
+							// if we didn't get an ID, don't continue adding
+							// notes, because we can't without knowing the ID
+							return;
+						}
+						var newItem = Zotero.Items.get(myID);
+					} else {
+						Zotero.debug("not adding attachment: no path or url specified");
+						return;
+					}
+				} else {
+					// generate nsIFile
+					var IOService = Components.classes["@mozilla.org/network/io-service;1"].
+									getService(Components.interfaces.nsIIOService);
+					var uri = IOService.newURI(item.path, "", null);
+					var file = uri.QueryInterface(Components.interfaces.nsIFileURL).file;
+					
+					if(item.url) {
+						// import from nsIFile
+						var myID = Zotero.Attachments.importSnapshotFromFile(file,
+							item.url, item.title, item.mimeType,
+							(item.charset ? item.charset : null), attachedTo);
+						var newItem = Zotero.Items.get(myID);
+					} else {
+						// import from nsIFile
+						var myID = Zotero.Attachments.importFromFile(file, attachedTo);
+						// get attachment item
+						var newItem = Zotero.Items.get(myID);
+					}
+				}
+				
+				var typeID = Zotero.ItemTypes.getID("attachment");
+				
+				// add note if necessary
+				if(item.note) {
+					newItem.updateNote(item.note);
+				}
+			} else {
+				var typeID = Zotero.ItemTypes.getID(type);
+				var newItem = Zotero.Items.getNewItemByType(typeID);
+			}
 			
 			// makes looping through easier
 			item.itemType = item.complete = undefined;
@@ -1180,9 +1185,13 @@ Zotero.Translate.prototype._itemDone = function(item) {
 			}
 			
 			// save item
-			var myID = newItem.save();
-			if(myID == true) {
-				myID = newItem.getID();
+			if(myID) {
+				newItem.save();
+			} else {
+				var myID = newItem.save();
+				if(myID == true || !myID) {
+					myID = newItem.getID();
+				}
 			}
 			
 			// handle notes
@@ -1234,10 +1243,8 @@ Zotero.Translate.prototype._itemDone = function(item) {
 							}*/
 						}
 					} else if(this.type == "import") {
-						var attachmentItem = this._itemImportAttachment(attachment, myID);
-						if(attachmentItem) {
-							this._itemTagsAndSeeAlso(attachment, attachmentItem);
-						}
+						// create new attachments attached here
+						this._itemDone(attachment, myID);
 					}
 				}
 			}
@@ -1246,7 +1253,9 @@ Zotero.Translate.prototype._itemDone = function(item) {
 		if(item.itemID) {
 			this._IDMap[item.itemID] = myID;
 		}
-		this.newItems.push(myID);
+		if(!attachedTo) {
+			this.newItems.push(myID);
+		}
 		
 		// handle see also
 		if(item.seeAlso) {
@@ -1272,10 +1281,12 @@ Zotero.Translate.prototype._itemDone = function(item) {
 	}
 	
 	// only re-enable if notifier was enabled at the beginning of scraping
-	if(notifierStatus) {
-		Zotero.Notifier.enable();
+	if(!attachedTo) {
+		if(notifierStatus) {
+			Zotero.Notifier.enable();
+		}
+		this._runHandler("itemDone", newItem);
 	}
-	this._runHandler("itemDone", newItem);
 }
 
 /*
@@ -1738,7 +1749,7 @@ Zotero.Translate.prototype._exportConfigureIO = function() {
  * copies attachment and returns data, given an attachment object
  */
 Zotero.Translate.prototype._exportGetAttachment = function(attachment) {
-	var attachmentArray = new Object();
+	var attachmentArray = attachment.toArray();
 	
 	var attachmentID = attachment.getID();
 	var linkMode = attachment.getAttachmentLinkMode();
@@ -1754,8 +1765,6 @@ Zotero.Translate.prototype._exportGetAttachment = function(attachment) {
 	}
 	// add item ID
 	attachmentArray.itemID = attachmentID;
-	// get title
-	attachmentArray.title = attachment.getField("title");
 	// get mime type
 	attachmentArray.mimeType = attachment.getAttachmentMimeType();
 	// get charset
@@ -1788,7 +1797,7 @@ Zotero.Translate.prototype._exportGetAttachment = function(attachment) {
 		}
 	}
 	
-	Zotero.debug(attachmentArray);
+	attachmentArray.itemType = "attachment";
 	
 	return attachmentArray;
 }
@@ -1799,19 +1808,14 @@ Zotero.Translate.prototype._exportGetAttachment = function(attachment) {
 Zotero.Translate.prototype._exportGetItem = function() {
 	if(this._itemsLeft.length != 0) {
 		var returnItem = this._itemsLeft.shift();
-		
-		// skip files if exportFileData is off, or if the file isn't standalone
-		if(returnItem.isAttachment() &&
-		  (!this._displayOptions["exportFileData"] ||
-		  returnItem.getSource())) {
-			return this._exportGetItem();
-		}
-		
 		// export file data for single files
 		if(returnItem.isAttachment()) {		// an independent attachment
 			var returnItemArray = this._exportGetAttachment(returnItem);
-			returnItemArray.itemType = "attachment";
-			return returnItemArray;
+			if(returnItemArray) {
+				return returnItemArray;
+			} else {
+				return this._exportGetItem();
+			}
 		} else {
 			var returnItemArray = returnItem.toArray();
 			// get attachments, although only urls will be passed if exportFileData

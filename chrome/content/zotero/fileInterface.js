@@ -278,6 +278,8 @@ var Zotero_File_Interface = new function() {
 		var newDialog = window.openDialog("chrome://zotero/content/bibliography.xul",
 			"_blank","chrome,modal,centerscreen", io);
 		
+		if(!io.output) return;
+		
 		// determine output format
 		var format = "HTML";
 		if(io.output == "save-as-rtf") {
