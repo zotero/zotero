@@ -907,12 +907,24 @@ Zotero.Item.prototype.updateNote = function(text){
 	Zotero.DB.beginTransaction();
 	
 	if (this.isNote()){
-		var sql = "UPDATE itemNotes SET note=? WHERE itemID=?";
+		var sourceID = this.getSource();
+		if (sourceID)
+		{
+			var sql = "REPLACE INTO itemNotes (note, sourceItemID, itemID) "
+				+ "VALUES (?,?,?)";
+			var bindParams = [{string:text}, sourceID, this.getID()];
+		}
+		else
+		{
+			var sql = "REPLACE INTO itemNotes (note, itemID) VALUES (?,?)";
+			var bindParams = [{string:text}, this.getID()];
+		}
 	}
 	else {
 		var sql = "REPLACE INTO itemNotes (note, itemID) VALUES (?,?)";
+		var bindParams = [{string:text}, this.getID()];
 	}
-	var bindParams = [{string:text}, this.getID()];
+	
 	var updated = Zotero.DB.query(sql, bindParams);
 	if (updated){
 		this.updateDateModified();
