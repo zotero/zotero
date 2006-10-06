@@ -107,7 +107,8 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids)
 	
 	var quicksearch = this._treebox.treeBody.ownerDocument.getElementById('tb-search');
 	
-	if((action == 'remove' && !this._itemGroup.isLibrary()) || (action == 'delete' && this._itemGroup.isLibrary()))
+	if((action == 'remove' && !this._itemGroup.isLibrary())
+		|| (action == 'delete' && (this._itemGroup.isLibrary() || this._itemGroup.isSearch())))
 	{
 		//Since a remove involves shifting of rows, we have to do it in order
 		
