@@ -324,7 +324,7 @@ Zotero.Schema = new function(){
 			Zotero.DB.query(sql);
 			var sql = "INSERT INTO itemAttachments VALUES(123456789, NULL, 3, 'text/html', 25, NULL, NULL)";
 			Zotero.DB.query(sql);
-			var sql = "INSERT INTO itemData VALUES(123456789, 1, 'http://www.zotero.org/documentation/doku.php?id=quick_start_guide')";
+			var sql = "INSERT INTO itemData VALUES(123456789, 1, 'http://www.zotero.org/documentation/quick_start_guide')";
 			Zotero.DB.query(sql);
 			var sql = "INSERT INTO itemData VALUES(123456789, 27, '2006-10-05 14:00:00')";
 			Zotero.DB.query(sql);
