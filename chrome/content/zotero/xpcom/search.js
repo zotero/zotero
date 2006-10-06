@@ -855,7 +855,7 @@ Zotero.SearchConditions = new function(){
 				field: 'value',
 				aliases: Zotero.DB.columnQuery("SELECT fieldName FROM fields " +
 					"WHERE fieldName NOT IN ('accessDate', 'date', 'pages', " +
-					"'section','accessionNumber','seriesNumber','issue')"),
+					"'section','seriesNumber','issue')"),
 				template: true // mark for special handling
 			},
 			
@@ -885,8 +885,7 @@ Zotero.SearchConditions = new function(){
 				},
 				table: 'itemData',
 				field: 'value',
-				aliases: ['pages', 'section', 'accessionNumber',
-					'seriesNumber','issue'],
+				aliases: ['pages', 'section', 'seriesNumber','issue'],
 				template: true // mark for special handling
 			},
 			
