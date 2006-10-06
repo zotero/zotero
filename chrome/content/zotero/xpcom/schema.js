@@ -546,6 +546,11 @@ Zotero.Schema = new function(){
 					Zotero.DB.query("UPDATE itemData SET fieldID=66 WHERE fieldID=24 AND itemID IN (SELECT itemID FROM items WHERE itemTypeID=9)");
 					Zotero.DB.query("UPDATE itemData SET fieldID=59 WHERE fieldID=24 AND itemID IN (SELECT itemID FROM items WHERE itemTypeID=12)");
 				}
+				
+				if (i==8){
+					Zotero.DB.query("DROP TABLE IF EXISTS translators");
+					Zotero.DB.query("DROP TABLE IF EXISTS csl");
+				}
 			}
 			
 			_updateSchema('userdata');
