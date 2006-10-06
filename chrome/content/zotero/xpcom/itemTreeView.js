@@ -343,18 +343,29 @@ Zotero.ItemTreeView.prototype.getImageSrc = function(row, col)
 			case 'attachment-snapshot':
 			case 'attachment-web-link':
 			case 'artwork':
+			case 'audioRecording':
+			case 'blogPost':
 			case 'book':
 			case 'bookSection':
+			case 'computerProgram':
+			case 'email':
 			case 'film':
+			case 'forumPost':
 			case 'interview':
 			case 'journalArticle':
 			case 'letter':
 			case 'magazineArticle':
 			case 'manuscript':
+			case 'map':
 			case 'newspaperArticle':
 			case 'note':
+			case 'podcast':
+			case 'report':
 			case 'thesis':
+			case 'tvBroadcast':
+			case 'videoRecording':
 			case 'webpage':
+				
 				return "chrome://zotero/skin/treeitem-"+itemType+".png";
 		}
 		
