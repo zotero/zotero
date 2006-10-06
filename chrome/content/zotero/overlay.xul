@@ -95,7 +95,7 @@
 					onselect="ZoteroPane.onCollectionSelected();" seltype="single"
 					ondragdrop="nsDragAndDrop.drop(event,ZoteroPane.getCollectionsView())"
 					ondraggesture="if (event.target.localName == 'treechildren') nsDragAndDrop.startDrag(event,ZoteroPane.getCollectionsView());"
-					onkeypress="if (event.keyCode == event.DOM_VK_BACK_SPACE || event.keyCode == event.DOM_VK_DELETE){ ZoteroPane.deleteSelectedCollection(); } return"
+					onkeypress="if (event.keyCode == event.DOM_VK_BACK_SPACE || event.keyCode == event.DOM_VK_DELETE){ ZoteroPane.deleteSelectedCollection(); } event.preventDefault();"
 					flex="1">
 					<treecols>
 						<treecol
@@ -137,7 +137,7 @@
 					id="items-tree" context="zotero-itemmenu"
 					ondblclick="ZoteroPane.onDoubleClick(event, this);"
 					enableColumnDrag="true"
-					onkeypress="if (event.keyCode == event.DOM_VK_BACK_SPACE || event.keyCode == event.DOM_VK_DELETE){ ZoteroPane.deleteSelectedItem(); } return"
+					onkeypress="if (event.keyCode == event.DOM_VK_BACK_SPACE || event.keyCode == event.DOM_VK_DELETE){ ZoteroPane.deleteSelectedItem(); } event.preventDefault();"
 					onselect="ZoteroPane.itemSelected();"
 					ondraggesture="if (event.target.localName == 'treechildren') nsDragAndDrop.startDrag(event,ZoteroPane.getItemsView());"
 					ondragover="nsDragAndDrop.dragOver(event,ZoteroPane.getItemsView())"
