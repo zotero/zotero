@@ -87,7 +87,7 @@
 					<rows id="editpane-dynamic-attachments" flex="1"/>
 				</grid>
 			</vbox>
-			<tagsbox id="editpane-tags" flex="1"/>
+			<tagsbox id="editpane-tags" flex="1" style="overflow:auto"/>
 			<seealsobox id="editpane-related" flex="1"/>
 	</deck>
 </overlay>
