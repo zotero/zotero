@@ -1,7 +1,7 @@
 const ZOTERO_CONTRACTID = '@zotero.org/Zotero;1';
 const ZOTERO_CLASSNAME = 'Zotero';
 const ZOTERO_CID = Components.ID('{e4c61080-ec2d-11da-8ad9-0800200c9a66}');
-const ZOTERO_IID = Components.interfaces.chnmIZoteroService;
+const ZOTERO_IID = Components.interfaces.chnmIZoteroService; //unused
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
@@ -153,7 +153,7 @@ function setTimeout(func, ms){
 ZoteroService.prototype = {
 	QueryInterface: function(iid){
 		if (!iid.equals(Components.interfaces.nsISupports) &&
-			!iid.equals(ZOTERO_IID)){
+			!iid.equals(ZOTERO_IID)){ // interface unused
 			throw Components.results.NS_ERROR_NO_INTERFACE;
 		}
 		return this;

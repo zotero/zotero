@@ -23,7 +23,6 @@
 const ZOTERO_AC_CONTRACTID = '@mozilla.org/autocomplete/search;1?name=zotero';
 const ZOTERO_AC_CLASSNAME = 'Zotero AutoComplete';
 const ZOTERO_AC_CID = Components.ID('{06a2ed11-d0a4-4ff0-a56f-a44545eee6ea}');
-//const ZOTERO_AC_IID = Components.interfaces.chnmIZoteroAutoComplete;
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
@@ -96,7 +95,7 @@ ZoteroAutoCompleteResult.prototype.QueryInterface = function(iid){
  */
 function ZoteroAutoComplete(){
 	// Get the Zotero object
-	this._zotero = Components.classes["@chnm.gmu.edu/Zotero;1"]
+	this._zotero = Components.classes["@zotero.org/Zotero;1"]
 				.getService(Components.interfaces.nsISupports)
 				.wrappedJSObject;
 }
