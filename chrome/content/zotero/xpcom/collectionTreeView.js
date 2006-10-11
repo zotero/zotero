@@ -106,9 +106,9 @@ Zotero.CollectionTreeView.prototype.notify = function(action, type, ids)
 	var madeChanges = false;
 	var ids = Zotero.flattenArguments(ids);
 	
-	if(action == 'remove')
+	if(action == 'delete')
 	{
-		//Since a remove involves shifting of rows, we have to do it in order
+		//Since a delete involves shifting of rows, we have to do it in order
 		
 		//sort the ids by row
 		var rows = new Array();

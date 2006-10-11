@@ -644,7 +644,7 @@ Zotero.Searches = new function(){
 		Zotero.DB.query(sql);
 		Zotero.DB.commitTransaction();
 		
-		Zotero.Notifier.trigger('remove', 'search', savedSearchID);
+		Zotero.Notifier.trigger('delete', 'search', savedSearchID);
 	}
 }
 

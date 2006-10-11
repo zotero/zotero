@@ -52,9 +52,16 @@ Zotero.Notifier = new function(){
 	}
 	
 	/**
-	* event - 'add', 'remove', 'modify'
-	* type - 'collection', 'search', 'item'
-	* ids - single id or array of ids
+	* Trigger a notification to the appropriate observers
+	*
+	* Possible values:
+	*
+	* 	event: 'add', 'modify', 'delete', 'move' (c, for changing parent),
+	*		'remove' (i, for removing from collections)
+	* 	type - 'collection', 'search', 'item'
+	* 	ids - single id or array of ids
+	*
+	* c = collection, s = search, i = item
 	**/
 	function trigger(event, type, ids){
 		if (_disabled){

@@ -2360,7 +2360,7 @@ Zotero.Collection.prototype.erase = function(deleteItems){
 	// Clear deleted collection from internal memory
 	Zotero.Collections.unload(collections);
 	
-	Zotero.Notifier.trigger('remove', 'collection', collections);
+	Zotero.Notifier.trigger('delete', 'collection', collections);
 	if (items.length){
 		Zotero.Notifier.trigger('delete', 'item', items);
 	}
