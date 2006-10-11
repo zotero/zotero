@@ -578,8 +578,9 @@ Zotero.Translate.prototype._generateSandbox = function() {
 		// set up selectItems handler
 		this._sandbox.Zotero.selectItems = function(options) { return me._selectItems(options) };
 	} else {
-		// use null URL to create sandbox
-		this._sandbox = new Components.utils.Sandbox("");
+		// use null URL to create sandbox. no idea why a blank string doesn't
+		// work on all installations, but this should fix things.
+		this._sandbox = new Components.utils.Sandbox("http://www.example.com/");
 		this._sandbox.Zotero = new Object();
 		
 		this._sandbox.Zotero.Utilities = new Zotero.Utilities();
