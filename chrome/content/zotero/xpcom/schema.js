@@ -311,6 +311,9 @@ Zotero.Schema = new function(){
 	function _initializeSchema(){
 		Zotero.DB.beginTransaction();
 		try {
+			// Enable auto-vacuuming
+			Zotero.DB.query("PRAGMA auto_vacuum = 1");
+			
 			Zotero.DB.query(_getSchemaSQL('userdata'));
 			_updateDBVersion('userdata', _getSchemaSQLVersion('userdata'));
 			
