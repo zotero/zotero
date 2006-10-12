@@ -80,8 +80,10 @@ Zotero.Notifier = new function(){
 				throw('Invalid type ' + type + ' in Notifier.trigger()');
 		}
 		
+		ids = Zotero.flattenArguments(ids);
+		
 		Zotero.debug("Notifier.trigger('" + event + "', '" + type + "', "
-			+ (typeof ids=='object' ? '[' + ids.join() + ']' : ids) + ") called "
+			+ '[' + ids.join() + ']' + ") called "
 			+ "[collection observers: " + _observers['collectionObserver'].length
 			+ ", item observers: " + _observers['itemObserver'].length + "]");
 		

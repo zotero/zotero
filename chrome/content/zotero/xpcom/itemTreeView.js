@@ -95,8 +95,6 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids)
 	this.selection.selectEventsSuppressed = true;
 	var savedSelection = this.saveSelection();
 	
-	ids = Zotero.flattenArguments(ids);
-	
 	// See if we're in the active window
 	var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
 		.getService(Components.interfaces.nsIWindowMediator);

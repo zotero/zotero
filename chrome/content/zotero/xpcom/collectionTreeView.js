@@ -104,7 +104,6 @@ Zotero.CollectionTreeView.prototype.reload = function()
 Zotero.CollectionTreeView.prototype.notify = function(action, type, ids)
 {
 	var madeChanges = false;
-	var ids = Zotero.flattenArguments(ids);
 	
 	if(action == 'delete')
 	{
