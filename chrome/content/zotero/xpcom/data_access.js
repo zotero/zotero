@@ -30,7 +30,7 @@ Zotero.Item = function(){
 	
 	// Accept itemTypeID in constructor
 	if (arguments.length){
-		this.setType(arguments[0]);
+		this.setType(Zotero.ItemTypes.getID(arguments[0]));
 	}
 }
 
@@ -268,6 +268,11 @@ Zotero.Item.prototype.getCreators = function(){
 
 /*
  * Set or update the creator at the specified position
+ *
+ * _orderIndex_: the position of this creator in the item (from 0)
+ * _fieldMode_: 0 for double-field, 1 for single-field mode
+ *
+ * If single-field mode, _firstName_ is ignored
  */
 Zotero.Item.prototype.setCreator = function(orderIndex, firstName, lastName, creatorTypeID, fieldMode){
 	if (this.getID() && !this._creatorsLoaded){
