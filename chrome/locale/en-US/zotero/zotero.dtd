@@ -1,88 +1,83 @@
-<!ENTITY zotero.name					"Zotero">
+<!ENTITY zotero.name									"Zotero">
 
-<!ENTITY tabs.info.label				"Info">
-<!ENTITY tabs.notes.label				"Notes">
-<!ENTITY tabs.attachments.label				"Attachments">
-<!ENTITY tabs.tags.label				"Tags">
-<!ENTITY tabs.related.label				"Related">
-<!ENTITY notes.separate					"Edit in a separate window">
+<!ENTITY zotero.tabs.info.label						"Info">
+<!ENTITY zotero.tabs.notes.label						"Notes">
+<!ENTITY zotero.tabs.attachments.label					"Attachments">
+<!ENTITY zotero.tabs.tags.label						"Tags">
+<!ENTITY zotero.tabs.related.label						"Related">
+<!ENTITY zotero.notes.separate							"Edit in a separate window">
 
-<!ENTITY items.type_column 				"Type">
-<!ENTITY items.title_column 			"Title">
-<!ENTITY items.creator_column 			"Creator">
-<!ENTITY items.source_column 			"Source">
-<!ENTITY items.rights_column 			"Rights">
-<!ENTITY items.numChildren_column 		"+">
-<!ENTITY items.dateAdded_column 		"Date Added">
-<!ENTITY items.dateModified_column	 	"Date Modified">
+<!ENTITY zotero.items.type_column						"Type">
+<!ENTITY zotero.items.title_column						"Title">
+<!ENTITY zotero.items.creator_column					"Creator">
+<!ENTITY zotero.items.source_column					"Source">
+<!ENTITY zotero.items.rights_column					"Rights">
+<!ENTITY zotero.items.numChildren_column				"+">
+<!ENTITY zotero.items.dateAdded_column					"Date Added">
+<!ENTITY zotero.items.dateModified_column				"Date Modified">
 
-<!ENTITY items.menu.attach.snapshot 	"Attach Snapshot of Current Page">
-<!ENTITY items.menu.attach.link	 	"Attach Link to Current Page">
+<!ENTITY zotero.items.menu.attach.snapshot				"Attach Snapshot of Current Page">
+<!ENTITY zotero.items.menu.attach.link					"Attach Link to Current Page">
 
-<!ENTITY collections.name_column		"Collections">
+<!ENTITY zotero.collections.name_column				"Collections">
 
-<!ENTITY toolbar.newItem.label    		"New Item">
-<!ENTITY toolbar.moreItemTypes.label	"More">
-<!ENTITY toolbar.newItemFromPage.label		"Create New Item from Current Page">
-<!ENTITY toolbar.removeItem.label 		  "Remove Item...">
-<!ENTITY toolbar.newCollection.label   	"New Collection...">
-<!ENTITY toolbar.newSavedSearch.label   	"New Saved Search...">
-<!ENTITY toolbar.renameCollection.label   "Rename Collection...">
-<!ENTITY toolbar.removeCollection.label   "Remove Collection...">
-<!ENTITY toolbar.exportCollection.label   "Export Collection...">
-<!ENTITY toolbar.renameSavedSearch.label   "Edit Saved Search...">
-<!ENTITY toolbar.removeSavedSearch.label   "Remove Saved Search...">
-<!ENTITY toolbar.exportSavedSearch.label   "Export Saved Search...">
-<!ENTITY toolbar.actions.label			"Actions">
-<!ENTITY toolbar.import.label			"Import...">
-<!ENTITY toolbar.export.label			"Export Library...">
-<!ENTITY toolbar.preferences.label		"Preferences...">
-<!ENTITY toolbar.about.label			"About Zotero...">
-<!ENTITY toolbar.createBibCollection.label   "Create Bibliography From Collection...">
-<!ENTITY toolbar.createBibSavedSearch.label   "Create Bibliography From Saved Search...">
-<!ENTITY toolbar.search.label   			"Search:">
-<!ENTITY toolbar.fullscreen.tooltip		"Toggle Fullscreen Mode">
-<!ENTITY toolbar.goToURL.label   		"View">
-<!ENTITY toolbar.goToURL.tooltip  		"Go to this item online">
-<!ENTITY toolbar.openURL.label 	  	"Locate">
-<!ENTITY toolbar.openURL.tooltip   	"Find through your local library">
+<!ENTITY zotero.toolbar.newItem.label					"New Item">
+<!ENTITY zotero.toolbar.moreItemTypes.label			"More">
+<!ENTITY zotero.toolbar.newItemFromPage.label			"Create New Item from Current Page">
+<!ENTITY zotero.toolbar.removeItem.label				"Remove Item...">
+<!ENTITY zotero.toolbar.newCollection.label			"New Collection...">
+<!ENTITY zotero.toolbar.newSavedSearch.label			"New Saved Search...">
+<!ENTITY zotero.toolbar.renameCollection.label			"Rename Collection...">
+<!ENTITY zotero.toolbar.removeCollection.label			"Remove Collection...">
+<!ENTITY zotero.toolbar.exportCollection.label			"Export Collection...">
+<!ENTITY zotero.toolbar.renameSavedSearch.label		"Edit Saved Search...">
+<!ENTITY zotero.toolbar.removeSavedSearch.label		"Remove Saved Search...">
+<!ENTITY zotero.toolbar.exportSavedSearch.label		"Export Saved Search...">
+<!ENTITY zotero.toolbar.actions.label					"Actions">
+<!ENTITY zotero.toolbar.import.label					"Import...">
+<!ENTITY zotero.toolbar.export.label					"Export Library...">
+<!ENTITY zotero.toolbar.preferences.label				"Preferences...">
+<!ENTITY zotero.toolbar.about.label					"About Zotero...">
+<!ENTITY zotero.toolbar.createBibCollection.label		"Create Bibliography From Collection...">
+<!ENTITY zotero.toolbar.createBibSavedSearch.label		"Create Bibliography From Saved Search...">
+<!ENTITY zotero.toolbar.search.label					"Search:">
+<!ENTITY zotero.toolbar.fullscreen.tooltip				"Toggle Fullscreen Mode">
+<!ENTITY zotero.toolbar.goToURL.label					"View">
+<!ENTITY zotero.toolbar.goToURL.tooltip				"Go to this item online">
+<!ENTITY zotero.toolbar.openURL.label					"Locate">
+<!ENTITY zotero.toolbar.openURL.tooltip				"Find through your local library">
 
 
-<!ENTITY item.add						"Add">
-<!ENTITY item.attachment.file.show		"Show File">
+<!ENTITY zotero.item.add								"Add">
+<!ENTITY zotero.item.attachment.file.show				"Show File">
 
-<!ENTITY toolbar.note.standalone		"New Standalone Note">
-<!ENTITY toolbar.attachment.linked   	"Link to File...">
-<!ENTITY toolbar.attachment.add   		"Store Copy of File...">
-<!ENTITY toolbar.attachment.weblink 	"Save Link to Current Page">
-<!ENTITY toolbar.attachment.snapshot 	"Take Snapshot of Current Page">
+<!ENTITY zotero.toolbar.note.standalone				"New Standalone Note">
+<!ENTITY zotero.toolbar.attachment.linked				"Link to File...">
+<!ENTITY zotero.toolbar.attachment.add					"Store Copy of File...">
+<!ENTITY zotero.toolbar.attachment.weblink				"Save Link to Current Page">
+<!ENTITY zotero.toolbar.attachment.snapshot			"Take Snapshot of Current Page">
 
-<!ENTITY selectitems.title   			"Select Items">
-<!ENTITY selectitems.intro.label   		"Select which items you'd like to add to your library">
-<!ENTITY selectitems.cancel.label   	"Cancel">
-<!ENTITY selectitems.select.label   	"OK">
+<!ENTITY zotero.selectitems.title						"Select Items">
+<!ENTITY zotero.selectitems.intro.label				"Select which items you'd like to add to your library">
+<!ENTITY zotero.selectitems.cancel.label				"Cancel">
+<!ENTITY zotero.selectitems.select.label				"OK">
 
-<!ENTITY bibliography.title				"Create Bibliography">
-<!ENTITY bibliography.style.label		"Citation Style:">
-<!ENTITY bibliography.output.label		"Output Format">
-<!ENTITY bibliography.saveAsRTF.label	"Save as RTF">
-<!ENTITY bibliography.saveAsHTML.label	"Save as HTML">
-<!ENTITY bibliography.copyToClipboard.label	"Copy to Clipboard">
-<!ENTITY bibliography.print.label		"Print">
+<!ENTITY zotero.bibliography.title						"Create Bibliography">
+<!ENTITY zotero.bibliography.style.label				"Citation Style:">
+<!ENTITY zotero.bibliography.output.label				"Output Format">
+<!ENTITY zotero.bibliography.saveAsRTF.label			"Save as RTF">
+<!ENTITY zotero.bibliography.saveAsHTML.label			"Save as HTML">
+<!ENTITY zotero.bibliography.copyToClipboard.label		"Copy to Clipboard">
+<!ENTITY zotero.bibliography.print.label				"Print">
 
-<!ENTITY integration.docPrefs.title		"Document Preferences">
+<!ENTITY zotero.integration.docPrefs.title				"Document Preferences">
 
-<!ENTITY progress.title					"Progress">
+<!ENTITY zotero.progress.title							"Progress">
 
-<!ENTITY exportOptions.title            "Export...">
-<!ENTITY exportOptions.format.label     "Format:">
-<!ENTITY exportOptions.translatorOptions.label     "Translator Options">
+<!ENTITY zotero.exportOptions.title					"Export...">
+<!ENTITY zotero.exportOptions.format.label				"Format:">
+<!ENTITY zotero.exportOptions.translatorOptions.label	"Translator Options">
 
-<!ENTITY search.match					"Match">
-<!ENTITY search.any						"any">
-<!ENTITY search.all						"all">
-<!ENTITY search.following				"of the following">
-
-<!ENTITY citation.page					"Page">
-<!ENTITY citation.paragraph				"Paragraph">
-<!ENTITY citation.line					"Line">
+<!ENTITY zotero.citation.page							"Page">
+<!ENTITY zotero.citation.paragraph						"Paragraph">
+<!ENTITY zotero.citation.line							"Line">

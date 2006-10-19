@@ -38,8 +38,8 @@
 								'typeID', typeID, otherFields)"/>
 				</popupset>
 				<hbox align="center">
-					<button id="tb-go-to-url" label="&toolbar.goToURL.label;" tooltiptext="&toolbar.goToURL.tooltip;" flex="1" oncommand="window.loadURI(this.getAttribute('viewURL'))" disabled="false"/>
-					<button id="tb-openurl" label="&toolbar.openURL.label;" tooltiptext="&toolbar.openURL.tooltip;" flex="1" oncommand="ZoteroItemPane.onOpenURLClick();"/>
+					<button id="tb-go-to-url" label="&zotero.toolbar.goToURL.label;" tooltiptext="&zotero.toolbar.goToURL.tooltip;" flex="1" oncommand="window.loadURI(this.getAttribute('viewURL'))" disabled="false"/>
+					<button id="tb-openurl" label="&zotero.toolbar.openURL.label;" tooltiptext="&zotero.toolbar.openURL.tooltip;" flex="1" oncommand="ZoteroItemPane.onOpenURLClick();"/>
 				</hbox>
 				<hbox align="center">
 					<menulist id="editpane-type-menu" oncommand="ZoteroItemPane.changeTypeTo(this.value)" flex="1">
@@ -57,7 +57,7 @@
 			<vbox flex="1">
 				<hbox align="center">
 					<label id="editpane-notes-label"/>
-					<button label="&item.add;" oncommand="ZoteroItemPane.addNote();"/>
+					<button label="&zotero.item.add;" oncommand="ZoteroItemPane.addNote();"/>
 				</hbox>
 				<grid flex="1">
 					<columns>
@@ -70,12 +70,12 @@
 			<vbox flex="1">
 				<hbox align="center">
 					<label id="editpane-attachments-label"/>
-					<button id="tb-item-attachments-add" type="menu" label="&item.add;">
+					<button id="tb-item-attachments-add" type="menu" label="&zotero.item.add;">
 						<menupopup>
-							<menuitem class="menuitem-iconic" id="tb-item-attachments-link" label="&toolbar.attachment.linked;" oncommand="ZoteroItemPane.addAttachmentFromDialog(true);"/>
-							<menuitem class="menuitem-iconic" id="tb-item-attachments-file" label="&toolbar.attachment.add;" oncommand="ZoteroItemPane.addAttachmentFromDialog();"/>
-							<menuitem class="menuitem-iconic" id="tb-item-attachments-web-link" label="&toolbar.attachment.weblink;" oncommand="ZoteroItemPane.addAttachmentFromPage(true);"/>
-							<menuitem class="menuitem-iconic" id="tb-item-attachments-snapshot" label="&toolbar.attachment.snapshot;" oncommand="ZoteroItemPane.addAttachmentFromPage();"/>
+							<menuitem class="menuitem-iconic" id="tb-item-attachments-link" label="&zotero.toolbar.attachment.linked;" oncommand="ZoteroItemPane.addAttachmentFromDialog(true);"/>
+							<menuitem class="menuitem-iconic" id="tb-item-attachments-file" label="&zotero.toolbar.attachment.add;" oncommand="ZoteroItemPane.addAttachmentFromDialog();"/>
+							<menuitem class="menuitem-iconic" id="tb-item-attachments-web-link" label="&zotero.toolbar.attachment.weblink;" oncommand="ZoteroItemPane.addAttachmentFromPage(true);"/>
+							<menuitem class="menuitem-iconic" id="tb-item-attachments-snapshot" label="&zotero.toolbar.attachment.snapshot;" oncommand="ZoteroItemPane.addAttachmentFromPage();"/>
 						</menupopup>
 					</button>
 				</hbox>

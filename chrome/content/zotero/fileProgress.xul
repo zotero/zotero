@@ -3,7 +3,7 @@
 <!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
 
 <window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-	title="&progress.title;" width="300" height="30"
+	title="&zotero.progress.title;" width="300" height="30"
 	id="zotero-progress">
 	<vbox style="padding:10px">
 		<hbox align="stretch">

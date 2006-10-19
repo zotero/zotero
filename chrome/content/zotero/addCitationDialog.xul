@@ -44,7 +44,7 @@
 	<hbox flex="1">
 		<vbox flex="1">
 			<hbox align="center" pack="end">
-				<label value="&toolbar.search.label;" control="tb-search"/>
+				<label value="&zotero.toolbar.search.label;" control="tb-search"/>
 				<textbox id="tb-search" type="timed" timeout="250" oncommand="onSearch()" dir="reverse" onkeypress="if(event.keyCode == event.DOM_VK_ESCAPE) { this.value = ''; this.doCommand('cmd_zotero_search'); return false; }">
 					<toolbarbutton id="tb-search-cancel" oncommand="this.parentNode.value='';" hidden="true"/>
 				</textbox>
@@ -57,7 +57,7 @@
 					<treecols>
 						<treecol
 							id="name_column"
-							label="&collections.name_column;"
+							label="&zotero.collections.name_column;"
 							flex="1"
 							primary="true"/>
 					</treecols>
@@ -70,22 +70,22 @@
 					<treecols>
 						<treecol
 							id="title" primary="true"
-							label="&items.title_column;"
+							label="&zotero.items.title_column;"
 							flex="4" persist="width ordinal hidden sortActive sortDirection"/>
 						<splitter class="tree-splitter"/>
 						<treecol
 							id="firstCreator"
-							label="&items.creator_column;"
+							label="&zotero.items.creator_column;"
 							flex="1" persist="width ordinal hidden sortActive sortDirection"/>
 						<splitter class="tree-splitter"/>
 						<treecol
 							id="dateAdded" hidden="true"
-							label="&items.dateAdded_column;"
+							label="&zotero.items.dateAdded_column;"
 							flex="1" persist="width ordinal hidden sortActive sortDirection"/>
 						<splitter class="tree-splitter"/>
 						<treecol
 							id="dateModified" hidden="true"
-							label="&items.dateModified_column;"
+							label="&zotero.items.dateModified_column;"
 							flex="1" persist="width ordinal hidden sortActive sortDirection"/>
 					</treecols>				
 					<treechildren/>
@@ -95,9 +95,9 @@
 			<hbox>
 				<menulist id="tree-locator-type">
 					<menupopup id="tree-locator-type-popup">
-						<menuitem value="p" label="&citation.page;" selected="1"/>
-						<menuitem value="g" label="&citation.paragraph;"/>
-						<menuitem value="l" label="&citation.line;"/>
+						<menuitem value="p" label="&zotero.citation.page;" selected="1"/>
+						<menuitem value="g" label="&zotero.citation.paragraph;"/>
+						<menuitem value="l" label="&zotero.citation.line;"/>
 					</menupopup>
 				</menulist>
 				<textbox id="tree-locator" flex="1"/>
@@ -115,9 +115,9 @@
 				<hbox>				
 					<menulist id="item-locator-type" disabled="true">
 						<menupopup id="item-locator-type-popup">
-							<menuitem value="p" label="&citation.page;"/>
-							<menuitem value="g" label="&citation.paragraph;"/>
-							<menuitem value="l" label="&citation.line;"/>
+							<menuitem value="p" label="&zotero.citation.page;"/>
+							<menuitem value="g" label="&zotero.citation.paragraph;"/>
+							<menuitem value="l" label="&zotero.citation.line;"/>
 						</menupopup>
 					</menulist>
 					<textbox id="item-locator"/>

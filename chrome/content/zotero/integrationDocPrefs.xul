@@ -2,7 +2,7 @@
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 <!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
 <dialog xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-	title="&integration.docPrefs.title;" buttons="accept"
+	title="&zotero.integration.docPrefs.title;" buttons="accept"
 	ondialogaccept="Zotero_File_Interface_Bibliography.acceptSelection()"
 	id="zotero-bibliography"
 	onload="Zotero_File_Interface_Bibliography.init()">
@@ -11,7 +11,7 @@
 <script src="bibliography.js"/>
 
 <hbox>
-	<label value="&bibliography.style.label;" control="style-menu"/>
+	<label value="&zotero.bibliography.style.label;" control="style-menu"/>
 	<menulist id="style-menu">
 		<menupopup id="style-popup">
 		</menupopup>

@@ -2,7 +2,7 @@
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 <!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
 <dialog xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-	title="&bibliography.title;" buttons="cancel,accept"
+	title="&zotero.bibliography.title;" buttons="cancel,accept"
 	ondialogaccept="Zotero_File_Interface_Bibliography.acceptSelection()"
 	id="zotero-bibliography"
 	onload="Zotero_File_Interface_Bibliography.init()">
@@ -11,19 +11,19 @@
 <script src="bibliography.js"/>
 
 <hbox>
-	<label value="&bibliography.style.label;" control="style-menu"/>
+	<label value="&zotero.bibliography.style.label;" control="style-menu"/>
 	<menulist id="style-menu">
 		<menupopup id="style-popup">
 		</menupopup>
 	</menulist>
 </hbox>
 <groupbox>
-	<caption label="&bibliography.output.label;"/>
+	<caption label="&zotero.bibliography.output.label;"/>
 	<radiogroup id="output-radio">
-		<radio id="save-as-rtf" selected="true" label="&bibliography.saveAsRTF.label;"/>
-		<radio id="save-as-html" label="&bibliography.saveAsHTML.label;"/>
-		<radio id="copy-to-clipboard" label="&bibliography.copyToClipboard.label;"/>
-		<radio id="print" label="&bibliography.print.label;"/>
+		<radio id="save-as-rtf" selected="true" label="&zotero.bibliography.saveAsRTF.label;"/>
+		<radio id="save-as-html" label="&zotero.bibliography.saveAsHTML.label;"/>
+		<radio id="copy-to-clipboard" label="&zotero.bibliography.copyToClipboard.label;"/>
+		<radio id="print" label="&zotero.bibliography.print.label;"/>
 	</radiogroup>
 </groupbox>
 
