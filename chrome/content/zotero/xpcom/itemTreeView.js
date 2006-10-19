@@ -155,7 +155,6 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids)
 					else if (!this.isContainer(row) && this.getParentIndex(row)==-1
 						&& this._getItemAtRow(row).ref.getSource())
 					{
-							Zotero.debug('row is here2');
 							this._hideItem(row);
 							this._treebox.rowCountChanged(row+1, -1)
 					}
@@ -169,7 +168,6 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids)
 					}
 					else
 					{
-						Zotero.debug('row is here3');
 						this._treebox.invalidateRow(row);
 					}
 					madeChanges = true;

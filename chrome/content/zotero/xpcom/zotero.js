@@ -324,7 +324,6 @@ var Zotero = new function(){
 			}
 		}
 		catch (e){
-			Zotero.debug(e);
 			throw ('Localized string not available for ' + name);
 		}
 		return l10n;
