@@ -33,6 +33,7 @@
 <!ENTITY toolbar.renameSavedSearch.label   "Edit Saved Search...">
 <!ENTITY toolbar.removeSavedSearch.label   "Remove Saved Search...">
 <!ENTITY toolbar.exportSavedSearch.label   "Export Saved Search...">
+<!ENTITY toolbar.actions.label			"Actions">
 <!ENTITY toolbar.import.label			"Import...">
 <!ENTITY toolbar.export.label			"Export Library...">
 <!ENTITY toolbar.preferences.label		"Preferences...">
@@ -45,6 +46,7 @@
 <!ENTITY toolbar.goToURL.tooltip  		"Go to this item online">
 <!ENTITY toolbar.openURL.label 	  	"Locate">
 <!ENTITY toolbar.openURL.tooltip   	"Find through your local library">
+
 
 <!ENTITY item.add						"Add">
 <!ENTITY item.attachment.file.show		"Show File">

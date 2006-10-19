@@ -81,7 +81,7 @@
 					<toolbarbutton id="tb-collection-addsearch" tooltiptext="&toolbar.newSavedSearch.label;" oncommand="ZoteroPane.newSearch();"/>
 					<toolbarbutton id="tb-collection-rename" tooltiptext="&toolbar.renameCollection.label;" oncommand="ZoteroPane.editSelectedCollection();" disabled="true"/>
 					<spacer flex="1"/>
-					<toolbarbutton id="tb-collection-menu" type="menu">
+					<toolbarbutton id="tb-actions-menu" tooltiptext="&toolbar.actions.label;" type="menu">
 						<menupopup>
 							<menuitem label="&toolbar.import.label;" oncommand="Zotero_File_Interface.importFile();"/>
 							<menuitem label="&toolbar.export.label;" oncommand="Zotero_File_Interface.exportFile();"/>
@@ -258,6 +258,6 @@
 		<key id="key_openZotero"
 			 key="Z" 
 			 oncommand="ZoteroPane.toggleDisplay();"
-			 modifiers="shift accel" />
+			 modifiers="alt accel" />
 	</keyset>
 </overlay>
