@@ -270,13 +270,19 @@ Zotero.Item.prototype.getCreators = function(){
  * Set or update the creator at the specified position
  *
  * _orderIndex_: the position of this creator in the item (from 0)
- * _fieldMode_: 0 for double-field, 1 for single-field mode
+ * _creatorTypeID_: id or type name
+ * _fieldMode_: 0 for double-field, 1 for single-field mode (default 0)
  *
- * If single-field mode, _firstName_ is ignored
+ * If fieldMode==1, _firstName_ is ignored
  */
 Zotero.Item.prototype.setCreator = function(orderIndex, firstName, lastName, creatorTypeID, fieldMode){
 	if (this.getID() && !this._creatorsLoaded){
 		this._loadCreators();
+	}
+	
+	// Default to double-field mode if not specified
+	if (!fieldMode){
+		fieldMode = 0;
 	}
 	
 	if (fieldMode==1 || !firstName){
@@ -286,6 +292,8 @@ Zotero.Item.prototype.setCreator = function(orderIndex, firstName, lastName, cre
 	if (!lastName){
 		lastName = '';
 	}
+	
+	creatorTypeID = Zotero.CreatorTypes.getID(creatorTypeID);
 	
 	// If creator at this position hasn't changed, cancel
 	if (this._creators.has(orderIndex) &&
@@ -1746,11 +1754,12 @@ Zotero.Item.prototype._loadCreators = function(){
 	
 	this._creators = new Zotero.Hash();
 	for (var i=0; i<creators.length; i++){
-		var creator = new Array();
-		creator['firstName'] = creators[i]['firstName'];
-		creator['lastName'] = creators[i]['lastName'];
-		creator['fieldMode'] = creators[i]['fieldMode'];
-		creator['creatorTypeID'] = creators[i]['creatorTypeID'];
+		var creator = {
+			firstName: creators[i]['firstName'],
+			lastName: creators[i]['lastName'],
+			creatorTypeID: creators[i]['creatorTypeID'],
+			fieldMode: creators[i]['fieldMode']
+		}
 		// Save creator data into Hash, indexed by orderIndex
 		this._creators.set(creators[i]['orderIndex'], creator);
 	}
