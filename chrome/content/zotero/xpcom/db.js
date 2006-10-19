@@ -552,9 +552,10 @@ Zotero.DB = new function(){
 				file.append(ZOTERO_CONFIG['DB_FILE']);
 				_connection = store.openDatabase(file);
 				Zotero.debug('Database restored', 1);
-				var msg = Zotero.getString('db.dbRestored');
-				msg = msg.replace('%1', Zotero.Date.getFileDateString(backupFile))
-				msg = msg.replace('%2', Zotero.Date.getFileTimeString(backupFile))
+				var msg = Zotero.getString('db.dbRestored', [
+					Zotero.Date.getFileDateString(backupFile),
+					Zotero.Date.getFileTimeString(backupFile)
+				]);
 				alert(msg);
 				
 				break catchBlock;

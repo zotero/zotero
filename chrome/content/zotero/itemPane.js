@@ -1202,14 +1202,14 @@ var ZoteroItemPane = new function()
 	{
 		var c = _notesList.childNodes.length;
 		
-		_notesLabel.value = Zotero.getString('pane.item.notes.count.'+(c != 1 ? "plural" : "singular")).replace('%1',c) + ":";
+		_notesLabel.value = Zotero.getString('pane.item.notes.count.'+(c != 1 ? "plural" : "singular"), [c]) + ":";
 	}
 	
 	function _updateAttachmentCount()
 	{
 		var c = _attachmentsList.childNodes.length;
 		
-		_attachmentsLabel.value = Zotero.getString('pane.item.attachments.count.'+(c != 1 ? "plural" : "singular")).replace('%1',c) + ":";
+		_attachmentsLabel.value = Zotero.getString('pane.item.attachments.count.'+(c != 1 ? "plural" : "singular"), [c]) + ":";
 	}
 	
 	function removeAttachment(id)

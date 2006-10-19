@@ -311,11 +311,20 @@ var Zotero = new function(){
 	}
 	
 	
-	function getString(name){
+	function getString(name, params){
 		try {
-			var l10n = _localizedStringBundle.GetStringFromName(name);
+			if (params){
+				if (typeof params != 'object'){
+					params = [params];
+				}
+				var l10n = _localizedStringBundle.formatStringFromName(name, params, params.length);
+			}
+			else {
+				var l10n = _localizedStringBundle.GetStringFromName(name);
+			}
 		}
 		catch (e){
+			Zotero.debug(e);
 			throw ('Localized string not available for ' + name);
 		}
 		return l10n;

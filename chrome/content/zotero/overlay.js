@@ -364,7 +364,7 @@ var ZoteroPane = new function()
 			var label = document.getElementById('zotero-view-selected-label');
 		
 			if(itemsView && itemsView.selection.count)
-				label.value = Zotero.getString('pane.item.selected.multiple').replace('%1', itemsView.selection.count);	
+				label.value = Zotero.getString('pane.item.selected.multiple', itemsView.selection.count);
 			else
 				label.value = Zotero.getString('pane.item.selected.zero');
 		}

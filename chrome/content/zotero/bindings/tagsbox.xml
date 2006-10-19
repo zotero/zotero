@@ -200,7 +200,8 @@
 								count = 0;
 						}
 						
-						this.id('tagsNum').value = count + ' tags:';
+						this.id('tagsNum').value =
+							Zotero.getString('pane.item.tags.count.' + (count != 1 ? "plural" : "singular"), [count]) + ":";
 						this.count = count;
 					]]>
 				</body>
