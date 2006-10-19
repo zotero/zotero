@@ -1,8 +1,8 @@
 <!ENTITY zotero.name 			"Zotero">
 <!ENTITY zotero.version		"version">
-<!ENTITY zotero.createdby		"Created by">
-<!ENTITY zotero.directors		"Directors">
-<!ENTITY zotero.developers		"Developers">
-<!ENTITY zotero.executiveProducer		"Executive Producer">
-<!ENTITY zotero.thanks			"Special thanks">
+<!ENTITY zotero.createdby		"Created by:">
+<!ENTITY zotero.directors		"Directors:">
+<!ENTITY zotero.developers		"Developers:">
+<!ENTITY zotero.executiveProducer		"Executive Producer:">
+<!ENTITY zotero.thanks			"Special thanks:">
 <!ENTITY zotero.about.close	"Close">

@@ -161,14 +161,14 @@
 			<xul:vbox flex="1">
 				<xul:groupbox xbl:inherits="flex">
 					<xul:caption align="center">
-						<xul:label value="&zotero.search.joinMode.match;"/>
+						<xul:label value="&zotero.search.joinMode.prefix;"/>
 						<xul:menulist id="joinModeMenu" oncommand="this.parentNode.parentNode.parentNode.parentNode.updateJoinMode()">
 							<xul:menupopup>
 								<xul:menuitem label="&zotero.search.joinMode.any;" value="any"/>
 								<xul:menuitem label="&zotero.search.joinMode.all;" value="all" selected="true"/>
 							</xul:menupopup>
 						</xul:menulist>
-						<xul:label value="&zotero.search.joinMode.ofTheFollowing;:"/>
+						<xul:label value="&zotero.search.joinMode.suffix;"/>
 					</xul:caption>
 					<xul:vbox id="conditions"/>
 				</xul:groupbox>

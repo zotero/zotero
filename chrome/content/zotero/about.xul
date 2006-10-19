@@ -34,28 +34,28 @@
 		<script>
 			document.getElementById('version').value += Zotero.version;
 		</script>
-		<label class="subhead" value="&zotero.createdby;:"/>
+		<label class="subhead" value="&zotero.createdby;"/>
 		<vbox class="subcontent">
 			<label class="text-link" href="http://chnm.gmu.edu" value="Center for History and New Media"/>
 			<label value="George Mason University"/>
 			<label value="Fairfax, VA"/>
 		</vbox>
-		<label class="subhead" value="&zotero.directors;:"/>
+		<label class="subhead" value="&zotero.directors;"/>
 		<vbox class="subcontent">
 			<label value="Dan Cohen"/>
 			<label value="Josh Greenberg"/>
 		</vbox>
-		<label class="subhead" value="&zotero.developers;:"/>
+		<label class="subhead" value="&zotero.developers;"/>
 		<vbox class="subcontent">
 			<label value="Dan Stillman"/>
 			<label value="Simon Kornblith"/>
 			<label value="David Norton"/>
 		</vbox>
-		<label class="subhead" value="&zotero.executiveProducer;:"/>
+		<label class="subhead" value="&zotero.executiveProducer;"/>
 		<vbox class="subcontent">
 			<label value="Roy Rosenzweig"/>
 		</vbox>
-		<label class="subhead" value="&zotero.thanks;:"/>
+		<label class="subhead" value="&zotero.thanks;"/>
 		<vbox class="subcontent">
 			<label class="text-link" href="http://www.imls.gov/" value="Institute of Museum and Library Services"/>
 			<label class="text-link" href="http://www.mellon.org/" value="Andrew W. Mellon Foundation"/>

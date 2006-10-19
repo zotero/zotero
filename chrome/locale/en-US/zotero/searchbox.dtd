@@ -1,7 +1,7 @@
-<!ENTITY zotero.search.joinMode.match		"Match">
+<!ENTITY zotero.search.joinMode.prefix		"Match">
 <!ENTITY zotero.search.joinMode.any		"any">
 <!ENTITY zotero.search.joinMode.all		"all">
-<!ENTITY zotero.search.joinMode.ofTheFollowing		"of the following">
+<!ENTITY zotero.search.joinMode.suffix		"of the following:">
 
 <!ENTITY zotero.search.recursive.label		"Search subfolders">
 
