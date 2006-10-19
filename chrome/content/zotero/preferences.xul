@@ -47,6 +47,8 @@
 
 <checkbox id="autoUpdateBox" label="&zotero.preferences.autoUpdate.label;"/>
 
+<checkbox id="reportTranslationFailure" label="&zotero.preferences.reportTranslationFailure.label;"/>
+
 <checkbox id="parseEndnoteBox" label="&zotero.preferences.parseEndnote.label;"/>
 
 <checkbox id="automaticSnapshots" label="&zotero.preferences.automaticSnapshots.label;"/>

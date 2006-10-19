@@ -21,6 +21,7 @@
 */
 
 var autoUpdateBox;
+var reportTranslationFailure;
 var positionMenu;
 var parseEndnoteBox;
 var automaticSnapshots;
@@ -47,6 +48,9 @@ function init()
 {	
 	autoUpdateBox = document.getElementById('autoUpdateBox');
 	autoUpdateBox.checked = Zotero.Prefs.get('automaticScraperUpdates');
+	
+	reportTranslationFailure = document.getElementById('reportTranslationFailure');
+	reportTranslationFailure.checked = Zotero.Prefs.get('reportTranslationFailure');
 	
 	positionMenu = document.getElementById('positionMenu');
 	positionMenu.selectedIndex = zoteroPaneOnTopInitial = Zotero.Prefs.get('zoteroPaneOnTop') ? 0 : 1;
@@ -76,6 +80,7 @@ function init()
 function accept()
 {
 	Zotero.Prefs.set('automaticScraperUpdates', autoUpdateBox.checked);
+	Zotero.Prefs.set('reportTranslationFailure', reportTranslationFailure.checked);
 	Zotero.Prefs.set('zoteroPaneOnTop', positionMenu.selectedIndex == 0);
 	
 	if(Zotero.Prefs.get('parseEndNoteMIMETypes') != parseEndnoteBox.checked)

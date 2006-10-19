@@ -1,6 +1,7 @@
 <!ENTITY zotero.name					"Zotero">
 <!ENTITY zotero.preferences.title		"Zotero Preferences">
 <!ENTITY zotero.preferences.autoUpdate.label		"Automatically check for updated scrapers">
+<!ENTITY zotero.preferences.reportTranslationFailure.label	"Report broken site translators">
 <!ENTITY zotero.preferences.position.label			"Display Zotero">
 <!ENTITY zotero.preferences.position.above			"above">
 <!ENTITY zotero.preferences.position.below			"below">
