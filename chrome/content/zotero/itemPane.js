@@ -854,12 +854,12 @@ var ZoteroItemPane = new function()
 	 * Save a multiple-field selection for the creator autocomplete
 	 * (e.g. "Shakespeare, William")
 	 */
-	function handleCreatorAutoCompleteSelect(textbox, creatorField)
+	function handleCreatorAutoCompleteSelect(textbox)
 	{
 		var comment = Zotero.Utilities.AutoComplete.getResultComment(textbox);
 		if (!comment)
 		{
-			return false;
+			return;
 		}
 		
 		var [creatorID, numFields] = comment.split('-');

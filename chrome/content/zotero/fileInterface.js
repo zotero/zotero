@@ -71,6 +71,7 @@ var Zotero_File_Interface = new function() {
 					translation.translate();
 			});
 		}
+		return false;
 	}
 	
 	/*

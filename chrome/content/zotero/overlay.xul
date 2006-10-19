@@ -129,7 +129,7 @@
 					<toolbarbutton id="tb-note-add" tooltiptext="&zotero.toolbar.note.standalone;" oncommand="ZoteroPane.newNote(event.shiftKey);"/>
 					<spacer flex="1"/>
 					<label value="&zotero.toolbar.search.label;" control="tb-search"/>
-					<textbox id="tb-search" type="timed" timeout="250" command="cmd_zotero_search" dir="reverse" onkeypress="if(event.keyCode == event.DOM_VK_ESCAPE) { this.value = ''; this.doCommand('cmd_zotero_search'); return false; }">
+					<textbox id="tb-search" type="timed" timeout="250" command="cmd_zotero_search" dir="reverse" onkeypress="if(event.keyCode == event.DOM_VK_ESCAPE) { this.value = ''; this.doCommand('cmd_zotero_search'); return false; } return true;">
 						<toolbarbutton id="tb-search-cancel" oncommand="this.parentNode.value='';" hidden="true"/>
 					</textbox>
 				</toolbar>

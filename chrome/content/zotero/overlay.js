@@ -201,7 +201,7 @@ var ZoteroPane = new function()
 		
 		if (!result)
 		{
-			return false;
+			return;
 		}
 		
 		if (!newName.value)
@@ -530,6 +530,7 @@ var ZoteroPane = new function()
 			if(collection && collection.isCollection())
 				return collection.ref;
 		}
+		return false;
 	}
 	
 	function getSelectedSavedSearch()
@@ -542,6 +543,7 @@ var ZoteroPane = new function()
 				return collection.ref;
 			}
 		}
+		return false;
 	}
 	
 	function getSelectedItems()
