@@ -19,6 +19,18 @@
 <!DOCTYPE bindings [
   <!ENTITY % textcontextDTD SYSTEM "chrome://global/locale/textcontext.dtd" >
   %textcontextDTD;
+  
+  <!-- These aren't yet included in textcontext.dtd in Minefield, so we reproduce them here
+  		(rather than including the massive browser.dtd) -->
+  <!ENTITY spellAddToDictionary.label "Add to dictionary">
+  <!ENTITY spellAddToDictionary.accesskey "o">
+  <!ENTITY spellEnable.label "Spell check this field">
+  <!ENTITY spellEnable.accesskey "S">
+  <!ENTITY spellNoSuggestions.label "(No spelling suggestions)">
+  <!ENTITY spellDictionaries.label "Languages">
+  <!ENTITY spellDictionaries.accesskey "l">
+  <!ENTITY spellAddDictionaries.label "Add dictionaries...">
+  <!ENTITY spellAddDictionaries.accesskey "A">
 ]>
 
 <bindings 	xmlns="http://www.mozilla.org/xbl"
