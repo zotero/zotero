@@ -38,9 +38,9 @@ Zotero.Item.prototype._init = function(){
 	//
 	// Public members for access by public methods -- do not access directly
 	//
-	this._data = new Array();
-	this._creators = new Zotero.Hash();
-	this._itemData = new Array();
+	this._data = [];
+	this._creators = [];
+	this._itemData = [];
 	
 	this._creatorsLoaded = false;
 	this._itemDataLoaded = false;
@@ -231,7 +231,7 @@ Zotero.Item.prototype.hasCreatorAt = function(pos){
 		this._loadCreators();
 	}
 	
-	return this._creators.has(pos);
+	return !!this._creators[pos];
 }
 
 
@@ -245,10 +245,7 @@ Zotero.Item.prototype.getCreator = function(pos){
 		this._loadCreators();
 	}
 	
-	if (!this._creators.items[pos]){
-		return false;
-	}
-	return this._creators.items[pos];
+	return this._creators[pos] ? this._creators[pos] : false;
 }
 
 
@@ -259,7 +256,9 @@ Zotero.Item.prototype.getCreator = function(pos){
  */
 Zotero.Item.prototype.getCreators = function(){
 	var creators = [];
-	for (var i=0, len=this.numCreators(); i<len; i++){
+	Zotero.debug(this._creators);
+	Zotero.debug(this._creators.length);
+	for (var i=0; i<this._creators.length; i++){
 		creators.push(this.getCreator(i));
 	}
 	return creators;
@@ -296,11 +295,11 @@ Zotero.Item.prototype.setCreator = function(orderIndex, firstName, lastName, cre
 	creatorTypeID = Zotero.CreatorTypes.getID(creatorTypeID);
 	
 	// If creator at this position hasn't changed, cancel
-	if (this._creators.has(orderIndex) &&
-		this._creators.get(orderIndex)['firstName']==firstName &&
-		this._creators.get(orderIndex)['lastName']==lastName &&
-		this._creators.get(orderIndex)['creatorTypeID']==creatorTypeID &&
-		this._creators.get(orderIndex)['fieldMode']==fieldMode){
+	if (this._creators[orderIndex] &&
+		this._creators[orderIndex]['firstName']==firstName &&
+		this._creators[orderIndex]['lastName']==lastName &&
+		this._creators[orderIndex]['creatorTypeID']==creatorTypeID &&
+		this._creators[orderIndex]['fieldMode']==fieldMode){
 		return false;
 	}
 	
@@ -308,13 +307,14 @@ Zotero.Item.prototype.setCreator = function(orderIndex, firstName, lastName, cre
 		creatorTypeID = 1;
 	}
 	
-	var creator = new Array();
-	creator['firstName'] = firstName;
-	creator['lastName'] = lastName;
-	creator['creatorTypeID'] = creatorTypeID;
-	creator['fieldMode'] = fieldMode;
+	var creator = {
+		firstName: firstName,
+		lastName: lastName,
+		creatorTypeID: creatorTypeID,
+		fieldMode: fieldMode
+	}
 	
-	this._creators.set(orderIndex, creator);
+	this._creators[orderIndex] = creator;
 	this._changedCreators.set(orderIndex);
 	return true;
 }
@@ -328,16 +328,15 @@ Zotero.Item.prototype.removeCreator = function(orderIndex){
 		this._loadCreators();
 	}
 	
-	if (!this._creators.has(orderIndex)){
+	if (!this._creators[orderIndex]){
 		throw ('No creator exists at position ' + orderIndex);
 	}
-	this._creators.remove(orderIndex);
+	this._creators[orderIndex] = false;
 	
 	// Go to length+1 so we clear the last one
 	for (var i=orderIndex, max=this._creators.length+1; i<max; i++){
-		var next =
-			this._creators.items[i+1] ? this._creators.items[i+1] : false;
-		this._creators.set(i, next);
+		var next = this._creators[i+1] ? this._creators[i+1] : false;
+		this._creators[i] = next;
 		this._changedCreators.set(i);
 	}
 	return true;
@@ -461,12 +460,24 @@ Zotero.Item.prototype.setField = function(field, value, loadIn){
  *
  * Note: Does not call notify() if transaction is in progress
  *
- * Returns true on item update or itemID of new item 
+ * Returns true on item update or itemID of new item
  */
 Zotero.Item.prototype.save = function(){
 	if (!this.hasChanged()){
 		Zotero.debug('Item ' + this.getID() + ' has not changed', 4);
 		return false;
+	}
+	
+	// Make sure there are no gaps in the creator indexes
+	var creators = this.getCreators();
+	for (var i=0; i<creators.length; i++){
+		if (!creators[i] || (!creators[i].firstName && !creators[i].lastName)){
+			var lastCreator = true;
+			continue;
+		}
+		if (lastCreator){
+			throw("Creator indices not contiguous or don't start at 0");
+		}
 	}
 	
 	//
@@ -527,8 +538,7 @@ Zotero.Item.prototype.save = function(){
 					Zotero.DB.query(sql2);
 					
 					// If empty, move on
-					if (typeof creator['firstName'] == 'undefined'
-						&& typeof creator['lastName'] == 'undefined'){
+					if (!creator['firstName'] && !creator['lastName']){
 						continue;
 					}
 					
@@ -818,7 +828,7 @@ Zotero.Item.prototype.save = function(){
 					
 					sql = 'INSERT INTO itemCreators VALUES ('
 						+ itemID + ',' + creatorID + ','
-						+ creator['creatorTypeID'] + ', ' + orderIndex
+						+ creator['creatorTypeID'] + ',' + orderIndex
 						+ ")";
 					Zotero.DB.query(sql);
 					
@@ -1752,16 +1762,14 @@ Zotero.Item.prototype._loadCreators = function(){
 		return true;
 	}
 	
-	this._creators = new Zotero.Hash();
+	this._creators = [];
 	for (var i=0; i<creators.length; i++){
-		var creator = {
+		this._creators[creators[i]['orderIndex']] = {
 			firstName: creators[i]['firstName'],
 			lastName: creators[i]['lastName'],
 			creatorTypeID: creators[i]['creatorTypeID'],
 			fieldMode: creators[i]['fieldMode']
-		}
-		// Save creator data into Hash, indexed by orderIndex
-		this._creators.set(creators[i]['orderIndex'], creator);
+		};
 	}
 	
 	return true;
@@ -2585,18 +2593,20 @@ Zotero.Collections = new function(){
 		
 		var result = Zotero.DB.query(sql);
 		
-		for (var i=0; i<result.length; i++){
-			var collectionID = result[i]['collectionID'];
-			
-			// If collection doesn't exist, create new object and stuff in array
-			if (!_collections[collectionID]){
-				var collection = new Zotero.Collection();
-				collection.loadFromRow(result[i]);
-				_collections[collectionID] = collection;
-			}
-			// If existing collection, reload in place
-			else {
-				_collections[collectionID].loadFromRow(result[i]);
+		if (result){
+			for (var i=0; i<result.length; i++){
+				var collectionID = result[i]['collectionID'];
+				
+				// If collection doesn't exist, create new object and stuff in array
+				if (!_collections[collectionID]){
+					var collection = new Zotero.Collection();
+					collection.loadFromRow(result[i]);
+					_collections[collectionID] = collection;
+				}
+				// If existing collection, reload in place
+				else {
+					_collections[collectionID].loadFromRow(result[i]);
+				}
 			}
 		}
 		_collectionsLoaded = true;
