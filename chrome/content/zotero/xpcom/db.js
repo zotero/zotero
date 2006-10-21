@@ -320,8 +320,9 @@ Zotero.DB = new function(){
 		var db = _getDBConnection();
 		
 		if (_transactionNestingLevel){
-			Zotero.debug('Flagging nested transaction for rollback', 5);
+			_transactionNestingLevel--;
 			_transactionRollback = true;
+			Zotero.debug('Flagging nested transaction for rollback', 5);
 		}
 		else {
 			Zotero.debug('Rolling back transaction', 5);
