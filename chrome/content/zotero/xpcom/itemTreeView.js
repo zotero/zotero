@@ -357,6 +357,7 @@ Zotero.ItemTreeView.prototype.getImageSrc = function(row, col)
 			case 'newspaperArticle':
 			case 'note':
 			case 'podcast':
+			case 'radioBroadcast':
 			case 'report':
 			case 'thesis':
 			case 'tvBroadcast':
