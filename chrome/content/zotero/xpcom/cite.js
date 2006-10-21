@@ -1114,6 +1114,7 @@ Zotero.CSL.prototype._getFieldValue = function(name, element, item, formattedStr
                                                 bibCitElement, position,
                                                 locatorType, locator, typeName) {
 	
+	var dataAppended = false;
 	var itemID = item.getID();
 	if(element._serialized && this._ignore && this._ignore[itemID] && this._ignore[itemID][element._serialized]) {
 		return false;
