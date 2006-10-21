@@ -34,6 +34,7 @@
 							var typeID = event.explicitOriginalTarget.getAttribute('typeid');
 							document.popupNode.setAttribute('label',
 								Zotero.getString('creatorTypes.' + Zotero.CreatorTypes.getName(typeID)) + ':');
+							document.popupNode.setAttribute('typeid', typeID);
 							ZoteroItemPane.modifyCreator(document.popupNode.getAttribute('fieldname').split('-')[1],
 								'typeID', typeID, otherFields)"/>
 				</popupset>

@@ -280,7 +280,7 @@ var ZoteroItemPane = new function()
 			else
 			{
 				// Add default row
-				addCreatorRow('', '', false, false, true, true);
+				addCreatorRow('', '', false, Zotero.Prefs.get('lastCreatorFieldMode'), true, true);
 			}
 			
 			var focusMode = 'info';
@@ -474,6 +474,7 @@ var ZoteroItemPane = new function()
 		
 		var label = document.createElement("toolbarbutton");
 		label.setAttribute("label",Zotero.getString('creatorTypes.'+Zotero.CreatorTypes.getName(typeID))+":");
+		label.setAttribute("typeid", typeID);
 		label.setAttribute("popup","creatorTypeMenu");
 		label.setAttribute("fieldname",'creator-'+_creatorCount+'-typeID');
 		label.className = 'clicky';
@@ -545,7 +546,7 @@ var ZoteroItemPane = new function()
 		}
 		else
 		{
-			_enablePlusButton(addButton, typeID);
+			_enablePlusButton(addButton, typeID, singleField);
 		}
 		hbox.appendChild(addButton);
 		
@@ -648,6 +649,9 @@ var ZoteroItemPane = new function()
 			comma.setAttribute('hidden', false);
 		}
 		
+		// Save the last-used field mode
+		Zotero.Prefs.set('lastCreatorFieldMode', singleField);
+		
 		if (!initial)
 		{
 			var [, index, field] = button.getAttribute('fieldname').split('-');
@@ -664,12 +668,12 @@ var ZoteroItemPane = new function()
 		button.setAttribute('onclick', false); 
 	}
 	
-	function _enablePlusButton(button, creatorTypeID)
+	function _enablePlusButton(button, creatorTypeID, fieldMode)
 	{
 		button.setAttribute('disabled', false);
 		button.setAttribute("class","clicky");
 		button.setAttribute("onclick",
-			"ZoteroItemPane.disableButton(this); ZoteroItemPane.addCreatorRow('',''," + (creatorTypeID ? creatorTypeID : 'false') + ",false,true);");
+			"ZoteroItemPane.disableButton(this); ZoteroItemPane.addCreatorRow('', '', " + (creatorTypeID ? creatorTypeID : 'false') + ", " + fieldMode + ", true);");
 	}
 	
 	function createValueElement(valueText, fieldName, tabindex)
@@ -747,7 +751,9 @@ var ZoteroItemPane = new function()
 			
 			// Enable the "+" button on the previous row
 			var elems = _dynamicFields.getElementsByAttribute('value', '+');
-			_enablePlusButton(elems[elems.length-1]);
+			var button = elems[elems.length-1];
+			var creatorFields = getCreatorFields(Zotero.getAncestorByTagName(button, 'row'));
+			_enablePlusButton(button, creatorFields.typeID, creatorFields.singleField);
 			
 			_creatorCount--;
 			return;
@@ -1101,7 +1107,7 @@ var ZoteroItemPane = new function()
 	}
 	
 	function getCreatorFields(row){
-		var type = row.getElementsByTagName('toolbarbutton')[0].getAttribute('label');
+		var typeID = row.getElementsByTagName('toolbarbutton')[0].getAttribute('typeid');
 		var label1 = row.getElementsByTagName('hbox')[0].firstChild.firstChild;
 		var label2 = label1.parentNode.lastChild;
 		
@@ -1110,7 +1116,7 @@ var ZoteroItemPane = new function()
 				: label1.value,
 			firstName: label2.firstChild ? label2.firstChild.nodeValue
 				: label2.value,
-			typeID: Zotero.CreatorTypes.getID(type.substr(0, type.length-1).toLowerCase()),
+			typeID: typeID,
 			singleField: label1.getAttribute('singleField') == 'true'
 		}
 	}
