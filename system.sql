@@ -1,4 +1,4 @@
--- 6
+-- 7
 
 -- This file creates system tables that can be safely wiped and reinitialized
 -- at any time, as long as existing ids are preserved.
@@ -500,6 +500,10 @@ INSERT INTO itemTypeFields VALUES (26, 22, NULL, 16);
 INSERT INTO itemTypeFields VALUES (27, 74, NULL, 1);
 INSERT INTO itemTypeFields VALUES (27, 7, NULL, 2);
 INSERT INTO itemTypeFields VALUES (27, 75, NULL, 3);
+INSERT INTO itemTypeFields VALUES (27, 2, NULL, 4);
+INSERT INTO itemTypeFields VALUES (27, 1, NULL, 5);
+INSERT INTO itemTypeFields VALUES (27, 27, NULL, 6);
+INSERT INTO itemTypeFields VALUES (27, 22, NULL, 7);
 INSERT INTO itemTypeFields VALUES (28, 63, NULL, 1);
 INSERT INTO itemTypeFields VALUES (28, 28, NULL, 2);
 INSERT INTO itemTypeFields VALUES (28, 4, NULL, 3);
@@ -565,6 +569,7 @@ INSERT INTO itemTypeFields VALUES (32, 2, NULL, 10);
 INSERT INTO itemTypeFields VALUES (32, 1, NULL, 11);
 INSERT INTO itemTypeFields VALUES (32, 27, NULL, 12);
 INSERT INTO itemTypeFields VALUES (32, 22, NULL, 13);
+
 
 INSERT INTO creatorTypes VALUES(1, "author");
 INSERT INTO creatorTypes VALUES(2, "contributor");
