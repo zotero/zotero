@@ -37,6 +37,8 @@ Zotero.Attachments = new function(){
 	var self = this;
 	
 	function importFromFile(file, sourceItemID){
+		Zotero.debug('Importing attachment from file');
+		
 		var title = file.leafName;
 		
 		Zotero.DB.beginTransaction();
@@ -90,6 +92,8 @@ Zotero.Attachments = new function(){
 	
 	
 	function linkFromFile(file, sourceItemID){
+		Zotero.debug('Linking attachment from file');
+		
 		var title = file.leafName;
 		var mimeType = Zotero.MIME.getMIMETypeFromFile(file);
 		
@@ -104,6 +108,8 @@ Zotero.Attachments = new function(){
 	
 	
 	function importSnapshotFromFile(file, url, title, mimeType, charset, sourceItemID){
+		Zotero.debug('Importing snapshot from file');
+		
 		var charsetID = Zotero.CharacterSets.getID(charset);
 		
 		Zotero.DB.beginTransaction();
@@ -154,6 +160,8 @@ Zotero.Attachments = new function(){
 	
 	
 	function importFromURL(url, sourceItemID){
+		Zotero.debug('Importing attachment from URL');
+		
 		Zotero.Utilities.HTTP.doHead(url, function(obj){
 			var mimeType = obj.channel.contentType;
 			
@@ -207,12 +215,14 @@ Zotero.Attachments = new function(){
 					file.initWithFile(destDir);
 					file.append(fileName);
 					
+					wbp.progressListener = new Zotero.WebProgressFinishListener(function(){
+						_addToDB(file, url, title, Zotero.Attachments.LINK_MODE_IMPORTED_URL,
+							mimeType, null, sourceItemID, itemID);
+						
+						Zotero.DB.commitTransaction();
+					});
+					
 					wbp.saveURI(nsIURL, null, null, null, null, file);	
-					
-					_addToDB(file, url, title, Zotero.Attachments.LINK_MODE_IMPORTED_URL,
-						mimeType, null, sourceItemID, itemID);
-					
-					Zotero.DB.commitTransaction();
 				}
 				catch (e){
 					Zotero.DB.rollbackTransaction();
@@ -224,6 +234,8 @@ Zotero.Attachments = new function(){
 	
 	
 	function linkFromURL(url, sourceItemID, mimeType, title){
+		Zotero.debug('Linking attachment from URL');
+		
 		// If no title provided, figure it out from the URL
 		if (!title){
 			title = url.substring(url.lastIndexOf('/')+1);
@@ -247,6 +259,8 @@ Zotero.Attachments = new function(){
 	
 	// TODO: what if called on file:// document?
 	function linkFromDocument(document, sourceItemID){
+		Zotero.debug('Linking attachment from document');
+		
 		var url = document.location;
 		var title = document.title; // TODO: don't use Mozilla-generated title for images, etc.
 		var mimeType = document.contentType;
@@ -265,9 +279,11 @@ Zotero.Attachments = new function(){
 	}
 	
 	
-	function importFromDocument(document, sourceItemID){
+	function importFromDocument(document, sourceItemID, forceTitle){
+		Zotero.debug('Importing attachment from document');
+		
 		var url = document.location;
-		var title = document.title;
+		var title = forceTitle ? forceTitle : document.title;
 		var mimeType = document.contentType;
 		var charsetID = Zotero.CharacterSets.getID(document.characterSet);
 		
@@ -296,6 +312,7 @@ Zotero.Attachments = new function(){
 		var file = Components.classes["@mozilla.org/file/local;1"].
 				createInstance(Components.interfaces.nsILocalFile);
 		file.initWithFile(destDir);
+		
 		var fileName = _getFileNameFromURL(url, mimeType);
 		
 		// This is a hack to make sure the file is opened in the browser when
@@ -310,20 +327,16 @@ Zotero.Attachments = new function(){
 		
 		file.append(fileName);
 		
-		wbp.saveDocument(document, file, destDir, mimeType, encodingFlags, false);
-		
-		_addToDB(file, url, title, this.LINK_MODE_IMPORTED_URL, mimeType,
-			charsetID, sourceItemID, itemID);
-		
-		Zotero.DB.commitTransaction();
-		
-		// Run the fulltext indexer asynchronously (actually, it hangs the UI
-		// thread, but at least it lets the menu close)
-		setTimeout(function(){
+		wbp.progressListener = new Zotero.WebProgressFinishListener(function(){
+			_addToDB(file, url, title, Zotero.Attachments.LINK_MODE_IMPORTED_URL, mimeType,
+				charsetID, sourceItemID, itemID);
+			
+			Zotero.DB.commitTransaction();
+			
 			Zotero.Fulltext.indexDocument(document, itemID);
-		}, 50);
+		});
 		
-		return itemID;
+		wbp.saveDocument(document, file, destDir, mimeType, encodingFlags, false);
 	}
 	
 	
@@ -358,11 +371,7 @@ Zotero.Attachments = new function(){
 	**/
 	function _addToDB(file, url, title, linkMode, mimeType, charsetID, sourceItemID, itemID){
 		if (file){
-			// Path relative to Zotero directory for external files and relative
-			// to storage directory for imported files
-			var refDir = (linkMode==this.LINK_MODE_LINKED_FILE)
-				? Zotero.getZoteroDirectory() : Zotero.getStorageDirectory();
-			var path = file.getRelativeDescriptor(refDir);
+			var path = file.persistentDescriptor;
 		}
 		
 		Zotero.DB.beginTransaction();

@@ -955,3 +955,18 @@ Zotero.Browser = new function() {
 		Zotero.debug("deleted hidden browser");
 	}
 }
+
+
+Zotero.WebProgressFinishListener = function(onFinish){
+		this.onStateChange = function(wp, req, stateFlags, status){
+			if ((stateFlags & Components.interfaces.nsIWebProgressListener.STATE_STOP)
+				&& (stateFlags & Components.interfaces.nsIWebProgressListener.STATE_IS_NETWORK)){
+				onFinish();
+			}
+		}
+		
+		this.onLocationChange = function(){}
+		this.onProgressChange = function(){}
+		this.onSecurityChange = function(){}
+		this.onStatusChange = function(){}
+}

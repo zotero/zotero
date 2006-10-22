@@ -256,8 +256,6 @@ Zotero.Item.prototype.getCreator = function(pos){
  */
 Zotero.Item.prototype.getCreators = function(){
 	var creators = [];
-	Zotero.debug(this._creators);
-	Zotero.debug(this._creators.length);
 	for (var i=0; i<this._creators.length; i++){
 		creators.push(this.getCreator(i));
 	}
@@ -1216,9 +1214,23 @@ Zotero.Item.prototype.getFile = function(row){
 	var file = Components.classes["@mozilla.org/file/local;1"].
 		createInstance(Components.interfaces.nsILocalFile);
 	
-	var refDir = (row['linkMode']==this.LINK_MODE_LINKED_FILE)
-		? Zotero.getZoteroDirectory() : Zotero.getStorageDirectory();
-	file.setRelativeDescriptor(refDir, row['path']);
+	try {
+		file.persistentDescriptor = row['path'];
+	}
+	// See if this is an old relative path (deprecated)
+	catch (e){
+		Zotero.debug('Invalid persistent descriptor');
+		try {
+			var refDir = (row['linkMode']==this.LINK_MODE_LINKED_FILE)
+				? Zotero.getZoteroDirectory() : Zotero.getStorageDirectory();
+			file.setRelativeDescriptor(refDir, row['path']);
+			// Convert this to a persistent descriptor
+			Zotero.DB.query("UPDATE itemAttachments SET path=? WHERE itemID=?", [file.persistentDescriptor, this.getID()]);
+		}
+		catch (e){
+			Zotero.debug('Invalid relative descriptor');
+		}
+	}
 	
 	if (!file.exists()){
 		return false;

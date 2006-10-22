@@ -822,12 +822,17 @@ var ZoteroPane = new function()
 			if(attachment.getAttachmentLinkMode() != Zotero.Attachments.LINK_MODE_LINKED_URL)
 			{
 				var file = attachment.getFile();
-				if (Zotero.MIME.fileHasInternalHandler(file))
-				{
-					window.loadURI(attachment.getLocalFileURL());
+				if (file){
+					if (Zotero.MIME.fileHasInternalHandler(file))
+					{
+						window.loadURI(attachment.getLocalFileURL());
+					}
+					else {
+						file.launch();
+					}
 				}
 				else {
-					file.launch();
+					alert(Zotero.getString('pane.item.attachments.fileNotFound'));
 				}
 			}
 			else
@@ -847,7 +852,12 @@ var ZoteroPane = new function()
 			if (attachment.getAttachmentLinkMode() != Zotero.Attachments.LINK_MODE_LINKED_URL)
 			{
 				var file = attachment.getFile();
-				file.reveal();
+				if (file){
+					file.reveal();
+				}
+				else {
+					alert(Zotero.getString('pane.item.attachments.fileNotFound'));
+				}
 			}
 		}
 	}

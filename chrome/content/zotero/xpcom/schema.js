@@ -554,6 +554,22 @@ Zotero.Schema = new function(){
 					Zotero.DB.query("DROP TABLE IF EXISTS translators");
 					Zotero.DB.query("DROP TABLE IF EXISTS csl");
 				}
+				
+				if (i==9){
+					var attachments = Zotero.DB.query("SELECT itemID, linkMode, path FROM itemAttachments");
+					for each(var row in attachments){
+						var file = Components.classes["@mozilla.org/file/local;1"].createInstance(Components.interfaces.nsILocalFile);
+						try {
+							var refDir = (row.linkMode==Zotero.Attachments.LINK_MODE_LINKED_FILE) ? Zotero.getZoteroDirectory() : Zotero.getStorageDirectory();
+							file.setRelativeDescriptor(refDir, row.path);
+							Zotero.DB.query("UPDATE itemAttachments SET path=? WHERE itemID=?", [file.persistentDescriptor, row.itemID]);
+							Zotero.debug('succeeded');
+						}
+						catch (e){
+							Zotero.debug('failed');
+						}
+					}
+				}
 			}
 			
 			_updateSchema('userdata');

@@ -1218,14 +1218,7 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 							Zotero.debug("not adding attachment: no URL specified");
 						} else if(attachment.downloadable && this._downloadAssociatedFiles) {
 							if(attachment.document) {
-								attachmentID = Zotero.Attachments.importFromDocument(attachment.document, myID);
-								
-								// change title, if a different one was specified
-								if(attachment.title && (!attachment.document.title
-								   || attachment.title != attachment.document.title)) {
-									var attachmentItem = Zotero.Items.get(attachmentID);
-									attachmentItem.setField("title", attachment.title);
-								}
+								Zotero.Attachments.importFromDocument(attachment.document, myID, attachment.title);
 							} else {
 								Zotero.Attachments.importFromURL(attachment.url, myID,
 										(attachment.mimeType ? attachment.mimeType : attachment.document.contentType),
