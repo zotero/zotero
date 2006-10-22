@@ -563,11 +563,8 @@ Zotero.Schema = new function(){
 							var refDir = (row.linkMode==Zotero.Attachments.LINK_MODE_LINKED_FILE) ? Zotero.getZoteroDirectory() : Zotero.getStorageDirectory();
 							file.setRelativeDescriptor(refDir, row.path);
 							Zotero.DB.query("UPDATE itemAttachments SET path=? WHERE itemID=?", [file.persistentDescriptor, row.itemID]);
-							Zotero.debug('succeeded');
 						}
-						catch (e){
-							Zotero.debug('failed');
-						}
+						catch (e){}
 					}
 				}
 			}
