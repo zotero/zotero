@@ -183,7 +183,7 @@ Zotero.CSL.Global = new function() {
 			
 			// get default terms
 			var locales = new XML(Zotero.CSL.Global.cleanXML(req.responseText));
-			Zotero.CSL.Global._defaultTerms = Zotero.CSL.Global.parseLocales(locales);
+			Zotero.CSL.Global._defaultTerms = Zotero.CSL.Global.parseLocales(locales, true);
 		}
 	}
 	
@@ -205,7 +205,7 @@ Zotero.CSL.Global = new function() {
 	/*
 	 * parses locale strings into Zotero.CSL.Global._defaultTerms
 	 */
-	this.parseLocales = function(termXML) {
+	this.parseLocales = function(termXML, ignoreLang) {
 		// return defaults if there are no terms
 		if(!termXML.length()) {
 			return (Zotero.CSL.Global._defaultTerms ? Zotero.CSL.Global._defaultTerms : {});
@@ -213,15 +213,20 @@ Zotero.CSL.Global = new function() {
 		
 		var xml = new Namespace("http://www.w3.org/XML/1998/namespace");
 		
-		// get proper locale
-		var locale = termXML.locale.(@xml::lang == Zotero.CSL.Global._xmlLang);
-		if(!locale.length()) {
-			var xmlLang = Zotero.CSL.Global._xmlLang.substr(0, 2);
-			locale = termXML.locale.(@xml::lang == xmlLang);
-		}
-		if(!locale.length()) {
-			// return defaults if there are no locales
-			return (Zotero.CSL.Global._defaultTerms ? Zotero.CSL.Global._defaultTerms : {});
+		if(ignoreLang) {
+			// ignore lang if loaded from chrome
+			locale = termXML.locale[0];
+		} else {
+			// get proper locale
+			var locale = termXML.locale.(@xml::lang == Zotero.CSL.Global._xmlLang);
+			if(!locale.length()) {
+				var xmlLang = Zotero.CSL.Global._xmlLang.substr(0, 2);
+				locale = termXML.locale.(@xml::lang == xmlLang);
+			}
+			if(!locale.length()) {
+				// return defaults if there are no locales
+				return (Zotero.CSL.Global._defaultTerms ? Zotero.CSL.Global._defaultTerms : {});
+			}
 		}
 		
 		var termArray = new Object();
@@ -1114,9 +1119,11 @@ Zotero.CSL.prototype._getFieldValue = function(name, element, item, formattedStr
                                                 bibCitElement, position,
                                                 locatorType, locator, typeName) {
 	
+	
 	var dataAppended = false;
 	var itemID = item.getID();
-	if(element._serialized && this._ignore && this._ignore[itemID] && this._ignore[itemID][element._serialized]) {
+	
+	if(element._serialized && this._ignore && this._ignore[element._serialized]) {
 		return false;
 	}
 	
@@ -1178,10 +1185,11 @@ Zotero.CSL.prototype._getFieldValue = function(name, element, item, formattedStr
 		dataAppended = formattedString.concat(data, element);
 	} else if(name == "access") {
 		var data = new Zotero.CSL.FormattedString(this, formattedString.format);
-		var text;
+		var text = null;
 		var save = false;
 		
 		for(var i in element.children) {
+			text = null;
 			var child = element.children[i];
 			
 			if(child.name == "url") {
@@ -1198,8 +1206,8 @@ Zotero.CSL.prototype._getFieldValue = function(name, element, item, formattedStr
 				text = this._getTerm(child["term-name"], false, child["form"]);
 			}
 				
-			if(string) {
-				data.append(string, child);
+			if(text) {
+				data.append(text, child);
 				if(child.name != "text") {
 					// only save if there's non-text data
 					save = true;
@@ -1342,8 +1350,7 @@ Zotero.CSL.prototype._getFieldValue = function(name, element, item, formattedStr
 			
 			// ignore elements with the same serialization
 			if(this._ignore) {	// array might not exist if doing disambiguation
-				if(!this._ignore[itemID]) this._ignore[itemID] = new Array();
-				this._ignore[itemID][substituteElement._serialized] = true;
+				this._ignore[serialization] = true;
 			}
 			
 			// return field value, if there is one; otherwise, keep processing
@@ -1365,6 +1372,14 @@ Zotero.CSL.FormattedString = function(CSL, format, delimiter) {
 	this.string = "";
 	this.closePunctuation = false;
 	this.useBritishStyleQuotes = false;
+	
+	if(format == "RTF") {
+		this._openQuote = "\\uc0\\u8220 ";
+		this._closeQuote = "\\uc0\\u8221 ";
+	} else {
+		this._openQuote = "\u201c";
+		this._closeQuote = "\u201d";
+	}
 }
 
 Zotero.CSL.FormattedString._punctuation = ["!", ".", ",", "?"];
@@ -1377,7 +1392,6 @@ Zotero.CSL.FormattedString.prototype.concat = function(formattedString, element)
 		return false;
 	}
 	
-	Zotero.debug("adding "+formattedString.string+" to "+this.string);
 	if(formattedString.format != this.format) {
 		throw "CSL: cannot concatenate formatted strings: formats do not match";
 	}
@@ -1431,34 +1445,36 @@ Zotero.CSL.FormattedString.prototype.append = function(string, element, dontDeli
 				string = string[0].toUpperCase()+string.substr(1).toLowerCase();
 			}
 		}
-		
-		if(!dontEscape) {
-			if(this.format == "HTML") {
-				// replace HTML entities
-				string = string.replace(/&/g, "&amp;");
-				string = string.replace(/</g, "&lt;");
-				string = string.replace(/>/g, "&gt;");
-			} else if(this.format == "RTF") {
-				var newString = "";
-				
-				// go through and fix up unicode entities
-				for(i=0; i<string.length; i++) {
-					var charCode = string.charCodeAt(i);
-					if(charCode > 127) {			// encode unicode
-						newString += "\\uc0\\u"+charCode.toString()+" ";
-					} else if(charCode == 92) {		// double backslashes
-						newString += "\\\\";
-					} else {
-						newString += string[i];
-					}
+	}
+	
+	if(!dontEscape) {
+		if(this.format == "HTML") {
+			// replace HTML entities
+			string = string.replace(/&/g, "&amp;");
+			string = string.replace(/</g, "&lt;");
+			string = string.replace(/>/g, "&gt;");
+		} else if(this.format == "RTF") {
+			var newString = "";
+			
+			// go through and fix up unicode entities
+			for(i=0; i<string.length; i++) {
+				var charCode = string.charCodeAt(i);
+				if(charCode > 127) {			// encode unicode
+					newString += "\\uc0\\u"+charCode.toString()+" ";
+				} else if(charCode == 92) {		// double backslashes
+					newString += "\\\\";
+				} else {
+					newString += string[i];
 				}
-				
-				string = newString
-			} else if(this.format == "Integration") {
-				string = string.replace(/\\/g, "\\\\");
 			}
+			
+			string = newString
+		} else if(this.format == "Integration") {
+			string = string.replace(/\\/g, "\\\\");
 		}
-		
+	}
+	
+	if(element) {
 		if(this.format == "HTML") {
 			var style = "";
 			
@@ -1484,15 +1500,15 @@ Zotero.CSL.FormattedString.prototype.append = function(string, element, dontDeli
 				string = "\\b "+string+"\\b0 ";
 			}
 		}
-		
+	
 		// add quotes if necessary
 		if(element.quotes) {
-			this.string += "\u201c";
+			this.string += this._openQuote;
 			
 			if(this.useBritishStyleQuotes) {
-				string += "\u201d";
+				string += this._closeQuote;
 			} else {
-				this.closePunctuation = "\u201d";
+				this.closePunctuation = this._closeQuote;
 			}
 		}
 	}
@@ -1512,7 +1528,6 @@ Zotero.CSL.FormattedString.prototype.append = function(string, element, dontDeli
 			suffix = suffix.substr(1);
 		}
 		
-		Zotero.debug("appending suffix");
 		this.append(suffix, null, true);
 	}
 	

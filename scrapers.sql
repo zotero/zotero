@@ -1,4 +1,4 @@
--- 100
+-- 101
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -687,7 +687,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO "translators" VALUES ('e85a3134-8c1a-8644-6926-584c8565f23e', '2006-10-02 17:00:00', 1, 100, 4, 'History Cooperative', 'Simon Kornblith', '^http://www\.historycooperative\.org/(?:journals/.+/.+/.+\.s?html$|cgi-bin/search.cgi)', 
+REPLACE INTO "translators" VALUES ('e85a3134-8c1a-8644-6926-584c8565f23e', '2006-10-23 00:23:00', 1, 100, 4, 'History Cooperative', 'Simon Kornblith', '^http://www\.historycooperative\.org/(?:journals/.+/.+/.+\.s?html$|cgi-bin/search.cgi)', 
 'function detectWeb(doc, url) {
 	if(doc.title == "History Cooperative: Search Results") {
 		return "multiple";
@@ -708,7 +708,13 @@ function scrape(doc) {
 	
 	var month, year;
 	var metaTags = doc.getElementsByTagName("meta");
-	associateMeta(newItem, metaTags, "Title", "title");
+	
+	// grab title without using meta tag, since when titles have quotes History
+	// Cooperative can''t create a proper meta tag
+	var titleRe = /<!--_title_-->(.*)<!--_\/title_-->/;
+	var m = titleRe.exec(doc.getElementsByTagName("body")[0].innerHTML);
+	newItem.title = m[1];
+	
 	associateMeta(newItem, metaTags, "Journal", "publicationTitle");
 	associateMeta(newItem, metaTags, "Volume", "volume");
 	associateMeta(newItem, metaTags, "Issue", "issue");
@@ -2572,11 +2578,17 @@ REPLACE INTO "translators" VALUES ('c54d1932-73ce-dfd4-a943-109380e06574', '2006
 	}
 }');
 
-REPLACE INTO "translators" VALUES ('fcf41bed-0cbc-3704-85c7-8062a0068a7a', '2006-10-02 17:00:00', 1, 100, 12, 'PubMed', 'Simon Kornblith', '^http://www\.ncbi\.nlm\.nih\.gov/entrez/query\.fcgi\?(?:.*db=PubMed.*list_uids=[0-9]|.*list_uids=[0-9].*db=PubMed|.*db=PubMed.*CMD=search|.*CMD=search.*db=PubMed)',
+REPLACE INTO "translators" VALUES ('fcf41bed-0cbc-3704-85c7-8062a0068a7a', '2006-10-23 00:23:00', 1, 100, 12, 'PubMed', 'Simon Kornblith', '^http://www\.ncbi\.nlm\.nih\.gov/entrez/query\.fcgi\?.*db=PubMed',
 'function detectWeb(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
 	if(doc.location.href.indexOf("list_uids=") >= 0) {
 		return "journalArticle";
-	} else {
+	} else if(doc.evaluate(''//div[@class="ResultSet"]/table/tbody'', doc,
+	                       nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
 	}
 }
@@ -2754,6 +2766,8 @@ REPLACE INTO "translators" VALUES ('951c027d-74ac-47d4-a107-9c3069ab7b48', '2006
 	var translator = Zotero.loadTranslator("import");
 	translator.setTranslator("5e3ad958-ac79-463d-812b-a86a9235c28f");
 	translator.setHandler("itemDone", function(obj, newItem) {
+		newItem.itemType = "webpage";
+		
 		// use document title if none given in dublin core
 		if(!newItem.title) {
 			newItem.title = doc.title;
@@ -7336,13 +7350,13 @@ REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '200
       <name/>
     </publisher>
     <access>
-      <text term-name="retrieved" text-transform="capitalize"/>
+      <text term-name="retrieved" text-transform="capitalize" suffix=" "/>
       <date suffix=", ">
         <month suffix=" "/>
         <day suffix=", "/>
         <year/>
       </date>
-      <text term-name="from"/>
+      <text term-name="from" suffix=" "/>
       <url/>
     </access>
   </defaults>
@@ -7579,7 +7593,7 @@ REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/chicago-note.c
   </citation>
 </style>');
 
-REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/mla.csl', '2006-10-02 17:00:00', 'Modern Language Association',
+REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/mla.csl', '2006-10-23 00:21:00', 'Modern Language Association',
 '<?xml version="1.0" encoding="UTF-8"?>
 <?oxygen RNGSchema="../schema/trunk/csl.rnc" type="compact"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="author" xml:lang="en">
@@ -7604,7 +7618,7 @@ REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/mla.csl', '200
   <defaults>
     <contributor name-as-sort-order="first">
       <name and="text" sort-separator=", " delimiter=", " delimiter-precedes-last="always"/>
-      <label form="short" suffix="."/>
+      <label form="short" prefix=", " suffix="."/>
     </contributor>
     <author>
       <substitute>
@@ -7693,7 +7707,7 @@ REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/mla.csl', '200
             </group>
             <volume prefix=" "/>
             <issue prefix="."/>
-            <group prefix=" " suffix=".">
+            <group suffix=".">
               <date prefix=" (" suffix=")"/>
               <pages prefix=": "/>
             </group>

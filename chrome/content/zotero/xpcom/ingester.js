@@ -326,9 +326,19 @@ Zotero.OpenURL = new function() {
 		}
 		
 		if(item.date) {
-			co += _mapTag(item.date, "date", version);
-		} else {
-			co += _mapTag(item.year, "date", version);
+			var date = Zotero.Date.strToDate(item.date);
+			
+			if(date.year) {
+				var dateString = Zotero.Utilities.prototype.lpad(date.year, "0", 4);
+				if(date.month) {
+					dateString += "-"+Zotero.Utilities.prototype.lpad(date.month, "0", 2);
+					if(date.day) {
+						dateString += "-"+Zotero.Utilities.prototype.lpad(date.day, "0", 2);
+					}
+				}
+				
+				co += _mapTag(dateString, "date", version);
+			}
 		}
 		co += _mapTag(item.pages, "pages", version);
 		co += _mapTag(item.ISBN, "isbn", version);
@@ -643,8 +653,16 @@ Zotero.Ingester.MIMEHandler.StreamListener.prototype.onStopRequest = function(ch
 	var translation = new Zotero.Translate("import");
 	translation.setLocation(this._request.name);
 	translation.setString(this._readString);
-	translation.setHandler("itemDone", this._frontWindow.Zotero_Ingester_Interface._itemDone);
-	translation.setHandler("done", this._frontWindow.Zotero_Ingester_Interface._finishScraping);
+	
+	//  use front window's save functions and folder
+	var frontWindow = this._frontWindow;
+	
+	var saveLocation = null;
+	try {
+		saveLocation = frontWindow.ZoteroPane.getSelectedCollection();
+	} catch(e) {}
+	translation.setHandler("itemDone", function(obj, item) { frontWindow.Zotero_Ingester_Interface._itemDone(obj, item, saveLocation) });
+	translation.setHandler("done", function(obj, item) { frontWindow.Zotero_Ingester_Interface._finishScraping(obj, item, saveLocation) });
 	
 	// attempt to retrieve translators
 	var translators = translation.getTranslators();
