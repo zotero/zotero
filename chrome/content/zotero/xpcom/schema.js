@@ -401,7 +401,8 @@ Zotero.Schema = new function(){
 		
 		var currentTime = xmlhttp.responseXML.
 			getElementsByTagName('currentTime')[0].firstChild.nodeValue;
-		var updates = xmlhttp.responseXML.getElementsByTagName('translator');
+		var translatorUpdates = xmlhttp.responseXML.getElementsByTagName('translator');
+		var styleUpdates = xmlhttp.responseXML.getElementsByTagName('style');
 		
 		Zotero.DB.beginTransaction();
 		
@@ -412,29 +413,32 @@ Zotero.Schema = new function(){
 		var d = new Date();
 		_updateDBVersion('lastcheck', Math.round(d.getTime()/1000)); // JS uses ms
 		
-		if (!updates.length){
-			Zotero.debug('All scrapers are up-to-date');
+		if (!translatorUpdates.length && !styleUpdates.length){
+			Zotero.debug('All translators and styles are up-to-date');
 			Zotero.DB.commitTransaction();
 			_setRepositoryTimer(ZOTERO_CONFIG['REPOSITORY_CHECK_INTERVAL']);
 			return false;
 		}
 		
-		for (var i=0, len=updates.length; i<len; i++){
-			try {
-				_scraperXMLToDBQuery(updates[i]);
+		try {
+			for (var i=0, len=translatorUpdates.length; i<len; i++){
+				_translatorXMLToDB(translatorUpdates[i]);
 			}
-			catch (e) {
-				Zotero.debug(e, 1);
-				Zotero.DB.rollbackTransaction();
-				var breakout = true;
-				break;
+			
+			for (var i=0, len=styleUpdates.length; i<len; i++){
+				_styleXMLToDB(styleUpdates[i]);
 			}
+		}
+		catch (e) {
+			Zotero.debug(e, 1);
+			Zotero.DB.rollbackTransaction();
+			_setRepositoryTimer(ZOTERO_CONFIG['REPOSITORY_RETRY_INTERVAL']);
+			return false;
 		}
 		
-		if (!breakout){
-			Zotero.DB.commitTransaction();
-			_setRepositoryTimer(ZOTERO_CONFIG['REPOSITORY_CHECK_INTERVAL']);
-		}
+		Zotero.DB.commitTransaction();
+		_setRepositoryTimer(ZOTERO_CONFIG['REPOSITORY_CHECK_INTERVAL']);
+		return true;
 	}
 	
 	
@@ -467,30 +471,49 @@ Zotero.Schema = new function(){
 	
 	
 	/**
-	* Traverse an XML scraper node from the repository and
+	* Traverse an XML translator node from the repository and
 	* update the local scrapers table with the scraper data
 	**/
-	function _scraperXMLToDBQuery(xmlnode){
+	function _translatorXMLToDB(xmlnode){
 		var sqlValues = [
-			{'string':xmlnode.getAttribute('id')},
-			{'string':xmlnode.getAttribute('lastUpdated')},
-			{'string':xmlnode.getAttribute('type')},
-			{'string':xmlnode.getElementsByTagName('label')[0].firstChild.nodeValue},
-			{'string':xmlnode.getElementsByTagName('creator')[0].firstChild.nodeValue},
+			{string: xmlnode.getAttribute('id')},
+			{string: xmlnode.getAttribute('lastUpdated')},
+			1, // inRepository
+			{int: xmlnode.getElementsByTagName('priority')[0].firstChild.nodeValue},
+			{int: xmlnode.getAttribute('type')},
+			{string: xmlnode.getElementsByTagName('label')[0].firstChild.nodeValue},
+			{string: xmlnode.getElementsByTagName('creator')[0].firstChild.nodeValue},
 			// target
 			(xmlnode.getElementsByTagName('target').item(0) &&
 				xmlnode.getElementsByTagName('target')[0].firstChild)
-				? {'string':xmlnode.getElementsByTagName('target')[0].firstChild.nodeValue}
-				: {'null':true},
+				? {string: xmlnode.getElementsByTagName('target')[0].firstChild.nodeValue}
+				: {null: true},
 			// detectCode can not exist or be empty
 			(xmlnode.getElementsByTagName('detectCode').item(0) &&
 				xmlnode.getElementsByTagName('detectCode')[0].firstChild)
-				? {'string':xmlnode.getElementsByTagName('detectCode')[0].firstChild.nodeValue}
-				: {'null':true},
-			{'string':xmlnode.getElementsByTagName('code')[0].firstChild.nodeValue}
-		]
+				? {string: xmlnode.getElementsByTagName('detectCode')[0].firstChild.nodeValue}
+				: {null: true},
+			{string: xmlnode.getElementsByTagName('code')[0].firstChild.nodeValue}
+		];
 		
-		var sql = "REPLACE INTO translators VALUES (?,?,?,?,?,?,?,?)";
+		var sql = "REPLACE INTO translators VALUES (?,?,?,?,?,?,?,?,?,?)";
+		return Zotero.DB.query(sql, sqlValues);
+	}
+	
+	
+	/**
+	* Traverse an XML style node from the repository and
+	* update the local csl table with the style data
+	**/
+	function _styleXMLToDB(xmlnode){
+		var sqlValues = [
+			{string: xmlnode.getAttribute('id')},
+			{string: xmlnode.getAttribute('updated')},
+			{string: xmlnode.getElementsByTagName('title')[0].firstChild.nodeValue},
+			{string: xmlnode.getElementsByTagName('csl')[0].firstChild.nodeValue}
+		];
+		
+		var sql = "REPLACE INTO csl VALUES (?,?,?,?)";
 		return Zotero.DB.query(sql, sqlValues);
 	}
 	
