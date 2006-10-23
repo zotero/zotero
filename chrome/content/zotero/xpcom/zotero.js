@@ -186,9 +186,6 @@ var Zotero = new function(){
 	
 	/*
 	 * Back up the main database file
-	 *
-	 * This could probably create a corrupt file fairly easily if all changes
-	 * haven't been flushed to disk -- proceed with caution
 	 */
 	function backupDatabase(){
 		if (Zotero.DB.transactionInProgress()){
@@ -214,6 +211,17 @@ var Zotero = new function(){
 		catch (e){
 			// TODO: deal with low disk space
 			throw (e);
+		}
+		
+		try {
+			var store = Components.classes["@mozilla.org/storage/service;1"].
+				getService(Components.interfaces.mozIStorageService);
+				
+			var connection = store.openDatabase(tmpFile);
+		}
+		catch (e){
+			Zotero.debug("Database file is corrupt--skipping backup");
+			return false;
 		}
 		
 		// Remove old backup file
