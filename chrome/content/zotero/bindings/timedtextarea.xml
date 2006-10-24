@@ -102,7 +102,7 @@
 							textbox.inputField.QueryInterface(CI.nsIDOMNSEditableElement).editor
 						);
 					} catch(ex) {
-					Zotero.debug(ex);
+						// this throws an error on window open...
 					}
 				  }
 				

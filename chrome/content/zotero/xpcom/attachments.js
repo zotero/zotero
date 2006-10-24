@@ -258,7 +258,7 @@ Zotero.Attachments = new function(){
 	
 	
 	// TODO: what if called on file:// document?
-	function linkFromDocument(document, sourceItemID){
+	function linkFromDocument(document, sourceItemID, parentCollectionIDs){
 		Zotero.debug('Linking attachment from document');
 		
 		var url = document.location;
@@ -268,6 +268,13 @@ Zotero.Attachments = new function(){
 		
 		var itemID = _addToDB(null, url, title, this.LINK_MODE_LINKED_URL,
 			mimeType, charsetID, sourceItemID);
+		
+		// Add to collections
+		var ids = Zotero.flattenArguments(parentCollectionIDs);
+		for each(var id in ids){
+			var col = Zotero.Collections.get(id);
+			col.addItem(itemID);
+		}
 		
 		// Run the fulltext indexer asynchronously (actually, it hangs the UI
 		// thread, but at least it lets the menu close)
@@ -279,7 +286,7 @@ Zotero.Attachments = new function(){
 	}
 	
 	
-	function importFromDocument(document, sourceItemID, forceTitle){
+	function importFromDocument(document, sourceItemID, forceTitle, parentCollectionIDs){
 		Zotero.debug('Importing attachment from document');
 		
 		var url = document.location;
@@ -330,6 +337,13 @@ Zotero.Attachments = new function(){
 		wbp.progressListener = new Zotero.WebProgressFinishListener(function(){
 			_addToDB(file, url, title, Zotero.Attachments.LINK_MODE_IMPORTED_URL, mimeType,
 				charsetID, sourceItemID, itemID);
+			
+			// Add to collections
+			var ids = Zotero.flattenArguments(parentCollectionIDs);
+			for each(var id in ids){
+				var col = Zotero.Collections.get(id);
+				col.addItem(itemID);
+			}
 			
 			Zotero.DB.commitTransaction();
 			

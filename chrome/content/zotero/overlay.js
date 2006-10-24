@@ -795,20 +795,18 @@ var ZoteroPane = new function()
 	
 	function addAttachmentFromPage(link, id)
 	{
+		if (itemsView && itemsView._itemGroup.isCollection())
+		{
+			var parentCollectionID = itemsView._itemGroup.ref.getID();
+		}
+		
 		if(link)
 		{
-			var attachmentID =
-				Zotero.Attachments.linkFromDocument(window.content.document, id);
+			Zotero.Attachments.linkFromDocument(window.content.document, id, parentCollectionID);
 		}
 		else
 		{
-			var attachmentID =
-				Zotero.Attachments.importFromDocument(window.content.document, id);
-		}
-		
-		if (attachmentID && itemsView && itemsView._itemGroup.isCollection())
-		{
-			itemsView._itemGroup.ref.addItem(attachmentID);
+			Zotero.Attachments.importFromDocument(window.content.document, id, false, parentCollectionID);
 		}
 	}
 	

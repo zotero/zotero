@@ -1515,8 +1515,18 @@ Zotero.Item.prototype.erase = function(deleteChildren){
 	// Remove item from parent collections
 	var parentCollectionIDs = this.getCollections();
 	if (parentCollectionIDs){
+		var notifierState = Zotero.Notifier.isEnabled();
+		Zotero.Notifier.disable();
+		
 		for (var i=0; i<parentCollectionIDs.length; i++){
 			Zotero.Collections.get(parentCollectionIDs[i]).removeItem(this.getID());
+		}
+		
+		if (notifierState){
+			Zotero.Notifier.enable();
+		}
+		else {
+			Zotero.Notifier.disable();
 		}
 	}
 	
@@ -2331,7 +2341,7 @@ Zotero.Collection.prototype.removeItem = function(itemID){
 	// If this was the last item, set collection to empty
 	if (!this._childItems.length){
 		this._hasChildItems = false;
-		// DEBUG: is this necessary?
+		// DEBUG: is this necessary? if so, it's no longer called during item deletes...
 		Zotero.Notifier.trigger('modify', 'collection', this.getID());
 	}
 	
