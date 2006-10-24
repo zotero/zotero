@@ -255,6 +255,10 @@ Zotero.Item.prototype.getCreator = function(pos){
  * Note: Creator data array is returned by reference
  */
 Zotero.Item.prototype.getCreators = function(){
+	if (this.getID() && !this._creatorsLoaded){
+		this._loadCreators();
+	}
+	
 	var creators = [];
 	for (var i=0; i<this._creators.length; i++){
 		creators.push(this.getCreator(i));
