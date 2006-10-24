@@ -488,7 +488,7 @@ var ZoteroItemPane = new function()
 		firstlast.setAttribute("flex","1");
 		
 		var tabindex = _tabIndexMinCreators + (_creatorCount * 2);
-		firstlast.appendChild(
+		var lastNameLabel = firstlast.appendChild(
 			createValueElement(
 				lastName,
 				'creator-' + _creatorCount + '-lastName',
@@ -562,6 +562,11 @@ var ZoteroItemPane = new function()
 		else
 		{
 			switchCreatorMode(hbox.parentNode, false, true);
+		}
+		
+		// Focus new rows
+		if (unsaved && !defaultRow){
+			lastNameLabel.click();
 		}
 	}
 	
@@ -878,9 +883,23 @@ var ZoteroItemPane = new function()
 			
 			var creator = Zotero.Creators.get(creatorID);
 			
+			var otherField = creatorField=='lastName' ? 'firstName' : 'lastName';
+			
+			// Update this textbox
+			textbox.setAttribute('value', creator[creatorField]);
+			textbox.value = creator[creatorField];
+			
+			// Update the other label
+			if (otherField=='firstName'){
+				var label = textbox.nextSibling.nextSibling;
+			}
+			else if (otherField=='lastName'){
+				var label = textbox.previousSibling.previousSibling;
+			}
+			label.firstChild.nodeValue = creator[otherField];
+			
 			var row = textbox.parentNode.parentNode.parentNode;
 			var otherFields = ZoteroItemPane.getCreatorFields(row);
-			var otherField = creatorField=='lastName' ? 'firstName' : 'lastName';
 			otherFields[otherField] = creator[otherField];
 			
 			ZoteroItemPane.modifyCreator(creatorIndex, creatorField,
