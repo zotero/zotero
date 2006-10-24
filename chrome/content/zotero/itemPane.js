@@ -486,7 +486,6 @@ var ZoteroItemPane = new function()
 		// Name
 		var firstlast = document.createElement("hbox");
 		firstlast.setAttribute("flex","1");
-		
 		var tabindex = _tabIndexMinCreators + (_creatorCount * 2);
 		var lastNameLabel = firstlast.appendChild(
 			createValueElement(
@@ -600,11 +599,14 @@ var ZoteroItemPane = new function()
 			// Hide first name field and prepend to last name field
 			firstName.setAttribute('hidden', true);
 			comma.setAttribute('hidden', true);
-			var first = _getFieldValue(firstName);
-			if (first && first != _defaultFirstName)
-			{
-				var last = _getFieldValue(lastName);
-				_setFieldValue(lastName, first + ' ' + last);
+			
+			if (!initial){
+				var first = _getFieldValue(firstName);
+				if (first && first != _defaultFirstName)
+				{
+					var last = _getFieldValue(lastName);
+					_setFieldValue(lastName, first + ' ' + last);
+				}
 			}
 			
 			if (_getFieldValue(lastName) == _defaultLastName)
@@ -629,16 +631,18 @@ var ZoteroItemPane = new function()
 				_tabIndexMaxCreators++;
 			}
 			
-			// Move all but last word to first name field and show it
-			var last = _getFieldValue(lastName);
-			if (last && last != _defaultFullName)
-			{
-				var lastNameRE = /(.*?)[ ]*([^ ]+[ ]*)$/;
-				var parts = lastNameRE.exec(last);
-				if (parts[2] && parts[2] != last)
+			if (!initial){
+				// Move all but last word to first name field and show it
+				var last = _getFieldValue(lastName);
+				if (last && last != _defaultFullName)
 				{
-					_setFieldValue(lastName, parts[2]);
-					_setFieldValue(firstName, parts[1]);
+					var lastNameRE = /(.*?)[ ]*([^ ]+[ ]*)$/;
+					var parts = lastNameRE.exec(last);
+					if (parts[2] && parts[2] != last)
+					{
+						_setFieldValue(lastName, parts[2]);
+						_setFieldValue(firstName, parts[1]);
+					}
 				}
 			}
 			
@@ -903,7 +907,13 @@ var ZoteroItemPane = new function()
 			else if (otherField=='lastName'){
 				var label = textbox.previousSibling.previousSibling;
 			}
-			label.firstChild.nodeValue = creator[otherField];
+			
+			if (label.firstChild){
+				label.firstChild.nodeValue = creator[otherField];
+			}
+			else {
+				label.value = creator[otherField];
+			}
 			
 			var row = textbox.parentNode.parentNode.parentNode;
 			var otherFields = ZoteroItemPane.getCreatorFields(row);
