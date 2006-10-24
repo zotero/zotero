@@ -270,10 +270,12 @@ Zotero.Attachments = new function(){
 			mimeType, charsetID, sourceItemID);
 		
 		// Add to collections
-		var ids = Zotero.flattenArguments(parentCollectionIDs);
-		for each(var id in ids){
-			var col = Zotero.Collections.get(id);
-			col.addItem(itemID);
+		if (parentCollectionIDs){
+			var ids = Zotero.flattenArguments(parentCollectionIDs);
+			for each(var id in ids){
+				var col = Zotero.Collections.get(id);
+				col.addItem(itemID);
+			}
 		}
 		
 		// Run the fulltext indexer asynchronously (actually, it hangs the UI
@@ -339,10 +341,12 @@ Zotero.Attachments = new function(){
 				charsetID, sourceItemID, itemID);
 			
 			// Add to collections
-			var ids = Zotero.flattenArguments(parentCollectionIDs);
-			for each(var id in ids){
-				var col = Zotero.Collections.get(id);
-				col.addItem(itemID);
+			if (parentCollectionIDs){
+				var ids = Zotero.flattenArguments(parentCollectionIDs);
+				for each(var id in ids){
+					var col = Zotero.Collections.get(id);
+					col.addItem(itemID);
+				}
 			}
 			
 			Zotero.DB.commitTransaction();
