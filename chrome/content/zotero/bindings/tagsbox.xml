@@ -120,12 +120,12 @@
 						{
 							remove.setAttribute('tabindex', -1);
 							remove.setAttribute('onclick',"this.parentNode.parentNode.parentNode.parentNode.parentNode.remove('"+id+"');");
-							remove.setAttribute('class','clicky');
+							remove.setAttribute('class','zotero-clicky');
 						}
 						else
 						{
 							remove.setAttribute('disabled', true);
-							remove.setAttribute('class', 'unclicky');
+							remove.setAttribute('class', 'zotero-unclicky');
 						}
 						
 						var row = document.createElement("row");

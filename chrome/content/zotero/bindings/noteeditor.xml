@@ -186,8 +186,8 @@
 		</implementation>
 		<content>
 			<xul:vbox xbl:inherits="flex">
-				<xul:label id="seeAlsoLabel" class="clicky" crop="end" onclick="this.parentNode.parentNode.seeAlsoClick();"/>
-				<xul:label id="tagsLabel" class="clicky" crop="end" onclick="this.parentNode.parentNode.tagsClick();"/>
+				<xul:label id="seeAlsoLabel" class="zotero-clicky" crop="end" onclick="this.parentNode.parentNode.seeAlsoClick();"/>
+				<xul:label id="tagsLabel" class="zotero-clicky" crop="end" onclick="this.parentNode.parentNode.tagsClick();"/>
 				<xul:popupset>
 					<xul:popup id="seeAlsoPopup" width="300" onpopupshowing="this.firstChild.reload();">
 						<xul:seealsobox id="seeAlso" flex="1"/>

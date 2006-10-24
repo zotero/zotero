@@ -44,19 +44,19 @@
 	<hbox flex="1">
 		<vbox flex="1">
 			<hbox align="center" pack="end">
-				<label value="&zotero.toolbar.search.label;" control="tb-search"/>
-				<textbox id="tb-search" type="timed" timeout="250" oncommand="onSearch()" dir="reverse" onkeypress="if(event.keyCode == event.DOM_VK_ESCAPE) { this.value = ''; this.doCommand('cmd_zotero_search'); return false; }">
-					<toolbarbutton id="tb-search-cancel" oncommand="this.parentNode.value='';" hidden="true"/>
+				<label value="&zotero.toolbar.search.label;" control="zotero-tb-search"/>
+				<textbox id="zotero-tb-search" type="timed" timeout="250" oncommand="onSearch()" dir="reverse" onkeypress="if(event.keyCode == event.DOM_VK_ESCAPE) { this.value = ''; this.doCommand('cmd_zotero_search'); return false; }">
+					<toolbarbutton id="zotero-tb-search-cancel" oncommand="this.parentNode.value='';" hidden="true"/>
 				</textbox>
 			</hbox>
 			
 			<hbox flex="1">
-				<tree id="collections-tree"
+				<tree id="zotero-collections-tree"
 					style="width: 200px;" hidecolumnpicker="true" seltype="single"
 					onselect="onCollectionSelected();">
 					<treecols>
 						<treecol
-							id="name_column"
+							id="zotero-collections-name-column"
 							label="&zotero.collections.name_column;"
 							flex="1"
 							primary="true"/>
@@ -64,27 +64,27 @@
 					<treechildren/>
 				</tree>
 			
-				<tree id="items-tree"
+				<tree id="zotero-items-tree"
 					flex="1" hidecolumnpicker="true" seltype="single"
 					onselect="Zotero_Citation_Dialog.treeItemSelected();">
 					<treecols>
 						<treecol
-							id="title" primary="true"
+							id="zotero-items-title-column" primary="true"
 							label="&zotero.items.title_column;"
 							flex="4" persist="width ordinal hidden sortActive sortDirection"/>
 						<splitter class="tree-splitter"/>
 						<treecol
-							id="firstCreator"
+							id="zotero-items-firstCreator-column"
 							label="&zotero.items.creator_column;"
 							flex="1" persist="width ordinal hidden sortActive sortDirection"/>
 						<splitter class="tree-splitter"/>
 						<treecol
-							id="dateAdded" hidden="true"
+							id="zotero-items-dateAdded-column" hidden="true"
 							label="&zotero.items.dateAdded_column;"
 							flex="1" persist="width ordinal hidden sortActive sortDirection"/>
 						<splitter class="tree-splitter"/>
 						<treecol
-							id="dateModified" hidden="true"
+							id="zotero-items-dateModified-column" hidden="true"
 							label="&zotero.items.dateModified_column;"
 							flex="1" persist="width ordinal hidden sortActive sortDirection"/>
 					</treecols>				

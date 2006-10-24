@@ -103,7 +103,7 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids)
 		var activeWindow = true;
 	}
 	
-	var quicksearch = this._treebox.treeBody.ownerDocument.getElementById('tb-search');
+	var quicksearch = this._treebox.treeBody.ownerDocument.getElementById('zotero-tb-search');
 	
 	if((action == 'remove' && !this._itemGroup.isLibrary()) || action == 'delete')
 	{
@@ -285,22 +285,22 @@ Zotero.ItemTreeView.prototype.getCellText = function(row, column)
 	var obj = this._getItemAtRow(row);
 	var val;
 	
-	if(column.id == "numChildren")
+	if(column.id == "zotero-items-numChildren-column")
 	{
 		var c = obj.numChildren();
 		if(c)	//don't display '0'
 			val = c;
 	}
-	else if(column.id == "typeIcon")
+	else if(column.id == "zotero-items-typeIcon-column")
 	{
 		val = Zotero.getString('itemTypes.'+Zotero.ItemTypes.getName(obj.getType()));
 	}
 	else
 	{
-		val = obj.getField(column.id);
+		val = obj.getField(column.id.substring(13, column.id.length-7));
 	}
 	
-	if(column.id == 'dateAdded' || column.id == 'dateModified')		//this is not so much that we will use this format for date, but a simple template for later revisions.
+	if(column.id == 'zotero-items-dateAdded-column' || column.id == 'zotero-items-dateModified-column')		//this is not so much that we will use this format for date, but a simple template for later revisions.
 	{
 		val = new Date(Date.parse(val.replace(/-/g,"/"))).toLocaleString();
 	}
@@ -310,7 +310,7 @@ Zotero.ItemTreeView.prototype.getCellText = function(row, column)
 
 Zotero.ItemTreeView.prototype.getImageSrc = function(row, col)
 {
-	if(col.id == 'title')
+	if(col.id == 'zotero-items-title-column')
 	{
 		var item = this._getItemAtRow(row);
 		var itemType = Zotero.ItemTypes.getName(item.getType());
@@ -509,10 +509,14 @@ Zotero.ItemTreeView.prototype.cycleHeader = function(column)
  */
 Zotero.ItemTreeView.prototype.sort = function()
 {
-	var column = this._treebox.columns.getSortedColumn()
+	var column = this._treebox.columns.getSortedColumn();
+	if (!column){
+		// DEBUG: This may be necessary for 1.0.0b2.r1=>1.0.0b2.r2 transition
+		column = this._treebox.columns.getFirstColumn();
+	}
 	var order = column.element.getAttribute('sortDirection') == 'descending';
 	
-	if(column.id == 'typeIcon')
+	if(column.id == 'zotero-items-typeIcon-column')
 	{
 		function columnSort(a,b)
 		{
@@ -522,7 +526,7 @@ Zotero.ItemTreeView.prototype.sort = function()
 			return (typeA > typeB) ? -1 : (typeA < typeB) ? 1 : 0;
 		}
 	}
-	else if(column.id == 'numNotes')
+	else if(column.id == 'zotero-items-numNotes-column')
 	{
 		function columnSort(a,b)
 		{
@@ -533,8 +537,8 @@ Zotero.ItemTreeView.prototype.sort = function()
 	{
 		function columnSort(a,b)
 		{
-			var fieldA = a.getField(column.id);
-			var fieldB = b.getField(column.id);
+			var fieldA = a.getField(column.id.substring(13, column.id.length-7));
+			var fieldB = b.getField(column.id.substring(13, column.id.length-7));
 			
 			if(typeof fieldA == 'string')
 			{

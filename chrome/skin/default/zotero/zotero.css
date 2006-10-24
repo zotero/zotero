@@ -101,52 +101,52 @@ zoterosearchtextbox .toolbarbutton-menu-dropmarker
 	padding:0 2px;
 }
 
-#editpane-dynamic-fields row, tagsbox row
+#zotero-editpane-dynamic-fields row, tagsbox row
 {
 	margin:0 0 1px;
 }
 
-#editpane-dynamic-fields textbox, tagsbox textbox
+#zotero-editpane-dynamic-fields textbox, tagsbox textbox
 {
 	margin-top:0;
 	margin-bottom:-1px;
 }
 
 /* DEBUG: this doesn't seem to work, unfortunately
-#editpane-dynamic-fields label[singleField=false]:after
+#zotero-editpane-dynamic-fields label[singleField=false]:after
 {
 	content:",";
 }
 */
 
 /* creator switch button */
-#editpane-dynamic-fields row hbox toolbarbutton
+#zotero-editpane-dynamic-fields row hbox toolbarbutton
 {
 	margin-right:5px;
 }
 
 /* metadata field names */
-#editpane-dynamic-fields row > label:first-child,
-#editpane-dynamic-fields row > toolbarbutton .toolbarbutton-text /* creator type menu */
+#zotero-editpane-dynamic-fields row > label:first-child,
+#zotero-editpane-dynamic-fields row > toolbarbutton .toolbarbutton-text /* creator type menu */
 {
 	text-align: right;
 	font-weight: bold;
 }
 
  /* creator type menu */
-#editpane-dynamic-fields row > toolbarbutton 
+#zotero-editpane-dynamic-fields row > toolbarbutton 
 {
 	margin: 0;
 	padding: 0;
 	list-style-image: url("chrome://browser/skin/dropmark-nav-small.png");
 	-moz-image-region: rect(0px, 14px, 16px, 0px);
 }
-#editpane-dynamic-fields row > toolbarbutton .toolbarbutton-text
+#zotero-editpane-dynamic-fields row > toolbarbutton .toolbarbutton-text
 {
 	margin-top: -1px;
 }
-#editpane-dynamic-fields row > toolbarbutton .toolbarbutton-icon,
-#editpane-dynamic-fields row > toolbarbutton .toolbarbutton-menu-dropmarker
+#zotero-editpane-dynamic-fields row > toolbarbutton .toolbarbutton-icon,
+#zotero-editpane-dynamic-fields row > toolbarbutton .toolbarbutton-menu-dropmarker
 {
 	margin: 0;
 	padding: 0;
@@ -154,35 +154,35 @@ zoterosearchtextbox .toolbarbutton-menu-dropmarker
 
 
 /* no space between last name and comma */
-#editpane-dynamic-fields row hbox label:first-child
+#zotero-editpane-dynamic-fields row hbox label:first-child
 {
 	margin-right:1px;
 }
 
-#editpane-dynamic-fields row hbox label.comma
+#zotero-editpane-dynamic-fields row hbox label.comma
 {
 	margin-left:0;
 }
 
-#editpane-dynamic-fields row vbox[fieldname=extra]
+#zotero-editpane-dynamic-fields row vbox[fieldname=extra]
 {
 	margin-left:6px;
 }
 
-.clicky, .unclicky
+.zotero-clicky, .zotero-unclicky
 {	
 	-moz-border-radius: 6px;
 }
 
-.clicky[value="-"], .clicky[value="+"],
-.unclicky[value="-"], .unclicky[value="+"]
+.zotero-clicky[value="-"], .zotero-clicky[value="+"],
+.zotero-unclicky[value="-"], .zotero-unclicky[value="+"]
 {
 	margin: 0px;
 	padding-left: 4px;
 	padding-right: 4px;
 }
 
-.clicky:hover
+.zotero-clicky:hover
 {
 	color: white;
 	background: #666666;

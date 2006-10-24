@@ -106,7 +106,7 @@
 									
 									var box = document.createElement('box');
 									box.setAttribute('onclick',"this.parentNode.parentNode.parentNode.parentNode.parentNode.showItem('"+seealso[i].getID()+"')");
-									box.setAttribute('class','clicky');
+									box.setAttribute('class','zotero-clicky');
 									box.setAttribute('flex','1');
 									box.appendChild(icon);
 									box.appendChild(label);
@@ -114,7 +114,7 @@
 									var remove = document.createElement("label");
 									remove.setAttribute('value','-');
 									remove.setAttribute('onclick',"this.parentNode.parentNode.parentNode.parentNode.parentNode.remove('"+seealso[i].getID()+"');");
-									remove.setAttribute('class','clicky');
+									remove.setAttribute('class','zotero-clicky');
 							
 									var row = document.createElement("row");
 									row.appendChild(box);

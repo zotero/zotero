@@ -436,8 +436,8 @@
 				<xul:menulist id="valuemenu" flex="1" hidden="true">
 					<xul:menupopup/>
 				</xul:menulist>
-				<xul:toolbarbutton id="remove" class="clicky" label="-" oncommand="this.parentNode.parentNode.onRemoveClicked();"/>
-				<xul:toolbarbutton id="add" class="clicky" label="+" oncommand="this.parentNode.parentNode.onAddClicked();"/>
+				<xul:toolbarbutton id="remove" class="zotero-clicky" label="-" oncommand="this.parentNode.parentNode.onRemoveClicked();"/>
+				<xul:toolbarbutton id="add" class="zotero-clicky" label="+" oncommand="this.parentNode.parentNode.onAddClicked();"/>
 			</xul:hbox>
 		</content>
 	</binding>

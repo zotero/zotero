@@ -29,7 +29,7 @@
 	<deck id="zotero-view-item" flex="1" onselect="if (this.selectedIndex!==''){ ZoteroItemPane.loadPane(this.selectedIndex) }">
 			<vbox id="zotero-info" flex="1">
 				<popupset>
-					<popup id="creatorTypeMenu" position="after_start"
+					<popup id="zotero-creator-type-menu" position="after_start"
 						oncommand="var otherFields = ZoteroItemPane.getCreatorFields(document.popupNode.parentNode);
 							var typeID = event.explicitOriginalTarget.getAttribute('typeid');
 							document.popupNode.setAttribute('label',
@@ -39,11 +39,11 @@
 								'typeID', typeID, otherFields)"/>
 				</popupset>
 				<hbox align="center">
-					<button id="tb-go-to-url" label="&zotero.toolbar.goToURL.label;" tooltiptext="&zotero.toolbar.goToURL.tooltip;" flex="1" oncommand="window.loadURI(this.getAttribute('viewURL'))" disabled="false"/>
-					<button id="tb-openurl" label="&zotero.toolbar.openURL.label;" tooltiptext="&zotero.toolbar.openURL.tooltip;" flex="1" oncommand="ZoteroItemPane.onOpenURLClick();"/>
+					<button id="zotero-tb-go-to-url" label="&zotero.toolbar.goToURL.label;" tooltiptext="&zotero.toolbar.goToURL.tooltip;" flex="1" oncommand="window.loadURI(this.getAttribute('viewURL'))" disabled="false"/>
+					<button id="zotero-tb-openurl" label="&zotero.toolbar.openURL.label;" tooltiptext="&zotero.toolbar.openURL.tooltip;" flex="1" oncommand="ZoteroItemPane.onOpenURLClick();"/>
 				</hbox>
 				<hbox align="center">
-					<menulist id="editpane-type-menu" oncommand="ZoteroItemPane.changeTypeTo(this.value)" flex="1">
+					<menulist id="zotero-editpane-type-menu" oncommand="ZoteroItemPane.changeTypeTo(this.value)" flex="1">
 						<menupopup/>
 					</menulist>
 				</hbox>
@@ -52,12 +52,12 @@
 						<column/>
 						<column flex="1"/>
 					</columns>
-					<rows id="editpane-dynamic-fields" flex="1"/>
+					<rows id="zotero-editpane-dynamic-fields" flex="1"/>
 				</grid>
 			</vbox>
 			<vbox flex="1">
 				<hbox align="center">
-					<label id="editpane-notes-label"/>
+					<label id="zotero-editpane-notes-label"/>
 					<button label="&zotero.item.add;" oncommand="ZoteroItemPane.addNote();"/>
 				</hbox>
 				<grid flex="1">
@@ -65,18 +65,18 @@
 						<column flex="1"/>
 						<column/>
 					</columns>
-					<rows id="editpane-dynamic-notes" flex="1"/>
+					<rows id="zotero-editpane-dynamic-notes" flex="1"/>
 				</grid>
 			</vbox>
 			<vbox flex="1">
 				<hbox align="center">
-					<label id="editpane-attachments-label"/>
-					<button id="tb-item-attachments-add" type="menu" label="&zotero.item.add;">
+					<label id="zotero-editpane-attachments-label"/>
+					<button id="zotero-tb-item-attachments-add" type="menu" label="&zotero.item.add;">
 						<menupopup>
-							<menuitem class="menuitem-iconic" id="tb-item-attachments-link" label="&zotero.toolbar.attachment.linked;" oncommand="ZoteroItemPane.addAttachmentFromDialog(true);"/>
-							<menuitem class="menuitem-iconic" id="tb-item-attachments-file" label="&zotero.toolbar.attachment.add;" oncommand="ZoteroItemPane.addAttachmentFromDialog();"/>
-							<menuitem class="menuitem-iconic" id="tb-item-attachments-web-link" label="&zotero.toolbar.attachment.weblink;" oncommand="ZoteroItemPane.addAttachmentFromPage(true);"/>
-							<menuitem class="menuitem-iconic" id="tb-item-attachments-snapshot" label="&zotero.toolbar.attachment.snapshot;" oncommand="ZoteroItemPane.addAttachmentFromPage();"/>
+							<menuitem class="menuitem-iconic" id="zotero-tb-item-attachments-link" label="&zotero.toolbar.attachment.linked;" oncommand="ZoteroItemPane.addAttachmentFromDialog(true);"/>
+							<menuitem class="menuitem-iconic" id="zotero-tb-item-attachments-file" label="&zotero.toolbar.attachment.add;" oncommand="ZoteroItemPane.addAttachmentFromDialog();"/>
+							<menuitem class="menuitem-iconic" id="zotero-tb-item-attachments-web-link" label="&zotero.toolbar.attachment.weblink;" oncommand="ZoteroItemPane.addAttachmentFromPage(true);"/>
+							<menuitem class="menuitem-iconic" id="zotero-tb-item-attachments-snapshot" label="&zotero.toolbar.attachment.snapshot;" oncommand="ZoteroItemPane.addAttachmentFromPage();"/>
 						</menupopup>
 					</button>
 				</hbox>
@@ -85,10 +85,10 @@
 						<column flex="1"/>
 						<column/>
 					</columns>
-					<rows id="editpane-dynamic-attachments" flex="1"/>
+					<rows id="zotero-editpane-dynamic-attachments" flex="1"/>
 				</grid>
 			</vbox>
-			<tagsbox id="editpane-tags" flex="1" style="overflow:auto"/>
-			<seealsobox id="editpane-related" flex="1"/>
+			<tagsbox id="zotero-editpane-tags" flex="1" style="overflow:auto"/>
+			<seealsobox id="zotero-editpane-related" flex="1"/>
 	</deck>
 </overlay>

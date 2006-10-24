@@ -34,7 +34,7 @@ function doLoad()
 	io = window.arguments[0];
 	
 	collectionsView = new Zotero.CollectionTreeView();
-	document.getElementById('collections-tree').view = collectionsView;
+	document.getElementById('zotero-collections-tree').view = collectionsView;
 
 	// move to center of screen
 	window.sizeToContent();
@@ -62,7 +62,7 @@ function onCollectionSelected()
 		collection.setSearch('');
 
 		itemsView = new Zotero.ItemTreeView(collection, (window.arguments[1] ? true : false));
-		document.getElementById('items-tree').view = itemsView;
+		document.getElementById('zotero-items-tree').view = itemsView;
 	}
 
 }
@@ -71,10 +71,10 @@ function onSearch()
 {
 	if(itemsView)
 	{
-		var searchVal = document.getElementById('tb-search').value;
+		var searchVal = document.getElementById('zotero-tb-search').value;
 		itemsView.searchText(searchVal);
 		
-		document.getElementById('tb-search-cancel').hidden = searchVal == "";
+		document.getElementById('zotero-tb-search-cancel').hidden = searchVal == "";
 	}
 }
 

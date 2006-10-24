@@ -84,15 +84,15 @@ var ZoteroItemPane = new function()
 			return false;
 		}
 		
-		_dynamicFields = document.getElementById('editpane-dynamic-fields');
-		_itemTypeMenu = document.getElementById('editpane-type-menu');
-		_creatorTypeMenu = document.getElementById('creatorTypeMenu');
-		_notesList = document.getElementById('editpane-dynamic-notes');
-		_notesLabel = document.getElementById('editpane-notes-label');
-		_attachmentsList = document.getElementById('editpane-dynamic-attachments');
-		_attachmentsLabel = document.getElementById('editpane-attachments-label');
-		_tagsBox = document.getElementById('editpane-tags');
-		_relatedBox = document.getElementById('editpane-related');
+		_dynamicFields = document.getElementById('zotero-editpane-dynamic-fields');
+		_itemTypeMenu = document.getElementById('zotero-editpane-type-menu');
+		_creatorTypeMenu = document.getElementById('zotero-creator-type-menu');
+		_notesList = document.getElementById('zotero-editpane-dynamic-notes');
+		_notesLabel = document.getElementById('zotero-editpane-notes-label');
+		_attachmentsList = document.getElementById('zotero-editpane-dynamic-attachments');
+		_attachmentsLabel = document.getElementById('zotero-editpane-attachments-label');
+		_tagsBox = document.getElementById('zotero-editpane-tags');
+		_relatedBox = document.getElementById('zotero-editpane-related');
 		
 		var itemTypes = Zotero.ItemTypes.getTypes();
 		for(var i = 0; i<itemTypes.length; i++)
@@ -184,10 +184,10 @@ var ZoteroItemPane = new function()
 				
 				validURI = uri.scheme && (uri.host || uri.scheme=='file');
 				
-				document.getElementById('tb-go-to-url').setAttribute('viewURL', spec);
+				document.getElementById('zotero-tb-go-to-url').setAttribute('viewURL', spec);
 			}
 			catch (e){}
-			document.getElementById('tb-go-to-url').setAttribute('disabled', !validURI);
+			document.getElementById('zotero-tb-go-to-url').setAttribute('disabled', !validURI);
 			
 			// Enable/disable "Locate =>" (OpenURL) button
 			switch (_itemBeingEdited.getType())
@@ -203,7 +203,7 @@ var ZoteroItemPane = new function()
 				default:
 					var openURL = false;
 			}
-			document.getElementById('tb-openurl').setAttribute('disabled', !openURL);
+			document.getElementById('zotero-tb-openurl').setAttribute('disabled', !openURL);
 			
 			// Clear and rebuild creator type menu
 			while(_creatorTypeMenu.hasChildNodes())
@@ -308,13 +308,13 @@ var ZoteroItemPane = new function()
 				
 					var box = document.createElement('box');
 					box.setAttribute('onclick',"ZoteroPane.selectItem("+notes[i].getID()+");");
-					box.setAttribute('class','clicky');
+					box.setAttribute('class','zotero-clicky');
 					box.appendChild(icon);
 					box.appendChild(label);
 				
 					var removeButton = document.createElement('label');
 					removeButton.setAttribute("value","-");
-					removeButton.setAttribute("class","clicky");
+					removeButton.setAttribute("class","zotero-clicky");
 					removeButton.setAttribute("onclick","ZoteroItemPane.removeNote("+notes[i].getID()+")");
 				
 					var row = document.createElement('row');
@@ -366,13 +366,13 @@ var ZoteroItemPane = new function()
 				
 					var box = document.createElement('box');
 					box.setAttribute('onclick',"ZoteroPane.selectItem('"+attachments[i].getID()+"')");
-					box.setAttribute('class','clicky');
+					box.setAttribute('class','zotero-clicky');
 					box.appendChild(icon);
 					box.appendChild(label);
 				
 					var removeButton = document.createElement('label');
 					removeButton.setAttribute("value","-");
-					removeButton.setAttribute("class","clicky");
+					removeButton.setAttribute("class","zotero-clicky");
 					removeButton.setAttribute("onclick","ZoteroItemPane.removeAttachment("+attachments[i].getID()+")");
 				
 					var row = document.createElement('row');
@@ -475,9 +475,9 @@ var ZoteroItemPane = new function()
 		var label = document.createElement("toolbarbutton");
 		label.setAttribute("label",Zotero.getString('creatorTypes.'+Zotero.CreatorTypes.getName(typeID))+":");
 		label.setAttribute("typeid", typeID);
-		label.setAttribute("popup","creatorTypeMenu");
+		label.setAttribute("popup","zotero-creator-type-menu");
 		label.setAttribute("fieldname",'creator-'+_creatorCount+'-typeID');
-		label.className = 'clicky';
+		label.className = 'zotero-clicky';
 		
 		// getCreatorFields(), switchCreatorMode() and handleCreatorAutoCompleteSelect()
 		// may need need to be adjusted if this DOM structure changes
@@ -519,7 +519,7 @@ var ZoteroItemPane = new function()
 		// Single/double field toggle
 		var toggleButton = document.createElement('toolbarbutton');
 		toggleButton.setAttribute('fieldname', 'creator-' + _creatorCount + '-singleField');
-		toggleButton.className = 'clicky';
+		toggleButton.className = 'zotero-clicky';
 		hbox.appendChild(toggleButton);
 		
 		// Minus (-) button
@@ -530,7 +530,7 @@ var ZoteroItemPane = new function()
 			disableButton(removeButton);
 		}
 		else {
-			removeButton.setAttribute("class","clicky");
+			removeButton.setAttribute("class","zotero-clicky");
 			removeButton.setAttribute("onclick","ZoteroItemPane.removeCreator("+_creatorCount+", this.parentNode.parentNode)");
 		}
 		hbox.appendChild(removeButton);
@@ -675,14 +675,14 @@ var ZoteroItemPane = new function()
 	function disableButton(button)
 	{
 		button.setAttribute('disabled', true);
-		button.setAttribute('class', 'unclicky');
+		button.setAttribute('class', 'zotero-unclicky');
 		button.setAttribute('onclick', false); 
 	}
 	
 	function _enablePlusButton(button, creatorTypeID, fieldMode)
 	{
 		button.setAttribute('disabled', false);
-		button.setAttribute("class","clicky");
+		button.setAttribute("class","zotero-clicky");
 		button.setAttribute("onclick",
 			"ZoteroItemPane.disableButton(this); ZoteroItemPane.addCreatorRow('', '', " + (creatorTypeID ? creatorTypeID : 'false') + ", " + fieldMode + ", true);");
 	}
@@ -703,7 +703,7 @@ var ZoteroItemPane = new function()
 			valueElement.setAttribute('fieldname',fieldName);
 			valueElement.setAttribute('tabindex', tabindex);
 			valueElement.setAttribute('onclick', 'ZoteroItemPane.showEditor(this)');
-			valueElement.className = 'clicky';
+			valueElement.className = 'zotero-clicky';
 			
 			switch (fieldName)
 			{

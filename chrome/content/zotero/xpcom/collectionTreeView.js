@@ -238,7 +238,7 @@ Zotero.CollectionTreeView.prototype.getCellText = function(row, column)
 {
 	var obj = this._getItemAtRow(row);
 	
-	if(column.id == "name_column")
+	if(column.id == "zotero-collections-name-column")
 		return obj.getName();
 	else
 		return "";
