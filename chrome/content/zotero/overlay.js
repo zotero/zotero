@@ -156,10 +156,12 @@ var ZoteroPane = new function()
 	
 	function fullScreen()
 	{
-		var visible = document.getElementById('content').getAttribute('collapsed') == 'true';
-		document.getElementById('content').setAttribute('collapsed', !visible);
-		document.getElementById('zotero-splitter').setAttribute('collapsed', !visible);
-		document.getElementById('tb-fullscreen').setAttribute('fullscreenmode', !visible);
+		var collapsed = document.getElementById('content').getAttribute('collapsed') == 'true';
+		// Turn Z-pane flex on to stretch to window in full-screen, but off otherwise so persist works
+		document.getElementById('zotero-pane').setAttribute('flex', collapsed ? "0" : "1");
+		document.getElementById('content').setAttribute('collapsed', !collapsed);
+		document.getElementById('zotero-splitter').setAttribute('collapsed', !collapsed);
+		document.getElementById('tb-fullscreen').setAttribute('fullscreenmode', !collapsed);
 	}
 		
 	/*
