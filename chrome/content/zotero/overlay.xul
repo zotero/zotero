@@ -47,7 +47,7 @@
 	<vbox id="appcontent">
 		<!-- Changes to attributes of zotero-splitter and zotero-pane must be mirrored on overlay.js's onLoad() function -->
 		<splitter id="zotero-splitter" resizebefore="closest" resizeafter="closest" collapsed="true"/>
-		<hbox id="zotero-pane" persist="height" collapsed="true" flex="1">
+		<hbox id="zotero-pane" persist="height" collapsed="true">
 			<popupset>
 				<popup id="zotero-collectionmenu" onpopupshowing="ZoteroPane.buildCollectionContextMenu();">
 					<menuitem label="&zotero.toolbar.newCollection.label;" command="cmd_zotero_newCollection"/>

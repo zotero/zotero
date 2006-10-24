@@ -72,8 +72,8 @@ var ZoteroPane = new function()
 			
 			var newPane = document.createElement('hbox');
 			newPane.setAttribute('id','zotero-pane');
+			newPane.setAttribute('persist','height');
 			newPane.setAttribute('collapsed',true);
-			newPane.setAttribute('flex','1');
 			newPane.height = oldPane.height;
 			while(oldPane.hasChildNodes())
 				newPane.appendChild(oldPane.firstChild);
