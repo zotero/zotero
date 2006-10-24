@@ -188,7 +188,7 @@
 				</tree>
 			</vbox>
 			<splitter id="zotero-view-splitter" resizebefore="closest" resizeafter="closest"/>
-			<vbox>
+			<vbox id="item-pane" persist="width">
 				<toolbar align="right">
 					<toolbarbutton id="tb-fullscreen" tooltiptext="&zotero.toolbar.fullscreen.tooltip;" oncommand="ZoteroPane.fullScreen();"/>
 					<toolbarbutton class="tabs-closebutton" oncommand="ZoteroPane.toggleDisplay()"/>
@@ -203,7 +203,7 @@
 							<tab label="&zotero.tabs.related.label;"/>
 						</tabs>
 					</caption>
-					<deck id="item-pane" selectedIndex="0" flex="1" onselect="document.getElementById('zotero-view-tabs').setAttribute('hidden',(this.selectedIndex != 1));">
+					<deck id="item-pane-content" selectedIndex="0" flex="1" onselect="document.getElementById('zotero-view-tabs').setAttribute('hidden',(this.selectedIndex != 1));">
 						<box pack="center" align="center">
 							<label id="zotero-view-selected-label"/>
 						</box>

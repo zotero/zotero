@@ -268,7 +268,7 @@ var ZoteroPane = new function()
 				{
 					document.getElementById('zotero-view-note-button').removeAttribute('sourceID');
 				}
-				document.getElementById('item-pane').selectedIndex = 2;
+				document.getElementById('item-pane-content').selectedIndex = 2;
 			}
 			else if(item.isAttachment())
 			{
@@ -349,17 +349,17 @@ var ZoteroPane = new function()
 				noteEditor.item = null;
 				noteEditor.note = item.ref;
 				
-				document.getElementById('item-pane').selectedIndex = 3;
+				document.getElementById('item-pane-content').selectedIndex = 3;
 			}
 			else
 			{
 				ZoteroItemPane.viewItem(item.ref);
-				document.getElementById('item-pane').selectedIndex = 1;
+				document.getElementById('item-pane-content').selectedIndex = 1;
 			}
 		}
 		else
 		{
-			document.getElementById('item-pane').selectedIndex = 0;
+			document.getElementById('item-pane-content').selectedIndex = 0;
 			
 			var label = document.getElementById('zotero-view-selected-label');
 		
