@@ -37,6 +37,7 @@ Zotero.DB = new function(){
 	this.commitTransaction = commitTransaction;
 	this.rollbackTransaction = rollbackTransaction;
 	this.transactionInProgress = transactionInProgress;
+	this.commitAllTransactions = commitAllTransactions;
 	this.tableExists = tableExists;
 	this.getColumns = getColumns;
 	this.getColumnHash = getColumnHash;
@@ -342,6 +343,24 @@ Zotero.DB = new function(){
 	function transactionInProgress(){
 		var db = _getDBConnection();
 		return db.transactionInProgress;
+	}
+	
+	
+	/**
+	 * Safety function used on shutdown to make sure we're not stuck in the
+	 * middle of a transaction
+	 */
+	function commitAllTransactions(){
+		if (transactionInProgress()){
+			var level = _transactionNestingLevel;
+			_transactionNestingLevel = 0;
+			try {
+				Zotero.DB.commitTransaction();
+			}
+			catch (e){}
+			return level ? level : true;
+		}
+		return false;
 	}
 	
 	

@@ -137,6 +137,12 @@ var Zotero = new function(){
 			return false;
 		}
 		
+		var level = Zotero.DB.commitAllTransactions();
+		if (level){
+			level = level===true ? '0' : level;
+			Zotero.debug("A transaction was still open! (level " + level + ")", 2);
+		}
+		
 		_shutdown = true;
 		
 		Zotero.backupDatabase();
