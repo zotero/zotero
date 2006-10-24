@@ -587,6 +587,7 @@ var ZoteroItemPane = new function()
 			button.setAttribute('tooltiptext', 'Switch to two fields');
 			lastName.setAttribute('singleField', 'true');
 			button.setAttribute('onclick', "ZoteroItemPane.switchCreatorMode(this.parentNode.parentNode, false)");
+			lastName.setAttribute('flex', '1');
 			
 			// Remove firstname field from tabindex
 			var tab = parseInt(firstName.getAttribute('tabindex'));
@@ -618,6 +619,7 @@ var ZoteroItemPane = new function()
 			button.setAttribute('tooltiptext', 'Switch to single field');
 			lastName.setAttribute('singleField', 'false');
 			button.setAttribute('onclick', "ZoteroItemPane.switchCreatorMode(this.parentNode.parentNode, true)");
+			lastName.setAttribute('flex', '0');
 			
 			// Add firstname field to tabindex
 			var tab = parseInt(lastName.getAttribute('tabindex'));
@@ -716,9 +718,13 @@ var ZoteroItemPane = new function()
 					}
 					break;
 			}
+			
+			if (fieldName.indexOf('firstName')!=-1){
+				valueElement.setAttribute('flex', '1');
+			}
 		}
 		
-		var firstSpace;		
+		var firstSpace;
 		if(typeof valueText == 'string')
 			firstSpace = valueText.indexOf(" ");
 		
@@ -735,7 +741,8 @@ var ZoteroItemPane = new function()
 			}
 		}
 		// 29 == arbitary length at which to chop uninterrupted text
-		else if ((firstSpace == -1 && valueText.length > 29 ) || firstSpace > 29)
+		else if ((firstSpace == -1 && valueText.length > 29 ) || firstSpace > 29
+			|| (fieldName && fieldName.substr(0, 7)=='creator'))
 		{
 			valueElement.setAttribute('crop', 'end');
 			valueElement.setAttribute('value',valueText);
