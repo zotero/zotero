@@ -6,7 +6,7 @@
   
     <em:id>zotero@chnm.gmu.edu</em:id>
     <em:name>Zotero</em:name>
-    <em:version>1.0.0b2.r1</em:version>
+    <em:version>1.0.0b2.r2</em:version>
     <em:description>The Next-Generation Research Tool</em:description>
     <em:creator>Center for History and New Media<br/>George Mason University</em:creator>
 	<em:contributor>Dan Cohen</em:contributor>
@@ -25,8 +25,8 @@
     <em:targetApplication>
       <Description>
         <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
-        <em:minVersion>2.0b1+</em:minVersion>
-        <em:maxVersion>2.0+</em:maxVersion>
+        <em:minVersion>2.0</em:minVersion>
+        <em:maxVersion>2.0.0.*</em:maxVersion>
       </Description>
     </em:targetApplication>
   

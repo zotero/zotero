@@ -57,8 +57,8 @@
 		</vbox>
 		<label class="subhead" value="&zotero.thanks;"/>
 		<vbox class="subcontent">
-			<label class="text-link" href="http://www.imls.gov/" value="Institute of Museum and Library Services"/>
 			<label class="text-link" href="http://www.mellon.org/" value="Andrew W. Mellon Foundation"/>
+			<label class="text-link" href="http://www.imls.gov/" value="Institute of Museum and Library Services"/>
 			<label class="text-link" href="http://www.sloan.org/" value="Alfred P. Sloan Foundation"/>
 			<label class="text-link" href="http://www.famfamfam.com/lab/icons/silk/" value="famfamfam (icons)"/>
 		</vbox>
