@@ -1,4 +1,4 @@
--- 101
+-- 102
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-10-02 17:00:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-10-25 13:30:00'));
 
 REPLACE INTO "translators" VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006-10-02 17:00:00', 1, 100, 4, 'Amazon.com', 'Simon Kornblith', '^http://www\.amazon\.com/', 
 'function detectWeb(doc, url) {
@@ -1010,7 +1010,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO "translators" VALUES ('add7c71c-21f3-ee14-d188-caf9da12728b', '2006-10-02 17:00:00', 1, 100, 4, 'SIRSI 2003+', 'Simon Kornblith', '/uhtbin/cgisirsi',
+REPLACE INTO "translators" VALUES ('add7c71c-21f3-ee14-d188-caf9da12728b', '2006-10-25 13:30:00', 1, 100, 4, 'SIRSI 2003+', 'Simon Kornblith', '/uhtbin/cgisirsi',
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -1070,6 +1070,8 @@ REPLACE INTO "translators" VALUES ('add7c71c-21f3-ee14-d188-caf9da12728b', '2006
 					var pubParts = value.split(" : ");
 					newItem.place = pubParts[0];
 				} else if(field == "personal author") {
+					newItem.creators.push(Zotero.Utilities.cleanAuthor(value, "author", true));
+				} else if(field == "author"){				 
 					newItem.creators.push(Zotero.Utilities.cleanAuthor(value, "author", true));
 				} else if(field == "added author") {
 					newItem.creators.push(Zotero.Utilities.cleanAuthor(value, "contributor", true));
