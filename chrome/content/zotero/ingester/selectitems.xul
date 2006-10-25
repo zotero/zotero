@@ -16,4 +16,8 @@
 	<box flex="1">
 		<listbox id="zotero-selectitems-links" flex="1" context="zoteroSelectContext"></listbox>
 	</box>
+	<hbox>
+		<button label="Select All" oncommand="Zotero_Ingester_Interface_SelectItems.selectAll()"/>
+		<button label="Deselect All" oncommand="Zotero_Ingester_Interface_SelectItems.selectAll(true)"/>
+	</hbox>
 </dialog>

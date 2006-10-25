@@ -55,6 +55,13 @@ Zotero_Ingester_Interface_SelectItems.init = function() {
 	}
 }
 
+Zotero_Ingester_Interface_SelectItems.selectAll = function(deselect) {
+	var listbox = document.getElementById("zotero-selectitems-links");
+	for (var i=0; i<listbox.childNodes.length; i++){
+		listbox.childNodes[i].setAttribute('checked', !deselect);
+	}
+}
+
 Zotero_Ingester_Interface_SelectItems.acceptSelection = function() {
 	var listbox = document.getElementById("zotero-selectitems-links");
 	
