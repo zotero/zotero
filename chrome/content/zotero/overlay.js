@@ -790,14 +790,14 @@ var ZoteroPane = new function()
 		// Automatically save snapshot if pref set
 		if (item.getID() && Zotero.Prefs.get('automaticSnapshots'))
 		{
-			addAttachmentFromPage(false, item.getID());
+			addAttachmentFromPage(false, item.getID(), true);
 		}
 	}
 	
 	
-	function addAttachmentFromPage(link, id)
+	function addAttachmentFromPage(link, id, noParent)
 	{
-		if (itemsView && itemsView._itemGroup.isCollection())
+		if (itemsView && itemsView._itemGroup.isCollection() && !noParent)
 		{
 			var parentCollectionID = itemsView._itemGroup.ref.getID();
 		}
