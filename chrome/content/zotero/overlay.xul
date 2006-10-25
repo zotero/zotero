@@ -44,6 +44,17 @@
 						label="&zotero.name;"
 						oncommand="ZoteroPane.toggleDisplay();"/>
 	</toolbarpalette>
+	
+	<popup id="contentAreaContextMenu">
+		<menuseparator id="zotero-context-separator"/>
+		<menuitem id="zotero-context-add-to-current-note" class="menu-iconic"
+			label="&zotero.contextMenu.addTextToCurrentNote;"
+			oncommand="ZoteroPane.addTextToNote(window.content.getSelection().toString())"/>
+		<menuitem id="zotero-context-add-to-new-note" class="menu-iconic"
+			label="&zotero.contextMenu.addTextToNewNote;"
+			oncommand="ZoteroPane.newNote(false, false, window.content.getSelection().toString())"/>
+	</popup>
+	
 	<vbox id="appcontent">
 		<!-- Changes to attributes of zotero-splitter and zotero-pane must be mirrored on overlay.js's onLoad() function -->
 		<splitter id="zotero-splitter" resizebefore="closest" resizeafter="closest" collapsed="true"/>
@@ -65,6 +76,7 @@
 					<menuitem label="&zotero.toolbar.export.label;" oncommand="Zotero_File_Interface.exportFile()"/>
 				</popup>
 				<popup id="zotero-itemmenu" onpopupshowing="ZoteroPane.buildItemContextMenu();">
+					<menuitem label="&zotero.items.menu.attach.note;" oncommand="ZoteroPane.newNote(false, this.parentNode.getAttribute('itemID'))"/>
 					<menuitem label="&zotero.items.menu.attach.snapshot;" oncommand="ZoteroPane.addAttachmentFromPage(false, this.parentNode.getAttribute('itemID'));"/>
 					<menuitem label="&zotero.items.menu.attach.link;" oncommand="ZoteroPane.addAttachmentFromPage(true, this.parentNode.getAttribute('itemID'));"/>
 					<menuseparator/>
@@ -79,7 +91,6 @@
 				<toolbar>
 					<toolbarbutton id="zotero-tb-collection-add" tooltiptext="&zotero.toolbar.newCollection.label;" command="cmd_zotero_newCollection"/>
 					<toolbarbutton id="zotero-tb-collection-addsearch" tooltiptext="&zotero.toolbar.newSavedSearch.label;" oncommand="ZoteroPane.newSearch();"/>
-					<toolbarbutton id="zotero-tb-collection-rename" tooltiptext="&zotero.toolbar.renameCollection.label;" oncommand="ZoteroPane.editSelectedCollection();" disabled="true"/>
 					<spacer flex="1"/>
 					<toolbarbutton id="zotero-tb-actions-menu" tooltiptext="&zotero.toolbar.actions.label;" type="menu">
 						<menupopup>

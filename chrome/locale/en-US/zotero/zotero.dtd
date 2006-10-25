@@ -1,5 +1,8 @@
 <!ENTITY zotero.name									"Zotero">
 
+<!ENTITY zotero.contextMenu.addTextToCurrentNote		"Add Selection to Zotero Note">
+<!ENTITY zotero.contextMenu.addTextToNewNote			"Create Zotero Note from Selection">
+
 <!ENTITY zotero.tabs.info.label						"Info">
 <!ENTITY zotero.tabs.notes.label						"Notes">
 <!ENTITY zotero.tabs.attachments.label					"Attachments">
@@ -16,6 +19,7 @@
 <!ENTITY zotero.items.dateAdded_column					"Date Added">
 <!ENTITY zotero.items.dateModified_column				"Date Modified">
 
+<!ENTITY zotero.items.menu.attach.note					"Add Note">
 <!ENTITY zotero.items.menu.attach.snapshot				"Attach Snapshot of Current Page">
 <!ENTITY zotero.items.menu.attach.link					"Attach Link to Current Page">
 
