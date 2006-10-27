@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<terms xmlns="http://purl.org/net/xbiblio/csl">
+  <locale xml:lang="en">
+    <term name="in">in</term>
+    <term name="ibid">ibid</term>
+    <term name="accessed">accessed</term>
+    <term name="retrieved">retrieved</term>
+    <term name="from">from</term>
+    <term name="forthcoming">forthcoming</term>
+    <term name="references">References</term>
+    <term name="no date">nd</term>
+    <term name="and">and</term>
+    <term name="et-al">et al.</term>
+    
+    <!-- LONG LOCATOR FORMS -->
+    <term name="page">
+      <single>page</single>
+      <multiple>pages</multiple>
+    </term>
+    <term name="paragraph">
+      <single>paragraph</single>
+      <multiple>paragraph</multiple>
+    </term>
+    <term name="line">
+      <single>line</single>
+      <multiple>line</multiple>
+    </term>
+    <term name="volume">volume</term>
+    <term name="issue">number</term>
+    
+    <!-- SHORT LOCATOR FORMS -->
+    <term name="page" form="short">
+      <single>p</single>
+      <multiple>pp</multiple>
+    </term>
+    <term name="paragraph" form="short">
+      <single>¶</single>
+      <multiple>¶¶</multiple>
+    </term>
+    <term name="line" form="short">
+      <single>line</single>
+      <multiple>line</multiple>
+    </term>
+    <term name="volume" form="short">vol</term>
+    <term name="issue" form="short">no</term>
+    
+    <!-- LONG ROLE FORMS -->
+    <term name="editor">
+      <single>editor</single>
+      <multiple>editors</multiple>
+    </term>
+    <term name="translator">
+      <single>translator</single>
+      <multiple>translators</multiple>
+    </term>
+    
+    <!-- SHORT ROLE FORMS -->
+    <term name="editor" form="short">
+      <single>ed</single>
+      <multiple>eds</multiple>
+    </term>
+    <term name="translator" form="short">
+      <single>tran</single>
+      <multiple>trans</multiple>
+    </term>
+    
+    <!-- VERB ROLE FORMS -->
+    <term name="editor" form="verb">edited by</term>
+    <term name="translator" form="verb">translated by</term>
+    
+    <!-- LONG MONTH FORMS -->
+    <term name="month-01">一月</term>
+    <term name="month-02">二月</term>
+    <term name="month-03">三月</term>
+    <term name="month-04">四月</term>
+    <term name="month-05">五月</term>
+    <term name="month-06">六月</term>
+    <term name="month-07">七月</term>
+    <term name="month-08">八月</term>
+    <term name="month-09">九月</term>
+    <term name="month-10">十月</term>
+    <term name="month-11">十一月</term>
+    <term name="month-12">十二月</term>
+    
+    <!-- SHORT MONTH FORMS -->
+    <term name="month-01" form="short">一月</term>
+    <term name="month-02" form="short">二月</term>
+    <term name="month-03" form="short">三月</term>
+    <term name="month-04" form="short">四月</term>
+    <term name="month-05" form="short">五月</term>
+    <term name="month-06" form="short">六月</term>
+    <term name="month-07" form="short">七月</term>
+    <term name="month-08" form="short">八月</term>
+    <term name="month-09" form="short">九月</term>
+    <term name="month-10" form="short">十月</term>
+    <term name="month-11" form="short">十一月</term>
+    <term name="month-12" form="short">十二月</term>
+  </locale>
+</terms>

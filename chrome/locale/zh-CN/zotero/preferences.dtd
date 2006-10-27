@@ -1,0 +1,13 @@
+<!ENTITY zotero.name "Zotero">
+<!ENTITY zotero.preferences.title "Zotero 配置">
+<!ENTITY zotero.preferences.autoUpdate.label "自动检查更新">
+<!ENTITY zotero.preferences.reportTranslationFailure.label "报告无效的网站 translators">
+<!ENTITY zotero.preferences.position.label "Zotero 显示">
+<!ENTITY zotero.preferences.position.above "高于">
+<!ENTITY zotero.preferences.position.below "低于">
+<!ENTITY zotero.preferences.position.browser "浏览器内容">
+<!ENTITY zotero.preferences.parseEndnote.label "使用 Zotero 处理下载的 EndNote 文件">
+<!ENTITY zotero.preferences.automaticSnapshots.label "从 web 页面创建条目时自动生成快照">
+<!ENTITY zotero.preferences.openurl.caption "OpenURL">
+<!ENTITY zotero.preferences.openurl.server "解析器:">
+<!ENTITY zotero.preferences.openurl.version "版本">

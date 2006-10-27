@@ -1,0 +1,13 @@
+<!ENTITY zotero.name "Zotero">
+<!ENTITY zotero.preferences.title "Zotero Einstellungen">
+<!ENTITY zotero.preferences.autoUpdate.label "Automatisch nach aktualisierten Scrapers checken">
+<!ENTITY zotero.preferences.reportTranslationFailure.label "Von nicht funktionierenden Übersetzern berichten">
+<!ENTITY zotero.preferences.position.label "Zotero">
+<!ENTITY zotero.preferences.position.above "über">
+<!ENTITY zotero.preferences.position.below "unter">
+<!ENTITY zotero.preferences.position.browser "Browser Inhalt zeigen">
+<!ENTITY zotero.preferences.parseEndnote.label "Zoteru für heruntergeladene EndNote-Dateien">
+<!ENTITY zotero.preferences.automaticSnapshots.label "Automatisch Schnappschüsse machen bei neuem Datensatz von Webseiten">
+<!ENTITY zotero.preferences.openurl.caption "OpenURL">
+<!ENTITY zotero.preferences.openurl.server "Resolver:">
+<!ENTITY zotero.preferences.openurl.version "Version:">

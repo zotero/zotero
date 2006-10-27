@@ -1,0 +1,9 @@
+<!ENTITY zotero.search.joinMode.prefix "匹配">
+<!ENTITY zotero.search.joinMode.any "任何">
+<!ENTITY zotero.search.joinMode.all "全部">
+<!ENTITY zotero.search.joinMode.suffix "下面的条件:">
+<!ENTITY zotero.search.recursive.label "搜索子目录">
+<!ENTITY zotero.search.textModes.phrase "表达式">
+<!ENTITY zotero.search.textModes.phraseBinary "表达式(包括二进制文件)">
+<!ENTITY zotero.search.textModes.regexp "正则表达式">
+<!ENTITY zotero.search.textModes.regexpCS "正则表达式(区分大小写)">

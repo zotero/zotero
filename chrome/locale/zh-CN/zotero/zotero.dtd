@@ -1,0 +1,72 @@
+<!ENTITY zotero.name "Zotero">
+<!ENTITY zotero.contextMenu.addTextToCurrentNote "添加所选内容至 Zotero 笔记">
+<!ENTITY zotero.contextMenu.addTextToNewNote "由所选内容创建 Zotero 笔记">
+<!ENTITY zotero.tabs.info.label "信息">
+<!ENTITY zotero.tabs.notes.label "笔记">
+<!ENTITY zotero.tabs.attachments.label "附件">
+<!ENTITY zotero.tabs.tags.label "标签">
+<!ENTITY zotero.tabs.related.label "相关条目">
+<!ENTITY zotero.notes.separate "在单独的窗口中编辑">
+<!ENTITY zotero.items.type_column "类型">
+<!ENTITY zotero.items.title_column "标题">
+<!ENTITY zotero.items.creator_column "作者">
+<!ENTITY zotero.items.source_column "源">
+<!ENTITY zotero.items.rights_column "Rights">
+<!ENTITY zotero.items.numChildren_column "+">
+<!ENTITY zotero.items.dateAdded_column "添加时间">
+<!ENTITY zotero.items.dateModified_column "修改时间">
+<!ENTITY zotero.items.menu.attach.note "添加笔记">
+<!ENTITY zotero.items.menu.attach.snapshot "附加当前页的快照">
+<!ENTITY zotero.items.menu.attach.link "附加当前页的链接">
+<!ENTITY zotero.collections.name_column "分类">
+<!ENTITY zotero.toolbar.newItem.label "新建条目">
+<!ENTITY zotero.toolbar.moreItemTypes.label "更多">
+<!ENTITY zotero.toolbar.newItemFromPage.label "由当前页新建条目">
+<!ENTITY zotero.toolbar.removeItem.label "移除条目...">
+<!ENTITY zotero.toolbar.newCollection.label "新建分类...">
+<!ENTITY zotero.toolbar.newSavedSearch.label "新建保存的搜索...">
+<!ENTITY zotero.toolbar.renameCollection.label "重命名分类...">
+<!ENTITY zotero.toolbar.removeCollection.label "删除分类...">
+<!ENTITY zotero.toolbar.exportCollection.label "导出分类...">
+<!ENTITY zotero.toolbar.renameSavedSearch.label "编辑保存的搜索...">
+<!ENTITY zotero.toolbar.removeSavedSearch.label "移除保存的搜索...">
+<!ENTITY zotero.toolbar.exportSavedSearch.label "导出保存的搜索...">
+<!ENTITY zotero.toolbar.actions.label "操作">
+<!ENTITY zotero.toolbar.import.label "导入...">
+<!ENTITY zotero.toolbar.export.label "导出库...">
+<!ENTITY zotero.toolbar.preferences.label "配置...">
+<!ENTITY zotero.toolbar.about.label "关于 Zotero...">
+<!ENTITY zotero.toolbar.createBibCollection.label "从分类创建文献目录...">
+<!ENTITY zotero.toolbar.createBibSavedSearch.label "从保存的搜索创建文献目录...">
+<!ENTITY zotero.toolbar.search.label "搜索:">
+<!ENTITY zotero.toolbar.fullscreen.tooltip "切换全屏模式">
+<!ENTITY zotero.toolbar.goToURL.label "查看">
+<!ENTITY zotero.toolbar.goToURL.tooltip "在线查看此项">
+<!ENTITY zotero.toolbar.openURL.label "定位">
+<!ENTITY zotero.toolbar.openURL.tooltip "在您的本地图书馆里查找">
+<!ENTITY zotero.item.add "添加">
+<!ENTITY zotero.item.attachment.file.show "显示文件">
+<!ENTITY zotero.toolbar.note.standalone "新建笔记">
+<!ENTITY zotero.toolbar.attachment.linked "链接至文件...">
+<!ENTITY zotero.toolbar.attachment.add "存储文件的拷贝...">
+<!ENTITY zotero.toolbar.attachment.weblink "保存当前页的链接">
+<!ENTITY zotero.toolbar.attachment.snapshot "生成当前页的快照">
+<!ENTITY zotero.selectitems.title "选择条目">
+<!ENTITY zotero.selectitems.intro.label "选择要添加至库的条目">
+<!ENTITY zotero.selectitems.cancel.label "取消">
+<!ENTITY zotero.selectitems.select.label "确定">
+<!ENTITY zotero.bibliography.title "创建文献目录">
+<!ENTITY zotero.bibliography.style.label "文献引用样式:">
+<!ENTITY zotero.bibliography.output.label "输出格式">
+<!ENTITY zotero.bibliography.saveAsRTF.label "另存为 RTF">
+<!ENTITY zotero.bibliography.saveAsHTML.label "另存为 HTML">
+<!ENTITY zotero.bibliography.copyToClipboard.label "复制到剪贴板">
+<!ENTITY zotero.bibliography.print.label "打印">
+<!ENTITY zotero.integration.docPrefs.title "文档选项">
+<!ENTITY zotero.progress.title "进度">
+<!ENTITY zotero.exportOptions.title "导出...">
+<!ENTITY zotero.exportOptions.format.label "格式:">
+<!ENTITY zotero.exportOptions.translatorOptions.label "Translator 选项">
+<!ENTITY zotero.citation.page "页">
+<!ENTITY zotero.citation.paragraph "段">
+<!ENTITY zotero.citation.line "行">

@@ -1,5 +1,7 @@
 content	zotero				chrome/content/zotero/
 locale	zotero	en-US		chrome/locale/en-US/zotero/
+locale	zotero	zh-CN		chrome/locale/zh-CN/zotero/
+locale	zotero	de-DE		chrome/locale/de-DE/zotero/
 skin	zotero	default		chrome/skin/default/zotero/
 
 overlay	chrome://browser/content/browser.xul	chrome://zotero/content/overlay.xul
