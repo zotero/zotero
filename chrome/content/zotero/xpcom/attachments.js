@@ -53,7 +53,7 @@ Zotero.Attachments = new function(){
 			// Create directory for attachment files within storage directory
 			var destDir = Zotero.getStorageDirectory();
 			destDir.append(itemID);
-			destDir.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0644);
+			destDir.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0755);
 			
 			file.copyTo(destDir, null);
 			
@@ -208,7 +208,7 @@ Zotero.Attachments = new function(){
 					// Create a new folder for this item in the storage directory
 					var destDir = Zotero.getStorageDirectory();
 					destDir.append(itemID);
-					destDir.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0644);
+					destDir.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0755);
 					
 					var file = Components.classes["@mozilla.org/file/local;1"].
 							createInstance(Components.interfaces.nsILocalFile);
@@ -316,7 +316,7 @@ Zotero.Attachments = new function(){
 		// Create a new folder for this item in the storage directory
 		var destDir = Zotero.getStorageDirectory();
 		destDir.append(itemID);
-		destDir.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0644);
+		destDir.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0755);
 		
 		var file = Components.classes["@mozilla.org/file/local;1"].
 				createInstance(Components.interfaces.nsILocalFile);
