@@ -141,6 +141,10 @@ Zotero_Ingester_Interface.contentLoad = function(event) {
 		var doc = event.originalTarget;
 		var rootDoc = doc;
 		
+		if(!doc.domain) {
+			return;
+		}
+		
 		// get the appropriate root document to check which browser we're on
 		while(rootDoc.defaultView.frameElement) {
 			rootDoc = rootDoc.defaultView.frameElement.ownerDocument;
