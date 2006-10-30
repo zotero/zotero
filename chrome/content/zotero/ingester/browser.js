@@ -82,6 +82,9 @@ Zotero_Ingester_Interface.chromeLoad = function() {
 	// this is for pageshow, for updating the status of the book icon
 	Zotero_Ingester_Interface.appContent.addEventListener("pageshow",
 		Zotero_Ingester_Interface.contentLoad, true);
+	// this is for turning off the book icon when a user navigates away from a page
+	Zotero_Ingester_Interface.appContent.addEventListener("pagehide",
+		Zotero_Ingester_Interface.contentHide, true);
 }
 
 /*
@@ -193,6 +196,34 @@ Zotero_Ingester_Interface.contentLoad = function(event) {
 		// add document
 		if(data.translators && data.translators.length) {
 			data.document = doc;
+		}
+	}
+}
+
+/*
+ * called to unregister Zotero icon, etc.
+ */
+Zotero_Ingester_Interface.contentHide = function(event) {
+	if(event.originalTarget instanceof HTMLDocument && !event.originalTarget.defaultView.frameElement) {
+		var doc = event.originalTarget;
+		
+		// Figure out what browser this contentDocument is associated with
+		var browser;
+		for(var i=0; i<Zotero_Ingester_Interface.tabBrowser.browsers.length; i++) {
+			if(doc == Zotero_Ingester_Interface.tabBrowser.browsers[i].contentDocument) {
+				browser = Zotero_Ingester_Interface.tabBrowser.browsers[i];
+				break;
+			}
+		}
+		
+		// get data object
+		var data = Zotero_Ingester_Interface._getData(browser);
+		
+		data.translators = false;
+		data.document = false;
+		// update status
+		if(Zotero_Ingester_Interface.tabBrowser.selectedBrowser == browser) {
+			Zotero_Ingester_Interface._updateStatus(data);
 		}
 	}
 }
