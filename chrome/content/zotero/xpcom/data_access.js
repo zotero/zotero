@@ -1117,7 +1117,7 @@ Zotero.Item.prototype.getSource = function(){
 		var Type = 'Attachment';
 	}
 	else {
-		throw ("getSource() can only be called on items of type 'note' or 'attachment'");
+		return false;
 	}
 	
 	var sql = "SELECT sourceItemID FROM item" + Type + "s WHERE itemID=" + this.getID();

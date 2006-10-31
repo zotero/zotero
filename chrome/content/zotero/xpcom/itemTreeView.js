@@ -201,8 +201,16 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids)
 	}
 	else if(action == 'add')
 	{
-		// If no quicksearch, process new items manually
-		if (quicksearch.value == '')
+		// If saved search, just rerun search
+		if (this._itemGroup.isSearch())
+		{
+			this.refresh();
+			madeChanges = true;
+		}
+		
+		// If not a quicksearch and not background window saved search,
+		// process new items manually
+		else if (quicksearch.value == '')
 		{
 			var items = Zotero.Items.get(ids);
 			
@@ -603,9 +611,16 @@ Zotero.ItemTreeView.prototype.sort = function()
 Zotero.ItemTreeView.prototype.selectItem = function(id)
 {
 	var row = this._itemRowMap[id];
+	// If row with id not visible, check to see if it's hidden under a parent
 	if(row == null)
 	{
 		var item = Zotero.Items.get(id);
+		var parent = item.getSource();
+		if (!parent)
+		{
+			// No parent -- it's not here
+			return false;
+		}
 		this.toggleOpenState(this._itemRowMap[item.getSource()]); //opens the parent of the item
 		row = this._itemRowMap[id];
 	}
