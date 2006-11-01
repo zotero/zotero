@@ -849,21 +849,26 @@ var ZoteroPane = new function()
 		var nsIFilePicker = Components.interfaces.nsIFilePicker;
 		var fp = Components.classes["@mozilla.org/filepicker;1"]
         					.createInstance(nsIFilePicker);
-		fp.init(window, Zotero.getString('pane.item.attachments.select'), nsIFilePicker.modeOpen);
+		fp.init(window, Zotero.getString('pane.item.attachments.select'), nsIFilePicker.modeOpenMultiple);
 		
 		if(fp.show() == nsIFilePicker.returnOK)
 		{
-			var attachmentID;
-			if(link)
-				attachmentID = Zotero.Attachments.linkFromFile(fp.file, id);
-			else
-				attachmentID = Zotero.Attachments.importFromFile(fp.file, id);
-		
-			if(attachmentID && !id)
-			{
-				var c = getSelectedCollection();
-				if(c)
-					c.addItem(attachmentID);
+			var files = fp.files;
+			while (files.hasMoreElements()){
+				var file = files.getNext();
+				file.QueryInterface(Components.interfaces.nsIFile);
+				var attachmentID;
+				if(link)
+					attachmentID = Zotero.Attachments.linkFromFile(file, id);
+				else
+					attachmentID = Zotero.Attachments.importFromFile(file, id);
+			
+				if(attachmentID && !id)
+				{
+					var c = getSelectedCollection();
+					if(c)
+						c.addItem(attachmentID);
+				}
 			}
 		}
 	}
