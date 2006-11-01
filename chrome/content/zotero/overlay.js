@@ -112,6 +112,7 @@ var ZoteroPane = new function()
 			var menuitem = document.createElement("menuitem");
 			menuitem.setAttribute("label", Zotero.getString("itemTypes."+itemTypes[i]['name']));
 			menuitem.setAttribute("oncommand","ZoteroPane.newItem("+itemTypes[i]['id']+")");
+			menuitem.setAttribute("tooltiptext", "");
 			addMenu.insertBefore(menuitem, separator);
 		}
 		// Create submenu for secondary item types
@@ -121,6 +122,7 @@ var ZoteroPane = new function()
 			var menuitem = document.createElement("menuitem");
 			menuitem.setAttribute("label", Zotero.getString("itemTypes."+itemTypes[i]['name']));
 			menuitem.setAttribute("oncommand","ZoteroPane.newItem("+itemTypes[i]['id']+")");
+			menuitem.setAttribute("tooltiptext", "");
 			moreMenu.appendChild(menuitem);
 		}
 		

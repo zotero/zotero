@@ -1,4 +1,3 @@
-<!ENTITY zotero.name "Zotero">
 <!ENTITY zotero.contextMenu.addTextToCurrentNote "添加所选内容至 Zotero 笔记">
 <!ENTITY zotero.contextMenu.addTextToNewNote "由所选内容创建 Zotero 笔记">
 <!ENTITY zotero.tabs.info.label "信息">

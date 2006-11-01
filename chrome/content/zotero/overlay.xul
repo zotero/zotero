@@ -41,7 +41,7 @@
 	<toolbarpalette id="BrowserToolbarPalette">
 		<toolbarbutton id="scholar-toolbar-button"/> <!-- May be necessary to keep pre-1.0b2 installs from breaking -->
 		<toolbarbutton id="zotero-toolbar-button" class="toolbarbutton-1"
-						label="&zotero.name;"
+						label="Zotero"
 						oncommand="ZoteroPane.toggleDisplay();"/>
 	</toolbarpalette>
 	
@@ -256,7 +256,7 @@
 	<menupopup id="menu_ToolsPopup">
 		<menuseparator id="zoteroSeparator" insertbefore="devToolsSeparator"/>
 		<menuitem id="tools-zotero" insertbefore="devToolsSeparator"
-			oncommand="ZoteroPane.toggleDisplay();" label="&zotero.name;"
+			oncommand="ZoteroPane.toggleDisplay();" label="Zotero"
 			key="key_openZotero"/>
 	</menupopup>
   

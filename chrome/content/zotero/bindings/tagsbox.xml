@@ -21,6 +21,8 @@
     ***** END LICENSE BLOCK *****
 -->
 
+<!DOCTYPE bindings SYSTEM "chrome://zotero/locale/zotero.dtd">
+
 <bindings 	xmlns="http://www.mozilla.org/xbl"
 			xmlns:xbl="http://www.mozilla.org/xbl"
 			xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
@@ -200,8 +202,20 @@
 								count = 0;
 						}
 						
-						this.id('tagsNum').value =
-							Zotero.getString('pane.item.tags.count.' + (count != 1 ? "plural" : "singular"), [count]) + ":";
+						var str = 'pane.item.tags.count.';
+						switch (count){
+							case 0:
+								str += 'zero';
+								break;
+							case 1:
+								str += 'singular';
+								break;
+							default:
+								str += 'plural';
+								break;
+						}
+						
+						this.id('tagsNum').value = Zotero.getString(str, [count]);
 						this.count = count;
 					]]>
 				</body>
@@ -238,7 +252,7 @@
 			<xul:vbox xbl:inherits="flex">
 				<xul:hbox align="center">
 					<xul:label id="tagsNum"/>
-					<xul:button label="Add" oncommand="this.parentNode.parentNode.parentNode.new();"/>
+					<xul:button label="&zotero.item.add;" oncommand="this.parentNode.parentNode.parentNode.new();"/>
 				</xul:hbox>
 				<xul:grid>
 					<xul:columns>

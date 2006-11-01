@@ -32,7 +32,7 @@
 <script src="preferences.js"/>
 <script src="include.js"/>
 
-<dialogheader id="header" title="&zotero.name;" description="&zotero.preferences.title;"/>
+<dialogheader id="header" title="Zotero" description="&zotero.preferences.title;"/>
 
 <hbox align="center">
 	<label value="&zotero.preferences.position.label;" control="positionMenu"/>

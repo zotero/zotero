@@ -28,7 +28,7 @@
 	<script src="include.js"/>
 	
 	<vbox id="aboutcontent">
-		<label id="name" value="&zotero.name;"/>
+		<label id="name" value="Zotero"/>
 		<label class="text-link" href="http://www.zotero.org" value="http://www.zotero.org"/>
 		<label id="version" value="&zotero.version; "/>
 		<script>

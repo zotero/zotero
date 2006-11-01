@@ -1244,14 +1244,40 @@ var ZoteroItemPane = new function()
 	{
 		var c = _notesList.childNodes.length;
 		
-		_notesLabel.value = Zotero.getString('pane.item.notes.count.'+(c != 1 ? "plural" : "singular"), [c]) + ":";
+		var str = 'pane.item.notes.count.';
+		switch (c){
+			case 0:
+				str += 'zero';
+				break;
+			case 1:
+				str += 'singular';
+				break;
+			default:
+				str += 'plural';
+				break;
+		}
+		
+		_notesLabel.value = Zotero.getString(str, [c]);
 	}
 	
 	function _updateAttachmentCount()
 	{
 		var c = _attachmentsList.childNodes.length;
 		
-		_attachmentsLabel.value = Zotero.getString('pane.item.attachments.count.'+(c != 1 ? "plural" : "singular"), [c]) + ":";
+		var str = 'pane.item.attachments.count.';
+		switch (c){
+			case 0:
+				str += 'zero';
+				break;
+			case 1:
+				str += 'singular';
+				break;
+			default:
+				str += 'plural';
+				break;
+		}
+		
+		_attachmentsLabel.value = Zotero.getString(str, [c]);
 	}
 	
 	function removeAttachment(id)

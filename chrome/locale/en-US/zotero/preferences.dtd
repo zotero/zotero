@@ -1,4 +1,3 @@
-<!ENTITY zotero.name					"Zotero">
 <!ENTITY zotero.preferences.title		"Zotero Preferences">
 <!ENTITY zotero.preferences.autoUpdate.label		"Automatically check for updated scrapers">
 <!ENTITY zotero.preferences.reportTranslationFailure.label	"Report broken site translators">
