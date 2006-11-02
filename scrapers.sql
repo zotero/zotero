@@ -1,4 +1,4 @@
--- 102
+-- 103
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-10-25 18:40:43'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-11-01 16:30:00'));
 
 REPLACE INTO "translators" VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006-10-02 17:00:00', 1, 100, 4, 'Amazon.com', 'Simon Kornblith', '^http://www\.amazon\.com/', 
 'function detectWeb(doc, url) {
@@ -2580,7 +2580,7 @@ REPLACE INTO "translators" VALUES ('c54d1932-73ce-dfd4-a943-109380e06574', '2006
 	}
 }');
 
-REPLACE INTO "translators" VALUES ('fcf41bed-0cbc-3704-85c7-8062a0068a7a', '2006-10-23 00:23:00', 1, 100, 12, 'PubMed', 'Simon Kornblith', '^http://www\.ncbi\.nlm\.nih\.gov/entrez/query\.fcgi\?.*db=PubMed',
+REPLACE INTO "translators" VALUES ('fcf41bed-0cbc-3704-85c7-8062a0068a7a', '2006-11-01 16:30:00', 1, 100, 12, 'PubMed', 'Simon Kornblith', '^http://www\.ncbi\.nlm\.nih\.gov/entrez/query\.fcgi\?.*db=PubMed',
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -2653,7 +2653,7 @@ function detectSearch(item) {
 			}
 			
 			if(article.Journal.length()) {
-				var issn = article.Journal.ISSN.text();
+				var issn = article.Journal.ISSN.text().toString();
 				if(issn) {
 					newItem.ISSN = issn.replace(/[^0-9]/g, "");
 				}
@@ -2666,15 +2666,15 @@ function detectSearch(item) {
 				}
 				
 				if(article.Journal.JournalIssue.length()) {
-					newItem.volume = article.Journal.JournalIssue.Volume.text();
-					newItem.issue = article.Journal.JournalIssue.Issue.text();
+					newItem.volume = article.Journal.JournalIssue.Volume.text().toString();
+					newItem.issue = article.Journal.JournalIssue.Issue.text().toString();
 					if(article.Journal.JournalIssue.PubDate.length()) {	// try to get the date
 						if(article.Journal.JournalIssue.PubDate.Day.text().toString() != "") {
-							newItem.date = article.Journal.JournalIssue.PubDate.Month.text()+" "+article.Journal.JournalIssue.PubDate.Day.text()+", "+article.Journal.JournalIssue.PubDate.Year.text();
+							newItem.date = article.Journal.JournalIssue.PubDate.Month.text().toString()+" "+article.Journal.JournalIssue.PubDate.Day.text().toString()+", "+article.Journal.JournalIssue.PubDate.Year.text().toString();
 						} else if(article.Journal.JournalIssue.PubDate.Month.text().toString() != "") {
-							newItem.date = article.Journal.JournalIssue.PubDate.Month.text()+" "+article.Journal.JournalIssue.PubDate.Year.text();
+							newItem.date = article.Journal.JournalIssue.PubDate.Month.text().toString()+" "+article.Journal.JournalIssue.PubDate.Year.text().toString();
 						} else if(article.Journal.JournalIssue.PubDate.Year.text().toString() != "") {
-							newItem.date = article.Journal.JournalIssue.PubDate.Year.text();
+							newItem.date = article.Journal.JournalIssue.PubDate.Year.text().toString();
 						}
 					}
 				}
@@ -4836,7 +4836,20 @@ REPLACE INTO "translators" VALUES ('14763d24-8ba0-45df-8f52-b8d1108e7ac9', '2006
 Zotero.configure("dataMode", "rdf");
 Zotero.addOption("exportNotes", true);
 Zotero.addOption("exportFileData", false);',
-'function generateSeeAlso(resource, seeAlso) {
+'var rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
+
+var n = {
+	bib:"http://purl.org/net/biblio#",
+	dc:"http://purl.org/dc/elements/1.1/",
+	dcterms:"http://purl.org/dc/terms/",
+	prism:"http://prismstandard.org/namespaces/1.2/basic/",
+	foaf:"http://xmlns.com/foaf/0.1/",
+	vcard:"http://nwalsh.com/rdf/vCard#",
+	link:"http://purl.org/rss/1.0/modules/link/",
+	fs:"http://www.zotero.org/namespaces/export#"
+};
+
+function generateSeeAlso(resource, seeAlso) {
 	for(var i in seeAlso) {
 		if(itemResources[seeAlso[i]]) {
 			Zotero.RDF.addStatement(resource, n.dc+"relation", itemResources[seeAlso[i]], false);
@@ -4927,11 +4940,48 @@ function generateItem(item, zoteroType, resource) {
 		if(item.charset) {
 			Zotero.RDF.addStatement(resource, n.link+"charset", item.charset, true);
 		}
+	} else if(zoteroType == "report") {
+		type = n.bib+"Report";
+	} else if(zoteroType == "bill") {
+		type = n.bib+"Legislation";
+	} else if(zoteroType == "case") {
+		type = n.bib+"Legislation";	// ??
+	} else if(zoteroType == "hearing") {
+		type = n.bib+"Report";
+	} else if(zoteroType == "patent") {
+		type = n.bib+"Patent";
+	} else if(zoteroType == "statute") {
+		type = n.bib+"Legislation";
+	} else if(zoteroType == "email") {
+		type = n.bib+"Letter";
+	} else if(zoteroType == "map") {
+		type = n.bib+"Image";
+	} else if(zoteroType == "blogPost") {
+		type = n.bib+"Document";
+	} else if(zoteroType == "instantMessage") {
+		type = n.bib+"Letter";
+	} else if(zoteroType == "forumPost") {
+		type = n.bib+"Document";
+	} else if(zoteroType == "audioRecording") {
+		type = n.bib+"Recording";
+	} else if(zoteroType == "presentation") {
+		type = n.bib+"ConferenceProceedings";
+	} else if(zoteroType == "videoRecording") {
+		type = n.bib+"Recording";
+	} else if(zoteroType == "tvBroadcast") {
+		type = n.bib+"Recording";
+	} else if(zoteroType == "radioBroadcast") {
+		type = n.bib+"Recording";
+	} else if(zoteroType == "podcast") {
+		type = n.bib+"Recording";
+	} else if(zoteroType == "computerProgram") {
+		type = n.bib+"Data";
 	}
 	
 	if(type) {
 		Zotero.RDF.addStatement(resource, rdf+"type", type, false);
 	}
+	Zotero.RDF.addStatement(resource, n.fs+"type", zoteroType, true);
 	
 	// authors/editors/contributors
 	var creatorContainers = new Object();
@@ -5132,10 +5182,15 @@ function generateItem(item, zoteroType, resource) {
 	}
 	
 	// type (not itemType)
-	if(item.type) {
-		Zotero.RDF.addStatement(resource, n.dc+"type", item.type, true);
-	} else if(item.thesisType) {
-		Zotero.RDF.addStatement(resource, n.dc+"type", item.thesisType, true);
+	var typeTypes = ["reportType", "videoRecordingType", "letterType",
+	                 "manuscriptType", "mapType", "thesisType", "websiteType",
+	                 "audioRecordingType", "presentationType", "postType",
+	                 "audioFileType"];
+	for each(var typeType in typeTypes) {
+		if(item[typeType]) {
+			Zotero.RDF.addStatement(resource, n.dc+"type", item[typeType], true);
+			break;
+		}
 	}
 	
 	// THIS IS NOT YET IN THE BIBLIO NAMESPACE, BUT BRUCE D''ARCUS HAS SAID
@@ -5197,19 +5252,6 @@ function generateItem(item, zoteroType, resource) {
 }
 
 function doExport() {
-	rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
-	
-	n = {
-		bib:"http://purl.org/net/biblio#",
-		dc:"http://purl.org/dc/elements/1.1/",
-		dcterms:"http://purl.org/dc/terms/",
-		prism:"http://prismstandard.org/namespaces/1.2/basic/",
-		foaf:"http://xmlns.com/foaf/0.1/",
-		vcard:"http://nwalsh.com/rdf/vCard#",
-		link:"http://purl.org/rss/1.0/modules/link/",
-		fs:"http://www.zotero.org/namespaces/export#"
-	};
-	
 	// add namespaces
 	for(var i in n) {
 		Zotero.RDF.addNamespace(i, n[i]);
@@ -5334,7 +5376,10 @@ REPLACE INTO "translators" VALUES ('6e372642-ed9d-4934-b5d1-c11ac758ebb7', '2006
 			Zotero.RDF.addStatement(resource, dc+"publisher", item.publisher, true);
 		} else if(item.distributor) {
 			Zotero.RDF.addStatement(resource, dc+"publisher", item.distributor, true);
+		} else if(item.institution) {
+			Zotero.RDF.addStatement(resource, dc+"publisher", item.distributor, true);
 		}
+		
 		// date/year
 		if(item.date) {
 			Zotero.RDF.addStatement(resource, dc+"date", item.date, true);
@@ -5380,7 +5425,20 @@ function detectImport() {
 		return true;
 	}
 }',
-'// gets the first result set for a property that can be encoded in multiple
+'var rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
+
+var n = {
+	bib:"http://purl.org/net/biblio#",
+	dc:"http://purl.org/dc/elements/1.1/",
+	dcterms:"http://purl.org/dc/terms/",
+	prism:"http://prismstandard.org/namespaces/1.2/basic/",
+	foaf:"http://xmlns.com/foaf/0.1/",
+	vcard:"http://nwalsh.com/rdf/vCard#",
+	link:"http://purl.org/rss/1.0/modules/link/",
+	fs:"http://www.zotero.org/namespaces/export#"
+};
+
+// gets the first result set for a property that can be encoded in multiple
 // ontologies
 function getFirstResults(node, properties, onlyOneString) {
 	for(var i=0; i<properties.length; i++) {
@@ -5587,7 +5645,23 @@ function importItem(newItem, node, type) {
 			}
 			newItem.charset = getFirstResults(node, [n.link+"charset"], true);
 			newItem.mimeType = getFirstResults(node, [n.link+"type"], true);
+		} else if(type == "report") {
+			newItem.itemType = "report";
+		} else if(type == "legislation") {
+			newItem.itemType = "statute";
+		} else if(type == "patent") {
+			newItem.itemType = "patent";
+		} else if(type == "image") {
+			newItem.itemType = "artwork";
+		} else if(type == "recording") {
+			newItem.itemType = "audioRecording";
 		}
+	}
+	
+	// check to see if we recognize the type in the fs or dc namespaces
+	var zoteroType = getFirstResults(node, [n.fs+"type", n.dc+"type"], true);
+	if(Zotero.Utilities.itemTypeExists(zoteroType)) {
+		newItem.itemType = zoteroType;
 	}
 	
 	// title
@@ -5797,19 +5871,6 @@ function importItem(newItem, node, type) {
 }
 
 function doImport() {
-	rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
-	
-	n = {
-		bib:"http://purl.org/net/biblio#",
-		dc:"http://purl.org/dc/elements/1.1/",
-		dcterms:"http://purl.org/dc/terms/",
-		prism:"http://prismstandard.org/namespaces/1.2/basic/",
-		foaf:"http://xmlns.com/foaf/0.1/",
-		vcard:"http://nwalsh.com/rdf/vCard#",
-		link:"http://purl.org/rss/1.0/modules/link/",
-		fs:"http://www.zotero.org/namespaces/export#"
-	};
-	
 	callNumberTypes = [
 		n.dcterms+"LCC", n.dcterms+"DDC", n.dcterms+"UDC"
 	];
@@ -7657,8 +7718,9 @@ REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/mla.csl', '200
     <et-al min-authors="6" use-first="1" position="subsequent"/>
     <layout>
       <item>
-        <author form="short"/>
-        <title form="short" when-multiple-author-items="true" prefix="“" suffix="”"/>
+        <author form="short">
+          <name and="text" sort-separator=", " delimiter=", " delimiter-precedes-last="always"/>
+        </author>
         <locator prefix=" "/>
       </item>
     </layout>
