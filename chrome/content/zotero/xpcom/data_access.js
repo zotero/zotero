@@ -377,8 +377,11 @@ Zotero.Item.prototype.creatorExists = function(firstName, lastName, creatorTypeI
  * Retrieves (and loads from DB, if necessary) an itemData field value
  *
  * Field can be passed as fieldID or fieldName
+ *
+ * If _unformatted_ is true, skip any special processing of DB value
+ *		(e.g. multipart date field) (default false)
  */
-Zotero.Item.prototype.getField = function(field){
+Zotero.Item.prototype.getField = function(field, unformatted){
 	//Zotero.debug('Requesting field ' + field + ' for item ' + this.getID(), 4);
 	if (this.isPrimaryField(field)){
 		return this._data[field] ? this._data[field] : '';
@@ -390,7 +393,15 @@ Zotero.Item.prototype.getField = function(field){
 		
 		var fieldID = Zotero.ItemFields.getID(field);
 		
-		return this._itemData[fieldID] ? this._itemData[fieldID] : '';
+		var value = this._itemData[fieldID] ? this._itemData[fieldID] : '';
+		
+		if (!unformatted){
+			if (fieldID==Zotero.ItemFields.getID('date')){
+				value = Zotero.Date.multipartToStr(value);
+			}
+		}
+		
+		return value;
 	}
 }
 
@@ -441,6 +452,14 @@ Zotero.Item.prototype.setField = function(field, value, loadIn){
 		
 		if (!Zotero.ItemFields.isValidForType(fieldID, this.getType())){
 			throw (field + ' is not a valid field for this type.');
+		}
+		
+		// Save date field as multipart date
+		if (!loadIn){
+			if (fieldID==Zotero.ItemFields.getID('date') &&
+					!Zotero.Date.isMultipart(value)){
+				value = Zotero.Date.strToMultipart(value);
+			}
 		}
 		
 		// If existing value, make sure it's actually changing
@@ -632,14 +651,19 @@ Zotero.Item.prototype.save = function(){
 								// Take advantage of SQLite's manifest typing
 								if (Zotero.ItemFields.isInteger(fieldID)){
 									updateStatement.bindInt32Parameter(0,
-										this.getField(fieldID));
+										this.getField(fieldID, true));
 								}
 								else {
 									updateStatement.bindUTF8StringParameter(0,
-										this.getField(fieldID));
+										this.getField(fieldID, true));
 								}
 								updateStatement.bindInt32Parameter(2, fieldID);
-								updateStatement.execute();
+								try {
+									updateStatement.execute();
+								}
+								catch(e){
+									throw(Zotero.DB.getLastErrorString());
+								}
 							}
 						}
 						
@@ -663,14 +687,19 @@ Zotero.Item.prototype.save = function(){
 							else {
 								if (Zotero.ItemFields.isInteger(fieldID)){
 									insertStatement.bindInt32Parameter(2,
-										this.getField(fieldID));
+										this.getField(fieldID, true));
 								}
 								else {
 									insertStatement.bindUTF8StringParameter(2,
-										this.getField(fieldID));
+										this.getField(fieldID, true));
 								}
 								
-								insertStatement.execute();
+								try {
+									insertStatement.execute();
+								}
+								catch(e){
+									throw(Zotero.DB.getLastErrorString());
+								}
 							}
 						}
 					}
@@ -769,7 +798,7 @@ Zotero.Item.prototype.save = function(){
 					Zotero.DB.getStatement("INSERT INTO itemData VALUES (?,?,?)");
 				
 				for (fieldID in this._changedItemData.items){
-					if (!this.getField(fieldID)){
+					if (!this.getField(fieldID, true)){
 						continue;
 					}
 					
@@ -784,12 +813,17 @@ Zotero.Item.prototype.save = function(){
 					}
 					else {
 						if (Zotero.ItemFields.isInteger(fieldID)){
-							statement.bindInt32Parameter(2, this.getField(fieldID));
+							statement.bindInt32Parameter(2, this.getField(fieldID, true));
 						}
 						else {
-							statement.bindUTF8StringParameter(2, this.getField(fieldID));
+							statement.bindUTF8StringParameter(2, this.getField(fieldID, true));
 						}
-						statement.execute();
+						try {
+							statement.execute();
+						}
+						catch(e){
+							throw(Zotero.DB.getLastErrorString());
+						}
 					}
 					
 					Zotero.History.add('itemData', 'itemID-fieldID',

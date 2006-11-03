@@ -1,4 +1,4 @@
--- 9
+-- 10
 
 -- This file creates tables containing user-specific data -- any changes
 -- to existing tables made here must be mirrored in transition steps in
@@ -63,6 +63,8 @@ CREATE TABLE IF NOT EXISTS items (
 );
 
 -- Type-specific data for individual items
+--
+-- Triggers specified in schema.js due to lack of trigger IF [NOT] EXISTS in Firefox 2.0
 CREATE TABLE IF NOT EXISTS itemData (
     itemID INT,
     fieldID INT,

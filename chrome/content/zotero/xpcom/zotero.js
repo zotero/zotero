@@ -679,8 +679,18 @@ Zotero.Date = new function(){
 	this.dateToSQL = dateToSQL;
 	this.strToDate = strToDate;
 	this.formatDate = formatDate;
+	this.strToMultipart = strToMultipart;
+	this.isMultipart = isMultipart;
+	this.multipartToSQL = multipartToSQL;
+	this.multipartToStr = multipartToStr;
+	this.isSQLDate = isSQLDate;
+	this.sqlHasYear = sqlHasYear;
+	this.sqlHasMonth = sqlHasMonth;
+	this.sqlHasDay = sqlHasDay;
 	this.getFileDateString = getFileDateString;
 	this.getFileTimeString = getFileTimeString;
+	this.getLocaleDateOrder = getLocaleDateOrder;
+	
 	
 	/**
 	* Convert an SQL date in the form '2006-06-13 11:03:05' into a JS Date object
@@ -773,6 +783,7 @@ Zotero.Date = new function(){
 	var _yearRe = /^(.*)\b((?:circa |around |about |c\.? ?)?[0-9]{1,4}(?: ?B\.? ?C\.?(?: ?E\.?)?| ?C\.? ?E\.?| ?A\.? ?D\.?)|[0-9]{3,4})\b(.*)$/i;
 	var _monthRe = null;
 	var _dayRe = null;
+	
 	function strToDate(string) {
 		var date = new Object();
 		
@@ -929,6 +940,93 @@ Zotero.Date = new function(){
 		return string;
 	}
 	
+	
+	function strToMultipart(str){
+		if (!str){
+			return '';
+		}
+		
+		var utils = new Zotero.Utilities();
+		
+		var parts = strToDate(str);
+		parts.month = typeof parts.month != undefined ? parts.month + 1 : '';
+		
+		var multi = utils.lpad(parts.year, '0', 4) + '-'
+			+ utils.lpad(parts.month, '0', 2) + '-'
+			+ utils.lpad(parts.day, '0', 2)
+			+ ' '
+			+ str;
+			
+		return multi;
+	}
+	
+	// Regexes for multipart and SQL dates
+	var _multipartRE = /^[0-9]{4}\-[0-9]{2}\-[0-9]{2} /;
+	var _sqldateRE = /^[0-9]{4}\-[0-9]{2}\-[0-9]{2}/;
+	
+	/**
+	 * Tests if a string is a multipart date string
+	 * e.g. '2006-11-03 November 3rd, 2006'
+	 */
+	function isMultipart(str){
+		return _multipartRE.test(str);
+	}
+	
+	
+	/**
+	 * Returns the SQL part of a multipart date string
+	 * (e.g. '2006-11-03 November 3rd, 2006' returns '2006-11-03')
+	 */
+	function multipartToSQL(multi){
+		if (!multi){
+			return '';
+		}
+		
+		if (!isMultipart(multi)){
+			return '0000-00-00';
+		}
+		
+		return multi.substr(0, 10);
+	}
+	
+	
+	/**
+	 * Returns the user part of a multipart date string
+	 * (e.g. '2006-11-03 November 3rd, 2006' returns 'November 3rd, 2006')
+	 */
+	function multipartToStr(multi){
+		if (!multi){
+			return '';
+		}
+		
+		if (!isMultipart(multi)){
+			return multi;
+		}
+		
+		return multi.substr(11);
+	}
+	
+	
+	function isSQLDate(str){
+		return _sqldateRE.test(str);
+	}
+	
+	
+	function sqlHasYear(sqldate){
+		return isSQLDate(sqldate) && sqldate.substr(0,4)!='0000';
+	}
+	
+	
+	function sqlHasMonth(sqldate){
+		return isSQLDate(sqldate) && sqldate.substr(5,2)!='00';
+	}
+	
+	
+	function sqlHasDay(sqldate){
+		return isSQLDate(sqldate) && sqldate.substr(8,2)!='00';
+	}
+	
+	
 	function getFileDateString(file){
 		var date = new Date();
 		date.setTime(file.lastModifiedTime);
@@ -940,6 +1038,54 @@ Zotero.Date = new function(){
 		var date = new Date();
 		date.setTime(file.lastModifiedTime);
 		return date.toLocaleTimeString();
+	}
+	
+	/**
+	 * Figure out the date order from the output of toLocaleDateString()
+	 *
+	 * Note: Currently unused
+	 *
+	 * Returns a string with y, m, and d (e.g. 'ymd', 'mdy')
+	 */
+	function getLocaleDateOrder(){
+		var date = new Date("October 5, 2006");
+		var parts = date.toLocaleDateString().match(/([0-9]+)[^0-9]+([0-9]+)[^0-9]+([0-9]+)/);
+		alert(parts);
+		switch (parseInt(parts[1])){
+			case 2006:
+				var order = 'y';
+				break;
+			case 10:
+				var order = 'm';
+				break;
+			case 5:
+				var order = 'd';
+				break;
+		}
+		switch (parseInt(parts[2])){
+			case 2006:
+				order += 'y';
+				break;
+			case 10:
+				order += 'm';
+				break;
+			case 5:
+				order += 'd';
+				break;
+		}
+		switch (parseInt(parts[3])){
+			case 2006:
+				order += 'y';
+				break;
+			case 10:
+				order += 'm';
+				break;
+			case 5:
+				order += 'd';
+				break;
+		}
+		
+		return order;
 	}
 }
 

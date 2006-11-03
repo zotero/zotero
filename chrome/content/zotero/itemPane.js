@@ -252,12 +252,16 @@ var ZoteroItemPane = new function()
 				
 				// Start tabindex at 1000 after creators
 				var tabindex = editable ? (i>0 ? _tabIndexMinFields + i : 1) : 0;
+				_tabIndexMaxInfoFields = Math.max(_tabIndexMaxInfoFields, tabindex);
+				
+				if (fieldNames[i]=='date'){
+					addDateRow(_itemBeingEdited.getField('date', true), tabindex);
+					continue;
+				}
 				
 				var valueElement = createValueElement(
 					val, editable ? fieldNames[i] : null, tabindex
 				);
-				
-				_tabIndexMaxInfoFields = Math.max(_tabIndexMaxInfoFields, tabindex);
 				
 				var label = document.createElement("label");
 				label.setAttribute("value",Zotero.getString("itemFields."+fieldNames[i])+":");
@@ -569,6 +573,49 @@ var ZoteroItemPane = new function()
 		}
 	}
 	
+	
+	/**
+	 * Add a date row with a label editor and a ymd indicator to show date parsing
+	 */
+	function addDateRow(value, tabindex)
+	{
+		var label = document.createElement("label");
+		label.setAttribute("value", Zotero.getString("itemFields.date") + ':');
+		label.setAttribute("fieldname",'date');
+		label.setAttribute("onclick", "this.nextSibling.firstChild.blur()");
+		
+		var hbox = document.createElement("hbox");
+		var elem = createValueElement(Zotero.Date.multipartToStr(value), 'date', tabindex);
+		
+		// y-m-d status indicator
+		var datebox = document.createElement('hbox');
+		datebox.className = 'zotero-date-field-status';
+		var year = document.createElement('label');
+		var month = document.createElement('label');
+		var day = document.createElement('label');
+		year.setAttribute('value', Zotero.getString('date.abbreviation.year'));
+		month.setAttribute('value', Zotero.getString('date.abbreviation.month'));
+		day.setAttribute('value', Zotero.getString('date.abbreviation.day'));
+		
+		// Display the date parts we have and hide the others
+		var sqldate = Zotero.Date.multipartToSQL(value);
+		year.setAttribute('hidden', !Zotero.Date.sqlHasYear(sqldate));
+		month.setAttribute('hidden', !Zotero.Date.sqlHasMonth(sqldate));
+		day.setAttribute('hidden', !Zotero.Date.sqlHasDay(sqldate));
+		
+		datebox.appendChild(year);
+		datebox.appendChild(month);
+		datebox.appendChild(day);
+		
+		var hbox = document.createElement('hbox');
+		hbox.setAttribute('flex', 1);
+		hbox.appendChild(elem);
+		hbox.appendChild(datebox);
+		
+		addDynamicRow(label, hbox);
+	}
+	
+	
 	function switchCreatorMode(row, singleField, initial)
 	{
 		// Change if button position changes
@@ -700,6 +747,7 @@ var ZoteroItemPane = new function()
 		
 		if(fieldName)
 		{
+			valueElement.setAttribute('flex', 1);
 			valueElement.setAttribute('fieldname',fieldName);
 			valueElement.setAttribute('tabindex', tabindex);
 			valueElement.setAttribute('onclick', 'ZoteroItemPane.showEditor(this)');
@@ -709,6 +757,12 @@ var ZoteroItemPane = new function()
 			{
 				case 'tag':
 					_tabIndexMaxTagsFields = Math.max(_tabIndexMaxTagsFields, tabindex);
+					break;
+				
+				// Display the SQL date as a tooltip for the date field
+				case 'date':
+					valueElement.setAttribute('tooltiptext',
+						Zotero.Date.multipartToSQL(_itemBeingEdited.getField('date', true)));
 					break;
 				
 				// Convert dates from UTC
@@ -756,6 +810,7 @@ var ZoteroItemPane = new function()
 			// Wrap to multiple lines
 			valueElement.appendChild(document.createTextNode(valueText));
 		}
+		
 		return valueElement;
 	}
 	
@@ -1095,7 +1150,7 @@ var ZoteroItemPane = new function()
 			if (fieldName=='accessDate' && value!='')
 			{
 				var localDate = Zotero.Date.sqlToDate(value);
-				var value = Zotero.Date.dateToSQL(localDate, true);
+				value = Zotero.Date.dateToSQL(localDate, true);
 			}
 			
 			if(saveChanges)

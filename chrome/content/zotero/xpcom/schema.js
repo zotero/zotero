@@ -315,6 +315,7 @@ Zotero.Schema = new function(){
 			Zotero.DB.query("PRAGMA auto_vacuum = 1");
 			
 			Zotero.DB.query(_getSchemaSQL('userdata'));
+			_updateFailsafeSchema();
 			_updateDBVersion('userdata', _getSchemaSQLVersion('userdata'));
 			
 			Zotero.DB.query(_getSchemaSQL('system'));
@@ -590,9 +591,20 @@ Zotero.Schema = new function(){
 						catch (e){}
 					}
 				}
+				
+				if (i==10){
+					var dates = Zotero.DB.query("SELECT itemID, value FROM itemData WHERE fieldID=14");
+					for each(var row in dates){
+						if (!Zotero.Date.isMultipart(row.value)){
+							Zotero.DB.query("UPDATE itemData SET value=? WHERE itemID=? AND fieldID=14", [Zotero.Date.strToMultipart(row.value), row.itemID]);
+						}
+					}
+				}
 			}
 			
 			_updateSchema('userdata');
+			_updateFailsafeSchema();
+			
 			Zotero.DB.commitTransaction();
 		}
 		catch(e){
@@ -600,5 +612,39 @@ Zotero.Schema = new function(){
 			alert('Error migrating Zotero database');
 			throw(e);
 		}
+	}
+	
+	
+	function _updateFailsafeSchema(){
+		// This is super-annoying, but SQLite didn't have IF [NOT] EXISTS
+		// on trigger statements until 3.3.8, which didn't make it into
+		// Firefox 2.0, so we just throw the triggers at the DB on every
+		// userdata update and catch errors individually
+		//
+		// Add in DROP statements if these need to change
+		var itemDataTrigger = "  FOR EACH ROW WHEN NEW.fieldID=14\n"
+			+ "  BEGIN\n"
+			+ "    SELECT CASE\n"
+			+ "        CAST(SUBSTR(NEW.value, 1, 4) AS INT) BETWEEN 0 AND 9999 AND\n"
+			+ "        SUBSTR(NEW.value, 5, 1) = '-' AND\n"
+			+ "        CAST(SUBSTR(NEW.value, 6, 2) AS INT) BETWEEN 0 AND 12 AND\n"
+			+ "        SUBSTR(NEW.value, 8, 1) = '-' AND\n"
+			+ "        CAST(SUBSTR(NEW.value, 9, 2) AS INT) BETWEEN 0 AND 31\n"
+			+ "      WHEN 0 THEN RAISE (ABORT, 'Date field must begin with SQL date') END;\n"
+			+ "  END;\n";
+		
+		try {
+			var sql = "CREATE TRIGGER insert_date_field BEFORE INSERT ON itemData\n"
+				+ itemDataTrigger;
+			Zotero.DB.query(sql);
+		}
+		catch (e){}
+		
+		try {
+			var sql = "CREATE TRIGGER update_date_field BEFORE UPDATE ON itemData\n"
+				+ itemDataTrigger;
+			Zotero.DB.query(sql);
+		}
+		catch (e){}
 	}
 }

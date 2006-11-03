@@ -158,7 +158,7 @@ Zotero.Utilities.prototype.inArray = Zotero.inArray;
  * pads a number or other string with a given string on the left
  */
 Zotero.Utilities.prototype.lpad = function(string, pad, length) {
-	string = string + '';
+	string = string ? string + '' : '';
 	while(string.length < length) {
 		string = pad + string;
 	}

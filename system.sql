@@ -15,6 +15,8 @@
     
     -- Describes various types of fields and their format restrictions,
     -- and indicates whether data should be stored as strings or integers
+    --
+    -- unused
     DROP TABLE IF EXISTS fieldFormats;
     CREATE TABLE fieldFormats (
         fieldFormatID INTEGER PRIMARY KEY,
@@ -113,10 +115,11 @@ CREATE TABLE itemTypeCreatorTypes (
     );
     
     
+    -- unused
     INSERT INTO "fieldFormats" VALUES(1, '.*', 0);
     INSERT INTO "fieldFormats" VALUES(2, '[0-9]*', 1);
     INSERT INTO "fieldFormats" VALUES(3, '[0-9]{4}', 1);
-    
+
 INSERT INTO itemTypes VALUES (1,'note',NULL,0);
 INSERT INTO itemTypes VALUES (2,'book',NULL,2);
 INSERT INTO itemTypes VALUES (3,'bookSection',2,2);
@@ -570,7 +573,6 @@ INSERT INTO itemTypeFields VALUES (32, 1, NULL, 11);
 INSERT INTO itemTypeFields VALUES (32, 27, NULL, 12);
 INSERT INTO itemTypeFields VALUES (32, 22, NULL, 13);
 
-
 INSERT INTO creatorTypes VALUES(1, "author");
 INSERT INTO creatorTypes VALUES(2, "contributor");
 INSERT INTO creatorTypes VALUES(3, "editor");
@@ -699,6 +701,7 @@ INSERT INTO itemTypeCreatorTypes VALUES(31,2,0);
 INSERT INTO itemTypeCreatorTypes VALUES(31,25,0);
 INSERT INTO itemTypeCreatorTypes VALUES(32,21,1);
 INSERT INTO itemTypeCreatorTypes VALUES(32,2,0);
+
 
     INSERT INTO "fileTypes" VALUES(1, 'webpage');
     INSERT INTO "fileTypes" VALUES(2, 'image');
