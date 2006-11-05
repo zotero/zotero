@@ -110,7 +110,10 @@ zoterosearchagefield
 	-moz-binding: url('chrome://zotero/content/bindings/searchtextbox.xml#search-in-the-last');
 }
 
-
+zoterosearchagefield textbox
+{
+	min-width:3em;
+}
 
 #zotero-editpane-dynamic-fields row, tagsbox row
 {
@@ -192,20 +195,19 @@ zoterosearchagefield
 	margin: 0 0 0 1px;
 }
 
-.zotero-clicky, .zotero-unclicky
+.zotero-clicky
 {	
 	-moz-border-radius: 6px;
 }
 
-.zotero-clicky[value="-"], .zotero-clicky[value="+"],
-.zotero-unclicky[value="-"], .zotero-unclicky[value="+"]
+.zotero-clicky[value="-"], .zotero-clicky[value="+"]
 {
 	margin: 0px;
 	padding-left: 4px;
 	padding-right: 4px;
 }
 
-.zotero-clicky:hover
+.zotero-clicky:not([disabled=true]):hover
 {
 	color: white;
 	background: #666666;

@@ -79,7 +79,12 @@
 						
 						condition.initWithParentAndCondition(this, ref);
 						
-						conditionsBox.childNodes[0].id('remove').hidden = (conditionsBox.childNodes.length == 1);
+						if (conditionsBox.childNodes.length == 2){
+							conditionsBox.childNodes[0].enableRemoveButton();
+						}
+						else if (conditionsBox.childNodes.length == 1){
+							conditionsBox.childNodes[0].disableRemoveButton();
+						}
 					]]>
 				</body>
 			</method>
@@ -97,7 +102,9 @@
 							}
 						}
 						
-						conditionsBox.childNodes[0].id('remove').hidden = (conditionsBox.childNodes.length == 1);
+						if (conditionsBox.childNodes.length == 1){
+							conditionsBox.childNodes[0].disableRemoveButton();
+						}
 					]]>
 				</body>
 			</method>
@@ -443,16 +450,34 @@
 			<method name="onRemoveClicked">
 				<body>
 					<![CDATA[
-						if(this.parent)
+						if (this.parent){
 							this.parent.removeCondition(this.conditionID);
+						}
+						window.sizeToContent()
 					]]>
 				</body>
 			</method>
 			<method name="onAddClicked">
 				<body>
 					<![CDATA[
-						if(this.parent)
+						if (this.parent){
 							this.parent.onAddClicked();
+						}
+						window.sizeToContent()
+					]]>
+				</body>
+			</method>
+			<method name="disableRemoveButton">
+				<body>
+					<![CDATA[
+						document.getAnonymousNodes(this)[0].lastChild.previousSibling.disabled = true;
+					]]>
+				</body>
+			</method>
+			<method name="enableRemoveButton">
+				<body>
+					<![CDATA[
+						document.getAnonymousNodes(this)[0].lastChild.previousSibling.disabled = false;
 					]]>
 				</body>
 			</method>
@@ -477,7 +502,7 @@
 				<xul:menulist id="valuemenu" flex="1" hidden="true">
 					<xul:menupopup/>
 				</xul:menulist>
-				<xul:zoterosearchagefield id="value-date-age" hidden="true"/>
+				<xul:zoterosearchagefield id="value-date-age" hidden="true" flex="1"/>
 				<xul:toolbarbutton id="remove" class="zotero-clicky" label="-" oncommand="this.parentNode.parentNode.onRemoveClicked();"/>
 				<xul:toolbarbutton id="add" class="zotero-clicky" label="+" oncommand="this.parentNode.parentNode.onAddClicked();"/>
 			</xul:hbox>

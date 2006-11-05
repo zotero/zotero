@@ -1,3 +1,5 @@
+<!ENTITY zotero.search.name				"Name:">
+
 <!ENTITY zotero.search.joinMode.prefix		"Match">
 <!ENTITY zotero.search.joinMode.any		"any">
 <!ENTITY zotero.search.joinMode.all		"all">

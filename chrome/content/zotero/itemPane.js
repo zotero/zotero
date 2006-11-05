@@ -542,6 +542,7 @@ var ZoteroItemPane = new function()
 		// Plus (+) button
 		var addButton = document.createElement('label');
 		addButton.setAttribute("value","+");
+		addButton.setAttribute("class","zotero-clicky");
 		// If row isn't saved, don't let user add more
 		if (unsaved)
 		{
@@ -722,14 +723,12 @@ var ZoteroItemPane = new function()
 	function disableButton(button)
 	{
 		button.setAttribute('disabled', true);
-		button.setAttribute('class', 'zotero-unclicky');
 		button.setAttribute('onclick', false); 
 	}
 	
 	function _enablePlusButton(button, creatorTypeID, fieldMode)
 	{
 		button.setAttribute('disabled', false);
-		button.setAttribute("class","zotero-clicky");
 		button.setAttribute("onclick",
 			"ZoteroItemPane.disableButton(this); ZoteroItemPane.addCreatorRow('', '', " + (creatorTypeID ? creatorTypeID : 'false') + ", " + fieldMode + ", true);");
 	}

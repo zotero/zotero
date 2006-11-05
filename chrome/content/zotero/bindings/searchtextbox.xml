@@ -219,10 +219,10 @@
 		</implementation>
 		
 		<content>
-			<xul:hbox xbl:inherits="flex">
-				<xul:textbox/>
-				<xul:menulist label="days">
-					<xul:menupopup>
+			<xul:hbox flex="1">
+				<xul:textbox flex="1"/>
+				<xul:menulist>
+					<xul:menupopup flex="1">
 						<xul:menuitem label="&zotero.search.date.units.days;" value="days" selected="true"/>
 						<xul:menuitem label="&zotero.search.date.units.months;" value="months"/>
 						<xul:menuitem label="&zotero.search.date.units.years;" value="years"/>
