@@ -195,10 +195,11 @@
 						var menulist = document.getAnonymousNodes(this)[0].firstChild.nextSibling;
 						var menupopup = menulist.firstChild;
 						
+						var selectThis = 0;
 						for (var i=0; i<menupopup.childNodes.length; i++){
 							if (menupopup.childNodes[i].value == units)
 							{
-								var selectThis = i;
+								selectThis = i;
 								break;
 							}
 						}

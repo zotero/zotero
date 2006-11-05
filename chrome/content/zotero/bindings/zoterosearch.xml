@@ -287,7 +287,6 @@
 							{
 								// If switching from menu to textbox, clear value
 								if (this.id('valuefield').hidden){
-									this.value = '';
 									this.id('valuefield').value = '';
 								}
 								// If switching between textbox conditions, get loaded value for new one
@@ -321,6 +320,10 @@
 					// Textbox + units dropdown for isInTheLast operator
 					else if (operatorsList.value=='isInTheLast')
 					{
+						// If switching from text field, clear value
+						if (this.id('value-date-age').hidden){
+							this.value = '';
+						}
 						this.id('valuefield').hidden = true;
 						this.id('valuemenu').hidden = true;
 						this.id('value-date-age').hidden = false;
@@ -329,7 +332,8 @@
 					// Textbox
 					else
 					{
-						if (!this.id('value-date-age').hidden){
+						// If switching from date age, clear value
+						if (this.id('valuefield').hidden){
 							this.value = '';
 						}
 						this.id('valuefield').hidden = false;
