@@ -319,7 +319,7 @@
 					}
 					
 					// Textbox + units dropdown for isInTheLast operator
-					if (operatorsList.value=='isInTheLast')
+					else if (operatorsList.value=='isInTheLast')
 					{
 						this.id('valuefield').hidden = true;
 						this.id('valuemenu').hidden = true;
@@ -329,6 +329,9 @@
 					// Textbox
 					else
 					{
+						if (!this.id('value-date-age').hidden){
+							this.value = '';
+						}
 						this.id('valuefield').hidden = false;
 						this.id('valuemenu').hidden = true;
 						this.id('value-date-age').hidden = true;
