@@ -90,13 +90,12 @@
 						var conditionsBox = this.id('conditions');
 						this.search.removeCondition(id);
 						
-						for(var i = 0, len=conditionsBox.childNodes.length; i < len; i++)
-							if(conditionsBox.childNodes[i].conditionID == id)
-							{
+						for (var i = 0, len=conditionsBox.childNodes.length; i < len; i++){
+							if (conditionsBox.childNodes[i].conditionID == id){
 								conditionsBox.removeChild(conditionsBox.childNodes[i]);
-								
-								i = len;
+								break;
 							}
+						}
 						
 						conditionsBox.childNodes[0].id('remove').hidden = (conditionsBox.childNodes.length == 1);
 					]]>
@@ -188,7 +187,7 @@
 			<field name="dontupdate"/>
 			<constructor>
 				<![CDATA[
-					var operators = new Array('is', 'isNot', 'contains', 'doesNotContain', 'isLessThan', 'isGreaterThan', 'isBefore', 'isAfter');
+					var operators = new Array('is', 'isNot', 'contains', 'doesNotContain', 'isLessThan', 'isGreaterThan', 'isBefore', 'isAfter', 'isInTheLast');
 					var operatorsList = this.id('operatorsmenu');
 					
 					for(var i in operators)
@@ -257,7 +256,7 @@
 							}
 							
 							this.createValueMenu(merged);
-							return;
+							break;
 						
 						case 'itemTypeID':
 							var types = Zotero.ItemTypes.getTypes();
@@ -269,25 +268,64 @@
 								delete types[i]['id'];
 							}
 							this.createValueMenu(types);
-							return;
+							break;
+						
+						default:
+							if (operatorsList.value=='isInTheLast')
+							{
+								this.id('value-date-age').value = this.value;
+							}
+							
+							else
+							{
+								// If switching from menu to textbox, clear value
+								if (this.id('valuefield').hidden){
+									this.value = '';
+									this.id('valuefield').value = '';
+								}
+								// If switching between textbox conditions, get loaded value for new one
+								else {
+									this.id('valuefield').value = this.value;
+								}
+								
+								// Update field drop-down if applicable
+								this.id('valuefield').update(conditionsMenu.value, this.mode);
+							}
 					}
 					
-					// Otherwise use a text field
+					this.onOperatorSelected();
+					]]>
+				</body>
+			</method>
+			<method name="onOperatorSelected">
+				<body>
+					<![CDATA[
+					var conditionsMenu = this.id('conditionsmenu');
+					var operatorsList = this.id('operatorsmenu');
 					
-					// If switching between menu and textbox, clear value
-					if (this.id('valuefield').hidden){
-						this.value = '';
-						this.id('valuefield').value = '';
+					// Drop-down menu
+					if (conditionsMenu.value=='collectionID' || conditionsMenu.value=='itemTypeID')
+					{
+						this.id('valuefield').hidden = true;
+						this.id('valuemenu').hidden = false;
+						this.id('value-date-age').hidden = true;
 					}
-					else {
-						this.id('valuefield').value = this.value;
+					
+					// Textbox + units dropdown for isInTheLast operator
+					if (operatorsList.value=='isInTheLast')
+					{
+						this.id('valuefield').hidden = true;
+						this.id('valuemenu').hidden = true;
+						this.id('value-date-age').hidden = false;
 					}
 					
-					// Update field drop-down if applicable
-					this.id('valuefield').update(conditionsMenu.value, this.mode);
-					
-					this.id('valuefield').hidden = false;
-					this.id('valuemenu').hidden = true;
+					// Textbox
+					else
+					{
+						this.id('valuefield').hidden = false;
+						this.id('valuemenu').hidden = true;
+						this.id('value-date-age').hidden = true;
+					}
 					]]>
 				</body>
 			</method>
@@ -310,8 +348,6 @@
 						{
 							this.id('valuemenu').value = this.value;
 						}
-						this.id('valuefield').hidden = true;
-						this.id('valuemenu').hidden = false;
 					]]>
 				</body>
 			</method>
@@ -372,6 +408,11 @@
 								}
 							}
 							
+							else if (!this.id('value-date-age').hidden)
+							{
+								var value = this.id('value-date-age').value;
+							}
+							
 							// Handle special C1234 and S5678 form for
 							// collections and searches
 							else if (this.id('conditionsmenu').value=='collectionID')
@@ -429,13 +470,14 @@
 				<xul:menulist id="conditionsmenu" oncommand="this.parentNode.parentNode.onConditionSelected();">
 					<xul:menupopup/>
 				</xul:menulist>
-				<xul:menulist id="operatorsmenu">
+				<xul:menulist id="operatorsmenu" oncommand="this.parentNode.parentNode.onOperatorSelected()">
 					<xul:menupopup/>
 				</xul:menulist>
 				<xul:zoterosearchtextbox id="valuefield" flex="1"/>
 				<xul:menulist id="valuemenu" flex="1" hidden="true">
 					<xul:menupopup/>
 				</xul:menulist>
+				<xul:zoterosearchagefield id="value-date-age" hidden="true"/>
 				<xul:toolbarbutton id="remove" class="zotero-clicky" label="-" oncommand="this.parentNode.parentNode.onRemoveClicked();"/>
 				<xul:toolbarbutton id="add" class="zotero-clicky" label="+" oncommand="this.parentNode.parentNode.onAddClicked();"/>
 			</xul:hbox>

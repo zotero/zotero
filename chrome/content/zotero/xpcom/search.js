@@ -556,6 +556,11 @@ Zotero.Search.prototype._buildQuery = function(){
 							condSQL += '>?';
 							condSQLParams.push({string:condition['value']});
 							break;
+							
+						case 'isInTheLast':
+							condSQL += ">DATE('NOW', ?)";
+							condSQLParams.push({string: '-' + condition['value']});
+							break;
 					}
 				}
 				
@@ -672,6 +677,7 @@ Zotero.SearchConditions = new function(){
 		isGreaterThan: true,
 		isBefore: true,
 		isAfter: true,
+		isInTheLast: true,
 		
 		// Special
 		any: true,
@@ -770,10 +776,11 @@ Zotero.SearchConditions = new function(){
 					is: true,
 					isNot: true,
 					isBefore: true,
-					isAfter: true
+					isAfter: true,
+					isInTheLast: true
 				},
 				table: 'items',
-				field: 'DATE(dateAdded)'
+				field: 'dateAdded'
 			},
 			
 			{
@@ -782,10 +789,11 @@ Zotero.SearchConditions = new function(){
 					is: true,
 					isNot: true,
 					isBefore: true,
-					isAfter: true
+					isAfter: true,
+					isInTheLast: true
 				},
 				table: 'items',
-				field: 'DATE(dateModified)'
+				field: 'dateModified'
 			},
 			
 			{
@@ -865,10 +873,11 @@ Zotero.SearchConditions = new function(){
 					is: true,
 					isNot: true,
 					isBefore: true,
-					isAfter: true
+					isAfter: true,
+					isInTheLast: true
 				},
 				table: 'itemData',
-				field: 'DATE(value)',
+				field: 'SUBSTR(value, 1, 10)', // use only beginning of multipart dates
 				aliases: ['accessDate', 'date'],
 				template: true // mark for special handling
 			},

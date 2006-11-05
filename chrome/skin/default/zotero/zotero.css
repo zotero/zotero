@@ -105,6 +105,13 @@ zoterosearchtextbox .toolbarbutton-menu-dropmarker
 	padding:0 2px;
 }
 
+zoterosearchagefield
+{
+	-moz-binding: url('chrome://zotero/content/bindings/searchtextbox.xml#search-in-the-last');
+}
+
+
+
 #zotero-editpane-dynamic-fields row, tagsbox row
 {
 	margin:0 0 1px;

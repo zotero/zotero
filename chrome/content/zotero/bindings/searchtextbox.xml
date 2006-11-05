@@ -173,4 +173,62 @@
 			</xul:textbox>
 		</content>
 	</binding>
+	
+	
+	
+	<binding id="search-in-the-last">
+		<implementation>
+			<property name="value">
+				<getter>
+					<![CDATA[
+						var menulist = document.getAnonymousNodes(this)[0].firstChild.nextSibling;
+						
+						return document.getAnonymousNodes(this)[0].firstChild.value + ' ' +
+							menulist.firstChild.childNodes[menulist.selectedIndex].getAttribute('value')
+					]]>
+				</getter>
+				<setter>
+					<![CDATA[
+						var [num, units] = val.split(' ');
+						document.getAnonymousNodes(this)[0].firstChild.setAttribute('value', num);
+						
+						var menulist = document.getAnonymousNodes(this)[0].firstChild.nextSibling;
+						var menupopup = menulist.firstChild;
+						
+						for (var i=0; i<menupopup.childNodes.length; i++){
+							if (menupopup.childNodes[i].value == units)
+							{
+								var selectThis = i;
+								break;
+							}
+						}
+						menulist.selectedIndex = selectThis;
+						
+						return val;
+					]]>
+				</setter>
+			</property>
+			<method name="id">
+				<parameter name="id"/>
+				<body>
+					<![CDATA[
+						return document.getAnonymousNodes(this)[0].getElementsByAttribute('id',id)[0];
+					]]>
+				</body>
+			</method>
+		</implementation>
+		
+		<content>
+			<xul:hbox xbl:inherits="flex">
+				<xul:textbox/>
+				<xul:menulist label="days">
+					<xul:menupopup>
+						<xul:menuitem label="&zotero.search.date.units.days;" value="days" selected="true"/>
+						<xul:menuitem label="&zotero.search.date.units.months;" value="months"/>
+						<xul:menuitem label="&zotero.search.date.units.years;" value="years"/>
+					</xul:menupopup>
+				</xul:menulist>
+			</xul:hbox>
+		</content>
+	</binding>
 </bindings>

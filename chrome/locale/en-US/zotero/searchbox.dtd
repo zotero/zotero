@@ -9,3 +9,7 @@
 <!ENTITY zotero.search.textModes.phraseBinary	"Phrase (incl. binary files)">
 <!ENTITY zotero.search.textModes.regexp	"Regexp">
 <!ENTITY zotero.search.textModes.regexpCS	"Regexp (case-sensitive)">
+
+<!ENTITY zotero.search.date.units.days		"days">
+<!ENTITY zotero.search.date.units.months	"months">
+<!ENTITY zotero.search.date.units.years	"years">
