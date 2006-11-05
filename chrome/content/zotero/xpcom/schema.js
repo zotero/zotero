@@ -600,6 +600,21 @@ Zotero.Schema = new function(){
 						}
 					}
 				}
+				
+				if (i==11){
+					var attachments = Zotero.DB.query("SELECT itemID, linkMode, path FROM itemAttachments WHERE linkMode IN (0,1)");
+					for each(var row in attachments){
+						var file = Components.classes["@mozilla.org/file/local;1"].createInstance(Components.interfaces.nsILocalFile);
+						try {
+							file.persistentDescriptor = row.path;
+							var storageDir = Zotero.getStorageDirectory();
+							storageDir.QueryInterface(Components.interfaces.nsILocalFile);
+							var path = file.getRelativeDescriptor(storageDir);
+							Zotero.DB.query("UPDATE itemAttachments SET path=? WHERE itemID=?", [path, row.itemID]);
+						}
+						catch (e){}
+					}
+				}
 			}
 			
 			_updateSchema('userdata');

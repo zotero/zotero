@@ -856,7 +856,7 @@ var ZoteroPane = new function()
 			var files = fp.files;
 			while (files.hasMoreElements()){
 				var file = files.getNext();
-				file.QueryInterface(Components.interfaces.nsIFile);
+				file.QueryInterface(Components.interfaces.nsILocalFile);
 				var attachmentID;
 				if(link)
 					attachmentID = Zotero.Attachments.linkFromFile(file, id);

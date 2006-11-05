@@ -389,7 +389,15 @@ Zotero.Attachments = new function(){
 	**/
 	function _addToDB(file, url, title, linkMode, mimeType, charsetID, sourceItemID, itemID){
 		if (file){
-			var path = file.persistentDescriptor;
+			if (linkMode==self.LINK_MODE_IMPORTED_URL ||
+					linkMode==self.LINK_MODE_IMPORTED_FILE){
+				var storageDir = Zotero.getStorageDirectory();
+				storageDir.QueryInterface(Components.interfaces.nsILocalFile);
+				var path = file.getRelativeDescriptor(storageDir);
+			}
+			else {
+				var path = file.persistentDescriptor;
+			}
 		}
 		
 		Zotero.DB.beginTransaction();

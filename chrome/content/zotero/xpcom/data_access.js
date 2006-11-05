@@ -1252,21 +1252,59 @@ Zotero.Item.prototype.getFile = function(row){
 	var file = Components.classes["@mozilla.org/file/local;1"].
 		createInstance(Components.interfaces.nsILocalFile);
 	
-	try {
-		file.persistentDescriptor = row['path'];
-	}
-	// See if this is an old relative path (deprecated)
-	catch (e){
-		Zotero.debug('Invalid persistent descriptor');
+	if (row['linkMode']==Zotero.Attachments.LINK_MODE_IMPORTED_URL ||
+			row['linkMode']==Zotero.Attachments.LINK_MODE_IMPORTED_FILE){
 		try {
-			var refDir = (row['linkMode']==this.LINK_MODE_LINKED_FILE)
-				? Zotero.getZoteroDirectory() : Zotero.getStorageDirectory();
-			file.setRelativeDescriptor(refDir, row['path']);
-			// Convert this to a persistent descriptor
-			Zotero.DB.query("UPDATE itemAttachments SET path=? WHERE itemID=?", [file.persistentDescriptor, this.getID()]);
+			Zotero.debug(row['path']);
+			var storageDir = Zotero.getStorageDirectory();
+			storageDir.QueryInterface(Components.interfaces.nsILocalFile);
+			file.setRelativeDescriptor(storageDir, row['path']);
+			if (!file.exists()){
+				throw('Invalid relative descriptor');
+			}
 		}
 		catch (e){
-			Zotero.debug('Invalid relative descriptor');
+			// See if this is a persistent path
+			// (deprecated for imported attachments)
+			Zotero.debug('Invalid relative descriptor -- trying persistent');
+			try {
+				file.persistentDescriptor = row['path'];
+				
+				var storageDir = Zotero.getStorageDirectory();
+				storageDir.QueryInterface(Components.interfaces.nsILocalFile);
+				var path = file.getRelativeDescriptor(storageDir);
+				
+				// If valid, convert this to a relative descriptor
+				if (file.exists()){
+					Zotero.DB.query("UPDATE itemAttachments SET path=? WHERE itemID=?",
+						[path, this.getID()]);
+				}
+			}
+			catch (e){
+				Zotero.debug('Invalid persistent descriptor');
+			}
+		}
+	}
+	else {
+		try {
+			file.persistentDescriptor = row['path'];
+		}
+		catch (e){
+			// See if this is an old relative path (deprecated)
+			Zotero.debug('Invalid persistent descriptor -- trying relative');
+			try {
+				var refDir = (row['linkMode']==this.LINK_MODE_LINKED_FILE)
+					? Zotero.getZoteroDirectory() : Zotero.getStorageDirectory();
+				file.setRelativeDescriptor(refDir, row['path']);
+				// If valid, convert this to a persistent descriptor
+				if (file.exists()){
+					Zotero.DB.query("UPDATE itemAttachments SET path=? WHERE itemID=?",
+						[file.persistentDescriptor, this.getID()]);
+				}
+			}
+			catch (e){
+				Zotero.debug('Invalid relative descriptor');
+			}
 		}
 	}
 	
