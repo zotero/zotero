@@ -209,13 +209,24 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParam,
 			break;
 		
 		case 'title':
-		// DEBUG: These two probably won't be necesary once there's a better
-		// date entry method
-		case 'dateModified':
-		case 'dateAdded':
 			var sql = "SELECT DISTINCT " + searchParam + " FROM items "
 				+ "WHERE " + searchParam + " LIKE ? ORDER BY " + searchParam;
 			var results = this._zotero.DB.columnQuery(sql, searchString + '%');
+			break;
+		
+		case 'dateModified':
+		case 'dateAdded':
+			var sql = "SELECT DISTINCT DATE(" + searchParam + ", 'localtime') FROM items "
+				+ "WHERE " + searchParam + " LIKE ? ORDER BY " + searchParam;
+			var results = this._zotero.DB.columnQuery(sql, searchString + '%');
+			break;
+			
+		case 'accessDate':
+			var fieldID = this._zotero.ItemFields.getID('accessDate');
+			
+			var sql = "SELECT DISTINCT DATE(value, 'localtime') FROM itemData "
+				+ "WHERE fieldID=? AND value LIKE ? ORDER BY value";
+			var results = this._zotero.DB.columnQuery(sql, [fieldID, searchString + '%']);
 			break;
 		
 		default:
@@ -229,8 +240,15 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParam,
 				break;
 			}
 			
-			var sql = "SELECT DISTINCT value FROM itemData WHERE fieldID=?1 AND "
-				+ "value LIKE ?2 "
+			// We don't use date autocomplete anywhere, but if we're not
+			// disallowing it altogether, we should at least do it right and
+			// use the user part of the multipart field
+			var valueField = searchParam=='date' ? 'SUBSTR(value, 12, 100)' : 'value';
+			
+			var sql = "SELECT DISTINCT " + valueField;
+			sql += " FROM itemData WHERE fieldID=?1 AND " + valueField;
+			sql += " LIKE ?2 "
+			
 			var sqlParams = [fieldID, searchString + '%'];
 			if (extra){
 				sql += "AND value NOT IN (SELECT value FROM itemData "

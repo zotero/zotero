@@ -260,7 +260,7 @@ var ZoteroItemPane = new function()
 				}
 				
 				var valueElement = createValueElement(
-					val, editable ? fieldNames[i] : null, tabindex
+					val, fieldNames[i], tabindex, !editable
 				);
 				
 				var label = document.createElement("label");
@@ -733,7 +733,7 @@ var ZoteroItemPane = new function()
 			"ZoteroItemPane.disableButton(this); ZoteroItemPane.addCreatorRow('', '', " + (creatorTypeID ? creatorTypeID : 'false') + ", " + fieldMode + ", true);");
 	}
 	
-	function createValueElement(valueText, fieldName, tabindex)
+	function createValueElement(valueText, fieldName, tabindex, noedit)
 	{
 		if (fieldName=='extra')
 		{
@@ -744,41 +744,39 @@ var ZoteroItemPane = new function()
 			var valueElement = document.createElement("label");
 		}
 		
-		if(fieldName)
-		{
+		valueElement.setAttribute('fieldname',fieldName);
+		
+		if (!noedit){
 			valueElement.setAttribute('flex', 1);
-			valueElement.setAttribute('fieldname',fieldName);
 			valueElement.setAttribute('tabindex', tabindex);
 			valueElement.setAttribute('onclick', 'ZoteroItemPane.showEditor(this)');
 			valueElement.className = 'zotero-clicky';
+		}
+		
+		switch (fieldName){
+			case 'tag':
+				_tabIndexMaxTagsFields = Math.max(_tabIndexMaxTagsFields, tabindex);
+				break;
 			
-			switch (fieldName)
-			{
-				case 'tag':
-					_tabIndexMaxTagsFields = Math.max(_tabIndexMaxTagsFields, tabindex);
-					break;
-				
-				// Display the SQL date as a tooltip for the date field
-				case 'date':
-					valueElement.setAttribute('tooltiptext',
-						Zotero.Date.multipartToSQL(_itemBeingEdited.getField('date', true)));
-					break;
-				
-				// Convert dates from UTC
-				case 'dateAdded':
-				case 'dateModified':
-				case 'accessDate':
-					if (valueText)
-					{
-						var date = Zotero.Date.sqlToDate(valueText, true);
-						valueText = date ? date.toLocaleString() : '';
-					}
-					break;
-			}
+			// Display the SQL date as a tooltip for the date field
+			case 'date':
+				valueElement.setAttribute('tooltiptext',
+					Zotero.Date.multipartToSQL(_itemBeingEdited.getField('date', true)));
+				break;
 			
-			if (fieldName.indexOf('firstName')!=-1){
-				valueElement.setAttribute('flex', '1');
-			}
+			// Convert dates from UTC
+			case 'dateAdded':
+			case 'dateModified':
+			case 'accessDate':
+				if (valueText){
+					var date = Zotero.Date.sqlToDate(valueText, true);
+					valueText = date ? date.toLocaleString() : '';
+				}
+				break;
+		}
+		
+		if (fieldName.indexOf('firstName')!=-1){
+			valueElement.setAttribute('flex', '1');
 		}
 		
 		var firstSpace;

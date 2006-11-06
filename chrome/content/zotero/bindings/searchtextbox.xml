@@ -116,6 +116,7 @@
 								switch (condition)
 								{
 									// Skip autocomplete for these fields
+									case 'date':
 									case 'note':
 									case 'extra':
 										break;

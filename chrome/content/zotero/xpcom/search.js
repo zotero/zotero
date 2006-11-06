@@ -330,6 +330,8 @@ Zotero.Search.prototype.getSQLParams = function(){
  * Build the SQL query for the search
  */
 Zotero.Search.prototype._buildQuery = function(){
+	var utils = new Zotero.Utilities();
+	
 	var sql = 'SELECT itemID FROM items';
 	var sqlParams = [];
 	// Separate ANY conditions for 'required' condition support
@@ -516,51 +518,173 @@ Zotero.Search.prototype._buildQuery = function(){
 				}
 				
 				if (!skipOperators){
-					condSQL += condition['field'];
-					switch (condition['operator']){
-						case 'contains':
-						case 'doesNotContain': // excluded with NOT IN above
-							condSQL += ' LIKE ?';
-							condSQLParams.push('%' + condition['value'] + '%');
-							break;
-							
-						case 'is':
-						case 'isNot': // excluded with NOT IN above
-							condSQL += '=?';
-							condSQLParams.push(condition['value']);
-							break;
+					// Special handling for date fields
+					//
+					// Note: We assume full datetimes are already UTC and don't
+					// need to be handle specially
+					if ((condition['name']=='dateAdded' ||
+							condition['name']=='dateModified' ||
+							condition['name']=='datefield') &&
+							!Zotero.Date.isSQLDateTime(condition['value'])){
 						
-						/*
-						case 'beginsWith':
-							condSQL += '=?';
-							condSQLParams.push(condition['value'] + '%');
-							break;
-						*/
+						switch (condition['operator']){
+							case 'is':
+							case 'isNot':
+								var parseDate = true;
+								var alt = '__';
+								var useFreeform = true;
+								break;
+							
+							case 'isBefore':
+								var parseDate = true;
+								var alt = '00';
+								var useFreeform = false;
+								break;
+								
+							case 'isAfter':
+								var parseDate = true;
+								// '__' used here just so the > string comparison
+								// doesn't match dates in the specified year
+								var alt = '__';
+								var useFreeform = false;
+								break;
+								
+							case 'isInTheLast':
+								var parseDate = false;
+								break;
+								
+							default:
+								throw ('Invalid date field operator in search');
+						}
 						
-						case 'isLessThan':
-							condSQL += '<?';
-							condSQLParams.push({int:condition['value']});
-							break;
+						// Convert stored UTC dates to localtime
+						//
+						// It'd be nice not to deal with time zones here at all,
+						// but otherwise searching for the date part of a field
+						// stored as UTC that wraps midnight would be unsuccessful
+						if (condition['name']=='dateAdded' ||
+								condition['name']=='dateModified' ||
+								condition['alias']=='accessDate'){
+							condSQL += "DATE(" + condition['field'] + ", 'localtime')";
+						}
+						// Only use first (SQL) part of multipart dates
+						else {
+							condSQL += "SUBSTR(" + condition['field'] + ", 1, 10)";
+						}
+						
+						if (parseDate){
+							var go = false;
+							var dateparts = Zotero.Date.strToDate(condition['value']);
 							
-						case 'isGreaterThan':
-							condSQL += '>?';
-							condSQLParams.push({int:condition['value']});
-							break;
+							// Search on SQL date -- underscore is
+							// single-character wildcard
+							//
+							// If isBefore or isAfter, month and day fall back
+							// to '00' so that a search for just a year works
+							// (and no year will just not find anything)
+							var sqldate = dateparts['year'] ?
+								utils.lpad(dateparts['year'], '0', 4) : '____';
+							sqldate += '-'
+							sqldate += dateparts['month'] ?
+								utils.lpad(dateparts['month'] + 1, '0', 2) : alt;
+							sqldate += '-';
+							sqldate += dateparts['day'] ?
+								utils.lpad(dateparts['day'], '0', 2) : alt;
 							
-						case 'isBefore':
-							condSQL += '<?';
-							condSQLParams.push({string:condition['value']});
-							break;
+							if (sqldate!='____-__-__'){
+								go = true;
+								
+								switch (condition['operator']){
+									case 'is':
+									case 'isNot':
+										condSQL += ' LIKE ?';
+										break;
+									
+									case 'isBefore':
+										condSQL += '<?';
+										condSQL += ' AND ' + condition['field'] +
+											">'0000-00-00'";
+										break;
+										
+									case 'isAfter':
+										condSQL += '>?';
+										break;
+								}
+								
+								condSQLParams.push({string:sqldate});
+							}
 							
-						case 'isAfter':
-							condSQL += '>?';
-							condSQLParams.push({string:condition['value']});
-							break;
+							// Search for any remaining parts individually
+							if (useFreeform && dateparts['part']){
+								go = true;
+								var parts = dateparts['part'].split(' ');
+								for each (var part in parts){
+									condSQL += " AND SUBSTR(" + condition['field'] + ", 12, 100)";
+									condSQL += " LIKE ?";
+									condSQLParams.push('%' + part  + '%');
+								}
+							}
 							
-						case 'isInTheLast':
-							condSQL += ">DATE('NOW', ?)";
-							condSQLParams.push({string: '-' + condition['value']});
-							break;
+							// If neither part used, invalidate clause
+							if (!go){
+								condSQL += '=0';
+							}
+						}
+						
+						else {
+							switch (condition['operator']){
+								case 'isInTheLast':
+									condSQL += ">DATE('NOW', 'localtime', ?)"; // e.g. ('NOW', '-10 DAYS')
+									condSQLParams.push({string: '-' + condition['value']});
+									break;
+							}
+						}
+					}
+					
+					// Non-date fields
+					else {
+						condSQL += condition['field'];
+						switch (condition['operator']){
+							case 'contains':
+							case 'doesNotContain': // excluded with NOT IN above
+								condSQL += ' LIKE ?';
+								condSQLParams.push('%' + condition['value'] + '%');
+								break;
+								
+							case 'is':
+							case 'isNot': // excluded with NOT IN above
+								condSQL += '=?';
+								condSQLParams.push(condition['value']);
+								break;
+							
+							/*
+							case 'beginsWith':
+								condSQL += '=?';
+								condSQLParams.push(condition['value'] + '%');
+								break;
+							*/
+							
+							case 'isLessThan':
+								condSQL += '<?';
+								condSQLParams.push({int:condition['value']});
+								break;
+								
+							case 'isGreaterThan':
+								condSQL += '>?';
+								condSQLParams.push({int:condition['value']});
+								break;
+							
+							// Next two only used with full datetimes
+							case 'isBefore':
+								condSQL += '<?';
+								condSQLParams.push({string:condition['value']});
+								break;
+								
+							case 'isAfter':
+								condSQL += '>?';
+								condSQLParams.push({string:condition['value']});
+								break;
+						}
 					}
 				}
 				
@@ -877,7 +1001,7 @@ Zotero.SearchConditions = new function(){
 					isInTheLast: true
 				},
 				table: 'itemData',
-				field: 'SUBSTR(value, 1, 10)', // use only beginning of multipart dates
+				field: 'value',
 				aliases: ['accessDate', 'date'],
 				template: true // mark for special handling
 			},

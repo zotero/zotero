@@ -684,6 +684,7 @@ Zotero.Date = new function(){
 	this.multipartToSQL = multipartToSQL;
 	this.multipartToStr = multipartToStr;
 	this.isSQLDate = isSQLDate;
+	this.isSQLDateTime = isSQLDateTime;
 	this.sqlHasYear = sqlHasYear;
 	this.sqlHasMonth = sqlHasMonth;
 	this.sqlHasDay = sqlHasDay;
@@ -963,6 +964,7 @@ Zotero.Date = new function(){
 	// Regexes for multipart and SQL dates
 	var _multipartRE = /^[0-9]{4}\-[0-9]{2}\-[0-9]{2} /;
 	var _sqldateRE = /^[0-9]{4}\-[0-9]{2}\-[0-9]{2}/;
+	var _sqldatetimeRE = /^[0-9]{4}\-[0-9]{2}\-[0-9]{2} ([0-1][0-9]|[2][0-3]):([0-5][0-9]):([0-5][0-9])/;
 	
 	/**
 	 * Tests if a string is a multipart date string
@@ -1009,6 +1011,11 @@ Zotero.Date = new function(){
 	
 	function isSQLDate(str){
 		return _sqldateRE.test(str);
+	}
+	
+	
+	function isSQLDateTime(str){
+		return _sqldatetimeRE.test(str);
 	}
 	
 	

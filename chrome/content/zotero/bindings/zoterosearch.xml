@@ -394,6 +394,16 @@
 									this.id('conditionsmenu').value = condition['condition'];
 							}
 							
+							// Convert datetimes from UTC to localtime
+							if ((condition['condition']=='accessDate' ||
+									condition['condition']=='dateAdded' ||
+									condition['condition']=='dateModified') &&
+									Zotero.Date.isSQLDateTime(condition['value'])){
+								
+								condition['value'] =
+									Zotero.Date.dateToSQL(Zotero.Date.sqlToDate(condition['value'], true));
+							}
+							
 							this.mode = condition['mode'];
 							this.id('operatorsmenu').value = condition['operator'];
 							this.value = prefix + condition['value'];
@@ -416,12 +426,23 @@
 							if (!this.id('valuefield').hidden)
 							{
 								var value = this.id('valuefield').value;
+								
+								// Convert datetimes to UTC before saving
+								if ((this.id('conditionsmenu').value=='accessDate' ||
+										this.id('conditionsmenu').value=='dateAdded' ||
+										this.id('conditionsmenu').value=='dateModified') &&
+										Zotero.Date.isSQLDateTime(value)){
+									
+									var value = Zotero.Date.dateToSQL(Zotero.Date.sqlToDate(value), true);
+								}
+								
 								// Append mode to condition
 								if (this.id('valuefield').mode){
 									condition += '/' + this.id('valuefield').mode;
 								}
 							}
 							
+							// isInTheLast operator
 							else if (!this.id('value-date-age').hidden)
 							{
 								var value = this.id('value-date-age').value;
