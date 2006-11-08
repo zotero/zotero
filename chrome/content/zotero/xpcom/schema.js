@@ -390,11 +390,16 @@ Zotero.Schema = new function(){
 	**/
 	function _updateScrapersRemoteCallback(xmlhttp){
 		if (!xmlhttp.responseXML){
-			if (xmlhttp.status>1000){
-				Zotero.debug('No network connection', 2);
+			try {
+				if (xmlhttp.status>1000){
+					Zotero.debug('No network connection', 2);
+				}
+				else {
+					Zotero.debug('Invalid response from repository', 2);
+				}
 			}
-			else {
-				Zotero.debug('Invalid response from repository', 2);
+			catch (e){
+				Zotero.debug('Repository cannot be contacted');
 			}
 			_setRepositoryTimer(ZOTERO_CONFIG['REPOSITORY_RETRY_INTERVAL']);
 			return false;
