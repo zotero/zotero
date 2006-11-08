@@ -647,6 +647,7 @@ var ZoteroPane = new function()
 			if (itemsView.selection.count > 1)
 			{
 				var multiple =  '.multiple';
+				hide.push(0,1,2,3);
 			}
 			// Single item selected
 			else
@@ -654,7 +655,7 @@ var ZoteroPane = new function()
 				var item = itemsView._getItemAtRow(itemsView.selection.currentIndex);
 				if (item.ref.isRegularItem())
 				{
-					var itemID = item.ref.getID();
+					var itemID = item.ref.getID();                             
 					menu.setAttribute('itemID', itemID);
 					
 					show.push(0,1,2,3);
