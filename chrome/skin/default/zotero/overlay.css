@@ -19,10 +19,15 @@
 	width: 150px;
 }
 
+#zotero-collections-tree {
+	min-height: 80px;
+}
+
 #zotero-collections-tree treechildren::-moz-tree-image
 {
 	margin-right: 5px;
 }
+
 
 #zotero-pane splitter
 {
@@ -70,17 +75,14 @@
 #zotero-tb-collection-add
 {
 	list-style-image: url('chrome://zotero/skin/toolbar-collection-add.png');
+	margin-top: -2px;
 }
 
-#zotero-tb-collection-rename
+#zotero-tb-tag-selector
 {
-	list-style-image: url('chrome://zotero/skin/toolbar-collection-edit.png');
+	list-style-image: url(chrome://zotero/skin/tag.png);
 }
 
-#zotero-tb-collection-rename[disabled="true"]
-{
-	list-style-image: url('chrome://zotero/skin/toolbar-collection-edit-gray.png');
-}
 
 
 /* These fix a rendering bug in Fx2.0b2 */
@@ -172,7 +174,6 @@
 #zotero-tb-collection-addsearch
 {
 	list-style-image: url('chrome://zotero/skin/treesource-search.png');
-	margin-bottom:-5px;
 }
 
 #zotero-tb-search-cancel

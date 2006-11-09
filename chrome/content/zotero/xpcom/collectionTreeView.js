@@ -699,6 +699,14 @@ Zotero.ItemGroup.prototype.getChildItems = function()
 		}
 	}
 	
+	if (this.tags){
+		for (var tag in this.tags){
+			if (this.tags[tag]){
+				s.addCondition('tag', 'is', tag);
+			}
+		}
+	}
+	
 	var ids = s.search();
 	return Zotero.Items.get(ids);
 }
@@ -706,4 +714,9 @@ Zotero.ItemGroup.prototype.getChildItems = function()
 Zotero.ItemGroup.prototype.setSearch = function(searchText)
 {
 	this.searchText = searchText;
+}
+
+Zotero.ItemGroup.prototype.setTags = function(tags)
+{
+	this.tags = tags;
 }

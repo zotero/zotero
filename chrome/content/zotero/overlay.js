@@ -36,6 +36,9 @@ var ZoteroPane = new function()
 	this.newItem = newItem;
 	this.newCollection = newCollection;
 	this.newSearch = newSearch;
+	this.toggleTagSelector = toggleTagSelector;
+	this.getTagSelection = getTagSelection;
+	this.updateTagFilter = updateTagFilter;
 	this.onCollectionSelected = onCollectionSelected;
 	this.itemSelected = itemSelected;
 	this.deleteSelectedItem = deleteSelectedItem;
@@ -126,8 +129,8 @@ var ZoteroPane = new function()
 			moreMenu.appendChild(menuitem);
 		}
 		
-		  var menu = document.getElementById("contentAreaContextMenu");
-		  menu.addEventListener("popupshowing", ZoteroPane.contextPopupShowing, false);
+		var menu = document.getElementById("contentAreaContextMenu");
+		menu.addEventListener("popupshowing", ZoteroPane.contextPopupShowing, false);
 	}
 	
 	/*
@@ -233,6 +236,40 @@ var ZoteroPane = new function()
 		window.openDialog('chrome://zotero/content/searchDialog.xul','','chrome,modal',io);
 	}
 	
+	
+	function toggleTagSelector(){
+		var tagSelector = document.getElementById('zotero-tag-selector');
+		var collapsed = tagSelector.getAttribute('collapsed')=='true';
+		// If hiding, clear selection
+		if (!collapsed){
+			tagSelector.init();
+		}
+		tagSelector.setAttribute('collapsed', !collapsed);
+	}
+	
+	
+	function getTagSelection(){
+		var tagSelector = document.getElementById('zotero-tag-selector');
+		return tagSelector.selection;
+	}
+	
+	
+	function updateTagFilter(){
+		if (itemsView)
+		{
+			itemsView.unregister();
+		}
+		
+		if (collectionsView){
+			var itemgroup = collectionsView._getItemAtRow(collectionsView.selection.currentIndex);
+			itemgroup.setTags(getTagSelection());
+			
+			itemsView = new Zotero.ItemTreeView(itemgroup);
+			document.getElementById('zotero-items-tree').view = itemsView;
+		}
+	}
+	
+	
 	function onCollectionSelected()
 	{
 		if(itemsView)
@@ -244,6 +281,7 @@ var ZoteroPane = new function()
 		{
 			var itemgroup = collectionsView._getItemAtRow(collectionsView.selection.currentIndex);
 			itemgroup.setSearch('');
+			itemgroup.setTags(getTagSelection());
 			
 			itemsView = new Zotero.ItemTreeView(itemgroup);
 			document.getElementById('zotero-items-tree').view = itemsView;
@@ -484,6 +522,7 @@ var ZoteroPane = new function()
 			}
 		}
 	}
+	
 	
 	function search()
 	{

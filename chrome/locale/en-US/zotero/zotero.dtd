@@ -29,6 +29,7 @@
 <!ENTITY zotero.toolbar.removeItem.label				"Remove Item...">
 <!ENTITY zotero.toolbar.newCollection.label			"New Collection...">
 <!ENTITY zotero.toolbar.newSavedSearch.label			"New Saved Search...">
+<!ENTITY zotero.toolbar.tagSelector.label			"Show/Hide Tag Selector">
 <!ENTITY zotero.toolbar.renameCollection.label			"Rename Collection...">
 <!ENTITY zotero.toolbar.removeCollection.label			"Remove Collection...">
 <!ENTITY zotero.toolbar.exportCollection.label			"Export Collection...">
@@ -49,7 +50,6 @@
 <!ENTITY zotero.toolbar.openURL.label					"Locate">
 <!ENTITY zotero.toolbar.openURL.tooltip				"Find through your local library">
 
-
 <!ENTITY zotero.item.add								"Add">
 <!ENTITY zotero.item.attachment.file.show				"Show File">
 
@@ -58,6 +58,11 @@
 <!ENTITY zotero.toolbar.attachment.add					"Store Copy of File...">
 <!ENTITY zotero.toolbar.attachment.weblink				"Save Link to Current Page">
 <!ENTITY zotero.toolbar.attachment.snapshot			"Take Snapshot of Current Page">
+
+<!ENTITY zotero.tagSelector.filter					"Filter:">
+<!ENTITY zotero.tagSelector.selectVisible			"Select Visible">
+<!ENTITY zotero.tagSelector.clearVisible				"Clear Visible">
+<!ENTITY zotero.tagSelector.clearAll					"Clear All">
 
 <!ENTITY zotero.selectitems.title						"Select Items">
 <!ENTITY zotero.selectitems.intro.label				"Select which items you'd like to add to your library">

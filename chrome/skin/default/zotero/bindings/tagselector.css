@@ -1,0 +1,54 @@
+@namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");
+@namespace html url("http://www.w3.org/1999/xhtml");
+
+
+/* Tag selector */
+
+groupbox
+{
+	overflow: auto;
+	min-height: 153px;
+}
+
+vbox
+{
+	overflow: auto;
+	margin-bottom: 10px;
+}
+
+html|div
+{
+	position: relative;
+}
+
+label
+{
+	margin-right: 5px;
+	padding: 2px 5px;
+}
+
+label[selected=true]
+{
+	background: #a9c6f0 !important;
+}
+
+hbox
+{
+	-moz-box-align: baseline;
+	-moz-box-pack: center;
+}
+
+#search-cancel
+{
+	margin: 0px;
+	padding: 0px;
+	cursor: default;
+	list-style-image: url('chrome://zotero/skin/search-cancel.png');
+}
+
+toolbarbutton.zotero-clicky
+{
+	margin:3px 5px;
+	padding:1px;
+	height:1em;
+}

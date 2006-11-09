@@ -24,7 +24,8 @@
 <!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
 
 <overlay id="zotero"
-	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	xmlns:html="http://www.w3.org/1999/xhtml">
 	<?xul-overlay href="itemPane.xul" ?>
 	
     <!-- Include the global XPCOM object -->
@@ -34,7 +35,6 @@
     <script src="fileInterface.js"/>
 	
 	<commandset id="mainCommandSet">
-		<command id="cmd_zotero_newItem" oncommand="ZoteroPane.newItem(2);"/>
 		<command id="cmd_zotero_newCollection" oncommand="ZoteroPane.newCollection();"/>
 		<command id="cmd_zotero_search" oncommand="ZoteroPane.search();"/>
 	</commandset>
@@ -92,6 +92,7 @@
 					<toolbarbutton id="zotero-tb-collection-add" tooltiptext="&zotero.toolbar.newCollection.label;" command="cmd_zotero_newCollection"/>
 					<toolbarbutton id="zotero-tb-collection-addsearch" tooltiptext="&zotero.toolbar.newSavedSearch.label;" oncommand="ZoteroPane.newSearch();"/>
 					<spacer flex="1"/>
+					<toolbarbutton id="zotero-tb-tag-selector" tooltiptext="&zotero.toolbar.tagSelector.label;" oncommand="ZoteroPane.toggleTagSelector()"/>
 					<toolbarbutton id="zotero-tb-actions-menu" tooltiptext="&zotero.toolbar.actions.label;" type="menu">
 						<menupopup>
 							<menuitem label="&zotero.toolbar.import.label;" oncommand="Zotero_File_Interface.importFile();"/>
@@ -117,6 +118,8 @@
 					</treecols>
 					<treechildren/>
 				</tree>
+				<splitter id="zotero-tags-splitter"/>
+				<zoterotagselector id="zotero-tag-selector" persist="height,collapsed" oncommand="ZoteroPane.updateTagFilter()"/>
 			</vbox>
 			<splitter id="zotero-tree-splitter" resizebefore="closest" resizeafter="closest"/>
 			<vbox id="zotero-items-pane" persist="width" flex="1">

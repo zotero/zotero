@@ -2858,6 +2858,8 @@ Zotero.Tags = new function(){
 	
 	this.getName = getName;
 	this.getID = getID;
+	this.getAll = getAll;
+	this.search = search;
 	this.add = add;
 	this.purge = purge;
 	
@@ -2897,6 +2899,32 @@ Zotero.Tags = new function(){
 		}
 		
 		return tagID;
+	}
+	
+	
+	/**
+	 * Get all tags indexed by tagID
+	 */
+	function getAll(){
+		var sql = 'SELECT tagID, tag FROM tags ORDER BY tag COLLATE NOCASE';
+		var tags = Zotero.DB.query(sql);
+		var indexed = {};
+		for (var i in tags){
+			indexed[tags[i]['tagID']] = tags[i]['tag'];
+		}
+		return indexed;
+	}
+	
+	
+	function search(str){
+		var sql = 'SELECT tagID, tag FROM tags WHERE tag LIKE ? '
+			+ 'ORDER BY tag COLLATE NOCASE';
+		var tags = Zotero.DB.query(sql, '%' + str + '%');
+		var indexed = {};
+		for (var i in tags){
+			indexed[tags[i]['tagID']] = tags[i]['tag'];
+		}
+		return indexed;
 	}
 	
 	

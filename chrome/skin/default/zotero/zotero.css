@@ -51,7 +51,6 @@ tagsbox
 	-moz-binding: url('chrome://zotero/content/bindings/tagsbox.xml#tags-box');
 }
 
-
 tagsbox row
 {
 	-moz-box-align:center;
@@ -67,6 +66,12 @@ zoterosearch
 	-moz-binding: url('chrome://zotero/content/bindings/zoterosearch.xml#search-box');
 	width:60em;
 }
+
+zoterotagselector
+{
+	-moz-binding: url('chrome://zotero/content/bindings/tagselector.xml#tag-selector');
+}
+
 
 searchcondition
 {
@@ -207,11 +212,20 @@ zoterosearchagefield textbox
 	padding-right: 4px;
 }
 
-.zotero-clicky:not([disabled=true]):hover
+.zotero-clicky:not([disabled=true]):hover,
+.zotero-clicky:not([disabled=true]):hover .toolbarbutton-text
 {
 	color: white;
-	background: #666666;
+	background: #666;
 }
+
+.zotero-clicky:not([disabled=true]):active,
+.zotero-clicky:not([disabled=true]):active .toolbarbutton-text
+{
+	color: white;
+	background: #333;
+}
+
 
 #zotero-progress-box, #zotero-progress-box
 {
