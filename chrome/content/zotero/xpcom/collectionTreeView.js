@@ -669,9 +669,9 @@ Zotero.ItemGroup.prototype.getName = function()
 
 Zotero.ItemGroup.prototype.getChildItems = function()
 {
-	if(this.searchText)
-	{
-		var s = new Zotero.Search();
+	var s = new Zotero.Search();
+	
+	if (this.searchText){
 		if (this.isCollection())
 		{
 			s.addCondition('collectionID', 'is', this.ref.getID(), true);
@@ -681,23 +681,26 @@ Zotero.ItemGroup.prototype.getChildItems = function()
 			s.addCondition('savedSearchID', 'is', this.ref['id'], true);
 		}
 		s.addCondition('quicksearch', 'contains', this.searchText);
-		return Zotero.Items.get(s.search());
 	}
 	else
 	{
-		if(this.isCollection())
-			return Zotero.getItems(this.ref.getID());
-		else if(this.isLibrary())
-			return Zotero.getItems();
-		else if(this.isSearch())
-		{
-			var s = new Zotero.Search();
-			s.load(this.ref['id']);
-			return Zotero.Items.get(s.search());
+		if (this.isLibrary()){
+			s.addCondition('noChildren', 'true');
 		}
-		else
+		else if (this.isCollection()){
+			s.addCondition('noChildren', 'true');
+			s.addCondition('collectionID', 'is', this.ref.getID());
+		}
+		else if (this.isSearch()){
+			s.load(this.ref['id']);
+		}
+		else {
 			return null;
+		}
 	}
+	
+	var ids = s.search();
+	return Zotero.Items.get(ids);
 }
 
 Zotero.ItemGroup.prototype.setSearch = function(searchText)

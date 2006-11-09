@@ -361,11 +361,14 @@ Zotero.Search.prototype._buildQuery = function(){
 		// Handle special conditions
 		else {
 			switch (data['name']){
+				case 'noChildren':
+					var noChildren = this._conditions[i]['operator']=='true';
+				
 				// Search subfolders
 				case 'recursive':
 					var recursive = this._conditions[i]['operator']=='true';
 					continue;
-					
+				
 				// Join mode ('any' or 'all')
 				case 'joinMode':
 					var joinMode = this._conditions[i]['operator'].toUpperCase();
@@ -388,8 +391,20 @@ Zotero.Search.prototype._buildQuery = function(){
 		}
 	}
 	
+	if (noChildren){
+		sql += " WHERE (itemID NOT IN (SELECT itemID FROM itemNotes "
+			+ "WHERE sourceItemID IS NOT NULL) AND itemID NOT IN "
+			+ "(SELECT itemID FROM itemAttachments "
+			+ "WHERE sourceItemID IS NOT NULL))";
+	}
+		
 	if (hasConditions){
-		sql += " WHERE ";
+		if (noChildren){
+			sql += " AND ";
+		}
+		else {
+			sql += " WHERE ";
+		}
 		
 		for each(var condition in conditions){
 				var openParens = 0;
@@ -820,7 +835,16 @@ Zotero.SearchConditions = new function(){
 			// Special conditions
 			//
 			
-			// Search recursively
+			// Don't include child items
+			{
+				name: 'noChildren',
+				operators: {
+					true: true,
+					false: true
+				}
+			},
+			
+			// Search recursively within collections
 			{
 				name: 'recursive',
 				operators: {
