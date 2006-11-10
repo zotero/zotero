@@ -1701,6 +1701,7 @@ Zotero.Item.prototype.erase = function(deleteChildren){
 	
 	Zotero.DB.query(sql);
 	Zotero.Creators.purge();
+	Zotero.Tags.purge();
 	
 	try {
 		Zotero.DB.commitTransaction();
