@@ -21,11 +21,12 @@
 */
 
 Zotero.Notifier = new function(){
-	var _observers = new Array();
+	var _observers = new Zotero.Hash();
 	var _disabled = false;
-	_observers['collectionObserver'] = new Zotero.Hash();
-	_observers['itemObserver'] = new Zotero.Hash();
+	var _types = ['collection', 'search', 'item'];
 	
+	this.registerObserver = registerObserver;
+	this.unregisterObserver = unregisterObserver;
 	this.registerCollectionObserver = registerCollectionObserver;
 	this.registerItemObserver = registerItemObserver;
 	this.unregisterCollectionObserver = unregisterCollectionObserver;
@@ -35,20 +36,65 @@ Zotero.Notifier = new function(){
 	this.enable = enable;
 	this.isEnabled = isEnabled;
 	
+	function registerObserver(ref, types){
+		if (types){
+			types = Zotero.flattenArguments(types);
+			
+			for (var i=0; i<types.length; i++){
+				if (_types.indexOf(types[i]) == -1){
+					throw ('Invalid type ' + types[i] + ' in registerObserver()');
+				}
+			}
+		}
+		
+		var len = 2;
+		var tries = 10;
+		do {
+			// Increase the hash length if we can't find a unique key
+			if (!tries){
+				len++;
+				tries = 10;
+			}
+			
+			var hash = Zotero.randomString(len);
+			tries--;
+		}
+		while (_observers.get(hash));
+		
+		Zotero.debug('Registering observer for '
+			+ (types ? '[' + types.join() + ']' : ' all types')
+			+ ' in notifier with hash ' + hash + "'", 4);
+		_observers.set(hash, {ref: ref, types: types});
+		return hash;
+	}
+	
+	function unregisterObserver(hash){
+		Zotero.debug("Unregistering observer in notifier with hash '" + hash + "'", 4);
+		_observers.remove(hash);
+	}
+	
+	// Deprecated
 	function registerCollectionObserver(ref){
-		return _register('collectionObserver', ref);
+		Zotero.debug('registerCollectionObserver is deprecated and will be removed in a future release -- use registerObserver() instead', 2);
+		return _register(ref, 'collection');
 	}
 	
+	// Deprecated
 	function registerItemObserver(ref){
-		return _register('itemObserver', ref);
+		Zotero.debug('registerItemObserver is deprecated and will be removed in a future release -- use registerObserver() instead', 2);
+		return _register(ref, 'item');
 	}
 	
+	// Deprecated
 	function unregisterCollectionObserver(hash){
-		_unregister('collectionObserver', hash);
+		Zotero.debug('unregisterCollectionObserver is deprecated and will be removed in a future release -- use unregisterObserver() instead', 2);
+		_unregister(hash);
 	}
 	
+	// Deprecated
 	function unregisterItemObserver(hash){
-		_unregister('itemObserver', hash);
+		Zotero.debug('unregisterItemObserver is deprecated and will be removed in a future release -- use unregisterObserver() instead', 2);
+		_unregister(hash);
 	}
 	
 	/**
@@ -68,29 +114,22 @@ Zotero.Notifier = new function(){
 			return false;
 		}
 		
-		switch (type){
-			case 'item':
-				var observerType = 'itemObserver';
-				break;
-			case 'collection':
-			case 'search':
-				var observerType = 'collectionObserver';
-				break;
-			default:
-				throw('Invalid type ' + type + ' in Notifier.trigger()');
+		if (_types && _types.indexOf(type) == -1){
+			throw ('Invalid type ' + type + ' in Notifier.trigger()');
 		}
 		
 		ids = Zotero.flattenArguments(ids);
 		
 		Zotero.debug("Notifier.trigger('" + event + "', '" + type + "', "
 			+ '[' + ids.join() + ']' + ") called "
-			+ "[collection observers: " + _observers['collectionObserver'].length
-			+ ", item observers: " + _observers['itemObserver'].length + "]");
+			+ "[observers: " + _observers.length + "]");
 		
-		for (i in _observers[observerType].items){
-			Zotero.debug("Calling notify() on " + observerType + " with hash '"
-				+ i + "'", 4);
-			_observers[observerType].get(i).notify(event, type, ids);
+		for (i in _observers.items){
+			Zotero.debug("Calling notify() on observer with hash '" + i + "'", 4);
+			// Find observers that handle notifications for this type (or all types)
+			if (!_observers.get(i).types || _observers.get(i).types.indexOf(type)!=-1){
+				_observers.get(i).ref.notify(event, type, ids);
+			}
 		}
 		
 		return true;
@@ -111,31 +150,5 @@ Zotero.Notifier = new function(){
 	
 	function isEnabled(){
 		return !_disabled;
-	}
-	
-	
-	function _register(type, ref){
-		var len = 2;
-		var tries = 10;
-		do {
-			// Increase the hash length if we can't find a unique key
-			if (!tries){
-				len++;
-				tries = 10;
-			}
-			
-			var hash = Zotero.randomString(len);
-			tries--;
-		}
-		while (_observers[type].get(hash));
-		
-		Zotero.debug('Registering ' + type + " in notifier with hash '" + hash + "'", 4);
-		_observers[type].set(hash, ref);
-		return hash;
-	}
-	
-	function _unregister(type, hash){
-		Zotero.debug("Unregistering " + type + " in notifier with hash '" + hash + "'", 4);
-		_observers[type].remove(hash);
 	}
 }

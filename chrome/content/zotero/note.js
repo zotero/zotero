@@ -60,7 +60,7 @@ function onLoad()
 			noteEditor.collection = Zotero.Collections.get(collectionID);
 	}
 	
-	notifierUnregisterID = Zotero.Notifier.registerItemObserver(NotifyCallback);
+	notifierUnregisterID = Zotero.Notifier.registerObserver(NotifyCallback, 'item');
 }
 
 function onUnload()
@@ -68,11 +68,12 @@ function onUnload()
 	if(noteEditor && noteEditor.value)
 		noteEditor.save();
 	
-	Zotero.Notifier.unregisterItemObserver(notifierUnregisterID);
+	Zotero.Notifier.unregisterObserver(notifierUnregisterID);
 }
 
 var NotifyCallback = {
-	notify: function(){
+	notify: function(action, type, ids){
+		// DEBUG: why does this reset without checking the modified ids?
 		if (noteEditor.note){
 			noteEditor.note = noteEditor.note;
 		}

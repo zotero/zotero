@@ -36,7 +36,7 @@ Zotero.CollectionTreeView = function()
 	this._treebox = null;
 	this.refresh();
 	
-	this._unregisterID = Zotero.Notifier.registerCollectionObserver(this);
+	this._unregisterID = Zotero.Notifier.registerObserver(this, ['collection', 'search']);
 }
 
 /*
@@ -208,7 +208,7 @@ Zotero.CollectionTreeView.prototype.notify = function(action, type, ids)
  */
 Zotero.CollectionTreeView.prototype.unregister = function()
 {
-	Zotero.Notifier.unregisterCollectionObserver(this._unregisterID);
+	Zotero.Notifier.unregisterObserver(this._unregisterID);
 }
 
 Zotero.CollectionTreeView.prototype.isLibrary = function(row)

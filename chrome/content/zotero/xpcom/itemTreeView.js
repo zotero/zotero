@@ -39,7 +39,7 @@ Zotero.ItemTreeView = function(itemGroup, sourcesOnly)
 	this._treebox = null;
 	this.refresh();
 	
-	this._unregisterID = Zotero.Notifier.registerItemObserver(this);
+	this._unregisterID = Zotero.Notifier.registerObserver(this, 'item');
 }
 
 /*
@@ -91,6 +91,10 @@ Zotero.ItemTreeView.prototype.refresh = function()
  */
 Zotero.ItemTreeView.prototype.notify = function(action, type, ids)
 {
+	if (type != 'item'){
+		return;
+	}
+	
 	var madeChanges = false;
 	this.selection.selectEventsSuppressed = true;
 	var savedSelection = this.saveSelection();
@@ -278,7 +282,7 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids)
  */
 Zotero.ItemTreeView.prototype.unregister = function()
 {
-	Zotero.Notifier.unregisterItemObserver(this._unregisterID);
+	Zotero.Notifier.unregisterObserver(this._unregisterID);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
