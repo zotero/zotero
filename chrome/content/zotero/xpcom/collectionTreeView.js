@@ -702,7 +702,7 @@ Zotero.ItemGroup.prototype.getChildItems = function()
 	if (this.tags){
 		for (var tag in this.tags){
 			if (this.tags[tag]){
-				s.addCondition('tag', 'is', tag);
+				s.addCondition('tag', 'is', tag, true);
 			}
 		}
 	}
