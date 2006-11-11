@@ -179,7 +179,10 @@ Zotero.Fulltext = new function(){
 			return false;
 		}
 		
-		if (!charset){ throw ('Charset not provided to indexFile()'); }
+		if (!charset){
+			Zotero.debug("Text file didn't have charset in indexFile()", 1);
+			return false;
+		}
 		
 		var text = Zotero.File.getContents(file, charset);
 		// Split elements to avoid word concatentation
