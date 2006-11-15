@@ -11,6 +11,7 @@
 	min-height: 170px;
 	height: 300px;
 	padding: 4px;
+	overflow: hidden;
 }
 
 #zotero-collections-pane

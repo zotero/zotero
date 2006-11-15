@@ -25,8 +25,7 @@
 
 <bindings xmlns="http://www.mozilla.org/xbl"
 		  xmlns:xbl="http://www.mozilla.org/xbl"
-		  xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-		  xmlns:html="http://www.w3.org/1999/xhtml">
+		  xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
 	<binding id="tag-selector">
 		<resources>
@@ -55,7 +54,7 @@
 				<parameter name="tags"/>
 				<body>
 					<![CDATA[
-						var tagsToggleDiv = this.id('tags-toggle').firstChild;
+						var tagsToggleDiv = this.id('tags-toggle');
 						
 						// Save selection
 						var labels = tagsToggleDiv.getElementsByTagName('label');
@@ -93,7 +92,7 @@
 			<method name="selectVisible">
 				<body>
 					<![CDATA[
-						var tagsToggleDiv = this.id('tags-toggle').firstChild;
+						var tagsToggleDiv = this.id('tags-toggle');
 						
 						var labels = tagsToggleDiv.getElementsByTagName('label');
 						for (var i=0; i<labels.length; i++){
@@ -109,7 +108,7 @@
 			<method name="clearVisible">
 				<body>
 					<![CDATA[
-						var tagsToggleDiv = this.id('tags-toggle').firstChild;
+						var tagsToggleDiv = this.id('tags-toggle');
 						
 						var labels = tagsToggleDiv.getElementsByTagName('label');
 						for (var i=0; i<labels.length; i++){
@@ -190,9 +189,7 @@
 		
 		<content>
 			<xul:groupbox flex="1">
-					<xul:vbox id="tags-toggle" flex="1">
-						<html:div/>
-					</xul:vbox>
+					<xul:vbox id="tags-toggle" flex="1"/>
 					<xul:hbox>
 						<xul:label value="&zotero.tagSelector.filter;"/>
 						<xul:textbox id="tags-search" flex="1" type="timed" timeout="250" dir="reverse"

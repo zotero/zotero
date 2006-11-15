@@ -7,24 +7,20 @@
 groupbox
 {
 	overflow: auto;
-	min-height: 153px;
+	min-height: 130px;
 }
 
-vbox
+#tags-toggle
 {
 	overflow: auto;
 	margin-bottom: 10px;
-}
-
-html|div
-{
-	position: relative;
+	display: block; /* allow labels to wrap instead of all being in one line */
 }
 
 label
 {
 	margin-right: 5px;
-	padding: 2px 5px;
+	padding: 2px 4px;
 }
 
 label[selected=true]

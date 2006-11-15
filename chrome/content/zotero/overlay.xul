@@ -24,8 +24,7 @@
 <!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
 
 <overlay id="zotero"
-	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-	xmlns:html="http://www.w3.org/1999/xhtml">
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 	<?xul-overlay href="itemPane.xul" ?>
 	
     <!-- Include the global XPCOM object -->
