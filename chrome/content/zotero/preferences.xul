@@ -26,7 +26,7 @@
 
 <!-- TODO: change to prefWindow? -->
 <dialog id="winMain" title="&zotero.preferences.title;" style="min-width:400px;"
-		onload="init();" ondialogaccept="accept()"
+		windowtype="zotero:pref" onload="init();" ondialogaccept="accept()"
 		xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
 <script src="preferences.js"/>
@@ -45,7 +45,10 @@
 	<label value="&zotero.preferences.position.browser;"/>
 </hbox>
 
-<checkbox id="autoUpdateBox" label="&zotero.preferences.autoUpdate.label;"/>
+<hbox align="center">
+	<checkbox id="autoUpdateBox" label="&zotero.preferences.autoUpdate.label;"/>
+	<button id="updateButton" style="margin-top:0" label="&zotero.preferences.updateNow.label;" oncommand="Zotero.Schema.updateScrapersRemote(true)"/>
+</hbox>
 
 <checkbox id="reportTranslationFailure" label="&zotero.preferences.reportTranslationFailure.label;"/>
 

@@ -127,7 +127,15 @@ Zotero.Schema = new function(){
 			+ 'version=' + Zotero.version;
 		
 		Zotero.debug('Checking repository for updates (' + url + ')');
-		var get = Zotero.Utilities.HTTP.doGet(url, _updateScrapersRemoteCallback);
+			
+		if (force){
+			url += '&m=1';
+			var get = Zotero.Utilities.HTTP.doGet(url, _updateScrapersRemoteCallbackManual);
+		}
+		else {
+			var get = Zotero.Utilities.HTTP.doGet(url, _updateScrapersRemoteCallback);
+		}
+		
 		
 		// TODO: instead, add an observer to start and stop timer on online state change
 		if (!get){
@@ -388,7 +396,7 @@ Zotero.Schema = new function(){
 	/**
 	* Process the response from the repository
 	**/
-	function _updateScrapersRemoteCallback(xmlhttp){
+	function _updateScrapersRemoteCallback(xmlhttp, manual){
 		if (!xmlhttp.responseXML){
 			try {
 				if (xmlhttp.status>1000){
@@ -401,7 +409,10 @@ Zotero.Schema = new function(){
 			catch (e){
 				Zotero.debug('Repository cannot be contacted');
 			}
-			_setRepositoryTimer(ZOTERO_CONFIG['REPOSITORY_RETRY_INTERVAL']);
+			
+			if (!manual){
+				_setRepositoryTimer(ZOTERO_CONFIG['REPOSITORY_RETRY_INTERVAL']);
+			}
 			return false;
 		}
 		
@@ -415,15 +426,19 @@ Zotero.Schema = new function(){
 		// Store the timestamp provided by the server
 		_updateDBVersion('repository', currentTime);
 		
-		// And the local timestamp of the update time
-		var d = new Date();
-		_updateDBVersion('lastcheck', Math.round(d.getTime()/1000)); // JS uses ms
+		if (!manual){
+			// And the local timestamp of the update time
+			var d = new Date();
+			_updateDBVersion('lastcheck', Math.round(d.getTime()/1000)); // JS uses ms
+		}
 		
 		if (!translatorUpdates.length && !styleUpdates.length){
 			Zotero.debug('All translators and styles are up-to-date');
 			Zotero.DB.commitTransaction();
-			_setRepositoryTimer(ZOTERO_CONFIG['REPOSITORY_CHECK_INTERVAL']);
-			return false;
+			if (!manual){
+				_setRepositoryTimer(ZOTERO_CONFIG['REPOSITORY_CHECK_INTERVAL']);
+			}
+			return -1;
 		}
 		
 		try {
@@ -438,13 +453,43 @@ Zotero.Schema = new function(){
 		catch (e) {
 			Zotero.debug(e, 1);
 			Zotero.DB.rollbackTransaction();
-			_setRepositoryTimer(ZOTERO_CONFIG['REPOSITORY_RETRY_INTERVAL']);
+			if (!manual){
+				_setRepositoryTimer(ZOTERO_CONFIG['REPOSITORY_RETRY_INTERVAL']);
+			}
 			return false;
 		}
 		
 		Zotero.DB.commitTransaction();
-		_setRepositoryTimer(ZOTERO_CONFIG['REPOSITORY_CHECK_INTERVAL']);
+		if (!manual){
+			_setRepositoryTimer(ZOTERO_CONFIG['REPOSITORY_CHECK_INTERVAL']);
+		}
 		return true;
+	}
+	
+	
+	function _updateScrapersRemoteCallbackManual(xmlhttp){
+		var updated = _updateScrapersRemoteCallback(xmlhttp, true);
+		
+		// Update the "Update Now" button in the pref dialog with the result
+		var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+			.getService(Components.interfaces.nsIWindowMediator);
+		var enumerator = wm.getEnumerator('zotero:pref');
+		while (enumerator.hasMoreElements()){
+			var win = enumerator.getNext();
+			var button = win.window.document.getElementById('updateButton');
+			if (button){
+				if (updated===-1){
+					var label = Zotero.getString('zotero.preferences.update.upToDate');
+				}
+				else if (updated){
+					var label = Zotero.getString('zotero.preferences.update.updated');
+				}
+				else {
+					var label = Zotero.getString('zotero.preferences.update.error');
+				}
+				button.setAttribute('label', label);
+			}
+		}
 	}
 	
 	
