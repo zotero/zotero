@@ -435,12 +435,14 @@ Zotero.DB = new function(){
 	* For example, if "Untitled" and "Untitled 2" and "Untitled 4",
 	* returns "Untitled 3"
 	*
+	* DEBUG: doesn't work once there's an "Untitled 10"
+	*
 	* If _name_ alone is available, returns that
 	**/
 	function getNextName(table, field, name)
 	{
 		var sql = "SELECT " + field + " FROM " + table + " WHERE " + field
-			+ " LIKE ? ORDER BY " + field;
+			+ " LIKE ? ORDER BY " + field + " COLLATE NOCASE";
 		var untitleds = Zotero.DB.columnQuery(sql, name + '%');
 		
 		if (!untitleds || untitleds[0]!=name){

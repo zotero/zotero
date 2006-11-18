@@ -769,7 +769,7 @@ Zotero.Searches = new function(){
 	 */
 	function getAll(){
 		var sql = "SELECT savedSearchID AS id, savedSearchName AS name "
-			+ "FROM savedSearches ORDER BY name";
+			+ "FROM savedSearches ORDER BY name COLLATE NOCASE";
 		return Zotero.DB.query(sql);
 	}
 	

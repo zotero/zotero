@@ -3367,7 +3367,7 @@ Zotero.getCollections = function(parent, recursive){
 	var sql = 'SELECT collectionID FROM collections C WHERE parentCollectionID';
 	sql += parent ? '=' + parent : ' IS NULL';
 	
-	sql += ' ORDER BY collectionName';
+	sql += ' ORDER BY collectionName COLLATE NOCASE';
 	
 	var children = Zotero.DB.columnQuery(sql);
 	

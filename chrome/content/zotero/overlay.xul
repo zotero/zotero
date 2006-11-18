@@ -34,7 +34,6 @@
     <script src="fileInterface.js"/>
 	
 	<commandset id="mainCommandSet">
-		<command id="cmd_zotero_newCollection" oncommand="ZoteroPane.newCollection();"/>
 		<command id="cmd_zotero_search" oncommand="ZoteroPane.search();"/>
 	</commandset>
 	<toolbarpalette id="BrowserToolbarPalette">
@@ -60,8 +59,9 @@
 		<hbox id="zotero-pane" persist="height" collapsed="true">
 			<popupset>
 				<popup id="zotero-collectionmenu" onpopupshowing="ZoteroPane.buildCollectionContextMenu();">
-					<menuitem label="&zotero.toolbar.newCollection.label;" command="cmd_zotero_newCollection"/>
+					<menuitem label="&zotero.toolbar.newCollection.label;" command="ZoteroPane.newCollection()"/>
 					<menuitem label="&zotero.toolbar.newSavedSearch.label;" oncommand="ZoteroPane.newSearch()"/>
+					<menuitem label="&zotero.toolbar.newSubcollection.label;" oncommand="ZoteroPane.newCollection(ZoteroPane.getSelectedCollection().getID())"/>
 					<menuseparator/>
 					<menuitem label="&zotero.toolbar.renameCollection.label;" oncommand="ZoteroPane.editSelectedCollection();"/>
 					<menuitem label="&zotero.toolbar.renameSavedSearch.label;" oncommand="ZoteroPane.editSelectedCollection()"/>
@@ -88,7 +88,7 @@
 			</popupset>
 			<vbox id="zotero-collections-pane" persist="width" flex="1">
 				<toolbar>
-					<toolbarbutton id="zotero-tb-collection-add" tooltiptext="&zotero.toolbar.newCollection.label;" command="cmd_zotero_newCollection"/>
+					<toolbarbutton id="zotero-tb-collection-add" tooltiptext="&zotero.toolbar.newCollection.label;" oncommand="ZoteroPane.newCollection()"/>
 					<toolbarbutton id="zotero-tb-collection-addsearch" tooltiptext="&zotero.toolbar.newSavedSearch.label;" oncommand="ZoteroPane.newSearch();"/>
 					<spacer flex="1"/>
 					<toolbarbutton id="zotero-tb-tag-selector" tooltiptext="&zotero.toolbar.tagSelector.label;" oncommand="ZoteroPane.toggleTagSelector()"/>

@@ -184,23 +184,32 @@ Zotero.CollectionTreeView.prototype.notify = function(action, type, ids)
 		switch (type)
 		{
 			case 'collection':
-				var item = Zotero.Collections.get(ids);
-				this._showItem(new Zotero.ItemGroup('collection',item), 0, this.rowCount);
+				var collection = Zotero.Collections.get(ids);
+				var collectionID = collection.getID();
+				// Open container if creating subcollection
+				var parentID = collection.getParent();
+				if (parentID) {
+					if (!this.isContainerOpen(this._collectionRowMap[parentID])){
+						this.toggleOpenState(this._collectionRowMap[parentID]);
+						this._refreshHashMap();
+					}
+				}
+				
+				this.reload();
+				this.selection.select(this._collectionRowMap[collectionID]);
 				break;
 				
 			case 'search':
 				var search = Zotero.Searches.get(ids);
-				this._showItem(new Zotero.ItemGroup('search', search), 0, this.rowCount);
+				this.reload();
+				this.selection.select(this._searchRowMap[search.id]);
 				break;
 		}
-		
-		this._treebox.rowCountChanged(this.rowCount-1,1);
-		this.selection.select(this.rowCount-1);
-		madeChanges = true;
 	}
 	
-	if(madeChanges)
+	if (madeChanges) {
 		this._refreshHashMap();
+	}
 }
 
 /*

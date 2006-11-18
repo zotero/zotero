@@ -198,7 +198,7 @@ var ZoteroPane = new function()
 		return item;
 	}
 	
-	function newCollection()
+	function newCollection(parent)
 	{
 		var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 								.getService(Components.interfaces.nsIPromptService);
@@ -221,7 +221,7 @@ var ZoteroPane = new function()
 			newName.value = untitled;
 		}
 		
-		Zotero.Collections.add(newName.value);
+		Zotero.Collections.add(newName.value, parent);
 	}
 	
 	function newSearch()
@@ -617,24 +617,8 @@ var ZoteroPane = new function()
 		if (collectionsView.selection.count == 1 &&
 			collectionsView._getItemAtRow(collectionsView.selection.currentIndex).isCollection())
 		{
-			var hide = [4,6,9,11,12];
-			var show = [3,5,7,8,10];
-			if (itemsView.rowCount>0)
-			{
-				var enable = [8,10];
-			}
-			else
-			{
-				var disable = [8,10];
-			}
-		
-		}
-		// Saved Search
-		else if (collectionsView.selection.count == 1 &&
-			collectionsView._getItemAtRow(collectionsView.selection.currentIndex).isSearch())
-		{
-			var hide = [3,5,8,10,12];
-			var show = [4,6,7,9,11];
+			var hide = [0,1,5,7,10,12,13];
+			var show = [2,3,4,6,8,9,11];
 			if (itemsView.rowCount>0)
 			{
 				var enable = [9,11];
@@ -643,12 +627,28 @@ var ZoteroPane = new function()
 			{
 				var disable = [9,11];
 			}
+		
+		}
+		// Saved Search
+		else if (collectionsView.selection.count == 1 &&
+			collectionsView._getItemAtRow(collectionsView.selection.currentIndex).isSearch())
+		{
+			var hide = [0,1,2,3,4,6,9,11,13];
+			var show = [5,7,8,10,12];
+			if (itemsView.rowCount>0)
+			{
+				var enable = [10,12];
+			}
+			else
+			{
+				var disable = [10,12];
+			}
 		}
 		// Library
 		else
 		{
-			var hide = [3,4,5,6,7,8,9,10,11];
-			var show = [12];
+			var hide = [2,4,5,6,7,8,9,10,11,12];
+			var show = [0,1,3,13];
 		}
 		
 		for (var i in disable)

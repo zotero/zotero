@@ -28,6 +28,7 @@
 <!ENTITY zotero.toolbar.newItemFromPage.label			"Create New Item from Current Page">
 <!ENTITY zotero.toolbar.removeItem.label				"Remove Item...">
 <!ENTITY zotero.toolbar.newCollection.label			"New Collection...">
+<!ENTITY zotero.toolbar.newSubcollection.label			"New Subcollection...">
 <!ENTITY zotero.toolbar.newSavedSearch.label			"New Saved Search...">
 <!ENTITY zotero.toolbar.tagSelector.label			"Show/Hide Tag Selector">
 <!ENTITY zotero.toolbar.renameCollection.label			"Rename Collection...">
