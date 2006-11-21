@@ -369,7 +369,6 @@ Zotero.Utilities.Ingester.HTTP.prototype.doGet = function(urls, processor, done)
 		throw("invalid URL in processDocuments");
 	}
 	
-	var translate = this.translate;
 	var me = this;
 	
 	Zotero.Utilities.HTTP.doGet(url, function(xmlhttp) {
@@ -378,16 +377,17 @@ Zotero.Utilities.Ingester.HTTP.prototype.doGet = function(urls, processor, done)
 				processor(xmlhttp.responseText, xmlhttp);
 			}
 			
-			// call again if multiple urls were passed
 			if(callAgain) {
 				me.doGet(urls, processor, done);
-			} else if(done) {
-				done();
+			} else {
+				if(done) {
+					done();
+				}
 			}
 		} catch(e) {
-			translate._translationComplete(false, e);
+			me.translate._translationComplete(false, e);
 		}
-	})
+	});
 }
 
 Zotero.Utilities.Ingester.HTTP.prototype.doPost = function(url, body, onDone) {
