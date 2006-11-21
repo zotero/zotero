@@ -76,25 +76,25 @@ Zotero.Notifier = new function(){
 	// Deprecated
 	function registerCollectionObserver(ref){
 		Zotero.debug('registerCollectionObserver is deprecated and will be removed in a future release -- use registerObserver() instead', 2);
-		return _register(ref, 'collection');
+		return registerObserver(ref, 'collection');
 	}
 	
 	// Deprecated
 	function registerItemObserver(ref){
 		Zotero.debug('registerItemObserver is deprecated and will be removed in a future release -- use registerObserver() instead', 2);
-		return _register(ref, 'item');
+		return registerObserver(ref, 'item');
 	}
 	
 	// Deprecated
 	function unregisterCollectionObserver(hash){
 		Zotero.debug('unregisterCollectionObserver is deprecated and will be removed in a future release -- use unregisterObserver() instead', 2);
-		_unregister(hash);
+		unregisterObserver(hash);
 	}
 	
 	// Deprecated
 	function unregisterItemObserver(hash){
 		Zotero.debug('unregisterItemObserver is deprecated and will be removed in a future release -- use unregisterObserver() instead', 2);
-		_unregister(hash);
+		unregisterObserver(hash);
 	}
 	
 	/**
