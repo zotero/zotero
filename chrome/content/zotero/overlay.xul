@@ -93,12 +93,12 @@
 					<spacer flex="1"/>
 					<toolbarbutton id="zotero-tb-tag-selector" tooltiptext="&zotero.toolbar.tagSelector.label;" oncommand="ZoteroPane.toggleTagSelector()"/>
 					<toolbarbutton id="zotero-tb-actions-menu" tooltiptext="&zotero.toolbar.actions.label;" type="menu">
-						<menupopup>
-							<menuitem label="&zotero.toolbar.import.label;" oncommand="Zotero_File_Interface.importFile();"/>
-							<menuitem label="&zotero.toolbar.export.label;" oncommand="Zotero_File_Interface.exportFile();"/>
+						<menupopup id="zotero-tb-actions-popup">
+							<menuitem id="zotero-tb-actions-import" label="&zotero.toolbar.import.label;" oncommand="Zotero_File_Interface.importFile();"/>
+							<menuitem id="zotero-tb-actions-export" label="&zotero.toolbar.export.label;" oncommand="Zotero_File_Interface.exportFile();"/>
 							<menuseparator/>
-							<menuitem label="&zotero.toolbar.preferences.label;" oncommand="window.openDialog('chrome://zotero/content/preferences.xul','zotero-prefs','chrome,modal')"/>
-							<menuitem label="&zotero.toolbar.about.label;" oncommand="window.openDialog('chrome://zotero/content/about.xul','about','chrome,left=' + (window.screenX + 200) + ',top=' + (window.screenY + 100))"/>
+							<menuitem id="zotero-tb-actions-prefs" label="&zotero.toolbar.preferences.label;" oncommand="window.openDialog('chrome://zotero/content/preferences.xul','zotero-prefs','chrome,modal')"/>
+							<menuitem id="zotero-tb-actions-about" label="&zotero.toolbar.about.label;" oncommand="window.openDialog('chrome://zotero/content/about.xul','about','chrome,left=' + (window.screenX + 200) + ',top=' + (window.screenY + 100))"/>
 						</menupopup>
 					</toolbarbutton>
 				</toolbar>
