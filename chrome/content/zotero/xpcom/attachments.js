@@ -191,7 +191,7 @@ Zotero.Attachments = new function(){
 				var wbp = Components
 					.classes["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"]
 					.createInstance(nsIWBP);
-				//wbp.persistFlags = nsIWBP.PERSIST_FLAGS...;
+				wbp.persistFlags = nsIWBP.PERSIST_FLAGS_AUTODETECT_APPLY_CONVERSION;
 				var encodingFlags = false;
 				
 				Zotero.DB.beginTransaction();
@@ -300,7 +300,7 @@ Zotero.Attachments = new function(){
 		var wbp = Components
 			.classes["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"]
 			.createInstance(nsIWBP);
-		//wbp.persistFlags = nsIWBP.PERSIST_FLAGS...;
+		wbp.persistFlags = nsIWBP.PERSIST_FLAGS_AUTODETECT_APPLY_CONVERSION;
 		var encodingFlags = false;
 		
 		Zotero.DB.beginTransaction();
