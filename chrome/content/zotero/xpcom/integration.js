@@ -361,12 +361,11 @@ Zotero.Integration.SOAP = new function() {
 	this.setDocPrefs = setDocPrefs;
 	
 	var _sessions = new Array();
-	var window;
+	var watcher;
 	
 	function init() {
-		window = Components.classes["@mozilla.org/appshell/appShellService;1"]
-					   .getService(Components.interfaces.nsIAppShellService)
-					   .hiddenDOMWindow;
+		watcher = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
+		                    .getService(Components.interfaces.nsIWindowWatcher);
 	}
 	
 	/*
@@ -391,9 +390,12 @@ Zotero.Integration.SOAP = new function() {
 		for(var i=3; i<vars.length; i+=2) {
 			if(vars[i+1] == "X") {
 				// get a new citation for a field with an X
-				var io = new Object();
-				window.openDialog('chrome://zotero/content/addCitationDialog.xul','',
-									'chrome,popup,modal', io, true);
+				var io = new function() {
+					this.wrappedJSObject = this;
+				}
+				
+				watcher.openWindow(null, 'chrome://zotero/content/addCitationDialog.xul', '',
+								  'chrome,modal'+(Zotero.isMac ? '' : ',popup'), io, true);
 				
 				citation = new Zotero.Integration.Citation(vars[i], "!");
 				updatedCitations[citation.index] = true;
@@ -531,7 +533,9 @@ Zotero.Integration.SOAP = new function() {
 	 * RETURNS: sessionID, styleID, style-class
 	 */
 	function setDocPrefs(vars) {
-		var io = new Object();
+		var io = new function() {
+			this.wrappedJSObject = this;
+		}
 		
 		if(!vars || !vars[0] || vars[0] == "!") {
 			// no session ID; generate a new one
@@ -548,8 +552,8 @@ Zotero.Integration.SOAP = new function() {
 			io.style = originalStyle;
 		}
 		
-		window.openDialog('chrome://zotero/content/integrationDocPrefs.xul','',
-		                    'chrome,popup,modal',io);
+		watcher.openWindow(null, 'chrome://zotero/content/integrationDocPrefs.xul', '',
+		                   'chrome,modal'+(Zotero.isMac ? '' : ',popup'), io);
 		session.setStyle(io.style);
 		
 		return [sessionID, io.style, session.style.class];

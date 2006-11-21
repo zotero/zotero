@@ -1,4 +1,4 @@
--- 103
+-- 104
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-11-01 16:30:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-11-20 23:10:00'));
 
 REPLACE INTO "translators" VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006-10-02 17:00:00', 1, 100, 4, 'Amazon.com', 'Simon Kornblith', '^http://www\.amazon\.com/', 
 'function detectWeb(doc, url) {
@@ -482,7 +482,7 @@ REPLACE INTO "translators" VALUES ('88915634-1af6-c134-0171-56fd198235ed', '2006
 	Zotero.wait();
 }');
 
-REPLACE INTO "translators" VALUES ('d921155f-0186-1684-615c-ca57682ced9b', '2006-10-02 17:00:00', 1, 100, 4, 'JSTOR', 'Simon Kornblith', '^http://www\.jstor\.org/(?:view|browse|search/)', 
+REPLACE INTO "translators" VALUES ('d921155f-0186-1684-615c-ca57682ced9b', '2006-11-20 23:10:00', 1, 100, 4, 'JSTOR', 'Simon Kornblith', '^http://www\.jstor\.org/(?:view|browse|search/)', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -501,22 +501,7 @@ REPLACE INTO "translators" VALUES ('d921155f-0186-1684-615c-ca57682ced9b', '2006
 		return "journalArticle";
 	}
 }',
-'function getList(urls, each, done) {
-	var url = urls.shift();
-	Zotero.Utilities.HTTP.doGet(url, function(text) {
-		if(each) {
-			each(text);
-		}
-		
-		if(urls.length) {
-			getList(urls, each, done);
-		} else if(done) {
-			done(text);
-		}
-	});
-}
-
-function getJSTORAttachment(viewURL) {
+'function getJSTORAttachment(viewURL) {
 	var viewRe = new RegExp("(^http://[^/]+/)view([^?]+)");
 	var m = viewRe.exec(viewURL);
 	if(m) {
@@ -615,7 +600,7 @@ function doWeb(doc, url) {
 	
 	Zotero.Utilities.HTTP.doGet(''http://www.jstor.org/browse?citationAction=removeAll&confirmRemAll=on&viewCitations=1'', function() {	// clear marked
 		// Mark all our citations
-		getList(saveCitations, null, function() {						// mark this
+		Zotero.Utilities.HTTP.doGet(saveCitations, null, function() {						// mark this
 			Zotero.Utilities.HTTP.doGet(''http://www.jstor.org/browse/citations.txt?exportAction=Save+as+Text+File&exportFormat=cm&viewCitations=1'', function(text) {
 																							// get marked
 				var k = 0;
@@ -3065,26 +3050,11 @@ REPLACE INTO "translators" VALUES ('3e684d82-73a3-9a34-095f-19b112d88bbf', '2006
 	Zotero.wait();
 }');
 
-REPLACE INTO "translators" VALUES ('57a00950-f0d1-4b41-b6ba-44ff0fc30289', '2006-08-26 1:10:00', 1, 100, 4, 'Google Zotero', 'Simon Kornblith', '^http://scholar\.google\.com/scholar',
+REPLACE INTO "translators" VALUES ('57a00950-f0d1-4b41-b6ba-44ff0fc30289', '2006-11-20 23:00:00', 1, 100, 4, 'Google Scholar', 'Simon Kornblith', '^http://scholar\.google\.com/scholar',
 'function detectWeb(doc, url) {
 	return "multiple";
 }',
-'function getList(urls, each, done) {
-	var url = urls.shift();
-	Zotero.Utilities.HTTP.doGet(url, function(text) {
-		if(each) {
-			each(text);
-		}
-		
-		if(urls.length) {
-			getList(urls, each, done);
-		} else if(done) {
-			done(text);
-		}
-	});
-}
-
-function doWeb(doc, url) {
+'function doWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
 	  if (prefix == ''x'') return namespace; else return null;
@@ -3168,7 +3138,7 @@ function doWeb(doc, url) {
 		item.complete();
 	});
 	
-	getList(urls, function(text) {
+	Zotero.Utilities.HTTP.doGet(urls, function(text) {
 		translator.setString(text);
 		translator.translate();
 	}, function() { Zotero.done() });
@@ -3419,7 +3389,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO "translators" VALUES ('ce7a3727-d184-407f-ac12-52837f3361ff', '2006-10-02 17:00:00', 1, 100, 4, 'New York Times', 'Simon Kornblith', '^http://(?:query\.nytimes\.com/search/query|(?:www\.)?nytimes\.com/.+)', 
+REPLACE INTO "translators" VALUES ('ce7a3727-d184-407f-ac12-52837f3361ff', '2006-11-20 23:10:00', 1, 100, 4, 'New York Times', 'Simon Kornblith', '^http://(?:query\.nytimes\.com/search/query|(?:www\.)?nytimes\.com/.+)', 
 'function detectWeb(doc, url) {
 	if(doc.title.substr(0, 30) == "The New York Times: Search for") {
 		var namespace = doc.documentElement.namespaceURI;
@@ -3439,22 +3409,7 @@ REPLACE INTO "translators" VALUES ('ce7a3727-d184-407f-ac12-52837f3361ff', '2006
 		}
 	}
 }',
-'function getList(urls, each, done) {
-	var url = urls.shift();
-	Zotero.Utilities.HTTP.doGet(url, function(text) {
-		if(each) {
-			each(text, url);
-		}
-		
-		if(urls.length) {
-			getList(urls, each, done);
-		} else if(done) {
-			done(text);
-		}
-	});
-}
-
-function associateMeta(newItem, metaTags, field, zoteroField) {
+'function associateMeta(newItem, metaTags, field, zoteroField) {
 	if(metaTags[field]) {
 		newItem[zoteroField] = metaTags[field];
 	}
@@ -3566,7 +3521,7 @@ function doWeb(doc, url) {
 			urls.push(i);
 		}
 		
-		getList(urls, scrape, function() { Zotero.done(); }, null);
+		Zotero.Utilities.HTTP.doGet(urls, scrape, function() { Zotero.done(); }, null);
 		
 		Zotero.wait();
 	} else {

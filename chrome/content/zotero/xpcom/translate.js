@@ -551,7 +551,7 @@ Zotero.Translate.prototype._generateSandbox = function() {
 	
 	if(this.type == "web" || this.type == "search") {
 		// get sandbox URL
-		var sandboxURL = "";
+		var sandboxURL = "http://www.example.com/";
 		if(this.type == "web") {
 			// use real URL, not proxied version, to create sandbox
 			sandboxURL = this.document.location.href;

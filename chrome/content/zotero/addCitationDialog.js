@@ -127,7 +127,7 @@ var Zotero_Citation_Dialog = new function () {
 	}
 	
 	function accept() {
-		var io = window.arguments[0];
+		var io = window.arguments[0].wrappedJSObject;
 		if(_multipleSourcesOn) {
 			treeItemSelected();		// store locator info
 			

@@ -40,6 +40,9 @@ var Zotero_File_Interface_Bibliography = new function() {
 	 */
 	function init() {
 		_io = window.arguments[0];
+		if(_io.wrappedJSObject){
+			_io = _io.wrappedJSObject;
+		}
 		
 		var listbox = document.getElementById("style-popup");
 		var styleMenu = document.getElementById("style-menu");

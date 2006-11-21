@@ -1660,7 +1660,25 @@ Zotero.CSL.FormattedString.prototype.appendDate = function(date, element) {
 	interview:"interview",
 	film:"motion picture",
 	artwork:"graphic",
-	website:"webpage"
+	webpage:"webpage",
+	report:"paper-conference",	// ??
+	bill:"bill",
+	case:"legal case",
+	hearing:"bill",				// ??
+	patent:"patent",
+	statute:"bill",				// ??
+	email:"personal communication",
+	map:"map",
+	blogPost:"webpage",
+	instantMessage:"personal communication",
+	forumPost:"webpage",
+	audioRecording:"song",		// ??
+	presentation:"paper-conference",
+	videoRecording:"motion picture",
+	tvBroadcast:"motion picture",
+	radioBroadcast:"motion picture",
+	podcast:"speech",			// ??
+	computerProgram:"book"		// ??
 };
 // TODO: check with Elena/APA/MLA on this
 Zotero.CSL.Global.fallbackTypeMappings = {
@@ -1675,7 +1693,24 @@ Zotero.CSL.Global.fallbackTypeMappings = {
 	interview:"book",
 	film:"book",
 	artwork:"book",
-	website:"article"
+	webpage:"article",
+	report:"book",
+	bill:"book",
+	case:"book",
+	hearing:"book",
+	patent:"book",
+	statute:"book",
+	email:"article",
+	map:"article",
+	blogPost:"article",
+	instantMessage:"article",
+	audioRecording:"book",
+	presentation:"article",
+	videoRecording:"book",
+	tvBroadcast:"book",
+	radioBroadcast:"book",
+	podcast:"book",
+	computerProgram:"book"
 };
 
 Zotero.CSL.prototype._getTypeFromItem = function(item) {
@@ -1699,8 +1734,10 @@ Zotero.CSL.prototype._separateItemCreators = function(item) {
 	var translatorID = Zotero.CreatorTypes.getID("translator");
 	
 	var creators = item.getCreators();
-	for(var j in creators) {
-		var creator = creators[j];
+	Zotero.debug("here come the creators");
+	Zotero.debug(creators);
+	for each(var creator in creators) {
+		Zotero.debug(creator);
 		
 		if(creator.creatorTypeID == editorID) {
 			editors.push(creator);

@@ -352,7 +352,16 @@ Zotero.Utilities.Ingester.HTTP = function(translate) {
 	this.translate = translate;
 }
 
-Zotero.Utilities.Ingester.HTTP.prototype.doGet = function(url, onDone) {
+Zotero.Utilities.Ingester.HTTP.prototype.doGet = function(urls, processor, done) {
+	var callAgain = false;
+	
+	if(typeof(urls) == "string") {
+		var url = urls;
+	} else {
+		if(urls.length > 1) callAgain = true;
+		var url = urls.shift();
+	}
+	
 	if(this.translate.locationIsProxied) {
 		url = Zotero.Ingester.ProxyMonitor.properToProxy(url);
 	}
@@ -361,9 +370,20 @@ Zotero.Utilities.Ingester.HTTP.prototype.doGet = function(url, onDone) {
 	}
 	
 	var translate = this.translate;
+	var me = this;
+	
 	Zotero.Utilities.HTTP.doGet(url, function(xmlhttp) {
 		try {
-			onDone(xmlhttp.responseText, xmlhttp);
+			if(processor) {
+				processor(xmlhttp.responseText, xmlhttp);
+			}
+			
+			// call again if multiple urls were passed
+			if(callAgain) {
+				me.doGet(urls, processor, done);
+			} else if(done) {
+				done();
+			}
 		} catch(e) {
 			translate._translationComplete(false, e);
 		}
