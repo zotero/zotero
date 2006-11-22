@@ -3,6 +3,11 @@
 	width: 49px;
 	margin:0 0 -1px;
 	padding:0 5px 1px;
+	list-style-image: url(chrome://zotero/skin/zotero_logo_18px.png);
+}
+#zotero-status-bar-icon[error=true]
+{
+	list-style-image: url(chrome://zotero/skin/zotero_logo_18px_error.png);
 }
 
 #zotero-pane

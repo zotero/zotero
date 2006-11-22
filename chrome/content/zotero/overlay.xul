@@ -243,15 +243,14 @@
 	
 	<statusbar id="status-bar">
 		<statusbarpanel id="zotero-status-bar-icon"
-			src="chrome://zotero/skin/zotero_logo_18px.png"
-			class="statusbarpanel-iconic" onclick="ZoteroPane.toggleDisplay();"
-			hidden="true"/>
+			class="statusbarpanel-iconic" onclick="ZoteroPane.toggleDisplay();"/>
 	</statusbar>
 	
 	<script>
 	window.addEventListener('load', function(e){
-		if (Zotero){
-			document.getElementById('zotero-status-bar-icon').setAttribute('hidden', 'false');
+		if (!Zotero){
+			document.getElementById('zotero-status-bar-icon').setAttribute('error', 'true');
+			document.getElementById('zotero-status-bar-icon').setAttribute('tooltiptext', 'There was an error starting Zotero.');
 		}
 	}, false);
 	</script>
