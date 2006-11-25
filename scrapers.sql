@@ -1,4 +1,4 @@
--- 108
+-- 109
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-11-24 18:50:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-11-24 19:13:00'));
 
 REPLACE INTO "translators" VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006-11-21 22:30:00', 1, 100, 4, 'Amazon', 'Sean Takats', '^http://(?:www\.)amazon', 
 'function detectWeb(doc, url) {
@@ -4116,9 +4116,9 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO "translators" VALUES ('ecddda2e-4fc6-4aea-9f17-ef3b56d7377a', '2006-11-24 18:50:00', 1, 100, 4, 'arXiv.org/eprintweb.org', 'Simon Kornblith', '^http://(?:www\.)?(?:arxiv\.org/(?:find/\w|abs/[^/]+/[0-9]+)|eprintweb.org/S/search)', 
+REPLACE INTO "translators" VALUES ('ecddda2e-4fc6-4aea-9f17-ef3b56d7377a', '2006-11-24 19:13:00', 1, 100, 4, 'arXiv.org/eprintweb.org', 'Simon Kornblith', '^http://(?:www\.)?(?:arxiv\.org/(?:find/\w|list/\w|abs/[^/]+/[0-9]+)|eprintweb.org/S/(?:search|archive|article))', 
 'function detectWeb(doc, url) {
-	var searchRe = /^http:\/\/(?:www\.)?(?:arxiv\.org\/find|eprintweb.org\/S\/search$)/;
+	var searchRe = /^http:\/\/(?:www\.)?(?:arxiv\.org\/(?:find|list)|eprintweb.org\/S\/(?:archive|search$))/;
 	if(searchRe.test(url)) {
 		return "multiple";
 	} else {
@@ -4161,7 +4161,7 @@ function doWeb(doc, url) {
 	var fetchIDs = new Array();
 	
 	var arxivAbsRe = /^http:\/\/(?:www\.)?arxiv\.org\/abs\/(.+)$/;
-	var eprintsAbsRe = /^http:\/\/(?:www\.)?eprintweb.org\/S\/search(.*)$/
+	var eprintsAbsRe = /^http:\/\/(?:www\.)?eprintweb.org\/S\/([a-z]+)(.*)$/
 	
 	var arxivM = arxivAbsRe.exec(url);
 	var eprintsM = eprintsAbsRe.exec(url);
@@ -4174,16 +4174,22 @@ function doWeb(doc, url) {
 	if(arxivM) {
 		// arxiv single
 		fetchIDs.push(arxivM[1]);
-	} else if(eprintsM && eprintsM[1]) {
+	} else if(eprintsM && (eprintsM[1] == "search" || eprintsM[1] == "article") && eprintsM[2]) {
+		var className = (eprintsM[1] == "article" ? "framed" : "panel");
+		
 		// eprints single
 		if(url.indexOf("refs") != -1 || url.indexOf("cited") != -1) {
-			var id = doc.evaluate(''//td[@class="panel"]//td[@class="txt"]/b[2]'', doc, nsResolver,
+			var id = doc.evaluate(''//td[@class="''+className+''"]//td[@class="txt"]/b[2]'', doc, nsResolver,
 				Components.interfaces.nsIDOMXPathResult.ANY_TYPE, null).iterateNext().textContent;
 		} else {
-			var id = doc.evaluate(''//td[@class="panel"]//td[@class="txt"]/b'', doc, nsResolver,
+			var id = doc.evaluate(''//td[@class="''+className+''"]//td[@class="txt"]/b'', doc, nsResolver,
 				Components.interfaces.nsIDOMXPathResult.ANY_TYPE, null).iterateNext().textContent;
 			id = id.replace("/  ", "/");
-			id = id.substr(0, id.indexOf(" "));
+			
+			var spaceIndex = id.indexOf(" ");
+			if(spaceIndex != -1) {
+				id = id.substr(0, id.indexOf(" "));
+			}
 		}
 		fetchIDs.push(id);
 	} else {
@@ -4195,7 +4201,7 @@ function doWeb(doc, url) {
 			
 			// get ids and titles
 			var started = false;
-			var elmts = doc.evaluate(''//td[@class="panel"]/table/tbody/tr/td'', doc, nsResolver,
+			var elmts = doc.evaluate(''//*[tr[td[@class="lti"]]]/tr/td'', doc, nsResolver,
 									 Components.interfaces.nsIDOMXPathResult.ANY_TYPE, null);
 			var elmt, title, id;
 			while(elmt = elmts.iterateNext()) {
@@ -4232,9 +4238,13 @@ function doWeb(doc, url) {
 			var id, title;
 			
 			while((id = ids.iterateNext()) && (title = titles.iterateNext())) {
-				// strip result numbers off ids
 				var realID = id.textContent.toString();
-				realID = realID.substring(realID.indexOf(".")+3);
+				
+				// strip result numbers off ids for search results
+				if(url.indexOf("list") == -1) {
+					realID = realID.substring(realID.indexOf(".")+3);
+				}
+				// strip off types
 				realID = realID.substr(0, realID.indexOf("[")-1);
 				
 				items[realID] = realID + " - " + title.textContent;
