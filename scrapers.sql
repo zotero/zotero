@@ -1,4 +1,4 @@
--- 106
+-- 107
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,9 +22,9 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-11-24 14:30:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-11-24 18:04:00'));
 
-REPLACE INTO "translators" VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006-11-21 22:30:00', 1, 100, 12, 'Amazon', 'Sean Takats', '^http://(?:www\.)amazon', 
+REPLACE INTO "translators" VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006-11-21 22:30:00', 1, 100, 4, 'Amazon', 'Sean Takats', '^http://(?:www\.)amazon', 
 'function detectWeb(doc, url) {
 
 	var suffixRe = new RegExp("http://(?:www\.)amazon\.([^/]+)/");
@@ -2787,7 +2787,7 @@ function doSearch(item) {
 	lookupPMIDs([getPMID(item.contextObject)]);
 }');
 
-REPLACE INTO "translators" VALUES ('951c027d-74ac-47d4-a107-9c3069ab7b48', '2006-10-02 17:00:00', 1, 100, 4, 'Embedded RDF', 'Simon Kornblith', NULL,
+REPLACE INTO "translators" VALUES ('951c027d-74ac-47d4-a107-9c3069ab7b48', '2006-11-24 16:14:00', 1, 100, 4, 'Embedded RDF', 'Simon Kornblith', NULL,
 'function detectWeb(doc, url) {
 	var metaTags = doc.getElementsByTagName("meta");
 	
@@ -2803,12 +2803,10 @@ REPLACE INTO "translators" VALUES ('951c027d-74ac-47d4-a107-9c3069ab7b48', '2006
 'function doWeb(doc, url) {
 	var dc = "http://purl.org/dc/elements/1.1/";
 
-	// load RDF translator
+	// load RDF translator, so that we don''t need to replicate import code
 	var translator = Zotero.loadTranslator("import");
 	translator.setTranslator("5e3ad958-ac79-463d-812b-a86a9235c28f");
 	translator.setHandler("itemDone", function(obj, newItem) {
-		newItem.itemType = "webpage";
-		
 		// use document title if none given in dublin core
 		if(!newItem.title) {
 			newItem.title = doc.title;
@@ -2838,6 +2836,7 @@ REPLACE INTO "translators" VALUES ('951c027d-74ac-47d4-a107-9c3069ab7b48', '2006
 		}
 	}
 	
+	rdf.defaultUnknownType = "webpage";
 	rdf.doImport();
 }');
 
@@ -4117,6 +4116,96 @@ function doWeb(doc, url) {
 	}
 }');
 
+REPLACE INTO "translators" VALUES ('ecddda2e-4fc6-4aea-9f17-ef3b56d7377a', '2006-11-24 16:32:00', 1, 100, 4, 'arXiv.org', 'Simon Kornblith', '^http://(?:www\.)?arxiv\.org/(?:find/\w|abs/[^/]+/[0-9]+)', 
+'function detectWeb(doc, url) {
+	var searchRe = /http:\/\/(?:www\.)?arxiv\.org\/find/;
+	if(searchRe.test(url)) {
+		return "multiple";
+	} else {
+		return "journalArticle";
+	}
+}',
+'function fetchItems(ids) {
+	var idRe = /^([\w\-]+)(?:\.[A-Z]{2})?\/([0-9]+)/;
+	var id = idRe.exec(ids.shift());
+	
+	// create a new item to pass to search interface
+	var searchItem = new Zotero.Item("journalArticle");
+	searchItem.contextObject = "url_ver=Z39.88-2004&rft_id=oai%3AarXiv.org%3A"+id[1]+"%2F"+id[2];
+	
+	// do search
+	var search = Zotero.loadTranslator("search");
+	search.setSearch(searchItem);
+	search.setHandler("done", function() {
+		if(ids.length) {
+			// if more items are left to process, process them
+			fetchItems(ids);
+		} else {
+			// otherwise, we''re done
+			Zotero.done();
+		}
+	});
+	search.setHandler("itemDone", function(obj, item) {
+		item.complete();
+	});
+	
+	Zotero.Utilities.debug(searchItem);
+	
+	var translators = search.getTranslators();
+	if(!translators) throw "Could not find a translator. Is CiteBase search translator installed?";
+	search.setTranslator(translators);
+	search.translate();
+}
+
+function doWeb(doc, url) {
+	var fetchIDs = new Array();
+	
+	var absRe = /http:\/\/(?:www\.)?arxiv\.org\/abs\/(.+)$/;
+	var m = absRe.exec(url);
+	
+	if(m) {
+		// single
+		fetchIDs.push(m[1]);
+	} else{
+		// search
+		var namespace = doc.documentElement.namespaceURI;
+		var nsResolver = namespace ? function(prefix) {
+			if (prefix == ''x'') return namespace; else return null;
+		} : null;
+		
+		var items = new Object();
+		
+		// get IDs and titles
+		var ids = doc.evaluate(''//div[@id="content"]/dl/dt'', doc, nsResolver,
+		                         Components.interfaces.nsIDOMXPathResult.ANY_TYPE, null);
+		var titles = doc.evaluate(''//div[@id="content"]/dl/dd/b[1]'', doc, nsResolver,
+		                         Components.interfaces.nsIDOMXPathResult.ANY_TYPE, null);
+		var id, title;
+		
+		while((id = ids.iterateNext()) && (title = titles.iterateNext())) {
+			// strip result numbers off ids
+			var realID = id.textContent.toString();
+			realID = realID.substring(realID.indexOf(".")+3);
+			realID = realID.substr(0, realID.indexOf("[")-1);
+			
+			items[realID] = realID + " - " + title.textContent;
+		}
+		
+		items = Zotero.selectItems(items);
+			
+		if(!items) {
+			return true;
+		}
+		
+		for(var i in items) {
+			fetchIDs.push(i);
+		}
+	}
+	
+	fetchItems(fetchIDs);
+	Zotero.wait();
+}');
+
 REPLACE INTO "translators" VALUES ('e07e9b8c-0e98-4915-bb5a-32a08cb2f365', '2006-10-02 17:00:00', 1, 100, 8, 'Open WorldCat', 'Simon Kornblith', 'http://partneraccess.oclc.org/',
 'function detectSearch(item) {
 	if(item.itemType == "book" || item.itemType == "bookSection") {
@@ -4192,9 +4281,9 @@ function doSearch(item) {
 	Zotero.wait();
 }');
 
-REPLACE INTO "translators" VALUES ('11645bd1-0420-45c1-badb-53fb41eeb753', '2006-10-02 17:00:00', 1, 100, 8, 'CrossRef', 'Simon Kornblith', 'http://partneraccess.oclc.org/',
+REPLACE INTO "translators" VALUES ('11645bd1-0420-45c1-badb-53fb41eeb753', '2006-11-24 16:42:00', 1, 100, 8, 'CrossRef', 'Simon Kornblith', 'http://partneraccess.oclc.org/',
 'function detectSearch(item) {
-	if(item.itemType == "journal") {
+	if(item.itemType == "journalArticle") {
 		return true;
 	}
 	return false;
@@ -4254,7 +4343,7 @@ function doSearch(item) {
 	if(item.contextObject) {
 		var co = item.contextObject;
 		if(co.indexOf("url_ver=") == -1) {
-			co = "url_ver=Z39.88-2004"+co;
+			co = "url_ver=Z39.88-2004&"+co;
 		}
 	} else {
 		var co = Zotero.Utilities.createContextObject(item);
@@ -4262,6 +4351,38 @@ function doSearch(item) {
 	
 	Zotero.Utilities.HTTP.doGet("http://www.crossref.org/openurl/?"+co+"&noredirect=true", function(responseText) {
 		processCrossRef(responseText);
+		Zotero.done();
+	});
+	
+	Zotero.wait();
+}');
+
+REPLACE INTO "translators" VALUES ('af4cf622-eaca-450b-bd45-0f4ba345d081', '2006-11-24 16:42:00', 1, 100, 8, 'CiteBase', 'Simon Kornblith', 'http://www.citebase.org/',
+'function detectSearch(item) {
+	if(item.itemType == "journalArticle") {
+		return true;
+	}
+	return false;
+}',
+'function doSearch(item) {
+	if(item.contextObject) {
+		var co = item.contextObject;
+		if(co.indexOf("url_ver=") == -1) {
+			co = "url_ver=Z39.88-2004&"+co;
+		}
+		co = co.replace(/(?:&|^)svc_id=[^&]*/, "");
+	} else {
+		var co = Zotero.Utilities.createContextObject(item);
+	}
+	
+	Zotero.Utilities.debug("http://www.citebase.org/openurl?"+co+"&svc_id=bibtex");
+	Zotero.Utilities.HTTP.doGet("http://www.citebase.org/openurl?"+co+"&svc_id=bibtex", function(responseText) {
+		// read BibTeX
+		var translator = Zotero.loadTranslator("import");
+		translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
+		translator.setString(responseText);
+		translator.translate();
+		
 		Zotero.done();
 	});
 	
@@ -5422,7 +5543,7 @@ REPLACE INTO "translators" VALUES ('6e372642-ed9d-4934-b5d1-c11ac758ebb7', '2006
 	}
 }');
 
-REPLACE INTO "translators" VALUES ('5e3ad958-ac79-463d-812b-a86a9235c28f', '2006-10-02 17:00:00', 1, 100, 1, 'RDF', 'Simon Kornblith', 'rdf',
+REPLACE INTO "translators" VALUES ('5e3ad958-ac79-463d-812b-a86a9235c28f', '2006-11-24 18:04:00', 1, 100, 1, 'RDF', 'Simon Kornblith', 'rdf',
 'Zotero.configure("dataMode", "rdf");
 
 function detectImport() {
@@ -5446,6 +5567,10 @@ var n = {
 	link:"http://purl.org/rss/1.0/modules/link/",
 	fs:"http://www.zotero.org/namespaces/export#"
 };
+
+var callNumberTypes = [n.dcterms+"LCC", n.dcterms+"DDC", n.dcterms+"UDC"];
+
+var defaultUnknownType = "book";
 
 // gets the first result set for a property that can be encoded in multiple
 // ontologies
@@ -5681,7 +5806,7 @@ function importItem(newItem, node, type) {
 	}
 	
 	if(!newItem.itemType) {
-		newItem.itemType = "book";
+		newItem.itemType = defaultUnknownType;
 	}
 	
 	// regular author-type creators
@@ -5880,10 +6005,6 @@ function importItem(newItem, node, type) {
 }
 
 function doImport() {
-	callNumberTypes = [
-		n.dcterms+"LCC", n.dcterms+"DDC", n.dcterms+"UDC"
-	];
-	
 	var nodes = Zotero.RDF.getAllResources();
 	if(!nodes) {
 		return false;
