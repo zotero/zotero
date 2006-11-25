@@ -1,4 +1,4 @@
--- 107
+-- 108
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-11-24 18:04:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-11-24 18:50:00'));
 
 REPLACE INTO "translators" VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006-11-21 22:30:00', 1, 100, 4, 'Amazon', 'Sean Takats', '^http://(?:www\.)amazon', 
 'function detectWeb(doc, url) {
@@ -4116,9 +4116,9 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO "translators" VALUES ('ecddda2e-4fc6-4aea-9f17-ef3b56d7377a', '2006-11-24 16:32:00', 1, 100, 4, 'arXiv.org', 'Simon Kornblith', '^http://(?:www\.)?arxiv\.org/(?:find/\w|abs/[^/]+/[0-9]+)', 
+REPLACE INTO "translators" VALUES ('ecddda2e-4fc6-4aea-9f17-ef3b56d7377a', '2006-11-24 18:50:00', 1, 100, 4, 'arXiv.org/eprintweb.org', 'Simon Kornblith', '^http://(?:www\.)?(?:arxiv\.org/(?:find/\w|abs/[^/]+/[0-9]+)|eprintweb.org/S/search)', 
 'function detectWeb(doc, url) {
-	var searchRe = /http:\/\/(?:www\.)?arxiv\.org\/find/;
+	var searchRe = /^http:\/\/(?:www\.)?(?:arxiv\.org\/find|eprintweb.org\/S\/search$)/;
 	if(searchRe.test(url)) {
 		return "multiple";
 	} else {
@@ -4160,37 +4160,87 @@ REPLACE INTO "translators" VALUES ('ecddda2e-4fc6-4aea-9f17-ef3b56d7377a', '2006
 function doWeb(doc, url) {
 	var fetchIDs = new Array();
 	
-	var absRe = /http:\/\/(?:www\.)?arxiv\.org\/abs\/(.+)$/;
-	var m = absRe.exec(url);
+	var arxivAbsRe = /^http:\/\/(?:www\.)?arxiv\.org\/abs\/(.+)$/;
+	var eprintsAbsRe = /^http:\/\/(?:www\.)?eprintweb.org\/S\/search(.*)$/
 	
-	if(m) {
-		// single
-		fetchIDs.push(m[1]);
-	} else{
-		// search
-		var namespace = doc.documentElement.namespaceURI;
-		var nsResolver = namespace ? function(prefix) {
-			if (prefix == ''x'') return namespace; else return null;
-		} : null;
+	var arxivM = arxivAbsRe.exec(url);
+	var eprintsM = eprintsAbsRe.exec(url);
 		
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	if(arxivM) {
+		// arxiv single
+		fetchIDs.push(arxivM[1]);
+	} else if(eprintsM && eprintsM[1]) {
+		// eprints single
+		if(url.indexOf("refs") != -1 || url.indexOf("cited") != -1) {
+			var id = doc.evaluate(''//td[@class="panel"]//td[@class="txt"]/b[2]'', doc, nsResolver,
+				Components.interfaces.nsIDOMXPathResult.ANY_TYPE, null).iterateNext().textContent;
+		} else {
+			var id = doc.evaluate(''//td[@class="panel"]//td[@class="txt"]/b'', doc, nsResolver,
+				Components.interfaces.nsIDOMXPathResult.ANY_TYPE, null).iterateNext().textContent;
+			id = id.replace("/  ", "/");
+			id = id.substr(0, id.indexOf(" "));
+		}
+		fetchIDs.push(id);
+	} else {
+		// search
 		var items = new Object();
 		
-		// get IDs and titles
-		var ids = doc.evaluate(''//div[@id="content"]/dl/dt'', doc, nsResolver,
-		                         Components.interfaces.nsIDOMXPathResult.ANY_TYPE, null);
-		var titles = doc.evaluate(''//div[@id="content"]/dl/dd/b[1]'', doc, nsResolver,
-		                         Components.interfaces.nsIDOMXPathResult.ANY_TYPE, null);
-		var id, title;
-		
-		while((id = ids.iterateNext()) && (title = titles.iterateNext())) {
-			// strip result numbers off ids
-			var realID = id.textContent.toString();
-			realID = realID.substring(realID.indexOf(".")+3);
-			realID = realID.substr(0, realID.indexOf("[")-1);
+		if(eprintsM) {
+			// eprints search
 			
-			items[realID] = realID + " - " + title.textContent;
+			// get ids and titles
+			var started = false;
+			var elmts = doc.evaluate(''//td[@class="panel"]/table/tbody/tr/td'', doc, nsResolver,
+									 Components.interfaces.nsIDOMXPathResult.ANY_TYPE, null);
+			var elmt, title, id;
+			while(elmt = elmts.iterateNext()) {
+				if(!started && elmt.className == "lti") {
+					// wait until first title to process
+					started = true;
+					title = elmt.textContent;
+				} else if(started) {
+					if(elmt.className == "lti") {
+						// finish previous item
+						items[id] = title;
+						title = null;
+						// grab title
+						title = elmt.textContent;
+					} else if(elmt.className == "txt") {
+						// get id
+						var tags = elmt.getElementsByTagName("b");
+						id = tags[0].textContent;
+					}
+				}
+			}
+			
+			if(title) {
+				items[id] = title;
+			}
+		} else {
+			// arxiv search
+			
+			// get IDs and titles
+			var ids = doc.evaluate(''//div[@id="content"]/dl/dt'', doc, nsResolver,
+									 Components.interfaces.nsIDOMXPathResult.ANY_TYPE, null);
+			var titles = doc.evaluate(''//div[@id="content"]/dl/dd/b[1]'', doc, nsResolver,
+									 Components.interfaces.nsIDOMXPathResult.ANY_TYPE, null);
+			var id, title;
+			
+			while((id = ids.iterateNext()) && (title = titles.iterateNext())) {
+				// strip result numbers off ids
+				var realID = id.textContent.toString();
+				realID = realID.substring(realID.indexOf(".")+3);
+				realID = realID.substr(0, realID.indexOf("[")-1);
+				
+				items[realID] = realID + " - " + title.textContent;
+			}
 		}
-		
+			
 		items = Zotero.selectItems(items);
 			
 		if(!items) {
