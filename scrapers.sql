@@ -1,4 +1,4 @@
--- 109
+-- 110
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-11-24 19:13:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-11-24 19:34:00'));
 
 REPLACE INTO "translators" VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006-11-21 22:30:00', 1, 100, 4, 'Amazon', 'Sean Takats', '^http://(?:www\.)amazon', 
 'function detectWeb(doc, url) {
@@ -801,7 +801,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO "translators" VALUES ('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '2006-10-02 17:00:00', 1, 100, 4, 'InnoPAC', 'Simon Kornblith', '^http://[^/]+/(?:search/|record=)',
+REPLACE INTO "translators" VALUES ('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '2006-11-24 19:34:00', 1, 100, 4, 'InnoPAC', 'Simon Kornblith', '^http://[^/]+/(?:search/|record=)',
 'function detectWeb(doc, url) {
 	// First, check to see if the URL alone reveals InnoPAC, since some sites don''t reveal the MARC button
 	var matchRegexp = new RegExp(''^(http://[^/]+/search/[^/]+/[^/]+/1\%2C[^/]+/)frameset(.+)$'');
@@ -835,63 +835,68 @@ REPLACE INTO "translators" VALUES ('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '2006
 	  if (prefix == ''x'') return namespace; else return null;
 	} : null;
 	
-	var xpath = ''//pre/text()[1]'';
-	var text = newDoc.evaluate(xpath, newDoc, nsResolver,
-			   XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
+	var xpath = ''//pre/text()'';
+	var elmts = newDoc.evaluate(xpath, newDoc, nsResolver,
+			   XPathResult.ANY_TYPE, null);
+	var elmt;
 	
-	var newItem = new Zotero.Item();
-	var record = new marc.record();
-	
-	var linee = text.split("\n");
-	for (var i=0; i<linee.length; i++) {
-		if(!linee[i]) {
-			continue;
-		}
+	while(elmt = elmts.iterateNext()) {
+		var text = elmt.nodeValue;
 		
-		linee[i] = linee[i].replace(/[\xA0_\t]/g, " ");
-		var value = linee[i].substr(7);
+		var newItem = new Zotero.Item();
+		var record = new marc.record();
 		
-		if(linee[i].substr(0, 6) == "      ") {
-			// add this onto previous value
-			tagValue += value;
-		} else {
-			if(linee[i].substr(0, 6) == "LEADER") {
-				// trap leader
-				record.leader = value;
+		var linee = text.split("\n");
+		for (var i=0; i<linee.length; i++) {
+			if(!linee[i]) {
+				continue;
+			}
+			
+			linee[i] = linee[i].replace(/[\xA0_\t]/g, " ");
+			var value = linee[i].substr(7);
+			
+			if(linee[i].substr(0, 6) == "      ") {
+				// add this onto previous value
+				tagValue += value;
 			} else {
-				if(tagValue) {	// finish last tag
-					tagValue = tagValue.replace(/\|(.)/g, marc.subfieldDelimiter+"$1");
-					if(tagValue[0] != marc.subfieldDelimiter) {
-						tagValue = marc.subfieldDelimiter+"a"+tagValue;
+				if(linee[i].substr(0, 6) == "LEADER") {
+					// trap leader
+					record.leader = value;
+				} else {
+					if(tagValue) {	// finish last tag
+						tagValue = tagValue.replace(/\|(.)/g, marc.subfieldDelimiter+"$1");
+						if(tagValue[0] != marc.subfieldDelimiter) {
+							tagValue = marc.subfieldDelimiter+"a"+tagValue;
+						}
+						
+						// add previous tag
+						record.addField(tag, ind, tagValue);
 					}
 					
-					// add previous tag
-					record.addField(tag, ind, tagValue);
+					var tag = linee[i].substr(0, 3);
+					var ind  = linee[i].substr(4, 2);
+					var tagValue = value;
 				}
-				
-				var tag = linee[i].substr(0, 3);
-				var ind  = linee[i].substr(4, 2);
-				var tagValue = value;
 			}
-		}
-	}	
-	if(tagValue) {
-		tagValue = tagValue.replace(/\|(.)/g, marc.subfieldDelimiter+"$1");
-		if(tagValue[0] != marc.subfieldDelimiter) {
-			tagValue = marc.subfieldDelimiter+"a"+tagValue;
+		}	
+		if(tagValue) {
+			tagValue = tagValue.replace(/\|(.)/g, marc.subfieldDelimiter+"$1");
+			if(tagValue[0] != marc.subfieldDelimiter) {
+				tagValue = marc.subfieldDelimiter+"a"+tagValue;
+			}
+			
+			// add previous tag
+			record.addField(tag, ind, tagValue);
 		}
 		
-		// add previous tag
-		record.addField(tag, ind, tagValue);
+		record.translate(newItem);
+		newItem.complete();
 	}
-	
-	record.translate(newItem);
-	newItem.complete();
 }
 
 function pageByPage(marc, urls) {
 	Zotero.Utilities.processDocuments(urls, function(newDoc) {
-		scrape(marc.getTranslatorObject(), newDoc);
+		scrape(marc, newDoc);
 	}, function() { Zotero.done() });
 }
 
@@ -899,8 +904,9 @@ function doWeb(doc, url) {
 	var uri = doc.location.href;
 	var newUri;
 	// load translator for MARC
-	var marc = Zotero.loadTranslator("import");
-	marc.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
+	var translator = Zotero.loadTranslator("import");
+	translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
+	var marc = translator.getTranslatorObject();
 	
 	var matchRegexp = new RegExp(''^(http://[^/]+/search/[^/]+/[^/]+/1\%2C[^/]+/)frameset(.+)$'');
 	var m = matchRegexp.exec(uri);
@@ -933,7 +939,6 @@ function doWeb(doc, url) {
 		var tagRegexp = new RegExp();
 		tagRegexp.compile(''^http://[^/]+/search/[^/]+/[^/]+/1\%2C[^/]+/frameset'');
 		
-		var checkboxes = new Array();
 		var urls = new Array();
 		var availableItems = new Array();
 		var firstURL = false;
@@ -954,14 +959,6 @@ function doWeb(doc, url) {
 			}
 			
 			if(link) {
-				if(!checkboxes[link.href]) {
-					// CHK is what we need to get it all as one file
-					var input = doc.evaluate(''./td/input[@type="checkbox"]'', tableRow,
-								nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-					if(input) {
-						checkboxes[link.href] = input.name+"="+escape(input.value);
-					}
-				}
 				if(availableItems[link.href]) {
 					continue;
 				}
@@ -989,32 +986,14 @@ function doWeb(doc, url) {
 			}
 		};
 		
-		Zotero.Utilities.debug(urls);
-		Zotero.Utilities.debug(availableItems);
 		var items = Zotero.selectItems(availableItems);
-		Zotero.Utilities.debug(items);
 		
 		if(!items) {
 			return true;
 		}
-		var urlRe = new RegExp("^(https?://[^/]+(/search/[^/]+(?:/|$)))");
-		var m = urlRe.exec(firstURL);
-		if(!m) {
-			throw("urlRe choked on "+urls[0]);
-		}
-		
-		var clearUrl = m[0]+"?clear_saves=1";
-		var postUrl = m[0];
-		var exportUrl = m[1]+"++export/1,-1,-1,B/export";
 		
 		var newUrls = new Array();
-		var postString = "";
-		var number = 0;
 		for(var url in items) {
-			if(checkboxes[url]) {
-				postString += checkboxes[url]+"&";
-				number++;
-			}
 			var m = matchRegexp.exec(url);
 			if(!m) {
 				throw("matchRegexp choked on "+url);
@@ -1022,28 +1001,7 @@ function doWeb(doc, url) {
 			newUrls.push(m[1]+"marc"+m[2]);
 		}
 		
-		if(postString && number > 1) {
-			postString += "save_func=save_marked";
-			
-			
-			Zotero.Utilities.HTTP.doGet(clearUrl, function() {
-				Zotero.Utilities.HTTP.doPost(postUrl, postString, function() {
-					Zotero.Utilities.HTTP.doPost(exportUrl, "ex_format=50&ex_device=45&SUBMIT=Submit", function(text) {
-						var notSpace = /[^\s]/
-						if(notSpace.test(text)) {
-							marc.setString(text);
-							marc.translate();
-							
-							Zotero.done();
-						} else {
-							pageByPage(marc, newUrls);
-						}
-					});
-				});
-			});
-		} else {
-			pageByPage(marc, newUrls);
-		}
+		pageByPage(marc, newUrls);
 	}
 
 	Zotero.wait();
