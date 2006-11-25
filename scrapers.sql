@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-11-25 15:34:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-11-25 20:00:00'));
 
 REPLACE INTO "translators" VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006-11-21 22:30:00', 1, 100, 4, 'Amazon', 'Sean Takats', '^http://(?:www\.)amazon', 
 'function detectWeb(doc, url) {
@@ -2968,7 +2968,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO "translators" VALUES ('3e684d82-73a3-9a34-095f-19b112d88bbf', '2006-11-25 14:18:00', 1, 100, 4, 'Google Books', 'Simon Kornblith', '^http://books\.google\.com/books\?(.*vid=.*\&id=.*|.*q=.*)',
+REPLACE INTO "translators" VALUES ('3e684d82-73a3-9a34-095f-19b112d88bbf', '2006-11-25 20:00:00', 1, 100, 4, 'Google Books', 'Simon Kornblith', '^http://books\.google\.com/books\?(.*vid=.*\&id=.*|.*q=.*)',
 'function detectWeb(doc, url) {
 	var re = new RegExp(''^http://books\\.google\\.com/books\\?vid=([^&]+).*\\&id=([^&]+)'', ''i'');
 	if(re.test(doc.location.href)) {
@@ -3403,7 +3403,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO "translators" VALUES ('ce7a3727-d184-407f-ac12-52837f3361ff', '2006-11-24 23:00:00', 1, 100, 4, 'New York Times', 'Simon Kornblith', '^http://(?:query\.nytimes\.com/search/query|(?:select\.|www\.)?nytimes\.com/.)', 
+REPLACE INTO "translators" VALUES ('ce7a3727-d184-407f-ac12-52837f3361ff', '2006-11-25 20:00:00', 1, 100, 4, 'New York Times', 'Simon Kornblith', '^http://(?:query\.nytimes\.com/search/query|(?:select\.|www\.)?nytimes\.com/.)', 
 'function detectWeb(doc, url) {
 	if(doc.title.substr(0, 30) == "The New York Times: Search for") {
 		var namespace = doc.documentElement.namespaceURI;
