@@ -1,4 +1,4 @@
--- 110
+-- 111
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-11-24 19:34:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-11-24 23:34:00'));
 
 REPLACE INTO "translators" VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006-11-21 22:30:00', 1, 100, 4, 'Amazon', 'Sean Takats', '^http://(?:www\.)amazon', 
 'function detectWeb(doc, url) {
@@ -3400,7 +3400,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO "translators" VALUES ('ce7a3727-d184-407f-ac12-52837f3361ff', '2006-11-20 23:10:00', 1, 100, 4, 'New York Times', 'Simon Kornblith', '^http://(?:query\.nytimes\.com/search/query|(?:www\.)?nytimes\.com/.+)', 
+REPLACE INTO "translators" VALUES ('ce7a3727-d184-407f-ac12-52837f3361ff', '2006-11-24 23:00:00', 1, 100, 4, 'New York Times', 'Simon Kornblith', '^http://(?:query\.nytimes\.com/search/query|(?:select\.|www\.)?nytimes\.com/.)', 
 'function detectWeb(doc, url) {
 	if(doc.title.substr(0, 30) == "The New York Times: Search for") {
 		var namespace = doc.documentElement.namespaceURI;
