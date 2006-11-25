@@ -1,4 +1,4 @@
--- 111
+-- 112
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-11-24 23:34:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-11-25 15:34:00'));
 
 REPLACE INTO "translators" VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '2006-11-21 22:30:00', 1, 100, 4, 'Amazon', 'Sean Takats', '^http://(?:www\.)amazon', 
 'function detectWeb(doc, url) {
@@ -2968,7 +2968,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO "translators" VALUES ('3e684d82-73a3-9a34-095f-19b112d88bbf', '2006-10-02 17:00:00', 1, 100, 4, 'Google Books', 'Simon Kornblith', '^http://books\.google\.com/books\?(.*vid=.*\&id=.*|.*q=.*)',
+REPLACE INTO "translators" VALUES ('3e684d82-73a3-9a34-095f-19b112d88bbf', '2006-11-25 14:18:00', 1, 100, 4, 'Google Books', 'Simon Kornblith', '^http://books\.google\.com/books\?(.*vid=.*\&id=.*|.*q=.*)',
 'function detectWeb(doc, url) {
 	var re = new RegExp(''^http://books\\.google\\.com/books\\?vid=([^&]+).*\\&id=([^&]+)'', ''i'');
 	if(re.test(doc.location.href)) {
@@ -3013,48 +3013,51 @@ REPLACE INTO "translators" VALUES ('3e684d82-73a3-9a34-095f-19b112d88bbf', '2006
 		var nsResolver = namespace ? function(prefix) {
 		  if (prefix == ''x'') return namespace; else return null;
 		} : null;
-		
-		var xpath = ''//table[@id="bib"]/tbody/tr'';
-		var elmts = newDoc.evaluate(xpath, newDoc, nsResolver,
-		                            XPathResult.ANY_TYPE, null);
-		var elmt;
-		while(elmt = elmts.iterateNext()) {
-			var field = newDoc.evaluate(''./td[1]//text()'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-			var value = newDoc.evaluate(''./td[2]//text()'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-			
-			if(field && value) {
-				field = Zotero.Utilities.superCleanString(field.nodeValue);
-				value = Zotero.Utilities.cleanString(value.nodeValue);
-				if(field == "Title") {
-					newItem.title = value;
-				} else if(field == "Author(s)") {
-					var authors = value.split(", ");
-					for(j in authors) {
-						newItem.creators.push(Zotero.Utilities.cleanAuthor(authors[j], "author"));
-					}
-				} else if(field == "Editor(s)") {
-					var authors = value.split(", ");
-					for(j in authors) {
-						newItem.creators.push(Zotero.Utilities.cleanAuthor(authors[j], "editor"));
-					}
-				} else if(field == "Publisher") {
-					newItem.publisher = value;
-				} else if(field == "Publication Date") {
-					newItem.date = value;
-				} else if(field == "ISBN") {
-					newItem.ISBN = value;
-				} else if(field == "Pages") {
-					newItem.pages = value;
-				} else {
-					newItem.extra += field+": "+value+"\n";
-				}
+
+		var xpath = ''//div[@id="titlebar"]/span[@class="title"]/text()''
+		var elmt;	
+		if (elmt = newDoc.evaluate(xpath, newDoc, nsResolver,
+		                            XPathResult.ANY_TYPE, null).iterateNext()){
+			var title = Zotero.Utilities.superCleanString(elmt.nodeValue);
+			newItem.title = title;
+			Zotero.Utilities.debug("title: " + title);
+		}
+		xpath = ''//div[@id="titlebar"]/span[@class="author"]/text()''
+		if (elmt = newDoc.evaluate(xpath, newDoc, nsResolver,
+		                            XPathResult.ANY_TYPE, null).iterateNext()){
+			var authors = Zotero.Utilities.superCleanString(elmt.nodeValue);
+			if (authors.substring(0, 3) == "By "){
+				authors = authors.substring(3);
+			}
+			authors = authors.split(", ");
+			for(j in authors) {
+				newItem.creators.push(Zotero.Utilities.cleanAuthor(authors[j], "author"));
 			}
 		}
 		
-		if(newItem.extra) {
-			newItem.extra = newItem.extra.substr(newItem.extra, newItem.extra.length-1);
-		}
-		
+		xpath = ''//table[@id="bibdata"]/tbody/tr'';
+		var elmts = newDoc.evaluate(xpath, newDoc, nsResolver,
+		                            XPathResult.ANY_TYPE, null);
+		while(elmt = elmts.iterateNext()) {
+			var fieldelmt = newDoc.evaluate(''./td[1]//text()'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+			if(fieldelmt) {
+				field = Zotero.Utilities.superCleanString(fieldelmt.nodeValue);
+				Zotero.Utilities.debug("output: " + field);
+				if(field.substring(0,10) == "Published ") {
+					newItem.date = field.substring(10);
+					var publisher = newDoc.evaluate(''../text()[2]'', fieldelmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+					if (publisher){
+						publisher =  Zotero.Utilities.superCleanString(publisher.nodeValue);
+						newItem.publisher = publisher;
+					}
+				} else if(field.substring(0,5) == "ISBN ") {
+					newItem.ISBN = field.substring(5);
+				} else if(field.substring(field.length-6) == " pages") {
+					newItem.pages = field.substring(0, field.length-6);
+				} else {
+				}
+			}
+		}		
 		newItem.complete();
 	}, function() { Zotero.done(); }, null);
 	
