@@ -532,6 +532,8 @@ Zotero.Schema = new function(){
 		
 		var sqlValues = [
 			{string: xmlnode.getAttribute('id')},
+			{string: xmlnode.getAttribute('minVersion')},
+			{string: xmlnode.getAttribute('maxVersion')},
 			{string: xmlnode.getAttribute('lastUpdated')},
 			1, // inRepository
 			{int: xmlnode.getElementsByTagName('priority')[0].firstChild.nodeValue},
@@ -551,7 +553,7 @@ Zotero.Schema = new function(){
 			{string: xmlnode.getElementsByTagName('code')[0].firstChild.nodeValue}
 		];
 		
-		var sql = "REPLACE INTO translators VALUES (?,?,?,?,?,?,?,?,?,?)";
+		var sql = "REPLACE INTO translators VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
 		return Zotero.DB.query(sql, sqlValues);
 	}
 	
@@ -669,6 +671,16 @@ Zotero.Schema = new function(){
 						catch (e){}
 					}
 				}
+				
+				if (i==12){
+					Zotero.DB.query("CREATE TABLE translatorsTemp (translatorID TEXT PRIMARY KEY, lastUpdated DATETIME, inRepository INT, priority INT, translatorType INT, label TEXT, creator TEXT, target TEXT, detectCode TEXT, code TEXT);");
+					Zotero.DB.query("INSERT INTO translatorsTemp SELECT * FROM translators");
+					Zotero.DB.query("DROP TABLE translators");
+					Zotero.DB.query("CREATE TABLE translators (\n    translatorID TEXT PRIMARY KEY,\n    minVersion TEXT,\n    maxVersion TEXT,\n    lastUpdated DATETIME,\n    inRepository INT,\n    priority INT,\n    translatorType INT,\n    label TEXT,\n    creator TEXT,\n    target TEXT,\n    detectCode TEXT,\n    code TEXT\n);");
+					Zotero.DB.query("INSERT INTO translators SELECT translatorID, '', '', lastUpdated, inRepository, priority, translatorType, label, creator, target, detectCode, code FROM translatorsTemp");
+					Zotero.DB.query("CREATE INDEX translators_type ON translators(translatorType)");
+					Zotero.DB.query("DROP TABLE translatorsTemp");
+				}
 			}
 			
 			_updateSchema('userdata');
@@ -678,6 +690,7 @@ Zotero.Schema = new function(){
 		}
 		catch(e){
 			Zotero.debug(e);
+			Zotero.DB.rollbackTransaction();
 			alert('Error migrating Zotero database');
 			throw(e);
 		}

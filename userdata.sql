@@ -1,4 +1,4 @@
--- 11
+-- 12
 
 -- This file creates tables containing user-specific data -- any changes
 -- to existing tables made here must be mirrored in transition steps in
@@ -201,6 +201,8 @@ CREATE INDEX IF NOT EXISTS fulltextItems_itemID ON fulltextItems(itemID);
 
 CREATE TABLE IF NOT EXISTS translators (
     translatorID TEXT PRIMARY KEY,
+    minVersion TEXT,
+    maxVersion TEXT,
     lastUpdated DATETIME,
     inRepository INT,
     priority INT,
