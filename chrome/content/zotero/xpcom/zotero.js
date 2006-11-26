@@ -49,6 +49,7 @@ var Zotero = new function(){
 	this.backupDatabase = backupDatabase;
 	this.debug = debug;
 	this.varDump = varDump;
+	this.safeDebug = safeDebug;
 	this.getString = getString;
 	this.flattenArguments = flattenArguments;
 	this.getAncestorByTagName = getAncestorByTagName;
@@ -322,6 +323,21 @@ var Zotero = new function(){
 			dumped_text = "===>"+arr+"<===("+typeof(arr)+")";
 		}
 		return dumped_text;
+	}
+	
+	
+	function safeDebug(obj){
+		for (var i in obj){
+			try {
+				Zotero.debug(i + ': ' + obj[i]);
+			}
+			catch (e){
+				try {
+					Zotero.debug(i + ': ERROR');
+				}
+				catch (e){}
+			}
+		}
 	}
 	
 	
