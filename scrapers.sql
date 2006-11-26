@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-11-26 09:05:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-11-26 23:50:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b3.r1', '', '2006-11-26 09:05:00', 1, 100, 4, 'Amazon', 'Sean Takats', '^http://(?:www\.)amazon', 
 'function detectWeb(doc, url) {
@@ -1739,7 +1739,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('cf87eca8-041d-b954-795a-2d86348999d5', '1.0.0b2.r2', '', '2006-11-24 14:30:00', 1, 100, 4, 'Aleph', 'Simon Kornblith', '^http://[^/]+/F(?:/[A-Z0-9\-]+(?:\?.*)?$|\?func=find|\?func=scan)',
+REPLACE INTO translators VALUES ('cf87eca8-041d-b954-795a-2d86348999d5', '1.0.0b2.r2', '', '2006-11-26 23:50:00', 1, 100, 4, 'Aleph', 'Simon Kornblith', '^http://[^/]+/F(?:/[A-Z0-9\-]+(?:\?.*)?$|\?func=find|\?func=scan)',
 'function detectWeb(doc, url) {
 	var singleRe = new RegExp("^http://[^/]+/F/[A-Z0-9\-]+\?.*(?:func=full-set-set.*\&format=[0-9]{3}|func=direct)");
 	
@@ -4077,7 +4077,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('ecddda2e-4fc6-4aea-9f17-ef3b56d7377a', '1.0.0b2.r2', '', '2006-11-24 19:13:00', 1, 100, 4, 'arXiv.org/eprintweb.org', 'Simon Kornblith', '^http://(?:www\.)?(?:arxiv\.org/(?:find/\w|list/\w|abs/[^/]+/[0-9]+)|eprintweb.org/S/(?:search|archive|article))', 
+REPLACE INTO translators VALUES ('ecddda2e-4fc6-4aea-9f17-ef3b56d7377a', '1.0.0b2.r2', '', '2006-11-26 23:50:00', 1, 100, 4, 'arXiv.org/eprintweb.org', 'Simon Kornblith', '^http://(?:www\.)?(?:arxiv\.org/(?:find/\w|list/\w|abs/[^/]+/[0-9]+)|eprintweb.org/S/(?:search|archive|article))', 
 'function detectWeb(doc, url) {
 	var searchRe = /^http:\/\/(?:www\.)?(?:arxiv\.org\/(?:find|list)|eprintweb.org\/S\/(?:archive|search$))/;
 	if(searchRe.test(url)) {
@@ -4302,7 +4302,7 @@ function doSearch(item) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('11645bd1-0420-45c1-badb-53fb41eeb753', '1.0.0b2.r2', '', '2006-11-24 16:42:00', 1, 100, 8, 'CrossRef', 'Simon Kornblith', 'http://partneraccess.oclc.org/',
+REPLACE INTO translators VALUES ('11645bd1-0420-45c1-badb-53fb41eeb753', '1.0.0b2.r2', '', '2006-11-26 23:50:00', 1, 100, 8, 'CrossRef', 'Simon Kornblith', 'http://partneraccess.oclc.org/',
 'function detectSearch(item) {
 	if(item.itemType == "journalArticle") {
 		return true;
@@ -4378,7 +4378,7 @@ function doSearch(item) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('af4cf622-eaca-450b-bd45-0f4ba345d081', '1.0.0b2.r2', '', '2006-11-24 16:42:00', 1, 100, 8, 'CiteBase', 'Simon Kornblith', 'http://www.citebase.org/',
+REPLACE INTO translators VALUES ('af4cf622-eaca-450b-bd45-0f4ba345d081', '1.0.0b2.r2', '', '2006-11-26 23:50:00', 1, 100, 8, 'CiteBase', 'Simon Kornblith', 'http://www.citebase.org/',
 'function detectSearch(item) {
 	if(item.itemType == "journalArticle") {
 		return true;
