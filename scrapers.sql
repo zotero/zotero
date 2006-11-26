@@ -2745,7 +2745,7 @@ function doSearch(item) {
 	lookupPMIDs([getPMID(item.contextObject)]);
 }');
 
-REPLACE INTO translators VALUES ('951c027d-74ac-47d4-a107-9c3069ab7b48', '1.0.0b2.r2', '', '2006-11-24 16:14:00', 1, 100, 4, 'Embedded RDF', 'Simon Kornblith', NULL,
+REPLACE INTO translators VALUES ('951c027d-74ac-47d4-a107-9c3069ab7b48', '1.0.0b3.r1', '', '2006-11-24 16:14:00', 1, 100, 4, 'Embedded RDF', 'Simon Kornblith', NULL,
 'function detectWeb(doc, url) {
 	var metaTags = doc.getElementsByTagName("meta");
 	
@@ -3064,7 +3064,7 @@ REPLACE INTO translators VALUES ('3e684d82-73a3-9a34-095f-19b112d88bbf', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('57a00950-f0d1-4b41-b6ba-44ff0fc30289', '1.0.0b2.r2', '', '2006-11-20 23:00:00', 1, 100, 4, 'Google Scholar', 'Simon Kornblith', '^http://scholar\.google\.com/scholar',
+REPLACE INTO translators VALUES ('57a00950-f0d1-4b41-b6ba-44ff0fc30289', '1.0.0b3.r1', '', '2006-11-20 23:00:00', 1, 100, 4, 'Google Scholar', 'Simon Kornblith', '^http://scholar\.google\.com/scholar',
 'function detectWeb(doc, url) {
 	return "multiple";
 }',
