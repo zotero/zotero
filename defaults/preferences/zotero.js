@@ -1,6 +1,8 @@
 // These are DEFAULT prefs for the INSTALL. You will have to reinstall the extension to see differences!
 
 // Display internal shortcut
+pref("extensions.zotero.debug.log",false);
+pref("extensions.zotero.debug.level",5);
 pref("extensions.zotero.automaticScraperUpdates",true);
 pref("extensions.zotero.cacheTranslatorData",true);
 pref("extensions.zotero.zoteroPaneOnTop",false);

@@ -24,8 +24,6 @@ const ZOTERO_CONFIG = {
 	GUID: 'zotero@chnm.gmu.edu',
 	DB_FILE: 'zotero.sqlite',
 	DB_REBUILD: false, // erase DB and recreate from schema
-	DEBUG_LOGGING: true,
-	DEBUG_TO_CONSOLE: true, // dump debug messages to console rather than (much slower) Debug Logger
 	REPOSITORY_URL: 'http://www.zotero.org/repo',
 	REPOSITORY_CHECK_INTERVAL: 86400, // 24 hours
 	REPOSITORY_RETRY_INTERVAL: 3600 // 1 hour
@@ -36,6 +34,8 @@ const ZOTERO_CONFIG = {
  */
 var Zotero = new function(){
 	var _initialized = false;
+	var _debugLogging;
+	var _debugLevel;
 	var _shutdown = false;
 	var _localizedStringBundle;
 	
@@ -86,6 +86,9 @@ var Zotero = new function(){
 		
 		// Load in the preferences branch for the extension
 		Zotero.Prefs.init();
+		
+		_debugLogging = Zotero.Prefs.get('debug.log');
+		_debugLevel = Zotero.Prefs.get('debug.level');
 		
 		// Load in the extension version from the extension manager
 		var nsIUpdateItem = Components.interfaces.nsIUpdateItem;
@@ -245,14 +248,12 @@ var Zotero = new function(){
 	/*
 	 * Debug logging function
 	 *
-	 * Uses DebugLogger extension available from http://mozmonkey.com/debuglogger/
-	 * if available, otherwise the console (in which case boolean browser.dom.window.dump.enabled
-	 * must be created and set to true in about:config)
+	 * Uses prefs e.z.debug.log and e.z.debug.level (restart required)
 	 *
 	 * Defaults to log level 3 if level not provided
 	 */
 	function debug(message, level) {
-		if (!ZOTERO_CONFIG['DEBUG_LOGGING']){
+		if (!_debugLogging){
 			return false;
 		}
 		
@@ -264,7 +265,14 @@ var Zotero = new function(){
 			level = 3;
 		}
 		
-		if (!ZOTERO_CONFIG['DEBUG_TO_CONSOLE']){
+		// If level above debug.level value, don't display
+		if (level > _debugLevel){
+			return false;
+		}
+		
+		// Note: DebugLogger extension is old and no longer supported -- if there's
+		// a better extension we could switch to that as an option
+		if (false && ZOTERO_CONFIG['DEBUG_TO_CONSOLE']){
 			try {
 				var logManager =
 				Components.classes["@mozmonkey.com/debuglogger/manager;1"]
