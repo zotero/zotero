@@ -70,7 +70,7 @@
 						// Regenerate list
 						for (var tagID in tags){
 							var label = document.createElement('label');
-							label.setAttribute('onclick', "this.parentNode.parentNode.parentNode.parentNode.handleTagClick(this)");
+							label.setAttribute('onclick', "this.parentNode.parentNode.parentNode.handleTagClick(this)");
 							label.className = 'zotero-clicky';
 							label.setAttribute('value', tags[tagID]);
 							tagsToggleDiv.appendChild(label);
