@@ -1,4 +1,4 @@
--- 114
+-- 115
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-11-27 22:45:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-11-27 12:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b3.r1', '', '2006-11-26 09:05:00', 1, 100, 4, 'Amazon', 'Sean Takats', '^http://(?:www\.)amazon', 
 'function detectWeb(doc, url) {
@@ -2577,7 +2577,7 @@ REPLACE INTO translators VALUES ('c54d1932-73ce-dfd4-a943-109380e06574', '1.0.0b
 	}
 }');
 
-REPLACE INTO translators VALUES ('fcf41bed-0cbc-3704-85c7-8062a0068a7a', '1.0.0b3.r1', '', '2006-11-01 16:30:00', 1, 100, 12, 'PubMed', 'Simon Kornblith', '^http://www\.ncbi\.nlm\.nih\.gov/entrez/query\.fcgi\?.*db=PubMed',
+REPLACE INTO translators VALUES ('fcf41bed-0cbc-3704-85c7-8062a0068a7a', '1.0.0b3.r1', '', '2006-11-29 12:00:00', 1, 100, 12, 'PubMed', 'Simon Kornblith', '^http://www\.ncbi\.nlm\.nih\.gov/entrez/query\.fcgi\?.*db=PubMed',
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -2647,6 +2647,10 @@ function detectSearch(item) {
 					title = title.substring(0, title.length-1);
 				}
 				newItem.title = title;
+			}
+			
+			if (article.Pagination.MedlinePgn.length()){
+				newItem.pages = article.Pagination.MedlinePgn.text().toString();
 			}
 			
 			if(article.Journal.length()) {
