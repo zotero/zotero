@@ -20,13 +20,17 @@
     ***** END LICENSE BLOCK *****
 */
 
-Zotero.Search = function(){
+Zotero.Search = function(savedSearchID){
 	this._sql = null;
 	this._sqlParams = null;
 	this._maxSearchConditionID = 0;
 	this._conditions = [];
 	this._savedSearchID = null;
 	this._savedSearchName = null;
+	
+	if (savedSearchID) {
+		this.load(savedSearchID);
+	}
 }
 
 
