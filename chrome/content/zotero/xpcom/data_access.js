@@ -1758,7 +1758,7 @@ Zotero.Item.prototype.toArray = function(){
 				break;
 			
 			// Skip certain fields
-			case 'firstCreator':
+			//case 'firstCreator':
 			case 'numNotes':
 			case 'numAttachments':
 				continue;

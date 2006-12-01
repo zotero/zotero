@@ -1,0 +1,27 @@
+a {
+	color: #000;
+	text-decoration: none;
+}
+
+
+/*
+ * Firefox gets funky with floated elements that span two pages, so we pretend we're a table
+ */
+ul.report {
+	display: table;
+}
+
+ul.report > li {
+	display: table-row;
+	page-break-inside: avoid; /* Waiting on https://bugzilla.mozilla.org/show_bug.cgi?id=132035 */
+}
+
+ul.report > li > span {
+	display: table-cell;
+	border-bottom: 1px solid #000; /* Normal <li> border disappears in table mode */
+	padding: .95em 0;
+}
+
+ul.report > li:last-child > span {
+	border-bottom: none;
+}

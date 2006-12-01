@@ -29,7 +29,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 /*
- *  Constructor the the ItemTreeView object
+ *  Constructor for the ItemTreeView object
  */
 Zotero.ItemTreeView = function(itemGroup, sourcesOnly)
 {
@@ -526,7 +526,7 @@ Zotero.ItemTreeView.prototype.sort = function()
 		// DEBUG: This may be necessary for 1.0.0b2.r1=>1.0.0b2.r2 transition
 		column = this._treebox.columns.getFirstColumn();
 	}
-	var order = column.element.getAttribute('sortDirection') == 'descending';
+	var order = column.element.getAttribute('sortDirection') == 'ascending';
 	
 	if(column.id == 'zotero-items-typeIcon-column')
 	{
@@ -766,6 +766,18 @@ Zotero.ItemTreeView.prototype.rememberSelection = function(selection)
 			this.selection.toggleSelect(this._itemRowMap[selection[i]]);
 	}
 }
+
+Zotero.ItemTreeView.prototype.getSortField = function() {
+	var col = this._treebox.columns.getSortedColumn().id;
+	// zotero.items._________.column
+	return col.substring(13, col.length-7);
+}
+
+
+Zotero.ItemTreeView.prototype.getSortDirection = function() {
+	return this._treebox.columns.getSortedColumn().element.getAttribute('sortDirection');
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 ///

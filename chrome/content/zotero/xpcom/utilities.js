@@ -116,6 +116,47 @@ Zotero.Utilities.prototype.cleanTags = function(x) {
 }
 
 /*
+ * Encode special XML/HTML characters
+ *
+ * Certain entities can be inserted manually:
+ *
+ *  <ZOTEROBREAK/> => <br/>
+ *  <ZOTEROHELLIP/> => &hellip;
+ */
+Zotero.Utilities.prototype.htmlSpecialChars = function(str) {
+	if (typeof str != 'string') {
+		throw "htmlSpecialChars: argument must be a string";
+	}
+	
+	if (!str) {
+		return '';
+	}
+	
+	var chars = ['&', '"',"'",'<','>'];
+	var entities = ['amp', 'quot', 'apos', 'lt', 'gt'];
+	
+	var newString = str;
+	for (var i = 0; i < chars.length; i++) {
+		var re = new RegExp(chars[i], 'g');
+		newString = newString.replace(re, '&' + entities[i] + ';');
+	}
+	
+	newString = newString.replace(/&lt;ZOTERO([^\/]+)\/&gt;/g, function (str, p1, offset, s) {
+		switch (p1) {
+			case 'BREAK':
+				return '<br/>';
+			case 'HELLIP':
+				return '&hellip;';
+			default:
+				return p1;
+		}
+	});
+	
+	return newString;
+}
+
+
+/*
  * Test if a string is an integer
  */
 Zotero.Utilities.prototype.isInt = function(x) {

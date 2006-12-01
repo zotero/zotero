@@ -1,0 +1,107 @@
+/* Fonts */
+li, li > p {
+	font-family: Georgia, Times New Roman, Times, serif;
+	font-size: .95em;
+}
+h2 {
+	font-size: 1.3em;
+	margin: .4em 0;
+}
+h3 {
+	font-size: 1.05em;
+}
+th, td {
+	font-size: .95em;
+}
+
+ul {
+	margin: 0;
+	padding: 0;
+}
+ul li {
+	list-style: none;
+}
+
+
+/* Line between items */
+ul.report > li {
+	display: block;
+	border-bottom: 1px #333 solid;
+	padding: .95em 0;
+}
+ul.report > li:after {
+    content: ".";
+    display: block;
+    height: 0;
+    clear: both;
+    visibility: hidden;
+}
+ul.report > li:first-child {
+	padding-top: 0;
+}
+ul.report > li:last-child {
+	border-bottom: none;
+}
+
+
+/* Metadata table */
+table {
+	border: 1px #ccc solid;
+	float: right;
+	width: 35%;
+	margin: .1em 0 .75em 1.5em;
+	padding: .2em .3em;
+	background: #fff;
+}
+th {
+	vertical-align: top;
+	text-align: right;
+	padding-right: .1em;
+	white-space: nowrap;
+}
+th:after {
+	content: ':';
+}
+
+
+/* Tags and child notes */
+ul ul {
+	padding: 0 .5em;
+}
+h3 {
+	margin-bottom: .4em;
+}
+h3:after {
+	content: ':';
+}
+
+
+/* Display tags as comma-separated lists */
+ul.tags li {
+	display: inline;
+}
+ul.tags li:not(:last-child):after {
+	content: ', ';
+}
+
+
+/* Child notes */
+ul.notes {
+	margin-left: 1em;
+}
+ul.notes li {
+	display: inline;
+}
+ul.notes li:first-child p:first-child {
+	margin-top: 1em;
+}
+ul.notes li p:first-child {
+	margin-top: .7em;
+	display: list-item;
+	list-style: square outside;
+}
+
+ul.notes li p, li.note p {
+	white-space: -moz-pre-wrap;
+	
+}
