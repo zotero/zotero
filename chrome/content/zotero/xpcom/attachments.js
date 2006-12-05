@@ -376,6 +376,20 @@ Zotero.Attachments = new function(){
 				}
 				catch (e) {
 					Zotero.DB.rollbackTransaction();
+					
+					try {
+						// Clean up
+						if (itemID) {
+							var destDir = Zotero.getStorageDirectory();
+							destDir.append(itemID);
+							if (destDir.exists()) {
+								destDir.remove(true);
+							}
+						}
+					}
+					catch (e) {}
+					
+					throw (e);
 				}
 				
 				Zotero.Fulltext.indexDocument(document, itemID);
