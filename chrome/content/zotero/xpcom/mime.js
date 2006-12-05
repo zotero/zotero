@@ -26,6 +26,7 @@ Zotero.MIME = new function(){
 	this.sniffForBinary = sniffForBinary;
 	this.getMIMETypeFromData = getMIMETypeFromData;
 	this.getMIMETypeFromFile = getMIMETypeFromFile;
+	this.hasNativeHandler = hasNativeHandler;
 	this.hasInternalHandler = hasInternalHandler;
 	this.fileHasInternalHandler = fileHasInternalHandler;
 	
@@ -134,8 +135,8 @@ Zotero.MIME = new function(){
 	
 	
 	/*
-	 * Determine if a MIME type can be handled internally (natively or with plugins)
-	 * or if it needs to be passed off to an external helper app
+	 * Determine if a MIME type can be handled natively
+	 * or if it needs to be passed off to a plugin or external helper app
 	 *
 	 * ext is an optional extension hint (only needed for text/plain files
 	 * that should be forced to open externally)
@@ -146,7 +147,7 @@ Zotero.MIME = new function(){
 	 * Note: nsIMIMEInfo provides a hasDefaultHandler() method, but it doesn't
 	 * do what we need
 	 */
-	function hasInternalHandler(mimeType, ext){
+	function hasNativeHandler(mimeType, ext) {
 		if (mimeType=='text/plain'){
 			if (this.isExternalTextExtension(ext)){
 				Zotero.debug('text/plain file has extension that should be handled externally');
@@ -158,6 +159,22 @@ Zotero.MIME = new function(){
 		if (_nativeMIMETypes[mimeType]){
 			Zotero.debug('MIME type ' + mimeType + ' can be handled natively');
 			return true;
+		}
+		
+		return null;
+	}
+	
+	
+	/*
+	 * Determine if a MIME type can be handled internally
+	 * or if it needs to be passed off to an external helper app
+	 *
+	 * Similar to hasNativeHandler() but also includes plugins
+	 */
+	function hasInternalHandler(mimeType, ext) {
+		var isNative = hasNativeHandler(mimeType, ext);
+		if (isNative !== null) {
+			return isNative;
 		}
 		
 		// Is there a better way to get to navigator?

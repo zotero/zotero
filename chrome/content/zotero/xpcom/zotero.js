@@ -1148,16 +1148,46 @@ Zotero.Browser = new function() {
 }
 
 
-Zotero.WebProgressFinishListener = function(onFinish){
-		this.onStateChange = function(wp, req, stateFlags, status){
-			if ((stateFlags & Components.interfaces.nsIWebProgressListener.STATE_STOP)
-				&& (stateFlags & Components.interfaces.nsIWebProgressListener.STATE_IS_NETWORK)){
-				onFinish();
+/*
+ * Implements nsIWebProgressListener
+ *
+ * For plugin content, onStateChange doesn't seem to be called after the document
+ * finishes loading, so the useProgress flag can be used to run onFinish()
+ * when all the content of the request has been loaded -- this should only be
+ * used for single file requests (generally, things handled by plugins)
+ */
+Zotero.WebProgressFinishListener = function(onFinish, useProgress, wbp) {
+	var _finished = false;
+	
+	this.onStateChange = function(wp, req, stateFlags, status) {
+		if ((stateFlags & Components.interfaces.nsIWebProgressListener.STATE_STOP)
+				&& (stateFlags & Components.interfaces.nsIWebProgressListener.STATE_IS_NETWORK)) {
+			if (useProgress) {
+				Zotero.debug('WebProgressFinishListener: useProgress set but STOP_STOP and STATE_IS_NETWORK were reached', 2);
+				if (_finished) {
+					return;
+				}
+				else {
+					_finished = true;
+				}
 			}
+			onFinish();
 		}
-		
-		this.onLocationChange = function(){}
-		this.onProgressChange = function(){}
-		this.onSecurityChange = function(){}
-		this.onStatusChange = function(){}
+	}
+	
+	this.onLocationChange = function() {}
+	
+	this.onProgressChange = function(wp, req, cur, max, curTotal, maxTotal) {
+		// DEBUG: This will never complete if the file size (maxTotal) isn't
+		// available, which seems to be the case with local files and is
+		// presumably the case with remote servers that don't send the file size.
+		//Zotero.debug('Current total: ' + curTotal + '  Max total: ' + maxTotal);
+		if (!_finished && useProgress && (curTotal == maxTotal)) {
+			_finished = true;
+			onFinish();
+		}
+	}
+	
+	this.onSecurityChange = function() {}
+	this.onStatusChange = function(wp, req, st, msg) {}
 }

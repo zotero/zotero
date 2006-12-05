@@ -224,11 +224,35 @@ Zotero.Attachments = new function(){
 					file.append(fileName);
 					
 					wbp.progressListener = new Zotero.WebProgressFinishListener(function(){
-						_addToDB(file, url, title, Zotero.Attachments.LINK_MODE_IMPORTED_URL,
-							mimeType, null, sourceItemID, itemID);
-						
-						Zotero.DB.commitTransaction();
+						try {
+							_addToDB(file, url, title, Zotero.Attachments.LINK_MODE_IMPORTED_URL,
+								mimeType, null, sourceItemID, itemID);
+						}
+						catch (e) {
+							// Clean up
+							if (itemID) {
+								var item = Zotero.Items.get(itemID);
+								if (item) {
+									item.erase();
+								}
+								
+								try {
+									var destDir = Zotero.getStorageDirectory();
+									destDir.append(itemID);
+									if (destDir.exists()) {
+										destDir.remove(true);
+									}
+								}
+								catch (e) {}
+							}
+							
+							throw (e);
+						}
 					});
+					
+					// The attachment is still incomplete here, but we can't risk
+					// leaving the transaction open if the callback never triggers
+					Zotero.DB.commitTransaction();
 					
 					wbp.saveURI(nsIURL, null, null, null, null, file);	
 				}
@@ -282,7 +306,7 @@ Zotero.Attachments = new function(){
 	function linkFromDocument(document, sourceItemID, parentCollectionIDs){
 		Zotero.debug('Linking attachment from document');
 		
-		var url = document.location;
+		var url = document.location.href;
 		var title = document.title; // TODO: don't use Mozilla-generated title for images, etc.
 		var mimeType = document.contentType;
 		var charsetID = Zotero.CharacterSets.getID(document.characterSet);
@@ -312,10 +336,20 @@ Zotero.Attachments = new function(){
 	function importFromDocument(document, sourceItemID, forceTitle, parentCollectionIDs){
 		Zotero.debug('Importing attachment from document');
 		
-		var url = document.location;
+		var url = document.location.href;
 		var title = forceTitle ? forceTitle : document.title;
 		var mimeType = document.contentType;
 		var charsetID = Zotero.CharacterSets.getID(document.characterSet);
+		var hasNativeHandler = Zotero.MIME.hasNativeHandler(mimeType, _getExtensionFromURL(url))
+		
+		// TODO: make this work -- with local plugin files, onStateChange in the
+		// nsIWebBrowserPersist's nsIWebProgressListener never completes and
+		// onProgressChange returns -1 for maxTotal, which prevents it from
+		// triggering the callback.
+		if (!hasNativeHandler && url.substr(0, 4) == 'file') {
+			Zotero.debug('Import of loaded files from plugins is not supported');
+			return false;
+		}
 		
 		const nsIWBP = Components.interfaces.nsIWebBrowserPersist;
 		var wbp = Components
@@ -360,6 +394,8 @@ Zotero.Attachments = new function(){
 			
 			wbp.progressListener = new Zotero.WebProgressFinishListener(function(){
 				try {
+					Zotero.DB.beginTransaction();
+					
 					_addToDB(file, url, title, Zotero.Attachments.LINK_MODE_IMPORTED_URL, mimeType,
 						charsetID, sourceItemID, itemID);
 					
@@ -377,23 +413,32 @@ Zotero.Attachments = new function(){
 				catch (e) {
 					Zotero.DB.rollbackTransaction();
 					
-					try {
-						// Clean up
-						if (itemID) {
+					// Clean up
+					if (itemID) {
+						var item = Zotero.Items.get(itemID);
+						if (item) {
+							item.erase();
+						}
+						
+						try {
 							var destDir = Zotero.getStorageDirectory();
 							destDir.append(itemID);
 							if (destDir.exists()) {
 								destDir.remove(true);
 							}
 						}
+						catch (e) {}
 					}
-					catch (e) {}
 					
 					throw (e);
 				}
 				
 				Zotero.Fulltext.indexDocument(document, itemID);
-			});
+			}, !hasNativeHandler);
+			
+			// The attachment is still incomplete here, but we can't risk
+			// leaving the transaction open if the callback never triggers
+			Zotero.DB.commitTransaction();
 			
 			wbp.saveDocument(document, file, destDir, mimeType, encodingFlags, false);
 		}
@@ -430,13 +475,21 @@ Zotero.Attachments = new function(){
 			try {
 				var ext = Components.classes["@mozilla.org/mime;1"]
 					.getService(Components.interfaces.nsIMIMEService)
-					.getPrimaryExtension(mimeType, nsIURL.fileExt ? nsIURL.fileExt : null);
+					.getPrimaryExtension(mimeType, nsIURL.fileExtension);
 			}
 			// getPrimaryExtension doesn't work on Linux
 			catch (e) {}
 		}
 		
 		return nsIURL.host + (ext ? '.' + ext : '');
+	}
+	
+	
+	function _getExtensionFromURL(url) {
+		var nsIURL = Components.classes["@mozilla.org/network/standard-url;1"]
+					.createInstance(Components.interfaces.nsIURL);
+		nsIURL.spec = url;
+		return nsIURL.fileExtension;
 	}
 	
 	
