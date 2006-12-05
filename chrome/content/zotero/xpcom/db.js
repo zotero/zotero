@@ -320,6 +320,11 @@ Zotero.DB = new function(){
 	function rollbackTransaction(){
 		var db = _getDBConnection();
 		
+		if (!db.transactionInProgress) {
+			Zotero.debug("Transaction is not in progress in rollbackTransaction()", 2);
+			return;
+		}
+		
 		if (_transactionNestingLevel){
 			_transactionNestingLevel--;
 			_transactionRollback = true;
