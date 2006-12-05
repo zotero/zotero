@@ -77,14 +77,18 @@ Zotero.Attachments = new function(){
 			// hmph
 			Zotero.DB.rollbackTransaction();
 			
-			// Clean up
-			if (itemID){
-				var itemDir = Zotero.getStorageDirectory();
-				itemDir.append(itemID);
-				if (itemDir.exists()){
-					itemDir.remove(true);
+			try {
+				// Clean up
+				if (itemID){
+					var itemDir = Zotero.getStorageDirectory();
+					itemDir.append(itemID);
+					if (itemDir.exists()){
+						itemDir.remove(true);
+					}
 				}
 			}
+			catch (e) {}
+			
 			throw (e);
 		}
 		return itemID;
@@ -145,14 +149,18 @@ Zotero.Attachments = new function(){
 		catch (e){
 			Zotero.DB.rollbackTransaction();
 			
-			// Clean up
-			if (itemID){
-				var itemDir = Zotero.getStorageDirectory();
-				itemDir.append(itemID);
-				if (itemDir.exists()){
-					itemDir.remove(true);
+			try {
+				// Clean up
+				if (itemID){
+					var itemDir = Zotero.getStorageDirectory();
+					itemDir.append(itemID);
+					if (itemDir.exists()){
+						itemDir.remove(true);
+					}
 				}
 			}
+			catch (e) {}
+			
 			throw (e);
 		}
 		return itemID;
@@ -226,6 +234,19 @@ Zotero.Attachments = new function(){
 				}
 				catch (e){
 					Zotero.DB.rollbackTransaction();
+					
+					try {
+						// Clean up
+						if (itemID) {
+							var destDir = Zotero.getStorageDirectory();
+							destDir.append(itemID);
+							if (destDir.exists()) {
+								destDir.remove(true);
+							}
+						}
+					}
+					catch (e) {}
+					
 					throw (e);
 				}
 			}
@@ -305,56 +326,80 @@ Zotero.Attachments = new function(){
 		
 		Zotero.DB.beginTransaction();
 		
-		// Create a new attachment
-		var attachmentItem = Zotero.Items.getNewItemByType(Zotero.ItemTypes.getID('attachment'));
-		attachmentItem.setField('title', title);
-		attachmentItem.setField('url', url);
-		attachmentItem.setField('accessDate', "CURRENT_TIMESTAMP");
-		attachmentItem.save();
-		var itemID = attachmentItem.getID();
-		
-		// Create a new folder for this item in the storage directory
-		var destDir = Zotero.getStorageDirectory();
-		destDir.append(itemID);
-		destDir.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0755);
-		
-		var file = Components.classes["@mozilla.org/file/local;1"].
-				createInstance(Components.interfaces.nsILocalFile);
-		file.initWithFile(destDir);
-		
-		var fileName = _getFileNameFromURL(url, mimeType);
-		
-		// This is a hack to make sure the file is opened in the browser when
-		// we use loadURI(), since Firefox's internal detection mechanisms seem
-		// to sometimes get confused
-		// 		(see #192, https://chnm.gmu.edu/trac/zotero/ticket/192)
-		if (mimeType=='text/html' &&
-				(fileName.substr(fileName.length-5)!='.html'
-					&& fileName.substr(fileName.length-4)!='.htm')){
-			fileName += '.html';
-		}
-		
-		file.append(fileName);
-		
-		wbp.progressListener = new Zotero.WebProgressFinishListener(function(){
-			_addToDB(file, url, title, Zotero.Attachments.LINK_MODE_IMPORTED_URL, mimeType,
-				charsetID, sourceItemID, itemID);
+		try {
+			// Create a new attachment
+			var attachmentItem = Zotero.Items.getNewItemByType(Zotero.ItemTypes.getID('attachment'));
+			attachmentItem.setField('title', title);
+			attachmentItem.setField('url', url);
+			attachmentItem.setField('accessDate', "CURRENT_TIMESTAMP");
+			attachmentItem.save();
+			var itemID = attachmentItem.getID();
 			
-			// Add to collections
-			if (parentCollectionIDs){
-				var ids = Zotero.flattenArguments(parentCollectionIDs);
-				for each(var id in ids){
-					var col = Zotero.Collections.get(id);
-					col.addItem(itemID);
-				}
+			// Create a new folder for this item in the storage directory
+			var destDir = Zotero.getStorageDirectory();
+			destDir.append(itemID);
+			destDir.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0755);
+			
+			var file = Components.classes["@mozilla.org/file/local;1"].
+					createInstance(Components.interfaces.nsILocalFile);
+			file.initWithFile(destDir);
+			
+			var fileName = _getFileNameFromURL(url, mimeType);
+			
+			// This is a hack to make sure the file is opened in the browser when
+			// we use loadURI(), since Firefox's internal detection mechanisms seem
+			// to sometimes get confused
+			// 		(see #192, https://chnm.gmu.edu/trac/zotero/ticket/192)
+			if (mimeType=='text/html' &&
+					(fileName.substr(fileName.length-5)!='.html'
+						&& fileName.substr(fileName.length-4)!='.htm')){
+				fileName += '.html';
 			}
 			
-			Zotero.DB.commitTransaction();
+			file.append(fileName);
 			
-			Zotero.Fulltext.indexDocument(document, itemID);
-		});
-		
-		wbp.saveDocument(document, file, destDir, mimeType, encodingFlags, false);
+			wbp.progressListener = new Zotero.WebProgressFinishListener(function(){
+				try {
+					_addToDB(file, url, title, Zotero.Attachments.LINK_MODE_IMPORTED_URL, mimeType,
+						charsetID, sourceItemID, itemID);
+					
+					// Add to collections
+					if (parentCollectionIDs){
+						var ids = Zotero.flattenArguments(parentCollectionIDs);
+						for each(var id in ids){
+							var col = Zotero.Collections.get(id);
+							col.addItem(itemID);
+						}
+					}
+					
+					Zotero.DB.commitTransaction();
+				}
+				catch (e) {
+					Zotero.DB.rollbackTransaction();
+				}
+				
+				Zotero.Fulltext.indexDocument(document, itemID);
+			});
+			
+			wbp.saveDocument(document, file, destDir, mimeType, encodingFlags, false);
+		}
+		catch (e) {
+			Zotero.DB.rollbackTransaction();
+			
+			try {
+				// Clean up
+				if (itemID) {
+					var destDir = Zotero.getStorageDirectory();
+					destDir.append(itemID);
+					if (destDir.exists()) {
+						destDir.remove(true);
+					}
+				}
+			}
+			catch (e) {}
+			
+			throw (e);
+		}
 	}
 	
 	
@@ -368,9 +413,13 @@ Zotero.Attachments = new function(){
 		}
 		
 		if (mimeType){
-			var ext = Components.classes["@mozilla.org/mime;1"]
-				.getService(Components.interfaces.nsIMIMEService)
-				.getPrimaryExtension(mimeType, nsIURL.fileExt ? nsIURL.fileExt : null);
+			try {
+				var ext = Components.classes["@mozilla.org/mime;1"]
+					.getService(Components.interfaces.nsIMIMEService)
+					.getPrimaryExtension(mimeType, nsIURL.fileExt ? nsIURL.fileExt : null);
+			}
+			// getPrimaryExtension doesn't work on Linux
+			catch (e) {}
 		}
 		
 		return nsIURL.host + (ext ? '.' + ext : '');
