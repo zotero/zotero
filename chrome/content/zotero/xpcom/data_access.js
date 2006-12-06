@@ -1255,7 +1255,6 @@ Zotero.Item.prototype.getFile = function(row){
 	if (row['linkMode']==Zotero.Attachments.LINK_MODE_IMPORTED_URL ||
 			row['linkMode']==Zotero.Attachments.LINK_MODE_IMPORTED_FILE){
 		try {
-			Zotero.debug(row['path']);
 			var storageDir = Zotero.getStorageDirectory();
 			storageDir.QueryInterface(Components.interfaces.nsILocalFile);
 			file.setRelativeDescriptor(storageDir, row['path']);

@@ -45,6 +45,7 @@ Zotero.MIME = new function(){
 	// DEBUG: There's definitely a better way of getting these
 	var _nativeMIMETypes = {
 		'text/html': true,
+		'text/css': true,
 		'image/jpeg': true,
 		'image/gif': true,
 		'text/xml': true,
@@ -102,23 +103,25 @@ Zotero.MIME = new function(){
 	 * ext is an optional file extension hint if data sniffing is unsuccessful
 	 */
 	function getMIMETypeFromData(str, ext){
-		var mimeType = this.sniffForMIMEType(str);
+		var mimeType = sniffForMIMEType(str);
 		if (mimeType){
 			Zotero.debug('Detected MIME type ' + mimeType);
 			return mimeType;
 		}
 		
 		try {
-			var mimeType = Components.classes["@mozilla.org/uriloader/external-helper-app-service;1"]
-				.getService(Components.interfaces.nsIMIMEService).getTypeFromExtension(ext);
-			Zotero.debug('Got MIME type ' + mimeType + ' from extension');
-			return mimeType;
+			if (ext) {
+				var mimeType = Components.classes["@mozilla.org/uriloader/external-helper-app-service;1"]
+					.getService(Components.interfaces.nsIMIMEService).getTypeFromExtension(ext);
+				Zotero.debug('Got MIME type ' + mimeType + ' from extension');
+				return mimeType;
+			}
 		}
-		catch (e){
-			var mimeType = this.sniffForBinary(str);
-			Zotero.debug('Cannot determine MIME type -- settling for ' + mimeType);
-			return mimeType;
-		}
+		catch (e) {}
+		
+		var mimeType = sniffForBinary(str);
+		Zotero.debug('Cannot determine MIME type from magic number or extension -- settling for ' + mimeType);
+		return mimeType;
 	}
 	
 	
@@ -130,7 +133,7 @@ Zotero.MIME = new function(){
 		var str = Zotero.File.getSample(file);
 		var ext = Zotero.File.getExtension(file);
 		
-		return this.getMIMETypeFromData(str, ext);
+		return getMIMETypeFromData(str, ext);
 	}
 	
 	
@@ -149,7 +152,7 @@ Zotero.MIME = new function(){
 	 */
 	function hasNativeHandler(mimeType, ext) {
 		if (mimeType=='text/plain'){
-			if (this.isExternalTextExtension(ext)){
+			if (isExternalTextExtension(ext)){
 				Zotero.debug('text/plain file has extension that should be handled externally');
 				return false;
 			}
@@ -195,9 +198,9 @@ Zotero.MIME = new function(){
 	
 	
 	function fileHasInternalHandler(file){
-		var mimeType = this.getMIMETypeFromFile(file);
+		var mimeType = getMIMETypeFromFile(file);
 		var ext = Zotero.File.getExtension(file);
-		return this.hasInternalHandler(mimeType, ext);
+		return hasInternalHandler(mimeType, ext);
 	}
 	
 	
