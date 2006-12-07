@@ -26,6 +26,7 @@ Zotero.MIME = new function(){
 	this.sniffForBinary = sniffForBinary;
 	this.getMIMETypeFromData = getMIMETypeFromData;
 	this.getMIMETypeFromFile = getMIMETypeFromFile;
+	this.isDocumentType = isDocumentType;
 	this.hasNativeHandler = hasNativeHandler;
 	this.hasInternalHandler = hasInternalHandler;
 	this.fileHasInternalHandler = fileHasInternalHandler;
@@ -40,6 +41,14 @@ Zotero.MIME = new function(){
 		["#!", 'text/plain'],
 		["<?xml", 'text/xml']
 	];
+	
+	// MIME types to be saved as documents
+	var _documentMIMETypes = {
+		'text/html': true,
+		'application/xhtml+xml': true,
+		'text/xml': true,
+		'application/xml': true
+	};
 	
 	// MIME types handled natively by Gecko
 	// DEBUG: There's definitely a better way of getting these
@@ -134,6 +143,11 @@ Zotero.MIME = new function(){
 		var ext = Zotero.File.getExtension(file);
 		
 		return getMIMETypeFromData(str, ext);
+	}
+	
+	
+	function isDocumentType(mimeType) {
+		return _documentMIMETypes[mimeType] ? true : false;
 	}
 	
 	

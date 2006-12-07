@@ -52,6 +52,12 @@
 		<menuitem id="zotero-context-add-to-new-note" class="menu-iconic"
 			label="&zotero.contextMenu.addTextToNewNote;"
 			oncommand="ZoteroPane.newNote(false, false, window.content.getSelection().toString())"/>
+		<menuitem id="zotero-context-save-link-as-snapshot" class="menu-iconic"
+			label="&zotero.contextMenu.saveLinkAsSnapshot;"
+			oncommand="Zotero.Attachments.importFromURL(window.gContextMenu.linkURL)"/>
+		<menuitem id="zotero-context-save-image-as-snapshot" class="menu-iconic"
+			label="&zotero.contextMenu.saveImageAsSnapshot;"
+			oncommand="Zotero.Attachments.importFromURL(window.gContextMenu.onImage ? window.gContextMenu.imageURL : window.gContextMenu.bgImageURL)"/>
 	</popup>
 	
 	<vbox id="appcontent">

@@ -159,6 +159,16 @@ Zotero.Fulltext = new function(){
 		
 		Zotero.debug("Indexing document '" + document.title + "'");
 		
+		if (document.contentType.indexOf('text/') !== 0) {
+			Zotero.debug('File is not text in indexDocument()', 2);
+			return false;
+		}
+		
+		if (!document.characterSet){
+			Zotero.debug("Text file didn't have charset in indexFile()", 1);
+			return false;
+		}
+		
 		var text = document.body.innerHTML.replace(/(>)/g, '$1 ');
 		text = HTMLToText(text);
 		indexString(text, document.characterSet, itemID);

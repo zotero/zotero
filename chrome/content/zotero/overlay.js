@@ -874,9 +874,34 @@ var ZoteroPane = new function()
 			}
 		}
 		
+		var menuitem = document.getElementById("zotero-context-save-link-as-snapshot");
+		if (menuitem) {
+			if (window.gContextMenu.onLink) {
+				menuitem.hidden = false;
+				showing = true;
+			}
+			else {
+				menuitem.hidden = true;
+			}
+		}
+		
+		var menuitem = document.getElementById("zotero-context-save-image-as-snapshot");
+		if (menuitem) {
+			// Not using window.gContextMenu.hasBGImage -- if the user wants it,
+			// they can use the Firefox option to view and then import from there
+			if (window.gContextMenu.onImage) {
+				menuitem.hidden = false;
+				showing = true;
+			}
+			else {
+				menuitem.hidden = true;
+			}
+		}
+		
 		var separator = document.getElementById("zotero-context-separator");
 		separator.hidden = !showing;
 	}
+	
 	
 	function newNote(popup, parent, text)
 	{

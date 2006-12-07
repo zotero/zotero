@@ -178,9 +178,9 @@ Zotero.Attachments = new function(){
 			nsIURL.spec = url;
 			var ext = nsIURL.fileExtension;
 			
-			// If we can load this internally, use a hidden browser (so we can
-			// get the charset and title)
-			if (Zotero.MIME.hasInternalHandler(mimeType, ext)){
+			// If we can load this natively, use a hidden browser (so we can
+			// get the charset and title and index the document)
+			if (Zotero.MIME.hasNativeHandler(mimeType, ext)){
 				var browser = Zotero.Browser.createHiddenBrowser();
 				browser.addEventListener("pageshow", function(){
 					Zotero.Attachments.importFromDocument(browser.contentDocument, sourceItemID);
@@ -254,7 +254,7 @@ Zotero.Attachments = new function(){
 					// leaving the transaction open if the callback never triggers
 					Zotero.DB.commitTransaction();
 					
-					wbp.saveURI(nsIURL, null, null, null, null, file);	
+					wbp.saveURI(nsIURL, null, null, null, null, file);
 				}
 				catch (e){
 					Zotero.DB.rollbackTransaction();
@@ -340,15 +340,17 @@ Zotero.Attachments = new function(){
 		var title = forceTitle ? forceTitle : document.title;
 		var mimeType = document.contentType;
 		var charsetID = Zotero.CharacterSets.getID(document.characterSet);
-		var hasNativeHandler = Zotero.MIME.hasNativeHandler(mimeType, _getExtensionFromURL(url))
 		
-		// TODO: make this work -- with local plugin files, onStateChange in the
-		// nsIWebBrowserPersist's nsIWebProgressListener never completes and
-		// onProgressChange returns -1 for maxTotal, which prevents it from
-		// triggering the callback.
-		if (!hasNativeHandler && url.substr(0, 4) == 'file') {
-			Zotero.debug('Import of loaded files from plugins is not supported');
-			return false;
+		if (!forceTitle) {
+			// Remove e.g. " - Scaled (-17%)" from end of images saved from links,
+			// though I'm not sure why it's getting added to begin with
+			if (mimeType.indexOf('image/') === 0) {
+				title = title.replace(/(.+ \([^,]+, [0-9]+x[0-9]+[^\)]+\)) - .+/, "$1" );
+			}
+			// If not native type, strip mime type data in parens
+			else if (!Zotero.MIME.hasNativeHandler(mimeType, _getExtensionFromURL(url))) {
+				title = title.replace(/(.+) \([a-z]+\/[^\)]+\)/, "$1" );
+			}
 		}
 		
 		const nsIWBP = Components.interfaces.nsIWebBrowserPersist;
@@ -434,13 +436,23 @@ Zotero.Attachments = new function(){
 				}
 				
 				Zotero.Fulltext.indexDocument(document, itemID);
-			}, !hasNativeHandler);
+			});
 			
 			// The attachment is still incomplete here, but we can't risk
 			// leaving the transaction open if the callback never triggers
 			Zotero.DB.commitTransaction();
 			
-			wbp.saveDocument(document, file, destDir, mimeType, encodingFlags, false);
+			if (Zotero.MIME.isDocumentType(mimeType)) {
+				Zotero.debug('Saving with saveDocument()');
+				wbp.saveDocument(document, file, destDir, mimeType, encodingFlags, false);
+			}
+			else {
+				Zotero.debug('Saving with saveURI()');
+				var ioService = Components.classes["@mozilla.org/network/io-service;1"]
+					.getService(Components.interfaces.nsIIOService);
+				var nsIURL = ioService.newURI(url, null, null);
+				wbp.saveURI(nsIURL, null, null, null, null, file);
+			}
 		}
 		catch (e) {
 			Zotero.DB.rollbackTransaction();
