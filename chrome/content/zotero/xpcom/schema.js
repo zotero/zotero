@@ -681,6 +681,16 @@ Zotero.Schema = new function(){
 					Zotero.DB.query("CREATE INDEX translators_type ON translators(translatorType)");
 					Zotero.DB.query("DROP TABLE translatorsTemp");
 				}
+				
+				if (i==13) {
+					Zotero.DB.query("CREATE TABLE itemNotesTemp (itemID INT, sourceItemID INT, note TEXT, PRIMARY KEY (itemID), FOREIGN KEY (itemID) REFERENCES items(itemID), FOREIGN KEY (sourceItemID) REFERENCES items(itemID))");
+					Zotero.DB.query("INSERT INTO itemNotesTemp SELECT * FROM itemNotes");
+					Zotero.DB.query("DROP TABLE itemNotes");
+					Zotero.DB.query("CREATE TABLE itemNotes (\n    itemID INT,\n    sourceItemID INT,\n    note TEXT,\n    isAbstract INT DEFAULT NULL,\n    PRIMARY KEY (itemID),\n    FOREIGN KEY (itemID) REFERENCES items(itemID),\n    FOREIGN KEY (sourceItemID) REFERENCES items(itemID)\n);");
+					Zotero.DB.query("INSERT INTO itemNotes SELECT itemID, sourceItemID, note, NULL FROM itemNotesTemp");
+					Zotero.DB.query("CREATE INDEX itemNotes_sourceItemID ON itemNotes(sourceItemID)");
+					Zotero.DB.query("DROP TABLE itemNotesTemp");
+				}
 			}
 			
 			_updateSchema('userdata');

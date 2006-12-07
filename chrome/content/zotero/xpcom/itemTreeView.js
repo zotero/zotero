@@ -347,6 +347,10 @@ Zotero.ItemTreeView.prototype.getImageSrc = function(row, col)
 			}
 		}
 		
+		if (itemType == 'note' && item.ref.isAbstract()) {
+			itemType = 'note-abstract';
+		}
+		
 		// DEBUG: only have icons for some types so far
 		switch (itemType)
 		{
@@ -371,6 +375,7 @@ Zotero.ItemTreeView.prototype.getImageSrc = function(row, col)
 			case 'map':
 			case 'newspaperArticle':
 			case 'note':
+			case 'note-abstract':
 			case 'podcast':
 			case 'radioBroadcast':
 			case 'report':
@@ -458,7 +463,7 @@ Zotero.ItemTreeView.prototype.toggleOpenState = function(row)
 		
 		var newRows;
 		if(attachments && notes)
-			newRows = attachments.concat(notes);
+			newRows = notes.concat(attachments);
 		else if(attachments)
 			newRows = attachments;
 		else if(notes)
