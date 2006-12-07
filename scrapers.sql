@@ -1,4 +1,4 @@
--- 115
+-- 116
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-11-27 12:00:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-12-06 23:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b3.r1', '', '2006-11-26 09:05:00', 1, 100, 4, 'Amazon', 'Sean Takats', '^http://(?:www\.)amazon', 
 'function detectWeb(doc, url) {
@@ -1007,21 +1007,44 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('add7c71c-21f3-ee14-d188-caf9da12728b', '1.0.0b3.r1', '', '2006-10-25 18:40:43', 1, 100, 4, 'SIRSI 2003+', 'Simon Kornblith', '/uhtbin/cgisirsi',
+REPLACE INTO translators VALUES ('add7c71c-21f3-ee14-d188-caf9da12728b', '1.0.0b3.r1', '', '2006-12-06 23:30:00', 1, 100, 4, 'SIRSI', 'Sean Takats', '/uhtbin/cgisirsi',
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == ''x'') return namespace; else return null;
 	} : null;
 	
+	
 	var xpath = ''//tr[th[@class="viewmarctags"]][td[@class="viewmarctags"]]'';
 	if(doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+		Zotero.Utilities.debug("SIRSI detectWeb: viewmarctags");
 		return "book";
 	}
+	var xpath = ''//input[@name="VOPTIONS"]'';
+	if(doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+		Zotero.Utilities.debug("SIRSI detectWeb: VOPTIONS");
+		return "book";
+	}
+	var elmts = doc.evaluate(''/html/body/form//text()'', doc, nsResolver,
+	                         XPathResult.ANY_TYPE, null);
+	while(elmt = elmts.iterateNext()) {
+		if(Zotero.Utilities.superCleanString(elmt.nodeValue) == "Viewing record") {
+			Zotero.Utilities.debug("SIRSI detectWeb: Viewing record");
+			return "book";
+		}
+	}
+	
 	var xpath = ''//td[@class="searchsum"]/table'';
 	if(doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+		Zotero.Utilities.debug("SIRSI detectWeb: searchsum");
 		return "multiple";
 	}
+	var xpath = ''//form[@name="hitlist"]/table/tbody/tr'';
+	if(doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+		Zotero.Utilities.debug("SIRSI detectWeb: hitlist");
+		return "multiple";
+	}
+	//	var xpath = ''//input[@type="checkbox"]'' 	
 }',
 'function scrape(doc) {
 	var namespace = doc.documentElement.namespaceURI;
@@ -1102,50 +1125,175 @@ REPLACE INTO translators VALUES ('add7c71c-21f3-ee14-d188-caf9da12728b', '1.0.0b
 	return true;
 }
 
-function doWeb(doc, url) {
+function doWeb(doc, url){
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == ''x'') return namespace; else return null;
 	} : null;
-
-	if(!scrape(doc)) {
-		var checkboxes = new Array();
-		var urls = new Array();
-		var availableItems = new Array();
-		
-		var tableRows = doc.evaluate(''//td[@class="searchsum"]/table[//input[@value="Details"]]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
-		var tableRow = tableRows.iterateNext();		// skip first row
-		// Go through table rows
-		while(tableRow = tableRows.iterateNext()) {
-			var input = doc.evaluate(''.//input[@value="Details"]'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-			var text = Zotero.Utilities.getNodeString(doc, tableRow, ''.//label/strong//text()'', nsResolver);
-			if(text) {
-				availableItems[input.name] = text;
+	
+	var sirsiNew = true; //toggle between SIRSI -2003 and SIRSI 2003+
+	var xpath = ''//td[@class="searchsum"]/table'';
+	if(doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+		Zotero.Utilities.debug("SIRSI doWeb: searchsum");
+		sirsiNew = true;	
+	} else if (doc.evaluate(''//form[@name="hitlist"]/table/tbody/tr'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+		Zotero.Utilities.debug("SIRSI doWeb: hitlist");
+		sirsiNew = false;
+	} else if (doc.evaluate(''//tr[th[@class="viewmarctags"]][td[@class="viewmarctags"]]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+		Zotero.Utilities.debug("SIRSI doWeb: viewmarctags");
+		sirsiNew = true;
+	} else if (doc.evaluate(''//input[@name="VOPTIONS"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+		Zotero.Utilities.debug("SIRSI doWeb: VOPTIONS");
+		sirsiNew = false;
+	} else {
+	var elmts = doc.evaluate(''/html/body/form//text()'', doc, nsResolver,
+	                         XPathResult.ANY_TYPE, null);
+		while(elmt = elmts.iterateNext()) {
+			if(Zotero.Utilities.superCleanString(elmt.nodeValue) == "Viewing record") {
+				Zotero.Utilities.debug("SIRSI doWeb: Viewing record");
+				sirsiNew = false;
 			}
 		}
-		
-		var items = Zotero.selectItems(availableItems);
-		
-		if(!items) {
-			return true;
+	}
+	
+	if (sirsiNew) { //executes Simon''s SIRSI 2003+ scraper code
+		Zotero.Utilities.debug("Running SIRSI 2003+ code");
+		if(!scrape(doc)) {
+			var checkboxes = new Array();
+			var urls = new Array();
+			var availableItems = new Array();			
+			var tableRows = doc.evaluate(''//td[@class="searchsum"]/table[//input[@value="Details"]]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+			var tableRow = tableRows.iterateNext();		// skip first row
+			// Go through table rows
+			while(tableRow = tableRows.iterateNext()) {
+				var input = doc.evaluate(''.//input[@value="Details"]'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+				var text = Zotero.Utilities.getNodeString(doc, tableRow, ''.//label/strong//text()'', nsResolver);
+				if(text) {
+					availableItems[input.name] = text;
+				}
+			}		
+			var items = Zotero.selectItems(availableItems);		
+			if(!items) {
+				return true;
+			}
+			var hostRe = new RegExp("^http(?:s)?://[^/]+");
+			var m = hostRe.exec(doc.location.href);
+			Zotero.Utilities.debug("href: " + doc.location.href);
+			var hitlist = doc.forms.namedItem("hitlist");
+			var baseUrl = m[0]+hitlist.getAttribute("action")+"?first_hit="+hitlist.elements.namedItem("first_hit").value+"&last_hit="+hitlist.elements.namedItem("last_hit").value;
+			var uris = new Array();
+			for(var i in items) {
+				uris.push(baseUrl+"&"+i+"=Details");
+			}
+			Zotero.Utilities.processDocuments(uris, function(doc) { scrape(doc) },
+				function() { Zotero.done() }, null);
+			Zotero.wait();
+		}	
+	} else{  //executes Simon''s SIRSI -2003 translator code
+		Zotero.Utilities.debug("Running SIRSI 2003+ code");
+		var uri = doc.location.href;
+		var recNumbers = new Array();
+		var xpath = ''//form[@name="hitlist"]/table/tbody/tr'';
+		var elmts = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var elmt = elmts.iterateNext();
+		if(elmt) {	// Search results page
+			var uriRegexp = /^http:\/\/[^\/]+/;
+			var m = uriRegexp.exec(uri);
+			var postAction = doc.forms.namedItem("hitlist").getAttribute("action");
+			var newUri = m[0]+postAction.substr(0, postAction.length-1)+"40";
+			var titleRe = /<br>\s*(.*[^\s])\s*<br>/i;
+			var items = new Array();
+			do {
+				var checkbox = doc.evaluate(''.//input[@type="checkbox"]'', elmt, nsResolver,
+											XPathResult.ANY_TYPE, null).iterateNext();
+				// Collect title
+				var title = Zotero.Utilities.getNodeString(doc, elmt, "./td[2]/text()", nsResolver);
+				if(checkbox && title) {
+					items[checkbox.name] = Zotero.Utilities.cleanString(title);
+				}
+			} while(elmt = elmts.iterateNext());
+			items = Zotero.selectItems(items);
+			
+			if(!items) {
+				return true;
+			}
+			
+			for(var i in items) {
+				recNumbers.push(i);
+			}
+		} else {		// Normal page
+			// this regex will fail about 1/100,000,000 tries
+			var uriRegexp = /^((.*?)\/([0-9]+?))\//;
+			var m = uriRegexp.exec(uri);
+			var newUri = m[1]+"/40"
+			
+			var elmts = doc.evaluate(''/html/body/form'', doc, nsResolver,
+									 XPathResult.ANY_TYPE, null);
+			while(elmt = elmts.iterateNext()) {
+				var initialText = doc.evaluate(''.//text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+				if(initialText && initialText.nodeValue && Zotero.Utilities.superCleanString(initialText.nodeValue) == "Viewing record") {
+					recNumbers.push(doc.evaluate(''./b[1]/text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue);
+					break;
+				}
+			}	
+			// begin Emory compatibility
+			var elmts = doc.evaluate(''//input[@name="first_hit"]'', doc, nsResolver,
+									 XPathResult.ANY_TYPE, null);
+			while (elmt = elmts.iterateNext()) {
+				recNumbers.length = 0;
+				var recNumber = doc.evaluate(''./@value'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue
+				recNumbers.push(recNumber);
+				break;
+			 }
+			// end Emory compatibility	
 		}
-		
-		var hostRe = new RegExp("^http://[^/]+");
-		var m = hostRe.exec(doc.location.href);
-		var hitlist = doc.forms.namedItem("hitlist");
-		var baseUrl = m[0]+hitlist.getAttribute("action")+"?first_hit="+hitlist.elements.namedItem("first_hit").value+"&last_hit="+hitlist.elements.namedItem("last_hit").value;
-		
-		var uris = new Array();
-		for(var i in items) {
-			uris.push(baseUrl+"&"+i+"=Details");
-		}
-		
-		Zotero.Utilities.processDocuments(uris, function(doc) { scrape(doc) },
-			function() { Zotero.done() }, null);
-		
-		Zotero.wait();
+		var translator = Zotero.loadTranslator("import");
+		translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
+		var marc = translator.getTranslatorObject();
+		Zotero.Utilities.loadDocument(newUri+''?marks=''+recNumbers.join(",")+''&shadow=NO&format=FLAT+ASCII&sort=TITLE&vopt_elst=ALL&library=ALL&display_rule=ASCENDING&duedate_code=l&holdcount_code=t&DOWNLOAD_x=22&DOWNLOAD_y=12&address=&form_type='', function(doc) {
+			var pre = doc.getElementsByTagName("pre");
+			var text = pre[0].textContent;
+			var documents = text.split("*** DOCUMENT BOUNDARY ***");
+			for(var j=1; j<documents.length; j++) {
+				var uri = newUri+"?marks="+recNumbers[j]+"&shadow=NO&format=FLAT+ASCII&sort=TITLE&vopt_elst=ALL&library=ALL&display_rule=ASCENDING&duedate_code=l&holdcount_code=t&DOWNLOAD_x=22&DOWNLOAD_y=12&address=&form_type=";
+				var lines = documents[j].split("\n");
+				var record = new marc.record();
+				var tag, content;
+				var ind = "";
+				for(var i=0; i<lines.length; i++) {
+					var line = lines[i];
+					if(line[0] == "." && line.substr(4,2) == ". ") {
+						if(tag) {
+							content = content.replace(/\|([a-z])/g, marc.subfieldDelimiter+"$1");
+							record.addField(tag, ind, content);
+						}
+					} else {
+						content += " "+line.substr(6);
+						continue;
+					}
+					tag = line.substr(1, 3);	
+					if(tag[0] != "0" || tag[1] != "0") {
+						ind = line.substr(6, 2);
+						content = line.substr(8);
+					} else {
+						content = line.substr(7);
+						if(tag == "000") {
+							tag = undefined;
+							record.leader = "00000"+content;
+							Zotero.Utilities.debug("the leader is: "+record.leader);
+						}
+					}
+				}	
+				var newItem = new Zotero.Item();
+				record.translate(newItem);
+				newItem.complete();
+			}
+			Zotero.done();
+		});
+		Zotero.wait();	
 	}
 }');
+
 
 REPLACE INTO translators VALUES ('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '1.0.0b3.r1', '', '2006-10-02 17:00:00', 1, 100, 4, 'ProQuest', 'Simon Kornblith', '^http://[^/]+/pqdweb\?((?:.*\&)?did=.*&Fmt=[0-9]|(?:.*\&)Fmt=[0-9].*&did=|(?:.*\&)searchInterface=)',
 'function detectWeb(doc, url) {
@@ -2190,143 +2338,6 @@ REPLACE INTO translators VALUES ('c0e6fda6-0ecd-e4f4-39ca-37a4de436e15', '1.0.0b
 		record.translate(newItem);
 		newItem.complete();
 	}, function() { Zotero.done(); }, null);
-	
-	Zotero.wait();
-}');
-
-REPLACE INTO translators VALUES ('5287d20c-8a13-6004-4dcb-5bb2b66a9cc9', '1.0.0b2.r2', '', '2006-10-02 17:00:00', 1, 100, 4, 'SIRSI -2003', 'Simon Kornblith', '/uhtbin/cgisirsi',
-'function detectWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == ''x'') return namespace; else return null;
-	} : null;
-	
-	var elmts = doc.evaluate(''/html/body/form/p/text()[1]'', doc, nsResolver,
-	                         XPathResult.ANY_TYPE, null);
-	var elmt;
-	while(elmt = elmts.iterateNext()) {
-		if(Zotero.Utilities.superCleanString(elmt.nodeValue) == "Viewing record") {
-			return "book";
-		}
-	}
-	
-	var xpath = ''//form[@name="hitlist"]/table/tbody/tr'';
-	var elmts = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
-	if(elmts.iterateNext()) {
-		return "multiple";
-	}
-}',
-'function doWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == ''x'') return namespace; else return null;
-	} : null;
-	
-	var uri = doc.location.href;
-	var recNumbers = new Array();
-	
-	var xpath = ''//form[@name="hitlist"]/table/tbody/tr'';
-	var elmts = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
-	var elmt = elmts.iterateNext();
-	
-	if(elmt) {	// Search results page
-		var uriRegexp = /^http:\/\/[^\/]+/;
-		var m = uriRegexp.exec(uri);
-		var postAction = doc.forms.namedItem("hitlist").getAttribute("action");
-		var newUri = m[0]+postAction.substr(0, postAction.length-1)+"40"
-		
-		var titleRe = /<br>\s*(.*[^\s])\s*<br>/i;
-		
-		var items = new Array();
-		
-		do {
-			var checkbox = doc.evaluate(''.//input[@type="checkbox"]'', elmt, nsResolver,
-			                            XPathResult.ANY_TYPE, null).iterateNext();
-			// Collect title
-			var title = Zotero.Utilities.getNodeString(doc, elmt, "./td[2]/text()", nsResolver);
-			
-			if(checkbox && title) {
-				items[checkbox.name] = Zotero.Utilities.cleanString(title);
-			}
-		} while(elmt = elmts.iterateNext());
-		
-		
-		items = Zotero.selectItems(items);
-		
-		if(!items) {
-			return true;
-		}
-		
-		for(var i in items) {
-			recNumbers.push(i);
-		}
-	} else {		// Normal page
-		var uriRegexp = /^(.*)(\/[0-9]+)$/;
-		var m = uriRegexp.exec(uri);
-		var newUri = m[1]+"/40"
-		
-		var elmts = doc.evaluate(''/html/body/form/p'', doc, nsResolver,
-		                         XPathResult.ANY_TYPE, null);
-		while(elmt = elmts.iterateNext()) {
-			var initialText = doc.evaluate(''./text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-			if(initialText && initialText.nodeValue && Zotero.Utilities.superCleanString(initialText.nodeValue) == "Viewing record") {
-				recNumbers.push(doc.evaluate(''./b[1]/text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue);
-				break;
-			}
-		}
-	}
-	
-	var translator = Zotero.loadTranslator("import");
-	translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
-	var marc = translator.getTranslatorObject();
-	
-	Zotero.Utilities.loadDocument(newUri+''?marks=''+recNumbers.join(",")+''&shadow=NO&format=FLAT+ASCII&sort=TITLE&vopt_elst=ALL&library=ALL&display_rule=ASCENDING&duedate_code=l&holdcount_code=t&DOWNLOAD_x=22&DOWNLOAD_y=12&address=&form_type='', function(doc) {
-		var pre = doc.getElementsByTagName("pre");
-		var text = pre[0].textContent;
-		
-		var documents = text.split("*** DOCUMENT BOUNDARY ***");
-		
-		for(var j=1; j<documents.length; j++) {
-			var uri = newUri+"?marks="+recNumbers[j]+"&shadow=NO&format=FLAT+ASCII&sort=TITLE&vopt_elst=ALL&library=ALL&display_rule=ASCENDING&duedate_code=l&holdcount_code=t&DOWNLOAD_x=22&DOWNLOAD_y=12&address=&form_type=";
-			var lines = documents[j].split("\n");
-			var record = new marc.record();
-			var tag, content;
-			var ind = "";
-			
-			for(var i=0; i<lines.length; i++) {
-				var line = lines[i];
-				
-				if(line[0] == "." && line.substr(4,2) == ". ") {
-					if(tag) {
-						content = content.replace(/\|([a-z])/g, marc.subfieldDelimiter+"$1");
-						record.addField(tag, ind, content);
-					}
-				} else {
-					content += " "+line.substr(6);
-					continue;
-				}
-				
-				tag = line.substr(1, 3);
-				
-				if(tag[0] != "0" || tag[1] != "0") {
-					ind = line.substr(6, 2);
-					content = line.substr(8);
-				} else {
-					content = line.substr(7);
-					if(tag == "000") {
-						tag = undefined;
-						record.leader = "00000"+content;
-						Zotero.Utilities.debug("the leader is: "+record.leader);
-					}
-				}
-			}
-			
-			var newItem = new Zotero.Item();
-			record.translate(newItem);
-			newItem.complete();
-		}
-		Zotero.done();
-	});
 	
 	Zotero.wait();
 }');
