@@ -1075,12 +1075,21 @@ var ZoteroPane = new function()
 						var internal = Zotero.MIME.hasInternalHandler(mimeType, ext);
 					}
 					
+					var fileURL = attachment.getLocalFileURL();
+					
 					if (internal || Zotero.MIME.fileHasInternalHandler(file))
 					{
-						window.loadURI(attachment.getLocalFileURL());
+						window.loadURI(fileURL);
 					}
 					else {
-						file.launch();
+						// Some platforms don't have nsILocalFile.launch, so we just load it and
+						// let the Firefox external helper app window handle it
+						try {
+							file.launch();
+						}
+						catch (e) {
+							window.loadURI(fileURL);
+						}
 					}
 				}
 				else {
@@ -1105,7 +1114,17 @@ var ZoteroPane = new function()
 			{
 				var file = attachment.getFile();
 				if (file){
-					file.reveal();
+					try {
+						file.reveal();
+					}
+					catch (e) {
+						// On platforms that don't support nsILocalFile.reveal() (e.g. Linux), we
+						// open a small window with a selected read-only textbox containing the
+						// file path, so the user can open it, Control-c, Control-w, Alt-Tab, and
+						// Control-v the path into another app
+						var io = {alertText: file.path};
+						window.openDialog('chrome://zotero/content/selectableAlert.xul', "zotero-reveal-window", "chrome", io);
+					}
 				}
 				else {
 					alert(Zotero.getString('pane.item.attachments.fileNotFound'));
