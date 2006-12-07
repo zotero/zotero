@@ -340,7 +340,7 @@ Zotero.Schema = new function(){
 			Zotero.DB.query(sql);
 			var sql = "INSERT INTO itemData VALUES(123456789, 27, '2006-10-05 14:00:00')";
 			Zotero.DB.query(sql);
-			var sql = "INSERT INTO itemNotes VALUES(123456789, NULL, ?)";
+			var sql = "INSERT INTO itemNotes (itemID, sourceItemID, note) VALUES(123456789, NULL, ?)";
 			var msg = "Welcome to Zotero! Click the \"View Page\" button above to visit our Quick Start Guide and learn how to get started collecting, managing, and citing your research.\n\nThanks for trying Zotero, and be sure to tell your friends about it.";
 			Zotero.DB.query(sql, msg);
 			
