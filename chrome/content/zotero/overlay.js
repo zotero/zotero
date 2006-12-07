@@ -1069,7 +1069,13 @@ var ZoteroPane = new function()
 			{
 				var file = attachment.getFile();
 				if (file){
-					if (Zotero.MIME.fileHasInternalHandler(file))
+					var mimeType = attachment.getAttachmentMimeType();
+					if (mimeType) {
+						var ext = Zotero.File.getExtension(file);
+						var internal = Zotero.MIME.hasInternalHandler(mimeType, ext);
+					}
+					
+					if (internal || Zotero.MIME.fileHasInternalHandler(file))
 					{
 						window.loadURI(attachment.getLocalFileURL());
 					}

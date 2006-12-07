@@ -442,7 +442,7 @@ Zotero.Attachments = new function(){
 			// leaving the transaction open if the callback never triggers
 			Zotero.DB.commitTransaction();
 			
-			if (Zotero.MIME.isDocumentType(mimeType)) {
+			if (mimeType == 'text/html') {
 				Zotero.debug('Saving with saveDocument()');
 				wbp.saveDocument(document, file, destDir, mimeType, encodingFlags, false);
 			}
