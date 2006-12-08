@@ -21,7 +21,7 @@
 */
 
 
-Zotero_Report_Interface = new function() {
+var Zotero_Report_Interface = new function() {
 	this.loadCollectionReport = loadCollectionReport;
 	this.loadItemReport = loadItemReport;
 	this.loadItemReportByIds = loadItemReportByIds;
