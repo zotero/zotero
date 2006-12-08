@@ -119,7 +119,11 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids)
 		{
 			if(action == 'delete' || !this._itemGroup.ref.hasItem(ids[i]))
 			{
-				rows.push(this._itemRowMap[ids[i]]);
+				// Row might already be gone (e.g. if this is a child and
+				// 'modify' was sent to parent)
+				if (this._itemRowMap[ids[i]] != undefined) {
+					rows.push(this._itemRowMap[ids[i]]);
+				}
 			}
 		}
 			
@@ -469,12 +473,14 @@ Zotero.ItemTreeView.prototype.toggleOpenState = function(row)
 		else if(notes)
 			newRows = notes;
 		
-		newRows = Zotero.Items.get(newRows); 
-		
-		for(var i = 0; i < newRows.length; i++)
-		{
-			count++;
-			this._showItem(new Zotero.ItemTreeView.TreeRow(newRows[i],thisLevel+1,false), row+i+1); //item ref, before row
+		if (newRows) {
+			newRows = Zotero.Items.get(newRows);
+			
+			for(var i = 0; i < newRows.length; i++)
+			{
+				count++;
+				this._showItem(new Zotero.ItemTreeView.TreeRow(newRows[i], thisLevel + 1, false), row + i + 1); // item ref, before row
+			}
 		}
 	}
 	
@@ -655,24 +661,27 @@ Zotero.ItemTreeView.prototype.deleteSelection = function(eraseChildren, force)
 	this._refreshHashMap();
 	
 	//create an array of selected items
-	var items = new Array();
-	var start = new Object();
-	var end = new Object();
+	var ids = [];
+	var start = {};
+	var end = {};
 	for (var i=0, len=this.selection.getRangeCount(); i<len; i++)
 	{
 		this.selection.getRangeAt(i,start,end);
 		for (var j=start.value; j<=end.value; j++)
-			items.push(this._getItemAtRow(j));
+			ids.push(this._getItemAtRow(j).ref.getID());
 	}
 	
 	//iterate and erase...
 	this._treebox.beginUpdateBatch();
-	for (var i=0; i<items.length; i++)
-	{
-		if(this._itemGroup.isLibrary() || force) //erase item from DB
-			items[i].ref.erase(eraseChildren);
-		else if(this._itemGroup.isCollection())
-			this._itemGroup.ref.removeItem(items[i].ref.getID());
+	
+	// Erase item(s) from DB
+	if (this._itemGroup.isLibrary() || force) {
+		Zotero.Items.erase(ids, eraseChildren);
+	}
+	else if (this._itemGroup.isCollection()) {
+		for each(var id in ids) {
+			this._itemGroup.ref.removeItem(id);
+		}
 	}
 	this._treebox.endUpdateBatch();
 }

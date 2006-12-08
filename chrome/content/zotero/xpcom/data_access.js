@@ -1828,9 +1828,7 @@ Zotero.Item.prototype.erase = function(deleteChildren){
 	}
 	
 	// If we're not in the middle of a larger commit, trigger the notifier now
-	if (!Zotero.DB.transactionInProgress()){
-		Zotero.Notifier.trigger('delete', 'item', this.getID());
-	}
+	Zotero.Notifier.trigger('delete', 'item', this.getID());
 }
 
 
@@ -2178,12 +2176,27 @@ Zotero.Items = new function(){
 	
 	
 	/**
-	* Delete item from database and clear from internal array
+	* Delete item(s) from database and clear from internal array
+	*
+	* If _eraseChildren_ is true, erase child items as well
 	**/
-	function erase(id){
-		var obj = this.get(id);
-		obj.erase(); // calls unload()
-		obj = undefined;
+	function erase(ids, eraseChildren){
+		var unlock = Zotero.Notifier.begin(true);
+		try {
+			for each(var id in ids) {
+				var item = this.get(id);
+				if (!item) {
+					Zotero.debug('Item ' + id + ' does not exist in Items.erase()!', 1);
+					Zotero.Notifier.trigger('item', 'delete', id);
+					continue;
+				}
+				item.erase(eraseChildren); // calls unload()
+				item = undefined;
+			}
+		}
+		finally {
+			Zotero.Notifier.commit(unlock);
+		}
 	}
 	
 	
