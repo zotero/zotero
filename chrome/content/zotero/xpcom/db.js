@@ -25,6 +25,7 @@ Zotero.DB = new function(){
 	var _connection;
 	var _transactionRollback;
 	var _transactionNestingLevel = 0;
+	var _callbacks = { begin: [], commit: [], rollback: [] };
 	
 	this.query = query;
 	this.valueQuery = valueQuery;
@@ -36,6 +37,8 @@ Zotero.DB = new function(){
 	this.beginTransaction = beginTransaction;
 	this.commitTransaction = commitTransaction;
 	this.rollbackTransaction = rollbackTransaction;
+	this.addCallback = addCallback;
+	this.removeCallback = removeCallback;
 	this.transactionInProgress = transactionInProgress;
 	this.commitAllTransactions = commitAllTransactions;
 	this.tableExists = tableExists;
@@ -288,6 +291,13 @@ Zotero.DB = new function(){
 		else {
 			Zotero.debug('Beginning DB transaction', 5);
 			db.beginTransaction();
+			
+			// Run callbacks
+			for (var i=0; i<_callbacks.begin.length; i++) {
+				if (_callbacks.begin[i]) {
+					_callbacks.begin[i]();
+				}
+			}
 		}
 	}
 	
@@ -307,11 +317,18 @@ Zotero.DB = new function(){
 			Zotero.debug('Committing transaction',5);
 			try {
 				db.commitTransaction();
+				
+				// Run callbacks
+				for (var i=0; i<_callbacks.commit.length; i++) {
+					if (_callbacks.commit[i]) {
+						_callbacks.commit[i]();
+					}
+				}
 			}
 			catch(e){
 				var dberr = (db.lastErrorString!='not an error')
 					? ' [ERROR: ' + db.lastErrorString + ']' : '';
-				throw(e + ' [QUERY: ' + sql + ']' + dberr);
+				throw(e + dberr);
 			}
 		}
 	}
@@ -335,6 +352,13 @@ Zotero.DB = new function(){
 			_transactionRollback = false;
 			try {
 				db.rollbackTransaction();
+				
+				// Run callbacks
+				for (var i=0; i<_callbacks.rollback.length; i++) {
+					if (_callbacks.rollback[i]) {
+						_callbacks.rollback[i]();
+					}
+				}
 			}
 			catch(e){
 				var dberr = (db.lastErrorString!='not an error')
@@ -342,6 +366,38 @@ Zotero.DB = new function(){
 				throw(e + dberr);
 			}
 		}
+	}
+	
+	
+	function addCallback(type, cb) {
+		switch (type) {
+			case 'begin':
+			case 'commit':
+			case 'rollback':
+				break;
+				
+			default:
+				throw ("Invalid callback type '" + type + "' in DB.addCallback()");
+		}
+		
+		var id = _callbacks[type].length;
+		_callbacks[type][id] = cb;
+		return id;
+	}
+	
+	
+	function removeCallback(type, id) {
+		switch (type) {
+			case 'begin':
+			case 'commit':
+			case 'rollback':
+				break;
+				
+			default:
+				throw ("Invalid callback type '" + type + "' in DB.removeCallback()");
+		}
+		
+		delete _callbacks[type][id];
 	}
 	
 	

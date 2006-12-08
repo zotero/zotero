@@ -122,6 +122,11 @@ var Zotero = new function(){
 			.getService(Components.interfaces.nsIStringBundleService);
 		_localizedStringBundle = stringBundleService.createBundle(src, appLocale);
 		
+		// Add notifier queue callbacks to the DB layer
+		Zotero.DB.addCallback('begin', Zotero.Notifier.begin);
+		Zotero.DB.addCallback('commit', Zotero.Notifier.commit);
+		Zotero.DB.addCallback('rollback', Zotero.Notifier.reset);
+		
 		// Trigger updating of schema and scrapers
 		Zotero.Schema.updateSchema();
 		Zotero.Schema.updateScrapersRemote();
