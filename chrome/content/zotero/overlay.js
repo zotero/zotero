@@ -555,25 +555,42 @@ var ZoteroPane = new function()
 		return itemsView;
 	}
 	
-	function selectItem(id)
+	
+	/*
+	 * Select item in current collection or, if not there, in Library
+	 *
+	 * If _inLibrary_, force switch to Library
+	 */
+	function selectItem(itemID, inLibrary)
 	{
+		if (!itemID) {
+			return false;
+		}
 		if(itemsView)
 		{
 			if(!itemsView._itemGroup.isLibrary())
 			{
-				//select the Library if the item is not in the current collection
-				
-				var item = Zotero.Items.get(id);
-				var collectionID = itemsView._itemGroup.ref.getID();
-				if(!item.isRegularItem())
-				{ 
-					if(!Zotero.Items.get(item.getSource()).inCollection(collectionID))
-						collectionsView.selection.select(0);
-				}
-				else if(!item.inCollection(collectionID))
+				if (inLibrary) {
 					collectionsView.selection.select(0);
+				}
+				// Select the Library if the item is not in the current collection
+				// TODO: does not work in saved searches
+				else {
+					var item = Zotero.Items.get(itemID);
+					var collectionID = itemsView._itemGroup.ref.getID();
+					if (!item.isRegularItem()) {
+						// If this isn't a regular item, check if the parent is
+						// in the collection instead
+						if (!Zotero.Items.get(item.getSource()).inCollection(collectionID)) {
+							collectionsView.selection.select(0);
+						}
+					}
+					else if (!item.inCollection(collectionID)) {
+						collectionsView.selection.select(0);
+					}
+				}
 			}
-			itemsView.selectItem(id);
+			itemsView.selectItem(itemID);
 		}
 	}
 	
@@ -662,45 +679,71 @@ var ZoteroPane = new function()
 	{
 		var menu = document.getElementById('zotero-collectionmenu');
 		
+		var m = {
+			newCollection: 0,
+			newSavedSearch: 1,
+			newSubcollection: 2,
+			sep1: 3,
+			editSelectedCollection: 4,
+			removeCollection: 5,
+			sep2: 6,
+			exportCollection: 7,
+			createBibCollection: 8,
+			exportFile: 9,
+			loadReport: 10
+		};
+		
 		// Collection
 		if (collectionsView.selection.count == 1 &&
 			collectionsView._getItemAtRow(collectionsView.selection.currentIndex).isCollection())
 		{
-			var hide = [0,1,5,7,10,12,13];
-			var show = [2,3,4,6,8,9,11,14];
+			var hide = [m.newCollection, m.newSavedSearch, m.exportFile];
+			var show = [m.newSubcollection, m.sep1, m.editSelectedCollection, m.removeCollection,
+				m.sep2, m.exportCollection, m.createBibCollection, m.loadReport];
 			if (itemsView.rowCount>0)
 			{
-				var enable = [9,11,14];
+				var enable = [m.exportCollection, m.createBibCollection, m.loadReport];
 			}
 			else
 			{
-				var disable = [9,11,14];
+				var disable = [m.exportCollection, m.createBibCollection, m.loadReport];
 			}
 			
-			menu.childNodes[14].setAttribute('label', Zotero.getString('pane.collections.menu.generateReport.collection'));
+			menu.childNodes[m.editSelectedCollection].setAttribute('label', Zotero.getString('pane.collections.menu.rename.collection'));
+			menu.childNodes[m.removeCollection].setAttribute('label', Zotero.getString('pane.collections.menu.remove.collection'));
+			menu.childNodes[m.exportCollection].setAttribute('label', Zotero.getString('pane.collections.menu.export.collection'));
+			menu.childNodes[m.createBibCollection].setAttribute('label', Zotero.getString('pane.collections.menu.createBib.collection'));
+			menu.childNodes[m.loadReport].setAttribute('label', Zotero.getString('pane.collections.menu.generateReport.collection'));
 		}
 		// Saved Search
 		else if (collectionsView.selection.count == 1 &&
 			collectionsView._getItemAtRow(collectionsView.selection.currentIndex).isSearch())
 		{
-			var hide = [0,1,2,3,4,6,9,11,13];
-			var show = [5,7,8,10,12,14];
+			var hide = [m.newCollection, m.newSavedSearch, m.newSubcollection, m.sep1, m.exportFile]
+			var show = [m.editSelectedCollection, m.removeCollection, m.sep2, m.exportCollection,
+				m.createBibCollection, m.loadReport];
+			
 			if (itemsView.rowCount>0)
 			{
-				var enable = [10,12,14];
+				var enable = [m.exportCollection, m.createBibCollection, m.loadReport];
 			}
 			else
 			{
-				var disable = [10,12,14];
+				var disable = [m.exportCollection, m.createBibCollection, m.loadReport];
 			}
 			
-			menu.childNodes[14].setAttribute('label', Zotero.getString('pane.collections.menu.generateReport.savedSearch'));
+			menu.childNodes[m.editSelectedCollection].setAttribute('label', Zotero.getString('pane.collections.menu.edit.savedSearch'));
+			menu.childNodes[m.removeCollection].setAttribute('label', Zotero.getString('pane.collections.menu.remove.savedSearch'));
+			menu.childNodes[m.exportCollection].setAttribute('label', Zotero.getString('pane.collections.menu.export.savedSearch'));
+			menu.childNodes[m.createBibCollection].setAttribute('label', Zotero.getString('pane.collections.menu.createBib.savedSearch'));
+			menu.childNodes[m.loadReport].setAttribute('label', Zotero.getString('pane.collections.menu.generateReport.savedSearch'));
 		}
 		// Library
 		else
 		{
-			var hide = [2,4,5,6,7,8,9,10,11,12,14];
-			var show = [0,1,3,13];
+			var hide = [m.newSubcollection, m.editSelectedCollection, m.removeCollection, m.sep2,
+				m.exportCollection, m.createBibCollection, m.loadReport];
+			var show = [m.newCollection, m.newSavedSearch, m.sep1, m.exportFile];
 		}
 		
 		for (var i in disable)
@@ -732,69 +775,85 @@ var ZoteroPane = new function()
 		
 		if(itemsView && itemsView.selection.count > 0)
 		{
-			enable.push(0,1,2,4,5,7,8,9,10);
+			enable.push(0,2,3,4,6,7,8,10,11,12);
 			
 			// Multiple items selected
 			if (itemsView.selection.count > 1)
 			{
 				var multiple =  '.multiple';
-				hide.push(0,1,2,3,4);
+				hide.push(0,1,2,3,4,5,6);
 			}
 			// Single item selected
 			else
 			{
 				var item = itemsView._getItemAtRow(itemsView.selection.currentIndex).ref;
+				var itemID = item.getID();
+				menu.setAttribute('itemID', itemID);
+				
+				// Show in Library
+				if (!itemsView._itemGroup.isLibrary()) {
+					show.push(0,1);
+				}
+				else {
+					hide.push(0,1);
+				}
+				
 				if (item.isRegularItem())
 				{
-					var itemID = item.getID();
-					menu.setAttribute('itemID', itemID);
-					
-					show.push(0,1,2,4);
-					hide.push(3); // abstract
+					show.push(2,3,4,6);
+					hide.push(5); // abstract
 				}
 				else
 				{
-					hide.push(0,1,2);
+					hide.push(2,3,4);
 					
 					// Abstract
 					if (item.isNote() && item.getSource()) {
-						show.push(3,4);
+						show.push(5,6);
 						if (item.isAbstract()) {
-							menu.childNodes[3].setAttribute('label', Zotero.getString('pane.items.menu.abstract.unset'));
+							menu.childNodes[5].setAttribute('label', Zotero.getString('pane.items.menu.abstract.unset'));
 						}
 						else {
-							menu.childNodes[3].setAttribute('label', Zotero.getString('pane.items.menu.abstract.set'));
+							menu.childNodes[5].setAttribute('label', Zotero.getString('pane.items.menu.abstract.set'));
 						}
 					}
 					else {
-						hide.push(3,4);
+						hide.push(5,6);
 					}
 				}
 			}
 		}
 		else
 		{
-			disable.push(0,1,2,5,6,8,9,10);
-			hide.push(3); // abstract
-			show.push(4); // separator
+			// Show in Library
+			if (!itemsView._itemGroup.isLibrary()) {
+				show.push(0,1);
+			}
+			else {
+				hide.push(0,1);
+			}
+			
+			disable.push(0,2,3,4,7,8,10,11,12);
+			hide.push(5); // abstract
+			show.push(6); // separator
 		}
 		
 		// Remove from collection
 		if (itemsView._itemGroup.isCollection())
 		{
-			menu.childNodes[5].setAttribute('label', Zotero.getString('pane.items.menu.remove' + multiple));
-			show.push(5);
+			menu.childNodes[7].setAttribute('label', Zotero.getString('pane.items.menu.remove' + multiple));
+			show.push(7);
 		}
 		else
 		{
-			hide.push(5);
+			hide.push(7);
 		}
 		
 		// Plural if necessary
-		menu.childNodes[6].setAttribute('label', Zotero.getString('pane.items.menu.erase' + multiple));
-		menu.childNodes[8].setAttribute('label', Zotero.getString('pane.items.menu.export' + multiple));
-		menu.childNodes[9].setAttribute('label', Zotero.getString('pane.items.menu.createBib' + multiple));
-		menu.childNodes[10].setAttribute('label', Zotero.getString('pane.items.menu.generateReport' + multiple));
+		menu.childNodes[8].setAttribute('label', Zotero.getString('pane.items.menu.erase' + multiple));
+		menu.childNodes[10].setAttribute('label', Zotero.getString('pane.items.menu.export' + multiple));
+		menu.childNodes[11].setAttribute('label', Zotero.getString('pane.items.menu.createBib' + multiple));
+		menu.childNodes[12].setAttribute('label', Zotero.getString('pane.items.menu.generateReport' + multiple));
 		
 		for (var i in disable)
 		{

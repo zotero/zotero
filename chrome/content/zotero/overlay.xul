@@ -70,19 +70,17 @@
 					<menuitem label="&zotero.toolbar.newSavedSearch.label;" oncommand="ZoteroPane.newSearch()"/>
 					<menuitem label="&zotero.toolbar.newSubcollection.label;" oncommand="ZoteroPane.newCollection(ZoteroPane.getSelectedCollection().getID())"/>
 					<menuseparator/>
-					<menuitem label="&zotero.toolbar.renameCollection.label;" oncommand="ZoteroPane.editSelectedCollection();"/>
-					<menuitem label="&zotero.toolbar.renameSavedSearch.label;" oncommand="ZoteroPane.editSelectedCollection()"/>
-					<menuitem label="&zotero.toolbar.removeCollection.label;" oncommand="ZoteroPane.deleteSelectedCollection();"/>
-					<menuitem label="&zotero.toolbar.removeSavedSearch.label;" oncommand="ZoteroPane.deleteSelectedCollection()"/>
+					<menuitem oncommand="ZoteroPane.editSelectedCollection();"/>
+					<menuitem oncommand="ZoteroPane.deleteSelectedCollection();"/>
 					<menuseparator/>
-					<menuitem label="&zotero.toolbar.exportCollection.label;" oncommand="Zotero_File_Interface.exportCollection();"/>
-					<menuitem label="&zotero.toolbar.exportSavedSearch.label;" oncommand="Zotero_File_Interface.exportCollection()"/>
-					<menuitem label="&zotero.toolbar.createBibCollection.label;" oncommand="Zotero_File_Interface.bibliographyFromCollection();"/>
-					<menuitem label="&zotero.toolbar.createBibSavedSearch.label;" oncommand="Zotero_File_Interface.bibliographyFromCollection()"/>
+					<menuitem oncommand="Zotero_File_Interface.exportCollection();"/>
+					<menuitem oncommand="Zotero_File_Interface.bibliographyFromCollection();"/>
 					<menuitem label="&zotero.toolbar.export.label;" oncommand="Zotero_File_Interface.exportFile()"/>
 					<menuitem oncommand="Zotero_Report_Interface.loadCollectionReport()"/>
 				</popup>
 				<popup id="zotero-itemmenu" onpopupshowing="ZoteroPane.buildItemContextMenu();">
+					<menuitem label="&zotero.items.menu.showInLibrary;" oncommand="ZoteroPane.selectItem(this.parentNode.getAttribute('itemID'), true)"/>
+					<menuseparator/>
 					<menuitem label="&zotero.items.menu.attach.note;" oncommand="ZoteroPane.newNote(false, this.parentNode.getAttribute('itemID'))"/>
 					<menuitem label="&zotero.items.menu.attach.snapshot;" oncommand="ZoteroPane.addAttachmentFromPage(false, this.parentNode.getAttribute('itemID'));"/>
 					<menuitem label="&zotero.items.menu.attach.link;" oncommand="ZoteroPane.addAttachmentFromPage(true, this.parentNode.getAttribute('itemID'));"/>
@@ -162,7 +160,7 @@
 					id="zotero-items-tree" context="zotero-itemmenu"
 					ondblclick="ZoteroPane.onDoubleClick(event, this);"
 					enableColumnDrag="true"
-					onfocus="if (!ZoteroPane.getItemsView().selection.count) { ZoteroPane.getItemsView().selection.select(0); }"
+					onfocus="if (ZoteroPane.getItemsView().rowCount &amp;&amp; !ZoteroPane.getItemsView().selection.count) { ZoteroPane.getItemsView().selection.select(0); }"
 					onkeypress="if (event.keyCode == event.DOM_VK_BACK_SPACE || event.keyCode == event.DOM_VK_DELETE){ ZoteroPane.deleteSelectedItem(); event.preventDefault(); }"
 					onselect="ZoteroPane.itemSelected();"
 					ondraggesture="if (event.target.localName == 'treechildren') nsDragAndDrop.startDrag(event,ZoteroPane.getItemsView());"

@@ -19,6 +19,7 @@
 <!ENTITY zotero.items.dateAdded_column					"Date Added">
 <!ENTITY zotero.items.dateModified_column				"Date Modified">
 
+<!ENTITY zotero.items.menu.showInLibrary					"Show in Library">
 <!ENTITY zotero.items.menu.attach.note					"Add Note">
 <!ENTITY zotero.items.menu.attach.snapshot				"Attach Snapshot of Current Page">
 <!ENTITY zotero.items.menu.attach.link					"Attach Link to Current Page">
@@ -33,19 +34,11 @@
 <!ENTITY zotero.toolbar.newSubcollection.label			"New Subcollection...">
 <!ENTITY zotero.toolbar.newSavedSearch.label			"New Saved Search...">
 <!ENTITY zotero.toolbar.tagSelector.label			"Show/Hide Tag Selector">
-<!ENTITY zotero.toolbar.renameCollection.label			"Rename Collection...">
-<!ENTITY zotero.toolbar.removeCollection.label			"Remove Collection...">
-<!ENTITY zotero.toolbar.exportCollection.label			"Export Collection...">
-<!ENTITY zotero.toolbar.renameSavedSearch.label		"Edit Saved Search...">
-<!ENTITY zotero.toolbar.removeSavedSearch.label		"Remove Saved Search...">
-<!ENTITY zotero.toolbar.exportSavedSearch.label		"Export Saved Search...">
 <!ENTITY zotero.toolbar.actions.label					"Actions">
 <!ENTITY zotero.toolbar.import.label					"Import...">
 <!ENTITY zotero.toolbar.export.label					"Export Library...">
 <!ENTITY zotero.toolbar.preferences.label				"Preferences...">
 <!ENTITY zotero.toolbar.about.label					"About Zotero...">
-<!ENTITY zotero.toolbar.createBibCollection.label		"Create Bibliography From Collection...">
-<!ENTITY zotero.toolbar.createBibSavedSearch.label		"Create Bibliography From Saved Search...">
 <!ENTITY zotero.toolbar.search.label					"Search:">
 <!ENTITY zotero.toolbar.fullscreen.tooltip				"Toggle Fullscreen Mode">
 <!ENTITY zotero.toolbar.goToURL.label					"View">
