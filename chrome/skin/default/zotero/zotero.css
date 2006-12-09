@@ -59,6 +59,7 @@ tagsbox row
 seealsobox
 {
 	-moz-binding: url('chrome://zotero/content/bindings/relatedbox.xml#seealso-box');
+	-moz-user-focus: ignore;
 }
 
 zoterosearch

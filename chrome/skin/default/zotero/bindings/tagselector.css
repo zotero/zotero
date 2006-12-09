@@ -4,6 +4,12 @@
 
 /* Tag selector */
 
+/* Don't focus filter textbox if pane isn't open */
+zoterotagselector[collapsed=true] tags-search
+{
+	-moz-user-focus: ignore;
+}
+
 groupbox
 {
 	overflow: auto;
@@ -21,6 +27,7 @@ label
 {
 	margin-right: 5px;
 	padding: 2px 4px;
+	-moz-user-focus: ignore;
 }
 
 label[selected=true]

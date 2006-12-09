@@ -72,6 +72,7 @@ var ZoteroItemPane = new function()
 	this.removeAttachment = removeAttachment;
 	this.addAttachmentFromDialog = addAttachmentFromDialog;
 	this.addAttachmentFromPage = addAttachmentFromPage;
+	this.focusFirstField = focusFirstField;
 	
 	
 	function onLoad()
@@ -637,8 +638,8 @@ var ZoteroItemPane = new function()
 			lastName.setAttribute('flex', '1');
 			
 			// Remove firstname field from tabindex
-			var tab = parseInt(firstName.getAttribute('tabindex'));
-			firstName.setAttribute('tabindex', -1);
+			var tab = parseInt(firstName.getAttribute('ztabindex'));
+			firstName.setAttribute('ztabindex', -1);
 			if (_tabIndexMaxCreators==tab)
 			{
 				_tabIndexMaxCreators--;
@@ -672,8 +673,8 @@ var ZoteroItemPane = new function()
 			lastName.setAttribute('flex', '0');
 			
 			// Add firstname field to tabindex
-			var tab = parseInt(lastName.getAttribute('tabindex'));
-			firstName.setAttribute('tabindex', tab + 1);
+			var tab = parseInt(lastName.getAttribute('ztabindex'));
+			firstName.setAttribute('ztabindex', tab + 1);
 			if (_tabIndexMaxCreators==tab)
 			{
 				_tabIndexMaxCreators++;
@@ -748,7 +749,7 @@ var ZoteroItemPane = new function()
 		
 		if (!noedit){
 			valueElement.setAttribute('flex', 1);
-			valueElement.setAttribute('tabindex', tabindex);
+			valueElement.setAttribute('ztabindex', tabindex);
 			valueElement.setAttribute('onclick', 'ZoteroItemPane.showEditor(this)');
 			valueElement.className = 'zotero-clicky';
 		}
@@ -836,7 +837,7 @@ var ZoteroItemPane = new function()
 		//Zotero.debug('Showing editor');
 		
 		var fieldName = elem.getAttribute('fieldname');
-		var tabindex = elem.getAttribute('tabindex');
+		var tabindex = elem.getAttribute('ztabindex');
 		
 		var [field, creatorIndex, creatorField] = fieldName.split('-');
 		if (field == 'creator')
@@ -867,7 +868,7 @@ var ZoteroItemPane = new function()
 		var t = document.createElement("textbox");
 		t.setAttribute('value',value);
 		t.setAttribute('fieldname', fieldName);
-		t.setAttribute('tabindex', tabindex);
+		t.setAttribute('ztabindex', tabindex);
 		t.setAttribute('flex','1');
 		
 		if (creatorField=='lastName')
@@ -1028,7 +1029,7 @@ var ZoteroItemPane = new function()
 			return;
 		}
 		var fieldName = textbox.getAttribute('fieldname');
-		var tabindex = textbox.getAttribute('tabindex');
+		var tabindex = textbox.getAttribute('ztabindex');
 		
 		var value = t.value;
 		
@@ -1351,6 +1352,15 @@ var ZoteroItemPane = new function()
 	}
 	
 	
+	function focusFirstField(mode) {
+		switch (mode) {
+			case 'info':
+				_focusNextField('info', _dynamicFields, 0, false);
+				break;
+		}
+	}
+	
+	
 	/*
 	 * Advance the field focus forward or backward
 	 *
@@ -1358,8 +1368,6 @@ var ZoteroItemPane = new function()
 	 * which doesn't work well with the weird label/textbox stuff we're doing.
 	 * (The textbox being tabbed away from is deleted before the blur()
 	 * completes, so it doesn't know where it's supposed to go next.)
-	 *
-	 * Use of the 'tabindex' attribute is arbitrary.
 	 */
 	function _focusNextField(mode, box, tabindex, back){
 		tabindex = parseInt(tabindex);
@@ -1371,6 +1379,7 @@ var ZoteroItemPane = new function()
 				{
 					case 1:
 						//Zotero.debug('At beginning');
+						document.getElementById('zotero-editpane-type-menu').focus();
 						return false;
 					
 					case _tabIndexMinCreators:
@@ -1438,7 +1447,7 @@ var ZoteroItemPane = new function()
 		switch (mode)
 		{
 			case 'info':
-				var next = box.getElementsByAttribute('tabindex', nextIndex);
+				var next = box.getElementsByAttribute('ztabindex', nextIndex);
 				if (!next[0])
 				{
 					//Zotero.debug("Next field not found");
@@ -1449,7 +1458,7 @@ var ZoteroItemPane = new function()
 			// Tags pane
 			case 'tags':
 				var next = document.getAnonymousNodes(box)[0].
-					getElementsByAttribute('tabindex', nextIndex);
+					getElementsByAttribute('ztabindex', nextIndex);
 				if (!next[0]){
 					next[0] = box.addDynamicRow();
 				}

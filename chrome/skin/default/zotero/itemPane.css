@@ -30,6 +30,11 @@
 	font-weight: bold;
 }
 
+#zotero-editpane-dynamic-fields row label
+{
+	-moz-user-focus: ignore;
+}
+
  /* creator type menu */
 #zotero-editpane-dynamic-fields row > toolbarbutton 
 {
