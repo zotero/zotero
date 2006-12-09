@@ -1,4 +1,4 @@
--- 7
+-- 8
 
 -- This file creates system tables that can be safely wiped and reinitialized
 -- at any time, as long as existing ids are preserved.
@@ -152,6 +152,7 @@ INSERT INTO itemTypes VALUES (29,'tvBroadcast',NULL,1);
 INSERT INTO itemTypes VALUES (30,'radioBroadcast',NULL,1);
 INSERT INTO itemTypes VALUES (31,'podcast',NULL,1);
 INSERT INTO itemTypes VALUES (32,'computerProgram',NULL,1);
+INSERT INTO itemTypes VALUES (33,'conferencePaper',NULL,1);
 
 INSERT INTO fields VALUES (1,'url',NULL);
 INSERT INTO fields VALUES (2,'rights',NULL);
@@ -218,6 +219,7 @@ INSERT INTO fields VALUES (80,'audioFileType',NULL);
 INSERT INTO fields VALUES (81,'version',NULL);
 INSERT INTO fields VALUES (82,'system',NULL);
 INSERT INTO fields VALUES (83,'company',NULL);
+INSERT INTO fields VALUES (84,'conferenceName',NULL);
 
 INSERT INTO itemTypeFields VALUES (2, 3, NULL, 1);
 INSERT INTO itemTypeFields VALUES (2, 30, NULL, 2);
@@ -572,6 +574,23 @@ INSERT INTO itemTypeFields VALUES (32, 2, NULL, 10);
 INSERT INTO itemTypeFields VALUES (32, 1, NULL, 11);
 INSERT INTO itemTypeFields VALUES (32, 27, NULL, 12);
 INSERT INTO itemTypeFields VALUES (32, 22, NULL, 13);
+INSERT INTO itemTypeFields VALUES (33, 14, NULL, 1);
+INSERT INTO itemTypeFields VALUES (33, 84, NULL, 2);
+INSERT INTO itemTypeFields VALUES (33, 7, NULL, 3);
+INSERT INTO itemTypeFields VALUES (33, 8, NULL, 4);
+INSERT INTO itemTypeFields VALUES (33, 4, NULL, 5);
+INSERT INTO itemTypeFields VALUES (33, 10, NULL, 6);
+INSERT INTO itemTypeFields VALUES (33, 3, NULL, 7);
+INSERT INTO itemTypeFields VALUES (33, 26, NULL, 8);
+INSERT INTO itemTypeFields VALUES (33, 11, NULL, 9);
+INSERT INTO itemTypeFields VALUES (33, 18, NULL, 10);
+INSERT INTO itemTypeFields VALUES (33, 19, NULL, 11);
+INSERT INTO itemTypeFields VALUES (33, 62, NULL, 12);
+INSERT INTO itemTypeFields VALUES (33, 2, NULL, 13);
+INSERT INTO itemTypeFields VALUES (33, 1, NULL, 14);
+INSERT INTO itemTypeFields VALUES (33, 27, NULL, 15);
+INSERT INTO itemTypeFields VALUES (33, 22, NULL, 16);
+
 
 INSERT INTO creatorTypes VALUES(1, "author");
 INSERT INTO creatorTypes VALUES(2, "contributor");
@@ -701,6 +720,11 @@ INSERT INTO itemTypeCreatorTypes VALUES(31,2,0);
 INSERT INTO itemTypeCreatorTypes VALUES(31,25,0);
 INSERT INTO itemTypeCreatorTypes VALUES(32,21,1);
 INSERT INTO itemTypeCreatorTypes VALUES(32,2,0);
+INSERT INTO itemTypeCreatorTypes VALUES(33, 1, 1);
+INSERT INTO itemTypeCreatorTypes VALUES(33, 2, 0);
+INSERT INTO itemTypeCreatorTypes VALUES(33, 3, 0);
+INSERT INTO itemTypeCreatorTypes VALUES(33, 4, 0);
+INSERT INTO itemTypeCreatorTypes VALUES(33, 5, 0);
 
 
     INSERT INTO "fileTypes" VALUES(1, 'webpage');

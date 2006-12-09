@@ -368,6 +368,7 @@ Zotero.ItemTreeView.prototype.getImageSrc = function(row, col)
 			case 'book':
 			case 'bookSection':
 			case 'computerProgram':
+			case 'conferencePaper':
 			case 'email':
 			case 'film':
 			case 'forumPost':
