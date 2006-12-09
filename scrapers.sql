@@ -1,4 +1,4 @@
--- 116
+-- 117
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-12-06 23:30:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-12-09 20:45:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b3.r1', '', '2006-11-26 09:05:00', 1, 100, 4, 'Amazon', 'Sean Takats', '^http://(?:www\.)amazon', 
 'function detectWeb(doc, url) {
@@ -6703,7 +6703,7 @@ function doExport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('9cb70025-a888-4a29-a210-93ec52da40d4', '1.0.0b3.r1', '', '2006-10-02 17:00:00', 1, 100, 3, 'BibTeX', 'Simon Kornblith', 'bib',
+REPLACE INTO translators VALUES ('9cb70025-a888-4a29-a210-93ec52da40d4', '1.0.0b3.r1', '', '2006-12-09 20:45:00', 1, 100, 3, 'BibTeX', 'Simon Kornblith', 'bib',
 'Zotero.configure("dataMode", "block");
 
 function detectImport() {
@@ -6762,12 +6762,13 @@ var typeMap = {
 	interview:"misc",
 	film:"misc",
 	artwork:"misc",
-	webpage:"misc"
+	webpage:"misc",
+	conferencePaper:"inproceedings"
 };
 
 // supplements outputTypeMap for importing
 var inputTypeMap = {
-	inproceedings:"journalArticle",
+	inproceedings:"conferencePaper",
 	conference:"journalArticle",
 	techreport:"book",
 	booklet:"book",
@@ -7029,15 +7030,40 @@ function doImport() {
 	}
 }
 
-function writeField(field, value) {
-	if(!value) return;
+// some fields are, in fact, macros.  If that is the case then we should not put the
+// data in the braces as it will cause the macros to not expand properly
+function writeMacroField(field, value) {
+	if (!value) {
+		return;
+	}
 	
 	value = value.toString();
 	// replace naughty chars
 	value = value.replace(/([#$%&~_^\\{}])/g, "\\$1");
 	
 	// replace accented characters	
-	for(var i in accentedCharacters) {
+	for (var i in accentedCharacters) {
+		value = value.replace(accentedCharacters[i], i);
+	}
+	// replace other accented characters
+	value = value.replace(/[\u0080-\uFFFF]/g, "?")
+	
+	// write
+	Zotero.write(",\n\t"+field+" = "+value);
+}
+
+function writeField(field, value) {
+	if(!value) return;
+	
+	value = value.toString();
+	// replace naughty chars
+	value = value.replace(/([#$%&~_^\\{}])/g, "\\$1");
+	// we assume people who use braces in their title probably did so intentionally
+	if (field == "title") {
+		value = value.replace(/\\([{}])/g, "$1");
+	}
+	// replace accented characters	
+	for (var i in accentedCharacters) {
 		value = value.replace(accentedCharacters[i], i);
 	}
 	// replace other accented characters
@@ -7070,8 +7096,24 @@ function doExport() {
 		// create a unique citation key
 		var basekey = "";
 		if(item.creators && item.creators[0] && item.creators[0].lastName) {
-			basekey = item.creators[0].lastName.toLowerCase();
+			basekey = item.creators[0].lastName.toLowerCase().replace(/ /g,"_").replace(/,/g,"");
 		}
+		
+		// include the item title as part of the citation key
+		if (item["title"]) {
+			// this is a list of words that should not appear as part of the citation key
+			bannedTitleKeys = {"a" : 1, "an" : 1, "does": 1, "how": 1, "it''s": 1, "on" : 1, "some": 1, "the" : 1, "this" : 1, "why" : 1 };
+			titleElements = item["title"].split(" ");
+			appendKey = "";
+			for (te in titleElements) {
+				if (!bannedTitleKeys[titleElements[te].toLowerCase()]) {
+					appendKey = "_" + titleElements[te].toLowerCase() + "_";
+					break;
+					}
+				}
+				basekey = basekey + appendKey;
+        }
+
 		if(item.date) {
 			var date = Zotero.Utilities.strToDate(item.date);
 			if(date.year && numberRe.test(date.year)) {
@@ -7079,6 +7121,8 @@ function doExport() {
 			}
 		}
 		
+		// make sure we do not have any other funny characters
+		basekey = basekey.replace(/[\. ,'':\"!&]/g,"");
 		var citekey = basekey;
 		var i = 0;
 		while(citekeys[citekey]) {
@@ -7097,6 +7141,10 @@ function doExport() {
 			}
 		}
 		
+		if(item.conferenceName) {
+			writeField("booktitle", item.conferenceName);
+		}
+
 		if(item.publicationTitle) {
 			if(item.itemType == "chapter") {
 				writeField("booktitle", item.publicationTitle);
@@ -7119,12 +7167,15 @@ function doExport() {
 			var editor = "";
 			for each(var creator in item.creators) {
 				var creatorString = creator.lastName;
-				if(creator.firstName) creatorString += ", "+creator.firstName;
-				
-				if(creator.creatorType == "editor") {
-					author += " and "+creatorString;
-				} else {
+
+				if (creator.firstName) {
+					creatorString = creator.firstName + " " + creator.lastName;
+				}
+
+				if (creator.creatorType == "editor") {
 					editor += " and "+creatorString;
+				} else {
+					author += " and "+creatorString;
 				}
 			}
 			
@@ -7132,14 +7183,14 @@ function doExport() {
 				writeField("author", author.substr(5));
 			}
 			if(editor) {
-				writeField("author", editor.substr(5));
+				writeField("editor", editor.substr(5));
 			}
 		}
 		
 		if(item.date) {
 			// need to use non-localized abbreviation
 			if(date.month) {
-				writeField("month", months[date.month]);
+				writeMacroField("month", months[date.month]);
 			}
 			if(date.year) {
 				writeField("year", date.year);
@@ -7152,6 +7203,9 @@ function doExport() {
 		
 		if(item.tags && item.tags.length) {
 			writeField("keywords", item.tags.join(","));
+		}
+		if(item.pages) {
+			writeField("pages", item.pages);
 		}
 		
 		Zotero.write("\n}");
