@@ -180,12 +180,12 @@ Zotero.Item.prototype.setType = function(itemTypeID){
 		// And reset custom creator types to the default
 		var creators = this.getCreators();
 		if (creators){
-			for each(var creator in creators){
-				if (!Zotero.CreatorTypes.isValidForItemType(creator['creatorTypeID'], itemTypeID))
+			for (var i in creators){
+				if (!Zotero.CreatorTypes.isValidForItemType(creators[i].creatorTypeID, itemTypeID))
 				{
 					// Reset to contributor (creatorTypeID 2), which exists in all
-					this.setCreator(orderIndex, creator['firstName'],
-						creator['lastName'], 2, creator['fieldMode']);
+					this.setCreator(i, creators[i].firstName,
+						creators[i].lastName, 2, creators[i].fieldMode);
 				}
 			}
 		}
