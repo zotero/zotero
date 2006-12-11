@@ -1,4 +1,4 @@
--- 118
+-- 119
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-12-11 15:44:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-12-11 15:57:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b3.r1', '', '2006-12-11 11:24:00', 1, 100, 4, 'Amazon', 'Sean Takats', '^http://(?:www\.)amazon', 
 'function detectWeb(doc, url) {
@@ -7578,7 +7578,7 @@ function doImport() {
 	}
 }');
 
-REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '2006-10-02 17:00:00', 'American Psychological Association',
+REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '2006-12-11 15:57:00', 'American Psychological Association',
 '<?xml version="1.0" encoding="UTF-8"?>
 <?oxygen RNGSchema="../schema/trunk/csl.rnc" type="compact"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="author-date" xml:lang="en">
@@ -7663,7 +7663,7 @@ REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '200
   </citation>
   <bibliography hanging-indent="true">
     <sort algorithm="author-date"/>
-    <et-al min-authors="4" use-first="3"/>
+    <et-al min-authors="6" use-first="6"/>
     <layout>
       <list>
         <heading>
