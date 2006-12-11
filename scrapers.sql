@@ -1,4 +1,4 @@
--- 117
+-- 118
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,9 +22,9 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-12-09 20:45:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-12-11 15:44:00'));
 
-REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b3.r1', '', '2006-11-26 09:05:00', 1, 100, 4, 'Amazon', 'Sean Takats', '^http://(?:www\.)amazon', 
+REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b3.r1', '', '2006-12-11 11:24:00', 1, 100, 4, 'Amazon', 'Sean Takats', '^http://(?:www\.)amazon', 
 'function detectWeb(doc, url) {
 
 	var suffixRe = new RegExp("http://(?:www\.)amazon\.([^/]+)/");
@@ -34,7 +34,6 @@ REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b
 	if(searchRe.test(doc.location.href)) {
 		return "multiple";
 	} else {
-			
 		var namespace = doc.documentElement.namespaceURI;
 		var nsResolver = namespace ? function(prefix) {
 			if (prefix == ''x'') return namespace; else return null;
@@ -42,17 +41,22 @@ REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b
 		
 		var xpath = ''//input[@name="ASIN"]'';
 		if(doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
-			elmt = doc.evaluate(''//input[@name="storeID"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-			var storeID = Zotero.Utilities.getNodeString(doc, elmt, ''./@value'', nsResolver);
-			Zotero.Utilities.debug("store id: " + storeID);
-			if (storeID=="books"){
-				return "book";
-			}
-			else if (storeID=="music"){
-				return "audioRecording";
-			}
-			else if (storeID=="dvd"|storeID=="video"){
-				return "videoRecording";
+			var elmt = doc.evaluate(''//input[@name="storeID"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+			if(elmt) {
+				var storeID = elmt.value;
+				Zotero.Utilities.debug("store id: " + storeID);
+				if (storeID=="books"){
+					return "book";
+				}
+				else if (storeID=="music"){
+					return "audioRecording";
+				}
+				else if (storeID=="dvd"|storeID=="video"){
+					return "videoRecording";
+				}
+				else {
+					return "book";
+				}
 			}
 			else {
 				return "book";
@@ -87,8 +91,8 @@ REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b
 		var asinRe = new RegExp(''/(dp|product)/([^/]+)/'');
 
 		do {
-			var link = Zotero.Utilities.getNodeString(doc, elmt, ''../@href'', nsResolver);
-			var searchTitle =  Zotero.Utilities.getNodeString(doc, elmt, ''./text()'', nsResolver);
+			var link = doc.evaluate(''../@href'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
+			var searchTitle = elmt.textContent;
 			availableItems[i] = searchTitle;
 			var asinMatch = asinRe.exec(link);
 			asins[i] = asinMatch[2];
@@ -110,7 +114,7 @@ REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b
 	                       nsResolver, XPathResult.ANY_TYPE, null);
 		var elmt;
 		while(elmt = elmts.iterateNext()) {
-			var asin = Zotero.Utilities.getNodeString(doc, elmt, ''./@value'', nsResolver);
+			var asin = elmt.value;
 		}
 		uris.push("http://ecs.amazonaws." + suffix + "/onca/xml?Service=AWSECommerceService&Version=2006-06-28&Operation=ItemLookup&SubscriptionId=0H174V5J5R5BE02YQN02&ItemId=" + asin + "&ResponseGroup=ItemAttributes");
 	}
@@ -407,7 +411,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b2.r2', '', '2006-10-02 17:00:00', 1, 100, 4, 'LOC/Voyager WebVoyage', 'Simon Kornblith', 'Pwebrecon\.cgi',
+REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b2.r2', '', '2006-12-11 11:24:00', 1, 100, 4, 'LOC/Voyager WebVoyage', 'Simon Kornblith', 'Pwebrecon\.cgi',
 'function detectWeb(doc, url) {
 	var export_options = doc.forms.namedItem(''frm'').elements.namedItem(''RD'').options;
 	for(var i in export_options) {
@@ -464,7 +468,7 @@ REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b
 			// Go through links
 			for(var j=0; j<links.length; j++) {
 				if(tagRegexp.test(links[j].href)) {
-					var text = Zotero.Utilities.getNodeString(doc, links[j], ".//text()", null);
+					var text = links[j].textContent;
 					if(text) {
 						text = Zotero.Utilities.cleanString(text);
 						if(!rejectRegexp.test(text)) {
@@ -801,7 +805,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '1.0.0b3.r1', '', '2006-11-24 19:34:00', 1, 100, 4, 'InnoPAC', 'Simon Kornblith', '^http://[^/]+/(?:search/|record=)',
+REPLACE INTO translators VALUES ('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '1.0.0b3.r1', '', '2006-12-11 11:44:00', 1, 100, 4, 'InnoPAC', 'Simon Kornblith', '^http://[^/]+/(?:search/|record=)',
 'function detectWeb(doc, url) {
 	// First, check to see if the URL alone reveals InnoPAC, since some sites don''t reveal the MARC button
 	var matchRegexp = new RegExp(''^(http://[^/]+/search/[^/]+/[^/]+/1\%2C[^/]+/)frameset(.+)$'');
@@ -969,8 +973,7 @@ function doWeb(doc, url) {
 					if(tagRegexp.test(link.href)) {
 						if(!firstURL) firstURL = link.href;
 						
-						var text = Zotero.Utilities.getNodeString(doc, link,
-																   ".//text()", null);
+						var text = link.textContent;
 						if(text) {
 							text = Zotero.Utilities.cleanString(text);
 							if(availableItems[link.href]) {
@@ -1007,7 +1010,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('add7c71c-21f3-ee14-d188-caf9da12728b', '1.0.0b3.r1', '', '2006-12-06 23:30:00', 1, 100, 4, 'SIRSI', 'Sean Takats', '/uhtbin/cgisirsi',
+REPLACE INTO translators VALUES ('add7c71c-21f3-ee14-d188-caf9da12728b', '1.0.0b3.r1', '', '2006-12-11 11:42:00', 1, 100, 4, 'SIRSI', 'Sean Takats', '/uhtbin/cgisirsi',
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -1167,7 +1170,7 @@ function doWeb(doc, url){
 			// Go through table rows
 			while(tableRow = tableRows.iterateNext()) {
 				var input = doc.evaluate(''.//input[@value="Details"]'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-				var text = Zotero.Utilities.getNodeString(doc, tableRow, ''.//label/strong//text()'', nsResolver);
+				var text = doc.evaluate(''.//label/strong'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 				if(text) {
 					availableItems[input.name] = text;
 				}
@@ -1190,7 +1193,7 @@ function doWeb(doc, url){
 			Zotero.wait();
 		}	
 	} else{  //executes Simon''s SIRSI -2003 translator code
-		Zotero.Utilities.debug("Running SIRSI 2003+ code");
+		Zotero.Utilities.debug("Running SIRSI -2003 code");
 		var uri = doc.location.href;
 		var recNumbers = new Array();
 		var xpath = ''//form[@name="hitlist"]/table/tbody/tr'';
@@ -1207,7 +1210,7 @@ function doWeb(doc, url){
 				var checkbox = doc.evaluate(''.//input[@type="checkbox"]'', elmt, nsResolver,
 											XPathResult.ANY_TYPE, null).iterateNext();
 				// Collect title
-				var title = Zotero.Utilities.getNodeString(doc, elmt, "./td[2]/text()", nsResolver);
+				var title = doc.evaluate("./td[2]", elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 				if(checkbox && title) {
 					items[checkbox.name] = Zotero.Utilities.cleanString(title);
 				}
@@ -1241,7 +1244,7 @@ function doWeb(doc, url){
 									 XPathResult.ANY_TYPE, null);
 			while (elmt = elmts.iterateNext()) {
 				recNumbers.length = 0;
-				var recNumber = doc.evaluate(''./@value'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue
+				var recNumber = elmt.value;
 				recNumbers.push(recNumber);
 				break;
 			 }
@@ -1295,7 +1298,7 @@ function doWeb(doc, url){
 }');
 
 
-REPLACE INTO translators VALUES ('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '1.0.0b3.r1', '', '2006-10-02 17:00:00', 1, 100, 4, 'ProQuest', 'Simon Kornblith', '^http://[^/]+/pqdweb\?((?:.*\&)?did=.*&Fmt=[0-9]|(?:.*\&)Fmt=[0-9].*&did=|(?:.*\&)searchInterface=)',
+REPLACE INTO translators VALUES ('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '1.0.0b3.r1', '', '2006-12-11 11:27:00', 1, 100, 4, 'ProQuest', 'Simon Kornblith', '^http://[^/]+/pqdweb\?((?:.*\&)?did=.*&Fmt=[0-9]|(?:.*\&)Fmt=[0-9].*&did=|(?:.*\&)searchInterface=)',
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -1321,15 +1324,15 @@ REPLACE INTO translators VALUES ('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '1.0.0b
 	var elmt;
 	
 	// Title
-	var xpath = ''/html/body/span[@class="textMedium"]/table/tbody/tr/td[@class="headerBlack"]/strong//text()'';
-	newItem.title = Zotero.Utilities.getNodeString(doc, doc, xpath, nsResolver);
+	var xpath = ''/html/body/span[@class="textMedium"]/table/tbody/tr/td[@class="headerBlack"]/strong'';
+	newItem.title = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 	
 	// Authors
 	var xpath = ''/html/body/span[@class="textMedium"]/table/tbody/tr/td[@class="textMedium"]/a/em'';
 	var elmts = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
 	while(elmt = elmts.iterateNext()) {
 		// there are sometimes additional tags representing higlighting
-		var author = Zotero.Utilities.getNodeString(doc, elmt, ''.//text()'', nsResolver);
+		var author = elmt.textContent;
 		if(author) {
 			newItem.creators.push(Zotero.Utilities.cleanAuthor(author, "author"));
 		}
@@ -1421,7 +1424,7 @@ REPLACE INTO translators VALUES ('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '1.0.0b
 			var subjects = doc.evaluate(".//a", elmt, nsResolver, XPathResult.ANY_TYPE, null);
 			var currentSubject;
 			while(currentSubject = subjects.iterateNext()) {
-				var subjectValue = Zotero.Utilities.getNodeString(doc, currentSubject, ".//text()", nsResolver);
+				var subjectValue = currentSubject.textContent;
 				subjectValue = Zotero.Utilities.superCleanString(subjectValue);
 				if(subjectValue) {
 					newItem.tags.push(subjectValue);
@@ -1783,7 +1786,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('b047a13c-fe5c-6604-c997-bef15e502b09', '1.0.0b2.r2', '', '2006-10-02 17:00:00', 1, 100, 4, 'LexisNexis', 'Simon Kornblith', '^http://web\.lexis-?nexis\.com/universe/(?:document|doclist)',
+REPLACE INTO translators VALUES ('b047a13c-fe5c-6604-c997-bef15e502b09', '1.0.0b2.r2', '', '2006-12-11 11:28:00', 1, 100, 4, 'LexisNexis', 'Simon Kornblith', '^http://web\.lexis-?nexis\.com/universe/(?:document|doclist)',
 'function detectWeb(doc, url) {
 	var detailRe = new RegExp("^http://[^/]+/universe/document");
 	if(detailRe.test(doc.location.href)) {
@@ -1887,7 +1890,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('cf87eca8-041d-b954-795a-2d86348999d5', '1.0.0b2.r2', '', '2006-11-27 22:45:00', 1, 100, 4, 'Aleph', 'Simon Kornblith', '^http://[^/]+/F(?:/[A-Z0-9\-]+(?:\?.*)?$|\?func=find|\?func=scan)',
+REPLACE INTO translators VALUES ('cf87eca8-041d-b954-795a-2d86348999d5', '1.0.0b2.r2', '', '2006-12-14 11:30:00', 1, 100, 4, 'Aleph', 'Simon Kornblith', '^http://[^/]+/F(?:/[A-Z0-9\-]+(?:\?.*)?$|\?func=find|\?func=scan)',
 'function detectWeb(doc, url) {
 	var singleRe = new RegExp("^http://[^/]+/F/[A-Z0-9\-]+\?.*(?:func=full-set-set.*\&format=[0-9]{3}|func=direct)");
 	
@@ -1958,7 +1961,7 @@ REPLACE INTO translators VALUES ('cf87eca8-041d-b954-795a-2d86348999d5', '1.0.0b
 		var record = new marc.record();
 		while(elmt = elmts.iterateNext()) {
 			var field = Zotero.Utilities.superCleanString(doc.evaluate(''./TD[1]/text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue);
-			var value = Zotero.Utilities.getNodeString(doc, elmt, ''./TD[2]//text()'', nsResolver);
+			var value = doc.evaluate(''./TD[2]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 			
 			if(field == "LDR") {
 				record.leader = value;
@@ -1986,7 +1989,7 @@ REPLACE INTO translators VALUES ('cf87eca8-041d-b954-795a-2d86348999d5', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('774d7dc2-3474-2684-392c-f787789ec63d', '1.0.0b2.r2', '', '2006-10-02 17:00:00', 1, 100, 4, 'Dynix', 'Simon Kornblith', 'ipac\.jsp\?.*(?:uri=full=[0-9]|menu=search)',
+REPLACE INTO translators VALUES ('774d7dc2-3474-2684-392c-f787789ec63d', '1.0.0b2.r2', '', '2006-12-11 11:43:00', 1, 100, 4, 'Dynix', 'Simon Kornblith', 'ipac\.jsp\?.*(?:uri=full=[0-9]|menu=search)',
 'function detectWeb(doc, url) {
 	var detailsRe = new RegExp(''ipac\.jsp\?.*uri=full=[0-9]'');
 	if(detailsRe.test(doc.location.href)) {
@@ -2047,7 +2050,7 @@ REPLACE INTO translators VALUES ('774d7dc2-3474-2684-392c-f787789ec63d', '1.0.0b
 		var record = new marc.record();		
 		while(elmt = elmts.iterateNext()) {
 			var field = Zotero.Utilities.superCleanString(newDoc.evaluate(''./TD[1]/A[1]/text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue);
-			var value = Zotero.Utilities.getNodeString(newDoc, elmt, ''./TD[2]/TABLE[1]/TBODY[1]/TR[1]/TD[1]/A[1]//text()'', nsResolver);
+			var value = newDoc.evaluate(''./TD[2]/TABLE[1]/TBODY[1]/TR[1]/TD[1]/A[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 			
 			if(field == "LDR") {
 				record.leader = value;
@@ -2075,7 +2078,7 @@ REPLACE INTO translators VALUES ('774d7dc2-3474-2684-392c-f787789ec63d', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('63a0a351-3131-18f4-21aa-f46b9ac51d87', '1.0.0b2.r2', '', '2006-10-02 17:00:00', 1, 100, 4, 'VTLS', 'Simon Kornblith', '/chameleon(?:\?|$)', 
+REPLACE INTO translators VALUES ('63a0a351-3131-18f4-21aa-f46b9ac51d87', '1.0.0b2.r2', '', '2006-12-11 11:59:00', 1, 100, 4, 'VTLS', 'Simon Kornblith', '/chameleon(?:\?|$)', 
 'function detectWeb(doc, url) {
 	var node = doc.evaluate(''//tr[@class="intrRow"]/td/table/tbody/tr[th]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 	if(node) {
@@ -2110,7 +2113,7 @@ REPLACE INTO translators VALUES ('63a0a351-3131-18f4-21aa-f46b9ac51d87', '1.0.0b
 		
 		var tableRows = doc.evaluate(''//tr[@class="intrRow"]'', doc, nsResolver,
 		                             XPathResult.ANY_TYPE, null);
-		var tableRow
+		var tableRow;
 		// Go through table rows
 		while(tableRow = tableRows.iterateNext()) {
 			var links = tableRow.getElementsByTagName("a");
@@ -2128,12 +2131,13 @@ REPLACE INTO translators VALUES ('63a0a351-3131-18f4-21aa-f46b9ac51d87', '1.0.0b
 				                          nsResolver, XPathResult.ANY_TYPE, null);
 				var field;
 				while(field = fields.iterateNext()) {
-					var header = doc.evaluate(''./th/text()'', fields[j], nsResolver,
+					var header = doc.evaluate(''./th/text()'', field, nsResolver,
 					                          XPathResult.ANY_TYPE, null).iterateNext();
 					if(header.nodeValue == "Title") {
-						var value = Zotero.Utilities.getNodeString(doc, fields[j], ''./td//text()'', nsResolver);
+						var value = doc.evaluate(''./td'', field, nsResolver,
+					    	XPathResult.ANY_TYPE, null).iterateNext();
 						if(value) {
-							items[url] = Zotero.Utilities.cleanString(value);
+							items[url] = Zotero.Utilities.cleanString(value.textContent);
 						}
 					}
 				}
@@ -3252,7 +3256,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('d0b1914a-11f1-4dd7-8557-b32fe8a3dd47', '1.0.0b3.r1', '', '2006-10-02 17:00:00', 1, 100, 4, 'EBSCOhost', 'Simon Kornblith', '^http://[^/]+/ehost/(?:results|detail)', 
+REPLACE INTO translators VALUES ('d0b1914a-11f1-4dd7-8557-b32fe8a3dd47', '1.0.0b3.r1', '', '2006-12-11 15:44:00', 1, 100, 4, 'EBSCOhost', 'Simon Kornblith', '^http://[^/]+/ehost/(?:results|detail)', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -3272,8 +3276,62 @@ REPLACE INTO translators VALUES ('d0b1914a-11f1-4dd7-8557-b32fe8a3dd47', '1.0.0b
 		return "journalArticle";
 	}
 }',
-'function fullEscape(text) {
+'var viewStateMatch = /<input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="([^"]+)" \/>/
+var eventValidationMatch = /<input type="hidden" name="__EVENTVALIDATION" id="__EVENTVALIDATION" value="([^"]+)" \/>/
+var host;
+
+function fullEscape(text) {
 	return escape(text).replace(/\//g, "%2F").replace(/\+/g, "%2B");
+}
+
+/*
+ * given the text of the delivery page, downloads an item
+ */
+function downloadFunction(text) {
+	var postLocation = /<form name="aspnetForm" method="post" action="([^"]+)"/
+	var m = postLocation.exec(text);
+	var deliveryURL = m[1].replace(/&amp;/g, "&");
+	m = viewStateMatch.exec(text);
+	var downloadString = "__EVENTTARGET=&__EVENTARGUMENT=&__LASTFOCUS=&__VIEWSTATE="+fullEscape(m[1])+"&ctl00%24ctl00%24ToolbarArea%24toolbar%24drpLanguages=&ctl00%24ctl00%24MainContentArea%24MainContentArea%24ctl01%24chkRemoveFromFolder=on&ctl00%24ctl00%24MainContentArea%24MainContentArea%24ctl01%24btnSubmit=Save&ctl00%24ctl00%24MainContentArea%24MainContentArea%24ctl01%24BibFormat=1&ajax=enabled";
+	Zotero.Utilities.HTTP.doPost("http://"+host+"/ehost/"+deliveryURL,
+								 downloadString, function(text) {	// get marked records as RIS
+		/*var form = doc.createElement("form");
+		form.setAttribute("method", "post");
+		form.setAttribute("action", "http://"+host+"/ehost/"+folderURL);
+		var args = [
+			["__EVENTARGUMENT", ""],
+			["__VIEWSTATE", folderViewState],
+			["__EVENTVALIDATION", folderEventValidation],
+			["__EVENTTARGET", "ctl00$ctl00$MainContentArea$MainContentArea$btnBack$lnkBack"]
+		];
+		for(var i in args) {
+			var input = doc.createElement("input");
+			input.setAttribute("type", "hidden");
+			input.setAttribute("name", args[i][0]);
+			input.setAttribute("value", args[i][1]);
+			form.appendChild(input);
+		}
+		var body = doc.getElementsByTagName("body");
+		body[0].appendChild(form);
+		form.submit();*/
+		
+		// load translator for RIS
+		var translator = Zotero.loadTranslator("import");
+		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+		translator.setString(text);
+		translator.setHandler("itemDone", function(obj, item) {
+			if(item.notes && item.notes[0]) {
+				item.extra = item.notes[0].note;
+				
+				delete item.notes;
+				item.notes = undefined;
+			}
+			item.complete();
+		});
+		translator.translate();
+		
+		Zotero.done();
+	});
 }
 
 function doWeb(doc, url) {
@@ -3284,7 +3342,7 @@ function doWeb(doc, url) {
 	
 	var hostRe = new RegExp("^http://([^/]+)/");
 	var m = hostRe.exec(url);
-	var host = m[1];
+	host = m[1];
 	
 	var queryRe = /\?(.*)$/;
 	var m = queryRe.exec(url);
@@ -3327,9 +3385,25 @@ function doWeb(doc, url) {
 			var m = argRe.exec(i);
 			citations.push(m[1]);
 		}
-		var saveString = "__EVENTTARGET=FolderItem:AddItem&IsCallBack=true&SearchTerm1=test&listDatabaseGroupings=pdh&SortOptionDropDown=date&__EVENTVALIDATION="+eventValidation+"&__EVENTARGUMENT="+citations.join(",")+"&";
 		
+		var saveString = "__EVENTTARGET=FolderItem:AddItem&IsCallBack=true&SearchTerm1=test&SortOptionDropDown=date&__EVENTVALIDATION="+eventValidation+"&__EVENTARGUMENT="+citations.join(",")+"&";
+		var folderString = "__EVENTTARGET=ctl00%24ctl00%24ToolbarArea%24toolbar%24folderControl%24lnkFolder&__EVENTARGUMENT=&__LASTFOCUS=&__VIEWSTATE="+viewState+"&ctl00%24ctl00%24ToolbarArea%24toolbar%24drpLanguages=&ctl00%24ctl00%24MainContentArea%24MainContentArea%24ctl11%24SearchTerm1=test&ctl00%24ctl00%24MainContentArea%24MainContentArea%24DbSortOptionControl%24SortOptionDropDown=date&__EVENTVALIDATION="+eventValidation;
 		
+		Zotero.Utilities.HTTP.doPost(url, saveString, function(text) {				// mark records
+			Zotero.Utilities.HTTP.doPost(url, folderString, function(text) {		// view folder
+				var postLocation = /<form name="aspnetForm" method="post" action="([^"]+)"/
+				var m = postLocation.exec(text);
+				var folderURL = m[1].replace(/&amp;/g, "&");
+				
+				m = viewStateMatch.exec(text);
+				var folderViewState = m[1];
+				m = eventValidationMatch.exec(text);
+				var folderEventValidation = m[1];
+				var deliverString = "__EVENTTARGET=ctl00%24ctl00%24MainContentArea%24MainContentArea%24btnDelivery%24lnkExport&__EVENTARGUMENT=&__VIEWSTATE="+fullEscape(folderViewState)+"&__EVENTVALIDATION="+fullEscape(folderEventValidation)+"&ajax=enabled";
+				Zotero.Utilities.HTTP.doPost("http://"+host+"/ehost/"+folderURL,
+											  deliverString, downloadFunction);		// download records as RIS
+			});
+		});
 	} else {
 		// If this is a view page, find the link to the citation
 		var xpath = ''/html/body/div[@class="indent"]/center//a[@class="nav"]'';
@@ -3337,83 +3411,9 @@ function doWeb(doc, url) {
 		var saveCitation = elmts.iterateNext();
 		var viewSavedCitations = elmts.iterateNext();
 		
-		var saveString = "__EVENTTARGET=ctl00%24ctl00%24MainContentArea%24MainContentArea%24topAddToFolderControl%24lnkAddToFolder&__EVENTARGUMENT=&__VIEWSTATE="+viewState+"&__EVENTVALIDATION="+eventValidation;
+		var deliverString = "ctl00%24ctl00%24MainContentArea%24MainContentArea%24topDeliveryControl%24deliveryButtonControl%24imgExport.x=18&ctl00%24ctl00%24MainContentArea%24MainContentArea%24topDeliveryControl%24deliveryButtonControl%24imgExport.y=9&__EVENTTARGET=&__EVENTARGUMENT=&__VIEWSTATE="+viewState+"&__EVENTVALIDATION="+eventValidation+"&ajax=enabled";
+		Zotero.Utilities.HTTP.doPost(url, deliverString, downloadFunction);
 	}
-	
-	var folderString = "__EVENTTARGET=ctl00%24ctl00%24ToolbarArea%24toolbar%24folderControl%24lnkFolder&__EVENTARGUMENT=&__VIEWSTATE="+viewState+"&__EVENTVALIDATION="+eventValidation;
-	var getString = "__EVENTTARGET=Tabs&IsCallBack=true&chkRemoveFromFolder=true&chkIncludeHTMLFT=true&chkIncludeHTMLLinks=true&CitationFormat=standard&lstFormatStandard=1&lstFormatIndustry=4&cfCommonAb=false&cfCommonAu=true&cfCommonTypDoc=true&cfCommonID=true&cfCommonISSN=true&cfCommonNote=false&cfCommonRevInfo=false&cfCommonSrc=true&cfCommonTi=true&__EVENTARGUMENT=1&"
-	
-	var viewStateMatch = /<input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="([^"]+)" \/>/
-	var eventValidationMatch = /<input type="hidden" name="__EVENTVALIDATION" id="__EVENTVALIDATION" value="([^"]+)" \/>/
-	
-	Zotero.Utilities.HTTP.doPost(url, saveString, function() {				// mark records
-		Zotero.Utilities.HTTP.doPost(url, folderString, function(text) {
-			var postLocation = /<form name="aspnetForm" method="post" action="([^"]+)"/
-			var m = postLocation.exec(text);
-			var folderURL = m[1].replace(/&amp;/g, "&");
-			
-			m = viewStateMatch.exec(text);
-			var folderViewState = m[1];
-			var folderBase = "__EVENTARGUMENT=&__VIEWSTATE="+fullEscape(folderViewState);
-			m = eventValidationMatch.exec(text);
-			var folderEventValidation = m[1];
-			folderBase += "&__EVENTVALIDATION="+fullEscape(folderEventValidation);
-			var deliverString = "__EVENTTARGET=ctl00%24ctl00%24MainContentArea%24MainContentArea%24btnDelivery%24lnkSave&"+folderBase
-			
-			Zotero.Utilities.HTTP.doPost("http://"+host+"/ehost/"+folderURL,
-										  deliverString, function(text) {
-				var postLocation = /<form name="aspnetForm" method="post" action="([^"]+)"/
-				var m = postLocation.exec(text);
-				var deliveryURL = m[1].replace(/&amp;/g, "&");
-
-				var m = viewStateMatch.exec(text);
-				var downloadString = "__EVENTTARGET=&__EVENTARGUMENT=&__VIEWSTATE="+fullEscape(m[1])+"&ctl00%24ctl00%24MainContentArea%24MainContentArea%24ctl01%24chkRemoveFromFolder=on&ctl00%24ctl00%24MainContentArea%24MainContentArea%24ctl01%24btnSubmit=Save&ctl00%24ctl00%24MainContentArea%24MainContentArea%24ctl01%24BibFormat=1";
-
-				Zotero.Utilities.HTTP.doPost("http://"+host+"/ehost/"+deliveryURL,
-				                         getString, function(text) {					
-					Zotero.Utilities.HTTP.doPost("http://"+host+"/ehost/"+deliveryURL,
-												 downloadString, function(text) {	// get marked
-						var form = doc.createElement("form");
-						form.setAttribute("method", "post");
-						form.setAttribute("action", "http://"+host+"/ehost/"+folderURL);
-						var args = [
-							["__EVENTARGUMENT", ""],
-							["__VIEWSTATE", folderViewState],
-							["__EVENTVALIDATION", folderEventValidation],
-							["__EVENTTARGET", "ctl00$ctl00$MainContentArea$MainContentArea$btnBack$lnkBack"]
-						];
-						for(var i in args) {
-							var input = doc.createElement("input");
-							input.setAttribute("type", "hidden");
-							input.setAttribute("name", args[i][0]);
-							input.setAttribute("value", args[i][1]);
-							form.appendChild(input);
-						}
-						var body = doc.getElementsByTagName("body");
-						body[0].appendChild(form);
-						form.submit();
-						
-						// load translator for RIS
-						var translator = Zotero.loadTranslator("import");
-						translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-						translator.setString(text);
-						translator.setHandler("itemDone", function(obj, item) {
-							if(item.notes && item.notes[0]) {
-								item.extra = item.notes[0].note;
-								
-								delete item.notes;
-								item.notes = undefined;
-							}
-							item.complete();
-						});
-						translator.translate();
-						
-						Zotero.done();
-					});
-				});
-			});
-		});
-	});
 	
 	Zotero.wait();
 }');

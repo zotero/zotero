@@ -285,6 +285,9 @@ Zotero.Utilities.Ingester.prototype.gatherElementsOnXPath = function(doc, parent
 
 /*
  * Gets a given node as a string containing all child nodes
+ *
+ * WARNING: This is DEPRECATED and may be removed in the final release. Use
+ * doc.evaluate and the "nodeValue" or "textContent" property
  */
 Zotero.Utilities.Ingester.prototype.getNodeString = function(doc, contextNode, xpath, nsResolver) {
 	var elmts = this.gatherElementsOnXPath(doc, contextNode, xpath, nsResolver);
