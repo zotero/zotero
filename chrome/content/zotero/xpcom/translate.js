@@ -91,9 +91,9 @@
  * _exportFileDirectory - the directory to which files will be exported
  * _hasBOM - whether the given file ready to be imported has a BOM or not
  *
- * WEB-ONLY PRIVATE PROPERTIES:
+ * WEB-ONLY PROPERTIES:
  *
- * _locationIsProxied - whether the URL being scraped is going through
+ * locationIsProxied - whether the URL being scraped is going through
  *                      an EZProxy
  * _downloadAssociatedFiles - whether to download content, according to
  *                            preferences
@@ -1081,6 +1081,12 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 				throw("item has no title");
 			}
 			
+			// if item was accessed through a proxy, ensure that the proxy
+			// address remains in the accessed version
+			if(this.locationIsProxied && item.url) {
+				item.url = Zotero.Ingester.ProxyMonitor.properToProxy(item.url);
+			}
+			
 			// create new item
 			if(type == "attachment") {
 				if(this.type != "import") {
@@ -1089,7 +1095,6 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 				}
 				
 				Zotero.debug("adding attachment");
-				Zotero.debug(item);
 				
 				if(!item.path) {
 					// create from URL
