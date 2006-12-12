@@ -1,4 +1,4 @@
--- 120
+-- 121
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -6095,7 +6095,7 @@ function doImport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7', '1.0.0b3.r1', '', '2006-10-02 17:00:00', 1, 100, 3, 'RIS', 'Simon Kornblith', 'ris',
+REPLACE INTO translators VALUES ('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7', '1.0.0b3.r1', '', '2006-12-11 12:02:00', 1, 100, 3, 'RIS', 'Simon Kornblith', 'ris',
 'Zotero.configure("dataMode", "line");
 Zotero.addOption("exportNotes", true);
 
@@ -6329,8 +6329,11 @@ function doImport(attachments) {
 	
 	var tag = "TY";
 	var data = line.substr(6);
-	while((line = Zotero.read()) !== false) {	// until EOF
-		line = line.replace(/^\s+/, "");
+	var rawLine;
+	while((rawLine = Zotero.read()) !== false) {	// until EOF
+		// trim leading space if this line is not part of a note
+		line = rawLine.replace(/^\s+/, "");
+		
 		if(line.substr(2, 4) == "  - ") {
 			// if this line is a tag, take a look at the previous line to map
 			// its tag
@@ -6357,11 +6360,16 @@ function doImport(attachments) {
 			}
 		} else {
 			// otherwise, assume this is data from the previous line continued
-			if(tag) {
+			if(tag == "N1" || tag == "N2" || tag == "AB") {
+				// preserve line endings for N1/N2/AB fields, for EndNote
+				// compatibility
+				data += "\n"+rawLine;
+			} else if(tag) {
+				// otherwise, follow the RIS spec
 				if(data[data.length-1] == " ") {
-					data += line;
+					data += rawLine;
 				} else {
-					data += " "+line;
+					data += " "+rawLine;
 				}
 			}
 		}
@@ -6436,7 +6444,7 @@ function doExport() {
 		// notes
 		if(Zotero.getOption("exportNotes")) {
 			for(var j in item.notes) {
-				addTag("N1", item.notes[j].note.replace(/[\r\n]/g, " "));
+				addTag("N1", item.notes[j].note.replace(/(?:\r\n?|\n)/g, "\r\n"));
 			}
 		}
 		
