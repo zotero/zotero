@@ -1250,8 +1250,7 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 										title = attachment.document.title;
 									}
 									
-									Zotero.Attachments.importFromURL(attachment.url, myID,
-											mimeType, title);
+									Zotero.Attachments.importFromURL(attachment.url, myID, title);
 								}
 							}
 							// links no longer exist, so just don't save them
