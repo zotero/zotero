@@ -1,4 +1,4 @@
--- 119
+-- 120
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-12-11 15:57:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-12-11 18:37:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b3.r1', '', '2006-12-11 11:24:00', 1, 100, 4, 'Amazon', 'Sean Takats', '^http://(?:www\.)amazon', 
 'function detectWeb(doc, url) {
@@ -540,7 +540,7 @@ REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('d921155f-0186-1684-615c-ca57682ced9b', '1.0.0b3.r1', '', '2006-11-20 23:10:00', 1, 100, 4, 'JSTOR', 'Simon Kornblith', '^http://www\.jstor\.org/(?:view|browse|search/)', 
+REPLACE INTO translators VALUES ('d921155f-0186-1684-615c-ca57682ced9b', '1.0.0b3.r1', '', '2006-12-11 17:48:00', 1, 100, 4, 'JSTOR', 'Simon Kornblith', '^http://www\.jstor\.org/(?:view|browse|search/)', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -564,8 +564,7 @@ REPLACE INTO translators VALUES ('d921155f-0186-1684-615c-ca57682ced9b', '1.0.0b
 	var m = viewRe.exec(viewURL);
 	if(m) {
 		return {url:m[1]+"cgi-bin/jstor/printpage"+m[2]+".pdf?dowhat=Acrobat",
-		        mimeType:"application/pdf", title:"JSTOR Full Text PDF",
-		        downloadable:true};
+		        mimeType:"application/pdf", title:"JSTOR Full Text PDF"};
 	} else {
 		return false;
 	}
@@ -573,8 +572,13 @@ REPLACE INTO translators VALUES ('d921155f-0186-1684-615c-ca57682ced9b', '1.0.0b
 
 function itemComplete(newItem, url) {
 	if(newItem.url) {
-		newItem.attachments.push({url:newItem.url, mimeType:"text/html",
-		                          title:"JSTOR Web-Readable Version"});
+		if(useSnapshot) {
+			newItem.attachments.push({document:useSnapshot,
+			                          title:"JSTOR Snapshot"});
+		} else {
+			newItem.attachments.push({url:newItem.url, mimeType:"text/html",
+			                          title:"JSTOR Snapshot"});
+		}
 	} else {
 		if(newItem.ISSN) {
 			newItem.url = "http://www.jstor.org/browse/"+newItem.ISSN;
@@ -585,6 +589,8 @@ function itemComplete(newItem, url) {
 	
 	newItem.complete();
 }
+
+var useSnapshot = false;
 
 function doWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
@@ -654,6 +660,8 @@ function doWeb(doc, url) {
 		} else {
 			throw("Could not find citation save links");
 		}
+		
+		useSnapshot = doc;
 	}
 	
 	Zotero.Utilities.HTTP.doGet(''http://www.jstor.org/browse?citationAction=removeAll&confirmRemAll=on&viewCitations=1'', function() {	// clear marked
@@ -730,7 +738,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('e85a3134-8c1a-8644-6926-584c8565f23e', '1.0.0b2.r2', '', '2006-10-23 00:23:00', 1, 100, 4, 'History Cooperative', 'Simon Kornblith', '^http://www\.historycooperative\.org/(?:journals/.+/.+/.+\.s?html$|cgi-bin/search.cgi)', 
+REPLACE INTO translators VALUES ('e85a3134-8c1a-8644-6926-584c8565f23e', '1.0.0b2.r2', '', '2006-12-11 18:01:00', 1, 100, 4, 'History Cooperative', 'Simon Kornblith', '^http://www\.historycooperative\.org/(?:journals/.+/.+/.+\.s?html$|cgi-bin/search.cgi)', 
 'function detectWeb(doc, url) {
 	if(doc.title == "History Cooperative: Search Results") {
 		return "multiple";
@@ -776,8 +784,7 @@ function scrape(doc) {
 		newItem.date = month.getAttribute("content")+" "+year.getAttribute("content");
 	}
 	
-	newItem.attachments.push({document:doc, title:"History Cooperative Full Text",
-	                          downloadable:true});
+	newItem.attachments.push({document:doc, title:"History Cooperative Snapshot"});
 	
 	newItem.complete();
 }
@@ -1298,7 +1305,7 @@ function doWeb(doc, url){
 }');
 
 
-REPLACE INTO translators VALUES ('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '1.0.0b3.r1', '', '2006-12-11 11:27:00', 1, 100, 4, 'ProQuest', 'Simon Kornblith', '^http://[^/]+/pqdweb\?((?:.*\&)?did=.*&Fmt=[0-9]|(?:.*\&)Fmt=[0-9].*&did=|(?:.*\&)searchInterface=)',
+REPLACE INTO translators VALUES ('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '1.0.0b3.r1', '', '2006-12-11 18:02:00', 1, 100, 4, 'ProQuest', 'Simon Kornblith', '^http://[^/]+/pqdweb\?((?:.*\&)?did=.*&Fmt=[0-9]|(?:.*\&)Fmt=[0-9].*&did=|(?:.*\&)searchInterface=)',
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -1440,10 +1447,10 @@ REPLACE INTO translators VALUES ('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '1.0.0b
 	
 	// figure out what we can attach
 	var attachArray = {
-		''//td[@class="textSmall"]//img[@alt="Full Text - PDF"]'':"ProQuest Full Text (PDF)",
-		''//td[@class="textSmall"]//img[@alt="Text+Graphics"]'':"ProQuest Full Text (HTML with Graphics)",
-		''//td[@class="textSmall"]//img[@alt="Full Text"]'':"ProQuest Full Text (HTML)",
-		''//td[@class="textSmall"]//img[@alt="Abstract"]'':"ProQuest Abstract"
+		''//td[@class="textSmall"]//img[@alt="Full Text - PDF"]'':"ProQuest Full Text PDF",
+		''//td[@class="textSmall"]//img[@alt="Text+Graphics"]'':"ProQuest Snapshot (HTML with Graphics)",
+		''//td[@class="textSmall"]//img[@alt="Full Text"]'':"ProQuest Snapshot (HTML)",
+		''//td[@class="textSmall"]//img[@alt="Abstract"]'':"ProQuest Snapshot (Abstract)"
 	}
 	for(var xpath in attachArray) {
 		var item = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
@@ -1452,13 +1459,21 @@ REPLACE INTO translators VALUES ('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '1.0.0b
 			
 			if(item.parentNode.tagName.toLowerCase() == "a") {
 				// item is not this page
-				newItem.attachments.push({url:item.parentNode.href,
-				title:title, mimeType:(title == "ProQuest Full Text (PDF)" ? "application/pdf" : "text/html"),
-				downloadable:true});
+				if(title == "ProQuest Full Text PDF") {
+					// PDF gets different mime type and downloadability
+					newItem.attachments.push({url:item.parentNode.href,
+						title:title, mimeType:"application/pdf"});
+				} else {
+					newItem.attachments.push({url:item.parentNode.href,
+						title:title, mimeType:"text/html"});
+				}
 			} else {
 				// item is this page
-				newItem.attachments.push({document:doc, title:title, downloadable:true});
+				newItem.attachments.push({document:doc, title:title});
 			}
+			
+			// only snapshot one of the possible types
+			if(title != "ProQuest Snapshot (PDF)") break;
 		}
 	}
 	
@@ -1524,7 +1539,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('6773a9af-5375-3224-d148-d32793884dec', '1.0.0b3.r1', '', '2006-10-02 17:00:00', 1, 100, 4, 'InfoTrac College Edition', 'Simon Kornblith', '^http://infotrac-college\.thomsonlearning\.com/itw/infomark/',
+REPLACE INTO translators VALUES ('6773a9af-5375-3224-d148-d32793884dec', '1.0.0b3.r1', '', '2006-12-11 18:04:00', 1, 100, 4, 'InfoTrac College Edition', 'Simon Kornblith', '^http://infotrac-college\.thomsonlearning\.com/itw/infomark/',
 'function detectWeb(doc, url) {
 	if(doc.title.substring(0, 8) == "Article ") {
 		return "magazineArticle";
@@ -1607,11 +1622,10 @@ REPLACE INTO translators VALUES ('6773a9af-5375-3224-d148-d32793884dec', '1.0.0b
 	}
 	
 	if(doc) {
-		newItem.attachments.push({document:doc, title:"InfoTrac Full Text",
-		                         downloadable:true});
+		newItem.attachments.push({document:doc, title:"InfoTrac Snapshot"});
 	} else {
-		newItem.attachments.push({url:url, title:"InfoTrac Full Text",
-		                         mimeType:"text/html", downloadable:true});
+		newItem.attachments.push({url:url, title:"InfoTrac Snapshot",
+		                         mimeType:"text/html"});
 	}
 	
 	newItem.complete();
@@ -1667,7 +1681,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('63c25c45-6257-4985-9169-35b785a2995e', '1.0.0b2.r2', '', '2006-10-02 17:00:00', 1, 100, 4, 'InfoTrac OneFile', 'Simon Kornblith', '^https?://[^/]+/itx/(?:[a-z]+Search|retrieve|paginate|tab)\.do',
+REPLACE INTO translators VALUES ('63c25c45-6257-4985-9169-35b785a2995e', '1.0.0b2.r2', '', '2006-12-11 18:04:00', 1, 100, 4, 'InfoTrac OneFile', 'Simon Kornblith', '^https?://[^/]+/itx/(?:[a-z]+Search|retrieve|paginate|tab)\.do',
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -1797,8 +1811,7 @@ REPLACE INTO translators VALUES ('b047a13c-fe5c-6604-c997-bef15e502b09', '1.0.0b
 }',
 'function scrape(doc) {
 	var newItem = new Zotero.Item();
-	newItem.attachments.push({document:doc, title:"LexisNexis Full Text",
-	                          downloadable:true});
+	newItem.attachments.push({document:doc, title:"LexisNexis Snapshot"});
 	
 	var citationDataDiv;
 	var divs = doc.getElementsByTagName("div");
@@ -2436,7 +2449,7 @@ REPLACE INTO translators VALUES ('0f9fc2fc-306e-5204-1117-25bca009dffc', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('c54d1932-73ce-dfd4-a943-109380e06574', '1.0.0b3.r1', '', '2006-10-02 17:00:00', 1, 100, 4, 'Project MUSE', 'Simon Kornblith', '^http://muse\.jhu\.edu/(?:journals/[^/]+/[^/]+/[^/]+\.html|search/pia.cgi)',
+REPLACE INTO translators VALUES ('c54d1932-73ce-dfd4-a943-109380e06574', '1.0.0b3.r1', '', '2006-12-11 18:09:00', 1, 100, 4, 'Project MUSE', 'Simon Kornblith', '^http://muse\.jhu\.edu/(?:journals/[^/]+/[^/]+/[^/]+\.html|search/pia.cgi)',
 'function detectWeb(doc, url) {
 	var searchRe = new RegExp("^http://[^/]+/search/pia\.cgi");
 	if(searchRe.test(url)) {
@@ -2476,14 +2489,12 @@ REPLACE INTO translators VALUES ('c54d1932-73ce-dfd4-a943-109380e06574', '1.0.0b
 				for(var i=0; i<aTags.length; i++) {
 					if(pdfRe.test(aTags[i].href)) {
 						attachments[input.value].push({url:aTags[i].href,
-													  title:"Project MUSE Full Text (PDF)",
-													  mimeType:"application/pdf",
-													  downloadable:true});
+													  title:"Project MUSE Full Text PDF",
+													  mimeType:"application/pdf"});
 					} else if(htmlRe.test(aTags[i].href)) {
 						attachments[input.value].push({url:aTags[i].href,
-													  title:"Project MUSE Full Text (HTML)",
-													  mimeType:"text/html",
-													  downloadable:true});
+													  title:"Project MUSE Snapshot",
+													  mimeType:"text/html"});
 					}
 				}
 			}
@@ -2535,14 +2546,13 @@ REPLACE INTO translators VALUES ('c54d1932-73ce-dfd4-a943-109380e06574', '1.0.0b
 	} else {
 		var newItem = new Zotero.Item("journalArticle");
 		newItem.url = url;
-		newItem.attachments.push({title:"Project MUSE Full Text (HTML)", mimeType:"text/html",
-		                         url:url, downloadable:true});
+		newItem.attachments.push({document:doc, title:"Project MUSE Snapshot"});
 		
 		var getPDF = doc.evaluate(''//a[text() = "[Access article in PDF]"]'', doc,
 		                          nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 		if(getPDF) {
-			newItem.attachments.push({title:"Project MUSE Full Text (PDF)", mimeType:"application/pdf",
-			                         url:getPDF.href, downloadable:true});
+			newItem.attachments.push({title:"Project MUSE Full Text PDF", mimeType:"application/pdf",
+			                         url:getPDF.href});
 		}
 		
 		var elmts = doc.evaluate(''//comment()'', doc, nsResolver,
@@ -2592,7 +2602,7 @@ REPLACE INTO translators VALUES ('c54d1932-73ce-dfd4-a943-109380e06574', '1.0.0b
 	}
 }');
 
-REPLACE INTO translators VALUES ('fcf41bed-0cbc-3704-85c7-8062a0068a7a', '1.0.0b3.r1', '', '2006-11-29 12:00:00', 1, 100, 12, 'PubMed', 'Simon Kornblith', '^http://www\.ncbi\.nlm\.nih\.gov/entrez/query\.fcgi\?.*db=PubMed',
+REPLACE INTO translators VALUES ('fcf41bed-0cbc-3704-85c7-8062a0068a7a', '1.0.0b3.r1', '', '2006-12-11 18:10:00', 1, 100, 12, 'PubMed', 'Simon Kornblith', '^http://www\.ncbi\.nlm\.nih\.gov/entrez/query\.fcgi\?.*db=PubMed',
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -2647,12 +2657,11 @@ function detectSearch(item) {
 			
 			// add attachments
 			if(doc) {
-				newItem.attachments.push({document:doc, title:"PubMed Abstract",
-				                         downloadable:true});
+				newItem.attachments.push({document:doc, title:"PubMed Snapshot"});
 			} else {
 				var url = "http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?db=pubmed&cmd=Retrieve&dopt=AbstractPlus&list_uids="+PMID;
-				newItem.attachments.push({url:url, title:"PubMed Abstract (HTML)",
-				                         mimeType:"text/html", downloadable:true});
+				newItem.attachments.push({url:url, title:"PubMed Snapshot",
+				                         mimeType:"text/html"});
 			}
 			
 			var article = citation.Article;
@@ -3026,7 +3035,6 @@ REPLACE INTO translators VALUES ('3e684d82-73a3-9a34-095f-19b112d88bbf', '1.0.0b
 	Zotero.Utilities.processDocuments(newUris, function(newDoc) {
 		var newItem = new Zotero.Item("book");
 		newItem.extra = "";
-		newItem.attachments.push({title:"Google Books Information Page", document:newDoc});
 		
 		var namespace = newDoc.documentElement.namespaceURI;
 		var nsResolver = namespace ? function(prefix) {
@@ -3083,7 +3091,7 @@ REPLACE INTO translators VALUES ('3e684d82-73a3-9a34-095f-19b112d88bbf', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('57a00950-f0d1-4b41-b6ba-44ff0fc30289', '1.0.0b3.r1', '', '2006-11-20 23:00:00', 1, 100, 4, 'Google Scholar', 'Simon Kornblith', '^http://scholar\.google\.com/scholar',
+REPLACE INTO translators VALUES ('57a00950-f0d1-4b41-b6ba-44ff0fc30289', '1.0.0b3.r1', '', '2006-12-11 18:15:00', 1, 100, 4, 'Google Scholar', 'Simon Kornblith', '^http://scholar\.google\.[a-z]+/scholar',
 'function detectWeb(doc, url) {
 	return "multiple";
 }',
@@ -3146,7 +3154,7 @@ REPLACE INTO translators VALUES ('57a00950-f0d1-4b41-b6ba-44ff0fc30289', '1.0.0b
 		var m = relatedMatch.exec(relatedLinks[i]);
 		urls.push("http://scholar.google.com/scholar.ris?hl=en&lr=&q=info:"+m[1]+"&oe=UTF-8&output=citation&oi=citation");
 		if(links[i]) {
-			attachments.push([{title:"Google Zotero Linked Page", type:"text/html",
+			attachments.push([{title:"Google Scholar Linked Page", type:"text/html",
 			                  url:links[i]}]);
 		} else {
 			attachments.push([]);
@@ -3418,7 +3426,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('ce7a3727-d184-407f-ac12-52837f3361ff', '1.0.0b2.r2', '', '2006-11-25 20:00:00', 1, 100, 4, 'New York Times', 'Simon Kornblith', '^http://(?:query\.nytimes\.com/search/query|(?:select\.|www\.)?nytimes\.com/.)', 
+REPLACE INTO translators VALUES ('ce7a3727-d184-407f-ac12-52837f3361ff', '1.0.0b3.r1', '', '2006-12-11 18:16:00', 1, 100, 4, 'New York Times', 'Simon Kornblith', '^http://(?:query\.nytimes\.com/search/query|(?:select\.|www\.)?nytimes\.com/.)', 
 'function detectWeb(doc, url) {
 	if(doc.title.substr(0, 30) == "The New York Times: Search for") {
 		var namespace = doc.documentElement.namespaceURI;
@@ -3473,8 +3481,8 @@ function scrape(doc, url) {
 			return;
 		}
 		
-		newItem.attachments.push({url:url, title:"Article (HTML)",
-	 	                          mimeType:"text/html", downloadable:true});
+		newItem.attachments.push({url:url, title:"New York Times Snapshot",
+	 	                          mimeType:"text/html"});
 	} else {
 		newItem.url = doc.location.href;
 		var metaTagHTML = doc.getElementsByTagName("meta");
@@ -3486,8 +3494,7 @@ function scrape(doc, url) {
 			}
 		}
 	
-		newItem.attachments.push({document:doc, title:"Article (HTML)",
-		                          downloadable:true});
+		newItem.attachments.push({document:doc, title:"New York Times Snapshot"});
 	}
 	
 	associateMeta(newItem, metaTags, "dat", "date");
@@ -3538,7 +3545,7 @@ function doWeb(doc, url) {
 		
 		var result = doc.evaluate(''//div[@id="srchContent"]'', doc, nsResolver,
 		             XPathResult.ANY_TYPE, null).iterateNext();
-		var items = Zotero.Utilities.getItemArray(doc, result, ''^http://www.nytimes.com/.*\.html$'');
+		var items = Zotero.Utilities.getItemArray(doc, result, ''^http://(?:select\.|www\.)nytimes.com/.*\.html$'');
 		items = Zotero.selectItems(items);
 			
 		if(!items) {
@@ -3550,7 +3557,7 @@ function doWeb(doc, url) {
 			urls.push(i);
 		}
 		
-		Zotero.Utilities.HTTP.doGet(urls, scrape, function() { Zotero.done(); }, null);
+		Zotero.Utilities.HTTP.doGet(urls, function(text, response, url) { scrape(text, url) }, function() { Zotero.done(); }, null);
 		
 		Zotero.wait();
 	} else {
@@ -3558,7 +3565,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('1e6d1529-246f-4429-84e2-1f1b180b250d', '1.0.0b2.r2', '', '2006-10-02 17:00:00', 1, 100, 4, 'Chronicle of Higher Education', 'Simon Kornblith', '^http://chronicle\.com/', 
+REPLACE INTO translators VALUES ('1e6d1529-246f-4429-84e2-1f1b180b250d', '1.0.0b2.r2', '', '2006-12-11 18:30:00', 1, 100, 4, 'Chronicle of Higher Education', 'Simon Kornblith', '^http://chronicle\.com/', 
 'function detectWeb(doc, url) {
 	var articleRegexp = /^http:\/\/chronicle\.com\/(?:daily|weekly)\/[^/]+\//
 	if(articleRegexp.test(url)) {
@@ -3610,8 +3617,7 @@ function scrape(doc) {
 	newItem.url = doc.location.href;
 	var metaTags = doc.getElementsByTagName("meta");
 
-	newItem.attachments.push({document:doc, title:"Article (HTML)",
-							  downloadable:true});
+	newItem.attachments.push({document:doc, title:"Chronicle of Higher Education Snapshot"});
 	
 	associateMeta(newItem, metaTags, "published_date", "date");
 	associateMeta(newItem, metaTags, "headline", "title");
@@ -3667,9 +3673,9 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('4c164cc8-be7b-4d02-bfbf-37a5622dfd56', '1.0.0b2.r2', '', '2006-10-02 17:00:00', 1, 100, 4, 'New York Review of Books', 'Simon Kornblith', '^http://www\.nybooks\.com/', 
+REPLACE INTO translators VALUES ('4c164cc8-be7b-4d02-bfbf-37a5622dfd56', '1.0.0b2.r2', '', '2006-12-11 18:31:00', 1, 100, 4, 'New York Review of Books', 'Simon Kornblith', '^http://www\.nybooks\.com/', 
 'function detectWeb(doc, url) {
-	var articleRegexp = /^http:\/\/www\.nybooks\.com\/articles\/[0-9]+/
+	var articleRegexp = /^http:\/\/www\.nybooks\.com\/articles\/[0-9]+\/?/
 	if(articleRegexp.test(url)) {
 		return "journalArticle";
 	} else {
@@ -3700,8 +3706,7 @@ function scrape(doc) {
 	newItem.url = doc.location.href;
 	var metaTags = doc.getElementsByTagName("meta");
 
-	newItem.attachments.push({document:doc, title:"Review (HTML)",
-							  downloadable:true});
+	newItem.attachments.push({document:doc, title:"New York Review of Books Snapshot"});
 	
 	associateMeta(newItem, metaTags, "dc.title", "title");
 	
@@ -3745,7 +3750,7 @@ function doWeb(doc, url) {
 	if(articleRegexp.test(url)) {
 		scrape(doc);
 	} else {
-		var items = Zotero.Utilities.getItemArray(doc, doc, "^http://www\\.nybooks\\.com/articles/[0-9]+/");
+		var items = Zotero.Utilities.getItemArray(doc, doc, "^http://www\\.nybooks\\.com/articles/[0-9]+/?");
 		items = Zotero.selectItems(items);
 			
 		if(!items) {
@@ -3762,7 +3767,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('d1bf1c29-4432-4ada-8893-2e29fc88fd9e', '1.0.0b2.r2', '', '2006-10-02 17:00:00', 1, 100, 4, 'Washington Post', 'Simon Kornblith', '^http://www\.washingtonpost\.com/', 
+REPLACE INTO translators VALUES ('d1bf1c29-4432-4ada-8893-2e29fc88fd9e', '1.0.0b2.r2', '', '2006-12-11 18:35:00', 1, 100, 4, 'Washington Post', 'Simon Kornblith', '^http://www\.washingtonpost\.com/', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -3801,8 +3806,7 @@ REPLACE INTO translators VALUES ('d1bf1c29-4432-4ada-8893-2e29fc88fd9e', '1.0.0b
 	newItem.url = doc.location.href;
 	var metaTags = doc.getElementsByTagName("meta");
 	
-	newItem.attachments.push({document:doc, title:"Article (HTML)",
-							  downloadable:true});
+	newItem.attachments.push({document:doc, title:"Washington Post Snapshot"});
 	
 	// grab title from doc title
 	newItem.title = doc.title.replace(" - washingtonpost.com", "");
@@ -3998,7 +4002,7 @@ REPLACE INTO translators VALUES ('a07bb62a-4d2d-4d43-ba08-d9679a0122f8', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('fa396dd4-7d04-4f99-95e1-93d6f355441d', '1.0.0b2.r2', '', '2006-10-02 17:00:00', 1, 100, 4, 'CiteSeer', 'Simon Kornblith', '^http://(?:citeseer\.ist\.psu\.edu/|citeseer\.csail\.mit\.edu/|citeseer\.ifi\.unizh\.ch/|citeseer\.comp\.nus\.edu\.sg/)', 
+REPLACE INTO translators VALUES ('fa396dd4-7d04-4f99-95e1-93d6f355441d', '1.0.0b2.r2', '', '2006-12-11 18:37:00', 1, 100, 4, 'CiteSeer', 'Simon Kornblith', '^http://(?:citeseer\.ist\.psu\.edu/|citeseer\.csail\.mit\.edu/|citeseer\.ifi\.unizh\.ch/|citeseer\.comp\.nus\.edu\.sg/)', 
 'function detectWeb(doc, url) {
 	var searchRe = /http:\/\/[^\/]+\/ci?s/;
 	if(searchRe.test(url)) {
@@ -4034,11 +4038,11 @@ REPLACE INTO translators VALUES ('fa396dd4-7d04-4f99-95e1-93d6f355441d', '1.0.0b
 		var index = acceptableTypes.indexOf(kind);
 		if(index != -1) {
 			var attachment = {url:elmt.href, mimeType:mimeTypes[index],
-			                  title:"Full Text "+kind};
-			if(kind == "PDF") {
-				attachment.downloadable = true;
-			}
+			                  title:"CiteSeer Full Text "+kind};
 			attachments.push(attachment);
+			
+			// only get one of thse files
+			break;
 		}
 	}
 	
@@ -4053,8 +4057,6 @@ REPLACE INTO translators VALUES ('fa396dd4-7d04-4f99-95e1-93d6f355441d', '1.0.0b
 				item.url = "http://"+item.url;
 			}
 			item.attachments = attachments;
-			item.attachments.push({document:doc, downloadable:false,
-			                       title:"CiteSeer Abstract"});
 			
 			item.complete();
 		});

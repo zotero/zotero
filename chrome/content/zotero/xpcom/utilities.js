@@ -418,7 +418,7 @@ Zotero.Utilities.Ingester.HTTP.prototype.doGet = function(urls, processor, done)
 	Zotero.Utilities.HTTP.doGet(url, function(xmlhttp) {
 		try {
 			if(processor) {
-				processor(xmlhttp.responseText, xmlhttp);
+				processor(xmlhttp.responseText, xmlhttp, url);
 			}
 			
 			if(callAgain) {

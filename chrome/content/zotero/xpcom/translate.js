@@ -958,7 +958,7 @@ Zotero.Translate.prototype._generateErrorString = function(error) {
 		// TODO: Currently using automaticSnapshots pref for everything
 		// Eventually downloadAssociatedFiles may be a separate pref
 		// for PDFs and other large files
-		//+ "\nextensions.zotero.downloadAssociatedFiles => "+Zotero.Prefs.get("downloadAssociatedFiles");
+		+ "\nextensions.zotero.downloadAssociatedFiles => "+Zotero.Prefs.get("downloadAssociatedFiles");
 		+ "\nextensions.zotero.automaticSnapshots => "+Zotero.Prefs.get("automaticSnapshots");
 	return errorString.substr(1);
 }
@@ -1216,20 +1216,44 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 			}
 			
 			// handle attachments
-			if(item.attachments) {
+			if(item.attachments && Zotero.Prefs.get("automaticSnapshots")) {
+				Zotero.debug("HANDLING ATTACHMENTS");
 				for each(var attachment in item.attachments) {
 					if(this.type == "web") {
 						if(!attachment.url && !attachment.document) {
 							Zotero.debug("not adding attachment: no URL specified");
-						} else if(attachment.downloadable && this._downloadAssociatedFiles) {
-							if(attachment.document) {
-								Zotero.Attachments.importFromDocument(attachment.document, myID, attachment.title);
-							} else {
-								Zotero.Attachments.importFromURL(attachment.url, myID,
-										(attachment.mimeType ? attachment.mimeType : attachment.document.contentType),
-										(attachment.title ? attachment.title : attachment.document.title));
-							}
 						} else {
+							if(attachment.document
+							|| (attachment.mimeType && attachment.mimeType == "text/html")
+							|| Zotero.Prefs.get("downloadAssociatedFiles")) {
+								if(attachment.document) {
+									Zotero.Attachments.importFromDocument(attachment.document, myID, attachment.title);
+								} else {
+									Zotero.debug("GOT ATTACHMENT");
+									Zotero.debug(attachment);
+									
+									var mimeType = null;
+									var title = null;
+									
+									if(attachment.mimeType) {
+										// first, try to extract mime type from mimeType attribute
+										mimeType = attachment.mimeType;
+									} else if(attachment.document && attachment.document.contentType) {
+										// if that fails, use document if possible
+										mimeType = attachment.document.contentType
+									}
+									
+									// same procedure for title as mime type
+									if(attachment.title) {
+										title = attachment.title;
+									} else if(attachment.document && attachment.document.title) {
+										title = attachment.document.title;
+									}
+									
+									Zotero.Attachments.importFromURL(attachment.url, myID,
+											mimeType, title);
+								}
+							}
 							// links no longer exist, so just don't save them
 							/*if(attachment.document) {
 								attachmentID = Zotero.Attachments.linkFromURL(attachment.document.location.href, myID,
@@ -1363,10 +1387,6 @@ Zotero.Translate.prototype._runHandler = function(type, argument) {
  * does the actual web translation
  */
 Zotero.Translate.prototype._web = function() {
-	// TODO: Currently using automaticSnapshots for everything
-	//this._downloadAssociatedFiles = Zotero.Prefs.get("downloadAssociatedFiles");
-	this._downloadAssociatedFiles = Zotero.Prefs.get("automaticSnapshots");
-	
 	try {
 		this._sandbox.doWeb(this.document, this.location);
 	} catch(e) {
