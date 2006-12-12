@@ -167,7 +167,7 @@ Zotero.Attachments = new function(){
 	}
 	
 	
-	function importFromURL(url, sourceItemID){
+	function importFromURL(url, sourceItemID, forceTitle){
 		Zotero.debug('Importing attachment from URL');
 		
 		Zotero.Utilities.HTTP.doHead(url, function(obj){
@@ -183,7 +183,7 @@ Zotero.Attachments = new function(){
 			if (Zotero.MIME.hasNativeHandler(mimeType, ext)){
 				var browser = Zotero.Browser.createHiddenBrowser();
 				browser.addEventListener("pageshow", function(){
-					Zotero.Attachments.importFromDocument(browser.contentDocument, sourceItemID);
+					Zotero.Attachments.importFromDocument(browser.contentDocument, sourceItemID, forceTitle);
 					browser.removeEventListener("pageshow", arguments.callee, true);
 					Zotero.Browser.deleteHiddenBrowser(browser);
 				}, true);
@@ -193,7 +193,7 @@ Zotero.Attachments = new function(){
 			// Otherwise use a remote web page persist
 			else {
 				var fileName = _getFileNameFromURL(url, mimeType);
-				var title = fileName;
+				var title = forceTitle ? forceTitle : fileName;
 				
 				const nsIWBP = Components.interfaces.nsIWebBrowserPersist;
 				var wbp = Components
