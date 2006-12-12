@@ -1718,7 +1718,13 @@ Zotero.CSL.prototype._getTypeFromItem = function(item) {
 
 	// get type
 	Zotero.debug("CSL: parsing item of Scholar type "+scholarType);
-	return [Zotero.CSL.Global.optionalTypeMappings[scholarType], Zotero.CSL.Global.fallbackTypeMappings[scholarType]];
+	if(Zotero.CSL.Global.optionalTypeMappings[scholarType]) {
+		return [Zotero.CSL.Global.optionalTypeMappings[scholarType], Zotero.CSL.Global.fallbackTypeMappings[scholarType]];
+	} else if(Zotero.CSL.Global.fallbackTypeMappings[scholarType]) {
+		return [Zotero.CSL.Global.fallbackTypeMappings[scholarType]];
+	} else {	// use article as backup type mapping
+		return ["article"];
+	}
 }
 
 /*
@@ -1729,7 +1735,7 @@ Zotero.CSL.prototype._separateItemCreators = function(item) {
 	var editors = new Array();
 	var translators = new Array();
 	
-	var authorID = Zotero.CreatorTypes.getID("author");
+	var authorID = Zotero.CreatorTypes.getPrimaryIDForType(item.getType());
 	var editorID = Zotero.CreatorTypes.getID("editor");
 	var translatorID = Zotero.CreatorTypes.getID("translator");
 	
@@ -1748,6 +1754,9 @@ Zotero.CSL.prototype._separateItemCreators = function(item) {
 			authors.push(creator);
 		}
 	}
+	
+	Zotero.debug(authorID+", "+editorID+", "+translatorID);
+	Zotero.debug(creators);
 	
 	return [authors, editors, translators];
 }
