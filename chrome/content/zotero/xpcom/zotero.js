@@ -809,8 +809,8 @@ Zotero.Date = new function(){
 	 *    part: anything that does not fall under any of the above categories
 	 *          (e.g., "Summer," etc.)
 	 */
-	var _slashRe = /\b([0-9]{1,4})([\-\/\.\u5e74])([0-9]{1,2})([\-\/\.\u6708])([0-9]{1,4})\b/
-	var _yearRe = /^(.*)\b((?:circa |around |about |c\.? ?)?[0-9]{1,4}(?: ?B\.? ?C\.?(?: ?E\.?)?| ?C\.? ?E\.?| ?A\.? ?D\.?)|[0-9]{3,4})\b(.*)$/i;
+	var _slashRe = /^(.*?)\b([0-9]{1,4})(?:([\-\/\.\u5e74])([0-9]{1,2}))?(?:([\-\/\.\u6708])([0-9]{1,4}))?\b(.*?)$/
+	var _yearRe = /^(.*?)\b((?:circa |around |about |c\.? ?)?[0-9]{1,4}(?: ?B\.? ?C\.?(?: ?E\.?)?| ?C\.? ?E\.?| ?A\.? ?D\.?)|[0-9]{3,4})\b(.*?)$/i;
 	var _monthRe = null;
 	var _dayRe = null;
 	
@@ -826,43 +826,51 @@ Zotero.Date = new function(){
 		
 		// first, directly inspect the string
 		var m = _slashRe.exec(string);
-		if(m && (m[2] == m[4] || (m[2] == "\u5e74" && m[4] == "\u6708"))) {
+		if(m &&
+		  (!m[5] || m[3] == m[5] || (m[3] == "\u5e74" && m[5] == "\u6708")) &&	// require sane separators
+		  ((m[2] && m[4] && m[6]) || (!m[1] && !m[7]))) {						// require that either all parts are found,
+		  																		// or else this is the entire date field
 			// figure out date based on parts
-			if(m[1].length == 4 || m[2] == "\u5e74") {
+			if(m[2].length == 4 || m[3] == "\u5e74") {
 				// ISO 8601 style date (big endian)
-				date.year = m[1];
-				date.month = m[3];
-				date.day = m[5];
+				date.year = m[2];
+				date.month = m[4];
+				date.day = m[6];
 			} else {
 				// local style date (middle or little endian)
-				date.year = m[5];
+				date.year = m[6];
 				var country = Zotero.locale.substr(3);
 				if(country == "US" ||	// The United States
 				   country == "FM" ||	// The Federated States of Micronesia
 				   country == "PW" ||	// Palau
 				   country == "PH") {	// The Philippines
-					date.month = m[1];
-					date.day = m[3];
+					date.month = m[2];
+					date.day = m[4];
 				} else {
-					date.month = m[3];
-					date.day = m[1];
+					date.month = m[4];
+					date.day = m[2];
+				}
+			}
+			Zotero.debug(date);
+			
+			if(date.year) date.year = parseInt(date.year, 10);
+			if(date.day) date.day = parseInt(date.day, 10);
+			if(date.month) {
+				date.month = parseInt(date.month, 10);
+				
+				if(date.month > 12) {
+					// swap day and month
+					var tmp = date.day;
+					date.day = date.month
+					date.month = tmp;
 				}
 			}
 			
-			date.year = parseInt(date.year, 10);
-			date.month = parseInt(date.month, 10);
-			date.day = parseInt(date.day, 10);
+			Zotero.debug(date);
 			
-			if(date.month > 12) {
-				// swap day and month
-				var tmp = date.day;
-				date.day = date.month
-				date.month = tmp;
-			}
-			
-			if(date.month <= 12) {
-				if(date.year < 100) {	// for two digit years, determine proper
-										// four digit year
+			if(!date.month || date.month <= 12) {
+				if(date.year && date.year < 100) {	// for two digit years, determine proper
+													// four digit year
 					var today = new Date();
 					var year = today.getFullYear();
 					var twoDigitYear = year % 100;
@@ -877,27 +885,39 @@ Zotero.Date = new function(){
 					}
 				}
 				
-				date.month--;		// subtract one for JS style
+				if(date.month) date.month--;		// subtract one for JS style
 				Zotero.debug("DATE: retrieved with algorithms: "+date.toSource());
-				return date;
+				
+				date.part = m[1]+m[7];
+			} else {
+				// give up; we failed the sanity check
+				Zotero.debug("DATE: algorithms failed sanity check");
+				date = {"part":string};
+			}
+			
+			Zotero.debug(date);
+		} else {
+			Zotero.debug("DATE: could not apply algorithms");
+			date.part = string;
+		}
+		
+		// couldn't find something with the algorithms; use regexp
+		// YEAR
+		if(!date.year) {
+			var m = _yearRe.exec(date.part);
+			if(m) {
+				date.year = m[2];
+				date.part = m[1]+m[3];
+				Zotero.debug("DATE: got year ("+date.year+", "+date.part+")");
 			}
 		}
 		
-		// couldn't use algorithms; use regexp
-		// first, see if we have anything resembling a year
-		var m = _yearRe.exec(string);
-		if(m) {
-			date.year = m[2];
-			date.part = m[1]+m[3];
-			Zotero.debug("DATE: got year ("+date.year+", "+date.part+")");
-			
-			// get short month strings from CSL interpreter
-			if(!months) {
-				var months = Zotero.CSL.Global.getMonthStrings("short");
-			}
+		// MONTH
+		if(!date.month) {
+			// compile month regular expression
+			var months = Zotero.CSL.Global.getMonthStrings("short");
 			if(!_monthRe) {
-				// then, see if have anything resembling a month anywhere
-				_monthRe = new RegExp("^(.*)\\b("+months.join("|")+")[^ ]* (.*)$", "i");
+				_monthRe = new RegExp("^(.*)\\b("+months.join("|")+")[^ ]*(?: (.*)$|$)", "i");
 			}
 			
 			var m = _monthRe.exec(date.part);
@@ -905,36 +925,43 @@ Zotero.Date = new function(){
 				date.month = months.indexOf(m[2][0].toUpperCase()+m[2].substr(1).toLowerCase());
 				date.part = m[1]+m[3];
 				Zotero.debug("DATE: got month ("+date.month+", "+date.part+")");
-				
-				// then, see if there's a day 
-				if(!_dayRe) {
-					var daySuffixes = Zotero.getString("date.daySuffixes").replace(/, ?/g, "|");
-					_dayRe = new RegExp("\\b([0-9]{1,2})(?:"+daySuffixes+")?\\b(.*)", "i");
-				}
-				var m = _dayRe.exec(date.part);
-				if(m) {
-					date.day = parseInt(m[1], 10);
-					
-					if(m.index > 0) {
-						date.part = date.part.substr(0, m.index);
-						if(m[2]) {
-							date.part += " "+m[2];;
-						}
-					} else {
-						date.part = m[2];
-					}
-					
-					Zotero.debug("DATE: got day ("+date.day+", "+date.part+")");
-				}
 			}
 		}
 		
+		// DAY
+		if(!date.day) {
+			// compile day regular expression
+			if(!_dayRe) {
+				var daySuffixes = Zotero.getString("date.daySuffixes").replace(/, ?/g, "|");
+				_dayRe = new RegExp("\\b([0-9]{1,2})(?:"+daySuffixes+")?\\b(.*)", "i");
+			}
+			
+			var m = _dayRe.exec(date.part);
+			if(m) {
+				date.day = parseInt(m[1], 10);
+				
+				if(m.index > 0) {
+					date.part = date.part.substr(0, m.index);
+					if(m[2]) {
+						date.part += " "+m[2];;
+					}
+				} else {
+					date.part = m[2];
+				}
+				
+				Zotero.debug("DATE: got day ("+date.day+", "+date.part+")");
+			}
+		}
+		
+		// clean up date part
 		if(date.part) {
 			date.part = date.part.replace(/^[^A-Za-z0-9]+/, "").replace(/[^A-Za-z0-9]+$/, "");
 			if(!date.part.length) {
 				date.part = undefined;
 			}
 		}
+		
+		Zotero.debug(date);
 		
 		return date;
 	}
@@ -949,12 +976,9 @@ Zotero.Date = new function(){
 			string += date.part+" ";
 		}
 		
-		if(!months) {
-			var months = Zotero.CSL.Global.getMonthStrings("short");
-		}
+		var months = Zotero.CSL.Global.getMonthStrings("long");
 		if(date.month != undefined && months[date.month]) {
 			// get short month strings from CSL interpreter
-			var months = Zotero.CSL.Global.getMonthStrings("long");
 			string += months[date.month];
 			if(date.day) {
 				string += " "+date.day+", ";
