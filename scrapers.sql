@@ -22,9 +22,9 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-12-12 22:34:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-12-12 23:41:00'));
 
-REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b3.r1', '', '2006-12-11 11:24:00', 1, 100, 4, 'Amazon', 'Sean Takats', '^http://(?:www\.)amazon', 
+REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b3.r1', '', '2006-12-12 23:41:00', 1, 100, 4, 'Amazon.com', 'Sean Takats', '^http://(?:www\.)amazon', 
 'function detectWeb(doc, url) {
 
 	var suffixRe = new RegExp("http://(?:www\.)amazon\.([^/]+)/");
@@ -216,7 +216,7 @@ REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('838d8849-4ffb-9f44-3d0d-aa8a0a079afe', '1.0.0b3.r1', '', '2006-10-02 17:00:00', 1, 100, 4, 'WorldCat', 'Simon Kornblith', '^http://(?:new)?firstsearch\.oclc\.org/WebZ/',
+REPLACE INTO translators VALUES ('838d8849-4ffb-9f44-3d0d-aa8a0a079afe', '1.0.0b3.r1', '', '2006-12-12 23:41:00', 1, 100, 4, 'OCLC WorldCat FirstSearch', 'Simon Kornblith', '^http://(?:new)?firstsearch\.oclc\.org/WebZ/',
 'function detectWeb(doc, url) {
 	var detailRe = /FirstSearch: [\w ]+ Detailed Record/;
 	var searchRe = /FirstSearch: [\w ]+ List of Records/;
@@ -411,7 +411,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b2.r2', '', '2006-12-11 11:24:00', 1, 100, 4, 'LOC/Voyager WebVoyage', 'Simon Kornblith', 'Pwebrecon\.cgi',
+REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b2.r2', '', '2006-12-12 23:41:00', 1, 100, 4, 'Library Catalog (Voyager)', 'Simon Kornblith', 'Pwebrecon\.cgi',
 'function detectWeb(doc, url) {
 	var export_options = doc.forms.namedItem(''frm'').elements.namedItem(''RD'').options;
 	for(var i in export_options) {
@@ -533,6 +533,15 @@ REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b
 		var marc = Zotero.loadTranslator("import");
 		marc.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
 		marc.setString(text);
+		
+		// if this is the LOC catalog, specify that in repository field
+		if(url.length > 23 && url.substr(0, 23) == "http://catalog.loc.gov/") {
+			marc.setHandler("itemDone", function(obj, item) {
+				item.repository = "Library of Congress Catalog";
+				item.complete();
+			});
+		}
+		
 		marc.translate();
 		
 		Zotero.done();
@@ -812,7 +821,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '1.0.0b3.r1', '', '2006-12-11 11:44:00', 1, 100, 4, 'InnoPAC', 'Simon Kornblith', '^http://[^/]+/(?:search/|record=)',
+REPLACE INTO translators VALUES ('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '1.0.0b3.r1', '', '2006-12-12 23:41:00', 1, 100, 4, 'Library Catalog (InnoPAC)', 'Simon Kornblith', '^http://[^/]+/(?:search/|record=)',
 'function detectWeb(doc, url) {
 	// First, check to see if the URL alone reveals InnoPAC, since some sites don''t reveal the MARC button
 	var matchRegexp = new RegExp(''^(http://[^/]+/search/[^/]+/[^/]+/1\%2C[^/]+/)frameset(.+)$'');
@@ -1017,7 +1026,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('add7c71c-21f3-ee14-d188-caf9da12728b', '1.0.0b3.r1', '', '2006-12-11 11:42:00', 1, 100, 4, 'SIRSI', 'Sean Takats', '/uhtbin/cgisirsi',
+REPLACE INTO translators VALUES ('add7c71c-21f3-ee14-d188-caf9da12728b', '1.0.0b3.r1', '', '2006-12-12 23:41:00', 1, 100, 4, 'Library Catalog (SIRSI)', 'Sean Takats', '/uhtbin/cgisirsi',
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -1903,7 +1912,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('cf87eca8-041d-b954-795a-2d86348999d5', '1.0.0b2.r2', '', '2006-12-14 11:30:00', 1, 100, 4, 'Aleph', 'Simon Kornblith', '^http://[^/]+/F(?:/[A-Z0-9\-]+(?:\?.*)?$|\?func=find|\?func=scan)',
+REPLACE INTO translators VALUES ('cf87eca8-041d-b954-795a-2d86348999d5', '1.0.0b2.r2', '', '2006-12-12 23:41:00', 1, 100, 4, 'Library Catalog (Aleph)', 'Simon Kornblith', '^http://[^/]+/F(?:/[A-Z0-9\-]+(?:\?.*)?$|\?func=find|\?func=scan)',
 'function detectWeb(doc, url) {
 	var singleRe = new RegExp("^http://[^/]+/F/[A-Z0-9\-]+\?.*(?:func=full-set-set.*\&format=[0-9]{3}|func=direct)");
 	
@@ -2002,7 +2011,7 @@ REPLACE INTO translators VALUES ('cf87eca8-041d-b954-795a-2d86348999d5', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('774d7dc2-3474-2684-392c-f787789ec63d', '1.0.0b2.r2', '', '2006-12-11 11:43:00', 1, 100, 4, 'Dynix', 'Simon Kornblith', 'ipac\.jsp\?.*(?:uri=full=[0-9]|menu=search)',
+REPLACE INTO translators VALUES ('774d7dc2-3474-2684-392c-f787789ec63d', '1.0.0b2.r2', '', '2006-12-12 23:41:00', 1, 100, 4, 'Library Catalog (Dynix)', 'Simon Kornblith', 'ipac\.jsp\?.*(?:uri=full=[0-9]|menu=search)',
 'function detectWeb(doc, url) {
 	var detailsRe = new RegExp(''ipac\.jsp\?.*uri=full=[0-9]'');
 	if(detailsRe.test(doc.location.href)) {
@@ -2091,7 +2100,7 @@ REPLACE INTO translators VALUES ('774d7dc2-3474-2684-392c-f787789ec63d', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('63a0a351-3131-18f4-21aa-f46b9ac51d87', '1.0.0b2.r2', '', '2006-12-11 11:59:00', 1, 100, 4, 'VTLS', 'Simon Kornblith', '/chameleon(?:\?|$)', 
+REPLACE INTO translators VALUES ('63a0a351-3131-18f4-21aa-f46b9ac51d87', '1.0.0b2.r2', '', '2006-12-12 23:41:00', 1, 100, 4, 'Library Catalog (VTLS)', 'Simon Kornblith', '/chameleon(?:\?|$)', 
 'function detectWeb(doc, url) {
 	var node = doc.evaluate(''//tr[@class="intrRow"]/td/table/tbody/tr[th]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 	if(node) {
@@ -2205,7 +2214,7 @@ REPLACE INTO translators VALUES ('63a0a351-3131-18f4-21aa-f46b9ac51d87', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('fb12ae9e-f473-cab4-0546-27ab88c64101', '1.0.0b2.r2', '', '2006-10-02 17:00:00', 1, 100, 4, 'DRA', 'Simon Kornblith', '/web2/tramp2\.exe/(?:see\_record/|authority\_hits/|goto/.*\?.*screen=Record\.html)',
+REPLACE INTO translators VALUES ('fb12ae9e-f473-cab4-0546-27ab88c64101', '1.0.0b2.r2', '', '2006-12-12 23:41:00', 1, 100, 4, 'Library Catalog (DRA)', 'Simon Kornblith', '/web2/tramp2\.exe/(?:see\_record/|authority\_hits/|goto/.*\?.*screen=Record\.html)',
 'function detectWeb(doc, url) {
 	if(doc.location.href.indexOf("/authority_hits") > 0) {
 		return "multiple";
@@ -2270,7 +2279,7 @@ REPLACE INTO translators VALUES ('fb12ae9e-f473-cab4-0546-27ab88c64101', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('c0e6fda6-0ecd-e4f4-39ca-37a4de436e15', '1.0.0b2.r2', '', '2006-10-02 17:00:00', 1, 100, 4, 'GEAC', 'Simon Kornblith', '/(?:GeacQUERY|GeacFETCH[\:\?].*[&:]next=html/(?:record\.html|geacnffull\.html))',
+REPLACE INTO translators VALUES ('c0e6fda6-0ecd-e4f4-39ca-37a4de436e15', '1.0.0b2.r2', '', '2006-12-12 23:41:00', 1, 100, 4, 'Library Catalog (GEAC)', 'Simon Kornblith', '/(?:GeacQUERY|GeacFETCH[\:\?].*[&:]next=html/(?:record\.html|geacnffull\.html))',
 'function detectWeb(doc, url) {
 	if(doc.location.href.indexOf("/GeacQUERY") > 0) {
 		return "multiple";
@@ -2359,7 +2368,7 @@ REPLACE INTO translators VALUES ('c0e6fda6-0ecd-e4f4-39ca-37a4de436e15', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('0f9fc2fc-306e-5204-1117-25bca009dffc', '1.0.0b2.r2', '', '2006-10-02 17:00:00', 1, 100, 4, 'TLC/YouSeeMore', 'Simon Kornblith', 'TLCScripts/interpac\.dll\?(?:.*LabelDisplay.*RecordNumber=[0-9]|Search|ItemTitles)',
+REPLACE INTO translators VALUES ('0f9fc2fc-306e-5204-1117-25bca009dffc', '1.0.0b2.r2', '', '2006-12-12 23:41:00', 1, 100, 4, 'Library Catalog (TLC/YouSeeMore)', 'Simon Kornblith', 'TLCScripts/interpac\.dll\?(?:.*LabelDisplay.*RecordNumber=[0-9]|Search|ItemTitles)',
 'function detectWeb(doc, url) {
 	var detailRe = new RegExp("TLCScripts/interpac\.dll\?.*LabelDisplay.*RecordNumber=[0-9]");
 	if(detailRe.test(doc.location.href)) {
@@ -2602,7 +2611,7 @@ REPLACE INTO translators VALUES ('c54d1932-73ce-dfd4-a943-109380e06574', '1.0.0b
 	}
 }');
 
-REPLACE INTO translators VALUES ('fcf41bed-0cbc-3704-85c7-8062a0068a7a', '1.0.0b3.r1', '', '2006-12-11 18:10:00', 1, 100, 12, 'PubMed', 'Simon Kornblith', '^http://www\.ncbi\.nlm\.nih\.gov/entrez/query\.fcgi\?.*db=PubMed',
+REPLACE INTO translators VALUES ('fcf41bed-0cbc-3704-85c7-8062a0068a7a', '1.0.0b3.r1', '', '2006-12-12 23:41:00', 1, 100, 12, 'NCBI PubMed', 'Simon Kornblith', '^http://www\.ncbi\.nlm\.nih\.gov/entrez/query\.fcgi\?.*db=PubMed',
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -2773,7 +2782,7 @@ function doSearch(item) {
 	lookupPMIDs([getPMID(item.contextObject)]);
 }');
 
-REPLACE INTO translators VALUES ('951c027d-74ac-47d4-a107-9c3069ab7b48', '1.0.0b3.r1', '', '2006-11-24 16:14:00', 1, 100, 4, 'Embedded RDF', 'Simon Kornblith', NULL,
+REPLACE INTO translators VALUES ('951c027d-74ac-47d4-a107-9c3069ab7b48', '1.0.0b3.r1', '', '2006-12-12 23:41:00', 1, 100, 4, 'Embedded RDF', 'Simon Kornblith', NULL,
 'function detectWeb(doc, url) {
 	var metaTags = doc.getElementsByTagName("meta");
 	
@@ -2801,6 +2810,7 @@ REPLACE INTO translators VALUES ('951c027d-74ac-47d4-a107-9c3069ab7b48', '1.0.0b
 		newItem.attachments.push({document:doc});
 		// add url
 		newItem.url = doc.location.href;
+		newItem.repository = false;
 		newItem.complete();
 	});
 	var rdf = translator.getTranslatorObject();
@@ -2826,7 +2836,7 @@ REPLACE INTO translators VALUES ('951c027d-74ac-47d4-a107-9c3069ab7b48', '1.0.0b
 	rdf.doImport();
 }');
 
-REPLACE INTO translators VALUES ('05d07af9-105a-4572-99f6-a8e231c0daef', '1.0.0b2.r1', '', '2006-11-27 22:45:00', 1, 100, 4, 'COinS', 'Simon Kornblith', NULL,
+REPLACE INTO translators VALUES ('05d07af9-105a-4572-99f6-a8e231c0daef', '1.0.0b2.r1', '', '2006-12-12 23:41:00', 1, 100, 4, 'COinS', 'Simon Kornblith', NULL,
 'function detectWeb(doc, url) {
 	var spanTags = doc.getElementsByTagName("span");
 	
@@ -2912,7 +2922,7 @@ function completeItems(newItems, useIndices, couldUseFullItems, doc) {
 	}
 	var i = useIndices.shift();
 	
-	// grab full item if requested
+	// grab full item if the COinS was missing an author
 	if(couldUseFullItems[i]) {
 		Zotero.Utilities.debug("looking up contextObject");
 		var search = Zotero.loadTranslator("search");
@@ -2927,6 +2937,11 @@ function completeItems(newItems, useIndices, couldUseFullItems, doc) {
 			}
 		});
 		search.setHandler("done", function(obj) {
+			// if we didn''t find anything, use what we had before (even if it
+			// lacks the creator)
+			if(!firstItem) {
+				newItems[i].complete();
+			}
 			// call next
 			completeItems(newItems, useIndices, couldUseFullItems);
 		});
@@ -2966,11 +2981,13 @@ function doWeb(doc, url) {
 			if(Zotero.Utilities.inArray("Z3988", spanClasses)) {
 				var spanTitle = spanTags[i].getAttribute("title");
 				var newItem = new Zotero.Item();
+				newItem.repository = false;	// do not save repository
 				if(Zotero.Utilities.parseContextObject(spanTitle, newItem)) {
 					if(newItem.title) {
 						if(!newItem.creators.length) {
 							// if we have a title but little other identifying
 							// information, say we''ll get full item later
+							newItem.contextObject = spanTitle;
 							couldUseFullItems[newItems.length] = true;
 						}
 						
@@ -3187,7 +3204,7 @@ REPLACE INTO translators VALUES ('57a00950-f0d1-4b41-b6ba-44ff0fc30289', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('9c335444-a562-4f88-b291-607e8f46a9bb', '1.0.0b2.r2', '', '2006-10-02 17:00:00', 1, 100, 4, 'Berkeley Library', 'Simon Kornblith', '^http://[^/]*berkeley.edu[^/]*/WebZ/(?:html/results.html|FETCH)\?.*sessionid=',
+REPLACE INTO translators VALUES ('9c335444-a562-4f88-b291-607e8f46a9bb', '1.0.0b2.r2', '', '2006-12-12 23:41:00', 1, 100, 4, 'Berkeley Library Catalog', 'Simon Kornblith', '^http://[^/]*berkeley.edu[^/]*/WebZ/(?:html/results.html|FETCH)\?.*sessionid=',
 'function detectWeb(doc, url) {
 	var resultsRegexp = /\/WebZ\/html\/results.html/i
 	if(resultsRegexp.test(url)) {
@@ -3426,7 +3443,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('ce7a3727-d184-407f-ac12-52837f3361ff', '1.0.0b3.r1', '', '2006-12-11 18:16:00', 1, 100, 4, 'New York Times', 'Simon Kornblith', '^http://(?:query\.nytimes\.com/search/query|(?:select\.|www\.)?nytimes\.com/.)', 
+REPLACE INTO translators VALUES ('ce7a3727-d184-407f-ac12-52837f3361ff', '1.0.0b3.r1', '', '2006-12-12 23:41:00', 1, 100, 4, 'NYTimes.com', 'Simon Kornblith', '^http://(?:query\.nytimes\.com/search/query|(?:select\.|www\.)?nytimes\.com/.)', 
 'function detectWeb(doc, url) {
 	if(doc.title.substr(0, 30) == "The New York Times: Search for") {
 		var namespace = doc.documentElement.namespaceURI;
@@ -3565,7 +3582,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('1e6d1529-246f-4429-84e2-1f1b180b250d', '1.0.0b2.r2', '', '2006-12-11 18:30:00', 1, 100, 4, 'Chronicle of Higher Education', 'Simon Kornblith', '^http://chronicle\.com/', 
+REPLACE INTO translators VALUES ('1e6d1529-246f-4429-84e2-1f1b180b250d', '1.0.0b2.r2', '', '2006-12-12 23:41:00', 1, 100, 4, 'The Chronicle of Higher Education', 'Simon Kornblith', '^http://chronicle\.com/', 
 'function detectWeb(doc, url) {
 	var articleRegexp = /^http:\/\/chronicle\.com\/(?:daily|weekly)\/[^/]+\//
 	if(articleRegexp.test(url)) {
@@ -3673,7 +3690,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('4c164cc8-be7b-4d02-bfbf-37a5622dfd56', '1.0.0b2.r2', '', '2006-12-11 18:31:00', 1, 100, 4, 'New York Review of Books', 'Simon Kornblith', '^http://www\.nybooks\.com/', 
+REPLACE INTO translators VALUES ('4c164cc8-be7b-4d02-bfbf-37a5622dfd56', '1.0.0b2.r2', '', '2006-12-12 23:41:00', 1, 100, 4, 'The New York Review of Books', 'Simon Kornblith', '^http://www\.nybooks\.com/', 
 'function detectWeb(doc, url) {
 	var articleRegexp = /^http:\/\/www\.nybooks\.com\/articles\/[0-9]+\/?/
 	if(articleRegexp.test(url)) {
@@ -3767,7 +3784,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('d1bf1c29-4432-4ada-8893-2e29fc88fd9e', '1.0.0b2.r2', '', '2006-12-11 18:35:00', 1, 100, 4, 'Washington Post', 'Simon Kornblith', '^http://www\.washingtonpost\.com/', 
+REPLACE INTO translators VALUES ('d1bf1c29-4432-4ada-8893-2e29fc88fd9e', '1.0.0b2.r2', '', '2006-12-12 23:41:00', 1, 100, 4, 'washingtonpost.com', 'Simon Kornblith', '^http://www\.washingtonpost\.com/', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -3873,7 +3890,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('a07bb62a-4d2d-4d43-ba08-d9679a0122f8', '1.0.0b2.r2', '', '2006-10-02 17:00:00', 1, 100, 4, 'ABC-CLIO', 'Simon Kornblith', '^http://serials\.abc-clio\.com/active/go/ABC-Clio-Serials_v4.1$', 
+REPLACE INTO translators VALUES ('a07bb62a-4d2d-4d43-ba08-d9679a0122f8', '1.0.0b2.r2', '', '2006-12-12 23:41:00', 1, 100, 4, 'ABC-CLIO Serials Web', 'Simon Kornblith', '^http://serials\.abc-clio\.com/active/go/ABC-Clio-Serials_v4.1$', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -4094,7 +4111,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('ecddda2e-4fc6-4aea-9f17-ef3b56d7377a', '1.0.0b2.r2', '', '2006-11-27 22:45:00', 1, 100, 4, 'arXiv.org/eprintweb.org', 'Simon Kornblith', '^http://(?:www\.)?(?:arxiv\.org/(?:find/\w|list/\w|abs/[^/]+/[0-9]+)|eprintweb.org/S/(?:search|archive|article))', 
+REPLACE INTO translators VALUES ('ecddda2e-4fc6-4aea-9f17-ef3b56d7377a', '1.0.0b2.r2', '', '2006-12-12 23:41:00', 1, 100, 4, 'arXiv.org', 'Simon Kornblith', '^http://(?:www\.)?(?:arxiv\.org/(?:find/\w|list/\w|abs/[^/]+/[0-9]+)|eprintweb.org/S/(?:search|archive|article))', 
 'function detectWeb(doc, url) {
 	var searchRe = /^http:\/\/(?:www\.)?(?:arxiv\.org\/(?:find|list)|eprintweb.org\/S\/(?:archive|search$))/;
 	if(searchRe.test(url)) {

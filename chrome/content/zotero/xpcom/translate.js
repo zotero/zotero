@@ -1047,7 +1047,15 @@ Zotero.Translate.prototype._itemTagsAndSeeAlso = function(item, newItem) {
 /*
  * executed when an item is done and ready to be loaded into the database
  */
-Zotero.Translate.prototype._itemDone = function(item, attachedTo) {	
+Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
+	if(this.type == "web") {
+		// store repository if this item was captured from a website, and
+		// repository is truly undefined (not false or "")
+		if(!item.repository && item.repository !== false && item.repository !== "") {
+			item.repository = this.translator[0].label;
+		}
+	}
+	
 	if(!this.saveItem) {	// if we're not supposed to save the item, just
 							// return the item array
 		
