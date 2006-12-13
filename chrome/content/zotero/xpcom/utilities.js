@@ -218,6 +218,18 @@ Zotero.Utilities.prototype.itemTypeExists = function(type) {
 }
 
 /*
+ * returns an array of all (string) creatorTypes valid for a (string) itemType
+ */
+Zotero.Utilities.prototype.getCreatorsForType = function(type) {
+	var types = Zotero.CreatorTypes.getTypesForItemType(Zotero.ItemTypes.getID(type));
+	var cleanTypes = new Array();
+	for each(var type in types) {
+		cleanTypes.push(type.name);
+	}
+	return cleanTypes;
+}
+
+/*
  * Cleans a title, capitalizing the proper words and replacing " :" with ":"
  */
 Zotero.Utilities.capitalizeSkipWords = ["but", "or", "yet", "so", "for", "and",
