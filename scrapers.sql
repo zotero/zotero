@@ -1,4 +1,4 @@
--- 122
+-- 123
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-12-12 22:10:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-12-12 22:34:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b3.r1', '', '2006-12-11 11:24:00', 1, 100, 4, 'Amazon', 'Sean Takats', '^http://(?:www\.)amazon', 
 'function detectWeb(doc, url) {
@@ -5000,7 +5000,7 @@ function doImport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('14763d24-8ba0-45df-8f52-b8d1108e7ac9', '1.0.0b3.r1', '', '2006-12-12 22:10:00', 1, 25, 2, 'Zotero RDF', 'Simon Kornblith', 'rdf',
+REPLACE INTO translators VALUES ('14763d24-8ba0-45df-8f52-b8d1108e7ac9', '1.0.0b3.r1', '', '2006-12-12 22:34:00', 1, 25, 2, 'Zotero RDF', 'Simon Kornblith', 'rdf',
 'Zotero.configure("getCollections", true);
 Zotero.configure("dataMode", "rdf");
 Zotero.addOption("exportNotes", true);
@@ -5095,17 +5095,6 @@ function generateItem(item, zoteroType, resource) {
 		}
 	} else if(zoteroType == "attachment") {
 		type = n.fs+"Attachment";
-		
-		// set path
-		if(item.path) {
-			Zotero.RDF.addStatement(resource, rdf+"resource", item.path, false);
-		}
-		// set mime type value
-		Zotero.RDF.addStatement(resource, n.link+"type", item.mimeType, true);
-		// set charset value
-		if(item.charset) {
-			Zotero.RDF.addStatement(resource, n.link+"charset", item.charset, true);
-		}
 	} else if(zoteroType == "report") {
 		type = n.bib+"Report";
 	} else if(zoteroType == "bill") {
@@ -5200,11 +5189,13 @@ function generateItem(item, zoteroType, resource) {
 							"audioRecordingType", "presentationType", "postType",
 							"audioFileType"];
 	var ignoreProperties = ["itemID", "itemType", "firstCreator", "dateAdded",
-							"dateModified", "section"];
+							"dateModified", "section", "sourceItemID"];
 	
 	for(var property in item) {
 		var value = item[property];
+		if(!value) continue;
 		
+		Zotero.Utilities.debug("processing "+property);
 		if(property == "title") {					// title
 			Zotero.RDF.addStatement(resource, n.dc+"title", value, true);
 		} else if(property == "creators") {			// authors/editors/contributors
@@ -5263,8 +5254,14 @@ function generateItem(item, zoteroType, resource) {
 		} else if(property == "pages") {			// pages
 			// not yet part of biblio, but should be soon
 			Zotero.RDF.addStatement(resource, n.bib+"pages", value, true);
-		} else if(property == "extra") {
+		} else if(property == "extra") {			// extra
 			Zotero.RDF.addStatement(resource, n.dc+"description", value, true);
+		} else if(property == "path") {				// path (attachments
+			Zotero.RDF.addStatement(resource, rdf+"resource", value, false);
+		} else if(property == "mimeType") {			// mimeType
+			Zotero.RDF.addStatement(resource, n.link+"type", value, true);
+		} else if(property == "charset") {			// charset
+			Zotero.RDF.addStatement(resource, n.link+"charset", value, true);
 		// THE FOLLOWING ARE ALL PART OF THE CONTAINER
 		} else if(property == "ISSN") {				// ISSN
 			Zotero.RDF.addStatement((containerElement ? containerElement : resource), n.dc+"identifier", "ISSN "+value, true);
@@ -5367,6 +5364,7 @@ function generateItem(item, zoteroType, resource) {
 			generateSeeAlso(resource, value);
 		} else if(property == "tags") {				// tags
 			generateTags(resource, value);
+		// THIS CATCHES ALL REMAINING PROPERTIES
 		} else if(ignoreProperties.indexOf(property) == -1) {
 			Zotero.Utilities.debug("Zotero RDF: using Zotero namespace for property "+property);
 			Zotero.RDF.addStatement(resource, n.fs+property, value, true);

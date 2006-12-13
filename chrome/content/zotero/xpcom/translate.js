@@ -2064,7 +2064,7 @@ Zotero.Translate.RDF.prototype._getResource = function(about) {
 			about = this._RDFService.GetResource(about);
 		}
 	} catch(e) {
-		throw("invalid RDF resource: "+about);
+		throw("Zotero.Translate.RDF.addStatement: Invalid RDF resource: "+about);
 	}
 	return about;
 }
@@ -2077,9 +2077,19 @@ Zotero.Translate.RDF.prototype.addStatement = function(about, relation, value, l
 	
 	if(!(value instanceof Components.interfaces.nsIRDFResource)) {
 		if(literal) {
-			value = this._RDFService.GetLiteral(value);
+			try {
+				value = this._RDFService.GetLiteral(value);
+			} catch(e) {
+				Zotero.debug(value);
+				throw "Zotero.Translate.RDF.addStatement: Could not convert to literal";
+			}
 		} else {
-			value = this._RDFService.GetResource(value);
+			try {
+				value = this._RDFService.GetResource(value);
+			} catch(e) {
+				Zotero.debug(value);
+				throw "Zotero.Translate.RDF.addStatement: Could not convert to resource";
+			}
 		}
 	}
 	
