@@ -12,4 +12,5 @@ pref("extensions.zotero.parseEndNoteMIMETypes",true);
 pref("extensions.zotero.automaticSnapshots",true);
 pref("extensions.zotero.downloadAssociatedFiles",false);
 pref("extensions.zotero.reportTranslationFailure",true);
+pref("extensions.zotero.enableMacClipboard",false);
 pref("extensions.zotero.lastCreatorFieldMode",0);

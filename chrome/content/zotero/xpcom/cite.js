@@ -527,7 +527,9 @@ Zotero.CSL.prototype.createBibliography = function(items, format) {
 				index++;
 				output += index+". ";
 			}
-			output += string+"\r\n\r\n";
+			// attach \n on mac (since both \r and \n count as newlines for
+			// clipboard purposes)
+			output += string+(Zotero.isMac ? "\n\n" : "\r\n\r\n");
 		}
 	}
 	
