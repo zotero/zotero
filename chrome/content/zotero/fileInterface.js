@@ -53,8 +53,15 @@ var Zotero_File_Interface = new function() {
 		
 		// set file name and extension
 		name = (name ? name : Zotero.getString("pane.collections.library"));
-		fp.defaultString = name+"."+io.selectedTranslator.target;
-		fp.appendFilter(io.selectedTranslator.label, "*."+io.selectedTranslator.target);
+		if(io.selectedTranslator.displayOptions.exportFileData) {
+			// if the result will be a folder, don't append any extension or use
+			// filters
+			fp.defaultString = name;
+		} else {
+			// if the result will be a file, append an extension and use filters
+			fp.defaultString = name+"."+io.selectedTranslator.target;
+			fp.appendFilter(io.selectedTranslator.label, "*."+io.selectedTranslator.target);
+		}
 		
 		var rv = fp.show();
 		if (rv == nsIFilePicker.returnOK || rv == nsIFilePicker.returnReplace) {
@@ -78,19 +85,9 @@ var Zotero_File_Interface = new function() {
 	 * exports a collection or saved search
 	 */
 	function exportCollection() {
-		var collection = ZoteroPane.getSelectedCollection();
-		if (collection)
-		{
-			exportFile(collection.getName(), Zotero.getItems(collection.getID()));
-			return;
-		}
-		
-		var searchRef = ZoteroPane.getSelectedSavedSearch();
-		if (searchRef)
-		{
-			var search = new Zotero.Search();
-			search.load(searchRef['id']);
-			exportFile(search.getName(), Zotero.Items.get(search.search()));
+		var nameAndItems = _getSortedSelectedCollection();
+		if(nameAndItems) {
+			exportFile(nameAndItems[0], nameAndItems[1]);
 			return;
 		}
 		
@@ -106,6 +103,33 @@ var Zotero_File_Interface = new function() {
 		if(!items || !items.length) throw("no items currently selected");
 		
 		exportFile(Zotero.getString("fileInterface.exportedItems"), items);
+	}
+	
+	/*
+	 * gets selected collection or saved search sorted
+	 */
+	function _getSortedSelectedCollection() {
+		var name = false;
+		var items = false;
+		
+		var collection = ZoteroPane.getSelectedCollection();
+		if (collection) {
+			name = collection.getName();
+			items = Zotero.getItems(collection.getID());
+		} else {
+			var searchRef = ZoteroPane.getSelectedSavedSearch();
+			if (searchRef) {
+				var search = new Zotero.Search();
+				search.load(searchRef['id']);
+				name = search.getName();
+				items = Zotero.Items.get(search.search());
+			}
+		}
+		
+		if(items) {
+			return [name, items];
+		}
+		return false;
 	}
 	
 	/*
@@ -228,19 +252,9 @@ var Zotero_File_Interface = new function() {
 	 * Creates a bibliography from a collection or saved search
 	 */
 	function bibliographyFromCollection() {
-		var collection = ZoteroPane.getSelectedCollection();
-		if (collection)
-		{
-			_doBibliographyOptions(collection.getName(), Zotero.getItems(collection.getID()));
-			return;
-		}
-		
-		var searchRef = ZoteroPane.getSelectedSavedSearch();
-		if (searchRef)
-		{
-			var search = new Zotero.Search();
-			search.load(searchRef['id']);
-			_doBibliographyOptions(search.getName(), Zotero.Items.get(search.search()));
+		var nameAndItems = _getSortedSelectedCollection();
+		if(nameAndItems) {
+			_doBibliographyOptions(nameAndItems[0], nameAndItems[1]);
 			return;
 		}
 		

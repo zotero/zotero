@@ -1691,24 +1691,24 @@ Zotero.Translate.prototype._export = function() {
 		                createInstance(Components.interfaces.nsILocalFile);
 		directory.initWithFile(this.location.parent);
 		
+		// delete this file if it exists
+		if(this.location.exists()) {
+			this.location.remove(false);
+		}
+		
 		// get name
 		var name = this.location.leafName;
-		var extensionMatch = /^(.*)\.[a-zA-Z0-9]+$/
-		var m = extensionMatch.exec(name);
-		if(m) {
-			name = m[1];
-		}
 		directory.append(name);
 		
 		// create directory
 		directory.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0700);
 		
-		// generate a new location
-		var originalName = this.location.leafName;
+		// generate a new location for the exported file, with the appropriate
+		// extension
 		this.location = Components.classes["@mozilla.org/file/local;1"].
 		                createInstance(Components.interfaces.nsILocalFile);
 		this.location.initWithFile(directory);
-		this.location.append(originalName);
+		this.location.append(name+"."+this.translator[0].target);
 		
 		// create files directory
 		this._exportFileDirectory = Components.classes["@mozilla.org/file/local;1"].

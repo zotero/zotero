@@ -1,4 +1,4 @@
--- 123
+-- 124
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-12-12 23:41:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-12-13 00:19:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b3.r1', '', '2006-12-12 23:41:00', 1, 100, 4, 'Amazon.com', 'Sean Takats', '^http://(?:www\.)amazon', 
 'function detectWeb(doc, url) {
@@ -5017,7 +5017,7 @@ function doImport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('14763d24-8ba0-45df-8f52-b8d1108e7ac9', '1.0.0b3.r1', '', '2006-12-12 22:34:00', 1, 25, 2, 'Zotero RDF', 'Simon Kornblith', 'rdf',
+REPLACE INTO translators VALUES ('14763d24-8ba0-45df-8f52-b8d1108e7ac9', '1.0.0b3.r1', '', '2006-12-13 00:19:00', 1, 25, 2, 'Zotero RDF', 'Simon Kornblith', 'rdf',
 'Zotero.configure("getCollections", true);
 Zotero.configure("dataMode", "rdf");
 Zotero.addOption("exportNotes", true);
@@ -5212,7 +5212,6 @@ function generateItem(item, zoteroType, resource) {
 		var value = item[property];
 		if(!value) continue;
 		
-		Zotero.Utilities.debug("processing "+property);
 		if(property == "title") {					// title
 			Zotero.RDF.addStatement(resource, n.dc+"title", value, true);
 		} else if(property == "creators") {			// authors/editors/contributors
