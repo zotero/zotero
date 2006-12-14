@@ -76,7 +76,7 @@ Zotero.Integration = new function() {
 	/*
 	 * handles a SOAP envelope
 	 */
-	function handleEnvelope(envelope, encoding) {
+	function handleEnvelope(envelope) {
 		Zotero.debug("Integration: SOAP Request\n"+envelope);
 		envelope = envelope.replace(_XMLRe, "");
 		
@@ -141,11 +141,11 @@ Zotero.Integration = new function() {
 					</SOAP-ENV:Body>
 				</SOAP-ENV:Envelope>;
 				
-				var response = '<?xml version="1.0" encoding="'+encoding+'"?>\n'+responseEnvelope.toXMLString();
+				var response = '<?xml version="1.0" encoding="UTF-8"?>\n'+responseEnvelope.toXMLString();
 				Zotero.debug("Integration: SOAP Response\n"+response);
 				
 				// return OK
-				return _generateResponse("200 OK", 'text/xml; charset="'+encoding+'"',
+				return _generateResponse("200 OK", 'text/xml; charset="UTF-8"',
 				                         response);
 			} else {
 				Zotero.debug("Integration: SOAP method not supported");
@@ -163,7 +163,7 @@ Zotero.Integration = new function() {
 			if(contentType) {
 				response += "Content-Type: "+contentType+"\r\n";
 			}
-			response += "Content-Length: "+body.length+"\r\n\r\n"+body;
+			response += "\r\n"+body;
 		} else {
 			response += "Content-Length: 0\r\n\r\n"
 		}
@@ -301,54 +301,28 @@ Zotero.Integration.DataListener.prototype._bodyData = function() {
 			this.body = this.body.substr(0, this.bodyLength);
 		}
 		
-		// UTF-8 crashes AppleScript
-		var encoding = (this.header.indexOf("\nUser-Agent: Mac OS X") !== -1 ? "macintosh" : "UTF-8");
-		var output = Zotero.Integration.handleEnvelope(this.body, encoding);
-		this._requestFinished(output, encoding);
+		var output = Zotero.Integration.handleEnvelope(this.body);
+		this._requestFinished(output);
 	}
 }
 
 /*
  * returns HTTP data from a request
  */
-Zotero.Integration.DataListener.prototype._requestFinished = function(response, encoding) {
+Zotero.Integration.DataListener.prototype._requestFinished = function(response) {
 	// close input stream
 	this.iStream.close();
 	
-	if(encoding == "macintosh") {
-		// double percent signs
-		response = response.replace(/%/g, "%%");
-		// replace line endings with percent signs
-		response = response.replace(/\n/g, " %!");
-		response = response.replace(/\r/g, "");
-
-		// convert Unicode to Mac Roman
-		var converter = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"] 
-								  .createInstance(Components.interfaces.nsIScriptableUnicodeConverter); 
-		converter.charset = "macintosh";
-		// convert text
-		response = converter.ConvertFromUnicode(response);
-		// fix returns
-		response = response.replace(/ %!/g, "\n");
-		// fix percent signs
-		response = response.replace(/%%/g, "%"); 
-		response = response + converter.Finish();
+	// open UTF-8 converter for output stream	
+	var intlStream = Components.classes["@mozilla.org/intl/converter-output-stream;1"]
+							   .createInstance(Components.interfaces.nsIConverterOutputStream);
+	intlStream.init(this.oStream, "UTF-8", 1024, "?".charCodeAt(0));
 	
-		// write
-		this.oStream.write(response, response.length); 
-	} else if(encoding) {
-		// open UTF-8 converter for output stream	
-		var intlStream = Components.classes["@mozilla.org/intl/converter-output-stream;1"]
-								   .createInstance(Components.interfaces.nsIConverterOutputStream);
-		intlStream.init(this.oStream, encoding, 1024, "?".charCodeAt(0));
-		
-		// write response
-		intlStream.writeString(response);
-		intlStream.close();
-	} else {
-		// write
-		this.oStream.write(response, response.length);
-	}
+	// write response
+	intlStream.writeString(response);
+	intlStream.close();
+	// write
+	this.oStream.write(response, response.length);
 	
 	// close output stream
 	this.oStream.close();

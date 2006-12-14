@@ -544,7 +544,7 @@ Zotero.CSL.prototype.createBibliography = function(items, format) {
 		output = output.substr(0, output.length-6)+"}";
 	} else {
 		// drop last 4 characters (last two returns)
-		output = output.substr(0, output.length-4);
+		output = output.substr(0, (Zotero.isMac ? output.length-2 : output.length-4));
 	}
 	
 	return output;
