@@ -311,34 +311,43 @@ Zotero.OpenURL = new function() {
 			_mapTag(item.title, "title", version);
 			_mapTag(item.publisher, "inst", version);
 			_mapTag(item.type, "degree", version);
+		} else if(item.itemType == "patent" && version == "1.0") {
+			co += "&rft_val_fmt=info%3Aofi%2Ffmt%3Akev%3Amtx%3Apatent";
+			
+			_mapTag(item.title, "title", version);
+			_mapTag(item.assignee, "assignee", version);
+			_mapTag(item.patentNumber, "number", version);
+			
+			if(item.issueDate) {
+				co += _mapTag(Zotero.Date.strToISO(item.issueDate), "date", version);
+			}
 		} else {
 			return false;
 		}
 		
-		// encode fields on all items
-		for each(creator in item.creators) {
-			if(creator.firstName) {
-				co += _mapTag(creator.firstName, "aufirst", version);
-				co += _mapTag(creator.lastName, "aulast", version);
+		if(item.creators && item.creators.length) {
+			// encode first author as first and last
+			var firstCreator = item.creators[0];
+			if(item.itemType == "patent") {
+				co += _mapTag(firstCreator.firstName, "invfirst", version);
+				co += _mapTag(firstCreator.lastName, "invlast", version);
 			} else {
-				co += _mapTag(creator.lastName, "aucorp", version);
+				if(firstCreator.isInstitution) {
+					co += _mapTag(firstCreator.lastName, "aucorp", version);
+				} else {
+					co += _mapTag(firstCreator.firstName, "aufirst", version);
+					co += _mapTag(firstCreator.lastName, "aulast", version);
+				}
+			}
+			
+			// encode subsequent creators as au
+			for each(creator in item.creators) {
+				co += _mapTag((creator.firstName ? creator.firstName+" " : "")+creator.lastName, (item.itemType == "patent" ? "inventor" : "au"), version);
 			}
 		}
 		
 		if(item.date) {
-			var date = Zotero.Date.strToDate(item.date);
-			
-			if(date.year) {
-				var dateString = Zotero.Utilities.prototype.lpad(date.year, "0", 4);
-				if(date.month) {
-					dateString += "-"+Zotero.Utilities.prototype.lpad(date.month, "0", 2);
-					if(date.day) {
-						dateString += "-"+Zotero.Utilities.prototype.lpad(date.day, "0", 2);
-					}
-				}
-				
-				co += _mapTag(dateString, "date", version);
-			}
+			co += _mapTag(Zotero.Date.strToISO(item.date), (item.itemType == "patent" ? "appldate" : "date"), version);
 		}
 		co += _mapTag(item.pages, "pages", version);
 		co += _mapTag(item.ISBN, "isbn", version);
@@ -376,12 +385,19 @@ Zotero.OpenURL = new function() {
 				} else if(format == "info:ofi/fmt:kev:mtx:book") {
 					if(Zotero.inArray("rft.genre=bookitem", coParts)) {
 						item.itemType = "bookSection";
+					} else if(Zotero.inArray("rft.genre=conference", coParts) || Zotero.inArray("rft.genre=proceeding", coParts)) {
+						item.itemType = "conferencePaper";
+					} else if(Zotero.inArray("rft.genre=report", coParts)) {
+						item.itemType = "report";
 					} else {
 						item.itemType = "book";
 					}
 					break;
 				} else if(format == "info:ofi/fmt:kev:mtx:dissertation") {
 					item.itemType = "thesis";
+					break;
+				} else if(format == "info:ofi/fmt:kev:mtx:patent") {
+					item.itemType = "patent";
 					break;
 				}
 			}
@@ -391,6 +407,9 @@ Zotero.OpenURL = new function() {
 		}
 		
 		var pagesKey = "";
+		
+		// keep track of "aucorp," "aufirst," "aulast"
+		var complexAu = new Array();
 		
 		for each(var part in coParts) {
 			var keyVal = part.split("=");
@@ -411,7 +430,7 @@ Zotero.OpenURL = new function() {
 					item.accessDate = "";
 				}
 			} else if(key == "rft.btitle") {
-				if(item.itemType == "book") {
+				if(item.itemType == "book" || item.itemType == "conferencePaper" || item.itemType == "report") {
 					item.title = value;
 				} else if(item.itemType == "bookSection") {
 					item.publicationTitle = value;
@@ -430,7 +449,11 @@ Zotero.OpenURL = new function() {
 					item.title = value;
 				}
 			} else if(key == "rft.date") {
-				item.date = value;
+				if(item.itemType == "patent") {
+					item.issueDate = value;
+				} else {
+					item.date = value;
+				}
 			} else if(key == "rft.volume") {
 				item.volume = value;
 			} else if(key == "rft.issue") {
@@ -464,24 +487,28 @@ Zotero.OpenURL = new function() {
 				}
 			} else if(key == "rft.issn" || (key == "rft.eissn" && !item.ISSN)) {
 				item.ISSN = value;
-			} else if(key == "rft.aulast") {
-				var lastCreator = item.creators[item.creators.length-1];
-				if(item.creators.length && !lastCreator.lastName && !lastCreator.institutional) {
+			} else if(key == "rft.aulast" || key == "rft.invlast") {
+				var lastCreator = complexAu[complexAu.length-1];
+				if(complexAu.length && !lastCreator.lastName && !lastCreator.institutional) {
 					lastCreator.lastName = value;
 				} else {
-					item.creators.push({lastName:value});
+					complexAu.push({lastName:value, creatorType:(key == "rft.aulast" ? "author" : "inventor")});
 				}
-			} else if(key == "rft.aufirst") {
-				var lastCreator = item.creators[item.creators.length-1];
-				if(item.creators.length && !lastCreator.firstName && !lastCreator.institutional) {
+			} else if(key == "rft.aufirst" || key == "rft.invfirst") {
+				var lastCreator = complexAu[complexAu.length-1];
+				if(complexAu.length && !lastCreator.firstName && !lastCreator.institutional) {
 					lastCreator.firstName = value;
 				} else {
-					item.creators.push({firstName:value});
+					complexAu.push({firstName:value, creatorType:(key == "rft.aufirst" ? "author" : "inventor")});
 				}
-			} else if(key == "rft.au") {
-				item.creators.push(Zotero.Utilities.prototype.cleanAuthor(value, "author", true));
+			} else if(key == "rft.au" || key == "rft.inventor") {
+				if(value.indexOf(",") !== -1) {
+					item.creators.push(Zotero.Utilities.prototype.cleanAuthor(value, (key == "rft.au" ? "author" : "inventor"), true));
+				} else {
+					item.creators.push(Zotero.Utilities.prototype.cleanAuthor(value, (key == "rft.au" ? "author" : "inventor"), false));
+				}
 			} else if(key == "rft.aucorp") {
-				item.creators.push({lastName:value, fieldMode:true});
+				complexAu.push({lastName:value, isInstitution:true});
 			} else if(key == "rft.isbn" && !item.ISBN) {
 				item.ISBN = value;
 			} else if(key == "rft.pub") {
@@ -498,7 +525,33 @@ Zotero.OpenURL = new function() {
 				} else if(key == "rft.degree") {
 					item.type = value;
 				}
+			} else if(item.itemType == "patent") {
+				if(key == "rft.assignee") {
+					item.assignee = value;
+				} else if(key == "rft.number") {
+					item.patentNumber = value;
+				} else if(key == "rft.appldate") {
+					item.date = value;
+				}
 			}
+		}
+		
+		// combine two lists of authors, eliminating duplicates
+		for each(var au in complexAu) {
+			var pushMe = true;
+			for each(var pAu in item.creators) {
+				// if there's a plain author that is close to this author (the
+				// same last name, and the same first name up to a point), keep
+				// the plain author, since it might have a middle initial
+				if(pAu.lastName == au.lastName &&
+				   (pAu.firstName == au.firstName == "" ||
+				   (pAu.firstName.length >= au.firstName.length &&
+				   pAu.substr(0, au.firstName.length) == au.firstName))) {
+					pushMe = false;
+					break;
+				}
+			}
+			if(pushMe) item.creators.push(au);
 		}
 		
 		return item;

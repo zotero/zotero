@@ -708,6 +708,7 @@ Zotero.Date = new function(){
 	this.dateToSQL = dateToSQL;
 	this.strToDate = strToDate;
 	this.formatDate = formatDate;
+	this.strToISO = strToISO;
 	this.strToMultipart = strToMultipart;
 	this.isMultipart = isMultipart;
 	this.multipartToSQL = multipartToSQL;
@@ -994,6 +995,21 @@ Zotero.Date = new function(){
 		return string;
 	}
 	
+	function strToISO(str){
+		var date = Zotero.Date.strToDate(str);
+		
+		if(date.year) {
+			var dateString = Zotero.Utilities.prototype.lpad(date.year, "0", 4);
+			if(date.month) {
+				dateString += "-"+Zotero.Utilities.prototype.lpad(date.month+1, "0", 2);
+				if(date.day) {
+					dateString += "-"+Zotero.Utilities.prototype.lpad(date.day, "0", 2);
+				}
+			}
+			return dateString;
+		}
+		return false;
+	}
 	
 	function strToMultipart(str){
 		if (!str){
