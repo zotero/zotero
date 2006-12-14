@@ -1196,8 +1196,6 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 						} else {
 							Zotero.debug("discarded field "+i+" for item: field not valid for type "+type);
 						}
-					} else {
-						Zotero.debug("discarded field "+i+" for item: field does not exist");
 					}
 				}
 			}
@@ -1221,6 +1219,11 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 					var myNote = Zotero.Items.get(noteID);
 					this._itemTagsAndSeeAlso(note, myNote);
 				}
+			}
+			
+			// handle abstract
+			if(item.abstractNote) {
+				Zotero.Notes.add(item.abstractNote, myID, true);
 			}
 			
 			// handle attachments
@@ -1850,6 +1853,23 @@ Zotero.Translate.prototype._exportGetItem = function() {
 			}
 		} else {
 			var returnItemArray = returnItem.toArray();
+			
+			// handle abstract as abstractNote
+			if(returnItem.isRegularItem()) {
+				var abstractID = returnItem.getAbstract();
+				
+				if(abstractID) {
+					// look for the abstract in the notes array and remove it
+					for(var i in returnItemArray.notes) {
+						if(returnItemArray.notes[i].itemID == abstractID) {
+							returnItemArray.abstractNote = returnItemArray.notes[i].note;
+							returnItemArray.notes.splice(i, 1);
+							break;
+						}
+					}
+				}
+			}
+			
 			// get attachments, although only urls will be passed if exportFileData
 			// is off
 			returnItemArray.attachments = new Array();
