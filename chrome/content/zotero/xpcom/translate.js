@@ -297,12 +297,19 @@ Zotero.Translate.prototype.setTranslator = function(translator) {
 				this._setDisplayOptions = translator.displayOptions;
 			}
 			
+			// if we were given the code, don't bother loading from DB
+			if(translator.code) {
+				this.translator = [translator];
+				return true;
+			}
+			
 			translator = [translator.translatorID];
 		} else {
 			// we have an associative array of translators
 			if(this.type != "search") {
 				throw("cannot set translator: a single translator must be specified when doing "+this.type+" translation");
 			}
+			
 			// accept a list of objects
 			for(var i in translator) {
 				if(typeof(translator[i]) == "object") {
@@ -374,6 +381,12 @@ Zotero.Translate.prototype.setTranslator = function(translator) {
  *   called: when all processing is finished
  *   passed: true if successful, false if an error occurred
  *   returns: N/A
+ *
+ * debug
+ *   valid: all
+ *   called: when Zotero.debug() is called
+ *   passed: string debug message
+ *   returns: true if message should be logged to the console, false if not
  */
 Zotero.Translate.prototype.setHandler = function(type, handler) {
 	if(!this._handlers[type]) {
@@ -606,9 +619,17 @@ Zotero.Translate.prototype._generateSandbox = function() {
 	
 	this._sandbox.XPathResult = Components.interfaces.nsIDOMXPathResult;
 	
+	// for debug messages
+	this._sandbox.Zotero.debug = function(string) {
+		// if handler does not return anything explicitly false, show debug
+		// message in console
+		if(me._runHandler("debug", string) !== false) Zotero.debug(string, 4);
+	}
+	
 	// for asynchronous operation, use wait()
 	// done() is implemented after wait() is called
 	this._sandbox.Zotero.wait = function() { me._enableAsynchronous() };
+	
 	// for adding configuration options
 	this._sandbox.Zotero.configure = function(option, value) {me._configure(option, value) };
 	// for adding displayed options
@@ -1366,7 +1387,7 @@ Zotero.Translate.prototype._processCollection = function(collection, parentID) {
  * calls a handler (see setHandler above)
  */
 Zotero.Translate.prototype._runHandler = function(type, argument) {
-	var returnValue;
+	var returnValue = undefined;
 	if(this._handlers[type]) {
 		for(var i in this._handlers[type]) {
 			Zotero.debug("running handler "+i+" for "+type);

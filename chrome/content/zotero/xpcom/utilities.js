@@ -32,10 +32,6 @@
 
 Zotero.Utilities = function () {}
 
-Zotero.Utilities.prototype.debug = function(msg) {
-	Zotero.debug(msg, 4);
-}
-
 /*
  * See Zotero.Date
  */
