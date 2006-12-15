@@ -1670,6 +1670,32 @@ Zotero.Item.prototype.getSeeAlso = function(){
 }
 
 
+Zotero.Item.prototype.getImageSrc = function() {
+	var itemType = Zotero.ItemTypes.getName(this.getType());
+	if (itemType == 'attachment') {
+		var linkMode = this.getAttachmentLinkMode();
+		if (linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_FILE) {
+			itemType = itemType + "-file";
+		}
+		else if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
+			itemType = itemType + "-link";
+		}
+		else if (linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_URL) {
+			itemType = itemType + "-snapshot";
+		}
+		else if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) {
+			itemType = itemType + "-web-link";
+		}
+	}
+	
+	if (itemType == 'note' && this.isAbstract()) {
+		itemType = 'note-abstract';
+	}
+	
+	return Zotero.ItemTypes.getImageSrc(itemType);
+}
+
+
 /**
 * Delete item from database and clear from Zotero.Items internal array
 **/
@@ -3251,6 +3277,7 @@ Zotero.ItemTypes = new function(){
 	this.getPrimaryTypes = getPrimaryTypes;
 	this.getSecondaryTypes = getSecondaryTypes;
 	this.getHiddenTypes = getHiddenTypes;
+	this.getImageSrc = getImageSrc;
 	
 	this._typeDesc = 'item type';
 	this._idCol = 'itemTypeID';
@@ -3267,6 +3294,46 @@ Zotero.ItemTypes = new function(){
 	
 	function getHiddenTypes(){
 		return this.getTypes('WHERE display=0');
+	}
+	
+	function getImageSrc(itemType) {
+		// DEBUG: only have icons for some types so far
+		switch (itemType) {
+			case 'attachment-file':
+			case 'attachment-link':
+			case 'attachment-snapshot':
+			case 'attachment-web-link':
+			case 'artwork':
+			case 'audioRecording':
+			case 'blogPost':
+			case 'book':
+			case 'bookSection':
+			case 'computerProgram':
+			case 'conferencePaper':
+			case 'email':
+			case 'film':
+			case 'forumPost':
+			case 'interview':
+			case 'journalArticle':
+			case 'letter':
+			case 'magazineArticle':
+			case 'manuscript':
+			case 'map':
+			case 'newspaperArticle':
+			case 'note':
+			case 'note-abstract':
+			case 'podcast':
+			case 'radioBroadcast':
+			case 'report':
+			case 'thesis':
+			case 'tvBroadcast':
+			case 'videoRecording':
+			case 'webpage':
+				
+				return "chrome://zotero/skin/treeitem-" + itemType + ".png";
+		}
+		
+		return "chrome://zotero/skin/treeitem.png";
 	}
 }
 

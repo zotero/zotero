@@ -328,71 +328,7 @@ Zotero.ItemTreeView.prototype.getImageSrc = function(row, col)
 {
 	if(col.id == 'zotero-items-title-column')
 	{
-		var item = this._getItemAtRow(row);
-		var itemType = Zotero.ItemTypes.getName(item.getType());
-		if(itemType == 'attachment')
-		{
-			var linkMode = item.ref.getAttachmentLinkMode();
-			if(linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_FILE)
-			{
-				itemType = itemType + "-file";
-			}
-			else if(linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE)
-			{
-				itemType = itemType + "-link";
-			}
-			else if(linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_URL)
-			{
-				itemType = itemType + "-snapshot";
-			}
-			else if(linkMode == Zotero.Attachments.LINK_MODE_LINKED_URL)
-			{
-				itemType = itemType + "-web-link";
-			}
-		}
-		
-		if (itemType == 'note' && item.ref.isAbstract()) {
-			itemType = 'note-abstract';
-		}
-		
-		// DEBUG: only have icons for some types so far
-		switch (itemType)
-		{
-			case 'attachment-file':
-			case 'attachment-link':
-			case 'attachment-snapshot':
-			case 'attachment-web-link':
-			case 'artwork':
-			case 'audioRecording':
-			case 'blogPost':
-			case 'book':
-			case 'bookSection':
-			case 'computerProgram':
-			case 'conferencePaper':
-			case 'email':
-			case 'film':
-			case 'forumPost':
-			case 'interview':
-			case 'journalArticle':
-			case 'letter':
-			case 'magazineArticle':
-			case 'manuscript':
-			case 'map':
-			case 'newspaperArticle':
-			case 'note':
-			case 'note-abstract':
-			case 'podcast':
-			case 'radioBroadcast':
-			case 'report':
-			case 'thesis':
-			case 'tvBroadcast':
-			case 'videoRecording':
-			case 'webpage':
-				
-				return "chrome://zotero/skin/treeitem-"+itemType+".png";
-		}
-		
-		return "chrome://zotero/skin/treeitem.png";
+		return this._getItemAtRow(row).ref.getImageSrc();
 	}
 }
 
