@@ -44,6 +44,8 @@ var ZoteroPane = new function()
 	this.deleteSelectedItem = deleteSelectedItem;
 	this.deleteSelectedCollection = deleteSelectedCollection;
 	this.editSelectedCollection = editSelectedCollection;
+	this.handleSearchKeypress = handleSearchKeypress;
+	this.handleSearchInput = handleSearchInput;
 	this.search = search;
 	this.getCollectionsView = getCollectionsView;
 	this.getItemsView = getItemsView;
@@ -56,6 +58,8 @@ var ZoteroPane = new function()
 	this.buildCollectionContextMenu = buildCollectionContextMenu;
 	this.buildItemContextMenu = buildItemContextMenu;
 	this.onDoubleClick = onDoubleClick;
+	this.setItemsPaneMessage = setItemsPaneMessage;
+	this.clearItemsPaneMessage = clearItemsPaneMessage;
 	this.contextPopupShowing = contextPopupShowing;
 	this.openNoteWindow = openNoteWindow;
 	this.toggleAbstractForSelectedItem = toggleAbstractForSelectedItem
@@ -230,7 +234,6 @@ var ZoteroPane = new function()
 	function newSearch()
 	{
 		var s = new Zotero.Search();
-		s.addCondition('title','contains','');
 		
 		var untitled = Zotero.getString('pane.collections.untitled');
 		untitled = Zotero.DB.getNextName('savedSearches', 'savedSearchName',
@@ -527,6 +530,36 @@ var ZoteroPane = new function()
 	}
 	
 	
+	function handleSearchKeypress(textbox, event) {
+		// Events that turn find-as-you-type on
+		if (event.keyCode == event.DOM_VK_ESCAPE) {
+			textbox.value = '';
+			ZoteroPane.setItemsPaneMessage(Zotero.getString('searchInProgress'));
+			setTimeout("document.getElementById('zotero-tb-search').doCommand('cmd_zotero_search'); ZoteroPane.clearItemsPaneMessage();", 1);
+		}
+		else if (event.keyCode == event.DOM_VK_RETURN ||
+			event.keyCode == event.DOM_VK_ENTER) {
+			textbox.skipTimeout = true;
+			ZoteroPane.setItemsPaneMessage(Zotero.getString('searchInProgress'));
+			setTimeout("document.getElementById('zotero-tb-search').doCommand('cmd_zotero_search'); ZoteroPane.clearItemsPaneMessage();", 1);
+		}
+	}
+	
+	
+	function handleSearchInput(textbox, event) {
+		// This is the new length, except, it seems, when the change is a
+		// result of Undo or Redo
+		if (!textbox.value.length) {
+			textbox.skipTimeout = true;
+			ZoteroPane.setItemsPaneMessage(Zotero.getString('searchInProgress'));
+			setTimeout("document.getElementById('zotero-tb-search').doCommand('cmd_zotero_search'); ZoteroPane.clearItemsPaneMessage();", 1);
+		}
+		else if (textbox.value.indexOf('"') != -1) {
+			ZoteroPane.setItemsPaneMessage(Zotero.getString('advancedSearchMode'));
+		}
+	}
+	
+	
 	function search()
 	{
 		if(itemsView)
@@ -564,7 +597,7 @@ var ZoteroPane = new function()
 	function selectItem(itemID, inLibrary)
 	{
 		if (!itemID) {
-			return false;
+			return;
 		}
 		if(itemsView)
 		{
@@ -769,19 +802,37 @@ var ZoteroPane = new function()
 	
 	function buildItemContextMenu()
 	{
+		var m = {
+			showInLibrary: 0,
+			sep1: 1,
+			addNote: 2,
+			attachSnapshot: 3,
+			attachLink: 4,
+			toggleAbstract: 5,
+			sep2: 6,
+			deleteItem: 7,
+			deleteFromLibrary: 8,
+			sep3: 9,
+			exportItems: 10,
+			createBib: 11,
+			loadReport: 12
+		};
+		
 		var menu = document.getElementById('zotero-itemmenu');
 		
 		var enable = [], disable = [], show = [], hide = [], multiple = '';
 		
 		if(itemsView && itemsView.selection.count > 0)
 		{
-			enable.push(0,2,3,4,6,7,8,10,11,12);
+			enable.push(m.showInLibrary, m.addNote, m.attachSnapshot, m.attachLink, m.sep2,
+				m.deleteItem, m.deleteFromLibrary, m.exportItems, m.createBib, m.loadReport);
 			
 			// Multiple items selected
 			if (itemsView.selection.count > 1)
 			{
 				var multiple =  '.multiple';
-				hide.push(0,1,2,3,4,5,6);
+				hide.push(m.showInLibrary, m.sep1, m.addNote, m.attachSnapshot,
+					m.attachLink, m.toggleAbstract, m.sep2);
 			}
 			// Single item selected
 			else
@@ -792,33 +843,33 @@ var ZoteroPane = new function()
 				
 				// Show in Library
 				if (!itemsView._itemGroup.isLibrary()) {
-					show.push(0,1);
+					show.push(m.showInLibrary, m.sep1);
 				}
 				else {
-					hide.push(0,1);
+					hide.push(m.showInLibrary, m.sep1);
 				}
 				
 				if (item.isRegularItem())
 				{
-					show.push(2,3,4,6);
-					hide.push(5); // abstract
+					show.push(m.addNote, m.attachSnapshot, m.attachLink, m.sep2);
+					hide.push(m.toggleAbstract);
 				}
 				else
 				{
-					hide.push(2,3,4);
+					hide.push(m.addNote, m.attachSnapshot, m.attachLink);
 					
 					// Abstract
 					if (item.isNote() && item.getSource()) {
-						show.push(5,6);
+						show.push(m.toggleAbstract, m.sep2);
 						if (item.isAbstract()) {
-							menu.childNodes[5].setAttribute('label', Zotero.getString('pane.items.menu.abstract.unset'));
+							menu.childNodes[m.toggleAbstract].setAttribute('label', Zotero.getString('pane.items.menu.abstract.unset'));
 						}
 						else {
-							menu.childNodes[5].setAttribute('label', Zotero.getString('pane.items.menu.abstract.set'));
+							menu.childNodes[m.toggleAbstract].setAttribute('label', Zotero.getString('pane.items.menu.abstract.set'));
 						}
 					}
 					else {
-						hide.push(5,6);
+						hide.push(m.toggleAbstract, m.sep2);
 					}
 				}
 			}
@@ -827,33 +878,34 @@ var ZoteroPane = new function()
 		{
 			// Show in Library
 			if (!itemsView._itemGroup.isLibrary()) {
-				show.push(0,1);
+				show.push(m.showInLibrary, m.sep1);
 			}
 			else {
-				hide.push(0,1);
+				hide.push(m.showInLibrary, m.sep1);
 			}
 			
-			disable.push(0,2,3,4,7,8,10,11,12);
-			hide.push(5); // abstract
-			show.push(6); // separator
+			disable.push(m.showInLibrary, m.addNote, m.attachSnapshot, m.attachLink,
+				m.deleteItem, m.deleteFromLibrary, m.exportItems, m.createBib, m.loadReport);
+			hide.push(m.toggleAbstract);
+			show.push(m.sep2);
 		}
 		
 		// Remove from collection
 		if (itemsView._itemGroup.isCollection())
 		{
-			menu.childNodes[7].setAttribute('label', Zotero.getString('pane.items.menu.remove' + multiple));
-			show.push(7);
+			menu.childNodes[m.deleteItem].setAttribute('label', Zotero.getString('pane.items.menu.remove' + multiple));
+			show.push(m.deleteItem);
 		}
 		else
 		{
-			hide.push(7);
+			hide.push(m.deleteItem);
 		}
 		
 		// Plural if necessary
-		menu.childNodes[8].setAttribute('label', Zotero.getString('pane.items.menu.erase' + multiple));
-		menu.childNodes[10].setAttribute('label', Zotero.getString('pane.items.menu.export' + multiple));
-		menu.childNodes[11].setAttribute('label', Zotero.getString('pane.items.menu.createBib' + multiple));
-		menu.childNodes[12].setAttribute('label', Zotero.getString('pane.items.menu.generateReport' + multiple));
+		menu.childNodes[m.deleteFromLibrary].setAttribute('label', Zotero.getString('pane.items.menu.erase' + multiple));
+		menu.childNodes[m.exportItems].setAttribute('label', Zotero.getString('pane.items.menu.export' + multiple));
+		menu.childNodes[m.createBib].setAttribute('label', Zotero.getString('pane.items.menu.createBib' + multiple));
+		menu.childNodes[m.loadReport].setAttribute('label', Zotero.getString('pane.items.menu.generateReport' + multiple));
 		
 		for (var i in disable)
 		{
@@ -875,6 +927,7 @@ var ZoteroPane = new function()
 			menu.childNodes[show[i]].setAttribute('hidden', false);
 		}
 	}
+	
 	
 	// Adapted from: http://www.xulplanet.com/references/elemref/ref_tree.html#cmnote-9
 	function onDoubleClick(event, tree)
@@ -898,6 +951,19 @@ var ZoteroPane = new function()
 				}
 			}
 		}
+	}
+	
+	
+	function setItemsPaneMessage(msg) {
+		document.getElementById('zotero-items-pane-content').selectedIndex = 1;
+		var elem = document.getElementById('zotero-items-pane-message');
+		elem.value = msg;
+	}
+	
+	
+	function clearItemsPaneMessage() {
+		document.getElementById('zotero-items-pane-content').selectedIndex = 0;
+		document.getElementById('zotero-items-pane-message').value = '';
 	}
 	
 	

@@ -112,10 +112,10 @@ Zotero.Schema = new function(){
 			}
 		}
 		
-		// If transaction already in progress, delay by a few seconds
+		// If transaction already in progress, delay by ten minutes
 		if (Zotero.DB.transactionInProgress()){
 			Zotero.debug('Transaction in progress -- delaying repository check', 4)
-			_setRepositoryTimer(30);
+			_setRepositoryTimer(600);
 			return false;
 		}
 		
@@ -529,6 +529,12 @@ Zotero.Schema = new function(){
 		// Don't split >4K chunks into multiple nodes
 		// https://bugzilla.mozilla.org/show_bug.cgi?id=194231
 		xmlnode.normalize();
+		
+		// Delete local version of remote translators with priority 0
+		if (xmlnode.getElementsByTagName('priority')[0].firstChild.nodeValue === "0") {
+			var sql = "DELETE FROM translators WHERE translatorID=?";
+			return Zotero.DB.query(sql, {string: xmlnode.getAttribute('id')});
+		}
 		
 		var sqlValues = [
 			{string: xmlnode.getAttribute('id')},

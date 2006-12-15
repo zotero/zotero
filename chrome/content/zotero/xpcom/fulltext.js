@@ -330,7 +330,8 @@ Zotero.Fulltext = new function(){
 			
 			// If not binary mode, only scan plaintext files
 			if (!mode || mode.indexOf('Binary')==-1){
-				if (i.getAttachmentMimeType().substr(0,5)!='text/'){
+				if (!Zotero.MIME.isTextType(i.getAttachmentMimeType())) {
+					Zotero.debug('Not scanning MIME type ' + mimeType, 4);
 					continue;
 				}
 			}

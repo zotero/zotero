@@ -21,6 +21,7 @@
 */
 
 Zotero.MIME = new function(){
+	this.isTextType = isTextType;
 	this.isExternalTextExtension = isExternalTextExtension;
 	this.sniffForMIMEType = sniffForMIMEType;
 	this.sniffForBinary = sniffForBinary;
@@ -41,6 +42,12 @@ Zotero.MIME = new function(){
 		["<?xml", 'text/xml']
 	];
 	
+	var _textTypes = {
+		'application/xhtml+xml': true,
+		'application/xml': true,
+		'application/x-javascript': true
+	};
+	
 	// MIME types handled natively by Gecko
 	// DEBUG: There's definitely a better way of getting these
 	var _nativeMIMETypes = {
@@ -59,6 +66,12 @@ Zotero.MIME = new function(){
 	var _externalTextExtensions = {
 		'graffle': true
 	};
+	
+	
+	
+	function isTextType(mimeType) {
+		return mimeType.substr(0, 5) == 'text/' || _textTypes[mimeType];
+	}
 	
 	
 	/*

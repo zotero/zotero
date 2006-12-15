@@ -176,18 +176,29 @@ Zotero.Search.prototype.addCondition = function(condition, operator, value, requ
 	if (condition=='quicksearch'){
 		this.addCondition('joinMode', 'any');
 		
-		// Quicksearch words don't need to be phrases
-		var words = Zotero.Fulltext.semanticSplitter(value);
-		for each(var i in words){
+		var parts = Zotero.SearchConditions.parseSearchString(value);
+		
+		for each(var part in parts) {
 			this.addCondition('blockStart');
-			this.addCondition('title', operator, i, false);
-			this.addCondition('field', operator, i, false);
-			this.addCondition('numberfield', operator, i, false);
-			this.addCondition('creator', operator, i, false);
-			this.addCondition('tag', operator, i, false);
-			this.addCondition('note', operator, i, false);
-			this.addCondition('fulltextWord', operator, i, false);
+			this.addCondition('title', operator, part.text, false);
+			this.addCondition('field', operator, part.text, false);
+			this.addCondition('numberfield', operator, part.text, false);
+			this.addCondition('creator', operator, part.text, false);
+			this.addCondition('tag', operator, part.text, false);
+			this.addCondition('note', operator, part.text, false);
+			
+			if (part.inQuotes) {
+				this.addCondition('fulltextContent', operator, part.text, false);
+			}
+			else {
+				var splits = Zotero.Fulltext.semanticSplitter(part.text);
+				for each(var split in splits) {
+					this.addCondition('fulltextWord', operator, split, false);
+				}
+			}
+			
 			this.addCondition('blockEnd');
+			
 		}
 		return false;
 	}
@@ -271,14 +282,53 @@ Zotero.Search.prototype.search = function(){
 	
 	var ids = Zotero.DB.columnQuery(this._sql, this._sqlParams);
 	
-	if (!ids){
-		return false;
+	var joinMode = 'all';
+	for each(var condition in this._conditions) {
+		if (condition.condition == 'joinMode') {
+			if (condition.operator == 'any') {
+				joinMode = 'any';
+			}
+			break;
+		}
 	}
 	
 	// Filter results with fulltext search
+	//
+	// If join mode ANY, return the superset of the main search and
+	// (a separate fulltext word search filtered by fulltext content)
+	//
+	// If join mode ALL, return the (union of SQL and fulltext word search)
+	// filtered by fulltext content
 	for each(var condition in this._conditions){
 		if (condition['condition']=='fulltextContent'){
-			var fulltextIDs = Zotero.Fulltext.findTextInItems(ids,
+			// Run a new search against the fulltext word index
+			// for words in this phrase
+			var s = new Zotero.Search();
+			var splits = Zotero.Fulltext.semanticSplitter(condition.value);
+			
+			for each(var split in splits){
+				s.addCondition('fulltextWord', condition.operator, split, false);
+			}
+			var fulltextWordIDs = s.search();
+			
+			var filter = function(val, index, array) {
+				return hash[val] ?
+					(condition.operator == 'contains') :
+					(condition.operator == 'doesNotContain');
+			}
+			
+			// If ALL mode, get union of main search and fulltext word index
+			if (joinMode == 'all') {
+				var hash = {};
+				for each(var id in fulltextWordIDs){
+					hash[id] = true;
+				}
+			}
+			else {
+				var scopeIDs = fulltextWordIDs;
+			}
+			
+			var fulltextIDs = Zotero.Fulltext.findTextInItems(scopeIDs,
 				condition['value'],	condition['mode']);
 			
 			var hash = {};
@@ -286,24 +336,20 @@ Zotero.Search.prototype.search = function(){
 				hash[val.id] = true;
 			}
 			
-			switch (condition['operator']){
-				case 'contains':
-					var filter = function(val,  index, array){
-						return hash[val] ? true : false;
-					}
-					break;
-				
-				case 'doesNotContain':
-					var filter = function(val,  index, array){
-						return hash[val] ? false : true;
-					}
-					break;
-					
-				default:
-					continue;
-			}
+			var filteredIDs = scopeIDs ? scopeIDs.filter(filter) : [];
 			
-			var ids = ids.filter(filter);
+			// If join mode ANY, add any new items from the fulltext content
+			// search to the main search results
+			if (joinMode == 'any' && ids) {
+				for each(var id in filteredIDs) {
+					if (ids.indexOf(id) == -1) {
+						ids.push(id);
+					}
+				}
+			}
+			else {
+				ids = filteredIDs;
+			}
 		}
 	}
 	
@@ -801,6 +847,7 @@ Zotero.SearchConditions = new function(){
 	this.get = get;
 	this.getStandardConditions = getStandardConditions;
 	this.hasOperator = hasOperator;
+	this.parseSearchString = parseSearchString;
 	this.parseCondition = parseCondition;
 	
 	var _initialized = false;
@@ -1170,6 +1217,41 @@ Zotero.SearchConditions = new function(){
 		}
 		
 		return !!_conditions[condition]['operators'][operator];
+	}
+	
+	
+	/*
+	 * Parses a search into words and "double-quoted phrases"
+	 *
+	 * Also strips unpaired quotes at the beginning and end of words
+	 *
+	 * Returns array of objects containing 'text' and 'inQuotes'
+	 */
+	function parseSearchString(str) {
+		var parts = str.split(/\s*("[^"]*")\s*|"\s|\s"|^"|"$|'\s|\s'|^'|'$|\s/m);
+		var parsed = [];
+		
+		for (var i in parts) {
+			var part = parts[i];
+			if (!part.length) {
+				continue;
+			}
+			
+			if (part.charAt(0)=='"' && part.charAt(part.length-1)=='"') {
+				parsed.push({
+					text: part.substring(1, part.length-1),
+					inQuotes: true
+				});
+			}
+			else {
+				parsed.push({
+					text: part,
+					inQuotes: false
+				});
+			}
+		}
+		
+		return parsed;
 	}
 	
 	

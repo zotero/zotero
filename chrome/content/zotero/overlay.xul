@@ -94,6 +94,7 @@
 					<menuitem oncommand="Zotero_Report_Interface.loadItemReport()"/>
 				</popup>
 			</popupset>
+			
 			<vbox id="zotero-collections-pane" persist="width" flex="1">
 				<toolbar>
 					<toolbarbutton id="zotero-tb-collection-add" tooltiptext="&zotero.toolbar.newCollection.label;" oncommand="ZoteroPane.newCollection()"/>
@@ -129,7 +130,9 @@
 				<splitter id="zotero-tags-splitter"/>
 				<zoterotagselector id="zotero-tag-selector" persist="height,collapsed" oncommand="ZoteroPane.updateTagFilter()"/>
 			</vbox>
+			
 			<splitter id="zotero-tree-splitter" resizebefore="closest" resizeafter="closest"/>
+			
 			<vbox id="zotero-items-pane" persist="width" flex="1">
 				<toolbar align="center">
 					<toolbarbutton id="zotero-tb-add" tooltiptext="&zotero.toolbar.newItem.label;" type="menu">
@@ -151,62 +154,77 @@
 					<toolbarbutton id="zotero-tb-note-add" tooltiptext="&zotero.toolbar.note.standalone;" oncommand="ZoteroPane.newNote(event.shiftKey);"/>
 					<spacer flex="1"/>
 					<label value="&zotero.toolbar.search.label;" control="zotero-tb-search"/>
-					<textbox id="zotero-tb-search" type="timed" timeout="250" command="cmd_zotero_search" dir="reverse"
-						onkeypress="if (event.keyCode == event.DOM_VK_ESCAPE) { this.value = ''; this.doCommand('cmd_zotero_search'); }">
+					<textbox id="zotero-tb-search" type="conditional-timed" timeout="250" command="cmd_zotero_search" dir="reverse"
+						onkeypress="ZoteroPane.handleSearchKeypress(this, event)"
+						oninput="ZoteroPane.handleSearchInput(this, event)"
+						testcode="me.value.indexOf('&quot;') == -1"
+						prefire="ZoteroPane.clearItemsPaneMessage()"
+						ontestfail="ZoteroPane.setItemsPaneMessage(Zotero.getString('advancedSearchMode'))">
 						<toolbarbutton id="zotero-tb-search-cancel" oncommand="this.parentNode.value='';" hidden="true"/>
 					</textbox>
 				</toolbar>
-				<tree 
-					id="zotero-items-tree" context="zotero-itemmenu"
-					ondblclick="ZoteroPane.onDoubleClick(event, this);"
-					enableColumnDrag="true"
-					onfocus="if (ZoteroPane.getItemsView().rowCount &amp;&amp; !ZoteroPane.getItemsView().selection.count) { ZoteroPane.getItemsView().selection.select(0); }"
-					onkeypress="if (event.keyCode == event.DOM_VK_BACK_SPACE || event.keyCode == event.DOM_VK_DELETE){ ZoteroPane.deleteSelectedItem(); event.preventDefault(); }"
-					onselect="ZoteroPane.itemSelected();"
-					ondraggesture="if (event.target.localName == 'treechildren') nsDragAndDrop.startDrag(event,ZoteroPane.getItemsView());"
-					ondragover="nsDragAndDrop.dragOver(event,ZoteroPane.getItemsView())"
-					ondragdrop="nsDragAndDrop.drop(event,ZoteroPane.getItemsView())"
-					flex="1">
-					<treecols>
-						<treecol
-							id="zotero-items-title-column" primary="true"
-							label="&zotero.items.title_column;"
-							flex="4" persist="width ordinal hidden sortActive sortDirection"/>
-						<splitter class="tree-splitter"/>
-						<treecol
-							id="zotero-items-firstCreator-column"
-							label="&zotero.items.creator_column;"
-							flex="1" persist="width ordinal hidden sortActive sortDirection"/>
-						<splitter class="tree-splitter"/>
-						<treecol
-							id="zotero-items-numChildren-column"
-							label="&zotero.items.numChildren_column;"
-							persist="width ordinal hidden sortActive sortDirection"/>
-						<splitter class="tree-splitter"/>
-						<treecol
-							id="zotero-items-typeIcon-column" hidden="true"
-							label="&zotero.items.type_column;"
-							width="40" persist="width ordinal hidden sortActive sortDirection"/>
-						<splitter class="tree-splitter"/>
-						<treecol
-							id="zotero-items-rights-column" hidden="true"
-							label="&zotero.items.rights_column;"
-							flex="1" persist="width ordinal hidden sortActive sortDirection"/>
-						<splitter class="tree-splitter"/>
-						<treecol
-							id="zotero-items-dateAdded-column" hidden="true"
-							label="&zotero.items.dateAdded_column;"
-							flex="1" persist="width ordinal hidden sortActive sortDirection"/>
-						<splitter class="tree-splitter"/>
-						<treecol
-							id="zotero-items-dateModified-column" hidden="true"
-							label="&zotero.items.dateModified_column;"
-							flex="1" persist="width ordinal hidden sortActive sortDirection"/>
-					</treecols>				
-					<treechildren/>
-				</tree>
+				
+				<deck id="zotero-items-pane-content" selectedIndex="0" flex="1">
+					<tree 
+						id="zotero-items-tree" context="zotero-itemmenu"
+						ondblclick="ZoteroPane.onDoubleClick(event, this);"
+						enableColumnDrag="true"
+						onfocus="if (ZoteroPane.getItemsView().rowCount &amp;&amp; !ZoteroPane.getItemsView().selection.count) { ZoteroPane.getItemsView().selection.select(0); }"
+						onkeypress="if (event.keyCode == event.DOM_VK_BACK_SPACE || event.keyCode == event.DOM_VK_DELETE){ ZoteroPane.deleteSelectedItem(); event.preventDefault(); }"
+						onselect="ZoteroPane.itemSelected();"
+						ondraggesture="if (event.target.localName == 'treechildren') nsDragAndDrop.startDrag(event,ZoteroPane.getItemsView());"
+						ondragover="nsDragAndDrop.dragOver(event,ZoteroPane.getItemsView())"
+						ondragdrop="nsDragAndDrop.drop(event,ZoteroPane.getItemsView())"
+						flex="1">
+						<treecols>
+							<treecol
+								id="zotero-items-title-column" primary="true"
+								label="&zotero.items.title_column;"
+								flex="4" persist="width ordinal hidden sortActive sortDirection"/>
+							<splitter class="tree-splitter"/>
+							<treecol
+								id="zotero-items-firstCreator-column"
+								label="&zotero.items.creator_column;"
+								flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+							<splitter class="tree-splitter"/>
+							<treecol
+								id="zotero-items-numChildren-column"
+								label="&zotero.items.numChildren_column;"
+								persist="width ordinal hidden sortActive sortDirection"/>
+							<splitter class="tree-splitter"/>
+							<treecol
+								id="zotero-items-typeIcon-column" hidden="true"
+								label="&zotero.items.type_column;"
+								width="40" persist="width ordinal hidden sortActive sortDirection"/>
+							<splitter class="tree-splitter"/>
+							<treecol
+								id="zotero-items-rights-column" hidden="true"
+								label="&zotero.items.rights_column;"
+								flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+							<splitter class="tree-splitter"/>
+							<treecol
+								id="zotero-items-dateAdded-column" hidden="true"
+								label="&zotero.items.dateAdded_column;"
+								flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+							<splitter class="tree-splitter"/>
+							<treecol
+								id="zotero-items-dateModified-column" hidden="true"
+								label="&zotero.items.dateModified_column;"
+								flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+						</treecols>
+						<treechildren/>
+					</tree>
+					
+					<!-- Label for displaying messages when items pane is hidden
+					     (e.g. "Advanced search mode — press Enter to search.")-->
+					<box pack="center" align="center">
+						<label id="zotero-items-pane-message" />
+					</box>
+				</deck>
 			</vbox>
+			
 			<splitter id="zotero-view-splitter" resizebefore="closest" resizeafter="closest"/>
+			
 			<vbox id="zotero-item-pane" persist="width">
 				<toolbar align="right">
 					<toolbarbutton id="zotero-tb-fullscreen" tooltiptext="&zotero.toolbar.fullscreen.tooltip;" oncommand="ZoteroPane.fullScreen();"/>

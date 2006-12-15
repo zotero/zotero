@@ -1,0 +1,69 @@
+<?xml version="1.0"?>
+<!--
+    ***** BEGIN LICENSE BLOCK *****
+    
+    Copyright (c) 2006  Center for History and New Media
+                        George Mason University, Fairfax, Virginia, USA
+                        http://chnm.gmu.edu
+    
+    Licensed under the Educational Community License, Version 1.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+    
+    http://www.opensource.org/licenses/ecl1.php
+    
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+    
+    ***** END LICENSE BLOCK *****
+-->
+
+<bindings xmlns="http://www.mozilla.org/xbl"
+		  xmlns:html="http://www.w3.org/1999/xhtml"
+		  xmlns:xbl="http://www.mozilla.org/xbl"
+		  xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+	<binding id="conditional-timed-textbox" extends="chrome://global/content/bindings/textbox.xml#timed-textbox">
+		<implementation>
+			<field name="skipTimeout"/>
+			<field name="testcode"/>
+			<field name="onbeforefire"/>
+			<field name="onafterfire"/>
+			<field name="ontestfail"/>
+			
+			<method name="_fireCommand">
+				<parameter name="me"/>
+				<body>
+				<![CDATA[
+					if (me.skipTimeout) {
+						me.skipTimeout = false;
+						return;
+					}
+					
+					var code = me.getAttribute('testcode');
+					if (!code.length) {
+						code = true;
+					}
+					
+					if (eval(code)) {
+						if (me.getAttribute('onbeforefire')) {
+							eval(me.getAttribute('onbeforefire'));
+						}
+						me._timer = null;
+						me.doCommand();
+						if (me.getAttribute('onafterfire')) {
+							eval(me.getAttribute('onafterfire'));
+						}
+					}
+					else {
+						eval(me.getAttribute('ontestfail'));
+					}
+				]]>
+				</body>
+			</method>
+		</implementation>
+	</binding>
+</bindings>
