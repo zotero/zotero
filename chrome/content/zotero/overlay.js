@@ -234,6 +234,7 @@ var ZoteroPane = new function()
 	function newSearch()
 	{
 		var s = new Zotero.Search();
+		s.addCondition('title', 'contains', '');
 		
 		var untitled = Zotero.getString('pane.collections.untitled');
 		untitled = Zotero.DB.getNextName('savedSearches', 'savedSearchName',
