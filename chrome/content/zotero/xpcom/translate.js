@@ -387,6 +387,12 @@ Zotero.Translate.prototype.setTranslator = function(translator) {
  *   called: when Zotero.debug() is called
  *   passed: string debug message
  *   returns: true if message should be logged to the console, false if not
+ *
+ * error
+ *   valid: all
+ *   called: when a fatal error occurs
+ *   passed: error object (or string)
+ *   returns: N/A
  */
 Zotero.Translate.prototype.setHandler = function(type, handler) {
 	if(!this._handlers[type]) {
@@ -620,11 +626,7 @@ Zotero.Translate.prototype._generateSandbox = function() {
 	this._sandbox.XPathResult = Components.interfaces.nsIDOMXPathResult;
 	
 	// for debug messages
-	this._sandbox.Zotero.debug = function(string) {
-		// if handler does not return anything explicitly false, show debug
-		// message in console
-		if(me._runHandler("debug", string) !== false) Zotero.debug(string, 4);
-	}
+	this._sandbox.Zotero.debug = function(string) {me._debug(string)};
 	
 	// for asynchronous operation, use wait()
 	// done() is implemented after wait() is called
@@ -941,20 +943,22 @@ Zotero.Translate.prototype._translationComplete = function(returnValue, error) {
 				}
 			}
 			
-			// call handlers
-			this._runHandler("done", returnValue);
-			
 			if(!returnValue) {
 				var errorString = this._generateErrorString(error);
-				Zotero.debug("translation using "+this.translator[0].label+" failed: \n"+errorString);
+				this._debug("Translation using "+this.translator[0].label+" failed: \n"+errorString);
 				
 				if(this.type == "web") {
 					// report translation error for webpages
 					this._reportTranslationFailure(errorString);
 				}
+				
+				this._runHandler("error", error);
 			} else {
-				Zotero.debug("translation successful");
+				this._debug("Translation successful");
 			}
+			
+			// call handlers
+			this._runHandler("done", returnValue);
 		}
 	}
 }
@@ -1381,6 +1385,15 @@ Zotero.Translate.prototype._processCollection = function(collection, parentID) {
 	}
 	
 	return newCollection;
+}
+
+/*
+ * logs a debugging message
+ */
+Zotero.Translate.prototype._debug = function(string) {
+	// if handler does not return anything explicitly false, show debug
+	// message in console
+	if(this._runHandler("debug", string) !== false) Zotero.debug(string, 4);
 }
 
 /*
