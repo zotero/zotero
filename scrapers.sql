@@ -1,4 +1,4 @@
--- 131
+-- 132
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-12-15 17:42:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-12-15 22:19:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b3.r1', '', '2006-12-15 03:40:00', 1, 100, 4, 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -4458,6 +4458,151 @@ function doWeb(doc, url) {
 		});
 	}
 	
+	Zotero.wait();
+}');
+
+REPLACE INTO translators VALUES ('cde4428-5434-437f-9cd9-2281d14dbf9', '1.0.0b2.r2', '', '2006-12-15 22:19:00', 1, 100, 4, 'Ovid', 'Simon Kornblith', '/gw1/ovidweb\.cgi', 
+'function detectWeb(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	var results = doc.evaluate(''//div[@class="bibheader-resultsrange"]/b'', doc, nsResolver,
+		XPathResult.ANY_TYPE, null).iterateNext();
+	
+	if(results) {
+		results = Zotero.Utilities.cleanString(results.textContent);
+		
+		if(results.indexOf("-") != -1) {
+			return "multiple";
+		} else {
+			return "journalArticle";
+		}
+	}
+	
+	return false;
+}',
+'function doWeb(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	var results = Zotero.Utilities.cleanString(doc.evaluate(''//div[@class="bibheader-resultsrange"]/b'', doc, nsResolver,
+		XPathResult.ANY_TYPE, null).iterateNext().textContent);
+	
+	var post = "S="+doc.evaluate(''.//input[@name="S"]'', doc, nsResolver, XPathResult.ANY_TYPE,
+		null).iterateNext().value;
+	
+	if(results.indexOf("-") != -1) {
+		var items = new Array();
+		
+		var tableRows = doc.evaluate(''/html/body/form/div[substring(@class, 1, 10)="titles-row"]'', doc,
+			nsResolver, XPathResult.ANY_TYPE, null);
+		var tableRow;
+		// Go through table rows
+		while(tableRow = tableRows.iterateNext()) {
+			var id = doc.evaluate(''.//input[@name="R"]'', tableRow, nsResolver, XPathResult.ANY_TYPE,
+				null).iterateNext().value;
+			items[id] = Zotero.Utilities.cleanString(doc.evaluate(''.//span[@class="titles-title"]'', tableRow,
+				nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+		}
+		
+		var items = Zotero.selectItems(items);
+		if(!items) return true;
+		
+		for(var i in items) {
+			post += "&R="+i;
+		}
+	} else {
+		var id = doc.evaluate(''.//input[@name="R"]'', doc, nsResolver, XPathResult.ANY_TYPE,
+			null).iterateNext().value;
+		post += "&R="+id;
+	}
+	
+	post += "&SELECT="+doc.evaluate(''.//input[@name="SELECT"]'', doc, nsResolver, XPathResult.ANY_TYPE,
+		null).iterateNext().value;
+	post += "&CitMan="+doc.evaluate(''.//input[@name="CitMan"]'', doc, nsResolver, XPathResult.ANY_TYPE,
+		null).iterateNext().value;
+	post += "&CitManPrev="+doc.evaluate(''.//input[@name="CitManPrev"]'', doc, nsResolver, XPathResult.ANY_TYPE,
+		null).iterateNext().value;
+	post += "&cmRecordSelect=SELECTED&cmFields=ALL&cmFormat=export&cmsave.x=12&cmsave.y=7";
+		
+	Zotero.Utilities.HTTP.doPost(url, post, function(text) {
+		Zotero.debug(text);
+		var lines = text.split("\n");
+		var haveStarted = false;
+		var newItemRe = /^<[0-9]+>/;
+		
+		var newItem = new Zotero.Item("journalArticle");
+		
+		for(var i in lines) {
+			if(lines[i].substring(0,3) == "<1>") {
+				haveStarted = true;
+			} else if(newItemRe.test(lines[i])) {
+				newItem.complete();
+				
+				newItem = new Zotero.Item("journalArticle");
+			} else if(lines[i].substr(2, 4) == "  - " && haveStarted) {
+				var fieldCode = lines[i].substr(0, 2);
+				var fieldContent = Zotero.Utilities.cleanString(lines[i].substr(6));
+				
+				if(fieldCode == "TI") {
+					newItem.title = fieldContent.replace(/\. \[\w+\]$/, "");
+				} else if(fieldCode == "AU") {
+					var names = fieldContent.split(", ");
+					
+					if(names.length >= 2) {
+						// get rid of the weird field codes
+						if(names.length == 2) {
+							names[1] = names[1].replace(/ [\+\*\S\[\]]+$/, "");
+						}
+						names[1] = names[1].replace(/ (?:MD|PhD|[BM]Sc|[BM]A|MPH|MB)$/i, "");
+						
+						newItem.creators.push({firstName:names[1], lastName:names[0], creatorType:"author"});
+					} else {
+						newItem.creators.push({lastName:names[0], isInstitution:true, creatorType:"author"});
+					}
+				} else if(fieldCode == "SO") {
+					// make a vague attempt at getting a volume and pages
+					var m = fieldContent.match(/([0-9]+)\(([0-9]+)\):([A-Z]?[0-9]+(?:\-[A-Z]?[0-9]+))/);
+					if(m) {
+						newItem.volume = m[1];
+						newItem.issue = m[2];
+						newItem.pages = m[3];
+						fieldContent = fieldContent.replace(m[0], "");
+					}
+					// try to get the date, too
+					var m = fieldContent.match(/((?:January|February|March|April|May|June|July|August|September|October|November|December).*[0-9]{4});$/);
+					if(m) {
+						newItem.date = m[1];
+						fieldContent = fieldContent.replace(m[0], "");
+					}
+					
+					newItem.publicationTitle = Zotero.Utilities.superCleanString(fieldContent);
+				} else if(fieldCode == "SB") {
+					newItem.tags.push(Zotero.Utilities.superCleanString(fieldContent));
+				} else if(fieldCode == "KW") {
+					newItem.tags.push(fieldContent.split(/; +/));
+				} else if(fieldCode == "DB") {
+					newItem.repository = "Ovid ("+fieldContent+")";
+				} else if(fieldCode == "DI") {
+					newItem.DOI = fieldContent;
+				} else if(fieldCode == "AB") {
+					newItem.abstractNote = fieldContent;
+				}
+			}
+		}
+		
+		// last item is complete
+		if(haveStarted) {
+			newItem.complete();
+		}
+		
+		Zotero.done();
+	});
+		
 	Zotero.wait();
 }');
 
