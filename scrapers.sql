@@ -1,4 +1,4 @@
--- 133
+-- 134
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-12-15 22:19:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-12-16 01:02:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b3.r1', '', '2006-12-15 03:40:00', 1, 100, 4, 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -4700,6 +4700,91 @@ REPLACE INTO translators VALUES ('cb48083-4d9-4ed-ac95-2e93dceea0ec', '1.0.0b2.r
 	Zotero.wait();
 }');
 
+REPLACE INTO translators VALUES ('f8765470-5ace-4a31-b4bd-4327b960ccd', '1.0.0b3.r1', '', '2006-12-16 01:02:00', 1, 100, 4, 'SpringerLink', 'Simon Kornblith', '^http://www\.springerlink\.com/content/', 
+'function detectWeb(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	if(doc.title == "SpringerLink - All Search Results" || doc.title == "SpringerLink - Journal Issue") {
+		return "multiple";
+	} else if(doc.title == "SpringerLink - Book Chapter") {
+		return "bookSection";
+	} else if(doc.evaluate(''//a[@id="_ctl0_PageSidebar__ctl1_Sidebarplaceholder1__ctl1_ExportRisLink"]'',
+	          doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+		return "journalArticle";
+	}
+}',
+'function doWeb(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	var m = url.match(/https?:\/\/[^\/]+/);
+	var host = m[0];
+	
+	if(doc.title == "SpringerLink - All Search Results" || doc.title == "SpringerLink - Journal Issue") {		
+		var items = Zotero.Utilities.getItemArray(doc, doc, ''/content/[^/]+/\\?p=[^&]+&pi='');
+		
+		items = Zotero.selectItems(items);
+		if(!items) return true;
+		
+		var urls = new Array();
+		for(var url in items) {
+			urls.push();
+		}
+	} else {
+		var urls = [url];
+	}
+	
+	var RIS = new Array();
+	
+	for each(var item in urls) {
+		var m = item.match(/\/content\/([^/]+)/);
+		RIS.push(host+"/export.mpx?code="+m[1]+"&mode=ris");
+	}
+	
+	Zotero.Utilities.HTTP.doGet(RIS, function(text) {
+		// load translator for RIS
+		var translator = Zotero.loadTranslator("import");
+		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+		translator.setString(text);
+		translator.setHandler("itemDone", function(obj, item) {
+			var url = urls.shift();
+			var m = url.match(/http:\/\/[^\/]+\/content\/[^\/]+\//);
+			item.attachments = [
+				{url:url, title:"SpringerLink Snapshot", mimeType:"text/html"},
+				{url:m[0]+"fulltext.pdf", title:"SpringerLink Full Text PDF", mimeType:"application/pdf"}
+			];
+			
+			// fix incorrect authors
+			var oldCreators = item.creators;
+			item.creators = new Array();
+			for each(var creator in oldCreators) {
+				item.creators.push(Zotero.Utilities.cleanAuthor(creator.lastName, "author"));
+			}
+			
+			// fix incorrect chapters
+			Zotero.debug(item);
+			if(item.publicationTitle && item.itemType == "book") item.itemType = "bookSection";
+			
+			// fix "V" in volume
+			if(item.volume) {
+				item.volume = item.volume.replace("V", "");
+			}
+			
+			item.complete();
+		});
+		translator.translate();
+		
+		Zotero.done();
+	});
+		
+	Zotero.wait();
+}');
+
 REPLACE INTO translators VALUES ('e07e9b8c-0e98-4915-bb5a-32a08cb2f365', '1.0.0b2.r2', '', '2006-10-02 17:00:00', 1, 100, 8, 'Open WorldCat', 'Simon Kornblith', 'http://partneraccess.oclc.org/',
 'function detectSearch(item) {
 	if(item.itemType == "book" || item.itemType == "bookSection") {
@@ -6806,7 +6891,7 @@ function doImport(attachments) {
 	while((rawLine = Zotero.read()) !== false) {	// until EOF
 		// trim leading space if this line is not part of a note
 		line = rawLine.replace(/^\s+/, "");
-		
+		Zotero.debug("line is "+rawLine);
 		if(line.substr(2, 4) == "  - " || line == "ER  -") {
 			// if this line is a tag, take a look at the previous line to map
 			// its tag
@@ -6848,7 +6933,8 @@ function doImport(attachments) {
 		}
 	}
 	
-	if(tag) {	// save any unprocessed tags
+	if(tag && tag != "ER") {	// save any unprocessed tags
+		Zotero.debug(tag);
 		processTag(item, tag, data);
 		completeItem(item);
 	}

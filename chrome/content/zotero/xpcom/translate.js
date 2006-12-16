@@ -2015,7 +2015,7 @@ Zotero.Translate.prototype._storageFunctions =  function(read, write) {
 				}
 				
 				me._storagePointer = me._storageLength;
-				return me._storage;
+				return me._storage.substr(oldPointer);
 			}
 		} else {									// block reading
 			this._sandbox.Zotero.read = function(amount) {
