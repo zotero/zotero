@@ -4733,7 +4733,7 @@ REPLACE INTO translators VALUES ('f8765470-5ace-4a31-b4bd-4327b960ccd', '1.0.0b3
 		
 		var urls = new Array();
 		for(var url in items) {
-			urls.push();
+			urls.push(url);
 		}
 	} else {
 		var urls = [url];
@@ -4753,7 +4753,7 @@ REPLACE INTO translators VALUES ('f8765470-5ace-4a31-b4bd-4327b960ccd', '1.0.0b3
 		translator.setString(text);
 		translator.setHandler("itemDone", function(obj, item) {
 			var url = urls.shift();
-			var m = url.match(/http:\/\/[^\/]+\/content\/[^\/]+\//);
+			var m = url.match(/https?:\/\/[^\/]+\/content\/[^\/]+\//);
 			item.attachments = [
 				{url:url, title:"SpringerLink Snapshot", mimeType:"text/html"},
 				{url:m[0]+"fulltext.pdf", title:"SpringerLink Full Text PDF", mimeType:"application/pdf"}
