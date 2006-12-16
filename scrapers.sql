@@ -1,4 +1,4 @@
--- 132
+-- 133
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -4606,6 +4606,100 @@ REPLACE INTO translators VALUES ('cde4428-5434-437f-9cd9-2281d14dbf9', '1.0.0b2.
 	Zotero.wait();
 }');
 
+REPLACE INTO translators VALUES ('cb48083-4d9-4ed-ac95-2e93dceea0ec', '1.0.0b2.r2', '', '2006-12-15 23:31:00', 1, 100, 4, 'Blackwell Synergy', 'Simon Kornblith', '^http://www\.blackwell-synergy\.com/(?:action/doSearch|doi/)', 
+'function detectWeb(doc, url) {
+	if(url.indexOf("doSearch") != -1) {
+		return "multiple";
+	} else {
+		return "journalArticle";
+	}
+}',
+'function doWeb(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	var post = "";
+	
+	var fulltext = new Object();
+	
+	if(url.indexOf("doSearch") != -1) {
+		var items = new Array();
+		var links = new Array();
+		
+		var tableRows = doc.evaluate(''//tr[td/p[@class="maintextbldleft"]]'', doc,
+			nsResolver, XPathResult.ANY_TYPE, null);
+		var tableRow;
+		// Go through table rows
+		while(tableRow = tableRows.iterateNext()) {
+			var id = doc.evaluate(''.//input[@name="doi"]'', tableRow, nsResolver, XPathResult.ANY_TYPE,
+				null).iterateNext().value;
+			items[id] = Zotero.Utilities.cleanString(doc.evaluate(''./td/p[@class="maintextbldleft"]'', tableRow,
+				nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+		}
+		
+		var items = Zotero.selectItems(items);
+		if(!items) return true;
+		
+		// find all fulltext links so we can determine where we can scrape the fulltext article
+		var fulltextLinks = doc.evaluate(''//a[img[@alt="Full Text Article"]]'', doc,
+			nsResolver, XPathResult.ANY_TYPE, null);
+		var fulltextLink;
+		while(fulltextLink = fulltextLinks.iterateNext()) {
+			links.push(fulltextLink.href.toString());
+		}
+		
+		for(var i in items) {
+			post += "doi="+escape(i)+"&";
+			
+			// check for fulltext links
+			for each(var link in links) {
+				if(link.indexOf(i) != -1) {
+					fulltext[i] = true;
+					break;
+				}
+			}
+		}
+	} else {
+		var m = url.match(/https?:\/\/[^\/]+\/doi\/[^\/]+\/([^\?]+)(\?|$)/);
+		var doi = unescape(m[1]);
+		post += "doi="+escape(doi)+"&";
+		
+		if(url.indexOf("doi/full") != -1 ||
+		  doc.evaluate(''//img[@alt="Full Text Article"]'', doc, nsResolver, XPathResult.ANY_TYPE,
+		  null).iterateNext()) {
+			fulltext[doi] = true;
+		}
+	}
+	
+	post += "include=abs&format=refman&direct=on&submit=Download+references";
+	
+	Zotero.Utilities.HTTP.doPost("http://www.blackwell-synergy.com/action/downloadCitation", post, function(text) {
+		// load translator for RIS
+		var translator = Zotero.loadTranslator("import");
+		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+		translator.setString(text);
+		translator.setHandler("itemDone", function(obj, item) {
+			item.attachments = [
+				{url:item.url, title:"Blackwell Synergy Snapshot", mimeType:"text/html"},
+				{url:item.url.replace("/doi/abs", "/doi/pdf"), title:"Blackwell Synergy Full Text PDF", mimeType:"application/pdf"}
+			];
+			// use fulltext if possible
+			if(fulltext[item.DOI.substr(4)]) {
+				item.attachments[0].url = item.attachments[0].url.replace("/doi/abs", "/doi/full");
+			}
+			
+			item.complete();
+		});
+		translator.translate();
+		
+		Zotero.done();
+	});
+		
+	Zotero.wait();
+}');
+
 REPLACE INTO translators VALUES ('e07e9b8c-0e98-4915-bb5a-32a08cb2f365', '1.0.0b2.r2', '', '2006-10-02 17:00:00', 1, 100, 8, 'Open WorldCat', 'Simon Kornblith', 'http://partneraccess.oclc.org/',
 'function detectSearch(item) {
 	if(item.itemType == "book" || item.itemType == "bookSection") {
@@ -6471,7 +6565,7 @@ function doImport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7', '1.0.0b3.r1', '', '2006-12-15 14:07:00', 1, 100, 3, 'RIS', 'Simon Kornblith', 'ris',
+REPLACE INTO translators VALUES ('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7', '1.0.0b3.r1', '', '2006-12-15 23:36:00', 1, 100, 3, 'RIS', 'Simon Kornblith', 'ris',
 'Zotero.configure("dataMode", "line");
 Zotero.addOption("exportNotes", true);
 
@@ -6497,7 +6591,8 @@ function detectImport() {
 	IS:"issue",
 	CP:"place",
 	PB:"publisher",
-	JA:"journalAbbreviation"
+	JA:"journalAbbreviation",
+	M3:"DOI"
 };
 
 var inputFieldMap = {
@@ -6712,7 +6807,7 @@ function doImport(attachments) {
 		// trim leading space if this line is not part of a note
 		line = rawLine.replace(/^\s+/, "");
 		
-		if(line.substr(2, 4) == "  - ") {
+		if(line.substr(2, 4) == "  - " || line == "ER  -") {
 			// if this line is a tag, take a look at the previous line to map
 			// its tag
 			if(tag) {
