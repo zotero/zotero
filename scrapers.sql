@@ -1,4 +1,4 @@
--- 134
+-- 135
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-12-16 01:02:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-12-16 04:13:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b3.r1', '', '2006-12-15 03:40:00', 1, 100, 4, 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -4778,9 +4778,98 @@ REPLACE INTO translators VALUES ('f8765470-5ace-4a31-b4bd-4327b960ccd', '1.0.0b3
 			item.complete();
 		});
 		translator.translate();
+	}, function() { Zotero.done() });
 		
-		Zotero.done();
-	});
+	Zotero.wait();
+}');
+
+REPLACE INTO translators VALUES ('6614a99-479a-4524-8e30-686e4d66663e', '1.0.0b3.r1', '', '2006-12-16 04:13:00', 1, 100, 4, 'Nature', 'Simon Kornblith', '^http://www\.nature\.com/(?:[^/]+/journal/v[^/]+/n[^/]+/(?:(?:full|abs)/.+\.html|index.html)|search/executeSearch)', 
+'function detectWeb(doc, url) {
+	var articleRe = /(https?:\/\/[^\/]+\/[^\/]+\/journal\/v[^\/]+\/n[^\/]+\/)(full|abs)(\/.+\.)html/;
+	
+	if(articleRe.test(url)) {
+		return "journalArticle";
+	} else {
+		var namespace = doc.documentElement.namespaceURI;
+		var nsResolver = namespace ? function(prefix) {
+			if (prefix == ''x'') return namespace; else return null;
+		} : null;
+		
+		var tableRows = doc.evaluate(''//*[@class="atl"] | //*[@class="articletitle"] | //h4[@class="norm"]'',
+			doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var fulltextLinks = doc.evaluate(''//a[text() = "Full Text"] | //a[text() = "Full text"] | //a[text() = "Full Text "]'',
+			doc, nsResolver, XPathResult.ANY_TYPE, null);
+		
+		if(tableRows.iterateNext() && fulltextLinks.iterateNext()) {
+			return "multiple";
+		}
+	}
+	
+	return false;
+}',
+'function doWeb(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	var articleRe = /(https?:\/\/[^\/]+\/[^\/]+\/journal\/v[^\/]+\/n[^\/]+\/)(full|abs)(\/.+\.)html/;
+	var m = articleRe.exec(url);
+	
+	if(!m) {
+		// search page
+		var items = new Array();
+		
+		var tableRows = doc.evaluate(''//*[@class="atl"] | //*[@class="articletitle"] | //h4[@class="norm"]'',
+			doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var fulltextLinks = doc.evaluate(''//a[text() = "Full Text"] | //a[text() = "Full text"] | //a[text() = "Full Text "]'',
+			doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var tableRow, fulltextLink;
+		while((tableRow = tableRows.iterateNext()) && (fulltextLink = fulltextLinks.iterateNext())) {
+			items[fulltextLink.href] = Zotero.Utilities.cleanString(tableRow.textContent);
+		}
+		
+		items = Zotero.selectItems(items);
+		if(!items) return true;
+		
+		var urls = new Array();
+		for(var url in items) {
+			urls.push(url);
+		}
+	} else {
+		var urls = [url];
+	}
+	
+	var RIS = new Array();
+	var regexps = new Array();
+	
+	for each(var item in urls) {
+		var m = articleRe.exec(item);
+		RIS.push(m[1]+"ris"+m[3]+"ris");
+		regexps.push(m);
+	}
+	
+	Zotero.Utilities.HTTP.doGet(RIS, function(text) {
+		var url = urls.shift();
+		
+		// load translator for RIS
+		var translator = Zotero.loadTranslator("import");
+		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+		translator.setString(text);
+		translator.setHandler("itemDone", function(obj, item) {
+			var m = regexps.shift();
+			item.attachments = [
+				{url:m[0], title:"Nature Snapshot", mimeType:"text/html"},
+				{url:m[1]+"pdf"+m[3]+"pdf", title:"Nature Full Text PDF", mimeType:"application/pdf"}
+			]
+			
+			item.notes = new Array();
+			item.date = item.date.replace("print ", "");
+			
+			item.complete();
+		});
+		translator.translate();
+	}, function() { Zotero.done(); });
 		
 	Zotero.wait();
 }');
