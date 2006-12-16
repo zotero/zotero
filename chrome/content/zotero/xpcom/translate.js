@@ -1286,6 +1286,10 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 										title = attachment.document.title;
 									}
 									
+									if(this.locationIsProxied) {
+										attachment.url = Zotero.Ingester.ProxyMonitor.properToProxy(attachment.url);
+									}
+									
 									Zotero.Attachments.importFromURL(attachment.url, myID, title);
 								}
 							}
