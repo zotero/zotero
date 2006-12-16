@@ -1,4 +1,4 @@
--- 135
+-- 136
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-12-16 04:13:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-12-16 16:29:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b3.r1', '', '2006-12-15 03:40:00', 1, 100, 4, 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -4870,6 +4870,103 @@ REPLACE INTO translators VALUES ('6614a99-479a-4524-8e30-686e4d66663e', '1.0.0b3
 		});
 		translator.translate();
 	}, function() { Zotero.done(); });
+		
+	Zotero.wait();
+}');
+
+REPLACE INTO translators VALUES ('92d4ed84-8d0-4d3c-941f-d4b9124cfbb', '1.0.0b2.r2', '', '2006-12-16 16:29:00', 1, 100, 4, 'IEEE Xplore', 'Simon Kornblith', '^http://ieeexplore.ieee.org/(?:[^\?]+\?(?:|.*&)arnumber=[0-9]+|search/(?:searchresult.jsp|selected.jsp))', 
+'function detectWeb(doc, url) {
+	var articleRe = /[?&]arnumber=([0-9]+)/;
+	var m = articleRe.exec(url);
+	
+	if(m) {
+		return "journalArticle";
+	} else {
+		return "multiple";
+	}
+	
+	return false;
+}',
+'function doWeb(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	var articleRe = /[?&]arnumber=([0-9]+)/;
+	var m = articleRe.exec(url);
+	
+	if(!m) {
+		// search page
+		var items = new Array();
+		
+		var tableRows = doc.evaluate(''//table[tbody/tr/td/div/strong]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var tableRow;
+		while(tableRow = tableRows.iterateNext()) {
+			var link = doc.evaluate(''.//a[@class="bodyCopy"]'', tableRow, nsResolver, XPathResult.ANY_TYPE,
+				null).iterateNext().href;
+			
+			var title = "";
+			var strongs = tableRow.getElementsByTagName("strong");
+			for each(var strong in strongs) {
+				if(strong.textContent) {
+					title += strong.textContent+" ";
+				}
+			}
+			
+			items[link] = Zotero.Utilities.cleanString(title);
+		}
+		
+		items = Zotero.selectItems(items);
+		if(!items) return true;
+		
+		var urls = new Array();
+		for(var url in items) {
+			urls.push(url);
+		}
+	} else {
+		var urls = [url];
+	}
+	
+	var arnumber = "";
+	for each(var url in urls) {
+		var m = articleRe.exec(url);
+		arnumber += "%3Carnumber%3E"+m[1]+"%3C%2Farnumber%3E";
+	}
+	
+	var post = "dlSelect=cite_abs&fileFormate=ris&arnumber="+arnumber+"&x=5&y=10";
+	
+	var isRe = /[?&]isnumber=([0-9]+)/;
+	var puRe = /[?&]punumber=([0-9]+)/;
+	
+	Zotero.Utilities.HTTP.doPost("http://ieeexplore.ieee.org/xpls/citationAct", post, function(text) {
+		// load translator for RIS
+		var translator = Zotero.loadTranslator("import");
+		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+		translator.setString(text);
+		translator.setHandler("itemDone", function(obj, item) {
+			var url = urls.shift();
+			Zotero.debug(url);
+			var is = isRe.exec(url);
+			var pu = puRe.exec(url);
+			var arnumber = articleRe.exec(url);
+			
+			if(is && pu) {
+				item.url = "http://ieeexplore.ieee.org/iel5/"+pu[1]+"/"+is[1]+"/"+Zotero.Utilities.lpad(arnumber[1], "0", 8)+".pdf";
+				item.attachments = [{title:"IEEE Xplore Full Text PDF", mimeType:"application/pdf", url:item.url}];
+			}
+			
+			if(item.notes[0] && item.notes[0].note) {
+				item.abstractNote = item.notes[0].note;
+				item.notes = new Array();
+			}
+			
+			item.complete();
+		});
+		translator.translate();
+		
+		Zotero.done();
+	});
 		
 	Zotero.wait();
 }');
