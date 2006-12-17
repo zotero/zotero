@@ -273,6 +273,12 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids)
 			
 			this.selectItem(ids[0]);
 		}
+		// If single item is selected and was modified, reselect
+		// (in case the sort order changed and it went off-screen)
+		else if (action == 'modify' && ids.length == 1 &&
+				savedSelection.length == 1 && savedSelection[0] == ids[0]) {
+			this.selectItem(ids[0]);
+		}
 		else
 		{
 			this.rememberSelection(savedSelection);
