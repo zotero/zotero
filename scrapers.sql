@@ -1,4 +1,4 @@
--- 137
+-- 138
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-11-06 20:20:46'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-12-17 04:33:24'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b3.r1', '', '2006-12-15 03:40:00', 1, 100, 4, 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -4971,7 +4971,7 @@ REPLACE INTO translators VALUES ('92d4ed84-8d0-4d3c-941f-d4b9124cfbb', '1.0.0b2.
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('7bdb79e-a47f-4e3d-b317-ccd5a0a74456', '1.0.0b3r1', '', '2006-11-06 20:20:46', '1', '100', '4', 'Factiva', 'Simon Kornblith', '^http://global\.factiva\.com/ha/default\.aspx$', 
+REPLACE INTO translators VALUES ('7bdb79e-a47f-4e3d-b317-ccd5a0a74456', '1.0.0b3r1', '', '2006-12-17 20:20:46', '1', '100', '4', 'Factiva', 'Simon Kornblith', '^http://global\.factiva\.com/ha/default\.aspx$', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -5093,6 +5093,198 @@ REPLACE INTO translators VALUES ('7bdb79e-a47f-4e3d-b317-ccd5a0a74456', '1.0.0b3
 	});
 		
 	Zotero.wait();
+}');
+
+REPLACE INTO translators VALUES ('82174f4f-8c13-403b-99b2-affc7bc7769b', '1.0.0b3r1', '', '2006-12-17 04:33:24', '1', '100', '4', 'Cambridge Scientific Abstracts', 'Simon Kornblith', 'https?://[^/]+/ids70/(?:results.php|view_record.php)', 
+'function detectWeb(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	if(url.indexOf("/results.php") != -1) {
+		var type = doc.evaluate(''//td[@class="rt_tab_on"]'', doc, nsResolver, XPathResult.ANY_TYPE,
+			null).iterateNext().textContent;
+		
+		if(type.substr(0, 15) == "Published Works") {
+			return "multiple";
+		}
+	} else {
+		// default to journal
+		var itemType = "journalArticle";
+		
+		var type = doc.evaluate(''//tr[td[1][@class="data_heading"]/text() = "Publication Type"]/td[3]'',
+			doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+		if(type) {
+			type = Zotero.Utilities.cleanString(type.textContent);
+			if(type == "Book Chapter") {
+				return "bookSection";
+			} else if(type.substr(0, 4) == "Book") {
+				return "book";
+			} else if(type.substr(0, 12) == "Dissertation") {
+				return "thesis";
+			} else if(type == "Catalog") {
+				return "magazineArticle";
+			}
+		}
+		return "journalArticle";
+	}
+	
+	return false;
+}', 
+'function scrape(doc) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	var itemType = "journalArticle";
+	
+	var type = doc.evaluate(''//tr[td[1][@class="data_heading"]/text() = "Publication Type"]/td[3]'',
+		doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+	if(type) {
+		type = Zotero.Utilities.cleanString(type.textContent);
+		if(type == "Book Chapter") {
+			itemType = "bookSection";
+		} else if(type.substr(0, 4) == "Book") {
+			itemType = "book";
+		} else if(type.substr(0, 12) == "Dissertation") {
+			itemType = "thesis";
+		} else if(type == "Catalog") {
+			itemType = "magazineArticle";
+		}
+	}
+	
+	var newItem = new Zotero.Item(itemType);
+	
+	newItem.attachments = [{document:doc, title:"Cambridge Scientific Abstracts Snapshot"}];
+	newItem.title = Zotero.Utilities.cleanString(doc.evaluate(''//tr/td[3][@class="data_emphasis"]'', doc, nsResolver,
+		XPathResult.ANY_TYPE, null).iterateNext().textContent);
+	
+	var dataRows = doc.evaluate(''//tr[td[3][@class="data_content"]]'', doc, nsResolver,
+		XPathResult.ANY_TYPE, null);
+	var dataRow;
+	while(dataRow = dataRows.iterateNext()) {
+		var tds = dataRow.getElementsByTagName("td");
+		var heading = Zotero.Utilities.cleanString(tds[0].textContent).toLowerCase();
+		var content = Zotero.Utilities.cleanString(tds[2].textContent);
+		
+		if(heading == "database") {
+			newItem.repository = "Cambridge Scientific Abstracts ("+content+")";
+		} else if(heading == "author") {
+			var authors = content.split("; ");
+			for each(var author in authors) {
+				newItem.creators.push(Zotero.Utilities.cleanAuthor(author, "author", true));
+			}
+		} else if(heading == "source") {
+			if(itemType == "journalArticle") {
+				var parts = content.split(",");
+				newItem.publicationTitle = parts.shift();
+				
+				var last = parts.pop();
+				var m = last.match(/([0-9]+)\(([0-9]+)\):([0-9]+)$/);
+				if(m) {
+					newItem.volume = m[1];
+					newItem.issue = m[2];
+					newItem.pages = m[3];
+				}
+				
+				var volMatch = /vol\.? ([0-9]+)/i;
+				var noMatch = /no\.? ([0-9]+)/i;
+				var ppMatch = /pp\.? ([\-0-9]+)/i;
+				
+				for each(var part in parts) {
+					var m = volMatch.exec(part);
+					if(m) {
+						newItem.volume = m[1];
+					} else {
+						var m = noMatch.exec(part);
+						if(m) {
+							newItem.issue = m[1];
+						} else {
+							var m = ppMatch.exec(part);
+							if(m) {
+								newItem.pages = m[1];
+							}
+						}
+					}
+				}
+			} else if(itemType == "book") {
+				var m = content.match(/^([^:]+): ([^,0-9]+)/);
+				if(m) {
+					newItem.place = m[1];
+					newItem.publisher = m[2];
+				}
+			} else if(itemType == "bookSection") {
+				if(content.length > newItem.publicationTitle.length
+				   && content.substr(0, newItem.publicationTitle.length) == newItem.publicationTitle) {
+					var m = content.match(/\)\. ([^:]+): ([^,0-9]+)/);
+					if(m) {
+						newItem.place = m[1];
+						newItem.publisher = m[2];
+					}
+					var m = content.match(/\(pp. ([\-0-9]+)\)/);
+					if(m) newItem.pages = m[1];
+				}
+			}
+		} else if(heading == "monograph title") {
+			newItem.publicationTitle = content;
+		} else if(heading == "series title") {
+			newItem.seriesTitle = content;
+		} else if(heading == "issn") {
+			newItem.ISSN = content;
+		} else if(heading == "isbn") {
+			newItem.ISBN = content;
+		} else if(heading == "abstract") {
+			newItem.abstractNote = content;
+		} else if(heading == "notes") {
+			newItem.extra = content;
+		} else if(heading == "publication year") {
+			if(!newItem.date) newItem.date = content;
+		} else if(heading == "information provider") {
+			if(content.substr(0, 19) == "http://dx.doi.org/") {
+				newItem.DOI = content.substr(19);
+			}
+		} else if(heading == "journal volume") {
+			newItem.volume = content;
+		} else if(heading == "journal pages") {
+			newItem.pages = content;
+		} else if(heading == "journal issue") {
+			newItem.issue = content;
+		} else if(heading == "affiliation") {
+			if(newItem.itemType == "thesis") {
+				newItem.publisher = content;
+			}
+		}
+	}
+	
+	var terms = doc.evaluate(''//input[substring(@name, 1, 4) = "term"]'', doc, nsResolver,
+		XPathResult.ANY_TYPE, null);
+	var term;
+	while(term = terms.iterateNext()) {
+		newItem.tags.push(term.value.replace(/ [0-9]{3,}$/, ""));
+	}
+	
+	newItem.complete();
+}
+
+function doWeb(doc, url) {
+	if(url.indexOf("/results.php") != -1) {
+		var items = Zotero.Utilities.getItemArray(doc, doc, ''/view_record\.php\?'', ''^(?:View Record|More\.{3})$'');
+		
+		items = Zotero.selectItems(items);
+		if(!items) return true;
+		
+		var urls = new Array();
+		for(var url in items) {
+			urls.push(url);
+		}
+		
+		Zotero.Utilities.processDocuments(urls, scrape, function() { Zotero.done() })
+		Zotero.wait();
+	} else {
+		scrape(doc);
+	}
 }');
 
 REPLACE INTO translators VALUES ('e07e9b8c-0e98-4915-bb5a-32a08cb2f365', '1.0.0b2.r2', '', '2006-10-02 17:00:00', 1, 100, 8, 'Open WorldCat', 'Simon Kornblith', 'http://partneraccess.oclc.org/',
