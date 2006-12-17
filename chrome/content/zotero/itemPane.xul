@@ -28,7 +28,7 @@
 	
 	<script src="itemPane.js"/>	
 	<deck id="zotero-view-item" flex="1" onselect="if (this.selectedIndex!==''){ ZoteroItemPane.loadPane(this.selectedIndex) }">
-			<vbox id="zotero-info" flex="1">
+			<scrollbox id="zotero-info" flex="1" orient="vertical" style="overflow:auto">
 				<popupset>
 					<popup id="zotero-creator-type-menu" position="after_start"
 						oncommand="var otherFields = ZoteroItemPane.getCreatorFields(document.popupNode.parentNode);
@@ -40,11 +40,18 @@
 								'typeID', typeID, otherFields)"/>
 				</popupset>
 				<hbox align="center">
-					<button id="zotero-tb-go-to-url" label="&zotero.toolbar.goToURL.label;" tooltiptext="&zotero.toolbar.goToURL.tooltip;" flex="1" oncommand="window.loadURI(this.getAttribute('viewURL'))" disabled="false"/>
-					<button id="zotero-tb-openurl" label="&zotero.toolbar.openURL.label;" tooltiptext="&zotero.toolbar.openURL.tooltip;" flex="1" oncommand="ZoteroItemPane.onOpenURLClick();"/>
+					<button id="zotero-tb-go-to-url" label="&zotero.toolbar.goToURL.label;"
+						onfocus="ZoteroItemPane.ensureElementIsVisible(this)"
+						tooltiptext="&zotero.toolbar.goToURL.tooltip;" flex="1"
+						oncommand="window.loadURI(this.getAttribute('viewURL'))" disabled="false"/>
+					<button id="zotero-tb-openurl" label="&zotero.toolbar.openURL.label;"
+						tooltiptext="&zotero.toolbar.openURL.tooltip;" flex="1"
+						onfocus="ZoteroItemPane.ensureElementIsVisible(this)"
+						oncommand="ZoteroItemPane.onOpenURLClick();"/>
 				</hbox>
 				<hbox align="center">
 					<menulist id="zotero-editpane-type-menu" oncommand="ZoteroItemPane.changeTypeTo(this.value)" flex="1"
+						onfocus="ZoteroItemPane.ensureElementIsVisible(this)"
 						onkeypress="if (event.keyCode == event.DOM_VK_TAB){ if (!event.shiftKey) { ZoteroItemPane.focusFirstField('info'); event.preventDefault(); } }">
 						<menupopup/>
 					</menulist>
@@ -56,7 +63,7 @@
 					</columns>
 					<rows id="zotero-editpane-dynamic-fields" flex="1"/>
 				</grid>
-			</vbox>
+			</scrollbox>
 			<vbox flex="1">
 				<hbox align="center">
 					<label id="zotero-editpane-notes-label"/>

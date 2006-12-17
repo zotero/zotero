@@ -53,6 +53,8 @@ var ZoteroItemPane = new function()
 	
 	this.onLoad = onLoad;
 	this.viewItem = viewItem;
+	this.scrollToTop = scrollToTop;
+	this.ensureElementIsVisible = ensureElementIsVisible;
 	this.loadPane = loadPane;
 	this.changeTypeTo = changeTypeTo;
 	this.onOpenURLClick = onOpenURLClick;
@@ -119,6 +121,9 @@ var ZoteroItemPane = new function()
 				// Info
 				case 0:
 					var boxes = _dynamicFields.getElementsByTagName('textbox');
+					
+					// When coming from another element, scroll pane to top
+					scrollToTop();
 					break;
 					
 				// Tags
@@ -413,6 +418,21 @@ var ZoteroItemPane = new function()
 			_focusNextField(focusMode, focusBox, _lastTabIndex, _tabDirection==-1);
 		}
 	}
+	
+	
+	function scrollToTop() {
+		var sbo = document.getElementById('zotero-info').boxObject;
+		sbo.QueryInterface(Components.interfaces.nsIScrollBoxObject);
+		sbo.scrollTo(0,0);
+	}
+	
+	
+	function ensureElementIsVisible(elem) {
+		var sbo = document.getElementById('zotero-info').boxObject;
+		sbo.QueryInterface(Components.interfaces.nsIScrollBoxObject);
+		sbo.ensureElementIsVisible(elem);
+	}
+	
 	
 	function changeTypeTo(id)
 	{
@@ -1169,6 +1189,10 @@ var ZoteroItemPane = new function()
 			}
 			_focusNextField(focusMode, focusBox, _lastTabIndex, _tabDirection==-1);
 		}
+		// If not tab, return focus to items pane
+		else {
+			document.getElementById('zotero-items-tree').focus();
+		}
 	}
 	
 	function modifyField(field, value)
@@ -1466,6 +1490,7 @@ var ZoteroItemPane = new function()
 		}
 		
 		next[0].click();
+		ensureElementIsVisible(next[0]);
 		return true;
 	}
 }
