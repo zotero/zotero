@@ -35,6 +35,7 @@ var ZoteroItemPane = new function()
 	var _loaded;
 	
 	var _itemBeingEdited;
+	var _activeScrollbox;
 	
 	var _lastTabIndex;
 	var _tabDirection;
@@ -165,6 +166,8 @@ var ZoteroItemPane = new function()
 		// Info pane
 		if(index == 0)
 		{
+			_activeScrollbox = document.getElementById('zotero-info');
+			
 			// Enable/disable "View =>" button
 			testView: try
 			{
@@ -400,6 +403,7 @@ var ZoteroItemPane = new function()
 		// Tags pane
 		else if(index == 3)
 		{
+			_activeScrollbox = document.getElementById('zotero-editpane-tags').getScrollBox();
 			var focusMode = 'tags';
 			var focusBox = _tagsBox;
 			_tagsBox.item = _itemBeingEdited;
@@ -421,14 +425,20 @@ var ZoteroItemPane = new function()
 	
 	
 	function scrollToTop() {
-		var sbo = document.getElementById('zotero-info').boxObject;
+		if (!_activeScrollbox) {
+			return;
+		}
+		var sbo = _activeScrollbox.boxObject;
 		sbo.QueryInterface(Components.interfaces.nsIScrollBoxObject);
 		sbo.scrollTo(0,0);
 	}
 	
 	
 	function ensureElementIsVisible(elem) {
-		var sbo = document.getElementById('zotero-info').boxObject;
+		if (!_activeScrollbox) {
+			return;
+		}
+		var sbo = _activeScrollbox.boxObject;
 		sbo.QueryInterface(Components.interfaces.nsIScrollBoxObject);
 		sbo.ensureElementIsVisible(elem);
 	}
@@ -1189,8 +1199,9 @@ var ZoteroItemPane = new function()
 			}
 			_focusNextField(focusMode, focusBox, _lastTabIndex, _tabDirection==-1);
 		}
-		// If not tab, return focus to items pane
-		else {
+		// If not tab and not new tag, return focus to items pane
+		// DEBUG: is this the best place for this?
+		else if (focusMode != 'tags') {
 			document.getElementById('zotero-items-tree').focus();
 		}
 	}

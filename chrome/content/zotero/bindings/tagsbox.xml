@@ -102,7 +102,7 @@
 							if (this.id('tagRows').lastChild)
 							{
 								tabindex = parseInt(this.id('tagRows').lastChild.
-									firstChild.nextSibling.getAttribute('tabindex')) + 1;
+									firstChild.nextSibling.getAttribute('ztabindex')) + 1;
 							}
 							else {
 								tabindex = 1;
@@ -121,7 +121,7 @@
 						remove.setAttribute('class','zotero-clicky');
 						if (id)
 						{
-							remove.setAttribute('tabindex', -1);
+							remove.setAttribute('ztabindex', -1);
 							remove.setAttribute('onclick',"this.parentNode.parentNode.parentNode.parentNode.parentNode.remove('"+id+"');");
 						}
 						else
@@ -246,9 +246,16 @@
 					]]>
 				</body>
 			</method>
+			<method name="getScrollBox">
+				<body>
+					<![CDATA[
+						return document.getAnonymousNodes(this)[0];
+					]]>
+				</body>
+			</method>
 		</implementation>
 		<content>
-			<xul:vbox xbl:inherits="flex">
+			<xul:scrollbox xbl:inherits="flex" orient="vertical" style="overflow:auto">
 				<xul:hbox align="center">
 					<xul:label id="tagsNum"/>
 					<xul:button label="&zotero.item.add;" oncommand="this.parentNode.parentNode.parentNode.new();"/>
@@ -261,7 +268,7 @@
 					</xul:columns>
 					<xul:rows id="tagRows"/>
 				</xul:grid>
-			</xul:vbox>
+			</xul:scrollbox>
 		</content>
 	</binding>
 </bindings>

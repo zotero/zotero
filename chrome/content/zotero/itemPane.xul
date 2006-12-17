@@ -97,7 +97,7 @@
 					<rows id="zotero-editpane-dynamic-attachments" flex="1"/>
 				</grid>
 			</vbox>
-			<tagsbox id="zotero-editpane-tags" flex="1" style="overflow:auto"/>
+			<tagsbox id="zotero-editpane-tags" flex="1"/>
 			<seealsobox id="zotero-editpane-related" flex="1"/>
 	</deck>
 </overlay>
