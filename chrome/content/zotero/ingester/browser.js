@@ -127,7 +127,7 @@ Zotero_Ingester_Interface.scrapeThisPage = function(saveLocation) {
 Zotero_Ingester_Interface.searchFrames = function(rootDoc, searchDoc) {
 	for each(var frame in rootDoc.frames) {
 		if(frame.document == searchDoc ||
-		   (frame.document.frames && searchFrames(frame, searchDoc))) {
+		   (frame.document.frames && searchFrames(frame.document, searchDoc))) {
 			return true;
 		}
 	}
