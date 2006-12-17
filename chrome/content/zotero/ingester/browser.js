@@ -303,6 +303,7 @@ Zotero_Ingester_Interface.showPopup = function(collectionID, parentElement) {
  * from Zotero.Translate.getTranslator()
  */
 Zotero_Ingester_Interface._getData = function(browser) {
+	if(!browser) return false;
 	try {
 		var key = browser.getAttribute("zotero-key");
 		if(Zotero_Ingester_Interface.browserData[key]) {
