@@ -1,4 +1,4 @@
--- 139
+-- 140
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-12-17 04:51:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-12-17 06:44:14'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b3.r1', '', '2006-12-15 03:40:00', 1, 100, 4, 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -5287,6 +5287,104 @@ function doWeb(doc, url) {
 	}
 }');
 
+REPLACE INTO translators VALUES ('e78d20f7-488-4023-831-dfe39679f3f', '1.0.0b3r1', '', '2006-12-17 06:44:14', '1', '100', '4', 'ACM', 'Simon Kornblith', '^http://portal\.acm\.org/(?:results\.cfm|citation\.cfm)', 
+'function detectWeb(doc, url) {
+	if(url.indexOf("/results.cfm") != -1) {
+		var items = Zotero.Utilities.getItemArray(doc, doc, ''^https?://[^/]+/citation.cfm\\?[^#]+$'');
+		// hack to return multiple if there are items
+		for(var i in items) {
+			return "multiple";
+		}
+	} else {
+		var onClick = doc.evaluate(''//a[substring(text(), 5, 7) = "EndNote"]'', doc, null, XPathResult.ANY_TYPE,
+			null).iterateNext().getAttribute("onClick");
+		if(onClick.match("proceeding.article")) {
+			return "conferencePaper";
+		} else {
+			return "journalArticle";
+		}
+	}
+}', 
+'var urls = new Array();
+
+// this handles sequential loading, since first we need to process a document (to get the abstract), then
+// get the Refer metadata, then process the next document, etc.
+function getNext() {
+	if(urls.length) {
+		var url = urls.shift();
+		Zotero.Utilities.processDocuments([url], function(doc) { scrape(doc); });
+	} else {
+		Zotero.done();
+	}
+}
+
+function scrape(doc) {
+	var onClick = doc.evaluate(''//a[substring(text(), 5, 7) = "EndNote"]'', doc, null, XPathResult.ANY_TYPE,
+		null).iterateNext().getAttribute("onClick");
+	var m = onClick.match(/''([^'']+)''/);
+	
+	var abstract = doc.evaluate(''//div[@class="abstract"]/p[@class="abstract"]'', doc, null,
+		XPathResult.ANY_TYPE, null).iterateNext();
+	if(abstract) abstract = Zotero.Utilities.cleanString(abstract.textContent);
+	
+	var snapshot = doc.location.href;
+	
+	var attachments = new Array();
+	var url;
+	var typeLinks = doc.evaluate(''//td[@class="smaller-text"]/a[img]'', doc, null,
+		XPathResult.ANY_TYPE, null);
+	var typeLink;
+	while(typeLink = typeLinks.iterateNext()) {
+		var linkText = typeLink.textContent.toLowerCase();
+		if(linkText == "pdf") {
+			attachments.push({title:"ACM Full Text PDF", mimeType:"application/pdf", url:typeLink.href});
+			url = typeLink.href;
+		} else if(linkText == "html") {
+			url = snapshot = typeLink.href;
+		}
+	}
+	
+	attachments.push({title:"ACM Snapshot", mimeType:"text/html", url:snapshot});
+	
+	Zotero.Utilities.HTTP.doGet("http://portal.acm.org/"+m[1], function(text) {
+		var m = text.split(/<\/?pre[^>]*>/ig);
+		var text = m[1];
+		
+		// load Refer translator
+		var translator = Zotero.loadTranslator("import");
+		translator.setTranslator("881f60f2-0802-411a-9228-ce5f47b64c7d");
+		translator.setString(text);
+		translator.setHandler("itemDone", function(obj, item) {
+			if(abstract) item.abstractNote = abstract;
+			item.attachments = attachments;
+			item.type = undefined;
+			item.complete();
+		});
+		translator.translate();
+		
+		getNext();
+	});
+}
+
+function doWeb(doc, url) {
+	if(url.indexOf("/results.cfm") != -1) {
+		var items = Zotero.Utilities.getItemArray(doc, doc, ''^https?://[^/]+/citation.cfm\\?[^#]+$'');
+		
+		items = Zotero.selectItems(items);
+		if(!items) return true;
+		
+		for(var url in items) {
+			urls.push(url);
+		}
+		
+		getNext();
+	} else {
+		scrape(doc);
+	}
+	
+	Zotero.wait();
+}');
+
 REPLACE INTO translators VALUES ('e07e9b8c-0e98-4915-bb5a-32a08cb2f365', '1.0.0b2.r2', '', '2006-10-02 17:00:00', 1, 100, 8, 'Open WorldCat', 'Simon Kornblith', 'http://partneraccess.oclc.org/',
 'function detectSearch(item) {
 	if(item.itemType == "book" || item.itemType == "bookSection") {
@@ -7542,7 +7640,7 @@ function doExport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('881f60f2-0802-411a-9228-ce5f47b64c7d', '1.0.0b3.r1', '', '2006-10-02 17:00:00', 1, 100, 3, 'Refer/BibIX', 'Simon Kornblith', 'txt',
+REPLACE INTO translators VALUES ('881f60f2-0802-411a-9228-ce5f47b64c7d', '1.0.0b3.r1', '', '2006-12-17 06:25:00', 1, 100, 3, 'Refer/BibIX', 'Simon Kornblith', 'txt',
 'Zotero.configure("dataMode", "line");
 
 function detectImport() {
@@ -7601,7 +7699,8 @@ var typeMap = {
 	interview:"Personal Communication",
 	film:"Audiovisual Material",
 	artwork:"Artwork",
-	webpage:"Electronic Source"
+	webpage:"Electronic Source",
+	conferencePaper:"Conference Paper"
 };
 
 // supplements outputTypeMap for importing
@@ -7613,13 +7712,13 @@ var inputTypeMap = {
 var isEndNote = false;
 
 function processTag(item, tag, value) {
+	value = Zotero.Utilities.cleanString(value);
+	
 	if(fieldMap[tag]) {
 		item[fieldMap[tag]] = value;
 	} else if(inputFieldMap[tag]) {
 		item[inputFieldMap[tag]] = value;
 	} else if(tag == "0") {
-		// EndNote type
-		isEndNote = true;
 		// first check typeMap
 		for(var i in typeMap) {
 			if(value == typeMap[i]) {
@@ -7644,12 +7743,7 @@ function processTag(item, tag, value) {
 			var type = "translator";
 		}
 		
-		// use comma only if EndNote format
-		if(isEndNote) {
-			item.creators.push(Zotero.Utilities.cleanAuthor(value, type, true));
-		} else {
-			item.creators.push(Zotero.Utilities.cleanAuthor(value, type));
-		}
+		item.creators.push(Zotero.Utilities.cleanAuthor(value, type, value.indexOf(",") != -1));
 	} else if(tag == "Q") {
 		item.creators.push({creatorType:"author", lastName:value, fieldMode:true});
 	} else if(tag == "H" || tag == "O") {
