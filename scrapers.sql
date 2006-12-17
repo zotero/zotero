@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-12-17 06:44:14'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-12-17 07:22:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b3.r1', '', '2006-12-15 03:40:00', 1, 100, 4, 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -555,7 +555,7 @@ REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('d921155f-0186-1684-615c-ca57682ced9b', '1.0.0b3.r1', '', '2006-12-14 14:24:00', 1, 100, 4, 'JSTOR', 'Simon Kornblith', '^https?://www\.jstor\.org/(?:view|browse|search/)', 
+REPLACE INTO translators VALUES ('d921155f-0186-1684-615c-ca57682ced9b', '1.0.0b3.r1', '', '2006-12-17 07:22:00', 1, 100, 4, 'JSTOR', 'Simon Kornblith', '^https?://www\.jstor\.org/(?:view|browse|search/|cgi-bin/jstor/viewitem)', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -563,7 +563,7 @@ REPLACE INTO translators VALUES ('d921155f-0186-1684-615c-ca57682ced9b', '1.0.0b
 	} : null;
 	
 	// See if this is a seach results page
-	if(doc.title == "JSTOR: Search Results") {
+	if(doc.title == "JSTOR: Search Results" || url.indexOf("/browse/") != -1) {
 		return "multiple";
 	}
 	
@@ -661,6 +661,31 @@ function doWeb(doc, url) {
 		for(var i in items) {
 			viewPages.push(tableView[i]);
 			saveCitations.push(tableSave[i].replace(''citationAction=remove'', ''citationAction=save''));
+		}
+	} else if(url.indexOf("/browse/") != -1) {
+		var tableView = new Object();
+		var items = new Object();
+		
+		var articleTitle, viewPage;
+		var links = doc.evaluate("//a", doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var link;
+		// get article and save citation links
+		while(link = links.iterateNext()) {
+			if(link.href.indexOf("/view/") != -1) {
+				articleTitle = link.textContent;
+				viewPage = link.href;
+			} else if(link.href.indexOf("citationAction=") != -1) {
+				items[link.href] = articleTitle;
+				tableView[link.href] = viewPage;
+			}
+		}
+		
+		var items = Zotero.selectItems(items);
+		if(!items) return true;
+		
+		for(var i in items) {
+			viewPages.push(tableView[i]);
+			saveCitations.push(i.replace(''citationAction=remove'', ''citationAction=save''));
 		}
 	} else {
 		// If this is a view page, find the link to the citation
