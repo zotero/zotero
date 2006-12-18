@@ -125,9 +125,11 @@ Zotero_Ingester_Interface.scrapeThisPage = function(saveLocation) {
 }
 
 Zotero_Ingester_Interface.searchFrames = function(rootDoc, searchDoc) {
-	for each(var frame in rootDoc.frames) {
-		if(frame.document == searchDoc ||
-		   (frame.document.frames && searchFrames(frame.document, searchDoc))) {
+	var frames = rootDoc.getElementsByTagName("frame");
+	for each(var frame in frames) {
+		if(frame.contentDocument &&
+		  (frame.contentDocument == searchDoc ||
+		  Zotero_Ingester_Interface.searchFrames(frame.contentDocument, searchDoc))) {
 			return true;
 		}
 	}
@@ -171,6 +173,7 @@ Zotero_Ingester_Interface.contentLoad = function(event) {
 		// if there's already a scrapable page in the browser window, and it's
 		// still there, ensure it is actually part of the page, then return
 		if(data.translators && data.translators.length && data.document.location) {
+			Zotero.debug("already scrapable?");
 			if(Zotero_Ingester_Interface.searchFrames(rootDoc, data.document)) {
 				return;
 			} else {
