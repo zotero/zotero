@@ -1,4 +1,4 @@
--- 141
+-- 144
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-12-17 07:31:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-12-17 21:49:18'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b3.r1', '', '2006-12-15 03:40:00', 1, 100, 4, 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -5406,6 +5406,155 @@ function doWeb(doc, url) {
 	} else {
 		scrape(doc);
 	}
+	
+	Zotero.wait();
+}');
+
+REPLACE INTO translators VALUES ('21ad38-3830-4836-aed7-7b5c2dbfa740', '1.0.0b3r1', '', '2006-12-17 21:49:18', '1', '100', '4', 'ISI Web of Science', 'Simon Kornblith', '^http://[^/]+/WoS/CIW\.cgi', 
+'function detectWeb(doc, url) {
+	if(doc.title.substr(0, 11) == "Full Record") {
+		return "journalArticle";
+	} else if(doc.title.substr(0, 14) == "Search Results") {
+		return "multiple";
+	}
+	
+	return false;
+}', 
+'function doWeb(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	var urls = null;
+	var post = "";
+	
+	// get form action
+	var formAction = doc.getElementsByTagName("form")[0].action;
+	
+	// get hidden fields to add to post string
+	var hiddenFields = doc.evaluate(''//input[@type="hidden"]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+	var hiddenField;
+	while(hiddenField = hiddenFields.iterateNext()) {
+		post += "&"+hiddenField.name+"="+encodeURIComponent(hiddenField.value);
+	}
+	
+	if(doc.title.substr(0, 14) == "Search Results") {
+		var items = new Array();
+		var links = new Array();
+		
+		var tableRows = doc.evaluate(''//tr[substring(@id, 1, 7) = "RECORD_"]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var tableRow;
+		while(tableRow = tableRows.iterateNext()) {
+			var id = tableRow.getElementsByTagName("input")[0].value;
+			var link = tableRow.getElementsByTagName("a")[0];
+			items[id] = link.textContent;
+			links[id] = link.href;
+		}
+		
+		items = Zotero.selectItems(items);
+		if(!items) return true;
+		
+		var urls = new Array();
+		for(var code in items) {
+			post += "&marked_list_candidates="+encodeURIComponent(code);
+			urls.push(links[id]);
+		}
+		post += "&mark_selection=selected_records&Export.x=10&Export.y=10";
+	} else {
+		post += "&ExportOne.x=10&ExportOne.y=10"
+	}
+	
+	post = post.substr(1)+"&fields=FullNoCitRef";
+	
+	Zotero.Utilities.HTTP.doPost(formAction, post, function(text) {
+		var m = text.match(/<a href="(uml_view.cgi[^"]+)">/);
+		var newURL = "http://portal.isiknowledge.com/uml/"+m[1];
+		Zotero.Utilities.HTTP.doGet(newURL, function(text) {
+			var lines = text.split("\n");
+			
+			var fieldRe = /^[A-Z0-9]{2}(?: |$)/;
+			var field, content, item;
+			
+			for each(var line in lines) {
+				if(fieldRe.test(line)) {
+					if(item && field && content) {
+						if(field == "AF") {
+							// returns need to be processed separately when dealing with authors
+							var authors = content.split("\n");
+							for each(var author in authors) {
+								item.creators.push(Zotero.Utilities.cleanAuthor(author, "author", true));
+							}
+						} else {
+							content = content.replace(/\n/g, " ");
+							if(field == "TI") {
+								item.title = content;
+							} else if(field == "SO") {
+								item.publicationTitle = content;
+							} else if(field == "DE" || field == "ID" || field == "SC") {
+								item.tags = item.tags.concat(content.split("; "));
+							} else if(field == "AB") {
+								item.abstractNote = content;
+							} else if(field == "PB") {
+								item.publisher = content;
+							} else if(field == "PI") {
+								item.place = content;
+							} else if(field == "SN") {
+								item.ISSN = content;
+							} else if(field == "JI") {
+								item.journalAbbreviation = content;
+							} else if(field == "PD") {
+								if(item.date) {
+									item.date = content+" "+item.date;
+								} else {
+									item.date = content;
+								}
+							} else if(field == "PY") {
+								if(item.date) {
+									item.date += " "+content;
+								} else {
+									item.date = content;
+								}
+							} else if(field == "VL") {
+								item.volume = content;
+							} else if(field == "IS") {
+								item.issue = content;
+							} else if(field == "BP") {
+								item.pages = content;
+							} else if(field == "EP") {
+								if(!item.pages) {
+									item.pages = content;
+								} else if(item.pages != content) {
+									item.pages += "-"+content;
+								}
+							}
+						}
+					}
+					
+					var field = line.substr(0, 2);
+					var content = Zotero.Utilities.cleanString(line.substr(3));
+					if(field == "PT") {
+						// theoretically, there could be book types, but I don''t know what the codes
+						// are and Thomson is unlikely to help me figure that out
+						item = new Zotero.Item("journalArticle");
+						if(urls) {
+							item.attachments = [{title:"ISI Web of Science Snapshot", url:urls.shift(), mimeType:"text/html"}];
+						} else {
+							item.attachments = [{title:"ISI Web of Science Snapshot", document:doc}];
+						}
+						field = content = undefined;
+					} else if(field == "ER") {
+						item.complete();
+						item = field = content = undefined;
+					}
+				} else {
+					content += "\n"+Zotero.Utilities.cleanString(line);
+				}
+				
+				Zotero.done();
+			}
+		});
+	});
 	
 	Zotero.wait();
 }');

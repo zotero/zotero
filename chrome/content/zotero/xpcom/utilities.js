@@ -442,7 +442,7 @@ Zotero.Utilities.Ingester.HTTP.prototype.doGet = function(urls, processor, done)
 	});
 }
 
-Zotero.Utilities.Ingester.HTTP.prototype.doPost = function(url, body, onDone) {
+Zotero.Utilities.Ingester.HTTP.prototype.doPost = function(url, body, onDone, contentType) {
 	if(this.translate.locationIsProxied) {
 		url = Zotero.Ingester.ProxyMonitor.properToProxy(url);
 	}
@@ -457,7 +457,7 @@ Zotero.Utilities.Ingester.HTTP.prototype.doPost = function(url, body, onDone) {
 		} catch(e) {
 			translate._translationComplete(false, e);
 		}
-	})
+	}, contentType);
 }
 
 // These are front ends for XMLHttpRequest. XMLHttpRequest can't actually be
@@ -508,7 +508,7 @@ Zotero.Utilities.HTTP = new function() {
 	* doPost can be called as:
 	* Zotero.Utilities.HTTP.doPost(url, body, onDone)
 	**/
-	function doPost(url, body, onDone) {
+	function doPost(url, body, onDone, contentType) {
 		Zotero.debug("HTTP POST "+body+" to "+url);
 		if (this.browserIsOffline()){
 			return false;
@@ -518,7 +518,7 @@ Zotero.Utilities.HTTP = new function() {
 					.createInstance();
 		
 		xmlhttp.open('POST', url, true);
-		xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+		xmlhttp.setRequestHeader("Content-Type", (contentType ? contentType : "application/x-www-form-urlencoded" ));
 		
 		xmlhttp.onreadystatechange = function(){
 			_stateChange(xmlhttp, onDone);
