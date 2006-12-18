@@ -1,4 +1,4 @@
--- 145
+-- 146
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-12-18 01:28:04'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-12-18 06:00:45'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b3.r1', '', '2006-12-15 03:40:00', 1, 100, 4, 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -1598,14 +1598,37 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('6773a9af-5375-3224-d148-d32793884dec', '1.0.0b3.r1', '', '2006-12-11 18:04:00', 1, 100, 4, 'InfoTrac College Edition', 'Simon Kornblith', '^http://infotrac-college\.thomsonlearning\.com/itw/infomark/',
+REPLACE INTO translators VALUES ('6773a9af-5375-3224-d148-d32793884dec', '1.0.0b3.r1', '', '2006-12-18 06:00:45', '1', '100', '4', 'InfoTrac', 'Simon Kornblith', '^https?://[^/]+/itw/infomark/', 
 'function detectWeb(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	// ensure that there is an InfoTrac logo
+	if(!doc.evaluate(''//img[substring(@alt, 1, 8) = "InfoTrac"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) return false;
+	
 	if(doc.title.substring(0, 8) == "Article ") {
+		var genre = doc.evaluate(''//comment()[substring(., 1, 6) = " Genre"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+		
+		if(genre) {
+			var value = Zotero.Utilities.cleanString(genre.nodeValue.substr(7));
+			if(value == "article") {
+				return "journalArticle";
+			} else if(value == "book") {
+				return "book";
+			} else if(value == "dissertation") {
+				return "thesis";
+			} else if(value == "bookitem") {
+				return "bookSection";
+			}
+		}
+		
 		return "magazineArticle";
 	} else if(doc.title.substring(0, 10) == "Citations ") {
 		return "multiple";
 	}
-}',
+}', 
 'function extractCitation(url, elmts, title, doc) {
 	var newItem = new Zotero.Item();
 	newItem.url = url;
@@ -1676,7 +1699,42 @@ REPLACE INTO translators VALUES ('6773a9af-5375-3224-d148-d32793884dec', '1.0.0b
 				newItem.date = date.substring(1);
 			}
 		} else if(field == "author") {
-			newItem.creators.push(Zotero.Utilities.cleanAuthor(value, "author", true));
+			var author = Zotero.Utilities.cleanAuthor(value, "author", true);
+			
+			// ensure author is not already there
+			var add = true;
+			for each(var existingAuthor in newItem.creators) {
+				if(existingAuthor.firstName == author.firstName && existingAuthor.lastName == author.lastName) {
+					add = false;
+					break;
+				}
+			}
+			if(add) newItem.creators.push(author);
+		} else if(field == "issue") {
+			newItem.issue = value;
+		} else if(field == "volume") {
+			newItem.volume = value;
+		} else if(field == "issn") {
+			newItem.ISSN = value;
+		} else if(field == "gjd") {
+			var m = value.match(/\(([0-9]{4}[^\)]*)\)(?:, pp\. ([0-9\-]+))?/);
+			if(m) {
+				newItem.date = m[1];
+				newItem.pages = m[2];
+			}
+		} else if(field == "BookTitle") {
+			newItem.publicationTitle = value;
+		} else if(field == "genre") {
+			value = value.toLowerCase();
+			if(value == "article") {
+				newItem.itemType = "journalArticle";
+			} else if(value == "book") {
+				newItem.itemType = "book";
+			} else if(value == "dissertation") {
+				newItem.itemType = "thesis";
+			} else if(value == "bookitem") {
+				newItem.itemType = "bookSection";
+			}
 		}
 	}
 	
@@ -1706,6 +1764,8 @@ function doWeb(doc, url) {
 		var uris = new Array();
 		var elmts = new Array();
 		
+		var host = doc.location.href.match(/^https?:\/\/[^\/]+/)[0];
+		
 		var tableRows = doc.evaluate(''/html/body//table/tbody/tr/td[a/b]'', doc, nsResolver,
 		                             XPathResult.ANY_TYPE, null);
 		var tableRow;
@@ -1716,7 +1776,7 @@ function doWeb(doc, url) {
 			var link = doc.evaluate(''./a'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 			var m = javaScriptRe.exec(link.href);
 			if(m) {
-				uris[i] = "http://infotrac-college.thomsonlearning.com/itw/infomark/192/215/90714844w6"+m[1]+"?sw_aep=olr_wad"+m[2];
+				uris[i] = host+"/itw/infomark/192/215/90714844w6"+m[1]+"?sw_aep=olr_wad"+m[2];
 			}
 			var article = doc.evaluate(''./b/text()'', link, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 			items[i] = article.nodeValue;
