@@ -1,4 +1,4 @@
--- 144
+-- 145
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-12-17 21:49:18'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-12-18 01:28:04'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b3.r1', '', '2006-12-15 03:40:00', 1, 100, 4, 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -5410,8 +5410,20 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('21ad38-3830-4836-aed7-7b5c2dbfa740', '1.0.0b3r1', '', '2006-12-17 21:49:18', '1', '100', '4', 'ISI Web of Science', 'Simon Kornblith', '^http://[^/]+/WoS/CIW\.cgi', 
+REPLACE INTO translators VALUES ('21ad38-3830-4836-aed7-7b5c2dbfa740', '1.0.0b3r1', '', '2006-12-18 01:28:04', '1', '100', '4', 'ISI Web of Knowledge', 'Simon Kornblith', '^https?://[^/]+/(?:[^/]+/CIW\.cgi|portal\.cgi)', 
 'function detectWeb(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	// require a link to Thomson at the bottom, to weed out other CGIs that
+	// happen to be called CIW.cgi
+	if(!doc.evaluate(''//p[@class="copyright"]/a[@href="http://www.thomson.com/scientific/scientific.jsp"]'',
+		doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+		return false;
+	}
+	
 	if(doc.title.substr(0, 11) == "Full Record") {
 		return "journalArticle";
 	} else if(doc.title.substr(0, 14) == "Search Results") {
@@ -5420,51 +5432,7 @@ REPLACE INTO translators VALUES ('21ad38-3830-4836-aed7-7b5c2dbfa740', '1.0.0b3r
 	
 	return false;
 }', 
-'function doWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == ''x'') return namespace; else return null;
-	} : null;
-	
-	var urls = null;
-	var post = "";
-	
-	// get form action
-	var formAction = doc.getElementsByTagName("form")[0].action;
-	
-	// get hidden fields to add to post string
-	var hiddenFields = doc.evaluate(''//input[@type="hidden"]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
-	var hiddenField;
-	while(hiddenField = hiddenFields.iterateNext()) {
-		post += "&"+hiddenField.name+"="+encodeURIComponent(hiddenField.value);
-	}
-	
-	if(doc.title.substr(0, 14) == "Search Results") {
-		var items = new Array();
-		var links = new Array();
-		
-		var tableRows = doc.evaluate(''//tr[substring(@id, 1, 7) = "RECORD_"]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
-		var tableRow;
-		while(tableRow = tableRows.iterateNext()) {
-			var id = tableRow.getElementsByTagName("input")[0].value;
-			var link = tableRow.getElementsByTagName("a")[0];
-			items[id] = link.textContent;
-			links[id] = link.href;
-		}
-		
-		items = Zotero.selectItems(items);
-		if(!items) return true;
-		
-		var urls = new Array();
-		for(var code in items) {
-			post += "&marked_list_candidates="+encodeURIComponent(code);
-			urls.push(links[id]);
-		}
-		post += "&mark_selection=selected_records&Export.x=10&Export.y=10";
-	} else {
-		post += "&ExportOne.x=10&ExportOne.y=10"
-	}
-	
+'function query(formAction, post, docOrUrls, done) {
 	post = post.substr(1)+"&fields=FullNoCitRef";
 	
 	Zotero.Utilities.HTTP.doPost(formAction, post, function(text) {
@@ -5537,10 +5505,10 @@ REPLACE INTO translators VALUES ('21ad38-3830-4836-aed7-7b5c2dbfa740', '1.0.0b3r
 						// theoretically, there could be book types, but I don''t know what the codes
 						// are and Thomson is unlikely to help me figure that out
 						item = new Zotero.Item("journalArticle");
-						if(urls) {
-							item.attachments = [{title:"ISI Web of Science Snapshot", url:urls.shift(), mimeType:"text/html"}];
+						if(docOrUrls.location) {
+							item.attachments = [{title:"ISI Web of Science Snapshot", document:docOrUrls}];
 						} else {
-							item.attachments = [{title:"ISI Web of Science Snapshot", document:doc}];
+							item.attachments = [{title:"ISI Web of Science Snapshot", url:docOrUrls.shift(), mimeType:"text/html"}];
 						}
 						field = content = undefined;
 					} else if(field == "ER") {
@@ -5550,11 +5518,146 @@ REPLACE INTO translators VALUES ('21ad38-3830-4836-aed7-7b5c2dbfa740', '1.0.0b3r
 				} else {
 					content += "\n"+Zotero.Utilities.cleanString(line);
 				}
-				
+			}
+			
+			if(done) {
+				done();
+			} else {
 				Zotero.done();
 			}
 		});
 	});
+}
+
+function crossSearchFetch(services, SID) {
+	// if we''ve fetched everything, we''re done
+	if(!services.length) {
+		Zotero.done();
+		return;
+	}
+	var service = services.shift();
+	Zotero.debug(service);
+	
+	// execute requests
+	var post = "&SID="+SID+"&all_summary_UTs="+service.items.join("%3B");
+	
+	// add marked_list_candidates
+	var i = 1;
+	for each(var marked_list_candidate in service.items) {
+		post += "&marked_list_candidates="+marked_list_candidate+"%2F"+i;
+	}
+	post += "&mark_selection=selected_records&Export.x=10&Export.y=10";
+	
+	// do query
+	query(service.URL, post, service.itemURLs, function() { crossSearchFetch(services, SID) });
+}
+
+function doWeb(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	var post = "";
+	
+	// get hidden fields to add to post string
+	var hiddenFields = doc.evaluate(''//input[@type="hidden"]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+	var hiddenField;
+	while(hiddenField = hiddenFields.iterateNext()) {
+		post += "&"+hiddenField.name+"="+encodeURIComponent(hiddenField.value);
+	}
+	
+	if(doc.title.substr(0, 14) == "Search Results") {
+		var items = new Array();
+		var links = new Array();
+		var tableRow;
+		
+		if(url.indexOf("/portal.cgi") != -1 || url.indexOf("/XS/CIW.cgi") != -1) {
+			// CrossSearch
+			var tableRows = doc.evaluate(''//tr[td/span/input[@name="marked_list_candidates"]]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+			while(tableRow = tableRows.iterateNext()) {
+				var id = tableRow.getElementsByTagName("input")[0].value;
+				
+				items[id] = tableRow.getElementsByTagName("b")[0].textContent;
+				
+				var linkList = tableRow.getElementsByTagName("a");
+				for each(var link in linkList) {
+					if(link.href && link.href.indexOf("&Func=TransferToPublisher&") != -1) {
+						links[id] = link.href;
+						break;
+					}
+				}
+			}
+			
+			items = Zotero.selectItems(items);
+			if(!items) return true;
+			
+			var serviceRe = /^(https?:\/\/[^\/]+\/).*%26SrcAuth%3D([^%]+)%26/;
+			var queries = new Object();
+			var urls = new Object();
+			
+			// contains an array of service objects with service, URL, itemURLs, and items properties
+			var services = new Array();
+			
+			// build up object of request URL => [marked_list_candidates]
+			for(var id in items) {
+				var foundService = null;
+				
+				var m = serviceRe.exec(links[id]);
+				for each(var service in services) {
+					if(service.service == m[2]) {
+						foundService = service;
+						break;
+					}
+				}
+				
+				if(!foundService) {
+					foundService = new Object();
+					foundService.service = m[2];
+					foundService.URL = m[1]+m[2]+"/CIW.cgi";
+					foundService.itemURLs = new Array();
+					foundService.items = new Array();
+					services.push(foundService);
+				}
+				
+				foundService.items.push(id.substr(id.indexOf(":")+1));
+				foundService.itemURLs.push(links[id]);
+			}
+			
+			var SID = doc.getElementsByName("SID")[0].value;
+			crossSearchFetch(services, SID);
+		} else {
+			var tableRows = doc.evaluate(''//tr[td/input[@name="marked_list_candidates"]]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+			while(tableRow = tableRows.iterateNext()) {
+				var id = tableRow.getElementsByTagName("input")[0].value;
+				var link = tableRow.getElementsByTagName("a")[0];
+				items[id] = link.textContent;
+				links[id] = link.href;
+			}
+			
+			items = Zotero.selectItems(items);
+			if(!items) return true;
+			
+			var urls = new Array();
+			for(var code in items) {
+				post += "&marked_list_candidates="+encodeURIComponent(code);
+				urls.push(links[id]);
+			}
+			post += "&mark_selection=selected_records&Export.x=10&Export.y=10";
+			
+			// get form action
+			var formAction = doc.getElementsByTagName("form")[0].action;
+			// run query
+			query(formAction, post, urls);
+		}
+	} else {
+		post += "&ExportOne.x=10&ExportOne.y=10"
+		
+		// get form action
+		var formAction = doc.getElementsByTagName("form")[0].action;
+		// run query
+		query(formAction, post, doc);
+	}
 	
 	Zotero.wait();
 }');

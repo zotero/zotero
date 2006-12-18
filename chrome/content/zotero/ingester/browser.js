@@ -173,7 +173,6 @@ Zotero_Ingester_Interface.contentLoad = function(event) {
 		// if there's already a scrapable page in the browser window, and it's
 		// still there, ensure it is actually part of the page, then return
 		if(data.translators && data.translators.length && data.document.location) {
-			Zotero.debug("already scrapable?");
 			if(Zotero_Ingester_Interface.searchFrames(rootDoc, data.document)) {
 				return;
 			} else {
@@ -327,6 +326,7 @@ Zotero_Ingester_Interface._getData = function(browser) {
  * Deletes the document object associated with a given browser window object
  */
 Zotero_Ingester_Interface._deleteData = function(browser) {
+	if(!browser) return false;
 	try {
 		var key = browser.getAttribute("zotero-key");
 		if(Zotero_Ingester_Interface.browserData[key]) {
