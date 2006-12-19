@@ -10,7 +10,7 @@
     orient="vertical"
 	buttons="accept"
 	buttonlabelaccept="&zotero.about.close;"
-	onload="onLoad();"
+	onload="moveToAlertPosition(); onLoad();"
 	ondialogaccept="return true;">
 	
 	<script>

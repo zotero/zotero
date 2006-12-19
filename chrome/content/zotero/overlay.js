@@ -33,6 +33,7 @@ var ZoteroPane = new function()
 	this.onUnload = onUnload;
 	this.toggleDisplay = toggleDisplay;
 	this.fullScreen = fullScreen;
+	this.handleKeyPress = handleKeyPress;
 	this.newItem = newItem;
 	this.newCollection = newCollection;
 	this.newSearch = newSearch;
@@ -138,6 +139,8 @@ var ZoteroPane = new function()
 		
 		var menu = document.getElementById("contentAreaContextMenu");
 		menu.addEventListener("popupshowing", ZoteroPane.contextPopupShowing, false);
+		
+		Zotero.Keys.windowInit(document);
 	}
 	
 	/*
@@ -161,8 +164,10 @@ var ZoteroPane = new function()
 		document.getElementById('zotero-pane').setAttribute('collapsed',!visible);
 		document.getElementById('zotero-splitter').setAttribute('collapsed',!visible);
 		
-		if(!visible)
-		{
+		if (visible) {
+			document.getElementById('zotero-pane').focus();
+		}
+		else {
 			document.getElementById('content').setAttribute('collapsed', false);
 			document.getElementById('zotero-tb-fullscreen').setAttribute('fullscreenmode', false);
 			
@@ -180,7 +185,65 @@ var ZoteroPane = new function()
 		document.getElementById('zotero-splitter').setAttribute('collapsed', !collapsed);
 		document.getElementById('zotero-tb-fullscreen').setAttribute('fullscreenmode', !collapsed);
 	}
+	
+	
+	function handleKeyPress(event) {
+		// Ignore keystrokes if Zotero pane is closed
+		if (document.getElementById('zotero-pane').getAttribute('collapsed') == 'true') {
+			return;
+		}
 		
+		var useShift = Zotero.isMac;
+		
+		var key = String.fromCharCode(event.which);
+		if (!key) {
+			Zotero.debug('No key');
+			return;
+		}
+		
+		// Ignore modifiers other than accel-alt (or accel-shift if useShift is on)
+		if (!((Zotero.isMac ? event.metaKey : event.ctrlKey) &&
+				useShift ? event.shiftKey : event.altKey)) {
+			return;
+		}
+		
+		var command = Zotero.Keys.getCommand(key);
+		if (!command) {
+			return;
+		}
+		
+		Zotero.debug(command);
+		
+		switch (command) {
+			case 'library':
+				document.getElementById('zotero-collections-tree').focus();
+				collectionsView.selection.select(0);
+				break;
+			case 'quicksearch':
+				document.getElementById('zotero-tb-search').focus();
+				break;
+			case 'newItem':
+				newItem(2); // book
+				document.getElementById('zotero-editpane-type-menu').focus();
+				break;
+			case 'newNote':
+				// Use key that's not the modifier as the popup toggle
+				newNote(useShift ? event.altKey : event.shiftKey);
+				break;
+			case 'toggleTagSelector':
+				toggleTagSelector();
+				break;
+			case 'toggleFullscreen':
+				fullScreen();
+				break;
+			default:
+				throw ('Command "' + command + '" not found in ZoteroPane.handleKeyPress()');
+		}
+		
+		event.preventDefault();
+	}
+	
+	
 	/*
 	 * Create a new item
 	 *
@@ -252,6 +315,9 @@ var ZoteroPane = new function()
 			tagSelector.init();
 		}
 		tagSelector.setAttribute('collapsed', !collapsed);
+		if (collapsed) {
+			tagSelector.focusTextbox();
+		}
 	}
 	
 	
@@ -1033,7 +1099,7 @@ var ZoteroPane = new function()
 	{
 		if (!popup)
 		{
-			var item = this.newItem(Zotero.ItemTypes.getID('note'));
+			var item = newItem(Zotero.ItemTypes.getID('note'));
 			var note = document.getElementById('zotero-note-editor');
 			try {
 				// trim
@@ -1049,8 +1115,6 @@ var ZoteroPane = new function()
 			
 			if (parent)
 			{
-				Zotero.debug(parent);
-				Zotero.debug(item.getID());
 				item.setSource(parent);
 				selectItem(item.getID());
 			}

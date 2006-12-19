@@ -20,13 +20,6 @@
     ***** END LICENSE BLOCK *****
 */
 
-var autoUpdateBox;
-var reportTranslationFailure;
-var positionMenu;
-var parseEndnoteBox;
-var automaticSnapshots;
-var openURLMenu;
-var openURLResolvers;
 var openURLServerField;
 var openURLVersionMenu;
 var zoteroPaneOnTopInitial;
@@ -45,58 +38,49 @@ var zoteroPaneOnTopInitial;
 */
 
 function init()
-{	
-	autoUpdateBox = document.getElementById('autoUpdateBox');
-	autoUpdateBox.checked = Zotero.Prefs.get('automaticScraperUpdates');
-	
-	reportTranslationFailure = document.getElementById('reportTranslationFailure');
-	reportTranslationFailure.checked = Zotero.Prefs.get('reportTranslationFailure');
-	
-	positionMenu = document.getElementById('positionMenu');
-	positionMenu.selectedIndex = zoteroPaneOnTopInitial = Zotero.Prefs.get('zoteroPaneOnTop') ? 0 : 1;
-	
-	parseEndnoteBox = document.getElementById('parseEndnoteBox');
-	parseEndnoteBox.checked = Zotero.Prefs.get('parseEndNoteMIMETypes');
-	
-	automaticSnapshots = document.getElementById('automaticSnapshots');
-	automaticSnapshots.checked = Zotero.Prefs.get('automaticSnapshots');
-	
-	openURLServerField = document.getElementById('openURLServerField');
-	openURLServerField.value = Zotero.Prefs.get('openURL.resolver');
-	openURLVersionMenu = document.getElementById('openURLVersionMenu');
-	openURLVersionMenu.value = Zotero.Prefs.get('openURL.version');
-
-	openURLMenu = document.getElementById('openURLMenu');
-
-	openURLResolvers = Zotero.OpenURL.discoverResolvers();
-	for(var i in openURLResolvers)
-	{
-		openURLMenu.insertItemAt(i,openURLResolvers[i]['name']);
-		if(openURLResolvers[i]['url'] == Zotero.Prefs.get('openURL.resolver') && openURLResolvers[i]['version'] == Zotero.Prefs.get('openURL.version'))
-			openURLMenu.selectedIndex = i;
-	}
-}
-
-function accept()
 {
-	Zotero.Prefs.set('automaticScraperUpdates', autoUpdateBox.checked);
-	Zotero.Prefs.set('reportTranslationFailure', reportTranslationFailure.checked);
-	Zotero.Prefs.set('zoteroPaneOnTop', positionMenu.selectedIndex == 0);
-	
-	if(Zotero.Prefs.get('parseEndNoteMIMETypes') != parseEndnoteBox.checked)
-	{
-		Zotero.Prefs.set('parseEndNoteMIMETypes', parseEndnoteBox.checked);
-		Zotero.Ingester.MIMEHandler.init();
+	// Display the appropriate modifier keys for the platform
+	var rows = document.getElementById('zotero-prefpane-keys').getElementsByTagName('row');
+	for (var i=0; i<rows.length; i++) {
+		rows[i].firstChild.nextSibling.value = Zotero.isMac ? 'Cmd+Shift+' : 'Ctrl+Alt+';
 	}
 	
-	Zotero.Prefs.set('automaticSnapshots', automaticSnapshots.checked);
-	
-	Zotero.Prefs.set('openURL.resolver', openURLServerField.value);
-	Zotero.Prefs.set('openURL.version', openURLVersionMenu.value);
+	zoteroPaneOnTopInitial = Zotero.Prefs.get('zoteroPaneOnTop') ? 0 : 1;
 }
+
+
+
+function populateOpenURLResolvers() {
+	var openURLMenu = document.getElementById('openURLMenu');
+	
+	var openURLResolvers = Zotero.OpenURL.discoverResolvers();
+	for each(var r in openURLResolvers) {
+		openURLMenu.insertItemAt(i, r.name);
+		if (r.url == Zotero.Prefs.get('openURL.resolver') && r.version == Zotero.Prefs.get('openURL.version')) {
+			openURLMenu.selectedIndex = i;
+		}
+	}
+	
+	var button = document.getElementById('openURLSearchButton');
+	switch (openURLResolvers.length) {
+		case 0:
+			var num = 'zero';
+			break;
+		case 1:
+			var num = 'singular';
+			break;
+		default:
+			var num = 'plural';
+	}
+	
+	button.setAttribute('label', Zotero.getString('zotero.preferences.openurl.resolversFound.' + num, openURLResolvers.length));
+}
+
 
 function onOpenURLSelected()
 {
+	var openURLMenu = document.getElementById('openURLMenu');
+	
 	if(openURLMenu.value == "custom")
 	{
 		openURLServerField.focus();
@@ -110,13 +94,13 @@ function onOpenURLSelected()
 
 function onOpenURLCustomized()
 {
-	openURLMenu.value = "custom";
+	document.getElementById('openURLMenu').value = "custom";
 }
 
 function onPositionChange()
 {
 	var statusLine = document.getElementById('statusLine');
-	if (positionMenu.selectedIndex != zoteroPaneOnTopInitial)
+	if (document.getElementById('positionMenu').selectedIndex != zoteroPaneOnTopInitial)
 	{
 		statusLine.value = Zotero.getString('zotero.preferences.status.positionChange');
 	}

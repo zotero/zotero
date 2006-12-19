@@ -1,0 +1,59 @@
+prefwindow .chromeclass-toolbar
+{
+	display: -moz-box !important; /* Ignore toolbar collapse button on OS X */
+}
+
+radio[pane=zotero-prefpane-general]
+{
+	-moz-image-region: rect(0px, 32px, 32px, 0px);
+}
+radio[pane=zotero-prefpane-general]:hover, 
+radio[pane=zotero-prefpane-general]:active,
+radio[pane=zotero-prefpane-general][selected="true"]
+{
+	-moz-image-region: rect(32px, 32px, 64px, 0px);
+}
+
+/* Use the Gear icon until we find a keyboard icon */
+radio[pane=zotero-prefpane-keys]
+{
+	-moz-image-region: rect(0px, 224px, 32px, 192px);
+}
+radio[pane=zotero-prefpane-keys]:hover, 
+radio[pane=zotero-prefpane-keys]:active,
+radio[pane=zotero-prefpane-keys][selected="true"]
+{
+	-moz-image-region: rect(32px, 224px, 64px, 192px);
+}
+
+
+/* General pane */
+
+#statusLine
+{
+	margin-bottom:.75em;
+	color: red;
+}
+
+
+/* Shortcut Keys pane */
+#zotero-prefpane-keys row
+{
+	-moz-box-align: center;
+}
+
+#zotero-prefpane-keys textbox
+{
+	margin-left: -1px;
+}
+
+#zotero-prefpane-keys checkbox
+{
+	margin: .75em 0;
+}
+
+#zotero-prefpane-keys .statusLine
+{
+	margin: .75em 0;
+	font-size: 10px;
+}

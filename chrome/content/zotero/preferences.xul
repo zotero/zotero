@@ -20,68 +20,149 @@
     
     ***** END LICENSE BLOCK *****
 -->
-<!DOCTYPE window SYSTEM "chrome://zotero/locale/preferences.dtd">
+<!DOCTYPE prefwindow SYSTEM "chrome://zotero/locale/preferences.dtd">
 
-<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://global/skin/global.css"?>
+<?xml-stylesheet href="chrome://browser/skin/preferences/preferences.css"?>
+<?xml-stylesheet href="chrome://zotero/skin/preferences.css"?>
 
-<!-- TODO: change to prefWindow? -->
-<dialog id="winMain" title="&zotero.preferences.title;" style="min-width:400px;"
-		windowtype="zotero:pref" onload="init();" ondialogaccept="accept()"
-		xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-
-<script src="preferences.js"/>
-<script src="include.js"/>
-
-<dialogheader id="header" title="Zotero" description="&zotero.preferences.title;"/>
-
-<hbox align="center">
-	<label value="&zotero.preferences.position.label;" control="positionMenu"/>
-	<menulist id="positionMenu" oncommand="onPositionChange()">
-		<menupopup>
-			<menuitem label="&zotero.preferences.position.above;"/>
-			<menuitem label="&zotero.preferences.position.below;"/>
-		</menupopup>
-	</menulist>
-	<label value="&zotero.preferences.position.browser;"/>
-</hbox>
-
-<hbox align="center">
-	<checkbox id="autoUpdateBox" label="&zotero.preferences.autoUpdate.label;"/>
-	<button id="updateButton" style="margin-top:0" label="&zotero.preferences.updateNow.label;" oncommand="Zotero.Schema.updateScrapersRemote(true)"/>
-</hbox>
-
-<checkbox id="reportTranslationFailure" label="&zotero.preferences.reportTranslationFailure.label;"/>
-
-<checkbox id="parseEndnoteBox" label="&zotero.preferences.parseEndnote.label;"/>
-
-<checkbox id="automaticSnapshots" label="&zotero.preferences.automaticSnapshots.label;"/>
-
-<groupbox>
-	<caption label="&zotero.preferences.openurl.caption;"/>
+<prefwindow id="zotero-prefs" title="&zotero.preferences.title;" onload="moveToAlertPosition(); init()"
+		windowtype="zotero:pref" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 	
-	<menulist id="openURLMenu" oncommand="onOpenURLSelected();">
-		<menupopup>
-			<menuseparator/>
-			<menuitem label="Custom..." value="custom" selected="true"/>
-		</menupopup>
-	</menulist>
+	<prefpane id="zotero-prefpane-general" label="&zotero.preferences.prefpane.general;">
+		<preferences>
+			<preference id="pref-zoteroPaneOnTop" name="extensions.zotero.zoteroPaneOnTop" type="bool"/>
+			<preference id="pref-automaticScraperUpdates" name="extensions.zotero.automaticScraperUpdates" type="bool"/>
+			<preference id="pref-reportTranslationFailure" name="extensions.zotero.reportTranslationFailure" type="bool"/>
+			<preference id="pref-parseEndNoteMIMETypes" name="extensions.zotero.parseEndNoteMIMETypes" type="bool" onchange="Zotero.Ingester.MIMEHandler.init()"/>
+			<preference id="pref-automaticSnapshots" name="extensions.zotero.automaticSnapshots" type="bool"/>
+			<preference id="pref-openURL-resolver" name="extensions.zotero.openURL.resolver" type="string"/>
+			<preference id="pref-openURL-version" name="extensions.zotero.openURL.version" type="string"/>
+		</preferences>
+		
+		<hbox align="center">
+			<label value="&zotero.preferences.position;" control="positionMenu"/>
+			<menulist id="positionMenu" oncommand="onPositionChange()" preference="pref-zoteroPaneOnTop">
+				<menupopup>
+					<menuitem label="&zotero.preferences.position.above;" value="true"/>
+					<menuitem label="&zotero.preferences.position.below;" value="false"/>
+				</menupopup>
+			</menulist>
+			<label value="&zotero.preferences.position.browser;"/>
+		</hbox>
+		
+		<hbox align="center">
+			<checkbox label="&zotero.preferences.autoUpdate;" preference="pref-automaticScraperUpdates"/>
+			<button id="updateButton" style="margin-top:0" label="&zotero.preferences.updateNow;" oncommand="Zotero.Schema.updateScrapersRemote(true)"/>
+		</hbox>
+		
+		<checkbox label="&zotero.preferences.reportTranslationFailure;" preference="pref-reportTranslationFailure"/>
+		
+		<checkbox label="&zotero.preferences.parseEndnote;" preference="pref-parseEndNoteMIMETypes"/>
+		
+		<checkbox label="&zotero.preferences.automaticSnapshots;" preference="pref-automaticSnapshots"/>
+		
+		<groupbox>
+			<caption label="&zotero.preferences.openurl.caption;"/>
+			
+			<button id="openURLSearchButton" label="Search for resolvers" oncommand="populateOpenURLResolvers()"/>
+			<menulist id="openURLMenu" oncommand="onOpenURLSelected();">
+				<menupopup>
+					<menuseparator/>
+					<menuitem label="&zotero.preferences.openurl.custom;" value="custom" selected="true"/>
+				</menupopup>
+			</menulist>
+			
+			<hbox align="center">
+				<label value="&zotero.preferences.openurl.server;"/>
+				<textbox id="openURLServerField" flex="1" oninput="onOpenURLCustomized();" preference="pref-openURL-resolver"/>
+			</hbox>
+		
+			<hbox align="center">
+				<label value="&zotero.preferences.openurl.version;" control="openURLVersionMenu"/>
+				<menulist id="openURLVersionMenu" oncommand="onOpenURLCustomized();" preference="pref-openURL-version">
+					<menupopup>
+						<menuitem label="0.1" value="0.1"/>
+						<menuitem label="1.0" value="1.0"/>
+					</menupopup>
+				</menulist>
+			</hbox>
+		</groupbox>
+		
+		<label id="statusLine" value=""/>
+	</prefpane>
 	
-	<hbox align="center">
-		<label value="&zotero.preferences.openurl.server;"/>
-		<textbox id="openURLServerField" flex="1" oninput="onOpenURLCustomized();"/>
-	</hbox>
-
-	<hbox align="center">
-		<label value="&zotero.preferences.openurl.version;"/>
-		<menulist id="openURLVersionMenu" oncommand="onOpenURLCustomized();">
-			<menupopup>
-				<menuitem label="0.1" value="0.1"/>
-				<menuitem label="1.0" value="1.0"/>
-			</menupopup>
-		</menulist>
-	</hbox>
-</groupbox>
-
-<label id="statusLine" value="" style="color:red"/>
-
-</dialog>
+	<prefpane id="zotero-prefpane-keys" label="&zotero.preferences.prefpane.keys;">
+		<preferences>
+			<preference id="pref-keys-openZotero" name="extensions.zotero.keys.openZotero" type="string"/>
+			<preference id="pref-keys-toggleFullscreen" name="extensions.zotero.keys.toggleFullscreen" type="string"/>
+			<preference id="pref-keys-library" name="extensions.zotero.keys.library" type="string"/>
+			<preference id="pref-keys-quicksearch" name="extensions.zotero.keys.quicksearch" type="string"/>
+			<preference id="pref-keys-newItem" name="extensions.zotero.keys.newItem" type="string"/>
+			<preference id="pref-keys-newNote" name="extensions.zotero.keys.newNote" type="string"/>
+			<preference id="pref-keys-toggleTagSelector" name="extensions.zotero.keys.toggleTagSelector" type="string"/>
+			<preference id="pref-keys-overrideGlobal" name="extensions.zotero.keys.overrideGlobal" type="bool"/>
+		</preferences>
+		
+		<grid>
+			<columns>
+				<column flex="1"/>
+				<column/>
+				<column/>
+			</columns>
+			
+			<rows>
+				<row>
+					<label value="&zotero.preferences.keys.openZotero;" control="key-textbox-openZotero"/>
+					<label/>
+					<textbox id="textbox-openZotero" maxlength="1" size="1" preference="pref-keys-openZotero"/>
+				</row>
+				
+				<row>
+					<label value="&zotero.preferences.keys.toggleFullscreen;" control="textbox-toggleFullscreen"/>
+					<label/>
+					<textbox id="textbox-toggleFullscreen" maxlength="1" size="1" preference="pref-keys-toggleFullscreen"/>
+				</row>
+				
+				<row>
+					<label value="&zotero.preferences.keys.library;" control="textbox-library"/>
+					<label/>
+					<textbox id="textbox-library" maxlength="1" size="1" preference="pref-keys-library"/>
+				</row>
+				
+				<row>
+					<label value="&zotero.preferences.keys.quicksearch;" control="textbox-quicksearch"/>
+					<label/>
+					<textbox id="textbox-quicksearch" maxlength="1" size="1" preference="pref-keys-quicksearch"/>
+				</row>
+				
+				<row>
+					<label value="&zotero.preferences.keys.newItem;" control="textbox-newItem"/>
+					<label/>
+					<textbox id="textbox-newItem" maxlength="1" size="1" preference="pref-keys-newItem"/>
+				</row>
+				
+				<row>
+					<label value="&zotero.preferences.keys.newNote;" control="textbox-newNote"/>
+					<label/>
+					<textbox id="textbox-newNote" maxlength="1" size="1" preference="pref-keys-newNote"/>
+				</row>
+				
+				<row>
+					<label value="&zotero.preferences.keys.toggleTagSelector;" control="textbox-toggleTagSelector"/>
+					<label/>
+					<textbox id="textbox-toggleTagSelector" maxlength="1" size="1" preference="pref-keys-toggleTagSelector"/>
+				</row>
+			</rows>
+		</grid>
+		
+		<checkbox label="&zotero.preferences.keys.overrideGlobal;" preference="pref-keys-overrideGlobal"/>
+		
+		<label class="statusLine" value="&zotero.preferences.keys.changesTakeEffect;"/>
+	</prefpane>
+	
+	<!-- These mess up the prefwindow if they come before the prefpanes
+	     https://bugzilla.mozilla.org/show_bug.cgi?id=296418 -->
+	<script src="include.js"/>
+	<script src="preferences.js"/>
+</prefwindow>

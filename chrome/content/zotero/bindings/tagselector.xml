@@ -177,6 +177,14 @@
 				</body>
 			</method>
 			
+			<method name="focusTextbox">
+				<body>
+					<![CDATA[
+						this.id('tags-search').focus();
+					]]>
+				</body>
+			</method>
+			
 			<method name="id">
 				<parameter name="id"/>
 				<body>

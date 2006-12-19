@@ -122,6 +122,8 @@ var Zotero = new function(){
 			.getService(Components.interfaces.nsIStringBundleService);
 		_localizedStringBundle = stringBundleService.createBundle(src, appLocale);
 		
+		Zotero.Keys.init();
+		
 		// Add notifier queue callbacks to the DB layer
 		Zotero.DB.addCallback('begin', Zotero.Notifier.begin);
 		Zotero.DB.addCallback('commit', Zotero.Notifier.commit);
@@ -356,7 +358,7 @@ var Zotero = new function(){
 	
 	function getString(name, params){
 		try {
-			if (params){
+			if (params != undefined){
 				if (typeof params != 'object'){
 					params = [params];
 				}
@@ -543,7 +545,7 @@ Zotero.Prefs = new function(){
 	this.observe = observe;
 	
 	// Public properties
-	this.prefBranch; // set in Zotero.init()
+	this.prefBranch;
 	
 	function init(){
 		var prefs = Components.classes["@mozilla.org/preferences-service;1"]
@@ -558,8 +560,16 @@ Zotero.Prefs = new function(){
 	/**
 	* Retrieve a preference
 	**/
-	function get(pref){
+	function get(pref, global){
 		try {
+			if (global) {
+				var service = Components.classes["@mozilla.org/preferences-service;1"]
+					.getService(Components.interfaces.nsIPrefService);
+			}
+			else {
+				var service = this.prefBranch;
+			}
+			
 			switch (this.prefBranch.getPrefType(pref)){
 				case this.prefBranch.PREF_BOOL:
 					return this.prefBranch.getBoolPref(pref);
@@ -629,6 +639,77 @@ Zotero.Prefs = new function(){
 	}
 }
 
+
+Zotero.Keys = new function() {
+	this.init = init;
+	this.windowInit = windowInit;
+	this.getCommand = getCommand;
+	
+	_actions = ['library', 'quicksearch', 'newItem', 'newNote', 'toggleTagSelector',
+		'toggleFullscreen'];
+	_keys = {};
+	
+	
+	function init() {
+		// Get the key=>command mappings from the prefs
+		for each (var action in _actions) {
+			_keys[Zotero.Prefs.get('keys.' + action)] = action;
+		}
+	}
+	
+	
+	function windowInit(document) {
+		var useShift = Zotero.isMac;
+		
+		// Zotero pane shortcut
+		var zKey = Zotero.Prefs.get('keys.openZotero');
+		var keyElem = document.getElementById('key_openZotero');
+		// Only override the default with the pref if the <key> hasn't been manually changed
+		// and the pref has been
+		if (keyElem.getAttribute('key') == 'Z' && keyElem.getAttribute('modifiers') == 'accel alt'
+			&& (zKey != 'Z' || useShift)) {
+			keyElem.setAttribute('key', zKey);
+			if (useShift) {
+				keyElem.setAttribute('modifiers', 'accel shift');
+			}
+		}
+		
+		if (Zotero.Prefs.get('keys.overrideGlobal')) {
+			var keys = document.getElementsByTagName('key');
+			for each(var key in keys) {
+				try {
+					var id = key.getAttribute('id');
+				}
+				// A couple keys are always invalid
+				catch (e) {
+					continue;
+				}
+				
+				if (id == 'key_openZotero') {
+					continue;
+				}
+				
+				var mods = key.getAttribute('modifiers').split(/[\,\s]/);
+				var second = useShift ? 'shift' : 'alt';
+				// Key doesn't match a Zotero shortcut
+				if (mods.length != 2 || !((mods[0] == 'accel' && mods[1] == second) ||
+						(mods[0] == second && mods[1] == 'accel'))) {
+					continue;
+				}
+				
+				if (_keys[key.getAttribute('key')] || key.getAttribute('key') == zKey) {
+					Zotero.debug('Removing key ' + id + ' with accesskey ' + key.getAttribute('key'));
+					key.parentNode.removeChild(key);
+				}
+			}
+		}
+	}
+	
+	
+	function getCommand(key) {
+		return _keys[key] ? _keys[key] : false;
+	}
+}
 
 
 /**

@@ -107,8 +107,9 @@
 							<menuitem id="zotero-tb-actions-export" label="&zotero.toolbar.export.label;" oncommand="Zotero_File_Interface.exportFile();"/>
 							<menuseparator id="zotero-tb-actions-utilities-separator" hidden="true"/>
 							<menuseparator id="zotero-tb-actions-separator"/>
-							<menuitem id="zotero-tb-actions-prefs" label="&zotero.toolbar.preferences.label;" oncommand="window.openDialog('chrome://zotero/content/preferences.xul','zotero-prefs','chrome,modal')"/>
-							<menuitem id="zotero-tb-actions-about" label="&zotero.toolbar.about.label;" oncommand="window.openDialog('chrome://zotero/content/about.xul','about','chrome,left=' + (window.screenX + 200) + ',top=' + (window.screenY + 100))"/>
+							<menuitem id="zotero-tb-actions-prefs" label="&zotero.toolbar.preferences.label;"
+								oncommand="window.openDialog('chrome://zotero/content/preferences.xul', 'zotero-prefs', 'chrome,titlebar,toolbar,' + Zotero.Prefs.get('browser.preferences.instantApply', true) ? 'dialog=no' : 'modal')"/>
+							<menuitem id="zotero-tb-actions-about" label="&zotero.toolbar.about.label;" oncommand="window.openDialog('chrome://zotero/content/about.xul', 'about', 'chrome')"/>
 						</menupopup>
 					</toolbarbutton>
 				</toolbar>
@@ -281,6 +282,8 @@
 			document.getElementById('zotero-status-bar-icon').setAttribute('tooltiptext', 'There was an error starting Zotero.');
 		}
 	}, false);
+	
+	document.getElementById('appcontent').addEventListener('keydown', ZoteroPane.handleKeyPress, true);
 	</script>
 	
 	<menupopup id="menu_ToolsPopup">
@@ -291,9 +294,13 @@
 	</menupopup>
   
 	<keyset id="mainKeyset">
+		<!--
+			The key can be changed by the pref extensions.zotero.keys.openZotero,
+			but if the values are changed here, the pref won't override them.
+		-->
 		<key id="key_openZotero"
 			 key="Z" 
 			 oncommand="ZoteroPane.toggleDisplay();"
-			 modifiers="alt accel" />
+			 modifiers="accel alt" />
 	</keyset>
 </overlay>

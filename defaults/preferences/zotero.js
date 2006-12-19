@@ -14,3 +14,13 @@ pref("extensions.zotero.downloadAssociatedFiles",false);
 pref("extensions.zotero.reportTranslationFailure",true);
 pref("extensions.zotero.enableMacClipboard",false);
 pref("extensions.zotero.lastCreatorFieldMode",0);
+
+// Keyboard shortcuts
+pref("extensions.zotero.keys.overrideGlobal", true);
+pref("extensions.zotero.keys.openZotero", 'Z');
+pref("extensions.zotero.keys.toggleFullscreen", 'F');
+pref("extensions.zotero.keys.library", 'L');
+pref("extensions.zotero.keys.quicksearch", 'K');
+pref("extensions.zotero.keys.newItem", 'N');
+pref("extensions.zotero.keys.newNote", 'O');
+pref("extensions.zotero.keys.toggleTagSelector", 'T');

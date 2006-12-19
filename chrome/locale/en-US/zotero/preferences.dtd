@@ -1,13 +1,27 @@
-<!ENTITY zotero.preferences.title		"Zotero Preferences">
-<!ENTITY zotero.preferences.autoUpdate.label		"Automatically check for updated scrapers">
-<!ENTITY zotero.preferences.updateNow.label		"Update now">
-<!ENTITY zotero.preferences.reportTranslationFailure.label	"Report broken site translators">
-<!ENTITY zotero.preferences.position.label			"Display Zotero">
-<!ENTITY zotero.preferences.position.above			"above">
-<!ENTITY zotero.preferences.position.below			"below">
-<!ENTITY zotero.preferences.position.browser		"browser content">
-<!ENTITY zotero.preferences.parseEndnote.label		"Use Zotero for downloaded EndNote files">
-<!ENTITY zotero.preferences.automaticSnapshots.label	"Automatically take snapshots when creating items from web pages">
-<!ENTITY zotero.preferences.openurl.caption		"OpenURL">
-<!ENTITY zotero.preferences.openurl.server			"Resolver:">
-<!ENTITY zotero.preferences.openurl.version		"Version:">
+<!ENTITY zotero.preferences.title						"Zotero Preferences">
+
+<!ENTITY zotero.preferences.prefpane.general				"General">
+<!ENTITY zotero.preferences.autoUpdate					"Automatically check for updated scrapers">
+<!ENTITY zotero.preferences.updateNow					"Update now">
+<!ENTITY zotero.preferences.reportTranslationFailure		"Report broken site translators">
+<!ENTITY zotero.preferences.position						"Display Zotero">
+<!ENTITY zotero.preferences.position.above				"above">
+<!ENTITY zotero.preferences.position.below				"below">
+<!ENTITY zotero.preferences.position.browser				"browser content">
+<!ENTITY zotero.preferences.parseEndnote					"Use Zotero for downloaded EndNote files">
+<!ENTITY zotero.preferences.automaticSnapshots			"Automatically take snapshots when creating items from web pages">
+<!ENTITY zotero.preferences.openurl.caption				"OpenURL">
+<!ENTITY zotero.preferences.openurl.custom				"Custom...">
+<!ENTITY zotero.preferences.openurl.server				"Resolver:">
+<!ENTITY zotero.preferences.openurl.version				"Version:">
+
+<!ENTITY zotero.preferences.prefpane.keys				"Shortcut Keys">
+<!ENTITY zotero.preferences.keys.openZotero				"Open/Close Zotero Pane">
+<!ENTITY zotero.preferences.keys.toggleFullscreen			"Toggle Fullscreen Mode">
+<!ENTITY zotero.preferences.keys.library					"Library">
+<!ENTITY zotero.preferences.keys.quicksearch				"Quick Search">
+<!ENTITY zotero.preferences.keys.newItem					"Create a new item">
+<!ENTITY zotero.preferences.keys.newNote					"Create a new note">
+<!ENTITY zotero.preferences.keys.toggleTagSelector		"Toggle Tag Selector">
+<!ENTITY zotero.preferences.keys.overrideGlobal			"Try to override conflicting shortcuts">
+<!ENTITY zotero.preferences.keys.changesTakeEffect		"Changes take effect in new windows only">
