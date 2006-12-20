@@ -1,4 +1,4 @@
--- 147
+-- 148
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-12-18 15:24:03'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-12-19 18:46:32'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b3.r1', '', '2006-12-15 03:40:00', 1, 100, 4, 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -5881,6 +5881,150 @@ function doWeb(doc, url) {
 			item.complete();
 		}
 	}
+}');
+
+REPLACE INTO translators VALUES ('5eacdb93-20b9-4c46-a89b-523f62935ae4', '1.0.0b2.r2', '', '2006-12-19 18:46:32', '1', '100', '4', 'Oxford Journals', 'Simon Kornblith', '^http://[^/]+/(?:cgi/searchresults|cgi/content/(?:abstract|full)/[0-9]+/[0-9]+/[0-9]+)', 
+'function detectWeb(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	if(doc.title == "Oxford Journals -- Search Result") {
+		if(doc.evaluate(''//div[@id="hw"]/table/tbody/tr/td/p/font/table/tbody/tr[td/input[@type="checkbox"]]'', doc,
+			nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) return "multiple";
+	} else {
+		if(doc.evaluate(''//a[substring(@href, 1, 16) = "/cgi/citmgr?gca="]'', doc, nsResolver,
+			XPathResult.ANY_TYPE, null).iterateNext()) return "journalArticle";
+	}
+	
+	return false;
+}', 
+'function handleRequests(requests) {
+	if(requests.length == 0) {
+		Zotero.done();
+		return;
+	}
+	
+	var request = requests.shift();
+	var URL = request.baseURL+request.args;
+	
+	Zotero.Utilities.HTTP.doGet(URL, function(text) {
+		// load translator for RIS
+		var translator = Zotero.loadTranslator("import");
+		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+		translator.setString(text);
+		translator.setHandler("itemDone", function(obj, item) {
+			if(item.notes[0]) {
+				item.DOI = item.notes[0].note;
+				item.notes = new Array();
+			}
+			
+			item.attachments = new Array();
+			var snapshot = request.snapshots.shift();
+			var pdf = request.pdfs.shift();
+			if(snapshot) {
+				if(typeof(snapshot) == "string") {
+					// string snapshot (from search)
+					item.attachments.push({title:"Oxford Journals Snapshot", mimeType:"text/html", url:snapshot});
+				} else {
+					// document object
+					item.attachments.push({title:"Oxford Journals Snapshot", document:snapshot});
+				}
+			}
+			if(pdf) {
+				var m = pdf.match(/^[^?]+/);
+				item.attachments.push({title:"Oxford Journals Full Text PDF", mimeType:"application/pdf", url:m[0]+".pdf"});
+			}
+			
+			item.complete();
+		});
+		translator.translate();
+		
+		handleRequests(requests);
+	});
+}
+
+function doWeb(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	var requests = new Array();
+	var hostRe = /https?:\/\/[^\/]+/;
+	
+	if(doc.title == "Oxford Journals -- Search Result") {
+		// search page
+		var items = new Object();
+		var snapshots = new Object();
+		var pdfs = new Object();
+		
+		var tableRows = doc.evaluate(''//div[@id="hw"]/table/tbody/tr/td/p/font/table/tbody/tr[td/input[@type="checkbox"]]'', doc,
+			nsResolver, XPathResult.ANY_TYPE, null);
+		var tableRow, link;
+		while(tableRow = tableRows.iterateNext()) {
+			var gca = doc.evaluate(''./td/input[@type="checkbox"]'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().value;
+			var title = doc.evaluate(''./td/font/strong'', tableRow, nsResolver, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+			title = title.snapshotItem(title.snapshotLength-1).textContent;
+			
+			var snapshot = undefined;
+			var pdf = undefined;
+			var links = doc.evaluate(''.//font/strong/a'', tableRow, nsResolver, XPathResult.ANY_TYPE, null);
+			while(link = links.iterateNext()) {
+				// prefer Full Text snapshots, but take abstracts
+				if((link.textContent == "Abstract" && !snapshot) || link.textContent == "Full Text") {
+					snapshot = link.href;
+				} else if(link.textContent == "PDF") {
+					pdf = link.href;
+				}
+			}
+			snapshots[gca] = snapshot;
+			pdfs[gca] = pdf;
+			
+			items[gca] = Zotero.Utilities.cleanString(title);
+		}
+		
+		items = Zotero.selectItems(items);
+		if(!items) return true;
+		
+		var requests = new Array();
+		for(var gca in items) {
+			var m = hostRe.exec(snapshots[gca]);
+			var baseURL = m[0]+"/cgi/citmgr?type=refman";
+			
+			var thisRequest = null;
+			for each(var request in requests) {
+				if(request.baseURL == baseURL) {
+					thisRequest = request;
+					break;
+				}
+			}
+			
+			if(!thisRequest) {
+				thisRequest = new Object();
+				thisRequest.snapshots = new Array();
+				thisRequest.pdfs = new Array();
+				thisRequest.args = "";
+				thisRequest.baseURL = baseURL;
+				requests.push(thisRequest);
+			}
+			
+			thisRequest.snapshots.push(snapshots[gca]);
+			thisRequest.pdfs.push(pdfs[gca]);
+			thisRequest.args += "&gca="+gca;
+		}
+	} else {
+		var baseURL = doc.evaluate(''//a[substring(@href, 1, 16) = "/cgi/citmgr?gca="]'', doc, nsResolver,
+			XPathResult.ANY_TYPE, null).iterateNext().href;
+		var pdf = doc.location.href.replace(/\/content\/[^\/]+\//, "/reprint/");
+		Zotero.debug(pdf);
+		var requests = [{baseURL:baseURL, args:"&type=refman", snapshots:[doc], pdfs:[pdf]}];
+	}
+	
+	handleRequests(requests);
+		
+	Zotero.wait();
 }');
 
 REPLACE INTO translators VALUES ('e07e9b8c-0e98-4915-bb5a-32a08cb2f365', '1.0.0b2.r2', '', '2006-10-02 17:00:00', 1, 100, 8, 'Open WorldCat', 'Simon Kornblith', 'http://partneraccess.oclc.org/',
