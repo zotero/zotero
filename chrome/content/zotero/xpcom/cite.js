@@ -371,38 +371,43 @@ Zotero.CSL.prototype.preprocessItems = function(items) {
 		if(lastAuthor == author) {
 			item._csl.subsequentAuthorSubstitute = true;
 		}
-		lastAuthor = author;
 		
 		// handle (2006a) disambiguation for author-date styles
 		if(this.class == "author-date") {
 			var year = item._csl.date.year;
-			
-			if(usedCitations[year]) {
-				if(!usedCitations[year]._csl.date.disambiguation) {
-					usedCitations[year]._csl.date.disambiguation = "a";
-					item._csl.date.disambiguation = "b";
-				} else {
-					// get all but last character
-					var oldLetter = usedCitations[year]._csl.date.disambiguation;
-					if(oldLetter.length > 1) {
-						item._csl.date.disambiguation = oldLetter.substr(0, oldLetter.length-1);
+				
+			if(lastAuthor == author) {
+				if(usedCitations[year]) {
+					if(!usedCitations[year]._csl.date.disambiguation) {
+						usedCitations[year]._csl.date.disambiguation = "a";
+						item._csl.date.disambiguation = "b";
 					} else {
-						item._csl.date.disambiguation = "";
-					}
-					
-					var charCode = oldLetter.charCodeAt(oldLetter.length-1);
-					if(charCode == 122) {
-						// item is z; add another letter
-						item._csl.date.disambiguation += "za";
-					} else {
-						// next lowercase letter
-						item._csl.date.disambiguation += String.fromCharCode(charCode+1);
+						// get all but last character
+						var oldLetter = usedCitations[year]._csl.date.disambiguation;
+						if(oldLetter.length > 1) {
+							item._csl.date.disambiguation = oldLetter.substr(0, oldLetter.length-1);
+						} else {
+							item._csl.date.disambiguation = "";
+						}
+						
+						var charCode = oldLetter.charCodeAt(oldLetter.length-1);
+						if(charCode == 122) {
+							// item is z; add another letter
+							item._csl.date.disambiguation += "za";
+						} else {
+							// next lowercase letter
+							item._csl.date.disambiguation += String.fromCharCode(charCode+1);
+						}
 					}
 				}
+			} else {
+				usedCitations = new Array();
 			}
 			
 			usedCitations[year] = item;
 		}
+		
+		lastAuthor = author;
 		
 		// add numbers to each
 		item._csl.number = i;
