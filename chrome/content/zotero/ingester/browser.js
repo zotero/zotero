@@ -348,7 +348,7 @@ Zotero_Ingester_Interface._updateStatus = function(data) {
 			// Use folder icon for multiple types, for now
 			Zotero_Ingester_Interface.statusImage.src = "chrome://zotero/skin/treesource-collection.png";
 		} else {
-			Zotero_Ingester_Interface.statusImage.src = "chrome://zotero/skin/treeitem-"+itemType+".png";
+			Zotero_Ingester_Interface.statusImage.src = Zotero.ItemTypes.getImageSrc(itemType);
 		}
 		Zotero_Ingester_Interface.statusImage.hidden = false;
 	} else {
@@ -361,7 +361,7 @@ Zotero_Ingester_Interface._updateStatus = function(data) {
  */
 Zotero_Ingester_Interface._itemDone = function(obj, item, collection) {
 	var title = item.getField("title");
-	var icon = "chrome://zotero/skin/treeitem-"+Zotero.ItemTypes.getName(item.getField("itemTypeID"))+".png"
+	var icon = item.getImageSrc();
 	Zotero_Ingester_Interface.Progress.addLines([title], [icon]);
 	
 	// add item to collection, if one was specified

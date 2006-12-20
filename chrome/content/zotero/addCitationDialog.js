@@ -103,7 +103,7 @@ var Zotero_Citation_Dialog = new function () {
 		itemNode.setAttribute("value", itemID);
 		itemNode.setAttribute("label", item.getField("title"));
 		itemNode.setAttribute("class", "listitem-iconic");
-		itemNode.setAttribute("image", "chrome://zotero/skin/treeitem-"+Zotero.ItemTypes.getName(item.getType())+".png");
+		itemNode.setAttribute("image", item.getImageSrc());
 		document.getElementById("citation-list").appendChild(itemNode);
 		
 		// don't let someone select it again
