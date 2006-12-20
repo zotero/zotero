@@ -1,4 +1,4 @@
--- 153
+-- 154
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-12-20 06:40:52'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-12-20 06:54:08'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b3.r1', '', '2006-12-15 03:40:00', 1, 100, 4, 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -5883,14 +5883,14 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('5eacdb93-20b9-4c46-a89b-523f62935ae4', '1.0.0b3.r1', '', '2006-12-20 06:40:52', '1', '100', '4', 'HighWire', 'Simon Kornblith', '^http://[^/]+/(?:cgi/searchresults|cgi/search|cgi/content/(?:abstract|full)/[0-9]+/[0-9]+/[0-9]+|current.dtl$|content/vol[0-9]+/issue[0-9]+/(?:index.dt)?$)', 
+REPLACE INTO translators VALUES ('5eacdb93-20b9-4c46-a89b-523f62935ae4', '1.0.0b3.r1', '', '2006-12-20 06:54:08', '1', '100', '4', 'HighWire', 'Simon Kornblith', '^http://[^/]+/(?:cgi/searchresults|cgi/search|cgi/content/(?:abstract|full)/[0-9]+/[0-9]+/[0-9]+|current.dtl$|content/vol[0-9]+/issue[0-9]+/(?:index.dt)?$)', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == ''x'') return namespace; else return null;
 	} : null;
 	
-	if(doc.title.indexOf(" -- Search Result") == doc.title.length-17 ||
+	if(doc.title.indexOf(" -- Search Result") != -1 ||
 	  doc.title == "Science/AAAS | Search Results") {
 		if(doc.evaluate(''//table/tbody/tr[td/input[@type="checkbox"][@name="gca"]]'', doc,
 			nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) return "multiple";
@@ -5974,7 +5974,7 @@ function doWeb(doc, url) {
 			var tableRows = doc.evaluate(''//form/dl/dd'', doc, nsResolver, XPathResult.ANY_TYPE, null);
 			var tableDTs = doc.evaluate(''//form/dl/dt'', doc, nsResolver, XPathResult.ANY_TYPE, null);
 		} else {
-			var tableRows = doc.evaluate(''//table/tbody/tr[td/input[@type="checkbox"]]'', doc,
+			var tableRows = doc.evaluate(''//table/tbody/tr[td/input[@type="checkbox"]][td/font/strong]'', doc,
 				nsResolver, XPathResult.ANY_TYPE, null);
 		}
 		
@@ -6007,13 +6007,17 @@ function doWeb(doc, url) {
 				} else {
 					var gca = doc.evaluate(''./td/input[@type="checkbox"]'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().value;
 					var title = doc.evaluate(''./td/font/strong'', tableRow, nsResolver, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
-					title = title.snapshotItem(title.snapshotLength-1).textContent;
+					if(title.snapshotItem(0).textContent.toUpperCase() == title.snapshotItem(0).textContent) {
+						title = title.snapshotItem(1).textContent;
+					} else {
+						title = title.snapshotItem(0).textContent;
+					}
 				}
 				
 				var links = doc.evaluate(''.//a'', tableRow, nsResolver, XPathResult.ANY_TYPE, null);
 				while(link = links.iterateNext()) {
 					// prefer Full Text snapshots, but take abstracts
-					var textContent = link.textContent;
+					var textContent = Zotero.Utilities.cleanString(link.textContent);
 					if((textContent.substr(0, 8) == "Abstract" && !snapshot) || textContent.substr(0, 9) == "Full Text") {
 						snapshot = link.href;
 					} else if(textContent.substr(0, 3) == "PDF") {
