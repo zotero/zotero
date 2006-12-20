@@ -393,7 +393,7 @@ Zotero.CSL.prototype.preprocessItems = function(items) {
 					var charCode = oldLetter.charCodeAt(oldLetter.length-1);
 					if(charCode == 122) {
 						// item is z; add another letter
-						item._csl.date.disambiguation += "a";
+						item._csl.date.disambiguation += "za";
 					} else {
 						// next lowercase letter
 						item._csl.date.disambiguation += String.fromCharCode(charCode+1);
