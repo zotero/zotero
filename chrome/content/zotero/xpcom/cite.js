@@ -342,7 +342,7 @@ Zotero.CSL.prototype.preprocessItems = function(items) {
 			item._csl.date = Zotero.CSL.prototype._processDate(item.getField("date"));
 		}
 		// clear disambiguation and subsequent author substitute
-		if(item._csl.disambiguation) item._csl.date.disambiguation = undefined;
+		if(item._csl.date && item._csl.date.disambiguation) item._csl.date.disambiguation = undefined;
 		if(item._csl.subsequentAuthorSubstitute) item._csl.subsequentAuthorSubstitute = undefined;
 	}
 	
@@ -375,18 +375,15 @@ Zotero.CSL.prototype.preprocessItems = function(items) {
 		
 		// handle (2006a) disambiguation for author-date styles
 		if(this.class == "author-date") {
-			formattedString.append(" ");
-			this._getFieldValue("date", this._getFieldDefaults("date"), item,
-			                    formattedString, this._bib);
-			var citation = formattedString.get();
+			var year = item._csl.date.year;
 			
-			if(usedCitations[citation]) {
-				if(!usedCitations[citation]._csl.date.disambiguation) {
-					usedCitations[citation]._csl.date.disambiguation = "a";
+			if(usedCitations[year]) {
+				if(!usedCitations[year]._csl.date.disambiguation) {
+					usedCitations[year]._csl.date.disambiguation = "a";
 					item._csl.date.disambiguation = "b";
 				} else {
 					// get all but last character
-					var oldLetter = usedCitations[citation]._csl.date.disambiguation;
+					var oldLetter = usedCitations[year]._csl.date.disambiguation;
 					if(oldLetter.length > 1) {
 						item._csl.date.disambiguation = oldLetter.substr(0, oldLetter.length-1);
 					} else {
@@ -396,7 +393,7 @@ Zotero.CSL.prototype.preprocessItems = function(items) {
 					var charCode = oldLetter.charCodeAt(oldLetter.length-1);
 					if(charCode == 122) {
 						// item is z; add another letter
-						item._csl.date.disambiguation += "za";
+						item._csl.date.disambiguation += "a";
 					} else {
 						// next lowercase letter
 						item._csl.date.disambiguation += String.fromCharCode(charCode+1);
@@ -404,7 +401,7 @@ Zotero.CSL.prototype.preprocessItems = function(items) {
 				}
 			}
 			
-			usedCitations[citation] = item;
+			usedCitations[year] = item;
 		}
 		
 		// add numbers to each
