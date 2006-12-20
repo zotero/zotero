@@ -399,6 +399,9 @@ Zotero.OpenURL = new function() {
 				} else if(format == "info:ofi/fmt:kev:mtx:patent") {
 					item.itemType = "patent";
 					break;
+				} else if(format == "info:ofi/fmt:kev:mtx:dc") {
+					item.itemType = "webpage";
+					break;
 				}
 			}
 		}
@@ -501,17 +504,25 @@ Zotero.OpenURL = new function() {
 				} else {
 					complexAu.push({firstName:value, creatorType:(key == "rft.aufirst" ? "author" : "inventor")});
 				}
-			} else if(key == "rft.au" || key == "rft.inventor") {
-				if(value.indexOf(",") !== -1) {
-					item.creators.push(Zotero.Utilities.prototype.cleanAuthor(value, (key == "rft.au" ? "author" : "inventor"), true));
+			} else if(key == "rft.au" || key == "rft.creator" || key == "rft.contributor" || key == "rft.inventor") {
+				if(key == "rft.contributor") {
+					var type = "contributor";
+				} else if(key == "rft.inventor") {
+					var type = "inventor";
 				} else {
-					item.creators.push(Zotero.Utilities.prototype.cleanAuthor(value, (key == "rft.au" ? "author" : "inventor"), false));
+					var type = "author";
+				}
+				
+				if(value.indexOf(",") !== -1) {
+					item.creators.push(Zotero.Utilities.prototype.cleanAuthor(value, type, true));
+				} else {
+					item.creators.push(Zotero.Utilities.prototype.cleanAuthor(value, type, false));
 				}
 			} else if(key == "rft.aucorp") {
 				complexAu.push({lastName:value, isInstitution:true});
 			} else if(key == "rft.isbn" && !item.ISBN) {
 				item.ISBN = value;
-			} else if(key == "rft.pub") {
+			} else if(key == "rft.pub" || key == "rft.publisher") {
 				item.publisher = value;
 			} else if(key == "rft.place") {
 				item.place = value;
@@ -532,6 +543,30 @@ Zotero.OpenURL = new function() {
 					item.patentNumber = value;
 				} else if(key == "rft.appldate") {
 					item.date = value;
+				}
+			} else if(format == "info:ofi/fmt:kev:mtx:dc") {
+				if(key == "rft.identifier") {
+					if(value.length > 8) {	// we could check length separately for
+											// each type, but all of these identifiers
+											// must be > 8 characters
+						if(value.substr(0, 5) == "ISBN ") {
+							item.ISBN = value.substr(5);
+						} else if(value.substr(0, 5) == "ISSN ") {
+							item.ISSN = value.substr(5);
+						} else if(value.substr(0, 8) == "urn:doi:") {
+							item.DOI = value.substr(4);
+						} else if(value.substr(0, 7) == "http://" || value.substr(0, 8) == "https://") {
+							item.url = value;
+						}
+					}
+				} else if(key == "rft.description") {
+					item.extra = value;
+				} else if(key == "rft.rights") {
+					item.rights = value;
+				} else if(key == "rft.subject") {
+					item.tags.push(value);
+				} else if(key == "rft.type") {
+					if(Zotero.ItemTypes.getID(value)) item.itemType = value;
 				}
 			}
 		}
