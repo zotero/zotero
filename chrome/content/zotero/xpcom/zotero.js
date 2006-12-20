@@ -933,7 +933,6 @@ Zotero.Date = new function(){
 					date.day = m[2];
 				}
 			}
-			Zotero.debug(date);
 			
 			if(date.year) date.year = parseInt(date.year, 10);
 			if(date.day) date.day = parseInt(date.day, 10);
@@ -947,8 +946,6 @@ Zotero.Date = new function(){
 					date.month = tmp;
 				}
 			}
-			
-			Zotero.debug(date);
 			
 			if(!date.month || date.month <= 12) {
 				if(date.year && date.year < 100) {	// for two digit years, determine proper
@@ -976,8 +973,6 @@ Zotero.Date = new function(){
 				Zotero.debug("DATE: algorithms failed sanity check");
 				date = {"part":string};
 			}
-			
-			Zotero.debug(date);
 		} else {
 			Zotero.debug("DATE: could not apply algorithms");
 			date.part = string;
@@ -1042,8 +1037,6 @@ Zotero.Date = new function(){
 				date.part = undefined;
 			}
 		}
-		
-		Zotero.debug(date);
 		
 		return date;
 	}

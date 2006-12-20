@@ -68,6 +68,10 @@
     <term name="editor" form="verb">edited by</term>
     <term name="translator" form="verb">translated by</term>
     
+    <!-- SHORT VERB ROLE FORMS -->
+    <term name="editor" form="verb-short">ed</term>
+    <term name="translator" form="verb-short">trans</term>
+    
     <!-- LONG MONTH FORMS -->
     <term name="month-01">January</term>
     <term name="month-02">February</term>

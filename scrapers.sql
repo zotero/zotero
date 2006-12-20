@@ -1,4 +1,4 @@
--- 149
+-- 150
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-12-19 21:25:46'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-12-19 23:51:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b3.r1', '', '2006-12-15 03:40:00', 1, 100, 4, 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -9675,6 +9675,167 @@ REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '200
       </item>
     </layout>
   </bibliography>
+</style>');
+
+REPLACE INTO "csl" VALUES('http://www.zotero.org/namespaces/CSL/chicago-author-date.csl', '2006-12-19 23:51:00', 'Chicago Manual of Style (Author-Date)',
+'<?xml version="1.0" encoding="UTF-8"?>
+<style xmlns="http://purl.org/net/xbiblio/csl" class="author-date" xml:lang="en">
+	<info>
+		<title>Chicago Reference List Style</title>
+		<id>http://www.zotero.org/namespaces/CSL/chicago-author-date.csl</id>
+		<author>
+			<name>Simon Kornblith</name>
+			<email>simon@simonster.com</email>
+		</author>
+		<updated>2006-09-04T20:27:00+05:00</updated>
+		<summary>The author-date variant of the Chicago style.</summary>
+	</info>
+	<defaults>
+		<contributor name-as-sort-order="no">
+			<label form="verb-short" suffix=". "/>
+			<name and="text" delimiter=", "/>
+		</contributor>
+		<author name-as-sort-order="first">
+			<name and="text" sort-separator=", " delimiter=", " delimiter-precedes-last="always"/>
+			<label form="verb-short" prefix=", " suffix="."/>
+			<substitute>
+				<choose>
+					<editor/>
+					<translator/>
+					<titles relation="container" font-style="italic"/>
+					<titles/>
+				</choose>
+			</substitute>
+		</author>
+		<locator>
+			<number/>
+		</locator>
+		<identifier>
+			<number/>
+		</identifier>
+		<titles>
+			<title/>
+		</titles>
+		<date>
+			<month text-transform="capitalize"/>
+			<day prefix=" "/>
+		</date>
+		<publisher>
+			<place suffix=": "/>
+			<name/>
+		</publisher>
+		<access>
+			<url/>
+			<text term-name="accessed" prefix=" (" suffix=" "/>
+			<date suffix=")">
+				<month suffix=" " text-transform="capitalize"/>
+				<day suffix=", "/>
+				<year/>
+			</date>
+		</access>
+	</defaults>
+	<citation prefix="(" suffix=")" delimiter="; ">
+		<et-al min-authors="3" use-first="1"/>
+		<layout>
+			<item>
+				<author form="short">
+					<name and="text" delimiter=", "/>
+				</author>
+				<date prefix=" ">
+					<year/>
+				</date>
+				<locator prefix=", "/>
+			</item>
+		</layout>
+	</citation>
+	<bibliography hanging-indent="true" subsequent-author-substitute="---">
+		<sort algorithm="author-date"/>
+		<et-al min-authors="6" use-first="6"/>
+		<layout>
+			<list>
+				<heading>
+					<text term-name="works cited"/>
+				</heading>
+			</list>
+			<item suffix=".">
+				<choose>
+					<type name="book">
+						<author suffix="."/>
+						<date prefix=" " suffix=".">
+							<year/>
+						</date>
+						<titles prefix=" " suffix="." font-style="italic"/>
+						<group prefix=" " suffix="." delimiter=", " text-transform="capitalize">
+							<editor/>
+							<translator/>
+						</group>
+						<publisher prefix=" " suffix="."/>
+						<access prefix=" "/>
+					</type>
+					<type name="chapter">
+						<author suffix="."/>
+						<date prefix=" " suffix=".">
+							<year/>
+						</date>
+						<titles prefix=" " suffix="."/>
+						<group class="container" suffix=".">
+							<text prefix=" " term-name="in" text-transform="capitalize"/>
+							<titles prefix=" " relation="container" font-style="italic"/>
+							<editor prefix=", "/>
+							<translator prefix=", "/>
+							<pages prefix=", "/>
+							<publisher prefix=". "/>
+						</group>
+						<access prefix=" "/>
+					</type>
+					<type name="article">
+						<author suffix="."/>
+						<date prefix=" " suffix=".">
+							<year/>
+						</date>
+						<titles prefix=" " suffix="."/>
+						<group prefix=" " suffix="." delimiter=", " text-transform="capitalize">
+							<editor/>
+							<translator/>
+						</group>
+						<date prefix=" " suffix="."/>
+						<access prefix=" "/>
+					</type>
+					<type name="article-journal">
+						<author suffix="."/>
+						<date prefix=" " suffix=".">
+							<year/>
+						</date>
+						<titles prefix=" " suffix="."/>
+						<group prefix=" " suffix="." delimiter=", " text-transform="capitalize">
+							<editor/>
+							<translator/>
+						</group>
+						<group class="container" prefix=" " suffix=".">
+							<titles relation="container" font-style="italic"/>
+							<volume prefix=" "/>						
+							<conditional>
+								<if field="issue">
+									<conditional>
+										<if field="date">
+											<issue prefix=", no. "/>
+											<date prefix=" (" suffix=")"/>
+										</if><else>
+											<issue prefix=" (" suffix=")"/>
+										</else>
+									</conditional>
+									<pages prefix=": "/>
+								</if><else>
+									<pages prefix=":"/>
+								</else>
+							</conditional>
+						</group>
+						<access prefix=" "/>
+					</type>
+				</choose>
+			</item>
+		</layout>
+	</bibliography>
 </style>');
 
 REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/chicago-note.csl', '2006-10-02 17:00:00', 'Chicago Manual of Style (Note)',

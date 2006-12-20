@@ -652,7 +652,9 @@ Zotero.CSL.prototype._parseFields = function(ref, position, type, bibCitElement,
 			}
 			
 			// parse group children
-			if(itemDesc.name == "group") {
+			if(itemDesc.name == "group" || itemDesc.name == "conditional" ||
+			   itemDesc.name == "if" || itemDesc.name == "else-if" ||
+			   itemDesc.name == "else") {
 				// parse attributes on this field, but ignore children
 				this._parseFieldAttrChildren(element, itemDesc, true);
 				
@@ -1276,9 +1278,9 @@ Zotero.CSL.prototype._getFieldValue = function(name, element, item, formattedStr
 						status = true;
 					}
 				} else if(condition.field) {
-					var formattedString = new Zotero.CSL.FormattedString(this, "Text");
+					var testString = new Zotero.CSL.FormattedString(this, "Text");
 					status = this._getFieldValue(condition.field, this._getFieldDefaults(condition.field), item,
-		                                formattedString, bibCitElement);
+		                                testString, bibCitElement);
 				}
 			} else if(condition.name == "else") {
 				status = true;
@@ -1293,7 +1295,7 @@ Zotero.CSL.prototype._getFieldValue = function(name, element, item, formattedStr
 					this._getFieldValue(child.name, child, item, data, bibCitElement,
 										position, typeName);
 				}
-				dataAppended = formattedString.concat(data, element);
+				dataAppended = formattedString.concat(data, condition);
 				break;
 			}
 		}
@@ -1407,8 +1409,6 @@ Zotero.CSL.FormattedString.prototype.concat = function(formattedString, element)
  * appends a string (with format parameters) to the current one
  */
 Zotero.CSL.FormattedString.prototype.append = function(string, element, dontDelimit, dontEscape) {
-	Zotero.debug("CSL: ordered to append "+string);
-	
 	if(!string) return false;
 	if(typeof(string) != "string") {
 		string = string.toString();
@@ -1444,7 +1444,7 @@ Zotero.CSL.FormattedString.prototype.append = function(string, element, dontDeli
 				string = string.toUpperCase();
 			} else if(element["text-transform"] == "capitalize") {
 				// capitalize first
-				string = string[0].toUpperCase()+string.substr(1).toLowerCase();
+				string = string[0].toUpperCase()+string.substr(1);
 			}
 		}
 	}
@@ -1742,11 +1742,7 @@ Zotero.CSL.prototype._separateItemCreators = function(item) {
 	var translatorID = Zotero.CreatorTypes.getID("translator");
 	
 	var creators = item.getCreators();
-	Zotero.debug("here come the creators");
-	Zotero.debug(creators);
 	for each(var creator in creators) {
-		Zotero.debug(creator);
-		
 		if(creator.creatorTypeID == editorID) {
 			editors.push(creator);
 		} else if(creator.creatorTypeID == translatorID) {
@@ -1756,9 +1752,6 @@ Zotero.CSL.prototype._separateItemCreators = function(item) {
 			authors.push(creator);
 		}
 	}
-	
-	Zotero.debug(authorID+", "+editorID+", "+translatorID);
-	Zotero.debug(creators);
 	
 	return [authors, editors, translators];
 }
