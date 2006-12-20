@@ -474,7 +474,7 @@ Zotero.CSL.prototype.createBibliography = function(items, format) {
 	
 	var index = 0;
 	if(format == "HTML") {
-		if(this.class == "note") {
+		if(this.class == "note" && this._bib == this._cit) {
 			output += '<ol>\r\n';
 		} else if(this._bib.hangingIndent) {
 			output += '<div style="margin-left:0.5in;text-indent:-0.5in;">\r\n';
@@ -513,19 +513,19 @@ Zotero.CSL.prototype.createBibliography = function(items, format) {
 				string += '<span class="Z3988" title="'+coins.replace("&", "&amp;")+'"></span>';
 			}
 			
-			if(this.class == "note") {
+			if(this.class == "note" && this._bib == this._cit) {
 				output += "<li>"+string+"</li>\r\n";
 			} else {
 				output += "<p>"+string+"</p>\r\n";
 			}
 		} else if(format == "RTF") {
-			if(this.class == "note") {
+			if(this.class == "note" && this._bib == this._cit) {
 				index++;
 				output += index+". ";
 			}
 			output += string+"\\\r\n\\\r\n";
 		} else {
-			if(format == "Text" && this.class == "note") {
+			if(format == "Text" && this.class == "note" && this._bib == this._cit) {
 				index++;
 				output += index+". ";
 			}
@@ -536,7 +536,7 @@ Zotero.CSL.prototype.createBibliography = function(items, format) {
 	}
 	
 	if(format == "HTML") {
-		if(this.class == "note") {
+		if(this.class == "note" && this._bib == this._cit) {
 			output += '</ol>';
 		} else if(this._bib.hangingIndent) {
 			output += '</div>';
@@ -1273,11 +1273,12 @@ Zotero.CSL.prototype._getFieldValue = function(name, element, item, formattedStr
 			if(condition.name == "if" || condition.name == "else-if") {
 				// evaluate condition for if/else if
 				if(condition.type) {
-					if(typeName == condition.type) {
-						status = true;
-					} else if(Zotero.CSL.Global.typeInheritance[typeName] &&
-					          Zotero.CSL.Global.typeInheritance[typeName] == condition.type) {
-						status = true;
+					var typeNames = this._getTypeFromItem(item);
+					for each(var typeName in typeNames) {
+						if(typeName == condition.type) {
+							status = true;
+							break;
+						}
 					}
 				} else if(condition.field) {
 					var testString = new Zotero.CSL.FormattedString(this, "Text");

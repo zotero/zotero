@@ -1,4 +1,4 @@
--- 150
+-- 151
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-12-19 23:51:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-12-20 03:57:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b3.r1', '', '2006-12-15 03:40:00', 1, 100, 4, 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -9677,7 +9677,7 @@ REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '200
   </bibliography>
 </style>');
 
-REPLACE INTO "csl" VALUES('http://www.zotero.org/namespaces/CSL/chicago-author-date.csl', '2006-12-19 23:51:00', 'Chicago Manual of Style (Author-Date)',
+REPLACE INTO "csl" VALUES('http://www.zotero.org/namespaces/CSL/chicago-author-date.csl', '2006-12-20 03:33:00', 'Chicago Manual of Style (Author-Date)',
 '<?xml version="1.0" encoding="UTF-8"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="author-date" xml:lang="en">
 	<info>
@@ -9687,7 +9687,7 @@ REPLACE INTO "csl" VALUES('http://www.zotero.org/namespaces/CSL/chicago-author-d
 			<name>Simon Kornblith</name>
 			<email>simon@simonster.com</email>
 		</author>
-		<updated>2006-09-04T20:27:00+05:00</updated>
+		<updated>2006-12-20T03:33:00+05:00</updated>
 		<summary>The author-date variant of the Chicago style.</summary>
 	</info>
 	<defaults>
@@ -9697,7 +9697,7 @@ REPLACE INTO "csl" VALUES('http://www.zotero.org/namespaces/CSL/chicago-author-d
 		</contributor>
 		<author name-as-sort-order="first">
 			<name and="text" sort-separator=", " delimiter=", " delimiter-precedes-last="always"/>
-			<label form="verb-short" prefix=", " suffix="."/>
+			<label form="short" prefix=", " suffix="."/>
 			<substitute>
 				<choose>
 					<editor/>
@@ -9798,7 +9798,10 @@ REPLACE INTO "csl" VALUES('http://www.zotero.org/namespaces/CSL/chicago-author-d
 							<editor/>
 							<translator/>
 						</group>
-						<date prefix=" " suffix="."/>
+						<group class="container" prefix=" " suffix="." delimiter=", ">
+							<titles relation="container" font-style="italic"/>
+							<date/>
+						</group>
 						<access prefix=" "/>
 					</type>
 					<type name="article-journal">
@@ -9838,7 +9841,7 @@ REPLACE INTO "csl" VALUES('http://www.zotero.org/namespaces/CSL/chicago-author-d
 	</bibliography>
 </style>');
 
-REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/chicago-note.csl', '2006-10-02 17:00:00', 'Chicago Manual of Style (Note)',
+REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/chicago-note.csl', '2006-12-20 04:20:00', 'Chicago Manual of Style (Note without Bibliography)',
 '<?xml version="1.0" encoding="UTF-8"?>
 <?oxygen RNGSchema="../schema/trunk/csl.rnc" type="compact"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="note" xml:lang="en">
@@ -9857,7 +9860,7 @@ REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/chicago-note.c
       <name>Johan Kool</name>
       <email>johankool@users.sourceforge.net</email>
     </contributor>
-    <updated>2006-09-04T20:27:00+05:00</updated>
+    <updated>2006-12-20T04:20:00+05:00</updated>
     <summary>The note-without-bibliography variant of the Chicago style.</summary>
   </info>
   <defaults>
@@ -9933,7 +9936,7 @@ REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/chicago-note.c
                 <editor/>
                 <translator/>
               </group>
-              <group prefix=" (" suffix=")" delimiter=", ">
+              <group prefix="(" suffix=")" delimiter=", ">
                 <publisher/>
                 <date>
                   <year/>
@@ -9971,10 +9974,176 @@ REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/chicago-note.c
       </item>
       <item position="subsequent" ibid="true">
         <author/>
-        <title prefix=", "/>
+        <conditional>
+          <if type="book">
+            <titles prefix=", " font-style="italic" form="short"/>
+          </if><else>
+            <titles prefix=", " quotes="true" form="short"/>
+          </else>
+        </conditional>
+        <pages prefix=", "/>
       </item>
     </layout>
   </citation>
+</style>');
+
+REPLACE INTO "csl" VALUES('http://www.zotero.org/namespaces/CSL/chicago-note-bibliography.csl', '2006-12-20 03:57:00', 'Chicago Manual of Style (Note with Bibliography)',
+'<?xml version="1.0" encoding="UTF-8"?>
+<style xmlns="http://purl.org/net/xbiblio/csl" class="note" xml:lang="en">
+	<info>
+		<title>Chicago Note With Bibliography Style</title>
+		<id>http://www.zotero.org/namespaces/CSL/chicago-note-bibliography.csl</id>
+		<author>
+			<name>Simon Kornblith</name>
+			<email>simon@simonster.com</email>
+		</author>
+		<updated>2006-12-20T03:29:00+05:00</updated>
+		<summary>The note-with-bibliography variant of the Chicago style.</summary>
+	</info>
+	<defaults>
+		<contributor name-as-sort-order="no">
+			<label form="verb" suffix=" "/>
+			<name and="text" delimiter=", "/>
+		</contributor>
+		<author name-as-sort-order="first">
+			<name and="text" sort-separator=", " delimiter=", " delimiter-precedes-last="always"/>
+			<label form="short" prefix=", " suffix="."/>
+			<substitute>
+				<choose>
+					<editor/>
+					<translator/>
+					<titles relation="container" font-style="italic"/>
+					<titles/>
+				</choose>
+			</substitute>
+		</author>
+		<locator>
+			<number/>
+		</locator>
+		<identifier>
+			<number/>
+		</identifier>
+		<titles>
+			<title/>
+		</titles>
+		<date>
+			<month suffix=" " text-transform="capitalize"/>
+			<day suffix=", "/>
+			<year/>
+		</date>
+		<publisher>
+			<place suffix=": "/>
+			<name/>
+		</publisher>
+		<access>
+			<url/>
+			<text term-name="accessed" prefix=" (" suffix=" "/>
+			<date suffix=")">
+				<month suffix=" " text-transform="capitalize"/>
+				<day suffix=", "/>
+				<year/>
+			</date>
+		</access>
+	</defaults>
+	<citation suffix="." delimiter="; ">
+		<et-al min-authors="3" use-first="1"/>
+		<layout>
+			<item suffix=".">
+				<author/>
+				<conditional>
+					<if type="book">
+						<titles prefix=", " font-style="italic" form="short"/>
+					</if><else>
+						<titles prefix=", " quotes="true" form="short"/>
+					</else>
+				</conditional>
+				<pages prefix=", "/>
+			</item>
+		</layout>
+	</citation>
+	<bibliography hanging-indent="true" subsequent-author-substitute="---">
+		<sort algorithm="author-date"/>
+		<et-al min-authors="6" use-first="6"/>
+		<layout>
+			<list>
+				<heading>
+					<text term-name="works cited"/>
+				</heading>
+			</list>
+			<item suffix=".">
+				<choose>
+					<type name="book">
+						<author suffix="."/>
+						<titles prefix=" " suffix="." font-style="italic"/>
+						<group prefix=" " suffix="." delimiter=", " text-transform="capitalize">
+							<editor/>
+							<translator/>
+						</group>
+						<group prefix=" " suffix="." delimiter=", ">
+							<publisher/>
+							<date>
+								<year/>
+							</date>
+						</group>
+						<access prefix=" "/>
+					</type>
+					<type name="chapter">
+						<author suffix="."/>
+						<titles prefix=" " suffix="." quotes="true"/>
+						<group class="container" suffix=".">
+							<text prefix=" " term-name="in" text-transform="capitalize"/>
+							<titles prefix=" " relation="container" font-style="italic"/>
+							<editor prefix=", "/>
+							<translator prefix=", "/>
+							<pages prefix=", "/>
+							<group prefix=". " delimiter=", ">
+								<publisher/>								
+								<date>
+									<year/>
+								</date>
+							</group>
+						</group>
+						<access prefix=" "/>
+					</type>
+					<type name="article">
+						<author suffix="."/>
+						<titles prefix=" " quotes="true"/>
+						<group prefix=" " suffix="." delimiter=", " text-transform="capitalize">
+							<editor/>
+							<translator/>
+						</group>
+						<group class="container" prefix=" " suffix="." delimiter=", ">
+							<titles prefix=" " relation="container" font-style="italic"/>
+							<date/>
+						</group>
+						<access prefix=" "/>
+					</type>
+					<type name="article-journal">
+						<author suffix="."/>
+						<titles prefix=" " suffix="." quotes="true"/>
+						<group prefix=" " suffix="." delimiter=", " text-transform="capitalize">
+							<editor/>
+							<translator/>
+						</group>
+						<group class="container" prefix=" " suffix=".">
+							<titles relation="container" font-style="italic"/>
+							<volume prefix=" "/>			
+							<issue prefix=", no. "/>
+							<conditional>
+								<if field="date">
+									<date prefix=" (" suffix=")"/>	
+									<pages prefix=": "/>
+								</if><else>
+									<pages prefix=":"/>
+								</else>
+							</conditional>
+						</group>
+						<access prefix=" "/>
+					</type>
+				</choose>
+			</item>
+		</layout>
+	</bibliography>
 </style>');
 
 REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/mla.csl', '2006-10-23 00:21:00', 'Modern Language Association',
