@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-12-19 20:33:07'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-12-19 21:25:46'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b3.r1', '', '2006-12-15 03:40:00', 1, 100, 4, 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -6057,6 +6057,92 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
+REPLACE INTO translators VALUES ('a354331-981b-43de-a61-bc26dd1be3a9', '1.0.0b2.r2', '', '2006-12-19 21:25:46', '1', '100', '4', 'AMS MathSciNet', 'Simon Kornblith', '^http://www\.ams\.org/mathscinet/search/(?:publications\.html|publdoc\.html)', 
+'function detectWeb(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	var tableRows = doc.evaluate(''//div[@id="content"]/form/div[@class="headline"]'', doc, nsResolver,
+			XPathResult.ANY_TYPE, null);
+	if(tableRows.iterateNext()) {
+		return "multiple"
+	} else if(doc.evaluate(''//div[@id="titleSeparator"]/div[@class="navbar"]/span[@class="PageLink"]/a[text() = "Up"]'',
+		doc, nsResolver, XPathResult.ANY_TYPE, null)) {
+		return "journalArticle";
+	}
+	
+	return false;
+}', 
+'function doWeb(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	var pub = "http://www.ams.org/mathscinet/search/publications.html?fmt=bibtex";
+	
+	var tableRows = doc.evaluate(''//div[@id="content"]/form/div[@class="headline"]'', doc, nsResolver,
+			XPathResult.ANY_TYPE, null);
+	var tableRow = tableRows.iterateNext();
+	if(tableRow) {
+		// search page
+		var items = new Object();
+		var links = new Object();
+		
+		do {
+			var id = doc.evaluate(''.//input[@type="checkbox"]'', tableRow, nsResolver,
+				XPathResult.ANY_TYPE, null).iterateNext().value;
+			items[id] = doc.evaluate(''./div[@class="headlineText"]/span[@class="title"]'', tableRow, nsResolver,
+				XPathResult.ANY_TYPE, null).iterateNext().textContent;
+			links[id] = doc.evaluate(''.//a'', tableRow, nsResolver, XPathResult.ANY_TYPE,
+				null).iterateNext().href;
+		} while(tableRow = tableRows.iterateNext())
+		
+		
+		items = Zotero.selectItems(items);
+		if(!items) return true;
+		
+		var docLinks = new Array();
+		for(var id in items) {
+			pub += "&b="+id;
+			docLinks.push(links[id]);
+		}
+	} else {
+		var MR = doc.evaluate(''//div[@id="content"]/div[@class="doc"]/div[@class="headline"]/strong'',
+			doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		pub += "&b="+MR.substr(2);
+	}
+	
+	Zotero.Utilities.HTTP.doGet(pub, function(text) {
+		var m = text.match(/<pre>(?:.|[\r\n])*?<\/pre>/g);
+		var bibTeXString = "";
+		for each(var citation in m) {
+			// kill pre tags
+			citation = citation.substring(5, citation.length-6);
+			bibTeXString += citation;
+		}
+		
+		// import using BibTeX
+		var translator = Zotero.loadTranslator("import");
+		translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
+		translator.setString(bibTeXString);
+		translator.setHandler("itemDone", function(obj, item) {
+			if(docLinks) {
+				item.attachments.push({title:"MathSciNet Snapshot", url:docLinks.shift(), mimeType:"text/html"});
+			} else {
+				item.attachments.push({title:"MathSciNet Snapshot", document:doc});
+			}
+			
+			item.complete();
+		});
+		translator.translate();
+		
+		Zotero.done();
+	});
+}');
+
 REPLACE INTO translators VALUES ('e07e9b8c-0e98-4915-bb5a-32a08cb2f365', '1.0.0b2.r2', '', '2006-10-02 17:00:00', 1, 100, 8, 'Open WorldCat', 'Simon Kornblith', 'http://partneraccess.oclc.org/',
 'function detectSearch(item) {
 	if(item.itemType == "book" || item.itemType == "bookSection") {
@@ -8542,7 +8628,7 @@ function doExport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('9cb70025-a888-4a29-a210-93ec52da40d4', '1.0.0b3.r1', '', '2006-12-15 03:40:00', 1, 100, 3, 'BibTeX', 'Simon Kornblith', 'bib',
+REPLACE INTO translators VALUES ('9cb70025-a888-4a29-a210-93ec52da40d4', '1.0.0b3.r1', '', '2006-12-15 20:40:00', 1, 100, 3, 'BibTeX', 'Simon Kornblith', 'bib',
 'Zotero.configure("dataMode", "block");
 
 function detectImport() {
@@ -8584,7 +8670,6 @@ function detectImport() {
 
 var inputFieldMap = {
 	booktitle :"publicationTitle",
-	journal:"publicationTitle",
 	school:"publisher",
 	publisher:"publisher"
 };
@@ -8674,6 +8759,19 @@ function processField(item, field, value) {
 		item[fieldMap[field]] = value;
 	} else if(inputFieldMap[field]) {
 		item[inputFieldMap[field]] = value;
+	} else if(field == "journal") {
+		if(item.publicationTitle) {
+			// we already had an fjournal
+			item.journalAbbreviation = value
+		} else {
+			item.publicationTitle = value;
+		}
+	} else if(field == "fjournal") {
+		if(item.publicationTitle) {
+			// move publicationTitle to abbreviation
+			item.journalAbbreviation = value;
+		}
+		item.publicationTitle = value;
 	} else if(field == "author" || field == "editor") {
 		// parse authors/editors
 		var names = value.split(" and ");
@@ -8804,7 +8902,7 @@ function getFieldValue() {
 }
 
 function beginRecord(type, closeChar) {
-	type = type.toLowerCase()
+	type = Zotero.Utilities.cleanString(type.toLowerCase());
 	if(inputTypeMap[type]) {
 		var item = new Zotero.Item(inputTypeMap[type]);
 	} else {
@@ -8818,6 +8916,8 @@ function beginRecord(type, closeChar) {
 			Zotero.debug("discarded item from BibTeX; type was "+type);
 		}
 	}
+	
+	item.extra = "";
 	
 	var field = "";
 	while(read = Zotero.read(1)) {
