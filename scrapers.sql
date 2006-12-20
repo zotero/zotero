@@ -1,4 +1,4 @@
--- 151
+-- 152
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-12-20 03:57:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-12-20 06:05:01'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b3.r1', '', '2006-12-15 03:40:00', 1, 100, 4, 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -6141,6 +6141,115 @@ REPLACE INTO translators VALUES ('a354331-981b-43de-a61-bc26dd1be3a9', '1.0.0b2.
 		
 		Zotero.done();
 	});
+}');
+
+REPLACE INTO translators VALUES ('938ebe32-2b2e-4349-a5b3-b3a05d3de627', '1.0.0b3.r1', '', '2006-12-20 06:05:01', '1', '100', '4', 'ACS Publications', 'Simon Kornblith', '^http://pubs\.acs\.org/(?:wls/journals/query/subscriberResults\.html|acs/journals/toc.page|cgi-bin/(?:article|abstract).cgi/[^/]+/[0-9]+/[0-9]+/i[0-9]+/(?:html|abs)/[^\.]+.html)', 
+'function detectWeb(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	if(url.indexOf("/toc.page") != -1 || url.indexOf("subscriberResults.html") != -1) {
+		if(doc.evaluate(''//form/span[@class="text"]/p/table/tbody/tr/td/table[@class="text"]/tbody/tr/td/table | //td[@class="bodyTD"]/span[@class="text"]/table/tbody/tr/td/table'',
+			doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) return "multiple";
+	} else {
+		return "journalArticle"
+	}
+	
+	return false;
+}', 
+'function handleRequests(requests) {
+	if(requests.length == 0) {
+		Zotero.done();
+		return;
+	}
+	
+	var request = requests.shift();
+	
+	Zotero.Utilities.HTTP.doPost("http://pubs.acs.org/servlet/citation/CitationServlet",
+							"format=refmgr&submit=1&"+request.post, function(text) {
+		// load translator for RIS
+		var translator = Zotero.loadTranslator("import");
+		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+		translator.setString(text);
+		translator.setHandler("itemDone", function(obj, item) {			
+			item.attachments = new Array();
+			if(request.snapshot) {
+				if(typeof(request.snapshot) == "string") {
+					item.attachments.push({title:"ACS Snapshot", mimeType:"text/html", url:request.snapshot});
+				} else {
+					// doc object
+					item.attachments.push({title:"ACS Snapshot", document:request.snapshot});
+				}
+			}
+			if(request.pdf) {
+				item.attachments.push({title:"ACS Full Text PDF", mimeType:"application/pdf", url:request.pdf});
+			}
+			
+			item.complete();
+		});
+		translator.translate();
+		
+		handleRequests(requests);
+	});
+}
+
+function doWeb(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	var dataRe = /https?:\/\/[^/]+\/cgi-bin\/[^\.]+\.cgi\/([^\/]+).*\/(.*)\.(?:html|pdf)/;
+	
+	var tableRows = doc.evaluate(''//form/span[@class="text"]/p/table/tbody/tr/td/table[@class="text"]/tbody/tr/td/table | //td[@class="bodyTD"]/span[@class="text"]/table/tbody/tr/td/table'',
+		doc, nsResolver, XPathResult.ANY_TYPE, null);
+	var tableRow = tableRows.iterateNext();
+	if(tableRow) {
+		// search page
+		var items = new Array();
+		var snapshots = new Array();
+		var pdfs = new Array();
+		
+		var tableRow;
+		do {
+			var snapshot = undefined;
+			var links = doc.evaluate(''.//a[@class="link"]'', tableRow, nsResolver, XPathResult.ANY_TYPE, null);
+			while(link = links.iterateNext()) {
+				if(link.textContent == "HTML") {
+					snapshot = link.href;
+				} else if(link.textContent == "PDF") {
+					var m = dataRe.exec(link.href);
+					var id = "coden="+m[1]+"&jid="+m[2];
+					pdfs[id] = link.href;
+				}
+			}
+			
+			items[id] = Zotero.Utilities.cleanString(doc.evaluate(''.//span[@class="textbold"]'', tableRow,
+				nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+			snapshots[id] = snapshot;
+		} while(tableRow = tableRows.iterateNext());
+		
+		items = Zotero.selectItems(items);
+		if(!items) return true;
+		
+		var requests = new Array();
+		for(var post in items) {
+			requests.push({post:post, snapshot:snapshots[post], pdf:pdfs[post]});
+		}
+	} else {
+		var pdf = doc.evaluate(''/html/body/a[text()="[PDF version of this article]"]'', doc, nsResolver,
+			XPathResult.ANY_TYPE, null).iterateNext();
+		if(pdf) pdf = pdf.href;
+		
+		var m = dataRe.exec(url);
+		var requests = [{post:"coden="+m[1]+"&jid="+m[2], snapshot:doc, pdf:pdf}];
+	}
+	
+	handleRequests(requests);
+		
+	Zotero.wait();
 }');
 
 REPLACE INTO translators VALUES ('e07e9b8c-0e98-4915-bb5a-32a08cb2f365', '1.0.0b2.r2', '', '2006-10-02 17:00:00', 1, 100, 8, 'Open WorldCat', 'Simon Kornblith', 'http://partneraccess.oclc.org/',
