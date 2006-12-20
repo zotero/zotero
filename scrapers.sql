@@ -1,4 +1,4 @@
--- 148
+-- 149
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-12-19 18:46:32'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-12-19 20:33:07'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b3.r1', '', '2006-12-15 03:40:00', 1, 100, 4, 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -5883,7 +5883,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('5eacdb93-20b9-4c46-a89b-523f62935ae4', '1.0.0b2.r2', '', '2006-12-19 18:46:32', '1', '100', '4', 'Oxford Journals', 'Simon Kornblith', '^http://[^/]+/(?:cgi/searchresults|cgi/content/(?:abstract|full)/[0-9]+/[0-9]+/[0-9]+)', 
+REPLACE INTO translators VALUES ('5eacdb93-20b9-4c46-a89b-523f62935ae4', '1.0.0b2.r2', '', '2006-12-19 20:33:07', '1', '100', '4', 'Oxford Journals', 'Simon Kornblith', '^http://[^/]+/(?:cgi/searchresults|cgi/content/(?:abstract|full)/[0-9]+/[0-9]+/[0-9]+|current.dtl|content/vol[0-9]+/issue[0-9]+/index.dtl)', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -5893,6 +5893,8 @@ REPLACE INTO translators VALUES ('5eacdb93-20b9-4c46-a89b-523f62935ae4', '1.0.0b
 	if(doc.title == "Oxford Journals -- Search Result") {
 		if(doc.evaluate(''//div[@id="hw"]/table/tbody/tr/td/p/font/table/tbody/tr[td/input[@type="checkbox"]]'', doc,
 			nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) return "multiple";
+	} else if(doc.title.indexOf(" -- Table of Contents") != -1) {
+		if(doc.evaluate(''//div[@id="hw"]/form/dl'', doc, nsResolver, XPathResult.ANY_TYPE,null).iterateNext()) return "multiple";
 	} else {
 		if(doc.evaluate(''//a[substring(@href, 1, 16) = "/cgi/citmgr?gca="]'', doc, nsResolver,
 			XPathResult.ANY_TYPE, null).iterateNext()) return "journalArticle";
@@ -5954,31 +5956,59 @@ function doWeb(doc, url) {
 	var requests = new Array();
 	var hostRe = /https?:\/\/[^\/]+/;
 	
-	if(doc.title == "Oxford Journals -- Search Result") {
+	var isSearch = doc.title == "Oxford Journals -- Search Result";
+	var isTOC = doc.title.indexOf(" -- Table of Contents") != -1;
+	if(isSearch || isTOC) {
 		// search page
 		var items = new Object();
 		var snapshots = new Object();
 		var pdfs = new Object();
 		
-		var tableRows = doc.evaluate(''//div[@id="hw"]/table/tbody/tr/td/p/font/table/tbody/tr[td/input[@type="checkbox"]]'', doc,
-			nsResolver, XPathResult.ANY_TYPE, null);
+		if(isTOC) {
+			var gcaRe = /^https?:\/\/[^\/]+\/cgi\/content\/abstract\/([0-9]+\/[0-9]+\/[0-9]+)/;
+			var tableRows = doc.evaluate(''//div[@id="hw"]/form/dl'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		} else {
+			var tableRows = doc.evaluate(''//div[@id="hw"]/table/tbody/tr/td/p/font/table/tbody/tr[td/input[@type="checkbox"]]'', doc,
+				nsResolver, XPathResult.ANY_TYPE, null);
+		}
+		
 		var tableRow, link;
 		while(tableRow = tableRows.iterateNext()) {
-			var gca = doc.evaluate(''./td/input[@type="checkbox"]'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().value;
-			var title = doc.evaluate(''./td/font/strong'', tableRow, nsResolver, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
-			title = title.snapshotItem(title.snapshotLength-1).textContent;
-			
 			var snapshot = undefined;
 			var pdf = undefined;
-			var links = doc.evaluate(''.//font/strong/a'', tableRow, nsResolver, XPathResult.ANY_TYPE, null);
-			while(link = links.iterateNext()) {
-				// prefer Full Text snapshots, but take abstracts
-				if((link.textContent == "Abstract" && !snapshot) || link.textContent == "Full Text") {
-					snapshot = link.href;
-				} else if(link.textContent == "PDF") {
-					pdf = link.href;
+			
+			if(isTOC) {
+				var title = doc.evaluate(''.//strong'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+				
+				var links = doc.evaluate(''.//a'', tableRow, nsResolver, XPathResult.ANY_TYPE, null);
+				while(link = links.iterateNext()) {
+					// prefer Full Text snapshots, but take abstracts
+					if(link.textContent == "[Abstract]") {
+						if(!snapshot) snapshot = link.href;
+						var m = gcaRe.exec(link.href);
+						var gca = m[1];
+					} else if (link.textContent == "[Full Text]") {
+						snapshot = link.href;
+					} else if(link.textContent == "[PDF]") {
+						pdf = link.href;
+					}
+				}
+			} else {
+				var gca = doc.evaluate(''./td/input[@type="checkbox"]'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().value;
+				var title = doc.evaluate(''./td/font/strong'', tableRow, nsResolver, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+				title = title.snapshotItem(title.snapshotLength-1).textContent;
+				
+				var links = doc.evaluate(''.//font/strong/a'', tableRow, nsResolver, XPathResult.ANY_TYPE, null);
+				while(link = links.iterateNext()) {
+					// prefer Full Text snapshots, but take abstracts
+					if((link.textContent == "Abstract" && !snapshot) || link.textContent == "Full Text") {
+						snapshot = link.href;
+					} else if(link.textContent == "PDF") {
+						pdf = link.href;
+					}
 				}
 			}
+			
 			snapshots[gca] = snapshot;
 			pdfs[gca] = pdf;
 			
