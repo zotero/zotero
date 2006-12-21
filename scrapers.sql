@@ -1,4 +1,4 @@
--- 154
+-- 155
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -10056,13 +10056,13 @@ REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/chicago-note.c
               <titles quotes="true"/>
             </group>
             <group class="container">
-              <text term-name="in" text-transform="lowercase"/>
+              <text prefix=" " term-name="in" text-transform="lowercase"/>
               <group delimiter=", ">
                 <titles relation="container" prefix=" " font-style="italic"/>
                 <editor/>
                 <translator/>
               </group>
-              <group prefix="(" suffix=")" delimiter=", ">
+              <group prefix=" (" suffix=")" delimiter=", ">
                 <publisher/>
                 <date>
                   <year/>

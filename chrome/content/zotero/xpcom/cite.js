@@ -422,14 +422,8 @@ Zotero.CSL.prototype.createCitation = function(citation, format) {
 		var string = this._getTerm("ibid");
 		string = string[0].toUpperCase()+string.substr(1);
 	} else {
-		var string = "";
+		var lasti = citation.itemIDs.length-1;
 		for(var i in citation.itemIDs) {
-			if(this._cit.format && this._cit.format.delimiter && string) {
-				// add delimiter if one exists, and this isn't the first element
-				// with content
-				string += this._cit.format.delimiter;
-			}
-			
 			var locatorType = false;
 			var locator = false;
 			if(citation.locators) {
@@ -444,9 +438,14 @@ Zotero.CSL.prototype.createCitation = function(citation, format) {
 				locator = citation.locators[i];
 			}
 			
-			string += this._getCitation(Zotero.Items.get(citation.itemIDs[i]),
+			string = this._getCitation(Zotero.Items.get(citation.itemIDs[i]),
 				(citation.citationType[i] == 1 ? "first" : "subsequent"),
 				locatorType, locator, format, this._cit);
+			
+			if(this._cit.format && this._cit.format.delimiter && i != lasti) {
+				// add delimiter if one exists, and this isn't the last element
+				string += this._cit.format.delimiter;
+			}
 		}
 	}
 	
@@ -454,14 +453,14 @@ Zotero.CSL.prototype.createCitation = function(citation, format) {
 	if(this._cit.format) {
 		// add citation prefix or suffix
 		if(this._cit.format.prefix) {
-			string = this._cit.format.prefix + string ;
+			string.string = string.string + this._cit.format.prefix;
 		}
 		if(this._cit.format.suffix) {
-			string += this._cit.format.suffix;
+			string.append(this._cit.format.suffix);
 		}
 	}
 	
-	return string;
+	return string.get();
 }
 
 /*
@@ -490,7 +489,7 @@ Zotero.CSL.prototype.createBibliography = function(items, format) {
 	for(var i in items) {
 		var item = items[i];
 		
-		var string = this._getCitation(item, "first", false, false, format, this._bib);
+		var string = this._getCitation(item, "first", false, false, format, this._bib).get();
 		if(!string) {
 			continue;
 		}
@@ -1115,7 +1114,7 @@ Zotero.CSL.prototype._getCitation = function(item, position, locatorType, locato
 		                    typeName);
 	}
 	
-	return formattedString.get();
+	return formattedString;
 }
 
 /*
@@ -1404,8 +1403,24 @@ Zotero.CSL.FormattedString.prototype.concat = function(formattedString, element)
 	}
 	
 	if(formattedString.string) {
-		return this.append(formattedString.get(), element, false, true);
+		// first, append the actual string
+		var haveAppended = this.append(formattedString.string, element, false, true);
+		
+		// if there's close punctuation to append, that also counts
+		if(formattedString.closePunctuation) {
+			haveAppended = true;
+			if(this.closePunctuation) {
+				// if there's existing close punctuation and punctuation to
+				// append, we need to append that
+				this.string += this.closePunctuation;
+			}
+			// add the new close punctuation
+			this.closePunctuation = formattedString.closePunctuation;
+		}
+		
+		return haveAppended;
 	}
+	return false;
 }
 
 /*
@@ -1430,9 +1445,10 @@ Zotero.CSL.FormattedString.prototype.append = function(string, element, dontDeli
 	// close quotes, etc. using punctuation
 	if(this.closePunctuation) {
 		if(Zotero.CSL.FormattedString._punctuation.indexOf(string[0]) != -1) {
-			this.string += string[0]+this.closePunctuation;
+			this.string += string[0];
 			string = string.substr(1);
 		}
+		this.string += this.closePunctuation;
 		this.closePunctuation = false;
 	}
 	
