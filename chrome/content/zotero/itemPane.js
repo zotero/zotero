@@ -1028,15 +1028,26 @@ var ZoteroItemPane = new function()
 					if (row == row.parentNode.lastChild)
 					{
 						_tabDirection = 1;
+						var lastTag = true;
 					}
 				}
 				target.blur();
+				
+				// Return focus to items pane
+				if (!lastTag) {
+					document.getElementById('zotero-items-tree').focus();
+				}
+				
 				return false;
 				
 			case event.DOM_VK_ESCAPE:
 				// Reset field to original value
 				target.value = target.getAttribute('value');
 				target.blur();
+				
+				// Return focus to items pane
+				document.getElementById('zotero-items-tree').focus();
+				
 				return false;
 				
 			case event.DOM_VK_TAB:
@@ -1198,11 +1209,6 @@ var ZoteroItemPane = new function()
 				var focusBox = _dynamicFields;
 			}
 			_focusNextField(focusMode, focusBox, _lastTabIndex, _tabDirection==-1);
-		}
-		// If not tab and not new tag, return focus to items pane
-		// DEBUG: is this the best place for this?
-		else if (focusMode != 'tags') {
-			document.getElementById('zotero-items-tree').focus();
 		}
 	}
 	
