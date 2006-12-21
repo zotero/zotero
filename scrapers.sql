@@ -5883,7 +5883,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('5eacdb93-20b9-4c46-a89b-523f62935ae4', '1.0.0b3.r1', '', '2006-12-21 18:29:08', '1', '100', '4', 'HighWire', 'Simon Kornblith', '^http://[^/]+/(?:cgi/searchresults|cgi/search|cgi/content/(?:abstract|full)/[^/]+/[0-9]+/[0-9]+|current.dtl$|content/vol[0-9]+/issue[0-9]+/(?:index.dtl)?$)', 
+REPLACE INTO translators VALUES ('5eacdb93-20b9-4c46-a89b-523f62935ae4', '1.0.0b3.r1', '', '2006-12-21 18:29:08', '1', '100', '4', 'HighWire', 'Simon Kornblith', '^http://[^/]+/(?:cgi/searchresults|cgi/search|cgi/content/(?:abstract|full|summary)/[^/]+/[0-9]+/[0-9]+|current.dtl$|content/vol[0-9]+/issue[0-9]+/(?:index.dtl)?$)', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
