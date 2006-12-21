@@ -424,7 +424,7 @@ Zotero.Item.prototype.setField = function(field, value, loadIn){
 				'setField');
 		}
 		
-		if (this._data[field] && this._data[field]==value){
+		if (this._data[field] != undefined && this._data[field]==value){
 			return false;
 		}
 		this._data[field] = value;
