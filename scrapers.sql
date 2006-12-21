@@ -1,4 +1,4 @@
--- 155
+-- 156
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-12-20 06:54:08'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-12-21 17:23:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b3.r1', '', '2006-12-15 03:40:00', 1, 100, 4, 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -8134,19 +8134,22 @@ function doImport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7', '1.0.0b3.r1', '', '2006-12-15 23:36:00', 1, 100, 3, 'RIS', 'Simon Kornblith', 'ris',
+REPLACE INTO translators VALUES ('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7', '1.0.0b3.r1', '', '2006-12-21 17:23:00', 1, 100, 3, 'RIS', 'Simon Kornblith', 'ris',
 'Zotero.configure("dataMode", "line");
 Zotero.addOption("exportNotes", true);
 
 function detectImport() {
 	var line;
+	var i = 0;
 	while((line = Zotero.read()) !== "false") {
 		line = line.replace(/^\s+/, "");
 		if(line != "") {
 			if(line.substr(0, 6) == "TY  - ") {
 				return true;
 			} else {
-				return false;
+				if(i++ > 3) {
+					return false;
+				}
 			}
 		}
 	}
