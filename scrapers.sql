@@ -10056,7 +10056,7 @@ REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/chicago-note.c
               <titles quotes="true"/>
             </group>
             <group class="container">
-              <text prefix=" " term-name="in" text-transform="lowercase"/>
+              <text prefix=", " term-name="in" text-transform="lowercase"/>
               <group delimiter=", ">
                 <titles relation="container" prefix=" " font-style="italic"/>
                 <editor/>
