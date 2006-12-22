@@ -46,6 +46,8 @@ var Zotero_File_Interface_Export = new function() {
 		var formatMenu = document.getElementById("format-menu");
 		var optionsBox = document.getElementById("translator-options");
 		
+		var selectedTranslator = Zotero.Prefs.get("export.lastTranslator");
+		
 		// add styles to list
 		for(i in translators) {
 			var itemNode = document.createElement("menuitem");
@@ -75,6 +77,11 @@ var Zotero_File_Interface_Export = new function() {
 					addedOptions[option] = true;
 				}
 			}
+			
+			// select last selected translator
+			if(translators[i].translatorID == selectedTranslator) {
+				formatMenu.selectedIndex = i;
+			}
 		}
 		
 		// select first item by default
@@ -82,16 +89,20 @@ var Zotero_File_Interface_Export = new function() {
 			formatMenu.selectedIndex = 0;
 		}
 		
-		updateOptions();
+		updateOptions(Zotero.Prefs.get("export.translatorSettings"));
 	}
 	
 	/*
 	 * update translator-specific options
 	 */
-	function updateOptions() {
+	function updateOptions(optionString) {
 		// get selected translator
 		var index = document.getElementById("format-menu").selectedIndex;
 		var translatorOptions = window.arguments[0].translators[index].displayOptions;
+		
+		if(optionString) {
+			var options = optionString.split(",");
+		}
 		
 		var optionsBox = document.getElementById("translator-options");
 		for(var i=0; i<optionsBox.childNodes.length; i++) {
@@ -105,8 +116,14 @@ var Zotero_File_Interface_Export = new function() {
 				
 				var defValue = translatorOptions[optionName];
 				if(typeof(defValue) == "boolean") {
-					// if option exists, enable it and set to default value
-					node.setAttribute("checked", (defValue ? "true" : "false"));
+					if(optionString) {
+						// if there's a saved prefs string, use it
+						var isChecked = options.shift();
+					} else {
+						// use defaults
+						var isChecked = (defValue ? "true" : "false");
+					}
+					node.setAttribute("checked", isChecked);
 				}
 			} else {
 				// option should be disabled and unchecked to prevent confusion
@@ -124,7 +141,11 @@ var Zotero_File_Interface_Export = new function() {
 		var index = document.getElementById("format-menu").selectedIndex;
 		window.arguments[0].selectedTranslator = window.arguments[0].translators[index];
 		
-		// set options on selected translator
+		// save selected translator
+		Zotero.Prefs.set("export.lastTranslator", window.arguments[0].translators[index].translatorID);
+		
+		// set options on selected translator and generate optionString
+		var optionString = "";
 		var optionsAvailable = window.arguments[0].selectedTranslator.displayOptions;
 		for(var option in optionsAvailable) {
 			var defValue = optionsAvailable[option];
@@ -132,12 +153,18 @@ var Zotero_File_Interface_Export = new function() {
 			
 			if(typeof(defValue) == "boolean") {
 				if(element.checked == true) {
+					optionString += ",true";
 					optionsAvailable[option] = true;
 				} else {
+					optionString += ",false";
 					optionsAvailable[option] = false;
 				}
 			}
 		}
+		
+		// save options
+		if(optionString) optionString = optionString.substr(1);
+		Zotero.Prefs.set("export.translatorSettings", optionString);
 	}
 	
 	/*

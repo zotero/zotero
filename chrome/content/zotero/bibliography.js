@@ -29,7 +29,7 @@
 // Class to provide options for bibliography
 
 var Zotero_File_Interface_Bibliography = new function() {
-	var _io;
+	var _io, _saveStyle;
 	
 	this.init = init;
 	this.acceptSelection = acceptSelection;
@@ -48,6 +48,12 @@ var Zotero_File_Interface_Bibliography = new function() {
 		var styleMenu = document.getElementById("style-menu");
 		var styles = Zotero.Cite.getStyles();
 		
+		// if no style is set, get the last style used
+		if(!_io.style) {
+			_io.style = Zotero.Prefs.get("export.lastStyle");
+			_saveStyle = true;
+		}
+		
 		// add styles to list
 		for(i in styles) {
 			var itemNode = document.createElement("menuitem");
@@ -65,11 +71,15 @@ var Zotero_File_Interface_Bibliography = new function() {
 			styleMenu.selectedIndex = 0;
 		}
 		
-		// disable clipboard on the Mac, because it can't support formatted
-		// output
-		if(Zotero.isMac && document.getElementById("copy-to-clipboard") &&
-		   !Zotero.Prefs.get("enableMacClipboard")) {
-			document.getElementById("copy-to-clipboard").hidden = "true";
+		if(document.getElementById("save-as-rtf")) {
+			// restore saved bibliographic settings
+			document.getElementById(Zotero.Prefs.get("export.bibliographySettings")).setAttribute("selected", "true");
+			
+			// disable clipboard on the Mac, because it can't support formatted
+			// output
+			if(Zotero.isMac && !Zotero.Prefs.get("enableMacClipboard")) {
+				document.getElementById("copy-to-clipboard").hidden = "true";
+			}
 		}
 		
 		// move to center of screen
@@ -84,7 +94,16 @@ var Zotero_File_Interface_Bibliography = new function() {
 		// collect code
 		_io.style = document.getElementById("style-menu").selectedItem.value;
 		if(document.getElementById("output-radio")) {
+			// collect settings
 			_io.output = document.getElementById("output-radio").selectedItem.id;
+			// save settings
+			Zotero.Prefs.set("export.bibliographySettings", _io.output);
+		}
+		
+		// save style (this happens only for "Export Bibliography," or Word
+		// integration when no bibliography style was previously selected)
+		if(_saveStyle) {
+			Zotero.Prefs.set("export.lastStyle", _io.style);
 		}
 	}
 }

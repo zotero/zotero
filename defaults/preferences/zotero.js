@@ -24,3 +24,9 @@ pref("extensions.zotero.keys.quicksearch", 'K');
 pref("extensions.zotero.keys.newItem", 'N');
 pref("extensions.zotero.keys.newNote", 'O');
 pref("extensions.zotero.keys.toggleTagSelector", 'T');
+
+// Export and citation settings
+pref("extensions.zotero.export.lastTranslator", '14763d24-8ba0-45df-8f52-b8d1108e7ac9');
+pref("extensions.zotero.export.translatorSettings", 'true,false');
+pref("extensions.zotero.export.lastStyle", 'http://purl.org/net/xbiblio/csl/styles/apa.csl');
+pref("extensions.zotero.export.bibliographySettings", 'save-as-rtf');
