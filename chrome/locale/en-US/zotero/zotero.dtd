@@ -58,8 +58,8 @@
 <!ENTITY zotero.tagSelector.filter					"Filter:">
 <!ENTITY zotero.tagSelector.displayAll				"Display All">
 <!ENTITY zotero.tagSelector.selectVisible			"Select Visible">
-<!ENTITY zotero.tagSelector.clearVisible				"Clear Visible">
-<!ENTITY zotero.tagSelector.clearAll					"Clear All">
+<!ENTITY zotero.tagSelector.clearVisible				"Deselect Visible">
+<!ENTITY zotero.tagSelector.clearAll					"Deselect All">
 <!ENTITY zotero.tagSelector.renameTag				"Rename Tag...">
 <!ENTITY zotero.tagSelector.deleteTag				"Delete Tag...">
 

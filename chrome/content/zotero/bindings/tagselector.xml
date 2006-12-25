@@ -478,8 +478,10 @@
 						</xul:textbox>
 					</xul:hbox>
 					<xul:hbox>
+						<!--
+						Disabled until there's an ANY search mode
 						<xul:toolbarbutton label="&zotero.tagSelector.selectVisible;" class="zotero-clicky"
-							oncommand="this.parentNode.parentNode.parentNode.selectVisible()"/>
+							oncommand="this.parentNode.parentNode.parentNode.selectVisible()"/>-->
 						<xul:toolbarbutton label="&zotero.tagSelector.clearVisible;" class="zotero-clicky"
 							oncommand="this.parentNode.parentNode.parentNode.clearVisible()"/>
 						<xul:toolbarbutton label="&zotero.tagSelector.clearAll;" class="zotero-clicky"
