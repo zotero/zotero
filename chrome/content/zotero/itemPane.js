@@ -865,7 +865,9 @@ var ZoteroItemPane = new function()
 	function showEditor(elem)
 	{
 		// Blur any active fields
-		_dynamicFields.focus();
+		if (_dynamicFields) {
+			_dynamicFields.focus();
+		}
 		
 		//Zotero.debug('Showing editor');
 		
@@ -1038,7 +1040,10 @@ var ZoteroItemPane = new function()
 				
 				// Return focus to items pane
 				if (!lastTag) {
-					document.getElementById('zotero-items-tree').focus();
+					var tree = document.getElementById('zotero-items-tree');
+					if (tree) {
+						tree.focus();
+					}
 				}
 				
 				return false;
@@ -1049,7 +1054,10 @@ var ZoteroItemPane = new function()
 				target.blur();
 				
 				// Return focus to items pane
-				document.getElementById('zotero-items-tree').focus();
+				var tree = document.getElementById('zotero-items-tree');
+				if (tree) {
+					tree.focus();
+				}
 				
 				return false;
 				
