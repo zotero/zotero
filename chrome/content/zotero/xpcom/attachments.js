@@ -178,6 +178,13 @@ Zotero.Attachments = new function(){
 			nsIURL.spec = url;
 			var ext = nsIURL.fileExtension;
 			
+			// Override MIME type to application/pdf if extension is .pdf --
+			// workaround for sites that respond to the HEAD request with an
+			// invalid MIME type (https://www.zotero.org/trac/ticket/460)
+			if (ext == 'pdf') {
+				mimeType = 'application/pdf';
+			}
+			
 			// If we can load this natively, use a hidden browser (so we can
 			// get the charset and title and index the document)
 			if (Zotero.MIME.hasNativeHandler(mimeType, ext)){
@@ -294,8 +301,18 @@ Zotero.Attachments = new function(){
 		
 		// Otherwise do a head request for the mime type
 		Zotero.Utilities.HTTP.doHead(url, function(obj){
+			var mimeType = obj.channel.contentType;
+			
+			// Override MIME type to application/pdf if extension is .pdf --
+			// workaround for sites that respond to the HEAD request with an
+			// invalid MIME type (https://www.zotero.org/trac/ticket/460)
+			var ext = _getExtensionFromURL(url);
+			if (ext == 'pdf') {
+				mimeType = 'application/pdf';
+			}
+			
 			_addToDB(null, url, title, Zotero.Attachments.LINK_MODE_LINKED_URL,
-				obj.channel.contentType, null, sourceItemID);
+				mimeType, null, sourceItemID);
 		});
 		
 		return true;
