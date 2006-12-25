@@ -864,6 +864,9 @@ var ZoteroItemPane = new function()
 	
 	function showEditor(elem)
 	{
+		// Blur any active fields
+		_dynamicFields.focus();
+		
 		//Zotero.debug('Showing editor');
 		
 		var fieldName = elem.getAttribute('fieldname');
