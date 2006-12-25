@@ -10,6 +10,7 @@
 <!ENTITY zotero.preferences.position.browser				"browser content">
 <!ENTITY zotero.preferences.parseEndnote					"Use Zotero for downloaded EndNote files">
 <!ENTITY zotero.preferences.automaticSnapshots			"Automatically take snapshots when creating items from web pages">
+<!ENTITY zotero.preferences.downloadAssociatedFiles		"Automatically attach associated PDFs and other files when saving items">
 <!ENTITY zotero.preferences.openurl.caption				"OpenURL">
 <!ENTITY zotero.preferences.openurl.custom				"Custom...">
 <!ENTITY zotero.preferences.openurl.server				"Resolver:">

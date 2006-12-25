@@ -26,6 +26,17 @@
 <?xml-stylesheet href="chrome://browser/skin/preferences/preferences.css"?>
 <?xml-stylesheet href="chrome://zotero/skin/preferences.css"?>
 
+<!--
+
+To add a new preference:
+	1) Add a new <preference> to <preferences>
+	2) Add a XUL control with a 'preference' attribute
+	3) (Optional) Add additional setup/change logic to preferences.js
+	4) (Optional) To add an observer for a preference change,
+		add an appropriate case in the switch statement
+		in Zotero.Prefs.observe()
+
+-->
 <prefwindow id="zotero-prefs" title="&zotero.preferences.title;" onload="moveToAlertPosition(); init()"
 		windowtype="zotero:pref" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 	
@@ -36,6 +47,7 @@
 			<preference id="pref-reportTranslationFailure" name="extensions.zotero.reportTranslationFailure" type="bool"/>
 			<preference id="pref-parseEndNoteMIMETypes" name="extensions.zotero.parseEndNoteMIMETypes" type="bool" onchange="Zotero.Ingester.MIMEHandler.init()"/>
 			<preference id="pref-automaticSnapshots" name="extensions.zotero.automaticSnapshots" type="bool"/>
+			<preference id="pref-downloadAssociatedFiles" name="extensions.zotero.downloadAssociatedFiles" type="bool"/>
 			<preference id="pref-openURL-resolver" name="extensions.zotero.openURL.resolver" type="string"/>
 			<preference id="pref-openURL-version" name="extensions.zotero.openURL.version" type="string"/>
 		</preferences>
@@ -57,10 +69,9 @@
 		</hbox>
 		
 		<checkbox label="&zotero.preferences.reportTranslationFailure;" preference="pref-reportTranslationFailure"/>
-		
 		<checkbox label="&zotero.preferences.parseEndnote;" preference="pref-parseEndNoteMIMETypes"/>
-		
 		<checkbox label="&zotero.preferences.automaticSnapshots;" preference="pref-automaticSnapshots"/>
+		<checkbox label="&zotero.preferences.downloadAssociatedFiles;" preference="pref-downloadAssociatedFiles"/>
 		
 		<groupbox>
 			<caption label="&zotero.preferences.openurl.caption;"/>
