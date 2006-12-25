@@ -36,11 +36,26 @@ Zotero.ItemTreeView = function(itemGroup, sourcesOnly)
 	this._itemGroup = itemGroup;
 	this._sourcesOnly = sourcesOnly;
 	
+	this._callbacks = [];
+	
 	this._treebox = null;
 	this.refresh();
 	
 	this._unregisterID = Zotero.Notifier.registerObserver(this, 'item');
 }
+
+
+Zotero.ItemTreeView.prototype.addCallback = function(callback) {
+	this._callbacks.push(callback);
+}
+
+
+Zotero.ItemTreeView.prototype._runCallbacks = function() {
+	for each(var cb in this._callbacks) {
+		cb();
+	}
+}
+
 
 /*
  *  Called by the tree itself
@@ -59,7 +74,11 @@ Zotero.ItemTreeView.prototype.setTree = function(treebox)
 	{
 		this.sort();
 	}
+	
+	//Zotero.debug('Running callbacks in itemTreeView.setTree()', 4);
+	this._runCallbacks();
 }
+
 
 /*
  *  Reload the rows from the data access methods
@@ -629,15 +648,24 @@ Zotero.ItemTreeView.prototype.deleteSelection = function(eraseChildren, force)
 	this._treebox.endUpdateBatch();
 }
 
+
 /*
- *  Set the search filter on the view
+ * Set the tags filter on the view
  */
-Zotero.ItemTreeView.prototype.searchText = function(search)
-{
+Zotero.ItemTreeView.prototype.setFilter = function(type, data) {
 	this.selection.selectEventsSuppressed = true;
 	var savedSelection = this.saveSelection();
 	
-	this._itemGroup.setSearch(search);
+	switch (type) {
+		case 'search':
+			this._itemGroup.setSearch(data);
+			break;
+		case 'tags':
+			this._itemGroup.setTags(data);
+			break;
+		default:
+			throw ('Invalid filter type in setFilter');
+	}
 	var oldCount = this.rowCount;
 	this.refresh();
 	this._treebox.rowCountChanged(0,this.rowCount-oldCount);
@@ -647,7 +675,10 @@ Zotero.ItemTreeView.prototype.searchText = function(search)
 	this.rememberSelection(savedSelection);
 	this.selection.selectEventsSuppressed = false;
 	this._treebox.invalidate();
+	//Zotero.debug('Running callbacks in itemTreeView.setFilter()', 4);
+	this._runCallbacks();
 }
+
 
 /*
  *  Called by various view functions to show a row

@@ -56,9 +56,12 @@
 <!ENTITY zotero.toolbar.attachment.snapshot			"Take Snapshot of Current Page">
 
 <!ENTITY zotero.tagSelector.filter					"Filter:">
+<!ENTITY zotero.tagSelector.displayAll				"Display All">
 <!ENTITY zotero.tagSelector.selectVisible			"Select Visible">
 <!ENTITY zotero.tagSelector.clearVisible				"Clear Visible">
 <!ENTITY zotero.tagSelector.clearAll					"Clear All">
+<!ENTITY zotero.tagSelector.renameTag				"Rename Tag...">
+<!ENTITY zotero.tagSelector.deleteTag				"Delete Tag...">
 
 <!ENTITY zotero.selectitems.title						"Select Items">
 <!ENTITY zotero.selectitems.intro.label				"Select which items you'd like to add to your library">

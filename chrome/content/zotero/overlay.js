@@ -148,6 +148,9 @@ var ZoteroPane = new function()
 	 */
 	function onUnload()
 	{
+		var tagSelector = document.getElementById('zotero-tag-selector');
+		tagSelector.unregister();
+		
 		collectionsView.unregister();
 		if(itemsView)
 			itemsView.unregister();
@@ -310,13 +313,17 @@ var ZoteroPane = new function()
 	function toggleTagSelector(){
 		var tagSelector = document.getElementById('zotero-tag-selector');
 		var collapsed = tagSelector.getAttribute('collapsed')=='true';
-		// If hiding, clear selection
-		if (!collapsed){
-			tagSelector.init();
-		}
 		tagSelector.setAttribute('collapsed', !collapsed);
+		// If showing, set scope to items in current view
+		// and focus filter textbox
 		if (collapsed) {
+			tagSelector.init();
+			_setTagScope();
 			tagSelector.focusTextbox();
+		}
+		// If hiding, clear selection
+		else {
+			tagSelector.uninit();
 		}
 	}
 	
@@ -327,18 +334,25 @@ var ZoteroPane = new function()
 	}
 	
 	
+	/*
+	 * Sets the tag filter on the items view
+	 */
 	function updateTagFilter(){
-		if (itemsView)
-		{
-			itemsView.unregister();
-		}
-		
-		if (collectionsView){
-			var itemgroup = collectionsView._getItemAtRow(collectionsView.selection.currentIndex);
-			itemgroup.setTags(getTagSelection());
-			
-			itemsView = new Zotero.ItemTreeView(itemgroup);
-			document.getElementById('zotero-items-tree').view = itemsView;
+		itemsView.setFilter('tags', getTagSelection());
+	}
+	
+	
+	/*
+	 * Set the tags scope to the items in the current view
+	 *
+	 * Passed to the items tree to trigger on changes
+	 */
+	function _setTagScope() {
+		var itemgroup = collectionsView._getItemAtRow(collectionsView.selection.currentIndex);
+		var tagSelector = document.getElementById('zotero-tag-selector');
+		if (tagSelector.getAttribute('collapsed') == 'false') {
+			Zotero.debug('Updating tag selector with current tags');
+			tagSelector.scope = itemgroup.getChildTags();
 		}
 	}
 	
@@ -357,6 +371,7 @@ var ZoteroPane = new function()
 			itemgroup.setTags(getTagSelection());
 			
 			itemsView = new Zotero.ItemTreeView(itemgroup);
+			itemsView.addCallback(_setTagScope);
 			document.getElementById('zotero-items-tree').view = itemsView;
 			itemsView.selection.clearSelection();
 		}
@@ -632,7 +647,7 @@ var ZoteroPane = new function()
 		if(itemsView)
 		{
 			var searchVal = document.getElementById('zotero-tb-search').value;
-			itemsView.searchText(searchVal);
+			itemsView.setFilter('search', searchVal);
 			
 			document.getElementById('zotero-tb-search-cancel').hidden = searchVal == "";
 		}

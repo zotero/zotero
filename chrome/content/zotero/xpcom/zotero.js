@@ -57,6 +57,7 @@ var Zotero = new function(){
 	this.inArray = inArray;
 	this.arraySearch = arraySearch;
 	this.arrayToHash = arrayToHash;
+	this.hasValues = hasValues;
 	this.randomString = randomString;
 	this.getRandomID = getRandomID;
 	this.moveToUnique = moveToUnique;
@@ -467,6 +468,18 @@ var Zotero = new function(){
 		}
 		
 		return hash;
+	}
+	
+	
+	/*
+	 * Returns true if an object (or associative array) has at least one value
+	 */
+	function hasValues(obj) {
+		for (var i in obj) {
+			return true;
+		}
+		
+		return false;
 	}
 	
 	

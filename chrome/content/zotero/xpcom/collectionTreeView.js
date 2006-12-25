@@ -678,6 +678,18 @@ Zotero.ItemGroup.prototype.getName = function()
 
 Zotero.ItemGroup.prototype.getChildItems = function()
 {
+	var s = this.getSearchObject();
+	var ids = s.search();
+	return Zotero.Items.get(ids);
+}
+
+
+/*
+ * Returns the search object for the currently display
+ *
+ * This accounts for the collection, saved search, quicksearch, tags, etc.
+ */
+Zotero.ItemGroup.prototype.getSearchObject = function() {
 	var s = new Zotero.Search();
 	
 	if (this.searchText){
@@ -716,9 +728,18 @@ Zotero.ItemGroup.prototype.getChildItems = function()
 		}
 	}
 	
-	var ids = s.search();
-	return Zotero.Items.get(ids);
+	return s;
 }
+
+
+/*
+ * Returns all the tags used by items in the current view
+ */
+Zotero.ItemGroup.prototype.getChildTags = function() {
+	var s = this.getSearchObject();
+	return Zotero.Tags.getAllWithinSearch(s);
+}
+
 
 Zotero.ItemGroup.prototype.setSearch = function(searchText)
 {

@@ -23,7 +23,7 @@
 Zotero.Notifier = new function(){
 	var _observers = new Zotero.Hash();
 	var _disabled = false;
-	var _types = ['collection', 'search', 'item'];
+	var _types = ['collection', 'search', 'item', 'tag'];
 	var _inTransaction;
 	var _locked = false;
 	var _queue = [];
@@ -69,7 +69,7 @@ Zotero.Notifier = new function(){
 		while (_observers.get(hash));
 		
 		Zotero.debug('Registering observer for '
-			+ (types ? '[' + types.join() + ']' : ' all types')
+			+ (types ? '[' + types.join() + ']' : 'all types')
 			+ ' in notifier with hash ' + hash + "'", 4);
 		_observers.set(hash, {ref: ref, types: types});
 		return hash;
@@ -114,9 +114,18 @@ Zotero.Notifier = new function(){
 	* 	type - 'collection', 'search', 'item'
 	* 	ids - single id or array of ids
 	*
-	* c = collection, s = search, i = item
+	* c = collection, s = search, i = item, t = tag
 	*
-	* New events and types should be added to the order arrays in commit()
+	*
+	* Notes:
+	*
+	* - add-item is currently used for both item creation and adding an
+	* existing item to a collection
+	*
+	* - If event queuing is on, events will not fire until commit() is called
+	* unless _force_ is true.
+	*
+	* - New events and types should be added to the order arrays in commit()
 	**/
 	function trigger(event, type, ids, force){
 		if (_disabled){
@@ -206,7 +215,7 @@ Zotero.Notifier = new function(){
 		function sorter(a, b) {
 			return order.indexOf(a) - order.indexOf(b);
 		}
-		var order = ['collection', 'search', 'items'];
+		var order = ['collection', 'search', 'items', 'tags'];
 		_queue.sort();
 		
 		var order = ['add', 'modify', 'remove', 'move', 'delete'];

@@ -72,7 +72,7 @@ function onSearch()
 	if(itemsView)
 	{
 		var searchVal = document.getElementById('zotero-tb-search').value;
-		itemsView.searchText(searchVal);
+		itemsView.setFilter('search', searchVal);
 		
 		document.getElementById('zotero-tb-search-cancel').hidden = searchVal == "";
 	}
