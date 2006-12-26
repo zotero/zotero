@@ -223,7 +223,7 @@ var ZoteroPane = new function()
 				collectionsView.selection.select(0);
 				break;
 			case 'quicksearch':
-				document.getElementById('zotero-tb-search').focus();
+				document.getElementById('zotero-tb-search').select();
 				break;
 			case 'newItem':
 				newItem(2); // book
@@ -330,7 +330,7 @@ var ZoteroPane = new function()
 	
 	function getTagSelection(){
 		var tagSelector = document.getElementById('zotero-tag-selector');
-		return tagSelector.selection;
+		return tagSelector.selection ? tagSelector.selection : {};
 	}
 	
 	

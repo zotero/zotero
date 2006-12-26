@@ -164,7 +164,7 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids)
 		}		
 		
 	}
-	else if(action == 'modify') 	//must check for null because it could legitimately be 0
+	else if (action == 'modify')
 	{
 		// If no quicksearch, process modifications manually
 		if (quicksearch.value == '')
@@ -188,7 +188,6 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids)
 							this._hideItem(row);
 							this._treebox.rowCountChanged(row+1, -1)
 					}
-					// If 
 					else if (!this.isContainer(row) && this.getParentIndex(row)!=-1
 						&& !this._getItemAtRow(row).ref.getSource())
 					{
@@ -228,7 +227,7 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids)
 	}
 	else if(action == 'add')
 	{
-		// If saved search, just rerun search
+		// If saved search, just re-run search
 		if (this._itemGroup.isSearch())
 		{
 			this.refresh();
@@ -257,10 +256,9 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids)
 				}
 			}
 		}
-		// Otherwise rerun the search, which refreshes the item list
+		// Otherwise re-run the search, which refreshes the item list
 		else
 		{
-			// If active window, clear search first
 			if (activeWindow)
 			{
 				quicksearch.value = '';
@@ -277,8 +275,7 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids)
 			this.sort();				//this also refreshes the hash map
 			this._treebox.invalidate();
 		}
-		//else if(action != 'modify') //no need to update this if we modified
-		else //no need to update this if we modified
+		else
 		{
 			this._refreshHashMap();
 		}
@@ -292,10 +289,26 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids)
 			
 			this.selectItem(ids[0]);
 		}
-		// If single item is selected and was modified, reselect
-		// (in case the sort order changed and it went off-screen)
+		// If single item is selected and was modified
 		else if (action == 'modify' && ids.length == 1 &&
 				savedSelection.length == 1 && savedSelection[0] == ids[0]) {
+			// If the item no longer matches the search term, clear the search
+			if (this._itemRowMap[ids[0]] == undefined) {
+				quicksearch.value = '';
+				quicksearch.doCommand();
+				if (this.isSorted())
+				{
+					this.sort();
+					this._treebox.invalidate();
+				}
+				else
+				{
+					this._refreshHashMap();
+				}
+			}
+			
+			// Reselect item (in case the sort order changed and the item
+			// went off-screen)
 			this.selectItem(ids[0]);
 		}
 		else
