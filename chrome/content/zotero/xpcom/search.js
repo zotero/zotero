@@ -413,6 +413,7 @@ Zotero.Search.prototype._buildQuery = function(){
 			switch (data['name']){
 				case 'noChildren':
 					var noChildren = this._conditions[i]['operator']=='true';
+					continue;
 				
 				// Search subfolders
 				case 'recursive':
