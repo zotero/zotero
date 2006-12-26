@@ -510,7 +510,8 @@ Zotero.CollectionTreeView.prototype.canDrop = function(row, orient)
 	{
 		var rowCollection = this._getItemAtRow(row).ref; //the collection we are dragging over
 		
-		if(dataType == 'zotero/item' || dataType == "text/x-moz-url")
+		// TODO: Dragging URLs not yet supported
+		if (dataType == 'zotero/item' || dataType == "text/x-moz-url")
 		{
 			var ids = data.data.split(',');
 			for each(var id in ids)
@@ -529,8 +530,11 @@ Zotero.CollectionTreeView.prototype.canDrop = function(row, orient)
 			}
 			return false;
 		}
-		else if(dataType='zotero/collection' && data.data != rowCollection.getID() && !Zotero.Collections.get(data.data).hasDescendent('collection',rowCollection.getID()) )
-			return true;	//collections cannot be dropped on themselves, nor in their children
+		else if (dataType == 'zotero/collection'
+				&& data.data != rowCollection.getID()
+				&& !Zotero.Collections.get(data.data).hasDescendent('collection', rowCollection.getID())) {
+			return true;//collections cannot be dropped on themselves, nor in their children
+		}
 	}
 	return false;
 }
@@ -608,7 +612,8 @@ Zotero.CollectionTreeView.prototype.onDragStart = function(evt,transferData,acti
 Zotero.CollectionTreeView.prototype.getSupportedFlavours = function () 
 { 
 	var flavors = new FlavourSet();
-	flavors.appendFlavour("text/x-moz-url");
+	// TODO: Dragging of URLs not yet supported
+	//flavors.appendFlavour("text/x-moz-url");
 	flavors.appendFlavour("zotero/item");
 	flavors.appendFlavour("zotero/collection");
 	return flavors; 

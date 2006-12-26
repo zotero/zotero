@@ -836,7 +836,8 @@ Zotero.ItemTreeView.prototype.getSupportedFlavours = function ()
 { 
 	var flavors = new FlavourSet();
 	flavors.appendFlavour("zotero/item");
-	flavors.appendFlavour("text/x-moz-url");
+	// TODO: Dragging of URLs not yet supported
+	//flavors.appendFlavour("text/x-moz-url");
 	return flavors; 
 }
 
