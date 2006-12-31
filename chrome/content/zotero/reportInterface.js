@@ -43,13 +43,13 @@ var Zotero_Report_Interface = new function() {
 		}
 		
 		if (id) {
-			window.loadURI('zotero://report/collection/' + id + queryString);
+			window.loadURI('zotero://report/collection/' + id + '/html/report.html' + queryString);
 			return;
 		}
 		
 		var id = ZoteroPane.getSelectedSavedSearch(true);
 		if (id) {
-			window.loadURI('zotero://report/search/' + id + queryString);
+			window.loadURI('zotero://report/search/' + id + '/html/report.html' + queryString);
 			return;
 		}
 		
@@ -67,7 +67,7 @@ var Zotero_Report_Interface = new function() {
 			throw ('No items currently selected');
 		}
 		
-		window.loadURI('zotero://report/items/' + items.join('-'));
+		window.loadURI('zotero://report/items/' + items.join('-') + '/html/report.html');
 	}
 	
 	
@@ -79,6 +79,6 @@ var Zotero_Report_Interface = new function() {
 			throw ('No itemIDs provided to loadItemReportByIds()');
 		}
 		
-		window.loadURI('zotero://report/items/' + ids.join('-'));
+		window.loadURI('zotero://report/items/' + ids.join('-') + '/html/report.html');
 	}
 }

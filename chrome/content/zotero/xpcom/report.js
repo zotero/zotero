@@ -35,12 +35,13 @@ Zotero.Report = new function() {
 		var ZU = new Zotero.Utilities();
 		var escapeXML = ZU.htmlSpecialChars;
 		
-		var content = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" ';
-		content += '"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">\n';
+		var content = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" ';
+        content += '"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">\n';
 		content += '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">\n';
 		content += '<head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" />\n';
 		content += '<title>' + Zotero.getString('report.title.default') + '</title>\n';
 		content += '<link rel="stylesheet" type="text/css" href="chrome://zotero/skin/report/detail.css"/>\n';
+		content += '<link rel="stylesheet" type="text/css" media="screen,projection" href="chrome://zotero/skin/report/detail_screen.css"/>\n';
 		content += '<link rel="stylesheet" type="text/css" media="print" href="chrome://zotero/skin/report/detail_print.css"/>\n';
 		content += '</head>\n<body>\n';
 		
@@ -48,7 +49,7 @@ Zotero.Report = new function() {
 		for each(var arr in items) {
 			//Zotero.debug(arr);
 			
-			content += '<li id="i' + arr.itemID + '" class="' + arr.itemType + '"><span>\n';
+			content += '<li id="i' + arr.itemID + '" class="item ' + arr.itemType + '">\n';
 			
 			// Title
 			if (arr.title) {
@@ -257,7 +258,7 @@ Zotero.Report = new function() {
 			}
 			
 			
-			content += '</span></li>\n';
+			content += '</li>\n';
 		}
 		content += '</ul>\n';
 		content += '</body>\n</html>';
