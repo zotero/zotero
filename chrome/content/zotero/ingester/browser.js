@@ -146,7 +146,12 @@ Zotero_Ingester_Interface.contentLoad = function(event) {
 		var doc = event.originalTarget;
 		var rootDoc = doc;
 		
-		if(!doc.domain) {
+		try {
+			if (!doc.domain) {
+				return;
+			}
+		}
+		catch (e) {
 			return;
 		}
 		
