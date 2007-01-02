@@ -153,6 +153,7 @@ INSERT INTO itemTypes VALUES (30,'radioBroadcast',NULL,1);
 INSERT INTO itemTypes VALUES (31,'podcast',NULL,1);
 INSERT INTO itemTypes VALUES (32,'computerProgram',NULL,1);
 INSERT INTO itemTypes VALUES (33,'conferencePaper',NULL,1);
+INSERT INTO itemTypes VALUES (34,'document',NULL,2);
 
 INSERT INTO fields VALUES (1,'url',NULL);
 INSERT INTO fields VALUES (2,'rights',NULL);
@@ -590,6 +591,15 @@ INSERT INTO itemTypeFields VALUES (33, 2, NULL, 13);
 INSERT INTO itemTypeFields VALUES (33, 1, NULL, 14);
 INSERT INTO itemTypeFields VALUES (33, 27, NULL, 15);
 INSERT INTO itemTypeFields VALUES (33, 22, NULL, 16);
+INSERT INTO itemTypeFields VALUES (34, 8, NULL, 1);
+INSERT INTO itemTypeFields VALUES (34, 14, NULL, 2);
+INSERT INTO itemTypeFields VALUES (34, 18, NULL, 3);
+INSERT INTO itemTypeFields VALUES (34, 19, NULL, 4);
+INSERT INTO itemTypeFields VALUES (34, 62, NULL, 5);
+INSERT INTO itemTypeFields VALUES (34, 2, NULL, 6);
+INSERT INTO itemTypeFields VALUES (34, 1, NULL, 7);
+INSERT INTO itemTypeFields VALUES (34, 27, NULL, 8);
+INSERT INTO itemTypeFields VALUES (34, 22, NULL, 9);
 
 
 INSERT INTO creatorTypes VALUES(1, "author");
@@ -725,6 +735,11 @@ INSERT INTO itemTypeCreatorTypes VALUES(33, 2, 0);
 INSERT INTO itemTypeCreatorTypes VALUES(33, 3, 0);
 INSERT INTO itemTypeCreatorTypes VALUES(33, 4, 0);
 INSERT INTO itemTypeCreatorTypes VALUES(33, 5, 0);
+INSERT INTO itemTypeCreatorTypes VALUES(34,1,1);
+INSERT INTO itemTypeCreatorTypes VALUES(34,2,0);
+INSERT INTO itemTypeCreatorTypes VALUES(34,3,0);
+INSERT INTO itemTypeCreatorTypes VALUES(34,4,0);
+INSERT INTO itemTypeCreatorTypes VALUES(34,27,0);
 
 
     INSERT INTO "fileTypes" VALUES(1, 'webpage');
