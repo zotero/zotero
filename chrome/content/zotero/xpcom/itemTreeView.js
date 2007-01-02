@@ -771,6 +771,17 @@ Zotero.ItemTreeView.prototype.rememberSelection = function(selection)
 	}
 }
 
+/*
+ * Returns an array of item ids of visible items in current sort order
+ */
+Zotero.ItemTreeView.prototype.getSortedItems = function() {
+	var ids = [];
+	for each(var item in this._dataItems) {
+		ids.push(item.ref.getID());
+	}
+	return ids;
+}
+
 Zotero.ItemTreeView.prototype.getSortField = function() {
 	var col = this._treebox.columns.getSortedColumn().id;
 	// zotero.items._________.column

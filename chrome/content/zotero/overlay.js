@@ -54,6 +54,7 @@ var ZoteroPane = new function()
 	this.getSelectedCollection = getSelectedCollection;
 	this.getSelectedSavedSearch = getSelectedSavedSearch;
 	this.getSelectedItems = getSelectedItems;
+	this.getSortedItems = getSortedItems;
 	this.getSortField = getSortField;
 	this.getSortDirection = getSortDirection;
 	this.buildCollectionContextMenu = buildCollectionContextMenu;
@@ -759,6 +760,18 @@ var ZoteroPane = new function()
 			}
 		}
 		return items;
+	}
+	
+	
+	/*
+	 * Returns an array of item ids of visible items in current sort order
+	 */
+	function getSortedItems() {
+		if (!itemsView) {
+			return false;
+		}
+		
+		return itemsView.getSortedItems();
 	}
 	
 	
