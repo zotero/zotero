@@ -2343,7 +2343,7 @@ Zotero.Notes = new function(){
 		var bindParams = [
 			note.getID(),
 			(sourceItemID ? {int:sourceItemID} : null),
-			{string:text},
+			{string: text ? text : ''},
 			isAbstract ? 1 : null,
 		];
 		Zotero.DB.query(sql, bindParams);

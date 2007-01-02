@@ -617,6 +617,8 @@ Zotero.ItemTreeView.prototype.selectItem = function(id)
 		
 	this.selection.select(row);
 	this._treebox.ensureRowIsVisible(row);
+	
+	return true;
 }
 
 /*

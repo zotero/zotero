@@ -262,11 +262,15 @@ var ZoteroPane = new function()
 		}
 		
 		item.save();
-		if(itemsView && itemsView._itemGroup.isCollection())
+		
+		if (itemsView && itemsView._itemGroup.isCollection()) {
 			itemsView._itemGroup.ref.addItem(item.getID());
-			
+		}
+		
 		//set to Info tab
 		document.getElementById('zotero-view-item').selectedIndex = 0;
+		
+		selectItem(item.getID());
 		
 		return item;
 	}
@@ -681,31 +685,17 @@ var ZoteroPane = new function()
 		if (!itemID) {
 			return;
 		}
-		if(itemsView)
-		{
-			if(!itemsView._itemGroup.isLibrary())
-			{
-				if (inLibrary) {
-					collectionsView.selection.select(0);
-				}
-				// Select the Library if the item is not in the current collection
-				// TODO: does not work in saved searches
-				else {
-					var item = Zotero.Items.get(itemID);
-					var collectionID = itemsView._itemGroup.ref.getID();
-					if (!item.isRegularItem()) {
-						// If this isn't a regular item, check if the parent is
-						// in the collection instead
-						if (!Zotero.Items.get(item.getSource()).inCollection(collectionID)) {
-							collectionsView.selection.select(0);
-						}
-					}
-					else if (!item.inCollection(collectionID)) {
-						collectionsView.selection.select(0);
-					}
-				}
+		
+		if (itemsView) {
+			if (!itemsView._itemGroup.isLibrary() && inLibrary) {
+				collectionsView.selection.select(0);
 			}
-			itemsView.selectItem(itemID);
+			
+			var selected = itemsView.selectItem(itemID);
+			if (!selected) {
+				collectionsView.selection.select(0);
+				itemsView.selectItem(itemID);
+			}
 		}
 	}
 	
@@ -1114,25 +1104,21 @@ var ZoteroPane = new function()
 	{
 		if (!popup)
 		{
-			var item = newItem(Zotero.ItemTypes.getID('note'));
-			var note = document.getElementById('zotero-note-editor');
 			try {
 				// trim
 				text = text.replace(/^[\xA0\r\n\s]*(.*)[\xA0\r\n\s]*$/m, "$1");
 			}
 			catch (e){}
-			if (text)
-			{
-				note.value = text;
-			}
-			note.save();
-			note.focus();
 			
-			if (parent)
-			{
-				item.setSource(parent);
-				selectItem(item.getID());
+			var itemID = Zotero.Notes.add(text, parent);
+			
+			if (itemsView && itemsView._itemGroup.isCollection()) {
+				itemsView._itemGroup.ref.addItem(itemID);
 			}
+			
+			selectItem(itemID);
+			
+			document.getElementById('zotero-note-editor').focus();
 		}
 		else
 		{

@@ -25,7 +25,7 @@
 			xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 	<binding id="note-editor">
 		<implementation>
-			<field name="itemRef"/>
+			<field name="itemRef">null</field>
 			<property name="item" onget="return this.itemRef;">
 				<setter>
 					<![CDATA[
@@ -42,7 +42,7 @@
 					]]>
 				</setter>
 			</property>
-			<field name="noteRef"/>
+			<field name="noteRef">null</field>
 			<property name="note" onget="return this.noteRef;">
 				<setter>
 					<![CDATA[
@@ -60,7 +60,7 @@
 					]]>
 				</setter>
 			</property>
-			<field name="collectionRef"/>
+			<field name="collectionRef">null</field>
 			<property name="collection" onget="return this.collectionRef;" onset="this.collectionRef = val;"/>
 			<property name="value" onget="return this.id('noteField').value;" onset="this.id('noteField').value = val;"/>
 			<method name="save">
