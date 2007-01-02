@@ -612,7 +612,7 @@ Zotero.ItemTreeView.prototype.selectItem = function(id)
 			// No parent -- it's not here
 			return false;
 		}
-		this.toggleOpenState(this._itemRowMap[item.getSource()]); //opens the parent of the item
+		this.toggleOpenState(this._itemRowMap[parent]); //opens the parent of the item
 		row = this._itemRowMap[id];
 	}
 		
@@ -755,6 +755,7 @@ Zotero.ItemTreeView.prototype.saveSelection = function()
 			savedSelection.push(this._getItemAtRow(j).ref.getID());
 		}
 	}
+	
 	return savedSelection;
 }
 
@@ -766,8 +767,26 @@ Zotero.ItemTreeView.prototype.rememberSelection = function(selection)
 	this.selection.clearSelection();
 	for(var i=0; i < selection.length; i++)
 	{
-		if(this._itemRowMap[selection[i]] != null)
+		if (this._itemRowMap[selection[i]] != null) {
 			this.selection.toggleSelect(this._itemRowMap[selection[i]]);
+		}
+		// Try the parent
+		else {
+			var item = Zotero.Items.get(selection[i]);
+			if (!item) {
+				continue;
+			}
+			
+			var parent = item.getSource();
+			if (!parent) {
+				continue;
+			}
+			
+			if (this._itemRowMap[parent] != null) {
+				this.toggleOpenState(this._itemRowMap[parent]);
+				this.selection.toggleSelect(this._itemRowMap[selection[i]]);
+			}
+		}
 	}
 }
 
