@@ -513,6 +513,7 @@ Zotero.ItemTreeView.prototype.sort = function()
 		column = this._treebox.columns.getFirstColumn();
 	}
 	var order = column.element.getAttribute('sortDirection') == 'ascending';
+	var columnField = column.id.substring(13, column.id.length-7);
 	
 	if(column.id == 'zotero-items-typeIcon-column')
 	{
@@ -535,8 +536,8 @@ Zotero.ItemTreeView.prototype.sort = function()
 	{
 		function columnSort(a,b)
 		{
-			var fieldA = a.getField(column.id.substring(13, column.id.length-7));
-			var fieldB = b.getField(column.id.substring(13, column.id.length-7));
+			var fieldA = a.getField(columnField);
+			var fieldB = b.getField(columnField);
 			
 			if(typeof fieldA == 'string')
 			{
