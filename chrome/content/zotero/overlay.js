@@ -1165,7 +1165,7 @@ var ZoteroPane = new function()
 		if (itemsView.selection.count == 1 && items[0] && items[0].isNote())
 		{
 			var note = items[0].getNote()
-			items[0].updateNote(note + "\n\n" + text);
+			items[0].updateNote(note == '' ? text : note + "\n\n" + text);
 			var noteElem = document.getElementById('zotero-note-editor')
 			noteElem.focus();
 			noteElem.id('noteField').inputField.editor.
@@ -1242,6 +1242,8 @@ var ZoteroPane = new function()
 		{
 			addAttachmentFromPage(false, item.getID(), true);
 		}
+		
+		return item.getID();
 	}
 	
 	
