@@ -22,7 +22,6 @@
 
 var openURLServerField;
 var openURLVersionMenu;
-var zoteroPaneOnTopInitial;
 
 function init()
 {
@@ -31,8 +30,6 @@ function init()
 	for (var i=0; i<rows.length; i++) {
 		rows[i].firstChild.nextSibling.value = Zotero.isMac ? 'Cmd+Shift+' : 'Ctrl+Alt+';
 	}
-	
-	zoteroPaneOnTopInitial = Zotero.Prefs.get('zoteroPaneOnTop') ? 0 : 1;
 }
 
 
@@ -82,17 +79,4 @@ function onOpenURLSelected()
 function onOpenURLCustomized()
 {
 	document.getElementById('openURLMenu').value = "custom";
-}
-
-function onPositionChange()
-{
-	var statusLine = document.getElementById('statusLine');
-	if (document.getElementById('positionMenu').selectedIndex != zoteroPaneOnTopInitial)
-	{
-		statusLine.value = Zotero.getString('zotero.preferences.status.positionChange');
-	}
-	else
-	{
-		statusLine.value = '';
-	}
 }

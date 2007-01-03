@@ -6,6 +6,7 @@ pref("extensions.zotero.debug.level",5);
 pref("extensions.zotero.automaticScraperUpdates",true);
 pref("extensions.zotero.cacheTranslatorData",true);
 pref("extensions.zotero.zoteroPaneOnTop",false);
+pref("extensions.zotero.statusBarIcon", 2);
 pref("extensions.zotero.openURL.resolver","http://athene.gmu.edu:8888/lfp/LinkFinderPlus/Display");
 pref("extensions.zotero.openURL.version","0.1");
 pref("extensions.zotero.parseEndNoteMIMETypes",true);

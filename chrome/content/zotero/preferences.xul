@@ -43,6 +43,7 @@ To add a new preference:
 	<prefpane id="zotero-prefpane-general" label="&zotero.preferences.prefpane.general;">
 		<preferences>
 			<preference id="pref-zoteroPaneOnTop" name="extensions.zotero.zoteroPaneOnTop" type="bool"/>
+			<preference id="pref-statusBarIcon" name="extensions.zotero.statusBarIcon" type="int"/>
 			<preference id="pref-automaticScraperUpdates" name="extensions.zotero.automaticScraperUpdates" type="bool"/>
 			<preference id="pref-reportTranslationFailure" name="extensions.zotero.reportTranslationFailure" type="bool"/>
 			<preference id="pref-parseEndNoteMIMETypes" name="extensions.zotero.parseEndNoteMIMETypes" type="bool" onchange="Zotero.Ingester.MIMEHandler.init()"/>
@@ -52,26 +53,42 @@ To add a new preference:
 			<preference id="pref-openURL-version" name="extensions.zotero.openURL.version" type="string"/>
 		</preferences>
 		
-		<hbox align="center">
-			<label value="&zotero.preferences.position;" control="positionMenu"/>
-			<menulist id="positionMenu" oncommand="onPositionChange()" preference="pref-zoteroPaneOnTop">
-				<menupopup>
-					<menuitem label="&zotero.preferences.position.above;" value="true"/>
-					<menuitem label="&zotero.preferences.position.below;" value="false"/>
-				</menupopup>
-			</menulist>
-			<label value="&zotero.preferences.position.browser;"/>
-		</hbox>
+		<groupbox>
+			<caption label="&zotero.preferences.userInterface;"/>
+			<hbox align="center">
+				<label value="&zotero.preferences.position;" control="positionMenu"/>
+				<menulist id="positionMenu" preference="pref-zoteroPaneOnTop">
+					<menupopup>
+						<menuitem label="&zotero.preferences.position.above;" value="true"/>
+						<menuitem label="&zotero.preferences.position.below;" value="false"/>
+					</menupopup>
+				</menulist>
+				<label value="&zotero.preferences.position.browser;"/>
+			</hbox>
+			
+			<hbox align="center">
+				<label value="&zotero.preferences.statusBarIcon;" control="statusBarIcon"/>
+				<radiogroup id="statusBarIcon" orient="horizontal" preference="pref-statusBarIcon">
+					<radio src="chrome://zotero/skin/zotero_status_bar.png" value="2"/>
+					<radio src="chrome://zotero/skin/zotero_status_bar_compact.png" value="1"/>
+					<radio label="None" value="0"/>
+				</radiogroup>
+			</hbox>
+			
+			<label class="statusLine" value="&zotero.preferences.keys.changesTakeEffect;"/>
+		</groupbox>
 		
-		<hbox align="center">
-			<checkbox label="&zotero.preferences.autoUpdate;" preference="pref-automaticScraperUpdates"/>
-			<button id="updateButton" style="margin-top:0" label="&zotero.preferences.updateNow;" oncommand="Zotero.Schema.updateScrapersRemote(true)"/>
-		</hbox>
-		
-		<checkbox label="&zotero.preferences.reportTranslationFailure;" preference="pref-reportTranslationFailure"/>
-		<checkbox label="&zotero.preferences.parseEndnote;" preference="pref-parseEndNoteMIMETypes"/>
-		<checkbox label="&zotero.preferences.automaticSnapshots;" preference="pref-automaticSnapshots"/>
-		<checkbox label="&zotero.preferences.downloadAssociatedFiles;" preference="pref-downloadAssociatedFiles"/>
+		<groupbox>
+			<hbox align="center">
+				<checkbox label="&zotero.preferences.autoUpdate;" preference="pref-automaticScraperUpdates"/>
+				<button id="updateButton" style="margin-top:0" label="&zotero.preferences.updateNow;" oncommand="Zotero.Schema.updateScrapersRemote(true)"/>
+			</hbox>
+			
+			<checkbox label="&zotero.preferences.reportTranslationFailure;" preference="pref-reportTranslationFailure"/>
+			<checkbox label="&zotero.preferences.parseEndnote;" preference="pref-parseEndNoteMIMETypes"/>
+			<checkbox label="&zotero.preferences.automaticSnapshots;" preference="pref-automaticSnapshots"/>
+			<checkbox label="&zotero.preferences.downloadAssociatedFiles;" preference="pref-downloadAssociatedFiles"/>
+		</groupbox>
 		
 		<groupbox>
 			<caption label="&zotero.preferences.openurl.caption;"/>
@@ -99,8 +116,6 @@ To add a new preference:
 				</menulist>
 			</hbox>
 		</groupbox>
-		
-		<label id="statusLine" value=""/>
 	</prefpane>
 	
 	<prefpane id="zotero-prefpane-keys" label="&zotero.preferences.prefpane.keys;">

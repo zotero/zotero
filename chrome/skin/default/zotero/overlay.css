@@ -1,13 +1,19 @@
 #zotero-status-bar-icon
 {
-	width: 49px;
+	width: 47px;
 	margin:0 0 -1px;
-	padding:0 5px 1px;
-	list-style-image: url(chrome://zotero/skin/zotero_logo_18px.png);
+	padding:0 4px 1px;
+	list-style-image: url(chrome://zotero/skin/zotero_status_bar.png);
 }
-#zotero-status-bar-icon[error=true]
+#zotero-status-bar-icon[compact="true"]
 {
-	list-style-image: url(chrome://zotero/skin/zotero_logo_18px_error.png);
+	width: 9px;
+	padding:0 5px 1px;
+	list-style-image: url(chrome://zotero/skin/zotero_status_bar_compact.png);
+}
+#zotero-status-bar-icon[error="true"]
+{
+	list-style-image: url(chrome://zotero/skin/zotero_status_bar_error.png);
 }
 
 #zotero-pane
