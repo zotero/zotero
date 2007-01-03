@@ -579,9 +579,9 @@ Zotero.ItemTreeView.prototype.sort = function()
 	}
 	
 	if(order)
-		this._dataItems.sort(oppositeSort);
-	else
 		this._dataItems.sort(doSort);
+	else
+		this._dataItems.sort(oppositeSort);
 		
 	this._refreshHashMap();
 	
