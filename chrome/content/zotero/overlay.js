@@ -322,7 +322,6 @@ var ZoteroPane = new function()
 		// If showing, set scope to items in current view
 		// and focus filter textbox
 		if (collapsed) {
-			tagSelector.init();
 			_setTagScope();
 			tagSelector.focusTextbox();
 		}
@@ -355,7 +354,8 @@ var ZoteroPane = new function()
 	function _setTagScope() {
 		var itemgroup = collectionsView._getItemAtRow(collectionsView.selection.currentIndex);
 		var tagSelector = document.getElementById('zotero-tag-selector');
-		if (tagSelector.getAttribute('collapsed') == 'false') {
+		if (!tagSelector.getAttribute('collapsed') ||
+				tagSelector.getAttribute('collapsed') == 'false') {
 			Zotero.debug('Updating tag selector with current tags');
 			tagSelector.scope = itemgroup.getChildTags();
 		}
@@ -406,6 +406,7 @@ var ZoteroPane = new function()
 				{
 					document.getElementById('zotero-view-note-button').removeAttribute('sourceID');
 				}
+				document.getElementById('zotero-note-editor').setAttribute('abstract', item.ref.isAbstract());
 				document.getElementById('zotero-item-pane-content').selectedIndex = 2;
 			}
 			else if(item.isAttachment())
@@ -438,10 +439,44 @@ var ZoteroPane = new function()
 				// For the time being, use a silly little popup
 				label.className = 'zotero-clicky';
 				label.onclick = function(event){
-					var newTitle = prompt(Zotero.getString('itemFields.title') + ':', val);
-					if (newTitle && newTitle != val)
-					{
-						item.ref.setField('title', newTitle);
+					var nsIPS = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+							.getService(Components.interfaces.nsIPromptService);
+					
+					var newTitle = { value: val };
+					var checkState = { value: false };
+					
+					while (true) {
+						var result = nsIPS.prompt(window,
+							Zotero.getString('pane.item.attachments.rename.title'),
+							'', newTitle,
+							Zotero.getString('pane.item.attachments.rename.renameAssociatedFile'),
+							checkState);
+						
+						if (!result || !newTitle.value) {
+							return;
+						}
+						
+						if (checkState.value) {
+							var renamed = item.ref.renameAttachmentFile(newTitle.value);
+							if (renamed == -1) {
+								var confirmed = confirm(newTitle.value + ' exists. Overwrite existing file?');
+								if (confirmed) {
+									item.ref.renameAttachmentFile(newTitle.value, true);
+									break;
+								}
+								continue;
+							}
+							else if (renamed == -2 || !renamed) {
+								alert(Zotero.getString('pane.item.attachments.rename.error'));
+								return;
+							}
+						}
+						
+						break;
+					}
+					
+					if (newTitle.value != val) {
+						item.ref.setField('title', newTitle.value);
 						item.ref.save();
 					}
 				}
@@ -1180,7 +1215,15 @@ var ZoteroPane = new function()
 	
 	function openNoteWindow(id, parent)
 	{
-		window.open('chrome://zotero/content/note.xul?v=1'+(id ? '&id='+id : '')+(parent ? '&coll='+parent : ''),'','chrome,resizable,centerscreen');
+		if (id) {
+			var item = Zotero.Items.get(id)
+		}
+		if (item) {
+			var isAbstract = item.isAbstract();
+		}
+		window.open('chrome://zotero/content/note.xul?v=1' + (id ? '&id=' + id : '')
+			+ (parent ? '&coll=' + parent : '') + (isAbstract ? '&abstract=1' : ''),
+			'', 'chrome,resizable,centerscreen');
 	}
 	
 	

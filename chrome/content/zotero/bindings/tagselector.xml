@@ -301,8 +301,6 @@
 				<parameter name="clear"/>
 				<body>
 					<![CDATA[
-						Zotero.debug(clear);	
-						
 						var textbox = this.id('tags-search');
 						var t = textbox.inputField;
 						

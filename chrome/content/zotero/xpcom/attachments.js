@@ -33,6 +33,7 @@ Zotero.Attachments = new function(){
 	this.linkFromURL = linkFromURL;
 	this.linkFromDocument = linkFromDocument;
 	this.importFromDocument = importFromDocument;
+	this.getPath = getPath;
 	
 	var self = this;
 	
@@ -491,6 +492,18 @@ Zotero.Attachments = new function(){
 	}
 	
 	
+	function getPath(file, linkMode) {
+		if (linkMode == self.LINK_MODE_IMPORTED_URL ||
+				linkMode == self.LINK_MODE_IMPORTED_FILE) {
+			var storageDir = Zotero.getStorageDirectory();
+			storageDir.QueryInterface(Components.interfaces.nsILocalFile);
+			return file.getRelativeDescriptor(storageDir);
+		}
+		
+		return file.persistentDescriptor;
+	}
+	
+	
 	function _getFileNameFromURL(url, mimeType){
 		var nsIURL = Components.classes["@mozilla.org/network/standard-url;1"]
 					.createInstance(Components.interfaces.nsIURL);
@@ -533,16 +546,8 @@ Zotero.Attachments = new function(){
 	* Returns the itemID of the new attachment
 	**/
 	function _addToDB(file, url, title, linkMode, mimeType, charsetID, sourceItemID, itemID){
-		if (file){
-			if (linkMode==self.LINK_MODE_IMPORTED_URL ||
-					linkMode==self.LINK_MODE_IMPORTED_FILE){
-				var storageDir = Zotero.getStorageDirectory();
-				storageDir.QueryInterface(Components.interfaces.nsILocalFile);
-				var path = file.getRelativeDescriptor(storageDir);
-			}
-			else {
-				var path = file.persistentDescriptor;
-			}
+		if (file) {
+			var path = getPath(file, linkMode);
 		}
 		
 		Zotero.DB.beginTransaction();
