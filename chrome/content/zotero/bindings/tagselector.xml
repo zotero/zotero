@@ -151,6 +151,7 @@
 					}
 					
 					Zotero.debug('Refreshing tags selector');
+					var empty = true;
 					var tagsToggleBox = this.id('tags-toggle');
 					
 					if (fetch || this._dirty) {
@@ -201,6 +202,7 @@
 								//Zotero.debug(2);
 								labels[i].setAttribute('inScope', true);
 								labels[i].setAttribute('hidden', false);
+								empty = false;
 							}
 							else {
 								//Zotero.debug(3);
@@ -220,8 +222,38 @@
 							}
 							
 							labels[i].setAttribute('hidden', false);
+							empty = false;
 						}
 					}
+					
+					this.updateNumSelected();
+					this.id('tags-toggle').setAttribute('collapsed', empty);
+					this.id('no-tags-box').setAttribute('collapsed', !empty);
+				]]>
+				</body>
+			</method>
+			
+			
+			<method name="updateNumSelected">
+				<body>
+				<![CDATA[
+					var count = 0;
+					for (var i in this.selection) {
+						count++;
+					}
+					
+					switch (count) {
+						case 0:
+							var mod = 'none';
+							break;
+						case 1:
+							var mod = 'singular';
+							break;
+						default:
+							var mod = 'plural';
+					}
+					
+					this.id('num-selected').value = Zotero.getString('pane.tagSelector.numSelected.' + mod, [count]);
 				]]>
 				</body>
 			</method>
@@ -252,6 +284,7 @@
 			</method>
 			
 			
+			<!-- Not currently used -->
 			<method name="selectVisible">
 				<body>
 					<![CDATA[
@@ -270,6 +303,7 @@
 			</method>
 			
 			
+			<!-- Not currently used -->
 			<method name="clearVisible">
 				<body>
 					<![CDATA[
@@ -278,7 +312,7 @@
 						var labels = tagsToggleBox.getElementsByTagName('label');
 						for (var i=0; i<labels.length; i++){
 							labels[i].setAttribute('selected', 'false');
-							this.selection[labels[i].value] = false;
+							delete this.selection[labels[i].value];
 						}
 						
 						// Bubbles up to command
@@ -335,7 +369,7 @@
 						
 						// Deselect
 						if (label.getAttribute('selected')=='true'){
-							this.selection[label.value] = false;
+							delete this.selection[label.value];
 							label.setAttribute('selected', 'false');
 						}
 						// Select
@@ -345,6 +379,8 @@
 						}
 						
 						this.doCommand();
+						
+						this.updateNumSelected();
 					]]>
 				</body>
 			</method>
@@ -462,29 +498,56 @@
 					<xul:menuitem label="&zotero.tagSelector.deleteTag;" class="menuitem-non-iconic" oncommand="this.parentNode.parentNode.parentNode.delete(document.popupNode.getAttribute('tagID')); event.stopPropagation()"/>
 				</xul:menupopup>
 				
-					<xul:vbox id="tags-toggle" flex="1"/>
-					<xul:checkbox label="&zotero.tagSelector.displayAll;"
-						oncommand="this.parentNode.parentNode.filterToScope = !this.checked; event.stopPropagation();">
-					</xul:checkbox>
-					<xul:hbox>
-						<xul:label value="&zotero.tagSelector.filter;"/>
-						<xul:textbox id="tags-search" flex="1" type="timed" timeout="250" dir="reverse"
-							oncommand="this.parentNode.parentNode.parentNode.handleKeyPress(); event.stopPropagation()"
-							onkeypress="if (event.keyCode == event.DOM_VK_ESCAPE) { this.parentNode.parentNode.parentNode.handleKeyPress(true); }">
-							<xul:toolbarbutton id="search-cancel"
-								oncommand="this.parentNode.focus(); this.parentNode.parentNode.parentNode.parentNode.handleKeyPress(true)" hidden="true"/>
-						</xul:textbox>
+				<xul:vbox id="no-tags-box" align="center" pack="center" flex="1">
+					<xul:label value="&zotero.tagSelector.noTagsToDisplay;"/>
+				</xul:vbox>
+				
+				<xul:vbox id="tags-toggle" flex="1"/>
+				
+				<xul:hbox>
+					<xul:hbox pack="start">
+						<xul:checkbox label="&zotero.tagSelector.displayAll;"
+							oncommand="this.parentNode.parentNode.parentNode.parentNode.filterToScope = !this.checked; event.stopPropagation();">
+						</xul:checkbox>
 					</xul:hbox>
+					
+					<!--
 					<xul:hbox>
-						<!--
-						Disabled until there's an ANY search mode
-						<xul:toolbarbutton label="&zotero.tagSelector.selectVisible;" class="zotero-clicky"
-							oncommand="this.parentNode.parentNode.parentNode.selectVisible()"/>-->
-						<xul:toolbarbutton label="&zotero.tagSelector.clearVisible;" class="zotero-clicky"
-							oncommand="this.parentNode.parentNode.parentNode.clearVisible()"/>
-						<xul:toolbarbutton label="&zotero.tagSelector.clearAll;" class="zotero-clicky"
-							oncommand="this.parentNode.parentNode.parentNode.clearAll();"/>
+						<xul:radiogroup orient="horizontal">
+							<xul:radio label="any"/>
+							<xul:radio label="all"/>
+						</xul:radiogroup>
 					</xul:hbox>
+					-->
+				</xul:hbox>
+					
+				<xul:hbox>
+					<xul:label value="&zotero.tagSelector.filter;"/>
+					<xul:textbox id="tags-search" flex="1" type="timed" timeout="250" dir="reverse"
+						oncommand="this.parentNode.parentNode.parentNode.handleKeyPress(); event.stopPropagation()"
+						onkeypress="if (event.keyCode == event.DOM_VK_ESCAPE) { this.parentNode.parentNode.parentNode.handleKeyPress(true); }">
+						<xul:toolbarbutton id="search-cancel"
+							oncommand="this.parentNode.focus(); this.parentNode.parentNode.parentNode.parentNode.handleKeyPress(true)" hidden="true"/>
+					</xul:textbox>
+				</xul:hbox>
+				
+				<xul:hbox>
+					<xul:hbox pack="center">
+						<xul:label id="num-selected"/>
+					</xul:hbox>
+					
+					<!--
+					Disabled (at least) until there's an ANY search mode
+					<xul:toolbarbutton label="&zotero.tagSelector.selectVisible;"
+						oncommand="this.parentNode.parentNode.parentNode.parentNode.selectVisible()"/>
+					<xul:button label="&zotero.tagSelector.clearVisible;"
+						oncommand="this.parentNode.parentNode.parentNode.parentNode.clearVisible()"/> -->
+					<xul:toolbarseparator/>
+					<xul:hbox pack="center">
+						<xul:button label="&zotero.tagSelector.clearAll;"
+							oncommand="this.parentNode.parentNode.parentNode.parentNode.clearAll();"/>
+					</xul:hbox>
+				</xul:hbox>
 			</xul:groupbox>
 		</content>
 	</binding>
