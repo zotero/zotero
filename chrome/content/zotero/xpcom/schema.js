@@ -697,6 +697,10 @@ Zotero.Schema = new function(){
 					Zotero.DB.query("CREATE INDEX itemNotes_sourceItemID ON itemNotes(sourceItemID)");
 					Zotero.DB.query("DROP TABLE itemNotesTemp");
 				}
+				
+				if (i==15) {
+					Zotero.DB.query("DROP TABLE annotations");
+				}
 			}
 			
 			_updateSchema('userdata');

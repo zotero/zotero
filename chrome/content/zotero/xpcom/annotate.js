@@ -472,7 +472,7 @@ Zotero.Annotation.prototype.save = function() {
 		// fetch path to node
 		var path = Zotero.Annotate.getPathForPoint(node, offset);
 		
-		var query = "INSERT INTO annotations VALUES (NULL, ?, ?, ?, ?, ?, ?, ?)";
+		var query = "INSERT INTO annotations VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 		var parameters = [
 			this.annotationsObj.itemID,	// itemID
 			path.parent,				// parent
@@ -480,6 +480,7 @@ Zotero.Annotation.prototype.save = function() {
 			path.offset,				// offset
 			this.x,						// x
 			this.y,						// y
+			30, 5,						// cols, rows
 			text						// text
 		];
 	}

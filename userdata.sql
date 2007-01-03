@@ -1,4 +1,4 @@
--- 14
+-- 15
 
 -- This file creates tables containing user-specific data -- any changes
 -- to existing tables made here must be mirrored in transition steps in
@@ -231,6 +231,8 @@ CREATE TABLE IF NOT EXISTS annotations (
     offset INT,
     x INT,
     y INT,
+    cols INT,
+    rows INT,
     text TEXT,
     FOREIGN KEY (itemID) REFERENCES itemAttachments(itemID)
 );
