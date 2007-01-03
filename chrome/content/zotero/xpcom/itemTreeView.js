@@ -671,6 +671,8 @@ Zotero.ItemTreeView.prototype.deleteSelection = function(eraseChildren, force)
 Zotero.ItemTreeView.prototype.setFilter = function(type, data) {
 	this.selection.selectEventsSuppressed = true;
 	var savedSelection = this.saveSelection();
+	var savedOpenState = this.saveOpenState();
+	var savedFirstRow = this.saveFirstRow();
 	
 	switch (type) {
 		case 'search':
@@ -688,7 +690,9 @@ Zotero.ItemTreeView.prototype.setFilter = function(type, data) {
 	
 	this.sort();
 
+	this.rememberOpenState(savedOpenState);
 	this.rememberSelection(savedSelection);
+	this.rememberFirstRow(savedFirstRow);
 	this.selection.selectEventsSuppressed = false;
 	this._treebox.invalidate();
 	//Zotero.debug('Running callbacks in itemTreeView.setFilter()', 4);
@@ -789,6 +793,41 @@ Zotero.ItemTreeView.prototype.rememberSelection = function(selection)
 		}
 	}
 }
+
+
+Zotero.ItemTreeView.prototype.saveOpenState = function() {
+	var ids = [];
+	for (var i=0, len=this.rowCount; i<len; i++) {
+		if (this.isContainer(i) && this.isContainerOpen(i)) {
+			ids.push(this._getItemAtRow(i).ref.getID());
+		}
+	}
+	return ids;
+}
+
+
+Zotero.ItemTreeView.prototype.rememberOpenState = function(ids) {
+	for each(var id in ids) {
+		var row = this._itemRowMap[id];
+		if (!row || !this.isContainer(row) || this.isContainerOpen(row)) {
+			continue;
+		}
+		this.toggleOpenState(row);
+	}
+}
+
+
+Zotero.ItemTreeView.prototype.saveFirstRow = function() {
+	return this._getItemAtRow(this._treebox.getFirstVisibleRow()).ref.getID();
+}
+
+
+Zotero.ItemTreeView.prototype.rememberFirstRow = function(firstRow) {
+	if (this._itemRowMap[firstRow]) {
+		this._treebox.scrollToRow(this._itemRowMap[firstRow]);
+	}
+}
+
 
 /*
  * Returns an array of item ids of visible items in current sort order

@@ -23,7 +23,12 @@
 <bindings 	xmlns="http://www.mozilla.org/xbl"
 			xmlns:xbl="http://www.mozilla.org/xbl"
 			xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	
 	<binding id="note-editor">
+		<resources>
+			<stylesheet src="chrome://zotero/skin/bindings/noteeditor.css"/>
+		</resources>
+		
 		<implementation>
 			<field name="itemRef">null</field>
 			<property name="item" onget="return this.itemRef;">
@@ -103,8 +108,7 @@
 				</body>
 			</method>
 		</implementation>
-		<handlers>
-		</handlers>
+		
 		<content>
 			<xul:vbox xbl:inherits="flex">
 				<xul:label id="citeLabel"/>

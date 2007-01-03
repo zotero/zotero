@@ -1249,6 +1249,9 @@ Zotero.Item.prototype.setAbstract = function(set) {
 	var sql = "UPDATE itemNotes SET isAbstract=? WHERE itemID=?";
 	Zotero.DB.valueQuery(sql, [set ? 1 : null, this.getID()]);
 	
+	this.removeAllRelated();
+	this.removeAllTags();
+	
 	Zotero.DB.commitTransaction();
 	
 	this._noteIsAbstract = !!set;
@@ -1531,6 +1534,10 @@ Zotero.Item.prototype.addTag = function(tag){
 		throw ('Cannot add tag to unsaved item in Item.addTag()');
 	}
 	
+	if (this.isAbstract()) {
+		throw ('Cannot add tag to abstract note');
+	}
+	
 	if (!tag){
 		Zotero.debug('Not saving empty tag in Item.addTag()', 2);
 		return false;
@@ -1557,6 +1564,10 @@ Zotero.Item.prototype.addTag = function(tag){
 Zotero.Item.prototype.addTagByID = function(tagID) {
 	if (!this.getID()) {
 		throw ('Cannot add tag to unsaved item in Item.addTagByID()');
+	}
+	
+	if (this.isAbstract()) {
+		throw ('Cannot add tag to abstract note');
 	}
 	
 	if (!tagID) {
@@ -1644,6 +1655,18 @@ Zotero.Item.prototype.removeTag = function(tagID){
 	Zotero.Notifier.trigger('modify', 'item', this.getID());
 }
 
+Zotero.Item.prototype.removeAllTags = function(){
+	if (!this.getID()) {
+		throw ('Cannot remove tags on unsaved item');
+	}
+	
+	Zotero.DB.beginTransaction();
+	Zotero.DB.query("DELETE FROM itemTags WHERE itemID=?", this.getID());
+	Zotero.Tags.purge();
+	Zotero.DB.commitTransaction();
+	Zotero.Notifier.trigger('modify', 'item', this.getID());
+}
+
 
 //
 // Methods dealing with See Also links
@@ -1654,6 +1677,10 @@ Zotero.Item.prototype.addSeeAlso = function(itemID){
 	if (itemID==this.getID()){
 		Zotero.debug('Cannot add item as See Also of itself', 2);
 		return false;
+	}
+	
+	if (this.isAbstract()) {
+		throw ('Cannot add Related item to abstract note');
 	}
 	
 	Zotero.DB.beginTransaction();
@@ -1682,6 +1709,10 @@ Zotero.Item.prototype.addSeeAlso = function(itemID){
 }
 
 Zotero.Item.prototype.removeSeeAlso = function(itemID){
+	if (!this.getID()) {
+		throw ('Cannot remove related item of unsaved item');
+	}
+	
 	Zotero.DB.beginTransaction();
 	var sql = "DELETE FROM itemSeeAlso WHERE itemID=? AND linkedItemID=?";
 	Zotero.DB.query(sql, [this.getID(), itemID]);
@@ -1689,6 +1720,22 @@ Zotero.Item.prototype.removeSeeAlso = function(itemID){
 	Zotero.DB.query(sql, [itemID, this.getID()]);
 	Zotero.DB.commitTransaction();
 	Zotero.Notifier.trigger('modify', 'item', [this.getID(), itemID]);
+}
+
+Zotero.Item.prototype.removeAllRelated = function() {
+	if (!this.getID()) {
+		throw ('Cannot remove related items of unsaved item');
+	}
+	
+	Zotero.DB.beginTransaction();
+	var relateds = this.getSeeAlso();
+	Zotero.DB.query("DELETE FROM itemSeeAlso WHERE itemID=?", this.getID());
+	Zotero.DB.query("DELETE FROM itemSeeAlso WHERE linkedItemID=?", this.getID());
+	Zotero.DB.commitTransaction();
+	
+	if (relateds) {
+		Zotero.Notifier.trigger('modify', 'item', relateds);
+	}
 }
 
 Zotero.Item.prototype.getSeeAlso = function(){
