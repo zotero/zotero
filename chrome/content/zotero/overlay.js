@@ -438,10 +438,44 @@ var ZoteroPane = new function()
 				// For the time being, use a silly little popup
 				label.className = 'zotero-clicky';
 				label.onclick = function(event){
-					var newTitle = prompt(Zotero.getString('itemFields.title') + ':', val);
-					if (newTitle && newTitle != val)
-					{
-						item.ref.setField('title', newTitle);
+					var nsIPS = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+							.getService(Components.interfaces.nsIPromptService);
+					
+					var newTitle = { value: val };
+					var checkState = { value: false };
+					
+					while (true) {
+						var result = nsIPS.prompt(window,
+							Zotero.getString('pane.item.attachments.rename.title'),
+							'', newTitle,
+							Zotero.getString('pane.item.attachments.rename.renameAssociatedFile'),
+							checkState);
+						
+						if (!result || !newTitle.value) {
+							return;
+						}
+						
+						if (checkState.value) {
+							var renamed = item.ref.renameAttachmentFile(newTitle.value);
+							if (renamed == -1) {
+								var confirmed = confirm(newTitle.value + ' exists. Overwrite existing file?');
+								if (confirmed) {
+									item.ref.renameAttachmentFile(newTitle.value, true);
+									break;
+								}
+								continue;
+							}
+							else if (renamed == -2 || !renamed) {
+								alert(Zotero.getString('pane.item.attachments.rename.error'));
+								return;
+							}
+						}
+						
+						break;
+					}
+					
+					if (newTitle.value != val) {
+						item.ref.setField('title', newTitle.value);
 						item.ref.save();
 					}
 				}

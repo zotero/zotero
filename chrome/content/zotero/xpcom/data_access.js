@@ -1424,6 +1424,46 @@ Zotero.Item.prototype.getFile = function(row){
 
 
 /*
+ * Rename file associated with an attachment
+ *
+ * -1   		Destination file exists -- use _force_ to overwrite
+ * -2		Error renaming
+ * false		Attachment file not found or other error
+ */
+Zotero.Item.prototype.renameAttachmentFile = function(newName, force) {
+	var file = this.getFile();
+	if (!file) {
+		return false;
+	}
+	
+	try {
+		var dest = file.parent;
+		dest.append(newName);
+		
+		if (force) {
+			dest.remove(null);
+		}
+		else if (dest.exists()) {
+			return -1;
+		}
+		
+		file.moveTo(file.parent, newName);
+		
+		var linkMode = this.getAttachmentLinkMode();
+		var path = Zotero.Attachments.getPath(file, linkMode);
+		
+		var sql = "UPDATE itemAttachments SET path=? WHERE itemID=?";
+		Zotero.DB.query(sql, [path, this.getID()]);
+		
+		return true;
+	}
+	catch (e) {
+		return -2;
+	}
+}
+
+
+/*
  * Return a file:/// URL path to files and snapshots
  */
 Zotero.Item.prototype.getLocalFileURL = function(){
