@@ -1,4 +1,4 @@
--- 13
+-- 14
 
 -- This file creates tables containing user-specific data -- any changes
 -- to existing tables made here must be mirrored in transition steps in
@@ -222,3 +222,29 @@ CREATE TABLE IF NOT EXISTS csl (
     title TEXT,
     csl TEXT
 );
+
+CREATE TABLE IF NOT EXISTS annotations (
+    annotationID INTEGER PRIMARY KEY,
+    itemID INT,
+    parent TEXT,
+    textNode INT,
+    offset INT,
+    x INT,
+    y INT,
+    text TEXT,
+    FOREIGN KEY (itemID) REFERENCES itemAttachments(itemID)
+);
+CREATE INDEX IF NOT EXISTS annotations_itemID ON annotations(itemID);
+
+CREATE TABLE IF NOT EXISTS highlights (
+    highlightID INTEGER PRIMARY KEY,
+    itemID INTEGER,
+    startParent TEXT,
+    startTextNode INT,
+    startOffset INT,
+    endParent TEXT,
+    endTextNode INT,
+    endOffset INT,
+    FOREIGN KEY (itemID) REFERENCES itemAttachments(itemID)
+);
+CREATE INDEX IF NOT EXISTS highlights_itemID ON highlights(itemID);

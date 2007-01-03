@@ -26,13 +26,14 @@
 <overlay id="zotero"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 	<?xul-overlay href="itemPane.xul" ?>
-	
+		
     <!-- Include the global XPCOM object -->
 	<script src="include.js"/>
 	
 	<script src="overlay.js"/>
     <script src="fileInterface.js"/>
 	<script src="reportInterface.js"/>
+	<script src="browser.js"/>
 	
 	<commandset id="mainCommandSet">
 		<command id="cmd_zotero_search" oncommand="ZoteroPane.search();"/>
@@ -268,7 +269,23 @@
 				</groupbox>
 			</vbox>
 		</hbox>
+		
+		<!-- Annotation Toolbar -->
+		<toolbar id="zotero-annotate-tb" crop="end" insertbefore="content" hidden="true">
+			<toolbarbutton id="zotero-annotate-tb-add" tooltiptext="&zotero.annotate.toolbar.add.label;" oncommand="Zotero_Browser.toggleAnnotateMode();"/>
+			<toolbarbutton id="zotero-annotate-tb-highlight" tooltiptext="&zotero.annotate.toolbar.highlight.label;" oncommand="Zotero_Browser.toggleHighlightMode();"/>
+		</toolbar>
 	</vbox>
+	
+	<!-- Scrape Code -->
+	<hbox id="urlbar-icons">
+		<popupset>
+		  <popup id="zotero-scrape-popup" onpopupshowing="Zotero_Browser.showPopup(null, this)" onpopuphidden="Zotero_Browser.hidePopup(null, this)">
+		  </popup>
+		</popupset>
+
+		<image src="chrome://zotero/skin/treeitem-book.png" id="zotero-status-image" onclick="Zotero_Browser.scrapeThisPage()" position="1" hidden="true" context="zotero-scrape-popup" />
+	</hbox>
 	
 	<statusbar id="status-bar">
 		<statusbarpanel id="zotero-status-bar-icon" hidden="true"

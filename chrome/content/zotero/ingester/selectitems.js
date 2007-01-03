@@ -42,7 +42,6 @@ var Zotero_Ingester_Interface_SelectItems = function() {}
  */
 Zotero_Ingester_Interface_SelectItems.init = function() {
 	this.io = window.arguments[0];
-	this.Zotero_Ingester_Interface = window.arguments[1];
 	var listbox = document.getElementById("zotero-selectitems-links");
 	
 	for(i in this.io.dataIn) {	// we could use a tree for this if we wanted to

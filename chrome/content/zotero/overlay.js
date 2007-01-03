@@ -1285,6 +1285,8 @@ var ZoteroPane = new function()
 					
 					if (internal || Zotero.MIME.fileHasInternalHandler(file))
 					{
+						// enable annotation
+						Zotero_Browser.annotateThisPage(attachment.getID());						
 						window.loadURI(fileURL);
 					}
 					else {

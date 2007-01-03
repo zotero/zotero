@@ -87,3 +87,6 @@
 <!ENTITY zotero.citation.page							"Page">
 <!ENTITY zotero.citation.paragraph						"Paragraph">
 <!ENTITY zotero.citation.line							"Line">
+
+<!ENTITY zotero.annotate.toolbar.add.label				"Add Annotation">
+<!ENTITY zotero.annotate.toolbar.highlight.label		"Highlight Text">

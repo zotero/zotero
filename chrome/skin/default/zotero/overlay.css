@@ -226,3 +226,23 @@
 	max-height: 4px;
 	background: #f5f5f5 !important;
 }
+
+#zotero-annotate-tb-add
+{
+	list-style-image: url('chrome://zotero/skin/annotate-add.png');
+}
+
+#zotero-annotate-tb-highlight
+{
+	list-style-image: url('chrome://zotero/skin/annotate-highlight.png');
+}
+
+#zotero-annotate-tb-add[tool-active=true]
+{
+	list-style-image: url('chrome://zotero/skin/annotate-add-selected.png');
+}
+
+#zotero-annotate-tb-highlight[tool-active=true]
+{
+	list-style-image: url('chrome://zotero/skin/annotate-highlight-selected.png');
+}
