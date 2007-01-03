@@ -691,8 +691,8 @@ Zotero.ItemTreeView.prototype.setFilter = function(type, data) {
 	this.sort();
 
 	this.rememberOpenState(savedOpenState);
-	this.rememberSelection(savedSelection);
 	this.rememberFirstRow(savedFirstRow);
+	this.rememberSelection(savedSelection);
 	this.selection.selectEventsSuppressed = false;
 	this._treebox.invalidate();
 	//Zotero.debug('Running callbacks in itemTreeView.setFilter()', 4);
@@ -818,12 +818,16 @@ Zotero.ItemTreeView.prototype.rememberOpenState = function(ids) {
 
 
 Zotero.ItemTreeView.prototype.saveFirstRow = function() {
-	return this._getItemAtRow(this._treebox.getFirstVisibleRow()).ref.getID();
+	var row = this._treebox.getFirstVisibleRow();
+	if (row) {
+		return this._getItemAtRow(row).ref.getID();
+	}
+	return false;
 }
 
 
 Zotero.ItemTreeView.prototype.rememberFirstRow = function(firstRow) {
-	if (this._itemRowMap[firstRow]) {
+	if (firstRow && this._itemRowMap[firstRow]) {
 		this._treebox.scrollToRow(this._itemRowMap[firstRow]);
 	}
 }

@@ -1188,8 +1188,12 @@ Zotero.Item.prototype.getNotes = function(){
  * Return true if a note item is an abstract, false otherwise
  */
 Zotero.Item.prototype.isAbstract = function() {
+	if (this.isAttachment()) {
+		return false;
+	}
+	
 	if (!this.isNote()) {
-		throw ("getAbstract() can only be called on note items");
+		throw ("isAbstract() can only be called on note items");
 	}
 	
 	if (!this.getID()) {
