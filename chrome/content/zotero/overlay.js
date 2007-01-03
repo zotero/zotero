@@ -354,7 +354,8 @@ var ZoteroPane = new function()
 	function _setTagScope() {
 		var itemgroup = collectionsView._getItemAtRow(collectionsView.selection.currentIndex);
 		var tagSelector = document.getElementById('zotero-tag-selector');
-		if (tagSelector.getAttribute('collapsed') == 'false') {
+		if (!tagSelector.getAttribute('collapsed') ||
+				tagSelector.getAttribute('collapsed') == 'false') {
 			Zotero.debug('Updating tag selector with current tags');
 			tagSelector.scope = itemgroup.getChildTags();
 		}
