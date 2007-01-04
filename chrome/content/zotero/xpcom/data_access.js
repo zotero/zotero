@@ -3259,6 +3259,47 @@ Zotero.Tags = new function(){
 		Zotero.debug('Renaming tag', 4);
 		
 		Zotero.DB.beginTransaction();
+		
+		// Check if the new tag already exists
+		var sql = "SELECT tagID FROM tags WHERE tag=?";
+		var existingTagID = Zotero.DB.valueQuery(sql, tag);
+		if (existingTagID) {
+			var itemIDs = this.getTagItems(tagID);
+			var existingItemIDs = this.getTagItems(existingTagID);
+			
+			// Would be easier to just call removeTag(tagID) and addTag(existingID)
+			// here, but this is considerably more efficient
+			var sql = "UPDATE OR REPLACE itemTags SET tagID=? WHERE tagID=?";
+			Zotero.DB.query(sql, [existingTagID, tagID]);
+			
+			// Manual purge of old tag
+			var sql = "DELETE FROM tags WHERE tagID=?";
+			Zotero.DB.query(sql, tagID);
+			delete _tags[_tagsByID[tagID]];
+			delete _tagsByID[tagID];
+			Zotero.Notifier.trigger('delete', 'tag', tagID);
+			
+			// Simulate tag removal on items that used old tag
+			var itemTags = [];
+			for (var i in itemIDs) {
+				itemTags.push(itemIDs[i] + '-' + tagID);
+			}
+			Zotero.Notifier.trigger('remove', 'item-tag', itemTags);
+			
+			// And send tag add for new tag (except for those that already had it)
+			var itemTags = [];
+			for (var i in itemIDs) {
+				if (existingItemIDs.indexOf(itemIDs[i]) == -1) {
+					itemTags.push(itemIDs[i] + '-' + existingTagID);
+				}
+			}
+			Zotero.Notifier.trigger('add', 'item-tag', itemTags);
+			
+			Zotero.Notifier.trigger('modify', 'item', itemIDs);
+			Zotero.DB.commitTransaction();
+			return;
+		}
+		
 		var sql = "UPDATE tags SET tag=? WHERE tagID=?";
 		Zotero.DB.query(sql, [{string: tag}, {int: tagID}]);
 		
@@ -3270,11 +3311,6 @@ Zotero.Tags = new function(){
 		Zotero.DB.commitTransaction();
 		
 		Zotero.Notifier.trigger('modify', 'item', itemIDs);
-		var itemTags = [];
-		for (var i in itemIDs) {
-			itemTags.push(itemIDs[i] + '-' + tagID);
-		}
-		Zotero.Notifier.trigger('modify', 'item-tag', itemTags);
 		Zotero.Notifier.trigger('modify', 'tag', tagID);
 	}
 	
