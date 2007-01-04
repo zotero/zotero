@@ -1636,6 +1636,7 @@ Zotero.Item.prototype.addTagByID = function(tagID) {
 	
 	Zotero.DB.commitTransaction();
 	Zotero.Notifier.trigger('modify', 'item', this.getID());
+	Zotero.Notifier.trigger('add', 'item-tag', this.getID() + '-' + tagID);
 	
 	return true;
 }
@@ -1679,6 +1680,8 @@ Zotero.Item.prototype.replaceTag = function(oldTagID, newTag){
 	var id = this.addTag(newTag);
 	Zotero.DB.commitTransaction();
 	Zotero.Notifier.trigger('modify', 'item', this.getID());
+	Zotero.Notifier.trigger('remove', 'item-tag', this.getID() + '-' + oldTagID);
+	Zotero.Notifier.trigger('add', 'item-tag', this.getID() + '-' + id);
 	return id;
 }
 
@@ -1693,6 +1696,7 @@ Zotero.Item.prototype.removeTag = function(tagID){
 	Zotero.Tags.purge();
 	Zotero.DB.commitTransaction();
 	Zotero.Notifier.trigger('modify', 'item', this.getID());
+	Zotero.Notifier.trigger('remove', 'item-tag', this.getID() + '-' + tagID);
 }
 
 Zotero.Item.prototype.removeAllTags = function(){
@@ -1701,10 +1705,18 @@ Zotero.Item.prototype.removeAllTags = function(){
 	}
 	
 	Zotero.DB.beginTransaction();
+	var tagIDs = this.getTagIDs();
 	Zotero.DB.query("DELETE FROM itemTags WHERE itemID=?", this.getID());
 	Zotero.Tags.purge();
 	Zotero.DB.commitTransaction();
 	Zotero.Notifier.trigger('modify', 'item', this.getID());
+	
+	if (tagIDs) {
+		for (var i in tagIDs) {
+			tagIDs[i] = this.getID() + '-' + tagIDs[i];
+		}
+		Zotero.Notifier.trigger('remove', 'item-tag', tagIDs);
+	}
 }
 
 
@@ -2643,7 +2655,7 @@ Zotero.Collection.prototype.addItem = function(itemID){
 		Zotero.Notifier.trigger('modify', 'collection', this.getID());
 	}
 	
-	Zotero.Notifier.trigger('add', 'item', itemID);
+	Zotero.Notifier.trigger('add', 'collection-item', this.getID() + '-' + itemID);
 }
 
 
@@ -2684,7 +2696,7 @@ Zotero.Collection.prototype.removeItem = function(itemID){
 		Zotero.Notifier.trigger('modify', 'collection', this.getID());
 	}
 	
-	Zotero.Notifier.trigger('remove', 'item', itemID);
+	Zotero.Notifier.trigger('remove', 'collection-item', this.getID() + '-' + itemID);
 }
 
 
@@ -3258,6 +3270,11 @@ Zotero.Tags = new function(){
 		Zotero.DB.commitTransaction();
 		
 		Zotero.Notifier.trigger('modify', 'item', itemIDs);
+		var itemTags = [];
+		for (var i in itemIDs) {
+			itemTags.push(itemIDs[i] + '-' + tagID);
+		}
+		Zotero.Notifier.trigger('modify', 'item-tag', itemTags);
 		Zotero.Notifier.trigger('modify', 'tag', tagID);
 	}
 	
@@ -3266,15 +3283,21 @@ Zotero.Tags = new function(){
 		Zotero.DB.beginTransaction();
 		
 		var sql  = "SELECT itemID FROM itemTags WHERE tagID=?";
-		var items = Zotero.DB.columnQuery(sql, tagID);
+		var itemIDs = Zotero.DB.columnQuery(sql, tagID);
 		
-		if (!items) {
+		if (!itemIDs) {
 			return;
 		}
 		
 		var sql = "DELETE FROM itemTags WHERE tagID=?";
 		Zotero.DB.query(sql, tagID);
-		Zotero.Notifier.trigger('modify', 'item', items)
+		
+		Zotero.Notifier.trigger('modify', 'item', itemIDs)
+		var itemTags = [];
+		for (var i in itemIDs) {
+			itemTags.push(itemIDs[i] + '-' + tagID);
+		}
+		Zotero.Notifier.trigger('remove', 'item-tag', itemTags);
 		
 		this.purge();
 		Zotero.DB.commitTransaction();

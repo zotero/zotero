@@ -265,20 +265,14 @@
 				<parameter name="ids"/>
 				<body>
 				<![CDATA[
-					if (type == 'item') {
+					// This could be more optimized to insert new/changed tags at the appropriate
+					// spot if we cared, but we probably don't
+					if (type == 'collection-item' || type == 'item-tag' || type == 'tag') {
 						var t = this.id('tags-search').inputField;
 						this.setFilterTags(Zotero.Tags.search(t.value), true);
 						this._dirty = true;
 						this.doCommand();
 					}
-					
-					// TODO: optimize for tag notifications?
-					// Would need separate additional Notifier events
-					// to distinguish between item adds and item collection adds
-					// and for tag changes on items separate from item-modify,
-					// plus code to insert new/changed tags at the appropriate spot
-					
-					return;
 				]]>
 				</body>
 			</method>
