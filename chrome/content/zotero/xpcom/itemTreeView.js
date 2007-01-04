@@ -305,9 +305,7 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids)
 				}
 			}
 			
-			// Reselect item (in case the sort order changed and the item
-			// went off-screen)
-			this.selectItem(ids[0]);
+			this.rememberSelection(savedSelection);
 		}
 		else
 		{
@@ -757,7 +755,6 @@ Zotero.ItemTreeView.prototype.saveSelection = function()
 			savedSelection.push(this._getItemAtRow(j).ref.getID());
 		}
 	}
-	
 	return savedSelection;
 }
 
