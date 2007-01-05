@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<terms xmlns="http://purl.org/net/xbiblio/csl">
+  <locale xml:lang="en">
+    <term name="in"> </term>
+    <term name="ibid">前掲</term>
+    <term name="accessed">アクセス</term>
+    <term name="retrieved">読み込み</term>
+    <term name="from">から</term>
+    <term name="forthcoming">近刊</term>
+    <term name="references">参考文献</term>
+    <term name="no date">日付なし</term>
+    <term name="and">と</term>
+    <term name="et-al">他</term>
+    
+    <!-- LONG LOCATOR FORMS -->
+    <term name="page">
+      <single>ページ</single>
+      <multiple>ページ</multiple>
+    </term>
+    <term name="paragraph">
+      <single>段落</single>
+      <multiple>段落</multiple>
+    </term>
+    <term name="line">
+      <single>行</single>
+      <multiple>行</multiple>
+    </term>
+    <term name="volume">巻</term>
+    <term name="issue">号</term>
+    
+    <!-- SHORT LOCATOR FORMS -->
+    <term name="page" form="short">
+      <single>p</single>
+      <multiple>p</multiple>
+    </term>
+    <term name="paragraph" form="short">
+      <single>¶</single>
+      <multiple>¶</multiple>
+    </term>
+    <term name="line" form="short">
+      <single>行</single>
+      <multiple>行</multiple>
+    </term>
+    <term name="volume" form="short">巻</term>
+    <term name="issue" form="short">号</term>
+    
+    <!-- LONG ROLE FORMS -->
+    <term name="editor">
+      <single>編集者</single>
+      <multiple>編集者</multiple>
+    </term>
+    <term name="translator">
+      <single>翻訳者</single>
+      <multiple>翻訳者</multiple>
+    </term>
+    
+    <!-- SHORT ROLE FORMS -->
+    <term name="editor" form="short">
+      <single>編集者</single>
+      <multiple>編集者</multiple>
+    </term>
+    <term name="translator" form="short">
+      <single>翻訳者</single>
+      <multiple>翻訳者</multiple>
+    </term>
+    
+    <!-- VERB ROLE FORMS -->
+    <term name="editor" form="verb">編集者：</term>
+    <term name="translator" form="verb">翻訳者：</term>
+    
+    <!-- LONG MONTH FORMS -->
+    <term name="month-01">1月</term>
+    <term name="month-02">2月</term>
+    <term name="month-03">3月</term>
+    <term name="month-04">4月</term>
+    <term name="month-05">5月</term>
+    <term name="month-06">6月</term>
+    <term name="month-07">7月</term>
+    <term name="month-08">8月</term>
+    <term name="month-09">9月</term>
+    <term name="month-10">10月</term>
+    <term name="month-11">11月</term>
+    <term name="month-12">12月</term>
+    
+    <!-- SHORT MONTH FORMS -->
+    <term name="month-01" form="short">1月</term>
+    <term name="month-02" form="short">2月</term>
+    <term name="month-03" form="short">3月</term>
+    <term name="month-04" form="short">4月</term>
+    <term name="month-05" form="short">5月</term>
+    <term name="month-06" form="short">6月</term>
+    <term name="month-07" form="short">7月</term>
+    <term name="month-08" form="short">8月</term>
+    <term name="month-09" form="short">9月</term>
+    <term name="month-10" form="short">10月</term>
+    <term name="month-11" form="short">11月</term>
+    <term name="month-12" form="short">12月</term>
+  </locale>
+</terms>

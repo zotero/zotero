@@ -1,12 +1,30 @@
 <!ENTITY zotero.preferences.title "Zotero 配置">
-<!ENTITY zotero.preferences.autoUpdate.label "自动检查更新">
-<!ENTITY zotero.preferences.reportTranslationFailure.label "报告无效的网站 translators">
-<!ENTITY zotero.preferences.position.label "Zotero 显示">
+
+<!ENTITY zotero.preferences.prefpane.general "General">
+<!ENTITY zotero.preferences.userInterface "User Interface">
+<!ENTITY zotero.preferences.position "Display Zotero">
 <!ENTITY zotero.preferences.position.above "高于">
 <!ENTITY zotero.preferences.position.below "低于">
-<!ENTITY zotero.preferences.position.browser "浏览器内容">
-<!ENTITY zotero.preferences.parseEndnote.label "使用 Zotero 处理下载的 EndNote 文件">
-<!ENTITY zotero.preferences.automaticSnapshots.label "从 web 页面创建条目时自动生成快照">
+<!ENTITY zotero.preferences.position.browser "浏览器页面">
+<!ENTITY zotero.preferences.statusBarIcon "Status bar icon:">
+<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated scrapers">
+<!ENTITY zotero.preferences.updateNow "Update now">
+<!ENTITY zotero.preferences.reportTranslationFailure "Report broken site translators">
+<!ENTITY zotero.preferences.parseEndnote "Use Zotero for downloaded EndNote files">
+<!ENTITY zotero.preferences.automaticSnapshots "Automatically take snapshots when creating items from web pages">
+<!ENTITY zotero.preferences.downloadAssociatedFiles "Automatically attach associated PDFs and other files when saving items">
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
+<!ENTITY zotero.preferences.openurl.custom "Custom...">
 <!ENTITY zotero.preferences.openurl.server "解析器:">
 <!ENTITY zotero.preferences.openurl.version "版本">
+
+<!ENTITY zotero.preferences.prefpane.keys "Shortcut Keys">
+<!ENTITY zotero.preferences.keys.openZotero "Open/Close Zotero Pane">
+<!ENTITY zotero.preferences.keys.toggleFullscreen "Toggle Fullscreen Mode">
+<!ENTITY zotero.preferences.keys.library "Library">
+<!ENTITY zotero.preferences.keys.quicksearch "Quick Search">
+<!ENTITY zotero.preferences.keys.newItem "Create a new item">
+<!ENTITY zotero.preferences.keys.newNote "Create a new note">
+<!ENTITY zotero.preferences.keys.toggleTagSelector "Toggle Tag Selector">
+<!ENTITY zotero.preferences.keys.overrideGlobal "Try to override conflicting shortcuts">
+<!ENTITY zotero.preferences.keys.changesTakeEffect "Changes take effect in new windows only">

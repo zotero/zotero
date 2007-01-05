@@ -1,0 +1,17 @@
+<!ENTITY zotero.search.name "Name:">
+
+<!ENTITY zotero.search.joinMode.prefix "Overeenkomst met">
+<!ENTITY zotero.search.joinMode.any "één van de">
+<!ENTITY zotero.search.joinMode.all "alle">
+<!ENTITY zotero.search.joinMode.suffix "volgende voorwaarden:">
+
+<!ENTITY zotero.search.recursive.label "Doorzoek onderliggende mappen">
+
+<!ENTITY zotero.search.textModes.phrase "Frase">
+<!ENTITY zotero.search.textModes.phraseBinary "Frase (binaire bestanden inbegrepen)">
+<!ENTITY zotero.search.textModes.regexp "Regexp">
+<!ENTITY zotero.search.textModes.regexpCS "Regexp (hoofdlettergevoelig)">
+
+<!ENTITY zotero.search.date.units.days "days">
+<!ENTITY zotero.search.date.units.months "months">
+<!ENTITY zotero.search.date.units.years "years">

@@ -1,11 +1,11 @@
-<!ENTITY zotero.preferences.title "Zotero-Einstellungen">
+<!ENTITY zotero.preferences.title "Zotero innstillinger">
 
 <!ENTITY zotero.preferences.prefpane.general "General">
 <!ENTITY zotero.preferences.userInterface "User Interface">
 <!ENTITY zotero.preferences.position "Display Zotero">
-<!ENTITY zotero.preferences.position.above "Ã¼ber">
-<!ENTITY zotero.preferences.position.below "unter">
-<!ENTITY zotero.preferences.position.browser "Browser-Inhalt">
+<!ENTITY zotero.preferences.position.above "over">
+<!ENTITY zotero.preferences.position.below "under">
+<!ENTITY zotero.preferences.position.browser "nettleserinnhold">
 <!ENTITY zotero.preferences.statusBarIcon "Status bar icon:">
 <!ENTITY zotero.preferences.autoUpdate "Automatically check for updated scrapers">
 <!ENTITY zotero.preferences.updateNow "Update now">
@@ -13,10 +13,10 @@
 <!ENTITY zotero.preferences.parseEndnote "Use Zotero for downloaded EndNote files">
 <!ENTITY zotero.preferences.automaticSnapshots "Automatically take snapshots when creating items from web pages">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Automatically attach associated PDFs and other files when saving items">
-<!ENTITY zotero.preferences.openurl.caption "OpenURL">
+<!ENTITY zotero.preferences.openurl.caption "Åpne URL">
 <!ENTITY zotero.preferences.openurl.custom "Custom...">
 <!ENTITY zotero.preferences.openurl.server "Resolver:">
-<!ENTITY zotero.preferences.openurl.version "Version:">
+<!ENTITY zotero.preferences.openurl.version "Versjon:">
 
 <!ENTITY zotero.preferences.prefpane.keys "Shortcut Keys">
 <!ENTITY zotero.preferences.keys.openZotero "Open/Close Zotero Pane">

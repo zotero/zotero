@@ -1,0 +1,17 @@
+<!ENTITY zotero.search.name "Name:">
+
+<!ENTITY zotero.search.joinMode.prefix "Trova">
+<!ENTITY zotero.search.joinMode.any "le corrispondenze parziali con i criteri">
+<!ENTITY zotero.search.joinMode.all "le corrispondenze esatte con i criteri">
+<!ENTITY zotero.search.joinMode.suffix "seguenti:">
+
+<!ENTITY zotero.search.recursive.label "Cerca nelle sottocartelle">
+
+<!ENTITY zotero.search.textModes.phrase "Frase">
+<!ENTITY zotero.search.textModes.phraseBinary "Frase (file binari inclusi)">
+<!ENTITY zotero.search.textModes.regexp "Espressione regolare">
+<!ENTITY zotero.search.textModes.regexpCS "Espressione regolare con distinzione tra maiuscole e minuscole">
+
+<!ENTITY zotero.search.date.units.days "days">
+<!ENTITY zotero.search.date.units.months "months">
+<!ENTITY zotero.search.date.units.years "years">

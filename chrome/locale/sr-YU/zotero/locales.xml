@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<terms xmlns="http://purl.org/net/xbiblio/csl">
+  <locale xml:lang="sr-YU">
+    <term name="in">у</term>
+    <term name="ibid">ibid</term>
+    <term name="accessed">приступљено</term>
+    <term name="retrieved">обновљено</term>
+    <term name="from">од</term>
+    <term name="forthcoming">долазећи</term>
+    <term name="references">Референце</term>
+    <term name="no date">без датума</term>
+    <term name="and">и</term>
+    <term name="et-al">et al.</term>
+    
+    <!-- LONG LOCATOR FORMS -->
+    <term name="page">
+      <single>страница</single>
+      <multiple>странице</multiple>
+    </term>
+    <term name="paragraph">
+      <single>параграф</single>
+      <multiple>параграфи</multiple>
+    </term>
+    <term name="line">
+      <single>линија</single>
+      <multiple>линије</multiple>
+    </term>
+    <term name="volume">том</term>
+    <term name="issue">број</term>
+    
+    <!-- SHORT LOCATOR FORMS -->
+    <term name="page" form="short">
+      <single>стр.</single>
+      <multiple>стр.</multiple>
+    </term>
+    <term name="paragraph" form="short">
+      <single>параграф</single>
+      <multiple>параграф</multiple>
+    </term>
+    <term name="line" form="short">
+      <single>линија</single>
+      <multiple>линије</multiple>
+    </term>
+    <term name="volume" form="short">том</term>
+    <term name="issue" form="short">бр.</term>
+    
+    <!-- LONG ROLE FORMS -->
+    <term name="editor">
+      <single>уредник</single>
+      <multiple>уредици</multiple>
+    </term>
+    <term name="translator">
+      <single>преводиоц</single>
+      <multiple>преводиоци</multiple>
+    </term>
+    
+    <!-- SHORT ROLE FORMS -->
+    <term name="editor" form="short">
+      <single>Ур.</single>
+      <multiple>Ур.</multiple>
+    </term>
+    <term name="translator" form="short">
+      <single>прев.</single>
+      <multiple>прев.</multiple>
+    </term>
+    
+    <!-- VERB ROLE FORMS -->
+    <term name="editor" form="verb">уредио</term>
+    <term name="translator" form="verb">превео</term>
+    
+    <!-- LONG MONTH FORMS -->
+    <term name="month-01">Јануар</term>
+    <term name="month-02">Фебруар</term>
+    <term name="month-03">Март</term>
+    <term name="month-04">Април</term>
+    <term name="month-05">Мај</term>
+    <term name="month-06">Јуни</term>
+    <term name="month-07">Јули</term>
+    <term name="month-08">Август</term>
+    <term name="month-09">Септембар</term>
+    <term name="month-10">Октобар</term>
+    <term name="month-11">Новембар</term>
+    <term name="month-12">Децембар</term>
+    
+    <!-- SHORT MONTH FORMS -->
+    <term name="month-01" form="short">Јан.</term>
+    <term name="month-02" form="short">Феб.</term>
+    <term name="month-03" form="short">Март</term>
+    <term name="month-04" form="short">Апр.</term>
+    <term name="month-05" form="short">Мај</term>
+    <term name="month-06" form="short">Јуни</term>
+    <term name="month-07" form="short">Јули</term>
+    <term name="month-08" form="short">Ауг.</term>
+    <term name="month-09" form="short">Сеп.</term>
+    <term name="month-10" form="short">Окт.</term>
+    <term name="month-11" form="short">Нов.</term>
+    <term name="month-12" form="short">Дец.</term>
+  </locale>
+</terms>

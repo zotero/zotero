@@ -1,0 +1,90 @@
+<!ENTITY zotero.contextMenu.addTextToCurrentNote "Ajouter la sélection à la note Zotero">
+<!ENTITY zotero.contextMenu.addTextToNewNote "Créer une note Zotero à partir de la sélection">
+<!ENTITY zotero.contextMenu.saveLinkAsSnapshot "Save Link As Zotero Snapshot">
+<!ENTITY zotero.contextMenu.saveImageAsSnapshot "Save Image As Zotero Snapshot">
+
+<!ENTITY zotero.tabs.info.label "Info">
+<!ENTITY zotero.tabs.notes.label "Notes">
+<!ENTITY zotero.tabs.attachments.label "Fichiers joints">
+<!ENTITY zotero.tabs.tags.label "Balises">
+<!ENTITY zotero.tabs.related.label "Connexe">
+<!ENTITY zotero.notes.separate "Éditer dans une fenêtre séparée">
+
+<!ENTITY zotero.items.type_column "Type">
+<!ENTITY zotero.items.title_column "Titre">
+<!ENTITY zotero.items.creator_column "Créateur">
+<!ENTITY zotero.items.source_column "Source">
+<!ENTITY zotero.items.rights_column "Autorisations">
+<!ENTITY zotero.items.numChildren_column "+">
+<!ENTITY zotero.items.dateAdded_column "Date d&apos;ajout">
+<!ENTITY zotero.items.dateModified_column "Date de modification">
+
+<!ENTITY zotero.items.menu.showInLibrary "Show in Library">
+<!ENTITY zotero.items.menu.attach.note "Ajouter une note">
+<!ENTITY zotero.items.menu.attach.snapshot "Joindre une capture de la page courante">
+<!ENTITY zotero.items.menu.attach.link "Joindre le lien vers la page courante">
+
+<!ENTITY zotero.collections.name_column "Collections">
+
+<!ENTITY zotero.toolbar.newItem.label "Nouvel élément">
+<!ENTITY zotero.toolbar.moreItemTypes.label "Plus">
+<!ENTITY zotero.toolbar.newItemFromPage.label "Créer un nouvel élément à partir de la page courante">
+<!ENTITY zotero.toolbar.removeItem.label "Supprimer l&apos;élément...">
+<!ENTITY zotero.toolbar.newCollection.label "Nouvelle collection...">
+<!ENTITY zotero.toolbar.newSubcollection.label "New Subcollection...">
+<!ENTITY zotero.toolbar.newSavedSearch.label "Nouvelle recherche enregistrée...">
+<!ENTITY zotero.toolbar.tagSelector.label "Show/Hide Tag Selector">
+<!ENTITY zotero.toolbar.actions.label "Actions">
+<!ENTITY zotero.toolbar.import.label "Importer...">
+<!ENTITY zotero.toolbar.export.label "Exporter la bibliothèque...">
+<!ENTITY zotero.toolbar.preferences.label "Préférences...">
+<!ENTITY zotero.toolbar.about.label "À propos de Zotero...">
+<!ENTITY zotero.toolbar.search.label "Recherche :">
+<!ENTITY zotero.toolbar.fullscreen.tooltip "Bascule du mode plein écran">
+<!ENTITY zotero.toolbar.goToURL.label "Aperçu">
+<!ENTITY zotero.toolbar.goToURL.tooltip "Aller à cet élément en ligne">
+<!ENTITY zotero.toolbar.openURL.label "Localiser">
+<!ENTITY zotero.toolbar.openURL.tooltip "Rechercher dans votre bibliothèque locale">
+
+<!ENTITY zotero.item.add "Ajouter">
+<!ENTITY zotero.item.attachment.file.show "Afficher le fichier">
+
+<!ENTITY zotero.toolbar.note.standalone "Nouvelle note indépendante">
+<!ENTITY zotero.toolbar.attachment.linked "Lien vers un fichier...">
+<!ENTITY zotero.toolbar.attachment.add "Stocker une copie du fichier...">
+<!ENTITY zotero.toolbar.attachment.weblink "Enregistrer le lien vers la page courante">
+<!ENTITY zotero.toolbar.attachment.snapshot "Capturer la page courante">
+
+<!ENTITY zotero.tagSelector.noTagsToDisplay "No tags to display">
+<!ENTITY zotero.tagSelector.filter "Filter:">
+<!ENTITY zotero.tagSelector.displayAll "Display all tags">
+<!ENTITY zotero.tagSelector.selectVisible "Select visible">
+<!ENTITY zotero.tagSelector.clearVisible "Deselect visible">
+<!ENTITY zotero.tagSelector.clearAll "Deselect all">
+<!ENTITY zotero.tagSelector.renameTag "Rename Tag...">
+<!ENTITY zotero.tagSelector.deleteTag "Delete Tag...">
+
+<!ENTITY zotero.selectitems.title "Sélectionner des éléments">
+<!ENTITY zotero.selectitems.intro.label "Veuillez sélectionner les éléments à ajouter à votre bibliothèque">
+<!ENTITY zotero.selectitems.cancel.label "Annuler">
+<!ENTITY zotero.selectitems.select.label "OK">
+
+<!ENTITY zotero.bibliography.title "Créer une bibliographie">
+<!ENTITY zotero.bibliography.style.label "Style de citation :">
+<!ENTITY zotero.bibliography.output.label "Format de sortie">
+<!ENTITY zotero.bibliography.saveAsRTF.label "Enregistrer au format RTF">
+<!ENTITY zotero.bibliography.saveAsHTML.label "Enregistrer au format HTML">
+<!ENTITY zotero.bibliography.copyToClipboard.label "Copier dans le presse-papiers">
+<!ENTITY zotero.bibliography.print.label "Imprimer">
+
+<!ENTITY zotero.integration.docPrefs.title "Préférences du document">
+
+<!ENTITY zotero.progress.title "Progression">
+
+<!ENTITY zotero.exportOptions.title "Exporter...">
+<!ENTITY zotero.exportOptions.format.label "Format :">
+<!ENTITY zotero.exportOptions.translatorOptions.label "Options du convertisseur">
+
+<!ENTITY zotero.citation.page "Page">
+<!ENTITY zotero.citation.paragraph "Paragraphe">
+<!ENTITY zotero.citation.line "Ligne">

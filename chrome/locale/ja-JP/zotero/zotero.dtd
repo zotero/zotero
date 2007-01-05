@@ -1,0 +1,90 @@
+<!ENTITY zotero.contextMenu.addTextToCurrentNote "選択範囲をZoteroメモに追加">
+<!ENTITY zotero.contextMenu.addTextToNewNote "選択範囲からZoteroメモを作成">
+<!ENTITY zotero.contextMenu.saveLinkAsSnapshot "Save Link As Zotero Snapshot">
+<!ENTITY zotero.contextMenu.saveImageAsSnapshot "Save Image As Zotero Snapshot">
+
+<!ENTITY zotero.tabs.info.label "情報">
+<!ENTITY zotero.tabs.notes.label "メモ">
+<!ENTITY zotero.tabs.attachments.label "添付ファイル">
+<!ENTITY zotero.tabs.tags.label "タグ">
+<!ENTITY zotero.tabs.related.label "関連ページ">
+<!ENTITY zotero.notes.separate "別画面で編集する">
+
+<!ENTITY zotero.items.type_column "種類">
+<!ENTITY zotero.items.title_column "タイトル">
+<!ENTITY zotero.items.creator_column "製作者">
+<!ENTITY zotero.items.source_column "情報源">
+<!ENTITY zotero.items.rights_column "権利">
+<!ENTITY zotero.items.numChildren_column "+">
+<!ENTITY zotero.items.dateAdded_column "作成日時">
+<!ENTITY zotero.items.dateModified_column "更新日時">
+
+<!ENTITY zotero.items.menu.showInLibrary "Show in Library">
+<!ENTITY zotero.items.menu.attach.note "メモを追加">
+<!ENTITY zotero.items.menu.attach.snapshot "本ページのスナップショットを添付">
+<!ENTITY zotero.items.menu.attach.link "本ページへのリンクを添付">
+
+<!ENTITY zotero.collections.name_column "コレクション">
+
+<!ENTITY zotero.toolbar.newItem.label "新規アイテム">
+<!ENTITY zotero.toolbar.moreItemTypes.label "More">
+<!ENTITY zotero.toolbar.newItemFromPage.label "本ページから新規アイテムを作成">
+<!ENTITY zotero.toolbar.removeItem.label "アイテムを削除">
+<!ENTITY zotero.toolbar.newCollection.label "新規コレクション">
+<!ENTITY zotero.toolbar.newSubcollection.label "New Subcollection...">
+<!ENTITY zotero.toolbar.newSavedSearch.label "検索式保存の新規作成">
+<!ENTITY zotero.toolbar.tagSelector.label "Show/Hide Tag Selector">
+<!ENTITY zotero.toolbar.actions.label "タスク">
+<!ENTITY zotero.toolbar.import.label "インポート">
+<!ENTITY zotero.toolbar.export.label "ライブラリーをエクスポート">
+<!ENTITY zotero.toolbar.preferences.label "設定">
+<!ENTITY zotero.toolbar.about.label "Zoteroについて">
+<!ENTITY zotero.toolbar.search.label "検索：">
+<!ENTITY zotero.toolbar.fullscreen.tooltip "全画面表示">
+<!ENTITY zotero.toolbar.goToURL.label "表示">
+<!ENTITY zotero.toolbar.goToURL.tooltip "このアイテムのURLにアクセス">
+<!ENTITY zotero.toolbar.openURL.label "所在確認">
+<!ENTITY zotero.toolbar.openURL.tooltip "あなたのローカル図書館を通して発見">
+
+<!ENTITY zotero.item.add "追加">
+<!ENTITY zotero.item.attachment.file.show "ファイルを表示">
+
+<!ENTITY zotero.toolbar.note.standalone "新規メモを作成">
+<!ENTITY zotero.toolbar.attachment.linked "ファイルへのリンクを作成">
+<!ENTITY zotero.toolbar.attachment.add "ファイルのコピーを保存">
+<!ENTITY zotero.toolbar.attachment.weblink "本ページへのリンクを作成">
+<!ENTITY zotero.toolbar.attachment.snapshot "本ページのスナップショットを作成">
+
+<!ENTITY zotero.tagSelector.noTagsToDisplay "No tags to display">
+<!ENTITY zotero.tagSelector.filter "Filter:">
+<!ENTITY zotero.tagSelector.displayAll "Display all tags">
+<!ENTITY zotero.tagSelector.selectVisible "Select visible">
+<!ENTITY zotero.tagSelector.clearVisible "Deselect visible">
+<!ENTITY zotero.tagSelector.clearAll "Deselect all">
+<!ENTITY zotero.tagSelector.renameTag "Rename Tag...">
+<!ENTITY zotero.tagSelector.deleteTag "Delete Tag...">
+
+<!ENTITY zotero.selectitems.title "アイテムを選択">
+<!ENTITY zotero.selectitems.intro.label "ライブラリーに追加したいアイテムを選択してください">
+<!ENTITY zotero.selectitems.cancel.label "キャンセル">
+<!ENTITY zotero.selectitems.select.label "OK">
+
+<!ENTITY zotero.bibliography.title "参考文献を作成">
+<!ENTITY zotero.bibliography.style.label "引用スタイル">
+<!ENTITY zotero.bibliography.output.label "アウトプット・フォーマット">
+<!ENTITY zotero.bibliography.saveAsRTF.label "RTFとして保存">
+<!ENTITY zotero.bibliography.saveAsHTML.label "HTMLとして保存">
+<!ENTITY zotero.bibliography.copyToClipboard.label "クリップボードにコピー">
+<!ENTITY zotero.bibliography.print.label "印刷">
+
+<!ENTITY zotero.integration.docPrefs.title "ドキュメントの設定">
+
+<!ENTITY zotero.progress.title "進行">
+
+<!ENTITY zotero.exportOptions.title "エクスポート">
+<!ENTITY zotero.exportOptions.format.label "フォーマット：">
+<!ENTITY zotero.exportOptions.translatorOptions.label "トランスレーターのオプション">
+
+<!ENTITY zotero.citation.page "ページ">
+<!ENTITY zotero.citation.paragraph "段落">
+<!ENTITY zotero.citation.line "行">

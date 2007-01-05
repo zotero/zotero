@@ -1,0 +1,17 @@
+<!ENTITY zotero.search.name "Name:">
+
+<!ENTITY zotero.search.joinMode.prefix "Correspond">
+<!ENTITY zotero.search.joinMode.any "au moins à une">
+<!ENTITY zotero.search.joinMode.all "à toutes les">
+<!ENTITY zotero.search.joinMode.suffix "condition(s) suivante(s) :">
+
+<!ENTITY zotero.search.recursive.label "Rechercher dans les sous-dossiers">
+
+<!ENTITY zotero.search.textModes.phrase "Phrase">
+<!ENTITY zotero.search.textModes.phraseBinary "Phrase (fichiers binaires incl.)">
+<!ENTITY zotero.search.textModes.regexp "Expression régulière (RegExp)">
+<!ENTITY zotero.search.textModes.regexpCS "Expression régulière (sensible à la casse)">
+
+<!ENTITY zotero.search.date.units.days "days">
+<!ENTITY zotero.search.date.units.months "months">
+<!ENTITY zotero.search.date.units.years "years">
