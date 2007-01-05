@@ -699,7 +699,7 @@ Zotero.Schema = new function(){
 				}
 				
 				if (i==15) {
-					Zotero.DB.query("DROP TABLE annotations");
+					Zotero.DB.query("DROP TABLE IF EXISTS annotations");
 				}
 			}
 			
