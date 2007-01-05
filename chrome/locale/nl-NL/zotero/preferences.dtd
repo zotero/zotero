@@ -1,11 +1,11 @@
-<!ENTITY zotero.preferences.title "Zotero-Einstellungen">
+<!ENTITY zotero.preferences.title "Zotero Voorkeuren">
 
 <!ENTITY zotero.preferences.prefpane.general "General">
 <!ENTITY zotero.preferences.userInterface "User Interface">
 <!ENTITY zotero.preferences.position "Display Zotero">
-<!ENTITY zotero.preferences.position.above "über">
-<!ENTITY zotero.preferences.position.below "unter">
-<!ENTITY zotero.preferences.position.browser "Browser-Inhalt">
+<!ENTITY zotero.preferences.position.above "boven">
+<!ENTITY zotero.preferences.position.below "onder">
+<!ENTITY zotero.preferences.position.browser "webpagina&apos;s">
 <!ENTITY zotero.preferences.statusBarIcon "Status bar icon:">
 <!ENTITY zotero.preferences.autoUpdate "Automatically check for updated scrapers">
 <!ENTITY zotero.preferences.updateNow "Update now">
@@ -16,7 +16,7 @@
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 <!ENTITY zotero.preferences.openurl.custom "Custom...">
 <!ENTITY zotero.preferences.openurl.server "Resolver:">
-<!ENTITY zotero.preferences.openurl.version "Version:">
+<!ENTITY zotero.preferences.openurl.version "Versie:">
 
 <!ENTITY zotero.preferences.prefpane.keys "Shortcut Keys">
 <!ENTITY zotero.preferences.keys.openZotero "Open/Close Zotero Pane">

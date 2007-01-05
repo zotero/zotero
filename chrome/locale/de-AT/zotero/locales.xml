@@ -69,7 +69,7 @@
     <term name="translator" form="verb">Übers. v.</term>
     
     <!-- LONG MONTH FORMS -->
-    <term name="month-01">Januar</term>
+    <term name="month-01">Jänner</term>
     <term name="month-02">Februar</term>
     <term name="month-03">März</term>
     <term name="month-04">April</term>
@@ -83,7 +83,7 @@
     <term name="month-12">Dezember</term>
     
     <!-- SHORT MONTH FORMS -->
-    <term name="month-01" form="short">Jan</term>
+    <term name="month-01" form="short">Jän</term>
     <term name="month-02" form="short">Feb</term>
     <term name="month-03" form="short">Mar</term>
     <term name="month-04" form="short">Apr</term>
