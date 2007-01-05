@@ -207,7 +207,11 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids)
 				else
 				{
 					var item = Zotero.Items.get(ids[i]);
-					
+					if (!item) {
+						// DEBUG: this shouldn't really happen but could if a
+						// modify comes in after a delete
+						continue;
+					}
 					if(item.isRegularItem() || !item.getSource())
 					{
 						//most likely, the note or attachment's parent was removed.
