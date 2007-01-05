@@ -110,7 +110,7 @@ Zotero.ItemTreeView.prototype.refresh = function()
  */
 Zotero.ItemTreeView.prototype.notify = function(action, type, ids)
 {
-	if (type != 'item'){
+	if (type != 'item' && type != 'collection-item'){
 		return;
 	}
 	
@@ -136,12 +136,13 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids)
 		var rows = new Array();
 		for(var i=0, len=ids.length; i<len; i++)
 		{
-			if(action == 'delete' || !this._itemGroup.ref.hasItem(ids[i]))
-			{
+			var removeID = (action == 'remove') ? ids[i].split('-')[1] : ids[i];
+			
+			if (action == 'delete' || !this._itemGroup.ref.hasItem(removeID)) {
 				// Row might already be gone (e.g. if this is a child and
 				// 'modify' was sent to parent)
-				if (this._itemRowMap[ids[i]] != undefined) {
-					rows.push(this._itemRowMap[ids[i]]);
+				if (this._itemRowMap[removeID] != undefined) {
+					rows.push(this._itemRowMap[removeID]);
 				}
 			}
 		}
@@ -239,7 +240,6 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids)
 		else if (quicksearch.value == '')
 		{
 			var items = Zotero.Items.get(ids);
-			
 			for (var i in items)
 			{
 				// if the item belongs in this collection
@@ -284,9 +284,7 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids)
 		if(action == 'add' && ids.length===1 && activeWindow)
 		{
 			// Reset to Info tab
-			this._treebox.treeBody.ownerDocument.
-			getElementById('zotero-view-tabs').selectedIndex = 0;
-			
+			this._treebox.treeBody.ownerDocument.getElementById('zotero-view-tabs').selectedIndex = 0;
 			this.selectItem(ids[0]);
 		}
 		// If single item is selected and was modified
@@ -307,9 +305,7 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids)
 				}
 			}
 			
-			// Reselect item (in case the sort order changed and the item
-			// went off-screen)
-			this.selectItem(ids[0]);
+			this.rememberSelection(savedSelection);
 		}
 		else
 		{
@@ -759,7 +755,6 @@ Zotero.ItemTreeView.prototype.saveSelection = function()
 			savedSelection.push(this._getItemAtRow(j).ref.getID());
 		}
 	}
-	
 	return savedSelection;
 }
 

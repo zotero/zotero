@@ -1,9 +1,3 @@
-/* Don't focus filter textbox if pane isn't open */
-zoterotagselector[collapsed=true] tags-search
-{
-	-moz-user-focus: ignore;
-}
-
 groupbox
 {
 	overflow: auto;
@@ -21,20 +15,20 @@ checkbox
 	margin: .75em 0 .4em;
 }
 
-label
+#tags-toggle label
 {
 	margin-right: .2em;
 	padding: .15em .25em;
 	-moz-user-focus: ignore;
 }
 
-label[selected="true"]
+#tags-toggle label[selected="true"]
 {
 	background: #a9c6f0 !important;
 }
 
 /* Visible out-of-scope tags should be grey */
-label[inScope="false"]
+#tags-toggle label[inScope="false"]
 {
 	color: #666 !important;
 }
@@ -46,15 +40,15 @@ label.zotero-clicky[inScope="false"]:active
 	background: inherit !important;
 }
 
-label[draggedOver="true"]
+#tags-toggle label[draggedOver="true"]
 {
 	color: white !important;
 	background: #666;
 }
 
-hbox
+groupbox > hbox
 {
-	-moz-box-align: baseline;
+	-moz-box-align: center;
 	-moz-box-pack: center;
 }
 
@@ -66,10 +60,21 @@ hbox
 	list-style-image: url('chrome://zotero/skin/search-cancel.png');
 }
 
+groupbox > hbox > hbox
+{
+	-moz-box-flex: 1;
+	-moz-box-align: center;
+}
+
 /* Bottom buttons */
 toolbarbutton.zotero-clicky
 {
 	margin:3px 5px;
 	padding:1px;
 	height:1em;
+}
+
+textbox
+{
+	margin: 3px 0 1px;
 }

@@ -1188,12 +1188,8 @@ Zotero.Item.prototype.getNotes = function(){
  * Return true if a note item is an abstract, false otherwise
  */
 Zotero.Item.prototype.isAbstract = function() {
-	if (this.isAttachment()) {
-		return false;
-	}
-	
 	if (!this.isNote()) {
-		throw ("isAbstract() can only be called on note items");
+		return false;
 	}
 	
 	if (!this.getID()) {
@@ -1640,6 +1636,7 @@ Zotero.Item.prototype.addTagByID = function(tagID) {
 	
 	Zotero.DB.commitTransaction();
 	Zotero.Notifier.trigger('modify', 'item', this.getID());
+	Zotero.Notifier.trigger('add', 'item-tag', this.getID() + '-' + tagID);
 	
 	return true;
 }
@@ -1683,6 +1680,8 @@ Zotero.Item.prototype.replaceTag = function(oldTagID, newTag){
 	var id = this.addTag(newTag);
 	Zotero.DB.commitTransaction();
 	Zotero.Notifier.trigger('modify', 'item', this.getID());
+	Zotero.Notifier.trigger('remove', 'item-tag', this.getID() + '-' + oldTagID);
+	Zotero.Notifier.trigger('add', 'item-tag', this.getID() + '-' + id);
 	return id;
 }
 
@@ -1697,6 +1696,7 @@ Zotero.Item.prototype.removeTag = function(tagID){
 	Zotero.Tags.purge();
 	Zotero.DB.commitTransaction();
 	Zotero.Notifier.trigger('modify', 'item', this.getID());
+	Zotero.Notifier.trigger('remove', 'item-tag', this.getID() + '-' + tagID);
 }
 
 Zotero.Item.prototype.removeAllTags = function(){
@@ -1705,10 +1705,18 @@ Zotero.Item.prototype.removeAllTags = function(){
 	}
 	
 	Zotero.DB.beginTransaction();
+	var tagIDs = this.getTagIDs();
 	Zotero.DB.query("DELETE FROM itemTags WHERE itemID=?", this.getID());
 	Zotero.Tags.purge();
 	Zotero.DB.commitTransaction();
 	Zotero.Notifier.trigger('modify', 'item', this.getID());
+	
+	if (tagIDs) {
+		for (var i in tagIDs) {
+			tagIDs[i] = this.getID() + '-' + tagIDs[i];
+		}
+		Zotero.Notifier.trigger('remove', 'item-tag', tagIDs);
+	}
 }
 
 
@@ -2647,7 +2655,7 @@ Zotero.Collection.prototype.addItem = function(itemID){
 		Zotero.Notifier.trigger('modify', 'collection', this.getID());
 	}
 	
-	Zotero.Notifier.trigger('add', 'item', itemID);
+	Zotero.Notifier.trigger('add', 'collection-item', this.getID() + '-' + itemID);
 }
 
 
@@ -2688,7 +2696,7 @@ Zotero.Collection.prototype.removeItem = function(itemID){
 		Zotero.Notifier.trigger('modify', 'collection', this.getID());
 	}
 	
-	Zotero.Notifier.trigger('remove', 'item', itemID);
+	Zotero.Notifier.trigger('remove', 'collection-item', this.getID() + '-' + itemID);
 }
 
 
@@ -3251,6 +3259,47 @@ Zotero.Tags = new function(){
 		Zotero.debug('Renaming tag', 4);
 		
 		Zotero.DB.beginTransaction();
+		
+		// Check if the new tag already exists
+		var sql = "SELECT tagID FROM tags WHERE tag=?";
+		var existingTagID = Zotero.DB.valueQuery(sql, tag);
+		if (existingTagID) {
+			var itemIDs = this.getTagItems(tagID);
+			var existingItemIDs = this.getTagItems(existingTagID);
+			
+			// Would be easier to just call removeTag(tagID) and addTag(existingID)
+			// here, but this is considerably more efficient
+			var sql = "UPDATE OR REPLACE itemTags SET tagID=? WHERE tagID=?";
+			Zotero.DB.query(sql, [existingTagID, tagID]);
+			
+			// Manual purge of old tag
+			var sql = "DELETE FROM tags WHERE tagID=?";
+			Zotero.DB.query(sql, tagID);
+			delete _tags[_tagsByID[tagID]];
+			delete _tagsByID[tagID];
+			Zotero.Notifier.trigger('delete', 'tag', tagID);
+			
+			// Simulate tag removal on items that used old tag
+			var itemTags = [];
+			for (var i in itemIDs) {
+				itemTags.push(itemIDs[i] + '-' + tagID);
+			}
+			Zotero.Notifier.trigger('remove', 'item-tag', itemTags);
+			
+			// And send tag add for new tag (except for those that already had it)
+			var itemTags = [];
+			for (var i in itemIDs) {
+				if (existingItemIDs.indexOf(itemIDs[i]) == -1) {
+					itemTags.push(itemIDs[i] + '-' + existingTagID);
+				}
+			}
+			Zotero.Notifier.trigger('add', 'item-tag', itemTags);
+			
+			Zotero.Notifier.trigger('modify', 'item', itemIDs);
+			Zotero.DB.commitTransaction();
+			return;
+		}
+		
 		var sql = "UPDATE tags SET tag=? WHERE tagID=?";
 		Zotero.DB.query(sql, [{string: tag}, {int: tagID}]);
 		
@@ -3270,15 +3319,21 @@ Zotero.Tags = new function(){
 		Zotero.DB.beginTransaction();
 		
 		var sql  = "SELECT itemID FROM itemTags WHERE tagID=?";
-		var items = Zotero.DB.columnQuery(sql, tagID);
+		var itemIDs = Zotero.DB.columnQuery(sql, tagID);
 		
-		if (!items) {
+		if (!itemIDs) {
 			return;
 		}
 		
 		var sql = "DELETE FROM itemTags WHERE tagID=?";
 		Zotero.DB.query(sql, tagID);
-		Zotero.Notifier.trigger('modify', 'item', items)
+		
+		Zotero.Notifier.trigger('modify', 'item', itemIDs)
+		var itemTags = [];
+		for (var i in itemIDs) {
+			itemTags.push(itemIDs[i] + '-' + tagID);
+		}
+		Zotero.Notifier.trigger('remove', 'item-tag', itemTags);
 		
 		this.purge();
 		Zotero.DB.commitTransaction();

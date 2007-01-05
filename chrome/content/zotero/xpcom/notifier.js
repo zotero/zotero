@@ -23,7 +23,7 @@
 Zotero.Notifier = new function(){
 	var _observers = new Zotero.Hash();
 	var _disabled = false;
-	var _types = ['collection', 'search', 'item', 'tag'];
+	var _types = ['collection', 'search', 'item', 'collection-item', 'item-tag', 'tag'];
 	var _inTransaction;
 	var _locked = false;
 	var _queue = [];
@@ -114,7 +114,7 @@ Zotero.Notifier = new function(){
 	* 	type - 'collection', 'search', 'item'
 	* 	ids - single id or array of ids
 	*
-	* c = collection, s = search, i = item, t = tag
+	* c = collection, s = search, i = item, t = tag, it = item-tag
 	*
 	*
 	* Notes:
@@ -215,7 +215,7 @@ Zotero.Notifier = new function(){
 		function sorter(a, b) {
 			return order.indexOf(a) - order.indexOf(b);
 		}
-		var order = ['collection', 'search', 'items', 'tags'];
+		var order = ['collection', 'search', 'item', 'collection-item', 'item-tag', 'tag'];
 		_queue.sort();
 		
 		var order = ['add', 'modify', 'remove', 'move', 'delete'];
