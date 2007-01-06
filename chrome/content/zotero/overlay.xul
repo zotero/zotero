@@ -62,7 +62,9 @@
 	
 	<vbox id="appcontent">
 		<!-- Changes to attributes of zotero-splitter and zotero-pane must be mirrored on overlay.js's onLoad() function -->
-		<splitter id="zotero-splitter" resizebefore="closest" resizeafter="closest" collapsed="true"/>
+		<!-- onmouseup shouldn't be necessary but seems to help prevent tag selector from sometimes going off the screen -->
+		<splitter id="zotero-splitter" resizebefore="closest" resizeafter="closest" collapsed="true"
+			onmouseup="ZoteroPane.updateTagSelectorSize()"/>
 		<hbox id="zotero-pane" persist="height" collapsed="true">
 			<popupset>
 				<popup id="zotero-collectionmenu" onpopupshowing="ZoteroPane.buildCollectionContextMenu();">
@@ -96,39 +98,43 @@
 			</popupset>
 			
 			<vbox id="zotero-collections-pane" persist="width" flex="1">
-				<toolbar>
-					<toolbarbutton id="zotero-tb-collection-add" tooltiptext="&zotero.toolbar.newCollection.label;" oncommand="ZoteroPane.newCollection()"/>
-					<toolbarbutton id="zotero-tb-collection-addsearch" tooltiptext="&zotero.toolbar.newSavedSearch.label;" oncommand="ZoteroPane.newSearch();"/>
-					<spacer flex="1"/>
-					<toolbarbutton id="zotero-tb-tag-selector" tooltiptext="&zotero.toolbar.tagSelector.label;" oncommand="ZoteroPane.toggleTagSelector()"/>
-					<toolbarbutton id="zotero-tb-actions-menu" tooltiptext="&zotero.toolbar.actions.label;" type="menu">
-						<menupopup id="zotero-tb-actions-popup">
-							<menuitem id="zotero-tb-actions-import" label="&zotero.toolbar.import.label;" oncommand="Zotero_File_Interface.importFile();"/>
-							<menuitem id="zotero-tb-actions-export" label="&zotero.toolbar.export.label;" oncommand="Zotero_File_Interface.exportFile();"/>
-							<menuseparator id="zotero-tb-actions-utilities-separator" hidden="true"/>
-							<menuseparator id="zotero-tb-actions-separator"/>
-							<menuitem id="zotero-tb-actions-prefs" label="&zotero.toolbar.preferences.label;"
-								oncommand="window.openDialog('chrome://zotero/content/preferences.xul', 'zotero-prefs', 'chrome,titlebar,toolbar,' + Zotero.Prefs.get('browser.preferences.instantApply', true) ? 'dialog=no' : 'modal')"/>
-							<menuitem id="zotero-tb-actions-about" label="&zotero.toolbar.about.label;" oncommand="window.openDialog('chrome://zotero/content/about.xul', 'about', 'chrome')"/>
-						</menupopup>
-					</toolbarbutton>
-				</toolbar>
-				<tree id="zotero-collections-tree" hidecolumnpicker="true" context="zotero-collectionmenu"
-					onselect="ZoteroPane.onCollectionSelected();" seltype="single"
-					ondragdrop="nsDragAndDrop.drop(event,ZoteroPane.getCollectionsView())"
-					ondraggesture="if (event.target.localName == 'treechildren') nsDragAndDrop.startDrag(event,ZoteroPane.getCollectionsView());"
-					onkeypress="if (event.keyCode == event.DOM_VK_BACK_SPACE || event.keyCode == event.DOM_VK_DELETE){ ZoteroPane.deleteSelectedCollection(); event.preventDefault(); }"
-					flex="1">
-					<treecols>
-						<treecol
-							id="zotero-collections-name-column"
-							label="&zotero.collections.name_column;"
-							flex="1"
-							primary="true"/>
-					</treecols>
-					<treechildren/>
-				</tree>
-				<splitter id="zotero-tags-splitter"/>
+				<!-- This extra vbox prevents the toolbar from getting compressed when resizing
+						the tag selector to max height -->
+				<vbox flex="1">
+					<toolbar>
+						<toolbarbutton id="zotero-tb-collection-add" tooltiptext="&zotero.toolbar.newCollection.label;" oncommand="ZoteroPane.newCollection()"/>
+						<toolbarbutton id="zotero-tb-collection-addsearch" tooltiptext="&zotero.toolbar.newSavedSearch.label;" oncommand="ZoteroPane.newSearch();"/>
+						<spacer flex="1"/>
+						<toolbarbutton id="zotero-tb-tag-selector" tooltiptext="&zotero.toolbar.tagSelector.label;" oncommand="ZoteroPane.toggleTagSelector()"/>
+						<toolbarbutton id="zotero-tb-actions-menu" tooltiptext="&zotero.toolbar.actions.label;" type="menu">
+							<menupopup id="zotero-tb-actions-popup">
+								<menuitem id="zotero-tb-actions-import" label="&zotero.toolbar.import.label;" oncommand="Zotero_File_Interface.importFile();"/>
+								<menuitem id="zotero-tb-actions-export" label="&zotero.toolbar.export.label;" oncommand="Zotero_File_Interface.exportFile();"/>
+								<menuseparator id="zotero-tb-actions-utilities-separator" hidden="true"/>
+								<menuseparator id="zotero-tb-actions-separator"/>
+								<menuitem id="zotero-tb-actions-prefs" label="&zotero.toolbar.preferences.label;"
+									oncommand="window.openDialog('chrome://zotero/content/preferences.xul', 'zotero-prefs', 'chrome,titlebar,toolbar,' + Zotero.Prefs.get('browser.preferences.instantApply', true) ? 'dialog=no' : 'modal')"/>
+								<menuitem id="zotero-tb-actions-about" label="&zotero.toolbar.about.label;" oncommand="window.openDialog('chrome://zotero/content/about.xul', 'about', 'chrome')"/>
+							</menupopup>
+						</toolbarbutton>
+					</toolbar>
+					<tree id="zotero-collections-tree" hidecolumnpicker="true" context="zotero-collectionmenu"
+						onselect="ZoteroPane.onCollectionSelected();" seltype="single"
+						ondragdrop="nsDragAndDrop.drop(event,ZoteroPane.getCollectionsView())"
+						ondraggesture="if (event.target.localName == 'treechildren') nsDragAndDrop.startDrag(event,ZoteroPane.getCollectionsView());"
+						onkeypress="if (event.keyCode == event.DOM_VK_BACK_SPACE || event.keyCode == event.DOM_VK_DELETE){ ZoteroPane.deleteSelectedCollection(); event.preventDefault(); }"
+						flex="1">
+						<treecols>
+							<treecol
+								id="zotero-collections-name-column"
+								label="&zotero.collections.name_column;"
+								flex="1"
+								primary="true"/>
+						</treecols>
+						<treechildren/>
+					</tree>
+				</vbox>
+				<splitter id="zotero-tags-splitter" onmouseup="ZoteroPane.updateTagSelectorSize()"/>
 				<zoterotagselector id="zotero-tag-selector" persist="height,collapsed" oncommand="ZoteroPane.updateTagFilter()"/>
 			</vbox>
 			

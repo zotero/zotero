@@ -38,6 +38,7 @@ var ZoteroPane = new function()
 	this.newCollection = newCollection;
 	this.newSearch = newSearch;
 	this.toggleTagSelector = toggleTagSelector;
+	this.updateTagSelectorSize = updateTagSelectorSize;
 	this.getTagSelection = getTagSelection;
 	this.updateTagFilter = updateTagFilter;
 	this.onCollectionSelected = onCollectionSelected;
@@ -99,6 +100,7 @@ var ZoteroPane = new function()
 			newSplitter.setAttribute('collapsed',true);
 			newSplitter.setAttribute('resizebefore','closest');
 			newSplitter.setAttribute('resizeafter','closest');
+			newSplitter.setAttribute('onmouseup', 'ZoteroPane.updateTagSelectorSize()');
 			appContent.removeChild(oldSplitter);
 			appContent.insertBefore(newSplitter, document.getElementById('content'));
 			
@@ -113,6 +115,8 @@ var ZoteroPane = new function()
 		
 		var itemsTree = document.getElementById('zotero-items-tree');
 		itemsTree.controllers.appendController(new Zotero.ItemTreeCommandController(itemsTree));
+		
+		this.updateTagSelectorSize();
 		
 		// Create the New Item (+) menu with each item type
 		var addMenu = document.getElementById('zotero-tb-add').firstChild;
@@ -316,12 +320,16 @@ var ZoteroPane = new function()
 	
 	
 	function toggleTagSelector(){
+		var zoteroPane = document.getElementById('zotero-pane');
 		var tagSelector = document.getElementById('zotero-tag-selector');
-		var collapsed = tagSelector.getAttribute('collapsed')=='true';
-		tagSelector.setAttribute('collapsed', !collapsed);
+		
+		var showing = tagSelector.getAttribute('collapsed') == 'true';
+		tagSelector.setAttribute('collapsed', !showing);
+		this.updateTagSelectorSize();
+		
 		// If showing, set scope to items in current view
 		// and focus filter textbox
-		if (collapsed) {
+		if (showing) {
 			_setTagScope();
 			tagSelector.focusTextbox();
 		}
@@ -329,6 +337,36 @@ var ZoteroPane = new function()
 		else {
 			tagSelector.uninit();
 		}
+	}
+	
+	
+	function updateTagSelectorSize() {
+		var zoteroPane = document.getElementById('zotero-pane');
+		var tagSelector = document.getElementById('zotero-tag-selector');
+		
+		height = tagSelector.boxObject.height;
+		
+		/*
+		Zotero.debug(tagSelector.boxObject.height);
+		Zotero.debug(tagSelector.getAttribute('height'));
+		Zotero.debug(zoteroPane.boxObject.height);
+		Zotero.debug(zoteroPane.getAttribute('height'));
+		*/
+		
+		// Don't let the Z-pane jump back down to its previous height
+		// (if shrinking or hiding the tag selector let it clear the min-height)
+		if (zoteroPane.getAttribute('height') < zoteroPane.boxObject.height) {
+			zoteroPane.setAttribute('height', zoteroPane.boxObject.height);
+		}
+		
+		if (tagSelector.getAttribute('collapsed') != 'true' && !height) {
+			height = parseInt(tagSelector.getAttribute('height'));
+		}
+		
+		// 170px is the Z-pane min-height sans tag selector; 120px seems to be
+		// enough room for the toolbar and collections tree at minimum height
+		//Zotero.debug('Setting tag selector minheight to ' + (Math.max(170, 120 + height)));
+		zoteroPane.setAttribute('minheight', Math.max(170, 120 + height));
 	}
 	
 	
