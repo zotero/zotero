@@ -1,14 +1,15 @@
 #zotero-status-bar-icon
 {
-	width: 47px;
-	margin:0 0 -1px;
-	padding:0 4px 1px;
+	width: 55px;
+	margin: 0 0 -1px; /* For Fitts's law (on OS X, at least) */
+	padding: 0 0 1px;
 	list-style-image: url(chrome://zotero/skin/zotero_status_bar.png);
 }
 #zotero-status-bar-icon[compact="true"]
 {
-	width: 9px;
-	padding:0 5px 1px;
+	width: 20px;
+	margin: 0 0 -1px;
+	padding: 0 0 1px;
 	list-style-image: url(chrome://zotero/skin/zotero_status_bar_compact.png);
 }
 #zotero-status-bar-icon[error="true"]
