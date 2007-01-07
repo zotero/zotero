@@ -1,4 +1,4 @@
--- 157
+-- 158
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-12-21 18:29:08'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2007-01-07 17:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b3.r1', '', '2006-12-15 03:40:00', 1, 100, 4, 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -3151,7 +3151,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('3e684d82-73a3-9a34-095f-19b112d88bbf', '1.0.0b3.r1', '', '2006-12-15 03:40:00', 1, 100, 4, 'Google Books', 'Simon Kornblith', '^http://books\.google\.[a-z]+/books\?(.*vid=.*\&id=.*|.*q=.*)',
+REPLACE INTO translators VALUES ('3e684d82-73a3-9a34-095f-19b112d88bbf', '1.0.0b3.r1', '', '2007-01-07 17:00:00', 1, 100, 4, 'Google Books', 'Simon Kornblith', '^http://books\.google\.[a-z]+/books\?(.*vid=.*\&id=.*|.*q=.*)',
 'function detectWeb(doc, url) {
 	var re = new RegExp(''^http://books\\.google\\.[a-z]+/books\\?vid=([^&]+).*\\&id=([^&]+)'', ''i'');
 	if(re.test(doc.location.href)) {
@@ -3164,7 +3164,7 @@ REPLACE INTO translators VALUES ('3e684d82-73a3-9a34-095f-19b112d88bbf', '1.0.0b
 	var uri = doc.location.href;
 	var newUris = new Array();
 	
-	var re = new RegExp(''^http://books\\.google\\.([a-z]+)/books\\?vid=([^&]+).*\\&id=([^&]+)'', ''i'');
+	var re = new RegExp(''^http://books\\.google\\.[a-z]+/books\\?vid=([^&]+).*\\&id=([^&]+)'', ''i'');
 	var m = re.exec(uri);
 	if(m) {
 		newUris.push(''http://books.google.com/books?vid=''+m[1]+''&id=''+m[2]);
