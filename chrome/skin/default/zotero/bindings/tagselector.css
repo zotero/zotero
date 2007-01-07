@@ -1,5 +1,6 @@
 groupbox
 {
+	overflow: hidden;
 	min-height: 132px;
 	padding-bottom: 2px;
 }
