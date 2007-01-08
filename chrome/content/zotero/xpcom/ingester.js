@@ -749,18 +749,18 @@ Zotero.Ingester.MIMEHandler.StreamListener.prototype.onStopRequest = function(ch
 	try {
 		saveLocation = frontWindow.ZoteroPane.getSelectedCollection();
 	} catch(e) {}
-	translation.setHandler("itemDone", function(obj, item) { frontWindow.Zotero_Browser._itemDone(obj, item, saveLocation) });
-	translation.setHandler("done", function(obj, item) { frontWindow.Zotero_Browser._finishScraping(obj, item, saveLocation) });
+	translation.setHandler("itemDone", function(obj, item) { frontWindow.Zotero_Browser.itemDone(obj, item, saveLocation) });
+	translation.setHandler("done", function(obj, item) { frontWindow.Zotero_Browser.finishScraping(obj, item, saveLocation) });
 	
 	// attempt to retrieve translators
 	var translators = translation.getTranslators();
 	if(!translators.length) {
 		// we lied. we can't really translate this file. call
 		// nsIExternalHelperAppService with the data
-		this._frontWindow.Zotero_Browser.Progress.kill();
+		frontWindow.Zotero_Browser.Progress.kill();
 
 		var streamListener;
-		if(streamListener = externalHelperAppService.doContent(this._contentType, this._request, this._frontWindow)) {
+		if(streamListener = externalHelperAppService.doContent(this._contentType, this._request, frontWindow)) {
 			// create a string input stream
 			var inputStream = Components.classes["@mozilla.org/io/string-input-stream;1"].
 							  createInstance(Components.interfaces.nsIStringInputStream);

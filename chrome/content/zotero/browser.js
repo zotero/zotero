@@ -49,6 +49,8 @@ var Zotero_Browser = new function() {
 	this.tabSelect = tabSelect;
 	this.tabClose = tabClose;
 	this.resize = resize;
+	this.finishScraping = finishScraping;
+	this.itemDone = itemDone;
 	
 	this.tabbrowser = null;
 	this.appcontent = null;
@@ -344,6 +346,41 @@ var Zotero_Browser = new function() {
 		tab.page.annotations.refresh();
 	}
 	
+	
+	/*
+	 * Callback to be executed when scraping is complete
+	 */
+	function finishScraping(obj, returnValue, collection) {
+		if(!returnValue) {
+			Zotero_Browser.Progress.changeHeadline(Zotero.getString("ingester.scrapeError"));
+			Zotero_Browser.Progress.addDescription(Zotero.getString("ingester.scrapeErrorDescription"));
+		}
+		
+		if(collection) {
+			// notify about modified items
+			Zotero.Notifier.trigger("modify", "collection", collection.getID());
+		}
+		
+		Zotero_Browser.Progress.fade();
+	}
+	
+	
+	/*
+	 * Callback to be executed when an item has been finished
+	 */
+	function itemDone(obj, item, collection) {
+		var title = item.getField("title");
+		var icon = item.getImageSrc();
+		Zotero_Browser.Progress.addLines([title], [icon]);
+		
+		// add item to collection, if one was specified
+		if(collection) {
+			Zotero.Notifier.disable();
+			collection.addItem(item.getID());
+			Zotero.Notifier.enable();
+		}
+	}
+	
 	//////////////////////////////////////////////////////////////////////////////
 	//
 	// Private Zotero_Browser methods
@@ -553,25 +590,9 @@ Zotero_Browser.Tab.prototype.translate = function(saveLocation) {
 		// use first translator available
 		this.page.translate.setTranslator(this.page.translators[0]);
 		this.page.translate.setHandler("select", me._selectItems);
-		this.page.translate.setHandler("itemDone", function(obj, item) { me._itemDone(obj, item, saveLocation) });
-		this.page.translate.setHandler("done", function(obj, item) { me._finishScraping(obj, item, saveLocation) });
+		this.page.translate.setHandler("itemDone", function(obj, item) { Zotero_Browser.itemDone(obj, item, saveLocation) });
+		this.page.translate.setHandler("done", function(obj, item) { Zotero_Browser.finishScraping(obj, item, saveLocation) });
 		this.page.translate.translate();
-	}
-}
-
-/*
- * Callback to be executed when an item has been finished
- */
-Zotero_Browser.Tab.prototype._itemDone = function(obj, item, collection) {
-	var title = item.getField("title");
-	var icon = item.getImageSrc();
-	Zotero_Browser.Progress.addLines([title], [icon]);
-	
-	// add item to collection, if one was specified
-	if(collection) {
-		Zotero.Notifier.disable();
-		collection.addItem(item.getID());
-		Zotero.Notifier.enable();
 	}
 }
 
@@ -589,23 +610,6 @@ Zotero_Browser.Tab.prototype._selectItems = function(obj, itemList) {
 	}
 	
 	return io.dataOut;
-}
-
-/*
- * Callback to be executed when scraping is complete
- */
-Zotero_Browser.Tab.prototype._finishScraping = function(obj, returnValue, collection) {
-	if(!returnValue) {
-		Zotero_Browser.Progress.changeHeadline(Zotero.getString("ingester.scrapeError"));
-		Zotero_Browser.Progress.addDescription(Zotero.getString("ingester.scrapeErrorDescription"));
-	}
-	
-	if(collection) {
-		// notify about modified items
-		Zotero.Notifier.trigger("modify", "collection", collection.getID());
-	}
-	
-	Zotero_Browser.Progress.fade();
 }
 
 /*
