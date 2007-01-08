@@ -3,12 +3,12 @@
 <!ENTITY zotero.search.joinMode.prefix "Finn">
 <!ENTITY zotero.search.joinMode.any "hvilken som helst">
 <!ENTITY zotero.search.joinMode.all "alle">
-<!ENTITY zotero.search.joinMode.suffix "av følgende:">
+<!ENTITY zotero.search.joinMode.suffix "av fÃ¸lgende:">
 
-<!ENTITY zotero.search.recursive.label "Søk i undermapper">
+<!ENTITY zotero.search.recursive.label "SÃ¸k i undermapper">
 
 <!ENTITY zotero.search.textModes.phrase "Frase">
-<!ENTITY zotero.search.textModes.phraseBinary "Frase (inkl. binærfiler)">
+<!ENTITY zotero.search.textModes.phraseBinary "Frase (inkl. binÃ¦rfiler)">
 <!ENTITY zotero.search.textModes.regexp "Regexp">
 <!ENTITY zotero.search.textModes.regexpCS "Regexp (versalsensitiv)">
 

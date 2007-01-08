@@ -1,0 +1,99 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<terms xmlns="http://purl.org/net/xbiblio/csl">
+  <locale xml:lang="ko">
+    <term name="in">in</term>
+    <term name="ibid">ibid</term>
+    <term name="accessed">접근된</term>
+    <term name="retrieved">retrieved</term>
+    <term name="from">(으)로부터</term>
+    <term name="forthcoming">근간</term>
+    <term name="references">참고 문헌</term>
+    <term name="no date">일자 없음</term>
+    <term name="and">와/과</term>
+    <term name="et-al">기타</term>
+    
+    <!-- LONG LOCATOR FORMS -->
+    <term name="page">
+      <single>페이지</single>
+      <multiple>페이지</multiple>
+    </term>
+    <term name="paragraph">
+      <single>단락</single>
+      <multiple>단락</multiple>
+    </term>
+    <term name="line">
+      <single>행</single>
+      <multiple>행</multiple>
+    </term>
+    <term name="volume">권</term>
+    <term name="issue">호</term>
+    
+    <!-- SHORT LOCATOR FORMS -->
+    <term name="page" form="short">
+      <single>p</single>
+      <multiple>pp</multiple>
+    </term>
+    <term name="paragraph" form="short">
+      <single>¶</single>
+      <multiple>¶¶</multiple>
+    </term>
+    <term name="line" form="short">
+      <single>행</single>
+      <multiple>행</multiple>
+    </term>
+    <term name="volume" form="short">권</term>
+    <term name="issue" form="short">호</term>
+    
+    <!-- LONG ROLE FORMS -->
+    <term name="editor">
+      <single>편집자</single>
+      <multiple>편집자</multiple>
+    </term>
+    <term name="translator">
+      <single>번역자</single>
+      <multiple>번역자</multiple>
+    </term>
+    
+    <!-- SHORT ROLE FORMS -->
+    <term name="editor" form="short">
+      <single>편집자</single>
+      <multiple>편집자</multiple>
+    </term>
+    <term name="translator" form="short">
+      <single>번역자</single>
+      <multiple>번역자</multiple>
+    </term>
+    
+    <!-- VERB ROLE FORMS -->
+    <term name="editor" form="verb">편집자：</term>
+    <term name="translator" form="verb">번역자：</term>
+    
+    <!-- LONG MONTH FORMS -->
+    <term name="month-01">1월</term>
+    <term name="month-02">2월</term>
+    <term name="month-03">3월</term>
+    <term name="month-04">4월</term>
+    <term name="month-05">5월</term>
+    <term name="month-06">6월</term>
+    <term name="month-07">7월</term>
+    <term name="month-08">8월</term>
+    <term name="month-09">9월</term>
+    <term name="month-10">10월</term>
+    <term name="month-11">11월</term>
+    <term name="month-12">12월</term>
+    
+    <!-- SHORT MONTH FORMS -->
+    <term name="month-01" form="short">1</term>
+    <term name="month-02" form="short">2</term>
+    <term name="month-03" form="short">3</term>
+    <term name="month-04" form="short">4</term>
+    <term name="month-05" form="short">5</term>
+    <term name="month-06" form="short">6</term>
+    <term name="month-07" form="short">7</term>
+    <term name="month-08" form="short">8</term>
+    <term name="month-09" form="short">9</term>
+    <term name="month-10" form="short">10</term>
+    <term name="month-11" form="short">11</term>
+    <term name="month-12" form="short">12</term>
+  </locale>
+</terms>

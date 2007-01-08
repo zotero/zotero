@@ -207,7 +207,11 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids)
 				else
 				{
 					var item = Zotero.Items.get(ids[i]);
-					
+					if (!item) {
+						// DEBUG: this shouldn't really happen but could if a
+						// modify comes in after a delete
+						continue;
+					}
 					if(item.isRegularItem() || !item.getSource())
 					{
 						//most likely, the note or attachment's parent was removed.
@@ -840,14 +844,24 @@ Zotero.ItemTreeView.prototype.getSortedItems = function() {
 }
 
 Zotero.ItemTreeView.prototype.getSortField = function() {
-	var col = this._treebox.columns.getSortedColumn().id;
+	var column = this._treebox.columns.getSortedColumn()
+	if (!column) {
+		return false;
+	}
 	// zotero.items._________.column
-	return col.substring(13, col.length-7);
+	return column.substring(13, column.length-7);
 }
 
 
+/*
+ * Returns 'ascending' or 'descending'
+ */
 Zotero.ItemTreeView.prototype.getSortDirection = function() {
-	return this._treebox.columns.getSortedColumn().element.getAttribute('sortDirection');
+	var column = this._treebox.columns.getSortedColumn();
+	if (!column) {
+		return 'ascending';
+	}
+	return column.element.getAttribute('sortDirection');
 }
 
 

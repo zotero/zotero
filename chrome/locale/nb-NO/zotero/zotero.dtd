@@ -32,24 +32,24 @@
 <!ENTITY zotero.toolbar.removeItem.label "Slett element...">
 <!ENTITY zotero.toolbar.newCollection.label "Ny samling...">
 <!ENTITY zotero.toolbar.newSubcollection.label "New Subcollection...">
-<!ENTITY zotero.toolbar.newSavedSearch.label "Nytt lagret søk...">
+<!ENTITY zotero.toolbar.newSavedSearch.label "Nytt lagret sÃ¸k...">
 <!ENTITY zotero.toolbar.tagSelector.label "Show/Hide Tag Selector">
 <!ENTITY zotero.toolbar.actions.label "Handlinger">
 <!ENTITY zotero.toolbar.import.label "Importer...">
 <!ENTITY zotero.toolbar.export.label "Eksporter bibliotek...">
 <!ENTITY zotero.toolbar.preferences.label "Innstillinger...">
 <!ENTITY zotero.toolbar.about.label "Om Zotero...">
-<!ENTITY zotero.toolbar.search.label "Søk:">
+<!ENTITY zotero.toolbar.search.label "SÃ¸k:">
 <!ENTITY zotero.toolbar.fullscreen.tooltip "Velg fullskjermmodus">
 <!ENTITY zotero.toolbar.goToURL.label "Se">
-<!ENTITY zotero.toolbar.goToURL.tooltip "Gå til dette elementet online">
+<!ENTITY zotero.toolbar.goToURL.tooltip "GÃ¥ til dette elementet online">
 <!ENTITY zotero.toolbar.openURL.label "Lokaliser">
 <!ENTITY zotero.toolbar.openURL.tooltip "Finn gjennom ditt lokale bibliotek">
 
 <!ENTITY zotero.item.add "Legg til">
 <!ENTITY zotero.item.attachment.file.show "Vis fil">
 
-<!ENTITY zotero.toolbar.note.standalone "Nytt enkeltstående notat">
+<!ENTITY zotero.toolbar.note.standalone "Nytt enkeltstÃ¥ende notat">
 <!ENTITY zotero.toolbar.attachment.linked "Lenke til fil...">
 <!ENTITY zotero.toolbar.attachment.add "Lagre kopi av fil...">
 <!ENTITY zotero.toolbar.attachment.weblink "Lagre lenke til gjeldende side">

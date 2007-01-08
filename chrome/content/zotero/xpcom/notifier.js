@@ -267,6 +267,9 @@ Zotero.Notifier = new function(){
 	}
 	
 	
+	/*
+	 * These should probably no longer be used now that we have event queuing
+	 */
 	function disable(){
 		Zotero.debug('Disabling Notifier notifications');
 		_disabled = true;

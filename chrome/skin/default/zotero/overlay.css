@@ -1,14 +1,15 @@
 #zotero-status-bar-icon
 {
-	width: 47px;
-	margin:0 0 -1px;
-	padding:0 4px 1px;
+	width: 55px;
+	margin: 0 0 -1px; /* For Fitts's law (on OS X, at least) */
+	padding: 0 0 1px;
 	list-style-image: url(chrome://zotero/skin/zotero_status_bar.png);
 }
 #zotero-status-bar-icon[compact="true"]
 {
-	width: 9px;
-	padding:0 5px 1px;
+	width: 20px;
+	margin: 0 0 -1px;
+	padding: 0 0 1px;
 	list-style-image: url(chrome://zotero/skin/zotero_status_bar_compact.png);
 }
 #zotero-status-bar-icon[error="true"]
@@ -28,7 +29,7 @@
 #zotero-collections-pane
 {
 	min-width: 150px;
-	width: 150px;
+	width: 250px;
 }
 
 #zotero-collections-tree {
@@ -95,7 +96,17 @@
 	list-style-image: url(chrome://zotero/skin/tag-selector.png);
 }
 
+/* Hard-code this to fix toolbar icon compression on Linux */
+#zotero-pane toolbar
+{
+	height: 32px !important;
+}
 
+/* Remove extra padding on Linux */
+#zotero-pane {
+	padding-top: 0;
+	padding-bottom: 0;
+}
 
 /* These fix a rendering bug in Fx2.0b2 */
 #zotero-pane toolbarbutton .toolbarbutton-text
@@ -180,6 +191,7 @@
 
 #zotero-tb-search
 {
+	font-size: 11px !important; /* Keep font size in Linux within reason */
 	width: 150px;
 }
 
@@ -190,10 +202,13 @@
 
 #zotero-tb-search-cancel
 {
-	margin: 0px;
-	padding: 0px;
+	width: 10px;
+	height: 10px;
+	margin: 0;
+	padding: 0;
 	cursor: default;
 	list-style-image: url('chrome://zotero/skin/search-cancel.png');
+	-moz-appearance: none !important; /* Fix rendering problems on Linux */
 }
 
 #zotero-tb-search-cancel:hover:active

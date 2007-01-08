@@ -37,6 +37,7 @@
 			<field name="_notifierID">false</field>
 			<field name="_tags">null</field>
 			<field name="_dirty">null</field>
+			<field name="_empty">null</field>
 			<field name="selection"/>
 			
 			<field name="_hasFilter">false</field>
@@ -108,7 +109,7 @@
 				<![CDATA[
 					this._initialized = true;
 					this.selection = {};
-					this._notifierID = Zotero.Notifier.registerObserver(this);
+					this._notifierID = Zotero.Notifier.registerObserver(this, ['collection-item', 'item-tag', 'tag']);
 				]]>
 				</body>
 			</method>
@@ -219,6 +220,16 @@
 							else {
 								//Zotero.debug(5);
 								labels[i].setAttribute('inScope', false);
+								
+								// If out of scope, make sure it's not selected (otherwise a tag
+								// stays selected after removing an item with that tag from the
+								// current collection)
+								if (this.selection[labels[i].value]) {
+									labels[i].setAttribute('selected', false);
+									delete this.selection[labels[i].value];
+									var doCommand = true;
+								}
+
 							}
 							
 							labels[i].setAttribute('hidden', false);
@@ -226,21 +237,37 @@
 						}
 					}
 					
+					
 					this.updateNumSelected();
+					this._empty = empty;
 					this.id('tags-toggle').setAttribute('collapsed', empty);
 					this.id('no-tags-box').setAttribute('collapsed', !empty);
+					
+					if (doCommand) {
+						Zotero.debug('A selected tag went out of scope -- deselecting');
+						this.doCommand();
+					}
 				]]>
 				</body>
 			</method>
 			
 			
-			<method name="updateNumSelected">
+			<method name="getNumSelected">
 				<body>
 				<![CDATA[
 					var count = 0;
 					for (var i in this.selection) {
 						count++;
 					}
+					return count;
+				]]>
+				</body>
+			</method>
+			
+			<method name="updateNumSelected">
+				<body>
+				<![CDATA[
+					var count = this.getNumSelected();
 					
 					switch (count) {
 						case 0:
@@ -265,13 +292,35 @@
 				<parameter name="ids"/>
 				<body>
 				<![CDATA[
+					// If a selected tag no longer exists, deselect it
+					if (event == 'delete') {
+						this._tags = Zotero.Tags.getAll();
+						
+						for (var tag in this.selection) {
+							for each(var tag2 in this._tags) {
+								if (tag == tag2) {
+									var found = true;
+									break;
+								}
+							}
+							if (!found) {
+								delete this.selection[tag];
+							}
+						}
+					}
+					
 					// This could be more optimized to insert new/changed tags at the appropriate
 					// spot if we cared, but we probably don't
-					if (type == 'collection-item' || type == 'item-tag' || type == 'tag') {
-						var t = this.id('tags-search').inputField;
-						this.setFilterTags(Zotero.Tags.search(t.value), true);
-						this._dirty = true;
-						this.doCommand();
+					var t = this.id('tags-search').inputField;
+					this.setFilterTags(Zotero.Tags.search(t.value), true);
+					this._dirty = true;
+					this.doCommand();
+					
+					// If no tags visible after a delete, deselect all
+					if ((event == 'remove' || event == 'delete') &&
+							this._empty && this.getNumSelected()) {
+						Zotero.debug('No tags visible after delete -- deselecting all');
+						this.clearAll();
 					}
 				]]>
 				</body>
@@ -309,7 +358,7 @@
 							delete this.selection[labels[i].value];
 						}
 						
-						// Bubbles up to command
+						this.doCommand();
 					]]>
 				</body>
 			</method>
@@ -539,7 +588,7 @@
 					<xul:toolbarseparator/>
 					<xul:hbox pack="center">
 						<xul:button label="&zotero.tagSelector.clearAll;"
-							oncommand="this.parentNode.parentNode.parentNode.parentNode.clearAll();"/>
+							oncommand="this.parentNode.parentNode.parentNode.parentNode.clearAll(); event.stopPropagation();"/>
 					</xul:hbox>
 				</xul:hbox>
 			</xul:groupbox>

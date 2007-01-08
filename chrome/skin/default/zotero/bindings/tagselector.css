@@ -1,7 +1,8 @@
 groupbox
 {
-	overflow: auto;
-	min-height: 130px;
+	overflow: hidden;
+	min-height: 132px;
+	padding-bottom: 2px;
 }
 
 #tags-toggle
@@ -52,12 +53,21 @@ groupbox > hbox
 	-moz-box-pack: center;
 }
 
+textbox
+{
+	margin: 3px 0 2px;
+	font-size: 11px !important; /* Keep font size in Linux within reason */
+}
+
 #search-cancel
 {
-	margin: 0px;
-	padding: 0px;
+	width: 0;
+	height: 0;
+	margin: 0;
+	padding: 0;
 	cursor: default;
 	list-style-image: url('chrome://zotero/skin/search-cancel.png');
+	-moz-appearance: none !important; /* Fix rendering problems on Linux */
 }
 
 groupbox > hbox > hbox
@@ -72,9 +82,4 @@ toolbarbutton.zotero-clicky
 	margin:3px 5px;
 	padding:1px;
 	height:1em;
-}
-
-textbox
-{
-	margin: 3px 0 1px;
 }
