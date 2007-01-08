@@ -9645,7 +9645,7 @@ function doImport() {
 	}
 }');
 
-REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '2006-12-11 15:57:00', 'American Psychological Association',
+REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '2006-12-11 15:57:00', 'American Psychological Association',
 '<?xml version="1.0" encoding="UTF-8"?>
 <?oxygen RNGSchema="../schema/trunk/csl.rnc" type="compact"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="author-date" xml:lang="en">
@@ -9806,7 +9806,7 @@ REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '200
   </bibliography>
 </style>');
 
-REPLACE INTO "csl" VALUES('http://www.zotero.org/namespaces/CSL/chicago-author-date.csl', '2006-12-20 03:33:00', 'Chicago Manual of Style (Author-Date)',
+REPLACE INTO csl VALUES('http://www.zotero.org/namespaces/CSL/chicago-author-date.csl', '2006-12-20 03:33:00', 'Chicago Manual of Style (Author-Date)',
 '<?xml version="1.0" encoding="UTF-8"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="author-date" xml:lang="en">
 	<info>
@@ -9970,7 +9970,7 @@ REPLACE INTO "csl" VALUES('http://www.zotero.org/namespaces/CSL/chicago-author-d
 	</bibliography>
 </style>');
 
-REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/chicago-note.csl', '2006-12-20 04:20:00', 'Chicago Manual of Style (Note without Bibliography)',
+REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/chicago-note.csl', '2006-12-20 04:20:00', 'Chicago Manual of Style (Note without Bibliography)',
 '<?xml version="1.0" encoding="UTF-8"?>
 <?oxygen RNGSchema="../schema/trunk/csl.rnc" type="compact"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="note" xml:lang="en">
@@ -10116,7 +10116,7 @@ REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/chicago-note.c
   </citation>
 </style>');
 
-REPLACE INTO "csl" VALUES('http://www.zotero.org/namespaces/CSL/chicago-note-bibliography.csl', '2006-12-20 03:57:00', 'Chicago Manual of Style (Note with Bibliography)',
+REPLACE INTO csl VALUES('http://www.zotero.org/namespaces/CSL/chicago-note-bibliography.csl', '2006-12-20 03:57:00', 'Chicago Manual of Style (Note with Bibliography)',
 '<?xml version="1.0" encoding="UTF-8"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="note" xml:lang="en">
 	<info>
@@ -10275,7 +10275,7 @@ REPLACE INTO "csl" VALUES('http://www.zotero.org/namespaces/CSL/chicago-note-bib
 	</bibliography>
 </style>');
 
-REPLACE INTO "csl" VALUES('http://purl.org/net/xbiblio/csl/styles/mla.csl', '2006-10-23 00:21:00', 'Modern Language Association',
+REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/mla.csl', '2006-10-23 00:21:00', 'Modern Language Association',
 '<?xml version="1.0" encoding="UTF-8"?>
 <?oxygen RNGSchema="../schema/trunk/csl.rnc" type="compact"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="author" xml:lang="en">
