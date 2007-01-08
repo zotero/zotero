@@ -1,4 +1,4 @@
--- 158
+-- 159
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2007-01-07 17:00:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2006-01-07 10:45:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b3.r1', '', '2006-12-15 03:40:00', 1, 100, 4, 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -4030,7 +4030,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('a07bb62a-4d2d-4d43-ba08-d9679a0122f8', '1.0.0b2.r2', '', '2006-12-12 23:41:00', 1, 100, 4, 'ABC-CLIO Serials Web', 'Simon Kornblith', '^http://serials\.abc-clio\.com/active/go/ABC-Clio-Serials_v4.1$', 
+REPLACE INTO translators VALUES ('a07bb62a-4d2d-4d43-ba08-d9679a0122f8', '1.0.0b2.r2', '', '2006-01-07 10:45:00', 1, 100, 4, 'ABC-CLIO Serials Web', 'Simon Kornblith', '^http://serials\.abc-clio\.com/active/go/ABC-Clio-Serials_v4', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
