@@ -2224,13 +2224,18 @@ Zotero.Items = new function(){
 		// If single id, return the object directly
 		if (arguments[0] && typeof arguments[0]!='object'
 				&& typeof arguments[1]=='undefined'){
+			if (!_items[arguments[0]]) {
+				Zotero.debug("Item " + arguments[0] + " doesn't exist", 2);
+				return false;
+			}
 			return _items[arguments[0]];
 		}
 		
 		// Otherwise, build return array
 		for (i=0; i<ids.length; i++){
 			if (!_items[ids[i]]){
-				Zotero.debug("Item " + ids[i] + " not loaded -- this shouldn't happen", 2);
+				Zotero.debug("Item " + ids[i] + " doesn't exist", 2);
+				continue;
 			}
 			loaded.push(_items[ids[i]]);
 		}
