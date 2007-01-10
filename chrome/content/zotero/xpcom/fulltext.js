@@ -182,7 +182,11 @@ Zotero.Fulltext = new function(){
 		}
 		
 		if (!itemID){ throw ('Item ID not provided to indexFile()'); }
-		if (!mimeType){ throw ('MIME type not provided to indexFile()'); }
+		
+		if (!mimeType) {
+			Zotero.debug("MIME type not provided in indexFile()", 1);
+			return false;
+		}
 		
 		if (mimeType.substr(0, 5)!='text/'){
 			Zotero.debug('File is not text in indexFile()', 2);
