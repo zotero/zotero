@@ -23,6 +23,7 @@
 Zotero.MIME = new function(){
 	this.isTextType = isTextType;
 	this.isExternalTextExtension = isExternalTextExtension;
+	this.getPrimaryExtension = getPrimaryExtension;
 	this.sniffForMIMEType = sniffForMIMEType;
 	this.sniffForBinary = sniffForBinary;
 	this.getMIMETypeFromData = getMIMETypeFromData;
@@ -79,6 +80,32 @@ Zotero.MIME = new function(){
 	 */
 	function isExternalTextExtension(ext){
 		return typeof _externalTextExtensions['ext'] != 'undefined';
+	}
+	
+	
+	/*
+	 * Our own wrapper around the MIME service's getPrimaryExtension() that
+	 * works a little better
+	 */
+	function getPrimaryExtension(mimeType, ext) {
+		// Enforce some extensions
+		switch (mimeType) {
+			case 'text/html':
+				return 'html';
+			case 'application/pdf':
+				return 'pdf';
+		}
+		
+		try {
+			ext = Components.classes["@mozilla.org/mime;1"]
+				.getService(Components.interfaces.nsIMIMEService)
+				.getPrimaryExtension(mimeType, ext);
+		}
+		// nsIMIMEService.getPrimaryExtension() doesn't work on Linux and
+		// throws an error if it can't find an extension
+		catch (e) {}
+		
+		return ext ? ext : '';
 	}
 	
 	

@@ -400,16 +400,6 @@ Zotero.Attachments = new function(){
 			
 			var fileName = _getFileNameFromURL(url, mimeType);
 			
-			// This is a hack to make sure the file is opened in the browser when
-			// we use loadURI(), since Firefox's internal detection mechanisms seem
-			// to sometimes get confused
-			// 		(see #192, https://chnm.gmu.edu/trac/zotero/ticket/192)
-			if (mimeType=='text/html' &&
-					(fileName.substr(fileName.length-5)!='.html'
-						&& fileName.substr(fileName.length-4)!='.htm')){
-				fileName += '.html';
-			}
-			
 			file.append(fileName);
 			
 			wbp.progressListener = new Zotero.WebProgressFinishListener(function(){
@@ -509,21 +499,32 @@ Zotero.Attachments = new function(){
 					.createInstance(Components.interfaces.nsIURL);
 		nsIURL.spec = url;
 		
-		if (nsIURL.fileName){
-			return nsIURL.fileName;
-		}
+		var ext = Zotero.MIME.getPrimaryExtension(mimeType, nsIURL.fileExtension);
 		
-		if (mimeType){
-			try {
-				var ext = Components.classes["@mozilla.org/mime;1"]
-					.getService(Components.interfaces.nsIMIMEService)
-					.getPrimaryExtension(mimeType, nsIURL.fileExtension);
+		if (!nsIURL.fileName) {
+			var matches = nsIURL.directory.match(/\/([^\/]+)\/$/);
+			// If no filename, use the last part of the path if there is one
+			if (matches) {
+				nsIURL.fileName = matches[1];
 			}
-			// getPrimaryExtension doesn't work on Linux
-			catch (e) {}
+			// Or just use the host
+			else {
+				nsIURL.fileName = nsIURL.host;
+				var tld = nsIURL.fileExtension;
+			}
 		}
 		
-		return nsIURL.host + (ext ? '.' + ext : '');
+		// If we found a better extension, use that
+		if (ext && (!nsIURL.fileExtension || nsIURL.fileExtension != ext)) {
+			nsIURL.fileExtension = ext;
+		}
+		
+		// If we replaced the TLD (which would've been interpreted as the extension), add it back
+		if (tld && tld != nsIURL.fileExtension) {
+			nsIURL.fileBaseName = nsIURL.fileBaseName + '.' + tld;
+		}
+		
+		return nsIURL.fileName;
 	}
 	
 	
