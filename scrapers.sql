@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2007-01-08 04:10:00'));
+REPLACE INTO "version" VALUES ('repository', STRFTIME('%s', '2007-01-09 16:17:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b3.r1', '', '2006-12-15 03:40:00', 1, 100, 4, 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -5470,7 +5470,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('21ad38-3830-4836-aed7-7b5c2dbfa740', '1.0.0b3.r1', '', '2006-12-18 01:28:04', '1', '100', '4', 'ISI Web of Knowledge', 'Simon Kornblith', '^https?://[^/]+/(?:[^/]+/CIW\.cgi|portal\.cgi)', 
+REPLACE INTO translators VALUES ('21ad38-3830-4836-aed7-7b5c2dbfa740', '1.0.0b3.r1', '', '2007-01-09 16:17:00', '1', '100', '4', 'ISI Web of Knowledge', 'Simon Kornblith', '^https?://[^/]+/(?:[^/]+/CIW\.cgi|portal\.cgi)', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -5643,7 +5643,6 @@ function doWeb(doc, url) {
 			var tableRows = doc.evaluate(''//tr[td/span/input[@name="marked_list_candidates"]]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
 			while(tableRow = tableRows.iterateNext()) {
 				var id = tableRow.getElementsByTagName("input")[0].value;
-				Zotero.debug(id);
 				
 				items[id] = tableRow.getElementsByTagName("b")[0].textContent;
 				
