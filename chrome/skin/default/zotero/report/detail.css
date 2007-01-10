@@ -60,6 +60,19 @@ ul.tags li:not(:last-child):after {
 	content: ', ';
 }
 
+
+/* Child notes */
+ul.notes {
+	margin-bottom: 1.2em;
+}
+ul.notes li {
+	border-bottom: 1px #ccc solid;
+}
+ul.notes li:last-child {
+	border-bottom: none;
+}
+
+
 /* Preserve whitespace on notes */
 ul.notes li p, li.note p {
 	white-space: pre-wrap;  /* css-3 */
