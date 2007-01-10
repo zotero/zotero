@@ -1,4 +1,4 @@
--- 162
+-- 163
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -5502,17 +5502,16 @@ REPLACE INTO translators VALUES ('21ad38-3830-4836-aed7-7b5c2dbfa740', '1.0.0b3.
 			var lines = text.split("\n");
 			
 			var fieldRe = /^[A-Z0-9]{2}(?: |$)/;
-			var field, content, item;
+			var field, content, item, authors;
 			
 			for each(var line in lines) {
 				if(fieldRe.test(line)) {
 					if(item && field && content) {
 						if(field == "AF") {
 							// returns need to be processed separately when dealing with authors
-							var authors = content.split("\n");
-							for each(var author in authors) {
-								item.creators.push(Zotero.Utilities.cleanAuthor(author, "author", true));
-							}
+							authors = content;
+						} else if(field == "AU" && !authors)  {
+							authors = content;
 						} else {
 							content = content.replace(/\n/g, " ");
 							if(field == "TI") {
@@ -5572,8 +5571,15 @@ REPLACE INTO translators VALUES ('21ad38-3830-4836-aed7-7b5c2dbfa740', '1.0.0b3.
 						}
 						field = content = undefined;
 					} else if(field == "ER") {
+						if(authors) {
+							authors = authors.split("\n");
+							for each(var author in authors) {
+								item.creators.push(Zotero.Utilities.cleanAuthor(author, "author", true));
+							}
+						}
+						
 						item.complete();
-						item = field = content = undefined;
+						item = field = content = authors = undefined;
 					}
 				} else {
 					content += "\n"+Zotero.Utilities.cleanString(line);
@@ -5637,6 +5643,7 @@ function doWeb(doc, url) {
 			var tableRows = doc.evaluate(''//tr[td/span/input[@name="marked_list_candidates"]]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
 			while(tableRow = tableRows.iterateNext()) {
 				var id = tableRow.getElementsByTagName("input")[0].value;
+				Zotero.debug(id);
 				
 				items[id] = tableRow.getElementsByTagName("b")[0].textContent;
 				

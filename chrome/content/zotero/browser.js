@@ -232,7 +232,9 @@ var Zotero_Browser = new function() {
 	 * An event handler called when a new document is loaded. Creates a new document
 	 * object, and updates the status of the capture icon
 	 */
-	function contentLoad(event) {			
+	function contentLoad(event) {
+		Zotero.debug("contentLoad event");
+		
 		var isHTML = event.originalTarget instanceof HTMLDocument;
 		
 		if(isHTML) {
@@ -293,6 +295,8 @@ var Zotero_Browser = new function() {
 	 * called to unregister Zotero icon, etc.
 	 */
 	function contentHide(event) {
+		Zotero.debug("contentHide event");
+		
 		if(event.originalTarget instanceof HTMLDocument && !event.originalTarget.defaultView.frameElement) {
 			var doc = event.originalTarget;
 			
@@ -544,11 +548,13 @@ Zotero_Browser.Tab.prototype.detectTranslators = function(rootDoc, doc) {
 	}
 	
 	// get translators
-	this.page.translate = new Zotero.Translate("web");
-	this.page.translate.setDocument(doc);
-	this.page.translators = this.page.translate.getTranslators();
+	var translate = new Zotero.Translate("web");
+	translate.setDocument(doc);
+	var translators = translate.getTranslators();
 	// add document
-	if(this.page.translators && this.page.translators.length) {
+	if(translators && translators.length) {
+		this.page.translate = translate;
+		this.page.translators = translators;
 		this.page.document = doc;
 	}
 }
@@ -588,10 +594,13 @@ Zotero_Browser.Tab.prototype.translate = function(saveLocation) {
 		var me = this;
 		
 		// use first translator available
-		this.page.translate.setTranslator(this.page.translators[0]);
-		this.page.translate.setHandler("select", me._selectItems);
-		this.page.translate.setHandler("itemDone", function(obj, item) { Zotero_Browser.itemDone(obj, item, saveLocation) });
-		this.page.translate.setHandler("done", function(obj, item) { Zotero_Browser.finishScraping(obj, item, saveLocation) });
+		if(!this.page.hasBeenTranslated) {
+			this.page.translate.setTranslator(this.page.translators[0]);
+			this.page.translate.setHandler("select", me._selectItems);
+			this.page.translate.setHandler("itemDone", function(obj, item) { Zotero_Browser.itemDone(obj, item, saveLocation) });
+			this.page.translate.setHandler("done", function(obj, item) { Zotero_Browser.finishScraping(obj, item, saveLocation) });
+			this.page.hasBeenTranslated = true;
+		}
 		this.page.translate.translate();
 	}
 }
@@ -638,6 +647,8 @@ Zotero_Browser.Tab.prototype.getCaptureIcon = function() {
 
 // Handles the display of a div showing progress in scraping
 Zotero_Browser.Progress = new function() {
+	var _progressWindow;
+	
 	var _windowLoaded = false;
 	var _windowLoading = false;
 	// keep track of all of these things in case they're called before we're
