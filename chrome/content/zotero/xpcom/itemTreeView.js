@@ -756,7 +756,11 @@ Zotero.ItemTreeView.prototype.saveSelection = function()
 		this.selection.getRangeAt(i,start,end);
 		for (var j=start.value; j<=end.value; j++)
 		{
-			savedSelection.push(this._getItemAtRow(j).ref.getID());
+			var item = this._getItemAtRow(j);
+			if (!item) {
+				continue;
+			}
+			savedSelection.push(item.ref.getID());
 		}
 	}
 	return savedSelection;
