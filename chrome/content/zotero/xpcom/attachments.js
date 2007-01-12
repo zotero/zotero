@@ -451,7 +451,7 @@ Zotero.Attachments = new function(){
 			Zotero.DB.commitTransaction();
 			
 			if (mimeType == 'text/html') {
-				Zotero.debug('Saving with saveDocument()');
+				Zotero.debug('Saving with saveDocument() to ' + destDir.path);
 				wbp.saveDocument(document, file, destDir, mimeType, encodingFlags, false);
 			}
 			else {
