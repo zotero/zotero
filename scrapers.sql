@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-01-11 16:14:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-01-12 00:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b3.r1', '', '2006-12-15 03:40:00', 1, 100, 4, 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -8140,7 +8140,7 @@ function doImport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7', '1.0.0b3.r1', '', '2006-01-11 16:14:00', 1, 100, 3, 'RIS', 'Simon Kornblith', 'ris',
+REPLACE INTO translators VALUES ('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7', '1.0.0b3.r1', '', '2007-01-12 00:30:00', 1, 100, 3, 'RIS', 'Simon Kornblith', 'ris',
 'Zotero.configure("dataMode", "line");
 Zotero.addOption("exportNotes", true);
 
