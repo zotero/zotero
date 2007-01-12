@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-01-12 15:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-01-12 20:05:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b3.r1', '', '2006-12-15 03:40:00', 1, 100, 4, 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -4251,7 +4251,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('ecddda2e-4fc6-4aea-9f17-ef3b56d7377a', '1.0.0b3.r1', '', '2007-01-12 15:00:00', '1', '100', '4', 'arXiv.org', 'Sean Takats', '^http://(?:www\.)?(?:arxiv\.org/(?:find/\w|list/\w|abs/[^/]+/[0-9]+)|eprintweb.org/S/(?:search|archive|article))', 
+REPLACE INTO translators VALUES ('ecddda2e-4fc6-4aea-9f17-ef3b56d7377a', '1.0.0b3.r1', '', '2007-01-12 20:05:00', '1', '100', '4', 'arXiv.org', 'Sean Takats', '^http://(?:www\.)?(?:arxiv\.org/(?:find/\w|list/\w|abs/[^/]+/[0-9]+)|eprintweb.org/S/(?:search|archive|article))', 
 'function detectWeb(doc, url) {
         var searchRe = /^http:\/\/(?:www\.)?(?:arxiv\.org\/(?:find|list)|eprintweb.org\/S\/(?:archive|search$))/;
         if(searchRe.test(url)) {
