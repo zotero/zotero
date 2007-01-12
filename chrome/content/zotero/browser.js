@@ -233,8 +233,6 @@ var Zotero_Browser = new function() {
 	 * object, and updates the status of the capture icon
 	 */
 	function contentLoad(event) {
-		Zotero.debug("contentLoad event");
-		
 		var isHTML = event.originalTarget instanceof HTMLDocument;
 		
 		if(isHTML) {
@@ -295,8 +293,6 @@ var Zotero_Browser = new function() {
 	 * called to unregister Zotero icon, etc.
 	 */
 	function contentHide(event) {
-		Zotero.debug("contentHide event");
-		
 		if(event.originalTarget instanceof HTMLDocument && !event.originalTarget.defaultView.frameElement) {
 			var doc = event.originalTarget;
 			
