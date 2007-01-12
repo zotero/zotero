@@ -1426,17 +1426,21 @@ Zotero.Item.prototype.getFile = function(row){
  * -2		Error renaming
  * false		Attachment file not found or other error
  */
-Zotero.Item.prototype.renameAttachmentFile = function(newName, force) {
+Zotero.Item.prototype.renameAttachmentFile = function(newName, overwrite) {
 	var file = this.getFile();
 	if (!file) {
 		return false;
 	}
 	
 	try {
+		if (file.leafName == newName) {
+			return true;
+		}
+		
 		var dest = file.parent;
 		dest.append(newName);
 		
-		if (force) {
+		if (overwrite) {
 			dest.remove(null);
 		}
 		else if (dest.exists()) {

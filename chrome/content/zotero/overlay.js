@@ -481,7 +481,7 @@ var ZoteroPane = new function()
 							.getService(Components.interfaces.nsIPromptService);
 					
 					var newTitle = { value: val };
-					var checkState = { value: false };
+					var checkState = { value: Zotero.Prefs.get('lastRenameAssociatedFile') };
 					
 					while (true) {
 						var result = nsIPS.prompt(window,
@@ -490,10 +490,14 @@ var ZoteroPane = new function()
 							Zotero.getString('pane.item.attachments.rename.renameAssociatedFile'),
 							checkState);
 						
+						// If they hit cancel or left it blank
 						if (!result || !newTitle.value) {
 							return;
 						}
 						
+						Zotero.Prefs.set('lastRenameAssociatedFile', checkState.value);
+						
+						// Rename associated file
 						if (checkState.value) {
 							var renamed = item.ref.renameAttachmentFile(newTitle.value);
 							if (renamed == -1) {
@@ -502,6 +506,8 @@ var ZoteroPane = new function()
 									item.ref.renameAttachmentFile(newTitle.value, true);
 									break;
 								}
+								// If they said not to overwrite existing file,
+								// start again
 								continue;
 							}
 							else if (renamed == -2 || !renamed) {
@@ -520,12 +526,14 @@ var ZoteroPane = new function()
 				}
 				
 				
+				var isImportedURL = item.ref.getAttachmentLinkMode() == Zotero.Attachments.LINK_MODE_IMPORTED_URL;
+				
 				// Metadata for URL's
 				if (item.ref.getAttachmentLinkMode() == Zotero.Attachments.LINK_MODE_LINKED_URL
-					|| item.ref.getAttachmentLinkMode() == Zotero.Attachments.LINK_MODE_IMPORTED_URL)
+					|| isImportedURL)
 				{
 					// "View Page"/"View Snapshot" label
-					if (item.ref.getAttachmentLinkMode() == Zotero.Attachments.LINK_MODE_IMPORTED_URL)
+					if (isImportedURL)
 					{
 						var str = Zotero.getString('pane.item.attachments.view.snapshot');
 					}
@@ -534,7 +542,7 @@ var ZoteroPane = new function()
 						var str = Zotero.getString('pane.item.attachments.view.link');
 					}
 					
-					document.getElementById('zotero-attachment-show').setAttribute('hidden', true);
+					document.getElementById('zotero-attachment-show').setAttribute('hidden', !isImportedURL);
 					
 					// URL
 					document.getElementById('zotero-attachment-url').setAttribute('value', item.getField('url'));
