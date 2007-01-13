@@ -325,7 +325,7 @@ var ZoteroPane = new function()
 		
 		var showing = tagSelector.getAttribute('collapsed') == 'true';
 		tagSelector.setAttribute('collapsed', !showing);
-		this.updateTagSelectorSize();
+		updateTagSelectorSize();
 		
 		// If showing, set scope to items in current view
 		// and focus filter textbox
