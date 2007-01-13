@@ -41,7 +41,7 @@ Zotero.ItemTreeView = function(itemGroup, sourcesOnly)
 	this._treebox = null;
 	this.refresh();
 	
-	this._unregisterID = Zotero.Notifier.registerObserver(this, 'item');
+	this._unregisterID = Zotero.Notifier.registerObserver(this, ['item', 'collection-item']);
 }
 
 
@@ -110,10 +110,6 @@ Zotero.ItemTreeView.prototype.refresh = function()
  */
 Zotero.ItemTreeView.prototype.notify = function(action, type, ids)
 {
-	if (type != 'item' && type != 'collection-item'){
-		return;
-	}
-	
 	var madeChanges = false;
 	this.selection.selectEventsSuppressed = true;
 	var savedSelection = this.saveSelection();
@@ -128,6 +124,20 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids)
 	
 	var quicksearch = this._treebox.treeBody.ownerDocument.getElementById('zotero-tb-search');
 	
+	// 'collection-item' ids are in the form collectionID-itemID
+	if (type == 'collection-item') {
+		var splitIDs = [];
+		for each(var id in ids) {
+			var split = id.split('-');
+			// Not items not in this collection
+			if (split[0] != this._itemGroup.ref.getID()) {
+				continue;
+			}
+			splitIDs.push(split[1]);
+		}
+		ids = splitIDs;
+	}
+	
 	if((action == 'remove' && !this._itemGroup.isLibrary()) || action == 'delete')
 	{
 		//Since a remove involves shifting of rows, we have to do it in order
@@ -136,17 +146,15 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids)
 		var rows = new Array();
 		for(var i=0, len=ids.length; i<len; i++)
 		{
-			var removeID = (action == 'remove') ? ids[i].split('-')[1] : ids[i];
-			
-			if (action == 'delete' || !this._itemGroup.ref.hasItem(removeID)) {
+			if (action == 'delete' || !this._itemGroup.ref.hasItem(ids[i])) {
 				// Row might already be gone (e.g. if this is a child and
 				// 'modify' was sent to parent)
-				if (this._itemRowMap[removeID] != undefined) {
-					rows.push(this._itemRowMap[removeID]);
+				if (this._itemRowMap[ids[i]] != undefined) {
+					rows.push(this._itemRowMap[ids[i]]);
 				}
 			}
 		}
-			
+		
 		if(rows.length > 0)
 		{
 			rows.sort(function(a,b) { return a-b });
