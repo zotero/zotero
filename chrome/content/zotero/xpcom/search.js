@@ -174,8 +174,6 @@ Zotero.Search.prototype.addCondition = function(condition, operator, value, requ
 	
 	// Shortcut to add a condition on every table -- does not return an id
 	if (condition=='quicksearch'){
-		this.addCondition('joinMode', 'any');
-		
 		var parts = Zotero.SearchConditions.parseSearchString(value);
 		
 		for each(var part in parts) {
@@ -198,7 +196,6 @@ Zotero.Search.prototype.addCondition = function(condition, operator, value, requ
 			}
 			
 			this.addCondition('blockEnd');
-			
 		}
 		return false;
 	}
@@ -272,6 +269,16 @@ Zotero.Search.prototype.getSearchConditions = function(){
 }
 
 
+Zotero.Search.prototype.hasPostSearchFilter = function() {
+	for each(var i in this._conditions){
+		if (i.condition == 'fulltextContent'){
+			return true;
+		}
+	}
+	return false;
+}
+
+
 /*
  * Run the search and return an array of item ids for results
  */
@@ -281,6 +288,9 @@ Zotero.Search.prototype.search = function(){
 	}
 	
 	var ids = Zotero.DB.columnQuery(this._sql, this._sqlParams);
+	
+	//Zotero.debug('IDs from main search: ');
+	//Zotero.debug(ids);
 	
 	var joinMode = 'all';
 	for each(var condition in this._conditions) {
@@ -292,22 +302,57 @@ Zotero.Search.prototype.search = function(){
 		}
 	}
 	
+	//Zotero.debug('Join mode: ' + joinMode);
+	
+	for each(var condition in this._conditions) {
+		if (condition.condition == 'blockStart') {
+			var hasQuicksearch = true;
+			break;
+		}
+	}
+	
 	// Filter results with fulltext search
 	//
-	// If join mode ANY, return the superset of the main search and
-	// (a separate fulltext word search filtered by fulltext content)
-	//
-	// If join mode ALL, return the (union of SQL and fulltext word search)
+	// If join mode ALL, return the (union of main and fulltext word search)
 	// filtered by fulltext content
+	//
+	// If join mode ANY or there's a quicksearch (which we assume
+	// fulltextContent is part of), return the superset of the main search and
+	// (a separate fulltext word search filtered by fulltext content)
 	for each(var condition in this._conditions){
 		if (condition['condition']=='fulltextContent'){
+			//Zotero.debug('Running subsearch against fulltext word index');
+			
 			// Run a new search against the fulltext word index
 			// for words in this phrase
 			var s = new Zotero.Search();
-			var splits = Zotero.Fulltext.semanticSplitter(condition.value);
 			
+			// Add any necessary conditions to the fulltext word search --
+			// those that are required in an ANY search and any outside the
+			// quicksearch in an ALL search
+			for each(var c in this._conditions) {
+				if (c.condition == 'blockStart') {
+					var inQS = true;
+					continue;
+				}
+				else if (c.condition == 'blockEnd') {
+					inQS = false;
+					continue;
+				}
+				else if (c.condition == 'fulltextContent' ||
+						c.condition == 'fulltextContent' ||
+							inQS) {
+					continue;
+				}
+				else if (joinMode == 'any' && !c.required) {
+					continue;
+				}
+				s.addCondition(c.condition, c.operator, c.value);
+			}
+			
+			var splits = Zotero.Fulltext.semanticSplitter(condition.value);
 			for each(var split in splits){
-				s.addCondition('fulltextWord', condition.operator, split, false);
+				s.addCondition('fulltextWord', condition.operator, split);
 			}
 			var fulltextWordIDs = s.search();
 			
@@ -315,15 +360,20 @@ Zotero.Search.prototype.search = function(){
 				return hash[val] ?
 					(condition.operator == 'contains') :
 					(condition.operator == 'doesNotContain');
-			}
+			};
 			
-			// If ALL mode, get union of main search and fulltext word index
-			if (joinMode == 'all') {
+			// If ALL mode, set union of main search and fulltext word index
+			// as the scope for the fulltext content search
+			if (joinMode == 'all' && !hasQuicksearch) {
 				var hash = {};
 				for each(var id in fulltextWordIDs){
 					hash[id] = true;
 				}
+				
+				var scopeIDs = ids.filter(filter);
 			}
+			// If ANY mode, just use fulltext word index hits for content search,
+			// since the main results will be added in below
 			else {
 				var scopeIDs = fulltextWordIDs;
 			}
@@ -331,16 +381,21 @@ Zotero.Search.prototype.search = function(){
 			var fulltextIDs = Zotero.Fulltext.findTextInItems(scopeIDs,
 				condition['value'],	condition['mode']);
 			
-			var hash = {};
-			for each(var val in fulltextIDs){
-				hash[val.id] = true;
+			if (scopeIDs) {
+				var hash = {};
+				for each(var val in fulltextIDs){
+					hash[val.id] = true;
+				}
+				
+				var filteredIDs = scopeIDs.filter(filter);
 			}
-			
-			var filteredIDs = scopeIDs ? scopeIDs.filter(filter) : [];
+			else {
+				var filteredIDs = [];
+			}
 			
 			// If join mode ANY, add any new items from the fulltext content
 			// search to the main search results
-			if (joinMode == 'any' && ids) {
+			if ((joinMode == 'any' || hasQuicksearch) && ids) {
 				for each(var id in filteredIDs) {
 					if (ids.indexOf(id) == -1) {
 						ids.push(id);
@@ -352,6 +407,9 @@ Zotero.Search.prototype.search = function(){
 			}
 		}
 	}
+	
+	//Zotero.debug('Final result set');
+	//Zotero.debug(ids);
 	
 	return ids;
 }
@@ -500,23 +558,23 @@ Zotero.Search.prototype._buildQuery = function(){
 						break;
 					
 					case 'collectionID':
-						condSQL += "collectionID IN (?,";
-						condSQLParams.push({int:condition['value']});
+						var q = ['?'];
+						var p = [{int:condition['value']}];
 						
-						// And descendents if recursive search
+						// Search descendent collections if recursive search
 						if (recursive){
 							var col = Zotero.Collections.get(condition['value']);
 							var descendents = col.getDescendents(false, 'collection');
 							if (descendents){
 								for (var k in descendents){
-									condSQL += '?,';
-									condSQLParams.push(descendents[k]['id']);
+									q.push('?');
+									p.push({int:descendents[k]['id']});
 								}
 							}
 						}
 						
-						// Strip final comma
-						condSQL = condSQL.substring(0, condSQL.length-1) + ")";
+						condSQL += "collectionID IN (" + q.join() + ")";
+						condSQLParams = condSQLParams.concat(p);
 						
 						skipOperators = true;
 						break;
@@ -531,17 +589,16 @@ Zotero.Search.prototype._buildQuery = function(){
 						search.load(condition['value']);
 						
 						// Check if there are any post-search filters
-						var subconds = search.getSearchConditions();
-						var hasFilter;
-						for each(var k in subconds){
-							if (k.condition == 'fulltextContent'){
-								hasFilter = true;
-								break;
-							}
-						}
+						var hasFilter = search.hasPostSearchFilter();
+						
 						// This is an ugly and inefficient way of doing a
 						// subsearch, but it's necessary if there are any
-						// post-search filters (e.g. fulltext scanning)
+						// post-search filters (e.g. fulltext scanning) in the
+						// subsearch
+						//
+						// DEBUG: it's possible there's a query length limit here
+						// or that this slows things down with large libraries
+						// -- should probably use a temporary table instead
 						if (hasFilter){
 							var subids = search.search();
 							condSQL += subids.join();
@@ -759,21 +816,33 @@ Zotero.Search.prototype._buildQuery = function(){
 					condSQL += ')';
 				}
 				
+				// Little hack to support multiple quicksearch words
+				if (condition['name'] == 'blockStart') {
+					var inQS = true;
+					var qsSQL = '';
+					var qsParams = [];
+					continue;
+				}
+				else if (condition['name'] == 'blockEnd') {
+					inQS = false;
+					// Strip ' OR ' from last condition
+					qsSQL = qsSQL.substring(0, qsSQL.length-4);
+					
+					// Add to existing quicksearch words
+					if (!quicksearchSQLSet) {
+						var quicksearchSQLSet = [];
+						var quicksearchParamsSet = [];
+					}
+					quicksearchSQLSet.push(qsSQL);
+					quicksearchParamsSet.push(qsParams);
+				}
+				else if (inQS) {
+					qsSQL += condSQL + ' OR ';
+					qsParams = qsParams.concat(condSQLParams);
+				}
 				// Keep non-required conditions separate if in ANY mode
-				if (!condition['required'] && joinMode=='ANY'){
-					// Little hack to allow multiple quicksearch words
-					if (condition['name'] == 'blockStart'){
-						condSQL += '(';
-					}
-					else if (condition['name'] == 'blockEnd'){
-						// Strip ' OR ' from last condition
-						anySQL = anySQL.substring(0, anySQL.length-4);
-						condSQL += ') AND ';
-					}
-					else {
-						condSQL += ' OR ';
-					}
-					anySQL += condSQL;
+				else if (!condition['required'] && joinMode == 'ANY') {
+					anySQL += condSQL + ' OR ';
 					anySQLParams = anySQLParams.concat(condSQLParams);
 				}
 				else {
@@ -787,13 +856,27 @@ Zotero.Search.prototype._buildQuery = function(){
 		if (anySQL){
 			sql += '(' + anySQL;
 			sqlParams = sqlParams.concat(anySQLParams);
-			// If we ended with a block, remove ' AND ', otherwise ' OR '
-			var remlen = condition['name']=='blockEnd' ? 5 : 4;
-			sql = sql.substring(0, sql.length-remlen);
+			sql = sql.substring(0, sql.length-4); // remove last ' OR '
 			sql += ')';
 		}
 		else {
 			sql = sql.substring(0, sql.length-5); // remove last ' AND '
+		}
+		
+		// Add on quicksearch conditions -- this requires searching against
+		// children, so we repeat the main query for note and attachment
+		// sourceItemIDs before ANDing the quicksearch block
+		if (quicksearchSQLSet) {
+			sql = "SELECT itemID FROM items WHERE itemID IN (" + sql + " UNION "
+				+ "SELECT itemID FROM itemNotes WHERE sourceItemID IN "
+				+ "(" + sql + ") UNION "
+				+ "SELECT itemID FROM itemAttachments WHERE sourceItemID IN "
+				+ "(" + sql + ")) AND ((" + quicksearchSQLSet.join(') AND (') + "))";
+			
+			sqlParams = sqlParams.concat(sqlParams).concat(sqlParams);
+			for each(var p in quicksearchParamsSet) {
+				sqlParams = sqlParams.concat(p);
+			}
 		}
 	}
 	

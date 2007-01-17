@@ -3212,12 +3212,24 @@ Zotero.Tags = new function(){
 	 * Get all tags within the items of a Zotero.Search object
 	 */
 	function getAllWithinSearch(search) {
-		var searchSQL = search.getSQL();
-		var searchParams = search.getSQLParams();
+		// If search has post-search filters (e.g. fulltext content), run it
+		// and just include the ids
+		//
+		// DEBUG: it's possible there's a query length limit here
+		// or that this slows things down with large libraries
+		// -- should probably use a temporary table instead
+		if (search.hasPostSearchFilter()) {
+			var ids = search.search();
+			var sql = "SELECT DISTINCT tagID, tag FROM itemTags NATURAL JOIN tags "
+				+ "WHERE itemID IN (" + ids.join() + ") ORDER BY tag COLLATE NOCASE";
+			var tags = Zotero.DB.query(sql);
+		}
+		else {
+			var sql = "SELECT DISTINCT tagID, tag FROM itemTags NATURAL JOIN tags "
+				+ "WHERE itemID IN (" + search.getSQL() + ") ORDER BY tag COLLATE NOCASE";
+			var tags = Zotero.DB.query(sql, search.getSQLParams());
+		}
 		
-		var sql = "SELECT DISTINCT tagID, tag FROM itemTags NATURAL JOIN tags "
-			+ "WHERE itemID IN (" + searchSQL + ") ORDER BY tag COLLATE NOCASE";
-		var tags = Zotero.DB.query(sql, searchParams);
 		var indexed = {};
 		for (var i in tags){
 			indexed[tags[i]['tagID']] = tags[i]['tag'];

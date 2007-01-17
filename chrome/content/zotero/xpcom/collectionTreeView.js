@@ -700,11 +700,11 @@ Zotero.ItemGroup.prototype.getSearchObject = function() {
 	if (this.searchText){
 		if (this.isCollection())
 		{
-			s.addCondition('collectionID', 'is', this.ref.getID(), true);
+			s.addCondition('collectionID', 'is', this.ref.getID());
 		}
 		else if (this.isSearch())
 		{
-			s.addCondition('savedSearchID', 'is', this.ref['id'], true);
+			s.addCondition('savedSearchID', 'is', this.ref['id']);
 		}
 		s.addCondition('quicksearch', 'contains', this.searchText);
 	}
@@ -728,7 +728,7 @@ Zotero.ItemGroup.prototype.getSearchObject = function() {
 	if (this.tags){
 		for (var tag in this.tags){
 			if (this.tags[tag]){
-				s.addCondition('tag', 'is', tag, true);
+				s.addCondition('tag', 'is', tag);
 			}
 		}
 	}
