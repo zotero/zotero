@@ -69,7 +69,7 @@
 		<hbox id="zotero-pane" persist="height" collapsed="true">
 			<popupset>
 				<popup id="zotero-collectionmenu" onpopupshowing="ZoteroPane.buildCollectionContextMenu();">
-					<menuitem label="&zotero.toolbar.newCollection.label;" command="ZoteroPane.newCollection()"/>
+					<menuitem label="&zotero.toolbar.newCollection.label;" oncommand="ZoteroPane.newCollection()"/>
 					<menuitem label="&zotero.toolbar.newSavedSearch.label;" oncommand="ZoteroPane.newSearch()"/>
 					<menuitem label="&zotero.toolbar.newSubcollection.label;" oncommand="ZoteroPane.newCollection(ZoteroPane.getSelectedCollection().getID())"/>
 					<menuseparator/>
