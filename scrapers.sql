@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-01-12 20:05:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-01-18 23:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b3.r1', '', '2006-12-15 03:40:00', 1, 100, 4, 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -3245,7 +3245,7 @@ REPLACE INTO translators VALUES ('3e684d82-73a3-9a34-095f-19b112d88bbf', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('57a00950-f0d1-4b41-b6ba-44ff0fc30289', '1.0.0b3.r1', '', '2006-12-11 18:15:00', 1, 100, 4, 'Google Scholar', 'Simon Kornblith', '^http://scholar\.google\.[a-z]+/scholar',
+REPLACE INTO translators VALUES ('57a00950-f0d1-4b41-b6ba-44ff0fc30289', '1.0.0b3.r1', '', '2007-01-18 23:00:00', 1, 100, 4, 'Google Scholar', 'Simon Kornblith', '^http://scholar\.google\.[a-z]+/scholar',
 'function detectWeb(doc, url) {
 	return "multiple";
 }',
@@ -3272,8 +3272,9 @@ REPLACE INTO translators VALUES ('57a00950-f0d1-4b41-b6ba-44ff0fc30289', '1.0.0b
 	while(elmt = elmts.iterateNext()) {
 		var isCitation = doc.evaluate("./font[1]/b[1]/text()[1]", elmt, nsResolver,
 		                              XPathResult.ANY_TYPE, null).iterateNext();
-		var relatedLink = doc.evaluate(''.//a[font/text() = "Related Articles"]'',
-									   elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+		var relatedLink = doc.evaluate(''.//a[text() = "Related Articles"]'',
+									   elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext(); 
+                                       
 		if(relatedLink) {
 			relatedLinks[i] = relatedLink.href;
 			if(isCitation && isCitation.nodeValue == "[CITATION]") {
