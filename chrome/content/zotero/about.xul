@@ -44,6 +44,7 @@
 		<vbox class="subcontent">
 			<label value="Dan Cohen"/>
 			<label value="Josh Greenberg"/>
+			<label value="Sean Takats"/>
 		</vbox>
 		<label class="subhead" value="&zotero.developers;"/>
 		<vbox class="subcontent">
