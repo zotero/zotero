@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-01-18 23:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-01-20 00:20:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b3.r1', '', '2006-12-15 03:40:00', 1, 100, 4, 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -8153,7 +8153,7 @@ function doImport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7', '1.0.0b3.r1', '', '2007-01-12 00:30:00', 1, 100, 3, 'RIS', 'Simon Kornblith', 'ris',
+REPLACE INTO translators VALUES ('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7', '1.0.0b3.r1', '', '2007-01-20 00:20:00', '1', '100', '3', 'RIS', 'Simon Kornblith', 'ris', 
 'Zotero.configure("dataMode", "line");
 Zotero.addOption("exportNotes", true);
 
@@ -8172,7 +8172,7 @@ function detectImport() {
 			}
 		}
 	}
-}',
+}', 
 'var fieldMap = {
 	ID:"itemID",
 	T1:"title",
@@ -8189,7 +8189,6 @@ function detectImport() {
 var inputFieldMap = {
 	TI:"title",
 	CT:"title",
-	JO:"publicationTitle",
 	CY:"place"
 };
 
@@ -8197,6 +8196,7 @@ var inputFieldMap = {
 var typeMap = {
 	book:"BOOK",
 	bookSection:"CHAP",
+	conferencePaper:"CONF", 
 	journalArticle:"JOUR",
 	magazineArticle:"MGZN",
 	newspaperArticle:"NEWS",
@@ -8210,7 +8210,7 @@ var typeMap = {
 };
 
 // supplements outputTypeMap for importing
-// TODO: BILL, CASE, COMP, CONF, DATA, HEAR, MUSIC, PAT, SOUND, STAT
+// TODO: BILL, CASE, COMP, DATA, HEAR, MUSIC, PAT, SOUND, STAT
 var inputTypeMap = {
 	ABST:"journalArticle",
 	ADVS:"film",
@@ -8234,7 +8234,7 @@ function processTag(item, tag, value) {
 		item[inputFieldMap[tag]] = value;
 	} else if(tag == "TY") {
 		// look for type
-		
+
 		// first check typeMap
 		for(var i in typeMap) {
 			if(value == typeMap[i]) {
@@ -8249,6 +8249,12 @@ function processTag(item, tag, value) {
 				// default to generic from inputTypeMap
 				item.itemType = inputTypeMap["GEN"];
 			}
+		}
+	} else if(tag == "JO") {
+		if (item.itemType == "conferencePaper"){
+			item.conferenceName = value;
+		} else {
+			item.publicationTitle = value;
 		}
 	} else if(tag == "BT") {
 		// ignore, unless this is a book or unpublished work, as per spec
@@ -8270,25 +8276,25 @@ function processTag(item, tag, value) {
 	} else if(tag == "Y1" || tag == "PY") {
 		// year or date
 		var dateParts = value.split("/");
-		
+
 		if(dateParts.length == 1) {
 			// technically, if there''s only one date part, the file isn''t valid
 			// RIS, but EndNote writes this, so we have to too
 			item.date = value;
 		} else {
 			// in the case that we have a year and other data, format that way
-			
+
 			var month = parseInt(dateParts[1]);
 			if(month) {
 				month--;
 			} else {
 				month = undefined;
 			}
-			
+
 			item.date = Zotero.Utilities.formatDate({year:dateParts[0],
-			                                          month:month,
-			                                          day:dateParts[2],
-			                                          part:dateParts[3]});
+								  month:month,
+								  day:dateParts[2],
+								  part:dateParts[3]});
 		}
 	} else if(tag == "Y2") {
 		// the secondary date field can mean two things, a secondary date, or an
@@ -8304,7 +8310,7 @@ function processTag(item, tag, value) {
 		}
 	} else if(tag == "N1" || tag == "AB") {
 		// notes
-		if(value != item.title) {	// why does EndNote do this!?
+		if(value != item.title) {       // why does EndNote do this!?
 			item.notes.push({note:value});
 		}
 	} else if(tag == "N2") {
@@ -8316,7 +8322,7 @@ function processTag(item, tag, value) {
 		// start page
 		if(!item.pages) {
 			item.pages = value;
-		} else if(item.pages[0] == "-") {	// already have ending page
+		} else if(item.pages[0] == "-") {       // already have ending page
 			item.pages = value + item.pages;
 		} else {	// multiple ranges? hey, it''s a possibility
 			item.pages += ", "+value;
@@ -8343,7 +8349,7 @@ function processTag(item, tag, value) {
 		if(!item.url) {
 			item.url = value;
 		}
-		
+
 		if(tag == "UR") {
 			item.attachments.push({url:value});
 		} else if(tag == "L1") {
@@ -8368,7 +8374,6 @@ function completeItem(item) {
 		}
 		item.backupPublicationTitle = undefined;
 	}
-	
 	item.complete();
 }
 
@@ -8376,25 +8381,25 @@ function doImport(attachments) {
 	// this is apparently the proper character set for RIS, although i''m not
 	// sure how many people follow this
 	Zotero.setCharacterSet("IBM850");
-	
+
 	var line = true;
 	var tag = data = false;
-	do {	// first valid line is type
+	do {    // first valid line is type
 		Zotero.debug("ignoring "+line);
 		line = Zotero.read();
 		line = line.replace(/^\s+/, "");
 	} while(line !== false && line.substr(0, 6) != "TY  - ");
-	
+
 	var item = new Zotero.Item();
 	var i = 0;
 	if(attachments && attachments[i]) {
 		item.attachments = attachments[i];
 	}
-	
+
 	var tag = "TY";
 	var data = line.substr(6);
 	var rawLine;
-	while((rawLine = Zotero.read()) !== false) {	// until EOF
+	while((rawLine = Zotero.read()) !== false) {    // until EOF
 		// trim leading space if this line is not part of a note
 		line = rawLine.replace(/^\s+/, "");
 		Zotero.debug("line is "+rawLine);
@@ -8404,14 +8409,14 @@ function doImport(attachments) {
 			if(tag) {
 				processTag(item, tag, data);
 			}
-			
+
 			// then fetch the tag and data from this line
 			tag = line.substr(0,2);
 			data = line.substr(6);
-			
+
 			Zotero.debug("tag: ''"+tag+"''; data: ''"+data+"''");
-			
-			if(tag == "ER") {		// ER signals end of reference			
+
+			if(tag == "ER") {	       // ER signals end of reference
 				// unset info
 				tag = data = false;
 				// new item
@@ -8438,7 +8443,7 @@ function doImport(attachments) {
 			}
 		}
 	}
-	
+
 	if(tag && tag != "ER") {	// save any unprocessed tags
 		Zotero.debug(tag);
 		processTag(item, tag, data);
@@ -8456,23 +8461,23 @@ function doExport() {
 	// this is apparently the proper character set for RIS, although i''m not
 	// sure how many people follow this
 	Zotero.setCharacterSet("IBM850");
-	
+
 	var item;
-	
+
 	while(item = Zotero.nextItem()) {
 		// can''t store independent notes in RIS
 		if(item.itemType == "note" || item.itemType == "attachment") {
 			continue;
 		}
-		
+
 		// type
 		addTag("TY", typeMap[item.itemType]);
-		
+
 		// use field map
 		for(var j in fieldMap) {
 			addTag(j, item[fieldMap[j]]);
 		}
-		
+
 		// creators
 		for(var j in item.creators) {
 			// only two types, primary and secondary
@@ -8480,10 +8485,10 @@ function doExport() {
 			if(item.creators[j].creatorType != "author") {
 				risTag = "A2";
 			}
-			
+
 			addTag(risTag, item.creators[j].lastName+","+item.creators[j].firstName);
 		}
-		
+
 		// date
 		if(item.date) {
 			var date = Zotero.Utilities.strToDate(item.date);
@@ -8505,23 +8510,23 @@ function doExport() {
 			}
 			addTag("PY", string);
 		}
-		
+
 		// notes
 		if(Zotero.getOption("exportNotes")) {
 			for(var j in item.notes) {
 				addTag("N1", item.notes[j].note.replace(/(?:\r\n?|\n)/g, "\r\n"));
 			}
 		}
-		
+
 		if(item.abstractNote) {
 			addTag("N2", item.abstractNote.replace(/(?:\r\n?|\n)/g, "\r\n"));
 		}
-		
+
 		// tags
 		for(var j in item.tags) {
 			addTag("KY", item.tags[j]);
 		}
-		
+
 		// pages
 		if(item.pages) {
 			if(item.itemType == "book") {
@@ -8532,18 +8537,18 @@ function doExport() {
 				addTag("EP", range[1]);
 			}
 		}
-		
+
 		// ISBN/ISSN
 		addTag("SN", item.ISBN);
 		addTag("SN", item.ISSN);
-		
+
 		// URL
 		if(item.url) {
 			addTag("UR", item.url);
 		} else if(item.source && item.source.substr(0, 7) == "http://") {
 			addTag("UR", item.source);
 		}
-		
+
 		Zotero.write("ER  - \r\n\r\n");
 	}
 }');
