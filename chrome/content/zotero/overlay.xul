@@ -55,10 +55,10 @@
 			oncommand="var itemID = ZoteroPane.addItemFromPage(); ZoteroPane.newNote(false, itemID, window.content.getSelection().toString())"/>
 		<menuitem id="zotero-context-save-link-as-snapshot" class="menu-iconic"
 			label="&zotero.contextMenu.saveLinkAsSnapshot;"
-			oncommand="Zotero.Attachments.importFromURL(window.gContextMenu.linkURL)"/>
+			oncommand="Zotero.Attachments.importFromURL(window.gContextMenu.linkURL, false, false, ZoteroPane.getSelectedCollection(true))"/>
 		<menuitem id="zotero-context-save-image-as-snapshot" class="menu-iconic"
 			label="&zotero.contextMenu.saveImageAsSnapshot;"
-			oncommand="Zotero.Attachments.importFromURL(window.gContextMenu.onImage ? window.gContextMenu.imageURL : window.gContextMenu.bgImageURL)"/>
+			oncommand="Zotero.Attachments.importFromURL(window.gContextMenu.onImage ? window.gContextMenu.imageURL : window.gContextMenu.bgImageURL, false, false, ZoteroPane.getSelectedCollection(true))"/>
 	</popup>
 	
 	<vbox id="appcontent">

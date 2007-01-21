@@ -155,8 +155,6 @@ Zotero.File = new function(){
 			prefService.setCharPref('intl.charset.detector', oldPref);
 			
 			callback(charset, args);
-			
-			Zotero.Browser.deleteHiddenBrowser(browser);
 		}, false);
 	}
 }

@@ -168,7 +168,7 @@ Zotero.Attachments = new function(){
 	}
 	
 	
-	function importFromURL(url, sourceItemID, forceTitle){
+	function importFromURL(url, sourceItemID, forceTitle, parentCollectionIDs){
 		Zotero.debug('Importing attachment from URL');
 		
 		Zotero.Utilities.HTTP.doHead(url, function(obj){
@@ -191,9 +191,13 @@ Zotero.Attachments = new function(){
 			if (Zotero.MIME.hasNativeHandler(mimeType, ext)){
 				var browser = Zotero.Browser.createHiddenBrowser();
 				browser.addEventListener("pageshow", function(){
-					Zotero.Attachments.importFromDocument(browser.contentDocument, sourceItemID, forceTitle);
-					browser.removeEventListener("pageshow", arguments.callee, true);
-					Zotero.Browser.deleteHiddenBrowser(browser);
+					var callback = function () {
+						browser.removeEventListener("pageshow", arguments.callee, true);
+						Zotero.Browser.deleteHiddenBrowser(browser);
+					};
+					
+					Zotero.Attachments.importFromDocument(browser.contentDocument,
+						sourceItemID, forceTitle, parentCollectionIDs, callback);
 				}, true);
 				browser.loadURI(url);
 			}
@@ -220,6 +224,15 @@ Zotero.Attachments = new function(){
 					attachmentItem.setField('accessDate', "CURRENT_TIMESTAMP");
 					attachmentItem.save();
 					var itemID = attachmentItem.getID();
+					
+					// Add to collections
+					if (parentCollectionIDs){
+						var ids = Zotero.flattenArguments(parentCollectionIDs);
+						for each(var id in ids){
+							var col = Zotero.Collections.get(id);
+							col.addItem(itemID);
+						}
+					}
 					
 					// Create a new folder for this item in the storage directory
 					var destDir = Zotero.getStorageDirectory();
@@ -351,7 +364,7 @@ Zotero.Attachments = new function(){
 	}
 	
 	
-	function importFromDocument(document, sourceItemID, forceTitle, parentCollectionIDs){
+	function importFromDocument(document, sourceItemID, forceTitle, parentCollectionIDs, callback){
 		Zotero.debug('Importing attachment from document');
 		
 		var url = document.location.href;
@@ -444,6 +457,10 @@ Zotero.Attachments = new function(){
 				}
 				
 				Zotero.Fulltext.indexDocument(document, itemID);
+				
+				if (callback) {
+					callback();
+				}
 			});
 			
 			// The attachment is still incomplete here, but we can't risk
@@ -635,6 +652,8 @@ Zotero.Attachments = new function(){
 				// Chain fulltext indexer inside the charset callback,
 				// since it's asynchronous and a prerequisite
 				Zotero.Fulltext.indexDocument(browser.contentDocument, itemID);
+				
+				Zotero.Browser.deleteHiddenBrowser(browser);
 			}
 		}, itemID);
 		

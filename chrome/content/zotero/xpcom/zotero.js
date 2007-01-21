@@ -1271,7 +1271,7 @@ Zotero.Browser = new function() {
 		return newHiddenBrowser;
 	}
 	
-	function deleteHiddenBrowser(myBrowser) {			
+	function deleteHiddenBrowser(myBrowser) {
 		// Delete a hidden browser
 		myBrowser.parentNode.removeChild(myBrowser);
 		delete myBrowser;
