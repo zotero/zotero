@@ -181,7 +181,6 @@
 							// If the last tag was the same, add this tagID and tagType to it
 							if (tagsToggleBox.lastChild &&
 									tagsToggleBox.lastChild.getAttribute('value') == this._tags[tagID].tag) {
-								Zotero.debug(this._tags[tagID].tag);
 								tagsToggleBox.lastChild.setAttribute('tagID', tagsToggleBox.lastChild.getAttribute('tagID') + '-' + tagID);
 								tagsToggleBox.lastChild.setAttribute('tagType', tagsToggleBox.lastChild.getAttribute('tagType') + '-' + this._tags[tagID].type);
 								continue;
@@ -654,7 +653,7 @@
 					<xul:toolbarbutton id="view-settings-menu" tooltiptext="&zotero.toolbar.actions.label;"
 							image="chrome://zotero/skin/tag-selector-menu.png" type="menu">
 						<xul:menupopup id="view-settings-popup">
-							<xul:menuitem id="show-automatic" label="Show automatic" autocheck="true" type="checkbox"
+							<xul:menuitem id="show-automatic" label="&zotero.tagSelector.showAutomatic;" autocheck="true" type="checkbox"
 								oncommand="var ts = this.parentNode.parentNode.parentNode.parentNode.parentNode; ts._dirty = true; ts.setAttribute('showAutomatic', this.getAttribute('checked') == 'true')"/>
 						</xul:menupopup>
 					</xul:toolbarbutton>
