@@ -50,7 +50,7 @@
 							{
 								for(var i = 0; i < tags.length; i++)
 								{
-									r = r + tags[i] + ", ";
+									r = r + tags[i].tag + ", ";
 								}
 								r = r.substr(0,r.length-2);
 							}
@@ -73,8 +73,7 @@
 						
 						if(tags)
 						{
-							for(var i = 0; i < tags.length; i++)
-							{
+							for (var i=0; i<tags.length; i++) {
 								this.addDynamicRow(tags[i], i+1);
 							}
 							this.updateCount(tags.length);
@@ -90,12 +89,18 @@
 				</body>
 			</method>
 			<method name="addDynamicRow">
-				<parameter name="tag"/>
+				<parameter name="tagObj"/>
 				<parameter name="tabindex"/>
 				<body>
 					<![CDATA[
-						var id = tag ? Zotero.Tags.getID(tag) : null;
-						tag = tag ? tag : '';
+						if (tagObj) {
+							var tagID = tagObj.id;
+							var tag = tagObj.tag;
+							var type = tagObj.type;
+						}
+						if (!tag) {
+							tag = '';
+						}
 						
 						if (!tabindex)
 						{
@@ -109,8 +114,17 @@
 							}
 						}
 						
-						var icon= document.createElement("image");
-						icon.setAttribute('src','chrome://zotero/skin/tag.png');
+						var icon = document.createElement("image");
+						var iconFile = 'tag';
+						if (type == 0) {
+							icon.setAttribute('tooltiptext', Zotero.getString('pane.item.tags.icon.user'));
+						}
+						else if (type == 1) {
+							iconFile += '-automatic';
+							icon.setAttribute('tooltiptext', Zotero.getString('pane.item.tags.icon.automatic'));
+						}
+						icon.setAttribute('src', 'chrome://zotero/skin/' + iconFile + '.png');
+						
 						// DEBUG: Why won't just this.nextSibling.blur() work?
 						icon.setAttribute('onclick','if (this.nextSibling.inputField){ this.nextSibling.inputField.blur() }');
 						
@@ -119,10 +133,10 @@
 						var remove = document.createElement("label");
 						remove.setAttribute('value','-');
 						remove.setAttribute('class','zotero-clicky');
-						if (id)
+						if (tagID)
 						{
 							remove.setAttribute('ztabindex', -1);
-							remove.setAttribute('onclick',"this.parentNode.parentNode.parentNode.parentNode.parentNode.remove('"+id+"');");
+							remove.setAttribute('onclick',"this.parentNode.parentNode.parentNode.parentNode.parentNode.remove('"+ tagID +"');");
 						}
 						else
 						{
@@ -133,9 +147,11 @@
 						row.appendChild(icon);
 						row.appendChild(label);
 						row.appendChild(remove);
-						if (id)
+						
+						if (tagID)
 						{
-							row.setAttribute('id','tag-'+id);
+							row.setAttribute('id', 'tag-' + tagID);
+							row.setAttribute('tagType', type);
 						}
 						
 						this.id('tagRows').appendChild(row);
@@ -242,6 +258,15 @@
 							this.parentNode.showPopup(
 								this.parentNode.parentNode.previousSibling,
 								-1, -1, 'popup');
+						}
+					]]>
+				</body>
+			</method>
+			<method name="closePopup">
+				<body>
+					<![CDATA[
+						if (this.parentNode.getAttribute('showing')=='true') {
+							this.parentNode.setAttribute('showing', false);
 						}
 					]]>
 				</body>

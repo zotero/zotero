@@ -39,6 +39,18 @@
 			<field name="_dirty">null</field>
 			<field name="_empty">null</field>
 			<field name="selection"/>
+			<property name="showAutomatic" onget="return this.getAttribute('showAutomatic')"/>
+			<property name="_types">
+				<getter>
+					<![CDATA[
+					var types = [0];
+					if (this.showAutomatic == 'true') {
+						types.push(1);
+					}
+					return types;
+					]]>
+				</getter>
+			</property>
 			
 			<field name="_hasFilter">false</field>
 			<field name="_filter">null</field>
@@ -99,6 +111,7 @@
 			<constructor>
 				<![CDATA[
 					this.setAttribute('filterToScope', true);
+					this.id('show-automatic').setAttribute('checked', this.getAttribute('showAutomatic'));
 					this.dragObserver = new this._dragObserverConstructor;
 				]]>
 			</constructor>
@@ -156,7 +169,7 @@
 					var tagsToggleBox = this.id('tags-toggle');
 					
 					if (fetch || this._dirty) {
-						this._tags = Zotero.Tags.getAll();
+						this._tags = Zotero.Tags.getAll(this._types);
 						
 						// Remove children
 						while (tagsToggleBox.hasChildNodes()){
@@ -165,11 +178,21 @@
 						
 						// Regenerate list
 						for (var tagID in this._tags) {
+							// If the last tag was the same, add this tagID and tagType to it
+							if (tagsToggleBox.lastChild &&
+									tagsToggleBox.lastChild.getAttribute('value') == this._tags[tagID].tag) {
+								Zotero.debug(this._tags[tagID].tag);
+								tagsToggleBox.lastChild.setAttribute('tagID', tagsToggleBox.lastChild.getAttribute('tagID') + '-' + tagID);
+								tagsToggleBox.lastChild.setAttribute('tagType', tagsToggleBox.lastChild.getAttribute('tagType') + '-' + this._tags[tagID].type);
+								continue;
+							}
+							
 							var label = document.createElement('label');
 							label.setAttribute('onclick', "this.parentNode.parentNode.parentNode.handleTagClick(this)");
 							label.className = 'zotero-clicky';
-							label.setAttribute('value', this._tags[tagID]);
+							label.setAttribute('value', this._tags[tagID].tag);
 							label.setAttribute('tagID', tagID);
+							label.setAttribute('tagType', this._tags[tagID].type);
 							label.setAttribute('context', 'tag-menu');
 							label.setAttribute('ondragover', 'nsDragAndDrop.dragOver(event, this.parentNode.parentNode.parentNode.dragObserver)');
 							label.setAttribute('ondragexit', 'nsDragAndDrop.dragExit(event, this.parentNode.parentNode.parentNode.dragObserver)');
@@ -183,7 +206,7 @@
 					// Set attributes
 					var labels = tagsToggleBox.getElementsByTagName('label');
 					for (var i=0; i<labels.length; i++){
-						var tagID = labels[i].getAttribute('tagID');
+						var tagIDs = labels[i].getAttribute('tagID').split('-');
 						
 						// Restore selection
 						if (this.selection[labels[i].value]){
@@ -193,13 +216,35 @@
 							labels[i].setAttribute('selected', 'false');
 						}
 						
+						// Check tags against filter
+						if (this._hasFilter) {
+							var inFilter = false;
+							for each(var tagID in tagIDs) {
+								if (this._filter[tagID]) {
+									inFilter = true;
+									break;
+								}
+							}
+						}
+						
+						// Check tags against scope
+						if (this._hasScope) {
+							var inScope = false;
+							for each(var tagID in tagIDs) {
+								if (this._scope[tagID]) {
+									inScope = true;
+									break;
+								}
+							}
+						}
+						
 						// If not in filter, hide
-						if (this._hasFilter && !this._filter[tagID]) {
+						if (this._hasFilter && !inFilter) {
 							//Zotero.debug(1);
 							labels[i].setAttribute('hidden', true);
 						}
 						else if (this.filterToScope) {
-							if (this._hasScope && this.scope[tagID]) {
+							if (this._hasScope && inScope) {
 								//Zotero.debug(2);
 								labels[i].setAttribute('inScope', true);
 								labels[i].setAttribute('hidden', false);
@@ -213,7 +258,7 @@
 						}
 						// Display all
 						else {
-							if (this._hasScope && this.scope[tagID]) {
+							if (this._hasScope && inScope) {
 								//Zotero.debug(4);
 								labels[i].setAttribute('inScope', true);
 							}
@@ -294,7 +339,7 @@
 				<![CDATA[
 					// If a selected tag no longer exists, deselect it
 					if (event == 'delete') {
-						this._tags = Zotero.Tags.getAll();
+						this._tags = Zotero.Tags.getAll(this._types);
 						
 						for (var tag in this.selection) {
 							for each(var tag2 in this._tags) {
@@ -430,10 +475,15 @@
 			
 			
 			<method name="rename">
-				<parameter name="tagID"/>
+				<parameter name="tagIDs"/>
 				<body>
 				<![CDATA[
-					var oldName = Zotero.Tags.getName(tagID);
+					tagIDs = tagIDs.split('-');
+					// Convert to ints
+					for (var i=0; i<tagIDs.length; i++) {
+						tagIDs[i] = parseInt(tagIDs[i]);
+					}
+					var oldName = Zotero.Tags.getName(tagIDs[0]);
 					
 					var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 						.getService(Components.interfaces.nsIPromptService);
@@ -444,9 +494,21 @@
 						Zotero.getString('pane.tagSelector.rename.message'),
 						newName, '', {});
 					
-					if (result && newName.value)
-					{
-						Zotero.Tags.rename(tagID, newName.value);
+					if (result && newName.value) {
+						Zotero.DB.beginTransaction();
+						
+						// Add other ids with same tag
+						var ids = Zotero.Tags.getIDs(oldName);
+						for each(var id in ids) {
+							if (tagIDs.indexOf(id) == -1) {
+								tagIDs.push(id);
+							}
+						}
+						
+						for each(var tagID in tagIDs) {
+							Zotero.Tags.rename(tagID, newName.value);
+						}
+						Zotero.DB.commitTransaction();
 					}
 				]]>
 				</body>
@@ -454,9 +516,12 @@
 			
 			
 			<method name="delete">
-				<parameter name="tagID"/>
+				<parameter name="tagIDs"/>
 				<body>
 				<![CDATA[
+					tagIDs = tagIDs.split('-');
+					var oldName = Zotero.Tags.getName(tagIDs[0]);
+					
 					var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 						.getService(Components.interfaces.nsIPromptService);
 					
@@ -465,7 +530,21 @@
 						Zotero.getString('pane.tagSelector.delete.message'));
 					
 					if (confirmed) {
-						Zotero.Tags.remove(tagID);
+						Zotero.DB.beginTransaction();
+						
+						// Add other ids with same tag
+						var ids = Zotero.Tags.getIDs(oldName);
+						for each(var id in ids) {
+							if (tagIDs.indexOf(id) == -1) {
+								tagIDs.push(id);
+							}
+						}
+						
+						for each(var tagID in tagIDs) {
+							Zotero.Tags.remove(tagID);
+						}
+						
+						Zotero.DB.commitTransaction()
 					}
 				]]>
 				</body>
@@ -572,6 +651,13 @@
 						<xul:toolbarbutton id="search-cancel"
 							oncommand="this.parentNode.focus(); this.parentNode.parentNode.parentNode.parentNode.handleKeyPress(true)" hidden="true"/>
 					</xul:textbox>
+					<xul:toolbarbutton id="view-settings-menu" tooltiptext="&zotero.toolbar.actions.label;"
+							image="chrome://zotero/skin/tag-selector-menu.png" type="menu">
+						<xul:menupopup id="view-settings-popup">
+							<xul:menuitem id="show-automatic" label="Show automatic" autocheck="true" type="checkbox"
+								oncommand="var ts = this.parentNode.parentNode.parentNode.parentNode.parentNode; ts._dirty = true; ts.setAttribute('showAutomatic', this.getAttribute('checked') == 'true')"/>
+						</xul:menupopup>
+					</xul:toolbarbutton>
 				</xul:hbox>
 				
 				<xul:hbox>

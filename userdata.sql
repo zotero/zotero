@@ -1,4 +1,4 @@
--- 15
+-- 16
 
 -- This file creates tables containing user-specific data -- any changes
 -- to existing tables made here must be mirrored in transition steps in
@@ -106,8 +106,10 @@ CREATE INDEX IF NOT EXISTS itemAttachments_mimeType ON itemAttachments(mimeType)
 -- Individual entries for each tag
 CREATE TABLE IF NOT EXISTS tags (
     tagID INT,
-    tag TEXT UNIQUE,
-    PRIMARY KEY (tagID)
+    tag TEXT,
+    tagType INT,
+    PRIMARY KEY (tagID),
+    UNIQUE (tag, tagType)
 );
 
 -- Associates items with keywords

@@ -1491,7 +1491,7 @@ Zotero.Item.prototype.getAttachmentLinkMode = function(){
 		throw ("getAttachmentLinkMode() can only be called on items of type 'attachment'");
 	}
 	
-	if (this._fileLinkMode!==null){
+	if (this._fileLinkMode !==null && this._fileLinkMode !==false){
 		return this._fileLinkMode;
 	}
 	
@@ -1573,7 +1573,7 @@ Zotero.Item.prototype.getBestSnapshot = function(){
 //
 // save() is not required for tag functions
 //
-Zotero.Item.prototype.addTag = function(tag){
+Zotero.Item.prototype.addTag = function(tag, type){
 	if (!this.getID()){
 		throw ('Cannot add tag to unsaved item in Item.addTag()');
 	}
@@ -1587,11 +1587,34 @@ Zotero.Item.prototype.addTag = function(tag){
 		return false;
 	}
 	
-	Zotero.DB.beginTransaction();
-	var tagID = Zotero.Tags.getID(tag);
-	if (!tagID){
-		var tagID = Zotero.Tags.add(tag);
+	if (!type) {
+		type = 0;
 	}
+	
+	if (type !=0 && type !=1) {
+		throw ('Invalid tag type in Item.addTag()');
+	}
+	
+	Zotero.DB.beginTransaction();
+	var tagID = Zotero.Tags.getID(tag, type);
+	var existingTypes = Zotero.Tags.getTypes(tag);
+	
+	if (existingTypes) {
+		// If existing automatic and adding identical user, remove automatic
+		if (type == 0 && existingTypes.indexOf(1) != -1) {
+			this.removeTag(Zotero.Tags.getID(tag, 1));
+		}
+		// If existing user and adding automatic, skip
+		else if (type == 1 && existingTypes.indexOf(0) != -1) {
+			Zotero.debug('Identical user tag already exists -- skipping automatic tag add');
+			return false;
+		}
+	}
+	
+	if (!tagID) {
+		var tagID = Zotero.Tags.add(tag, type);
+	}
+	
 	try {
 		var result = this.addTagByID(tagID);
 		Zotero.DB.commitTransaction();
@@ -1651,10 +1674,10 @@ Zotero.Item.prototype.hasTag = function(tagID) {
 }
 
 Zotero.Item.prototype.getTags = function(){
-	var sql = "SELECT tag FROM tags WHERE tagID IN "
+	var sql = "SELECT tagID AS id, tag, tagType AS type FROM tags WHERE tagID IN "
 		+ "(SELECT tagID FROM itemTags WHERE itemID=" + this.getID() + ") "
 		+ "ORDER BY tag COLLATE NOCASE";
-	return Zotero.DB.columnQuery(sql);
+	return Zotero.DB.query(sql);
 }
 
 Zotero.Item.prototype.getTagIDs = function(){
@@ -3141,11 +3164,14 @@ Zotero.Creators = new function(){
  * Same structure as Zotero.Creators -- make changes in both places if possible
  */
 Zotero.Tags = new function(){
-	var _tags = new Array; // indexed by tag text
-	var _tagsByID = new Array; // indexed by tagID
+	var _tags = []; // indexed by tag text
+	var _tagsByID = []; // indexed by tagID
 	
+	this.get = get;
 	this.getName = getName;
 	this.getID = getID;
+	this.getIDs = getIDs;
+	this.getTypes = getTypes;
 	this.getAll = getAll;
 	this.getAllWithinSearch = getAllWithinSearch;
 	this.getTagItems = getTagItems;
@@ -3156,53 +3182,100 @@ Zotero.Tags = new function(){
 	this.purge = purge;
 	
 	/*
-	 * Returns a tag for a given tagID
+	 * Returns a tag and type for a given tagID
 	 */
-	function getName(tagID){
+	function get(tagID) {
 		if (_tagsByID[tagID]){
 			return _tagsByID[tagID];
 		}
 		
-		var sql = 'SELECT tag FROM tags WHERE tagID=' + tagID;
-		var result = Zotero.DB.valueQuery(sql);
+		var sql = 'SELECT tag, tagType FROM tags WHERE tagID=?';
+		var result = Zotero.DB.rowQuery(sql, tagID);
 		
 		if (!result){
 			return false;
 		}
 		
-		_tagsByID[tagID] = result;
+		_tagsByID[tagID] = {
+			tag: result.tag,
+			type: result.tagType
+		};
 		return result;
 	}
 	
 	
 	/*
-	 * Returns the tagID matching given tag
+	 * Returns a tag for a given tagID
 	 */
-	function getID(tag){
-		if (_tags[tag]){
-			return _tags[tag];
+	function getName(tagID) {
+		if (_tagsByID[tagID]){
+			return _tagsByID[tagID].tag;
 		}
 		
-		var sql = 'SELECT tagID FROM tags WHERE tag=?';
-		var tagID = Zotero.DB.valueQuery(sql, [{string:tag}]);
+		var tag = this.get(tagID);
 		
-		if (tagID){
-			_tags[tag] = tagID;
+		return _tagsByID[tagID] ? _tagsByID[tagID].tag : false;
+	}
+	
+	
+	/*
+	 * Returns the tagID matching given tag and type
+	 */
+	function getID(tag, type) {
+		if (_tags[type] && _tags[type][tag]){
+			return _tags[type][tag];
+		}
+		
+		var sql = 'SELECT tagID FROM tags WHERE tag=? AND tagType=?';
+		var tagID = Zotero.DB.valueQuery(sql, [tag, type]);
+		
+		if (tagID) {
+			if (!_tags[type]) {
+				_tags[type] = [];
+			}
+			_tags[type][tag] = tagID;
 		}
 		
 		return tagID;
 	}
 	
 	
+	/*
+	 * Returns all tagIDs for this tag (of all types)
+	 */
+	function getIDs(tag) {
+		var sql = 'SELECT tagID FROM tags WHERE tag=?';
+		return Zotero.DB.columnQuery(sql, [tag]);
+	}
+	
+	
+	/*
+	 * Returns an array of tagTypes for tags matching given tag
+	 */
+	function getTypes(tag) {
+		var sql = 'SELECT tagType FROM tags WHERE tag=?';
+		return Zotero.DB.columnQuery(sql, [tag]);
+	}
+	
+	
 	/**
 	 * Get all tags indexed by tagID
+	 *
+	 * _types_ is an optional array of tagTypes to fetch
 	 */
-	function getAll(){
-		var sql = 'SELECT tagID, tag FROM tags ORDER BY tag COLLATE NOCASE';
+	function getAll(types) {
+		var sql = "SELECT tagID, tag, tagType FROM tags ";
+		if (types) {
+			sql += "WHERE tagType IN (" + types.join() + ") ";
+		}
+		sql += "ORDER BY tag COLLATE NOCASE";
 		var tags = Zotero.DB.query(sql);
 		var indexed = {};
-		for (var i in tags){
-			indexed[tags[i]['tagID']] = tags[i]['tag'];
+		for each(var tag in tags) {
+			indexed[tag.tagID] = {
+				tag: tag.tag,
+				type: tag.tagType
+			};
 		}
 		return indexed;
 	}
@@ -3210,8 +3283,10 @@ Zotero.Tags = new function(){
 	
 	/*
 	 * Get all tags within the items of a Zotero.Search object
+	 *
+	 * _types_ is an optional array of tagTypes to fetch
 	 */
-	function getAllWithinSearch(search) {
+	function getAllWithinSearch(search, types) {
 		// If search has post-search filters (e.g. fulltext content), run it
 		// and just include the ids
 		//
@@ -3220,19 +3295,30 @@ Zotero.Tags = new function(){
 		// -- should probably use a temporary table instead
 		if (search.hasPostSearchFilter()) {
 			var ids = search.search();
-			var sql = "SELECT DISTINCT tagID, tag FROM itemTags NATURAL JOIN tags "
-				+ "WHERE itemID IN (" + ids.join() + ") ORDER BY tag COLLATE NOCASE";
+			var sql = "SELECT DISTINCT tagID, tag, tagType FROM itemTags "
+				+ "NATURAL JOIN tags WHERE itemID IN (" + ids.join() + ") ";
+			if (types) {
+				sql += "AND tagType IN (" + types.join() + ") ";
+			}
+			sql += "ORDER BY tag COLLATE NOCASE";
 			var tags = Zotero.DB.query(sql);
 		}
 		else {
-			var sql = "SELECT DISTINCT tagID, tag FROM itemTags NATURAL JOIN tags "
-				+ "WHERE itemID IN (" + search.getSQL() + ") ORDER BY tag COLLATE NOCASE";
+			var sql = "SELECT DISTINCT tagID, tag, tagType FROM itemTags "
+				+ "NATURAL JOIN tags WHERE itemID IN (" + search.getSQL() + ") ";
+			if (types) {
+				sql += "AND tagType IN (" + types.join() + ") ";
+			}
+			sql += "ORDER BY tag COLLATE NOCASE";
 			var tags = Zotero.DB.query(sql, search.getSQLParams());
 		}
 		
 		var indexed = {};
-		for (var i in tags){
-			indexed[tags[i]['tagID']] = tags[i]['tag'];
+		for each(var tag in tags) {
+			indexed[tag.tagID] = {
+				tag: tag.tag,
+				type: tag.tagType
+			};
 		}
 		return indexed;
 	}
@@ -3245,12 +3331,15 @@ Zotero.Tags = new function(){
 	
 	
 	function search(str){
-		var sql = 'SELECT tagID, tag FROM tags WHERE tag LIKE ? '
+		var sql = 'SELECT tagID, tag, tagType FROM tags WHERE tag LIKE ? '
 			+ 'ORDER BY tag COLLATE NOCASE';
 		var tags = Zotero.DB.query(sql, '%' + str + '%');
 		var indexed = {};
-		for (var i in tags){
-			indexed[tags[i]['tagID']] = tags[i]['tag'];
+		for each(var tag in tags) {
+			indexed[tag.tagID] = {
+				tag: tag.tag,
+				type: tag.tagType
+			};
 		}
 		return indexed;
 	}
@@ -3261,14 +3350,22 @@ Zotero.Tags = new function(){
 	 *
 	 * Returns new tagID
 	 */
-	function add(tag){
-		Zotero.debug('Adding new tag', 4);
+	function add(tag, type){
+		if (type != 0 && type != 1) {
+			throw ('Invalid tag type ' + type + ' in Tags.add()');
+		}
+		
+		if (!type) {
+			type = 0;
+		}
+		
+		Zotero.debug('Adding new tag of type ' + type, 4);
 		
 		Zotero.DB.beginTransaction();
 		
-		var sql = 'INSERT INTO tags VALUES (?,?)';
+		var sql = 'INSERT INTO tags VALUES (?,?,?)';
 		var rnd = Zotero.getRandomID('tags', 'tagID');
-		Zotero.DB.query(sql, [{int: rnd}, {string: tag}]);
+		Zotero.DB.query(sql, [{int: rnd}, {string: tag}, {int: type}]);
 		
 		Zotero.DB.commitTransaction();
 		Zotero.Notifier.trigger('add', 'tag', rnd);
@@ -3281,8 +3378,21 @@ Zotero.Tags = new function(){
 		
 		Zotero.DB.beginTransaction();
 		
+		var tagObj = this.get(tagID);
+		var oldName = tagObj.tag;
+		var oldType = tagObj.type;
+		
+		if (oldName == tag) {
+			if (oldType != 0) {
+				var sql = "UPDATE tags SET tagType=0 WHERE tagID=?";
+				Zotero.DB.query(sql, tagID);
+			}
+			Zotero.DB.commitTransaction();
+			return;
+		}
+		
 		// Check if the new tag already exists
-		var sql = "SELECT tagID FROM tags WHERE tag=?";
+		var sql = "SELECT tagID FROM tags WHERE tag=? AND tagType=0";
 		var existingTagID = Zotero.DB.valueQuery(sql, tag);
 		if (existingTagID) {
 			var itemIDs = this.getTagItems(tagID);
@@ -3296,7 +3406,9 @@ Zotero.Tags = new function(){
 			// Manual purge of old tag
 			var sql = "DELETE FROM tags WHERE tagID=?";
 			Zotero.DB.query(sql, tagID);
-			delete _tags[_tagsByID[tagID]];
+			if (_tags[oldType]) {
+				delete _tags[oldType][oldName];
+			}
 			delete _tagsByID[tagID];
 			Zotero.Notifier.trigger('delete', 'tag', tagID);
 			
@@ -3321,12 +3433,15 @@ Zotero.Tags = new function(){
 			return;
 		}
 		
-		var sql = "UPDATE tags SET tag=? WHERE tagID=?";
+		// 0 == user tag -- we set all renamed tags to 0
+		var sql = "UPDATE tags SET tag=?, tagType=0 WHERE tagID=?";
 		Zotero.DB.query(sql, [{string: tag}, {int: tagID}]);
 		
 		var itemIDs = this.getTagItems(tagID);
 		
-		delete _tags[_tagsByID[tagID]];
+		if (_tags[oldType]) {
+			delete _tags[oldType][oldName];
+		}
 		delete _tagsByID[tagID];
 		
 		Zotero.DB.commitTransaction();
@@ -3343,6 +3458,7 @@ Zotero.Tags = new function(){
 		var itemIDs = Zotero.DB.columnQuery(sql, tagID);
 		
 		if (!itemIDs) {
+			Zotero.DB.commitTransaction();
 			return;
 		}
 		
@@ -3368,26 +3484,35 @@ Zotero.Tags = new function(){
 	 * Returns removed tagIDs on success
 	 */
 	function purge(){
-		var sql = 'SELECT tagID FROM tags WHERE tagID NOT IN '
-			+ '(SELECT tagID FROM itemTags);';
-		var toDelete = Zotero.DB.columnQuery(sql);
+		Zotero.DB.beginTransaction();
+		
+		var sql = 'SELECT tagID, tag, tagType FROM tags WHERE tagID '
+			+ 'NOT IN (SELECT tagID FROM itemTags);';
+		var toDelete = Zotero.DB.query(sql);
 		
 		if (!toDelete){
+			Zotero.DB.commitTransaction();
 			return false;
 		}
 		
+		var purged = [];
+		
 		// Clear tag entries in internal array
-		for (var i=0; i<toDelete.length; i++){
-			var tag = this.getName(toDelete[i]);
-			delete _tags[tag];
-			delete _tagsByID[toDelete[i]];
+		for each(var tag in toDelete) {
+			purged.push(tag.tagID);
+			if (_tags[tag.tagType]) {
+				delete _tags[tag.tagType][tag.tag];
+			}
+			delete _tagsByID[tag.tagID];
 		}
 		
 		sql = 'DELETE FROM tags WHERE tagID NOT IN '
 			+ '(SELECT tagID FROM itemTags);';
 		var result = Zotero.DB.query(sql);
 		
-		Zotero.Notifier.trigger('delete', 'tag', toDelete);
+		Zotero.DB.commitTransaction();
+		
+		Zotero.Notifier.trigger('delete', 'tag', purged);
 		
 		return toDelete;
 	}

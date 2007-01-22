@@ -136,7 +136,8 @@
 					</tree>
 				</vbox>
 				<splitter id="zotero-tags-splitter" onmouseup="ZoteroPane.updateTagSelectorSize()"/>
-				<zoterotagselector id="zotero-tag-selector" persist="height,collapsed" oncommand="ZoteroPane.updateTagFilter()"/>
+				<zoterotagselector id="zotero-tag-selector" persist="height,collapsed,showAutomaticsvn st"
+					oncommand="ZoteroPane.updateTagFilter()"/>
 			</vbox>
 			
 			<splitter id="zotero-tree-splitter" resizebefore="closest" resizeafter="closest"/>

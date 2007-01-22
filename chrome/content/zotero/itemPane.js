@@ -1153,7 +1153,7 @@ var ZoteroItemPane = new function()
 						// (which causes a delete of the row),
 						// clear the tab direction so we don't advance
 						// when the notifier kicks in
-						var existing = Zotero.Tags.getID(value);
+						var existing = Zotero.Tags.getID(value, 0);
 						if (existing && id != existing)
 						{
 							_tabDirection = false;
@@ -1170,9 +1170,20 @@ var ZoteroItemPane = new function()
 						return;
 					}
 				}
+				// New tag
 				else
 				{
+					// If this is an existing automatic tag, it's going to be
+					// deleted and the number of rows will stay the same,
+					// so we have to compensate
+					var existingTypes = Zotero.Tags.getTypes(value);
+					if (existingTypes && existingTypes.indexOf(1) != -1) {
+						_lastTabIndex--;
+					}
+					
 					var id = tagsbox.add(value);
+					
+					// DEBUG: why does this need to continue if added?
 				}
 			}
 			
@@ -1183,8 +1194,14 @@ var ZoteroItemPane = new function()
 			else
 			{
 				// Just remove the row
-				var row = rows.removeChild(row);
+				//
+				// If there's an open popup, this throws NODE CANNOT BE FOUND
+				try {
+					var row = rows.removeChild(row);
+				}
+				catch (e) {}
 				tagsbox.fixPopup();
+				
 				_tabDirection = false;
 				return;
 			}

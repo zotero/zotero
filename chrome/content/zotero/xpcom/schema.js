@@ -701,6 +701,15 @@ Zotero.Schema = new function(){
 				if (i==15) {
 					Zotero.DB.query("DROP TABLE IF EXISTS annotations");
 				}
+				
+				if (i==16) {
+					Zotero.DB.query("CREATE TABLE tagsTemp (tagID INT, tag TEXT, PRIMARY KEY (tagID))");
+					Zotero.DB.query("INSERT INTO tagsTemp SELECT * FROM tags");
+					Zotero.DB.query("DROP TABLE tags");
+					Zotero.DB.query("CREATE TABLE tags (\n    tagID INT,\n    tag TEXT,\n    tagType INT,\n    PRIMARY KEY (tagID),\n    UNIQUE (tag, tagType)\n);");
+					Zotero.DB.query("INSERT INTO tags SELECT tagID, tag, 0 FROM tagsTemp");
+					Zotero.DB.query("DROP TABLE tagsTemp");
+				}
 			}
 			
 			_updateSchema('userdata');
