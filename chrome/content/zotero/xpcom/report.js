@@ -207,8 +207,8 @@ Zotero.Report = new function() {
 				// TODO: localize
 				content += '<h3 class="tags">' + escapeXML('Tags') + '</h3>\n';
 				content += '<ul class="tags">\n';
-				for each(var tag in arr['tags']) {
-					content += '<li>' + escapeXML(tag) + '</li>\n';
+				for each(var tag in arr.tags) {
+					content += '<li>' + escapeXML(tag.tag) + '</li>\n';
 				}
 				content += '</ul>\n';
 			}
