@@ -1050,14 +1050,13 @@ var ZoteroPane = new function()
 				hide.push(m.showInLibrary, m.sep1);
 			}
 			
-			disable.push(m.showInLibrary, m.addNote, m.attachSnapshot, m.attachLink,
-				m.deleteItem, m.deleteFromLibrary, m.exportItems, m.createBib, m.loadReport);
-			hide.push(m.toggleAbstract);
-			show.push(m.sep2);
+			disable.push(m.showInLibrary, m.deleteItem, m.deleteFromLibrary,
+				m.exportItems, m.createBib, m.loadReport);
+			hide.push(m.addNote, m.attachSnapshot, m.attachLink, m.toggleAbstract, m.sep2);
 		}
 		
 		// Remove from collection
-		if (itemsView._itemGroup.isCollection())
+		if (itemsView._itemGroup.isCollection() && !(item && item.getSource()))
 		{
 			menu.childNodes[m.deleteItem].setAttribute('label', Zotero.getString('pane.items.menu.remove' + multiple));
 			show.push(m.deleteItem);
