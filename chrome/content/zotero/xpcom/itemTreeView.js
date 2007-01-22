@@ -129,8 +129,8 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids)
 		var splitIDs = [];
 		for each(var id in ids) {
 			var split = id.split('-');
-			// Not items not in this collection
-			if (split[0] != this._itemGroup.ref.getID()) {
+			// Skip if not collection or not an item in this collection
+			if (!this._itemGroup.isCollection() || split[0] != this._itemGroup.ref.getID()) {
 				continue;
 			}
 			splitIDs.push(split[1]);
