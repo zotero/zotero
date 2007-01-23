@@ -312,7 +312,11 @@ var ZoteroItemPane = new function()
 				for(var i = 0; i < notes.length; i++)
 				{
 					var icon = document.createElement('image');
-					icon.setAttribute('src','chrome://zotero/skin/treeitem-note.png');
+					var iconType = 'treeitem-note';
+					if (notes[i].isAbstract()) {
+						iconType += '-abstract';
+					}
+					icon.setAttribute('src','chrome://zotero/skin/' + iconType + '.png');
 				
 					var label = document.createElement('label');
 					label.setAttribute('value',_noteToTitle(notes[i].getNote()));
