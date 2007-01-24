@@ -14,6 +14,7 @@
 <!ENTITY zotero.items.title_column						"Title">
 <!ENTITY zotero.items.creator_column					"Creator">
 <!ENTITY zotero.items.date_column						"Date">
+<!ENTITY zotero.items.year_column						"Year">
 <!ENTITY zotero.items.publisher_column					"Publisher">
 <!ENTITY zotero.items.rights_column					"Rights">
 <!ENTITY zotero.items.dateAdded_column					"Date Added">

@@ -207,6 +207,11 @@
 								flex="1" persist="width ordinal hidden sortActive sortDirection"/>
 							<splitter class="tree-splitter"/>
 							<treecol
+								id="zotero-items-column-year" hidden="true"
+								label="&zotero.items.year_column;"
+								flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+							<splitter class="tree-splitter"/>
+							<treecol
 								id="zotero-items-column-publisher" hidden="true"
 								label="&zotero.items.publisher_column;"
 								flex="1" persist="width ordinal hidden sortActive sortDirection"/>

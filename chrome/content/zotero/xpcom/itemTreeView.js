@@ -357,6 +357,10 @@ Zotero.ItemTreeView.prototype.getCellText = function(row, column)
 	{
 		val = Zotero.getString('itemTypes.'+Zotero.ItemTypes.getName(obj.getType()));
 	}
+	// Year column is just date field truncated
+	else if (column.id == "zotero-items-column-year") {
+		val = obj.getField('date', true).substr(0, 4)
+	}
 	else
 	{
 		val = obj.getField(column.id.substring(20));
@@ -540,12 +544,17 @@ Zotero.ItemTreeView.prototype.sort = function()
 	}
 	else
 	{
+		// Year is really the date field truncated
+		if (columnField == 'year') {
+			columnField = 'date';
+		}
+		
 		// Some fields (e.g. dates) need to be retrieved unformatted for sorting
 		switch (columnField) {
 			case 'date':
 				var unformatted = true;
 				break;
-				
+			
 			default:
 				var unformatted = false;
 		}
@@ -637,6 +646,9 @@ Zotero.ItemTreeView.prototype.selectItem = function(id)
 	
 	return true;
 }
+
+
+
 
 /*
  * Delete the selection
