@@ -1,4 +1,4 @@
--- 166
+-- 167
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-01-23 23:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-01-24 01:35:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b3.r1', '', '2006-12-15 03:40:00', 1, 100, 4, 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -6289,7 +6289,7 @@ function doWeb(doc, url) {
 }');
 
 
-REPLACE INTO translators VALUES ('1b9ed730-69c7-40b0-8a06-517a89a3a278', '1.0.0b3r1', '', '2007-01-23 23:30:00', '0', '100', '4', 'Sudoc', 'Sean Takats', '^http://www\.sudoc\.abes\.fr', 
+REPLACE INTO translators VALUES ('1b9ed730-69c7-40b0-8a06-517a89a3a278', '1.0.0b3r1', '', '2007-01-24 01:35:00', '0', '100', '4', 'Sudoc', 'Sean Takats', '^http://www\.sudoc\.abes\.fr', 
 'function detectWeb(doc, url) {
 		var namespace = doc.documentElement.namespaceURI;
 		var nsResolver = namespace ? function(prefix) {
@@ -6306,7 +6306,7 @@ REPLACE INTO translators VALUES ('1b9ed730-69c7-40b0-8a06-517a89a3a278', '1.0.0b
 		else if (elt = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) 
 		{
 				var contenu = elt.textContent;
-				var numRegexp = /(Num?ro.*de.*notice|Record.*number)/;
+				var numRegexp = /(Num.ro.de.notice|Record.number)/;
 				var m = numRegexp.exec(contenu);
 				if (m) {
 						// On a bien une notice d"ouvrage, on doit chercher limage 
