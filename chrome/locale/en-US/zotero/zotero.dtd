@@ -13,11 +13,12 @@
 <!ENTITY zotero.items.type_column						"Type">
 <!ENTITY zotero.items.title_column						"Title">
 <!ENTITY zotero.items.creator_column					"Creator">
-<!ENTITY zotero.items.source_column					"Source">
+<!ENTITY zotero.items.date_column						"Date">
+<!ENTITY zotero.items.publisher_column					"Publisher">
 <!ENTITY zotero.items.rights_column					"Rights">
-<!ENTITY zotero.items.numChildren_column				"+">
 <!ENTITY zotero.items.dateAdded_column					"Date Added">
 <!ENTITY zotero.items.dateModified_column				"Date Modified">
+<!ENTITY zotero.items.numChildren_column				"+">
 
 <!ENTITY zotero.items.menu.showInLibrary					"Show in Library">
 <!ENTITY zotero.items.menu.attach.note					"Add Note">

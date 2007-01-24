@@ -358,6 +358,7 @@ var ZoteroItemPane = new function()
 				{
 					var icon = document.createElement('image');
 					var linkMode = attachments[i].getAttachmentLinkMode();
+					var itemType = '';
 					if(linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_FILE)
 					{
 						itemType = "-file";

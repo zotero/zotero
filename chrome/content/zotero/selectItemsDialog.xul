@@ -66,22 +66,22 @@
 			onselect="onItemSelected();">
 			<treecols>
 				<treecol
-					id="zotero-items-title-column" primary="true"
+					id="zotero-items-column-title" primary="true"
 					label="&zotero.items.title_column;"
 					flex="4" persist="width ordinal hidden sortActive sortDirection"/>
 				<splitter class="tree-splitter"/>
 				<treecol
-					id="zotero-items-firstCreator-column"
+					id="zotero-items-column-firstCreator"
 					label="&zotero.items.creator_column;"
 					flex="1" persist="width ordinal hidden sortActive sortDirection"/>
 				<splitter class="tree-splitter"/>
 				<treecol
-					id="zotero-items-dateAdded-column" hidden="true"
+					id="zotero-items-column-dateAdded" hidden="true"
 					label="&zotero.items.dateAdded_column;"
 					flex="1" persist="width ordinal hidden sortActive sortDirection"/>
 				<splitter class="tree-splitter"/>
 				<treecol
-					id="zotero-items-dateModified-column" hidden="true"
+					id="zotero-items-column-dateModified" hidden="true"
 					label="&zotero.items.dateModified_column;"
 					flex="1" persist="width ordinal hidden sortActive sortDirection"/>
 			</treecols>				

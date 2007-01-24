@@ -347,22 +347,22 @@ Zotero.ItemTreeView.prototype.getCellText = function(row, column)
 	var obj = this._getItemAtRow(row);
 	var val;
 	
-	if(column.id == "zotero-items-numChildren-column")
+	if(column.id == "zotero-items-column-numChildren")
 	{
 		var c = obj.numChildren();
 		if(c)	//don't display '0'
 			val = c;
 	}
-	else if(column.id == "zotero-items-typeIcon-column")
+	else if(column.id == "zotero-items-column-type")
 	{
 		val = Zotero.getString('itemTypes.'+Zotero.ItemTypes.getName(obj.getType()));
 	}
 	else
 	{
-		val = obj.getField(column.id.substring(13, column.id.length-7));
+		val = obj.getField(column.id.substring(20));
 	}
 	
-	if(column.id == 'zotero-items-dateAdded-column' || column.id == 'zotero-items-dateModified-column')		//this is not so much that we will use this format for date, but a simple template for later revisions.
+	if(column.id == 'zotero-items-column-dateAdded' || column.id == 'zotero-items-column-dateModified')		//this is not so much that we will use this format for date, but a simple template for later revisions.
 	{
 		val = new Date(Date.parse(val.replace(/-/g,"/"))).toLocaleString();
 	}
@@ -372,7 +372,7 @@ Zotero.ItemTreeView.prototype.getCellText = function(row, column)
 
 Zotero.ItemTreeView.prototype.getImageSrc = function(row, col)
 {
-	if(col.id == 'zotero-items-title-column')
+	if(col.id == 'zotero-items-column-title')
 	{
 		return this._getItemAtRow(row).ref.getImageSrc();
 	}
@@ -521,10 +521,9 @@ Zotero.ItemTreeView.prototype.sort = function()
 		column = this._treebox.columns.getFirstColumn();
 	}
 	var order = column.element.getAttribute('sortDirection') == 'ascending';
-	var columnField = column.id.substring(13, column.id.length-7);
+	var columnField = column.id.substring(20);
 	
-	if(column.id == 'zotero-items-typeIcon-column')
-	{
+	if(columnField == 'type') {
 		function columnSort(a,b)
 		{
 			var typeA = Zotero.getString('itemTypes.'+Zotero.ItemTypes.getName(a.getType()));
@@ -533,19 +532,28 @@ Zotero.ItemTreeView.prototype.sort = function()
 			return (typeA > typeB) ? -1 : (typeA < typeB) ? 1 : 0;
 		}
 	}
-	else if(column.id == 'zotero-items-numNotes-column')
-	{
+	else if (columnField == 'numChildren') {
 		function columnSort(a,b)
 		{
-			return b.numNotes() - a.numNotes();
+			return b.numChildren() - a.numChildren();
 		}
 	}
 	else
 	{
+		// Some fields (e.g. dates) need to be retrieved unformatted for sorting
+		switch (columnField) {
+			case 'date':
+				var unformatted = true;
+				break;
+				
+			default:
+				var unformatted = false;
+		}
+		
 		function columnSort(a,b)
 		{
-			var fieldA = a.getField(columnField);
-			var fieldB = b.getField(columnField);
+			var fieldA = a.getField(columnField, unformatted);
+			var fieldB = b.getField(columnField, unformatted);
 			
 			if(typeof fieldA == 'string')
 			{
@@ -860,8 +868,8 @@ Zotero.ItemTreeView.prototype.getSortField = function() {
 	if (!column) {
 		return false;
 	}
-	// zotero.items._________.column
-	return column.substring(13, column.length-7);
+	// zotero-items-column-_________
+	return column.substring(20);
 }
 
 
@@ -1176,9 +1184,9 @@ Zotero.ItemTreeView.TreeRow.prototype.isRegularItem = function()
 	return this.ref.isRegularItem();
 }
 
-Zotero.ItemTreeView.TreeRow.prototype.getField = function(field)
+Zotero.ItemTreeView.TreeRow.prototype.getField = function(field, unformatted)
 {
-	return this.ref.getField(field);
+	return this.ref.getField(field, unformatted);
 }
 
 Zotero.ItemTreeView.TreeRow.prototype.getType = function()

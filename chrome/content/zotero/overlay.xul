@@ -187,39 +187,49 @@
 						flex="1">
 						<treecols>
 							<treecol
-								id="zotero-items-title-column" primary="true"
+								id="zotero-items-column-title" primary="true"
 								label="&zotero.items.title_column;"
 								flex="4" persist="width ordinal hidden sortActive sortDirection"/>
 							<splitter class="tree-splitter"/>
 							<treecol
-								id="zotero-items-firstCreator-column"
+								id="zotero-items-column-firstCreator"
 								label="&zotero.items.creator_column;"
 								flex="1" persist="width ordinal hidden sortActive sortDirection"/>
 							<splitter class="tree-splitter"/>
 							<treecol
-								id="zotero-items-numChildren-column"
-								label="&zotero.items.numChildren_column;"
-								persist="width ordinal hidden sortActive sortDirection"/>
-							<splitter class="tree-splitter"/>
-							<treecol
-								id="zotero-items-typeIcon-column" hidden="true"
+								id="zotero-items-column-type" hidden="true"
 								label="&zotero.items.type_column;"
 								width="40" persist="width ordinal hidden sortActive sortDirection"/>
 							<splitter class="tree-splitter"/>
 							<treecol
-								id="zotero-items-rights-column" hidden="true"
+								id="zotero-items-column-date" hidden="true"
+								label="&zotero.items.date_column;"
+								flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+							<splitter class="tree-splitter"/>
+							<treecol
+								id="zotero-items-column-publisher" hidden="true"
+								label="&zotero.items.publisher_column;"
+								flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+							<splitter class="tree-splitter"/>
+							<treecol
+								id="zotero-items-column-rights" hidden="true"
 								label="&zotero.items.rights_column;"
 								flex="1" persist="width ordinal hidden sortActive sortDirection"/>
 							<splitter class="tree-splitter"/>
 							<treecol
-								id="zotero-items-dateAdded-column" hidden="true"
+								id="zotero-items-column-dateAdded" hidden="true"
 								label="&zotero.items.dateAdded_column;"
 								flex="1" persist="width ordinal hidden sortActive sortDirection"/>
 							<splitter class="tree-splitter"/>
 							<treecol
-								id="zotero-items-dateModified-column" hidden="true"
+								id="zotero-items-column-dateModified" hidden="true"
 								label="&zotero.items.dateModified_column;"
 								flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+							<splitter class="tree-splitter"/>
+							<treecol
+								id="zotero-items-column-numChildren"
+								label="&zotero.items.numChildren_column;"
+								persist="width ordinal hidden sortActive sortDirection"/>
 						</treecols>
 						<treechildren/>
 					</tree>
