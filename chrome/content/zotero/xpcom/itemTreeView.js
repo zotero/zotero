@@ -881,7 +881,7 @@ Zotero.ItemTreeView.prototype.getSortField = function() {
 		return false;
 	}
 	// zotero-items-column-_________
-	return column.substring(20);
+	return column.id.substring(20);
 }
 
 
