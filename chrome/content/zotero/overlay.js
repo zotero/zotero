@@ -37,6 +37,7 @@ var ZoteroPane = new function()
 	this.newItem = newItem;
 	this.newCollection = newCollection;
 	this.newSearch = newSearch;
+	this.openAdvancedSearchWindow = openAdvancedSearchWindow;
 	this.toggleTagSelector = toggleTagSelector;
 	this.updateTagSelectorSize = updateTagSelectorSize;
 	this.getTagSelection = getTagSelection;
@@ -285,8 +286,7 @@ var ZoteroPane = new function()
 		var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 								.getService(Components.interfaces.nsIPromptService);
 		
-		var untitled = Zotero.getString('pane.collections.untitled');
-		untitled = Zotero.DB.getNextName('collections', 'collectionName',
+		var untitled = Zotero.DB.getNextName('collections', 'collectionName',
 			Zotero.getString('pane.collections.untitled'));
 		
 		var newName = { value: untitled };
@@ -316,6 +316,14 @@ var ZoteroPane = new function()
 			Zotero.getString('pane.collections.untitled'));
 		var io = {dataIn: {search: s, name: untitled}, dataOut: null};
 		window.openDialog('chrome://zotero/content/searchDialog.xul','','chrome,modal',io);
+	}
+	
+	
+	function openAdvancedSearchWindow() {
+		var s = new Zotero.Search();
+		s.addCondition('title', 'contains', '');
+		var io = {dataIn: {search: s}, dataOut: null};
+		window.openDialog('chrome://zotero/content/advancedSearch.xul', '', 'chrome,dialog=no,centerscreen', io);
 	}
 	
 	
@@ -761,8 +769,9 @@ var ZoteroPane = new function()
 	 * Select item in current collection or, if not there, in Library
 	 *
 	 * If _inLibrary_, force switch to Library
+	 * If _expand_, open item if it's a container
 	 */
-	function selectItem(itemID, inLibrary)
+	function selectItem(itemID, inLibrary, expand)
 	{
 		if (!itemID) {
 			return;
@@ -773,10 +782,10 @@ var ZoteroPane = new function()
 				collectionsView.selection.select(0);
 			}
 			
-			var selected = itemsView.selectItem(itemID);
+			var selected = itemsView.selectItem(itemID, expand);
 			if (!selected) {
 				collectionsView.selection.select(0);
-				itemsView.selectItem(itemID);
+				itemsView.selectItem(itemID, expand);
 			}
 		}
 	}
@@ -822,6 +831,11 @@ var ZoteroPane = new function()
 	 */
 	function getSelectedItems(asIDs)
 	{
+		if (itemsView) {
+			return itemsView.getSelectedItems(asIDs);
+		}
+		return [];
+		
 		if(itemsView)
 		{
 			var items = new Array();

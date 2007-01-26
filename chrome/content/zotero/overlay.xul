@@ -161,6 +161,8 @@
 					<toolbarbutton id="zotero-tb-link-page" tooltiptext="&zotero.toolbar.attachment.weblink;" oncommand="ZoteroPane.addAttachmentFromPage(true)"/>
 					<toolbarbutton id="zotero-tb-snapshot-page" tooltiptext="&zotero.toolbar.attachment.snapshot;" oncommand="ZoteroPane.addAttachmentFromPage()"/>
 					<toolbarbutton id="zotero-tb-note-add" tooltiptext="&zotero.toolbar.note.standalone;" oncommand="ZoteroPane.newNote(event.shiftKey);"/>
+					<toolbarseparator/>
+					<toolbarbutton id="zotero-tb-advanced-search" tooltiptext="&zotero.toolbar.advancedSearch;" oncommand="ZoteroPane.openAdvancedSearchWindow()"/>
 					<spacer flex="1"/>
 					<label value="&zotero.toolbar.search.label;" control="zotero-tb-search"/>
 					<textbox id="zotero-tb-search" type="conditional-timed" timeout="250" command="cmd_zotero_search" dir="reverse"

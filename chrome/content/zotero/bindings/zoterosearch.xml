@@ -56,17 +56,9 @@
 								this.addCondition(conditions[id]);
 							}
 						}
-
 					]]>
 				</setter>
 			</property>
-			<method name="onAddClicked">
-				<body>
-					<![CDATA[
-						this.addCondition(this.search.getSearchCondition(this.search.addCondition("title","contains","")));
-					]]>
-				</body>
-			</method>
 			<method name="addCondition">
 				<parameter name="ref"/>
 				<body>
@@ -76,6 +68,11 @@
 						condition.setAttribute('flex','1');
 						
 						conditionsBox.appendChild(condition);
+						
+						// Default to an empty 'title' condition
+						if (!ref) {
+							ref = this.search.getSearchCondition(this.search.addCondition("title","contains",""))
+						}
 						
 						condition.initWithParentAndCondition(this, ref);
 						
@@ -137,21 +134,49 @@
 					]]>
 				</body>
 			</method>
-			<method name="save">
+			<!-- Gets values from all rows and updates the associated search conditions -->
+			<method name="updateSearch">
 				<body>
 					<![CDATA[
 						var conditionsBox = this.id('conditions');
 						
-						if(conditionsBox.hasChildNodes())
-							for(var i = 0, len=conditionsBox.childNodes.length; i < len; i++)
-							{
+						if (conditionsBox.hasChildNodes()) {
+							for(var i = 0, len=conditionsBox.childNodes.length; i < len; i++) {
 								conditionsBox.childNodes[i].updateSearch();
 							}
-						
+						}
+					]]>
+				</body>
+			</method>
+			<method name="save">
+				<body>
+					<![CDATA[
+						this.updateSearch();
 						return this.search.save();
 					]]>
 				</body>
 			</method>
+			
+			<method name="handleKeyPress">
+				<parameter name="event"/>
+				<body>
+				<![CDATA[
+					switch (event.keyCode) {
+						case event.DOM_VK_RETURN:
+						case event.DOM_VK_ENTER:
+							if (event.shiftKey) {
+								this.addCondition();
+							}
+							else {
+								this.doCommand();
+							}
+							break;
+					}
+				]]>
+				</body>
+			</method>
+			
+			
 			<method name="id">
 				<parameter name="id"/>
 				<body>
@@ -161,14 +186,13 @@
 				</body>
 			</method>
 		</implementation>
-		<handlers>
-		</handlers>
+		
 		<content>
-			<xul:vbox flex="1">
+			<xul:vbox flex="1" onkeypress="this.parentNode.handleKeyPress(event)">
 				<xul:groupbox xbl:inherits="flex">
 					<xul:caption align="center">
 						<xul:label value="&zotero.search.joinMode.prefix;"/>
-						<xul:menulist id="joinModeMenu" oncommand="this.parentNode.parentNode.parentNode.parentNode.updateJoinMode()">
+						<xul:menulist id="joinModeMenu" oncommand="this.parentNode.parentNode.parentNode.parentNode.updateJoinMode(); event.stopPropagation()">
 							<xul:menupopup>
 								<xul:menuitem label="&zotero.search.joinMode.any;" value="any"/>
 								<xul:menuitem label="&zotero.search.joinMode.all;" value="all" selected="true"/>
@@ -178,7 +202,7 @@
 					</xul:caption>
 					<xul:vbox id="conditions"/>
 				</xul:groupbox>
-				<xul:checkbox id="recursiveCheckbox" label="&zotero.search.recursive.label;" oncommand="this.parentNode.parentNode.updateRecursive()"/>
+				<xul:checkbox id="recursiveCheckbox" label="&zotero.search.recursive.label;" oncommand="this.parentNode.parentNode.updateRecursive(); event.stopPropagation()"/>
 			</xul:vbox>
 		</content>
 	</binding>
@@ -411,9 +435,12 @@
 						}
 						
 						this.onConditionSelected();
+						
+						this.id('conditionsmenu').focus();
 					]]>
 				</body>
 			</method>
+			<!-- Gets the value from the field and updates the associated search condition -->
 			<method name="updateSearch">
 				<body>
 					<![CDATA[
@@ -480,8 +507,8 @@
 					<![CDATA[
 						if (this.parent){
 							this.parent.removeCondition(this.conditionID);
+							window.sizeToContent()
 						}
-						window.sizeToContent()
 					]]>
 				</body>
 			</method>
@@ -489,9 +516,9 @@
 				<body>
 					<![CDATA[
 						if (this.parent){
-							this.parent.onAddClicked();
+							this.parent.addCondition();
+							window.sizeToContent();
 						}
-						window.sizeToContent()
 					]]>
 				</body>
 			</method>
@@ -520,10 +547,10 @@
 		</implementation>
 		<content>
 			<xul:hbox xbl:inherits="flex">
-				<xul:menulist id="conditionsmenu" oncommand="this.parentNode.parentNode.onConditionSelected();">
+				<xul:menulist id="conditionsmenu" oncommand="this.parentNode.parentNode.onConditionSelected(); event.stopPropagation()">
 					<xul:menupopup/>
 				</xul:menulist>
-				<xul:menulist id="operatorsmenu" oncommand="this.parentNode.parentNode.onOperatorSelected()">
+				<xul:menulist id="operatorsmenu" oncommand="this.parentNode.parentNode.onOperatorSelected(); event.stopPropagation()">
 					<xul:menupopup/>
 				</xul:menulist>
 				<xul:zoterosearchtextbox id="valuefield" flex="1"/>
@@ -531,8 +558,8 @@
 					<xul:menupopup/>
 				</xul:menulist>
 				<xul:zoterosearchagefield id="value-date-age" hidden="true" flex="1"/>
-				<xul:toolbarbutton id="remove" class="zotero-clicky" label="-" oncommand="this.parentNode.parentNode.onRemoveClicked();"/>
-				<xul:toolbarbutton id="add" class="zotero-clicky" label="+" oncommand="this.parentNode.parentNode.onAddClicked();"/>
+				<xul:toolbarbutton id="remove" class="zotero-clicky" label="-" oncommand="this.parentNode.parentNode.onRemoveClicked(event); event.stopPropagation()"/>
+				<xul:toolbarbutton id="add" class="zotero-clicky" label="+" oncommand="this.parentNode.parentNode.onAddClicked(event); event.stopPropagation()"/>
 			</xul:hbox>
 		</content>
 	</binding>

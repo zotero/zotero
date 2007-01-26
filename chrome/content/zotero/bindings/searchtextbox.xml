@@ -160,7 +160,7 @@
 		</implementation>
 		
 		<content>
-			<xul:textbox xbl:inherits="flex">
+			<xul:textbox id="textbox" xbl:inherits="flex">
 				<xul:popupset>
 					<xul:menupopup id="textbox-fulltext-menu">
 						<xul:menuitem type="radio" checked="true" label="&zotero.search.textModes.phrase;"/>

@@ -167,6 +167,20 @@ Zotero.Search.prototype.save = function(){
 }
 
 
+Zotero.Search.prototype.clone = function() {
+	var s = new Zotero.Search();
+	
+	var conditions = this.getSearchConditions();
+	
+	for each(var condition in conditions) {
+		s.addCondition(condition.condition, condition.operator, condition.value,
+			condition.required);
+	}
+	
+	return s;
+}
+
+
 Zotero.Search.prototype.addCondition = function(condition, operator, value, required){
 	if (!Zotero.SearchConditions.hasOperator(condition, operator)){
 		throw ("Invalid operator '" + operator + "' for condition " + condition);
@@ -228,9 +242,12 @@ Zotero.Search.prototype.updateCondition = function(searchConditionID, condition,
 		throw ("Invalid operator '" + operator + "' for condition " + condition);
 	}
 	
+	var [condition, mode] = Zotero.SearchConditions.parseCondition(condition);
+	
 	this._conditions[searchConditionID] = {
 		id: searchConditionID,
 		condition: condition,
+		mode: mode,
 		operator: operator,
 		value: value,
 		required: required
@@ -264,8 +281,20 @@ Zotero.Search.prototype.getSearchCondition = function(searchConditionID){
  * used in the search, indexed by searchConditionID
  */
 Zotero.Search.prototype.getSearchConditions = function(){
-	// TODO: make copy
-	return this._conditions;
+	var conditions = [];
+	var i = 1;
+	for each(var condition in this._conditions) {
+		conditions[i] = {
+			id: i,
+			condition: condition.condition,
+			mode: condition.mode,
+			operator: condition.operator,
+			value: condition.value,
+			required: condition.required
+		};
+		i++;
+	}
+	return conditions;
 }
 
 

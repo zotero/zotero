@@ -66,14 +66,7 @@ Zotero.ItemTreeView.prototype.setTree = function(treebox)
 		return;
 	this._treebox = treebox;
 	
-	if(!this.isSorted())
-	{
-		this.cycleHeader(this._treebox.columns.getNamedColumn('firstCreator'));
-	}
-	else
-	{
-		this.sort();
-	}
+	this.sort();
 	
 	//Zotero.debug('Running callbacks in itemTreeView.setTree()', 4);
 	this._runCallbacks();
@@ -86,6 +79,8 @@ Zotero.ItemTreeView.prototype.setTree = function(treebox)
  */
 Zotero.ItemTreeView.prototype.refresh = function()
 {
+	var oldRows = this.rowCount;
+	
 	this._dataItems = new Array();
 	this.rowCount = 0;
 	
@@ -103,6 +98,12 @@ Zotero.ItemTreeView.prototype.refresh = function()
 	}
 	
 	this._refreshHashMap();
+	
+	// Update the treebox's row count
+	var diff = this.rowCount - oldRows;
+	if (this._treebox && diff != 0) {
+		this._treebox.rowCountChanged(oldRows - 1, diff);
+	}
 }
 
 /*
@@ -175,8 +176,15 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids)
 	}
 	else if (action == 'modify')
 	{
+		// If saved search, just re-run search
+		if (this._itemGroup.isSearch())
+		{
+			this.refresh();
+			madeChanges = true;
+		}
+		
 		// If no quicksearch, process modifications manually
-		if (quicksearch.value == '')
+		else if (!quicksearch || quicksearch.value == '')
 		{
 			for(var i=0, len=ids.length; i<len; i++)
 			{
@@ -282,15 +290,8 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids)
 	
 	if(madeChanges)
 	{
-		if(this.isSorted())
-		{
-			this.sort();				//this also refreshes the hash map
-			this._treebox.invalidate();
-		}
-		else
-		{
-			this._refreshHashMap();
-		}
+		this.sort();				//this also refreshes the hash map
+		this._treebox.invalidate();
 		
 		// If adding and this is the active window, select the item
 		if(action == 'add' && ids.length===1 && activeWindow)
@@ -303,18 +304,12 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids)
 		else if (action == 'modify' && ids.length == 1 &&
 				savedSelection.length == 1 && savedSelection[0] == ids[0]) {
 			// If the item no longer matches the search term, clear the search
-			if (this._itemRowMap[ids[0]] == undefined) {
+			if (quicksearch && this._itemRowMap[ids[0]] == undefined) {
+				Zotero.debug('Selected item no longer matches quicksearch -- clearing');
 				quicksearch.value = '';
 				quicksearch.doCommand();
-				if (this.isSorted())
-				{
-					this.sort();
-					this._treebox.invalidate();
-				}
-				else
-				{
-					this._refreshHashMap();
-				}
+				this.sort();
+				this._treebox.invalidate();
 			}
 			
 			this.rememberSelection(savedSelection);
@@ -482,10 +477,8 @@ Zotero.ItemTreeView.prototype.toggleOpenState = function(row)
 
 Zotero.ItemTreeView.prototype.isSorted = function()
 {
-	for(var i=0, len=this._treebox.columns.count; i<len; i++)
-		if(this._treebox.columns.getColumnAt(i).element.getAttribute('sortActive'))
-			return true;
-	return false;
+	// We sort by the first column if none selected, so return true
+	return true;
 }
 
 Zotero.ItemTreeView.prototype.cycleHeader = function(column)
@@ -521,7 +514,6 @@ Zotero.ItemTreeView.prototype.sort = function()
 {
 	var column = this._treebox.columns.getSortedColumn();
 	if (!column){
-		// DEBUG: This may be necessary for 1.0.0b2.r1=>1.0.0b2.r2 transition
 		column = this._treebox.columns.getFirstColumn();
 	}
 	var order = column.element.getAttribute('sortDirection') == 'ascending';
@@ -624,30 +616,80 @@ Zotero.ItemTreeView.prototype.sort = function()
 /*
  *  Select an item
  */
-Zotero.ItemTreeView.prototype.selectItem = function(id)
+Zotero.ItemTreeView.prototype.selectItem = function(id, expand)
 {
 	var row = this._itemRowMap[id];
+	
+	// Get the row of the parent, if there is one
+	var parentRow = null;
+	var item = Zotero.Items.get(id);
+	var parent = item.getSource();
+	if (parent && this._itemRowMap[parent]) {
+		parentRow = this._itemRowMap[parent];
+	}
+	
 	// If row with id not visible, check to see if it's hidden under a parent
 	if(row == null)
 	{
-		var item = Zotero.Items.get(id);
-		var parent = item.getSource();
-		if (!parent)
+		if (!parent || !parentRow)
 		{
 			// No parent -- it's not here
 			return false;
 		}
-		this.toggleOpenState(this._itemRowMap[parent]); //opens the parent of the item
+		this.toggleOpenState(parentRow); //opens the parent of the item
 		row = this._itemRowMap[id];
 	}
 		
 	this.selection.select(row);
-	this._treebox.ensureRowIsVisible(row);
+	// If _expand_, open container
+	if (expand && this.isContainer(row) && !this.isContainerOpen(row)) {
+		this.toggleOpenState(row);
+	}
+	this.selection.select(row);
+	
+	// We aim for a row 5 below the target row, since ensureRowIsVisible() does
+	// the bare minimum to get the row in view
+	for (var v = row + 5; v>=row; v--) {
+		if (this._dataItems[v]) {
+			this._treebox.ensureRowIsVisible(v);
+			if (this._treebox.getFirstVisibleRow() <= row) {
+				break;
+			}
+		}
+	}
+	
+	// If the parent row isn't in view and we have enough room, make parent visible
+	if (parentRow !== null && this._treebox.getFirstVisibleRow() > parentRow) {
+		if ((row - parentRow) < this._treebox.getPageLength()) {
+			this._treebox.ensureRowIsVisible(parentRow);
+		}
+	}
 	
 	return true;
 }
 
-
+/*
+ * Return an array of Item objects for selected items
+ *
+ * If asIDs is true, return an array of itemIDs instead
+ */
+Zotero.ItemTreeView.prototype.getSelectedItems = function(asIDs)
+{
+	var items = [], start = {}, end = {};
+	for (var i=0, len = this.selection.getRangeCount(); i<len; i++)
+	{
+		this.selection.getRangeAt(i,start,end);
+		for (var j=start.value; j<=end.value; j++) {
+			if (asIDs) {
+				items.push(this._getItemAtRow(j).ref.getID());
+			}
+			else {
+				items.push(this._getItemAtRow(j).ref);
+			}
+		}
+	}
+	return items;
+}
 
 
 /*
@@ -714,10 +756,9 @@ Zotero.ItemTreeView.prototype.setFilter = function(type, data) {
 	}
 	var oldCount = this.rowCount;
 	this.refresh();
-	this._treebox.rowCountChanged(0,this.rowCount-oldCount);
 	
 	this.sort();
-
+	
 	this.rememberOpenState(savedOpenState);
 	this.rememberFirstRow(savedFirstRow);
 	this.rememberSelection(savedSelection);
@@ -878,7 +919,7 @@ Zotero.ItemTreeView.prototype.getSortedItems = function() {
 Zotero.ItemTreeView.prototype.getSortField = function() {
 	var column = this._treebox.columns.getSortedColumn()
 	if (!column) {
-		return false;
+		column = this._treebox.columns.getFirstColumn()
 	}
 	// zotero-items-column-_________
 	return column.id.substring(20);

@@ -15,3 +15,7 @@
 <!ENTITY zotero.search.date.units.days		"days">
 <!ENTITY zotero.search.date.units.months	"months">
 <!ENTITY zotero.search.date.units.years	"years">
+
+<!ENTITY zotero.search.search				"Search">
+<!ENTITY zotero.search.clear					"Clear">
+<!ENTITY zotero.search.saveSearch			"Save Search">

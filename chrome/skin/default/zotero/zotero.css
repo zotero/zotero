@@ -194,3 +194,20 @@ zoterosearchagefield textbox
 {
 	list-style-image: url('chrome://zotero/skin/treesource-collection.png');
 }
+
+
+#zotero-advanced-search-dialog
+{
+	padding: 8px 8px 14px;
+	height: 400px;
+}
+
+#zotero-advanced-search-dialog #zotero-search-buttons
+{
+	margin: 3px 0;
+}
+
+#zotero-advanced-search-dialog #zotero-items-tree
+{
+	min-height: 170px;
+}

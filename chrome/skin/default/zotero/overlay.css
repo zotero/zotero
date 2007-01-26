@@ -173,6 +173,11 @@
 	list-style-image: url('chrome://zotero/skin/treeitem-attachment-web-link.png');
 }
 
+#zotero-tb-advanced-search
+{
+	list-style-image: url('chrome://zotero/skin/toolbar-advanced-search.png');
+}
+
 #zotero-tb-fullscreen
 {
 	list-style-image: url('chrome://zotero/skin/toolbar-fullscreen-bottom.png');
