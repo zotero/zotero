@@ -20,8 +20,92 @@
     ***** END LICENSE BLOCK *****
 */
 
+/****Zotero_File_Exporter****
+ **
+ * A class to handle exporting of items, collections, or the entire library
+ **/
+
+/**
+ * Constructs a new Zotero_File_Exporter with defaults
+ **/
+var Zotero_File_Exporter = function() {
+	this.name = Zotero.getString("fileInterface.exportedItems");
+	this.collection = false;
+	this.items = false;
+}
+
+/**
+ * Performs the actual export operation
+ **/
+Zotero_File_Exporter.prototype.save = function() {
+	var translation = new Zotero.Translate("export");
+	var translators = translation.getTranslators();
+	
+	// present options dialog
+	var io = {translators:translators}
+	window.openDialog("chrome://zotero/content/exportOptions.xul",
+		"_blank", "chrome,modal,centerscreen", io);
+	if(!io.selectedTranslator) {
+		return false;
+	}
+	
+	const nsIFilePicker = Components.interfaces.nsIFilePicker;
+	var fp = Components.classes["@mozilla.org/filepicker;1"]
+			.createInstance(nsIFilePicker);
+	
+	fp.init(window, Zotero.getString("fileInterface.export"), nsIFilePicker.modeSave);
+	
+	// set file name and extension
+	if(io.selectedTranslator.displayOptions.exportFileData) {
+		// if the result will be a folder, don't append any extension or use
+		// filters
+		fp.defaultString = this.name;
+	} else {
+		// if the result will be a file, append an extension and use filters
+		fp.defaultString = this.name+"."+io.selectedTranslator.target;
+		fp.appendFilter(io.selectedTranslator.label, "*."+io.selectedTranslator.target);
+	}
+	
+	var rv = fp.show();
+	if (rv == nsIFilePicker.returnOK || rv == nsIFilePicker.returnReplace) {
+		if(this.collection) {
+			translation.setCollection(this.collection);
+		} else if(this.items) {
+			translation.setItems(this.items);
+		}
+		
+		translation.setLocation(fp.file);
+		translation.setTranslator(io.selectedTranslator);
+		translation.setHandler("done", this._exportDone);
+		Zotero.UnresponsiveScriptIndicator.disable();
+		Zotero_File_Interface.Progress.show(
+			Zotero.getString("fileInterface.itemsExported"),
+			function() {
+				translation.translate();
+		});
+	}
+	return false;
+}
+	
+/*
+ * Closes the items exported indicator
+ */
+Zotero_File_Exporter.prototype._exportDone = function(obj, worked) {
+	Zotero_File_Interface.Progress.close();
+	Zotero.UnresponsiveScriptIndicator.enable();
+	
+	if(!worked) {
+		window.alert(Zotero.getString("fileInterface.exportError"));
+	}
+}
+
+/****Zotero_File_Interface****
+ **
+ * A singleton to interface with ZoteroPane to provide export/bibliography
+ * capabilities
+ **/
 var Zotero_File_Interface = new function() {
-	var _unresponsiveScriptPreference, _importCollection, _notifyItem, _notifyCollection;
+	var _importCollection, _unlock;
 	
 	this.exportFile = exportFile;
 	this.exportCollection = exportCollection;
@@ -33,65 +117,36 @@ var Zotero_File_Interface = new function() {
 	/*
 	 * Creates Zotero.Translate instance and shows file picker for file export
 	 */
-	function exportFile(name, items) {
-		var translation = new Zotero.Translate("export");
-		var translators = translation.getTranslators();
-		
-		// present options dialog
-		var io = {translators:translators}
-		window.openDialog("chrome://zotero/content/exportOptions.xul",
-			"_blank", "chrome,modal,centerscreen", io);
-		if(!io.selectedTranslator) {
-			return false;
-		}
-		
-		const nsIFilePicker = Components.interfaces.nsIFilePicker;
-		var fp = Components.classes["@mozilla.org/filepicker;1"]
-				.createInstance(nsIFilePicker);
-		
-		fp.init(window, Zotero.getString("fileInterface.export"), nsIFilePicker.modeSave);
-		
-		// set file name and extension
-		name = (name ? name : Zotero.getString("pane.collections.library"));
-		if(io.selectedTranslator.displayOptions.exportFileData) {
-			// if the result will be a folder, don't append any extension or use
-			// filters
-			fp.defaultString = name;
-		} else {
-			// if the result will be a file, append an extension and use filters
-			fp.defaultString = name+"."+io.selectedTranslator.target;
-			fp.appendFilter(io.selectedTranslator.label, "*."+io.selectedTranslator.target);
-		}
-		
-		var rv = fp.show();
-		if (rv == nsIFilePicker.returnOK || rv == nsIFilePicker.returnReplace) {
-			if(items) {
-				translation.setItems(items);
-			}
-			translation.setLocation(fp.file);
-			translation.setTranslator(io.selectedTranslator);
-			translation.setHandler("done", _exportDone);
-			_disableUnresponsive();
-			Zotero_File_Interface.Progress.show(
-				Zotero.getString("fileInterface.itemsExported"),
-				function() {
-					translation.translate();
-			});
-		}
-		return false;
+	function exportFile() {
+		var exporter = new Zotero_File_Exporter();
+		exporter.name = Zotero.getString("pane.collections.library");
+		exporter.save();
 	}
 	
 	/*
 	 * exports a collection or saved search
 	 */
 	function exportCollection() {
-		var nameAndItems = _getSortedSelectedCollection();
-		if(nameAndItems) {
-			exportFile(nameAndItems[0], nameAndItems[1]);
-			return;
+		var exporter = new Zotero_File_Exporter();
+	
+		var collection = ZoteroPane.getSelectedCollection();
+		if(collection) {
+			exporter.name = collection.getName();
+			exporter.collection = collection;
+		} else {
+			// find sorted items
+			exporter.items = ZoteroPane.getSortedItems();
+			if(!exporter.items) throw ("No items to save");
+			
+			// find name
+			var searchRef = ZoteroPane.getSelectedSavedSearch();
+			if(searchRef) {
+				var search = new Zotero.Search();
+				search.load(searchRef['id']);
+				exporter.name = search.getName();
+			}
 		}
-		
-		throw ("No collection or saved search currently selected");
+		exporter.save();
 	}
 	
 	
@@ -99,49 +154,12 @@ var Zotero_File_Interface = new function() {
 	 * exports items
 	 */
 	function exportItems() {
-		var items = ZoteroPane.getSelectedItems();
-		if(!items || !items.length) throw("no items currently selected");
+		var exporter = new Zotero_File_Exporter();
 		
-		exportFile(Zotero.getString("fileInterface.exportedItems"), items);
-	}
-	
-	/*
-	 * gets selected collection or saved search sorted
-	 */
-	function _getSortedSelectedCollection() {
-		var name = false;
-		var items = false;
+		exporter.items = ZoteroPane.getSelectedItems();
+		if(!exporter.items || !exporter.items.length) throw("no items currently selected");
 		
-		var collection = ZoteroPane.getSelectedCollection();
-		if (collection) {
-			name = collection.getName();
-			items = Zotero.getItems(collection.getID());
-		} else {
-			var searchRef = ZoteroPane.getSelectedSavedSearch();
-			if (searchRef) {
-				var search = new Zotero.Search();
-				search.load(searchRef['id']);
-				name = search.getName();
-				items = Zotero.Items.get(search.search());
-			}
-		}
-		
-		if(items) {
-			return [name, items];
-		}
-		return false;
-	}
-	
-	/*
-	 * closes items exported indicator
-	 */
-	function _exportDone(obj, worked) {
-		Zotero_File_Interface.Progress.close();
-		_restoreUnresponsive();
-		
-		if(!worked) {
-			window.alert(Zotero.getString("fileInterface.exportError"));
-		}
+		exporter.save();
 	}
 	
 	/*
@@ -175,15 +193,15 @@ var Zotero_File_Interface = new function() {
 				translation.setTranslator(translators[0]);
 				translation.setHandler("collectionDone", _importCollectionDone);
 				translation.setHandler("done", _importDone);
-				_disableUnresponsive();
-				
-				// disable notifier
-				Zotero.Notifier.disable();
+				Zotero.UnresponsiveScriptIndicator.disable();
 				
 				// show progress indicator
 				Zotero_File_Interface.Progress.show(
 					Zotero.getString("fileInterface.itemsImported"),
 					function() {
+						// disable notifier
+						_unlock = Zotero.Notifier.begin(true);
+						// translate
 						translation.translate();
 				});
 			} else {
@@ -198,10 +216,7 @@ var Zotero_File_Interface = new function() {
 	 * collections
 	 */
 	function _importCollectionDone(obj, collection) {
-		Zotero.Notifier.enable();
-		Zotero.Notifier.trigger("add", "collection", collection.getID());
 		collection.changeParent(_importCollection.getID());
-		Zotero.Notifier.disable();
 	}
 	
 	/*
@@ -213,15 +228,11 @@ var Zotero_File_Interface = new function() {
 			_importCollection.addItem(itemID);
 		}
 		
-		// run notify
-		Zotero.Notifier.enable();
-		if(obj.newItems.length) {
-			Zotero.Notifier.trigger("add", "item", obj.newItems);
-			Zotero.Notifier.trigger("modify", "collection", _importCollection.getID());
-		}
+		// notify
+		Zotero.Notifier.commit(_unlock);
 		
 		Zotero_File_Interface.Progress.close();
-		_restoreUnresponsive();
+		Zotero.UnresponsiveScriptIndicator.enable();
 		
 		if(!worked) {
 			window.alert(Zotero.getString("fileInterface.importError"));
@@ -229,34 +240,30 @@ var Zotero_File_Interface = new function() {
 	}
 	
 	/*
-	 * disables the "unresponsive script" warning; necessary for import and
-	 * export, which can take quite a while to execute
-	 */
-	function _disableUnresponsive() {
-		var prefService = Components.classes["@mozilla.org/preferences-service;1"].
-		                  getService(Components.interfaces.nsIPrefBranch);
-		_unresponsiveScriptPreference = prefService.getIntPref("dom.max_chrome_script_run_time");
-		prefService.setIntPref("dom.max_chrome_script_run_time", 0);
-	}
-	 
-	/*
-	 * restores the "unresponsive script" warning
-	 */
-	function _restoreUnresponsive() {
-		var prefService = Components.classes["@mozilla.org/preferences-service;1"].
-		                  getService(Components.interfaces.nsIPrefBranch);
-		prefService.setIntPref("dom.max_chrome_script_run_time", _unresponsiveScriptPreference);
-	}
-	
-	/*
 	 * Creates a bibliography from a collection or saved search
 	 */
 	function bibliographyFromCollection() {
-		var nameAndItems = _getSortedSelectedCollection();
-		if(nameAndItems) {
-			_doBibliographyOptions(nameAndItems[0], nameAndItems[1]);
-			return;
+		// find sorted items
+		var items = Zotero.Items.get(ZoteroPane.getSortedItems());
+		if(!items) return;
+		
+		// find name
+		var name = false;
+		
+		var collection = ZoteroPane.getSelectedCollection();
+		if(collection) {
+			name = collection.getName();
+		} else {
+			var searchRef = ZoteroPane.getSelectedSavedSearch();
+			if(searchRef) {
+				var search = new Zotero.Search();
+				search.load(searchRef['id']);
+				name = search.getName();
+			}
 		}
+		
+		_doBibliographyOptions(name, items);
+		return;
 		
 		throw ("No collection or saved search currently selected");
 	}

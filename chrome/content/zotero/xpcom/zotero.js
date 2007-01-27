@@ -1252,6 +1252,9 @@ Zotero.Date = new function(){
 	}
 }
 
+/**
+ * Functions for creating and destroying hidden browser objects
+ **/
 Zotero.Browser = new function() {
 	this.createHiddenBrowser = createHiddenBrowser;
 	this.deleteHiddenBrowser = deleteHiddenBrowser;
@@ -1276,6 +1279,44 @@ Zotero.Browser = new function() {
 		myBrowser.parentNode.removeChild(myBrowser);
 		delete myBrowser;
 		Zotero.debug("deleted hidden browser");
+	}
+}
+
+/**
+ * Functions for disabling and enabling the unresponsive script indicator
+ **/
+Zotero.UnresponsiveScriptIndicator = new function() {
+	this.disable = disable;
+	this.enable = enable;
+	
+	// stores the state of the unresponsive script preference prior to disabling
+	var _unresponsiveScriptPreference, _isDisabled;
+	
+	/**
+	 * disables the "unresponsive script" warning; necessary for import and
+	 * export, which can take quite a while to execute
+	 **/
+	function disable() {
+		// don't do anything if already disabled
+		if(_isDisabled) return;
+		
+		var prefService = Components.classes["@mozilla.org/preferences-service;1"].
+		                  getService(Components.interfaces.nsIPrefBranch);
+		_unresponsiveScriptPreference = prefService.getIntPref("dom.max_chrome_script_run_time");
+		prefService.setIntPref("dom.max_chrome_script_run_time", 0);
+		
+		_isDisabled = true;
+	}
+	 
+	/**
+	 * restores the "unresponsive script" warning
+	 **/
+	function enable() {
+		var prefService = Components.classes["@mozilla.org/preferences-service;1"].
+		                  getService(Components.interfaces.nsIPrefBranch);
+		prefService.setIntPref("dom.max_chrome_script_run_time", _unresponsiveScriptPreference);
+		
+		_isDisabled = false;
 	}
 }
 

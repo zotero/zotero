@@ -1,4 +1,4 @@
--- 167
+-- 168
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-01-24 01:35:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-01-26 20:43:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b3.r1', '', '2006-12-15 03:40:00', 1, 100, 4, 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -4798,7 +4798,7 @@ REPLACE INTO translators VALUES ('cb48083-4d9-4ed-ac95-2e93dceea0ec', '1.0.0b3.r
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('f8765470-5ace-4a31-b4bd-4327b960ccd', '1.0.0b3.r1', '', '2006-12-16 01:02:00', 1, 100, 4, 'SpringerLink', 'Simon Kornblith', '^http://www\.springerlink\.com/content/', 
+REPLACE INTO translators VALUES ('f8765470-5ace-4a31-b4bd-4327b960ccd', '1.0.0b3.r1', '', '2007-01-26 20:43:00', 1, 100, 4, 'SpringerLink', 'Simon Kornblith', '^http://www\.springerlink\.com/content/', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -4809,7 +4809,7 @@ REPLACE INTO translators VALUES ('f8765470-5ace-4a31-b4bd-4327b960ccd', '1.0.0b3
 		return "multiple";
 	} else if(doc.title == "SpringerLink - Book Chapter") {
 		return "bookSection";
-	} else if(doc.evaluate(''//a[@id="_ctl0_PageSidebar__ctl1_Sidebarplaceholder1__ctl1_ExportRisLink"]'',
+	} else if(doc.evaluate(''//a[text() = "RIS"]'',
 	          doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "journalArticle";
 	}
@@ -4881,7 +4881,7 @@ REPLACE INTO translators VALUES ('f8765470-5ace-4a31-b4bd-4327b960ccd', '1.0.0b3
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('6614a99-479a-4524-8e30-686e4d66663e', '1.0.0b3.r1', '', '2006-12-16 04:13:00', 1, 100, 4, 'Nature', 'Simon Kornblith', '^http://www\.nature\.com/(?:[^/]+/journal/v[^/]+/n[^/]+/(?:(?:full|abs)/.+\.html|index.html)|search/executeSearch)', 
+REPLACE INTO translators VALUES ('6614a99-479a-4524-8e30-686e4d66663e', '1.0.0b3.r1', '', '2007-01-26 20:43:00', 1, 100, 4, 'Nature', 'Simon Kornblith', '^http://www\.nature\.com/(?:[^/]+/journal/v[^/]+/n[^/]+/(?:(?:full|abs)/.+\.html|index.html)|search/executeSearch)', 
 'function detectWeb(doc, url) {
 	var articleRe = /(https?:\/\/[^\/]+\/[^\/]+\/journal\/v[^\/]+\/n[^\/]+\/)(full|abs)(\/.+\.)html/;
 	
@@ -4911,7 +4911,7 @@ REPLACE INTO translators VALUES ('6614a99-479a-4524-8e30-686e4d66663e', '1.0.0b3
 		if (prefix == ''x'') return namespace; else return null;
 	} : null;
 	
-	var articleRe = /(https?:\/\/[^\/]+\/[^\/]+\/journal\/v[^\/]+\/n[^\/]+\/)(full|abs)(\/.+\.)html/;
+	var articleRe = /(https?:\/\/[^\/]+\/[^\/]+\/journal\/v[^\/]+\/n[^\/]+\/)(full|abs)(\/.+)\.html/;
 	var m = articleRe.exec(url);
 	
 	if(!m) {
@@ -4943,7 +4943,10 @@ REPLACE INTO translators VALUES ('6614a99-479a-4524-8e30-686e4d66663e', '1.0.0b3
 	
 	for each(var item in urls) {
 		var m = articleRe.exec(item);
-		RIS.push(m[1]+"ris"+m[3]+"ris");
+		if(m[3][m[3].length-2] == "_") {
+			m[3] = m[3].substr(0, m[3].length-2);
+		}
+		RIS.push(m[1]+"ris"+m[3]+".ris");
 		regexps.push(m);
 	}
 	
@@ -4958,7 +4961,7 @@ REPLACE INTO translators VALUES ('6614a99-479a-4524-8e30-686e4d66663e', '1.0.0b3
 			var m = regexps.shift();
 			item.attachments = [
 				{url:m[0], title:"Nature Snapshot", mimeType:"text/html"},
-				{url:m[1]+"pdf"+m[3]+"pdf", title:"Nature Full Text PDF", mimeType:"application/pdf"}
+				{url:m[1]+"pdf"+m[3]+".pdf", title:"Nature Full Text PDF", mimeType:"application/pdf"}
 			]
 			
 			item.notes = new Array();
@@ -7769,7 +7772,7 @@ REPLACE INTO translators VALUES ('6e372642-ed9d-4934-b5d1-c11ac758ebb7', '1.0.0b
 	}
 }');
 
-REPLACE INTO translators VALUES ('5e3ad958-ac79-463d-812b-a86a9235c28f', '1.0.0b3.r1', '', '2006-12-15 14:39:00', 1, 100, 1, 'RDF', 'Simon Kornblith', 'rdf',
+REPLACE INTO translators VALUES ('5e3ad958-ac79-463d-812b-a86a9235c28f', '1.0.0b3.r1', '', '2007-01-26 20:43:00', 1, 100, 1, 'RDF', 'Simon Kornblith', 'rdf',
 'Zotero.configure("dataMode", "rdf");
 
 function detectImport() {
@@ -8267,7 +8270,7 @@ function importItem(newItem, node, type) {
 	for each(var relation in relations) {			
 		var type = Zotero.RDF.getTargets(relation, rdf+"type");
 		if(Zotero.RDF.getResourceURI(type[0]) == n.fs+"Attachment") {
-			var attachment = new Object();
+			var attachment = new Zotero.Item();
 			newItem.attachments.push(attachment);
 			importItem(attachment, relation, n.fs+"Attachment");
 		}
@@ -8304,7 +8307,6 @@ function doImport() {
 		// figure out if this is a part of another resource, or a linked
 		// attachment
 		if(Zotero.RDF.getSources(node, n.dcterms+"isPartOf") ||
-		   Zotero.RDF.getSources(node, n.dcterms+"hasPart") ||
 		   Zotero.RDF.getSources(node, n.bib+"presentedAt") ||
 		   Zotero.RDF.getSources(node, n.link+"link")) {
 			continue;
@@ -8318,7 +8320,7 @@ function doImport() {
 			// skip if this is not an independent attachment,
 			if((type == n.fs+"Attachment" || type == n.bib+"Memo") && isPart(node)) {
 				continue;
-			} else if(type == n.bib+"Collection") {
+			} else if(type == n.bib+"Collection" || type == n.fs+"Collection") {
 				// skip collections until all the items are done
 				collections.push(node);
 				continue;

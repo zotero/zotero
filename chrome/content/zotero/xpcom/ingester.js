@@ -567,6 +567,8 @@ Zotero.OpenURL = new function() {
 					item.tags.push(value);
 				} else if(key == "rft.type") {
 					if(Zotero.ItemTypes.getID(value)) item.itemType = value;
+				} else if(key == "rft.source") {
+					item.publicationTitle = value;
 				}
 			}
 		}

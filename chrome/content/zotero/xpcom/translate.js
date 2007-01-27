@@ -233,10 +233,17 @@ Zotero.Translate.prototype.setSearch = function(search) {
 }
 
 /*
- * sets the item to be used for export
+ * sets the items to be used for export
  */
 Zotero.Translate.prototype.setItems = function(items) {
 	this.items = items;
+}
+
+/*
+ * sets the collection to be used for export (overrides setItems)
+ */
+Zotero.Translate.prototype.setCollection = function(collection) {
+	this.collection = collection;
 }
 
 /*
@@ -356,12 +363,6 @@ Zotero.Translate.prototype.setTranslator = function(translator) {
  *   passed: an associative array in the form id => text
  *   returns: a numerically indexed array of ids, as extracted from the passed
  *            string
- *
- * itemCount
- *   valid: export
- *   called: when the export 
- *   passed: the number of items to be processed
- *   returns: N/A
  *
  * itemDone
  *   valid: import, web, search
@@ -932,17 +933,6 @@ Zotero.Translate.prototype._translationComplete = function(returnValue, error) {
 			// close open streams
 			this._closeStreams();
 			
-			if(Zotero.Notifier.isEnabled()) {
-				// notify itemTreeView about updates
-				if(this.newItems.length) {
-					Zotero.Notifier.trigger("add", "item", this.newItems);
-				}
-				// notify collectionTreeView about updates
-				if(this.newCollections && this.newCollections.length) {
-					Zotero.Notifier.trigger("add", "collection", this.newCollections);
-				}
-			}
-			
 			if(!returnValue) {
 				var errorString = this._generateErrorString(error);
 				this._debug("Translation using "+this.translator[0].label+" failed: \n"+errorString);
@@ -1012,9 +1002,11 @@ Zotero.Translate.prototype._closeStreams = function() {
 		}
 		
 		try {
-			var rdfService = Components.classes["@mozilla.org/rdf/rdf-service;1"].
-							 getService(Components.interfaces.nsIRDFService);
-			rdfService.UnregisterDataSource(this._rdf.dataSource);
+			if(this._rdf.dataSource) {
+				var rdfService = Components.classes["@mozilla.org/rdf/rdf-service;1"].
+								 getService(Components.interfaces.nsIRDFService);
+				rdfService.UnregisterDataSource(this._rdf.dataSource);
+			}
 		} catch(e) {}
 		
 		delete this._rdf.dataSource;
@@ -1094,265 +1086,243 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 		return;
 	}
 	
-	if(!attachedTo) {
-		var notifierStatus = Zotero.Notifier.isEnabled();
-		if(notifierStatus) {
-			Zotero.Notifier.disable();
-		}
-	}
+	// Get typeID, defaulting to "webpage"
+	var type = (item.itemType ? item.itemType : "webpage");
 	
-	try {	// make sure notifier gets turned back on when done
-		// Get typeID, defaulting to "webpage"
-		var type = (item.itemType ? item.itemType : "webpage");
+	if(type == "note") {	// handle notes differently
+		var myID = Zotero.Notes.add(item.note);
+		// re-retrieve the item
+		var newItem = Zotero.Items.get(myID);
+	} else {
+		if(!item.title && this.type == "web") {
+			throw("item has no title");
+		}
 		
-		if(type == "note") {	// handle notes differently
-			var myID = Zotero.Notes.add(item.note);
-			// re-retrieve the item
-			var newItem = Zotero.Items.get(myID);
-		} else {
-			if(!item.title && this.type == "web") {
-				throw("item has no title");
+		// if item was accessed through a proxy, ensure that the proxy
+		// address remains in the accessed version
+		if(this.locationIsProxied && item.url) {
+			item.url = Zotero.Ingester.ProxyMonitor.properToProxy(item.url);
+		}
+		
+		// create new item
+		if(type == "attachment") {
+			if(this.type != "import") {
+				Zotero.debug("discarding standalone attachment");
+				return;
 			}
 			
-			// if item was accessed through a proxy, ensure that the proxy
-			// address remains in the accessed version
-			if(this.locationIsProxied && item.url) {
-				item.url = Zotero.Ingester.ProxyMonitor.properToProxy(item.url);
-			}
+			Zotero.debug("adding attachment");
 			
-			// create new item
-			if(type == "attachment") {
-				if(this.type != "import") {
-					Zotero.debug("discarding standalone attachment");
-					return;
-				}
-				
-				Zotero.debug("adding attachment");
-				
-				if(!item.path) {
-					// create from URL
-					if(item.url) {
-						var myID = Zotero.Attachments.linkFromURL(item.url, attachedTo,
-								(item.mimeType ? item.mimeType : undefined),
-								(item.title ? item.title : undefined));
-						Zotero.debug("created attachment; id is "+myID);
-						if(!myID) {
-							// if we didn't get an ID, don't continue adding
-							// notes, because we can't without knowing the ID
-							return;
-						}
-						var newItem = Zotero.Items.get(myID);
-					} else {
-						Zotero.debug("not adding attachment: no path or url specified");
+			if(!item.path) {
+				// create from URL
+				if(item.url) {
+					var myID = Zotero.Attachments.linkFromURL(item.url, attachedTo,
+							(item.mimeType ? item.mimeType : undefined),
+							(item.title ? item.title : undefined));
+					Zotero.debug("created attachment; id is "+myID);
+					if(!myID) {
+						// if we didn't get an ID, don't continue adding
+						// notes, because we can't without knowing the ID
 						return;
 					}
+					var newItem = Zotero.Items.get(myID);
 				} else {
-					// generate nsIFile
-					var IOService = Components.classes["@mozilla.org/network/io-service;1"].
-									getService(Components.interfaces.nsIIOService);
-					var uri = IOService.newURI(item.path, "", null);
-					var file = uri.QueryInterface(Components.interfaces.nsIFileURL).file;
-					
-					if(item.url) {
-						// import from nsIFile
-						var myID = Zotero.Attachments.importSnapshotFromFile(file,
-							item.url, item.title, item.mimeType,
-							(item.charset ? item.charset : null), attachedTo);
-						var newItem = Zotero.Items.get(myID);
+					Zotero.debug("not adding attachment: no path or url specified");
+					return;
+				}
+			} else {
+				// generate nsIFile
+				var IOService = Components.classes["@mozilla.org/network/io-service;1"].
+								getService(Components.interfaces.nsIIOService);
+				var uri = IOService.newURI(item.path, "", null);
+				var file = uri.QueryInterface(Components.interfaces.nsIFileURL).file;
+				
+				if(item.url) {
+					// import from nsIFile
+					var myID = Zotero.Attachments.importSnapshotFromFile(file,
+						item.url, item.title, item.mimeType,
+						(item.charset ? item.charset : null), attachedTo);
+					var newItem = Zotero.Items.get(myID);
+				} else {
+					// import from nsIFile
+					var myID = Zotero.Attachments.importFromFile(file, attachedTo);
+					// get attachment item
+					var newItem = Zotero.Items.get(myID);
+				}
+			}
+			
+			var typeID = Zotero.ItemTypes.getID("attachment");
+			
+			// add note if necessary
+			if(item.note) {
+				newItem.updateNote(item.note);
+			}
+		} else {
+			var typeID = Zotero.ItemTypes.getID(type);
+			var newItem = Zotero.Items.getNewItemByType(typeID);
+		}
+		
+		// makes looping through easier
+		item.itemType = item.complete = undefined;
+		
+		// automatically set access date if URL is set
+		if(item.url && !item.accessDate && this.type == "web") {
+			item.accessDate = "CURRENT_TIMESTAMP";
+		}
+		
+		var fieldID, data;
+		for(var field in item) {
+			// loop through item fields
+			data = item[field];
+			
+			if(data) {						// if field has content
+				if(field == "creators") {		// creators are a special case
+					for(var j in data) {
+						var creatorType = 1;
+						// try to assign correct creator type
+						if(data[j].creatorType) {
+							try {
+								var creatorType = Zotero.CreatorTypes.getID(data[j].creatorType);
+							} catch(e) {
+								Zotero.debug("invalid creator type "+data[j].creatorType+" for creator index "+j);
+							}
+						}
+						
+						newItem.setCreator(j, data[j].firstName, data[j].lastName, creatorType);
+					}
+				} else if(field == "title") {	// skip checks for title
+					newItem.setField(field, data);
+				} else if(field == "seeAlso") {
+					newItem.translateSeeAlso = data;
+				} else if(field != "note" && field != "notes" && field != "itemID" &&
+						  field != "attachments" && field != "tags" &&
+						  (fieldID = Zotero.ItemFields.getID(field))) {
+											// if field is in db
+					if(Zotero.ItemFields.isValidForType(fieldID, typeID)) {
+											// if field is valid for this type
+						// add field
+						newItem.setField(field, data);
 					} else {
-						// import from nsIFile
-						var myID = Zotero.Attachments.importFromFile(file, attachedTo);
-						// get attachment item
-						var newItem = Zotero.Items.get(myID);
-					}
-				}
-				
-				var typeID = Zotero.ItemTypes.getID("attachment");
-				
-				// add note if necessary
-				if(item.note) {
-					newItem.updateNote(item.note);
-				}
-			} else {
-				var typeID = Zotero.ItemTypes.getID(type);
-				var newItem = Zotero.Items.getNewItemByType(typeID);
-			}
-			
-			// makes looping through easier
-			item.itemType = item.complete = undefined;
-			
-			// automatically set access date if URL is set
-			if(item.url && !item.accessDate && this.type == "web") {
-				item.accessDate = "CURRENT_TIMESTAMP";
-			}
-			
-			var fieldID, field;
-			for(var i in item) {
-				// loop through item fields
-				data = item[i];
-				
-				if(data) {						// if field has content
-					if(i == "creators") {		// creators are a special case
-						for(var j in data) {
-							var creatorType = 1;
-							// try to assign correct creator type
-							if(data[j].creatorType) {
-								try {
-									var creatorType = Zotero.CreatorTypes.getID(data[j].creatorType);
-								} catch(e) {
-									Zotero.debug("invalid creator type "+data[j].creatorType+" for creator index "+j);
-								}
-							}
-							
-							newItem.setCreator(j, data[j].firstName, data[j].lastName, creatorType);
-						}
-					} else if(i == "title") {	// skip checks for title
-						newItem.setField(i, data);
-					} else if(i == "seeAlso") {
-						newItem.translateSeeAlso = data;
-					} else if(i != "note" && i != "notes" && i != "itemID" &&
-							  i != "attachments" && i != "tags" &&
-							  (fieldID = Zotero.ItemFields.getID(i))) {
-												// if field is in db
-						if(Zotero.ItemFields.isValidForType(fieldID, typeID)) {
-												// if field is valid for this type
-							// add field
-							newItem.setField(i, data);
-						} else {
-							Zotero.debug("discarded field "+i+" for item: field not valid for type "+type);
-						}
+						Zotero.debug("discarded field "+field+" for item: field not valid for type "+type);
 					}
 				}
 			}
-			
-			// save item
-			if(myID) {
-				newItem.save();
-			} else {
-				var myID = newItem.save();
-				if(myID == true || !myID) {
-					myID = newItem.getID();
-				}
+		}
+		
+		// save item
+		if(myID) {
+			newItem.save();
+		} else {
+			var myID = newItem.save();
+			if(myID == true || !myID) {
+				myID = newItem.getID();
 			}
-			
-			// handle notes
-			if(item.notes) {
-				for each(var note in item.notes) {
-					var noteID = Zotero.Notes.add(note.note, myID);
-					
-					// handle see also
-					var myNote = Zotero.Items.get(noteID);
-					this._itemTagsAndSeeAlso(note, myNote);
-				}
+		}
+		
+		// handle notes
+		if(item.notes) {
+			for each(var note in item.notes) {
+				var noteID = Zotero.Notes.add(note.note, myID);
+				
+				// handle see also
+				var myNote = Zotero.Items.get(noteID);
+				this._itemTagsAndSeeAlso(note, myNote);
 			}
-			
-			// handle abstract
-			if(item.abstractNote) {
-				Zotero.Notes.add(item.abstractNote, myID, true);
-			}
-			
-			// handle attachments
-			if(item.attachments && Zotero.Prefs.get("automaticSnapshots")) {
-				Zotero.debug("HANDLING ATTACHMENTS");
-				for each(var attachment in item.attachments) {
-					if(this.type == "web") {
-						if(!attachment.url && !attachment.document) {
-							Zotero.debug("not adding attachment: no URL specified");
-						} else {
-							if(attachment.document
-							|| (attachment.mimeType && attachment.mimeType == "text/html")
-							|| Zotero.Prefs.get("downloadAssociatedFiles")) {
-								if(attachment.document) {
-									Zotero.Attachments.importFromDocument(attachment.document, myID, attachment.title);
-								} else {
-									Zotero.debug("GOT ATTACHMENT");
-									Zotero.debug(attachment);
-									
-									var mimeType = null;
-									var title = null;
-									
-									if(attachment.mimeType) {
-										// first, try to extract mime type from mimeType attribute
-										mimeType = attachment.mimeType;
-									} else if(attachment.document && attachment.document.contentType) {
-										// if that fails, use document if possible
-										mimeType = attachment.document.contentType
-									}
-									
-									// same procedure for title as mime type
-									if(attachment.title) {
-										title = attachment.title;
-									} else if(attachment.document && attachment.document.title) {
-										title = attachment.document.title;
-									}
-									
-									if(this.locationIsProxied) {
-										attachment.url = Zotero.Ingester.ProxyMonitor.properToProxy(attachment.url);
-									}
-									
-									Zotero.Attachments.importFromURL(attachment.url, myID, title);
-								}
-							}
-							// links no longer exist, so just don't save them
-							/*if(attachment.document) {
-								attachmentID = Zotero.Attachments.linkFromURL(attachment.document.location.href, myID,
-										(attachment.mimeType ? attachment.mimeType : attachment.document.contentType),
-										(attachment.title ? attachment.title : attachment.document.title));
+		}
+		
+		// handle abstract
+		if(item.abstractNote) {
+			Zotero.Notes.add(item.abstractNote, myID, true);
+		}
+		
+		// handle attachments
+		if(item.attachments && Zotero.Prefs.get("automaticSnapshots")) {
+			Zotero.debug("HANDLING ATTACHMENTS");
+			for each(var attachment in item.attachments) {
+				if(this.type == "web") {
+					if(!attachment.url && !attachment.document) {
+						Zotero.debug("not adding attachment: no URL specified");
+					} else {
+						if(attachment.document
+						|| (attachment.mimeType && attachment.mimeType == "text/html")
+						|| Zotero.Prefs.get("downloadAssociatedFiles")) {
+							if(attachment.document) {
+								Zotero.Attachments.importFromDocument(attachment.document, myID, attachment.title);
 							} else {
-								if(!attachment.mimeType || attachment.title) {
-									Zotero.debug("notice: either mimeType or title is missing; attaching file will be slower");
+								Zotero.debug("GOT ATTACHMENT");
+								Zotero.debug(attachment);
+								
+								var mimeType = null;
+								var title = null;
+								
+								if(attachment.mimeType) {
+									// first, try to extract mime type from mimeType attribute
+									mimeType = attachment.mimeType;
+								} else if(attachment.document && attachment.document.contentType) {
+									// if that fails, use document if possible
+									mimeType = attachment.document.contentType
 								}
 								
-								attachmentID = Zotero.Attachments.linkFromURL(attachment.url, myID,
-										(attachment.mimeType ? attachment.mimeType : undefined),
-										(attachment.title ? attachment.title : undefined));
-							}*/
+								// same procedure for title as mime type
+								if(attachment.title) {
+									title = attachment.title;
+								} else if(attachment.document && attachment.document.title) {
+									title = attachment.document.title;
+								}
+								
+								if(this.locationIsProxied) {
+									attachment.url = Zotero.Ingester.ProxyMonitor.properToProxy(attachment.url);
+								}
+								
+								Zotero.Attachments.importFromURL(attachment.url, myID, title);
+							}
 						}
-					} else if(this.type == "import") {
-						// create new attachments attached here
-						this._itemDone(attachment, myID);
+						// links no longer exist, so just don't save them
+						/*if(attachment.document) {
+							attachmentID = Zotero.Attachments.linkFromURL(attachment.document.location.href, myID,
+									(attachment.mimeType ? attachment.mimeType : attachment.document.contentType),
+									(attachment.title ? attachment.title : attachment.document.title));
+						} else {
+							if(!attachment.mimeType || attachment.title) {
+								Zotero.debug("notice: either mimeType or title is missing; attaching file will be slower");
+							}
+							
+							attachmentID = Zotero.Attachments.linkFromURL(attachment.url, myID,
+									(attachment.mimeType ? attachment.mimeType : undefined),
+									(attachment.title ? attachment.title : undefined));
+						}*/
 					}
+				} else if(this.type == "import") {
+					// create new attachments attached here
+					this._itemDone(attachment, myID);
 				}
 			}
 		}
-		
-		if(item.itemID) {
-			this._IDMap[item.itemID] = myID;
-		}
-		if(!attachedTo) {
-			this.newItems.push(myID);
-		}
-		
-		// handle see also
-		if(item.seeAlso) {
-			for each(var seeAlso in item.seeAlso) {
-				if(this._IDMap[seeAlso]) {
-					newItem.addSeeAlso(this._IDMap[seeAlso]);
-				}
-			}
-		}
-		
-		if(item.tags) {
-			for each(var tag in item.tags) {
-				newItem.addTag(tag);
-			}
-		}
-		
-		delete item;
-	} catch(e) {
-		if(notifierStatus) {
-			Zotero.Notifier.enable();
-		}
-		throw(e);
 	}
 	
-	// only re-enable if notifier was enabled at the beginning of scraping
-	if(!attachedTo) {
-		if(notifierStatus) {
-			Zotero.Notifier.enable();
-		}
-		this._runHandler("itemDone", newItem);
+	if(item.itemID) {
+		this._IDMap[item.itemID] = myID;
 	}
+	if(!attachedTo) {
+		this.newItems.push(myID);
+	}
+	
+	// handle see also
+	if(item.seeAlso) {
+		for each(var seeAlso in item.seeAlso) {
+			if(this._IDMap[seeAlso]) {
+				newItem.addSeeAlso(this._IDMap[seeAlso]);
+			}
+		}
+	}
+	
+	if(item.tags) {
+		for each(var tag in item.tags) {
+			newItem.addTag(tag);
+		}
+	}
+	
+	delete item;
 }
 
 /*
@@ -1708,19 +1678,32 @@ Zotero.Translate.prototype._importDefuseBOM = function() {
  */
 Zotero.Translate.prototype._export = function() {
 	
-	// get items
 	if(this.items) {
+		// if just items, get them and don't worry about collection logic
 		this._itemsLeft = this.items;
+	} else if(this.collection) {
+			Zotero.debug("using collection");
+			Zotero.debug(this.collection);
+			
+		// get items in this collection
+		this._itemsLeft = Zotero.getItems(this.collection.getID());
+		
+		if(this._configOptions.getCollections) {
+			// get child collections
+			this._collectionsLeft = Zotero.getCollections(this.collection.getID(), true);
+			// get items in child collections
+			for each(var collection in this._collectionsLeft) {
+				this._itemsLeft = this._itemsLeft.concat(Zotero.getItems(collection.getID()));
+			}
+		}
 	} else {
+		// get all items
 		this._itemsLeft = Zotero.getItems();
-	}
-	
-	// run handler for items available
-	this._runHandler("itemCount", this._itemsLeft.length);
-	
-	// get collections, if requested
-	if(this._configOptions.getCollections && !this.items) {
-		this._collectionsLeft = Zotero.getCollections();
+		
+		if(this._configOptions.getCollections) {
+			// get all collections
+			this._collectionsLeft = Zotero.getCollections();
+		}
 	}
 	
 	Zotero.debug(this._displayOptions);

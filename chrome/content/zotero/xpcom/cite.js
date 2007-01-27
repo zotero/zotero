@@ -949,8 +949,8 @@ Zotero.CSL.prototype._compareItem = function(a, b, opt) {
 		this._getFieldValue(sortElement.name, sortElement, b,
 		                                 formattedStringB, this._bib);
 		
-		var aValue = formattedStringA.get();
-		var bValue = formattedStringB.get();
+		var aValue = formattedStringA.get().toLowerCase();
+		var bValue = formattedStringB.get().toLowerCase();
 		
 		if(bValue > aValue) {
 			return -1;
