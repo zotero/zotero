@@ -453,7 +453,7 @@ Zotero.CSL.prototype.createCitation = function(citation, format) {
 	if(this._cit.format) {
 		// add citation prefix or suffix
 		if(this._cit.format.prefix) {
-			string.string = string.string + this._cit.format.prefix;
+			string.string = this._cit.format.prefix + string.string;
 		}
 		if(this._cit.format.suffix) {
 			string.append(this._cit.format.suffix);
