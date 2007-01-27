@@ -1481,7 +1481,7 @@ Zotero.CSL.FormattedString.prototype.append = function(string, element, dontDeli
 			for(i=0; i<string.length; i++) {
 				var charCode = string.charCodeAt(i);
 				if(charCode > 127) {			// encode unicode
-					newString += "\\uc0\\u"+charCode.toString()+" ";
+					newString += "\\uc0\\u"+charCode.toString()+"  ";
 				} else if(charCode == 92) {		// double backslashes
 					newString += "\\\\";
 				} else {
