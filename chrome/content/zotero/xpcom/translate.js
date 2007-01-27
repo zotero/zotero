@@ -1318,9 +1318,24 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 	
 	if(item.tags) {
 		for each(var tag in item.tags) {
-			newItem.addTag(tag);
+			if(typeof(tag) == "string") {
+				// accept strings in tag array as automatic tags, or, if
+				// importing, as non-automatic tags
+				newItem.addTag(tag, (this.type == "import" ? 0 : 1));
+			} else if(typeof(tag) == "object") {
+				// also accept objects
+				if(tag.tag) {
+					var type = (tag.isAutomatic ? 1 : 0);
+					newItem.addTag(tag.tag, type);
+				} else {
+					Zotero.debug("ignoring blank tag: ");
+					Zotero.debug(tag);
+				}
+			}
 		}
 	}
+	
+	if(!attachedTo) this._runHandler("itemDone", newItem);
 	
 	delete item;
 }

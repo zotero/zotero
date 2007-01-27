@@ -1,4 +1,4 @@
--- 168
+-- 169
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-01-26 20:43:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-01-26 21:44:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b3.r1', '', '2006-12-15 03:40:00', 1, 100, 4, 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -1358,7 +1358,7 @@ function doWeb(doc, url){
 }');
 
 
-REPLACE INTO translators VALUES ('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '1.0.0b3.r1', '', '2006-12-15 14:24:00', 1, 100, 4, 'ProQuest', 'Simon Kornblith', '^https?://[^/]+/pqdweb\?((?:.*\&)?did=.*&Fmt=[0-9]|(?:.*\&)Fmt=[0-9].*&did=|(?:.*\&)searchInterface=)',
+REPLACE INTO translators VALUES ('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '1.0.0b3.r1', '', '2007-01-26 21:29:00', 1, 100, 4, 'ProQuest', 'Simon Kornblith', '^https?://[^/]+/pqdweb\?((?:.*\&)?did=.*&Fmt=[0-9]|(?:.*\&)Fmt=[0-9].*&did=|(?:.*\&)searchInterface=)',
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -1384,11 +1384,11 @@ REPLACE INTO translators VALUES ('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '1.0.0b
 	var elmt;
 	
 	// Title
-	var xpath = ''/html/body/span[@class="textMedium"]/table/tbody/tr/td[@class="headerBlack"]/strong'';
+	var xpath = ''/html/body/table/tbody/tr/td[@class="headerBlack"]/strong'';
 	newItem.title = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 	
 	// Authors
-	var xpath = ''/html/body/span[@class="textMedium"]/table/tbody/tr/td[@class="textMedium"]/a/em'';
+	var xpath = ''/html/body/table/tbody/tr/td[@class="textMedium"]/a/em'';
 	var elmts = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
 	while(elmt = elmts.iterateNext()) {
 		// there are sometimes additional tags representing higlighting
@@ -1399,7 +1399,7 @@ REPLACE INTO translators VALUES ('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '1.0.0b
 	}
 	
 	// Other info
-	var xpath = ''/html/body/span[@class="textMedium"]/font/table/tbody/tr'';
+	var xpath = ''/html/body/font/table/tbody/tr'';
 	var elmts = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
 	while(elmt = elmts.iterateNext()) {
 		var field = Zotero.Utilities.superCleanString(doc.evaluate(''./TD[1]/text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue).toLowerCase();
@@ -1586,7 +1586,7 @@ function doWeb(doc, url) {
 		
 		Zotero.wait();
 	} else {
-		if(doc.evaluate(''/html/body/span[@class="textMedium"]/table/tbody/tr/td[@class="headerBlack"]/strong//text()'',
+		if(doc.evaluate(''/html/body/table/tbody/tr/td[@class="headerBlack"]/strong//text()'',
 						doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
 			scrape(doc);
 		} else {
@@ -3461,25 +3461,6 @@ function downloadFunction(text) {
 	var downloadString = "__EVENTTARGET=&__EVENTARGUMENT=&__LASTFOCUS=&__VIEWSTATE="+fullEscape(m[1])+"&ctl00%24ctl00%24ToolbarArea%24toolbar%24drpLanguages=&ctl00%24ctl00%24MainContentArea%24MainContentArea%24ctl01%24chkRemoveFromFolder=on&ctl00%24ctl00%24MainContentArea%24MainContentArea%24ctl01%24btnSubmit=Save&ctl00%24ctl00%24MainContentArea%24MainContentArea%24ctl01%24BibFormat=1&ajax=enabled";
 	Zotero.Utilities.HTTP.doPost("http://"+host+"/ehost/"+deliveryURL,
 								 downloadString, function(text) {	// get marked records as RIS
-		/*var form = doc.createElement("form");
-		form.setAttribute("method", "post");
-		form.setAttribute("action", "http://"+host+"/ehost/"+folderURL);
-		var args = [
-			["__EVENTARGUMENT", ""],
-			["__VIEWSTATE", folderViewState],
-			["__EVENTVALIDATION", folderEventValidation],
-			["__EVENTTARGET", "ctl00$ctl00$MainContentArea$MainContentArea$btnBack$lnkBack"]
-		];
-		for(var i in args) {
-			var input = doc.createElement("input");
-			input.setAttribute("type", "hidden");
-			input.setAttribute("name", args[i][0]);
-			input.setAttribute("value", args[i][1]);
-			form.appendChild(input);
-		}
-		var body = doc.getElementsByTagName("body");
-		body[0].appendChild(form);
-		form.submit();*/
 		
 		// load translator for RIS
 		var translator = Zotero.loadTranslator("import");
@@ -4414,7 +4395,7 @@ function doWeb(doc, url) {
         Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('b6d0a7a-d076-48ae-b2f0-b6de28b194e', '1.0.0b3.r1', '', '2006-12-15 18:49:00', 1, 100, 4, 'ScienceDirect', 'Simon Kornblith', '^http://www\.sciencedirect\.com/science\?(?:.+\&|)_ob=(?:ArticleURL|ArticleListURL|PublicationURL)', 
+REPLACE INTO translators VALUES ('b6d0a7a-d076-48ae-b2f0-b6de28b194e', '1.0.0b3.r1', '', '2007-01-26 21:44:00', 1, 100, 4, 'ScienceDirect', 'Simon Kornblith', '^http://www\.sciencedirect\.com/science\?(?:.+\&|)_ob=(?:ArticleURL|ArticleListURL|PublicationURL)', 
 'function detectWeb(doc, url) {
 	if(url.indexOf("_ob=ArticleURL") == -1) {
 		return "multiple";
@@ -4547,11 +4528,18 @@ function doWeb(doc, url) {
 		
 		Zotero.Utilities.HTTP.doGet(get, function(text) {
 			var md5 = text.match(/<input type=hidden name=md5 value=([^>]+)>/);
-			var alid = url.match(/_alid=([0-9]+)/);
-			var rdoc = url.match(/_rdoc=([0-9]+)/);
 			var acct = url.match(/_acct=([^&]+)/);
 			var userid = url.match(/_userid=([^&]+)/);
-			var post = "_ob=DownloadURL&_method=finish&_acct="+acct[1]+"&_userid="+userid[1]+"&_docType=FLA&_ArticleListID="+alid[1]+"&_rdoc="+rdoc[1]+"&md5="+md5[1]+"&JAVASCRIPT_ON=Y&format=cite-abs&citation-type=RIS&x=26&y=17";
+			var alid = url.match(/_alid=([0-9]+)/);
+			if(alid) {
+				var rdoc = url.match(/_rdoc=([0-9]+)/);
+				var docIdentifier = "_ArticleListID="+alid[1]+"&_rdoc="+rdoc[1];
+			} else {
+				var udi = url.match(/_udi=([^&]+)/);
+				var docIdentifier = "_uoikey="+udi[1];
+			}
+			
+			var post = "_ob=DownloadURL&_method=finish&_acct="+acct[1]+"&_userid="+userid[1]+"&_docType=FLA&"+docIdentifier+"&md5="+md5[1]+"&JAVASCRIPT_ON=Y&format=cite-abs&citation-type=RIS&x=26&y=17";
 			Zotero.Utilities.HTTP.doPost("http://www.sciencedirect.com/science", post, function(text) { handleRIS(text, PDFs) });
 		});
 	}

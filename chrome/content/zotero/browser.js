@@ -309,7 +309,7 @@ var Zotero_Browser = new function() {
 			var tab = _getTabObject(browser);
 			
 			// save annotations
-			if(tab.page.annotations) tab.page.annotations.save();
+			if(tab.page && tab.page.annotations) tab.page.annotations.save();
 			
 			tab.clear();
 			
@@ -356,11 +356,6 @@ var Zotero_Browser = new function() {
 			Zotero_Browser.Progress.addDescription(Zotero.getString("ingester.scrapeErrorDescription"));
 		}
 		
-		if(collection) {
-			// notify about modified items
-			Zotero.Notifier.trigger("modify", "collection", collection.getID());
-		}
-		
 		Zotero_Browser.Progress.fade();
 	}
 	
@@ -375,9 +370,7 @@ var Zotero_Browser = new function() {
 		
 		// add item to collection, if one was specified
 		if(collection) {
-			Zotero.Notifier.disable();
 			collection.addItem(item.getID());
-			Zotero.Notifier.enable();
 		}
 	}
 	
