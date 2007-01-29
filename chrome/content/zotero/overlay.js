@@ -89,7 +89,7 @@ var ZoteroPane = new function()
 			var newPane = document.createElement('hbox');
 			newPane.setAttribute('id','zotero-pane');
 			newPane.setAttribute('persist','height');
-			newPane.setAttribute('collapsed',true);
+			newPane.setAttribute('hidden', true);
 			newPane.height = oldPane.height;
 			while(oldPane.hasChildNodes())
 				newPane.appendChild(oldPane.firstChild);
@@ -98,7 +98,7 @@ var ZoteroPane = new function()
 			
 			var newSplitter = document.createElement('splitter');
 			newSplitter.setAttribute('id','zotero-splitter');
-			newSplitter.setAttribute('collapsed',true);
+			newSplitter.setAttribute('hidden', true);
 			newSplitter.setAttribute('resizebefore','closest');
 			newSplitter.setAttribute('resizeafter','closest');
 			newSplitter.setAttribute('onmouseup', 'ZoteroPane.updateTagSelectorSize()');
@@ -168,10 +168,10 @@ var ZoteroPane = new function()
 	function toggleDisplay()
 	{
 		// Visible == target visibility
-		var visible = document.getElementById('zotero-pane').getAttribute('collapsed') == 'true';
+		var visible = document.getElementById('zotero-pane').getAttribute('hidden') == 'true';
 		
-		document.getElementById('zotero-pane').setAttribute('collapsed',!visible);
-		document.getElementById('zotero-splitter').setAttribute('collapsed',!visible);
+		document.getElementById('zotero-pane').setAttribute('hidden', !visible);
+		document.getElementById('zotero-splitter').setAttribute('hidden', !visible);
 		
 		if (visible) {
 			document.getElementById('zotero-pane').focus();
@@ -191,14 +191,14 @@ var ZoteroPane = new function()
 		// Turn Z-pane flex on to stretch to window in full-screen, but off otherwise so persist works
 		document.getElementById('zotero-pane').setAttribute('flex', collapsed ? "0" : "1");
 		document.getElementById('content').setAttribute('collapsed', !collapsed);
-		document.getElementById('zotero-splitter').setAttribute('collapsed', !collapsed);
+		document.getElementById('zotero-splitter').setAttribute('hidden', !collapsed);
 		document.getElementById('zotero-tb-fullscreen').setAttribute('fullscreenmode', !collapsed);
 	}
 	
 	
 	function handleKeyPress(event) {
 		// Ignore keystrokes if Zotero pane is closed
-		if (document.getElementById('zotero-pane').getAttribute('collapsed') == 'true') {
+		if (document.getElementById('zotero-pane').getAttribute('hidden') == 'true') {
 			return;
 		}
 		
@@ -367,14 +367,28 @@ var ZoteroPane = new function()
 			zoteroPane.setAttribute('height', zoteroPane.boxObject.height);
 		}
 		
-		if (tagSelector.getAttribute('collapsed') != 'true' && !height) {
-			height = parseInt(tagSelector.getAttribute('height'));
+		if (tagSelector.getAttribute('collapsed') == 'true') {
+			// 32px is the default Z pane min-height in overlay.css
+			height = 32;
+		}
+		else {
+			// tS.boxObject.height doesn't exist at startup, so get from attribute
+			if (!height) {
+				height = parseInt(tagSelector.getAttribute('height'));
+			}
+			// 121px seems to be enough room for the toolbar and collections
+			// tree at minimum height
+			height = height + 121;
 		}
 		
-		// 170px is the Z-pane min-height sans tag selector; 120px seems to be
-		// enough room for the toolbar and collections tree at minimum height
-		//Zotero.debug('Setting tag selector minheight to ' + (Math.max(170, 120 + height)));
-		zoteroPane.setAttribute('minheight', Math.max(170, 120 + height));
+		Zotero.debug('Setting Zotero pane minheight to ' + height);
+		zoteroPane.setAttribute('minheight', height);
+		
+		// Fix bug whereby resizing the Z pane downward after resizing
+		// the tag selector up and then down sometimes caused the Z pane to
+		// stay at a fixed size and get pushed below the bottom
+		tagSelector.height++;
+		tagSelector.height--;
 	}
 	
 	

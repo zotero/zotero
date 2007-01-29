@@ -106,7 +106,7 @@ var ZoteroAdvancedSearch = new function() {
 					return;
 				}
 				
-				if (lastWin.document.getElementById('zotero-pane').getAttribute('collapsed') == 'true') {
+				if (lastWin.document.getElementById('zotero-pane').getAttribute('hidden') == 'true') {
 					lastWin.ZoteroPane.toggleDisplay();
 				}
 				
