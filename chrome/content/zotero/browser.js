@@ -45,9 +45,9 @@ var Zotero_Browser = new function() {
 	this.chromeUnload = chromeUnload;
 	this.contentLoad = contentLoad;
 	this.contentHide = contentHide;
-	this.tabSelect = tabSelect;
 	this.tabClose = tabClose;
 	this.resize = resize;
+	this.updateStatus = updateStatus;
 	this.finishScraping = finishScraping;
 	this.itemDone = itemDone;
 	
@@ -210,7 +210,7 @@ var Zotero_Browser = new function() {
 		this.tabbrowser.addEventListener("TabClose",
 			function(e) { Zotero_Browser.tabClose(e) }, false);
 		this.tabbrowser.addEventListener("TabSelect",
-			function(e) { Zotero_Browser.tabSelect(e) }, false);
+			function(e) { Zotero_Browser.updateStatus() }, false);
 		// this is for pageshow, for updating the status of the book icon
 		this.appcontent.addEventListener("pageshow",
 			function(e) { Zotero_Browser.contentLoad(e) }, true);
@@ -276,11 +276,6 @@ var Zotero_Browser = new function() {
 			
 			// detect translators
 			tab.detectTranslators(rootDoc, doc);
-		
-			// update status
-			if(this.tabbrowser.selectedBrowser == browser) {
-				_updateStatus();
-			}
 		}
 		
 		// clear annotateNextLoad
@@ -315,7 +310,7 @@ var Zotero_Browser = new function() {
 			
 			// update status
 			if(this.tabbrowser.selectedBrowser == browser) {
-				_updateStatus();
+				updateStatus();
 			}
 		}
 	}
@@ -330,13 +325,6 @@ var Zotero_Browser = new function() {
 	}
 	
 	/*
-	 * called when a tab is switched
-	 */
-	function tabSelect(event) {
-		_updateStatus();
-	}
-	
-	/*
 	 * called when the window is resized
 	 */
 	function resize(event) {
@@ -346,6 +334,29 @@ var Zotero_Browser = new function() {
 		tab.page.annotations.refresh();
 	}
 	
+	/*
+	 * Updates the status of the capture icon to reflect the scrapability or lack
+	 * thereof of the current page
+	 */
+	function updateStatus() {
+		var tab = _getTabObject(Zotero_Browser.tabbrowser.selectedBrowser);
+		
+		var captureIcon = tab.getCaptureIcon();
+		if(captureIcon) {
+			Zotero_Browser.statusImage.src = captureIcon;
+			Zotero_Browser.statusImage.hidden = false;
+		} else {
+			Zotero_Browser.statusImage.hidden = true;
+		}
+		
+		// set annotation bar status
+		if(tab.page.annotations) {
+			document.getElementById('zotero-annotate-tb').hidden = false;
+			toggleMode();
+		} else {
+			document.getElementById('zotero-annotate-tb').hidden = true;
+		}
+	}
 	
 	/*
 	 * Callback to be executed when scraping is complete
@@ -425,30 +436,6 @@ var Zotero_Browser = new function() {
 	}
 	
 	/*
-	 * Updates the status of the capture icon to reflect the scrapability or lack
-	 * thereof of the current page
-	 */
-	function _updateStatus() {
-		var tab = _getTabObject(Zotero_Browser.tabbrowser.selectedBrowser);
-		
-		var captureIcon = tab.getCaptureIcon();
-		if(captureIcon) {
-			Zotero_Browser.statusImage.src = captureIcon;
-			Zotero_Browser.statusImage.hidden = false;
-		} else {
-			Zotero_Browser.statusImage.hidden = true;
-		}
-		
-		// set annotation bar status
-		if(tab.page.annotations) {
-			document.getElementById('zotero-annotate-tb').hidden = false;
-			toggleMode();
-		} else {
-			document.getElementById('zotero-annotate-tb').hidden = true;
-		}
-	}
-	
-	/*
 	 * adds an annotation
 	 */
 	 function _add(type, e) {
@@ -521,15 +508,12 @@ Zotero_Browser.Tab.prototype.detectTranslators = function(rootDoc, doc) {
 	}
 	
 	// get translators
+	var me = this;
+	
 	var translate = new Zotero.Translate("web");
 	translate.setDocument(doc);
+	translate.setHandler("translators", function(obj, item) { me._translatorsAvailable(obj, item) });
 	var translators = translate.getTranslators();
-	// add document
-	if(translators && translators.length) {
-		this.page.translate = translate;
-		this.page.translators = translators;
-		this.page.document = doc;
-	}
 }
 
 
@@ -566,32 +550,17 @@ Zotero_Browser.Tab.prototype.translate = function(saveLocation) {
 		
 		var me = this;
 		
-		// use first translator available
 		if(!this.page.hasBeenTranslated) {
+			// use first translator available
 			this.page.translate.setTranslator(this.page.translators[0]);
 			this.page.translate.setHandler("select", me._selectItems);
 			this.page.translate.setHandler("itemDone", function(obj, item) { Zotero_Browser.itemDone(obj, item, saveLocation) });
 			this.page.translate.setHandler("done", function(obj, item) { Zotero_Browser.finishScraping(obj, item, saveLocation) });
 			this.page.hasBeenTranslated = true;
 		}
+		
 		this.page.translate.translate();
 	}
-}
-
-/*
- * called when a user is supposed to select items
- */
-Zotero_Browser.Tab.prototype._selectItems = function(obj, itemList) {
-	// this is kinda ugly, mozillazine made me do it! honest!
-	var io = { dataIn:itemList, dataOut:null }
-	var newDialog = window.openDialog("chrome://zotero/content/ingester/selectitems.xul",
-		"_blank","chrome,modal,centerscreen,resizable=yes", io);
-	
-	if(!io.dataOut) {	// user selected no items, so kill the progress indicatior
-		Zotero_Browser.Progress.kill();
-	}
-	
-	return io.dataOut;
 }
 
 /*
@@ -610,6 +579,37 @@ Zotero_Browser.Tab.prototype.getCaptureIcon = function() {
 	}
 	
 	return false;
+}
+
+/**********CALLBACKS**********/
+
+/*
+ * called when a user is supposed to select items
+ */
+Zotero_Browser.Tab.prototype._selectItems = function(obj, itemList) {
+	// this is kinda ugly, mozillazine made me do it! honest!
+	var io = { dataIn:itemList, dataOut:null }
+	var newDialog = window.openDialog("chrome://zotero/content/ingester/selectitems.xul",
+		"_blank","chrome,modal,centerscreen,resizable=yes", io);
+	
+	if(!io.dataOut) {	// user selected no items, so kill the progress indicatior
+		Zotero_Browser.Progress.kill();
+	}
+	
+	return io.dataOut;
+}
+
+/*
+ * called when translators are available
+ */
+Zotero_Browser.Tab.prototype._translatorsAvailable = function(translate, translators) {
+	if(translators && translators.length) {
+		this.page.translate = translate;
+		this.page.translators = translators;
+		this.page.document = translate.document;
+	}
+	
+	Zotero_Browser.updateStatus();
 }
 
 //////////////////////////////////////////////////////////////////////////////
