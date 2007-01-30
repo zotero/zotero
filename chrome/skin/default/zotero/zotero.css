@@ -91,7 +91,7 @@ searchcondition menulist[id="operatorsmenu"]
 
 zoterosearchtextbox
 {
-	-moz-binding: url('chrome://zotero/content/bindings/searchtextbox.xml#zotero-search-textbox');
+	-moz-binding: url('chrome://zotero/content/bindings/zoterosearch.xml#search-textbox');
 }
 
 zoterosearchtextbox toolbarbutton
