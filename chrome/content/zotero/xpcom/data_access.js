@@ -509,6 +509,7 @@ Zotero.Item.prototype.save = function(){
 		Zotero.debug('Updating database with new item data', 4);
 		
 		var itemID = this.getID();
+		var preItemArray = this.toArray();
 		
 		try {
 			Zotero.DB.beginTransaction();
@@ -899,7 +900,7 @@ Zotero.Item.prototype.save = function(){
 	}
 	else {
 		if (!Zotero.DB.transactionInProgress()){
-			Zotero.Notifier.trigger('modify', 'item', this.getID());
+			Zotero.Notifier.trigger('modify', 'item', this.getID(), { old: preItemArray });
 		}
 		return true;
 	}
@@ -966,6 +967,8 @@ Zotero.Item.prototype.updateNote = function(text){
 	
 	Zotero.DB.beginTransaction();
 	
+	var preItemArray = this.toArray();
+	
 	if (this.isNote()){
 		var sourceItemID = this.getSource();
 	}
@@ -988,7 +991,7 @@ Zotero.Item.prototype.updateNote = function(text){
 		Zotero.DB.commitTransaction();
 		this.updateNoteCache(text, this.isAbstract());
 		
-		Zotero.Notifier.trigger('modify', 'item', this.getID());
+		Zotero.Notifier.trigger('modify', 'item', this.getID(), { old: preItemArray });
 	}
 	else {
 		Zotero.DB.commitTransaction();
@@ -1025,9 +1028,14 @@ Zotero.Item.prototype.setSource = function(sourceItemID){
 	
 	Zotero.DB.beginTransaction();
 	
+	var preItemArray = this.toArray();
+	
 	var newItem = Zotero.Items.get(sourceItemID);
 	// FK check
-	if (sourceItemID && !newItem){
+	if (sourceItemID && newItem) {
+		var preNewItemArray = newItem.toArray();
+	}
+	else {
 		Zotero.DB.rollbackTransaction();
 		throw ("Cannot set " + type + " source to invalid item " + sourceItemID);
 	}
@@ -1041,9 +1049,12 @@ Zotero.Item.prototype.setSource = function(sourceItemID){
 	}
 	
 	var oldItem = Zotero.Items.get(oldSourceItemID);
-	if (oldSourceItemID && !oldItem){
-		Zotero.debug("Old source item " + oldSourceItemID
-			+ "didn't exist in setSource()", 2);
+	if (oldSourceItemID && oldItem) {
+		var preOldItemArray = oldItem.toArray();
+	}
+	else {
+		var preOldItemArray = false;
+		Zotero.debug("Old source item " + oldSourceItemID + "didn't exist in setSource()", 2);
 	}
 	
 	// If this was an independent item, remove from any collections where it
@@ -1078,7 +1089,7 @@ Zotero.Item.prototype.setSource = function(sourceItemID){
 	this.updateDateModified();
 	Zotero.DB.commitTransaction();
 	
-	Zotero.Notifier.trigger('modify', 'item', this.getID());
+	Zotero.Notifier.trigger('modify', 'item', this.getID(), { old: preItemArray });
 	
 	// Update the counts of the previous and new sources
 	if (oldItem){
@@ -1090,8 +1101,9 @@ Zotero.Item.prototype.setSource = function(sourceItemID){
 				oldItem.decrementAttachmentCount();
 				break;
 		}
-		Zotero.Notifier.trigger('modify', 'item', oldSourceItemID);
+		Zotero.Notifier.trigger('modify', 'item', oldSourceItemID, { old: preOldItemArray });
 	}
+	
 	if (newItem){
 		switch (type){
 			case 'note':
@@ -1101,7 +1113,7 @@ Zotero.Item.prototype.setSource = function(sourceItemID){
 				newItem.incrementAttachmentCount();
 				break;
 		}
-		Zotero.Notifier.trigger('modify', 'item', sourceItemID);
+		Zotero.Notifier.trigger('modify', 'item', sourceItemID, { old: preNewItemArray });
 	}
 	
 	return true;
@@ -1234,9 +1246,14 @@ Zotero.Item.prototype.setAbstract = function(set) {
 		throw ("Cannot make a non-child note an abstract");
 	}
 	
+	var notifierData = [{ old: this.toArray() }];
+	
+	var sourceItem = Zotero.Items.get(sourceItemID);
+	notifierData.push({ old: sourceItem.toArray() });
+	
+	// If existing abstract, clear it
 	if (set) {
-		// If existing abstract, clear it
-		var oldAbstractID = Zotero.Items.get(sourceItemID).getAbstract();
+		var oldAbstractID = sourceItem.getAbstract();
 		if (oldAbstractID) {
 			var oldAbstractItem = Zotero.Items.get(oldAbstractID);
 			oldAbstractItem.setAbstract(false);
@@ -1256,7 +1273,7 @@ Zotero.Item.prototype.setAbstract = function(set) {
 	
 	this._noteIsAbstract = !!set;
 	
-	Zotero.Notifier.trigger('modify', 'item', [this.getID(), sourceItemID]);
+	Zotero.Notifier.trigger('modify', 'item', [this.getID(), sourceItemID], notifierData);
 }
 
 
@@ -1733,17 +1750,20 @@ Zotero.Item.prototype.removeAllTags = function(){
 	
 	Zotero.DB.beginTransaction();
 	var tagIDs = this.getTagIDs();
+	if (!tagIDs) {
+		Zotero.DB.commitTransaction();
+		return;
+	}
+	
 	Zotero.DB.query("DELETE FROM itemTags WHERE itemID=?", this.getID());
 	Zotero.Tags.purge();
 	Zotero.DB.commitTransaction();
 	Zotero.Notifier.trigger('modify', 'item', this.getID());
 	
-	if (tagIDs) {
-		for (var i in tagIDs) {
-			tagIDs[i] = this.getID() + '-' + tagIDs[i];
-		}
-		Zotero.Notifier.trigger('remove', 'item-tag', tagIDs);
+	for (var i in tagIDs) {
+		tagIDs[i] = this.getID() + '-' + tagIDs[i];
 	}
+	Zotero.Notifier.trigger('remove', 'item-tag', tagIDs);
 }
 
 
@@ -1764,7 +1784,9 @@ Zotero.Item.prototype.addSeeAlso = function(itemID){
 	
 	Zotero.DB.beginTransaction();
 	
-	if (!Zotero.Items.get(itemID)){
+	var relatedItem = Zotero.Items.get(itemID);
+	
+	if (!relatedItem){
 		Zotero.DB.commitTransaction();
 		throw ("Cannot add invalid item " + itemID + " as See Also");
 		return false;
@@ -1780,10 +1802,15 @@ Zotero.Item.prototype.addSeeAlso = function(itemID){
 		return false;
 	}
 	
+	var notifierData = [
+		{ old: this.toArray() },
+		{ old: relatedItem.toArray() }
+	];
+	
 	var sql = "INSERT INTO itemSeeAlso VALUES (?,?)";
 	Zotero.DB.query(sql, [this.getID(), {int:itemID}]);
 	Zotero.DB.commitTransaction();
-	Zotero.Notifier.trigger('modify', 'item', [this.getID(), itemID]);
+	Zotero.Notifier.trigger('modify', 'item', [this.getID(), itemID], notifierData);
 	return true;
 }
 
@@ -1793,12 +1820,25 @@ Zotero.Item.prototype.removeSeeAlso = function(itemID){
 	}
 	
 	Zotero.DB.beginTransaction();
+	
+	var relatedItem = Zotero.Items.get(itemID);
+	if (!relatedItem) {
+		Zotero.DB.commitTransaction();
+		throw ("Cannot remove invalid item " + itemID + " as See Also");
+		return false;
+	}
+	
+	var notifierData = [
+		{ old: this.toArray() },
+		{ old: relatedItem.toArray() }
+	];
+	
 	var sql = "DELETE FROM itemSeeAlso WHERE itemID=? AND linkedItemID=?";
 	Zotero.DB.query(sql, [this.getID(), itemID]);
 	var sql = "DELETE FROM itemSeeAlso WHERE itemID=? AND linkedItemID=?";
 	Zotero.DB.query(sql, [itemID, this.getID()]);
 	Zotero.DB.commitTransaction();
-	Zotero.Notifier.trigger('modify', 'item', [this.getID(), itemID]);
+	Zotero.Notifier.trigger('modify', 'item', [this.getID(), itemID], notifierData);
 }
 
 Zotero.Item.prototype.removeAllRelated = function() {
@@ -1808,13 +1848,24 @@ Zotero.Item.prototype.removeAllRelated = function() {
 	
 	Zotero.DB.beginTransaction();
 	var relateds = this.getSeeAlso();
+	if (!relateds) {
+		Zotero.DB.commitTransaction();
+		return;
+	}
+	
+	var notifierData = [ { old: this.toArray() } ];
+	for each(var id in relateds) {
+		var item = Zotero.Items.get(id);
+		notifierData.push(item ? { old: item.toArray() } : false);
+	}
+	
 	Zotero.DB.query("DELETE FROM itemSeeAlso WHERE itemID=?", this.getID());
 	Zotero.DB.query("DELETE FROM itemSeeAlso WHERE linkedItemID=?", this.getID());
 	Zotero.DB.commitTransaction();
 	
-	if (relateds) {
-		Zotero.Notifier.trigger('modify', 'item', relateds);
-	}
+	var ids = [this.getID()].concat(relateds);
+	
+	Zotero.Notifier.trigger('modify', 'item', ids, notifierData);
 }
 
 Zotero.Item.prototype.getSeeAlso = function(){
@@ -1865,6 +1916,10 @@ Zotero.Item.prototype.erase = function(deleteChildren){
 	
 	Zotero.DB.beginTransaction();
 	
+	// For Notifier
+	var preItemArray = this.toArray();
+	var notifierData = [];
+	
 	// Remove item from parent collections
 	var parentCollectionIDs = this.getCollections();
 	if (parentCollectionIDs){
@@ -1880,6 +1935,7 @@ Zotero.Item.prototype.erase = function(deleteChildren){
 		var sourceItemID = Zotero.DB.valueQuery(sql);
 		if (sourceItemID){
 			var sourceItem = Zotero.Items.get(sourceItemID);
+			notifierData.push({ old: sourceItem.toArray() });
 			sourceItem.decrementNoteCount();
 			changedItems.push(sourceItemID);
 		}
@@ -1891,6 +1947,7 @@ Zotero.Item.prototype.erase = function(deleteChildren){
 		var sourceItemID = Zotero.DB.valueQuery(sql);
 		if (sourceItemID){
 			var sourceItem = Zotero.Items.get(sourceItemID);
+			notifierData.push({ old: sourceItem.toArray() });
 			sourceItem.decrementAttachmentCount();
 			changedItems.push(sourceItemID);
 		}
@@ -1933,6 +1990,10 @@ Zotero.Item.prototype.erase = function(deleteChildren){
 		var sql = "SELECT itemID FROM itemNotes WHERE sourceItemID=" + this.getID();
 		var childNotes = Zotero.DB.columnQuery(sql);
 		if (childNotes){
+			for each(var id in childNotes) {
+				var i = Zotero.Items.get(id);
+				notifierData.push({ old: i.toArray() });
+			}
 			changedItems.push(childNotes);
 		}
 		var sql = "UPDATE itemNotes SET sourceItemID=NULL WHERE sourceItemID="
@@ -1943,6 +2004,10 @@ Zotero.Item.prototype.erase = function(deleteChildren){
 		var sql = "SELECT itemID FROM itemAttachments WHERE sourceItemID=" + this.getID();
 		var childAttachments = Zotero.DB.columnQuery(sql);
 		if (childAttachments){
+			for each(var id in childAttachments) {
+				var i = Zotero.Items.get(id);
+				notifierData.push({ old: i.toArray() });
+			}
 			changedItems.push(childAttachments);
 		}
 		var sql = "UPDATE itemAttachments SET sourceItemID=NULL WHERE sourceItemID="
@@ -1951,9 +2016,13 @@ Zotero.Item.prototype.erase = function(deleteChildren){
 	}
 	
 	// Flag See Also links for notification
-	var seeAlso = this.getSeeAlso();
-	if (seeAlso){
-		changedItems = changedItems.concat(seeAlso);
+	var relateds = this.getSeeAlso();
+	if (relateds){
+		for each(var id in relateds) {
+			var i = Zotero.Items.get(id);
+			notifierData.push({ old: i.toArray() });
+		}
+		changedItems = changedItems.concat(relateds);
 	}
 	
 	// Clear fulltext cache
@@ -1995,11 +2064,10 @@ Zotero.Item.prototype.erase = function(deleteChildren){
 	
 	// Send notification of changed items
 	if (changedItems.length){
-		Zotero.Notifier.trigger('modify', 'item', changedItems);
+		Zotero.Notifier.trigger('modify', 'item', changedItems, notifierData);
 	}
 	
-	// If we're not in the middle of a larger commit, trigger the notifier now
-	Zotero.Notifier.trigger('delete', 'item', this.getID());
+	Zotero.Notifier.trigger('delete', 'item', this.getID(), { old: preItemArray });
 }
 
 
@@ -2363,7 +2431,7 @@ Zotero.Items = new function(){
 				var item = this.get(id);
 				if (!item) {
 					Zotero.debug('Item ' + id + ' does not exist in Items.erase()!', 1);
-					Zotero.Notifier.trigger('delete', 'item', id);
+					Zotero.Notifier.trigger('delete', 'item', id, [false]);
 					continue;
 				}
 				item.erase(eraseChildren); // calls unload()
@@ -2475,8 +2543,9 @@ Zotero.Notes = new function(){
 		note.updateNoteCache(text, isAbstract);
 		
 		if (sourceItemID){
+			var notifierData = { old: sourceItem.toArray() };
 			sourceItem.incrementNoteCount();
-			Zotero.Notifier.trigger('modify', 'item', sourceItemID);
+			Zotero.Notifier.trigger('modify', 'item', sourceItemID, notifierData);
 		}
 		
 		Zotero.Notifier.trigger('add', 'item', note.getID());
@@ -2582,12 +2651,14 @@ Zotero.Collection.prototype.rename = function(name){
 		return false;
 	}
 	
+	var notifierData = { old: this.toArray() };
+	
 	var sql = "UPDATE collections SET collectionName=? "
 		+ "WHERE collectionID=?";
 	Zotero.DB.query(sql, [{'string':name},{'int':this.getID()}]);
 	this._name = name;
 	
-	Zotero.Notifier.trigger('modify', 'collection', this.getID());
+	Zotero.Notifier.trigger('modify', 'collection', this.getID(), notifierData);
 	return true;
 }
 
@@ -2627,6 +2698,8 @@ Zotero.Collection.prototype.changeParent = function(parent){
 		}
 	}
 	
+	var notifierData = { old: this.toArray() };
+	
 	var parentParam = parent ? {'int':parent} : {'null':true};
 	
 	var sql = "UPDATE collections SET parentCollectionID=? "
@@ -2643,7 +2716,7 @@ Zotero.Collection.prototype.changeParent = function(parent){
 	
 	// TODO: only reload the necessary ones
 	Zotero.Collections.reloadAll();
-	Zotero.Notifier.trigger('move', 'collection', notifyIDs);
+	Zotero.Notifier.trigger('move', 'collection', notifyIDs, notifierData);
 	return true;
 }
 
@@ -2673,8 +2746,6 @@ Zotero.Collection.prototype.addItem = function(itemID){
 	// If this was previously empty, update and send a notification to the tree
 	if (!this._hasChildItems){
 		this._hasChildItems = true;
-		// DEBUG: is this necessary?
-		Zotero.Notifier.trigger('modify', 'collection', this.getID());
 	}
 	
 	Zotero.Notifier.trigger('add', 'collection-item', this.getID() + '-' + itemID);
@@ -2714,8 +2785,6 @@ Zotero.Collection.prototype.removeItem = function(itemID){
 	// If this was the last item, set collection to empty
 	if (!this._childItems.length){
 		this._hasChildItems = false;
-		// DEBUG: is this necessary? if so, it's no longer called during item deletes...
-		Zotero.Notifier.trigger('modify', 'collection', this.getID());
 	}
 	
 	Zotero.Notifier.trigger('remove', 'collection-item', this.getID() + '-' + itemID);
@@ -2752,18 +2821,20 @@ Zotero.Collection.prototype.erase = function(deleteItems){
 	
 	var descendents = this.getDescendents();
 	var collections = [this.getID()], items = [];
+	var notifierData = [{ old: this.toArray() }];
 	
 	for(var i=0, len=descendents.length; i<len; i++){
 		// Descendent collections
 		if (descendents[i]['type']=='collection'){
 			collections.push(descendents[i]['id']);
+			var c = Zotero.Collections.get(descendents[i]['id']);
+			notifierData.push(c ? { old: c.toArray() } : false);
 		}
 		// Descendent items
 		else {
 			if (deleteItems){
 				// Delete items from DB
 				Zotero.Items.get(descendents[i]['id']).erase();
-				items.push(descendents[i]['id']);
 			}
 		}
 	}
@@ -2781,10 +2852,7 @@ Zotero.Collection.prototype.erase = function(deleteItems){
 	// Clear deleted collection from internal memory
 	Zotero.Collections.unload(collections);
 	
-	Zotero.Notifier.trigger('delete', 'collection', collections);
-	if (items.length){
-		Zotero.Notifier.trigger('delete', 'item', items);
-	}
+	Zotero.Notifier.trigger('delete', 'collection', collections, notifierData);
 }
 
 
@@ -2793,8 +2861,13 @@ Zotero.Collection.prototype.isCollection = function(){
 }
 
 
-Zotero.Collection.prototype.toArray = function(){
-	return this.getDescendents(true);
+Zotero.Collection.prototype.toArray = function() {
+	return {
+		id: this.getID(),
+		name: this.getName(),
+		parent: this.getParent(),
+		descendents: this.getDescendents(true)
+	};
 }
 
 
@@ -3170,6 +3243,8 @@ Zotero.Tags = new function(){
 	this.rename = rename;
 	this.remove = remove;
 	this.purge = purge;
+	this.toArray = toArray;
+	
 	
 	/*
 	 * Returns a tag and type for a given tagID
@@ -3371,11 +3446,13 @@ Zotero.Tags = new function(){
 		var tagObj = this.get(tagID);
 		var oldName = tagObj.tag;
 		var oldType = tagObj.type;
+		var notifierData = [{ old: this.toArray() }];
 		
 		if (oldName == tag) {
 			if (oldType != 0) {
 				var sql = "UPDATE tags SET tagType=0 WHERE tagID=?";
 				Zotero.DB.query(sql, tagID);
+				Zotero.Notifier.trigger('modify', 'tag', tagID, notifierData);
 			}
 			Zotero.DB.commitTransaction();
 			return;
@@ -3400,7 +3477,7 @@ Zotero.Tags = new function(){
 				delete _tags[oldType][oldName];
 			}
 			delete _tagsByID[tagID];
-			Zotero.Notifier.trigger('delete', 'tag', tagID);
+			Zotero.Notifier.trigger('delete', 'tag', tagID, notifierData);
 			
 			// Simulate tag removal on items that used old tag
 			var itemTags = [];
@@ -3425,7 +3502,7 @@ Zotero.Tags = new function(){
 		
 		// 0 == user tag -- we set all renamed tags to 0
 		var sql = "UPDATE tags SET tag=?, tagType=0 WHERE tagID=?";
-		Zotero.DB.query(sql, [{string: tag}, {int: tagID}]);
+		Zotero.DB.query(sql, [{string: tag}, tagID]);
 		
 		var itemIDs = this.getTagItems(tagID);
 		
@@ -3437,7 +3514,7 @@ Zotero.Tags = new function(){
 		Zotero.DB.commitTransaction();
 		
 		Zotero.Notifier.trigger('modify', 'item', itemIDs);
-		Zotero.Notifier.trigger('modify', 'tag', tagID);
+		Zotero.Notifier.trigger('modify', 'tag', tagID, notifierData);
 	}
 	
 	
@@ -3486,9 +3563,12 @@ Zotero.Tags = new function(){
 		}
 		
 		var purged = [];
+		var notifierData = [];
 		
 		// Clear tag entries in internal array
 		for each(var tag in toDelete) {
+			notifierData.push(Zotero.Tags.toArray(tag.tagID));
+			
 			purged.push(tag.tagID);
 			if (_tags[tag.tagType]) {
 				delete _tags[tag.tagType][tag.tag];
@@ -3502,9 +3582,16 @@ Zotero.Tags = new function(){
 		
 		Zotero.DB.commitTransaction();
 		
-		Zotero.Notifier.trigger('delete', 'tag', purged);
+		Zotero.Notifier.trigger('delete', 'tag', purged, notifierData);
 		
 		return toDelete;
+	}
+	
+	
+	function toArray(tagID) {
+		var obj = this.get(tagID);
+		obj.id = tagID;
+		return obj;
 	}
 }
 

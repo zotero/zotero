@@ -38,9 +38,6 @@ Zotero.Notifier = new function(){
 	this.begin = begin;
 	this.commit = commit;
 	this.reset = reset;
-	this.disable = disable;
-	this.enable = enable;
-	this.isEnabled = isEnabled;
 	
 	
 	function registerObserver(ref, types){
@@ -109,31 +106,36 @@ Zotero.Notifier = new function(){
 	*
 	* Possible values:
 	*
-	* 	event: 'add', 'modify', 'delete', 'move' (c, for changing parent),
-	*		'remove' (i, for removing from collections)
-	* 	type - 'collection', 'search', 'item'
+	* 	event: 'add', 'modify', 'delete', 'move' ('c', for changing parent),
+	*		'remove' (ci, it)
+	* 	type - 'collection', 'search', 'item', 'collection-item', 'item-tag', 'tag'
 	* 	ids - single id or array of ids
 	*
-	* c = collection, s = search, i = item, t = tag, it = item-tag
-	*
-	*
 	* Notes:
-	*
-	* - add-item is currently used for both item creation and adding an
-	* existing item to a collection
 	*
 	* - If event queuing is on, events will not fire until commit() is called
 	* unless _force_ is true.
 	*
 	* - New events and types should be added to the order arrays in commit()
 	**/
-	function trigger(event, type, ids, force){
+	function trigger(event, type, ids, extraData, force){
 		if (_disabled){
 			return false;
 		}
 		
 		if (_types && _types.indexOf(type) == -1){
 			throw ('Invalid type ' + type + ' in Notifier.trigger()');
+		}
+		
+		switch (type) {
+			case 'modify':
+			case 'delete':
+				if (!extraData) {
+					throw ("Extra data must be supplied with Notifier type '" + type + "'");
+				}
+				if (extraData.constructor.name != 'Array') {
+					extraData = [extraData];
+				}
 		}
 		
 		ids = Zotero.flattenArguments(ids);
@@ -148,10 +150,15 @@ Zotero.Notifier = new function(){
 				_queue[type] = [];
 			}
 			if (!_queue[type][event]) {
-				_queue[type][event] = [];
+				_queue[type][event] = {};
+			}
+			if (!_queue[type][event].ids) {
+				_queue[type][event].ids = [];
+				_queue[type][event].data = [];
 			}
 			
-			_queue[type][event] = _queue[type][event].concat(ids);
+			_queue[type][event].ids = _queue[type][event].ids.concat(ids);
+			_queue[type][event].data = _queue[type][event].data.concat(extraData);
 			
 			return true;
 		}
@@ -160,7 +167,13 @@ Zotero.Notifier = new function(){
 			Zotero.debug("Calling notify() on observer with hash '" + i + "'", 4);
 			// Find observers that handle notifications for this type (or all types)
 			if (!_observers.get(i).types || _observers.get(i).types.indexOf(type)!=-1){
-				_observers.get(i).ref.notify(event, type, ids);
+				_observers.get(i).ref.notify(event, type, ids, extraData);
+				
+				/*
+				if (extraData) {
+					Zotero.debug(extraData);
+				}
+				*/
 			}
 		}
 		
@@ -213,7 +226,7 @@ Zotero.Notifier = new function(){
 		var runQueue = [];
 		
 		function sorter(a, b) {
-			return order.indexOf(a) - order.indexOf(b);
+			return order.indexOf(b) - order.indexOf(a);
 		}
 		var order = ['collection', 'search', 'item', 'collection-item', 'item-tag', 'tag'];
 		_queue.sort();
@@ -228,16 +241,32 @@ Zotero.Notifier = new function(){
 			_queue[type].sort();
 			
 			for (var event in _queue[type]) {
-				runQueue[type][event] = [];
+				runQueue[type][event] = {
+					ids: [],
+					data: []
+				};
 				
 				// Remove redundant ids
-				for each(var id in _queue[type][event]) {
-					if (runQueue[type][event].indexOf(id) == -1) {
-						runQueue[type][event].push(id);
+				for (var i=0; i<_queue[type][event].ids.length; i++) {
+					var id = _queue[type][event].ids[i];
+					var data = _queue[type][event].data[i];
+					
+					// Don't send modify on nonexistent items
+					if (event == 'modify') {
+						if (!Zotero.Items.get(id)) {
+							continue;
+						}
+					}
+					
+					if (runQueue[type][event].ids.indexOf(id) == -1) {
+						runQueue[type][event].ids.push(id);
+						runQueue[type][event].data.push(data);
 					}
 				}
 				
-				totals += ' [' + event + '-' + type + ': ' + runQueue[type][event].length + ']';
+				if (runQueue[type][event].ids.length) {
+					totals += ' [' + event + '-' + type + ': ' + runQueue[type][event].ids.length + ']';
+				}
 			}
 		}
 		
@@ -246,8 +275,9 @@ Zotero.Notifier = new function(){
 			
 			for (var type in runQueue) {
 				for (var event in runQueue[type]) {
-					if (runQueue[type][event].length) {
-						trigger(event, type, runQueue[type][event], true);
+					if (runQueue[type][event].ids.length) {
+						trigger(event, type, runQueue[type][event].ids,
+							runQueue[type][event].data, true);
 					}
 				}
 			}
@@ -264,25 +294,5 @@ Zotero.Notifier = new function(){
 		_locked = false;
 		_queue = [];
 		_inTransaction = false;
-	}
-	
-	
-	/*
-	 * These should probably no longer be used now that we have event queuing
-	 */
-	function disable(){
-		Zotero.debug('Disabling Notifier notifications');
-		_disabled = true;
-	}
-	
-	
-	function enable(){
-		Zotero.debug('Enabling Notifier notifications');
-		_disabled = false;
-	}
-	
-	
-	function isEnabled(){
-		return !_disabled;
 	}
 }
