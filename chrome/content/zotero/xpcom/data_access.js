@@ -2714,8 +2714,8 @@ Zotero.Collection.prototype.changeParent = function(parent){
 		(parent ? parent : null)
 	];
 	
-	// TODO: only reload the necessary ones
 	Zotero.Collections.reloadAll();
+	
 	Zotero.Notifier.trigger('move', 'collection', notifyIDs, notifierData);
 	return true;
 }
@@ -2852,6 +2852,8 @@ Zotero.Collection.prototype.erase = function(deleteItems){
 	// Clear deleted collection from internal memory
 	Zotero.Collections.unload(collections);
 	
+	Zotero.Collections.reloadAll();
+	
 	Zotero.Notifier.trigger('delete', 'collection', collections, notifierData);
 }
 
@@ -2979,7 +2981,7 @@ Zotero.Collections = new function(){
 	 */
 	function get(id){
 		if (!_collectionsLoaded){
-			_load();
+			this.reloadAll();
 		}
 		return (typeof _collections[id]!='undefined') ? _collections[id] : false;
 	}
@@ -3015,19 +3017,11 @@ Zotero.Collections = new function(){
 		
 		Zotero.DB.commitTransaction();
 		
-		_load(rnd);
+		this.reloadAll();
+		
 		Zotero.Notifier.trigger('add', 'collection', rnd);
 		
 		return this.get(rnd);
-	}
-	
-	
-	/**
-	* Clears internal cache and reloads collection data from DB
-	**/
-	function reloadAll(){
-		_collections = new Array();
-		_load();
 	}
 	
 	
@@ -3048,7 +3042,7 @@ Zotero.Collections = new function(){
 	/**
 	* Loads collection data from DB and adds to internal cache
 	**/
-	function _load(){
+	function reloadAll() {
 		// This should be the same as the query in Zotero.Collection.loadFromID,
 		// just without a specific collectionID
 		var sql = "SELECT collectionID, collectionName, parentCollectionID, "
@@ -3065,9 +3059,12 @@ Zotero.Collections = new function(){
 		
 		var result = Zotero.DB.query(sql);
 		
+		var collectionIDs = [];
+		
 		if (result){
 			for (var i=0; i<result.length; i++){
 				var collectionID = result[i]['collectionID'];
+				collectionIDs.push(collectionID);
 				
 				// If collection doesn't exist, create new object and stuff in array
 				if (!_collections[collectionID]){
@@ -3081,6 +3078,14 @@ Zotero.Collections = new function(){
 				}
 			}
 		}
+		
+		// Remove old collections that no longer exist
+		for each(var c in _collections) {
+			if (collectionIDs.indexOf(c.getID()) == -1) {
+				this.unload(c.getID());
+			}
+		}
+		
 		_collectionsLoaded = true;
 	}
 }

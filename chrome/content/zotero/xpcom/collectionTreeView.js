@@ -269,15 +269,16 @@ Zotero.CollectionTreeView.prototype.isContainerOpen = function(row)
 	return this._dataItems[row][1];
 }
 
+/*
+ * Returns true if the collection has no child collections
+ */
 Zotero.CollectionTreeView.prototype.isContainerEmpty = function(row)
 {
-	//NOTE: this returns true if the collection has no child collections
-	
 	var itemGroup = this._getItemAtRow(row);
-	if(itemGroup.isCollection())
+	if (itemGroup.isCollection()) {
 		return !itemGroup.ref.hasChildCollections();
-	else
-		return true;
+	}
+	return true;
 }
 
 Zotero.CollectionTreeView.prototype.getLevel = function(row)
