@@ -1316,7 +1316,10 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 		}
 	}
 	
-	if(item.tags) {
+	// handle tags, if this is an import translation or automatic tagging is
+	// enabled in the preferences (as it is by default)
+	if(item.tags &&
+	  (this.type == "import" || Zotero.Prefs.get("automaticTags"))) {
 		for each(var tag in item.tags) {
 			if(typeof(tag) == "string") {
 				// accept strings in tag array as automatic tags, or, if

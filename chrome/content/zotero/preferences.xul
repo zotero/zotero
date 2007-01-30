@@ -49,6 +49,7 @@ To add a new preference:
 			<preference id="pref-parseEndNoteMIMETypes" name="extensions.zotero.parseEndNoteMIMETypes" type="bool" onchange="Zotero.Ingester.MIMEHandler.init()"/>
 			<preference id="pref-automaticSnapshots" name="extensions.zotero.automaticSnapshots" type="bool"/>
 			<preference id="pref-downloadAssociatedFiles" name="extensions.zotero.downloadAssociatedFiles" type="bool"/>
+			<preference id="pref-automaticTags" name="extensions.zotero.automaticTags" type="bool"/>
 			<preference id="pref-openURL-resolver" name="extensions.zotero.openURL.resolver" type="string"/>
 			<preference id="pref-openURL-version" name="extensions.zotero.openURL.version" type="string"/>
 		</preferences>
@@ -88,6 +89,7 @@ To add a new preference:
 			<checkbox label="&zotero.preferences.parseEndnote;" preference="pref-parseEndNoteMIMETypes"/>
 			<checkbox label="&zotero.preferences.automaticSnapshots;" preference="pref-automaticSnapshots"/>
 			<checkbox label="&zotero.preferences.downloadAssociatedFiles;" preference="pref-downloadAssociatedFiles"/>
+			<checkbox label="&zotero.preferences.automaticTags;" preference="pref-automaticTags"/>
 		</groupbox>
 		
 		<groupbox>
