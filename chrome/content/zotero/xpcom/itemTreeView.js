@@ -1046,7 +1046,7 @@ Zotero.ItemTreeView.prototype.canDrop = function(row, orient)
 				// DISABLED: move parent on child drag
 				//var source = item.isRegularItem() ? false : item.getSource();
 				//if (!this._itemGroup.ref.hasItem(source ? source : id))
-				if (!this._itemGroup.ref.hasItem(id))
+				if (this._itemGroup.ref && !this._itemGroup.ref.hasItem(id))
 				{
 					return true;
 				}

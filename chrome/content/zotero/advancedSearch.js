@@ -6,8 +6,9 @@ var ZoteroAdvancedSearch = new function() {
 	this.onDblClick = onDblClick;
 	this.onUnload = onUnload;
 	
+	this.itemsView = false;
+	
 	var _searchBox;
-	var _itemsView;
 	
 	function onLoad() {
 		_searchBox = document.getElementById('zotero-search-box');
@@ -31,18 +32,18 @@ var ZoteroAdvancedSearch = new function() {
 			isSearch: function () { return true; }
 		}
 		
-		if (_itemsView) {
-			_itemsView.unregister();
+		if (this.itemsView) {
+			this.itemsView.unregister();
 		}
 		
-		_itemsView = new Zotero.ItemTreeView(itemGroup, false);
-		document.getElementById('zotero-items-tree').view = _itemsView;
+		this.itemsView = new Zotero.ItemTreeView(itemGroup, false);
+		document.getElementById('zotero-items-tree').view = this.itemsView;
 	}
 	
 	
 	function clear() {
-		if (_itemsView) {
-			_itemsView.unregister();
+		if (this.itemsView) {
+			this.itemsView.unregister();
 		}
 		document.getElementById('zotero-items-tree').view = null;
 		
@@ -90,9 +91,9 @@ var ZoteroAdvancedSearch = new function() {
 			tree.treeBoxObject.getCellAt(event.clientX, event.clientY, row, col, obj);
 			// obj.value == cell/text/image
 			// TODO: handle collection double-click
-			if (obj.value && _itemsView && _itemsView.selection.currentIndex > -1)
+			if (obj.value && this.itemsView && this.itemsView.selection.currentIndex > -1)
 			{
-				var item = _itemsView.getSelectedItems()[0];
+				var item = this.itemsView.getSelectedItems()[0];
 				
 				var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
 							   .getService(Components.interfaces.nsIWindowMediator);
@@ -118,8 +119,8 @@ var ZoteroAdvancedSearch = new function() {
 	
 	function onUnload() {
 		// Unregister search from Notifier
-		if (_itemsView) {
-			_itemsView.unregister();
+		if (this.itemsView) {
+			this.itemsView.unregister();
 		}
 	}
 }

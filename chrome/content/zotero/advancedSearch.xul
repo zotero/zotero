@@ -21,6 +21,8 @@
 	
 	<script src="include.js"/>
 	<script src="advancedSearch.js"/>
+	<script src="chrome://global/content/nsDragAndDrop.js"/>
+	<script src="chrome://global/content/nsTransferable.js"/>
 	
 	<hbox>
 		<zoterosearch id="zotero-search-box" oncommand="ZoteroAdvancedSearch.search()" flex="1"/>
@@ -33,7 +35,8 @@
 	</hbox>
 	
 	<tree id="zotero-items-tree" flex="1" hidecolumnpicker="true" seltype="multiple"
-			ondblclick="ZoteroAdvancedSearch.onDblClick(event, this)">
+			ondblclick="ZoteroAdvancedSearch.onDblClick(event, this)"
+			ondraggesture="if (event.target.localName == 'treechildren') { nsDragAndDrop.startDrag(event, ZoteroAdvancedSearch.itemsView); }">
 		<treecols>
 			<treecol
 				id="zotero-items-column-title" primary="true"
