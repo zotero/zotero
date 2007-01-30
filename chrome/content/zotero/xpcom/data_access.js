@@ -1868,18 +1868,8 @@ Zotero.Item.prototype.erase = function(deleteChildren){
 	// Remove item from parent collections
 	var parentCollectionIDs = this.getCollections();
 	if (parentCollectionIDs){
-		var notifierState = Zotero.Notifier.isEnabled();
-		Zotero.Notifier.disable();
-		
 		for (var i=0; i<parentCollectionIDs.length; i++){
 			Zotero.Collections.get(parentCollectionIDs[i]).removeItem(this.getID());
-		}
-		
-		if (notifierState){
-			Zotero.Notifier.enable();
-		}
-		else {
-			Zotero.Notifier.disable();
 		}
 	}
 	
@@ -2373,7 +2363,7 @@ Zotero.Items = new function(){
 				var item = this.get(id);
 				if (!item) {
 					Zotero.debug('Item ' + id + ' does not exist in Items.erase()!', 1);
-					Zotero.Notifier.trigger('item', 'delete', id);
+					Zotero.Notifier.trigger('delete', 'item', id);
 					continue;
 				}
 				item.erase(eraseChildren); // calls unload()
