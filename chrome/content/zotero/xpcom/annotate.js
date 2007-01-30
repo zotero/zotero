@@ -49,18 +49,27 @@ Zotero.Annotate = new function() {
 		var path = {parent:"", textNode:null, offset:(offset ? offset : null)};
 		
 		var lastWasTextNode = node.nodeType == textType;
-		
-		// if the selected point is inside a highlight node
-		if(node.parentNode.getAttribute && node.parentNode.getAttribute("zotero")) {
-			// add offsets of preceding text nodes in this zotero node			
+
+		if(node.parentNode.getAttribute && node.parentNode.getAttribute("zotero")) {		
+			// if the selected point is inside a highlight node, add offsets of
+			// preceding text nodes in this zotero node			
 			var sibling = node.previousSibling;
 			while(sibling) {
-				if(child.nodeType == textType) path.offset += child.nodeValue.length;
+				if(sibling.nodeType == textType) path.offset += sibling.nodeValue.length;
 				sibling = sibling.previousSibling;
 			}
 			
 			// use parent node for future purposes
 			node = node.parentNode;
+		} else if(node.getAttribute && node.getAttribute("zotero")) {
+			// if selected point is a zotero node, move it to the last character
+			// of the previous node
+			node = node.previousSibling;
+			if(node.nodeType == textType) {
+				offset = node.nodeValue.length;
+			} else {
+				offset = 0;
+			}
 		}
 		
 		if(lastWasTextNode) {
@@ -327,6 +336,87 @@ Zotero.Annotations.prototype.createHighlight = function(selectedRange) {
 	highlight.initWithRange(selectedRange);
 	this.highlights.push(highlight);
 	return highlight;
+}
+
+Zotero.Annotations.prototype.unhighlight = function(selectedRange) {
+	// first, see if part of this range is already covered
+	for(var i in this.highlights) {
+		var compareHighlight = this.highlights[i];
+		var compareRange = compareHighlight.range;
+		
+		var startToStart = compareRange.compareBoundaryPoints(Components.interfaces.nsIDOMRange.START_TO_START, selectedRange);
+		var endToEnd = compareRange.compareBoundaryPoints(Components.interfaces.nsIDOMRange.END_TO_END, selectedRange);
+		
+		var done = false;
+		
+		if(startToStart == -1 && endToEnd == 1) {
+			Zotero.debug("checkpoint 1");
+			// there's a bug in Mozilla's handling of ranges
+			var selectStartPoint = Zotero.Annotate.getPathForPoint(selectedRange.startContainer, selectedRange.startOffset);
+			var compareStartPoint = Zotero.Annotate.getPathForPoint(compareRange.startContainer, compareRange.startOffset);
+			if(selectStartPoint.parent == compareStartPoint.parent &&
+			   selectStartPoint.textNode == compareStartPoint.textNode &&
+			   selectStartPoint.offset == compareStartPoint.offset) {
+				startToStart = 0;
+			} else {				
+				var selectEndPoint = Zotero.Annotate.getPathForPoint(selectedRange.endContainer, selectedRange.endOffset);
+				var compareEndPoint = Zotero.Annotate.getPathForPoint(compareRange.endContainer, compareRange.endOffset);
+				if(selectEndPoint.parent == compareEndPoint.parent &&
+				   selectEndPoint.textNode == compareEndPoint.textNode &&
+				   selectEndPoint.offset == compareEndPoint.offset) {
+					endToEnd = 0;
+				} else {
+					// this will unhighlight the entire end
+					compareHighlight.unhighlight(selectedRange.startContainer, selectedRange.startOffset, 2);
+					
+					// need to use point references because they disregard highlights
+					var newRange = this.document.createRange();
+					var startPoint = Zotero.Annotate.getPointForPath(selectEndPoint.parent, selectEndPoint.textNode, selectEndPoint.offset,
+						this.document, this.nsResolver);
+					var endPoint = Zotero.Annotate.getPointForPath(compareEndPoint.parent, compareEndPoint.textNode, compareEndPoint.offset,
+						this.document, this.nsResolver);
+					newRange.setStart(startPoint.node, startPoint.offset);
+					newRange.setEnd(endPoint.node, endPoint.offset);
+					
+					// create new node
+					var highlight = new Zotero.Highlight(this);
+					highlight.initWithRange(newRange);
+					this.highlights.push(highlight);
+					
+					done = true;
+				}
+			}
+		}
+		
+		if(!done) {
+			if(startToStart != -1 && endToEnd != 1) {
+				Zotero.debug("checkpoint 2");
+				// if this range is inside selected range, delete
+				compareHighlight.unhighlight(null, null, 0);
+				
+				this.highlights[i] = undefined;
+				delete this.highlights[i];
+			} else {
+				var endToStart = compareRange.compareBoundaryPoints(Components.interfaces.nsIDOMRange.END_TO_START, selectedRange);
+				if(endToStart != 1 && endToEnd != -1) {
+					Zotero.debug("checkpoint 3");
+					// if the end of the selected range is between the start and
+					// end of this range
+					//compareRange.setStart(selectedRange.endContainer, selectedRange.endOffset);
+					compareHighlight.unhighlight(selectedRange.endContainer, selectedRange.endOffset, 1);
+				} else {
+					var startToEnd = compareRange.compareBoundaryPoints(Components.interfaces.nsIDOMRange.START_TO_END, selectedRange);
+					if(startToEnd != -1 && startToStart != 1) {
+						Zotero.debug("checkpoint 4");
+						// if the start of the selected range is between the
+						// start and end of this range
+						//compareRange.setEnd(selectedRange.startContainer, selectedRange.startOffset);
+						compareHighlight.unhighlight(selectedRange.startContainer, selectedRange.startOffset, 2);
+					}
+				}
+			}
+		}
+	}
 }
 
 Zotero.Annotations.prototype.refresh = function() {
@@ -660,40 +750,84 @@ Zotero.Highlight.prototype.save = function(index) {
 	Zotero.DB.query(query, parameters);	
 }
 
-Zotero.Highlight.prototype.remove = function() {
+/**
+ * Un-highlights a range. 
+ *
+ * mode can be:
+ *     0: unhighlight all
+ *     1: unhighlight from start to point
+ *     2: unhighlight from point to end
+ **/
+Zotero.Highlight.prototype.unhighlight = function(container, offset, mode) {
 	var textType = Components.interfaces.nsIDOMNode.TEXT_NODE;
 	
-	for each(var span in this.spans) {
-		var parentNode = span.parentNode;
-		
-		// deal with split text nodes
-		if(span.childNodes.length == 1 && span.previousSibling && span.nextSibling &&
-		  textType == span.previousSibling.nodeType == span.firstChild.nodeType == span.nextSibling.nodeType) {
-			span.previousSibling.nodeValue += span.firstChild.nodeValue + span.nextSibling.nodeValue;
-			span.removeChild(span.firstChild);
-			parentNode.removeChild(span.nextSibling);
-		} else if(span.previousSibling &&
-		          textType == span.firstChild.nodeType == span.previousSibling.nodeType) {
-			span.previousSibling.nodeValue += span.firstChild.nodeValue;
-			span.removeChild(span.firstChild);
-		} else if(span.nextSibling &&
-		          textType == span.lastChild.nodeType == span.nextSibling.nodeType) {
-			span.nextSibling.nodeValue = span.lastChild.nodeValue + span.nextSibling.nodeValue;
-			span.removeChild(span.lastChild);
-		}
-		
-		// attach child nodes before
-		while(span.firstChild) {
-			var child = span.firstChild;
-			span.removeChild(child);
-			parentNode.insertBefore(child, span);
-		}
-		
-		// remove span from tree
-		parentNode.removeChild(span);
+	if(mode == 1) {
+		this.range.setStart(container, offset);
+	} else if(mode == 2) {
+		this.range.setEnd(container, offset);
 	}
 	
-	this.spans = new Array();
+	for(var i in this.spans) {
+		var span = this.spans[i];
+		var parentNode = span.parentNode;
+		
+		if(mode != 0 && span.isSameNode(container.parentNode) && offset != 0) {
+			if(mode == 1) {
+				// split text node
+				var textNode = container.splitText(offset);
+				this.range.setStart(textNode, 0);
+				
+				if(span.nextSibling && span.nextSibling.nodeType == span.lastChild == textType) {
+					// attach last node to next text node if possible
+					span.nextSibling.nodeValue = span.lastChild.nodeValue + span.nextSibling.nodeValue;
+					span.removeChild(span.lastChild);
+				}
+				
+				// loop through, removing nodes
+				var node = span.firstChild;
+				
+				while(span.firstChild && !span.firstChild.isSameNode(textNode)) {
+					parentNode.insertBefore(span.removeChild(span.firstChild), span);
+				}
+			} else if(mode == 2) {
+				// split text node
+				var textNode = container.splitText(offset);
+				
+				if(span.previousSibling && span.previousSibling.nodeType == span.firstChild == textType) {
+					// attach last node to next text node if possible
+					span.previousSibling.nodeValue += span.firstChild.nodeValue;
+					span.removeChild(span.firstChild);
+				}
+				
+				// loop through, removing nodes
+				var node = textNode;
+				var child = node;
+				
+				while(node) {
+					child = node;
+					node = node.nextSibling;
+					
+					span.removeChild(child);
+					parentNode.insertBefore(child, span.nextSibling);
+				}
+				
+				this.range.setEnd(textNode, 0);
+			}
+		} else if(mode == 0 || !this.range.isPointInRange(span, 1)) {
+			Zotero.debug("point is in range");
+			
+			// attach child nodes before
+			while(span.hasChildNodes()) {
+				Zotero.debug("moving "+span.firstChild.textContent);
+				span.parentNode.insertBefore(span.removeChild(span.firstChild), span);
+			}
+			
+			// remove span from DOM
+			span.parentNode.removeChild(span);
+		}
+		
+		parentNode.normalize();
+	}
 }
 
 Zotero.Highlight.prototype._highlight = function() {

@@ -40,8 +40,7 @@ var Zotero_Browser = new function() {
 	this.init = init;
 	this.scrapeThisPage = scrapeThisPage;
 	this.annotateThisPage = annotateThisPage;
-	this.toggleAnnotateMode = toggleAnnotateMode;
-	this.toggleHighlightMode = toggleHighlightMode;
+	this.toggleMode = toggleMode;
 	this.chromeLoad = chromeLoad;
 	this.chromeUnload = chromeUnload;
 	this.contentLoad = contentLoad;
@@ -66,6 +65,24 @@ var Zotero_Browser = new function() {
 		"questionmarket.com",
 		"atdmt.com"
 	];
+	
+	var tools = {
+		'zotero-annotate-tb-add':{
+			cursor:"pointer",
+			event:"click",
+			callback:function(e) { _add("annotation", e) }
+		},
+		'zotero-annotate-tb-highlight':{
+			cursor:"text",
+			event:"mouseup",
+			callback:function(e) { _add("highlight", e) }
+		},
+		'zotero-annotate-tb-unhighlight':{
+			cursor:"text",
+			event:"mouseup",
+			callback:function(e) { _add("unhighlight", e) }
+		}
+	};
 
 	//////////////////////////////////////////////////////////////////////////////
 	//
@@ -107,48 +124,31 @@ var Zotero_Browser = new function() {
 		tab.annotateNextLoad = true;
 		tab.annotateID = id;
 	}
-		
-	/*
-	 * toggles the "add annotation" button
-	 */
-	function toggleAnnotateMode() {
-		if(document.getElementById('zotero-annotate-tb-highlight').getAttribute("tool-active")) {
-			toggleHighlightMode();
-		}
-		
-		var body = Zotero_Browser.tabbrowser.selectedBrowser.contentDocument.getElementsByTagName("body")[0];
-		var addElement = document.getElementById('zotero-annotate-tb-add');
-		
-		if(addElement.getAttribute("tool-active")) {
-			body.style.cursor = "auto";
-			addElement.removeAttribute("tool-active");
-			Zotero_Browser.tabbrowser.selectedBrowser.removeEventListener("click", _addAnnotation, true);
-		} else {
-			body.style.cursor = "pointer";
-			addElement.setAttribute("tool-active", "true");
-			Zotero_Browser.tabbrowser.selectedBrowser.addEventListener("click", _addAnnotation, true);
-		}
-	}
 	
-	/*
-	 * toggles the "higlight" button
-	 */
-	function toggleHighlightMode() {
-		if(document.getElementById('zotero-annotate-tb-add').getAttribute("tool-active")) {
-			toggleAnnotateMode();
+	function toggleMode(toggleTool, ignoreOtherTools) {
+		// make sure other tools are turned off
+		if(!ignoreOtherTools) {
+			for(var tool in tools) {
+				if(tool != toggleTool && document.getElementById(tool).getAttribute("tool-active")) {
+					toggleMode(tool, true);
+				}
+			}
 		}
 		
+		if(!toggleTool) return;
+		
 		var body = Zotero_Browser.tabbrowser.selectedBrowser.contentDocument.getElementsByTagName("body")[0];
-		var addElement = document.getElementById('zotero-annotate-tb-highlight');
+		var addElement = document.getElementById(toggleTool);
 		
 		if(addElement.getAttribute("tool-active")) {
+			// turn off
 			body.style.cursor = "auto";
 			addElement.removeAttribute("tool-active");
-			Zotero_Browser.tabbrowser.selectedBrowser.removeEventListener("mouseup", _addHighlight, true);
+			Zotero_Browser.tabbrowser.selectedBrowser.removeEventListener(tools[toggleTool].event, tools[toggleTool].callback, true);
 		} else {
-			body.style.cursor = "text";
+			body.style.cursor = tools[toggleTool].cursor;
 			addElement.setAttribute("tool-active", "true");
-			Zotero_Browser.tabbrowser.selectedBrowser.addEventListener("mouseup", _addHighlight, true);
+			Zotero_Browser.tabbrowser.selectedBrowser.addEventListener(tools[toggleTool].event, tools[toggleTool].callback, true);
 		}
 	}
 	
@@ -326,7 +326,7 @@ var Zotero_Browser = new function() {
 	function tabClose(event) {
 		// To execute if document object does not exist
 		_deleteTabObject(event.target.linkedBrowser);
-		_deselectTools();
+		toggleMode(null);
 	}
 	
 	/*
@@ -442,59 +442,43 @@ var Zotero_Browser = new function() {
 		// set annotation bar status
 		if(tab.page.annotations) {
 			document.getElementById('zotero-annotate-tb').hidden = false;
-			_deselectTools();
+			toggleMode();
 		} else {
 			document.getElementById('zotero-annotate-tb').hidden = true;
 		}
 	}
 	
 	/*
-	 * Deselects annotation tools
-	 */
-	function _deselectTools() {
-		if(document.getElementById('zotero-annotate-tb-add').getAttribute("tool-active")) {
-			toggleAnnotateMode();
-		}
-		if(document.getElementById('zotero-annotate-tb-highlight').getAttribute("tool-active")) {
-			toggleHighlightMode();
-		}
-	}
-	
-	/*
 	 * adds an annotation
 	 */
-	 function _addAnnotation(e) {
+	 function _add(type, e) {
 		var tab = _getTabObject(Zotero_Browser.tabbrowser.selectedBrowser);
 		
-		// ignore click if it's on an existing annotation
-		if(e.target.getAttribute("zotero-annotation")) return;
-		
-		var annotation = tab.page.annotations.createAnnotation();
-		annotation.initWithEvent(e);
-		
-		// stop propagation
-		e.stopPropagation();
-		e.preventDefault();
-		
-		// disable add mode, now that we've used it
-		toggleAnnotateMode();
-	 }
-	 
-	 /*
-	  * adds a highlight
-	  */
-	 function _addHighlight(e) {
-		var tab = _getTabObject(Zotero_Browser.tabbrowser.selectedBrowser);
-		
-		try {
-		 	var selection = Zotero_Browser.tabbrowser.selectedBrowser.contentWindow.getSelection();
-		} catch(err) {
-			return;
+		if(type == "annotation") {
+			// ignore click if it's on an existing annotation
+			if(e.target.getAttribute("zotero-annotation")) return;
+			
+			var annotation = tab.page.annotations.createAnnotation();
+			annotation.initWithEvent(e);
+			
+			// disable add mode, now that we've used it
+			toggleMode();
+		} else {
+			try {
+				var selection = Zotero_Browser.tabbrowser.selectedBrowser.contentWindow.getSelection();
+			} catch(err) {
+				return;
+			}
+			if(selection.isCollapsed) return;
+			
+			if(type == "highlight") {
+	 			tab.page.annotations.createHighlight(selection.getRangeAt(0));
+			} else if(type == "unhighlight") {
+	 			tab.page.annotations.unhighlight(selection.getRangeAt(0));
+			}
+			
+			selection.removeAllRanges();
 		}
-	 	if(selection.isCollapsed) return;
-	 	
-	 	tab.page.annotations.createHighlight(selection.getRangeAt(0));
-		selection.removeAllRanges();
 		
 		// stop propagation
 		e.stopPropagation();

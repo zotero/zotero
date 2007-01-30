@@ -95,3 +95,4 @@
 
 <!ENTITY zotero.annotate.toolbar.add.label				"Add Annotation">
 <!ENTITY zotero.annotate.toolbar.highlight.label		"Highlight Text">
+<!ENTITY zotero.annotate.toolbar.unhighlight.label		"Unhighlight Text">

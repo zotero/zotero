@@ -257,6 +257,11 @@
 	list-style-image: url('chrome://zotero/skin/annotate-highlight.png');
 }
 
+#zotero-annotate-tb-unhighlight
+{
+	list-style-image: url('chrome://zotero/skin/annotate-unhighlight.png');
+}
+
 #zotero-annotate-tb-add[tool-active=true]
 {
 	list-style-image: url('chrome://zotero/skin/annotate-add-selected.png');
@@ -265,4 +270,9 @@
 #zotero-annotate-tb-highlight[tool-active=true]
 {
 	list-style-image: url('chrome://zotero/skin/annotate-highlight-selected.png');
+}
+
+#zotero-annotate-tb-unhighlight[tool-active=true]
+{
+	list-style-image: url('chrome://zotero/skin/annotate-unhighlight-selected.png');
 }
