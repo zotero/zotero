@@ -117,20 +117,21 @@
 					]]>
 				</body>
 			</method>
-			<method name="updateRecursive">
+			<method name="updateCheckbox">
+				<parameter name="condition"/>
 				<body>
 					<![CDATA[
-						var checkbox = this.id('recursiveCheckbox');
+						var checkbox = this.id(condition + 'Checkbox');
 						var value = checkbox.checked ? 'true' : 'false';
 						if(checkbox.hasAttribute('condition'))
 						{
 							this.search.updateCondition(checkbox.getAttribute('condition'),
-								'recursive', value, null);
+								condition, value, null);
 						}
 						else
 						{
 							checkbox.setAttribute('condition',
-								this.search.addCondition('recursive', value, null));
+								this.search.addCondition(condition, value, null));
 						}
 					]]>
 				</body>
@@ -203,7 +204,10 @@
 					</xul:caption>
 					<xul:vbox id="conditions"/>
 				</xul:groupbox>
-				<xul:checkbox id="recursiveCheckbox" label="&zotero.search.recursive.label;" oncommand="this.parentNode.parentNode.updateRecursive(); event.stopPropagation()"/>
+				<xul:hbox>
+					<xul:checkbox id="recursiveCheckbox" label="&zotero.search.recursive.label;" oncommand="this.parentNode.parentNode.parentNode.updateCheckbox('recursive'); event.stopPropagation()"/>
+					<xul:checkbox id="noChildrenCheckbox" label="&zotero.search.noChildren;" oncommand="this.parentNode.parentNode.parentNode.updateCheckbox('noChildren'); event.stopPropagation()"/>
+				</xul:hbox>
 			</xul:vbox>
 		</content>
 	</binding>

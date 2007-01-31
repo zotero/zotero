@@ -207,6 +207,11 @@ zoterosearchagefield textbox
 	margin: 3px 0;
 }
 
+#zotero-advanced-search-dialog checkbox
+{
+	margin-right: .5em;
+}
+
 #zotero-advanced-search-dialog #zotero-items-tree
 {
 	min-height: 170px;
