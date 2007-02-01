@@ -653,6 +653,12 @@ Zotero.Prefs = new function(){
 }
 
 
+/*
+ * Handles keyboard shortcut initialization from preferences, optionally
+ * overriding existing global shortcuts
+ *
+ * Actions are configured in ZoteroPane.handleKeyPress()
+ */
 Zotero.Keys = new function() {
 	this.init = init;
 	this.windowInit = windowInit;
@@ -663,6 +669,9 @@ Zotero.Keys = new function() {
 	_keys = {};
 	
 	
+	/*
+	 * Called by Zotero.init()
+	 */
 	function init() {
 		// Get the key=>command mappings from the prefs
 		for each (var action in _actions) {
@@ -671,6 +680,9 @@ Zotero.Keys = new function() {
 	}
 	
 	
+	/*
+	 * Called by ZoteroPane.onLoad()
+	 */
 	function windowInit(document) {
 		var useShift = Zotero.isMac;
 		

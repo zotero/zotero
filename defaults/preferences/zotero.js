@@ -21,7 +21,7 @@ pref("extensions.zotero.lastCreatorFieldMode",0);
 pref("extensions.zotero.lastRenameAssociatedFile", false);
 
 // Keyboard shortcuts
-pref("extensions.zotero.keys.overrideGlobal", true);
+pref("extensions.zotero.keys.overrideGlobal", false);
 pref("extensions.zotero.keys.openZotero", 'Z');
 pref("extensions.zotero.keys.toggleFullscreen", 'F');
 pref("extensions.zotero.keys.library", 'L');

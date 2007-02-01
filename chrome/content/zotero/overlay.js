@@ -210,6 +210,9 @@ var ZoteroPane = new function()
 	}
 	
 	
+	/*
+	 * Trigger actions based on keyboard shortcuts
+	 */
 	function handleKeyPress(event) {
 		// Ignore keystrokes if Zotero pane is closed
 		if (document.getElementById('zotero-pane').getAttribute('hidden') == 'true') {
