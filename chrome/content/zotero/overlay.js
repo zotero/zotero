@@ -381,7 +381,7 @@ var ZoteroPane = new function()
 			height = height + 121;
 		}
 		
-		Zotero.debug('Setting Zotero pane minheight to ' + height);
+		//Zotero.debug('Setting Zotero pane minheight to ' + height);
 		zoteroPane.setAttribute('minheight', height);
 		
 		// Fix bug whereby resizing the Z pane downward after resizing
@@ -1125,22 +1125,30 @@ var ZoteroPane = new function()
 	// Adapted from: http://www.xulplanet.com/references/elemref/ref_tree.html#cmnote-9
 	function onDoubleClick(event, tree)
 	{
-		if (event && tree && (event.type == "click" || event.type == "dblclick"))
-		{
+		if (event && tree && event.type == "dblclick") {
 			var row = {}, col = {}, obj = {};
 			tree.treeBoxObject.getCellAt(event.clientX, event.clientY, row, col, obj);
-			// obj.value == cell/text/image
-			// TODO: handle collection double-click
-			if (obj.value && itemsView && itemsView.selection.currentIndex > -1)
-			{
-				var item = getSelectedItems()[0];
-				if(item && item.isNote())
-				{
-					document.getElementById('zotero-view-note-button').doCommand();
+			
+			// obj.value == 'cell'/'text'/'image'
+			if (!obj.value) {
+				return false;
+			}
+			
+			if (tree.id == 'zotero-collections-tree') {
+				var s = this.getSelectedSavedSearch();
+				if (s) {
+					this.editSelectedCollection();
 				}
-				else if(item && item.isAttachment())
-				{
-					viewSelectedAttachment();
+			}
+			else if (tree.id == 'zotero-items-tree') {
+				if (itemsView && itemsView.selection.currentIndex > -1) {
+					var item = getSelectedItems()[0];
+					if (item && item.isNote()) {
+						document.getElementById('zotero-view-note-button').doCommand();
+					}
+					else if (item && item.isAttachment()) {
+						this.viewSelectedAttachment();
+					}
 				}
 			}
 		}
