@@ -43,6 +43,7 @@ To add a new preference:
 	<prefpane id="zotero-prefpane-general" label="&zotero.preferences.prefpane.general;">
 		<preferences>
 			<preference id="pref-zoteroPaneOnTop" name="extensions.zotero.zoteroPaneOnTop" type="bool"/>
+			<preference id="pref-fontSize" name="extensions.zotero.fontSize" type="string"/>
 			<preference id="pref-statusBarIcon" name="extensions.zotero.statusBarIcon" type="int"/>
 			<preference id="pref-automaticScraperUpdates" name="extensions.zotero.automaticScraperUpdates" type="bool"/>
 			<preference id="pref-reportTranslationFailure" name="extensions.zotero.reportTranslationFailure" type="bool"/>
@@ -56,25 +57,52 @@ To add a new preference:
 		
 		<groupbox>
 			<caption label="&zotero.preferences.userInterface;"/>
-			<hbox align="center">
-				<label value="&zotero.preferences.position;" control="positionMenu"/>
-				<menulist id="positionMenu" preference="pref-zoteroPaneOnTop">
-					<menupopup>
-						<menuitem label="&zotero.preferences.position.above;" value="true"/>
-						<menuitem label="&zotero.preferences.position.below;" value="false"/>
-					</menupopup>
-				</menulist>
-				<label value="&zotero.preferences.position.browser;"/>
-			</hbox>
 			
-			<hbox align="center">
-				<label value="&zotero.preferences.statusBarIcon;" control="statusBarIcon"/>
-				<radiogroup id="statusBarIcon" orient="horizontal" preference="pref-statusBarIcon">
-					<radio src="chrome://zotero/skin/zotero_status_bar.png" value="2"/>
-					<radio src="chrome://zotero/skin/zotero_status_bar_compact.png" value="1"/>
-					<radio label="None" value="0"/>
-				</radiogroup>
-			</hbox>
+			<grid>
+				<columns>
+					<column/>
+					<column flex="1"/>
+				</columns>
+			
+				<rows>
+					<row>
+						<hbox>
+							<label value="&zotero.preferences.position;" control="positionMenu"/>
+						</hbox>
+						<hbox>
+							<menulist id="positionMenu" preference="pref-zoteroPaneOnTop">
+								<menupopup>
+									<menuitem label="&zotero.preferences.position.above;" value="true"/>
+									<menuitem label="&zotero.preferences.position.below;" value="false"/>
+								</menupopup>
+							</menulist>
+							<label value="&zotero.preferences.position.browser;"/>
+						</hbox>
+					</row>
+					
+					<row>
+						<hbox>
+							<label value="&zotero.preferences.fontSize;" control="fontSize"/>
+						</hbox>
+						<radiogroup id="fontSize" orient="horizontal" preference="pref-fontSize">
+							<radio id="fontSize1" label="Small" value="1.0"/>
+							<radio id="fontSize2" label="Medium" value="1.25"/>
+							<radio id="fontSize3" label="Large" value="1.5"/>
+						</radiogroup>
+					</row>
+					
+					<row>
+						<hbox>
+							<label value="&zotero.preferences.statusBarIcon;" control="statusBarIcon"/>
+						</hbox>
+						<radiogroup id="statusBarIcon" orient="horizontal" preference="pref-statusBarIcon">
+							<radio src="chrome://zotero/skin/zotero_status_bar.png" value="2"/>
+							<radio src="chrome://zotero/skin/zotero_status_bar_compact.png" value="1"/>
+							<radio label="None" value="0"/>
+						</radiogroup>
+					</row>
+				</rows>
+			</grid>
 			
 			<label class="statusLine" value="&zotero.preferences.keys.changesTakeEffect;"/>
 		</groupbox>

@@ -15,6 +15,7 @@ pref("extensions.zotero.downloadAssociatedFiles",false);
 pref("extensions.zotero.reportTranslationFailure",true);
 pref("extensions.zotero.enableMacClipboard",false);
 pref("extensions.zotero.automaticTags",true);
+pref("extensions.zotero.fontSize", "1.0");
 
 pref("extensions.zotero.lastCreatorFieldMode",0);
 pref("extensions.zotero.lastRenameAssociatedFile", false);

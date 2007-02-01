@@ -108,6 +108,20 @@ var ZoteroPane = new function()
 			document.getElementById('zotero-tb-fullscreen').setAttribute('zoterotop','true');
 		}
 		
+		// Font size
+		document.getElementById('zotero-pane').style.fontSize = Zotero.Prefs.get('fontSize') + 'em';
+		var size = Zotero.Prefs.get('fontSize');
+		if (size <= 1) {
+			size = 'small';
+		}
+		else if (size <= 1.25) {
+			size = 'medium';
+		}
+		else {
+			size = 'large';
+		}
+		document.getElementById('zotero-pane').setAttribute('fontSize', size);
+		
 		//Initialize collections view
 		collectionsView = new Zotero.CollectionTreeView();
 		var collectionsTree = document.getElementById('zotero-collections-tree');
@@ -1131,7 +1145,7 @@ var ZoteroPane = new function()
 			
 			// obj.value == 'cell'/'text'/'image'
 			if (!obj.value) {
-				return false;
+				return;
 			}
 			
 			if (tree.id == 'zotero-collections-tree') {

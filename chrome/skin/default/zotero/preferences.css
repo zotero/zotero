@@ -29,20 +29,45 @@ radio[pane=zotero-prefpane-keys][selected="true"]
 
 /* General pane */
 
+grid row hbox:first-child
+{
+	-moz-box-pack: end;
+}
+
+#fontSize
+{
+	font-size: 3mm; /* Firefox default */
+}
+
+#fontSize1
+{
+	font-size: 1.0em;
+}
+
+#fontSize2
+{
+	font-size: 1.25em;
+}
+
+#fontSize3
+{
+	font-size: 1.5em;
+}
+
+#fontSize radio, #statusBarIcon radio
+{
+	width: 90px;
+}
+
+#fontSize radio .radio-icon, #statusBarIcon radio .radio-icon
+{
+	margin-left: 6px;
+}
+
 #statusLine
 {
 	margin-bottom:.75em;
 	color: red;
-}
-
-#statusBarIcon radio
-{
-	margin-right: 20px;
-}
-
-#statusBarIcon radio .radio-icon
-{
-	margin-left: 6px;
 }
 
 /* Shortcut Keys pane */

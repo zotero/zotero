@@ -1,3 +1,26 @@
+/* Font sizes */
+#zotero-pane[fontSize=medium] #zotero-tb-search, #zotero-pane[fontSize=large] #zotero-tb-search,
+#zotero-pane[fontSize=medium] zoterotagselector textbox, #zotero-pane[fontSize=large] zoterotagselector textbox
+{
+	font-size: 1em !important;
+}
+
+#zotero-pane[fontSize=medium] treechildren::-moz-tree-row
+{
+	height: 1.5em;
+}
+
+#zotero-pane[fontSize=large] treechildren::-moz-tree-row
+{
+	height: 1.5em;
+}
+
+#zotero-pane[fontSize=large] .treecol-text
+{
+	margin:0;
+	padding:0;
+}
+
 #zotero-status-bar-icon
 {
 	width: 55px;
