@@ -8,6 +8,9 @@
 <!ENTITY zotero.preferences.position.browser				"browser content">
 <!ENTITY zotero.preferences.statusBarIcon				"Status bar icon:">
 <!ENTITY zotero.preferences.fontSize						"Font size:">
+<!ENTITY zotero.preferences.fontSize.small				"Small">
+<!ENTITY zotero.preferences.fontSize.medium				"Medium">
+<!ENTITY zotero.preferences.fontSize.large				"Large">
 <!ENTITY zotero.preferences.autoUpdate					"Automatically check for updated scrapers">
 <!ENTITY zotero.preferences.updateNow					"Update now">
 <!ENTITY zotero.preferences.reportTranslationFailure		"Report broken site translators">
