@@ -118,7 +118,7 @@ zoterosearchtextbox .toolbarbutton-menu-dropmarker
 
 zoterosearchagefield
 {
-	-moz-binding: url('chrome://zotero/content/bindings/searchtextbox.xml#search-in-the-last');
+	-moz-binding: url('chrome://zotero/content/bindings/zoterosearch.xml#search-in-the-last');
 }
 
 zoterosearchagefield textbox
