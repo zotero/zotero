@@ -132,7 +132,7 @@ Zotero.DBConnection.prototype.valueQuery = function (sql,params) {
  * Run a query and return the first row
  */
 Zotero.DBConnection.prototype.rowQuery = function (sql,params) {
-	var result = query(sql,params);
+	var result = this.query(sql,params);
 	if (result) {
 		return result[0];
 	}
