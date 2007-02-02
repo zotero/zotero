@@ -509,8 +509,8 @@ Zotero.Annotation.prototype.initWithEvent = function(e) {
 	
 	Zotero.debug("Annotate: added new annotation");
 	
-
 	this.displayWithAbsoluteCoordinates(clickX, clickY);
+	this.textarea.select();
 }
 
 Zotero.Annotation.prototype.initWithDBRow = function(row) {
