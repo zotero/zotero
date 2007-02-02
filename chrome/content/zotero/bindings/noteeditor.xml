@@ -99,6 +99,47 @@
 					]]>
 				</body>
 			</method>
+			
+			<method name="selectParent">
+				<body>
+				<![CDATA[
+					if (!this.item.getID()) {
+						return;
+					}
+					
+					if (document.getElementById('zotero-pane')) {
+						var zp = ZoteroPane;
+					}
+					else {
+						var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+									   .getService(Components.interfaces.nsIWindowMediator);
+						
+						var lastWin = wm.getMostRecentWindow("navigator:browser");
+						
+						if (!lastWin) {
+							window.open();
+							var newWindow = wm.getMostRecentWindow("navigator:browser");
+							var b = newWindow.getBrowser();
+							return;
+						}
+						
+						if (lastWin.document.getElementById('zotero-pane').getAttribute('hidden') == 'true') {
+							lastWin.ZoteroPane.toggleDisplay();
+							
+							// DEBUG: The actions below seem to crash Firefox 2.0.0.1 on OS X if
+							// the Z pane isn't already open, so we don't try
+							return;
+						}
+						
+						var zp = lastWin.ZoteroPane;
+					}
+					
+					zp.clearQuicksearch();
+					zp.selectItem(this.item.getID());
+				]]>
+				</body>
+			</method>
+			
 			<method name="id">
 				<parameter name="id"/>
 				<body>
@@ -111,7 +152,7 @@
 		
 		<content>
 			<xul:vbox xbl:inherits="flex">
-				<xul:label id="citeLabel"/>
+				<xul:label id="citeLabel" onclick="this.parentNode.parentNode.selectParent()"/>
 				<xul:textbox id="noteField" multiline="true" type="timed" timeout="1000" flex="1" oncommand="this.parentNode.parentNode.save();"/>
 				<xul:hbox>
 					<xul:linksbox id="links" flex="1"/>

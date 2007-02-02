@@ -2,3 +2,8 @@ noteeditor[abstract="true"] #links
 {
 	display: none;
 }
+
+#citeLabel:hover
+{
+	cursor: pointer !important;
+}

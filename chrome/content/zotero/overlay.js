@@ -47,6 +47,7 @@ var ZoteroPane = new function()
 	this.deleteSelectedItem = deleteSelectedItem;
 	this.deleteSelectedCollection = deleteSelectedCollection;
 	this.editSelectedCollection = editSelectedCollection;
+	this.clearQuicksearch = clearQuicksearch;
 	this.handleSearchKeypress = handleSearchKeypress;
 	this.handleSearchInput = handleSearchInput;
 	this.search = search;
@@ -447,7 +448,7 @@ var ZoteroPane = new function()
 			this.itemsView.unregister();
 		}
 		
-		document.getElementById('zotero-tb-search').value = "";
+		this.clearQuicksearch();
 		
 		if (this.collectionsView.selection.count == 1 && this.collectionsView.selection.currentIndex != -1) {
 			var itemgroup = this.collectionsView._getItemAtRow(this.collectionsView.selection.currentIndex);
@@ -732,6 +733,12 @@ var ZoteroPane = new function()
 					this.onCollectionSelected(); //reload itemsView
 			}
 		}
+	}
+	
+	
+	function clearQuicksearch() {
+		document.getElementById('zotero-tb-search').value = "";
+		document.getElementById('zotero-tb-search').doCommand('cmd_zotero_search');
 	}
 	
 	
@@ -1130,7 +1137,7 @@ var ZoteroPane = new function()
 			}
 			else if (tree.id == 'zotero-items-tree') {
 				if (this.itemsView && this.itemsView.selection.currentIndex > -1) {
-					var item = getSelectedItems()[0];
+					var item = this.getSelectedItems()[0];
 					if (item && item.isNote()) {
 						document.getElementById('zotero-view-note-button').doCommand();
 					}
@@ -1162,8 +1169,8 @@ var ZoteroPane = new function()
 		var menuitem = document.getElementById("zotero-context-add-to-current-note");
 		var showing = false;
 		if (menuitem){
-			var items = getSelectedItems();
-			if (this.itemsView.selection.count==1 && items[0] && items[0].isNote()
+			var items = ZoteroPane.getSelectedItems();
+			if (ZoteroPane.itemsView.selection.count==1 && items[0] && items[0].isNote()
 				&& window.gContextMenu.isTextSelected)
 			{
 				menuitem.hidden = false;
@@ -1261,7 +1268,7 @@ var ZoteroPane = new function()
 			return false;
 		}
 		
-		var items = getSelectedItems();
+		var items = this.getSelectedItems();
 		if (this.itemsView.selection.count == 1 && items[0] && items[0].isNote()) {
 			var note = items[0].getNote()
 			items[0].updateNote(note == '' ? text : note + "\n\n" + text);
@@ -1292,7 +1299,7 @@ var ZoteroPane = new function()
 	
 	
 	function toggleAbstractForSelectedItem() {
-		var items = getSelectedItems();
+		var items = this.getSelectedItems();
 		if (this.itemsView.selection.count == 1 && items[0] && items[0].isNote()
 				&& items[0].getSource()) {
 			
@@ -1373,7 +1380,7 @@ var ZoteroPane = new function()
 	function viewSelectedAttachment()
 	{
 		if (this.itemsView && this.itemsView.selection.count == 1) {
-			var attachment = getSelectedItems()[0];
+			var attachment = this.getSelectedItems()[0];
 			
 			if(attachment.getAttachmentLinkMode() != Zotero.Attachments.LINK_MODE_LINKED_URL)
 			{
@@ -1419,7 +1426,7 @@ var ZoteroPane = new function()
 	function showSelectedAttachmentInFilesystem()
 	{
 		if (this.itemsView && this.itemsView.selection.count == 1) {
-			var attachment = getSelectedItems()[0];
+			var attachment = this.getSelectedItems()[0];
 			
 			if (attachment.getAttachmentLinkMode() != Zotero.Attachments.LINK_MODE_LINKED_URL)
 			{
