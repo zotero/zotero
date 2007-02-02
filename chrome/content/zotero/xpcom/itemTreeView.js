@@ -102,7 +102,7 @@ Zotero.ItemTreeView.prototype.refresh = function()
 	// Update the treebox's row count
 	var diff = this.rowCount - oldRows;
 	if (this._treebox && diff != 0) {
-		this._treebox.rowCountChanged(oldRows - 1, diff);
+		this._treebox.rowCountChanged(0, diff);
 	}
 }
 
