@@ -652,7 +652,11 @@ Zotero.Annotation.prototype._addChildElements = function() {
 		
 		var img = this.document.createElement("img");
 		img.src = "chrome://zotero/skin/annotation-close.png";
-		img.addEventListener("click", function() { me._delete() }, false);
+		img.addEventListener("click", function(event) {
+			if (me._confirmDelete(event)) {
+				me._delete()
+			}
+		}, false);
 		div.appendChild(img);
 		
 		this.textarea = this.document.createElement("textarea");
@@ -674,6 +678,31 @@ Zotero.Annotation.prototype._addChildElements = function() {
 Zotero.Annotation.prototype._click = function() {
 	this.annotationsObj.zIndex++
 	this.div.style.zIndex = this.annotationsObj.zIndex;
+}
+
+Zotero.Annotation.prototype._confirmDelete = function(event) {
+	if (event.target.parentNode.nextSibling.value == '' ||
+		!Zotero.Prefs.get('annotations.warnOnClose')) {
+		return true;
+	}
+	
+	var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+									.getService(Components.interfaces.nsIPromptService);
+	
+	var dontShowAgain = { value: false };
+	var del = promptService.confirmCheck(
+		this.window,
+		Zotero.getString('annotations.confirmClose.title'),
+		Zotero.getString('annotations.confirmClose.body'),
+		Zotero.getString('general.dontShowWarningAgain'),
+		dontShowAgain
+	);
+	
+	if (dontShowAgain.value) {
+		Zotero.Prefs.set('annotations.warnOnClose', false);
+	}
+	
+	return del;
 }
 
 Zotero.Annotation.prototype._delete = function() {
