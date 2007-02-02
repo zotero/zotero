@@ -24,6 +24,7 @@ Zotero.Schema = new function(){
 	var _dbVersions = [];
 	var _schemaVersions = [];
 	var _repositoryTimer;
+	var _remoteUpdateInProgress = false;
 	
 	this.updateSchema = updateSchema;
 	this.updateScrapersRemote = updateScrapersRemote;
@@ -65,8 +66,8 @@ Zotero.Schema = new function(){
 			}
 			
 			_migrateUserDataSchema(dbVersion);
-			_updateSchema('system');
-			_updateSchema('scrapers');
+			var up1 = _updateSchema('system');
+			var up2 = _updateSchema('scrapers');
 			
 			// Rebuild fulltext cache if necessary
 			if (Zotero.Fulltext.cacheIsOutdated()){
@@ -79,10 +80,17 @@ Zotero.Schema = new function(){
 			Zotero.DB.rollbackTransaction();
 			throw(e);
 		}
+		
+		if (up1 || up2) {
+			// Run a manual scraper update if upgraded and pref set
+			if (Zotero.Prefs.get('automaticScraperUpdates')){
+				this.updateScrapersRemote(2);
+			}
+		}
+		
 		return;
 	}
-	
-	
+
 	/**
 	* Send XMLHTTP request for updated scrapers to the central repository
 	*
@@ -91,6 +99,11 @@ Zotero.Schema = new function(){
 	**/
 	function updateScrapersRemote(force){
 		if (!force){
+			if (_remoteUpdateInProgress) {
+				Zotero.debug("A remote update is already in progress -- not checking repository");
+				return false;
+			}
+			
 			// Check user preference for automatic updates
 			if (!Zotero.Prefs.get('automaticScraperUpdates')){
 				Zotero.debug('Automatic scraper updating disabled -- not checking repository', 4);
@@ -127,15 +140,19 @@ Zotero.Schema = new function(){
 			+ 'version=' + Zotero.version;
 		
 		Zotero.debug('Checking repository for updates (' + url + ')');
-			
-		if (force){
+		
+		_remoteUpdateInProgress = true;
+		
+		if (force === true) {
 			url += '&m=1';
 			var get = Zotero.Utilities.HTTP.doGet(url, _updateScrapersRemoteCallbackManual);
 		}
 		else {
+			if (force == 2) {
+				url += '&m=2';
+			}
 			var get = Zotero.Utilities.HTTP.doGet(url, _updateScrapersRemoteCallback);
 		}
-		
 		
 		// TODO: instead, add an observer to start and stop timer on online state change
 		if (!get){
@@ -370,7 +387,7 @@ Zotero.Schema = new function(){
 		var schemaVersion = _getSchemaSQLVersion(schema);
 		
 		if (dbVersion == schemaVersion){
-			return;
+			return false;
 		}
 		else if (dbVersion < schemaVersion){
 			Zotero.DB.beginTransaction();
@@ -385,11 +402,10 @@ Zotero.Schema = new function(){
 				alert('Error updating Zotero database'); // TODO: localize
 				throw(e);
 			}
-			return;
+			return true;
 		}
-		else {
-			throw("Zotero '" + schema + "' DB version is newer than SQL file");
-		}
+		
+		throw("Zotero '" + schema + "' DB version is newer than SQL file");
 	}
 	
 	
@@ -413,6 +429,8 @@ Zotero.Schema = new function(){
 			if (!manual){
 				_setRepositoryTimer(ZOTERO_CONFIG['REPOSITORY_RETRY_INTERVAL']);
 			}
+			
+			_remoteUpdateInProgress = false;
 			return false;
 		}
 		
@@ -438,6 +456,7 @@ Zotero.Schema = new function(){
 			if (!manual){
 				_setRepositoryTimer(ZOTERO_CONFIG['REPOSITORY_CHECK_INTERVAL']);
 			}
+			_remoteUpdateInProgress = false;
 			return -1;
 		}
 		
@@ -456,6 +475,7 @@ Zotero.Schema = new function(){
 			if (!manual){
 				_setRepositoryTimer(ZOTERO_CONFIG['REPOSITORY_RETRY_INTERVAL']);
 			}
+			_remoteUpdateInProgress = false;
 			return false;
 		}
 		
@@ -463,6 +483,7 @@ Zotero.Schema = new function(){
 		if (!manual){
 			_setRepositoryTimer(ZOTERO_CONFIG['REPOSITORY_CHECK_INTERVAL']);
 		}
+		_remoteUpdateInProgress = false;
 		return true;
 	}
 	
