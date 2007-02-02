@@ -244,24 +244,24 @@ var ZoteroPane = new function()
 		switch (command) {
 			case 'library':
 				document.getElementById('zotero-collections-tree').focus();
-				this.collectionsView.selection.select(0);
+				ZoteroPane.collectionsView.selection.select(0);
 				break;
 			case 'quicksearch':
 				document.getElementById('zotero-tb-search').select();
 				break;
 			case 'newItem':
-				this.newItem(2); // book
+				ZoteroPane.newItem(2); // book
 				document.getElementById('zotero-editpane-type-menu').focus();
 				break;
 			case 'newNote':
 				// Use key that's not the modifier as the popup toggle
-				this.newNote(useShift ? event.altKey : event.shiftKey);
+				ZoteroPane.newNote(useShift ? event.altKey : event.shiftKey);
 				break;
 			case 'toggleTagSelector':
-				this.toggleTagSelector();
+				ZoteroPane.toggleTagSelector();
 				break;
 			case 'toggleFullscreen':
-				this.fullScreen();
+				ZoteroPane.fullScreen();
 				break;
 			default:
 				throw ('Command "' + command + '" not found in ZoteroPane.handleKeyPress()');
