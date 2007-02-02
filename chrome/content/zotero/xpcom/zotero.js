@@ -22,7 +22,6 @@
 
 const ZOTERO_CONFIG = {
 	GUID: 'zotero@chnm.gmu.edu',
-	DB_FILE: 'zotero.sqlite',
 	DB_REBUILD: false, // erase DB and recreate from schema
 	REPOSITORY_URL: 'http://www.zotero.org/repo',
 	REPOSITORY_CHECK_INTERVAL: 86400, // 24 hours
@@ -36,17 +35,16 @@ var Zotero = new function(){
 	var _initialized = false;
 	var _debugLogging;
 	var _debugLevel;
-	var _shutdown = false;
+	//var _shutdown = false;
 	var _localizedStringBundle;
 	
 	// Privileged (public) methods
 	this.init = init;
-	this.shutdown = shutdown;
+	//this.shutdown = shutdown;
 	this.getProfileDirectory = getProfileDirectory;
 	this.getZoteroDirectory = getZoteroDirectory;
 	this.getStorageDirectory = getStorageDirectory;
 	this.getZoteroDatabase = getZoteroDatabase;
-	this.backupDatabase = backupDatabase;
 	this.debug = debug;
 	this.varDump = varDump;
 	this.safeDebug = safeDebug;
@@ -77,6 +75,7 @@ var Zotero = new function(){
 		}
 		
 		// Register shutdown handler to call Zotero.shutdown()
+		/*
 		var observerService = Components.classes["@mozilla.org/observer-service;1"]
 			.getService(Components.interfaces.nsIObserverService);
 		observerService.addObserver({
@@ -84,6 +83,7 @@ var Zotero = new function(){
 				Zotero.shutdown(subject, topic, data)
 			}
 		}, "xpcom-shutdown", false);
+		*/
 		
 		// Load in the preferences branch for the extension
 		Zotero.Prefs.init();
@@ -143,24 +143,15 @@ var Zotero = new function(){
 	}
 	
 	
+	/*
 	function shutdown(subject, topic, data){
 		// Called twice otherwise, for some reason
 		if (_shutdown){
 			return false;
 		}
-		
-		var level = Zotero.DB.commitAllTransactions();
-		if (level){
-			level = level===true ? '0' : level;
-			Zotero.debug("A transaction was still open! (level " + level + ")", 2);
-		}
-		
-		_shutdown = true;
-		
-		Zotero.backupDatabase();
-		
 		return true;
 	}
+	*/
 	
 	
 	function getProfileDirectory(){
@@ -193,63 +184,13 @@ var Zotero = new function(){
 		return file;
 	}
 	
-	function getZoteroDatabase(ext){
+	function getZoteroDatabase(name, ext){
+		name = name ? name + '.sqlite' : 'zotero.sqlite';
 		ext = ext ? '.' + ext : '';
 		
 		var file = Zotero.getZoteroDirectory();
-		file.append(ZOTERO_CONFIG['DB_FILE'] + ext);
+		file.append(name + ext);
 		return file;
-	}
-	
-	
-	/*
-	 * Back up the main database file
-	 */
-	function backupDatabase(){
-		if (Zotero.DB.transactionInProgress()){
-			Zotero.debug('Transaction in progress--skipping DB backup', 2);
-			return false;
-		}
-		
-		Zotero.debug('Backing up database');
-		
-		var file = Zotero.getZoteroDatabase();
-		var backupFile = Zotero.getZoteroDatabase('bak');
-		
-		// Copy via a temporary file so we don't run into disk space issues
-		// after deleting the old backup file
-		var tmpFile = Zotero.getZoteroDatabase('tmp');
-		if (tmpFile.exists()){
-			tmpFile.remove(null);
-		}
-		
-		try {
-			file.copyTo(file.parent, tmpFile.leafName);
-		}
-		catch (e){
-			// TODO: deal with low disk space
-			throw (e);
-		}
-		
-		try {
-			var store = Components.classes["@mozilla.org/storage/service;1"].
-				getService(Components.interfaces.mozIStorageService);
-				
-			var connection = store.openDatabase(tmpFile);
-		}
-		catch (e){
-			Zotero.debug("Database file is corrupt--skipping backup");
-			return false;
-		}
-		
-		// Remove old backup file
-		if (backupFile.exists()){
-			backupFile.remove(null);
-		}
-		
-		tmpFile.moveTo(tmpFile.parent, backupFile.leafName);
-		
-		return true;
 	}
 	
 	
