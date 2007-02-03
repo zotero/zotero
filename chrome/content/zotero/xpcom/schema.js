@@ -662,6 +662,8 @@ Zotero.Schema = new function(){
 					Zotero.DB.query("DROP TABLE IF EXISTS csl");
 				}
 				
+				// 1.0b2 (1.0.0b2.r1)
+				
 				if (i==9){
 					var attachments = Zotero.DB.query("SELECT itemID, linkMode, path FROM itemAttachments");
 					for each(var row in attachments){
@@ -674,6 +676,8 @@ Zotero.Schema = new function(){
 						catch (e){}
 					}
 				}
+				
+				// 1.0.0b2.r2
 				
 				if (i==10){
 					var dates = Zotero.DB.query("SELECT itemID, value FROM itemData WHERE fieldID=14");
@@ -701,8 +705,10 @@ Zotero.Schema = new function(){
 				
 				if (i==12){
 					Zotero.DB.query("CREATE TABLE translatorsTemp (translatorID TEXT PRIMARY KEY, lastUpdated DATETIME, inRepository INT, priority INT, translatorType INT, label TEXT, creator TEXT, target TEXT, detectCode TEXT, code TEXT);");
-					Zotero.DB.query("INSERT INTO translatorsTemp SELECT * FROM translators");
-					Zotero.DB.query("DROP TABLE translators");
+					if (Zotero.DB.tableExists('translators')) {
+						Zotero.DB.query("INSERT INTO translatorsTemp SELECT * FROM translators");
+						Zotero.DB.query("DROP TABLE translators");
+					}
 					Zotero.DB.query("CREATE TABLE translators (\n    translatorID TEXT PRIMARY KEY,\n    minVersion TEXT,\n    maxVersion TEXT,\n    lastUpdated DATETIME,\n    inRepository INT,\n    priority INT,\n    translatorType INT,\n    label TEXT,\n    creator TEXT,\n    target TEXT,\n    detectCode TEXT,\n    code TEXT\n);");
 					Zotero.DB.query("INSERT INTO translators SELECT translatorID, '', '', lastUpdated, inRepository, priority, translatorType, label, creator, target, detectCode, code FROM translatorsTemp");
 					Zotero.DB.query("CREATE INDEX translators_type ON translators(translatorType)");
@@ -719,17 +725,25 @@ Zotero.Schema = new function(){
 					Zotero.DB.query("DROP TABLE itemNotesTemp");
 				}
 				
+				// 1.0.0b3.r1
+				
 				if (i==15) {
 					Zotero.DB.query("DROP TABLE IF EXISTS annotations");
 				}
 				
 				if (i==16) {
 					Zotero.DB.query("CREATE TABLE tagsTemp (tagID INT, tag TEXT, PRIMARY KEY (tagID))");
-					Zotero.DB.query("INSERT INTO tagsTemp SELECT * FROM tags");
-					Zotero.DB.query("DROP TABLE tags");
+					if (Zotero.DB.tableExists("tags")) {
+						Zotero.DB.query("INSERT INTO tagsTemp SELECT * FROM tags");
+						Zotero.DB.query("DROP TABLE tags");
+					}
 					Zotero.DB.query("CREATE TABLE tags (\n    tagID INT,\n    tag TEXT,\n    tagType INT,\n    PRIMARY KEY (tagID),\n    UNIQUE (tag, tagType)\n);");
 					Zotero.DB.query("INSERT INTO tags SELECT tagID, tag, 0 FROM tagsTemp");
 					Zotero.DB.query("DROP TABLE tagsTemp");
+					
+					// Compensate for csl table drop in step 8 for upgraders from early versions,
+					// in case we do something with it in a later step
+					Zotero.DB.query("CREATE TABLE IF NOT EXISTS csl (\n    cslID TEXT PRIMARY KEY,\n    updated DATETIME,\n    title TEXT,\n    csl TEXT\n);");
 				}
 			}
 			
