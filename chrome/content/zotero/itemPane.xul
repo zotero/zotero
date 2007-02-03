@@ -50,7 +50,7 @@
 						oncommand="ZoteroItemPane.onOpenURLClick();"/>
 				</hbox>
 				<hbox align="center">
-					<menulist id="zotero-editpane-type-menu" oncommand="ZoteroItemPane.changeTypeTo(this.value)" flex="1"
+					<menulist id="zotero-editpane-type-menu" oncommand="ZoteroItemPane.changeTypeTo(this.value, this)" flex="1"
 						onfocus="ZoteroItemPane.ensureElementIsVisible(this)"
 						onkeypress="if (event.keyCode == event.DOM_VK_TAB){ if (!event.shiftKey) { ZoteroItemPane.focusFirstField('info'); event.preventDefault(); } }">
 						<menupopup/>

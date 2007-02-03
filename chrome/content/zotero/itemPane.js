@@ -273,7 +273,7 @@ var ZoteroItemPane = new function()
 				);
 				
 				var label = document.createElement("label");
-				label.setAttribute("value",Zotero.getString("itemFields."+fieldNames[i])+":");
+				label.setAttribute("value", Zotero.ItemFields.getLocalizedString(_itemBeingEdited.getType(), fieldNames[i]) + ":");
 				label.setAttribute("onclick","this.nextSibling.blur();");
 			
 				addDynamicRow(label,valueElement);
@@ -449,13 +449,36 @@ var ZoteroItemPane = new function()
 	}
 	
 	
-	function changeTypeTo(id)
-	{
-		if(id != _itemBeingEdited.getType() && confirm(Zotero.getString('pane.item.changeType')))
-		{
-			_itemBeingEdited.setType(id);
+	function changeTypeTo(itemTypeID, menu) {
+		if (itemTypeID == _itemBeingEdited.getType()) {
+			return;
+		}
+		
+		var fieldsToDelete = _itemBeingEdited.getFieldsNotInType(itemTypeID, true);
+		
+		// Generate list of localized field names for display in pop-up
+		if (fieldsToDelete) {
+			var fieldNames = "";
+			for each(var fieldID in fieldsToDelete) {
+				fieldNames += "\n - " +
+					Zotero.ItemFields.getLocalizedString(_itemBeingEdited.getType(), fieldID);
+			}
+			
+			var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+				.getService(Components.interfaces.nsIPromptService);
+		}
+		
+		if (!fieldsToDelete ||
+				promptService.confirm(null,
+					Zotero.getString('pane.item.changeType.title'),
+					Zotero.getString('pane.item.changeType.message') + "\n" + fieldNames)) {
+			_itemBeingEdited.setType(itemTypeID);
 			_itemBeingEdited.save();
 			loadPane(0);
+		}
+		// Revert the menu (which changes before the pop-up)
+		else {
+			menu.value = _itemBeingEdited.getType();
 		}
 	}
 	

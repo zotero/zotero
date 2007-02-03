@@ -1,4 +1,4 @@
--- 10
+-- 11
 
 -- This file creates system tables that can be safely wiped and reinitialized
 -- at any time, as long as existing ids are preserved.
@@ -44,7 +44,20 @@
         FOREIGN KEY (itemTypeID) REFERENCES itemTypes(itemTypeID),
         FOREIGN KEY (fieldID) REFERENCES fields(fieldID)
     );
-    
+
+-- Maps base fields to type-specific fields (e.g. publisher to label in audioRecording)
+DROP TABLE IF EXISTS baseFieldMappings;
+CREATE TABLE baseFieldMappings (
+    itemTypeID INT,
+    baseFieldID INT,
+    fieldID INT,
+    PRIMARY KEY (itemTypeID, baseFieldID, fieldID),
+    FOREIGN KEY (baseFieldID) REFERENCES fields(fieldID),
+    FOREIGN KEY (fieldID) REFERENCES fields(fieldID)
+);
+DROP INDEX IF EXISTS baseFieldMappings_baseFieldID;
+CREATE INDEX baseFieldMappings_baseFieldID ON baseFieldMappings(baseFieldID);
+
     DROP TABLE IF EXISTS charsets;
     CREATE TABLE charsets (
         charsetID INTEGER PRIMARY KEY,
@@ -227,6 +240,7 @@ INSERT INTO fields VALUES (85,'encyclopediaTitle',NULL);
 INSERT INTO fields VALUES (86,'dictionaryTitle',NULL);
 INSERT INTO fields VALUES (87,'language',NULL);
 INSERT INTO fields VALUES (88,'programmingLanguage',NULL);
+INSERT INTO fields VALUES (89,'university',NULL);
 
 INSERT INTO itemTypeFields VALUES (2, 3, NULL, 1);
 INSERT INTO itemTypeFields VALUES (2, 30, NULL, 2);
@@ -313,7 +327,7 @@ INSERT INTO itemTypeFields VALUES (6, 62, NULL, 12);
 INSERT INTO itemTypeFields VALUES (6, 2, NULL, 13);
 INSERT INTO itemTypeFields VALUES (6, 22, NULL, 14);
 INSERT INTO itemTypeFields VALUES (7, 69, NULL, 1);
-INSERT INTO itemTypeFields VALUES (7, 8, NULL, 2);
+INSERT INTO itemTypeFields VALUES (7, 89, NULL, 2);
 INSERT INTO itemTypeFields VALUES (7, 14, NULL, 3);
 INSERT INTO itemTypeFields VALUES (7, 10, NULL, 4);
 INSERT INTO itemTypeFields VALUES (7, 87, NULL, 5);
@@ -678,6 +692,11 @@ INSERT INTO itemTypeFields VALUES (36, 27, NULL, 17);
 INSERT INTO itemTypeFields VALUES (36, 2, NULL, 18);
 INSERT INTO itemTypeFields VALUES (36, 22, NULL, 19);
 
+INSERT INTO baseFieldMappings VALUES (26, 8, 72); -- audioRecording/publisher/label
+INSERT INTO baseFieldMappings VALUES (28, 8, 76); -- videoRecording/publisher/studio
+INSERT INTO baseFieldMappings VALUES (30, 8, 78); -- radioBroadcast/publisher/network
+INSERT INTO baseFieldMappings VALUES (32, 8, 83); -- computerProgram/publisher/company
+INSERT INTO baseFieldMappings VALUES (7, 8, 89); -- thesis/publisher/university
 
 INSERT INTO creatorTypes VALUES(1, "author");
 INSERT INTO creatorTypes VALUES(2, "contributor");

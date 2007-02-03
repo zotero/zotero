@@ -162,18 +162,29 @@ Zotero.Item.prototype.setType = function(itemTypeID){
 		return true;
 	}
 	
-	// If existing type
+	// If there's an existing type
 	if (this.getType()){
-		// Clear fields from old type that aren't in new one
-		var sql = 'SELECT fieldID FROM itemTypeFields '
-			+ 'WHERE itemTypeID=' + this.getType() + ' AND fieldID NOT IN '
-			+ '(SELECT fieldID FROM itemTypeFields WHERE itemTypeID='
-			+ itemTypeID + ')';
-		var obsoleteFields = Zotero.DB.columnQuery(sql);
-		
-		if (obsoleteFields){
-			for (var i=0; i<obsoleteFields.length; i++){
-				this.setField(obsoleteFields[i],false);
+		var obsoleteFields = this.getFieldsNotInType(itemTypeID);
+		if (obsoleteFields) {
+			var copiedFields = [];
+			
+			for each(var oldFieldID in obsoleteFields) {
+				// Try to get a base type for this field
+				var baseFieldID =
+					Zotero.ItemFields.getBaseIDFromTypeAndField(this.getType(), oldFieldID);
+				
+				if (baseFieldID) {
+					var newFieldID =
+						Zotero.ItemFields.getFieldIDFromTypeAndBase(itemTypeID, baseFieldID);
+						
+					// If so, save value to copy to new field
+					if (newFieldID) {
+						copiedFields.push([newFieldID, this.getField(oldFieldID)]);
+					}
+				}
+				
+				// Clear old field
+				this.setField(oldFieldID, false);
 			}
 		}
 		
@@ -193,7 +204,44 @@ Zotero.Item.prototype.setType = function(itemTypeID){
 	
 	this._data['itemTypeID'] = itemTypeID;
 	this._changed.set('itemTypeID');
+	
+	if (copiedFields) {
+		for each(var f in copiedFields) {
+			this.setField(f[0], f[1]);
+		}
+	}
+	
 	return true;
+}
+
+
+/*
+ * Find existing fields from current type that aren't in another
+ *
+ * If _allowBaseConversion_, don't return fields that can be converted
+ * via base fields (e.g. label => publisher => studio)
+ */
+Zotero.Item.prototype.getFieldsNotInType = function (itemTypeID, allowBaseConversion) {
+	var sql = "SELECT fieldID FROM itemTypeFields WHERE itemTypeID=?1 AND "
+		+ "fieldID IN (SELECT fieldID FROM itemData WHERE itemID=?2) AND "
+		+ "fieldID NOT IN (SELECT fieldID FROM itemTypeFields WHERE itemTypeID=?3)";
+		
+	if (allowBaseConversion) {
+		// Not the type-specific field for a base field in the new type
+		sql += " AND fieldID NOT IN (SELECT fieldID FROM baseFieldMappings "
+			+ "WHERE itemTypeID=?1 AND baseFieldID IN "
+			+ "(SELECT fieldID FROM itemTypeFields WHERE itemTypeID=?3)) AND ";
+		// And not a base field with a type-specific field in the new type
+		sql += "fieldID NOT IN (SELECT baseFieldID FROM baseFieldMappings "
+			+ "WHERE itemTypeID=?3) AND ";
+		// And not the type-specific field for a base field that has
+		// a type-specific field in the new type
+		sql += "fieldID NOT IN (SELECT fieldID FROM baseFieldMappings "
+			+ "WHERE itemTypeID=?1 AND baseFieldID IN "
+			+ "(SELECT baseFieldID FROM baseFieldMappings WHERE itemTypeID=?3))";
+	}
+	
+	return Zotero.DB.columnQuery(sql, [this.getType(), this.getID(), {int: itemTypeID}]);
 }
 
 
@@ -3857,22 +3905,19 @@ Zotero.ItemFields = new function(){
 	var _fieldFormats = new Array();
 	var _itemTypeFields = new Array();
 	
+	var self = this;
+	
 	// Privileged methods
 	this.getName = getName;
 	this.getID = getID;
+	this.getLocalizedString = getLocalizedString;
 	this.isValidForType = isValidForType;
 	this.isInteger = isInteger;
 	this.getItemTypeFields = getItemTypeFields;
-	
-	/*
-	 * Return the fieldName for a passed fieldID or fieldName
-	 */
-	function getName(field){
-		if (!_fields.length){
-			_loadFields();
-		}
-		return _fields[field] ? _fields[field]['name'] : false;
-	}
+	this.isBaseField = isBaseField;
+	this.getFieldIDFromTypeAndBase = getFieldIDFromTypeAndBase;
+	this.getBaseIDFromTypeAndField = getBaseIDFromTypeAndField;
+	this.getTypeFieldsFromBase = getTypeFieldsFromBase;
 	
 	
 	/*
@@ -3886,12 +3931,40 @@ Zotero.ItemFields = new function(){
 	}
 	
 	
+	/*
+	 * Return the fieldName for a passed fieldID or fieldName
+	 */
+	function getName(field){
+		if (!_fields.length){
+			_loadFields();
+		}
+		return _fields[field] ? _fields[field]['name'] : false;
+	}
+	
+	
+	function getLocalizedString(itemTypeID, field) {
+		var fieldName = this.getName(field);
+		
+		// Fields in items are special cases
+		switch (field) {
+			case 'title':
+			case 'dateAdded':
+			case 'dateModified':
+				fieldName = field;
+		}
+		
+		// TODO: different labels for different item types
+		
+		return Zotero.getString("itemFields." + fieldName);
+	}
+	
+	
 	function isValidForType(fieldID, itemTypeID){
 		if (!_fields.length){
 			_loadFields();
 		}
 		
-		_fieldCheck(fieldID);
+		_fieldCheck(fieldID, 'isValidForType');
 		
 		if (!_fields[fieldID]['itemTypes']){
 			throw('No associated itemTypes for fieldID ' + fieldID);
@@ -3906,7 +3979,7 @@ Zotero.ItemFields = new function(){
 			_loadFields();
 		}
 		
-		_fieldCheck(fieldID);
+		_fieldCheck(fieldID, 'isInteger');
 		
 		var ffid = _fields[fieldID]['formatID'];
 		return _fieldFormats[ffid] ? _fieldFormats[ffid]['isInteger'] : false;
@@ -3935,16 +4008,104 @@ Zotero.ItemFields = new function(){
 	}
 	
 	
+	function isBaseField(fieldID) {
+		return !!Zotero.DB.valueQuery("SELECT COUNT(*)>=1 FROM baseFieldMappings "
+			+ "WHERE baseFieldID=?", fieldID);
+	}
+	
+	
+	/*
+	 * Returns the fieldID of a type-specific field for a given base field
+	 * 		or false if none
+	 *
+	 * Examples:
+	 *
+	 * 'audioRecording' and 'publisher' returns label's fieldID
+	 * 'book' and 'publisher' returns publisher's fieldID
+	 * 'audioRecording' and 'number' returns false
+	 *
+	 * Accepts names or ids
+	 */
+	function getFieldIDFromTypeAndBase(itemType, baseField) {
+		var itemTypeID = Zotero.ItemTypes.getID(itemType);
+		var baseFieldID = this.getID(baseField);
+		
+		if (!itemTypeID) {
+			throw ("Invalid item type '" + itemType + "' in ItemFields.getFieldIDFromTypeAndBase()");
+		}
+		
+		if (!baseFieldID) {
+			throw ("Invalid base field '" + baseField + '" in ItemFields.getFieldIDFromTypeAndBase()');
+		}
+		
+		// If the base field is already valid for the type, just return that
+		if (this.isValidForType(baseFieldID, itemTypeID)) {
+			return baseFieldID;
+		}
+		
+		return Zotero.DB.valueQuery("SELECT fieldID FROM baseFieldMappings "
+			+ "WHERE itemTypeID=? AND baseFieldID=?", [itemTypeID, baseFieldID]);
+	}
+	
+	/*
+	 * Returns the fieldID of the base field for a given type-specific field
+	 * 		or false if none
+	 *
+	 * Examples:
+	 *
+	 * 'audioRecording' and 'label' returns publisher's fieldID
+	 * 'book' and 'publisher' returns publisher's fieldID
+	 * 'audioRecording' and 'runningTime' returns false
+	 *
+	 * Accepts names or ids
+	 */
+	function getBaseIDFromTypeAndField(itemType, typeField) {
+		var itemTypeID = Zotero.ItemTypes.getID(itemType);
+		var typeFieldID = this.getID(typeField);
+		
+		if (!itemTypeID) {
+			throw ("Invalid item type '" + itemType + "' in ItemFields.getBaseIDFromTypeAndField()");
+		}
+		
+		_fieldCheck(typeField, 'getBaseIDFromTypeAndField');
+		
+		if (!this.isValidForType(typeFieldID, itemTypeID)) {
+			throw ("'" + typeField + "' is not a valid field for '" + itemType + "' in ItemFields.getBaseIDFromTypeAndField()");
+		}
+		
+		// If typeField is already a base field, just return that
+		if (this.isBaseField(typeFieldID)) {
+			return typeFieldID;
+		}
+		
+		return Zotero.DB.valueQuery("SELECT baseFieldID FROM baseFieldMappings "
+			+ "WHERE itemTypeID=? AND fieldID=?", [itemTypeID, typeFieldID]);
+	}
+	
+	
+	/*
+	 * Returns an array of fieldIDs associated with a given base field
+	 *
+	 * e.g. 'publisher' returns fieldIDs for [university, studio, label, network]
+	 */
+	function getTypeFieldsFromBase(baseField) {
+		var baseFieldID = this.getID(baseField);
+		if (!baseFieldID) {
+			throw ("Invalid base field '" + baseField + '" in ItemFields.getTypeFieldsFromBase()');
+		}
+		
+		return Zotero.DB.columnQuery("SELECT fieldID FROM baseFieldMappings "
+			+ "WHERE baseFieldID=?", baseFieldID);
+	}
+	
+	
 	/**
-	* Check whether a fieldID is valid, throwing an exception if not
+	* Check whether a field is valid, throwing an exception if not
 	* (since it should never actually happen)
 	**/
-	function _fieldCheck(fieldID){
-		if (!_fields.length){
-			_loadFields();
-		}
-		if (typeof _fields[fieldID]=='undefined'){
-			throw('Invalid fieldID ' + fieldID);
+	function _fieldCheck(field, func) {
+		if (!self.getID(field)) {
+			throw ("Invalid field '" + field + (func ? "' in ItemFields." + func + "()" : "'"));
 		}
 	}
 	

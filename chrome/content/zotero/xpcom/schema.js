@@ -745,6 +745,10 @@ Zotero.Schema = new function(){
 					// in case we do something with it in a later step
 					Zotero.DB.query("CREATE TABLE IF NOT EXISTS csl (\n    cslID TEXT PRIMARY KEY,\n    updated DATETIME,\n    title TEXT,\n    csl TEXT\n);");
 				}
+				
+				if (i==17) {
+					Zotero.DB.query("UPDATE itemData SET fieldID=89 WHERE fieldID=8 AND itemID IN (SELECT itemID FROM items WHERE itemTypeID=7)");
+				}
 			}
 			
 			_updateSchema('userdata');
