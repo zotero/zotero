@@ -1316,8 +1316,8 @@ var ZoteroPane = new function()
 		var nsIFilePicker = Components.interfaces.nsIFilePicker;
 		var fp = Components.classes["@mozilla.org/filepicker;1"]
         					.createInstance(nsIFilePicker);
-		fp.appendFilters(Components.interfaces.nsIFilePicker.filterAll);
 		fp.init(window, Zotero.getString('pane.item.attachments.select'), nsIFilePicker.modeOpenMultiple);
+		fp.appendFilters(Components.interfaces.nsIFilePicker.filterAll);
 		
 		if(fp.show() == nsIFilePicker.returnOK)
 		{
