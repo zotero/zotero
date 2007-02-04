@@ -261,6 +261,12 @@
 	margin-left: 5px;
 }
 
+/* Don't collapse blank attachment labels, since it prevents renaming */
+#zotero-attachment-label
+{
+	min-height: 1.25em;
+}
+
 #zotero-splitter
 {
 	border-top: none;
