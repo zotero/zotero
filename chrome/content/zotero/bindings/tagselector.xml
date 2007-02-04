@@ -187,7 +187,7 @@
 							}
 							
 							var label = document.createElement('label');
-							label.setAttribute('onclick', "this.parentNode.parentNode.parentNode.handleTagClick(this)");
+							label.setAttribute('onclick', "this.parentNode.parentNode.parentNode.handleTagClick(event, this)");
 							label.className = 'zotero-clicky';
 							label.setAttribute('value', this._tags[tagID].tag);
 							label.setAttribute('tagID', tagID);
@@ -446,9 +446,14 @@
 			
 			
 			<method name="handleTagClick">
+				<parameter name="event"/>
 				<parameter name="label"/>
 				<body>
 					<![CDATA[
+						if (event.button != 0) {
+							return;
+						}
+						
 						// Ignore clicks on tags not in scope
 						if (label.getAttribute('inScope') == 'false') {
 							return;
