@@ -308,6 +308,17 @@
 							this.createValueMenu(types);
 							break;
 						
+						case 'fileTypeID':
+							var types = Zotero.FileTypes.getTypes();
+							for (var i in types) {
+								types[i][0] = Zotero.getString('fileTypes.' + types[i]['name']);
+								types[i][1] = types[i]['id'];
+								delete types[i]['name'];
+								delete types[i]['id'];
+							}
+							this.createValueMenu(types);
+							break;
+						
 						default:
 							if (operatorsList.value=='isInTheLast')
 							{
@@ -341,8 +352,8 @@
 					var operatorsList = this.id('operatorsmenu');
 					
 					// Drop-down menu
-					if (conditionsMenu.value=='collectionID' || conditionsMenu.value=='itemTypeID')
-					{
+					if (conditionsMenu.value == 'collectionID' || conditionsMenu.value == 'itemTypeID'
+							|| conditionsMenu.value == 'fileTypeID') {
 						this.id('valuefield').hidden = true;
 						this.id('valuemenu').hidden = false;
 						this.id('value-date-age').hidden = true;

@@ -645,6 +645,13 @@ Zotero.Search.prototype._buildQuery = function(){
 						skipOperators = true;
 						break;
 					
+					case 'fileTypeID':
+						condSQL += 'mimeType IN (SELECT mimeType FROM '
+							+ 'fileTypeMimeTypes WHERE fileTypeID IN ('
+							+ 'SELECT fileTypeID FROM fileTypes WHERE ';
+						openParens = openParens + 2;
+						break;
+					
 					case 'tag':
 						condSQL += "tagID IN (SELECT tagID FROM tags WHERE ";
 						openParens++;
@@ -1116,6 +1123,16 @@ Zotero.SearchConditions = new function(){
 				},
 				table: 'items',
 				field: 'itemTypeID'
+			},
+			
+			{
+				name: 'fileTypeID',
+				operators: {
+					is: true,
+					isNot: true
+				},
+				table: 'itemAttachments',
+				field: 'fileTypeID'
 			},
 			
 			{
