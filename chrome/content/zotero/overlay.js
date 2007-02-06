@@ -244,6 +244,8 @@ var ZoteroPane = new function()
 				}
 				ZoteroPane.collectionsView.setHighlightedRows();
 			}
+			
+			return;
 		}
 		
 		// Ignore keystrokes if Zotero pane is closed
@@ -322,7 +324,7 @@ var ZoteroPane = new function()
 	 */
 	function setHighlightedRowsCallback() {
 		var itemIDs = ZoteroPane.getSelectedItems(true);
-		if (itemIDs) {
+		if (itemIDs && itemIDs.length) {
 			var collectionIDs = Zotero.Collections.getCollectionsContainingItems(itemIDs, true);
 			if (collectionIDs) {
 				ZoteroPane.collectionsView.setHighlightedRows(collectionIDs);
