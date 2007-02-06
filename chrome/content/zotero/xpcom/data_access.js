@@ -509,6 +509,15 @@ Zotero.Item.prototype.setField = function(field, value, loadIn){
 					!Zotero.Date.isMultipart(value)){
 				value = Zotero.Date.strToMultipart(value);
 			}
+			
+			if (fieldID == Zotero.ItemFields.getID('accessDate')) {
+				if (!Zotero.Date.isSQLDate(value) &&
+						!Zotero.Date.isSQLDateTime(value)) {
+					Zotero.debug("Discarding invalid accessDate '" + value
+						+ "' in Item.setField()");
+					return false;
+				}
+			}
 		}
 		
 		// If existing value, make sure it's actually changing

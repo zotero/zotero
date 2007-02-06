@@ -771,8 +771,11 @@ Zotero.Schema = new function(){
 		// Firefox 2.0, so we just throw the triggers at the DB on every
 		// userdata update and catch errors individually
 		//
-		// Add in DROP statements if these need to change
-		var itemDataTrigger = "  FOR EACH ROW WHEN NEW.fieldID=14\n"
+		
+		try { Zotero.DB.query("DROP TRIGGER insert_date_field"); } catch (e) {}
+		try { Zotero.DB.query("DROP TRIGGER update_date_field"); } catch (e) {}
+		
+		var itemDataTrigger = "  FOR EACH ROW WHEN NEW.fieldID IN (14, 27)\n"
 			+ "  BEGIN\n"
 			+ "    SELECT CASE\n"
 			+ "        CAST(SUBSTR(NEW.value, 1, 4) AS INT) BETWEEN 0 AND 9999 AND\n"

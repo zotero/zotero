@@ -830,6 +830,11 @@ var ZoteroItemPane = new function()
 				if (valueText){
 					var date = Zotero.Date.sqlToDate(valueText, true);
 					valueText = date ? date.toLocaleString() : '';
+					
+					// Don't show time for access date if none
+					if (fieldName == 'accessDate') {
+						valueText = valueText.replace('00:00:00 ', '');
+					}
 				}
 				break;
 		}
@@ -1241,11 +1246,21 @@ var ZoteroItemPane = new function()
 		// Fields
 		else
 		{
-			// Access date needs to be converted to UTC
+			// Access date needs to be parsed and converted to UTC
 			if (fieldName=='accessDate' && value!='')
 			{
-				var localDate = Zotero.Date.sqlToDate(value);
-				value = Zotero.Date.dateToSQL(localDate, true);
+				if (Zotero.Date.isSQLDate(value) || Zotero.Date.isSQLDateTime(value)) {
+					var localDate = Zotero.Date.sqlToDate(value);
+					value = Zotero.Date.dateToSQL(localDate, true);
+				}
+				else {
+					var d = Zotero.Date.strToDate(value);
+					value = null;
+					if (d.year && d.month != undefined && d.day) {
+						d = new Date(d.year, d.month, d.day);
+						value = Zotero.Date.dateToSQL(d, true);
+					}
+				}
 			}
 			
 			if(saveChanges)
