@@ -33,7 +33,9 @@ var ZoteroPane = new function()
 	this.onUnload = onUnload;
 	this.toggleDisplay = toggleDisplay;
 	this.fullScreen = fullScreen;
-	this.handleKeyPress = handleKeyPress;
+	this.handleKeyDown = handleKeyDown;
+	this.handleKeyUp = handleKeyUp;
+	this.setHighlightedRowsCallback = setHighlightedRowsCallback;
 	this.newItem = newItem;
 	this.newCollection = newCollection;
 	this.newSearch = newSearch;
@@ -91,6 +93,9 @@ var ZoteroPane = new function()
 			newPane.setAttribute('id','zotero-pane');
 			newPane.setAttribute('persist','height');
 			newPane.setAttribute('hidden', true);
+			newPane.setAttribute('onkeydown', 'ZoteroPane.handleKeyDown(event, this.id)');
+			newPane.setAttribute('onkeyup', 'ZoteroPane.handleKeyUp(event, this.id)');
+			
 			newPane.height = oldPane.height;
 			while(oldPane.hasChildNodes())
 				newPane.appendChild(oldPane.firstChild);
@@ -214,7 +219,33 @@ var ZoteroPane = new function()
 	/*
 	 * Trigger actions based on keyboard shortcuts
 	 */
-	function handleKeyPress(event) {
+	function handleKeyDown(event, from) {
+		if (from == 'zotero-pane') {
+			// Highlight collections containing selected items
+			//
+			// We use Control (17) on Windows because Alt triggers the menubar;
+			// 	otherwise we use Alt/Option (18)
+			if ((Zotero.isWin && event.keyCode == 17 && !event.altKey) ||
+					(!Zotero.isWin && event.keyCode == 18 && !event.ctrlKey)
+					&& !event.shiftKey && !event.metaKey) {
+				
+				this.highlightTimer = Components.classes["@mozilla.org/timer;1"].
+					createInstance(Components.interfaces.nsITimer);
+				// {} implements nsITimerCallback
+				this.highlightTimer.initWithCallback({
+					notify: ZoteroPane.setHighlightedRowsCallback
+				}, 225, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
+			}
+			else if ((Zotero.isWin && event.ctrlKey) ||
+					(!Zotero.isWin && event.altKey)) {
+				if (this.highlightTimer) {
+					this.highlightTimer.cancel();
+					this.highlightTimer = null;
+				}
+				ZoteroPane.collectionsView.setHighlightedRows();
+			}
+		}
+		
 		// Ignore keystrokes if Zotero pane is closed
 		if (document.getElementById('zotero-pane').getAttribute('hidden') == 'true') {
 			return;
@@ -264,10 +295,39 @@ var ZoteroPane = new function()
 				ZoteroPane.fullScreen();
 				break;
 			default:
-				throw ('Command "' + command + '" not found in ZoteroPane.handleKeyPress()');
+				throw ('Command "' + command + '" not found in ZoteroPane.handleKeyDown()');
 		}
 		
 		event.preventDefault();
+	}
+	
+	
+	function handleKeyUp(event, from) {
+		if (from == 'zotero-pane') {
+			if ((Zotero.isWin && event.keyCode == 17) ||
+					(!Zotero.isWin && event.keyCode == 18)) {
+				if (this.highlightTimer) {
+					this.highlightTimer.cancel();
+					this.highlightTimer = null;
+				}
+				ZoteroPane.collectionsView.setHighlightedRows();
+			}
+		}
+	}
+	
+	
+	/*
+	 * Highlights collections containing selected items on Ctrl (Win) or
+	 * Option/Alt (Mac/Linux) press
+	 */
+	function setHighlightedRowsCallback() {
+		var itemIDs = ZoteroPane.getSelectedItems(true);
+		if (itemIDs) {
+			var collectionIDs = Zotero.Collections.getCollectionsContainingItems(itemIDs, true);
+			if (collectionIDs) {
+				ZoteroPane.collectionsView.setHighlightedRows(collectionIDs);
+			}
+		}
 	}
 	
 	

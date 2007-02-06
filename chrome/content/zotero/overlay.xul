@@ -66,7 +66,9 @@
 		<!-- onmouseup shouldn't be necessary but seems to help prevent tag selector from sometimes going off the screen -->
 		<splitter id="zotero-splitter" resizebefore="closest" resizeafter="closest" hidden="true"
 			onmouseup="ZoteroPane.updateTagSelectorSize()"/>
-		<hbox id="zotero-pane" persist="height" hidden="true">
+		<hbox id="zotero-pane" persist="height" hidden="true"
+			onkeydown="ZoteroPane.handleKeyDown(event, this.id)"
+			onkeyup="ZoteroPane.handleKeyUp(event, this.id)">
 			<popupset>
 				<popup id="zotero-collectionmenu" onpopupshowing="ZoteroPane.buildCollectionContextMenu();">
 					<menuitem label="&zotero.toolbar.newCollection.label;" oncommand="ZoteroPane.newCollection()"/>
@@ -120,6 +122,7 @@
 						</toolbarbutton>
 					</toolbar>
 					<tree id="zotero-collections-tree" hidecolumnpicker="true" context="zotero-collectionmenu"
+						onmouseover="ZoteroPane.collectionsView.setHighlightedRows();"
 						ondblclick="ZoteroPane.onDoubleClick(event, this);"
 						onselect="ZoteroPane.onCollectionSelected();" seltype="single"
 						ondragdrop="nsDragAndDrop.drop(event, ZoteroPane.collectionsView)"
@@ -339,7 +342,7 @@
 		}
 	}, false);
 	
-	document.getElementById('appcontent').addEventListener('keydown', ZoteroPane.handleKeyPress, true);
+	document.getElementById('appcontent').addEventListener('keydown', ZoteroPane.handleKeyDown, true);
 	</script>
 	
 	<menupopup id="menu_ToolsPopup">

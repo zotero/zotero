@@ -64,6 +64,12 @@
 	margin-right: 5px;
 }
 
+/* Set by setHighlightedRows() and getCellProperties() in collectionTreeView.js) */
+#zotero-collections-tree treechildren::-moz-tree-row(highlighted)
+{
+	background: #FFFF99;
+}
+
 
 #zotero-pane splitter
 {

@@ -36,6 +36,8 @@ Zotero.CollectionTreeView = function()
 	this._treebox = null;
 	this.refresh();
 	
+	this._highlightedRows = {};
+	
 	this._unregisterID = Zotero.Notifier.registerObserver(this, ['collection', 'search']);
 }
 
@@ -211,6 +213,22 @@ Zotero.CollectionTreeView.prototype.notify = function(action, type, ids)
 		this._refreshHashMap();
 	}
 }
+
+
+/*
+ * Set the rows that should be highlighted -- actually highlighting is done
+ * by getRowProperties based on the array set here
+ */
+Zotero.CollectionTreeView.prototype.setHighlightedRows = function (ids) {
+	this._highlightedRows = {};
+	this._treebox.invalidate();
+	
+	for each(var id in ids) {
+		this._highlightedRows[this._collectionRowMap[id]] = true;
+		this._treebox.invalidateRow(this._collectionRowMap[id]);
+	}
+}
+
 
 /*
  *  Unregisters view from Zotero.Notifier (called on window close)
@@ -634,7 +652,16 @@ Zotero.CollectionTreeView.prototype.onDrop = function (evt,dropdata,session) { }
 Zotero.CollectionTreeView.prototype.isSorted = function() 							{ return false; }
 Zotero.CollectionTreeView.prototype.isSeparator = function(row) 					{ return false; }
 Zotero.CollectionTreeView.prototype.isEditable = function(row, idx) 				{ return false; }
-Zotero.CollectionTreeView.prototype.getRowProperties = function(row, prop) 		{ }
+
+/* Set 'highlighted' property on rows set by setHighlightedRows */
+Zotero.CollectionTreeView.prototype.getRowProperties = function(row, props) {
+	if (this._highlightedRows[row]) {
+		var aServ = Components.classes["@mozilla.org/atom-service;1"].
+			getService(Components.interfaces.nsIAtomService);
+		props.AppendElement(aServ.getAtom("highlighted"));
+	}
+}
+
 Zotero.CollectionTreeView.prototype.getColumnProperties = function(col, prop) 		{ }
 Zotero.CollectionTreeView.prototype.getCellProperties = function(row, col, prop) 	{ }
 Zotero.CollectionTreeView.prototype.performAction = function(action) 				{ }

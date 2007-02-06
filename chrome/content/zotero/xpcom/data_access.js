@@ -3021,6 +3021,7 @@ Zotero.Collections = new function(){
 	
 	this.get = get;
 	this.add = add;
+	this.getCollectionsContainingItems = getCollectionsContainingItems;
 	this.reloadAll = reloadAll;
 	this.unload = unload;
 	
@@ -3071,6 +3072,26 @@ Zotero.Collections = new function(){
 		
 		return this.get(rnd);
 	}
+	
+	
+	function getCollectionsContainingItems(itemIDs, asIDs) {
+		var sql = "SELECT collectionID FROM collections WHERE ";
+		var sqlParams = [];
+		for each(var id in itemIDs) {
+			sql += "collectionID IN (SELECT collectionID FROM collectionItems "
+				+ "WHERE itemID=?) AND "
+			sqlParams.push(id);
+		}
+		sql = sql.substring(0, sql.length - 5);
+		var collectionIDs = Zotero.DB.columnQuery(sql, sqlParams);
+		
+		if (asIDs) {
+			return collectionIDs;
+		}
+		
+		return Zotero.Collections.get(collectionIDs);
+	}
+	
 	
 	
 	/**

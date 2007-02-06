@@ -65,6 +65,7 @@ var Zotero = new function(){
 	this.platform;
 	this.locale;
 	this.isMac;
+	this.isWin;
 	
 	/*
 	 * Initialize the extension
@@ -106,6 +107,7 @@ var Zotero = new function(){
 			   .hiddenDOMWindow;
 		this.platform = win.navigator.platform;
 		this.isMac = (this.platform.substr(0, 3) == "Mac");
+		this.isWin = (this.platform.substr(0, 3) == "Win");
 		
 		// Locale		
 		var localeService = Components.classes['@mozilla.org/intl/nslocaleservice;1'].
