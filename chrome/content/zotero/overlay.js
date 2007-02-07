@@ -510,7 +510,7 @@ var ZoteroPane = new function()
 			this.itemsView.unregister();
 		}
 		
-		this.clearQuicksearch();
+		document.getElementById('zotero-tb-search').value = ""; 
 		
 		if (this.collectionsView.selection.count == 1 && this.collectionsView.selection.currentIndex != -1) {
 			var itemgroup = this.collectionsView._getItemAtRow(this.collectionsView.selection.currentIndex);
