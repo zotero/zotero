@@ -1,4 +1,4 @@
--- 171
+-- 172
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-01-27 16:10:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-02-07 02:10:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b3.r1', '', '2006-12-15 03:40:00', 1, 100, 4, 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -6465,6 +6465,71 @@ function doWeb(doc, url) {
 		else {
 				scrape(doc);
 		}
+}');
+
+
+REPLACE INTO translators VALUES ('66928fe3-1e93-45a7-8e11-9df6de0a11b3', '1.0.0b3r1', '', '2007-02-06 02:10:00', '0', '100', '4', 'Max Planck VL Library', 'Sean Takats', 'http://vlp.mpiwg-berlin.mpg.de/library/', 
+'function detectWeb(doc, url){
+	var namespace = doc.documentElement.namespaceURI;
+		var nsResolver = namespace ? function(prefix) {
+				if (prefix == ''x'') return namespace; else return null;
+		} : null;
+	var elmt = doc.evaluate(''//base[contains(@href, "/library/data/lit")]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+	if (elmt){
+			return "book";
+	}
+	elmt = doc.evaluate(''//span[starts-with(@title, "lit")]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+	if (elmt){
+		return "multiple";
+	}
+}', 
+'function doWeb(doc, url){
+
+	var namespace = doc.documentElement.namespaceURI;
+		var nsResolver = namespace ? function(prefix) {
+				if (prefix == ''x'') return namespace; else return null;
+		} : null;
+	var uris = new Array();
+	var baseElmt = doc.evaluate(''//base[contains(@href, "/library/data/lit")]/@href'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+	if (baseElmt){
+		var docID = baseElmt.nodeValue;
+		var idRe = /lit[^\/]+/;
+		var m = idRe.exec(docID);
+		uris.push("http://vlp.mpiwg-berlin.mpg.de/library/meta?id=" + m[0]);
+	} else {
+		var searchElmts = doc.evaluate(''//a[starts-with(@title, "lit")]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var searchElmt;
+		var links = new Array();
+		var availableItems = new Array();
+		var i = 0;
+		while (searchElmt = searchElmts.iterateNext()){
+			availableItems[i] = searchElmt.textContent;
+			var docID = doc.evaluate(''./@title'', searchElmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
+			links.push("http://vlp.mpiwg-berlin.mpg.de/library/meta?id=" + docID);
+			i++;
+		}
+		var items = Zotero.selectItems(availableItems);
+		if(!items) {
+			return true;
+		}
+		var uris = new Array();
+		for(var i in items) {
+			uris.push(links[i]);
+		}
+	}
+	Zotero.Utilities.HTTP.doGet(uris, function(text) {
+		// load Refer translator
+		var translator = Zotero.loadTranslator("import");
+		translator.setTranslator("881f60f2-0802-411a-9228-ce5f47b64c7d");
+		translator.setString(text);
+		translator.setHandler("itemDone", function(obj, item) {
+// TODO		item.attachments.push({url:"http://www.arxiv.org/pdf/" + articleID, mimeType:"application/pdf", title:"VL Library PDF"}
+			item.type = undefined;
+			item.complete();
+		});
+		translator.translate();
+	}, function() {Zotero.done();}, null);
+	Zotero.wait();
 }');
 
 
