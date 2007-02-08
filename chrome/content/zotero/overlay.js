@@ -194,7 +194,7 @@ var ZoteroPane = new function()
 		document.getElementById('zotero-splitter').setAttribute('hidden', !visible);
 		
 		if (visible) {
-			document.getElementById('zotero-pane').focus();
+			document.getElementById('zotero-pane').click();
 		}
 		else {
 			document.getElementById('content').setAttribute('collapsed', false);
