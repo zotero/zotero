@@ -58,6 +58,7 @@ var ZoteroItemPane = new function()
 	this.ensureElementIsVisible = ensureElementIsVisible;
 	this.loadPane = loadPane;
 	this.changeTypeTo = changeTypeTo;
+	this.onViewClick = onViewClick;
 	this.onOpenURLClick = onOpenURLClick;
 	this.addCreatorRow = addCreatorRow;
 	this.switchCreatorMode = switchCreatorMode;
@@ -171,32 +172,59 @@ var ZoteroItemPane = new function()
 			// Enable/disable "View =>" button
 			testView: try
 			{
-				var validURI = false;
+				var viewButton = document.getElementById('zotero-go-to-url');
 				
+				viewButton.removeAttribute('viewSnapshot');
+				viewButton.removeAttribute('viewURL');
+				viewButton.setAttribute('label',
+					Zotero.getString('pane.item.goToURL.online.label'));
+				viewButton.setAttribute('tooltiptext',
+					Zotero.getString('pane.item.goToURL.online.tooltip'));
+				
+				var spec = false, validURI = false;
+				
+				var uri = Components.classes["@mozilla.org/network/standard-url;1"].
+						createInstance(Components.interfaces.nsIURI);
+				
+				// First try to find a snapshot matching the item's URL field
 				var snapID = _itemBeingEdited.getBestSnapshot();
-				if (snapID)
-				{
-					var spec = Zotero.Items.get(snapID).getLocalFileURL();
-				}
-				else
-				{
-					var spec = _itemBeingEdited.getField('url');
+				if (snapID) {
+					spec = Zotero.Items.get(snapID).getLocalFileURL();
+					uri.spec = spec;
+					if (!uri.scheme || uri.scheme != 'file') {
+						snapID = false;
+						spec = false;
+					}
 				}
 				
-				if (!spec)
-				{
+				// If that fails, try the URL field itself
+				if (!spec) {
+					spec = _itemBeingEdited.getField('url');
+					uri.spec = spec;
+					if (!(uri.scheme && (uri.host || uri.scheme == 'file'))) {
+						spec = false;
+					}
+				}
+				
+				if (!spec) {
 					break testView;
 				}
-				var uri = Components.classes["@mozilla.org/network/io-service;1"]
-							.getService(Components.interfaces.nsIIOService)
-							.newURI(spec, null, null);
 				
-				validURI = uri.scheme && (uri.host || uri.scheme=='file');
+				validURI = true;
 				
-				document.getElementById('zotero-tb-go-to-url').setAttribute('viewURL', spec);
+				if (snapID) {
+					viewButton.setAttribute('label',
+						Zotero.getString('pane.item.goToURL.snapshot.label'));
+					viewButton.setAttribute('tooltiptext',
+						Zotero.getString('pane.item.goToURL.snapshot.tooltip'));
+					viewButton.setAttribute('viewSnapshot', snapID);
+				}
+				else {
+					viewButton.setAttribute('viewURL', spec);
+				}
 			}
-			catch (e){}
-			document.getElementById('zotero-tb-go-to-url').setAttribute('disabled', !validURI);
+			catch (e){Zotero.debug(e);}
+			viewButton.setAttribute('disabled', !validURI);
 			
 			// Enable/disable "Locate =>" (OpenURL) button
 			switch (_itemBeingEdited.getType())
@@ -212,7 +240,7 @@ var ZoteroItemPane = new function()
 				default:
 					var openURL = false;
 			}
-			document.getElementById('zotero-tb-openurl').setAttribute('disabled', !openURL);
+			document.getElementById('zotero-openurl').setAttribute('disabled', !openURL);
 			
 			// Clear and rebuild creator type menu
 			while(_creatorTypeMenu.hasChildNodes())
@@ -273,8 +301,17 @@ var ZoteroItemPane = new function()
 				);
 				
 				var label = document.createElement("label");
+				label.setAttribute('fieldname', fieldNames[i]);
 				label.setAttribute("value", Zotero.ItemFields.getLocalizedString(_itemBeingEdited.getType(), fieldNames[i]) + ":");
-				label.setAttribute("onclick","this.nextSibling.blur();");
+				
+				if (fieldNames[i] == 'url' && val) {
+					label.setAttribute("isButton", true);
+					label.setAttribute("onclick", "ZoteroPane.loadURI(this.nextSibling.value, event)");
+					label.setAttribute("tooltiptext", Zotero.getString('pane.item.goToURL.online.tooltip'));
+				}
+				else {
+					label.setAttribute("onclick","this.nextSibling.blur();");
+				}
 			
 				addDynamicRow(label,valueElement);
 			}
@@ -482,12 +519,21 @@ var ZoteroItemPane = new function()
 		}
 	}
 	
-	function onOpenURLClick()
+	function onViewClick(button, event) {
+		if (button.getAttribute('viewURL')) {
+			ZoteroPane.loadURI(button.getAttribute('viewURL'), event);
+		}
+		else if (button.getAttribute('viewSnapshot')) {
+			ZoteroPane.viewAttachment(button.getAttribute('viewSnapshot'), event);
+		}
+	}
+	
+	function onOpenURLClick(event)
 	{
 		var url = Zotero.OpenURL.resolve(_itemBeingEdited);
 		if (url)
 		{
-			window.loadURI(Zotero.OpenURL.resolve(_itemBeingEdited));
+			ZoteroPane.loadURI(url, event);
 		}
 	}
 	

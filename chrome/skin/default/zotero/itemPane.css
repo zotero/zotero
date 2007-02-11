@@ -30,6 +30,11 @@
 	font-weight: bold;
 }
 
+#zotero-editpane-dynamic-fields row label:first-child[isButton=true]:hover
+{
+	cursor: pointer;
+}
+
 #zotero-editpane-dynamic-fields row label
 {
 	-moz-user-focus: ignore;

@@ -44,8 +44,6 @@
 <!ENTITY zotero.toolbar.advancedSearch				"Advanced Search">
 <!ENTITY zotero.toolbar.search.label					"Search:">
 <!ENTITY zotero.toolbar.fullscreen.tooltip				"Toggle Fullscreen Mode">
-<!ENTITY zotero.toolbar.goToURL.label					"View">
-<!ENTITY zotero.toolbar.goToURL.tooltip				"Go to this item online">
 <!ENTITY zotero.toolbar.openURL.label					"Locate">
 <!ENTITY zotero.toolbar.openURL.tooltip				"Find through your local library">
 

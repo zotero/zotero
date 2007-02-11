@@ -284,11 +284,11 @@
 						<vbox id="zotero-view-attachment" flex="1">
 							<label id="zotero-attachment-label"/>
 							<hbox>
-								<button id="zotero-attachment-view" flex="1" oncommand="ZoteroPane.viewSelectedAttachment();"/>
+								<button id="zotero-attachment-view" flex="1" oncommand="ZoteroPane.viewSelectedAttachment(event);"/>
 								<button id="zotero-attachment-show" label="&zotero.item.attachment.file.show;" flex="1" oncommand="ZoteroPane.showSelectedAttachmentInFilesystem()"/>
 							</hbox>
 							<vbox>
-								<label id="zotero-attachment-url" class="text-link" crop="end" onclick="window.loadURI(this.value)"/>
+								<label id="zotero-attachment-url" class="text-link" crop="end" onclick="ZoteroPane.loadURI(this.value, event)"/>
 								<label id="zotero-attachment-accessed"/>
 							</vbox>
 							<noteeditor id="zotero-attachment-note-editor" notitle="1" flex="1"/>

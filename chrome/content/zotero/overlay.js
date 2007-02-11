@@ -63,6 +63,7 @@ var ZoteroPane = new function()
 	this.buildCollectionContextMenu = buildCollectionContextMenu;
 	this.buildItemContextMenu = buildItemContextMenu;
 	this.onDoubleClick = onDoubleClick;
+	this.loadURI = loadURI;
 	this.setItemsPaneMessage = setItemsPaneMessage;
 	this.clearItemsPaneMessage = clearItemsPaneMessage;
 	this.contextPopupShowing = contextPopupShowing;
@@ -73,6 +74,7 @@ var ZoteroPane = new function()
 	this.addItemFromPage = addItemFromPage;
 	this.addAttachmentFromDialog = addAttachmentFromDialog;
 	this.addAttachmentFromPage = addAttachmentFromPage;
+	this.viewAttachment = viewAttachment;
 	this.viewSelectedAttachment = viewSelectedAttachment;
 	this.showSelectedAttachmentInFilesystem = showSelectedAttachmentInFilesystem;
 	
@@ -1204,10 +1206,56 @@ var ZoteroPane = new function()
 						document.getElementById('zotero-view-note-button').doCommand();
 					}
 					else if (item && item.isAttachment()) {
-						this.viewSelectedAttachment();
+						this.viewSelectedAttachment(event);
 					}
 				}
 			}
+		}
+	}
+	
+	
+	/*
+	 * Loads a URL following the standard modifier key behavior
+	 *  (e.g. meta-click == new background tab, meta-shift-click == new front tab,
+	 *  shift-click == new window, no modifier == frontmost tab
+	 */
+	function loadURI(uri, event, data) {
+		// Open in new tab
+		if (event.metaKey) {
+			var tab = gBrowser.addTab(uri);
+			var browser = gBrowser.getBrowserForTab(tab);
+			
+			if (data && data.attachmentID) {
+				Zotero_Browser.annotatePage(data.attachmentID, browser);
+				// In case the page has already loaded, update
+				Zotero_Browser.updateStatus();
+			}
+			
+			if (event.shiftKey) {
+				gBrowser.selectedTab = tab;
+			}
+		}
+		else if (event.shiftKey) {
+			window.open(uri, "zotero-loaded-page",
+				"menubar=yes,location=yes,toolbar=yes,personalbar=yes,resizable=yes,scrollbars=yes,status=yes");
+			
+			var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+					   .getService(Components.interfaces.nsIWindowMediator);
+			var newWindow = wm.getMostRecentWindow("navigator:browser");
+			var browser = newWindow.getBrowser();
+			
+			if (data && data.attachmentID) {
+				newWindow.Zotero_Browser.annotatePage(data.attachmentID);
+				// In case the page has already loaded, update
+				newWindow.Zotero_Browser.updateStatus();
+			}
+		}
+		else {
+			if (data && data.attachmentID) {
+				// Enable annotation
+				Zotero_Browser.annotatePage(data.attachmentID);
+			}
+			window.loadURI(uri);
 		}
 	}
 	
@@ -1440,48 +1488,51 @@ var ZoteroPane = new function()
 	}
 	
 	
-	function viewSelectedAttachment()
+	function viewAttachment(itemID, event) {
+		var attachment = Zotero.Items.get(itemID);
+		if (!attachment.isAttachment()) {
+			throw ("Item " + itemID + " is not an attachment in ZoteroPane.viewAttachment()");
+		}
+		
+		if (attachment.getAttachmentLinkMode() == Zotero.Attachments.LINK_MODE_LINKED_URL) {
+			this.loadURI(attachment.getField('url'), event);
+			return;
+		}
+		
+		var file = attachment.getFile();
+		if (file) {
+			var mimeType = attachment.getAttachmentMimeType();
+			if (mimeType) {
+				var ext = Zotero.File.getExtension(file);
+				var internal = Zotero.MIME.hasInternalHandler(mimeType, ext);
+			}
+			
+			var fileURL = attachment.getLocalFileURL();
+			
+			if (internal || Zotero.MIME.fileHasInternalHandler(file)) {
+				this.loadURI(fileURL, event, { attachmentID: itemID});
+			}
+			else {
+				// Some platforms don't have nsILocalFile.launch, so we just load it and
+				// let the Firefox external helper app window handle it
+				try {
+					file.launch();
+				}
+				catch (e) {
+					window.loadURI(fileURL, event);
+				}
+			}
+		}
+		else {
+			alert(Zotero.getString('pane.item.attachments.fileNotFound'));
+		}
+	}
+	
+	
+	function viewSelectedAttachment(event)
 	{
 		if (this.itemsView && this.itemsView.selection.count == 1) {
-			var attachment = this.getSelectedItems()[0];
-			
-			if(attachment.getAttachmentLinkMode() != Zotero.Attachments.LINK_MODE_LINKED_URL)
-			{
-				var file = attachment.getFile();
-				if (file){
-					var mimeType = attachment.getAttachmentMimeType();
-					if (mimeType) {
-						var ext = Zotero.File.getExtension(file);
-						var internal = Zotero.MIME.hasInternalHandler(mimeType, ext);
-					}
-					
-					var fileURL = attachment.getLocalFileURL();
-					
-					if (internal || Zotero.MIME.fileHasInternalHandler(file))
-					{
-						// enable annotation
-						Zotero_Browser.annotateThisPage(attachment.getID());						
-						window.loadURI(fileURL);
-					}
-					else {
-						// Some platforms don't have nsILocalFile.launch, so we just load it and
-						// let the Firefox external helper app window handle it
-						try {
-							file.launch();
-						}
-						catch (e) {
-							window.loadURI(fileURL);
-						}
-					}
-				}
-				else {
-					alert(Zotero.getString('pane.item.attachments.fileNotFound'));
-				}
-			}
-			else
-			{
-				window.loadURI(attachment.getField('url'));
-			}
+			this.viewAttachment(this.getSelectedItems(true)[0], event);
 		}
 	}
 	

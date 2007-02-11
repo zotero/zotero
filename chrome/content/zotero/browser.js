@@ -39,7 +39,7 @@
 var Zotero_Browser = new function() {
 	this.init = init;
 	this.scrapeThisPage = scrapeThisPage;
-	this.annotateThisPage = annotateThisPage;
+	this.annotatePage = annotatePage;
 	this.toggleMode = toggleMode;
 	this.chromeLoad = chromeLoad;
 	this.chromeUnload = chromeUnload;
@@ -56,7 +56,6 @@ var Zotero_Browser = new function() {
 	this.statusImage = null;
 	
 	var _scrapePopupShowing = false;
-	var _annotateNextLoad = false;
 	var _browserData = new Object();
 	
 	var _blacklist = [
@@ -119,8 +118,13 @@ var Zotero_Browser = new function() {
 	/*
 	 * flags a page for annotation
 	 */
-	function annotateThisPage(id) {
-		var tab = _getTabObject(this.tabbrowser.selectedBrowser);
+	function annotatePage(id, browser) {
+		if (browser) {
+			var tab = _getTabObject(browser);
+		}
+		else {
+			var tab = _getTabObject(this.tabbrowser.selectedBrowser);
+		}
 		tab.annotateNextLoad = true;
 		tab.annotateID = id;
 	}

@@ -39,15 +39,14 @@
 							ZoteroItemPane.modifyCreator(document.popupNode.getAttribute('fieldname').split('-')[1],
 								'typeID', typeID, otherFields)"/>
 				</popupset>
-				<hbox align="center">
-					<button id="zotero-tb-go-to-url" label="&zotero.toolbar.goToURL.label;"
+				<hbox id="zotero-editpane-go-buttons" align="center">
+					<button id="zotero-go-to-url"
 						onfocus="ZoteroItemPane.ensureElementIsVisible(this)"
-						tooltiptext="&zotero.toolbar.goToURL.tooltip;" flex="1"
-						oncommand="window.loadURI(this.getAttribute('viewURL'))" disabled="false"/>
-					<button id="zotero-tb-openurl" label="&zotero.toolbar.openURL.label;"
-						tooltiptext="&zotero.toolbar.openURL.tooltip;" flex="1"
+						oncommand="ZoteroItemPane.onViewClick(this, event)" disabled="false"/>
+					<button id="zotero-openurl" label="&zotero.toolbar.openURL.label;"
+						tooltiptext="&zotero.toolbar.openURL.tooltip;"
 						onfocus="ZoteroItemPane.ensureElementIsVisible(this)"
-						oncommand="ZoteroItemPane.onOpenURLClick();"/>
+						oncommand="ZoteroItemPane.onOpenURLClick(event);"/>
 				</hbox>
 				<hbox align="center">
 					<menulist id="zotero-editpane-type-menu" oncommand="ZoteroItemPane.changeTypeTo(this.value, this)" flex="1"
