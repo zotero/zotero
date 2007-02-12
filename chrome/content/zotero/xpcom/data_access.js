@@ -2157,6 +2157,12 @@ Zotero.Item.prototype.toArray = function(){
 			case 'numAttachments':
 				continue;
 			
+			case 'firstCreator':
+				if (!this.isRegularItem()) {
+					continue;
+				}
+				// fall through
+			
 			// For the rest, just copy over
 			default:
 				arr[i] = this._data[i];
@@ -2184,9 +2190,10 @@ Zotero.Item.prototype.toArray = function(){
 	}
 	
 	// Notes
-	if (this.isNote()){
+	if (this.isNote()) {
 		// Don't need title for notes
 		delete arr['title'];
+		arr['isAbstract'] = this.isAbstract();
 		arr['note'] = this.getNote();
 		if (this.getSource()){
 			arr['sourceItemID'] = this.getSource();
@@ -2202,9 +2209,6 @@ Zotero.Item.prototype.toArray = function(){
 			arr['sourceItemID'] = this.getSource();
 		}
 	}
-	
-	arr['tags'] = this.getTags();
-	arr['seeAlso'] = this.getSeeAlso();
 	
 	// Attach children of regular items
 	if (this.isRegularItem()){
@@ -2223,6 +2227,9 @@ Zotero.Item.prototype.toArray = function(){
 			arr['attachments'].push(attachment.toArray());
 		}
 	}
+	
+	arr['tags'] = this.getTags();
+	arr['seeAlso'] = this.getSeeAlso();
 	
 	return arr;
 }

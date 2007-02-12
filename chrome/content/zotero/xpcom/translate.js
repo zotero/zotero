@@ -1819,7 +1819,7 @@ Zotero.Translate.prototype._exportGetItem = function() {
 				if(abstractID) {
 					// look for the abstract in the notes array and remove it
 					for(var i in returnItemArray.notes) {
-						if(returnItemArray.notes[i].itemID == abstractID) {
+						if(returnItemArray.notes[i].isAbstract) {
 							returnItemArray.abstractNote = returnItemArray.notes[i].note;
 							returnItemArray.notes.splice(i, 1);
 							break;
