@@ -2573,9 +2573,9 @@ Zotero.Notes = new function(){
 				Zotero.DB.commitTransaction();
 				throw ("Cannot set note source to invalid item " + sourceItemID);
 			}
-			if (sourceItem.isNote()){
+			if (!sourceItem.isRegularItem()){
 				Zotero.DB.commitTransaction();
-				throw ("Cannot set note source to another note (" + sourceItemID + ")");
+				throw ("Cannot set note source to a note or attachment (" + sourceItemID + ")");
 			}
 		}
 		
