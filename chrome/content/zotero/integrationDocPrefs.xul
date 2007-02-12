@@ -7,14 +7,13 @@
 	id="zotero-bibliography"
 	onload="Zotero_File_Interface_Bibliography.init()">
 
-<script src="include.js"/>
-<script src="bibliography.js"/>
-
-<hbox>
-	<label value="&zotero.bibliography.style.label;" control="style-menu"/>
-	<menulist id="style-menu">
-		<menupopup id="style-popup">
-		</menupopup>
-	</menulist>
-</hbox>
+	<script src="include.js"/>
+	<script src="bibliography.js"/>
+	
+	<hbox id="zotero-bibliography-container">
+		<label value="&zotero.bibliography.style.label;" control="style-menu"/>
+		<menulist id="style-menu">
+			<menupopup id="style-popup"/>
+		</menulist>
+	</hbox>
 </dialog>

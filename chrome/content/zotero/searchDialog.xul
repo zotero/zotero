@@ -19,9 +19,11 @@
 	<script src="include.js"/>
 	<script src="searchDialog.js"/>
 	
-	<hbox align="center">
-		<label value="&zotero.search.name;"/>
-		<textbox id="search-name" flex="1"/>
-	</hbox>
-	<zoterosearch id="search-box" flex="1"/>
+	<vbox id="zotero-search-box-container" flex="1">
+		<hbox align="center">
+			<label value="&zotero.search.name;"/>
+			<textbox id="search-name" flex="1"/>
+		</hbox>
+		<zoterosearch id="search-box" flex="1"/>
+	</vbox>
 </dialog>

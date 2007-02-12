@@ -13,6 +13,10 @@ var ZoteroAdvancedSearch = new function() {
 	function onLoad() {
 		_searchBox = document.getElementById('zotero-search-box');
 		
+		// Set font size from pref
+		var sbc = document.getElementById('zotero-search-box-container');
+		Zotero.setFontSize(sbc);
+		
 		var io = window.arguments[0];
 		_searchBox.search = io.dataIn.search;
 	}

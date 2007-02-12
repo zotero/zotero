@@ -31,11 +31,15 @@ var io;
  */
 function doLoad()
 {
+	// Set font size from pref
+	var sbc = document.getElementById('zotero-select-items-container');
+	Zotero.setFontSize(sbc);
+	
 	io = window.arguments[0];
 	
 	collectionsView = new Zotero.CollectionTreeView();
 	document.getElementById('zotero-collections-tree').view = collectionsView;
-
+	
 	// move to center of screen
 	window.sizeToContent();
 	window.moveTo(

@@ -24,6 +24,8 @@
 	<script src="chrome://global/content/nsDragAndDrop.js"/>
 	<script src="chrome://global/content/nsTransferable.js"/>
 	
+	<vbox id="zotero-search-box-container" flex="1">
+	
 	<hbox>
 		<zoterosearch id="zotero-search-box" oncommand="ZoteroAdvancedSearch.search()" flex="1"/>
 	</hbox>
@@ -51,6 +53,8 @@
 		</treecols>
 		<treechildren alternatingbackground="true"/>
 	</tree>
+	
+	</vbox>
 	
 	<keyset>
 		<key id="key_close" key="W" modifiers="accel" oncommand="window.close()"/>

@@ -7,24 +7,25 @@
 	id="zotero-bibliography"
 	onload="Zotero_File_Interface_Bibliography.init()">
 
-<script src="include.js"/>
-<script src="bibliography.js"/>
-
-<hbox>
-	<label value="&zotero.bibliography.style.label;" control="style-menu"/>
-	<menulist id="style-menu">
-		<menupopup id="style-popup">
-		</menupopup>
-	</menulist>
-</hbox>
-<groupbox>
-	<caption label="&zotero.bibliography.output.label;"/>
-	<radiogroup id="output-radio">
-		<radio id="save-as-rtf" label="&zotero.bibliography.saveAsRTF.label;"/>
-		<radio id="save-as-html" label="&zotero.bibliography.saveAsHTML.label;"/>
-		<radio id="copy-to-clipboard" label="&zotero.bibliography.copyToClipboard.label;"/>
-		<radio id="print" label="&zotero.bibliography.print.label;"/>
-	</radiogroup>
-</groupbox>
-
+	<script src="include.js"/>
+	<script src="bibliography.js"/>
+	
+	<vbox id="zotero-bibliography-container">
+		<hbox>
+			<label value="&zotero.bibliography.style.label;" control="style-menu"/>
+			<menulist id="style-menu">
+				<menupopup id="style-popup">
+				</menupopup>
+			</menulist>
+		</hbox>
+		<groupbox>
+			<caption label="&zotero.bibliography.output.label;"/>
+			<radiogroup id="output-radio">
+				<radio id="save-as-rtf" label="&zotero.bibliography.saveAsRTF.label;"/>
+				<radio id="save-as-html" label="&zotero.bibliography.saveAsHTML.label;"/>
+				<radio id="copy-to-clipboard" label="&zotero.bibliography.copyToClipboard.label;"/>
+				<radio id="print" label="&zotero.bibliography.print.label;"/>
+			</radiogroup>
+		</groupbox>
+	</vbox>
 </dialog>

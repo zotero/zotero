@@ -40,6 +40,8 @@
 	<script src="include.js"/>
 	<script src="selectItemsDialog.js"/>
 	
+	<vbox id="zotero-select-items-container" flex="1">
+	
 	<hbox align="center" pack="end">
 		<label value="&zotero.toolbar.search.label;" control="zotero-tb-search"/>
 		<textbox id="zotero-tb-search" type="timed" timeout="250" oncommand="onSearch()" dir="reverse" onkeypress="if(event.keyCode == event.DOM_VK_ESCAPE) { this.value = ''; this.doCommand('cmd_zotero_search'); return false; }">
@@ -88,4 +90,6 @@
 			<treechildren/>
 		</tree>
 	</hbox>
+	
+	</vbox>
 </dialog>

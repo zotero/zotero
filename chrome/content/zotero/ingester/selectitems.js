@@ -41,6 +41,10 @@ var Zotero_Ingester_Interface_SelectItems = function() {}
  * loading
  */
 Zotero_Ingester_Interface_SelectItems.init = function() {
+	// Set font size from pref
+	var sbc = document.getElementById('zotero-select-items-container');
+	Zotero.setFontSize(sbc);
+	
 	this.io = window.arguments[0];
 	var listbox = document.getElementById("zotero-selectitems-links");
 	

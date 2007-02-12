@@ -116,19 +116,7 @@ var ZoteroPane = new function()
 			document.getElementById('zotero-tb-fullscreen').setAttribute('zoterotop','true');
 		}
 		
-		// Font size
-		document.getElementById('zotero-pane').style.fontSize = Zotero.Prefs.get('fontSize') + 'em';
-		var size = Zotero.Prefs.get('fontSize');
-		if (size <= 1) {
-			size = 'small';
-		}
-		else if (size <= 1.25) {
-			size = 'medium';
-		}
-		else {
-			size = 'large';
-		}
-		document.getElementById('zotero-pane').setAttribute('fontSize', size);
+		Zotero.setFontSize(document.getElementById('zotero-pane'))
 		
 		//Initialize collections view
 		this.collectionsView = new Zotero.CollectionTreeView();
@@ -170,6 +158,7 @@ var ZoteroPane = new function()
 		
 		Zotero.Keys.windowInit(document);
 	}
+	
 	
 	/*
 	 * Called when the window closes

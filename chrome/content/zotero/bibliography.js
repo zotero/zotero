@@ -39,6 +39,11 @@ var Zotero_File_Interface_Bibliography = new function() {
 	 * loading
 	 */
 	function init() {
+		// Set font size from pref
+		// Affects bibliography.xul and integrationDocPrefs.xul
+		var sbc = document.getElementById('zotero-bibliography-container');
+		Zotero.setFontSize(sbc);
+		
 		_io = window.arguments[0];
 		if(_io.wrappedJSObject){
 			_io = _io.wrappedJSObject;

@@ -38,6 +38,10 @@ var Zotero_File_Interface_Export = new function() {
 	 * add options to export
 	 */
 	function init() {
+		// Set font size from pref
+		var sbc = document.getElementById('zotero-export-options-container');
+		Zotero.setFontSize(sbc);
+		
 		var addedOptions = new Object();
 		
 		var translators = window.arguments[0].translators;

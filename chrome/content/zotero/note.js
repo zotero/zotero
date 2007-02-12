@@ -28,6 +28,9 @@ function onLoad()
 	noteEditor = document.getElementById('note-editor');
 	noteEditor.focus();
 	
+	// Set font size from pref
+	Zotero.setFontSize(noteEditor);
+	
 	var params = new Array();
 	var b = document.location.href.substr(document.location.href.indexOf('?')+1).split('&');
 	for(var i = 0; i < b.length; i++)

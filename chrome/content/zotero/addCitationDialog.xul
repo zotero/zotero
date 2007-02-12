@@ -41,6 +41,8 @@
 	<script src="selectItemsDialog.js"/>
 	<script src="addCitationDialog.js"/>
 	
+	<vbox id="zotero-select-items-container" flex="1">
+	
 	<hbox flex="1">
 		<vbox flex="1">
 			<hbox align="center" pack="end">
@@ -137,4 +139,6 @@
 			</hbox>
 		</vbox>
 	</hbox>
+	
+	</vbox>
 </dialog>

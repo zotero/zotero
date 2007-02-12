@@ -7,17 +7,19 @@
 	ondialogcancel="Zotero_File_Interface_Export.cancel()"
 	id="zotero-export-options"
 	onload="Zotero_File_Interface_Export.init()">
-
-<script src="include.js"/>
-<script src="exportOptions.js"/>
-<hbox>
-	<label value="&zotero.exportOptions.format.label;" control="format-menu"/>
-	<menulist id="format-menu" oncommand="Zotero_File_Interface_Export.updateOptions()">
-		<menupopup id="format-popup">
-		</menupopup>
-	</menulist>
-</hbox>
-<groupbox id="translator-options">
-	<caption label="&zotero.exportOptions.translatorOptions.label;"/>
-</groupbox>
+	
+	<script src="include.js"/>
+	<script src="exportOptions.js"/>
+	
+	<vbox id="zotero-export-options-container" flex="1">
+		<hbox>
+			<label value="&zotero.exportOptions.format.label;" control="format-menu"/>
+			<menulist id="format-menu" oncommand="Zotero_File_Interface_Export.updateOptions()">
+				<menupopup id="format-popup"/>
+			</menulist>
+		</hbox>
+		<groupbox id="translator-options">
+			<caption label="&zotero.exportOptions.translatorOptions.label;"/>
+		</groupbox>
+	</vbox>
 </dialog>

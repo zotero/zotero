@@ -1,3 +1,27 @@
+/* Font sizes */
+*[zoteroFontSize=medium] #zotero-tb-search, *[zoteroFontSize=large] #zotero-tb-search,
+*[zoteroFontSize=medium] zoterotagselector textbox, *[zoteroFontSize=large] zoterotagselector textbox
+{
+	font-size: 1em !important;
+}
+
+*[zoteroFontSize=medium] treechildren::-moz-tree-row
+{
+	height: 1.5em;
+}
+
+*[zoteroFontSize=large] treechildren::-moz-tree-row
+{
+	height: 1.5em;
+}
+
+*[zoteroFontSize=large] .treecol-text
+{
+	margin:0;
+	padding:0;
+}
+
+
 #zotero-toolbar-button
 {
 	list-style-image: url('chrome://zotero/skin/zotero-z-24px.png');

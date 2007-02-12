@@ -4,6 +4,10 @@ var io;
 
 function doLoad()
 {
+	// Set font size from pref
+	var sbc = document.getElementById('zotero-search-box-container');
+	Zotero.setFontSize(sbc);
+	
 	io = window.arguments[0];
 	
 	document.getElementById('search-box').search = io.dataIn.search;
