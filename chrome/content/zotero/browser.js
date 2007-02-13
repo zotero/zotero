@@ -306,6 +306,7 @@ var Zotero_Browser = new function() {
 			
 			// clear data object
 			var tab = _getTabObject(browser);
+			if(!tab) return;
 			
 			// save annotations
 			if(tab.page && tab.page.annotations) tab.page.annotations.save();

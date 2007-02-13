@@ -20,6 +20,8 @@
     ***** END LICENSE BLOCK *****
 */
 
+const TEXT_TYPE = Components.interfaces.nsIDOMNode.TEXT_NODE;
+
 //////////////////////////////////////////////////////////////////////////////
 //
 // Zotero.Annotate
@@ -36,8 +38,7 @@ Zotero.Annotate = new function() {
 	this.getPathForPoint = getPathForPoint;
 	this.getPointForPath = getPointForPath;
 	this.getPixelOffset = getPixelOffset;
-	
-	var textType = Components.interfaces.nsIDOMNode.TEXT_NODE;
+	this.normalizeRange = normalizeRange;
 	
 	/*
 	 * gets a path object, comprising an XPath, text node index, and offset, for
@@ -48,14 +49,14 @@ Zotero.Annotate = new function() {
 		
 		var path = {parent:"", textNode:null, offset:(offset ? offset : null)};
 		
-		var lastWasTextNode = node.nodeType == textType;
+		var lastWasTextNode = node.nodeType == TEXT_TYPE;
 
 		if(node.parentNode.getAttribute && node.parentNode.getAttribute("zotero")) {		
 			// if the selected point is inside a highlight node, add offsets of
 			// preceding text nodes in this zotero node			
 			var sibling = node.previousSibling;
 			while(sibling) {
-				if(sibling.nodeType == textType) path.offset += sibling.nodeValue.length;
+				if(sibling.nodeType == TEXT_TYPE) path.offset += sibling.nodeValue.length;
 				sibling = sibling.previousSibling;
 			}
 			
@@ -65,12 +66,15 @@ Zotero.Annotate = new function() {
 			// if selected point is a zotero node, move it to the last character
 			// of the previous node
 			node = node.previousSibling;
-			if(node.nodeType == textType) {
-				offset = node.nodeValue.length;
+			if(node.nodeType == TEXT_TYPE) {
+				path.offset = node.nodeValue.length;
+				lastWasTextNode = true;
 			} else {
-				offset = 0;
+				path.offset = 0;
 			}
 		}
+		
+		lastWasTextNode = lastWasTextNode || node.nodeType == TEXT_TYPE;
 		
 		if(lastWasTextNode) {
 			path.textNode = 1;
@@ -81,7 +85,7 @@ Zotero.Annotate = new function() {
 				var isZotero = undefined;
 				if(sibling.getAttribute) isZotero = sibling.getAttribute("zotero");
 				
-				if(sibling.nodeType == textType ||
+				if(sibling.nodeType == TEXT_TYPE ||
 				  (isZotero == "highlight")) {
 				   	// is a text node
 					if(first == true) {
@@ -89,7 +93,9 @@ Zotero.Annotate = new function() {
 						if(sibling.getAttribute) {
 							// get offset of all child nodes
 							for each(var child in sibling.childNodes) {
-								if(child.nodeType == textType) path.offset += child.nodeValue.length;
+								if(child && child.nodeType == TEXT_TYPE) {
+									path.offset += child.nodeValue.length;
+								}
 							}
 						} else {
 							path.offset += sibling.nodeValue.length;
@@ -108,6 +114,10 @@ Zotero.Annotate = new function() {
 			}
 			
 			node = node.parentNode;
+		} else if(path.offset != 0) {
+			for(; path.offset > 0 && node.nextSibling; path.offset--) {
+				node = node.nextSibling;
+			}
 		}
 		
 		var doc = node.ownerDocument;
@@ -121,9 +131,13 @@ Zotero.Annotate = new function() {
 			}
 			
 			// don't add highlight nodes
-			var tag = node.tagName.toLowerCase();
-			if(tag == "span") {
-				tag += "[not(@zotero)]";
+			if(node.tagName) {
+				var tag = node.tagName.toLowerCase();
+				if(tag == "span") {
+					tag += "[not(@zotero)]";
+				}
+			} else {
+				var tag = node.nodeType;
 			}
 			
 			path.parent = "/"+tag+"["+number+"]"+path.parent;
@@ -167,7 +181,7 @@ Zotero.Annotate = new function() {
 			var isZotero = undefined;
 			if(point.node.getAttribute) isZotero = point.node.getAttribute("zotero");
 			
-			if(point.node.nodeType == textType ||
+			if(point.node.nodeType == TEXT_TYPE ||
 			   isZotero == "highlight") {
 				if(!lastWasTextNode) {
 					number++;
@@ -198,7 +212,7 @@ Zotero.Annotate = new function() {
 				var parentNode = point.node;
 				point.node = point.node.firstChild;
 				while(point.node) {
-					if(point.node.nodeType == textType) {
+					if(point.node.nodeType == TEXT_TYPE) {
 						// break if end condition reached
 						if(point.node.nodeValue.length >= point.offset) return point;
 						// otherwise, continue subtracting offsets
@@ -218,7 +232,7 @@ Zotero.Annotate = new function() {
 			point.node = point.node.nextSibling;
 			// if next node does not exist or is not a text node, this
 			// point is invalid
-			if(!point.node || (point.node.nodeType != textType &&
+			if(!point.node || (point.node.nodeType != TEXT_TYPE &&
 			  (!point.node.getAttribute || !point.node.getAttribute("zotero")))) {
 				Zotero.debug("Annotate: could not find point.offset "+point.offset+" for text node "+textNode+" of "+parent);
 				return false;
@@ -242,6 +256,30 @@ Zotero.Annotate = new function() {
 		
 		return [x, y];
 	}
+	
+	/*
+	 * Sometimes, Firefox stupidly decides to use node offsets to reference
+	 * nodes. This is a terrible idea, because Firefox then can't figure out
+	 * when the node boundary matches another. This fixes it.
+	 */
+	 function normalizeRange(range) {
+	 	for each(var type in ["start", "end"]) {
+	 		var container = range[type+"Container"];
+	 		var offset = range[type+"Offset"];
+	 		
+	 		if(container.nodeType != TEXT_TYPE && offset) {	 			
+				for(; offset > 0 && container.nextSibling; offset--) {
+					container = container.nextSibling;
+				}
+				
+				if(type == "start") {
+					range.setStart(container, offset);
+				} else {
+					range.setEnd(container, offset);
+				}
+	 		}
+	 	}
+	 }
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -332,6 +370,7 @@ Zotero.Annotations.prototype.createHighlight = function(selectedRange) {
 		return this.highlights[endIn];
 	}
 	
+	Zotero.Annotate.normalizeRange(selectedRange);
 	var highlight = new Zotero.Highlight(this);
 	highlight.initWithRange(selectedRange);
 	this.highlights.push(highlight);
@@ -343,6 +382,8 @@ Zotero.Annotations.prototype.unhighlight = function(selectedRange) {
 	for(var i in this.highlights) {
 		var compareHighlight = this.highlights[i];
 		var compareRange = compareHighlight.range;
+		
+		Zotero.Annotate.normalizeRange(compareRange);
 		
 		var startToStart = compareRange.compareBoundaryPoints(Components.interfaces.nsIDOMRange.START_TO_START, selectedRange);
 		var endToEnd = compareRange.compareBoundaryPoints(Components.interfaces.nsIDOMRange.END_TO_END, selectedRange);
@@ -366,11 +407,14 @@ Zotero.Annotations.prototype.unhighlight = function(selectedRange) {
 				   selectEndPoint.offset == compareEndPoint.offset) {
 					endToEnd = 0;
 				} else {
+					
 					// this will unhighlight the entire end
 					compareHighlight.unhighlight(selectedRange.startContainer, selectedRange.startOffset, 2);
 					
-					// need to use point references because they disregard highlights
 					var newRange = this.document.createRange();
+					
+					// need to use point references because they disregard highlights
+					
 					var startPoint = Zotero.Annotate.getPointForPath(selectEndPoint.parent, selectEndPoint.textNode, selectEndPoint.offset,
 						this.document, this.nsResolver);
 					var endPoint = Zotero.Annotate.getPointForPath(compareEndPoint.parent, compareEndPoint.textNode, compareEndPoint.offset,
@@ -456,9 +500,13 @@ Zotero.Annotations.prototype.load = function() {
 	// load highlights
 	var rows = Zotero.DB.query("SELECT * FROM highlights WHERE itemID = ?", [this.itemID]);
 	for each(var row in rows) {
-		var highlight = new Zotero.Highlight(this);
-		highlight.initWithDBRow(row);
-		this.highlights.push(highlight);
+		try {
+			var highlight = new Zotero.Highlight(this);
+			highlight.initWithDBRow(row);
+			this.highlights.push(highlight);
+		} catch(e) {
+			Zotero.debug("Annotate: could not load highlight");
+		}
 	}
 }
 
@@ -737,7 +785,6 @@ Zotero.Highlight = function(annotationsObj) {
 }
 
 Zotero.Highlight.prototype.initWithDBRow = function(row) {
-	Zotero.debug(row.startParent);
 	var start = Zotero.Annotate.getPointForPath(row.startParent, row.startTextNode,
 		row.startOffset, this.document, this.nsResolver);
 	var end = Zotero.Annotate.getPointForPath(row.endParent, row.endTextNode,
@@ -796,7 +843,7 @@ Zotero.Highlight.prototype.unhighlight = function(container, offset, mode) {
 		this.range.setEnd(container, offset);
 	}
 	
-	for(var i in this.spans) {
+	for(var i=0; i<this.spans.length; i++) {
 		var span = this.spans[i];
 		var parentNode = span.parentNode;
 		
@@ -842,24 +889,28 @@ Zotero.Highlight.prototype.unhighlight = function(container, offset, mode) {
 				
 				this.range.setEnd(textNode, 0);
 			}
-		} else if(mode == 0 || !this.range.isPointInRange(span, 1)) {
+		} else if(mode == 0 || !this.range.isPointInRange(span, 1) && parentNode) {
 			Zotero.debug("point is in range");
 			
 			// attach child nodes before
 			while(span.hasChildNodes()) {
 				Zotero.debug("moving "+span.firstChild.textContent);
-				span.parentNode.insertBefore(span.removeChild(span.firstChild), span);
+				parentNode.insertBefore(span.removeChild(span.firstChild), span);
 			}
 			
 			// remove span from DOM
-			span.parentNode.removeChild(span);
+			parentNode.removeChild(span);
+			
+			// remove span from list
+			this.spans.splice(i, 1);
+			i--;
 		}
-		
-		parentNode.normalize();
 	}
 }
 
 Zotero.Highlight.prototype._highlight = function() {
+	Zotero.Annotate.normalizeRange(this.range);
+	
 	var startNode = this.range.startContainer;
 	var endNode = this.range.endContainer;
 	
@@ -869,7 +920,7 @@ Zotero.Highlight.prototype._highlight = function() {
 	
 	if(!onlyOneNode) {
 		// highlight nodes after start node in the DOM hierarchy not at ancestor level
-		while(!startNode.parentNode.isSameNode(ancestor)) {
+		while(startNode.parentNode && !startNode.parentNode.isSameNode(ancestor)) {
 			if(startNode.nextSibling) {
 				this._highlightSpaceBetween(startNode.nextSibling, startNode.parentNode.lastChild);
 			}
@@ -877,7 +928,7 @@ Zotero.Highlight.prototype._highlight = function() {
 			startNode = startNode.parentNode;
 		}
 		// highlight nodes after end node in the DOM hierarchy not at ancestor level
-		while(!endNode.parentNode.isSameNode(ancestor)) {
+		while(endNode.parentNode && !endNode.parentNode.isSameNode(ancestor)) {
 			if(endNode.previousSibling) {
 				this._highlightSpaceBetween(endNode.parentNode.firstChild, endNode.previousSibling);
 			}
@@ -892,8 +943,10 @@ Zotero.Highlight.prototype._highlight = function() {
 	
 	// split the end off the existing node
 	if(this.range.endContainer.nodeType == Components.interfaces.nsIDOMNode.TEXT_NODE && this.range.endOffset != 0) {
+	Zotero.debug("using end range");
 		if(this.range.endOffset != this.range.endContainer.nodeValue) {
 			var textNode = this.range.endContainer.splitText(this.range.endOffset);
+			Zotero.debug("split along "+textNode.textContent);
 		}
 		if(!onlyOneNode) {
 			this._highlightTextNode(this.range.endContainer);
@@ -927,7 +980,7 @@ Zotero.Highlight.prototype._highlightTextNode = function(textNode) {
 	  nextSibling.getAttribute("zotero") == "highlight") {
 		// next node is highlighted
 		parent.removeChild(textNode);
-		nextSibling.firstChild.nodeValue = textNode.nodeValue + nextSibling.firstChild.nodeValue;
+		nextSibling.insertBefore(textNode, nextSibling.firstChild);
 		return nextSibling;
 	}
 	
@@ -936,7 +989,7 @@ Zotero.Highlight.prototype._highlightTextNode = function(textNode) {
 	  previousSibling.getAttribute("zotero") == "highlight") {
 		// previous node is highlighted
 		parent.removeChild(textNode);
-		previousSibling.firstChild.nodeValue += textNode.nodeValue;
+		previousSibling.appendChild(textNode);
 		return previousSibling;
 	}
 	
