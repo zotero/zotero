@@ -1,4 +1,4 @@
--- 172
+-- 173
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-02-07 02:10:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-02-15 22:50:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b3.r1', '', '2006-12-15 03:40:00', 1, 100, 4, 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -2747,21 +2747,22 @@ REPLACE INTO translators VALUES ('c54d1932-73ce-dfd4-a943-109380e06574', '1.0.0b
 	}
 }');
 
-REPLACE INTO translators VALUES ('fcf41bed-0cbc-3704-85c7-8062a0068a7a', '1.0.0b3.r1', '', '2006-12-14 17:53:00', 1, 100, 12, 'NCBI PubMed', 'Simon Kornblith', '^http://www\.ncbi\.nlm\.nih\.gov/entrez/query\.fcgi\?.*db=PubMed',
+REPLACE INTO translators VALUES ('fcf41bed-0cbc-3704-85c7-8062a0068a7a', '1.0.0b3.r1', '', '2007-02-15 22:50:00', '1', '100', '4', 'NCBI PubMed', 'Simon Kornblith', '^http://www\.ncbi\.nlm\.nih\.gov/entrez/query\.fcgi\?.*db=PubMed', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == ''x'') return namespace; else return null;
 	} : null;
-	
-	if(doc.location.href.indexOf("list_uids=") >= 0) {
+
+	var uids = doc.evaluate(''//input[@name="uid"]'', doc,
+			       nsResolver, XPathResult.ANY_TYPE, null);
+	if(uids.iterateNext()) {
+		if (uids.iterateNext()){
+			return "multiple";
+		}
 		return "journalArticle";
-	} else if(doc.evaluate(''//div[@class="ResultSet"]/table/tbody'', doc,
-	                       nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
-		return "multiple";
 	}
 }
-
 function getPMID(co) {
 	var coParts = co.split("&");
 	for each(part in coParts) {
@@ -2781,34 +2782,35 @@ function detectSearch(item) {
 		}
 	}
 	return false;
-}',
+}
+', 
 'function lookupPMIDs(ids, doc) {
 	Zotero.wait();
-	
+
 	var newUri = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=PubMed&retmode=xml&rettype=citation&id="+ids.join(",");
 	Zotero.Utilities.HTTP.doGet(newUri, function(text) {
 		// Remove xml parse instruction and doctype
 		text = text.replace(/<!DOCTYPE[^>]*>/, "").replace(/<\?xml[^>]*\?>/, "");
-		
+
 		var xml = new XML(text);
-		
+
 		for(var i=0; i<xml.PubmedArticle.length(); i++) {
 			var newItem = new Zotero.Item("journalArticle");
-			
+
 			var citation = xml.PubmedArticle[i].MedlineCitation;
-			
+
 			var PMID = citation.PMID.text().toString();
 			newItem.accessionNumber = "PMID "+PMID;
-			
+
 			// add attachments
 			if(doc) {
 				newItem.attachments.push({document:doc, title:"PubMed Snapshot"});
 			} else {
 				var url = "http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?db=pubmed&cmd=Retrieve&dopt=AbstractPlus&list_uids="+PMID;
 				newItem.attachments.push({url:url, title:"PubMed Snapshot",
-				                         mimeType:"text/html"});
+							 mimeType:"text/html"});
 			}
-			
+
 			var article = citation.Article;
 			if(article.ArticleTitle.length()) {
 				var title = article.ArticleTitle.text().toString();
@@ -2817,24 +2819,24 @@ function detectSearch(item) {
 				}
 				newItem.title = title;
 			}
-			
+
 			if (article.Pagination.MedlinePgn.length()){
 				newItem.pages = article.Pagination.MedlinePgn.text().toString();
 			}
-			
+
 			if(article.Journal.length()) {
 				var issn = article.Journal.ISSN.text().toString();
 				if(issn) {
 					newItem.ISSN = issn.replace(/[^0-9]/g, "");
 				}
-				
+
 				newItem.journalAbbreviation = Zotero.Utilities.superCleanString(citation.MedlineJournalInfo.MedlineTA.text().toString());
 				if(article.Journal.Title.length()) {
 					newItem.publicationTitle = Zotero.Utilities.superCleanString(article.Journal.Title.text().toString());
 				} else if(citation.MedlineJournalInfo.MedlineTA.length()) {
 					newItem.publicationTitle = newItem.journalAbbreviation;
 				}
-				
+
 				if(article.Journal.JournalIssue.length()) {
 					newItem.volume = article.Journal.JournalIssue.Volume.text().toString();
 					newItem.issue = article.Journal.JournalIssue.Issue.text().toString();
@@ -2849,7 +2851,7 @@ function detectSearch(item) {
 					}
 				}
 			}
-			
+
 			if(article.AuthorList.length() && article.AuthorList.Author.length()) {
 				var authors = article.AuthorList.Author;
 				for(var j=0; j<authors.length(); j++) {
@@ -2863,55 +2865,54 @@ function detectSearch(item) {
 					}
 				}
 			}
-			
+
 			newItem.abstractNote = article.Abstract.AbstractText.toString()
-			
+
 			newItem.complete();
 		}
-	
+
 		Zotero.done();
 	});
 }
 
 function doWeb(doc, url) {
-	var uri = doc.location.href;
-	var ids = new Array();
-	var idRegexp = /[\?\&]list_uids=([0-9\,]+)/;
-	
-	var m = idRegexp.exec(uri);
-	if(m) {
-		ids.push(m[1]);
-	
-		lookupPMIDs(ids, doc);
-	} else {
-		var namespace = doc.documentElement.namespaceURI;
-		var nsResolver = namespace ? function(prefix) {
-			if (prefix == ''x'') return namespace; else return null;
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
 		} : null;
-		
-		var items = new Array();
-		var tableRows = doc.evaluate(''//div[@class="ResultSet"]/table/tbody'', doc,
-		                             nsResolver, XPathResult.ANY_TYPE, null);
-		var tableRow;
-		// Go through table rows
-		while(tableRow = tableRows.iterateNext()) {
-			var link = doc.evaluate(''.//a'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-			var article = doc.evaluate(''./tr[2]/td[2]/text()[1]'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-			items[link.href] = article.nodeValue;
+	var ids = new Array();
+	var uids = doc.evaluate(''//input[@name="uid"]'', doc,
+			       nsResolver, XPathResult.ANY_TYPE, null);
+	var uid = uids.iterateNext();
+	if(uid) {
+		if (uids.iterateNext()){
+			var items = new Array();
+			var tableRows = doc.evaluate(''//div[@class="ResultSet"]/table/tbody'', doc,
+					     nsResolver, XPathResult.ANY_TYPE, null);
+			var tableRow;
+			// Go through table rows
+			while(tableRow = tableRows.iterateNext()) {
+				var link = doc.evaluate(''.//a'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+				uid = doc.evaluate(''.//input[@name="uid"]'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+				var article = doc.evaluate(''./tr[2]/td[2]/text()[1]'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+				items[uid.value] = article.nodeValue;
+			}
+
+			items = Zotero.selectItems(items);
+
+			if(!items) {
+				return true;
+			}
+
+			for(var i in items) {
+				ids.push(i);
+			}
+
+			lookupPMIDs(ids);
+		} else {
+			ids.push(uid.value);
+			lookupPMIDs(ids, doc);
 		}
-		
-		items = Zotero.selectItems(items);
-		
-		if(!items) {
-			return true;
-		}
-		
-		for(var i in items) {
-			var m = idRegexp.exec(i);
-			ids.push(m[1]);
-		}
-	
-		lookupPMIDs(ids);
 	}
 }
 
@@ -2919,6 +2920,7 @@ function doSearch(item) {
 	// pmid was defined earlier in detectSearch
 	lookupPMIDs([getPMID(item.contextObject)]);
 }');
+
 
 REPLACE INTO translators VALUES ('951c027d-74ac-47d4-a107-9c3069ab7b48', '1.0.0b3.r1', '', '2006-12-12 23:41:00', 1, 100, 4, 'Embedded RDF', 'Simon Kornblith', NULL,
 'function detectWeb(doc, url) {
@@ -6468,7 +6470,7 @@ function doWeb(doc, url) {
 }');
 
 
-REPLACE INTO translators VALUES ('66928fe3-1e93-45a7-8e11-9df6de0a11b3', '1.0.0b3r1', '', '2007-02-06 02:10:00', '0', '100', '4', 'Max Planck VL Library', 'Sean Takats', 'http://vlp.mpiwg-berlin.mpg.de/library/', 
+REPLACE INTO translators VALUES ('66928fe3-1e93-45a7-8e11-9df6de0a11b3', '1.0.0b3r1', '', '2007-02-15 22:50:00', '0', '100', '4', 'Max Planck Institute for the History of Science: Virtual Laboratory Library', 'Sean Takats', 'http://vlp.mpiwg-berlin.mpg.de/library/', 
 'function detectWeb(doc, url){
 	var namespace = doc.documentElement.namespaceURI;
 		var nsResolver = namespace ? function(prefix) {
@@ -6478,7 +6480,7 @@ REPLACE INTO translators VALUES ('66928fe3-1e93-45a7-8e11-9df6de0a11b3', '1.0.0b
 	if (elmt){
 			return "book";
 	}
-	elmt = doc.evaluate(''//span[starts-with(@title, "lit")]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+	elmt = doc.evaluate(''//span[starts-with(@title, "lit")] | //a[starts-with(@title, "lit")] | //p[starts-with(@title, "lit")]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 	if (elmt){
 		return "multiple";
 	}
@@ -6493,17 +6495,17 @@ REPLACE INTO translators VALUES ('66928fe3-1e93-45a7-8e11-9df6de0a11b3', '1.0.0b
 	var baseElmt = doc.evaluate(''//base[contains(@href, "/library/data/lit")]/@href'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 	if (baseElmt){
 		var docID = baseElmt.nodeValue;
-		var idRe = /lit[^\/]+/;
+		var idRe = /lit[0-9]+/;
 		var m = idRe.exec(docID);
 		uris.push("http://vlp.mpiwg-berlin.mpg.de/library/meta?id=" + m[0]);
 	} else {
-		var searchElmts = doc.evaluate(''//a[starts-with(@title, "lit")]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var searchElmts = doc.evaluate(''//span[starts-with(@title, "lit")] | //a[starts-with(@title, "lit")] | //p[starts-with(@title, "lit")]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
 		var searchElmt;
 		var links = new Array();
 		var availableItems = new Array();
 		var i = 0;
 		while (searchElmt = searchElmts.iterateNext()){
-			availableItems[i] = searchElmt.textContent;
+			availableItems[i] = Zotero.Utilities.cleanString(searchElmt.textContent);
 			var docID = doc.evaluate(''./@title'', searchElmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
 			links.push("http://vlp.mpiwg-berlin.mpg.de/library/meta?id=" + docID);
 			i++;
@@ -6523,7 +6525,6 @@ REPLACE INTO translators VALUES ('66928fe3-1e93-45a7-8e11-9df6de0a11b3', '1.0.0b
 		translator.setTranslator("881f60f2-0802-411a-9228-ce5f47b64c7d");
 		translator.setString(text);
 		translator.setHandler("itemDone", function(obj, item) {
-// TODO		item.attachments.push({url:"http://www.arxiv.org/pdf/" + articleID, mimeType:"application/pdf", title:"VL Library PDF"}
 			item.type = undefined;
 			item.complete();
 		});
