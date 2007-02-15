@@ -1144,6 +1144,8 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 					newItem.setField(field, data);
 				} else if(field == "seeAlso") {
 					newItem.translateSeeAlso = data;
+				} else if(field == "abstractNote") { // abstractNote is 'abstract' field
+					newItem.setField('abstract', data);
 				} else if(field != "note" && field != "notes" && field != "itemID" &&
 						  field != "attachments" && field != "tags" &&
 						  (fieldID = Zotero.ItemFields.getID(field))) {
@@ -1178,11 +1180,6 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 				var myNote = Zotero.Items.get(noteID);
 				this._itemTagsAndSeeAlso(note, myNote);
 			}
-		}
-		
-		// handle abstract
-		if(item.abstractNote) {
-			Zotero.Notes.add(item.abstractNote, myID, true);
 		}
 		
 		// handle attachments
@@ -1811,22 +1808,6 @@ Zotero.Translate.prototype._exportGetItem = function() {
 			}
 		} else {
 			var returnItemArray = returnItem.toArray();
-			
-			// handle abstract as abstractNote
-			if(returnItem.isRegularItem()) {
-				var abstractID = returnItem.getAbstract();
-				
-				if(abstractID) {
-					// look for the abstract in the notes array and remove it
-					for(var i in returnItemArray.notes) {
-						if(returnItemArray.notes[i].isAbstract) {
-							returnItemArray.abstractNote = returnItemArray.notes[i].note;
-							returnItemArray.notes.splice(i, 1);
-							break;
-						}
-					}
-				}
-			}
 			
 			// get attachments, although only urls will be passed if exportFileData
 			// is off

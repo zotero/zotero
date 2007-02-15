@@ -62,6 +62,7 @@ var ZoteroItemPane = new function()
 	this.onOpenURLClick = onOpenURLClick;
 	this.addCreatorRow = addCreatorRow;
 	this.switchCreatorMode = switchCreatorMode;
+	this.toggleAbstractExpand = toggleAbstractExpand;
 	this.disableButton = disableButton;
 	this.createValueElement = createValueElement;
 	this.removeCreator = removeCreator;
@@ -309,8 +310,11 @@ var ZoteroItemPane = new function()
 					label.setAttribute("onclick", "ZoteroPane.loadURI(this.nextSibling.value, event)");
 					label.setAttribute("tooltiptext", Zotero.getString('pane.item.goToURL.online.tooltip'));
 				}
+				else if (fieldNames[i] == 'abstract') {
+					label.setAttribute("onclick", "if (this.nextSibling.inputField) { this.nextSibling.inputField.blur(); } else { ZoteroItemPane.toggleAbstractExpand(this); }");
+				}
 				else {
-					label.setAttribute("onclick","this.nextSibling.blur();");
+					label.setAttribute("onclick", "if (this.nextSibling.inputField) { this.nextSibling.inputField.blur(); }");
 				}
 			
 				addDynamicRow(label,valueElement);
@@ -349,11 +353,7 @@ var ZoteroItemPane = new function()
 				for(var i = 0; i < notes.length; i++)
 				{
 					var icon = document.createElement('image');
-					var iconType = 'treeitem-note';
-					if (notes[i].isAbstract()) {
-						iconType += '-abstract';
-					}
-					icon.setAttribute('src','chrome://zotero/skin/' + iconType + '.png');
+					icon.setAttribute('src','chrome://zotero/skin/treeitem-note.png');
 				
 					var label = document.createElement('label');
 					label.setAttribute('value',_noteToTitle(notes[i].getNote()));
@@ -825,6 +825,19 @@ var ZoteroItemPane = new function()
 		}
 	}
 	
+	
+	function toggleAbstractExpand(label) {
+		var cur = Zotero.Prefs.get('lastAbstractExpand');
+		Zotero.Prefs.set('lastAbstractExpand', !cur);
+		
+		var ab = label.nextSibling;
+		var valueText = _itemBeingEdited.getField('abstract');
+		var tabindex = ab.getAttribute('ztabindex');
+		var elem = createValueElement(valueText, 'abstract', tabindex);
+		ab.parentNode.replaceChild(elem, ab);
+	}
+	
+	
 	function disableButton(button)
 	{
 		button.setAttribute('disabled', true);
@@ -840,8 +853,10 @@ var ZoteroItemPane = new function()
 	
 	function createValueElement(valueText, fieldName, tabindex, noedit)
 	{
-		if (fieldName=='extra')
-		{
+		var abstractAsVbox = (fieldName == 'abstract') &&
+			Zotero.Prefs.get('lastAbstractExpand');
+		
+		if (fieldName == 'extra' || abstractAsVbox) {
 			var valueElement = document.createElement("vbox");
 		}
 		else
@@ -895,8 +910,7 @@ var ZoteroItemPane = new function()
 		
 		// To support newlines in 'extra' fields, we use multiple
 		// <description> elements inside a vbox
-		if (fieldName=='extra')
-		{
+		if (fieldName == 'extra' || abstractAsVbox) {
 			var lines = valueText.split("\n");
 			for (var i = 0; i < lines.length; i++) {
 				var descriptionNode = document.createElement("description");
@@ -905,10 +919,13 @@ var ZoteroItemPane = new function()
 				valueElement.appendChild(descriptionNode);
 			}
 		}
-		// 29 == arbitary length at which to chop uninterrupted text
+		// 29 == arbitrary length at which to chop uninterrupted text
 		else if ((firstSpace == -1 && valueText.length > 29 ) || firstSpace > 29
-			|| (fieldName && fieldName.substr(0, 7)=='creator'))
-		{
+			|| (fieldName &&
+				(fieldName.substr(0, 7) == 'creator') || fieldName == 'abstract')) {
+			if (fieldName == 'abstract') {
+				valueText = valueText.replace(/[\t\n]/g, ' ');
+			}
 			valueElement.setAttribute('crop', 'end');
 			valueElement.setAttribute('value',valueText);
 		}
@@ -990,7 +1007,7 @@ var ZoteroItemPane = new function()
 			t.setAttribute('singleField', elem.getAttribute('singleField'));
 		}
 		
-		if (fieldName=='extra')
+		if (fieldName == 'abstract' || fieldName == 'extra')
 		{
 			t.setAttribute('multiline', true);
 			t.setAttribute('rows', 8);
@@ -1094,28 +1111,30 @@ var ZoteroItemPane = new function()
 	}
 	
 	function handleKeyPress(event){
-		var target = document.commandDispatcher.focusedElement;
+		var target = event.target;
+		var focused = document.commandDispatcher.focusedElement;
+		
 		switch (event.keyCode)
 		{
 			case event.DOM_VK_RETURN:
-				// Use shift-enter as the save action for the 'extra' field
-				if (target.parentNode.parentNode.getAttribute('fieldname')=='extra'
+				// Use shift-enter as the save action for the larger fields
+				if ((target.getAttribute('fieldname') == 'abstract'
+					|| target.getAttribute('fieldname') == 'extra')
 					&& !event.shiftKey)
 				{
 					break;
 				}
-				else if (target.parentNode.parentNode.
-					parentNode.getAttribute('fieldname')=='tag')
+				else if (target.getAttribute('fieldname')=='tag')
 				{
 					// If last tag row, create new one
-					var row = target.parentNode.parentNode.parentNode.parentNode;
+					var row = target.parentNode.parentNode;
 					if (row == row.parentNode.lastChild)
 					{
 						_tabDirection = 1;
 						var lastTag = true;
 					}
 				}
-				target.blur();
+				focused.blur();
 				
 				// Return focus to items pane
 				if (!lastTag) {
@@ -1130,7 +1149,7 @@ var ZoteroItemPane = new function()
 			case event.DOM_VK_ESCAPE:
 				// Reset field to original value
 				target.value = target.getAttribute('value');
-				target.blur();
+				focused.blur();
 				
 				// Return focus to items pane
 				var tree = document.getElementById('zotero-items-tree');
@@ -1144,7 +1163,7 @@ var ZoteroItemPane = new function()
 				_tabDirection = event.shiftKey ? -1 : 1;
 				// Blur the old manually -- not sure why this is necessary,
 				// but it prevents an immediate blur() on the next tag
-				target.blur();
+				focused.blur();
 				return false;
 		}
 		

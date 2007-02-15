@@ -50,7 +50,6 @@ Zotero.Item.prototype._init = function(){
 	this._changedItemData = new Zotero.Hash();
 	
 	this._noteText = null;
-	this._noteIsAbstract = null
 	this._noteAccessTime = null;
 	
 	this._fileLinkMode = null;
@@ -1032,9 +1031,9 @@ Zotero.Item.prototype.updateNote = function(text){
 	
 	if (sourceItemID)
 	{
-		var sql = "REPLACE INTO itemNotes (note, sourceItemID, itemID, isAbstract) "
-			+ "VALUES (?,?,?,?)";
-		var bindParams = [{string:text}, sourceItemID, this.getID(), this.isAbstract() ? 1 : null];
+		var sql = "REPLACE INTO itemNotes (note, sourceItemID, itemID) "
+			+ "VALUES (?,?,?)";
+		var bindParams = [{string:text}, sourceItemID, this.getID()];
 	}
 	else
 	{
@@ -1046,7 +1045,7 @@ Zotero.Item.prototype.updateNote = function(text){
 	if (updated){
 		this.updateDateModified();
 		Zotero.DB.commitTransaction();
-		this.updateNoteCache(text, this.isAbstract());
+		this.updateNoteCache(text);
 		
 		Zotero.Notifier.trigger('modify', 'item', this.getID(), { old: preItemArray });
 	}
@@ -1056,11 +1055,10 @@ Zotero.Item.prototype.updateNote = function(text){
 }
 
 
-Zotero.Item.prototype.updateNoteCache = function(text, isAbstract){
+Zotero.Item.prototype.updateNoteCache = function(text){
 	// Update cached values
 	this._noteText = text ? text : '';
 	if (this.isNote()){
-		this._noteIsAbstract = !!isAbstract;
 		this.setField('title', this._noteToTitle(), true);
 	}
 }
@@ -1129,14 +1127,6 @@ Zotero.Item.prototype.setSource = function(sourceItemID){
 				var sql = "DELETE FROM collectionItems WHERE itemID=?";
 				Zotero.DB.query(sql, this.getID());
 			}
-		}
-	}
-	
-	if (this.isAbstract()) {
-		// If making an independent note or if new item already has an
-		// abstract, clear abstract status
-		if (!sourceItemID || newItem.getAbstract()) {
-			this.setAbstract(false);
 		}
 	}
 	
@@ -1248,107 +1238,11 @@ Zotero.Item.prototype.getNotes = function(){
 	}
 	
 	var sql = "SELECT itemID FROM itemNotes NATURAL JOIN items "
-		+ "WHERE sourceItemID=" + this.getID() + " ORDER BY isAbstract IS NULL, dateAdded";
+		+ "WHERE sourceItemID=" + this.getID() + " ORDER BY dateAdded";
 	return Zotero.DB.columnQuery(sql);
 }
 
 
-/*
- * Return true if a note item is an abstract, false otherwise
- */
-Zotero.Item.prototype.isAbstract = function() {
-	if (!this.isNote()) {
-		return false;
-	}
-	
-	if (!this.getID()) {
-		throw ("Cannot call isAbstract() on unsaved item");
-	}
-	
-	if (this._noteIsAbstract !== null) {
-		return this._noteIsAbstract;
-	}
-	
-	var sql = "SELECT isAbstract FROM itemNotes WHERE itemID=?";
-	var isAbstract = !!Zotero.DB.valueQuery(sql, this.getID());
-	
-	this._noteIsAbstract = isAbstract;
-	return isAbstract;
-}
-
-
-/*
- * Make a note item an abstract or clear abstract status
- */
-Zotero.Item.prototype.setAbstract = function(set) {
-	if (!this.isNote()) {
-		throw ("setAbstract() can only be called on note items");
-	}
-	
-	if (!this.getID()) {
-		throw ("Cannot call setAbstract() on unsaved item");
-	}
-	
-	if (!!set == !!this.isAbstract()) {
-		Zotero.debug('Abstract status has not changed', 4);
-		return;
-	}
-	
-	Zotero.DB.beginTransaction();
-	
-	var sourceItemID = this.getSource();
-	
-	if (!sourceItemID) {
-		Zotero.DB.rollbackTransaction();
-		throw ("Cannot make a non-child note an abstract");
-	}
-	
-	var notifierData = [{ old: this.toArray() }];
-	
-	var sourceItem = Zotero.Items.get(sourceItemID);
-	notifierData.push({ old: sourceItem.toArray() });
-	
-	// If existing abstract, clear it
-	if (set) {
-		var oldAbstractID = sourceItem.getAbstract();
-		if (oldAbstractID) {
-			var oldAbstractItem = Zotero.Items.get(oldAbstractID);
-			oldAbstractItem.setAbstract(false);
-		}
-	}
-	
-	var sql = "UPDATE itemNotes SET isAbstract=NULL WHERE sourceItemID=?";
-	Zotero.DB.query(sql, sourceItemID);
-	
-	var sql = "UPDATE itemNotes SET isAbstract=? WHERE itemID=?";
-	Zotero.DB.valueQuery(sql, [set ? 1 : null, this.getID()]);
-	
-	this.removeAllRelated();
-	this.removeAllTags();
-	
-	Zotero.DB.commitTransaction();
-	
-	this._noteIsAbstract = !!set;
-	
-	Zotero.Notifier.trigger('modify', 'item', [this.getID(), sourceItemID], notifierData);
-}
-
-
-/*
- * Return the itemID of a parent item's abstract note, or false if none
- */
-Zotero.Item.prototype.getAbstract = function() {
-	if (!this.isRegularItem()) {
-		throw ("getAbstract() can only be called on regular items");
-	}
-	
-	if (!this.getID()) {
-		throw ("Cannot call getAbstract() on unsaved item");
-	}
-	
-	var sql = "SELECT itemID FROM itemNotes WHERE sourceItemID=? AND isAbstract=1";
-	return Zotero.DB.valueQuery(sql, this.getID());
-}
 
 
 
@@ -1652,10 +1546,6 @@ Zotero.Item.prototype.addTag = function(tag, type){
 		throw ('Cannot add tag to unsaved item in Item.addTag()');
 	}
 	
-	if (this.isAbstract()) {
-		throw ('Cannot add tag to abstract note');
-	}
-	
 	if (!tag){
 		Zotero.debug('Not saving empty tag in Item.addTag()', 2);
 		return false;
@@ -1705,10 +1595,6 @@ Zotero.Item.prototype.addTag = function(tag, type){
 Zotero.Item.prototype.addTagByID = function(tagID) {
 	if (!this.getID()) {
 		throw ('Cannot add tag to unsaved item in Item.addTagByID()');
-	}
-	
-	if (this.isAbstract()) {
-		throw ('Cannot add tag to abstract note');
 	}
 	
 	if (!tagID) {
@@ -1835,10 +1721,6 @@ Zotero.Item.prototype.addSeeAlso = function(itemID){
 		return false;
 	}
 	
-	if (this.isAbstract()) {
-		throw ('Cannot add Related item to abstract note');
-	}
-	
 	Zotero.DB.beginTransaction();
 	
 	var relatedItem = Zotero.Items.get(itemID);
@@ -1949,10 +1831,6 @@ Zotero.Item.prototype.getImageSrc = function() {
 		else if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) {
 			itemType = itemType + "-web-link";
 		}
-	}
-	
-	if (itemType == 'note' && this.isAbstract()) {
-		itemType = 'note-abstract';
 	}
 	
 	return Zotero.ItemTypes.getImageSrc(itemType);
@@ -2151,6 +2029,12 @@ Zotero.Item.prototype.toArray = function(){
 				arr['itemType'] = Zotero.ItemTypes.getName(this._data[i]);
 				break;
 			
+			// Since 'abstract' is a reserved word in JS, we use abstractNote
+			// instead so clients can use dot notation
+			case 'abstract':
+				arr['abstractNote'] = this._data[i];
+				continue;
+			
 			// Skip certain fields
 			//case 'firstCreator':
 			case 'numNotes':
@@ -2193,7 +2077,6 @@ Zotero.Item.prototype.toArray = function(){
 	if (this.isNote()) {
 		// Don't need title for notes
 		delete arr['title'];
-		arr['isAbstract'] = this.isAbstract();
 		arr['note'] = this.getNote();
 		if (this.getSource()){
 			arr['sourceItemID'] = this.getSource();
@@ -2564,7 +2447,7 @@ Zotero.Notes = new function(){
 	*
 	* Returns the itemID of the new note item
 	**/
-	function add(text, sourceItemID, isAbstract){
+	function add(text, sourceItemID){
 		Zotero.DB.beginTransaction();
 		
 		if (sourceItemID){
@@ -2579,32 +2462,21 @@ Zotero.Notes = new function(){
 			}
 		}
 		
-		// If creating abstract, clear abstract status of existing abstract
-		// for source item
-		if (isAbstract && sourceItemID) {
-			var oldAbstractID = Zotero.Items.get(sourceItemID).getAbstract();
-			if (oldAbstractID) {
-				var oldAbstractItem = Zotero.Items.get(oldAbstractID);
-				oldAbstractItem.setAbstract(false);
-			}
-		}
-		
 		var note = Zotero.Items.getNewItemByType(Zotero.ItemTypes.getID('note'));
 		note.save();
 		
-		var sql = "INSERT INTO itemNotes VALUES (?,?,?,?)";
+		var sql = "INSERT INTO itemNotes VALUES (?,?,?)";
 		var bindParams = [
 			note.getID(),
 			(sourceItemID ? {int:sourceItemID} : null),
-			{string: text ? text : ''},
-			isAbstract ? 1 : null,
+			{string: text ? text : ''}
 		];
 		Zotero.DB.query(sql, bindParams);
 		Zotero.DB.commitTransaction();
 		
 		// Switch to Zotero.Items version
 		var note = Zotero.Items.get(note.getID());
-		note.updateNoteCache(text, isAbstract);
+		note.updateNoteCache(text);
 		
 		if (sourceItemID){
 			var notifierData = { old: sourceItem.toArray() };
@@ -3879,7 +3751,6 @@ Zotero.ItemTypes = new function(){
 			case 'map':
 			case 'newspaperArticle':
 			case 'note':
-			case 'note-abstract':
 			case 'podcast':
 			case 'radioBroadcast':
 			case 'report':

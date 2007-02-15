@@ -89,7 +89,6 @@
 					<menuitem label="&zotero.items.menu.attach.note;" oncommand="ZoteroPane.newNote(false, this.parentNode.getAttribute('itemID'))"/>
 					<menuitem label="&zotero.items.menu.attach.snapshot;" oncommand="ZoteroPane.addAttachmentFromPage(false, this.parentNode.getAttribute('itemID'));"/>
 					<menuitem label="&zotero.items.menu.attach.link;" oncommand="ZoteroPane.addAttachmentFromPage(true, this.parentNode.getAttribute('itemID'));"/>
-					<menuitem oncommand="ZoteroPane.toggleAbstractForSelectedItem()"/>
 					<menuseparator/>
 					<menuitem oncommand="ZoteroPane.deleteSelectedItem();"/>
 					<menuitem oncommand="ZoteroPane.deleteSelectedItem(true);"/>

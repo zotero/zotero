@@ -42,10 +42,6 @@ function onLoad()
 	var id = params['id'];
 	var collectionID = params['coll'];
 	
-	if (params['abstract']) {
-		noteEditor.setAttribute('abstract', true);
-	}
-	
 	if(id && id != '' && id != 'undefined')
 	{
 		var ref = Zotero.Items.get(id);

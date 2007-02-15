@@ -18,6 +18,7 @@ pref("extensions.zotero.automaticTags",true);
 pref("extensions.zotero.fontSize", "1.0");
 
 pref("extensions.zotero.lastCreatorFieldMode",0);
+pref("extensions.zotero.lastAbstractExpand",0);
 pref("extensions.zotero.lastRenameAssociatedFile", false);
 
 // Keyboard shortcuts

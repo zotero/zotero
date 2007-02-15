@@ -1,4 +1,4 @@
--- 18
+-- 19
 
 -- This file creates tables containing user-specific data -- any changes
 -- to existing tables made here must be mirrored in transition steps in
@@ -80,7 +80,6 @@ CREATE TABLE IF NOT EXISTS itemNotes (
     itemID INT,
     sourceItemID INT,
     note TEXT,
-    isAbstract INT DEFAULT NULL,
     PRIMARY KEY (itemID),
     FOREIGN KEY (itemID) REFERENCES items(itemID),
     FOREIGN KEY (sourceItemID) REFERENCES items(itemID)
