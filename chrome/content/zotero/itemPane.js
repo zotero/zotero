@@ -303,7 +303,16 @@ var ZoteroItemPane = new function()
 				
 				var label = document.createElement("label");
 				label.setAttribute('fieldname', fieldNames[i]);
-				label.setAttribute("value", Zotero.ItemFields.getLocalizedString(_itemBeingEdited.getType(), fieldNames[i]) + ":");
+				
+				var prefix = '';
+				// Add '(...)' before 'Abstract:' for collapsed abstracts
+				if (fieldNames[i] == 'abstract') {
+					if (val && !Zotero.Prefs.get('lastAbstractExpand')) {
+						prefix = '(...) ';
+					}
+				}
+				label.setAttribute("value", prefix +
+					Zotero.ItemFields.getLocalizedString(_itemBeingEdited.getType(), fieldNames[i]) + ":");
 				
 				if (fieldNames[i] == 'url' && val) {
 					label.setAttribute("isButton", true);
@@ -835,6 +844,13 @@ var ZoteroItemPane = new function()
 		var tabindex = ab.getAttribute('ztabindex');
 		var elem = createValueElement(valueText, 'abstract', tabindex);
 		ab.parentNode.replaceChild(elem, ab);
+		
+		var text = Zotero.ItemFields.getLocalizedString(_itemBeingEdited.getType(), 'abstract') + ':';
+		// Add '(...)' before "Abstract:" for collapsed abstracts
+		if (valueText && cur) {
+			text = '(...) ' + text;
+		}
+		label.setAttribute('value', text);
 	}
 	
 	
