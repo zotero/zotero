@@ -138,7 +138,7 @@
 						<treechildren/>
 					</tree>
 				</vbox>
-				<splitter id="zotero-tags-splitter" onmouseup="ZoteroPane.updateTagSelectorSize()"/>
+				<splitter id="zotero-tags-splitter" persist="collapsed" onmouseup="ZoteroPane.updateTagSelectorSize()"/>
 				<zoterotagselector id="zotero-tag-selector" persist="height,collapsed,showAutomatic"
 					oncommand="ZoteroPane.updateTagFilter()"/>
 			</vbox>

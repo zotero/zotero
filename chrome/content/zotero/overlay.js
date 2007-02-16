@@ -399,10 +399,12 @@ var ZoteroPane = new function()
 	
 	function toggleTagSelector(){
 		var zoteroPane = document.getElementById('zotero-pane');
+		var splitter = document.getElementById('zotero-tags-splitter');
 		var tagSelector = document.getElementById('zotero-tag-selector');
 		
 		var showing = tagSelector.getAttribute('collapsed') == 'true';
 		tagSelector.setAttribute('collapsed', !showing);
+		splitter.setAttribute('collapsed', !showing);
 		this.updateTagSelectorSize();
 		
 		// If showing, set scope to items in current view
@@ -448,7 +450,7 @@ var ZoteroPane = new function()
 			}
 			// 121px seems to be enough room for the toolbar and collections
 			// tree at minimum height
-			height = height + 121;
+			height = height + 125;
 		}
 		
 		//Zotero.debug('Setting Zotero pane minheight to ' + height);

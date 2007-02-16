@@ -2,7 +2,8 @@ groupbox
 {
 	overflow: hidden;
 	min-height: 132px;
-	padding-bottom: 2px;
+	margin: 0;
+	padding: 1px 1px 0;
 }
 
 #tags-toggle
@@ -56,7 +57,7 @@ groupbox > hbox
 
 textbox
 {
-	margin: 3px 0 2px;
+	margin: 3px 0 1px;
 	font-size: 11px !important; /* Keep font size in Linux within reason */
 }
 
@@ -80,7 +81,7 @@ groupbox > hbox > hbox
 /* Bottom buttons */
 toolbarbutton.zotero-clicky
 {
-	margin:3px 5px;
+	margin:2px 5px 3px;
 	padding:1px;
 	height:1em;
 }
