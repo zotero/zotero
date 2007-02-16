@@ -663,6 +663,12 @@ Zotero.Search.prototype._buildQuery = function(){
 						openParens++;
 						break;
 					
+					case 'childNote':
+						condSQL += "itemID IN (SELECT sourceItemID FROM "
+							+ "itemNotes WHERE ";
+						openParens++;
+						break;
+					
 					case 'fulltextWord':
 						condSQL += "wordID IN (SELECT wordID FROM fulltextWords "
 							+ "WHERE ";
@@ -1165,6 +1171,16 @@ Zotero.SearchConditions = new function(){
 					doesNotContain: true
 				},
 				table: 'itemNotes',
+				field: 'note'
+			},
+			
+			{
+				name: 'childNote',
+				operators: {
+					contains: true,
+					doesNotContain: true
+				},
+				table: 'items',
 				field: 'note'
 			},
 			
