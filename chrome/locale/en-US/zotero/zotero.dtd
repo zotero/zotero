@@ -77,6 +77,7 @@
 <!ENTITY zotero.bibliography.saveAsRTF.label			"Save as RTF">
 <!ENTITY zotero.bibliography.saveAsHTML.label			"Save as HTML">
 <!ENTITY zotero.bibliography.copyToClipboard.label		"Copy to Clipboard">
+<!ENTITY zotero.bibliography.macClipboardWarning		"(Some formatting may be lost.)">
 <!ENTITY zotero.bibliography.print.label				"Print">
 
 <!ENTITY zotero.integration.docPrefs.title				"Document Preferences">

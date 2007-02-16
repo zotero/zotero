@@ -82,8 +82,8 @@ var Zotero_File_Interface_Bibliography = new function() {
 			
 			// disable clipboard on the Mac, because it can't support formatted
 			// output
-			if(Zotero.isMac && !Zotero.Prefs.get("enableMacClipboard")) {
-				document.getElementById("copy-to-clipboard").hidden = "true";
+			if(Zotero.isMac) {
+				document.getElementById("mac-clipboard-warning").hidden = false;
 			}
 		}
 		

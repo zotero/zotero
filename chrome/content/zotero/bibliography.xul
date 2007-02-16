@@ -23,7 +23,11 @@
 			<radiogroup id="output-radio">
 				<radio id="save-as-rtf" label="&zotero.bibliography.saveAsRTF.label;"/>
 				<radio id="save-as-html" label="&zotero.bibliography.saveAsHTML.label;"/>
-				<radio id="copy-to-clipboard" label="&zotero.bibliography.copyToClipboard.label;"/>
+				<hbox align="center">
+					<radio id="copy-to-clipboard" label="&zotero.bibliography.copyToClipboard.label;"/>
+					<label id="mac-clipboard-warning" value="&zotero.bibliography.macClipboardWarning;"
+						hidden="true" style="margin-left:1em; font-size:0.95em"/>
+				</hbox>
 				<radio id="print" label="&zotero.bibliography.print.label;"/>
 			</radiogroup>
 		</groupbox>
