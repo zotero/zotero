@@ -511,7 +511,8 @@ Zotero.Item.prototype.setField = function(field, value, loadIn){
 			
 			if (fieldID == Zotero.ItemFields.getID('accessDate')) {
 				if (!Zotero.Date.isSQLDate(value) &&
-						!Zotero.Date.isSQLDateTime(value)) {
+						!Zotero.Date.isSQLDateTime(value) &&
+						value != 'CURRENT_TIMESTAMP') {
 					Zotero.debug("Discarding invalid accessDate '" + value
 						+ "' in Item.setField()");
 					return false;
