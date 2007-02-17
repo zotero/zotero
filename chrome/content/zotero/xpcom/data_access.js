@@ -2830,12 +2830,17 @@ Zotero.Collection.prototype._loadChildItems = function(){
 
 /**
 * Returns an array of descendent collections and items
-* 	(rows of 'id', 'type' ('item' or 'collection'), and, if collection, 'name')
+*	(rows of 'id', 'type' ('item' or 'collection'), and, if collection, 'name'
+*	and the nesting 'level')
 *
 * nested: Return multidimensional array with 'children' nodes instead of flat array
 **/
-Zotero.Collection.prototype.getDescendents = function(nested, type){
+Zotero.Collection.prototype.getDescendents = function(nested, type, level){
 	var toReturn = new Array();
+	
+	if (!level) {
+		level = 1;
+	}
 	
 	// 0 == collection
 	// 1 == item
@@ -2866,12 +2871,13 @@ Zotero.Collection.prototype.getDescendents = function(nested, type){
 					toReturn.push({
 						id: children[i]['id'],
 						name: children[i]['collectionName'],
-						type: 'collection'
+						type: 'collection',
+						level: level
 					});
 				}
 				
 				var descendents =
-					Zotero.Collections.get(children[i]['id']).getDescendents(nested, type);
+					Zotero.Collections.get(children[i]['id']).getDescendents(nested, type, level+1);
 				
 				if (nested){
 					toReturn[toReturn.length-1]['children'] = descendents;
@@ -3823,6 +3829,7 @@ Zotero.ItemFields = new function(){
 	this.isInteger = isInteger;
 	this.getItemTypeFields = getItemTypeFields;
 	this.isBaseField = isBaseField;
+	this.getBaseMappedFields = getBaseMappedFields;
 	this.getFieldIDFromTypeAndBase = getFieldIDFromTypeAndBase;
 	this.getBaseIDFromTypeAndField = getBaseIDFromTypeAndField;
 	this.getTypeFieldsFromBase = getTypeFieldsFromBase;
@@ -3875,7 +3882,7 @@ Zotero.ItemFields = new function(){
 		_fieldCheck(fieldID, 'isValidForType');
 		
 		if (!_fields[fieldID]['itemTypes']){
-			throw('No associated itemTypes for fieldID ' + fieldID);
+			return false;
 		}
 		
 		return !!_fields[fieldID]['itemTypes'][itemTypeID];
@@ -3922,6 +3929,11 @@ Zotero.ItemFields = new function(){
 	}
 	
 	
+	function getBaseMappedFields() {
+		return Zotero.DB.columnQuery("SELECT DISTINCT fieldID FROM baseFieldMappings");
+	}
+	
+	
 	/*
 	 * Returns the fieldID of a type-specific field for a given base field
 	 * 		or false if none
@@ -3943,7 +3955,7 @@ Zotero.ItemFields = new function(){
 		}
 		
 		if (!baseFieldID) {
-			throw ("Invalid base field '" + baseField + '" in ItemFields.getFieldIDFromTypeAndBase()');
+			throw ("Invalid field '" + baseField + '" for base field in ItemFields.getFieldIDFromTypeAndBase()');
 		}
 		
 		// If the base field is already valid for the type, just return that
@@ -4125,6 +4137,14 @@ Zotero.getCollections = function(parent, recursive){
 				if (!obj2){
 					throw ('Collection ' + desc[j] + ' not found');
 				}
+				
+				// TODO: This is a quick hack so that we can indent subcollections
+				// in the search dialog -- ideally collections would have a
+				// getLevel() method, but there's no particularly quick way
+				// of calculating that without either storing it in the DB or
+				// changing the schema to Modified Preorder Tree Traversal,
+				// and I don't know if we'll actually need it anywhere else.
+				obj2.level = desc[j].level;
 				
 				toReturn.push(obj2);
 			}

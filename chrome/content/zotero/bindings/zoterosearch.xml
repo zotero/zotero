@@ -28,6 +28,10 @@
 		  xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 	
 	<binding id="search-box">
+		<resources>
+			<stylesheet src="chrome://zotero/skin/bindings/search.css"/>
+		</resources>
+		
 		<implementation>
 			<field name="searchRef"/>
 			<property name="search" onget="return this.searchRef;">
@@ -190,7 +194,7 @@
 		</implementation>
 		
 		<content>
-			<xul:vbox flex="1" onkeypress="this.parentNode.handleKeyPress(event)">
+			<xul:vbox id="search-box" flex="1" onkeypress="this.parentNode.handleKeyPress(event)">
 				<xul:groupbox xbl:inherits="flex">
 					<xul:caption align="center">
 						<xul:label value="&zotero.search.joinMode.prefix;"/>
@@ -215,6 +219,10 @@
 	
 	
 	<binding id="search-condition">
+		<resources>
+			<stylesheet src="chrome://zotero/skin/bindings/search.css"/>
+		</resources>
+		
 		<implementation>
 			<field name="conditionID"/>
 			<field name="selectedCondition"/>
@@ -238,7 +246,76 @@
 					
 					for(var i=0, len=conditions.length; i<len; i++)
 					{
-						conditionsList.appendItem(conditions[i]['localized'], conditions[i]['name']);
+						var menuitem = conditionsList.appendItem(conditions[i]['localized'], conditions[i]['name']);
+						
+						var baseFields = null;
+						try {
+							baseFields = Zotero.ItemFields.getTypeFieldsFromBase(conditions[i]['name']);
+						}
+						catch (e) {}
+						
+						if (baseFields) {
+							// Build tooltip if it doesn't already exist
+							if (!this.id(conditions[i]['name'] + '-tooltip')) {
+								var fieldName = null;
+								try {
+									fieldName = Zotero.getString('itemFields.' + conditions[i]['name']);
+								}
+								catch (e) {}
+								
+								if (fieldName) {
+									var localized = [fieldName];
+								}
+								else {
+									var localized = [];
+								}
+								
+								for (var j in baseFields) {
+									var str = Zotero.SearchConditions.getLocalizedName(Zotero.ItemFields.getName(baseFields[j]));
+									
+									if (localized.indexOf(str) == -1) {
+										localized.push(str);
+									}
+								}
+								localized.sort();
+								
+								var tt = document.createElement('tooltip');
+								tt.setAttribute('id', conditions[i]['name'] + '-tooltip');
+								tt.setAttribute('orient', 'vertical');
+								tt.setAttribute('noautohide', true);
+								
+								var grid = document.createElement('grid');
+								
+								var columns = document.createElement('columns');
+								var col1 = document.createElement('column');
+								var col2 = document.createElement('column');
+								columns.appendChild(col1);
+								columns.appendChild(col2);
+								
+								var rows = document.createElement('rows');
+								
+								var fieldRow = document.createElement('row');
+								var label = document.createElement('label');
+								label.setAttribute('value', Zotero.getString('searchConditions.tooltip.fields'));
+								fieldRow.appendChild(label);
+								var vbox = document.createElement('vbox');
+								for each(var str in localized) {
+									var label = document.createElement('label')
+									label.setAttribute('value', str);
+									vbox.appendChild(label);
+								}
+								fieldRow.appendChild(vbox);
+								
+								rows.appendChild(fieldRow);
+								
+								grid.appendChild(rows);
+								tt.appendChild(grid);
+								
+								this.id('condition-tooltips').appendChild(tt);
+							}
+							
+							menuitem.setAttribute('tooltip', conditions[i]['name'] + '-tooltip');
+						}
 					}
 					conditionsList.selectedIndex = 0;
 				]]>
@@ -281,7 +358,15 @@
 							var cols = Zotero.getCollections(false, true);
 							for (var i in cols)
 							{
-								merged.push([cols[i].getName(), 'C' + cols[i].getID()]);
+								// Indent subcollections
+								var indent = '';
+								if (cols[i].level) {
+									for (var j=1; j<cols[i].level; j++) {
+										indent += '    ';
+									}
+									indent += '- ';
+								}
+								merged.push([indent + cols[i].getName(), 'C' + cols[i].getID()]);
 							}
 							
 							var searches = Zotero.Searches.getAll();
@@ -558,13 +643,17 @@
 				<parameter name="id"/>
 				<body>
 					<![CDATA[
-						return document.getAnonymousNodes(this)[0].getElementsByAttribute('id',id)[0];
+						var elems = document.getAnonymousNodes(this)[0].getElementsByAttribute('id',id);
+						return elems[0] ? elems[0] : false;
 					]]>
 				</body>
 			</method>
 		</implementation>
+		
 		<content>
-			<xul:hbox xbl:inherits="flex">
+			<xul:hbox id="search-condition" xbl:inherits="flex">
+				<xul:popupset id="condition-tooltips"/>
+				
 				<xul:menulist id="conditionsmenu" oncommand="this.parentNode.parentNode.onConditionSelected(); event.stopPropagation()">
 					<xul:menupopup/>
 				</xul:menulist>
@@ -576,6 +665,7 @@
 					<xul:menupopup/>
 				</xul:menulist>
 				<xul:zoterosearchagefield id="value-date-age" hidden="true" flex="1"/>
+				<!-- Adding elements below will break disable/enableRemoveButton() -->
 				<xul:toolbarbutton id="remove" class="zotero-clicky" label="-" oncommand="this.parentNode.parentNode.onRemoveClicked(event); event.stopPropagation()"/>
 				<xul:toolbarbutton id="add" class="zotero-clicky" label="+" oncommand="this.parentNode.parentNode.onAddClicked(event); event.stopPropagation()"/>
 			</xul:hbox>
@@ -585,6 +675,10 @@
 	
 	
 	<binding id="search-textbox">
+		<resources>
+			<stylesheet src="chrome://zotero/skin/bindings/search.css"/>
+		</resources>
+		
 		<implementation>
 			<property name="value"
 				onget="return document.getAnonymousNodes(this)[0].value"
@@ -718,7 +812,7 @@
 		</implementation>
 		
 		<content>
-			<xul:textbox id="textbox" xbl:inherits="flex">
+			<xul:textbox id="search-textbox" xbl:inherits="hasOptions,flex">
 				<xul:popupset>
 					<xul:menupopup id="textbox-fulltext-menu">
 						<xul:menuitem type="radio" checked="true" label="&zotero.search.textModes.phrase;"/>
@@ -736,6 +830,10 @@
 	
 	
 	<binding id="search-in-the-last">
+		<resources>
+			<stylesheet src="chrome://zotero/skin/bindings/search.css"/>
+		</resources>
+		
 		<implementation>
 			<property name="value">
 				<getter>
@@ -779,7 +877,7 @@
 		</implementation>
 		
 		<content>
-			<xul:hbox flex="1">
+			<xul:hbox id="search-in-the-last" flex="1">
 				<xul:textbox flex="1"/>
 				<xul:menulist>
 					<xul:menupopup flex="1">

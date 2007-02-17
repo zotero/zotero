@@ -577,13 +577,27 @@ Zotero.Search.prototype._buildQuery = function(){
 				switch (condition['name']){
 					case 'field':
 					case 'datefield':
+					case 'numberfield':
 						if (!condition['alias']){
 							break;
 						}
-						condSQL += 'fieldID=? AND ';
-						condSQLParams.push(
-							Zotero.ItemFields.getID(condition['alias'])
-						);
+						
+						var typeFields = Zotero.ItemFields.getTypeFieldsFromBase(condition['alias']);
+						if (typeFields) {
+							condSQL += 'fieldID IN (';
+							for each(var fieldID in typeFields) {
+								condSQL += '?,';
+								condSQLParams.push(fieldID);
+							}
+							condSQL = condSQL.substr(0, condSQL.length - 1);
+							condSQL += ') AND ';
+						}
+						else {
+							condSQL += 'fieldID=? AND ';
+							condSQLParams.push(
+								Zotero.ItemFields.getID(condition['alias'])
+							);
+						}
 						break;
 					
 					case 'collectionID':
@@ -973,12 +987,15 @@ Zotero.SearchConditions = new function(){
 	this.get = get;
 	this.getStandardConditions = getStandardConditions;
 	this.hasOperator = hasOperator;
+	this.getLocalizedName = getLocalizedName;
 	this.parseSearchString = parseSearchString;
 	this.parseCondition = parseCondition;
 	
 	var _initialized = false;
 	var _conditions = [];
 	var _standardConditions = [];
+	
+	var self = this;
 	
 	/*
 	 * Define the advanced search operators
@@ -1281,23 +1298,29 @@ Zotero.SearchConditions = new function(){
 		var sortKeys = [];
 		var sortValues = [];
 		
+		var baseMappedFields = Zotero.ItemFields.getBaseMappedFields();
+		
 		// Separate standard conditions for menu display
 		for (var i in _conditions){
-			// If explicitly special or a template master (e.g. 'field') or
-			// no table and not explicitly unspecial, skip
+			var fieldID = false;
+			if (['field', 'datefield', 'numberfield'].indexOf(_conditions[i]['name']) != -1) {
+				fieldID = Zotero.ItemFields.getID(i);
+			}
+			
+			// If explicitly special...
 			if (_conditions[i]['special'] ||
+				// or a template master (e.g. 'field')...
 				(_conditions[i]['template'] && i==_conditions[i]['name']) ||
+				// or no table and not explicitly unspecial...
 				(!_conditions[i]['table'] &&
-					typeof _conditions[i]['special'] == 'undefined')){
+					typeof _conditions[i]['special'] == 'undefined') ||
+				// or field is a type-specific version of a base field...
+				(fieldID && baseMappedFields.indexOf(fieldID) != -1)) {
+				// ...then skip
 				continue;
 			}
 			
-			try {
-				var localized = Zotero.getString('searchConditions.' + i)
-			}
-			catch (e){
-				var localized = Zotero.getString('itemFields.' + i);
-			}
+			var localized = self.getLocalizedName(i);
 			
 			sortKeys.push(localized);
 			sortValues[localized] = {
@@ -1363,6 +1386,16 @@ Zotero.SearchConditions = new function(){
 		}
 		
 		return !!_conditions[condition]['operators'][operator];
+	}
+	
+	
+	function getLocalizedName(str) {
+		try {
+			return Zotero.getString('searchConditions.' + str)
+		}
+		catch (e) {
+			return Zotero.getString('itemFields.' + str);
+		}
 	}
 	
 	

@@ -21,7 +21,6 @@
 	padding:0;
 }
 
-
 #zotero-toolbar-button
 {
 	list-style-image: url('chrome://zotero/skin/zotero-z-24px.png');
@@ -54,7 +53,6 @@ toolbar[iconsize="small"] #zotero-toolbar-button:active
 
 
 /* Bindings */
-
 textbox[type="conditional-timed"]
 {
 	-moz-binding: url('chrome://zotero/content/bindings/conditional-timed-textbox.xml#conditional-timed-textbox');
@@ -94,7 +92,6 @@ seealsobox
 zoterosearch
 {
 	-moz-binding: url('chrome://zotero/content/bindings/zoterosearch.xml#search-box');
-	width:60em;
 }
 
 zoterotagselector
@@ -108,46 +105,15 @@ searchcondition
 	-moz-binding: url('chrome://zotero/content/bindings/zoterosearch.xml#search-condition');
 }
 
-searchcondition menulist[id="operatorsmenu"]
-{
-	width:15em;
-}
-
 zoterosearchtextbox
 {
 	-moz-binding: url('chrome://zotero/content/bindings/zoterosearch.xml#search-textbox');
 }
 
-zoterosearchtextbox toolbarbutton
-{
-	padding:0;
-	cursor:default;
-}
-
-zoterosearchtextbox:not([hasOptions=true]) toolbarbutton
-{
-	display:none;
-}
-
-zoterosearchtextbox .toolbarbutton-text
-{
-	margin:0;
-	padding:0;
-}
-
-zoterosearchtextbox .toolbarbutton-menu-dropmarker
-{
-	padding:0 2px;
-}
 
 zoterosearchagefield
 {
 	-moz-binding: url('chrome://zotero/content/bindings/zoterosearch.xml#search-in-the-last');
-}
-
-zoterosearchagefield textbox
-{
-	min-width:3em;
 }
 
 .zotero-clicky
@@ -217,26 +183,4 @@ zoterosearchagefield textbox
 .zotero-scrape-popup-collection
 {
 	list-style-image: url('chrome://zotero/skin/treesource-collection.png');
-}
-
-
-#zotero-advanced-search-dialog
-{
-	padding: 8px 8px 14px;
-	height: 400px;
-}
-
-#zotero-advanced-search-dialog #zotero-search-buttons
-{
-	margin: 3px 0;
-}
-
-#zotero-advanced-search-dialog checkbox
-{
-	margin-right: .5em;
-}
-
-#zotero-advanced-search-dialog #zotero-items-tree
-{
-	min-height: 170px;
 }
