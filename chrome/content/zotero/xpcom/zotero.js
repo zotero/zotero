@@ -117,10 +117,8 @@ var Zotero = new function(){
 		
 		// Load in the localization stringbundle for use by getString(name)
 		var src = 'chrome://zotero/locale/zotero.properties';
-		var localeService =
-			Components.classes["@mozilla.org/intl/nslocaleservice;1"]
-			.getService(Components.interfaces.nsILocaleService);
 		var appLocale = localeService.getApplicationLocale();
+		
 		var stringBundleService =
 			Components.classes["@mozilla.org/intl/stringbundle;1"]
 			.getService(Components.interfaces.nsIStringBundleService);
@@ -630,7 +628,7 @@ Zotero.Keys = new function() {
 	this.getCommand = getCommand;
 	
 	_actions = ['library', 'quicksearch', 'newItem', 'newNote', 'toggleTagSelector',
-		'toggleFullscreen'];
+		'toggleFullscreen', 'copySelectedItemsToClipboard'];
 	_keys = {};
 	
 	

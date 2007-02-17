@@ -148,6 +148,24 @@ To add a new preference:
 		</groupbox>
 	</prefpane>
 	
+	
+	<prefpane id="zotero-prefpane-export" label="&zotero.preferences.prefpane.export;">
+		<preferences>
+			<preference id="pref-quickCopy-setting" name="extensions.zotero.export.quickCopy.setting" type="string"/>
+		</preferences>
+		
+		<groupbox>
+			<caption label="&zotero.preferences.quickCopy.caption;"/>
+			<label value="&zotero.preferences.quickCopy.outputFormat;" control="quickCopy-menu"/>
+			<menulist id="quickCopy-menu">
+				<menupopup/>
+			</menulist>
+			<label id="quickCopy-instructions"/>
+			<label id="quickCopy-macWarning" hidden="true" value="&zotero.preferences.quickCopy.macWarning;"/>
+		</groupbox>
+	</prefpane>
+	
+	
 	<prefpane id="zotero-prefpane-keys" label="&zotero.preferences.prefpane.keys;">
 		<preferences>
 			<preference id="pref-keys-openZotero" name="extensions.zotero.keys.openZotero" type="string"/>
@@ -157,6 +175,7 @@ To add a new preference:
 			<preference id="pref-keys-newItem" name="extensions.zotero.keys.newItem" type="string"/>
 			<preference id="pref-keys-newNote" name="extensions.zotero.keys.newNote" type="string"/>
 			<preference id="pref-keys-toggleTagSelector" name="extensions.zotero.keys.toggleTagSelector" type="string"/>
+			<preference id="pref-keys-copySelectedItemsToClipboard" name="extensions.zotero.keys.copySelectedItemsToClipboard" type="string"/>
 			<preference id="pref-keys-overrideGlobal" name="extensions.zotero.keys.overrideGlobal" type="bool"/>
 		</preferences>
 		
@@ -209,6 +228,13 @@ To add a new preference:
 					<label/>
 					<textbox id="textbox-toggleTagSelector" maxlength="1" size="1" preference="pref-keys-toggleTagSelector"/>
 				</row>
+				
+				<row>
+					<label value="&zotero.preferences.keys.copySelectedItemsToClipboard;" control="textbox-copySelectedItemsToClipboard"/>
+					<label/>
+					<textbox id="textbox-copySelectedItemsToClipboard" maxlength="1" size="1" preference="pref-keys-copySelectedItemsToClipboard" onchange="updateQuickCopyInstructions()"/>
+				</row>
+				
 			</rows>
 		</grid>
 		

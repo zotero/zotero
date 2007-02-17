@@ -49,6 +49,7 @@ var ZoteroPane = new function()
 	this.deleteSelectedItem = deleteSelectedItem;
 	this.deleteSelectedCollection = deleteSelectedCollection;
 	this.editSelectedCollection = editSelectedCollection;
+	this.copySelectedItemsToClipboard = copySelectedItemsToClipboard;
 	this.clearQuicksearch = clearQuicksearch;
 	this.handleSearchKeypress = handleSearchKeypress;
 	this.handleSearchInput = handleSearchInput;
@@ -285,6 +286,9 @@ var ZoteroPane = new function()
 				break;
 			case 'toggleFullscreen':
 				ZoteroPane.fullScreen();
+				break;
+			case 'copySelectedItemsToClipboard':
+				ZoteroPane.copySelectedItemsToClipboard();
 				break;
 			default:
 				throw ('Command "' + command + '" not found in ZoteroPane.handleKeyDown()');
@@ -789,6 +793,34 @@ var ZoteroPane = new function()
 	}
 	
 	
+	function copySelectedItemsToClipboard() {
+		var items = this.getSelectedItems();
+		if (!items.length) {
+			return;
+		}
+		
+		// Make sure at least one item is not a standalone note or attachment
+		var haveRegularItem = false;
+		for each(var item in items) {
+			if (item.isRegularItem()) {
+				haveRegularItem = true;
+				break;
+			}
+		}
+		if (!haveRegularItem) {
+			window.alert(Zotero.getString("fileInterface.noReferencesError"));
+			return;
+		}
+		
+		// TODO: we only support bibliography output at the moment
+		var mode = Zotero.Prefs.get("export.quickCopy.mode");
+		if (mode == 'bibliography') {
+			var style = Zotero.Prefs.get("export.quickCopy.setting");
+			Zotero_File_Interface.copyItemsToClipboard(items, style);
+		}
+	}
+	
+	
 	function clearQuicksearch() {
 		document.getElementById('zotero-tb-search').value = "";
 		document.getElementById('zotero-tb-search').doCommand('cmd_zotero_search');
@@ -904,24 +936,6 @@ var ZoteroPane = new function()
 			return this.itemsView.getSelectedItems(asIDs);
 		}
 		return [];
-		
-		if (this.itemsView) {
-			var items = new Array();
-			var start = new Object();
-			var end = new Object();
-			for (var i=0, len=this.itemsView.selection.getRangeCount(); i<len; i++) {
-				this.itemsView.selection.getRangeAt(i,start,end);
-				for (var j=start.value; j<=end.value; j++) {
-					if (asIDs) {
-						items.push(this.itemsView._getItemAtRow(j).ref.getID());
-					}
-					else {
-						items.push(this.itemsView._getItemAtRow(j).ref);
-					}
-				}
-			}
-		}
-		return items;
 	}
 	
 	

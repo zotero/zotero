@@ -3,6 +3,15 @@ prefwindow .chromeclass-toolbar
 	display: -moz-box !important; /* Ignore toolbar collapse button on OS X */
 }
 
+radio[pane]
+{
+	width: 48px;
+	height: 48px;
+	-moz-box-align: center;
+	-moz-box-pack: end;
+}
+
+/* General pane icon */
 radio[pane=zotero-prefpane-general]
 {
 	-moz-image-region: rect(0px, 32px, 32px, 0px);
@@ -14,7 +23,26 @@ radio[pane=zotero-prefpane-general][selected="true"]
 	-moz-image-region: rect(32px, 32px, 64px, 0px);
 }
 
-/* Use the Gear icon until we find a keyboard icon */
+/*
+ * Export pane icon
+ */
+radio[pane=zotero-prefpane-export]
+{
+	list-style-image: url("chrome://browser/skin/Toolbar.png");
+	-moz-image-region: rect(0px, 312px, 24px, 288px);
+}
+radio[pane=zotero-prefpane-export]:hover, 
+radio[pane=zotero-prefpane-export]:active,
+radio[pane=zotero-prefpane-export][selected="true"]
+{
+	-moz-image-region: rect(24px, 312px, 48px, 288px);
+}
+
+/*
+ * Shortcut Keys pane icon
+ *
+ * Use the Gear icon until we find a keyboard icon
+ */
 radio[pane=zotero-prefpane-keys]
 {
 	-moz-image-region: rect(0px, 224px, 32px, 192px);
@@ -70,6 +98,26 @@ grid row hbox:first-child
 	color: red;
 }
 
+
+/* Export pane */
+#quickCopy-menu
+{
+	margin-top: .4em;
+	margin-bottom: .6em;
+}
+
+#quickCopy-instructions, #quickCopy-macWarning
+{
+	font-size: .85em;
+}
+
+#quickCopy-macWarning
+{
+	margin-top: .5em;
+	margin-bottom: 1em;
+}
+
+
 /* Shortcut Keys pane */
 #zotero-prefpane-keys row
 {
@@ -89,5 +137,5 @@ grid row hbox:first-child
 .statusLine
 {
 	margin: .75em 0;
-	font-size: 10px;
+	font-size: .85em;
 }

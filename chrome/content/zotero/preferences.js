@@ -30,6 +30,9 @@ function init()
 	for (var i=0; i<rows.length; i++) {
 		rows[i].firstChild.nextSibling.value = Zotero.isMac ? 'Cmd+Shift+' : 'Ctrl+Alt+';
 	}
+	
+	populateQuickCopyList();
+	updateQuickCopyInstructions();
 }
 
 
@@ -58,6 +61,47 @@ function populateOpenURLResolvers() {
 	}
 	
 	button.setAttribute('label', Zotero.getString('zotero.preferences.openurl.resolversFound.' + num, openURLResolvers.length));
+}
+
+
+function populateQuickCopyList() {
+	var formatMenu = document.getElementById("quickCopy-menu");
+	var listbox = formatMenu.firstChild;
+	var styles = Zotero.Cite.getStyles();
+	
+	var format = Zotero.Prefs.get("export.quickCopy.setting");
+	
+	// add styles to list
+	for (i in styles) {
+		var itemNode = document.createElement("menuitem");
+		itemNode.setAttribute("value", i);
+		itemNode.setAttribute("label", styles[i]);
+		listbox.appendChild(itemNode);
+		
+		if (i == format) {
+			formatMenu.selectedItem = itemNode;
+		}
+	}
+	
+	formatMenu.setAttribute('preference', "pref-quickCopy-setting");
+}
+
+
+function updateQuickCopyInstructions() {
+	if (Zotero.isMac) {
+		document.getElementById('quickCopy-macWarning').setAttribute('hidden', false);
+	}
+	
+	var prefix = Zotero.isMac ? 'Cmd+Shift+' : 'Ctrl+Alt+';
+	var key = Zotero.Prefs.get('keys.copySelectedItemsToClipboard');
+	
+	var instr = document.getElementById('quickCopy-instructions');
+	var str = Zotero.getString('zotero.preferences.export.quickCopy.instructions', prefix + key);
+	
+	while (instr.hasChildNodes()) {
+		instr.removeChild(instr.firstChild);
+	}
+	instr.appendChild(document.createTextNode(str));
 }
 
 

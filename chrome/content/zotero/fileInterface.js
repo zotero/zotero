@@ -113,6 +113,7 @@ var Zotero_File_Interface = new function() {
 	this.importFile = importFile;
 	this.bibliographyFromCollection = bibliographyFromCollection;
 	this.bibliographyFromItems = bibliographyFromItems;
+	this.copyItemsToClipboard = copyItemsToClipboard;
 	
 	/*
 	 * Creates Zotero.Translate instance and shows file picker for file export
@@ -278,20 +279,55 @@ var Zotero_File_Interface = new function() {
 		_doBibliographyOptions(Zotero.getString("fileInterface.untitledBibliography"), items);
 	}
 	
+	
+	/*
+	 * Copies HTML and text bibliography entries for passed items in given style
+	 *
+	 * Does not check that items are actual references (and not notes or attachments)
+	 */
+	function copyItemsToClipboard(items, style) {
+		// copy to clipboard
+		var transferable = Components.classes["@mozilla.org/widget/transferable;1"].
+						   createInstance(Components.interfaces.nsITransferable);
+		var clipboardService = Components.classes["@mozilla.org/widget/clipboard;1"].
+							   getService(Components.interfaces.nsIClipboard);
+		
+		var csl = Zotero.Cite.getStyle(style);
+		csl.preprocessItems(items);
+		
+		// add HTML
+		var bibliography = csl.createBibliography(items, "HTML");
+		var str = Components.classes["@mozilla.org/supports-string;1"].
+				  createInstance(Components.interfaces.nsISupportsString);
+		str.data = bibliography;
+		transferable.addDataFlavor("text/html");
+		transferable.setTransferData("text/html", str, bibliography.length*2);
+		
+		// add text
+		var bibliography = csl.createBibliography(items, "Text");
+		var str = Components.classes["@mozilla.org/supports-string;1"].
+				  createInstance(Components.interfaces.nsISupportsString);
+		str.data = bibliography;
+		transferable.addDataFlavor("text/unicode");
+		transferable.setTransferData("text/unicode", str, bibliography.length*2);
+		
+		clipboardService.setData(transferable, null, Components.interfaces.nsIClipboard.kGlobalClipboard);
+	}
+	
+	
 	/*
 	 * Shows bibliography options and creates a bibliography
 	 */
 	function _doBibliographyOptions(name, items) {
 		// make sure at least one item is not a standalone note or attachment
-		var haveNonNote = false;
-		for(var i in items) {
-			var type = Zotero.ItemTypes.getName(items[i].getType());
-			if(type != "note" && type != "attachment") {
-				haveNonNote = true;
+		var haveRegularItem = false;
+		for each(var item in items) {
+			if (item.isRegularItem()) {
+				haveRegularItem = true;
 				break;
 			}
 		}
-		if(!haveNonNote) {
+		if (!haveRegularItem) {
 			window.alert(Zotero.getString("fileInterface.noReferencesError"));
 			return;
 		}
@@ -310,13 +346,18 @@ var Zotero_File_Interface = new function() {
 		
 		// generate bibliography
 		try {
-			var csl = Zotero.Cite.getStyle(io.style);
-			csl.preprocessItems(items);
-			var bibliography = csl.createBibliography(items, format);
+			if (io.output == 'clipboard') {
+				this.copyItemsToClipboard(items, io.style);
+				return;
+			}
+			else {
+				var csl = Zotero.Cite.getStyle(io.style);
+				csl.preprocessItems(items);
+				var bibliography = csl.createBibliography(items, format);
+			}
 		} catch(e) {
 			window.alert(Zotero.getString("fileInterface.bibliographyGenerationError"));
 			throw(e);
-			return;
 		}
 		
 		if(io.output == "print") {
@@ -380,30 +421,9 @@ var Zotero_File_Interface = new function() {
 				fStream.write(bibliography, bibliography.length);
 				fStream.close();
 			}
-		} else if(io.output == "copy-to-clipboard") {
-			// copy to clipboard
-			var transferable = Components.classes["@mozilla.org/widget/transferable;1"].
-			                   createInstance(Components.interfaces.nsITransferable);
-			var clipboardService = Components.classes["@mozilla.org/widget/clipboard;1"].
-			                       getService(Components.interfaces.nsIClipboard);
-			
-			// add HTML
-			var str = Components.classes["@mozilla.org/supports-string;1"].
-			          createInstance(Components.interfaces.nsISupportsString);
-			str.data = bibliography;
-			transferable.addDataFlavor("text/html");
-			transferable.setTransferData("text/html", str, bibliography.length*2);
-			// add text
-			var bibliography = csl.createBibliography(items, "Text");
-			var str = Components.classes["@mozilla.org/supports-string;1"].
-			          createInstance(Components.interfaces.nsISupportsString);
-			str.data = bibliography;
-			transferable.addDataFlavor("text/unicode");
-			transferable.setTransferData("text/unicode", str, bibliography.length*2);
-			
-			clipboardService.setData(transferable, null, Components.interfaces.nsIClipboard.kGlobalClipboard);
 		}
 	}
+	
 	
 	function _saveBibliography(name, format) {	
 		// savable bibliography, using a file stream

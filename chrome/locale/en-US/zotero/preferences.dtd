@@ -23,6 +23,11 @@
 <!ENTITY zotero.preferences.openurl.server				"Resolver:">
 <!ENTITY zotero.preferences.openurl.version				"Version:">
 
+<!ENTITY zotero.preferences.prefpane.export				"Export">
+<!ENTITY zotero.preferences.quickCopy.caption				"Quick Copy">
+<!ENTITY zotero.preferences.quickCopy.outputFormat		"Output Format:">
+<!ENTITY zotero.preferences.quickCopy.macWarning			"Note that some formatting may be lost on Mac OS X.">
+
 <!ENTITY zotero.preferences.prefpane.keys				"Shortcut Keys">
 <!ENTITY zotero.preferences.keys.openZotero				"Open/Close Zotero Pane">
 <!ENTITY zotero.preferences.keys.toggleFullscreen			"Toggle Fullscreen Mode">
@@ -31,5 +36,6 @@
 <!ENTITY zotero.preferences.keys.newItem					"Create a new item">
 <!ENTITY zotero.preferences.keys.newNote					"Create a new note">
 <!ENTITY zotero.preferences.keys.toggleTagSelector		"Toggle Tag Selector">
+<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard		"Copy Selected Items to Clipboard">
 <!ENTITY zotero.preferences.keys.overrideGlobal			"Try to override conflicting shortcuts">
 <!ENTITY zotero.preferences.keys.changesTakeEffect		"Changes take effect in new windows only">
