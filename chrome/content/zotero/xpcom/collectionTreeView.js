@@ -729,6 +729,9 @@ Zotero.ItemGroup.prototype.getSearchObject = function() {
 		if (this.isCollection())
 		{
 			s.addCondition('collectionID', 'is', this.ref.getID());
+			if (Zotero.Prefs.get('recursiveCollections')) {
+				s.addCondition('recursive', 'true');
+			}
 		}
 		else if (this.isSearch())
 		{
@@ -744,6 +747,9 @@ Zotero.ItemGroup.prototype.getSearchObject = function() {
 		else if (this.isCollection()){
 			s.addCondition('noChildren', 'true');
 			s.addCondition('collectionID', 'is', this.ref.getID());
+			if (Zotero.Prefs.get('recursiveCollections')) {
+				s.addCondition('recursive', 'true');
+			}
 		}
 		else if (this.isSearch()){
 			s.load(this.ref['id']);
