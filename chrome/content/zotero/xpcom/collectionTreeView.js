@@ -424,7 +424,8 @@ Zotero.CollectionTreeView.prototype.deleteSelection = function()
  */
 Zotero.CollectionTreeView.prototype._showItem = function(itemGroup, level, beforeRow)
 {
-	this._dataItems.splice(beforeRow, 0, [itemGroup, false, level]); this.rowCount++;
+	this._dataItems.splice(beforeRow, 0, [itemGroup, false, level]);
+	this.rowCount++;
 }
 
 /*
@@ -502,9 +503,16 @@ Zotero.CollectionTreeCommandController.prototype.onEvent = function(evt)
  */
 Zotero.CollectionTreeView.prototype.canDrop = function(row, orient)
 {
-	if(typeof row == 'object')	//workaround... two different services call canDrop (nsDragAndDrop, and the tree)
+	// workaround... two different services call canDrop
+	// (nsDragAndDrop, and the tree) -- this is for the former,
+	// used when dragging between windows
+	if (typeof row == 'object') {
 		return false;
-		
+	}
+	
+	//Zotero.debug('Row is ' + row);
+	//Zotero.debug('Orient is ' + orient);
+	
 	try
 	{
 		var dataSet = nsTransferable.get(this.getSupportedFlavours(),nsDragAndDrop.getDragData, true);
@@ -529,9 +537,7 @@ Zotero.CollectionTreeView.prototype.canDrop = function(row, orient)
 	{
 		var rowCollection = this._getItemAtRow(row).ref; //the collection we are dragging over
 		
-		// TODO: Dragging URLs not yet supported
-		if (dataType == 'zotero/item' || dataType == "text/x-moz-url")
-		{
+		if (dataType == 'zotero/item') {
 			var ids = data.data.split(',');
 			for each(var id in ids)
 			{
@@ -548,6 +554,11 @@ Zotero.CollectionTreeView.prototype.canDrop = function(row, orient)
 				}
 			}
 			return false;
+		}
+		else if (dataType == 'text/x-moz-url') {
+			if (!this._getItemAtRow(row).isSearch()) {
+				return true;
+			}
 		}
 		else if (dataType == 'zotero/collection'
 				&& data.data != rowCollection.getID()
@@ -567,10 +578,12 @@ Zotero.CollectionTreeView.prototype.drop = function(row, orient)
 	var data = dataSet.first.first;
 	var dataType = data.flavour.contentType;
 	
+	if (!this.canDrop(row, orient)) {
+		return false;
+	}
+	
 	if(dataType == 'zotero/collection')
 	{
-		var oldCount = this.rowCount;
-		
 		var targetCollectionID;
 		if(this._getItemAtRow(row).isCollection())
 			targetCollectionID = this._getItemAtRow(row).ref.getID();
@@ -585,10 +598,8 @@ Zotero.CollectionTreeView.prototype.drop = function(row, orient)
 		this.selection.clearSelection();
 		this.selection.select(selectRow);
 		this.selection.selectEventsSuppressed = false;
-			
 	}
-	else if(dataType == 'zotero/item' && this.canDrop(row, orient))
-	{
+	else if (dataType == 'zotero/item') {
 		var ids = data.data.split(',');
 		var targetCollection = this._getItemAtRow(row).ref;
 		for each(var id in ids)
@@ -601,16 +612,17 @@ Zotero.CollectionTreeView.prototype.drop = function(row, orient)
 			}
 		}
 	}
-	else if(dataType == 'text/x-moz-url' && this.canDrop(row, orient))
-	{
+	else if (dataType == 'text/x-moz-url') {
 		var url = data.data.split("\n")[0];
 		
-		/* WAITING FOR INGESTER SUPPORT
-		var newItem = Zotero.Ingester.scrapeURL(url);
+		if (this._getItemAtRow(row).isCollection()) {
+			var parentCollectionID = this._getItemAtRow(row).ref.getID();
+		}
+		else {
+			var parentCollectionID = false;
+		}
 		
-		if(newItem)
-			this._getItemAtRow(row).ref.addItem(newItem.getID());
-		*/
+		Zotero.Attachments.importFromURL(url, false, false, parentCollectionID);
 	}
 }
 
@@ -631,10 +643,9 @@ Zotero.CollectionTreeView.prototype.onDragStart = function(evt,transferData,acti
 Zotero.CollectionTreeView.prototype.getSupportedFlavours = function () 
 { 
 	var flavors = new FlavourSet();
-	// TODO: Dragging of URLs not yet supported
-	//flavors.appendFlavour("text/x-moz-url");
-	flavors.appendFlavour("zotero/item");
 	flavors.appendFlavour("zotero/collection");
+	flavors.appendFlavour("zotero/item");
+	flavors.appendFlavour("text/x-moz-url");
 	return flavors; 
 }
 

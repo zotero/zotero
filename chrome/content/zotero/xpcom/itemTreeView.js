@@ -994,13 +994,16 @@ Zotero.ItemTreeView.prototype.getSupportedFlavours = function ()
 { 
 	var flavors = new FlavourSet();
 	flavors.appendFlavour("zotero/item");
-	// TODO: Dragging of URLs not yet supported
-	//flavors.appendFlavour("text/x-moz-url");
+	flavors.appendFlavour("text/x-moz-url");
 	return flavors; 
 }
 
 Zotero.ItemTreeView.prototype.canDrop = function(row, orient)
 {
+	if (row == -1 && orient == -1) {
+		return true;
+	}
+	
 	try
 	{
 		var dataSet = nsTransferable.get(this.getSupportedFlavours(),
@@ -1017,11 +1020,15 @@ Zotero.ItemTreeView.prototype.canDrop = function(row, orient)
 	
 	var data = dataSet.first.first;
 	var dataType = data.flavour.contentType;
-	var ids = data.data.split(','); // ids of rows we are dragging in
 	
-	if (row==-1 && orient==-1)
-	{
-		return true;
+	switch (dataType) {
+		case 'zotero/item':
+			var ids = data.data.split(','); // ids of rows we are dragging in
+			break;
+		
+		case 'text/x-moz-url':
+			var url = data.data.split("\n")[0];
+			break;
 	}
 	
 	// workaround... two different services call canDrop
@@ -1032,24 +1039,33 @@ Zotero.ItemTreeView.prototype.canDrop = function(row, orient)
 		// If drag to different window
 		if (nsDragAndDrop.mDragSession.sourceNode!=row.target)
 		{
-			// Check if at least one item (or parent item for children) doesn't
-			// already exist in target
-			for each(var id in ids)
-			{
-				var item = Zotero.Items.get(id);
+			if (dataType == 'zotero/item') {
+				// Check if at least one item (or parent item for children) doesn't
+				// already exist in target
+				for each(var id in ids)
+				{
+					var item = Zotero.Items.get(id);
+					
+					// Skip non-top-level items
+					if (!item.isRegularItem() && item.getSource())
+					{
+						continue;
+					}
+					// DISABLED: move parent on child drag
+					//var source = item.isRegularItem() ? false : item.getSource();
+					//if (!this._itemGroup.ref.hasItem(source ? source : id))
+					if (this._itemGroup.ref && !this._itemGroup.ref.hasItem(id))
+					{
+						return true;
+					}
+				}
+			}
+			else if (dataType == 'text/x-moz-url') {
+				if (this._itemGroup.isSearch()) {
+					return false;
+				}
 				
-				// Skip non-top-level items
-				if (!item.isRegularItem() && item.getSource())
-				{
-					continue;
-				}
-				// DISABLED: move parent on child drag
-				//var source = item.isRegularItem() ? false : item.getSource();
-				//if (!this._itemGroup.ref.hasItem(source ? source : id))
-				if (this._itemGroup.ref && !this._itemGroup.ref.hasItem(id))
-				{
-					return true;
-				}
+				return true;
 			}
 		}
 		
@@ -1096,12 +1112,19 @@ Zotero.ItemTreeView.prototype.canDrop = function(row, orient)
 		
 		return false;
 	}
-	/*
-	else if (dataType == "text/x-moz-url")
-	{
+	else if (dataType == "text/x-moz-url") {
+		// Disallow direct drop on a non-regular item (e.g. note)
+		if (orient == 0) {
+			if (!rowItem.isRegularItem()) {
+				return false;
+			}
+		}
+		else if (this._itemGroup.isSearch()) {
+			return false;
+		}
+		
 		return true;
 	}
-	*/
 	
 	return false;
 }
@@ -1129,8 +1152,11 @@ Zotero.ItemTreeView.prototype.drop = function(row, orient)
 	var data = dataSet.first.first;
 	var dataType = data.flavour.contentType;
 	
-	if (dataType == 'zotero/item' && this.canDrop(row, orient))
-	{
+	if (!this.canDrop(row, orient)) {
+		return false;
+	}
+	
+	if (dataType == 'zotero/item') {
 		var ids = data.data.split(','); // ids of rows we are dragging in
 		
 		// Dropped directly on a row
@@ -1138,7 +1164,7 @@ Zotero.ItemTreeView.prototype.drop = function(row, orient)
 		{
 			// If item was a top-level item and it exists in a collection,
 			// replace it in collections with the parent item
-			rowItem = this._getItemAtRow(row).ref; // the item we are dragging over
+			var rowItem = this._getItemAtRow(row).ref; // the item we are dragging over
 			for each(var id in ids)
 			{
 				var item = Zotero.Items.get(id);
@@ -1184,16 +1210,21 @@ Zotero.ItemTreeView.prototype.drop = function(row, orient)
 			}
 		}
 	}
-	else if (dataType == 'text/x-moz-url' && this.canDrop(row, orient))
-	{
+	else if (dataType == 'text/x-moz-url') {
 		var url = data.data.split("\n")[0];
 		
-		/* WAITING FOR INGESTER SUPPORT
-		var newItem = Zotero.Ingester.scrapeURL(url);
+		var sourceItemID = false;
+		var parentCollectionID = false;
 		
-		if(newItem)
-			this._getItemAtRow(row).ref.addItem(newItem.getID());
-		*/
+		if (orient == 0) {
+			var rowItem = this._getItemAtRow(row).ref;
+			sourceItemID = rowItem.getID()
+		}
+		else if (this._itemGroup.isCollection()) {
+			var parentCollectionID = this._itemGroup.ref.getID();
+		}
+		
+		Zotero.Attachments.importFromURL(url, sourceItemID, false, parentCollectionID);
 	}
 }
 
