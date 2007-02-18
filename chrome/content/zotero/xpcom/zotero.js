@@ -627,8 +627,6 @@ Zotero.Keys = new function() {
 	this.windowInit = windowInit;
 	this.getCommand = getCommand;
 	
-	_actions = ['library', 'quicksearch', 'newItem', 'newNote', 'toggleTagSelector',
-		'toggleFullscreen', 'copySelectedItemsToClipboard'];
 	_keys = {};
 	
 	
@@ -636,8 +634,14 @@ Zotero.Keys = new function() {
 	 * Called by Zotero.init()
 	 */
 	function init() {
+		var actions = Zotero.Prefs.prefBranch.getChildList('keys', {}, {});
+		
 		// Get the key=>command mappings from the prefs
-		for each (var action in _actions) {
+		for each(var action in actions) {
+			var action = action.substr(5); // strips 'keys.'
+			if (action == 'overrideGlobal') {
+				continue;
+			}
 			_keys[Zotero.Prefs.get('keys.' + action)] = action;
 		}
 	}
