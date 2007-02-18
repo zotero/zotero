@@ -37,7 +37,6 @@
 	</hbox>
 	
 	<tree id="zotero-items-tree" flex="1" hidecolumnpicker="true" seltype="multiple"
-			onkeypress="ZoteroAdvancedSearch.handleKeyPress(event)"
 			ondblclick="ZoteroAdvancedSearch.onDblClick(event, this)"
 			ondraggesture="if (event.target.localName == 'treechildren') { nsDragAndDrop.startDrag(event, ZoteroAdvancedSearch.itemsView); }">
 		<treecols>

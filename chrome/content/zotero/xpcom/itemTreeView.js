@@ -66,6 +66,24 @@ Zotero.ItemTreeView.prototype.setTree = function(treebox)
 		return;
 	this._treebox = treebox;
 	
+	// Add a keypress listener for expand/collapse
+	var expandAllRows = this.expandAllRows;
+	var collapseAllRows = this.collapseAllRows;
+	var tree = this._treebox.treeBody.parentNode;
+	tree.addEventListener('keypress', function(event) {
+		var key = String.fromCharCode(event.which);
+		
+		if (key == '+' && !(event.ctrlKey || event.altKey || event.metaKey)) {
+			expandAllRows(treebox);
+			return;
+		}
+		else if (key == '-' && !(event.shiftKey || event.ctrlKey ||
+				event.altKey || event.metaKey)) {
+			collapseAllRows(treebox);
+			return;
+		}
+	}, false);
+	
 	this.sort();
 	
 	//Zotero.debug('Running callbacks in itemTreeView.setTree()', 4);
@@ -473,28 +491,6 @@ Zotero.ItemTreeView.prototype.toggleOpenState = function(row)
 	this._treebox.invalidateRow(row);
 	this._treebox.endUpdateBatch();
 	this._refreshHashMap();
-}
-
-
-Zotero.ItemTreeView.prototype.expandAllRows = function() {
-	this._treebox.beginUpdateBatch();
-	for (var i=0; i<this.rowCount; i++) {
-		if (this.isContainer(i) && !this.isContainerOpen(i)) {
-			this.toggleOpenState(i);
-		}
-	}
-	this._treebox.endUpdateBatch();
-}
-
-
-Zotero.ItemTreeView.prototype.collapseAllRows = function() {
-	this._treebox.beginUpdateBatch();
-	for (var i=0; i<this.rowCount; i++) {
-		if (this.isContainer(i) && this.isContainerOpen(i)) {
-			this.toggleOpenState(i);
-		}
-	}
-	this._treebox.endUpdateBatch();
 }
 
 
@@ -925,6 +921,30 @@ Zotero.ItemTreeView.prototype.rememberFirstRow = function(firstRow) {
 	if (firstRow && this._itemRowMap[firstRow]) {
 		this._treebox.scrollToRow(this._itemRowMap[firstRow]);
 	}
+}
+
+
+Zotero.ItemTreeView.prototype.expandAllRows = function(treebox) {
+	var view = treebox.view;
+	treebox.beginUpdateBatch();
+	for (var i=0; i<view.rowCount; i++) {
+		if (view.isContainer(i) && !view.isContainerOpen(i)) {
+			view.toggleOpenState(i);
+		}
+	}
+	treebox.endUpdateBatch();
+}
+
+
+Zotero.ItemTreeView.prototype.collapseAllRows = function(treebox) {
+	var view = treebox.view;
+	treebox.beginUpdateBatch();
+	for (var i=0; i<view.rowCount; i++) {
+		if (view.isContainer(i) && view.isContainerOpen(i)) {
+			view.toggleOpenState(i);
+		}
+	}
+	treebox.endUpdateBatch();
 }
 
 
