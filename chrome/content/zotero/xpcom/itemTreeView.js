@@ -475,6 +475,29 @@ Zotero.ItemTreeView.prototype.toggleOpenState = function(row)
 	this._refreshHashMap();
 }
 
+
+Zotero.ItemTreeView.prototype.expandAllRows = function() {
+	this._treebox.beginUpdateBatch();
+	for (var i=0; i<this.rowCount; i++) {
+		if (this.isContainer(i) && !this.isContainerOpen(i)) {
+			this.toggleOpenState(i);
+		}
+	}
+	this._treebox.endUpdateBatch();
+}
+
+
+Zotero.ItemTreeView.prototype.collapseAllRows = function() {
+	this._treebox.beginUpdateBatch();
+	for (var i=0; i<this.rowCount; i++) {
+		if (this.isContainer(i) && this.isContainerOpen(i)) {
+			this.toggleOpenState(i);
+		}
+	}
+	this._treebox.endUpdateBatch();
+}
+
+
 Zotero.ItemTreeView.prototype.isSorted = function()
 {
 	// We sort by the first column if none selected, so return true

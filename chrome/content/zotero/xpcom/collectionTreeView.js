@@ -360,6 +360,29 @@ Zotero.CollectionTreeView.prototype.toggleOpenState = function(row)
 	this._refreshHashMap();
 }
 
+
+Zotero.CollectionTreeView.prototype.expandAllRows = function() {
+	this._treebox.beginUpdateBatch();
+	for (var i=0; i<this.rowCount; i++) {
+		if (this.isContainer(i) && !this.isContainerOpen(i)) {
+			this.toggleOpenState(i);
+		}
+	}
+	this._treebox.endUpdateBatch();
+}
+
+
+Zotero.CollectionTreeView.prototype.collapseAllRows = function() {
+	this._treebox.beginUpdateBatch();
+	for (var i=0; i<this.rowCount; i++) {
+		if (this.isContainer(i) && this.isContainerOpen(i)) {
+			this.toggleOpenState(i);
+		}
+	}
+	this._treebox.endUpdateBatch();
+}
+
+
 ////////////////////////////////////////////////////////////////////////////////
 ///
 ///  Additional functions for managing data in the tree

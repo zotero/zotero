@@ -36,6 +36,7 @@ var ZoteroPane = new function()
 	this.handleKeyDown = handleKeyDown;
 	this.handleKeyUp = handleKeyUp;
 	this.setHighlightedRowsCallback = setHighlightedRowsCallback;
+	this.handleKeyPress = handleKeyPress;
 	this.newItem = newItem;
 	this.newCollection = newCollection;
 	this.newSearch = newSearch;
@@ -326,6 +327,49 @@ var ZoteroPane = new function()
 				ZoteroPane.collectionsView.setHighlightedRows(collectionIDs);
 			}
 		}
+	}
+	
+	
+	function handleKeyPress(event, from) {
+		var key = String.fromCharCode(event.which);
+		
+		if (from == 'zotero-collections-tree') {
+			if (event.keyCode == event.DOM_VK_BACK_SPACE ||
+					event.keyCode == event.DOM_VK_DELETE) {
+				ZoteroPane.deleteSelectedCollection();
+				event.preventDefault();
+				return;
+			}
+			
+			if (key == '+' && !(event.ctrlKey || event.altKey || event.metaKey)) {
+				ZoteroPane.collectionsView.expandAllRows();
+				return;
+			}
+			else if (key == '-' && !(event.shiftKey || event.ctrlKey ||
+					event.altKey || event.metaKey)) {
+				ZoteroPane.collectionsView.collapseAllRows();
+				return;
+			}
+		}
+		else if (from == 'zotero-items-tree') {
+			if (event.keyCode == event.DOM_VK_BACK_SPACE ||
+					event.keyCode == event.DOM_VK_DELETE) {
+				ZoteroPane.deleteSelectedItem();
+				event.preventDefault();
+				return;
+			}
+			
+			if (key == '+' && !(event.ctrlKey || event.altKey || event.metaKey)) {
+				ZoteroPane.itemsView.expandAllRows();
+				return;
+			}
+			else if (key == '-' && !(event.shiftKey || event.ctrlKey ||
+					event.altKey || event.metaKey)) {
+				ZoteroPane.itemsView.collapseAllRows();
+				return;
+			}
+		}
+		
 	}
 	
 	
