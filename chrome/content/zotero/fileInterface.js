@@ -52,8 +52,8 @@ Zotero_File_Exporter.prototype.save = function() {
 	const nsIFilePicker = Components.interfaces.nsIFilePicker;
 	var fp = Components.classes["@mozilla.org/filepicker;1"]
 			.createInstance(nsIFilePicker);
-	
 	fp.init(window, Zotero.getString("fileInterface.export"), nsIFilePicker.modeSave);
+	fp.appendFilters(Components.interfaces.nsIFilePicker.filterAll);
 	
 	// set file name and extension
 	if(io.selectedTranslator.displayOptions.exportFileData) {
