@@ -1300,7 +1300,7 @@ Zotero.Item.prototype.numAttachments = function(){
 * Note: Always returns false for items with LINK_MODE_LINKED_URL,
 * since they have no files -- use getField('url') instead
 **/
-Zotero.Item.prototype.getFile = function(row){
+Zotero.Item.prototype.getFile = function(row, skipExistsCheck) {
 	if (!this.isAttachment()){
 		throw ("getFile() can only be called on items of type 'attachment'");
 	}
@@ -1379,7 +1379,7 @@ Zotero.Item.prototype.getFile = function(row){
 		}
 	}
 	
-	if (!file.exists()){
+	if (!skipExistsCheck && !file.exists()){
 		return false;
 	}
 	
@@ -1416,12 +1416,7 @@ Zotero.Item.prototype.renameAttachmentFile = function(newName, overwrite) {
 		}
 		
 		file.moveTo(file.parent, newName);
-		
-		var linkMode = this.getAttachmentLinkMode();
-		var path = Zotero.Attachments.getPath(file, linkMode);
-		
-		var sql = "UPDATE itemAttachments SET path=? WHERE itemID=?";
-		Zotero.DB.query(sql, [path, this.getID()]);
+		this.relinkAttachmentFile(file);
 		
 		return true;
 	}
@@ -1429,6 +1424,21 @@ Zotero.Item.prototype.renameAttachmentFile = function(newName, overwrite) {
 		return -2;
 	}
 }
+
+
+Zotero.Item.prototype.relinkAttachmentFile = function(file) {
+	var linkMode = this.getAttachmentLinkMode();
+	
+	if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) {
+		throw('Cannot relink linked URL in Zotero.Items.relinkAttachmentFile()');
+	}
+	
+	var path = Zotero.Attachments.getPath(file, linkMode);
+	
+	var sql = "UPDATE itemAttachments SET path=? WHERE itemID=?";
+	Zotero.DB.query(sql, [path, this.getID()]);
+}
+
 
 
 /*

@@ -77,6 +77,8 @@ var ZoteroPane = new function()
 	this.viewAttachment = viewAttachment;
 	this.viewSelectedAttachment = viewSelectedAttachment;
 	this.showSelectedAttachmentInFilesystem = showSelectedAttachmentInFilesystem;
+	this.showAttachmentNotFoundDialog = showAttachmentNotFoundDialog;
+	this.relinkAttachment = relinkAttachment;
 	
 	var self = this;
 	
@@ -1495,7 +1497,7 @@ var ZoteroPane = new function()
 			}
 		}
 		else {
-			alert(Zotero.getString('pane.item.attachments.fileNotFound'));
+			this.showAttachmentNotFoundDialog(itemID);
 		}
 	}
 	
@@ -1530,9 +1532,55 @@ var ZoteroPane = new function()
 					}
 				}
 				else {
-					alert(Zotero.getString('pane.item.attachments.fileNotFound'));
+					this.showAttachmentNotFoundDialog(attachment.getID())
 				}
 			}
+		}
+	}
+	
+	
+	function showAttachmentNotFoundDialog(itemID) {
+		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"].
+				createInstance(Components.interfaces.nsIPromptService);
+		var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_OK)
+			+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING);
+		var index = ps.confirmEx(null,
+			Zotero.getString('pane.item.attachments.fileNotFound.title'),
+			Zotero.getString('pane.item.attachments.fileNotFound.text'),
+			buttonFlags, null, Zotero.getString('pane.item.attachments.locate'),
+			null, null, {});
+		
+		if (index == 1) {
+			this.relinkAttachment(itemID);
+		}
+	}
+	
+	
+	function relinkAttachment(itemID) {
+		var item = Zotero.Items.get(itemID);
+		if (!item) {
+			throw('Item ' + itemID + ' not found in ZoteroPane.relinkAttachment()');
+		}
+		
+		var nsIFilePicker = Components.interfaces.nsIFilePicker;
+		var fp = Components.classes["@mozilla.org/filepicker;1"]
+					.createInstance(nsIFilePicker);
+		fp.init(window, Zotero.getString('pane.item.attachments.select'), nsIFilePicker.modeOpen);
+		
+		
+		var file = item.getFile(false, true);
+		var dir = Zotero.File.getClosestDirectory(file);
+		if (dir) {
+			dir.QueryInterface(Components.interfaces.nsILocalFile);
+			fp.displayDirectory = dir;
+		}
+		
+		fp.appendFilters(Components.interfaces.nsIFilePicker.filterAll);
+		
+		if (fp.show() == nsIFilePicker.returnOK) {
+			var file = fp.file;
+			file.QueryInterface(Components.interfaces.nsILocalFile);
+			item.relinkAttachmentFile(file);
 		}
 	}
 }

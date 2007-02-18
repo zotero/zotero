@@ -499,6 +499,10 @@ Zotero.Attachments = new function(){
 	}
 	
 	
+	/*
+	 * Gets a relative path for imported attachments and an absolute path
+	 * for files outside the storage directory
+	 */
 	function getPath(file, linkMode) {
 		if (linkMode == self.LINK_MODE_IMPORTED_URL ||
 				linkMode == self.LINK_MODE_IMPORTED_FILE) {

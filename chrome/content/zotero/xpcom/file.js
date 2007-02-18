@@ -22,6 +22,7 @@
 
 Zotero.File = new function(){
 	this.getExtension = getExtension;
+	this.getClosestDirectory = getClosestDirectory;
 	this.getSample = getSample;
 	this.getContents = getContents;
 	this.getCharsetFromFile = getCharsetFromFile;
@@ -31,6 +32,24 @@ Zotero.File = new function(){
 	function getExtension(file){
 		var pos = file.leafName.lastIndexOf('.');
 		return pos==-1 ? '' : file.leafName.substr(pos+1);
+	}
+	
+	
+	/*
+	 * Traverses up the filesystem from a file until it finds an existing
+	 *  directory, or false if it hits the root
+	 */
+	function getClosestDirectory(file) {
+		var dir = file.parent;
+		
+		while (dir && !dir.exists()) {
+			var dir = dir.parent;
+		}
+		
+		if (dir && dir.exists()) {
+			return dir;
+		}
+		return false;
 	}
 	
 	
