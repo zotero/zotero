@@ -28,7 +28,6 @@
 Zotero.Item = function(){
 	this._init();
 	
-	// Accept itemTypeID in constructor
 	if (arguments.length){
 		this.setType(Zotero.ItemTypes.getID(arguments[0]));
 	}
@@ -2315,8 +2314,8 @@ Zotero.Items = new function(){
 	}
 	
 	
-	function getNewItemByType(itemTypeID){
-		return new Zotero.Item(itemTypeID);
+	function getNewItemByType(itemType){
+		return new Zotero.Item(itemType);
 	}
 	
 	
@@ -3973,14 +3972,18 @@ Zotero.ItemFields = new function(){
 	 *
 	 * e.g. 'publisher' returns fieldIDs for [university, studio, label, network]
 	 */
-	function getTypeFieldsFromBase(baseField) {
+	function getTypeFieldsFromBase(baseField, asNames) {
 		var baseFieldID = this.getID(baseField);
 		if (!baseFieldID) {
 			throw ("Invalid base field '" + baseField + '" in ItemFields.getTypeFieldsFromBase()');
 		}
 		
-		return Zotero.DB.columnQuery("SELECT fieldID FROM baseFieldMappings "
-			+ "WHERE baseFieldID=?", baseFieldID);
+		var sql = "SELECT fieldID FROM baseFieldMappings WHERE baseFieldID=?";
+		if (asNames) {
+			sql = "SELECT fieldName FROM fields WHERE fieldID IN (" + sql + ")";
+		}
+		
+		return Zotero.DB.columnQuery(sql, baseFieldID);
 	}
 	
 	

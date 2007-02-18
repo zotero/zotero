@@ -1030,33 +1030,41 @@ var ZoteroItemPane = new function()
 		}
 		else
 		{
+			var autoCompleteFields = [
+				'creator',
+				'journalAbbreviation',
+				'seriesTitle',
+				'seriesText',
+				'repository',
+				'callNumber',
+				'archiveLocation',
+				'language',
+				'rights',
+				'tag'
+			];
+			
+			// Add the type-specific versions of these base fields
+			var baseACFields = ['publisher', 'publicationTitle', 'type',
+				'medium', 'place'];
+			autoCompleteFields = autoCompleteFields.concat(baseACFields);
+			
+			for each(var baseField in baseACFields) {
+				var add = Zotero.ItemFields.getTypeFieldsFromBase(baseField, true)
+				autoCompleteFields = autoCompleteFields.concat(add);
+			}
+			
 			// Add auto-complete for certain fields
-			switch (field)
-			{
-				case 'creator':
-				case 'publisher':
-				case 'place':
-				case 'publicationTitle':
-				case 'journalAbbreviation':
-				case 'seriesTitle':
-				case 'seriesText':
-				case 'tag':
-				// DEBUG: should have type and medium, but they need to be
-				// broken out first into multiple fields (artworkType,
-				// interviewMedium, etc.)
-					t.setAttribute('type', 'autocomplete');
-					t.setAttribute('autocompletesearch', 'zotero');
-					var suffix = itemID ? itemID : '';
-					if (field=='creator')
-					{
-						suffix = (elem.getAttribute('singleField')=='true'
-							? '1' : '0') + '-' + suffix;
-					}
-					t.setAttribute('autocompletesearchparam',
-						fieldName + '/' + suffix);
-					t.setAttribute('ontextentered',
-							'ZoteroItemPane.handleCreatorAutoCompleteSelect(this)');
-					break;
+			if (autoCompleteFields.indexOf(field) != -1) {
+				t.setAttribute('type', 'autocomplete');
+				t.setAttribute('autocompletesearch', 'zotero');
+				var suffix = itemID ? itemID : '';
+				if (field=='creator') {
+					suffix = (elem.getAttribute('singleField')=='true'
+						? '1' : '0') + '-' + suffix;
+				}
+				t.setAttribute('autocompletesearchparam', fieldName + '/' + suffix);
+				t.setAttribute('ontextentered',
+						'ZoteroItemPane.handleCreatorAutoCompleteSelect(this)');
 			}
 		}
 		var box = elem.parentNode;
