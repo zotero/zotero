@@ -105,7 +105,6 @@
 				<vbox flex="1">
 					<toolbar>
 						<toolbarbutton id="zotero-tb-collection-add" tooltiptext="&zotero.toolbar.newCollection.label;" oncommand="ZoteroPane.newCollection()"/>
-						<toolbarbutton id="zotero-tb-collection-addsearch" tooltiptext="&zotero.toolbar.newSavedSearch.label;" oncommand="ZoteroPane.newSearch();"/>
 						<spacer flex="1"/>
 						<toolbarbutton id="zotero-tb-tag-selector" tooltiptext="&zotero.toolbar.tagSelector.label;" oncommand="ZoteroPane.toggleTagSelector()"/>
 						<toolbarbutton id="zotero-tb-actions-menu" tooltiptext="&zotero.toolbar.actions.label;" type="menu">

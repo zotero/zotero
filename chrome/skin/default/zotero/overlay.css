@@ -198,11 +198,6 @@
 	width: 150px;
 }
 
-#zotero-tb-collection-addsearch
-{
-	list-style-image: url('chrome://zotero/skin/treesource-search.png');
-}
-
 #zotero-tb-search-cancel
 {
 	width: 10px;

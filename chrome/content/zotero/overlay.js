@@ -38,7 +38,6 @@ var ZoteroPane = new function()
 	this.setHighlightedRowsCallback = setHighlightedRowsCallback;
 	this.newItem = newItem;
 	this.newCollection = newCollection;
-	this.newSearch = newSearch;
 	this.openAdvancedSearchWindow = openAdvancedSearchWindow;
 	this.toggleTagSelector = toggleTagSelector;
 	this.updateTagSelectorSize = updateTagSelectorSize;
@@ -378,18 +377,6 @@ var ZoteroPane = new function()
 		}
 		
 		Zotero.Collections.add(newName.value, parent);
-	}
-	
-	function newSearch()
-	{
-		var s = new Zotero.Search();
-		s.addCondition('title', 'contains', '');
-		
-		var untitled = Zotero.getString('pane.collections.untitled');
-		untitled = Zotero.DB.getNextName('savedSearches', 'savedSearchName',
-			Zotero.getString('pane.collections.untitled'));
-		var io = {dataIn: {search: s, name: untitled}, dataOut: null};
-		window.openDialog('chrome://zotero/content/searchDialog.xul','','chrome,modal',io);
 	}
 	
 	
