@@ -2219,7 +2219,6 @@ Zotero.Items = new function(){
 	this.reload = reload;
 	this.reloadAll = reloadAll;
 	this.getNewItemByType = getNewItemByType;
-	this.search = search;
 	this.erase = erase;
 	this.unload = unload;
 	
@@ -2337,37 +2336,6 @@ Zotero.Items = new function(){
 	
 	
 	/**
-	* Fulltext search on all fields
-	*
-	* TODO: more
-	**/
-	function search(text, parentCollectionID){
-		if (!text){
-			text = '';
-		}
-		
-		var sql = "SELECT itemID FROM items WHERE title LIKE ?1 UNION "
-			+ "SELECT itemID FROM itemData WHERE value LIKE ?1 UNION "
-			+ "SELECT itemID FROM itemCreators WHERE creatorID IN "
-			+ "(SELECT creatorID FROM creators WHERE firstName LIKE ?1 "
-				+ "OR lastName LIKE ?1) UNION "
-			+ "SELECT itemID FROM itemTags WHERE tagID IN "
-			+ "(SELECT tagID FROM tags WHERE tag LIKE ?1) UNION "
-			+ "SELECT itemID FROM itemNotes WHERE note LIKE ?1";
-		
-		var sqlParams = [{'string':'%' + text + '%'}];
-		
-		if (parentCollectionID){
-			sql = "SELECT itemID FROM (" + sql + ") WHERE itemID IN "
-				+ "(SELECT itemID FROM collectionItems WHERE collectionID=?2)";
-			sqlParams.push({'int':parentCollectionID});
-		}
-		
-		return Zotero.DB.columnQuery(sql, sqlParams);
-	}
-	
-	
-	/**
 	* Delete item(s) from database and clear from internal array
 	*
 	* If _eraseChildren_ is true, erase child items as well
@@ -2416,7 +2384,6 @@ Zotero.Items = new function(){
 		if (arguments[0]){
 			sql += ' AND I.itemID IN (' + Zotero.join(arguments,',') + ')';
 		}
-		
 		var result = Zotero.DB.query(sql);
 		
 		if (result){
@@ -2820,9 +2787,6 @@ Zotero.Collection.prototype._loadChildItems = function(){
 		for (var i=0; i<itemIDs.length; i++){
 			this._childItems.set(itemIDs[i]);
 		}
-	}
-	else {
-		Zotero.debug('Collection ' + this._id + ' has no child items');
 	}
 	
 	this._childItemsLoaded = true;
