@@ -34,6 +34,7 @@
 <!ENTITY zotero.toolbar.removeItem.label				"Remove Item...">
 <!ENTITY zotero.toolbar.newCollection.label			"New Collection...">
 <!ENTITY zotero.toolbar.newSubcollection.label			"New Subcollection...">
+<!ENTITY zotero.toolbar.newSavedSearch.label			"New Saved Search...">
 <!ENTITY zotero.toolbar.tagSelector.label			"Show/Hide Tag Selector">
 <!ENTITY zotero.toolbar.actions.label					"Actions">
 <!ENTITY zotero.toolbar.import.label					"Import...">
