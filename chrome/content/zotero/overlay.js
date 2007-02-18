@@ -369,7 +369,6 @@ var ZoteroPane = new function()
 				return;
 			}
 		}
-		
 	}
 	
 	

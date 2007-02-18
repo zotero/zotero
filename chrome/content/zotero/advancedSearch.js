@@ -3,6 +3,7 @@ var ZoteroAdvancedSearch = new function() {
 	this.search = search;
 	this.clear = clear;
 	this.save = save;
+	this.handleKeyPress = handleKeyPress;
 	this.onDblClick = onDblClick;
 	this.onUnload = onUnload;
 	
@@ -84,6 +85,22 @@ var ZoteroAdvancedSearch = new function() {
 		s.setName(name.value);
 		s.save();
 	}
+	
+	
+	function handleKeyPress(event) {
+		var key = String.fromCharCode(event.which);
+		
+		if (key == '+' && !(event.ctrlKey || event.altKey || event.metaKey)) {
+			this.itemsView.expandAllRows();
+			return;
+		}
+		else if (key == '-' && !(event.shiftKey || event.ctrlKey ||
+				event.altKey || event.metaKey)) {
+			this.itemsView.collapseAllRows();
+			return;
+		}
+	}
+
 	
 	
 	// Adapted from: http://www.xulplanet.com/references/elemref/ref_tree.html#cmnote-9
