@@ -949,15 +949,11 @@ Zotero.Item.prototype.save = function(){
 	Zotero.Items.reload(this.getID());
 	
 	if (isNew){
-		if (!Zotero.DB.transactionInProgress()){
-			Zotero.Notifier.trigger('add', 'item', this.getID());
-		}
+		Zotero.Notifier.trigger('add', 'item', this.getID());
 		return this.getID();
 	}
 	else {
-		if (!Zotero.DB.transactionInProgress()){
-			Zotero.Notifier.trigger('modify', 'item', this.getID(), { old: preItemArray });
-		}
+		Zotero.Notifier.trigger('modify', 'item', this.getID(), { old: preItemArray });
 		return true;
 	}
 }
@@ -1087,12 +1083,14 @@ Zotero.Item.prototype.setSource = function(sourceItemID){
 	
 	var newItem = Zotero.Items.get(sourceItemID);
 	// FK check
-	if (sourceItemID && newItem) {
-		var preNewItemArray = newItem.toArray();
-	}
-	else {
-		Zotero.DB.rollbackTransaction();
-		throw ("Cannot set " + type + " source to invalid item " + sourceItemID);
+	if (newItem) {
+		if (sourceItemID) {
+			var preNewItemArray = newItem.toArray();
+		}
+		else {
+			Zotero.DB.rollbackTransaction();
+			throw ("Cannot set " + type + " source to invalid item " + sourceItemID);
+		}
 	}
 	
 	var oldSourceItemID = this.getSource();
@@ -1844,6 +1842,80 @@ Zotero.Item.prototype.getImageSrc = function() {
 	}
 	
 	return Zotero.ItemTypes.getImageSrc(itemType);
+}
+
+
+Zotero.Item.prototype.clone = function() {
+	if (!this.getID()) {
+		throw ('Cannot clone unsaved item in Zotero.Item.clone()');
+	}
+	
+	if (this.isAttachment()) {
+		throw ('Cloning attachment items not supported in Zotero.Item.clone()');
+	}
+	
+	Zotero.DB.beginTransaction();
+	
+	var obj = this.toArray();
+	
+	// Note
+	if (this.isNote()) {
+		var newItemID = Zotero.Notes.add(this.getNote(), this.getSource());
+		var newItem = Zotero.Items.get(newItemID);
+	}
+	
+	// Regular item
+	else {
+		var itemTypeID = this.getType();
+		var newItem = new Zotero.Item(itemTypeID);
+		
+		for (var i in obj) {
+			switch (i) {
+				// TODO: remove when title is changed to regular field
+				case 'title':
+					if (obj.itemType != 'note') {
+						newItem.setField('title', obj[i]);
+					}
+					continue;
+				
+				// toArray()'s 'abstractNote' is 'abstract' field
+				case 'abstractNote':
+					newItem.setField('abstract', obj[i]);
+					continue;
+				
+				case 'creators':
+					var i = 0;
+					for each(var c in obj.creators) {
+						newItem.setCreator(i, c.firstName, c.lastName,
+							c.creatorType, c.fieldMode ? c.fieldMode : null);
+						i++;
+					}
+					continue;
+			}
+			
+			var fieldID = Zotero.ItemFields.getID(i);
+			if (fieldID && Zotero.ItemFields.isValidForType(fieldID, itemTypeID)) {
+				newItem.setField(i, obj[i]);
+			}
+		}
+		
+		newItem.save();
+	}
+	
+	if (obj.tags) {
+		for each(var tag in obj.tags) {
+			newItem.addTagByID(tag.id);
+		}
+	}
+	
+	if (obj.seeAlso) {
+		for each(var id in obj.seeAlso) {
+			newItem.addSeeAlso(id)
+		}
+	}
+	
+	Zotero.DB.commitTransaction();
+	return newItem.getID();
 }
 
 

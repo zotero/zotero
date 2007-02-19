@@ -25,6 +25,7 @@
 <!ENTITY zotero.items.menu.attach.note					"Add Note">
 <!ENTITY zotero.items.menu.attach.snapshot				"Attach Snapshot of Current Page">
 <!ENTITY zotero.items.menu.attach.link					"Attach Link to Current Page">
+<!ENTITY zotero.items.menu.duplicateItem					"Duplicate Selected Item">
 
 <!ENTITY zotero.collections.name_column				"Collections">
 

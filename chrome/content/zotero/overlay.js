@@ -47,6 +47,7 @@ var ZoteroPane = new function()
 	this.updateTagFilter = updateTagFilter;
 	this.onCollectionSelected = onCollectionSelected;
 	this.itemSelected = itemSelected;
+	this.duplicateSelectedItem = duplicateSelectedItem;
 	this.deleteSelectedItem = deleteSelectedItem;
 	this.deleteSelectedCollection = deleteSelectedCollection;
 	this.editSelectedCollection = editSelectedCollection;
@@ -717,6 +718,17 @@ var ZoteroPane = new function()
 	}
 	
 	
+	function duplicateSelectedItem() {
+		var newItemID = this.getSelectedItems()[0].clone();
+		var newItem = Zotero.Items.get(newItemID);
+		
+		if (this.itemsView._itemGroup.isCollection()) {
+			this.itemsView._itemGroup.ref.addItem(newItem.getID());
+			this.selectItem(newItemID);
+		}
+	}
+	
+	
 	/*
 	 *  _force_ deletes item from DB even if removing from a collection or search
 	 */
@@ -1092,12 +1104,13 @@ var ZoteroPane = new function()
 			attachSnapshot: 3,
 			attachLink: 4,
 			sep2: 5,
-			deleteItem: 6,
-			deleteFromLibrary: 7,
-			sep3: 8,
-			exportItems: 9,
-			createBib: 10,
-			loadReport: 11
+			duplicateItem: 6,
+			deleteItem: 7,
+			deleteFromLibrary: 8,
+			sep3: 9,
+			exportItems: 10,
+			createBib: 11,
+			loadReport: 12
 		};
 		
 		var menu = document.getElementById('zotero-itemmenu');
@@ -1105,14 +1118,15 @@ var ZoteroPane = new function()
 		var enable = [], disable = [], show = [], hide = [], multiple = '';
 		
 		if (this.itemsView && this.itemsView.selection.count > 0) {
-			enable.push(m.showInLibrary, m.addNote, m.attachSnapshot, m.attachLink, m.sep2,
-				m.deleteItem, m.deleteFromLibrary, m.exportItems, m.createBib, m.loadReport);
+			enable.push(m.showInLibrary, m.addNote, m.attachSnapshot, m.attachLink,
+				m.sep2, m.duplicateItem, m.deleteItem, m.deleteFromLibrary,
+				m.exportItems, m.createBib, m.loadReport);
 			
 			// Multiple items selected
 			if (this.itemsView.selection.count > 1) {
 				var multiple =  '.multiple';
 				hide.push(m.showInLibrary, m.sep1, m.addNote, m.attachSnapshot,
-					m.attachLink, m.sep2);
+					m.attachLink, m.sep2, m.duplicateItem);
 			}
 			// Single item selected
 			else
@@ -1137,6 +1151,13 @@ var ZoteroPane = new function()
 				{
 					hide.push(m.addNote, m.attachSnapshot, m.attachLink, m.sep2);
 				}
+				
+				if (item.isAttachment()) {
+					hide.push(m.duplicateItem);
+				}
+				else {
+					show.push(m.duplicateItem);
+				}
 			}
 		}
 		else
@@ -1149,8 +1170,8 @@ var ZoteroPane = new function()
 				hide.push(m.showInLibrary, m.sep1);
 			}
 			
-			disable.push(m.showInLibrary, m.deleteItem, m.deleteFromLibrary,
-				m.exportItems, m.createBib, m.loadReport);
+			disable.push(m.showInLibrary, m.duplicateItem, m.deleteItem,
+				m.deleteFromLibrary, m.exportItems, m.createBib, m.loadReport);
 			hide.push(m.addNote, m.attachSnapshot, m.attachLink, m.sep2);
 		}
 		

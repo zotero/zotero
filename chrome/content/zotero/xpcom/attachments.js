@@ -616,14 +616,13 @@ Zotero.Attachments = new function(){
 			(path ? {string:path} : null)
 		];
 		Zotero.DB.query(sql, bindParams);
-		Zotero.DB.commitTransaction();
 		
 		if (sourceItemID){
 			sourceItem.incrementAttachmentCount();
 			Zotero.Notifier.trigger('modify', 'item', sourceItemID);
 		}
 		
-		Zotero.Notifier.trigger('add', 'item', attachmentItem.getID());
+		Zotero.DB.commitTransaction();
 		
 		return attachmentItem.getID();
 	}

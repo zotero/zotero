@@ -90,6 +90,7 @@
 					<menuitem label="&zotero.items.menu.attach.snapshot;" oncommand="ZoteroPane.addAttachmentFromPage(false, this.parentNode.getAttribute('itemID'));"/>
 					<menuitem label="&zotero.items.menu.attach.link;" oncommand="ZoteroPane.addAttachmentFromPage(true, this.parentNode.getAttribute('itemID'));"/>
 					<menuseparator/>
+					<menuitem label="&zotero.items.menu.duplicateItem;" oncommand="ZoteroPane.duplicateSelectedItem();"/>
 					<menuitem oncommand="ZoteroPane.deleteSelectedItem();"/>
 					<menuitem oncommand="ZoteroPane.deleteSelectedItem(true);"/>
 					<menuseparator/>
