@@ -1109,7 +1109,7 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 			}
 		} else {
 			var typeID = Zotero.ItemTypes.getID(type);
-			var newItem = Zotero.Items.getNewItemByType(typeID);
+			var newItem = new Zotero.Item(typeID);
 		}
 		
 		// makes looping through easier

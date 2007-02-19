@@ -46,7 +46,7 @@ Zotero.Attachments = new function(){
 		
 		try {
 			// Create a new attachment
-			var attachmentItem = Zotero.Items.getNewItemByType(Zotero.ItemTypes.getID('attachment'));
+			var attachmentItem = new Zotero.Item('attachment');
 			attachmentItem.setField('title', title);
 			attachmentItem.save();
 			var itemID = attachmentItem.getID();
@@ -121,7 +121,7 @@ Zotero.Attachments = new function(){
 		
 		try {
 			// Create a new attachment
-			var attachmentItem = Zotero.Items.getNewItemByType(Zotero.ItemTypes.getID('attachment'));
+			var attachmentItem = new Zotero.Item('attachment');
 			attachmentItem.setField('title', title);
 			attachmentItem.setField('url', url);
 			// DEBUG: this should probably insert access date too so as to
@@ -218,7 +218,7 @@ Zotero.Attachments = new function(){
 				
 				try {
 					// Create a new attachment
-					var attachmentItem = Zotero.Items.getNewItemByType(Zotero.ItemTypes.getID('attachment'));
+					var attachmentItem = new Zotero.Item('attachment');
 					attachmentItem.setField('title', title);
 					attachmentItem.setField('url', url);
 					attachmentItem.setField('accessDate', "CURRENT_TIMESTAMP");
@@ -395,7 +395,7 @@ Zotero.Attachments = new function(){
 		
 		try {
 			// Create a new attachment
-			var attachmentItem = Zotero.Items.getNewItemByType(Zotero.ItemTypes.getID('attachment'));
+			var attachmentItem = new Zotero.Item('attachment');
 			attachmentItem.setField('title', title);
 			attachmentItem.setField('url', url);
 			attachmentItem.setField('accessDate', "CURRENT_TIMESTAMP");
@@ -595,7 +595,7 @@ Zotero.Attachments = new function(){
 		}
 		// Otherwise create a new attachment
 		else {
-			var attachmentItem = Zotero.Items.getNewItemByType(Zotero.ItemTypes.getID('attachment'));
+			var attachmentItem = new Zotero.Item('attachment');
 			attachmentItem.setField('title', title);
 			if (linkMode==self.LINK_MODE_IMPORTED_URL
 				|| linkMode==self.LINK_MODE_LINKED_URL){

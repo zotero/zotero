@@ -25,11 +25,11 @@
  *
  * Generally should be called through Zotero.Items rather than directly
  */
-Zotero.Item = function(){
+Zotero.Item = function(itemTypeOrID){
 	this._init();
 	
-	if (arguments.length){
-		this.setType(Zotero.ItemTypes.getID(arguments[0]));
+	if (itemTypeOrID){
+		this.setType(Zotero.ItemTypes.getID(itemTypeOrID));
 	}
 }
 
@@ -2225,9 +2225,9 @@ Zotero.Items = new function(){
 	// Privileged methods
 	this.get = get;
 	this.getAll = getAll;
+	this.add = add;
 	this.reload = reload;
 	this.reloadAll = reloadAll;
-	this.getNewItemByType = getNewItemByType;
 	this.erase = erase;
 	this.unload = unload;
 	
@@ -2298,6 +2298,58 @@ Zotero.Items = new function(){
 	
 	
 	/*
+	 * Create a new item with optional metadata and pass back the primary reference
+	 *
+	 * Using "var item = new Zotero.Item()" and "item.save()" directly results
+	 * in an orphaned reference to the created item. If other code retrieves the
+	 * new item with Zotero.Items.get() and modifies it, the original reference
+	 * will not reflect the changes.
+	 *
+	 * Using this method avoids the need to call Zotero.Items.get() after save()
+	 * in order to get the primary item reference. Since it accepts metadata
+	 * as a JavaScript object, it also offers a simpler syntax than
+	 * item.setField() and item.setCreator().
+	 *
+	 * Callers with no need for an up-to-date reference after save() (or who
+	 * don't mind doing an extra Zotero.Items.get()) can use Zotero.Item
+	 * directly if they prefer.
+	 *
+	 * Sample usage:
+	 *
+	 * var data = {
+	 *     title: "Shakespeare: The Invention of the Human",
+	 *     publisher: "Riverhead Hardcover",
+	 *     date: '1998-10-26',
+	 *     isbn: 1573221201,
+	 *     pages: 745,
+	 *     creators: [
+	 *         ['Harold', 'Bloom', 'author']
+	 *     ]
+	 * };
+	 * var item = Zotero.Items.add('book', data);
+	 */
+	function add(itemTypeOrID, data) {
+		var item = new Zotero.Item(itemTypeOrID);
+		for (var field in data){
+			if (field == 'creators') {
+				var i = 0;
+				for each(var creator in data.creators) {
+					// TODO: accept format from toArray()
+					item.setCreator(i, creator[0], creator[1], creator[2], creator[3] ? creator[3] : null);
+					i++;
+				}
+			}
+			else {
+				item.setField(field, data[field]);
+			}
+		}
+		var id = item.save();
+		
+		return this.get(id);
+	}
+	
+	
+	/*
 	 * Reloads data for specified items into internal array
 	 *
 	 * Can be passed ids as individual parameters or as an array of ids, or both
@@ -2321,26 +2373,6 @@ Zotero.Items = new function(){
 	function reloadAll(){
 		_items = new Array();
 		_load();
-	}
-	
-	
-	function getNewItemByType(itemType){
-		return new Zotero.Item(itemType);
-	}
-	
-	
-	function add(data, itemTypeID){
-		var insert = new Array();
-		
-		var obj = new Zotero.Item(itemTypeID);
-		
-		for (field in data){
-			obj.setField(data[field]);
-		}
-		
-		var id = obj.save();
-		
-		return this.get(id);
 	}
 	
 	
@@ -2439,7 +2471,7 @@ Zotero.Notes = new function(){
 			}
 		}
 		
-		var note = Zotero.Items.getNewItemByType(Zotero.ItemTypes.getID('note'));
+		var note = new Zotero.Item('note');
 		note.save();
 		
 		var sql = "INSERT INTO itemNotes VALUES (?,?,?)";
