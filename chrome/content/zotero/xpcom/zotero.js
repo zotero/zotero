@@ -98,7 +98,6 @@ var Zotero = new function(){
 		var gExtensionManager =
 			Components.classes["@mozilla.org/extensions/manager;1"]
 				.getService(Components.interfaces.nsIExtensionManager);
-		var itemType = nsIUpdateItem.TYPE_EXTENSION;
 		this.version
 			= gExtensionManager.getItemForID(ZOTERO_CONFIG['GUID']).version;
 		
@@ -130,6 +129,8 @@ var Zotero = new function(){
 		Zotero.DB.addCallback('begin', Zotero.Notifier.begin);
 		Zotero.DB.addCallback('commit', Zotero.Notifier.commit);
 		Zotero.DB.addCallback('rollback', Zotero.Notifier.reset);
+		
+		Zotero.Fulltext.init();
 		
 		// Trigger updating of schema and scrapers
 		Zotero.Schema.updateSchema();

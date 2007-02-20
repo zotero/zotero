@@ -1972,9 +1972,8 @@ Zotero.Item.prototype.erase = function(deleteChildren){
 		// Delete associated files
 		var linkMode = this.getAttachmentLinkMode();
 		switch (linkMode){
-			case Zotero.Attachments.LINK_MODE_LINKED_FILE:
+			// Link only -- nothing to delete
 			case Zotero.Attachments.LINK_MODE_LINKED_URL:
-				// Links only -- nothing to delete
 				break;
 			default:
 				var file = Zotero.getStorageDirectory();

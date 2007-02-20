@@ -21,23 +21,79 @@
 */
 
 Zotero.Fulltext = new function(){
+	const FULLTEXT_VERSION = 1;
+	const CACHE_FILE = '.zotero-ft-cache';
+	
+	this.init = init;
+	this.registerPDFToText = registerPDFToText;
+	this.cacheIsOutdated = cacheIsOutdated;
+	this.rebuildCache = rebuildCache;
+	this.isCachedMIMEType = isCachedMIMEType;
 	this.indexWord = indexWord;
 	this.indexWords = indexWords;
 	this.indexDocument = indexDocument;
 	this.indexString = indexString;
 	this.indexFile = indexFile;
+	this.indexPDF = indexPDF;
 	this.indexItems = indexItems;
 	this.findTextInFile = findTextInFile;
 	this.findTextInItems = findTextInItems;
-	this.cacheIsOutdated = cacheIsOutdated;
-	this.rebuildCache = rebuildCache;
 	this.clearItemWords = clearItemWords;
 	//this.clearItemContent = clearItemContent;
 	this.purgeUnusedWords = purgeUnusedWords;
 	this.HTMLToText = HTMLToText;
 	this.semanticSplitter = semanticSplitter;
 	
-	const FULLTEXT_VERSION = 1;
+	var _pdftotext = null;
+	
+	
+	function init() {
+		this.registerPDFToText();
+	}
+	
+	
+	/*
+	 * Looks for pdftotext-{platform}[.exe] in the Zotero data directory
+	 *
+	 * {platform} is navigator.platform, with spaces replaced by hyphens
+	 *   e.g. "Win32", "Linux-i686", "MacPPC", "MacIntel", etc.
+	 */
+	function registerPDFToText() {
+		var exec = Zotero.getZoteroDirectory();
+		var fileName = 'pdftotext-' + Zotero.platform.replace(' ', '-');
+		if (Zotero.isWin) {
+			fileName += '.exe';
+		}
+		
+		var errMsg = false;
+		
+		exec.append(fileName);
+		if (exec.exists()) {
+			if (exec.isSymlink()) {
+				exec = exec.target;
+				if (!exec.target) {
+					errMsg = fileName + ' symlink target not found';
+				}
+				else {
+					_pdftotext = exec;
+				}
+			}
+			else {
+				_pdftotext = exec;
+			}
+		}
+		else {
+			errMsg = fileName + ' not found';
+		}
+		
+		if (_pdftotext) {
+			Zotero.debug('pdftotext registered at ' + _pdftotext.path);
+		}
+		else {
+			_pdftotext = null;
+			Zotero.debug(errMsg + ' -- PDF indexing disabled');
+		}
+	}
 	
 	
 	function cacheIsOutdated(){
@@ -54,14 +110,25 @@ Zotero.Fulltext = new function(){
 		
 		var sql = "SELECT itemID FROM itemAttachments";
 		var items = Zotero.DB.columnQuery(sql);
-		indexItems(items);
+		this.indexItems(items);
 		
 		Zotero.DB.commitTransaction();
 	}
 	
 	
+	function isCachedMIMEType(mimeType) {
+		switch (mimeType) {
+			case 'application/pdf':
+				return true;
+		}
+		return false;
+	}
+	
+	
 	/*
 	 * Index a single word
+	 *
+	 * Note: not used
 	 */
 	function indexWord(itemID, word){
 		Zotero.DB.beginTransaction();
@@ -140,8 +207,8 @@ Zotero.Fulltext = new function(){
 		
 		Zotero.DB.beginTransaction();
 		
-		clearItemWords(itemID);
-		indexWords(itemID, words);
+		this.clearItemWords(itemID);
+		this.indexWords(itemID, words);
 		
 		/*
 		var sql = "REPLACE INTO fulltextContent (itemID, textContent) VALUES (?,?)";
@@ -169,9 +236,18 @@ Zotero.Fulltext = new function(){
 			return false;
 		}
 		
-		var text = document.body.innerHTML.replace(/(>)/g, '$1 ');
-		text = HTMLToText(text);
-		indexString(text, document.characterSet, itemID);
+		var text = document.body.innerHTML;
+		
+		var max = Zotero.Prefs.get('fulltext.textMaxLength');
+		if (text.length > max) {
+			Zotero.debug('Only indexing first ' + max + ' characters of item '
+				+ itemID + ' in indexDocument()');
+			text = text.substr(0, max);
+		}
+		
+		text = text.replace(/(>)/g, '$1 ');
+		text = this.HTMLToText(text);
+		this.indexString(text, document.characterSet, itemID);
 	}
 	
 	
@@ -188,6 +264,10 @@ Zotero.Fulltext = new function(){
 			return false;
 		}
 		
+		if (mimeType == 'application/pdf') {
+			return this.indexPDF(file, itemID);
+		}
+		
 		if (mimeType.substr(0, 5)!='text/'){
 			Zotero.debug('File is not text in indexFile()', 2);
 			return false;
@@ -198,15 +278,62 @@ Zotero.Fulltext = new function(){
 			return false;
 		}
 		
-		var text = Zotero.File.getContents(file, charset);
+		Zotero.debug('Indexing file ' + file.path);
+		
+		var maxLength = Zotero.Prefs.get('fulltext.textMaxLength');
+		var text = Zotero.File.getContents(file, charset, maxLength);
 		// Split elements to avoid word concatentation
 		text = text.replace(/(>)/g, '$1 ');
-		text = HTMLToText(text);
-		indexString(text, charset, itemID);
+		text = this.HTMLToText(text);
+		this.indexString(text, charset, itemID);
+		
+		return true;
+	}
+	
+	
+	/*
+	 * Run PDF through pdftotext to generate .zotero-ft-cache and pass the
+	 * text file back to indexFile()
+	 */
+	function indexPDF(file, itemID) {
+		if (!_pdftotext) {
+			return false;
+		}
+		
+		var item = Zotero.Items.get(itemID);
+		var linkMode = item.getAttachmentLinkMode();
+		// If file is stored outside of Zotero, create a directory for the item
+		// in the storage directory and save the cache file there
+		if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
+			var cacheFile = Zotero.Attachments.createDirectoryForItem(itemID);
+		}
+		else {
+			var cacheFile = file.parent;
+		}
+		cacheFile.append(CACHE_FILE);
+		
+		var proc = Components.classes["@mozilla.org/process/util;1"].
+				createInstance(Components.interfaces.nsIProcess);
+		proc.init(_pdftotext);
+		var maxPages = Zotero.Prefs.get('fulltext.pdfMaxPages');
+		Zotero.debug('Running pdftotext -nopgbrk -l ' + maxPages +
+			' "' + file.path + '" "' + cacheFile.path + '"');
+		var args = ['-nopgbrk', '-l', maxPages, file.path, cacheFile.path];
+		Zotero.debug(args);
+		proc.run(true, args, args.length);
+		
+		if (cacheFile.exists()) {
+			return this.indexFile(cacheFile, 'text/plain', 'utf-8', itemID);
+		}
+		return false;
 	}
 	
 	
 	function indexItems(items){
+		if (items.constructor.name != 'Array') {
+			items = [items];
+		}
+		
 		var items = Zotero.Items.get(items);
 		var found = [];
 		
@@ -222,7 +349,7 @@ Zotero.Fulltext = new function(){
 				continue;
 			}
 			
-			indexFile(file, i.getAttachmentMimeType(),
+			this.indexFile(file, i.getAttachmentMimeType(),
 				i.getAttachmentCharset(), i.getID());
 		}
 		
@@ -247,7 +374,8 @@ Zotero.Fulltext = new function(){
 	function findTextInFile(file, charset, searchText, mode){
 		Zotero.debug("Searching for text '" + searchText + "' in " + file.path);
 		
-		var str = Zotero.File.getContents(file, charset);
+		var maxLength = Zotero.Prefs.get('fulltext.textMaxLength');
+		var str = Zotero.File.getContents(file, charset, maxLength);
 		
 		// If not binary mode, convert HTML to text
 		if (!mode || mode.indexOf('Binary')==-1){
@@ -255,7 +383,7 @@ Zotero.Fulltext = new function(){
 			str = str.replace(/(>)/g, '$1 ');
 			
 			// Parse to avoid searching on HTML
-			str = HTMLToText(str);
+			str = this.HTMLToText(str);
 		}
 		
 		switch (mode){
@@ -332,17 +460,30 @@ Zotero.Fulltext = new function(){
 				continue;
 			}
 			
-			// If not binary mode, only scan plaintext files
-			if (!mode || mode.indexOf('Binary')==-1){
-				if (!Zotero.MIME.isTextType(i.getAttachmentMimeType())) {
-					Zotero.debug('Not scanning MIME type ' + mimeType, 4);
+			var mimeType = i.getAttachmentMimeType();
+			
+			if (isCachedMIMEType(mimeType)) {
+				var file = _getItemCacheFile(i.getID());
+				if (!file.exists()) {
 					continue;
 				}
+				
+				mimeType = 'text/plain';
+				var charset = 'utf-8';
+			}
+			else {
+				// If not binary mode, only scan plaintext files
+				if (!mode || mode.indexOf('Binary') == -1) {
+					if (!Zotero.MIME.isTextType(mimeType)) {
+						Zotero.debug('Not scanning MIME type ' + mimeType, 4);
+						continue;
+					}
+				}
+				
+				var charset = i.getAttachmentCharset();
 			}
 			
-			var charset = i.getAttachmentCharset();
-			
-			var match = findTextInFile(file, charset, searchText, mode);
+			var match = this.findTextInFile(file, charset, searchText, mode);
 			
 			if (match != -1){
 				found.push({id:i.getID(), match:match});
@@ -355,6 +496,17 @@ Zotero.Fulltext = new function(){
 	
 	function clearItemWords(itemID){
 		Zotero.DB.query("DELETE FROM fulltextItems WHERE itemID=" + itemID);
+		
+		// Delete fulltext cache file if there is one
+		var item = Zotero.Items.get(itemID);
+		switch (item.getAttachmentMimeType()) {
+			case 'application/pdf':
+				var cacheFile = _getItemCacheFile();
+				if (cacheFile.exists()) {
+					cacheFile.remove(null);
+				}
+				break;
+		}
 	}
 	
 	
@@ -466,5 +618,13 @@ Zotero.Fulltext = new function(){
 	function _restoreTroubleChars(text){
 		text = text.replace("zoteroapostrophe", "'");
 		return text;
+	}
+	
+	
+	function _getItemCacheFile(itemID) {
+		var cacheFile = Zotero.getStorageDirectory();
+		cacheFile.append(itemID);
+		cacheFile.append(CACHE_FILE);
+		return cacheFile;
 	}
 }

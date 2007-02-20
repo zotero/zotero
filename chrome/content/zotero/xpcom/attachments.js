@@ -33,6 +33,7 @@ Zotero.Attachments = new function(){
 	this.linkFromURL = linkFromURL;
 	this.linkFromDocument = linkFromDocument;
 	this.importFromDocument = importFromDocument;
+	this.createDirectoryForItem = createDirectoryForItem;
 	this.getPath = getPath;
 	
 	var self = this;
@@ -52,9 +53,7 @@ Zotero.Attachments = new function(){
 			var itemID = attachmentItem.getID();
 			
 			// Create directory for attachment files within storage directory
-			var destDir = Zotero.getStorageDirectory();
-			destDir.append(itemID);
-			destDir.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0755);
+			var destDir = this.createDirectoryForItem(itemID);
 			
 			file.copyTo(destDir, null);
 			
@@ -235,9 +234,7 @@ Zotero.Attachments = new function(){
 					}
 					
 					// Create a new folder for this item in the storage directory
-					var destDir = Zotero.getStorageDirectory();
-					destDir.append(itemID);
-					destDir.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0755);
+					var destDir = Zotero.Attachments.createDirectoryForItem(itemID);
 					
 					var file = Components.classes["@mozilla.org/file/local;1"].
 							createInstance(Components.interfaces.nsILocalFile);
@@ -248,6 +245,16 @@ Zotero.Attachments = new function(){
 						try {
 							_addToDB(file, url, title, Zotero.Attachments.LINK_MODE_IMPORTED_URL,
 								mimeType, null, sourceItemID, itemID);
+							
+							// We don't have any way of knowing that the file
+							// is flushed to disk, so we just wait a second
+							// and hope for the best -- we'll index it later
+							// if it fails
+							var timer = Components.classes["@mozilla.org/timer;1"].
+								createInstance(Components.interfaces.nsITimer);
+							timer.initWithCallback({notify: function() {
+								Zotero.Fulltext.indexItems([itemID]);
+							}}, 1000, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
 						}
 						catch (e) {
 							// Clean up
@@ -356,8 +363,13 @@ Zotero.Attachments = new function(){
 		
 		// Run the fulltext indexer asynchronously (actually, it hangs the UI
 		// thread, but at least it lets the menu close)
-		setTimeout(function(){
-			Zotero.Fulltext.indexDocument(document, itemID);
+		setTimeout(function() {
+			if (Zotero.Fulltext.isCachedMIMEType(mimeType)) {
+				Zotero.Fulltext.indexItems([itemID]);
+			}
+			else {
+				Zotero.Fulltext.indexDocument(document, itemID);
+			}
 		}, 50);
 		
 		return itemID;
@@ -403,9 +415,7 @@ Zotero.Attachments = new function(){
 			var itemID = attachmentItem.getID();
 			
 			// Create a new folder for this item in the storage directory
-			var destDir = Zotero.getStorageDirectory();
-			destDir.append(itemID);
-			destDir.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0755);
+			var destDir = this.createDirectoryForItem(itemID);
 			
 			var file = Components.classes["@mozilla.org/file/local;1"].
 					createInstance(Components.interfaces.nsILocalFile);
@@ -496,6 +506,19 @@ Zotero.Attachments = new function(){
 			
 			throw (e);
 		}
+	}
+	
+	
+	/*
+	 * Create directory for attachment files within storage directory
+	 */
+	function createDirectoryForItem(itemID) {
+		var dir = Zotero.getStorageDirectory();
+		dir.append(itemID);
+		if (!dir.exists()) {
+			dir.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0755);
+		}
+		return dir;
 	}
 	
 	
@@ -635,10 +658,17 @@ Zotero.Attachments = new function(){
 	 * asynchronously after the fact
 	 */
 	function _postProcessFile(itemID, file, mimeType){
+		// MIME types that get cached by the fulltext indexer can just be
+		// indexed directly
+		if (Zotero.Fulltext.isCachedMIMEType(mimeType)) {
+			Zotero.Fulltext.indexItems([itemID]);
+			return;
+		}
+		
 		var ext = Zotero.File.getExtension(file);
 		if (mimeType.substr(0, 5)!='text/' ||
 			!Zotero.MIME.hasInternalHandler(mimeType, ext)){
-			return false;
+			return;
 		}
 		
 		var browser = Zotero.Browser.createHiddenBrowser();

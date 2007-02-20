@@ -74,7 +74,7 @@ Zotero.File = new function(){
 	}
 	
 	
-	function getContents(file, charset){
+	function getContents(file, charset, maxLength){
 		var fis = Components.classes["@mozilla.org/network/file-input-stream;1"].
 			createInstance(Components.interfaces.nsIFileInputStream);
 		fis.init(file, false, false, false);
@@ -92,9 +92,19 @@ Zotero.File = new function(){
 		var is = Components.classes["@mozilla.org/intl/converter-input-stream;1"]
 			.createInstance(Components.interfaces.nsIConverterInputStream);
 		is.init(fis, charset, 1024, replacementChar);
+		var chars = 1024;
 		
 		var contents = [], str = {};
 		while (is.readString(4096, str) != 0) {
+			if (maxLength) {
+				chars += 4096;
+				if (chars >= maxLength) {
+					Zotero.debug('Stopping at ' + (chars - 4096)
+						+ ' characters in File.getContents()');
+					break;
+				}
+			}
+			
 			contents.push(str.value);
 		}
 		

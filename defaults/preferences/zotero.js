@@ -16,7 +16,6 @@ pref("extensions.zotero.automaticTags",true);
 pref("extensions.zotero.fontSize", "1.0");
 pref("extensions.zotero.recursiveCollections", false);
 
-
 pref("extensions.zotero.lastCreatorFieldMode",0);
 pref("extensions.zotero.lastAbstractExpand",0);
 pref("extensions.zotero.lastRenameAssociatedFile", false);
@@ -31,6 +30,10 @@ pref("extensions.zotero.keys.newItem", 'N');
 pref("extensions.zotero.keys.newNote", 'O');
 pref("extensions.zotero.keys.toggleTagSelector", 'T');
 pref("extensions.zotero.keys.copySelectedItemsToClipboard", 'C');
+
+// Fulltext indexing
+pref("extensions.zotero.fulltext.textMaxLength", 500000);
+pref("extensions.zotero.fulltext.pdfMaxPages", 100);
 
 // Export and citation settings
 pref("extensions.zotero.export.lastTranslator", '14763d24-8ba0-45df-8f52-b8d1108e7ac9');
