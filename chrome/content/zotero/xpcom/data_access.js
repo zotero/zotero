@@ -1637,8 +1637,27 @@ Zotero.Item.prototype.addTagByID = function(tagID) {
 }
 
 Zotero.Item.prototype.hasTag = function(tagID) {
-	var sql = "SELECT COUNT(*) FROM itemTags WHERE itemID=? AND tagID=?";
-	return !!Zotero.DB.valueQuery(sql, [this.getID(), tagID]);
+	return this.hasTags(tagID);
+}
+
+/*
+ * Returns true if the item has one or more of |tagIDs|
+ *
+ * |tagIDs| can be an int or array of ints
+ */
+Zotero.Item.prototype.hasTags = function(tagIDs) {
+	var tagIDs = Zotero.flattenArguments(tagIDs);
+	
+	var sql = "SELECT COUNT(*) FROM itemTags WHERE itemID=? AND tagID IN (";
+	var q = [];
+	var p = [this.getID()];
+	for each(var tagID in tagIDs) {
+		q.push('?');
+		p.push(tagID);
+	}
+	sql += q.join();
+	sql += ")";
+	return !!Zotero.DB.valueQuery(sql, p);
 }
 
 Zotero.Item.prototype.getTags = function(){
