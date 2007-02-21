@@ -2061,9 +2061,11 @@ Zotero.Item.prototype.erase = function(deleteChildren){
 	}
 	
 	// Clear fulltext cache
-	Zotero.Fulltext.clearItemWords(this.getID());
-	//Zotero.Fulltext.clearItemContent(this.getID());
-	Zotero.Fulltext.purgeUnusedWords();
+	if (this.isAttachment()) {
+		Zotero.Fulltext.clearItemWords(this.getID());
+		//Zotero.Fulltext.clearItemContent(this.getID());
+		Zotero.Fulltext.purgeUnusedWords();
+	}
 	
 	sql = 'DELETE FROM itemCreators WHERE itemID=' + this.getID() + ";\n";
 	sql += 'DELETE FROM itemNotes WHERE itemID=' + this.getID() + ";\n";
