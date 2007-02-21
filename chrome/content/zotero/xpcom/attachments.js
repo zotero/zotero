@@ -221,7 +221,12 @@ Zotero.Attachments = new function(){
 					attachmentItem.setField('title', title);
 					attachmentItem.setField('url', url);
 					attachmentItem.setField('accessDate', "CURRENT_TIMESTAMP");
+					// Don't send a Notifier event on the incomplete item
+					var disabled = Zotero.Notifier.disable();
 					attachmentItem.save();
+					if (disabled) {
+						Zotero.Notifier.enable();
+					}
 					var itemID = attachmentItem.getID();
 					
 					// Add to collections
@@ -245,6 +250,8 @@ Zotero.Attachments = new function(){
 						try {
 							_addToDB(file, url, title, Zotero.Attachments.LINK_MODE_IMPORTED_URL,
 								mimeType, null, sourceItemID, itemID);
+							
+							Zotero.Notifier.trigger('add', 'item', itemID);
 							
 							// We don't have any way of knowing that the file
 							// is flushed to disk, so we just wait a second
@@ -411,7 +418,12 @@ Zotero.Attachments = new function(){
 			attachmentItem.setField('title', title);
 			attachmentItem.setField('url', url);
 			attachmentItem.setField('accessDate', "CURRENT_TIMESTAMP");
+			// Don't send a Notifier event on the incomplete item
+			var disabled = Zotero.Notifier.disable();
 			attachmentItem.save();
+			if (disabled) {
+				Zotero.Notifier.enable();
+			}
 			var itemID = attachmentItem.getID();
 			
 			// Create a new folder for this item in the storage directory
@@ -431,6 +443,8 @@ Zotero.Attachments = new function(){
 					
 					_addToDB(file, url, title, Zotero.Attachments.LINK_MODE_IMPORTED_URL, mimeType,
 						charsetID, sourceItemID, itemID);
+					
+					Zotero.Notifier.trigger('add', 'item', itemID);
 					
 					// Add to collections
 					if (parentCollectionIDs){

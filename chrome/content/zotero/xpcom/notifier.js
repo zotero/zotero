@@ -38,6 +38,9 @@ Zotero.Notifier = new function(){
 	this.begin = begin;
 	this.commit = commit;
 	this.reset = reset;
+	this.disable = disable;
+	this.enable = enable;
+	this.isEnabled = isEnabled;
 	
 	
 	function registerObserver(ref, types){
@@ -294,5 +297,36 @@ Zotero.Notifier = new function(){
 		_locked = false;
 		_queue = [];
 		_inTransaction = false;
+	}
+	
+	
+	// 
+	// These should rarely be used now that we have event queuing
+	//
+	
+	/*
+	 * Disables Notifier notifications
+	 *
+	 * Returns false if the Notifier was already disabled, true otherwise
+	 */
+	function disable() {
+		if (_disabled) {
+			Zotero.debug('Notifier notifications are already disabled');
+			return false;
+		}
+		Zotero.debug('Disabling Notifier notifications'); 
+		_disabled = true;
+		return true;
+	}
+	
+	
+	function enable(enable) {
+		Zotero.debug('Enabling Notifier notifications');
+		_disabled = false; 
+	}
+	
+	
+	function isEnabled() {
+		return !_disabled;
 	}
 }
