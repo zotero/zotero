@@ -1,4 +1,4 @@
--- 173
+-- 174
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-02-21 14:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-02-27 20:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b3.r1', '', '2006-12-15 03:40:00', 1, 100, 4, 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -411,12 +411,13 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b3.r1', '', '2006-12-15 15:11:00', 1, 100, 4, 'Library Catalog (Voyager)', 'Simon Kornblith', 'Pwebrecon\.cgi',
+REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b3.r1', '', '2007-02-27 20:00:00', 1, 100, 4, 'Library Catalog (Voyager)', 'Simon Kornblith', 'Pwebrecon\.cgi',
 'function detectWeb(doc, url) {
 	var export_options = doc.forms.namedItem(''frm'').elements.namedItem(''RD'').options;
 	for(var i in export_options) {
 		if(export_options[i].text == ''Latin1 MARC''
 		|| export_options[i].text == ''Raw MARC''
+		|| export_options[i].text == ''MARC 8''
 		|| export_options[i].text == ''UTF-8''
 		|| export_options[i].text == ''MARC (Unicode/UTF-8)''
 		|| export_options[i].text == ''MARC (non-Unicode/MARC-8)'') {
@@ -505,6 +506,7 @@ REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b
 	var export_options = form.elements.namedItem(''RD'').options;
 	for(var i=0; i<export_options.length; i++) {
 		if(export_options[i].text == ''Raw MARC''
+		|| export_options[i].text == ''MARC 8''
 		|| export_options[i].text == ''MARC (non-Unicode/MARC-8)'') {
 			raw = i;
 		}  if(export_options[i].text == ''Latin1 MARC'') {
@@ -555,7 +557,7 @@ REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('d921155f-0186-1684-615c-ca57682ced9b', '1.0.0b3.r1', '', '2007-02-21 14:00:00', 1, 100, 4, 'JSTOR', 'Simon Kornblith', '^https?://(?:www\.|ocrpdf-sandbox\.)jstor\.org/(?:view|browse/[^/]+/[^/]+\?|search/|cgi-bin/jstor/viewitem)', 
+REPLACE INTO translators VALUES ('d921155f-0186-1684-615c-ca57682ced9b', '1.0.0b3.r1', '', '2007-02-27 20:00:00', 1, 100, 4, 'JSTOR', 'Simon Kornblith', '^https?://(?:www\.|ocrpdf-sandbox\.)jstor\.org/(?:view|browse/[^/]+/[^/]+\?|search/|cgi-bin/jstor/viewitem)', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -568,7 +570,7 @@ REPLACE INTO translators VALUES ('d921155f-0186-1684-615c-ca57682ced9b', '1.0.0b
 	}
 	
 	// If this is a view page, find the link to the citation
-	var xpath = ''/html/body/div[@class="indent"]/center//a[@class="nav"]'';
+	var xpath = ''/html/body/div[@class="indent"]//a[@class="nav"]'';
 	var elmts = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
 	if(elmts.iterateNext()) {
 		return "journalArticle";
@@ -689,7 +691,7 @@ function doWeb(doc, url) {
 		}
 	} else {
 		// If this is a view page, find the link to the citation
-		var xpath = ''/html/body/div[@class="indent"]/center//a[@class="nav"]'';
+		var xpath = ''/html/body/div[@class="indent"]//a[@class="nav"]'';
 		var elmts = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
 		var saveCitation = elmts.iterateNext();
 		var viewSavedCitations = elmts.iterateNext();
@@ -8398,7 +8400,7 @@ function doImport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7', '1.0.0b3.r1', '', '2007-01-20 00:20:00', '1', '100', '3', 'RIS', 'Simon Kornblith', 'ris', 
+REPLACE INTO translators VALUES ('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7', '1.0.0b3.r1', '', '2007-02-27 20:00:00', '1', '100', '3', 'RIS', 'Simon Kornblith', 'ris', 
 'Zotero.configure("dataMode", "line");
 Zotero.addOption("exportNotes", true);
 
@@ -8618,6 +8620,10 @@ function completeItem(item) {
 			item.publicationTitle = item.backupPublicationTitle;
 		}
 		item.backupPublicationTitle = undefined;
+	}
+	// hack for sites like Nature, which only use JA, journal abbreviation
+	if(item.journalAbbreviation && !item.publicationTitle){
+		item.publicationTitle = item.journalAbbreviation;
 	}
 	item.complete();
 }
