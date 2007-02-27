@@ -582,9 +582,14 @@ Zotero.Search.prototype._buildQuery = function(){
 							break;
 						}
 						
+						// Add base field
+						condSQLParams.push(
+							Zotero.ItemFields.getID(condition['alias'])
+						);
 						var typeFields = Zotero.ItemFields.getTypeFieldsFromBase(condition['alias']);
 						if (typeFields) {
-							condSQL += 'fieldID IN (';
+							condSQL += 'fieldID IN (?,';
+							// Add type-specific fields
 							for each(var fieldID in typeFields) {
 								condSQL += '?,';
 								condSQLParams.push(fieldID);
@@ -594,9 +599,6 @@ Zotero.Search.prototype._buildQuery = function(){
 						}
 						else {
 							condSQL += 'fieldID=? AND ';
-							condSQLParams.push(
-								Zotero.ItemFields.getID(condition['alias'])
-							);
 						}
 						break;
 					
