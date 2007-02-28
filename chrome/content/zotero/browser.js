@@ -95,6 +95,10 @@ var Zotero_Browser = new function() {
 	 * loading
 	 */
 	function init() {
+		if (!Zotero || !Zotero.initialized) {
+			return;
+		}
+		
 		Zotero_Browser.browserData = new Object();
 		Zotero_Browser._scrapePopupShowing = false;
 		Zotero.Ingester.ProxyMonitor.init();

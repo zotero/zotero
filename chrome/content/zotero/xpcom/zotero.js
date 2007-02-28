@@ -121,10 +121,6 @@ var Zotero = new function(){
 							getService(Components.interfaces.nsILocaleService);
 		this.locale = localeService.getLocaleComponentForUserAgent();
 		
-		//var serv = Components.classes["@mozilla.org/network/protocol;1?name=http"].getService(Components.interfaces.nsIHttpProtocolHandler);
-		//Components.classes["@mozilla.org/network/protocol;1?name=http"].getService(Components.interfaces.nsIHttpProtocolHandler).language
-		//Components.classes['@mozilla.org/intl/nslocaleservice;1'].getService(Components.interfaces.nsILocaleService).getApplicationLocale().getCategory("NSILOCALE_MESSAGES")
-		
 		// Load in the localization stringbundle for use by getString(name)
 		var src = 'chrome://zotero/locale/zotero.properties';
 		var appLocale = localeService.getApplicationLocale();
