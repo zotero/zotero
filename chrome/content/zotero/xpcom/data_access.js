@@ -3353,8 +3353,8 @@ Zotero.Tags = new function(){
 	 * Returns the tagID matching given tag and type
 	 */
 	function getID(tag, type) {
-		if (_tags[type] && _tags[type][tag]){
-			return _tags[type][tag];
+		if (_tags[type] && _tags[type]['_' + tag]){
+			return _tags[type]['_' + tag];
 		}
 		
 		var sql = 'SELECT tagID FROM tags WHERE tag=? AND tagType=?';
@@ -3364,7 +3364,7 @@ Zotero.Tags = new function(){
 			if (!_tags[type]) {
 				_tags[type] = [];
 			}
-			_tags[type][tag] = tagID;
+			_tags[type]['_' + tag] = tagID;
 		}
 		
 		return tagID;
@@ -3540,7 +3540,7 @@ Zotero.Tags = new function(){
 			var sql = "DELETE FROM tags WHERE tagID=?";
 			Zotero.DB.query(sql, tagID);
 			if (_tags[oldType]) {
-				delete _tags[oldType][oldName];
+				delete _tags[oldType]['_' + oldName];
 			}
 			delete _tagsByID[tagID];
 			Zotero.Notifier.trigger('delete', 'tag', tagID, notifierData);
@@ -3573,7 +3573,7 @@ Zotero.Tags = new function(){
 		var itemIDs = this.getTagItems(tagID);
 		
 		if (_tags[oldType]) {
-			delete _tags[oldType][oldName];
+			delete _tags[oldType]['_' + oldName];
 		}
 		delete _tagsByID[tagID];
 		
@@ -3637,7 +3637,7 @@ Zotero.Tags = new function(){
 			
 			purged.push(tag.tagID);
 			if (_tags[tag.tagType]) {
-				delete _tags[tag.tagType][tag.tag];
+				delete _tags[tag.tagType]['_' + tag.tag];
 			}
 			delete _tagsByID[tag.tagID];
 		}
@@ -3683,7 +3683,7 @@ Zotero.Tags = new function(){
  * 
  */
 Zotero.CachedTypes = function(){
-	var _types = new Array();
+	var _types = [];
 	var _typesLoaded;
 	var self = this;
 	
@@ -3708,12 +3708,12 @@ Zotero.CachedTypes = function(){
 			idOrName = idOrName.toLowerCase();
 		}
 		
-		if (!_types[idOrName]){
+		if (!_types['_' + idOrName]){
 			Zotero.debug('Invalid ' + this._typeDesc + ' ' + idOrName, 1);
 			return '';
 		}
 		
-		return _types[idOrName]['name'];
+		return _types['_' + idOrName]['name'];
 	}
 	
 	
@@ -3727,12 +3727,12 @@ Zotero.CachedTypes = function(){
 			idOrName = idOrName.toLowerCase();
 		}
 		
-		if (!_types[idOrName]){
+		if (!_types['_' + idOrName]){
 			Zotero.debug('Invalid ' + this._typeDesc + ' ' + idOrName, 1);
 			return false;
 		}
 		
-		return _types[idOrName]['id'];
+		return _types['_' + idOrName]['id'];
 	}
 	
 	
@@ -3752,12 +3752,12 @@ Zotero.CachedTypes = function(){
 				id: types[i]['id'],
 				name: types[i]['name']
 			}
-			_types[types[i]['id']] = typeData;
+			_types['_' + types[i]['id']] = typeData;
 			if (self._ignoreCase){
-				_types[types[i]['name'].toLowerCase()] = _types[types[i]['id']];
+				_types['_' + types[i]['name'].toLowerCase()] = _types['_' + types[i]['id']];
 			}
 			else {
-				_types[types[i]['name']] = _types[types[i]['id']];
+				_types['_' + types[i]['name']] = _types['_' + types[i]['id']];
 			}
 		}
 		
@@ -3913,9 +3913,10 @@ Zotero.CharacterSets = new function(){
 
 Zotero.ItemFields = new function(){
 	// Private members
-	var _fields = new Array();
-	var _fieldFormats = new Array();
-	var _itemTypeFields = new Array();
+	var _fields = [];
+	var _fieldsLoaded;
+	var _fieldFormats = [];
+	var _itemTypeFields = [];
 	
 	var self = this;
 	
@@ -3937,10 +3938,10 @@ Zotero.ItemFields = new function(){
 	 * Return the fieldID for a passed fieldID or fieldName
 	 */
 	function getID(field){
-		if (!_fields.length){
+		if (!_fieldsLoaded){
 			_loadFields();
 		}
-		return _fields[field] ? _fields[field]['id'] : false;
+		return _fields['_' + field] ? _fields['_' + field]['id'] : false;
 	}
 	
 	
@@ -3948,10 +3949,10 @@ Zotero.ItemFields = new function(){
 	 * Return the fieldName for a passed fieldID or fieldName
 	 */
 	function getName(field){
-		if (!_fields.length){
+		if (!_fieldsLoaded){
 			_loadFields();
 		}
-		return _fields[field] ? _fields[field]['name'] : false;
+		return _fields['_' + field] ? _fields['_' + field]['name'] : false;
 	}
 	
 	
@@ -3973,28 +3974,28 @@ Zotero.ItemFields = new function(){
 	
 	
 	function isValidForType(fieldID, itemTypeID){
-		if (!_fields.length){
+		if (!_fieldsLoaded){
 			_loadFields();
 		}
 		
 		_fieldCheck(fieldID, 'isValidForType');
 		
-		if (!_fields[fieldID]['itemTypes']){
+		if (!_fields['_' + fieldID]['itemTypes']){
 			return false;
 		}
 		
-		return !!_fields[fieldID]['itemTypes'][itemTypeID];
+		return !!_fields['_' + fieldID]['itemTypes'][itemTypeID];
 	}
 	
 	
 	function isInteger(fieldID){
-		if (!_fields.length){
+		if (!_fieldsLoaded){
 			_loadFields();
 		}
 		
 		_fieldCheck(fieldID, 'isInteger');
 		
-		var ffid = _fields[fieldID]['formatID'];
+		var ffid = _fields['_' + fieldID]['formatID'];
 		return _fieldFormats[ffid] ? _fieldFormats[ffid]['isInteger'] : false;
 	}
 	
@@ -4178,15 +4179,17 @@ Zotero.ItemFields = new function(){
 		var fieldItemTypes = _getFieldItemTypes();
 		
 		for (i=0,len=result.length; i<len; i++){
-			_fields[result[i]['fieldID']] = {
+			_fields['_' + result[i]['fieldID']] = {
 				id: result[i]['fieldID'],
 				name: result[i]['fieldName'],
 				formatID: result[i]['fieldFormatID'],
 				itemTypes: fieldItemTypes[result[i]['fieldID']]
 			};
 			// Store by name as well as id
-			_fields[result[i]['fieldName']] = _fields[result[i]['fieldID']];
+			_fields['_' + result[i]['fieldName']] = _fields['_' + result[i]['fieldID']];
 		}
+		
+		_fieldsLoaded = true;
 	}
 }
 
