@@ -1,5 +1,8 @@
 // These are DEFAULT prefs for the INSTALL. You will have to reinstall the extension to see differences!
 
+pref("extensions.zotero.useDataDir", false);
+pref("extensions.zotero.dataDir", '');
+pref("extensions.zotero.lastDataDir", '');
 pref("extensions.zotero.debug.log",false);
 pref("extensions.zotero.debug.level",5);
 pref("extensions.zotero.automaticScraperUpdates",true);

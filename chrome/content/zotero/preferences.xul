@@ -243,6 +243,28 @@ To add a new preference:
 		<label class="statusLine" value="&zotero.preferences.keys.changesTakeEffect;"/>
 	</prefpane>
 	
+	
+	<prefpane id="zotero-prefpane-advanced" label="&zotero.preferences.prefpane.advanced;">
+		<preferences>
+			<preference id="pref-useDataDir" name="extensions.zotero.useDataDir" type="bool"/>
+			<preference id="pref-dataDir" name="extensions.zotero.dataDir" type="string"/>
+		</preferences>
+		
+		<groupbox>
+			<caption label="&zotero.preferences.dataDir;"/>
+			
+			<radiogroup id="dataDir" preference="pref-useDataDir" onsyncfrompreference="onDataDirLoad();" onsynctopreference="return onDataDirUpdate(event);">
+				<radio label="&zotero.preferences.dataDir.useProfile;" value="false"/>
+				<hbox>
+					<radio label="&zotero.preferences.dataDir.custom;" value="true"/>
+					<textbox id="dataDirPath" preference="pref-dataDir" onsyncfrompreference="return getDataDirPath();" readonly="true" flex="1"/>
+					<button label="&zotero.preferences.dataDir.choose;" oncommand="var file = Zotero.chooseZoteroDirectory(true); if (!file) { event.stopPropagation(); }"/>
+				</hbox>
+			</radiogroup>
+		</groupbox>
+	</prefpane>
+	
+	
 	<!-- These mess up the prefwindow if they come before the prefpanes
 	     https://bugzilla.mozilla.org/show_bug.cgi?id=296418 -->
 	<script src="include.js"/>

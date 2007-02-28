@@ -1,6 +1,7 @@
 <!ENTITY zotero.preferences.title						"Zotero Preferences">
 
 <!ENTITY zotero.preferences.prefpane.general				"General">
+
 <!ENTITY zotero.preferences.userInterface				"User Interface">
 <!ENTITY zotero.preferences.position						"Display Zotero">
 <!ENTITY zotero.preferences.position.above				"above">
@@ -11,6 +12,7 @@
 <!ENTITY zotero.preferences.fontSize.small				"Small">
 <!ENTITY zotero.preferences.fontSize.medium				"Medium">
 <!ENTITY zotero.preferences.fontSize.large				"Large">
+
 <!ENTITY zotero.preferences.autoUpdate					"Automatically check for updated scrapers">
 <!ENTITY zotero.preferences.updateNow					"Update now">
 <!ENTITY zotero.preferences.reportTranslationFailure		"Report broken site translators">
@@ -18,17 +20,22 @@
 <!ENTITY zotero.preferences.automaticSnapshots			"Automatically take snapshots when creating items from web pages">
 <!ENTITY zotero.preferences.downloadAssociatedFiles		"Automatically attach associated PDFs and other files when saving items">
 <!ENTITY zotero.preferences.automaticTags				"Automatically tag items with keywords and subject headings">
+
 <!ENTITY zotero.preferences.openurl.caption				"OpenURL">
 <!ENTITY zotero.preferences.openurl.custom				"Custom...">
 <!ENTITY zotero.preferences.openurl.server				"Resolver:">
 <!ENTITY zotero.preferences.openurl.version				"Version:">
 
+
 <!ENTITY zotero.preferences.prefpane.export				"Export">
+
 <!ENTITY zotero.preferences.quickCopy.caption				"Quick Copy">
 <!ENTITY zotero.preferences.quickCopy.outputFormat		"Output Format:">
 <!ENTITY zotero.preferences.quickCopy.macWarning			"Note that some formatting may be lost on Mac OS X.">
 
+
 <!ENTITY zotero.preferences.prefpane.keys				"Shortcut Keys">
+
 <!ENTITY zotero.preferences.keys.openZotero				"Open/Close Zotero Pane">
 <!ENTITY zotero.preferences.keys.toggleFullscreen			"Toggle Fullscreen Mode">
 <!ENTITY zotero.preferences.keys.library					"Library">
@@ -39,3 +46,11 @@
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard		"Copy Selected Items to Clipboard">
 <!ENTITY zotero.preferences.keys.overrideGlobal			"Try to override conflicting shortcuts">
 <!ENTITY zotero.preferences.keys.changesTakeEffect		"Changes take effect in new windows only">
+
+
+<!ENTITY zotero.preferences.prefpane.advanced				"Advanced">
+
+<!ENTITY zotero.preferences.dataDir						"Storage Location">
+<!ENTITY zotero.preferences.dataDir.useProfile			"Use Firefox profile directory">
+<!ENTITY zotero.preferences.dataDir.custom				"Custom:">
+<!ENTITY zotero.preferences.dataDir.choose				"Choose...">

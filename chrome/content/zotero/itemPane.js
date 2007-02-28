@@ -82,12 +82,16 @@ var ZoteroItemPane = new function()
 	
 	function onLoad()
 	{
+		if (!Zotero || !Zotero.initialized) {
+			return;
+		}
+		
 		_tabs = document.getElementById('zotero-view-tabs');
 		
 		// Not in item pane, so skip the introductions
 		if (!_tabs)
 		{
-			return false;
+			return;
 		}
 		
 		_dynamicFields = document.getElementById('zotero-editpane-dynamic-fields');
@@ -104,8 +108,6 @@ var ZoteroItemPane = new function()
 		for(var i = 0; i<itemTypes.length; i++)
 			if(itemTypes[i]['name'] != 'note' && itemTypes[i]['name'] != 'attachment')
 				_itemTypeMenu.appendItem(Zotero.getString("itemTypes."+itemTypes[i]['name']),itemTypes[i]['id']);
-		
-		return true;
 	}
 	
 	/*

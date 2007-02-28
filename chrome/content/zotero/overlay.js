@@ -89,6 +89,10 @@ var ZoteroPane = new function()
 	 */
 	function onLoad()
 	{
+		if (!Zotero || !Zotero.initialized) {
+			return;
+		}
+		
 		if(Zotero.Prefs.get("zoteroPaneOnTop"))
 		{
 			var oldPane = document.getElementById('zotero-pane');
@@ -169,6 +173,10 @@ var ZoteroPane = new function()
 	 */
 	function onUnload()
 	{
+		if (!Zotero || !Zotero.initialized) {
+			return;
+		}
+		
 		var tagSelector = document.getElementById('zotero-tag-selector');
 		tagSelector.unregister();
 		
@@ -184,6 +192,27 @@ var ZoteroPane = new function()
 	{
 		// Visible == target visibility
 		var visible = document.getElementById('zotero-pane').getAttribute('hidden') == 'true';
+		
+		// If Zotero not initialized, try to get the error handler
+		// or load the default error page
+		if (visible && (!Zotero || !Zotero.initialized)) {
+			if (Zotero) {
+				var errFunc = Zotero.startupErrorHandler;
+			}
+			
+			if (errFunc) {
+				errFunc();
+			}
+			else {
+				// TODO: Add a better error page/window here with reporting
+				// instructions
+				// window.loadURI('chrome://zotero/content/error.xul');
+				// TODO: localize if possible
+				alert("There was an error starting Zotero.");
+			}
+			
+			return;
+		}
 		
 		document.getElementById('zotero-pane').setAttribute('hidden', !visible);
 		document.getElementById('zotero-splitter').setAttribute('hidden', !visible);
@@ -1591,7 +1620,7 @@ var ZoteroPane = new function()
 		var index = ps.confirmEx(null,
 			Zotero.getString('pane.item.attachments.fileNotFound.title'),
 			Zotero.getString('pane.item.attachments.fileNotFound.text'),
-			buttonFlags, null, Zotero.getString('pane.item.attachments.locate'),
+			buttonFlags, null, Zotero.getString('general.locate'),
 			null, null, {});
 		
 		if (index == 1) {

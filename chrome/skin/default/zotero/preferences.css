@@ -55,8 +55,24 @@ radio[pane=zotero-prefpane-keys][selected="true"]
 }
 
 
-/* General pane */
+/*
+ * Advanced pane icon
+ *
+ * Use the Gear icon until we find a better icon
+ */
+radio[pane=zotero-prefpane-advanced]
+{
+	-moz-image-region: rect(0px, 224px, 32px, 192px);
+}
+radio[pane=zotero-prefpane-advanced]:hover, 
+radio[pane=zotero-prefpane-advanced]:active,
+radio[pane=zotero-prefpane-advanced][selected="true"]
+{
+	-moz-image-region: rect(32px, 224px, 64px, 192px);
+}
 
+
+/* General pane */
 grid row hbox:first-child
 {
 	-moz-box-pack: end;

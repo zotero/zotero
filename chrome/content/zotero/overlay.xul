@@ -321,9 +321,10 @@
 	</statusbar>
 	
 	<script>
+	<![CDATA[
 	window.addEventListener('load', function(e){
 		var icon = document.getElementById('zotero-status-bar-icon');
-		if (Zotero){
+		if (Zotero && Zotero.initialized){
 			switch (Zotero.Prefs.get('statusBarIcon')) {
 				case 2:
 					icon.setAttribute('hidden', false);
@@ -335,13 +336,23 @@
 			}
 		}
 		else {
-			icon.setAttribute('hidden', false);
+			if (Zotero) {
+				var errMsg = Zotero.startupError;
+			}
+			
+			// Use defaults if necessary
+			if (!errMsg) {
+				var errMsg = 'There was an error starting Zotero.';
+			}
+			
+			icon.setAttribute('tooltiptext', errMsg);
 			icon.setAttribute('error', 'true');
-			icon.setAttribute('tooltiptext', 'There was an error starting Zotero.');
+			icon.setAttribute('hidden', false);
 		}
 	}, false);
 	
 	document.getElementById('appcontent').addEventListener('keydown', ZoteroPane.handleKeyDown, true);
+	]]>
 	</script>
 	
 	<menupopup id="menu_ToolsPopup">
@@ -350,7 +361,7 @@
 			oncommand="ZoteroPane.toggleDisplay();" label="Zotero"
 			key="key_openZotero"/>
 	</menupopup>
-  
+	
 	<keyset id="mainKeyset">
 		<!--
 			The key can be changed by the pref extensions.zotero.keys.openZotero,

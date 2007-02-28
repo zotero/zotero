@@ -36,6 +36,75 @@ function init()
 }
 
 
+function onDataDirLoad() {
+	var path = document.getElementById('dataDirPath');
+	var useDataDir = Zotero.Prefs.get('useDataDir');
+	path.setAttribute('disabled', !useDataDir);
+}
+
+
+function onDataDirUpdate(event) {
+	var radiogroup = document.getElementById('dataDir');
+	var path = document.getElementById('dataDirPath');
+	var useDataDir = Zotero.Prefs.get('useDataDir');
+	
+	// If triggered from the Choose button, don't show the dialog, since
+	// Zotero.chooseZoteroDirectory() shows its own
+	if (event.originalTarget.tagName == 'button') {
+		return true;
+	}
+	// If directory not set or invalid, prompt for location
+	if (!getDataDirPath()) {
+		event.stopPropagation();
+		var file = Zotero.chooseZoteroDirectory(true);
+		radiogroup.selectedIndex = file ? 1 : 0;
+		return !!file;
+	}
+	
+	var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+		.getService(Components.interfaces.nsIPromptService);
+	
+	var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
+		+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
+	var index = ps.confirmEx(window,
+		Zotero.getString('general.restartFirefox.singular'),
+		'',
+		buttonFlags,
+		Zotero.getString('general.restartNow'),
+		null, null, null, {});
+	
+	if (index == 0) {
+		useDataDir = !!radiogroup.selectedIndex;
+		// quit() is asynchronous, but set this here just in case
+		Zotero.Prefs.set('useDataDir', useDataDir);
+		var appStartup = Components.classes["@mozilla.org/toolkit/app-startup;1"]
+				.getService(Components.interfaces.nsIAppStartup);
+		appStartup.quit(Components.interfaces.nsIAppStartup.eRestart);
+		appStartup.quit(Components.interfaces.nsIAppStartup.eAttemptQuit);
+	}
+	
+	radiogroup.selectedIndex = useDataDir ? 1 : 0;
+	return useDataDir;
+}
+
+
+function getDataDirPath() {
+	var desc = Zotero.Prefs.get('dataDir');
+	if (desc == '') {
+		return '';
+	}
+	
+	var file = Components.classes["@mozilla.org/file/local;1"].
+		createInstance(Components.interfaces.nsILocalFile);
+	try {
+		file.persistentDescriptor = desc;
+	}
+	catch (e) {
+		return '';
+	}
+	return file.path;
+}
+
 
 function populateOpenURLResolvers() {
 	var openURLMenu = document.getElementById('openURLMenu');
