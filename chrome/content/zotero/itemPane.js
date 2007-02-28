@@ -308,7 +308,7 @@ var ZoteroItemPane = new function()
 				
 				var prefix = '';
 				// Add '(...)' before 'Abstract:' for collapsed abstracts
-				if (fieldNames[i] == 'abstract') {
+				if (fieldNames[i] == 'abstractNote') {
 					if (val && !Zotero.Prefs.get('lastAbstractExpand')) {
 						prefix = '(...) ';
 					}
@@ -321,7 +321,7 @@ var ZoteroItemPane = new function()
 					label.setAttribute("onclick", "ZoteroPane.loadURI(this.nextSibling.value, event)");
 					label.setAttribute("tooltiptext", Zotero.getString('pane.item.goToURL.online.tooltip'));
 				}
-				else if (fieldNames[i] == 'abstract') {
+				else if (fieldNames[i] == 'abstractNote') {
 					label.setAttribute("onclick", "if (this.nextSibling.inputField) { this.nextSibling.inputField.blur(); } else { ZoteroItemPane.toggleAbstractExpand(this); }");
 				}
 				else {
@@ -842,12 +842,12 @@ var ZoteroItemPane = new function()
 		Zotero.Prefs.set('lastAbstractExpand', !cur);
 		
 		var ab = label.nextSibling;
-		var valueText = _itemBeingEdited.getField('abstract');
+		var valueText = _itemBeingEdited.getField('abstractNote');
 		var tabindex = ab.getAttribute('ztabindex');
-		var elem = createValueElement(valueText, 'abstract', tabindex);
+		var elem = createValueElement(valueText, 'abstractNote', tabindex);
 		ab.parentNode.replaceChild(elem, ab);
 		
-		var text = Zotero.ItemFields.getLocalizedString(_itemBeingEdited.getType(), 'abstract') + ':';
+		var text = Zotero.ItemFields.getLocalizedString(_itemBeingEdited.getType(), 'abstractNote') + ':';
 		// Add '(...)' before "Abstract:" for collapsed abstracts
 		if (valueText && cur) {
 			text = '(...) ' + text;
@@ -871,7 +871,7 @@ var ZoteroItemPane = new function()
 	
 	function createValueElement(valueText, fieldName, tabindex, noedit)
 	{
-		var abstractAsVbox = (fieldName == 'abstract') &&
+		var abstractAsVbox = (fieldName == 'abstractNote') &&
 			Zotero.Prefs.get('lastAbstractExpand');
 		
 		if (fieldName == 'extra' || abstractAsVbox) {
@@ -940,8 +940,8 @@ var ZoteroItemPane = new function()
 		// 29 == arbitrary length at which to chop uninterrupted text
 		else if ((firstSpace == -1 && valueText.length > 29 ) || firstSpace > 29
 			|| (fieldName &&
-				(fieldName.substr(0, 7) == 'creator') || fieldName == 'abstract')) {
-			if (fieldName == 'abstract') {
+				(fieldName.substr(0, 7) == 'creator') || fieldName == 'abstractNote')) {
+			if (fieldName == 'abstractNote') {
 				valueText = valueText.replace(/[\t\n]/g, ' ');
 			}
 			valueElement.setAttribute('crop', 'end');
@@ -1025,7 +1025,7 @@ var ZoteroItemPane = new function()
 			t.setAttribute('singleField', elem.getAttribute('singleField'));
 		}
 		
-		if (fieldName == 'abstract' || fieldName == 'extra')
+		if (fieldName == 'abstractNote' || fieldName == 'extra')
 		{
 			t.setAttribute('multiline', true);
 			t.setAttribute('rows', 8);
@@ -1144,7 +1144,7 @@ var ZoteroItemPane = new function()
 		{
 			case event.DOM_VK_RETURN:
 				// Use shift-enter as the save action for the larger fields
-				if ((target.getAttribute('fieldname') == 'abstract'
+				if ((target.getAttribute('fieldname') == 'abstractNote'
 					|| target.getAttribute('fieldname') == 'extra')
 					&& !event.shiftKey)
 				{

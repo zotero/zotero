@@ -1144,8 +1144,6 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 					newItem.setField(field, data);
 				} else if(field == "seeAlso") {
 					newItem.translateSeeAlso = data;
-				} else if(field == "abstractNote") { // abstractNote is 'abstract' field
-					newItem.setField('abstract', data);
 				} else if(field != "note" && field != "notes" && field != "itemID" &&
 						  field != "attachments" && field != "tags" &&
 						  (fieldID = Zotero.ItemFields.getID(field))) {

@@ -1897,11 +1897,6 @@ Zotero.Item.prototype.clone = function() {
 					}
 					continue;
 				
-				// toArray()'s 'abstractNote' is 'abstract' field
-				case 'abstractNote':
-					newItem.setField('abstract', obj[i]);
-					continue;
-				
 				case 'creators':
 					var i = 0;
 					for each(var c in obj.creators) {
@@ -2130,12 +2125,6 @@ Zotero.Item.prototype.toArray = function(){
 			case 'itemTypeID':
 				arr['itemType'] = Zotero.ItemTypes.getName(this._data[i]);
 				break;
-			
-			// Since 'abstract' is a reserved word in JS, we use abstractNote
-			// instead so clients can use dot notation
-			case 'abstract':
-				arr['abstractNote'] = this._data[i];
-				continue;
 			
 			// Skip certain fields
 			//case 'firstCreator':

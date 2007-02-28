@@ -1,4 +1,4 @@
--- 13
+-- 14
 
 -- This file creates system tables that can be safely wiped and reinitialized
 -- at any time, as long as existing ids are preserved.
@@ -241,7 +241,7 @@ INSERT INTO fields VALUES (86,'dictionaryTitle',NULL);
 INSERT INTO fields VALUES (87,'language',NULL);
 INSERT INTO fields VALUES (88,'programmingLanguage',NULL);
 INSERT INTO fields VALUES (89,'university',NULL);
-INSERT INTO fields VALUES (90,'abstract',NULL);
+INSERT INTO fields VALUES (90,'abstractNote',NULL);
 INSERT INTO fields VALUES (91,'websiteTitle',NULL);
 INSERT INTO fields VALUES (92,'reportNumber',NULL);
 INSERT INTO fields VALUES (93,'billNumber',NULL);

@@ -71,7 +71,7 @@
 	margin-left: 0;
 }
 
-#zotero-editpane-dynamic-fields row vbox[fieldname=abstract],
+#zotero-editpane-dynamic-fields row vbox[fieldname=abstractNote],
 #zotero-editpane-dynamic-fields row vbox[fieldname=extra]
 {
 	margin-top: 1px;
