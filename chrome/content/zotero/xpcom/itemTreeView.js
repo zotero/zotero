@@ -579,8 +579,8 @@ Zotero.ItemTreeView.prototype.sort = function()
 				break;
 			
 			default:
-				var fieldA = a.getField(columnField, unformatted);
-				var fieldB = b.getField(columnField, unformatted);
+				var fieldA = a.getField(columnField, unformatted, true);
+				var fieldB = b.getField(columnField, unformatted, true);
 				
 				if (typeof fieldA == 'string') {
 					fieldA = fieldA.toLowerCase();
@@ -1360,7 +1360,7 @@ Zotero.ItemTreeView.TreeRow.prototype.isRegularItem = function()
 
 Zotero.ItemTreeView.TreeRow.prototype.getField = function(field, unformatted)
 {
-	return this.ref.getField(field, unformatted);
+	return this.ref.getField(field, unformatted, true);
 }
 
 Zotero.ItemTreeView.TreeRow.prototype.getType = function()

@@ -425,10 +425,13 @@ Zotero.Item.prototype.creatorExists = function(firstName, lastName, creatorTypeI
  *
  * Field can be passed as fieldID or fieldName
  *
- * If _unformatted_ is true, skip any special processing of DB value
+ * If |unformatted| is true, skip any special processing of DB value
  *		(e.g. multipart date field) (default false)
+ *
+ * If |includeBaseMapped| is true and field is a base field, returns value of
+ * 		type-specific field instead (e.g. 'label' for 'publisher' in 'audioRecording')
  */
-Zotero.Item.prototype.getField = function(field, unformatted){
+Zotero.Item.prototype.getField = function(field, unformatted, includeBaseMapped) {
 	//Zotero.debug('Requesting field ' + field + ' for item ' + this.getID(), 4);
 	if (this.isPrimaryField(field)){
 		return this._data[field] ? this._data[field] : '';
@@ -438,7 +441,14 @@ Zotero.Item.prototype.getField = function(field, unformatted){
 			this._loadItemData();
 		}
 		
-		var fieldID = Zotero.ItemFields.getID(field);
+		if (includeBaseMapped && Zotero.ItemFields.isBaseField(field)) {
+			var fieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(
+				this.getType(), field
+			);
+		}
+		else {
+			var fieldID = Zotero.ItemFields.getID(field);
+		}
 		
 		var value = this._itemData[fieldID] ? this._itemData[fieldID] : '';
 		
@@ -3906,6 +3916,7 @@ Zotero.ItemFields = new function(){
 	var _fieldsLoaded;
 	var _fieldFormats = [];
 	var _itemTypeFields = [];
+	var _baseTypeFields = [];
 	
 	var self = this;
 	
@@ -4011,9 +4022,14 @@ Zotero.ItemFields = new function(){
 	}
 	
 	
-	function isBaseField(fieldID) {
-		return !!Zotero.DB.valueQuery("SELECT COUNT(*)>=1 FROM baseFieldMappings "
-			+ "WHERE baseFieldID=?", fieldID);
+	function isBaseField(field) {
+		if (!_fieldsLoaded){
+			_loadFields();
+		}
+		
+		_fieldCheck(field, arguments.callee.name);
+		
+		return _fields['_' + field]['isBaseField'];
 	}
 	
 	
@@ -4035,6 +4051,10 @@ Zotero.ItemFields = new function(){
 	 * Accepts names or ids
 	 */
 	function getFieldIDFromTypeAndBase(itemType, baseField) {
+		if (!_fieldsLoaded){
+			_loadFields();
+		}
+		
 		var itemTypeID = Zotero.ItemTypes.getID(itemType);
 		var baseFieldID = this.getID(baseField);
 		
@@ -4046,14 +4066,20 @@ Zotero.ItemFields = new function(){
 			throw ("Invalid field '" + baseField + '" for base field in ItemFields.getFieldIDFromTypeAndBase()');
 		}
 		
+		if (!this.isBaseField(baseFieldID)) {
+			return false;
+		}
+		
 		// If the base field is already valid for the type, just return that
 		if (this.isValidForType(baseFieldID, itemTypeID)) {
 			return baseFieldID;
 		}
 		
-		return Zotero.DB.valueQuery("SELECT fieldID FROM baseFieldMappings "
-			+ "WHERE itemTypeID=? AND baseFieldID=?", [itemTypeID, baseFieldID]);
+		return (_baseTypeFields[itemTypeID] &&
+			_baseTypeFields[itemTypeID][baseFieldID]) ?
+				_baseTypeFields[itemTypeID][baseFieldID] : false;
 	}
+	
 	
 	/*
 	 * Returns the fieldID of the base field for a given type-specific field
@@ -4144,6 +4170,22 @@ Zotero.ItemFields = new function(){
 	}
 	
 	
+	function _loadBaseTypeFields() {
+		var sql = "SELECT itemTypeID, baseFieldID, fieldID FROM baseFieldMappings";
+		var rows = Zotero.DB.query(sql);
+		
+		var fields = [];
+		for each(var row in rows) {
+			if (!fields[row.itemTypeID]) {
+				fields[row.itemTypeID] = [];
+			}
+			fields[row.itemTypeID][row.baseFieldID] = row.fieldID;
+		}
+		
+		_baseTypeFields = fields;
+	}
+	
+	
 	/*
 	 * Load all fields into an internal hash array
 	 */
@@ -4166,11 +4208,16 @@ Zotero.ItemFields = new function(){
 		}
 		
 		var fieldItemTypes = _getFieldItemTypes();
+		_loadBaseTypeFields();
+		
+		var sql = "SELECT DISTINCT baseFieldID FROM baseFieldMappings";
+		var baseFields = Zotero.DB.columnQuery(sql);
 		
 		for (i=0,len=result.length; i<len; i++){
 			_fields['_' + result[i]['fieldID']] = {
 				id: result[i]['fieldID'],
 				name: result[i]['fieldName'],
+				isBaseField: (baseFields.indexOf(result[i]['fieldID']) != -1),
 				formatID: result[i]['fieldFormatID'],
 				itemTypes: fieldItemTypes[result[i]['fieldID']]
 			};
