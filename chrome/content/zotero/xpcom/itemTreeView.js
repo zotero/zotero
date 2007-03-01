@@ -538,70 +538,117 @@ Zotero.ItemTreeView.prototype.sort = function()
 	var order = column.element.getAttribute('sortDirection') == 'ascending';
 	var columnField = column.id.substring(20);
 	
-	if(columnField == 'type') {
-		function columnSort(a,b)
-		{
-			var typeA = Zotero.getString('itemTypes.'+Zotero.ItemTypes.getName(a.getType()));
-			var typeB = Zotero.getString('itemTypes.'+Zotero.ItemTypes.getName(b.getType()));
-			
-			return (typeA > typeB) ? -1 : (typeA < typeB) ? 1 : 0;
-		}
+	// Year is really the date field truncated
+	if (columnField == 'year') {
+		columnField = 'date';
 	}
-	else if (columnField == 'numChildren') {
-		function columnSort(a,b)
-		{
-			return b.numChildren() - a.numChildren();
-		}
-	}
-	else
-	{
-		// Year is really the date field truncated
-		if (columnField == 'year') {
-			columnField = 'date';
-		}
+	
+	// Some fields (e.g. dates) need to be retrieved unformatted for sorting
+	switch (columnField) {
+		case 'date':
+			var unformatted = true;
+			break;
 		
-		// Some fields (e.g. dates) need to be retrieved unformatted for sorting
+		default:
+			var unformatted = false;
+	}
+	
+	// Hash table of fields for which rows with empty values should be displayed last
+	// - Not currently used
+	var emptyFirst = {};
+	
+	function columnSort(a,b) {
+		var cmp;
+		
 		switch (columnField) {
-			case 'date':
-				var unformatted = true;
+			case 'type':
+				var typeA = Zotero.getString('itemTypes.'+Zotero.ItemTypes.getName(a.getType()));
+				var typeB = Zotero.getString('itemTypes.'+Zotero.ItemTypes.getName(b.getType()));
+				
+				cmp = (typeA > typeB) ? -1 : (typeA < typeB) ? 1 : 0;
+				if (cmp) {
+					return cmp;
+				}
+				break;
+				
+			case 'numChildren':
+				cmp = b.numChildren() - a.numChildren();
+				if (cmp) {
+					return cmp;
+				}
 				break;
 			
 			default:
-				var unformatted = false;
+				var fieldA = a.getField(columnField, unformatted);
+				var fieldB = b.getField(columnField, unformatted);
+				
+				if (typeof fieldA == 'string') {
+					fieldA = fieldA.toLowerCase();
+					fieldB = fieldB.toLowerCase();
+				}
+				
+				// Display rows with empty values last
+				if (!emptyFirst[columnField]) {
+					cmp = (fieldA == '' && fieldB != '') ? -1 :
+						(fieldA != '' && fieldB == '') ? 1 : 0;
+					if (cmp) {
+						return cmp;
+					}
+				}
+				
+				cmp = (fieldA > fieldB) ? -1 : (fieldA < fieldB) ? 1 : 0;
+				if (cmp) {
+					return cmp;
+				}
 		}
 		
-		function columnSort(a,b)
-		{
-			var fieldA = a.getField(columnField, unformatted);
-			var fieldB = b.getField(columnField, unformatted);
+		if (columnField != 'firstCreator') {
+			fieldA = a.getField('firstCreator');
+			fieldB = b.getField('firstCreator');
 			
-			if(typeof fieldA == 'string')
-			{
-				fieldA = fieldA.toLowerCase();
-				fieldB = fieldB.toLowerCase();
+			// Display rows with empty values last
+			cmp = (fieldA == '' && fieldB != '') ? -1 :
+				(fieldA != '' && fieldB == '') ? 1 : 0;
+			if (cmp) {
+				return cmp;
 			}
 			
-			return (fieldA > fieldB) ? -1 : (fieldA < fieldB) ? 1 : 0;
+			cmp = (fieldA > fieldB) ? -1 : (fieldA < fieldB) ? 1 : 0;
+			if (cmp) {
+				return cmp;
+			}
 		}
+		
+		if (columnField != 'date') {
+			fieldA = a.getField('date', true);
+			fieldB = b.getField('date', true);
+			
+			// Display rows with empty values last
+			cmp = (fieldA == '' && fieldB != '') ? -1 :
+				(fieldA != '' && fieldB == '') ? 1 : 0;
+			if (cmp) {
+				return cmp;
+			}
+			
+			cmp = (fieldA > fieldB) ? -1 : (fieldA < fieldB) ? 1 : 0;
+			if (cmp) {
+				return cmp;
+			}
+		}
+		
+		fieldA = a.getField('dateModified');
+		fieldB = b.getField('dateModified');
+		return (fieldA > fieldB) ? -1 : (fieldA < fieldB) ? 1 : 0;
 	}
 	
 	function doSort(a,b)
 	{
-		var s = columnSort(a,b);
-		if(s)
-			return s;
-		else
-			return secondarySort(a,b);
+		return columnSort(a,b);
 	}
 	
 	function oppositeSort(a,b)
 	{
 		return(doSort(a,b) * -1);
-	}
-	
-	function secondarySort(a,b)
-	{
-		return (a.getField('dateModified') > b.getField('dateModified')) ? -1 : (a.getField('dateModified') < b.getField('dateModified')) ? 1 : 0;
 	}
 	
 	var openRows = new Array();

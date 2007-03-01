@@ -16,7 +16,10 @@
 <!ENTITY zotero.items.date_column						"Date">
 <!ENTITY zotero.items.year_column						"Year">
 <!ENTITY zotero.items.publisher_column					"Publisher">
-<!ENTITY zotero.items.rights_column					"Rights">
+<!ENTITY zotero.items.language_column					"Language">
+<!ENTITY zotero.items.callNumber_column					"Call Number">
+<!ENTITY zotero.items.repository_column					"Repository">
+<!ENTITY zotero.items.rights_column						"Rights">
 <!ENTITY zotero.items.dateAdded_column					"Date Added">
 <!ENTITY zotero.items.dateModified_column				"Date Modified">
 <!ENTITY zotero.items.numChildren_column				"+">
