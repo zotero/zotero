@@ -166,7 +166,7 @@ Zotero.Notifier = new function(){
 			return true;
 		}
 		
-		for (i in _observers.items){
+		for (var i in _observers.items){
 			Zotero.debug("Calling notify() on observer with hash '" + i + "'", 4);
 			// Find observers that handle notifications for this type (or all types)
 			if (!_observers.get(i).types || _observers.get(i).types.indexOf(type)!=-1){
@@ -254,9 +254,12 @@ Zotero.Notifier = new function(){
 					var id = _queue[type][event].ids[i];
 					var data = _queue[type][event].data[i];
 					
-					// Don't send modify on nonexistent items
+					// Don't send modify on nonexistent items or tags
 					if (event == 'modify') {
-						if (!Zotero.Items.get(id)) {
+						if (type == 'item' && !Zotero.Items.get(id)) {
+							continue;
+						}
+						else if (type == 'tag' && !Zotero.Tags.get(id)) {
 							continue;
 						}
 					}

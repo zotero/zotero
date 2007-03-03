@@ -60,6 +60,7 @@ Zotero.Fulltext = new function(){
 	 */
 	function registerPDFToText() {
 		var exec = Zotero.getZoteroDirectory();
+		
 		var fileName = 'pdftotext-' + Zotero.platform.replace(' ', '-');
 		if (Zotero.isWin) {
 			fileName += '.exe';
@@ -319,7 +320,6 @@ Zotero.Fulltext = new function(){
 		Zotero.debug('Running pdftotext -nopgbrk -l ' + maxPages +
 			' "' + file.path + '" "' + cacheFile.path + '"');
 		var args = ['-nopgbrk', '-l', maxPages, file.path, cacheFile.path];
-		Zotero.debug(args);
 		proc.run(true, args, args.length);
 		
 		if (cacheFile.exists()) {

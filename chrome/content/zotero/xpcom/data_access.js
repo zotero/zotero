@@ -3461,9 +3461,12 @@ Zotero.Tags = new function(){
 	
 	
 	function search(str){
-		var sql = 'SELECT tagID, tag, tagType FROM tags WHERE tag LIKE ? '
-			+ 'ORDER BY tag COLLATE NOCASE';
-		var tags = Zotero.DB.query(sql, '%' + str + '%');
+		var sql = 'SELECT tagID, tag, tagType FROM tags';
+		if (str) {
+			sql += ' WHERE tag LIKE ?';
+		}
+		sql += ' ORDER BY tag COLLATE NOCASE';
+		var tags = Zotero.DB.query(sql, str ? '%' + str + '%' : undefined);
 		var indexed = {};
 		for each(var tag in tags) {
 			indexed[tag.tagID] = {

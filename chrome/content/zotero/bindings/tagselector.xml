@@ -411,7 +411,7 @@
 			<method name="clearAll">
 				<body>
 					<![CDATA[
-						this.selection = [];
+						this.selection = {};
 						this.clearVisible();
 					]]>
 				</body>
