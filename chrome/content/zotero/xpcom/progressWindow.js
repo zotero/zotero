@@ -20,6 +20,57 @@
     ***** END LICENSE BLOCK *****
 */
 
+
+Zotero.ProgressWindowSet = new function() {
+	this.add = add;
+	this.tile = tile;
+	this.remove = remove;
+	
+	var _numWindows = 0;
+	var _progressWindows = [];
+	
+	const X_OFFSET = 30;
+	const Y_OFFSET = 10;
+	
+	function add(progressWin) {
+		_progressWindows.push(progressWin);
+		_numWindows++;
+	}
+	
+	
+	function tile(progressWin) {
+		var parent = progressWin.opener;
+		var sum = 0;
+		
+		for (var i=0; i<_progressWindows.length; i++) {
+			var p = _progressWindows[i];
+			
+			// Skip progress windows from other windows
+			if (p.opener != parent) {
+				continue;
+			}
+			
+			sum += Y_OFFSET + p.outerHeight;
+			
+			p.moveTo(
+				parent.screenX + parent.innerWidth - p.outerWidth - X_OFFSET,
+				parent.screenY + parent.innerHeight - sum
+			);
+		}
+	}
+	
+	
+	function remove(progressWin) {
+		_numWindows--;
+		for (var i=0; i<_progressWindows.length; i++) {
+			if (_progressWindows[i] == progressWin) {
+				_progressWindows.splice(i, 1);
+			}
+		}
+	}
+}
+
+
 /*
  * Handles the display of a div showing progress in scraping, indexing, etc.
  *
@@ -55,10 +106,13 @@ Zotero.ProgressWindow = function(_window){
 		if(_windowLoading || _windowLoaded) {	// already loading or loaded
 			return false;
 		}
+		
 		_progressWindow = _window.openDialog("chrome://zotero/chrome/progressWindow.xul",
 		                                    "", "chrome,dialog=no,titlebar=no,popup=yes");
-		_progressWindow.addEventListener("load", _onWindowLoaded, false);
+		_progressWindow.addEventListener("pageshow", _onWindowLoaded, false);
 		_windowLoading = true;
+		
+		Zotero.ProgressWindowSet.add(_progressWindow);
 		
 		return true;
 	}
@@ -126,6 +180,7 @@ Zotero.ProgressWindow = function(_window){
 	function kill() {
 		_windowLoaded = false;
 		_windowLoading = false;
+		Zotero.ProgressWindowSet.remove(_progressWindow);
 		try {
 			_progressWindow.close();
 		} catch(ex) {}
@@ -152,10 +207,7 @@ Zotero.ProgressWindow = function(_window){
 	
 	function _move() {
 		_progressWindow.sizeToContent();
-		_progressWindow.moveTo(
-			_window.screenX + _window.innerWidth - _progressWindow.outerWidth - 30,
-			_window.screenY + _window.innerHeight - _progressWindow.outerHeight - 10
-		);
+		Zotero.ProgressWindowSet.tile(_progressWindow);
 	}
 	
 	function _timeout() {
