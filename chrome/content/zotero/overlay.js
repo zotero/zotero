@@ -218,7 +218,8 @@ var ZoteroPane = new function()
 		document.getElementById('zotero-splitter').setAttribute('hidden', !visible);
 		
 		if (visible) {
-			document.getElementById('zotero-pane').click();
+			// Focus the quicksearch on pane open
+			setTimeout("document.getElementById('zotero-tb-search').inputField.select();", 1);
 		}
 		else {
 			document.getElementById('content').setAttribute('collapsed', false);

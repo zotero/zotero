@@ -331,6 +331,10 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids)
 			}
 			
 			this.rememberSelection(savedSelection);
+			
+			if (activeWindow) {
+				this.selectItem(ids[0]);
+			}
 		}
 		else
 		{
@@ -554,8 +558,9 @@ Zotero.ItemTreeView.prototype.sort = function()
 	}
 	
 	// Hash table of fields for which rows with empty values should be displayed last
-	// - Not currently used
-	var emptyFirst = {};
+	var emptyFirst = {
+		title: true
+	};
 	
 	function columnSort(a,b) {
 		var cmp;
