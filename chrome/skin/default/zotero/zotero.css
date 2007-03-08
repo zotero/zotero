@@ -170,9 +170,14 @@ zoterosearchagefield
 	width: 210px;
 }
 
-.zotero-progress-description
+#zotero-progress-box description
 {
 	width: 220px;
+}
+
+#zotero-progress-box description label
+{
+	margin: 0;
 }
 
 .zotero-scrape-popup-library
