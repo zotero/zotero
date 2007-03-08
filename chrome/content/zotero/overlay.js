@@ -962,7 +962,9 @@ var ZoteroPane = new function()
 	}
 	
 	function getSelectedCollection(asID) {
-		if (this.collectionsView.selection.count > 0 && this.collectionsView.selection.currentIndex != -1) {
+		if (this.collectionsView.selection
+				&& this.collectionsView.selection.count > 0
+				&& this.collectionsView.selection.currentIndex != -1) {
 			var collection = this.collectionsView._getItemAtRow(this.collectionsView.selection.currentIndex);
 			if (collection && collection.isCollection()) {
 				if (asID) {

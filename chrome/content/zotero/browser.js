@@ -372,11 +372,15 @@ var Zotero_Browser = new function() {
 	 */
 	function finishScraping(obj, returnValue, collection) {
 		if(!returnValue) {
-			Zotero_Browser.Progress.changeHeadline(Zotero.getString("ingester.scrapeError"));
-			Zotero_Browser.Progress.addDescription(Zotero.getString("ingester.scrapeErrorDescription"));
+			Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.scrapeError"));
+			// Include link to Known Translator Issues page
+			var url = "http://www.zotero.org/documentation/known_translator_issues";
+			var linkText = '<a href="' + url + '" tooltiptext="' + url + '">'
+				+ Zotero.getString('ingester.scrapeErrorDescription.linkText') + '</a>';
+			Zotero_Browser.progress.addDescription(Zotero.getString("ingester.scrapeErrorDescription", linkText));
 		}
 		
-		Zotero_Browser.Progress.fade();
+		Zotero_Browser.progress.fade();
 	}
 	
 	
@@ -386,7 +390,8 @@ var Zotero_Browser = new function() {
 	function itemDone(obj, item, collection) {
 		var title = item.getField("title");
 		var icon = item.getImageSrc();
-		Zotero_Browser.Progress.addLines([title], [icon]);
+		Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.scraping"));
+		Zotero_Browser.progress.addLines([title], [icon]);
 		
 		// add item to collection, if one was specified
 		if(collection) {
@@ -547,7 +552,7 @@ Zotero_Browser.Tab.prototype._searchFrames = function(rootDoc, searchDoc) {
  */
 Zotero_Browser.Tab.prototype.translate = function(saveLocation) {
 	if(this.page.translators && this.page.translators.length) {
-		Zotero_Browser.Progress.show();
+		Zotero_Browser.progress.show();
 		
 		if(saveLocation) {
 			saveLocation = Zotero.Collections.get(saveLocation);
@@ -602,7 +607,7 @@ Zotero_Browser.Tab.prototype._selectItems = function(obj, itemList) {
 		"_blank","chrome,modal,centerscreen,resizable=yes", io);
 	
 	if(!io.dataOut) {	// user selected no items, so kill the progress indicatior
-		Zotero_Browser.Progress.kill();
+		Zotero_Browser.progress.kill();
 	}
 	
 	return io.dataOut;
@@ -621,143 +626,7 @@ Zotero_Browser.Tab.prototype._translatorsAvailable = function(translate, transla
 	Zotero_Browser.updateStatus();
 }
 
-//////////////////////////////////////////////////////////////////////////////
-//
-// Zotero_Browser.Progress
-//
-//////////////////////////////////////////////////////////////////////////////
-
 // Handles the display of a div showing progress in scraping
-Zotero_Browser.Progress = new function() {
-	var _progressWindow;
-	
-	var _windowLoaded = false;
-	var _windowLoading = false;
-	// keep track of all of these things in case they're called before we're
-	// done loading the progress window
-	var _loadDescription = null;
-	var _loadLines = new Array();
-	var _loadIcons = new Array();
-	var _loadHeadline = Zotero.getString("ingester.scraping");
-	
-	this.show = show;
-	this.changeHeadline = changeHeadline;
-	this.addLines = addLines;
-	this.addDescription = addDescription;
-	this.fade = fade;
-	this.kill = kill;
-	
-	function show() {
-		if(_windowLoading || _windowLoaded) {	// already loading or loaded
-			return false;
-		}
-		_progressWindow = window.openDialog("chrome://zotero/chrome/ingester/progress.xul",
-		                                    "", "chrome,dialog=no,titlebar=no,popup=yes");
-		_progressWindow.addEventListener("load", _onWindowLoaded, false);
-		_windowLoading = true;
-		
-		return true;
-	}
-	
-	function changeHeadline(headline) {
-		if(_windowLoaded) {
-			_progressWindow.document.getElementById("zotero-progress-text-headline").value = headline;
-		} else {
-			_loadHeadline = headline;
-		}
-	}
-	
-	function addLines(label, icon) {
-		if(_windowLoaded) {
-			for(i in label) {
-				var newLabel = _progressWindow.document.createElement("label");
-				newLabel.setAttribute("class", "zotero-progress-item-label");
-				newLabel.setAttribute("crop", "end");
-				newLabel.setAttribute("value", label[i]);
-				
-				var newImage = _progressWindow.document.createElement("image");
-				newImage.setAttribute("class", "zotero-progress-item-icon");
-				newImage.setAttribute("src", icon[i]);
-				
-				var newHB = _progressWindow.document.createElement("hbox");
-				newHB.setAttribute("class", "zotero-progress-item-hbox");
-				newHB.setAttribute("valign", "center");
-				newHB.appendChild(newImage);
-				newHB.appendChild(newLabel);
-				
-				_progressWindow.document.getElementById("zotero-progress-text-box").appendChild(newHB);
-			}
-			
-			_move();
-		} else {
-			_loadLines = _loadLines.concat(label);
-			_loadIcons = _loadIcons.concat(icon);
-		}
-	}
-	
-	function addDescription(text) {
-		if(_windowLoaded) {
-			var newHB = _progressWindow.document.createElement("hbox");
-			newHB.setAttribute("class", "zotero-progress-item-hbox");
-			var newDescription = _progressWindow.document.createElement("description");
-			newDescription.setAttribute("class", "zotero-progress-description");
-			var newText = _progressWindow.document.createTextNode(text);
-			
-			newDescription.appendChild(newText);
-			newHB.appendChild(newDescription);
-			_progressWindow.document.getElementById("zotero-progress-text-box").appendChild(newHB);
-			
-			_move();
-		} else {
-			_loadDescription = text;
-		}
-	}
-	
-	function fade() {
-		if(_windowLoaded || _windowLoading) {
-			setTimeout(_timeout, 2500);
-		}
-	}
-	
-	function kill() {
-		_windowLoaded = false;
-		_windowLoading = false;
-		try {
-			_progressWindow.close();
-		} catch(ex) {}
-	}
-	
-	function _onWindowLoaded() {
-		_windowLoading = false;
-		_windowLoaded = true;
-		
-		_move();
-		// do things we delayed because the window was loading
-		changeHeadline(_loadHeadline);
-		addLines(_loadLines, _loadIcons);
-		if(_loadDescription) {
-			addDescription(_loadDescription);
-		}
-		
-		// reset parameters
-		_loadDescription = null;
-		_loadLines = new Array();
-		_loadIcons = new Array();
-		_loadHeadline = Zotero.getString("ingester.scraping")
-	}
-	
-	function _move() {
-		_progressWindow.sizeToContent();
-		_progressWindow.moveTo(
-			window.screenX + window.innerWidth - _progressWindow.outerWidth - 30,
-			window.screenY + window.innerHeight - _progressWindow.outerHeight - 10
-		);
-	}
-	
-	function _timeout() {
-		kill();	// could check to see if we're really supposed to fade yet
-				// (in case multiple scrapers are operating at once)
-	}
-}
+Zotero_Browser.progress = new Zotero.ProgressWindow();
 
 Zotero_Browser.init();

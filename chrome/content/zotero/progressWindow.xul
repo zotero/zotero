@@ -5,13 +5,11 @@
 
 <window id="zotero-progress-window"
         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-        windowtype="alert:alert"
-        align="start">
-
+        windowtype="alert:alert">
+		
 	<hbox id="zotero-progress-box">
 		<vbox id="zotero-progress-text-box">
 			<label id="zotero-progress-text-headline" style="font-weight: bold;" />
 		</vbox>
 	</hbox>
-
 </window>

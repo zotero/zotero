@@ -26,7 +26,7 @@
 <overlay id="zotero"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 	<?xul-overlay href="itemPane.xul" ?>
-		
+	
     <!-- Include the global XPCOM object -->
 	<script src="include.js"/>
 	
@@ -367,6 +367,8 @@
 	}, false);
 	
 	document.getElementById('appcontent').addEventListener('keydown', ZoteroPane.handleKeyDown, true);
+	// Make sure open progress windows are fading
+	document.getElementById('appcontent').addEventListener('mousemove', Zotero.ProgressWindowSet.updateTimers, false);
 	]]>
 	</script>
 	

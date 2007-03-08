@@ -153,6 +153,54 @@ Zotero.Utilities.prototype.htmlSpecialChars = function(str) {
 
 
 /*
+ * Parses a text string for HTML/XUL markup and returns an array of parts
+ *
+ * Currently only finds HTML links (<a> tags)
+ *
+ * Returns an array of objects with the following form:
+ *     {
+ *         type: 'text'|'link',
+ *         text: "text content",
+ *         [ attributes: { key1: val [ , key2: val, ...] }
+ *     }
+ */
+Zotero.Utilities.prototype.parseMarkup = function(str) {
+	var parts = [];
+	var splits = str.split(/(<a [^>]+>[^<]*<\/a>)/);
+	
+	for each(var split in splits) {
+		// Link
+		if (split.indexOf('<a ') == 0) {
+			var matches = split.match(/<a ([^>]+)>([^<]*)<\/a>/);
+			if (matches) {
+				// Attribute pairs
+				var attributes = {};
+				var pairs = matches[1].match(/([^ =]+)="([^"]+")/g);
+				for each (var pair in pairs) {
+					var [key, val] = pair.split(/=/);
+					attributes[key] = val.substr(1, val.length - 2);
+				}
+				
+				parts.push({
+					type: 'link',
+					text: matches[2],
+					attributes: attributes
+				});
+				continue;
+			}
+		}
+		
+		parts.push({
+			type: 'text',
+			text: split
+		});
+	}
+	
+	return parts;
+}
+
+
+/*
  * Test if a string is an integer
  */
 Zotero.Utilities.prototype.isInt = function(x) {
