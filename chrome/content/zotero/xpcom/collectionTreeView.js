@@ -46,8 +46,9 @@ Zotero.CollectionTreeView = function()
  */
 Zotero.CollectionTreeView.prototype.setTree = function(treebox)
 {
-	if(this._treebox)
+	if (this._treebox || !treebox) {
 		return;
+	}
 	this._treebox = treebox;
 	
 	// Add a keypress listener for expand/collapse
