@@ -1,4 +1,4 @@
--- 175
+-- 176
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -5439,7 +5439,7 @@ function scrape(doc) {
 	attachments.push({title:"ACM Snapshot", mimeType:"text/html", url:snapshot});
 
 	var keywords = new Array();
-	var keywordLinks = doc.evaluate('//p[@class="keywords"]/a', doc, null,
+	var keywordLinks = doc.evaluate(''//p[@class="keywords"]/a'', doc, null,
 		XPathResult.ANY_TYPE, null);
 	var keywordLink;
 	while(keywordLink = keywordLinks.iterateNext()) {
