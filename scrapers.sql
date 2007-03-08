@@ -1,4 +1,4 @@
--- 174
+-- 175
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-02-27 20:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-03-08 22:10:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b3.r1', '', '2006-12-15 03:40:00', 1, 100, 4, 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -4695,7 +4695,7 @@ REPLACE INTO translators VALUES ('cde4428-5434-437f-9cd9-2281d14dbf9', '1.0.0b3.
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('cb48083-4d9-4ed-ac95-2e93dceea0ec', '1.0.0b3.r1', '', '2006-12-15 23:31:00', 1, 100, 4, 'Blackwell Synergy', 'Simon Kornblith', '^http://www\.blackwell-synergy\.com/(?:action/doSearch|doi/)', 
+REPLACE INTO translators VALUES ('cb48083-4d9-4ed-ac95-2e93dceea0ec', '1.0.0b3.r1', '', '2007-03-08 22:10:00', 1, 100, 4, 'Blackwell Synergy', 'Simon Kornblith', '^http://www\.blackwell-synergy\.com/(?:action/doSearch|doi/)', 
 'function detectWeb(doc, url) {
 	if(url.indexOf("doSearch") != -1) {
 		return "multiple";
@@ -4717,14 +4717,14 @@ REPLACE INTO translators VALUES ('cb48083-4d9-4ed-ac95-2e93dceea0ec', '1.0.0b3.r
 		var items = new Array();
 		var links = new Array();
 		
-		var tableRows = doc.evaluate(''//tr[td/p[@class="maintextbldleft"]]'', doc,
+		var tableRows = doc.evaluate(''//div[@class="toc_item"]'', doc,
 			nsResolver, XPathResult.ANY_TYPE, null);
 		var tableRow;
 		// Go through table rows
 		while(tableRow = tableRows.iterateNext()) {
 			var id = doc.evaluate(''.//input[@name="doi"]'', tableRow, nsResolver, XPathResult.ANY_TYPE,
 				null).iterateNext().value;
-			items[id] = Zotero.Utilities.cleanString(doc.evaluate(''./td/p[@class="maintextbldleft"]'', tableRow,
+			items[id] = Zotero.Utilities.cleanString(doc.evaluate(''.//label'', tableRow,
 				nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
 		}
 		
@@ -4789,7 +4789,7 @@ REPLACE INTO translators VALUES ('cb48083-4d9-4ed-ac95-2e93dceea0ec', '1.0.0b3.r
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('f8765470-5ace-4a31-b4bd-4327b960ccd', '1.0.0b3.r1', '', '2007-01-27 08:00:00', 1, 100, 4, 'SpringerLink', 'Simon Kornblith', '^http://www\.springerlink\.com/content/', 
+REPLACE INTO translators VALUES ('f8765470-5ace-4a31-b4bd-4327b960ccd', '1.0.0b3.r1', '', '2007-03-08 22:10:00', 1, 100, 4, 'SpringerLink', 'Simon Kornblith', '^http://(?:www\.springerlink\.com|springerlink.metapress.com)/content/', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -5379,7 +5379,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('e78d20f7-488-4023-831-dfe39679f3f', '1.0.0b3.r1', '', '2006-12-17 06:44:14', '1', '100', '4', 'ACM', 'Simon Kornblith', '^http://portal\.acm\.org/(?:results\.cfm|citation\.cfm)', 
+REPLACE INTO translators VALUES ('e78d20f7-488-4023-831-dfe39679f3f', '1.0.0b3.r1', '', '2007-03-08 22:10:00', '1', '100', '4', 'ACM', 'Simon Kornblith', '^http://portal\.acm\.org/(?:results\.cfm|citation\.cfm)', 
 'function detectWeb(doc, url) {
 	if(url.indexOf("/results.cfm") != -1) {
 		var items = Zotero.Utilities.getItemArray(doc, doc, ''^https?://[^/]+/citation.cfm\\?[^#]+$'');
@@ -5437,6 +5437,14 @@ function scrape(doc) {
 	}
 	
 	attachments.push({title:"ACM Snapshot", mimeType:"text/html", url:snapshot});
+
+	var keywords = new Array();
+	var keywordLinks = doc.evaluate('//p[@class="keywords"]/a', doc, null,
+		XPathResult.ANY_TYPE, null);
+	var keywordLink;
+	while(keywordLink = keywordLinks.iterateNext()) {
+		keywords.push(keywordLink.textContent.toLowerCase());
+	}
 	
 	Zotero.Utilities.HTTP.doGet("http://portal.acm.org/"+m[1], function(text) {
 		var m = text.split(/<\/?pre[^>]*>/ig);
@@ -5449,6 +5457,7 @@ function scrape(doc) {
 		translator.setHandler("itemDone", function(obj, item) {
 			if(abstract) item.abstractNote = abstract;
 			item.attachments = attachments;
+			item.tags = keywords;
 			item.type = undefined;
 			item.complete();
 		});
