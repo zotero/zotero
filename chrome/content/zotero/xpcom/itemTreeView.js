@@ -39,6 +39,9 @@ Zotero.ItemTreeView = function(itemGroup, sourcesOnly)
 	this._callbacks = [];
 	
 	this._treebox = null;
+	this._ownerDocument = null;
+	this._needsSort = false;
+	
 	this.refresh();
 	
 	this._unregisterID = Zotero.Notifier.registerObserver(this, ['item', 'collection-item']);
@@ -62,8 +65,21 @@ Zotero.ItemTreeView.prototype._runCallbacks = function() {
  */
 Zotero.ItemTreeView.prototype.setTree = function(treebox)
 {
-	if(this._treebox)
+	// Try to set the window document if not yet set
+	if (treebox && !this._ownerDocument) {
+		try {
+			this._ownerDocument = treebox.treeBody.ownerDocument;
+		}
+		catch (e) {}
+	}
+	
+	if (this._treebox) {
+		if (this._needsSort) {
+			this.sort();
+		}
+		
 		return;
+	}
 	this._treebox = treebox;
 	
 	// Add a keypress listener for expand/collapse
@@ -133,15 +149,16 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids)
 	this.selection.selectEventsSuppressed = true;
 	var savedSelection = this.saveSelection();
 	
-	// See if we're in the active window
-	var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-		.getService(Components.interfaces.nsIWindowMediator);
-	if (wm.getMostRecentWindow("navigator:browser") ==
-			this._treebox.treeBody.ownerDocument.defaultView){
-		var activeWindow = true;
+	if (this._treebox && this._treebox.treeBody) {
+		// See if we're in the active window
+		var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+			.getService(Components.interfaces.nsIWindowMediator);
+		if (wm.getMostRecentWindow("navigator:browser") == this._ownerDocument.defaultView){
+			var activeWindow = true;
+		}
 	}
 	
-	var quicksearch = this._treebox.treeBody.ownerDocument.getElementById('zotero-tb-search');
+	var quicksearch = this._ownerDocument.getElementById('zotero-tb-search');
 	
 	// 'collection-item' ids are in the form collectionID-itemID
 	if (type == 'collection-item') {
@@ -275,7 +292,7 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids)
 		
 		// If not a quicksearch and not background window saved search,
 		// process new items manually
-		else if (quicksearch.value == '')
+		else if (quicksearch && quicksearch.value == '')
 		{
 			var items = Zotero.Items.get(ids);
 			for (var i in items)
@@ -297,8 +314,7 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids)
 		// Otherwise re-run the search, which refreshes the item list
 		else
 		{
-			if (activeWindow)
-			{
+			if (activeWindow) {
 				quicksearch.value = '';
 			}
 			quicksearch.doCommand();
@@ -315,7 +331,7 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids)
 		if(action == 'add' && ids.length===1 && activeWindow)
 		{
 			// Reset to Info tab
-			this._treebox.treeBody.ownerDocument.getElementById('zotero-view-tabs').selectedIndex = 0;
+			this._ownerDocument.getElementById('zotero-view-tabs').selectedIndex = 0;
 			this.selectItem(ids[0]);
 		}
 		// If single item is selected and was modified
@@ -535,6 +551,15 @@ Zotero.ItemTreeView.prototype.cycleHeader = function(column)
  */
 Zotero.ItemTreeView.prototype.sort = function()
 {
+	// If Zotero pane is hidden, mark tree for sorting later in setTree()
+	if (!this._treebox.columns) {
+		this._needsSort = true;
+		return;
+	}
+	else {
+		this._needsSort = false;
+	}
+	
 	var column = this._treebox.columns.getSortedColumn();
 	if (!column){
 		column = this._treebox.columns.getFirstColumn();
