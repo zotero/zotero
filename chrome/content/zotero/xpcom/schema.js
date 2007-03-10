@@ -349,9 +349,11 @@ Zotero.Schema = new function(){
 			Zotero.DB.query(_getSchemaSQL('scrapers'));
 			_updateDBVersion('scrapers', _getSchemaSQLVersion('scrapers'));
 			
-			var sql = "INSERT INTO items VALUES(123456789, 14, 'Zotero - Quick Start Guide', '2006-10-05 14:00:00', '2006-10-05 14:00:00')";
+			var sql = "INSERT INTO items VALUES(123456789, 14, '2006-10-05 14:00:00', '2006-10-05 14:00:00')";
 			Zotero.DB.query(sql);
 			var sql = "INSERT INTO itemAttachments VALUES(123456789, NULL, 3, 'text/html', 25, NULL, NULL)";
+			Zotero.DB.query(sql);
+			var sql = "INSERT INTO itemData VALUES(123456789, 110, 'Zotero - Quick Start Guide')";
 			Zotero.DB.query(sql);
 			var sql = "INSERT INTO itemData VALUES(123456789, 1, 'http://www.zotero.org/documentation/quick_start_guide')";
 			Zotero.DB.query(sql);
