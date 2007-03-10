@@ -587,8 +587,21 @@ Zotero.ItemTreeView.prototype.sort = function()
 		title: true
 	};
 	
+	// Cache primary values while sorting, since base-field-mapped getField()
+	// calls are relatively expensive
+	var cache = [];
+	
 	function columnSort(a,b) {
-		var cmp;
+		var cmp, fieldA, fieldB;
+		
+		var aItemID = a.ref.getID();
+		if (cache[aItemID]) {
+			fieldA = cache[aItemID];
+		}
+		var bItemID = b.ref.getID();
+		if (cache[bItemID]) {
+			fieldB = cache[bItemID];
+		}
 		
 		switch (columnField) {
 			case 'type':
@@ -609,12 +622,20 @@ Zotero.ItemTreeView.prototype.sort = function()
 				break;
 			
 			default:
-				var fieldA = a.getField(columnField, unformatted, true);
-				var fieldB = b.getField(columnField, unformatted, true);
+				if (fieldA == undefined) {
+					fieldA = a.getField(columnField, unformatted, true);
+					if (typeof fieldA == 'string') {
+						fieldA = fieldA.toLowerCase();
+					}
+					cache[aItemID] = fieldA;
+				}
 				
-				if (typeof fieldA == 'string') {
-					fieldA = fieldA.toLowerCase();
-					fieldB = fieldB.toLowerCase();
+				if (fieldB == undefined) {
+					fieldB = b.getField(columnField, unformatted, true);
+					if (typeof fieldB == 'string') {
+						fieldB = fieldB.toLowerCase();
+					}
+					cache[bItemID] = fieldB;
 				}
 				
 				// Display rows with empty values last
@@ -650,8 +671,8 @@ Zotero.ItemTreeView.prototype.sort = function()
 		}
 		
 		if (columnField != 'date') {
-			fieldA = a.getField('date', true);
-			fieldB = b.getField('date', true);
+			fieldA = a.getField('date', true, true);
+			fieldB = b.getField('date', true, true);
 			
 			// Display rows with empty values last
 			cmp = (fieldA == '' && fieldB != '') ? -1 :

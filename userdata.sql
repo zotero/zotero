@@ -1,4 +1,4 @@
--- 20
+-- 21
 
 -- This file creates tables containing user-specific data -- any changes
 -- to existing tables made here must be mirrored in transition steps in
@@ -57,7 +57,6 @@ CREATE TABLE IF NOT EXISTS userItemTypeFields (
 CREATE TABLE IF NOT EXISTS items (
     itemID INTEGER PRIMARY KEY,
     itemTypeID INT,
-    title TEXT,
     dateAdded DATETIME DEFAULT CURRENT_TIMESTAMP,
     dateModified DATETIME DEFAULT CURRENT_TIMESTAMP
 );

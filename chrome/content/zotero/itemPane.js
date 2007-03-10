@@ -278,15 +278,16 @@ var ZoteroItemPane = new function()
 				if(_itemTypeMenu.firstChild.childNodes[i].value == _itemBeingEdited.getType())
 					_itemTypeMenu.selectedIndex = i;
 		
-			var fieldNames = new Array("title");
+			var fieldNames = [];
 			var fields = Zotero.ItemFields.getItemTypeFields(_itemBeingEdited.getField("itemTypeID"));
-			for(var i = 0; i<fields.length; i++)
+			for (var i = 0; i<fields.length; i++) {
 				fieldNames.push(Zotero.ItemFields.getName(fields[i]));
+			}
 			fieldNames.push("dateAdded","dateModified");
 			
 			for(var i = 0; i<fieldNames.length; i++)
 			{
-				var editable = (!_itemBeingEdited.isPrimaryField(fieldNames[i]) || _itemBeingEdited.isEditableField(fieldNames[i]));
+				var editable = !_itemBeingEdited.isPrimaryField(fieldNames[i]);
 				
 				var val = _itemBeingEdited.getField(fieldNames[i]);
 				

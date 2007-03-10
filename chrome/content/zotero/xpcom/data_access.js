@@ -48,6 +48,7 @@ Zotero.Item.prototype._init = function(){
 	this._changedCreators = new Zotero.Hash();
 	this._changedItemData = new Zotero.Hash();
 	
+	this._noteTitle = null;
 	this._noteText = null;
 	this._noteAccessTime = null;
 	
@@ -77,18 +78,6 @@ Zotero.Item.prototype.isPrimaryField = function(field){
 	return !!Zotero.Item.primaryFields[field];
 }
 
-Zotero.Item.editableFields = {
-	title: true
-};
-
-/*
- * Check if the specified primary field can be changed with setField()
- */
-Zotero.Item.prototype.isEditableField = function(field){
-	return !!Zotero.Item.editableFields[field];
-}
-
-
 /*
  * Build object from database
  */
@@ -115,14 +104,9 @@ Zotero.Item.prototype.loadFromID = function(id){
  */
 Zotero.Item.prototype.loadFromRow = function(row){
 	this._init();
-	for (col in row){
+	for (var col in row){
 		// Only accept primary field data through loadFromRow()
 		if (this.isPrimaryField(col)){
-			// Return first line of content for note items
-			if (col=='title' && this.isNote()){
-				row[col] = this._noteToTitle();
-			}
-			
 			this._data[col] = row[col];
 		}
 		else {
@@ -436,30 +420,39 @@ Zotero.Item.prototype.getField = function(field, unformatted, includeBaseMapped)
 	if (this.isPrimaryField(field)){
 		return this._data[field] ? this._data[field] : '';
 	}
-	else {
-		if (this.getID() && !this._itemDataLoaded){
-			this._loadItemData();
+	
+	if (Zotero.ItemFields.getName(field) == 'title' && this.isNote()) {
+		if (this._noteTitle !== null) {
+			return this._noteTitle;
 		}
-		
-		if (includeBaseMapped && Zotero.ItemFields.isBaseField(field)) {
-			var fieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(
-				this.getType(), field
-			);
-		}
-		else {
-			var fieldID = Zotero.ItemFields.getID(field);
-		}
-		
-		var value = this._itemData[fieldID] ? this._itemData[fieldID] : '';
-		
-		if (!unformatted){
-			if (fieldID==Zotero.ItemFields.getID('date')){
-				value = Zotero.Date.multipartToStr(value);
-			}
-		}
-		
-		return value;
+		var title = this._noteToTitle();
+		this._noteTitle = title;
+		return title;
 	}
+	
+	if (this.getID() && !this._itemDataLoaded){
+		this._loadItemData();
+	}
+	
+	if (includeBaseMapped) {
+		var fieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(
+			this.getType(), field
+		);
+	}
+	
+	if (!fieldID) {
+		var fieldID = Zotero.ItemFields.getID(field);
+	}
+	
+	var value = this._itemData[fieldID] ? this._itemData[fieldID] : '';
+	
+	if (!unformatted){
+		if (fieldID==Zotero.ItemFields.getID('date')){
+			value = Zotero.Date.multipartToStr(value);
+		}
+	}
+	
+	return value;
 }
 
 
@@ -475,71 +468,64 @@ Zotero.Item.prototype.setField = function(field, value, loadIn){
 	
 	// Primary field
 	if (this.isPrimaryField(field)){
-		if (!this.isEditableField(field)){
-			throw ('Primary field ' + field + ' cannot be changed through ' +
-				'setField');
-		}
-		
-		if (this._data[field] != undefined && this._data[field]==value){
-			return false;
-		}
-		this._data[field] = value;
-		if (!loadIn){
-			this._changed.set(field);
-		}
-		return true;
+		throw ('Primary field ' + field + ' cannot be changed through setField');
 	}
+	
 	// Type-specific field
-	else {
-		if (!this.getType()){
-			throw ('Item type must be set before setting field data.');
-		}
-		
-		// If existing item, load field data first unless we're already in
-		// the middle of a load
-		if (this.getID() && !loadIn && !this._itemDataLoaded){
-			this._loadItemData();
-		}
-		
-		var fieldID = Zotero.ItemFields.getID(field);
-		
-		if (!fieldID){
-			throw (field + ' is not a valid itemData field.');
-		}
-		
-		if (!Zotero.ItemFields.isValidForType(fieldID, this.getType())){
-			throw (field + ' is not a valid field for this type.');
-		}
-		
-		// Save date field as multipart date
-		if (!loadIn){
-			if (fieldID==Zotero.ItemFields.getID('date') &&
-					!Zotero.Date.isMultipart(value)){
-				value = Zotero.Date.strToMultipart(value);
-			}
-			
-			if (fieldID == Zotero.ItemFields.getID('accessDate')) {
-				if (!Zotero.Date.isSQLDate(value) &&
-						!Zotero.Date.isSQLDateTime(value) &&
-						value != 'CURRENT_TIMESTAMP') {
-					Zotero.debug("Discarding invalid accessDate '" + value
-						+ "' in Item.setField()");
-					return false;
-				}
-			}
-		}
-		
-		// If existing value, make sure it's actually changing
-		if ((!this._itemData[fieldID] && !value) ||
-			(this._itemData[fieldID] && this._itemData[fieldID]==value)){
-			return false;
-		}
-		this._itemData[fieldID] = value;
-		if (!loadIn){
-			this._changedItemData.set(fieldID);
-		}
-		return true;
+	if (!this.getType()){
+		throw ('Item type must be set before setting field data.');
 	}
+	
+	// If existing item, load field data first unless we're already in
+	// the middle of a load
+	if (this.getID() && !loadIn && !this._itemDataLoaded){
+		this._loadItemData();
+	}
+	
+	var fieldID = Zotero.ItemFields.getID(field);
+	
+	if (!fieldID){
+		throw (field + ' is not a valid itemData field.');
+	}
+	
+	if (!Zotero.ItemFields.isValidForType(fieldID, this.getType())){
+		throw (field + ' is not a valid field for this type.');
+	}
+	
+	// Save date field as multipart date
+	if (!loadIn){
+		if (fieldID==Zotero.ItemFields.getID('date') &&
+				!Zotero.Date.isMultipart(value)){
+			value = Zotero.Date.strToMultipart(value);
+		}
+		
+		if (fieldID == Zotero.ItemFields.getID('accessDate')) {
+			if (!Zotero.Date.isSQLDate(value) &&
+					!Zotero.Date.isSQLDateTime(value) &&
+					value != 'CURRENT_TIMESTAMP') {
+				Zotero.debug("Discarding invalid accessDate '" + value
+					+ "' in Item.setField()");
+				return false;
+			}
+		}
+	}
+	
+	// If existing value, make sure it's actually changing
+	if ((!this._itemData[fieldID] && !value) ||
+		(this._itemData[fieldID] && this._itemData[fieldID]==value)){
+		return false;
+	}
+	this._itemData[fieldID] = value;
+	
+	if (loadIn) {
+		// Not ideal to do this here, but there's not a great way to set this
+		// private variable from Z.Items._load()
+		this._itemDataLoaded = true;
+	}
+	else {
+		this._changedItemData.set(fieldID);
+	}
+	return true;
 }
 
 
@@ -595,10 +581,6 @@ Zotero.Item.prototype.save = function(){
 			if (this._changed.has('itemTypeID')){
 				sql += "itemTypeID=?, ";
 				sqlValues.push({'int':this.getField('itemTypeID')});
-			}
-			if (this._changed.has('title')){
-				sql += "title=?, ";
-				sqlValues.push({'string':this.getField('title')});
 			}
 			
 			// Always update modified time
@@ -826,11 +808,6 @@ Zotero.Item.prototype.save = function(){
 		
 		sqlColumns.push('itemTypeID');
 		sqlValues.push({'int':this.getField('itemTypeID')});
-		
-		if (this._changed.has('title')){
-			sqlColumns.push('title');
-			sqlValues.push({'string':this.getField('title')});
-		}
 		
 		try {
 			Zotero.DB.beginTransaction();
@@ -1065,7 +1042,7 @@ Zotero.Item.prototype.updateNoteCache = function(text){
 	// Update cached values
 	this._noteText = text ? text : '';
 	if (this.isNote()){
-		this.setField('title', this._noteToTitle(), true);
+		this._noteTitle = this._noteToTitle();
 	}
 }
 
@@ -1900,13 +1877,6 @@ Zotero.Item.prototype.clone = function() {
 		
 		for (var i in obj) {
 			switch (i) {
-				// TODO: remove when title is changed to regular field
-				case 'title':
-					if (obj.itemType != 'note') {
-						newItem.setField('title', obj[i]);
-					}
-					continue;
-				
 				case 'creators':
 					var i = 0;
 					for each(var c in obj.creators) {
@@ -2176,8 +2146,6 @@ Zotero.Item.prototype.toArray = function(){
 	
 	// Notes
 	if (this.isNote()) {
-		// Don't need title for notes
-		delete arr['title'];
 		arr['note'] = this.getNote();
 		if (this.getSource()){
 			arr['sourceItemID'] = this.getSource();
@@ -2268,24 +2236,14 @@ Zotero.Item.prototype._loadItemData = function(){
 		throw ('ItemID not set for object before attempting to load data');
 	}
 	
-	var sql = 'SELECT ID.fieldID, value FROM itemData ID JOIN '
-		+ 'itemTypeFields ITF ON (ITF.itemTypeID=(SELECT itemTypeID FROM '
-		+ 'items WHERE itemID=?1) AND ITF.fieldID=ID.fieldID) '
-		+ 'WHERE itemID=?1 ORDER BY orderIndex';
-		
-	var result = Zotero.DB.query(sql,[{'int':this._data['itemID']}]);
+	var sql = 'SELECT fieldID, value FROM itemData WHERE itemID=?';
+	var fields = Zotero.DB.query(sql, this.getID());
+	
+	for each(var field in fields) {
+		this.setField(field['fieldID'], field['value'], true);
+	}
 	
 	this._itemDataLoaded = true;
-	
-	if (result){
-		for (var i=0,len=result.length; i<len; i++){
-			this.setField(result[i]['fieldID'], result[i]['value'], true);
-		}
-		return true;
-	}
-	else {
-		return false;
-	}
 }
 
 
@@ -2516,22 +2474,30 @@ Zotero.Items = new function(){
 		if (arguments[0]){
 			sql += ' AND I.itemID IN (' + Zotero.join(arguments,',') + ')';
 		}
-		var result = Zotero.DB.query(sql);
+		var itemsRows = Zotero.DB.query(sql);
 		
-		if (result){
-			for (var i=0,len=result.length; i<len; i++){
-				// Item doesn't exist -- create new object and stuff in array
-				if (!_items[result[i]['itemID']]){
-					var obj = new Zotero.Item();
-					obj.loadFromRow(result[i]);
-					_items[result[i]['itemID']] = obj;
-				}
-				// Existing item -- reload in place
-				else {
-					_items[result[i]['itemID']].loadFromRow(result[i]);
-				}
+		for each(var row in itemsRows) {
+			// Item doesn't exist -- create new object and stuff in array
+			if (!_items[row['itemID']]){
+				var item = new Zotero.Item();
+				item.loadFromRow(row);
+				_items[row['itemID']] = item;
+			}
+			// Existing item -- reload in place
+			else {
+				_items[row['itemID']].loadFromRow(row);
 			}
 		}
+		
+		var sql = "SELECT * FROM itemData";
+		if (arguments[0]) {
+			sql += " WHERE itemID IN (" + Zotero.join(arguments, ',') + ")";
+		}
+		var itemDataRows = Zotero.DB.query(sql);
+		for each(var row in itemDataRows) {
+			_items[row['itemID']].setField(row['fieldID'], row['value'], true);
+		}
+		
 		return true;
 	}
 }
@@ -3915,7 +3881,7 @@ Zotero.CharacterSets = new function(){
 
 Zotero.ItemFields = new function(){
 	// Private members
-	var _fields = [];
+	var _fields = {};
 	var _fieldsLoaded;
 	var _fieldFormats = [];
 	var _itemTypeFields = [];
@@ -3944,7 +3910,12 @@ Zotero.ItemFields = new function(){
 		if (!_fieldsLoaded){
 			_loadFields();
 		}
-		return _fields['_' + field] ? _fields['_' + field]['id'] : false;
+		
+		if (typeof field == 'number') {
+			return field;
+		}
+		
+		return _fields[field] ? _fields[field]['id'] : false;
 	}
 	
 	
@@ -3955,7 +3926,8 @@ Zotero.ItemFields = new function(){
 		if (!_fieldsLoaded){
 			_loadFields();
 		}
-		return _fields['_' + field] ? _fields['_' + field]['name'] : false;
+		
+		return _fields[field] ? _fields[field]['name'] : false;
 	}
 	
 	
@@ -3964,7 +3936,6 @@ Zotero.ItemFields = new function(){
 		
 		// Fields in items are special cases
 		switch (field) {
-			case 'title':
 			case 'dateAdded':
 			case 'dateModified':
 				fieldName = field;
@@ -3983,11 +3954,11 @@ Zotero.ItemFields = new function(){
 		
 		_fieldCheck(fieldID, 'isValidForType');
 		
-		if (!_fields['_' + fieldID]['itemTypes']){
+		if (!_fields[fieldID]['itemTypes']){
 			return false;
 		}
 		
-		return !!_fields['_' + fieldID]['itemTypes'][itemTypeID];
+		return !!_fields[fieldID]['itemTypes'][itemTypeID];
 	}
 	
 	
@@ -3998,7 +3969,7 @@ Zotero.ItemFields = new function(){
 		
 		_fieldCheck(fieldID, 'isInteger');
 		
-		var ffid = _fields['_' + fieldID]['formatID'];
+		var ffid = _fields[fieldID]['formatID'];
 		return _fieldFormats[ffid] ? _fieldFormats[ffid]['isInteger'] : false;
 	}
 	
@@ -4032,7 +4003,7 @@ Zotero.ItemFields = new function(){
 		
 		_fieldCheck(field, arguments.callee.name);
 		
-		return _fields['_' + field]['isBaseField'];
+		return _fields[field]['isBaseField'];
 	}
 	
 	
@@ -4059,28 +4030,16 @@ Zotero.ItemFields = new function(){
 		}
 		
 		var itemTypeID = Zotero.ItemTypes.getID(itemType);
-		var baseFieldID = this.getID(baseField);
-		
 		if (!itemTypeID) {
 			throw ("Invalid item type '" + itemType + "' in ItemFields.getFieldIDFromTypeAndBase()");
 		}
 		
+		var baseFieldID = this.getID(baseField);
 		if (!baseFieldID) {
 			throw ("Invalid field '" + baseField + '" for base field in ItemFields.getFieldIDFromTypeAndBase()');
 		}
 		
-		if (!this.isBaseField(baseFieldID)) {
-			return false;
-		}
-		
-		// If the base field is already valid for the type, just return that
-		if (this.isValidForType(baseFieldID, itemTypeID)) {
-			return baseFieldID;
-		}
-		
-		return (_baseTypeFields[itemTypeID] &&
-			_baseTypeFields[itemTypeID][baseFieldID]) ?
-				_baseTypeFields[itemTypeID][baseFieldID] : false;
+		return _baseTypeFields[itemTypeID][baseFieldID];
 	}
 	
 	
@@ -4173,16 +4132,38 @@ Zotero.ItemFields = new function(){
 	}
 	
 	
+	/*
+	 * Build a lookup table for base field mappings
+	 */
 	function _loadBaseTypeFields() {
-		var sql = "SELECT itemTypeID, baseFieldID, fieldID FROM baseFieldMappings";
+		// Grab all fields, base field or not
+		var sql = "SELECT IT.itemTypeID, F.fieldID AS baseFieldID, BFM.fieldID "
+			+ "FROM itemTypes IT LEFT JOIN fields F "
+			+ "LEFT JOIN baseFieldMappings BFM"
+			+ " ON (IT.itemTypeID=BFM.itemTypeID AND F.fieldID=BFM.baseFieldID)";
 		var rows = Zotero.DB.query(sql);
+		
+		var sql = "SELECT DISTINCT baseFieldID FROM baseFieldMappings";
+		var baseFields = Zotero.DB.columnQuery(sql);
 		
 		var fields = [];
 		for each(var row in rows) {
 			if (!fields[row.itemTypeID]) {
 				fields[row.itemTypeID] = [];
 			}
-			fields[row.itemTypeID][row.baseFieldID] = row.fieldID;
+			if (row.fieldID) {
+				fields[row.itemTypeID][row.baseFieldID] = row.fieldID;
+			}
+			// If a base field and already valid for the type, just use that
+			else if (isBaseField(row.baseFieldID) &&
+					isValidForType(row.baseFieldID, row.itemTypeID)) {
+				fields[row.itemTypeID][row.baseFieldID] = row.baseFieldID;
+			}
+			// Set false for other fields so that we don't need to test for
+			// existence
+			else {
+				fields[row.itemTypeID][row.baseFieldID] = false;
+			}
 		}
 		
 		_baseTypeFields = fields;
@@ -4193,42 +4174,37 @@ Zotero.ItemFields = new function(){
 	 * Load all fields into an internal hash array
 	 */
 	function _loadFields(){
-		var i,len;
-		
 		var result = Zotero.DB.query('SELECT * FROM fieldFormats');
 		
-		for (i=0; i<result.length; i++){
+		for (var i=0; i<result.length; i++){
 			_fieldFormats[result[i]['fieldFormatID']] = {
 				regex: result[i]['regex'],
 				isInteger: result[i]['isInteger']
 			};
 		}
 		
-		result = Zotero.DB.query('SELECT * FROM fields');
-		
-		if (!result.length){
-			throw ('No fields in database!');
-		}
+		var fields = Zotero.DB.query('SELECT * FROM fields');
 		
 		var fieldItemTypes = _getFieldItemTypes();
-		_loadBaseTypeFields();
 		
 		var sql = "SELECT DISTINCT baseFieldID FROM baseFieldMappings";
 		var baseFields = Zotero.DB.columnQuery(sql);
 		
-		for (i=0,len=result.length; i<len; i++){
-			_fields['_' + result[i]['fieldID']] = {
-				id: result[i]['fieldID'],
-				name: result[i]['fieldName'],
-				isBaseField: (baseFields.indexOf(result[i]['fieldID']) != -1),
-				formatID: result[i]['fieldFormatID'],
-				itemTypes: fieldItemTypes[result[i]['fieldID']]
+		for each(var field in fields){
+			_fields[field['fieldID']] = {
+				id: field['fieldID'],
+				name: field['fieldName'],
+				isBaseField: (baseFields.indexOf(field['fieldID']) != -1),
+				formatID: field['fieldFormatID'],
+				itemTypes: fieldItemTypes[field['fieldID']]
 			};
 			// Store by name as well as id
-			_fields['_' + result[i]['fieldName']] = _fields['_' + result[i]['fieldID']];
+			_fields[field['fieldName']] = _fields[field['fieldID']];
 		}
 		
 		_fieldsLoaded = true;
+		
+		_loadBaseTypeFields();
 	}
 }
 
