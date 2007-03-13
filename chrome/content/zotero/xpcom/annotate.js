@@ -784,7 +784,7 @@ Zotero.Annotation.prototype._addChildElements = function() {
 	this.moveImg = this.document.createElement("img");
 	this.moveImg.src = "chrome://zotero/skin/annotation-move.png";
 	this.moveImg.addEventListener("click", function(e) {
-		me._startMove();
+		me._startMove(e);
 	}, false);
 	moveDiv.appendChild(this.moveImg);
 	
