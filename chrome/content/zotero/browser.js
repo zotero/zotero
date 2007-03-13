@@ -133,6 +133,9 @@ var Zotero_Browser = new function() {
 		tab.annotateID = id;
 	}
 	
+	/*
+	 * toggles a tool on/off
+	 */
 	function toggleMode(toggleTool, ignoreOtherTools) {
 		// make sure other tools are turned off
 		if(!ignoreOtherTools) {
@@ -142,6 +145,10 @@ var Zotero_Browser = new function() {
 				}
 			}
 		}
+		
+		// make sure annotation action is toggled
+		var tab = _getTabObject(Zotero_Browser.tabbrowser.selectedBrowser);
+		if(tab.page.annotations.clearAction) tab.page.annotations.clearAction();
 		
 		if(!toggleTool) return;
 		
@@ -279,7 +286,7 @@ var Zotero_Browser = new function() {
 		if(isHTML) {
 			if(tab.annotateNextLoad) {
 				// enable annotation
-				tab.page.annotations = new Zotero.Annotations(browser, tab.annotateID);
+				tab.page.annotations = new Zotero.Annotations(this, browser, tab.annotateID);
 			}
 			
 			// detect translators

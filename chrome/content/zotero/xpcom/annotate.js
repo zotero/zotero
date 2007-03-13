@@ -289,7 +289,8 @@ Zotero.Annotate = new function() {
 //////////////////////////////////////////////////////////////////////////////
 // a set of annotations to correspond to a given page
 
-Zotero.Annotations = function(browser, itemID) {
+Zotero.Annotations = function(Zotero_Browser, browser, itemID) {
+	this.Zotero_Browser = Zotero_Browser;
 	this.browser = browser;
 	this.document = browser.contentDocument;
 	this.window = browser.contentWindow;
@@ -522,6 +523,8 @@ Zotero.Annotation = function(annotationsObj) {
 	this.window = annotationsObj.browser.contentWindow;
 	this.document = annotationsObj.browser.contentDocument;
 	this.nsResolver = annotationsObj.nsResolver;
+	this.cols = 30;
+	this.rows = 5;
 }
 
 Zotero.Annotation.prototype.initWithEvent = function(e) {
@@ -553,8 +556,6 @@ Zotero.Annotation.prototype.initWithEvent = function(e) {
 	var pixelOffset = Zotero.Annotate.getPixelOffset(this.node);
 	this.x = clickX - pixelOffset[0];
 	this.y = clickY - pixelOffset[1];
-	this.cols = 30;
-	this.rows = 5;
 	
 	Zotero.debug("Annotate: added new annotation");
 	
@@ -684,6 +685,12 @@ Zotero.Annotation.prototype._generateMarker = function(offset) {
 	range.setStart(this.node, offset);
 	range.setEnd(this.node, offset);
 	
+	// next, we delete the old node, if there is one
+	if(this.node && this.node.getAttribute && this.node.getAttribute("zotero") == "annotation-marker") {
+		this.node.parentNode.removeChild(this.node);
+		this.node = undefined;
+	}
+		
 	// next, we insert a span
 	this.node = this.document.createElement("span");
 	this.node.setAttribute("zotero", "annotation-marker");
@@ -696,13 +703,20 @@ Zotero.Annotation.prototype._addChildElements = function() {
 	// top bar
 	var bar = this.document.createElement("div");
 	bar.style.display = "block";
-	bar.style.textAlign = "left";
 	bar.style.backgroundColor = Zotero.Annotate.annotationBarColor;
 	bar.style.paddingRight = "0";
 	bar.style.paddingLeft = bar.style.paddingTop = bar.style.paddingBottom = "1px";
 	bar.style.borderBottom = "1px solid";
+	bar.style.height = "10px";
 	bar.style.borderColor = Zotero.Annotate.annotationBorderColor;
 	
+	// close box
+	var closeDiv = this.document.createElement("div");
+	closeDiv.style.display = "block";
+	closeDiv.style.position = "absolute";
+	closeDiv.style.left = "1px";
+	closeDiv.style.top = "1px";
+	closeDiv.style.cursor = "pointer";
 	var img = this.document.createElement("img");
 	img.src = "chrome://zotero/skin/annotation-close.png";
 	img.addEventListener("click", function(event) {
@@ -710,7 +724,23 @@ Zotero.Annotation.prototype._addChildElements = function() {
 			me._delete();
 		}
 	}, false);
-	bar.appendChild(img);
+	closeDiv.appendChild(img);
+	bar.appendChild(closeDiv);
+	
+	// move box
+	var moveDiv = this.document.createElement("div");
+	moveDiv.style.display = "block";
+	moveDiv.style.position = "absolute";
+	moveDiv.style.right = "1px";
+	moveDiv.style.top = "1px";
+	moveDiv.style.cursor = "pointer";
+	this.moveImg = this.document.createElement("img");
+	this.moveImg.src = "chrome://zotero/skin/annotation-move.png";
+	this.moveImg.addEventListener("click", function(e) {
+		me._startMove(e);
+	}, false);
+	moveDiv.appendChild(this.moveImg);
+	bar.appendChild(moveDiv);
 	
 	// grippy
 	this.grippyDiv = this.document.createElement("div");
@@ -718,13 +748,13 @@ Zotero.Annotation.prototype._addChildElements = function() {
 	this.grippyDiv.style.position = "absolute";
 	this.grippyDiv.style.right = "0px";
 	this.grippyDiv.style.bottom = "0px";
-	
+	this.grippyDiv.style.cursor = "move";
 	var img = this.document.createElement("img");
 	img.src = "chrome://zotero/skin/annotation-grippy.png";
-	this.grippyDiv.appendChild(img);
 	img.addEventListener("mousedown", function(event) {
 		me._startDrag(event);
 	}, false);
+	this.grippyDiv.appendChild(img);
 	
 	// text area
 	this.textarea = this.document.createElement("textarea");
@@ -747,6 +777,10 @@ Zotero.Annotation.prototype._addChildElements = function() {
 }
 
 Zotero.Annotation.prototype._click = function() {
+	// clear current action
+	this.annotationsObj.Zotero_Browser.toggleMode(null);
+	
+	// alter z-index
 	this.annotationsObj.zIndex++
 	this.div.style.zIndex = this.annotationsObj.zIndex;
 }
@@ -827,8 +861,6 @@ Zotero.Annotation.prototype._doDrag = function(e) {
 	var colSize = this.textarea.clientWidth/this.textarea.cols;
 	var rowSize = this.textarea.clientHeight/this.textarea.rows;
 	
-	Zotero.debug("sizes: "+colSize+", "+rowSize);
-	
 	// update cols and rows
 	if(Math.abs(x) > colSize) {
 		var cols = this.clickStartCols+Math.floor(x/colSize);
@@ -847,6 +879,40 @@ Zotero.Annotation.prototype._doDrag = function(e) {
 	
 	// not sure why this is necessary
 	this.div.style.width = (6+this.textarea.offsetWidth)+"px";
+}
+
+Zotero.Annotation.prototype._startMove = function(e) {
+	// stop propagation
+	e.stopPropagation();
+	e.preventDefault();
+	
+	var body = this.document.getElementsByTagName("body")[0];
+	
+	// deactivate current action
+	this.annotationsObj.Zotero_Browser.toggleMode(null);
+	
+	var me = this;
+	// set the handler required to deactivate
+	this.annotationsObj.clearAction = function() {
+		me.document.removeEventListener("click", me._handleMove, false);
+		body.style.cursor = "auto";
+		me.moveImg.src = "chrome://zotero/skin/annotation-move.png";
+		me.annotationsObj.clearAction = undefined;
+	}
+	
+	// create a handler for clicking
+	this._handleMove = function(e) {
+		me.initWithEvent(e);
+		me.annotationsObj.clearAction();
+		
+		// stop propagation
+		e.stopPropagation();
+		e.preventDefault();
+	};
+	
+	this.document.addEventListener("click", this._handleMove, false);
+	body.style.cursor = "pointer";
+	this.moveImg.src = "chrome://zotero/skin/annotation-move-selected.png";
 }
 
 //////////////////////////////////////////////////////////////////////////////
