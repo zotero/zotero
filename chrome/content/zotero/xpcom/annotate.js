@@ -553,7 +553,8 @@ Zotero.Annotation.prototype.initWithEvent = function(e) {
 	var pixelOffset = Zotero.Annotate.getPixelOffset(this.node);
 	this.x = clickX - pixelOffset[0];
 	this.y = clickY - pixelOffset[1];
-	this.editable = true;
+	this.cols = 30;
+	this.rows = 5;
 	
 	Zotero.debug("Annotate: added new annotation");
 	
@@ -574,8 +575,9 @@ Zotero.Annotation.prototype.initWithDBRow = function(row) {
 	
 	this.x = row.x;
 	this.y = row.y;
+	this.cols = row.cols;
+	this.rows = row.rows;
 	this.annotationID = row.annotationID;
-	this.editable = true;
 	
 	this.display();
 	
@@ -587,9 +589,11 @@ Zotero.Annotation.prototype.save = function() {
 	
 	if(this.annotationID) {
 		// already in the DB; all we need to do is update the text
-		var query = "UPDATE annotations SET text = ? WHERE annotationID = ?";
+		var query = "UPDATE annotations SET cols = ?, rows = ?, text = ? WHERE annotationID = ?";
 		var parameters = [
-			text,
+			this.cols,				// cols
+			this.rows,				// rows
+			text,					// text
 			this.annotationID
 		];
 	} else {
@@ -618,7 +622,8 @@ Zotero.Annotation.prototype.save = function() {
 			path.offset,				// offset
 			this.x,						// x
 			this.y,						// y
-			30, 5,						// cols, rows
+			this.cols,					// cols
+			this.rows,					// rows
 			text						// text
 		];
 	}
@@ -688,39 +693,57 @@ Zotero.Annotation.prototype._generateMarker = function(offset) {
 Zotero.Annotation.prototype._addChildElements = function() {
 	var me = this;
 	
-	if(this.editable) {
-		var div = this.document.createElement("div");
-		div.style.display = "block";
-		div.style.textAlign = "left";
-		div.style.backgroundColor = Zotero.Annotate.annotationBarColor;
-		div.style.paddingRight = "0";
-		div.style.paddingLeft = div.style.paddingTop = div.style.paddingBottom = "1px";
-		div.style.borderBottom = "1px solid";
-		div.style.borderColor = Zotero.Annotate.annotationBorderColor;
-		
-		var img = this.document.createElement("img");
-		img.src = "chrome://zotero/skin/annotation-close.png";
-		img.addEventListener("click", function(event) {
-			if (me._confirmDelete(event)) {
-				me._delete()
-			}
-		}, false);
-		div.appendChild(img);
-		
-		this.textarea = this.document.createElement("textarea");
-		this.textarea.setAttribute("zotero", "annotation");
-		this.textarea.setAttribute("cols", "30");
-		this.textarea.setAttribute("rows", "5");
-		this.textarea.setAttribute("wrap", "soft");
-		this.textarea.style.fontFamily = "Arial, Lucida Grande, FreeSans, sans";
-		this.textarea.style.fontSize = "12px";
-		this.textarea.style.backgroundColor = Zotero.Annotate.annotationColor;
-		this.textarea.style.border = "none";
-		this.textarea.style.margin = "3px";
-		this.div.appendChild(div);
-		this.div.appendChild(this.textarea);
-		var me = this;
-	}
+	// top bar
+	var bar = this.document.createElement("div");
+	bar.style.display = "block";
+	bar.style.textAlign = "left";
+	bar.style.backgroundColor = Zotero.Annotate.annotationBarColor;
+	bar.style.paddingRight = "0";
+	bar.style.paddingLeft = bar.style.paddingTop = bar.style.paddingBottom = "1px";
+	bar.style.borderBottom = "1px solid";
+	bar.style.borderColor = Zotero.Annotate.annotationBorderColor;
+	
+	var img = this.document.createElement("img");
+	img.src = "chrome://zotero/skin/annotation-close.png";
+	img.addEventListener("click", function(event) {
+		if(me._confirmDelete(event)) {
+			me._delete();
+		}
+	}, false);
+	bar.appendChild(img);
+	
+	// grippy
+	this.grippyDiv = this.document.createElement("div");
+	this.grippyDiv.style.display = "block";
+	this.grippyDiv.style.position = "absolute";
+	this.grippyDiv.style.right = "0px";
+	this.grippyDiv.style.bottom = "0px";
+	
+	var img = this.document.createElement("img");
+	img.src = "chrome://zotero/skin/annotation-grippy.png";
+	this.grippyDiv.appendChild(img);
+	img.addEventListener("mousedown", function(event) {
+		me._startDrag(event);
+	}, false);
+	
+	// text area
+	this.textarea = this.document.createElement("textarea");
+	this.textarea.setAttribute("zotero", "annotation");
+	this.textarea.setAttribute("wrap", "soft");
+	this.textarea.cols = this.cols;
+	this.textarea.rows = this.rows;
+	this.textarea.style.fontFamily = "Arial, Lucida Grande, FreeSans, sans";
+	this.textarea.style.fontSize = "12px";
+	this.textarea.style.backgroundColor = Zotero.Annotate.annotationColor;
+	this.textarea.style.border = "none";
+	this.textarea.style.margin = "3px 3px 5px 3px";
+	
+	this.div.appendChild(bar);
+	this.div.appendChild(this.grippyDiv);
+	this.div.appendChild(this.textarea);
+	
+	this.colSize = this.textarea.clientWidth/this.cols;
+	this.rowSize = this.textarea.clientHeight/this.rows;
 }
 
 Zotero.Annotation.prototype._click = function() {
@@ -766,6 +789,64 @@ Zotero.Annotation.prototype._delete = function() {
 			this.annotationsObj.annotations.splice(i, 1);
 		}
 	}
+}
+
+Zotero.Annotation.prototype._startDrag = function(e) {
+	var me = this;
+	
+	this.clickStartX = this.window.pageXOffset + e.clientX;
+	this.clickStartY = this.window.pageYOffset + e.clientY;
+	this.clickStartCols = this.textarea.cols;
+	this.clickStartRows = this.textarea.rows;
+	
+	// add a listener to handle mouse moves
+	this._handleDrag = function(e) {
+		me._doDrag(e);
+	}
+	this.document.addEventListener("mousemove", this._handleDrag, false);
+	
+	// add a listener that gets called when things stop happening
+	this._endDrag = function() {
+		me.dragging = false;
+		me.document.removeEventListener("mousemove", me._handleDrag, false);
+		me.document.removeEventListener("mouseup", me._endDrag, false);
+	}
+	this.document.addEventListener("mouseup", this._endDrag, false);
+	
+	// stop propagation
+	e.stopPropagation();
+	e.preventDefault();
+}
+
+Zotero.Annotation.prototype._doDrag = function(e) {
+	var pixelOffset = Zotero.Annotate.getPixelOffset(this.grippyDiv);
+	var x = this.window.pageXOffset + e.clientX - this.clickStartX;
+	var y = this.window.pageYOffset + e.clientY - this.clickStartY;
+	
+	// update sizes
+	var colSize = this.textarea.clientWidth/this.textarea.cols;
+	var rowSize = this.textarea.clientHeight/this.textarea.rows;
+	
+	Zotero.debug("sizes: "+colSize+", "+rowSize);
+	
+	// update cols and rows
+	if(Math.abs(x) > colSize) {
+		var cols = this.clickStartCols+Math.floor(x/colSize);
+		cols = (cols > 5 ? cols : 5);
+		
+		this.textarea.cols = this.cols = cols;
+	}
+	if(Math.abs(y) > rowSize) {
+		var rows = this.clickStartRows+Math.floor(y/rowSize);
+		rows = (rows > 2 ? rows : 2);
+		
+		this.textarea.rows = this.rows = rows;
+	}
+	
+	Zotero.debug("cols: "+cols+", "+rows);
+	
+	// not sure why this is necessary
+	this.div.style.width = (6+this.textarea.offsetWidth)+"px";
 }
 
 //////////////////////////////////////////////////////////////////////////////
