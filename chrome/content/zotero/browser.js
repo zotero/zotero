@@ -41,6 +41,7 @@ var Zotero_Browser = new function() {
 	this.scrapeThisPage = scrapeThisPage;
 	this.annotatePage = annotatePage;
 	this.toggleMode = toggleMode;
+	this.setCollapsed = setCollapsed;
 	this.chromeLoad = chromeLoad;
 	this.chromeUnload = chromeUnload;
 	this.contentLoad = contentLoad;
@@ -165,6 +166,14 @@ var Zotero_Browser = new function() {
 			addElement.setAttribute("tool-active", "true");
 			Zotero_Browser.tabbrowser.selectedBrowser.addEventListener(tools[toggleTool].event, tools[toggleTool].callback, true);
 		}
+	}
+	
+	/*
+	 * expands all annotations
+	 */
+	function setCollapsed(status) {
+		var tab = _getTabObject(Zotero_Browser.tabbrowser.selectedBrowser);
+		tab.page.annotations.setCollapsed(status);
 	}
 	
 	/*

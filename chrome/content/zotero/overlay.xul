@@ -315,6 +315,8 @@
 		<!-- Annotation Toolbar -->
 		<toolbar id="zotero-annotate-tb" crop="end" insertbefore="content" hidden="true">
 			<toolbarbutton id="zotero-annotate-tb-add" tooltiptext="&zotero.annotate.toolbar.add.label;" oncommand="Zotero_Browser.toggleMode(this.id);"/>
+			<toolbarbutton id="zotero-annotate-tb-collapse" tooltiptext="&zotero.annotate.toolbar.collapse.label;" oncommand="Zotero_Browser.setCollapsed(true);"/>
+			<toolbarbutton id="zotero-annotate-tb-expand" tooltiptext="&zotero.annotate.toolbar.expand.label;" oncommand="Zotero_Browser.setCollapsed(false);"/>
 			<toolbarbutton id="zotero-annotate-tb-highlight" tooltiptext="&zotero.annotate.toolbar.highlight.label;" oncommand="Zotero_Browser.toggleMode(this.id);"/>
 			<toolbarbutton id="zotero-annotate-tb-unhighlight" tooltiptext="&zotero.annotate.toolbar.unhighlight.label;" oncommand="Zotero_Browser.toggleMode(this.id);"/>
 		</toolbar>

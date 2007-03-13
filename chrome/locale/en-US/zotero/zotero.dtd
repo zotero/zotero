@@ -97,5 +97,7 @@
 <!ENTITY zotero.citation.line							"Line">
 
 <!ENTITY zotero.annotate.toolbar.add.label				"Add Annotation">
+<!ENTITY zotero.annotate.toolbar.collapse.label			"Collapse All Annotations">
+<!ENTITY zotero.annotate.toolbar.expand.label			"Expand All Annotations">
 <!ENTITY zotero.annotate.toolbar.highlight.label		"Highlight Text">
 <!ENTITY zotero.annotate.toolbar.unhighlight.label		"Unhighlight Text">

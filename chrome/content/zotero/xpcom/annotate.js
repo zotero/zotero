@@ -511,6 +511,12 @@ Zotero.Annotations.prototype.load = function() {
 	}
 }
 
+Zotero.Annotations.prototype.setCollapsed = function(status) {
+	for each(var annotation in this.annotations) {
+		annotation.setCollapsed(status);
+	}
+}
+
 //////////////////////////////////////////////////////////////////////////////
 //
 // Zotero.Annotation
@@ -653,9 +659,13 @@ Zotero.Annotation.prototype.displayWithAbsoluteCoordinates = function(absX, absY
 	var startScroll = this.window.scrollMaxX;
 	
 	if(!this.div) {
+		var me = this;
+		var body = this.document.getElementsByTagName("body")[0];
+		
+		// generate regular div
 		this.div = this.document.createElement("div");
 		this.div.setAttribute("zotero", "annotation");
-		this.document.getElementsByTagName("body")[0].appendChild(this.div);
+		body.appendChild(this.div);
 		this.div.style.backgroundColor = Zotero.Annotate.annotationColor;
 		this.div.style.padding = "0";
 		this.div.style.display = "block";
@@ -664,10 +674,24 @@ Zotero.Annotation.prototype.displayWithAbsoluteCoordinates = function(absX, absY
 		this.div.style.borderColor = Zotero.Annotate.annotationBorderColor;
 		this.div.style.MozOpacity = 0.9;
 		this.div.style.zIndex = this.annotationsObj.zIndex;
-		var me = this;
 		this.div.addEventListener("click", function() { me._click() }, false);
-		
 		this._addChildElements();
+		
+		// generate pushpin div
+		this.pushpinDiv = this.document.createElement("div");
+		this.pushpinDiv.style.padding = "0";
+		this.pushpinDiv.style.display = "block";
+		this.pushpinDiv.style.position = "absolute";
+		this.pushpinDiv.style.MozOpacity = 0.9;
+		this.pushpinDiv.style.cursor = "pointer";
+		// generate pushpin image
+		var img = this.document.createElement("img");
+		img.src = "chrome://zotero/skin/annotation-hidden.png";
+		img.addEventListener("click", function() {
+			me.setCollapsed(false);
+		}, false);
+		this.pushpinDiv.appendChild(img);
+		body.appendChild(this.pushpinDiv);
 	}
 	this.div.style.display = "block";
 	this.div.style.left = absX+"px";
@@ -676,6 +700,24 @@ Zotero.Annotation.prototype.displayWithAbsoluteCoordinates = function(absX, absY
 	// move to the left if we're making things scroll
 	if(absX + this.div.scrollWidth > this.window.innerWidth) {
 		this.div.style.left = (absX-this.div.scrollWidth)+"px";
+	}
+}
+
+Zotero.Annotation.prototype.setCollapsed = function(status) {
+	if(status == true) {
+		// hide div
+		this.div.style.display = "none";
+		// move pushpin div
+		this.pushpinDiv.style.left = this.div.style.left;
+		this.pushpinDiv.style.top = this.div.style.top;
+		this.pushpinDiv.style.zIndex = this.div.style.zIndex;
+		// show pushpin div
+		this.pushpinDiv.style.display = "block";
+	} else {
+		// hide pushpin div
+		this.pushpinDiv.style.display = "none";
+		// show div
+		this.div.style.display = "block";
 	}
 }
 
@@ -710,13 +752,15 @@ Zotero.Annotation.prototype._addChildElements = function() {
 	bar.style.height = "10px";
 	bar.style.borderColor = Zotero.Annotate.annotationBorderColor;
 	
-	// close box
+	// left box
 	var closeDiv = this.document.createElement("div");
 	closeDiv.style.display = "block";
 	closeDiv.style.position = "absolute";
 	closeDiv.style.left = "1px";
 	closeDiv.style.top = "1px";
 	closeDiv.style.cursor = "pointer";
+	
+	// close image
 	var img = this.document.createElement("img");
 	img.src = "chrome://zotero/skin/annotation-close.png";
 	img.addEventListener("click", function(event) {
@@ -724,22 +768,34 @@ Zotero.Annotation.prototype._addChildElements = function() {
 			me._delete();
 		}
 	}, false);
+	
 	closeDiv.appendChild(img);
 	bar.appendChild(closeDiv);
 	
-	// move box
+	// right box
 	var moveDiv = this.document.createElement("div");
 	moveDiv.style.display = "block";
 	moveDiv.style.position = "absolute";
 	moveDiv.style.right = "1px";
 	moveDiv.style.top = "1px";
 	moveDiv.style.cursor = "pointer";
+	
+	// move image
 	this.moveImg = this.document.createElement("img");
 	this.moveImg.src = "chrome://zotero/skin/annotation-move.png";
 	this.moveImg.addEventListener("click", function(e) {
-		me._startMove(e);
+		me._startMove();
 	}, false);
 	moveDiv.appendChild(this.moveImg);
+	
+	// hide image
+	var img = this.document.createElement("img");
+	img.src = "chrome://zotero/skin/annotation-hide.png";
+	img.addEventListener("click", function(event) {
+		me.setCollapsed(true);
+	}, false);
+	moveDiv.appendChild(img);
+	
 	bar.appendChild(moveDiv);
 	
 	// grippy
@@ -786,7 +842,7 @@ Zotero.Annotation.prototype._click = function() {
 }
 
 Zotero.Annotation.prototype._confirmDelete = function(event) {
-	if (event.target.parentNode.nextSibling.value == '' ||
+	if (this.textarea.value == '' ||
 		!Zotero.Prefs.get('annotations.warnOnClose')) {
 		return true;
 	}

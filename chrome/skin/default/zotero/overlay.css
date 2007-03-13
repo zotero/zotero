@@ -254,6 +254,16 @@
 	list-style-image: url('chrome://zotero/skin/annotate-add.png');
 }
 
+#zotero-annotate-tb-collapse
+{
+	list-style-image: url('chrome://zotero/skin/annotate-collapse-all.png');
+}
+
+#zotero-annotate-tb-expand
+{
+	list-style-image: url('chrome://zotero/skin/annotate-expand-all.png');
+}
+
 #zotero-annotate-tb-highlight
 {
 	list-style-image: url('chrome://zotero/skin/annotate-highlight.png');
