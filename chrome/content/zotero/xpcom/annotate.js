@@ -862,20 +862,13 @@ Zotero.Annotation.prototype._doDrag = function(e) {
 	var rowSize = this.textarea.clientHeight/this.textarea.rows;
 	
 	// update cols and rows
-	if(Math.abs(x) > colSize) {
-		var cols = this.clickStartCols+Math.floor(x/colSize);
-		cols = (cols > 5 ? cols : 5);
-		
-		this.textarea.cols = this.cols = cols;
-	}
-	if(Math.abs(y) > rowSize) {
-		var rows = this.clickStartRows+Math.floor(y/rowSize);
-		rows = (rows > 2 ? rows : 2);
-		
-		this.textarea.rows = this.rows = rows;
-	}
+	var cols = this.clickStartCols+Math.floor(x/colSize);
+	cols = (cols > 5 ? cols : 5);
+	this.textarea.cols = this.cols = cols;
 	
-	Zotero.debug("cols: "+cols+", "+rows);
+	var rows = this.clickStartRows+Math.floor(y/rowSize);
+	rows = (rows > 2 ? rows : 2);
+	this.textarea.rows = this.rows = rows;
 	
 	// not sure why this is necessary
 	this.div.style.width = (6+this.textarea.offsetWidth)+"px";
