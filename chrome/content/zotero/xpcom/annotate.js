@@ -682,11 +682,11 @@ Zotero.Annotation.prototype.displayWithAbsoluteCoordinates = function(absX, absY
 		this.pushpinDiv.style.padding = "0";
 		this.pushpinDiv.style.display = "block";
 		this.pushpinDiv.style.position = "absolute";
-		this.pushpinDiv.style.MozOpacity = 0.9;
 		this.pushpinDiv.style.cursor = "pointer";
 		// generate pushpin image
 		var img = this.document.createElement("img");
 		img.src = "chrome://zotero/skin/annotation-hidden.png";
+		img.title = Zotero.getString("annotations.expand.tooltip");
 		img.addEventListener("click", function() {
 			me.setCollapsed(false);
 		}, false);
@@ -763,6 +763,7 @@ Zotero.Annotation.prototype._addChildElements = function() {
 	// close image
 	var img = this.document.createElement("img");
 	img.src = "chrome://zotero/skin/annotation-close.png";
+	img.title = Zotero.getString("annotations.close.tooltip");
 	img.addEventListener("click", function(event) {
 		if(me._confirmDelete(event)) {
 			me._delete();
@@ -783,6 +784,7 @@ Zotero.Annotation.prototype._addChildElements = function() {
 	// move image
 	this.moveImg = this.document.createElement("img");
 	this.moveImg.src = "chrome://zotero/skin/annotation-move.png";
+	this.moveImg.title = Zotero.getString("annotations.move.tooltip");
 	this.moveImg.addEventListener("click", function(e) {
 		me._startMove(e);
 	}, false);
@@ -791,6 +793,7 @@ Zotero.Annotation.prototype._addChildElements = function() {
 	// hide image
 	var img = this.document.createElement("img");
 	img.src = "chrome://zotero/skin/annotation-hide.png";
+	img.title = Zotero.getString("annotations.collapse.tooltip");
 	img.addEventListener("click", function(event) {
 		me.setCollapsed(true);
 	}, false);
@@ -804,7 +807,7 @@ Zotero.Annotation.prototype._addChildElements = function() {
 	this.grippyDiv.style.position = "absolute";
 	this.grippyDiv.style.right = "0px";
 	this.grippyDiv.style.bottom = "0px";
-	this.grippyDiv.style.cursor = "move";
+	this.grippyDiv.style.cursor = "se-resize";
 	var img = this.document.createElement("img");
 	img.src = "chrome://zotero/skin/annotation-grippy.png";
 	img.addEventListener("mousedown", function(event) {
