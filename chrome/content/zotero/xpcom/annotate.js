@@ -594,45 +594,40 @@ Zotero.Annotation.prototype.initWithDBRow = function(row) {
 Zotero.Annotation.prototype.save = function() {
 	var text = this.textarea.value;
 	
-	if(this.annotationID) {
-		// already in the DB; all we need to do is update the text
-		var query = "UPDATE annotations SET cols = ?, rows = ?, text = ? WHERE annotationID = ?";
-		var parameters = [
-			this.cols,				// cols
-			this.rows,				// rows
-			text,					// text
-			this.annotationID
-		];
-	} else {
-		// fetch marker location
-		if(this.node.getAttribute && this.node.getAttribute("zotero") == "annotation-marker") {
-			var node = this.node.previousSibling;
-			
-			if(node.nodeType != Components.interfaces.nsIDOMNode.TEXT_NODE) {
-				// someone added a highlight around this annotation
-				node = node.lastChild;
-			}
-			var offset = node.nodeValue.length;
-		} else {
-			var node = this.node;
-			var offset = 0;
+	// fetch marker location
+	if(this.node.getAttribute && this.node.getAttribute("zotero") == "annotation-marker") {
+		var node = this.node.previousSibling;
+		
+		if(node.nodeType != Components.interfaces.nsIDOMNode.TEXT_NODE) {
+			// someone added a highlight around this annotation
+			node = node.lastChild;
 		}
-		
-		// fetch path to node
-		var path = Zotero.Annotate.getPathForPoint(node, offset);
-		
+		var offset = node.nodeValue.length;
+	} else {
+		var node = this.node;
+		var offset = 0;
+	}
+	
+	// fetch path to node
+	var path = Zotero.Annotate.getPathForPoint(node, offset);
+	
+	var parameters = [
+		this.annotationsObj.itemID,	// itemID
+		path.parent,				// parent
+		path.textNode,				// textNode
+		path.offset,				// offset
+		this.x,						// x
+		this.y,						// y
+		this.cols,					// cols
+		this.rows,					// rows
+		text						// text
+	];
+	
+	if(this.annotationID) {
+		var query = "INSERT OR REPLACE INTO annotations VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+		parameters.unshift(this.annotationID);
+	} else {
 		var query = "INSERT INTO annotations VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-		var parameters = [
-			this.annotationsObj.itemID,	// itemID
-			path.parent,				// parent
-			path.textNode,				// textNode
-			path.offset,				// offset
-			this.x,						// x
-			this.y,						// y
-			this.cols,					// cols
-			this.rows,					// rows
-			text						// text
-		];
 	}
 	
 	Zotero.DB.query(query, parameters);
