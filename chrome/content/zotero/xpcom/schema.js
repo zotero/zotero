@@ -353,16 +353,21 @@ Zotero.Schema = new function(){
 			Zotero.DB.query(sql);
 			var sql = "INSERT INTO itemAttachments VALUES(123456789, NULL, 3, 'text/html', 25, NULL, NULL)";
 			Zotero.DB.query(sql);
-			var sql = "INSERT INTO itemData VALUES(123456789, 110, 'Zotero - Quick Start Guide')";
+			var sql = "INSERT INTO itemDataValues VALUES (1, 'Zotero - Quick Start Guide')";
 			Zotero.DB.query(sql);
-			var sql = "INSERT INTO itemData VALUES(123456789, 1, 'http://www.zotero.org/documentation/quick_start_guide')";
+			var sql = "INSERT INTO itemData VALUES(123456789, 110, 1)";
 			Zotero.DB.query(sql);
-			var sql = "INSERT INTO itemData VALUES(123456789, 27, '2006-10-05 14:00:00')";
+			var sql = "INSERT INTO itemDataValues VALUES (2, 'http://www.zotero.org/documentation/quick_start_guide')";
+			Zotero.DB.query(sql);
+			var sql = "INSERT INTO itemData VALUES(123456789, 1, 2)";
+			Zotero.DB.query(sql);
+			var sql = "INSERT INTO itemDataValues VALUES (3, '2006-10-05 14:00:00')";
+			Zotero.DB.query(sql);
+			var sql = "INSERT INTO itemData VALUES(123456789, 27, 3)";
 			Zotero.DB.query(sql);
 			var sql = "INSERT INTO itemNotes (itemID, sourceItemID, note) VALUES(123456789, NULL, ?)";
 			var msg = "Welcome to Zotero! Click the \"View Page\" button above to visit our Quick Start Guide and learn how to get started collecting, managing, and citing your research.\n\nThanks for trying Zotero, and be sure to tell your friends about it.";
 			Zotero.DB.query(sql, msg);
-			
 			Zotero.DB.commitTransaction();
 		}
 		catch(e){
@@ -798,6 +803,61 @@ Zotero.Schema = new function(){
 					Zotero.DB.query("INSERT INTO items SELECT * FROM itemsTemp");
 					Zotero.DB.query("DROP TABLE itemsTemp");
 				}
+				
+				if (i==22) {
+					if (Zotero.DB.valueQuery("SELECT COUNT(*) FROM items WHERE itemID=0")) {
+						var itemID = Zotero.getRandomID('items', 'itemID');
+						Zotero.DB.query("UPDATE items SET itemID=? WHERE itemID=?", [itemID, 0]);
+						Zotero.DB.query("UPDATE itemData SET itemID=? WHERE itemID=?", [itemID, 0]);
+						Zotero.DB.query("UPDATE itemNotes SET itemID=? WHERE itemID=?", [itemID, 0]);
+						Zotero.DB.query("UPDATE itemAttachments SET itemID=? WHERE itemID=?", [itemID, 0]);
+					}
+					if (Zotero.DB.valueQuery("SELECT COUNT(*) FROM collections WHERE collectionID=0")) {
+						var collectionID = Zotero.getRandomID('collections', 'collectionID');
+						Zotero.DB.query("UPDATE collections SET collectionID=? WHERE collectionID=0", [collectionID]);
+						Zotero.DB.query("UPDATE collectionItems SET collectionID=? WHERE collectionID=0", [collectionID]);
+					}
+					Zotero.DB.query("DELETE FROM tags WHERE tagID=0");
+					Zotero.DB.query("DELETE FROM itemTags WHERE tagID=0");
+					Zotero.DB.query("DELETE FROM savedSearches WHERE savedSearchID=0");
+				}
+				
+				if (i==23) {
+					Zotero.DB.query("CREATE TABLE IF NOT EXISTS itemNoteTitles (\n    itemID INT,\n    title TEXT,\n    PRIMARY KEY (itemID),\n    FOREIGN KEY (itemID) REFERENCES itemNotes(itemID)\n);");
+					var notes = Zotero.DB.query("SELECT itemID, note FROM itemNotes WHERE itemID IN (SELECT itemID FROM items WHERE itemTypeID=1)");
+					var f = function(text) { var t = text.substring(0, 80); var ln = t.indexOf("\n"); if (ln>-1 && ln<80) { t = t.substring(0, ln); } return t; }
+					for each(var note in notes) {
+						Zotero.DB.query("INSERT INTO itemNoteTitles VALUES (?,?)", [note['itemID'], f(note['note'])]);
+					}
+					
+					Zotero.DB.query("CREATE TABLE IF NOT EXISTS itemDataValues (\n    valueID INT,\n    value,\n    PRIMARY KEY (valueID)\n);");
+					var values = Zotero.DB.columnQuery("SELECT DISTINCT value FROM itemData");
+					for each(var value in values) {
+						var valueID = Zotero.getRandomID('itemDataValues', 'valueID', 2097152); // Stored in 3 bytes
+						Zotero.DB.query("INSERT INTO itemDataValues VALUES (?,?)", [valueID, value]);
+					}
+					
+					Zotero.DB.query("CREATE TEMPORARY TABLE itemDataTemp AS SELECT itemID, fieldID, (SELECT valueID FROM itemDataValues WHERE value=ID.value) AS valueID FROM itemData ID");
+					Zotero.DB.query("DROP TABLE itemData");
+					Zotero.DB.query("CREATE TABLE itemData (\n    itemID INT,\n    fieldID INT,\n    valueID INT,\n    PRIMARY KEY (itemID, fieldID),\n    FOREIGN KEY (itemID) REFERENCES items(itemID),\n    FOREIGN KEY (fieldID) REFERENCES fields(fieldID)\n    FOREIGN KEY (valueID) REFERENCES itemDataValues(valueID)\n);");
+					Zotero.DB.query("INSERT INTO itemData SELECT * FROM itemDataTemp");
+					Zotero.DB.query("DROP TABLE itemDataTemp");
+				}
+				
+				if (i==24) {
+					var rows = Zotero.DB.query("SELECT * FROM itemData NATURAL JOIN itemDataValues WHERE fieldID IN (52,96,100)");
+					for each(var row in rows) {
+						if (!Zotero.Date.isMultipart(row['value'])) {
+							var value = Zotero.Date.strToMultipart(row['value']);
+							var valueID = Zotero.DB.valueQuery("SELECT valueID FROM itemDataValues WHERE value=?", value);
+							if (!valueID) {
+								var valueID = Zotero.getRandomID('itemDataValues', 'valueID', 2097152);
+								Zotero.DB.query("INSERT INTO itemDataValues VALUES (?,?)", [valueID, value]);
+							}
+							Zotero.DB.query("UPDATE itemData SET valueID=? WHERE itemID=? AND fieldID=?", [valueID, row['itemID'], row['fieldID']]);
+						}
+					}
+				}
 			}
 			
 			_updateSchema('userdata');
@@ -824,14 +884,14 @@ Zotero.Schema = new function(){
 		try { Zotero.DB.query("DROP TRIGGER insert_date_field"); } catch (e) {}
 		try { Zotero.DB.query("DROP TRIGGER update_date_field"); } catch (e) {}
 		
-		var itemDataTrigger = "  FOR EACH ROW WHEN NEW.fieldID IN (14, 27)\n"
+		var itemDataTrigger = "  FOR EACH ROW WHEN NEW.fieldID IN (14, 27, 52, 96, 100)\n"
 			+ "  BEGIN\n"
 			+ "    SELECT CASE\n"
-			+ "        CAST(SUBSTR(NEW.value, 1, 4) AS INT) BETWEEN 0 AND 9999 AND\n"
-			+ "        SUBSTR(NEW.value, 5, 1) = '-' AND\n"
-			+ "        CAST(SUBSTR(NEW.value, 6, 2) AS INT) BETWEEN 0 AND 12 AND\n"
-			+ "        SUBSTR(NEW.value, 8, 1) = '-' AND\n"
-			+ "        CAST(SUBSTR(NEW.value, 9, 2) AS INT) BETWEEN 0 AND 31\n"
+			+ "        CAST(SUBSTR((SELECT value FROM itemDataValues WHERE valueID=NEW.valueID), 1, 4) AS INT) BETWEEN 0 AND 9999 AND\n"
+			+ "        SUBSTR((SELECT value FROM itemDataValues WHERE valueID=NEW.valueID), 5, 1) = '-' AND\n"
+			+ "        CAST(SUBSTR((SELECT value FROM itemDataValues WHERE valueID=NEW.valueID), 6, 2) AS INT) BETWEEN 0 AND 12 AND\n"
+			+ "        SUBSTR((SELECT value FROM itemDataValues WHERE valueID=NEW.valueID), 8, 1) = '-' AND\n"
+			+ "        CAST(SUBSTR((SELECT value FROM itemDataValues WHERE valueID=NEW.valueID), 9, 2) AS INT) BETWEEN 0 AND 31\n"
 			+ "      WHEN 0 THEN RAISE (ABORT, 'Date field must begin with SQL date') END;\n"
 			+ "  END;\n";
 		

@@ -208,12 +208,6 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParam,
 			}
 			break;
 		
-		case 'title':
-			var sql = "SELECT DISTINCT " + searchParam + " FROM items "
-				+ "WHERE " + searchParam + " LIKE ? ORDER BY " + searchParam;
-			var results = this._zotero.DB.columnQuery(sql, searchString + '%');
-			break;
-		
 		case 'dateModified':
 		case 'dateAdded':
 			var sql = "SELECT DISTINCT DATE(" + searchParam + ", 'localtime') FROM items "
@@ -245,14 +239,15 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParam,
 			// use the user part of the multipart field
 			var valueField = searchParam=='date' ? 'SUBSTR(value, 12, 100)' : 'value';
 			
-			var sql = "SELECT DISTINCT " + valueField;
-			sql += " FROM itemData WHERE fieldID=?1 AND " + valueField;
-			sql += " LIKE ?2 "
+			var sql = "SELECT DISTINCT " + valueField
+				+ " FROM itemData NATURAL JOIN itemDataValues "
+				+ "WHERE fieldID=?1 AND " + valueField
+				+ " LIKE ?2 "
 			
 			var sqlParams = [fieldID, searchString + '%'];
 			if (extra){
 				sql += "AND value NOT IN (SELECT value FROM itemData "
-				+ "WHERE fieldID=?1 AND itemID=?3) ";
+					+ "NATURAL JOIN itemDataValues WHERE fieldID=?1 AND itemID=?3) ";
 				sqlParams.push(extra);
 			}
 			sql += "ORDER BY value";

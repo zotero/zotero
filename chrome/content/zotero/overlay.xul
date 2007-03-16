@@ -261,7 +261,7 @@
 					
 					<!-- Label for displaying messages when items pane is hidden
 					     (e.g. "Advanced search mode — press Enter to search.")-->
-					<box pack="center" align="center">
+					<box id="zotero-items-pane-message-box" pack="center" align="center">
 						<label id="zotero-items-pane-message" />
 					</box>
 				</deck>

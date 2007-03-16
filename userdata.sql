@@ -1,4 +1,4 @@
--- 21
+-- 24
 
 -- This file creates tables containing user-specific data -- any changes
 -- to existing tables made here must be mirrored in transition steps in
@@ -67,12 +67,18 @@ CREATE TABLE IF NOT EXISTS items (
 CREATE TABLE IF NOT EXISTS itemData (
     itemID INT,
     fieldID INT,
-    value,
+    valueID,
     PRIMARY KEY (itemID, fieldID),
     FOREIGN KEY (itemID) REFERENCES items(itemID),
     FOREIGN KEY (fieldID) REFERENCES fields(fieldID)
+    FOREIGN KEY (valueID) REFERENCES itemDataValues(valueID)
 );
-CREATE INDEX IF NOT EXISTS value ON itemData(value);
+
+CREATE TABLE IF NOT EXISTS itemDataValues (
+    valueID INT,
+    value,
+    PRIMARY KEY (itemID)
+);
 
 -- Note data for note items
 CREATE TABLE IF NOT EXISTS itemNotes (
@@ -84,6 +90,13 @@ CREATE TABLE IF NOT EXISTS itemNotes (
     FOREIGN KEY (sourceItemID) REFERENCES items(itemID)
 );
 CREATE INDEX IF NOT EXISTS itemNotes_sourceItemID ON itemNotes(sourceItemID);
+
+CREATE TABLE IF NOT EXISTS itemNoteTitles (
+    itemID INT,
+    title TEXT,
+    PRIMARY KEY (itemID),
+    FOREIGN KEY (itemID) REFERENCES itemNotes(itemID)
+);
 
 -- Metadata for attachment items
 CREATE TABLE IF NOT EXISTS itemAttachments (

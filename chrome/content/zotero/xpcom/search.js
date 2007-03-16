@@ -192,9 +192,7 @@ Zotero.Search.prototype.addCondition = function(condition, operator, value, requ
 		
 		for each(var part in parts) {
 			this.addCondition('blockStart');
-			this.addCondition('title', operator, part.text, false);
 			this.addCondition('field', operator, part.text, false);
-			this.addCondition('numberfield', operator, part.text, false);
 			this.addCondition('creator', operator, part.text, false);
 			this.addCondition('tag', operator, part.text, false);
 			this.addCondition('note', operator, part.text, false);
@@ -578,28 +576,30 @@ Zotero.Search.prototype._buildQuery = function(){
 					case 'field':
 					case 'datefield':
 					case 'numberfield':
-						if (!condition['alias']){
-							break;
+						if (condition['alias']) {
+							// Add base field
+							condSQLParams.push(
+								Zotero.ItemFields.getID(condition['alias'])
+							);
+							var typeFields = Zotero.ItemFields.getTypeFieldsFromBase(condition['alias']);
+							if (typeFields) {
+								condSQL += 'fieldID IN (?,';
+								// Add type-specific fields
+								for each(var fieldID in typeFields) {
+									condSQL += '?,';
+									condSQLParams.push(fieldID);
+								}
+								condSQL = condSQL.substr(0, condSQL.length - 1);
+								condSQL += ') AND ';
+							}
+							else {
+								condSQL += 'fieldID=? AND ';
+							}
 						}
 						
-						// Add base field
-						condSQLParams.push(
-							Zotero.ItemFields.getID(condition['alias'])
-						);
-						var typeFields = Zotero.ItemFields.getTypeFieldsFromBase(condition['alias']);
-						if (typeFields) {
-							condSQL += 'fieldID IN (?,';
-							// Add type-specific fields
-							for each(var fieldID in typeFields) {
-								condSQL += '?,';
-								condSQLParams.push(fieldID);
-							}
-							condSQL = condSQL.substr(0, condSQL.length - 1);
-							condSQL += ') AND ';
-						}
-						else {
-							condSQL += 'fieldID=? AND ';
-						}
+						condSQL += "valueID IN (SELECT valueID FROM "
+							+ "itemDataValues WHERE ";
+						openParens++;
 						break;
 					
 					case 'collectionID':
@@ -1102,16 +1102,6 @@ Zotero.SearchConditions = new function(){
 				},
 				table: 'collectionItems',
 				field: 'collectionID'
-			},
-			
-			{
-				name: 'title',
-				operators: {
-					contains: true,
-					doesNotContain: true
-				},
-				table: 'items',
-				field: 'title'
 			},
 			
 			{

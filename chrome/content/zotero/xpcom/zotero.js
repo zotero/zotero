@@ -41,6 +41,8 @@ var Zotero = new function(){
 	this.getZoteroDatabase = getZoteroDatabase;
 	this.chooseZoteroDirectory = chooseZoteroDirectory;
 	this.debug = debug;
+	this.log = log;
+	this.getErrors = getErrors;
 	this.varDump = varDump;
 	this.safeDebug = safeDebug;
 	this.getString = getString;
@@ -58,6 +60,7 @@ var Zotero = new function(){
 	
 	// Public properties
 	this.initialized = false;
+	this.skipLoading = false;
 	this.__defineGetter__("startupError", function() { return _startupError; });
 	this.__defineGetter__("startupErrorHandler", function() { return _startupErrorHandler; });
 	this.version;
@@ -79,7 +82,7 @@ var Zotero = new function(){
 	 * Initialize the extension
 	 */
 	function init(){
-		if (this.initialized){
+		if (this.initialized || this.skipLoading) {
 			return false;
 		}
 		
@@ -361,25 +364,65 @@ var Zotero = new function(){
 			return false;
 		}
 		
-		// Note: DebugLogger extension is old and no longer supported -- if there's
-		// a better extension we could switch to that as an option
-		if (false && ZOTERO_CONFIG['DEBUG_TO_CONSOLE']){
-			try {
-				var logManager =
-				Components.classes["@mozmonkey.com/debuglogger/manager;1"]
-				.getService(Components.interfaces.nsIDebugLoggerManager);
-				var logger = logManager.registerLogger("Zotero");
-			}
-			catch (e){}
-		}
-		
-		if (logger){
-			logger.log(level, message);
-		}
-		else {
-			dump('zotero(' + level + '): ' + message + "\n\n");
-		}
+		dump('zotero(' + level + '): ' + message + "\n\n");
 		return true;
+	}
+	
+	
+	/*
+	 * Log a message to the Mozilla JS error console
+	 *
+	 * |type| is a string with one of the flag types in nsIScriptError:
+	 *    'error', 'warning', 'exception', 'strict'
+	 */
+	function log(message, type, sourceName, sourceLine, lineNumber,
+			columnNumber, category) {
+		var consoleService = Components.classes["@mozilla.org/consoleservice;1"]
+			.getService(Components.interfaces.nsIConsoleService);
+		var scriptError = Components.classes["@mozilla.org/scripterror;1"]
+			.createInstance(Components.interfaces.nsIScriptError);
+		
+		if (!type) {
+			type = 'warning';
+		}
+		var flags = scriptError[type + 'Flag'];
+		
+		scriptError.init(
+			message,
+			sourceName ? sourceName : null,
+			sourceLine != undefined ? sourceLine : null,
+			lineNumber != undefined ? lineNumber : null, 
+			columnNumber != undefined ? columnNumber : null,
+			flags,
+			category
+		);
+		consoleService.logMessage(scriptError);
+	}
+	
+	
+	function getErrors() {
+		var errors = [];
+		var cs = Components.classes["@mozilla.org/consoleservice;1"].
+			getService(Components.interfaces.nsIConsoleService);
+		var messages = {};
+		cs.getMessageArray(messages, {})
+		
+		var skip = ['CSS Parser', 'content javascript'];
+		
+		for each(var msg in messages) {
+			Zotero.debug(msg);
+			try {
+				msg.QueryInterface(Components.interfaces.nsIScriptError);
+				if (skip.indexOf(msg.category) != -1) {
+					continue;
+				}
+				errors.push(msg.errorMessage);
+			}
+			catch(e) {
+				errors.push(msg.message);
+			}
+		}
+		return errors;
 	}
 	
 	
@@ -622,18 +665,18 @@ var Zotero = new function(){
 			max = 16383;
 		}
 		
+		max--; // since we use ceil(), decrement max by 1
 		var tries = 3; // # of tries to find a unique id
 		do {
 			// If no luck after number of tries, try a larger range
 			if (!tries){
 				max = max * 128;
 			}
-			var rnd = Math.floor(Math.random()*max);
+			var rnd = Math.ceil(Math.random()*max);
 			var exists = Zotero.DB.valueQuery(sql + rnd);
 			tries--;
 		}
 		while (exists);
-		
 		return rnd;
 	}
 	
@@ -1226,14 +1269,13 @@ Zotero.Date = new function(){
 		var utils = new Zotero.Utilities();
 		
 		var parts = strToDate(str);
-		parts.month = typeof parts.month != undefined ? parts.month + 1 : '';
+		parts.month = typeof parts.month != "undefined" ? parts.month + 1 : '';
 		
-		var multi = utils.lpad(parts.year, '0', 4) + '-'
+		var multi = (parts.year ? utils.lpad(parts.year, '0', 4) : '0000') + '-'
 			+ utils.lpad(parts.month, '0', 2) + '-'
-			+ utils.lpad(parts.day, '0', 2)
+			+ (parts.day ? utils.lpad(parts.day, '0', 2) : '00')
 			+ ' '
 			+ str;
-			
 		return multi;
 	}
 	
@@ -1455,7 +1497,6 @@ Zotero.WebProgressFinishListener = function(onFinish) {
 				//Zotero.debug('onFinish() called before STATE_STOP in WebProgressFinishListener.onStateChange()');
 				return;
 			}
-			
 			onFinish();
 		}
 	}

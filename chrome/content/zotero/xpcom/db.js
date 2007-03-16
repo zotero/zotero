@@ -32,6 +32,7 @@ Zotero.DBConnection = function(dbName) {
 	this._transactionRollback = null;
 	this._transactionNestingLevel = 0;
 	this._callbacks = { begin: [], commit: [], rollback: [] };
+	this._skipBackup = false;
 	this._self = this;
 }
 	
@@ -103,6 +104,8 @@ Zotero.DBConnection.prototype.query = function (sql,params) {
 		}
 	}
 	catch (e) {
+		this.checkException(e);
+		
 		var dberr = (db.lastErrorString!='not an error')
 			? ' [ERROR: ' + db.lastErrorString + ']' : '';
 		throw(e + ' [QUERY: ' + sql + ']' + dberr);
@@ -539,9 +542,55 @@ Zotero.DBConnection.prototype.observe = function(subject, topic, data) {
 }
 
 
+Zotero.DBConnection.prototype.checkException = function (e) {
+	if (e.name == 'NS_ERROR_FILE_CORRUPTED') {
+		var file = Zotero.getZoteroDatabase(this._dbName, 'is.corrupt');
+		var foStream = Components.classes["@mozilla.org/network/file-output-stream;1"]
+						 .createInstance(Components.interfaces.nsIFileOutputStream);
+		foStream.init(file, 0x02 | 0x08 | 0x20, 0664, 0); // write, create, truncate
+		foStream.write('', 0);
+		foStream.close();
+		
+		this._skipBackup = true;
+		
+		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+								.getService(Components.interfaces.nsIPromptService);
+		
+		var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
+			+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING);
+		
+		var index = ps.confirmEx(null,
+			Zotero.getString('db.dbCorrupted', this._dbName),
+			Zotero.getString('db.dbCorrupted.restart'),
+			buttonFlags,
+			Zotero.getString('general.restartNow'),
+			Zotero.getString('general.restartLater'),
+			null, null, {});
+		
+		if (index == 0) {
+			var appStartup = Components.classes["@mozilla.org/toolkit/app-startup;1"]
+					.getService(Components.interfaces.nsIAppStartup);
+			appStartup.quit(Components.interfaces.nsIAppStartup.eRestart);
+			appStartup.quit(Components.interfaces.nsIAppStartup.eAttemptQuit);
+		}
+		
+		Zotero.skipLoading = true;
+		return false;
+	}
+	return true;
+}
+
+
 Zotero.DBConnection.prototype.backupDatabase = function () {
 	if (this.transactionInProgress()) {
 		this._debug("Transaction in progress--skipping backup of DB '" + this._dbName + "'", 2);
+		return false;
+	}
+	
+	var corruptMarker = Zotero.getZoteroDatabase(this._dbName, 'is.corrupt').exists();
+	
+	if (this._skipBackup || corruptMarker) {
+		this._debug("Database '" + this._dbName + "' is marked as corrupt--skipping backup", 1);
 		return false;
 	}
 	
@@ -640,6 +689,10 @@ Zotero.DBConnection.prototype._getDBConnection = function () {
 	}
 	
 	catchBlock: try {
+		var corruptMarker = Zotero.getZoteroDatabase(this._dbName, 'is.corrupt');
+		if (corruptMarker.exists()) {
+			throw({ name: 'NS_ERROR_FILE_CORRUPTED' })
+		}
 		this._connection = store.openDatabase(file);
 	}
 	catch (e) {
@@ -706,13 +759,16 @@ Zotero.DBConnection.prototype._getDBConnection = function () {
 			]);
 			alert(msg);
 			
+			if (corruptMarker.exists()) {
+				corruptMarker.remove(null);
+			}
+			
 			break catchBlock;
 		}
 		
 		// Some other error that we don't yet know how to deal with
 		throw (e);
 	}
-	
 	
 	// Register shutdown handler to call this.onShutdown() for DB backup
 	var observerService = Components.classes["@mozilla.org/observer-service;1"]

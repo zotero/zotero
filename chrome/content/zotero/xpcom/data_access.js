@@ -26,20 +26,31 @@
  * Generally should be called through Zotero.Items rather than directly
  */
 Zotero.Item = function(itemTypeOrID){
-	this._init();
+	this._init(itemTypeOrID);
 	
-	if (itemTypeOrID){
-		this.setType(Zotero.ItemTypes.getID(itemTypeOrID));
+	if (itemTypeOrID) {
+		this._changed.set('itemTypeID');
 	}
 }
 
-Zotero.Item.prototype._init = function(){
+Zotero.Item.prototype._init = function(itemTypeOrID, create) {
 	//
-	// Public members for access by public methods -- do not access directly
+	// These members are public so that they can be accessed by public methods
+	// -- do not access directly
 	//
-	this._data = [];
+	this._data = {};
+	this.isPrimaryField('itemID'); // make sure primary field hash array exists
+	for (var field in Zotero.Item.primaryFields) {
+		this._data[field] = null;
+	}
+	
 	this._creators = [];
-	this._itemData = [];
+	this._itemData = null;
+	
+	if (itemTypeOrID) {
+		// setType initializes type-specific properties in this._itemData
+		this.setType(Zotero.ItemTypes.getID(itemTypeOrID), true);
+	}
 	
 	this._creatorsLoaded = false;
 	this._itemDataLoaded = false;
@@ -47,6 +58,8 @@ Zotero.Item.prototype._init = function(){
 	this._changed = new Zotero.Hash();
 	this._changedCreators = new Zotero.Hash();
 	this._changedItemData = new Zotero.Hash();
+	
+	this._preChangeArray = null;
 	
 	this._noteTitle = null;
 	this._noteText = null;
@@ -70,7 +83,6 @@ Zotero.Item.prototype.isPrimaryField = function(field){
 	if (!Zotero.Item.primaryFields){
 		Zotero.Item.primaryFields = Zotero.DB.getColumnHash('items');
 		Zotero.Item.primaryFields['firstCreator'] = true;
-		Zotero.Item.primaryFields['numChildren'] = true;
 		Zotero.Item.primaryFields['numNotes'] = true;
 		Zotero.Item.primaryFields['numAttachments'] = true;
 	}
@@ -81,39 +93,80 @@ Zotero.Item.prototype.isPrimaryField = function(field){
 /*
  * Build object from database
  */
-Zotero.Item.prototype.loadFromID = function(id){
-	// Should be the same as query in Zotero.Items.loadFromID, just
-	// without itemID clause
-	var sql = 'SELECT I.*, lastName || '
-		+ 'CASE ((SELECT COUNT(*) FROM itemCreators WHERE itemID=' + id + ')>1) '
-		+ "WHEN 0 THEN '' ELSE ' et al.' END AS firstCreator, "
-		+ "(SELECT COUNT(*) FROM itemNotes WHERE sourceItemID=I.itemID) AS numNotes, "
-		+ "(SELECT COUNT(*) FROM itemAttachments WHERE sourceItemID=I.itemID) AS numAttachments "
-		+ 'FROM items I '
-		+ 'LEFT JOIN itemCreators IC ON (I.itemID=IC.itemID) '
-		+ 'LEFT JOIN creators C ON (IC.creatorID=C.creatorID) '
-		+ 'WHERE itemID=' + id
-		+ ' AND (IC.orderIndex=0 OR IC.orderIndex IS NULL)'; // first creator
+Zotero.Item.prototype.loadFromID = function(id) {
+	var columns = [], join = [], where = [];
+	for (var field in Zotero.Item.primaryFields) {
+		var colSQL = null, joinSQL = null, whereSQL = null;
+		// If field not already set
+		if (this._data[field] === null) {
+			// Parts should be the same as query in Zotero.Items._load, just
+			// without itemID clause
+			switch (field) {
+				case 'itemTypeID':
+				case 'dateAdded':
+				case 'dateModified':
+					colSQL = 'I.' + field;
+					break;
+				
+				case 'firstCreator':
+					colSQL = 'CASE ((SELECT COUNT(*) FROM itemCreators '
+						+ 'WHERE itemID=' + id + ')>1) '
+						+ "WHEN 0 THEN '' ELSE ' et al.' END AS firstCreator";
+					joinSQL = 'LEFT JOIN itemCreators IC ON (I.itemID=IC.itemID) '
+						+ 'LEFT JOIN creators C ON (IC.creatorID=C.creatorID)';
+					whereSQL = '(IC.orderIndex=0 OR IC.orderIndex IS NULL)';
+					break;
+					
+				case 'numNotes':
+					colSQL = '(SELECT COUNT(*) FROM itemNotes '
+						+ 'WHERE sourceItemID=I.itemID) AS numNotes';
+					break;
+					
+				case 'numAttachments':
+					colSQL = '(SELECT COUNT(*) FROM itemAttachments '
+						+ 'WHERE sourceItemID=I.itemID) AS numAttachments';
+					break;
+			}
+			if (colSQL) {
+				columns.push(colSQL);
+			}
+			if (joinSQL) {
+				join.push(joinSQL);
+			}
+			if (whereSQL) {
+				where.push(whereSQL);
+			}
+		}
+	}
+	
+	var sql = 'SELECT I.itemID' + (columns.length ? ', ' + columns.join(', ') : '')
+		+ " FROM items I " + (join.length ? join.join(' ') + ' ' : '')
+		+ "WHERE I.itemID=" + id + (where.length ? ' AND ' + where.join(' AND ') : '');
 	var row = Zotero.DB.rowQuery(sql);
 	this.loadFromRow(row);
+	this._itemDataLoaded = true;
 }
 
 
 /*
  * Populate basic item data from a database row
  */
-Zotero.Item.prototype.loadFromRow = function(row){
-	this._init();
+Zotero.Item.prototype.loadFromRow = function(row, reload) {
+	// If necessary or reloading, set the type and initialize this._itemData
+	if (reload || (!this.getType() && row['itemTypeID'])) {
+		this.setType(row['itemTypeID'], true);
+	}
+	
 	for (var col in row){
 		// Only accept primary field data through loadFromRow()
 		if (this.isPrimaryField(col)){
-			this._data[col] = row[col];
+			//Zotero.debug('Setting field ' + col + ' for item ' + this.getID());
+			this._data[col] = row[col] ? row[col] : false;
 		}
 		else {
 			Zotero.debug(col + ' is not a valid primary field');
 		}
 	}
-	return true;
 }
 
 
@@ -139,17 +192,17 @@ Zotero.Item.prototype.getType = function(){
 /*
  * Set or change the item's type
  */
-Zotero.Item.prototype.setType = function(itemTypeID){
+Zotero.Item.prototype.setType = function(itemTypeID, loadIn) {
 	if (itemTypeID==this.getType()){
 		return true;
 	}
 	
 	// If there's an existing type
 	if (this.getType()){
+		var copiedFields = [];
+		
 		var obsoleteFields = this.getFieldsNotInType(itemTypeID);
 		if (obsoleteFields) {
-			var copiedFields = [];
-			
 			for each(var oldFieldID in obsoleteFields) {
 				// Try to get a base type for this field
 				var baseFieldID =
@@ -170,6 +223,13 @@ Zotero.Item.prototype.setType = function(itemTypeID){
 			}
 		}
 		
+		for (var fieldID in this._itemData) {
+			if (this._itemData[fieldID] &&
+					(!obsoleteFields || obsoleteFields.indexOf(fieldID) == -1)) {
+				copiedFields.push([fieldID, this.getField(fieldID)]);
+			}
+		}
+		
 		// And reset custom creator types to the default
 		var creators = this.getCreators();
 		if (creators){
@@ -185,12 +245,22 @@ Zotero.Item.prototype.setType = function(itemTypeID){
 	}
 	
 	this._data['itemTypeID'] = itemTypeID;
-	this._changed.set('itemTypeID');
+	
+	// Initialize this._itemData with type-specific fields
+	this._itemData = {};
+	var fields = Zotero.ItemFields.getItemTypeFields(itemTypeID);
+	for each(var fieldID in fields) {
+		this._itemData[fieldID] = null;
+	}
 	
 	if (copiedFields) {
 		for each(var f in copiedFields) {
 			this.setField(f[0], f[1]);
 		}
+	}
+	
+	if (!loadIn) {
+		this._changed.set('itemTypeID');
 	}
 	
 	return true;
@@ -418,20 +488,21 @@ Zotero.Item.prototype.creatorExists = function(firstName, lastName, creatorTypeI
 Zotero.Item.prototype.getField = function(field, unformatted, includeBaseMapped) {
 	//Zotero.debug('Requesting field ' + field + ' for item ' + this.getID(), 4);
 	if (this.isPrimaryField(field)){
+		if (this.getID() && this._data[field] === null) {
+			this.loadFromID(this.getID());
+		}
+		//Zotero.debug('Returning ' + (this._data[field] ? this._data[field] : ''));
 		return this._data[field] ? this._data[field] : '';
 	}
 	
-	if (Zotero.ItemFields.getName(field) == 'title' && this.isNote()) {
-		if (this._noteTitle !== null) {
-			return this._noteTitle;
+	if (this.isNote()) {
+		switch (Zotero.ItemFields.getName(field)) {
+			case 'title':
+				return this.getNoteTitle();
+				
+			default:
+				return '';
 		}
-		var title = this._noteToTitle();
-		this._noteTitle = title;
-		return title;
-	}
-	
-	if (this.getID() && !this._itemDataLoaded){
-		this._loadItemData();
 	}
 	
 	if (includeBaseMapped) {
@@ -444,14 +515,24 @@ Zotero.Item.prototype.getField = function(field, unformatted, includeBaseMapped)
 		var fieldID = Zotero.ItemFields.getID(field);
 	}
 	
+	if (typeof this._itemData[fieldID] == 'undefined') {
+		//Zotero.debug('Returning blank for ' + field + ' in ' + this.getType());
+		return '';
+	}
+	
+	if (this.getID() && this._itemData[fieldID] === null && !this._itemDataLoaded) {
+		this._loadItemData();
+	}
+	
 	var value = this._itemData[fieldID] ? this._itemData[fieldID] : '';
 	
 	if (!unformatted){
-		if (fieldID==Zotero.ItemFields.getID('date')){
+		// Multipart date fields
+		if (Zotero.ItemFields.isFieldOfBase(fieldID, 'date')) {
 			value = Zotero.Date.multipartToStr(value);
 		}
 	}
-	
+	//Zotero.debug('Returning ' + value);
 	return value;
 }
 
@@ -471,14 +552,13 @@ Zotero.Item.prototype.setField = function(field, value, loadIn){
 		throw ('Primary field ' + field + ' cannot be changed through setField');
 	}
 	
-	// Type-specific field
 	if (!this.getType()){
 		throw ('Item type must be set before setting field data.');
 	}
 	
 	// If existing item, load field data first unless we're already in
 	// the middle of a load
-	if (this.getID() && !loadIn && !this._itemDataLoaded){
+	if (this.getID() && !loadIn && !this._itemDataLoaded) {
 		this._loadItemData();
 	}
 	
@@ -488,18 +568,23 @@ Zotero.Item.prototype.setField = function(field, value, loadIn){
 		throw (field + ' is not a valid itemData field.');
 	}
 	
-	if (!Zotero.ItemFields.isValidForType(fieldID, this.getType())){
-		throw (field + ' is not a valid field for this type.');
+	if (loadIn && this.isNote() && field == 110) { // title
+		this._noteTitle = value;
+		return true;
 	}
 	
-	// Save date field as multipart date
+	if (!Zotero.ItemFields.isValidForType(fieldID, this.getType())){
+		throw ('"' + field + "' is not a valid field for this type.");
+	}
+	
 	if (!loadIn){
-		if (fieldID==Zotero.ItemFields.getID('date') &&
-				!Zotero.Date.isMultipart(value)){
+		// Save date field as multipart date
+		if (Zotero.ItemFields.isFieldOfBase(fieldID, 'date') &&
+				!Zotero.Date.isMultipart(value)) {
 			value = Zotero.Date.strToMultipart(value);
 		}
-		
-		if (fieldID == Zotero.ItemFields.getID('accessDate')) {
+		// Validate access date
+		else if (fieldID == Zotero.ItemFields.getID('accessDate')) {
 			if (!Zotero.Date.isSQLDate(value) &&
 					!Zotero.Date.isSQLDateTime(value) &&
 					value != 'CURRENT_TIMESTAMP') {
@@ -508,21 +593,22 @@ Zotero.Item.prototype.setField = function(field, value, loadIn){
 				return false;
 			}
 		}
+		
+		// If existing value, make sure it's actually changing
+		if ((!this._itemData[fieldID] && !value) ||
+				(this._itemData[fieldID] && this._itemData[fieldID]==value)) {
+			return false;
+		}
+		
+		// Save a copy of the object before modifying
+		if (!this._preChangeArray) {
+			this._preChangeArray = this.toArray();
+		}
 	}
 	
-	// If existing value, make sure it's actually changing
-	if ((!this._itemData[fieldID] && !value) ||
-		(this._itemData[fieldID] && this._itemData[fieldID]==value)){
-		return false;
-	}
 	this._itemData[fieldID] = value;
 	
-	if (loadIn) {
-		// Not ideal to do this here, but there's not a great way to set this
-		// private variable from Z.Items._load()
-		this._itemDataLoaded = true;
-	}
-	else {
+	if (!loadIn) {
 		this._changedItemData.set(fieldID);
 	}
 	return true;
@@ -531,8 +617,6 @@ Zotero.Item.prototype.setField = function(field, value, loadIn){
 
 /*
  * Save changes back to database
- *
- * Note: Does not call notify() if transaction is in progress
  *
  * Returns true on item update or itemID of new item
  */
@@ -561,7 +645,6 @@ Zotero.Item.prototype.save = function(){
 		Zotero.debug('Updating database with new item data', 4);
 		
 		var itemID = this.getID();
-		var preItemArray = this.toArray();
 		
 		try {
 			Zotero.DB.beginTransaction();
@@ -645,15 +728,6 @@ Zotero.Item.prototype.save = function(){
 						'itemID-creatorID-creatorTypeID',
 						[this.getID(), creatorID, creator['creatorTypeID']]);
 				}
-				
-				// Delete obsolete creators
-				var deleted;
-				if (deleted = Zotero.Creators.purge()){
-					for (var i in deleted){
-						// Add purged creators to history
-						Zotero.History.remove('creators', 'creatorID', i);
-					}
-				}
 			}
 			
 			
@@ -663,94 +737,75 @@ Zotero.Item.prototype.save = function(){
 			if (this._changedItemData.length){
 				var del = new Array();
 				
-				sql = "SELECT COUNT(*) FROM itemData WHERE itemID=? AND fieldID=?";
-				var countStatement = Zotero.DB.getStatement(sql);
+				sql = "SELECT valueID FROM itemDataValues WHERE value=?";
+				var valueStatement = Zotero.DB.getStatement(sql);
 				
-				sql = "UPDATE itemData SET value=? WHERE itemID=? AND fieldID=?";
-				var updateStatement = Zotero.DB.getStatement(sql);
-				
-				sql = "INSERT INTO itemData VALUES (?,?,?)";
+				sql = "INSERT INTO itemDataValues VALUES (?,?)";
 				var insertStatement = Zotero.DB.getStatement(sql);
 				
+				sql = "REPLACE INTO itemData VALUES (?,?,?)";
+				var replaceStatement = Zotero.DB.getStatement(sql);
+				
 				for (fieldID in this._changedItemData.items){
-					if (this.getField(fieldID)){
-						// Oh, for an INSERT...ON DUPLICATE KEY UPDATE
-						countStatement.bindInt32Parameter(0, this.getID());
-						countStatement.bindInt32Parameter(1, fieldID);
-						countStatement.executeStep();
-						var exists = countStatement.getInt64(0);
-						countStatement.reset();
-						
-						// Update
-						if (exists){
-							updateStatement.bindInt32Parameter(1, this.getID());
-							
+					var value = this.getField(fieldID, true);
+					if (value) {
+						// Field exists
+						if (this._preChangeArray[Zotero.ItemFields.getName(fieldID)]) {
 							Zotero.History.modify('itemData', 'itemID-fieldID',
 								[this.getID(), fieldID]);
+						}
+						// Field is new
+						else {
+							Zotero.History.add('itemData', 'itemID-fieldID',
+								[this.getID(), fieldID]);
+						}
+						
+						valueStatement.bindUTF8StringParameter(0, value);
+						if (valueStatement.executeStep()) {
+							var valueID = valueStatement.getInt32(0);
+						}
+						else {
+							var valueID = null;
+						}
+						valueStatement.reset();
+						
+						if (!valueID) {
+							valueID = Zotero.getRandomID('itemDataValues', 'valueID', 2097152); // stored in 3 bytes
+							insertStatement.bindInt32Parameter(0, valueID);
 							
-							// Don't bind CURRENT_TIMESTAMP as string
-							if (Zotero.ItemFields.getID('accessDate')==fieldID
-								&& this.getField(fieldID)=='CURRENT_TIMESTAMP')
-							{
-								sql = "UPDATE itemData SET value=CURRENT_TIMESTAMP"
-									+ " WHERE itemID=? AND fieldID=?";
-								Zotero.DB.query(sql,
-									[{int:this.getID()}, {int:fieldID}]);
+							if (Zotero.ItemFields.getID('accessDate') == fieldID
+									&& this.getField(fieldID) == 'CURRENT_TIMESTAMP') {
+								sql = "INSERT INTO itemDataValues VALUES "
+									+ "(?,CURRENT_TIMESTAMP)";
+								Zotero.DB.query(sql, {int: valueID});
 							}
 							else {
-								// Take advantage of SQLite's manifest typing
-								if (Zotero.ItemFields.isInteger(fieldID)){
-									updateStatement.bindInt32Parameter(0,
-										this.getField(fieldID, true));
+								if (Zotero.ItemFields.isInteger(fieldID)) {
+									insertStatement.
+										bindInt32Parameter(1, value);
 								}
 								else {
-									updateStatement.bindUTF8StringParameter(0,
-										this.getField(fieldID, true));
+									insertStatement.
+										bindUTF8StringParameter(1, value);
 								}
-								updateStatement.bindInt32Parameter(2, fieldID);
 								try {
-									updateStatement.execute();
+									insertStatement.execute();
 								}
-								catch(e){
-									throw(Zotero.DB.getLastErrorString());
+								catch (e) {
+									throw (Zotero.DB.getLastErrorString());
 								}
 							}
 						}
 						
-						// Insert
-						else {
-							Zotero.History.add('itemData', 'itemID-fieldID',
-								[this.getID(), fieldID]);
+						replaceStatement.bindInt32Parameter(0, this.getID());
+						replaceStatement.bindInt32Parameter(1, fieldID);
+						replaceStatement.bindInt32Parameter(2, valueID);
 							
-							insertStatement.bindInt32Parameter(0, this.getID());
-							insertStatement.bindInt32Parameter(1, fieldID);
-							
-							if (Zotero.ItemFields.getID('accessDate')==fieldID
-								&& this.getField(fieldID)=='CURRENT_TIMESTAMP')
-							{
-								sql = "INSERT INTO itemData VALUES "
-									+ "(?,?,CURRENT_TIMESTAMP)";
-								
-								Zotero.DB.query(sql,
-									[{int:this.getID()}, {int:fieldID}]);
-							}
-							else {
-								if (Zotero.ItemFields.isInteger(fieldID)){
-									insertStatement.bindInt32Parameter(2,
-										this.getField(fieldID, true));
-								}
-								else {
-									insertStatement.bindUTF8StringParameter(2,
-										this.getField(fieldID, true));
-								}
-								
-								try {
-									insertStatement.execute();
-								}
-								catch(e){
-									throw(Zotero.DB.getLastErrorString());
-								}
-							}
+						try {
+							replaceStatement.execute();
+						}
+						catch (e) {
+							throw (Zotero.DB.getLastErrorString());
 						}
 					}
 					
@@ -760,9 +815,8 @@ Zotero.Item.prototype.save = function(){
 					}
 				}
 				
-				countStatement.reset();
-				updateStatement.reset();
 				insertStatement.reset();
+				replaceStatement.reset();
 				
 				// Delete blank fields
 				if (del.length){
@@ -839,43 +893,76 @@ Zotero.Item.prototype.save = function(){
 			//
 			if (this._changedItemData.length){
 				// Use manual bound parameters to speed things up
-				var statement =
-					Zotero.DB.getStatement("INSERT INTO itemData VALUES (?,?,?)");
+				sql = "SELECT valueID FROM itemDataValues WHERE value=?";
+				var valueStatement = Zotero.DB.getStatement(sql);
 				
+				sql = "INSERT INTO itemDataValues VALUES (?,?)";
+				var insertValueStatement = Zotero.DB.getStatement(sql);
+				
+				sql = "INSERT INTO itemData VALUES (?,?,?)";
+				var insertStatement = Zotero.DB.getStatement(sql);
+				
+				Zotero.debug(this._changedItemData.items);
 				for (fieldID in this._changedItemData.items){
-					if (!this.getField(fieldID, true)){
+					var value = this.getField(fieldID, true);
+					if (!value) {
 						continue;
 					}
 					
-					statement.bindInt32Parameter(0, this.getID());
-					statement.bindInt32Parameter(1, fieldID);
-					
-					if (Zotero.ItemFields.getID('accessDate')==fieldID
-						&& this.getField(fieldID)=='CURRENT_TIMESTAMP')
-					{
-						sql = "INSERT INTO itemData VALUES (?,?,CURRENT_TIMESTAMP)";
-						Zotero.DB.query(sql, [{int:this.getID()}, {int:fieldID}])
+					valueStatement.bindUTF8StringParameter(0, value);
+					if (valueStatement.executeStep()) {
+						var valueID = valueStatement.getInt32(0);
 					}
 					else {
-						if (Zotero.ItemFields.isInteger(fieldID)){
-							statement.bindInt32Parameter(2, this.getField(fieldID, true));
+						var valueID = null;
+					}
+					valueStatement.reset();
+					
+					if (!valueID) {
+						valueID = Zotero.getRandomID('itemDataValues', 'valueID', 2097152); // stored in 3 bytes
+						insertValueStatement.bindInt32Parameter(0, valueID);
+						
+						if (Zotero.ItemFields.getID('accessDate') == fieldID
+								&& this.getField(fieldID) == 'CURRENT_TIMESTAMP') {
+							sql = "INSERT INTO itemDataValues VALUES "
+								+ "(?,CURRENT_TIMESTAMP)";
+							Zotero.DB.query(sql, {int: valueID});
 						}
 						else {
-							statement.bindUTF8StringParameter(2, this.getField(fieldID, true));
+							if (Zotero.ItemFields.isInteger(fieldID)) {
+								insertValueStatement.
+									bindInt32Parameter(1, value);
+							}
+							else {
+								insertValueStatement.
+									bindUTF8StringParameter(1, value);
+							}
+							try {
+								insertValueStatement.execute();
+							}
+							catch (e) {
+								throw (Zotero.DB.getLastErrorString());
+							}
 						}
-						try {
-							statement.execute();
-						}
-						catch(e){
-							throw(Zotero.DB.getLastErrorString());
-						}
+					}
+					
+					insertStatement.bindInt32Parameter(0, this.getID());
+					insertStatement.bindInt32Parameter(1, fieldID);
+					insertStatement.bindInt32Parameter(2, valueID);
+					
+					try {
+						insertStatement.execute();
+					}
+					catch(e) {
+						throw(Zotero.DB.getLastErrorString());
 					}
 					
 					Zotero.History.add('itemData', 'itemID-fieldID',
 						[itemID, fieldID]);
 				}
 				
-				statement.reset();
+				insertValueStatement.reset();
+				insertStatement.reset();
 			}
 			
 			//
@@ -940,7 +1027,7 @@ Zotero.Item.prototype.save = function(){
 		return this.getID();
 	}
 	else {
-		Zotero.Notifier.trigger('modify', 'item', this.getID(), { old: preItemArray });
+		Zotero.Notifier.trigger('modify', 'item', this.getID(), { old: this._preChangeArray });
 		return true;
 	}
 }
@@ -1008,14 +1095,18 @@ Zotero.Item.prototype.updateNote = function(text){
 	
 	var preItemArray = this.toArray();
 	
+	var title = Zotero.Notes.noteToTitle(text);
+	
 	if (this.isNote()){
 		var sourceItemID = this.getSource();
+		
+		Zotero.DB.query("REPLACE INTO itemNoteTitles VALUES (?,?)",
+			[this.getID(), {string: title}]);
 	}
 	
 	if (sourceItemID)
 	{
-		var sql = "REPLACE INTO itemNotes (note, sourceItemID, itemID) "
-			+ "VALUES (?,?,?)";
+		var sql = "REPLACE INTO itemNotes VALUES (?,?,?)";
 		var bindParams = [{string:text}, sourceItemID, this.getID()];
 	}
 	else
@@ -1028,7 +1119,9 @@ Zotero.Item.prototype.updateNote = function(text){
 	if (updated){
 		this.updateDateModified();
 		Zotero.DB.commitTransaction();
-		this.updateNoteCache(text);
+		
+		this._noteText = text ? text : '';
+		this._noteTitle = title ? title : '';
 		
 		Zotero.Notifier.trigger('modify', 'item', this.getID(), { old: preItemArray });
 	}
@@ -1038,12 +1131,12 @@ Zotero.Item.prototype.updateNote = function(text){
 }
 
 
-Zotero.Item.prototype.updateNoteCache = function(text){
-	// Update cached values
+/*
+ * Update the cached value of the note
+ */
+Zotero.Item.prototype.updateNoteCache = function(text, title) {
 	this._noteText = text ? text : '';
-	if (this.isNote()){
-		this._noteTitle = this._noteToTitle();
-	}
+	this._noteTitle = title ? title : '';
 }
 
 
@@ -1169,6 +1262,27 @@ Zotero.Item.prototype.numNotes = function(){
 
 
 /**
+* Get the first line of the note for display in the items list
+**/
+Zotero.Item.prototype.getNoteTitle = function(){
+	if (!this.isNote() && !this.isAttachment()){
+		throw ("getNoteTitle() can only be called on notes and attachments");
+	}
+	
+	if (this._noteTitle !== null){
+		return this._noteTitle;
+	}
+	
+	var sql = "SELECT title FROM itemNoteTitles WHERE itemID=" + this.getID();
+	var title = Zotero.DB.valueQuery(sql);
+	
+	this._noteTitle = title ? title : '';
+	
+	return title ? title : '';
+}
+
+
+/**
 * Get the text of an item note
 **/
 Zotero.Item.prototype.getNote = function(){
@@ -1176,9 +1290,14 @@ Zotero.Item.prototype.getNote = function(){
 		throw ("getNote() can only be called on notes and attachments");
 	}
 	
+	if (!this.getID()) {
+		return '';
+	}
+	
+	// Store access time for later garbage collection
+	this._noteAccessTime = new Date();
+	
 	if (this._noteText !== null){
-		// Store access time for later garbage collection
-		this._noteAccessTime = new Date();
 		return this._noteText;
 	}
 	
@@ -1195,6 +1314,10 @@ Zotero.Item.prototype.getNote = function(){
 * Get the itemID of the source item for a note or file
 **/
 Zotero.Item.prototype.getSource = function(){
+	if (!this.getID()) {
+		return false;
+	}
+	
 	if (this.isNote()){
 		var Type = 'Note';
 	}
@@ -1523,6 +1646,7 @@ Zotero.Item.prototype.getBestSnapshot = function(){
 	
 	var sql = "SELECT IA.itemID FROM itemAttachments IA NATURAL JOIN items I "
 		+ "LEFT JOIN itemData ID ON (IA.itemID=ID.itemID AND fieldID=1) "
+		+ "NATURAL JOIN ItemDataValues "
 		+ "WHERE sourceItemID=? AND linkMode=? AND value=? "
 		+ "ORDER BY dateAdded DESC LIMIT 1";
 		
@@ -1648,6 +1772,9 @@ Zotero.Item.prototype.hasTags = function(tagIDs) {
 }
 
 Zotero.Item.prototype.getTags = function(){
+	if (!this.getID()) {
+		return false;
+	}
 	var sql = "SELECT tagID AS id, tag, tagType AS type FROM tags WHERE tagID IN "
 		+ "(SELECT tagID FROM itemTags WHERE itemID=" + this.getID() + ") "
 		+ "ORDER BY tag COLLATE NOCASE";
@@ -1822,6 +1949,9 @@ Zotero.Item.prototype.removeAllRelated = function() {
 }
 
 Zotero.Item.prototype.getSeeAlso = function(){
+	if (!this.getID()) {
+		return false;
+	}
 	// Check both ways, using a UNION to take advantage of indexes
 	var sql ="SELECT linkedItemID FROM itemSeeAlso WHERE itemID=?1 UNION "
 		+ "SELECT itemID FROM itemSeeAlso WHERE linkedItemID=?1";
@@ -1915,6 +2045,8 @@ Zotero.Item.prototype.clone = function() {
 
 /**
 * Delete item from database and clear from Zotero.Items internal array
+*
+* Items.erase() should be used instead of this
 **/
 Zotero.Item.prototype.erase = function(deleteChildren){
 	if (!this.getID()){
@@ -2039,11 +2171,11 @@ Zotero.Item.prototype.erase = function(deleteChildren){
 	if (this.isAttachment()) {
 		Zotero.Fulltext.clearItemWords(this.getID());
 		//Zotero.Fulltext.clearItemContent(this.getID());
-		Zotero.Fulltext.purgeUnusedWords();
 	}
 	
 	sql = 'DELETE FROM itemCreators WHERE itemID=' + this.getID() + ";\n";
 	sql += 'DELETE FROM itemNotes WHERE itemID=' + this.getID() + ";\n";
+	sql += 'DELETE FROM itemNoteTitles WHERE itemID=' + this.getID() + ";\n";
 	sql += 'DELETE FROM itemAttachments WHERE itemID=' + this.getID() + ";\n";
 	sql += 'DELETE FROM itemSeeAlso WHERE itemID=' + this.getID() + ";\n";
 	sql += 'DELETE FROM itemSeeAlso WHERE linkedItemID=' + this.getID() + ";\n";
@@ -2052,8 +2184,6 @@ Zotero.Item.prototype.erase = function(deleteChildren){
 	sql += 'DELETE FROM items WHERE itemID=' + this.getID() + ";\n";
 	
 	Zotero.DB.query(sql);
-	Zotero.Creators.purge();
-	Zotero.Tags.purge();
 	
 	try {
 		Zotero.DB.commitTransaction();
@@ -2236,31 +2366,25 @@ Zotero.Item.prototype._loadItemData = function(){
 		throw ('ItemID not set for object before attempting to load data');
 	}
 	
-	var sql = 'SELECT fieldID, value FROM itemData WHERE itemID=?';
+	var sql = "SELECT fieldID, value FROM itemData NATURAL JOIN itemDataValues "
+		+ "WHERE itemID=?";
 	var fields = Zotero.DB.query(sql, this.getID());
+	
+	var itemTypeFields = Zotero.ItemFields.getItemTypeFields(this.getType());
 	
 	for each(var field in fields) {
 		this.setField(field['fieldID'], field['value'], true);
 	}
 	
+	// Mark nonexistent fields as loaded
+	for each(var fieldID in itemTypeFields) {
+		if (this._itemData[fieldID] === null) {
+			this._itemData[fieldID] = false;
+		}
+	}
+	
 	this._itemDataLoaded = true;
 }
-
-
-/**
-* Return first line (or first MAX_LENGTH characters) of note content
-**/
-Zotero.Item.prototype._noteToTitle = function(){
-	var MAX_LENGTH = 80;
-	
-	var t = this.getNote().substring(0, MAX_LENGTH);
-	var ln = t.indexOf("\n");
-	if (ln>-1 && ln<MAX_LENGTH){
-		t = t.substring(0, ln);
-	}
-	return t;
-}
-
 
 
 
@@ -2268,17 +2392,21 @@ Zotero.Item.prototype._noteToTitle = function(){
  * Primary interface for accessing Zotero items
  */
 Zotero.Items = new function(){
-	// Private members
-	var _items = new Array();
-	
 	// Privileged methods
 	this.get = get;
 	this.getAll = getAll;
 	this.add = add;
 	this.reload = reload;
-	this.reloadAll = reloadAll;
+	this.cacheFields = cacheFields;
 	this.erase = erase;
+	this.purge = purge;
 	this.unload = unload;
+	
+	// Private members
+	var _items = [];
+	var _itemsLoaded = false;
+	var _cachedFields = [];
+	
 	
 	/*
 	 * Retrieves (and loads, if necessary) an arbitrary number of items
@@ -2416,12 +2544,94 @@ Zotero.Items = new function(){
 	}
 	
 	
-	/*
-	 * Reloads all items
-	 */
-	function reloadAll(){
-		_items = new Array();
-		_load();
+	function cacheFields(fields, items) {
+		_load(items);
+		
+		var primaryFields = [];
+		var fieldIDs = [];
+		for each(var field in fields) {
+			// Check if field already cached
+			if (_cachedFields.indexOf(field) != -1) {
+				continue;
+			}
+			
+			_cachedFields.push(field);
+			
+			if (Zotero.Item.prototype.isPrimaryField(field)) {
+				primaryFields.push(field);
+			}
+			else {
+				fieldIDs.push(Zotero.ItemFields.getID(field));
+				if (Zotero.ItemFields.isBaseField(field)) {
+					fieldIDs = fieldIDs.concat(Zotero.ItemFields.getTypeFieldsFromBase(field));
+				}
+			}
+		}
+		
+		if (primaryFields.length) {
+			var sql = "SELECT itemID, " + primaryFields.join(', ') + " FROM items";
+			if (items) {
+				sql += " WHERE itemID IN (" + items.join() + ")";
+			}
+			var rows = Zotero.DB.query(sql);
+			for each(var row in rows) {
+				//Zotero.debug('Calling loadFromRow for item ' + row['itemID']);
+				_items[row['itemID']].loadFromRow(row);
+			}
+		}
+		
+		// All fields already cached
+		if (!fieldIDs.length) {
+			return;
+		}
+		
+		var allItemIDs = Zotero.DB.columnQuery("SELECT itemID FROM items");
+		var itemFieldsCached = {};
+		
+		var sql = "SELECT itemID, fieldID, value FROM itemData "
+			+ "NATURAL JOIN itemDataValues WHERE ";
+		if (items) {
+			sql += "itemID IN (" + items.join() + ") AND ";
+		}
+		sql += "fieldID IN (" + fieldIDs.join() + ")";
+		
+		var itemDataRows = Zotero.DB.query(sql);
+		for each(var row in itemDataRows) {
+			//Zotero.debug('Setting field for item ' + row['itemID']);
+			_items[row['itemID']].setField(row['fieldID'], row['value'], true);
+			
+			if (!itemFieldsCached[row['itemID']]) {
+				itemFieldsCached[row['itemID']] = {};
+			}
+			itemFieldsCached[row['itemID']][row['fieldID']] = true;
+		}
+		
+		// If 'title' is one of the fields, load in noteTitles
+		if (fields.indexOf('title') != -1) {
+			var titleFieldID = Zotero.ItemFields.getID('title');
+			var sql = 'SELECT itemID, title FROM itemNoteTitles';
+			if (items) {
+				sql += " WHERE itemID IN (" + items.join() + ")";
+			}
+			
+			var rows = Zotero.DB.query(sql);
+			for each(var row in rows) {
+				//Zotero.debug('Setting title for note ' + row['itemID']);
+				_items[row['itemID']].setField(titleFieldID, row['title'], true);
+			}
+		}
+		
+		// Set nonexistent fields in the cache list to false (instead of null)
+		for each(var itemID in allItemIDs) {
+			for each(var fieldID in fieldIDs) {
+				if (Zotero.ItemFields.isValidForType(fieldID, _items[itemID].getType())) {
+					if (!itemFieldsCached[itemID] || !itemFieldsCached[itemID][fieldID]) {
+						//Zotero.debug('Setting field ' + fieldID + ' to false for item ' + itemID);
+						_items[itemID].setField(fieldID, false, true);
+					}
+				}
+			}
+		}
 	}
 	
 	
@@ -2432,7 +2642,9 @@ Zotero.Items = new function(){
 	**/
 	function erase(ids, eraseChildren){
 		var unlock = Zotero.Notifier.begin(true);
+		Zotero.UnresponsiveScriptIndicator.disable();
 		try {
+			Zotero.DB.beginTransaction();
 			for each(var id in ids) {
 				var item = this.get(id);
 				if (!item) {
@@ -2443,10 +2655,31 @@ Zotero.Items = new function(){
 				item.erase(eraseChildren); // calls unload()
 				item = undefined;
 			}
+			this.purge();
+			Zotero.DB.commitTransaction();
+		}
+		catch (e) {
+			Zotero.DB.rollbackTransaction();
+			throw (e);
 		}
 		finally {
 			Zotero.Notifier.commit(unlock);
+			Zotero.UnresponsiveScriptIndicator.enable();
 		}
+	}
+	
+	
+	/*
+	 * Clear entries from various tables that no longer exist
+	 *
+	 * This is called automatically by Items.erase() but must be called
+	 * manually after Item.erase()
+	 */
+	function purge() {
+		Zotero.Creators.purge();
+		Zotero.Tags.purge();
+		Zotero.Fulltext.purgeUnusedWords();
+		// TODO: purge itemDataValues?
 	}
 	
 	
@@ -2458,10 +2691,13 @@ Zotero.Items = new function(){
 	}
 	
 	
-	function _load(){
-		// Should be the same as query in Zotero.Item.loadFromID, just
-		// without itemID clause
-		var sql = 'SELECT I.*, lastName || '
+	function _load() {
+		if (!arguments[0] && _itemsLoaded) {
+			return;
+		}
+		
+		// Should be the same as parts in Zotero.Item.loadFromID
+		var sql = 'SELECT I.itemID, I.itemTypeID, I.dateModified, lastName || '
 			+ 'CASE ((SELECT COUNT(*) FROM itemCreators WHERE itemID=I.itemID)>1) '
 			+ "WHEN 0 THEN '' ELSE ' et al.' END AS firstCreator, "
 			+ "(SELECT COUNT(*) FROM itemNotes WHERE sourceItemID=I.itemID) AS numNotes, "
@@ -2480,25 +2716,20 @@ Zotero.Items = new function(){
 			// Item doesn't exist -- create new object and stuff in array
 			if (!_items[row['itemID']]){
 				var item = new Zotero.Item();
-				item.loadFromRow(row);
+				item.loadFromRow(row, true);
 				_items[row['itemID']] = item;
 			}
 			// Existing item -- reload in place
 			else {
-				_items[row['itemID']].loadFromRow(row);
+				_items[row['itemID']].loadFromRow(row, true);
 			}
 		}
 		
-		var sql = "SELECT * FROM itemData";
-		if (arguments[0]) {
-			sql += " WHERE itemID IN (" + Zotero.join(arguments, ',') + ")";
+		if (!arguments[0]) {
+			_itemsLoaded = true;
+			_cachedFields = ['itemID', 'itemTypeID', 'dateModified',
+				'firstCreator', 'numNotes', 'numAttachments', 'numChildren'];
 		}
-		var itemDataRows = Zotero.DB.query(sql);
-		for each(var row in itemDataRows) {
-			_items[row['itemID']].setField(row['fieldID'], row['value'], true);
-		}
-		
-		return true;
 	}
 }
 
@@ -2507,6 +2738,7 @@ Zotero.Items = new function(){
 
 Zotero.Notes = new function(){
 	this.add = add;
+	this.noteToTitle = noteToTitle;
 	
 	/**
 	* Create a new item of type 'note' and add the note text to the itemNotes table
@@ -2531,6 +2763,10 @@ Zotero.Notes = new function(){
 		var note = new Zotero.Item('note');
 		note.save();
 		
+		var title = text ? this.noteToTitle(text) : '';
+		var sql = "INSERT INTO itemNoteTitles VALUES (?,?)";
+		Zotero.DB.query(sql, [note.getID(), title]);
+		
 		var sql = "INSERT INTO itemNotes VALUES (?,?,?)";
 		var bindParams = [
 			note.getID(),
@@ -2542,7 +2778,7 @@ Zotero.Notes = new function(){
 		
 		// Switch to Zotero.Items version
 		var note = Zotero.Items.get(note.getID());
-		note.updateNoteCache(text);
+		note.updateNoteCache(text, title);
 		
 		if (sourceItemID){
 			var notifierData = { old: sourceItem.toArray() };
@@ -2550,10 +2786,24 @@ Zotero.Notes = new function(){
 			Zotero.Notifier.trigger('modify', 'item', sourceItemID, notifierData);
 		}
 		
-		Zotero.Notifier.trigger('add', 'item', note.getID());
-		
 		return note.getID();
 	}
+	
+	
+	/**
+	* Return first line (or first MAX_LENGTH characters) of note content
+	**/
+	function noteToTitle(text) {
+		var MAX_LENGTH = 80;
+		
+		var t = text.substring(0, MAX_LENGTH);
+		var ln = t.indexOf("\n");
+		if (ln>-1 && ln<MAX_LENGTH){
+			t = t.substring(0, ln);
+		}
+		return t;
+	}
+
 }
 
 
@@ -2758,30 +3008,10 @@ Zotero.Collection.prototype.addItem = function(itemID){
 * Remove an item from the collection (does not delete item from library)
 **/
 Zotero.Collection.prototype.removeItem = function(itemID){
-	Zotero.DB.beginTransaction();
-	
-	var sql = "SELECT orderIndex FROM collectionItems "
-		+ "WHERE collectionID=" + this._id + " AND itemID=" + itemID;
-	var orderIndex = Zotero.DB.valueQuery(sql);
-	
-	if (orderIndex===false){
-		Zotero.debug('Item ' + itemID + ' is not a child of collection '
-			+ this._id);
-		Zotero.DB.rollbackTransaction();
-		return false;
-	}
-	
 	var sql = "DELETE FROM collectionItems WHERE collectionID=" + this._id
 		+ " AND itemID=" + itemID;
 	Zotero.DB.query(sql);
 	
-	// Move down items above deleted item in collection
-	sql = 'UPDATE collectionItems SET orderIndex=orderIndex-1 '
-		+ 'WHERE collectionID=' + this._id
-		+ ' AND orderIndex>' + orderIndex;
-	Zotero.DB.query(sql);
-	
-	Zotero.DB.commitTransaction();
 	this._childItems.remove(itemID);
 	
 	// If this was the last item, set collection to empty
@@ -3886,6 +4116,8 @@ Zotero.ItemFields = new function(){
 	var _fieldFormats = [];
 	var _itemTypeFields = [];
 	var _baseTypeFields = [];
+	var _typeFieldIDsByBase = {};
+	var _typeFieldNamesByBase = {};
 	
 	var self = this;
 	
@@ -3897,6 +4129,7 @@ Zotero.ItemFields = new function(){
 	this.isInteger = isInteger;
 	this.getItemTypeFields = getItemTypeFields;
 	this.isBaseField = isBaseField;
+	this.isFieldOfBase = isFieldOfBase;
 	this.getBaseMappedFields = getBaseMappedFields;
 	this.getFieldIDFromTypeAndBase = getFieldIDFromTypeAndBase;
 	this.getBaseIDFromTypeAndField = getBaseIDFromTypeAndField;
@@ -3983,15 +4216,15 @@ Zotero.ItemFields = new function(){
 		}
 		
 		if (!itemTypeID){
-			Zotero.debug("Invalid item type id '" + itemTypeID
-				+ "' provided to getItemTypeFields()", 1);
-			return [];
+			throw("Invalid item type id '" + itemTypeID
+				+ "' provided to getItemTypeFields()");
 		}
 		
 		var sql = 'SELECT fieldID FROM itemTypeFields '
 			+ 'WHERE itemTypeID=' + itemTypeID + ' ORDER BY orderIndex';
+		var fields = Zotero.DB.columnQuery(sql);
 		
-		_itemTypeFields[itemTypeID] = Zotero.DB.columnQuery(sql);
+		_itemTypeFields[itemTypeID] = fields ? fields : [];
 		return _itemTypeFields[itemTypeID];
 	}
 	
@@ -4004,6 +4237,23 @@ Zotero.ItemFields = new function(){
 		_fieldCheck(field, arguments.callee.name);
 		
 		return _fields[field]['isBaseField'];
+	}
+	
+	
+	function isFieldOfBase(field, baseField) {
+		var fieldID = _fieldCheck(field, 'isFieldOfBase');
+		
+		var baseFieldID = this.getID(baseField);
+		if (!baseFieldID) {
+			throw ("Invalid field '" + baseField + '" for base field in ItemFields.getFieldIDFromTypeAndBase()');
+		}
+		
+		if (fieldID == baseFieldID) {
+			return true;
+		}
+		
+		var typeFields = this.getTypeFieldsFromBase(baseFieldID);
+		return typeFields.indexOf(fieldID) != -1;
 	}
 	
 	
@@ -4090,12 +4340,13 @@ Zotero.ItemFields = new function(){
 			throw ("Invalid base field '" + baseField + '" in ItemFields.getTypeFieldsFromBase()');
 		}
 		
-		var sql = "SELECT fieldID FROM baseFieldMappings WHERE baseFieldID=?";
 		if (asNames) {
-			sql = "SELECT fieldName FROM fields WHERE fieldID IN (" + sql + ")";
+			return _typeFieldNamesByBase[baseFieldID] ?
+				_typeFieldNamesByBase[baseFieldID] : false;
 		}
 		
-		return Zotero.DB.columnQuery(sql, baseFieldID);
+		return _typeFieldIDsByBase[baseFieldID] ?
+			_typeFieldIDsByBase[baseFieldID] : false;
 	}
 	
 	
@@ -4104,9 +4355,11 @@ Zotero.ItemFields = new function(){
 	* (since it should never actually happen)
 	**/
 	function _fieldCheck(field, func) {
-		if (!self.getID(field)) {
+		var fieldID = self.getID(field);
+		if (!fieldID) {
 			throw ("Invalid field '" + field + (func ? "' in ItemFields." + func + "()" : "'"));
 		}
+		return fieldID;
 	}
 	
 	
@@ -4167,6 +4420,19 @@ Zotero.ItemFields = new function(){
 		}
 		
 		_baseTypeFields = fields;
+		
+		
+		var sql = "SELECT baseFieldID, fieldID, fieldName "
+			+ "FROM baseFieldMappings JOIN fields USING (fieldID)";
+		var rows = Zotero.DB.query(sql);
+		for each(var row in rows) {
+			if (!_typeFieldIDsByBase[row['baseFieldID']]) {
+				_typeFieldIDsByBase[row['baseFieldID']] = [];
+				_typeFieldNamesByBase[row['baseFieldID']] = [];
+			}
+			_typeFieldIDsByBase[row['baseFieldID']].push(row['fieldID']);
+			_typeFieldNamesByBase[row['baseFieldID']].push(row['fieldName']);
+		}
 	}
 	
 	

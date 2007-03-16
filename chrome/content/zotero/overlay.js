@@ -569,10 +569,12 @@ var ZoteroPane = new function()
 			itemgroup.setSearch('');
 			itemgroup.setTags(getTagSelection());
 			
+			Zotero.UnresponsiveScriptIndicator.disable();
 			this.itemsView = new Zotero.ItemTreeView(itemgroup);
 			this.itemsView.addCallback(_setTagScope);
 			document.getElementById('zotero-items-tree').view = this.itemsView;
 			this.itemsView.selection.clearSelection();
+			Zotero.UnresponsiveScriptIndicator.enable();
 		}
 		else
 		{

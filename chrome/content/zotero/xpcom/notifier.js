@@ -30,10 +30,6 @@ Zotero.Notifier = new function(){
 	
 	this.registerObserver = registerObserver;
 	this.unregisterObserver = unregisterObserver;
-	this.registerCollectionObserver = registerCollectionObserver;
-	this.registerItemObserver = registerItemObserver;
-	this.unregisterCollectionObserver = unregisterCollectionObserver;
-	this.unregisterItemObserver = unregisterItemObserver;
 	this.trigger = trigger;
 	this.begin = begin;
 	this.commit = commit;
@@ -78,30 +74,6 @@ Zotero.Notifier = new function(){
 	function unregisterObserver(hash){
 		Zotero.debug("Unregistering observer in notifier with hash '" + hash + "'", 4);
 		_observers.remove(hash);
-	}
-	
-	// Deprecated
-	function registerCollectionObserver(ref){
-		Zotero.debug('registerCollectionObserver is deprecated and will be removed in a future release -- use registerObserver() instead', 2);
-		return registerObserver(ref, 'collection');
-	}
-	
-	// Deprecated
-	function registerItemObserver(ref){
-		Zotero.debug('registerItemObserver is deprecated and will be removed in a future release -- use registerObserver() instead', 2);
-		return registerObserver(ref, 'item');
-	}
-	
-	// Deprecated
-	function unregisterCollectionObserver(hash){
-		Zotero.debug('unregisterCollectionObserver is deprecated and will be removed in a future release -- use unregisterObserver() instead', 2);
-		unregisterObserver(hash);
-	}
-	
-	// Deprecated
-	function unregisterItemObserver(hash){
-		Zotero.debug('unregisterItemObserver is deprecated and will be removed in a future release -- use unregisterObserver() instead', 2);
-		unregisterObserver(hash);
 	}
 	
 	/**
@@ -170,13 +142,14 @@ Zotero.Notifier = new function(){
 			Zotero.debug("Calling notify() on observer with hash '" + i + "'", 4);
 			// Find observers that handle notifications for this type (or all types)
 			if (!_observers.get(i).types || _observers.get(i).types.indexOf(type)!=-1){
-				_observers.get(i).ref.notify(event, type, ids, extraData);
-				
-				/*
-				if (extraData) {
-					Zotero.debug(extraData);
+				// Catch exceptions so all observers get notified even if
+				// one throws an error
+				try {
+					_observers.get(i).ref.notify(event, type, ids, extraData);
 				}
-				*/
+				catch (e) {
+					Components.utils.reportError(e);
+				}
 			}
 		}
 		

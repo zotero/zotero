@@ -288,15 +288,15 @@ var ZoteroItemPane = new function()
 			for(var i = 0; i<fieldNames.length; i++)
 			{
 				var editable = !_itemBeingEdited.isPrimaryField(fieldNames[i]);
-				
+				var fieldID = Zotero.ItemFields.getID(fieldNames[i])
 				var val = _itemBeingEdited.getField(fieldNames[i]);
 				
 				// Start tabindex at 1000 after creators
 				var tabindex = editable ? (i>0 ? _tabIndexMinFields + i : 1) : 0;
 				_tabIndexMaxInfoFields = Math.max(_tabIndexMaxInfoFields, tabindex);
 				
-				if (fieldNames[i]=='date'){
-					addDateRow(_itemBeingEdited.getField('date', true), tabindex);
+				if (editable && Zotero.ItemFields.isFieldOfBase(fieldID, 'date')) {
+					addDateRow(fieldNames[i], _itemBeingEdited.getField(fieldNames[i], true), tabindex);
 					continue;
 				}
 				
@@ -695,15 +695,15 @@ var ZoteroItemPane = new function()
 	/**
 	 * Add a date row with a label editor and a ymd indicator to show date parsing
 	 */
-	function addDateRow(value, tabindex)
+	function addDateRow(field, value, tabindex)
 	{
 		var label = document.createElement("label");
-		label.setAttribute("value", Zotero.getString("itemFields.date") + ':');
-		label.setAttribute("fieldname",'date');
+		label.setAttribute("value", Zotero.getString("itemFields." + field) + ':');
+		label.setAttribute("fieldname", field);
 		label.setAttribute("onclick", "this.nextSibling.firstChild.blur()");
 		
 		var hbox = document.createElement("hbox");
-		var elem = createValueElement(Zotero.Date.multipartToStr(value), 'date', tabindex);
+		var elem = createValueElement(Zotero.Date.multipartToStr(value), field, tabindex);
 		
 		// y-m-d status indicator
 		var datebox = document.createElement('hbox');
@@ -897,12 +897,6 @@ var ZoteroItemPane = new function()
 				_tabIndexMaxTagsFields = Math.max(_tabIndexMaxTagsFields, tabindex);
 				break;
 			
-			// Display the SQL date as a tooltip for the date field
-			case 'date':
-				valueElement.setAttribute('tooltiptext',
-					Zotero.Date.multipartToSQL(_itemBeingEdited.getField('date', true)));
-				break;
-			
 			// Convert dates from UTC
 			case 'dateAdded':
 			case 'dateModified':
@@ -917,6 +911,13 @@ var ZoteroItemPane = new function()
 					}
 				}
 				break;
+		}
+		
+		// Display the SQL date as a tooltip for date fields
+		var fieldID = Zotero.ItemFields.getID(fieldName);
+		if (fieldID && Zotero.ItemFields.isFieldOfBase(fieldID, 'date')) {
+			valueElement.setAttribute('tooltiptext',
+				Zotero.Date.multipartToSQL(_itemBeingEdited.getField(fieldName, true)));
 		}
 		
 		if (fieldName.indexOf('firstName')!=-1){
