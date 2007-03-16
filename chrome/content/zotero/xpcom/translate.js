@@ -1140,18 +1140,22 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 						
 						newItem.setCreator(j, data[j].firstName, data[j].lastName, creatorType);
 					}
-				} else if(field == "title") {	// skip checks for title
-					newItem.setField(field, data);
 				} else if(field == "seeAlso") {
 					newItem.translateSeeAlso = data;
 				} else if(field != "note" && field != "notes" && field != "itemID" &&
 						  field != "attachments" && field != "tags" &&
 						  (fieldID = Zotero.ItemFields.getID(field))) {
 											// if field is in db
-					if(Zotero.ItemFields.isValidForType(fieldID, typeID)) {
-											// if field is valid for this type
-						// add field
-						newItem.setField(field, data);
+					
+					// try to map from base field
+					if(Zotero.ItemFields.isBaseField(fieldID)) {
+						var fieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(typeID, fieldID);
+						if(fieldID) Zotero.debug("mapping "+field+" to "+Zotero.ItemFields.getName(fieldID));
+					}
+					
+					// if field is valid for this type, set field
+					if(fieldID && Zotero.ItemFields.isValidForType(fieldID, typeID)) {
+						newItem.setField(fieldID, data);
 					} else {
 						Zotero.debug("discarded field "+field+" for item: field not valid for type "+type);
 					}
@@ -1737,55 +1741,49 @@ Zotero.Translate.prototype._exportConfigureIO = function() {
  * copies attachment and returns data, given an attachment object
  */
 Zotero.Translate.prototype._exportGetAttachment = function(attachment) {
-	var attachmentArray = attachment.toArray();
+	var attachmentArray = this._exportToArray(attachment);
 	
-	var attachmentID = attachment.getID();
 	var linkMode = attachment.getAttachmentLinkMode();
 	
-	// get URL and accessDate if they exist
-	if(linkMode == Zotero.Attachments.LINK_MODE_LINKED_URL ||
-	   linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_URL) {
-		attachmentArray.url = attachment.getField('url');
-		attachmentArray.accessDate = attachment.getField('accessDate');
-	} else if(!this.displayOptions["exportFileData"]) {
-		// only export urls, not files, if exportFileData is off
-		return false;
-	}
-	// add item ID
-	attachmentArray.itemID = attachmentID;
 	// get mime type
-	attachmentArray.mimeType = attachment.getAttachmentMimeType();
+	attachmentArray.mimeType = attachmentArray.uniqueFields.mimeType = attachment.getAttachmentMimeType();
 	// get charset
-	attachmentArray.charset = attachment.getAttachmentCharset();
-	// get seeAlso
-	attachmentArray.seeAlso = attachment.getSeeAlso();
-	// get tags
-	attachmentArray.tags = attachment.getTags();
+	attachmentArray.charset = attachmentArray.uniqueFields.charset = attachment.getAttachmentCharset();
 	
 	if(linkMode != Zotero.Attachments.LINK_MODE_LINKED_URL &&
 	   this.displayOptions["exportFileData"]) {
 		// add path and filename if not an internet link
 		var file = attachment.getFile();
-		attachmentArray.path = "files/"+attachmentID+"/"+file.leafName;
+		attachmentArray.path = "files/"+attachmentArray.itemID+"/"+file.leafName;
 		
 		if(linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
 			// create a new directory
 			var directory = Components.classes["@mozilla.org/file/local;1"].
 							createInstance(Components.interfaces.nsILocalFile);
 			directory.initWithFile(this._exportFileDirectory);
-			directory.append(attachmentID);
+			directory.append(attachmentArray.itemID);
 			directory.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0700);
 			// copy file
-			file.copyTo(directory, attachmentArray.filename);
+			try {
+				file.copyTo(directory, attachmentArray.filename);
+			} catch(e) {
+				attachmentArray.path = undefined;
+			}
 		} else {
 			// copy imported files from the Zotero directory
 			var directory = Zotero.getStorageDirectory();
-			directory.append(attachmentID);
-			directory.copyTo(this._exportFileDirectory, attachmentID);
+			directory.append(attachmentArray.itemID);
+			try {
+				directory.copyTo(this._exportFileDirectory, attachmentArray.itemID);
+			} catch(e) {
+				attachmentArray.path = undefined;
+			}
 		}
 	}
 	
 	attachmentArray.itemType = "attachment";
+	
+	Zotero.debug(attachmentArray);
 	
 	return attachmentArray;
 }
@@ -1805,7 +1803,7 @@ Zotero.Translate.prototype._exportGetItem = function() {
 				return this._exportGetItem();
 			}
 		} else {
-			var returnItemArray = returnItem.toArray();
+			returnItemArray = this._exportToArray(returnItem);
 			
 			// get attachments, although only urls will be passed if exportFileData
 			// is off
@@ -1827,6 +1825,38 @@ Zotero.Translate.prototype._exportGetItem = function() {
 	}
 	
 	return false;
+}
+
+Zotero.Translate.prototype._exportToArray = function(returnItem) {
+	var returnItemArray = returnItem.toArray();
+	returnItemArray.uniqueFields = new Object();
+	
+	// get base fields, not just the type-specific ones
+	var itemTypeID = returnItem.getType();
+	var allFields = Zotero.ItemFields.getItemTypeFields(itemTypeID);
+	for each(var field in allFields) {
+		var fieldName = Zotero.ItemFields.getName(field);
+		
+		if(returnItemArray[fieldName] !== undefined) {
+			var baseField = Zotero.ItemFields.getBaseIDFromTypeAndField(itemTypeID, field);
+			if(baseField && baseField != field) {
+				var baseName = Zotero.ItemFields.getName(baseField);
+				if(baseName) {
+					returnItemArray[baseName] = returnItemArray[fieldName];
+					returnItemArray.uniqueFields[baseName] = returnItemArray[fieldName];
+				} else {
+					returnItemArray.uniqueFields[fieldName] = returnItemArray[fieldName];
+				}
+			} else {
+				returnItemArray.uniqueFields[fieldName] = returnItemArray[fieldName];
+			}
+		}
+	}
+	
+	// preserve notes
+	if(returnItemArray.note) returnItemArray.uniqueFields.note = returnItemArray.note;
+	
+	return returnItemArray;
 }
 
 /*

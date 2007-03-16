@@ -1,4 +1,4 @@
--- 178
+-- 180
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-03-16 03:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-03-16 22:57:15'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b3.r1', '', '2006-12-15 03:40:00', 1, 100, 4, 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -7378,7 +7378,7 @@ function doImport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('14763d24-8ba0-45df-8f52-b8d1108e7ac9', '1.0.0b3.r1', '', '2006-12-15 14:39:00', 1, 25, 2, 'Zotero RDF', 'Simon Kornblith', 'rdf',
+REPLACE INTO translators VALUES ('14763d24-8ba0-45df-8f52-b8d1108e7ac9', '1.0.0b3.r1', '', '2007-03-16 22:57:15', 1, 25, 2, 'Zotero RDF', 'Simon Kornblith', 'rdf',
 'Zotero.configure("getCollections", true);
 Zotero.configure("dataMode", "rdf");
 Zotero.addOption("exportNotes", true);
@@ -7517,7 +7517,7 @@ function generateItem(item, zoteroType, resource) {
 	if(type) {
 		Zotero.RDF.addStatement(resource, rdf+"type", type, false);
 	}
-	Zotero.RDF.addStatement(resource, n.fs+"type", zoteroType, true);
+	Zotero.RDF.addStatement(resource, n.fs+"itemType", zoteroType, true);
 	
 	// generate section
 	if(item.section) {
@@ -7569,41 +7569,75 @@ function generateItem(item, zoteroType, resource) {
 	var ignoreProperties = ["itemID", "itemType", "firstCreator", "dateAdded",
 							"dateModified", "section", "sourceItemID"];
 	
-	for(var property in item) {
+	// creators
+	if(item.creators) {			// authors/editors/contributors
+		var creatorContainers = new Object();
+		
+		// not yet in biblio
+		var biblioCreatorTypes = ["author", "editor", "contributor"];
+		
+		for(var j in item.creators) {
+			var creator = Zotero.RDF.newResource();
+			Zotero.RDF.addStatement(creator, rdf+"type", n.foaf+"Person", false);
+			// gee. an entire vocabulary for describing people, and these aren''t even
+			// standardized in it. oh well. using them anyway.
+			Zotero.RDF.addStatement(creator, n.foaf+"surname", item.creators[j].lastName, true);
+			Zotero.RDF.addStatement(creator, n.foaf+"givenname", item.creators[j].firstName, true);
+			
+			if(biblioCreatorTypes.indexOf(item.creators[j].creatorType) != -1) {
+				var cTag = n.bib+item.creators[j].creatorType+"s";
+			} else {
+				var cTag = n.fs+item.creators[j].creatorType+"s";
+			}
+			
+			if(!creatorContainers[cTag]) {
+				var creatorResource = Zotero.RDF.newResource();
+				// create new seq for author type
+				creatorContainers[cTag] = Zotero.RDF.newContainer("seq", creatorResource);
+				// attach container to resource
+				Zotero.RDF.addStatement(resource, cTag, creatorResource, false);
+			}
+			Zotero.RDF.addContainerElement(creatorContainers[cTag], creator, false);
+		}
+	}
+	
+	// notes
+	if(item.notes && Zotero.getOption("exportNotes")) {
+		for(var j in item.notes) {
+			var noteResource = itemResources[item.notes[j].itemID];
+			
+			// add note tag
+			Zotero.RDF.addStatement(noteResource, rdf+"type", n.bib+"Memo", false);
+			// add note item.notes
+			Zotero.RDF.addStatement(noteResource, rdf+"value", item.notes[j].note, true);
+			// add relationship between resource and note
+			Zotero.RDF.addStatement(resource, n.dcterms+"isReferencedBy", noteResource, false);
+			
+			// Add see also info to RDF
+			generateSeeAlso(noteResource, item.notes[j].seeAlso);
+			generateTags(noteResource, item.notes[j].tags);
+		}
+	}
+	
+	// attachments
+	if(item.attachments) {
+		for each(var attachment in item.attachments) {
+			var attachmentResource = itemResources[attachment.itemID];
+			Zotero.RDF.addStatement(resource, n.link+"link", attachmentResource, false);
+			generateItem(attachment, "attachment", attachmentResource);
+		}
+	}
+	
+	// seeAlso and tags
+	if(item.seeAlso) generateSeeAlso(resource, value);
+	if(item.tags) generateTags(resource, value);
+	
+	for(var property in item.uniqueFields) {
 		var value = item[property];
 		if(!value) continue;
 		
 		if(property == "title") {					// title
 			Zotero.RDF.addStatement(resource, n.dc+"title", value, true);
-		} else if(property == "creators") {			// authors/editors/contributors
-			var creatorContainers = new Object();
-			
-			// not yet in biblio
-			var biblioCreatorTypes = ["author", "editor", "contributor"];
-			
-			for(var j in value) {
-				var creator = Zotero.RDF.newResource();
-				Zotero.RDF.addStatement(creator, rdf+"type", n.foaf+"Person", false);
-				// gee. an entire vocabulary for describing people, and these aren''t even
-				// standardized in it. oh well. using them anyway.
-				Zotero.RDF.addStatement(creator, n.foaf+"surname", value[j].lastName, true);
-				Zotero.RDF.addStatement(creator, n.foaf+"givenname", value[j].firstName, true);
-				
-				if(biblioCreatorTypes.indexOf(value[j].creatorType) != -1) {
-					var cTag = n.bib+value[j].creatorType+"s";
-				} else {
-					var cTag = n.fs+value[j].creatorType+"s";
-				}
-				
-				if(!creatorContainers[cTag]) {
-					var creatorResource = Zotero.RDF.newResource();
-					// create new seq for author type
-					creatorContainers[cTag] = Zotero.RDF.newContainer("seq", creatorResource);
-					// attach container to resource
-					Zotero.RDF.addStatement(resource, cTag, creatorResource, false);
-				}
-				Zotero.RDF.addContainerElement(creatorContainers[cTag], creator, false);
-			}
 		} else if(property == "source") {			// authors/editors/contributors
 			Zotero.RDF.addStatement(resource, n.dc+"source", value, true);
 		} else if(property == "url") {				// url
@@ -7715,34 +7749,6 @@ function generateItem(item, zoteroType, resource) {
 					Zotero.RDF.addStatement(resource, rdf+"value", value, true);
 				}
 			}
-		} else if(property == "notes") {			// notes
-			if(Zotero.getOption("exportNotes")) {
-				for(var j in value) {
-					var noteResource = itemResources[value[j].itemID];
-					
-					// add note tag
-					Zotero.RDF.addStatement(noteResource, rdf+"type", n.bib+"Memo", false);
-					// add note value
-					Zotero.RDF.addStatement(noteResource, rdf+"value", value[j].note, true);
-					// add relationship between resource and note
-					Zotero.RDF.addStatement(resource, n.dcterms+"isReferencedBy", noteResource, false);
-					
-					// Add see also info to RDF
-					generateSeeAlso(noteResource, value[j].seeAlso);
-					generateTags(noteResource, value[j].tags);
-				}
-			}
-		} else if(property == "attachments") {		// attachments
-			for each(var attachment in value) {
-				var attachmentResource = itemResources[attachment.itemID];
-				Zotero.RDF.addStatement(resource, n.link+"link", attachmentResource, false);
-				generateItem(attachment, "attachment", attachmentResource);
-			}
-		// THE FOLLOWING RELATE TO SEE ALSO AND TAGS
-		} else if(property == "seeAlso") {			// seeAlso
-			generateSeeAlso(resource, value);
-		} else if(property == "tags") {				// tags
-			generateTags(resource, value);
 		// THIS CATCHES ALL REMAINING PROPERTIES
 		} else if(ignoreProperties.indexOf(property) == -1) {
 			Zotero.debug("Zotero RDF: using Zotero namespace for property "+property);
@@ -7913,7 +7919,7 @@ REPLACE INTO translators VALUES ('6e372642-ed9d-4934-b5d1-c11ac758ebb7', '1.0.0b
 	}
 }');
 
-REPLACE INTO translators VALUES ('5e3ad958-ac79-463d-812b-a86a9235c28f', '1.0.0b3.r1', '', '2007-01-26 20:43:00', 1, 100, 1, 'RDF', 'Simon Kornblith', 'rdf',
+REPLACE INTO translators VALUES ('5e3ad958-ac79-463d-812b-a86a9235c28f', '1.0.0b3.r1', '', '2007-03-16 22:57:15', 1, 100, 1, 'RDF', 'Simon Kornblith', 'rdf',
 'Zotero.configure("dataMode", "rdf");
 
 function detectImport() {
@@ -8167,7 +8173,7 @@ function importItem(newItem, node, type) {
 	}
 	
 	// check to see if we recognize the type in the fs or dc namespaces
-	var zoteroType = getFirstResults(node, [n.fs+"type", n.dc+"type"], true);
+	var zoteroType = getFirstResults(node, [n.fs+"itemType", n.fs+"type", n.dc+"type"], true);
 	if(Zotero.Utilities.itemTypeExists(zoteroType)) {
 		newItem.itemType = zoteroType;
 	}
@@ -8423,9 +8429,7 @@ function importItem(newItem, node, type) {
 		var uri = Zotero.RDF.getResourceURI(arc);
 		if(uri.substr(0, n.fs.length) == n.fs) {
 			var property = uri.substr(n.fs.length);
-			if(property != "type") {
-				newItem[property] = Zotero.RDF.getTargets(node, n.fs+property)[0];
-			}
+			newItem[property] = Zotero.RDF.getTargets(node, n.fs+property)[0];
 		}
 	}
 	
@@ -8486,7 +8490,7 @@ function doImport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7', '1.0.0b3.r1', '', '2007-02-27 20:00:00', '1', '100', '3', 'RIS', 'Simon Kornblith', 'ris', 
+REPLACE INTO translators VALUES ('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7', '1.0.0b3.r1', '', '2007-03-17 23:15:32', '1', '100', '3', 'RIS', 'Simon Kornblith', 'ris', 
 'Zotero.configure("dataMode", "line");
 Zotero.addOption("exportNotes", true);
 
@@ -8808,11 +8812,11 @@ function doExport() {
 		}
 
 		// type
-		addTag("TY", typeMap[item.itemType]);
+		addTag("TY", typeMap[item.itemType] ? typeMap[item.itemType] : "GEN");
 
 		// use field map
 		for(var j in fieldMap) {
-			addTag(j, item[fieldMap[j]]);
+			if(item[fieldMap[j]]) addTag(j, item[fieldMap[j]]);
 		}
 
 		// creators
@@ -8890,7 +8894,7 @@ function doExport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('881f60f2-0802-411a-9228-ce5f47b64c7d', '1.0.0b3.r1', '', '2006-12-17 06:25:00', 1, 100, 3, 'Refer/BibIX', 'Simon Kornblith', 'txt',
+REPLACE INTO translators VALUES ('881f60f2-0802-411a-9228-ce5f47b64c7d', '1.0.0b3.r1', '', '2007-03-17 23:15:32', 1, 100, 3, 'Refer/BibIX', 'Simon Kornblith', 'txt',
 'Zotero.configure("dataMode", "line");
 
 function detectImport() {
@@ -9090,11 +9094,11 @@ function doExport() {
 		}
 		
 		// type
-		addTag("0", typeMap[item.itemType]);
+		addTag("0", typeMap[item.itemType] ? typeMap[item.itemType] : "Generic");
 		
 		// use field map
 		for(var j in fieldMap) {
-			addTag(j, item[fieldMap[j]]);
+			if(item[fieldMap[j]]) addTag(j, item[fieldMap[j]]);
 		}
 		
 		// creators
