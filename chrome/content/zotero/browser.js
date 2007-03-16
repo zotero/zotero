@@ -149,7 +149,7 @@ var Zotero_Browser = new function() {
 		
 		// make sure annotation action is toggled
 		var tab = _getTabObject(Zotero_Browser.tabbrowser.selectedBrowser);
-		if(tab.page.annotations.clearAction) tab.page.annotations.clearAction();
+		if(tab.page && tab.page.annotations && tab.page.annotations.clearAction) tab.page.annotations.clearAction();
 		
 		if(!toggleTool) return;
 		
