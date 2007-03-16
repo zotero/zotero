@@ -1,4 +1,4 @@
--- 180
+-- 181
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-03-16 22:57:15'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-03-16 23:28:15'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b3.r1', '', '2006-12-15 03:40:00', 1, 100, 4, 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -7378,7 +7378,7 @@ function doImport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('14763d24-8ba0-45df-8f52-b8d1108e7ac9', '1.0.0b3.r1', '', '2007-03-16 22:57:15', 1, 25, 2, 'Zotero RDF', 'Simon Kornblith', 'rdf',
+REPLACE INTO translators VALUES ('14763d24-8ba0-45df-8f52-b8d1108e7ac9', '1.0.0b3.r1', '', '2007-03-16 23:28:15', 1, 25, 2, 'Zotero RDF', 'Simon Kornblith', 'rdf',
 'Zotero.configure("getCollections", true);
 Zotero.configure("dataMode", "rdf");
 Zotero.addOption("exportNotes", true);
@@ -7393,7 +7393,7 @@ var n = {
 	foaf:"http://xmlns.com/foaf/0.1/",
 	vcard:"http://nwalsh.com/rdf/vCard#",
 	link:"http://purl.org/rss/1.0/modules/link/",
-	fs:"http://www.zotero.org/namespaces/export#"
+	z:"http://www.zotero.org/namespaces/export#"
 };
 
 var container, containerElement;
@@ -7414,7 +7414,7 @@ function generateTags(resource, tags) {
 
 function generateCollection(collection) {
 	var collectionResource = "#collection:"+collection.id;
-	Zotero.RDF.addStatement(collectionResource, rdf+"type", n.fs+"Collection", false);
+	Zotero.RDF.addStatement(collectionResource, rdf+"type", n.z+"Collection", false);
 	Zotero.RDF.addStatement(collectionResource, n.dc+"title", collection.name, true);
 	
 	for each(var child in collection.children) {
@@ -7465,14 +7465,14 @@ function generateItem(item, zoteroType, resource) {
 		type = n.bib+"Illustration";
 	} else if(zoteroType == "webpage") {
 		type = n.bib+"Document";
-		container = n.fs+"Website";
+		container = n.z+"Website";
 	} else if(zoteroType == "note") {
 		type = n.bib+"Memo";
 		if(!Zotero.getOption("exportNotes")) {
 			return;
 		}
 	} else if(zoteroType == "attachment") {
-		type = n.fs+"Attachment";
+		type = n.z+"Attachment";
 	} else if(zoteroType == "report") {
 		type = n.bib+"Report";
 	} else if(zoteroType == "bill") {
@@ -7492,12 +7492,12 @@ function generateItem(item, zoteroType, resource) {
 		type = n.bib+"Image";
 	} else if(zoteroType == "blogPost") {
 		type = n.bib+"Document";
-		container = n.fs+"Blog";
+		container = n.z+"Blog";
 	} else if(zoteroType == "instantMessage") {
 		type = n.bib+"Letter";
 	} else if(zoteroType == "forumPost") {
 		type = n.bib+"Document";
-		container = n.fs+"Forum";
+		container = n.z+"Forum";
 	} else if(zoteroType == "audioRecording") {
 		type = n.bib+"Recording";
 	} else if(zoteroType == "presentation") {
@@ -7517,7 +7517,7 @@ function generateItem(item, zoteroType, resource) {
 	if(type) {
 		Zotero.RDF.addStatement(resource, rdf+"type", type, false);
 	}
-	Zotero.RDF.addStatement(resource, n.fs+"itemType", zoteroType, true);
+	Zotero.RDF.addStatement(resource, n.z+"itemType", zoteroType, true);
 	
 	// generate section
 	if(item.section) {
@@ -7587,7 +7587,7 @@ function generateItem(item, zoteroType, resource) {
 			if(biblioCreatorTypes.indexOf(item.creators[j].creatorType) != -1) {
 				var cTag = n.bib+item.creators[j].creatorType+"s";
 			} else {
-				var cTag = n.fs+item.creators[j].creatorType+"s";
+				var cTag = n.z+item.creators[j].creatorType+"s";
 			}
 			
 			if(!creatorContainers[cTag]) {
@@ -7752,7 +7752,7 @@ function generateItem(item, zoteroType, resource) {
 		// THIS CATCHES ALL REMAINING PROPERTIES
 		} else if(ignoreProperties.indexOf(property) == -1) {
 			Zotero.debug("Zotero RDF: using Zotero namespace for property "+property);
-			Zotero.RDF.addStatement(resource, n.fs+property, value, true);
+			Zotero.RDF.addStatement(resource, n.z+property, value, true);
 		}
 	}
 }
@@ -7919,7 +7919,7 @@ REPLACE INTO translators VALUES ('6e372642-ed9d-4934-b5d1-c11ac758ebb7', '1.0.0b
 	}
 }');
 
-REPLACE INTO translators VALUES ('5e3ad958-ac79-463d-812b-a86a9235c28f', '1.0.0b3.r1', '', '2007-03-16 22:57:15', 1, 100, 1, 'RDF', 'Simon Kornblith', 'rdf',
+REPLACE INTO translators VALUES ('5e3ad958-ac79-463d-812b-a86a9235c28f', '1.0.0b3.r1', '', '2007-03-16 23:28:15', 1, 100, 1, 'RDF', 'Simon Kornblith', 'rdf',
 'Zotero.configure("dataMode", "rdf");
 
 function detectImport() {
@@ -7941,7 +7941,7 @@ var n = {
 	foaf:"http://xmlns.com/foaf/0.1/",
 	vcard:"http://nwalsh.com/rdf/vCard#",
 	link:"http://purl.org/rss/1.0/modules/link/",
-	fs:"http://www.zotero.org/namespaces/export#"
+	z:"http://www.zotero.org/namespaces/export#"
 };
 
 var callNumberTypes = [n.dcterms+"LCC", n.dcterms+"DDC", n.dcterms+"UDC"];
@@ -8022,7 +8022,7 @@ function processCollection(node, collection) {
 			type = Zotero.RDF.getResourceURI(type[0]);
 		}
 		
-		if(type == n.bib+"Collection" || type == n.fs+"Collection") {
+		if(type == n.bib+"Collection" || type == n.z+"Collection") {
 			// for collections, process recursively
 			collection.children.push(processCollection(child));
 		} else {
@@ -8146,7 +8146,7 @@ function importItem(newItem, node, type) {
 			}
 		} else if(type == n.bib+"Memo") {
 			newItem.itemType = "note";
-		} else if(type == n.fs+"Attachment") {
+		} else if(type == n.z+"Attachment") {
 			// unless processing of independent attachment is intended, don''t
 			// process
 			
@@ -8173,17 +8173,17 @@ function importItem(newItem, node, type) {
 	}
 	
 	// check to see if we recognize the type in the fs or dc namespaces
-	var zoteroType = getFirstResults(node, [n.fs+"itemType", n.fs+"type", n.dc+"type"], true);
+	var zoteroType = getFirstResults(node, [n.z+"itemType", n.z+"type", n.dc+"type"], true);
 	if(Zotero.Utilities.itemTypeExists(zoteroType)) {
 		newItem.itemType = zoteroType;
 	}
 	
 	if(newItem.itemType == "blogPost") {
-		container = getNodeByType(isPartOf, n.fs+"Blog");
+		container = getNodeByType(isPartOf, n.z+"Blog");
 	} else if(newItem.itemType == "forumPost") {
-		container = getNodeByType(isPartOf, n.fs+"Forum");
+		container = getNodeByType(isPartOf, n.z+"Forum");
 	} else if(newItem.itemType == "webpage") {
-		container = getNodeByType(isPartOf, n.fs+"Website");
+		container = getNodeByType(isPartOf, n.z+"Website");
 	}
 	
 	// title
@@ -8205,7 +8205,7 @@ function importItem(newItem, node, type) {
 		} else if(creatorType == "editor" || creatorType == "contributor") {
 			var creators = getFirstResults(node, [n.bib+creatorType+"s"]);
 		} else {
-			var creators = getFirstResults(node, [n.fs+creatorType+"s"]);
+			var creators = getFirstResults(node, [n.z+creatorType+"s"]);
 		}
 		
 		if(creators) handleCreators(newItem, creators, creatorType);
@@ -8416,10 +8416,10 @@ function importItem(newItem, node, type) {
 	var relations = getFirstResults(node, [n.link+"link"]);
 	for each(var relation in relations) {			
 		var type = Zotero.RDF.getTargets(relation, rdf+"type");
-		if(Zotero.RDF.getResourceURI(type[0]) == n.fs+"Attachment") {
+		if(Zotero.RDF.getResourceURI(type[0]) == n.z+"Attachment") {
 			var attachment = new Zotero.Item();
 			newItem.attachments.push(attachment);
-			importItem(attachment, relation, n.fs+"Attachment");
+			importItem(attachment, relation, n.z+"Attachment");
 		}
 	}
 	
@@ -8427,9 +8427,9 @@ function importItem(newItem, node, type) {
 	var arcs = Zotero.RDF.getArcsOut(node);
 	for each(var arc in arcs) {
 		var uri = Zotero.RDF.getResourceURI(arc);
-		if(uri.substr(0, n.fs.length) == n.fs) {
-			var property = uri.substr(n.fs.length);
-			newItem[property] = Zotero.RDF.getTargets(node, n.fs+property)[0];
+		if(uri.substr(0, n.z.length) == n.z) {
+			var property = uri.substr(n.z.length);
+			newItem[property] = Zotero.RDF.getTargets(node, n.z+property)[0];
 		}
 	}
 	
@@ -8463,9 +8463,9 @@ function doImport() {
 			type = Zotero.RDF.getResourceURI(type[0]);
 			
 			// skip if this is not an independent attachment,
-			if((type == n.fs+"Attachment" || type == n.bib+"Memo") && isPart(node)) {
+			if((type == n.z+"Attachment" || type == n.bib+"Memo") && isPart(node)) {
 				continue;
-			} else if(type == n.bib+"Collection" || type == n.fs+"Collection") {
+			} else if(type == n.bib+"Collection" || type == n.z+"Collection") {
 				// skip collections until all the items are done
 				collections.push(node);
 				continue;
