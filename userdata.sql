@@ -70,14 +70,14 @@ CREATE TABLE IF NOT EXISTS itemData (
     valueID,
     PRIMARY KEY (itemID, fieldID),
     FOREIGN KEY (itemID) REFERENCES items(itemID),
-    FOREIGN KEY (fieldID) REFERENCES fields(fieldID)
+    FOREIGN KEY (fieldID) REFERENCES fields(fieldID),
     FOREIGN KEY (valueID) REFERENCES itemDataValues(valueID)
 );
 
 CREATE TABLE IF NOT EXISTS itemDataValues (
     valueID INT,
     value,
-    PRIMARY KEY (itemID)
+    PRIMARY KEY (valueID)
 );
 
 -- Note data for note items
