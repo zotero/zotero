@@ -1,4 +1,4 @@
--- 182
+-- 183
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-03-19 22:20:40'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-03-19 22:41:38'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b3.r1', '', '2006-12-15 03:40:00', 1, 100, 4, 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -7045,7 +7045,7 @@ REPLACE INTO translators VALUES ('af4cf622-eaca-450b-bd45-0f4ba345d081', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('0e2235e7-babf-413c-9acf-f27cce5f059c', '1.0.0b3.r1', '', '2006-12-15 03:40:00', 1, 50, 3, 'MODS', 'Simon Kornblith', 'xml',
+REPLACE INTO translators VALUES ('0e2235e7-babf-413c-9acf-f27cce5f059c', '1.0.0b3.r1', '', '2007-03-19 22:41:38', 1, 50, 3, 'MODS', 'Simon Kornblith', 'xml',
 'Zotero.addOption("exportNotes", true);
 
 function detectImport() {
@@ -7404,36 +7404,41 @@ function doImport() {
 			}
 		}
 		
+		var marcGenres = {
+			"book":"book",
+			"periodical":"journalArticle",
+			"newspaper":"newspaperArticle",
+			"theses":"thesis",
+			"letter":"letter",
+			"motion picture":"film",
+			"art original":"artwork",
+			"web site":"webpage"
+		};
+		
 		// try to get genre from local genre
 		for each(var genre in mods.m::genre) {
 			if(genre.@authority == "local" && Zotero.Utilities.itemTypeExists(genre)) {
 				newItem.itemType = genre.text().toString();
-			} else if(!newItem.itemType && genre.@authority == "marcgt") {
+			} else if(!newItem.itemType && (genre.@authority == "marcgt" || genre.@authority == "marc")) {
 				// otherwise, look at the marc genre
-				if(marcGenre == "book") {
-					newItem.itemType = "book";
-				} else if(marcGenre == "periodical") {
-					newItem.itemType = "magazineArticle";
-				} else if(marcGenre == "newspaper") {
-					newItem.itemType = "newspaperArticle";
-				} else if(marcGenre == "theses") {
-					newItem.itemType = "thesis";
-				} else if(marcGenre == "letter") {
-					newItem.itemType = "letter";
-				} else if(marcGenre == "interview") {
-					newItem.itemType = "interview";
-				} else if(marcGenre == "motion picture") {
-					newItem.itemType = "film";
-				} else if(marcGenre == "art original") {
-					newItem.itemType = "artwork";
-				} else if(marcGenre == "web site") {
-					newItem.itemType = "webpage";
-				}
+				newItem.itemType = marcGenres[genre.text().toString()];
 			}
 		}
 		
 		if(!newItem.itemType) {
-			newItem.itemType = "book";
+			// try to get genre data from host
+			for each(var relatedItem in mods.m::relatedItem) {
+				if(relatedItem.@type == "host") {
+					for each(var genre in relatedItem.m::genre) {
+						if(genre.@authority == "marcgt" || genre.@authority == "marc") {
+							newItem.itemType = marcGenres[genre.text().toString()];
+							break;
+						}
+					}
+				}
+			}
+			
+			if(!newItem.itemType) newItem.itemType = "book";
 		}
 		
 		var isPartialItem = Zotero.Utilities.inArray(newItem.itemType, partialItemTypes);
