@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-03-19 22:41:38'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-03-19 22:51:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b3.r1', '', '2006-12-15 03:40:00', 1, 100, 4, 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -3155,7 +3155,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('e7e01cac-1e37-4da6-b078-a0e8343b0e98', '1.0.0b4r1', '', '2007-03-19 22:20:40', '1', '90', '4', 'unAPI', 'Simon Kornblith', '', 
+REPLACE INTO translators VALUES ('e7e01cac-1e37-4da6-b078-a0e8343b0e98', '1.0.0b4r1', '', '2007-03-19 22:51:00', '1', '90', '4', 'unAPI', 'Simon Kornblith', '', 
 'var RECOGNIZABLE_FORMATS = ["mods", "marc", "endnote", "ris", "bibtex", "rdf"];
 var FORMAT_GUIDS = {
 	"mods":"0e2235e7-babf-413c-9acf-f27cce5f059c",
@@ -3365,6 +3365,9 @@ function getAllItems() {
 				foundItems[i].complete();
 			}
 		}
+		
+		// reset items
+		foundItems = [];
 		
 		Zotero.done();
 		return;
@@ -7045,7 +7048,7 @@ REPLACE INTO translators VALUES ('af4cf622-eaca-450b-bd45-0f4ba345d081', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('0e2235e7-babf-413c-9acf-f27cce5f059c', '1.0.0b3.r1', '', '2007-03-19 22:41:38', 1, 50, 3, 'MODS', 'Simon Kornblith', 'xml',
+REPLACE INTO translators VALUES ('0e2235e7-babf-413c-9acf-f27cce5f059c', '1.0.0b3.r1', '', '2007-03-19 22:51:00', 1, 50, 3, 'MODS', 'Simon Kornblith', 'xml',
 'Zotero.addOption("exportNotes", true);
 
 function detectImport() {
@@ -7495,7 +7498,8 @@ function doImport() {
 			if(relatedItem.@type == "host") {
 				for each(var titleInfo in relatedItem.m::titleInfo) {
 					if(titleInfo.@type == "abbreviated") {
-						newItem.journalAbbreviation = titleInfo.m::title.text().toString()
+						newItem.journalAbbreviation = titleInfo.m::title.text().toString();
+						if(!newItem.publicationTitle) newItem.publicationTitle = newItem.journalAbbreviation;
 					} else {
 						newItem.publicationTitle = titleInfo.m::title.text().toString();
 					}
