@@ -1623,7 +1623,7 @@ Zotero.Translate.prototype._importDefuseBOM = function() {
 	}
 	
 	// if we know what kind of BOM it has, generate an input stream	
-	intlStream = Components.classes["@mozilla.org/intl/converter-input-stream;1"]
+	var intlStream = Components.classes["@mozilla.org/intl/converter-input-stream;1"]
 						   .createInstance(Components.interfaces.nsIConverterInputStream);
 	intlStream.init(this._inputStream, this._hasBOM, 65535,
 		Components.interfaces.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER);
