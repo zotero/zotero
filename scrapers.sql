@@ -7347,6 +7347,18 @@ function doExport() {
 }
 
 function doImport() {
+	var marcGenres = {
+		"book":"book",
+		"periodical":"journalArticle",
+		"newspaper":"newspaperArticle",
+		"theses":"thesis",
+		"letter":"letter",
+		"motion picture":"film",
+		"art original":"artwork",
+		"web site":"webpage"
+	};
+	
+	
 	var text = "";
 	var read;
 	
@@ -7403,18 +7415,6 @@ function doImport() {
 				newItem.title = titleInfo.m::title;
 			}
 		}
-		
-		var marcGenres = {
-			"book":"book",
-			"periodical":"journalArticle",
-			"newspaper":"newspaperArticle",
-			"theses":"thesis",
-			"letter":"letter",
-			"motion picture":"film",
-			"art original":"artwork",
-			"web site":"webpage"
-		};
-		
 		// try to get genre from local genre
 		for each(var genre in mods.m::genre) {
 			if(genre.@authority == "local" && Zotero.Utilities.itemTypeExists(genre)) {
