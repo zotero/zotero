@@ -1103,7 +1103,7 @@ Zotero.ItemTreeView.prototype.saveOpenState = function() {
 Zotero.ItemTreeView.prototype.rememberOpenState = function(ids) {
 	for each(var id in ids) {
 		var row = this._itemRowMap[id];
-		if (!row || !this.isContainer(row) || this.isContainerOpen(row)) {
+		if (row == undefined || !this.isContainer(row) || this.isContainerOpen(row)) {
 			continue;
 		}
 		this.toggleOpenState(row);
