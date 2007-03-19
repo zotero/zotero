@@ -2101,10 +2101,15 @@ Zotero.Item.prototype.erase = function(deleteChildren){
 			case Zotero.Attachments.LINK_MODE_LINKED_URL:
 				break;
 			default:
-				var file = Zotero.getStorageDirectory();
-				file.append(this.getID());
-				if (file.exists()){
-					file.remove(true);
+				try {
+					var file = Zotero.getStorageDirectory();
+					file.append(this.getID());
+					if (file.exists()){
+						file.remove(true);
+					}
+				}
+				catch (e) {
+					Components.utils.reportError(e);
 				}
 		}
 	}
