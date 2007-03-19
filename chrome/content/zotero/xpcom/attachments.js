@@ -33,6 +33,7 @@ Zotero.Attachments = new function(){
 	this.linkFromURL = linkFromURL;
 	this.linkFromDocument = linkFromDocument;
 	this.importFromDocument = importFromDocument;
+	this.getFileBaseNameFromItem = getFileBaseNameFromItem;
 	this.createDirectoryForItem = createDirectoryForItem;
 	this.getPath = getPath;
 	
@@ -168,7 +169,7 @@ Zotero.Attachments = new function(){
 	}
 	
 	
-	function importFromURL(url, sourceItemID, forceTitle, forceFileName, parentCollectionIDs){
+	function importFromURL(url, sourceItemID, forceTitle, forceFileBaseName, parentCollectionIDs){
 		Zotero.debug('Importing attachment from URL');
 		
 		Zotero.Utilities.HTTP.doHead(url, function(obj){
@@ -193,7 +194,7 @@ Zotero.Attachments = new function(){
 				browser.addEventListener("pageshow", function(){
 					try {
 						Zotero.Attachments.importFromDocument(browser.contentDocument,
-							sourceItemID, forceTitle, forceFileName, parentCollectionIDs);
+							sourceItemID, forceTitle, parentCollectionIDs);
 					}
 					finally {
 						browser.removeEventListener("pageshow", arguments.callee, true);
@@ -216,7 +217,14 @@ Zotero.Attachments = new function(){
 			
 			// Otherwise use a remote web page persist
 			else {
-				var fileName = _getFileNameFromURL(url, mimeType);
+				if (forceFileBaseName) {
+					var ext = _getExtensionFromURL(url, mimeType);
+					var fileName = forceFileBaseName + (ext != '' ? '.' + ext : '');
+				}
+				else {
+					var fileName = _getFileNameFromURL(url, mimeType);
+				}
+				
 				var title = forceTitle ? forceTitle : fileName;
 				
 				const nsIWBP = Components.interfaces.nsIWebBrowserPersist;
@@ -405,7 +413,7 @@ Zotero.Attachments = new function(){
 	 *
 	 * Returns itemID of attachment
 	 */
-	function importFromDocument(document, sourceItemID, forceTitle, forceFileName, parentCollectionIDs) {
+	function importFromDocument(document, sourceItemID, forceTitle, parentCollectionIDs) {
 		Zotero.debug('Importing attachment from document');
 		
 		var url = document.location.href;
@@ -641,6 +649,75 @@ Zotero.Attachments = new function(){
 		}
 	}
 	*/
+	
+	
+	/*
+	 * Returns a formatted string to use as the basename of an attachment
+	 * based on the metadata of the specified item and a format string
+	 *
+	 * (Optional) |formatString| specifies the format string -- otherwise
+	 *     the 'attachmentRenameFormatString' pref is used
+	 *
+	 * Valid substitution markers:
+	 *
+	 *  %c -- firstCreator
+	 *  %y -- year (extracted from Date field)
+	 *  %t -- title
+	 *
+	 * Fields can be truncated to a certain length by appending an integer
+	 * within curly brackets -- e.g. %t{50} truncates the title to 50 characters
+	 */
+	function getFileBaseNameFromItem(itemID, formatString) {
+		if (!formatString) {
+			formatString = Zotero.Prefs.get('attachmentRenameFormatString');
+		}
+		
+		var item = Zotero.Items.get(itemID);
+		if (!item) {
+			throw ('Invalid itemID ' + itemID + ' in Zotero.Attachments.getFileBaseNameFromItem()');
+		}
+		
+		// Replaces the substitution marker with the field value,
+		// truncating based on the {[0-9]+} modifier if applicable
+		function rpl(field, str) {
+			switch (field) {
+				case 'creator':
+					field = 'firstCreator';
+					var rpl = '%c';
+					break;
+					
+				case 'title':
+					var rpl = '%t';
+					break;
+			}
+			
+			var f = function(match) {
+				var value = item.getField(field, false, true);
+				var chars = match.match(/{([0-9]+)}/);
+				return (chars) ? value.substr(0, chars[1]) : value;
+			}
+			
+			return str.replace(new RegExp(rpl + "(\{[0-9]+\})?"), f);
+		}
+		
+		// Creator
+		formatString = rpl('creator', formatString);
+		
+		// Year
+		var year = item.getField('date', true);
+		if (year) {
+			year = Zotero.Date.multipartToSQL(year).substr(0, 4);
+			if (year == '0000') {
+				year = '';
+			}
+		}
+		formatString = formatString.replace('%y', year);
+		
+		// Title
+		formatString = rpl('title', formatString);
+		
+		return formatString;
+	}
 	
 	
 	/*

@@ -873,8 +873,11 @@ var wpdDOMSaver = {
   // wrapper HTML File which references "aDocument"
   // ("aFileName" is the filename without(!) extension)
 	saveDocumentFile : function(aDocument,aFileName)
-	{                                                                      
-	  dump("[wpdDOMSaver.saveDocumentFile]: "+aFileName+"\n"); 
+	{
+	  dump("[wpdDOMSaver.saveDocumentFile]: "+aFileName+"\n");
+	  
+	  	return this.download(this.currentURL,true)
+		/* Wrapper file disabled by Dan S. for Zotero
 		var aFileURL = aDocument.location.href;
 	
 		if ( !aFileName ) aFileName = "file" + Math.random().toString();
@@ -887,11 +890,13 @@ var wpdDOMSaver = {
 			var HTMLText = '<html><head><meta http-equiv="refresh" content="0;URL=' + newFileName + '"></head><body></body></html>';
 		}
  
-		var HTMLFile = this.currentDir + aFileName + ".html";  
+		var HTMLFile = this.currentDir + aFileName + ".html";
+		
 		if (!wpdCommon.writeFile(HTMLText,HTMLFile)) 
 		  wpdCommon.addError("[wpdDOMSaver.saveDocumentFile]: could not write HTML wrapper for "+aFileName+"\n");
-
-		return aFileName + ".html"; 
+	  	
+		return aFileName + ".html";
+		*/
 	},
 
   // save the CSS Stylesheets of "aDocument" as "aFileName" and 

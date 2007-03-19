@@ -1566,7 +1566,7 @@ var ZoteroPane = new function()
 				Zotero.Attachments.linkFromDocument(window.content.document, itemID, false, parentCollectionID);
 			}
 			else {
-				Zotero.Attachments.importFromDocument(window.content.document, itemID, false, false, parentCollectionID);
+				Zotero.Attachments.importFromDocument(window.content.document, itemID, false, parentCollectionID);
 			}
 		}
 		// Give progress window time to appear

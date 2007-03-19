@@ -1223,7 +1223,8 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 									attachment.url = Zotero.Ingester.ProxyMonitor.properToProxy(attachment.url);
 								}
 								
-								Zotero.Attachments.importFromURL(attachment.url, myID, title);
+								var fileBaseName = Zotero.Attachments.getFileBaseNameFromItem(myID);
+								Zotero.Attachments.importFromURL(attachment.url, myID, title, fileBaseName);
 							}
 						}
 						// links no longer exist, so just don't save them
