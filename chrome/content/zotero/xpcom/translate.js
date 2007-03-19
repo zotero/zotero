@@ -537,8 +537,6 @@ Zotero.Translate.prototype._loadTranslator = function() {
  * does the actual translation
  */
 Zotero.Translate.prototype.translate = function() {
-	Zotero.debug("translate called");
-	
 	/*
 	 * initialize properties
 	 */
@@ -2164,7 +2162,7 @@ Zotero.Translate.TranslatorSearch.prototype.complete = function(returnValue, err
 	
 	this.currentTranslator = undefined;
 	this.asyncMode = false;
-	
+		
 	// resume execution
 	this.execute();
 }
