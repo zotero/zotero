@@ -92,6 +92,44 @@
 					]]>
 				</body>
 			</method>
+			
+			<method name="handleKeyDown">
+				<parameter name="event"/>
+				<body>
+				<![CDATA[
+					switch (event.keyCode) {
+						// Insert tab manually
+						case 9:
+							if (event.shiftKey || event.ctrlKey || event.altKey) {
+								return;
+							}
+							// From http://kb.mozillazine.org/Inserting_text_at_cursor
+							try {
+								var command = "cmd_insertText";
+								var controller = document.commandDispatcher.getControllerForCommand(command);
+								if (controller && controller.isCommandEnabled(command)) {
+									controller = controller.QueryInterface(Components.interfaces.nsICommandController);
+									var params = Components.classes["@mozilla.org/embedcomp/command-params;1"]
+									.createInstance(Components.interfaces.nsICommandParams);
+									params.setStringValue("state_data", "\t");
+									controller.doCommandWithParams(command, params);
+								}
+							}
+							catch (e) {
+								Zotero.debug("Can't do cmd_insertText!\n" + e, 1);
+							}
+							
+							event.stopPropagation();
+							event.preventDefault();
+							
+							// DEBUG: is there a better way to prevent blur()?
+							setTimeout(function() { event.target.focus(); }, 1);
+							break;
+					}
+				]]>
+				</body>
+			</method>
+			
 			<method name="focus">
 				<body>
 					<![CDATA[
@@ -153,7 +191,7 @@
 		<content>
 			<xul:vbox xbl:inherits="flex">
 				<xul:label id="citeLabel" onclick="this.parentNode.parentNode.selectParent()"/>
-				<xul:textbox id="noteField" multiline="true" type="timed" timeout="1000" flex="1" oncommand="this.parentNode.parentNode.save();"/>
+				<xul:textbox id="noteField" multiline="true" type="timed" timeout="1000" flex="1" onkeydown="document.getBindingParent(this).handleKeyDown(event)" oncommand="document.getBindingParent(this).save();"/>
 				<xul:hbox>
 					<xul:linksbox id="links" flex="1"/>
 				</xul:hbox>
