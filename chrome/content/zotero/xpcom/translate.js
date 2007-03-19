@@ -495,7 +495,8 @@ Zotero.Translate.prototype.getTranslators = function() {
 	// see which translators can translate
 	this._translatorSearch = new Zotero.Translate.TranslatorSearch(this, translators);
 	
-	Zotero.debug(this._translatorSearch.foundTranslators);
+	// erroring should call complete
+	this.error = function(value, error) { this._translatorSearch.complete(value, error) };
 	
 	// return translators if asynchronous
 	if(!this._translatorSearch.asyncMode) return this._translatorSearch.foundTranslators;
@@ -556,6 +557,9 @@ Zotero.Translate.prototype.translate = function() {
 		// translators and have to go through each
 		throw("cannot translate: no location specified");
 	}
+	
+	// erroring should end
+	this.error = this._translationComplete;
 	
 	if(!this._loadTranslator()) {
 		return;
@@ -885,7 +889,7 @@ Zotero.Translate.prototype._translationComplete = function(returnValue, error) {
 			
 			if(!returnValue) {
 				var errorString = this._generateErrorString(error);
-				this._debug("Translation using "+this.translator[0].label+" failed: \n"+errorString);
+				this._debug("Translation using "+(this.translator && this.translator[0] && this.translator[0].label ? this.translator[0].label : "no translator")+" failed: \n"+errorString);
 				
 				if(this.type == "web") {
 					// report translation error for webpages
@@ -2076,8 +2080,7 @@ Zotero.Translate.TranslatorSearch.prototype.execute = function() {
 					returnValue = this.translate._sandbox.detectImport();
 				}
 			} catch(e) {
-				Zotero.debug(e+' in executing detectCode for '+translator.label);
-				this.execute();
+				this.complete(returnValue, e);
 				return;
 			}
 			
@@ -2131,12 +2134,17 @@ Zotero.Translate.TranslatorSearch.prototype.processReturnValue = function(transl
 	this.foundTranslators.push(translator);
 }
 
-Zotero.Translate.TranslatorSearch.prototype.complete = function(returnValue) {
+Zotero.Translate.TranslatorSearch.prototype.complete = function(returnValue, error) {
 	// reset done function
 	this.translate._sandbox.Zotero.done = undefined;
 	this.translate.waitForCompletion = false;
 	
-	this.processReturnValue(this.currentTranslator, returnValue);
+	if(returnValue) {
+		this.processReturnValue(this.currentTranslator, returnValue);
+	} else if(error) {
+		var errorString = this.translate._generateErrorString(error);
+		Zotero.debug("detectCode for "+(this.currentTranslator ? this.currentTranslator.label : "no translator")+" failed: \n"+errorString);
+	}
 	
 	this.currentTranslator = undefined;
 	this.asyncMode = false;

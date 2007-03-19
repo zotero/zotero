@@ -583,7 +583,7 @@ Zotero.OpenURL = new function() {
 				if(pAu.lastName == au.lastName &&
 				   (pAu.firstName == au.firstName == "" ||
 				   (pAu.firstName.length >= au.firstName.length &&
-				   pAu.substr(0, au.firstName.length) == au.firstName))) {
+				   pAu.firstName.substr(0, au.firstName.length) == au.firstName))) {
 					pushMe = false;
 					break;
 				}

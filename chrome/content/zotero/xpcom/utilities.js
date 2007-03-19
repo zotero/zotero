@@ -441,7 +441,7 @@ Zotero.Utilities.Ingester.prototype.processDocuments = function(urls, processor,
 	if(!exception) {
 		var translate = this.translate;
 		exception = function(e) {
-			translate._translationComplete(false, e);
+			translate.error(false, e);
 		}
 	}
 	
@@ -485,7 +485,7 @@ Zotero.Utilities.Ingester.HTTP.prototype.doGet = function(urls, processor, done)
 				}
 			}
 		} catch(e) {
-			me.translate._translationComplete(false, e);
+			me.translate.error(false, e);
 		}
 	});
 }
@@ -503,7 +503,7 @@ Zotero.Utilities.Ingester.HTTP.prototype.doPost = function(url, body, onDone, co
 		try {
 			onDone(xmlhttp.responseText, xmlhttp);
 		} catch(e) {
-			translate._translationComplete(false, e);
+			translate.error(false, e);
 		}
 	}, contentType);
 }
