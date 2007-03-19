@@ -1504,6 +1504,13 @@ var ZoteroPane = new function()
 	
 	
 	function addItemFromPage() {
+		var progressWin = new Zotero.ProgressWindow();
+		progressWin.changeHeadline(Zotero.getString('ingester.scraping'));
+		var icon = 'chrome://zotero/skin/treeitem-webpage.png';
+		progressWin.addLines(window.content.document.title, icon)
+		progressWin.show();
+		progressWin.startCloseTimer();
+		
 		var data = {
 			title: window.content.document.title,
 			url: window.content.document.location.href,
@@ -1515,27 +1522,55 @@ var ZoteroPane = new function()
 		// Automatically save snapshot if pref set
 		if (item.getID() && Zotero.Prefs.get('automaticSnapshots'))
 		{
-			this.addAttachmentFromPage(false, item.getID(), true);
+			var f = function() {
+				// We set |noParent|, since child items don't belong to collections
+				ZoteroPane.addAttachmentFromPage(false, item.getID(), true);
+			}
+			// Give progress window time to appear
+			setTimeout(f, 300);
 		}
 		
 		return item.getID();
 	}
 	
 	
-	function addAttachmentFromPage(link, id, noParent)
+	/*
+	 * Create an attachment from the current page
+	 *
+	 * |link|      -- create web link instead of snapshot
+	 * |itemID|    -- itemID of parent item
+	 * |noParent|  -- don't add to current collection
+	 */
+	function addAttachmentFromPage(link, itemID, noParent)
 	{
-		if (this.itemsView && this.itemsView._itemGroup.isCollection() && !noParent) {
-			var parentCollectionID = this.itemsView._itemGroup.ref.getID();
+		if (!noParent) {
+			var progressWin = new Zotero.ProgressWindow();
+			progressWin.changeHeadline(Zotero.getString('save.' + (link ? 'link' : 'attachment')));
+			var type = link ? 'web-link' : 'snapshot';
+			var icon = 'chrome://zotero/skin/treeitem-attachment-' + type + '.png';
+			progressWin.addLines(window.content.document.title, icon)
+			progressWin.show();
+			progressWin.startCloseTimer();
+			
+			Zotero.debug('here');
+			if (this.itemsView && this.itemsView._itemGroup.isCollection()) {
+				Zotero.debug('here2');
+				var parentCollectionID = this.itemsView._itemGroup.ref.getID();
+				Zotero.debug(parentCollectionID);
+			}
 		}
 		
-		if(link)
-		{
-			Zotero.Attachments.linkFromDocument(window.content.document, id, parentCollectionID);
+		var f = function() {
+			Zotero.debug(parentCollectionID);
+			if (link) {
+				Zotero.Attachments.linkFromDocument(window.content.document, itemID, false, parentCollectionID);
+			}
+			else {
+				Zotero.Attachments.importFromDocument(window.content.document, itemID, false, false, parentCollectionID);
+			}
 		}
-		else
-		{
-			Zotero.Attachments.importFromDocument(window.content.document, id, false, parentCollectionID);
-		}
+		// Give progress window time to appear
+		setTimeout(f, 100);
 	}
 	
 	

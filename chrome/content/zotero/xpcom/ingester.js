@@ -759,7 +759,7 @@ Zotero.Ingester.MIMEHandler.StreamListener.prototype.onStopRequest = function(ch
 	if(!translators.length) {
 		// we lied. we can't really translate this file. call
 		// nsIExternalHelperAppService with the data
-		frontWindow.Zotero_Browser.Progress.kill();
+		frontWindow.Zotero_Browser.progress.close();
 
 		var streamListener;
 		if(streamListener = externalHelperAppService.doContent(this._contentType, this._request, frontWindow)) {

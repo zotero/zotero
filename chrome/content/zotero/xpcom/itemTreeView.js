@@ -85,7 +85,9 @@ Zotero.ItemTreeView.prototype.setTree = function(treebox)
 	
 	this._treebox = treebox;
 	
-	this._ownerDocument.defaultView.ZoteroPane.setItemsPaneMessage(Zotero.getString('pane.items.loading'));
+	if (this._ownerDocument.defaultView.ZoteroPane) {
+		this._ownerDocument.defaultView.ZoteroPane.setItemsPaneMessage(Zotero.getString('pane.items.loading'));
+	}
 	
 	// Generate the tree contents in a timer to allow message above to display
 	var paneLoader = function(obj) {
@@ -114,7 +116,9 @@ Zotero.ItemTreeView.prototype.setTree = function(treebox)
 		//Zotero.debug('Running callbacks in itemTreeView.setTree()', 4);
 		obj._runCallbacks();
 		
-		obj._ownerDocument.defaultView.ZoteroPane.clearItemsPaneMessage();
+		if (obj._ownerDocument.defaultView.ZoteroPane) {
+			obj._ownerDocument.defaultView.ZoteroPane.clearItemsPaneMessage();
+		}
 	}
 	
 	this._ownerDocument.defaultView.setTimeout(paneLoader, 50, this);
@@ -128,7 +132,6 @@ Zotero.ItemTreeView.prototype.setTree = function(treebox)
 Zotero.ItemTreeView.prototype.refresh = function()
 {
 	var oldRows = this.rowCount;
-	
 	this._dataItems = [];
 	this.rowCount = 0;
 	
@@ -248,11 +251,12 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids)
 			for(var i=0, len=ids.length; i<len; i++)
 			{
 				var row = this._itemRowMap[ids[i]];
-				var sourceItemID = this._getItemAtRow(row).ref.getSource();
-				var parentIndex = this.getParentIndex(row);
 				// Item already exists in this view
 				if( row != null)
 				{
+					var sourceItemID = this._getItemAtRow(row).ref.getSource();
+					var parentIndex = this.getParentIndex(row);
+					
 					if (this.isContainer(row) && this.isContainerOpen(row))
 					{
 						this.toggleOpenState(row);
@@ -277,7 +281,6 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids)
 					}
 					// If not moved from under one item to another
 					else if (parentIndex == -1 || !sourceItemID) {
-						Zotero.debug('here');
 						sort = ids[i];
 					}
 					madeChanges = true;
@@ -776,7 +779,6 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 	if (itemID) {
 		this._refreshHashMap();
 		var row = this._itemRowMap[itemID];
-		Zotero.debug(row);
 		for (var i=0, len=this._dataItems.length; i<len; i++) {
 			if (i == row) {
 				continue;
@@ -1475,7 +1477,7 @@ Zotero.ItemTreeView.prototype.drop = function(row, orient)
 			var parentCollectionID = this._itemGroup.ref.getID();
 		}
 		
-		Zotero.Attachments.importFromURL(url, sourceItemID, false, parentCollectionID);
+		Zotero.Attachments.importFromURL(url, sourceItemID, false, false, parentCollectionID);
 	}
 }
 

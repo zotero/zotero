@@ -28,14 +28,13 @@ radio[pane=zotero-prefpane-general][selected="true"]
  */
 radio[pane=zotero-prefpane-export]
 {
-	list-style-image: url("chrome://browser/skin/Toolbar.png");
-	-moz-image-region: rect(0px, 312px, 24px, 288px);
+	-moz-image-region: rect(0px, 224px, 32px, 192px);
 }
 radio[pane=zotero-prefpane-export]:hover, 
 radio[pane=zotero-prefpane-export]:active,
 radio[pane=zotero-prefpane-export][selected="true"]
 {
-	-moz-image-region: rect(24px, 312px, 48px, 288px);
+	-moz-image-region: rect(32px, 224px, 64px, 192px);
 }
 
 /*

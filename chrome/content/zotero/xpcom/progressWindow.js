@@ -95,7 +95,9 @@ Zotero.ProgressWindowSet = new function() {
 		}
 		
 		for (var i=0; i<_progressWindows.length; i++) {
-			_progressWindows[i].instance.fade();
+			// Pass |requireMouseOver| so that the window only closes
+			// if the mouse was over it at some point
+			_progressWindows[i].instance.startCloseTimer(true);
 		}
 	}
 }
@@ -111,8 +113,8 @@ Zotero.ProgressWindow = function(_window){
 	this.changeHeadline = changeHeadline;
 	this.addLines = addLines;
 	this.addDescription = addDescription;
-	this.fade = fade;
-	this.kill = kill;
+	this.startCloseTimer = startCloseTimer;
+	this.close = close;
 	
 	var _window = null;
 	
@@ -120,6 +122,7 @@ Zotero.ProgressWindow = function(_window){
 	var _windowLoaded = false;
 	var _windowLoading = false;
 	var _timeoutID = false;
+	var _mouseWasOver = false
 	
 	// keep track of all of these things in case they're called before we're
 	// done loading the progress window
@@ -243,21 +246,26 @@ Zotero.ProgressWindow = function(_window){
 	}
 	
 	
-	function fade() {
+	function startCloseTimer(requireMouseOver) {
 		if (_windowLoaded || _windowLoading) {
-			if (_timeoutID) {
+			if (requireMouseOver && !_mouseWasOver) {
 				return;
+			}
+			
+			if (_timeoutID) {
+				_disableTimeout();
 			}
 			
 			_timeoutID = _progressWindow.setTimeout(_timeout, 2500);
 		}
 	}
 	
-	function kill() {
+	function close() {
 		_disableTimeout();
 		_windowLoaded = false;
 		_windowLoading = false;
 		Zotero.ProgressWindowSet.remove(_progressWindow);
+		
 		try {
 			_progressWindow.close();
 		} catch(ex) {}
@@ -288,7 +296,7 @@ Zotero.ProgressWindow = function(_window){
 	}
 	
 	function _timeout() {
-		kill();	// could check to see if we're really supposed to fade yet
+		close();	// could check to see if we're really supposed to close yet
 				// (in case multiple scrapers are operating at once)
 		_timeoutID = false;
 	}
@@ -300,20 +308,21 @@ Zotero.ProgressWindow = function(_window){
 	
 	
 	/*
-	 * Disable the fade timer when the mouse is over the window
+	 * Disable the close timer when the mouse is over the window
 	 */
 	function _onMouseOver(e) {
+		_mouseWasOver = true;
 		_disableTimeout();
 	}
 	
 	
 	/*
-	 * Start the fade timer when the mouse leaves the window
+	 * Start the close timer when the mouse leaves the window
 	 *
 	 * Note that this onmouseout doesn't work correctly on popups in Fx2,
 	 * so 1) we have to calculate the window borders manually to avoid fading
 	 * when the mouse is still over the box, and 2) this only does anything
-	 * when the mouse is moved off of the browser window -- otherwise the fade
+	 * when the mouse is moved off of the browser window -- otherwise the close
 	 * is triggered by onmousemove on appcontent in overlay.xul.
 	 */
 	function _onMouseOut(e) {
@@ -324,12 +333,12 @@ Zotero.ProgressWindow = function(_window){
 				return;
 		}
 		
-		fade();
+		startCloseTimer();
 	}
 	
 	
 	function _onMouseUp(e) {
-		kill();
+		close();
 	}
 	
 	

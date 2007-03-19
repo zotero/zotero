@@ -902,7 +902,6 @@ Zotero.Item.prototype.save = function(){
 				sql = "INSERT INTO itemData VALUES (?,?,?)";
 				var insertStatement = Zotero.DB.getStatement(sql);
 				
-				Zotero.debug(this._changedItemData.items);
 				for (fieldID in this._changedItemData.items){
 					var value = this.getField(fieldID, true);
 					if (!value) {

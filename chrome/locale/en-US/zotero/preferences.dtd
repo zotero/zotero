@@ -13,6 +13,7 @@
 <!ENTITY zotero.preferences.fontSize.medium				"Medium">
 <!ENTITY zotero.preferences.fontSize.large				"Large">
 
+<!ENTITY zotero.preferences.miscellaneous				"Miscellaneous">
 <!ENTITY zotero.preferences.autoUpdate					"Automatically check for updated scrapers">
 <!ENTITY zotero.preferences.updateNow					"Update now">
 <!ENTITY zotero.preferences.reportTranslationFailure		"Report broken site translators">
@@ -31,7 +32,7 @@
 
 <!ENTITY zotero.preferences.quickCopy.caption				"Quick Copy">
 <!ENTITY zotero.preferences.quickCopy.outputFormat		"Output Format:">
-<!ENTITY zotero.preferences.quickCopy.macWarning			"Note that some formatting may be lost on Mac OS X.">
+<!ENTITY zotero.preferences.quickCopy.macWarning			"Note that rich-text formatting will be lost on Mac OS X.">
 
 
 <!ENTITY zotero.preferences.prefpane.keys				"Shortcut Keys">

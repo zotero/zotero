@@ -38,6 +38,7 @@ Zotero.Attachments = new function(){
 	
 	var self = this;
 	
+	
 	function importFromFile(file, sourceItemID){
 		Zotero.debug('Importing attachment from file');
 		
@@ -167,7 +168,7 @@ Zotero.Attachments = new function(){
 	}
 	
 	
-	function importFromURL(url, sourceItemID, forceTitle, parentCollectionIDs){
+	function importFromURL(url, sourceItemID, forceTitle, forceFileName, parentCollectionIDs){
 		Zotero.debug('Importing attachment from URL');
 		
 		Zotero.Utilities.HTTP.doHead(url, function(obj){
@@ -190,6 +191,17 @@ Zotero.Attachments = new function(){
 			if (Zotero.MIME.hasNativeHandler(mimeType, ext)){
 				var browser = Zotero.Browser.createHiddenBrowser();
 				browser.addEventListener("pageshow", function(){
+					try {
+						Zotero.Attachments.importFromDocument(browser.contentDocument,
+							sourceItemID, forceTitle, forceFileName, parentCollectionIDs);
+					}
+					finally {
+						browser.removeEventListener("pageshow", arguments.callee, true);
+						Zotero.Browser.deleteHiddenBrowser(browser);
+					}
+					
+					/* Built-in method -- disabled in favor of WebPageDump
+					
 					var callback = function () {
 						browser.removeEventListener("pageshow", arguments.callee, true);
 						Zotero.Browser.deleteHiddenBrowser(browser);
@@ -197,6 +209,7 @@ Zotero.Attachments = new function(){
 					
 					Zotero.Attachments.importFromDocument(browser.contentDocument,
 						sourceItemID, forceTitle, parentCollectionIDs, callback);
+					*/
 				}, true);
 				browser.loadURI(url);
 			}
@@ -356,6 +369,8 @@ Zotero.Attachments = new function(){
 		var mimeType = document.contentType;
 		var charsetID = Zotero.CharacterSets.getID(document.characterSet);
 		
+		Zotero.DB.beginTransaction();
+		
 		var itemID = _addToDB(null, url, title, this.LINK_MODE_LINKED_URL,
 			mimeType, charsetID, sourceItemID);
 		
@@ -367,6 +382,8 @@ Zotero.Attachments = new function(){
 				col.addItem(itemID);
 			}
 		}
+		
+		Zotero.DB.commitTransaction();
 		
 		// Run the fulltext indexer asynchronously (actually, it hangs the UI
 		// thread, but at least it lets the menu close)
@@ -383,6 +400,108 @@ Zotero.Attachments = new function(){
 	}
 	
 	
+	/*
+	 * Save a snapshot -- uses synchronous WebPageDump
+	 *
+	 * Returns itemID of attachment
+	 */
+	function importFromDocument(document, sourceItemID, forceTitle, forceFileName, parentCollectionIDs) {
+		Zotero.debug('Importing attachment from document');
+		
+		var url = document.location.href;
+		var title = forceTitle ? forceTitle : document.title;
+		var mimeType = document.contentType;
+		var charsetID = Zotero.CharacterSets.getID(document.characterSet);
+		
+		if (!forceTitle) {
+			// Remove e.g. " - Scaled (-17%)" from end of images saved from links,
+			// though I'm not sure why it's getting added to begin with
+			if (mimeType.indexOf('image/') === 0) {
+				title = title.replace(/(.+ \([^,]+, [0-9]+x[0-9]+[^\)]+\)) - .+/, "$1" );
+			}
+			// If not native type, strip mime type data in parens
+			else if (!Zotero.MIME.hasNativeHandler(mimeType, _getExtensionFromURL(url))) {
+				title = title.replace(/(.+) \([a-z]+\/[^\)]+\)/, "$1" );
+			}
+		}
+		
+		Zotero.DB.beginTransaction();
+		
+		try {
+			// Create a new attachment
+			var attachmentItem = new Zotero.Item('attachment');
+			attachmentItem.setField('title', title);
+			attachmentItem.setField('url', url);
+			attachmentItem.setField('accessDate', "CURRENT_TIMESTAMP");
+			var itemID = attachmentItem.save();
+			
+			// Create a new folder for this item in the storage directory
+			var destDir = this.createDirectoryForItem(itemID);
+			
+			var file = Components.classes["@mozilla.org/file/local;1"].
+					createInstance(Components.interfaces.nsILocalFile);
+			file.initWithFile(destDir);
+			
+			var fileName = _getFileNameFromURL(url, mimeType);
+			
+			file.append(fileName);
+			
+			// Load WebPageDump code
+			Components.classes["@mozilla.org/moz/jssubscript-loader;1"]
+				.getService(Components.interfaces.mozIJSSubScriptLoader)
+				.loadSubScript("chrome://zotero/content/webpagedump/common.js");
+			
+			Components.classes["@mozilla.org/moz/jssubscript-loader;1"]
+				.getService(Components.interfaces.mozIJSSubScriptLoader)
+				.loadSubScript("chrome://zotero/content/webpagedump/domsaver.js");
+			
+			wpdDOMSaver.init(file.path, document)
+			wpdDOMSaver.saveHTMLDocument()
+			
+			_addToDB(file, url, title, Zotero.Attachments.LINK_MODE_IMPORTED_URL,
+				mimeType, charsetID, sourceItemID, itemID);
+			
+			Zotero.Notifier.trigger('add', 'item', itemID);
+			
+			// Add to collections
+			if (parentCollectionIDs){
+				var ids = Zotero.flattenArguments(parentCollectionIDs);
+				for each(var id in ids){
+					var col = Zotero.Collections.get(id);
+					col.addItem(itemID);
+				}
+			}
+			
+			Zotero.DB.commitTransaction();
+			
+			Zotero.Fulltext.indexDocument(document, itemID);
+		}
+		catch (e) {
+			Zotero.DB.rollbackTransaction();
+			
+			try {
+				// Clean up
+				if (itemID) {
+					var destDir = Zotero.getStorageDirectory();
+					destDir.append(itemID);
+					if (destDir.exists()) {
+						destDir.remove(true);
+					}
+				}
+			}
+			catch (e) {}
+			
+			throw (e);
+		}
+		
+		return itemID;
+	}
+	
+	
+	/*
+	 * Previous asynchronous snapshot method -- disabled in favor of WebPageDump
+	 */
+	 /*
 	function importFromDocument(document, sourceItemID, forceTitle, parentCollectionIDs, callback){
 		Zotero.debug('Importing attachment from document');
 		
@@ -521,6 +640,7 @@ Zotero.Attachments = new function(){
 			throw (e);
 		}
 	}
+	*/
 	
 	
 	/*

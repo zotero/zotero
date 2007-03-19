@@ -108,6 +108,8 @@ To add a new preference:
 		</groupbox>
 		
 		<groupbox>
+			<caption label="&zotero.preferences.miscellaneous;"/>
+			
 			<hbox align="center">
 				<checkbox label="&zotero.preferences.autoUpdate;" preference="pref-automaticScraperUpdates"/>
 				<button id="updateButton" style="margin-top:0" label="&zotero.preferences.updateNow;" oncommand="Zotero.Schema.updateScrapersRemote(true)"/>

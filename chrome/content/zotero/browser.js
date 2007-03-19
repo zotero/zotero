@@ -394,9 +394,8 @@ var Zotero_Browser = new function() {
 			var linkText = '<a href="' + url + '" tooltiptext="' + url + '">'
 				+ Zotero.getString('ingester.scrapeErrorDescription.linkText') + '</a>';
 			Zotero_Browser.progress.addDescription(Zotero.getString("ingester.scrapeErrorDescription", linkText));
+			Zotero_Browser.progress.startCloseTimer();
 		}
-		
-		Zotero_Browser.progress.fade();
 	}
 	
 	
@@ -413,6 +412,8 @@ var Zotero_Browser = new function() {
 		if(collection) {
 			collection.addItem(item.getID());
 		}
+		
+		Zotero_Browser.progress.startCloseTimer();
 	}
 	
 	//////////////////////////////////////////////////////////////////////////////
@@ -622,8 +623,8 @@ Zotero_Browser.Tab.prototype._selectItems = function(obj, itemList) {
 	var newDialog = window.openDialog("chrome://zotero/content/ingester/selectitems.xul",
 		"_blank","chrome,modal,centerscreen,resizable=yes", io);
 	
-	if(!io.dataOut) {	// user selected no items, so kill the progress indicatior
-		Zotero_Browser.progress.kill();
+	if(!io.dataOut) {	// user selected no items, so close the progress indicatior
+		Zotero_Browser.progress.close();
 	}
 	
 	return io.dataOut;

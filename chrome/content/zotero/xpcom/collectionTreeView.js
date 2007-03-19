@@ -108,7 +108,7 @@ Zotero.CollectionTreeView.prototype.reload = function()
 	var oldCount = this.rowCount;
 	this._treebox.beginUpdateBatch();
 	this.refresh();
-	this._treebox.rowCountChanged(0,this.rowCount - oldCount);
+	this._treebox.rowCountChanged(this.rowCount, this.rowCount - oldCount);
 	
 	for(var i = 0; i < openCollections.length; i++)
 	{
@@ -213,7 +213,6 @@ Zotero.CollectionTreeView.prototype.notify = function(action, type, ids)
 				if (parentID) {
 					if (!this.isContainerOpen(this._collectionRowMap[parentID])){
 						this.toggleOpenState(this._collectionRowMap[parentID]);
-						this._refreshHashMap();
 					}
 				}
 				
@@ -667,7 +666,7 @@ Zotero.CollectionTreeView.prototype.drop = function(row, orient)
 			var parentCollectionID = false;
 		}
 		
-		Zotero.Attachments.importFromURL(url, false, false, parentCollectionID);
+		Zotero.Attachments.importFromURL(url, false, false, false, parentCollectionID);
 	}
 }
 
