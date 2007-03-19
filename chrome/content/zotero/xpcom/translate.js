@@ -1004,14 +1004,30 @@ Zotero.Translate.prototype._itemTagsAndSeeAlso = function(item, newItem) {
 		this._IDMap[item.itemID] = newItem.getID();
 	}
 	// add see alsos
-	for each(var seeAlso in item.seeAlso) {
-		if(this._IDMap[seeAlso]) {
-			newItem.addSeeAlso(this._IDMap[seeAlso]);
+	if(item.seeAlso) {
+		for each(var seeAlso in item.seeAlso) {
+			if(this._IDMap[seeAlso]) {
+				newItem.addSeeAlso(this._IDMap[seeAlso]);
+			}
 		}
 	}
-	
-	for each(var tag in item.tags) {
-		newItem.addTag(tag);
+	if(item.tags) {
+		for each(var tag in item.tags) {
+			if(typeof(tag) == "string") {
+				// accept strings in tag array as automatic tags, or, if
+				// importing, as non-automatic tags
+				newItem.addTag(tag, (this.type == "import" ? 0 : 1));
+			} else if(typeof(tag) == "object") {
+				// also accept objects
+				if(tag.tag) {
+					var type = (tag.isAutomatic ? 1 : 0);
+					newItem.addTag(tag.tag, type);
+				} else {
+					Zotero.debug("ignoring blank tag: ");
+					Zotero.debug(tag);
+				}
+			}
+		}
 	}
 }
 
@@ -1459,6 +1475,7 @@ Zotero.Translate.prototype._importConfigureIO = function() {
 				// found a UTF BOM at the beginning of the file; don't allow
 				// translator to set the character set
 				this._sandbox.Zotero.setCharacterSet = function() {}
+				this._streams.push(intlStream);
 			} else {
 				// allow translator to set charset
 				this._sandbox.Zotero.setCharacterSet = function(charset) {
@@ -1472,7 +1489,7 @@ Zotero.Translate.prototype._importConfigureIO = function() {
 					intlStream = Components.classes["@mozilla.org/intl/converter-input-stream;1"]
 										   .createInstance(Components.interfaces.nsIConverterInputStream);
 					try {
-						intlStream.init(me._inputStream, charset, 1024,
+						intlStream.init(me._inputStream, charset, 65535,
 							Components.interfaces.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER);
 					} catch(e) {
 						throw "Text encoding not supported";
@@ -1486,8 +1503,7 @@ Zotero.Translate.prototype._importConfigureIO = function() {
 				this._inputStream.QueryInterface(Components.interfaces.nsILineInputStream);
 				
 				this._sandbox.Zotero.read = function() {
-					if(intlStream && intlStream instanceof Components.interfaces.nsIUnicharLineInputStream) {	
-						Zotero.debug("using intlStream");
+					if(intlStream && intlStream instanceof Components.interfaces.nsIUnicharLineInputStream) {
 						var amountRead = intlStream.readLine(str);
 					} else {
 						var amountRead = me._inputStream.readLine(str);
@@ -1609,7 +1625,7 @@ Zotero.Translate.prototype._importDefuseBOM = function() {
 	// if we know what kind of BOM it has, generate an input stream	
 	intlStream = Components.classes["@mozilla.org/intl/converter-input-stream;1"]
 						   .createInstance(Components.interfaces.nsIConverterInputStream);
-	intlStream.init(this._inputStream, this._hasBOM, 1024,
+	intlStream.init(this._inputStream, this._hasBOM, 65535,
 		Components.interfaces.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER);
 	return intlStream;
 }
