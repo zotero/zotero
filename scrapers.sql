@@ -1,4 +1,4 @@
--- 183
+-- 184
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-03-19 22:51:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-03-20 17:45:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b3.r1', '', '2006-12-15 03:40:00', 1, 100, 4, 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -8738,7 +8738,7 @@ function doImport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7', '1.0.0b3.r1', '', '2007-03-17 23:15:32', '1', '100', '3', 'RIS', 'Simon Kornblith', 'ris', 
+REPLACE INTO translators VALUES ('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7', '1.0.0b3.r1', '', '2007-03-20 17:45:00', '1', '100', '3', 'RIS', 'Simon Kornblith', 'ris', 
 'Zotero.configure("dataMode", "line");
 Zotero.addOption("exportNotes", true);
 
@@ -8781,7 +8781,6 @@ var inputFieldMap = {
 var typeMap = {
 	book:"BOOK",
 	bookSection:"CHAP",
-	conferencePaper:"CONF", 
 	journalArticle:"JOUR",
 	magazineArticle:"MGZN",
 	newspaperArticle:"NEWS",
@@ -8791,25 +8790,41 @@ var typeMap = {
 	interview:"PCOMM",
 	film:"MPCT",
 	artwork:"ART",
-	webpage:"ELEC"
+	report:"RPRT",
+	bill:"BILL",
+	case:"CASE",
+	hearing:"HEAR",
+	patent:"PAT",
+	statute:"STAT",
+	map:"MAP",
+	blogPost:"ELEC",
+	webpage:"ELEC",
+	instantMessage:"ICOMM",
+	forumPost:"ICOMM",
+	email:"ICOMM",
+	audioRecording:"SOUND",
+	presentation:"GEN",
+	videoRecording:"VIDEO",
+	tvBroadcast:"GEN",
+	radioBroadcast:"GEN",
+	podcast:"GEN",
+	computerProgram:"COMP",
+	conferencePaper:"CONF",
+	document:"GEN"
 };
 
 // supplements outputTypeMap for importing
-// TODO: BILL, CASE, COMP, DATA, HEAR, MUSIC, PAT, SOUND, STAT
+// TODO: DATA, MUSIC
 var inputTypeMap = {
 	ABST:"journalArticle",
 	ADVS:"film",
 	CTLG:"magazineArticle",
-	GEN:"book",
 	INPR:"manuscript",
 	JFULL:"journalArticle",
-	MAP:"artwork",
 	PAMP:"manuscript",
-	RPRT:"book",
 	SER:"book",
 	SLIDE:"artwork",
-	UNBILL:"manuscript",
-	VIDEO:"film"
+	UNBILL:"manuscript"
 };
 
 function processTag(item, tag, value) {
