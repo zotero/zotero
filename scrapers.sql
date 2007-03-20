@@ -608,7 +608,7 @@ function itemComplete(newItem, url) {
 }
 
 var useSnapshot = false;
-f
+
 function doWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
