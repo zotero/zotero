@@ -1,4 +1,4 @@
--- 185
+-- 186
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-03-20 17:50:13'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-03-20 18:29:21'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b3.r1', '', '2006-12-15 03:40:00', 1, 100, 4, 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -9179,7 +9179,7 @@ function doExport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('881f60f2-0802-411a-9228-ce5f47b64c7d', '1.0.0b3.r1', '', '2007-03-17 23:15:32', 1, 100, 3, 'Refer/BibIX', 'Simon Kornblith', 'txt',
+REPLACE INTO translators VALUES ('881f60f2-0802-411a-9228-ce5f47b64c7d', '1.0.0b3.r1', '', '2007-03-20 18:29:21', 1, 100, 3, 'Refer/BibIX', 'Simon Kornblith', 'txt',
 'Zotero.configure("dataMode", "line");
 
 function detectImport() {
@@ -9216,7 +9216,8 @@ function detectImport() {
 	L:"callNumber",
 	M:"accessionNumber",
 	U:"url",
-	7:"edition"
+	7:"edition",
+	X:"abstractNote"
 };
 
 var inputFieldMap = {
@@ -9409,7 +9410,7 @@ function doExport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('9cb70025-a888-4a29-a210-93ec52da40d4', '1.0.0b3.r1', '', '2006-12-15 20:40:00', 1, 100, 3, 'BibTeX', 'Simon Kornblith', 'bib',
+REPLACE INTO translators VALUES ('9cb70025-a888-4a29-a210-93ec52da40d4', '1.0.0b3.r1', '', '2007-03-20 18:29:21', 1, 100, 3, 'BibTeX', 'Simon Kornblith', 'bib',
 'Zotero.configure("dataMode", "block");
 
 function detectImport() {
@@ -9446,7 +9447,8 @@ function detectImport() {
 	isbn:"ISBN",
 	issn:"ISSN",
 	location:"archiveLocation",
-	url:"url"
+	url:"url",
+	"abstract":"abstractNote"
 };
 
 var inputFieldMap = {
