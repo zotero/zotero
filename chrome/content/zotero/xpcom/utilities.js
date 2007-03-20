@@ -422,7 +422,7 @@ Zotero.Utilities.Ingester.prototype.loadDocument = function(url, succeeded, fail
 }
 
 Zotero.Utilities.Ingester._protocolRe = new RegExp();
-Zotero.Utilities.Ingester._protocolRe.compile("^(?:(?:http|https|ftp):|[^:]*/)", "i");
+Zotero.Utilities.Ingester._protocolRe.compile("^(?:(?:http|https|ftp):|[^:](?:/.*)?$)", "i");
 Zotero.Utilities.Ingester.prototype.processDocuments = function(urls, processor, done, exception) {
 	if(this.translate.locationIsProxied) {
 		for(var i in urls) {

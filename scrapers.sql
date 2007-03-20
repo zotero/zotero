@@ -1,4 +1,4 @@
--- 184
+-- 185
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-03-20 17:45:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-03-20 17:50:13'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b3.r1', '', '2006-12-15 03:40:00', 1, 100, 4, 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -608,7 +608,7 @@ function itemComplete(newItem, url) {
 }
 
 var useSnapshot = false;
-
+f
 function doWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -3155,7 +3155,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('e7e01cac-1e37-4da6-b078-a0e8343b0e98', '1.0.0b4r1', '', '2007-03-19 22:51:00', '1', '90', '4', 'unAPI', 'Simon Kornblith', '', 
+REPLACE INTO translators VALUES ('e7e01cac-1e37-4da6-b078-a0e8343b0e98', '1.0.0b4r1', '', '2007-03-20 17:50:13', '1', '90', '4', 'unAPI', 'Simon Kornblith', '', 
 'var RECOGNIZABLE_FORMATS = ["mods", "marc", "endnote", "ris", "bibtex", "rdf"];
 var FORMAT_GUIDS = {
 	"mods":"0e2235e7-babf-413c-9acf-f27cce5f059c",
@@ -3186,11 +3186,10 @@ function detectWeb(doc, url) {
 	// look for abbrs
 	var abbrs = doc.getElementsByTagName("abbr");
 	for each(var abbr in abbrs) {
-		if(abbr.getAttribute) {
-			if(abbr.getAttribute("class").split(" ").indexOf("unapi-id") != -1 && abbr.getAttribute("title")) {
-				// found an abbr
-				unsearchedIds.push(abbr.getAttribute("title"));
-			}
+		if(abbr.getAttribute && abbr.getAttribute("class") &&
+		   abbr.getAttribute("class").split(" ").indexOf("unapi-id") != -1 && abbr.getAttribute("title")) {
+			// found an abbr
+			unsearchedIds.push(escape(abbr.getAttribute("title")));
 		}
 	}
 	
@@ -3273,22 +3272,22 @@ function checkFormats(text) {
 		
 		if(format.@namespace_uri == "http://www.loc.gov/mods/v3" || lowerName == "mods" || format.@docs == "http://www.loc.gov/standards/mods/") {
 			if(!foundFormat["mods"] || lowerName.indexOf("full") != -1) {
-				foundFormat["mods"] = name;
+				foundFormat["mods"] = escape(name);
 			}
 		} else if(lowerName.match(/^marc\b/)) {
 			if(!foundFormat["marc"] || lowerName.indexOf("utf8") != -1) {
-				foundFormat["marc"] = name;
+				foundFormat["marc"] = escape(name);
 			}
 		} else if(lowerName == "rdf_dc") {
-			foundFormat["rdf"] = name;
+			foundFormat["rdf"] = escape(name);
 		} else if(format.@docs.text() == "http://www.refman.com/support/risformat_intro.asp" || lowerName.match(/^ris\b/)) {
 			if(!foundFormat["ris"] || lowerName.indexOf("utf8") != -1) {
-				foundFormat["ris"] = name;
+				foundFormat["ris"] = escape(name);
 			}
 		} else if(lowerName == "bibtex") {
-			foundFormat["bibtex"] = name;
+			foundFormat["bibtex"] = escape(name);
 		} else if(lowerName == "endnote") {
-			foundFormat["endnote"] = name;
+			foundFormat["endnote"] = escape(name);
 		}
 	}
 	
@@ -7048,7 +7047,7 @@ REPLACE INTO translators VALUES ('af4cf622-eaca-450b-bd45-0f4ba345d081', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('0e2235e7-babf-413c-9acf-f27cce5f059c', '1.0.0b3.r1', '', '2007-03-19 22:51:00', 1, 50, 3, 'MODS', 'Simon Kornblith', 'xml',
+REPLACE INTO translators VALUES ('0e2235e7-babf-413c-9acf-f27cce5f059c', '1.0.0b3.r1', '', '2007-03-20 17:50:13', 1, 50, 3, 'MODS', 'Simon Kornblith', 'xml',
 'Zotero.addOption("exportNotes", true);
 
 function detectImport() {
@@ -7292,6 +7291,11 @@ function doExport() {
 			mods.relatedItem.titleInfo += <titleInfo type="abbreviated"><title>{item.journalAbbreviation}</title></titleInfo>;
 		}
 		
+		// XML tag abstract; object field abstractNote
+		if(item.abstractNote) {
+			mods.abstract = item.abstractNote;
+		}
+		
 		if(mods.relatedItem.length() == 1 && isPartialItem) {
 			mods.relatedItem.@type = "host";
 		}
@@ -7441,7 +7445,19 @@ function doImport() {
 				}
 			}
 			
-			if(!newItem.itemType) newItem.itemType = "book";
+			// check if this is an electronic resource
+			if(!newItem.itemType) {
+				for each(var form in mods.m::physicalDescription.m::form) {
+					if(form.@authority == "marcform" || form.@authority == "marc") {
+						if(form.text().toString() == "electronic") {
+							newItem.itemType = "webpage";
+							break;
+						}
+					}
+				}
+				
+				if(!newItem.itemType) newItem.itemType = "book";
+			}
 		}
 		
 		var isPartialItem = Zotero.Utilities.inArray(newItem.itemType, partialItemTypes);
@@ -7577,7 +7593,11 @@ function doImport() {
 		}
 		// publisher/distributor
 		if(originInfo.m::publisher.length()) {
-			newItem.publisher = newItem.distributor = originInfo.m::publisher[0].text().toString();
+			if(newItem.itemType == "webpage" || newItem.itemType == "website") {
+				newItem.publicationTitle = originInfo.m::publisher[0].text().toString();
+			} else {
+				newItem.publisher = originInfo.m::publisher[0].text().toString();
+			}
 		}
 		// date
 		if(originInfo.m::copyrightDate.length()) {
@@ -7609,6 +7629,8 @@ function doImport() {
 		newItem.archiveLocation = mods.m::location.m::physicalLocation.text().toString();
 		// url
 		newItem.url = mods.m::location.m::url.text().toString();
+		// abstract
+		newItem.abstractNote = mods.m::abstract.text().toString();
 		
 		/** NOTES **/
 		for each(var note in mods.m::note) {
