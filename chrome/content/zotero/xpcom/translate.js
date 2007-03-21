@@ -886,6 +886,10 @@ Zotero.Translate.prototype._translationComplete = function(returnValue, error) {
 			this._closeStreams();
 			
 			if(!returnValue) {
+				// report error to console
+				Components.utils.reportError(error);
+				
+				// report error to debug log
 				var errorString = this._generateErrorString(error);
 				this._debug("Translation using "+(this.translator && this.translator[0] && this.translator[0].label ? this.translator[0].label : "no translator")+" failed: \n"+errorString);
 				
