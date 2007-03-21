@@ -167,10 +167,10 @@ var Zotero_File_Interface = new function() {
 	/*
 	 * exports items to clipboard
 	 */
-	function exportItemsToClipboard(items, format) {
+	function exportItemsToClipboard(items, translatorID) {
 		var translation = new Zotero.Translate("export");
 		translation.setItems(items);
-		translation.setTranslator(format);
+		translation.setTranslator(translatorID);
 		translation.setHandler("done", _copyToClipboard);
 		translation.translate();
 	}

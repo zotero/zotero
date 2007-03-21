@@ -42,10 +42,9 @@ pref("extensions.zotero.fulltext.pdfMaxPages", 100);
 // Export and citation settings
 pref("extensions.zotero.export.lastTranslator", '14763d24-8ba0-45df-8f52-b8d1108e7ac9');
 pref("extensions.zotero.export.translatorSettings", 'true,false');
-pref("extensions.zotero.export.lastStyle", 'http://purl.org/net/xbiblio/csl/styles/apa.csl');
+pref("extensions.zotero.export.lastStyle", 'http://purl.org/net/xbiblio/csl/styles/chicago-note.csl');
 pref("extensions.zotero.export.bibliographySettings", 'save-as-rtf');
 
-pref("extensions.zotero.export.quickCopy.mode", 'bibliography');
-pref("extensions.zotero.export.quickCopy.setting", 'http://purl.org/net/xbiblio/csl/styles/apa.csl');
+pref("extensions.zotero.export.quickCopy.setting", 'bibliography=http://purl.org/net/xbiblio/csl/styles/chicago-note.csl');
 
 pref("extensions.zotero.annotations.warnOnClose", true);

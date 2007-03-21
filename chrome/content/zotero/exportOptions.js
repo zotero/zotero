@@ -53,7 +53,7 @@ var Zotero_File_Interface_Export = new function() {
 		var selectedTranslator = Zotero.Prefs.get("export.lastTranslator");
 		
 		// add styles to list
-		for(i in translators) {
+		for(var i in translators) {
 			var itemNode = document.createElement("menuitem");
 			itemNode.setAttribute("label", translators[i].label);
 			listbox.appendChild(itemNode);

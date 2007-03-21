@@ -881,11 +881,14 @@ var ZoteroPane = new function()
 			return;
 		}
 		
-		// TODO: we only support bibliography output at the moment
-		var mode = Zotero.Prefs.get("export.quickCopy.mode");
+		var [mode, format] = Zotero.Prefs.get("export.quickCopy.setting").split('=');
+		Zotero.debug(mode);
+		Zotero.debug(format);
 		if (mode == 'bibliography') {
-			var style = Zotero.Prefs.get("export.quickCopy.setting");
-			Zotero_File_Interface.copyItemsToClipboard(items, style);
+			Zotero_File_Interface.copyItemsToClipboard(items, format);
+		}
+		else if (mode == 'export') {
+			Zotero_File_Interface.exportItemsToClipboard(items, format);
 		}
 	}
 	

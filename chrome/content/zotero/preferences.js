@@ -136,18 +136,50 @@ function populateOpenURLResolvers() {
 function populateQuickCopyList() {
 	var formatMenu = document.getElementById("quickCopy-menu");
 	var listbox = formatMenu.firstChild;
-	var styles = Zotero.Cite.getStyles();
-	
 	var format = Zotero.Prefs.get("export.quickCopy.setting");
 	
+	var itemNode = document.createElement("menuitem");
+	itemNode.setAttribute("label", Zotero.getString('zotero.preferences.export.quickCopy.bibStyles'));
+	itemNode.setAttribute("disabled", true);
+	listbox.appendChild(itemNode);
+	
 	// add styles to list
-	for (i in styles) {
+	var styles = Zotero.Cite.getStyles();
+	for (var i in styles) {
+		var val = 'bibliography=' + i;
 		var itemNode = document.createElement("menuitem");
-		itemNode.setAttribute("value", i);
+		itemNode.setAttribute("value", val);
 		itemNode.setAttribute("label", styles[i]);
 		listbox.appendChild(itemNode);
 		
-		if (i == format) {
+		if (val == format) {
+			formatMenu.selectedItem = itemNode;
+		}
+	}
+	
+	var itemNode = document.createElement("menuitem");
+	itemNode.setAttribute("label", Zotero.getString('zotero.preferences.export.quickCopy.exportFormats'));
+	itemNode.setAttribute("disabled", true);
+	listbox.appendChild(itemNode);
+	
+	// add export formats to list
+	var translation = new Zotero.Translate("export");
+	var translators = translation.getTranslators();
+	
+	for (var i in translators) {
+		// Skip RDF formats
+		switch (translators[i].translatorID) {
+			case '6e372642-ed9d-4934-b5d1-c11ac758ebb7':
+			case '14763d24-8ba0-45df-8f52-b8d1108e7ac9':
+				continue;
+		}
+		var val  = 'export=' + translators[i].translatorID;
+		var itemNode = document.createElement("menuitem");
+		itemNode.setAttribute("value", val);
+		itemNode.setAttribute("label", translators[i].label);
+		listbox.appendChild(itemNode);
+		
+		if (val == format) {
 			formatMenu.selectedItem = itemNode;
 		}
 	}
