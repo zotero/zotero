@@ -116,6 +116,7 @@ var ZoteroAdvancedSearch = new function() {
 				}
 				
 				lastWin.ZoteroPane.selectItem(item.getID(), false, true);
+				lastWin.focus();
 			}
 		}
 	}

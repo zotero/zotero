@@ -450,6 +450,18 @@ var ZoteroPane = new function()
 	
 	
 	function openAdvancedSearchWindow() {
+		var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+					.getService(Components.interfaces.nsIWindowMediator);
+		var enumerator = wm.getEnumerator('zotero:search');
+		while (enumerator.hasMoreElements()) {
+			var win = enumerator.getNext();
+		}
+		
+		if (win) {
+			win.focus();
+			return;
+		}
+		
 		var s = new Zotero.Search();
 		s.addCondition('title', 'contains', '');
 		var io = {dataIn: {search: s}, dataOut: null};

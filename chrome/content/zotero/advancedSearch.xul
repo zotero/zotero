@@ -17,7 +17,8 @@
 	persist="screenX screenY width height"
 	onload="ZoteroAdvancedSearch.onLoad()"
 	onunload="ZoteroAdvancedSearch.onUnload()"
-	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	windowtype="zotero:search">
 	
 	<script src="include.js"/>
 	<script src="advancedSearch.js"/>
