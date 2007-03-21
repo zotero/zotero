@@ -1,4 +1,4 @@
--- 190
+-- 191
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-03-21 18:05:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-03-21 23:15:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-03-21 15:26:54', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -6415,7 +6415,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('a354331-981b-43de-a61-bc26dd1be3a9', '1.0.0b3.r1', '', '2006-12-19 21:25:46', '1', '100', '4', 'AMS MathSciNet', 'Simon Kornblith', '^http://www\.ams\.org/mathscinet/search/(?:publications\.html|publdoc\.html)', 
+REPLACE INTO translators VALUES ('a354331-981b-43de-a61-bc26dd1be3a9', '1.0.0b3.r1', '', '2007-03-21 23:15:00', '1', '100', '4', 'AMS MathSciNet', 'Simon Kornblith', '^http://www\.ams\.org/mathscinet/search/(?:publications\.html|publdoc\.html)', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -6470,7 +6470,7 @@ REPLACE INTO translators VALUES ('a354331-981b-43de-a61-bc26dd1be3a9', '1.0.0b3.
 	} else {
 		var MR = doc.evaluate(''//div[@id="content"]/div[@class="doc"]/div[@class="headline"]/strong'',
 			doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-		pub += "&b="+MR.substr(2);
+		pub += "&b="+MR.replace(/^MR0*/, "");
 	}
 	
 	Zotero.Utilities.HTTP.doGet(pub, function(text) {
