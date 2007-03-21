@@ -184,7 +184,7 @@ var Zotero_File_Interface = new function() {
 		} else {
 			Components.classes["@mozilla.org/widget/clipboardhelper;1"]
                       .getService(Components.interfaces.nsIClipboardHelper)
-                      .copyString(obj.output);
+                      .copyString(obj.output.replace(/\r\n/g, "\n"));
 		}
 	}
 	
