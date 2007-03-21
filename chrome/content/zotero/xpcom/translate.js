@@ -100,6 +100,10 @@
  *                      an EZProxy
  * _downloadAssociatedFiles - whether to download content, according to
  *                            preferences
+ *
+ * EXPORT-ONLY PROPERTIES:
+ *
+ * output - export output (if no location has been specified)
  */
 
 Zotero.Translate = function(type, saveItem) {
@@ -550,7 +554,7 @@ Zotero.Translate.prototype.translate = function() {
 		throw("cannot translate: no translator specified");
 	}
 	
-	if(!this.location && this.type != "search" && !this._storage) {
+	if(!this.location && this.type != "search" && this.type != "export" && !this._storage) {
 		// searches operate differently, because we could have an array of
 		// translators and have to go through each
 		throw("cannot translate: no location specified");
@@ -1024,9 +1028,6 @@ Zotero.Translate.prototype._itemTagsAndSeeAlso = function(item, newItem) {
 				if(tag.tag) {
 					var type = (tag.isAutomatic ? 1 : 0);
 					newItem.addTag(tag.tag, type);
-				} else {
-					Zotero.debug("ignoring blank tag: ");
-					Zotero.debug(tag);
 				}
 			}
 		}
@@ -1221,7 +1222,6 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 								Zotero.Attachments.importFromDocument(attachment.document, myID, attachment.title);
 							} else {
 								Zotero.debug("GOT ATTACHMENT");
-								Zotero.debug(attachment);
 								
 								var mimeType = null;
 								var title = null;
@@ -1302,9 +1302,6 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 				if(tag.tag) {
 					var type = (tag.isAutomatic ? 1 : 0);
 					newItem.addTag(tag.tag, type);
-				} else {
-					Zotero.debug("ignoring blank tag: ");
-					Zotero.debug(tag);
 				}
 			}
 		}
@@ -1641,9 +1638,6 @@ Zotero.Translate.prototype._export = function() {
 		// if just items, get them and don't worry about collection logic
 		this._itemsLeft = this.items;
 	} else if(this.collection) {
-			Zotero.debug("using collection");
-			Zotero.debug(this.collection);
-			
 		// get items in this collection
 		this._itemsLeft = Zotero.getItems(this.collection.getID());
 		
@@ -1718,44 +1712,56 @@ Zotero.Translate.prototype._export = function() {
  * configures IO for export
  */
 Zotero.Translate.prototype._exportConfigureIO = function() {
-	// open file
-	var fStream = Components.classes["@mozilla.org/network/file-output-stream;1"]
-							 .createInstance(Components.interfaces.nsIFileOutputStream);
-	fStream.init(this.location, 0x02 | 0x08 | 0x20, 0664, 0); // write, create, truncate
-	// attach to stack of streams to close at the end
-	this._streams.push(fStream);
-	
-	if(this.configOptions.dataMode == "rdf") {	// rdf io
-		this._rdf = new Object();
+	if(this.location) {
+		// open file
+		var fStream = Components.classes["@mozilla.org/network/file-output-stream;1"]
+								 .createInstance(Components.interfaces.nsIFileOutputStream);
+		fStream.init(this.location, 0x02 | 0x08 | 0x20, 0664, 0); // write, create, truncate
+		// attach to stack of streams to close at the end
+		this._streams.push(fStream);
 		
-		// create data source
-		this._rdf.dataSource = Components.classes["@mozilla.org/rdf/datasource;1?name=xml-datasource"].
-		                 createInstance(Components.interfaces.nsIRDFDataSource);
-		// create serializer
-		this._rdf.serializer = Components.classes["@mozilla.org/rdf/xml-serializer;1"].
-		                 createInstance(Components.interfaces.nsIRDFXMLSerializer);
-		this._rdf.serializer.init(this._rdf.dataSource);
-		this._rdf.serializer.QueryInterface(Components.interfaces.nsIRDFXMLSource);
-		
-		// make an instance of the RDF handler
-		this._sandbox.Zotero.RDF = new Zotero.Translate.RDF(this._rdf.dataSource, this._rdf.serializer);
+		if(this.configOptions.dataMode == "rdf") {	// rdf io
+			this._rdf = new Object();
+			
+			// create data source
+			this._rdf.dataSource = Components.classes["@mozilla.org/rdf/datasource;1?name=xml-datasource"].
+							 createInstance(Components.interfaces.nsIRDFDataSource);
+			// create serializer
+			this._rdf.serializer = Components.classes["@mozilla.org/rdf/xml-serializer;1"].
+							 createInstance(Components.interfaces.nsIRDFXMLSerializer);
+			this._rdf.serializer.init(this._rdf.dataSource);
+			this._rdf.serializer.QueryInterface(Components.interfaces.nsIRDFXMLSource);
+			
+			// make an instance of the RDF handler
+			this._sandbox.Zotero.RDF = new Zotero.Translate.RDF(this._rdf.dataSource, this._rdf.serializer);
+		} else {
+			// regular io; write just writes to file
+			var intlStream = null;
+			
+			// allow setting of character sets
+			this._sandbox.Zotero.setCharacterSet = function(charset) {
+				intlStream = Components.classes["@mozilla.org/intl/converter-output-stream;1"]
+									   .createInstance(Components.interfaces.nsIConverterOutputStream);
+				intlStream.init(fStream, charset, 1024, "?".charCodeAt(0));
+			};
+			
+			this._sandbox.Zotero.write = function(data) {
+				if(intlStream) {
+					intlStream.writeString(data);
+				} else {
+					fStream.write(data, data.length);
+				}
+			};
+		}
 	} else {
-		// regular io; write just writes to file
-		var intlStream = null;
+		var me = this;
+		this.output = "";
 		
-		// allow setting of character sets
-		this._sandbox.Zotero.setCharacterSet = function(charset) {
-			intlStream = Components.classes["@mozilla.org/intl/converter-output-stream;1"]
-			                       .createInstance(Components.interfaces.nsIConverterOutputStream);
-			intlStream.init(fStream, charset, 1024, "?".charCodeAt(0));
-		};
-		
+		// dummy setCharacterSet function
+		this._sandbox.Zotero.setCharacterSet = function() {};
+		// write to string
 		this._sandbox.Zotero.write = function(data) {
-			if(intlStream) {
-				intlStream.writeString(data);
-			} else {
-				fStream.write(data, data.length);
-			}
+			me.output += data;
 		};
 	}
 }
@@ -1805,8 +1811,6 @@ Zotero.Translate.prototype._exportGetAttachment = function(attachment) {
 	}
 	
 	attachmentArray.itemType = "attachment";
-	
-	Zotero.debug(attachmentArray);
 	
 	return attachmentArray;
 }
@@ -2276,14 +2280,12 @@ Zotero.Translate.RDF.prototype.addStatement = function(about, relation, value, l
 			try {
 				value = this._RDFService.GetLiteral(value);
 			} catch(e) {
-				Zotero.debug(value);
 				throw "Zotero.Translate.RDF.addStatement: Could not convert to literal";
 			}
 		} else {
 			try {
 				value = this._RDFService.GetResource(value);
 			} catch(e) {
-				Zotero.debug(value);
 				throw "Zotero.Translate.RDF.addStatement: Could not convert to resource";
 			}
 		}

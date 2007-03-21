@@ -109,6 +109,7 @@ var Zotero_File_Interface = new function() {
 	
 	this.exportFile = exportFile;
 	this.exportCollection = exportCollection;
+	this.exportItemsToClipboard = exportItemsToClipboard;
 	this.exportItems = exportItems;
 	this.importFile = importFile;
 	this.bibliographyFromCollection = bibliographyFromCollection;
@@ -161,6 +162,30 @@ var Zotero_File_Interface = new function() {
 		if(!exporter.items || !exporter.items.length) throw("no items currently selected");
 		
 		exporter.save();
+	}
+	
+	/*
+	 * exports items to clipboard
+	 */
+	function exportItemsToClipboard(items, format) {
+		var translation = new Zotero.Translate("export");
+		translation.setItems(items);
+		translation.setTranslator(format);
+		translation.setHandler("done", _copyToClipboard);
+		translation.translate();
+	}
+	
+	/*
+	 * handler when done exporting items to clipboard
+	 */
+	function _copyToClipboard(obj, worked) {
+		if(!worked) {
+			window.alert(Zotero.getString("fileInterface.exportError"));
+		} else {
+			Components.classes["@mozilla.org/widget/clipboardhelper;1"]
+                      .getService(Components.interfaces.nsIClipboardHelper)
+                      .copyString(obj.output);
+		}
 	}
 	
 	/*
@@ -313,7 +338,6 @@ var Zotero_File_Interface = new function() {
 		
 		clipboardService.setData(transferable, null, Components.interfaces.nsIClipboard.kGlobalClipboard);
 	}
-	
 	
 	/*
 	 * Shows bibliography options and creates a bibliography
