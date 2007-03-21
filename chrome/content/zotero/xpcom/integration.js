@@ -666,7 +666,7 @@ Zotero.Integration.CitationSet.prototype.addCitation = function(citation) {
 		}
 	}
 	
-	this.lastItemID = (citation.itemIDs.length == 1 ? citation.itemIDString : null);
+	this.lastItemIDString = (citation.itemIDs.length == 1 ? citation.itemIDString : null);
 	this.citationsByIndex[citation.index] = citation;
 	
 	return isDuplicate;

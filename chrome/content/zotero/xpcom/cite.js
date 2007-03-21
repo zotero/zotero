@@ -419,8 +419,9 @@ Zotero.CSL.prototype.preprocessItems = function(items) {
  */
 Zotero.CSL.prototype.createCitation = function(citation, format) {
 	if(citation.citationType == 2) {
-		var string = this._getTerm("ibid");
-		string = string[0].toUpperCase()+string.substr(1);
+		var string = new Zotero.CSL.FormattedString(this, format);
+		var term = this._getTerm("ibid");
+		string.append(term[0].toUpperCase()+term.substr(1));
 	} else {
 		var lasti = citation.itemIDs.length-1;
 		for(var i in citation.itemIDs) {
