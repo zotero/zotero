@@ -675,7 +675,7 @@ Zotero.Annotation.prototype.displayWithAbsoluteCoordinates = function(absX, absY
 		// generate pushpin div
 		this.pushpinDiv = this.document.createElement("div");
 		this.pushpinDiv.style.padding = "0";
-		this.pushpinDiv.style.display = "block";
+		this.pushpinDiv.style.display = "none";
 		this.pushpinDiv.style.position = "absolute";
 		this.pushpinDiv.style.cursor = "pointer";
 		// generate pushpin image
