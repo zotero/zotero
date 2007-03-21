@@ -699,7 +699,7 @@ Zotero.Ingester.MIMEHandler.StreamListener = function(request, contentType) {
 	var windowWatcher = Components.classes["@mozilla.org/embedcomp/window-watcher;1"].
 						getService(Components.interfaces.nsIWindowWatcher);
 	this._frontWindow = windowWatcher.activeWindow;
-	this._frontWindow.Zotero_Browser.Progress.show();
+	this._frontWindow.Zotero_Browser.progress.show();
 	
 	Zotero.debug("EndNote prepared to grab content type "+contentType);
 }
