@@ -1,4 +1,4 @@
--- 188
+-- 189
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-03-21 16:13:39'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-03-21 18:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-03-21 15:26:54', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -9180,7 +9180,7 @@ function doExport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('881f60f2-0802-411a-9228-ce5f47b64c7d', '1.0.0b3.r1', '', '2007-03-20 18:40:00', 1, 100, 3, 'Refer/BibIX', 'Simon Kornblith', 'txt',
+REPLACE INTO translators VALUES ('881f60f2-0802-411a-9228-ce5f47b64c7d', '1.0.0b3.r1', '', '2007-03-21 18:00:00', 1, 100, 3, 'EndNote/Refer/BibIX', 'Simon Kornblith', 'txt',
 'Zotero.configure("dataMode", "line");
 
 function detectImport() {
@@ -9238,42 +9238,74 @@ var typeMap = {
 	letter:"Personal Communication",
 	manuscript:"Unpublished Work",
 	interview:"Personal Communication",
-	film:"Audiovisual Material",
+	film:"Film or Broadcast",
 	artwork:"Artwork",
-	webpage:"Electronic Source",
-	conferencePaper:"Conference Paper"
+	webpage:"Web Page",
+	report:"Report",
+	bill:"Bill",
+	"case":"Case",
+	hearing:"Hearing",
+	patent:"Patent",
+	statute:"Statute",
+	email:"Personal Communication",
+	map:"Map",
+	blogPost:"Web Page",
+	instantMessage:"Personal Communication",
+	forumPost:"Web Page",
+	audioRecording:"Audiovisual Material",
+	presentation:"Report",
+	videoRecording:"Audiovisual Material",
+	tvBroadcast:"Film or Broadcast",
+	radioBroadcast:"Film or Broadcast",
+	podcast:"Audiovisual Material",
+	computerProgram:"Computer Program",
+	conferencePaper:"Conference Paper",
+	document:"Generic",
+	encyclopediaArticle:"Encyclopedia",
+	dictionaryEntry:"Dictionary"
 };
 
 // supplements outputTypeMap for importing
 // TODO: BILL, CASE, COMP, CONF, DATA, HEAR, MUSIC, PAT, SOUND, STAT
 var inputTypeMap = {
-	"Generic":"book"
+	"Ancient Text":"book",
+	"Audiovisual Material":"videoRecording",
+	"Generic":"book",
+	"Chart or Table":"artwork",
+	"Classical Work":"book",
+	"Conference Proceedings":"conferencePaper",
+	"Edited Book":"book",
+	"Electronic Article":"journalArticle",
+	"Electronic Book":"book",
+	"Equation":"artwork",
+	"Figure":"artwork",
+	"Government Document":"document",
+	"Grant":"document",
+	"Legal Rule or Regulation":"statute",
+	"Online Database":"webpage",
+	"Online Multimedia":"webpage",
+	"Electronic Source":"webpage"
 };
 
 var isEndNote = false;
 
 function processTag(item, tag, value) {
-	value = Zotero.Utilities.cleanString(value);
-	
 	if(fieldMap[tag]) {
 		item[fieldMap[tag]] = value;
 	} else if(inputFieldMap[tag]) {
 		item[inputFieldMap[tag]] = value;
 	} else if(tag == "0") {
-		// first check typeMap
-		for(var i in typeMap) {
-			if(value == typeMap[i]) {
-				item.itemType = i;
+		if(inputTypeMap[value]) {	// first check inputTypeMap
+			item.itemType = inputTypeMap[value]
+		} else {					// then check typeMap
+			for(var i in typeMap) {
+				if(value == typeMap[i]) {
+					item.itemType = i;
+					break;
+				}
 			}
-		}
-		// then check inputTypeMap
-		if(!item.itemType) {
-			if(inputTypeMap[value]) {
-				item.itemType = inputTypeMap[value];
-			} else {
-				// default to generic from inputTypeMap
-				item.itemType = inputTypeMap["Generic"];
-			}
+			// fall back to generic
+			if(!item.itemType) item.itemType = inputTypeMap["Generic"];
 		}
 	} else if(tag == "A" || tag == "E" || tag == "?") {
 		if(tag == "A") {
