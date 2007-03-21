@@ -858,6 +858,10 @@ Zotero.Schema = new function(){
 						}
 					}
 				}
+				
+				if (i==25) {
+					Zotero.DB.query("UPDATE itemData SET fieldID=100 WHERE itemID IN (SELECT itemID FROM items WHERE itemTypeID=15) AND fieldID=14;")
+				}
 			}
 			
 			_updateSchema('userdata');
