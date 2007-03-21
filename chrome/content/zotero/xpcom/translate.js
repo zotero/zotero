@@ -1215,9 +1215,25 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 					if(!attachment.url && !attachment.document) {
 						Zotero.debug("not adding attachment: no URL specified");
 					} else {
-						if(attachment.document
+						if(attachment.snapshot === false) {
+							// if snapshot is explicitly set to false, attach as link
+							if(attachment.document) {
+								attachmentID = Zotero.Attachments.linkFromURL(attachment.document.location.href, myID,
+										(attachment.mimeType ? attachment.mimeType : attachment.document.contentType),
+										(attachment.title ? attachment.title : attachment.document.title));
+							} else {
+								if(!attachment.mimeType || !attachment.title) {
+									Zotero.debug("NOTICE: either mimeType or title is missing; attaching file will be slower");
+								}
+								
+								attachmentID = Zotero.Attachments.linkFromURL(attachment.url, myID,
+										(attachment.mimeType ? attachment.mimeType : undefined),
+										(attachment.title ? attachment.title : undefined));
+							}
+						} else if(attachment.document
 						|| (attachment.mimeType && attachment.mimeType == "text/html")
 						|| Zotero.Prefs.get("downloadAssociatedFiles")) {
+							// if snapshot is not explicitly set to false, retrieve snapshot
 							if(attachment.document) {
 								Zotero.Attachments.importFromDocument(attachment.document, myID, attachment.title);
 							} else {
@@ -1249,20 +1265,6 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 								Zotero.Attachments.importFromURL(attachment.url, myID, title, fileBaseName);
 							}
 						}
-						// links no longer exist, so just don't save them
-						/*if(attachment.document) {
-							attachmentID = Zotero.Attachments.linkFromURL(attachment.document.location.href, myID,
-									(attachment.mimeType ? attachment.mimeType : attachment.document.contentType),
-									(attachment.title ? attachment.title : attachment.document.title));
-						} else {
-							if(!attachment.mimeType || attachment.title) {
-								Zotero.debug("notice: either mimeType or title is missing; attaching file will be slower");
-							}
-							
-							attachmentID = Zotero.Attachments.linkFromURL(attachment.url, myID,
-									(attachment.mimeType ? attachment.mimeType : undefined),
-									(attachment.title ? attachment.title : undefined));
-						}*/
 					}
 				} else if(this.type == "import") {
 					// create new attachments attached here

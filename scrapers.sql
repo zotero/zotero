@@ -1,4 +1,4 @@
--- 186
+-- 187
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,9 +22,9 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-03-20 18:40:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-03-21 15:26:54'));
 
-REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b3.r1', '', '2006-12-15 03:40:00', 1, 100, 4, 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
+REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-03-21 15:26:54', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
 
 	var suffixRe = new RegExp("https?://(?:www\.)?amazon\.([^/]+)/");
@@ -64,7 +64,7 @@ REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b
 		}
 	}
 }
-',
+', 
 'function doWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -125,6 +125,7 @@ REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b
 		texts = texts[1].split("</ItemLookupResponse>");
 		text = "<Items>" + texts[0];
 		var xml = new XML(text);
+		Zotero.debug(text);
 
 		var publisher = "";
 		if (xml..Publisher.length()){
@@ -202,14 +203,14 @@ REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b
 			title = title.substring(0, title.lastIndexOf("(")-1);
 		}
 		if (xml..ASIN.length()){
-			newItem.url = "http://www.amazon." + suffix + "/dp/" + Zotero.Utilities.cleanString(xml..ASIN[0].text().toString());
+			var url = "http://www.amazon." + suffix + "/dp/" + Zotero.Utilities.cleanString(xml..ASIN[0].text().toString());
+			newItem.attachments.push({title:"Amazon.com Link", snapshot:false, mimeType:"text/html", url:url});
 		}
 		
 		if (xml..OriginalReleaseDate.length()){
 			newItem.extra =  newItem.pages = Zotero.Utilities.cleanString(xml..OriginalReleaseDate[0].text().toString());
 		}
 		
-		Zotero.debug("item title: " + title);
 		newItem.title = title;
 		newItem.complete();			
 	}, function() {Zotero.done();}, null);
