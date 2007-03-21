@@ -59,7 +59,7 @@ Zotero.File = new function(){
 	function getSample(file){
 		var fis = Components.classes["@mozilla.org/network/file-input-stream;1"].
 			createInstance(Components.interfaces.nsIFileInputStream);
-		fis.init(file, false, false, false);
+		fis.init(file, 0x01, 0664, 0);
 		
 		const replacementChar
 			= Components.interfaces.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER;
@@ -67,7 +67,7 @@ Zotero.File = new function(){
 			.createInstance(Components.interfaces.nsIConverterInputStream);
 		is.init(fis, "UTF-8", 128, replacementChar);
 		var str = {};
-		var numChars = is.readString(512, str);
+		var numChars = is.readString(128, str);
 		is.close();
 		
 		return str.value;
@@ -77,7 +77,7 @@ Zotero.File = new function(){
 	function getContents(file, charset, maxLength){
 		var fis = Components.classes["@mozilla.org/network/file-input-stream;1"].
 			createInstance(Components.interfaces.nsIFileInputStream);
-		fis.init(file, false, false, false);
+		fis.init(file, 0x01, 0664, 0);
 		
 		if (charset){
 			charset = Zotero.CharacterSets.getName(charset);
@@ -91,8 +91,8 @@ Zotero.File = new function(){
 			= Components.interfaces.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER;
 		var is = Components.classes["@mozilla.org/intl/converter-input-stream;1"]
 			.createInstance(Components.interfaces.nsIConverterInputStream);
-		is.init(fis, charset, 1024, replacementChar);
-		var chars = 1024;
+		is.init(fis, charset, 4096, replacementChar);
+		var chars = 4096;
 		
 		var contents = [], str = {};
 		while (is.readString(4096, str) != 0) {
