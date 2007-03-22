@@ -1161,6 +1161,8 @@ Zotero.CSL.prototype._getFieldValue = function(name, element, item, formattedStr
 					string = item.getField("publicationTitle");
 				} else if(element.relation == "collection") {
 					string = item.getField("seriesTitle");
+				} else if(element.relation == "event") {
+					string = item.getField("conferenceName");
 				}
 			}
 				
