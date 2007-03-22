@@ -1,4 +1,4 @@
--- 191
+-- 192
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-03-21 23:15:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-03-22 14:50:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-03-21 15:26:54', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -7048,7 +7048,7 @@ REPLACE INTO translators VALUES ('af4cf622-eaca-450b-bd45-0f4ba345d081', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('0e2235e7-babf-413c-9acf-f27cce5f059c', '1.0.0b3.r1', '', '2007-03-20 17:50:13', 1, 50, 3, 'MODS', 'Simon Kornblith', 'xml',
+REPLACE INTO translators VALUES ('0e2235e7-babf-413c-9acf-f27cce5f059c', '1.0.0b3.r1', '', '2007-03-22 14:50:00', 1, 50, 3, 'MODS', 'Simon Kornblith', 'xml',
 'Zotero.addOption("exportNotes", true);
 
 function detectImport() {
@@ -7264,7 +7264,7 @@ function doExport() {
 			identifier.identifier += <identifier type="issn">{item.ISSN}</identifier>;
 		}
 		if(item.DOI) {
-			identifier.identifier += <identifier type="doi">{item.DOI}</identifier>;
+			mods.identifier += <identifier type="doi">{item.DOI}</identifier>;
 		}
 		
 		// XML tag relatedItem.titleInfo; object field publication
@@ -7352,6 +7352,18 @@ function doExport() {
 	
 	Zotero.write(''<?xml version="1.0"?>''+"\n");
 	Zotero.write(modsCollection.toXMLString());
+}
+
+function processIdentifiers(newItem, identifier) {
+	for each(var myIdentifier in identifier) {
+		if(myIdentifier.@type == "isbn") {
+			newItem.ISBN = myIdentifier.text().toString()
+		} else if(myIdentifier.@type == "issn") {
+			newItem.ISSN = myIdentifier.text().toString()
+		} else if(myIdentifier.@type == "doi") {
+			newItem.DOI = myIdentifier.text().toString()
+		}
+	}
 }
 
 function doImport() {
@@ -7508,7 +7520,7 @@ function doImport() {
 		
 		/** SUPPLEMENTAL FIELDS **/
 		
-		var part = false, originInfo = false, identifier = false;
+		var part = false, originInfo = false;
 		
 		// series
 		for each(var relatedItem in mods.m::relatedItem) {
@@ -7523,7 +7535,7 @@ function doImport() {
 				}
 				part = relatedItem.m::part;
 				originInfo = relatedItem.m::originInfo;
-				identifier = relatedItem.m::identifier;
+				processIdentifiers(newItem, relatedItem.m::identifier);
 			} else if(relatedItem.@type == "series") {
 				newItem.series = relatedItem.m::titleInfo.m::title.text().toString();
 				newItem.seriesTitle = relatedItem.m::titleInfo.m::partTitle.text().toString();
@@ -7536,7 +7548,6 @@ function doImport() {
 		if(!part) {
 			part = mods.m::part;
 			originInfo = mods.m::originInfo;
-			identifier = mods.m::identifier;
 		}
 		
 		if(part) {
@@ -7568,7 +7579,7 @@ function doImport() {
 			
 			// pages
 			for each(var extent in part.m::extent) {
-				if(extent.@unit == "pages") {
+				if(extent.@unit == "pages" || extent.@unit == "page") {
 					var pagesStart = extent.m::start.text().toString();
 					var pagesEnd = extent.m::end.text().toString();
 					if(pagesStart || pagesEnd) {
@@ -7584,6 +7595,8 @@ function doImport() {
 			}
 		}
 		
+		// identifier
+		processIdentifiers(newItem, mods.m::identifier);
 		// edition
 		newItem.edition = originInfo.m::edition.text().toString();
 		// place
@@ -7612,17 +7625,6 @@ function doImport() {
 		newItem.lastModified = originInfo.m::dateModified.text().toString();
 		// accessDate
 		newItem.accessDate = originInfo.m::dateCaptured.text().toString();
-		
-		// identifiers
-		for each(var myIdentifier in identifier) {
-			if(myIdentifier.@type == "isbn") {
-				newItem.ISBN = myIdentifier.text().toString()
-			} else if(myIdentifier.@type == "issn") {
-				newItem.ISSN = myIdentifier.text().toString()
-			} else if(myIdentifier.@type == "doi") {
-				newItem.DOI = myIdentifier.text().toString()
-			}
-		}
 		
 		// call number
 		newItem.callNumber = mods.m::classification.text().toString();
