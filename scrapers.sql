@@ -10530,7 +10530,7 @@ function formatFirstAuthor(authors, useTypes) {
 }
 
 function formatDate(date) {
-	var date = date.substr(0, item.date.indexOf(" "));
+	var date = date.substr(0, date.indexOf(" "));
 	if(date.substr(4, 3) == "-00") {
 		date = date.substr(0, 4);
 	} else if(date.substr(7, 3) == "-00") {
