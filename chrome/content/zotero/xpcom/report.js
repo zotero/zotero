@@ -129,6 +129,11 @@ Zotero.Report = new function() {
 					continue;
 				}
 				
+				// Convert false to empty string
+				if (!arr[i]) {
+					continue;
+				}
+				
 				table = true;
 				var fieldText;
 				
