@@ -994,7 +994,7 @@ Zotero.CSL.prototype._processCreators = function(type, element, creators, format
 			var useEtAl = false;
 			
 			// figure out if we need to use "et al"
-			if(bibCitElement.etAl && maxCreators >= bibCitElement.etAl.minCreators) {
+			if(bibCitElement.etAl && maxCreators > bibCitElement.etAl.minCreators) {
 				maxCreators = bibCitElement.etAl.useFirst;
 				useEtAl = true;
 			}
