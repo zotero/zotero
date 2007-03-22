@@ -6891,11 +6891,7 @@ REPLACE INTO translators VALUES ('66928fe3-1e93-45a7-8e11-9df6de0a11b3', '1.0.0b
 	Zotero.wait();
 }');
 
-<<<<<<< .mine
 REPLACE INTO translators VALUES ('c73a4a8c-3ef1-4ec8-8229-7531ee384cc4', '1.0.0b3.r1', '', '2007-03-22 18:15:00', 1, 100, 12, 'Open WorldCat (Web)', 'Sean Takats', '^http://(?:www\.)?worldcat\.org/search\?',
-=======
-REPLACE INTO translators VALUES ('c73a4a8c-3ef1-4ec8-8229-7531ee384cc4', '1.0.0b3.r1', '', '2007-03-22 18:00:00', 1, 100, 12, 'Open WorldCat (Web)', 'Sean Takats', '^http://(?:www\.)?worldcat\.org/search\?',
->>>>>>> .r1281
 'function detectWeb(doc, url){
 	var nsResolver = doc.createNSResolver(doc.documentElement);
 
