@@ -1,4 +1,4 @@
--- 200
+-- 201
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-03-22 20:55:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-03-22 23:26:24'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-03-21 15:26:54', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -10458,9 +10458,8 @@ function doImport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('3f50aaac-7acc-4350-acd0-59cb77faf620', '1.0.0b4.r1', '', '2007-03-22 20:55:00', 1, 100, 2, 'Wikipedia', 'Simon Kornblith', '', NULL,
+REPLACE INTO translators VALUES ('3f50aaac-7acc-4350-acd0-59cb77faf620', '1.0.0b4.r1', '', '2007-03-22 23:26:24', 1, 100, 2, 'Wikipedia Citation Templates', 'Simon Kornblith', '', NULL,
 'var fieldMap = {
-	"url":"url",
 	edition:"edition",
 	publisher:"publisher",
 	doi:"DOI",
@@ -10739,6 +10738,14 @@ function doExport() {
 				properties.minutes = item.runningTime;
 			} else {
 				properties.time = item.runningTime;
+			}
+		}
+		
+		if(item.url && item.accessDate) {
+			if(item.itemType == "bookSection") {
+				properties.chapterurl = item.url;
+			} else {
+				properties.url = item.url;
 			}
 		}
 		
