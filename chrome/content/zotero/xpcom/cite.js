@@ -84,6 +84,7 @@ Zotero.CSL = function(csl) {
 	
 	// load class defaults
 	this.class =  this._csl["@class"].toString();
+	this.hasBibliography = true;
 	Zotero.debug("CSL: style class is "+this.class);
 	
 	this._defaults = new Object();
@@ -103,6 +104,7 @@ Zotero.CSL = function(csl) {
 	if(!this._bib) {
 		Zotero.debug("CSL: using citation element for bibliography");
 		this._bib = this._cit;
+		this.hasBibliography = false;
 	}
 }
 

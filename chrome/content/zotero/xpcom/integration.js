@@ -530,7 +530,7 @@ Zotero.Integration.SOAP = new function() {
 		                   'chrome,modal'+(Zotero.isMac ? '' : ',popup'), io);
 		session.setStyle(io.style);
 		
-		return [sessionID, io.style, session.style.class];
+		return [sessionID, io.style, session.style.class, session.style.hasBibliography ? "1" : "0"];
 	}
 }
 
