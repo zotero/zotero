@@ -1,4 +1,4 @@
--- 197
+-- 198
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-03-22 18:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-03-22 18:15:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-03-21 15:26:54', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -6891,7 +6891,11 @@ REPLACE INTO translators VALUES ('66928fe3-1e93-45a7-8e11-9df6de0a11b3', '1.0.0b
 	Zotero.wait();
 }');
 
+<<<<<<< .mine
+REPLACE INTO translators VALUES ('c73a4a8c-3ef1-4ec8-8229-7531ee384cc4', '1.0.0b3.r1', '', '2007-03-22 18:15:00', 1, 100, 12, 'Open WorldCat (Web)', 'Sean Takats', '^http://(?:www\.)?worldcat\.org/search\?',
+=======
 REPLACE INTO translators VALUES ('c73a4a8c-3ef1-4ec8-8229-7531ee384cc4', '1.0.0b3.r1', '', '2007-03-22 18:00:00', 1, 100, 12, 'Open WorldCat (Web)', 'Sean Takats', '^http://(?:www\.)?worldcat\.org/search\?',
+>>>>>>> .r1281
 'function detectWeb(doc, url){
 	var nsResolver = doc.createNSResolver(doc.documentElement);
 
@@ -6912,7 +6916,12 @@ REPLACE INTO translators VALUES ('c73a4a8c-3ef1-4ec8-8229-7531ee384cc4', '1.0.0b
 				var spanTitle = spanTags[i].getAttribute("title");
 				var item = new Zotero.Item();
 				if(Zotero.Utilities.parseContextObject(spanTitle, item)) {
-					item.title = Zotero.Utilities.capitalizeTitle(item.title);
+					if(item.title) {
+						item.title = Zotero.Utilities.capitalizeTitle(item.title);
+					} else {
+						item.title = "[Untitled]";
+					}
+					
 					item.complete();
 					return true;
 				} else {
@@ -6953,7 +6962,7 @@ function doWeb(doc, url){
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('e07e9b8c-0e98-4915-bb5a-32a08cb2f365', '1.0.0b3.r1', '', '2007-03-22 17:55:00', 1, 100, 12, 'Open WorldCat (Search)', 'Simon Kornblith', 'http://partneraccess.oclc.org/',
+REPLACE INTO translators VALUES ('e07e9b8c-0e98-4915-bb5a-32a08cb2f365', '1.0.0b3.r1', '', '2007-03-22 18:15:00', 1, 100, 12, 'Open WorldCat (Search)', 'Simon Kornblith', 'http://partneraccess.oclc.org/',
 'function detectSearch(item) {
 	if(item.itemType == "book" || item.itemType == "bookSection") {
 		return true;
@@ -6971,7 +6980,12 @@ function processOWC(doc) {
 				var spanTitle = spanTags[i].getAttribute("title");
 				var item = new Zotero.Item();
 				if(Zotero.Utilities.parseContextObject(spanTitle, item)) {
-					item.title = Zotero.Utilities.capitalizeTitle(item.title);
+					if(item.title) {
+						item.title = Zotero.Utilities.capitalizeTitle(item.title);
+					} else {
+						item.title = "[Untitled]";
+					}
+					
 					item.complete();
 					return true;
 				} else {
