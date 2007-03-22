@@ -1026,8 +1026,7 @@ Zotero.Translate.prototype._itemTagsAndSeeAlso = function(item, newItem) {
 			} else if(typeof(tag) == "object") {
 				// also accept objects
 				if(tag.tag) {
-					var type = (tag.isAutomatic ? 1 : 0);
-					newItem.addTag(tag.tag, type);
+					newItem.addTag(tag.tag, tag.type ? tag.type : 0);
 				}
 			}
 		}
@@ -1302,8 +1301,12 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 			} else if(typeof(tag) == "object") {
 				// also accept objects
 				if(tag.tag) {
-					var type = (tag.isAutomatic ? 1 : 0);
-					newItem.addTag(tag.tag, type);
+					if(this.type == "import") {
+						newItem.addTag(tag.tag, tag.type ? tag.type : 0);
+					} else {
+						// force web imports to automatic
+						newItem.addTag(tag.tag, 1);
+					}
 				}
 			}
 		}
@@ -1416,7 +1419,7 @@ Zotero.Translate.prototype._import = function() {
  */
 Zotero.Translate.prototype._importConfigureIO = function() {
 	if(this._storage) {
-		if(this.configOptions.dataMode == "rdf") {
+		if(this.configOptions.dataMode && this.configOptions.dataMode == "rdf") {
 			this._rdf = new Object();
 			
 			// read string out of storage stream
@@ -1440,7 +1443,7 @@ Zotero.Translate.prototype._importConfigureIO = function() {
 	} else {
 		var me = this;
 		
-		if(this.configOptions.dataMode == "rdf") {
+		if(this.configOptions.dataMode && this.configOptions.dataMode == "rdf") {
 			if(!this._rdf) {
 				this._rdf = new Object()
 				
@@ -1500,7 +1503,7 @@ Zotero.Translate.prototype._importConfigureIO = function() {
 			}
 			
 			var str = new Object();
-			if(this.configOptions.dataMode == "line") {	// line by line reading	
+			if(this.configOptions.dataMode && this.configOptions.dataMode == "line") {	// line by line reading	
 				this._inputStream.QueryInterface(Components.interfaces.nsILineInputStream);
 				
 				this._sandbox.Zotero.read = function() {
@@ -1722,7 +1725,7 @@ Zotero.Translate.prototype._exportConfigureIO = function() {
 		// attach to stack of streams to close at the end
 		this._streams.push(fStream);
 		
-		if(this.configOptions.dataMode == "rdf") {	// rdf io
+		if(this.configOptions.dataMode && this.configOptions.dataMode == "rdf") {	// rdf io
 			this._rdf = new Object();
 			
 			// create data source
@@ -1914,7 +1917,7 @@ Zotero.Translate.prototype._exportGetCollection = function() {
  */
 Zotero.Translate.prototype._initializeInternalIO = function() {
 	if(this.type == "import" || this.type == "export") {
-		if(this.configOptions.dataMode == "rdf") {
+		if(this.configOptions.dataMode && this.configOptions.dataMode == "rdf") {
 			this._rdf = new Object();
 			// use an in-memory data source for internal IO
 			this._rdf.dataSource = Components.classes["@mozilla.org/rdf/datasource;1?name=in-memory-datasource"].
@@ -1950,7 +1953,7 @@ Zotero.Translate.prototype._storageFunctions =  function(read, write) {
 	
 	if(read) {
 		// set up read methods
-		if(this.configOptions.dataMode == "line") {	// line by line reading
+		if(this.configOptions.dataMode && this.configOptions.dataMode == "line") {	// line by line reading
 			var lastCharacter;
 			
 			this._sandbox.Zotero.read = function() {

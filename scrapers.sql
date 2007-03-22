@@ -1,4 +1,4 @@
--- 193
+-- 194
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -7048,7 +7048,7 @@ REPLACE INTO translators VALUES ('af4cf622-eaca-450b-bd45-0f4ba345d081', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('0e2235e7-babf-413c-9acf-f27cce5f059c', '1.0.0b3.r1', '', '2007-03-22 14:50:00', 1, 50, 3, 'MODS', 'Simon Kornblith', 'xml',
+REPLACE INTO translators VALUES ('0e2235e7-babf-413c-9acf-f27cce5f059c', '1.0.0b3.r1', '', '2007-03-22 15:55:00', 1, 50, 3, 'MODS', 'Simon Kornblith', 'xml',
 'Zotero.addOption("exportNotes", true);
 
 function detectImport() {
@@ -7314,7 +7314,7 @@ function doExport() {
 		/** TAGS **/
 		
 		for(var j in item.tags) {
-			mods.subject += <subject><topic>{item.tags[j]}</topic></subject>;
+			mods.subject += <subject><topic>{item.tags[j].tag}</topic></subject>;
 		}
 		
 		
@@ -7651,7 +7651,7 @@ function doImport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('14763d24-8ba0-45df-8f52-b8d1108e7ac9', '1.0.0b4.r1', '', '2007-03-16 23:28:15', 1, 25, 2, 'Zotero RDF', 'Simon Kornblith', 'rdf',
+REPLACE INTO translators VALUES ('14763d24-8ba0-45df-8f52-b8d1108e7ac9', '1.0.0b4.r1', '', '2007-03-22 15:55:00', 1, 25, 2, 'Zotero RDF', 'Simon Kornblith', 'rdf',
 'Zotero.configure("getCollections", true);
 Zotero.configure("dataMode", "rdf");
 Zotero.addOption("exportNotes", true);
@@ -7680,8 +7680,18 @@ function generateSeeAlso(resource, seeAlso) {
 }
 
 function generateTags(resource, tags) {
-	for(var j in tags) {
-		Zotero.RDF.addStatement(resource, n.dc+"subject", tags[j], true);
+	Zotero.debug("processing tags");
+	for each(var tag in tags) {
+		if(tag.type == 1) {
+			var tagResource = Zotero.RDF.newResource();
+			// set tag type and value
+			Zotero.RDF.addStatement(tagResource, rdf+"type", n.z+"AutomaticTag", false);
+			Zotero.RDF.addStatement(tagResource, rdf+"value", tag.tag, true);
+			// add relationship to resource
+			Zotero.RDF.addStatement(resource, n.dc+"subject", tagResource, false);
+		} else {
+			Zotero.RDF.addStatement(resource, n.dc+"subject", tag.tag, true);
+		}
 	}
 }
 
@@ -7902,8 +7912,8 @@ function generateItem(item, zoteroType, resource) {
 	}
 	
 	// seeAlso and tags
-	if(item.seeAlso) generateSeeAlso(resource, value);
-	if(item.tags) generateTags(resource, value);
+	if(item.seeAlso) generateSeeAlso(resource, item.seeAlso);
+	if(item.tags) generateTags(resource, item.tags);
 	
 	for(var property in item.uniqueFields) {
 		var value = item[property];
@@ -8192,7 +8202,7 @@ REPLACE INTO translators VALUES ('6e372642-ed9d-4934-b5d1-c11ac758ebb7', '1.0.0b
 	}
 }');
 
-REPLACE INTO translators VALUES ('5e3ad958-ac79-463d-812b-a86a9235c28f', '1.0.0b3.r1', '', '2007-03-16 23:28:15', 1, 100, 1, 'RDF', 'Simon Kornblith', 'rdf',
+REPLACE INTO translators VALUES ('5e3ad958-ac79-463d-812b-a86a9235c28f', '1.0.0b3.r1', '', '2007-03-22 15:55:00', 1, 100, 1, 'RDF', 'Simon Kornblith', 'rdf',
 'Zotero.configure("dataMode", "rdf");
 
 function detectImport() {
@@ -8325,6 +8335,15 @@ function processTags(node, newItem) {
 		for each(var subject in subjects) {
 			if(typeof(subject) == "string") {	// a regular tag
 				newItem.tags.push(subject);
+			} else {
+				// a call number
+				var type = Zotero.RDF.getTargets(subject, rdf+"type");
+				if(type) {
+					type = Zotero.RDF.getResourceURI(type[0]);
+					if(type == n.z+"AutomaticTag") {
+						newItem.tags.push({tag:getFirstResults(subject, [rdf+"value"], true), type:1});
+					}
+				}
 			}
 		}
 	}
@@ -8674,12 +8693,14 @@ function importItem(newItem, node, type) {
 	for each(var subject in subjects) {
 		if(typeof(subject) == "string") {	// a regular tag
 			newItem.tags.push(subject);
-		} else {							// a call number
+		} else {							// a call number or automatic tag
 			var type = Zotero.RDF.getTargets(subject, rdf+"type");
 			if(type) {
 				type = Zotero.RDF.getResourceURI(type[0]);
 				if(Zotero.Utilities.inArray(type, callNumberTypes)) {
 					newItem.callNumber = getFirstResults(subject, [rdf+"value"], true);
+				} else if(type == n.z+"AutomaticTag") {
+					newItem.tags.push({tag:getFirstResults(subject, [rdf+"value"], true), type:1});
 				}
 			}
 		}
@@ -8763,7 +8784,7 @@ function doImport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7', '1.0.0b3.r1', '', '2007-03-20 17:45:00', '1', '100', '3', 'RIS', 'Simon Kornblith', 'ris', 
+REPLACE INTO translators VALUES ('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7', '1.0.0b3.r1', '', '2007-03-22 15:55:00', '1', '100', '3', 'RIS', 'Simon Kornblith', 'ris', 
 'Zotero.configure("dataMode", "line");
 Zotero.addOption("exportNotes", true);
 
@@ -9152,8 +9173,8 @@ function doExport() {
 		}
 
 		// tags
-		for(var j in item.tags) {
-			addTag("KY", item.tags[j]);
+		for each(var tag in item.tags) {
+			addTag("KW", tag.tag);
 		}
 
 		// pages
@@ -9182,7 +9203,7 @@ function doExport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('881f60f2-0802-411a-9228-ce5f47b64c7d', '1.0.0b3.r1', '', '2007-03-21 18:00:00', 1, 100, 3, 'EndNote/Refer/BibIX', 'Simon Kornblith', 'txt',
+REPLACE INTO translators VALUES ('881f60f2-0802-411a-9228-ce5f47b64c7d', '1.0.0b3.r1', '', '2007-03-22 15:55:00', 1, 100, 3, 'EndNote/Refer/BibIX', 'Simon Kornblith', 'txt',
 'Zotero.configure("dataMode", "line");
 
 function detectImport() {
@@ -9439,13 +9460,17 @@ function doExport() {
 		
 		// tags
 		if(item.tags) {
-			addTag("K", item.tags.join("\r\n"));
+			var keywordTag = "";
+			for each(var tag in item.tags) {
+				keywordTag += "\r\n"+tag.tag;
+			}
+			addTag("K", keywordTag.substr(2));
 		}
 		Zotero.write("\r\n");
 	}
 }');
 
-REPLACE INTO translators VALUES ('9cb70025-a888-4a29-a210-93ec52da40d4', '1.0.0b3.r1', '', '2007-03-21 18:05:00', 1, 100, 3, 'BibTeX', 'Simon Kornblith', 'bib',
+REPLACE INTO translators VALUES ('9cb70025-a888-4a29-a210-93ec52da40d4', '1.0.0b3.r1', '', '2007-03-22 15:55:00', 1, 100, 3, 'BibTeX', 'Simon Kornblith', 'bib',
 'Zotero.configure("dataMode", "block");
 
 function detectImport() {
@@ -9957,7 +9982,11 @@ function doExport() {
 		}
 		
 		if(item.tags && item.tags.length) {
-			writeField("keywords", item.tags.join(","));
+			var tagString = "";
+			for each(var tag in item.tags) {
+				tagString += ","+tag.tag;
+			}
+			writeField("keywords", tagString.substr(1));
 		}
 		if(item.pages) {
 			writeField("pages", item.pages);
@@ -9967,7 +9996,7 @@ function doExport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('a6ee60df-1ddc-4aae-bb25-45e0537be973', '1.0.0b3.r1', '', '2007-03-22 15:00:00', 1, 100, 1, 'MARC', 'Simon Kornblith', 'marc',
+REPLACE INTO translators VALUES ('a6ee60df-1ddc-4aae-bb25-45e0537be973', '1.0.0b3.r1', '', '2007-03-22 15:55:00', 1, 100, 1, 'MARC', 'Simon Kornblith', 'marc',
 'function detectImport() {
 	var marcRecordRegexp = /^[0-9]{5}[a-z ]{3}$/
 	var read = Zotero.read(8);
