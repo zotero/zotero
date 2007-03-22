@@ -1,4 +1,4 @@
--- 198
+-- 199
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-03-22 18:15:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-03-22 19:45:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-03-21 15:26:54', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -7750,7 +7750,7 @@ function doImport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('14763d24-8ba0-45df-8f52-b8d1108e7ac9', '1.0.0b4.r1', '', '2007-03-22 15:55:00', 1, 25, 2, 'Zotero RDF', 'Simon Kornblith', 'rdf',
+REPLACE INTO translators VALUES ('14763d24-8ba0-45df-8f52-b8d1108e7ac9', '1.0.0b4.r1', '', '2007-03-22 19:45:00', 1, 25, 2, 'Zotero RDF', 'Simon Kornblith', 'rdf',
 'Zotero.configure("getCollections", true);
 Zotero.configure("dataMode", "rdf");
 Zotero.addOption("exportNotes", true);
@@ -7799,7 +7799,7 @@ function generateCollection(collection) {
 	Zotero.RDF.addStatement(collectionResource, rdf+"type", n.z+"Collection", false);
 	Zotero.RDF.addStatement(collectionResource, n.dc+"title", collection.name, true);
 	
-	for each(var child in collection.children) {
+	for each(var child in collection.descendents) {
 		// add child list items
 		if(child.type == "collection") {
 			Zotero.RDF.addStatement(collectionResource, n.dcterms+"hasPart", "#collection:"+child.id, false);

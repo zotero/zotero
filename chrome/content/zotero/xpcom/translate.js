@@ -1901,13 +1901,7 @@ Zotero.Translate.prototype._exportGetCollection = function() {
 	
 	if(this._collectionsLeft && this._collectionsLeft.length != 0) {
 		var returnItem = this._collectionsLeft.shift();
-		var collection = new Object();
-		collection.id = returnItem.getID();
-		collection.name = returnItem.getName();
-		collection.type = "collection";
-		collection.children = returnItem.toArray();
-		
-		return collection;
+		return returnItem.toArray();
 	}
 }
 
