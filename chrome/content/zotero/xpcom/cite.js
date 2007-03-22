@@ -1102,9 +1102,6 @@ Zotero.CSL.prototype._getCitation = function(item, position, locatorType, locato
 		}
 	}
 	
-	if(!type) {
-		return false;
-	}
 	Zotero.debug("CSL: using CSL type "+typeName);
 	
 	// remove previous ignore entries from list
@@ -1730,12 +1727,13 @@ Zotero.CSL.Global.fallbackTypeMappings = {
 	map:"article",
 	blogPost:"article",
 	instantMessage:"article",
-	audioRecording:"book",
+	forumPost:"article",
+	audioRecording:"article",
 	presentation:"article",
-	videoRecording:"book",
-	tvBroadcast:"book",
-	radioBroadcast:"book",
-	podcast:"book",
+	videoRecording:"article",
+	tvBroadcast:"article",
+	radioBroadcast:"article",
+	podcast:"article",
 	computerProgram:"book"
 };
 
@@ -1744,9 +1742,18 @@ Zotero.CSL.prototype._getTypeFromItem = function(item) {
 
 	// get type
 	Zotero.debug("CSL: parsing item of Scholar type "+scholarType);
-	if(Zotero.CSL.Global.optionalTypeMappings[scholarType]) {
-		return [Zotero.CSL.Global.optionalTypeMappings[scholarType], Zotero.CSL.Global.fallbackTypeMappings[scholarType]];
-	} else if(Zotero.CSL.Global.fallbackTypeMappings[scholarType]) {
+	if(Zotero.CSL.Global.optionalTypeMappings[scholarType]) { // if there is an optional type mapping
+		var array = [Zotero.CSL.Global.optionalTypeMappings[scholarType]];
+		
+		// check if there is a fallback type mapping; otherwise, use article
+		if(Zotero.CSL.Global.fallbackTypeMappings[scholarType]) {
+			array.push(Zotero.CSL.Global.fallbackTypeMappings[scholarType]);
+		} else {
+			array.push("article");
+		}
+		
+		return array;
+	} else if(Zotero.CSL.Global.fallbackTypeMappings[scholarType]) { // if there is a fallback type mapping
 		return [Zotero.CSL.Global.fallbackTypeMappings[scholarType]];
 	} else {	// use article as backup type mapping
 		return ["article"];

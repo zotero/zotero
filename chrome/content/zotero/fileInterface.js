@@ -370,8 +370,8 @@ var Zotero_File_Interface = new function() {
 		
 		// generate bibliography
 		try {
-			if (io.output == 'clipboard') {
-				this.copyItemsToClipboard(items, io.style);
+			if(io.output == 'copy-to-clipboard') {
+				copyItemsToClipboard(items, io.style);
 				return;
 			}
 			else {
