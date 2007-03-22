@@ -1,4 +1,4 @@
--- 195
+-- 196
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-03-22 16:35:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-03-22 17:40:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-03-21 15:26:54', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -3495,20 +3495,17 @@ REPLACE INTO translators VALUES ('3e684d82-73a3-9a34-095f-19b112d88bbf', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('57a00950-f0d1-4b41-b6ba-44ff0fc30289', '1.0.0b3.r1', '', '2007-01-18 23:00:00', 1, 100, 4, 'Google Scholar', 'Simon Kornblith', '^http://scholar\.google\.[a-z]+/scholar',
+REPLACE INTO translators VALUES ('57a00950-f0d1-4b41-b6ba-44ff0fc30289', '1.0.0b3.r1', '', '2007-03-22 17:40:00', 1, 100, 4, 'Google Scholar', 'Simon Kornblith', '^http://scholar\.google\.[a-z]+/scholar',
 'function detectWeb(doc, url) {
 	return "multiple";
 }',
-'function doWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-	  if (prefix == ''x'') return namespace; else return null;
-	} : null;
-	
-	doc.cookie = "GSP=ID=deadbeefdeadbeef:IN=ebe89f7e83a8fe75+7e6cc990821af63:CF=2; domain=.scholar.google.com";
+'var haveEndNoteLinks;
+
+function scrape(doc) {
+	var nsResolver = doc.createNSResolver(doc.documentElement);
 	
 	var items = new Array();
-	var relatedLinks = new Array();
+	var itemGrabLinks = new Array();
 	var links = new Array();
 	var types = new Array();
 	
@@ -3519,21 +3516,28 @@ REPLACE INTO translators VALUES ('57a00950-f0d1-4b41-b6ba-44ff0fc30289', '1.0.0b
 	                         XPathResult.ANY_TYPE, null);
 	var elmt;
 	var i=0;
+	Zotero.debug("get elms");
 	while(elmt = elmts.iterateNext()) {
 		var isCitation = doc.evaluate("./font[1]/b[1]/text()[1]", elmt, nsResolver,
 		                              XPathResult.ANY_TYPE, null).iterateNext();
-		var relatedLink = doc.evaluate(''.//a[text() = "Related Articles"]'',
-									   elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext(); 
-                                       
-		if(relatedLink) {
-			relatedLinks[i] = relatedLink.href;
-			if(isCitation && isCitation.nodeValue == "[CITATION]") {
+		// use EndNote links if available
+		if(haveEndNoteLinks) {
+			var itemGrabLink = doc.evaluate(''.//a[text() = "Import into EndNote"]'',
+										   elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext(); 
+		} else {
+			var itemGrabLink = doc.evaluate(''.//a[text() = "Related Articles"]'',
+										   elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext(); 
+		}
+        
+        var noLinkRe = /^\[[^\]]+\]$/;
+		if(itemGrabLinks) {
+			itemGrabLinks[i] = itemGrabLink.href;
+			if(isCitation && noLinkRe.test(isCitation.textContent)) {
+				// get titles for [BOOK] or [CITATION] entries
 				items[i] = Zotero.Utilities.getNodeString(doc, elmt, ''./text()|./b/text()'', nsResolver);
-			} else if(isCitation && isCitation.nodeValue == "[BOOK]") {
-				items[i] = Zotero.Utilities.getNodeString(doc, elmt, ''./text()|./b/text()'', nsResolver);
-				types[i] = "book";
-			} else {		
-				var link = doc.evaluate(''.//span[@class="w"]/a'', elmt, nsResolver,
+			} else {
+				// get titles for articles
+				var link = doc.evaluate(''.//a'', elmt, nsResolver,
 										XPathResult.ANY_TYPE, null).iterateNext();
 				if(link) {
 					items[i] = link.textContent;
@@ -3549,6 +3553,7 @@ REPLACE INTO translators VALUES ('57a00950-f0d1-4b41-b6ba-44ff0fc30289', '1.0.0b
 	
 	items = Zotero.selectItems(items);
 	if(!items) {
+		if(Zotero.done) Zotero.done(true);
 		return true;
 	}
 	
@@ -3556,30 +3561,25 @@ REPLACE INTO translators VALUES ('57a00950-f0d1-4b41-b6ba-44ff0fc30289', '1.0.0b
 	
 	var urls = new Array();
 	for(var i in items) {
-		var m = relatedMatch.exec(relatedLinks[i]);
-		urls.push("http://scholar.google.com/scholar.ris?hl=en&lr=&q=info:"+m[1]+"&oe=UTF-8&output=citation&oi=citation");
+		// get url
+		if(haveEndNoteLinks) {
+			urls.push(itemGrabLinks[i]);
+		} else {
+			var m = relatedMatch.exec(itemGrabLinks[i]);
+			urls.push("http://scholar.google.com/scholar.ris?hl=en&lr=&q=info:"+m[1]+"&oe=UTF-8&output=citation&oi=citation");
+		}
+		
 		if(links[i]) {
 			attachments.push([{title:"Google Scholar Linked Page", type:"text/html",
 			                  url:links[i]}]);
 		} else {
 			attachments.push([]);
 		}
-		
-		if(types[i]) {	// for books
-			itemTypes.push(types[i]);
-		} else {
-			itemTypes.push(null);
-		}
 	}
 	
 	var translator = Zotero.loadTranslator("import");
-	translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+	translator.setTranslator("881f60f2-0802-411a-9228-ce5f47b64c7d");
 	translator.setHandler("itemDone", function(obj, item) {
-		var itemType = itemTypes.shift();
-		if(itemType) {
-			item.itemType = itemType;
-		}
-		
 		item.attachments = attachments.shift();
 		item.complete();
 	});
@@ -3588,8 +3588,32 @@ REPLACE INTO translators VALUES ('57a00950-f0d1-4b41-b6ba-44ff0fc30289', '1.0.0b
 		translator.setString(text);
 		translator.translate();
 	}, function() { Zotero.done() });
+}
+
+function doWeb(doc, url) {
+	var nsResolver = doc.createNSResolver(doc.documentElement);
 	
-	Zotero.wait();
+	doc.cookie = "GSP=ID=deadbeefdeadbeef:IN=ebe89f7e83a8fe75+7e6cc990821af63:CF=3; domain=.scholar.google.com";
+	
+	// determine if we need to reload the page
+	
+	// first check for EndNote links
+	Zotero.debug("get links");
+	haveEndNoteLinks = doc.evaluate(''//a[text() = "Import into EndNote"]'', 
+			doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+	if(!haveEndNoteLinks) {
+		// next check if there are docs with no related articles
+		if(doc.evaluate(''//p[@class="g"][not(descendant-or-self::text() = "Related Articles")]'',
+				doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+					// now it''s reload time
+					haveEndNoteLinks = true;
+					Zotero.Utilities.loadDocument(url, scrape);
+					
+					return;
+		}
+	}
+	
+	scrape(doc, url);
 }');
 
 REPLACE INTO translators VALUES ('9c335444-a562-4f88-b291-607e8f46a9bb', '1.0.0b3.r1', '', '2006-12-15 15:11:00', 1, 100, 4, 'Berkeley Library Catalog', 'Simon Kornblith', '^http://[^/]*berkeley.edu[^/]*/WebZ/(?:html/results.html|FETCH)\?.*sessionid=',
