@@ -1,4 +1,4 @@
--- 192
+-- 193
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-03-22 14:50:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-03-22 15:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-03-21 15:26:54', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -9967,7 +9967,7 @@ function doExport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('a6ee60df-1ddc-4aae-bb25-45e0537be973', '1.0.0b3.r1', '', '2006-12-15 03:40:00', 1, 100, 1, 'MARC', 'Simon Kornblith', 'marc',
+REPLACE INTO translators VALUES ('a6ee60df-1ddc-4aae-bb25-45e0537be973', '1.0.0b3.r1', '', '2007-03-22 15:00:00', 1, 100, 1, 'MARC', 'Simon Kornblith', 'marc',
 'function detectImport() {
 	var marcRecordRegexp = /^[0-9]{5}[a-z ]{3}$/
 	var read = Zotero.read(8);
@@ -10082,8 +10082,6 @@ record.prototype.importBinary = function(record) {
 		}
 		this.directory[tag].push([fieldPosition, fieldLength]);
 	}
-	//strip any nulls that we added above
-	this.content = this.content.replace("\x00", "", "g");
 }
 
 // add a field to this record
