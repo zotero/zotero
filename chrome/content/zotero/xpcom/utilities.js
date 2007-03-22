@@ -274,6 +274,17 @@ Zotero.Utilities.prototype.getCreatorsForType = function(type) {
 }
 
 /*
+ * returns a localized creatorType name
+ */
+Zotero.Utilities.prototype.getLocalizedCreatorType = function(type) {
+	try {
+		return Zotero.getString("creatorTypes."+type);
+	} catch(e) {
+		return false;
+	}
+}
+
+/*
  * Cleans a title, capitalizing the proper words and replacing " :" with ":"
  */
 Zotero.Utilities.capitalizeSkipWords = ["but", "or", "yet", "so", "for", "and",
