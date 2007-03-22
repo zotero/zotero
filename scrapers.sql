@@ -6804,7 +6804,7 @@ function doWeb(doc, url) {
 }');
 
 
-REPLACE INTO translators VALUES ('66928fe3-1e93-45a7-8e11-9df6de0a11b3', '1.0.0b3r1', '', '2007-02-15 22:50:00', '0', '100', '4', 'Max Planck Institute for the History of Science: Virtual Laboratory Library', 'Sean Takats', 'http://vlp.mpiwg-berlin.mpg.de/library/', 
+REPLACE INTO translators VALUES ('66928fe3-1e93-45a7-8e11-9df6de0a11b3', '1.0.0b3.r1', '', '2007-03-22 16:35:00', '0', '100', '4', 'Max Planck Institute for the History of Science: Virtual Laboratory Library', 'Sean Takats', 'http://vlp.mpiwg-berlin.mpg.de/library/', 
 'function detectWeb(doc, url){
 	var namespace = doc.documentElement.namespaceURI;
 		var nsResolver = namespace ? function(prefix) {
