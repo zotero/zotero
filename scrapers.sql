@@ -1,4 +1,4 @@
--- 202
+-- 203
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-03-23 14:45:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-03-23 19:25:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-03-21 15:26:54', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -10760,7 +10760,7 @@ function doExport() {
 	}
 }');
 
-REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '2006-12-11 15:57:00', 'American Psychological Association',
+REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '2007-03-23 19:25:00', 'American Psychological Association',
 '<?xml version="1.0" encoding="UTF-8"?>
 <?oxygen RNGSchema="../schema/trunk/csl.rnc" type="compact"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="author-date" xml:lang="en">
@@ -10812,10 +10812,6 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '2006-
       <month prefix=", "/>
       <day prefix=" "/>
     </date>
-    <publisher>
-      <place suffix=": "/>
-      <name/>
-    </publisher>
     <access>
       <text term-name="retrieved" text-transform="capitalize" suffix=" "/>
       <date suffix=", ">
@@ -10866,7 +10862,10 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '2006-
                 <translator/>
               </group>
             </group>
-            <publisher prefix=" "/>
+            <group prefix=" " delimiter=": ">
+            	<publisher><place/></publisher>
+            	<publisher><name/></publisher>
+            </group>
             <access prefix=" "/>
           </type>
           <type name="chapter">
@@ -10887,7 +10886,10 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '2006-
               </translator>
               <titles relation="container" font-style="italic" prefix=" " suffix="."/>
               <titles relation="collection" prefix=" " suffix="."/>
-              <publisher prefix=" "/>
+				<group prefix=" " delimiter=": ">
+					<publisher><place/></publisher>
+					<publisher><name/></publisher>
+				</group>
               <pages prefix=" (" suffix=")">
                 <label form="short" text-transform="capitalize" suffix=". "/>
                 <number/>
@@ -10921,7 +10923,7 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '2006-
   </bibliography>
 </style>');
 
-REPLACE INTO csl VALUES('http://www.zotero.org/namespaces/CSL/chicago-author-date.csl', '2006-12-20 03:33:00', 'Chicago Manual of Style (Author-Date)',
+REPLACE INTO csl VALUES('http://www.zotero.org/namespaces/CSL/chicago-author-date.csl', '2007-03-23 19:25:00', 'Chicago Manual of Style (Author-Date)',
 '<?xml version="1.0" encoding="UTF-8"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="author-date" xml:lang="en">
 	<info>
@@ -10961,17 +10963,12 @@ REPLACE INTO csl VALUES('http://www.zotero.org/namespaces/CSL/chicago-author-dat
 			<title/>
 		</titles>
 		<date>
-			<month text-transform="capitalize"/>
-			<day prefix=" "/>
+			<year/>
 		</date>
-		<publisher>
-			<place suffix=": "/>
-			<name/>
-		</publisher>
 		<access>
 			<url/>
-			<text term-name="accessed" prefix=" (" suffix=" "/>
-			<date suffix=")">
+			<date prefix=" (" suffix=")">
+				<text term-name="accessed" suffix=" "/>
 				<month suffix=" " text-transform="capitalize"/>
 				<day suffix=", "/>
 				<year/>
@@ -10985,9 +10982,7 @@ REPLACE INTO csl VALUES('http://www.zotero.org/namespaces/CSL/chicago-author-dat
 				<author form="short">
 					<name and="text" delimiter=", "/>
 				</author>
-				<date prefix=" ">
-					<year/>
-				</date>
+				<date prefix=" "/>
 				<locator prefix=", "/>
 			</item>
 		</layout>
@@ -11005,22 +11000,33 @@ REPLACE INTO csl VALUES('http://www.zotero.org/namespaces/CSL/chicago-author-dat
 				<choose>
 					<type name="book">
 						<author suffix="."/>
-						<date prefix=" " suffix=".">
-							<year/>
-						</date>
+						<conditional>
+							<if field="date">
+								<date prefix=" " suffix="."/>
+							</if><else>
+								<text term-name="no date" text-transform="capitalize" prefix=" " suffix="."/>
+							</else>
+						</conditional>
 						<titles prefix=" " suffix="." font-style="italic"/>
 						<group prefix=" " suffix="." delimiter=", " text-transform="capitalize">
 							<editor/>
 							<translator/>
 						</group>
-						<publisher prefix=" " suffix="."/>
+						<group prefix=" " suffix="." delimiter=": ">
+							<publisher><place/></publisher>
+							<publisher><name/></publisher>
+						</group>
 						<access prefix=" "/>
 					</type>
 					<type name="chapter">
 						<author suffix="."/>
-						<date prefix=" " suffix=".">
-							<year/>
-						</date>
+						<conditional>
+							<if field="date">
+								<date prefix=" " suffix="."/>
+							</if><else>
+								<text term-name="no date" text-transform="capitalize" prefix=" " suffix="."/>
+							</else>
+						</conditional>
 						<titles prefix=" " suffix="."/>
 						<group class="container" suffix=".">
 							<text prefix=" " term-name="in" text-transform="capitalize"/>
@@ -11028,15 +11034,16 @@ REPLACE INTO csl VALUES('http://www.zotero.org/namespaces/CSL/chicago-author-dat
 							<editor prefix=", "/>
 							<translator prefix=", "/>
 							<pages prefix=", "/>
-							<publisher prefix=". "/>
+							<group prefix=". " delimiter=": ">
+								<publisher><place/></publisher>
+								<publisher><name/></publisher>
+							</group>
 						</group>
 						<access prefix=" "/>
 					</type>
 					<type name="article">
 						<author suffix="."/>
-						<date prefix=" " suffix=".">
-							<year/>
-						</date>
+						<date prefix=" " suffix="."/>
 						<titles prefix=" " suffix="."/>
 						<group prefix=" " suffix="." delimiter=", " text-transform="capitalize">
 							<editor/>
@@ -11044,15 +11051,16 @@ REPLACE INTO csl VALUES('http://www.zotero.org/namespaces/CSL/chicago-author-dat
 						</group>
 						<group class="container" prefix=" " suffix="." delimiter=", ">
 							<titles relation="container" font-style="italic"/>
-							<date/>
+							<date>
+								<month text-transform="capitalize"/>
+								<day prefix=" "/>
+							</date>
 						</group>
 						<access prefix=" "/>
 					</type>
 					<type name="article-journal">
 						<author suffix="."/>
-						<date prefix=" " suffix=".">
-							<year/>
-						</date>
+						<date prefix=" " suffix="."/>
 						<titles prefix=" " suffix="."/>
 						<group prefix=" " suffix="." delimiter=", " text-transform="capitalize">
 							<editor/>
@@ -11066,7 +11074,10 @@ REPLACE INTO csl VALUES('http://www.zotero.org/namespaces/CSL/chicago-author-dat
 									<conditional>
 										<if field="date">
 											<issue prefix=", no. "/>
-											<date prefix=" (" suffix=")"/>
+											<date prefix=" (" suffix=")">
+												<month text-transform="capitalize"/>
+												<day prefix=" "/>
+											</date>
 										</if><else>
 											<issue prefix=" (" suffix=")"/>
 										</else>
@@ -11085,7 +11096,7 @@ REPLACE INTO csl VALUES('http://www.zotero.org/namespaces/CSL/chicago-author-dat
 	</bibliography>
 </style>');
 
-REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/chicago-note.csl', '2006-12-20 04:20:00', 'Chicago Manual of Style (Note without Bibliography)',
+REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/chicago-note.csl', '2007-03-23 19:25:00', 'Chicago Manual of Style (Note without Bibliography)',
 '<?xml version="1.0" encoding="UTF-8"?>
 <?oxygen RNGSchema="../schema/trunk/csl.rnc" type="compact"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="note" xml:lang="en">
@@ -11133,10 +11144,6 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/chicago-note.csl
       <day suffix=", "/>
       <year/>
     </date>
-    <publisher>
-      <place suffix=": "/>
-      <name/>
-    </publisher>
     <access>
       <url/>
       <date prefix=" (" suffix=")">
@@ -11160,10 +11167,17 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/chicago-note.csl
               <translator/>
             </group>
             <group prefix=" (" suffix=")" delimiter=", ">
-              <publisher/>
-              <date>
-                <year/>
-              </date>
+              <group delimiter=": ">
+            	<publisher><place/></publisher>
+            	<publisher><name/></publisher>
+              </group>
+			  <conditional>
+				<if field="date">
+					<date><year/></date>
+				</if><else>
+					<text term-name="no date"/>
+				</else>
+			  </conditional>
             </group>
             <pages prefix=", "/>
             <access prefix=", "/>
@@ -11181,10 +11195,17 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/chicago-note.csl
                 <translator/>
               </group>
               <group prefix=" (" suffix=")" delimiter=", ">
-                <publisher/>
-                <date>
-                  <year/>
-                </date>
+                <group delimiter=": ">
+            	  <publisher><place/></publisher>
+            	  <publisher><name/></publisher>
+                </group>
+				<conditional>
+					<if field="date">
+						<date><year/></date>
+					</if><else>
+						<text term-name="no date"/>
+					</else>
+			    </conditional>
               </group>
               <pages prefix=", "/>
               <access prefix=", "/>
@@ -11217,7 +11238,7 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/chicago-note.csl
         </choose>
       </item>
       <item position="subsequent" ibid="true">
-        <author/>
+        <author form="short"/>
         <conditional>
           <if type="book">
             <titles prefix=", " font-style="italic" form="short"/>
@@ -11231,7 +11252,7 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/chicago-note.csl
   </citation>
 </style>');
 
-REPLACE INTO csl VALUES('http://www.zotero.org/namespaces/CSL/chicago-note-bibliography.csl', '2006-12-20 03:57:00', 'Chicago Manual of Style (Note with Bibliography)',
+REPLACE INTO csl VALUES('http://www.zotero.org/namespaces/CSL/chicago-note-bibliography.csl', '2007-03-23 19:25:00', 'Chicago Manual of Style (Note with Bibliography)',
 '<?xml version="1.0" encoding="UTF-8"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="note" xml:lang="en">
 	<info>
@@ -11275,14 +11296,10 @@ REPLACE INTO csl VALUES('http://www.zotero.org/namespaces/CSL/chicago-note-bibli
 			<day suffix=", "/>
 			<year/>
 		</date>
-		<publisher>
-			<place suffix=": "/>
-			<name/>
-		</publisher>
 		<access>
 			<url/>
-			<text term-name="accessed" prefix=" (" suffix=" "/>
-			<date suffix=")">
+			<date prefix=" (" suffix=")">
+				<text term-name="accessed" suffix=" "/>
 				<month suffix=" " text-transform="capitalize"/>
 				<day suffix=", "/>
 				<year/>
@@ -11293,7 +11310,7 @@ REPLACE INTO csl VALUES('http://www.zotero.org/namespaces/CSL/chicago-note-bibli
 		<et-al min-authors="3" use-first="1"/>
 		<layout>
 			<item suffix=".">
-				<author/>
+				<author form="short"/>
 				<conditional>
 					<if type="book">
 						<titles prefix=", " font-style="italic" form="short"/>
@@ -11323,11 +11340,18 @@ REPLACE INTO csl VALUES('http://www.zotero.org/namespaces/CSL/chicago-note-bibli
 							<editor/>
 							<translator/>
 						</group>
-						<group prefix=" " suffix="." delimiter=", ">
-							<publisher/>
-							<date>
-								<year/>
-							</date>
+						<group prefix=" " suffix="." delimiter=", " text-transform="capitalize">
+              				<group delimiter=": ">
+            					<publisher><place/></publisher>
+            					<publisher><name/></publisher>
+              				</group>	
+							<conditional>
+								<if field="date">
+									<date><year/></date>
+								</if><else>
+									<text term-name="no date"/>
+								</else>
+							</conditional>
 						</group>
 						<access prefix=" "/>
 					</type>
@@ -11341,10 +11365,17 @@ REPLACE INTO csl VALUES('http://www.zotero.org/namespaces/CSL/chicago-note-bibli
 							<translator prefix=", "/>
 							<pages prefix=", "/>
 							<group prefix=". " delimiter=", ">
-								<publisher/>								
-								<date>
-									<year/>
-								</date>
+              					<group delimiter=": ">
+            						<publisher><place/></publisher>
+            						<publisher><name/></publisher>
+              					</group>	
+								<conditional>
+									<if field="date">
+										<date><year/></date>
+									</if><else>
+										<text term-name="no date"/>
+									</else>
+								</conditional>
 							</group>
 						</group>
 						<access prefix=" "/>
@@ -11390,7 +11421,7 @@ REPLACE INTO csl VALUES('http://www.zotero.org/namespaces/CSL/chicago-note-bibli
 	</bibliography>
 </style>');
 
-REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/mla.csl', '2007-03-23 14:45:00', 'Modern Language Association',
+REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/mla.csl', '2007-03-23 19:25:00', 'Modern Language Association',
 '<?xml version="1.0" encoding="UTF-8"?>
 <?oxygen RNGSchema="../schema/trunk/csl.rnc" type="compact"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="author" xml:lang="en">
@@ -11434,10 +11465,6 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/mla.csl', '2007-
     <date>
       <year/>
     </date>
-    <publisher>
-      <place suffix=": "/>
-      <name/>
-    </publisher>
     <access>
       <date>
         <day suffix=" "/>
@@ -11475,7 +11502,10 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/mla.csl', '2007-
             <titles font-style="italic" prefix=" " suffix="."/>
             <group prefix=" " suffix="." delimiter=", ">
               <edition/>
-              <publisher/>
+			  <group delimiter=": ">
+				<publisher><place/></publisher>
+				<publisher><name/></publisher>
+			  </group>
               <date/>
             </group>
             <access prefix=" " suffix="."/>
@@ -11490,7 +11520,10 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/mla.csl', '2007-
                 <name and="text" delimiter=", "/>
       	      </editor>
               <titles relation="collection" prefix=" " suffix="."/>
-              <publisher prefix=" "/>
+			  <group prefix=" " delimiter=": ">
+				<publisher><place/></publisher>
+				<publisher><name/></publisher>
+			  </group>
               <date prefix=", "/>
             </group>
             <pages prefix=" " suffix="."/>

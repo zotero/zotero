@@ -990,21 +990,32 @@ Zotero.CSL.prototype._serializeElement = function(name, element) {
 Zotero.CSL.prototype._compareItem = function(a, b, opt) {
 	for(var i in this._bib.sortOrder) {
 		var sortElement = this._bib.sortOrder[i];
-		var formattedStringA = new Zotero.CSL.FormattedString(this, "compare");
-		var formattedStringB = new Zotero.CSL.FormattedString(this, "compare");
 		
-		this._getFieldValue(sortElement.name, sortElement, a,
-		                                 formattedStringA, this._bib);
-		this._getFieldValue(sortElement.name, sortElement, b,
-		                                 formattedStringB, this._bib);
-		
-		var aValue = formattedStringA.get().toLowerCase();
-		var bValue = formattedStringB.get().toLowerCase();
-		
-		if(bValue > aValue) {
-			return -1;
-		} else if(bValue < aValue) {
-			return 1;
+		if(sortElement.name == "date") {
+			var bDate = b.getField("date");
+			var aDate = a.getField("date");
+			if(bDate > aDate) {
+				return -1;
+			} else if(bDate < aDate) {
+				return 1;
+			}
+		} else {
+			var formattedStringA = new Zotero.CSL.FormattedString(this, "compare");
+			var formattedStringB = new Zotero.CSL.FormattedString(this, "compare");
+			
+			this._getFieldValue(sortElement.name, sortElement, a,
+											 formattedStringA, this._bib);
+			this._getFieldValue(sortElement.name, sortElement, b,
+											 formattedStringB, this._bib);
+			
+			var aValue = formattedStringA.get().toLowerCase();
+			var bValue = formattedStringB.get().toLowerCase();
+			
+			if(bValue > aValue) {
+				return -1;
+			} else if(bValue < aValue) {
+				return 1;
+			}
 		}
 	}
 
