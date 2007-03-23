@@ -139,6 +139,9 @@ Zotero.ItemTreeView.prototype.refresh = function()
 	// Cache the visible fields so they don't load individually
 	var visibleFields = this.getVisibleFields();
 	for each(var field in visibleFields) {
+		if (field == 'year') {
+			field = 'date';
+		}
 		if (cacheFields.indexOf(field) == -1) {
 			cacheFields = cacheFields.concat(field);
 		}

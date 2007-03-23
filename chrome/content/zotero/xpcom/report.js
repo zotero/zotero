@@ -129,7 +129,7 @@ Zotero.Report = new function() {
 					continue;
 				}
 				
-				// Convert false to empty string
+				// Skip empty fields
 				if (!arr[i]) {
 					continue;
 				}

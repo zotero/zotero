@@ -574,7 +574,7 @@ Zotero.Item.prototype.setField = function(field, value, loadIn){
 	}
 	
 	if (!Zotero.ItemFields.isValidForType(fieldID, this.getType())){
-		throw ('"' + field + "' is not a valid field for this type.");
+		throw ('"' + field + "' is not a valid field for type " + this.getType());
 	}
 	
 	if (!loadIn){
