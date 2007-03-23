@@ -359,20 +359,28 @@ Zotero.CSL.prototype.preprocessItems = function(items) {
 	
 	// disambiguate items after preprocessing and sorting
 	var usedCitations = new Array();
-	var lastAuthor;
+	var lastAuthors;
 	
 	for(var i in items) {
 		var item = items[i];
 		
-		var formattedString = new Zotero.CSL.FormattedString(this, "disambiguate");
-		this._getFieldValue("author", this._getFieldDefaults("author"), item,
-		                    formattedString, this._bib);
-		var author = formattedString.get();
-		
 		// handle subsequent author substitutes
-		if(lastAuthor == author) {
-			item._csl.subsequentAuthorSubstitute = true;
+		Zotero.debug(item.getField("title"));
+		if(item._csl.authors.length && lastAuthors) {
+			var authorsAreSame = true;
+			for(var i=item._csl.authors.length-1; i>=0; i--) {
+				Zotero.debug(i);
+				if(!lastAuthors[i] ||
+						lastAuthors[i].firstName != item._csl.authors[i].firstName ||
+						lastAuthors[i].lastName != item._csl.authors[i].lastName ||
+						lastAuthors[i].creatorType != item._csl.authors[i].creatorType) {
+					authorsAreSame = false;
+					break;
+				}
+			}
+			if(authorsAreSame) item._csl.subsequentAuthorSubstitute = true;
 		}
+		lastAuthors = item._csl.authors;
 		
 		// handle (2006a) disambiguation for author-date styles
 		if(this.class == "author-date") {
@@ -408,8 +416,6 @@ Zotero.CSL.prototype.preprocessItems = function(items) {
 			
 			usedCitations[year] = item;
 		}
-		
-		lastAuthor = author;
 		
 		// add numbers to each
 		item._csl.number = i;

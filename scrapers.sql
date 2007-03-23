@@ -1,4 +1,4 @@
--- 201
+-- 202
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-03-22 23:26:24'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-03-23 14:45:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-03-21 15:26:54', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -11390,7 +11390,7 @@ REPLACE INTO csl VALUES('http://www.zotero.org/namespaces/CSL/chicago-note-bibli
 	</bibliography>
 </style>');
 
-REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/mla.csl', '2006-10-23 00:21:00', 'Modern Language Association',
+REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/mla.csl', '2007-03-23 14:45:00', 'Modern Language Association',
 '<?xml version="1.0" encoding="UTF-8"?>
 <?oxygen RNGSchema="../schema/trunk/csl.rnc" type="compact"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="author" xml:lang="en">
@@ -11453,7 +11453,7 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/mla.csl', '2006-
     <layout>
       <item>
         <author form="short">
-          <name and="text" sort-separator=", " delimiter=", " delimiter-precedes-last="always"/>
+          <name and="text" sort-separator=", " delimiter=", "/>
         </author>
         <locator prefix=" "/>
       </item>
