@@ -123,7 +123,7 @@ var Zotero_Citation_Dialog = new function () {
 		var selectedListItem = citationList.getSelectedItem(0);
 		
 		// remove from _itemLocators
-		_itemLocators[selectedListItem.value] = _itemLocatorType[selectedListItem.value] = undefined;
+		_itemLocators[selectedListItem.value] = _itemLocatorTypes[selectedListItem.value] = undefined;
 		
 		// remove from list
 		citationList.removeChild(selectedListItem);
