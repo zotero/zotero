@@ -32,6 +32,7 @@ var Zotero_File_Interface_Bibliography = new function() {
 	var _io, _saveStyle;
 	
 	this.init = init;
+	this.styleChanged = styleChanged;
 	this.acceptSelection = acceptSelection;
 	
 	/*
@@ -76,6 +77,7 @@ var Zotero_File_Interface_Bibliography = new function() {
 			styleMenu.selectedIndex = 0;
 		}
 		
+		// ONLY FOR bibliography.xul: export options
 		if(document.getElementById("save-as-rtf")) {
 			// restore saved bibliographic settings
 			document.getElementById(Zotero.Prefs.get("export.bibliographySettings")).setAttribute("selected", "true");
@@ -87,12 +89,28 @@ var Zotero_File_Interface_Bibliography = new function() {
 			}
 		}
 		
-		// move to center of screen
+		// ONLY FOR integrationDocPrefs.xul: update status of displayAs
+		if(document.getElementById("displayAs")) {
+			if(_io.useEndnotes == 1) document.getElementById("displayAs").selectedIndex = 1;
+			styleChanged();
+		}
+		
+		// FOR ALL: move to center of screen
 		window.sizeToContent();
 		window.moveTo(
 			(self.screen.width-window.innerWidth)/2,
 			(self.screen.height-window.innerHeight)/2
 		);
+	}
+	
+	/*
+	 * ONLY FOR integrationDocPrefs.xul: called when style is changed
+	 */
+	function styleChanged() {
+		// update status of displayAs box based
+		var selectedStyle = document.getElementById("style-menu").selectedItem.value;
+		var styleClass = Zotero.Cite.getStyleClass(selectedStyle);
+		document.getElementById("displayAs").disabled = styleClass != "note";
 	}
 
 	function acceptSelection() {
@@ -103,6 +121,11 @@ var Zotero_File_Interface_Bibliography = new function() {
 			_io.output = document.getElementById("output-radio").selectedItem.id;
 			// save settings
 			Zotero.Prefs.set("export.bibliographySettings", _io.output);
+		}
+		
+		// ONLY FOR integrationDocPrefs.xul: collect displayAs
+		if(document.getElementById("displayAs")) {
+			_io.useEndnotes = document.getElementById("displayAs").selectedIndex;
 		}
 		
 		// save style (this happens only for "Export Bibliography," or Word

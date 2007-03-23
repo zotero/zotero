@@ -485,13 +485,13 @@ Zotero.Integration.SOAP = new function() {
 	 */
 	function restoreSession(vars) {
 		var sessionID = Zotero.randomString();
-		var session = _sessions[sessionID] = new Zotero.Integration.Session(vars[0]);
+		var session = _sessions[sessionID] = new Zotero.Integration.Session(vars[0], vars[1]);
 		
 		var encounteredItem = new Object();
 		var newField = new Object();
 		var regenerate = new Object();
 		
-		for(var i=1; i<vars.length; i+=2) {
+		for(var i=2; i<vars.length; i+=2) {
 			var citation = new Zotero.Integration.Citation(vars[i], vars[i+1]);
 			session.citationSet.addCitation(citation);		// add to see when refresh is necessary
 		}
@@ -529,20 +529,27 @@ Zotero.Integration.SOAP = new function() {
 			}
 			var originalStyle = session.styleID;
 			io.style = originalStyle;
+			io.useEndnotes = session.useEndnotes;
 		}
 		
 		watcher.openWindow(null, 'chrome://zotero/content/integrationDocPrefs.xul', '',
 		                   'chrome,modal'+(Zotero.isMac ? '' : ',popup'), io);
-		session.setStyle(io.style);
 		
-		return [sessionID, io.style, session.style.class, session.style.hasBibliography ? "1" : "0"];
+		session.setStyle(io.style);
+		session.useEndnotes = io.useEndnotes;
+		
+		return [sessionID, io.style, session.style.class, session.style.hasBibliography ? "1" : "0", io.useEndnotes];
 	}
 }
 
-Zotero.Integration.Session = function(styleID) {
+Zotero.Integration.Session = function(styleID, useEndnotes) {
 	if(styleID) {
 		this.styleID = styleID;
 		this.style = Zotero.Cite.getStyle(this.styleID);
+	}
+	if(useEndnotes) {
+		this.useEndnotes = useEndnotes;
+		Zotero.debug("the answer is "+useEndnotes);
 	}
 	
 	this.citationSet = new Zotero.Integration.CitationSet(this.style);

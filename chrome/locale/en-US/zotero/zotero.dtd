@@ -102,3 +102,7 @@
 <!ENTITY zotero.annotate.toolbar.expand.label			"Expand All Annotations">
 <!ENTITY zotero.annotate.toolbar.highlight.label		"Highlight Text">
 <!ENTITY zotero.annotate.toolbar.unhighlight.label		"Unhighlight Text">
+
+<!ENTITY zotero.integration.prefs.displayAs.label		"Display Citations As:">
+<!ENTITY zotero.integration.prefs.footnotes.label		"Footnotes">
+<!ENTITY zotero.integration.prefs.endnotes.label		"Endnotes">

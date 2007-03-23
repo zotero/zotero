@@ -32,6 +32,7 @@ Zotero.Cite = new function() {
 	var _lastStyle = null;
 	
 	this.getStyles = getStyles;
+	this.getStyleClass = getStyleClass;
 	this.getStyle = getStyle;
 	
 	/*
@@ -50,21 +51,36 @@ Zotero.Cite = new function() {
 		
 		return stylesObject;
 	}
+	
+	/*
+	 * gets the class of a given style
+	 */
+	function getStyleClass(cslID) {
+		var csl = _getCSL(cslID);
+		var xml = new XML(Zotero.CSL.Global.cleanXML(csl));
+		return xml["@class"].toString();
+	}
+	
 	/*
 	 * gets CSL from the database, or, if it's the most recently used style,
 	 * from the cache
 	 */
 	function getStyle(cslID) {
 		if(_lastStyle != cslID || Zotero.Prefs.get("cacheTranslatorData") == false) {
-			// get style
-			var sql = "SELECT csl FROM csl WHERE cslID = ?";
-			var style = Zotero.DB.valueQuery(sql, [cslID]);
-			
 			// create a CSL instance
-			_lastCSL = new Zotero.CSL(style);
+			_lastCSL = new Zotero.CSL(_getCSL(cslID));
 			_lastStyle = cslID;
 		}
 		return _lastCSL;
+	}
+	
+	/*
+	 * get CSL for a given style from the database
+	 */
+	function _getCSL(cslID) {
+		var style = Zotero.DB.valueQuery("SELECT csl FROM csl WHERE cslID = ?", [cslID]);
+		if(!style) throw "Zotero.Cite: invalid CSL ID";
+		return style;
 	}
 }
 
@@ -386,7 +402,7 @@ Zotero.CSL.prototype.preprocessItems = function(items) {
 		if(this.class == "author-date") {
 			var year = item._csl.date.year;
 				
-			if(lastAuthor == author) {
+			if(authorsAreSame) {
 				if(usedCitations[year]) {
 					if(!usedCitations[year]._csl.date.disambiguation) {
 						usedCitations[year]._csl.date.disambiguation = "a";
