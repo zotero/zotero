@@ -53,6 +53,11 @@ toolbar[iconsize="small"] #zotero-toolbar-button:active
 
 
 /* Bindings */
+treecol[id=zotero-items-column-title] .treecol-text
+{
+	/* -moz-binding: url('chrome://zotero/content/bindings/expanding-treecol.xml#expanding-treecol'); */
+}
+
 textbox[type="conditional-timed"]
 {
 	-moz-binding: url('chrome://zotero/content/bindings/conditional-timed-textbox.xml#conditional-timed-textbox');

@@ -5,7 +5,7 @@ prefwindow .chromeclass-toolbar
 
 radio[pane]
 {
-	width: 48px;
+	width: 60px;
 	height: 48px;
 	-moz-box-align: center;
 	-moz-box-pack: end;
@@ -14,13 +14,7 @@ radio[pane]
 /* General pane icon */
 radio[pane=zotero-prefpane-general]
 {
-	-moz-image-region: rect(0px, 32px, 32px, 0px);
-}
-radio[pane=zotero-prefpane-general]:hover, 
-radio[pane=zotero-prefpane-general]:active,
-radio[pane=zotero-prefpane-general][selected="true"]
-{
-	-moz-image-region: rect(32px, 32px, 64px, 0px);
+	list-style-image: url("chrome://zotero/skin/prefs-general.png");
 }
 
 /*
@@ -28,13 +22,7 @@ radio[pane=zotero-prefpane-general][selected="true"]
  */
 radio[pane=zotero-prefpane-export]
 {
-	-moz-image-region: rect(0px, 224px, 32px, 192px);
-}
-radio[pane=zotero-prefpane-export]:hover, 
-radio[pane=zotero-prefpane-export]:active,
-radio[pane=zotero-prefpane-export][selected="true"]
-{
-	-moz-image-region: rect(32px, 224px, 64px, 192px);
+	list-style-image: url("chrome://zotero/skin/prefs-export.png");
 }
 
 /*
@@ -44,13 +32,7 @@ radio[pane=zotero-prefpane-export][selected="true"]
  */
 radio[pane=zotero-prefpane-keys]
 {
-	-moz-image-region: rect(0px, 224px, 32px, 192px);
-}
-radio[pane=zotero-prefpane-keys]:hover, 
-radio[pane=zotero-prefpane-keys]:active,
-radio[pane=zotero-prefpane-keys][selected="true"]
-{
-	-moz-image-region: rect(32px, 224px, 64px, 192px);
+	list-style-image: url("chrome://zotero/skin/prefs-keys.png");
 }
 
 
@@ -61,13 +43,7 @@ radio[pane=zotero-prefpane-keys][selected="true"]
  */
 radio[pane=zotero-prefpane-advanced]
 {
-	-moz-image-region: rect(0px, 224px, 32px, 192px);
-}
-radio[pane=zotero-prefpane-advanced]:hover, 
-radio[pane=zotero-prefpane-advanced]:active,
-radio[pane=zotero-prefpane-advanced][selected="true"]
-{
-	-moz-image-region: rect(32px, 224px, 64px, 192px);
+	list-style-image: url("chrome://zotero/skin/prefs-advanced.png");
 }
 
 

@@ -61,7 +61,8 @@
 			<label class="text-link" href="http://www.mellon.org/" value="Andrew W. Mellon Foundation"/>
 			<label class="text-link" href="http://www.imls.gov/" value="Institute of Museum and Library Services"/>
 			<label class="text-link" href="http://www.sloan.org/" value="Alfred P. Sloan Foundation"/>
-			<label class="text-link" href="http://www.famfamfam.com/lab/icons/silk/" value="famfamfam (icons)"/>
+			<label class="text-link" href="http://www.famfamfam.com/lab/icons/silk/" value="famfamfam (small icons)"/>
+			<label class="text-link" href="http://tango.freedesktop.org/Tango_Desktop_Project" value="Tango Desktop Project (pref icons)"/>
 		</vbox>
 	</vbox>
 </dialog>
