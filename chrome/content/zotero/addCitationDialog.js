@@ -114,7 +114,7 @@ var Zotero_Citation_Dialog = new function () {
 		
 		// flag
 		_itemLocators[itemID] = document.getElementById("tree-locator").value;
-		_itemLocatorTypes[itemID] = document.getElementById("tree-locator-type").selectedItem.value;
+		_itemLocatorTypes[itemID] = document.getElementById("tree-locator-type").selectedIndex;
 		document.getElementById("tree-locator").value = "";
 	}
 	
@@ -130,6 +130,9 @@ var Zotero_Citation_Dialog = new function () {
 	}
 	
 	function accept() {
+		// use to map selectedIndexes back to "p"/"g"/"l"
+		var locatorTypeElements = document.getElementById("tree-locator-type").getElementsByTagName("menuitem");
+		
 		var io = window.arguments[0].wrappedJSObject;
 		if(_multipleSourcesOn) {
 			treeItemSelected();		// store locator info
@@ -145,7 +148,7 @@ var Zotero_Citation_Dialog = new function () {
 				for(var i=0; i<listLength; i++) {
 					var itemID = citationList.childNodes[i].value;
 					io.items.push(itemID);
-					io.locatorTypes.push(_itemLocatorTypes[itemID]);
+					io.locatorTypes.push(locatorTypeElements[_itemLocatorTypes[itemID]].value);
 					io.locators.push(_itemLocators[itemID]);
 				}
 			}
