@@ -42,27 +42,30 @@ var Zotero_Citation_Dialog = new function () {
 	}
 	
 	function toggleMultipleSources() {
+		_multipleSourcesOn = !_multipleSourcesOn;
 		if(_multipleSourcesOn) {
-			document.getElementById("multiple-sources").hidden = true;
-			document.getElementById("add-citation-dialog").width = "600";
-			document.getElementById("multiple-sources-button").label = Zotero.getString("citation.multipleSources");			
-			window.sizeToContent();
-			window.moveTo((window.screenX+75), window.screenY);
-		} else {
 			document.getElementById("multiple-sources").hidden = undefined;
 			document.getElementById("add-citation-dialog").width = "750";
 			document.getElementById("multiple-sources-button").label = Zotero.getString("citation.singleSource");			
 			window.sizeToContent();
 			window.moveTo((window.screenX-75), window.screenY);
+			Zotero.debug("Calling treeItemSelected");
+			treeItemSelected();
+		} else {
+			document.getElementById("multiple-sources").hidden = true;
+			document.getElementById("add-citation-dialog").width = "600";
+			document.getElementById("multiple-sources-button").label = Zotero.getString("citation.multipleSources");			
+			window.sizeToContent();
+			window.moveTo((window.screenX+75), window.screenY);
 		}
-		
-		_multipleSourcesOn = !_multipleSourcesOn;
 	}
 	
 	function treeItemSelected() {
 		if(_multipleSourcesOn) {
 			// get selected item (from selectItemsDialog.js)
 			var item = getSelectedItems(true);
+			
+			Zotero.debug(item);
 			
 			// if item has already been added, disable add button
 			document.getElementById("citation-add").disabled = (!item.length || _itemLocators[item[0]] != undefined ? true : false);
@@ -111,7 +114,7 @@ var Zotero_Citation_Dialog = new function () {
 		
 		// flag
 		_itemLocators[itemID] = document.getElementById("tree-locator").value;
-		_itemLocatorTypes[itemID] = document.getElementById("tree-locator-type").selectedIndex;
+		_itemLocatorTypes[itemID] = document.getElementById("tree-locator-type").selectedItem.value;
 		document.getElementById("tree-locator").value = "";
 	}
 	

@@ -426,8 +426,8 @@ Zotero.CSL._locatorTerms = {
  * create a citation (in-text or footnote)
  */
 Zotero.CSL.prototype.createCitation = function(citation, format) {
+	var string = new Zotero.CSL.FormattedString(this, format);
 	if(citation.citationType >= 3) {	// indicates ibid
-		var string = new Zotero.CSL.FormattedString(this, format);
 		var term = this._getTerm("ibid");
 		string.append(term[0].toUpperCase()+term.substr(1));
 		
@@ -464,13 +464,14 @@ Zotero.CSL.prototype.createCitation = function(citation, format) {
 				locator = citation.locators[i];
 			}
 			
-			string = this._getCitation(Zotero.Items.get(citation.itemIDs[i]),
+			var citationString = this._getCitation(Zotero.Items.get(citation.itemIDs[i]),
 				(citation.citationType[i] == 1 ? "first" : "subsequent"),
 				locatorType, locator, format, this._cit);
+			string.concat(citationString);
 			
 			if(this._cit.format && this._cit.format.delimiter && i != lasti) {
 				// add delimiter if one exists, and this isn't the last element
-				string += this._cit.format.delimiter;
+				string.append(this._cit.format.delimiter);
 			}
 		}
 	}

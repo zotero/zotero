@@ -596,8 +596,9 @@ Zotero.Integration.Citation.prototype.setData = function(itemIDs, locators, loca
 	
 	this.locatorString = "";
 	for(var i in locators) {
-		this.locatorString += locatorTypes[i]+locators[i].replace("|", "");
+		this.locatorString += "|"+locatorTypes[i]+locators[i].replace("|", "");
 	}
+	if(this.locatorString) this.locatorString = this.locatorString.substr(1);
 	
 	this.serialization = this.itemIDString+"_"+this.locatorString;
 }

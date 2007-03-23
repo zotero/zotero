@@ -122,7 +122,7 @@
 							<menuitem value="l" label="&zotero.citation.line;"/>
 						</menupopup>
 					</menulist>
-					<textbox id="item-locator"/>
+					<textbox id="item-locator" disabled="true"/>
 				</hbox>
 			</vbox>
 		</hbox>
