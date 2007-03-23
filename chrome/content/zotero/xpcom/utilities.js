@@ -45,6 +45,7 @@ Zotero.Utilities.prototype.strToDate = function(date) {
 /*
  * Cleans extraneous punctuation off an author name
  */
+Zotero.Utilities._allCapsRe = /^[A-Z]+$/;
 Zotero.Utilities.prototype.cleanAuthor = function(author, type, useComma) {
 	if(typeof(author) != "string") {
 		throw "cleanAuthor: author must be a string";
@@ -70,7 +71,7 @@ Zotero.Utilities.prototype.cleanAuthor = function(author, type, useComma) {
 		var firstName = author.substring(0, spaceIndex);
 	}
 	
-	if(firstName && firstName.toUpperCase() == firstName &&
+	if(firstName && Zotero.Utilities._allCapsRe.test(firstName) &&
 			firstName.length <= 4 && lastName.toUpperCase() != lastName) {
 		// first name is probably initials
 		var newFirstName = "";
