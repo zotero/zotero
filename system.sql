@@ -1,4 +1,4 @@
--- 15
+-- 16
 
 -- This file creates system tables that can be safely wiped and reinitialized
 -- at any time, as long as existing ids are preserved.
@@ -264,6 +264,7 @@ INSERT INTO fields VALUES (110,'title',NULL);
 INSERT INTO fields VALUES (111,'caseName',NULL);
 INSERT INTO fields VALUES (112,'nameOfAct',NULL);
 INSERT INTO fields VALUES (113,'subject',NULL);
+INSERT INTO fields VALUES (114,'proceedingsTitle',NULL);
 
 INSERT INTO itemTypeFields VALUES (2, 110, NULL, 1);
 INSERT INTO itemTypeFields VALUES (2, 90, NULL, 2);
@@ -713,22 +714,23 @@ INSERT INTO itemTypeFields VALUES (32, 22, NULL, 16);
 INSERT INTO itemTypeFields VALUES (33, 110, NULL, 1);
 INSERT INTO itemTypeFields VALUES (33, 90, NULL, 2);
 INSERT INTO itemTypeFields VALUES (33, 14, NULL, 3);
-INSERT INTO itemTypeFields VALUES (33, 84, NULL, 4);
-INSERT INTO itemTypeFields VALUES (33, 7, NULL, 5);
-INSERT INTO itemTypeFields VALUES (33, 8, NULL, 6);
-INSERT INTO itemTypeFields VALUES (33, 4, NULL, 7);
-INSERT INTO itemTypeFields VALUES (33, 10, NULL, 8);
-INSERT INTO itemTypeFields VALUES (33, 3, NULL, 9);
-INSERT INTO itemTypeFields VALUES (33, 87, NULL, 10);
-INSERT INTO itemTypeFields VALUES (33, 26, NULL, 11);
-INSERT INTO itemTypeFields VALUES (33, 11, NULL, 12);
-INSERT INTO itemTypeFields VALUES (33, 18, NULL, 13);
-INSERT INTO itemTypeFields VALUES (33, 19, NULL, 14);
-INSERT INTO itemTypeFields VALUES (33, 62, NULL, 15);
-INSERT INTO itemTypeFields VALUES (33, 1, NULL, 16);
-INSERT INTO itemTypeFields VALUES (33, 27, NULL, 17);
-INSERT INTO itemTypeFields VALUES (33, 2, NULL, 18);
-INSERT INTO itemTypeFields VALUES (33, 22, NULL, 19);
+INSERT INTO itemTypeFields VALUES (33, 114, NULL, 4);
+INSERT INTO itemTypeFields VALUES (33, 84, NULL, 5);
+INSERT INTO itemTypeFields VALUES (33, 7, NULL, 6);
+INSERT INTO itemTypeFields VALUES (33, 8, NULL, 7);
+INSERT INTO itemTypeFields VALUES (33, 4, NULL, 8);
+INSERT INTO itemTypeFields VALUES (33, 10, NULL, 9);
+INSERT INTO itemTypeFields VALUES (33, 3, NULL, 10);
+INSERT INTO itemTypeFields VALUES (33, 87, NULL, 11);
+INSERT INTO itemTypeFields VALUES (33, 26, NULL, 12);
+INSERT INTO itemTypeFields VALUES (33, 11, NULL, 13);
+INSERT INTO itemTypeFields VALUES (33, 18, NULL, 14);
+INSERT INTO itemTypeFields VALUES (33, 19, NULL, 15);
+INSERT INTO itemTypeFields VALUES (33, 62, NULL, 16);
+INSERT INTO itemTypeFields VALUES (33, 1, NULL, 17);
+INSERT INTO itemTypeFields VALUES (33, 27, NULL, 18);
+INSERT INTO itemTypeFields VALUES (33, 2, NULL, 19);
+INSERT INTO itemTypeFields VALUES (33, 22, NULL, 20);
 INSERT INTO itemTypeFields VALUES (34, 110, NULL, 1);
 INSERT INTO itemTypeFields VALUES (34, 90, NULL, 2);
 INSERT INTO itemTypeFields VALUES (34, 8, NULL, 3);
@@ -795,6 +797,7 @@ INSERT INTO baseFieldMappings VALUES (30, 8, 78); -- radioBroadcast/publisher/ne
 INSERT INTO baseFieldMappings VALUES (32, 8, 83); -- computerProgram/publisher/company
 INSERT INTO baseFieldMappings VALUES (16, 10, 95); -- bill/pages/codePages
 INSERT INTO baseFieldMappings VALUES (17, 10, 98); -- case/pages/firstPage
+INSERT INTO baseFieldMappings VALUES (33, 12, 114); -- conferencePaper/publicationTitle/proceedingsTitle
 INSERT INTO baseFieldMappings VALUES (13, 12, 91); -- webpage/publicationTitle/websiteTitle
 INSERT INTO baseFieldMappings VALUES (23, 12, 107); -- blogPost/publicationTitle/blogTitle
 INSERT INTO baseFieldMappings VALUES (25, 12, 104); -- forumPost/publicationTitle/forumTitle
