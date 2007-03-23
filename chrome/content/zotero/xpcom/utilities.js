@@ -54,10 +54,9 @@ Zotero.Utilities.prototype.cleanAuthor = function(author, type, useComma) {
 	author = author.replace(/[\s\,\/\[\]\:\.]+$/, '');
 	author = author.replace(/  +/, ' ');
 	if(useComma) {
-		// Add period for initials
-		if(author.substr(author.length-2, 1) == " " || author.substr(author.length-2, 1) == ".") {
-			author += ".";
-		}
+		// Add spaces between periods
+		author = author.replace(/\.([^ ])/, ". $1");
+		
 		var splitNames = author.split(/, ?/);
 		if(splitNames.length > 1) {
 			var lastName = splitNames[0];
@@ -70,7 +69,17 @@ Zotero.Utilities.prototype.cleanAuthor = function(author, type, useComma) {
 		var lastName = author.substring(spaceIndex+1);
 		var firstName = author.substring(0, spaceIndex);
 	}
-	// TODO: take type into account
+	
+	if(firstName && firstName.toUpperCase() == firstName &&
+			firstName.length <= 4 && lastName.toUpperCase() != lastName) {
+		// first name is probably initials
+		var newFirstName = "";
+		for(var i=0; i<firstName.length; i++) {
+			newFirstName += " "+firstName[i]+".";
+		}
+		firstName = newFirstName.substr(1);
+	}
+	
 	return {firstName:firstName, lastName:lastName, creatorType:type};
 }
 
