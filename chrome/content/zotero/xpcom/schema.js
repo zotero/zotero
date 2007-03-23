@@ -866,6 +866,10 @@ Zotero.Schema = new function(){
 				if (i==26) {
 					Zotero.DB.query("INSERT INTO itemData SELECT itemID, 114, valueID FROM itemData WHERE itemID IN (SELECT itemID FROM items WHERE itemTypeID=33) AND fieldID=84");
 				}
+				
+				if (i==27) {
+					Zotero.DB.query("UPDATE itemData SET fieldID=115 WHERE itemID IN (SELECT itemID FROM items WHERE itemTypeID=3) AND fieldID=12");
+				}
 			}
 			
 			_updateSchema('userdata');

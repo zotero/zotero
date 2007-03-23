@@ -1,4 +1,4 @@
--- 16
+-- 17
 
 -- This file creates system tables that can be safely wiped and reinitialized
 -- at any time, as long as existing ids are preserved.
@@ -265,6 +265,7 @@ INSERT INTO fields VALUES (111,'caseName',NULL);
 INSERT INTO fields VALUES (112,'nameOfAct',NULL);
 INSERT INTO fields VALUES (113,'subject',NULL);
 INSERT INTO fields VALUES (114,'proceedingsTitle',NULL);
+INSERT INTO fields VALUES (115,'bookTitle',NULL);
 
 INSERT INTO itemTypeFields VALUES (2, 110, NULL, 1);
 INSERT INTO itemTypeFields VALUES (2, 90, NULL, 2);
@@ -288,7 +289,7 @@ INSERT INTO itemTypeFields VALUES (2, 2, NULL, 19);
 INSERT INTO itemTypeFields VALUES (2, 22, NULL, 20);
 INSERT INTO itemTypeFields VALUES (3, 110, NULL, 1);
 INSERT INTO itemTypeFields VALUES (3, 90, NULL, 2);
-INSERT INTO itemTypeFields VALUES (3, 12, NULL, 3);
+INSERT INTO itemTypeFields VALUES (3, 115, NULL, 3);
 INSERT INTO itemTypeFields VALUES (3, 3, NULL, 4);
 INSERT INTO itemTypeFields VALUES (3, 30, NULL, 5);
 INSERT INTO itemTypeFields VALUES (3, 4, NULL, 6);
@@ -786,6 +787,7 @@ INSERT INTO itemTypeFields VALUES (36, 27, NULL, 19);
 INSERT INTO itemTypeFields VALUES (36, 2, NULL, 20);
 INSERT INTO itemTypeFields VALUES (36, 22, NULL, 21);
 
+
 INSERT INTO baseFieldMappings VALUES (16, 4, 94); -- bill/volume/codeVolume
 INSERT INTO baseFieldMappings VALUES (17, 4, 97); -- case/volume/reporterVolume
 INSERT INTO baseFieldMappings VALUES (19, 7, 102); -- patent/place/country
@@ -797,6 +799,7 @@ INSERT INTO baseFieldMappings VALUES (30, 8, 78); -- radioBroadcast/publisher/ne
 INSERT INTO baseFieldMappings VALUES (32, 8, 83); -- computerProgram/publisher/company
 INSERT INTO baseFieldMappings VALUES (16, 10, 95); -- bill/pages/codePages
 INSERT INTO baseFieldMappings VALUES (17, 10, 98); -- case/pages/firstPage
+INSERT INTO baseFieldMappings VALUES (3, 12, 115); -- bookSection/publicationTitle/bookTitle
 INSERT INTO baseFieldMappings VALUES (33, 12, 114); -- conferencePaper/publicationTitle/proceedingsTitle
 INSERT INTO baseFieldMappings VALUES (13, 12, 91); -- webpage/publicationTitle/websiteTitle
 INSERT INTO baseFieldMappings VALUES (23, 12, 107); -- blogPost/publicationTitle/blogTitle
