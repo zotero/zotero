@@ -381,11 +381,9 @@ Zotero.CSL.prototype.preprocessItems = function(items) {
 		var item = items[i];
 		
 		// handle subsequent author substitutes
-		Zotero.debug(item.getField("title"));
 		if(item._csl.authors.length && lastAuthors) {
 			var authorsAreSame = true;
 			for(var i=item._csl.authors.length-1; i>=0; i--) {
-				Zotero.debug(i);
 				if(!lastAuthors[i] ||
 						lastAuthors[i].firstName != item._csl.authors[i].firstName ||
 						lastAuthors[i].lastName != item._csl.authors[i].lastName ||
@@ -721,7 +719,7 @@ Zotero.CSL.prototype._parseFields = function(ref, position, type, bibCitElement,
 				// create serialized representation
 				itemDesc._serialized = this._serializeElement(itemDesc.name, itemDesc);
 				// add to serialization for type
-				if(bibCitElement) {
+				if(bibCitElement && bibCitElement._serializations) {
 					bibCitElement._serializations[position][type][itemDesc._serialized] = itemDesc;
 				}
 			}
@@ -802,9 +800,12 @@ Zotero.CSL.prototype._parseBibliographyOptions = function() {
 		// for classes, use the sort order that 
 		if(algorithm == "author-date") {
 			this._bib.sortOrder = [this._getFieldDefaults("author"),
-			                 this._getFieldDefaults("date")];
+			                 this._getFieldDefaults("date"),
+			                 this._getFieldDefaults("titles")];
 			this._bib.sortOrder[0].name = "author";
+			this._bib.sortOrder[0]["name-as-sort-order"] = "all";
 			this._bib.sortOrder[1].name = "date";
+			this._bib.sortOrder[2].name = "titles";
 		} else if(algorithm == "label") {
 			this._bib.sortOrder = [this._getFieldDefaults("label")];
 			this._bib.sortOrder[0].name = "label";
@@ -813,7 +814,7 @@ Zotero.CSL.prototype._parseBibliographyOptions = function() {
 			this._bib.sortOrder[0].name = "cited";
 		}
 	} else {
-		this._bib.sortOrder = this._parseFields(bibliography.sort, "first", false, this._bib);
+		this._bib.sortOrder = this._parseFields(bibliography.sort.children(), "first", false, this._bib);
 	}
 	
 	// parse et al
@@ -992,16 +993,23 @@ Zotero.CSL.prototype._compareItem = function(a, b, opt) {
 		var sortElement = this._bib.sortOrder[i];
 		
 		if(sortElement.name == "date") {
-			var bDate = b.getField("date");
-			var aDate = a.getField("date");
-			if(bDate > aDate) {
+			var aValue = a.getField("date", true);
+			var bValue = b.getField("date", true);
+			
+			if(bValue == "" && aValue != "") {
 				return -1;
-			} else if(bDate < aDate) {
+			} else if(aValue == "" && bValue != "") {
+				return 1;
+			} else if(bValue > aValue) {
+				return -1;
+			} else if(bValue < aValue) {
 				return 1;
 			}
 		} else {
 			var formattedStringA = new Zotero.CSL.FormattedString(this, "compare");
 			var formattedStringB = new Zotero.CSL.FormattedString(this, "compare");
+			
+			//Zotero.debug('comparing '+sortElement.name+' on "'+a.getField("title")+'" and "'+b.getField("title")+'"');
 			
 			this._getFieldValue(sortElement.name, sortElement, a,
 											 formattedStringA, this._bib);
@@ -1010,6 +1018,7 @@ Zotero.CSL.prototype._compareItem = function(a, b, opt) {
 			
 			var aValue = formattedStringA.get().toLowerCase();
 			var bValue = formattedStringB.get().toLowerCase();
+			//Zotero.debug(aValue+" vs "+bValue);
 			
 			if(bValue > aValue) {
 				return -1;
@@ -1219,8 +1228,17 @@ Zotero.CSL.prototype._getFieldValue = function(name, element, item, formattedStr
 				} else if(element.relation == "event") {
 					string = item.getField("conferenceName");
 				}
-			}
 				
+				// if comparing, drop "a" or "the" from title
+				if(formattedString.format == "compare" && string.length > 1) {
+					if(string.substr(0, 2).toLowerCase() == "a ") {
+						string = string.substr(2);
+					} else if(string.length > 3 && string.substr(0, 4).toLowerCase() == "the ") {
+						string = string.substr(4);
+					}
+				}
+			}
+			
 			if(string) {
 				data.append(string, child);
 			}
