@@ -72,7 +72,8 @@ Zotero.Utilities.prototype.cleanAuthor = function(author, type, useComma) {
 	}
 	
 	if(firstName && Zotero.Utilities._allCapsRe.test(firstName) &&
-			firstName.length <= 4 && lastName.toUpperCase() != lastName) {
+			firstName.length < 4 &&
+			(firstName.length == 1 || lastName.toUpperCase() != lastName)) {
 		// first name is probably initials
 		var newFirstName = "";
 		for(var i=0; i<firstName.length; i++) {
