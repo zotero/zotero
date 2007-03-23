@@ -2014,7 +2014,8 @@ Zotero.Translate.TranslatorSearch = function(translate, translators) {
 }
 
 /*
- * Check to see if a list of translators (in 
+ * Check to see if a list of translators can scrape the page passed to the
+ * translate() instance
  */
 Zotero.Translate.TranslatorSearch.prototype.execute = function() {
 	if(!this.running) return;
@@ -2027,7 +2028,7 @@ Zotero.Translate.TranslatorSearch.prototype.execute = function() {
 	if((this.translate.type == "import" || this.translate.type == "web") && !this.translate.location) {
 		// if no location yet (e.g., getting list of possible web translators),
 		// just return true
-		this.foundTranslators.push(translator);
+		this.addTranslator(translator);
 		this.execute();
 		return;
 	}
@@ -2119,13 +2120,16 @@ Zotero.Translate.TranslatorSearch.prototype.execute = function() {
 		} else {
 			// add translator even though it has no proper detectCode (usually
 			// export translators, which have options but do nothing with them)
-			this.foundTranslators.push(translator);
+			this.addTranslator(translator);
 		}
 	}
 
 	this.execute();
 }
 
+/*
+ * Determines whether all translators have been processed
+ */
 Zotero.Translate.TranslatorSearch.prototype.checkDone = function() {
 	if(this.translators.length == 0) {
 		// if we've gone through all of the translators, trigger the handler
@@ -2146,15 +2150,21 @@ Zotero.Translate.TranslatorSearch.prototype.checkDone = function() {
 	return false;
 }
 
+/*
+ * Processes the return value from a translator
+ */
 Zotero.Translate.TranslatorSearch.prototype.processReturnValue = function(translator, returnValue) {
 	Zotero.debug("found translator "+translator.label);
 	
 	if(typeof(returnValue) == "string") {
 		translator.itemType = returnValue;
 	}
-	this.foundTranslators.push(translator);
+	this.addTranslator(translator);
 }
 
+/*
+ * Called upon completion of asynchronous translator search
+ */
 Zotero.Translate.TranslatorSearch.prototype.complete = function(returnValue, error) {
 	// reset done function
 	this.translate._sandbox.Zotero.done = undefined;
@@ -2172,6 +2182,17 @@ Zotero.Translate.TranslatorSearch.prototype.complete = function(returnValue, err
 		
 	// resume execution
 	this.execute();
+}
+
+/*
+ * Copies a translator to the foundTranslators list
+ */
+Zotero.Translate.TranslatorSearch.prototype.addTranslator = function(translator) {
+	var newTranslator = new Object();
+	for(var i in translator) {
+		newTranslator[i] = translator[i];
+	}
+	this.foundTranslators.push(newTranslator);
 }
 
 /* Zotero.Translate.ZoteroItem: a class for generating a new item from
