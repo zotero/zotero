@@ -321,11 +321,16 @@ Zotero.Integration.DataListener.prototype._requestFinished = function(response) 
 	// write response
 	intlStream.writeString(response);
 	intlStream.close();
-	// write
-	this.oStream.write(response, response.length);
 	
-	// close output stream
-	this.oStream.close();
+	// write
+	try {
+		this.oStream.write(response, response.length);
+	} finally {	
+		try {
+			// close output stream
+			this.oStream.close();
+		} catch(e) {}
+	}
 }
 
 Zotero.Integration.SOAP = new function() {
@@ -636,13 +641,18 @@ Zotero.Integration.CitationSet.prototype.addCitation = function(citation) {
 	
 	if(this.style.ibid && citation.itemIDs.length == 1 &&	// if using ibid
 	   citation.itemIDString == this.lastItemIDString) {	// and is same as last
-		// use ibid if possible
-		citation.citationType = 2;
-		citation.serializedType = "2";
+		// use ibid if possible, but check whether to use ibid+pages
+		if(citation.locatorString == this.lastLocatorString) {
+			citation.citationType = 3;
+			citation.serializedType = "3";
+		} else {
+			citation.citationType = 4;
+			citation.serializedType = "4";
+		}
+		
 		for each(itemID in citation.itemIDs) {
 			this.citationsByID[itemID].push(citation);
 		}
-		
 		this.citationsByField[citation.field] = citation;
 	} else {
 		// loop through to see which are first citations
@@ -653,7 +663,7 @@ Zotero.Integration.CitationSet.prototype.addCitation = function(citation) {
 				citation.citationType.push(1);
 			} else {
 				this.citationsByID[itemID].push(citation);
-				citation.citationType.push(3);
+				citation.citationType.push(2);
 			}
 		}
 		citation.serializedType = citation.citationType.join(",");
@@ -667,6 +677,7 @@ Zotero.Integration.CitationSet.prototype.addCitation = function(citation) {
 	}
 	
 	this.lastItemIDString = (citation.itemIDs.length == 1 ? citation.itemIDString : null);
+	this.lastLocatorString = citation.locatorString;
 	this.citationsByIndex[citation.index] = citation;
 	
 	return isDuplicate;

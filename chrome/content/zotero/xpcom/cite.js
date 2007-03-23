@@ -416,28 +416,51 @@ Zotero.CSL.prototype.preprocessItems = function(items) {
 	}
 }
 
+Zotero.CSL._locatorTerms = {
+	p:"page",
+	g:"paragraph",
+	l:"line"
+};
+
 /*
  * create a citation (in-text or footnote)
  */
 Zotero.CSL.prototype.createCitation = function(citation, format) {
-	if(citation.citationType == 2) {
+	if(citation.citationType >= 3) {	// indicates ibid
 		var string = new Zotero.CSL.FormattedString(this, format);
 		var term = this._getTerm("ibid");
 		string.append(term[0].toUpperCase()+term.substr(1));
-	} else {
+		
+		// if type == 4, attach pages
+		if(citation.citationType == 4) {
+			// locator data
+			var locator = citation.locators[0];
+			
+			if(locator) {
+				var locatorType = Zotero.CSL._locatorTerms[citation.locatorTypes[0]];
+				
+				// search for elements with the same serialization
+				var element = this._getFieldDefaults("locator");
+				if(!element) {
+					element = {
+						name:"locator",
+						children:{name:"number"}
+					};
+				}
+				
+				if(element) {
+					string.append("., ");
+					string.appendLocator(locatorType, locator, element);
+				}
+			}
+		}
+	} else {							// indicates primary or subsequent
 		var lasti = citation.itemIDs.length-1;
 		for(var i in citation.itemIDs) {
 			var locatorType = false;
 			var locator = false;
 			if(citation.locators) {
-				if(citation.locatorTypes[i] == "p") {
-					locatorType = "page";
-				} else if(citation.locatorTypes[i] == "g") {
-					locatorType = "paragraph";
-				} else if(citation.locatorTypes[i] == "l") {
-					locatorType = "line";
-				}
-				
+				locatorType = Zotero.CSL._locatorTerms[citation.locatorTypes[i]];
 				locator = citation.locators[i];
 			}
 			
@@ -1158,6 +1181,7 @@ Zotero.CSL.prototype._getFieldValue = function(name, element, item, formattedStr
 					string = item.getField("publicationTitle");
 				} else if(element.relation == "collection") {
 					string = item.getField("seriesTitle");
+					if(!string) string = item.getField("series");
 				} else if(element.relation == "event") {
 					string = item.getField("conferenceName");
 				}
