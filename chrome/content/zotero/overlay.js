@@ -1321,12 +1321,12 @@ var ZoteroPane = new function()
 			window.open(uri, "zotero-loaded-page",
 				"menubar=yes,location=yes,toolbar=yes,personalbar=yes,resizable=yes,scrollbars=yes,status=yes");
 			
-			var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-					   .getService(Components.interfaces.nsIWindowMediator);
-			var newWindow = wm.getMostRecentWindow("navigator:browser");
-			var browser = newWindow.getBrowser();
-			
 			if (data && data.attachmentID) {
+				var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+						   .getService(Components.interfaces.nsIWindowMediator);
+				var newWindow = wm.getMostRecentWindow("navigator:browser");
+				//var browser = newWindow.getBrowser();
+				
 				newWindow.Zotero_Browser.annotatePage(data.attachmentID);
 				// In case the page has already loaded, update
 				newWindow.Zotero_Browser.updateStatus();
