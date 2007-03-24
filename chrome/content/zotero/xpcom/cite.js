@@ -1874,26 +1874,7 @@ Zotero.CSL.prototype._processDate = function(string) {
  * get a field on an item
  */
 Zotero.CSL.prototype._getField = function(item, field) {
-	var fieldID = Zotero.ItemFields.getID(field);
-	
-	if(fieldID) {
-		var typeID = item.getType();
-		
-		if(Zotero.ItemFields.isValidForType(fieldID, typeID)) {
-			// get field if available
-			var result = item.getField(fieldID);
-			if(result) return result;
-		} else if(Zotero.ItemFields.isBaseField(fieldID)) {
-			// get base field if available
-			var newFieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(typeID, fieldID);
-			if(newFieldID) {
-				result = item.getField(newFieldID);
-				if(result) return result;
-			}
-		}
-	}
-	
-	return "";
+	return item.getField(field, false, true);
 }
 
 /*
