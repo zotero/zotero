@@ -1062,7 +1062,14 @@ Zotero.ItemTreeView.prototype.saveSelection = function()
  */
 Zotero.ItemTreeView.prototype.rememberSelection = function(selection)
 {
-	this.selection.clearSelection();
+	// clearSelection() seems to cause a crash in Firefox 2.0.0.2 - 2.0.0.3, at least
+	//this.selection.clearSelection();
+	// So try this alternative method
+	this.selection.selectEventsSuppressed = true;
+	this.selection.select(0);
+	this.selection.toggleSelect(0);
+	this.selection.selectEventsSuppressed = false;
+	
 	for(var i=0; i < selection.length; i++)
 	{
 		if (this._itemRowMap[selection[i]] != null) {
