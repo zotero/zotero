@@ -716,6 +716,9 @@ Zotero.Attachments = new function(){
 		// Title
 		formatString = rpl('title', formatString);
 		
+		// Strip potentially invalid characters
+		// See http://en.wikipedia.org/wiki/Filename#Reserved_characters_and_words
+		formatString = formatString.replace(/[\/\\\?\*:|"<>\.]/g, '');
 		return formatString;
 	}
 	
