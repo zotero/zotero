@@ -343,7 +343,7 @@ Zotero.CSL.prototype.preprocessItems = function(items) {
 	// get data necessary to generate citations before sorting
 	for(var i in items) {
 		var item = items[i];
-		var dateModified = item.getField("dateModified");
+		var dateModified = this._getField(item, "dateModified");
 		
 		if(!item._csl || item._csl.dateModified != dateModified) {
 			// namespace everything in item._csl so there's no chance of overlap
@@ -357,7 +357,7 @@ Zotero.CSL.prototype.preprocessItems = function(items) {
 			item._csl.translators = creators[2];
 			
 			// parse date
-			item._csl.date = Zotero.CSL.prototype._processDate(item.getField("date"));
+			item._csl.date = Zotero.CSL.prototype._processDate(this._getField(item, "date"));
 		}
 		// clear disambiguation and subsequent author substitute
 		if(item._csl.date && item._csl.date.disambiguation) item._csl.date.disambiguation = undefined;
@@ -1219,14 +1219,14 @@ Zotero.CSL.prototype._getFieldValue = function(name, element, item, formattedStr
 			if(child.name == "title") {	// for now, we only care about the
 									// "title" sub-element
 				if(!element.relation) {
-					string = item.getField("title");
+					string = this._getField(item, "title");
 				} else if(element.relation == "container") {
-					string = item.getField("publicationTitle");
+					string = this._getField(item, "publicationTitle");
 				} else if(element.relation == "collection") {
-					string = item.getField("seriesTitle");
-					if(!string) string = item.getField("series");
+					string = this._getField(item, "seriesTitle");
+					if(!string) string = this._getField(item, "series");
 				} else if(element.relation == "event") {
-					string = item.getField("conferenceName");
+					string = this._getField(item, "conferenceName");
 				}
 				
 				// if comparing, drop "a" or "the" from title
@@ -1255,9 +1255,9 @@ Zotero.CSL.prototype._getFieldValue = function(name, element, item, formattedStr
 			var string = "";
 			
 			if(child.name == "place") {
-				string = item.getField("place");
+				string = this._getField(item, "place");
 			} else if(child.name == "name") {
-				string = item.getField("publisher");
+				string = this._getField(item, "publisher");
 			}
 				
 			if(string) {
@@ -1276,15 +1276,15 @@ Zotero.CSL.prototype._getFieldValue = function(name, element, item, formattedStr
 			var child = element.children[i];
 			
 			if(child.name == "url") {
-				text = item.getField("url");
+				text = this._getField(item, "url");
 			} else if(child.name == "date") {
-				var field = item.getField("accessDate");
+				var field = this._getField(item, "accessDate");
 				if(field) {
 					data.appendDate(this._processDate(field), child);
 					save = true;
 				}
 			} else if(child.name == "physicalLocation") {
-				text = item.getField("archiveLocation");
+				text = this._getField(item, "archiveLocation");
 			} else if(child.name == "text") {
 				text = this._getTerm(child["term-name"], false, child["form"]);
 			}
@@ -1304,7 +1304,7 @@ Zotero.CSL.prototype._getFieldValue = function(name, element, item, formattedStr
 	} else if(name == "volume" || name == "issue") {
 		var data = new Zotero.CSL.FormattedString(this, formattedString.format);
 		
-		var field = item.getField(name);
+		var field = this._getField(item, name);
 		if(field) {
 			dataAppended = formattedString.appendLocator(name, field, element);
 		}
@@ -1312,7 +1312,7 @@ Zotero.CSL.prototype._getFieldValue = function(name, element, item, formattedStr
 		if(locatorType == "page") {
 			var field = locator;
 		} else if(typeName != "book") {
-			var field = item.getField("pages");
+			var field = this._getField(item, "pages");
 		}
 		
 		if(field) {
@@ -1323,11 +1323,11 @@ Zotero.CSL.prototype._getFieldValue = function(name, element, item, formattedStr
 			dataAppended = formattedString.appendLocator(locatorType, locator, element);
 		}
 	} else if(name == "edition") {
-		dataAppended = formattedString.append(item.getField("edition"), element);
+		dataAppended = formattedString.append(this._getField(item, "edition"), element);
 	} else if(name == "genre") {
-		var data = item.getField("type");
+		var data = this._getField(item, "type");
 		if(!data) {
-			data = item.getField("thesisType");
+			data = this._getField(item, "thesisType");
 		}
 		dataAppended = formattedString.append(data, element);
 	} else if(name == "group") {
@@ -1382,7 +1382,7 @@ Zotero.CSL.prototype._getFieldValue = function(name, element, item, formattedStr
 	} else if(name == "text") {
 		dataAppended = formattedString.append(this._getTerm(element["term-name"], false, element["form"]), element);
 	} else if(name == "isbn" || name == "doi") {
-		var field = item.getField(name.toUpperCase());
+		var field = this._getField(item, name.toUpperCase());
 		if(field) {
 			dataAppended = formattedString.appendLocator(null, field, element);
 		}
@@ -1868,6 +1868,32 @@ Zotero.CSL.prototype._separateItemCreators = function(item) {
  */
 Zotero.CSL.prototype._processDate = function(string) {
 	return Zotero.Date.strToDate(string);
+}
+
+/*
+ * get a field on an item
+ */
+Zotero.CSL.prototype._getField = function(item, field) {
+	var fieldID = Zotero.ItemFields.getID(field);
+	
+	if(fieldID) {
+		var typeID = item.getType();
+		
+		if(Zotero.ItemFields.isValidForType(fieldID, typeID)) {
+			// get field if available
+			var result = item.getField(fieldID);
+			if(result) return result;
+		} else if(Zotero.ItemFields.isBaseField(fieldID)) {
+			// get base field if available
+			var newFieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(typeID, fieldID);
+			if(newFieldID) {
+				result = item.getField(newFieldID);
+				if(result) return result;
+			}
+		}
+	}
+	
+	return "";
 }
 
 /*
