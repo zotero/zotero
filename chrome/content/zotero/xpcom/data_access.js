@@ -144,7 +144,6 @@ Zotero.Item.prototype.loadFromID = function(id) {
 		+ "WHERE I.itemID=" + id + (where.length ? ' AND ' + where.join(' AND ') : '');
 	var row = Zotero.DB.rowQuery(sql);
 	this.loadFromRow(row);
-	this._itemDataLoaded = true;
 }
 
 
@@ -152,7 +151,8 @@ Zotero.Item.prototype.loadFromID = function(id) {
  * Populate basic item data from a database row
  */
 Zotero.Item.prototype.loadFromRow = function(row, reload) {
-	// If necessary or reloading, set the type and initialize this._itemData
+	// If necessary or reloading, set the type, initialize this._itemData,
+	// and reset _itemDataLoaded
 	if (reload || (!this.getType() && row['itemTypeID'])) {
 		this.setType(row['itemTypeID'], true);
 	}
@@ -223,10 +223,12 @@ Zotero.Item.prototype.setType = function(itemTypeID, loadIn) {
 			}
 		}
 		
-		for (var fieldID in this._itemData) {
-			if (this._itemData[fieldID] &&
-					(!obsoleteFields || obsoleteFields.indexOf(fieldID) == -1)) {
-				copiedFields.push([fieldID, this.getField(fieldID)]);
+		if (!loadIn) {
+			for (var fieldID in this._itemData) {
+				if (this._itemData[fieldID] &&
+						(!obsoleteFields || obsoleteFields.indexOf(fieldID) == -1)) {
+					copiedFields.push([fieldID, this.getField(fieldID)]);
+				}
 			}
 		}
 		
@@ -259,7 +261,10 @@ Zotero.Item.prototype.setType = function(itemTypeID, loadIn) {
 		}
 	}
 	
-	if (!loadIn) {
+	if (loadIn) {
+		this._itemDataLoaded = false;
+	}
+	else {
 		this._changed.set('itemTypeID');
 	}
 	
