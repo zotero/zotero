@@ -519,6 +519,9 @@ var wpdCommon = {
 
 	removeNodeFromParent : function(aNode)
 	{
+		// Added by Dan S. for Zotero
+		var document = aNode.ownerDocument;
+		
 		var newNode = document.createTextNode("");
 		aNode.parentNode.replaceChild(newNode, aNode);
 		aNode = newNode;

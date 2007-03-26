@@ -197,8 +197,11 @@ var wpdDOMSaver = {
 			"movie"   		: false, 
 			"archive" 		: false, 
 			"custom"  		: "",       // comma delimited custom extensions (e.g. doc,xls,...)
-			"format"  		: true,     // when false we get only naked html without images 
-			"script"  		: false,    // no scripts
+			"format"  		: true,     // when false we get only naked html without images
+			
+			// Changed by Dan for Zotero
+			"script"  		: true,    // no scripts
+			
 			"encodeUTF8"	: false,    // write the DOM Tree as UTF-8 and change the charset entry of the document
 			"metainfo"	  : true,     // include meta tags with URL and date/time information
 			"metacharset" : false     // if the meta charset is defined inside html override document charset
@@ -253,7 +256,7 @@ var wpdDOMSaver = {
 		var flag = false;
 		switch ( ext )
 		{
-		  case "jpg" : case "jpeg" : case "png" : case "g,if" : flag = this.option["image"];   break;
+		  case "jpg" : case "jpeg" : case "png" : case "gif" : flag = this.option["image"];   break;
 			case "mp3" : case "wav"  : case "ram" : case "wma" : flag = this.option["sound"];   break;
 			case "mpg" : case "mpeg" : case "avi" : 
 			case "ram" : case "rm"   : case "mov" : case "wmv" : flag = this.option["movie"];   break;
