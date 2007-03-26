@@ -1567,18 +1567,14 @@ var ZoteroPane = new function()
 			progressWin.show();
 			progressWin.startCloseTimer();
 			
-			Zotero.debug('here');
 			if (this.itemsView && this.itemsView._itemGroup.isCollection()) {
-				Zotero.debug('here2');
 				var parentCollectionID = this.itemsView._itemGroup.ref.getID();
-				Zotero.debug(parentCollectionID);
 			}
 		}
 		
 		var f = function() {
-			Zotero.debug(parentCollectionID);
 			if (link) {
-				Zotero.Attachments.linkFromDocument(window.content.document, itemID, false, parentCollectionID);
+				Zotero.Attachments.linkFromDocument(window.content.document, itemID, parentCollectionID);
 			}
 			else {
 				Zotero.Attachments.importFromDocument(window.content.document, itemID, false, parentCollectionID);
