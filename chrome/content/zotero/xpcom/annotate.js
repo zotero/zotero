@@ -680,7 +680,7 @@ Zotero.Annotation.prototype.displayWithAbsoluteCoordinates = function(absX, absY
 		this.pushpinDiv.style.cursor = "pointer";
 		// generate pushpin image
 		var img = this.document.createElement("img");
-		img.src = "chrome://zotero/skin/annotation-hidden.png";
+		img.src = "chrome://zotero/skin/annotation-hidden.gif";
 		img.title = Zotero.getString("annotations.expand.tooltip");
 		img.addEventListener("click", function() {
 			me.setCollapsed(false);
