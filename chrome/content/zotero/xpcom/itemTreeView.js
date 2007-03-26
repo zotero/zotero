@@ -171,19 +171,21 @@ Zotero.ItemTreeView.prototype.refresh = function()
  */
 Zotero.ItemTreeView.prototype.notify = function(action, type, ids)
 {
+	if (!this._treebox || !this._treebox.treeBody) {
+		return;
+	}
+	
 	var madeChanges = false;
 	var sort = false;
 	
 	this.selection.selectEventsSuppressed = true;
 	var savedSelection = this.saveSelection();
 	
-	if (this._treebox && this._treebox.treeBody) {
-		// See if we're in the active window
-		var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-			.getService(Components.interfaces.nsIWindowMediator);
-		if (wm.getMostRecentWindow("navigator:browser") == this._ownerDocument.defaultView){
-			var activeWindow = true;
-		}
+	// See if we're in the active window
+	var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+		.getService(Components.interfaces.nsIWindowMediator);
+	if (wm.getMostRecentWindow("navigator:browser") == this._ownerDocument.defaultView){
+		var activeWindow = true;
 	}
 	
 	var quicksearch = this._ownerDocument.getElementById('zotero-tb-search');
