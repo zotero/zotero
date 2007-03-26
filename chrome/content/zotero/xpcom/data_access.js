@@ -315,7 +315,7 @@ Zotero.Item.prototype.getCollections = function(){
 * Determine whether the item belongs to a given collectionID
 **/
 Zotero.Item.prototype.inCollection = function(collectionID){
-	return !!parseInt(Zotero.DB.valueQuery("SELECT COUNT(*) collectionID "
+	return !!parseInt(Zotero.DB.valueQuery("SELECT COUNT(*) "
 		+ "FROM collectionItems WHERE collectionID=" + collectionID + " AND "
 		+ "itemID=" + this.getID()));
 }
