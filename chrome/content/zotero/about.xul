@@ -5,22 +5,109 @@
 <!DOCTYPE window SYSTEM "chrome://zotero/locale/about.dtd">
 
 <dialog
-    id="zotero-about"
-    xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-    orient="vertical"
+	id="zotero-about"
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	orient="vertical"
 	buttons="accept"
 	buttonlabelaccept="&zotero.about.close;"
-	onload="moveToAlertPosition(); onLoad();"
+	onload="onLoad(); moveToAlertPosition(); sizeToContent();"
 	ondialogaccept="return true;">
 	
 	<script>
 		<![CDATA[
 			function onLoad()
 			{
-				var labels = document.getElementsByTagName('label');
+				var translators = {
+					bgBG: [
+						"Peter Stoilov"
+					],
+					
+					deAT: [
+						"stw"
+					],
+					
+					deCH: [
+						"stw"
+					],
+					
+					deDE: [
+						"Harald Kliems",
+						"jverber",
+						"stw"
+					],
+					
+					esES: [
+						"Alberto González Palomo"
+					],
+					
+					frFR: [
+						"Pascal Pichon",
+						"Jojaba",
+						"La Luciole"
+					],
+					
+					itIT: [
+						"Andrea",
+						"Elisabetta Manuele",
+						"Giuliano Masseroni",
+						"Luca Pedrazzi"
+					],
+					
+					jaJP: [
+						"Andreas Bovens",
+						"Michael Schiltz"
+					],
+					
+					koKR: [
+						"wtspout"
+					],
+					
+					nbNO: [
+						"Finn Arne Jørgensen"
+					],
+					
+					nlNL: [
+						"Andreas Bovens",
+						"Michael Schiltz"
+					],
+					
+					ptBR: [
+						"Humberto Sartini"
+					],
+					
+					srYU: [
+						"Igor_M"
+					],
+					
+					trTR: [
+						"Zeki Celikbas"
+					],
+					
+					zhCN: [
+						"liyan",
+						"Wenping Guo"
+					],
+					
+					zhTW: [
+						"Chun-Chung Chen"
+					]
+				};
 				
-				for(var i = 0; i<labels.length; i++)
-					labels[i].setAttribute('crop','end');
+				var box = document.getElementById('zotero-translators-list');
+				
+				for (var locale in translators) {
+					var heading = document.createElement('label');
+					var str = locale.substr(0, 2) + '-' + locale.substr(2) + ':';
+					heading.className = 'locale';
+					heading.setAttribute('value', str);
+					box.appendChild(heading);
+					
+					for each(var person in translators[locale]) {
+						var label = document.createElement('label');
+						label.setAttribute('value', person);
+						box.appendChild(label);
+					}
+				}
 			}
 		]]>
 	</script>
@@ -52,6 +139,15 @@
 			<label value="Simon Kornblith"/>
 			<label value="David Norton"/>
 		</vbox>
+		<label class="subhead" value="&zotero.about.localizations;"/>
+		<vbox class="subcontent">
+			<vbox id="zotero-translators-list"/>
+		</vbox>
+		<label class="subhead" value="&zotero.about.icons;"/>
+		<vbox class="subcontent">
+			<label class="text-link" href="http://www.famfamfam.com/lab/icons/silk/" value="famfamfam (small icons)"/>
+			<label class="text-link" href="http://tango.freedesktop.org/Tango_Desktop_Project" value="Tango Desktop Project (pref icons)"/>
+		</vbox>
 		<label class="subhead" value="&zotero.executiveProducer;"/>
 		<vbox class="subcontent">
 			<label value="Roy Rosenzweig"/>
@@ -61,8 +157,6 @@
 			<label class="text-link" href="http://www.mellon.org/" value="Andrew W. Mellon Foundation"/>
 			<label class="text-link" href="http://www.imls.gov/" value="Institute of Museum and Library Services"/>
 			<label class="text-link" href="http://www.sloan.org/" value="Alfred P. Sloan Foundation"/>
-			<label class="text-link" href="http://www.famfamfam.com/lab/icons/silk/" value="famfamfam (small icons)"/>
-			<label class="text-link" href="http://tango.freedesktop.org/Tango_Desktop_Project" value="Tango Desktop Project (pref icons)"/>
 		</vbox>
 	</vbox>
 </dialog>

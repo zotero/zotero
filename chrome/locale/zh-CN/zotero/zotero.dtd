@@ -38,7 +38,7 @@
 <!ENTITY zotero.toolbar.import.label "导入...">
 <!ENTITY zotero.toolbar.export.label "导出库...">
 <!ENTITY zotero.toolbar.preferences.label "配置...">
-<!ENTITY zotero.toolbar.about.label "关于 Zotero...">
+<!ENTITY zotero.toolbar.about.label "关于 Zotero">
 <!ENTITY zotero.toolbar.search.label "检索:">
 <!ENTITY zotero.toolbar.fullscreen.tooltip "切换全屏模式">
 <!ENTITY zotero.toolbar.goToURL.label "查看">
