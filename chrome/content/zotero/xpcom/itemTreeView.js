@@ -400,10 +400,12 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids)
 				this._refreshHashMap();
 			}
 			
-			this.rememberSelection(savedSelection);
-			
 			if (activeWindow) {
 				this.selectItem(ids[0]);
+			}
+			else {
+				Zotero.debug('crashdebug1');
+				this.rememberSelection(savedSelection);
 			}
 		}
 		else
@@ -414,7 +416,7 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids)
 			else {
 				this._refreshHashMap();
 			}
-			
+			Zotero.debug('crashdebug2')
 			this.rememberSelection(savedSelection);
 		}
 		
@@ -610,6 +612,7 @@ Zotero.ItemTreeView.prototype.cycleHeader = function(column)
 	this.selection.selectEventsSuppressed = true;
 	var savedSelection = this.saveSelection();
 	this.sort();
+	Zotero.debug('crashdebug3')
 	this.rememberSelection(savedSelection);
 	this.selection.selectEventsSuppressed = false;
 	this._treebox.invalidate();
@@ -983,6 +986,7 @@ Zotero.ItemTreeView.prototype.setFilter = function(type, data) {
 	
 	this.rememberOpenState(savedOpenState);
 	this.rememberFirstRow(savedFirstRow);
+	Zotero.debug('crashdebug4')
 	this.rememberSelection(savedSelection);
 	this.selection.selectEventsSuppressed = false;
 	this._treebox.invalidate();
@@ -1062,13 +1066,8 @@ Zotero.ItemTreeView.prototype.saveSelection = function()
  */
 Zotero.ItemTreeView.prototype.rememberSelection = function(selection)
 {
-	// clearSelection() seems to cause a crash in Firefox 2.0.0.2 - 2.0.0.3, at least
-	//this.selection.clearSelection();
-	// So try this alternative method
-	this.selection.selectEventsSuppressed = true;
-	this.selection.select(0);
-	this.selection.toggleSelect(0);
-	this.selection.selectEventsSuppressed = false;
+	// DEBUG: This seems to occasionally cause a crash
+	this.selection.clearSelection();
 	
 	for(var i=0; i < selection.length; i++)
 	{
