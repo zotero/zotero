@@ -786,11 +786,11 @@ Zotero.Attachments = new function(){
 	}
 	
 	
-	function _getExtensionFromURL(url) {
+	function _getExtensionFromURL(url, mimeType) {
 		var nsIURL = Components.classes["@mozilla.org/network/standard-url;1"]
 					.createInstance(Components.interfaces.nsIURL);
 		nsIURL.spec = url;
-		return nsIURL.fileExtension;
+		return Zotero.MIME.getPrimaryExtension(mimeType, nsIURL.fileExtension);
 	}
 	
 	
