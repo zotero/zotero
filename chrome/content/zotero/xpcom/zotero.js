@@ -120,12 +120,19 @@ var Zotero = new function(){
 		this.isWin = (this.platform.substr(0, 3) == "Win");
 		
 		// Locale		
-		var localeService = Components.classes['@mozilla.org/intl/nslocaleservice;1'].
-							getService(Components.interfaces.nsILocaleService);
-		this.locale = localeService.getLocaleComponentForUserAgent();
+		var ph = Components.classes["@mozilla.org/network/protocol;1?name=http"].
+					getService(Components.interfaces.nsIHttpProtocolHandler);
+		if (ph.language.length == 2) {
+			this.locale = ph.language + '-' + ph.language.toUpperCase();
+		}
+		else {
+			this.locale = ph.language;
+		}
 		
 		// Load in the localization stringbundle for use by getString(name)
 		var src = 'chrome://zotero/locale/zotero.properties';
+		var localeService = Components.classes['@mozilla.org/intl/nslocaleservice;1'].
+							getService(Components.interfaces.nsILocaleService);
 		var appLocale = localeService.getApplicationLocale();
 		
 		var stringBundleService =
