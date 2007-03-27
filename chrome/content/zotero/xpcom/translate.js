@@ -417,6 +417,13 @@ Zotero.Translate.prototype.setHandler = function(type, handler) {
 }
 
 /*
+ * clears all handlers for a given function
+ */
+Zotero.Translate.prototype.clearHandlers = function(type) {
+	this._handlers[type] = new Array();
+}
+
+/*
  * calls a handler (see setHandler above)
  */
 Zotero.Translate.prototype.runHandler = function(type, argument) {

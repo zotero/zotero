@@ -386,7 +386,7 @@ var Zotero_Browser = new function() {
 	/*
 	 * Callback to be executed when scraping is complete
 	 */
-	function finishScraping(obj, returnValue, collection) {
+	function finishScraping(obj, returnValue) {
 		if(!returnValue) {
 			Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.scrapeError"));
 			// Include link to Known Translator Issues page
@@ -585,10 +585,11 @@ Zotero_Browser.Tab.prototype.translate = function(saveLocation) {
 			// use first translator available
 			this.page.translate.setTranslator(this.page.translators[0]);
 			this.page.translate.setHandler("select", me._selectItems);
-			this.page.translate.setHandler("itemDone", function(obj, item) { Zotero_Browser.itemDone(obj, item, saveLocation) });
-			this.page.translate.setHandler("done", function(obj, item) { Zotero_Browser.finishScraping(obj, item, saveLocation) });
+			this.page.translate.setHandler("done", function(obj, item) { Zotero_Browser.finishScraping(obj, item) });
 			this.page.hasBeenTranslated = true;
 		}
+		this.page.translate.clearHandlers("itemDone");
+		this.page.translate.setHandler("itemDone", function(obj, item) { Zotero_Browser.itemDone(obj, item, saveLocation) });
 		
 		this.page.translate.translate();
 	}

@@ -326,12 +326,7 @@
 	
 	<!-- Scrape Code -->
 	<hbox id="urlbar-icons">
-		<popupset>
-		  <popup id="zotero-scrape-popup" onpopupshowing="Zotero_Browser.showPopup(null, this)" onpopuphidden="Zotero_Browser.hidePopup(null, this)">
-		  </popup>
-		</popupset>
-
-		<image src="chrome://zotero/skin/treeitem-book.png" id="zotero-status-image" onclick="Zotero_Browser.scrapeThisPage()" position="1" hidden="true" context="zotero-scrape-popup" />
+		<image src="chrome://zotero/skin/treeitem-book.png" id="zotero-status-image" onclick="Zotero_Browser.scrapeThisPage()" position="1" hidden="true"/>
 	</hbox>
 	
 	<statusbar id="status-bar">
