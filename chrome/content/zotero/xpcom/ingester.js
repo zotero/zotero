@@ -304,7 +304,7 @@ Zotero.OpenURL = new function() {
 			co += _mapTag(item.place, "place", version);
 			co += _mapTag(item.publisher, "publisher", version)		
 			co += _mapTag(item.edition, "edition", version);
-			co += _mapTag(item.seriesTitle, "series", version);
+			co += _mapTag(item.series, "series", version);
 		} else if(item.itemType == "thesis" && version == "1.0") {
 			co += "&rft_val_fmt=info%3Aofi%2Ffmt%3Akev%3Amtx%3Adissertation";
 			
@@ -529,7 +529,7 @@ Zotero.OpenURL = new function() {
 			} else if(key == "rft.edition") {
 				item.edition = value;
 			} else if(key == "rft.series") {
-				item.seriesTitle = value;
+				item.series = value;
 			} else if(item.itemType == "thesis") {
 				if(key == "rft.inst") {
 					item.publisher = value;
