@@ -2,8 +2,8 @@
 <!ENTITY zotero.createdby "Skapt av:">
 <!ENTITY zotero.directors "Direksjonsmedlemmer:">
 <!ENTITY zotero.developers "Utviklere:">
-<!ENTITY zotero.about.localizations "">
-<!ENTITY zotero.about.icons "">
+<!ENTITY zotero.about.localizations "Localizations:">
+<!ENTITY zotero.about.icons "Icons:">
 <!ENTITY zotero.executiveProducer "Ledende produsent:">
 <!ENTITY zotero.thanks "Spesiell takk til:">
 <!ENTITY zotero.about.close "Close">

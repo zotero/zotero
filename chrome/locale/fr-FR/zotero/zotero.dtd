@@ -13,12 +13,12 @@
 <!ENTITY zotero.items.type_column "Type">
 <!ENTITY zotero.items.title_column "Titre">
 <!ENTITY zotero.items.creator_column "Créateur">
-<!ENTITY zotero.items.date_column "">
-<!ENTITY zotero.items.year_column "">
-<!ENTITY zotero.items.publisher_column "">
-<!ENTITY zotero.items.language_column "">
-<!ENTITY zotero.items.callNumber_column "">
-<!ENTITY zotero.items.repository_column "">
+<!ENTITY zotero.items.date_column "Date">
+<!ENTITY zotero.items.year_column "Year">
+<!ENTITY zotero.items.publisher_column "Publisher">
+<!ENTITY zotero.items.language_column "Language">
+<!ENTITY zotero.items.callNumber_column "Call Number">
+<!ENTITY zotero.items.repository_column "Repository">
 <!ENTITY zotero.items.rights_column "Autorisations">
 <!ENTITY zotero.items.dateAdded_column "Date d&apos;ajout">
 <!ENTITY zotero.items.dateModified_column "Date de modification">
@@ -28,7 +28,7 @@
 <!ENTITY zotero.items.menu.attach.note "Ajouter une note">
 <!ENTITY zotero.items.menu.attach.snapshot "Joindre une capture de la page courante">
 <!ENTITY zotero.items.menu.attach.link "Joindre le lien vers la page courante">
-<!ENTITY zotero.items.menu.duplicateItem "">
+<!ENTITY zotero.items.menu.duplicateItem "Duplicate Selected Item">
 
 <!ENTITY zotero.collections.name_column "Collections">
 
@@ -44,9 +44,9 @@
 <!ENTITY zotero.toolbar.import.label "Importer...">
 <!ENTITY zotero.toolbar.export.label "Exporter la bibliothèque...">
 <!ENTITY zotero.toolbar.preferences.label "Préférences...">
-<!ENTITY zotero.toolbar.documentation.label "">
+<!ENTITY zotero.toolbar.documentation.label "Documentation">
 <!ENTITY zotero.toolbar.about.label "À propos de Zotero">
-<!ENTITY zotero.toolbar.advancedSearch "">
+<!ENTITY zotero.toolbar.advancedSearch "Advanced Search">
 <!ENTITY zotero.toolbar.search.label "Recherche :">
 <!ENTITY zotero.toolbar.fullscreen.tooltip "Bascule du mode plein écran">
 <!ENTITY zotero.toolbar.openURL.label "Localiser">
@@ -63,7 +63,7 @@
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Aucune balise à afficher">
 <!ENTITY zotero.tagSelector.filter "Filtre :">
-<!ENTITY zotero.tagSelector.showAutomatic "">
+<!ENTITY zotero.tagSelector.showAutomatic "Show automatic">
 <!ENTITY zotero.tagSelector.displayAll "Afficher toutes les balises">
 <!ENTITY zotero.tagSelector.selectVisible "Sélectionner ce qui est visible">
 <!ENTITY zotero.tagSelector.clearVisible "Désélectionner ce qui est visible">
@@ -82,7 +82,7 @@
 <!ENTITY zotero.bibliography.saveAsRTF.label "Enregistrer au format RTF">
 <!ENTITY zotero.bibliography.saveAsHTML.label "Enregistrer au format HTML">
 <!ENTITY zotero.bibliography.copyToClipboard.label "Copier dans le presse-papiers">
-<!ENTITY zotero.bibliography.macClipboardWarning "">
+<!ENTITY zotero.bibliography.macClipboardWarning "(Rich-text formatting will be lost.)">
 <!ENTITY zotero.bibliography.print.label "Imprimer">
 
 <!ENTITY zotero.integration.docPrefs.title "Préférences du document">
@@ -97,12 +97,12 @@
 <!ENTITY zotero.citation.paragraph "Paragraphe">
 <!ENTITY zotero.citation.line "Ligne">
 
-<!ENTITY zotero.annotate.toolbar.add.label "">
-<!ENTITY zotero.annotate.toolbar.collapse.label "">
-<!ENTITY zotero.annotate.toolbar.expand.label "">
-<!ENTITY zotero.annotate.toolbar.highlight.label "">
-<!ENTITY zotero.annotate.toolbar.unhighlight.label "">
+<!ENTITY zotero.annotate.toolbar.add.label "Add Annotation">
+<!ENTITY zotero.annotate.toolbar.collapse.label "Collapse All Annotations">
+<!ENTITY zotero.annotate.toolbar.expand.label "Expand All Annotations">
+<!ENTITY zotero.annotate.toolbar.highlight.label "Highlight Text">
+<!ENTITY zotero.annotate.toolbar.unhighlight.label "Unhighlight Text">
 
-<!ENTITY zotero.integration.prefs.displayAs.label "">
-<!ENTITY zotero.integration.prefs.footnotes.label "">
-<!ENTITY zotero.integration.prefs.endnotes.label "">
+<!ENTITY zotero.integration.prefs.displayAs.label "Display Citations As:">
+<!ENTITY zotero.integration.prefs.footnotes.label "Footnotes">
+<!ENTITY zotero.integration.prefs.endnotes.label "Endnotes">

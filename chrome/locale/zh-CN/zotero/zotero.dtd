@@ -13,12 +13,12 @@
 <!ENTITY zotero.items.type_column "类型">
 <!ENTITY zotero.items.title_column "标题">
 <!ENTITY zotero.items.creator_column "作者">
-<!ENTITY zotero.items.date_column "">
-<!ENTITY zotero.items.year_column "">
-<!ENTITY zotero.items.publisher_column "">
-<!ENTITY zotero.items.language_column "">
-<!ENTITY zotero.items.callNumber_column "">
-<!ENTITY zotero.items.repository_column "">
+<!ENTITY zotero.items.date_column "Date">
+<!ENTITY zotero.items.year_column "Year">
+<!ENTITY zotero.items.publisher_column "Publisher">
+<!ENTITY zotero.items.language_column "Language">
+<!ENTITY zotero.items.callNumber_column "Call Number">
+<!ENTITY zotero.items.repository_column "Repository">
 <!ENTITY zotero.items.rights_column "权限">
 <!ENTITY zotero.items.dateAdded_column "添加时间">
 <!ENTITY zotero.items.dateModified_column "修改时间">
@@ -28,7 +28,7 @@
 <!ENTITY zotero.items.menu.attach.note "添加笔记">
 <!ENTITY zotero.items.menu.attach.snapshot "附加当前页的快照">
 <!ENTITY zotero.items.menu.attach.link "附加当前页的链接">
-<!ENTITY zotero.items.menu.duplicateItem "">
+<!ENTITY zotero.items.menu.duplicateItem "Duplicate Selected Item">
 
 <!ENTITY zotero.collections.name_column "分类">
 
@@ -44,9 +44,9 @@
 <!ENTITY zotero.toolbar.import.label "导入...">
 <!ENTITY zotero.toolbar.export.label "导出库...">
 <!ENTITY zotero.toolbar.preferences.label "配置...">
-<!ENTITY zotero.toolbar.documentation.label "">
+<!ENTITY zotero.toolbar.documentation.label "Documentation">
 <!ENTITY zotero.toolbar.about.label "关于 Zotero">
-<!ENTITY zotero.toolbar.advancedSearch "">
+<!ENTITY zotero.toolbar.advancedSearch "Advanced Search">
 <!ENTITY zotero.toolbar.search.label "检索:">
 <!ENTITY zotero.toolbar.fullscreen.tooltip "切换全屏模式">
 <!ENTITY zotero.toolbar.openURL.label "定位">
@@ -63,7 +63,7 @@
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "无标签可显示">
 <!ENTITY zotero.tagSelector.filter "过滤:">
-<!ENTITY zotero.tagSelector.showAutomatic "">
+<!ENTITY zotero.tagSelector.showAutomatic "Show automatic">
 <!ENTITY zotero.tagSelector.displayAll "显示所有标签">
 <!ENTITY zotero.tagSelector.selectVisible "选择可见的">
 <!ENTITY zotero.tagSelector.clearVisible "取消可见的选择">
@@ -82,7 +82,7 @@
 <!ENTITY zotero.bibliography.saveAsRTF.label "另存为 RTF">
 <!ENTITY zotero.bibliography.saveAsHTML.label "另存为 HTML">
 <!ENTITY zotero.bibliography.copyToClipboard.label "复制到剪贴板">
-<!ENTITY zotero.bibliography.macClipboardWarning "">
+<!ENTITY zotero.bibliography.macClipboardWarning "(Rich-text formatting will be lost.)">
 <!ENTITY zotero.bibliography.print.label "打印">
 
 <!ENTITY zotero.integration.docPrefs.title "文档选项">
@@ -97,12 +97,12 @@
 <!ENTITY zotero.citation.paragraph "段">
 <!ENTITY zotero.citation.line "行">
 
-<!ENTITY zotero.annotate.toolbar.add.label "">
-<!ENTITY zotero.annotate.toolbar.collapse.label "">
-<!ENTITY zotero.annotate.toolbar.expand.label "">
-<!ENTITY zotero.annotate.toolbar.highlight.label "">
-<!ENTITY zotero.annotate.toolbar.unhighlight.label "">
+<!ENTITY zotero.annotate.toolbar.add.label "Add Annotation">
+<!ENTITY zotero.annotate.toolbar.collapse.label "Collapse All Annotations">
+<!ENTITY zotero.annotate.toolbar.expand.label "Expand All Annotations">
+<!ENTITY zotero.annotate.toolbar.highlight.label "Highlight Text">
+<!ENTITY zotero.annotate.toolbar.unhighlight.label "Unhighlight Text">
 
-<!ENTITY zotero.integration.prefs.displayAs.label "">
-<!ENTITY zotero.integration.prefs.footnotes.label "">
-<!ENTITY zotero.integration.prefs.endnotes.label "">
+<!ENTITY zotero.integration.prefs.displayAs.label "Display Citations As:">
+<!ENTITY zotero.integration.prefs.footnotes.label "Footnotes">
+<!ENTITY zotero.integration.prefs.endnotes.label "Endnotes">

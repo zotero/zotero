@@ -6,7 +6,7 @@
 <!ENTITY zotero.search.joinMode.suffix "condition(s) suivante(s) :">
 
 <!ENTITY zotero.search.recursive.label "Rechercher dans les sous-dossiers">
-<!ENTITY zotero.search.noChildren "">
+<!ENTITY zotero.search.noChildren "Only show top-level items">
 
 <!ENTITY zotero.search.textModes.phrase "Expression">
 <!ENTITY zotero.search.textModes.phraseBinary "Expression (fichiers binaires incl.)">
@@ -17,6 +17,6 @@
 <!ENTITY zotero.search.date.units.months "mois">
 <!ENTITY zotero.search.date.units.years "années">
 
-<!ENTITY zotero.search.search "">
-<!ENTITY zotero.search.clear "">
-<!ENTITY zotero.search.saveSearch "">
+<!ENTITY zotero.search.search "Search">
+<!ENTITY zotero.search.clear "Clear">
+<!ENTITY zotero.search.saveSearch "Save Search">

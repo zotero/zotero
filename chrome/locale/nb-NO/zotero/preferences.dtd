@@ -8,19 +8,19 @@
 <!ENTITY zotero.preferences.position.below "under">
 <!ENTITY zotero.preferences.position.browser "nettleserinnhold">
 <!ENTITY zotero.preferences.statusBarIcon "Ikon på statuslinje:">
-<!ENTITY zotero.preferences.fontSize "">
-<!ENTITY zotero.preferences.fontSize.small "">
-<!ENTITY zotero.preferences.fontSize.medium "">
-<!ENTITY zotero.preferences.fontSize.large "">
+<!ENTITY zotero.preferences.fontSize "Font size:">
+<!ENTITY zotero.preferences.fontSize.small "Small">
+<!ENTITY zotero.preferences.fontSize.medium "Medium">
+<!ENTITY zotero.preferences.fontSize.large "Large">
 
-<!ENTITY zotero.preferences.miscellaneous "">
+<!ENTITY zotero.preferences.miscellaneous "Miscellaneous">
 <!ENTITY zotero.preferences.autoUpdate "Sjekk automatisk for oppdaterte scrapers">
 <!ENTITY zotero.preferences.updateNow "Oppdater nå">
 <!ENTITY zotero.preferences.reportTranslationFailure "Rapporter ødelagte nettstedoversettere">
 <!ENTITY zotero.preferences.parseEndnote "Bruk Zotero for nedlastede Endnotefiler">
 <!ENTITY zotero.preferences.automaticSnapshots "Ta automatisk snapshots når du lager elementer fra nettsider">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Lagre assosierte PDF-filer og andre filer når du lagrer elementer">
-<!ENTITY zotero.preferences.automaticTags "">
+<!ENTITY zotero.preferences.automaticTags "Automatically tag items with keywords and subject headings">
 
 <!ENTITY zotero.preferences.openurl.caption "Åpne URL">
 <!ENTITY zotero.preferences.openurl.custom "Egendefinert...">
@@ -28,11 +28,11 @@
 <!ENTITY zotero.preferences.openurl.version "Versjon:">
 
 
-<!ENTITY zotero.preferences.prefpane.export "">
+<!ENTITY zotero.preferences.prefpane.export "Export">
 
-<!ENTITY zotero.preferences.quickCopy.caption "">
-<!ENTITY zotero.preferences.quickCopy.outputFormat "">
-<!ENTITY zotero.preferences.quickCopy.macWarning "">
+<!ENTITY zotero.preferences.quickCopy.caption "Quick Copy">
+<!ENTITY zotero.preferences.quickCopy.outputFormat "Output Format:">
+<!ENTITY zotero.preferences.quickCopy.macWarning "Note that rich-text formatting will be lost on Mac OS X.">
 
 
 <!ENTITY zotero.preferences.prefpane.keys "Hurtigtaster">
@@ -44,14 +44,14 @@
 <!ENTITY zotero.preferences.keys.newItem "Lag et nytt element">
 <!ENTITY zotero.preferences.keys.newNote "Lag et nytt notat">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Slå taggvelgeren av/på">
-<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "">
+<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copy Selected Items to Clipboard">
 <!ENTITY zotero.preferences.keys.overrideGlobal "Forsøk å overstyre snarveier i konflikt">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Endringer gjelder kun for nye vinduer">
 
 
-<!ENTITY zotero.preferences.prefpane.advanced "">
+<!ENTITY zotero.preferences.prefpane.advanced "Advanced">
 
-<!ENTITY zotero.preferences.dataDir "">
-<!ENTITY zotero.preferences.dataDir.useProfile "">
-<!ENTITY zotero.preferences.dataDir.custom "">
-<!ENTITY zotero.preferences.dataDir.choose "">
+<!ENTITY zotero.preferences.dataDir "Storage Location">
+<!ENTITY zotero.preferences.dataDir.useProfile "Use Firefox profile directory">
+<!ENTITY zotero.preferences.dataDir.custom "Custom:">
+<!ENTITY zotero.preferences.dataDir.choose "Choose...">

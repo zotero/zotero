@@ -1,22 +1,42 @@
 <!ENTITY zotero.preferences.title "Зотеро поставке">
+
 <!ENTITY zotero.preferences.prefpane.general "Општа">
+
 <!ENTITY zotero.preferences.userInterface "Корисничко сучеље">
 <!ENTITY zotero.preferences.position "Прикажи Зотеро">
 <!ENTITY zotero.preferences.position.above "изнад">
 <!ENTITY zotero.preferences.position.below "испод">
 <!ENTITY zotero.preferences.position.browser "садржаја веб претраживача">
 <!ENTITY zotero.preferences.statusBarIcon "Икона статусне линије:">
+<!ENTITY zotero.preferences.fontSize "Font size:">
+<!ENTITY zotero.preferences.fontSize.small "Small">
+<!ENTITY zotero.preferences.fontSize.medium "Medium">
+<!ENTITY zotero.preferences.fontSize.large "Large">
+
+<!ENTITY zotero.preferences.miscellaneous "Miscellaneous">
 <!ENTITY zotero.preferences.autoUpdate "самостално провери за ажуриране стругаче">
 <!ENTITY zotero.preferences.updateNow "ажурирај сада">
 <!ENTITY zotero.preferences.reportTranslationFailure "Извести о грешкама у „преводиоцу странице“">
 <!ENTITY zotero.preferences.parseEndnote "Користи Зотеро за снимање EndNote датотека">
 <!ENTITY zotero.preferences.automaticSnapshots "Самостално узми снимак када се прави ставка са веб странице">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Самостално приложи повезане PDF и друге датотека када чуваш ставке">
+<!ENTITY zotero.preferences.automaticTags "Automatically tag items with keywords and subject headings">
+
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 <!ENTITY zotero.preferences.openurl.custom "Прилагођено...">
 <!ENTITY zotero.preferences.openurl.server "Разрешивач:">
 <!ENTITY zotero.preferences.openurl.version "Верзија:">
+
+
+<!ENTITY zotero.preferences.prefpane.export "Export">
+
+<!ENTITY zotero.preferences.quickCopy.caption "Quick Copy">
+<!ENTITY zotero.preferences.quickCopy.outputFormat "Output Format:">
+<!ENTITY zotero.preferences.quickCopy.macWarning "Note that rich-text formatting will be lost on Mac OS X.">
+
+
 <!ENTITY zotero.preferences.prefpane.keys "Пречице на тастатури">
+
 <!ENTITY zotero.preferences.keys.openZotero "Отвори/затвори Зотеро површ">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Укључи/искључи приказ преко целог екрана">
 <!ENTITY zotero.preferences.keys.library "Библиотека">
@@ -24,5 +44,14 @@
 <!ENTITY zotero.preferences.keys.newItem "Направи нову ставку">
 <!ENTITY zotero.preferences.keys.newNote "Направи нову белешку">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Искључи/укључи избирача ознаке">
+<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copy Selected Items to Clipboard">
 <!ENTITY zotero.preferences.keys.overrideGlobal "Покушај да премостиш сукобљене пречице">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Промене су постављене само у новом прозору">
+
+
+<!ENTITY zotero.preferences.prefpane.advanced "Advanced">
+
+<!ENTITY zotero.preferences.dataDir "Storage Location">
+<!ENTITY zotero.preferences.dataDir.useProfile "Use Firefox profile directory">
+<!ENTITY zotero.preferences.dataDir.custom "Custom:">
+<!ENTITY zotero.preferences.dataDir.choose "Choose...">

@@ -6,7 +6,7 @@
 <!ENTITY zotero.search.joinMode.suffix "от изброените:">
 
 <!ENTITY zotero.search.recursive.label "Търси в подпапките">
-<!ENTITY zotero.search.noChildren "">
+<!ENTITY zotero.search.noChildren "Only show top-level items">
 
 <!ENTITY zotero.search.textModes.phrase "Израз">
 <!ENTITY zotero.search.textModes.phraseBinary "Фраза (вкл. двоичните файлове)">
@@ -17,6 +17,6 @@
 <!ENTITY zotero.search.date.units.months "месеци">
 <!ENTITY zotero.search.date.units.years "години">
 
-<!ENTITY zotero.search.search "">
-<!ENTITY zotero.search.clear "">
-<!ENTITY zotero.search.saveSearch "">
+<!ENTITY zotero.search.search "Search">
+<!ENTITY zotero.search.clear "Clear">
+<!ENTITY zotero.search.saveSearch "Save Search">

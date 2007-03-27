@@ -8,19 +8,19 @@
 <!ENTITY zotero.preferences.position.below "下">
 <!ENTITY zotero.preferences.position.browser "にZoteroを表示する">
 <!ENTITY zotero.preferences.statusBarIcon "ステータスバーのアイコン">
-<!ENTITY zotero.preferences.fontSize "">
-<!ENTITY zotero.preferences.fontSize.small "">
-<!ENTITY zotero.preferences.fontSize.medium "">
-<!ENTITY zotero.preferences.fontSize.large "">
+<!ENTITY zotero.preferences.fontSize "Font size:">
+<!ENTITY zotero.preferences.fontSize.small "Small">
+<!ENTITY zotero.preferences.fontSize.medium "Medium">
+<!ENTITY zotero.preferences.fontSize.large "Large">
 
-<!ENTITY zotero.preferences.miscellaneous "">
+<!ENTITY zotero.preferences.miscellaneous "Miscellaneous">
 <!ENTITY zotero.preferences.autoUpdate "スクレーパのアップデートを自動的にチェックする">
 <!ENTITY zotero.preferences.updateNow "アップデート">
 <!ENTITY zotero.preferences.reportTranslationFailure "壊れたスクレーパを報告する">
 <!ENTITY zotero.preferences.parseEndnote "ダウンロードされたEndNoteファイルをZoteroで開く">
 <!ENTITY zotero.preferences.automaticSnapshots "ウェブページのアイテムを作成するときに自動的にスナップショットを作成する">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "アイテムを作成するときに自動的に関連PDFや他のファイルを添付する">
-<!ENTITY zotero.preferences.automaticTags "">
+<!ENTITY zotero.preferences.automaticTags "Automatically tag items with keywords and subject headings">
 
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 <!ENTITY zotero.preferences.openurl.custom "カスタム...">
@@ -28,11 +28,11 @@
 <!ENTITY zotero.preferences.openurl.version "バージョン：">
 
 
-<!ENTITY zotero.preferences.prefpane.export "">
+<!ENTITY zotero.preferences.prefpane.export "Export">
 
-<!ENTITY zotero.preferences.quickCopy.caption "">
-<!ENTITY zotero.preferences.quickCopy.outputFormat "">
-<!ENTITY zotero.preferences.quickCopy.macWarning "">
+<!ENTITY zotero.preferences.quickCopy.caption "Quick Copy">
+<!ENTITY zotero.preferences.quickCopy.outputFormat "Output Format:">
+<!ENTITY zotero.preferences.quickCopy.macWarning "Note that rich-text formatting will be lost on Mac OS X.">
 
 
 <!ENTITY zotero.preferences.prefpane.keys "ショートカットキー">
@@ -44,14 +44,14 @@
 <!ENTITY zotero.preferences.keys.newItem "新規アイテムを作成">
 <!ENTITY zotero.preferences.keys.newNote "新規メモを作成">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "タグ・セレクターを表示">
-<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "">
+<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copy Selected Items to Clipboard">
 <!ENTITY zotero.preferences.keys.overrideGlobal "矛盾するショートカットを上書く">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "変更を有効にするために、新規画面を開いてください">
 
 
-<!ENTITY zotero.preferences.prefpane.advanced "">
+<!ENTITY zotero.preferences.prefpane.advanced "Advanced">
 
-<!ENTITY zotero.preferences.dataDir "">
-<!ENTITY zotero.preferences.dataDir.useProfile "">
-<!ENTITY zotero.preferences.dataDir.custom "">
-<!ENTITY zotero.preferences.dataDir.choose "">
+<!ENTITY zotero.preferences.dataDir "Storage Location">
+<!ENTITY zotero.preferences.dataDir.useProfile "Use Firefox profile directory">
+<!ENTITY zotero.preferences.dataDir.custom "Custom:">
+<!ENTITY zotero.preferences.dataDir.choose "Choose...">

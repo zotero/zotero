@@ -8,19 +8,19 @@
 <!ENTITY zotero.preferences.position.below "低於">
 <!ENTITY zotero.preferences.position.browser "瀏灠器內容">
 <!ENTITY zotero.preferences.statusBarIcon "狀態列圖標：">
-<!ENTITY zotero.preferences.fontSize "">
-<!ENTITY zotero.preferences.fontSize.small "">
-<!ENTITY zotero.preferences.fontSize.medium "">
-<!ENTITY zotero.preferences.fontSize.large "">
+<!ENTITY zotero.preferences.fontSize "Font size:">
+<!ENTITY zotero.preferences.fontSize.small "Small">
+<!ENTITY zotero.preferences.fontSize.medium "Medium">
+<!ENTITY zotero.preferences.fontSize.large "Large">
 
-<!ENTITY zotero.preferences.miscellaneous "">
+<!ENTITY zotero.preferences.miscellaneous "Miscellaneous">
 <!ENTITY zotero.preferences.autoUpdate "自動檢查更新了的刮錄器">
 <!ENTITY zotero.preferences.updateNow "立刻更新">
 <!ENTITY zotero.preferences.reportTranslationFailure "報告故障了的網站翻譯器">
 <!ENTITY zotero.preferences.parseEndnote "用Zotero在下載的EndNote檔案">
 <!ENTITY zotero.preferences.automaticSnapshots "在從網頁建立項目時自動攝取快照">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "在貯存項目時自動附屬相關的PDF及其他檔案">
-<!ENTITY zotero.preferences.automaticTags "">
+<!ENTITY zotero.preferences.automaticTags "Automatically tag items with keywords and subject headings">
 
 <!ENTITY zotero.preferences.openurl.caption "開啟統源址">
 <!ENTITY zotero.preferences.openurl.custom "自行定義…">
@@ -28,11 +28,11 @@
 <!ENTITY zotero.preferences.openurl.version "版本：">
 
 
-<!ENTITY zotero.preferences.prefpane.export "">
+<!ENTITY zotero.preferences.prefpane.export "Export">
 
-<!ENTITY zotero.preferences.quickCopy.caption "">
-<!ENTITY zotero.preferences.quickCopy.outputFormat "">
-<!ENTITY zotero.preferences.quickCopy.macWarning "">
+<!ENTITY zotero.preferences.quickCopy.caption "Quick Copy">
+<!ENTITY zotero.preferences.quickCopy.outputFormat "Output Format:">
+<!ENTITY zotero.preferences.quickCopy.macWarning "Note that rich-text formatting will be lost on Mac OS X.">
 
 
 <!ENTITY zotero.preferences.prefpane.keys "快速鍵">
@@ -44,14 +44,14 @@
 <!ENTITY zotero.preferences.keys.newItem "建立一個新的項目">
 <!ENTITY zotero.preferences.keys.newNote "建立一個新的注記">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "切換標簽選擇器">
-<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "">
+<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copy Selected Items to Clipboard">
 <!ENTITY zotero.preferences.keys.overrideGlobal "嘗試蓋過相衝突的快速鍵">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "改變只會在新開的視窗中生效">
 
 
-<!ENTITY zotero.preferences.prefpane.advanced "">
+<!ENTITY zotero.preferences.prefpane.advanced "Advanced">
 
-<!ENTITY zotero.preferences.dataDir "">
-<!ENTITY zotero.preferences.dataDir.useProfile "">
-<!ENTITY zotero.preferences.dataDir.custom "">
-<!ENTITY zotero.preferences.dataDir.choose "">
+<!ENTITY zotero.preferences.dataDir "Storage Location">
+<!ENTITY zotero.preferences.dataDir.useProfile "Use Firefox profile directory">
+<!ENTITY zotero.preferences.dataDir.custom "Custom:">
+<!ENTITY zotero.preferences.dataDir.choose "Choose...">

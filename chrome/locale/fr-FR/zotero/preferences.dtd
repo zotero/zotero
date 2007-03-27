@@ -8,19 +8,19 @@
 <!ENTITY zotero.preferences.position.below "en bas">
 <!ENTITY zotero.preferences.position.browser "de la fenêtre du navigateur">
 <!ENTITY zotero.preferences.statusBarIcon "Icône de la barre d&apos;état :">
-<!ENTITY zotero.preferences.fontSize "">
-<!ENTITY zotero.preferences.fontSize.small "">
-<!ENTITY zotero.preferences.fontSize.medium "">
-<!ENTITY zotero.preferences.fontSize.large "">
+<!ENTITY zotero.preferences.fontSize "Font size:">
+<!ENTITY zotero.preferences.fontSize.small "Small">
+<!ENTITY zotero.preferences.fontSize.medium "Medium">
+<!ENTITY zotero.preferences.fontSize.large "Large">
 
-<!ENTITY zotero.preferences.miscellaneous "">
+<!ENTITY zotero.preferences.miscellaneous "Miscellaneous">
 <!ENTITY zotero.preferences.autoUpdate "Vérifier automatiquement les mises à jour des collecteurs de données">
 <!ENTITY zotero.preferences.updateNow "Mettre à jour maintenant">
 <!ENTITY zotero.preferences.reportTranslationFailure "Signaler les collecteurs de données en ligne défectueux">
 <!ENTITY zotero.preferences.parseEndnote "Utiliser Zotero pour les fichiers EndNote téléchargés">
 <!ENTITY zotero.preferences.automaticSnapshots "Faire une capture automatique de la page lors de la création d&apos;éléments à partir de pages Web">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Joindre automatiquement les fichers PDF associés lors de la sauvegarde d&apos;un élément">
-<!ENTITY zotero.preferences.automaticTags "">
+<!ENTITY zotero.preferences.automaticTags "Automatically tag items with keywords and subject headings">
 
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 <!ENTITY zotero.preferences.openurl.custom "Personnaliser...">
@@ -28,11 +28,11 @@
 <!ENTITY zotero.preferences.openurl.version "Version :">
 
 
-<!ENTITY zotero.preferences.prefpane.export "">
+<!ENTITY zotero.preferences.prefpane.export "Export">
 
-<!ENTITY zotero.preferences.quickCopy.caption "">
-<!ENTITY zotero.preferences.quickCopy.outputFormat "">
-<!ENTITY zotero.preferences.quickCopy.macWarning "">
+<!ENTITY zotero.preferences.quickCopy.caption "Quick Copy">
+<!ENTITY zotero.preferences.quickCopy.outputFormat "Output Format:">
+<!ENTITY zotero.preferences.quickCopy.macWarning "Note that rich-text formatting will be lost on Mac OS X.">
 
 
 <!ENTITY zotero.preferences.prefpane.keys "Raccourcis clavier">
@@ -44,14 +44,14 @@
 <!ENTITY zotero.preferences.keys.newItem "Créer un nouvel élément">
 <!ENTITY zotero.preferences.keys.newNote "Créer une nouvelle note">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Bascule du sélecteur de balise">
-<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "">
+<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copy Selected Items to Clipboard">
 <!ENTITY zotero.preferences.keys.overrideGlobal "Essayer de gérer les conflits de raccourcis">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Les modifications ne prendront effet que dans une nouvelle fenêtre">
 
 
-<!ENTITY zotero.preferences.prefpane.advanced "">
+<!ENTITY zotero.preferences.prefpane.advanced "Advanced">
 
-<!ENTITY zotero.preferences.dataDir "">
-<!ENTITY zotero.preferences.dataDir.useProfile "">
-<!ENTITY zotero.preferences.dataDir.custom "">
-<!ENTITY zotero.preferences.dataDir.choose "">
+<!ENTITY zotero.preferences.dataDir "Storage Location">
+<!ENTITY zotero.preferences.dataDir.useProfile "Use Firefox profile directory">
+<!ENTITY zotero.preferences.dataDir.custom "Custom:">
+<!ENTITY zotero.preferences.dataDir.choose "Choose...">

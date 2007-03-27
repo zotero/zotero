@@ -13,12 +13,12 @@
 <!ENTITY zotero.items.type_column "種類">
 <!ENTITY zotero.items.title_column "タイトル">
 <!ENTITY zotero.items.creator_column "作成者">
-<!ENTITY zotero.items.date_column "">
-<!ENTITY zotero.items.year_column "">
-<!ENTITY zotero.items.publisher_column "">
-<!ENTITY zotero.items.language_column "">
-<!ENTITY zotero.items.callNumber_column "">
-<!ENTITY zotero.items.repository_column "">
+<!ENTITY zotero.items.date_column "Date">
+<!ENTITY zotero.items.year_column "Year">
+<!ENTITY zotero.items.publisher_column "Publisher">
+<!ENTITY zotero.items.language_column "Language">
+<!ENTITY zotero.items.callNumber_column "Call Number">
+<!ENTITY zotero.items.repository_column "Repository">
 <!ENTITY zotero.items.rights_column "権利">
 <!ENTITY zotero.items.dateAdded_column "作成日時">
 <!ENTITY zotero.items.dateModified_column "更新日時">
@@ -28,7 +28,7 @@
 <!ENTITY zotero.items.menu.attach.note "メモを追加">
 <!ENTITY zotero.items.menu.attach.snapshot "本ページのスナップショットを添付">
 <!ENTITY zotero.items.menu.attach.link "本ページへのリンクを添付">
-<!ENTITY zotero.items.menu.duplicateItem "">
+<!ENTITY zotero.items.menu.duplicateItem "Duplicate Selected Item">
 
 <!ENTITY zotero.collections.name_column "コレクション">
 
@@ -44,9 +44,9 @@
 <!ENTITY zotero.toolbar.import.label "インポート">
 <!ENTITY zotero.toolbar.export.label "ライブラリーをエクスポート">
 <!ENTITY zotero.toolbar.preferences.label "設定">
-<!ENTITY zotero.toolbar.documentation.label "">
+<!ENTITY zotero.toolbar.documentation.label "Documentation">
 <!ENTITY zotero.toolbar.about.label "Zoteroについて">
-<!ENTITY zotero.toolbar.advancedSearch "">
+<!ENTITY zotero.toolbar.advancedSearch "Advanced Search">
 <!ENTITY zotero.toolbar.search.label "検索：">
 <!ENTITY zotero.toolbar.fullscreen.tooltip "全画面表示">
 <!ENTITY zotero.toolbar.openURL.label "所在確認">
@@ -63,7 +63,7 @@
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "タグがありません">
 <!ENTITY zotero.tagSelector.filter "フィルター:">
-<!ENTITY zotero.tagSelector.showAutomatic "">
+<!ENTITY zotero.tagSelector.showAutomatic "Show automatic">
 <!ENTITY zotero.tagSelector.displayAll "すべてのタグを表示">
 <!ENTITY zotero.tagSelector.selectVisible "可視タグを選択">
 <!ENTITY zotero.tagSelector.clearVisible "可視タグの選択を解除">
@@ -82,7 +82,7 @@
 <!ENTITY zotero.bibliography.saveAsRTF.label "RTFとして保存">
 <!ENTITY zotero.bibliography.saveAsHTML.label "HTMLとして保存">
 <!ENTITY zotero.bibliography.copyToClipboard.label "クリップボードにコピー">
-<!ENTITY zotero.bibliography.macClipboardWarning "">
+<!ENTITY zotero.bibliography.macClipboardWarning "(Rich-text formatting will be lost.)">
 <!ENTITY zotero.bibliography.print.label "印刷">
 
 <!ENTITY zotero.integration.docPrefs.title "ドキュメントの設定">
@@ -97,12 +97,12 @@
 <!ENTITY zotero.citation.paragraph "段落">
 <!ENTITY zotero.citation.line "行">
 
-<!ENTITY zotero.annotate.toolbar.add.label "">
-<!ENTITY zotero.annotate.toolbar.collapse.label "">
-<!ENTITY zotero.annotate.toolbar.expand.label "">
-<!ENTITY zotero.annotate.toolbar.highlight.label "">
-<!ENTITY zotero.annotate.toolbar.unhighlight.label "">
+<!ENTITY zotero.annotate.toolbar.add.label "Add Annotation">
+<!ENTITY zotero.annotate.toolbar.collapse.label "Collapse All Annotations">
+<!ENTITY zotero.annotate.toolbar.expand.label "Expand All Annotations">
+<!ENTITY zotero.annotate.toolbar.highlight.label "Highlight Text">
+<!ENTITY zotero.annotate.toolbar.unhighlight.label "Unhighlight Text">
 
-<!ENTITY zotero.integration.prefs.displayAs.label "">
-<!ENTITY zotero.integration.prefs.footnotes.label "">
-<!ENTITY zotero.integration.prefs.endnotes.label "">
+<!ENTITY zotero.integration.prefs.displayAs.label "Display Citations As:">
+<!ENTITY zotero.integration.prefs.footnotes.label "Footnotes">
+<!ENTITY zotero.integration.prefs.endnotes.label "Endnotes">

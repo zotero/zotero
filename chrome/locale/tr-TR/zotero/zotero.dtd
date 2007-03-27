@@ -13,12 +13,12 @@
 <!ENTITY zotero.items.type_column "Tür">
 <!ENTITY zotero.items.title_column "Başlık">
 <!ENTITY zotero.items.creator_column "Yaratan">
-<!ENTITY zotero.items.date_column "">
-<!ENTITY zotero.items.year_column "">
-<!ENTITY zotero.items.publisher_column "">
-<!ENTITY zotero.items.language_column "">
-<!ENTITY zotero.items.callNumber_column "">
-<!ENTITY zotero.items.repository_column "">
+<!ENTITY zotero.items.date_column "Date">
+<!ENTITY zotero.items.year_column "Year">
+<!ENTITY zotero.items.publisher_column "Publisher">
+<!ENTITY zotero.items.language_column "Language">
+<!ENTITY zotero.items.callNumber_column "Call Number">
+<!ENTITY zotero.items.repository_column "Repository">
 <!ENTITY zotero.items.rights_column "Telif">
 <!ENTITY zotero.items.dateAdded_column "Eklendiği Tarih">
 <!ENTITY zotero.items.dateModified_column "Değiştirildiği Tarih">
@@ -28,7 +28,7 @@
 <!ENTITY zotero.items.menu.attach.note "Not Ekle">
 <!ENTITY zotero.items.menu.attach.snapshot "Geçerli Sayfanın Görünümünü Ekle">
 <!ENTITY zotero.items.menu.attach.link "Geçerli Sayfaya Bağlantı Ekle">
-<!ENTITY zotero.items.menu.duplicateItem "">
+<!ENTITY zotero.items.menu.duplicateItem "Duplicate Selected Item">
 
 <!ENTITY zotero.collections.name_column "Dermeler">
 
@@ -44,9 +44,9 @@
 <!ENTITY zotero.toolbar.import.label "İçeri Aktar...">
 <!ENTITY zotero.toolbar.export.label "Kitaplığı Dışarı Aktar...">
 <!ENTITY zotero.toolbar.preferences.label "Tercihler...">
-<!ENTITY zotero.toolbar.documentation.label "">
+<!ENTITY zotero.toolbar.documentation.label "Documentation">
 <!ENTITY zotero.toolbar.about.label "Zotero Hakkında">
-<!ENTITY zotero.toolbar.advancedSearch "">
+<!ENTITY zotero.toolbar.advancedSearch "Advanced Search">
 <!ENTITY zotero.toolbar.search.label "Arama:">
 <!ENTITY zotero.toolbar.fullscreen.tooltip "Tam Ekran Moduna Geç">
 <!ENTITY zotero.toolbar.openURL.label "Yerini Belirle">
@@ -63,7 +63,7 @@
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Gösterilecek konu yok">
 <!ENTITY zotero.tagSelector.filter "Süzgeç:">
-<!ENTITY zotero.tagSelector.showAutomatic "">
+<!ENTITY zotero.tagSelector.showAutomatic "Show automatic">
 <!ENTITY zotero.tagSelector.displayAll "Tüm konuları göster">
 <!ENTITY zotero.tagSelector.selectVisible "Görülebiliri seçin">
 <!ENTITY zotero.tagSelector.clearVisible "Görülebiliri seçme">
@@ -82,7 +82,7 @@
 <!ENTITY zotero.bibliography.saveAsRTF.label "RTF olarak Kaydet">
 <!ENTITY zotero.bibliography.saveAsHTML.label "HTML olarak Kaydet">
 <!ENTITY zotero.bibliography.copyToClipboard.label "Pano&apos;ya Kopyala">
-<!ENTITY zotero.bibliography.macClipboardWarning "">
+<!ENTITY zotero.bibliography.macClipboardWarning "(Rich-text formatting will be lost.)">
 <!ENTITY zotero.bibliography.print.label "Yazdır">
 
 <!ENTITY zotero.integration.docPrefs.title "Döküman Tercihleri">
@@ -97,12 +97,12 @@
 <!ENTITY zotero.citation.paragraph "Paragraf">
 <!ENTITY zotero.citation.line "Satır">
 
-<!ENTITY zotero.annotate.toolbar.add.label "">
-<!ENTITY zotero.annotate.toolbar.collapse.label "">
-<!ENTITY zotero.annotate.toolbar.expand.label "">
-<!ENTITY zotero.annotate.toolbar.highlight.label "">
-<!ENTITY zotero.annotate.toolbar.unhighlight.label "">
+<!ENTITY zotero.annotate.toolbar.add.label "Add Annotation">
+<!ENTITY zotero.annotate.toolbar.collapse.label "Collapse All Annotations">
+<!ENTITY zotero.annotate.toolbar.expand.label "Expand All Annotations">
+<!ENTITY zotero.annotate.toolbar.highlight.label "Highlight Text">
+<!ENTITY zotero.annotate.toolbar.unhighlight.label "Unhighlight Text">
 
-<!ENTITY zotero.integration.prefs.displayAs.label "">
-<!ENTITY zotero.integration.prefs.footnotes.label "">
-<!ENTITY zotero.integration.prefs.endnotes.label "">
+<!ENTITY zotero.integration.prefs.displayAs.label "Display Citations As:">
+<!ENTITY zotero.integration.prefs.footnotes.label "Footnotes">
+<!ENTITY zotero.integration.prefs.endnotes.label "Endnotes">

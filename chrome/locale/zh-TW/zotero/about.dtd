@@ -2,8 +2,8 @@
 <!ENTITY zotero.createdby "創建人是：">
 <!ENTITY zotero.directors "指導人員：">
 <!ENTITY zotero.developers "發展人員：">
-<!ENTITY zotero.about.localizations "">
-<!ENTITY zotero.about.icons "">
+<!ENTITY zotero.about.localizations "Localizations:">
+<!ENTITY zotero.about.icons "Icons:">
 <!ENTITY zotero.executiveProducer "執行制作人：">
 <!ENTITY zotero.thanks "特別感謝：">
 <!ENTITY zotero.about.close "關閉">

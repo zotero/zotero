@@ -13,12 +13,12 @@
 <!ENTITY zotero.items.type_column "형식">
 <!ENTITY zotero.items.title_column "제목">
 <!ENTITY zotero.items.creator_column "창작자">
-<!ENTITY zotero.items.date_column "">
-<!ENTITY zotero.items.year_column "">
-<!ENTITY zotero.items.publisher_column "">
-<!ENTITY zotero.items.language_column "">
-<!ENTITY zotero.items.callNumber_column "">
-<!ENTITY zotero.items.repository_column "">
+<!ENTITY zotero.items.date_column "Date">
+<!ENTITY zotero.items.year_column "Year">
+<!ENTITY zotero.items.publisher_column "Publisher">
+<!ENTITY zotero.items.language_column "Language">
+<!ENTITY zotero.items.callNumber_column "Call Number">
+<!ENTITY zotero.items.repository_column "Repository">
 <!ENTITY zotero.items.rights_column "권리">
 <!ENTITY zotero.items.dateAdded_column "날짜 추가">
 <!ENTITY zotero.items.dateModified_column "날짜 변경">
@@ -28,7 +28,7 @@
 <!ENTITY zotero.items.menu.attach.note "노트 추가">
 <!ENTITY zotero.items.menu.attach.snapshot "현재 페이지의 스냅샷 첨부">
 <!ENTITY zotero.items.menu.attach.link "현재 페이지로 링크 첨부">
-<!ENTITY zotero.items.menu.duplicateItem "">
+<!ENTITY zotero.items.menu.duplicateItem "Duplicate Selected Item">
 
 <!ENTITY zotero.collections.name_column "수집품">
 
@@ -44,9 +44,9 @@
 <!ENTITY zotero.toolbar.import.label "불러오기...">
 <!ENTITY zotero.toolbar.export.label "라이브러리 내보내기...">
 <!ENTITY zotero.toolbar.preferences.label "환경설정...">
-<!ENTITY zotero.toolbar.documentation.label "">
+<!ENTITY zotero.toolbar.documentation.label "Documentation">
 <!ENTITY zotero.toolbar.about.label "Zotero 정보">
-<!ENTITY zotero.toolbar.advancedSearch "">
+<!ENTITY zotero.toolbar.advancedSearch "Advanced Search">
 <!ENTITY zotero.toolbar.search.label "검색:">
 <!ENTITY zotero.toolbar.fullscreen.tooltip "전체화면 모드 끄기/켜기">
 <!ENTITY zotero.toolbar.openURL.label "위치">
@@ -63,7 +63,7 @@
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "표시할 태그가 없음">
 <!ENTITY zotero.tagSelector.filter "필터:">
-<!ENTITY zotero.tagSelector.showAutomatic "">
+<!ENTITY zotero.tagSelector.showAutomatic "Show automatic">
 <!ENTITY zotero.tagSelector.displayAll "모든 태그 표시">
 <!ENTITY zotero.tagSelector.selectVisible "보이는 것들 선택">
 <!ENTITY zotero.tagSelector.clearVisible "보이는 것들 선택 해제">
@@ -82,7 +82,7 @@
 <!ENTITY zotero.bibliography.saveAsRTF.label "RTF로 저장">
 <!ENTITY zotero.bibliography.saveAsHTML.label "HTML로 저장">
 <!ENTITY zotero.bibliography.copyToClipboard.label "클립보드로 복사">
-<!ENTITY zotero.bibliography.macClipboardWarning "">
+<!ENTITY zotero.bibliography.macClipboardWarning "(Rich-text formatting will be lost.)">
 <!ENTITY zotero.bibliography.print.label "인쇄">
 
 <!ENTITY zotero.integration.docPrefs.title "문서 환경설정">
@@ -97,12 +97,12 @@
 <!ENTITY zotero.citation.paragraph "단락">
 <!ENTITY zotero.citation.line "행">
 
-<!ENTITY zotero.annotate.toolbar.add.label "">
-<!ENTITY zotero.annotate.toolbar.collapse.label "">
-<!ENTITY zotero.annotate.toolbar.expand.label "">
-<!ENTITY zotero.annotate.toolbar.highlight.label "">
-<!ENTITY zotero.annotate.toolbar.unhighlight.label "">
+<!ENTITY zotero.annotate.toolbar.add.label "Add Annotation">
+<!ENTITY zotero.annotate.toolbar.collapse.label "Collapse All Annotations">
+<!ENTITY zotero.annotate.toolbar.expand.label "Expand All Annotations">
+<!ENTITY zotero.annotate.toolbar.highlight.label "Highlight Text">
+<!ENTITY zotero.annotate.toolbar.unhighlight.label "Unhighlight Text">
 
-<!ENTITY zotero.integration.prefs.displayAs.label "">
-<!ENTITY zotero.integration.prefs.footnotes.label "">
-<!ENTITY zotero.integration.prefs.endnotes.label "">
+<!ENTITY zotero.integration.prefs.displayAs.label "Display Citations As:">
+<!ENTITY zotero.integration.prefs.footnotes.label "Footnotes">
+<!ENTITY zotero.integration.prefs.endnotes.label "Endnotes">

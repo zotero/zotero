@@ -6,7 +6,7 @@
 <!ENTITY zotero.search.joinMode.suffix "を満たす：">
 
 <!ENTITY zotero.search.recursive.label "サブフォルダを検索する">
-<!ENTITY zotero.search.noChildren "">
+<!ENTITY zotero.search.noChildren "Only show top-level items">
 
 <!ENTITY zotero.search.textModes.phrase "フレーズ">
 <!ENTITY zotero.search.textModes.phraseBinary "フレーズ (バイナリファイルを含む)">
@@ -17,6 +17,6 @@
 <!ENTITY zotero.search.date.units.months "ヶ月">
 <!ENTITY zotero.search.date.units.years "年間">
 
-<!ENTITY zotero.search.search "">
-<!ENTITY zotero.search.clear "">
-<!ENTITY zotero.search.saveSearch "">
+<!ENTITY zotero.search.search "Search">
+<!ENTITY zotero.search.clear "Clear">
+<!ENTITY zotero.search.saveSearch "Save Search">
