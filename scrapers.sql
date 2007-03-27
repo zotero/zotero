@@ -1,4 +1,4 @@
--- 206
+-- 207
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-03-27 00:43:34'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-03-27 03:18:44'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-03-21 15:26:54', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -10755,7 +10755,7 @@ function doExport() {
 	}
 }');
 
-REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '2007-03-23 19:25:00', 'American Psychological Association',
+REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '2007-03-27 03:18:44', 'American Psychological Association',
 '<?xml version="1.0" encoding="UTF-8"?>
 <?oxygen RNGSchema="../schema/trunk/csl.rnc" type="compact"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="author-date" xml:lang="en">
@@ -10789,7 +10789,7 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '2007-
         <choose>
           <editor/>
           <translator/>
-          <titles/>
+          <titles quotes="true"/>
         </choose>
       </substitute>
     </author>
@@ -10918,7 +10918,7 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '2007-
   </bibliography>
 </style>');
 
-REPLACE INTO csl VALUES('http://www.zotero.org/namespaces/CSL/chicago-author-date.csl', '2007-03-23 19:25:00', 'Chicago Manual of Style (Author-Date)',
+REPLACE INTO csl VALUES('http://www.zotero.org/namespaces/CSL/chicago-author-date.csl', '2007-03-27 03:18:44', 'Chicago Manual of Style (Author-Date)',
 '<?xml version="1.0" encoding="UTF-8"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="author-date" xml:lang="en">
 	<info>
@@ -10944,7 +10944,7 @@ REPLACE INTO csl VALUES('http://www.zotero.org/namespaces/CSL/chicago-author-dat
 					<editor/>
 					<translator/>
 					<titles relation="container" font-style="italic"/>
-					<titles/>
+					<titles quotes="true"/>
 				</choose>
 			</substitute>
 		</author>
@@ -11247,7 +11247,7 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/chicago-note.csl
   </citation>
 </style>');
 
-REPLACE INTO csl VALUES('http://www.zotero.org/namespaces/CSL/chicago-note-bibliography.csl', '2007-03-23 21:30:00', 'Chicago Manual of Style (Note with Bibliography)',
+REPLACE INTO csl VALUES('http://www.zotero.org/namespaces/CSL/chicago-note-bibliography.csl', '2007-03-27 03:18:44', 'Chicago Manual of Style (Note with Bibliography)',
 '<?xml version="1.0" encoding="UTF-8"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="note" xml:lang="en">
 	<info>
@@ -11273,7 +11273,7 @@ REPLACE INTO csl VALUES('http://www.zotero.org/namespaces/CSL/chicago-note-bibli
 					<editor/>
 					<translator/>
 					<titles relation="container" font-style="italic"/>
-					<titles/>
+					<titles quotes="true"/>
 				</choose>
 			</substitute>
 		</author>
@@ -11419,7 +11419,7 @@ REPLACE INTO csl VALUES('http://www.zotero.org/namespaces/CSL/chicago-note-bibli
 	</bibliography>
 </style>');
 
-REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/mla.csl', '2007-03-23 19:25:00', 'Modern Language Association',
+REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/mla.csl', '2007-03-27 03:18:44', 'Modern Language Association',
 '<?xml version="1.0" encoding="UTF-8"?>
 <?oxygen RNGSchema="../schema/trunk/csl.rnc" type="compact"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="author" xml:lang="en">
@@ -11450,7 +11450,7 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/mla.csl', '2007-
       <substitute>
         <choose>
           <editor/>
-          <titles/>
+          <titles quotes="true"/>
         </choose>
       </substitute>
     </author>

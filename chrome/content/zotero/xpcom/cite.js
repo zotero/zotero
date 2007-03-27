@@ -1215,11 +1215,18 @@ Zotero.CSL.prototype._getFieldValue = function(name, element, item, formattedStr
 		
 		for(var i in element.children) {
 			var child = element.children[i];
+			var string = null;
 			
 			if(child.name == "title") {	// for now, we only care about the
 									// "title" sub-element
 				if(!element.relation) {
-					string = this._getField(item, "title");
+					// preferentially use shortTitle if flagged
+					if(element.form && element.form == "short") {
+						string = this._getField(item, "shortTitle");
+					}
+					if(!string) {
+						string = this._getField(item, "title");
+					}
 				} else if(element.relation == "container") {
 					string = this._getField(item, "publicationTitle");
 				} else if(element.relation == "collection") {
@@ -1424,6 +1431,7 @@ Zotero.CSL.prototype._getFieldValue = function(name, element, item, formattedStr
 			// general prefix and suffix from the element it's substituting for
 			substituteElement.prefix = element.prefix;
 			substituteElement.suffix = element.suffix;
+			substituteElement.form = element.form;
 			// clear substitute element off of the element we're substituting
 			substituteElement.substitute = undefined;
 			
