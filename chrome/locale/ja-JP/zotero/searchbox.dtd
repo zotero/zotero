@@ -1,4 +1,4 @@
-<!ENTITY zotero.search.name "Name:">
+<!ENTITY zotero.search.name "検索式保存名:">
 
 <!ENTITY zotero.search.joinMode.prefix "次の条件">
 <!ENTITY zotero.search.joinMode.any "のいずれか">
@@ -6,12 +6,17 @@
 <!ENTITY zotero.search.joinMode.suffix "を満たす：">
 
 <!ENTITY zotero.search.recursive.label "サブフォルダを検索する">
+<!ENTITY zotero.search.noChildren "">
 
 <!ENTITY zotero.search.textModes.phrase "フレーズ">
 <!ENTITY zotero.search.textModes.phraseBinary "フレーズ (バイナリファイルを含む)">
 <!ENTITY zotero.search.textModes.regexp "正規表現">
 <!ENTITY zotero.search.textModes.regexpCS "正規表現（大文字小文字の区別あり）">
 
-<!ENTITY zotero.search.date.units.days "days">
-<!ENTITY zotero.search.date.units.months "months">
-<!ENTITY zotero.search.date.units.years "years">
+<!ENTITY zotero.search.date.units.days "日間">
+<!ENTITY zotero.search.date.units.months "ヶ月">
+<!ENTITY zotero.search.date.units.years "年間">
+
+<!ENTITY zotero.search.search "">
+<!ENTITY zotero.search.clear "">
+<!ENTITY zotero.search.saveSearch "">

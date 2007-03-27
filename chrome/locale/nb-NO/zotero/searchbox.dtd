@@ -1,4 +1,4 @@
-<!ENTITY zotero.search.name "Name:">
+<!ENTITY zotero.search.name "Navn:">
 
 <!ENTITY zotero.search.joinMode.prefix "Finn">
 <!ENTITY zotero.search.joinMode.any "hvilken som helst">
@@ -6,12 +6,17 @@
 <!ENTITY zotero.search.joinMode.suffix "av følgende:">
 
 <!ENTITY zotero.search.recursive.label "Søk i undermapper">
+<!ENTITY zotero.search.noChildren "">
 
 <!ENTITY zotero.search.textModes.phrase "Frase">
 <!ENTITY zotero.search.textModes.phraseBinary "Frase (inkl. binærfiler)">
 <!ENTITY zotero.search.textModes.regexp "Regexp">
 <!ENTITY zotero.search.textModes.regexpCS "Regexp (versalsensitiv)">
 
-<!ENTITY zotero.search.date.units.days "days">
-<!ENTITY zotero.search.date.units.months "months">
-<!ENTITY zotero.search.date.units.years "years">
+<!ENTITY zotero.search.date.units.days "dager">
+<!ENTITY zotero.search.date.units.months "måneder">
+<!ENTITY zotero.search.date.units.years "år">
+
+<!ENTITY zotero.search.search "">
+<!ENTITY zotero.search.clear "">
+<!ENTITY zotero.search.saveSearch "">

@@ -1,0 +1,22 @@
+<!ENTITY zotero.search.name "Nome:">
+
+<!ENTITY zotero.search.joinMode.prefix "Comparar">
+<!ENTITY zotero.search.joinMode.any "qualquer">
+<!ENTITY zotero.search.joinMode.all "tudo">
+<!ENTITY zotero.search.joinMode.suffix "do exemplo:">
+
+<!ENTITY zotero.search.recursive.label "Pesquisar subpastas">
+<!ENTITY zotero.search.noChildren "">
+
+<!ENTITY zotero.search.textModes.phrase "Frase">
+<!ENTITY zotero.search.textModes.phraseBinary "Frase (incluindo arquivos binários)">
+<!ENTITY zotero.search.textModes.regexp "Regexp">
+<!ENTITY zotero.search.textModes.regexpCS "Regexp (case-sensitive)">
+
+<!ENTITY zotero.search.date.units.days "dias">
+<!ENTITY zotero.search.date.units.months "meses">
+<!ENTITY zotero.search.date.units.years "anos">
+
+<!ENTITY zotero.search.search "">
+<!ENTITY zotero.search.clear "">
+<!ENTITY zotero.search.saveSearch "">

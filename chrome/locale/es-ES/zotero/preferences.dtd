@@ -1,0 +1,57 @@
+<!ENTITY zotero.preferences.title "Preferencias de Zotero">
+
+<!ENTITY zotero.preferences.prefpane.general "General">
+
+<!ENTITY zotero.preferences.userInterface "Interfaz de usuario">
+<!ENTITY zotero.preferences.position "Mostrar Zotero">
+<!ENTITY zotero.preferences.position.above "encima">
+<!ENTITY zotero.preferences.position.below "debajo">
+<!ENTITY zotero.preferences.position.browser "contenido del navegador">
+<!ENTITY zotero.preferences.statusBarIcon "Icono en la barra de estado:">
+<!ENTITY zotero.preferences.fontSize "">
+<!ENTITY zotero.preferences.fontSize.small "">
+<!ENTITY zotero.preferences.fontSize.medium "">
+<!ENTITY zotero.preferences.fontSize.large "">
+
+<!ENTITY zotero.preferences.miscellaneous "">
+<!ENTITY zotero.preferences.autoUpdate "Comprobar automáticamente si hay rascadores actualizados">
+<!ENTITY zotero.preferences.updateNow "Actualizarse ahora">
+<!ENTITY zotero.preferences.reportTranslationFailure "Informar de traductores de sitio incorrectos">
+<!ENTITY zotero.preferences.parseEndnote "Usar Zotero para los archivos de EndNote descargados">
+<!ENTITY zotero.preferences.automaticSnapshots "Tomar instantáneas automáticamente al crear ítems a partir de páginas Web">
+<!ENTITY zotero.preferences.downloadAssociatedFiles "Adjuntar automáticamente los archivos PDF y de otros tipos al guardar ítems">
+<!ENTITY zotero.preferences.automaticTags "">
+
+<!ENTITY zotero.preferences.openurl.caption "OpenURL">
+<!ENTITY zotero.preferences.openurl.custom "Personalizar...">
+<!ENTITY zotero.preferences.openurl.server "Resolutor:">
+<!ENTITY zotero.preferences.openurl.version "Versión:">
+
+
+<!ENTITY zotero.preferences.prefpane.export "">
+
+<!ENTITY zotero.preferences.quickCopy.caption "">
+<!ENTITY zotero.preferences.quickCopy.outputFormat "">
+<!ENTITY zotero.preferences.quickCopy.macWarning "">
+
+
+<!ENTITY zotero.preferences.prefpane.keys "Atajos de teclado">
+
+<!ENTITY zotero.preferences.keys.openZotero "Abrir/cerrar el panel de Zotero">
+<!ENTITY zotero.preferences.keys.toggleFullscreen "Conmutar el modo de pantalla completa">
+<!ENTITY zotero.preferences.keys.library "Biblioteca">
+<!ENTITY zotero.preferences.keys.quicksearch "Búsqueda rápida">
+<!ENTITY zotero.preferences.keys.newItem "Crear un nuevo ítem">
+<!ENTITY zotero.preferences.keys.newNote "Crear una nueva nota">
+<!ENTITY zotero.preferences.keys.toggleTagSelector "Conmutar el selector de marcas">
+<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "">
+<!ENTITY zotero.preferences.keys.overrideGlobal "Intentar eliminar los atajos contradictorios">
+<!ENTITY zotero.preferences.keys.changesTakeEffect "Los cambios tendrán efecto sólo en las ventanas nuevas">
+
+
+<!ENTITY zotero.preferences.prefpane.advanced "">
+
+<!ENTITY zotero.preferences.dataDir "">
+<!ENTITY zotero.preferences.dataDir.useProfile "">
+<!ENTITY zotero.preferences.dataDir.custom "">
+<!ENTITY zotero.preferences.dataDir.choose "">

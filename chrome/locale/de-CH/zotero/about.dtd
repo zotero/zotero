@@ -2,6 +2,8 @@
 <!ENTITY zotero.createdby "Erstellt von:">
 <!ENTITY zotero.directors "Direktoren:">
 <!ENTITY zotero.developers "Entwickler:">
+<!ENTITY zotero.about.localizations "">
+<!ENTITY zotero.about.icons "">
 <!ENTITY zotero.executiveProducer "Produktionsleiter:">
 <!ENTITY zotero.thanks "Besonderer Dank gebührt:">
 <!ENTITY zotero.about.close "Schliessen">

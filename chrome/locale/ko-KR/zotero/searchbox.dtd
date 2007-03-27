@@ -1,4 +1,4 @@
-<!ENTITY zotero.search.name "Name:">
+<!ENTITY zotero.search.name "이름:">
 
 <!ENTITY zotero.search.joinMode.prefix "다음 조건 중">
 <!ENTITY zotero.search.joinMode.any "아무거나">
@@ -6,12 +6,17 @@
 <!ENTITY zotero.search.joinMode.suffix "일치하는 것을 검색:">
 
 <!ENTITY zotero.search.recursive.label "하위폴더 검색">
+<!ENTITY zotero.search.noChildren "">
 
 <!ENTITY zotero.search.textModes.phrase "어구">
 <!ENTITY zotero.search.textModes.phraseBinary "어구(바이너리 파일 포함)">
 <!ENTITY zotero.search.textModes.regexp "정규표현식">
 <!ENTITY zotero.search.textModes.regexpCS "정규표현식 (대/소문자 구분)">
 
-<!ENTITY zotero.search.date.units.days "days">
-<!ENTITY zotero.search.date.units.months "months">
-<!ENTITY zotero.search.date.units.years "years">
+<!ENTITY zotero.search.date.units.days "일">
+<!ENTITY zotero.search.date.units.months "월">
+<!ENTITY zotero.search.date.units.years "년">
+
+<!ENTITY zotero.search.search "">
+<!ENTITY zotero.search.clear "">
+<!ENTITY zotero.search.saveSearch "">

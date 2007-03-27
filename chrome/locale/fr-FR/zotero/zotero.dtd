@@ -1,28 +1,34 @@
 <!ENTITY zotero.contextMenu.addTextToCurrentNote "Ajouter la sélection à la note Zotero">
 <!ENTITY zotero.contextMenu.addTextToNewNote "Créer une note Zotero à partir de la sélection">
-<!ENTITY zotero.contextMenu.saveLinkAsSnapshot "Save Link As Zotero Snapshot">
-<!ENTITY zotero.contextMenu.saveImageAsSnapshot "Save Image As Zotero Snapshot">
+<!ENTITY zotero.contextMenu.saveLinkAsSnapshot "Enregistrer le lien en tant que capture d&apos;écran Zotero">
+<!ENTITY zotero.contextMenu.saveImageAsSnapshot "Enregistrer l&apos;image en tant que capture d&apos;écran Zotero">
 
 <!ENTITY zotero.tabs.info.label "Info">
 <!ENTITY zotero.tabs.notes.label "Notes">
 <!ENTITY zotero.tabs.attachments.label "Fichiers joints">
 <!ENTITY zotero.tabs.tags.label "Balises">
 <!ENTITY zotero.tabs.related.label "Connexe">
-<!ENTITY zotero.notes.separate "Éditer dans une fenêtre séparée">
+<!ENTITY zotero.notes.separate "Éditer dans une nouvelle fenêtre">
 
 <!ENTITY zotero.items.type_column "Type">
 <!ENTITY zotero.items.title_column "Titre">
 <!ENTITY zotero.items.creator_column "Créateur">
-<!ENTITY zotero.items.source_column "Source">
+<!ENTITY zotero.items.date_column "">
+<!ENTITY zotero.items.year_column "">
+<!ENTITY zotero.items.publisher_column "">
+<!ENTITY zotero.items.language_column "">
+<!ENTITY zotero.items.callNumber_column "">
+<!ENTITY zotero.items.repository_column "">
 <!ENTITY zotero.items.rights_column "Autorisations">
-<!ENTITY zotero.items.numChildren_column "+">
 <!ENTITY zotero.items.dateAdded_column "Date d&apos;ajout">
 <!ENTITY zotero.items.dateModified_column "Date de modification">
+<!ENTITY zotero.items.numChildren_column "+">
 
-<!ENTITY zotero.items.menu.showInLibrary "Show in Library">
+<!ENTITY zotero.items.menu.showInLibrary "Montrer dans la bibliothèque">
 <!ENTITY zotero.items.menu.attach.note "Ajouter une note">
 <!ENTITY zotero.items.menu.attach.snapshot "Joindre une capture de la page courante">
 <!ENTITY zotero.items.menu.attach.link "Joindre le lien vers la page courante">
+<!ENTITY zotero.items.menu.duplicateItem "">
 
 <!ENTITY zotero.collections.name_column "Collections">
 
@@ -31,18 +37,18 @@
 <!ENTITY zotero.toolbar.newItemFromPage.label "Créer un nouvel élément à partir de la page courante">
 <!ENTITY zotero.toolbar.removeItem.label "Supprimer l&apos;élément...">
 <!ENTITY zotero.toolbar.newCollection.label "Nouvelle collection...">
-<!ENTITY zotero.toolbar.newSubcollection.label "New Subcollection...">
+<!ENTITY zotero.toolbar.newSubcollection.label "Nouvelle sous-collection...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Nouvelle recherche enregistrée...">
-<!ENTITY zotero.toolbar.tagSelector.label "Show/Hide Tag Selector">
+<!ENTITY zotero.toolbar.tagSelector.label "Montrer/cacher le sélecteur de balises">
 <!ENTITY zotero.toolbar.actions.label "Actions">
 <!ENTITY zotero.toolbar.import.label "Importer...">
 <!ENTITY zotero.toolbar.export.label "Exporter la bibliothèque...">
 <!ENTITY zotero.toolbar.preferences.label "Préférences...">
+<!ENTITY zotero.toolbar.documentation.label "">
 <!ENTITY zotero.toolbar.about.label "À propos de Zotero">
+<!ENTITY zotero.toolbar.advancedSearch "">
 <!ENTITY zotero.toolbar.search.label "Recherche :">
 <!ENTITY zotero.toolbar.fullscreen.tooltip "Bascule du mode plein écran">
-<!ENTITY zotero.toolbar.goToURL.label "Aperçu">
-<!ENTITY zotero.toolbar.goToURL.tooltip "Aller à cet élément en ligne">
 <!ENTITY zotero.toolbar.openURL.label "Localiser">
 <!ENTITY zotero.toolbar.openURL.tooltip "Rechercher dans votre bibliothèque locale">
 
@@ -55,14 +61,15 @@
 <!ENTITY zotero.toolbar.attachment.weblink "Enregistrer le lien vers la page courante">
 <!ENTITY zotero.toolbar.attachment.snapshot "Capturer la page courante">
 
-<!ENTITY zotero.tagSelector.noTagsToDisplay "No tags to display">
-<!ENTITY zotero.tagSelector.filter "Filter:">
-<!ENTITY zotero.tagSelector.displayAll "Display all tags">
-<!ENTITY zotero.tagSelector.selectVisible "Select visible">
-<!ENTITY zotero.tagSelector.clearVisible "Deselect visible">
-<!ENTITY zotero.tagSelector.clearAll "Deselect all">
-<!ENTITY zotero.tagSelector.renameTag "Rename Tag...">
-<!ENTITY zotero.tagSelector.deleteTag "Delete Tag...">
+<!ENTITY zotero.tagSelector.noTagsToDisplay "Aucune balise à afficher">
+<!ENTITY zotero.tagSelector.filter "Filtre :">
+<!ENTITY zotero.tagSelector.showAutomatic "">
+<!ENTITY zotero.tagSelector.displayAll "Afficher toutes les balises">
+<!ENTITY zotero.tagSelector.selectVisible "Sélectionner ce qui est visible">
+<!ENTITY zotero.tagSelector.clearVisible "Désélectionner ce qui est visible">
+<!ENTITY zotero.tagSelector.clearAll "Tout désélectionner">
+<!ENTITY zotero.tagSelector.renameTag "Renommer la balise...">
+<!ENTITY zotero.tagSelector.deleteTag "Effacer la balise...">
 
 <!ENTITY zotero.selectitems.title "Sélectionner des éléments">
 <!ENTITY zotero.selectitems.intro.label "Veuillez sélectionner les éléments à ajouter à votre bibliothèque">
@@ -75,6 +82,7 @@
 <!ENTITY zotero.bibliography.saveAsRTF.label "Enregistrer au format RTF">
 <!ENTITY zotero.bibliography.saveAsHTML.label "Enregistrer au format HTML">
 <!ENTITY zotero.bibliography.copyToClipboard.label "Copier dans le presse-papiers">
+<!ENTITY zotero.bibliography.macClipboardWarning "">
 <!ENTITY zotero.bibliography.print.label "Imprimer">
 
 <!ENTITY zotero.integration.docPrefs.title "Préférences du document">
@@ -88,3 +96,13 @@
 <!ENTITY zotero.citation.page "Page">
 <!ENTITY zotero.citation.paragraph "Paragraphe">
 <!ENTITY zotero.citation.line "Ligne">
+
+<!ENTITY zotero.annotate.toolbar.add.label "">
+<!ENTITY zotero.annotate.toolbar.collapse.label "">
+<!ENTITY zotero.annotate.toolbar.expand.label "">
+<!ENTITY zotero.annotate.toolbar.highlight.label "">
+<!ENTITY zotero.annotate.toolbar.unhighlight.label "">
+
+<!ENTITY zotero.integration.prefs.displayAs.label "">
+<!ENTITY zotero.integration.prefs.footnotes.label "">
+<!ENTITY zotero.integration.prefs.endnotes.label "">

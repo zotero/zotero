@@ -1,17 +1,13 @@
-<!ENTITY zotero.search.name "Name:">
-
-<!ENTITY zotero.search.joinMode.prefix "Подударај">
+<!ENTITY zotero.search.name "Име:">
+<!ENTITY zotero.search.joinMode.prefix "Подудара">
 <!ENTITY zotero.search.joinMode.any "било који">
 <!ENTITY zotero.search.joinMode.all "све">
 <!ENTITY zotero.search.joinMode.suffix "од следећих:">
-
 <!ENTITY zotero.search.recursive.label "Претражи подфасцикле">
-
-<!ENTITY zotero.search.textModes.phrase "Фраза">
-<!ENTITY zotero.search.textModes.phraseBinary "Фраза (укључујући бинарне датотеке)">
+<!ENTITY zotero.search.textModes.phrase "Израз">
+<!ENTITY zotero.search.textModes.phraseBinary "Израз (укључујући бинарне датотеке)">
 <!ENTITY zotero.search.textModes.regexp "Regexp - Регуларни изрази">
 <!ENTITY zotero.search.textModes.regexpCS "Regexp - Регуларни изрази (осетљив на велика/мала слова)">
-
-<!ENTITY zotero.search.date.units.days "days">
-<!ENTITY zotero.search.date.units.months "months">
-<!ENTITY zotero.search.date.units.years "years">
+<!ENTITY zotero.search.date.units.days "дани">
+<!ENTITY zotero.search.date.units.months "месеци">
+<!ENTITY zotero.search.date.units.years "године">

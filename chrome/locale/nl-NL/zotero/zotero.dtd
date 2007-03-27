@@ -1,68 +1,75 @@
 <!ENTITY zotero.contextMenu.addTextToCurrentNote "Voeg Selectie toe aan Zotero Aantekening">
 <!ENTITY zotero.contextMenu.addTextToNewNote "Maak Zotero Aantekening aan uit Selectie">
-<!ENTITY zotero.contextMenu.saveLinkAsSnapshot "Save Link As Zotero Snapshot">
-<!ENTITY zotero.contextMenu.saveImageAsSnapshot "Save Image As Zotero Snapshot">
+<!ENTITY zotero.contextMenu.saveLinkAsSnapshot "Link Opslaan Als Zotero Snapshot">
+<!ENTITY zotero.contextMenu.saveImageAsSnapshot "Afbeelding Opslaan Als Zotero Snapshot">
 
 <!ENTITY zotero.tabs.info.label "Info">
 <!ENTITY zotero.tabs.notes.label "Aantekeningen">
 <!ENTITY zotero.tabs.attachments.label "Bijlagen">
 <!ENTITY zotero.tabs.tags.label "Tags">
-<!ENTITY zotero.tabs.related.label "Kruisverwijzingen">
+<!ENTITY zotero.tabs.related.label "Relaties">
 <!ENTITY zotero.notes.separate "Bewerk in een nieuw venster">
 
 <!ENTITY zotero.items.type_column "Type">
 <!ENTITY zotero.items.title_column "Titel">
 <!ENTITY zotero.items.creator_column "Auteur">
-<!ENTITY zotero.items.source_column "Bron">
+<!ENTITY zotero.items.date_column "">
+<!ENTITY zotero.items.year_column "">
+<!ENTITY zotero.items.publisher_column "">
+<!ENTITY zotero.items.language_column "">
+<!ENTITY zotero.items.callNumber_column "">
+<!ENTITY zotero.items.repository_column "">
 <!ENTITY zotero.items.rights_column "Rechten">
-<!ENTITY zotero.items.numChildren_column "+">
 <!ENTITY zotero.items.dateAdded_column "Datum van Toevoeging">
 <!ENTITY zotero.items.dateModified_column "Datum van Laatste Bewerking">
+<!ENTITY zotero.items.numChildren_column "+">
 
-<!ENTITY zotero.items.menu.showInLibrary "Show in Library">
+<!ENTITY zotero.items.menu.showInLibrary "Toon in Bibliotheek">
 <!ENTITY zotero.items.menu.attach.note "Voeg Aantekening toe">
 <!ENTITY zotero.items.menu.attach.snapshot "Voeg Snapshot van Huidige Pagina toe">
 <!ENTITY zotero.items.menu.attach.link "Voeg Link naar Huidige Pagina toe">
+<!ENTITY zotero.items.menu.duplicateItem "">
 
 <!ENTITY zotero.collections.name_column "Collecties">
 
 <!ENTITY zotero.toolbar.newItem.label "Nieuw Item">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Meer">
-<!ENTITY zotero.toolbar.newItemFromPage.label "Maak Nieuw Item aan uit Huidige Pagina">
+<!ENTITY zotero.toolbar.newItemFromPage.label "Nieuw Item uit Huidige Pagina">
 <!ENTITY zotero.toolbar.removeItem.label "Verwijder Item...">
 <!ENTITY zotero.toolbar.newCollection.label "Nieuwe Collectie...">
-<!ENTITY zotero.toolbar.newSubcollection.label "New Subcollection...">
+<!ENTITY zotero.toolbar.newSubcollection.label "Nieuwe Subcollectie...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Nieuwe Bewaarde Zoekopdracht...">
-<!ENTITY zotero.toolbar.tagSelector.label "Show/Hide Tag Selector">
-<!ENTITY zotero.toolbar.actions.label "Handelingen">
+<!ENTITY zotero.toolbar.tagSelector.label "Tag-kiezer Weergeven/Verbergen">
+<!ENTITY zotero.toolbar.actions.label "Extra">
 <!ENTITY zotero.toolbar.import.label "Importeer...">
 <!ENTITY zotero.toolbar.export.label "Exporteer Bibliotheek...">
 <!ENTITY zotero.toolbar.preferences.label "Voorkeuren...">
+<!ENTITY zotero.toolbar.documentation.label "">
 <!ENTITY zotero.toolbar.about.label "Over Zotero">
+<!ENTITY zotero.toolbar.advancedSearch "">
 <!ENTITY zotero.toolbar.search.label "Zoek:">
 <!ENTITY zotero.toolbar.fullscreen.tooltip "Volledig Scherm">
-<!ENTITY zotero.toolbar.goToURL.label "Toon">
-<!ENTITY zotero.toolbar.goToURL.tooltip "Ga naar dit item online">
 <!ENTITY zotero.toolbar.openURL.label "Localiseer">
 <!ENTITY zotero.toolbar.openURL.tooltip "Vind in je plaatselijke bibliotheek">
 
-<!ENTITY zotero.item.add "Voeg een Item toe">
+<!ENTITY zotero.item.add "Toevoegen">
 <!ENTITY zotero.item.attachment.file.show "Toon Bestand">
 
 <!ENTITY zotero.toolbar.note.standalone "Nieuwe Losstaande Aantekening">
-<!ENTITY zotero.toolbar.attachment.linked "Link met Bestand...">
-<!ENTITY zotero.toolbar.attachment.add "Link met Kopie van Bestand...">
-<!ENTITY zotero.toolbar.attachment.weblink "Link met Huidige Pagina">
-<!ENTITY zotero.toolbar.attachment.snapshot "Neem Snapshot van Huidige Pagina">
+<!ENTITY zotero.toolbar.attachment.linked "Link naar Bestand...">
+<!ENTITY zotero.toolbar.attachment.add "Kopie van Bestand...">
+<!ENTITY zotero.toolbar.attachment.weblink "Link naar Huidige Pagina">
+<!ENTITY zotero.toolbar.attachment.snapshot "Snapshot van Huidige Pagina">
 
-<!ENTITY zotero.tagSelector.noTagsToDisplay "No tags to display">
+<!ENTITY zotero.tagSelector.noTagsToDisplay "Geen tags weer te geven">
 <!ENTITY zotero.tagSelector.filter "Filter:">
-<!ENTITY zotero.tagSelector.displayAll "Display all tags">
-<!ENTITY zotero.tagSelector.selectVisible "Select visible">
-<!ENTITY zotero.tagSelector.clearVisible "Deselect visible">
-<!ENTITY zotero.tagSelector.clearAll "Deselect all">
-<!ENTITY zotero.tagSelector.renameTag "Rename Tag...">
-<!ENTITY zotero.tagSelector.deleteTag "Delete Tag...">
+<!ENTITY zotero.tagSelector.showAutomatic "">
+<!ENTITY zotero.tagSelector.displayAll "Toon alle tags">
+<!ENTITY zotero.tagSelector.selectVisible "Selecteer zichtbare tags">
+<!ENTITY zotero.tagSelector.clearVisible "Selectie zichtbare tags ongedaan maken">
+<!ENTITY zotero.tagSelector.clearAll "Niets selecteren">
+<!ENTITY zotero.tagSelector.renameTag "Tag Wijzigen...">
+<!ENTITY zotero.tagSelector.deleteTag "Tag Verwijderen...">
 
 <!ENTITY zotero.selectitems.title "Selecteer Items">
 <!ENTITY zotero.selectitems.intro.label "Selecteer Items die je aan de bibliotheek wil toevoegen">
@@ -75,6 +82,7 @@
 <!ENTITY zotero.bibliography.saveAsRTF.label "Bewaar als RTF">
 <!ENTITY zotero.bibliography.saveAsHTML.label "Bewaar als HTML">
 <!ENTITY zotero.bibliography.copyToClipboard.label "Kopieer naar Plakbord">
+<!ENTITY zotero.bibliography.macClipboardWarning "">
 <!ENTITY zotero.bibliography.print.label "Afdrukken">
 
 <!ENTITY zotero.integration.docPrefs.title "Document Voorkeuren">
@@ -83,8 +91,18 @@
 
 <!ENTITY zotero.exportOptions.title "Exporteer...">
 <!ENTITY zotero.exportOptions.format.label "Formaat:">
-<!ENTITY zotero.exportOptions.translatorOptions.label "Vertaalopties">
+<!ENTITY zotero.exportOptions.translatorOptions.label "Opties">
 
 <!ENTITY zotero.citation.page "Pagina">
 <!ENTITY zotero.citation.paragraph "Paragraaf">
 <!ENTITY zotero.citation.line "Regel">
+
+<!ENTITY zotero.annotate.toolbar.add.label "">
+<!ENTITY zotero.annotate.toolbar.collapse.label "">
+<!ENTITY zotero.annotate.toolbar.expand.label "">
+<!ENTITY zotero.annotate.toolbar.highlight.label "">
+<!ENTITY zotero.annotate.toolbar.unhighlight.label "">
+
+<!ENTITY zotero.integration.prefs.displayAs.label "">
+<!ENTITY zotero.integration.prefs.footnotes.label "">
+<!ENTITY zotero.integration.prefs.endnotes.label "">

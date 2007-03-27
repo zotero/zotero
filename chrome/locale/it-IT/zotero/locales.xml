@@ -57,7 +57,7 @@
     <!-- SHORT ROLE FORMS -->
     <term name="editor" form="short">
       <single>cur.</single>
-      <multiple>curr.</multiple>
+      <multiple>cur.</multiple>
     </term>
     <term name="translator" form="short">
       <single>trad.</single>
@@ -67,6 +67,10 @@
     <!-- VERB ROLE FORMS -->
     <term name="editor" form="verb">a cura di</term>
     <term name="translator" form="verb">tradotto da</term>
+    
+    <!-- SHORT VERB ROLE FORMS -->
+    <term name="editor" form="verb-short">cur. da</term>
+    <term name="translator" form="verb-short">trad. da</term>
     
     <!-- LONG MONTH FORMS -->
     <term name="month-01">Gennaio</term>

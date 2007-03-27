@@ -96,4 +96,7 @@
     <term name="month-11" form="short">11月</term>
     <term name="month-12" form="short">12月</term>
   </locale>
+</terms>    <term name="month-11" form="short">Nov</term>
+    <term name="month-12" form="short">Dec</term>
+  </locale>
 </terms>

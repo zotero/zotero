@@ -1,0 +1,22 @@
+<!ENTITY zotero.search.name "Име:">
+
+<!ENTITY zotero.search.joinMode.prefix "Съвпадение на">
+<!ENTITY zotero.search.joinMode.any "който и да е">
+<!ENTITY zotero.search.joinMode.all "всички">
+<!ENTITY zotero.search.joinMode.suffix "от изброените:">
+
+<!ENTITY zotero.search.recursive.label "Търси в подпапките">
+<!ENTITY zotero.search.noChildren "">
+
+<!ENTITY zotero.search.textModes.phrase "Израз">
+<!ENTITY zotero.search.textModes.phraseBinary "Фраза (вкл. двоичните файлове)">
+<!ENTITY zotero.search.textModes.regexp "Регулярен Израз">
+<!ENTITY zotero.search.textModes.regexpCS "Регулярен Израз (различаващ главни/малки булкви)">
+
+<!ENTITY zotero.search.date.units.days "дни">
+<!ENTITY zotero.search.date.units.months "месеци">
+<!ENTITY zotero.search.date.units.years "години">
+
+<!ENTITY zotero.search.search "">
+<!ENTITY zotero.search.clear "">
+<!ENTITY zotero.search.saveSearch "">

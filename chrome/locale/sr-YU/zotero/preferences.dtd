@@ -1,30 +1,28 @@
 <!ENTITY zotero.preferences.title "Зотеро поставке">
-
-<!ENTITY zotero.preferences.prefpane.general "General">
-<!ENTITY zotero.preferences.userInterface "User Interface">
-<!ENTITY zotero.preferences.position "Display Zotero">
+<!ENTITY zotero.preferences.prefpane.general "Општа">
+<!ENTITY zotero.preferences.userInterface "Корисничко сучеље">
+<!ENTITY zotero.preferences.position "Прикажи Зотеро">
 <!ENTITY zotero.preferences.position.above "изнад">
 <!ENTITY zotero.preferences.position.below "испод">
-<!ENTITY zotero.preferences.position.browser "Садржај разледача">
-<!ENTITY zotero.preferences.statusBarIcon "Status bar icon:">
-<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated scrapers">
-<!ENTITY zotero.preferences.updateNow "Update now">
-<!ENTITY zotero.preferences.reportTranslationFailure "Report broken site translators">
-<!ENTITY zotero.preferences.parseEndnote "Use Zotero for downloaded EndNote files">
-<!ENTITY zotero.preferences.automaticSnapshots "Automatically take snapshots when creating items from web pages">
-<!ENTITY zotero.preferences.downloadAssociatedFiles "Automatically attach associated PDFs and other files when saving items">
+<!ENTITY zotero.preferences.position.browser "садржаја веб претраживача">
+<!ENTITY zotero.preferences.statusBarIcon "Икона статусне линије:">
+<!ENTITY zotero.preferences.autoUpdate "самостално провери за ажуриране стругаче">
+<!ENTITY zotero.preferences.updateNow "ажурирај сада">
+<!ENTITY zotero.preferences.reportTranslationFailure "Извести о грешкама у „преводиоцу странице“">
+<!ENTITY zotero.preferences.parseEndnote "Користи Зотеро за снимање EndNote датотека">
+<!ENTITY zotero.preferences.automaticSnapshots "Самостално узми снимак када се прави ставка са веб странице">
+<!ENTITY zotero.preferences.downloadAssociatedFiles "Самостално приложи повезане PDF и друге датотека када чуваш ставке">
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
-<!ENTITY zotero.preferences.openurl.custom "Custom...">
+<!ENTITY zotero.preferences.openurl.custom "Прилагођено...">
 <!ENTITY zotero.preferences.openurl.server "Разрешивач:">
-<!ENTITY zotero.preferences.openurl.version "Издање:">
-
-<!ENTITY zotero.preferences.prefpane.keys "Shortcut Keys">
-<!ENTITY zotero.preferences.keys.openZotero "Open/Close Zotero Pane">
-<!ENTITY zotero.preferences.keys.toggleFullscreen "Toggle Fullscreen Mode">
-<!ENTITY zotero.preferences.keys.library "Library">
-<!ENTITY zotero.preferences.keys.quicksearch "Quick Search">
-<!ENTITY zotero.preferences.keys.newItem "Create a new item">
-<!ENTITY zotero.preferences.keys.newNote "Create a new note">
-<!ENTITY zotero.preferences.keys.toggleTagSelector "Toggle Tag Selector">
-<!ENTITY zotero.preferences.keys.overrideGlobal "Try to override conflicting shortcuts">
-<!ENTITY zotero.preferences.keys.changesTakeEffect "Changes take effect in new windows only">
+<!ENTITY zotero.preferences.openurl.version "Верзија:">
+<!ENTITY zotero.preferences.prefpane.keys "Пречице на тастатури">
+<!ENTITY zotero.preferences.keys.openZotero "Отвори/затвори Зотеро површ">
+<!ENTITY zotero.preferences.keys.toggleFullscreen "Укључи/искључи приказ преко целог екрана">
+<!ENTITY zotero.preferences.keys.library "Библиотека">
+<!ENTITY zotero.preferences.keys.quicksearch "Брза претрага">
+<!ENTITY zotero.preferences.keys.newItem "Направи нову ставку">
+<!ENTITY zotero.preferences.keys.newNote "Направи нову белешку">
+<!ENTITY zotero.preferences.keys.toggleTagSelector "Искључи/укључи избирача ознаке">
+<!ENTITY zotero.preferences.keys.overrideGlobal "Покушај да премостиш сукобљене пречице">
+<!ENTITY zotero.preferences.keys.changesTakeEffect "Промене су постављене само у новом прозору">

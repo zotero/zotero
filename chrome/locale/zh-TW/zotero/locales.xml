@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<terms xmlns="http://purl.org/net/xbiblio/csl">
+  <locale xml:lang="zh-TW">
+    <term name="in">在</term>
+    <term name="ibid">同上出處</term>
+    <term name="accessed">被取用</term>
+    <term name="retrieved">被取回</term>
+    <term name="from">從</term>
+    <term name="forthcoming">將來的</term>
+    <term name="references">參考資料</term>
+    <term name="no date">無日期</term>
+    <term name="and">及</term>
+    <term name="et-al">等人</term>
+    
+    <!-- LONG LOCATOR FORMS -->
+    <term name="page">
+      <single>頁</single>
+      <multiple>頁</multiple>
+    </term>
+    <term name="paragraph">
+      <single>段落</single>
+      <multiple>段落</multiple>
+    </term>
+    <term name="line">
+      <single>行</single>
+      <multiple>行</multiple>
+    </term>
+    <term name="volume">卷次</term>
+    <term name="issue">期號</term>
+    
+    <!-- SHORT LOCATOR FORMS -->
+    <term name="page" form="short">
+      <single>頁</single>
+      <multiple>頁</multiple>
+    </term>
+    <term name="paragraph" form="short">
+      <single>¶</single>
+      <multiple>¶¶</multiple>
+    </term>
+    <term name="line" form="short">
+      <single>行</single>
+      <multiple>行</multiple>
+    </term>
+    <term name="volume" form="short">卷</term>
+    <term name="issue" form="short">期</term>
+    
+    <!-- LONG ROLE FORMS -->
+    <term name="editor">
+      <single>編輯</single>
+      <multiple>編輯</multiple>
+    </term>
+    <term name="translator">
+      <single>翻譯</single>
+      <multiple>翻譯</multiple>
+    </term>
+    
+    <!-- SHORT ROLE FORMS -->
+    <term name="editor" form="short">
+      <single>編</single>
+      <multiple>編</multiple>
+    </term>
+    <term name="translator" form="short">
+      <single>譯</single>
+      <multiple>譯</multiple>
+    </term>
+    
+    <!-- VERB ROLE FORMS -->
+    <term name="editor" form="verb">編者是</term>
+    <term name="translator" form="verb">譯者是</term>
+    
+    <!-- SHORT VERB ROLE FORMS -->
+    <term name="editor" form="verb-short">編</term>
+    <term name="translator" form="verb-short">譯</term>
+    
+    <!-- LONG MONTH FORMS -->
+    <term name="month-01">一月</term>
+    <term name="month-02">二月</term>
+    <term name="month-03">三月</term>
+    <term name="month-04">四月</term>
+    <term name="month-05">五月</term>
+    <term name="month-06">六月</term>
+    <term name="month-07">七月</term>
+    <term name="month-08">八月</term>
+    <term name="month-09">九月</term>
+    <term name="month-10">十月</term>
+    <term name="month-11">十一月</term>
+    <term name="month-12">十二月</term>
+    
+    <!-- SHORT MONTH FORMS -->
+    <term name="month-01" form="short">1月</term>
+    <term name="month-02" form="short">2月</term>
+    <term name="month-03" form="short">3月</term>
+    <term name="month-04" form="short">4月</term>
+    <term name="month-05" form="short">5月</term>
+    <term name="month-06" form="short">6月</term>
+    <term name="month-07" form="short">7月</term>
+    <term name="month-08" form="short">8月</term>
+    <term name="month-09" form="short">9月</term>
+    <term name="month-10" form="short">10月</term>
+    <term name="month-11" form="short">11月</term>
+    <term name="month-12" form="short">12月</term>
+  </locale>
+</terms>

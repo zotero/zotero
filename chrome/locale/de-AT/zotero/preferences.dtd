@@ -1,24 +1,42 @@
 <!ENTITY zotero.preferences.title "Zotero-Einstellungen">
 
 <!ENTITY zotero.preferences.prefpane.general "General">
+
 <!ENTITY zotero.preferences.userInterface "User Interface">
 <!ENTITY zotero.preferences.position "Display Zotero">
 <!ENTITY zotero.preferences.position.above "über">
 <!ENTITY zotero.preferences.position.below "unter">
 <!ENTITY zotero.preferences.position.browser "Browser-Inhalt">
 <!ENTITY zotero.preferences.statusBarIcon "Status bar icon:">
+<!ENTITY zotero.preferences.fontSize "">
+<!ENTITY zotero.preferences.fontSize.small "">
+<!ENTITY zotero.preferences.fontSize.medium "">
+<!ENTITY zotero.preferences.fontSize.large "">
+
+<!ENTITY zotero.preferences.miscellaneous "">
 <!ENTITY zotero.preferences.autoUpdate "Automatically check for updated scrapers">
 <!ENTITY zotero.preferences.updateNow "Update now">
 <!ENTITY zotero.preferences.reportTranslationFailure "Report broken site translators">
 <!ENTITY zotero.preferences.parseEndnote "Use Zotero for downloaded EndNote files">
 <!ENTITY zotero.preferences.automaticSnapshots "Automatically take snapshots when creating items from web pages">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Automatically attach associated PDFs and other files when saving items">
+<!ENTITY zotero.preferences.automaticTags "">
+
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 <!ENTITY zotero.preferences.openurl.custom "Custom...">
 <!ENTITY zotero.preferences.openurl.server "Resolver:">
 <!ENTITY zotero.preferences.openurl.version "Version:">
 
+
+<!ENTITY zotero.preferences.prefpane.export "">
+
+<!ENTITY zotero.preferences.quickCopy.caption "">
+<!ENTITY zotero.preferences.quickCopy.outputFormat "">
+<!ENTITY zotero.preferences.quickCopy.macWarning "">
+
+
 <!ENTITY zotero.preferences.prefpane.keys "Shortcut Keys">
+
 <!ENTITY zotero.preferences.keys.openZotero "Open/Close Zotero Pane">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Toggle Fullscreen Mode">
 <!ENTITY zotero.preferences.keys.library "Library">
@@ -26,5 +44,14 @@
 <!ENTITY zotero.preferences.keys.newItem "Create a new item">
 <!ENTITY zotero.preferences.keys.newNote "Create a new note">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Toggle Tag Selector">
+<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "">
 <!ENTITY zotero.preferences.keys.overrideGlobal "Try to override conflicting shortcuts">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Changes take effect in new windows only">
+
+
+<!ENTITY zotero.preferences.prefpane.advanced "">
+
+<!ENTITY zotero.preferences.dataDir "">
+<!ENTITY zotero.preferences.dataDir.useProfile "">
+<!ENTITY zotero.preferences.dataDir.custom "">
+<!ENTITY zotero.preferences.dataDir.choose "">

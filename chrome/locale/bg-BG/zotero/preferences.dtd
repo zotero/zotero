@@ -1,0 +1,57 @@
+<!ENTITY zotero.preferences.title "Настройки на Зотеро">
+
+<!ENTITY zotero.preferences.prefpane.general "Общи">
+
+<!ENTITY zotero.preferences.userInterface "Потребителски интерфейс">
+<!ENTITY zotero.preferences.position "Покaзване на Зотеро">
+<!ENTITY zotero.preferences.position.above "над">
+<!ENTITY zotero.preferences.position.below "под">
+<!ENTITY zotero.preferences.position.browser "съдържанието на браузера">
+<!ENTITY zotero.preferences.statusBarIcon "Икона в лентата за състоянието">
+<!ENTITY zotero.preferences.fontSize "">
+<!ENTITY zotero.preferences.fontSize.small "">
+<!ENTITY zotero.preferences.fontSize.medium "">
+<!ENTITY zotero.preferences.fontSize.large "">
+
+<!ENTITY zotero.preferences.miscellaneous "">
+<!ENTITY zotero.preferences.autoUpdate "Автоматична проверка за осъвременени екстрактори">
+<!ENTITY zotero.preferences.updateNow "Осъвремени сега">
+<!ENTITY zotero.preferences.reportTranslationFailure "Осведомяване за неработещи преводачи на страници">
+<!ENTITY zotero.preferences.parseEndnote "Използване Зотеро за свалените EndNote файлове">
+<!ENTITY zotero.preferences.automaticSnapshots "Автоматично правене на снимки когато се създават обекти от интернет страници">
+<!ENTITY zotero.preferences.downloadAssociatedFiles "Автоматично прикачвай асоциираните PDF и други файлове по време на записа на обектите">
+<!ENTITY zotero.preferences.automaticTags "">
+
+<!ENTITY zotero.preferences.openurl.caption "Отворяне на URL">
+<!ENTITY zotero.preferences.openurl.custom "Потребителси...">
+<!ENTITY zotero.preferences.openurl.server "Решаващ Сървър:">
+<!ENTITY zotero.preferences.openurl.version "Версия:">
+
+
+<!ENTITY zotero.preferences.prefpane.export "">
+
+<!ENTITY zotero.preferences.quickCopy.caption "">
+<!ENTITY zotero.preferences.quickCopy.outputFormat "">
+<!ENTITY zotero.preferences.quickCopy.macWarning "">
+
+
+<!ENTITY zotero.preferences.prefpane.keys "Клавишни Комбинации">
+
+<!ENTITY zotero.preferences.keys.openZotero "Отваряне/Затваряне на Панела на Зотеро">
+<!ENTITY zotero.preferences.keys.toggleFullscreen "Превключване в Режим на Цял Екран">
+<!ENTITY zotero.preferences.keys.library "Библиотека">
+<!ENTITY zotero.preferences.keys.quicksearch "Бързо Търсене">
+<!ENTITY zotero.preferences.keys.newItem "Създаване на нов обект">
+<!ENTITY zotero.preferences.keys.newNote "Създаване на нова бележка">
+<!ENTITY zotero.preferences.keys.toggleTagSelector "Превключване на Избора на Отметки">
+<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "">
+<!ENTITY zotero.preferences.keys.overrideGlobal "Приоритет в случай на конфликт в клавишните комбинации.">
+<!ENTITY zotero.preferences.keys.changesTakeEffect "Промените ще се отразят само в новотворените прозорци">
+
+
+<!ENTITY zotero.preferences.prefpane.advanced "">
+
+<!ENTITY zotero.preferences.dataDir "">
+<!ENTITY zotero.preferences.dataDir.useProfile "">
+<!ENTITY zotero.preferences.dataDir.custom "">
+<!ENTITY zotero.preferences.dataDir.choose "">

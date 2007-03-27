@@ -1,7 +1,7 @@
 <!ENTITY zotero.contextMenu.addTextToCurrentNote "添加所选内容至 Zotero 笔记">
 <!ENTITY zotero.contextMenu.addTextToNewNote "由所选内容创建 Zotero 笔记">
-<!ENTITY zotero.contextMenu.saveLinkAsSnapshot "Save Link As Zotero Snapshot">
-<!ENTITY zotero.contextMenu.saveImageAsSnapshot "Save Image As Zotero Snapshot">
+<!ENTITY zotero.contextMenu.saveLinkAsSnapshot "保存链接为 Zotero 快照">
+<!ENTITY zotero.contextMenu.saveImageAsSnapshot "保存图片为 Zotero 快照">
 
 <!ENTITY zotero.tabs.info.label "信息">
 <!ENTITY zotero.tabs.notes.label "笔记">
@@ -13,16 +13,22 @@
 <!ENTITY zotero.items.type_column "类型">
 <!ENTITY zotero.items.title_column "标题">
 <!ENTITY zotero.items.creator_column "作者">
-<!ENTITY zotero.items.source_column "源">
-<!ENTITY zotero.items.rights_column "Rights">
-<!ENTITY zotero.items.numChildren_column "+">
+<!ENTITY zotero.items.date_column "">
+<!ENTITY zotero.items.year_column "">
+<!ENTITY zotero.items.publisher_column "">
+<!ENTITY zotero.items.language_column "">
+<!ENTITY zotero.items.callNumber_column "">
+<!ENTITY zotero.items.repository_column "">
+<!ENTITY zotero.items.rights_column "权限">
 <!ENTITY zotero.items.dateAdded_column "添加时间">
 <!ENTITY zotero.items.dateModified_column "修改时间">
+<!ENTITY zotero.items.numChildren_column "+">
 
-<!ENTITY zotero.items.menu.showInLibrary "Show in Library">
+<!ENTITY zotero.items.menu.showInLibrary "在图书馆中显示">
 <!ENTITY zotero.items.menu.attach.note "添加笔记">
 <!ENTITY zotero.items.menu.attach.snapshot "附加当前页的快照">
 <!ENTITY zotero.items.menu.attach.link "附加当前页的链接">
+<!ENTITY zotero.items.menu.duplicateItem "">
 
 <!ENTITY zotero.collections.name_column "分类">
 
@@ -31,18 +37,18 @@
 <!ENTITY zotero.toolbar.newItemFromPage.label "由当前页新建条目">
 <!ENTITY zotero.toolbar.removeItem.label "移除条目...">
 <!ENTITY zotero.toolbar.newCollection.label "新建分类...">
-<!ENTITY zotero.toolbar.newSubcollection.label "New Subcollection...">
+<!ENTITY zotero.toolbar.newSubcollection.label "新建子类...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "新建检索...">
-<!ENTITY zotero.toolbar.tagSelector.label "Show/Hide Tag Selector">
+<!ENTITY zotero.toolbar.tagSelector.label "显示/隐藏标签选择器">
 <!ENTITY zotero.toolbar.actions.label "操作">
 <!ENTITY zotero.toolbar.import.label "导入...">
 <!ENTITY zotero.toolbar.export.label "导出库...">
 <!ENTITY zotero.toolbar.preferences.label "配置...">
+<!ENTITY zotero.toolbar.documentation.label "">
 <!ENTITY zotero.toolbar.about.label "关于 Zotero">
+<!ENTITY zotero.toolbar.advancedSearch "">
 <!ENTITY zotero.toolbar.search.label "检索:">
 <!ENTITY zotero.toolbar.fullscreen.tooltip "切换全屏模式">
-<!ENTITY zotero.toolbar.goToURL.label "查看">
-<!ENTITY zotero.toolbar.goToURL.tooltip "在线查看此项">
 <!ENTITY zotero.toolbar.openURL.label "定位">
 <!ENTITY zotero.toolbar.openURL.tooltip "在您的本地图书馆里查找">
 
@@ -55,14 +61,15 @@
 <!ENTITY zotero.toolbar.attachment.weblink "保存当前页的链接">
 <!ENTITY zotero.toolbar.attachment.snapshot "生成当前页的快照">
 
-<!ENTITY zotero.tagSelector.noTagsToDisplay "No tags to display">
-<!ENTITY zotero.tagSelector.filter "Filter:">
-<!ENTITY zotero.tagSelector.displayAll "Display all tags">
-<!ENTITY zotero.tagSelector.selectVisible "Select visible">
-<!ENTITY zotero.tagSelector.clearVisible "Deselect visible">
-<!ENTITY zotero.tagSelector.clearAll "Deselect all">
-<!ENTITY zotero.tagSelector.renameTag "Rename Tag...">
-<!ENTITY zotero.tagSelector.deleteTag "Delete Tag...">
+<!ENTITY zotero.tagSelector.noTagsToDisplay "无标签可显示">
+<!ENTITY zotero.tagSelector.filter "过滤:">
+<!ENTITY zotero.tagSelector.showAutomatic "">
+<!ENTITY zotero.tagSelector.displayAll "显示所有标签">
+<!ENTITY zotero.tagSelector.selectVisible "选择可见的">
+<!ENTITY zotero.tagSelector.clearVisible "取消可见的选择">
+<!ENTITY zotero.tagSelector.clearAll "取消全部选择">
+<!ENTITY zotero.tagSelector.renameTag "重命名标签...">
+<!ENTITY zotero.tagSelector.deleteTag "删除标签...">
 
 <!ENTITY zotero.selectitems.title "选择条目">
 <!ENTITY zotero.selectitems.intro.label "选择要添加至库的条目">
@@ -75,6 +82,7 @@
 <!ENTITY zotero.bibliography.saveAsRTF.label "另存为 RTF">
 <!ENTITY zotero.bibliography.saveAsHTML.label "另存为 HTML">
 <!ENTITY zotero.bibliography.copyToClipboard.label "复制到剪贴板">
+<!ENTITY zotero.bibliography.macClipboardWarning "">
 <!ENTITY zotero.bibliography.print.label "打印">
 
 <!ENTITY zotero.integration.docPrefs.title "文档选项">
@@ -88,3 +96,13 @@
 <!ENTITY zotero.citation.page "页">
 <!ENTITY zotero.citation.paragraph "段">
 <!ENTITY zotero.citation.line "行">
+
+<!ENTITY zotero.annotate.toolbar.add.label "">
+<!ENTITY zotero.annotate.toolbar.collapse.label "">
+<!ENTITY zotero.annotate.toolbar.expand.label "">
+<!ENTITY zotero.annotate.toolbar.highlight.label "">
+<!ENTITY zotero.annotate.toolbar.unhighlight.label "">
+
+<!ENTITY zotero.integration.prefs.displayAs.label "">
+<!ENTITY zotero.integration.prefs.footnotes.label "">
+<!ENTITY zotero.integration.prefs.endnotes.label "">

@@ -6,6 +6,7 @@
 <!ENTITY zotero.search.joinMode.suffix "der folgenden:">
 
 <!ENTITY zotero.search.recursive.label "Unterverzeichnisse durchsuchen">
+<!ENTITY zotero.search.noChildren "">
 
 <!ENTITY zotero.search.textModes.phrase "Phrase">
 <!ENTITY zotero.search.textModes.phraseBinary "Phrase (inkl. Binärdatei)">
@@ -15,3 +16,7 @@
 <!ENTITY zotero.search.date.units.days "days">
 <!ENTITY zotero.search.date.units.months "months">
 <!ENTITY zotero.search.date.units.years "years">
+
+<!ENTITY zotero.search.search "">
+<!ENTITY zotero.search.clear "">
+<!ENTITY zotero.search.saveSearch "">

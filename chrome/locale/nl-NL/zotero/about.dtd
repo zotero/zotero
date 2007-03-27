@@ -2,6 +2,8 @@
 <!ENTITY zotero.createdby "Gemaakt door:">
 <!ENTITY zotero.directors "Onder toezicht van:">
 <!ENTITY zotero.developers "Ontwikkelaars:">
+<!ENTITY zotero.about.localizations "">
+<!ENTITY zotero.about.icons "">
 <!ENTITY zotero.executiveProducer "Uitvoerend Producent:">
 <!ENTITY zotero.thanks "Met speciale dank aan:">
 <!ENTITY zotero.about.close "Sluiten">

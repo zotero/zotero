@@ -1,0 +1,22 @@
+<!ENTITY zotero.search.name "名稱：">
+
+<!ENTITY zotero.search.joinMode.prefix "比對">
+<!ENTITY zotero.search.joinMode.any "任一個">
+<!ENTITY zotero.search.joinMode.all "全部">
+<!ENTITY zotero.search.joinMode.suffix "下列的：">
+
+<!ENTITY zotero.search.recursive.label "搜尋子目錄">
+<!ENTITY zotero.search.noChildren "">
+
+<!ENTITY zotero.search.textModes.phrase "詞語">
+<!ENTITY zotero.search.textModes.phraseBinary "詞語【含非文字檔】">
+<!ENTITY zotero.search.textModes.regexp "正規表達式">
+<!ENTITY zotero.search.textModes.regexpCS "正規表達式【區分大小寫】">
+
+<!ENTITY zotero.search.date.units.days "日">
+<!ENTITY zotero.search.date.units.months "月">
+<!ENTITY zotero.search.date.units.years "年">
+
+<!ENTITY zotero.search.search "">
+<!ENTITY zotero.search.clear "">
+<!ENTITY zotero.search.saveSearch "">

@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<terms xmlns="http://purl.org/net/xbiblio/csl">
+  <locale xml:lang="tr">
+    <term name="in">içinde</term>
+    <term name="ibid">ibid</term>
+    <term name="accessed">eriþildi</term>
+    <term name="retrieved">eriþildi</term>
+    <term name="from">den</term>
+    <term name="forthcoming">gelecek</term>
+    <term name="references">referans</term>
+    <term name="no date">tarih yok</term>
+    <term name="and">ve</term>
+    <term name="et-al">ve dið.</term>
+    
+    <!-- LONG LOCATOR FORMS -->
+    <term name="page">
+      <single>sayfa</single>
+      <multiple>sayfalar</multiple>
+    </term>
+    <term name="paragraph">
+      <single>paragraf</single>
+      <multiple>paragraf</multiple>
+    </term>
+    <term name="line">
+      <single>satýr</single>
+      <multiple>satýr</multiple>
+    </term>
+    <term name="volume">cilt</term>
+    <term name="issue">sayý</term>
+    
+    <!-- SHORT LOCATOR FORMS -->
+    <term name="page" form="short">
+      <single>p</single>
+      <multiple>pp</multiple>
+    </term>
+    <term name="paragraph" form="short">
+      <single>Â¶</single>
+      <multiple>Â¶Â¶</multiple>
+    </term>
+    <term name="line" form="short">
+      <single>satýr</single>
+      <multiple>satýr</multiple>
+    </term>
+    <term name="volume" form="short">cilt</term>
+    <term name="issue" form="short">sayý</term>
+    
+    <!-- LONG ROLE FORMS -->
+    <term name="editor">
+      <single>editör</single>
+      <multiple>editörler</multiple>
+    </term>
+    <term name="translator">
+      <single>çevirmen</single>
+      <multiple>çevirmenler</multiple>
+    </term>
+    
+    <!-- SHORT ROLE FORMS -->
+    <term name="editor" form="short">
+      <single>ed</single>
+      <multiple>ed</multiple>
+    </term>
+    <term name="translator" form="short">
+      <single>çev</single>
+      <multiple>çev</multiple>
+    </term>
+    
+    <!-- VERB ROLE FORMS -->
+    <term name="editor" form="verb">editör</term>
+    <term name="translator" form="verb">çeviren</term>
+    
+    <!-- SHORT VERB ROLE FORMS -->
+    <term name="editor" form="verb-short">ed</term>
+    <term name="translator" form="verb-short">çev</term>
+    
+    <!-- LONG MONTH FORMS -->
+    <term name="month-01">Ocak</term>
+    <term name="month-02">Þubat</term>
+    <term name="month-03">Mart</term>
+    <term name="month-04">Nisan</term>
+    <term name="month-05">Mayýs</term>
+    <term name="month-06">Haziran</term>
+    <term name="month-07">Temmuz</term>
+    <term name="month-08">Aðustos</term>
+    <term name="month-09">Eylül</term>
+    <term name="month-10">Ekim</term>
+    <term name="month-11">Kasým</term>
+    <term name="month-12">Aralýk</term>
+    
+    <!-- SHORT MONTH FORMS -->
+    <term name="month-01" form="short">Oca</term>
+    <term name="month-02" form="short">Þub</term>
+    <term name="month-03" form="short">Mar</term>
+    <term name="month-04" form="short">Nis</term>
+    <term name="month-05" form="short">May</term>
+    <term name="month-06" form="short">Haz</term>
+    <term name="month-07" form="short">Tem</term>
+    <term name="month-08" form="short">Aðu</term>
+    <term name="month-09" form="short">Eyl</term>
+    <term name="month-10" form="short">Eki</term>
+    <term name="month-11" form="short">Kas</term>
+    <term name="month-12" form="short">Ara</term>
+  </locale>
+</terms>

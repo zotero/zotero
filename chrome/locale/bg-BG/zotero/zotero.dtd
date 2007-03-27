@@ -1,0 +1,108 @@
+<!ENTITY zotero.contextMenu.addTextToCurrentNote "Добавяне Избраното към Бележка в Зотеро">
+<!ENTITY zotero.contextMenu.addTextToNewNote "Създаване на Обект и Бележка в Зотеро от Избраното.">
+<!ENTITY zotero.contextMenu.saveLinkAsSnapshot "Запазване на Връзката като Снимка в Зотеро">
+<!ENTITY zotero.contextMenu.saveImageAsSnapshot "Запазване на Изображението като Снимка в Зотеро">
+
+<!ENTITY zotero.tabs.info.label "Информация">
+<!ENTITY zotero.tabs.notes.label "Бележки">
+<!ENTITY zotero.tabs.attachments.label "Приложения">
+<!ENTITY zotero.tabs.tags.label "Отметки">
+<!ENTITY zotero.tabs.related.label "Близки">
+<!ENTITY zotero.notes.separate "Редактиране в отделен прозорец">
+
+<!ENTITY zotero.items.type_column "Тип">
+<!ENTITY zotero.items.title_column "Заглавие">
+<!ENTITY zotero.items.creator_column "Създател">
+<!ENTITY zotero.items.date_column "">
+<!ENTITY zotero.items.year_column "">
+<!ENTITY zotero.items.publisher_column "">
+<!ENTITY zotero.items.language_column "">
+<!ENTITY zotero.items.callNumber_column "">
+<!ENTITY zotero.items.repository_column "">
+<!ENTITY zotero.items.rights_column "Права">
+<!ENTITY zotero.items.dateAdded_column "Добавен на">
+<!ENTITY zotero.items.dateModified_column "Променен на">
+<!ENTITY zotero.items.numChildren_column "+">
+
+<!ENTITY zotero.items.menu.showInLibrary "Показване в библиотеката">
+<!ENTITY zotero.items.menu.attach.note "Добавяне на Бележка">
+<!ENTITY zotero.items.menu.attach.snapshot "Прилагане Снимка на Настоящата Страница">
+<!ENTITY zotero.items.menu.attach.link "Прилагане Връзка към Настоящата Страница">
+<!ENTITY zotero.items.menu.duplicateItem "">
+
+<!ENTITY zotero.collections.name_column "Колекции">
+
+<!ENTITY zotero.toolbar.newItem.label "Нов Обект">
+<!ENTITY zotero.toolbar.moreItemTypes.label "Още">
+<!ENTITY zotero.toolbar.newItemFromPage.label "Създаване на Нов Обект от Настоящата Страница">
+<!ENTITY zotero.toolbar.removeItem.label "Остраняване на Обект...">
+<!ENTITY zotero.toolbar.newCollection.label "Нова Колекция...">
+<!ENTITY zotero.toolbar.newSubcollection.label "Нова Подколекция...">
+<!ENTITY zotero.toolbar.newSavedSearch.label "Ново Запазено Търсене...">
+<!ENTITY zotero.toolbar.tagSelector.label "Показване/Скриване на Избора на Отментки">
+<!ENTITY zotero.toolbar.actions.label "Действия">
+<!ENTITY zotero.toolbar.import.label "Внос...">
+<!ENTITY zotero.toolbar.export.label "Износ на Библиотека...">
+<!ENTITY zotero.toolbar.preferences.label "Настройки...">
+<!ENTITY zotero.toolbar.documentation.label "">
+<!ENTITY zotero.toolbar.about.label "За Зотеро">
+<!ENTITY zotero.toolbar.advancedSearch "">
+<!ENTITY zotero.toolbar.search.label "Търсене:">
+<!ENTITY zotero.toolbar.fullscreen.tooltip "Превключване в Режим на Цял Ектран">
+<!ENTITY zotero.toolbar.openURL.label "Откриване">
+<!ENTITY zotero.toolbar.openURL.tooltip "Откриване през вашата локална библиотека">
+
+<!ENTITY zotero.item.add "Добавяне">
+<!ENTITY zotero.item.attachment.file.show "Показване на Файл">
+
+<!ENTITY zotero.toolbar.note.standalone "Нова Самостоятелна Бележка">
+<!ENTITY zotero.toolbar.attachment.linked "Връзка към Файл">
+<!ENTITY zotero.toolbar.attachment.add "Запазване на Копие от Файл">
+<!ENTITY zotero.toolbar.attachment.weblink "Запазване на Връзка към Настоящата Страница">
+<!ENTITY zotero.toolbar.attachment.snapshot "Снимка на Настоящата Страница">
+
+<!ENTITY zotero.tagSelector.noTagsToDisplay "Няма отметки, които да бъдат показани">
+<!ENTITY zotero.tagSelector.filter "Филтър:">
+<!ENTITY zotero.tagSelector.showAutomatic "">
+<!ENTITY zotero.tagSelector.displayAll "Покзване на всички отметки">
+<!ENTITY zotero.tagSelector.selectVisible "Избор на видимите">
+<!ENTITY zotero.tagSelector.clearVisible "Отказ на видимите">
+<!ENTITY zotero.tagSelector.clearAll "Отказ на всички">
+<!ENTITY zotero.tagSelector.renameTag "Преименуване на Отметката...">
+<!ENTITY zotero.tagSelector.deleteTag "Изтриване на Отметка...">
+
+<!ENTITY zotero.selectitems.title "Избрани Обекти">
+<!ENTITY zotero.selectitems.intro.label "Изберете кои обекти искате да добавите към Вашата библиотека">
+<!ENTITY zotero.selectitems.cancel.label "Отказ">
+<!ENTITY zotero.selectitems.select.label "OK">
+
+<!ENTITY zotero.bibliography.title "Създаване на Библиотека">
+<!ENTITY zotero.bibliography.style.label "Стил на Цитиране:">
+<!ENTITY zotero.bibliography.output.label "Изходящ Формат:">
+<!ENTITY zotero.bibliography.saveAsRTF.label "Записване като RTF">
+<!ENTITY zotero.bibliography.saveAsHTML.label "Записване като HTML">
+<!ENTITY zotero.bibliography.copyToClipboard.label "Копиране в Междинния Буфер">
+<!ENTITY zotero.bibliography.macClipboardWarning "">
+<!ENTITY zotero.bibliography.print.label "Печат">
+
+<!ENTITY zotero.integration.docPrefs.title "Настройки на Докумета">
+
+<!ENTITY zotero.progress.title "Напредък">
+
+<!ENTITY zotero.exportOptions.title "Износ...">
+<!ENTITY zotero.exportOptions.format.label "Формат:">
+<!ENTITY zotero.exportOptions.translatorOptions.label "Параметри на преводачите">
+
+<!ENTITY zotero.citation.page "Страница">
+<!ENTITY zotero.citation.paragraph "Параграф">
+<!ENTITY zotero.citation.line "Ред">
+
+<!ENTITY zotero.annotate.toolbar.add.label "">
+<!ENTITY zotero.annotate.toolbar.collapse.label "">
+<!ENTITY zotero.annotate.toolbar.expand.label "">
+<!ENTITY zotero.annotate.toolbar.highlight.label "">
+<!ENTITY zotero.annotate.toolbar.unhighlight.label "">
+
+<!ENTITY zotero.integration.prefs.displayAs.label "">
+<!ENTITY zotero.integration.prefs.footnotes.label "">
+<!ENTITY zotero.integration.prefs.endnotes.label "">

@@ -1,7 +1,7 @@
-<!ENTITY zotero.version "Издање">
-<!ENTITY zotero.createdby "Направио:">
+<!ENTITY zotero.version "верзија">
+<!ENTITY zotero.createdby "Направљена од стране:">
 <!ENTITY zotero.directors "Директори:">
-<!ENTITY zotero.developers "Аутори:">
-<!ENTITY zotero.executiveProducer "Руководиоц:">
+<!ENTITY zotero.developers "Програмери:">
+<!ENTITY zotero.executiveProducer "Извршни продуцент:">
 <!ENTITY zotero.thanks "Посебне захвалнице:">
 <!ENTITY zotero.about.close "Затвори">

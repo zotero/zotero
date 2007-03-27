@@ -13,16 +13,22 @@
 <!ENTITY zotero.items.type_column "Type">
 <!ENTITY zotero.items.title_column "Tittel">
 <!ENTITY zotero.items.creator_column "Skaper">
-<!ENTITY zotero.items.source_column "Kilde">
+<!ENTITY zotero.items.date_column "">
+<!ENTITY zotero.items.year_column "">
+<!ENTITY zotero.items.publisher_column "">
+<!ENTITY zotero.items.language_column "">
+<!ENTITY zotero.items.callNumber_column "">
+<!ENTITY zotero.items.repository_column "">
 <!ENTITY zotero.items.rights_column "Rettigheter">
-<!ENTITY zotero.items.numChildren_column "+">
 <!ENTITY zotero.items.dateAdded_column "Dato lagt til">
 <!ENTITY zotero.items.dateModified_column "Dato modifisert">
+<!ENTITY zotero.items.numChildren_column "+">
 
-<!ENTITY zotero.items.menu.showInLibrary "Show in Library">
-<!ENTITY zotero.items.menu.attach.note "Legg til Note">
+<!ENTITY zotero.items.menu.showInLibrary "Vis i bibliotek">
+<!ENTITY zotero.items.menu.attach.note "Legg til notat">
 <!ENTITY zotero.items.menu.attach.snapshot "Legg til snapshot av gjeldende side">
 <!ENTITY zotero.items.menu.attach.link "Legg til lenke til gjeldende side">
+<!ENTITY zotero.items.menu.duplicateItem "">
 
 <!ENTITY zotero.collections.name_column "Samlinger">
 
@@ -31,18 +37,18 @@
 <!ENTITY zotero.toolbar.newItemFromPage.label "Skap nytt element fra gjeldende side">
 <!ENTITY zotero.toolbar.removeItem.label "Slett element...">
 <!ENTITY zotero.toolbar.newCollection.label "Ny samling...">
-<!ENTITY zotero.toolbar.newSubcollection.label "New Subcollection...">
+<!ENTITY zotero.toolbar.newSubcollection.label "Ny undersamling...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Nytt lagret søk...">
-<!ENTITY zotero.toolbar.tagSelector.label "Show/Hide Tag Selector">
+<!ENTITY zotero.toolbar.tagSelector.label "Vis/skjul taggsamling">
 <!ENTITY zotero.toolbar.actions.label "Handlinger">
 <!ENTITY zotero.toolbar.import.label "Importer...">
 <!ENTITY zotero.toolbar.export.label "Eksporter bibliotek...">
 <!ENTITY zotero.toolbar.preferences.label "Innstillinger...">
+<!ENTITY zotero.toolbar.documentation.label "">
 <!ENTITY zotero.toolbar.about.label "Om Zotero">
+<!ENTITY zotero.toolbar.advancedSearch "">
 <!ENTITY zotero.toolbar.search.label "Søk:">
 <!ENTITY zotero.toolbar.fullscreen.tooltip "Velg fullskjermmodus">
-<!ENTITY zotero.toolbar.goToURL.label "Se">
-<!ENTITY zotero.toolbar.goToURL.tooltip "Gå til dette elementet online">
 <!ENTITY zotero.toolbar.openURL.label "Lokaliser">
 <!ENTITY zotero.toolbar.openURL.tooltip "Finn gjennom ditt lokale bibliotek">
 
@@ -55,14 +61,15 @@
 <!ENTITY zotero.toolbar.attachment.weblink "Lagre lenke til gjeldende side">
 <!ENTITY zotero.toolbar.attachment.snapshot "Lag snapshot av gjeldende side">
 
-<!ENTITY zotero.tagSelector.noTagsToDisplay "No tags to display">
+<!ENTITY zotero.tagSelector.noTagsToDisplay "Ingen tagger finnes">
 <!ENTITY zotero.tagSelector.filter "Filter:">
-<!ENTITY zotero.tagSelector.displayAll "Display all tags">
-<!ENTITY zotero.tagSelector.selectVisible "Select visible">
-<!ENTITY zotero.tagSelector.clearVisible "Deselect visible">
-<!ENTITY zotero.tagSelector.clearAll "Deselect all">
-<!ENTITY zotero.tagSelector.renameTag "Rename Tag...">
-<!ENTITY zotero.tagSelector.deleteTag "Delete Tag...">
+<!ENTITY zotero.tagSelector.showAutomatic "">
+<!ENTITY zotero.tagSelector.displayAll "Vis alle tagger">
+<!ENTITY zotero.tagSelector.selectVisible "Velg synlig">
+<!ENTITY zotero.tagSelector.clearVisible "Slipp synlig">
+<!ENTITY zotero.tagSelector.clearAll "Slipp alle">
+<!ENTITY zotero.tagSelector.renameTag "Gi nytt navn til tagg...">
+<!ENTITY zotero.tagSelector.deleteTag "Slett tagg...">
 
 <!ENTITY zotero.selectitems.title "Velg elementer">
 <!ENTITY zotero.selectitems.intro.label "Velg hvilke enheter du vil legge til biblioteket ditt">
@@ -75,6 +82,7 @@
 <!ENTITY zotero.bibliography.saveAsRTF.label "Lagre som RTF">
 <!ENTITY zotero.bibliography.saveAsHTML.label "Lagre som HTML">
 <!ENTITY zotero.bibliography.copyToClipboard.label "Kopier til utklippstavle">
+<!ENTITY zotero.bibliography.macClipboardWarning "">
 <!ENTITY zotero.bibliography.print.label "Skriv ut">
 
 <!ENTITY zotero.integration.docPrefs.title "Dokumentegenskaper">
@@ -88,3 +96,13 @@
 <!ENTITY zotero.citation.page "Side">
 <!ENTITY zotero.citation.paragraph "Paragraf">
 <!ENTITY zotero.citation.line "Linje">
+
+<!ENTITY zotero.annotate.toolbar.add.label "">
+<!ENTITY zotero.annotate.toolbar.collapse.label "">
+<!ENTITY zotero.annotate.toolbar.expand.label "">
+<!ENTITY zotero.annotate.toolbar.highlight.label "">
+<!ENTITY zotero.annotate.toolbar.unhighlight.label "">
+
+<!ENTITY zotero.integration.prefs.displayAs.label "">
+<!ENTITY zotero.integration.prefs.footnotes.label "">
+<!ENTITY zotero.integration.prefs.endnotes.label "">

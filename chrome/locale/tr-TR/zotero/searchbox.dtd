@@ -1,0 +1,22 @@
+<!ENTITY zotero.search.name "İsim:">
+
+<!ENTITY zotero.search.joinMode.prefix "Eşleştir">
+<!ENTITY zotero.search.joinMode.any "herhangi">
+<!ENTITY zotero.search.joinMode.all "tümü">
+<!ENTITY zotero.search.joinMode.suffix "belirtilen">
+
+<!ENTITY zotero.search.recursive.label "Alt dizinleri araştır">
+<!ENTITY zotero.search.noChildren "">
+
+<!ENTITY zotero.search.textModes.phrase "Sözçük öbeği">
+<!ENTITY zotero.search.textModes.phraseBinary "Sözçük öbeği (ikili dosyalar içerir)">
+<!ENTITY zotero.search.textModes.regexp "AraBul">
+<!ENTITY zotero.search.textModes.regexpCS "AraBul (harf duyarlı)">
+
+<!ENTITY zotero.search.date.units.days "gün">
+<!ENTITY zotero.search.date.units.months "ay">
+<!ENTITY zotero.search.date.units.years "yıl">
+
+<!ENTITY zotero.search.search "">
+<!ENTITY zotero.search.clear "">
+<!ENTITY zotero.search.saveSearch "">

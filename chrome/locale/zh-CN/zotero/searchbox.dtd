@@ -1,4 +1,4 @@
-<!ENTITY zotero.search.name "Name:">
+<!ENTITY zotero.search.name "名称:">
 
 <!ENTITY zotero.search.joinMode.prefix "匹配">
 <!ENTITY zotero.search.joinMode.any "任何">
@@ -6,12 +6,17 @@
 <!ENTITY zotero.search.joinMode.suffix "下面的条件:">
 
 <!ENTITY zotero.search.recursive.label "搜索子目录">
+<!ENTITY zotero.search.noChildren "">
 
 <!ENTITY zotero.search.textModes.phrase "表达式">
 <!ENTITY zotero.search.textModes.phraseBinary "表达式(包括二进制文件)">
 <!ENTITY zotero.search.textModes.regexp "正则表达式">
 <!ENTITY zotero.search.textModes.regexpCS "正则表达式(区分大小写)">
 
-<!ENTITY zotero.search.date.units.days "days">
-<!ENTITY zotero.search.date.units.months "months">
-<!ENTITY zotero.search.date.units.years "years">
+<!ENTITY zotero.search.date.units.days "日">
+<!ENTITY zotero.search.date.units.months "月">
+<!ENTITY zotero.search.date.units.years "年">
+
+<!ENTITY zotero.search.search "">
+<!ENTITY zotero.search.clear "">
+<!ENTITY zotero.search.saveSearch "">

@@ -2,6 +2,8 @@
 <!ENTITY zotero.createdby "제작자:">
 <!ENTITY zotero.directors "감독:">
 <!ENTITY zotero.developers "개발자:">
+<!ENTITY zotero.about.localizations "">
+<!ENTITY zotero.about.icons "">
 <!ENTITY zotero.executiveProducer "행정 감독:">
 <!ENTITY zotero.thanks "감사드릴 분들:">
 <!ENTITY zotero.about.close "닫기">

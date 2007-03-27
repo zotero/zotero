@@ -68,19 +68,23 @@
     <term name="editor" form="verb">edited by</term>
     <term name="translator" form="verb">translated by</term>
     
+    <!-- SHORT VERB ROLE FORMS -->
+    <term name="editor" form="verb-short">ed</term>
+    <term name="translator" form="verb-short">trans</term>
+    
     <!-- LONG MONTH FORMS -->
-    <term name="month-01">一月</term>
-    <term name="month-02">二月</term>
-    <term name="month-03">三月</term>
-    <term name="month-04">四月</term>
-    <term name="month-05">五月</term>
-    <term name="month-06">六月</term>
-    <term name="month-07">七月</term>
-    <term name="month-08">八月</term>
-    <term name="month-09">九月</term>
-    <term name="month-10">十月</term>
-    <term name="month-11">十一月</term>
-    <term name="month-12">十二月</term>
+    <term name="month-01">January</term>
+    <term name="month-02">February</term>
+    <term name="month-03">March</term>
+    <term name="month-04">April</term>
+    <term name="month-05">May</term>
+    <term name="month-06">June</term>
+    <term name="month-07">July</term>
+    <term name="month-08">August</term>
+    <term name="month-09">September</term>
+    <term name="month-10">October</term>
+    <term name="month-11">November</term>
+    <term name="month-12">December</term>
     
     <!-- SHORT MONTH FORMS -->
     <term name="month-01" form="short">Jan</term>

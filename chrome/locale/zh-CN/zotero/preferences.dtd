@@ -1,30 +1,57 @@
 <!ENTITY zotero.preferences.title "Zotero 配置">
 
-<!ENTITY zotero.preferences.prefpane.general "General">
-<!ENTITY zotero.preferences.userInterface "User Interface">
-<!ENTITY zotero.preferences.position "Display Zotero">
+<!ENTITY zotero.preferences.prefpane.general "常规">
+
+<!ENTITY zotero.preferences.userInterface "用户界面">
+<!ENTITY zotero.preferences.position "显示 Zotero">
 <!ENTITY zotero.preferences.position.above "高于">
 <!ENTITY zotero.preferences.position.below "低于">
 <!ENTITY zotero.preferences.position.browser "浏览器页面">
-<!ENTITY zotero.preferences.statusBarIcon "Status bar icon:">
-<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated scrapers">
-<!ENTITY zotero.preferences.updateNow "Update now">
-<!ENTITY zotero.preferences.reportTranslationFailure "Report broken site translators">
-<!ENTITY zotero.preferences.parseEndnote "Use Zotero for downloaded EndNote files">
-<!ENTITY zotero.preferences.automaticSnapshots "Automatically take snapshots when creating items from web pages">
-<!ENTITY zotero.preferences.downloadAssociatedFiles "Automatically attach associated PDFs and other files when saving items">
+<!ENTITY zotero.preferences.statusBarIcon "状态栏图标:">
+<!ENTITY zotero.preferences.fontSize "">
+<!ENTITY zotero.preferences.fontSize.small "">
+<!ENTITY zotero.preferences.fontSize.medium "">
+<!ENTITY zotero.preferences.fontSize.large "">
+
+<!ENTITY zotero.preferences.miscellaneous "">
+<!ENTITY zotero.preferences.autoUpdate "自动更新刮录器(scrapers)">
+<!ENTITY zotero.preferences.updateNow "立刻更新">
+<!ENTITY zotero.preferences.reportTranslationFailure "报告失效的网站转换器">
+<!ENTITY zotero.preferences.parseEndnote "将 Zotero 用于下载的EndNote 文件">
+<!ENTITY zotero.preferences.automaticSnapshots "从 Web 页面创建条目时自动生成快照">
+<!ENTITY zotero.preferences.downloadAssociatedFiles "保存条目时自动附加关联的 PDFs 和其它文件">
+<!ENTITY zotero.preferences.automaticTags "">
+
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
-<!ENTITY zotero.preferences.openurl.custom "Custom...">
+<!ENTITY zotero.preferences.openurl.custom "自定义...">
 <!ENTITY zotero.preferences.openurl.server "解析器:">
 <!ENTITY zotero.preferences.openurl.version "版本">
 
-<!ENTITY zotero.preferences.prefpane.keys "Shortcut Keys">
-<!ENTITY zotero.preferences.keys.openZotero "Open/Close Zotero Pane">
-<!ENTITY zotero.preferences.keys.toggleFullscreen "Toggle Fullscreen Mode">
-<!ENTITY zotero.preferences.keys.library "Library">
-<!ENTITY zotero.preferences.keys.quicksearch "Quick Search">
-<!ENTITY zotero.preferences.keys.newItem "Create a new item">
-<!ENTITY zotero.preferences.keys.newNote "Create a new note">
-<!ENTITY zotero.preferences.keys.toggleTagSelector "Toggle Tag Selector">
-<!ENTITY zotero.preferences.keys.overrideGlobal "Try to override conflicting shortcuts">
-<!ENTITY zotero.preferences.keys.changesTakeEffect "Changes take effect in new windows only">
+
+<!ENTITY zotero.preferences.prefpane.export "">
+
+<!ENTITY zotero.preferences.quickCopy.caption "">
+<!ENTITY zotero.preferences.quickCopy.outputFormat "">
+<!ENTITY zotero.preferences.quickCopy.macWarning "">
+
+
+<!ENTITY zotero.preferences.prefpane.keys "快捷键">
+
+<!ENTITY zotero.preferences.keys.openZotero "开/关 Zotero 面板">
+<!ENTITY zotero.preferences.keys.toggleFullscreen "切换全屏模式">
+<!ENTITY zotero.preferences.keys.library "数据库">
+<!ENTITY zotero.preferences.keys.quicksearch "快速搜索">
+<!ENTITY zotero.preferences.keys.newItem "新建条目">
+<!ENTITY zotero.preferences.keys.newNote "新建笔记">
+<!ENTITY zotero.preferences.keys.toggleTagSelector "切换标签选择器">
+<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "">
+<!ENTITY zotero.preferences.keys.overrideGlobal "尝试覆盖相冲突的快捷键">
+<!ENTITY zotero.preferences.keys.changesTakeEffect "更改仅在新开的窗口中生效">
+
+
+<!ENTITY zotero.preferences.prefpane.advanced "">
+
+<!ENTITY zotero.preferences.dataDir "">
+<!ENTITY zotero.preferences.dataDir.useProfile "">
+<!ENTITY zotero.preferences.dataDir.custom "">
+<!ENTITY zotero.preferences.dataDir.choose "">
