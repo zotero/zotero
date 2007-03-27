@@ -1,4 +1,4 @@
--- 205
+-- 206
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-03-24 22:20:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-03-27 00:43:34'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-03-21 15:26:54', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -562,7 +562,7 @@ REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('d921155f-0186-1684-615c-ca57682ced9b', '1.0.0b3.r1', '', '2007-03-24 22:20:00', 1, 100, 4, 'JSTOR', 'Simon Kornblith', '^https?://(?:www\.|ocrpdf-sandbox\.)jstor\.org[^/]*/(?:view|browse/[^/]+/[^/]+\?|search/|cgi-bin/jstor/viewitem)', 
+REPLACE INTO translators VALUES ('d921155f-0186-1684-615c-ca57682ced9b', '1.0.0b4.r1', '', '2007-03-27 00:43:34', 1, 100, 4, 'JSTOR', 'Simon Kornblith', '^https?://(?:www\.|ocrpdf-sandbox\.)jstor\.org[^/]*/(?:view|browse/[^/]+/[^/]+\?|search/|cgi-bin/jstor/viewitem)', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -572,6 +572,8 @@ REPLACE INTO translators VALUES ('d921155f-0186-1684-615c-ca57682ced9b', '1.0.0b
 	// See if this is a seach results page
 	if(doc.title == "JSTOR: Search Results" || url.indexOf("/browse/") != -1) {
 		return "multiple";
+	} else if(url.indexOf("/search/") != -1) {
+		return false;
 	}
 	
 	// If this is a view page, find the link to the citation
@@ -594,13 +596,8 @@ REPLACE INTO translators VALUES ('d921155f-0186-1684-615c-ca57682ced9b', '1.0.0b
 
 function itemComplete(newItem, url) {
 	if(newItem.url) {
-		if(useSnapshot) {
-			newItem.attachments.push({document:useSnapshot,
-			                          title:"JSTOR Snapshot"});
-		} else {
-			newItem.attachments.push({url:newItem.url, mimeType:"text/html",
-			                          title:"JSTOR Snapshot"});
-		}
+		newItem.attachments.push({url:newItem.url, mimeType:"text/html",
+			                      title:"JSTOR Link", snapshot:false});
 	} else {
 		if(newItem.ISSN) {
 			newItem.url = "http://www.jstor.org/browse/"+newItem.ISSN;
@@ -611,8 +608,6 @@ function itemComplete(newItem, url) {
 	
 	newItem.complete();
 }
-
-var useSnapshot = false;
 
 function doWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
@@ -707,8 +702,6 @@ function doWeb(doc, url) {
 		} else {
 			throw("Could not find citation save links");
 		}
-		
-		useSnapshot = doc;
 	}
 	
 	Zotero.Utilities.HTTP.doGet(''http://www.jstor.org/browse?citationAction=removeAll&confirmRemAll=on&viewCitations=1'', function() {	// clear marked
