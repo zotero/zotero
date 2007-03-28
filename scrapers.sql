@@ -1,4 +1,4 @@
--- 211
+-- 212
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-03-28 16:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-03-28 19:15:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-03-21 15:26:54', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -10090,7 +10090,7 @@ function doExport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('a6ee60df-1ddc-4aae-bb25-45e0537be973', '1.0.0b3.r1', '', '2007-03-28 00:45:00', 1, 100, 1, 'MARC', 'Simon Kornblith', 'marc',
+REPLACE INTO translators VALUES ('a6ee60df-1ddc-4aae-bb25-45e0537be973', '1.0.0b3.r1', '', '2007-03-28 19:15:00', 1, 100, 1, 'MARC', 'Simon Kornblith', 'marc',
 'function detectImport() {
 	var marcRecordRegexp = /^[0-9]{5}[a-z ]{3}$/
 	var read = Zotero.read(8);
@@ -10108,8 +10108,8 @@ var subfieldDelimiter = "\x1F";
 
 // general purpose cleaning
 function clean(value) {
-	value = value.replace(/^[\s\.\,\/\:]+/, '''');
-	value = value.replace(/[\s\.\,\/\:]+$/, '''');
+	value = value.replace(/^[\s\.\,\/\:;]+/, '''');
+	value = value.replace(/[\s\.\,\/\:;]+$/, '''');
 	value = value.replace(/ +/g, '' '');
 	
 	var char1 = value[0];
@@ -10267,7 +10267,10 @@ record.prototype.getFieldSubfields = function(tag) { // returns a two-dimensiona
 		} else {
 			for(var j in subfields) {
 				if(subfields[j]) {
-					returnFields[i][subfields[j].substr(0, this.subfieldCodeLength-1)] = subfields[j].substr(this.subfieldCodeLength-1);
+					var subfieldIndex = subfields[j].substr(0, this.subfieldCodeLength-1);
+					if(!returnFields[i][subfieldIndex]) {
+						returnFields[i][subfieldIndex] = subfields[j].substr(this.subfieldCodeLength-1);
+					}
 				}
 			}
 		}
@@ -10279,7 +10282,7 @@ record.prototype.getFieldSubfields = function(tag) { // returns a two-dimensiona
 // add field to DB
 record.prototype._associateDBField = function(item, fieldNo, part, fieldName, execMe, arg1, arg2) {
 	var field = this.getFieldSubfields(fieldNo);
-	Zotero.debug(''found ''+field.length+'' matches for ''+fieldNo+part);
+	Zotero.debug(''MARC: found ''+field.length+'' matches for ''+fieldNo+part);
 	if(field) {
 		for(var i in field) {
 			var value = false;
@@ -10304,6 +10307,7 @@ record.prototype._associateDBField = function(item, fieldNo, part, fieldName, ex
 					item.creators.push(value);
 				} else {
 					item[fieldName] = value;
+					return;
 				}
 			}
 		}
