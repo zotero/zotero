@@ -319,7 +319,8 @@ var ZoteroItemPane = new function()
 				
 				if (fieldNames[i] == 'url' && val) {
 					label.setAttribute("isButton", true);
-					label.setAttribute("onclick", "ZoteroPane.loadURI(this.nextSibling.value, event)");
+					// TODO: make getFieldValue non-private and use below instead
+					label.setAttribute("onclick", "ZoteroPane.loadURI(this.nextSibling.firstChild ? this.nextSibling.firstChild.nodeValue : this.nextSibling.value, event)");
 					label.setAttribute("tooltiptext", Zotero.getString('pane.item.goToURL.online.tooltip'));
 				}
 				else if (fieldNames[i] == 'abstractNote') {
