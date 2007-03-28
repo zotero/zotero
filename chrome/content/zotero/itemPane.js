@@ -252,8 +252,8 @@ var ZoteroItemPane = new function()
 			}
 			
 			var creatorTypes = Zotero.CreatorTypes.getTypesForItemType(_itemBeingEdited.getType());
-			var localized = [];
-			for (var i in creatorTypes)
+			var localized = {};
+			for (var i=0; i<creatorTypes.length; i++)
 			{
 				localized[creatorTypes[i]['name']]
 					= Zotero.getString('creatorTypes.' + creatorTypes[i]['name']);
@@ -509,9 +509,9 @@ var ZoteroItemPane = new function()
 		// Generate list of localized field names for display in pop-up
 		if (fieldsToDelete) {
 			var fieldNames = "";
-			for each(var fieldID in fieldsToDelete) {
+			for (var i=0; i<fieldsToDelete.length; i++) {
 				fieldNames += "\n - " +
-					Zotero.ItemFields.getLocalizedString(_itemBeingEdited.getType(), fieldID);
+					Zotero.ItemFields.getLocalizedString(_itemBeingEdited.getType(), fieldsToDelete[i]);
 			}
 			
 			var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
