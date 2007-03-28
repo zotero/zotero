@@ -1,4 +1,4 @@
--- 209
+-- 210
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-03-28 00:45:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-03-28 16:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-03-21 15:26:54', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -562,7 +562,7 @@ REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('d921155f-0186-1684-615c-ca57682ced9b', '1.0.0b4.r1', '', '2007-03-27 00:43:34', 1, 100, 4, 'JSTOR', 'Simon Kornblith', '^https?://(?:www\.|ocrpdf-sandbox\.)jstor\.org[^/]*/(?:view|browse/[^/]+/[^/]+\?|search/|cgi-bin/jstor/viewitem)', 
+REPLACE INTO translators VALUES ('d921155f-0186-1684-615c-ca57682ced9b', '1.0.0b4.r1', '', '2007-03-28 16:00:00', 1, 100, 4, 'JSTOR', 'Simon Kornblith', '^https?://(?:www\.|ocrpdf-sandbox\.)jstor\.org[^/]*/(?:view|browse/[^/]+/[^/]+\?|search/|cgi-bin/jstor/viewitem)', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -624,7 +624,7 @@ function doWeb(doc, url) {
 		var tagRegexp = new RegExp();
 		tagRegexp.compile(''citationAction='');
 		
-		var tableRows = doc.evaluate(''/html/body/div[@class="indent"]/table/tbody/tr[td/span[@class="printDownloadSaveLinks"]]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var tableRows = doc.evaluate(''//tr/td[span[@class="printDownloadSaveLinks"]]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
 		var tableRow;
 		// Go through table rows
 		var tableView = new Array();
