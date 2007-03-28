@@ -1,4 +1,4 @@
--- 208
+-- 209
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-03-27 00:43:34'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-03-28 00:45:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-03-21 15:26:54', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -5529,7 +5529,7 @@ REPLACE INTO translators VALUES ('7bdb79e-a47f-4e3d-b317-ccd5a0a74456', '1.0.0b3
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('82174f4f-8c13-403b-99b2-affc7bc7769b', '1.0.0b3.r1', '', '2006-12-17 04:33:24', '1', '100', '4', 'Cambridge Scientific Abstracts', 'Simon Kornblith', 'https?://[^/]+/ids70/(?:results.php|view_record.php)', 
+REPLACE INTO translators VALUES ('82174f4f-8c13-403b-99b2-affc7bc7769b', '1.0.0b3.r1', '', '2007-03-28 00:45:00', '1', '100', '4', 'Cambridge Scientific Abstracts', 'Simon Kornblith', 'https?://[^/]+/ids70/(?:results.php|view_record.php)', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -5664,7 +5664,7 @@ REPLACE INTO translators VALUES ('82174f4f-8c13-403b-99b2-affc7bc7769b', '1.0.0b
 		} else if(heading == "monograph title") {
 			newItem.publicationTitle = content;
 		} else if(heading == "series title") {
-			newItem.seriesTitle = content;
+			newItem.series = content;
 		} else if(heading == "issn") {
 			newItem.ISSN = content;
 		} else if(heading == "isbn") {
@@ -8878,7 +8878,7 @@ function doImport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7', '1.0.0b4.r1', '', '2007-03-22 15:55:00', '1', '100', '3', 'RIS', 'Simon Kornblith', 'ris', 
+REPLACE INTO translators VALUES ('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7', '1.0.0b4.r1', '', '2007-03-28 00:45:00', '1', '100', '3', 'RIS', 'Simon Kornblith', 'ris', 
 'Zotero.configure("dataMode", "line");
 Zotero.addOption("exportNotes", true);
 
@@ -8901,7 +8901,7 @@ function detectImport() {
 'var fieldMap = {
 	ID:"itemID",
 	T1:"title",
-	T3:"seriesTitle",
+	T3:"series",
 	JF:"publicationTitle",
 	VL:"volume",
 	IS:"issue",
@@ -9297,7 +9297,7 @@ function doExport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('881f60f2-0802-411a-9228-ce5f47b64c7d', '1.0.0b4.r1', '', '2007-03-22 15:55:00', 1, 100, 3, 'EndNote/Refer/BibIX', 'Simon Kornblith', 'txt',
+REPLACE INTO translators VALUES ('881f60f2-0802-411a-9228-ce5f47b64c7d', '1.0.0b4.r1', '', '2007-03-28 00:45:00', 1, 100, 3, 'EndNote/Refer/BibIX', 'Simon Kornblith', 'txt',
 'Zotero.configure("dataMode", "line");
 
 function detectImport() {
@@ -9321,7 +9321,7 @@ function detectImport() {
 }',
 'var fieldMap = {
 	T:"title",
-	S:"seriesTitle",
+	S:"series",
 	V:"volume",
 	N:"issue",
 	C:"place",
@@ -10090,7 +10090,7 @@ function doExport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('a6ee60df-1ddc-4aae-bb25-45e0537be973', '1.0.0b3.r1', '', '2007-03-22 15:55:00', 1, 100, 1, 'MARC', 'Simon Kornblith', 'marc',
+REPLACE INTO translators VALUES ('a6ee60df-1ddc-4aae-bb25-45e0537be973', '1.0.0b3.r1', '', '2007-03-28 00:45:00', 1, 100, 1, 'MARC', 'Simon Kornblith', 'marc',
 'function detectImport() {
 	var marcRecordRegexp = /^[0-9]{5}[a-z ]{3}$/
 	var read = Zotero.read(8);
@@ -10410,7 +10410,7 @@ record.prototype.translate = function(item) {
 	// Extract pages
 	this._associateDBField(item, "300", "a", "pages", pullNumber);
 	// Extract series
-	this._associateDBField(item, "440", "a", "seriesTitle");
+	this._associateDBField(item, "440", "a", "series");
 	// Extract call number
 	this._associateDBField(item, "084", "ab", "callNumber");
 	this._associateDBField(item, "082", "a", "callNumber");
