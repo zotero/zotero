@@ -53,13 +53,13 @@ Zotero_File_Exporter.prototype.save = function() {
 	var fp = Components.classes["@mozilla.org/filepicker;1"]
 			.createInstance(nsIFilePicker);
 	fp.init(window, Zotero.getString("fileInterface.export"), nsIFilePicker.modeSave);
-	fp.appendFilters(Components.interfaces.nsIFilePicker.filterAll);
 	
 	// set file name and extension
 	if(io.selectedTranslator.displayOptions.exportFileData) {
 		// if the result will be a folder, don't append any extension or use
 		// filters
 		fp.defaultString = this.name;
+		fp.appendFilters(Components.interfaces.nsIFilePicker.filterAll);
 	} else {
 		// if the result will be a file, append an extension and use filters
 		fp.defaultString = this.name+"."+io.selectedTranslator.target;
