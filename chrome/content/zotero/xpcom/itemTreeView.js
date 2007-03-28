@@ -119,6 +119,13 @@ Zotero.ItemTreeView.prototype.setTree = function(treebox)
 		if (obj._ownerDocument.defaultView.ZoteroPane) {
 			obj._ownerDocument.defaultView.ZoteroPane.clearItemsPaneMessage();
 		}
+		
+		// Select a queued item from selectItem()
+		if (obj._itemGroup && obj._itemGroup.itemToSelect) {
+			var item = obj._itemGroup.itemToSelect;
+			obj.selectItem(item['id'], item['expand']);
+			obj._itemGroup.itemToSelect = null;
+		}
 	}
 	
 	this._ownerDocument.defaultView.setTimeout(paneLoader, 50, this);
@@ -202,6 +209,12 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids)
 			splitIDs.push(split[1]);
 		}
 		ids = splitIDs;
+		
+		// Select the last item even if there are no changes (e.g. if the tag
+		// selector is open and already refreshed the pane)
+		if (splitIDs.length > 0) {
+			var selectItem = splitIDs[splitIDs.length - 1];
+		}
 	}
 	
 	if((action == 'remove' && !this._itemGroup.isLibrary()) || action == 'delete')
@@ -424,6 +437,13 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids)
 		
 		this._treebox.invalidate();
 	}
+	// For special case in which an item needs to be selected without changes
+	// necessarily having been made
+	// ('collection-item' add with tag selector open)
+	else if (selectItem) {
+		this.selectItem(selectItem);
+	}
+	
 	this.selection.selectEventsSuppressed = false;
 }
 
@@ -845,20 +865,32 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
  */
 Zotero.ItemTreeView.prototype.selectItem = function(id, expand)
 {
+	// If no row map, we're probably in the process of switching collections,
+	// so store the item to select on the item group for later
+	if (!this._itemRowMap) {
+		if (this._itemGroup) {
+			this._itemGroup.itemToSelect = { id: id, expand: expand };
+			return false;
+		}
+		
+		Zotero.debug('Item group not found and no row map in ItemTreeView.selectItem() -- discarding select', 2);
+		return false;
+	}
+	
 	var row = this._itemRowMap[id];
 	
 	// Get the row of the parent, if there is one
 	var parentRow = null;
 	var item = Zotero.Items.get(id);
 	var parent = item.getSource();
-	if (parent && this._itemRowMap[parent]) {
+	if (parent && this._itemRowMap[parent] != undefined) {
 		parentRow = this._itemRowMap[parent];
 	}
 	
 	// If row with id not visible, check to see if it's hidden under a parent
-	if(row == null)
+	if(row == undefined)
 	{
-		if (!parent || !parentRow)
+		if (!parent || parentRow === null)
 		{
 			// No parent -- it's not here
 			return false;

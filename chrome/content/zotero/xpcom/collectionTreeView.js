@@ -36,6 +36,8 @@ Zotero.CollectionTreeView = function()
 	this._treebox = null;
 	this.refresh();
 	
+	this.itemToSelect = null;
+	
 	this._highlightedRows = {};
 	
 	this._unregisterID = Zotero.Notifier.registerObserver(this, ['collection', 'search']);
