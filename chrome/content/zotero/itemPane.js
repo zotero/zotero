@@ -1053,8 +1053,8 @@ var ZoteroItemPane = new function()
 				'medium', 'place'];
 			autoCompleteFields = autoCompleteFields.concat(baseACFields);
 			
-			for each(var baseField in baseACFields) {
-				var add = Zotero.ItemFields.getTypeFieldsFromBase(baseField, true)
+			for (var i=0; i<baseACFields.length; i++) {
+				var add = Zotero.ItemFields.getTypeFieldsFromBase(baseACFields[i], true)
 				autoCompleteFields = autoCompleteFields.concat(add);
 			}
 			
