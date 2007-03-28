@@ -1,4 +1,4 @@
--- 210
+-- 211
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -624,7 +624,7 @@ function doWeb(doc, url) {
 		var tagRegexp = new RegExp();
 		tagRegexp.compile(''citationAction='');
 		
-		var tableRows = doc.evaluate(''//tr/td[span[@class="printDownloadSaveLinks"]]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var tableRows = doc.evaluate(''//tr[td/span[@class="printDownloadSaveLinks"]]'', doc, nsResolver, XPathResult.ANY_TYPE, null);		
 		var tableRow;
 		// Go through table rows
 		var tableView = new Array();
