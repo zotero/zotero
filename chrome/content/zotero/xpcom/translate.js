@@ -1191,6 +1191,37 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 				}
 			}
 		}
+	
+		// create short title
+		if(item.shortTitle === undefined) {
+			// get field id
+			var fieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(typeID, "title");
+			// get title
+			var title = newItem.getField(fieldID);
+			
+			if(title) {
+				// only set if changes have been made
+				var set = false;
+				
+				// shorten to before first colon
+				var index = title.indexOf(":");
+				if(index !== -1) {
+					title = title.substr(0, index);
+					set = true;
+				}
+				// shorten to after first question mark
+				index = title.indexOf("?");
+				if(index !== -1) {
+					index++;
+					if(index != title.length) {
+						title = title.substr(0, index);
+						set = true;
+					}
+				}
+				
+				if(set) newItem.setField("shortTitle", title);
+			}
+		}
 		
 		// save item
 		if(myID) {
