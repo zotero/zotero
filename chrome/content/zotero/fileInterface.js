@@ -63,6 +63,7 @@ Zotero_File_Exporter.prototype.save = function() {
 	} else {
 		// if the result will be a file, append an extension and use filters
 		fp.defaultString = this.name+"."+io.selectedTranslator.target;
+		fp.defaultExtension = io.selectedTranslator.target;
 		fp.appendFilter(io.selectedTranslator.label, "*."+io.selectedTranslator.target);
 	}
 	
