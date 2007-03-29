@@ -1304,7 +1304,7 @@ var ZoteroPane = new function()
 	 */
 	function loadURI(uri, event, data) {
 		// Open in new tab
-		if (event.metaKey) {
+		if (event.metaKey || (!Zotero.isMac && event.ctrlKey)) {
 			var tab = gBrowser.addTab(uri);
 			var browser = gBrowser.getBrowserForTab(tab);
 			
