@@ -873,24 +873,24 @@ Zotero.Schema = new function(){
 				
 				if (i==28) {
 					var childNotes = Zotero.DB.query("SELECT * FROM itemNotes WHERE itemID IN (SELECT itemID FROM items) AND sourceItemID IS NOT NULL");
-					for (var i=0; i<childNotes.length; i++) {
-						var reversed = Zotero.DB.query("SELECT * FROM itemNotes WHERE note=? AND sourceItemID=?", [childNotes[i].itemID, childNotes[i].sourceItemID]);
+					for (var j=0; j<childNotes.length; j++) {
+						var reversed = Zotero.DB.query("SELECT * FROM itemNotes WHERE note=? AND sourceItemID=?", [childNotes[j].itemID, childNotes[j].sourceItemID]);
 						if (!reversed.length) {
 							continue;
 						}
 						var maxLength = 0;
-						for (var j=0; j<reversed.length; j++) {
-							if (reversed[j].itemID.length > maxLength) {
-								maxLength = reversed[j].itemID.length;
-								var maxLengthIndex = j;
+						for (var k=0; k<reversed.length; k++) {
+							if (reversed[k].itemID.length > maxLength) {
+								maxLength = reversed[k].itemID.length;
+								var maxLengthIndex = k;
 							}
 						}
 						if (maxLengthIndex) {
-							Zotero.DB.query("UPDATE itemNotes SET note=? WHERE itemID=?", [reversed[maxLengthIndex].itemID, childNotes[i].itemID]);
+							Zotero.DB.query("UPDATE itemNotes SET note=? WHERE itemID=?", [reversed[maxLengthIndex].itemID, childNotes[j].itemID]);
 							var f = function(text) { var t = text.substring(0, 80); var ln = t.indexOf("\n"); if (ln>-1 && ln<80) { t = t.substring(0, ln); } return t; }
-							Zotero.DB.query("UPDATE itemNoteTitles SET title=? WHERE itemID=?", [f(reversed[maxLengthIndex].itemID), childNotes[i].itemID]);
+							Zotero.DB.query("UPDATE itemNoteTitles SET title=? WHERE itemID=?", [f(reversed[maxLengthIndex].itemID), childNotes[j].itemID]);
 						}
-						Zotero.DB.query("DELETE FROM itemNotes WHERE note=? AND sourceItemID=?", [childNotes[i].itemID, childNotes[i].sourceItemID]);
+						Zotero.DB.query("DELETE FROM itemNotes WHERE note=? AND sourceItemID=?", [childNotes[j].itemID, childNotes[j].sourceItemID]);
 					}
 				}
 			}
