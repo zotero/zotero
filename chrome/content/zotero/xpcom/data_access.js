@@ -1111,7 +1111,7 @@ Zotero.Item.prototype.updateNote = function(text){
 	if (sourceItemID)
 	{
 		var sql = "REPLACE INTO itemNotes VALUES (?,?,?)";
-		var bindParams = [{string:text}, sourceItemID, this.getID()];
+		var bindParams = [this.getID(), sourceItemID, {string:text}];
 	}
 	else
 	{
