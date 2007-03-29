@@ -46,15 +46,20 @@
 						var conditions = this.search.getSearchConditions();
 						for(var id in conditions)
 						{
+							// Checkboxes
+							switch (conditions[id]['condition']) {
+								case 'recursive':
+								case 'noChildren':
+									var checkbox = conditions[id]['condition'] + 'Checkbox';
+									this.id(checkbox).setAttribute('condition',id);
+									this.id(checkbox).checked = (conditions[id]['operator']=='true');
+									continue;
+							}
+							
 							if(conditions[id]['condition'] == 'joinMode')
 							{
 								this.id('joinModeMenu').setAttribute('condition',id);
 								this.id('joinModeMenu').value = conditions[id]['operator'];
-							}
-							else if(conditions[id]['condition'] == 'recursive')
-							{
-								this.id('recursiveCheckbox').setAttribute('condition',id);
-								this.id('recursiveCheckbox').checked = (conditions[id]['operator']=='true');
 							}
 							else
 							{
