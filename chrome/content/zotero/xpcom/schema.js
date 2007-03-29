@@ -870,6 +870,29 @@ Zotero.Schema = new function(){
 				if (i==27) {
 					Zotero.DB.query("UPDATE itemData SET fieldID=115 WHERE itemID IN (SELECT itemID FROM items WHERE itemTypeID=3) AND fieldID=12");
 				}
+				
+				if (i==28) {
+					var childNotes = Zotero.DB.query("SELECT * FROM itemNotes WHERE itemID IN (SELECT itemID FROM items) AND sourceItemID IS NOT NULL");
+					for (var i=0; i<childNotes.length; i++) {
+						var reversed = Zotero.DB.query("SELECT * FROM itemNotes WHERE note=? AND sourceItemID=?", [childNotes[i].itemID, childNotes[i].sourceItemID]);
+						if (!reversed.length) {
+							continue;
+						}
+						var maxLength = 0;
+						for (var j=0; j<reversed.length; j++) {
+							if (reversed[j].itemID.length > maxLength) {
+								maxLength = reversed[j].itemID.length;
+								var maxLengthIndex = j;
+							}
+						}
+						if (maxLengthIndex) {
+							Zotero.DB.query("UPDATE itemNotes SET note=? WHERE itemID=?", [reversed[maxLengthIndex].itemID, childNotes[i].itemID]);
+							var f = function(text) { var t = text.substring(0, 80); var ln = t.indexOf("\n"); if (ln>-1 && ln<80) { t = t.substring(0, ln); } return t; }
+							Zotero.DB.query("UPDATE itemNoteTitles SET title=? WHERE itemID=?", [f(reversed[maxLengthIndex].itemID), childNotes[i].itemID]);
+						}
+						Zotero.DB.query("DELETE FROM itemNotes WHERE note=? AND sourceItemID=?", [childNotes[i].itemID, childNotes[i].sourceItemID]);
+					}
+				}
 			}
 			
 			_updateSchema('userdata');
