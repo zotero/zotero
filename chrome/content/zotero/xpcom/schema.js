@@ -741,7 +741,7 @@ Zotero.Schema = new function(){
 				if (i==16) {
 					Zotero.DB.query("CREATE TABLE tagsTemp (tagID INT, tag TEXT, PRIMARY KEY (tagID))");
 					if (Zotero.DB.tableExists("tags")) {
-						Zotero.DB.query("INSERT INTO tagsTemp SELECT * FROM tags");
+						Zotero.DB.query("INSERT INTO tagsTemp SELECT tagID, tag FROM tags");
 						Zotero.DB.query("DROP TABLE tags");
 					}
 					Zotero.DB.query("CREATE TABLE tags (\n    tagID INT,\n    tag TEXT,\n    tagType INT,\n    PRIMARY KEY (tagID),\n    UNIQUE (tag, tagType)\n);");
