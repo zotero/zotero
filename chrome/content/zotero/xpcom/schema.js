@@ -741,7 +741,7 @@ Zotero.Schema = new function(){
 				if (i==16) {
 					Zotero.DB.query("CREATE TABLE tagsTemp (tagID INT, tag TEXT, PRIMARY KEY (tagID))");
 					if (Zotero.DB.tableExists("tags")) {
-						Zotero.DB.query("INSERT INTO tagsTemp SELECT tagID, tag FROM tags");
+						Zotero.DB.query("INSERT INTO tagsTemp SELECT * FROM tags");
 						Zotero.DB.query("DROP TABLE tags");
 					}
 					Zotero.DB.query("CREATE TABLE tags (\n    tagID INT,\n    tag TEXT,\n    tagType INT,\n    PRIMARY KEY (tagID),\n    UNIQUE (tag, tagType)\n);");
@@ -871,6 +871,8 @@ Zotero.Schema = new function(){
 					Zotero.DB.query("UPDATE itemData SET fieldID=115 WHERE itemID IN (SELECT itemID FROM items WHERE itemTypeID=3) AND fieldID=12");
 				}
 				
+				// 1.0.0b4.r1
+				
 				if (i==28) {
 					var childNotes = Zotero.DB.query("SELECT * FROM itemNotes WHERE itemID IN (SELECT itemID FROM items) AND sourceItemID IS NOT NULL");
 					for (var j=0; j<childNotes.length; j++) {
@@ -893,6 +895,8 @@ Zotero.Schema = new function(){
 						Zotero.DB.query("DELETE FROM itemNotes WHERE note=? AND sourceItemID=?", [childNotes[j].itemID, childNotes[j].sourceItemID]);
 					}
 				}
+				
+				// 1.0.0b4.r2
 			}
 			
 			_updateSchema('userdata');
