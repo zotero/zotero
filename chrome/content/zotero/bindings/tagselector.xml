@@ -499,18 +499,28 @@
 						newName, '', {});
 					
 					if (result && newName.value) {
-						Zotero.DB.beginTransaction();
-						
 						// Add other ids with same tag
 						var ids = Zotero.Tags.getIDs(oldName);
-						for each(var id in ids) {
-							if (tagIDs.indexOf(id) == -1) {
-								tagIDs.push(id);
+						
+						for (var i=0; i<ids.length; i++) {
+							if (tagIDs.indexOf(ids[i]) == -1) {
+								tagIDs.push(ids[i]);
 							}
 						}
 						
-						for each(var tagID in tagIDs) {
-							Zotero.Tags.rename(tagID, newName.value);
+						if (this.selection[oldName]) {
+							var wasSelected = true;
+							delete this.selection[oldName];
+						}
+						
+						Zotero.DB.beginTransaction();
+						
+						for (var i=0; i<tagIDs.length; i++) {
+							Zotero.Tags.rename(tagIDs[i], newName.value);
+						}
+						
+						if (wasSelected) {
+							this.selection[newName.value] = true;
 						}
 						Zotero.DB.commitTransaction();
 					}
