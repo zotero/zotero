@@ -647,15 +647,21 @@ Zotero.CollectionTreeView.prototype.drop = function(row, orient)
 	}
 	else if (dataType == 'zotero/item') {
 		var ids = data.data.split(',');
-		var targetCollection = this._getItemAtRow(row).ref;
-		for each(var id in ids)
-		{
-			var item = Zotero.Items.get(id);
+		if (ids.length < 1) {
+			return;
+		}
+		
+		var toAdd = [];
+		for (var i=0; i<ids.length; i++) {
+			var item = Zotero.Items.get(ids[i]);
 			// Only accept top-level items
-			if (item.isRegularItem() || !item.getSource())
-			{
-				targetCollection.addItem(id);
+			if (item.isRegularItem() || !item.getSource()) {
+				toAdd.push(ids[i]);
 			}
+		}
+		
+		if (toAdd.length > 0) {
+			this._getItemAtRow(row).ref.addItems(toAdd);
 		}
 	}
 	else if (dataType == 'text/x-moz-url') {

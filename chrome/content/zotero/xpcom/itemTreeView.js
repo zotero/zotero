@@ -992,9 +992,7 @@ Zotero.ItemTreeView.prototype.deleteSelection = function(eraseChildren, force)
 		Zotero.Items.erase(ids, eraseChildren);
 	}
 	else if (this._itemGroup.isCollection()) {
-		for each(var id in ids) {
-			this._itemGroup.ref.removeItem(id);
-		}
+		this._itemGroup.ref.removeItems(ids);
 	}
 	this._treebox.endUpdateBatch();
 }

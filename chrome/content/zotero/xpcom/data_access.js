@@ -3014,6 +3014,22 @@ Zotero.Collection.prototype.addItem = function(itemID){
 
 
 /**
+ * Add multiple items to the collection in batch
+ */
+Zotero.Collection.prototype.addItems = function(itemIDs) {
+	if (!itemIDs || !itemIDs.length) {
+		return;
+	}
+	
+	Zotero.DB.beginTransaction();
+	for (var i=0; i<itemIDs.length; i++) {
+		this.addItem(itemIDs[i]);
+	}
+	Zotero.DB.commitTransaction();
+}
+
+
+/**
 * Remove an item from the collection (does not delete item from library)
 **/
 Zotero.Collection.prototype.removeItem = function(itemID){
@@ -3031,6 +3047,22 @@ Zotero.Collection.prototype.removeItem = function(itemID){
 	Zotero.Notifier.trigger('remove', 'collection-item', this.getID() + '-' + itemID);
 }
 
+
+/**
+ * Remove multiple items from the collection in batch
+ * (does not delete item from library)
+ */
+Zotero.Collection.prototype.removeItems = function(itemIDs) {
+	if (!itemIDs || !itemIDs.length) {
+		return;
+	}
+	
+	Zotero.DB.beginTransaction();
+	for (var i=0; i<itemIDs.length; i++) {
+		this.removeItem(itemIDs[i]);
+	}
+	Zotero.DB.commitTransaction();
+}
 
 /**
 * Check if an item belongs to the collection
