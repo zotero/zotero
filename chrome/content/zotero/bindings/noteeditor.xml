@@ -190,7 +190,7 @@
 		
 		<content>
 			<xul:vbox xbl:inherits="flex">
-				<xul:label id="citeLabel" onclick="this.parentNode.parentNode.selectParent()"/>
+				<xul:label id="citeLabel" onclick="document.getBindingParent(this).selectParent()"/>
 				<xul:textbox id="noteField" multiline="true" type="timed" timeout="1000" flex="1" onkeydown="document.getBindingParent(this).handleKeyDown(event)" oncommand="document.getBindingParent(this).save();"/>
 				<xul:hbox>
 					<xul:linksbox id="links" flex="1"/>
