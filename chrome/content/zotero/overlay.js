@@ -1617,7 +1617,7 @@ var ZoteroPane = new function()
 					file.launch();
 				}
 				catch (e) {
-					window.loadURI(fileURL, event);
+					window.loadURI(fileURL);
 				}
 			}
 		}
