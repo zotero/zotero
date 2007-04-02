@@ -144,7 +144,13 @@ Zotero.ItemTreeView.prototype.refresh = function()
 	
 	var cacheFields = ['title', 'date'];
 	// Cache the visible fields so they don't load individually
-	var visibleFields = this.getVisibleFields();
+	try {
+		var visibleFields = this.getVisibleFields();
+	}
+	// If treebox isn't ready, skip refresh
+	catch (e) {
+		return;
+	}
 	for each(var field in visibleFields) {
 		if (field == 'year') {
 			field = 'date';
