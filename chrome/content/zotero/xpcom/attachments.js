@@ -451,20 +451,35 @@ Zotero.Attachments = new function(){
 			file.initWithFile(destDir);
 			
 			var fileName = _getFileNameFromURL(url, mimeType);
-			
 			file.append(fileName);
 			
-			// Load WebPageDump code
-			Components.classes["@mozilla.org/moz/jssubscript-loader;1"]
-				.getService(Components.interfaces.mozIJSSubScriptLoader)
-				.loadSubScript("chrome://zotero/content/webpagedump/common.js");
+			if (mimeType == 'text/html') {
+				// Load WebPageDump code
+				Components.classes["@mozilla.org/moz/jssubscript-loader;1"]
+					.getService(Components.interfaces.mozIJSSubScriptLoader)
+					.loadSubScript("chrome://zotero/content/webpagedump/common.js");
+				
+				Components.classes["@mozilla.org/moz/jssubscript-loader;1"]
+					.getService(Components.interfaces.mozIJSSubScriptLoader)
+					.loadSubScript("chrome://zotero/content/webpagedump/domsaver.js");
+				
+				wpdDOMSaver.init(file.path, document)
+				wpdDOMSaver.saveHTMLDocument()
+			}
+			else {
+				Zotero.debug('Saving with saveURI()');
+				const nsIWBP = Components.interfaces.nsIWebBrowserPersist;
+				var wbp = Components
+					.classes["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"]
+					.createInstance(nsIWBP);
+				wbp.persistFlags = nsIWBP.PERSIST_FLAGS_AUTODETECT_APPLY_CONVERSION
+					| nsIWBP.PERSIST_FLAGS_FROM_CACHE;
+				var ioService = Components.classes["@mozilla.org/network/io-service;1"]
+					.getService(Components.interfaces.nsIIOService);
+				var nsIURL = ioService.newURI(url, null, null);
+				wbp.saveURI(nsIURL, null, null, null, null, file);
+			}
 			
-			Components.classes["@mozilla.org/moz/jssubscript-loader;1"]
-				.getService(Components.interfaces.mozIJSSubScriptLoader)
-				.loadSubScript("chrome://zotero/content/webpagedump/domsaver.js");
-			
-			wpdDOMSaver.init(file.path, document)
-			wpdDOMSaver.saveHTMLDocument()
 			
 			_addToDB(file, url, title, Zotero.Attachments.LINK_MODE_IMPORTED_URL,
 				mimeType, charsetID, sourceItemID, itemID);
@@ -482,7 +497,25 @@ Zotero.Attachments = new function(){
 			
 			Zotero.DB.commitTransaction();
 			
-			Zotero.Fulltext.indexDocument(document, itemID);
+			if (mimeType == 'application/pdf') {
+				var f = function() {
+					Zotero.Fulltext.indexPDF(file, itemID);;
+				};
+			}
+			else {
+				var f = function() {
+					Zotero.Fulltext.indexDocument(document, itemID);
+				};
+			}
+			
+			// We don't have any way of knowing that the file is flushed to
+			// disk, so we just wait a second and hope for the best --
+			// we'll index it later if it fails
+			var timer = Components.classes["@mozilla.org/timer;1"].
+				createInstance(Components.interfaces.nsITimer);
+			timer.initWithCallback({notify: f}, 1000,
+				Components.interfaces.nsITimer.TYPE_ONE_SHOT);
+			
 		}
 		catch (e) {
 			Zotero.DB.rollbackTransaction();
