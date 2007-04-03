@@ -30,7 +30,15 @@
         <em:maxVersion>2.0.0.*</em:maxVersion>
       </Description>
     </em:targetApplication>
-  
+    
+    <!-- Flock -->
+    <em:targetApplication>
+        <Description>
+            <em:id>{a463f10c-3994-11da-9945-000d60ca027b}</em:id>
+            <em:minVersion>0.8</em:minVersion>
+            <em:maxVersion>0.8.99</em:maxVersion>
+        </Description>
+    </em:targetApplication>
+    
   </Description>
-
 </RDF>
