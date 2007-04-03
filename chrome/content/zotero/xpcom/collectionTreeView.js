@@ -34,12 +34,8 @@
 Zotero.CollectionTreeView = function()
 {
 	this._treebox = null;
-	this.refresh();
-	
 	this.itemToSelect = null;
-	
 	this._highlightedRows = {};
-	
 	this._unregisterID = Zotero.Notifier.registerObserver(this, ['collection', 'search']);
 }
 
@@ -71,6 +67,8 @@ Zotero.CollectionTreeView.prototype.setTree = function(treebox)
 		}
 	}, false);
 	
+	this.refresh();
+	
 	//select Library
 	this.selection.select(0);
 }
@@ -81,7 +79,9 @@ Zotero.CollectionTreeView.prototype.setTree = function(treebox)
  */
 Zotero.CollectionTreeView.prototype.refresh = function()
 {
-	this._dataItems = new Array();
+	this.selection.clearSelection();
+	var oldCount = this.rowCount;
+	this._dataItems = [];
 	this.rowCount = 0;
 	this._showItem(new Zotero.ItemGroup('library',null),0,1);
 	
@@ -90,10 +90,19 @@ Zotero.CollectionTreeView.prototype.refresh = function()
 		this._showItem(new Zotero.ItemGroup('collection',newRows[i]),  0, this._dataItems.length); //itemgroup ref, level, beforeRow
 	
 	var savedSearches = Zotero.Searches.getAll();
-	for(var i = 0; i < savedSearches.length; i++)
-		this._showItem(new Zotero.ItemGroup('search',savedSearches[i]),  0, this._dataItems.length); //itemgroup ref, level, beforeRow
+	if (savedSearches) {
+		for (var i=0; i<savedSearches.length; i++) {
+			this._showItem(new Zotero.ItemGroup('search',savedSearches[i]),  0, this._dataItems.length); //itemgroup ref, level, beforeRow
+		}
+	}
 	
 	this._refreshHashMap();
+	
+	// Update the treebox's row count
+	var diff = this.rowCount - oldCount;
+	if (diff != 0) {
+		this._treebox.rowCountChanged(0, diff);
+	}
 }
 
 /*
@@ -101,22 +110,23 @@ Zotero.CollectionTreeView.prototype.refresh = function()
  */
 Zotero.CollectionTreeView.prototype.reload = function()
 {
-	var openCollections = new Array();
+	var openCollections = [];
 	
-	for(var i = 0; i < this.rowCount; i++)
-		if(this.isContainer(i) && this.isContainerOpen(i))
+	for (var i=0; i<this.rowCount; i++) {
+		if (this.isContainer(i) && this.isContainerOpen(i)) {
 			openCollections.push(this._getItemAtRow(i).ref.getID());
+		}
+	}
 	
-	var oldCount = this.rowCount;
 	this._treebox.beginUpdateBatch();
 	this.refresh();
-	this._treebox.rowCountChanged(this.rowCount, this.rowCount - oldCount);
 	
 	for(var i = 0; i < openCollections.length; i++)
 	{
 		var row = this._collectionRowMap[openCollections[i]];
-		if(row != null)
+		if (row != null) {
 			this.toggleOpenState(row);
+		}
 	}
 	this._treebox.invalidate();
 	this._treebox.endUpdateBatch();
@@ -127,6 +137,13 @@ Zotero.CollectionTreeView.prototype.reload = function()
  */
 Zotero.CollectionTreeView.prototype.notify = function(action, type, ids)
 {
+	if (!ids || ids.length == 0) {
+		return;
+	}
+	
+	this.selection.selectEventsSuppressed = true;
+	var savedSelection = this.saveSelection();
+	
 	var madeChanges = false;
 	
 	if(action == 'delete')
@@ -166,39 +183,27 @@ Zotero.CollectionTreeView.prototype.notify = function(action, type, ids)
 				this._treebox.rowCountChanged(row-i,-1);
 			}
 			
-			madeChanges = true;
-		}		
-		
+			this._refreshHashMap();
+		}
 	}
 	else if(action == 'move')
 	{
+		for (var i=0; i<ids.length; i++) {
+			// Open the parent collection if closed
+			var collection = Zotero.Collections.get(ids[i]);
+			var parentID = collection.getParent();
+			if (parentID && !this.isContainerOpen(this._collectionRowMap[parentID])) {
+				this.toggleOpenState(this._collectionRowMap[parentID]);
+			}
+		}
+		
 		this.reload();
+		this.rememberSelection(savedSelection);
 	}
 	else if(action == 'modify')
 	{
-		for (var i in ids)
-		{
-			switch (type)
-			{
-				case 'collection':
-					if (this._collectionRowMap[ids[i]] != null)
-					{
-						this._treebox.invalidateRow(this._collectionRowMap[ids[i]]);
-					}
-					break;
-					
-				case 'search':
-					if (this._searchRowMap[ids[i]] != null)
-					{
-						// Search rows aren't mapped to native objects, so we
-						// have to pull the new data manually
-						this._getItemAtRow(this._searchRowMap[ids[i]]).ref =
-							Zotero.Searches.get(ids[i]);
-						this._treebox.invalidateRow(this._searchRowMap[ids[i]]);
-					}
-					break;
-			}
-		}
+		this.reload();
+		this.rememberSelection(savedSelection);
 	}
 	else if(action == 'add')
 	{
@@ -230,9 +235,7 @@ Zotero.CollectionTreeView.prototype.notify = function(action, type, ids)
 		}
 	}
 	
-	if (madeChanges) {
-		this._refreshHashMap();
-	}
+	this.selection.selectEventsSuppressed = false;
 }
 
 
@@ -490,6 +493,60 @@ Zotero.CollectionTreeView.prototype._getItemAtRow = function(row)
 	return this._dataItems[row][0];
 }
 
+
+/*
+ *  Saves the ids of the currently selected item for later
+ */
+Zotero.CollectionTreeView.prototype.saveSelection = function()
+{
+	for (var i=0, len=this.rowCount; i<len; i++) {
+		if (this.selection.isSelected(i)) {
+			if (this._getItemAtRow(i).isLibrary()) {
+				return 'L';
+			}
+			else if (this._getItemAtRow(i).isCollection()) {
+				return 'C' + this._getItemAtRow(i).ref.getID();
+			}
+			else if (this._getItemAtRow(i).isSearch()) {
+				return 'S' + this._getItemAtRow(i).ref.id;
+			}
+		}
+	}
+	return false;
+}
+
+/*
+ *  Sets the selection based on saved selection ids (see above)
+ */
+Zotero.CollectionTreeView.prototype.rememberSelection = function(selection)
+{
+	var id = selection.substr(1);
+	switch (selection.substr(0, 1)) {
+		// Library
+		case 'L':
+			this.selection.select(0);
+			break;
+		
+		// Collection
+		case 'C':
+			// This only selects the collection if it's still visible,
+			// so we open the parent in notify()
+			if (this._collectionRowMap[id] != undefined) {
+				this.selection.select(this._collectionRowMap[id]);
+			}
+			break;
+		
+		// Saved search
+		case 'S':
+			if (this._searchRowMap[id] != undefined) {
+				this.selection.select(this._searchRowMap[id]);
+			}
+			break;
+	}
+}
+
+
+
 /*
  * Creates hash map of collection and search ids to row indexes
  * e.g., var rowForID = this._collectionRowMap[]
@@ -635,15 +692,6 @@ Zotero.CollectionTreeView.prototype.drop = function(row, orient)
 			targetCollectionID = this._getItemAtRow(row).ref.getID();
 		var droppedCollection = Zotero.Collections.get(data.data);
 		droppedCollection.changeParent(targetCollectionID);
-		
-		var selectRow = this._collectionRowMap[data.data];
-		if(selectRow == null)
-			selectRow = this._collectionRowMap[targetCollectionID];
-		
-		this.selection.selectEventsSuppressed = true;
-		this.selection.clearSelection();
-		this.selection.select(selectRow);
-		this.selection.selectEventsSuppressed = false;
 	}
 	else if (dataType == 'zotero/item') {
 		var ids = data.data.split(',');
