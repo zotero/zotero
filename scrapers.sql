@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-04-02 14:55:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-04-04 15:45:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-03-21 15:26:54', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -9570,7 +9570,7 @@ function doExport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('9cb70025-a888-4a29-a210-93ec52da40d4', '1.0.0b4.r1', '', '2007-03-22 15:55:00', 1, 100, 3, 'BibTeX', 'Simon Kornblith', 'bib',
+REPLACE INTO translators VALUES ('9cb70025-a888-4a29-a210-93ec52da40d4', '1.0.0b4.r1', '', '2007-04-04 15:45:00', 1, 100, 3, 'BibTeX', 'Simon Kornblith', 'bib',
 'Zotero.configure("dataMode", "block");
 
 function detectImport() {
@@ -9776,6 +9776,7 @@ function getFieldValue() {
 	var value = "";
 	// now, we have the first character of the field
 	if("0123456789".indexOf(read) != -1) {
+		value += read;
 		// character is a number
 		while((read = Zotero.read(1)) && ("0123456789".indexOf(read) != -1)) {
 			value += read;
