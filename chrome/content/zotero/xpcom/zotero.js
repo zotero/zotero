@@ -1096,7 +1096,7 @@ Zotero.Date = new function(){
 		  ((m[2] && m[4] && m[6]) || (!m[1] && !m[7]))) {						// require that either all parts are found,
 		  																		// or else this is the entire date field
 			// figure out date based on parts
-			if(m[2].length == 4 || m[3] == "\u5e74") {
+			if(m[2].length == 3 || m[2].length == 4 || m[3] == "\u5e74") {
 				// ISO 8601 style date (big endian)
 				date.year = m[2];
 				date.month = m[4];
