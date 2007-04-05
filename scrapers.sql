@@ -1,4 +1,4 @@
--- 214
+-- 215
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-04-04 15:45:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-04-05 19:45:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-03-21 15:26:54', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -4900,6 +4900,95 @@ REPLACE INTO translators VALUES ('19643c25-a4b2-480d-91b7-4e0b761fb6ad', '1.0.0b
 		translator.translate();
 		Zotero.done();
 	});
+	Zotero.wait();
+}');
+
+REPLACE INTO translators VALUES ('d75381ee-7d8d-4a3b-a595-b9190a06f43f', '1.0.0b3r1', '', '2007-04-05 19:45:00', '0', '100', '4', 'Scitation', 'Eugeniy Mikhailov', '^https?://(?:www\.)?scitation.aip.org', 
+'function detectWeb(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+
+	var multids = doc.evaluate(''//tr/td/input[@type="checkbox" and @name="SelectCheck"]'',doc, nsResolver, XPathResult.ANY_TYPE, null);
+	var singid = doc.evaluate(''//input[@type="hidden" and @name="SelectCheck"]'',doc, nsResolver, XPathResult.ANY_TYPE, null);
+
+	if (multids.iterateNext()){
+		return "multiple";
+	} else if (singid.iterateNext()){
+		return "journalArticle";
+	}
+}', 
+'function doWeb(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+
+	var multids = doc.evaluate(''//tr/td/input[@type="checkbox" and @name="SelectCheck"]'',doc, nsResolver, XPathResult.ANY_TYPE, null);
+	var singids = doc.evaluate(''//input[@type="hidden" and @name="SelectCheck"]'',doc, nsResolver, XPathResult.ANY_TYPE, null);
+	var multid;
+	var singid;
+	var getstring = "/getabs/servlet/GetCitation?PrefType=ARTICLE&PrefAction=Add+Selected&fn=open_isi&source=scitation&downloadcitation=+Go+";
+	if (multid = multids.iterateNext()){
+		var titles = new Array();
+		var ids = new Array();
+		var items = new Array();
+		var title;
+		do {
+			title = doc.evaluate(''../..//a[1]'',multid, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+			items[multid.value] = Zotero.Utilities.cleanString(title.textContent);
+		} while (multid =multids.iterateNext());
+		
+		items = Zotero.selectItems(items);
+		if(!items) return true;
+
+		for(var i in items) {
+			getstring = getstring + "&SelectCheck=" + i;
+		}
+	} else if (singid = singids.iterateNext()){
+		getstring = getstring + "&SelectCheck=" + singid.value;
+	} 
+
+	var hostRe = new RegExp("^(https?://[^/]+)/");
+	var m = hostRe.exec(url);
+	var host = m[1];
+	var newuri = host + getstring;
+	Zotero.Utilities.HTTP.doGet(newuri, function(text) {
+		// load translator for RIS
+		var translator = Zotero.loadTranslator("import");
+		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+		Zotero.debug(text);
+		translator.setString(text);
+		translator.translate();
+
+		Zotero.done();
+    });
+	Zotero.wait();
+}');
+
+REPLACE INTO translators VALUES ('2c310a37-a4dd-48d2-82c9-bd29c53c1c76', '1.0.0b3r1', '', '2007-04-05 19:45:00', '0', '100', '4', 'PROLA', 'Eugeniy Mikhailov', '^https?://(?:www\.)?prola.aps.org/(searchabstract|abstract)/', 
+'function detectWeb(doc, url) {
+	return "journalArticle";
+}	', 
+'function doWeb(doc, url) {
+    var urlRIS = url;
+	// so far several more or less  identical url possible
+	// one is with "abstract" other with "searchabstract"
+	urlRIS = urlRIS.replace("searchabstract","export");
+	urlRIS = urlRIS.replace("abstract","export");
+	var post = "type=ris";
+	
+	Zotero.Utilities.HTTP.doPost(urlRIS, post, function(text) {
+		// load translator for RIS
+		var translator = Zotero.loadTranslator("import");
+		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+		Zotero.debug(text);
+		translator.setString(text);
+		translator.translate();
+
+		Zotero.done();
+	 });
 	Zotero.wait();
 }');
 
