@@ -216,7 +216,7 @@ function showQuickCopySiteEditor(index) {
 	var format = Zotero.QuickCopy.getSettingFromFormattedName(format);
 	
 	var io = {domain: domain, format: format, ok: false};
-	window.openDialog('chrome://zotero/content/quickCopySiteEditor.xul', "zotero-preferences-quickCopySiteEditor", "chrome, modal", io);
+	window.openDialog('chrome://zotero/content/preferences/quickCopySiteEditor.xul', "zotero-preferences-quickCopySiteEditor", "chrome, modal", io);
 	
 	if (!io.ok) {
 		return;

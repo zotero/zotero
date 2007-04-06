@@ -289,6 +289,6 @@ To add a new preference:
 	
 	<!-- These mess up the prefwindow if they come before the prefpanes
 	     https://bugzilla.mozilla.org/show_bug.cgi?id=296418 -->
-	<script src="include.js"/>
+	<script src="chrome://zotero/content/include.js"/>
 	<script src="preferences.js"/>
 </prefwindow>
