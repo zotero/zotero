@@ -897,6 +897,10 @@ Zotero.Schema = new function(){
 				}
 				
 				// 1.0.0b4.r2
+				
+				if (i==29) {
+					Zotero.DB.query("CREATE TABLE settings (\n    setting TEXT,\n    key TEXT,\n    value,\n    PRIMARY KEY (setting, key)\n);");
+				}
 			}
 			
 			_updateSchema('userdata');
