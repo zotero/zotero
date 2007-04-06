@@ -521,7 +521,7 @@ var ZoteroItemPane = new function()
 		if (!fieldsToDelete ||
 				promptService.confirm(null,
 					Zotero.getString('pane.item.changeType.title'),
-					Zotero.getString('pane.item.changeType.message') + "\n" + fieldNames)) {
+					Zotero.getString('pane.item.changeType.text') + "\n" + fieldNames)) {
 			_itemBeingEdited.setType(itemTypeID);
 			_itemBeingEdited.save();
 			loadPane(0);
