@@ -183,9 +183,12 @@
 					// dictionary list
 					var dictmenu = document.getAnonymousElementByAttribute(this, "anonid",
 									 "spell-dictionaries-menu");
-					var numdicts = spellui.addDictionaryListToMenu(dictmenu, null);
-					this._setMenuItemVisibility("spell-dictionaries", enabled && numdicts > 1);
-				
+					var addsep = document.getAnonymousElementByAttribute(this, "anonid",
+									 "spell-language-separator");
+					
+					var numdicts = spellui.addDictionaryListToMenu(dictmenu, addsep);
+					this._setMenuItemVisibility("spell-dictionaries", enabled);
+					
 					this._doPopupItemEnabling(popupNode);
 				  ]]>
 				</body>
@@ -236,16 +239,14 @@
 		<content context="_child">
 			<xul:hbox class="textbox-input-box" flex="1">
 				<html:textarea class="textbox-textarea" flex="1" anonid="input"
-					   xbl:inherits="onfocus,onblur,xbl:text=value,disabled,tabindex,rows,cols,readonly,wrap"><children/></html:textarea>
+					xbl:inherits="onfocus,onblur,xbl:text=value,disabled,tabindex,rows,cols,readonly,wrap"><children/></html:textarea>
 				<xul:menupopup anonid="input-box-contextmenu"
-						 onpopupshowing="if (document.commandDispatcher.focusedElement != this.parentNode.firstChild)
-											   this.parentNode.firstChild.focus();
-											 this.parentNode.parentNode._doPopupItemEnablingSpell(this);"
-						 onpopuphiding="this.parentNode.parentNode._doPopupItemDisabling(this);"
-						 oncommand="var cmd = event.originalTarget.getAttribute('cmd'); if(cmd) { this.parentNode.parentNode.doTextCommand(cmd); event.stopPropagation(); }">
+								onpopupshowing="if (document.commandDispatcher.focusedElement != this.parentNode.firstChild) { this.parentNode.firstChild.focus(); } this.parentNode.parentNode._doPopupItemEnablingSpell(this);"
+								onpopuphiding="this.parentNode.parentNode._doPopupItemDisabling(this);"
+								oncommand="var cmd = event.originalTarget.getAttribute('cmd'); if(cmd) { this.parentNode.parentNode.doTextCommand(cmd); event.stopPropagation(); }">
 					<xul:menuitem label="&spellNoSuggestions.label;" anonid="spell-no-suggestions" disabled="true"/>
 					<xul:menuitem label="&spellAddToDictionary.label;" accesskey="&spellAddToDictionary.accesskey;" anonid="spell-add-to-dictionary"
-								  oncommand="this.parentNode.parentNode.parentNode.spellCheckerUI.addToDictionary();"/>
+									oncommand="this.parentNode.parentNode.parentNode.spellCheckerUI.addToDictionary();"/>
 					<xul:menuseparator anonid="spell-suggestions-separator"/>
 					<xul:menuitem label="&undoCmd.label;" accesskey="&undoCmd.accesskey;" cmd="cmd_undo"/>
 					<xul:menuseparator/>
@@ -257,11 +258,16 @@
 					<xul:menuitem label="&selectAllCmd.label;" accesskey="&selectAllCmd.accesskey;" cmd="cmd_selectAll"/>
 					<xul:menuseparator anonid="spell-check-separator"/>
 					<xul:menuitem label="&spellEnable.label;" type="checkbox" accesskey="&spellEnable.accesskey;" anonid="spell-check-enabled"
-								  oncommand="this.parentNode.parentNode.parentNode.spellCheckerUI.toggleEnabled();"/>
+									oncommand="this.parentNode.parentNode.parentNode.spellCheckerUI.toggleEnabled();"/>
 					<xul:menu label="&spellDictionaries.label;" accesskey="&spellDictionaries.accesskey;" anonid="spell-dictionaries">
-					  <xul:menupopup anonid="spell-dictionaries-menu"
-									 onpopupshowing="event.stopPropagation();"
-									 onpopuphiding="event.stopPropagation();"/>
+						<xul:menupopup anonid="spell-dictionaries-menu"
+										onpopupshowing="event.stopPropagation();"
+										onpopuphiding="event.stopPropagation();">
+							<xul:menuseparator anonid="spell-language-separator"/>
+							<xul:menuitem anonid="spell-add-dictionaries-main" label="&spellAddDictionaries.label;"
+											accesskey="&spellAddDictionaries.accesskey;"
+											oncommand="nsContextMenu.prototype.addDictionaries();"/>
+						</xul:menupopup>
 					</xul:menu>
 				</xul:menupopup>
 			</xul:hbox>
