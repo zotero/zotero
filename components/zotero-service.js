@@ -60,6 +60,10 @@ Cc["@mozilla.org/moz/jssubscript-loader;1"]
 	
 Cc["@mozilla.org/moz/jssubscript-loader;1"]
 	.getService(Ci.mozIJSSubScriptLoader)
+	.loadSubScript("chrome://zotero/content/xpcom/quickCopy.js");
+
+Cc["@mozilla.org/moz/jssubscript-loader;1"]
+	.getService(Ci.mozIJSSubScriptLoader)
 	.loadSubScript("chrome://zotero/content/xpcom/report.js");
 	
 Cc["@mozilla.org/moz/jssubscript-loader;1"]

@@ -570,7 +570,7 @@ Zotero.Item.prototype.setField = function(field, value, loadIn){
 	var fieldID = Zotero.ItemFields.getID(field);
 	
 	if (!fieldID){
-		throw (field + ' is not a valid itemData field.');
+		throw ('"' + field + '" is not a valid itemData field.');
 	}
 	
 	if (loadIn && this.isNote() && field == 110) { // title

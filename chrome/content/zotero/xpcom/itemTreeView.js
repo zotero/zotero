@@ -1290,8 +1290,47 @@ Zotero.ItemTreeCommandController.prototype.onEvent = function(evt)
  */
 Zotero.ItemTreeView.prototype.onDragStart = function (evt,transferData,action)
 { 
+	try {
+	
+	
+	
 	transferData.data=new TransferData();
 	transferData.data.addDataForFlavour("zotero/item", this.saveSelection());
+	
+	// Get Quick Copy format for current URL
+	var url = this._ownerDocument.defaultView.content.location.href;
+	var format = Zotero.QuickCopy.getFormatFromURL(url);
+	
+	Zotero.debug("Dragging with format " + Zotero.QuickCopy.getFormattedNameFromSetting(format));
+	
+	var exportCallback = function(obj, worked) {
+		if (!worked) {
+			Zotero.log(Zotero.getString("fileInterface.exportError"), 'warning');
+			return;
+		}
+		
+		var text = obj.output.replace(/\r\n/g, "\n");
+		transferData.data.addDataForFlavour("text/unicode", text);
+	}
+	
+	var items = Zotero.Items.get(this.saveSelection());
+	
+	var [mode, ] = format.split('=');
+	if (mode == 'export') {
+		Zotero.QuickCopy.getContentFromItems(items, format, exportCallback);
+	}
+	else if (mode == 'bibliography') {
+		var content = Zotero.QuickCopy.getContentFromItems(items, format);
+		transferData.data.addDataForFlavour("text/unicode", content.text);
+		transferData.data.addDataForFlavour("text/html", content.html);
+	}
+	
+	
+	
+	}
+	catch (e) {
+		Zotero.debug(e);
+	}
 }
 
 /*

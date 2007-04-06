@@ -91,6 +91,10 @@ grid row hbox:first-child
 
 
 /* Export pane */
+#quickCopy-instructions, #zotero-prefpane-export vbox {
+	margin-bottom: 1em;
+}
+
 #quickCopy-menu
 {
 	margin-top: .4em;

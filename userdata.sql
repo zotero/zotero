@@ -1,10 +1,8 @@
--- 28
+-- 29
 
 -- This file creates tables containing user-specific data -- any changes
 -- to existing tables made here must be mirrored in transition steps in
--- schema.js::_migrateSchema() -- however, new tables can be added by simply
--- adding a CREATE TABLE IF NOT EXISTS statement and incrementing the version
--- number above
+-- schema.js::_migrateSchema()
 
 
 CREATE TABLE IF NOT EXISTS version (
@@ -12,6 +10,13 @@ CREATE TABLE IF NOT EXISTS version (
     version INT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS schema ON version(schema);
+
+CREATE TABLE IF NOT EXISTS settings (
+    setting TEXT,
+    key TEXT,
+    value,
+    PRIMARY KEY (setting, key)
+);
 
 -- Show or hide pre-mapped fields for system item types
 CREATE TABLE IF NOT EXISTS userFieldMask (

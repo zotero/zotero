@@ -895,8 +895,7 @@ var ZoteroPane = new function()
 		}
 		
 		var [mode, format] = Zotero.Prefs.get("export.quickCopy.setting").split('=');
-		Zotero.debug(mode);
-		Zotero.debug(format);
+		
 		if (mode == 'bibliography') {
 			Zotero_File_Interface.copyItemsToClipboard(items, format);
 		}

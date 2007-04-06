@@ -158,11 +158,31 @@ To add a new preference:
 		
 		<groupbox>
 			<caption label="&zotero.preferences.quickCopy.caption;"/>
-			<label value="&zotero.preferences.quickCopy.outputFormat;" control="quickCopy-menu"/>
-			<menulist id="quickCopy-menu">
-				<menupopup/>
-			</menulist>
+			
 			<label id="quickCopy-instructions"/>
+			
+			<vbox>
+				<label value="&zotero.preferences.quickCopy.defaultOutputFormat;" control="quickCopy-menu"/>
+				<menulist id="quickCopy-menu"/>
+			</vbox>
+			
+			<vbox>
+				<label value="&zotero.preferences.quickCopy.siteEditor.setings;" control="quickCopy-siteSettings"/>
+				<tree flex="1" id="quickCopy-siteSettings" hidecolumnpicker="true" rows="6" seltype="single"
+						ondblclick="showQuickCopySiteEditor(this.currentIndex)"
+						onkeypress="if (event.keyCode == event.DOM_VK_DELETE) { deleteSelectedQuickCopySite(); }">
+					<treecols>
+						<treecol id="quickCopy-urlColumn" label="&zotero.preferences.quickCopy.siteEditor.domainPath;" flex="1"/>
+						<treecol id="quickCopy-formatColumn" label="&zotero.preferences.quickCopy.siteEditor.outputFormat;" flex="2"/>
+					</treecols>
+					<treechildren id="quickCopy-siteSettings-rows"/>
+				</tree>
+				<hbox pack="end">
+					<button label="-" onclick="deleteSelectedQuickCopySite()"/>
+					<button label="+" onclick="showQuickCopySiteEditor()"/>
+				</hbox>
+			</vbox>
+			
 			<label id="quickCopy-macWarning" hidden="true" value="&zotero.preferences.quickCopy.macWarning;"/>
 		</groupbox>
 	</prefpane>
