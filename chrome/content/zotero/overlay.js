@@ -585,7 +585,6 @@ var ZoteroPane = new function()
 			this.itemsView = new Zotero.ItemTreeView(itemgroup);
 			this.itemsView.addCallback(_setTagScope);
 			document.getElementById('zotero-items-tree').view = this.itemsView;
-			Zotero.debug('crashdebug6');
 			this.itemsView.selection.clearSelection();
 			Zotero.UnresponsiveScriptIndicator.enable();
 		}

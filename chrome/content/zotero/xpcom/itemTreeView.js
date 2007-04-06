@@ -425,7 +425,6 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids)
 				this.selectItem(ids[0]);
 			}
 			else {
-				Zotero.debug('crashdebug1');
 				this.rememberSelection(savedSelection);
 			}
 		}
@@ -437,7 +436,6 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids)
 			else {
 				this._refreshHashMap();
 			}
-			Zotero.debug('crashdebug2')
 			this.rememberSelection(savedSelection);
 		}
 		
@@ -640,7 +638,6 @@ Zotero.ItemTreeView.prototype.cycleHeader = function(column)
 	this.selection.selectEventsSuppressed = true;
 	var savedSelection = this.saveSelection();
 	this.sort();
-	Zotero.debug('crashdebug3')
 	this.rememberSelection(savedSelection);
 	this.selection.selectEventsSuppressed = false;
 	this._treebox.invalidate();
@@ -1024,7 +1021,6 @@ Zotero.ItemTreeView.prototype.setFilter = function(type, data) {
 	
 	this.rememberOpenState(savedOpenState);
 	this.rememberFirstRow(savedFirstRow);
-	Zotero.debug('crashdebug4')
 	this.rememberSelection(savedSelection);
 	this.selection.selectEventsSuppressed = false;
 	this._treebox.invalidate();
