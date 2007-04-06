@@ -986,6 +986,8 @@ Zotero.Date = new function(){
 	this.getFileTimeString = getFileTimeString;
 	this.getLocaleDateOrder = getLocaleDateOrder;
 	
+	var _localeDateOrder = null;
+	
 	
 	/**
 	* Convert an SQL date in the form '2006-06-13 11:03:05' into a JS Date object
@@ -1380,9 +1382,13 @@ Zotero.Date = new function(){
 	 * Returns a string with y, m, and d (e.g. 'ymd', 'mdy')
 	 */
 	function getLocaleDateOrder(){
+		if (_localeDateOrder) {
+			return _localeDateOrder;
+		}
+		
 		var date = new Date("October 5, 2006");
 		var parts = date.toLocaleDateString().match(/([0-9]+)[^0-9]+([0-9]+)[^0-9]+([0-9]+)/);
-		alert(parts);
+		
 		switch (parseInt(parts[1])){
 			case 2006:
 				var order = 'y';
@@ -1416,6 +1422,8 @@ Zotero.Date = new function(){
 				order += 'd';
 				break;
 		}
+		
+		_localeDateOrder = order;
 		
 		return order;
 	}
