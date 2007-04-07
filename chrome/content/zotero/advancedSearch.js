@@ -67,7 +67,8 @@ var ZoteroAdvancedSearch = new function() {
 			Zotero.getString('pane.collections.untitled'));
 		
 		var name = { value: untitled };
-		var result = promptService.prompt(window, "",
+		var result = promptService.prompt(window,
+			Zotero.getString('pane.collections.newSavedSeach'),
 			Zotero.getString('pane.collections.savedSearchName'), name, "", {});
 		
 		if (!result)

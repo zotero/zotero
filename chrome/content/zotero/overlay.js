@@ -420,7 +420,8 @@ var ZoteroPane = new function()
 			Zotero.getString('pane.collections.untitled'));
 		
 		var newName = { value: untitled };
-		var result = promptService.prompt(window, "",
+		var result = promptService.prompt(window,
+			Zotero.getString('pane.collections.newCollection'),
 			Zotero.getString('pane.collections.name'), newName, "", {});
 		
 		if (!result)
