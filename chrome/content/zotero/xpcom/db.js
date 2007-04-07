@@ -443,7 +443,7 @@ Zotero.DBConnection.prototype.getColumns = function (table) {
 
 Zotero.DBConnection.prototype.getColumnHash = function (table) {
 	var cols = this.getColumns(table);
-	var hash = new Array();
+	var hash = {};
 	if (cols.length) {
 		for (var i=0; i<cols.length; i++) {
 			hash[cols[i]] = true;
@@ -518,7 +518,7 @@ Zotero.DBConnection.prototype.getNextName = function (table, field, name)
 
 
 /*
- * Shutdown observer
+ * Shutdown observer -- implements nsIObserver
  */
 Zotero.DBConnection.prototype.observe = function(subject, topic, data) {
 	switch (topic) {
@@ -560,8 +560,8 @@ Zotero.DBConnection.prototype.checkException = function (e) {
 			+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING);
 		
 		var index = ps.confirmEx(null,
-			Zotero.getString('db.dbCorrupted', this._dbName),
-			Zotero.getString('db.dbCorrupted.restart'),
+			Zotero.getString('general.error'),
+			Zotero.getString('db.dbCorrupted', this._dbName) + '\n\n' + Zotero.getString('db.dbCorrupted.restart'),
 			buttonFlags,
 			Zotero.getString('general.restartNow'),
 			Zotero.getString('general.restartLater'),
@@ -614,15 +614,20 @@ Zotero.DBConnection.prototype.backupDatabase = function () {
 		throw (e);
 	}
 	
-	try {
-		var store = Components.classes["@mozilla.org/storage/service;1"].
-			getService(Components.interfaces.mozIStorageService);
-			
-		var connection = store.openDatabase(tmpFile);
-	}
-	catch (e){
-		this._debug("Database file '" + tmpFile.leafName + "' is corrupt--skipping backup");
-		return false;
+	// Opened database files can't be moved on Windows, so we have to skip
+	// the extra integrity check (unless we wanted to write two copies of
+	// the database, but that doesn't seem like a great idea)
+	if (!Zotero.isWin) {
+		try {
+			var store = Components.classes["@mozilla.org/storage/service;1"].
+				getService(Components.interfaces.mozIStorageService);
+				
+			var connection = store.openDatabase(tmpFile);
+		}
+		catch (e){
+			this._debug("Database file '" + tmpFile.leafName + "' is corrupt--skipping backup");
+			return false;
+		}
 	}
 	
 	// Remove old backup file
