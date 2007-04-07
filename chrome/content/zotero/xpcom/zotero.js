@@ -158,7 +158,8 @@ var Zotero = new function(){
 						+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING)
 						+ (ps.BUTTON_POS_2) * (ps.BUTTON_TITLE_IS_STRING);
 					var index = ps.confirmEx(win,
-						_startupError,
+						Zotero.getString('general.error'),
+						_startupError + '\n\n' +
 						Zotero.getString('dataDir.previousDir') + ' '
 							+ Zotero.Prefs.get('lastDataDir'),
 						buttonFlags, null,
@@ -328,8 +329,8 @@ var Zotero = new function(){
 			buttonFlags += (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING);
 		}
 		var index = ps.confirmEx(win,
+			Zotero.getString('general.restartRequired'),
 			Zotero.getString('general.restartFirefox.singular'),
-			'',
 			buttonFlags,
 			Zotero.getString('general.restartNow'),
 			forceRestartNow ? null : Zotero.getString('general.restartLater'),
