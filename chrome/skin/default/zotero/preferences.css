@@ -5,7 +5,7 @@ prefwindow .chromeclass-toolbar
 
 radio[pane]
 {
-	width: 60px;
+	min-width: 5.5em;
 	height: 48px;
 	-moz-box-align: center;
 	-moz-box-pack: end;
