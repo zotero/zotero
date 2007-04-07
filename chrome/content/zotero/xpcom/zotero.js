@@ -235,6 +235,10 @@ var Zotero = new function(){
 			var file = Components.classes["@mozilla.org/file/local;1"].
 				createInstance(Components.interfaces.nsILocalFile);
 			file.persistentDescriptor = Zotero.Prefs.get('dataDir');
+			if (!file.exists()) {
+				var e = { name: "NS_ERROR_FILE_NOT_FOUND" };
+				throw (e);
+			}
 		}
 		else {
 			var file = Zotero.getProfileDirectory();

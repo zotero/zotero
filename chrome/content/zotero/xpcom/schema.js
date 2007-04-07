@@ -46,6 +46,13 @@ Zotero.Schema = new function(){
 		
 		var schemaVersion = _getSchemaSQLVersion('userdata');
 		
+		Zotero.UnresponsiveScriptIndicator.disable();
+		
+		// If upgrading userdata, make backup of database first
+		if (dbVersion < schemaVersion){
+			Zotero.DB.backupDatabase(dbVersion);
+		}
+		
 		Zotero.DB.beginTransaction();
 		
 		try {
@@ -65,9 +72,9 @@ Zotero.Schema = new function(){
 				 }
 			}
 			
-			_migrateUserDataSchema(dbVersion);
-			var up1 = _updateSchema('system');
-			var up2 = _updateSchema('scrapers');
+			var up1 = _migrateUserDataSchema(dbVersion);
+			var up2 = _updateSchema('system');
+			var up3 = _updateSchema('scrapers');
 			
 			// Rebuild fulltext cache if necessary
 			if (Zotero.Fulltext.cacheIsOutdated()){
@@ -78,16 +85,36 @@ Zotero.Schema = new function(){
 		catch(e){
 			Zotero.debug(e);
 			Zotero.DB.rollbackTransaction();
+			Zotero.UnresponsiveScriptIndicator.enable();
 			throw(e);
 		}
 		
-		if (up1 || up2) {
+		if (up1) {
+			// Upgrade seems to have been a success -- delete any previous backups
+			var maxPrevious = dbVersion - 1;
+			var file = Zotero.getZoteroDirectory();
+			// directoryEntries.hasMoreElements() throws an error (possibly
+			// because of the temporary SQLite journal file?), so we just look
+			// for all versions
+			for (var i=maxPrevious; i>=29; i--) {
+				var fileName = 'zotero.sqlite.' + i + '.bak';
+				file.append(fileName);
+				if (file.exists()) {
+					Zotero.debug('Removing previous backup file ' + fileName);
+					file.remove(null);
+				}
+				file = file.parent;
+			}
+		}
+		
+		if (up2 || up3) {
 			// Run a manual scraper update if upgraded and pref set
 			if (Zotero.Prefs.get('automaticScraperUpdates')){
 				this.updateScrapersRemote(2);
 			}
 		}
 		
+		Zotero.UnresponsiveScriptIndicator.enable();
 		return;
 	}
 
@@ -914,6 +941,8 @@ Zotero.Schema = new function(){
 			alert('Error migrating Zotero database');
 			throw(e);
 		}
+		
+		return true;
 	}
 	
 	

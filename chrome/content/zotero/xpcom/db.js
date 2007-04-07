@@ -581,7 +581,7 @@ Zotero.DBConnection.prototype.checkException = function (e) {
 }
 
 
-Zotero.DBConnection.prototype.backupDatabase = function () {
+Zotero.DBConnection.prototype.backupDatabase = function (suffix) {
 	if (this.transactionInProgress()) {
 		this._debug("Transaction in progress--skipping backup of DB '" + this._dbName + "'", 2);
 		return false;
@@ -597,7 +597,8 @@ Zotero.DBConnection.prototype.backupDatabase = function () {
 	this._debug("Backing up database '" + this._dbName + "'");
 	
 	var file = Zotero.getZoteroDatabase(this._dbName);
-	var backupFile = Zotero.getZoteroDatabase(this._dbName, 'bak');
+	var backupFile = Zotero.getZoteroDatabase(this._dbName,
+		(suffix ? suffix + '.' : '') + 'bak');
 	
 	// Copy via a temporary file so we don't run into disk space issues
 	// after deleting the old backup file
@@ -626,6 +627,9 @@ Zotero.DBConnection.prototype.backupDatabase = function () {
 		}
 		catch (e){
 			this._debug("Database file '" + tmpFile.leafName + "' is corrupt--skipping backup");
+			if (tmpFile.exists()) {
+				tmpFile.remove(null);
+			}
 			return false;
 		}
 	}
@@ -679,18 +683,6 @@ Zotero.DBConnection.prototype._getDBConnection = function () {
 				dir.remove(true);
 			}
 		}
-	}
-	
-	// DEBUG: Temporary check
-	// Test the backup file (to make sure the backup mechanism is working)
-	if (backupFile.exists()) {
-		try {
-			this._connection = store.openDatabase(backupFile);
-		}
-		catch (e) {
-			this._debug("Backup file '" + backupFile.leafName + "' was corrupt!", 1);
-		}
-		this._connection = undefined;
 	}
 	
 	catchBlock: try {
