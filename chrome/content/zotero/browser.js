@@ -243,6 +243,13 @@ var Zotero_Browser = new function() {
 			function(e) { Zotero_Browser.contentHide(e) }, true);
 		this.tabbrowser.addEventListener("resize",
 			function(e) { Zotero_Browser.resize(e) }, false);
+		// for text zoom changes
+		document.getElementById('cmd_textZoomReduce').addEventListener("command",
+			function(e) { Zotero_Browser.resize(e) }, false);
+		document.getElementById('cmd_textZoomEnlarge').addEventListener("command",
+			function(e) { Zotero_Browser.resize(e) }, false);
+		document.getElementById('cmd_textZoomReset').addEventListener("command",
+			function(e) { Zotero_Browser.resize(e) }, false);
 	}
 	
 	/*
