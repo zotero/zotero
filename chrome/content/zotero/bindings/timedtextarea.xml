@@ -116,6 +116,11 @@
 			  // everything is initialized and the editor will fail to create the
 			  // inline spell checker object
 			  setTimeout(this._delayedInitSpellCheck, 0, this)
+			  
+				// oninput doesn't seem to fire on text drag
+				this.inputField.addEventListener('dragdrop', function(event) {
+					document.getBindingParent(event.target).doInput();
+				}, false);
 			]]>
 			</constructor>
 			
@@ -222,16 +227,25 @@
 					]]>
 				</body>
 			</method>
+			
+			<method name="doInput">
+				<body>
+				<![CDATA[
+					if (this._timer) {
+						clearTimeout(this._timer);
+					}
+					this._timer = this.timeout && setTimeout(this._fireCommand, this.timeout, this);
+				]]>
+				</body>
+			</method>
 		</implementation>
 		
 		
 		<handlers>
 			<handler event="input">
-				<![CDATA[
-				  if (this._timer)
-					clearTimeout(this._timer);
-				  this._timer = this.timeout && setTimeout(this._fireCommand, this.timeout, this);
-				]]>
+			<![CDATA[
+				this.doInput();
+			]]>
 			</handler>
 		</handlers>
 		
