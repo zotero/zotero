@@ -1,4 +1,4 @@
--- 18
+-- 19
 
 -- This file creates system tables that can be safely wiped and reinitialized
 -- at any time, as long as existing ids are preserved.
@@ -556,7 +556,7 @@ INSERT INTO itemTypeFields VALUES (20, 90, NULL, 2);
 INSERT INTO itemTypeFields VALUES (20, 36, NULL, 3);
 INSERT INTO itemTypeFields VALUES (20, 55, NULL, 4);
 INSERT INTO itemTypeFields VALUES (20, 101, NULL, 5);
-INSERT INTO itemTypeFields VALUES (20, 14, NULL, 6);
+INSERT INTO itemTypeFields VALUES (20, 100, NULL, 6);
 INSERT INTO itemTypeFields VALUES (20, 10, NULL, 7);
 INSERT INTO itemTypeFields VALUES (20, 15, NULL, 8);
 INSERT INTO itemTypeFields VALUES (20, 40, NULL, 9);
