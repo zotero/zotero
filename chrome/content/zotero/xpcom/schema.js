@@ -21,14 +21,56 @@
 */
 
 Zotero.Schema = new function(){
+	this.userDataUpgradeRequired = userDataUpgradeRequired;
+	this.showUpgradeWizard = showUpgradeWizard;
+	this.updateSchema = updateSchema;
+	this.updateScrapersRemote = updateScrapersRemote;
+	this.stopRepositoryTimer = stopRepositoryTimer;
+	
+	this.upgradeFinished = false;
+	this.goToChangeLog = false;
+	
 	var _dbVersions = [];
 	var _schemaVersions = [];
 	var _repositoryTimer;
 	var _remoteUpdateInProgress = false;
 	
-	this.updateSchema = updateSchema;
-	this.updateScrapersRemote = updateScrapersRemote;
-	this.stopRepositoryTimer = stopRepositoryTimer;
+	
+	function userDataUpgradeRequired() {
+		var dbVersion = _getDBVersion('userdata');
+		var schemaVersion = _getSchemaSQLVersion('userdata');
+		
+		return dbVersion && (dbVersion < schemaVersion);
+	}
+	
+	
+	function showUpgradeWizard() {
+		var dbVersion = _getDBVersion('userdata');
+		var schemaVersion = _getSchemaSQLVersion('userdata');
+		
+		var ww = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
+				   .getService(Components.interfaces.nsIWindowWatcher);
+		var obj = { Zotero: Zotero, data: { success: false } };
+		var io = { wrappedJSObject: obj };
+		var win = ww.openWindow(null, "chrome://zotero/content/upgrade.xul",
+					"zotero-schema-upgrade", "chrome,centerscreen,modal", io);
+		
+		if (obj.data.e) {
+			var ww = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
+					   .getService(Components.interfaces.nsIWindowWatcher);
+			var data = {
+				msg: obj.data.msg,
+				e: obj.data.e,
+				extraData: "Schema upgrade from " + dbVersion + " to " + schemaVersion
+			};
+			var io = { wrappedJSObject: { Zotero: Zotero, data:  data } };
+			var win = ww.openWindow(null, "chrome://zotero/content/errorReport.xul",
+						"zotero-error-report", "chrome,centerscreen,modal", io);
+		}
+		
+		return obj.data.success;
+	}
+	
 	
 	/*
 	 * Checks if the DB schema exists and is up-to-date, updating if necessary
@@ -46,75 +88,77 @@ Zotero.Schema = new function(){
 		
 		var schemaVersion = _getSchemaSQLVersion('userdata');
 		
-		Zotero.UnresponsiveScriptIndicator.disable();
-		
-		// If upgrading userdata, make backup of database first
-		if (dbVersion < schemaVersion){
-			Zotero.DB.backupDatabase(dbVersion);
-		}
-		
-		Zotero.DB.beginTransaction();
-		
 		try {
-			// Old schema system
-			if (!dbVersion){
-				// Check for pre-1.0b2 'user' table
-				 var user = _getDBVersion('user');
-				 if (user)
-				 {
-					 dbVersion = user;
-					 var sql = "UPDATE version SET schema=? WHERE schema=?";
-					 Zotero.DB.query(sql, ['userdata', 'user']);
-				 }
-				 else
-				 {
-					 dbVersion = 0;
-				 }
+			Zotero.UnresponsiveScriptIndicator.disable();
+			
+			// If upgrading userdata, make backup of database first
+			if (dbVersion < schemaVersion){
+				Zotero.DB.backupDatabase(dbVersion);
 			}
 			
-			var up1 = _migrateUserDataSchema(dbVersion);
-			var up2 = _updateSchema('system');
-			var up3 = _updateSchema('scrapers');
+			Zotero.DB.beginTransaction();
 			
-			// Rebuild fulltext cache if necessary
-			if (Zotero.Fulltext.cacheIsOutdated()){
-				Zotero.Fulltext.rebuildCache();
-			}
-			Zotero.DB.commitTransaction();
-		}
-		catch(e){
-			Zotero.debug(e);
-			Zotero.DB.rollbackTransaction();
-			Zotero.UnresponsiveScriptIndicator.enable();
-			throw(e);
-		}
-		
-		if (up1) {
-			// Upgrade seems to have been a success -- delete any previous backups
-			var maxPrevious = dbVersion - 1;
-			var file = Zotero.getZoteroDirectory();
-			// directoryEntries.hasMoreElements() throws an error (possibly
-			// because of the temporary SQLite journal file?), so we just look
-			// for all versions
-			for (var i=maxPrevious; i>=29; i--) {
-				var fileName = 'zotero.sqlite.' + i + '.bak';
-				file.append(fileName);
-				if (file.exists()) {
-					Zotero.debug('Removing previous backup file ' + fileName);
-					file.remove(null);
+			try {
+				// Old schema system
+				if (!dbVersion){
+					// Check for pre-1.0b2 'user' table
+					 var user = _getDBVersion('user');
+					 if (user)
+					 {
+						 dbVersion = user;
+						 var sql = "UPDATE version SET schema=? WHERE schema=?";
+						 Zotero.DB.query(sql, ['userdata', 'user']);
+					 }
+					 else
+					 {
+						 dbVersion = 0;
+					 }
 				}
-				file = file.parent;
+				
+				var up1 = _migrateUserDataSchema(dbVersion);
+				var up2 = _updateSchema('system');
+				var up3 = _updateSchema('scrapers');
+				
+				// Rebuild fulltext cache if necessary
+				if (Zotero.Fulltext.cacheIsOutdated()){
+					Zotero.Fulltext.rebuildCache();
+				}
+				Zotero.DB.commitTransaction();
+			}
+			catch(e){
+				Zotero.debug(e);
+				Zotero.DB.rollbackTransaction();
+				throw(e);
+			}
+			
+			if (up1) {
+				// Upgrade seems to have been a success -- delete any previous backups
+				var maxPrevious = dbVersion - 1;
+				var file = Zotero.getZoteroDirectory();
+				// directoryEntries.hasMoreElements() throws an error (possibly
+				// because of the temporary SQLite journal file?), so we just look
+				// for all versions
+				for (var i=maxPrevious; i>=29; i--) {
+					var fileName = 'zotero.sqlite.' + i + '.bak';
+					file.append(fileName);
+					if (file.exists()) {
+						Zotero.debug('Removing previous backup file ' + fileName);
+						file.remove(null);
+					}
+					file = file.parent;
+				}
+			}
+			
+			if (up2 || up3) {
+				// Run a manual scraper update if upgraded and pref set
+				if (Zotero.Prefs.get('automaticScraperUpdates')){
+					this.updateScrapersRemote(2);
+				}
 			}
 		}
-		
-		if (up2 || up3) {
-			// Run a manual scraper update if upgraded and pref set
-			if (Zotero.Prefs.get('automaticScraperUpdates')){
-				this.updateScrapersRemote(2);
-			}
+		finally {
+			Zotero.UnresponsiveScriptIndicator.enable();
 		}
-		
-		Zotero.UnresponsiveScriptIndicator.enable();
 		return;
 	}
 
@@ -399,6 +443,7 @@ Zotero.Schema = new function(){
 		}
 		catch(e){
 			Zotero.debug(e, 1);
+			Components.utils.reportError(e);
 			Zotero.DB.rollbackTransaction();
 			alert('Error initializing Zotero database'); // TODO: localize
 			throw(e);
@@ -433,7 +478,6 @@ Zotero.Schema = new function(){
 			catch (e){
 				Zotero.debug(e, 1);
 				Zotero.DB.rollbackTransaction();
-				alert('Error updating Zotero database'); // TODO: localize
 				throw(e);
 			}
 			return true;
@@ -640,7 +684,7 @@ Zotero.Schema = new function(){
 	 * Migrate user data schema from an older version, preserving data
 	 */
 	function _migrateUserDataSchema(fromVersion){
-		toVersion = _getSchemaSQLVersion('userdata');
+		var toVersion = _getSchemaSQLVersion('userdata');
 		
 		if (fromVersion==toVersion){
 			return false;
@@ -761,6 +805,58 @@ Zotero.Schema = new function(){
 				
 				// 1.0.0b3.r1
 				
+				// Repair for interrupted B4 upgrades
+				if (i==14) {
+					var hash = Zotero.DB.getColumnHash('itemNotes');
+					if (!hash.isAbstract) {
+						// See if itemDataValues exists
+						if (!Zotero.DB.tableExists('itemDataValues')) {
+							// Copied from step 23
+							var notes = Zotero.DB.query("SELECT itemID, note FROM itemNotes WHERE itemID IN (SELECT itemID FROM items WHERE itemTypeID=1)");
+							if (notes) {
+								var f = function(text) { var t = text.substring(0, 80); var ln = t.indexOf("\n"); if (ln>-1 && ln<80) { t = t.substring(0, ln); } return t; }
+								for (var j=0; j<notes.length; j++) {
+									Zotero.DB.query("REPLACE INTO itemNoteTitles VALUES (?,?)", [notes[j]['itemID'], f(notes[j]['note'])]);
+								}
+							}
+							
+							Zotero.DB.query("CREATE TABLE itemDataValues (\n    valueID INT,\n    value,\n    PRIMARY KEY (valueID)\n);");
+							var values = Zotero.DB.columnQuery("SELECT DISTINCT value FROM itemData");
+							if (values) {
+								for (var j=0; j<values.length; j++) {
+									var valueID = Zotero.getRandomID('itemDataValues', 'valueID', 2097152); // Stored in 3 bytes
+									Zotero.DB.query("INSERT INTO itemDataValues VALUES (?,?)", [valueID, values[j]]);
+								}
+							}
+							
+							Zotero.DB.query("CREATE TEMPORARY TABLE itemDataTemp AS SELECT itemID, fieldID, (SELECT valueID FROM itemDataValues WHERE value=ID.value) AS valueID FROM itemData ID");
+							Zotero.DB.query("DROP TABLE itemData");
+							Zotero.DB.query("CREATE TABLE itemData (\n    itemID INT,\n    fieldID INT,\n    valueID INT,\n    PRIMARY KEY (itemID, fieldID),\n    FOREIGN KEY (itemID) REFERENCES items(itemID),\n    FOREIGN KEY (fieldID) REFERENCES fields(fieldID)\n    FOREIGN KEY (valueID) REFERENCES itemDataValues(valueID)\n);");
+							Zotero.DB.query("INSERT INTO itemData SELECT * FROM itemDataTemp");
+							Zotero.DB.query("DROP TABLE itemDataTemp");
+							
+							i = 23;
+							continue;
+						}
+						
+						var rows = Zotero.DB.query("SELECT * FROM itemData WHERE valueID NOT IN (SELECT valueID FROM itemDataValues)");
+						if (rows) {
+							for (var j=0; j<rows.length; j++) {
+								for (var j=0; j<values.length; j++) {
+									var valueID = Zotero.getRandomID('itemDataValues', 'valueID', 2097152); // Stored in 3 bytes
+									Zotero.DB.query("INSERT INTO itemDataValues VALUES (?,?)", [valueID, values[j]]);
+									Zotero.DB.query("UPDATE itemData SET valueID=? WHERE itemID=? AND fieldID=?", [valueID, rows[j]['itemID'], rows[j]['fieldID']]);
+								}
+							}
+							i = 23;
+							continue;
+						}
+						
+						i = 27;
+						continue;
+					}
+				}
+				
 				if (i==15) {
 					Zotero.DB.query("DROP TABLE IF EXISTS annotations");
 				}
@@ -852,16 +948,20 @@ Zotero.Schema = new function(){
 				if (i==23) {
 					Zotero.DB.query("CREATE TABLE IF NOT EXISTS itemNoteTitles (\n    itemID INT,\n    title TEXT,\n    PRIMARY KEY (itemID),\n    FOREIGN KEY (itemID) REFERENCES itemNotes(itemID)\n);");
 					var notes = Zotero.DB.query("SELECT itemID, note FROM itemNotes WHERE itemID IN (SELECT itemID FROM items WHERE itemTypeID=1)");
+					if (notes) {
 					var f = function(text) { var t = text.substring(0, 80); var ln = t.indexOf("\n"); if (ln>-1 && ln<80) { t = t.substring(0, ln); } return t; }
-					for each(var note in notes) {
-						Zotero.DB.query("INSERT INTO itemNoteTitles VALUES (?,?)", [note['itemID'], f(note['note'])]);
+						for (var j=0; j<notes.length; j++) {
+							Zotero.DB.query("INSERT INTO itemNoteTitles VALUES (?,?)", [notes[j]['itemID'], f(notes[j]['note'])]);
+						}
 					}
 					
 					Zotero.DB.query("CREATE TABLE IF NOT EXISTS itemDataValues (\n    valueID INT,\n    value,\n    PRIMARY KEY (valueID)\n);");
 					var values = Zotero.DB.columnQuery("SELECT DISTINCT value FROM itemData");
-					for each(var value in values) {
-						var valueID = Zotero.getRandomID('itemDataValues', 'valueID', 2097152); // Stored in 3 bytes
-						Zotero.DB.query("INSERT INTO itemDataValues VALUES (?,?)", [valueID, value]);
+					if (values) {
+						for (var j=0; j<values.length; j++) {
+							var valueID = Zotero.getRandomID('itemDataValues', 'valueID', 2097152); // Stored in 3 bytes
+							Zotero.DB.query("INSERT INTO itemDataValues VALUES (?,?)", [valueID, values[j]]);
+						}
 					}
 					
 					Zotero.DB.query("CREATE TEMPORARY TABLE itemDataTemp AS SELECT itemID, fieldID, (SELECT valueID FROM itemDataValues WHERE value=ID.value) AS valueID FROM itemData ID");
@@ -873,15 +973,17 @@ Zotero.Schema = new function(){
 				
 				if (i==24) {
 					var rows = Zotero.DB.query("SELECT * FROM itemData NATURAL JOIN itemDataValues WHERE fieldID IN (52,96,100)");
-					for each(var row in rows) {
-						if (!Zotero.Date.isMultipart(row['value'])) {
-							var value = Zotero.Date.strToMultipart(row['value']);
-							var valueID = Zotero.DB.valueQuery("SELECT valueID FROM itemDataValues WHERE value=?", value);
-							if (!valueID) {
-								var valueID = Zotero.getRandomID('itemDataValues', 'valueID', 2097152);
-								Zotero.DB.query("INSERT INTO itemDataValues VALUES (?,?)", [valueID, value]);
+					if (rows) {
+						for (var j=0; j<rows.length; j++) {
+							if (!Zotero.Date.isMultipart(rows[j]['value'])) {
+								var value = Zotero.Date.strToMultipart(rows[j]['value']);
+								var valueID = Zotero.DB.valueQuery("SELECT valueID FROM itemDataValues WHERE value=?", rows[j]['value']);
+								if (!valueID) {
+									var valueID = Zotero.getRandomID('itemDataValues', 'valueID', 2097152);
+									Zotero.DB.query("INSERT INTO itemDataValues VALUES (?,?)", [valueID, value]);
+								}
+								Zotero.DB.query("UPDATE itemData SET valueID=? WHERE itemID=? AND fieldID=?", [valueID, rows[j]['itemID'], rows[j]['fieldID']]);
 							}
-							Zotero.DB.query("UPDATE itemData SET valueID=? WHERE itemID=? AND fieldID=?", [valueID, row['itemID'], row['fieldID']]);
 						}
 					}
 				}
@@ -902,8 +1004,17 @@ Zotero.Schema = new function(){
 				
 				if (i==28) {
 					var childNotes = Zotero.DB.query("SELECT * FROM itemNotes WHERE itemID IN (SELECT itemID FROM items) AND sourceItemID IS NOT NULL");
+					if (!childNotes.length) {
+						continue;
+					}
+					Zotero.DB.query("CREATE TEMPORARY TABLE itemNotesTemp AS SELECT * FROM itemNotes WHERE note IN (SELECT itemID FROM items) AND sourceItemID IS NOT NULL");
+					Zotero.DB.query("CREATE INDEX tmp_itemNotes_pk ON itemNotesTemp(note, sourceItemID);");
+					var num = Zotero.DB.valueQuery("SELECT COUNT(*) FROM itemNotesTemp");
+					if (!num) {
+						continue;
+					}
 					for (var j=0; j<childNotes.length; j++) {
-						var reversed = Zotero.DB.query("SELECT * FROM itemNotes WHERE note=? AND sourceItemID=?", [childNotes[j].itemID, childNotes[j].sourceItemID]);
+						var reversed = Zotero.DB.query("SELECT * FROM itemNotesTemp WHERE note=? AND sourceItemID=?", [childNotes[j].itemID, childNotes[j].sourceItemID]);
 						if (!reversed.length) {
 							continue;
 						}
@@ -926,7 +1037,7 @@ Zotero.Schema = new function(){
 				// 1.0.0b4.r2
 				
 				if (i==29) {
-					Zotero.DB.query("CREATE TABLE settings (\n    setting TEXT,\n    key TEXT,\n    value,\n    PRIMARY KEY (setting, key)\n);");
+					Zotero.DB.query("CREATE TABLE IF NOT EXISTS settings (\n    setting TEXT,\n    key TEXT,\n    value,\n    PRIMARY KEY (setting, key)\n);");
 				}
 			}
 			
@@ -936,9 +1047,7 @@ Zotero.Schema = new function(){
 			Zotero.DB.commitTransaction();
 		}
 		catch(e){
-			Zotero.debug(e);
 			Zotero.DB.rollbackTransaction();
-			alert('Error migrating Zotero database');
 			throw(e);
 		}
 		

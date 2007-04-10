@@ -81,6 +81,7 @@ var ZoteroPane = new function()
 	this.showSelectedAttachmentInFilesystem = showSelectedAttachmentInFilesystem;
 	this.showAttachmentNotFoundDialog = showAttachmentNotFoundDialog;
 	this.relinkAttachment = relinkAttachment;
+	this.reportErrors = reportErrors;
 	
 	var self = this;
 	
@@ -582,12 +583,16 @@ var ZoteroPane = new function()
 			itemgroup.setSearch('');
 			itemgroup.setTags(getTagSelection());
 			
-			Zotero.UnresponsiveScriptIndicator.disable();
-			this.itemsView = new Zotero.ItemTreeView(itemgroup);
-			this.itemsView.addCallback(_setTagScope);
-			document.getElementById('zotero-items-tree').view = this.itemsView;
-			this.itemsView.selection.clearSelection();
-			Zotero.UnresponsiveScriptIndicator.enable();
+			try {
+				Zotero.UnresponsiveScriptIndicator.disable();
+				this.itemsView = new Zotero.ItemTreeView(itemgroup);
+				this.itemsView.addCallback(_setTagScope);
+				document.getElementById('zotero-items-tree').view = this.itemsView;
+				this.itemsView.selection.clearSelection();
+			}
+			finally {
+				Zotero.UnresponsiveScriptIndicator.enable();
+			}
 		}
 		else
 		{
@@ -1706,6 +1711,21 @@ var ZoteroPane = new function()
 			file.QueryInterface(Components.interfaces.nsILocalFile);
 			item.relinkAttachmentFile(file);
 		}
+	}
+	
+	
+	function reportErrors() {
+		var errors = Zotero.getErrors(true);
+		var ww = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
+				   .getService(Components.interfaces.nsIWindowWatcher);
+		var data = {
+			msg: Zotero.getString('errorReport.followingErrors'),
+			e: errors.join('\n\n'),
+			askForSteps: true
+		};
+		var io = { wrappedJSObject: { Zotero: Zotero, data:  data } };
+		var win = ww.openWindow(null, "chrome://zotero/content/errorReport.xul",
+					"zotero-error-report", "chrome,centerscreen,modal", io);
 	}
 }
 

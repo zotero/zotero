@@ -43,6 +43,7 @@ var Zotero = new function(){
 	this.debug = debug;
 	this.log = log;
 	this.getErrors = getErrors;
+	this.getSystemInfo = getSystemInfo;
 	this.varDump = varDump;
 	this.safeDebug = safeDebug;
 	this.getString = getString;
@@ -68,6 +69,7 @@ var Zotero = new function(){
 	this.locale;
 	this.isMac;
 	this.isWin;
+	this.initialURL; // used by Schema to show the changelog on upgrades
 	
 	var _startupError;
 	var _startupErrorHandler;
@@ -195,7 +197,19 @@ var Zotero = new function(){
 		Zotero.Fulltext.init();
 		
 		// Trigger updating of schema and scrapers
-		Zotero.Schema.updateSchema();
+		if (Zotero.Schema.userDataUpgradeRequired()) {
+			var upgraded = Zotero.Schema.showUpgradeWizard();
+			if (!upgraded) {
+				this.skipLoading = true;
+				Zotero.DB.skipBackup = true;
+				return false;
+			}
+		}
+		// If no userdata upgrade, still might need to process system/scrapers
+		else {
+			Zotero.Schema.updateSchema();
+		}
+		
 		Zotero.Schema.updateScrapersRemote();
 		
 		// Initialize integration web server
@@ -203,6 +217,7 @@ var Zotero = new function(){
 		Zotero.Integration.init();
 		
 		this.initialized = true;
+		
 		return true;
 	}
 	
@@ -412,7 +427,7 @@ var Zotero = new function(){
 	}
 	
 	
-	function getErrors() {
+	function getErrors(asStrings) {
 		var errors = [];
 		var cs = Components.classes["@mozilla.org/consoleservice;1"].
 			getService(Components.interfaces.nsIConsoleService);
@@ -421,20 +436,46 @@ var Zotero = new function(){
 		
 		var skip = ['CSS Parser', 'content javascript'];
 		
-		for each(var msg in messages) {
-			Zotero.debug(msg);
+		for each(var msg in messages.value) {
+			//Zotero.debug(msg);
 			try {
 				msg.QueryInterface(Components.interfaces.nsIScriptError);
-				if (skip.indexOf(msg.category) != -1) {
+				//Zotero.debug(msg);
+				if (skip.indexOf(msg.category) != -1 || msg.flags & msg.warningFlag) {
 					continue;
 				}
-				errors.push(msg.errorMessage);
 			}
-			catch(e) {
-				errors.push(msg.message);
+			catch (e) { }
+			
+			if (asStrings) {
+				errors.push(msg.message)
+			}
+			else {
+				errors.push(msg);
 			}
 		}
 		return errors;
+	}
+	
+	
+	function getSystemInfo() {
+		var appInfo = Components.classes["@mozilla.org/xre/app-info;1"].
+			getService(Components.interfaces.nsIXULAppInfo);
+		
+		var info = {
+			version: Zotero.version,
+			platform: Zotero.platform,
+			locale: Zotero.locale,
+			appName: appInfo.name,
+			appVersion: appInfo.version
+		};
+		
+		var str = '';
+		for (var key in info) {
+			str += key + ' => ' + info[key] + ', ';
+		}
+		str = str.substr(0, str.length - 2);
+		return str;
 	}
 	
 	

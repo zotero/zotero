@@ -25,6 +25,8 @@ Zotero.DBConnection = function(dbName) {
 		throw ('DB name not provided in Zotero.DBConnection()');
 	}
 	
+	this.skipBackup = false;
+	
 	// Private members
 	this._dbName = dbName;
 	this._shutdown = false;
@@ -32,7 +34,7 @@ Zotero.DBConnection = function(dbName) {
 	this._transactionRollback = null;
 	this._transactionNestingLevel = 0;
 	this._callbacks = { begin: [], commit: [], rollback: [] };
-	this._skipBackup = false;
+	this._dbIsCorrupt = null
 	this._self = this;
 }
 	
@@ -543,7 +545,7 @@ Zotero.DBConnection.prototype.observe = function(subject, topic, data) {
 
 
 Zotero.DBConnection.prototype.checkException = function (e) {
-	if (e.name == 'NS_ERROR_FILE_CORRUPTED') {
+	if (e.name && e.name == 'NS_ERROR_FILE_CORRUPTED') {
 		var file = Zotero.getZoteroDatabase(this._dbName, 'is.corrupt');
 		var foStream = Components.classes["@mozilla.org/network/file-output-stream;1"]
 						 .createInstance(Components.interfaces.nsIFileOutputStream);
@@ -551,7 +553,7 @@ Zotero.DBConnection.prototype.checkException = function (e) {
 		foStream.write('', 0);
 		foStream.close();
 		
-		this._skipBackup = true;
+		this._dbIsCorrupt = true;
 		
 		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 								.getService(Components.interfaces.nsIPromptService);
@@ -589,7 +591,11 @@ Zotero.DBConnection.prototype.backupDatabase = function (suffix) {
 	
 	var corruptMarker = Zotero.getZoteroDatabase(this._dbName, 'is.corrupt').exists();
 	
-	if (this._skipBackup || corruptMarker) {
+	if (this.skipBackup) {
+		this._debug("Skipping backup of database '" + this._dbName + "'", 1);
+		return false;
+	}
+	else if (this._dbIsCorrupt || corruptMarker) {
 		this._debug("Database '" + this._dbName + "' is marked as corrupt--skipping backup", 1);
 		return false;
 	}
