@@ -68,7 +68,7 @@
 		<!-- onmouseup shouldn't be necessary but seems to help prevent tag selector from sometimes going off the screen -->
 		<splitter id="zotero-splitter" resizebefore="closest" resizeafter="closest" hidden="true"
 			onmouseup="ZoteroPane.updateTagSelectorSize()"/>
-		<hbox id="zotero-pane" persist="height" hidden="true"
+		<hbox id="zotero-pane" persist="savedHeight" hidden="true"
 			onkeydown="ZoteroPane.handleKeyDown(event, this.id)"
 			onkeyup="ZoteroPane.handleKeyUp(event, this.id)">
 			<popupset>

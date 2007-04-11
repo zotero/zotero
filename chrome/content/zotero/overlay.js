@@ -32,7 +32,9 @@ var ZoteroPane = new function()
 	this.onLoad = onLoad;
 	this.onUnload = onUnload;
 	this.toggleDisplay = toggleDisplay;
+	this.isShowing = isShowing;
 	this.fullScreen = fullScreen;
+	this.isFullScreen = isFullScreen;
 	this.handleKeyDown = handleKeyDown;
 	this.handleKeyUp = handleKeyUp;
 	this.setHighlightedRowsCallback = setHighlightedRowsCallback;
@@ -83,6 +85,8 @@ var ZoteroPane = new function()
 	this.relinkAttachment = relinkAttachment;
 	this.reportErrors = reportErrors;
 	
+	const COLLECTIONS_HEIGHT = 125; // minimum height of the collections pane and toolbar
+	
 	var self = this;
 	
 	/*
@@ -102,7 +106,7 @@ var ZoteroPane = new function()
 			
 			var newPane = document.createElement('hbox');
 			newPane.setAttribute('id','zotero-pane');
-			newPane.setAttribute('persist','height');
+			newPane.setAttribute('persist','savedHeight');
 			newPane.setAttribute('hidden', true);
 			newPane.setAttribute('onkeydown', 'ZoteroPane.handleKeyDown(event, this.id)');
 			newPane.setAttribute('onkeyup', 'ZoteroPane.handleKeyUp(event, this.id)');
@@ -191,12 +195,23 @@ var ZoteroPane = new function()
 	 */
 	function toggleDisplay()
 	{
-		// Visible == target visibility
-		var visible = document.getElementById('zotero-pane').getAttribute('hidden') == 'true';
+		var zoteroPane = document.getElementById('zotero-pane');
+		var zoteroSplitter = document.getElementById('zotero-splitter')
+		
+		if (zoteroPane.getAttribute('hidden') == 'true') {
+			var isHidden = true;
+		}
+		else if (zoteroPane.getAttribute('collapsed') == 'true') {
+			var isCollapsed = true;
+		}
+		
+		if (isHidden || isCollapsed) {
+			var makeVisible = true;
+		}
 		
 		// If Zotero not initialized, try to get the error handler
 		// or load the default error page
-		if (visible && (!Zotero || !Zotero.initialized)) {
+		if (makeVisible && (!Zotero || !Zotero.initialized)) {
 			if (Zotero) {
 				var errFunc = Zotero.startupErrorHandler;
 			}
@@ -215,30 +230,82 @@ var ZoteroPane = new function()
 			return;
 		}
 		
-		document.getElementById('zotero-pane').setAttribute('hidden', !visible);
-		document.getElementById('zotero-splitter').setAttribute('hidden', !visible);
+		zoteroSplitter.setAttribute('hidden', !makeVisible);
 		
-		if (visible) {
+		// Restore fullscreen mode if necessary
+		var fullScreenMode = document.getElementById('zotero-tb-fullscreen').getAttribute('fullscreenmode') == 'true';
+		if (makeVisible && fullScreenMode) {
+			this.fullScreen(true);
+		}
+		
+		var savedHeight = zoteroPane.getAttribute('savedHeight');
+		
+		/*
+		Zotero.debug("zoteroPane.boxObject.height: " + zoteroPane.boxObject.height);
+		Zotero.debug("zoteroPane.getAttribute('height'): " + zoteroPane.getAttribute('height'));
+		Zotero.debug("zoteroPane.getAttribute('minheight'): " + zoteroPane.getAttribute('minheight'));
+		Zotero.debug("savedHeight: " + savedHeight);
+		*/
+		
+		if (makeVisible) {
+			this.updateTagSelectorSize();
+			
+			var max = document.getElementById('appcontent').boxObject.height
+						- zoteroSplitter.boxObject.height;
+			
+			if (isHidden) {
+				zoteroPane.setAttribute('height', Math.min(savedHeight, max));
+				zoteroPane.setAttribute('hidden', false);
+			}
+			else if (isCollapsed) {
+				zoteroPane.setAttribute('height', Math.min(savedHeight, max));
+				zoteroPane.setAttribute('collapsed', false);
+			}
+			
 			// Focus the quicksearch on pane open
 			setTimeout("document.getElementById('zotero-tb-search').inputField.select();", 1);
 		}
 		else {
+			zoteroPane.setAttribute('collapsed', true);
+			zoteroPane.height = 0;
+			
 			document.getElementById('content').setAttribute('collapsed', false);
-			document.getElementById('zotero-tb-fullscreen').setAttribute('fullscreenmode', false);
 			
 			// Return focus to the browser content pane
 			window.content.window.focus();
 		}
 	}
 	
-	function fullScreen()
+	
+	function isShowing() {
+		var zoteroPane = document.getElementById('zotero-pane');
+		return zoteroPane.getAttribute('hidden') != 'true' &&
+				zoteroPane.getAttribute('collapsed') != 'true';
+	}
+	
+	
+	function fullScreen(set)
 	{
-		var collapsed = document.getElementById('content').getAttribute('collapsed') == 'true';
+		var fs = document.getElementById('zotero-tb-fullscreen');
+		
+		if (set != undefined) {
+			var makeFullScreen = set;
+		}
+		else {
+			var makeFullScreen = fs.getAttribute('fullscreenmode') != 'true';
+		}
+		
 		// Turn Z-pane flex on to stretch to window in full-screen, but off otherwise so persist works
-		document.getElementById('zotero-pane').setAttribute('flex', collapsed ? "0" : "1");
-		document.getElementById('content').setAttribute('collapsed', !collapsed);
-		document.getElementById('zotero-splitter').setAttribute('hidden', !collapsed);
-		document.getElementById('zotero-tb-fullscreen').setAttribute('fullscreenmode', !collapsed);
+		document.getElementById('zotero-pane').setAttribute('flex', makeFullScreen ? "1" : "0");
+		document.getElementById('content').setAttribute('collapsed', makeFullScreen);
+		document.getElementById('zotero-splitter').setAttribute('hidden', makeFullScreen);
+		fs.setAttribute('fullscreenmode', makeFullScreen);
+	}
+	
+	
+	function isFullScreen() {
+		var fs = document.getElementById('zotero-tb-fullscreen');
+		return fs.getAttribute('fullscreenmode') == 'true'
 	}
 	
 	
@@ -275,7 +342,9 @@ var ZoteroPane = new function()
 		}
 		
 		// Ignore keystrokes if Zotero pane is closed
-		if (document.getElementById('zotero-pane').getAttribute('hidden') == 'true') {
+		var zoteroPane = document.getElementById('zotero-pane');
+		if (zoteroPane.getAttribute('hidden') == 'true' ||
+				zoteroPane.getAttribute('collapsed') == 'true') {
 			return;
 		}
 		
@@ -495,21 +564,35 @@ var ZoteroPane = new function()
 	
 	
 	function updateTagSelectorSize() {
+		//Zotero.debug('Updating tag selector size');
 		var zoteroPane = document.getElementById('zotero-pane');
+		var splitter = document.getElementById('zotero-tags-splitter');
 		var tagSelector = document.getElementById('zotero-tag-selector');
+		
+		// Nothing should be bigger than appcontent's height
+		var max = document.getElementById('appcontent').boxObject.height
+					- splitter.boxObject.height;
+		
+		// Shrink tag selector to appcontent's height
+		var maxTS = max - COLLECTIONS_HEIGHT;
+		if (parseInt(tagSelector.getAttribute("height")) > maxTS) {
+			//Zotero.debug("Limiting tag selector height to appcontent");
+			tagSelector.setAttribute('height', maxTS);
+		}
 		
 		height = tagSelector.boxObject.height;
 		
 		/*
-		Zotero.debug(tagSelector.boxObject.height);
-		Zotero.debug(tagSelector.getAttribute('height'));
-		Zotero.debug(zoteroPane.boxObject.height);
-		Zotero.debug(zoteroPane.getAttribute('height'));
+		Zotero.debug("tagSelector.boxObject.height: " + tagSelector.boxObject.height);
+		Zotero.debug("tagSelector.getAttribute('height'): " + tagSelector.getAttribute('height'));
+		Zotero.debug("zoteroPane.boxObject.height: " + zoteroPane.boxObject.height);
+		Zotero.debug("zoteroPane.getAttribute('height'): " + zoteroPane.getAttribute('height'));
 		*/
 		
 		// Don't let the Z-pane jump back down to its previous height
 		// (if shrinking or hiding the tag selector let it clear the min-height)
 		if (zoteroPane.getAttribute('height') < zoteroPane.boxObject.height) {
+			//Zotero.debug("Setting Zotero pane height attribute to " +  zoteroPane.boxObject.height);
 			zoteroPane.setAttribute('height', zoteroPane.boxObject.height);
 		}
 		
@@ -529,6 +612,10 @@ var ZoteroPane = new function()
 		
 		//Zotero.debug('Setting Zotero pane minheight to ' + height);
 		zoteroPane.setAttribute('minheight', height);
+		
+		if (this.isShowing() && !this.isFullScreen()) {
+			zoteroPane.setAttribute('savedHeight', zoteroPane.boxObject.height);
+		}
 		
 		// Fix bug whereby resizing the Z pane downward after resizing
 		// the tag selector up and then down sometimes caused the Z pane to

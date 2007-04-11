@@ -68,6 +68,7 @@ Zotero.ItemTreeView.prototype._runCallbacks = function() {
  */
 Zotero.ItemTreeView.prototype.setTree = function(treebox)
 {
+	//Zotero.debug("Calling setTree()");
 	// Try to set the window document if not yet set
 	if (treebox && !this._ownerDocument) {
 		try {
@@ -81,6 +82,10 @@ Zotero.ItemTreeView.prototype.setTree = function(treebox)
 			this.sort();
 		}
 		return;
+	}
+	
+	if (!treebox) {
+		Components.utils.reportError("Passed treebox empty in setTree()");
 	}
 	
 	this._treebox = treebox;
@@ -185,6 +190,7 @@ Zotero.ItemTreeView.prototype.refresh = function()
 Zotero.ItemTreeView.prototype.notify = function(action, type, ids)
 {
 	if (!this._treebox || !this._treebox.treeBody) {
+		Components.utils.reportError("Treebox didn't exist in itemTreeView.notify()");
 		return;
 	}
 	
@@ -1021,6 +1027,11 @@ Zotero.ItemTreeView.prototype.deleteSelection = function(eraseChildren, force)
  * Set the tags filter on the view
  */
 Zotero.ItemTreeView.prototype.setFilter = function(type, data) {
+	if (!this._treebox || !this._treebox.treeBody) {
+		Components.utils.reportError("Treebox didn't exist in itemTreeView.setFilter()");
+		return;
+	}
+	
 	this.selection.selectEventsSuppressed = true;
 	var savedSelection = this.saveSelection();
 	var savedOpenState = this.saveOpenState();
@@ -1122,7 +1133,6 @@ Zotero.ItemTreeView.prototype.saveSelection = function()
  */
 Zotero.ItemTreeView.prototype.rememberSelection = function(selection)
 {
-	// DEBUG: This seems to occasionally cause a crash
 	this.selection.clearSelection();
 	
 	for(var i=0; i < selection.length; i++)
