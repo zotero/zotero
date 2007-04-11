@@ -436,6 +436,7 @@ var Zotero = new function(){
 		
 		var skip = ['CSS Parser', 'content javascript'];
 		
+		msgblock:
 		for each(var msg in messages.value) {
 			//Zotero.debug(msg);
 			try {
@@ -446,6 +447,19 @@ var Zotero = new function(){
 				}
 			}
 			catch (e) { }
+			
+			var blacklist = [
+				"No chrome package registered for chrome://communicator",
+				'[JavaScript Error: "Components is not defined" {file: "chrome://nightly/content/talkback/talkback.js',
+				'[JavaScript Error: "document.getElementById("sanitizeItem")'
+			];
+			
+			for (var i=0; i<blacklist.length; i++) {
+				if (msg.message.indexOf(blacklist[i]) != -1) {
+					Zotero.debug("Skipping blacklisted error: " + msg.message);
+					continue msgblock;
+				}
+			}
 			
 			if (asStrings) {
 				errors.push(msg.message)
