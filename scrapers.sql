@@ -1,4 +1,4 @@
--- 215
+-- 216
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-04-05 19:45:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-04-13 16:05:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-03-21 15:26:54', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -4503,7 +4503,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('ecddda2e-4fc6-4aea-9f17-ef3b56d7377a', '1.0.0b3.r1', '', '2007-04-02 14:55:00', '1', '100', '4', 'arXiv.org', 'Sean Takats', '^http://(?:www\.)?(?:arxiv\.org/(?:find/\w|list/\w|abs/[^/]+/[0-9]+)|eprintweb.org/S/(?:search|archive|article))', 
+REPLACE INTO translators VALUES ('ecddda2e-4fc6-4aea-9f17-ef3b56d7377a', '1.0.0b3.r1', '', '2007-04-13 16:05:00', '1', '100', '4', 'arXiv.org', 'Sean Takats', '^http://(?:www\.)?(?:arxiv\.org/(?:find/\w|list/\w|abs/)|eprintweb.org/S/(?:search|archive|article)(?!.*refs$)(?!.*cited$))', 
 'function detectWeb(doc, url) {
 	var searchRe = /^http:\/\/(?:www\.)?(?:arxiv\.org\/(?:find|list)|eprintweb.org\/S\/(?:archive|search$))/;
 	if(searchRe.test(url)) {
@@ -4518,10 +4518,13 @@ REPLACE INTO translators VALUES ('ecddda2e-4fc6-4aea-9f17-ef3b56d7377a', '1.0.0b
 }
 
 function doWeb(doc, url) {
-	var eprintsMultRe = /^http:\/\/(?:www\.)?eprintweb.org\/S\/(?:search|archive)/;
-	var eprintsM = eprintsMultRe.exec(url);
+	var eprintMultRe = /^http:\/\/(?:www\.)?eprintweb.org\/S\/(?:search|archive)/;
+	var eprintMultM = eprintMultRe.exec(url);
+	
+	var eprintSingRe = /^http:\/\/(?:www\.)?eprintweb.org\/S\/(?:article|article)/;
+	var eprintSingM = eprintSingRe.exec(url);
 
-	if (eprintsM) {
+	if (eprintMultM) {
 		var elmtsXPath = ''//table/tbody/tr/td[@class="txt"]/a[text()="Abstract"]/../b'';
 		var titlesXPath = ''//table/tbody/tr/td[@class="lti"]'';
 		var titleNode = ''./text()'';
@@ -4547,23 +4550,23 @@ function doWeb(doc, url) {
 		var arXivCats = new Array();
 		var arXivIDs = new Array();
 		var i=0;
-		if (eprintsM){
+		if (eprintMultM){
 			do {
-				var newURI = doc.evaluate(''./text()'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent; 
+				var newID = doc.evaluate(''./text()'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+				newID = newID.replace(/arXiv:/, "");
+				newID = newID.replace(/\//g, "%2F"); 
 				availableItems[i] = doc.evaluate(titleNode, title, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent; 
-				var urlComponents = newURI.split("/");
-				arXivCats[i] = urlComponents[0].split(".")[0];
-				arXivIDs[i] = urlComponents[1];
+				arXivIDs[i] = newID;
 				i++;
 			} while ((elmt = elmts.iterateNext()) && (title = titles.iterateNext()));
 		}
 		else{
 			do {
-				var newURI = doc.evaluate(''./@href'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent; 
+				var newID= elmt.textContent;
+				newID = newID.replace(/arXiv:/, "");
+				newID = newID.replace(/\//g, "%2F"); 
 				availableItems[i] = doc.evaluate(titleNode, title, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent; 
-				var urlComponents = newURI.split("/");
-				arXivCats[i] = urlComponents[urlComponents.length - 2].split(".")[0];
-				arXivIDs[i] = urlComponents[urlComponents.length - 1];
+				arXivIDs[i] = newID;
 				i++;
 			} while ((elmt = elmts.iterateNext()) && (title = titles.iterateNext()));
 		}
@@ -4572,26 +4575,24 @@ function doWeb(doc, url) {
 			return true;
 		}
 		for(var i in items) {
-			newURIs.push("http://export.arxiv.org/oai2?verb=GetRecord&identifier=oai%3AarXiv.org%3A" + arXivCats[i] + "%2F" + arXivIDs[i] + "&metadataPrefix=oai_dc");
+			newURIs.push("http://export.arxiv.org/oai2?verb=GetRecord&identifier=oai%3AarXiv.org%3A" + arXivIDs[i] + "&metadataPrefix=oai_dc");
+
 		}
 	}
 	else {
-		if (eprintsM){
-			var titleID = doc.evaluate(''//td[@class="panel"]//tr[1]/td[@class="txt"]/b/text()'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-			var urlComponents = titleID.split(" ");
-			urlComponents = urlComponents[0].split("/");
-			var arXivCat;
-			var arXivID;
-			arXivCat = urlComponents[0].split(".")[0];
-			arXivID = urlComponents[1];
+		if (eprintSingM){
+			var titleID = doc.evaluate(''//td[@class="ti"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+			var arXivID = doc.evaluate(''//tr[1]/td[@class="txt"]/b'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+			arXivID = arXivID.replace(/arXiv:/, "");
+			arXivID = arXivID.replace(/\//g, "%2F"); 
 		} else {
-			var urlComponents = url.split("/");
-			var arXivCat;
-			var arXivID;
-			arXivCat = urlComponents[urlComponents.length - 2].split(".")[0];
-			arXivID = urlComponents[urlComponents.length - 1];
+			var arXivID = doc.evaluate(''//title'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+			var titleRe = /\[([^\]]*)]/;
+			var m = titleRe.exec(arXivID);
+			arXivID = m[1];
+			arXivID = arXivID.replace(/\//g, "%2F"); 
 		}
-		newURIs.push("http://export.arxiv.org/oai2?verb=GetRecord&identifier=oai%3AarXiv.org%3A" + arXivCat + "%2F" + arXivID + "&metadataPrefix=oai_dc");
+		newURIs.push("http://export.arxiv.org/oai2?verb=GetRecord&identifier=oai%3AarXiv.org%3A" + arXivID + "&metadataPrefix=oai_dc");
 
 	}
 
