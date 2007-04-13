@@ -20,7 +20,6 @@
 #zotero-pane
 {
 	min-height: 32px; /* must match value in ZoteroPane.updateTagSelectorSize() */
-	height: 300px;
 	padding: 0 7px 4px;
 	overflow: hidden;
 }

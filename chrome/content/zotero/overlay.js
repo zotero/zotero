@@ -85,6 +85,7 @@ var ZoteroPane = new function()
 	this.relinkAttachment = relinkAttachment;
 	this.reportErrors = reportErrors;
 	
+	const DEFAULT_ZPANE_HEIGHT = 300;
 	const COLLECTIONS_HEIGHT = 125; // minimum height of the collections pane and toolbar
 	
 	var self = this;
@@ -238,7 +239,12 @@ var ZoteroPane = new function()
 			this.fullScreen(true);
 		}
 		
-		var savedHeight = zoteroPane.getAttribute('savedHeight');
+		if (zoteroPane.hasAttribute('savedHeight')) {
+			var savedHeight = zoteroPane.getAttribute('savedHeight');
+		}
+		else {
+			var savedHeight = DEFAULT_ZPANE_HEIGHT;
+		}
 		
 		/*
 		Zotero.debug("zoteroPane.boxObject.height: " + zoteroPane.boxObject.height);
