@@ -1039,6 +1039,10 @@ Zotero.Schema = new function(){
 				if (i==29) {
 					Zotero.DB.query("CREATE TABLE IF NOT EXISTS settings (\n    setting TEXT,\n    key TEXT,\n    value,\n    PRIMARY KEY (setting, key)\n);");
 				}
+				
+				if (i==31) {
+					Zotero.DB.query("UPDATE itemData SET fieldID=14 WHERE itemID IN (SELECT itemID FROM items WHERE itemTypeID=15) AND fieldID=100");
+				}
 			}
 			
 			_updateSchema('userdata');

@@ -1,4 +1,4 @@
--- 19
+-- 20
 
 -- This file creates system tables that can be safely wiped and reinitialized
 -- at any time, as long as existing ids are preserved.
@@ -473,7 +473,7 @@ INSERT INTO itemTypeFields VALUES (15, 32, NULL, 4);
 INSERT INTO itemTypeFields VALUES (15, 28, NULL, 5);
 INSERT INTO itemTypeFields VALUES (15, 7, NULL, 6);
 INSERT INTO itemTypeFields VALUES (15, 31, NULL, 7);
-INSERT INTO itemTypeFields VALUES (15, 100, NULL, 8);
+INSERT INTO itemTypeFields VALUES (15, 14, NULL, 8);
 INSERT INTO itemTypeFields VALUES (15, 10, NULL, 9);
 INSERT INTO itemTypeFields VALUES (15, 87, NULL, 10);
 INSERT INTO itemTypeFields VALUES (15, 116, NULL, 11);
@@ -821,6 +821,7 @@ INSERT INTO itemTypeFields VALUES (36, 19, NULL, 19);
 INSERT INTO itemTypeFields VALUES (36, 62, NULL, 20);
 INSERT INTO itemTypeFields VALUES (36, 2, NULL, 21);
 INSERT INTO itemTypeFields VALUES (36, 22, NULL, 22);
+
 
 INSERT INTO baseFieldMappings VALUES (16, 4, 94); -- bill/volume/codeVolume
 INSERT INTO baseFieldMappings VALUES (17, 4, 97); -- case/volume/reporterVolume
