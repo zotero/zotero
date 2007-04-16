@@ -3671,13 +3671,25 @@ Zotero.Tags = new function(){
 			var tags = Zotero.DB.query(sql);
 		}
 		else {
+			var sql = "CREATE TEMPORARY TABLE tmpSearchResults AS " + search.getSQL();
+			Zotero.DB.query(sql, search.getSQLParams());
+			sql = "CREATE INDEX tmpSearchResults_itemID ON tmpSearchResults(itemID)";
+			Zotero.DB.query(sql);
+			
 			var sql = "SELECT DISTINCT tagID, tag, tagType FROM itemTags "
-				+ "NATURAL JOIN tags WHERE itemID IN (" + search.getSQL() + ") ";
+				+ "NATURAL JOIN tags WHERE ("
+				+ "itemID IN (SELECT itemID FROM tmpSearchResults) OR "
+				+ "itemID IN (SELECT itemID FROM itemNotes WHERE sourceItemID IN (SELECT itemID FROM tmpSearchResults)) OR "
+				+ "itemID IN (SELECT itemID FROM itemAttachments WHERE sourceItemID IN (SELECT itemID FROM tmpSearchResults))"
+				+ ") ";
 			if (types) {
 				sql += "AND tagType IN (" + types.join() + ") ";
 			}
 			sql += "ORDER BY tag COLLATE NOCASE";
-			var tags = Zotero.DB.query(sql, search.getSQLParams());
+			var tags = Zotero.DB.query(sql);
+			
+			sql = "DROP TABLE tmpSearchResults";
+			Zotero.DB.query(sql);
 		}
 		
 		var indexed = {};

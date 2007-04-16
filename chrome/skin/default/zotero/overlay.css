@@ -39,7 +39,7 @@
 	margin-right: 5px;
 }
 
-/* Set by setHighlightedRows() and getCellProperties() in collectionTreeView.js) */
+/* Set by setHighlightedRows() and getRowProperties() in collectionTreeView.js) */
 #zotero-collections-tree treechildren::-moz-tree-row(highlighted)
 {
 	background: #FFFF99;
@@ -57,6 +57,18 @@
 #zotero-items-tree treechildren::-moz-tree-image
 {
 	margin-right: 5px;
+}
+
+
+/* Style search results, display non-matches in gray */
+#zotero-items-tree treechildren::-moz-tree-cell-text(contextRow) {
+	color: gray;
+}
+
+#zotero-items-tree treechildren::-moz-tree-cell-text(contextRow, selected, focus) {
+	/* This is the default color, not the (platform-specific) highlight color, but at least it
+	   helps to differentiate when clicking on a context row. */
+	color: inherit;
 }
 
 #zotero-items-pane

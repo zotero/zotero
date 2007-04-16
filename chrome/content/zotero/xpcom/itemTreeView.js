@@ -117,6 +117,7 @@ Zotero.ItemTreeView.prototype.setTree = function(treebox)
 		}, false);
 		
 		obj.sort();
+		obj.expandMatchParents();
 		
 		//Zotero.debug('Running callbacks in itemTreeView.setTree()', 4);
 		obj._runCallbacks();
@@ -143,8 +144,12 @@ Zotero.ItemTreeView.prototype.setTree = function(treebox)
  */
 Zotero.ItemTreeView.prototype.refresh = function()
 {
+	this._searchMode = this._itemGroup.isSearchMode();
+	
 	var oldRows = this.rowCount;
 	this._dataItems = [];
+	this._searchItemIDs = {}; // items matching the search
+	this._searchParentIDs = {};
 	this.rowCount = 0;
 	
 	var cacheFields = ['title', 'date'];
@@ -156,7 +161,8 @@ Zotero.ItemTreeView.prototype.refresh = function()
 	catch (e) {
 		return;
 	}
-	for each(var field in visibleFields) {
+	for (var i=0; i<visibleFields.length; i++) {
+		var field = visibleFields[i];
 		if (field == 'year') {
 			field = 'date';
 		}
@@ -167,10 +173,33 @@ Zotero.ItemTreeView.prototype.refresh = function()
 	Zotero.Items.cacheFields(cacheFields);
 	
 	var newRows = this._itemGroup.getChildItems();
+	var added = 0;
+	
 	for (var i=0, len=newRows.length; i < len; i++) {
-		if (newRows[i] &&
-		  (!this._sourcesOnly || (!newRows[i].isAttachment() && !newRows[i].isNote()))) {
-			this._showItem(new Zotero.ItemTreeView.TreeRow(newRows[i], 0, false), i+1); //item ref, before row
+		// Only add regular items if sourcesOnly is set
+		if (this._sourcesOnly && !newRows[i].isRegularItem()) {
+			continue;
+		}
+		
+		// Don't add child items directly
+		var sourceItemID = newRows[i].getSource();
+		if (sourceItemID) {
+			this._searchParentIDs[sourceItemID] = true;
+		}
+		// Add top-level items
+		else {
+			this._showItem(new Zotero.ItemTreeView.TreeRow(newRows[i], 0, false), added + 1); //item ref, before row
+			added++;
+		}
+		this._searchItemIDs[newRows[i].getID()] = true;
+	}
+	
+	// Add parents of matches if not matches themselves
+	for (var id in this._searchParentIDs) {
+		if (!this._searchItemIDs[id]) {
+			var item = Zotero.Items.get(id);
+			this._showItem(new Zotero.ItemTreeView.TreeRow(item, 0, false), added + 1); //item ref, before row
+			added++;
 		}
 	}
 	
@@ -667,8 +696,8 @@ Zotero.ItemTreeView.prototype.cycleHeader = function(column)
 	var savedSelection = this.saveSelection();
 	this.sort();
 	this.rememberSelection(savedSelection);
-	this.selection.selectEventsSuppressed = false;
 	this._treebox.invalidate();
+	this.selection.selectEventsSuppressed = false;
 }
 
 /*
@@ -1053,10 +1082,12 @@ Zotero.ItemTreeView.prototype.setFilter = function(type, data) {
 	this.sort();
 	
 	this.rememberOpenState(savedOpenState);
+	this.expandMatchParents();
 	this.rememberFirstRow(savedFirstRow);
 	this.rememberSelection(savedSelection);
-	this.selection.selectEventsSuppressed = false;
 	this._treebox.invalidate();
+	this.selection.selectEventsSuppressed = false;
+	
 	//Zotero.debug('Running callbacks in itemTreeView.setFilter()', 4);
 	this._runCallbacks();
 }
@@ -1182,6 +1213,19 @@ Zotero.ItemTreeView.prototype.rememberOpenState = function(ids) {
 			continue;
 		}
 		this.toggleOpenState(row);
+	}
+}
+
+
+Zotero.ItemTreeView.prototype.expandMatchParents = function () {
+	// Expand parents of child matches
+	if (this._searchMode) {
+		var view = this._treebox.view;
+		for (var id in this._searchParentIDs) {
+			if (!view.isContainerOpen(this._itemRowMap[id])) {
+				view.toggleOpenState(this._itemRowMap[id]);
+			}
+		}
 	}
 }
 
@@ -1609,9 +1653,17 @@ Zotero.ItemTreeView.prototype.onDragOver = function (evt,dropdata,session) { }
 ////////////////////////////////////////////////////////////////////////////////
 
 Zotero.ItemTreeView.prototype.isSeparator = function(row) 						{ return false; }
-Zotero.ItemTreeView.prototype.getRowProperties = function(row, prop) 			{ }
+Zotero.ItemTreeView.prototype.getRowProperties = function(row, prop) { }
 Zotero.ItemTreeView.prototype.getColumnProperties = function(col, prop) 		{ }
-Zotero.ItemTreeView.prototype.getCellProperties = function(row, col, prop) 	{ }
+
+/* Mark items not matching search as context rows, displayed in gray */
+Zotero.ItemTreeView.prototype.getCellProperties = function(row, col, prop) {
+	if (this._searchMode && !this._searchItemIDs[this._getItemAtRow(row).ref.getID()]) {
+		var aServ = Components.classes["@mozilla.org/atom-service;1"].
+			getService(Components.interfaces.nsIAtomService);
+		prop.AppendElement(aServ.getAtom("contextRow"));
+	}
+}
 
 Zotero.ItemTreeView.TreeRow = function(ref, level, isOpen)
 {

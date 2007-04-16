@@ -834,51 +834,42 @@ Zotero.ItemGroup.prototype.getChildItems = function()
  * This accounts for the collection, saved search, quicksearch, tags, etc.
  */
 Zotero.ItemGroup.prototype.getSearchObject = function() {
+	// Create/load the inner search
 	var s = new Zotero.Search();
-	
-	if (this.searchText){
-		if (this.isCollection())
-		{
-			s.addCondition('collectionID', 'is', this.ref.getID());
-			if (Zotero.Prefs.get('recursiveCollections')) {
-				s.addCondition('recursive', 'true');
-			}
-		}
-		else if (this.isSearch())
-		{
-			s.addCondition('savedSearchID', 'is', this.ref['id']);
-		}
-		s.addCondition('quicksearch', 'contains', this.searchText);
+	if (this.isLibrary()) {
+		s.addCondition('noChildren', true);
 	}
-	else
-	{
-		if (this.isLibrary()){
-			s.addCondition('noChildren', 'true');
+	else if (this.isCollection()) {
+		s.addCondition('noChildren', true);
+		s.addCondition('collectionID', 'is', this.ref.getID());
+		if (Zotero.Prefs.get('recursiveCollections')) {
+			s.addCondition('recursive', 'true');
 		}
-		else if (this.isCollection()){
-			s.addCondition('noChildren', 'true');
-			s.addCondition('collectionID', 'is', this.ref.getID());
-			if (Zotero.Prefs.get('recursiveCollections')) {
-				s.addCondition('recursive', 'true');
-			}
-		}
-		else if (this.isSearch()){
-			s.load(this.ref['id']);
-		}
-		else {
-			return null;
-		}
+	}
+	else if (this.isSearch()){
+		s.load(this.ref['id']);
+	}
+	else {
+		throw ('Invalid search mode in Zotero.ItemGroup.getSearchObject()');
+	}
+	
+	// Create the outer (filter) search
+	var s2 = new Zotero.Search();
+	s2.setScope(s);
+	
+	if (this.searchText) {
+		s2.addCondition('quicksearch', 'contains', this.searchText);
 	}
 	
 	if (this.tags){
 		for (var tag in this.tags){
 			if (this.tags[tag]){
-				s.addCondition('tag', 'is', tag);
+				s2.addCondition('tag', 'is', tag);
 			}
 		}
 	}
 	
-	return s;
+	return s2;
 }
 
 
@@ -899,4 +890,17 @@ Zotero.ItemGroup.prototype.setSearch = function(searchText)
 Zotero.ItemGroup.prototype.setTags = function(tags)
 {
 	this.tags = tags;
+}
+
+/*
+ * Returns TRUE if using quicksearch or tag filter
+ */
+Zotero.ItemGroup.prototype.isSearchMode = function() {
+	if (this.tags) {
+		for (var i in this.tags) {
+			var hasTags = true;
+			break;
+		}
+	}
+	return this.searchText != '' || hasTags;
 }

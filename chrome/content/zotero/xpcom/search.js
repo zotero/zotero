@@ -21,6 +21,7 @@
 */
 
 Zotero.Search = function(savedSearchID){
+	this._scope = null;
 	this._sql = null;
 	this._sqlParams = null;
 	this._maxSearchConditionID = 0;
@@ -231,6 +232,14 @@ Zotero.Search.prototype.addCondition = function(condition, operator, value, requ
 }
 
 
+/*
+ * Sets scope of search to the results of the passed Search object
+ */
+Zotero.Search.prototype.setScope = function (searchObj) {
+	this._scope = searchObj;
+}
+
+
 Zotero.Search.prototype.updateCondition = function(searchConditionID, condition, operator, value, required){
 	if (typeof this._conditions[searchConditionID] == 'undefined'){
 		throw ('Invalid searchConditionID ' + searchConditionID + ' in updateCondition()');
@@ -314,7 +323,56 @@ Zotero.Search.prototype.search = function(){
 		this._buildQuery();
 	}
 	
-	var ids = Zotero.DB.columnQuery(this._sql, this._sqlParams);
+	if (this._scope) {
+		// If subsearch has post-search filter, run and insert ids into temp table
+		if (this._scope.hasPostSearchFilter()) {
+			var ids = this._scope.search();
+			if (!ids) {
+				return false;
+			}
+			
+			Zotero.DB.query("DROP TABLE IF EXISTS tmpSearchResults");
+			
+			var sql = "CREATE TEMPORARY TABLE tmpSearchResults (itemID INT)";
+			Zotero.DB.query(sql);
+			var sql = "INSERT INTO tmpSearchResults VALUES (?)";
+			var insertStatement = Zotero.DB.getStatement(sql);
+			for (var i=0; i<ids.length; i++) {
+				insertStatement.bindInt32Parameter(1, ids[i]);
+				try {
+					insertStatement.execute();
+				}
+				catch (e) {
+					throw (Zotero.DB.getLastErrorString());
+				}
+			}
+			insertStatement.reset();
+		}
+		// Otherwise, just copy to temp table directly
+		else {
+			var sql = "CREATE TEMPORARY TABLE tmpSearchResults AS "
+				+ this._scope.getSQL();
+			Zotero.DB.query(sql, this._scope.getSQLParams());
+		}
+		
+		var sql = "CREATE INDEX tmpSearchResults_itemID ON tmpSearchResults(itemID)";
+		Zotero.DB.query(sql);
+		
+		var sql = "SELECT itemID FROM items WHERE itemID IN (" + this._sql + ") "
+			+ "AND ("
+			+ "itemID IN (SELECT itemID FROM tmpSearchResults) OR "
+			+ "itemID IN (SELECT itemID FROM itemAttachments"
+			+ " WHERE sourceItemID IN (SELECT itemID FROM tmpSearchResults)) OR "
+			+ "itemID IN (SELECT itemID FROM itemNotes"
+			+ " WHERE sourceItemID IN (SELECT itemID FROM tmpSearchResults))"
+			+ ")";
+		var ids = Zotero.DB.columnQuery(sql, this._sqlParams);
+		
+		Zotero.DB.query("DROP TABLE tmpSearchResults");
+	}
+	else {
+		var ids = Zotero.DB.columnQuery(this._sql, this._sqlParams);
+	}
 	
 	//Zotero.debug('IDs from main search: ');
 	//Zotero.debug(ids);
@@ -348,6 +406,10 @@ Zotero.Search.prototype.search = function(){
 	// (a separate fulltext word search filtered by fulltext content)
 	for each(var condition in this._conditions){
 		if (condition['condition']=='fulltextContent'){
+			if (this._scope) {
+				throw ("Cannot perform fulltext content search with custom scope in Zotero.Search.search()");
+			}
+			
 			//Zotero.debug('Running subsearch against fulltext word index');
 			
 			// Run a new search against the fulltext word index
@@ -900,10 +962,12 @@ Zotero.Search.prototype._buildQuery = function(){
 				}
 				// Keep non-required conditions separate if in ANY mode
 				else if (!condition['required'] && joinMode == 'ANY') {
+					var nonQSConditions = true;
 					anySQL += condSQL + ' OR ';
 					anySQLParams = anySQLParams.concat(condSQLParams);
 				}
 				else {
+					var nonQSConditions = true;
 					condSQL += ' AND ';
 					sql += condSQL;
 					sqlParams = sqlParams.concat(condSQLParams);
@@ -917,23 +981,20 @@ Zotero.Search.prototype._buildQuery = function(){
 			sql = sql.substring(0, sql.length-4); // remove last ' OR '
 			sql += ')';
 		}
-		else {
+		else if (nonQSConditions) {
 			sql = sql.substring(0, sql.length-5); // remove last ' AND '
 		}
+		else {
+			sql = sql.substring(0, sql.length-7); // remove ' WHERE '
+		}
 		
-		// Add on quicksearch conditions -- this requires searching against
-		// children, so we repeat the main query for note and attachment
-		// sourceItemIDs before ANDing the quicksearch block
+		// Add on quicksearch conditions
 		if (quicksearchSQLSet) {
-			sql = "SELECT itemID FROM items WHERE itemID IN (" + sql + " UNION "
-				+ "SELECT itemID FROM itemNotes WHERE sourceItemID IN "
-				+ "(" + sql + ") UNION "
-				+ "SELECT itemID FROM itemAttachments WHERE sourceItemID IN "
-				+ "(" + sql + ")) AND ((" + quicksearchSQLSet.join(') AND (') + "))";
+			sql = "SELECT itemID FROM items WHERE itemID IN (" + sql + ") "
+				+ "AND ((" + quicksearchSQLSet.join(') AND (') + "))";
 			
-			sqlParams = sqlParams.concat(sqlParams).concat(sqlParams);
-			for each(var p in quicksearchParamsSet) {
-				sqlParams = sqlParams.concat(p);
+			for (var k=0; k<quicksearchParamsSet.length; k++) {
+				sqlParams = sqlParams.concat(quicksearchParamsSet[k]);
 			}
 		}
 	}
