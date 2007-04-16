@@ -1449,6 +1449,8 @@ Zotero.ItemTreeView.prototype.canDrop = function(row, orient)
 	var data = dataSet.first.first;
 	var dataType = data.flavour.contentType;
 	
+	//Zotero.debug("Drag data type is " + dataType);
+	
 	switch (dataType) {
 		case 'zotero/item':
 			var ids = data.data.split(','); // ids of rows we are dragging in
@@ -1462,9 +1464,6 @@ Zotero.ItemTreeView.prototype.canDrop = function(row, orient)
 			var file = data.data;
 			break;
 	}
-	
-	//Zotero.debug("Drag data type is " + dataType);
-	//Zotero.debug("Drag URL is " + url);
 	
 	// workaround... two different services call canDrop
 	// (nsDragAndDrop, and the tree) -- this is for the former,
@@ -1638,23 +1637,7 @@ Zotero.ItemTreeView.prototype.drop = function(row, orient)
 			}
 		}
 	}
-	else if (dataType == 'text/x-moz-url') {
-		var url = data.data.split("\n")[0];
-		
-		var sourceItemID = false;
-		var parentCollectionID = false;
-		
-		if (orient == 0) {
-			var rowItem = this._getItemAtRow(row).ref;
-			sourceItemID = rowItem.getID()
-		}
-		else if (this._itemGroup.isCollection()) {
-			var parentCollectionID = this._itemGroup.ref.getID();
-		}
-		
-		Zotero.Attachments.importFromURL(url, sourceItemID, false, false, parentCollectionID);
-	}
-	else if (dataType == 'application/x-moz-file') {
+	else if (dataType == 'text/x-moz-url' || dataType == 'application/x-moz-file') {
 		var sourceItemID = false;
 		var parentCollectionID = false;
 		
@@ -1670,6 +1653,37 @@ Zotero.ItemTreeView.prototype.drop = function(row, orient)
 			var dataList = dataSet.dataList;
 			for (var i=0, len=dataList.length; i<len; i++) {
 				var file = dataList[i].first.data;
+				
+				if (dataType == 'text/x-moz-url') {
+					var url = file.split("\n")[0];
+					
+					if (url.indexOf('file:///') == 0) {
+						var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+								   .getService(Components.interfaces.nsIWindowMediator);
+						var win = wm.getMostRecentWindow("navigator:browser");
+						// If dragging currently loaded page, only convert to
+						// file if not an HTML document
+						if (win.content.location.href != url ||
+								win.content.document.contentType != 'text/html') {
+							var nsIFPH = Components.classes["@mozilla.org/network/protocol;1?name=file"]
+									.getService(Components.interfaces.nsIFileProtocolHandler);
+							try {
+								var file = nsIFPH.getFileFromURLSpec(url);
+							}
+							catch (e) {
+								Zotero.debug(e);
+							}
+						}
+					}
+					
+					// Still string, so remote URL
+					if (typeof file == 'string') {
+						Zotero.Attachments.importFromURL(url, sourceItemID, false, false, parentCollectionID);
+						continue;
+					}
+					
+					// Otherwise file, so fall through
+				}
 				
 				try {
 					Zotero.DB.beginTransaction();

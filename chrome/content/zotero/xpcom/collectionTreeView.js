@@ -712,19 +712,7 @@ Zotero.CollectionTreeView.prototype.drop = function(row, orient)
 			this._getItemAtRow(row).ref.addItems(toAdd);
 		}
 	}
-	else if (dataType == 'text/x-moz-url') {
-		var url = data.data.split("\n")[0];
-		
-		if (this._getItemAtRow(row).isCollection()) {
-			var parentCollectionID = this._getItemAtRow(row).ref.getID();
-		}
-		else {
-			var parentCollectionID = false;
-		}
-		
-		Zotero.Attachments.importFromURL(url, false, false, false, parentCollectionID);
-	}
-	else if (dataType == 'application/x-moz-file') {
+	else if (dataType == 'text/x-moz-url' || dataType == 'application/x-moz-file') {
 		if (this._getItemAtRow(row).isCollection()) {
 			var parentCollectionID = this._getItemAtRow(row).ref.getID();
 		}
@@ -733,15 +721,45 @@ Zotero.CollectionTreeView.prototype.drop = function(row, orient)
 		}
 		
 		var unlock = Zotero.Notifier.begin(true);
-		
 		try {
 			var dataList = dataSet.dataList;
 			for (var i=0, len=dataList.length; i<len; i++) {
 				var file = dataList[i].first.data;
 				
+				if (dataType == 'text/x-moz-url') {
+					var url = file.split("\n")[0];
+					
+					if (url.indexOf('file:///') == 0) {
+						var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+								   .getService(Components.interfaces.nsIWindowMediator);
+						var win = wm.getMostRecentWindow("navigator:browser");
+						// If dragging currently loaded page, only convert to
+						// file if not an HTML document
+						if (win.content.location.href != url ||
+								win.content.document.contentType != 'text/html') {
+							var nsIFPH = Components.classes["@mozilla.org/network/protocol;1?name=file"]
+									.getService(Components.interfaces.nsIFileProtocolHandler);
+							try {
+								var file = nsIFPH.getFileFromURLSpec(url);
+							}
+							catch (e) {
+								Zotero.debug(e);
+							}
+						}
+					}
+					
+					// Still string, so remote URL
+					if (typeof file == 'string') {
+						Zotero.Attachments.importFromURL(url, false, false, false, parentCollectionID);
+						continue;
+					}
+					
+					// Otherwise file, so fall through
+				}
+				
 				try {
 					Zotero.DB.beginTransaction();
-					var itemID = Zotero.Attachments.importFromFile(file);
+					var itemID = Zotero.Attachments.importFromFile(file, false);
 					if (parentCollectionID) {
 						var col = Zotero.Collections.get(parentCollectionID);
 						if (col) {
