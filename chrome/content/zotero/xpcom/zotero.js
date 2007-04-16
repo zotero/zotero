@@ -47,6 +47,7 @@ var Zotero = new function(){
 	this.varDump = varDump;
 	this.safeDebug = safeDebug;
 	this.getString = getString;
+	this.getLocaleCollation = getLocaleCollation;
 	this.setFontSize = setFontSize;
 	this.flattenArguments = flattenArguments;
 	this.getAncestorByTagName = getAncestorByTagName;
@@ -566,6 +567,15 @@ var Zotero = new function(){
 			throw ('Localized string not available for ' + name);
 		}
 		return l10n;
+	}
+	
+	
+	function getLocaleCollation() {
+		var localeService = Components.classes["@mozilla.org/intl/nslocaleservice;1"]
+			.getService(Components.interfaces.nsILocaleService);
+		var collationFactory = Components.classes["@mozilla.org/intl/collation-factory;1"]
+			.getService(Components.interfaces.nsICollationFactory);
+		return collation = collationFactory.CreateCollation(localeService.getApplicationLocale());
 	}
 	
 	

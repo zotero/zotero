@@ -718,11 +718,7 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 	var columnField = this.getSortField();
 	var order = this.getSortDirection() == 'ascending';
 	
-	var localeService = Components.classes["@mozilla.org/intl/nslocaleservice;1"]
-		.getService(Components.interfaces.nsILocaleService);
-	var collationFactory = Components.classes["@mozilla.org/intl/collation-factory;1"]
-		.getService(Components.interfaces.nsICollationFactory);
-	var collation = collationFactory.CreateCollation(localeService.getApplicationLocale());
+	var collation = Zotero.getLocaleCollation();
 	
 	// Year is really the date field truncated
 	if (columnField == 'year') {

@@ -1780,9 +1780,18 @@ Zotero.Item.prototype.getTags = function(){
 		return false;
 	}
 	var sql = "SELECT tagID AS id, tag, tagType AS type FROM tags WHERE tagID IN "
-		+ "(SELECT tagID FROM itemTags WHERE itemID=" + this.getID() + ") "
-		+ "ORDER BY tag COLLATE NOCASE";
-	return Zotero.DB.query(sql);
+		+ "(SELECT tagID FROM itemTags WHERE itemID=" + this.getID() + ")";
+	
+	var tags = Zotero.DB.query(sql);
+	if (!tags) {
+		return false;
+	}
+	
+	var collation = Zotero.getLocaleCollation();
+	tags.sort(function(a, b) {
+		return collation.compareString(0, a.tag, b.tag);
+	});
+	return tags;
 }
 
 Zotero.Item.prototype.getTagIDs = function(){
@@ -3635,13 +3644,21 @@ Zotero.Tags = new function(){
 		if (types) {
 			sql += "WHERE tagType IN (" + types.join() + ") ";
 		}
-		sql += "ORDER BY tag COLLATE NOCASE";
 		var tags = Zotero.DB.query(sql);
+		if (!tags) {
+			return {};
+		}
+		
+		var collation = Zotero.getLocaleCollation();
+		tags.sort(function(a, b) {
+			return collation.compareString(0, a.tag, b.tag);
+		});
+		
 		var indexed = {};
-		for each(var tag in tags) {
-			indexed[tag.tagID] = {
-				tag: tag.tag,
-				type: tag.tagType
+		for (var i=0; i<tags.length; i++) {
+			indexed[tags[i].tagID] = {
+				tag: tags[i].tag,
+				type: tags[i].tagType
 			};
 		}
 		return indexed;
@@ -3654,49 +3671,36 @@ Zotero.Tags = new function(){
 	 * _types_ is an optional array of tagTypes to fetch
 	 */
 	function getAllWithinSearch(search, types) {
-		// If search has post-search filters (e.g. fulltext content), run it
-		// and just include the ids
-		//
-		// DEBUG: it's possible there's a query length limit here
-		// or that this slows things down with large libraries
-		// -- should probably use a temporary table instead
-		if (search.hasPostSearchFilter()) {
-			var ids = search.search();
-			var sql = "SELECT DISTINCT tagID, tag, tagType FROM itemTags "
-				+ "NATURAL JOIN tags WHERE itemID IN (" + ids.join() + ") ";
-			if (types) {
-				sql += "AND tagType IN (" + types.join() + ") ";
-			}
-			sql += "ORDER BY tag COLLATE NOCASE";
-			var tags = Zotero.DB.query(sql);
-		}
-		else {
-			var sql = "CREATE TEMPORARY TABLE tmpSearchResults AS " + search.getSQL();
-			Zotero.DB.query(sql, search.getSQLParams());
-			sql = "CREATE INDEX tmpSearchResults_itemID ON tmpSearchResults(itemID)";
-			Zotero.DB.query(sql);
-			
-			var sql = "SELECT DISTINCT tagID, tag, tagType FROM itemTags "
-				+ "NATURAL JOIN tags WHERE ("
-				+ "itemID IN (SELECT itemID FROM tmpSearchResults) OR "
-				+ "itemID IN (SELECT itemID FROM itemNotes WHERE sourceItemID IN (SELECT itemID FROM tmpSearchResults)) OR "
-				+ "itemID IN (SELECT itemID FROM itemAttachments WHERE sourceItemID IN (SELECT itemID FROM tmpSearchResults))"
-				+ ") ";
-			if (types) {
-				sql += "AND tagType IN (" + types.join() + ") ";
-			}
-			sql += "ORDER BY tag COLLATE NOCASE";
-			var tags = Zotero.DB.query(sql);
-			
-			sql = "DROP TABLE tmpSearchResults";
-			Zotero.DB.query(sql);
+		// Save search results to temporary table
+		var tmpTable = search.search(true);
+		if (!tmpTable) {
+			return {};
 		}
 		
+		var sql = "SELECT DISTINCT tagID, tag, tagType FROM itemTags "
+			+ "NATURAL JOIN tags WHERE itemID IN "
+			+ "(SELECT itemID FROM " + tmpTable + ") ";
+		if (types) {
+			sql += "AND tagType IN (" + types.join() + ") ";
+		}
+		var tags = Zotero.DB.query(sql);
+		
+		Zotero.DB.query("DROP TABLE " + tmpTable);
+		
+		if (!tags) {
+			return {};
+		}
+		
+		var collation = Zotero.getLocaleCollation();
+		tags.sort(function(a, b) {
+			return collation.compareString(0, a.tag, b.tag);
+		});
+		
 		var indexed = {};
-		for each(var tag in tags) {
-			indexed[tag.tagID] = {
-				tag: tag.tag,
-				type: tag.tagType
+		for (var i=0; i<tags.length; i++) {
+			indexed[tags[i].tagID] = {
+				tag: tags[i].tag,
+				type: tags[i].tagType
 			};
 		}
 		return indexed;
@@ -4558,11 +4562,7 @@ Zotero.getCollections = function(parent, recursive){
 	}
 	
 	// Do proper collation sort
-	var localeService = Components.classes["@mozilla.org/intl/nslocaleservice;1"]
-		.getService(Components.interfaces.nsILocaleService);
-	var collationFactory = Components.classes["@mozilla.org/intl/collation-factory;1"]
-		.getService(Components.interfaces.nsICollationFactory);
-	var collation = collationFactory.CreateCollation(localeService.getApplicationLocale());
+	var collation = Zotero.getLocaleCollation();
 	children.sort(function (a, b) {
 		return collation.compareString(0, a.name, b.name);
 	});

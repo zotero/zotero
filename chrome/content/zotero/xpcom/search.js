@@ -318,7 +318,7 @@ Zotero.Search.prototype.hasPostSearchFilter = function() {
 /*
  * Run the search and return an array of item ids for results
  */
-Zotero.Search.prototype.search = function(){
+Zotero.Search.prototype.search = function(asTempTable){
 	if (!this._sql){
 		this._buildQuery();
 	}
@@ -331,48 +331,46 @@ Zotero.Search.prototype.search = function(){
 				return false;
 			}
 			
-			Zotero.DB.query("DROP TABLE IF EXISTS tmpSearchResults");
-			
-			var sql = "CREATE TEMPORARY TABLE tmpSearchResults (itemID INT)";
-			Zotero.DB.query(sql);
-			var sql = "INSERT INTO tmpSearchResults VALUES (?)";
-			var insertStatement = Zotero.DB.getStatement(sql);
-			for (var i=0; i<ids.length; i++) {
-				insertStatement.bindInt32Parameter(1, ids[i]);
-				try {
-					insertStatement.execute();
-				}
-				catch (e) {
-					throw (Zotero.DB.getLastErrorString());
-				}
-			}
-			insertStatement.reset();
+			var tmpTable = this._idsToTempTable(ids);
 		}
 		// Otherwise, just copy to temp table directly
 		else {
-			var sql = "CREATE TEMPORARY TABLE tmpSearchResults AS "
+			var tmpTable = "tmpSearchResults_" + Zotero.randomString(8);
+			var sql = "CREATE TEMPORARY TABLE " + tmpTable + " AS "
 				+ this._scope.getSQL();
 			Zotero.DB.query(sql, this._scope.getSQLParams());
+			var sql = "CREATE INDEX " + tmpTable + "_itemID ON " + tmpTable + "(itemID)";
+			Zotero.DB.query(sql);
 		}
 		
-		var sql = "CREATE INDEX tmpSearchResults_itemID ON tmpSearchResults(itemID)";
-		Zotero.DB.query(sql);
-		
+		// Search ids in temp table and their child items
 		var sql = "SELECT itemID FROM items WHERE itemID IN (" + this._sql + ") "
 			+ "AND ("
-			+ "itemID IN (SELECT itemID FROM tmpSearchResults) OR "
+			+ "itemID IN (SELECT itemID FROM " + tmpTable + ") OR "
 			+ "itemID IN (SELECT itemID FROM itemAttachments"
-			+ " WHERE sourceItemID IN (SELECT itemID FROM tmpSearchResults)) OR "
+			+ " WHERE sourceItemID IN (SELECT itemID FROM " + tmpTable + ")) OR "
 			+ "itemID IN (SELECT itemID FROM itemNotes"
-			+ " WHERE sourceItemID IN (SELECT itemID FROM tmpSearchResults))"
+			+ " WHERE sourceItemID IN (SELECT itemID FROM " + tmpTable + "))"
 			+ ")";
-		var ids = Zotero.DB.columnQuery(sql, this._sqlParams);
 		
-		Zotero.DB.query("DROP TABLE tmpSearchResults");
+		if (asTempTable) {
+			var tmpTable2 = "tmpSearchResults_" + Zotero.randomString(8);
+			sql = "CREATE TEMPORARY TABLE " + tmpTable2 + " AS " + sql;
+			Zotero.DB.query(sql, this._sqlParams);
+			return tmpTable2;
+		}
+		else {
+			var ids = Zotero.DB.columnQuery(sql, this._sqlParams);
+			Zotero.DB.query("DROP TABLE " + tmpTable);
+			return ids;
+		}
 	}
-	else {
-		var ids = Zotero.DB.columnQuery(this._sql, this._sqlParams);
+	
+	if (this._scope) {
+		throw ("Fulltext content search with custom scope not currently supported in Zotero.Search.search()");
 	}
+	
+	var ids = Zotero.DB.columnQuery(this._sql, this._sqlParams);
 	
 	//Zotero.debug('IDs from main search: ');
 	//Zotero.debug(ids);
@@ -406,10 +404,6 @@ Zotero.Search.prototype.search = function(){
 	// (a separate fulltext word search filtered by fulltext content)
 	for each(var condition in this._conditions){
 		if (condition['condition']=='fulltextContent'){
-			if (this._scope) {
-				throw ("Cannot perform fulltext content search with custom scope in Zotero.Search.search()");
-			}
-			
 			//Zotero.debug('Running subsearch against fulltext word index');
 			
 			// Run a new search against the fulltext word index
@@ -500,6 +494,15 @@ Zotero.Search.prototype.search = function(){
 	//Zotero.debug('Final result set');
 	//Zotero.debug(ids);
 	
+	if (asTempTable) {
+		var ids = this._scope.search();
+		if (!ids) {
+			return false;
+		}
+		
+		return this._idsToTempTable(ids);
+	}
+	
 	return ids;
 }
 
@@ -520,6 +523,34 @@ Zotero.Search.prototype.getSQLParams = function(){
 		this._buildQuery();
 	}
 	return this._sqlParams;
+}
+
+
+/*
+ * Batch insert
+ */
+Zotero.Search.prototype._idsToTempTable = function (ids) {
+	var tmpTable = "tmpSearchResults_" + Zotero.randomString(8);
+	
+	var sql = "CREATE TEMPORARY TABLE " + tmpTable + " (itemID INT)";
+	Zotero.DB.query(sql);
+	var sql = "INSERT INTO " + tmpTable + " VALUES (?)";
+	var insertStatement = Zotero.DB.getStatement(sql);
+	for (var i=0; i<ids.length; i++) {
+		insertStatement.bindInt32Parameter(1, ids[i]);
+		try {
+			insertStatement.execute();
+		}
+		catch (e) {
+			throw (Zotero.DB.getLastErrorString());
+		}
+	}
+	insertStatement.reset();
+	
+	var sql = "CREATE INDEX " + tmpTable + "_itemID ON " + tmpTable + "(itemID)";
+	Zotero.DB.query(sql);
+	
+	return tmpTable;
 }
 
 
