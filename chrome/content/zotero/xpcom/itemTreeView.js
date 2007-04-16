@@ -1422,6 +1422,7 @@ Zotero.ItemTreeView.prototype.getSupportedFlavours = function ()
 	var flavors = new FlavourSet();
 	flavors.appendFlavour("zotero/item");
 	flavors.appendFlavour("text/x-moz-url");
+	flavors.appendFlavour("application/x-moz-file", "nsIFile");
 	return flavors; 
 }
 
@@ -1456,7 +1457,14 @@ Zotero.ItemTreeView.prototype.canDrop = function(row, orient)
 		case 'text/x-moz-url':
 			var url = data.data.split("\n")[0];
 			break;
+			
+		case 'application/x-moz-file':
+			var file = data.data;
+			break;
 	}
+	
+	//Zotero.debug("Drag data type is " + dataType);
+	//Zotero.debug("Drag URL is " + url);
 	
 	// workaround... two different services call canDrop
 	// (nsDragAndDrop, and the tree) -- this is for the former,
@@ -1487,7 +1495,7 @@ Zotero.ItemTreeView.prototype.canDrop = function(row, orient)
 					}
 				}
 			}
-			else if (dataType == 'text/x-moz-url') {
+			else if (dataType == 'text/x-moz-url' || dataType == 'application/x-moz-file') {
 				if (this._itemGroup.isSearch()) {
 					return false;
 				}
@@ -1538,7 +1546,7 @@ Zotero.ItemTreeView.prototype.canDrop = function(row, orient)
 		}
 		return false;
 	}
-	else if (dataType == "text/x-moz-url") {
+	else if (dataType == "text/x-moz-url" || dataType == 'application/x-moz-file') {
 		// Disallow direct drop on a non-regular item (e.g. note)
 		if (orient == 0) {
 			if (!rowItem.isRegularItem()) {
@@ -1645,6 +1653,44 @@ Zotero.ItemTreeView.prototype.drop = function(row, orient)
 		}
 		
 		Zotero.Attachments.importFromURL(url, sourceItemID, false, false, parentCollectionID);
+	}
+	else if (dataType == 'application/x-moz-file') {
+		var sourceItemID = false;
+		var parentCollectionID = false;
+		
+		if (orient == 0) {
+			sourceItemID = this._getItemAtRow(row).ref.getID()
+		}
+		else if (this._itemGroup.isCollection()) {
+			var parentCollectionID = this._itemGroup.ref.getID();
+		}
+		
+		var unlock = Zotero.Notifier.begin(true);
+		try {
+			var dataList = dataSet.dataList;
+			for (var i=0, len=dataList.length; i<len; i++) {
+				var file = dataList[i].first.data;
+				
+				try {
+					Zotero.DB.beginTransaction();
+					var itemID = Zotero.Attachments.importFromFile(file, sourceItemID);
+					if (parentCollectionID) {
+						var col = Zotero.Collections.get(parentCollectionID);
+						if (col) {
+							col.addItem(itemID);
+						}
+					}
+					Zotero.DB.commitTransaction();
+				}
+				catch (e) {
+					Zotero.DB.rollbackTransaction();
+					throw (e);
+				}
+			}
+		}
+		finally {
+			Zotero.Notifier.commit(unlock);
+		}
 	}
 }
 

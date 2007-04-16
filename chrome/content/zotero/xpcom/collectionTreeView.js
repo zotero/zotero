@@ -631,9 +631,8 @@ Zotero.CollectionTreeView.prototype.canDrop = function(row, orient)
 	var data = dataSet.first.first;
 	var dataType = data.flavour.contentType;
 	
-	//Highlight the rows correctly on drag:
-	if(orient == 1 && row == 0 && dataType == 'zotero/collection') //for dropping collections into root level
-	{
+	// For dropping collections onto root level
+	if (orient == 1 && row == 0 && dataType == 'zotero/collection') {
 		return true;
 	}
 	else if(orient == 0)	//directly on a row...
@@ -658,7 +657,8 @@ Zotero.CollectionTreeView.prototype.canDrop = function(row, orient)
 			}
 			return false;
 		}
-		else if (dataType == 'text/x-moz-url') {
+		else if (dataType == 'text/x-moz-url'
+				|| dataType == 'application/x-moz-file') {
 			if (!this._getItemAtRow(row).isSearch()) {
 				return true;
 			}
@@ -724,6 +724,42 @@ Zotero.CollectionTreeView.prototype.drop = function(row, orient)
 		
 		Zotero.Attachments.importFromURL(url, false, false, false, parentCollectionID);
 	}
+	else if (dataType == 'application/x-moz-file') {
+		if (this._getItemAtRow(row).isCollection()) {
+			var parentCollectionID = this._getItemAtRow(row).ref.getID();
+		}
+		else {
+			var parentCollectionID = false;
+		}
+		
+		var unlock = Zotero.Notifier.begin(true);
+		
+		try {
+			var dataList = dataSet.dataList;
+			for (var i=0, len=dataList.length; i<len; i++) {
+				var file = dataList[i].first.data;
+				
+				try {
+					Zotero.DB.beginTransaction();
+					var itemID = Zotero.Attachments.importFromFile(file);
+					if (parentCollectionID) {
+						var col = Zotero.Collections.get(parentCollectionID);
+						if (col) {
+							col.addItem(itemID);
+						}
+					}
+					Zotero.DB.commitTransaction();
+				}
+				catch (e) {
+					Zotero.DB.rollbackTransaction();
+					throw (e);
+				}
+			}
+		}
+		finally {
+			Zotero.Notifier.commit(unlock);
+		}
+	}
 }
 
 /*
@@ -746,6 +782,7 @@ Zotero.CollectionTreeView.prototype.getSupportedFlavours = function ()
 	flavors.appendFlavour("zotero/collection");
 	flavors.appendFlavour("zotero/item");
 	flavors.appendFlavour("text/x-moz-url");
+	flavors.appendFlavour("application/x-moz-file", "nsIFile");
 	return flavors; 
 }
 
