@@ -4548,22 +4548,29 @@ Zotero.getCollections = function(parent, recursive){
 		parent = null;
 	}
 	
-	var sql = 'SELECT collectionID FROM collections C WHERE parentCollectionID';
-	sql += parent ? '=' + parent : ' IS NULL';
-	
-	sql += ' ORDER BY collectionName COLLATE NOCASE';
-	
-	var children = Zotero.DB.columnQuery(sql);
+	var sql = "SELECT collectionID AS id, collectionName AS name FROM collections C "
+		+ "WHERE parentCollectionID " + (parent ? '=' + parent : ' IS NULL');
+	var children = Zotero.DB.query(sql);
 	
 	if (!children){
 		Zotero.debug('No child collections of collection ' + parent, 5);
 		return toReturn;
 	}
 	
+	// Do proper collation sort
+	var localeService = Components.classes["@mozilla.org/intl/nslocaleservice;1"]
+		.getService(Components.interfaces.nsILocaleService);
+	var collationFactory = Components.classes["@mozilla.org/intl/collation-factory;1"]
+		.getService(Components.interfaces.nsICollationFactory);
+	var collation = collationFactory.CreateCollation(localeService.getApplicationLocale());
+	children.sort(function (a, b) {
+		return collation.compareString(0, a.name, b.name);
+	});
+	
 	for (var i=0, len=children.length; i<len; i++){
-		var obj = Zotero.Collections.get(children[i]);
+		var obj = Zotero.Collections.get(children[i].id);
 		if (!obj){
-			throw ('Collection ' + children[i] + ' not found');
+			throw ('Collection ' + children[i].id + ' not found');
 		}
 		
 		toReturn.push(obj);

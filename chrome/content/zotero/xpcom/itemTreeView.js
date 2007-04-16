@@ -718,6 +718,12 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 	var columnField = this.getSortField();
 	var order = this.getSortDirection() == 'ascending';
 	
+	var localeService = Components.classes["@mozilla.org/intl/nslocaleservice;1"]
+		.getService(Components.interfaces.nsILocaleService);
+	var collationFactory = Components.classes["@mozilla.org/intl/collation-factory;1"]
+		.getService(Components.interfaces.nsICollationFactory);
+	var collation = collationFactory.CreateCollation(localeService.getApplicationLocale());
+	
 	// Year is really the date field truncated
 	if (columnField == 'year') {
 		columnField = 'date';
@@ -798,7 +804,8 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 					}
 				}
 				
-				cmp = (fieldA > fieldB) ? -1 : (fieldA < fieldB) ? 1 : 0;
+				//cmp = (fieldA > fieldB) ? -1 : (fieldA < fieldB) ? 1 : 0;
+				cmp = collation.compareString(0, fieldA, fieldB);
 				if (cmp) {
 					return cmp;
 				}
@@ -815,7 +822,8 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 				return cmp;
 			}
 			
-			cmp = (fieldA > fieldB) ? -1 : (fieldA < fieldB) ? 1 : 0;
+			//cmp = (fieldA > fieldB) ? -1 : (fieldA < fieldB) ? 1 : 0;
+			cmp = collation.compareString(0, fieldA, fieldB);
 			if (cmp) {
 				return cmp;
 			}
@@ -840,7 +848,8 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 		
 		fieldA = a.getField('dateModified');
 		fieldB = b.getField('dateModified');
-		return (fieldA > fieldB) ? -1 : (fieldA < fieldB) ? 1 : 0;
+		//return (fieldA > fieldB) ? -1 : (fieldA < fieldB) ? 1 : 0;
+		return collation.compareString(0, fieldA, fieldB);
 	}
 	
 	function doSort(a,b)
