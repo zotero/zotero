@@ -989,6 +989,12 @@ Zotero.CSL.prototype._serializeElement = function(name, element) {
  * handles sorting of items
  */
 Zotero.CSL.prototype._compareItem = function(a, b, opt) {
+	var localeService = Components.classes["@mozilla.org/intl/nslocaleservice;1"]
+		.getService(Components.interfaces.nsILocaleService);
+	var collationFactory = Components.classes["@mozilla.org/intl/collation-factory;1"]
+		.getService(Components.interfaces.nsICollationFactory);
+	var collation = collationFactory.CreateCollation(localeService.getApplicationLocale());
+	
 	for(var i in this._bib.sortOrder) {
 		var sortElement = this._bib.sortOrder[i];
 		
@@ -1020,10 +1026,9 @@ Zotero.CSL.prototype._compareItem = function(a, b, opt) {
 			var bValue = formattedStringB.get().toLowerCase();
 			//Zotero.debug(aValue+" vs "+bValue);
 			
-			if(bValue > aValue) {
-				return -1;
-			} else if(bValue < aValue) {
-				return 1;
+			var cmp = collation.compareString(0, aValue, bValue);
+			if(cmp != 0) {
+				return cmp;
 			}
 		}
 	}
