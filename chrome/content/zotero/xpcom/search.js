@@ -353,24 +353,12 @@ Zotero.Search.prototype.search = function(asTempTable){
 			+ " WHERE sourceItemID IN (SELECT itemID FROM " + tmpTable + "))"
 			+ ")";
 		
-		if (asTempTable) {
-			var tmpTable2 = "tmpSearchResults_" + Zotero.randomString(8);
-			sql = "CREATE TEMPORARY TABLE " + tmpTable2 + " AS " + sql;
-			Zotero.DB.query(sql, this._sqlParams);
-			return tmpTable2;
-		}
-		else {
-			var ids = Zotero.DB.columnQuery(sql, this._sqlParams);
-			Zotero.DB.query("DROP TABLE " + tmpTable);
-			return ids;
-		}
+		var ids = Zotero.DB.columnQuery(sql, this._sqlParams);
+		Zotero.DB.query("DROP TABLE " + tmpTable);
 	}
-	
-	if (this._scope) {
-		throw ("Fulltext content search with custom scope not currently supported in Zotero.Search.search()");
+	else {
+		var ids = Zotero.DB.columnQuery(this._sql, this._sqlParams);
 	}
-	
-	var ids = Zotero.DB.columnQuery(this._sql, this._sqlParams);
 	
 	//Zotero.debug('IDs from main search: ');
 	//Zotero.debug(ids);
@@ -453,7 +441,12 @@ Zotero.Search.prototype.search = function(asTempTable){
 					hash[id] = true;
 				}
 				
-				var scopeIDs = ids.filter(filter);
+				if (ids) {
+					var scopeIDs = ids.filter(filter);
+				}
+				else {
+					var scopeIDs = [];
+				}
 			}
 			// If ANY mode, just use fulltext word index hits for content search,
 			// since the main results will be added in below
@@ -495,7 +488,6 @@ Zotero.Search.prototype.search = function(asTempTable){
 	//Zotero.debug(ids);
 	
 	if (asTempTable) {
-		var ids = this._scope.search();
 		if (!ids) {
 			return false;
 		}
@@ -537,7 +529,7 @@ Zotero.Search.prototype._idsToTempTable = function (ids) {
 	var sql = "INSERT INTO " + tmpTable + " VALUES (?)";
 	var insertStatement = Zotero.DB.getStatement(sql);
 	for (var i=0; i<ids.length; i++) {
-		insertStatement.bindInt32Parameter(1, ids[i]);
+		insertStatement.bindInt32Parameter(0, ids[i]);
 		try {
 			insertStatement.execute();
 		}

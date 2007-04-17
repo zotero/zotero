@@ -948,14 +948,23 @@ Zotero.ItemGroup.prototype.setTags = function(tags)
 }
 
 /*
- * Returns TRUE if using quicksearch or tag filter
+ * Returns TRUE if saved search, quicksearch or tag filter
  */
 Zotero.ItemGroup.prototype.isSearchMode = function() {
+	// Search
+	if (this.isSearch()) {
+		return true;
+	}
+	
+	// Quicksearch
+	if (this.searchText != '') {
+		return true;
+	}
+	
+	// Tag filter
 	if (this.tags) {
 		for (var i in this.tags) {
-			var hasTags = true;
-			break;
+			return true;
 		}
 	}
-	return this.searchText != '' || hasTags;
 }

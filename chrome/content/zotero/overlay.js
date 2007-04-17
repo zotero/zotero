@@ -46,6 +46,7 @@ var ZoteroPane = new function()
 	this.toggleTagSelector = toggleTagSelector;
 	this.updateTagSelectorSize = updateTagSelectorSize;
 	this.getTagSelection = getTagSelection;
+	this.clearTagSelection = clearTagSelection;
 	this.updateTagFilter = updateTagFilter;
 	this.onCollectionSelected = onCollectionSelected;
 	this.itemSelected = itemSelected;
@@ -637,6 +638,14 @@ var ZoteroPane = new function()
 	}
 	
 	
+	function clearTagSelection() {
+		if (Zotero.hasValues(this.getTagSelection())) {
+			var tagSelector = document.getElementById('zotero-tag-selector');
+			tagSelector.clearAll();
+		}
+	}
+	
+	
 	/*
 	 * Sets the tag filter on the items view
 	 */
@@ -1004,8 +1013,11 @@ var ZoteroPane = new function()
 	
 	
 	function clearQuicksearch() {
-		document.getElementById('zotero-tb-search').value = "";
-		document.getElementById('zotero-tb-search').doCommand('cmd_zotero_search');
+		var search = document.getElementById('zotero-tb-search');
+		if (search.value != '') {
+			search.value = '';
+			search.doCommand('cmd_zotero_search');
+		}
 	}
 	
 	

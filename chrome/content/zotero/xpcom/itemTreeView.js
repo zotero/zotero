@@ -928,7 +928,7 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 /*
  *  Select an item
  */
-Zotero.ItemTreeView.prototype.selectItem = function(id, expand)
+Zotero.ItemTreeView.prototype.selectItem = function(id, expand, noRecurse)
 {
 	// If no row map, we're probably in the process of switching collections,
 	// so store the item to select on the item group for later
@@ -955,15 +955,22 @@ Zotero.ItemTreeView.prototype.selectItem = function(id, expand)
 	// If row with id not visible, check to see if it's hidden under a parent
 	if(row == undefined)
 	{
-		if (!parent || parentRow === null)
-		{
+		if (!parent || parentRow === null) {
 			// No parent -- it's not here
+			
+			// Clear the quicksearch and tag selection and try again (once)
+			if (!noRecurse) {
+				this._ownerDocument.defaultView.ZoteroPane.clearQuicksearch();
+				this._ownerDocument.defaultView.ZoteroPane.clearTagSelection();
+				return this.selectItem(id, expand, true);
+			}
+			
 			return false;
 		}
 		this.toggleOpenState(parentRow); //opens the parent of the item
 		row = this._itemRowMap[id];
 	}
-		
+	
 	this.selection.select(row);
 	// If _expand_, open container
 	if (expand && this.isContainer(row) && !this.isContainerOpen(row)) {
