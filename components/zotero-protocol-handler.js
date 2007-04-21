@@ -107,19 +107,28 @@ function ChromeExtensionHandler() {
 					
 					case 'search':
 						var s = new Zotero.Search(ids);
-						var items = Zotero.Items.get(s.search());
+						var ids = s.search();
 						break;
 					
 					case 'items':
 					case 'item':
-						var items = Zotero.Items.get(ids.split('-'));
+						var ids = ids.split('-');
 						break;
 						
 					default:
 						var type = 'library';
 						var s = new Zotero.Search();
 						s.addCondition('noChildren', 'true');
-						var items = Zotero.Items.get(s.search());
+						var ids = s.search();
+				}
+				
+				var results = Zotero.Items.get(ids);
+				var items = [];
+				// Only include parent items
+				for (var i=0; i<results.length; i++) {
+					if (!results[i].getSource()) {
+						items.push(results[i]);
+					}
 				}
 				
 				if (!items){
@@ -128,18 +137,13 @@ function ChromeExtensionHandler() {
 					break generateContent;
 				}
 				
-				// Convert item objects to export arrays
-				for (var i in items) {
-					items[i] = items[i].toArray();
-				}
-				
 				// Sort items
 				if (!sortBy) {
 					sortBy = 'title';
 				}
 				
 				var sorts = sortBy.split(',');
-				for (var i in sorts) {
+				for (var i=0; i<sorts.length; i++) {
 					var [field, order] = sorts[i].split('/');
 					switch (order) {
 						case 'd':
@@ -157,17 +161,23 @@ function ChromeExtensionHandler() {
 					};
 				}
 				
+				
+				var collation = Zotero.getLocaleCollation();
 				var compareFunction = function(a, b) {
 					var index = 0;
 					
 					// Multidimensional sort
 					do {
-						var result = a[sorts[index].field] > b[sorts[index].field] ?
-							sorts[index].order
-						: a[sorts[index].field] < b[sorts[index].field] ?
-							(sorts[index].order * -1)
-						: 0;
+						var cmp = collation.compareString(0,
+							a.getField(sorts[index].field),
+							b.getField(sorts[index].field)
+						);
 						
+						if (cmp == 0) {
+							continue;
+						}
+						
+						var result = cmp * sorts[index].order;
 						index++;
 					}
 					while (result == 0 && sorts[index]);
@@ -177,6 +187,10 @@ function ChromeExtensionHandler() {
 				
 				items.sort(compareFunction);
 				
+				// Convert item objects to export arrays
+				for (var i=0; i<items.length; i++) {
+					items[i] = items[i].toArray();
+				}
 				
 				// Pass off to the appropriate handler
 				switch (format){

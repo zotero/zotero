@@ -22,6 +22,7 @@
 
 Zotero.Search = function(savedSearchID){
 	this._scope = null;
+	this._scopeIncludeChildren = null;
 	this._sql = null;
 	this._sqlParams = null;
 	this._maxSearchConditionID = 0;
@@ -235,8 +236,9 @@ Zotero.Search.prototype.addCondition = function(condition, operator, value, requ
 /*
  * Sets scope of search to the results of the passed Search object
  */
-Zotero.Search.prototype.setScope = function (searchObj) {
+Zotero.Search.prototype.setScope = function (searchObj, includeChildren) {
 	this._scope = searchObj;
+	this._scopeIncludeChildren = includeChildren;
 }
 
 
@@ -323,6 +325,21 @@ Zotero.Search.prototype.search = function(asTempTable){
 		this._buildQuery();
 	}
 	
+	var joinMode = 'all';
+	for each(var condition in this._conditions) {
+		switch (condition.condition) {
+			case 'joinMode':
+				if (condition.operator == 'any') {
+					joinMode = 'any';
+				}
+				break;
+			
+			case 'blockStart':
+				var hasQuicksearch = true;
+				break;
+		}
+	}
+	
 	if (this._scope) {
 		// If subsearch has post-search filter, run and insert ids into temp table
 		if (this._scope.hasPostSearchFilter()) {
@@ -343,15 +360,18 @@ Zotero.Search.prototype.search = function(asTempTable){
 			Zotero.DB.query(sql);
 		}
 		
-		// Search ids in temp table and their child items
+		// Search ids in temp table
 		var sql = "SELECT itemID FROM items WHERE itemID IN (" + this._sql + ") "
 			+ "AND ("
-			+ "itemID IN (SELECT itemID FROM " + tmpTable + ") OR "
-			+ "itemID IN (SELECT itemID FROM itemAttachments"
+			+ "itemID IN (SELECT itemID FROM " + tmpTable + ")";
+		
+		if (this._scopeIncludeChildren) {
+			sql += " OR itemID IN (SELECT itemID FROM itemAttachments"
 			+ " WHERE sourceItemID IN (SELECT itemID FROM " + tmpTable + ")) OR "
 			+ "itemID IN (SELECT itemID FROM itemNotes"
-			+ " WHERE sourceItemID IN (SELECT itemID FROM " + tmpTable + "))"
-			+ ")";
+			+ " WHERE sourceItemID IN (SELECT itemID FROM " + tmpTable + "))";
+		}
+		sql += ")";
 		
 		var ids = Zotero.DB.columnQuery(sql, this._sqlParams);
 		Zotero.DB.query("DROP TABLE " + tmpTable);
@@ -363,24 +383,8 @@ Zotero.Search.prototype.search = function(asTempTable){
 	//Zotero.debug('IDs from main search: ');
 	//Zotero.debug(ids);
 	
-	var joinMode = 'all';
-	for each(var condition in this._conditions) {
-		if (condition.condition == 'joinMode') {
-			if (condition.operator == 'any') {
-				joinMode = 'any';
-			}
-			break;
-		}
-	}
 	
 	//Zotero.debug('Join mode: ' + joinMode);
-	
-	for each(var condition in this._conditions) {
-		if (condition.condition == 'blockStart') {
-			var hasQuicksearch = true;
-			break;
-		}
-	}
 	
 	// Filter results with fulltext search
 	//
