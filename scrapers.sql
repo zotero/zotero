@@ -1,4 +1,4 @@
--- 217
+-- 218
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-04-16 17:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-04-23 17:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-03-21 15:26:54', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -4663,6 +4663,79 @@ function doWeb(doc, url) {
 		newItem.attachments.push(getPDF(articleID));
 		newItem.complete();
 	}, function() {Zotero.done();}, null);
+	Zotero.wait();
+}');
+
+REPLACE INTO translators VALUES ('232903bc-7307-4058-bb1a-27cfe3e4e655', '1.0.0b3r1', '', '2007-04-23 17:00:00', '0', '100', '4', 'SPIRES', 'Sean Takats', '^http://www.slac.stanford.edu/spires/find/hep/', 
+'function detectWeb(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+		
+	var citations = doc.evaluate(''//dl/dd/a[text()="BibTeX"]'', doc, nsResolver,
+			XPathResult.ANY_TYPE, null);
+	var citation = citations.iterateNext();
+	var titles = doc.evaluate(''//p/b[1]'', doc, nsResolver,
+			XPathResult.ANY_TYPE, null);
+	var title = titles.iterateNext();
+	if(citation && title) {
+		// search page
+		return "multiple";
+	}
+}', 
+'function doWeb(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+		
+	var citations = doc.evaluate(''//dl/dd/a[text()="BibTeX"]'', doc, nsResolver,
+			XPathResult.ANY_TYPE, null);
+	var citation = citations.iterateNext();
+//	var titles = doc.evaluate(''//p/b[1]'', doc, nsResolver,
+//			XPathResult.ANY_TYPE, null);
+	var titles = doc.evaluate(''//p[b[1]]'', doc, nsResolver,
+			XPathResult.ANY_TYPE, null);
+	var title = titles.iterateNext();
+	if(citation && title) {
+		// search page
+		var items = new Object();		
+		do {
+			items[citation.href] = Zotero.Utilities.cleanString(title.textContent);
+		} while((citation=citations.iterateNext()) && (title=titles.iterateNext()))
+		
+		items = Zotero.selectItems(items);
+		if(!items) return true;
+		
+		var newUris = new Array();
+		for(var id in items) {
+			newUris.push(id);
+		}
+	} else {
+		//single result page?
+	}
+	
+	Zotero.Utilities.HTTP.doGet(newUris, function(text) {
+		var m = text.match(/<pre>(?:.|[\r\n])*?<\/pre>/g);
+		var bibTeXString = "";
+		for each(var citation in m) {
+			// kill pre tags
+			citation = citation.substring(5, citation.length-6);
+			bibTeXString += citation;
+		}
+		
+		// import using BibTeX
+		var translator = Zotero.loadTranslator("import");
+		translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
+		translator.setString(bibTeXString);
+		translator.setHandler("itemDone", function(obj, item) {			
+			item.complete();
+		});
+		translator.translate();
+		
+		Zotero.done();
+	});
 	Zotero.wait();
 }');
 
