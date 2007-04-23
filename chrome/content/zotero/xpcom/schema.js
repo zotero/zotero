@@ -1043,6 +1043,10 @@ Zotero.Schema = new function(){
 				if (i==31) {
 					Zotero.DB.query("UPDATE itemData SET fieldID=14 WHERE itemID IN (SELECT itemID FROM items WHERE itemTypeID=15) AND fieldID=100");
 				}
+				
+				if (i==32) {
+					Zotero.DB.query("UPDATE itemData SET fieldID=100 WHERE itemID IN (SELECT itemID FROM items WHERE itemTypeID=20) AND fieldID=14;");
+				}
 			}
 			
 			_updateSchema('userdata');
