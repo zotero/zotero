@@ -1,4 +1,4 @@
--- 218
+-- 219
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-04-23 17:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-04-23 15:50:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-03-21 15:26:54', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -3693,7 +3693,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('d0b1914a-11f1-4dd7-8557-b32fe8a3dd47', '1.0.0b3.r1', '', '2007-01-27 16:10:00', 1, 100, 4, 'EBSCOhost', 'Simon Kornblith', '^https?://[^/]+/ehost/(?:results|detail)', 
+REPLACE INTO translators VALUES ('d0b1914a-11f1-4dd7-8557-b32fe8a3dd47', '1.0.0b3.r1', '', '2007-04-23 15:50:00', '1', '100', '4', 'EBSCOhost', 'Simon Kornblith', '^https?://[^/]+/ehost/(?:results|detail)', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -3712,9 +3712,8 @@ REPLACE INTO translators VALUES ('d0b1914a-11f1-4dd7-8557-b32fe8a3dd47', '1.0.0b
 	if(persistentLink) {
 		return "journalArticle";
 	}
-}',
+}', 
 'var viewStateMatch = /<input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="([^"]+)" \/>/
-var eventValidationMatch = /<input type="hidden" name="__EVENTVALIDATION" id="__EVENTVALIDATION" value="([^"]+)" \/>/
 var host;
 
 function fullEscape(text) {
@@ -3765,9 +3764,6 @@ function doWeb(doc, url) {
 	var m = queryRe.exec(url);
 	var queryString = m[1];
 		
-	var eventValidation = doc.evaluate(''//input[@name="__EVENTVALIDATION"]'', doc, nsResolver,
-	                                   XPathResult.ANY_TYPE, null).iterateNext();		
-	eventValidation = fullEscape(eventValidation.value);
 	var viewState = doc.evaluate(''//input[@name="__VIEWSTATE"]'', doc, nsResolver,
 								 XPathResult.ANY_TYPE, null).iterateNext();
 	viewState = fullEscape(viewState.value);
@@ -3803,9 +3799,9 @@ function doWeb(doc, url) {
 			citations.push(m[1]);
 		}
 		
-		var saveString = "__EVENTTARGET=FolderItem:AddItem&IsCallBack=true&SearchTerm1=test&SortOptionDropDown=date&__EVENTVALIDATION="+eventValidation+"&__EVENTARGUMENT="+citations.join(",")+"&";
-		var folderString = "__EVENTTARGET=ctl00%24ctl00%24ToolbarArea%24toolbar%24folderControl%24lnkFolder&__EVENTARGUMENT=&__LASTFOCUS=&__VIEWSTATE="+viewState+"&ctl00%24ctl00%24ToolbarArea%24toolbar%24drpLanguages=&ctl00%24ctl00%24MainContentArea%24MainContentArea%24ctl11%24SearchTerm1=test&ctl00%24ctl00%24MainContentArea%24MainContentArea%24DbSortOptionControl%24SortOptionDropDown=date&__EVENTVALIDATION="+eventValidation;
-		
+		var saveString = "__EVENTTARGET=FolderItem:AddItem&IsCallBack=true&SearchTerm1=test&SortOptionDropDown=date&__EVENTARGUMENT="+citations.join(",")+"&";
+
+		var folderString = "__EVENTTARGET=ctl00%24ctl00%24ToolbarArea%24toolbar%24folderControl%24lnkFolder&__EVENTARGUMENT=&__LASTFOCUS=&__VIEWSTATE="+viewState+"&ctl00%24ctl00%24ToolbarArea%24toolbar%24drpLanguages=&ctl00%24ctl00%24MainContentArea%24MainContentArea%24ctl11%24SearchTerm1=test&ctl00%24ctl00%24MainContentArea%24MainContentArea%24DbSortOptionControl%24SortOptionDropDown=date";
 		Zotero.Utilities.HTTP.doPost(url, saveString, function(text) {				// mark records
 			Zotero.Utilities.HTTP.doPost(url, folderString, function(text) {		// view folder
 				var postLocation = /<form name="aspnetForm" method="post" action="([^"]+)"/
@@ -3814,9 +3810,7 @@ function doWeb(doc, url) {
 				
 				m = viewStateMatch.exec(text);
 				var folderViewState = m[1];
-				m = eventValidationMatch.exec(text);
-				var folderEventValidation = m[1];
-				var deliverString = "__EVENTTARGET=ctl00%24ctl00%24MainContentArea%24MainContentArea%24btnDelivery%24lnkExport&__EVENTARGUMENT=&__VIEWSTATE="+fullEscape(folderViewState)+"&__EVENTVALIDATION="+fullEscape(folderEventValidation)+"&ajax=enabled";
+				var deliverString = "__EVENTTARGET=ctl00%24ctl00%24MainContentArea%24MainContentArea%24btnDelivery%24lnkExport&__EVENTARGUMENT=&__VIEWSTATE="+fullEscape(folderViewState)+"&ajax=enabled";
 				Zotero.Utilities.HTTP.doPost(host+"/ehost/"+folderURL,
 											  deliverString, downloadFunction);		// download records as RIS
 			});
@@ -3828,7 +3822,7 @@ function doWeb(doc, url) {
 		var saveCitation = elmts.iterateNext();
 		var viewSavedCitations = elmts.iterateNext();
 		
-		var deliverString = "__EVENTTARGET=ctl00%24ctl00%24MainContentArea%24MainContentArea%24topDeliveryControl%24deliveryButtonControl%24lnkExport&__EVENTARGUMENT=&__LASTFOCUS=&__VIEWSTATE="+viewState+"&__EVENTVALIDATION="+eventValidation+"&ajax=enabled";
+		var deliverString = "__EVENTTARGET=ctl00%24ctl00%24MainContentArea%24MainContentArea%24topDeliveryControl%24deliveryButtonControl%24lnkExport&__EVENTARGUMENT=&__LASTFOCUS=&__VIEWSTATE="+viewState+"&ajax=enabled";
 		Zotero.Utilities.HTTP.doPost(url, deliverString, downloadFunction);
 	}
 	
