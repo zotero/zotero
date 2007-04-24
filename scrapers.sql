@@ -1,4 +1,4 @@
--- 219
+-- 220
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-04-23 15:50:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-04-24 15:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-03-21 15:26:54', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -9727,7 +9727,7 @@ function doExport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('9cb70025-a888-4a29-a210-93ec52da40d4', '1.0.0b4.r1', '', '2007-04-04 15:45:00', 1, 100, 3, 'BibTeX', 'Simon Kornblith', 'bib',
+REPLACE INTO translators VALUES ('9cb70025-a888-4a29-a210-93ec52da40d4', '1.0.0b4.r1', '', '2007-04-24 15:30:00', 1, 100, 3, 'BibTeX', 'Simon Kornblith', 'bib',
 'Zotero.configure("dataMode", "block");
 
 function detectImport() {
@@ -10140,9 +10140,9 @@ function doExport() {
 		// include the item title as part of the citation key
 		if (item["title"]) {
 			// this is a list of words that should not appear as part of the citation key
-			bannedTitleKeys = {"a" : 1, "an" : 1, "does": 1, "how": 1, "it''s": 1, "on" : 1, "some": 1, "the" : 1, "this" : 1, "why" : 1 };
-			titleElements = item["title"].split(" ");
-			appendKey = "";
+			var bannedTitleKeys = {"a" : 1, "an" : 1, "does": 1, "how": 1, "it''s": 1, "on" : 1, "some": 1, "the" : 1, "this" : 1, "why" : 1 };
+			var titleElements = item["title"].split(" ");
+			var appendKey = "";
 			for (te in titleElements) {
 				if (!bannedTitleKeys[titleElements[te].toLowerCase()]) {
 					appendKey = "_" + titleElements[te].toLowerCase() + "_";
@@ -10621,7 +10621,7 @@ function doImport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('3f50aaac-7acc-4350-acd0-59cb77faf620', '1.0.0b4.r1', '', '2007-03-22 23:26:24', 1, 100, 2, 'Wikipedia Citation Templates', 'Simon Kornblith', '', NULL,
+REPLACE INTO translators VALUES ('3f50aaac-7acc-4350-acd0-59cb77faf620', '1.0.0b4.r1', '', '2007-04-24 15:30:00', 1, 100, 2, 'Wikipedia Citation Templates', 'Simon Kornblith', '', NULL,
 'var fieldMap = {
 	edition:"edition",
 	publisher:"publisher",
@@ -10632,7 +10632,7 @@ REPLACE INTO translators VALUES ('3f50aaac-7acc-4350-acd0-59cb77faf620', '1.0.0b
 	volume:"volume",
 	issue:"issue",
 	pages:"pages",
-	number:"epsiodeNumber"
+	number:"episodeNumber"
 };
 
 var typeMap = {
