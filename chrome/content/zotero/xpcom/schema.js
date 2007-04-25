@@ -668,6 +668,10 @@ Zotero.Schema = new function(){
 	* update the local csl table with the style data
 	**/
 	function _styleXMLToDB(xmlnode){
+		// Don't split >4K chunks into multiple nodes
+		// https://bugzilla.mozilla.org/show_bug.cgi?id=194231
+		xmlnode.normalize();
+		
 		var sqlValues = [
 			{string: xmlnode.getAttribute('id')},
 			{string: xmlnode.getAttribute('updated')},
