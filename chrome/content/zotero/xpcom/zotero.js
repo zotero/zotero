@@ -224,6 +224,9 @@ var Zotero = new function(){
 	}
 	
 	
+	/*
+	 * Check if a DB transaction is open and, if so, disable Zotero
+	 */
 	function stateCheck() {
 		if (Zotero.DB.transactionInProgress()) {
 			this.initialized = false;

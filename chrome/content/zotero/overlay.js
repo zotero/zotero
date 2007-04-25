@@ -470,7 +470,7 @@ var ZoteroPane = new function()
 	{
 		if (!Zotero.stateCheck()) {
 			this.displayErrorMessage(true);
-			return;
+			return false;
 		}
 		
 		var item = new Zotero.Item(typeID);
@@ -1655,7 +1655,7 @@ var ZoteroPane = new function()
 	function addItemFromPage() {
 		if (!Zotero.stateCheck()) {
 			this.displayErrorMessage(true);
-			return;
+			return false;
 		}
 		
 		var progressWin = new Zotero.ProgressWindow();

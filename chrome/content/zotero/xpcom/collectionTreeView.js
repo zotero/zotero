@@ -889,17 +889,17 @@ Zotero.ItemGroup.prototype.getChildItems = function()
  * This accounts for the collection, saved search, quicksearch, tags, etc.
  */
 Zotero.ItemGroup.prototype.getSearchObject = function() {
+	var includeScopeChildren = false;
+	
 	// Create/load the inner search
 	var s = new Zotero.Search();
-	if (this.isLibrary()) {
-		s.addCondition('noChildren', true);
-	}
+	if (this.isLibrary()) { }
 	else if (this.isCollection()) {
-		s.addCondition('noChildren', true);
 		s.addCondition('collectionID', 'is', this.ref.getID());
 		if (Zotero.Prefs.get('recursiveCollections')) {
 			s.addCondition('recursive', 'true');
 		}
+		includeScopeChildren = true;
 	}
 	else if (this.isSearch()){
 		s.load(this.ref['id']);
@@ -910,7 +910,7 @@ Zotero.ItemGroup.prototype.getSearchObject = function() {
 	
 	// Create the outer (filter) search
 	var s2 = new Zotero.Search();
-	s2.setScope(s);
+	s2.setScope(s, includeScopeChildren);
 	
 	if (this.searchText) {
 		s2.addCondition('quicksearch', 'contains', this.searchText);
