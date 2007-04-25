@@ -118,7 +118,7 @@
 								<menuseparator id="zotero-tb-actions-separator"/>
 								<menuitem id="zotero-tb-actions-prefs" label="&zotero.toolbar.preferences.label;"
 									oncommand="window.openDialog('chrome://zotero/content/preferences/preferences.xul', 'zotero-prefs', 'chrome,titlebar,toolbar,' + Zotero.Prefs.get('browser.preferences.instantApply', true) ? 'dialog=no' : 'modal')"/>
-								<menuitem id="zotero-tb-actions-reportErrors" label="&zotero.toolbar.reportErrors;" command="cmd_zotero_reportErrors" disabled="true"/>
+								<menuitem id="zotero-tb-actions-reportErrors" command="cmd_zotero_reportErrors" disabled="true"/>
 								<menuitem id="zotero-tb-actions-documentation" label="&zotero.toolbar.documentation.label;" oncommand="window.open('http://www.zotero.org/documentation/', '', 'menubar=yes,location=yes,toolbar=yes,personalbar=yes,resizable=yes,scrollbars=yes,status=yes');"/>
 								<menuitem id="zotero-tb-actions-about" label="&zotero.toolbar.about.label;" oncommand="window.openDialog('chrome://zotero/content/about.xul', 'about', 'chrome')"/>
 							</menupopup>
@@ -265,9 +265,7 @@
 					
 					<!-- Label for displaying messages when items pane is hidden
 					     (e.g. "Advanced search mode — press Enter to search.")-->
-					<box id="zotero-items-pane-message-box" pack="center" align="center">
-						<label id="zotero-items-pane-message" />
-					</box>
+					<vbox id="zotero-items-pane-message-box" pack="center" align="center"/>
 				</deck>
 			</vbox>
 			
@@ -351,6 +349,11 @@
 					icon.setAttribute('compact', true);
 					break;
 			}
+			
+			// Set "Report Errors..." label via property rather than DTD entity,
+			// since we need to reference it in script elsewhere
+			document.getElementById('zotero-tb-actions-reportErrors').setAttribute('label',
+				Zotero.getString('errorReport.reportErrors'));
 			
 			// Used for loading the changelog after upgrades
 			if (Zotero.initialURL) {

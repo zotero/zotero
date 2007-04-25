@@ -264,6 +264,10 @@
 	-moz-appearance: listbox;
 }
 
+#zotero-items-pane-message-box description:not(:first-child) {
+	margin-top: .75em;
+}
+
 
 #zotero-annotate-tb-add
 {

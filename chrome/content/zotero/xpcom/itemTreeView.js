@@ -96,6 +96,24 @@ Zotero.ItemTreeView.prototype.setTree = function(treebox)
 	
 	// Generate the tree contents in a timer to allow message above to display
 	var paneLoader = function(obj) {
+		// If a DB transaction is open, display error message and bail
+		if (!Zotero.stateCheck()) {
+			if (obj._ownerDocument.defaultView.ZoteroPane) {
+				obj._ownerDocument.defaultView.ZoteroPane.displayErrorMessage();
+				/*
+				var reportErrorsStr = Zotero.getString('errorReport.reportErrors');
+				var reportInstructions =
+					Zotero.getString('errorReport.reportInstructions', reportErrorsStr)
+				
+				var msg = Zotero.getString('general.errorHasOccurred') + ' '
+					+ Zotero.getString('general.restartFirefox') + '\n\n'
+					+ reportInstructions;
+				obj._ownerDocument.defaultView.ZoteroPane.setItemsPaneMessage(msg);
+				*/
+			}
+			return;
+		}
+		
 		obj.refresh();
 		
 		// Add a keypress listener for expand/collapse

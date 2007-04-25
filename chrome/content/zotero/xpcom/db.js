@@ -403,6 +403,8 @@ Zotero.DBConnection.prototype.transactionInProgress = function () {
 /**
  * Safety function used on shutdown to make sure we're not stuck in the
  * middle of a transaction
+ *
+ * NOTE: No longer used
  */
 Zotero.DBConnection.prototype.commitAllTransactions = function () {
 	if (this.transactionInProgress()) {
@@ -410,6 +412,23 @@ Zotero.DBConnection.prototype.commitAllTransactions = function () {
 		this._transactionNestingLevel = 0;
 		try {
 			this.commitTransaction();
+		}
+		catch (e) {}
+		return level ? level : true;
+	}
+	return false;
+}
+
+
+/*
+ * Used on shutdown to rollback all open transactions
+ */
+Zotero.DBConnection.prototype.rollbackAllTransactions = function () {
+	if (this.transactionInProgress()) {
+		var level = this._transactionNestingLevel;
+		this._transactionNestingLevel = 0;
+		try {
+			this.rollbackTransaction();
 		}
 		catch (e) {}
 		return level ? level : true;
@@ -530,7 +549,9 @@ Zotero.DBConnection.prototype.observe = function(subject, topic, data) {
 				return;
 			}
 			
-			var level = this.commitAllTransactions();
+			// NOTE: disabled
+			//var level = this.commitAllTransactions();
+			var level = this.rollbackAllTransactions()
 			if (level) {
 				level = level === true ? '0' : level;
 				this._debug("A transaction in DB '" + this._dbName + "' was still open! (level " + level + ")", 2);
@@ -776,8 +797,8 @@ Zotero.DBConnection.prototype._getDBConnection = function () {
 	// Register shutdown handler to call this.onShutdown() for DB backup
 	var observerService = Components.classes["@mozilla.org/observer-service;1"]
 		.getService(Components.interfaces.nsIObserverService);
-	
 	observerService.addObserver(this, "xpcom-shutdown", false);
+	observerService = null;
 	
 	return this._connection;
 }

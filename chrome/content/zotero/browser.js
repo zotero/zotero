@@ -117,6 +117,15 @@ var Zotero_Browser = new function() {
 	 * ID as the argument
 	 */
 	function scrapeThisPage(saveLocation) {
+		if (!Zotero.stateCheck()) {
+			Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.scrapeError"));
+			var desc = Zotero.getString("ingester.scrapeError.transactionInProgress.previousError")
+				+ ' ' + Zotero.getString("general.restartFirefoxAndTryAgain");
+			Zotero_Browser.progress.addDescription(desc);
+			Zotero_Browser.progress.show();
+			Zotero_Browser.progress.startCloseTimer(8000);
+			return;
+		}
 		_getTabObject(this.tabbrowser.selectedBrowser).translate(saveLocation);
 	}
 	

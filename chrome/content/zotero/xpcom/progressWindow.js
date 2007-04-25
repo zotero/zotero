@@ -97,7 +97,7 @@ Zotero.ProgressWindowSet = new function() {
 		for (var i=0; i<_progressWindows.length; i++) {
 			// Pass |requireMouseOver| so that the window only closes
 			// if the mouse was over it at some point
-			_progressWindows[i].instance.startCloseTimer(true);
+			_progressWindows[i].instance.startCloseTimer(null, true);
 		}
 	}
 }
@@ -246,7 +246,7 @@ Zotero.ProgressWindow = function(_window){
 	}
 	
 	
-	function startCloseTimer(requireMouseOver) {
+	function startCloseTimer(ms, requireMouseOver) {
 		if (_windowLoaded || _windowLoading) {
 			if (requireMouseOver && !_mouseWasOver) {
 				return;
@@ -256,7 +256,11 @@ Zotero.ProgressWindow = function(_window){
 				_disableTimeout();
 			}
 			
-			_timeoutID = _progressWindow.setTimeout(_timeout, 2500);
+			if (typeof ms != 'number') {
+				ms = 2500;
+			}
+			
+			_timeoutID = _progressWindow.setTimeout(_timeout, ms);
 		}
 	}
 	

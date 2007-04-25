@@ -85,6 +85,7 @@ var ZoteroPane = new function()
 	this.showAttachmentNotFoundDialog = showAttachmentNotFoundDialog;
 	this.relinkAttachment = relinkAttachment;
 	this.reportErrors = reportErrors;
+	this.displayErrorMessage = displayErrorMessage;
 	
 	const DEFAULT_ZPANE_HEIGHT = 300;
 	const COLLECTIONS_HEIGHT = 125; // minimum height of the collections pane and toolbar
@@ -467,6 +468,11 @@ var ZoteroPane = new function()
 	 */
 	function newItem(typeID, data)
 	{
+		if (!Zotero.stateCheck()) {
+			this.displayErrorMessage(true);
+			return;
+		}
+		
 		var item = new Zotero.Item(typeID);
 		
 		for (var i in data)
@@ -704,6 +710,11 @@ var ZoteroPane = new function()
 	
 	function itemSelected()
 	{
+		if (!Zotero.stateCheck()) {
+			this.displayErrorMessage();
+			return;
+		}
+		
 		if (this.itemsView && this.itemsView.selection.count == 1 && this.itemsView.selection.currentIndex != -1)
 		{
 			var item = this.itemsView._getItemAtRow(this.itemsView.selection.currentIndex);
@@ -1453,15 +1464,23 @@ var ZoteroPane = new function()
 	
 	
 	function setItemsPaneMessage(msg) {
+		var elem = document.getElementById('zotero-items-pane-message-box');
+		while (elem.hasChildNodes()) {
+			elem.removeChild(elem.firstChild);
+		}
+		var msgParts = msg.split("\n\n");
+		for (var i=0; i<msgParts.length; i++) {
+			var desc = document.createElement('description');
+			desc.appendChild(document.createTextNode(msgParts[i]));
+			elem.appendChild(desc);
+		}
+		
 		document.getElementById('zotero-items-pane-content').selectedIndex = 1;
-		var elem = document.getElementById('zotero-items-pane-message');
-		elem.value = msg;
 	}
 	
 	
 	function clearItemsPaneMessage() {
 		document.getElementById('zotero-items-pane-content').selectedIndex = 0;
-		document.getElementById('zotero-items-pane-message').value = '';
 	}
 	
 	
@@ -1527,6 +1546,11 @@ var ZoteroPane = new function()
 	
 	
 	function newNote(popup, parent, text) {
+		if (!Zotero.stateCheck()) {
+			this.displayErrorMessage(true);
+			return;
+		}
+		
 		if (!popup) {
 			try {
 				// trim
@@ -1629,6 +1653,11 @@ var ZoteroPane = new function()
 	
 	
 	function addItemFromPage() {
+		if (!Zotero.stateCheck()) {
+			this.displayErrorMessage(true);
+			return;
+		}
+		
 		var progressWin = new Zotero.ProgressWindow();
 		progressWin.changeHeadline(Zotero.getString('ingester.scraping'));
 		var icon = 'chrome://zotero/skin/treeitem-webpage.png';
@@ -1668,6 +1697,11 @@ var ZoteroPane = new function()
 	 */
 	function addAttachmentFromPage(link, itemID, noParent)
 	{
+		if (!Zotero.stateCheck()) {
+			this.displayErrorMessage(true);
+			return;
+		}
+		
 		if (!noParent) {
 			var progressWin = new Zotero.ProgressWindow();
 			progressWin.changeHeadline(Zotero.getString('save.' + (link ? 'link' : 'attachment')));
@@ -1831,6 +1865,38 @@ var ZoteroPane = new function()
 		var io = { wrappedJSObject: { Zotero: Zotero, data:  data } };
 		var win = ww.openWindow(null, "chrome://zotero/content/errorReport.xul",
 					"zotero-error-report", "chrome,centerscreen,modal", io);
+	}
+	
+	
+	/*
+	 * Display an error message saying that an error has occurred and Firefox
+	 * needs to be restarted.
+	 *
+	 * If |popup| is TRUE, display in popup progress window; otherwise, display
+	 * as items pane message
+	 */
+	function displayErrorMessage(popup) {
+		var reportErrorsStr = Zotero.getString('errorReport.reportErrors');
+		var reportInstructions =
+			Zotero.getString('errorReport.reportInstructions', reportErrorsStr)
+		
+		// Display as popup progress window
+		if (popup) {
+			var pw = new Zotero.ProgressWindow();
+			pw.changeHeadline(Zotero.getString('general.errorHasOccurred'));
+			var desc = Zotero.getString('general.restartFirefox') + ' '
+				+ reportInstructions;
+			pw.addDescription(desc);
+			pw.show();
+			pw.startCloseTimer(8000);
+		}
+		// Display as items pane message
+		else {
+			var msg = Zotero.getString('general.errorHasOccurred') + ' '
+				+ Zotero.getString('general.restartFirefox') + '\n\n'
+				+ reportInstructions;
+			self.setItemsPaneMessage(msg);
+		}
 	}
 }
 

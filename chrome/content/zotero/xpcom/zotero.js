@@ -34,6 +34,7 @@ const ZOTERO_CONFIG = {
 var Zotero = new function(){
 	// Privileged (public) methods
 	this.init = init;
+	this.stateCheck = stateCheck;
 	//this.shutdown = shutdown;
 	this.getProfileDirectory = getProfileDirectory;
 	this.getZoteroDirectory = getZoteroDirectory;
@@ -223,6 +224,17 @@ var Zotero = new function(){
 	}
 	
 	
+	function stateCheck() {
+		if (Zotero.DB.transactionInProgress()) {
+			this.initialized = false;
+			this.skipLoading = true;
+			return false;
+		}
+		
+		return true;
+	}
+	
+	
 	/*
 	function shutdown(subject, topic, data){
 		// Called twice otherwise, for some reason
@@ -350,7 +362,7 @@ var Zotero = new function(){
 		}
 		var index = ps.confirmEx(win,
 			Zotero.getString('general.restartRequired'),
-			Zotero.getString('general.restartFirefox.singular'),
+			Zotero.getString('general.restartRequiredForChange'),
 			buttonFlags,
 			Zotero.getString('general.restartNow'),
 			forceRestartNow ? null : Zotero.getString('general.restartLater'),

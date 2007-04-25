@@ -68,7 +68,7 @@ function onDataDirUpdate(event) {
 		+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
 	var index = ps.confirmEx(window,
 		Zotero.getString('general.restartRequired'),
-		Zotero.getString('general.restartFirefox.singular'),
+		Zotero.getString('general.restartRequiredForChange'),
 		buttonFlags,
 		Zotero.getString('general.restartNow'),
 		null, null, null, {});
