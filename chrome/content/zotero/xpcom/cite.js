@@ -1561,18 +1561,43 @@ Zotero.CSL.FormattedString.prototype.append = function(string, element, dontDeli
 	
 	if(!dontEscape) {
 		if(this.format == "HTML") {
-			// replace HTML entities
-			string = string.replace(/&/g, "&amp;");
-			string = string.replace(/</g, "&lt;");
-			string = string.replace(/>/g, "&gt;");
+			var newString = "";
+			
+			for(var i=0; i<string.length; i++) {
+				var charCode = string.charCodeAt(i);
+				// Replace certain characters with HTML entities
+				switch (charCode) {
+					case 38: // &
+						newString += '&amp;';
+						break;
+					case 60: // <
+						newString += '&lt;';
+						break;
+					case 62: // >
+						newString += '&gt;';
+						break;
+					case 8211: // en-dash
+						newString += '&#8211;'
+						break;
+					case 8212: // em-dash
+						newString += '&#8212;'
+						break;
+					default:
+						newString += string[i];
+				}
+			}
+			
+			string = newString;
+			
 		} else if(this.format == "RTF") {
 			var newString = "";
 			
 			// go through and fix up unicode entities
-			for(i=0; i<string.length; i++) {
+			for(var i=0; i<string.length; i++) {
 				var charCode = string.charCodeAt(i);
+				Zotero.debug(charCode);
 				if(charCode > 127) {			// encode unicode
-					newString += "\\uc0\\u"+charCode.toString()+"  ";
+					newString += "{\\uc0\\u"+charCode.toString()+"}";
 				} else if(charCode == 92) {		// double backslashes
 					newString += "\\\\";
 				} else {
@@ -1580,7 +1605,7 @@ Zotero.CSL.FormattedString.prototype.append = function(string, element, dontDeli
 				}
 			}
 			
-			string = newString
+			string = newString;
 		} else if(this.format == "Integration") {
 			string = string.replace(/\\/g, "\\\\");
 		}

@@ -1,4 +1,4 @@
--- 220
+-- 221
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-04-24 15:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-04-25 23:40:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-03-21 15:26:54', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -11086,7 +11086,7 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '2007-
   </bibliography>
 </style>');
 
-REPLACE INTO csl VALUES('http://www.zotero.org/namespaces/CSL/chicago-author-date.csl', '2007-03-23 19:25:00', 'Chicago Manual of Style (Author-Date)',
+REPLACE INTO csl VALUES('http://www.zotero.org/namespaces/CSL/chicago-author-date.csl', '2007-04-25 23:40:00', 'Chicago Manual of Style (Author-Date)',
 '<?xml version="1.0" encoding="UTF-8"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="author-date" xml:lang="en">
 	<info>
@@ -11150,7 +11150,7 @@ REPLACE INTO csl VALUES('http://www.zotero.org/namespaces/CSL/chicago-author-dat
 			</item>
 		</layout>
 	</citation>
-	<bibliography hanging-indent="true" subsequent-author-substitute="---">
+	<bibliography hanging-indent="true" subsequent-author-substitute="&#8212;&#8212;&#8212;">
 		<sort algorithm="author-date"/>
 		<et-al min-authors="6" use-first="6"/>
 		<layout>
@@ -11415,7 +11415,7 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/chicago-note.csl
   </citation>
 </style>');
 
-REPLACE INTO csl VALUES('http://www.zotero.org/namespaces/CSL/chicago-note-bibliography.csl', '2007-03-23 21:30:00', 'Chicago Manual of Style (Note with Bibliography)',
+REPLACE INTO csl VALUES('http://www.zotero.org/namespaces/CSL/chicago-note-bibliography.csl', '2007-04-25 23:40:00', 'Chicago Manual of Style (Note with Bibliography)',
 '<?xml version="1.0" encoding="UTF-8"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="note" xml:lang="en">
 	<info>
@@ -11485,7 +11485,7 @@ REPLACE INTO csl VALUES('http://www.zotero.org/namespaces/CSL/chicago-note-bibli
 			</item>
 		</layout>
 	</citation>
-	<bibliography hanging-indent="true" subsequent-author-substitute="---">
+	<bibliography hanging-indent="true" subsequent-author-substitute="&#8212;&#8212;&#8212;">
 		<sort>
 			<author name-as-sort-order="all"/>
 			<titles/>
