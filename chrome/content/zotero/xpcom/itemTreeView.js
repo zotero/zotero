@@ -100,16 +100,6 @@ Zotero.ItemTreeView.prototype.setTree = function(treebox)
 		if (!Zotero.stateCheck()) {
 			if (obj._ownerDocument.defaultView.ZoteroPane) {
 				obj._ownerDocument.defaultView.ZoteroPane.displayErrorMessage();
-				/*
-				var reportErrorsStr = Zotero.getString('errorReport.reportErrors');
-				var reportInstructions =
-					Zotero.getString('errorReport.reportInstructions', reportErrorsStr)
-				
-				var msg = Zotero.getString('general.errorHasOccurred') + ' '
-					+ Zotero.getString('general.restartFirefox') + '\n\n'
-					+ reportInstructions;
-				obj._ownerDocument.defaultView.ZoteroPane.setItemsPaneMessage(msg);
-				*/
 			}
 			return;
 		}
