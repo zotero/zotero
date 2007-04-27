@@ -893,8 +893,11 @@ Zotero.ItemGroup.prototype.getSearchObject = function() {
 	
 	// Create/load the inner search
 	var s = new Zotero.Search();
-	if (this.isLibrary()) { }
+	if (this.isLibrary()) {
+		s.addCondition('noChildren', 'true');
+	}
 	else if (this.isCollection()) {
+		s.addCondition('noChildren', 'true');
 		s.addCondition('collectionID', 'is', this.ref.getID());
 		if (Zotero.Prefs.get('recursiveCollections')) {
 			s.addCondition('recursive', 'true');

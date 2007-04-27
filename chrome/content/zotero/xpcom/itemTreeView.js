@@ -188,6 +188,8 @@ Zotero.ItemTreeView.prototype.refresh = function()
 			cacheFields = cacheFields.concat(field);
 		}
 	}
+	
+	Zotero.DB.beginTransaction();
 	Zotero.Items.cacheFields(cacheFields);
 	
 	var newRows = this._itemGroup.getChildItems();
@@ -220,6 +222,8 @@ Zotero.ItemTreeView.prototype.refresh = function()
 			added++;
 		}
 	}
+	
+	Zotero.DB.commitTransaction();
 	
 	this._refreshHashMap();
 	

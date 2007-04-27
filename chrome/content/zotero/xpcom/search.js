@@ -341,10 +341,13 @@ Zotero.Search.prototype.search = function(asTempTable){
 	}
 	
 	if (this._scope) {
+		Zotero.DB.beginTransaction();
+		
 		// If subsearch has post-search filter, run and insert ids into temp table
 		if (this._scope.hasPostSearchFilter()) {
 			var ids = this._scope.search();
 			if (!ids) {
+				Zotero.DB.commitTransaction();
 				return false;
 			}
 			
@@ -375,6 +378,7 @@ Zotero.Search.prototype.search = function(asTempTable){
 		
 		var ids = Zotero.DB.columnQuery(sql, this._sqlParams);
 		Zotero.DB.query("DROP TABLE " + tmpTable);
+		Zotero.DB.commitTransaction();
 	}
 	else {
 		var ids = Zotero.DB.columnQuery(this._sql, this._sqlParams);
@@ -528,6 +532,8 @@ Zotero.Search.prototype.getSQLParams = function(){
 Zotero.Search.prototype._idsToTempTable = function (ids) {
 	var tmpTable = "tmpSearchResults_" + Zotero.randomString(8);
 	
+	Zotero.DB.beginTransaction();
+	
 	var sql = "CREATE TEMPORARY TABLE " + tmpTable + " (itemID INT)";
 	Zotero.DB.query(sql);
 	var sql = "INSERT INTO " + tmpTable + " VALUES (?)";
@@ -545,6 +551,8 @@ Zotero.Search.prototype._idsToTempTable = function (ids) {
 	
 	var sql = "CREATE INDEX " + tmpTable + "_itemID ON " + tmpTable + "(itemID)";
 	Zotero.DB.query(sql);
+	
+	Zotero.DB.commitTransaction();
 	
 	return tmpTable;
 }

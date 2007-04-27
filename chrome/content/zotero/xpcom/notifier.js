@@ -249,6 +249,8 @@ Zotero.Notifier = new function(){
 			}
 		}
 		
+		reset();
+		
 		if (totals) {
 			Zotero.debug("Committing Notifier event queue" + totals);
 			
@@ -261,7 +263,6 @@ Zotero.Notifier = new function(){
 				}
 			}
 		}
-		reset();
 	}
 	
 	
