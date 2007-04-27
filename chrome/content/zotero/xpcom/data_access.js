@@ -1694,6 +1694,7 @@ Zotero.Item.prototype.addTag = function(tag, type){
 		// If existing user and adding automatic, skip
 		else if (type == 1 && existingTypes.indexOf(0) != -1) {
 			Zotero.debug('Identical user tag already exists -- skipping automatic tag add');
+			Zotero.DB.commitTransaction();
 			return false;
 		}
 	}
