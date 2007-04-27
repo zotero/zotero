@@ -1463,8 +1463,13 @@ var ZoteroPane = new function()
 	}
 	
 	
-	function setItemsPaneMessage(msg) {
+	function setItemsPaneMessage(msg, lock) {
 		var elem = document.getElementById('zotero-items-pane-message-box');
+		
+		if (elem.getAttribute('locked') == 'true') {
+			return;
+		}
+		
 		while (elem.hasChildNodes()) {
 			elem.removeChild(elem.firstChild);
 		}
@@ -1475,11 +1480,22 @@ var ZoteroPane = new function()
 			elem.appendChild(desc);
 		}
 		
+		// Make message permanent
+		if (lock) {
+			elem.setAttribute('locked', true);
+		}
+		
 		document.getElementById('zotero-items-pane-content').selectedIndex = 1;
 	}
 	
 	
 	function clearItemsPaneMessage() {
+		// If message box is locked, don't clear
+		var box = document.getElementById('zotero-items-pane-message-box');
+		if (box.getAttribute('locked') == 'true') {
+			return;
+		}
+		
 		document.getElementById('zotero-items-pane-content').selectedIndex = 0;
 	}
 	
@@ -1895,7 +1911,7 @@ var ZoteroPane = new function()
 			var msg = Zotero.getString('general.errorHasOccurred') + ' '
 				+ Zotero.getString('general.restartFirefox') + '\n\n'
 				+ reportInstructions;
-			self.setItemsPaneMessage(msg);
+			self.setItemsPaneMessage(msg, true);
 		}
 	}
 }
