@@ -121,7 +121,12 @@ Zotero.Schema = new function(){
 				
 				// Rebuild fulltext cache if necessary
 				if (Zotero.Fulltext.cacheIsOutdated()){
-					Zotero.Fulltext.rebuildCache();
+					try {
+						Zotero.Fulltext.rebuildCache();
+					}
+					catch (e) {
+						Components.utils.reportError(e);
+					}
 				}
 				Zotero.DB.commitTransaction();
 			}

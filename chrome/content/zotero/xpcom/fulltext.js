@@ -111,7 +111,9 @@ Zotero.Fulltext = new function(){
 		
 		var sql = "SELECT itemID FROM itemAttachments";
 		var items = Zotero.DB.columnQuery(sql);
-		this.indexItems(items);
+		if (items) {
+			this.indexItems(items);
+		}
 		
 		Zotero.DB.commitTransaction();
 	}
