@@ -357,8 +357,7 @@
 			
 			// Used for loading the changelog after upgrades
 			if (Zotero.initialURL) {
-				gBrowser.selectedTab = gBrowser.addTab(Zotero.initialURL);
-				Zotero.initialURL = null;
+				setTimeout("gBrowser.selectedTab = gBrowser.addTab(Zotero.initialURL); Zotero.initialURL = null;", 1);
 			}
 		}
 		else {

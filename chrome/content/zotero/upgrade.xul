@@ -33,6 +33,7 @@
 				var wizard = document.getElementById('zotero-schema-upgrade');
 				wizard.getButton('cancel').setAttribute('disabled', true);
 				wizard.canRewind = false;
+				wizard.getButton('finish').focus(); // prevent focusing of changelog link
 			}
 			
 			
