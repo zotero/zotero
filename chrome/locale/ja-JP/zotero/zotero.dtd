@@ -1,3 +1,22 @@
+<!ENTITY zotero.general.optional "(Optional)">
+
+<!ENTITY zotero.errorReport.additionalInfo "Additional Information">
+<!ENTITY zotero.errorReport.emailAddress "Your e-mail address:">
+<!ENTITY zotero.errorReport.errorSteps "What were you doing when the error occurred? If possible, please include steps to reproduce the error.">
+<!ENTITY zotero.errorReport.submissionInProgress "Please wait while the error report is submitted.">
+<!ENTITY zotero.errorReport.submitted "The error report has been submitted.">
+<!ENTITY zotero.errorReport.reportID "Report ID:">
+<!ENTITY zotero.errorReport.includeReportID "Please include the Report ID in any correspondence with the Zotero developers regarding this issue.">
+
+<!ENTITY zotero.upgrade.newVersionInstalled "You have installed a new version of Zotero.">
+<!ENTITY zotero.upgrade.upgradeRequired "Your Zotero database must be upgraded to work with the new version.">
+<!ENTITY zotero.upgrade.autoBackup "Your existing database will be backed up automatically before any changes are made.">
+<!ENTITY zotero.upgrade.upgradeInProgress "Please wait for the upgrade process to finish. This may take a few minutes.">
+<!ENTITY zotero.upgrade.upgradeSucceeded "Your Zotero database has been successfully upgraded.">
+<!ENTITY zotero.upgrade.changeLogBeforeLink "Please see">
+<!ENTITY zotero.upgrade.changeLogLink "the changelog">
+<!ENTITY zotero.upgrade.changeLogAfterLink "to find out what's new.">
+
 <!ENTITY zotero.contextMenu.addTextToCurrentNote "選択範囲をZoteroメモに追加">
 <!ENTITY zotero.contextMenu.addTextToNewNote "選択範囲からZoteroメモを作成">
 <!ENTITY zotero.contextMenu.saveLinkAsSnapshot "リンクをZoteroスナップショットとして保存">

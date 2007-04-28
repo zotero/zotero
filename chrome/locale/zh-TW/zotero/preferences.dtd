@@ -31,9 +31,12 @@
 <!ENTITY zotero.preferences.prefpane.export "Export">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Quick Copy">
-<!ENTITY zotero.preferences.quickCopy.outputFormat "Output Format:">
+<!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Default Output Format:">
 <!ENTITY zotero.preferences.quickCopy.macWarning "Note that rich-text formatting will be lost on Mac OS X.">
-
+<!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Site-Specific Settings:">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domain/Path">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(e.g. wikipedia.org)">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Output Format">
 
 <!ENTITY zotero.preferences.prefpane.keys "快速鍵">
 
