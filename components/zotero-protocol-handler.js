@@ -102,7 +102,7 @@ function ChromeExtensionHandler() {
 				
 				switch (type){
 					case 'collection':
-						var items = Zotero.getItems(ids);
+						var results = Zotero.getItems(ids);
 						break;
 					
 					case 'search':
@@ -122,7 +122,9 @@ function ChromeExtensionHandler() {
 						var ids = s.search();
 				}
 				
-				var results = Zotero.Items.get(ids);
+				if (!results) {
+					var results = Zotero.Items.get(ids);
+				}
 				var items = [];
 				// Only include parent items
 				for (var i=0; i<results.length; i++) {
