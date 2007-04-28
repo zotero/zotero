@@ -2275,7 +2275,7 @@ Zotero.Item.prototype.toArray = function(){
 	
 	// Item metadata
 	for (var i in this._itemData){
-		arr[Zotero.ItemFields.getName(i)] = this._itemData[i];
+		arr[Zotero.ItemFields.getName(i)] = this._itemData[i] ? this._itemData[i] : '';
 	}
 	
 	if (!this.isNote() && !this.isAttachment()){
