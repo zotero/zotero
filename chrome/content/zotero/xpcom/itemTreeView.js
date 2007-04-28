@@ -813,7 +813,7 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 				}
 				
 				//cmp = (fieldA > fieldB) ? -1 : (fieldA < fieldB) ? 1 : 0;
-				cmp = collation.compareString(0, fieldA, fieldB);
+				cmp = collation.compareString(0, fieldB, fieldA);
 				if (cmp) {
 					return cmp;
 				}
@@ -831,7 +831,7 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 			}
 			
 			//cmp = (fieldA > fieldB) ? -1 : (fieldA < fieldB) ? 1 : 0;
-			cmp = collation.compareString(0, fieldA, fieldB);
+			cmp = collation.compareString(0, fieldB, fieldA);
 			if (cmp) {
 				return cmp;
 			}
@@ -856,8 +856,7 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 		
 		fieldA = a.getField('dateModified');
 		fieldB = b.getField('dateModified');
-		//return (fieldA > fieldB) ? -1 : (fieldA < fieldB) ? 1 : 0;
-		return collation.compareString(0, fieldA, fieldB);
+		return (fieldA > fieldB) ? -1 : (fieldA < fieldB) ? 1 : 0;
 	}
 	
 	function doSort(a,b)
