@@ -467,7 +467,8 @@ var Zotero = new function(){
 			var blacklist = [
 				"No chrome package registered for chrome://communicator",
 				'[JavaScript Error: "Components is not defined" {file: "chrome://nightly/content/talkback/talkback.js',
-				'[JavaScript Error: "document.getElementById("sanitizeItem")'
+				'[JavaScript Error: "document.getElementById("sanitizeItem")',
+				'chrome://webclipper'
 			];
 			
 			for (var i=0; i<blacklist.length; i++) {
