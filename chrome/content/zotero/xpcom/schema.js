@@ -1056,6 +1056,26 @@ Zotero.Schema = new function(){
 				if (i==32) {
 					Zotero.DB.query("UPDATE itemData SET fieldID=100 WHERE itemID IN (SELECT itemID FROM items WHERE itemTypeID=20) AND fieldID=14;");
 				}
+				
+				if (i==33) {
+					var rows = Zotero.DB.query("SELECT * FROM itemNotes WHERE itemID NOT IN (SELECT itemID FROM items)");
+					if (rows) {
+						var colID = Zotero.getRandomID('collections', 'collectionID');
+						Zotero.DB.query("INSERT INTO collections VALUES (?,?,?)", [colID, "[Recovered Notes]", null]);
+						
+						for (var j=0; j<rows.length; j++) {
+							if (rows[j].sourceItemID) {
+								var count = Zotero.DB.valueQuery("SELECT COUNT(*) FROM items WHERE itemID=?", rows[j].sourceItemID);
+								if (count == 0) {
+									Zotero.DB.query("UPDATE itemNotes SET sourceItemID=NULL WHERE itemID=?", rows[j].sourceItemID);
+								}
+							}
+							Zotero.DB.query("INSERT INTO items (itemID, itemTypeID) VALUES (?,?)", [rows[j].itemID, 1]);
+							var max = Zotero.DB.valueQuery("SELECT COUNT(*) FROM collectionItems WHERE collectionID=?", colID);
+							Zotero.DB.query("INSERT INTO collectionItems VALUES (?,?,?)", [colID, rows[j].itemID, max]);
+						}
+					}
+				}
 			}
 			
 			_updateSchema('userdata');
