@@ -1,4 +1,4 @@
--- 222
+-- 223
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-04-26 09:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-04-29 17:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-03-21 15:26:54', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -6692,7 +6692,7 @@ REPLACE INTO translators VALUES ('a354331-981b-43de-a61-bc26dd1be3a9', '1.0.0b3.
 	});
 }');
 
-REPLACE INTO translators VALUES ('938ebe32-2b2e-4349-a5b3-b3a05d3de627', '1.0.0b3.r1', '', '2007-04-02 14:55:00', '1', '100', '4', 'ACS Publications', 'Sean Takats', '[^/]*/(?:wls/journals/query/subscriberResults\.html|acs/journals/toc.page|cgi-bin/(?:article|abstract|sample).cgi/[^/]+/[0-9]+/[0-9]+/i[0-9]+/(?:html|abs)/[^\.]+.html)', 
+REPLACE INTO translators VALUES ('938ebe32-2b2e-4349-a5b3-b3a05d3de627', '1.0.0b3.r1', '', '2007-04-29 17:30:00', '1', '100', '4', 'ACS Publications', 'Sean Takats', '[^/]*/(?:wls/journals/query/subscriberResults\.html|acs/journals/toc.page|cgi-bin/(?:article|abstract|sample).cgi/[^/]+/[0-9]+/[0-9]+/i[0-9]+/(?:html|abs)/[^\.]+.html)', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -6776,7 +6776,7 @@ function doWeb(doc, url) {
 
 		var getstring = "";
 		for(var i in items) {
-			getstring = getstring + "jid=" + i + "&";
+			getstring = getstring + "jid=" + encodeURIComponent(i) + "&";
 			pdfs.push(links[i]+"?sessid=");
 		}
 		Zotero.debug(getstring);
@@ -6788,7 +6788,7 @@ function doWeb(doc, url) {
 		var pdf = doc.evaluate(''/html/body/a[text()="[PDF version of this article]"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 		if(pdf) pdf = pdf.href;
 
-		var requests = [{jid:"jid=" + jid}]; 
+		var requests = [{jid:"jid=" + encodeURIComponent(jid)}]; 
 		pdfs.push(pdf+"?sessid=");
 	}
 
