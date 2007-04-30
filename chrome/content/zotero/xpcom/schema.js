@@ -1070,6 +1070,10 @@ Zotero.Schema = new function(){
 									Zotero.DB.query("UPDATE itemNotes SET sourceItemID=NULL WHERE itemID=?", rows[j].sourceItemID);
 								}
 							}
+							if (parseInt(rows[j].itemID) != rows[j].itemID) {
+								Zotero.DB.query("DELETE FROM itemNotes WHERE itemID=?", rows[j].itemID);
+								continue;
+							}
 							Zotero.DB.query("INSERT INTO items (itemID, itemTypeID) VALUES (?,?)", [rows[j].itemID, 1]);
 							var max = Zotero.DB.valueQuery("SELECT COUNT(*) FROM collectionItems WHERE collectionID=?", colID);
 							Zotero.DB.query("INSERT INTO collectionItems VALUES (?,?,?)", [colID, rows[j].itemID, max]);
