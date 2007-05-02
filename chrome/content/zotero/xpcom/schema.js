@@ -1057,6 +1057,8 @@ Zotero.Schema = new function(){
 					Zotero.DB.query("UPDATE itemData SET fieldID=100 WHERE itemID IN (SELECT itemID FROM items WHERE itemTypeID=20) AND fieldID=14;");
 				}
 				
+				// 1.0.0b4.r3
+				
 				if (i==33) {
 					var rows = Zotero.DB.query("SELECT * FROM itemNotes WHERE itemID NOT IN (SELECT itemID FROM items)");
 					if (rows) {
@@ -1070,7 +1072,31 @@ Zotero.Schema = new function(){
 									Zotero.DB.query("UPDATE itemNotes SET sourceItemID=NULL WHERE itemID=?", rows[j].sourceItemID);
 								}
 							}
-							if (parseInt(rows[j].itemID) != rows[j].itemID) {
+							var parsedID = parseInt(rows[j].itemID);
+							Zotero.debug(parsedID);
+							Zotero.debug(rows[j].itemID);
+							if ((parsedID + '').length != rows[j].itemID) {
+								if (parseInt(rows[j].note) != rows[j].note ||
+										(parseInt(rows[j].note) + '').length != rows[j].note.length) {
+									Zotero.DB.query("DELETE FROM itemNotes WHERE itemID=?", rows[j].itemID);
+									continue;
+								}
+								var exists = Zotero.DB.valueQuery("SELECT COUNT(*) FROM itemNotes WHERE itemID=?", rows[j].note);
+								if (exists) {
+									var noteItemID = Zotero.getRandomID('items', 'itemID');
+								}
+								else {
+									var noteItemID = rows[j].note;
+								}
+								Zotero.DB.query("UPDATE itemNotes SET itemID=?, sourceItemID=NULL, note=? WHERE itemID=? AND sourceItemID=?", [noteItemID, rows[j].itemID, rows[j].itemID, rows[j].sourceItemID]);
+								var f = function(text) { var t = text.substring(0, 80); var ln = t.indexOf("\n"); if (ln>-1 && ln<80) { t = t.substring(0, ln); } return t; }
+								Zotero.DB.query("REPLACE INTO itemNoteTitles VALUES (?,?)", [noteItemID, f(rows[j].itemID)]);
+								Zotero.DB.query("INSERT OR IGNORE INTO items (itemID, itemTypeID) VALUES (?,?)", [noteItemID, 1]);
+								var max = Zotero.DB.valueQuery("SELECT COUNT(*) FROM collectionItems WHERE collectionID=?", colID);
+								Zotero.DB.query("INSERT OR IGNORE INTO collectionItems VALUES (?,?,?)", [colID, noteItemID, max]);
+								continue;
+							}
+							else if (parsedID != rows[j].itemID) {
 								Zotero.DB.query("DELETE FROM itemNotes WHERE itemID=?", rows[j].itemID);
 								continue;
 							}
