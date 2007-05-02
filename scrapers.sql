@@ -1,4 +1,4 @@
--- 223
+-- 224
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-04-29 17:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-05-02 17:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-03-21 15:26:54', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -1361,8 +1361,7 @@ function doWeb(doc, url){
 	}
 }');
 
-
-REPLACE INTO translators VALUES ('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '1.0.0b3.r1', '', '2007-01-27 08:00:00', 1, 100, 4, 'ProQuest', 'Simon Kornblith', '^https?://[^/]+/pqdweb\?((?:.*\&)?did=.*&Fmt=[0-9]|(?:.*\&)Fmt=[0-9].*&did=|(?:.*\&)searchInterface=)',
+REPLACE INTO translators VALUES ('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '1.0.0b3.r1', '', '2007-05-02 17:00:00', '1', '100', '4', 'ProQuest', 'Simon Kornblith', '^https?://[^/]+/pqdweb\?((?:.*\&)?did=.*&Fmt=[0-9]|(?:.*\&)Fmt=[0-9].*&did=|(?:.*\&)searchInterface=)', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -1377,7 +1376,7 @@ REPLACE INTO translators VALUES ('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '1.0.0b
 			return "magazineArticle";
 		}
 	}
-}',
+}', 
 'function scrape(doc) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -1388,14 +1387,14 @@ REPLACE INTO translators VALUES ('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '1.0.0b
 	var elmt;
 	
 	// Title
-	var xpath = ''/html/body/table/tbody/tr/td[@class="headerBlack"]/strong'';
+	var xpath = ''//td[@class="headerBlack"]/strong'';
 	newItem.title = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 	
 	// Authors
-	var xpath = ''/html/body/table/tbody/tr/td[@class="textMedium"]/a/em'';
+	var xpath = ''//td[@class="textMedium"]/a/em'';
 	var elmts = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
 	while(elmt = elmts.iterateNext()) {
-		// there are sometimes additional tags representing higlighting
+		// there are sometimes additional tags representing highlighting
 		var author = elmt.textContent;
 		if(author) {
 			newItem.creators.push(Zotero.Utilities.cleanAuthor(author, "author"));
@@ -1403,7 +1402,7 @@ REPLACE INTO translators VALUES ('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '1.0.0b
 	}
 	
 	// Other info
-	var xpath = ''/html/body/font/table/tbody/tr'';
+	var xpath = ''//table[@id="tableIndexTerms"]/tbody/tr'';
 	var elmts = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
 	while(elmt = elmts.iterateNext()) {
 		var field = Zotero.Utilities.superCleanString(doc.evaluate(''./TD[1]/text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue).toLowerCase();
@@ -1427,7 +1426,6 @@ REPLACE INTO translators VALUES ('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '1.0.0b
 			if(moreInfo.nodeValue) {
 				moreInfo = Zotero.Utilities.superCleanString(moreInfo.nodeValue);
 				var parts = moreInfo.split(";\xA0");
-				
 				var issueRegexp = /^(\w+)\.(?: |\xA0)?(.+)$/
 				var issueInfo = parts[0].split(",\xA0");
 				for(j in issueInfo) {
@@ -1447,6 +1445,18 @@ REPLACE INTO translators VALUES ('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '1.0.0b
 					
 					if(m) {
 						newItem.pages = m[0];
+						var pgs = parts[1].split(",\xA0");
+						if(pgs[1] && Zotero.Utilities.superCleanString(pgs[1]).substring(pgs[1].length-3, pgs[1].length).toLowerCase() == "pgs") {
+							var re = /[0-9\-]+/;
+							var m = re.exec(pgs[1]);
+							if(m) {
+								var pagelength = parseInt(m[0]);
+								if (pagelength > 1){
+									var endpage = parseInt(newItem.pages) + pagelength - 1;
+									newItem.pages = newItem.pages + "-" + endpage;
+								}
+							}
+						}			
 					}
 				}
 			}
@@ -1475,9 +1485,9 @@ REPLACE INTO translators VALUES ('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '1.0.0b
 				}
 			}
 		} else if(field == "document url") {
-			var value = doc.evaluate(''./TD[2]/text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+			var value = doc.evaluate(''./TD[2]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 			if(value) {
-				newItem.url = Zotero.Utilities.cleanString(value.nodeValue);
+				newItem.url = Zotero.Utilities.cleanString(value.textContent);
 			}
 		} else if(field == "proquest document id") {
 			var value = doc.evaluate(''./TD[2]/text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
@@ -1504,10 +1514,10 @@ REPLACE INTO translators VALUES ('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '1.0.0b
 	
 	// figure out what we can attach
 	var attachArray = {
-		''//td[@class="textSmall"]//img[@alt="Full Text - PDF"]'':"ProQuest Full Text PDF",
-		''//td[@class="textSmall"]//img[@alt="Text+Graphics"]'':"ProQuest Snapshot (HTML with Graphics)",
-		''//td[@class="textSmall"]//img[@alt="Full Text"]'':"ProQuest Snapshot (HTML)",
-		''//td[@class="textSmall"]//img[@alt="Abstract"]'':"ProQuest Snapshot (Abstract)"
+		''//div[@class="textMedium formatBox"]//img[@alt="Full Text - PDF"]'':"ProQuest Full Text PDF",
+		''//div[@class="textMedium formatBox"]//img[@alt="Text+Graphics"]'':"ProQuest Snapshot (HTML with Graphics)",
+		''//div[@class="textMedium formatBox"]//img[@alt="Full Text"]'':"ProQuest Snapshot (HTML)",
+		''//div[@class="textMedium formatBox"]//img[@alt="Abstract"]'':"ProQuest Snapshot (Abstract)"
 	}
 	for(var xpath in attachArray) {
 		var item = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
