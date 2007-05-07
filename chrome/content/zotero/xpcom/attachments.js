@@ -713,10 +713,18 @@ Zotero.Attachments = new function(){
 		// Replaces the substitution marker with the field value,
 		// truncating based on the {[0-9]+} modifier if applicable
 		function rpl(field, str) {
+			if (!str) {
+				str = formatString;
+			}
+			
 			switch (field) {
 				case 'creator':
 					field = 'firstCreator';
 					var rpl = '%c';
+					break;
+					
+				case 'year':
+					var rpl = '%y';
 					break;
 					
 				case 'title':
@@ -724,30 +732,42 @@ Zotero.Attachments = new function(){
 					break;
 			}
 			
+			switch (field) {
+				case 'year':
+					var value = item.getField('date', true);
+					if (value) {
+						value = Zotero.Date.multipartToSQL(value).substr(0, 4);
+						if (value == '0000') {
+							value = '';
+						}
+					}
+				break;
+				
+				default:
+					var value = item.getField(field, false, true);
+			}
+			
+			// If no value for this field, strip entire conditional block
+			// (within curly braces)
+			if (!value) {
+				var re = new RegExp("\{[^%]*" + rpl + "(\{[0-9]+\})?" + "[^%]*\}");
+				if (str.match(re)) {
+					return str.replace(re, '')
+				}
+			}
+			
 			var f = function(match) {
-				var value = item.getField(field, false, true);
 				var chars = match.match(/{([0-9]+)}/);
 				return (chars) ? value.substr(0, chars[1]) : value;
 			}
 			
-			return str.replace(new RegExp(rpl + "(\{[0-9]+\})?"), f);
+			var re = new RegExp("(\{[^%]*)?" + rpl + "(\{[0-9]+\})?" + "([^%]*\})?");
+			return str.replace(re, f);
 		}
 		
-		// Creator
-		formatString = rpl('creator', formatString);
-		
-		// Year
-		var year = item.getField('date', true);
-		if (year) {
-			year = Zotero.Date.multipartToSQL(year).substr(0, 4);
-			if (year == '0000') {
-				year = '';
-			}
-		}
-		formatString = formatString.replace('%y', year);
-		
-		// Title
-		formatString = rpl('title', formatString);
+		formatString = rpl('creator');
+		formatString = rpl('year');
+		formatString = rpl('title');
 		
 		// Strip potentially invalid characters
 		// See http://en.wikipedia.org/wiki/Filename#Reserved_characters_and_words
