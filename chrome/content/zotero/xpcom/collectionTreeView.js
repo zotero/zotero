@@ -900,6 +900,7 @@ Zotero.ItemGroup.prototype.getSearchObject = function() {
 	var s = new Zotero.Search();
 	if (this.isLibrary()) {
 		s.addCondition('noChildren', 'true');
+		includeScopeChildren = true;
 	}
 	else if (this.isCollection()) {
 		s.addCondition('noChildren', 'true');
