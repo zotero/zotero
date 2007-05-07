@@ -34,6 +34,8 @@
     <script src="fileInterface.js"/>
 	<script src="reportInterface.js"/>
 	<script src="browser.js"/>
+	<script src="chrome://global/content/nsDragAndDrop.js"/>
+	<script src="chrome://global/content/nsTransferable.js"/>
 	
 	<commandset id="mainCommandSet">
 		<command id="cmd_zotero_search" oncommand="ZoteroPane.search();"/>

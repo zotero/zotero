@@ -159,7 +159,6 @@ Zotero.ItemTreeView.prototype.refresh = function()
 	this._searchItemIDs = {}; // items matching the search
 	this._searchParentIDs = {};
 	this.rowCount = 0;
-	
 	var cacheFields = ['title', 'date'];
 	// Cache the visible fields so they don't load individually
 	try {
@@ -1388,9 +1387,20 @@ Zotero.ItemTreeView.prototype.onDragStart = function (evt,transferData,action)
 	try {
 	
 	
-	
-	transferData.data=new TransferData();
+	transferData.data = new TransferData();
 	transferData.data.addDataForFlavour("zotero/item", this.saveSelection());
+	
+	var items = Zotero.Items.get(this.saveSelection());
+	
+	// If at least one file is a non-web-link attachment, enable dragging to file system
+	for (var i=0; i<items.length; i++) {
+		if (items[i].isAttachment() &&
+				items[i].getAttachmentLinkMode() != Zotero.Attachments.LINK_MODE_LINKED_URL ) {
+			transferData.data.addDataForFlavour("application/x-moz-file-promise",
+				new Zotero.ItemTreeView.fileDragDataProvider(), 0, Components.interfaces.nsISupports);
+			break;
+		}
+	}
 	
 	// Get Quick Copy format for current URL
 	var url = this._ownerDocument.defaultView.content.location.href;
@@ -1407,8 +1417,6 @@ Zotero.ItemTreeView.prototype.onDragStart = function (evt,transferData,action)
 		var text = obj.output.replace(/\r\n/g, "\n");
 		transferData.data.addDataForFlavour("text/unicode", text);
 	}
-	
-	var items = Zotero.Items.get(this.saveSelection());
 	
 	var [mode, ] = format.split('=');
 	if (mode == 'export') {
@@ -1427,6 +1435,104 @@ Zotero.ItemTreeView.prototype.onDragStart = function (evt,transferData,action)
 		Zotero.debug(e);
 	}
 }
+
+
+// Implements nsIFlavorDataProvider for dragging attachment files to OS
+Zotero.ItemTreeView.fileDragDataProvider = function() { };
+
+Zotero.ItemTreeView.fileDragDataProvider.prototype = {
+	QueryInterface : function(iid) {
+		if (iid.equals(Components.interfaces.nsIFlavorDataProvider) ||
+				iid.equals(Components.interfaces.nsISupports)) {
+			return this;
+		}
+		throw Components.results.NS_NOINTERFACE;
+	},
+	
+	getFlavorData : function(transferable, flavor, data, dataLen) {
+		if (flavor == "application/x-moz-file-promise") {
+			// Get the destination directory
+			var dataSize = {};
+			var dirPrimitive = {};
+			transferable.getTransferData("application/x-moz-file-promise-dir", dirPrimitive, dataSize);
+			var destDir = dirPrimitive.value.QueryInterface(Components.interfaces.nsILocalFile);
+			
+			// Get the items we're dragging
+			var items = {};
+			transferable.getTransferData("zotero/item", items, dataSize);
+			items.value.QueryInterface(Components.interfaces.nsISupportsString);
+			var items = Zotero.Items.get(items.value.data.split(','));
+			var existingItems = [];
+			var existingFileNames = [];
+			for (var i=0; i<items.length; i++) {
+				if (!items[i].isAttachment() ||
+						items[i].getAttachmentLinkMode() == Zotero.Attachments.LINK_MODE_LINKED_URL) {
+					continue;
+				}
+				var file = items[i].getFile();
+				if (!file) {
+					Components.utils.reportError("File not found for item " + items[i].getID());
+					continue;
+				}
+				
+				// Determine if we need to copy multiple files (web page snapshots)
+				var parentDir = file.parent;
+				var files = parentDir.directoryEntries;
+				var numFiles = 0;
+				while (files.hasMoreElements()) {
+					var f = files.getNext();
+					f.QueryInterface(Components.interfaces.nsILocalFile);
+					if (f.leafName.indexOf('.') != 0) {
+						numFiles++;
+					}
+				}
+				
+				// Create folder if multiple files
+				if (numFiles > 1) {
+					var dirName = Zotero.Attachments.getFileBaseNameFromItem(items[i].getID());
+					try {
+						parentDir.copyTo(destDir, dirName);
+					}
+					catch (e) {
+						if (e.name == 'NS_ERROR_FILE_ALREADY_EXISTS') {
+							existingItems.push(items[i].getID());
+							existingFileNames.push(dirName);
+						}
+						else {
+							throw (e);
+						}
+					}
+				}
+				// Otherwise just copy
+				else {
+					try {
+						file.copyTo(destDir, null);
+					}
+					catch (e) {
+						if (e.name == 'NS_ERROR_FILE_ALREADY_EXISTS') {
+							existingItems.push(items[i].getID());
+							existingFileNames.push(items[i].getFile().leafName);
+						}
+						else {
+							throw (e);
+						}
+					}
+				}
+			}
+			
+			// Display alert if existing files were skipped
+			if (existingItems.length > 0) {
+				var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+										.getService(Components.interfaces.nsIPromptService);
+				
+				promptService.alert(null, Zotero.getString('general.warning'),
+					Zotero.getString('dragAndDrop.existingFiles') + "\n\n"
+					+ existingFileNames.join("\n"));
+			}
+		}
+	}
+}
+
 
 /*
  *  Called by nsDragAndDrop.js for any sort of drop on the tree
@@ -1476,6 +1582,10 @@ Zotero.ItemTreeView.prototype.canDrop = function(row, orient)
 			
 		case 'application/x-moz-file':
 			var file = data.data;
+			// Don't allow folder drag
+			if (file.isDirectory()) {
+				return false;
+			}
 			break;
 	}
 	

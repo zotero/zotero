@@ -659,9 +659,14 @@ Zotero.CollectionTreeView.prototype.canDrop = function(row, orient)
 		}
 		else if (dataType == 'text/x-moz-url'
 				|| dataType == 'application/x-moz-file') {
-			if (!this._getItemAtRow(row).isSearch()) {
-				return true;
+			if (this._getItemAtRow(row).isSearch()) {
+				return false;
 			}
+			// Don't allow folder drag
+			if (dataType == 'application/x-moz-file' && data.data.isDirectory()) {
+				return false;
+			}
+			return true;
 		}
 		else if (dataType == 'zotero/collection'
 				&& data.data != rowCollection.getID()

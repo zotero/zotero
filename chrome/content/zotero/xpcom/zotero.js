@@ -591,7 +591,7 @@ var Zotero = new function(){
 			.getService(Components.interfaces.nsILocaleService);
 		var collationFactory = Components.classes["@mozilla.org/intl/collation-factory;1"]
 			.getService(Components.interfaces.nsICollationFactory);
-		return collation = collationFactory.CreateCollation(localeService.getApplicationLocale());
+		return collationFactory.CreateCollation(localeService.getApplicationLocale());
 	}
 	
 	
