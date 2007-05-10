@@ -1,0 +1,121 @@
+<?xml version="1.0"?>
+<!--
+    ***** BEGIN LICENSE BLOCK *****
+    
+    Copyright (c) 2006  Center for History and New Media
+                        George Mason University, Fairfax, Virginia, USA
+                        http://chnm.gmu.edu
+    
+    Licensed under the Educational Community License, Version 1.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+    
+    http://www.opensource.org/licenses/ecl1.php
+    
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+    
+    ***** END LICENSE BLOCK *****
+-->
+<?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
+
+<window
+	id="csl-edit"
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	onload="Zotero_CSL_Editor.init();">
+	
+	<script src="chrome://zotero/content/include.js"/>
+	
+	<script>
+	<![CDATA[
+		var Zotero_CSL_Editor = new function() {
+			var mainWindow = window.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
+				.getInterface(Components.interfaces.nsIWebNavigation)
+				.QueryInterface(Components.interfaces.nsIDocShellTreeItem)
+				.rootTreeItem
+				.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
+				.getInterface(Components.interfaces.nsIDOMWindow);
+			
+			this.init = init;
+			this.handleKeyPress = handleKeyPress;
+			this.loadCSL = loadCSL;
+			this.generateBibliography = generateBibliography;
+			
+			function init() {
+				var cslList = document.getElementById('zotero-csl-list');
+				if (cslList.getAttribute('initialized') == 'true') {
+					return;
+				}
+				
+				var csls = Zotero.DB.query("SELECT title, cslID FROM csl ORDER BY title");
+				
+				for (var i=0; i<csls.length; i++) {
+					cslList.appendItem(csls[i].title, csls[i].cslID);
+				}
+				
+				cslList.setAttribute('initialized', true)
+			}
+			
+			
+			function handleKeyPress(event) {
+				if (event.keyCode == 9 &&
+						(!event.shiftKey && !event.metaKey && !event.altKey && !event.ctrlKey)) {
+					_insertText("\t");
+					event.preventDefault();
+				}
+			}
+			
+			
+			function loadCSL(cslID) {
+				var editor = document.getElementById('zotero-csl-editor')
+				editor.value = Zotero.DB.valueQuery("SELECT csl FROM csl WHERE cslID=?", cslID);
+				editor.doCommand();
+				document.getElementById('zotero-csl-list').value = cslID;
+			}
+			
+			
+			function generateBibliography(value) {
+				var iframe = document.getElementById('zotero-csl-preview-box');
+				
+				var items = mainWindow.ZoteroPane.getSelectedItems();
+				if (items.length == 0) {
+					iframe.contentDocument.documentElement.innerHTML = '<html><head><title></title></head><body><p style="color: red">No references selected in Zotero.</p></body></html>';
+					return;
+				}
+				
+				var csl = new Zotero.CSL(value);
+				csl.preprocessItems(items);
+				iframe.contentDocument.documentElement.innerHTML = csl.createBibliography(items, "HTML");
+			}
+			
+			
+			// From http://kb.mozillazine.org/Inserting_text_at_cursor
+			function _insertText(text) {
+				var command = "cmd_insertText";
+				var controller = document.commandDispatcher.getControllerForCommand(command);
+				if (controller && controller.isCommandEnabled(command)) {
+					controller = controller.QueryInterface(Components.interfaces.nsICommandController);
+					var params = Components.classes["@mozilla.org/embedcomp/command-params;1"];
+					params = params.createInstance(Components.interfaces.nsICommandParams);
+					params.setStringValue("state_data", "\t");
+					controller.doCommandWithParams(command, params);
+				}
+			}
+		}
+	]]>
+	</script>
+	
+	<vbox flex="1">
+		<menulist id="zotero-csl-list" initialized="false" oncommand="Zotero_CSL_Editor.loadCSL(this.selectedItem.value)"/>
+		<textbox id="zotero-csl-editor" type="timed" timeout="250" multiline="true"
+			flex="1"
+			onkeypress="Zotero_CSL_Editor.handleKeyPress(event)"
+			oncommand="document.getElementById('zotero-csl-list').selectedIndex = -1; Zotero_CSL_Editor.generateBibliography(this.value)"/>
+		<splitter/>
+		<iframe id="zotero-csl-preview-box" flex="1" style="padding: 0 1em" overflow="auto"/>
+	</vbox>
+	
+</window>
