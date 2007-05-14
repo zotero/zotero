@@ -1,4 +1,4 @@
--- 225
+-- 226
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-05-03 15:05:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-05-15 12:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-03-21 15:26:54', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -3408,25 +3408,25 @@ function doWeb() {
 	getAllIds();
 }');
 
-REPLACE INTO translators VALUES ('3e684d82-73a3-9a34-095f-19b112d88bbf', '1.0.0b3.r1', '', '2007-01-07 17:00:00', 1, 100, 4, 'Google Books', 'Simon Kornblith', '^http://books\.google\.[a-z]+/books\?(.*vid=.*\&id=.*|.*q=.*)',
+REPLACE INTO translators VALUES ('3e684d82-73a3-9a34-095f-19b112d88bbf', '1.0.0b3.r1', '', '2007-05-15 12:00:00', '1', '100', '4', 'Google Books', 'Simon Kornblith', '^http://books\.google\.[a-z]+/books\?(.*id=.*|.*q=.*)', 
 'function detectWeb(doc, url) {
-	var re = new RegExp(''^http://books\\.google\\.[a-z]+/books\\?vid=([^&]+).*\\&id=([^&]+)'', ''i'');
+	var re = new RegExp(''^http://books\\.google\\.[a-z]+/books\\?id=([^&]+)'', ''i'');
 	if(re.test(doc.location.href)) {
 		return "book";
 	} else {
 		return "multiple";
 	}
-}',
+}', 
 'function doWeb(doc, url) {
 	var uri = doc.location.href;
 	var newUris = new Array();
 	
-	var re = new RegExp(''^http://books\\.google\\.[a-z]+/books\\?vid=([^&]+).*\\&id=([^&]+)'', ''i'');
+	var re = new RegExp(''^http://books\\.google\\.[a-z]+/books\\?id=([^&]+)'', ''i'');
 	var m = re.exec(uri);
 	if(m) {
-		newUris.push(''http://books.google.com/books?vid=''+m[1]+''&id=''+m[2]);
+		newUris.push(''http://books.google.com/books?id=''+m[1]);
 	} else {
-		var items = Zotero.Utilities.getItemArray(doc, doc, ''http://books\\.google\\.[a-z]+/books\\?vid=([^&]+).*\\&id=([^&]+)'', ''^(?:All matching pages|About this Book|Table of Contents|Index)'');
+		var items = Zotero.Utilities.getItemArray(doc, doc, ''http://books\\.google\\.[a-z]+/books\\?id=([^&]+)'', ''^(?:All matching pages|About this Book|Table of Contents|Index)'');
 	
 		// Drop " - Page" thing
 		for(var i in items) {
@@ -3440,7 +3440,7 @@ REPLACE INTO translators VALUES ('3e684d82-73a3-9a34-095f-19b112d88bbf', '1.0.0b
 		
 		for(var i in items) {
 			var m = re.exec(i);
-			newUris.push(''http://books.google.com/books?vid=''+m[1]+''&id=''+m[2]);
+			newUris.push(''http://books.google.com/books?id=''+m[1]);
 		}
 	}
 	
@@ -3493,6 +3493,8 @@ REPLACE INTO translators VALUES ('3e684d82-73a3-9a34-095f-19b112d88bbf', '1.0.0b
 					newItem.ISBN = field.substring(5);
 				} else if(field.substring(field.length-6) == " pages") {
 					newItem.pages = field.substring(0, field.length-6);
+				} else if(field.substring(0,12) == "Contributor ") {
+					newItem.creators.push(Zotero.Utilities.cleanAuthor(field.substring(12), "contributor"));
 				}
 			}
 		}		
