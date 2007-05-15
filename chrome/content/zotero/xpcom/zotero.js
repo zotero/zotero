@@ -1161,6 +1161,8 @@ Zotero.Date = new function(){
 	 *    year: 4 digit year (or, year + BC/AD/etc.)
 	 *    part: anything that does not fall under any of the above categories
 	 *          (e.g., "Summer," etc.)
+	 *
+	 * Note: the returned object is *not* a JS Date object
 	 */
 	var _slashRe = /^(.*?)\b([0-9]{1,4})(?:([\-\/\.\u5e74])([0-9]{1,2}))?(?:([\-\/\.\u6708])([0-9]{1,4}))?\b(.*?)$/
 	var _yearRe = /^(.*?)\b((?:circa |around |about |c\.? ?)?[0-9]{1,4}(?: ?B\.? ?C\.?(?: ?E\.?)?| ?C\.? ?E\.?| ?A\.? ?D\.?)|[0-9]{3,4})\b(.*?)$/i;
@@ -1314,6 +1316,8 @@ Zotero.Date = new function(){
 	
 	/*
 	 * does pretty formatting of a date object returned by strToDate()
+	 *
+	 * |date| is *not* a JS Date object
 	 */
 	function formatDate(date) {
 		var string = "";
@@ -1474,6 +1478,25 @@ Zotero.Date = new function(){
 		
 		var date = new Date("October 5, 2006");
 		var parts = date.toLocaleDateString().match(/([0-9]+)[^0-9]+([0-9]+)[^0-9]+([0-9]+)/);
+		
+		// The above only works on OS X and Linux,
+		// where toLocaleDateString() produces "10/05/2006"
+		if (!parts) {
+				var country = Zotero.locale.substr(3);
+				switch (country) {
+					// I don't know where this country list came from, but these
+					// are little-endian in Zotero.strToDate()
+					case 'US': // The United States
+					case 'FM': // The Federated States of Micronesia
+					case 'PW':	// Palau
+					case 'PH':	// The Philippines
+						return 'mdy';
+						break;
+						
+					default:
+						return 'dmy';
+				}
+		}
 		
 		switch (parseInt(parts[1])){
 			case 2006:
