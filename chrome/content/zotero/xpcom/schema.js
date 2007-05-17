@@ -1073,8 +1073,6 @@ Zotero.Schema = new function(){
 								}
 							}
 							var parsedID = parseInt(rows[j].itemID);
-							Zotero.debug(parsedID);
-							Zotero.debug(rows[j].itemID);
 							if ((parsedID + '').length != rows[j].itemID) {
 								if (parseInt(rows[j].note) != rows[j].note ||
 										(parseInt(rows[j].note) + '').length != rows[j].note.length) {

@@ -226,8 +226,8 @@ var Zotero_File_Interface = new function() {
 				Zotero_File_Interface.Progress.show(
 					Zotero.getString("fileInterface.itemsImported"),
 					function() {
-						// disable notifier
-						_unlock = Zotero.Notifier.begin(true);
+						Zotero.DB.beginTransaction();
+						
 						// translate
 						translation.translate();
 				});
@@ -255,13 +255,13 @@ var Zotero_File_Interface = new function() {
 			_importCollection.addItem(itemID);
 		}
 		
-		// notify
-		Zotero.Notifier.commit(_unlock);
+		Zotero.DB.commitTransaction();
 		
 		Zotero_File_Interface.Progress.close();
 		Zotero.UnresponsiveScriptIndicator.enable();
 		
 		if(!worked) {
+			_importCollection.erase();
 			window.alert(Zotero.getString("fileInterface.importError"));
 		}
 	}

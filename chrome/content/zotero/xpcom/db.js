@@ -304,7 +304,7 @@ Zotero.DBConnection.prototype.commitTransaction = function () {
 	}
 	else if (this._transactionRollback) {
 		this._debug('Rolling back previously flagged transaction', 5);
-		db.rollbackTransaction();
+		this.rollbackTransaction();
 	}
 	else {
 		this._debug('Committing transaction',5);
@@ -669,6 +669,69 @@ Zotero.DBConnection.prototype.backupDatabase = function (suffix) {
 	tmpFile.moveTo(tmpFile.parent, backupFile.leafName);
 	
 	return true;
+}
+
+
+/*
+ * Keep the SQLite shared cache live between transactions with a dummy statement,
+ * which speeds up DB access dramatically (at least on Windows and Linux--OS X
+ * seems to be much faster already, perhaps due to its own disk cache)
+ *
+ * This is the same technique used by Mozilla code. The one downside is that it
+ * prevents schema changes, so this is called after schema updating. If the
+ * schema really needs to be updated at another point, use stopDummyStatement().
+ *
+ * See http://developer.mozilla.org/en/docs/Storage:Performance for more info.
+ */
+Zotero.DBConnection.prototype.startDummyStatement = function () {
+	try {
+		if (!this._dummyConnection) {
+			this._debug("Opening database '" + this._dbName + " for dummy statement");
+			// Get the storage service
+			var store = Components.classes["@mozilla.org/storage/service;1"].
+				getService(Components.interfaces.mozIStorageService);
+			var file = Zotero.getZoteroDatabase(this._dbName);
+			this._dummyConnection = store.openDatabase(file);
+		}
+		
+		if (this._dummyStatement) {
+			Zotero.debug("Dummy statement is already open");
+			return;
+		}
+		
+		Zotero.debug("Initializing dummy statement for '" + this._dbName + "'");
+		
+		var sql = "CREATE TABLE IF NOT EXISTS zoteroDummyTable (id INTEGER PRIMARY KEY)";
+		this._dummyConnection.executeSimpleSQL(sql);
+		
+		sql = "INSERT OR IGNORE INTO zoteroDummyTable VALUES (1)";
+		this._dummyConnection.executeSimpleSQL(sql);
+		
+		sql = "SELECT id FROM zoteroDummyTable LIMIT 1"
+		this._dummyStatement = this._dummyConnection.createStatement(sql)
+		this._dummyStatement.executeStep()
+	
+	}
+	catch (e) {
+		Components.utils.reportError(e);
+		Zotero.debug(e);
+	}
+}
+
+
+/*
+ * Stop the dummy statement temporarily to allow for schema changess
+ *
+ * The statement needs to be started again or performance will suffer.
+ */
+Zotero.DBConnection.prototype.stopDummyStatement = function () {
+	if (!this._dummyStatement) {
+		return;
+	}
+	
+	Zotero.debug("Stopping dummy statement for '" + this._dbName + "'");
+	this._dummyStatement.reset();
+	this._dummyStatement = null;
 }
 
 

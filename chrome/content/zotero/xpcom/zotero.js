@@ -212,6 +212,7 @@ var Zotero = new function(){
 			Zotero.Schema.updateSchema();
 		}
 		
+		Zotero.DB.startDummyStatement();
 		Zotero.Schema.updateScrapersRemote();
 		
 		// Initialize integration web server
@@ -1220,7 +1221,7 @@ Zotero.Date = new function(){
 				}
 			}
 			
-			if(!date.month || date.month <= 12) {
+			if((!date.month || date.month <= 12) && (!date.day || date.day <= 31)) {
 				if(date.year && date.year < 100) {	// for two digit years, determine proper
 													// four digit year
 					var today = new Date();
@@ -1288,18 +1289,21 @@ Zotero.Date = new function(){
 			
 			var m = _dayRe.exec(date.part);
 			if(m) {
-				date.day = parseInt(m[1], 10);
-				
-				if(m.index > 0) {
-					date.part = date.part.substr(0, m.index);
-					if(m[2]) {
-						date.part += " "+m[2];;
+				var day = parseInt(m[1], 10);
+				// Sanity check
+				if (day <= 31) {
+					date.day = day;
+					if(m.index > 0) {
+						date.part = date.part.substr(0, m.index);
+						if(m[2]) {
+							date.part += " "+m[2];;
+						}
+					} else {
+						date.part = m[2];
 					}
-				} else {
-					date.part = m[2];
+					
+					Zotero.debug("DATE: got day ("+date.day+", "+date.part+")");
 				}
-				
-				Zotero.debug("DATE: got day ("+date.day+", "+date.part+")");
 			}
 		}
 		
