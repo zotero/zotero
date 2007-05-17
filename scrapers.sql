@@ -1,4 +1,4 @@
--- 227
+-- 228
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-05-15 22:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-05-17 12:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-03-21 15:26:54', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -858,10 +858,10 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '1.0.0b3.r1', '', '2006-12-17 4:51:00', 1, 100, 4, 'Library Catalog (InnoPAC)', 'Simon Kornblith', '^https?://[^/]+/(?:search\??/|record=)',
+REPLACE INTO translators VALUES ('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '1.0.0b3.r1', '', '2007-05-17 12:00:00', '1', '100', '4', 'Library Catalog (InnoPAC)', 'Simon Kornblith', '^https?://[^/]+/(?:search\??/|record=)', 
 'function detectWeb(doc, url) {
 	// First, check to see if the URL alone reveals InnoPAC, since some sites don''t reveal the MARC button
-	var matchRegexp = new RegExp(''^(https?://[^/]+/search\\??/[^/]+/[^/]+/1\%2C[^/]+/)frameset(.+)$'');
+	var matchRegexp = new RegExp(''^(https?://[^/]+/search\\??/[^/]+/[^/]+/[0-9]*\%2C[^/]+/)frameset(.+)$'');
 	if(matchRegexp.test(doc.location.href)) {
 		return "book";
 	}
@@ -885,7 +885,7 @@ REPLACE INTO translators VALUES ('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '1.0.0b
 	}
 	
 	return false;
-}',
+}', 
 'function scrape(marc, newDoc) {
 	var namespace = newDoc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -969,7 +969,7 @@ function doWeb(doc, url) {
 	translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
 	var marc = translator.getTranslatorObject();
 	
-	var matchRegexp = new RegExp(''^(https?://[^/]+/search\\??/[^/]+/[^/]+/1\%2C[^/]+/)frameset(.+)$'');
+	var matchRegexp = new RegExp(''^(https?://[^/]+/search\\??/[^/]+/[^/]+/[0-9]*\%2C[^/]+/)frameset(.+)$'');
 	var m = matchRegexp.exec(uri);
 	if(m) {
 		newUri = m[1]+''marc''+m[2];
@@ -998,7 +998,7 @@ function doWeb(doc, url) {
 	} else {	// Search results page
 		// Require link to match this
 		var tagRegexp = new RegExp();
-		tagRegexp.compile(''^https?://[^/]+/search\\??/[^/]+/[^/]+/1\%2C[^/]+/frameset'');
+		tagRegexp.compile(''^https?://[^/]+/search\\??/[^/]+/[^/]+/[0-9]*\%2C[^/]+/frameset'');
 		
 		var urls = new Array();
 		var availableItems = new Array();
