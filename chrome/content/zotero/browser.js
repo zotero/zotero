@@ -241,18 +241,31 @@ var Zotero_Browser = new function() {
 		
 		// this gives us onLocationChange, for updating when tabs are switched/created
 		this.tabbrowser.addEventListener("TabClose",
-			function(e) { Zotero_Browser.tabClose(e) }, false);
+			function(e) {
+				//Zotero.debug("TabClose");
+				Zotero_Browser.tabClose(e);
+			}, false);
 		this.tabbrowser.addEventListener("TabSelect",
-			function(e) { Zotero_Browser.updateStatus() }, false);
+			function(e) {
+				//Zotero.debug("TabSelect");
+				Zotero_Browser.updateStatus();
+			}, false);
 		// this is for pageshow, for updating the status of the book icon
 		this.appcontent.addEventListener("pageshow",
-			function(e) { Zotero_Browser.contentLoad(e) }, true);
+			function(e) {
+				//Zotero.debug("pageshow");
+				Zotero_Browser.contentLoad(e);
+			}, true);
 		// this is for turning off the book icon when a user navigates away from a page
 		this.appcontent.addEventListener("pagehide",
-			function(e) { Zotero_Browser.contentHide(e) }, true);
+			function(e) {
+				//Zotero.debug("pagehide");
+				Zotero_Browser.contentHide(e);
+			}, true);
+		
 		this.tabbrowser.addEventListener("resize",
 			function(e) { Zotero_Browser.resize(e) }, false);
-		// for text zoom changes
+		// Resize on text zoom changes
 		document.getElementById('cmd_textZoomReduce').addEventListener("command",
 			function(e) { Zotero_Browser.resize(e) }, false);
 		document.getElementById('cmd_textZoomEnlarge').addEventListener("command",
@@ -360,10 +373,17 @@ var Zotero_Browser = new function() {
 	 * called when a tab is closed
 	 */
 	function tabClose(event) {
+		// Save annotations when closing a tab, since the browser is already
+		// gone from tabbrowser by the time contentHide() gets called
+		var tab = _getTabObject(event.target);
+		if(tab.page && tab.page.annotations) tab.page.annotations.save();
+		tab.clear();
+		
 		// To execute if document object does not exist
 		_deleteTabObject(event.target.linkedBrowser);
 		toggleMode(null);
 	}
+	
 	
 	/*
 	 * called when the window is resized
