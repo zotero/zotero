@@ -1,4 +1,4 @@
--- 228
+-- 229
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-05-17 12:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-05-18 23:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-03-21 15:26:54', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -858,10 +858,10 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '1.0.0b3.r1', '', '2007-05-17 12:00:00', '1', '100', '4', 'Library Catalog (InnoPAC)', 'Simon Kornblith', '^https?://[^/]+/(?:search\??/|record=)', 
+REPLACE INTO translators VALUES ('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '1.0.0b3.r1', '', '2007-05-18 23:00:00', '1', '100', '4', 'Library Catalog (InnoPAC)', 'Simon Kornblith', '^https?://[^/]+/(?:search\??/|record=)', 
 'function detectWeb(doc, url) {
 	// First, check to see if the URL alone reveals InnoPAC, since some sites don''t reveal the MARC button
-	var matchRegexp = new RegExp(''^(https?://[^/]+/search\\??/[^/]+/[^/]+/[0-9]*\%2C[^/]+/)frameset(.+)$'');
+	var matchRegexp = new RegExp(''^(https?://[^/]+/search\\??/[^/]+/[^/]+/[0-9]+\%2C[^/]+/)frameset(.+)$'');
 	if(matchRegexp.test(doc.location.href)) {
 		return "book";
 	}
@@ -969,7 +969,7 @@ function doWeb(doc, url) {
 	translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
 	var marc = translator.getTranslatorObject();
 	
-	var matchRegexp = new RegExp(''^(https?://[^/]+/search\\??/[^/]+/[^/]+/[0-9]*\%2C[^/]+/)frameset(.+)$'');
+	var matchRegexp = new RegExp(''^(https?://[^/]+/search\\??/[^/]+/[^/]+/[0-9]+\%2C[^/]+/)frameset(.+)$'');
 	var m = matchRegexp.exec(uri);
 	if(m) {
 		newUri = m[1]+''marc''+m[2];
@@ -998,7 +998,7 @@ function doWeb(doc, url) {
 	} else {	// Search results page
 		// Require link to match this
 		var tagRegexp = new RegExp();
-		tagRegexp.compile(''^https?://[^/]+/search\\??/[^/]+/[^/]+/[0-9]*\%2C[^/]+/frameset'');
+		tagRegexp.compile(''^https?://[^/]+/search\\??/[^/]+/[^/]+/[0-9]+\%2C[^/]+/frameset'');
 		
 		var urls = new Array();
 		var availableItems = new Array();
@@ -2761,14 +2761,14 @@ REPLACE INTO translators VALUES ('c54d1932-73ce-dfd4-a943-109380e06574', '1.0.0b
 	}
 }');
 
-REPLACE INTO translators VALUES ('fcf41bed-0cbc-3704-85c7-8062a0068a7a', '1.0.0b3.r1', '', '2007-02-15 22:50:00', '1', '100', '4', 'NCBI PubMed', 'Simon Kornblith', '^http://www\.ncbi\.nlm\.nih\.gov/entrez/query\.fcgi\?.*db=PubMed', 
+REPLACE INTO translators VALUES ('fcf41bed-0cbc-3704-85c7-8062a0068a7a', '1.0.0b3.r1', '', '2007-05-18 23:00:00', '1', '100', '4', 'NCBI PubMed', 'Simon Kornblith', '^http://www\.ncbi\.nlm\.nih\.gov/(sites/entrez|entrez/query\.fcgi\?.*db=PubMed)', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == ''x'') return namespace; else return null;
 	} : null;
 
-	var uids = doc.evaluate(''//input[@name="uid"]'', doc,
+	var uids = doc.evaluate(''//input[@id="UidCheckBox" or @name="uid"]'', doc,
 			       nsResolver, XPathResult.ANY_TYPE, null);
 	if(uids.iterateNext()) {
 		if (uids.iterateNext()){
@@ -2895,19 +2895,19 @@ function doWeb(doc, url) {
 		if (prefix == ''x'') return namespace; else return null;
 		} : null;
 	var ids = new Array();
-	var uids = doc.evaluate(''//input[@name="uid"]'', doc,
+	var uids = doc.evaluate(''//input[@id="UidCheckBox" or @name="uid"]'', doc, //edited for new PubMed
 			       nsResolver, XPathResult.ANY_TYPE, null);
 	var uid = uids.iterateNext();
 	if(uid) {
 		if (uids.iterateNext()){
 			var items = new Array();
-			var tableRows = doc.evaluate(''//div[@class="ResultSet"]/table/tbody'', doc,
+			var tableRows = doc.evaluate(''//div[@class="ResultSet"]/table/tbody | //table[@id="ResultPanel"]/tbody/tr[3]/td/div[5]/table/tbody'', doc, // edited for new PubMed
 					     nsResolver, XPathResult.ANY_TYPE, null);
 			var tableRow;
 			// Go through table rows
 			while(tableRow = tableRows.iterateNext()) {
 				var link = doc.evaluate(''.//a'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-				uid = doc.evaluate(''.//input[@name="uid"]'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+				uid = doc.evaluate(''.//input[@id="UidCheckBox" or @name="uid"]'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 				var article = doc.evaluate(''./tr[2]/td[2]/text()[1]'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 				items[uid.value] = article.nodeValue;
 			}
@@ -2934,7 +2934,6 @@ function doSearch(item) {
 	// pmid was defined earlier in detectSearch
 	lookupPMIDs([getPMID(item.contextObject)]);
 }');
-
 
 REPLACE INTO translators VALUES ('951c027d-74ac-47d4-a107-9c3069ab7b48', '1.0.0b3.r1', '', '2006-12-12 23:41:00', 1, 100, 4, 'Embedded RDF', 'Simon Kornblith', NULL,
 'function detectWeb(doc, url) {
