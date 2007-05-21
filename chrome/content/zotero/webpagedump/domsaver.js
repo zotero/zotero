@@ -544,7 +544,8 @@ var wpdDOMSaver = {
 	repairInlineCSS : function(aHTMLText)
 	{
     if ( (WPD_CSSSCROLLBUG) && ( aHTMLText.match(/background:/i)) ) {         
-			var re = new RegExp(/style=\"(.*)background:(.*)(repeat scroll 0(?:pt|px|%);)/);     
+			// Regex fixed by Dan for Zotero
+			var re = new RegExp(/style=\"([^\"]*)background:([^;\"]*)(repeat scroll 0(?:pt|px|%);?)/);
 			while ( re.exec( aHTMLText ) ) { 
   		  var firstPart = RegExp.$1;
         var secondPart = RegExp.$2;
@@ -553,7 +554,8 @@ var wpdDOMSaver = {
 	    }
 		}	 
 		if ( (WPD_CSSBACKGROUNDPOSITIONBUG) && ( aHTMLText.match(/background-position: /i)) ) {
-		  var re = new RegExp(/style=\"(.*)background-position: 0(?:pt|px|%);/);     
+			// Regex fixed by Dan for Zotero
+			var re = new RegExp(/style=\"([^\"]*)background-position: 0(?:pt|px|%);/);
 			while ( re.exec( aHTMLText ) ) { 
         aHTMLText = aHTMLText.replace(re,"style=\""+RegExp.$1+"background-position: ;");
 	    }	
