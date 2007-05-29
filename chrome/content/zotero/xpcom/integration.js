@@ -737,8 +737,16 @@ Zotero.Integration.CitationFactory.prototype.updateItems = function(citationSet,
 	var updateCheck = new Array();
 	var disambiguation = new Array();
 	
+	var missingItems = [];
+	
 	for(var i in citationSet.citationsByID) {
 		var item = Zotero.Items.get(i);
+		
+		if (!item) {
+			missingItems.push(i)
+			continue;
+		}
+		
 		this.items.push(item);
 		
 		if(this.dateModified[i] && this.dateModified[i] != item.getField("dateModified")) {
@@ -784,10 +792,19 @@ Zotero.Integration.CitationFactory.prototype.updateItems = function(citationSet,
 		}
 	}
 	
+	// TODO: clear missing items from cache?
+	
 	return true;
 }
 
 Zotero.Integration.CitationFactory.prototype.getCitation = function(citation, usingCache) {
+	// Return "!" for deleted items
+	for (var i=0; i<citation.itemIDs.length; i++) {
+		if (!Zotero.Items.get(citation.itemIDs[i])) {
+			return '!';
+		}
+	}
+	
 	if(!usingCache) usingCache = this.cache;
 	
 	if(usingCache[citation.serializedType] && usingCache[citation.serializedType][citation.serialization]) {
