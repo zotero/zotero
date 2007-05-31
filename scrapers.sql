@@ -1,4 +1,4 @@
--- 230
+-- 231
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-05-24 19:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-05-31 20:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-03-21 15:26:54', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -412,7 +412,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b3.r1', '', '2007-04-02 14:55:00', 1, 100, 4, 'Library Catalog (Voyager)', 'Simon Kornblith', 'Pwebrecon\.cgi',
+REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b3.r1', '', '2007-05-31 20:00:00', 1, 100, 4, 'Library Catalog (Voyager)', 'Simon Kornblith', 'Pwebrecon\.cgi',
 'function detectWeb(doc, url) {
 	var export_options = doc.forms.namedItem(''frm'').elements.namedItem(''RD'').options;
 	for(var i in export_options) {
@@ -421,6 +421,7 @@ REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b
 		|| export_options[i].text == ''MARC 8''
 		|| export_options[i].text == ''UTF-8''
 		|| export_options[i].text == ''MARC (Unicode/UTF-8)''
+		|| export_options[i].text == ''MARC UTF-8''
 		|| export_options[i].text == ''UTF-8 MARC (Unicode)''
 		|| export_options[i].text == ''MARC (non-Unicode/MARC-8)'') {
 			// We have an exportable single record
@@ -519,6 +520,7 @@ REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b
 			latin1 = i;
 		} else if(export_options[i].text == ''UTF-8''
 		|| export_options[i].text == ''UTF-8 MARC (Unicode)''
+		|| export_options[i].text == ''MARC UTF-8''
 		|| export_options[i].text == ''MARC (Unicode/UTF-8)'') {
 			unicode = i;
 		}
