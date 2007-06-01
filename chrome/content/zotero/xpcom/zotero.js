@@ -1615,16 +1615,10 @@ Zotero.UnresponsiveScriptIndicator = new function() {
  * Implements nsIWebProgressListener
  */
 Zotero.WebProgressFinishListener = function(onFinish) {
-	var _finished = false;
-	
 	this.onStateChange = function(wp, req, stateFlags, status) {
 		//Zotero.debug('onStageChange: ' + stateFlags);
 		if ((stateFlags & Components.interfaces.nsIWebProgressListener.STATE_STOP)
 				&& (stateFlags & Components.interfaces.nsIWebProgressListener.STATE_IS_NETWORK)) {
-			if (_finished) {
-				//Zotero.debug('onFinish() called before STATE_STOP in WebProgressFinishListener.onStateChange()');
-				return;
-			}
 			onFinish();
 		}
 	}
@@ -1633,13 +1627,6 @@ Zotero.WebProgressFinishListener = function(onFinish) {
 		//Zotero.debug('onProgressChange');
 		//Zotero.debug('Current: ' + curTotalProgress);
 		//Zotero.debug('Max: ' + maxTotalProgress);
-		
-		// STATE_STOP alone (in onStateChange) doesn't always do the trick,
-		// so we check for max progress too
-		if (curTotalProgress == maxTotalProgress) {
-			_finished = true;
-			onFinish();
-		}
 	}
 	
 	this.onLocationChange = function(wp, req, location) {}
