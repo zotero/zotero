@@ -2617,7 +2617,18 @@ Zotero.Items = new function(){
 		var itemDataRows = Zotero.DB.query(sql);
 		for each(var row in itemDataRows) {
 			//Zotero.debug('Setting field for item ' + row['itemID']);
-			_items[row['itemID']].setField(row['fieldID'], row['value'], true);
+			if (_items[row['itemID']]) {
+				_items[row['itemID']].setField(row['fieldID'], row['value'], true);
+			}
+			else {
+				if (!missingItems) {
+					var missingItems = {};
+				}
+				if (!missingItems[row['itemID']]) {
+					missingItems[row['itemID']] = true;
+					Components.utils.reportError("itemData row references nonexistent item " + row['itemID']);
+				}
+			}
 			
 			if (!itemFieldsCached[row['itemID']]) {
 				itemFieldsCached[row['itemID']] = {};
@@ -2636,7 +2647,18 @@ Zotero.Items = new function(){
 			var rows = Zotero.DB.query(sql);
 			for each(var row in rows) {
 				//Zotero.debug('Setting title for note ' + row['itemID']);
-				_items[row['itemID']].setField(titleFieldID, row['title'], true);
+				if (_items[row['itemID']]) {
+					_items[row['itemID']].setField(titleFieldID, row['title'], true);
+				}
+				else {
+					if (!missingItems) {
+						var missingItems = {};
+					}
+					if (!missingItems[row['itemID']]) {
+						missingItems[row['itemID']] = true;
+						Components.utils.reportError("itemData row references nonexistent item " + row['itemID']);
+					}
+				}
 			}
 		}
 		
