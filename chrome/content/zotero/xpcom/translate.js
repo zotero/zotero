@@ -1193,7 +1193,9 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 		}
 	
 		// create short title
-		if(item.shortTitle === undefined && Zotero.ItemFields.isValidForType("shortTitle", typeID)) {
+		if(this.type == "web" && 
+		   item.shortTitle === undefined &&
+		   Zotero.ItemFields.isValidForType("shortTitle", typeID)) {
 			// get field id
 			var fieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(typeID, "title");
 			// get title

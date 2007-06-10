@@ -484,8 +484,9 @@ Zotero.CSL.prototype.createCitation = function(citation, format) {
 				locator = citation.locators[i];
 			}
 			
+			var position = (citation.citationType[i] == 1 ? "first" : "subsequent");
 			var citationString = this._getCitation(Zotero.Items.get(citation.itemIDs[i]),
-				(citation.citationType[i] == 1 ? "first" : "subsequent"),
+				position,
 				locatorType, locator, format, this._cit);
 			string.concat(citationString);
 			
@@ -1041,7 +1042,7 @@ Zotero.CSL.prototype._compareItem = function(a, b, opt) {
  * process creator objects; if someone had a creator model that handled
  * non-Western names better than ours, this would be the function to change
  */
-Zotero.CSL.prototype._processCreators = function(type, element, creators, format, bibCitElement) {
+Zotero.CSL.prototype._processCreators = function(type, element, creators, format, bibCitElement, position) {
 	var maxCreators = creators.length;
 	if(!maxCreators) return false;
 	
@@ -1057,6 +1058,11 @@ Zotero.CSL.prototype._processCreators = function(type, element, creators, format
 		return false;
 	}
 	
+	var etAl = bibCitElement.etAl;
+	if(position == "subsequent" && bibCitElement.subsequentEtAl) {
+		etAl = bibCitElement.subsequentEtAl;
+	}
+	
 	for(var i in element.children) {
 		var child = element.children[i];
 		var string = "";
@@ -1065,8 +1071,8 @@ Zotero.CSL.prototype._processCreators = function(type, element, creators, format
 			var useEtAl = false;
 			
 			// figure out if we need to use "et al"
-			if(bibCitElement.etAl && maxCreators > bibCitElement.etAl.minCreators) {
-				maxCreators = bibCitElement.etAl.useFirst;
+			if(etAl && maxCreators >= etAl.minCreators) {
+				maxCreators = etAl.useFirst;
 				useEtAl = true;
 			}
 			
@@ -1122,14 +1128,15 @@ Zotero.CSL.prototype._processCreators = function(type, element, creators, format
 						}
 						
 						authorStrings[maxCreators-1] = and+" "+authorStrings[maxCreators-1];
-						// skip the comma if there are only two creators and no
-						// et al, and name as sort is no
-						if((maxCreators == 2 && child["delimiter-precedes-last"] != "always") ||
-						   (maxCreators > 2 && child["delimiter-precedes-last"] == "never")) {
-						   	var lastString = authorStrings.pop();
-							authorStrings[maxCreators-2] = authorStrings[maxCreators-2]+" "+lastString;
-						}
 					}
+				}
+				
+				// check whether to use a serial comma
+				Zotero.debug(child["delimiter-precedes-last"]);
+				if((authorStrings.length == 2 && child["delimiter-precedes-last"] != "always") ||
+				   (authorStrings.length > 2 && child["delimiter-precedes-last"] == "never")) {
+					var lastString = authorStrings.pop();
+					authorStrings[authorStrings.length-1] = authorStrings[authorStrings.length-1]+" "+lastString;
 				}
 			}
 			string = authorStrings.join(joinString);
@@ -1154,19 +1161,18 @@ Zotero.CSL.prototype._processCreators = function(type, element, creators, format
 Zotero.CSL.prototype._getCitation = function(item, position, locatorType, locator, format, bibCitElement) {
 	Zotero.debug("CSL: generating citation for item "+item.getID());
 	
-	if(!bibCitElement._types[position]) {
-		position = "first";
-	}
+	// use true position if possible, otherwise "first"
+	var typePosition = (bibCitElement._types[position] ? position : "first");
 	
 	// determine mapping
-	if(bibCitElement._types[position][0]) {
+	if(bibCitElement._types[typePosition][0]) {
 		// only one element
 		var typeName = 0;
-		var type = this._getTypeObject(position, typeName, bibCitElement);
+		var type = this._getTypeObject(typePosition, typeName, bibCitElement);
 	} else {
 		var typeNames = this._getTypeFromItem(item);
 		for each(var typeName in typeNames) {
-			var type = this._getTypeObject(position, typeName, bibCitElement);
+			var type = this._getTypeObject(typePosition, typeName, bibCitElement);
 			if(type) {
 				break;
 			}
@@ -1208,13 +1214,13 @@ Zotero.CSL.prototype._getFieldValue = function(name, element, item, formattedStr
 			// handle subsequent author substitute behavior
 			dataAppended = formattedString.append(bibCitElement.subsequentAuthorSubstitute, element);
 		} else {
-			var newString = this._processCreators(name, element, item._csl.authors, formattedString.format, bibCitElement);
+			var newString = this._processCreators(name, element, item._csl.authors, formattedString.format, bibCitElement, position);
 			if(newString) dataAppended = formattedString.concat(newString, element);
 		}
 	} else if(name == "editor") {
-		dataAppended = formattedString.concat(this._processCreators(name, element, item._csl.editors, formattedString.format, bibCitElement), element);
+		dataAppended = formattedString.concat(this._processCreators(name, element, item._csl.editors, formattedString.format, bibCitElement, position), element);
 	} else if(name == "translator") {
-		dataAppended = formattedString.concat(this._processCreators(name, element, item._csl.translators, formattedString.format, bibCitElement), element);
+		dataAppended = formattedString.concat(this._processCreators(name, element, item._csl.translators, formattedString.format, bibCitElement, position), element);
 	} else if(name == "titles") {
 		var data = new Zotero.CSL.FormattedString(this, formattedString.format);
 		

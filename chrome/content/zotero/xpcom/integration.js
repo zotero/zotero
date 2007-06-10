@@ -509,7 +509,7 @@ Zotero.Integration.SOAP = new function() {
 	/*
 	 * sets document preferences
 	 * ACCEPTS: (sessionID)?
-	 * RETURNS: sessionID, styleID, style-class
+	 * RETURNS: sessionID, styleID, style-class, has-bibliography, use-endnotes
 	 */
 	function setDocPrefs(vars) {
 		var io = new function() {
@@ -549,7 +549,6 @@ Zotero.Integration.Session = function(styleID, useEndnotes) {
 	}
 	if(useEndnotes) {
 		this.useEndnotes = useEndnotes;
-		Zotero.debug("the answer is "+useEndnotes);
 	}
 	
 	this.citationSet = new Zotero.Integration.CitationSet(this.style);
@@ -760,7 +759,6 @@ Zotero.Integration.CitationFactory.prototype.updateItems = function(citationSet,
 		}
 	}
 	
-	Zotero.debug(disambiguation);
 	this.style.preprocessItems(this.items);
 	
 	var tempCache = new Object();

@@ -1,4 +1,4 @@
--- 231
+-- 232
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-05-31 20:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-06-10 16:54:12'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-03-21 15:26:54', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -6428,7 +6428,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('5eacdb93-20b9-4c46-a89b-523f62935ae4', '1.0.0b3.r1', '', '2007-05-15 22:00:00', '1', '100', '4', 'HighWire', 'Simon Kornblith', '^http://[^/]+/(?:cgi/searchresults|cgi/search|cgi/content/(?:abstract|full|short|summary)/[^/]+/[0-9]+/[0-9]+|current.dtl$|content/vol[0-9]+/issue[0-9]+/(?:index.dtl)?$)', 
+REPLACE INTO translators VALUES ('5eacdb93-20b9-4c46-a89b-523f62935ae4', '1.0.0b3.r1', '', '2007-06-10 16:54:12', '1', '100', '4', 'HighWire', 'Simon Kornblith', '^http://[^/]+/(?:cgi/searchresults|cgi/search|cgi/content/(?:abstract|full|short|summary)|current.dtl$|content/vol[0-9]+/issue[0-9]+/(?:index.dtl)?$)', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -10939,7 +10939,7 @@ function doExport() {
 	}
 }');
 
-REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '2007-03-23 19:25:00', 'American Psychological Association',
+REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '2007-06-10 16:54:12', 'American Psychological Association',
 '<?xml version="1.0" encoding="UTF-8"?>
 <?oxygen RNGSchema="../schema/trunk/csl.rnc" type="compact"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="author-date" xml:lang="en">
@@ -11003,8 +11003,8 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '2007-
     </access>
   </defaults>
   <citation prefix="(" suffix=")" delimiter="; ">
-    <et-al min-authors="6" use-first="6" position="first"/>
-    <et-al min-authors="6" use-first="1" position="subsequent"/>
+    <et-al min-authors="6" use-first="1" position="first"/>
+    <et-al min-authors="3" use-first="1" position="subsequent"/>
     <layout>
       <item>
         <author form="short">
@@ -11431,7 +11431,7 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/chicago-note.csl
   </citation>
 </style>');
 
-REPLACE INTO csl VALUES('http://www.zotero.org/namespaces/CSL/chicago-note-bibliography.csl', '2007-04-25 23:40:00', 'Chicago Manual of Style (Note with Bibliography)',
+REPLACE INTO csl VALUES('http://www.zotero.org/namespaces/CSL/chicago-note-bibliography.csl', '2007-06-10 16:54:12', 'Chicago Manual of Style (Note with Bibliography)',
 '<?xml version="1.0" encoding="UTF-8"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="note" xml:lang="en">
 	<info>
@@ -11489,7 +11489,22 @@ REPLACE INTO csl VALUES('http://www.zotero.org/namespaces/CSL/chicago-note-bibli
 		<et-al min-authors="3" use-first="1"/>
 		<layout>
 			<item suffix=".">
-				<author form="short"/>
+				<author form="short">
+					<name and="text" sort-separator=", " delimiter=", "/>
+				</author>
+				<conditional>
+					<if type="book">
+						<titles prefix=", " font-style="italic" form="short"/>
+					</if><else>
+						<titles prefix=", " quotes="true" form="short"/>
+					</else>
+				</conditional>
+				<pages prefix=", "/>
+			</item>
+			<item suffix="." position="subsequent" ibid="true">
+				<author form="short">
+					<name and="text" sort-separator=", " delimiter=", "/>
+				</author>
 				<conditional>
 					<if type="book">
 						<titles prefix=", " font-style="italic" form="short"/>
