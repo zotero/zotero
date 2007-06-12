@@ -1,4 +1,4 @@
--- 233
+-- 234
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-06-12 23:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-06-12 23:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-03-21 15:26:54', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -2626,7 +2626,7 @@ REPLACE INTO translators VALUES ('0f9fc2fc-306e-5204-1117-25bca009dffc', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('c54d1932-73ce-dfd4-a943-109380e06574', '1.0.0b3.r1', '', '2007-03-24 22:20:00', 1, 100, 4, 'Project MUSE', 'Simon Kornblith', '^https?://muse\.jhu\.edu[^/]*/(?:journals/[^/]+/[^/]+/[^/]+\.html|search/pia.cgi)',
+REPLACE INTO translators VALUES ('c54d1932-73ce-dfd4-a943-109380e06574', '1.0.0b3.r1', '', '2007-06-12 23:30:00', 1, 100, 4, 'Project MUSE', 'Simon Kornblith', '^https?://muse\.jhu\.edu[^/]*/(?:journals/[^/]+/[^/]+/[^/]+\.html|search/pia.cgi)',
 'function detectWeb(doc, url) {
 	var searchRe = new RegExp("^https?://[^/]+/search/pia\.cgi");
 	if(searchRe.test(url)) {
@@ -2655,7 +2655,7 @@ REPLACE INTO translators VALUES ('c54d1932-73ce-dfd4-a943-109380e06574', '1.0.0b
 		while(tableRow = tableRows.iterateNext()) {
 			// article_id is what we need to get it all as one file
 			var input = doc.evaluate(''./tbody/tr/td/input[@name="article_id"]'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-			var link = doc.evaluate(''.//b/i/a/text()'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+			var link = doc.evaluate(''.//b/i/text()'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 			if(input && input.value && link && link.nodeValue) {
 				items[input.value] = link.nodeValue;
 				
