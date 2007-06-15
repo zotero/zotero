@@ -788,17 +788,11 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 			default:
 				if (fieldA == undefined) {
 					fieldA = a.getField(columnField, unformatted, true);
-					if (typeof fieldA == 'string') {
-						fieldA = fieldA.toLowerCase();
-					}
 					cache[aItemID] = fieldA;
 				}
 				
 				if (fieldB == undefined) {
 					fieldB = b.getField(columnField, unformatted, true);
-					if (typeof fieldB == 'string') {
-						fieldB = fieldB.toLowerCase();
-					}
 					cache[bItemID] = fieldB;
 				}
 				
@@ -812,7 +806,7 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 				}
 				
 				//cmp = (fieldA > fieldB) ? -1 : (fieldA < fieldB) ? 1 : 0;
-				cmp = collation.compareString(0, fieldB, fieldA);
+				cmp = collation.compareString(1, fieldB, fieldA);
 				if (cmp) {
 					return cmp;
 				}
@@ -830,7 +824,7 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 			}
 			
 			//cmp = (fieldA > fieldB) ? -1 : (fieldA < fieldB) ? 1 : 0;
-			cmp = collation.compareString(0, fieldB, fieldA);
+			cmp = collation.compareString(1, fieldB, fieldA);
 			if (cmp) {
 				return cmp;
 			}

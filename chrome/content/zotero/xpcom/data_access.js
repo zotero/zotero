@@ -1790,7 +1790,7 @@ Zotero.Item.prototype.getTags = function(){
 	
 	var collation = Zotero.getLocaleCollation();
 	tags.sort(function(a, b) {
-		return collation.compareString(0, a.tag, b.tag);
+		return collation.compareString(1, a.tag, b.tag);
 	});
 	return tags;
 }
@@ -3674,7 +3674,7 @@ Zotero.Tags = new function(){
 		
 		var collation = Zotero.getLocaleCollation();
 		tags.sort(function(a, b) {
-			return collation.compareString(0, a.tag, b.tag);
+			return collation.compareString(1, a.tag, b.tag);
 		});
 		
 		var indexed = {};
@@ -3716,7 +3716,7 @@ Zotero.Tags = new function(){
 		
 		var collation = Zotero.getLocaleCollation();
 		tags.sort(function(a, b) {
-			return collation.compareString(0, a.tag, b.tag);
+			return collation.compareString(1, a.tag, b.tag);
 		});
 		
 		var indexed = {};
@@ -4587,7 +4587,7 @@ Zotero.getCollections = function(parent, recursive){
 	// Do proper collation sort
 	var collation = Zotero.getLocaleCollation();
 	children.sort(function (a, b) {
-		return collation.compareString(0, a.name, b.name);
+		return collation.compareString(1, a.name, b.name);
 	});
 	
 	for (var i=0, len=children.length; i<len; i++){
