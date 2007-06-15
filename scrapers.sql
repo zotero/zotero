@@ -1,4 +1,4 @@
--- 235
+-- 236
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-06-13 20:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-06-15 20:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-03-21 15:26:54', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -215,6 +215,141 @@ REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b
 		newItem.complete();			
 	}, function() {Zotero.done();}, null);
 	Zotero.wait();
+}');
+
+REPLACE INTO translators VALUES ('aee2323e-ce00-4fcc-a949-06eb1becc98f', '1.0.0b4r1', '', '2007-06-15 20:00:00', '0', '100', '4', 'Epicurious', 'Sean Takats', '^https?://www\.epicurious\.com/recipes/(?:find/results|recipe_views/views/)', 
+'function detectWeb(doc, url){
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+		} : null;
+		
+	var xpath = ''//div[@class="recipeDetailLeftDiv"][@id="ingredients"]'';
+	var multxpath = ''//div[@id="left"]/table[@class="searchresults"]/tbody/tr'';
+
+	if(doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
+		return "document";
+	} else if (doc.evaluate(multxpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
+		return "multiple";
+	}
+	
+}', 
+'function cleanText(s){
+	s = s.replace(/\n+/g, "\n");
+	s = s.replace(/(\n|\r)\t+/g, "\n");  
+	s = s.replace(/\t+/g, " ");
+	s = s.replace("        ", "", "g");
+	return s;
+}
+
+function scrape(doc){
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+		} : null;
+
+	var newItem = new Zotero.Item("document");
+
+	var xpath = ''//title'';
+	var title = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+	title = title.substring(0, title.indexOf(" Recipe at Epicurious.com"));
+	newItem.title = title;
+
+	var elmt;
+
+	xpath = ''//div[@id="sourceInfo"]/p[@class="source"]'';
+	var elmts = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+	if (elmt = elmts.iterateNext()){
+		var authordate = elmt.textContent;
+		var authordates = authordate.split(",");
+		newItem.creators.push(Zotero.Utilities.cleanAuthor(authordates[0], "contributor", true));
+		newItem.date = authordates[1];
+		while (elmt = elmts.iterateNext()){
+		 	Zotero.debug("looping?");
+		 	Zotero.debug(elmt.textContent);
+			newItem.creators.push(Zotero.Utilities.cleanAuthor(elmt.textContent, "contributor", false));
+		}
+	}
+		
+	xpath = ''//div[@class="recipeDetailLeftDiv"][@id="intro"]/p'';
+	if (elmt = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
+		var abstract = elmt.textContent;
+		abstract = Zotero.Utilities.cleanString(abstract);
+		newItem.abstractNote = abstract;		
+	}
+
+	xpath = ''//div[@class="recipeDetailLeftDiv"][@id="ingredients"]'';
+	if (elmt = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
+		var ingredients = elmt.textContent;
+		ingredients = Zotero.Utilities.superCleanString(ingredients);
+		ingredients = cleanText(ingredients);
+	}
+	xpath = ''//div[@class="recipeDetailLeftDiv"][@id="preparation"]'';
+	if (elmt = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
+		var prep = elmt.textContent;
+		prep = Zotero.Utilities.superCleanString(prep);
+		prep = cleanText(prep);
+		prep = prep.replace(/\n/g, "\n\n");
+	}
+	xpath = ''//div[@id="servingInfo"]'';
+	if (elmt = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
+		var serving = elmt.textContent;
+		serving = Zotero.Utilities.superCleanString(serving);
+		serving = cleanText(serving);
+	}
+//	notestring = ingredients + "\n\n" + prep + "\n\n" + serving;
+//	newItem.notes.push({note:notestring});
+	newItem.notes.push({note:ingredients});
+	newItem.notes.push({note:prep});
+	newItem.notes.push({note:serving});
+
+	var url = doc.location.href;
+	
+	var snapshotURL = url.replace("/views/", "/printer_friendly/");
+	newItem.attachments.push({title:"Epicurious.com Snapshot", mimeType:"text/html", url:snapshotURL, snapshot:true});
+	newItem.url = url;
+	newItem.attachments.push({title:"Epicurious.com Link", snapshot:false, mimeType:"text/html", url:url});
+
+	newItem.complete();
+}
+
+function doWeb(doc, url){
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+		} : null;
+
+	var singxpath = ''//div[@class="recipeDetailLeftDiv"][@id="ingredients"]'';
+	var multxpath = ''//div[@id="left"]/table[@class="searchresults"]/tbody/tr'';
+	if(doc.evaluate(singxpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
+		// single recipe page
+		scrape(doc, url);
+	} else if (doc.evaluate(multxpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
+		var items = new Object();
+		var elmtxpath = ''//div[@id="left"]/table[@class="searchresults"]/tbody/tr/td[@class="pd2"]/a[@class="hed"]'';
+		var elmts = doc.evaluate(elmtxpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var elmt;
+		while (elmt = elmts.iterateNext()) {
+			var title = elmt.textContent;
+			var link = elmt.href;
+			if (title && link){
+				items[link] = title;
+			}
+		}
+		
+		var items = Zotero.selectItems(items);
+		if(!items) {
+			return true;
+		}
+		
+		var urls = new Array();
+		for(var i in items) {
+			urls.push(i);
+		}
+		
+		Zotero.Utilities.processDocuments(urls, scrape, function() { Zotero.done(); });
+		Zotero.wait();	
+	}
 }');
 
 REPLACE INTO translators VALUES ('0dda3f89-15de-4479-987f-cc13f1ba7999', '1.0.0b3r1', '', '2007-06-13 20:00:00', '0', '100', '4', 'Ancestry.com US Federal Census', 'Elena Razlogova', '^https?://search.ancestry.com/(.*)usfedcen|1890orgcen', 
@@ -3634,6 +3769,820 @@ function doWeb() {
 	
 	// retrieve data for all ids
 	getAllIds();
+}');
+
+REPLACE INTO translators VALUES ('3af43735-36d3-46ae-9ca8-506ff032b0d3', '1.0.0b4.r1', '', '2007-06-15 20:00:00', '0', '100', '4', 'HeinOnline', 'Bill McKinney', 'http:\/\/heinonline\.org\/HOL\/Page\?handle\=hein\.journals\/.+', 
+'function detectWeb(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	var re = /http:\/\/heinonline\.org\/HOL\/Page\?handle\=hein\.journals\/.+/
+	if(re.test(url)) {
+		return "book";
+	} else {
+		var aTags = doc.getElementsByTagName("a");
+		for(var i=0; i<aTags.length; i++) {
+			if(articleRegexp.test(aTags[i].href)) {
+				return "multiple";
+			}
+		}
+	}
+}', 
+'function scrape(doc) {
+
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	var newItem = new Zotero.Item("journalArticle");
+	newItem.url = doc.location.href;
+	
+	// publicaton
+	var tmpTitle = doc.title;
+	var titleRe= /Law Journal Library (.+)\s+-\s+HeinOnline\.org/
+	var titleMatch = titleRe.exec(tmpTitle);
+	if (titleMatch) {
+		newItem.publicationTitle = titleMatch[1];
+	} else {
+		newItem.publicationTitle = doc.title;
+	}
+	
+	// default title
+	newItem.title = doc.title;
+	
+	// get selected page
+	var selectedPage = "1";
+	var pageNum = "1";
+	var p= doc.getElementsByTagName("select");
+	if (p.length > 0) {
+		for (var i = 0; i < p[4].options.length; i++) {
+			if (p[4].options[ i ].selected) {
+				selectedPage = p[4].options[i].value;
+				pageNum = p[4].options[i].innerHTML;
+				newItem.pages = pageNum.replace(/^Page\s+/,"") + "-";
+			}
+		}
+	}
+
+
+	// get handle
+	var handle="";
+	var handleRe = /handle=([^\&]+)\&/
+	var handleMatch = handleRe.exec(doc.location.href);
+	if (handleMatch) {
+		handle = handleMatch[1];
+	}
+	
+	// fetch citation
+	var url = "http://heinonline.org/HOL/citation-info?handle="+handle+"&id="+selectedPage+"&rand=12345&collection=journals";
+	Zotero.Utilities.HTTP.doGet(url, function(text) {
+		
+		var tmpTxt = text;
+		var citeRe = /(\d+)\s+(.+)\s+(\d+)\s+\(([^\)]+)\)\s+<br>\s+([^;]+)(;\s.+[\S])/
+		var citeMatch = citeRe.exec(tmpTxt)
+		if (citeMatch) {
+			
+			newItem.volume = citeMatch[1];
+			//newItem.issue= citeMatch[3];
+			newItem.date = citeMatch[4];
+			newItem.journalAbbreviation = citeMatch[2];
+			newItem.title = citeMatch[5];
+			
+			var tmpAuthors = citeMatch[6];
+			var authors = tmpAuthors.split(";");
+			for (i=1;i<authors .length;i++) {
+				
+				var name = authors[i].split(",");
+				var fname = name[1].replace(/^\s+/,"");
+				var lname= name[0].replace(/^\s+/,"");
+				newItem.creators.push({lastName:lname, firstName:fname, creatorType:"author", fieldMode:true});
+			}
+			newItem.abstract =  citeMatch[0];
+		}	
+	
+		var getSectionUrl = "http://heinonline.org/HOL/ajaxcalls/get-section-id?base=js&handle="+handle+"&id="+selectedPage;
+		Zotero.Utilities.HTTP.doGet(getSectionUrl, function(sectionRes) {
+		
+			var pdfUrl = "http://heinonline.org/HOL/PDF?handle="+handle+"&id="+selectedPage+"&print=section&section="+sectionRes+"&ext=.pdf";
+			newItem.attachments.push({url:pdfUrl, title:"PDF version", mimeType:"application/pdf", downloadable:true});
+			newItem.notes.push({note:"PDF version: "+pdfUrl});
+			newItem.complete();
+		});	
+	});	
+	
+	
+	// print page: PDF?handle=hein.journals/adelrev11&id=150&print=section&section=16&ext=.pdf"
+}
+
+function doWeb(doc, url) {
+	var re=  /http:\/\/heinonline\.org\/HOL\/Page\?handle\=hein\.journals\/.+/
+	if(re.test(url)) {
+		scrape(doc);
+	} else {
+		
+		var items = Zotero.Utilities.getItemArray(doc, doc, re);
+		items = Zotero.selectItems(items);
+		
+		if(!items) {
+			return true;
+		}
+		
+		var urls = new Array();
+		for(var i in items) {
+			urls.push(i);
+		}
+		
+		Zotero.Utilities.processDocuments(urls, scrape, function() { Zotero.done(); });
+		Zotero.wait();
+	}
+}');
+
+REPLACE INTO translators VALUES ('dede653d-d1f8-411e-911c-44a0219bbdad', '1.0.0b4.r1', '', '2007-06-15 20:00:00', '0', '100', '4', 'GPO Access e-CFR', 'Bill McKinney', '^http://ecfr\.gpoaccess\.gov/cgi/t/text/text-idx.+', 
+'function detectWeb(doc, url) {
+	var re = new RegExp("^http://ecfr\.gpoaccess\.gov/cgi/t/text/text-idx");
+	if(re.test(doc.location.href)) {
+		return "book";
+	} else {
+		return "multiple";
+	}
+}', 
+'function get_nextsibling(n)
+  {
+  var x=n.nextSibling;
+  while (x.nodeType!=1)
+   {
+   x=x.nextSibling;
+   }
+  return x;
+}
+function scrape(doc) {
+
+	var newItem = new Zotero.Item("statute");
+	newItem.url = doc.location.href;
+	var extraText = new String();
+	var tmpSection = "";
+	newItem.code = "Electronic Code of Federal Regulations";
+	newItem.language = "en-us";
+	
+	var spanTags = doc.getElementsByTagName("span");
+	for(var i=0; i<spanTags.length; i++) {
+		if (spanTags[i].className == "mainheader") {
+			var tmpStr = spanTags[i].innerHTML;
+			tmpStr = tmpStr.replace(/\&nbsp;/g, " ");
+			tmpStr = tmpStr.replace(/\&\#167;/g, "Sec.");
+			newItem.codeNumber = tmpStr;
+			newItem.title = "e-CFR: " + tmpStr;
+		}
+		if (spanTags[i].className == "div5head") {
+			var tmpStr = spanTags[i].childNodes[0].innerHTML;
+			tmpStr = tmpStr.replace(/\&nbsp;/g, " ");
+			tmpStr = tmpStr.replace(/\&\#167;/g, "Sec.");
+			tmpSection = tmpStr;
+		}
+	}
+
+	var heading5Tags = doc.getElementsByTagName("h5");
+	for(var i=0; i<heading5Tags.length; i++) {
+		var tmpStr = heading5Tags[0].innerHTML;
+		tmpStr = tmpStr.replace(/\&nbsp;/g, " ");
+		tmpStr = tmpStr.replace(/\&\#167;/g, "Sec.");
+		if (tmpSection != "") {
+			tmpSection = tmpSection + " - ";
+		}
+		newItem.section = tmpSection + tmpStr;
+		break;
+	}
+
+	// statutory source
+	var boldTags = doc.getElementsByTagName("b");
+	for(var i=0; i<boldTags.length; i++) {
+		var s = new String(boldTags[i].innerHTML);
+		if (s.indexOf("Source:") > -1) {
+			newItem.history = "Source: " + boldTags[i].nextSibling.nodeValue;
+		}
+		if (s.indexOf("Authority:") > -1) {
+			newItem.extra = "Authority: " + boldTags[i].nextSibling.nodeValue;
+		}
+	}
+
+	newItem.complete();
+}
+
+function doWeb(doc, url) {
+	var re = new RegExp("http://ecfr\.gpoaccess\.gov/cgi/t/text/text-idx.+");
+	if(re.test(doc.location.href)) {
+		scrape(doc);
+	} else {
+		var items = Zotero.Utilities.getItemArray(doc, doc,"http://ecfr\.gpoaccess\.gov/cgi/t/text/text-idx.+");
+		items = Zotero.selectItems(items);
+		
+		if(!items) {
+			return true;
+		}
+		
+		var uris = new Array();
+		for(var i in items) {
+			uris.push(i);
+		}
+		
+		Zotero.Utilities.processDocuments(uris, function(doc) { scrape(doc) },
+			function() { Zotero.done(); }, null);
+		
+		Zotero.wait();
+	}
+}');
+
+REPLACE INTO translators VALUES ('5ed5ab01-899f-4a3b-a74c-290fb2a1c9a4', '1.0.0b4.r1', '', '2007-06-15 20:00:00', '0', '100', '4', 'AustLII and NZLII', 'Bill McKinney', 'http:\/\/www\.(?:austlii\.edu\.au|nzlii\.org)\/(?:\/cgi-bin\/disp\.pl\/)?(?:au|nz)\/cases\/.+', 
+'function detectWeb(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	var austliiRegexp = /^http:\/\/www\.(?:austlii\.edu\.au|nzlii\.org)\/(?:\/cgi-bin\/disp\.pl\/)?(?:au|nz)\/cases\/.+/
+	if(austliiRegexp.test(url)) {
+		return "book";
+	} else {
+		var aTags = doc.getElementsByTagName("a");
+		for(var i=0; i<aTags.length; i++) {
+			if(articleRegexp.test(aTags[i].href)) {
+				return "multiple";
+			}
+		}
+	}
+}
+', 
+'function scrape(doc) {
+
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	var newItem = new Zotero.Item("case");
+	newItem.title = doc.title;
+	newItem.url = doc.location.href;
+
+	var titleRegexp = /^(.+)\s+\[(\d+)\]\s+(\w+)\s(\d+)\s+\((\d+)\s+(\w+)\s+(\d+)\)/
+	var titleMatch = titleRegexp .exec(doc.title);
+	if (titleMatch ) {
+		newItem.caseName = titleMatch[1] + " [" + titleMatch[2] + "] " + titleMatch[3] + " " + titleMatch[4];
+		newItem.dateDecided = titleMatch[7] + " " + titleMatch[6] + " " + titleMatch[5];
+		newItem.court = titleMatch[3];	
+	} else {
+		newItem.caseName = doc.title;
+		newItem.dateDecided = "not found";
+	}
+	
+	newItem.complete();
+}
+
+function doWeb(doc, url) {
+	var austliiRegexp = /^http:\/\/www\.(?:austlii\.edu\.au|nzlii\.org)\/(?:\/cgi-bin\/disp\.pl\/)?(?:au|nz)\/cases\/.+/
+	if(austliiRegexp.test(url)) {
+		scrape(doc);
+	} else {
+		
+		var items = Zotero.Utilities.getItemArray(doc, doc, austliiRegexp);
+		items = Zotero.selectItems(items);
+		
+		if(!items) {
+			return true;
+		}
+		
+		var urls = new Array();
+		for(var i in items) {
+			urls.push(i);
+		}
+		
+		Zotero.Utilities.processDocuments(urls, scrape, function() { Zotero.done(); });
+		Zotero.wait();
+	}
+}');
+
+REPLACE INTO translators VALUES ('5ae63913-669a-4792-9f45-e089a37de9ab', '1.0.0b4.r1', '', '2007-06-15 20:00:00', '0', '100', '4', 'BAILII', 'Bill McKinney', 'http:\/\/www\.bailii\.org(?:\/cgi\-bin\/markup\.cgi\?doc\=)?\/\w+\/cases\/.+', 
+'function detectWeb(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	var liiRegexp= /^http:\/\/www\.bailii\.org(?:\/cgi\-bin\/markup\.cgi\?doc\=)?\/\w+\/cases\/.+/
+	if(liiRegexp.test(url)) {
+		return "book";
+	} else {
+		var aTags = doc.getElementsByTagName("a");
+		for(var i=0; i<aTags.length; i++) {
+			if(articleRegexp.test(aTags[i].href)) {
+				return "multiple";
+			}
+		}
+	}
+}', 
+'function scrape(doc) {
+
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	var newItem = new Zotero.Item("case");
+	newItem.title = doc.title;
+	newItem.url = doc.location.href;
+
+	var titleRegexp = /^(.+)\s+\[(\d+)\]\s+(.+)\s+\((\d+)\s+(\w+)\s+(\d+)\)/
+	var titleMatch = titleRegexp .exec(doc.title);
+	if (titleMatch ) {
+		newItem.caseName = titleMatch[1] + " [" + titleMatch[2] + "] " + titleMatch[3];
+		newItem.dateDecided = titleMatch[4] + " " + titleMatch[5] + " " + titleMatch[6];
+	} else {
+		newItem.caseName = doc.title;
+		newItem.dateDecided = "not found";
+	}
+
+	var courtRegexp = /cases\/([^\/]+)\/([^\/]+)\//
+	var courtMatch = courtRegexp.exec(doc.location.href);
+	if (courtMatch) {
+		var divRegexp = /\w+/
+		var divMatch = divRegexp.exec(courtMatch[2]);
+		if (divMatch) {
+			newItem.court = courtMatch[1] + " (" + courtMatch[2] + ")";
+		} else {
+			newItem.court = courtMatch[1];
+		}
+	} else {
+		newItem.court = "not found";
+	}
+	
+	// judge
+	var panel = doc.getElementsByTagName("PANEL");
+	if (panel.length > 0) {
+		var tmp = panel[0].innerHTML;
+		newItem.creators.push({lastName:tmp, creatorType:"judge", fieldMode:true});
+		
+	}
+	// citation
+	var cite = doc.getElementsByTagName("CITATION");
+	if (cite.length > 0) {
+		var tmpc = cite[0].childNodes[0].innerHTML;
+		newItem.notes.push({note:tmpc});
+	}
+	
+	newItem.complete();
+}
+
+function doWeb(doc, url) {
+	var liiRegexp= /http:\/\/www\.bailii\.org(?:\/cgi\-bin\/markup\.cgi\?doc\=)?\/\w+\/cases\/.+/
+	if(liiRegexp.test(url)) {
+		scrape(doc);
+	} else {
+		
+		var items = Zotero.Utilities.getItemArray(doc, doc, liiRegexp);
+		items = Zotero.selectItems(items);
+		
+		if(!items) {
+			return true;
+		}
+		
+		var urls = new Array();
+		for(var i in items) {
+			urls.push(i);
+		}
+		
+		Zotero.Utilities.processDocuments(urls, scrape, function() { Zotero.done(); });
+		Zotero.wait();
+	}
+}');
+
+REPLACE INTO translators VALUES ('84799379-7bc5-4e55-9817-baf297d129fe', '1.0.0b4.r1', '', '2007-06-15 20:00:00', '0', '100', '4', 'CanLII', 'Bill McKinney', 'http:\/\/www\.canlii\.org\/en\/[^\/]+\/[^\/]+\/doc\/.+', 
+'function detectWeb(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	var canLiiRegexp = /http:\/\/www\.canlii\.org\/en\/[^\/]+\/[^\/]+\/doc\/.+/
+	if(canLiiRegexp .test(url)) {
+		return "book";
+	} else {
+		var aTags = doc.getElementsByTagName("a");
+		for(var i=0; i<aTags.length; i++) {
+			if(articleRegexp.test(aTags[i].href)) {
+				return "multiple";
+			}
+		}
+	}
+}
+', 
+'function associateMeta(newItem, metaTags, field, zoteroField) {
+	var field = metaTags.namedItem(field);
+	if(field) {
+		newItem[zoteroField] = field.getAttribute("content");
+	}
+}
+
+function scrape(doc) {
+
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	var newItem = new Zotero.Item("case");
+	
+	var metaTags = doc.getElementsByTagName("meta");
+	associateMeta(newItem, metaTags, "DC.Title", "title");
+	associateMeta(newItem, metaTags, "DC.Date", "dateDecided");
+	associateMeta(newItem, metaTags, "DC.Language", "language");
+	newItem.url = doc.location.href;
+	
+	var field = metaTags.namedItem("DC.Title");
+	var tmpText = "";
+	if(field) {
+		tmpText = field.getAttribute("content");
+		var capRe = /^(.+),\s+(\d{4})\s+(\w+)\s+(\d+)\s+\(([^\)]+)\)/;
+			var m = capRe.exec(tmpText);
+			if(m) {
+				
+				newItem.caseName = m[1]+", "+m[2]+" "+m[3]+" "+m[4];
+				if (m[3] == ''CanLII'') {
+					newItem.court = m[5];
+				} else {
+					newItem.court = m[3];
+				}
+				
+			} else {
+				newItem.caseName = tmpText;
+				newItem.court = "not found";
+			}
+	}
+	
+	
+	
+	// attach link to pdf version
+	// NOTE: not working - don''t know why
+	var pdfRe = /^(.+)\.html$/;
+	var pdfMatch = pdfRe.exec(doc.location.href);
+	if (pdfMatch) {
+		var pdfUrl = pdfMatch[1]+".pdf";
+		newItem.attachments = [{url:pdfUrl, title:"PDF version", mimeType:"application/pdf"}];
+	}
+	
+	newItem.complete();
+}
+
+function doWeb(doc, url) {
+	var canLiiRegexp= /http:\/\/www\.canlii\.org\/en\/[^\/]+\/[^\/]+\/doc\/.+/
+	if(canLiiRegexp.test(url)) {
+		scrape(doc);
+	} else {
+		
+		var items = Zotero.Utilities.getItemArray(doc, doc, canLiiRegexp);
+		items = Zotero.selectItems(items);
+		
+		if(!items) {
+			return true;
+		}
+		
+		var urls = new Array();
+		for(var i in items) {
+			urls.push(i);
+		}
+		
+		Zotero.Utilities.processDocuments(urls, scrape, function() { Zotero.done(); });
+		Zotero.wait();
+	}
+}');
+
+REPLACE INTO translators VALUES ('930d49bc-44a1-4c22-9dde-aa6f72fb11e5', '1.0.0b4.r1', '', '2007-06-15 20:00:00', '0', '100', '4', 'Cornell LII', 'Bill McKinney', '^http://www\.law\.cornell\.edu/supct/html/.+', 
+'function detectWeb(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	var liiRegexp = /http:\/\/www\.law\.cornell\.edu\/supct\/html\/.+/
+	if(liiRegexp.test(url)) {
+		return "book";
+	} else {
+		var aTags = doc.getElementsByTagName("a");
+		for(var i=0; i<aTags.length; i++) {
+			if(articleRegexp.test(aTags[i].href)) {
+				return "multiple";
+			}
+		}
+	}
+}', 
+'function associateMeta(newItem, metaTags, field, zoteroField) {
+	var field = metaTags.namedItem(field);
+	if(field) {
+		newItem[zoteroField] = field.getAttribute("content");
+	}
+}
+
+function scrape(doc) {
+
+	var caselawCourt = "U.S. Supreme Court";
+	var caselawJurisdiction = "Federal";
+	var caselawSourceReporter = "U.S.";
+	var caselawSourceVolume = "___";
+	var caselawSourceStartPage = "___";
+	var caselawParallelSourceVolume = "___";
+	var caselawParallelSourceStartPage = "___";
+	var caselawParallelSourceReporter = "___";
+	var caselawDecisionYear = "";
+	
+	var newItem = new Zotero.Item("case");
+	newItem.url = doc.location.href;
+	newItem.language = "en-us";
+	newItem.court = "U.S. Supreme Court";
+	newItem.reporter = "U.S.";
+	
+	// LII provides a bunch of meta tags to harvest
+	var metaTags = doc.getElementsByTagName("meta");
+	associateMeta(newItem, metaTags, "CASENAME", "title");
+	associateMeta(newItem, metaTags, "CASENAME", "caseName");
+	//associateMeta(newItem, metaTags, "DOCKET", "caselawDocket");
+	//associateMeta(newItem, metaTags, "PARTY1", "caselawParty1");
+	//associateMeta(newItem, metaTags, "PARTY2", "caselawParty2");
+	//associateMeta(newItem, metaTags, "ARGDATE", "caselawArguedDate");
+	//associateMeta(newItem, metaTags, "DECDATE", "dateDecided");
+	associateMeta(newItem, metaTags, "COURTBELOW", "history");
+	//associateMeta(newItem, metaTags, "ACTION", "caselawCourtAction");
+
+
+	var tmpCasename = newItem.caseName;
+	tmpCasename = Zotero.Utilities.capitalizeTitle(tmpCasename.toLowerCase());
+	tmpCasename = tmpCasename.replace("V.", "v.");
+	newItem.caseName = tmpCasename;
+	newItem.shortTitle = tmpCasename;
+	
+	// judge
+	var j = metaTags.namedItem("AUTHOR");
+	if(j) {
+		newItem.creators.push({lastName:j.getAttribute("content"), creatorType:"judge", fieldMode:true});
+	}
+
+	// group meta tags
+	for(var i=0; i<metaTags.length; i++) {
+		var key = metaTags[i].getAttribute("name");
+		var value = metaTags[i].getAttribute("content");
+		if (key == "GROUP") {
+			newItem.tags.push(value);		
+		}
+	}
+	
+	// parse year out of decision date
+	var decdateField = metaTags.namedItem("DECDATE");
+	if(decdateField ) {
+		var decisionYearRegex = /(\w+)\s+(\d+),\s+(\d+)/
+		var decisionDateMatch = decisionYearRegex.exec(decdateField.getAttribute("content"));
+		var dy;
+		var dm;
+		var dd;
+		if (decisionDateMatch ) {
+			dm = decisionDateMatch[1];
+			dd = decisionDateMatch[2];
+			dy = decisionDateMatch [3];
+			caselawDecisionYear = dy;
+			newItem.dateDecided = dy + " " + dm + " " + dd;
+		}
+	}
+
+	// create attachment to pdf
+	var dyRegex = /^(.+)\/html\/(.+)(\.Z\w+)\.html$/;
+	var dyMatch = dyRegex.exec(newItem.url);
+	if (dyMatch) {
+		var pdfUrl = dyMatch[1]+"/pdf/"+dyMatch[2]+"P"+dyMatch[3];
+		newItem.attachments.push({url:pdfUrl, title:"PDF version", mimeType:"application/pdf", downloadable:true});
+	}
+
+	// parse disposition
+	var dis = doc.getElementsByTagName("DISPOSITION");
+	if (dis.length > 0) {
+		var tmpDis = dis[0].innerHTML;
+		tmpDis = tmpDis.replace(/\s+/g, " ");
+		newItem.title = newItem.title + " (" +	tmpDis + ")";	
+		newItem.caseName= newItem.caseName + " (" +	tmpDis + ")";	
+		
+	}
+	
+	
+	// parse citation into parts so that bluebook can be constructed
+	var cite = doc.getElementsByTagName("CASENUMBER");
+	if (cite.length > 0) {
+			var citeRegex = /([0-9]+)\s+U\.S\.\s+([0-9]+)/;
+			var citeMatch = citeRegex.exec(cite[0].innerHTML);
+			if (citeMatch) {
+				caselawSourceVolume = citeMatch[1];
+				newItem.reporterVolume = citeMatch[1];
+				caselawSourceStartPage = citeMatch[2];
+				newItem.firstPage = citeMatch[2];
+			}
+	}
+	
+	// look for offcite span element
+	var spanTags = doc.getElementsByTagName("span");
+	if (spanTags.length > 0) {
+		for(var i=0; i<spanTags.length; i++) {
+			if(spanTags[i].className == "offcite") {
+				var citeRegex = /([0-9]+)\s+U\.S\.\s+([0-9]+)/;
+				var citeMatch = citeRegex.exec(spanTags[i].innerHTML);
+				if (citeMatch) {
+					caselawSourceVolume = citeMatch[1];
+					newItem.reporterVolume = citeMatch[1];
+					caselawSourceStartPage = citeMatch[2];
+					newItem.firstPage = citeMatch[2];
+				}
+				break;	
+			}
+		}
+	}
+	
+	// bluebook citation	
+	var bbCite = newItem.shortTitle + ", " + 
+		caselawSourceVolume + " " + 
+		caselawSourceReporter + " " + 
+		caselawSourceStartPage;
+	// paralell cite	
+	if (caselawParallelSourceVolume != "___") {
+		bbCite = bbCite + ", " + caselawParallelSourceVolume +
+		" " + caselawParallelSourceReporter + " " +
+		caselawParallelSourceStartPage;
+	}	
+	// jurisdiction and year
+	bbCite = bbCite + " (" + caselawDecisionYear + ")";
+	// closing period
+	bbCite = "Bluebook citation: " + bbCite + ".";
+	newItem.notes.push({note:bbCite});
+	
+	// parse out publication notice
+	var notice = doc.getElementsByTagName("NOTICE");
+	if (notice .length > 0) {
+		var tmpNotice= notice [0].innerHTML;
+		tmpNotice= tmpNotice.replace(/\s+/g, " ");
+		newItem.notes.push({note:tmpNotice});		
+	}
+	
+	newItem.complete();
+}
+
+function doWeb(doc, url) {
+	var liiRegexp = /http:\/\/www\.law\.cornell\.edu\/supct\/html\/.+/
+	if(liiRegexp.test(url)) {
+		scrape(doc);
+	} else {
+		
+		var items = Zotero.Utilities.getItemArray(doc, doc, liiRegexp);
+		items = Zotero.selectItems(items);
+		
+		if(!items) {
+			return true;
+		}
+		
+		var urls = new Array();
+		for(var i in items) {
+			urls.push(i);
+		}
+		
+		Zotero.Utilities.processDocuments(urls, scrape, function() { Zotero.done(); });
+		Zotero.wait();
+	}
+}');
+
+REPLACE INTO translators VALUES ('232e24fe-2f68-44fc-9366-ecd45720ee9e', '1.0.0b4.r1', '', '2007-06-15 20:00:00', '0', '100', '4', 'Patents - USPTO', 'Bill McKinney', '^http://patft\.uspto\.gov/netacgi/nph-Parser.+', 
+'function detectWeb(doc, url) {
+	var re = new RegExp("^http://patft\.uspto\.gov/netacgi/nph-Parser");
+	if(re.test(doc.location.href)) {
+		return "book";
+	} else {
+		return "multiple";
+	}
+}', 
+'function get_nextsibling(n)
+  {
+  var x=n.nextSibling;
+  while (x.nodeType!=1)
+   {
+   x=x.nextSibling;
+   }
+  return x;
+}
+
+function scrape(doc) {
+
+	var newItem = new Zotero.Item("patent");
+	newItem.url = doc.location.href;
+	var extraText = new String();
+	var tmpStr = new String();
+	var tmpRefs = "";
+	var tmpTitle = doc.title;
+	
+	var fontTags = doc.getElementsByTagName("font");
+	for(var i=0; i<fontTags.length; i++) {
+		if (fontTags[i].getAttribute("size") == "+1") {
+			tmpTitle = tmpTitle + " - " + fontTags[i].innerHTML;
+		}
+	}
+	tmpTitle = Zotero.Utilities.cleanString(tmpTitle);
+	tmpTitle = tmpTitle.replace(/<[^>]+>/g, "");
+	newItem.title = tmpTitle;
+	
+	var cellTags = doc.getElementsByTagName("td");
+	for(var i=0; i<cellTags.length; i++) {
+
+		var s = new String(cellTags[i].innerHTML);
+		if (s.indexOf("United States Patent") > -1) {
+			
+			tmpStr = cellTags[i+1].childNodes[0].innerHTML;
+			tmpStr = tmpStr.replace(/<[^>]+>/gi, "");
+			tmpStr = tmpStr.replace(/,/gi, "");
+			newItem.patentNumber = tmpStr;
+			
+			tmpStr = cellTags[i+3].innerHTML;
+			tmpStr = tmpStr.replace(/<[^>]+>/gi, "");
+			newItem.issueDate = tmpStr;
+			continue;
+		}
+		if (s.indexOf("Assignee") > -1) {
+			tmpStr = cellTags[i+1].innerHTML;
+			tmpStr = tmpStr.replace(/<\/?\w+>/gi, "");
+			newItem.assignee = tmpStr;
+			continue;
+		}
+		if (s.indexOf("Inventors") > -1) {
+			tmpStr = cellTags[i+1].innerHTML;
+			
+			var inventors = tmpStr.split(/<b>,/ig);
+			for (var j=0; j<inventors.length; j++) {
+				var tmpInventor = inventors[j];
+				tmpInventor = tmpInventor.replace(/<\/?\w+>/gi, "");
+				tmpInventor = tmpInventor.replace(/\([^\)]+\)/gi, "");
+				tmpInventor = tmpInventor.replace(/^\s+/gi, "");
+				
+				var names = tmpInventor.split(";");
+				if (names) {
+					var lname = names[0];
+					var fname = names[1];
+					lname = lname.replace(/^\s+/gi, "");
+					lname = lname.replace(/\s+$/gi, "");
+					fname= fname.replace(/^\s+/gi, "");
+					fname= fname.replace(/\s+$/gi, "");
+					newItem.creators.push({lastName:lname, firstName:fname, creatorType:"inventor"});
+				}
+			}
+			continue;
+		}
+		
+		// references
+		if (s.indexOf("<a href=\"/netacgi/nph-Parser?Sect2") > -1) {
+				tmpRefs = tmpRefs + cellTags[i].childNodes[0].innerHTML + " ";
+		}
+		if (s.indexOf("<a href=\"http://appft1.uspto.gov/netacgi/nph-Parser?TERM1") > -1) {
+				tmpRefs = tmpRefs + cellTags[i].childNodes[0].innerHTML + " ";
+		}
+	}
+	
+	var centerTags = doc.getElementsByTagName("center");
+	for(var i=0; i<centerTags.length; i++) {
+		var s = new String(centerTags[i].innerHTML);
+		if (s.indexOf("Abstract") > -1) {
+			//newItem.extra = "ok";
+			var el = get_nextsibling(centerTags[i]);
+			newItem.abstract= el.innerHTML;
+		}
+	
+	}
+
+	newItem.references = tmpRefs;
+	newItem.complete();
+}
+
+function doWeb(doc, url) {
+	var re = new RegExp("^http://patft\.uspto\.gov/netacgi/nph-Parser.+");
+	if(re.test(doc.location.href)) {
+		scrape(doc);
+	} else {
+		var items = Zotero.Utilities.getItemArray(doc, doc, "^http://patft\.uspto\.gov/netacgi/nph-Parser.+");
+		items = Zotero.selectItems(items);
+		
+		if(!items) {
+			return true;
+		}
+		
+		var uris = new Array();
+		for(var i in items) {
+			uris.push(i);
+		}
+		
+		Zotero.Utilities.processDocuments(uris, function(doc) { scrape(doc) },
+			function() { Zotero.done(); }, null);
+		
+		Zotero.wait();
+	}
 }');
 
 REPLACE INTO translators VALUES ('3e684d82-73a3-9a34-095f-19b112d88bbf', '1.0.0b3.r1', '', '2007-05-15 12:00:00', '1', '100', '4', 'Google Books', 'Simon Kornblith', '^http://books\.google\.[a-z]+/books\?(.*id=.*|.*q=.*)', 
