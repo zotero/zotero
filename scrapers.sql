@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-06-15 20:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-06-16 17:20:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-03-21 15:26:54', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -352,7 +352,7 @@ function doWeb(doc, url){
 	}
 }');
 
-REPLACE INTO translators VALUES ('0dda3f89-15de-4479-987f-cc13f1ba7999', '1.0.0b3r1', '', '2007-06-13 20:00:00', '0', '100', '4', 'Ancestry.com US Federal Census', 'Elena Razlogova', '^https?://search.ancestry.com/(.*)usfedcen|1890orgcen', 
+REPLACE INTO translators VALUES ('0dda3f89-15de-4479-987f-cc13f1ba7999', '1.0.0b3r1', '', '2007-06-16 17:20:00', '0', '100', '4', 'Ancestry.com US Federal Census', 'Elena Razlogova', '^https?://search.ancestry.com/(.*)usfedcen|1890orgcen', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -377,11 +377,15 @@ REPLACE INTO translators VALUES ('0dda3f89-15de-4479-987f-cc13f1ba7999', '1.0.0b
 	if(result && linkNo == 2) {
 		return "multiple";
 	} else {
-		var loggedIn = doc.evaluate(''//a[@id="_ctl16__ctl4_m_logout"]|//a[@id="_ctl18__ctl4_m_logout"]'', doc, nsResolver,
-	             XPathResult.ANY_TYPE, null).iterateNext();
-	             
+		var indivRe = /indiv=1/;
+		var m = indivRe.exec(doc.location.href);
+		var indiv = 0;
+		if(m) {
+			indiv = 1;
+			}
+
 		checkURL = doc.location.href.replace("pf=", "").replace("&h=", "");
-		if(doc.location.href == checkURL && loggedIn) {
+		if(doc.location.href == checkURL && indiv == 1) {
 			return "bookSection";
 		}
 	} 
