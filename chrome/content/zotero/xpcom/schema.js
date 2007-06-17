@@ -1104,6 +1104,14 @@ Zotero.Schema = new function(){
 						}
 					}
 				}
+				
+				if (i==34) {
+					Zotero.DB.query("ALTER TABLE annotations ADD collapsed BOOL");
+					Zotero.DB.query("ALTER TABLE annotations ADD dateModified DATETIME");
+					Zotero.DB.query("ALTER TABLE highlights ADD dateModified DATETIME");
+					Zotero.DB.query("UPDATE annotations SET dateModified = DATETIME('now')");
+					Zotero.DB.query("UPDATE highlights SET dateModified = DATETIME('now')");
+				}
 			}
 			
 			_updateSchema('userdata');

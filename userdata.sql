@@ -1,4 +1,4 @@
--- 33
+-- 34
 
 -- This file creates tables containing user-specific data -- any changes
 -- to existing tables made here must be mirrored in transition steps in
@@ -252,6 +252,8 @@ CREATE TABLE IF NOT EXISTS annotations (
     cols INT,
     rows INT,
     text TEXT,
+    collapsed BOOL,
+    dateModified DATE,
     FOREIGN KEY (itemID) REFERENCES itemAttachments(itemID)
 );
 CREATE INDEX IF NOT EXISTS annotations_itemID ON annotations(itemID);
@@ -265,6 +267,7 @@ CREATE TABLE IF NOT EXISTS highlights (
     endParent TEXT,
     endTextNode INT,
     endOffset INT,
+    dateModified DATE,
     FOREIGN KEY (itemID) REFERENCES itemAttachments(itemID)
 );
 CREATE INDEX IF NOT EXISTS highlights_itemID ON highlights(itemID);

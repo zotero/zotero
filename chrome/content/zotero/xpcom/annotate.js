@@ -562,6 +562,7 @@ Zotero.Annotation.prototype.initWithEvent = function(e) {
 	var pixelOffset = Zotero.Annotate.getPixelOffset(this.node);
 	this.x = clickX - pixelOffset[0];
 	this.y = clickY - pixelOffset[1];
+	this.collapsed = false;
 	
 	Zotero.debug("Annotate: added new annotation");
 	
@@ -585,6 +586,7 @@ Zotero.Annotation.prototype.initWithDBRow = function(row) {
 	this.cols = row.cols;
 	this.rows = row.rows;
 	this.annotationID = row.annotationID;
+	this.collapsed = !!row.collapsed;
 	
 	this.display();
 	
@@ -620,14 +622,15 @@ Zotero.Annotation.prototype.save = function() {
 		this.y,						// y
 		this.cols,					// cols
 		this.rows,					// rows
-		text						// text
+		text,						// text
+		(this.collapsed ? 1 : 0)	// collapsed
 	];
 	
 	if(this.annotationID) {
-		var query = "INSERT OR REPLACE INTO annotations VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+		var query = "INSERT OR REPLACE INTO annotations VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, DATETIME('now'))";
 		parameters.unshift(this.annotationID);
 	} else {
-		var query = "INSERT INTO annotations VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+		var query = "INSERT INTO annotations VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, DATETIME('now'))";
 	}
 	
 	Zotero.DB.query(query, parameters);
@@ -663,7 +666,7 @@ Zotero.Annotation.prototype.displayWithAbsoluteCoordinates = function(absX, absY
 		body.appendChild(this.div);
 		this.div.style.backgroundColor = Zotero.Annotate.annotationColor;
 		this.div.style.padding = "0";
-		this.div.style.display = "block";
+		this.div.style.display = (this.collapsed ? "none" : "block");
 		this.div.style.position = "absolute";
 		this.div.style.border = "1px solid";
 		this.div.style.borderColor = Zotero.Annotate.annotationBorderColor;
@@ -675,7 +678,7 @@ Zotero.Annotation.prototype.displayWithAbsoluteCoordinates = function(absX, absY
 		// generate pushpin div
 		this.pushpinDiv = this.document.createElement("div");
 		this.pushpinDiv.style.padding = "0";
-		this.pushpinDiv.style.display = "none";
+		this.pushpinDiv.style.display = (this.collapsed ? "block" : "none");
 		this.pushpinDiv.style.position = "absolute";
 		this.pushpinDiv.style.cursor = "pointer";
 		// generate pushpin image
@@ -688,9 +691,9 @@ Zotero.Annotation.prototype.displayWithAbsoluteCoordinates = function(absX, absY
 		this.pushpinDiv.appendChild(img);
 		body.appendChild(this.pushpinDiv);
 	}
-	this.div.style.display = "block";
-	this.div.style.left = absX+"px";
-	this.div.style.top = absY+"px";
+	this.div.style.left = this.pushpinDiv.style.left = absX+"px";
+	this.div.style.top = this.pushpinDiv.style.top = absY+"px";
+	this.pushpinDiv.style.zIndex = this.div.style.zIndex;
 	
 	// move to the left if we're making things scroll
 	if(absX + this.div.scrollWidth > this.window.innerWidth) {
@@ -702,17 +705,14 @@ Zotero.Annotation.prototype.setCollapsed = function(status) {
 	if(status == true) {
 		// hide div
 		this.div.style.display = "none";
-		// move pushpin div
-		this.pushpinDiv.style.left = this.div.style.left;
-		this.pushpinDiv.style.top = this.div.style.top;
-		this.pushpinDiv.style.zIndex = this.div.style.zIndex;
-		// show pushpin div
 		this.pushpinDiv.style.display = "block";
+		this.pushpinDiv.style.zIndex = this.div.style.zIndex;
+		this.collapsed = true;
 	} else {
 		// hide pushpin div
 		this.pushpinDiv.style.display = "none";
-		// show div
 		this.div.style.display = "block";
+		this.collapsed = false;
 	}
 }
 
