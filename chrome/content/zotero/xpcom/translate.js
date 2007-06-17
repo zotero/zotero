@@ -636,10 +636,11 @@ Zotero.Translate.prototype._generateSandbox = function() {
 	
 	if(this.type == "web" || this.type == "search") {
 		// get sandbox URL
-		var sandboxURL = "http://www.example.com/";
+		var sandboxLocation = "http://www.example.com/";
 		if(this.type == "web") {
 			// use real URL, not proxied version, to create sandbox
-			sandboxURL = this.document.location.href;
+			sandboxLocation = this.document.defaultView;
+			Zotero.debug("binding sandbox to "+this.document.location.href);
 		} else {
 			// generate sandbox for search by extracting domain from translator
 			// target, if one exists
@@ -648,12 +649,13 @@ Zotero.Translate.prototype._generateSandbox = function() {
 				var tempURL = this.translator[0].target.replace(/\\/g, "").replace(/\^/g, "");
 				var m = Zotero.Translate._searchSandboxRegexp.exec(tempURL);
 				if(m) {
-					sandboxURL = m[0];
+					sandboxLocation = m[0];
 				}
-			} 
+			}
+			Zotero.debug("binding sandbox to "+sandboxLocation);
 		}
-		Zotero.debug("binding sandbox to "+sandboxURL);
-		this._sandbox = new Components.utils.Sandbox(sandboxURL);
+		this._sandbox = new Components.utils.Sandbox(sandboxLocation);
+		
 		this._sandbox.Zotero = new Object();
 		
 		// add ingester utilities
@@ -2059,7 +2061,6 @@ Zotero.Translate.TranslatorSearch = function(translate, translators) {
  */
 Zotero.Translate.TranslatorSearch.prototype.execute = function() {
 	if(!this.running) return;
-	
 	if(this.checkDone()) return;
 	
 	// get next translator
@@ -2133,6 +2134,7 @@ Zotero.Translate.TranslatorSearch.prototype.execute = function() {
 		   (this.translate.type == "import" && this.translate._sandbox.detectImport)) {
 			var returnValue;
 			
+			this.currentTranslator = translator;
 			try {
 				if(this.translate.type == "web") {
 					returnValue = this.translate._sandbox.detectWeb(this.translate.document, this.translate.location);
@@ -2149,10 +2151,9 @@ Zotero.Translate.TranslatorSearch.prototype.execute = function() {
 			Zotero.debug("executed detectCode for "+translator.label);
 					
 			if(this.translate.type == "web" && this.translate.waitForCompletion) {
-				this.currentTranslator = translator;
 				this.asyncMode = true;
 				
-				// don't immediately execute
+				// don't immediately execute next
 				return;
 			} else if(returnValue) {
 				this.processReturnValue(translator, returnValue);
