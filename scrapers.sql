@@ -1,4 +1,4 @@
--- 236
+-- 237
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-06-16 17:20:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-06-17 20:44:02'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-03-21 15:26:54', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -5372,6 +5372,10 @@ function doWeb(doc, url) {
 
 REPLACE INTO translators VALUES ('d1bf1c29-4432-4ada-8893-2e29fc88fd9e', '1.0.0b3.r1', '', '2006-12-15 03:40:00', 1, 100, 4, 'washingtonpost.com', 'Simon Kornblith', '^http://www\.washingtonpost\.com/', 
 'function detectWeb(doc, url) {
+	Zotero.debug("WHAT THE FUCK???");
+	Zotero.debug(url);
+	Zotero.debug(doc.lcoation);
+	
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == ''x'') return namespace; else return null;
@@ -12932,4 +12936,300 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/mla.csl', '2007-
       </item>
     </layout>
   </bibliography>
+</style>');
+
+REPLACE INTO csl VALUES('http://zotero.org/namespaces/csl/mhra_note_without_bibliography.csl', '2007-06-17 20:40:54', 'Modern Humanities Research Association (Note without Bibliography)',
+'<?xml version="1.0" encoding="UTF-8"?>
+<?oxygen RNGSchema="../csl.rnc" type="compact"?>
+<style xmlns="http://purl.org/net/xbiblio/csl" class="note">
+    <info>
+        <title>Modern Humanities Research Association</title>
+        <summary>Bibliography styles for the Modern Humanities Research Association.</summary>
+        <author>
+            <name>Jim Safley</name>
+            <email>jsafley@gmu.edu</email>
+        </author>
+        <id></id>
+        <updated>2007-03-19T16:24:28</updated>
+    </info>
+    <defaults>
+        <et-al min-authors="4" use-first="1" term-name="and-others"></et-al>
+        <author name-as-sort-order="no">
+            <name and="text" delimiter=", " delimiter-precedes-last="always"></name>
+            <substitute>
+                <choose>
+                    <editor></editor>
+                    <translator></translator>
+                    <titles></titles>
+                </choose>
+            </substitute>
+        </author>
+        <contributor name-as-sort-order="no">
+            <label suffix=" " form="verb"></label>
+            <name and="text" delimiter=", "></name>
+        </contributor>
+        <locator>
+            <number></number>
+        </locator>
+        <pages>
+            <label suffix=". " form="short" ></label>
+            <number></number>
+        </pages>
+        <identifier>
+            <number></number>
+        </identifier>
+        <titles>
+            <title></title>
+        </titles>
+        <date>
+            <year></year>
+        </date>
+        <publisher>
+            <place suffix=": "></place>
+            <name></name>
+        </publisher>
+        <access>
+            <url prefix=" &lt;" suffix="&gt; "></url>
+            <text prefix=" [" suffix=" " term-name="accessed"></text>
+            <date suffix="]">
+                <day suffix=" "></day>
+                <month suffix=" " text-transform="capitalize"></month>
+                <year></year>
+            </date>
+        </access>
+    </defaults>
+    <citation suffix="." delimiter="; ">
+        <layout>
+            <item>
+                <choose>
+                    <type name="book">
+                        <author></author>
+                        <titles prefix=", " font-style="italic"></titles>
+                        <editor prefix=", "></editor>
+                        <translator prefix=", "></translator>
+                        <titles prefix=" " relation="collection"></titles><!-- this line should print out Zoteros "Series", but it does not -->
+                        <!-- this line should be Zoteros "Series Number", what CSL element matches it? -->
+                        <edition prefix=", "></edition>
+                        <text prefix=" " term-name="edn"></text>
+                        <!-- this line should be Zoteros "# of Volumes", what CSL element matches it? -->
+                        <group prefix=" (" suffix=")">
+                            <publisher></publisher>
+                            <date prefix=", ">
+                                <year></year>
+                            </date>
+                        </group>
+                        <volume prefix=", "></volume>
+                        <access prefix=" "></access>
+                    </type>
+                    <type name="chapter">
+                        <author></author>
+                        <titles prefix=", " font-style="italic"></titles>
+                        <text prefix=", " term-name="in"></text>
+                        <titles prefix=" " relation="container" font-style="italic"/>
+                        <editor prefix=", "></editor>
+                        <translator prefix=", "></translator>
+                        <titles prefix=" " relation="collection"></titles><!-- this line should print out Zoteros "Series", but it does not -->
+                        <!-- this line should be Zoteros "Series Number", what CSL element matches it? -->
+                        <edition prefix=", "></edition>
+                        <text prefix=" " term-name="edn"></text> <!-- this line should print out "edn" -->
+                        <!-- this line should be Zoteros "# of Volumes", what CSL element matches it? -->
+                        <group prefix=" (" suffix=")">
+                            <publisher></publisher>
+                            <date prefix=", ">
+                                <year></year>
+                            </date>
+                        </group>
+                        <volume prefix=", "></volume>
+                        <pages prefix=", "></pages>
+                        <access prefix=" "></access>
+                    </type>
+                    <type name="article">
+                        <author></author>
+                        <titles prefix=", " quotes="true"></titles>
+                        <titles prefix=", " relation="container" font-style="italic"/>
+                        <date prefix=", ">
+                            <day suffix=" "></day>
+                            <month suffix=" " text-transform="capitalize"></month>
+                            <year></year>
+                        </date>
+                        <pages prefix=", "></pages>
+                        <access prefix=" "></access>
+                    </type>
+                    <type name="article-journal">
+                        <author></author>
+                        <titles prefix=", " quotes="true"></titles>
+                        <titles prefix=", " relation="container" font-style="italic"/>
+                        <volume prefix=", "></volume>
+                        <issue prefix="."></issue>
+                        <date prefix=" (" suffix=")"></date>
+                        <pages prefix=", ">
+                            <number></number>
+                        </pages>
+                        <access prefix=" "></access>
+                    </type>
+                </choose>
+            </item>
+        </layout>
+    </citation>
+</style>');
+
+REPLACE INTO csl VALUES('http://zotero.org/namespaces/csl/asa.csl', '2007-06-17 20:41:52', 'American Sociological Association',
+'<?xml version="1.0" encoding="UTF-8"?>
+<?oxygen RNGSchema="../csl.rnc" type="compact"?>
+<style xmlns="http://purl.org/net/xbiblio/csl" class="author-date">
+    <info>
+        <title>American Sociological Association</title>
+        <summary>Bibliography styles for the American Sociological Association.</summary>
+        <author>
+            <name>Jim Safley</name>
+            <email>jsafley@gmu.edu</email>
+        </author>
+        <id></id>
+        <updated>2007-03-06T16:24:28</updated>
+    </info>
+    <defaults>
+        <contributor name-as-sort-order="no">
+            <label suffix=" " form="verb"></label>
+            <name and="text" delimiter=", "></name>
+        </contributor>
+        <author name-as-sort-order="first">
+            <name sort-separator=", " and="text" delimiter=", "></name>
+            <substitute>
+                <choose>
+                    <editor></editor>
+                    <translator></translator>
+                    <titles></titles>
+                </choose>
+            </substitute>
+        </author>
+        <locator>
+            <number></number>
+        </locator>
+        <identifier>
+            <number></number>
+        </identifier>
+        <titles>
+            <title></title>
+        </titles>
+        <date>
+            <year></year>
+        </date>
+        <publisher>
+            <place suffix=": "></place>
+            <name></name>
+        </publisher>
+        <access>
+            <text suffix=" " term-name="retrieved" text-transform="capitalize"></text>
+            <date>
+                <month suffix=" " text-transform="capitalize"></month>
+                <day suffix=", "></day>
+                <year></year>
+            </date>
+            <url prefix=" (" suffix=")"></url>
+        </access>
+    </defaults>
+    <citation prefix="(" suffix=")" delimiter="; ">
+        <et-al min-authors="3" use-first="3" position="first"/>
+        <et-al min-authors="3" use-first="1" position="subsequent"/>
+        <layout>
+            <item>
+                <author suffix=" " form="short"></author>
+                <date suffix=":"></date>
+                <locator></locator>
+            </item>
+        </layout>
+    </citation>
+    <bibliography hanging-indent="true" subsequent-author-substitute="------.">
+        <sort algorithm="author-date"></sort>
+        <et-al min-authors="6" use-first="6"></et-al>
+        <layout>
+            <list>
+                <heading>
+                    <text term-name="references"></text>
+                </heading>
+            </list>
+            <item>
+                <choose>
+                    <type name="book">
+                        <author suffix=". "></author>
+                        <date suffix=". "></date>
+                        <group suffix=". " delimiter=", ">
+                            <titles>
+                                <title font-style="italic"></title>
+                            </titles>
+                            <editor></editor>
+                            <translator></translator>
+                        </group>
+                        <edition suffix=" ed. "></edition>
+                        <publisher suffix=". "></publisher>
+                        <access></access>
+                    </type>
+                    <type name="chapter">
+                        <author suffix=". "></author>
+                        <date suffix=". "></date>
+                        <titles>
+                            <title suffix=". " quotes="true"></title>
+                        </titles>
+                        <pages suffix=" ">
+                            <label suffix=". " form="short" text-transform="capitalize"></label>
+                            <number></number>
+                        </pages>
+                        <conditional>
+                            <if field="pages">
+                                <text suffix=" " term-name="in"></text>
+                            </if><else>
+                                <text suffix=" " term-name="in" text-transform="capitalize"></text>
+                            </else>
+                        </conditional>
+                        <group prefix=" " suffix=". " delimiter=", " class="container">
+                            <titles relation="container">
+                                <title font-style="italic"></title>
+                            </titles>
+                            <editor></editor>
+                            <translator></translator>
+                        </group>
+                        <edition suffix=" ed. "></edition>
+                        <publisher suffix=". "></publisher>
+                        <access></access>
+                    </type>
+                    <type name="article">
+                        <author suffix=". "></author>
+                        <date suffix=". "></date>
+                        <titles>
+                            <title suffix=". " quotes="true"></title>
+                        </titles>
+                        <group suffix=". " class="container">
+                            <titles relation="container">
+                                <title suffix=", " font-style="italic"></title>
+                            </titles>
+                            <date>
+                                <month suffix=" " text-transform="capitalize"></month>
+                                <day></day>
+                            </date>
+                            <volume prefix=", "></volume>
+                            <issue prefix="(" suffix=")"></issue>
+                            <pages prefix=":"></pages>
+                        </group>
+                        <access></access>
+                    </type>
+                    <type name="article-journal">
+                        <author suffix=". "></author>
+                        <date suffix=". "></date>
+                        <titles>
+                            <title suffix=". " quotes="true"></title>
+                        </titles>
+                        <group suffix=". " class="container">
+                            <titles relation="container">
+                                <title font-style="italic"></title>
+                            </titles>
+                            <volume prefix=" "></volume>			
+                            <issue prefix="(" suffix=")"></issue>
+                            <pages prefix=":"></pages>
+                        </group>
+                        <access></access>
+                    </type>
+                </choose>
+            </item>
+        </layout>
+    </bibliography>
 </style>');
