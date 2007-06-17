@@ -5372,10 +5372,6 @@ function doWeb(doc, url) {
 
 REPLACE INTO translators VALUES ('d1bf1c29-4432-4ada-8893-2e29fc88fd9e', '1.0.0b3.r1', '', '2006-12-15 03:40:00', 1, 100, 4, 'washingtonpost.com', 'Simon Kornblith', '^http://www\.washingtonpost\.com/', 
 'function detectWeb(doc, url) {
-	Zotero.debug("WHAT THE FUCK???");
-	Zotero.debug(url);
-	Zotero.debug(doc.lcoation);
-	
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == ''x'') return namespace; else return null;
