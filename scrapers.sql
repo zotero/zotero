@@ -1,4 +1,4 @@
--- 239
+-- 240
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-06-18 18:15:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-06-18 23:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-03-21 15:26:54', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -2402,6 +2402,115 @@ function doWeb(doc, url) {
 		
 		Zotero.wait();
 	}
+}');
+
+REPLACE INTO translators VALUES ('5e3e6245-83da-4f55-a39b-b712df54a935', '1.0.0b3r1', '', '2007-06-18 23:30:00', '0', '50', '4', 'MELVYL', 'Sean Takats', '^https?://melvyl-dev.cdlib.org:8162/F(?:/[A-Z0-9\-]+(?:\?.*)?$|\?func=find|\?func=scan)', 
+'function detectWeb(doc, url) {
+	var singleRe = new RegExp("^https?://[^/]+/F/[A-Z0-9\-]+\?.*(?:func=full-set-set.*\&format=[0-9]{3}|func=direct)");
+	
+	if(singleRe.test(doc.location.href)) {
+		return "book";
+	} else {
+		var tags = doc.getElementsByTagName("a");
+		for(var i=0; i<tags.length; i++) {
+			if(singleRe.test(tags[i].href)) {
+				return "multiple";
+			}
+		}
+	}
+}', 
+'function doWeb(doc, url) {
+	var detailRe = new RegExp("^https?://[^/]+/F/[A-Z0-9\-]+\?.*(?:func=full-set-set.*\&format=[0-9]{3}|func=direct)");
+	var uri = doc.location.href;
+	var newUris = new Array();
+	
+	if(detailRe.test(uri)) {
+	newUris.push(uri.replace(/\&format=[0-9]{3}/, "&format=001"))
+	} else {
+		var itemRegexp = ''^https?://[^/]+/F/[A-Z0-9\-]+\?.*(?:func=full-set-set.*\&format=999|func=direct)'';
+		
+		var namespace = doc.documentElement.namespaceURI;
+		var nsResolver = namespace ? function(prefix) {
+			if (prefix == ''x'') return namespace; else return null;
+		} : null;
+			
+		var xpath = ''//td[2][@class="resultsBrief"]/a[1]'';  // gets MELVYL links
+		var elmts = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var elmt;
+		var titleXpath = ''//tr[td[@class="resultsBrief"][@id="bold"]/b[text()="Title"]]/td[4]''; // gets MELVYL results titles
+		var titleElmts = doc.evaluate(titleXpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var titleElmt;
+		var items = new Array();
+		while ((elmt = elmts.iterateNext()) && (titleElmt = titleElmts.iterateNext())){
+			items[elmt.href] = Zotero.Utilities.cleanString(titleElmt.textContent);
+		}
+		
+			
+		items = Zotero.selectItems(items);
+		
+		if(!items) {
+			return true;
+		}
+		
+		for(var i in items) {
+			var newUri = i.replace(/\&format=[0-9]{3}/, "&format=001")
+			if(newUri == i) {
+				newUri += "&format=001";
+			}
+			newUris.push(newUri);
+		}
+	}
+	
+	var translator = Zotero.loadTranslator("import");
+	translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
+	var marc = translator.getTranslatorObject();
+	Zotero.Utilities.processDocuments(newUris, function(newDoc) {
+		var uri = newDoc.location.href;
+		
+		var namespace = newDoc.documentElement.namespaceURI;
+		var nsResolver = namespace ? function(prefix) {
+		  if (prefix == ''x'') return namespace; else return null;
+		} : null;
+		
+		var xpath = ''//tr[td[1][@class="contentSmall"][@id="bold"]/strong]'';
+		var elmts = newDoc.evaluate(xpath, newDoc, nsResolver, XPathResult.ANY_TYPE, null);
+		var elmt;
+		
+		var record = new marc.record();
+		while(elmt = elmts.iterateNext()) {
+			var field = Zotero.Utilities.superCleanString(doc.evaluate(''./TD[1]/strong/text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue);
+			var value = doc.evaluate(''./TD[2]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+			
+			if(field == "LDR") {
+				record.leader = value;
+			} else if(field != "FMT") {
+				
+				Zotero.debug("field=" + field);
+				value = value.replace(/\|([a-z]) /g, marc.subfieldDelimiter+"$1");
+				
+				var code = field.substring(0, 3);
+				var ind = "";
+				if(field.length > 3) {
+					ind = field[3];
+					if(field.length > 4) {
+						ind += field[4];
+					}
+				}
+				
+				record.addField(code, ind, value);
+			}
+		}
+		
+		var newItem = new Zotero.Item();
+		record.translate(newItem);
+		
+		var domain = url.match(/https?:\/\/([^/]+)/);
+		newItem.repository = domain[1]+" Library Catalog";
+		
+		newItem.complete();
+	}, function() { Zotero.done(); }, null);
+	
+	Zotero.wait();
 }');
 
 REPLACE INTO translators VALUES ('cf87eca8-041d-b954-795a-2d86348999d5', '1.0.0b3.r1', '', '2006-12-15 15:11:00', 1, 100, 4, 'Library Catalog (Aleph)', 'Simon Kornblith', '^https?://[^/]+/F(?:/[A-Z0-9\-]+(?:\?.*)?$|\?func=find|\?func=scan)',
