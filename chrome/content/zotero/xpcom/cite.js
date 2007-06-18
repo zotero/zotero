@@ -755,6 +755,11 @@ Zotero.CSL.prototype._parseEtAl = function(etAl, bibCitElement) {
 		
 		bibCitElement.etAl.minCreators = parseInt(parseElement['@min-authors'], 10);
 		bibCitElement.etAl.useFirst = parseInt(parseElement['@use-first'], 10);
+	} else if(this._defaults["et-al"]) {
+		bibCitElement.etAl = new Object();
+		
+		bibCitElement.etAl.minCreators = parseInt(this._defaults["et-al"]['min-authors'], 10);
+		bibCitElement.etAl.useFirst = parseInt(this._defaults["et-al"]['use-first'], 10);
 	}
 }
 

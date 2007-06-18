@@ -1,4 +1,4 @@
--- 237
+-- 238
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-06-17 20:44:02'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-06-18 00:32:33'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-03-21 15:26:54', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -12934,19 +12934,20 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/mla.csl', '2007-
   </bibliography>
 </style>');
 
-REPLACE INTO csl VALUES('http://zotero.org/namespaces/csl/mhra_note_without_bibliography.csl', '2007-06-17 20:40:54', 'Modern Humanities Research Association (Note without Bibliography)',
+REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/mhra_note_without_bibliography.csl', '2007-06-18 00:32:33', 'Modern Humanities Research Association (Note without Bibliography)',
 '<?xml version="1.0" encoding="UTF-8"?>
 <?oxygen RNGSchema="../csl.rnc" type="compact"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="note">
     <info>
         <title>Modern Humanities Research Association</title>
+    	<id>http://purl.org/net/xbiblio/csl/styles/mhra_note_without_bibliography.csl</id>
+    	<link>http://purl.org/net/xbiblio/csl/styles/mhra_note_without_bibliography.csl</link>
         <summary>Bibliography styles for the Modern Humanities Research Association.</summary>
         <author>
             <name>Jim Safley</name>
             <email>jsafley@gmu.edu</email>
         </author>
-        <id></id>
-        <updated>2007-03-19T16:24:28</updated>
+        <updated>2007-06-18T00:32:33</updated>
     </info>
     <defaults>
         <et-al min-authors="4" use-first="1" term-name="and-others"></et-al>
@@ -13069,21 +13070,23 @@ REPLACE INTO csl VALUES('http://zotero.org/namespaces/csl/mhra_note_without_bibl
     </citation>
 </style>');
 
-REPLACE INTO csl VALUES('http://zotero.org/namespaces/csl/asa.csl', '2007-06-17 20:41:52', 'American Sociological Association',
+REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/asa.csl', '2007-06-18 00:28:24', 'American Sociological Association',
 '<?xml version="1.0" encoding="UTF-8"?>
 <?oxygen RNGSchema="../csl.rnc" type="compact"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="author-date">
     <info>
         <title>American Sociological Association</title>
+    	<id>http://purl.org/net/xbiblio/csl/styles/asa.csl</id>
+    	<link>http://purl.org/net/xbiblio/csl/styles/asa.csl</link>
         <summary>Bibliography styles for the American Sociological Association.</summary>
         <author>
             <name>Jim Safley</name>
             <email>jsafley@gmu.edu</email>
         </author>
-        <id></id>
-        <updated>2007-03-06T16:24:28</updated>
+        <updated>2007-06-18T00:28:24</updated>
     </info>
     <defaults>
+        <et-al min-authors="6" use-first="6"></et-al>
         <contributor name-as-sort-order="no">
             <label suffix=" " form="verb"></label>
             <name and="text" delimiter=", "></name>
@@ -13137,7 +13140,6 @@ REPLACE INTO csl VALUES('http://zotero.org/namespaces/csl/asa.csl', '2007-06-17 
     </citation>
     <bibliography hanging-indent="true" subsequent-author-substitute="------.">
         <sort algorithm="author-date"></sort>
-        <et-al min-authors="6" use-first="6"></et-al>
         <layout>
             <list>
                 <heading>
