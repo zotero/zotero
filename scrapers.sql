@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-06-18 18:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-06-18 18:15:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-03-21 15:26:54', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -217,7 +217,7 @@ REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('aee2323e-ce00-4fcc-a949-06eb1becc98f', '1.0.0b4r1', '', '2007-06-15 20:00:00', '0', '100', '4', 'Epicurious', 'Sean Takats', '^https?://www\.epicurious\.com/recipes/(?:find/results|recipe_views/views/)', 
+REPLACE INTO translators VALUES ('aee2323e-ce00-4fcc-a949-06eb1becc98f', '1.0.0b4r1', '', '2007-06-18 18:15:00', '0', '100', '4', 'Epicurious', 'Sean Takats', '^https?://www\.epicurious\.com/recipes/(?:find/results|recipe_views/views/)', 
 'function detectWeb(doc, url){
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -3775,7 +3775,7 @@ function doWeb() {
 	getAllIds();
 }');
 
-REPLACE INTO translators VALUES ('3af43735-36d3-46ae-9ca8-506ff032b0d3', '1.0.0b4.r1', '', '2007-06-15 20:00:00', '0', '100', '4', 'HeinOnline', 'Bill McKinney', 'http:\/\/heinonline\.org\/HOL\/Page\?handle\=hein\.journals\/.+', 
+REPLACE INTO translators VALUES ('3af43735-36d3-46ae-9ca8-506ff032b0d3', '1.0.0b4.r1', '', '2007-06-18 18:15:00', '0', '100', '4', 'HeinOnline', 'Bill McKinney', 'http:\/\/heinonline\.org\/HOL\/Page\?handle\=hein\.journals\/.+', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -3904,7 +3904,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('dede653d-d1f8-411e-911c-44a0219bbdad', '1.0.0b4.r1', '', '2007-06-15 20:00:00', '0', '100', '4', 'GPO Access e-CFR', 'Bill McKinney', '^http://ecfr\.gpoaccess\.gov/cgi/t/text/text-idx.+', 
+REPLACE INTO translators VALUES ('dede653d-d1f8-411e-911c-44a0219bbdad', '1.0.0b4.r1', '', '2007-06-18 18:15:00', '0', '100', '4', 'GPO Access e-CFR', 'Bill McKinney', '^http://ecfr\.gpoaccess\.gov/cgi/t/text/text-idx.+', 
 'function detectWeb(doc, url) {
 	var re = new RegExp("^http://ecfr\.gpoaccess\.gov/cgi/t/text/text-idx");
 	if(re.test(doc.location.href)) {
@@ -3999,7 +3999,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('5ed5ab01-899f-4a3b-a74c-290fb2a1c9a4', '1.0.0b4.r1', '', '2007-06-15 20:00:00', '0', '100', '4', 'AustLII and NZLII', 'Bill McKinney', 'http:\/\/www\.(?:austlii\.edu\.au|nzlii\.org)\/(?:\/cgi-bin\/disp\.pl\/)?(?:au|nz)\/cases\/.+', 
+REPLACE INTO translators VALUES ('5ed5ab01-899f-4a3b-a74c-290fb2a1c9a4', '1.0.0b4.r1', '', '2007-06-18 18:15:00', '0', '100', '4', 'AustLII and NZLII', 'Bill McKinney', 'http:\/\/www\.(?:austlii\.edu\.au|nzlii\.org)\/(?:\/cgi-bin\/disp\.pl\/)?(?:au|nz)\/cases\/.+', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -4067,7 +4067,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('5ae63913-669a-4792-9f45-e089a37de9ab', '1.0.0b4.r1', '', '2007-06-15 20:00:00', '0', '100', '4', 'BAILII', 'Bill McKinney', 'http:\/\/www\.bailii\.org(?:\/cgi\-bin\/markup\.cgi\?doc\=)?\/\w+\/cases\/.+', 
+REPLACE INTO translators VALUES ('5ae63913-669a-4792-9f45-e089a37de9ab', '1.0.0b4.r1', '', '2007-06-18 18:15:00', '0', '100', '4', 'BAILII', 'Bill McKinney', 'http:\/\/www\.bailii\.org(?:\/cgi\-bin\/markup\.cgi\?doc\=)?\/\w+\/cases\/.+', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -4161,7 +4161,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('84799379-7bc5-4e55-9817-baf297d129fe', '1.0.0b4.r1', '', '2007-06-15 20:00:00', '0', '100', '4', 'CanLII', 'Bill McKinney', 'http:\/\/www\.canlii\.org\/en\/[^\/]+\/[^\/]+\/doc\/.+', 
+REPLACE INTO translators VALUES ('84799379-7bc5-4e55-9817-baf297d129fe', '1.0.0b4.r1', '', '2007-06-18 18:15:00', '0', '100', '4', 'CanLII', 'Bill McKinney', 'http:\/\/www\.canlii\.org\/en\/[^\/]+\/[^\/]+\/doc\/.+', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -4261,7 +4261,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('930d49bc-44a1-4c22-9dde-aa6f72fb11e5', '1.0.0b4.r1', '', '2007-06-15 20:00:00', '0', '100', '4', 'Cornell LII', 'Bill McKinney', '^http://www\.law\.cornell\.edu/supct/html/.+', 
+REPLACE INTO translators VALUES ('930d49bc-44a1-4c22-9dde-aa6f72fb11e5', '1.0.0b4.r1', '', '2007-06-18 18:15:00', '0', '100', '4', 'Cornell LII', 'Bill McKinney', '^http://www\.law\.cornell\.edu/supct/html/.+', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -4457,7 +4457,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('232e24fe-2f68-44fc-9366-ecd45720ee9e', '1.0.0b4.r1', '', '2007-06-15 20:00:00', '0', '100', '4', 'Patents - USPTO', 'Bill McKinney', '^http://patft\.uspto\.gov/netacgi/nph-Parser.+', 
+REPLACE INTO translators VALUES ('232e24fe-2f68-44fc-9366-ecd45720ee9e', '1.0.0b4.r1', '', '2007-06-18 18:15:00', '0', '100', '4', 'Patents - USPTO', 'Bill McKinney', '^http://patft\.uspto\.gov/netacgi/nph-Parser.+', 
 'function detectWeb(doc, url) {
 	var re = new RegExp("^http://patft\.uspto\.gov/netacgi/nph-Parser");
 	if(re.test(doc.location.href)) {
@@ -4589,7 +4589,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('3e684d82-73a3-9a34-095f-19b112d88bbf', '1.0.0b3.r1', '', '2007-06-18 18:00:00', '1', '100', '4', 'Google Books', 'Simon Kornblith', '^http://books\.google\.[a-z]+/books\?(.*id=.*|.*q=.*)', 
+REPLACE INTO translators VALUES ('3e684d82-73a3-9a34-095f-19b112d88bbf', '1.0.0b3.r1', '', '2007-06-18 18:15:00', '1', '100', '4', 'Google Books', 'Simon Kornblith', '^http://books\.google\.[a-z]+/books\?(.*id=.*|.*q=.*)', 
 'function detectWeb(doc, url) {
 	var re = new RegExp(''^http://books\\.google\\.[a-z]+/books\\?id=([^&]+)'', ''i'');
 	if(re.test(doc.location.href)) {
@@ -5370,7 +5370,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('d1bf1c29-4432-4ada-8893-2e29fc88fd9e', '1.0.0b3.r1', '', '2006-12-15 03:40:00', 1, 100, 4, 'washingtonpost.com', 'Simon Kornblith', '^http://www\.washingtonpost\.com/', 
+REPLACE INTO translators VALUES ('d1bf1c29-4432-4ada-8893-2e29fc88fd9e', '1.0.0b3.r1', '', '2007-06-18 18:15:00', 1, 100, 4, 'washingtonpost.com', 'Simon Kornblith', '^http://www\.washingtonpost\.com/', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -12934,7 +12934,7 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/mla.csl', '2007-
   </bibliography>
 </style>');
 
-REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/mhra_note_without_bibliography.csl', '2007-06-18 00:32:33', 'Modern Humanities Research Association (Note without Bibliography)',
+REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/mhra_note_without_bibliography.csl', '2007-06-18 18:15:00', 'Modern Humanities Research Association (Note without Bibliography)',
 '<?xml version="1.0" encoding="UTF-8"?>
 <?oxygen RNGSchema="../csl.rnc" type="compact"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="note">
@@ -13070,7 +13070,7 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/mhra_note_withou
     </citation>
 </style>');
 
-REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/asa.csl', '2007-06-18 00:28:24', 'American Sociological Association',
+REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/asa.csl', '2007-06-18 18:15:00', 'American Sociological Association',
 '<?xml version="1.0" encoding="UTF-8"?>
 <?oxygen RNGSchema="../csl.rnc" type="compact"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="author-date">
