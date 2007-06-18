@@ -1,4 +1,4 @@
--- 238
+-- 239
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-06-18 00:32:33'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-06-18 18:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-03-21 15:26:54', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -4589,7 +4589,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('3e684d82-73a3-9a34-095f-19b112d88bbf', '1.0.0b3.r1', '', '2007-05-15 12:00:00', '1', '100', '4', 'Google Books', 'Simon Kornblith', '^http://books\.google\.[a-z]+/books\?(.*id=.*|.*q=.*)', 
+REPLACE INTO translators VALUES ('3e684d82-73a3-9a34-095f-19b112d88bbf', '1.0.0b3.r1', '', '2007-06-18 18:00:00', '1', '100', '4', 'Google Books', 'Simon Kornblith', '^http://books\.google\.[a-z]+/books\?(.*id=.*|.*q=.*)', 
 'function detectWeb(doc, url) {
 	var re = new RegExp(''^http://books\\.google\\.[a-z]+/books\\?id=([^&]+)'', ''i'');
 	if(re.test(doc.location.href)) {
@@ -4634,7 +4634,7 @@ REPLACE INTO translators VALUES ('3e684d82-73a3-9a34-095f-19b112d88bbf', '1.0.0b
 		  if (prefix == ''x'') return namespace; else return null;
 		} : null;
 
-		var xpath = ''//div[@id="titlebar"]/span[@class="title"]/text()''
+		var xpath = ''//div[@id="titlebar"]/h2[@class="title"]/text()''
 		var elmt;	
 		if (elmt = newDoc.evaluate(xpath, newDoc, nsResolver,
 		                            XPathResult.ANY_TYPE, null).iterateNext()){
