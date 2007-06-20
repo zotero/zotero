@@ -259,6 +259,9 @@ Zotero.OpenURL = new function() {
 		}
 		
 		// encode ctx_ver (if available) and identifiers
+		// TODO identifiers may need to be encoded as follows:
+		// rft_id=info:doi/<the-url-encoded-doi>
+		// rft_id=http://<the-rest-of-the-url-encoded-url>
 		if(version == "0.1") {
 			var co = "";
 			
@@ -378,7 +381,7 @@ Zotero.OpenURL = new function() {
 		// get type
 		for each(var part in coParts) {
 			if(part.substr(0, 12) == "rft_val_fmt=") {
-				var format = unescape(part.substr(12));
+				var format = decodeURIComponent(part.substr(12));
 				if(format == "info:ofi/fmt:kev:mtx:journal") {
 					item.itemType = "journalArticle";
 					break;
@@ -417,7 +420,7 @@ Zotero.OpenURL = new function() {
 		for each(var part in coParts) {
 			var keyVal = part.split("=");
 			var key = keyVal[0];
-			var value = unescape(keyVal[1].replace(/\+|%2[bB]/g, " "));
+			var value = decodeURIComponent(keyVal[1].replace(/\+|%2[bB]/g, " "));
 			if(!value) {
 				continue;
 			}
@@ -600,9 +603,9 @@ Zotero.OpenURL = new function() {
 	function _mapTag(data, tag, version) {
 		if(data) {
 			if(version == "0.1") {
-				return "&"+tag+"="+escape(data);
+				return "&"+tag+"="+encodeURIComponent(data);
 			} else {
-				return "&rft."+tag+"="+escape(data);
+				return "&rft."+tag+"="+encodeURIComponent(data);
 			}
 		} else {
 			return "";
