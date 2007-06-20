@@ -3973,7 +3973,7 @@ REPLACE INTO translators VALUES ('3af43735-36d3-46ae-9ca8-506ff032b0d3', '1.0.0b
 				var lname= name[0].replace(/^\s+/,"");
 				newItem.creators.push({lastName:lname, firstName:fname, creatorType:"author", fieldMode:true});
 			}
-			newItem.abstract =  citeMatch[0];
+			newItem.abstractNote =  citeMatch[0];
 		}	
 	
 		var getSectionUrl = "http://heinonline.org/HOL/ajaxcalls/get-section-id?base=js&handle="+handle+"&id="+selectedPage;
@@ -4665,7 +4665,7 @@ function scrape(doc) {
 		if (s.indexOf("Abstract") > -1) {
 			//newItem.extra = "ok";
 			var el = get_nextsibling(centerTags[i]);
-			newItem.abstract= el.innerHTML;
+			newItem.abstractNote = el.innerHTML;
 		}
 	
 	}
