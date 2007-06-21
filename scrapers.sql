@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-06-21 20:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-06-21 20:10:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -5479,7 +5479,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('d1bf1c29-4432-4ada-8893-2e29fc88fd9e', '1.0.0b3.r1', '', '2007-06-21 20:00:00', 1, 100, 4, 'washingtonpost.com', 'Simon Kornblith', '^http://www\.washingtonpost\.com/', 
+REPLACE INTO translators VALUES ('d1bf1c29-4432-4ada-8893-2e29fc88fd9e', '1.0.0b3.r1', '', '2007-06-21 20:10:00', 1, 100, 4, 'washingtonpost.com', 'Simon Kornblith', '^http://www\.washingtonpost\.com/', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -5518,7 +5518,7 @@ REPLACE INTO translators VALUES ('d1bf1c29-4432-4ada-8893-2e29fc88fd9e', '1.0.0b
 	newItem.url = doc.location.href;
 	var metaTags = doc.getElementsByTagName("meta");
 	
-	// Elena's code to grab print version (all pages)
+	// Elena''s code to grab print version (all pages)
 	snapshotURL=doc.location.href.replace(".html", "_pf.html");
 	newItem.attachments.push({title:"Washington Post Snapshot", mimeType:"text/html", url:snapshotURL, snapshot:true});
 
