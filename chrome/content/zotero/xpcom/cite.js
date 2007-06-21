@@ -444,6 +444,22 @@ Zotero.CSL._locatorTerms = {
 
 /*
  * create a citation (in-text or footnote)
+ * accepts a citation object containing:
+ *
+ * citation.citationType
+ *		1 = first
+ *		2 = subsequent
+ *		3 = ibid
+ *		4 = ibid + pages
+ *
+ * citation.locators
+ *		array of locators
+ *
+ * citation.locatorTypes
+ *		array of types for given locators (see above)
+ *
+ * citation.items/citation.itemIDs
+ *		array of items/itemIDs to be cited
  */
 Zotero.CSL.prototype.createCitation = function(citation, format) {
 	var string = new Zotero.CSL.FormattedString(this, format);
@@ -475,8 +491,10 @@ Zotero.CSL.prototype.createCitation = function(citation, format) {
 			}
 		}
 	} else {							// indicates primary or subsequent
-		var lasti = citation.itemIDs.length-1;
-		for(var i in citation.itemIDs) {
+		if(citation.itemIDs) citation.items = citation.itemIDs;
+		
+		var lasti = citation.items.length-1;
+		for(var i in citation.items) {
 			var locatorType = false;
 			var locator = false;
 			if(citation.locators) {
@@ -485,7 +503,15 @@ Zotero.CSL.prototype.createCitation = function(citation, format) {
 			}
 			
 			var position = (citation.citationType[i] == 1 ? "first" : "subsequent");
-			var citationString = this._getCitation(Zotero.Items.get(citation.itemIDs[i]),
+			
+			// allow either item objects or ids
+			if(typeof citation.items[i] == "object") {
+				item = citation.items[i];
+			} else {
+				item = Zotero.Items.get(citation.items[i]);
+			}
+			
+			var citationString = this._getCitation(item,
 				position,
 				locatorType, locator, format, this._cit);
 			string.concat(citationString);

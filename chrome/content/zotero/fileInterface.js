@@ -116,6 +116,7 @@ var Zotero_File_Interface = new function() {
 	this.bibliographyFromCollection = bibliographyFromCollection;
 	this.bibliographyFromItems = bibliographyFromItems;
 	this.copyItemsToClipboard = copyItemsToClipboard;
+	this.copyCitationToClipboard = copyCitationToClipboard;
 	
 	/*
 	 * Creates Zotero.Translate instance and shows file picker for file export
@@ -331,6 +332,41 @@ var Zotero_File_Interface = new function() {
 		
 		// add text
 		var bibliography = csl.createBibliography(items, "Text");
+		var str = Components.classes["@mozilla.org/supports-string;1"].
+				  createInstance(Components.interfaces.nsISupportsString);
+		str.data = bibliography;
+		transferable.addDataFlavor("text/unicode");
+		transferable.setTransferData("text/unicode", str, bibliography.length*2);
+		
+		clipboardService.setData(transferable, null, Components.interfaces.nsIClipboard.kGlobalClipboard);
+	}
+	
+	
+	/*
+	 * Copies HTML and text citations for passed items in given style
+	 *
+	 * Does not check that items are actual references (and not notes or attachments)
+	 */
+	function copyCitationToClipboard(items, style) {
+		// copy to clipboard
+		var transferable = Components.classes["@mozilla.org/widget/transferable;1"].
+						   createInstance(Components.interfaces.nsITransferable);
+		var clipboardService = Components.classes["@mozilla.org/widget/clipboard;1"].
+							   getService(Components.interfaces.nsIClipboard);
+		
+		var csl = Zotero.Cite.getStyle(style);
+		csl.preprocessItems(items);
+		
+		// add HTML
+		var bibliography = csl.createCitation({citationType:1, items:items}, "HTML");
+		var str = Components.classes["@mozilla.org/supports-string;1"].
+				  createInstance(Components.interfaces.nsISupportsString);
+		str.data = bibliography;
+		transferable.addDataFlavor("text/html");
+		transferable.setTransferData("text/html", str, bibliography.length*2);
+		
+		// add text
+		var bibliography = csl.createCitation({citationType:1, items:items}, "Text");
 		var str = Components.classes["@mozilla.org/supports-string;1"].
 				  createInstance(Components.interfaces.nsISupportsString);
 		str.data = bibliography;
