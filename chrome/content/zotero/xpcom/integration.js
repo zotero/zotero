@@ -374,7 +374,7 @@ Zotero.Integration.SOAP = new function() {
 				}
 				
 				watcher.openWindow(null, 'chrome://zotero/content/addCitationDialog.xul', '',
-								  'chrome,modal'+(Zotero.isMac ? '' : ',popup'), io, true);
+								  'chrome,modal'+(Zotero.isWin ? ',popup' : ''), io, true);
 				
 				citation = new Zotero.Integration.Citation(vars[i], "!");
 				updatedCitations[citation.index] = true;
