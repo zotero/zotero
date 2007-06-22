@@ -1,4 +1,4 @@
--- 243
+-- 244
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-06-21 20:10:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-06-22 17:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -4995,7 +4995,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('d0b1914a-11f1-4dd7-8557-b32fe8a3dd47', '1.0.0b3.r1', '', '2007-06-12 23:00:00', '1', '100', '4', 'EBSCOhost', 'Simon Kornblith', '^https?://[^/]+/ehost/(?:results|detail)', 
+REPLACE INTO translators VALUES ('d0b1914a-11f1-4dd7-8557-b32fe8a3dd47', '1.0.0b3.r1', '', '2007-06-22 17:30:00', '1', '100', '4', 'EBSCOhost', 'Simon Kornblith', '^https?://[^/]+/ehost/(?:results|detail)', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -5008,9 +5008,21 @@ REPLACE INTO translators VALUES ('d0b1914a-11f1-4dd7-8557-b32fe8a3dd47', '1.0.0b
 	if(searchResult) {
 		return "multiple";
 	}
+	var xpath = ''//tr[td[@class="left-content-ft"][text() = "Persistent link to this record:"''
+		+''or text() = "Vínculo persistente a este informe:"''
+		+''or text() = "Lien permanent à cette donnée:"''
+		+''or text() = "Permanenter Link zu diesem Datensatz:"''
+		+''or text() = "Link permanente al record:"''
+		+''or text() = "Link permanente para este registro:"''
+		+''or text() = "本記錄固定連結:"''
+		+''or text() = "此记录的永久链接:"''
+		+''or text() = "このレコードへのパーシスタント リンク:"''
+		+''or text() = "레코드 링크 URL:"''
+		+''or text() = "Постоянная ссылка на эту запись:"''
+		+''or text() = "Bu kayda sürekli bağlantı:"''
+		+''or text() = "Μόνιμος σύνδεσμος σε αυτό το αρχείο:"]]/td[@class="right-content-ft"]'';
 
-	var persistentLink = doc.evaluate(''//tr[td[@class="left-content-ft"]/text() = "Persistent link to this record:"]/td[@class="right-content-ft"]'',
-									  doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+	var persistentLink = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 	if(persistentLink) {
 		return "journalArticle";
 	}
@@ -11198,7 +11210,7 @@ function doExport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('9cb70025-a888-4a29-a210-93ec52da40d4', '1.0.0b4.r1', '', '2007-04-24 15:30:00', 1, 100, 3, 'BibTeX', 'Simon Kornblith', 'bib',
+REPLACE INTO translators VALUES ('9cb70025-a888-4a29-a210-93ec52da40d4', '1.0.0b4.r1', '', '2007-06-22 17:30:00', '1', '100', '3', 'BibTeX', 'Simon Kornblith', 'bib', 
 'Zotero.configure("dataMode", "block");
 
 function detectImport() {
@@ -11221,12 +11233,12 @@ function detectImport() {
 	if(re.test(block)) {
 		return true;
 	}
-}',
+}', 
 'var fieldMap = {
 	address:"place",
 	chapter:"section",
 	edition:"edition",
-	number:"issue",
+//	number:"issue",
 	type:"type",
 	series:"series",
 	title:"title",
@@ -11351,6 +11363,12 @@ function processField(item, field, value) {
 		}
 	} else if(field == "institution" || field == "organization") {
 		item.backupPublisher = value;
+	} else if(field == "number"){ // fix for techreport
+		if (item.itemType == "report") {
+			item.reportNumber = value;
+		} else {
+			item.issue = value;
+		}
 	} else if(field == "month") {
 		var monthIndex = months.indexOf(value.toLowerCase());
 		if(monthIndex != -1) {
