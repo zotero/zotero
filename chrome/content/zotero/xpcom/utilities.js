@@ -162,6 +162,13 @@ Zotero.Utilities.prototype.htmlSpecialChars = function(str) {
 	return newString;
 }
 
+/*
+Zotero.Utilities.prototype.unescapeHTML = function(str) {
+	var nsISUHTML = Components.classes["@mozilla.org/feed-unescapehtml;1"]
+		.getService(Components.interfaces.nsIScriptableUnescapeHTML);
+	return nsISUHTML.unescape(str);
+}
+*/
 
 /*
  * Parses a text string for HTML/XUL markup and returns an array of parts
