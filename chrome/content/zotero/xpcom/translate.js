@@ -535,7 +535,7 @@ Zotero.Translate.prototype._loadTranslator = function() {
 		if(this._parentTranslator) {
 			throw(e);
 		} else {
-			Zotero.debug(e+' in parsing code for '+this.translator[0].label);
+			this._debug(e+' in parsing code for '+this.translator[0].label);
 			this._translationComplete(false, e);
 			return false;
 		}
@@ -620,7 +620,7 @@ Zotero.Translate.prototype._parseDetectCode = function(translator) {
 		try {
 			Components.utils.evalInSandbox(detectCode, this._sandbox);
 		} catch(e) {
-			Zotero.debug(e+' in parsing detectCode for '+translator.label);
+			this._debug(e+' in parsing detectCode for '+translator.label);
 			return;
 		}
 	}
@@ -2215,7 +2215,7 @@ Zotero.Translate.TranslatorSearch.prototype.complete = function(returnValue, err
 		this.processReturnValue(this.currentTranslator, returnValue);
 	} else if(error) {
 		var errorString = this.translate._generateErrorString(error);
-		Zotero.debug("detectCode for "+(this.currentTranslator ? this.currentTranslator.label : "no translator")+" failed: \n"+errorString);
+		this.translate._debug("detectCode for "+(this.currentTranslator ? this.currentTranslator.label : "no translator")+" failed: \n"+errorString);
 	}
 	
 	this.currentTranslator = undefined;
