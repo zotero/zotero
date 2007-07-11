@@ -88,7 +88,18 @@
 				
 				var csl = new Zotero.CSL(value);
 				csl.preprocessItems(items);
-				iframe.contentDocument.documentElement.innerHTML = csl.createBibliography(items, "HTML");
+				// Generate single citations
+				var citations = '';
+				for (var i=0; i<items.length; i++) {
+					citations += csl.createCitation({citationType:1, items:[items[i]] }, "HTML") + '<br/>';
+				}
+				// Generate multiple citations
+				var multCitations = csl.createCitation({citationType:1, items:items}, "HTML");
+				// Generate bibliography
+				var bibliography = csl.createBibliography(items, "HTML");
+				
+				iframe.contentDocument.documentElement.innerHTML =
+					citations + '<hr/>' + multCitations + '<hr/>' + bibliography;
 			}
 			
 			
