@@ -333,6 +333,13 @@ Zotero.Integration.DataListener.prototype._requestFinished = function(response) 
 	}
 }
 
+Zotero.Integration.citationTypes = {
+	1:"first",
+	2:"subsequent",
+	3:"ibid",
+	4:"ibid-pages"
+}
+
 Zotero.Integration.SOAP = new function() {
 	this.init = init;
 	this.update = update;
@@ -438,7 +445,7 @@ Zotero.Integration.SOAP = new function() {
 			Zotero.debug("Integration: Regenerating bibliography");
 			// EBNF: bibliography-data
 			if(bibliographyMode != "false") {
-				output.push(session.style.createBibliography(session.citationFactory.items, "Integration"));
+				output.push(session.style.createBibliography(session.citationFactory.itemSet, "Integration"));
 			} else {
 				output.push("!");
 			}
@@ -759,9 +766,9 @@ Zotero.Integration.CitationFactory.prototype.updateItems = function(citationSet,
 		}
 	}
 	
-	this.style.preprocessItems(this.items);
+	this.itemSet = this.style.generateItemSet(this.items);
 	
-	var tempCache = new Object();
+	/*var tempCache = new Object();
 	for(var i in this.items) {
 		var itemID = this.items[i].getID();
 		this.dateModified[itemID] = this.items[i].getField("dateModified");
@@ -788,7 +795,7 @@ Zotero.Integration.CitationFactory.prototype.updateItems = function(citationSet,
 				}
 			}
 		}
-	}
+	}*/
 	
 	// TODO: clear missing items from cache?
 	
@@ -810,7 +817,9 @@ Zotero.Integration.CitationFactory.prototype.getCitation = function(citation, us
 	}
 	
 	citation.loadLocators();
-	var citationText = this.style.createCitation(citation, "Integration");
+	var citationText = this.style.createCitation(this.itemSet, citation.itemIDs, "Integration",
+		Zotero.Integration.citationTypes[citation.citationType], citation.locators,
+		citation.locatorTypes);
 	
 	if(!usingCache[citation.serializedType]) {
 		usingCache[citation.serializedType] = new Object();
