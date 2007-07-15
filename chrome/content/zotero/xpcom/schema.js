@@ -1120,7 +1120,6 @@ Zotero.Schema = new function(){
 					Zotero.DB.query("ALTER TABLE fulltextItems ADD indexedChars INT");
 					Zotero.DB.query("ALTER TABLE fulltextItems ADD totalChars INT");
 					Zotero.DB.query("DELETE FROM version WHERE schema='fulltext'");
-					Zotero.DB.query("VACUUM");
 				}
 			}
 			
