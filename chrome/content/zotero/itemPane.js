@@ -1028,8 +1028,7 @@ var ZoteroItemPane = new function()
 			t.setAttribute('singleField', elem.getAttribute('singleField'));
 		}
 		
-		if (fieldName == 'abstractNote' || fieldName == 'extra')
-		{
+		if (['title', 'abstractNote', 'extra'].indexOf(fieldName) != -1) {
 			t.setAttribute('multiline', true);
 			t.setAttribute('rows', 8);
 		}
