@@ -82,7 +82,7 @@ Zotero.Notifier = new function(){
 	* Possible values:
 	*
 	* 	event: 'add', 'modify', 'delete', 'move' ('c', for changing parent),
-	*		'remove' (ci, it)
+	*		'remove' (ci, it), 'refresh'
 	* 	type - 'collection', 'search', 'item', 'collection-item', 'item-tag', 'tag'
 	* 	ids - single id or array of ids
 	*

@@ -66,10 +66,10 @@ To add a new preference:
 			
 				<rows>
 					<row>
-						<hbox>
+						<hbox id="position-menu-box-label">
 							<label value="&zotero.preferences.position;" control="positionMenu"/>
 						</hbox>
-						<hbox>
+						<hbox id="position-menu-box">
 							<menulist id="positionMenu" preference="pref-zoteroPaneOnTop">
 								<menupopup>
 									<menuitem label="&zotero.preferences.position.above;" value="true"/>
@@ -147,6 +147,104 @@ To add a new preference:
 					</menupopup>
 				</menulist>
 			</hbox>
+		</groupbox>
+	</prefpane>
+	
+	
+	<prefpane id="zotero-prefpane-search" label="&zotero.preferences.prefpane.search;"
+			onpaneload="updateIndexStats()">
+		<preferences>
+			<preference id="pref-fulltext-textMaxLength" name="extensions.zotero.fulltext.textMaxLength" type="int"/>
+			<preference id="pref-fulltext-pdfmaxpages" name="extensions.zotero.fulltext.pdfMaxPages" type="int"/>
+		</preferences>
+		
+		<groupbox>
+			<caption label="&zotero.preferences.search.fulltextCache;"/>
+			
+			<hbox>
+				<button id="fulltext-rebuildIndex" flex="1" oncommand="rebuildIndexPrompt()"/>
+				<button id="fulltext-clearIndex" flex="1" oncommand="clearIndexPrompt()"/>
+			</hbox>
+			
+			<grid id="fulltext-settings">
+				<columns>
+					<column/>
+					<column flex="1"/>
+				</columns>
+				
+				<rows>
+					<row>
+						<hbox>
+							<label value="&zotero.preferences.fulltext.textMaxLength;"/>
+						</hbox>
+						<hbox>
+							<textbox size="10" preference="pref-fulltext-textMaxLength"/>
+							<label value="(&zotero.preferences.default; 500000)"/>
+						</hbox>
+					</row>
+				</rows>
+			</grid>
+		</groupbox>
+		
+		<groupbox id="pdftools-box">
+			<caption label="&zotero.preferences.search.pdfIndexing;"/>
+			
+			<label id="pdfconverter-status"/>
+			<label id="pdfinfo-status"/>
+			<label id="pdftools-required" hidden="true"/>
+			<hbox>
+				<button id="pdftools-update-button" flex="1" oncommand="checkPDFToolsDownloadVersion()"/>
+			</hbox>
+			<label id="pdftools-documentation-link" hidden="true"/>
+			
+			<grid id="pdftools-settings" hidden="true">
+				<columns>
+					<column/>
+					<column flex="1"/>
+				</columns>
+				
+				<rows>
+					<row>
+						<hbox>
+							<label value="&zotero.preferences.fulltext.pdfMaxPages;"/>
+						</hbox>
+						<hbox>
+							<textbox size="5" preference="pref-fulltext-pdfmaxpages"/>
+							<label value="(&zotero.preferences.default; 100)"/>
+						</hbox>
+					</row>
+				</rows>
+			</grid>
+		</groupbox>
+		
+		<groupbox id="fulltext-stats">
+			<caption label="&zotero.preferences.search.indexStats;"/>
+			
+			<grid>
+				<columns>
+					<column/>
+					<column/>
+				</columns>
+				
+				<rows>
+					<row id="fulltext-stats-indexed">
+						<label value="Indexed:"/>
+						<label/>
+					</row>
+					<row id="fulltext-stats-partial">
+						<label value="Partial:"/>
+						<label/>
+					</row>
+					<row id="fulltext-stats-unindexed">
+						<label value="Unindexed:"/>
+						<label/>
+					</row>
+					<row id="fulltext-stats-words">
+						<label value="Words:"/>
+						<label/>
+					</row>
+				</rows>
+			</grid>
 		</groupbox>
 	</prefpane>
 	

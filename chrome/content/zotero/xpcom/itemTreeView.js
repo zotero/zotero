@@ -237,8 +237,19 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids)
 	var madeChanges = false;
 	var sort = false;
 	
-	this.selection.selectEventsSuppressed = true;
 	var savedSelection = this.saveSelection();
+	
+	// If refreshing a single item, just unselect and reselect it
+	if (action == 'refresh') {
+		if (savedSelection.length == 1 && savedSelection[0] == ids[0]) {
+			this.selection.clearSelection();
+			this.rememberSelection(savedSelection);
+		}
+		
+		return;
+	}
+	
+	this.selection.selectEventsSuppressed = true;
 	
 	// See if we're in the active window
 	var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]

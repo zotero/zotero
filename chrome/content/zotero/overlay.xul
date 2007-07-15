@@ -101,6 +101,8 @@
 					<menuitem oncommand="Zotero_File_Interface.exportItems();"/>
 					<menuitem oncommand="Zotero_File_Interface.bibliographyFromItems();"/>
 					<menuitem oncommand="Zotero_Report_Interface.loadItemReport()"/>
+					<menuseparator/>
+					<menuitem oncommand="ZoteroPane.reindexItem();"/>
 				</popup>
 			</popupset>
 			
@@ -305,10 +307,17 @@
 								<button id="zotero-attachment-view" flex="1" oncommand="ZoteroPane.viewSelectedAttachment(event);"/>
 								<button id="zotero-attachment-show" label="&zotero.item.attachment.file.show;" flex="1" oncommand="ZoteroPane.showSelectedAttachmentInFilesystem()"/>
 							</hbox>
-							<vbox>
-								<label id="zotero-attachment-url" class="text-link" crop="end" onclick="ZoteroPane.loadURI(this.value, event)"/>
-								<label id="zotero-attachment-accessed"/>
-							</vbox>
+							<label id="zotero-attachment-url" class="text-link" crop="end" onclick="ZoteroPane.loadURI(this.value, event)"/>
+							
+							
+							<label id="zotero-attachment-accessed"/>
+							<label id="zotero-attachment-pages"/>
+							
+							<hbox id="zotero-attachment-index-box">
+								<label id="zotero-attachment-index-status"/>
+								<toolbarbutton id="zotero-attachment-reindex" oncommand="ZoteroPane.reindexItem()"/>
+							</hbox>
+							
 							<noteeditor id="zotero-attachment-note-editor" notitle="1" flex="1"/>
 						</vbox>
 					</deck>

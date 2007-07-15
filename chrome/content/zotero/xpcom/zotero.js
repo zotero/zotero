@@ -122,6 +122,7 @@ var Zotero = new function(){
 		this.platform = win.navigator.platform;
 		this.isMac = (this.platform.substr(0, 3) == "Mac");
 		this.isWin = (this.platform.substr(0, 3) == "Win");
+		this.isLinux = (this.platform.substr(0, 5) == "Linux");
 		
 		// Locale		
 		var ph = Components.classes["@mozilla.org/network/protocol;1?name=http"].

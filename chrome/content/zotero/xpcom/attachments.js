@@ -35,6 +35,7 @@ Zotero.Attachments = new function(){
 	this.importFromDocument = importFromDocument;
 	this.getFileBaseNameFromItem = getFileBaseNameFromItem;
 	this.createDirectoryForItem = createDirectoryForItem;
+	this.getStorageDirectory = getStorageDirectory;
 	this.getPath = getPath;
 	
 	var self = this;
@@ -499,12 +500,14 @@ Zotero.Attachments = new function(){
 			
 			if (mimeType == 'application/pdf') {
 				var f = function() {
-					Zotero.Fulltext.indexPDF(file, itemID);;
+					Zotero.Fulltext.indexPDF(file, itemID);
+					Zotero.Notifier.trigger('refresh', 'item', itemID);
 				};
 			}
 			else {
 				var f = function() {
 					Zotero.Fulltext.indexDocument(document, itemID);
+					Zotero.Notifier.trigger('refresh', 'item', itemID);
 				};
 			}
 			
@@ -780,8 +783,7 @@ Zotero.Attachments = new function(){
 	 * Create directory for attachment files within storage directory
 	 */
 	function createDirectoryForItem(itemID) {
-		var dir = Zotero.getStorageDirectory();
-		dir.append(itemID);
+		var dir = this.getStorageDirectory(itemID);
 		if (!dir.exists()) {
 			dir.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0755);
 		}
@@ -789,9 +791,16 @@ Zotero.Attachments = new function(){
 	}
 	
 	
+	function getStorageDirectory(itemID) {
+		var dir = Zotero.getStorageDirectory();
+		dir.append(itemID);
+		return dir;
+	}
+	
+	
 	/*
-	 * Gets a relative path for imported attachments and an absolute path
-	 * for files outside the storage directory
+	 * Gets a relative descriptor for imported attachments and a persistent
+	 * descriptor for files outside the storage directory
 	 */
 	function getPath(file, linkMode) {
 		if (linkMode == self.LINK_MODE_IMPORTED_URL ||

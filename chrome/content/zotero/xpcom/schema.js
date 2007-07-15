@@ -119,15 +119,6 @@ Zotero.Schema = new function(){
 				var up2 = _updateSchema('system');
 				var up3 = _updateSchema('scrapers');
 				
-				// Rebuild fulltext cache if necessary
-				if (Zotero.Fulltext.cacheIsOutdated()){
-					try {
-						Zotero.Fulltext.rebuildCache();
-					}
-					catch (e) {
-						Components.utils.reportError(e);
-					}
-				}
 				Zotero.DB.commitTransaction();
 			}
 			catch(e){
@@ -1105,12 +1096,31 @@ Zotero.Schema = new function(){
 					}
 				}
 				
+				// 1.0.0b4.r5
+				
 				if (i==34) {
 					Zotero.DB.query("ALTER TABLE annotations ADD collapsed BOOL");
 					Zotero.DB.query("ALTER TABLE annotations ADD dateModified DATETIME");
 					Zotero.DB.query("ALTER TABLE highlights ADD dateModified DATETIME");
 					Zotero.DB.query("UPDATE annotations SET dateModified = DATETIME('now')");
 					Zotero.DB.query("UPDATE highlights SET dateModified = DATETIME('now')");
+				}
+				
+				if (i==35) {
+					Zotero.DB.query("CREATE TABLE fulltextItemWords (\n    wordID INT,\n    itemID INT,\n    PRIMARY KEY (wordID, itemID),\n    FOREIGN KEY (wordID) REFERENCES fulltextWords(wordID),\n    FOREIGN KEY (itemID) REFERENCES items(itemID)\n);");
+					Zotero.DB.query("INSERT INTO fulltextItemWords SELECT * FROM fulltextItems");
+					Zotero.DB.query("DROP TABLE fulltextItems");
+					Zotero.DB.query("CREATE TABLE fulltextItems (\n    itemID INT,\n    version INT,\n    PRIMARY KEY (itemID),\n    FOREIGN KEY (itemID) REFERENCES items(itemID)\n);");
+					Zotero.DB.query("INSERT INTO fulltextItems SELECT DISTINCT itemID, 1 FROM fulltextItemWords");
+				}
+				
+				if (i==36) {
+					Zotero.DB.query("ALTER TABLE fulltextItems ADD indexedPages INT");
+					Zotero.DB.query("ALTER TABLE fulltextItems ADD totalPages INT");
+					Zotero.DB.query("ALTER TABLE fulltextItems ADD indexedChars INT");
+					Zotero.DB.query("ALTER TABLE fulltextItems ADD totalChars INT");
+					Zotero.DB.query("DELETE FROM version WHERE schema='fulltext'");
+					Zotero.DB.query("VACUUM");
 				}
 			}
 			

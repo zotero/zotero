@@ -25,6 +25,7 @@ Zotero.File = new function(){
 	this.getClosestDirectory = getClosestDirectory;
 	this.getSample = getSample;
 	this.getContents = getContents;
+	this.putContents = putContents;
 	this.getCharsetFromFile = getCharsetFromFile;
 	this.addCharsetListener = addCharsetListener;
 	
@@ -111,6 +112,23 @@ Zotero.File = new function(){
 		is.close();
 		
 		return contents.join();
+	}
+	
+	
+	/*
+	 * Write string to a file, overwriting existing file if necessary
+	 *
+	 * Note: Can only handle ASCII text!
+	 */
+	function putContents(file, str) {
+		if (file.exists()) {
+			file.remove(null);
+		}
+		var foStream = Components.classes["@mozilla.org/network/file-output-stream;1"]
+						 .createInstance(Components.interfaces.nsIFileOutputStream);
+		foStream.init(file, 0x02 | 0x08 | 0x20, 0664, 0); // write, create, truncate
+		foStream.write(str, str.length);
+		foStream.close();
 	}
 	
 	

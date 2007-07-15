@@ -233,6 +233,27 @@
 	-moz-box-flex: 1;
 }
 
+
+/* Reindex button in attachment pane */
+#zotero-attachment-index-box
+{
+	-moz-box-align: center;
+}
+#zotero-attachment-reindex
+{
+	margin: 0;
+	padding: 0;
+	list-style-image: url(chrome://zotero/skin/arrow_refresh.png);
+}
+
+
+#zotero-attachment-reindex .toolbarbutton-icon
+{
+	margin: 0;
+	padding: 0;
+}
+
+
 #zotero-go-to-url[disabled=true], #zotero-openurl[disabled=true]
 {
 	list-style-image: url('chrome://zotero/skin/toolbar-go-arrow-disabled.png');
@@ -249,6 +270,18 @@
 {
 	min-height: 1.25em;
 }
+
+#zotero-attachment-index-box
+{
+	-moz-box-align: center;
+}
+
+#zotero-attachment-index-box > button
+{
+	font-size: .95em;
+	padding: 0;
+}
+
 
 #zotero-splitter
 {

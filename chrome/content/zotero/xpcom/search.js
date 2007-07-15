@@ -1354,7 +1354,7 @@ Zotero.SearchConditions = new function(){
 					contains: true,
 					doesNotContain: true
 				},
-				table: 'fulltextItems',
+				table: 'fulltextItemWords',
 				field: 'word',
 				special: true
 			},
