@@ -942,7 +942,7 @@ var ZoteroPane = new function()
 	function reindexItem() {
 		var items = this.getSelectedItems();
 		if (!items) {
-			return false;
+			return;
 		}
 		
 		for (var i=0; i<items.length; i++) {
@@ -1610,7 +1610,8 @@ var ZoteroPane = new function()
 		var showing = false;
 		if (menuitem){
 			var items = ZoteroPane.getSelectedItems();
-			if (ZoteroPane.itemsView.selection.count==1 && items[0] && items[0].isNote()
+			if (ZoteroPane.itemsView.selection && ZoteroPane.itemsView.selection.count==1
+				&& items[0] && items[0].isNote()
 				&& window.gContextMenu.isTextSelected)
 			{
 				menuitem.hidden = false;
