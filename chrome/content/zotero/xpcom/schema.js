@@ -1099,9 +1099,21 @@ Zotero.Schema = new function(){
 				// 1.0.0b4.r5
 				
 				if (i==34) {
-					Zotero.DB.query("ALTER TABLE annotations ADD collapsed BOOL");
-					Zotero.DB.query("ALTER TABLE annotations ADD dateModified DATETIME");
-					Zotero.DB.query("ALTER TABLE highlights ADD dateModified DATETIME");
+					if (!Zotero.DB.tableExists('annotations')) {
+						Zotero.DB.query("CREATE TABLE annotations (\n    annotationID INTEGER PRIMARY KEY,\n    itemID INT,\n    parent TEXT,\n    textNode INT,\n    offset INT,\n    x INT,\n    y INT,\n    cols INT,\n    rows INT,\n    text TEXT,\n    collapsed BOOL,\n    dateModified DATE,\n    FOREIGN KEY (itemID) REFERENCES itemAttachments(itemID)\n)");
+						Zotero.DB.query("CREATE INDEX annotations_itemID ON annotations(itemID)");
+					}
+					else {
+						Zotero.DB.query("ALTER TABLE annotations ADD collapsed BOOL");
+						Zotero.DB.query("ALTER TABLE annotations ADD dateModified DATETIME");
+					}
+					if (!Zotero.DB.tableExists('highlights')) {
+						Zotero.DB.query("CREATE TABLE highlights (\n    highlightID INTEGER PRIMARY KEY,\n    itemID INTEGER,\n    startParent TEXT,\n    startTextNode INT,\n    startOffset INT,\n    endParent TEXT,\n    endTextNode INT,\n    endOffset INT,\n    dateModified DATE,\n    FOREIGN KEY (itemID) REFERENCES itemAttachments(itemID)\n)");
+						Zotero.Db.query("CREATE INDEX highlights_itemID ON highlights(itemID)");
+					}
+					else {
+						Zotero.DB.query("ALTER TABLE highlights ADD dateModified DATETIME");
+					}
 					Zotero.DB.query("UPDATE annotations SET dateModified = DATETIME('now')");
 					Zotero.DB.query("UPDATE highlights SET dateModified = DATETIME('now')");
 				}
