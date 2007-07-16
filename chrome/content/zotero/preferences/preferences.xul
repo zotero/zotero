@@ -382,6 +382,14 @@ To add a new preference:
 				</hbox>
 			</radiogroup>
 		</groupbox>
+		
+		<groupbox>
+			<caption label="&zotero.preferences.dbIntegrity;"/>
+			
+			<hbox>
+				<button label="&zotero.preferences.dbIntegrity.integrityCheck;" oncommand="runIntegrityCheck()"/>
+			</hbox>
+		</groupbox>
 	</prefpane>
 	
 	

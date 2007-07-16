@@ -754,6 +754,19 @@ function revealDataDirectory() {
 }
 
 
+function runIntegrityCheck() {
+	var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+		.getService(Components.interfaces.nsIPromptService);
+	
+	var ok = Zotero.DB.integrityCheck();
+	var str = ok ? 'passed' : 'failed';
+	
+	ps.alert(window,
+		Zotero.getString('general.' + str),
+		Zotero.getString('db.integrityCheck.' + str));
+}
+
+
 function onOpenURLSelected()
 {
 	var openURLMenu = document.getElementById('openURLMenu');

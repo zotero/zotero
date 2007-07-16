@@ -565,6 +565,12 @@ Zotero.DBConnection.prototype.observe = function(subject, topic, data) {
 }
 
 
+Zotero.DBConnection.prototype.integrityCheck = function () {
+	var ok = this.valueQuery("PRAGMA integrity_check");
+	return ok == 'ok';
+}
+
+
 Zotero.DBConnection.prototype.checkException = function (e) {
 	if (e.name && e.name == 'NS_ERROR_FILE_CORRUPTED') {
 		var file = Zotero.getZoteroDatabase(this._dbName, 'is.corrupt');
