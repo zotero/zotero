@@ -1109,7 +1109,7 @@ Zotero.Schema = new function(){
 					}
 					if (!Zotero.DB.tableExists('highlights')) {
 						Zotero.DB.query("CREATE TABLE highlights (\n    highlightID INTEGER PRIMARY KEY,\n    itemID INTEGER,\n    startParent TEXT,\n    startTextNode INT,\n    startOffset INT,\n    endParent TEXT,\n    endTextNode INT,\n    endOffset INT,\n    dateModified DATE,\n    FOREIGN KEY (itemID) REFERENCES itemAttachments(itemID)\n)");
-						Zotero.Db.query("CREATE INDEX highlights_itemID ON highlights(itemID)");
+						Zotero.DB.query("CREATE INDEX highlights_itemID ON highlights(itemID)");
 					}
 					else {
 						Zotero.DB.query("ALTER TABLE highlights ADD dateModified DATETIME");
