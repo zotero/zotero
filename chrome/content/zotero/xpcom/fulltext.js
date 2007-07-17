@@ -123,17 +123,7 @@ Zotero.Fulltext = new function(){
 		}
 		
 		exec.append(fileName);
-		if (exec.exists()) {
-			// DEBUG: I'm not sure isSymlink() actually works on any platforms
-			if (exec.isSymlink()) {
-				exec = exec.target;
-				if (!exec.target) {
-					errMsg = fileName + ' symlink target not found';
-					exec = null;
-				}
-			}
-		}
-		else {
+		if (!exec.exists()) {
 			exec = null;
 			errMsg = fileName + ' not found';
 		}
