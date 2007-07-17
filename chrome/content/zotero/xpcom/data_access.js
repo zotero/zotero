@@ -3695,7 +3695,18 @@ Zotero.Tags = new function(){
 	 */
 	function getAllWithinSearch(search, types) {
 		// Save search results to temporary table
-		var tmpTable = search.search(true);
+		try {
+			var tmpTable = search.search(true);
+		}
+		catch (e) {
+			if (e.match(/Saved search [0-9]+ does not exist/)) {
+				Zotero.DB.rollbackTransaction();
+				Zotero.debug(e, 2);
+			}
+			else {
+				throw (e);
+			}
+		}
 		if (!tmpTable) {
 			return {};
 		}

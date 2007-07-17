@@ -883,7 +883,19 @@ Zotero.ItemGroup.prototype.getName = function()
 Zotero.ItemGroup.prototype.getChildItems = function()
 {
 	var s = this.getSearchObject();
-	var ids = s.search();
+	try {
+		var ids = s.search();
+	}
+	catch (e) {
+		if (e.match(/Saved search [0-9]+ does not exist/)) {
+			Zotero.DB.rollbackTransaction();
+			Zotero.debug(e, 2);
+			return false;
+		}
+		else {
+			throw (e);
+		}
+	}
 	return Zotero.Items.get(ids);
 }
 
