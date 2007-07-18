@@ -320,10 +320,10 @@ var Zotero_File_Interface = new function() {
 							   getService(Components.interfaces.nsIClipboard);
 		
 		var csl = Zotero.Cite.getStyle(style);
-		csl.preprocessItems(items);
+		var itemSet = csl.generateItemSet(items); 
 		
 		// add HTML
-		var bibliography = csl.createBibliography(items, "HTML");
+		var bibliography = csl.createBibliography(itemSet, "HTML");
 		var str = Components.classes["@mozilla.org/supports-string;1"].
 				  createInstance(Components.interfaces.nsISupportsString);
 		str.data = bibliography;
@@ -331,7 +331,7 @@ var Zotero_File_Interface = new function() {
 		transferable.setTransferData("text/html", str, bibliography.length*2);
 		
 		// add text
-		var bibliography = csl.createBibliography(items, "Text");
+		var bibliography = csl.createBibliography(itemSet, "Text");
 		var str = Components.classes["@mozilla.org/supports-string;1"].
 				  createInstance(Components.interfaces.nsISupportsString);
 		str.data = bibliography;
@@ -355,10 +355,14 @@ var Zotero_File_Interface = new function() {
 							   getService(Components.interfaces.nsIClipboard);
 		
 		var csl = Zotero.Cite.getStyle(style);
-		csl.preprocessItems(items);
+		var itemSet = csl.generateItemSet(items);
+		var itemIDs = [];;
+		for (var i=0; i<items.length; i++) {
+			itemIDs.push(items[i]);
+		}
 		
 		// add HTML
-		var bibliography = csl.createCitation({citationType:1, items:items}, "HTML");
+		var bibliography = csl.createCitation(itemSet, itemIDs, "HTML", 1, null, null);
 		var str = Components.classes["@mozilla.org/supports-string;1"].
 				  createInstance(Components.interfaces.nsISupportsString);
 		str.data = bibliography;
@@ -366,7 +370,7 @@ var Zotero_File_Interface = new function() {
 		transferable.setTransferData("text/html", str, bibliography.length*2);
 		
 		// add text
-		var bibliography = csl.createCitation({citationType:1, items:items}, "Text");
+		var bibliography = csl.createCitation(itemSet, itemIDs, "Text", 1, null, null);
 		var str = Components.classes["@mozilla.org/supports-string;1"].
 				  createInstance(Components.interfaces.nsISupportsString);
 		str.data = bibliography;
@@ -413,8 +417,8 @@ var Zotero_File_Interface = new function() {
 			}
 			else {
 				var csl = Zotero.Cite.getStyle(io.style);
-				csl.preprocessItems(items);
-				var bibliography = csl.createBibliography(items, format);
+				var itemSet = csl.generateItemSet(items); 
+				var bibliography = csl.createBibliography(itemSet, format);
 			}
 		} catch(e) {
 			window.alert(Zotero.getString("fileInterface.bibliographyGenerationError"));
