@@ -584,6 +584,7 @@ Zotero.Search.prototype._buildQuery = function(){
 				field: data['field'],
 				operator: this._conditions[i]['operator'],
 				value: this._conditions[i]['value'],
+				flags: data['flags'],
 				required: this._conditions[i]['required']
 			});
 			
@@ -926,7 +927,14 @@ Zotero.Search.prototype._buildQuery = function(){
 							case 'contains':
 							case 'doesNotContain': // excluded with NOT IN above
 								condSQL += ' LIKE ?';
-								condSQLParams.push('%' + condition['value'] + '%');
+								if (condition['flags'] &&
+										condition['flags']['leftbound'] &&
+										Zotero.Prefs.get('search.useLeftBound')) {
+									condSQLParams.push(condition['value'] + '%');
+								}
+								else {
+									condSQLParams.push('%' + condition['value'] + '%');
+								}
 								break;
 								
 							case 'is':
@@ -1120,6 +1128,10 @@ Zotero.SearchConditions = new function(){
 	
 	/*
 	 * Define and set up the available advanced search conditions
+	 *
+	 * Flags:
+	 *  - special
+	 *  - template
 	 */
 	function _init(){
 		_conditions = [
@@ -1266,7 +1278,10 @@ Zotero.SearchConditions = new function(){
 					doesNotContain: true
 				},
 				table: 'itemTags',
-				field: 'tag'
+				field: 'tag',
+				flags: {
+					leftbound: true
+				}
 			},
 			
 			{
@@ -1356,6 +1371,9 @@ Zotero.SearchConditions = new function(){
 				},
 				table: 'fulltextItemWords',
 				field: 'word',
+				flags: {
+					leftbound: true
+				},
 				special: true
 			},
 			
@@ -1414,11 +1432,13 @@ Zotero.SearchConditions = new function(){
 			sortValues[localized] = {
 				name: i,
 				localized: localized,
-				operators: _conditions[i]['operators']
+				operators: _conditions[i]['operators'],
+				flags: _conditions[i]['flags']
 			};
 		}
 		
 		// Alphabetize by localized name
+		// TODO: locale collation sort
 		sortKeys = sortKeys.sort();
 		for each(var i in sortKeys){
 			_standardConditions.push(sortValues[i]);
