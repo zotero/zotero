@@ -25,6 +25,7 @@ Zotero.File = new function(){
 	this.getClosestDirectory = getClosestDirectory;
 	this.getSample = getSample;
 	this.getContents = getContents;
+	this.getContentsFromURL = getContentsFromURL;
 	this.putContents = putContents;
 	this.getCharsetFromFile = getCharsetFromFile;
 	this.addCharsetListener = addCharsetListener;
@@ -112,6 +113,20 @@ Zotero.File = new function(){
 		is.close();
 		
 		return contents.join();
+	}
+	
+	
+	/*
+	 * Return the contents of a URL as a string
+	 *
+	 * Runs asynchronously, so should only be run on local (e.g. chrome) URLs
+	 */
+	function getContentsFromURL(url) {
+		var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
+						.createInstance();
+		xmlhttp.open('GET', url, false);
+		xmlhttp.send(null);
+		return xmlhttp.responseText;
 	}
 	
 	
