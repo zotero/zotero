@@ -85,6 +85,7 @@ Zotero.Fulltext = new function(){
 		_pdfInfoFileName = this.pdfInfoName + '-' + platform;
 		if (Zotero.isWin) {
 			_pdfConverterFileName += '.exe';
+			_pdfInfoFileName += '.exe';
 		}
 		
 		this.__defineGetter__("pdfConverterFileName", function() { return _pdfConverterFileName; });
