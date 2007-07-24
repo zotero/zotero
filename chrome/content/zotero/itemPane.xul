@@ -38,6 +38,16 @@
 							document.popupNode.setAttribute('typeid', typeID);
 							ZoteroItemPane.modifyCreator(document.popupNode.getAttribute('fieldname').split('-')[1],
 								'typeID', typeID, otherFields)"/>
+					<popup id="zotero-field-menu">
+						<menu label="&zotero.item.textTransform;">
+							<menupopup>
+								<menuitem label="&zotero.item.textTransform.lowercase;" class="menuitem-non-iconic"
+									oncommand="ZoteroItemPane.textTransform(document.popupNode, 'lower')"/>
+								<menuitem label="&zotero.item.textTransform.titlecase;" class="menuitem-non-iconic"
+									oncommand="ZoteroItemPane.textTransform(document.popupNode, 'title')"/>
+							</menupopup>
+						</menu>
+					</popup>
 				</popupset>
 				<hbox id="zotero-editpane-go-buttons" align="center">
 					<button id="zotero-go-to-url"

@@ -4255,10 +4255,12 @@ Zotero.ItemFields = new function(){
 	}
 	
 	
-	function getLocalizedString(itemTypeID, field) {
+	function getLocalizedString(itemType, field) {
+		// unused currently
+		//var typeName = Zotero.ItemTypes.getName(itemType);
 		var fieldName = this.getName(field);
 		
-		// Fields in items are special cases
+		// Fields in the items table are special cases
 		switch (field) {
 			case 'dateAdded':
 			case 'dateModified':

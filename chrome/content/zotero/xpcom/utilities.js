@@ -304,13 +304,21 @@ Zotero.Utilities.prototype.getLocalizedCreatorType = function(type) {
 
 /*
  * Cleans a title, capitalizing the proper words and replacing " :" with ":"
+ *
+ * Follows capitalizeTitles pref, unless |force| is true
  */
 Zotero.Utilities.capitalizeSkipWords = ["but", "or", "yet", "so", "for", "and",
 "nor", "a", "an", "the", "at", "by", "from", "in", "into", "of", "on", "to",
 "with", "up", "down"];
-Zotero.Utilities.prototype.capitalizeTitle = function(title) {
+Zotero.Utilities.prototype.capitalizeTitle = function(title, force) {
+	if (!Zotero.Prefs.get('capitalizeTitles') && !force) {
+		return title;
+	}
 	title = this.cleanString(title);
-	title = title.replace(/ : /g, ": ");	
+	if (!title) {
+		return '';
+	}
+	title = title.replace(/ : /g, ": ");
 	var words = title.split(" ");
 	
 	// always capitalize first
@@ -443,6 +451,7 @@ Zotero.Utilities.Ingester.prototype.lookupContextObject = function(co, done, err
 Zotero.Utilities.Ingester.prototype.parseContextObject = function(co, item) {
 	return Zotero.OpenURL.parseContextObject(co, item);
 }
+
 
 // Ingester adapters for Zotero.Utilities.HTTP to handle proxies
 

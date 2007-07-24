@@ -70,6 +70,7 @@ var ZoteroItemPane = new function()
 	this.handleKeyPress = handleKeyPress;
 	this.handleCreatorAutoCompleteSelect = handleCreatorAutoCompleteSelect;
 	this.hideEditor = hideEditor;
+	this.textTransform = textTransform;
 	this.getCreatorFields = getCreatorFields;
 	this.modifyCreator = modifyCreator;
 	this.removeNote = removeNote;
@@ -873,6 +874,9 @@ var ZoteroItemPane = new function()
 	
 	function createValueElement(valueText, fieldName, tabindex, noedit)
 	{
+		var fieldID = Zotero.ItemFields.getID(fieldName);
+		
+		// If an abstract, check last expand state
 		var abstractAsVbox = (fieldName == 'abstractNote') &&
 			Zotero.Prefs.get('lastAbstractExpand');
 		
@@ -893,7 +897,7 @@ var ZoteroItemPane = new function()
 			valueElement.className = 'zotero-clicky';
 		}
 		
-		switch (fieldName){
+		switch (fieldName) {
 			case 'tag':
 				_tabIndexMaxTagsFields = Math.max(_tabIndexMaxTagsFields, tabindex);
 				break;
@@ -914,12 +918,21 @@ var ZoteroItemPane = new function()
 				break;
 		}
 		
-		// Display the SQL date as a tooltip for date fields
-		var fieldID = Zotero.ItemFields.getID(fieldName);
-		if (fieldID && Zotero.ItemFields.isFieldOfBase(fieldID, 'date')) {
-			valueElement.setAttribute('tooltiptext',
-				Zotero.Date.multipartToSQL(_itemBeingEdited.getField(fieldName, true)));
+		if (fieldID) {
+			// Display the SQL date as a tooltip for date fields
+			if (Zotero.ItemFields.isFieldOfBase(fieldID, 'date')) {
+				valueElement.setAttribute('tooltiptext',
+					Zotero.Date.multipartToSQL(_itemBeingEdited.getField(fieldName, true)));
+			}
+			
+			// Display a context menu for certain fields
+			if (fieldName == 'seriesTitle' || fieldName == 'shortTitle' ||
+					Zotero.ItemFields.isFieldOfBase(fieldID, 'title') ||
+					Zotero.ItemFields.isFieldOfBase(fieldID, 'publicationTitle')) {
+				valueElement.setAttribute('contextmenu', 'zotero-field-menu');
+			}
 		}
+		
 		
 		if (fieldName.indexOf('firstName')!=-1){
 			valueElement.setAttribute('flex', '1');
@@ -1081,6 +1094,8 @@ var ZoteroItemPane = new function()
 		
 		_tabDirection = false;
 		_lastTabIndex = tabindex;
+		
+		return t;
 	}
 	
 	
@@ -1356,8 +1371,9 @@ var ZoteroItemPane = new function()
 				}
 			}
 			
-			if(saveChanges)
-				modifyField(fieldName,value);
+			if (saveChanges) {
+				_modifyField(fieldName,value);
+			}
 			
 			elem = createValueElement(_itemBeingEdited.getField(fieldName), fieldName, tabindex);
 		}
@@ -1376,11 +1392,12 @@ var ZoteroItemPane = new function()
 		}
 	}
 	
-	function modifyField(field, value)
+	function _modifyField(field, value)
 	{
 		_itemBeingEdited.setField(field,value);
 		return _itemBeingEdited.save();
 	}
+	
 	
 	function _getFieldValue(field)
 	{
@@ -1399,6 +1416,26 @@ var ZoteroItemPane = new function()
 			field.value = value;
 		}
 	}
+	
+	
+	// TODO: work with textboxes too
+	function textTransform(label, mode) {
+		var val = _getFieldValue(label);
+		switch (mode) {
+			case 'lower':
+				var newVal = val.toLowerCase();
+				break;
+			case 'title':
+				var utils = new Zotero.Utilities();
+				var newVal = utils.capitalizeTitle(val.toLowerCase(), true);
+				break;
+			default:
+				throw ("Invalid transform mode '" + mode + "' in ZoteroItemPane.textTransform()");
+		}
+		_setFieldValue(label, newVal);
+		_modifyField(label.getAttribute('fieldname'), newVal);
+	}
+	
 	
 	function getCreatorFields(row){
 		var typeID = row.getElementsByTagName('toolbarbutton')[0].getAttribute('typeid');
@@ -1463,6 +1500,7 @@ var ZoteroItemPane = new function()
 		_itemBeingEdited.setCreator(index, firstName, lastName, typeID, singleField);
 		_itemBeingEdited.save();
 	}
+	
 	
 	function removeNote(id)
 	{

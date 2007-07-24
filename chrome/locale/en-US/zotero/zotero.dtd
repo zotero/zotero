@@ -73,6 +73,9 @@
 
 <!ENTITY zotero.item.add								"Add">
 <!ENTITY zotero.item.attachment.file.show				"Show File">
+<!ENTITY zotero.item.textTransform						"Transform Text">
+<!ENTITY zotero.item.textTransform.lowercase			"lower case">
+<!ENTITY zotero.item.textTransform.titlecase			"Title Case">
 
 <!ENTITY zotero.toolbar.note.standalone				"New Standalone Note">
 <!ENTITY zotero.toolbar.attachment.linked				"Link to File...">
