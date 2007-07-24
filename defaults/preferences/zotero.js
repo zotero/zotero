@@ -19,7 +19,7 @@ pref("extensions.zotero.automaticTags",true);
 pref("extensions.zotero.fontSize", "1.0");
 pref("extensions.zotero.recursiveCollections", false);
 pref("extensions.zotero.attachmentRenameFormatString", '{%c - }{%y - }{%t{50}}');
-pref("extensions.zotero.capitalizeTitles", false);
+pref("extensions.zotero.capitalizeTitles", true);
 
 pref("extensions.zotero.lastCreatorFieldMode",0);
 pref("extensions.zotero.lastAbstractExpand",0);
