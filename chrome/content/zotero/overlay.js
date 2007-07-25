@@ -442,8 +442,6 @@ var ZoteroPane = new function()
 	
 	
 	function handleKeyPress(event, from) {
-		var key = String.fromCharCode(event.which);
-		
 		if (from == 'zotero-collections-tree') {
 			if (event.keyCode == event.DOM_VK_BACK_SPACE ||
 					event.keyCode == event.DOM_VK_DELETE) {
@@ -455,7 +453,9 @@ var ZoteroPane = new function()
 		else if (from == 'zotero-items-tree') {
 			if (event.keyCode == event.DOM_VK_BACK_SPACE ||
 					event.keyCode == event.DOM_VK_DELETE) {
-				ZoteroPane.deleteSelectedItem();
+				// If Cmd or Ctrl delete, delete from Library (with prompt)
+				var fromDB = event.metaKey || (!Zotero.isMac && event.ctrlKey);
+				ZoteroPane.deleteSelectedItem(fromDB);
 				event.preventDefault();
 				return;
 			}
