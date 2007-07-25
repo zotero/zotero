@@ -703,6 +703,16 @@ var ZoteroPane = new function()
 			finally {
 				Zotero.UnresponsiveScriptIndicator.enable();
 			}
+			
+			if (itemgroup.isLibrary()) {
+				Zotero.Prefs.set('lastViewedFolder', 'L');
+			}
+			if (itemgroup.isCollection()) {
+				Zotero.Prefs.set('lastViewedFolder', 'C' + itemgroup.ref.getID());
+			}
+			else if (itemgroup.isSearch()) {
+				Zotero.Prefs.set('lastViewedFolder', 'S' + itemgroup.ref.id);
+			}
 		}
 		else
 		{
