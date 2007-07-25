@@ -69,8 +69,19 @@ Zotero.CollectionTreeView.prototype.setTree = function(treebox)
 	
 	this.refresh();
 	
-	//select Library
-	this.selection.select(0);
+	// Select the last-viewed collection
+	var lastViewedFolder = Zotero.Prefs.get('lastViewedFolder');
+	var matches = lastViewedFolder.match(/^(?:(C|S)([0-9]+)|L)$/);
+	var select = 0;
+	if (matches) {
+		if (matches[1] == 'C' && this._collectionRowMap[matches[2]]) {
+			select = this._collectionRowMap[matches[2]];
+		}
+		else if (matches[1] == 'S' && this._searchRowMap[matches[2]]) {
+			select = this._searchRowMap[matches[2]];
+		}
+	}
+	this.selection.select(select);
 }
 
 /*

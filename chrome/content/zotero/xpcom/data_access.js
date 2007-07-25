@@ -2564,6 +2564,8 @@ Zotero.Items = new function(){
 	
 	
 	function cacheFields(fields, items) {
+		Zotero.debug("Caching fields [" + fields.join() + "]"
+			+ (items ? " for " + items + " items" : ''));
 		_load(items);
 		
 		var primaryFields = [];

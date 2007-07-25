@@ -24,6 +24,7 @@ pref("extensions.zotero.capitalizeTitles", true);
 pref("extensions.zotero.lastCreatorFieldMode",0);
 pref("extensions.zotero.lastAbstractExpand",0);
 pref("extensions.zotero.lastRenameAssociatedFile", false);
+pref("extensions.zotero.lastViewedFolder", 'L');
 
 // Keyboard shortcuts
 pref("extensions.zotero.keys.overrideGlobal", false);
