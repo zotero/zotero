@@ -59,7 +59,6 @@
 	margin-right: 5px;
 }
 
-
 /* Style search results, display non-matches in gray */
 #zotero-items-tree treechildren::-moz-tree-cell-text(contextRow) {
 	color: gray;
@@ -69,6 +68,11 @@
 	/* This is the default color, not the (platform-specific) highlight color, but at least it
 	   helps to differentiate when clicking on a context row. */
 	color: inherit;
+}
+
+#zotero-advanced-search-dialog #zotero-items-tree
+{
+	min-height: 250px;
 }
 
 #zotero-items-pane
