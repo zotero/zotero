@@ -4266,6 +4266,7 @@ Zotero.ItemFields = new function(){
 		switch (field) {
 			case 'dateAdded':
 			case 'dateModified':
+			case 'itemType':
 				fieldName = field;
 		}
 		
