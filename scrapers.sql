@@ -217,7 +217,7 @@ REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('aee2323e-ce00-4fcc-a949-06eb1becc98f', '1.0.0b4r1', '', '2007-06-18 18:15:00', '0', '100', '4', 'Epicurious', 'Sean Takats', '^https?://www\.epicurious\.com/recipes/(?:find/results|recipe_views/views/)', 
+REPLACE INTO translators VALUES ('aee2323e-ce00-4fcc-a949-06eb1becc98f', '1.0.0b4.r1', '', '2007-06-18 18:15:00', '0', '100', '4', 'Epicurious', 'Sean Takats', '^https?://www\.epicurious\.com/recipes/(?:find/results|recipe_views/views/)', 
 'function detectWeb(doc, url){
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -352,7 +352,7 @@ function doWeb(doc, url){
 	}
 }');
 
-REPLACE INTO translators VALUES ('0dda3f89-15de-4479-987f-cc13f1ba7999', '1.0.0b3r1', '', '2007-06-16 17:20:00', '0', '100', '4', 'Ancestry.com US Federal Census', 'Elena Razlogova', '^https?://search.ancestry.com/(.*)usfedcen|1890orgcen', 
+REPLACE INTO translators VALUES ('0dda3f89-15de-4479-987f-cc13f1ba7999', '1.0.0b3.r1', '', '2007-06-16 17:20:00', '0', '100', '4', 'Ancestry.com US Federal Census', 'Elena Razlogova', '^https?://search.ancestry.com/(.*)usfedcen|1890orgcen', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -762,7 +762,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b3.r1', '', '2007-07-30 22:00:00', '1', '100', '4', 'Library Catalog (Voyager)', 'Simon Kornblith', 'Pwebrecon\.cgi', 
+REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b3.r1', '', '2007-07-31 16:45:00', '1', '100', '4', 'Library Catalog (Voyager)', 'Simon Kornblith', 'Pwebrecon\.cgi', 
 'function detectWeb(doc, url) {
 	var export_options = doc.forms.namedItem(''frm'').elements.namedItem(''RD'').options;
 	for(var i in export_options) {
@@ -1211,7 +1211,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('7987b420-e8cb-4bea-8ef7-61c2377cd686', '1.0.0b4r1', '', '2007-06-27 02:00:00', '0', '100', '4', 'NASA ADS', 'Asa Kusuma and Ramesh Srigiriraju', '^http://adsabs\.harvard\.edu/(?:cgi-bin|abs)/', 
+REPLACE INTO translators VALUES ('7987b420-e8cb-4bea-8ef7-61c2377cd686', '1.0.0b4.r1', '', '2007-06-27 02:00:00', '0', '100', '4', 'NASA ADS', 'Asa Kusuma and Ramesh Srigiriraju', '^http://adsabs\.harvard\.edu/(?:cgi-bin|abs)/', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -1281,7 +1281,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('99f958ab-0732-483d-833f-6bd8e42f6277', '1.0.0b4r1', '', '2007-06-27 02:00:00', '0', '100', '4', 'National Bureau of Economic Research', 'Asa Kusuma', '^https?://(?:papers\.|www\.)?nber\.org/papers', 
+REPLACE INTO translators VALUES ('99f958ab-0732-483d-833f-6bd8e42f6277', '1.0.0b4.r1', '', '2007-06-27 02:00:00', '0', '100', '4', 'National Bureau of Economic Research', 'Asa Kusuma', '^https?://(?:papers\.|www\.)?nber\.org/papers', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -1368,7 +1368,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('411f9a8b-64f3-4465-b7df-a3c988b602f3', '1.0.0b4r1', '', '2007-06-26 15:17:22', '0', '100', '4', 'RePEc', 'Asa Kusuma', '^https?://ideas\.repec\.org/', 
+REPLACE INTO translators VALUES ('411f9a8b-64f3-4465-b7df-a3c988b602f3', '1.0.0b4.r1', '', '2007-06-26 15:17:22', '0', '100', '4', 'RePEc', 'Asa Kusuma', '^https?://ideas\.repec\.org/', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -1537,7 +1537,7 @@ function doWeb(doc, url) {
 
 }');
 
-REPLACE INTO translators VALUES ('e4660e05-a935-43ec-8eec-df0347362e4c', '1.0.0b4r1', '', '2007-07-30 22:00:00', '0', '100', '4', 'ERIC', 'Ramesh Srigiriraju', '^http://(?:www\.)?eric\.ed\.gov/', 
+REPLACE INTO translators VALUES ('e4660e05-a935-43ec-8eec-df0347362e4c', '1.0.0b4.r1', '', '2007-07-31 16:45:00', '0', '100', '4', 'ERIC', 'Ramesh Srigiriraju', '^http://(?:www\.)?eric\.ed\.gov/', 
 'function detectWeb(doc, url)	{
 	var namespace=doc.documentElement.namespaceURI;
 	var nsResolver=namespace?function(prefix)	{
@@ -2135,7 +2135,7 @@ function doWeb(doc, url) {
 
 }');
 
-REPLACE INTO translators VALUES ('84bd421d-c6d1-4223-ab80-a156f98a8e30', '1.0.0b4r1', '', '2007-07-31 16:45:00', '0', '100', '4', 'International Herald Tribune', 'Michael Berkowitz', '^http://(www.)?iht.com/',
+REPLACE INTO translators VALUES ('84bd421d-c6d1-4223-ab80-a156f98a8e30', '1.0.0b4.r1', '', '2007-07-31 16:45:00', '0', '100', '4', 'International Herald Tribune', 'Michael Berkowitz', '^http://(www.)?iht.com/',
 'function detectWeb(doc, url) {
 	if (doc.title == "Search - International Herald Tribune" && doc.location.href != "http://www.iht.com/info/nytarchive.php") {
 		return "multiple";
@@ -2253,7 +2253,7 @@ function doWeb(doc, url) {
 }
 ');
 
-REPLACE INTO translators VALUES ('1f40baef-eece-43e4-a1cc-27d20c0ce086', '1.0.0b4r1', '', '2007-06-27 02:00:00', '1', '100', '4', 'Engineering Village', 'Ben Parr', '^https?://(?:www\.)?engineeringvillage2\.(?:com|org)', 
+REPLACE INTO translators VALUES ('1f40baef-eece-43e4-a1cc-27d20c0ce086', '1.0.0b4.r1', '', '2007-06-27 02:00:00', '1', '100', '4', 'Engineering Village', 'Ben Parr', '^https?://(?:www\.)?engineeringvillage2\.(?:com|org)', 
 'function detectWeb(doc, url)
 {
 	var namespace = doc.documentElement.namespaceURI;
@@ -2366,7 +2366,7 @@ function doWeb(doc, url) {
 }');
 
 
-REPLACE INTO translators VALUES ('13b9f6fe-ded7-4f91-8c55-5d6ce64fb43e', '1.0.0b4r1', '', '2007-06-27 02:00:00', '0', '100', '4', 'SPIE Digital Library', 'Asa Kusuma', '^https?://spiedigitallibrary\.aip\.org/', 
+REPLACE INTO translators VALUES ('13b9f6fe-ded7-4f91-8c55-5d6ce64fb43e', '1.0.0b4.r1', '', '2007-06-27 02:00:00', '0', '100', '4', 'SPIE Digital Library', 'Asa Kusuma', '^https?://spiedigitallibrary\.aip\.org/', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -2486,7 +2486,7 @@ function doWeb(doc, url) {
 	
 }');
 
-REPLACE INTO translators VALUES ('ab961e61-2a8a-4be1-b8a3-044f20d52d78', '1.0.0b4r1', '', '2007-07-30 22:00:00', '0', '100', '4', 'BIBSYS', 'Ramesh Srigiriraju', '^http://ask\.bibsys\.no/ask/action', 
+REPLACE INTO translators VALUES ('ab961e61-2a8a-4be1-b8a3-044f20d52d78', '1.0.0b4.r1', '', '2007-07-31 16:45:00', '0', '100', '4', 'BIBSYS', 'Ramesh Srigiriraju', '^http://ask\.bibsys\.no/ask/action', 
 'function detectWeb(doc, url)	{
 	var multireg=new RegExp("^http://ask\.bibsys\.no/ask/action/result");
 	if(multireg.test(url))
@@ -2540,7 +2540,7 @@ REPLACE INTO translators VALUES ('ab961e61-2a8a-4be1-b8a3-044f20d52d78', '1.0.0b
 	}
 }');
 
-REPLACE INTO translators VALUES ('f4130157-93f7-4493-8f24-a7c85549013d', '1.0.0b4r1', '', '2007-07-30 22:00:00', '0', '100', '4', 'BBC', 'Ben Parr', '^https?://(?:www|news?)\.bbc\.co.uk', 
+REPLACE INTO translators VALUES ('f4130157-93f7-4493-8f24-a7c85549013d', '1.0.0b4.r1', '', '2007-07-31 16:45:00', '0', '100', '4', 'BBC', 'Ben Parr', '^https?://(?:www|news?)\.bbc\.co.uk', 
 'function detectWeb(doc, url)
 {
 
@@ -2644,7 +2644,7 @@ function doWeb(doc,url)
      
 }');
 
-REPLACE INTO translators VALUES ('dbb5d4bc-3b21-47a2-9751-5dcbb65b902a', '1.0.0b4r1', '', '2007-07-30 22:00:00', '0', '100', '4', 'AMS Online Journals - Allenpress', 'Ben Parr', '^http://ams.allenpress.com/', 
+REPLACE INTO translators VALUES ('dbb5d4bc-3b21-47a2-9751-5dcbb65b902a', '1.0.0b4.r1', '', '2007-07-31 16:45:00', '0', '100', '4', 'AMS Online Journals - Allenpress', 'Ben Parr', '^http://ams.allenpress.com/', 
 'function detectWeb(doc,url)
 {
       var namespace = doc.documentElement.namespaceURI;
@@ -2925,7 +2925,7 @@ function doWeb(doc,url)
 		parseRIS(urls,PDFs);
 }');
 
-REPLACE INTO translators VALUES ('7e51d3fb-082e-4063-8601-cda08f6004a3', '1.0.0b4r1', '', '2007-07-30 22:00:00', '0', '100', '4', 'Education Week', 'Ben Parr', '^https?://(?:www\.|blogs\.|www2\.)?edweek', 
+REPLACE INTO translators VALUES ('7e51d3fb-082e-4063-8601-cda08f6004a3', '1.0.0b4.r1', '', '2007-07-31 16:45:00', '0', '100', '4', 'Education Week', 'Ben Parr', '^https?://(?:www\.|blogs\.|www2\.)?edweek', 
 'function detectWeb(doc,url)
 {
        var namespace = doc.documentElement.namespaceURI;
@@ -3008,7 +3008,7 @@ function doWeb(doc,url)
       }
 }');
 
-REPLACE INTO translators VALUES ('9220fa99-b936-430e-a8ea-43ca6cb04145', '1.0.0b4r1', '', '2007-07-30 22:00:00', '0', '100', '4', 'AGU Journals', 'Ben Parr','^https?://(?:www.)?agu.org',
+REPLACE INTO translators VALUES ('9220fa99-b936-430e-a8ea-43ca6cb04145', '1.0.0b4.r1', '', '2007-07-31 16:45:00', '0', '100', '4', 'AGU Journals', 'Ben Parr','^https?://(?:www.)?agu.org',
 'function detectWeb(doc,url)
 {
      var namespace = doc.documentElement.namespaceURI;
@@ -3255,7 +3255,7 @@ function doWeb(doc,url)
 }
 ');
 
-REPLACE INTO translators VALUES ('e4fe1596-a8c4-4d09-945f-120c4d83e580', '1.0.0b4r1', '', '2007-07-30 22:00:00', '0', '100', '4', 'LA Times', 'Ben Parr', '^https?://(?:www.|travel.)?latimes.com', 
+REPLACE INTO translators VALUES ('e4fe1596-a8c4-4d09-945f-120c4d83e580', '1.0.0b4.r1', '', '2007-07-31 16:45:00', '0', '100', '4', 'LA Times', 'Ben Parr', '^https?://(?:www.|travel.)?latimes.com', 
 'function detectWeb(doc, url)
 {
    var namespace = doc.documentElement.namespaceURI;
@@ -3467,7 +3467,7 @@ function doWeb(doc, url)
       }
 }');
 
-REPLACE INTO translators VALUES ('1a3e63b2-0adf-4c8e-928b-c58c2594b45d', '1.0.0b4r1', '', '2007-07-30 22:00:00', '0', '100', '4', 'BioMed Central and More', 'Ben Parr', '^http://(www.)?(biomedcentral|actavetscand|aidsrestherapy|almob|ann-clinmicrob|annals-general-psychiatry|asir-journal|arthritis-research|anzhealthpolicy|behavioralandbrainfunctions|bjoc.beilstein-journals|biology-direct|biomagres|bio-diglib|biomedical-engineering-online|bpsmedicine|breast-cancer-research|cancerci|cbmjournal|cardiab|cardiovascularultrasound|cellandchromosome|biosignaling|celldiv|cerebrospinalfluidresearch|journal.chemistrycentral|capmh|cmjournal|chiroandosteo|clinicalmolecularallergy|cpementalhealth|comparative-hepatology|conflictandhealth|resource-allocation|coughjournal|ccforum|cytojournal|diagnosticpathology|dynamic-med|ete-online|ehjournal|epi-perspectives|filariajournal|frontiersinzoology|gvt-journal|genomebiology|geochemicaltransactions|globalizationandhealth|harmreductionjournal|head-face-med|hqlo|health-policy-systems|human-resources-health|immunityageing|immunome-research|implementationscience|infectagentscancer|internationalbreastfeedingjournal|equityhealthj|ijbnpa|ij-healthgeographics|issoonline|jautoimdis|jbiol|j-biomed-discovery|jbppni|carcinogenesis|cardiothoracicsurgery|jcircadianrhythms|ethnobiomed|jexpclinassistreprod|jibtherapies|journal-inflammation|jmedicalcasereports|jmolecularsignaling|jnanobiotechnology|jnrbm|jneuroengrehab|jneuroinflammation|occup-med|josr-online|translational-medicine|kinetoplastids|lipidworld|malariajournal|medimmunol|microbialcellfactories|molecular-cancer|molecularneurodegeneration|molecularpain|neuraldevelopment|nonlinearbiomedphys|nuclear-receptor|nutritionandmetabolism|nutritionj|ojrd|om-pc|particleandfibretoxicology|ped-rheum|peh-med|plantmethods|pophealthmetrics|proteomesci|ro-journal|rbej|reproductive-health-journal|respiratory-research|retrovirology|salinesystems|scoliosisjournal|scfbm|substanceabusepolicy|tbiomed|thrombosisjournal|trialsjournal|virologyj|wjes|wjso)\.(com|org|net)', 
+REPLACE INTO translators VALUES ('1a3e63b2-0adf-4c8e-928b-c58c2594b45d', '1.0.0b4.r1', '', '2007-07-31 16:45:00', '0', '100', '4', 'BioMed Central and More', 'Ben Parr', '^http://(www.)?(biomedcentral|actavetscand|aidsrestherapy|almob|ann-clinmicrob|annals-general-psychiatry|asir-journal|arthritis-research|anzhealthpolicy|behavioralandbrainfunctions|bjoc.beilstein-journals|biology-direct|biomagres|bio-diglib|biomedical-engineering-online|bpsmedicine|breast-cancer-research|cancerci|cbmjournal|cardiab|cardiovascularultrasound|cellandchromosome|biosignaling|celldiv|cerebrospinalfluidresearch|journal.chemistrycentral|capmh|cmjournal|chiroandosteo|clinicalmolecularallergy|cpementalhealth|comparative-hepatology|conflictandhealth|resource-allocation|coughjournal|ccforum|cytojournal|diagnosticpathology|dynamic-med|ete-online|ehjournal|epi-perspectives|filariajournal|frontiersinzoology|gvt-journal|genomebiology|geochemicaltransactions|globalizationandhealth|harmreductionjournal|head-face-med|hqlo|health-policy-systems|human-resources-health|immunityageing|immunome-research|implementationscience|infectagentscancer|internationalbreastfeedingjournal|equityhealthj|ijbnpa|ij-healthgeographics|issoonline|jautoimdis|jbiol|j-biomed-discovery|jbppni|carcinogenesis|cardiothoracicsurgery|jcircadianrhythms|ethnobiomed|jexpclinassistreprod|jibtherapies|journal-inflammation|jmedicalcasereports|jmolecularsignaling|jnanobiotechnology|jnrbm|jneuroengrehab|jneuroinflammation|occup-med|josr-online|translational-medicine|kinetoplastids|lipidworld|malariajournal|medimmunol|microbialcellfactories|molecular-cancer|molecularneurodegeneration|molecularpain|neuraldevelopment|nonlinearbiomedphys|nuclear-receptor|nutritionandmetabolism|nutritionj|ojrd|om-pc|particleandfibretoxicology|ped-rheum|peh-med|plantmethods|pophealthmetrics|proteomesci|ro-journal|rbej|reproductive-health-journal|respiratory-research|retrovirology|salinesystems|scoliosisjournal|scfbm|substanceabusepolicy|tbiomed|thrombosisjournal|trialsjournal|virologyj|wjes|wjso)\.(com|org|net)', 
 'function detectWeb(doc,url)
 {
 	var namespace = doc.documentElement.namespaceURI;
@@ -3579,7 +3579,7 @@ function doWeb(doc,url)
 }
 ');
 
-REPLACE INTO translators VALUES ('a1a97ad4-493a-45f2-bd46-016069de4162', '1.0.0b4r1', '', '2007-07-03 18:05:11', '0', '100', '4', 'OpticsInfoBase', 'Ben Parr','^https?://(?:www\.)?opticsinfobase.org',
+REPLACE INTO translators VALUES ('a1a97ad4-493a-45f2-bd46-016069de4162', '1.0.0b4.r1', '', '2007-07-03 18:05:11', '0', '100', '4', 'OpticsInfoBase', 'Ben Parr','^https?://(?:www\.)?opticsinfobase.org',
 'function detectWeb(doc,url)
 {
        var namespace = doc.documentElement.namespaceURI;
@@ -3787,7 +3787,7 @@ function doWeb(doc,url)
        }
 }');
 
-REPLACE INTO translators VALUES ('b61c224b-34b6-4bfd-8a76-a476e7092d43', '1.0.0b4r1', '', '2007-07-30 22:00:00', '0', '100', '4', 'SSRN', 'Ramesh Srigiriraju', '^http://papers\.ssrn\.com/', 
+REPLACE INTO translators VALUES ('b61c224b-34b6-4bfd-8a76-a476e7092d43', '1.0.0b4.r1', '', '2007-07-31 16:45:00', '0', '100', '4', 'SSRN', 'Ramesh Srigiriraju', '^http://papers\.ssrn\.com/', 
 'function detectWeb(doc, url)	{
 	var namespace=doc.documentElement.namespaceURI;
 	var nsResolver=namespace?function(prefix)	{
@@ -3883,7 +3883,7 @@ REPLACE INTO translators VALUES ('b61c224b-34b6-4bfd-8a76-a476e7092d43', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('1c34744d-690f-4cac-b31b-b7f0c90ac14d', '1.0.0b3r1', '', '2007-07-30 22:00:00', '0', '100', '4', 'RSC Publishing', 'Ramesh Srigiriraju', 'http://(:?www\.|google\.)?rsc\.org/', 
+REPLACE INTO translators VALUES ('1c34744d-690f-4cac-b31b-b7f0c90ac14d', '1.0.0b3.r1', '', '2007-07-31 16:45:00', '0', '100', '4', 'RSC Publishing', 'Ramesh Srigiriraju', 'http://(:?www\.|google\.)?rsc\.org/', 
 'function detectWeb(doc, url)	{
 	var namespace=doc.documentElement.namespaceURI;
 	var nsResolver=namespace?function(prefix)	{
@@ -4303,7 +4303,7 @@ function doWeb(doc, url)	{
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('0faa6714-927a-4b07-911e-7101895daae0', '1.0.0b4r1', '', '2007-07-30 22:00:00', '0', '100', '4', 'GBV', 'Ramesh Srigiriraju', '^http://(?:www\.|gso\.)?gbv\.de/', 
+REPLACE INTO translators VALUES ('0faa6714-927a-4b07-911e-7101895daae0', '1.0.0b4.r1', '', '2007-07-31 16:45:00', '0', '100', '4', 'GBV', 'Ramesh Srigiriraju', '^http://(?:www\.|gso\.)?gbv\.de/', 
 'function detectWeb(doc, url)	{
 	var namespace=doc.documentElement.namespaceURI;
 	var nsResolver=namespace?function(prefix){
@@ -5566,7 +5566,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('5e3e6245-83da-4f55-a39b-b712df54a935', '1.0.0b3r1', '', '2007-07-30 22:00:00', '0', '90', '4', 'Melvyl', 'Sean Takats', '^https?://melvyl-dev.cdlib.org:8162/F(?:/[A-Z0-9\-]+(?:\?.*)?$|\?func=find|\?func=scan)', 
+REPLACE INTO translators VALUES ('5e3e6245-83da-4f55-a39b-b712df54a935', '1.0.0b3.r1', '', '2007-07-31 16:45:00', '0', '90', '4', 'Melvyl', 'Sean Takats', '^https?://melvyl-dev.cdlib.org:8162/F(?:/[A-Z0-9\-]+(?:\?.*)?$|\?func=find|\?func=scan)', 
 'function detectWeb(doc, url) {
 	var singleRe = new RegExp("^https?://[^/]+/F/[A-Z0-9\-]+\?.*(?:func=full-set-set.*\&format=[0-9]{3}|func=direct)");
 	
@@ -6823,7 +6823,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('e7e01cac-1e37-4da6-b078-a0e8343b0e98', '1.0.0b4r1', '', '2007-03-20 17:50:13', '1', '90', '4', 'unAPI', 'Simon Kornblith', '', 
+REPLACE INTO translators VALUES ('e7e01cac-1e37-4da6-b078-a0e8343b0e98', '1.0.0b4.r1', '', '2007-03-20 17:50:13', '1', '90', '4', 'unAPI', 'Simon Kornblith', '', 
 'var RECOGNIZABLE_FORMATS = ["mods", "marc", "endnote", "ris", "bibtex", "rdf"];
 var FORMAT_GUIDS = {
 	"mods":"0e2235e7-babf-413c-9acf-f27cce5f059c",
@@ -9163,7 +9163,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('232903bc-7307-4058-bb1a-27cfe3e4e655', '1.0.0b3r1', '', '2007-04-23 17:00:00', '0', '100', '4', 'SPIRES', 'Sean Takats', '^http://www.slac.stanford.edu/spires/find/hep/', 
+REPLACE INTO translators VALUES ('232903bc-7307-4058-bb1a-27cfe3e4e655', '1.0.0b3.r1', '', '2007-04-23 17:00:00', '0', '100', '4', 'SPIRES', 'Sean Takats', '^http://www.slac.stanford.edu/spires/find/hep/', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -9474,7 +9474,7 @@ REPLACE INTO translators VALUES ('19643c25-a4b2-480d-91b7-4e0b761fb6ad', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('d75381ee-7d8d-4a3b-a595-b9190a06f43f', '1.0.0b3r1', '', '2007-04-05 19:45:00', '0', '100', '4', 'Scitation', 'Eugeniy Mikhailov', '^https?://(?:www\.)?scitation.aip.org', 
+REPLACE INTO translators VALUES ('d75381ee-7d8d-4a3b-a595-b9190a06f43f', '1.0.0b3.r1', '', '2007-04-05 19:45:00', '0', '100', '4', 'Scitation', 'Eugeniy Mikhailov', '^https?://(?:www\.)?scitation.aip.org', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -9538,7 +9538,7 @@ REPLACE INTO translators VALUES ('d75381ee-7d8d-4a3b-a595-b9190a06f43f', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('2c310a37-a4dd-48d2-82c9-bd29c53c1c76', '1.0.0b3r1', '', '2007-04-05 19:45:00', '0', '100', '4', 'PROLA', 'Eugeniy Mikhailov', '^https?://(?:www\.)?prola.aps.org/(searchabstract|abstract)/', 
+REPLACE INTO translators VALUES ('2c310a37-a4dd-48d2-82c9-bd29c53c1c76', '1.0.0b3.r1', '', '2007-04-05 19:45:00', '0', '100', '4', 'PROLA', 'Eugeniy Mikhailov', '^https?://(?:www\.)?prola.aps.org/(searchabstract|abstract)/', 
 'function detectWeb(doc, url) {
 	return "journalArticle";
 }	', 
@@ -11300,7 +11300,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('72cb2536-3211-41e0-ae8b-974c0385e085', '1.0.0b4r1', '', '2007-06-21 07:00:00', '0', '100', '4', 'ARTFL Encyclopedie', 'Sean Takats', '/cgi-bin/philologic31/(getobject\.pl\?c\.[0-9]+:[0-9]+\.encyclopedie|search3t\?dbname=encyclopedie0507)', 
+REPLACE INTO translators VALUES ('72cb2536-3211-41e0-ae8b-974c0385e085', '1.0.0b4.r1', '', '2007-06-21 07:00:00', '0', '100', '4', 'ARTFL Encyclopedie', 'Sean Takats', '/cgi-bin/philologic31/(getobject\.pl\?c\.[0-9]+:[0-9]+\.encyclopedie|search3t\?dbname=encyclopedie0507)', 
 'function detectWeb(doc, url) {
 	if (url.indexOf("getobject.pl") != -1){
 		return "encyclopediaArticle";
@@ -11457,7 +11457,7 @@ function doWeb(doc, url) {
 		
 }');
 
-REPLACE INTO translators VALUES ('1b9ed730-69c7-40b0-8a06-517a89a3a278', '1.0.0b3r1', '', '2007-01-24 01:35:00', '0', '100', '4', 'Sudoc', 'Sean Takats', '^http://www\.sudoc\.abes\.fr', 
+REPLACE INTO translators VALUES ('1b9ed730-69c7-40b0-8a06-517a89a3a278', '1.0.0b3.r1', '', '2007-01-24 01:35:00', '0', '100', '4', 'Sudoc', 'Sean Takats', '^http://www\.sudoc\.abes\.fr', 
 'function detectWeb(doc, url) {
 		var namespace = doc.documentElement.namespaceURI;
 		var nsResolver = namespace ? function(prefix) {
