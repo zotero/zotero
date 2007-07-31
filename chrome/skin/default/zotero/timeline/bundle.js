@@ -1,23 +1,23 @@
-/*
-	***** BEGIN LICENSE BLOCK *****
-
+/* 
+	From http://simile.mit.edu/timeline/api/bundle.js
+	
 	© Copyright The SIMILE Project 2003-2005.
 	http://simile.mit.edu/
 	
 	Redistribution and use in source and binary forms, with or without
 	modification, are permitted provided that the following conditions
 	are met:
-
+	
 	1. Redistributions of source code must retain the above copyright
 	   notice, this list of conditions and the following disclaimer.
-
+	
 	2. Redistributions in binary form must reproduce the above copyright
 	   notice, this list of conditions and the following disclaimer in the
 	   documentation and/or other materials provided with the distribution.
-
+	
 	3. The name of the author may not be used to endorse or promote products
 	   derived from this software without specific prior written permission.
-
+	
 	THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
 	IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 	OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
@@ -28,15 +28,7 @@
 	THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 	(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 	THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-	***** END LICENSE BLOCK *****
-	
-	
-	http://simile.mit.edu/timeline/api/bundle.js	
 */
-
-
-/* timeline.js */
 
 Timeline.strings={};Timeline.create=function(elmt,bandInfos,orientation,unit){return new Timeline._Impl(elmt,bandInfos,orientation,unit);};Timeline.HORIZONTAL=0;Timeline.VERTICAL=1;Timeline._defaultTheme=null;Timeline.createBandInfo=function(params){var theme=("theme"in params)?params.theme:Timeline.getDefaultTheme();var eventSource=("eventSource"in params)?params.eventSource:null;var ether=new Timeline.LinearEther({centersOn:("date"in params)?params.date:new Date(),interval:Timeline.DateTime.gregorianUnitLengths[params.intervalUnit],pixelsPerInterval:params.intervalPixels});var etherPainter=new Timeline.GregorianEtherPainter({unit:params.intervalUnit,multiple:("multiple"in params)?params.multiple:1,theme:theme,align:("align"in params)?params.align:undefined});var layout=new Timeline.StaticTrackBasedLayout({eventSource:eventSource,ether:ether,showText:("showEventText"in params)?params.showEventText:true,theme:theme});var eventPainterParams={showText:("showEventText"in params)?params.showEventText:true,layout:layout,theme:theme};if("trackHeight"in params){eventPainterParams.trackHeight=params.trackHeight;}
 if("trackGap"in params){eventPainterParams.trackGap=params.trackGap;}
