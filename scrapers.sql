@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-07-31 16:45:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-07-31 19:40:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -2253,7 +2253,7 @@ function doWeb(doc, url) {
 }
 ');
 
-REPLACE INTO translators VALUES ('1f40baef-eece-43e4-a1cc-27d20c0ce086', '1.0.0b4.r1', '', '2007-06-27 02:00:00', '1', '100', '4', 'Engineering Village', 'Ben Parr', '^https?://(?:www\.)?engineeringvillage2\.(?:com|org)', 
+REPLACE INTO translators VALUES ('1f40baef-eece-43e4-a1cc-27d20c0ce086', '1.0.0b4.r1', '', '2007-07-31 19:40:00', '1', '100', '4', 'Engineering Village', 'Ben Parr', '^https?://(?:www\.)?engineeringvillage(2)?\.(?:com|org)', 
 'function detectWeb(doc, url)
 {
 	var namespace = doc.documentElement.namespaceURI;
@@ -2287,10 +2287,11 @@ REPLACE INTO translators VALUES ('1f40baef-eece-43e4-a1cc-27d20c0ce086', '1.0.0b
 }
 
 //creates the link to the RIS file
-function createURL(EISESSION,docidlist)
+function createURL(EISESSION,docidlist,curURL)
 {
-	var milli = (new Date()).getTime();		
-	var url="http://www.engineeringvillage2.org/controller/servlet/Controller?EISESSION="+EISESSION;
+	var milli = (new Date()).getTime();
+	var temp = curURL.split(''/'');		
+	var url = temp.slice(0,temp.length-1).join(''/'') + "/Controller?EISESSION="+EISESSION;
 	url+="&CID=downloadSelectedRecordsris&format=ris&displayformat=fullDoc&timestamp="
 	url+=milli;
 	url+="&docidlist=";
@@ -2324,7 +2325,7 @@ function doWeb(doc, url) {
 		var EISESSION =temp.href;
 		EISESSION=EISESSION.split("(''")[1];
 		EISESSION=EISESSION.split("''")[0];
-		url=createURL(EISESSION,docidlist);
+		url=createURL(EISESSION,docidlist,doc.location.href);
 		parseRIS(url);
 	}
 	else
@@ -2346,7 +2347,7 @@ function doWeb(doc, url) {
 			docidlist=row.value;
 			docidlist=docidlist.split("''")[1];
 			
-			url=createURL(EISESSION,docidlist);
+			url=createURL(EISESSION,docidlist,doc.location.href);
 			
 			title=xpath2.iterateNext();
 			title=title.textContent;
