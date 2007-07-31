@@ -1,4 +1,4 @@
--- 250
+-- 251
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-07-30 22:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-07-31 12:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) {
@@ -1639,7 +1639,7 @@ REPLACE INTO translators VALUES ('e4660e05-a935-43ec-8eec-df0347362e4c', '1.0.0b
 	}
 }');
 
-REPLACE INTO translators VALUES ('d9be934c-edb9-490c-a88d-34e2ee106cd7', '1.0.0b3r1', '', '2007-07-30 22:00:00', '0', '100', '4', 'Time.com', 'Michael Berkowitz', '^http://www.time.com/time/*', 
+REPLACE INTO translators VALUES ('d9be934c-edb9-490c-a88d-34e2ee106cd7', '1.0.0b4.r5', '', '2007-07-31 12:30:00', '0', '100', '4', 'Time.com', 'Michael Berkowitz', '^http://www.time.com/time/', 
 'function detectWeb(doc, url) {
 	if (doc.title == "TIME Magazine - Search Results") {
 		return "multiple";
@@ -1785,7 +1785,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('b33bbb49-03d2-4175-91c4-3840501bc953', '1.0.0b3r1', '', '2007-07-30 22:00:00', '1', '100', '4', 'Time-Blog.com', 'Michael Berkowitz', '^http://time-blog.com/.*', 
+REPLACE INTO translators VALUES ('b33bbb49-03d2-4175-91c4-3840501bc953', '1.0.0b4.r5', '', '2007-07-31 12:30:00', '1', '100', '4', 'Time-Blog.com', 'Michael Berkowitz', '^http://time-blog.com/', 
 'function detectWeb(doc, url) {
 	if (url.substr(-4,4) == "html") {
 		return "blogPost";
@@ -1912,7 +1912,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('9346ddef-126b-47ec-afef-8809ed1972ab', '1.0.0b3r1', '', '2007-07-30 22:00:00', '1', '99', '4', 'Institute of Physics', 'Michael Berkowitz', '^http://www.iop.org/EJ/(toc|abstract|search)/.*', 
+REPLACE INTO translators VALUES ('9346ddef-126b-47ec-afef-8809ed1972ab', '1.0.0b4.r5', '', '2007-07-31 12:30:00', '1', '99', '4', 'Institute of Physics', 'Michael Berkowitz', '^http://www.iop.org/EJ/(toc|abstract|search)', 
 'function detectWeb(doc, url) {
 	if ((doc.location.href.indexOf("toc") == -1) && (doc.location.href.indexOf("search") == -1)) {
 		Zotero.debug("journalArticle");
@@ -2027,7 +2027,7 @@ function doWeb(doc, url) {
 
 ');
 
-REPLACE INTO translators VALUES ('6ec8008d-b206-4a4c-8d0a-8ef33807703b', '1.0.0b3r1', '', '2007-07-30 22:00:00', '1', '100', '4', 'The Economist', 'Michael Berkowitz', '^http://(www.)*economist.com/*', 
+REPLACE INTO translators VALUES ('6ec8008d-b206-4a4c-8d0a-8ef33807703b', '1.0.0b4.r5', '', '2007-07-31 12:30:00', '1', '100', '4', 'The Economist', 'Michael Berkowitz', '^http://(www.)?economist.com/', 
 'function detectWeb(doc, url) {
        if (doc.location.href.indexOf("search") != -1) {
                return "multiple";
@@ -2135,7 +2135,7 @@ function doWeb(doc, url) {
 
 }');
 
-REPLACE INTO translators VALUES ('84bd421d-c6d1-4223-ab80-a156f98a8e30', '1.0.0b4r1', '', '2007-07-30 22:00:00', '0', '100', '4', 'International Herald Tribune', 'Michael Berkowitz', '^http://(www.)*iht.com/*',
+REPLACE INTO translators VALUES ('84bd421d-c6d1-4223-ab80-a156f98a8e30', '1.0.0b4r1', '', '2007-07-31 12:30:00', '0', '100', '4', 'International Herald Tribune', 'Michael Berkowitz', '^http://(www.)?iht.com/',
 'function detectWeb(doc, url) {
 	if (doc.title == "Search - International Herald Tribune" && doc.location.href != "http://www.iht.com/info/nytarchive.php") {
 		return "multiple";
