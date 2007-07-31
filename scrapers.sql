@@ -1,4 +1,4 @@
--- 249
+-- 250
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -1639,7 +1639,503 @@ REPLACE INTO translators VALUES ('e4660e05-a935-43ec-8eec-df0347362e4c', '1.0.0b
 	}
 }');
 
-REPLACE INTO translators VALUES ('84bd421d-c6d1-4223-ab80-a156f98a8e30', '1.0.0b4r1', '', '2007-06-27 02:00:00', '0', '100', '4', 'International Herald Tribune', 'Michael Berkowitz', '^http://(www.)*iht.com/*',
+REPLACE INTO translators VALUES ('d9be934c-edb9-490c-a88d-34e2ee106cd7', '1.0.0b3r1', '', '2007-07-30 22:00:00', '0', '100', '4', 'Time.com', 'Michael Berkowitz', '^http://www.time.com/time/*', 
+'function detectWeb(doc, url) {
+	if (doc.title == "TIME Magazine - Search Results") {
+		return "multiple";
+	} else {
+		var namespace = doc.documentElement.namespaceURI;
+		var nsResolver = namespace ? function(prefix) {
+			if (prefix == "x") return namespace; else return null;
+		} : null;
+		
+		var xpath = ''//meta[@name="byline"]'';
+		var xpath2 = ''//div[@class="byline"]'';
+		var xpath3 = ''//div[@class="copy"]/div[@class="byline"]'';
+		if ((doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext() || doc.evaluate(xpath2, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext() || doc.evaluate(xpath3, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) ) {
+			if (url.substr(-4,4) == "html") {
+				return "newspaperArticle";
+			}
+		}
+	}
+}
+', 
+'function associateMeta(newItem, metaTags, field, zoteroField) {
+	if (metaTags[field]) {
+		newItem[zoteroField] = metaTags[field];
+	}
+}
+
+function scrape(doc, url) {
+	var newItem = new Zotero.Item("newspaperArticle");
+	newItem.publicationTitle = "Time Magazine";
+	newItem.ISSN = "0040-718X";
+	newItem.url = doc.location.href;
+	
+	var metaTags = new Object();
+	
+	var metaTagHTML = doc.getElementsByTagName("meta")
+	for (var i = 0 ; i < metaTagHTML.length ; i++) {
+		metaTags[metaTagHTML[i].getAttribute("name")] = metaTagHTML[i].getAttribute("content");
+	}
+	
+	if (metaTags["head"]) {
+		associateMeta(newItem, metaTags, "head", "title");
+	} else {
+		newItem.title = doc.title.substr(0, doc.title.length - 7);
+	}
+	
+	if (metaTags["description"]) {
+		associateMeta(newItem, metaTags, "description", "abstractNote");
+	}
+	
+	 if (metaTags["date"]) {
+		 var date = metaTags["date"];
+		 var months = new Object();
+		 	months["jan"] = "January";
+		 	months["feb"] = "February";
+		 	months["mar"] = "March";
+		 	months["apr"] = "April";
+		 	months["may"] = "May";
+		 	months["jun"] = "June";
+		 	months["jul"] = "July";
+		 	months["aug"] = "August";
+		 	months["sep"] = "September";
+		 	months["oct"] = "October";
+		 	months["nov"] = "November";
+		 	months["dec"] = "December";
+		 date = date.split(".").join("").split(", ").slice(1);
+		 date[0] = months[date[0].split(" ")[0].toLowerCase()] + " " + date[0].split(" ")[1];
+		 newItem.date = date.join(", ");
+	 }
+	if (metaTags["keywords"]) {
+		newItem.tags = Zotero.Utilities.cleanString(metaTags["keywords"]).split(", ");
+		for (var i in newItem.tags) {
+			if (newItem.tags[i] == "" || newItem.tags[i] == " ") {
+				break;
+			} else {
+				var words = newItem.tags[i].split(" ");
+				for (var j = 0 ; j < words.length ; j++) {
+					Zotero.debug(words[j]);
+					if (words[j][0] == words[j][0].toLowerCase() && words[j][0]) {
+						words[j] = words[j][0].toUpperCase() + words[j].substr(1).toLowerCase();
+					}
+				}
+			} 
+			newItem.tags[i] = words.join(" ");
+		}
+	}
+	
+	if (metaTags["byline"]) {
+		var byline = Zotero.Utilities.cleanString(metaTags["byline"]);
+		var byline1 = byline.split(" and ");
+		for (var i = 0 ; i < byline1.length ; i++) {
+			var byline2 = byline1[i].split("/");
+			for (var j = 0 ; j < byline2.length ; j++) {
+				byline2[j] = Zotero.Utilities.cleanString(byline2[j]);
+				if (byline2[j].indexOf(" ") == -1) {
+					if (byline2[j].length == 2) {
+						newItem.extra = byline2[j];
+					} else {
+						newItem.extra = byline2[j][0].toUpperCase() + byline2[j].substr(1).toLowerCase();
+					}
+				} else {
+					byline3 = byline2[j].split(" ");
+					for (var x = 0 ; x < byline3.length ; x++) {
+						byline3[x] = byline3[x][0].toUpperCase() + byline3[x].substr(1).toLowerCase();
+					}
+					byline3 = byline3.join(" ");
+					newItem.creators.push(Zotero.Utilities.cleanAuthor(byline3, "author"));
+				}
+			}
+		}
+	}
+	newItem.complete();
+}
+
+
+function doWeb(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == "x") return namespace; else return null;
+	} : null;
+	
+	var urls = new Array();
+	if (doc.title == "TIME Magazine - Search Results") {
+		var items = new Array();
+		var items = Zotero.Utilities.getItemArray(doc, doc.getElementById("search_results").getElementsByTagName("h3"), ''^http://www.time.com/time/.*\.html$'');
+		Zotero.debug(items);
+
+		items = Zotero.selectItems(items);
+	
+		if (!items) {
+			return true;
+		}
+		
+		for (var i in items) {
+			if (i.match("covers") == null) {
+				urls.push(i);
+			}
+		}
+	} else if (doc.evaluate(''//meta[@name="byline"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext() || doc.evaluate(''//div[@class="byline"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext() || doc.evaluate(''//div[@class="copy"]/div[@class="byline"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext() ) {
+		urls.push(doc.location.href);
+	}
+	Zotero.Utilities.processDocuments(urls, scrape, function() { Zotero.done(); } );
+	
+	Zotero.wait();
+}');
+
+REPLACE INTO translators VALUES ('b33bbb49-03d2-4175-91c4-3840501bc953', '1.0.0b3r1', '', '2007-07-30 22:00:00', '1', '100', '4', 'Time-Blog.com', 'Michael Berkowitz', '^http://time-blog.com/.*', 
+'function detectWeb(doc, url) {
+	if (url.substr(-4,4) == "html") {
+		return "blogPost";
+	} else {
+		return "multiple";
+	}
+}', 
+'function scrape(doc, url) {
+	var newItem = new Zotero.Item("blogPost");
+	
+	newItem.url = doc.location.href;
+	newItem.title = doc.title.substr(0, doc.title.indexOf(" - "));
+	
+	var titleRE = new RegExp(''^http://time-blog.com/([^/]*)/'');
+	var title = titleRE.exec(doc.location.href)[1].split("_");
+	for (var i = 0 ; i < title.length ; i++) {
+		title[i] = title[i][0].toUpperCase() + title[i].substr(1).toLowerCase();
+	}
+	newItem.blogTitle = title.join(" ");
+	var metaTags = new Object();
+	
+	var metaTagHTML = doc.getElementsByTagName("meta");
+	for (var i = 0 ; i < metaTagHTML.length ; i++) {
+		metaTags[metaTagHTML[i].getAttribute("name")] = metaTagHTML[i].getAttribute("content");
+	}
+	
+	if (metaTags["description"]) {
+		newItem.abstractNote = Zotero.Utilities.cleanString(Zotero.Utilities.cleanTags(metaTags["description"]));
+	}
+	
+	if (metaTags["date"]) {
+		 var date = metaTags["date"];
+		 var months = new Object();
+		 	months["jan"] = "January";
+		 	months["feb"] = "February";
+		 	months["mar"] = "March";
+		 	months["apr"] = "April";
+		 	months["may"] = "May";
+		 	months["jun"] = "June";
+		 	months["jul"] = "July";
+		 	months["aug"] = "August";
+		 	months["sep"] = "September";
+		 	months["oct"] = "October";
+		 	months["nov"] = "November";
+		 	months["dec"] = "December";
+		 date = date.split(".").join("").split(", ");
+		 date[0] = months[date[0].split(" ")[0].toLowerCase()] + " " + date[0].split(" ")[1];
+		 newItem.date = date.join(", ");
+	 }
+	 
+	 if (metaTags["keywords"]) {
+		newItem.tags = metaTags["keywords"].split(", ");
+		for (var i in newItem.tags) {
+			if (newItem.tags[i] == "" || newItem.tags[i] == " ") {
+				break;
+			} else {
+				var words = newItem.tags[i].split(" ");
+				for (var j = 0 ; j < words.length ; j++) {
+					if (words[j][0] == words[j][0].toLowerCase() && words[j][0]) {
+						words[j] = words[j][0].toUpperCase() + words[j].substr(1).toLowerCase();
+					}
+				}
+			} 
+			newItem.tags[i] = words.join(" ");
+		}
+	}
+	
+	if (doc.evaluate(''//span[@class="postedby"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+		var byline = Zotero.Utilities.cleanString(doc.evaluate(''//span[@class="postedby"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+		if (byline.substr(0,9).toLowerCase() == "posted by") {
+			byline = byline.substr(10).split(" ");
+		} else {
+			byline.split(" ");
+		}
+		for (var i = 0; i < byline.length ; i++) {
+			byline[i] = byline[i][0].toUpperCase() + byline[i].substr(1).toLowerCase();
+		}
+		newItem.creators.push(Zotero.Utilities.cleanAuthor(byline.join(" "), "author"));
+	} else if (newItem.blogTitle == "Theag") {
+		newItem.creators.push(Zotero.Utilities.cleanAuthor("Matthew Yeomans", "author"));
+		newItem.blogTitle = "the Aggregator";
+	}
+	
+	Zotero.debug(newItem);
+	
+	newItem.complete();
+	
+}
+
+function doWeb(doc, url) {
+
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == "x") return namespace; else return null;
+	} : null;
+	
+	var URIS = new Array();
+	
+	var xpath = ''//h1[@class="entryTitle"]/a'';
+	var articles = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+	var art = articles.iterateNext();
+	var arts = new Array();
+	var urls = new Array();
+	while (art) {
+		 arts.push(art.textContent);
+		 urls.push(art.href);
+		 art = articles.iterateNext();
+	}
+	if (arts.length > 1) {
+		var items = new Object;
+		for (var i  = 0; i < arts.length ; i++ ) {
+			items[urls[i]] = arts[i];
+		}
+		items = Zotero.selectItems(items);
+	
+		for (i in items) {
+			URIS.push(i);
+		}
+	} else {
+		URIS.push(url);
+	}
+	Zotero.Utilities.processDocuments(URIS, scrape, function() { Zotero.done(); } );
+	
+	Zotero.wait();
+}');
+
+REPLACE INTO translators VALUES ('9346ddef-126b-47ec-afef-8809ed1972ab', '1.0.0b3r1', '', '2007-07-30 22:00:00', '1', '99', '4', 'Institute of Physics', 'Michael Berkowitz', '^http://www.iop.org/EJ/(toc|abstract|search)/.*', 
+'function detectWeb(doc, url) {
+	if ((doc.location.href.indexOf("toc") == -1) && (doc.location.href.indexOf("search") == -1)) {
+		Zotero.debug("journalArticle");
+		return "journalArticle";
+	} else {
+		Zotero.debug("multiple");
+		return "multiple";
+	}
+}', 
+'function parseRIS(getURL, pdfURL) {   
+    Zotero.Utilities.HTTP.doGet(getURL, function(text){
+        // load translator for RIS
+        var translator = Zotero.loadTranslator ("import");
+        translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+        translator.setString(text);
+        translator.setHandler("itemDone", function(obj, item) { 
+		item.attachments = [
+	    		{url:pdfURL, title:"IOP Full Text PDF", mimeType:"application/pdf"}
+	    	];
+	    	item.complete();
+	});
+	translator.translate();
+        Zotero.done();
+    }, function() {}); 
+
+    Zotero.wait();
+}
+
+
+function doWeb(doc, url) {
+    var namespace = doc.documentElement.namespaceURI;
+    var nsResolver = namespace ? function(prefix) {
+        if (prefix == "x" ) return namespace; else return null; 
+    } : null;
+    
+    var xpath = ''//td[1][@id="toc-opts-left"]/span[@class="toclink"]/a[contains(text(), "Abstract")]'';
+    var PDFs = new Array();
+    var urls = new Array();
+    var pdfurls = new Array();
+    var items = new Array();
+    
+    if (doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+        var links = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+        var url = links.iterateNext();
+        while (url) {
+	        items.push(url.href);
+	url = links.iterateNext ();
+        }
+        
+        var titles = new Array();
+        var xpath2 = ''//strong[@class="tocTitle"]'';
+	var stuff = doc.evaluate(xpath2, doc, nsResolver, XPathResult.ANY_TYPE, null);
+	var title = stuff.iterateNext();
+	while (title) {
+		titles.push(title.textContent);
+		title = stuff.iterateNext();
+	}
+        
+        var xpath3 = ''//table/tbody/tr/td[2]/span[@class="toclink"]/a'';
+        var PDFlinks = doc.evaluate(xpath3, doc, nsResolver, XPathResult.ANY_TYPE, null);
+        var newPDF = PDFlinks.iterateNext();
+        while (newPDF) {
+	        PDFs.push(newPDF.href);
+	        newPDF = PDFlinks.iterateNext();
+        }
+        
+        var newItems = new Object();
+        
+        Zotero.debug(items.length);
+        Zotero.debug(titles.length);
+        for (var x = 0 ; x < items.length ; x++) {
+            newItems[items[x]] = [titles[x], PDFs[x]];
+        }
+        
+        
+        Zotero.debug(newItems); 
+        
+        
+        newItems = Zotero.selectItems(newItems);
+
+        if (!newItems) {
+            return true;
+        }
+        
+        for (var i in newItems) {
+            Zotero.debug(i);
+            urls.push (i);
+            var newStuff = newItems[i].split('','');
+            pdfurls.push(Zotero.Utilities.cleanString(newStuff[newStuff.length - 1]));
+        }
+        
+    } else {
+        urls.push(doc.location.href);
+        var xpath4 = ''//div[@id="abstract"]//td[2]/a'';
+        pdfurls.push(doc.evaluate(xpath4, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href);
+    }
+    
+    for (var i = 0 ; i < urls.length ; i++) {
+        urls[i] = urls[i].replace("abstract", "sview"); 
+    }
+    
+    Zotero.debug(urls);
+    Zotero.debug(pdfurls);
+    Zotero.Utilities.HTTP.doPost(urls, "format=refmgr&submit=1", function(text) {
+        for (var j = 0 ; j < urls.length ; j++) {
+            parseRIS(urls[j] + "?format=refmgr&submit=1", pdfurls[j]); 
+        }
+    });
+    
+    Zotero.wait();
+}
+
+');
+
+REPLACE INTO translators VALUES ('6ec8008d-b206-4a4c-8d0a-8ef33807703b', '1.0.0b3r1', '', '2007-07-30 22:00:00', '1', '100', '4', 'The Economist', 'Michael Berkowitz', '^http://(www.)*economist.com/*', 
+'function detectWeb(doc, url) {
+       if (doc.location.href.indexOf("search") != -1) {
+               return "multiple";
+       } else if (doc.location.href.indexOf("displaystory") != -1 || doc.location.href.indexOf("cityPage") != -1) {
+               return "magazineArticle";
+       }
+}', 
+'function scrape(doc, url) {
+       var namespace = doc.documentElement.namespaceURI;
+       var nsResolver = namespace ? function(prefix) {
+               if (prefix == "x" ) return namespace; else return null;
+       } : null;
+
+       newItem = new Zotero.Item("magazineArticle");
+       newItem.ISSN = "0013-0613";
+       newItem.url = doc.location.href;
+       newItem.publicationTitle = "The Economist";
+
+
+       //get headline
+       var title = new Array();
+       if (doc.title && doc.title != "" && doc.title != "Economist.com") {
+               title = doc.title.split(" | ");
+       } else {
+		title.push(doc.evaluate(''//div[@class="clear"][@id="pay-barrier"]/div[@class="col-left"]/div[@class="article"]/font/b'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+       }
+
+
+       if (title.length == 1) {
+               title.push = title;
+       } else {
+               title = title.slice(0, title.length - 1);
+               title = title.join(": ");
+       }
+       newItem.title = title;
+
+       if (doc.evaluate(''//div[@class="clear"][@id="pay-barrier"]/div[@class="col-right"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext() ) {
+               newItem.extra =  "(Subscription only)";
+       }
+
+       //get abstract
+       if (doc.evaluate(''//div[@id="content"]/div[@class="clear top-border"]/div[@class="col-left"]/h2'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext() ) {
+               newItem.abstractNote = doc.evaluate(''//div[@id="content"]/div[@class="clear top-border"]/div[@class="col-left"]/h2'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+       } else if (doc.evaluate(''//div[@class="clear"][@id="pay-barrier"]/div[@class="col-left"]/div[@class="article"]/p/strong'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext() ) {
+               newItem.abstractNote = doc.evaluate(''//div[@class="clear"][@id="pay-barrier"]/div[@class="col-left"]/div[@class="article"]/p/strong'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+       }
+       
+       if (newItem.abstractNote[newItem.abstractNote.length - 1] != ".") {
+	       newItem.abstractNote += ".";
+       }
+
+       //get date and extra stuff
+       if (doc.evaluate(''//div[@class="col-left"]/p[@class="info"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext() ) {
+               newItem.date = doc.evaluate(''//div[@class="col-left"]/p[@class="info"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.substr(0,13);
+       }
+	
+	var url = doc.location.href;
+       newItem.attachments = [
+       		{url:url.replace("displaystory", "PrinterFriendly"), title:"The Economist Snapshot", mimeType:"text/html"}
+       	];
+       	
+       newItem.complete();
+}
+
+
+function doWeb(doc, url) {
+       var namespace = doc.documentElement.namespaceURI;
+       var nsResolver = namespace ? function(prefix) {
+               if (prefix == "x" ) return namespace; else return null;
+       } : null;
+
+       var urls = new Array();
+
+       if (doc.title == "Search | Economist.com") {
+               var items = new Array();
+               var uris = new Array();
+               var results = doc.evaluate(''//ol[@class="search-results"]/li/h2/a'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+               var headline = results.iterateNext();
+               while (headline) {
+                       items.push(headline.textContent);
+                       uris.push(headline.href);
+                       headline = results.iterateNext();
+               }
+
+               var newItems = new Object();
+               for (var i = 0 ; i <items.length ; i++) {
+                       newItems[items[i]] = uris[i];
+               }
+               var newItems  = Zotero.Utilities.getItemArray(doc, doc, ''^http://(www.)*economist.com/(.*/)*(displaystory.cfm|cityPage.cfm)'');
+               newItems = Zotero.selectItems(newItems);
+               if (!newItems) {
+                       return true;
+               }
+
+               for (var i in newItems) {
+                       urls.push(i);
+               }
+       } else if (doc.location.href.indexOf("displaystory") != -1) {
+               urls.push(url);
+       }
+       
+       Zotero.Utilities.processDocuments(urls, scrape, function() { Zotero.done(); });
+       
+       Zotero.wait();
+
+}');
+
+REPLACE INTO translators VALUES ('84bd421d-c6d1-4223-ab80-a156f98a8e30', '1.0.0b4r1', '', '2007-07-30 22:00:00', '0', '100', '4', 'International Herald Tribune', 'Michael Berkowitz', '^http://(www.)*iht.com/*',
 'function detectWeb(doc, url) {
 	if (doc.title == "Search - International Herald Tribune" && doc.location.href != "http://www.iht.com/info/nytarchive.php") {
 		return "multiple";
