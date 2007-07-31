@@ -62,6 +62,7 @@
 <!ENTITY zotero.toolbar.actions.label					"Actions">
 <!ENTITY zotero.toolbar.import.label					"Import...">
 <!ENTITY zotero.toolbar.export.label					"Export Library...">
+<!ENTITY zotero.toolbar.timeline.label				"Create Timeline">
 <!ENTITY zotero.toolbar.preferences.label				"Preferences...">
 <!ENTITY zotero.toolbar.documentation.label			"Documentation">
 <!ENTITY zotero.toolbar.about.label					"About Zotero">

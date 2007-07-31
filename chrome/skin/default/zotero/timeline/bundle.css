@@ -1,0 +1,172 @@
+.timeline-ether-marker-bottom {
+    width:          5em; 
+    height:         1.5em; 
+    border-left:    1px solid #aaa; 
+    padding-left:   2px; 
+    color:          #aaa;
+}
+
+.timeline-ether-marker-bottom-emphasized {
+    width:          5em; 
+    height:         2em; 
+    border-left:    1px solid #aaa; 
+    padding-left:   2px; 
+    color:          black;
+}
+
+.timeline-ether-marker-top {
+    width:          5em; 
+    height:         1.5em; 
+    border-left:    1px solid #aaa; 
+    padding-left:   2px; 
+    color:          #aaa;
+}
+
+.timeline-ether-marker-top-emphasized {
+    width:          5em; 
+    height:         2em; 
+    border-left:    1px solid #aaa; 
+    padding-left:   2px; 
+    color:          black;
+}
+
+
+.timeline-ether-marker-right {
+    width:          5em; 
+    height:         1.5em; 
+    border-top:     1px solid #aaa; 
+    padding-top:    2px; 
+    color:          #aaa;
+}
+
+.timeline-ether-marker-right-emphasized {
+    width:          7em; 
+    height:         1.5em; 
+    border-top:     1px solid #aaa; 
+    padding-top:    2px; 
+    color:          black;
+}
+.timeline-ether-marker-left {
+    width:          5em; 
+    height:         1.5em; 
+    border-top:     1px solid #aaa; 
+    padding-top:    2px; 
+    color:          #aaa;
+}
+
+.timeline-ether-marker-left-emphasized {
+    width:          7em; 
+    height:         1.5em; 
+    border-top:     1px solid #aaa; 
+    padding-top:    2px; 
+    color:          black;
+}
+.timeline-duration-event {
+    position: absolute;
+    overflow: hidden;
+    border: 1px solid blue;
+}
+
+.timeline-instant-event2 {
+    position: absolute;
+    overflow: hidden;
+    border-left: 1px solid blue;
+    padding-left: 2px;
+}
+
+.timeline-instant-event {
+    position: absolute;
+    overflow: hidden;
+}
+
+.timeline-event-bubble-title {
+    font-weight: bold;
+    border-bottom: 1px solid #888;
+    margin-bottom: 0.5em;
+}
+
+.timeline-event-bubble-body {
+}
+
+.timeline-event-bubble-wiki {
+    margin:     0.5em;
+    text-align: right;
+    color:      #A0A040;
+}
+.timeline-event-bubble-wiki a {
+    color:      #A0A040;
+}
+
+.timeline-event-bubble-time {
+    color: #aaa;
+}
+
+.timeline-event-bubble-image {
+    float: right;
+    padding-left: 5px;
+    padding-bottom: 5px;
+}.timeline-container {
+    position: relative;
+    overflow: hidden;
+}
+
+.timeline-copyright {
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+    z-index: 1000;
+    cursor: pointer;
+}
+
+.timeline-message-container {
+    position:   absolute;
+    top:        30%;
+    left:       35%;
+    right:      35%;
+    z-index:    1000;
+    display:    none;
+}
+.timeline-message {
+    font-size:      120%;
+    font-weight:    bold;
+    text-align:     center;
+}
+.timeline-message img {
+    vertical-align: middle;
+}
+
+.timeline-band {
+    position:   absolute;
+    background: #eee;
+    z-index:    10;
+}
+
+.timeline-band-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.timeline-band-input {
+    position:   absolute;
+    width:      1em;
+    height:     1em;
+    overflow:   hidden;
+    z-index:    0;
+}
+.timeline-band-input input{
+    width:      0;
+}
+
+.timeline-band-layer {
+    position:   absolute;
+    width:      100%;
+    height:     100%;
+}
+
+.timeline-band-layer-inner {
+    position:   relative;
+    width:      100%;
+    height:     100%;
+}
+

@@ -222,11 +222,206 @@ function ChromeExtensionHandler() {
 			return extChannel;
 		}
 	};
+
+	var TimelineExtension = new function(){
+		this.newChannel = newChannel;
+
+		function getInterval(a){
+			switch (a){
+				case 'd':
+					return 'Timeline.DateTime.DAY';
+				case 'm':
+					return 'Timeline.DateTime.MONTH';
+				case 'y':
+					return 'Timeline.DateTime.YEAR';
+				case 'e':
+					return 'Timeline.DateTime.DECADE';
+				case 'c':
+					return 'Timeline.DateTime.CENTURY';
+				case 'i':
+					return 'Timeline.DateTime.MILLENNIUM';
+				default:
+					return false;
+			}
+		}
+
+		/*
+		zotero://timeline/intervals/timelineDate/dateType/type/ids/  ----->creates html for timeline
+		zotero://timeline/ ------> minimum needed (defaults:  intervals = month, year, decade | 
+													timelineDate = today's date | dateType = date | type = library)
+		zotero://timeline/data/dateType/type/ids ----->creates XML
+		*/
+		function newChannel(uri) {
+			var ioService = Components.classes["@mozilla.org/network/io-service;1"]
+				.getService(Components.interfaces.nsIIOService);
+
+			var Zotero = Components.classes["@zotero.org/Zotero;1"]
+				.getService(Components.interfaces.nsISupports)
+				.wrappedJSObject;
+
+			generateContent:try {
+				var mimeType, content = '';
+	
+				var [path, queryString] = uri.path.substr(1).split('?');
+				var pathParts = path.split('/');
+				
+				if (pathParts[0] != 'data') {
+					//creates HTML file
+					var intervals = pathParts[0];
+					var timelineDate = pathParts[1];
+					content = Zotero.File.getContentsFromURL('chrome://zotero/skin/timeline/timeline.html');
+					mimeType = 'text/html';
+					
+					var theTemp = 'Timeline.loadXML("zotero://timeline/data/';
+					
+					if(!timelineDate){
+						timelineDate=Date();
+						var dateParts=timelineDate.toString().split(' ');
+						timelineDate=dateParts[1]+'.'+dateParts[2]+'.'+dateParts[3];
+					}
+					else {
+						//passes information (dateType,type,ids) for when the XML is created
+						content = content.replace(theTemp, theTemp + pathParts.slice(2).join('/'));
+					}
+
+					//sets the intervals of the timeline bands
+					theTemp = '<body onload="onLoad(';
+					var a = (getInterval(intervals[0])) ? getInterval(intervals[0]) : 'Timeline.DateTime.MONTH';
+					var b = (getInterval(intervals[1])) ? getInterval(intervals[1]) : 'Timeline.DateTime.YEAR';
+					var c = (getInterval(intervals[2])) ? getInterval(intervals[2]) : 'Timeline.DateTime.DECADE';
+					content = content.replace(theTemp, theTemp + a + ',' + b + ',' + c + ',\'' + timelineDate + '\'');
+					
+					var uri_str = 'data:' + (mimeType ? mimeType + ',' : '') + encodeURIComponent(content);
+					var ext_uri = ioService.newURI(uri_str, null, null);
+					var extChannel = ioService.newChannelFromURI(ext_uri);
+
+					return extChannel;
+				}
+				else {
+					var [data, dateType, type, ids] = pathParts;
+				}
+				//creates XML file
+				switch (type){
+					case 'collection':
+						var results = Zotero.getItems(ids);
+						break;
+
+					case 'search':
+						var s = new Zotero.Search(ids);
+						var ids = s.search();
+						break;
+
+					case 'items':
+					case 'item':
+						var ids = ids.split('-');
+						break;
+
+					default:
+						var type = 'library';
+						var s = new Zotero.Search();
+						s.addCondition('noChildren', 'true');
+						var ids = s.search();
+				}
+
+				if (!results) {
+					var results = Zotero.Items.get(ids);
+				}
+				var items = [];
+				// Only include parent items
+				for (var i = 0; i < results.length; i++) {
+					if (!results[i].getSource()) {
+						items.push(results[i]);
+					}
+				}
+
+				if (!items) {
+					mimeType = 'text/html';
+					content = 'Invalid ID';
+					break generateContent;
+				}
+
+				// Convert item objects to export arrays
+				for (var i = 0; i < items.length; i++) {
+					items[i] = items[i].toArray();
+				}
+
+				mimeType = 'application/xml';
+
+				//default dateType = date (publication date)
+				if (!dateType) {
+					dateType = 'date';
+				}
+				content = Zotero.Timeline.generateXMLDetails(items, dateType);
+
+			}
+			catch (e){
+				Zotero.debug(e);
+				throw (e);
+			}
+
+			var uri_str = 'data:' + (mimeType ? mimeType + ',' : '') + encodeURIComponent(content);
+			var ext_uri = ioService.newURI(uri_str, null, null);
+			var extChannel = ioService.newChannelFromURI(ext_uri);
+
+			return extChannel;
+		}
+	};
+	
+	
+	/*
+		zotero://select/type/id
+	*/
+	
+	var SelectExtension = new function(){
+		this.newChannel = newChannel;
+
+		function newChannel(uri) {
+			var ioService = Components.classes["@mozilla.org/network/io-service;1"]
+				.getService(Components.interfaces.nsIIOService);
+
+			var Zotero = Components.classes["@zotero.org/Zotero;1"]
+				.getService(Components.interfaces.nsISupports)
+				.wrappedJSObject;
+
+			generateContent:try {
+				var mimeType, content = '';
+	
+				var [path, queryString] = uri.path.substr(1).split('?');
+				var [type, id] = path.split('/');
+				
+				//currently only able to select one item
+				var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+					.getService(Components.interfaces.nsIWindowMediator);
+				var win = wm.getMostRecentWindow(null);
+				
+				if(!win.ZoteroPane.isShowing()){
+					win.ZoteroPane.toggleDisplay();
+				}
+				
+				win.ZoteroPane.selectItem(id);
+			}
+			catch (e){
+				Zotero.debug(e);
+				throw (e);
+			}
+		}
+	};
+
 	
 	var ReportExtensionSpec = ZOTERO_SCHEME + "://report"
 	ReportExtensionSpec = ReportExtensionSpec.toLowerCase();
 	
 	this._extensions[ReportExtensionSpec] = ReportExtension;
+
+	var TimelineExtensionSpec = ZOTERO_SCHEME + "://timeline"
+	TimelineExtensionSpec = TimelineExtensionSpec.toLowerCase();
+
+	this._extensions[TimelineExtensionSpec] = TimelineExtension;
+	
+	var SelectExtensionSpec = ZOTERO_SCHEME + "://select"
+	SelectExtensionSpec = SelectExtensionSpec.toLowerCase();
+
+	this._extensions[SelectExtensionSpec] = SelectExtension;
 }
 
 
