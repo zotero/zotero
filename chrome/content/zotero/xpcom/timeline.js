@@ -40,7 +40,7 @@ Zotero.Timeline = new function () {
 				var item = Zotero.Items.get(arr.itemID);
 				var theDate =(dateType == 'date') ? Zotero.Date.multipartToSQL(arr[dateType]):arr[dateType];
 				content += '<event start="' + Zotero.Date.sqlToDate(theDate) + '" ';
-				content += 'title=" ' + escapeXML(arr.title) + '" ';
+				content += 'title=" ' + (arr.title ? escapeXML(arr.title) : '') + '" ';
 				content += 'icon="' + item.getImageSrc() + '" ';			
 				content += 'color="black">';
 				content += 'zotero://select/item/'+arr.itemID;
