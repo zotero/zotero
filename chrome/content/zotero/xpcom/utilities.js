@@ -132,7 +132,7 @@ Zotero.Utilities.prototype.cleanTags = function(x) {
  */
 Zotero.Utilities.prototype.htmlSpecialChars = function(str) {
 	if (typeof str != 'string') {
-		throw "htmlSpecialChars: argument must be a string";
+		throw "Argument '" + str + "' must be a string in Zotero.Utilities.htmlSpecialChars()";
 	}
 	
 	if (!str) {
