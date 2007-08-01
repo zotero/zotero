@@ -299,14 +299,17 @@ var Zotero_Browser = new function() {
 			}
 			
 			// ignore blacklisted domains
-			if(doc.domain) {
-				for each(var blacklistedURL in _blacklist) {
-					if(doc.domain.substr(doc.domain.length-blacklistedURL.length) == blacklistedURL) {
-						Zotero.debug("Ignoring blacklisted URL "+doc.location);
-						return;
+			try {
+				if(doc.domain) {
+					for each(var blacklistedURL in _blacklist) {
+						if(doc.domain.substr(doc.domain.length-blacklistedURL.length) == blacklistedURL) {
+							Zotero.debug("Ignoring blacklisted URL "+doc.location);
+							return;
+						}
 					}
 				}
 			}
+			catch (e) {}
 		}
 		
 		// Figure out what browser this contentDocument is associated with
