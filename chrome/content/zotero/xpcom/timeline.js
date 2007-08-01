@@ -43,7 +43,7 @@ Zotero.Timeline = new function () {
 				content += 'title=" ' + (arr.title ? escapeXML(arr.title) : '') + '" ';
 				content += 'icon="' + item.getImageSrc() + '" ';			
 				content += 'color="black">';
-				content += 'zotero://select/item/'+arr.itemID;
+				content += arr.itemID;
 				content += '</event>\n';
 			}
 		}

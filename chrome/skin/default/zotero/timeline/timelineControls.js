@@ -4,7 +4,11 @@ function getLocaleHash() {
 	var localeHash = new Object();
 	var content = getContentsFromURL("chrome://zotero/locale/timeline.properties");
 	var m;
-	while(m = /^[\S]+(?=\s*=)/gm.exec(content)) {
+	while(true) {
+		m = /^[\S]+(?=\s*=)/gm.exec(content);
+		if(!m) {
+			break;
+		}
 		localeHash[m] = /=[^\n]+/g.exec(content).toString().replace(/=\s*/,'');;
 	}
 	return localeHash;
@@ -89,7 +93,7 @@ function checkDate(date) {
 	}
 	
 	if(/\D/.test(date)) {
-		return false;
+		return;
 	}
 	
 	if (bc) {
@@ -126,11 +130,11 @@ function changeDateType(url, intervals, values, date, seletedIndex) {
 }
 
 function createOption(t, selected) {
-	option = document.createElement("option");
+	var option = document.createElement("option");
 	if (selected) {
 		option.selected = "true";
 	}
-	text = document.createTextNode(t);
+	var text = document.createTextNode(t);
 	option.setAttribute("value", t);
 	option.appendChild(text);
 	return option;
@@ -293,7 +297,7 @@ function setupFilterHighlightControls(div, timeline, bandIndices, theme) {
 	td = tr.insertCell(1);
 	td.innerHTML = localeHash["general.highlight"];
 	
-	var handler = function (elmt, evt, target) {
+	var handler = function(elmt, evt, target) {
 		onKeyPress(timeline, bandIndices, table);
 	};
 	
@@ -302,7 +306,7 @@ function setupFilterHighlightControls(div, timeline, bandIndices, theme) {
 	
 	td = tr.insertCell(0);
 	
-	input = document.createElement("input");
+	var input = document.createElement("input");
 	input.type = "text";
 	input.size = "18";
 	Timeline.DOM.registerEvent(input, "keypress", handler);
@@ -323,9 +327,9 @@ function setupFilterHighlightControls(div, timeline, bandIndices, theme) {
 	}
 	
 	td = tr.insertCell(tr.cells.length);
-	button = document.createElement("button");
+	var button = document.createElement("button");
 	button.innerHTML = localeHash["general.clearAll"];
-	Timeline.DOM.registerEvent(button, "click", function () {
+	Timeline.DOM.registerEvent(button, "click", function() {
 		clearAll(timeline, bandIndices, table);
 	});
 	td.appendChild(button);
@@ -338,12 +342,12 @@ function onKeyPress(timeline, bandIndices, table) {
 	if (timerID != null) {
 		window.clearTimeout(timerID);
 	}
-	timerID = window.setTimeout(function () {
+	timerID = window.setTimeout(function() {
 		performFiltering(timeline, bandIndices, table);
 	}, 300);
 }
 function cleanString(s) {
-	return s.replace(/^\s + /, '').replace(/\s + $/, '');
+	return s.replace(/^\s+/, '').replace(/\s + $/, '');
 }
 function performFiltering(timeline, bandIndices, table) {
 	timerID = null;
@@ -354,7 +358,7 @@ function performFiltering(timeline, bandIndices, table) {
 	var filterMatcher = null;
 	if (text.length > 0) {
 		var regex = new RegExp(text, "i");
-		filterMatcher = function (evt) {
+		filterMatcher = function(evt) {
 			return regex.test(evt.getText()) || regex.test(evt.getDescription());
 		};
 	}
@@ -371,7 +375,7 @@ function performFiltering(timeline, bandIndices, table) {
 			regexes.push(null);
 		}
 	}
-	var highlightMatcher = hasHighlights ? function (evt) {
+	var highlightMatcher = hasHighlights ? function(evt) {
 		var text = evt.getText();
 		var description = evt.getDescription();
 		for (var x = 0; x < regexes.length; x++) {
@@ -380,7 +384,7 @@ function performFiltering(timeline, bandIndices, table) {
 				return x;
 			}
 		}
-		return - 1;
+		return -1;
 	} : null;
 	
 	for (var i = 0; i < bandIndices.length; i++) {

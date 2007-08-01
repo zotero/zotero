@@ -33,6 +33,7 @@
 	<script src="overlay.js"/>
     <script src="fileInterface.js"/>
 	<script src="reportInterface.js"/>
+	<script src="timelineInterface.js"/>
 	<script src="browser.js"/>
 	<script src="chrome://global/content/nsDragAndDrop.js"/>
 	<script src="chrome://global/content/nsTransferable.js"/>
@@ -119,7 +120,7 @@
 								<menuitem id="zotero-tb-actions-import" label="&zotero.toolbar.import.label;" oncommand="Zotero_File_Interface.importFile();"/>
 								<menuitem id="zotero-tb-actions-export" label="&zotero.toolbar.export.label;" oncommand="Zotero_File_Interface.exportFile();"/>
 								<menuseparator id="zotero-tb-actions-utilities-separator"/>
-								<menuitem id="zotero-tb-actions-timeline" label="&zotero.toolbar.timeline.label;" oncommand="window.loadURI('zotero://timeline/')"/>
+								<menuitem id="zotero-tb-actions-timeline" label="&zotero.toolbar.timeline.label;" oncommand="Zotero_Timeline_Interface.loadTimeline()"/>
 								<menuseparator id="zotero-tb-actions-separator"/>
 								<menuitem id="zotero-tb-actions-prefs" label="&zotero.toolbar.preferences.label;"
 									oncommand="window.openDialog('chrome://zotero/content/preferences/preferences.xul', 'zotero-prefs', 'chrome,titlebar,toolbar,' + Zotero.Prefs.get('browser.preferences.instantApply', true) ? 'dialog=no' : 'modal')"/>

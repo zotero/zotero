@@ -77,7 +77,7 @@
 			}
 			
 			Timeline.DurationEventPainter.prototype._showBubble = function(x, y, evt) {
-				window.location=evt.getDescription();
+				window.location='zotero://select/item/' + evt.getDescription();
 			}
 			
 			document.write("<title>"+localeHash["general.title"]+"</title>");
