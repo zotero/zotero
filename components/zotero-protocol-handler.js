@@ -226,30 +226,37 @@ function ChromeExtensionHandler() {
 	var TimelineExtension = new function(){
 		this.newChannel = newChannel;
 
-		function getInterval(a){
-			switch (a){
-				case 'd':
-					return 'Timeline.DateTime.DAY';
-				case 'm':
-					return 'Timeline.DateTime.MONTH';
-				case 'y':
-					return 'Timeline.DateTime.YEAR';
-				case 'e':
-					return 'Timeline.DateTime.DECADE';
-				case 'c':
-					return 'Timeline.DateTime.CENTURY';
-				case 'i':
-					return 'Timeline.DateTime.MILLENNIUM';
-				default:
-					return false;
-			}
-		}
-
 		/*
-		zotero://timeline/intervals/timelineDate/dateType/type/ids/  ----->creates html for timeline
-		zotero://timeline/ ------> minimum needed (defaults:  intervals = month, year, decade | 
-													timelineDate = today's date | dateType = date | type = library)
-		zotero://timeline/data/dateType/type/ids ----->creates XML
+		queryString key abbreviations:  intervals = i  |  dateType = t  |  timelineDate = d
+		
+		interval abbreviations:  day = d  |  month = m  |  year = y  |  decade = e  |  century = c  |  millennium = i
+		dateType abbreviations:  date = d  |  dateAdded = da  |  dateModified = dm
+		timelineDate format:  shortMonthName.day.year  (year is positive for A.D. and negative for B.C.)
+		
+		
+		
+		zotero://timeline   -----> creates HTML for timeline 
+			(defaults:  type = library | intervals = month, year, decade | timelineDate = today's date | dateType = date)
+			
+			
+		Example URLs:
+		
+		zotero://timeline/library?i=yec
+		zotero://timeline/collection/12345?t=da&d=Jul.24.2008
+		zotero://timeline/search/54321?d=Dec.1.-500&i=dmy&t=d
+		
+		
+		
+		zotero://timeline/data    ----->creates XML file
+			(defaults:  type = library  |  dateType = date)
+		
+		
+		Example URLs:
+		
+		zotero://timeline/data/library?t=da
+		zotero://timeline/data/collection/12345
+		zotero://timeline/data/search/54321?t=dm
+		
 		*/
 		function newChannel(uri) {
 			var ioService = Components.classes["@mozilla.org/network/io-service;1"]
@@ -263,33 +270,73 @@ function ChromeExtensionHandler() {
 				var mimeType, content = '';
 	
 				var [path, queryString] = uri.path.substr(1).split('?');
+				var [intervals, timelineDate, dateType] = ['','',''];
+				
+				if (queryString) {
+					var queryVars = queryString.split('&');
+					for (var i in queryVars) {
+						var [key, val] = queryVars[i].split('=');
+						if(val) {
+							switch (key) {
+								case 'i':
+									intervals = val;
+									break;
+								case 'd':
+									timelineDate = val;
+									break;
+								case 't':
+									dateType = val;
+									break;
+							}
+						}
+					}
+				}
+				
 				var pathParts = path.split('/');
 				
 				if (pathParts[0] != 'data') {
 					//creates HTML file
-					var intervals = pathParts[0];
-					var timelineDate = pathParts[1];
 					content = Zotero.File.getContentsFromURL('chrome://zotero/skin/timeline/timeline.html');
 					mimeType = 'text/html';
 					
-					var theTemp = 'Timeline.loadXML("zotero://timeline/data/';
-					
+					var [type, id] = pathParts;
+										
 					if(!timelineDate){
 						timelineDate=Date();
 						var dateParts=timelineDate.toString().split(' ');
 						timelineDate=dateParts[1]+'.'+dateParts[2]+'.'+dateParts[3];
 					}
-					else {
-						//passes information (dateType,type,ids) for when the XML is created
-						content = content.replace(theTemp, theTemp + pathParts.slice(2).join('/'));
+					if (intervals.length < 3) {
+						intervals += "mye".substr(intervals.length);
 					}
-
+					
+					var theIntervals = new Object();
+						theIntervals['d'] = 'Timeline.DateTime.DAY';
+						theIntervals['m'] = 'Timeline.DateTime.MONTH';
+						theIntervals['y'] = 'Timeline.DateTime.YEAR';
+						theIntervals['e'] = 'Timeline.DateTime.DECADE';
+						theIntervals['c'] = 'Timeline.DateTime.CENTURY';
+						theIntervals['i'] = 'Timeline.DateTime.MILLENNIUM';
+					
 					//sets the intervals of the timeline bands
-					theTemp = '<body onload="onLoad(';
-					var a = (getInterval(intervals[0])) ? getInterval(intervals[0]) : 'Timeline.DateTime.MONTH';
-					var b = (getInterval(intervals[1])) ? getInterval(intervals[1]) : 'Timeline.DateTime.YEAR';
-					var c = (getInterval(intervals[2])) ? getInterval(intervals[2]) : 'Timeline.DateTime.DECADE';
+					var theTemp = '<body onload="onLoad(';
+					var a = (theIntervals[intervals[0]]) ? theIntervals[intervals[0]] : 'Timeline.DateTime.MONTH';
+					var b = (theIntervals[intervals[1]]) ? theIntervals[intervals[1]] : 'Timeline.DateTime.YEAR';
+					var c = (theIntervals[intervals[2]]) ? theIntervals[intervals[2]] : 'Timeline.DateTime.DECADE';
 					content = content.replace(theTemp, theTemp + a + ',' + b + ',' + c + ',\'' + timelineDate + '\'');
+					
+					
+					theTemp = 'Timeline.loadXML("zotero://timeline/data/';
+					var d = '';
+					//passes information (type,ids, dateType) for when the XML is created
+					if(!type || (type != 'collection' && type != 'search')) {
+						d += 'library?t=' + dateType;
+					}
+					else {
+						d += type + '/' + id + '?t=' + dateType;
+					}
+					content = content.replace(theTemp, theTemp + d);
+					
 					
 					var uri_str = 'data:' + (mimeType ? mimeType + ',' : '') + encodeURIComponent(content);
 					var ext_uri = ioService.newURI(uri_str, null, null);
@@ -298,72 +345,75 @@ function ChromeExtensionHandler() {
 					return extChannel;
 				}
 				else {
-					var [data, dateType, type, ids] = pathParts;
-				}
-				//creates XML file
-				switch (type){
-					case 'collection':
-						var results = Zotero.getItems(ids);
-						break;
+					//creates XML file
+					var [, type, ids] = pathParts;
+					
+					switch (type){
+						case 'collection':
+							var results = Zotero.getItems(ids);
+							break;
 
-					case 'search':
-						var s = new Zotero.Search(ids);
-						var ids = s.search();
-						break;
+						case 'search':
+							var s = new Zotero.Search(ids);
+							var ids = s.search();
+							break;
 
-					case 'items':
-					case 'item':
-						var ids = ids.split('-');
-						break;
-
-					default:
-						var type = 'library';
-						var s = new Zotero.Search();
-						s.addCondition('noChildren', 'true');
-						var ids = s.search();
-				}
-
-				if (!results) {
-					var results = Zotero.Items.get(ids);
-				}
-				var items = [];
-				// Only include parent items
-				for (var i = 0; i < results.length; i++) {
-					if (!results[i].getSource()) {
-						items.push(results[i]);
+						default:
+							type = 'library';
+							var s = new Zotero.Search();
+							s.addCondition('noChildren', 'true');
+							var ids = s.search();
 					}
+
+					if (!results) {
+						var results = Zotero.Items.get(ids);
+					}
+					var items = [];
+					// Only include parent items
+					for (var i = 0; i < results.length; i++) {
+						if (!results[i].getSource()) {
+							items.push(results[i]);
+						}
+					}
+
+					if (!items) {
+						mimeType = 'text/html';
+						content = 'Invalid ID';
+						break generateContent;
+					}
+
+					// Convert item objects to export arrays
+					for (var i = 0; i < items.length; i++) {
+						items[i] = items[i].toArray();
+					}
+
+					mimeType = 'application/xml';
+
+				
+					var theDateTypes = new Object();
+						theDateTypes['d'] = 'date';
+						theDateTypes['da'] = 'dateAdded';
+						theDateTypes['dm'] = 'dateModified';
+					
+					//default dateType = date
+					if (!dateType || !theDateTypes[dateType]) {
+						dateType = 'd';
+					}
+				
+					content = Zotero.Timeline.generateXMLDetails(items, theDateTypes[dateType]);
+
 				}
+				
+				var uri_str = 'data:' + (mimeType ? mimeType + ',' : '') + encodeURIComponent(content);
+				var ext_uri = ioService.newURI(uri_str, null, null);
+				var extChannel = ioService.newChannelFromURI(ext_uri);
 
-				if (!items) {
-					mimeType = 'text/html';
-					content = 'Invalid ID';
-					break generateContent;
-				}
-
-				// Convert item objects to export arrays
-				for (var i = 0; i < items.length; i++) {
-					items[i] = items[i].toArray();
-				}
-
-				mimeType = 'application/xml';
-
-				//default dateType = date (publication date)
-				if (!dateType) {
-					dateType = 'date';
-				}
-				content = Zotero.Timeline.generateXMLDetails(items, dateType);
-
+				return extChannel;
 			}
 			catch (e){
 				Zotero.debug(e);
 				throw (e);
 			}
-
-			var uri_str = 'data:' + (mimeType ? mimeType + ',' : '') + encodeURIComponent(content);
-			var ext_uri = ioService.newURI(uri_str, null, null);
-			var extChannel = ioService.newChannelFromURI(ext_uri);
-
-			return extChannel;
 		}
 	};
 	

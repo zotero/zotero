@@ -1,4 +1,6 @@
 var localeHash = getLocaleHash();
+var jumpToYearTimer;
+var lastJumpToYearValue;
 
 function getLocaleHash() {
 	var localeHash = new Object();
@@ -25,7 +27,7 @@ function getContentsFromURL(url) {
 
 function getTimeline() {
 	var tt = getHeight();
-	tt -= 180;
+	tt -= 165;
 	if (tt < 100) {
 		tt = 100;
 	}
@@ -46,12 +48,31 @@ function getHeight() {
 	return 0;
 }
 
-function doReturn(e)
-{
-	if(e.which)	{
-		if(e.which == '13'){
-			checkDate(document.getElementById('jumpYear').value);
+function wasChanged(current) {
+	if (current != lastJumpToYearValue) {
+		lastJumpToYearValue = current;
+		var theYear = document.getElementById("jumpYear").value;
+		if(theYear.length == 0) {
+			centerTimeline(new Date());
 		}
+		else {
+			checkDate(theYear);
+		}
+	}
+}
+
+function doTheKeyPress(e)
+{
+	clearTimeout(jumpToYearTimer);
+	lastJumpToYearValue = document.getElementById('jumpYear').value;
+	if((e.which == '8' || e.which == '0') && lastJumpToYearValue.length == 0) {
+		centerTimeline(new Date());
+	}
+	else if(e.which == '13'){
+		checkDate(lastJumpToYearValue);
+	}
+	else {
+		jumpToYearTimer = setTimeout('wasChanged(document.getElementById("jumpYear").value);', 1000)
 	}
 }
 
@@ -97,15 +118,18 @@ function checkDate(date) {
 	}
 	
 	if (bc) {
-		centerTimeline(date + ' BC');
+		if(date < 10000) {
+			centerTimeline(date + ' BC');
+		}
 	}
 	else {
-		centerTimeline(date);
+		if(date < 275000) {
+			centerTimeline(date);
+		}
 	}
 }
-function changeBand(band, intervals, date, url, selectedIndex) {
+function changeBand(path, queryString, band, intervals, selectedIndex) {
 	var values = new Array('d', 'm', 'y', 'e', 'c', 'i');
-	var temp = url.split('/');
 	
 	var newIntervals = '';
 	for (var i = 0; i < intervals.length; i++) {
@@ -116,17 +140,8 @@ function changeBand(band, intervals, date, url, selectedIndex) {
 			newIntervals += intervals[i];
 		}
 	}
-	temp[3] = newIntervals;
-	temp[4] = date;
-	window.location = temp.join('/');
-}
-
-function changeDateType(url, intervals, values, date, seletedIndex) {
-	var temp = url.split('/');
-	temp[3] = intervals;
-	temp[4] = date;
-	temp[5] = values[seletedIndex];
-	window.location = temp.join('/');
+	
+	window.location = path + queryString + 'i=' + newIntervals;
 }
 
 function createOption(t, selected) {
@@ -159,15 +174,65 @@ function getFull(a) {
 	}
 }
 
+function createQueryString(theQueryValue, except, timeline) {
+	var temp = '?';
+	for(var i in theQueryValue) {
+		if(except != i) {
+			temp += i + '=' + theQueryValue[i] + '&';
+		}
+	}
+	if(except != 'd') {
+		temp += 'd=' + getTimelineDate(timeline) + '&';
+	}
+	//remove last & if no exceptions
+	if(!except) {
+		temp = temp.substr(0, temp.length -1)
+	}
+	return temp;
+}
+
 function setupOtherControls(div, timeline, url) {
 	var table = document.createElement("table");
 	
-	// url=  zotero://timeline/intervals/timelineDate/dateType/type/ids/
-	var parts = url.split('/');
-	var intervals = parts[3];
-	if (intervals.length < 3) {
-		intervals += "mye".substr(intervals.length);
+	var [path, queryString] = url.split('?');
+	if(path == 'zotero://timeline') {
+		path += '/';
 	}
+	if(path =='zotero://timeline/') {
+		path += 'library';
+	}
+	var defaultQueryValue = new Object();
+		defaultQueryValue['i'] = 'mye';
+		defaultQueryValue['t'] = 'd';
+		
+	var theQueryValue = new Object;
+	
+	if (queryString) {
+		var queryVars = queryString.split('&');
+		for (var i in queryVars) {
+			var [key, val] = queryVars[i].split('=');
+			if(val) {
+				switch (key) {
+					case 'i':
+						theQueryValue['i'] = val;
+						break;
+					case 't':
+						theQueryValue['t'] = val;
+						break;
+				}
+			}
+		}
+	}
+	
+	var intervals = (theQueryValue['i']) ? theQueryValue['i'] : defaultQueryValue['i'];
+	if (intervals.length < 3) {
+		intervals += defaultQueryValue['i'].substr(intervals.length);
+	}
+	var dateType = (theQueryValue['t']) ? theQueryValue['t'] : defaultQueryValue['t'];
+	if(dateType != 'da' && dateType != 'dm') {
+		dateType = defaultQueryValue['t'];
+	}
+	
 	var tr = table.insertRow(0);
 	
 	var td = tr.insertCell(0);
@@ -190,8 +255,8 @@ function setupOtherControls(div, timeline, url) {
 	var input = document.createElement("input");
 	input.type = "text";
 	input.size = "15";
-	input.id="jumpYear";
-	input.onkeypress=doReturn;
+	input.id = "jumpYear";
+	input.onkeypress=doTheKeyPress;
 	td.appendChild(input);
 	
 	var options = new Array(localeHash["interval.day"], localeHash["interval.month"], localeHash["interval.year"],
@@ -207,7 +272,7 @@ function setupOtherControls(div, timeline, url) {
 		select1.appendChild(createOption(options[i],(options[i] == selected)));
 	}
 	select1.onchange = function () {
-		changeBand(0, intervals, getTimelineDate(timeline), url, table.rows[1].cells[1].firstChild.selectedIndex);
+		changeBand(path, createQueryString(theQueryValue, 'i', timeline), 0, intervals, table.rows[1].cells[1].firstChild.selectedIndex);
 	};
 	td.appendChild(select1);
 	
@@ -219,7 +284,7 @@ function setupOtherControls(div, timeline, url) {
 		select2.appendChild(createOption(options[i],(options[i] == selected)));
 	}
 	select2.onchange = function () {
-		changeBand(1, intervals, getTimelineDate(timeline), url, table.rows[1].cells[2].firstChild.selectedIndex);
+		changeBand(path, createQueryString(theQueryValue, 'i', timeline), 1, intervals, table.rows[1].cells[2].firstChild.selectedIndex);
 	};
 	td.appendChild(select2);
 	
@@ -231,27 +296,21 @@ function setupOtherControls(div, timeline, url) {
 		select3.appendChild(createOption(options[i],(options[i] == selected)));
 	}
 	select3.onchange = function () {
-		changeBand(2, intervals, getTimelineDate(timeline), url, table.rows[1].cells[3].firstChild.selectedIndex);
+		changeBand(path, createQueryString(theQueryValue, 'i', timeline), 2, intervals, table.rows[1].cells[3].firstChild.selectedIndex);
 	};
 	td.appendChild(select3);
 	
+	
 	td = tr.insertCell(tr.cells.length);
 	options = new Array(localeHash["dateType.published"], localeHash["dateType.added"], localeHash["dateType.modified"]);
-	var values = new Array('date', 'dateAdded', 'dateModified');
+	var values = new Array('d', 'da', 'dm');
 	var select4 = document.createElement("select");
-	selected = 0;
-	if (parts[5]) {
-		selected = values.indexOf(parts[5]);
-	}
-	if (selected < 0) {
-		selected = 0;
-	}
-	
+		
 	for (var i = 0; i < options.length; i++) {
-		select4.appendChild(createOption(options[i],(i == selected)));
+		select4.appendChild(createOption(options[i],(values[i] == dateType)));
 	}
 	select4.onchange = function () {
-		changeDateType(url, intervals, values, getTimelineDate(timeline), table.rows[1].cells[4].firstChild.selectedIndex);
+		window.location = path + createQueryString(theQueryValue, 't', timeline) + 't=' + values[table.rows[1].cells[4].firstChild.selectedIndex];
 	};
 	td.appendChild(select4);
 	
@@ -259,22 +318,9 @@ function setupOtherControls(div, timeline, url) {
 	var fitToScreen = document.createElement("button");
 	fitToScreen.innerHTML = localeHash["general.fitToScreen"];
 	Timeline.DOM.registerEvent(fitToScreen, "click", function () {
-		var temp = url.split('/');
-		temp[3] = intervals;
-		temp[4] = getTimelineDate(timeline);
-		window.location = temp.join('/');
+		window.location = path + createQueryString(theQueryValue, false, timeline);
 	});
 	td.appendChild(fitToScreen);
-
-	tr = table.insertRow(2);
-	td = tr.insertCell(0);
-	
-	var button = document.createElement("button");
-	button.innerHTML = localeHash["general.go"];
-	Timeline.DOM.registerEvent(button, "click", function () {
-		checkDate(table.rows[1].cells[0].firstChild.value);
-	});
-	td.appendChild(button);
 	
 	div.appendChild(table);
 }

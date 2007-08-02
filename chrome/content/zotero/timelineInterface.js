@@ -28,21 +28,17 @@ var Zotero_Timeline_Interface = new function() {
 	 * Load a timeline for the currently selected collection
 	 */
 	function loadTimeline() {
-		var today=Date();
-		var dateParts=today.toString().split(' ');
-		today=dateParts[1]+'.'+dateParts[2]+'.'+dateParts[3];
-		
-		var uri = 'zotero://timeline/mye/' + today + '/date';
+		var uri = 'zotero://timeline/';
 		var id = ZoteroPane.getSelectedCollection(true);
 		
 		if (id) {
-			window.loadURI(uri + '/collection/' + id);
+			window.loadURI(uri + 'collection/' + id);
 			return;
 		}
 		
 		var id = ZoteroPane.getSelectedSavedSearch(true);
 		if (id) {
-			window.loadURI(uri + '/search/' + id);
+			window.loadURI(uri + 'search/' + id);
 			return;
 		}
 		
