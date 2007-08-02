@@ -81,6 +81,8 @@ Timeline.Platform = new Object();
 		Modified by Ben for Zotero
 	*/
     
+
+
     // ISO-639 language codes, ISO-3166 country codes (2 characters)
     var supportedLocales = [
         "cs",       // Czech
@@ -255,6 +257,8 @@ Timeline.Platform = new Object();
 			Modified by Ben for Zotero
 		*/
         
+
+
         Timeline.Platform.serverLocale = defaultServerLocale;
         Timeline.Platform.clientLocale = defaultClientLocale;
     } catch (e) {

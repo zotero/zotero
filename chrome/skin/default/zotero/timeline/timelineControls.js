@@ -61,7 +61,7 @@ function wasChanged(current) {
 	}
 }
 
-function doTheKeyPress(e)
+function doKeyPress(e)
 {
 	clearTimeout(jumpToYearTimer);
 	lastJumpToYearValue = document.getElementById('jumpYear').value;
@@ -223,7 +223,7 @@ function setupOtherControls(div, timeline, url) {
 			}
 		}
 	}
-	
+
 	var intervals = (theQueryValue['i']) ? theQueryValue['i'] : defaultQueryValue['i'];
 	if (intervals.length < 3) {
 		intervals += defaultQueryValue['i'].substr(intervals.length);
@@ -256,7 +256,7 @@ function setupOtherControls(div, timeline, url) {
 	input.type = "text";
 	input.size = "15";
 	input.id = "jumpYear";
-	input.onkeypress=doTheKeyPress;
+	input.onkeypress=doKeyPress;
 	td.appendChild(input);
 	
 	var options = new Array(localeHash["interval.day"], localeHash["interval.month"], localeHash["interval.year"],
@@ -326,7 +326,7 @@ function setupOtherControls(div, timeline, url) {
 }
 
 /*
-	Everything below is from http://simile.mit.edu/timeline/examples/examples.js
+	Everything below is from http://simile.mit.edu/timeline/examples/examples.js unless noted otherwise
 */
 
 function centerTimeline(date) {
@@ -354,7 +354,7 @@ function setupFilterHighlightControls(div, timeline, bandIndices, theme) {
 	
 	var input = document.createElement("input");
 	input.type = "text";
-	input.size = "18";
+	input.size = "18";//Added by Ben for Zotero
 	Timeline.DOM.registerEvent(input, "keypress", handler);
 	td.appendChild(input);
 	
@@ -365,7 +365,7 @@ function setupFilterHighlightControls(div, timeline, bandIndices, theme) {
 		input.type = "text";
 		Timeline.DOM.registerEvent(input, "keypress", handler);
 		td.appendChild(input);
-		input.size = "15";
+		input.size = "15";//Added by Ben for Zotero
 		var divColor = document.createElement("div");
 		divColor.style.height = "0.5em";
 		divColor.style.background = theme.event.highlightColors[i];

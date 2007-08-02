@@ -325,6 +325,18 @@ function ChromeExtensionHandler() {
 					var c = (theIntervals[intervals[2]]) ? theIntervals[intervals[2]] : 'Timeline.DateTime.DECADE';
 					content = content.replace(theTemp, theTemp + a + ',' + b + ',' + c + ',\'' + timelineDate + '\'');
 					
+					theTemp = 'document.write("<title>';
+					if(type == 'collection') {
+						var theCollection = Zotero.Collections.get(id);
+						content = content.replace(theTemp, theTemp + theCollection.getName() + ' - ');
+					}
+					else if(type == 'search') {
+						var theSearch = Zotero.Searches.get(id);
+						content = content.replace(theTemp, theTemp + theSearch['name'] + ' - ');
+					}
+					else {
+						content = content.replace(theTemp, theTemp + Zotero.getString('pane.collections.library') + ' - ');
+					}
 					
 					theTemp = 'Timeline.loadXML("zotero://timeline/data/';
 					var d = '';
