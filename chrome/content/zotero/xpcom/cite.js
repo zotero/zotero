@@ -106,7 +106,7 @@ Zotero.CSL = function(csl) {
 	// load localizations
 	this._terms = Zotero.CSL.Global.parseLocales(this._csl.terms);
 	
-	// load class defaults
+	// load class
 	this.class =  this._csl["@class"].toString();
 	Zotero.debug("CSL: style class is "+this.class);
 	
@@ -124,32 +124,6 @@ Zotero.CSL._namesVariables = {
 	"author":true
 }
 
-Zotero.CSL._textVariables = {
-	"title":true,
-	"container-title":true,
-	"collection-title":true,
-	"publisher":true,
-	"locator":true,
-	"pages":true,
-	"status":true,
-	"identifier":true,
-	"version":true,
-	"volume":true,
-	"issue":true,
-	"number-of-volumes":true,
-	"medium":true,
-	"edition":true,
-	"genre":true,
-	"note":true,
-	"annote":true,
-	"abstract":true,
-	"keyword":true,
-	"number":true,
-	"URL":true,
-	"DOI":true,
-	"status":true
-}
-
 /*
  * generate an item set
  */
@@ -160,42 +134,36 @@ Zotero.CSL.prototype.generateItemSet = function(items) {
 /*
  * create a citation (in-text or footnote)
  */
-Zotero.CSL.prototype.createCitation = function(itemSet, itemIDs, format, position, locators, locatorTypes) {
+Zotero.CSL.prototype.createCitation = function(itemSet, items, format, position, locators, locatorTypes) {
 	var context = this._csl.citation;
 	if(!context) {
 		throw "CSL: createCitation called on style with no citation context";
 	}
+	if(!items.length) {
+		throw "CSL: createCitation called with no items";
+	}
 	
-	// get items
-	var items = itemSet.getItemsByIds(itemIDs);
-	
-	var string = new Zotero.CSL.FormattedString(this, format);
-	var lasti = items.length-1;
-	
+	var string = new Zotero.CSL.FormattedString(this, format, context.layout.@delimiter.toString());
 	for(var i in items) {
-		var locatorType = false;
-		var locator = false;
+		if(items[i] == undefined) continue;
+		
 		if(locators) {
-			locatorType = locatorTypes[i];
-			locator = locators[i];
+			var locatorType = locatorTypes[i];
+			var locator = locators[i];
+		} else {
+			var locatorType = false;
+			var locator = false;
 		}
 		
-		var citationString = this._getCitation(items[i], context, format, position, locator, locatorType);
+		var citationString = new Zotero.CSL.FormattedString(this, format);
+		this._processElements(items[i], context.layout, citationString,
+			context, position, locator, locatorType);
 		string.concat(citationString);
-		
-		if(context.@delimiter.length() && i != lasti) {
-			// add delimiter if one exists, and this isn't the last element
-			string.append(context.@delimiter.toString());
-		}
 	}
 	
-	// add citation prefix or suffix
-	string.string = context.layout.@prefix.toString() + string.string;
-	if(context.layout.@suffix.length()) {
-		string.append(context.layout.@suffix.toString());
-	}
-	
-	return string.get();
+	var returnString = new Zotero.CSL.FormattedString(this, format);
+	returnString.append(string.get(), context.layout);
+	return returnString.get();
 }
 
 /*
@@ -231,8 +199,11 @@ Zotero.CSL.prototype.createBibliography = function(itemSet, format) {
 	
 	for(var i in itemSet.items) {
 		var item = itemSet.items[i];
+		if(item == undefined) continue;
 		
-		var string = this._getCitation(item, context, format, "first");
+		var string = new Zotero.CSL.FormattedString(this, format);
+		this._processElements(item, context.layout, string,
+			context, "first");
 		if(!string) {
 			continue;
 		}
@@ -291,19 +262,6 @@ Zotero.CSL.prototype.createBibliography = function(itemSet, format) {
 }
 
 /*
- * get a citation, given an item and bibCitElement
- */
-Zotero.CSL.prototype._getCitation = function(item, context, format, position, locator, locatorType) {
-	Zotero.debug("CSL: generating citation for item");
-	
-	var formattedString = new Zotero.CSL.FormattedString(this, format);
-	this._processElements(item, context.layout, formattedString,
-		context, position, locator, locatorType);
-	
-	return formattedString;
-}
-
-/*
  * gets a term, in singular or plural form
  */
 Zotero.CSL.prototype._getTerm = function(term, plural, form) {
@@ -337,40 +295,14 @@ Zotero.CSL.prototype._processNames = function(item, element, formattedString, co
 	if(!children.length()) return false;
 	var variableSucceeded = false;
 	
-	// Special routine for sorted names
-	if(formattedString.format == "Sort") {
-		for(var j=0; j<variables.length; j++) {
-			var creators = item.getNames(variables[j]);
-			
-			if(creators.length) {
-				newString = formattedString.clone();
-				
-				for each(var creator in creators) {
-					var name = creator.getNameVariable("lastName");
-					var firstName = creator.getNameVariable("firstName");
-					if(name && firstName) name += ", ";
-					name += firstName;
-					
-					newString.append(name);
-				}
-				
-				formattedString.concat(newString);
-				variableSucceeded = true;
-			}
-		}
-		
-		return variableSucceeded;
-	}
-	
-	var isShort = element.@form.toString() == "short";
-			
 	for(var j=0; j<variables.length; j++) {
 		var success = false;
 		newString = formattedString.clone();
 		
-		if(context.option.(@name == "subsequent-author-substitute").length()
+		if(formattedString.format != "Sort" && variables[j] == "author"
+				&& context.option.(@name == "subsequent-author-substitute").length()
 				&& item.getProperty("subsequent-author-substitute")
-				&& variables[j] == "author") {
+				&& context.localName() == "bibliography") {
 			newString.append(context.option.(@name == "subsequent-author-substitute").@value.toString());
 			success = true;
 		} else {
@@ -386,86 +318,120 @@ Zotero.CSL.prototype._processNames = function(item, element, formattedString, co
 					if(name == "name") {
 						var useEtAl = false;
 						
-						// figure out if we need to use "et al"
-						var etAlMin = context.option.(@name == "et-al-min").@value.toString();
-						var etAlUseFirst = context.option.(@name == "et-al-use-first").@value.toString();
-						
-						if(position == "subsequent" && context.option.(@name == "et-al-subsequent-min").length()) {
-							etAlMin = context.option.(@name == "et-al-subsequent-min").@value.toString();
-						}
-						if(position == "subsequent" && context.option.(@name == "et-al-subsequent-use-first").length()) {
-							etAlUseFirst = context.option.(@name == "et-al-subsequent-use-first").@value.toString();
-						}
-						
-						if(etAlMin && etAlUseFirst && maxCreators >= parseInt(etAlMin, 10)) {
-							maxCreators = parseInt(etAlUseFirst, 10);
-							useEtAl = true;
+						if(context) {
+							// figure out if we need to use "et al"
+							var etAlMin = context.option.(@name == "et-al-min").@value.toString();
+							var etAlUseFirst = context.option.(@name == "et-al-use-first").@value.toString();
+							
+							if(position == "subsequent" && context.option.(@name == "et-al-subsequent-min").length()) {
+								etAlMin = context.option.(@name == "et-al-subsequent-min").@value.toString();
+							}
+							if(position == "subsequent" && context.option.(@name == "et-al-subsequent-use-first").length()) {
+								etAlUseFirst = context.option.(@name == "et-al-subsequent-use-first").@value.toString();
+							}
+							
+							if(etAlMin && etAlUseFirst && maxCreators >= parseInt(etAlMin, 10)) {
+								maxCreators = parseInt(etAlUseFirst, 10);
+								useEtAl = true;
+							}
+							
+							// add additional names to disambiguate
+							if(variables[j] == "author" && useEtAl) {
+								var disambigNames = item.getProperty("disambiguate-add-names");
+								if(disambigNames != "") {
+									maxCreators = disambigNames;
+									if(disambigNames == creators.length) useEtAl = false;
+								}
+							}
+							
+							var authorStrings = [];
+							var firstName, lastName;
+							
+							if(child.@form == "short") {
+								var fullNames = item.getProperty("disambiguate-add-givenname").split(",");
+							}
 						}
 						
 						// parse authors into strings
-						var authorStrings = [];
-						var firstName, lastName;
 						for(var i=0; i<maxCreators; i++) {
-							var firstName = "";
-							if(!isShort && child.@form != "short") {
-								if(child["@initialize-with"].length()) {
-									// even if initialize-with is simply an empty string, use
-									// initials
-									
-									// use first initials
-									var firstNames = creators[i].getNameVariable("firstName").split(" ");
-									for(var k in firstNames) {
-										if(firstNames[k]) {
-											// get first initial, put in upper case, add initializeWith string
-											firstName += firstNames[k][0].toUpperCase()+child["@initialize-with"].toString();
-										}
-									}
-								} else {
-									firstName = creators[i].getNameVariable("firstName");
-								}
-							}
-							lastName = creators[i].getNameVariable("lastName");
-							
-							if(child["@name-as-sort-order"].length()
-							  && ((i == 0 && child["@name-as-sort-order"] == "first")
-							  || child["@name-as-sort-order"] == "all")
-							  && child["@sort-separator"].length()) {
-								// if this is the first author and name-as-sort="first"
-								// or if this is a subsequent author and name-as-sort="all"
-								// then the name gets inverted
-								authorStrings.push(lastName+(firstName ? child["@sort-separator"].toString()+firstName : ""));
+							if(formattedString.format == "Sort") {
+								// for sort, we use the plain names
+								var name = creators[i].getNameVariable("lastName");
+								var firstName = creators[i].getNameVariable("firstName");
+								if(name && firstName) name += ", ";
+								name += firstName;
+								
+								newString.append(name);
 							} else {
-								authorStrings.push((firstName ? firstName+" " : "")+lastName);
+								var firstName = "";
+								
+								if(child.@form != "short" || (fullNames && fullNames.indexOf(i) != -1)) {
+									if(child["@initialize-with"].length()) {
+										// even if initialize-with is simply an empty string, use
+										// initials
+										
+										// use first initials
+										var firstNames = creators[i].getNameVariable("firstName").split(" ");
+										for(var k in firstNames) {
+											if(firstNames[k]) {
+												// get first initial, put in upper case, add initializeWith string
+												firstName += firstNames[k][0].toUpperCase()+child["@initialize-with"].toString();
+											}
+										}
+								
+										if(firstName[firstName.length-1] == " ") {
+											firstName = firstName.substr(0, firstName.length-1);
+										}
+									} else {
+										firstName = creators[i].getNameVariable("firstName");
+									}
+								}
+								lastName = creators[i].getNameVariable("lastName");
+								
+								if(child["@name-as-sort-order"].length()
+								  && ((i == 0 && child["@name-as-sort-order"] == "first")
+								  || child["@name-as-sort-order"] == "all")
+								  && child["@sort-separator"].length()) {
+									// if this is the first author and name-as-sort="first"
+									// or if this is a subsequent author and name-as-sort="all"
+									// then the name gets inverted
+									authorStrings.push(lastName+(firstName ? child["@sort-separator"].toString()+firstName : ""));
+								} else {
+									authorStrings.push((firstName ? firstName+" " : "")+lastName);
+								}
 							}
 						}
 						
-						// figure out if we need an "and" or an "et al"
-						var joinString = (child["@delimiter"].length() ? child["@delimiter"].toString() : ", ");
-						if(creators.length > 1) {
-							if(useEtAl) {	// multiple creators and need et al
-								authorStrings.push(this._getTerm("et-al"));
-							} else {		// multiple creators but no et al
-								// add and to last creator
-								if(child["@and"].length()) {
-									if(child["@and"] == "symbol") {
-										var and = "&"
-									} else if(child["@and"] == "text") {
-										var and = this._getTerm("and");
+						if(formattedString.format != "Sort") {
+							// figure out if we need an "and" or an "et al"
+							var joinString = (child["@delimiter"].length() ? child["@delimiter"].toString() : ", ");
+							if(creators.length > 1) {
+								if(useEtAl) {	// multiple creators and need et al
+									authorStrings.push(this._getTerm("et-al"));
+								} else {		// multiple creators but no et al
+									// add and to last creator
+									if(child["@and"].length()) {
+										if(child["@and"] == "symbol") {
+											var and = "&"
+										} else if(child["@and"] == "text") {
+											var and = this._getTerm("and");
+										}
+										
+										authorStrings[maxCreators-1] = and+" "+authorStrings[maxCreators-1];
 									}
-									
-									authorStrings[maxCreators-1] = and+" "+authorStrings[maxCreators-1];
+								}
+								
+								// check whether to use a serial comma
+								if((authorStrings.length == 2 && (child["@delimiter-precedes-last"] != "always" || useEtAl)) ||
+								   (authorStrings.length > 2 && child["@delimiter-precedes-last"] == "never")) {
+									var lastString = authorStrings.pop();
+									authorStrings[authorStrings.length-1] = authorStrings[authorStrings.length-1]+" "+lastString;
 								}
 							}
-							
-							// check whether to use a serial comma
-							if((authorStrings.length == 2 && child["@delimiter-precedes-last"] != "always") ||
-							   (authorStrings.length > 2 && child["@delimiter-precedes-last"] == "never")) {
-								var lastString = authorStrings.pop();
-								authorStrings[authorStrings.length-1] = authorStrings[authorStrings.length-1]+" "+lastString;
-							}
+							newString.append(authorStrings.join(joinString), child);
 						}
-						newString.append(authorStrings.join(joinString), child);
-					} else if(name == "label" && variables[j] != "author") {
+					} else if(formattedString.format != "Sort" && 
+							name == "label" && variables[j] != "author") {
 						newString.append(this._getTerm(variables[j], (maxCreators != 1), child["@form"].toString()), child);
 					}
 				}
@@ -487,7 +453,6 @@ Zotero.CSL.prototype._processNames = function(item, element, formattedString, co
  */
 Zotero.CSL.prototype._processElements = function(item, element, formattedString,
 		context, position, locator, locatorType, ignore, isSingle) {
-	
 	if(!ignore) {
 		ignore = new Array();
 		ignore[0] = new Array();		// for variables
@@ -513,8 +478,8 @@ Zotero.CSL.prototype._processElements = function(item, element, formattedString,
 		var name = child.localName();
 		
 		if(name == "text") {
-			if(child["@term-name"].length()) {
-				var term = this._getTerm(child["@term-name"].toString(), child.@plural.length(), child.@form.toString());
+			if(child["@term"].length()) {
+				var term = this._getTerm(child["@term"].toString(), child.@plural.length(), child.@form.toString());
 				if(term) {
 					formattedString.append(term, child);
 				}
@@ -527,7 +492,12 @@ Zotero.CSL.prototype._processElements = function(item, element, formattedString,
 				for(var j=0; j<variables.length; j++) {
 					if(ignore[0][variables[j]]) continue;
 					
-					var text = item.getText(variables[j], form);
+					if(variables[j] == "locator") {
+						// special case for locator
+						var text = locator;
+					} else {
+						var text = item.getText(variables[j], form);
+					}
 					
 					if(text) {
 						newString.append(text);
@@ -544,14 +514,46 @@ Zotero.CSL.prototype._processElements = function(item, element, formattedString,
 				if(!macro.length()) throw "CSL: style references undefined macro";
 				
 				// If not ignored (bc already used as a substitution)
-				if(!ignore[1][child.@macro.toString()]) {			
+				if(!ignore[1][child.@macro.toString()]) {
 					var newString = formattedString.clone(child.@delimiter.toString());
 					var success = this._processElements(item, macro, newString,
-						context, position, locatorType, ignore);
+						context, position, locator, locatorType, ignore);
 					
 					formattedString.concat(newString, child);
 					dataAppended = true;
 				}
+			}
+		} else if(name == "label") {
+			var form = child.@form.toString();
+			var variables = child["@variable"].toString().split(" ");
+			var newString = formattedString.clone(child.@delimiter.toString());
+			var success = false;
+			
+			for(var j=0; j<variables.length; j++) {
+				if(ignore[0][variables[j]]) continue;
+				
+				if(variables[j] == "locator") {
+					// special case for locator
+					var term = locatorType;
+					var value = locator;
+				} else {
+					var term = variables[j];
+					var value = item.getText(variables[j]);
+				}
+				
+				if(term && value) {
+					var isPlural = value.indexOf("-") != -1 || value.indexOf("—") != -1 || value.indexOf(",") != -1;
+					var text = this._getTerm(term, isPlural, child.@form.toString());
+					
+					if(text) {
+						newString.append(text);
+						success = true;
+					}
+				}
+			}
+			
+			if(success) {
+				formattedString.concat(newString, child);
 			}
 		} else if(name == "names") {
 			var variables = child["@variable"].toString().split(" ");
@@ -625,36 +627,40 @@ Zotero.CSL.prototype._processElements = function(item, element, formattedString,
 						var newName = newChild.localName();
 						var newForm = newChild.@form.toString();
 						
-						if(newName == "text") {
-							var string = this.CSL._getTerm(newChild["@term-name"].toString(), false, form);
-						} else if(newName == "date-part") {
+						if(newName == "date-part") {
 							var part = newChild.@name.toString();
-							var string = date.getDateVariable(part);
+							var string = date.getDateVariable(part).toString();
 							if(string == "") continue;
 						
 							if(part == "year") {
+								// if 4 digits and no B.C., use short form
 								if(newForm == "short" && string.length == 4 && !isNaN(string*1)) {
 									string = string.substr(2, 2);
 								}
 								
-								var disambiguate = item.getProperty("disambiguate");
-								if(disambiguate && variable == "published" &&
-										context.option.(@name == "disambiguate-year-suffix").length()) {
+								var disambiguate = item.getProperty("disambiguate-add-year-suffix");
+								if(disambiguate && variables[j] == "issued") {
 									string += disambiguate;
 								}
 							} else if(part == "month") {
-								isNumeric = !isNaN(string*1);
-								
-								if(isNumeric) {
-									if(form == "numeric") {
-										string = month;
+								// if month is a numeric month, format as such
+								if(!isNaN(string*1)) {
+									if(form == "numeric-leading-zeros") {
+										if(string.length == 1) {
+											string = "0" + string;
+										}
 									} else if(form == "short") {
 										string = this._terms["short"]["_months"][string];
-									} else {
+									} else if(form != "numeric") {
 										string = this._terms["long"]["_months"][string];
 									}
 								} else if(form == "numeric") {
 									string = "";
+								}
+							} else if(part == "day") {
+								if(form == "numeric-leading-zeros"
+										&& string.length() == 1) {
+									string = "0" + string;
 								}
 							}
 						}
@@ -931,7 +937,12 @@ Zotero.CSL.Global = new function() {
  * with "_") are implemented.
  */
 Zotero.CSL.Item = function(item) {
-	this.zoteroItem = item;
+	if(!(item instanceof Zotero.Item)) {
+		throw "Zotero.CSL.Item called to wrap a non-item";
+	} else {
+		this.zoteroItem = item;
+	}
+	
 	this._dates = {};
 	this._properties = {};
 }
@@ -976,15 +987,16 @@ Zotero.CSL.Item._zoteroFieldMap = {
 	"container-title":"publicationTitle",
 	"collection-title":["seriesTitle", "series"],
 	"publisher":"publisher",
-	"pages":"pages",
+	"publisher-place":"place",
+	"page":"pages",
 	"volume":"volume",
 	"issue":"issue",
-	"number-of-volumes":"number-of-volumes",
+	"number-of-volumes":"numberOfVolumes",
 	"edition":"edition",
 	"genre":"type",
 	"abstract":"abstract",
 	"URL":"url",
-	"DOI":"doi"
+	"DOI":"DOI"
 }
 
 /*
@@ -1124,12 +1136,12 @@ Zotero.CSL.Item.prototype._separateNames = function() {
 }
 
 /*
- * Generates an date object for a given variable (currently supported: published
+ * Generates an date object for a given variable (currently supported: issued
  * and accessed)
  */
 Zotero.CSL.Item.prototype._createDate = function(variable) {
 	// first, figure out what date variable to use.
-	if(variable == "published") {
+	if(variable == "issued") {
 		var date = this.zoteroItem.getField("date", false, true);
 		var sort = this.zoteroItem.getField("date", true, true);
 	} else if(variable == "accessed") {
@@ -1203,7 +1215,7 @@ Zotero.CSL.Item.Name.prototype.getNameVariable = function(variable) {
  * When an array of items are passed to create a new item set, each is wrapped
  * in an item wrapper.
  */
-Zotero.CSL.ItemSet = function(unwrappedItems, csl) {
+Zotero.CSL.ItemSet = function(items, csl) {
 	var localeService = Components.classes["@mozilla.org/intl/nslocaleservice;1"]
 		.getService(Components.interfaces.nsILocaleService);
 	var collationFactory = Components.classes["@mozilla.org/intl/collation-factory;1"]
@@ -1212,91 +1224,38 @@ Zotero.CSL.ItemSet = function(unwrappedItems, csl) {
 	
 	this.csl = csl;
 	
-	this.postprocess = false;
-	this.bib = csl._csl.bibliography;
-	if(this.bib.option.(@name == "disambiguate").length()
-			|| this.bib.option.(@name == "subsequent-author-substitute").length()) {
-		this.postprocess = true;
+	this.citation = csl._csl.citation;
+	this.bibliography = csl._csl.bibliography;
+	
+	// collect options
+	this.options = new Object();
+	options = this.citation.option.(@name.substr(0, 12) == "disambiguate")
+		+ this.bibliography.option.(@name == "subsequent-author-substitute");
+	for each(var option in options) {
+		this.options[option.@name.toString()] = option.@value.toString();
 	}
 	
 	this.items = [];
 	this.itemsById = {};
 	
-	if(!unwrappedItems) {
+	// add items
+	this.add(items);
+	
+	// check which disambiguation options are enabled
+	enabledDisambiguationOptions = new Array();
+	for each(var option in ["disambiguate-add-year-suffix",
+			"disambiguate-add-givenname", "disambiguate-add-names",
+			"disambiguate-add-title"]) {
+		if(this.options[option]) {
+			enabledDisambiguationOptions.push(option);
+		}
+	}
+	
+	if(!items) {
 		return;
 	}
 	
-	// add data (authors, editors, translators, etc.)
-	for(var i in unwrappedItems) {
-		var newItem = new Zotero.CSL.Item(unwrappedItems[i]);
-		this.items.push(newItem);
-		this.itemsById[newItem.getID()] = newItem;
-	}
-	
-	if(this.bib.option.(@name == "sort-algorithm").length()
-			&& this.bib.option.(@name == "sort-algorithm").@value != "cited") {
-		this.resort();
-	}
-	
-	// run postprocessing (subsequent author substitute and disambiguation)
-	if(this.postprocess) {
-		var lastItem = false;
-		var lastNames = false;
-		var lastYear = false;
-		
-		for(var i in this.items) {
-			var item = this.items[i];
-			
-			var year = item.getDate("published");
-			if(year) year = year.getDateVariable("year");
-			var names = item.getNames("author");
-			
-			if(names && lastNames && !this._compareNames(names, lastNames)) {
-				if(year && year == lastYear) {
-					var oldDisambiguate = lastItem.getProperty("disambiguate");
-					if(!oldDisambiguate) {
-						lastItem.setProperty("disambiguate", "a");
-						item.setProperty("disambiguate", "b");
-					} else {
-						var newDisambiguate = "";
-						if(oldDisambiguate.length > 1) {
-							newDisambiguate = oldLetter.substr(0, oldDisambiguate.length-1);
-						}
-						
-						var charCode = oldDisambiguate.charCodeAt(oldDisambiguate.length-1);
-						if(charCode == 122) {
-							// item is z; add another letter
-							newDisambiguate += "a";
-						} else {
-							// next lowercase letter
-							newDisambiguate += String.fromCharCode(charCode+1);
-						}
-						
-						item.setProperty("disambiguate", newDisambiguate);
-					}
-				}
-				
-				item.setProperty("subsequent-author-substitute", "1");
-			}
-			
-			item.setProperty("number", i+1);
-			
-			lastItem = item;
-			lastNames = names;
-			lastYear = year;
-		}
-	}
-}
-
-/*
- * Sorts the item set, running postprocessing afterwards
- */
-Zotero.CSL.ItemSet.prototype.resort = function() {
-	var me = this;
-	
-	this.items = this.items.sort(function(a, b) {
-		return me._compareItem(a, b);
-	});
+	this.resort();
 }
 
 /*
@@ -1305,11 +1264,259 @@ Zotero.CSL.ItemSet.prototype.resort = function() {
 Zotero.CSL.ItemSet.prototype.getItemsByIds = function(ids) {
 	var items = [];
 	for each(var id in ids) {
-		if(this.itemsById[id]) {
+		if(this.itemsById[id] != undefined) {
 			items.push(this.itemsById[id]);
 		}
 	}
 	return items;
+}
+
+/*
+ * Adds items to the given item set; must be passed either CSL.Item 
+ * objects or objects that may be wrapped as CSL.Item objects
+ */
+Zotero.CSL.ItemSet.prototype.add = function(items) {
+	for(var i in items) {
+		if(items[i] instanceof Zotero.CSL.Item) {
+			var newItem = items[i];
+		} else {
+			var newItem = new Zotero.CSL.Item(items[i]);
+		}
+		
+		this.itemsById[newItem.getID()] = newItem;
+		this.items.push(newItem);
+	}
+}
+
+/*
+ * Removes items from the item set; must be passed either CSL.Item objects
+ * or item IDs
+ */
+Zotero.CSL.ItemSet.prototype.remove = function(items) {
+	for(var i in items) {
+		if(items[i] instanceof Zotero.CSL.Item) {
+			var item = items[i];
+		} else {
+			var item = this.itemsById[items[i]];
+		}
+		this.itemsById[item.getID()] = undefined;
+		this.items.splice(this.items.indexOf(item), 1);
+	}
+}
+
+/*
+ * Sorts the item set, also running postprocessing and returning items whose
+ * citations have changed
+ */
+Zotero.CSL.ItemSet.prototype.resort = function() {
+	// sort, if necessary
+	if(this.bibliography.option.(@name == "sort-algorithm").length()
+			&& this.bibliography.option.(@name == "sort-algorithm").@value != "cited") {
+		var me = this;
+		
+		this.items = this.items.sort(function(a, b) {
+			return me._compareItem(a, b);
+		});
+	}
+	
+	changedCitations = new Array();
+	
+	// first loop through to collect disambiguation data by item, so we can
+	// see if any items have changed
+	if(enabledDisambiguationOptions.length) {
+		oldDisambiguate = new Array();
+		for(var i in enabledDisambiguationOptions) {
+			oldDisambiguate[i] = new Array();
+			for(var j in this.items) {
+				if(this.items[j] == undefined) continue;
+				oldDisambiguate[i][j] = this.items[j].getProperty(enabledDisambiguationOptions[i]);
+				this.items[j].setProperty(enabledDisambiguationOptions[i], "");
+			}
+		}
+	}
+	
+	// loop through once to determine where items equal the previous item
+	if(enabledDisambiguationOptions.length) {
+		citationsEqual = [];
+		for(var i in this.items) {
+			citationsEqual[i] = this._compareCitations(this.items[i-1], this.items[i]);
+		}
+	}
+	
+	var lastItem = false;
+	var lastNames = false;
+	var lastYear = false;
+	for(var i in this.items) {
+		var item = this.items[i];
+		if(item == undefined) continue;
+		
+		var year = item.getDate("issued");
+		if(year) year = year.getDateVariable("year");
+		var names = item.getNames("author");
+		var disambiguated = false;
+		
+		// true only if names are an exact match
+		var exactMatch = this._compareNames(item, lastItem);
+		
+		if(enabledDisambiguationOptions.length && i != 0 && !citationsEqual[i]
+				&& year == lastYear) {
+			// some options can only be applied if there are actual authors
+			if(names && lastNames) {				
+				if(exactMatch == 0) {
+					// copy from previous item
+					this._copyDisambiguation(lastItem, item);
+				} else {
+					// these options only apply if not an _exact_ match
+					if(this.options["disambiguate-add-names"]) {
+						// try adding names to disambiguate
+						var oldAddNames = lastItem.getProperty("disambiguate-add-names");
+						
+						// if a different number of names, disambiguation is
+						// easy, although we should still see if there is a
+						// smaller number of names that works
+						var numberOfNames = names.length;
+						if(numberOfNames > lastNames.length) {
+							numberOfNames = lastNames.length;
+							item.setProperty("disambiguate-add-names", numberOfNames+1);
+							
+							// have to check old property
+							if(!oldAddNames || oldAddNames < numberOfNames) {
+								lastItem.setProperty("disambiguate-add-names", numberOfNames);
+							}
+							
+							disambiguated = true;
+						} else if(numberOfNames != lastNames.length) {
+							item.setProperty("disambiguate-add-names", numberOfNames);
+							
+							// have to check old property
+							if(!oldAddNames || oldAddNames < numberOfNames+1) {
+								lastItem.setProperty("disambiguate-add-names", numberOfNames+1);
+							}
+							
+							disambiguated = true;
+						}
+					}
+					
+					// now, loop through and see whether there's a
+					// dissimilarity before the end
+					for(var j=0; j<numberOfNames; j++) {
+						var lastUnequal = this.options["disambiguate-add-names"]
+							&& names[j].getNameVariable("lastName") != lastNames[j].getNameVariable("lastName");
+						var firstUnequal = this.options["disambiguate-add-givenname"]
+							&& names[j].getNameVariable("firstName") != lastNames[j].getNameVariable("firstName");
+						
+						if(lastUnequal || firstUnequal) {
+							if(this.options["disambiguate-add-names"]) {
+								item.setProperty("disambiguate-add-names", j+1);
+								
+								if(!oldAddNames || oldAddNames < j+1) {
+									lastItem.setProperty("disambiguate-add-names", j+1);
+								}
+							}
+							
+							// if the difference is only in the first
+							// name, show first name
+							if(!lastUnequal && firstUnequal) {
+								oldAddGivenname = lastItem.getProperty("disambiguate-add-givenname").split(",");
+								if(oldAddGivenname) {
+									if(oldAddGivenname.indexOf(j) == -1) {
+										oldAddGivenname.push(j);
+										lastItem.setProperty("disambiguate-add-givenname", oldAddGivenname.join(","));
+									}
+								} else {
+									lastItem.setProperty("disambiguate-add-givenname", j);
+								}
+								item.setProperty("disambiguate-add-givenname", j);
+							}
+							
+							// add to names before as well
+							for(var k=i-2; this._compareNames(lastItem, this.items[k]) == 0; k--) {
+								this._copyDisambiguation(lastItem, this.items[k]);
+							}
+							
+							disambiguated = true;
+							break;
+						}
+					}
+				}
+			}
+			
+			// add a year suffix, if the above didn't work
+			if(!disambiguated && year && this.options["disambiguate-add-year-suffix"]) {
+				var lastDisambiguate = lastItem.getProperty("disambiguate-add-year-suffix");
+				if(!lastDisambiguate) {
+					lastItem.setProperty("disambiguate-add-year-suffix", "a");
+					item.setProperty("disambiguate-add-year-suffix", "b");
+				} else {
+					var newDisambiguate = "";
+					if(lastDisambiguate.length > 1) {
+						newDisambiguate = oldLetter.substr(0, lastDisambiguate.length-1);
+					}
+					
+					var charCode = lastDisambiguate.charCodeAt(lastDisambiguate.length-1);
+					if(charCode == 122) {
+						// item is z; add another letter
+						newDisambiguate += "a";
+					} else {
+						// next lowercase letter
+						newDisambiguate += String.fromCharCode(charCode+1);
+					}
+					
+					item.setProperty("disambiguate-add-year-suffix", newDisambiguate);
+				}
+				
+				disambiguated = true;
+			}
+			
+			// add a title, if the above didn't work
+			if(!disambiguated) {
+				lastItem.setProperty("disambiguate-add-title", true);
+				item.setProperty("disambiguate-add-title", true);
+				
+				disambiguated = true;
+			}
+		}
+		
+		if(this.options["subsequent-author-substitute"] && names && lastNames
+				&& exactMatch) {
+			item.setProperty("subsequent-author-substitute", "1");
+		}
+		
+		
+		item.setProperty("number", i+1);
+		
+		lastItem = item;
+		lastNames = names;
+		lastYear = year;
+	}
+	
+	// find changed citations
+	if(enabledDisambiguationOptions.length) {
+		for(var j in this.items) {
+			if(this.items[j] == undefined) continue;
+			for(var i in enabledDisambiguationOptions) {
+				if(this.items[j].getProperty(enabledDisambiguationOptions[i]) != oldDisambiguate[i][j]) {
+					changedCitations.push(this.items[j]);
+				}
+			}
+		}
+	}
+	
+	return changedCitations;
+}
+
+/*
+ * Copies disambiguation settings (with the exception of disambiguate-add-year-suffix)
+ * from one item to another
+ */
+Zotero.CSL.ItemSet.prototype._copyDisambiguation = function(fromItem, toItem) {
+	for each(var option in ["disambiguate-add-givenname", "disambiguate-add-names",
+			"disambiguate-add-title"]) {
+		var value = fromItem.getProperty(option);
+		if(value) {
+			toItem.setProperty(option, value);
+		}
+	}
 }
 
 /*
@@ -1321,17 +1528,17 @@ Zotero.CSL.ItemSet.prototype._compareItem = function(a, b) {
 	var sortB = [];
 	
 	// author
-	if(this.bib.option.(@name == "sort-algorithm").@value == "author-date") {
+	if(this.bibliography.option.(@name == "sort-algorithm").@value == "author-date") {
 		var sortString = new Zotero.CSL.SortString();
 		this.csl._processElements(a, this.csl._csl.macro.(@name == "author"), sortString);
 		sortA.push(sortString.get().toLowerCase());
-		var date = a.getDate("published");
+		var date = a.getDate("issued");
 		if(date) sortA.push(date.getDateVariable("sort"));
 		
 		sortString = new Zotero.CSL.SortString();
 		this.csl._processElements(b, this.csl._csl.macro.(@name == "author"), sortString);
 		sortB.push(sortString.get().toLowerCase());
-		var date = b.getDate("published");
+		var date = b.getDate("issued");
 		if(date) sortB.push(date.getDateVariable("sort"));
 	}
 	
@@ -1357,20 +1564,56 @@ Zotero.CSL.ItemSet.prototype._compareItem = function(a, b) {
 }
 
 /*
+ * Compares two citations; returns true if they are different, false if they are equal
+ */
+Zotero.CSL.ItemSet.prototype._compareCitations = function(a, b) {
+	if((!a && b) || (a && !b)) {
+		return true;
+	} else if(!a && !b) {
+		return false;
+	}
+	
+	var aString = new Zotero.CSL.FormattedString(this, "Text");
+	this.csl._processElements(a, this.citation.layout, aString,
+		this.citation, "subsequent");
+		
+	var bString = new Zotero.CSL.FormattedString(this, "Text");
+	this.csl._processElements(b, this.citation.layout, bString,
+		this.citation, "subsequent");
+	
+	return !(aString.get() == bString.get());
+}
+
+/*
  * Compares the names from two items
  * Returns -1 if A comes before B, 1 if B comes before A, or 0 if they are equal
  */
-Zotero.CSL.ItemSet.prototype._compareNames = function(a, b) {
+Zotero.CSL.ItemSet.prototype._compareNames = function(a, b, context) {
+	if(!a && b) {
+		return -1;
+	} else if(!b && a) {
+		return 1;
+	} else if(!b && !a) {
+		return 0;
+	}
+	
 	var sortString = new Zotero.CSL.SortString();
-	this.csl._processElements(a, this.bib.macro.(@name == "author"), sortString);
+	this.csl._processElements(a, this.csl._csl.macro.(@name == "author"), sortString, context);
 	aString = sortString.get().toLowerCase();
 	
 	sortString = new Zotero.CSL.SortString();
-	this.csl._processElements(b, this.bib.macro.(@name == "author"), sortString);
+	this.csl._processElements(b, this.csl._csl.macro.(@name == "author"), sortString, context);
 	bString = sortString.get().toLowerCase();
-			
+	
 	if(aString != bString) {
-		return this._collation.compareString(0, aString, bString);;
+		var b = this._collation.compareString(0, aString, bString);
+		if(b != 0) return b;
+		
+		if(aString < bString) {
+			return -1;
+		} else {
+			return 1;
+		}
 	}
 	return 0;
 }
@@ -1604,16 +1847,16 @@ Zotero.CSL.FormattedString.prototype.clone = function(delimiter) {
 Zotero.CSL.SortString = function() {
 	this.format = "Sort";
 	this.string = "";
-	this.delimiter = "\u0000"; // null character
+	this.delimiter = "\003"; // null character
 }
 
 Zotero.CSL.SortString.prototype.concat = function(string) {
 	newString = string.get();
 	
 	// Replace old delimiter if concatenated string has a delimiter as wel
-	if(newString.match("\u0000")) {
+	if(newString.match("\003")) {
 		delimiterRegexp = new RegExp(this.delimiter, "g");
-		this.delimiter += "\u0000";
+		this.delimiter += "\003";
 		this.string = this.string.replace(delimiterRegexp, this.delimiter);
 	}
 	

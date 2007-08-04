@@ -159,7 +159,7 @@ Zotero.Translate.init = function() {
 			// fetch translator list
 			var translators = Zotero.DB.query("SELECT translatorID, translatorType, label, "+
 				"target, detectCode IS NULL as noDetectCode FROM translators "+
-				"ORDER BY target IS NULL, priority, label");
+				"ORDER BY priority, label");
 			var detectCodes = Zotero.DB.query("SELECT translatorID, detectCode FROM translators WHERE target IS NULL");
 			
 			Zotero.Translate.cache = new Object();
@@ -492,7 +492,7 @@ Zotero.Translate.prototype.getTranslators = function() {
 	} else {
 		var sql = "SELECT translatorID, label, target, detectCode IS NULL as "+
 			"noDetectCode FROM translators WHERE translatorType IN ("+this._numericTypes+") "+
-			"ORDER BY target IS NULL, priority, label";
+			"ORDER BY priority, label";
 		var translators = Zotero.DB.query(sql);
 	}
 	

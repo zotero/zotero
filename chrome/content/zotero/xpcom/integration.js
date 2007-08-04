@@ -376,9 +376,7 @@ Zotero.Integration.SOAP = new function() {
 		for(var i=3; i<vars.length; i+=2) {
 			if(vars[i+1] == "X") {
 				// get a new citation for a field with an X
-				var io = new function() {
-					this.wrappedJSObject = this;
-				}
+				var io = new function() { this.wrappedJSObject = this; }
 				
 				watcher.openWindow(null, 'chrome://zotero/content/addCitationDialog.xul', '',
 								  'chrome,modal'+(Zotero.isWin ? ',popup' : ''), io, true);
@@ -564,7 +562,7 @@ Zotero.Integration.Session = function(styleID, useEndnotes) {
 
 Zotero.Integration.Session.prototype.setStyle = function(styleID) {
 	this.styleID = styleID;
-	this.citationSet.style = this.citationFactory.style = this.style =  Zotero.Cite.getStyle(styleID);
+	this.citationSet.style = this.citationFactory.style = this.style = Zotero.Cite.getStyle(styleID);
 	this.citationFactory.clearCache();
 }
 
@@ -704,104 +702,85 @@ Zotero.Integration.CitationFactory = function(style) {
 	if(style) this.style = style;
 	this.cache = new Object();
 	this.dateModified = new Object();
-	this.items = new Array();
 }
 
 Zotero.Integration.CitationFactory.prototype.updateItems = function(citationSet, session, updateCitations) {
-	if(session) {
-		// check to see if an update is really necessary
-		var regenerateItemList = false;
-		var item, itemID;
-		for(var i in this.items) {
-			item = this.items[i]
-			itemID = item.getID();
-			
-			// see if old items were deleted or changed
-			if(!citationSet.citationsByID[itemID] ||
-			 (this.dateModified[itemID] != item.getField("dateModified"))) {
-				regenerateItemList = true;
-				break;
-			}
-		}
-		if(!regenerateItemList) {
-			for(var i in citationSet.citationsByID) {
-				// see if new items were added
-				if(!session.citationSet.citationsByID[i]) {
-					regenerateItemList = true;
-					break;
-				}
-			}
-		}
-		
-		// leave if it's not
-		if(!regenerateItemList) {
-			return false;
-		}
-	}
+	var addedItems = [];
+	var deletedItems = [];
+	var missingItems = [];
+	var updateItems = [];
+	var resort = false;
 	
 	this.items = new Array();
 	var updateCheck = new Array();
 	var disambiguation = new Array();
 	
-	var missingItems = [];
-	
 	for(var i in citationSet.citationsByID) {
 		var item = Zotero.Items.get(i);
-		
 		if (!item) {
-			missingItems.push(i)
+			deletedItems.push(i);
+			resort = true;
 			continue;
 		}
 		
-		this.items.push(item);
-		
-		if(this.dateModified[i] && this.dateModified[i] != item.getField("dateModified")) {
-			// so that we can update modified this.items
-			updateCheck[i] = true;
-		}
-		
-		if(item._csl && item._csl.date.disambiguation) {
-			// keep track of disambiguation data
-			disambiguation[i] = item._csl.date.disambiguation;
+		// see if new items were added
+		if(!session || !this.itemSet || !session.citationSet.citationsByID[i]) {
+			addedItems.push(item);
+			resort = true;
+			this.dateModified[i] = item.getField("dateModified", true, true);
 		}
 	}
 	
-	this.itemSet = this.style.generateItemSet(this.items);
-	
-	/*var tempCache = new Object();
-	for(var i in this.items) {
-		var itemID = this.items[i].getID();
-		this.dateModified[itemID] = this.items[i].getField("dateModified");
+	if(!this.itemSet) {
+		this.itemSet = this.style.generateItemSet(addedItems);
+	} else {
+		// see if old items were deleted or changed
+		for each(var item in this.itemSet.items) {
+			var itemID = item.getID();
+			
+			if(!citationSet.citationsByID[itemID]) {
+				missingItems.push(itemID);
+				resort = true;
+				continue;
+			}
+
+			if(item.zoteroItem && this.dateModified[itemID] != item.zoteroItem.getField("dateModified", true, true)) {
+				// so that we can update modified this.items
+				updateItems.push(item);
+			}
+		}
 		
-		if(session) {
-			// check to see if disambiguation has changed
-			if(this.items[i]._csl.date.disambiguation != disambiguation[itemID]) {
-				for each(var citation in citationSet.citationsByID[itemID]) {
-					updateCitations[citation.index] = true;
-					citation.updateText = true;
-					this.cache[citation.serialization] = null;
-				}
-			} else if(updateCheck[itemID]) {
-				// check against cache to see if updated item has changed
-				for each(var citation in citationSet.citationsByID[itemID]) {
-					if(this.cache[citation.serializedType][citation.serialization]) {
-						var citationText = this.getCitation(citation, tempCache);
-						if(citationText != this.cache[citation.serializedType][citation.serialization]) {
-							updateCitations[citation.index] = true;
-							citation.updateText = true;
-							this.cache[citation.serializedType][citation.serialization] = citationText;
-						}
-					}
+		if(addedItems.length) {
+			this.itemSet.add(addedItems);
+		} else if(missingItems.length || deletedItems.length) {
+			this.itemSet.remove(missingItems.concat(deletedItems));
+		}
+		
+		if(resort) {
+			var citationChanged = this.itemSet.resort();
+			updateItems = updateItems.concat(citationChanged);
+		}
+		
+		for each(var item in updateItems) {
+			itemID = item.getID();
+			this.dateModified[itemID] = item.zoteroItem.getField("dateModified", true, true);
+			
+			for each(var citation in citationSet.citationsByID[itemID]) {
+				updateCitations[citation.index] = true;
+				citation.updateText = true;
+				if(citation.serializedType && citation.serialization) {
+					this.cache[citation.serializedType][citation.serialization] = undefined;
 				}
 			}
 		}
-	}*/
+	}
 	
 	// TODO: clear missing items from cache?
 	
 	return true;
 }
 
+Zotero.Integration.CitationFactory._locatorMap = {p:"page", g:"paragraph", l:"line"};
 Zotero.Integration.CitationFactory.prototype.getCitation = function(citation, usingCache) {
 	// Return "!" for deleted items
 	for (var i=0; i<citation.itemIDs.length; i++) {
@@ -816,10 +795,21 @@ Zotero.Integration.CitationFactory.prototype.getCitation = function(citation, us
 		return usingCache[citation.serializedType][citation.serialization];
 	}
 	
+	if(!this.itemSet) {
+		throw "Zotero.Integration.CitationFactory: getCitation called before updateCitations";
+	}
+	
 	citation.loadLocators();
-	var citationText = this.style.createCitation(this.itemSet, citation.itemIDs, "Integration",
+	// map locators to proper term names
+	var locatorTerms = [];
+	for each(var type in citation.locatorTypes) {
+		locatorTerms.push(Zotero.Integration.CitationFactory._locatorMap[type]);
+	}
+	
+	var items = this.itemSet.getItemsByIds(citation.itemIDs);
+	var citationText = this.style.createCitation(this.itemSet, items, "Integration",
 		Zotero.Integration.citationTypes[citation.citationType], citation.locators,
-		citation.locatorTypes);
+		locatorTerms);
 	
 	if(!usingCache[citation.serializedType]) {
 		usingCache[citation.serializedType] = new Object();
@@ -832,4 +822,5 @@ Zotero.Integration.CitationFactory.prototype.getCitation = function(citation, us
 Zotero.Integration.CitationFactory.prototype.clearCache = function() {
 	this.cache = new Object();
 	this.dateModified = new Object();
+	this.itemSet = undefined;
 }

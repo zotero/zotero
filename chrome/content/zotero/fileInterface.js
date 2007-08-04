@@ -356,13 +356,13 @@ var Zotero_File_Interface = new function() {
 		
 		var csl = Zotero.Cite.getStyle(style);
 		var itemSet = csl.generateItemSet(items);
-		var itemIDs = [];;
+		var itemIDs = [];
 		for (var i=0; i<items.length; i++) {
 			itemIDs.push(items[i]);
 		}
 		
 		// add HTML
-		var bibliography = csl.createCitation(itemSet, itemIDs, "HTML", 1, null, null);
+		var bibliography = csl.createCitation(itemSet, itemSet.getItemsByIds(itemIDs), "HTML", 1, null, null);
 		var str = Components.classes["@mozilla.org/supports-string;1"].
 				  createInstance(Components.interfaces.nsISupportsString);
 		str.data = bibliography;
@@ -370,7 +370,7 @@ var Zotero_File_Interface = new function() {
 		transferable.setTransferData("text/html", str, bibliography.length*2);
 		
 		// add text
-		var bibliography = csl.createCitation(itemSet, itemIDs, "Text", 1, null, null);
+		var bibliography = csl.createCitation(itemSet, itemSet.getItemsByIds(itemIDs), "Text", 1, null, null);
 		var str = Components.classes["@mozilla.org/supports-string;1"].
 				  createInstance(Components.interfaces.nsISupportsString);
 		str.data = bibliography;

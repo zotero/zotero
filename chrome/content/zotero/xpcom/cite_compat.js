@@ -279,14 +279,42 @@ Zotero.CSL.Compat.Global = new function() {
  * of items
  */
 Zotero.CSL.Compat.prototype.generateItemSet = function(items) {
-	Zotero.debug("CSL: preprocessing items");
-	
-	this._ignore = null;
+	return new Zotero.CSL.Compat.ItemSet(items, this);
+}
+
+Zotero.CSL.Compat.ItemSet = function(items, csl) {
+	this.items = [];
+	this.csl = csl;
+	this.add(items);
+	this.resort();
+}
+
+Zotero.CSL.Compat.ItemSet.prototype.getItemsByIds = function(ids) {
+	return Zotero.Items.get(ids);
+}
+
+Zotero.CSL.Compat.ItemSet.prototype.add = function(items) {
+	this.items = this.items.concat(items);
+}
+
+Zotero.CSL.Compat.ItemSet.prototype.remove = function(items) {
+	for(var i in items) {
+		if(items[i] instanceof Zotero.Item) {
+			var item = items[i];
+		} else {
+			var item = this.itemsById[items[i]];
+		}
+		this.items.splice(this.items.indexOf(item), 1);
+	}
+}
+
+Zotero.CSL.Compat.ItemSet.prototype.resort = function() {
+	var oldDisambiguation = {};
 	
 	// get data necessary to generate citations before sorting
-	for(var i in items) {
-		var item = items[i];
-		var dateModified = this._getField(item, "dateModified");
+	for(var i in this.items) {
+		var item = this.items[i];
+		var dateModified = this.csl._getField(item, "dateModified");
 		
 		if(!item._csl || item._csl.dateModified != dateModified) {
 			// namespace everything in item._csl so there's no chance of overlap
@@ -294,34 +322,38 @@ Zotero.CSL.Compat.prototype.generateItemSet = function(items) {
 			item._csl.dateModified = dateModified;
 			
 			// separate item into authors, editors, translators
-			var creators = this._separateItemCreators(item);
+			var creators = this.csl._separateItemCreators(item);
 			item._csl.authors = creators[0];
 			item._csl.editors = creators[1];
 			item._csl.translators = creators[2];
 			
 			// parse date
-			item._csl.date = Zotero.CSL.Compat.prototype._processDate(this._getField(item, "date"));
+			item._csl.date = Zotero.CSL.Compat.prototype._processDate(this.csl._getField(item, "date"));
 		}
+		
 		// clear disambiguation and subsequent author substitute
-		if(item._csl.date && item._csl.date.disambiguation) item._csl.date.disambiguation = undefined;
+		if(item._csl.date && item._csl.date.disambiguation) {
+			oldDisambiguation[item.getID()] = item._csl.date.disambiguation;
+			item._csl.date.disambiguation = undefined;
+		}
 		if(item._csl.subsequentAuthorSubstitute) item._csl.subsequentAuthorSubstitute = undefined;
 	}
 	
 	// sort by sort order
-	if(this._bib.sortOrder) {
-		Zotero.debug("CSL: sorting items");
-		var me = this;
-		items.sort(function(a, b) {
+	if(this.csl._bib.sortOrder) {
+		Zotero.debug("CSL: sorting this.items");
+		var me = this.csl;
+		this.items.sort(function(a, b) {
 			return me._compareItem(a, b);
 		});
 	}
 	
-	// disambiguate items after preprocessing and sorting
+	// disambiguate this.items after preprocessing and sorting
 	var usedCitations = new Array();
 	var lastAuthors;
 	
-	for(var i in items) {
-		var item = items[i];
+	for(var i in this.items) {
+		var item = this.items[i];
 		
 		// handle subsequent author substitutes
 		if(item._csl.authors.length && lastAuthors) {
@@ -340,7 +372,7 @@ Zotero.CSL.Compat.prototype.generateItemSet = function(items) {
 		lastAuthors = item._csl.authors;
 		
 		// handle (2006a) disambiguation for author-date styles
-		if(this.class == "author-date") {
+		if(this.csl.class == "author-date") {
 			var year = item._csl.date.year;
 				
 			if(authorsAreSame) {
@@ -378,13 +410,17 @@ Zotero.CSL.Compat.prototype.generateItemSet = function(items) {
 		item._csl.number = i;
 	}
 	
-	// for compatibility, create an itemSet object
-	var me = this;
-	itemSet = new Object();
-	itemSet.items = items;
-	itemSet.resort = function() { this.items = me.generateItemSet(items).items };
-	
-	return itemSet;
+	// see which items have changed
+	var returnItems = [];
+	for each(var item in this.items) {
+		if(item._csl.date && item._csl.date.disambiguation) {
+			var oldDisambig = oldDisambiguation[item.getID()];
+			if(!oldDisambig || oldDisambig != item._csl.date.disambiguation) {
+				returnItems += item;
+			}
+		}
+	}
+	return returnItems;
 }
 
 Zotero.CSL.Compat._locatorTerms = {
@@ -393,9 +429,7 @@ Zotero.CSL.Compat._locatorTerms = {
 	l:"line"
 };
 
-Zotero.CSL.Compat.prototype.createCitation = function(itemSet, ids, format, position, locators, locatorTypes) {
-	var items = Zotero.Items.get(ids);
-	
+Zotero.CSL.Compat.prototype.createCitation = function(itemSet, items, format, position, locators, locatorTypes) {
 	var string = new Zotero.CSL.Compat.FormattedString(this, format);
 	if(position == "ibid" || position == "ibid-pages") {	// indicates ibid
 		var term = this._getTerm("ibid");
@@ -406,7 +440,7 @@ Zotero.CSL.Compat.prototype.createCitation = function(itemSet, ids, format, posi
 			var locator = locators[0];
 			
 			if(locator) {
-				var locatorType = Zotero.CSL.Compat._locatorTerms[locatorTypes[0]];
+				var locatorType = locatorTypes[0];
 				
 				// search for elements with the same serialization
 				var element = this._getFieldDefaults("locator");
@@ -429,7 +463,7 @@ Zotero.CSL.Compat.prototype.createCitation = function(itemSet, ids, format, posi
 			var locatorType = false;
 			var locator = false;
 			if(locators) {
-				locatorType = Zotero.CSL.Compat._locatorTerms[locatorTypes[i]];
+				locatorType = locatorTypes[i];
 				locator = locators[i];
 			}
 			
@@ -1088,7 +1122,7 @@ Zotero.CSL.Compat.prototype._processCreators = function(type, element, creators,
 				
 				// check whether to use a serial comma
 				Zotero.debug(child["delimiter-precedes-last"]);
-				if((authorStrings.length == 2 && child["delimiter-precedes-last"] != "always") ||
+				if((authorStrings.length == 2 && (useEtAl || child["delimiter-precedes-last"] != "always")) ||
 				   (authorStrings.length > 2 && child["delimiter-precedes-last"] == "never")) {
 					var lastString = authorStrings.pop();
 					authorStrings[authorStrings.length-1] = authorStrings[authorStrings.length-1]+" "+lastString;
