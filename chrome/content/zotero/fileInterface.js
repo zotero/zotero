@@ -318,7 +318,6 @@ var Zotero_File_Interface = new function() {
 						   createInstance(Components.interfaces.nsITransferable);
 		var clipboardService = Components.classes["@mozilla.org/widget/clipboard;1"].
 							   getService(Components.interfaces.nsIClipboard);
-		
 		var csl = Zotero.Cite.getStyle(style);
 		var itemSet = csl.generateItemSet(items); 
 		
@@ -358,7 +357,7 @@ var Zotero_File_Interface = new function() {
 		var itemSet = csl.generateItemSet(items);
 		var itemIDs = [];
 		for (var i=0; i<items.length; i++) {
-			itemIDs.push(items[i]);
+			itemIDs.push(items[i].getID());
 		}
 		
 		// add HTML
