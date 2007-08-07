@@ -129,3 +129,7 @@
 <!ENTITY zotero.integration.prefs.displayAs.label		"Display Citations As:">
 <!ENTITY zotero.integration.prefs.footnotes.label		"Footnotes">
 <!ENTITY zotero.integration.prefs.endnotes.label		"Endnotes">
+
+<!ENTITY zotero.integration.prefs.formatUsing.label		"Format Using:">
+<!ENTITY zotero.integration.prefs.bookmarks.label		"Bookmarks">
+<!ENTITY zotero.integration.prefs.bookmarks.caption		"Bookmarks are preserved across Microsoft Word and OpenOffice.org, but may be accidentally modified.">

@@ -20,6 +20,8 @@
     ***** END LICENSE BLOCK *****
 */
 
+const API_VERSION = 1
+
 Zotero.Integration = new function() {
 	var _contentLengthRe = /[\r\n]Content-Length: *([0-9]+)/i;
 	var _XMLRe = /<\?[^>]+\?>/;
@@ -316,20 +318,18 @@ Zotero.Integration.DataListener.prototype._requestFinished = function(response) 
 	// open UTF-8 converter for output stream	
 	var intlStream = Components.classes["@mozilla.org/intl/converter-output-stream;1"]
 							   .createInstance(Components.interfaces.nsIConverterOutputStream);
-	intlStream.init(this.oStream, "UTF-8", 1024, "?".charCodeAt(0));
-	
-	// write response
-	intlStream.writeString(response);
-	intlStream.close();
 	
 	// write
 	try {
-		this.oStream.write(response, response.length);
+		intlStream.init(this.oStream, "UTF-8", 1024, "?".charCodeAt(0));
+		
+		// write response
+		intlStream.writeString(response);
+	} catch(e) {
+		Zotero.debug("An error occurred.");
+		Zotero.debug(e);
 	} finally {	
-		try {
-			// close output stream
-			this.oStream.close();
-		} catch(e) {}
+		intlStream.close();
 	}
 }
 
@@ -485,18 +485,22 @@ Zotero.Integration.SOAP = new function() {
 	
 	/*
 	 * restores a session, given all citations
-	 * ACCEPTS: styleID(, fieldIndex, fieldName)+
+	 * ACCEPTS: version, styleID, use-endnotes, use-bookmarks(, fieldIndex, fieldName)+
 	 * RETURNS: sessionID
 	 */
 	function restoreSession(vars) {
+		if(!vars || !_checkVersion(vars[0])) {
+			return "ERROR:"+Zotero.getString("integration.incompatibleVersion");
+		}
+		
 		var sessionID = Zotero.randomString();
-		var session = _sessions[sessionID] = new Zotero.Integration.Session(vars[0], vars[1]);
+		var session = _sessions[sessionID] = new Zotero.Integration.Session(vars);
 		
 		var encounteredItem = new Object();
 		var newField = new Object();
 		var regenerate = new Object();
 		
-		for(var i=2; i<vars.length; i+=2) {
+		for(var i=4; i<vars.length; i+=2) {
 			var citation = new Zotero.Integration.Citation(vars[i], vars[i+1]);
 			session.citationSet.addCitation(citation);		// add to see when refresh is necessary
 		}
@@ -513,15 +517,24 @@ Zotero.Integration.SOAP = new function() {
 	
 	/*
 	 * sets document preferences
-	 * ACCEPTS: (sessionID)?
-	 * RETURNS: sessionID, styleID, style-class, has-bibliography, use-endnotes
+	 * ACCEPTS: (sessionID | "!"), version
+	 * RETURNS: version, sessionID, styleID, style-class, has-bibliography, use-endnotes, use-bookmarks
 	 */
 	function setDocPrefs(vars) {
+		if(!vars || !vars.length || !_checkVersion(vars[1])) {
+			return "ERROR:"+Zotero.getString("integration.incompatibleVersion");
+		}
+		
 		var io = new function() {
 			this.wrappedJSObject = this;
 		}
 		
-		if(!vars || !vars[0] || vars[0] == "!") {
+		var version = vars[1].split("/");
+		if(version[2].substr(0, 3) == "OOo") {
+			io.openOffice = true;
+		}
+		
+		if(vars[0] == "!") {
 			// no session ID; generate a new one
 			var sessionID = Zotero.randomString();
 			var session = _sessions[sessionID] = new Zotero.Integration.Session();
@@ -535,6 +548,7 @@ Zotero.Integration.SOAP = new function() {
 			var originalStyle = session.styleID;
 			io.style = originalStyle;
 			io.useEndnotes = session.useEndnotes;
+			io.useBookmarks = session.useBookmarks;
 		}
 		
 		watcher.openWindow(null, 'chrome://zotero/content/integrationDocPrefs.xul', '',
@@ -542,18 +556,30 @@ Zotero.Integration.SOAP = new function() {
 		
 		session.setStyle(io.style);
 		session.useEndnotes = io.useEndnotes;
+		session.useBookmarks = io.useBookmarks;
 		
-		return [sessionID, io.style, session.style.class, session.style.hasBibliography ? "1" : "0", io.useEndnotes];
+		return [sessionID, io.style, session.style.class, session.style.hasBibliography ? "1" : "0", io.useEndnotes, io.useBookmarks];
+	}
+	
+	/*
+	 * checks to see whether this version of the Integration API is compatible
+	 * with the given version of the plug-in
+	 */
+	function _checkVersion(version) {
+		versionParts = version.split("/");
+		Zotero.debug("Integration: client version "+version);
+		if(versionParts.length != 3 || versionParts[1] != API_VERSION) return false;
+		return true;
 	}
 }
 
-Zotero.Integration.Session = function(styleID, useEndnotes) {
-	if(styleID) {
-		this.styleID = styleID;
+Zotero.Integration.Session = function(restoreSessionMessage) {
+	if(restoreSessionMessage) {
+		this.styleID = restoreSessionMessage[1];
 		this.style = Zotero.Cite.getStyle(this.styleID);
-	}
-	if(useEndnotes) {
-		this.useEndnotes = useEndnotes;
+		
+		this.useEndnotes = restoreSessionMessage[2];
+		this.useBookmarks = restoreSessionMessage[3];
 	}
 	
 	this.citationSet = new Zotero.Integration.CitationSet(this.style);

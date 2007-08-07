@@ -1,0 +1,11 @@
+#style-listbox
+{
+	height: 72pt;
+	width: 300pt;
+}
+
+.radioDescription
+{
+	margin: 0 0 5px 20px;
+	font-size: .85em;
+}
