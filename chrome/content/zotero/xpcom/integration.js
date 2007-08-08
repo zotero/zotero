@@ -299,12 +299,19 @@ Zotero.Integration.DataListener.prototype._headerFinished = function() {
  */
 Zotero.Integration.DataListener.prototype._bodyData = function() {
 	if(this.body.length >= this.bodyLength) {
-		if(this.body.length > this.bodyLength) {
-			// truncate
-			this.body = this.body.substr(0, this.bodyLength);
-		}
+		// convert to UTF-8
+		var dataStream = Components.classes["@mozilla.org/io/string-input-stream;1"]
+		                           .createInstance(Components.interfaces.nsIStringInputStream);
+		dataStream.setData(this.body, this.bodyLength);
 		
-		var output = Zotero.Integration.handleEnvelope(this.body);
+		var utf8Stream = Components.classes["@mozilla.org/intl/converter-input-stream;1"]
+		                           .createInstance(Components.interfaces.nsIConverterInputStream);
+		utf8Stream.init(dataStream, "UTF-8", 1024, "?");
+		var string = {};
+		utf8Stream.readString(this.bodyLength, string)
+		
+		// handle envelope
+		var output = Zotero.Integration.handleEnvelope(string.value);
 		this._requestFinished(output);
 	}
 }
