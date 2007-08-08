@@ -302,7 +302,7 @@ Zotero.CSL.Compat.ItemSet.prototype.remove = function(items) {
 		if(items[i] instanceof Zotero.Item) {
 			var item = items[i];
 		} else {
-			var item = this.itemsById[items[i]];
+			var item = Zotero.Items.get(i);
 		}
 		this.items.splice(this.items.indexOf(item), 1);
 	}

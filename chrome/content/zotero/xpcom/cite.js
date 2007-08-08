@@ -162,7 +162,7 @@ Zotero.CSL.prototype.createCitation = function(itemSet, items, format, position,
 	}
 	
 	var returnString = new Zotero.CSL.FormattedString(this, format);
-	returnString.append(string.get(), context.layout);
+	returnString.append(string.get(), context.layout, false, true);
 	return returnString.get();
 }
 
@@ -522,6 +522,8 @@ Zotero.CSL.prototype._processElements = function(item, element, formattedString,
 					formattedString.concat(newString, child);
 					dataAppended = true;
 				}
+			} else if(child.@value.length()) {
+				formattedString.append(child.@value.toString(), child);
 			}
 		} else if(name == "label") {
 			var form = child.@form.toString();
@@ -766,32 +768,6 @@ Zotero.CSL.Global = new function() {
 	this.getMonthStrings = getMonthStrings;
 	this.cleanXML = cleanXML;
 	this.parseLocales = parseLocales;
-	
-	// for types
-	this.typeInheritance = { 
-		"article-magazine":"article",
-		"article-newspaper":"article",
-		"article-journal":"article",
-		"bill":"article",
-		"figure":"article",
-		"graphic":"article",
-		"interview":"article",
-		"legal-case":"article",
-		"manuscript":"book",
-		"map":"article",
-		"motion picture":"book",
-		"musical score":"article",
-		"pamphlet":"book",
-		"paper-conference":"chapter",
-		"patent":"article",
-		"personal communication":"article",
-		"report":"book",
-		"song":"article",
-		"speech":"article",
-		"thesis":"book",
-		"treaty":"article",
-		"webpage":"article",
-	}
 
 	this.ns = "http://purl.org/net/xbiblio/csl";
 
@@ -1293,12 +1269,14 @@ Zotero.CSL.ItemSet.prototype.add = function(items) {
  * or item IDs
  */
 Zotero.CSL.ItemSet.prototype.remove = function(items) {
+	Zotero.debug("removing!")
 	for(var i in items) {
 		if(items[i] instanceof Zotero.CSL.Item) {
 			var item = items[i];
 		} else {
 			var item = this.itemsById[items[i]];
 		}
+		Zotero.debug("old index was "+this.items.indexOf(item))
 		this.itemsById[item.getID()] = undefined;
 		this.items.splice(this.items.indexOf(item), 1);
 	}

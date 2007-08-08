@@ -98,20 +98,21 @@ Zotero.Integration = new function() {
 					vars[0] = "";
 					var i = 0;
 					
-					colonIndex = input.indexOf(":");
+					var lastIndex = 0;
+					var colonIndex = input.indexOf(":", lastIndex);
 					while(colonIndex != -1) {
 						if(input[colonIndex+1] == ":") {	// escaped
-							vars[i] += input.substr(0, colonIndex+1);
-							input = input.substr(colonIndex+2);
+							vars[i] += input.substring(lastIndex, colonIndex+1);
+							lastIndex = colonIndex+2;
 						} else {							// not escaped
-							vars[i] += input.substr(0, colonIndex);
+							vars[i] += input.substring(lastIndex, colonIndex);
 							i++;
 							vars[i] = "";
-							input = input.substr(colonIndex+1);
+							lastIndex = colonIndex+1;
 						}
-						colonIndex = input.indexOf(":");
+						colonIndex = input.indexOf(":", lastIndex);
 					}
-					vars[i] += input;
+					vars[i] += input.substr(lastIndex);
 				} else {
 					var vars = null;
 				}
@@ -778,7 +779,8 @@ Zotero.Integration.CitationFactory.prototype.updateItems = function(citationSet,
 		
 		if(addedItems.length) {
 			this.itemSet.add(addedItems);
-		} else if(missingItems.length || deletedItems.length) {
+		}
+		if(missingItems.length || deletedItems.length) {
 			this.itemSet.remove(missingItems.concat(deletedItems));
 		}
 		
