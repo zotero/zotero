@@ -1,4 +1,4 @@
--- 253
+-- 254
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-08-04 23:15:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-08-09 23:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -9001,7 +9001,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('ecddda2e-4fc6-4aea-9f17-ef3b56d7377a', '1.0.0b3.r1', '', '2007-04-13 16:05:00', '1', '100', '4', 'arXiv.org', 'Sean Takats', '^http://(?:www\.)?(?:arxiv\.org/(?:find/\w|list/\w|abs/)|eprintweb.org/S/(?:search|archive|article)(?!.*refs$)(?!.*cited$))', 
+REPLACE INTO translators VALUES ('ecddda2e-4fc6-4aea-9f17-ef3b56d7377a', '1.0.0b3.r1', '', '2007-08-09 23:00:00', '1', '100', '4', 'arXiv.org', 'Sean Takats', '^http://(?:www\.)?(?:arxiv\.org/(?:find/\w|list/\w|abs/)|eprintweb.org/S/(?:search|archive|article)(?!.*refs$)(?!.*cited$))', 
 'function detectWeb(doc, url) {
 	var searchRe = /^http:\/\/(?:www\.)?(?:arxiv\.org\/(?:find|list)|eprintweb.org\/S\/(?:archive|search$))/;
 	if(searchRe.test(url)) {
@@ -9019,7 +9019,7 @@ function doWeb(doc, url) {
 	var eprintMultRe = /^http:\/\/(?:www\.)?eprintweb.org\/S\/(?:search|archive)/;
 	var eprintMultM = eprintMultRe.exec(url);
 	
-	var eprintSingRe = /^http:\/\/(?:www\.)?eprintweb.org\/S\/(?:article|article)/;
+	var eprintSingRe = /^http:\/\/(?:www\.)?eprintweb.org\/S\/(?:article|search\/[0-9]+\/A[0-9]+)/;
 	var eprintSingM = eprintSingRe.exec(url);
 
 	if (eprintMultM) {
@@ -9027,9 +9027,8 @@ function doWeb(doc, url) {
 		var titlesXPath = ''//table/tbody/tr/td[@class="lti"]'';
 		var titleNode = ''./text()'';
 	} else {
-		var elmtsXPath = ''//div[@id="content"]/dl/dt/font/b/a'';
-		var titlesXPath = ''//div[@id="content"]//dd'';
-		var titleNode = ''./b[1]/text()'';
+		var elmtsXPath = ''//div[@id="dlpage"]/dl/dt/span[@class="list-identifier"]/a[1]'';
+		var titlesXPath = ''//div[@id="dlpage"]/dl/dd/div[@class="meta"]/div[@class="list-title"]'';
 	}
 
 	var namespace = doc.documentElement.namespaceURI;
@@ -9063,7 +9062,7 @@ function doWeb(doc, url) {
 				var newID= elmt.textContent;
 				newID = newID.replace(/arXiv:/, "");
 				newID = newID.replace(/\//g, "%2F"); 
-				availableItems[i] = doc.evaluate(titleNode, title, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent; 
+				availableItems[i] = Zotero.Utilities.cleanString(title.textContent); 
 				arXivIDs[i] = newID;
 				i++;
 			} while ((elmt = elmts.iterateNext()) && (title = titles.iterateNext()));
@@ -9080,9 +9079,10 @@ function doWeb(doc, url) {
 	else {
 		if (eprintSingM){
 			var titleID = doc.evaluate(''//td[@class="ti"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-			var arXivID = doc.evaluate(''//tr[1]/td[@class="txt"]/b'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+			var arXivID = doc.evaluate(''//table/tbody/tr[4]/td/table/tbody/tr/td[1]/table/tbody/tr[1]/td[@class="txt"]/b'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+			arXivID = arXivID.substring(0, arXivID.indexOf(" "));
 			arXivID = arXivID.replace(/arXiv:/, "");
-			arXivID = arXivID.replace(/\//g, "%2F"); 
+			arXivID = arXivID.replace(/\//g, "%2F");
 		} else {
 			var arXivID = doc.evaluate(''//title'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 			var titleRe = /\[([^\]]*)]/;
@@ -9133,8 +9133,11 @@ function doWeb(doc, url) {
 			}
 		}
 		if (citation.dc_subject.length()) {
-			var subjectValue = Zotero.Utilities.cleanString(citation.dc_subject.text().toString());
-			newItem.tags.push(subjectValue);
+			var subjects = citation.dc_subject;
+			for (var j=0; j<subjects.length(); j++) { 
+				var subjectValue = Zotero.Utilities.cleanString(subjects[j].text().toString());
+				newItem.tags.push(subjectValue);
+			}
 		}
 		if (citation.dc_identifier.length()) {
 			var identifiers = citation.dc_identifier;
