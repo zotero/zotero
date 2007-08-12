@@ -50,6 +50,7 @@
 							switch (conditions[id]['condition']) {
 								case 'recursive':
 								case 'noChildren':
+								case 'includeParentsAndChildren':
 									var checkbox = conditions[id]['condition'] + 'Checkbox';
 									this.id(checkbox).setAttribute('condition',id);
 									this.id(checkbox).checked = (conditions[id]['operator']=='true');
@@ -145,7 +146,7 @@
 					]]>
 				</body>
 			</method>
-			<!-- Gets values from all rows and updates the associated search conditions -->
+			<!-- Calls updateSearch() on all search conditions -->
 			<method name="updateSearch">
 				<body>
 					<![CDATA[
@@ -217,6 +218,7 @@
 					<xul:checkbox id="recursiveCheckbox" label="&zotero.search.recursive.label;" oncommand="this.parentNode.parentNode.parentNode.updateCheckbox('recursive'); event.stopPropagation()"/>
 					<xul:checkbox id="noChildrenCheckbox" label="&zotero.search.noChildren;" oncommand="this.parentNode.parentNode.parentNode.updateCheckbox('noChildren'); event.stopPropagation()"/>
 				</xul:hbox>
+				<xul:checkbox id="includeParentsAndChildrenCheckbox" label="&zotero.search.includeParentsAndChildren;" oncommand="document.getBindingParent(this).updateCheckbox('includeParentsAndChildren'); event.stopPropagation()"/>
 			</xul:vbox>
 		</content>
 	</binding>
@@ -238,19 +240,20 @@
 			<field name="dontupdate"/>
 			<constructor>
 				<![CDATA[
-					var operators = new Array('is', 'isNot', 'contains', 'doesNotContain', 'isLessThan', 'isGreaterThan', 'isBefore', 'isAfter', 'isInTheLast');
+					var operators = new Array('is', 'isNot', 'beginsWith', 'contains', 'doesNotContain', 'isLessThan', 'isGreaterThan', 'isBefore', 'isAfter', 'isInTheLast');
 					var operatorsList = this.id('operatorsmenu');
 					
+					// Build operator menu
 					for(var i in operators)
 					{
 						operatorsList.appendItem(Zotero.getString('searchOperator.'+operators[i]),operators[i]);
 					}
-						
+					
+					// Build conditions menu
 					var conditionsList = this.id('conditionsmenu');
 					var conditions = Zotero.SearchConditions.getStandardConditions();
 					
-					for(var i=0, len=conditions.length; i<len; i++)
-					{
+					for (var i=0, len=conditions.length; i<len; i++) {
 						var menuitem = conditionsList.appendItem(conditions[i]['localized'], conditions[i]['name']);
 						
 						var baseFields = null;
@@ -259,8 +262,8 @@
 						}
 						catch (e) {}
 						
+						// Add tooltip, building it if it doesn't exist
 						if (baseFields) {
-							// Build tooltip if it doesn't already exist
 							if (!this.id(conditions[i]['name'] + '-tooltip')) {
 								var fieldName = null;
 								try {
@@ -328,7 +331,7 @@
 			<method name="onConditionSelected">
 				<body>
 					<![CDATA[
-					// Skip if already selected
+					// Skip if correct condition already selected
 					if (this.id('conditionsmenu').value==this.selectedCondition){
 						return;
 					}
@@ -355,7 +358,7 @@
 					}
 					operatorsList.selectedIndex = selectThis;
 					
-					// Generate drop-down menus for certain conditions
+					// Generate drop-down menu instead of textbox for certain conditions
 					switch (conditionsMenu.value){
 						case 'collectionID':
 							var merged = [];
@@ -415,8 +418,8 @@
 								this.id('value-date-age').value = this.value;
 							}
 							
-							else
-							{
+							// Textbox
+							else {
 								// If switching from menu to textbox, clear value
 								if (this.id('valuefield').hidden){
 									this.id('valuefield').value = '';
@@ -604,7 +607,6 @@
 							{
 								var value = this.id('valuemenu').value;
 							}
-							
 							this.parent.search.updateCondition(this.conditionID, condition, operator, value);
 						}
 					]]>
@@ -705,7 +707,6 @@
 								break;
 							}
 						}
-						
 						switch (button.popup){
 							case 'textbox-fulltext-menu':
 								switch (selectedIndex){
@@ -762,7 +763,6 @@
 											break;
 									}
 								}
-								
 								menu.childNodes[selectedIndex].setAttribute('checked', true);
 								break;
 								
@@ -820,7 +820,7 @@
 			<xul:textbox id="search-textbox" xbl:inherits="hasOptions,flex">
 				<xul:popupset>
 					<xul:menupopup id="textbox-fulltext-menu">
-						<xul:menuitem type="radio" checked="true" label="&zotero.search.textModes.phrase;"/>
+						<xul:menuitem type="radio" label="&zotero.search.textModes.phrase;"/>
 						<xul:menuitem type="radio" label="&zotero.search.textModes.phraseBinary;"/>
 						<xul:menuitem type="radio" label="&zotero.search.textModes.regexp;"/>
 						<xul:menuitem type="radio" label="&zotero.search.textModes.regexpCS;"/>

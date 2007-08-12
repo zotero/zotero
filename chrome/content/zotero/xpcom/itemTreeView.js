@@ -190,7 +190,8 @@ Zotero.ItemTreeView.prototype.refresh = function()
 			continue;
 		}
 		
-		// Don't add child items directly
+		// Don't add child items directly (instead mark their parents for
+		// inclusion below)
 		var sourceItemID = newRows[i].getSource();
 		if (sourceItemID) {
 			this._searchParentIDs[sourceItemID] = true;

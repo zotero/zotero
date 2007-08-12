@@ -77,7 +77,7 @@ Zotero.DBConnection.prototype.query = function (sql,params) {
 			while (statement.executeStep()) {
 				var row = new Array();
 				
-				for(var i=0; i<statement.columnCount; i++) {
+				for(var i=0, len=statement.columnCount; i<len; i++) {
 					row[statement.getColumnName(i)] = this._getTypedValue(statement, i);
 				}
 				dataset.push(row);
