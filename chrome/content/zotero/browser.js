@@ -326,9 +326,19 @@ var Zotero_Browser = new function() {
 		var tab = _getTabObject(browser);
 		
 		if(isHTML) {
-			if(tab.annotateNextLoad) {
-				// enable annotation
-				tab.page.annotations = new Zotero.Annotations(this, browser, tab.annotateID);
+			if(tab.annotateNextLoad) {				
+				if(Zotero.Annotate.isAnnotated(tab.annotateID)) {
+					window.alert(Zotero.getString("annotations.oneWindowWarning"));
+				} else {		
+					// enable annotation
+					tab.page.annotations = new Zotero.Annotations(this, browser, tab.annotateID);
+					Zotero.Annotate.setAnnotated(tab.annotateID, true);
+					browser.contentWindow.addEventListener('beforeunload', function() {			
+						// save annotations
+						tab.page.annotations.save();
+						Zotero.Annotate.setAnnotated(tab.page.annotations.itemID, false);
+					}, false);
+				}
 			}
 			
 			// detect translators
@@ -360,10 +370,6 @@ var Zotero_Browser = new function() {
 			// clear data object
 			var tab = _getTabObject(browser);
 			if(!tab) return;
-			
-			// save annotations
-			if(tab.page && tab.page.annotations) tab.page.annotations.save();
-			
 			tab.clear();
 			
 			// update status

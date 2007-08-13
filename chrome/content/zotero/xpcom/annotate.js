@@ -30,6 +30,8 @@ const TEXT_TYPE = Components.interfaces.nsIDOMNode.TEXT_NODE;
 // general purpose annotation/highlighting methods
 
 Zotero.Annotate = new function() {
+	var _annotated = {};
+	
 	this.annotationColor = "#fff580";
 	this.annotationBarColor = "#c0b860";
 	this.annotationBorderColor = "#878244";
@@ -39,6 +41,8 @@ Zotero.Annotate = new function() {
 	this.getPointForPath = getPointForPath;
 	this.getPixelOffset = getPixelOffset;
 	this.normalizeRange = normalizeRange;
+	this.setAnnotated = setAnnotated;
+	this.isAnnotated = isAnnotated;
 	
 	/*
 	 * gets a path object, comprising an XPath, text node index, and offset, for
@@ -279,6 +283,17 @@ Zotero.Annotate = new function() {
 				}
 	 		}
 	 	}
+	 }
+	 
+	 /*
+	  * gets and sets annotated status
+	  */
+	 function isAnnotated(id) {
+	 	return _annotated[id] == true;
+	 }
+	 
+	 function setAnnotated(id, value) {
+	 	_annotated[id] = !!value;
 	 }
 }
 
