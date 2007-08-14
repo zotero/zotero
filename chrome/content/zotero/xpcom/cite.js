@@ -495,6 +495,8 @@ Zotero.CSL.prototype._processElements = function(item, element, formattedString,
 					if(variables[j] == "locator") {
 						// special case for locator
 						var text = locator;
+					} else if(variables[j] == "citation-number") {
+						var text = item.getProperty("citation-number");
 					} else {
 						var text = item.getText(variables[j], form);
 					}
@@ -770,6 +772,11 @@ Zotero.CSL.Global = new function() {
 	this.parseLocales = parseLocales;
 
 	this.ns = "http://purl.org/net/xbiblio/csl";
+	this.collation = Components.classes["@mozilla.org/intl/collation-factory;1"]
+	                       .getService(Components.interfaces.nsICollationFactory)
+	                       .CreateCollation(Components.classes["@mozilla.org/intl/nslocaleservice;1"]
+	                           .getService(Components.interfaces.nsILocaleService)
+	                           .getApplicationLocale());
 
 	/*
 	 * initializes CSL interpreter
@@ -1192,12 +1199,6 @@ Zotero.CSL.Item.Name.prototype.getNameVariable = function(variable) {
  * in an item wrapper.
  */
 Zotero.CSL.ItemSet = function(items, csl) {
-	var localeService = Components.classes["@mozilla.org/intl/nslocaleservice;1"]
-		.getService(Components.interfaces.nsILocaleService);
-	var collationFactory = Components.classes["@mozilla.org/intl/collation-factory;1"]
-		.getService(Components.interfaces.nsICollationFactory);
-	this._collation = collationFactory.CreateCollation(localeService.getApplicationLocale());
-	
 	this.csl = csl;
 	
 	this.citation = csl._csl.citation;
@@ -1210,6 +1211,8 @@ Zotero.CSL.ItemSet = function(items, csl) {
 	for each(var option in options) {
 		this.options[option.@name.toString()] = option.@value.toString();
 	}
+	
+	Zotero.debug((this.options["subsequent-author-substitute"] ? "subsequent-author-substitute on" : "subsequent-author-substitute off"));
 	
 	this.items = [];
 	this.itemsById = {};
@@ -1324,6 +1327,8 @@ Zotero.CSL.ItemSet.prototype.resort = function() {
 	var lastItem = false;
 	var lastNames = false;
 	var lastYear = false;
+	var citationNumber = 1;
+	
 	for(var i in this.items) {
 		var item = this.items[i];
 		if(item == undefined) continue;
@@ -1455,13 +1460,12 @@ Zotero.CSL.ItemSet.prototype.resort = function() {
 			}
 		}
 		
-		if(this.options["subsequent-author-substitute"] && names && lastNames
-				&& exactMatch) {
-			item.setProperty("subsequent-author-substitute", "1");
+		if(this.options["subsequent-author-substitute"] && names
+				&& exactMatch == 0) {
+			item.setProperty("subsequent-author-substitute", true);
 		}
 		
-		
-		item.setProperty("number", i+1);
+		item.setProperty("citation-number", citationNumber++);
 		
 		lastItem = item;
 		lastNames = names;
@@ -1507,37 +1511,18 @@ Zotero.CSL.ItemSet.prototype._compareItem = function(a, b) {
 	
 	// author
 	if(this.bibliography.option.(@name == "sort-algorithm").@value == "author-date") {
-		var sortString = new Zotero.CSL.SortString();
-		this.csl._processElements(a, this.csl._csl.macro.(@name == "author"), sortString);
-		sortA.push(sortString.get().toLowerCase());
+		var sortA = new Zotero.CSL.SortString();
+		this.csl._processElements(a, this.csl._csl.macro.(@name == "author"), sortA);
 		var date = a.getDate("issued");
-		if(date) sortA.push(date.getDateVariable("sort"));
+		if(date) sortA.append(date.getDateVariable("sort"));
 		
-		sortString = new Zotero.CSL.SortString();
-		this.csl._processElements(b, this.csl._csl.macro.(@name == "author"), sortString);
-		sortB.push(sortString.get().toLowerCase());
+		var sortB = new Zotero.CSL.SortString();
+		this.csl._processElements(b, this.csl._csl.macro.(@name == "author"), sortB);
 		var date = b.getDate("issued");
-		if(date) sortB.push(date.getDateVariable("sort"));
-	}
-	
-	var compareNum = Math.min(sortA.length, sortB.length);
-	for(i=0; i<compareNum; i++) {
-		aValue = sortA[i];
-		bValue = sortB[i];
+		if(date) sortB.append(date.getDateVariable("sort"));
 		
-		if(aValue != bValue) {
-			var cmp = this._collation.compareString(0, aValue, bValue);
-			return cmp;
-		}
+		return sortA.compare(sortB);
 	}
-	
-	if(sortA.length < sortB.length) {
-		return -1;
-	} else if(sortA.length != sortB.length) {
-		return 1;
-	}
-	
-	// finally, give up; they're the same
 	return 0;
 }
 
@@ -1566,7 +1551,7 @@ Zotero.CSL.ItemSet.prototype._compareCitations = function(a, b) {
  * Compares the names from two items
  * Returns -1 if A comes before B, 1 if B comes before A, or 0 if they are equal
  */
-Zotero.CSL.ItemSet.prototype._compareNames = function(a, b, context) {
+Zotero.CSL.ItemSet.prototype._compareNames = function(a, b) {
 	if(!a && b) {
 		return -1;
 	} else if(!b && a) {
@@ -1575,25 +1560,12 @@ Zotero.CSL.ItemSet.prototype._compareNames = function(a, b, context) {
 		return 0;
 	}
 	
-	var sortString = new Zotero.CSL.SortString();
-	this.csl._processElements(a, this.csl._csl.macro.(@name == "author"), sortString, context);
-	aString = sortString.get().toLowerCase();
+	var aString = new Zotero.CSL.SortString();
+	this.csl._processElements(a, this.csl._csl.macro.(@name == "author"), aString);
+	var bString = new Zotero.CSL.SortString();
+	this.csl._processElements(b, this.csl._csl.macro.(@name == "author"), bString);
 	
-	sortString = new Zotero.CSL.SortString();
-	this.csl._processElements(b, this.csl._csl.macro.(@name == "author"), sortString, context);
-	bString = sortString.get().toLowerCase();
-	
-	if(aString != bString) {
-		var b = this._collation.compareString(0, aString, bString);
-		if(b != 0) return b;
-		
-		if(aString < bString) {
-			return -1;
-		} else {
-			return 1;
-		}
-	}
-	return 0;
+	return aString.compare(bString);
 }
 
 Zotero.CSL.FormattedString = function(CSL, format, delimiter) {
@@ -1770,6 +1742,9 @@ Zotero.CSL.FormattedString.prototype.append = function(string, element, dontDeli
 			if(element["@font-weight"] == "bold") {
 				string = "\\b "+string+"\\b0 ";
 			}
+			if(element["@text-decoration"] == "underline") {
+				string = "\\ul "+string+"\\ul0 ";
+			}
 		}
 	
 		// add quotes if necessary
@@ -1824,34 +1799,77 @@ Zotero.CSL.FormattedString.prototype.clone = function(delimiter) {
  */
 Zotero.CSL.SortString = function() {
 	this.format = "Sort";
-	this.string = "";
-	this.delimiter = "\003"; // null character
+	this.string = [];
 }
 
-Zotero.CSL.SortString.prototype.concat = function(string) {
-	newString = string.get();
-	
-	// Replace old delimiter if concatenated string has a delimiter as wel
-	if(newString.match("\003")) {
-		delimiterRegexp = new RegExp(this.delimiter, "g");
-		this.delimiter += "\003";
-		this.string = this.string.replace(delimiterRegexp, this.delimiter);
-	}
-	
-	// append
-	this.append(newString);
-}
-
-Zotero.CSL.SortString.prototype.append = function(string) {
-	if(this.string) {
-		this.string += this.delimiter + string;
+Zotero.CSL.SortString.prototype.concat = function(newString) {
+	if(newString.string.length == 0) {
+		return;
+	} else if(newString.string.length == 1) {
+		this.string.push(newString.string[0]);
 	} else {
-		this.string += string;
+		this.string.push(newString.string);
 	}
 }
 
-Zotero.CSL.SortString.prototype.get = function() {
-	return this.string;
+Zotero.CSL.SortString.prototype.append = function(newString) {
+	this.string.push(newString);
+}
+
+Zotero.CSL.SortString.prototype.compare = function(b, a) {
+	// by default, a is this string
+	if(a == undefined) {
+		a = this.string;
+		b = b.string;
+	}
+	
+	var aIsString = typeof(a) != "object";
+	var bIsString = typeof(b) != "object";
+	if(aIsString && bIsString) {
+		if(a == b) {
+			return 0;
+		} else {
+			var cmp = Zotero.CSL.Global.collation.compareString(Zotero.CSL.Global.collation.kCollationCaseInSensitive, a, b);
+			if(cmp == 0) {
+				// for some reason collation service returned 0; the collation
+				// service sucks!
+				if(b > a) {
+					return -1;
+				} else {
+					return 1;
+				}
+			}
+			return cmp;
+		}
+	} else if(aIsString && !bIsString) {
+		var cmp = this.compare(b[0], a);
+		if(cmp == 0) {
+			return -1;	// a before b
+		}
+		return cmp;
+	} else if(bIsString && !aIsString) {
+		var cmp = this.compare(b, a[0]);
+		if(cmp == 0) {
+			return 1;	// b before a
+		}
+		return cmp;
+	}
+	
+	var maxLength = Math.min(b.length, a.length);
+	for(var i = 0; i < maxLength; i++) {
+		var cmp = this.compare(b[i], a[i]);
+		if(cmp != 0) {
+			return cmp;
+		}
+	}
+	
+	if(b.length > a.length) {
+		return -1;	// a before b
+	} else if(b.length < a.length) {
+		return 1;	// b before a
+	}
+	
+	return 0;
 }
 
 

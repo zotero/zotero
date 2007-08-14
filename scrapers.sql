@@ -1,4 +1,4 @@
--- 254
+-- 255
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-08-09 23:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-08-14 09:06:19'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -15601,7 +15601,7 @@ function doExport() {
 	}
 }');
 
-REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '2007-08-04 23:15:00', 'American Psychological Association',
+REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '2007-08-14 09:06:19', 'American Psychological Association',
 '<style xmlns="http://purl.org/net/xbiblio/csl" class="in-text" xml:lang="en">
   <info>
     <title>American Psychological Association</title>
@@ -15613,17 +15613,17 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '2007-
     </author>
     <category term="psychology"/>
     <category term="generic-base"/>
-    <updated>2007-08-04T15:15:00+08:00</updated>
+    <updated>2007-08-14T09:06:19+00:00</updated>
   </info>
   <macro name="editor-translator">
     <names variable="editor translator" prefix="(" suffix=")" delimiter=", ">
-      <name and="symbol" initialize-with="." delimiter=", "/>
+      <name and="symbol" initialize-with=". " delimiter=", "/>
       <label form="short" prefix=", " text-transform="capitalize" suffix="."/>
     </names>
   </macro>
   <macro name="author">
     <names variable="author">
-      <name name-as-sort-order="all" and="symbol" sort-separator=", " initialize-with="."
+      <name name-as-sort-order="all" and="symbol" sort-separator=", " initialize-with=". "
         delimiter=", " delimiter-precedes-last="always"/>
       <label form="short" prefix=" (" suffix=".)" text-transform="capitalize"/>
       <substitute>
@@ -15635,7 +15635,7 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '2007-
   </macro>
   <macro name="author-short">
     <names variable="author">
-      <name form="short" and="symbol" delimiter=", " initialize-with="."/>
+      <name form="short" and="symbol" delimiter=", " initialize-with=". "/>
       <substitute>
         <names variable="editor"/>
         <names variable="translator"/>
@@ -15719,7 +15719,7 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '2007-
           <group class="container" prefix=". ">
             <text term="in" text-transform="capitalize"/>
             <names variable="editor translator" prefix=" " suffix="," delimiter=", ">
-              <name and="symbol" sort-separator=", " initialize-with="."/>
+              <name and="symbol" sort-separator=", " initialize-with=". "/>
               <label form="short" prefix=" (" suffix=".)" text-transform="capitalize"/>
             </names>
             <text variable="container-title" font-style="italic" prefix=" " suffix="."/>
