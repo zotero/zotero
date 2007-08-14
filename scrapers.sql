@@ -1,4 +1,4 @@
--- 256
+-- 257
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-08-14 16:15:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-08-14 17:41:10'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -16055,7 +16055,7 @@ function doExport() {
 	}
 }');
 
-REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '2007-08-14 09:06:19', 'American Psychological Association',
+REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '2007-08-14 17:41:10', 'American Psychological Association',
 '<style xmlns="http://purl.org/net/xbiblio/csl" class="in-text" xml:lang="en">
   <info>
     <title>American Psychological Association</title>
@@ -16067,7 +16067,7 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '2007-
     </author>
     <category term="psychology"/>
     <category term="generic-base"/>
-    <updated>2007-08-14T09:06:19+00:00</updated>
+    <updated>2007-08-14T17:41:10+00:00</updated>
   </info>
   <macro name="editor-translator">
     <names variable="editor translator" prefix="(" suffix=")" delimiter=", ">
@@ -16147,7 +16147,8 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '2007-
       <date variable="issued" prefix=", ">
         <date-part name="year"/>
       </date>
-      <text variable="locator" prefix=": "/>
+      <label variable="locator" prefix=", " suffix="." form="short"/>
+      <text variable="locator" prefix=" "/>
     </layout>
   </citation>
   <bibliography>
