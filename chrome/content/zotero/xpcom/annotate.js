@@ -501,6 +501,7 @@ Zotero.Annotations.prototype.save = function() {
 		}
 		Zotero.DB.commitTransaction();
 	} catch(e) {
+		throw(e);
 		Zotero.DB.rollbackTransaction();
 	}
 }
@@ -1021,7 +1022,7 @@ Zotero.Highlight.prototype.save = function(index) {
 	var start = Zotero.Annotate.getPathForPoint(this.range.startContainer, this.range.startOffset);
 	var end = Zotero.Annotate.getPathForPoint(this.range.endContainer, this.range.endOffset);
 	
-	var query = "INSERT INTO highlights VALUES (NULL, ?, ?, ?, ?, ?, ?, ?)";
+	var query = "INSERT INTO highlights VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, DATETIME('now'))";
 	var parameters = [
 		this.annotationsObj.itemID,	// itemID
 		start.parent,				// startParent

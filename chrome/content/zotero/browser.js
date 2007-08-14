@@ -335,8 +335,13 @@ var Zotero_Browser = new function() {
 					Zotero.Annotate.setAnnotated(tab.annotateID, true);
 					browser.contentWindow.addEventListener('beforeunload', function() {			
 						// save annotations
-						tab.page.annotations.save();
-						Zotero.Annotate.setAnnotated(tab.page.annotations.itemID, false);
+						try {
+							tab.page.annotations.save();
+						} catch(e) {
+							throw(e);
+						} finally {
+							Zotero.Annotate.setAnnotated(tab.page.annotations.itemID, false);
+						}
 					}, false);
 				}
 			}
