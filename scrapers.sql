@@ -1,4 +1,4 @@
--- 255
+-- 256
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-08-14 09:06:19'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-08-14 16:15:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -2252,6 +2252,460 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }
 ');
+
+REPLACE INTO translators VALUES ('631ff0c7-2e64-4279-a9c9-ad9518d40f2b', '1.0.0b4.r5', '', '2007-08-14 16:15:00', '0', '100', '4', 'Stuff.co.nz', 'Michael Berkowitz', '^http://(www.)?stuff.co.nz/', 
+'function detectWeb(doc, url) {
+	if ((doc.location.href.indexOf("search-results") != -1) || (doc.location.href.indexOf("/blogs/blogs/") != -1 )) {
+		return "multiple";
+	} else if ((doc.location.href.indexOf("blogs") != -1) && (url != "http://www.stuff.co.nz/blogs/blogs") && (url != "http://stuff.co.nz/blogs/blogs")) {
+		return "blogPost";
+	} else if (doc.location.href.indexOf("html") == (doc.location.href.length - 4)){
+		return "newspaperArticle";
+	}
+}', 
+'function scrape(doc, url) {
+	if (doc.location.href.indexOf("html") != -1) {
+		var newItem = new Zotero.Item("newspaperArticle");
+		newItem.url = doc.location.href;
+		newItem.publicationTitle = "Stuff.co.nz";
+		newItem.title = doc.title.split(" - ")[0];
+		
+		//abstract
+		var xpath = ''//div[@id="leftcol_story"]/p/strong'';
+		newItem.abstractNote = Zotero.Utilities.cleanString(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+		
+		//date and author
+		var xpath = ''//div[@id="story_headline"]'';
+		var info = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent.split(/\n+/)[2].split(" | ");
+		
+		newItem.date = Zotero.Utilities.cleanString(info[1].split(",")[1]);
+		
+		var author = Zotero.Utilities.cleanString(info[0]);
+		if (author.substr(0,2).toLowerCase() == "by") {
+			author = author.substr(3);
+			if (author.indexOf(" - ") != -1) {
+				author = author.split(" - ")[0].split(" ");
+			} else {
+				author = author.split(" ");
+			}
+			for (var i = 0 ; i < author.length ; i++) {
+				author[i] = author[i][0] + author[i].substr(1).toLowerCase();
+				var creator = author.join(" ");
+			}
+			newItem.creators.push(Zotero.Utilities.cleanAuthor(creator, "author"));
+		} else {
+			newItem.extra = author;
+		}
+	} else if (doc.location.href.indexOf("blogs") != -1) {
+		var newItem = new Zotero.Item("blogPost");
+		newItem.url = doc.location.href;
+
+		//post title
+		var xpath = ''//div[@class="post"]/h2[@class="storytitle"]/a'';
+		newItem.title = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+	
+		//date and author
+		var xpath = ''//div[@class="meta"][@id="postdate"]''
+		var info = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent.split(" | ");
+		var byline = Zotero.Utilities.cleanString(info[0]).split(" in ");
+		newItem.creators.push(Zotero.Utilities.cleanAuthor(byline[0], "author"));
+		newItem.blogTitle = byline[1];
+		var date = Zotero.Utilities.cleanString(info[1]).split("m ");
+		newItem.date = date[1];
+	}
+	newItem.complete();
+}
+
+function doWeb(doc, url) {
+	var URLS = new Array();
+	
+	//multiple
+	if ((url.indexOf("search-results") != -1) || (url.indexOf("blogs/blogs/") != -1)) {
+		if (url.indexOf("search-results") != -1) {
+			var xpath = ''//div[@id="leftcol_story"]/p/a'';
+		} else if (url.indexOf("blogs/blogs/") != -1) {
+			var xpath = ''//h2[@class="storytitle"]/a'';
+		}
+	
+		var items = new Object();
+		var titles = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
+		var newTitle = titles.iterateNext();
+		while (newTitle) {
+			items[newTitle.href] = newTitle.textContent;
+			newTitle = titles.iterateNext();
+		}
+		
+		items = Zotero.selectItems(items);
+		
+		for (var i in items) {
+			URLS.push(i);
+		}
+	} else {
+		URLS.push(url);
+	}
+	
+	Zotero.Utilities.processDocuments(URLS, scrape, function() {Zotero.done();});
+	Zotero.wait();
+}');
+
+REPLACE INTO translators VALUES ('efb3c424-daa9-40c9-8ee2-983d2802b27a', '1.0.0b4.r5', '', '2007-08-14 16:15:00', '0', '100', '4', 'The Age', 'Michael Berkowitz', '^http://(www|search).theage.com.au/', 
+'function detectWeb(doc, url) {
+	if (url.indexOf("siteSearch.ac") != -1) {
+		return "multiple";
+	} else if (url.indexOf("html") != -1) {
+		return "newspaperArticle";
+	}
+}', 
+'function scrape(url) {
+	Zotero.Utilities.HTTP.doGet(url, function(text) {
+		var newItem = new Zotero.Item("newspaperArticle");
+		newItem.ISSN = "0312-6307";
+		newItem.url =url;
+		newItem.publicationTitle = "The Age";
+		Zotero.debug(url);
+		
+		//title
+		var t = /<HEADLINE>(.*)<\/HEADLINE>/;
+		newItem.title = Zotero.Utilities.unescapeHTML(Zotero.Utilities.capitalizeTitle(text.match(t)[1]).split(" - ")[0]);
+		
+		//meta tags? (except abstract, for some reason)
+		var m = /name=\"(.*)\"\s+content=\"(.*)\"\s+\/>/g;
+		var metaTags = text.match(m);
+		var metaInfo = new Object();
+		var metaNames = new Array();
+		var m2 = /name=\"(.*)\"\s+content=\"(.*)\"\s+\/>/;
+		for (var i = 0 ; i < metaTags.length ; i++) {
+			var stuff = metaTags[i].match(m2);
+			metaInfo[stuff[1]] = stuff[2];
+			metaNames.push(stuff[1]);
+		}
+		
+		for (var i = 0 ; i <metaNames.length ; i++) {
+			if (metaNames[i] == "sitecategories") {
+				newItem.section = metaInfo[metaNames[i]].split(",")[0];
+			} else if (metaNames[i] == "publishdate") {
+				newItem.date = metaInfo[metaNames[i]].split(/\s+/)[0];
+			} else if (metaNames[i] == "byline") {
+				var byline = metaInfo[metaNames[i]].split(",")[0];
+				if (byline.indexOf(" and ") != -1) {
+					byline = byline.split(" and ");
+					for (var j = 0 ; j < byline.length ; j++) {
+						newItem.creators.push(Zotero.Utilities.cleanAuthor(byline[j], "author"));
+					}
+				} else {
+					newItem.creators.push(Zotero.Utilities.cleanAuthor(byline, "author"));
+				}
+			} else if (metaNames[i] == "keywords") {
+				var keywords = metaInfo[metaNames[i]].split(",");
+				for (var k = 0 ; k < keywords.length ; k++) {
+					if (keywords[k].length > 1) {
+						newItem.tags.push(Zotero.Utilities.unescapeHTML(keywords[k][0].toUpperCase() + keywords[k].substr(1).toLowerCase()));
+					}
+				}
+			}
+		}
+		
+		//abstract
+		var a = /\"Description\"\s+content=\"([^\"]*)\"/;
+		newItem.abstractNote = Zotero.Utilities.unescapeHTML(text.match(a)[1].substring(0, text.match(a)[1].length - 3));
+		
+		newItem.complete();
+		Zotero.done();
+	}, function() {});
+}
+
+function doWeb(doc, url) {
+	var URLS = new Array();
+	if (url.indexOf("siteSearch.ac") != -1) {
+		var xpath = ''//div[@class="searchresults"]/dl/dt/a'';
+		var titles = new Object();
+		var stuff = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
+		var newest = stuff.iterateNext();
+		while (newest) {
+			titles[newest.href] = newest.textContent;
+			newest = stuff.iterateNext();
+		}
+		
+		var items = Zotero.selectItems(titles);
+		
+		for (var i in items) {
+			URLS.push(i.split("u=")[1].replace(/%3A/g,":").replace(/%2F/g,"/").split("&")[0]);
+		}
+	} else {
+		URLS.push(url);
+	}
+	
+	Zotero.debug(URLS);
+	
+	Zotero.Utilities.HTTP.doPost(URLS, "", function(text) {
+		for (var i = 0 ; i < URLS.length ; i++) {
+			scrape(URLS[i]);
+		}
+	});
+	Zotero.wait();
+}');
+
+REPLACE INTO translators VALUES ('c7830593-807e-48cb-99f2-c3bed2b148c2', '1.0.0b4.r5', '', '2007-08-14 16:15:00', '1', '100', '4', 'New Zealand Herald', 'Michael Berkowitz', '^http://(www|search).nzherald.co.nz/', 
+'function detectWeb(doc, url) {
+	if (doc.title.indexOf("Search Results") != -1) {
+		return "multiple";
+	} else if (doc.location.href.indexOf("story.cfm") != -1) {
+		return "newspaperArticle";
+	}
+}', 
+'function scrape(url) {
+	Zotero.Utilities.HTTP.doGet(url, function(text) {
+		var newItem = new Zotero.Item("newspaperArticle");
+		newItem.url = url;
+		newItem.publicationTitle = "New Zealand Herald";
+		
+		//author?
+		var aut = /<a href=\"\/author\/[^>]*>(.*)<\/a>/;
+		if (text.match(aut)) {
+			var author = text.match(aut)[1];
+			newItem.creators.push(Zotero.Utilities.cleanAuthor(author, "author"));
+		}
+		
+		//abstract
+		var a = /meta name=\"description\" content=\"([^&]*)/;
+		newItem.abstractNote = text.match(a)[1];
+		
+		//title and date
+		var t = /<title>(.*)<\/title>/;
+		var result = text.match(t)[1].split(" - ");
+		newItem.title = result[0];
+		newItem.date = result[1];
+		
+		//keywords
+		var k = /<meta name=\"keywords\" content=\"(.*)\"/;
+		var kwords = Zotero.Utilities.cleanString(text.match(k)[1]).split(", ");
+		for (var i = 0 ; i < kwords.length ; i++) {
+			newItem.tags.push(kwords[i]);
+		}
+		
+		//section
+		var s = /class=\"current\"><.*><span>(.*)<\/span>/;
+		newItem.section = text.match(s)[1];
+		
+		newItem.complete();
+		Zotero.debug(newItem);
+		
+		Zotero.done();
+	}, function() {});
+}
+
+function doWeb(doc, url) {
+	var articles = new Array();
+	var names = new Array();
+	if (doc.title.indexOf("Search Results:") != -1) {
+		var URLS = new Array();
+		var titles = new Array();
+		var xpath = ''//p[@class="g"]/a'';
+		var links = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
+		var link = links.iterateNext();
+	
+		while (link) {
+			URLS.push(link.href);
+			titles.push(link.textContent);
+			link = links.iterateNext();
+		}
+		
+		Zotero.debug(titles);
+		Zotero.debug(URLS);
+		
+		var newItems = new Object();
+		
+		for (var i = 0 ; i < titles.length ; i++) {
+			newItems[URLS[i]] = titles[i];
+		}
+	
+		newItems = Zotero.selectItems(newItems);
+	
+		Zotero.debug(newItems);
+		
+		for (var i in newItems) {
+			articles.push(i);
+			names.push(newItems[i]);
+		}
+	} else {
+		articles.push(doc.location.href);
+		names.push(Zotero.Utilities.cleanString(doc.title.split("-")[0]));
+	}
+	
+	Zotero.debug(articles);
+	
+	Zotero.Utilities.HTTP.doPost(articles, "", function(text) {
+		for (var i = 0 ; i < articles.length ; i++) {
+			scrape(articles[i]);
+		}
+	});
+	
+	Zotero.wait();
+}');
+
+REPLACE INTO translators VALUES ('19120a71-17a8-4629-936a-ccdf899b9861', '1.0.0b4.r5', '', '2007-08-14 16:15:00', '1', '99', '4', 'Sydney Morning Herald', 'Michael Berkowitz', '^http://(www|search).smh.com.au/(news|siteSearch|articles)', 
+'function detectWeb(doc, url) {
+	if (doc.location.href.indexOf("news") != -1 || doc.location.href.indexOf("articles") != -1) {
+		return "newspaperArticle";
+	} else if (doc.location.href.indexOf("siteSearch") != -1) {
+		return "multiple";
+	}
+}', 
+'function regexMeta(str, item) {
+	var re = /name=\"(.*)\"\s+content=\"(.*)\"\s+\/>/;
+	var stuff = str.match(re);
+	if (stuff[1] == "byline") {
+		authors = stuff[2].split(" and ");
+		for (var i = 0 ; i < authors.length ; i++) {
+			item.creators.push(Zotero.Utilities.cleanAuthor(authors[i].split(" in ")[0], "author"));
+		}
+	} else if (stuff[1] == "sitecategories") {
+		item.section = stuff[2];
+	} else if (stuff[1] == "publishdate") {
+		item.date = stuff[2].split(/\s+/)[0];
+	}
+}
+
+function doWeb(doc, url) {
+	var articles = new Array();
+	if (doc.location.href.indexOf("siteSearch") != -1) {
+		var items = new Array();
+		var xpath = ''//div[@class="searchresults"]/dl/dt/a'';
+		var stuff = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
+		var thing = stuff.iterateNext();
+		while (thing) {
+			items[thing.href] = thing.textContent;
+			thing = stuff.iterateNext();
+		}
+		
+		items = Zotero.selectItems(items);
+		
+		for (var i in items) {
+			articles.push(i);
+		}
+	} else {
+		articles.push(url);
+	}
+	for (var i = 0 ; i < articles.length ; i++) {
+		var url = articles[i]
+		Zotero.Utilities.HTTP.doGet(url, function(text) {
+			var newItem = new Zotero.Item("newspaperArticle");
+			newItem.publicationTitle = "Sydney Morning Herald";
+			newItem.url = url;
+			newItem.ISSN = "0312-6315";
+			//title
+			var t = /<HEADLINE>(.*)<\/HEADLINE>/;
+			newItem.title = Zotero.Utilities.unescapeHTML(Zotero.Utilities.capitalizeTitle(text.match(t)[1]));
+			//hooray for real meta tags!
+			var meta = /<meta\s+name=(.*)\/>/g;
+			var metaTags = text.match(meta);
+			for (var i = 0 ; i <metaTags.length ; i++) {
+				regexMeta(metaTags[i], newItem);
+			}
+			//abstract
+			var abs = /meta name=\"Description\" content=\"([^\"]*)\"/;
+			var abstract = text.match(abs)[1].split(/\s+/);
+			abstract[0] = abstract[0][0] + abstract[0].substr(1).toLowerCase();
+			abstract = abstract.join(" ");
+			newItem.abstractNote = Zotero.Utilities.unescapeHTML(abstract.substr(0, abstract.length - 3));
+			newItem.complete();
+			Zotero.done();
+		}, function() {});
+	}
+	Zotero.wait();
+}');
+
+REPLACE INTO translators VALUES ('393afc28-212d-47dd-be87-ec51bc7a58a4', '1.0.0b3r1', '', '2007-08-14 16:15:00', '1', '100', '4', 'The Australian', 'Michael Berkowitz', '^http://(searchresults|www.theaustralian).news.com.au/', 
+'function detectWeb(doc, url) {
+	if (url == "http://searchresults.news.com.au/servlet/Search" || url.indexOf("siteSearch") != -1) {
+		return "multiple";
+	} else if (url.indexOf("story") != -1) {
+		return "newspaperArticle";
+	}
+}', 
+'function scrape(url) {
+	Zotero.Utilities.HTTP.doGet(url, function(text) {
+		var newItem = new Zotero.Item("newspaperArticle");
+		newItem.url = url;
+		newItem.publicationTitle = "The Australian";
+		
+		//title
+		var t = /<title>(.*)<\/title>/;
+		newItem.title = Zotero.Utilities.capitalizeTitle(text.match(t)[1].split(" | ")[0]);
+		
+		//abstract
+		var abs = /meta name=\"description\"\s+content=\"(.*)\"/;
+		var abstract = Zotero.Utilities.unescapeHTML(text.match(abs)[1]).split(" ");
+		abstract[0] = abstract[0][0] + abstract[0].substr(1).toLowerCase();
+		newItem.abstractNote = abstract.join(" ");
+		
+		//tags
+		var t = /meta name=\"keywords\"\s+content=\"(.*)\"/;
+		var tags = text.match(t)[1].split(/,\s+/);
+		for (var i = 0 ; i < tags.length ; i++) {
+			newItem.tags.push(Zotero.Utilities.unescapeHTML(tags[i]));
+		}
+
+		//section
+		var sec = /active\"><a[^>]*>(.*)<\/a>/;
+		if (text.match(sec)) {
+			newItem.section = text.match(sec)[1];
+		}
+		
+		//timestamp
+		var t = /<em class=\"timestamp\">(.*)<\/em>/;
+		newItem.date = text.match(t)[1];
+		
+		//byline
+		var by = /<div\s+class=\"module-subheader\"><p>(.*)/;
+		if (text.match(by)[1]) {
+			var byline = text.match(by)[1];
+			var authors = new Array();
+			if (byline.indexOf(",") != -1) {
+				byline = byline.split(",")[0];
+			}
+			if (byline.indexOf(" and ") != -1) {
+				var authors = byline.split(" and ");
+			} else {
+				authors.push(byline);
+			}
+			for (var i = 0 ; i < authors.length ; i++) {
+				newItem.creators.push(Zotero.Utilities.cleanAuthor(authors[i], "author"));
+			}
+		}
+		
+		newItem.complete();
+		Zotero.debug(newItem);
+		
+		Zotero.done();
+	}, function() {});
+}
+
+function doWeb(doc, url) {
+	var URLS = new Array();
+	var newItems = new Object();
+	if (url == "http://searchresults.news.com.au/servlet/Search") {
+		var articles = new Array();
+		var xpath = ''//ol/li/h4[@class="heading"]/a'';
+		//var titles = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
+		
+		newItems = Zotero.Utilities.getItemArray(doc, doc.getElementsByTagName("h4"), /^http:\/\//);
+		newItems = Zotero.selectItems(newItems);
+	} else {
+		newItems[url] = doc.title.split(" | ")[0]; 
+	}
+
+	for (var i in newItems) {
+		URLS.push(i);
+	}
+	
+	Zotero.debug(URLS);
+	Zotero.Utilities.HTTP.doPost(URLS, "", function(text) {
+		for (var i = 0 ; i < URLS.length ; i++) {
+			scrape(URLS[i]);
+		}
+	});
+}');
 
 REPLACE INTO translators VALUES ('1f40baef-eece-43e4-a1cc-27d20c0ce086', '1.0.0b4.r1', '', '2007-07-31 19:40:00', '1', '100', '4', 'Engineering Village', 'Ben Parr', '^https?://(?:www\.)?engineeringvillage(2)?\.(?:com|org)', 
 'function detectWeb(doc, url)
