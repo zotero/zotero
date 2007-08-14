@@ -2763,20 +2763,30 @@ Zotero.Items = new function(){
 			") " +
 			"WHEN 0 THEN NULL " +
 			"WHEN 1 THEN (" +
-				"SELECT lastName FROM itemCreators NATURAL JOIN creators WHERE itemID=I.itemID" +
+				"SELECT lastName FROM itemCreators IC NATURAL JOIN creators " +
+				"LEFT JOIN itemTypeCreatorTypes ITCT " +
+				"ON (IC.creatorTypeID=ITCT.creatorTypeID AND ITCT.itemTypeID=I.itemTypeID) " +
+				"WHERE itemID=I.itemID AND primaryField=1" +
 			") " +
 			"WHEN 2 THEN (" +
 				"SELECT " +
-				"(SELECT lastName FROM itemCreators NATURAL JOIN creators WHERE itemID=I.itemID ORDER BY orderIndex LIMIT 1)" +
+				"(SELECT lastName FROM itemCreators IC NATURAL JOIN creators " +
+				"LEFT JOIN itemTypeCreatorTypes ITCT " +
+				"ON (IC.creatorTypeID=ITCT.creatorTypeID AND ITCT.itemTypeID=I.itemTypeID) " +
+				"WHERE itemID=I.itemID AND primaryField=1 ORDER BY orderIndex LIMIT 1)" +
 				" || ' " + localizedAnd + " ' || " +
-				"(SELECT lastName FROM itemCreators NATURAL JOIN creators WHERE itemID=I.itemID ORDER BY orderIndex LIMIT 1,1) " +
-				"FROM itemCreators NATURAL JOIN creators WHERE itemID=I.itemID" +
+				"(SELECT lastName FROM itemCreators IC NATURAL JOIN creators " +
+				"LEFT JOIN itemTypeCreatorTypes ITCT " +
+				"ON (IC.creatorTypeID=ITCT.creatorTypeID AND ITCT.itemTypeID=I.itemTypeID) " +
+				"WHERE itemID=I.itemID AND primaryField=1 ORDER BY orderIndex LIMIT 1,1)" +
 			") " +
 			"ELSE (" +
 				"SELECT " +
-				"(SELECT lastName FROM itemCreators NATURAL JOIN creators WHERE itemID=I.itemID ORDER BY orderIndex LIMIT 1)" +
+				"(SELECT lastName FROM itemCreators IC NATURAL JOIN creators " +
+				"LEFT JOIN itemTypeCreatorTypes ITCT " +
+				"ON (IC.creatorTypeID=ITCT.creatorTypeID AND ITCT.itemTypeID=I.itemTypeID) " +
+				"WHERE itemID=I.itemID AND primaryField=1 ORDER BY orderIndex LIMIT 1)" +
 				" || ' et al.' " +
-				"FROM itemCreators NATURAL JOIN creators WHERE itemID=I.itemID" +
 			") " +
 			"END, " +
 			
@@ -2795,13 +2805,11 @@ Zotero.Items = new function(){
 				"(SELECT lastName FROM itemCreators NATURAL JOIN creators WHERE itemID=I.itemID AND creatorTypeID IN (3) ORDER BY orderIndex LIMIT 1)" +
 				" || ' " + localizedAnd + " ' || " +
 				"(SELECT lastName FROM itemCreators NATURAL JOIN creators WHERE itemID=I.itemID AND creatorTypeID IN (3) ORDER BY orderIndex LIMIT 1,1) " +
-				"FROM itemCreators NATURAL JOIN creators WHERE itemID=I.itemID" +
 			") " +
 			"ELSE (" +
 				"SELECT " +
 				"(SELECT lastName FROM itemCreators NATURAL JOIN creators WHERE itemID=I.itemID AND creatorTypeID IN (3) ORDER BY orderIndex LIMIT 1)" +
 				" || ' et al.' " +
-				"FROM itemCreators NATURAL JOIN creators WHERE itemID=I.itemID" +
 			") " +
 			"END, " +
 			
@@ -2820,13 +2828,11 @@ Zotero.Items = new function(){
 				"(SELECT lastName FROM itemCreators NATURAL JOIN creators WHERE itemID=I.itemID AND creatorTypeID IN (2) ORDER BY orderIndex LIMIT 1)" +
 				" || ' " + localizedAnd + " ' || " +
 				"(SELECT lastName FROM itemCreators NATURAL JOIN creators WHERE itemID=I.itemID AND creatorTypeID IN (2) ORDER BY orderIndex LIMIT 1,1) " +
-				"FROM itemCreators NATURAL JOIN creators WHERE itemID=I.itemID" +
 			") " +
 			"ELSE (" +
 				"SELECT " +
 				"(SELECT lastName FROM itemCreators NATURAL JOIN creators WHERE itemID=I.itemID AND creatorTypeID IN (2) ORDER BY orderIndex LIMIT 1)" +
 				" || ' et al.' " +
-				"FROM itemCreators NATURAL JOIN creators WHERE itemID=I.itemID" +
 			") " +
 			"END" +
 		") AS firstCreator";
