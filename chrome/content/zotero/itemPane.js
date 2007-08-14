@@ -348,14 +348,14 @@ var ZoteroItemPane = new function()
 				}
 				
 				if (_addCreatorRow) {
-					addCreatorRow('', '', false, Zotero.Prefs.get('lastCreatorFieldMode'), true, true);
+					addCreatorRow('', '', false, Zotero.Prefs.get('lastCreatorFieldMode'), true, false);
 					_addCreatorRow = false;
 				}
 			}
 			else
 			{
 				// Add default row
-				addCreatorRow('', '', false, Zotero.Prefs.get('lastCreatorFieldMode'), true, false);
+				addCreatorRow('', '', false, Zotero.Prefs.get('lastCreatorFieldMode'), true, true);
 			}
 			
 			var focusMode = 'info';
