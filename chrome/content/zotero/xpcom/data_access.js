@@ -109,12 +109,7 @@ Zotero.Item.prototype.loadFromID = function(id) {
 					break;
 				
 				case 'firstCreator':
-					colSQL = 'CASE ((SELECT COUNT(*) FROM itemCreators '
-						+ 'WHERE itemID=' + id + ')>1) '
-						+ "WHEN 0 THEN '' ELSE ' et al.' END AS firstCreator";
-					joinSQL = 'LEFT JOIN itemCreators IC ON (I.itemID=IC.itemID) '
-						+ 'LEFT JOIN creators C ON (IC.creatorID=C.creatorID)';
-					whereSQL = '(IC.orderIndex=0 OR IC.orderIndex IS NULL)';
+					colSQL = Zotero.Items.getfirstCreatorSQL();
 					break;
 					
 				case 'numNotes':
@@ -2425,6 +2420,7 @@ Zotero.Items = new function(){
 	var _items = [];
 	var _itemsLoaded = false;
 	var _cachedFields = [];
+	var _firstCreatorSQL = '';
 	
 	
 	/*
@@ -2734,21 +2730,112 @@ Zotero.Items = new function(){
 	}
 	
 	
+	/*
+	 * Generate SQL to retrieve firstCreator field
+	 *
+	 * Why do we do this entirely in SQL? Because we're crazy. Crazy like foxes.
+	 */
+	function getFirstCreatorSQL() {
+		if (_firstCreatorSQL) {
+			return _firstCreatorSQL;
+		}
+		
+		/* This whole block is to get the firstCreator */
+		var localizedAnd = Zotero.getString('general.and');
+		var sql = "COALESCE(" +
+			// First try for primary creator types
+			"CASE (" +
+				"SELECT COUNT(*) FROM itemCreators IC " +
+				"LEFT JOIN itemTypeCreatorTypes ITCT " +
+				"ON (IC.creatorTypeID=ITCT.creatorTypeID AND ITCT.itemTypeID=I.itemTypeID) " +
+				"WHERE itemID=I.itemID AND primaryField=1" +
+			") " +
+			"WHEN 0 THEN NULL " +
+			"WHEN 1 THEN (" +
+				"SELECT lastName FROM itemCreators NATURAL JOIN creators WHERE itemID=I.itemID" +
+			") " +
+			"WHEN 2 THEN (" +
+				"SELECT " +
+				"(SELECT lastName FROM itemCreators NATURAL JOIN creators WHERE itemID=I.itemID ORDER BY orderIndex LIMIT 1)" +
+				" || ' " + localizedAnd + " ' || " +
+				"(SELECT lastName FROM itemCreators NATURAL JOIN creators WHERE itemID=I.itemID ORDER BY orderIndex LIMIT 1,1) " +
+				"FROM itemCreators NATURAL JOIN creators WHERE itemID=I.itemID" +
+			") " +
+			"ELSE (" +
+				"SELECT " +
+				"(SELECT lastName FROM itemCreators NATURAL JOIN creators WHERE itemID=I.itemID ORDER BY orderIndex LIMIT 1)" +
+				" || ' et al.' " +
+				"FROM itemCreators NATURAL JOIN creators WHERE itemID=I.itemID" +
+			") " +
+			"END, " +
+			
+			// Then try editors
+			"CASE (" +
+				"SELECT COUNT(*) FROM itemCreators " +
+				"NATURAL JOIN creatorTypes WHERE itemID=I.itemID AND creatorTypeID IN (3)" +
+			") " +
+			"WHEN 0 THEN NULL " +
+			"WHEN 1 THEN (" +
+				"SELECT lastName FROM itemCreators NATURAL JOIN creators " +
+				"WHERE itemID=I.itemID AND creatorTypeID IN (3)" +
+			") " +
+			"WHEN 2 THEN (" +
+				"SELECT " +
+				"(SELECT lastName FROM itemCreators NATURAL JOIN creators WHERE itemID=I.itemID AND creatorTypeID IN (3) ORDER BY orderIndex LIMIT 1)" +
+				" || ' " + localizedAnd + " ' || " +
+				"(SELECT lastName FROM itemCreators NATURAL JOIN creators WHERE itemID=I.itemID AND creatorTypeID IN (3) ORDER BY orderIndex LIMIT 1,1) " +
+				"FROM itemCreators NATURAL JOIN creators WHERE itemID=I.itemID" +
+			") " +
+			"ELSE (" +
+				"SELECT " +
+				"(SELECT lastName FROM itemCreators NATURAL JOIN creators WHERE itemID=I.itemID AND creatorTypeID IN (3) ORDER BY orderIndex LIMIT 1)" +
+				" || ' et al.' " +
+				"FROM itemCreators NATURAL JOIN creators WHERE itemID=I.itemID" +
+			") " +
+			"END, " +
+			
+			// Then try contributors
+			"CASE (" +
+				"SELECT COUNT(*) FROM itemCreators " +
+				"NATURAL JOIN creatorTypes WHERE itemID=I.itemID AND creatorTypeID IN (2)" +
+			") " +
+			"WHEN 0 THEN NULL " +
+			"WHEN 1 THEN (" +
+				"SELECT lastName FROM itemCreators NATURAL JOIN creators " +
+				"WHERE itemID=I.itemID AND creatorTypeID IN (2)" +
+			") " +
+			"WHEN 2 THEN (" +
+				"SELECT " +
+				"(SELECT lastName FROM itemCreators NATURAL JOIN creators WHERE itemID=I.itemID AND creatorTypeID IN (2) ORDER BY orderIndex LIMIT 1)" +
+				" || ' " + localizedAnd + " ' || " +
+				"(SELECT lastName FROM itemCreators NATURAL JOIN creators WHERE itemID=I.itemID AND creatorTypeID IN (2) ORDER BY orderIndex LIMIT 1,1) " +
+				"FROM itemCreators NATURAL JOIN creators WHERE itemID=I.itemID" +
+			") " +
+			"ELSE (" +
+				"SELECT " +
+				"(SELECT lastName FROM itemCreators NATURAL JOIN creators WHERE itemID=I.itemID AND creatorTypeID IN (2) ORDER BY orderIndex LIMIT 1)" +
+				" || ' et al.' " +
+				"FROM itemCreators NATURAL JOIN creators WHERE itemID=I.itemID" +
+			") " +
+			"END" +
+		") AS firstCreator";
+		
+		_firstCreatorSQL = sql;
+		return sql;
+	}
+	
+	
 	function _load() {
 		if (!arguments[0] && _itemsLoaded) {
 			return;
 		}
 		
 		// Should be the same as parts in Zotero.Item.loadFromID
-		var sql = 'SELECT I.itemID, I.itemTypeID, I.dateModified, lastName || '
-			+ 'CASE ((SELECT COUNT(*) FROM itemCreators WHERE itemID=I.itemID)>1) '
-			+ "WHEN 0 THEN '' ELSE ' et al.' END AS firstCreator, "
+		var sql = 'SELECT I.itemID, I.itemTypeID, I.dateModified, '
+			+ getFirstCreatorSQL() + ', '
 			+ "(SELECT COUNT(*) FROM itemNotes WHERE sourceItemID=I.itemID) AS numNotes, "
 			+ "(SELECT COUNT(*) FROM itemAttachments WHERE sourceItemID=I.itemID) AS numAttachments "
-			+ 'FROM items I '
-			+ 'LEFT JOIN itemCreators IC ON (I.itemID=IC.itemID) '
-			+ 'LEFT JOIN creators C ON (IC.creatorID=C.creatorID) '
-			+ 'WHERE (IC.orderIndex=0 OR IC.orderIndex IS NULL)';
+			+ 'FROM items I WHERE 1';
 		
 		if (arguments[0]){
 			sql += ' AND I.itemID IN (' + Zotero.join(arguments,',') + ')';
