@@ -37,6 +37,8 @@ var ZoteroItemPane = new function()
 	var _itemBeingEdited;
 	var _activeScrollbox;
 	
+	var _addCreatorRow;
+	
 	var _lastTabIndex;
 	var _tabDirection;
 	var _tabIndexMinCreators = 10;
@@ -344,11 +346,16 @@ var ZoteroItemPane = new function()
 					var creator = _itemBeingEdited.getCreator(i);
 					addCreatorRow(creator['firstName'], creator['lastName'], creator['creatorTypeID'], creator['fieldMode']);
 				}
+				
+				if (_addCreatorRow) {
+					addCreatorRow('', '', false, Zotero.Prefs.get('lastCreatorFieldMode'), true, true);
+					_addCreatorRow = false;
+				}
 			}
 			else
 			{
 				// Add default row
-				addCreatorRow('', '', false, Zotero.Prefs.get('lastCreatorFieldMode'), true, true);
+				addCreatorRow('', '', false, Zotero.Prefs.get('lastCreatorFieldMode'), true, false);
 			}
 			
 			var focusMode = 'info';
@@ -1160,14 +1167,14 @@ var ZoteroItemPane = new function()
 		switch (event.keyCode)
 		{
 			case event.DOM_VK_RETURN:
+				var fieldname = target.getAttribute('fieldname');
 				// Use shift-enter as the save action for the larger fields
-				if ((target.getAttribute('fieldname') == 'abstractNote'
-					|| target.getAttribute('fieldname') == 'extra')
+				if ((fieldname == 'abstractNote' || fieldname == 'extra')
 					&& !event.shiftKey)
 				{
 					break;
 				}
-				else if (target.getAttribute('fieldname')=='tag')
+				else if (fieldname == 'tag')
 				{
 					// If last tag row, create new one
 					var row = target.parentNode.parentNode;
@@ -1176,6 +1183,27 @@ var ZoteroItemPane = new function()
 						_tabDirection = 1;
 						var lastTag = true;
 					}
+				}
+				// Shift-enter adds new creator row
+				else if (fieldname.indexOf('creator-') == 0 && event.shiftKey) {
+					// Value hasn't changed
+					if (target.getAttribute('value') == target.value) {
+						Zotero.debug("Value hasn't changed");
+						// If + button is disabled, just focus next creator row
+						if (Zotero.getAncestorByTagName(target, 'row').lastChild.lastChild.disabled) {
+							_focusNextField('info', _dynamicFields, _lastTabIndex, false);
+						}
+						else {
+							ZoteroItemPane.addCreatorRow('', '', false, Zotero.Prefs.get('lastCreatorFieldMode'), true, false);
+						}
+					}
+					// Value has changed
+					else {
+						_tabDirection = 1;
+						_addCreatorRow = true;
+						focused.blur();
+					}
+					return false;
 				}
 				focused.blur();
 				

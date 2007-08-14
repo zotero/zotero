@@ -152,6 +152,12 @@ Zotero.Item.prototype.loadFromRow = function(row, reload) {
 		this.setType(row['itemTypeID'], true);
 	}
 	
+	// This is a quick hack to reset the creators on reload --
+	// there's probably a better place for this
+	this._creatorsLoaded = false;
+	this._changedCreators = new Zotero.Hash();
+	this._creators = [];
+	
 	for (var col in row){
 		// Only accept primary field data through loadFromRow()
 		if (this.isPrimaryField(col)){
@@ -436,10 +442,15 @@ Zotero.Item.prototype.removeCreator = function(orderIndex){
 	}
 	this._creators[orderIndex] = false;
 	
-	// Go to length+1 so we clear the last one
+	// Shift creator orderIndexes down, going to length+1 so we clear the last one
 	for (var i=orderIndex, max=this._creators.length+1; i<max; i++){
 		var next = this._creators[i+1] ? this._creators[i+1] : false;
-		this._creators[i] = next;
+		if (next) {
+			this._creators[i] = next;
+		}
+		else {
+			delete this._creators[i];
+		}
 		this._changedCreators.set(i);
 	}
 	return true;
@@ -2512,7 +2523,7 @@ Zotero.Items = new function(){
 	 *     title: "Shakespeare: The Invention of the Human",
 	 *     publisher: "Riverhead Hardcover",
 	 *     date: '1998-10-26',
-	 *     isbn: 1573221201,
+	 *     ISBN: 1573221201,
 	 *     pages: 745,
 	 *     creators: [
 	 *         ['Harold', 'Bloom', 'author']
