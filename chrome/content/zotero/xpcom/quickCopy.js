@@ -126,11 +126,10 @@ Zotero.QuickCopy = new function() {
 		}
 		else if (mode == 'bibliography') {
 			var csl = Zotero.Cite.getStyle(format);
-			Zotero.debug(items);
-			csl.preprocessItems(items);
+			var itemSet = csl.generateItemSet(items);
 			var bibliography = {
-				text: csl.createBibliography(items, "Text"),
-				html: csl.createBibliography(items, "HTML")
+				text: csl.createBibliography(itemSet, "Text"),
+				html: csl.createBibliography(itemSet, "HTML")
 			};
 			return bibliography;
 		}
