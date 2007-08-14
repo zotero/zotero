@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-08-14 17:41:10'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-08-14 22:20:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -2253,7 +2253,7 @@ function doWeb(doc, url) {
 }
 ');
 
-REPLACE INTO translators VALUES ('631ff0c7-2e64-4279-a9c9-ad9518d40f2b', '1.0.0b4.r5', '', '2007-08-14 16:15:00', '0', '100', '4', 'Stuff.co.nz', 'Michael Berkowitz', '^http://(www.)?stuff.co.nz/', 
+REPLACE INTO translators VALUES ('631ff0c7-2e64-4279-a9c9-ad9518d40f2b', '1.0.0b4.r5', '', '2007-08-14 22:15:00', '0', '100', '4', 'Stuff.co.nz', 'Michael Berkowitz', '^http://(www.)?stuff.co.nz/', 
 'function detectWeb(doc, url) {
 	if ((doc.location.href.indexOf("search-results") != -1) || (doc.location.href.indexOf("/blogs/blogs/") != -1 )) {
 		return "multiple";
@@ -2348,7 +2348,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('efb3c424-daa9-40c9-8ee2-983d2802b27a', '1.0.0b4.r5', '', '2007-08-14 16:15:00', '0', '100', '4', 'The Age', 'Michael Berkowitz', '^http://(www|search).theage.com.au/', 
+REPLACE INTO translators VALUES ('efb3c424-daa9-40c9-8ee2-983d2802b27a', '1.0.0b4.r5', '', '2007-08-14 22:15:00', '0', '100', '4', 'The Age', 'Michael Berkowitz', '^http://(www|search).theage.com.au/', 
 'function detectWeb(doc, url) {
 	if (url.indexOf("siteSearch.ac") != -1) {
 		return "multiple";
@@ -2445,7 +2445,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('c7830593-807e-48cb-99f2-c3bed2b148c2', '1.0.0b4.r5', '', '2007-08-14 16:15:00', '1', '100', '4', 'New Zealand Herald', 'Michael Berkowitz', '^http://(www|search).nzherald.co.nz/', 
+REPLACE INTO translators VALUES ('c7830593-807e-48cb-99f2-c3bed2b148c2', '1.0.0b4.r5', '', '2007-08-14 22:15:00', '1', '100', '4', 'New Zealand Herald', 'Michael Berkowitz', '^http://(www|search).nzherald.co.nz/', 
 'function detectWeb(doc, url) {
 	if (doc.title.indexOf("Search Results") != -1) {
 		return "multiple";
@@ -2543,7 +2543,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('19120a71-17a8-4629-936a-ccdf899b9861', '1.0.0b4.r5', '', '2007-08-14 16:15:00', '1', '99', '4', 'Sydney Morning Herald', 'Michael Berkowitz', '^http://(www|search).smh.com.au/(news|siteSearch|articles)', 
+REPLACE INTO translators VALUES ('19120a71-17a8-4629-936a-ccdf899b9861', '1.0.0b4.r5', '', '2007-08-14 22:15:00', '1', '99', '4', 'Sydney Morning Herald', 'Michael Berkowitz', '^http://(www|search).smh.com.au/(news|siteSearch|articles)', 
 'function detectWeb(doc, url) {
 	if (doc.location.href.indexOf("news") != -1 || doc.location.href.indexOf("articles") != -1) {
 		return "newspaperArticle";
@@ -2615,7 +2615,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('393afc28-212d-47dd-be87-ec51bc7a58a4', '1.0.0b3r1', '', '2007-08-14 16:15:00', '1', '100', '4', 'The Australian', 'Michael Berkowitz', '^http://(searchresults|www.theaustralian).news.com.au/', 
+REPLACE INTO translators VALUES ('393afc28-212d-47dd-be87-ec51bc7a58a4', '1.0.0b3.r1', '', '2007-08-14 22:20:00', '1', '100', '4', 'The Australian', 'Michael Berkowitz', '^http://(searchresults|www.theaustralian).news.com.au/', 
 'function detectWeb(doc, url) {
 	if (url == "http://searchresults.news.com.au/servlet/Search" || url.indexOf("siteSearch") != -1) {
 		return "multiple";
