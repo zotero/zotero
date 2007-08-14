@@ -203,6 +203,7 @@ Zotero.Search.prototype.addCondition = function(condition, operator, value, requ
 			this.addCondition('creator', operator, part.text, false);
 			this.addCondition('tag', operator, part.text, false);
 			this.addCondition('note', operator, part.text, false);
+			this.addCondition('annotation', operator, part.text, false);
 			
 			if (part.inQuotes) {
 				this.addCondition('fulltextContent', operator, part.text, false);
@@ -1538,6 +1539,16 @@ Zotero.SearchConditions = new function(){
 				field: 'value',
 				aliases: ['pages', 'section', 'seriesNumber','issue'],
 				template: true // mark for special handling
+			},
+			
+			{
+				name: 'annotation',
+				operators: {
+					contains: true,
+					doesNotContain: true
+				},
+				table: 'annotations',
+				field: 'text'
 			},
 			
 			{
