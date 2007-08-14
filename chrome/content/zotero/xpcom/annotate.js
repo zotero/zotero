@@ -501,8 +501,8 @@ Zotero.Annotations.prototype.save = function() {
 		}
 		Zotero.DB.commitTransaction();
 	} catch(e) {
-		throw(e);
 		Zotero.DB.rollbackTransaction();
+		throw(e);
 	}
 }
 
