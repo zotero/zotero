@@ -1,0 +1,23 @@
+#zotero-editpane-dynamic-fields row hbox
+{
+	-moz-box-align: center;
+	margin: 0;
+	padding: 0;
+}
+
+#zotero-editpane-dynamic-fields row hbox label
+{
+	margin-top: 0;
+	margin-bottom: 0;
+}
+
+#zotero-editpane-dynamic-fields row > toolbarbutton
+{
+	margin-right: 5px;
+}
+
+#zotero-editpane-dynamic-fields row vbox[fieldname=abstractNote],
+#zotero-editpane-dynamic-fields row vbox[fieldname=extra]
+{
+	margin-left: 1px;
+}

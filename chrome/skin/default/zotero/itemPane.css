@@ -16,12 +16,6 @@
 }
 */
 
-/* creator switch button */
-#zotero-editpane-dynamic-fields row hbox toolbarbutton
-{
-	margin-right: 5px;
-}
-
 /* metadata field names */
 #zotero-editpane-dynamic-fields row > label:first-child,
 #zotero-editpane-dynamic-fields row > toolbarbutton .toolbarbutton-text /* creator type menu */
@@ -41,10 +35,10 @@
 }
 
  /* creator type menu */
-#zotero-editpane-dynamic-fields row > toolbarbutton 
+#zotero-editpane-dynamic-fields row > toolbarbutton
 {
-	margin: 0;
-	padding: 0;
+	margin: 0 2px 0 0;
+	padding: 0 0 0 5px;
 	list-style-image: url("chrome://browser/skin/dropmark-nav-small.png");
 	-moz-image-region: rect(0px, 14px, 16px, 0px);
 }

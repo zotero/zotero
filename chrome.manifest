@@ -23,3 +23,5 @@ skin		zotero	default		chrome/skin/default/zotero/
 overlay	chrome://browser/content/browser.xul	chrome://zotero/content/overlay.xul
 style	chrome://browser/content/browser.xul	chrome://zotero/skin/zotero.css
 style	chrome://global/content/customizeToolbar.xul	chrome://zotero/skin/zotero.css
+
+content	zotero-platform		chrome/content/zotero-platform/		platform
