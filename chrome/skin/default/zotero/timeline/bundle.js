@@ -232,9 +232,11 @@ Timeline.GregorianDateLabeller=function(locale,timeZone){this._locale=locale;thi
 /*
 	Modified by Ben for Zotero
 */
-Timeline.GregorianDateLabeller.monthNames = [localeHash["shortName.january"], localeHash["shortName.february"], localeHash["shortName.march"], localeHash["shortName.april"], localeHash["shortName.may"],
-	localeHash["shortName.june"], localeHash["shortName.july"], localeHash["shortName.august"], localeHash["shortName.september"], localeHash["shortName.october"], localeHash["shortName.november"], localeHash["shortName.december"]];
-Timeline.GregorianDateLabeller.getMonthName=function(month,locale){return Timeline.GregorianDateLabeller.monthNames[month];};
+
+Timeline.GregorianDateLabeller.monthNames = Zotero.CSL.Global.getMonthStrings("short");
+Timeline.GregorianDateLabeller.getMonthName=function(month,locale) {
+	return Timeline.GregorianDateLabeller.monthNames[month];
+};
 
 
 

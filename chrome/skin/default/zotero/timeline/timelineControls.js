@@ -1,27 +1,42 @@
-var localeHash = getLocaleHash();
+var localeBundle = initLocaleBundle();
 var jumpToYearTimer;
 var lastJumpToYearValue;
 
-function getLocaleHash() {
-	var localeHash = new Object();
-	var content = getContentsFromURL("chrome://zotero/locale/timeline.properties");
-	var m;
-	while(true) {
-		m = /^[\S]+(?=\s*=)/gm.exec(content);
-		if(!m) {
-			break;
-		}
-		localeHash[m] = /=[^\n]+/g.exec(content).toString().replace(/=\s*/,'');;
-	}
-	return localeHash;
+/*
+ * Set up the localization string bundle from timeline.properties
+ */
+function initLocaleBundle() {
+	var src = 'chrome://zotero/locale/timeline.properties';
+	var localeService = Components.classes['@mozilla.org/intl/nslocaleservice;1']
+		.getService(Components.interfaces.nsILocaleService);
+	var appLocale = localeService.getApplicationLocale();
+	
+	var stringBundleService = Components.classes["@mozilla.org/intl/stringbundle;1"]
+			.getService(Components.interfaces.nsIStringBundleService);
+	return stringBundleService.createBundle(src, appLocale);
 }
 
-function getContentsFromURL(url) {
-	var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
-					.createInstance();
-	xmlhttp.open('GET', url, false);
-	xmlhttp.send(null);
-	return xmlhttp.responseText;
+/*
+ * Get a localized string from the string bundle
+ *
+ * This is copied from zotero.js
+ */
+function getString(name, params){
+	try {
+		if (params != undefined){
+			if (typeof params != 'object'){
+				params = [params];
+			}
+			var l10n = localeBundle.formatStringFromName(name, params, params.length);
+		}
+		else {
+			var l10n = localeBundle.GetStringFromName(name);
+		}
+	}
+	catch (e){
+		throw ('Localized string not available for ' + name);
+	}
+	return l10n;
 }
 
 
@@ -158,17 +173,17 @@ function createOption(t, selected) {
 function getFull(a) {
 	switch (a) {
 		case 'd':
-			return localeHash["interval.day"];
+			return getString("interval.day");
 		case 'm':
-			return localeHash["interval.month"];
+			return getString("interval.month");
 		case 'y':
-			return localeHash["interval.year"];
+			return getString("interval.year");
 		case 'e':
-			return localeHash["interval.decade"];
+			return getString("interval.decade");
 		case 'c':
-			return localeHash["interval.century"];
+			return getString("interval.century");
 		case 'i':
-			return localeHash["interval.millennium"];
+			return getString("interval.millennium");
 		default:
 			return false;
 	}
@@ -236,17 +251,17 @@ function setupOtherControls(div, timeline, url) {
 	var tr = table.insertRow(0);
 	
 	var td = tr.insertCell(0);
-	td.innerHTML = localeHash["general.jumpToYear"];
+	td.innerHTML = getString("general.jumpToYear");
 	td = tr.insertCell(tr.cells.length);
-	td.innerHTML = localeHash["general.firstBand"];
+	td.innerHTML = getString("general.firstBand");
 	td = tr.insertCell(tr.cells.length);
-	td.innerHTML = localeHash["general.secondBand"];;
+	td.innerHTML = getString("general.secondBand");;
 	td = tr.insertCell(tr.cells.length);
-	td.innerHTML = localeHash["general.thirdBand"];;
+	td.innerHTML = getString("general.thirdBand");;
 	td = tr.insertCell(tr.cells.length);
-	td.innerHTML = localeHash["general.dateType"];;
+	td.innerHTML = getString("general.dateType");;
 	td = tr.insertCell(tr.cells.length);
-	td.innerHTML = localeHash["general.timelineHeight"];;
+	td.innerHTML = getString("general.timelineHeight");;
 
 	tr = table.insertRow(1);
 	tr.style.verticalAlign = "top";
@@ -259,8 +274,8 @@ function setupOtherControls(div, timeline, url) {
 	input.onkeypress=doKeyPress;
 	td.appendChild(input);
 	
-	var options = new Array(localeHash["interval.day"], localeHash["interval.month"], localeHash["interval.year"],
-		localeHash["interval.decade"], localeHash["interval.century"], localeHash["interval.millennium"]);
+	var options = new Array(getString("interval.day"), getString("interval.month"), getString("interval.year"),
+		getString("interval.decade"), getString("interval.century"), getString("interval.millennium"));
 	var selected = '';
 	var theSelects = new Array();
 	
@@ -302,7 +317,7 @@ function setupOtherControls(div, timeline, url) {
 	
 	
 	td = tr.insertCell(tr.cells.length);
-	options = new Array(localeHash["dateType.published"], localeHash["dateType.added"], localeHash["dateType.modified"]);
+	options = new Array(getString("dateType.published"), Zotero.getString("itemFields.dateAdded"), getString("dateType.modified"));
 	var values = new Array('d', 'da', 'dm');
 	var select4 = document.createElement("select");
 		
@@ -316,7 +331,7 @@ function setupOtherControls(div, timeline, url) {
 	
 	td = tr.insertCell(tr.cells.length);
 	var fitToScreen = document.createElement("button");
-	fitToScreen.innerHTML = localeHash["general.fitToScreen"];
+	fitToScreen.innerHTML = getString("general.fitToScreen");
 	Timeline.DOM.registerEvent(fitToScreen, "click", function () {
 		window.location = path + createQueryString(theQueryValue, false, timeline);
 	});
@@ -338,10 +353,10 @@ function setupFilterHighlightControls(div, timeline, bandIndices, theme) {
 	var tr = table.insertRow(0);
 	
 	var td = tr.insertCell(0);
-	td.innerHTML = localeHash["general.filter"];
+	td.innerHTML = getString("general.filter");
 	
 	td = tr.insertCell(1);
-	td.innerHTML = localeHash["general.highlight"];
+	td.innerHTML = getString("general.highlight");
 	
 	var handler = function(elmt, evt, target) {
 		onKeyPress(timeline, bandIndices, table);
@@ -374,7 +389,7 @@ function setupFilterHighlightControls(div, timeline, bandIndices, theme) {
 	
 	td = tr.insertCell(tr.cells.length);
 	var button = document.createElement("button");
-	button.innerHTML = localeHash["general.clearAll"];
+	button.innerHTML = getString("general.clearAll");
 	Timeline.DOM.registerEvent(button, "click", function() {
 		clearAll(timeline, bandIndices, table);
 	});

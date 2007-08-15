@@ -510,6 +510,9 @@ ChromeExtensionHandler.prototype = {
 	},
 	
 	newChannel : function(uri) {
+		var ioService = Components.classes["@mozilla.org/network/io-service;1"]
+			.getService(Components.interfaces.nsIIOService);
+		
 		var chromeService = Components.classes["@mozilla.org/network/protocol;1?name=chrome"]
 			.getService(Components.interfaces.nsIProtocolHandler);
 		
@@ -522,14 +525,12 @@ ChromeExtensionHandler.prototype = {
 				var ext = this._extensions[extSpec];
 				
 				if (uriString.indexOf(extSpec) == 0) {
-					
 					if (this._systemPrincipal == null) {
-						var ioService = Components.classes["@mozilla.org/network/io-service;1"]
-							.getService(Components.interfaces.nsIIOService);
-						
 						var chromeURI = chromeService.newURI(DUMMY_CHROME_URL, null, null);
 						var chromeChannel = chromeService.newChannel(chromeURI);
 						
+						// Cache System Principal from chrome request
+						// so proxied pages load with chrome privileges
 						this._systemPrincipal = chromeChannel.owner;
 						
 						var chromeRequest = chromeChannel.QueryInterface(Components.interfaces.nsIRequest);
@@ -537,13 +538,17 @@ ChromeExtensionHandler.prototype = {
 					}
 					
 					var extChannel = ext.newChannel(uri);
+					// Extension returned null, so cancel request
+					if (!extChannel) {
+						var chromeURI = chromeService.newURI(DUMMY_CHROME_URL, null, null);
+						var extChannel = chromeService.newChannel(chromeURI);
+						var chromeRequest = extChannel.QueryInterface(Components.interfaces.nsIRequest);
+						chromeRequest.cancel(0x804b0002); // BINDING_ABORTED
+					}
 					
 					if (this._systemPrincipal != null) {
 						// applying cached system principal to extension channel
 						extChannel.owner = this._systemPrincipal;
-					}
-					else {
-						// no cached system principal to apply to extension channel
 					}
 					
 					extChannel.originalURI = uri;

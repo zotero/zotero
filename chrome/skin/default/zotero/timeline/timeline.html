@@ -15,6 +15,7 @@
 			}
 		</style>
 		
+		<script src="chrome://zotero/content/include.js"></script>
 		<script src="chrome://zotero/skin/timeline/timelineControls.js" type="text/javascript"></script>
 		<script src="chrome://zotero/skin/timeline/timeline-api.js" type="text/javascript"></script>
 		<script type="text/javascript">
@@ -77,7 +78,15 @@
 			}
 			
 			Timeline.DurationEventPainter.prototype._showBubble = function(x, y, evt) {
-				window.location='zotero://select/item/' + evt.getDescription();
+				// Get ChromeWindow so we have access to ZoteroPane (overlay.js)
+				var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+					.getService(Components.interfaces.nsIWindowMediator);
+				var win = wm.getMostRecentWindow('navigator:browser');
+				var zp = win.ZoteroPane;
+				if (!zp.isShowing()) {
+					zp.toggleDisplay();
+				}
+				zp.selectItem(evt.getDescription());
 			}
 			
 			document.write("<title>"+localeHash["general.title"]+"</title>");
