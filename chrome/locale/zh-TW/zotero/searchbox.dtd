@@ -7,6 +7,7 @@
 
 <!ENTITY zotero.search.recursive.label "搜尋子目錄">
 <!ENTITY zotero.search.noChildren "Only show top-level items">
+<!ENTITY zotero.search.includeParentsAndChildren "Include parent and child items of matching items">
 
 <!ENTITY zotero.search.textModes.phrase "詞語">
 <!ENTITY zotero.search.textModes.phraseBinary "詞語【含非文字檔】">

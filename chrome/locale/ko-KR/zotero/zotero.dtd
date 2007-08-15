@@ -62,6 +62,7 @@
 <!ENTITY zotero.toolbar.actions.label "동작">
 <!ENTITY zotero.toolbar.import.label "불러오기...">
 <!ENTITY zotero.toolbar.export.label "라이브러리 내보내기...">
+<!ENTITY zotero.toolbar.timeline.label "Create Timeline">
 <!ENTITY zotero.toolbar.preferences.label "환경설정...">
 <!ENTITY zotero.toolbar.documentation.label "Documentation">
 <!ENTITY zotero.toolbar.about.label "Zotero 정보">
@@ -73,6 +74,9 @@
 
 <!ENTITY zotero.item.add "추가">
 <!ENTITY zotero.item.attachment.file.show "파일 표시">
+<!ENTITY zotero.item.textTransform "Transform Text">
+<!ENTITY zotero.item.textTransform.lowercase "lower case">
+<!ENTITY zotero.item.textTransform.titlecase "Title Case">
 
 <!ENTITY zotero.toolbar.note.standalone "새로운 독립 노트">
 <!ENTITY zotero.toolbar.attachment.linked "파일로 연결...">
@@ -125,3 +129,7 @@
 <!ENTITY zotero.integration.prefs.displayAs.label "Display Citations As:">
 <!ENTITY zotero.integration.prefs.footnotes.label "Footnotes">
 <!ENTITY zotero.integration.prefs.endnotes.label "Endnotes">
+
+<!ENTITY zotero.integration.prefs.formatUsing.label "Format Using:">
+<!ENTITY zotero.integration.prefs.bookmarks.label "Bookmarks">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks are preserved across Microsoft Word and OpenOffice.org, but may be accidentally modified.">

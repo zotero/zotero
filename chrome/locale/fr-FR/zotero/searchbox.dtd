@@ -7,6 +7,7 @@
 
 <!ENTITY zotero.search.recursive.label "Rechercher dans les sous-dossiers">
 <!ENTITY zotero.search.noChildren "Only show top-level items">
+<!ENTITY zotero.search.includeParentsAndChildren "Include parent and child items of matching items">
 
 <!ENTITY zotero.search.textModes.phrase "Expression">
 <!ENTITY zotero.search.textModes.phraseBinary "Expression (fichiers binaires incl.)">

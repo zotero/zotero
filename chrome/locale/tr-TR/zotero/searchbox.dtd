@@ -7,6 +7,7 @@
 
 <!ENTITY zotero.search.recursive.label "Alt dizinleri araştır">
 <!ENTITY zotero.search.noChildren "Only show top-level items">
+<!ENTITY zotero.search.includeParentsAndChildren "Include parent and child items of matching items">
 
 <!ENTITY zotero.search.textModes.phrase "Sözçük öbeği">
 <!ENTITY zotero.search.textModes.phraseBinary "Sözçük öbeği (ikili dosyalar içerir)">

@@ -1,5 +1,7 @@
 <!ENTITY zotero.preferences.title "Zotero 配置">
 
+<!ENTITY zotero.preferences.default "Default:">
+
 <!ENTITY zotero.preferences.prefpane.general "常规">
 
 <!ENTITY zotero.preferences.userInterface "用户界面">
@@ -27,6 +29,13 @@
 <!ENTITY zotero.preferences.openurl.server "解析器:">
 <!ENTITY zotero.preferences.openurl.version "版本">
 
+<!ENTITY zotero.preferences.prefpane.search "Search">
+<!ENTITY zotero.preferences.search.fulltextCache "Full-Text Cache">
+<!ENTITY zotero.preferences.search.pdfIndexing "PDF Indexing">
+<!ENTITY zotero.preferences.search.indexStats "Index Statistics">
+
+<!ENTITY zotero.preferences.fulltext.textMaxLength "Maximum characters to index per file:">
+<!ENTITY zotero.preferences.fulltext.pdfMaxPages "Maximum pages to index per file:">
 
 <!ENTITY zotero.preferences.prefpane.export "Export">
 
@@ -58,3 +67,6 @@
 <!ENTITY zotero.preferences.dataDir.useProfile "Use Firefox profile directory">
 <!ENTITY zotero.preferences.dataDir.custom "Custom:">
 <!ENTITY zotero.preferences.dataDir.choose "Choose...">
+
+<!ENTITY zotero.preferences.dbIntegrity "Database Integrity">
+<!ENTITY zotero.preferences.dbIntegrity.integrityCheck "Check Database Now">

@@ -7,6 +7,7 @@
 
 <!ENTITY zotero.search.recursive.label "Søk i undermapper">
 <!ENTITY zotero.search.noChildren "Only show top-level items">
+<!ENTITY zotero.search.includeParentsAndChildren "Include parent and child items of matching items">
 
 <!ENTITY zotero.search.textModes.phrase "Frase">
 <!ENTITY zotero.search.textModes.phraseBinary "Frase (inkl. binærfiler)">

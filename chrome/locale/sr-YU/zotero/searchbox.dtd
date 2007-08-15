@@ -7,6 +7,7 @@
 
 <!ENTITY zotero.search.recursive.label "Претражи подфасцикле">
 <!ENTITY zotero.search.noChildren "Only show top-level items">
+<!ENTITY zotero.search.includeParentsAndChildren "Include parent and child items of matching items">
 
 <!ENTITY zotero.search.textModes.phrase "Израз">
 <!ENTITY zotero.search.textModes.phraseBinary "Израз (укључујући бинарне датотеке)">

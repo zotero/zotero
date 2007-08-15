@@ -7,6 +7,7 @@
 
 <!ENTITY zotero.search.recursive.label "搜索子目录">
 <!ENTITY zotero.search.noChildren "Only show top-level items">
+<!ENTITY zotero.search.includeParentsAndChildren "Include parent and child items of matching items">
 
 <!ENTITY zotero.search.textModes.phrase "表达式">
 <!ENTITY zotero.search.textModes.phraseBinary "表达式(包括二进制文件)">
