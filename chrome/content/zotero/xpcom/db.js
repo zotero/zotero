@@ -573,6 +573,7 @@ Zotero.DBConnection.prototype.integrityCheck = function () {
 
 Zotero.DBConnection.prototype.checkException = function (e) {
 	if (e.name && e.name == 'NS_ERROR_FILE_CORRUPTED') {
+		// Write corrupt marker to data directory
 		var file = Zotero.getZoteroDatabase(this._dbName, 'is.corrupt');
 		var foStream = Components.classes["@mozilla.org/network/file-output-stream;1"]
 						 .createInstance(Components.interfaces.nsIFileOutputStream);
@@ -805,6 +806,10 @@ Zotero.DBConnection.prototype._getDBConnection = function () {
 				var file = Zotero.getZoteroDatabase(this._dbName);
 				this._connection = store.openDatabase(file);
 				
+				if (corruptMarker.exists()) {
+					corruptMarker.remove(null);
+				}
+				
 				alert(Zotero.getString('db.dbCorruptedNoBackup', fileName));
 				break catchBlock;
 			}
@@ -825,6 +830,11 @@ Zotero.DBConnection.prototype._getDBConnection = function () {
 				this._connection = store.openDatabase(file);
 				
 				alert(Zotero.getString('db.dbRestoreFailed', fileName));
+				
+				if (corruptMarker.exists()) {
+					corruptMarker.remove(null);
+				}
+				
 				break catchBlock;
 			}
 			
