@@ -1,4 +1,4 @@
--- 257
+-- 258
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-08-14 22:20:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-08-15 16:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -6251,7 +6251,7 @@ REPLACE INTO translators VALUES ('cf87eca8-041d-b954-795a-2d86348999d5', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('774d7dc2-3474-2684-392c-f787789ec63d', '1.0.0b3.r1', '', '2006-12-15 15:11:00', 1, 100, 4, 'Library Catalog (Dynix)', 'Simon Kornblith', 'ipac\.jsp\?.*(?:uri=full=[0-9]|menu=search)',
+REPLACE INTO translators VALUES ('774d7dc2-3474-2684-392c-f787789ec63d', '1.0.0b3.r1', '', '2007-08-15 16:00:00', '1', '100', '4', 'Library Catalog (Dynix)', 'Simon Kornblith', 'ipac\.jsp\?.*(?:uri=full=[0-9]|menu=search)', 
 'function detectWeb(doc, url) {
 	var detailsRe = new RegExp(''ipac\.jsp\?.*uri=full=[0-9]'');
 	if(detailsRe.test(doc.location.href)) {
@@ -6259,7 +6259,7 @@ REPLACE INTO translators VALUES ('774d7dc2-3474-2684-392c-f787789ec63d', '1.0.0b
 	} else {
 		return "multiple";
 	}
-}',
+}', 
 'function doWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -6307,6 +6307,10 @@ REPLACE INTO translators VALUES ('774d7dc2-3474-2684-392c-f787789ec63d', '1.0.0b
 		
 		var xpath = ''//form/table[@class="tableBackground"]/tbody/tr/td/table[@class="tableBackground"]/tbody/tr[td[1]/a[@class="normalBlackFont1"]]'';
 		var elmts = newDoc.evaluate(xpath, newDoc, nsResolver, XPathResult.ANY_TYPE, null);
+		if (!elmts.iterateNext()) {
+			var xpath2 = ''//form/table[@class="tableBackground"]/tbody/tr/td/table[@class="tableBackground"]/tbody/tr[td[1]/a[@class="boldBlackFont1"]]'';
+			var elmts = newDoc.evaluate(xpath2, newDoc, nsResolver, XPathResult.ANY_TYPE, null);
+		}
 		var elmt;
 		
 		var record = new marc.record();		
@@ -6337,7 +6341,7 @@ REPLACE INTO translators VALUES ('774d7dc2-3474-2684-392c-f787789ec63d', '1.0.0b
 		
 		var domain = url.match(/https?:\/\/([^/]+)/);
 		newItem.repository = domain[1]+" Library Catalog";
-		
+
 		newItem.complete();
 	}, function() { Zotero.done() }, null);
 	
