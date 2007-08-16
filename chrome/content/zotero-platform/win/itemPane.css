@@ -1,11 +1,18 @@
-#zotero-editpane-dynamic-fields row hbox
+#zotero-editpane-dynamic-fields row hbox,
+#zotero-editpane-dynamic-fields row vbox
 {
-	-moz-box-align: center;
-	margin: 0;
-	padding: 0;
+	margin-top: 0 !important;
+	margin-bottom: 0 !important;
+	padding-top: 0 !important;
+	padding-bottom: 0 !important;
 }
 
-#zotero-editpane-dynamic-fields row hbox label
+#zotero-editpane-dynamic-fields row hbox hbox
+{
+	-moz-box-align: center;
+}
+
+#zotero-editpane-dynamic-fields row hbox hbox label
 {
 	margin-top: 0;
 	margin-bottom: 0;
