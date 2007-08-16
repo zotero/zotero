@@ -118,13 +118,20 @@ Zotero.Schema = new function(){
 				
 				var up1 = _migrateUserDataSchema(dbVersion);
 				var up2 = _updateSchema('system');
-				var up3 = _updateSchema('scrapers');
 				
 				Zotero.DB.commitTransaction();
 			}
 			catch(e){
 				Zotero.debug(e);
 				Zotero.DB.rollbackTransaction();
+				throw(e);
+			}
+			
+			try {
+				var up3 = _updateSchema('scrapers');
+			}
+			catch (e) {
+				Zotero.debug(e, 1);
 				throw(e);
 			}
 			
