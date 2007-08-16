@@ -1457,9 +1457,11 @@ Zotero.ItemTreeView.fileDragDataProvider.prototype = {
 	
 	getFlavorData : function(transferable, flavor, data, dataLen) {
 		if (flavor == "application/x-moz-file-promise") {
+			var useTemp = !Zotero.isMac;
+			
 			// Get the destination directory
-			var dataSize = {};
 			var dirPrimitive = {};
+			var dataSize = {};
 			transferable.getTransferData("application/x-moz-file-promise-dir", dirPrimitive, dataSize);
 			var destDir = dirPrimitive.value.QueryInterface(Components.interfaces.nsILocalFile);
 			
@@ -1468,8 +1470,22 @@ Zotero.ItemTreeView.fileDragDataProvider.prototype = {
 			transferable.getTransferData("zotero/item", items, dataSize);
 			items.value.QueryInterface(Components.interfaces.nsISupportsString);
 			var items = Zotero.Items.get(items.value.data.split(','));
+			
+			// On platforms other than OS X, create a directory
+			// to store multiple files
+			if (useTemp && items.length > 1) {
+				var tmpDirName = 'Zotero Dragged Files';
+				destDir.append(tmpDirName);
+				if (destDir.exists()) {
+					destDir.remove(true);
+				}
+				destDir.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0755);
+			}
+			
+			var copiedFiles = [];
 			var existingItems = [];
 			var existingFileNames = [];
+			
 			for (var i=0; i<items.length; i++) {
 				if (!items[i].isAttachment() ||
 						items[i].getAttachmentLinkMode() == Zotero.Attachments.LINK_MODE_LINKED_URL) {
@@ -1497,10 +1513,38 @@ Zotero.ItemTreeView.fileDragDataProvider.prototype = {
 				if (numFiles > 1) {
 					var dirName = Zotero.Attachments.getFileBaseNameFromItem(items[i].getID());
 					try {
+						if (useTemp) {
+							var copiedFile = destDir.clone();
+							copiedFile.append(dirName);
+							if (copiedFile.exists()) {
+								// If directory already exists in the temp dir,
+								// delete it
+								if (items.length == 1) {
+									copiedFile.remove(true);
+								}
+								// If directory already exists in the container
+								// directory (i.e. it's a duplicate), throw a file
+								// exists error (rather than giving a directory
+								// not empty error) so it will be marked as an
+								// existing file below
+								else {
+									e = {};
+									e.name = 'NS_ERROR_FILE_ALREADY_EXISTS';
+									throw (e);
+								}
+							}
+						}
+						
 						parentDir.copyTo(destDir, dirName);
+						
+						// Store nsIFile
+						if (useTemp) {
+							copiedFiles.push(copiedFile);
+						}
 					}
 					catch (e) {
 						if (e.name == 'NS_ERROR_FILE_ALREADY_EXISTS') {
+							// Keep track of items that already existed
 							existingItems.push(items[i].getID());
 							existingFileNames.push(dirName);
 						}
@@ -1512,7 +1556,22 @@ Zotero.ItemTreeView.fileDragDataProvider.prototype = {
 				// Otherwise just copy
 				else {
 					try {
+						if (useTemp) {
+							var copiedFile = destDir.clone();
+							copiedFile.append(file.leafName);
+							// If file exists in the temp directory,
+							// delete it
+							if (items.length == 1 && copiedFile.exists()) {
+								copiedFile.remove(null);
+							}
+						}
+						
 						file.copyTo(destDir, null);
+						
+						// Store nsIFile
+						if (useTemp) {
+							copiedFiles.push(copiedFile);
+						}
 					}
 					catch (e) {
 						if (e.name == 'NS_ERROR_FILE_ALREADY_EXISTS') {
@@ -1524,6 +1583,18 @@ Zotero.ItemTreeView.fileDragDataProvider.prototype = {
 						}
 					}
 				}
+			}
+			
+			// Files passed via data.value will be automatically moved
+			// from the temp directory to the destination directory
+			if (useTemp && copiedFiles.length) {
+				if (items.length > 1) {
+					data.value = destDir.QueryInterface(Components.interfaces.nsISupports);
+				}
+				else {
+					data.value = copiedFiles[0].QueryInterface(Components.interfaces.nsISupports);
+				}
+				dataLen.value = 4;
 			}
 			
 			// Display alert if existing files were skipped
