@@ -35,6 +35,7 @@ Zotero.Schema = new function(){
 	var _repositoryTimer;
 	var _remoteUpdateInProgress = false;
 	
+	var _fulltextItemWordsCache = [];
 	
 	function userDataUpgradeRequired() {
 		var dbVersion = _getDBVersion('userdata');
@@ -125,6 +126,27 @@ Zotero.Schema = new function(){
 				Zotero.debug(e);
 				Zotero.DB.rollbackTransaction();
 				throw(e);
+			}
+			
+			// Workaround for upgrade error in step 35
+			if (_fulltextItemWordsCache) {
+				Zotero.DB.beginTransaction();
+				try {
+					sql = "INSERT INTO fulltextItemWords VALUES (?,?)";
+					var insertStatement = Zotero.DB.getStatement(sql);
+					for (var j=0; j<_fulltextItemWordsCache.length; j++) {
+						insertStatement.bindInt32Parameter(0, _fulltextItemWordsCache[j]['wordID']);
+						insertStatement.bindInt32Parameter(1, _fulltextItemWordsCache[j]['itemID']);
+						insertStatement.execute();
+					}
+					insertStatement.reset();
+					Zotero.DB.commitTransaction();
+				}
+				catch (e) {
+					Zotero.debug(e);
+					Zotero.DB.rollbackTransaction();
+					throw(e);
+				}
 			}
 			
 			if (up1) {
@@ -1120,7 +1142,12 @@ Zotero.Schema = new function(){
 				
 				if (i==35) {
 					Zotero.DB.query("CREATE TABLE fulltextItemWords (\n    wordID INT,\n    itemID INT,\n    PRIMARY KEY (wordID, itemID),\n    FOREIGN KEY (wordID) REFERENCES fulltextWords(wordID),\n    FOREIGN KEY (itemID) REFERENCES items(itemID)\n);");
-					Zotero.DB.query("INSERT INTO fulltextItemWords SELECT * FROM fulltextItems");
+					
+					// A direct copy to fulltextItemWords seems to expose an SQLite or Firefox bug
+					// related to the size of the transaction, so we save the rows to a JS array and
+					// update after the transaction
+					_fulltextItemWordsCache = Zotero.DB.query("SELECT * FROM fulltextItems");
+					
 					Zotero.DB.query("DROP TABLE fulltextItems");
 					Zotero.DB.query("CREATE TABLE fulltextItems (\n    itemID INT,\n    version INT,\n    PRIMARY KEY (itemID),\n    FOREIGN KEY (itemID) REFERENCES items(itemID)\n);");
 					Zotero.DB.query("INSERT INTO fulltextItems SELECT DISTINCT itemID, 1 FROM fulltextItemWords");
