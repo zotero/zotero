@@ -1,5 +1,5 @@
-#zotero-editpane-dynamic-fields row hbox,
-#zotero-editpane-dynamic-fields row vbox
+#zotero-editpane-dynamic-fields row > hbox,
+#zotero-editpane-dynamic-fields row > vbox
 {
 	margin-top: 0 !important;
 	margin-bottom: 0 !important;
@@ -7,7 +7,7 @@
 	padding-bottom: 0 !important;
 }
 
-#zotero-editpane-dynamic-fields row hbox hbox
+#zotero-editpane-dynamic-fields row > hbox > hbox
 {
 	-moz-box-align: center;
 }
