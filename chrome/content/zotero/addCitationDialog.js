@@ -159,6 +159,8 @@ var Zotero_Citation_Dialog = new function () {
 			if(io.items.length) {
 				io.locatorTypes = new Array(document.getElementById("tree-locator-type").selectedItem.value);
 				io.locators = new Array(document.getElementById("tree-locator").value);
+			} else {
+				io.items = undefined;
 			}
 		}
 	}

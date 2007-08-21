@@ -306,12 +306,16 @@ Zotero.Integration.DataListener.prototype._bodyData = function() {
 		
 		var utf8Stream = Components.classes["@mozilla.org/intl/converter-input-stream;1"]
 		                           .createInstance(Components.interfaces.nsIConverterInputStream);
-		utf8Stream.init(dataStream, "UTF-8", 1024, "?");
+		utf8Stream.init(dataStream, "UTF-8", 4096, "?");
+
+		this.body = "";
 		var string = {};
-		utf8Stream.readString(this.bodyLength, string)
+		while(utf8Stream.readString(this.bodyLength, string)) {
+			this.body += string.value;
+		}		
 		
 		// handle envelope
-		var output = Zotero.Integration.handleEnvelope(string.value);
+		var output = Zotero.Integration.handleEnvelope(this.body);
 		this._requestFinished(output);
 	}
 }
@@ -382,6 +386,16 @@ Zotero.Integration.SOAP = new function() {
 		
 		var citation, update;
 		for(var i=3; i<vars.length; i+=2) {
+			// correction for empty field
+			if(vars[i].substr(":")) {
+				var ids = vars[i].split(":");
+				vars[i] = ids[ids.length-1];
+				// delete empty fields
+				for(var j=0; j<ids.length-1; j++) {
+					updatedCitations[ids[j]] = true;
+				}
+			}
+			
 			if(vars[i+1] == "X") {
 				// get a new citation for a field with an X
 				var io = new function() { this.wrappedJSObject = this; }
@@ -472,6 +486,7 @@ Zotero.Integration.SOAP = new function() {
 				if(citation.updateField) {
 					output.push(citation.field);
 				} else {
+					Zotero.debug("!");
 					output.push("!");
 				}
 				
@@ -753,6 +768,13 @@ Zotero.Integration.CitationFactory.prototype.updateItems = function(citationSet,
 		var item = Zotero.Items.get(i);
 		if (!item) {
 			deletedItems.push(i);
+			
+			if(updateCitations) {
+				for each(var citation in citationSet.citationsByID[i]) {
+					updateCitations[citation.index] = true;
+				}
+			}
+			
 			resort = true;
 			continue;
 		}

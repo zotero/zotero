@@ -295,10 +295,12 @@ Zotero.CSL.Compat.ItemSet.prototype.getItemsByIds = function(ids) {
 
 Zotero.CSL.Compat.ItemSet.prototype.add = function(items) {
 	this.items = this.items.concat(items);
+	Zotero.debug(this.items);
 }
 
 Zotero.CSL.Compat.ItemSet.prototype.remove = function(items) {
 	for(var i in items) {
+		if(!item) continue;
 		if(items[i] instanceof Zotero.Item) {
 			var item = items[i];
 		} else {

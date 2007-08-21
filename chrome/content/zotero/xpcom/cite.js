@@ -1272,14 +1272,13 @@ Zotero.CSL.ItemSet.prototype.add = function(items) {
  * or item IDs
  */
 Zotero.CSL.ItemSet.prototype.remove = function(items) {
-	Zotero.debug("removing!")
 	for(var i in items) {
+		if(!item) continue;
 		if(items[i] instanceof Zotero.CSL.Item) {
 			var item = items[i];
 		} else {
 			var item = this.itemsById[items[i]];
 		}
-		Zotero.debug("old index was "+this.items.indexOf(item))
 		this.itemsById[item.getID()] = undefined;
 		this.items.splice(this.items.indexOf(item), 1);
 	}
