@@ -19,7 +19,6 @@
 <!ENTITY zotero.preferences.autoUpdate "スクレーパのアップデートを自動的にチェックする">
 <!ENTITY zotero.preferences.updateNow "アップデート">
 <!ENTITY zotero.preferences.reportTranslationFailure "壊れたスクレーパを報告する">
-<!ENTITY zotero.preferences.parseEndnote "ダウンロードされたEndNoteファイルをZoteroで開く">
 <!ENTITY zotero.preferences.automaticSnapshots "ウェブページのアイテムを作成するときに自動的にスナップショットを作成する">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "アイテムを作成するときに自動的に関連PDFや他のファイルを添付する">
 <!ENTITY zotero.preferences.automaticTags "Automatically tag items with keywords and subject headings">

@@ -19,7 +19,6 @@
 <!ENTITY zotero.preferences.autoUpdate "Güncelleştirmeleri otomatik olarak kontrol et">
 <!ENTITY zotero.preferences.updateNow "Şimdi Güncelle">
 <!ENTITY zotero.preferences.reportTranslationFailure "Bozuk site çevirilerini raporla">
-<!ENTITY zotero.preferences.parseEndnote "İndirilen EndNote dosyaları için Zotero&apos;yu kullan">
 <!ENTITY zotero.preferences.automaticSnapshots "Web sayfalarından eserler yaratılırken sayfa görünümü otomatik olarak kaydet">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Eserleri kaydederken birleşik PDF ve diğer dosyaları da otomatik olarak ekle">
 <!ENTITY zotero.preferences.automaticTags "Automatically tag items with keywords and subject headings">

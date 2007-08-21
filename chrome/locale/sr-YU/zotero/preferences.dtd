@@ -19,7 +19,6 @@
 <!ENTITY zotero.preferences.autoUpdate "самостално провери за ажуриране стругаче">
 <!ENTITY zotero.preferences.updateNow "ажурирај сада">
 <!ENTITY zotero.preferences.reportTranslationFailure "Извести о грешкама у „преводиоцу странице“">
-<!ENTITY zotero.preferences.parseEndnote "Користи Зотеро за снимање EndNote датотека">
 <!ENTITY zotero.preferences.automaticSnapshots "Самостално узми снимак када се прави ставка са веб странице">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Самостално приложи повезане PDF и друге датотека када чуваш ставке">
 <!ENTITY zotero.preferences.automaticTags "Automatically tag items with keywords and subject headings">

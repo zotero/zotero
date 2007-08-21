@@ -19,7 +19,6 @@
 <!ENTITY zotero.preferences.autoUpdate "Site-vertalers automatisch bijwerken">
 <!ENTITY zotero.preferences.updateNow "Nu bijwerken">
 <!ENTITY zotero.preferences.reportTranslationFailure "Defecte site-vertalers rapporteren">
-<!ENTITY zotero.preferences.parseEndnote "Gebruik Zotero voor gedownloade EndNote bestanden">
 <!ENTITY zotero.preferences.automaticSnapshots "Neem automatisch snapshots bij het maken van items van webpagina&apos;s">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Voeg automatisch geassocieerde PDFs en andere bestanden toe bij het opslaan van items">
 <!ENTITY zotero.preferences.automaticTags "Automatically tag items with keywords and subject headings">

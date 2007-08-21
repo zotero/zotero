@@ -19,7 +19,6 @@
 <!ENTITY zotero.preferences.autoUpdate "自动更新刮录器(scrapers)">
 <!ENTITY zotero.preferences.updateNow "立刻更新">
 <!ENTITY zotero.preferences.reportTranslationFailure "报告失效的网站转换器">
-<!ENTITY zotero.preferences.parseEndnote "将 Zotero 用于下载的EndNote 文件">
 <!ENTITY zotero.preferences.automaticSnapshots "从 Web 页面创建条目时自动生成快照">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "保存条目时自动附加关联的 PDFs 和其它文件">
 <!ENTITY zotero.preferences.automaticTags "Automatically tag items with keywords and subject headings">

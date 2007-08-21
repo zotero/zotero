@@ -19,7 +19,6 @@
 <!ENTITY zotero.preferences.autoUpdate "Automatisch nach aktualisierten Scrapern suchen">
 <!ENTITY zotero.preferences.updateNow "Jetzt aktualisieren">
 <!ENTITY zotero.preferences.reportTranslationFailure "Fehlerhafte Übersetzer melden">
-<!ENTITY zotero.preferences.parseEndnote "Zotero für heruntergeladene EndNote-Datei verwenden">
 <!ENTITY zotero.preferences.automaticSnapshots "Automatisch einen Schnappschuss erstellen, wenn ein Eintrag aus einer Webseite erstellt wird">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Automatisch zugehörige PDFs und andere Dateien beim Speichern von Einträgen anhängen">
 <!ENTITY zotero.preferences.automaticTags "Automatically tag items with keywords and subject headings">

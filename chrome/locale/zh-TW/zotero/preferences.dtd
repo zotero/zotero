@@ -19,7 +19,6 @@
 <!ENTITY zotero.preferences.autoUpdate "自動檢查更新了的刮錄器">
 <!ENTITY zotero.preferences.updateNow "立刻更新">
 <!ENTITY zotero.preferences.reportTranslationFailure "報告故障了的網站翻譯器">
-<!ENTITY zotero.preferences.parseEndnote "用Zotero在下載的EndNote檔案">
 <!ENTITY zotero.preferences.automaticSnapshots "在從網頁建立項目時自動攝取快照">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "在貯存項目時自動附屬相關的PDF及其他檔案">
 <!ENTITY zotero.preferences.automaticTags "Automatically tag items with keywords and subject headings">

@@ -19,7 +19,6 @@
 <!ENTITY zotero.preferences.autoUpdate "Vérifier automatiquement les mises à jour des collecteurs de données">
 <!ENTITY zotero.preferences.updateNow "Mettre à jour maintenant">
 <!ENTITY zotero.preferences.reportTranslationFailure "Signaler les collecteurs de données en ligne défectueux">
-<!ENTITY zotero.preferences.parseEndnote "Utiliser Zotero pour les fichiers EndNote téléchargés">
 <!ENTITY zotero.preferences.automaticSnapshots "Faire une capture automatique de la page lors de la création d&apos;éléments à partir de pages Web">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Joindre automatiquement les fichers PDF associés lors de la sauvegarde d&apos;un élément">
 <!ENTITY zotero.preferences.automaticTags "Automatically tag items with keywords and subject headings">

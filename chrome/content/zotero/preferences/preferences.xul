@@ -116,7 +116,7 @@ To add a new preference:
 			</hbox>
 			
 			<checkbox label="&zotero.preferences.reportTranslationFailure;" preference="pref-reportTranslationFailure"/>
-			<checkbox label="&zotero.preferences.parseEndnote;" preference="pref-parseEndNoteMIMETypes"/>
+			<checkbox label="&zotero.preferences.parseRISRefer;" preference="pref-parseEndNoteMIMETypes"/>
 			<checkbox label="&zotero.preferences.automaticSnapshots;" preference="pref-automaticSnapshots"/>
 			<checkbox label="&zotero.preferences.downloadAssociatedFiles;" preference="pref-downloadAssociatedFiles"/>
 			<checkbox label="&zotero.preferences.automaticTags;" preference="pref-automaticTags"/>

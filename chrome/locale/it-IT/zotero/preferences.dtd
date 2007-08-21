@@ -19,7 +19,6 @@
 <!ENTITY zotero.preferences.autoUpdate "Controlla automaticamente nuovi motori di ricerca">
 <!ENTITY zotero.preferences.updateNow "Aggiorna adesso">
 <!ENTITY zotero.preferences.reportTranslationFailure "Segnala motori di ricerca non funzionanti">
-<!ENTITY zotero.preferences.parseEndnote "Scarica file EndNote con Zotero">
 <!ENTITY zotero.preferences.automaticSnapshots "Scatta un&apos;istantanea degli elementi estratti dalle pagine web">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Allega automaticamente file PDF o di altro tipo durante il salvataggio degli elementi">
 <!ENTITY zotero.preferences.automaticTags "Automatically tag items with keywords and subject headings">
