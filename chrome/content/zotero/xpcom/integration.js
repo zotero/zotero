@@ -486,7 +486,6 @@ Zotero.Integration.SOAP = new function() {
 				if(citation.updateField) {
 					output.push(citation.field);
 				} else {
-					Zotero.debug("!");
 					output.push("!");
 				}
 				
