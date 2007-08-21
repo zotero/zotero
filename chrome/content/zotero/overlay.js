@@ -1873,14 +1873,22 @@ var ZoteroPane = new function()
 		var file = attachment.getFile();
 		if (file) {
 			var mimeType = attachment.getAttachmentMimeType();
-			if (mimeType) {
+			// If no MIME type specified, try to detect again (I guess in case
+			// we've gotten smarter since the file was imported?)
+			if (!mimeType) {
+				var mimeType = Zotero.MIME.getMIMETypeFromFile(file);
 				var ext = Zotero.File.getExtension(file);
-				var internal = Zotero.MIME.hasInternalHandler(mimeType, ext);
+				
+				// TODO: update DB with new info
 			}
+			var ext = Zotero.File.getExtension(file);
+			var isNative = Zotero.MIME.hasNativeHandler(mimeType, ext);
+			var internal = Zotero.MIME.hasInternalHandler(mimeType, ext);
 			
 			var fileURL = attachment.getLocalFileURL();
 			
-			if (internal || Zotero.MIME.fileHasInternalHandler(file)) {
+			if (isNative ||
+					(internal && !Zotero.Prefs.get('launchNonNativeFiles'))) {
 				this.loadURI(fileURL, event, { attachmentID: itemID});
 			}
 			else {
