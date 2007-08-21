@@ -1616,6 +1616,10 @@ var ZoteroPane = new function()
 	// Updates browser context menu options
 	function contextPopupShowing()
 	{
+		if (!Zotero.Prefs.get('browserContentContextMenu')) {
+			return;
+		}
+		
 		var menuitem = document.getElementById("zotero-context-add-to-current-note");
 		var showing = false;
 		if (menuitem){

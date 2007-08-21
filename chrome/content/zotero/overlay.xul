@@ -51,18 +51,18 @@
 	</toolbarpalette>
 	
 	<popup id="contentAreaContextMenu">
-		<menuseparator id="zotero-context-separator"/>
+		<menuseparator id="zotero-context-separator" hidden="true"/>
 		<menuitem id="zotero-context-add-to-current-note" class="menu-iconic"
-			label="&zotero.contextMenu.addTextToCurrentNote;"
+			label="&zotero.contextMenu.addTextToCurrentNote;" hidden="true"
 			oncommand="ZoteroPane.addTextToNote(window.content.getSelection().toString())"/>
 		<menuitem id="zotero-context-add-to-new-note" class="menu-iconic"
-			label="&zotero.contextMenu.addTextToNewNote;"
+			label="&zotero.contextMenu.addTextToNewNote;" hidden="true"
 			oncommand="var itemID = ZoteroPane.addItemFromPage(); ZoteroPane.newNote(false, itemID, window.content.getSelection().toString())"/>
 		<menuitem id="zotero-context-save-link-as-snapshot" class="menu-iconic"
-			label="&zotero.contextMenu.saveLinkAsSnapshot;"
+			label="&zotero.contextMenu.saveLinkAsSnapshot;" hidden="true"
 			oncommand="Zotero.Attachments.importFromURL(window.gContextMenu.linkURL, false, false, false, ZoteroPane.getSelectedCollection(true))"/>
 		<menuitem id="zotero-context-save-image-as-snapshot" class="menu-iconic"
-			label="&zotero.contextMenu.saveImageAsSnapshot;"
+			label="&zotero.contextMenu.saveImageAsSnapshot;" hidden="true"
 			oncommand="Zotero.Attachments.importFromURL(window.gContextMenu.onImage ? window.gContextMenu.imageURL : window.gContextMenu.bgImageURL, false, false, false, ZoteroPane.getSelectedCollection(true))"/>
 	</popup>
 	
