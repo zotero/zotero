@@ -900,7 +900,7 @@ var ZoteroItemPane = new function()
 		if (!noedit){
 			valueElement.setAttribute('flex', 1);
 			valueElement.setAttribute('ztabindex', tabindex);
-			valueElement.setAttribute('onclick', 'ZoteroItemPane.showEditor(this)');
+			valueElement.setAttribute('onclick', '/* Skip right-click on Windows */ if (event.button) { return; } ZoteroItemPane.showEditor(this)');
 			valueElement.className = 'zotero-clicky';
 		}
 		
