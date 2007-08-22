@@ -27,7 +27,7 @@
 
 <dialog
 	id="zotero-select-items-dialog"
-	title="Select"
+	title="&zotero.selectitems.title;"
 	orient="vertical"
 	width="600" height="450"
 	buttons="cancel,accept"

@@ -98,7 +98,7 @@ To add a new preference:
 						<radiogroup id="statusBarIcon" orient="horizontal" preference="pref-statusBarIcon">
 							<radio src="chrome://zotero/skin/zotero_status_bar.png" value="2"/>
 							<radio src="chrome://zotero/skin/zotero_status_bar_compact.png" value="1"/>
-							<radio label="None" value="0"/>
+							<radio label="&zotero.preferences.statusBarIcon.none;" value="0"/>
 						</radiogroup>
 					</row>
 				</rows>
@@ -125,7 +125,7 @@ To add a new preference:
 		<groupbox>
 			<caption label="&zotero.preferences.openurl.caption;"/>
 			
-			<button id="openURLSearchButton" label="Search for resolvers" oncommand="populateOpenURLResolvers()"/>
+			<button id="openURLSearchButton" label="&zotero.preferences.openurl.search;" oncommand="populateOpenURLResolvers()"/>
 			<menulist id="openURLMenu" oncommand="onOpenURLSelected();">
 				<menupopup>
 					<menuseparator/>

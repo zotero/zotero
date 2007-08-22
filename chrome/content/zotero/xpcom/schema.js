@@ -449,8 +449,8 @@ Zotero.Schema = new function(){
 			Zotero.DB.query(sql);
 			var sql = "INSERT INTO itemAttachments VALUES(123456789, NULL, 3, 'text/html', 25, NULL, NULL)";
 			Zotero.DB.query(sql);
-			var sql = "INSERT INTO itemDataValues VALUES (1, 'Zotero - Quick Start Guide')";
-			Zotero.DB.query(sql);
+			var sql = "INSERT INTO itemDataValues VALUES (?, ?)";
+			Zotero.DB.query(sql, [1, "Zotero - " + Zotero.getString('install.quickStartGuide')]);
 			var sql = "INSERT INTO itemData VALUES(123456789, 110, 1)";
 			Zotero.DB.query(sql);
 			var sql = "INSERT INTO itemDataValues VALUES (2, 'http://www.zotero.org/documentation/quick_start_guide')";
@@ -462,7 +462,7 @@ Zotero.Schema = new function(){
 			var sql = "INSERT INTO itemData VALUES(123456789, 27, 3)";
 			Zotero.DB.query(sql);
 			var sql = "INSERT INTO itemNotes (itemID, sourceItemID, note) VALUES(123456789, NULL, ?)";
-			var msg = "Welcome to Zotero! Click the \"View Page\" button above to visit our Quick Start Guide and learn how to get started collecting, managing, and citing your research.\n\nThanks for trying Zotero, and be sure to tell your friends about it.";
+			var msg = Zotero.getString('install.quickStartGuide.message');
 			Zotero.DB.query(sql, msg);
 			Zotero.DB.commitTransaction();
 		}

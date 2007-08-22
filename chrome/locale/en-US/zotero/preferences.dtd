@@ -10,6 +10,7 @@
 <!ENTITY zotero.preferences.position.below				"below">
 <!ENTITY zotero.preferences.position.browser				"browser content">
 <!ENTITY zotero.preferences.statusBarIcon				"Status bar icon:">
+<!ENTITY zotero.preferences.statusBarIcon.none			"None">
 <!ENTITY zotero.preferences.fontSize						"Font size:">
 <!ENTITY zotero.preferences.fontSize.small				"Small">
 <!ENTITY zotero.preferences.fontSize.medium				"Medium">
@@ -25,6 +26,8 @@
 <!ENTITY zotero.preferences.automaticTags				"Automatically tag items with keywords and subject headings">
 
 <!ENTITY zotero.preferences.openurl.caption				"OpenURL">
+
+<!ENTITY zotero.preferences.openurl.search				"Search for resolvers">
 <!ENTITY zotero.preferences.openurl.custom				"Custom...">
 <!ENTITY zotero.preferences.openurl.server				"Resolver:">
 <!ENTITY zotero.preferences.openurl.version				"Version:">

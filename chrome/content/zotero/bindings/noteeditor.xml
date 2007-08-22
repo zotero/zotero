@@ -228,10 +228,11 @@
 						// TODO: localize
 						var v = this.id('tags').summary;
 						
-						if(!v || v == "")
-							v = "[click here]";
+						if (!v || v == "") {
+							v = "[" + Zotero.getString('pane.item.noteEditor.clickHere') + "]";
+						}
 							
-						this.id('tagsLabel').value = "Tags: " + v;
+						this.id('tagsLabel').value = Zotero.getString('pane.item.tags') + " " + v;
 					]]>
 				</body>
 			</method>
@@ -251,10 +252,11 @@
 					<![CDATA[
 						var v = this.id('seeAlso').summary;
 						
-						if(!v || v == "")
-							v = "[click here]";
+						if (!v || v == "") {
+							v = "[" + Zotero.getString('pane.item.noteEditor.clickHere') + "]";
+						}
 						
-						this.id('seeAlsoLabel').value = "Related: " + v;
+						this.id('seeAlsoLabel').value = Zotero.getString('pane.item.related') + " " + v;
 					]]>
 				</body>
 			</method>
