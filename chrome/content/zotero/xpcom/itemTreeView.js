@@ -1490,10 +1490,12 @@ Zotero.ItemTreeView.fileDragDataProvider.prototype = {
 			var existingFileNames = [];
 			
 			for (var i=0; i<items.length; i++) {
+				// TODO create URL?
 				if (!items[i].isAttachment() ||
 						items[i].getAttachmentLinkMode() == Zotero.Attachments.LINK_MODE_LINKED_URL) {
 					continue;
 				}
+				
 				var file = items[i].getFile();
 				if (!file) {
 					Components.utils.reportError("File not found for item " + items[i].getID());
@@ -1502,14 +1504,16 @@ Zotero.ItemTreeView.fileDragDataProvider.prototype = {
 				
 				// Determine if we need to copy multiple files for this item
 				// (web page snapshots)
-				var parentDir = file.parent;
-				var files = parentDir.directoryEntries;
-				var numFiles = 0;
-				while (files.hasMoreElements()) {
-					var f = files.getNext();
-					f.QueryInterface(Components.interfaces.nsILocalFile);
-					if (f.leafName.indexOf('.') != 0) {
-						numFiles++;
+				if (items[i].getAttachmentLinkMode() != Zotero.Attachments.LINK_MODE_LINKED_FILE) {
+					var parentDir = file.parent;
+					var files = parentDir.directoryEntries;
+					var numFiles = 0;
+					while (files.hasMoreElements()) {
+						var f = files.getNext();
+						f.QueryInterface(Components.interfaces.nsILocalFile);
+						if (f.leafName.indexOf('.') != 0) {
+							numFiles++;
+						}
 					}
 				}
 				
@@ -1545,7 +1549,6 @@ Zotero.ItemTreeView.fileDragDataProvider.prototype = {
 						}
 					}
 					catch (e) {
-						Zotero.debug(e);
 						if (e.name == 'NS_ERROR_FILE_ALREADY_EXISTS') {
 							// Keep track of items that already existed
 							existingItems.push(items[i].getID());
