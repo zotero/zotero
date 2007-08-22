@@ -100,7 +100,7 @@ Zotero.Report = new function() {
 			var dm = arr['dateModified'];
 			delete arr['dateAdded'];
 			delete arr['dateModified'];
-			arr['dateAdded'] = dm;
+			arr['dateAdded'] = da;
 			arr['dateModified'] = dm;
 			
 			for (var i in arr) {
@@ -192,7 +192,7 @@ Zotero.Report = new function() {
 				}
 				// Convert dates to local format
 				else if (i=='accessDate' || i=='dateAdded' || i=='dateModified') {
-					var date = Zotero.Date.sqlToDate(arr[i])
+					var date = Zotero.Date.sqlToDate(arr[i], true)
 					fieldText = escapeXML(date.toLocaleString());
 				}
 				else {
