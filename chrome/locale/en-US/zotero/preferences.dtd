@@ -37,6 +37,11 @@
 <!ENTITY zotero.preferences.search.pdfIndexing				"PDF Indexing">
 <!ENTITY zotero.preferences.search.indexStats				"Index Statistics">
 
+<!ENTITY zotero.preferences.search.indexStats.indexed		"Indexed:">
+<!ENTITY zotero.preferences.search.indexStats.partial		"Partial:">
+<!ENTITY zotero.preferences.search.indexStats.unindexed	"Unindexed:">
+<!ENTITY zotero.preferences.search.indexStats.words		"Words:">
+
 <!ENTITY zotero.preferences.fulltext.textMaxLength			"Maximum characters to index per file:">
 <!ENTITY zotero.preferences.fulltext.pdfMaxPages			"Maximum pages to index per file:">
 

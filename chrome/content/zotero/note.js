@@ -48,17 +48,15 @@ function onLoad()
 		if(ref.isNote())
 		{
 			noteEditor.note = ref;
-			document.title = "Edit Note";
+			document.title = Zotero.getString('noteEditor.editNote');
 		}
 		else
 		{
 			noteEditor.item = ref;
-			document.title = "Add Note";
 		}
 	}
 	else
 	{
-		document.title = "Add Note";
 		if(collectionID && collectionID != '' && collectionID != 'undefined')
 			noteEditor.collection = Zotero.Collections.get(collectionID);
 	}

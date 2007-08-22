@@ -1,3 +1,5 @@
+<!ENTITY zotero.search.advancedSearch	"Advanced Search">
+
 <!ENTITY zotero.search.name				"Name:">
 
 <!ENTITY zotero.search.joinMode.prefix		"Match">

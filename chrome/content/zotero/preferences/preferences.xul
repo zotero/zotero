@@ -228,19 +228,19 @@ To add a new preference:
 				
 				<rows>
 					<row id="fulltext-stats-indexed">
-						<label value="Indexed:"/>
+						<label value="&zotero.preferences.search.indexStats.indexed;"/>
 						<label/>
 					</row>
 					<row id="fulltext-stats-partial">
-						<label value="Partial:"/>
+						<label value="&zotero.preferences.search.indexStats.partial;"/>
 						<label/>
 					</row>
 					<row id="fulltext-stats-unindexed">
-						<label value="Unindexed:"/>
+						<label value="&zotero.preferences.search.indexStats.unindexed;"/>
 						<label/>
 					</row>
 					<row id="fulltext-stats-words">
-						<label value="Words:"/>
+						<label value="&zotero.preferences.search.indexStats.words;"/>
 						<label/>
 					</row>
 				</rows>

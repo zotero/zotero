@@ -12,7 +12,7 @@
 
 <window
 	id="zotero-advanced-search-dialog"
-	title="Advanced Search"
+	title="&zotero.search.advancedSearch;"
 	orient="vertical"
 	persist="screenX screenY width height"
 	onload="ZoteroAdvancedSearch.onLoad()"
