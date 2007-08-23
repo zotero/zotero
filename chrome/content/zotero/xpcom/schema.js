@@ -445,7 +445,7 @@ Zotero.Schema = new function(){
 			Zotero.DB.query(_getSchemaSQL('scrapers'));
 			_updateDBVersion('scrapers', _getSchemaSQLVersion('scrapers'));
 			
-			var sql = "INSERT INTO items VALUES(123456789, 14, '2006-10-05 14:00:00', '2006-10-05 14:00:00')";
+			var sql = "INSERT INTO items VALUES(123456789, 14, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)";
 			Zotero.DB.query(sql);
 			var sql = "INSERT INTO itemAttachments VALUES(123456789, NULL, 3, 'text/html', 25, NULL, NULL)";
 			Zotero.DB.query(sql);
@@ -457,13 +457,13 @@ Zotero.Schema = new function(){
 			Zotero.DB.query(sql);
 			var sql = "INSERT INTO itemData VALUES(123456789, 1, 2)";
 			Zotero.DB.query(sql);
-			var sql = "INSERT INTO itemDataValues VALUES (3, '2006-10-05 14:00:00')";
+			var sql = "INSERT INTO itemDataValues VALUES (3, CURRENT_TIMESTAMP)";
 			Zotero.DB.query(sql);
 			var sql = "INSERT INTO itemData VALUES(123456789, 27, 3)";
 			Zotero.DB.query(sql);
 			var sql = "INSERT INTO itemNotes (itemID, sourceItemID, note) VALUES(123456789, NULL, ?)";
 			var msg = Zotero.getString('install.quickStartGuide.message.welcome')
-				+ Zotero.getString('install.quickStartGuide.message.clickViewPage')
+				+ " " + Zotero.getString('install.quickStartGuide.message.clickViewPage')
 				+ "\n\n" + Zotero.getString('install.quickStartGuide.message.thanks');
 			Zotero.DB.query(sql, msg);
 			Zotero.DB.commitTransaction();
