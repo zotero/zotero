@@ -14,6 +14,7 @@
               <minVersion>2.0</minVersion>
               <maxVersion>2.0.0.*</maxVersion>
               <updateLink>http://www.zotero.org/download/zotero.xpi</updateLink>
+              <updateHash>sha1:</updateHash>
             </RDF:Description>
           </targetApplication>
         </RDF:Description>

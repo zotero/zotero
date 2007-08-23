@@ -18,7 +18,7 @@
     <em:optionsURL>chrome://zotero/content/preferences/preferences.xul</em:optionsURL>
     <em:aboutURL>chrome://zotero/content/about.xul</em:aboutURL>
     <em:iconURL>chrome://zotero/skin/zotero_z_32px.png</em:iconURL>
-    <em:updateURL>http://www.zotero.org/download/update-svn.rdf</em:updateURL>
+    <em:updateURL>https://www.zotero.org/download/update-svn.rdf</em:updateURL>
     <em:type>2</em:type> <!-- type=extension --> 
     
     <!-- Firefox -->
