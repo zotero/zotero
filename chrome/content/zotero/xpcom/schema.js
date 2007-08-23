@@ -462,7 +462,9 @@ Zotero.Schema = new function(){
 			var sql = "INSERT INTO itemData VALUES(123456789, 27, 3)";
 			Zotero.DB.query(sql);
 			var sql = "INSERT INTO itemNotes (itemID, sourceItemID, note) VALUES(123456789, NULL, ?)";
-			var msg = Zotero.getString('install.quickStartGuide.message');
+			var msg = Zotero.getString('install.quickStartGuide.message.welcome')
+				+ Zotero.getString('install.quickStartGuide.message.clickViewPage')
+				+ "\n\n" + Zotero.getString('install.quickStartGuide.message.thanks');
 			Zotero.DB.query(sql, msg);
 			Zotero.DB.commitTransaction();
 		}

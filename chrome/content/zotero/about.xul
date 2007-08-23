@@ -130,23 +130,31 @@
 		<label class="subhead" value="&zotero.directors;"/>
 		<vbox class="subcontent">
 			<label value="Dan Cohen"/>
-			<label value="Josh Greenberg"/>
 			<label value="Sean Takats"/>
 		</vbox>
 		<label class="subhead" value="&zotero.developers;"/>
 		<vbox class="subcontent">
 			<label value="Dan Stillman"/>
 			<label value="Simon Kornblith"/>
-			<label value="David Norton"/>
+			
+		</vbox>
+		<label class="subhead" value="&zotero.alumni;"/>
+		<vbox class="subcontent">
+			<label value="Josh Greenberg (co-director)"/>
+			<label value="David Norton (developer)"/>
 		</vbox>
 		<label class="subhead" value="&zotero.about.localizations;"/>
 		<vbox class="subcontent">
 			<vbox id="zotero-translators-list"/>
 		</vbox>
-		<label class="subhead" value="&zotero.about.icons;"/>
+		<label class="subhead" value="&zotero.about.additionalSoftware;"/>
 		<vbox class="subcontent">
 			<label class="text-link" href="http://www.famfamfam.com/lab/icons/silk/" value="famfamfam (small icons)"/>
+			<label class="text-link" href="http://simile.mit.edu/timeline/" value="SIMILE Project (Timeline)"/>
 			<label class="text-link" href="http://tango.freedesktop.org/Tango_Desktop_Project" value="Tango Desktop Project (pref icons)"/>
+			<label class="text-link" href="http://www.dbai.tuwien.ac.at/user/pollak/webpagedump/" value="WebPageDump (snapshot code)"/>
+			<label class="text-link" href="http://xbiblio.sourceforge.net/" value="XBiblio (Citation Style Language)"/>
+			<label class="text-link" href="http://www.foolabs.com/xpdf/" value="Xpdf (pdftotext)"/>
 		</vbox>
 		<label class="subhead" value="&zotero.executiveProducer;"/>
 		<vbox class="subcontent">
