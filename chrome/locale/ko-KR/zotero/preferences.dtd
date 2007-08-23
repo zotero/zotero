@@ -10,6 +10,7 @@
 <!ENTITY zotero.preferences.position.below "아래">
 <!ENTITY zotero.preferences.position.browser "브라우저 화면">
 <!ENTITY zotero.preferences.statusBarIcon "상태 막대 아이콘:">
+<!ENTITY zotero.preferences.statusBarIcon.none "None">
 <!ENTITY zotero.preferences.fontSize "Font size:">
 <!ENTITY zotero.preferences.fontSize.small "Small">
 <!ENTITY zotero.preferences.fontSize.medium "Medium">
@@ -19,11 +20,14 @@
 <!ENTITY zotero.preferences.autoUpdate "수집기 갱신을 자동으로 확인">
 <!ENTITY zotero.preferences.updateNow "지금 갱신">
 <!ENTITY zotero.preferences.reportTranslationFailure "고장난 사이트 중계기 신고">
+<!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded RIS/Refer files">
 <!ENTITY zotero.preferences.automaticSnapshots "웹 페이지로 항목을 생성시 자동으로 스냅샷을 찍습니다">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "항목 저장시 PDF와 다른 파일의 조합을 자동으로 첨부합니다">
 <!ENTITY zotero.preferences.automaticTags "Automatically tag items with keywords and subject headings">
 
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
+
+<!ENTITY zotero.preferences.openurl.search "Search for resolvers">
 <!ENTITY zotero.preferences.openurl.custom "사용자 지정...">
 <!ENTITY zotero.preferences.openurl.server "해독기:">
 <!ENTITY zotero.preferences.openurl.version "버전:">
@@ -32,6 +36,11 @@
 <!ENTITY zotero.preferences.search.fulltextCache "Full-Text Cache">
 <!ENTITY zotero.preferences.search.pdfIndexing "PDF Indexing">
 <!ENTITY zotero.preferences.search.indexStats "Index Statistics">
+
+<!ENTITY zotero.preferences.search.indexStats.indexed "Indexed:">
+<!ENTITY zotero.preferences.search.indexStats.partial "Partial:">
+<!ENTITY zotero.preferences.search.indexStats.unindexed "Unindexed:">
+<!ENTITY zotero.preferences.search.indexStats.words "Words:">
 
 <!ENTITY zotero.preferences.fulltext.textMaxLength "Maximum characters to index per file:">
 <!ENTITY zotero.preferences.fulltext.pdfMaxPages "Maximum pages to index per file:">

@@ -10,6 +10,7 @@
 <!ENTITY zotero.preferences.position.below "低於">
 <!ENTITY zotero.preferences.position.browser "瀏灠器內容">
 <!ENTITY zotero.preferences.statusBarIcon "狀態列圖標：">
+<!ENTITY zotero.preferences.statusBarIcon.none "None">
 <!ENTITY zotero.preferences.fontSize "Font size:">
 <!ENTITY zotero.preferences.fontSize.small "Small">
 <!ENTITY zotero.preferences.fontSize.medium "Medium">
@@ -19,11 +20,14 @@
 <!ENTITY zotero.preferences.autoUpdate "自動檢查更新了的刮錄器">
 <!ENTITY zotero.preferences.updateNow "立刻更新">
 <!ENTITY zotero.preferences.reportTranslationFailure "報告故障了的網站翻譯器">
+<!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded RIS/Refer files">
 <!ENTITY zotero.preferences.automaticSnapshots "在從網頁建立項目時自動攝取快照">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "在貯存項目時自動附屬相關的PDF及其他檔案">
 <!ENTITY zotero.preferences.automaticTags "Automatically tag items with keywords and subject headings">
 
 <!ENTITY zotero.preferences.openurl.caption "開啟統源址">
+
+<!ENTITY zotero.preferences.openurl.search "Search for resolvers">
 <!ENTITY zotero.preferences.openurl.custom "自行定義…">
 <!ENTITY zotero.preferences.openurl.server "解答器：">
 <!ENTITY zotero.preferences.openurl.version "版本：">
@@ -32,6 +36,11 @@
 <!ENTITY zotero.preferences.search.fulltextCache "Full-Text Cache">
 <!ENTITY zotero.preferences.search.pdfIndexing "PDF Indexing">
 <!ENTITY zotero.preferences.search.indexStats "Index Statistics">
+
+<!ENTITY zotero.preferences.search.indexStats.indexed "Indexed:">
+<!ENTITY zotero.preferences.search.indexStats.partial "Partial:">
+<!ENTITY zotero.preferences.search.indexStats.unindexed "Unindexed:">
+<!ENTITY zotero.preferences.search.indexStats.words "Words:">
 
 <!ENTITY zotero.preferences.fulltext.textMaxLength "Maximum characters to index per file:">
 <!ENTITY zotero.preferences.fulltext.pdfMaxPages "Maximum pages to index per file:">

@@ -2,8 +2,9 @@
 <!ENTITY zotero.createdby "Gemaakt door:">
 <!ENTITY zotero.directors "Onder toezicht van:">
 <!ENTITY zotero.developers "Ontwikkelaars:">
+<!ENTITY zotero.alumni "Alumni:">
 <!ENTITY zotero.about.localizations "Localizations:">
-<!ENTITY zotero.about.icons "Icons:">
+<!ENTITY zotero.about.additionalSoftware "Third-Party Software and Standards:">
 <!ENTITY zotero.executiveProducer "Uitvoerend Producent:">
 <!ENTITY zotero.thanks "Met speciale dank aan:">
 <!ENTITY zotero.about.close "Sluiten">

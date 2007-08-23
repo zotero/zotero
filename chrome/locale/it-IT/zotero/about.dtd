@@ -2,8 +2,9 @@
 <!ENTITY zotero.createdby "Creata da:">
 <!ENTITY zotero.directors "Direttori:">
 <!ENTITY zotero.developers "Sviluppatori:">
+<!ENTITY zotero.alumni "Alumni:">
 <!ENTITY zotero.about.localizations "Localizations:">
-<!ENTITY zotero.about.icons "Icons:">
+<!ENTITY zotero.about.additionalSoftware "Third-Party Software and Standards:">
 <!ENTITY zotero.executiveProducer "Produttore esecutivo:">
 <!ENTITY zotero.thanks "Ringraziamenti speciali:">
 <!ENTITY zotero.about.close "Chiudi">

@@ -10,6 +10,7 @@
 <!ENTITY zotero.preferences.position.below "nella parte inferiore">
 <!ENTITY zotero.preferences.position.browser "della finestra del browser">
 <!ENTITY zotero.preferences.statusBarIcon "Icona barra di stato:">
+<!ENTITY zotero.preferences.statusBarIcon.none "None">
 <!ENTITY zotero.preferences.fontSize "Font size:">
 <!ENTITY zotero.preferences.fontSize.small "Small">
 <!ENTITY zotero.preferences.fontSize.medium "Medium">
@@ -19,11 +20,14 @@
 <!ENTITY zotero.preferences.autoUpdate "Controlla automaticamente nuovi motori di ricerca">
 <!ENTITY zotero.preferences.updateNow "Aggiorna adesso">
 <!ENTITY zotero.preferences.reportTranslationFailure "Segnala motori di ricerca non funzionanti">
+<!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded RIS/Refer files">
 <!ENTITY zotero.preferences.automaticSnapshots "Scatta un&apos;istantanea degli elementi estratti dalle pagine web">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Allega automaticamente file PDF o di altro tipo durante il salvataggio degli elementi">
 <!ENTITY zotero.preferences.automaticTags "Automatically tag items with keywords and subject headings">
 
 <!ENTITY zotero.preferences.openurl.caption "Apri URL">
+
+<!ENTITY zotero.preferences.openurl.search "Search for resolvers">
 <!ENTITY zotero.preferences.openurl.custom "Personalizza...">
 <!ENTITY zotero.preferences.openurl.server "Sistema di risoluzione:">
 <!ENTITY zotero.preferences.openurl.version "Versione:">
@@ -32,6 +36,11 @@
 <!ENTITY zotero.preferences.search.fulltextCache "Full-Text Cache">
 <!ENTITY zotero.preferences.search.pdfIndexing "PDF Indexing">
 <!ENTITY zotero.preferences.search.indexStats "Index Statistics">
+
+<!ENTITY zotero.preferences.search.indexStats.indexed "Indexed:">
+<!ENTITY zotero.preferences.search.indexStats.partial "Partial:">
+<!ENTITY zotero.preferences.search.indexStats.unindexed "Unindexed:">
+<!ENTITY zotero.preferences.search.indexStats.words "Words:">
 
 <!ENTITY zotero.preferences.fulltext.textMaxLength "Maximum characters to index per file:">
 <!ENTITY zotero.preferences.fulltext.pdfMaxPages "Maximum pages to index per file:">

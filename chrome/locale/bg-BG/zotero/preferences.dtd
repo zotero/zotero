@@ -10,6 +10,7 @@
 <!ENTITY zotero.preferences.position.below "под">
 <!ENTITY zotero.preferences.position.browser "съдържанието на браузера">
 <!ENTITY zotero.preferences.statusBarIcon "Икона в лентата за състоянието">
+<!ENTITY zotero.preferences.statusBarIcon.none "None">
 <!ENTITY zotero.preferences.fontSize "Font size:">
 <!ENTITY zotero.preferences.fontSize.small "Small">
 <!ENTITY zotero.preferences.fontSize.medium "Medium">
@@ -19,11 +20,14 @@
 <!ENTITY zotero.preferences.autoUpdate "Автоматична проверка за осъвременени екстрактори">
 <!ENTITY zotero.preferences.updateNow "Осъвремени сега">
 <!ENTITY zotero.preferences.reportTranslationFailure "Осведомяване за неработещи преводачи на страници">
+<!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded RIS/Refer files">
 <!ENTITY zotero.preferences.automaticSnapshots "Автоматично правене на снимки когато се създават обекти от интернет страници">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Автоматично прикачвай асоциираните PDF и други файлове по време на записа на обектите">
 <!ENTITY zotero.preferences.automaticTags "Automatically tag items with keywords and subject headings">
 
 <!ENTITY zotero.preferences.openurl.caption "Отворяне на URL">
+
+<!ENTITY zotero.preferences.openurl.search "Search for resolvers">
 <!ENTITY zotero.preferences.openurl.custom "Потребителси...">
 <!ENTITY zotero.preferences.openurl.server "Решаващ Сървър:">
 <!ENTITY zotero.preferences.openurl.version "Версия:">
@@ -32,6 +36,11 @@
 <!ENTITY zotero.preferences.search.fulltextCache "Full-Text Cache">
 <!ENTITY zotero.preferences.search.pdfIndexing "PDF Indexing">
 <!ENTITY zotero.preferences.search.indexStats "Index Statistics">
+
+<!ENTITY zotero.preferences.search.indexStats.indexed "Indexed:">
+<!ENTITY zotero.preferences.search.indexStats.partial "Partial:">
+<!ENTITY zotero.preferences.search.indexStats.unindexed "Unindexed:">
+<!ENTITY zotero.preferences.search.indexStats.words "Words:">
 
 <!ENTITY zotero.preferences.fulltext.textMaxLength "Maximum characters to index per file:">
 <!ENTITY zotero.preferences.fulltext.pdfMaxPages "Maximum pages to index per file:">
