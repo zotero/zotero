@@ -27,6 +27,7 @@ Zotero.Schema = new function(){
 	this.updateScrapersRemote = updateScrapersRemote;
 	this.stopRepositoryTimer = stopRepositoryTimer;
 	
+	this.dbInitialized = false;
 	this.upgradeFinished = false;
 	this.goToChangeLog = false;
 	
@@ -36,6 +37,8 @@ Zotero.Schema = new function(){
 	var _remoteUpdateInProgress = false;
 	
 	var _fulltextItemWordsCache = [];
+	
+	var self = this;
 	
 	function userDataUpgradeRequired() {
 		var dbVersion = _getDBVersion('userdata');
@@ -467,6 +470,8 @@ Zotero.Schema = new function(){
 				+ "\n\n" + Zotero.getString('install.quickStartGuide.message.thanks');
 			Zotero.DB.query(sql, msg);
 			Zotero.DB.commitTransaction();
+			
+			self.dbInitialized = true;
 		}
 		catch(e){
 			Zotero.debug(e, 1);

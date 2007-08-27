@@ -1,5 +1,7 @@
 // These are DEFAULT prefs for the INSTALL. You will have to reinstall the extension to see differences!
 
+pref("extensions.zotero.firstRun", true);
+
 pref("extensions.zotero.useDataDir", false);
 pref("extensions.zotero.dataDir", '');
 pref("extensions.zotero.lastDataDir", '');

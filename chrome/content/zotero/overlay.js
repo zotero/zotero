@@ -175,6 +175,16 @@ var ZoteroPane = new function()
 		menu.addEventListener("popupshowing", ZoteroPane.contextPopupShowing, false);
 		
 		Zotero.Keys.windowInit(document);
+		
+		// If the database was initialized and Zotero hasn't been run before
+		// in this profile, display the Quick Start Guide -- this way the guide
+		// won't be displayed they sync their DB to another profile or if
+		// they the DB is initialized erroneously (e.g. while switching data
+		// directory locations)
+		if (Zotero.Schema.dbInitialized && Zotero.Prefs.get('firstRun')) {
+			gBrowser.selectedTab = gBrowser.addTab('http://www.zotero.org/documentation/quick_start_guide');
+			Zotero.Prefs.set('extensions.zotero.firstRun', false);
+		}
 	}
 	
 	
