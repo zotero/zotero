@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-08-15 16:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-08-27 05:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-08-24 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -217,15 +217,15 @@ REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('aee2323e-ce00-4fcc-a949-06eb1becc98f', '1.0.0b4.r1', '', '2007-06-18 18:15:00', '0', '100', '4', 'Epicurious', 'Sean Takats', '^https?://www\.epicurious\.com/recipes/(?:find/results|recipe_views/views/)', 
+REPLACE INTO translators VALUES ('aee2323e-ce00-4fcc-a949-06eb1becc98f', '1.0.0b4.r1', '', '2007-08-27 05:00:00', '0', '100', '4', 'Epicurious', 'Sean Takats', '^https?://www\.epicurious\.com/(?:tools/searchresults|recipes/food/views)', 
 'function detectWeb(doc, url){
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == ''x'') return namespace; else return null;
 		} : null;
 		
-	var xpath = ''//div[@class="recipeDetailLeftDiv"][@id="ingredients"]'';
-	var multxpath = ''//div[@id="left"]/table[@class="searchresults"]/tbody/tr'';
+	var xpath = ''//div[@id="ingredients"]'';
+	var multxpath = ''//table[@class="search-results"]/tbody/tr'';
 
 	if(doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
 		return "document";
@@ -257,13 +257,15 @@ function scrape(doc){
 
 	var elmt;
 
-	xpath = ''//div[@id="sourceInfo"]/p[@class="source"]'';
+	xpath = ''//p[@class="source"]'';
 	var elmts = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
 	if (elmt = elmts.iterateNext()){
 		var authordate = elmt.textContent;
-		var authordates = authordate.split(",");
+		var authordates = authordate.split("|");
 		newItem.creators.push(Zotero.Utilities.cleanAuthor(authordates[0], "contributor", true));
-		newItem.date = authordates[1];
+		var datestring = authordates[1].toString();
+		datestring = datestring.replace("Copyright", "");
+		newItem.date = Zotero.Utilities.formatDate(Zotero.Utilities.strToDate(datestring));
 		while (elmt = elmts.iterateNext()){
 		 	Zotero.debug("looping?");
 		 	Zotero.debug(elmt.textContent);
@@ -271,27 +273,27 @@ function scrape(doc){
 		}
 	}
 		
-	xpath = ''//div[@class="recipeDetailLeftDiv"][@id="intro"]/p'';
+	xpath = ''//div[@id="recipe_intro"]/p'';
 	if (elmt = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
 		var abstract = elmt.textContent;
 		abstract = Zotero.Utilities.cleanString(abstract);
 		newItem.abstractNote = abstract;		
 	}
 
-	xpath = ''//div[@class="recipeDetailLeftDiv"][@id="ingredients"]'';
+	xpath = ''//div[@id="ingredients"]'';
 	if (elmt = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
 		var ingredients = elmt.textContent;
 		ingredients = Zotero.Utilities.superCleanString(ingredients);
 		ingredients = cleanText(ingredients);
 	}
-	xpath = ''//div[@class="recipeDetailLeftDiv"][@id="preparation"]'';
+	xpath = ''//div[@id="preparation"]'';
 	if (elmt = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
 		var prep = elmt.textContent;
 		prep = Zotero.Utilities.superCleanString(prep);
 		prep = cleanText(prep);
 		prep = prep.replace(/\n/g, "\n\n");
 	}
-	xpath = ''//div[@id="servingInfo"]'';
+	xpath = ''//div[@id="recipe_summary"]/p'';
 	if (elmt = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
 		var serving = elmt.textContent;
 		serving = Zotero.Utilities.superCleanString(serving);
@@ -305,7 +307,7 @@ function scrape(doc){
 
 	var url = doc.location.href;
 	
-	var snapshotURL = url.replace("/views/", "/printer_friendly/");
+	var snapshotURL = url.replace("/views/", "/printerfriendly/");
 	newItem.attachments.push({title:"Epicurious.com Snapshot", mimeType:"text/html", url:snapshotURL, snapshot:true});
 	newItem.url = url;
 	newItem.attachments.push({title:"Epicurious.com Link", snapshot:false, mimeType:"text/html", url:url});
@@ -319,14 +321,14 @@ function doWeb(doc, url){
 		if (prefix == ''x'') return namespace; else return null;
 		} : null;
 
-	var singxpath = ''//div[@class="recipeDetailLeftDiv"][@id="ingredients"]'';
-	var multxpath = ''//div[@id="left"]/table[@class="searchresults"]/tbody/tr'';
+	var singxpath = ''//div[@id="ingredients"]'';
+	var multxpath = ''//table[@class="search-results"]/tbody/tr'';
 	if(doc.evaluate(singxpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
 		// single recipe page
 		scrape(doc, url);
 	} else if (doc.evaluate(multxpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
 		var items = new Object();
-		var elmtxpath = ''//div[@id="left"]/table[@class="searchresults"]/tbody/tr/td[@class="pd2"]/a[@class="hed"]'';
+		var elmtxpath = ''//div[@id="resultstable"]/table[@class="search-results"]/tbody/tr/td[3][@class="name"]/a[@class="hed"]'';
 		var elmts = doc.evaluate(elmtxpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
 		var elmt;
 		while (elmt = elmts.iterateNext()) {
@@ -2995,7 +2997,7 @@ REPLACE INTO translators VALUES ('ab961e61-2a8a-4be1-b8a3-044f20d52d78', '1.0.0b
 	}
 }');
 
-REPLACE INTO translators VALUES ('f4130157-93f7-4493-8f24-a7c85549013d', '1.0.0b4.r1', '', '2007-07-31 16:45:00', '0', '100', '4', 'BBC', 'Ben Parr', '^https?://(?:www|news?)\.bbc\.co.uk', 
+REPLACE INTO translators VALUES ('f4130157-93f7-4493-8f24-a7c85549013d', '1.0.0b4.r1', '', '2007-08-27 05:00:00', '0', '100', '4', 'BBC', 'Ben Parr', '^https?://(?:www|news?)\.bbc\.co.uk', 
 'function detectWeb(doc, url)
 {
 
@@ -3071,7 +3073,7 @@ REPLACE INTO translators VALUES ('f4130157-93f7-4493-8f24-a7c85549013d', '1.0.0b
 	    	     { 	newItem.abstractNote=temp.value;     }
 	     }
 	     
-	     newItem.attachments.push({url:url, title:"New York Times Snapshot",mimeType:"text/html"});
+	     newItem.attachments.push({url:url, title:"BBC News Snapshot",mimeType:"text/html"});
 	     
 	     newItem.complete();
 }
@@ -6021,7 +6023,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('5e3e6245-83da-4f55-a39b-b712df54a935', '1.0.0b3.r1', '', '2007-07-31 16:45:00', '0', '90', '4', 'Melvyl', 'Sean Takats', '^https?://melvyl-dev.cdlib.org:8162/F(?:/[A-Z0-9\-]+(?:\?.*)?$|\?func=find|\?func=scan)', 
+REPLACE INTO translators VALUES ('5e3e6245-83da-4f55-a39b-b712df54a935', '1.0.0b3.r1', '', '2007-08-27 05:00:00', '0', '90', '4', 'Melvyl', 'Sean Takats', '^https?://(?:melvyl.cdlib.org|melvyl-dev.cdlib.org:8162)/F(?:/[A-Z0-9\-]+(?:\?.*)?$|\?func=find|\?func=scan)', 
 'function detectWeb(doc, url) {
 	var singleRe = new RegExp("^https?://[^/]+/F/[A-Z0-9\-]+\?.*(?:func=full-set-set.*\&format=[0-9]{3}|func=direct)");
 	
