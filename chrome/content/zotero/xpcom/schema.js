@@ -36,7 +36,7 @@ Zotero.Schema = new function(){
 	var _repositoryTimer;
 	var _remoteUpdateInProgress = false;
 	
-	var _fulltextItemWordsCache = [];
+	var _fulltextItemWordsCache = null;
 	
 	var self = this;
 	
