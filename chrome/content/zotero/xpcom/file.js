@@ -27,6 +27,7 @@ Zotero.File = new function(){
 	this.getContents = getContents;
 	this.getContentsFromURL = getContentsFromURL;
 	this.putContents = putContents;
+	this.copyToUnique = this.copyToUnique;
 	this.getCharsetFromFile = getCharsetFromFile;
 	this.addCharsetListener = addCharsetListener;
 	
@@ -144,6 +145,17 @@ Zotero.File = new function(){
 		foStream.init(file, 0x02 | 0x08 | 0x20, 0664, 0); // write, create, truncate
 		foStream.write(str, str.length);
 		foStream.close();
+	}
+	
+	
+	function copyToUnique(file, newFile) {
+		newFile.createUnique(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0644);
+		var newName = newFile.leafName;
+		newFile.remove(null);
+		
+		// Copy file to unique name
+		file.copyTo(newFile.parent, newName);
+		return file;
 	}
 	
 	
