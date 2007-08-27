@@ -295,6 +295,7 @@ To add a new preference:
 			<preference id="pref-keys-newItem" name="extensions.zotero.keys.newItem" type="string"/>
 			<preference id="pref-keys-newNote" name="extensions.zotero.keys.newNote" type="string"/>
 			<preference id="pref-keys-toggleTagSelector" name="extensions.zotero.keys.toggleTagSelector" type="string"/>
+			<preference id="pref-keys-copySelectedItemCitationsToClipboard" name="extensions.zotero.keys.copySelectedItemCitationsToClipboard" type="string"/>
 			<preference id="pref-keys-copySelectedItemsToClipboard" name="extensions.zotero.keys.copySelectedItemsToClipboard" type="string"/>
 			<preference id="pref-keys-overrideGlobal" name="extensions.zotero.keys.overrideGlobal" type="bool"/>
 		</preferences>
@@ -347,6 +348,12 @@ To add a new preference:
 					<label value="&zotero.preferences.keys.toggleTagSelector;" control="textbox-toggleTagSelector"/>
 					<label/>
 					<textbox id="textbox-toggleTagSelector" maxlength="1" size="1" preference="pref-keys-toggleTagSelector"/>
+				</row>
+				
+				<row>
+					<label value="&zotero.preferences.keys.copySelectedItemCitationsToClipboard;" control="textbox-copySelectedItemCitationsToClipboard"/>
+					<label/>
+					<textbox id="textbox-copySelectedItemCitationsToClipboard" maxlength="1" size="1" preference="pref-keys-copySelectedItemCitationsToClipboard"/>
 				</row>
 				
 				<row>

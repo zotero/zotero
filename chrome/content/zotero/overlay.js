@@ -413,6 +413,9 @@ var ZoteroPane = new function()
 			case 'toggleFullscreen':
 				ZoteroPane.fullScreen();
 				break;
+			case 'copySelectedItemCitationsToClipboard':
+				ZoteroPane.copySelectedItemsToClipboard(true)
+				break;
 			case 'copySelectedItemsToClipboard':
 				ZoteroPane.copySelectedItemsToClipboard();
 				break;
@@ -1090,7 +1093,7 @@ var ZoteroPane = new function()
 	}
 	
 	
-	function copySelectedItemsToClipboard() {
+	function copySelectedItemsToClipboard(asCitations) {
 		var items = this.getSelectedItems();
 		if (!items.length) {
 			return;
@@ -1112,10 +1115,21 @@ var ZoteroPane = new function()
 		var [mode, format] = Zotero.Prefs.get("export.quickCopy.setting").split('=');
 		
 		if (mode == 'bibliography') {
-			Zotero_File_Interface.copyItemsToClipboard(items, format);
+			if (asCitations) {
+				Zotero_File_Interface.copyCitationToClipboard(items, format);
+			}
+			else {
+				Zotero_File_Interface.copyItemsToClipboard(items, format);
+			}
 		}
 		else if (mode == 'export') {
-			Zotero_File_Interface.exportItemsToClipboard(items, format);
+			// Copy citations doesn't work in export mode
+			if (asCitations) {
+				return;
+			}
+			else {
+				Zotero_File_Interface.exportItemsToClipboard(items, format);
+			}
 		}
 	}
 	

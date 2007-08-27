@@ -39,6 +39,7 @@ pref("extensions.zotero.keys.quicksearch", 'K');
 pref("extensions.zotero.keys.newItem", 'N');
 pref("extensions.zotero.keys.newNote", 'O');
 pref("extensions.zotero.keys.toggleTagSelector", 'T');
+pref("extensions.zotero.keys.copySelectedItemCitationsToClipboard", 'A');
 pref("extensions.zotero.keys.copySelectedItemsToClipboard", 'C');
 
 // Fulltext indexing

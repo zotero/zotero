@@ -64,6 +64,7 @@
 <!ENTITY zotero.preferences.keys.newItem					"Create a new item">
 <!ENTITY zotero.preferences.keys.newNote					"Create a new note">
 <!ENTITY zotero.preferences.keys.toggleTagSelector		"Toggle Tag Selector">
+<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard		"Copy Selected Item Citations to Clipboard">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard		"Copy Selected Items to Clipboard">
 <!ENTITY zotero.preferences.keys.overrideGlobal			"Try to override conflicting shortcuts">
 <!ENTITY zotero.preferences.keys.changesTakeEffect		"Changes take effect in new windows only">
