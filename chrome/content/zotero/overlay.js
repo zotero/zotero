@@ -185,7 +185,7 @@ var ZoteroPane = new function()
 			setTimeout(function () {
 				gBrowser.selectedTab = gBrowser.addTab('http://www.zotero.org/documentation/quick_start_guide');
 			}, 400);
-			Zotero.Prefs.set('extensions.zotero.firstRun', false);
+			Zotero.Prefs.set('firstRun', false);
 		}
 	}
 	
