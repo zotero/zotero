@@ -36,7 +36,7 @@ Zotero.Schema = new function(){
 	var _repositoryTimer;
 	var _remoteUpdateInProgress = false;
 	
-	var _fulltextItemWordsCache = [];
+	var _fulltextItemWordsCache = null;
 	
 	var self = this;
 	
@@ -150,6 +150,10 @@ Zotero.Schema = new function(){
 						insertStatement.execute();
 					}
 					insertStatement.reset();
+					Zotero.DB.commitTransaction();
+					
+					Zotero.DB.beginTransaction();
+					Zotero.DB.query("INSERT INTO fulltextItems SELECT DISTINCT itemID, 1, NULL, NULL, NULL, NULL FROM fulltextItemWords");
 					Zotero.DB.commitTransaction();
 				}
 				catch (e) {
@@ -1164,7 +1168,6 @@ Zotero.Schema = new function(){
 					
 					Zotero.DB.query("DROP TABLE fulltextItems");
 					Zotero.DB.query("CREATE TABLE fulltextItems (\n    itemID INT,\n    version INT,\n    PRIMARY KEY (itemID),\n    FOREIGN KEY (itemID) REFERENCES items(itemID)\n);");
-					Zotero.DB.query("INSERT INTO fulltextItems SELECT DISTINCT itemID, 1 FROM fulltextItemWords");
 				}
 				
 				if (i==36) {
