@@ -182,7 +182,9 @@ var ZoteroPane = new function()
 		// they the DB is initialized erroneously (e.g. while switching data
 		// directory locations)
 		if (Zotero.Schema.dbInitialized && Zotero.Prefs.get('firstRun')) {
-			gBrowser.selectedTab = gBrowser.addTab('http://www.zotero.org/documentation/quick_start_guide');
+			setTimeout(function () {
+				gBrowser.selectedTab = gBrowser.addTab('http://www.zotero.org/documentation/quick_start_guide');
+			}, 400);
 			Zotero.Prefs.set('extensions.zotero.firstRun', false);
 		}
 	}
