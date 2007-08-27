@@ -153,7 +153,7 @@ Zotero.Schema = new function(){
 					Zotero.DB.commitTransaction();
 					
 					Zotero.DB.beginTransaction();
-					Zotero.DB.query("INSERT INTO fulltextItems SELECT DISTINCT itemID, 1 FROM fulltextItemWords");
+					Zotero.DB.query("INSERT INTO fulltextItems SELECT DISTINCT itemID, 1, NULL, NULL, NULL, NULL FROM fulltextItemWords");
 					Zotero.DB.commitTransaction();
 				}
 				catch (e) {
