@@ -109,6 +109,7 @@
 <!ENTITY zotero.bibliography.print.label				"Print">
 
 <!ENTITY zotero.integration.docPrefs.title				"Document Preferences">
+<!ENTITY zotero.integration.addEditCitation.title		"Add/Edit Citation">
 
 <!ENTITY zotero.progress.title							"Progress">
 

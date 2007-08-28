@@ -826,7 +826,7 @@ Zotero.Integration.Session.prototype.getCitationPositions = function(citation, u
 		for(var i=0; i<citation.citationItems.length; i++) {
 			var citationItem = citation.citationItems[i];
 			var newPosition = (!this.citationsByItemID[citationItem.itemID]
-				|| this.citationsByItemID[citationItem.itemID][0] == citation
+					|| this.citationsByItemID[citationItem.itemID][0].properties.index >= citation.properties.index
 				? Zotero.CSL.POSITION_FIRST : Zotero.CSL.POSITION_SUBSEQUENT);
 			
 			// update if desired

@@ -29,7 +29,7 @@
 <dialog
 	id="add-citation-dialog"
 	orient="vertical"
-	title="Add Citation"
+	title="&zotero.integration.addEditCitation.title;"
 	width="600" height="450"
 	onload="Zotero_Citation_Dialog.load();"
 	onunload="doUnload();"
