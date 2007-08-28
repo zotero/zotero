@@ -16,9 +16,14 @@
 
 .rt-text-control
 {
-	width: 16px;
-	margin: 0;
+	margin: 0 4px 0 0;
 	padding: 0;
+}
+
+.rt-text-control .toolbarbutton-text
+{
+	margin: 0 !important;
+	padding: 0 !important;
 }
 
 .rt-text-control[selected="true"] {
