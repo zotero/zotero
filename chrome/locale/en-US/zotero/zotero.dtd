@@ -112,13 +112,22 @@
 
 <!ENTITY zotero.progress.title							"Progress">
 
-<!ENTITY zotero.exportOptions.title					"Export...">
+<!ENTITY zotero.exportOptions.title						"Export...">
 <!ENTITY zotero.exportOptions.format.label				"Format:">
 <!ENTITY zotero.exportOptions.translatorOptions.label	"Translator Options">
+
+<!ENTITY zotero.citation.keepSorted.label				"Keep Sources Sorted">
 
 <!ENTITY zotero.citation.page							"Page">
 <!ENTITY zotero.citation.paragraph						"Paragraph">
 <!ENTITY zotero.citation.line							"Line">
+<!ENTITY zotero.citation.suppressAuthor.label			"Suppress Author">
+<!ENTITY zotero.citation.prefix.label					"Prefix:">
+<!ENTITY zotero.citation.suffix.label					"Suffix:">
+
+<!ENTITY zotero.richText.italic.label					"Italic">
+<!ENTITY zotero.richText.bold.label						"Bold">
+<!ENTITY zotero.richText.underline.label				"Underline">
 
 <!ENTITY zotero.annotate.toolbar.add.label				"Add Annotation">
 <!ENTITY zotero.annotate.toolbar.collapse.label			"Collapse All Annotations">

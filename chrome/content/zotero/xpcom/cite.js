@@ -113,6 +113,22 @@ Zotero.CSL = function(csl) {
 	this.hasBibliography = (this._csl.bibliography.length() ? 1 : 0);
 }
 
+/*
+ * Constants for citation positions
+ */
+Zotero.CSL.POSITION_FIRST = 0;
+Zotero.CSL.POSITION_SUBSEQUENT = 1;
+Zotero.CSL.POSITION_IBID = 2;
+Zotero.CSL.POSITION_IBID_WITH_LOCATOR = 3;
+
+/*
+ * Constants for locator types
+ */
+Zotero.CSL.LOCATOR_PAGES = 0;
+Zotero.CSL.LOCATOR_PARAGRAPH = 1;
+Zotero.CSL.LOCATOR_LINE = 2;
+Zotero.CSL.locatorTypeTerms = ["page", "paragraph", "line"];
+
 Zotero.CSL._dateVariables = {
 	"date":true,
 	"accessDate":true
@@ -127,37 +143,50 @@ Zotero.CSL._namesVariables = {
 /*
  * generate an item set
  */
-Zotero.CSL.prototype.generateItemSet = function(items) {
+Zotero.CSL.prototype.createItemSet = function(items) {
 	return new Zotero.CSL.ItemSet(items, this);
+}
+
+/*
+ * generate a citation object
+ */
+Zotero.CSL.prototype.createCitation = function(citationItems) {
+	return new Zotero.CSL.Citation(citationItems, this);
 }
 
 /*
  * create a citation (in-text or footnote)
  */
-Zotero.CSL.prototype.createCitation = function(itemSet, items, format, position, locators, locatorTypes) {
+Zotero.CSL.prototype.formatCitation = function(citation, format) {
 	var context = this._csl.citation;
 	if(!context) {
-		throw "CSL: createCitation called on style with no citation context";
+		throw "CSL: formatCitation called on style with no citation context";
 	}
-	if(!items.length) {
-		throw "CSL: createCitation called with no items";
+	if(!citation.citationItems.length) {
+		throw "CSL: formatCitation called with empty citation";
 	}
 	
 	var string = new Zotero.CSL.FormattedString(this, format, context.layout.@delimiter.toString());
-	for(var i in items) {
-		if(items[i] == undefined) continue;
+	for(var i=0; i<citation.citationItems.length; i++) {
+		var citationItem = citation.citationItems[i];
+		var citationString = new Zotero.CSL.FormattedString(this, format);
 		
-		if(locators) {
-			var locatorType = locatorTypes[i];
-			var locator = locators[i];
-		} else {
-			var locatorType = false;
-			var locator = false;
+		// suppress author if requested
+		var ignore = citationItem.suppressAuthor ? [{"author":true}, []] : undefined;
+		
+		// add prefix
+		if(citationItem.prefix) {
+			citationString.append(citationItem.prefix+" ");
 		}
 		
-		var citationString = new Zotero.CSL.FormattedString(this, format);
-		this._processElements(items[i], context.layout, citationString,
-			context, position, locator, locatorType);
+		this._processElements(citationItem.item, context.layout, citationString,
+			context, citationItem, ignore);
+		
+		// add suffix
+		if(citationItem.suffix) {
+			citationString.append(" "+citationItem.suffix);
+		}
+		
 		string.concat(citationString);
 	}
 	
@@ -169,7 +198,7 @@ Zotero.CSL.prototype.createCitation = function(itemSet, items, format, position,
 /*
  * create a bibliography
  */
-Zotero.CSL.prototype.createBibliography = function(itemSet, format) {
+Zotero.CSL.prototype.formatBibliography = function(itemSet, format) {
 	var context = this._csl.bibliography;
 	if(!context.length()) {
 		context = this._csl.citation;
@@ -203,7 +232,7 @@ Zotero.CSL.prototype.createBibliography = function(itemSet, format) {
 		
 		var string = new Zotero.CSL.FormattedString(this, format);
 		this._processElements(item, context.layout, string,
-			context, "first");
+			context);
 		if(!string) {
 			continue;
 		}
@@ -290,14 +319,14 @@ Zotero.CSL.prototype._getTerm = function(term, plural, form) {
  * process creator objects; if someone had a creator model that handled
  * non-Western names better than ours, this would be the function to change
  */
-Zotero.CSL.prototype._processNames = function(item, element, formattedString, context, position, variables) {
+Zotero.CSL.prototype._processNames = function(item, element, formattedString, context, citationItem, variables) {
 	var children = element.children();
 	if(!children.length()) return false;
 	var variableSucceeded = false;
 	
 	for(var j=0; j<variables.length; j++) {
 		var success = false;
-		newString = formattedString.clone();
+		var newString = formattedString.clone();
 		
 		if(formattedString.format != "Sort" && variables[j] == "author"
 				&& context.option.(@name == "subsequent-author-substitute").length()
@@ -309,7 +338,7 @@ Zotero.CSL.prototype._processNames = function(item, element, formattedString, co
 			var creators = item.getNames(variables[j]);
 			
 			if(creators && creators.length) {
-				maxCreators = creators.length;
+				var maxCreators = creators.length;
 	
 				for each(var child in children) {
 					if(child.namespace() != Zotero.CSL.Global.ns) continue;
@@ -323,11 +352,14 @@ Zotero.CSL.prototype._processNames = function(item, element, formattedString, co
 							var etAlMin = context.option.(@name == "et-al-min").@value.toString();
 							var etAlUseFirst = context.option.(@name == "et-al-use-first").@value.toString();
 							
-							if(position == "subsequent" && context.option.(@name == "et-al-subsequent-min").length()) {
-								etAlMin = context.option.(@name == "et-al-subsequent-min").@value.toString();
-							}
-							if(position == "subsequent" && context.option.(@name == "et-al-subsequent-use-first").length()) {
-								etAlUseFirst = context.option.(@name == "et-al-subsequent-use-first").@value.toString();
+							if(citationItem && citationItem.position
+									&& citationItem.position >= Zotero.CSL.POSITION_SUBSEQUENT) {
+								if(context.option.(@name == "et-al-subsequent-min").length()) {
+									etAlMin = context.option.(@name == "et-al-subsequent-min").@value.toString();
+								}
+								if(context.option.(@name == "et-al-subsequent-use-first").length()) {
+									etAlUseFirst = context.option.(@name == "et-al-subsequent-use-first").@value.toString();
+								}
 							}
 							
 							if(etAlMin && etAlUseFirst && maxCreators >= parseInt(etAlMin, 10)) {
@@ -452,11 +484,10 @@ Zotero.CSL.prototype._processNames = function(item, element, formattedString, co
  * processes an element from a (pre-processed) item into text
  */
 Zotero.CSL.prototype._processElements = function(item, element, formattedString,
-		context, position, locator, locatorType, ignore, isSingle) {
+		context, citationItem, ignore, isSingle) {
 	if(!ignore) {
-		ignore = new Array();
-		ignore[0] = new Array();		// for variables
-		ignore[1] = new Array();		// for macros
+		ignore = [[], []];
+		// ignore[0] is for variables; ignore[1] is for macros
 	}
 	
 	var dataAppended = false;
@@ -494,7 +525,7 @@ Zotero.CSL.prototype._processElements = function(item, element, formattedString,
 					
 					if(variables[j] == "locator") {
 						// special case for locator
-						var text = locator;
+						var text = citationItem.locator;
 					} else if(variables[j] == "citation-number") {
 						var text = item.getProperty("citation-number");
 					} else {
@@ -519,7 +550,7 @@ Zotero.CSL.prototype._processElements = function(item, element, formattedString,
 				if(!ignore[1][child.@macro.toString()]) {
 					var newString = formattedString.clone(child.@delimiter.toString());
 					var success = this._processElements(item, macro, newString,
-						context, position, locator, locatorType, ignore);
+						context, citationItem, ignore);
 					
 					formattedString.concat(newString, child);
 					dataAppended = true;
@@ -538,15 +569,16 @@ Zotero.CSL.prototype._processElements = function(item, element, formattedString,
 				
 				if(variables[j] == "locator") {
 					// special case for locator
-					var term = locatorType;
-					var value = locator;
+					var locatorType = (citationItem.locatorType ? citationItem.locatorType : 0);
+					var term = Zotero.CSL.locatorTypeTerms[locatorType];
+					var value = citationItem.locator;
 				} else {
 					var term = variables[j];
 					var value = item.getText(variables[j]);
 				}
 				
 				if(term && value) {
-					var isPlural = value.indexOf("-") != -1 || value.indexOf("—") != -1 || value.indexOf(",") != -1;
+					var isPlural = value.indexOf("-") != -1 || value.indexOf("‚Äî") != -1 || value.indexOf(",") != -1;
 					var text = this._getTerm(term, isPlural, child.@form.toString());
 					
 					if(text) {
@@ -565,10 +597,14 @@ Zotero.CSL.prototype._processElements = function(item, element, formattedString,
 			
 			// remove variables that aren't supposed to be there
 			for(var j=0; j<variables.length; j++) {
-				if(ignore[0][variables[j]]) variables.splice(j, 1);
+				if(ignore[0][variables[j]]) {
+					variables.splice(j, 1);
+				}
 			}
+			if(!variables.length) continue;
 			
-			var success = this._processNames(item, child, newString, context, position, variables);
+			var success = this._processNames(item, child, newString, context,
+				citationItem, variables);
 			
 			if(!success && child.substitute.length()) {
 				for each(var newChild in child.substitute.children()) {
@@ -577,9 +613,10 @@ Zotero.CSL.prototype._processElements = function(item, element, formattedString,
 					if(newChild.localName() == "names" && newChild.children.length() == 0) {
 						// apply same rules to substitute names
 						// with no children
-						variable = newChild.@variable.toString();
+						var variable = newChild.@variable.toString();
 						variables = variable.split(" ");
-						success = this._processNames(item, child, newString, context, position, variables);
+						success = this._processNames(item, child, newString,
+							context, citationItem, variables);
 						
 						ignore[0][newChild.@variable.toString()] = true;
 						
@@ -589,8 +626,7 @@ Zotero.CSL.prototype._processElements = function(item, element, formattedString,
 						if(!newChild.@prefix.length()) newChild.@prefix = element.@prefix;
 						
 						success = this._processElements(item, 
-							newChild, newString, context, position, locator,
-							locatorType, ignore, true);
+							newChild, newString, context, citationItem, ignore, true);
 						
 						// ignore if used as substitution
 						if(newChild.@variable.length()) {
@@ -684,7 +720,7 @@ Zotero.CSL.prototype._processElements = function(item, element, formattedString,
 		} else if(name == "group") {
 			var newString = formattedString.clone(child.@delimiter.toString());			
 			var success = this._processElements(item, 
-				child, newString, context, position, locator, locatorType,
+				child, newString, context, citationItem,
 				ignore);
 			
 			// concat only if true data (not text element) was appended
@@ -724,8 +760,16 @@ Zotero.CSL.prototype._processElements = function(item, element, formattedString,
 									var exists = item.getText(variables[j]) !== "";
 								} else if(attribute == "type") {
 									var exists = item.isType(variables[j]);
-								} else {
-									var exists = position == variables[j];
+								} else {	// attribute == "position"
+									if(variables[j] == "first") {
+										var exists = !citationItem.position || citationItem.position == Zotero.CSL.POSITION_FIRST;
+									} else if(variables[j] == "subsequent") {
+										var exists = citationItem.position >= Zotero.CSL.POSITION_SUBSEQUENT;
+									} else if(variables[j] == "ibid") {
+										var exists = citationItem.position >= Zotero.CSL.POSITION_IBID;
+									} else if(variables[j] == "ibid-with-locator") {
+										var exists = citationItem.position == Zotero.CSL.POSITION_IBID_WITH_LOCATOR;
+									}
 								}
 								
 								if(matchAny) {
@@ -746,9 +790,8 @@ Zotero.CSL.prototype._processElements = function(item, element, formattedString,
 				if(truthValue) {
 					// if true, process
 					var newString = formattedString.clone(newChild.@delimiter.toString());			
-					var success = this._processElements(item, 
-						newChild, newString, context, position, locator, locatorType,
-						ignore);
+					var success = this._processElements(item,  newChild,
+						newString, context, citationItem, ignore);
 					
 					formattedString.concat(newString, child);
 					dataAppended = true;
@@ -763,6 +806,73 @@ Zotero.CSL.prototype._processElements = function(item, element, formattedString,
 	}
 	
 	return dataAppended;
+}
+
+/*
+ * Compares two items, in order to sort the reference list
+ * Returns -1 if A comes before B, 1 if B comes before A, or 0 if they are equal
+ */
+Zotero.CSL.prototype._compareItem = function(a, b, context) {
+	var sortA = [];
+	var sortB = [];
+	
+	// author
+	if(context.option.(@name == "sort-algorithm").@value == "author-date") {
+		var sortA = new Zotero.CSL.SortString();
+		this._processElements(a, this._csl.macro.(@name == "author"), sortA);
+		var date = a.getDate("issued");
+		if(date) sortA.append(date.getDateVariable("sort"));
+		
+		var sortB = new Zotero.CSL.SortString();
+		this._processElements(b, this._csl.macro.(@name == "author"), sortB);
+		var date = b.getDate("issued");
+		if(date) sortB.append(date.getDateVariable("sort"));
+		
+		return sortA.compare(sortB);
+	}
+	return 0;
+}
+
+/*
+ * Compares two citations; returns true if they are different, false if they are equal
+ */
+Zotero.CSL.prototype._compareCitations = function(a, b) {
+	if((!a && b) || (a && !b)) {
+		return true;
+	} else if(!a && !b) {
+		return false;
+	}
+	
+	var aString = new Zotero.CSL.FormattedString(this, "Text");
+	this._processElements(a, this._csl.citation.layout, aString,
+		this._csl.citation, "subsequent");
+		
+	var bString = new Zotero.CSL.FormattedString(this, "Text");
+	this._processElements(b, this._csl.citation.layout, bString,
+		this._csl.citation, "subsequent");
+	
+	return !(aString.get() == bString.get());
+}
+
+/*
+ * Compares the names from two items
+ * Returns -1 if A comes before B, 1 if B comes before A, or 0 if they are equal
+ */
+Zotero.CSL.prototype._compareNames = function(a, b) {
+	if(!a && b) {
+		return -1;
+	} else if(!b && a) {
+		return 1;
+	} else if(!b && !a) {
+		return 0;
+	}
+	
+	var aString = new Zotero.CSL.SortString();
+	this._processElements(a, this._csl.macro.(@name == "author"), aString);
+	var bString = new Zotero.CSL.SortString();
+	this._processElements(b, this._csl.macro.(@name == "author"), bString);
+	
+	return aString.compare(bString);
 }
 
 Zotero.CSL.Global = new function() {
@@ -913,6 +1023,82 @@ Zotero.CSL.Global = new function() {
 }
 
 /*
+ * the CitationItem object represents an individual source within a citation.
+ *
+ * PROPERTIES:
+ * prefix
+ * suffix
+ * locatorType
+ * locator
+ * suppressAuthor
+ */
+Zotero.CSL.CitationItem = function(item) {
+	if(item) {
+		this.item = item;
+		this.itemID = item.getID();
+	}
+}
+
+/*
+ * the Citation object represents a citation.
+ */
+Zotero.CSL.Citation = function(citationItems, csl) {
+	if(csl) {
+		this._csl = csl;
+		this._citation = csl._csl.citation;
+		this.sortable = this._citation.option.(@name == "sort-algorithm").length()
+				&& this._citation.option.(@name == "sort-algorithm").@value != "cited";
+	} else {
+		this.sortable = false;
+	}
+	
+	this.citationItems = [];
+	if(citationItems) this.add(citationItems);
+	
+	// reserved for application use
+	this.properties = {};
+}
+
+/*
+ * sorts a citation
+ */
+Zotero.CSL.Citation.prototype.sort = function() {
+	if(this.sortable) {
+		var me = this;
+		this.citationItems = this.citationItems.sort(function(a, b) {
+			return me._csl._compareItem(a.item, b.item, me._citation);
+		});
+	}
+}
+
+/*
+ * adds a citationItem to a citation
+ */
+Zotero.CSL.Citation.prototype.add = function(citationItems) {
+	for(var i=0; i<citationItems.length; i++) {
+		var citationItem = citationItems[i];
+		
+		if(citationItem instanceof Zotero.CSL.Item
+				|| citationItem instanceof Zotero.Item) {
+			this.citationItems.push(new Zotero.CSL.CitationItem(citationItem));
+		} else {
+			this.citationItems.push(citationItem);
+		}
+	}
+}
+
+/*
+ * removes a citationItem from a citation
+ */
+Zotero.CSL.Citation.prototype.remove = function(citationItems) {
+	for each(var citationItem in citationItems){
+		var index = this.citationItems.indexOf(citationItem);
+		if(index == -1) throw "Zotero.CSL.Citation: tried to remove an item not in citation";
+		this.citationItems.splice(index, 1);
+	}
+}
+
+/*
  * This is an item wrapper class for Zotero items. If converting this code to
  * work with another application, this is what needs changing. Potentially, this
  * function could accept an ID or an XML data structure instead of an actual
@@ -920,10 +1106,15 @@ Zotero.CSL.Global = new function() {
  * with "_") are implemented.
  */
 Zotero.CSL.Item = function(item) {
-	if(!(item instanceof Zotero.Item)) {
-		throw "Zotero.CSL.Item called to wrap a non-item";
-	} else {
+	if(item instanceof Zotero.Item) {
 		this.zoteroItem = item;
+	} else if(parseInt(item, 10) == item) {
+		// is an item ID
+		this.zoteroItem = Zotero.Items.get(item);
+	}
+	
+	if(!this.zoteroItem) {
+		throw "Zotero.CSL.Item called to wrap a non-item";
 	}
 	
 	this._dates = {};
@@ -1088,8 +1279,9 @@ Zotero.CSL.Item._fallbackTypeMap = {
 Zotero.CSL.Item.prototype.isType = function(type) {
 	var zoteroType = Zotero.ItemTypes.getName(this.zoteroItem.getType());
 	
-	return Zotero.CSL.Item._optionalTypeMap[zoteroType] == type
-			|| Zotero.CSL.Item._fallbackTypeMap[zoteroType] == type;
+	return (Zotero.CSL.Item._optionalTypeMap[zoteroType]
+		&& Zotero.CSL.Item._optionalTypeMap[zoteroType] == type)
+		|| (Zotero.CSL.Item._fallbackTypeMap[zoteroType] ? Zotero.CSL.Item._fallbackTypeMap[zoteroType] : "article") == type;
 }
 
 /*
@@ -1245,6 +1437,8 @@ Zotero.CSL.ItemSet.prototype.getItemsByIds = function(ids) {
 	for each(var id in ids) {
 		if(this.itemsById[id] != undefined) {
 			items.push(this.itemsById[id]);
+		} else {
+			items.push(false);
 		}
 	}
 	return items;
@@ -1255,6 +1449,8 @@ Zotero.CSL.ItemSet.prototype.getItemsByIds = function(ids) {
  * objects or objects that may be wrapped as CSL.Item objects
  */
 Zotero.CSL.ItemSet.prototype.add = function(items) {
+	var newItems = new Array();
+	
 	for(var i in items) {
 		if(items[i] instanceof Zotero.CSL.Item) {
 			var newItem = items[i];
@@ -1264,7 +1460,10 @@ Zotero.CSL.ItemSet.prototype.add = function(items) {
 		
 		this.itemsById[newItem.getID()] = newItem;
 		this.items.push(newItem);
+		newItems.push(newItem);
 	}
+	
+	return newItems;
 }
 
 /*
@@ -1273,7 +1472,7 @@ Zotero.CSL.ItemSet.prototype.add = function(items) {
  */
 Zotero.CSL.ItemSet.prototype.remove = function(items) {
 	for(var i in items) {
-		if(!item) continue;
+		if(!items[i]) continue;
 		if(items[i] instanceof Zotero.CSL.Item) {
 			var item = items[i];
 		} else {
@@ -1295,16 +1494,16 @@ Zotero.CSL.ItemSet.prototype.resort = function() {
 		var me = this;
 		
 		this.items = this.items.sort(function(a, b) {
-			return me._compareItem(a, b);
+			return me.csl._compareItem(a, b, me.bibliography);
 		});
 	}
 	
-	changedCitations = new Array();
+	var changedCitations = new Array();
 	
 	// first loop through to collect disambiguation data by item, so we can
 	// see if any items have changed
 	if(enabledDisambiguationOptions.length) {
-		oldDisambiguate = new Array();
+		var oldDisambiguate = new Array();
 		for(var i in enabledDisambiguationOptions) {
 			oldDisambiguate[i] = new Array();
 			for(var j in this.items) {
@@ -1317,9 +1516,9 @@ Zotero.CSL.ItemSet.prototype.resort = function() {
 	
 	// loop through once to determine where items equal the previous item
 	if(enabledDisambiguationOptions.length) {
-		citationsEqual = [];
-		for(var i in this.items) {
-			citationsEqual[i] = this._compareCitations(this.items[i-1], this.items[i]);
+		var citationsEqual = [];
+		for(var i=1; i<this.items.length; i++) {
+			citationsEqual[i] = me.csl._compareCitations(this.items[i-1], this.items[i]);
 		}
 	}
 	
@@ -1338,7 +1537,7 @@ Zotero.CSL.ItemSet.prototype.resort = function() {
 		var disambiguated = false;
 		
 		// true only if names are an exact match
-		var exactMatch = this._compareNames(item, lastItem);
+		var exactMatch = me.csl._compareNames(item, lastItem);
 		
 		if(enabledDisambiguationOptions.length && i != 0 && !citationsEqual[i]
 				&& year == lastYear) {
@@ -1412,7 +1611,7 @@ Zotero.CSL.ItemSet.prototype.resort = function() {
 							}
 							
 							// add to names before as well
-							for(var k=i-2; this._compareNames(lastItem, this.items[k]) == 0; k--) {
+							for(var k=i-2; me.csl._compareNames(lastItem, this.items[k]) == 0; k--) {
 								this._copyDisambiguation(lastItem, this.items[k]);
 							}
 							
@@ -1498,73 +1697,6 @@ Zotero.CSL.ItemSet.prototype._copyDisambiguation = function(fromItem, toItem) {
 			toItem.setProperty(option, value);
 		}
 	}
-}
-
-/*
- * Compares two items, in order to sort the reference list
- * Returns -1 if A comes before B, 1 if B comes before A, or 0 if they are equal
- */
-Zotero.CSL.ItemSet.prototype._compareItem = function(a, b) {
-	var sortA = [];
-	var sortB = [];
-	
-	// author
-	if(this.bibliography.option.(@name == "sort-algorithm").@value == "author-date") {
-		var sortA = new Zotero.CSL.SortString();
-		this.csl._processElements(a, this.csl._csl.macro.(@name == "author"), sortA);
-		var date = a.getDate("issued");
-		if(date) sortA.append(date.getDateVariable("sort"));
-		
-		var sortB = new Zotero.CSL.SortString();
-		this.csl._processElements(b, this.csl._csl.macro.(@name == "author"), sortB);
-		var date = b.getDate("issued");
-		if(date) sortB.append(date.getDateVariable("sort"));
-		
-		return sortA.compare(sortB);
-	}
-	return 0;
-}
-
-/*
- * Compares two citations; returns true if they are different, false if they are equal
- */
-Zotero.CSL.ItemSet.prototype._compareCitations = function(a, b) {
-	if((!a && b) || (a && !b)) {
-		return true;
-	} else if(!a && !b) {
-		return false;
-	}
-	
-	var aString = new Zotero.CSL.FormattedString(this, "Text");
-	this.csl._processElements(a, this.citation.layout, aString,
-		this.citation, "subsequent");
-		
-	var bString = new Zotero.CSL.FormattedString(this, "Text");
-	this.csl._processElements(b, this.citation.layout, bString,
-		this.citation, "subsequent");
-	
-	return !(aString.get() == bString.get());
-}
-
-/*
- * Compares the names from two items
- * Returns -1 if A comes before B, 1 if B comes before A, or 0 if they are equal
- */
-Zotero.CSL.ItemSet.prototype._compareNames = function(a, b) {
-	if(!a && b) {
-		return -1;
-	} else if(!b && a) {
-		return 1;
-	} else if(!b && !a) {
-		return 0;
-	}
-	
-	var aString = new Zotero.CSL.SortString();
-	this.csl._processElements(a, this.csl._csl.macro.(@name == "author"), aString);
-	var bString = new Zotero.CSL.SortString();
-	this.csl._processElements(b, this.csl._csl.macro.(@name == "author"), bString);
-	
-	return aString.compare(bString);
 }
 
 Zotero.CSL.FormattedString = function(CSL, format, delimiter) {
@@ -1766,7 +1898,7 @@ Zotero.CSL.FormattedString.prototype.append = function(string, element, dontDeli
 	if(element && element.@suffix.length()) {
 		suffix = element.@suffix.toString(); // copy so as to leave original intact
 		
-		if(suffix[0] == "." &&
+		if(suffix.length && suffix[0] == "." &&
 		   Zotero.CSL.FormattedString._punctuation.indexOf(string[string.length-1]) != -1) {
 		   // if string already ends in punctuation, preserve the existing stuff
 		   // and don't add a period

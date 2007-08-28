@@ -1634,3 +1634,145 @@ Zotero.WebProgressFinishListener = function(onFinish) {
 	this.onSecurityChange = function(wp, req, stateFlags, status) {}
 	this.onStatusChange = function(wp, req, status, msg) {}
 }
+
+/*
+ * Saves or loads JSON objects. Based on public domain code from
+ * http://www.json.org/json.js
+ */
+Zotero.JSON = new function() {
+	this.serialize = serialize;
+	this.unserialize = unserialize;
+	
+	// m is a table of character substitutions.
+	var m = {
+		'\b': '\\b',
+		'\t': '\\t',
+		'\n': '\\n',
+		'\f': '\\f',
+		'\r': '\\r',
+		'"' : '\\"',
+		'\\': '\\\\'
+	};
+
+	// Format integers to have at least two digits.
+	function f(n) {
+		return n < 10 ? '0' + n : n;
+	}
+	
+	function replaceFunction(a) {
+		var c = m[a];
+		if (c) {
+			return c;
+		}
+		c = a.charCodeAt();
+		return '\\u00' +
+			Math.floor(c / 16).toString(16) +
+			(c % 16).toString(16);
+	}
+	
+	function serialize(arg) {
+		if(arg === null) {
+			return "null";
+		} else if(arg instanceof Array) {
+			var a = [],	 // The array holding the partial texts.
+				i,		  // Loop counter.
+				l = arg.length,
+				v;		  // The value to be stringified.
+	
+	
+			// For each value in arg array...
+	
+			for (i = 0; i < l; i += 1) {
+				var out = serialize(arg[i]);
+				if(out !== undefined) {
+					a.push(out);
+				}
+			}
+	
+			// Join all of the member texts together and wrap them in brackets.
+	
+			return '[' + a.join(',') + ']';
+		} else if(typeof(arg) == "boolean") {
+			return String(arg);
+		} else if(arg instanceof Date) {
+			// Eventually, this method will be based on the date.toISOString method.
+	
+			return '"' + arg.getUTCFullYear() + '-' +
+					f(arg.getUTCMonth() + 1) + '-' +
+					f(arg.getUTCDate()) + 'T' +
+					f(arg.getUTCHours()) + ':' +
+					f(arg.getUTCMinutes()) + ':' +
+					f(arg.getUTCSeconds()) + 'Z"';
+		} else if(typeof(arg) == "number") {
+			// JSON numbers must be finite. Encode non-finite numbers as null.
+
+			return isFinite(arg) ? String(arg) : 'null';
+		} else if(typeof(arg) == "string") {
+			if (/["\\\x00-\x1f]/.test(arg)) {
+				return '"' + arg.replace(/[\x00-\x1f\\"]/g, replaceFunction) + '"';
+			}
+			return '"' + arg + '"';
+		} else if(arg instanceof Object) {
+			var a = [],	 // The array holding the partial texts.
+				k,		  // The current key.
+				v;		  // The current value.
+	
+			// Iterate through all of the keys in the object, ignoring the proto chain
+			// and keys that are not strings.
+	
+			for (k in arg) {
+				if (typeof k === 'string' &&
+						Object.prototype.hasOwnProperty.apply(arg, [k])) {
+					var out = serialize(arg[k]);
+					if(out !== undefined) {
+						a.push(serialize(k) + ':' + out);
+					}
+				}
+			}
+			
+			// Join all of the member texts together and wrap them in braces.
+			
+			return '{' + a.join(',') + '}';
+		}
+		
+		return undefined;
+	}
+
+
+	function unserialize(arg) {
+		var j;
+
+		// Parsing happens in three stages. In the first stage, we run the text against
+		// a regular expression which looks for non-JSON characters. We are especially
+		// concerned with '()' and 'new' because they can cause invocation, and '='
+		// because it can cause mutation. But just to be safe, we will reject all
+		// unexpected characters.
+		
+		// We split the first stage into 3 regexp operations in order to work around
+		// crippling deficiencies in Safari's regexp engine. First we replace all
+		// backslash pairs with '@' (a non-JSON character). Second we delete all of
+		// the string literals. Third, we look to see if only JSON characters
+		// remain. If so, then the text is safe for eval.
+
+		if (/^[,:{}\[\]0-9.\-+Eaeflnr-u \n\r\t]*$/.test(arg.
+				replace(/\\./g, '@').
+				replace(/"[^"\\\n\r]*"/g, ''))) {
+
+			// In the second stage we use the eval function to compile the text into a
+			// JavaScript structure. The '{' operator is subject to a syntactic ambiguity
+			// in JavaScript: it can begin a block or an object literal. We wrap the text
+			// in parens to eliminate the ambiguity.
+
+			j = eval('(' + arg + ')');
+			
+			// In the optional third stage, we recursively walk the new structure, passing
+			// each name/value pair to a filter function for possible transformation.
+
+			return j;
+		}
+
+		// If the text is not JSON parseable, then a SyntaxError is thrown.
+
+		throw new SyntaxError('parseJSON');
+	}
+}

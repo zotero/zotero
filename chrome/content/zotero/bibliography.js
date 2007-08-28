@@ -91,9 +91,10 @@ var Zotero_File_Interface_Bibliography = new function() {
 		// ONLY FOR integrationDocPrefs.xul: update status of displayAs, set
 		// bookmarks text
 		if(document.getElementById("displayAs")) {
-			if(_io.useEndnotes == 1) document.getElementById("displayAs").selectedIndex = 1;
-			if(_io.useBookmarks == 1) document.getElementById("formatUsing").selectedIndex = 1;
+			if(_io.useEndnotes && _io.useEndnotes == 1) document.getElementById("displayAs").selectedIndex = 1;
+			styleChanged();
 			
+			if(_io.useBookmarks && _io.useBookmarks == 1) document.getElementById("formatUsing").selectedIndex = 1;			
 			if(_io.openOffice) {
 				var formatOption = "referenceMarks";
 			} else {
@@ -102,15 +103,13 @@ var Zotero_File_Interface_Bibliography = new function() {
 			document.getElementById("fields").label = Zotero.getString("integration."+formatOption+".label");
 			document.getElementById("fields-caption").textContent = Zotero.getString("integration."+formatOption+".caption");
 			
-			styleChanged();
+			// add border on Windows
+			if(Zotero.isWin) {
+				document.getElementById("zotero-bibliography-container").style.border = "1px solid black";
+			}
 		}
-		
-		// FOR ALL: move to center of screen
 		window.sizeToContent();
-		window.moveTo(
-			(self.screen.width-window.innerWidth)/2,
-			(self.screen.height-window.innerHeight)/2
-		);
+		window.centerWindowOnScreen();
 	}
 	
 	/*

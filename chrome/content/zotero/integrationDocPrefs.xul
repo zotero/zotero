@@ -3,16 +3,21 @@
 <?xml-stylesheet href="chrome://browser/skin/preferences/preferences.css"?>
 <?xml-stylesheet href="chrome://zotero/skin/bibliography.css"?>
 <!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
-<dialog xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-	title="&zotero.integration.docPrefs.title;" buttons="accept"
-	ondialogaccept="Zotero_File_Interface_Bibliography.acceptSelection()"
-	id="zotero-bibliography"
-	onload="Zotero_File_Interface_Bibliography.init()">
 
+<dialog
+	id="add-citation-dialog"
+	orient="vertical"
+	buttons="accept"
+	title="&zotero.integration.docPrefs.title;"
+	onload="Zotero_File_Interface_Bibliography.init();"
+	ondialogaccept="Zotero_File_Interface_Bibliography.acceptSelection();"
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	style="padding: 0">
+	
 	<script src="include.js"/>
 	<script src="bibliography.js"/>
 
-	<vbox id="zotero-bibliography-container">
+	<vbox id="zotero-bibliography-container" style="padding: 0.5em">
 		<groupbox>
 			<caption label="&zotero.bibliography.style.label;"/>
 			<listbox id="style-listbox" oncommand="Zotero_File_Interface_Bibliography.styleChanged()"/>

@@ -319,10 +319,10 @@ var Zotero_File_Interface = new function() {
 		var clipboardService = Components.classes["@mozilla.org/widget/clipboard;1"].
 							   getService(Components.interfaces.nsIClipboard);
 		var csl = Zotero.Cite.getStyle(style);
-		var itemSet = csl.generateItemSet(items); 
+		var itemSet = csl.createItemSet(items); 
 		
 		// add HTML
-		var bibliography = csl.createBibliography(itemSet, "HTML");
+		var bibliography = csl.formatBibliography(itemSet, "HTML");
 		var str = Components.classes["@mozilla.org/supports-string;1"].
 				  createInstance(Components.interfaces.nsISupportsString);
 		str.data = bibliography;
@@ -330,7 +330,7 @@ var Zotero_File_Interface = new function() {
 		transferable.setTransferData("text/html", str, bibliography.length*2);
 		
 		// add text
-		var bibliography = csl.createBibliography(itemSet, "Text");
+		var bibliography = csl.formatBibliography(itemSet, "Text");
 		var str = Components.classes["@mozilla.org/supports-string;1"].
 				  createInstance(Components.interfaces.nsISupportsString);
 		str.data = bibliography;
@@ -354,14 +354,15 @@ var Zotero_File_Interface = new function() {
 							   getService(Components.interfaces.nsIClipboard);
 		
 		var csl = Zotero.Cite.getStyle(style);
-		var itemSet = csl.generateItemSet(items);
+		var itemSet = csl.createItemSet(items);
 		var itemIDs = [];
 		for (var i=0; i<items.length; i++) {
 			itemIDs.push(items[i].getID());
 		}
+		var citation = csl.createCitation(itemSet.getItemsByIds(itemIDs));
 		
 		// add HTML
-		var bibliography = csl.createCitation(itemSet, itemSet.getItemsByIds(itemIDs), "HTML", 1, null, null);
+		var bibliography = csl.formatCitation(citation, "HTML");
 		var str = Components.classes["@mozilla.org/supports-string;1"].
 				  createInstance(Components.interfaces.nsISupportsString);
 		str.data = bibliography;
@@ -369,7 +370,7 @@ var Zotero_File_Interface = new function() {
 		transferable.setTransferData("text/html", str, bibliography.length*2);
 		
 		// add text
-		var bibliography = csl.createCitation(itemSet, itemSet.getItemsByIds(itemIDs), "Text", 1, null, null);
+		var bibliography = csl.formatCitation(citation, "Text");
 		var str = Components.classes["@mozilla.org/supports-string;1"].
 				  createInstance(Components.interfaces.nsISupportsString);
 		str.data = bibliography;
@@ -416,8 +417,8 @@ var Zotero_File_Interface = new function() {
 			}
 			else {
 				var csl = Zotero.Cite.getStyle(io.style);
-				var itemSet = csl.generateItemSet(items); 
-				var bibliography = csl.createBibliography(itemSet, format);
+				var itemSet = csl.createItemSet(items); 
+				var bibliography = csl.formatBibliography(itemSet, format);
 			}
 		} catch(e) {
 			window.alert(Zotero.getString("fileInterface.bibliographyGenerationError"));
@@ -428,6 +429,7 @@ var Zotero_File_Interface = new function() {
 			// printable bibliography, using a hidden browser
 			var browser = Zotero.Browser.createHiddenBrowser(window);
 			browser.contentDocument.write(bibliography);
+			browser.contentDocument.close();
 			
 			// this is kinda nasty, but we have to temporarily modify the user's
 			// settings to eliminate the header and footer. the other way to do

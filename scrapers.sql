@@ -1,4 +1,4 @@
--- 258
+-- 259
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-08-27 05:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-08-28 16:45:48'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -16061,7 +16061,7 @@ function doExport() {
 	}
 }');
 
-REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '2007-08-14 17:41:10', 'American Psychological Association',
+REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '2007-08-28 16:45:48', 'American Psychological Association',
 '<style xmlns="http://purl.org/net/xbiblio/csl" class="in-text" xml:lang="en">
   <info>
     <title>American Psychological Association</title>
@@ -16141,6 +16141,7 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '2007-
     </group>
   </macro>
   <citation>
+    <option name="sort-algorithm" value="author-date"/>
     <option name="et-al-min" value="6"/>
     <option name="et-al-use-first" value="6"/>
     <option name="et-al-subsequent-min" value="6"/>
@@ -16149,12 +16150,16 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '2007-
     <option name="disambiguate-add-names" value="true"/>
     <option name="disambiguate-add-givenname" value="true"/>
     <layout prefix="(" suffix=")" delimiter="; ">
-      <text macro="author-short"/>
-      <date variable="issued" prefix=", ">
-        <date-part name="year"/>
-      </date>
-      <label variable="locator" prefix=", " suffix="." form="short"/>
-      <text variable="locator" prefix=" "/>
+      <group delimiter=", ">
+        <text macro="author-short"/>
+        <date variable="issued">
+          <date-part name="year"/>
+        </date>
+        <group>
+          <label variable="locator" suffix="." form="short"/>
+          <text variable="locator" prefix=" "/>
+        </group>
+      </group>
     </layout>
   </citation>
   <bibliography>
@@ -16214,7 +16219,7 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '2007-
   </bibliography>
 </style>');
 
-REPLACE INTO csl VALUES('http://www.zotero.org/namespaces/CSL/chicago-author-date.csl', '2007-04-25 23:40:00', 'Chicago Manual of Style (Author-Date)',
+REPLACE INTO csl VALUES('http://www.zotero.org/namespaces/CSL/chicago-author-date.csl', '2007-08-28 16:45:48', 'Chicago Manual of Style (Author-Date)',
 '<?xml version="1.0" encoding="UTF-8"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="author-date" xml:lang="en">
 	<info>
@@ -16270,11 +16275,15 @@ REPLACE INTO csl VALUES('http://www.zotero.org/namespaces/CSL/chicago-author-dat
 		<et-al min-authors="3" use-first="1"/>
 		<layout>
 			<item>
-				<author form="short">
-					<name and="text" delimiter=", "/>
-				</author>
-				<date prefix=" "/>
-				<locator prefix=", "/>
+				<group delimiter=" ">
+					<author form="short">
+						<name and="text" delimiter=", "/>
+					</author>
+					<group>
+						<date/>
+						<locator prefix=", "/>
+					</group>
+				</group>
 			</item>
 		</layout>
 	</citation>
@@ -16387,7 +16396,7 @@ REPLACE INTO csl VALUES('http://www.zotero.org/namespaces/CSL/chicago-author-dat
 	</bibliography>
 </style>');
 
-REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/chicago-note.csl', '2007-03-23 19:25:00', 'Chicago Manual of Style (Note without Bibliography)',
+REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/chicago-note.csl', '2007-08-28 16:45:48', 'Chicago Manual of Style (Note without Reference List)',
 '<?xml version="1.0" encoding="UTF-8"?>
 <?oxygen RNGSchema="../schema/trunk/csl.rnc" type="compact"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="note" xml:lang="en">
@@ -16543,7 +16552,7 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/chicago-note.csl
   </citation>
 </style>');
 
-REPLACE INTO csl VALUES('http://www.zotero.org/namespaces/CSL/chicago-note-bibliography.csl', '2007-06-13 01:00:00', 'Chicago Manual of Style (Note with Bibliography)',
+REPLACE INTO csl VALUES('http://www.zotero.org/namespaces/CSL/chicago-note-bibliography.csl', '2007-08-28 16:45:48', 'Chicago Manual of Style (Note with Reference List)',
 '<?xml version="1.0" encoding="UTF-8"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="note" xml:lang="en">
 	<info>
@@ -16601,30 +16610,34 @@ REPLACE INTO csl VALUES('http://www.zotero.org/namespaces/CSL/chicago-note-bibli
 		<et-al min-authors="3" use-first="1"/>
 		<layout>
 			<item suffix=".">
-				<author form="short">
-					<name and="text" sort-separator=", " delimiter=", "/>
-				</author>
-				<conditional>
-					<if type="book">
-						<titles prefix=", " font-style="italic" form="short"/>
-					</if><else>
-						<titles prefix=", " quotes="true" form="short"/>
-					</else>
-				</conditional>
-				<pages prefix=", "/>
+				<group delimiter=", ">
+					<author form="short">
+						<name and="text" sort-separator=", " delimiter=", "/>
+					</author>
+					<conditional>
+						<if type="book">
+							<titles font-style="italic" form="short"/>
+						</if><else>
+							<titles quotes="true" form="short"/>
+						</else>
+					</conditional>
+					<pages/>
+				</group>
 			</item>
 			<item suffix="." position="subsequent" ibid="true">
-				<author form="short">
-					<name and="text" sort-separator=", " delimiter=", "/>
-				</author>
-				<conditional>
-					<if type="book">
-						<titles prefix=", " font-style="italic" form="short"/>
-					</if><else>
-						<titles prefix=", " quotes="true" form="short"/>
-					</else>
-				</conditional>
-				<pages prefix=", "/>
+				<group delimiter=", ">
+					<author form="short">
+						<name and="text" sort-separator=", " delimiter=", "/>
+					</author>
+					<conditional>
+						<if type="book">
+							<titles font-style="italic" form="short"/>
+						</if><else>
+							<titles quotes="true" form="short"/>
+						</else>
+					</conditional>
+					<pages/>
+				</group>
 			</item>
 		</layout>
 	</citation>
@@ -16730,7 +16743,7 @@ REPLACE INTO csl VALUES('http://www.zotero.org/namespaces/CSL/chicago-note-bibli
 	</bibliography>
 </style>');
 
-REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/mla.csl', '2007-03-23 19:25:00', 'Modern Language Association',
+REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/mla.csl', '2007-08-28 16:45:48', 'Modern Language Association',
 '<?xml version="1.0" encoding="UTF-8"?>
 <?oxygen RNGSchema="../schema/trunk/csl.rnc" type="compact"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="author" xml:lang="en">
@@ -16788,10 +16801,12 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/mla.csl', '2007-
     <et-al min-authors="6" use-first="1" position="subsequent"/>
     <layout>
       <item>
-        <author form="short">
-          <name and="text" sort-separator=", " delimiter=", "/>
-        </author>
-        <locator prefix=" "/>
+        <group delimiter=" ">
+          <author form="short">
+            <name and="text" sort-separator=", " delimiter=", "/>
+          </author>
+          <locator prefix=" "/>
+        </group>
       </item>
     </layout>
   </citation>
@@ -16995,7 +17010,7 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/mhra_note_withou
     </citation>
 </style>');
 
-REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/asa.csl', '2007-06-18 18:15:00', 'American Sociological Association',
+REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/asa.csl', '2007-08-28 16:45:48', 'American Sociological Association',
 '<?xml version="1.0" encoding="UTF-8"?>
 <?oxygen RNGSchema="../csl.rnc" type="compact"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="author-date">
@@ -17057,9 +17072,13 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/asa.csl', '2007-
         <et-al min-authors="3" use-first="1" position="subsequent"/>
         <layout>
             <item>
-                <author suffix=" " form="short"></author>
-                <date suffix=":"></date>
-                <locator></locator>
+            	<group delimiter=" ">
+					<author form="short"></author>
+					<group delimiter=":">
+						<date></date>
+						<locator></locator>
+					</group>
+				</group>
             </item>
         </layout>
     </citation>

@@ -1,0 +1,35 @@
+.rt-bold {
+	list-style-image: url('chrome://zotero/skin/text_bold.png');
+}
+
+.rt-italic {
+	list-style-image: url('chrome://zotero/skin/text_italic.png');
+}
+
+.rt-underline {
+	list-style-image: url('chrome://zotero/skin/text_underline.png');
+}
+
+.rt-toolbar {
+	padding: 2px;
+}
+
+.rt-text-control
+{
+	width: 16px;
+	margin: 0;
+	padding: 0;
+}
+
+.rt-text-control[selected="true"] {
+	background-color: #666666;
+	-moz-border-radius: 6px;
+}
+
+.rt-box {
+	border: 1px solid black;
+}
+
+.rt-view {
+	min-height: 2em;
+}

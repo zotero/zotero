@@ -42,10 +42,7 @@ function doLoad()
 	
 	// move to center of screen
 	window.sizeToContent();
-	window.moveTo(
-		(self.screen.width-window.innerWidth)/2,
-		(self.screen.height-window.innerHeight)/2
-	);
+	window.centerWindowOnScreen();
 }
 
 function doUnload()
@@ -85,6 +82,15 @@ function onSearch()
 function onItemSelected()
 {
 	
+}
+
+function selectItem(itemID) {
+	var selected = itemsView.selectItem(itemID);
+	if (!selected) {
+		collectionsView.selection.select(0);
+		var selected = itemsView.selectItem(itemID);
+	}
+	return selected;
 }
 
 function getSelectedItems(byID) {

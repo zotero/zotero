@@ -55,4 +55,8 @@ pref("extensions.zotero.export.bibliographySettings", 'save-as-rtf');
 
 pref("extensions.zotero.export.quickCopy.setting", 'bibliography=http://purl.org/net/xbiblio/csl/styles/chicago-note.csl');
 
+// Integration settings
+pref("extensions.zotero.integration.autoRegenerate", -1);	// -1 = ask; 0 = no; 1 = yes
+
+// Annotation settings
 pref("extensions.zotero.annotations.warnOnClose", true);

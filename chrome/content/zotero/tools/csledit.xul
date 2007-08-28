@@ -93,25 +93,20 @@
 					csl = new Zotero.CSL(str);
 				}
 				
-				var itemSet = csl.generateItemSet(items);
-				var itemIDs = [];
-				for (var i=0; i<items.length; i++) {
-					itemIDs.push(items[i].getID());
-				}
+				var itemSet = csl.createItemSet(items);
+				
+				// Generate multiple citations
+				var citation = csl.createCitation(itemSet.items);
+				var multCitations = csl.formatCitation(citation, "HTML");
 				
 				// Generate single citations
 				var citations = '';
-				for (var i=0; i<itemIDs.length; i++) {
-					var itemID = [];
-					itemID[0] = itemIDs[i];
-					citations += csl.createCitation(itemSet, itemSet.getItemsByIds(itemID), "HTML", 1, null, null) + '<br />';
+				for (var i=0; i<citation.citationItems.length; i++) {
+					citations += csl.formatCitation(csl.createCitation([citation.citationItems[i]]), "HTML") + '<br />';
 				}
 				
-				// Generate multiple citations
-				var multCitations = csl.createCitation(itemSet, itemSet.getItemsByIds(itemIDs), "HTML", 1, null, null);
-				
 				// Generate bibliography
-				var bibliography = csl.createBibliography(itemSet, "HTML");
+				var bibliography = csl.formatBibliography(itemSet, "HTML");
 				iframe.contentDocument.documentElement.innerHTML =
 					citations + '<hr/>' + multCitations + '<hr/>' + bibliography;
 			}

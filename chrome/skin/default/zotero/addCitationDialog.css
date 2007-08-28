@@ -1,6 +1,7 @@
 #citation-add {
 	list-style-image: url('chrome://zotero/skin/citation-add.png');
 }
+
 #citation-add[disabled="true"] {
 	list-style-image: url('chrome://zotero/skin/citation-add-gray.png');
 }
@@ -8,10 +9,24 @@
 #citation-delete {
 	list-style-image: url('chrome://zotero/skin/citation-delete.png');
 }
+
 #citation-delete[disabled="true"] {
 	list-style-image: url('chrome://zotero/skin/citation-delete-gray.png');
 }
 
+#prefix, #suffix {
+	width: 200px;
+}
+
+#tree-locator {
+	width: 60px;
+}
+
 #item-locator {
 	max-width:100px;
+}
+
+#editor {
+	margin-top: 10px;
+	max-height: 75px;
 }

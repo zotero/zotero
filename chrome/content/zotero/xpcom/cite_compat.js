@@ -271,31 +271,48 @@ Zotero.CSL.Compat.Global = new function() {
 	}
 }
 
-/*
- * preprocess items, separating authors, editors, and translators arrays into
- * separate properties
- *
- * must be called prior to generating citations or bibliography with a new set
- * of items
- */
-Zotero.CSL.Compat.prototype.generateItemSet = function(items) {
+Zotero.CSL.Compat.prototype.createItemSet = function(items) {
 	return new Zotero.CSL.Compat.ItemSet(items, this);
+}
+
+Zotero.CSL.Compat.prototype.createCitation = function(citationItems) {
+	return new Zotero.CSL.Citation(citationItems);
 }
 
 Zotero.CSL.Compat.ItemSet = function(items, csl) {
 	this.items = [];
 	this.csl = csl;
-	this.add(items);
+	if(items) this.add(items);
 	this.resort();
 }
 
 Zotero.CSL.Compat.ItemSet.prototype.getItemsByIds = function(ids) {
-	return Zotero.Items.get(ids);
+	var returnList = [];
+	for each(var id in ids) {
+		var item = Zotero.Items.get(id);
+		if(this.items.indexOf(item) !== -1) {
+			returnList.push(item);
+		} else {
+			returnList.push(false);
+		}
+	}
+	return returnList;
 }
 
 Zotero.CSL.Compat.ItemSet.prototype.add = function(items) {
-	this.items = this.items.concat(items);
-	Zotero.debug(this.items);
+	var returnList = [];
+	for each(var item in items) {
+		if(!(item instanceof Zotero.Item)) {
+			item = Zotero.Items.get(item);
+		}
+		if(!item) {
+			throw "Zotero.CSL.Compat.ItemSet.add called on a non-item"; 
+		}
+		this.items.push(item);
+		returnList.push(item);
+		item.zoteroItem = item;
+	}
+	return returnList;
 }
 
 Zotero.CSL.Compat.ItemSet.prototype.remove = function(items) {
@@ -312,6 +329,7 @@ Zotero.CSL.Compat.ItemSet.prototype.remove = function(items) {
 
 Zotero.CSL.Compat.ItemSet.prototype.resort = function() {
 	var oldDisambiguation = {};
+	if(!this.items) return;
 	
 	// get data necessary to generate citations before sorting
 	for(var i in this.items) {
@@ -418,31 +436,27 @@ Zotero.CSL.Compat.ItemSet.prototype.resort = function() {
 		if(item._csl.date && item._csl.date.disambiguation) {
 			var oldDisambig = oldDisambiguation[item.getID()];
 			if(!oldDisambig || oldDisambig != item._csl.date.disambiguation) {
-				returnItems += item;
+				returnItems.push(item);
 			}
 		}
 	}
 	return returnItems;
 }
 
-Zotero.CSL.Compat._locatorTerms = {
-	p:"page",
-	g:"paragraph",
-	l:"line"
-};
-
-Zotero.CSL.Compat.prototype.createCitation = function(itemSet, items, format, position, locators, locatorTypes) {
+Zotero.CSL.Compat.prototype.formatCitation = function(citation, format) {
 	var string = new Zotero.CSL.Compat.FormattedString(this, format);
-	if(position == "ibid" || position == "ibid-pages") {	// indicates ibid
+	if(this.ibid == true && citation.citationItems.length == 1 &&
+			citation.citationItems[0].position == Zotero.CSL.POSITION_IBID
+			|| citation.citationItems[0].position == Zotero.CSL.POSITION_IBID_WITH_LOCATOR) {	// indicates ibid
 		var term = this._getTerm("ibid");
 		string.append(term[0].toUpperCase()+term.substr(1));
 		
-		if(position == "ibid-pages") {
+		if(citation.citationItems[0].position == Zotero.CSL.POSITION_IBID_WITH_LOCATOR) {
 			// locator data
-			var locator = locators[0];
+			var locator = citation.citationItems[0].locator;
 			
 			if(locator) {
-				var locatorType = locatorTypes[0];
+				var locatorType = Zotero.CSL.locatorTypeTerms[citation.citationItems[0].locatorType];
 				
 				// search for elements with the same serialization
 				var element = this._getFieldDefaults("locator");
@@ -460,21 +474,20 @@ Zotero.CSL.Compat.prototype.createCitation = function(itemSet, items, format, po
 			}
 		}
 	} else {							// indicates primary or subsequent
-		var lasti = items.length-1;
-		for(var i in items) {
-			var locatorType = false;
-			var locator = false;
-			if(locators) {
-				locatorType = locatorTypes[i];
-				locator = locators[i];
-			}
+		var lasti = citation.citationItems.length-1;
+		for(var i in citation.citationItems) {
+			var citationItem = citation.citationItems[i];
+			if(!citationItem.locatorType) citationItem.locatorType = 0;
 			
-			var item = items[i];
+			var position = (citationItem.position >= Zotero.CSL.POSITION_SUBSEQUENT ? "subsequent" : "first");
+			var ignore = (citationItem.suppressAuthor ? {"author":true} : undefined);
 			
-			var citationString = this._getCitation(item,
-				position,
-				locatorType, locator, format, this._cit);
+			if(citationItem.prefix) string.append(citationItem.prefix+" ");
+			var citationString = this._getCitation(citationItem.item,
+				position, Zotero.CSL.locatorTypeTerms[citationItem.locatorType],
+				citationItem.locator, format, this._cit, ignore);
 			string.concat(citationString);
+			if(citationItem.suffix) string.append(citationItem.suffix+" ");
 			
 			if(this._cit.format && this._cit.format.delimiter && i != lasti) {
 				// add delimiter if one exists, and this isn't the last element
@@ -501,7 +514,7 @@ Zotero.CSL.Compat.prototype.createCitation = function(itemSet, items, format, po
  * create a bibliography
  * (items is expected to be an array of items)
  */
-Zotero.CSL.Compat.prototype.createBibliography = function(itemSet, format) {
+Zotero.CSL.Compat.prototype.formatBibliography = function(itemSet, format) {
 	var items = itemSet.items;
 	var output = "";
 	
@@ -1149,7 +1162,7 @@ Zotero.CSL.Compat.prototype._processCreators = function(type, element, creators,
 /*
  * get a citation, given an item and bibCitElement
  */
-Zotero.CSL.Compat.prototype._getCitation = function(item, position, locatorType, locator, format, bibCitElement) {
+Zotero.CSL.Compat.prototype._getCitation = function(item, position, locatorType, locator, format, bibCitElement, ignore) {
 	Zotero.debug("CSL: generating citation for item "+item.getID());
 	
 	// use true position if possible, otherwise "first"
@@ -1173,7 +1186,7 @@ Zotero.CSL.Compat.prototype._getCitation = function(item, position, locatorType,
 	Zotero.debug("CSL: using CSL type "+typeName);
 	
 	// remove previous ignore entries from list
-	this._ignore = new Array();
+	this._ignore = (ignore ? ignore : new Object());
 	
 	var formattedString = new Zotero.CSL.Compat.FormattedString(this, format);
 	for(var j in type) {
@@ -1191,8 +1204,6 @@ Zotero.CSL.Compat.prototype._getCitation = function(item, position, locatorType,
 Zotero.CSL.Compat.prototype._getFieldValue = function(name, element, item, formattedString,
                                                 bibCitElement, position,
                                                 locatorType, locator, typeName) {
-	
-	
 	var dataAppended = false;
 	var itemID = item.getID();
 	
@@ -1255,6 +1266,7 @@ Zotero.CSL.Compat.prototype._getFieldValue = function(name, element, item, forma
 		
 		dataAppended = formattedString.concat(data, element);
 	} else if(name == "date") {
+		Zotero.debug(formattedString.toSource());
 		dataAppended = formattedString.appendDate(item._csl.date, element);
 	} else if(name == "publisher") {
 		var data = new Zotero.CSL.Compat.FormattedString(this, formattedString.format);
@@ -1329,6 +1341,7 @@ Zotero.CSL.Compat.prototype._getFieldValue = function(name, element, item, forma
 		}
 	} else if(name == "locator") {
 		if(locator) {
+			Zotero.debug("locatorType "+locatorType);
 			dataAppended = formattedString.appendLocator(locatorType, locator, element);
 		}
 	} else if(name == "edition") {
@@ -1346,8 +1359,9 @@ Zotero.CSL.Compat.prototype._getFieldValue = function(name, element, item, forma
 			// get data for each child element
 			var child = element.children[i];
 			
-			this._getFieldValue(child.name, child, item, data, bibCitElement,
-			                    position, typeName);
+			this._getFieldValue(child.name, child, item, data,
+		                    bibCitElement, position, locatorType, locator,
+		                    typeName);
 		}
 		
 		dataAppended = formattedString.concat(data, element);
@@ -1368,8 +1382,9 @@ Zotero.CSL.Compat.prototype._getFieldValue = function(name, element, item, forma
 					}
 				} else if(condition.field) {
 					var testString = new Zotero.CSL.Compat.FormattedString(this, "Text");
-					status = this._getFieldValue(condition.field, this._getFieldDefaults(condition.field), item,
-		                                testString, bibCitElement);
+					status = this._getFieldValue(condition.field, this._getFieldDefaults(condition.field), item, testString,
+		                    bibCitElement, position, locatorType, locator,
+		                    typeName);
 				}
 			} else if(condition.name == "else") {
 				status = true;
@@ -1381,8 +1396,9 @@ Zotero.CSL.Compat.prototype._getFieldValue = function(name, element, item, forma
 					// get data for each child element
 					var child = condition.children[j];
 					
-					this._getFieldValue(child.name, child, item, data, bibCitElement,
-										position, typeName);
+					this._getFieldValue(child.name, child, item, data,
+		                    bibCitElement, position, locatorType, locator,
+		                    typeName);
 				}
 				dataAppended = formattedString.concat(data, condition);
 				break;
@@ -1440,7 +1456,8 @@ Zotero.CSL.Compat.prototype._getFieldValue = function(name, element, item, forma
 			// get field value
 			dataAppended = this._getFieldValue(substituteElement.name,
 			                           substituteElement, item, formattedString,
-			                           bibCitElement, position, typeName);
+		                    bibCitElement, position, locatorType, locator,
+		                    typeName);
 			
 			// ignore elements with the same serialization
 			if(this._ignore) {	// array might not exist if doing disambiguation

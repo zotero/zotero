@@ -34,111 +34,126 @@
 	onload="Zotero_Citation_Dialog.load();"
 	onunload="doUnload();"
 	ondialogaccept="Zotero_Citation_Dialog.accept();"
+	ondialogcancel="Zotero_Citation_Dialog.cancel();"
+	xmlns:html="http://www.w3.org/1999/xhtml"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-	style="padding:2em">
+	style="padding: 0">
 	
 	<script src="include.js"/>
 	<script src="selectItemsDialog.js"/>
 	<script src="addCitationDialog.js"/>
 	
-	<vbox id="zotero-select-items-container" flex="1">
-	
-	<hbox flex="1">
-		<vbox flex="1">
-			<hbox align="center" pack="end">
-				<label value="&zotero.toolbar.search.label;" control="zotero-tb-search"/>
-				<textbox id="zotero-tb-search" type="timed" timeout="250" oncommand="onSearch()" dir="reverse" onkeypress="if(event.keyCode == event.DOM_VK_ESCAPE) { this.value = ''; this.doCommand('cmd_zotero_search'); return false; }">
-					<toolbarbutton id="zotero-tb-search-cancel" oncommand="this.parentNode.value='';" hidden="true"/>
-				</textbox>
-			</hbox>
-			
-			<hbox flex="1">
-				<tree id="zotero-collections-tree"
-					style="width: 200px;" hidecolumnpicker="true" seltype="single"
-					onselect="onCollectionSelected();">
-					<treecols>
-						<treecol
-							id="zotero-collections-name-column"
-							label="&zotero.collections.name_column;"
-							flex="1"
-							primary="true"/>
-					</treecols>
-					<treechildren/>
-				</tree>
-			
-				<tree id="zotero-items-tree"
-					flex="1" hidecolumnpicker="true" seltype="single"
-					onselect="Zotero_Citation_Dialog.treeItemSelected();">
-					<treecols>
-						<treecol
-							id="zotero-items-column-title" primary="true"
-							label="&zotero.items.title_column;"
-							flex="4" persist="width ordinal hidden sortActive sortDirection"/>
-						<splitter class="tree-splitter"/>
-						<treecol
-							id="zotero-items-column-firstCreator"
-							label="&zotero.items.creator_column;"
-							flex="1" persist="width ordinal hidden sortActive sortDirection"/>
-						<splitter class="tree-splitter"/>
-						<treecol
-							id="zotero-items-column-dateAdded" hidden="true"
-							label="&zotero.items.dateAdded_column;"
-							flex="1" persist="width ordinal hidden sortActive sortDirection"/>
-						<splitter class="tree-splitter"/>
-						<treecol
-							id="zotero-items-column-dateModified" hidden="true"
-							label="&zotero.items.dateModified_column;"
-							flex="1" persist="width ordinal hidden sortActive sortDirection"/>
-					</treecols>				
-					<treechildren/>
-				</tree>
-			</hbox>
-			
-			<hbox>
-				<menulist id="tree-locator-type">
-					<menupopup id="tree-locator-type-popup">
-						<menuitem value="p" label="&zotero.citation.page;" selected="1"/>
-						<menuitem value="g" label="&zotero.citation.paragraph;"/>
-						<menuitem value="l" label="&zotero.citation.line;"/>
-					</menupopup>
-				</menulist>
-				<textbox id="tree-locator" flex="1"/>
-			</hbox>
-		</vbox>
-		
-		<hbox hidden="true" id="multiple-sources">
-			<vbox pack="center">
-				<toolbarbutton id="citation-add" oncommand="Zotero_Citation_Dialog.addCitation()" disabled="true"/>
-				<toolbarbutton id="citation-delete" oncommand="Zotero_Citation_Dialog.deleteCitation()" disabled="true"/>
-			</vbox>
-			<vbox>
-				<listbox id="citation-list" flex="1" seltype="single"
-					onselect="Zotero_Citation_Dialog.listItemSelected();"></listbox>
-				<hbox>				
-					<menulist id="item-locator-type" disabled="true">
-						<menupopup id="item-locator-type-popup">
-							<menuitem value="p" label="&zotero.citation.page;"/>
-							<menuitem value="g" label="&zotero.citation.paragraph;"/>
-							<menuitem value="l" label="&zotero.citation.line;"/>
-						</menupopup>
-					</menulist>
-					<textbox id="item-locator" disabled="true"/>
+	<vbox id="zotero-select-items-container" flex="1" style="padding: 1em">	
+		<hbox flex="1">
+			<vbox flex="1">
+				<hbox flex="1">
+					<vbox align="stretch" flex="1">
+						<hbox align="center" pack="end">
+							<label value="&zotero.toolbar.search.label;" control="zotero-tb-search"/>
+							<textbox id="zotero-tb-search" type="timed" timeout="250" oncommand="onSearch()" dir="reverse" onkeypress="if(event.keyCode == event.DOM_VK_ESCAPE) { this.value = ''; this.doCommand('cmd_zotero_search'); return false; } return true;">
+								<toolbarbutton id="zotero-tb-search-cancel" oncommand="this.parentNode.value='';" hidden="true"/>
+							</textbox>
+						</hbox>
+						<hbox flex="1" style="margin-top: 5px">
+							<tree id="zotero-collections-tree"
+								style="width: 200px;" hidecolumnpicker="true" seltype="single"
+								onselect="onCollectionSelected();">
+								<treecols>
+									<treecol
+										id="zotero-collections-name-column"
+										label="&zotero.collections.name_column;"
+										flex="1"
+										primary="true"/>
+								</treecols>
+								<treechildren/>
+							</tree>
+						
+							<tree id="zotero-items-tree"
+								flex="1" hidecolumnpicker="true" seltype="single"
+								onselect="Zotero_Citation_Dialog.treeItemSelected();">
+								<treecols>
+									<treecol
+										id="zotero-items-column-title" primary="true"
+										label="&zotero.items.title_column;"
+										flex="4" persist="width ordinal hidden sortActive sortDirection"/>
+									<splitter class="tree-splitter"/>
+									<treecol
+										id="zotero-items-column-firstCreator"
+										label="&zotero.items.creator_column;"
+										flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+									<splitter class="tree-splitter"/>
+									<treecol
+										id="zotero-items-column-dateAdded" hidden="true"
+										label="&zotero.items.dateAdded_column;"
+										flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+									<splitter class="tree-splitter"/>
+									<treecol
+										id="zotero-items-column-dateModified" hidden="true"
+										label="&zotero.items.dateModified_column;"
+										flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+								</treecols>				
+								<treechildren/>
+							</tree>
+						</hbox>
+					</vbox>
+							
+					<hbox hidden="true" id="multiple-sources">
+						<vbox align="center" pack="center">
+							<toolbarbutton id="citation-add" oncommand="Zotero_Citation_Dialog.addCitation()" disabled="true"/>
+							<toolbarbutton id="citation-delete" oncommand="Zotero_Citation_Dialog.deleteCitation()" disabled="true"/>
+						</vbox>
+						<vbox>
+							<checkbox id="keepSorted" hidden="true" checked="false" oncommand="Zotero_Citation_Dialog.sortCitation()" label="&zotero.citation.keepSorted.label;"/>
+							<listbox id="citation-list" flex="1" align="stretch" seltype="single"
+								onselect="Zotero_Citation_Dialog.listItemSelected();"></listbox>
+						</vbox>
+					</hbox>
+				</hbox>
+				
+				<hbox align="stretch" style="margin-top: 8px">
+					<vbox flex="1">
+						<hbox align="center">
+							<label value="&zotero.citation.prefix.label;"/>
+							<textbox oninput="Zotero_Citation_Dialog.confirmRegenerate(false)" onchange="Zotero_Citation_Dialog.confirmRegenerate(true)" class="fix" id="prefix" align="stretch" flex="1"/>
+						</hbox>
+						<hbox align="center">
+							<label value="&zotero.citation.suffix.label;"/>
+							<textbox oninput="Zotero_Citation_Dialog.confirmRegenerate(false)" onchange="Zotero_Citation_Dialog.confirmRegenerate(true)" class="fix" id="suffix" align="stretch" flex="1"/>
+						</hbox>
+						<spacer flex="1"/>
+					</vbox>
+					<separator flex="4"/>
+					<vbox flex="1">
+						<hbox align="stretch">
+							<menulist onchange="Zotero_Citation_Dialog.confirmRegenerate(true)" id="locatorType">
+								<menupopup id="locator-type-popup">
+									<menuitem value="page" label="&zotero.citation.page;" selected="1"/>
+									<menuitem value="paragraph" label="&zotero.citation.paragraph;"/>
+									<menuitem value="line" label="&zotero.citation.line;"/>
+								</menupopup>
+							</menulist>
+							<textbox oninput="Zotero_Citation_Dialog.confirmRegenerate(false)" onchange="Zotero_Citation_Dialog.confirmRegenerate(true)" id="locator" flex="1"/>
+						</hbox>
+						<separator style="height: 2px" flex="1"/>
+						<checkbox oncommand="Zotero_Citation_Dialog.confirmRegenerate(true)" id="suppressAuthor" label="&zotero.citation.suppressAuthor.label;"/>
+					</vbox>
 				</hbox>
 			</vbox>
 		</hbox>
-	</hbox>
-	
-	<hbox>
-		<vbox>
-			<button id="multiple-sources-button" oncommand="Zotero_Citation_Dialog.toggleMultipleSources()"/>
-		</vbox>
-		<vbox flex="1" align="end">
+		
+		<textbox id="editor" type="styled" hidden="true" flex="1"/>
+		
+		<hbox style="margin-top: 15px">
 			<hbox>
-				<button dlgtype="cancel"/>
-				<button dlgtype="accept"/>
+				<button id="show-editor-button" oncommand="Zotero_Citation_Dialog.toggleEditor()"/>
+				<button id="multiple-sources-button" oncommand="Zotero_Citation_Dialog.toggleMultipleSources()"/>
 			</hbox>
-		</vbox>
-	</hbox>
-	
+			<vbox flex="1" align="end">
+				<hbox>
+					<button dlgtype="cancel"/>
+					<button dlgtype="accept" disabled="true"/>
+				</hbox>
+			</vbox>
+		</hbox>
 	</vbox>
 </dialog>
