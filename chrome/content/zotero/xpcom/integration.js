@@ -94,7 +94,6 @@ Zotero.Integration = new function() {
 					// split apart passed parameters (same colon-escaped format
 					// as we pass)
 					var input = request.input.toString();
-					Zotero.debug(input);
 					var vars = new Array();
 					vars[0] = "";
 					var i = 0;
@@ -672,12 +671,9 @@ Zotero.Integration.Session.prototype.completeCitation = function(object) {
 		
 		// loop through items not in itemSet
 		if(item == false) {
-			Zotero.debug("a");
 			item = Zotero.Items.get(citationItem.itemID);
 			if(!item) return false;
-			Zotero.debug(item);
 			item = this.itemSet.add([item])[0];
-			Zotero.debug(item);
 			
 			this.dateModified[citationItem.itemID] = item.zoteroItem.getField("dateModified", true, true);
 			this.updateItemIDs[citationItem.itemID] = true;

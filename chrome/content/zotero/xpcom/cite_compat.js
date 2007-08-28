@@ -1266,7 +1266,6 @@ Zotero.CSL.Compat.prototype._getFieldValue = function(name, element, item, forma
 		
 		dataAppended = formattedString.concat(data, element);
 	} else if(name == "date") {
-		Zotero.debug(formattedString.toSource());
 		dataAppended = formattedString.appendDate(item._csl.date, element);
 	} else if(name == "publisher") {
 		var data = new Zotero.CSL.Compat.FormattedString(this, formattedString.format);
@@ -1609,7 +1608,6 @@ Zotero.CSL.Compat.FormattedString.prototype.append = function(string, element, d
 			// go through and fix up unicode entities
 			for(var i=0; i<string.length; i++) {
 				var charCode = string.charCodeAt(i);
-				Zotero.debug(charCode);
 				if(charCode > 127) {			// encode unicode
 					newString += "{\\uc0\\u"+charCode.toString()+"}";
 				} else if(charCode == 92) {		// double backslashes
