@@ -17,7 +17,6 @@
 <!ENTITY zotero.preferences.fontSize.large "Large">
 
 <!ENTITY zotero.preferences.miscellaneous "Miscellaneous">
-<!ENTITY zotero.preferences.autoUpdate "Controlla automaticamente nuovi motori di ricerca">
 <!ENTITY zotero.preferences.updateNow "Aggiorna adesso">
 <!ENTITY zotero.preferences.reportTranslationFailure "Segnala motori di ricerca non funzionanti">
 <!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded RIS/Refer files">

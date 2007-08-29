@@ -17,7 +17,6 @@
 <!ENTITY zotero.preferences.fontSize.large "Large">
 
 <!ENTITY zotero.preferences.miscellaneous "Miscellaneous">
-<!ENTITY zotero.preferences.autoUpdate "スクレーパのアップデートを自動的にチェックする">
 <!ENTITY zotero.preferences.updateNow "アップデート">
 <!ENTITY zotero.preferences.reportTranslationFailure "壊れたスクレーパを報告する">
 <!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded RIS/Refer files">

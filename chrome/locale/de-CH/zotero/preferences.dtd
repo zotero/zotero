@@ -17,7 +17,6 @@
 <!ENTITY zotero.preferences.fontSize.large "Large">
 
 <!ENTITY zotero.preferences.miscellaneous "Miscellaneous">
-<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated scrapers">
 <!ENTITY zotero.preferences.updateNow "Update now">
 <!ENTITY zotero.preferences.reportTranslationFailure "Report broken site translators">
 <!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded RIS/Refer files">

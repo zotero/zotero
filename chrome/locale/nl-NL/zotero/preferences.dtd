@@ -17,7 +17,6 @@
 <!ENTITY zotero.preferences.fontSize.large "Large">
 
 <!ENTITY zotero.preferences.miscellaneous "Miscellaneous">
-<!ENTITY zotero.preferences.autoUpdate "Site-vertalers automatisch bijwerken">
 <!ENTITY zotero.preferences.updateNow "Nu bijwerken">
 <!ENTITY zotero.preferences.reportTranslationFailure "Defecte site-vertalers rapporteren">
 <!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded RIS/Refer files">

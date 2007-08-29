@@ -17,7 +17,6 @@
 <!ENTITY zotero.preferences.fontSize.large "Large">
 
 <!ENTITY zotero.preferences.miscellaneous "Miscellaneous">
-<!ENTITY zotero.preferences.autoUpdate "самостално провери за ажуриране стругаче">
 <!ENTITY zotero.preferences.updateNow "ажурирај сада">
 <!ENTITY zotero.preferences.reportTranslationFailure "Извести о грешкама у „преводиоцу странице“">
 <!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded RIS/Refer files">

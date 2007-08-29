@@ -17,7 +17,6 @@
 <!ENTITY zotero.preferences.fontSize.large "Large">
 
 <!ENTITY zotero.preferences.miscellaneous "Miscellaneous">
-<!ENTITY zotero.preferences.autoUpdate "自动更新刮录器(scrapers)">
 <!ENTITY zotero.preferences.updateNow "立刻更新">
 <!ENTITY zotero.preferences.reportTranslationFailure "报告失效的网站转换器">
 <!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded RIS/Refer files">

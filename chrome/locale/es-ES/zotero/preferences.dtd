@@ -17,7 +17,6 @@
 <!ENTITY zotero.preferences.fontSize.large "Large">
 
 <!ENTITY zotero.preferences.miscellaneous "Miscellaneous">
-<!ENTITY zotero.preferences.autoUpdate "Comprobar automáticamente si hay rascadores actualizados">
 <!ENTITY zotero.preferences.updateNow "Actualizarse ahora">
 <!ENTITY zotero.preferences.reportTranslationFailure "Informar de traductores de sitio incorrectos">
 <!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded RIS/Refer files">

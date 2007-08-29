@@ -17,7 +17,6 @@
 <!ENTITY zotero.preferences.fontSize.large "Large">
 
 <!ENTITY zotero.preferences.miscellaneous "Miscellaneous">
-<!ENTITY zotero.preferences.autoUpdate "Güncelleştirmeleri otomatik olarak kontrol et">
 <!ENTITY zotero.preferences.updateNow "Şimdi Güncelle">
 <!ENTITY zotero.preferences.reportTranslationFailure "Bozuk site çevirilerini raporla">
 <!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded RIS/Refer files">
