@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-08-31 18:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-08-31 21:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -5348,7 +5348,7 @@ function doWeb(doc, url){
 	}
 }');
 
-REPLACE INTO translators VALUES ('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '1.0.0b3.r1', '', '2007-08-31 18:00:00', '1', '100', '4', 'ProQuest', 'Simon Kornblith', '^https?://[^/]+/pqdweb\?((?:.*\&)?did=.*&Fmt=[0-9]|(?:.*\&)Fmt=[0-9].*&did=|(?:.*\&)searchInterface=|TS=[0-9])', 
+REPLACE INTO translators VALUES ('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '1.0.0b3.r1', '', '2007-08-31 21:00:00', '1', '100', '4', 'ProQuest', 'Simon Kornblith', '^https?://[^/]+/pqdweb\?((?:.*\&)?did=.*&Fmt=[0-9]|(?:.*\&)Fmt=[0-9].*&did=|(?:.*\&)searchInterface=|TS=[0-9])', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -5357,10 +5357,36 @@ REPLACE INTO translators VALUES ('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '1.0.0b
 	       
 	if(doc.evaluate(''//img[substring(@src, string-length(@src)-32) = "/images/common/logo_proquest.gif" or substring(@src, string-length(@src)-38) = "/images/common/logo_proquest_small.gif"]'',
 	                doc, nsResolver, XPathResult.ANY_TYPE, null)) {    
+		                
+		
+		var xpath = ''//table[@id="tableIndexTerms"]/tbody/tr/td[@class="textSmall"]'';
+		var data= doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var aitem;
+		var source;
+		while(aitem = data.iterateNext()) {
+			source=aitem.textContent;
+			if(source=="Source type:") {
+				source=data.iterateNext().textContent;
+				Zotero.debug("Item Source Type: "+source);
+				break;
+			}
+		}        
+	                
 		if(doc.title == "Results") {
 			return "multiple";
 		} else if(doc.title == "Document View") {
-			return "magazineArticle";
+			switch (source) {
+				case ''Dissertation'':
+					return "thesis";
+					break;
+				case ''Historical Newspaper'':
+				case ''Newspaper'':
+					return "newspaperArticle";
+				default:
+					return "journalArticle";
+					break;
+			}
+			
 		}
 	}
 }
@@ -5368,15 +5394,14 @@ REPLACE INTO translators VALUES ('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '1.0.0b
 //^https?://[^/]+/pqdweb\?((?:.*\&)?did=.*&Fmt=[0-9]|(?:.*\&)Fmt=[0-9].*&did=|(?:.*\&)searchInterface=)', 
 'function parseRIS(uris) {
 	
-	
 	Zotero.Utilities.HTTP.doGet(uris, function(text, xmlhttp, url){	
 		// load translator for RIS
 
 		if(url.match("exportFormat=1")=="exportFormat=1") {
-			
-			
 			var translator = Zotero.loadTranslator("import");
 			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+			// Strip lines with just whitespace, which mess up RIS parsing
+			text = text.replace(/^\s*$\n/gm, '''');
 			translator.setString(text);
 
 			//Set Handler fixes anomaly in Proquest RIS format. Properly formats author name as [last name], [first name]
@@ -5408,12 +5433,16 @@ REPLACE INTO translators VALUES ('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '1.0.0b
 }
 
 function doWeb(doc, url) {
-	
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == ''x'') return namespace; else return null;
 	} : null;
 	
+	var hostRegexp = new RegExp("^(https?://[^/]+)/");
+	var hMatch = hostRegexp.exec(url);
+	var host = hMatch[1];
+	
+
 	
 	if(doc.evaluate(''//img[substring(@src, string-length(@src)-32) = "/images/common/logo_proquest.gif" or substring(@src, string-length(@src)-38) = "/images/common/logo_proquest_small.gif"]'',
 		                doc, nsResolver, XPathResult.ANY_TYPE, null)) {
@@ -5448,7 +5477,7 @@ function doWeb(doc, url) {
 					
 					var str= mInfo.value;
 					str= str.replace("retrieveGroup", "sid");
-					var url = "http://proquest.umi.com/pqdweb?RQT=530&markedListInfo="+str+"1";
+					var url = host+"/pqdweb?RQT=530&markedListInfo="+str+"1";
 					items[url] = Zotero.Utilities.cleanString(titleElmt.textContent);
 
 				} while((mInfo = mInfos.iterateNext()) && (titleElmt = titleElmts.iterateNext()));
@@ -5461,8 +5490,8 @@ function doWeb(doc, url) {
 				var uris = new Array();
 				
 				//Clear Basket
-				uris.push("http://proquest.umi.com/pqdweb?RQT=531&clientId="+clientID);
-				uris.push("http://proquest.umi.com/pqdweb?RQT=532&clientId="+clientID);
+				uris.push(host+"/pqdweb?RQT=531&clientId="+clientID);
+				uris.push(host+"/pqdweb?RQT=532&clientId="+clientID);
 				
 				//Add URLS to the basket
 				for(var bibcode in items) {
@@ -5470,9 +5499,9 @@ function doWeb(doc, url) {
 				}
 					
 				//Export basket as a RIS file
-				uris.push("http://proquest.umi.com/pqdweb?RQT=532&clientId="+clientID);
-				uris.push("http://proquest.umi.com/pqdweb?RQT=562&MRR=M&clientId="+clientID);
-				uris.push("http://proquest.umi.com/pqdweb?RQT=562&exportFormat=1&clientId="+clientID);
+				uris.push(host+"/pqdweb?RQT=532&clientId="+clientID);
+				uris.push(host+"/pqdweb?RQT=562&MRR=M&clientId="+clientID);
+				uris.push(host+"/pqdweb?RQT=562&exportFormat=1&clientId="+clientID);
 				
 				parseRIS(uris);
 				
@@ -5500,19 +5529,19 @@ function doWeb(doc, url) {
 				var uris = new Array();
 				
 				//Clear Basket
-				uris.push("http://proquest.umi.com/pqdweb?RQT=531&clientId="+clientID);
-				uris.push("http://proquest.umi.com/pqdweb?RQT=532&clientId="+clientID);
+				uris.push(host+"/pqdweb?RQT=531&clientId="+clientID);
+				uris.push(host+"/pqdweb?RQT=532&clientId="+clientID);
 				
 				//Create URL to add item to basket
-				url = "http://proquest.umi.com/pqdweb?RQT=530&markedListInfo="+str+"1";
+				url = host+"/pqdweb?RQT=530&markedListInfo="+str+"1";
 				Zotero.debug("RIS URL: "+url);
 				
 				uris.push(url);
 					
 				//Export basket as a RIS file
-				uris.push("http://proquest.umi.com/pqdweb?RQT=532&clientId="+clientID);
-				uris.push("http://proquest.umi.com/pqdweb?RQT=562&MRR=M&clientId="+clientID);
-				uris.push("http://proquest.umi.com/pqdweb?RQT=562&exportFormat=1&clientId="+clientID);
+				uris.push(host+"/pqdweb?RQT=532&clientId="+clientID);
+				uris.push(host+"/pqdweb?RQT=562&MRR=M&clientId="+clientID);
+				uris.push(host+"/pqdweb?RQT=562&exportFormat=1&clientId="+clientID);
 				
 				parseRIS(uris);
 				
