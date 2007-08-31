@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-08-28 16:45:48'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-08-31 18:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -5348,255 +5348,177 @@ function doWeb(doc, url){
 	}
 }');
 
-REPLACE INTO translators VALUES ('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '1.0.0b3.r1', '', '2007-05-03 15:05:00', '1', '100', '4', 'ProQuest', 'Simon Kornblith', '^https?://[^/]+/pqdweb\?((?:.*\&)?did=.*&Fmt=[0-9]|(?:.*\&)Fmt=[0-9].*&did=|(?:.*\&)searchInterface=)', 
+REPLACE INTO translators VALUES ('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '1.0.0b3.r1', '', '2007-08-31 18:00:00', '1', '100', '4', 'ProQuest', 'Simon Kornblith', '^https?://[^/]+/pqdweb\?((?:.*\&)?did=.*&Fmt=[0-9]|(?:.*\&)Fmt=[0-9].*&did=|(?:.*\&)searchInterface=|TS=[0-9])', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == ''x'') return namespace; else return null;
 	} : null;
-	
+	       
 	if(doc.evaluate(''//img[substring(@src, string-length(@src)-32) = "/images/common/logo_proquest.gif" or substring(@src, string-length(@src)-38) = "/images/common/logo_proquest_small.gif"]'',
-	                doc, nsResolver, XPathResult.ANY_TYPE, null)) {
+	                doc, nsResolver, XPathResult.ANY_TYPE, null)) {    
 		if(doc.title == "Results") {
 			return "multiple";
-		} else {
+		} else if(doc.title == "Document View") {
 			return "magazineArticle";
 		}
 	}
-}', 
-'function scrape(doc) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == ''x'') return namespace; else return null;
-	} : null;
+}
 
-	var newItem = new Zotero.Item();
-	var elmt;
+//^https?://[^/]+/pqdweb\?((?:.*\&)?did=.*&Fmt=[0-9]|(?:.*\&)Fmt=[0-9].*&did=|(?:.*\&)searchInterface=)', 
+'function parseRIS(uris) {
 	
-	// Title
-	var xpath = ''//td[@class="headerBlack"]/strong'';
-	newItem.title = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 	
-	// Authors
-	var xpath = ''//td[@class="textMedium"]/a/em'';
-	var elmts = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
-	while(elmt = elmts.iterateNext()) {
-		// there are sometimes additional tags representing highlighting
-		var author = elmt.textContent;
-		if(author) {
-			newItem.creators.push(Zotero.Utilities.cleanAuthor(author, "author"));
-		}
-	}
+	Zotero.Utilities.HTTP.doGet(uris, function(text, xmlhttp, url){	
+		// load translator for RIS
+
+		if(url.match("exportFormat=1")=="exportFormat=1") {
+			
+			
+			var translator = Zotero.loadTranslator("import");
+			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+			translator.setString(text);
+
+			//Set Handler fixes anomaly in Proquest RIS format. Properly formats author name as [last name], [first name]
+			translator.setHandler("itemDone", function(obj, item) {
+				var cre = new Array();
+				cre = item.creators;
+				for each(var e in cre) {
 	
-	// Other info
-	var xpath = ''//table[@id="tableIndexTerms"]/tbody/tr'';
-	var elmts = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
-	while(elmt = elmts.iterateNext()) {
-		var field = Zotero.Utilities.superCleanString(doc.evaluate(''./TD[1]/text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue).toLowerCase();
-		if(field == "publication title") {
-			var publication = doc.evaluate(''./TD[2]/A[1]/text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-			if(publication.nodeValue) {
-				newItem.publicationTitle = Zotero.Utilities.superCleanString(publication.nodeValue);
-			}
-			
-			var place = doc.evaluate(''./TD[2]/text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-			if(place.nodeValue) {
-				newItem.place = Zotero.Utilities.superCleanString(place.nodeValue);
-			}
-			
-			var date = doc.evaluate(''./TD[2]/A[2]/text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();		
-			if(date.nodeValue) {
-				newItem.date = date.nodeValue;
-			}
-			
-			var moreInfo = doc.evaluate(''./TD[2]/text()[2]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-			if(moreInfo.nodeValue) {
-				moreInfo = Zotero.Utilities.superCleanString(moreInfo.nodeValue);
-				var parts = moreInfo.split(";\xA0");
-				var issueRegexp = /^(\w+)\.(?: |\xA0)?(.+)$/
-				var issueInfo = parts[0].split(",\xA0");
-				for(j in issueInfo) {
-					var m = issueRegexp.exec(issueInfo[j]);
-					if(m) {
-						var info = m[1].toLowerCase();
-						if(info == "vol") {
-							newItem.volume = Zotero.Utilities.superCleanString(m[2]);
-						} else if(info == "iss" || info == "no") {
-							newItem.issue = Zotero.Utilities.superCleanString(m[2]);
+					if(!e[''firstName'']) {
+						//check if there is a first name, if not, take the first word in the last name
+						var names = e[''lastName''].split(" ");
+						e[''firstName'']=names[0];
+						e[''lastName'']="";
+						for(var i = 1; i<names.length; i++) {
+							e[''lastName'']+=names[i];
 						}
 					}
 				}
-				if(parts[1] && Zotero.Utilities.superCleanString(parts[1]).substring(0, 3).toLowerCase() == "pg.") {
-					var re = /[0-9\-]+/;
-					var m = re.exec(parts[1]);
-					
-					if(m) {
-						newItem.pages = m[0];
-						var pgs = parts[1].split(",\xA0");
-						if(pgs[1] && Zotero.Utilities.superCleanString(pgs[1]).substring(pgs[1].length-3, pgs[1].length).toLowerCase() == "pgs") {
-							var re = /[0-9\-]+/;
-							var m = re.exec(pgs[1]);
-							if(m) {
-								var pagelength = parseInt(m[0]);
-								if (pagelength > 1){
-									var endpage = parseInt(newItem.pages) + pagelength - 1;
-									newItem.pages = newItem.pages + "-" + endpage;
-								}
-							}
-						}			
-					}
-				}
-			}
-		} else if(field == "source type") {
-			var value = doc.evaluate(''./TD[2]/text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-			if(value.nodeValue) {
-				value = Zotero.Utilities.superCleanString(value.nodeValue).toLowerCase();
-				
-				if(value.indexOf("periodical") >= 0) {
-					newItem.itemType = "magazineArticle";
-				} else if(value.indexOf("newspaper") >= 0) {
-					newItem.itemType = "newspaperArticle";
-				} else {	// TODO: support thesis
-					newItem.itemType = "book";
-				}
-			}
-		} else if(field == "isbn" || field == "issn" || field == "issn/isbn") {
-			var value = doc.evaluate(''./TD[2]/text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-			if(value) {
-				var type;
-				value = Zotero.Utilities.superCleanString(value.nodeValue);
-				if(value.length == 10 || value.length == 13) {
-					newItem.ISBN = value;
-				} else if(value.length == 8) {
-					newItem.ISSN = value;
-				}
-			}
-		} else if(field == "document url") {
-			var value = doc.evaluate(''./TD[2]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-			if(value) {
-				newItem.url = Zotero.Utilities.cleanString(value.textContent);
-			}
-		} else if(field == "proquest document id") {
-			var value = doc.evaluate(''./TD[2]/text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-			if(value) {
-				newItem.accessionNumber = Zotero.Utilities.cleanString(value.nodeValue);
-			}
-		} else if(field == "subjects" || field == "people" || field == "locations") {
-			var subjects = doc.evaluate(".//a", elmt, nsResolver, XPathResult.ANY_TYPE, null);
-			var currentSubject;
-			while(currentSubject = subjects.iterateNext()) {
-				var subjectValue = currentSubject.textContent;
-				subjectValue = Zotero.Utilities.superCleanString(subjectValue);
-				if(subjectValue) {
-					newItem.tags.push(subjectValue);
-				}
-			}
+
+				item.complete();
+			});
+		
+			translator.translate();
+			Zotero.done();
 		}
-	}
-	
-	// magazineArticle -> journalArticle if issue and volume exist
-	if(newItem.itemType == "magazineArticle" && (newItem.issue || newItem.volume)) {
-		newItem.itemType = "journalArticle";
-	}
-	
-	// figure out what we can attach
-	var attachArray = {
-		''//div[@class="textMedium formatBox"]//img[@alt="Full Text - PDF"]'':"ProQuest Full Text PDF",
-		''//div[@class="textMedium formatBox"]//img[@alt="Text+Graphics"]'':"ProQuest Snapshot (HTML with Graphics)",
-		''//div[@class="textMedium formatBox"]//img[@alt="Full Text"]'':"ProQuest Snapshot (HTML)",
-		''//div[@class="textMedium formatBox"]//img[@alt="Abstract"]'':"ProQuest Snapshot (Abstract)"
-	}
-	for(var xpath in attachArray) {
-		var item = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-		if(item) {
-			var title = attachArray[xpath];
-			
-			if(item.parentNode.tagName.toLowerCase() == "a") {
-				// item is not this page
-				if(title == "ProQuest Full Text PDF") {
-					// PDF gets different mime type and downloadability
-					newItem.attachments.push({url:item.parentNode.href,
-						title:title, mimeType:"application/pdf"});
-				} else {
-					newItem.attachments.push({url:item.parentNode.href,
-						title:title, mimeType:"text/html"});
-				}
-			} else {
-				// item is this page
-				newItem.attachments.push({document:doc, title:title});
-			}
-			
-			// only snapshot one of the possible types
-			if(title != "ProQuest Snapshot (PDF)") break;
-		}
-	}
-	
-	var abstractNote = doc.evaluate(''//table[*/tr[1]/td[@class="textSmall"]/strong/text() = "Abstract"]/*/tr[2]'',
-		doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-	if(abstractNote) {
-		newItem.abstractNote = abstractNote.textContent;
-	}
-	
-	newItem.complete();
+		
+	}, function() {});
+	Zotero.wait();
 }
 
 function doWeb(doc, url) {
+	
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == ''x'') return namespace; else return null;
 	} : null;
 	
-	if(doc.title == "Results") {
-		var items = new Object();
-		
-		// Require link to match this
-		var tagRegexp = new RegExp();
-		tagRegexp.compile(''^https?://[^/]+/pqdweb\\?((?:.*&)?did=.*&Fmt=[12](?:[^0-9]|$)|(?:.*&)Fmt=[12][^0-9].*&did=)'');
-		
-		var tableRows = doc.evaluate(''//tr[@class="rowUnMarked"]'',
-		                doc, nsResolver, XPathResult.ANY_TYPE, null);
-		// Go through table rows
-		var tableRow;
-		while(tableRow = tableRows.iterateNext()) {
-			var links = tableRow.getElementsByTagName("a");
-			// Go through links
-			for(var j=0; j<links.length; j++) {
-				if(tagRegexp.test(links[j].href)) {
-					var text = doc.evaluate(''.//a[@class="bold"]/text()'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-					if(text && text.nodeValue) {
-						text = Zotero.Utilities.cleanString(text.nodeValue);
-						items[links[j].href] = text;
+	
+	if(doc.evaluate(''//img[substring(@src, string-length(@src)-32) = "/images/common/logo_proquest.gif" or substring(@src, string-length(@src)-38) = "/images/common/logo_proquest_small.gif"]'',
+		                doc, nsResolver, XPathResult.ANY_TYPE, null)) {
+			if(doc.title == "Results") {
+				
+				//Get Client ID
+				var xpath = ''//a'';
+				var data= doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+				var aitem;
+				var clientID;
+				while(aitem = data.iterateNext()) {
+					clientID=aitem.href;
+					if(clientID.indexOf("clientId")!=-1) {
+						clientID = clientID.substr(clientID.indexOf("clientId")+9,clientID.length);
+						break;
 					}
-					break;
+				}		
+				
+				var multXpath = ''//input[@name="chk"][@type="checkbox"]'';
+				var titleXpath = ''//a[@class="bold"]'';
+				var mInfos = doc.evaluate(multXpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+				var titleElmts = doc.evaluate(titleXpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+				var titleElmt;
+				var mInfo;
+				mInfo = mInfos.iterateNext();
+				titleElmt = titleElmts.iterateNext();
+
+				var items = new Array();
+
+				do {
+					//Get item ID
+					
+					var str= mInfo.value;
+					str= str.replace("retrieveGroup", "sid");
+					var url = "http://proquest.umi.com/pqdweb?RQT=530&markedListInfo="+str+"1";
+					items[url] = Zotero.Utilities.cleanString(titleElmt.textContent);
+
+				} while((mInfo = mInfos.iterateNext()) && (titleElmt = titleElmts.iterateNext()));
+
+				items = Zotero.selectItems(items);
+				if(!items) return true;
+
+				
+				//Array of URLs for the doGet
+				var uris = new Array();
+				
+				//Clear Basket
+				uris.push("http://proquest.umi.com/pqdweb?RQT=531&clientId="+clientID);
+				uris.push("http://proquest.umi.com/pqdweb?RQT=532&clientId="+clientID);
+				
+				//Add URLS to the basket
+				for(var bibcode in items) {
+					uris.push(bibcode);
 				}
+					
+				//Export basket as a RIS file
+				uris.push("http://proquest.umi.com/pqdweb?RQT=532&clientId="+clientID);
+				uris.push("http://proquest.umi.com/pqdweb?RQT=562&MRR=M&clientId="+clientID);
+				uris.push("http://proquest.umi.com/pqdweb?RQT=562&exportFormat=1&clientId="+clientID);
+				
+				parseRIS(uris);
+				
+			} else {
+
+				//Get Client ID
+				var xpath = ''//a'';
+				var data= doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+				var aitem;
+				var clientID;
+				while(aitem = data.iterateNext()) {
+					clientID=aitem.href;
+					if(clientID.indexOf("clientId")!=-1) {
+						clientID = clientID.substr(clientID.indexOf("clientId")+9,clientID.length);
+						break;
+					}
+				}		
+				
+				//Get item ID
+				var xpath = ''//input[@name="marked"][@type="checkbox"]'';
+				var str= doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().value;
+				str= str.replace("retrieveGroup", "sid");
+				
+				//Array of URLs for the doGet
+				var uris = new Array();
+				
+				//Clear Basket
+				uris.push("http://proquest.umi.com/pqdweb?RQT=531&clientId="+clientID);
+				uris.push("http://proquest.umi.com/pqdweb?RQT=532&clientId="+clientID);
+				
+				//Create URL to add item to basket
+				url = "http://proquest.umi.com/pqdweb?RQT=530&markedListInfo="+str+"1";
+				Zotero.debug("RIS URL: "+url);
+				
+				uris.push(url);
+					
+				//Export basket as a RIS file
+				uris.push("http://proquest.umi.com/pqdweb?RQT=532&clientId="+clientID);
+				uris.push("http://proquest.umi.com/pqdweb?RQT=562&MRR=M&clientId="+clientID);
+				uris.push("http://proquest.umi.com/pqdweb?RQT=562&exportFormat=1&clientId="+clientID);
+				
+				parseRIS(uris);
+				
 			}
 		}
-		items = Zotero.selectItems(items);
-		
-		if(!items) {
-			return true;
-		}
-		
-		var urls = new Array();
-		for(var i in items) {
-			urls.push(i);
-		}
-		
-		Zotero.Utilities.processDocuments(urls, function(doc) { scrape(doc) },
-			function() { Zotero.done(); }, null);
-		
-		Zotero.wait();
-	} else {
-		if(doc.evaluate(''/html/body/table/tbody/tr/td[@class="headerBlack"]/strong//text()'',
-						doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
-			scrape(doc);
-		} else {
-			var newURL = doc.location.href.replace(/RQT=[0-9]+/i, "RQT=309");
-			newURL = newURL.replace(/Fmt=[0-9]+/i, "Fmt=1");
-			Zotero.Utilities.loadDocument(newURL, function(doc) { scrape(doc); Zotero.done(); }, null);
-			Zotero.wait();
-		}
-	}
+
 }');
 
 REPLACE INTO translators VALUES ('6773a9af-5375-3224-d148-d32793884dec', '1.0.0b3.r1', '', '2006-12-18 06:00:45', '1', '100', '4', 'InfoTrac', 'Simon Kornblith', '^https?://[^/]+/itw/infomark/', 
