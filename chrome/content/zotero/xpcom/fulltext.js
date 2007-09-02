@@ -620,8 +620,7 @@ Zotero.Fulltext = new function(){
 	function getPages(itemID, force) {
 		var sql = "SELECT indexedPages AS indexed, totalPages AS total "
 			+ "FROM fulltextItems WHERE itemID=?";
-		var result = Zotero.DB.rowQuery(sql, itemID);
-		return result ? result : { indexed: null, total: null };
+		return Zotero.DB.rowQuery(sql, itemID);
 	}
 	
 	
@@ -651,8 +650,7 @@ Zotero.Fulltext = new function(){
 	function getChars(itemID) {
 		var sql = "SELECT indexedChars AS indexed, totalChars AS total "
 			+ "FROM fulltextItems WHERE itemID=?";
-		var result = Zotero.DB.rowQuery(sql, itemID);
-		return result ? result : { indexed: null, total: null };
+		return Zotero.DB.rowQuery(sql, itemID);
 	}
 	
 	
@@ -712,48 +710,50 @@ Zotero.Fulltext = new function(){
 			// Use pages for PDFs
 			case 'application/pdf':
 				var pages = this.getPages(itemID);
-				var indexedPages = pages.indexed;
-				var totalPages = pages.total;
-				if (!totalPages) {
-					if (!indexedPages) {
-						var status = this.INDEX_STATE_UNINDEXED;
-					}
-					else {
+				if (pages) {
+					var indexedPages = pages.indexed;
+					var totalPages = pages.total;
+					
+					if (!totalPages && !indexedPages) {
 						var status = this.INDEX_STATE_UNAVAILABLE;
 					}
-				}
-				else if (!indexedPages) {
-					var status = this.INDEX_STATE_UNINDEXED;
-				}
-				else if (indexedPages < totalPages) {
-					var status = this.INDEX_STATE_PARTIAL;
+					else if (!indexedPages) {
+						var status = this.INDEX_STATE_UNINDEXED;
+					}
+					else if (indexedPages < totalPages) {
+						var status = this.INDEX_STATE_PARTIAL;
+					}
+					else {
+						var status = this.INDEX_STATE_INDEXED;
+					}
 				}
 				else {
-					var status = this.INDEX_STATE_INDEXED;
+					var status = this.INDEX_STATE_UNINDEXED;
 				}
 				break;
 			
 			// Use chars
 			default:
 				var chars = this.getChars(itemID);
-				var indexedChars = chars.indexed;
-				var totalChars = chars.total;
-				if (!totalChars) {
-					if (!indexedChars) {
-						var status = this.INDEX_STATE_UNINDEXED;
-					}
-					else {
+				if (chars) {
+					var indexedChars = chars.indexed;
+					var totalChars = chars.total;
+					
+					if (!totalChars && !indexedChars) {
 						var status = this.INDEX_STATE_UNAVAILABLE;
 					}
-				}
-				else if (!indexedChars) {
-					var status = this.INDEX_STATE_UNINDEXED;
-				}
-				else if (indexedChars < totalChars) {
-					var status = this.INDEX_STATE_PARTIAL;
+					else if (!indexedChars) {
+						var status = this.INDEX_STATE_UNINDEXED;
+					}
+					else if (indexedChars < totalChars) {
+						var status = this.INDEX_STATE_PARTIAL;
+					}
+					else {
+						var status = this.INDEX_STATE_INDEXED;
+					}
 				}
 				else {
-					var status = this.INDEX_STATE_INDEXED;
+					var status = this.INDEX_STATE_UNINDEXED;
 				}
 		}
 		return status;

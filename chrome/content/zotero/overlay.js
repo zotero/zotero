@@ -880,7 +880,8 @@ var ZoteroPane = new function()
 				document.getElementById('zotero-attachment-view').setAttribute('label', str);
 				
 				// Display page count
-				var pages = Zotero.Fulltext.getPages(item.ref.getID()).total;
+				var pages = Zotero.Fulltext.getPages(item.ref.getID());
+				var pages = pages ? pages.total : null;
 				var pagesRow = document.getElementById('zotero-attachment-pages');
 				if (pages) {
 					var str = Zotero.getString('itemFields.pages') + ': ' + pages;
