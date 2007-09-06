@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-08-31 21:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-08-31 19:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -2707,6 +2707,155 @@ function doWeb(doc, url) {
 			scrape(URLS[i]);
 		}
 	});
+}');
+
+REPLACE INTO translators VALUES ('303bdfc5-11b8-4107-bca1-63ca97701a0f', '1.0.0b3.r1', '', '2007-09-06 19:30:00', '0', '100', '4', 'ASCE', 'Michael Berkowitz', '^http://ascelibrary.aip.org/.+', 
+'function detectWeb(doc, url) {
+	if (doc.evaluate(''//div[@id="sr-content-wrap"]//div[@class="sr-right"]/p[@class="sr-art-title"]/a'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+		return "multiple";
+	} else {
+		return "journalArticle";
+	}
+}', 
+'function getRIS(doc, url) {
+	var newx = ''//div[@id="sci-art-options-box"]//input[@name="SelectCheck"]'';
+	var key = doc.evaluate(newx, doc, null, XPathResult.ANY_TYPE, null).iterateNext().value;
+	Zotero.debug(key);
+	var citation = ''http://ascelibrary.aip.org/getabs/servlet/GetCitation?source=scitation&PrefType=ARTICLE&PrefAction=Add+Selected&SelectCheck='' + key + ''&fn=open_refworks&downloadcitation=+Go+'';
+	Zotero.Utilities.HTTP.doGet(citation, function(text) {
+		var translator = Zotero.loadTranslator("import");
+		text = text.replace(/RT/, "TY");
+		text = text.replace(/VO/, "VL");
+		text = text.replace(/LK/, "UR");
+		text = text.replace(/YR/, "PY");
+		Zotero.debug(text);
+		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+		translator.setString(text.replace(/([A-Z][A-Z\d]\s)/g, "$1 - "));
+		translator.setHandler("itemDone", function(obj, item) {
+			item.attachments = [
+				{url:item.url, title:"ASCE Snapshot", mimeType:"text/html"},
+				{url:"http://ascelibrary.aip.org/getpdf/servlet/GetPDFServlet?filetype=pdf&id=" + key + "&idtype=cvips&prog=search", title:"EAS Full Text PDF", mimeType:"application/pdf"}
+			];
+			//item.itemType = "journalArticle";
+			item.complete();
+		});
+		translator.translate();
+		Zotero.wait();
+		Zotero.done();
+	});
+}
+
+function doWeb(doc, url) {
+	var articles = new Array();
+	var items = new Object();
+	var xpath = ''//div[@class="sr-right"]/p[@class="sr-art-title"]/a'';
+	if (doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+		var titles = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
+		while (new_title = titles.iterateNext()) {
+			items[new_title.href] = new_title.textContent;
+		}
+		
+		items = Zotero.selectItems(items);
+		
+		for (var i in items) {
+			articles.push(i)
+		}
+	} else {
+		var newx = ''//div[@id="sci-art-options-box"]//input[@name="SelectCheck"]'';
+		var stuff = doc.evaluate(newx, doc, null, XPathResult.ANY_TYPE, null).iterateNext().value;
+		Zotero.debug(stuff);
+		articles.push(url);
+	}
+
+	Zotero.debug(articles);
+	Zotero.Utilities.processDocuments(articles, getRIS, function() {Zotero.done});
+	Zotero.wait();
+
+}
+');
+
+REPLACE INTO translators VALUES ('5af42734-7cd5-4c69-97fc-bc406999bdba', '1.0.0b4.r5', '', '2007-09-06 19:30:00', '0', '100', '4', 'ESA Journals', 'Michael Berkowitz', '^http://www.esajournals.org/*', 
+'function detectWeb(doc, url) {
+	Zotero.debug(doc.title);
+	if (url.indexOf("get-toc") != -1) {
+		return "multiple";
+	} else if (url.indexOf("get-document") != -1 || url.indexOf("get-abstract") != -1) {
+		return "journalArticle";
+	}
+}', 
+'function doWeb(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+	if (prefix == ''x'') return namespace; else return null;
+       	} : null;
+	
+	var items = new Array();
+	if (url.indexOf("get-toc") != -1) {
+		var titlesAr = new Array();
+		var linksAr = new Array();
+		
+		var group_xpath = ''//div[@class="group"]'';
+		var articles = doc.evaluate(group_xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+		while (group = articles.iterateNext()) {
+			//gets article titles
+			titlesAr.push(doc.evaluate(''.//p[@class="title"]'', group, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+			
+			//gets full text links, or abstracts if that''s all that''s available
+			var link_xpath = ''.//p[@class="link"]'';
+			if (group.textContent.indexOf("Full Text") != -1) {
+			link_xpath += ''/a[substring(text(), 1, 4) = "Full"]'';
+			} else if (group.textContent.indexOf("Abstract") != -1) {
+				link_xpath += ''/a[substring(text(), 1, 8) = "Abstract"]'';
+			}
+			linksAr.push(doc.evaluate(link_xpath, group, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href);
+		}
+		
+		var articles = new Object();
+		for (var i = 0 ; i < linksAr.length ; i++) {
+			articles[linksAr[i]] = titlesAr[i];
+		}
+		
+		articles = Zotero.selectItems(articles);
+		
+		
+		
+		for (var i in articles) {
+			items.push(i);
+		}
+	} else {
+		items.push(url);
+	}
+	
+	for (var i = 0 ; i < items.length ; i++) {
+		var re= /<a href=\"([^"]*)\"?>RefWorks Format/;
+		var doi = items[i].split("doi=")[1];
+		var URI = "http://www.esajournals.org/perlserv/?request=cite-builder&doi=" + doi;
+		Zotero.Utilities.HTTP.doGet(URI, function(text) {
+			var newURI = Zotero.Utilities.unescapeHTML(text.match(re)[1]);
+			Zotero.Utilities.HTTP.doGet("http://www.esajournals.org/perlserv/" + newURI, function(text) {
+				var translator = Zotero.loadTranslator("import");
+				text = text.replace(/RT/, "TY");
+				text = text.replace(/VO/, "VL");
+				text = text.replace(/LK/, "UR");
+				text = text.replace(/YR/, "PY");
+				Zotero.debug(text);
+				translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+				translator.setString(text.replace(/([A-Z][A-Z\d]\s)/g, "$1 - "));
+				translator.setHandler("itemDone", function(obj, item) {
+					item.attachments = [
+						{url:item.url, title:"EAS Snapshot", mimeType:"text/html"},
+						{url:"http://www.esajournals.org/perlserv/?request=res-loc&uri=urn%3Aap%3Apdf%3Adoi%3A" + doi, title:"EAS Full Text PDF", mimeType:"application/pdf"}
+					];
+					item.itemType = "journalArticle";
+					item.complete();
+				});
+				translator.translate();
+				Zotero.wait();
+				Zotero.done();
+			});
+		});
+	}
+	Zotero.wait();
 }');
 
 REPLACE INTO translators VALUES ('1f40baef-eece-43e4-a1cc-27d20c0ce086', '1.0.0b4.r1', '', '2007-07-31 19:40:00', '1', '100', '4', 'Engineering Village', 'Ben Parr', '^https?://(?:www\.)?engineeringvillage(2)?\.(?:com|org)', 
@@ -17126,3 +17275,202 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/asa.csl', '2007-
         </layout>
     </bibliography>
 </style>');
+
+
+REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/nature.csl', '2007-09-06 19:30:00', 'Nature Journal', 
+'<?xml version="1.0" encoding="UTF-8"?>
+<?oxygen RNGSchema="file:/Users/mikowitz/Documents/Development/CSLs/csl.rnc" type="compact"?>
+<style xmlns="http://purl.org/net/xbiblio/csl" class="note" xml:lang="en">
+    <info>
+        <title>Nature Journals</title>
+        <id>http://purl.org/net/xbiblio/csl/styles/nature.csl</id>
+        <link>http://purl.org/net/xbiblio/csl/styles/nature.csl</link>
+        <author>
+            <name>Michael Berkowitz</name>
+            <email>michael@songsaboutsnow.com</email>
+        </author>
+        <category term="biology"/>
+        <category term="generic-base"/>
+        <updated>2007-08-29T15:15:00+08:00</updated>
+    </info>
+    <macro name="author">
+        <names variable="author">
+            <name sort-separator=", " delimiter=", " and="symbol" initialize-with="." delimiter-precedes-last="never" name-as-sort-order="all"/>
+        </names>
+    </macro>
+    <macro name="access">
+        <text variable="DOI" prefix=" doi: "/>
+        <substitute>
+            <text variable="URL" prefix=" at &lt;" suffix="&gt;"/>
+        </substitute>
+    </macro>
+    <citation></citation>
+    <bibliography>
+        <option name="et-al-min" value="4"/>
+        <option name="et-al-use-first" value="1"/>
+        <layout>
+            <text variable="citation-number" suffix=". "/>
+            <text macro="author"/>
+            <text variable="title" prefix=" " suffix=". "/>
+            <text variable="container-title" font-style="italic" suffix=" "/>
+            <text variable="volume" suffix=", " font-weight="bold"/>
+            <text variable="page"/>
+            <text macro="access"/>
+            <date prefix=" (" suffix=")." variable="issued">
+                <date-part name="year"/>
+            </date>
+        </layout>
+    </bibliography>
+</style>'
+);
+
+REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/nlm.csl', '2007-09-06 19:30:00', 'National Library of Medicine',
+'<?xml version="1.0" encoding="UTF-8"?>
+<?oxygen RNGSchema="file:/Users/mikowitz/Documents/Development/CSLs/csl.rnc" type="compact"?>
+<style xmlns="http://purl.org/net/xbiblio/csl" class="in-text" xml:lang="en">
+    <info>
+        <title>National Library of Medicine</title>
+        <id>http://purl.org/net/xbiblio/csl/styles/nlm.csl</id>
+        <link>http://purl.org/net/xbiblio/csl/styles/nlm.csl</link>
+        <author>
+            <name>Michael Berkowitz</name>
+            <email>michael@songsaboutsnow.com</email>
+        </author>
+        <category term="generic-base"/>
+        <updated>2007-08-31T15:15:00+08:00</updated>
+    </info>
+    <macro name="author">
+        <names variable="author" suffix=". ">
+            <name sort-separator=" " initialize-with="" name-as-sort-order="all" delimiter=", " delimiter-precedes-last="always"/>
+        </names>
+    </macro>
+    <macro name="editor">
+        <names variable="editor" suffix=", editor(s). ">
+            <name sort-separator=" " initialize-with="" name-as-sort-order="all" delimiter=", " delimiter-precedes-last="always"/>
+        </names>
+    </macro>
+    <macro name="publisher">
+        <text variable="publisher-place" suffix=": "/>
+        <text variable="publisher" suffix="; "/>
+        <date variable="issued">
+            <date-part name="year" suffix=". "/>
+        </date>
+    </macro>
+    <citation>
+        <layout prefix="(" suffix=")" delimiter="; ">
+            <text variable="citation-number"/>
+        </layout>
+    </citation>
+    <bibliography>
+        <option name="et-al-min" value="7"/>
+        <option name="et-al-use-first" value="6"/>
+        <layout>
+            <text variable="citation-number" suffix=". "/>
+            <text macro="author"/>
+            <text variable="title" suffix=". "/>
+            <choose>
+                <if type="book">
+                    <text variable="edition" prefix=" " suffix=" ed. "/>
+                    <text macro="publisher" prefix=" "/>
+                </if>
+                <else-if type="chapter">
+                    <group prefix=" In: " suffix=". ">
+                        <text macro="editor"/>
+                        <text variable="container-title"/>
+                    </group>
+                    <text macro="publisher" prefix=" "/>
+                    <text variable="page" prefix=" p. " suffix="."/>
+                </else-if>
+                <else>
+                    <text variable="container-title" suffix=". " form="short"/>
+                    <date variable="issued" suffix=";">
+                        <date-part name="year" suffix=" "/>
+                        <date-part name="month" form="short" suffix=" "/>
+                        <date-part name="day"/>
+                    </date>
+                    <text variable="volume"/>
+                    <text variable="issue" prefix="(" suffix="):"/>
+                    <text variable="page" suffix="."/>
+                </else>
+            </choose>
+        </layout>
+    </bibliography>
+</style>')
+
+REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/ieee.csl', '2007-09-06 19:30:00', 'IEEE',
+'<?xml version="1.0" encoding="UTF-8"?>
+<?oxygen RNGSchema="file:/Users/mikowitz/Documents/Development/CSLs/csl.rnc" type="compact"?>
+<style xmlns="http://purl.org/net/xbiblio/csl" class="in-text" xml:lang="en">
+    <info>
+        <title>IEEE</title>
+        <id>http://purl.org/net/xbiblio/csl/styles/ieee.csl</id>
+        <link>http://purl.org/net/xbiblio/csl/styles/ieee.csl</link>
+        <author>
+            <name>Michael Berkowitz</name>
+            <email>michael@songsaboutsnow.com</email>
+        </author>
+        <category term="engineering"/>
+        <category term="generic-base"/>
+        <updated>2007-08-31T15:15:00+08:00</updated>
+    </info>
+    <macro name="citation-number">
+        <text variable="citation-number" prefix="[" suffix="]"/>
+    </macro>
+    <macro name="author">
+        <names variable="author">
+            <name initialize-with="." delimiter=", " and="text" name-as-sort-order="all"/>
+        </names>
+    </macro>
+    <macro name="title">
+        <choose>
+            <if type="book">
+                <text variable="title" font-style="italic"/>
+            </if>
+            <else>
+                <text variable="title" prefix=' "' suffix='," '/>
+            </else>
+        </choose>
+    </macro>
+    <macro name="publisher">
+        <text variable="publisher-place" suffix=": " prefix=" "/>
+        <text variable="publisher" suffix=", "/>
+        <date variable="issued">
+            <date-part name="year"/>
+        </date>
+    </macro>
+    <citation>
+        <layout>
+            <text macro="citation-number"/>
+        </layout>
+    </citation>
+    <bibliography>
+        <option name="et-al-min" value="4"/>
+        <option name="et-al-use-first" value="1"/>
+        <layout>
+            <text macro="citation-number"/>
+            <text macro="author" prefix="   " suffix=", "/>
+            <choose>
+                <if type="book">
+                    <text macro="title" suffix=". "/>
+                    <text macro="publisher" suffix="."/>
+                </if>
+                <else-if type="chapter">
+                    <text macro="title"/>
+                    <text variable="container-title" font-style="italic" prefix=" in " suffix=", "/>
+                    <text macro="publisher" suffix=", "/>
+                    <text variable="page" prefix=" pp. " suffix="."/>
+                </else-if>
+                <else>
+                    <text macro="title"/>
+                    <text variable="container-title" font-style="italic" suffix=", "/>
+                    <text variable="volume" prefix=" vol. " suffix=", "/>
+                    <text variable="page" prefix="pp. " suffix=", "/>
+                    <date variable="issued" suffix=".">
+                        <date-part name="month" form="short" suffix=" "/>
+                        <date-part name="year"/>
+                    </date>
+                </else>
+            </choose>
+        </layout>
+    </bibliography>
+</style>')
