@@ -17450,7 +17450,7 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/ieee.csl', '2007
                 <text variable="title" font-style="italic"/>
             </if>
             <else>
-                <text variable="title" prefix=' "' suffix='," '/>
+                <text variable="title" prefix='' "'' suffix=''," ''/>
             </else>
         </choose>
     </macro>
