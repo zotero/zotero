@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-09-06 19:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-09-08 12:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -354,7 +354,7 @@ function doWeb(doc, url){
 	}
 }');
 
-REPLACE INTO translators VALUES ('0dda3f89-15de-4479-987f-cc13f1ba7999', '1.0.0b3.r1', '', '2007-06-16 17:20:00', '0', '100', '4', 'Ancestry.com US Federal Census', 'Elena Razlogova', '^https?://search.ancestry.com/(.*)usfedcen|1890orgcen', 
+REPLACE INTO translators VALUES ('0dda3f89-15de-4479-987f-cc13f1ba7999', '1.0.0b4r1', '', '2007-09-08 12:00:00', '0', '100', '4', 'Ancestry.com US Federal Census', 'Elena Razlogova', '^https?://search.ancestry.com/(.*)usfedcen|1890orgcen|1910uscenindex', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -435,9 +435,6 @@ function scrape(doc) {
 				var year = m[1];
 			}
 		} else { var year = data.ry; }
-		if (year == 1890) {
-			var yearDb = "1890orgcen";
-		} else { var yearDb = year+"usfedcen"; }
 		var state = data.rs.replace(/\+/g, " "); 
 		var county = data.rcnty.replace(/\+/g, " "); // this does not get saved yet because no field is available; the info is in the snapshot
 		var city = data.rcty.replace(/\+/g, " "); 
@@ -463,12 +460,17 @@ function scrape(doc) {
 	newItem.date = year;
 	
 	// get snapshot with all searchable text and a simplified link to the record for the URL field
+	var dbRe = /db=([0-9a-z]+)/;
+	var m = dbRe.exec(doc.location.href);
+	if(m) {
+		db = m[1];
+	}
 	var snapshotRe = /recid=([0-9]+)/;
 	var m = snapshotRe.exec(doc.location.href);
-	if(m) {
-		snapshotURL = "http://search.ancestry.com/cgi-bin/sse.dll?db="+yearDb+"&indiv=1&pf=1&recid="+m[1];
+		if(m) {
+		snapshotURL = "http://search.ancestry.com/cgi-bin/sse.dll?db="+db+"&indiv=1&pf=1&recid="+m[1];
 		newItem.attachments.push({title:"Ancestry.com Snapshot", mimeType:"text/html", url:snapshotURL, snapshot:true});
-		cleanURL = "http://search.ancestry.com/cgi-bin/sse.dll?indiv=1&db="+yearDb+"&recid="+m[1];
+		cleanURL = "http://search.ancestry.com/cgi-bin/sse.dll?indiv=1&db="+db+"&recid="+m[1];
 		newItem.url = cleanURL;
 	}
 			
@@ -536,6 +538,12 @@ function doWeb(doc, url) {
 			year = m[1];
 		}
 		
+		var dbRe = /db=([0-9a-z]+)/;
+		var m = dbRe.exec(doc.location.href);
+		if(m) {
+			db = m[1];
+		}
+
 		//select items
 		var items = new Array();
 		var listElts = doc.evaluate(''//div[@class="g_container"]/div[@class="g_panelWrap"]/div[@class="g_panelCore"]/div[@class="s_container"]/div[@class="p_rsltList"]/table/tbody/tr[@class="tblrowalt record"] | //div[@class="g_container"]/div[@class="g_panelWrap"]/div[@class="g_panelCore"]/div[@class="s_container"]/div[@class="p_rsltList"]/table/tbody/tr[@class="tblrow record"]'', 
@@ -550,7 +558,7 @@ function doWeb(doc, url) {
 			if(m) {
 				recid = m[1];
 			}
-			link = "http://search.ancestry.com/cgi-bin/sse.dll?indiv=1&db="+year+"usfedcen&recid="+recid;
+			link = "http://search.ancestry.com/cgi-bin/sse.dll?indiv=1&db="+db+"&recid="+recid;
 			name = doc.evaluate(''.//span[@class="srchHit"]'', listElt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 			items[link] = Zotero.Utilities.cleanString(name);
 		} 
@@ -1139,14 +1147,15 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('e85a3134-8c1a-8644-6926-584c8565f23e', '1.0.0b3.r1', '', '2007-03-24 22:20:00', 1, 100, 4, 'History Cooperative', 'Simon Kornblith', '^https?://www\.historycooperative\.org[^/]*/(?:journals/.+/.+/.+\.s?html$|cgi-bin/search.cgi)', 
+REPLACE INTO translators VALUES ('e85a3134-8c1a-8644-6926-584c8565f23e', '1.0.0b4.r1', '', '2007-09-08 12:00:00', '1', '100', '4', 'History Cooperative', 'Simon Kornblith', '^https?://www\.historycooperative\.org[^/]*/(?:journals/.+/.+/.+\.s?html$|cgi-bin/search.cgi|journals/.+/.+/)', 
 'function detectWeb(doc, url) {
-	if(doc.title == "History Cooperative: Search Results") {
+	var contents = doc.title.replace("Contents", "");
+	if(doc.title != contents || doc.title == "History Cooperative: Search Results") {
 		return "multiple";
 	} else {
 		return "journalArticle";
 	}
-}',
+}', 
 'function associateMeta(newItem, metaTags, field, zoteroField) {
 	var field = metaTags.namedItem(field);
 	if(field) {
@@ -1165,7 +1174,19 @@ function scrape(doc) {
 	// Cooperative can''t create a proper meta tag
 	var titleRe = /<!--_title_-->(.*)<!--_\/title_-->/;
 	var m = titleRe.exec(doc.getElementsByTagName("body")[0].innerHTML);
-	newItem.title = m[1];
+	if(m) {
+		newItem.title = m[1];
+	} else {
+		var namespace = doc.documentElement.namespaceURI;
+		var nsResolver = namespace ? function(prefix) {
+			if (prefix == ''x'') return namespace; else return null;
+		} : null;
+	
+		var bookTitle = doc.evaluate(''/html/body/form/table/tbody/tr/td[3]/table/tbody/tr/td/i'',
+			doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();	
+		bookTitle = bookTitle.textContent;
+		newItem.title = "Review of "+bookTitle;
+	}
 	
 	associateMeta(newItem, metaTags, "Journal", "publicationTitle");
 	associateMeta(newItem, metaTags, "Volume", "volume");
@@ -1175,6 +1196,7 @@ function scrape(doc) {
 	if(author) {
 		var authors = author.getAttribute("content").split(" and ");
 		for(j in authors) {
+			authors[j] = authors[j].replace("Reviewed by ", "");
 			newItem.creators.push(Zotero.Utilities.cleanAuthor(authors[j], "author"));
 		}
 	}
@@ -1191,7 +1213,8 @@ function scrape(doc) {
 }
 
 function doWeb(doc, url) {
-	if(doc.title == "History Cooperative: Search Results") {
+	var contents = doc.title.replace(" Contents | ", "");
+	if(doc.title != contents || doc.title == "History Cooperative: Search Results") {
 		var items = Zotero.Utilities.getItemArray(doc, doc, ''^https?://[^/]+/journals/.+/.+/.+\.html$'');
 		items = Zotero.selectItems(items);
 		
