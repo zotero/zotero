@@ -8888,6 +8888,7 @@ function doWeb(doc, url) {
 	}
 	Zotero.wait();
 }');
+
 REPLACE INTO translators VALUES ('ce7a3727-d184-407f-ac12-52837f3361ff', '1.0.0b3.r1', '', '2006-12-12 23:41:00', 1, 100, 4, 'NYTimes.com', 'Simon Kornblith', '^http://(?:query\.nytimes\.com/search/query|(?:select\.|www\.)?nytimes\.com/.)', 
 'function detectWeb(doc, url) {
 	if(doc.title.substr(0, 30) == "The New York Times: Search for") {
@@ -14689,7 +14690,7 @@ function doExport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('881f60f2-0802-411a-9228-ce5f47b64c7d', '1.0.0b4.r1', '', '2007-03-28 00:45:00', 1, 100, 3, 'EndNote/Refer/BibIX', 'Simon Kornblith', 'txt',
+REPLACE INTO translators VALUES ('881f60f2-0802-411a-9228-ce5f47b64c7d', '1.0.0b4.r1', '', '2007-09-08 12:00:00', '1', '100', '3', 'EndNote/Refer/BibIX', 'Simon Kornblith', 'txt', 
 'Zotero.configure("dataMode", "line");
 
 function detectImport() {
@@ -14710,7 +14711,7 @@ function detectImport() {
 			}
 		}
 	}
-}',
+}', 
 'var fieldMap = {
 	T:"title",
 	S:"series",
@@ -14783,6 +14784,7 @@ var inputTypeMap = {
 	"Chart or Table":"artwork",
 	"Classical Work":"book",
 	"Conference Proceedings":"conferencePaper",
+	"Conference Paper":"conferencePaper",
 	"Edited Book":"book",
 	"Electronic Article":"journalArticle",
 	"Electronic Book":"book",
@@ -14799,6 +14801,7 @@ var inputTypeMap = {
 var isEndNote = false;
 
 function processTag(item, tag, value) {
+	value = Zotero.Utilities.superCleanString(value);
 	if(fieldMap[tag]) {
 		item[fieldMap[tag]] = value;
 	} else if(inputFieldMap[tag]) {
