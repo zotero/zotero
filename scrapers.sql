@@ -354,7 +354,7 @@ function doWeb(doc, url){
 	}
 }');
 
-REPLACE INTO translators VALUES ('0dda3f89-15de-4479-987f-cc13f1ba7999', '1.0.0b4.r1', '', '2007-09-08 12:00:00', '0', '100', '4', 'Ancestry.com US Federal Census', 'Elena Razlogova', '^https?://search.ancestry.com/(.*)usfedcen|1890orgcen|1910uscenindex', 
+REPLACE INTO translators VALUES ('0dda3f89-15de-4479-987f-cc13f1ba7999', '1.0.0b4r1', '', '2007-09-08 12:00:00', '0', '100', '4', 'Ancestry.com US Federal Census', 'Elena Razlogova', '^https?://search.ancestry.com/(.*)usfedcen|1890orgcen|1910uscenindex', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -8759,7 +8759,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('d0b1914a-11f1-4dd7-8557-b32fe8a3dd47', '1.0.0b3.r1', '', '2007-06-22 17:30:00', '1', '100', '4', 'EBSCOhost', 'Simon Kornblith', '^https?://[^/]+/ehost/(?:results|detail)', 
+REPLACE INTO translators VALUES ('d0b1914a-11f1-4dd7-8557-b32fe8a3dd47', '1.0.0b3.r1', '', '2007-09-08 12:00:00', '1', '100', '4', 'EBSCOhost', 'Simon Kornblith', '^https?://[^/]+/ehost/(?:results|detail)', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -8767,12 +8767,13 @@ REPLACE INTO translators VALUES ('d0b1914a-11f1-4dd7-8557-b32fe8a3dd47', '1.0.0b
 	} : null;
 	
 	// See if this is a seach results page
-	var searchResult = doc.evaluate(''//table[@class="result-list-inner"]'', doc, nsResolver,
-	                                XPathResult.ANY_TYPE, null).iterateNext();
+	var searchResult = doc.evaluate(''//ul[@class="result-list"]/li/div[@class="result-list-record"]'', doc, nsResolver,
+	                                XPathResult.ANY_TYPE, null).iterateNext();         
 	if(searchResult) {
 		return "multiple";
 	}
-	var xpath = ''//tr[td[@class="left-content-ft"][text() = "Persistent link to this record:"''
+	
+	var xpath = ''//div[@class="record-display"]/dl[@class="citation-fields"]/dt[text() = "Persistent link to this record:"''
 		+''or text() = "Vínculo persistente a este informe:"''
 		+''or text() = "Lien permanent à cette donnée:"''
 		+''or text() = "Permanenter Link zu diesem Datensatz:"''
@@ -8784,7 +8785,7 @@ REPLACE INTO translators VALUES ('d0b1914a-11f1-4dd7-8557-b32fe8a3dd47', '1.0.0b
 		+''or text() = "레코드 링크 URL:"''
 		+''or text() = "Постоянная ссылка на эту запись:"''
 		+''or text() = "Bu kayda sürekli bağlantı:"''
-		+''or text() = "Μόνιμος σύνδεσμος σε αυτό το αρχείο:"]]/td[@class="right-content-ft"]'';
+		+''or text() = "Μόνιμος σύνδεσμος σε αυτό το αρχείο:"]'';
 
 	var persistentLink = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 	if(persistentLink) {
@@ -8834,86 +8835,59 @@ function doWeb(doc, url) {
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == ''x'') return namespace; else return null;
 	} : null;
-	
+
 	var hostRe = new RegExp("^(https?://[^/]+)/");
 	var m = hostRe.exec(url);
 	host = m[1];
+	                                
+	var searchResult = doc.evaluate(''//ul[@class="result-list"]/li/div[@class="result-list-record"]'', doc, nsResolver,
+	                                XPathResult.ANY_TYPE, null).iterateNext();                              
 	
-	var queryRe = /\?(.*)$/;
-	var m = queryRe.exec(url);
-	var queryString = m[1];
-		
-	var viewState = doc.evaluate(''//input[@name="__VIEWSTATE"]'', doc, nsResolver,
-								 XPathResult.ANY_TYPE, null).iterateNext();
-	viewState = fullEscape(viewState.value);
-	
-	var searchResult = doc.evaluate(''//table[@class="result-list-inner"]'', doc, nsResolver,
-	                                XPathResult.ANY_TYPE, null).iterateNext();
 	if(searchResult) {
 		var items = new Object();
-		
-		var tableRows = doc.evaluate(''//table[@class="cluster-result-record-table"]/tbody/tr'',
+		var titles = doc.evaluate(''//div[@class="result-list-record"]/span[@class="medium-font"]/a'',
 		                             doc, nsResolver, XPathResult.ANY_TYPE, null);
-		var tableRow;
-		// Go through table rows
-		while(tableRow = tableRows.iterateNext()) {
-			var title = doc.evaluate(''.//a[@class="title-link"]'', tableRow, nsResolver,
-			                         XPathResult.ANY_TYPE, null).iterateNext();
-			var addLink = doc.evaluate(''.//a[substring(@id, 1, 11)="addToFolder"]'', tableRow, nsResolver,
-			                           XPathResult.ANY_TYPE, null).iterateNext();
-			if(title && addLink) {
-				items[addLink.href] = title.textContent;
-			}
+		var title;
+		// Go through titles
+		while(title = titles.iterateNext()) {
+			items[title.href] = title.textContent;
 		}
 		
 		var items = Zotero.selectItems(items);
 		if(!items) {
 			return true;
 		}
-		
-		var citations = new Array();
-		var argRe = /''([^'']+)''/;
+
+		var uris = new Array();
 		for(var i in items) {
-			var m = argRe.exec(i);
-			citations.push(m[1]);
+			uris.push(i);
 		}
-
-		var saveString = "__EVENTTARGET=FolderItem:AddItem&IsCallBack=true&SearchTerm1=test&SortOptionDropDown=date&__EVENTARGUMENT="+citations.join(",")+"&";
-		var folderString = "__EVENTTARGET=ctl00%24ctl00%24ToolbarArea%24toolbar%24folderControl%24lnkFolder&__EVENTARGUMENT=&__VIEWSTATE="+viewState+"&ctl00%24ctl00%24ToolbarArea%24toolbar%24drpLanguages=&ctl00%24ctl00%24MainContentArea%24MainContentArea%24ctl11%24SearchTerm1=test&ctl00%24ctl00%24MainContentArea%24MainContentArea%24DbSortOptionControl%24SortOptionDropDown=date";
-		//clear saved folder first
-		var clearUrl = url.replace("results?", "folder?");
-		clearUrl = clearUrl.replace("vid=2", "vid=3");
-		var clearString = "__EVENTTARGET=&__EVENTARGUMENT=&ctl00%24ctl00%24MainContentArea%24MainContentArea%24btnRemoveAll=Remove+All&ajax=enabled";
-
-		Zotero.Utilities.HTTP.doPost(clearUrl, clearString, function(text){
-			Zotero.Utilities.HTTP.doPost(url, saveString, function(text) {				// mark records
-				Zotero.Utilities.HTTP.doPost(url, folderString, function(text) {		// view folder
-					var postLocation = /<form name="aspnetForm" method="post" action="([^"]+)"/
-					var m = postLocation.exec(text);
-					var folderURL = m[1].replace(/&amp;/g, "&");
-					
-					m = viewStateMatch.exec(text);
-					var folderViewState = m[1];
-					var deliverString = "__EVENTTARGET=ctl00%24ctl00%24MainContentArea%24MainContentArea%24btnDelivery%24lnkExport&__EVENTARGUMENT=&__VIEWSTATE="+fullEscape(folderViewState)+"&ajax=enabled";
-					Zotero.Utilities.HTTP.doPost(host+"/ehost/"+folderURL,
-												  deliverString, downloadFunction);		// download records as RIS
-				});
-			});
+		
+		Zotero.Utilities.processDocuments(uris, function(newDoc){
+			var xpath = ''/html/body/div[@class="indent"]/center//a[@class="nav"]'';
+			var elmts = newDoc.evaluate(xpath, newDoc, nsResolver, XPathResult.ANY_TYPE, null);
+			var saveCitation = elmts.iterateNext();
+			var viewSavedCitations = elmts.iterateNext();
+			var viewState = newDoc.evaluate(''//input[@name="__VIEWSTATE"]'', newDoc, nsResolver,
+								 XPathResult.ANY_TYPE, null).iterateNext();
+			viewState = fullEscape(viewState.value);
+			var deliverString = "__EVENTTARGET=ctl00%24ctl00%24MainContentArea%24MainContentArea%24topDeliveryControl%24deliveryButtonControl%24lnkExport&__EVENTARGUMENT=&__VIEWSTATE="+viewState+"&ajax=enabled";
+			Zotero.Utilities.HTTP.doPost(newDoc.location.href, deliverString, downloadFunction);
 		});
 	} else {
-		// If this is a view page, find the link to the citation
+		// If this is a view page, find the link to the citation		
 		var xpath = ''/html/body/div[@class="indent"]/center//a[@class="nav"]'';
 		var elmts = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
 		var saveCitation = elmts.iterateNext();
 		var viewSavedCitations = elmts.iterateNext();
-		
+		var viewState = doc.evaluate(''//input[@name="__VIEWSTATE"]'', doc, nsResolver,
+								 XPathResult.ANY_TYPE, null).iterateNext();
+		viewState = fullEscape(viewState.value);
 		var deliverString = "__EVENTTARGET=ctl00%24ctl00%24MainContentArea%24MainContentArea%24topDeliveryControl%24deliveryButtonControl%24lnkExport&__EVENTARGUMENT=&__VIEWSTATE="+viewState+"&ajax=enabled";
 		Zotero.Utilities.HTTP.doPost(url, deliverString, downloadFunction);
 	}
-	
 	Zotero.wait();
 }');
-
 REPLACE INTO translators VALUES ('ce7a3727-d184-407f-ac12-52837f3361ff', '1.0.0b3.r1', '', '2006-12-12 23:41:00', 1, 100, 4, 'NYTimes.com', 'Simon Kornblith', '^http://(?:query\.nytimes\.com/search/query|(?:select\.|www\.)?nytimes\.com/.)', 
 'function detectWeb(doc, url) {
 	if(doc.title.substr(0, 30) == "The New York Times: Search for") {
@@ -17450,7 +17424,7 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/ieee.csl', '2007
                 <text variable="title" font-style="italic"/>
             </if>
             <else>
-                <text variable="title" prefix='' "'' suffix=''," ''/>
+                <text variable="title" prefix=' "' suffix='," '/>
             </else>
         </choose>
     </macro>
