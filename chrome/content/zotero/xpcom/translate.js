@@ -1118,21 +1118,25 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 				var uri = IOService.newURI(item.path, "", null);
 				var file = uri.QueryInterface(Components.interfaces.nsIFileURL).file;
 				
-				if(item.url) {
-					// import from nsIFile
+				if (!file.exists()) {
+					var myID = Zotero.Attachments.createMissingAttachment(
+						item.url ? Zotero.Attachments.LINK_MODE_IMPORTED_URL
+							: Zotero.Attachments.LINK_MODE_IMPORTED_FILE,
+						file, item.url ? item.url : null, item.title,
+						item.mimeType, item.charset, attachedTo);
+				}
+				else if (item.url) {
 					var myID = Zotero.Attachments.importSnapshotFromFile(file,
-						item.url, item.title, item.mimeType,
-						(item.charset ? item.charset : null), attachedTo);
-					var newItem = Zotero.Items.get(myID);
-				} else {
-					// import from nsIFile
+						item.url, item.title, item.mimeType, item.charset,
+						attachedTo);
+				}
+				else {
 					var myID = Zotero.Attachments.importFromFile(file, attachedTo);
-					// get attachment item
-					var newItem = Zotero.Items.get(myID);
 				}
 			}
 			
 			var typeID = Zotero.ItemTypes.getID("attachment");
+			var newItem = Zotero.Items.get(myID);
 			
 			// add note if necessary
 			if(item.note) {
