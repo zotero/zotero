@@ -102,7 +102,8 @@ function ChromeExtensionHandler() {
 				
 				switch (type){
 					case 'collection':
-						var results = Zotero.getItems(ids);
+						var col = Zotero.Collections.get(ids);
+						var results = col.getChildItems();
 						break;
 					
 					case 'search':
@@ -124,20 +125,132 @@ function ChromeExtensionHandler() {
 				
 				if (!results) {
 					var results = Zotero.Items.get(ids);
-				}
-				var items = [];
-				// Only include parent items
-				for (var i=0; i<results.length; i++) {
-					if (!results[i].getSource()) {
-						items.push(results[i]);
+					
+					if (!results) {
+						mimeType = 'text/html';
+						content = 'Invalid ID';
+						break generateContent;
 					}
 				}
 				
-				if (!items){
-					mimeType = 'text/html';
-					content = 'Invalid ID';
-					break generateContent;
+				var items = [];
+				var itemsHash = {}; // key = itemID, val = position in |items|
+				var searchItemIDs = {}; // hash of all selected items
+				var searchParentIDs = {}; // hash of parents of selected child items
+				var searchChildIDs = {}; // hash of selected chlid items
+				
+				var includeAllChildItems = Zotero.Prefs.get('report.includeAllChildItems');
+				var combineChildItems = Zotero.Prefs.get('report.combineChildItems');
+				
+				for (var i=0; i<results.length; i++) {
+					// Don't add child items directly
+					// (instead mark their parents for inclusion below)
+					var sourceItemID = results[i].getSource();
+					if (sourceItemID) {
+						searchParentIDs[sourceItemID] = true;
+						searchChildIDs[results[i].getID()] = true;
+						
+						// Don't include all child items if any child
+						// items were selected
+						includeAllChildItems = false;
+					}
+					// If combining children, add matching parents
+					else if (combineChildItems) {
+						itemsHash[results[i].getID()] = items.length;
+						items.push(results[i].toArray());
+						// Flag item as a search match
+						items[items.length - 1].reportSearchMatch = true;
+					}
+					searchItemIDs[results[i].getID()] = true;
 				}
+				
+				// If including all child items, add children of all matched
+				// parents to the child array
+				if (includeAllChildItems) {
+					for (var id in searchItemIDs) {
+						if (!searchChildIDs[id]) {
+							var children = [];
+							var item = Zotero.Items.get(id);
+							var func = function (ids) {
+								if (ids) {
+									for (var i=0; i<ids.length; i++) {
+											searchChildIDs[ids[i]] = true;
+									}
+								}
+							};
+							func(item.getNotes());
+							func(item.getAttachments());
+						}
+					}
+				}
+				
+				if (combineChildItems) {
+					// Add parents of matches if not parents aren't matches themselves
+					for (var id in searchParentIDs) {
+						if (!searchItemIDs[id]) {
+							var item = Zotero.Items.get(id);
+							itemsHash[id] = items.length;
+							items.push(item.toArray());
+						}
+					}
+					
+					// Add children to reportChildren property of parents
+					for (var id in searchChildIDs) {
+						var item = Zotero.Items.get(id);
+						var parentItemID = item.getSource();
+						if (!items[itemsHash[parentItemID]].reportChildren) {
+							items[itemsHash[parentItemID]].reportChildren = {
+								notes: [],
+								attachments: []
+							};
+						}
+						if (item.isNote()) {
+							items[itemsHash[parentItemID]].reportChildren.notes.push(item.toArray());
+						}
+						if (item.isAttachment()) {
+							items[itemsHash[parentItemID]].reportChildren.attachments.push(item.toArray());
+						}
+					}
+				}
+				// If not combining children, add a parent/child pair
+				// for each matching child
+				else {
+					for (var id in searchChildIDs) {
+						var item = Zotero.Items.get(id);
+						var parentID = item.getSource();
+						var parentItem = Zotero.Items.get(parentID);
+						
+						if (!itemsHash[parentID]) {
+							// If parent is a search match and not yet added,
+							// add on its own
+							if (searchItemIDs[parentID]) {
+								itemsHash[parentID] = [items.length];
+								items.push(parentItem.toArray());
+								items[items.length - 1].reportSearchMatch = true;
+							}
+							else {
+								itemsHash[parentID] = [];
+							}
+						}
+						
+						// Now add parent and child
+						itemsHash[parentID].push(items.length);
+						items.push(parentItem.toArray());
+						if (item.isNote()) {
+							items[items.length - 1].reportChildren = {
+								notes: [item.toArray()],
+								attachments: []
+							};
+						}
+						else if (item.isAttachment()) {
+							items[items.length - 1].reportChildren = {
+								notes: [],
+								attachments: [item.toArray()]
+							};
+						}
+					}
+				}
+				
 				
 				// Sort items
 				if (!sortBy) {
@@ -171,8 +284,8 @@ function ChromeExtensionHandler() {
 					// Multidimensional sort
 					do {
 						var cmp = collation.compareString(0,
-							a.getField(sorts[index].field),
-							b.getField(sorts[index].field)
+							a[sorts[index].field],
+							b[sorts[index].field]
 						);
 						
 						if (cmp == 0) {
@@ -188,10 +301,11 @@ function ChromeExtensionHandler() {
 				};
 				
 				items.sort(compareFunction);
-				
-				// Convert item objects to export arrays
-				for (var i=0; i<items.length; i++) {
-					items[i] = items[i].toArray();
+				for (var i in items) {
+					if (items[i].reportChildren) {
+						items[i].reportChildren.notes.sort(compareFunction);
+						items[i].reportChildren.attachments.sort(compareFunction);
+					}
 				}
 				
 				// Pass off to the appropriate handler
@@ -207,7 +321,7 @@ function ChromeExtensionHandler() {
 					default:
 						format = 'html';
 						mimeType = 'application/xhtml+xml';
-						content = Zotero.Report.generateHTMLDetails(items);
+						content = Zotero.Report.generateHTMLDetails(items, combineChildItems);
 				}
 			}
 			catch (e){
@@ -362,7 +476,8 @@ function ChromeExtensionHandler() {
 					
 					switch (type){
 						case 'collection':
-							var results = Zotero.getItems(ids);
+							var col = Zotero.Collections.get(ids);
+							var results = col.getChildItems();
 							break;
 
 						case 'search':

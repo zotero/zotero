@@ -470,7 +470,8 @@ var Zotero = new function(){
 				"No chrome package registered for chrome://communicator",
 				'[JavaScript Error: "Components is not defined" {file: "chrome://nightly/content/talkback/talkback.js',
 				'[JavaScript Error: "document.getElementById("sanitizeItem")',
-				'chrome://webclipper'
+				'chrome://webclipper',
+				'No chrome package registered for chrome://piggy-bank'
 			];
 			
 			for (var i=0; i<blacklist.length; i++) {
@@ -1007,7 +1008,7 @@ Zotero.Keys = new function() {
 **/
 Zotero.Hash = function(){
 	this.length = 0;
-	this.items = new Array();
+	this.items = {};
 	
 	// Public methods defined on prototype below
 	

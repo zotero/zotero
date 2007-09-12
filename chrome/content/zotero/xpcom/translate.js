@@ -1690,19 +1690,19 @@ Zotero.Translate.prototype._export = function() {
 		this._itemsLeft = this.items;
 	} else if(this.collection) {
 		// get items in this collection
-		this._itemsLeft = Zotero.getItems(this.collection.getID());
+		this._itemsLeft = this.collection.getChildItems();
 		
 		if(this.configOptions.getCollections) {
 			// get child collections
 			this._collectionsLeft = Zotero.getCollections(this.collection.getID(), true);
 			// get items in child collections
 			for each(var collection in this._collectionsLeft) {
-				this._itemsLeft = this._itemsLeft.concat(Zotero.getItems(collection.getID()));
+				this._itemsLeft = this._itemsLeft.concat(collection.getChildItems());
 			}
 		}
 	} else {
-		// get all items
-		this._itemsLeft = Zotero.getItems();
+		// get all top-level items
+		this._itemsLeft = Zotero.Items.getAll(true);
 		
 		if(this.configOptions.getCollections) {
 			// get all collections

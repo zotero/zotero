@@ -58,7 +58,7 @@ var Zotero_Report_Interface = new function() {
 	
 	
 	/*
-	 * Load a report for the currently selected collection
+	 * Load a report for the currently selected items
 	 */
 	function loadItemReport() {
 		var items = ZoteroPane.getSelectedItems(true);

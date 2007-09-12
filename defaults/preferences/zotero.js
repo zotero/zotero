@@ -47,6 +47,10 @@ pref("extensions.zotero.fulltext.textMaxLength", 500000);
 pref("extensions.zotero.fulltext.pdfMaxPages", 100);
 pref("extensions.zotero.search.useLeftBound", true);
 
+// Reports
+pref("extensions.zotero.report.includeAllChildItems", true);
+pref("extensions.zotero.report.combineChildItems", true);
+
 // Export and citation settings
 pref("extensions.zotero.export.lastTranslator", '14763d24-8ba0-45df-8f52-b8d1108e7ac9');
 pref("extensions.zotero.export.translatorSettings", 'true,false');

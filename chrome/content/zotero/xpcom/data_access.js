@@ -1624,7 +1624,8 @@ Zotero.Item.prototype.getAttachmentCharset = function(){
 
 
 /**
-* Returns an array of attachment itemIDs that have this item as a source
+* Returns an array of attachment itemIDs that have this item as a source,
+* or FALSE if none
 **/
 Zotero.Item.prototype.getAttachments = function(){
 	if (this.isAttachment()){
@@ -2490,10 +2491,16 @@ Zotero.Items = new function(){
 	
 	/*
 	 * Returns all items in the database
+	 *
+	 * If |onlyTopLevel|, don't include child items
 	 */
-	function getAll(){
+	function getAll(onlyTopLevel) {
 		var sql = 'SELECT itemID FROM items';
-		// DEBUG: default order?
+		if (onlyTopLevel) {
+			sql += ' A LEFT JOIN itemNotes B USING (itemID) '
+			+ 'LEFT JOIN itemAttachments C ON (C.itemID=A.itemID) '
+			+ 'WHERE B.sourceItemID IS NULL AND C.sourceItemID IS NULL';
+		}
 		
 		var ids = Zotero.DB.columnQuery(sql);
 		return this.get(ids);
@@ -3201,6 +3208,29 @@ Zotero.Collection.prototype.removeItems = function(itemIDs) {
 	}
 	Zotero.DB.commitTransaction();
 }
+
+
+/*
+ * Returns an array of child items of this collecetion as Zotero.Item instances,
+ * or FALSE if none
+ */
+Zotero.Collection.prototype.getChildItems = function () {
+	if (!this._childItemsLoaded){
+		this._loadChildItems();
+	}
+	
+	if (this._childItems.length == 0) {
+		return false;
+	}
+	
+	var toLoad = [];
+	for (var id in this._childItems.items) {
+		toLoad.push(id);
+	}
+	
+	return Zotero.Items.get(toLoad);
+}
+
 
 /**
 * Check if an item belongs to the collection
@@ -4741,51 +4771,4 @@ Zotero.getCollections = function(parent, recursive){
 	}
 	
 	return toReturn;
-}
-
-
-/*
- * Zotero.getItems(parent)
- *
- * Returns an array of all items that are children of a collection--or all
- * items if no parent provided--as Zotero.Item instances
- */
-Zotero.getItems = function(parent){
-	var toReturn = new Array();
-	
-	if (!parent){
-		// Not child items
-		var sql = "SELECT A.itemID FROM items A LEFT JOIN itemNotes B USING (itemID) "
-			+ "LEFT JOIN itemAttachments C ON (C.itemID=A.itemID) WHERE B.sourceItemID IS NULL"
-			+ " AND C.sourceItemID IS NULL";
-	}
-	else {
-		var sql = 'SELECT itemID FROM collectionItems '
-			+ 'WHERE collectionID=' + parent;
-	}
-	
-	var children = Zotero.DB.columnQuery(sql);
-	
-	if (!children){
-		if (!parent){
-			Zotero.debug('No items in library', 5);
-		}
-		else {
-			Zotero.debug('No child items of collection ' + parent, 5);
-		}
-		return toReturn;
-	}
-	
-	return Zotero.Items.get(children);
-}
-
-
-Zotero.getAttachments = function(){
-	var toReturn = [];
-	
-	var sql = "SELECT A.itemID FROM items A JOIN itemAttachments B ON "
-		+ "(B.itemID=A.itemID) WHERE B.sourceItemID IS NULL";
-	var items = Zotero.DB.query(itemAttachments);
-	
-	return Zotero.Items.get(items);
 }

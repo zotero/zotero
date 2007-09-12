@@ -85,17 +85,42 @@ Zotero.Utilities.prototype.cleanAuthor = function(author, type, useComma) {
 	return {firstName:firstName, lastName:lastName, creatorType:type};
 }
 
+
+/*
+ * Removes leading and trailing whitespace from a string
+ */
+Zotero.Utilities.prototype.trim = function(s) {
+	if (typeof(s) != "string") {
+		throw "trim: argument must be a string";
+	}
+	
+	s = s.replace(/^\s+/, "");
+	return s.replace(/\s+$/, "");
+}
+
+
 /*
  * Cleans whitespace off a string and replaces multiple spaces with one
  */
-Zotero.Utilities.prototype.cleanString = function(s) {
-	if(typeof(s) != "string") {
-		throw "cleanString: argument must be a string";
+Zotero.Utilities.prototype.trimInternal = function(s) {
+	if (typeof(s) != "string") {
+		throw "trimInternal: argument must be a string";
 	}
 	
 	s = s.replace(/[\xA0\r\n\s]+/g, " ");
-	s = s.replace(/^\s+/, "");
-	return s.replace(/\s+$/, "");
+	return this.trim(s);
+}
+
+
+
+/*
+ * Cleans whitespace off a string and replaces multiple spaces with one
+ *
+ * DEPRECATED: use trimInternal()
+ */
+Zotero.Utilities.prototype.cleanString = function(s) {
+	Zotero.debug("cleanString() is deprecated; use trimInternal() instead", 2);
+	return this.trimInternal(s);
 }
 
 /*

@@ -15,13 +15,29 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 h2 {
-	margin: 0 0 .75em;
-	padding: 0 0 0.25em;
+	margin: 0 0 .5em;
+}
+
+h2.parentItem {
+	font-weight: bold;
+	font-size: 1em;
+	padding: 0 0 .5em;
 	border-bottom: 1px solid #ccc;
 }
 
+/* If combining children, display parent slightly larger */
+ul.report.combineChildItems h2.parentItem {
+	font-size: 1.1em;
+	padding-bottom: .75em;
+	margin-bottom: .4em;
+}
+
+h2.parentItem .title {
+	font-weight: normal;
+}
+
 h3 {
-	margin-bottom: .5em;
+	margin-bottom: .6em;
 	font-weight: bold !important;
 	font-size: 1em;
 	display: block;
@@ -46,7 +62,11 @@ ul {
 	padding-left: 0;
 }
 
-/* Display tags as comma-separated lists */
+/* Tags */
+h3.tags {
+	font-size: 1.1em;
+}
+
 ul.tags {
 	line-height: 1.75em;
 	list-style: none;
@@ -62,14 +82,33 @@ ul.tags li:not(:last-child):after {
 
 
 /* Child notes */
+h3.notes {
+	font-size: 1.1em;
+}
+
 ul.notes {
 	margin-bottom: 1.2em;
 }
-ul.notes li {
+
+ul.notes > li:first-child p {
+	margin-top: 0;
+}
+
+ul.notes > li {
+	padding: .7em 0;
+}
+
+ul.notes > li:not(:last-child) {
 	border-bottom: 1px #ccc solid;
 }
-ul.notes li:last-child {
-	border-bottom: none;
+
+
+ul.notes > li p:first-child {
+	margin-top: 0;
+}
+
+ul.notes > li p:last-child {
+	margin-bottom: 0;
 }
 
 
@@ -80,4 +119,22 @@ ul.notes li p, li.note p {
 	white-space: -pre-wrap;  /* Opera 4-6 */
 	white-space: -o-pre-wrap;  /* Opera 7 */
 	word-wrap: break-word;  /* Internet Explorer 5.5+ */
+}
+
+/* Display tags within child notes inline */
+ul.notes h3.tags {
+	display: inline;
+	font-size: 1em;
+}
+
+ul.notes h3.tags:after {
+	content: ' ';
+}
+
+ul.notes ul.tags {
+	display: inline;
+}
+
+ul.notes ul.tags li:not(:last-child):after {
+	content: ', ';
 }
