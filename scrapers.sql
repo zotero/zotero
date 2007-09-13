@@ -23,7 +23,7 @@
 
 -- Set the following timestamp to the most recent scraper update date
 
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-09-09 22:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-09-13 12:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -771,6 +771,164 @@ function doWeb(doc, url) {
 	
 	processURLs(urls);
 	Zotero.wait();
+}');
+
+REPLACE INTO translators VALUES ('a2363670-7040-4cb9-8c48-6b96584e92ee', '1.0.0b4r1', '', '2007-09-13 12:00:00', '0', '100', '4', 'Florida University Libraries (Endeca 1)', 'Sean Takats', '^http://[^/]+/[^\.]+.jsp\?Nt.=', 
+'function detectWeb(doc, url){
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+		} : null;
+		
+	var xpath = ''//div[starts-with(@id, "briefTitle")]'';
+	if(doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+		return "multiple";
+	}
+	if (url.indexOf("&V=D")){
+		return "book";
+	} else if (url.indexOf("&V=M")){
+		return "book";
+	} else if (url.indexOf("&V=U")){
+		return "book";
+	}
+}', 
+'function doWeb(doc, url){
+	var newUris = new Array();
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+		} : null;	
+	var xpath = ''//div[starts-with(@id, "briefTitle")]/a'';
+	var elmts = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+	var elmt;
+	if(elmt = elmts.iterateNext()) {
+		// search page
+		var items = new Array();
+		do {
+			items[elmt.href] = Zotero.Utilities.cleanString(elmt.textContent);
+			Zotero.debug(elmt.textContent);
+		} while (elmt = elmts.iterateNext());
+		
+		items = Zotero.selectItems(items);
+		if(!items) {
+			return true;
+		}
+		for(var i in items) {
+			var newUri = i.replace(/&V=./, "&V=M");
+			newUris.push(newUri);
+		}
+	} else {
+		// single page
+		var newURL = url.replace(/&V=./, "&V=M");
+		newUris.push(newURL);
+	}
+	var translator = Zotero.loadTranslator("import");
+	translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
+	var marc = translator.getTranslatorObject();
+	Zotero.Utilities.processDocuments(newUris, function(newDoc) {
+		var uri = newDoc.location.href;
+		var xpath = ''//tr[@class="trGenContent"][td[3]]'';
+		var elmts = newDoc.evaluate(xpath, newDoc, nsResolver, XPathResult.ANY_TYPE, null);
+		var elmt;
+		
+		var record = new marc.record();
+		while(elmt = elmts.iterateNext()) {
+			var field = Zotero.Utilities.superCleanString(doc.evaluate(''./TD[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+			var value = doc.evaluate(''./TD[3]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+			
+			if(field == "LDR") {
+				record.leader = value;
+			} else if(field != "FMT") {
+				
+				Zotero.debug("field=" + field);
+				value = value.replace(/\|([a-z]) /g, marc.subfieldDelimiter+"$1");
+				
+				var code = field.substring(0, 3);
+				var ind = "";
+				if(field.length > 3) {
+					ind = field[3];
+					if(field.length > 4) {
+						ind += field[4];
+					}
+				}
+				
+				record.addField(code, ind, value);
+			}
+		}
+		
+		var newItem = new Zotero.Item();
+		record.translate(newItem);
+		
+		var domain = url.match(/https?:\/\/([^/]+)/);
+		newItem.repository = domain[1]+" Library Catalog";
+		
+		newItem.complete();
+	}, function() { Zotero.done(); }, null);
+	Zotero.wait();	
+}');
+
+REPLACE INTO translators VALUES ('da440efe-646c-4a18-9958-abe1f7d55cde', '1.0.0b4r1', '', '2007-09-13 12:00:00', '0', '100', '4', 'NCSU Library (Endeca 2)', 'Sean Takats', '^https?://[^\.]+.lib.ncsu.edu/(?:web2/tramp2\.exe|catalog/\?)', 
+'function detectWeb(doc, url) { 
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	var xpath = ''//a[contains(text(), "MARC record")]'';
+	if(doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+		return "book";
+	}
+	xpath = ''//span[@class="resultTitle"]/a'';
+	if(doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+		return "multiple";
+	}
+}', 
+'function scrape(text){
+	var tempidRe = new RegExp("/web2/tramp2\.exe/goto/([^?]+)\?");
+	var tempidMatch = tempidRe.exec(text);
+	var tempid = tempidMatch[1];
+	
+	marcUri = "http://catalog.lib.ncsu.edu/web2/tramp2.exe/download_hitlist/" + tempid;
+	marcUri = marcUri + "/NCSUCatResults.mrc?server=1home&format=MARC&server=1home&item=1&item_source=1home";
+	Zotero.Utilities.HTTP.doGet(marcUri, function(text) {
+		// load translator for MARC
+		var marc = Zotero.loadTranslator("import");
+		marc.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
+		marc.setString(text);	
+		marc.translate();
+	}, function() {Zotero.done()}, null);
+}
+
+function doWeb(doc, url) { 
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	var xpath = ''//span[@class="resultTitle"]/a'';
+	var elmts = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+	var elmt;
+	if(elmt = elmts.iterateNext()) {
+		// search results page
+		var newUris = new Array();
+		var items = new Array();
+		do {
+			items[elmt.href] = Zotero.Utilities.cleanString(elmt.textContent);
+		} while (elmt = elmts.iterateNext());
+		items = Zotero.selectItems(items);
+		if(!items) {
+			return true;
+		}
+		for(var i in items) {
+			newUris.push(i);
+		}
+		Zotero.Utilities.HTTP.doGet(newUris, function(text) { scrape(text) },
+			function() {}, null);		
+		Zotero.wait();
+	} else if (elmt = doc.evaluate(''//a[contains(text(), "MARC record")]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
+		// single book
+		scrape(elmt.href);
+		Zotero.wait();
+	}
 }');
 
 REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b3.r1', '', '2007-07-31 16:45:00', '1', '100', '4', 'Library Catalog (Voyager)', 'Simon Kornblith', 'Pwebrecon\.cgi', 
