@@ -17018,7 +17018,7 @@ REPLACE INTO csl VALUES('http://www.zotero.org/namespaces/CSL/chicago-note-bibli
 	</bibliography>
 </style>');
 
-REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/mla.csl', '2007-09-13 20:50:16', 'Modern Language Association',
+REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/mla.csl', '2007-09-13 21:23:00', 'Modern Language Association',
 '<?oxygen RNGSchema="csl.rnc" type="compact"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="in-text" xml:lang="en">
   <info>
@@ -17030,10 +17030,10 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/mla.csl', '2007-
       <email>simon@simonster.com</email>
     </author>
     <category term="generic-base"/>
-    <updated>2007-08-14T17:41:10+00:00</updated>
+    <updated>2007-09-13T21:23:00+00:00</updated>
   </info>
   <macro name="editor-translator">
-    <names variable="editor translator" prefix="(" suffix=")" delimiter=". ">
+    <names variable="editor translator" delimiter=". ">
       <label form="verb-short" text-transform="capitalize" suffix=". "/>
       <name and="symbol" delimiter=", "/>
     </names>
@@ -17061,17 +17061,13 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/mla.csl', '2007-
     </names>
   </macro>
   <macro name="access">
-    <group>
-      <text term="retrieved" text-transform="capitalize" suffix=" "/>
-      <date variable="accessed" suffix=", ">
-        <date-part name="month" suffix=" "/>
-        <date-part name="day" suffix=", "/>
-        <date-part name="year"/>
+    <group delimiter=" ">
+      <date variable="accessed">
+		<date-part name="day" suffix=" "/>
+		<date-part name="month" form="short" include-period="true" suffix=" "/>
+		<date-part name="year"/>
       </date>
-      <group>
-        <text term="from" suffix=" "/>
-        <text variable="URL"/>
-      </group>
+      <text variable="URL" prefix="<" suffix=">"/>
     </group>
   </macro>
   <macro name="title">
@@ -17182,7 +17178,7 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/mla.csl', '2007-
           </group>
         </else>
       </choose>
-      <text prefix=" " macro="access"/>
+      <text prefix=" " suffix="." macro="access"/>
     </layout>
   </bibliography>
 </style>');
