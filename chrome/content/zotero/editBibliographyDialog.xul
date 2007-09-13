@@ -27,21 +27,21 @@
 <!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
 
 <dialog
-	id="add-citation-dialog"
+	id="edit-bibliography-dialog"
 	orient="vertical"
-	title="&zotero.integration.addEditCitation.title;"
-	width="600" height="450"
-	onload="Zotero_Citation_Dialog.load();"
+	title="&zotero.integration.editBibliography.title;"
+	width="750" height="450"
+	onload="Zotero_Bibliography_Dialog.load();"
 	onunload="doUnload();"
-	ondialogaccept="Zotero_Citation_Dialog.accept();"
-	ondialogcancel="Zotero_Citation_Dialog.cancel();"
+	ondialogaccept="Zotero_Bibliography_Dialog.accept();"
+	buttons="cancel,accept"
 	xmlns:html="http://www.w3.org/1999/xhtml"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	style="padding: 0">
 	
 	<script src="include.js"/>
 	<script src="selectItemsDialog.js"/>
-	<script src="addCitationDialog.js"/>
+	<script src="editBibliographyDialog.js"/>
 	
 	<vbox id="zotero-select-items-container" flex="1" style="padding: 1em">
 		<vbox flex="1">
@@ -55,7 +55,7 @@
 					</hbox>
 					<hbox flex="1" style="margin-top: 5px">
 						<tree id="zotero-collections-tree"
-							style="width: 200px;" hidecolumnpicker="true" seltype="single"
+							style="width: 150px;" hidecolumnpicker="true" seltype="single"
 							onselect="onCollectionSelected();">
 							<treecols>
 								<treecol
@@ -69,7 +69,7 @@
 					
 						<tree id="zotero-items-tree"
 							flex="1" hidecolumnpicker="true" seltype="single"
-							onselect="Zotero_Citation_Dialog.treeItemSelected();">
+							onselect="Zotero_Bibliography_Dialog.treeItemSelected();">
 							<treecols>
 								<treecol
 									id="zotero-items-column-title" primary="true"
@@ -96,58 +96,20 @@
 					</hbox>
 				</vbox>
 						
-				<hbox hidden="true" id="multiple-sources">
+				<hbox id="source-list">
 					<vbox align="center" pack="center">
-						<toolbarbutton id="add" oncommand="Zotero_Citation_Dialog.add()" disabled="true"/>
-						<toolbarbutton id="remove" oncommand="Zotero_Citation_Dialog.remove()" disabled="true"/>
+						<toolbarbutton id="add" oncommand="Zotero_Bibliography_Dialog.add()" disabled="true"/>
+						<toolbarbutton id="remove" oncommand="Zotero_Bibliography_Dialog.remove()" disabled="true"/>
 					</vbox>
 					<vbox>
-						<checkbox id="keepSorted" hidden="true" checked="false" oncommand="Zotero_Citation_Dialog.sortCitation()" label="&zotero.citation.keepSorted.label;"/>
-						<listbox id="citation-list" flex="1" align="stretch" seltype="single"
-							onselect="Zotero_Citation_Dialog.listItemSelected();"></listbox>
+						<label value="&zotero.integration.references.label;"/>
+						<listbox id="item-list" flex="1" align="stretch" seltype="single"
+							style="width: 250px;" onselect="Zotero_Bibliography_Dialog.listItemSelected();"/>
 					</vbox>
 				</hbox>
-			</hbox>
-			
-			<hbox align="stretch" style="margin-top: 8px">
-				<vbox flex="1">
-					<hbox align="center">
-						<label value="&zotero.citation.prefix.label;"/>
-						<textbox oninput="Zotero_Citation_Dialog.confirmRegenerate(false)" onchange="Zotero_Citation_Dialog.confirmRegenerate(true)" class="fix" id="prefix" align="stretch" flex="1"/>
-					</hbox>
-					<hbox align="center">
-						<label value="&zotero.citation.suffix.label;"/>
-						<textbox oninput="Zotero_Citation_Dialog.confirmRegenerate(false)" onchange="Zotero_Citation_Dialog.confirmRegenerate(true)" class="fix" id="suffix" align="stretch" flex="1"/>
-					</hbox>
-					<spacer flex="1"/>
-				</vbox>
-				<separator flex="4"/>
-				<vbox flex="1">
-					<hbox align="stretch">
-						<menulist onchange="Zotero_Citation_Dialog.confirmRegenerate(true)" id="locatorType">
-							<menupopup id="locator-type-popup"/>
-						</menulist>
-						<textbox oninput="Zotero_Citation_Dialog.confirmRegenerate(false)" onchange="Zotero_Citation_Dialog.confirmRegenerate(true)" id="locator" flex="1"/>
-					</hbox>
-					<separator style="height: 2px" flex="1"/>
-					<checkbox oncommand="Zotero_Citation_Dialog.confirmRegenerate(true)" id="suppressAuthor" label="&zotero.citation.suppressAuthor.label;"/>
-				</vbox>
 			</hbox>
 		</vbox>
 		
-		<textbox id="editor" type="styled" hidden="true" flex="1"/>
-		
-		<hbox style="margin-top: 15px">
-			<hbox>
-				<button id="show-editor-button" oncommand="Zotero_Citation_Dialog.toggleEditor()"/>
-				<button id="multiple-sources-button" oncommand="Zotero_Citation_Dialog.toggleMultipleSources()"/>
-			</hbox>
-			<vbox flex="1" align="end">
-				<hbox>
-					<button dlgtype="cancel"/>
-					<button dlgtype="accept" disabled="true"/>
-				</hbox>
-			</vbox>
-		</hbox>
+		<textbox id="editor" type="styled" flex="1"/>
 	</vbox>
 </dialog>

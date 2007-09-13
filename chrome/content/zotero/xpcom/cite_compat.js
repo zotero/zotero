@@ -310,19 +310,28 @@ Zotero.CSL.Compat.ItemSet.prototype.add = function(items) {
 		}
 		this.items.push(item);
 		returnList.push(item);
+		
 		item.zoteroItem = item;
+		
+		item.setProperty = function(property, value) {
+			item._csl[property] = value;
+		}
+		
+		item.getProperty = function(property) {
+			return (item._csl[property] ? item._csl[property] : "");
+		}
 	}
 	return returnList;
 }
 
 Zotero.CSL.Compat.ItemSet.prototype.remove = function(items) {
 	for(var i in items) {
-		if(!item) continue;
 		if(items[i] instanceof Zotero.Item) {
 			var item = items[i];
 		} else {
 			var item = Zotero.Items.get(i);
 		}
+		if(!item) continue;
 		this.items.splice(this.items.indexOf(item), 1);
 	}
 }
@@ -456,8 +465,6 @@ Zotero.CSL.Compat.prototype.formatCitation = function(citation, format) {
 			var locator = citation.citationItems[0].locator;
 			
 			if(locator) {
-				var locatorType = Zotero.CSL.locatorTypeTerms[citation.citationItems[0].locatorType];
-				
 				// search for elements with the same serialization
 				var element = this._getFieldDefaults("locator");
 				if(!element) {
@@ -469,7 +476,7 @@ Zotero.CSL.Compat.prototype.formatCitation = function(citation, format) {
 				
 				if(element) {
 					string.append("., ");
-					string.appendLocator(locatorType, locator, element);
+					string.appendLocator(citation.citationItems[0].locatorType, locator, element);
 				}
 			}
 		}
@@ -484,7 +491,7 @@ Zotero.CSL.Compat.prototype.formatCitation = function(citation, format) {
 			
 			if(citationItem.prefix) string.append(citationItem.prefix+" ");
 			var citationString = this._getCitation(citationItem.item,
-				position, Zotero.CSL.locatorTypeTerms[citationItem.locatorType],
+				position, citationItem.locatorType,
 				citationItem.locator, format, this._cit, ignore);
 			string.concat(citationString);
 			if(citationItem.suffix) string.append(citationItem.suffix+" ");
@@ -536,7 +543,10 @@ Zotero.CSL.Compat.prototype.formatBibliography = function(itemSet, format) {
 	for(var i in items) {
 		var item = items[i];
 		
-		var string = this._getCitation(item, "first", false, false, format, this._bib).get();
+		var string = item.getProperty("bibliography-"+format);
+		if(!string) {
+			string = this._getCitation(item, "first", false, false, format, this._bib).get();
+		}
 		if(!string) {
 			continue;
 		}
@@ -1085,7 +1095,7 @@ Zotero.CSL.Compat.prototype._processCreators = function(type, element, creators,
 			var firstName, lastName;
 			for(var i=0; i<maxCreators; i++) {
 				var firstName = "";
-				if(element["form"] != "short") {
+				if(element["form"] && element["form"] != "short") {
 					if(child["initialize-with"] != undefined) {
 						// even if initialize-with is simply an empty string, use
 						// initials

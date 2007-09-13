@@ -65,11 +65,16 @@
 					this._toggle = [];
 					
 					// why is this necessary? because the browser takes time to
-					// load, but doesn't appear to fire an event when loaded.
-					// why does this work? no idea.
+					// load, but doesn't appear to fire an event when loaded,
+					// when recovering from being hidden. why does this work?
+					// no idea.
 					this._isLoaded = false;
 					var me = this;
-					window.setTimeout(function() {me._loaded()}, 1);
+					if(this.hasAttribute("hidden")) {
+						window.setTimeout(function() {me._loaded()}, 1);
+					} else {
+						this._browser.contentWindow.addEventListener("load", function() {me._loaded()}, false);
+					}
 			]]></constructor>
 			
 			<!-- Called when loaded. Until the browser is loaded, we can't do 
@@ -137,7 +142,7 @@
 				<setter><![CDATA[
 					this._readonly = val;
 					if(this._isLoaded) {
-						if(val == true) {
+						if(val) {
 							this._browser.contentDocument.designMode = "off";
 						} else {
 							this._browser.contentDocument.designMode = "on";
@@ -201,7 +206,9 @@
 						this._browser.contentDocument.write("<body>"+html+"</body>");
 						this._browser.contentDocument.close();
 						this._browser.contentDocument.designMode = (this._readonly ? "off" : "on");
-						this._browser.contentDocument.execCommand("styleWithCSS", false, this._styleWithCSS);
+						try {
+							this._browser.contentDocument.execCommand("styleWithCSS", false, this._styleWithCSS);
+						} catch(e) {}
 						
 						this._updateButtons();
 					} else {

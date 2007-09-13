@@ -34,6 +34,7 @@ var Zotero_Citation_Dialog = new function () {
 	var _lastSelected = null;
 	var _previewShown = false;
 	var _suppressNextTreeSelect = false;
+	var _locatorIndexArray = {};
 	var _autoRegeneratePref;
 	var _acceptButton;
 	var _sortCheckbox;
@@ -45,8 +46,8 @@ var Zotero_Citation_Dialog = new function () {
 	this.toggleEditor = toggleEditor;
 	this.treeItemSelected = treeItemSelected;
 	this.listItemSelected = listItemSelected;
-	this.addCitation = addCitation;
-	this.deleteCitation = deleteCitation;
+	this.add = add;
+	this.remove = remove;
 	this.sortCitation = sortCitation;
 	this.confirmRegenerate = confirmRegenerate;
 	this.accept = accept;
@@ -66,7 +67,6 @@ var Zotero_Citation_Dialog = new function () {
 		
 		// find accept button
 		_acceptButton = document.getElementById("add-citation-dialog").getButton("accept");
-		
 		_autoRegeneratePref = Zotero.Prefs.get("integration.autoRegenerate");
 		
 		// if a style with sortable citations, present checkbox
@@ -74,7 +74,27 @@ var Zotero_Citation_Dialog = new function () {
 			_sortCheckbox = document.getElementById("keepSorted");
 			_sortCheckbox.hidden = false;
 			_sortCheckbox.checked = true;
+			io.citation.properties.sort = true;
 		}
+		
+		// load locators
+		var locators = Zotero.CSL.Global.getLocatorStrings();
+		var menu = document.getElementById("locatorType");
+		var popup = document.getElementById("locator-type-popup");
+		var i = 0;
+		for(var value in locators) {
+			var locator = locators[value];
+			locator = locator[0].toUpperCase()+locator.substr(1);
+			// add to popup
+			var child = document.createElement("menuitem");
+			child.setAttribute("value", value);
+			child.setAttribute("label", locator);
+			popup.appendChild(child);
+			// add to array
+			_locatorIndexArray[value] = i;
+			i++;
+		}
+		menu.selectedIndex = 0;
 		
 		// load (from selectItemsDialog.js)
 		doLoad();
@@ -88,15 +108,22 @@ var Zotero_Citation_Dialog = new function () {
 				selectItem(io.citation.citationItems[0].itemID);	// from selectItemsDialog.js
 				for(var property in _preserveData) {
 					if(io.citation.citationItems[0][property]) {
-						document.getElementById(property)[_preserveData[property]] = io.citation.citationItems[0][property];
+						if(property == "locatorType") {
+							document.getElementById(property)[_preserveData[property]] = _locatorIndexArray[io.citation.citationItems[0][property]];
+						} else {
+							document.getElementById(property)[_preserveData[property]] = io.citation.citationItems[0][property];
+						}
 					}
 				}
 			} else {
 				// multiple citations
 				toggleMultipleSources();
 				for(var i=0; i<io.citation.citationItems.length; i++) {
-					_addItem(io.citation.citationItems[i].itemID);
-					_itemData[io.citation.citationItems[i].itemID] = io.citation.citationItems[i];
+					var item = Zotero.Items.get(io.citation.citationItems[i].itemID);
+					if(item) {
+						_addItem(item);
+						_itemData[io.citation.citationItems[i].itemID] = io.citation.citationItems[i];
+					}
 				}
 			}
 			
@@ -105,6 +132,8 @@ var Zotero_Citation_Dialog = new function () {
 				toggleEditor(io.citation.properties.custom);
 				io.citation.properties.custom = undefined;
 			}
+			
+			_updateAccept();
 		}
 	}
 	
@@ -160,7 +189,7 @@ var Zotero_Citation_Dialog = new function () {
 			// disable boxes if item not added; otherwise, enable
 			_itemSelected(hasBeenAdded ? itemID : false);
 			// disable adding nothing, or things already added
-			document.getElementById("citation-add").disabled = !itemID || hasBeenAdded;
+			document.getElementById("add").disabled = !itemID || hasBeenAdded;
 		} else {
 			_updateAccept();
 			_updatePreview();
@@ -175,17 +204,20 @@ var Zotero_Citation_Dialog = new function () {
 		var itemID = (selectedListItem ? selectedListItem.value : false);
 		_itemSelected(itemID);
 		
-		document.getElementById("citation-delete").disabled = !itemID;
+		document.getElementById("remove").disabled = !itemID;
 	}
 	
 	/*
 	 * Adds a citation to the multipleSources list
 	 */
-	function addCitation() {
+	function add() {
 		// get selected item (from selectItemsDialog.js)
 		var item = getSelectedItems()[0];
 		_itemSelected(item.getID());
 		_addItem(item);
+		
+		// don't let someone select it again
+		document.getElementById("add").disabled = true;
 		
 		// allow user to press OK
 		_updateAccept();
@@ -196,7 +228,7 @@ var Zotero_Citation_Dialog = new function () {
 	/*
 	 * Deletes a citation from the multipleSources list
 	 */
-	function deleteCitation() {
+	function remove() {
 		var citationList = document.getElementById("citation-list");
 		var selectedListItem = citationList.getSelectedItem(0);
 		var itemID = selectedListItem.value;
@@ -217,6 +249,7 @@ var Zotero_Citation_Dialog = new function () {
 	 * Sorts the list of citations
 	 */
 	function sortCitation() {
+		io.citation.properties.sort = _sortCheckbox.checked;
 		if(_sortCheckbox.checked) {
 			_getCitation();
 			
@@ -226,22 +259,14 @@ var Zotero_Citation_Dialog = new function () {
 				citationList.removeChild(citationList.firstChild);
 			}
 			
-			// add surrogate items to citation
-			for(var i=0; i<io.citation.citationItems.length; i++) {
-				io.citation.citationItems[i].item = new Zotero.CSL.Item(Zotero.Items.get(io.citation.citationItems[i].itemID));
-			}
-			io.citation.sort();
+			// run preview function to re-sort, if it hasn't already been
+			// run
+			if(!_previewShown) io.previewFunction();
 			
 			// add items back to list
 			for(var i=0; i<io.citation.citationItems.length; i++) {
-				var item = io.citation.citationItems[i].item.zoteroItem;
-				
-				var itemNode = document.createElement("listitem");
-				itemNode.setAttribute("value", item.getID());
-				itemNode.setAttribute("label", item.getField("title"));
-				itemNode.setAttribute("class", "listitem-iconic");
-				itemNode.setAttribute("image", item.getImageSrc());
-				document.getElementById("citation-list").appendChild(itemNode);
+				var item = Zotero.Items.get(io.citation.citationItems[i].itemID);
+				_addItem(item);
 			}
 		}
 	}
@@ -365,12 +390,22 @@ var Zotero_Citation_Dialog = new function () {
 			var property = _preserveData[box];
 			
 			// save property
-			if(_lastSelected) _itemData[_lastSelected][box] = domBox[property];
+			if(_lastSelected) {
+				if(property == "locatorType") {
+					_itemData[_lastSelected][box] = domBox.selectedItem.value;
+				} else {
+					_itemData[_lastSelected][box] = domBox[property];
+				}
+			}
 			// restore previous property
 			if(itemID) {
 				domBox.disabled = false;
 				if(_itemData[itemID] && _itemData[itemID][box] !== undefined) {
-					domBox[property] = _itemData[itemID][box];
+					if(property == "locatorType") {
+						domBox[property] = _locatorIndexArray[_itemData[itemID][box]];
+					} else {
+						domBox[property] = _itemData[itemID][box];
+					}
 				}
 			} else if(itemID !== undefined) {
 				domBox.disabled = true;
@@ -413,7 +448,11 @@ var Zotero_Citation_Dialog = new function () {
 			var citationItem = new Zotero.CSL.CitationItem();
 			citationItem.itemID = items[0];
 			for(var property in _preserveData) {
-				citationItem[property] = document.getElementById(property)[_preserveData[property]];
+				if(property == "locatorType") {
+					citationItem[property] = document.getElementById(property).selectedItem.value;
+				} else {
+					citationItem[property] = document.getElementById(property)[_preserveData[property]];
+				}
 			}
 			io.citation.citationItems = [citationItem];
 		}
@@ -429,8 +468,5 @@ var Zotero_Citation_Dialog = new function () {
 		itemNode.setAttribute("class", "listitem-iconic");
 		itemNode.setAttribute("image", item.getImageSrc());
 		document.getElementById("citation-list").appendChild(itemNode);
-		
-		// don't let someone select it again
-		document.getElementById("citation-add").disabled = true;
 	}
 }

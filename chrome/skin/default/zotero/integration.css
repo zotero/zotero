@@ -1,18 +1,25 @@
-#citation-add {
+#add {
 	list-style-image: url('chrome://zotero/skin/citation-add.png');
 }
 
-#citation-add[disabled="true"] {
+#add[disabled="true"] {
 	list-style-image: url('chrome://zotero/skin/citation-add-gray.png');
 }
 
-#citation-delete {
+#remove {
 	list-style-image: url('chrome://zotero/skin/citation-delete.png');
 }
 
-#citation-delete[disabled="true"] {
+#remove[disabled="true"] {
 	list-style-image: url('chrome://zotero/skin/citation-delete-gray.png');
 }
+
+#add .toolbarbutton-text, #remove .toolbarbutton-text
+{
+	margin: 0 !important;
+	padding: 0 !important;
+}
+
 
 #prefix, #suffix {
 	width: 200px;

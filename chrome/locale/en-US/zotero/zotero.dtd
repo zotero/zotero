@@ -110,6 +110,7 @@
 
 <!ENTITY zotero.integration.docPrefs.title				"Document Preferences">
 <!ENTITY zotero.integration.addEditCitation.title		"Add/Edit Citation">
+<!ENTITY zotero.integration.editBibliography.title		"Edit Bibliography">
 
 <!ENTITY zotero.progress.title							"Progress">
 
@@ -143,3 +144,5 @@
 <!ENTITY zotero.integration.prefs.formatUsing.label		"Format Using:">
 <!ENTITY zotero.integration.prefs.bookmarks.label		"Bookmarks">
 <!ENTITY zotero.integration.prefs.bookmarks.caption		"Bookmarks are preserved across Microsoft Word and OpenOffice.org, but may be accidentally modified.">
+
+<!ENTITY zotero.integration.references.label			"References in Bibliography">
