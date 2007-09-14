@@ -914,6 +914,12 @@ Zotero.Integration.Session.prototype.updateItemSet = function() {
  */
 Zotero.Integration.Session.prototype.sortItemSet = function() {
 	if(!this.itemSetIsSorted) {
+		if(!this.itemSet.sortable) {
+			// sort by order in document
+			var me = this;
+			this.itemSet.items.sort(function(a, b) { return me.sortByOrderAdded(a, b) });
+		}
+		
 		var citationChanged = this.itemSet.resort();
 		
 		// add to list of updated item IDs
@@ -922,6 +928,23 @@ Zotero.Integration.Session.prototype.sortItemSet = function() {
 		}
 		
 		this.itemSetIsSorted = true;
+	}
+}
+
+/*
+ * sorts items by order added
+ */
+Zotero.Integration.Session.prototype.sortByOrderAdded = function(a, b) {
+	var aID = a.getID();
+	var bID = b.getID();
+	
+	if(this.citationsByItemID[aID] && this.citationsByItemID[aID].length) {
+		if(!this.citationsByItemID[bID] || !this.citationsByItemID[bID].length) return -1;
+		return this.citationsByItemID[aID][0].properties.index-this.citationsByItemID[bID][0].properties.index;
+	} else if(this.citationsByItemID[bID] && this.citationsByItemID[bID].length) {
+		return 1;
+	} else {
+		return 0;
 	}
 }
 

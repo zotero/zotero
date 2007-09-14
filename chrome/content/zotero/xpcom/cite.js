@@ -1653,12 +1653,24 @@ Zotero.CSL.ItemSet = function(items, csl) {
 		this.options[option.@name.toString()] = option.@value.toString();
 	}
 	
-	for each(var thisIf in this.citation..if) {
+	// check for disambiguate condition
+	for each(var thisIf in csl._csl..if) {
 		if(thisIf.@disambiguate.length()) {
 			this.options["disambiguate-condition"] = true;
 			break;
 		}
 	}
+	
+	// check for citation number
+	for each(var thisText in csl._csl..text) {
+		if(thisText.@variable == "citation-number") {
+			this.options["citation-number"] = true;
+			break;
+		}
+	}
+	
+	// set sortable
+	this.sortable = !!this.bibliography.sort.key.length();
 	
 	this.items = [];
 	this.itemsById = {};
@@ -1667,10 +1679,14 @@ Zotero.CSL.ItemSet = function(items, csl) {
 	this.add(items);
 	
 	// check which disambiguation options are enabled
-	enabledDisambiguationOptions = new Array();
+	this._citationChangingOptions = new Array();
+	this._disambiguate = false;
 	for(var option in this.options) {
 		if(option.substr(0, 12) == "disambiguate" && this.options[option]) {
-			enabledDisambiguationOptions.push(option);
+			this._citationChangingOptions.push(option);
+			this._disambiguate = true;
+		} else if(option == "citation-number" && this.options[option]) {
+			this._citationChangingOptions.push(option);
 		}
 	}
 	
@@ -1741,7 +1757,7 @@ Zotero.CSL.ItemSet.prototype.remove = function(items) {
  */
 Zotero.CSL.ItemSet.prototype.resort = function() {
 	// sort, if necessary
-	if(this.bibliography.sort.key.length()) {
+	if(this.sortable) {
 		var me = this;
 		
 		this.items = this.items.sort(function(a, b) {
@@ -1751,14 +1767,14 @@ Zotero.CSL.ItemSet.prototype.resort = function() {
 	
 	// first loop through to collect disambiguation data by item, so we can
 	// see if any items have changed; also collect last names
-	if(enabledDisambiguationOptions.length) {
-		var oldDisambiguate = new Array();
-		for(var i in enabledDisambiguationOptions) {
-			oldDisambiguate[i] = new Array();
+	if(this._citationChangingOptions.length) {
+		var oldOptions = new Array();
+		for(var i in this._citationChangingOptions) {
+			oldOptions[i] = new Array();
 			for(var j in this.items) {
 				if(this.items[j] == undefined) continue;
-				oldDisambiguate[i][j] = this.items[j].getProperty(enabledDisambiguationOptions[i]);
-				this.items[j].setProperty(enabledDisambiguationOptions[i], "");
+				oldOptions[i][j] = this.items[j].getProperty(this._citationChangingOptions[i]);
+				this.items[j].setProperty(this._citationChangingOptions[i], "");
 			}
 		}
 	}
@@ -1835,7 +1851,7 @@ Zotero.CSL.ItemSet.prototype.resort = function() {
 	}
 	
 	// loop through once to determine where items equal the previous item
-	if(enabledDisambiguationOptions.length) {
+	if(this._disambiguate) {
 		var citationsEqual = [];
 		for(var i=1; i<this.items.length; i++) {
 			citationsEqual[i] = this.csl._compareCitations(this.items[i-1], this.items[i], this.citation);
@@ -1858,7 +1874,7 @@ Zotero.CSL.ItemSet.prototype.resort = function() {
 		var names = namesByItem[i];
 		var disambiguated = false;
 		
-		if(enabledDisambiguationOptions.length && i != 0 && citationsEqual[i] == 0) {
+		if(this._disambiguate && i != 0 && citationsEqual[i] == 0) {
 			// some options can only be applied if there are actual authors
 			if(names && lastNames && this.options["disambiguate-add-names"]) {
 				// try adding names to disambiguate
@@ -1947,16 +1963,24 @@ Zotero.CSL.ItemSet.prototype.resort = function() {
 				// if we cannot disambiguate with the conditional, revert
 				if(me.csl._compareCitations(lastItem, item) == 0) {
 					if(!oldCondition) {
-						lastItem.setProperty("disambiguate-conditon", undefined);
+						lastItem.setProperty("disambiguate-condition", undefined);
 					}
 					item.setProperty("disambiguate-condition", undefined);
 				}
 			}
 		}
 		
-		if(this.options["subsequent-author-substitute"] && names
-				&& exactMatch == 0) {
-			item.setProperty("subsequent-author-substitute", true);
+		if(this.options["subsequent-author-substitute"]) {
+			var namesDiffer = false;
+			for(var j=0; j<numberOfNames; j++) {
+				namesDiffer = (names[j].getNameVariable("lastName") != lastNames[j].getNameVariable("lastName")
+						|| (names[j].getNameVariable("firstName") != lastNames[j].getNameVariable("firstName")));
+				if(namesDiffer) break;
+			}
+			
+			if(!namesDiffer) {
+				item.setProperty("subsequent-author-substitute", true);
+			}
 		}
 		
 		item.setProperty("citation-number", citationNumber++);
@@ -1968,11 +1992,11 @@ Zotero.CSL.ItemSet.prototype.resort = function() {
 	
 	// find changed citations
 	var changedCitations = new Array();
-	if(enabledDisambiguationOptions.length) {
+	if(this._citationChangingOptions.length) {
 		for(var j in this.items) {
 			if(this.items[j] == undefined) continue;
-			for(var i in enabledDisambiguationOptions) {
-				if(this.items[j].getProperty(enabledDisambiguationOptions[i]) != oldDisambiguate[i][j]) {
+			for(var i in this._citationChangingOptions) {
+				if(this.items[j].getProperty(this._citationChangingOptions[i]) != oldOptions[i][j]) {
 					changedCitations.push(this.items[j]);
 				}
 			}
