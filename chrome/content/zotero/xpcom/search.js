@@ -829,6 +829,12 @@ Zotero.Search.prototype._buildQuery = function(){
 						// Search descendent collections if recursive search
 						if (recursive){
 							var col = Zotero.Collections.get(condition['value']);
+							if (!col) {
+								var msg = "Collection " + condition['value'] + " specified in saved search doesn't exist";
+								Zotero.debug(msg, 2);
+								Zotero.log(msg, 'warning', 'chrome://zotero/content/xpcom/search.js');
+								continue;
+							}
 							var descendents = col.getDescendents(false, 'collection');
 							if (descendents){
 								for (var k in descendents){
