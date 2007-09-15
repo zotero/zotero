@@ -1398,10 +1398,12 @@ Zotero.ItemTreeView.prototype.onDragStart = function (evt,transferData,action)
 	
 	var items = Zotero.Items.get(this.saveSelection());
 	
-	// If at least one file is a non-web-link attachment, enable dragging to file system
+	// If at least one file is a non-web-link attachment and can be found,
+	// enable dragging to file system
 	for (var i=0; i<items.length; i++) {
 		if (items[i].isAttachment() &&
-				items[i].getAttachmentLinkMode() != Zotero.Attachments.LINK_MODE_LINKED_URL ) {
+				items[i].getAttachmentLinkMode() != Zotero.Attachments.LINK_MODE_LINKED_URL
+					&& items[i].getFile()) {
 			transferData.data.addDataForFlavour("application/x-moz-file-promise",
 				new Zotero.ItemTreeView.fileDragDataProvider(), 0, Components.interfaces.nsISupports);
 			break;
@@ -1472,7 +1474,20 @@ Zotero.ItemTreeView.fileDragDataProvider.prototype = {
 			var items = {};
 			transferable.getTransferData("zotero/item", items, dataSize);
 			items.value.QueryInterface(Components.interfaces.nsISupportsString);
-			var items = Zotero.Items.get(items.value.data.split(','));
+			var draggedItems = Zotero.Items.get(items.value.data.split(','));
+			
+			var items = [];
+			
+			// Make sure files exist
+			var notFoundNames = [];
+			for (var i=0; i<draggedItems.length; i++) {
+				if (draggedItems[i].getFile()) {
+					items.push(draggedItems[i]);
+				}
+				else {
+					notFoundNames.push(draggedItems[i].getField('title'));
+				}
+			}
 			
 			// If using the temp directory, create a directory to store multiple
 			// files, since we can (it seems) only pass one nsIFile in data.value
@@ -1497,10 +1512,6 @@ Zotero.ItemTreeView.fileDragDataProvider.prototype = {
 				}
 				
 				var file = items[i].getFile();
-				if (!file) {
-					Components.utils.reportError("File not found for item " + items[i].getID());
-					continue;
-				}
 				
 				// Determine if we need to copy multiple files for this item
 				// (web page snapshots)
@@ -1613,11 +1624,32 @@ Zotero.ItemTreeView.fileDragDataProvider.prototype = {
 				dataLen.value = 4;
 			}
 			
+			if (notFoundNames.length || existingItems.length) {
+				var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+					.getService(Components.interfaces.nsIPromptService);
+			}
+			
+			// Display alert if files were not found
+			if (notFoundNames.length > 0) {
+				// On platforms that use a temporary directory, an alert here
+				// would interrupt the dragging process, so we just log a
+				// warning to the console
+				if (useTemp) {
+					for each(var name in notFoundNames) {
+						var msg = "Attachment file for dragged item '" + name + "' not found";
+						Zotero.log(msg, 'warning',
+							'chrome://zotero/content/xpcom/itemTreeView.js');
+					}
+				}
+				else {
+					promptService.alert(null, Zotero.getString('general.warning'),
+						Zotero.getString('dragAndDrop.filesNotFound') + "\n\n"
+						+ notFoundNames.join("\n"));
+				}
+			}
+			
 			// Display alert if existing files were skipped
 			if (existingItems.length > 0) {
-				var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-										.getService(Components.interfaces.nsIPromptService);
-				
 				promptService.alert(null, Zotero.getString('general.warning'),
 					Zotero.getString('dragAndDrop.existingFiles') + "\n\n"
 					+ existingFileNames.join("\n"));
