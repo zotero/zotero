@@ -2855,7 +2855,7 @@ Zotero.Items = new function(){
 		}
 		
 		// Should be the same as parts in Zotero.Item.loadFromID
-		var sql = 'SELECT I.itemID, I.itemTypeID, I.dateModified, '
+		var sql = 'SELECT I.itemID, I.itemTypeID, I.dateAdded, I.dateModified, '
 			+ getFirstCreatorSQL() + ', '
 			+ "(SELECT COUNT(*) FROM itemNotes WHERE sourceItemID=I.itemID) AS numNotes, "
 			+ "(SELECT COUNT(*) FROM itemAttachments WHERE sourceItemID=I.itemID) AS numAttachments "
@@ -2881,7 +2881,7 @@ Zotero.Items = new function(){
 		
 		if (!arguments[0]) {
 			_itemsLoaded = true;
-			_cachedFields = ['itemID', 'itemTypeID', 'dateModified',
+			_cachedFields = ['itemID', 'itemTypeID', 'dateAdded', 'dateModified',
 				'firstCreator', 'numNotes', 'numAttachments', 'numChildren'];
 		}
 	}
