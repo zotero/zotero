@@ -1218,11 +1218,17 @@ var ZoteroPane = new function()
 				&& this.collectionsView.selection.currentIndex != -1) {
 			var collection = this.collectionsView._getItemAtRow(this.collectionsView.selection.currentIndex);
 			if (collection && collection.isCollection()) {
-				if (asID) {
-					return collection.ref.getID();
-				}
-				else {
-					return collection.ref;
+				return asID ? collection.ref.getID() : collection.ref;
+			}
+		}
+		// If the Zotero pane hasn't yet been opened, use the lastViewedFolder pref
+		else {
+			var lastViewedFolder = Zotero.Prefs.get('lastViewedFolder');
+			var matches = lastViewedFolder.match(/^(?:(C|S)([0-9]+)|L)$/);
+			if (matches && matches[1] == 'C') {
+				var col = Zotero.Collections.get(matches[2]);
+				if (col) {
+					return asID ? col.getID() : col;
 				}
 			}
 		}
@@ -1234,11 +1240,17 @@ var ZoteroPane = new function()
 		if (this.collectionsView.selection.count > 0 && this.collectionsView.selection.currentIndex != -1) {
 			var collection = this.collectionsView._getItemAtRow(this.collectionsView.selection.currentIndex);
 			if (collection && collection.isSearch()) {
-				if (asID) {
-					return collection.ref.id;
-				}
-				else {
-					return collection.ref;
+				return asID ? collection.ref.id : collection.ref;
+			}
+		}
+		// If the Zotero pane hasn't yet been opened, use the lastViewedFolder pref
+		else {
+			var lastViewedFolder = Zotero.Prefs.get('lastViewedFolder');
+			var matches = lastViewedFolder.match(/^(?:(C|S)([0-9]+)|L)$/);
+			if (matches && matches[1] == 'S') {
+				var search = Zotero.Search.get(matches[2]);
+				if (search) {
+					return asID ? search.id : search;
 				}
 			}
 		}
