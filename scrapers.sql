@@ -7388,7 +7388,7 @@ REPLACE INTO translators VALUES ('951c027d-74ac-47d4-a107-9c3069ab7b48', '1.0.0b
 	rdf.doImport();
 }');
 
-REPLACE INTO translators VALUES ('05d07af9-105a-4572-99f6-a8e231c0daef', '1.0.0b3.r1', '', '2007-08-04 23:15:00', 1, 300, 4, 'COinS', 'Simon Kornblith', NULL,
+REPLACE INTO translators VALUES ('05d07af9-105a-4572-99f6-a8e231c0daef', '1.0.0b3.r1', '', '2007-09-15 20:08:46', 1, 300, 4, 'COinS', 'Simon Kornblith', NULL,
 'function detectWeb(doc, url) {
 	var spanTags = doc.getElementsByTagName("span");
 	
@@ -7444,7 +7444,7 @@ function retrieveNextCOinS(needFullItems, newItems, couldUseFullItems, doc) {
 		}
 	} else {
 		completeCOinS(newItems, couldUseFullItems, doc);
-		Zotero.done(true);
+		Zotero.done();
 	}
 }
 
@@ -12582,7 +12582,7 @@ function doSearch(item) {
 }');
 
 
-REPLACE INTO translators VALUES ('11645bd1-0420-45c1-badb-53fb41eeb753', '1.0.0b3.r1', '', '2007-09-13 21:30:00', 1, 100, 8, 'CrossRef', 'Simon Kornblith', 'http://partneraccess.oclc.org/',
+REPLACE INTO translators VALUES ('11645bd1-0420-45c1-badb-53fb41eeb753', '1.0.0b3.r1', '', '2007-09-15 20:08:46', 1, 100, 8, 'CrossRef', 'Simon Kornblith', 'http://partneraccess.oclc.org/',
 'function detectSearch(item) {
 	if(item.itemType == "journalArticle") {
 		return true;
@@ -12651,7 +12651,7 @@ function doSearch(item) {
 		var co = Zotero.Utilities.createContextObject(item);
 	}
 	
-	Zotero.Utilities.HTTP.doGet("http://www.crossref.org/openurl?pid=zter:zter321&"+co+"&noredirect=true", function(responseText) {
+	Zotero.Utilities.HTTP.doGet("http://www.crossref.org/openurl?req_dat=zter:zter321&"+co+"&noredirect=true", function(responseText) {
 		processCrossRef(responseText);
 		Zotero.done();
 	});

@@ -555,6 +555,7 @@ Zotero.Translate.prototype.translate = function() {
 	this.newCollections = new Array();
 	this._IDMap = new Array();
 	this._complete = false;
+	this._itemsDone = false;
 	this._hasBOM = null;
 	
 	if(!this.translator || !this.translator.length) {
@@ -849,7 +850,7 @@ Zotero.Translate.prototype._enableAsynchronousDetect = function() {
 Zotero.Translate.prototype._enableAsynchronousTranslate = function() {
 	var me = this;
 	this.waitForCompletion = true;
-	this._sandbox.Zotero.done = function() { me._translationComplete(true) };
+	this._sandbox.Zotero.done = function(val) { me._translationComplete(val) };
 }
 
 /*
@@ -884,16 +885,25 @@ Zotero.Translate.prototype._selectItems = function(options) {
  */
 Zotero.Translate.prototype._translationComplete = function(returnValue, error) {
 	// to make sure this isn't called twice
+	if(returnValue === undefined) {
+		returnValue = this._itemsDone;
+	}
+	
 	if(!this._complete) {
 		this._complete = true;
 		
-		if(this.type == "search" && !this._itemsFound && this.translator.length > 1) {
+		if(this.type == "search" && !this._itemsDone) {
 			// if we're performing a search and didn't get any results, go on
 			// to the next translator
 			Zotero.debug("could not find a result using "+this.translator[0].label+": \n"
 			              +this._generateErrorString(error));
-			this.translator.shift();
-			this.translate();
+			if(this.translator.length > 1) {
+				this.translator.shift();
+				this.translate();
+			} else {
+				// call handlers
+				this.runHandler("done", returnValue);
+			}
 		} else {
 			// close open streams
 			this._closeStreams();
@@ -1053,6 +1063,8 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 			item.repository = this.translator[0].label;
 		}
 	}
+	
+	this._itemsDone = true;
 	
 	if(!this.saveItem) {	// if we're not supposed to save the item, just
 							// return the item array
@@ -2329,7 +2341,7 @@ Zotero.Translate.RDF.prototype._getResource = function(about) {
 			about = this._RDFService.GetResource(about);
 		}
 	} catch(e) {
-		throw("Zotero.Translate.RDF.addStatement: Invalid RDF resource: "+about);
+		throw("Zotero.Translate.RDF: Invalid RDF resource: "+about);
 	}
 	return about;
 }
@@ -2342,6 +2354,11 @@ Zotero.Translate.RDF.prototype.addStatement = function(about, relation, value, l
 	
 	if(!(value instanceof Components.interfaces.nsIRDFResource)) {
 		if(literal) {
+			// zap chars that Mozilla will mangle
+			if(typeof(value) == "string") {
+				value = value.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '');
+			}
+			
 			try {
 				value = this._RDFService.GetLiteral(value);
 			} catch(e) {

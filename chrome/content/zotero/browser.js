@@ -445,8 +445,8 @@ var Zotero_Browser = new function() {
 			var linkText = '<a href="' + url + '" tooltiptext="' + url + '">'
 				+ Zotero.getString('ingester.scrapeErrorDescription.linkText') + '</a>';
 			Zotero_Browser.progress.addDescription(Zotero.getString("ingester.scrapeErrorDescription", linkText));
-			Zotero_Browser.progress.startCloseTimer();
 		}
+		Zotero_Browser.progress.startCloseTimer();
 	}
 	
 	
