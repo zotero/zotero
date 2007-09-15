@@ -46,7 +46,6 @@ Zotero.QuickCopy = new function() {
 		}
 		catch (e) {
 			return Zotero.Prefs.get("export.quickCopy.setting");
-			return;
 		}
 		
 		var matches = [];

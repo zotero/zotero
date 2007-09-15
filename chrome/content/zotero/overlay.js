@@ -1113,7 +1113,8 @@ var ZoteroPane = new function()
 			return;
 		}
 		
-		var [mode, format] = Zotero.Prefs.get("export.quickCopy.setting").split('=');
+		var url = window.content.location.href;
+		var [mode, format] = Zotero.QuickCopy.getFormatFromURL(url).split('=');
 		
 		if (mode == 'bibliography') {
 			if (asCitations) {
