@@ -193,13 +193,13 @@ Zotero.Attachments = new function(){
 			// get the charset and title and index the document)
 			if (Zotero.MIME.hasNativeHandler(mimeType, ext)){
 				var browser = Zotero.Browser.createHiddenBrowser();
-				browser.addEventListener("pageshow", function(){
+				var onpageshow = function() {
 					try {
 						Zotero.Attachments.importFromDocument(browser.contentDocument,
 							sourceItemID, forceTitle, parentCollectionIDs);
 					}
 					finally {
-						browser.removeEventListener("pageshow", arguments.callee, true);
+						browser.removeEventListener("pageshow", onpageshow, true);
 						Zotero.Browser.deleteHiddenBrowser(browser);
 					}
 					
@@ -213,7 +213,8 @@ Zotero.Attachments = new function(){
 					Zotero.Attachments.importFromDocument(browser.contentDocument,
 						sourceItemID, forceTitle, parentCollectionIDs, callback);
 					*/
-				}, true);
+				};
+				browser.addEventListener("pageshow", onpageshow, true);
 				browser.loadURI(url);
 			}
 			
@@ -999,7 +1000,7 @@ Zotero.Attachments = new function(){
 				Zotero.Fulltext.indexDocument(browser.contentDocument, itemID);
 				
 				Zotero.Browser.deleteHiddenBrowser(browser);
-			}
+			};
 		}, itemID);
 		
 		var url = Components.classes["@mozilla.org/network/protocol;1?name=file"]

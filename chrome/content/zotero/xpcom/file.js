@@ -221,7 +221,9 @@ Zotero.File = new function(){
 			prefService.setCharPref('intl.charset.detector', 'universal_charset_detector');
 		}
 		
-		browser.addEventListener("pageshow", function(){
+		var onpageshow = function(){
+			browser.removeEventListener("pageshow", onpageshow, false);
+			
 			var charset = browser.contentDocument.characterSet;
 			Zotero.debug("Detected character set '" + charset + "'");
 			
@@ -229,6 +231,8 @@ Zotero.File = new function(){
 			prefService.setCharPref('intl.charset.detector', oldPref);
 			
 			callback(charset, args);
-		}, false);
+		};
+		
+		browser.addEventListener("pageshow", onpageshow, false);
 	}
 }

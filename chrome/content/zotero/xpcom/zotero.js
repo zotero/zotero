@@ -1553,9 +1553,16 @@ Zotero.Browser = new function() {
 	
 	function createHiddenBrowser(myWindow) {
 	 	if(!myWindow) {
+			// Use the hidden window, since using the main window causes
+			// a persistent wait cursor
+			var myWindow = Components.classes["@mozilla.org/appshell/appShellService;1"]
+							 .getService(Components.interfaces.nsIAppShellService)
+							 .hiddenDOMWindow;
+			/*
 			var myWindow = Components.classes["@mozilla.org/appshell/window-mediator;1"]
 			                   .getService(Components.interfaces.nsIWindowMediator)
 			                   .getMostRecentWindow("navigator:browser");
+			*/
 		}
 		
 		// Create a hidden browser
@@ -1567,9 +1574,9 @@ Zotero.Browser = new function() {
 	}
 	
 	function deleteHiddenBrowser(myBrowser) {
-		// Delete a hidden browser
+		myBrowser.stop();
 		myBrowser.parentNode.removeChild(myBrowser);
-		delete myBrowser;
+		myBrowser = null;
 		Zotero.debug("deleted hidden browser");
 	}
 }
