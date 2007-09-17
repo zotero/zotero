@@ -1916,7 +1916,7 @@ var ZoteroPane = new function()
 		
 		var file = attachment.getFile();
 		if (file) {
-			var mimeType = attachment.getAttachmentMimeType();
+			var mimeType = attachment.getAttachmentMIMEType();
 			// If no MIME type specified, try to detect again (I guess in case
 			// we've gotten smarter since the file was imported?)
 			if (!mimeType) {

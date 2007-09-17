@@ -1838,7 +1838,7 @@ Zotero.Translate.prototype._exportGetAttachment = function(attachment) {
 	var linkMode = attachment.getAttachmentLinkMode();
 	
 	// get mime type
-	attachmentArray.mimeType = attachmentArray.uniqueFields.mimeType = attachment.getAttachmentMimeType();
+	attachmentArray.mimeType = attachmentArray.uniqueFields.mimeType = attachment.getAttachmentMIMEType();
 	// get charset
 	attachmentArray.charset = attachmentArray.uniqueFields.charset = attachment.getAttachmentCharset();
 	

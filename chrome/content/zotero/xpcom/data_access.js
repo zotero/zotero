@@ -66,6 +66,7 @@ Zotero.Item.prototype._init = function(itemTypeOrID, create) {
 	this._noteAccessTime = null;
 	
 	this._fileLinkMode = null;
+	this._fileMIMEType = null;
 }
 
 
@@ -1587,7 +1588,7 @@ Zotero.Item.prototype.getAttachmentLinkMode = function(){
 		throw ("getAttachmentLinkMode() can only be called on items of type 'attachment'");
 	}
 	
-	if (this._fileLinkMode !==null && this._fileLinkMode !==false){
+	if (this._fileLinkMode !== null) {
 		return this._fileLinkMode;
 	}
 	
@@ -1598,15 +1599,20 @@ Zotero.Item.prototype.getAttachmentLinkMode = function(){
 
 
 /**
-* Get the mime type of an attachment (e.g. text/plain)
+* Get the MIME type of an attachment (e.g. 'text/plain')
 **/
-Zotero.Item.prototype.getAttachmentMimeType = function(){
+Zotero.Item.prototype.getAttachmentMIMEType = function(){
 	if (!this.isAttachment()){
 		throw ("getAttachmentMIMEType() can only be called on items of type 'attachment'");
 	}
 	
+	if (this._fileMIMEType != null) {
+		return this._fileMIMEType;
+	}
+	
 	var sql = "SELECT mimeType FROM itemAttachments WHERE itemID=" + this.getID();
-	return Zotero.DB.valueQuery(sql);
+	this._fileMIMEType = Zotero.DB.valueQuery(sql);
+	return this._fileMIMEType;
 }
 
 
@@ -1984,17 +1990,25 @@ Zotero.Item.prototype.getImageSrc = function() {
 	var itemType = Zotero.ItemTypes.getName(this.getType());
 	if (itemType == 'attachment') {
 		var linkMode = this.getAttachmentLinkMode();
-		if (linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_FILE) {
-			itemType = itemType + "-file";
+		
+		// Quick hack to use PDF icon for imported files and URLs --
+		// extend to support other document types later
+		if ((linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_FILE ||
+				linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_URL) &&
+				this.getAttachmentMIMEType() == 'application/pdf') {
+			itemType += '-pdf';
+		}
+		else if (linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_FILE) {
+			itemType += "-file";
 		}
 		else if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
-			itemType = itemType + "-link";
+			itemType += "-link";
 		}
 		else if (linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_URL) {
-			itemType = itemType + "-snapshot";
+			itemType += "-snapshot";
 		}
 		else if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) {
-			itemType = itemType + "-web-link";
+			itemType += "-web-link";
 		}
 	}
 	
@@ -4262,6 +4276,7 @@ Zotero.ItemTypes = new function(){
 			case 'attachment-link':
 			case 'attachment-snapshot':
 			case 'attachment-web-link':
+			case 'attachment-pdf':
 			case 'artwork':
 			case 'audioRecording':
 			case 'blogPost':
@@ -4287,7 +4302,6 @@ Zotero.ItemTypes = new function(){
 			case 'tvBroadcast':
 			case 'videoRecording':
 			case 'webpage':
-				
 				return "chrome://zotero/skin/treeitem-" + itemType + ".png";
 		}
 		

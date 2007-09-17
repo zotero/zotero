@@ -464,7 +464,7 @@ Zotero.Fulltext = new function(){
 				continue;
 			}
 			
-			this.indexFile(file, i.getAttachmentMimeType(),
+			this.indexFile(file, i.getAttachmentMIMEType(),
 				i.getAttachmentCharset(), i.getID(), !complete);
 		}
 		
@@ -572,7 +572,7 @@ Zotero.Fulltext = new function(){
 				continue;
 			}
 			
-			var mimeType = i.getAttachmentMimeType();
+			var mimeType = i.getAttachmentMIMEType();
 			
 			if (isCachedMIMEType(mimeType)) {
 				var file = _getItemCacheFile(i.getID());
@@ -659,7 +659,7 @@ Zotero.Fulltext = new function(){
 	 */
 	function getTotalCharsFromFile(itemID) {
 		var item = Zotero.Items.get(itemID);
-		switch (item.getAttachmentMimeType()) {
+		switch (item.getAttachmentMIMEType()) {
 			case 'application/pdf':
 				var file = Zotero.Attachments.getStorageDirectory(itemID);
 				file.append(this.pdfConverterCacheFile);
@@ -706,7 +706,7 @@ Zotero.Fulltext = new function(){
 			throw ('Item ' + itemID + ' is not an attachment in Zotero.Fulltext.getIndexedState()');
 		}
 		
-		switch (item.getAttachmentMimeType()) {
+		switch (item.getAttachmentMIMEType()) {
 			// Use pages for PDFs
 			case 'application/pdf':
 				var pages = this.getPages(itemID);
@@ -874,7 +874,7 @@ Zotero.Fulltext = new function(){
 		}
 		
 		Zotero.debug('Clearing full-text cache file for item ' + itemID);
-		switch (item.getAttachmentMimeType()) {
+		switch (item.getAttachmentMIMEType()) {
 			case 'application/pdf':
 				var cacheFile = _getItemCacheFile();
 				if (cacheFile.exists()) {
