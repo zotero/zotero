@@ -48,6 +48,7 @@ var Zotero = new function(){
 	this.varDump = varDump;
 	this.safeDebug = safeDebug;
 	this.getString = getString;
+	this.localeJoin = localeJoin;
 	this.getLocaleCollation = getLocaleCollation;
 	this.setFontSize = setFontSize;
 	this.flattenArguments = flattenArguments;
@@ -69,6 +70,7 @@ var Zotero = new function(){
 	this.version;
 	this.platform;
 	this.locale;
+	this.dir; // locale direction: 'ltr' or 'rtl'
 	this.isMac;
 	this.isWin;
 	this.initialURL; // used by Schema to show the changelog on upgrades
@@ -143,7 +145,16 @@ var Zotero = new function(){
 		var stringBundleService =
 			Components.classes["@mozilla.org/intl/stringbundle;1"]
 			.getService(Components.interfaces.nsIStringBundleService);
+		
 		_localizedStringBundle = stringBundleService.createBundle(src, appLocale);
+		
+		// Set the locale direction to Zotero.dir
+		// DEBUG: is there a better way to get the entity from JS?
+		var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
+						.createInstance();
+		xmlhttp.open('GET', 'chrome://global/locale/global.dtd', false);
+		xmlhttp.send(null);
+		this.dir = xmlhttp.responseText.match(/(ltr|rtl)/)[0];
 		
 		try {
 			this.getZoteroDirectory();
@@ -586,6 +597,24 @@ var Zotero = new function(){
 			throw ('Localized string not available for ' + name);
 		}
 		return l10n;
+	}
+	
+	
+	/*
+	 * Join the elements of an array into a string using the appropriate
+	 * locale direction
+	 *
+	 * |separator| defaults to a space (not a comma like Array.join()) if
+	 *   not specified
+	 */
+	function localeJoin(arr, separator) {
+		if (typeof separator == 'undefined') {
+			separator = ' ';
+		}
+		if (this.dir == 'rtl') {
+			str.reverse();
+		}
+		return arr.join(separator);
 	}
 	
 	

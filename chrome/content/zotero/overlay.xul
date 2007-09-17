@@ -21,7 +21,13 @@
     ***** END LICENSE BLOCK *****
 -->
 <?xml-stylesheet href="chrome://zotero/skin/overlay.css" type="text/css"?>
-<!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
+
+<!DOCTYPE window [
+	<!ENTITY % globalDTD SYSTEM "chrome://global/locale/global.dtd">
+	%globalDTD;
+	<!ENTITY % zoteroDTD SYSTEM "chrome://zotero/locale/zotero.dtd">
+	%zoteroDTD;
+]>
 
 <overlay id="zotero"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
@@ -73,7 +79,8 @@
 			onmouseup="ZoteroPane.updateTagSelectorSize()"/>
 		<hbox id="zotero-pane" persist="savedHeight" hidden="true"
 			onkeydown="ZoteroPane.handleKeyDown(event, this.id)"
-			onkeyup="ZoteroPane.handleKeyUp(event, this.id)">
+			onkeyup="ZoteroPane.handleKeyUp(event, this.id)"
+			chromedir="&locale.dir;">
 			<popupset>
 				<popup id="zotero-collectionmenu" onpopupshowing="ZoteroPane.buildCollectionContextMenu();">
 					<menuitem label="&zotero.toolbar.newCollection.label;" oncommand="ZoteroPane.newCollection()"/>

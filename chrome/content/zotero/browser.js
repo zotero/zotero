@@ -420,6 +420,7 @@ var Zotero_Browser = new function() {
 		var captureIcon = tab.getCaptureIcon();
 		if(captureIcon) {
 			Zotero_Browser.statusImage.src = captureIcon;
+			Zotero_Browser.statusImage.tooltipText = tab.getCaptureTooltip();
 			Zotero_Browser.statusImage.hidden = false;
 		} else {
 			Zotero_Browser.statusImage.hidden = true;
@@ -663,6 +664,19 @@ Zotero_Browser.Tab.prototype.getCaptureIcon = function() {
 	
 	return false;
 }
+
+Zotero_Browser.Tab.prototype.getCaptureTooltip = function() {
+	if (this.page.translators && this.page.translators.length) {
+		var arr = [Zotero.getString('ingester.saveToZotero')];
+		if (this.page.translators[0].itemType == 'multiple') {
+			arr.push('...');
+		}
+		arr.push (' ' , '(' + this.page.translators[0].label + ')');
+		return Zotero.localeJoin(arr, '');
+	}
+	return '';
+}
+
 
 /**********CALLBACKS**********/
 
