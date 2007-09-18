@@ -40,7 +40,9 @@ Zotero.MIME = new function(){
 		["From", 'text/plain'],
 		[">From", 'text/plain'],
 		["#!", 'text/plain'],
-		["<?xml", 'text/xml']
+		["<?xml", 'text/xml'],
+		["<!DOCTYPE html", 'text/html'],
+		["<html", 'text/html']
 	];
 	
 	var _textTypes = {

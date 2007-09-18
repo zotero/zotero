@@ -461,6 +461,8 @@ Zotero.Fulltext = new function(){
 			
 			var file = i.getFile();
 			if (!file){
+				Zotero.debug("No file to index for item " + i.getID()
+					+ " in Fulltext.indexItems()");
 				continue;
 			}
 			

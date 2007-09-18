@@ -185,6 +185,8 @@ Zotero.Attachments = new function(){
 			// Override MIME type to application/pdf if extension is .pdf --
 			// workaround for sites that respond to the HEAD request with an
 			// invalid MIME type (https://www.zotero.org/trac/ticket/460)
+			//
+			// Downloaded file is inspected below and deleted if actually HTML
 			if (ext == 'pdf') {
 				mimeType = 'application/pdf';
 			}
@@ -246,12 +248,7 @@ Zotero.Attachments = new function(){
 					attachmentItem.setField('url', url);
 					attachmentItem.setField('accessDate', "CURRENT_TIMESTAMP");
 					// Don't send a Notifier event on the incomplete item
-					var disabled = Zotero.Notifier.disable();
-					attachmentItem.save();
-					if (disabled) {
-						Zotero.Notifier.enable();
-					}
-					var itemID = attachmentItem.getID();
+					var itemID = attachmentItem.save();
 					
 					// Add to collections
 					if (parentCollectionIDs){
@@ -272,6 +269,15 @@ Zotero.Attachments = new function(){
 					
 					wbp.progressListener = new Zotero.WebProgressFinishListener(function(){
 						try {
+							var str = Zotero.File.getSample(file);
+							if (Zotero.MIME.sniffForMIMEType(str) != 'application/pdf') {
+								Zotero.debug("Downloaded PDF did not have MIME type "
+									+ "'application/pdf' in Attachments.importFromURL()", 2);
+								var item = Zotero.Items.get(itemID);
+								item.erase();
+								return;
+							}
+							
 							_addToDB(file, url, title, Zotero.Attachments.LINK_MODE_IMPORTED_URL,
 								mimeType, null, sourceItemID, itemID);
 							
@@ -281,6 +287,8 @@ Zotero.Attachments = new function(){
 							// is flushed to disk, so we just wait a second
 							// and hope for the best -- we'll index it later
 							// if it fails
+							//
+							// TODO: index later
 							var timer = Components.classes["@mozilla.org/timer;1"].
 								createInstance(Components.interfaces.nsITimer);
 							timer.initWithCallback({notify: function() {
@@ -289,29 +297,23 @@ Zotero.Attachments = new function(){
 						}
 						catch (e) {
 							// Clean up
-							if (itemID) {
-								var item = Zotero.Items.get(itemID);
-								if (item) {
-									item.erase();
-								}
-								
-								try {
-									var destDir = Zotero.getStorageDirectory();
-									destDir.append(itemID);
-									if (destDir.exists()) {
-										destDir.remove(true);
-									}
-								}
-								catch (e) {}
-							}
+							var item = Zotero.Items.get(itemID);
+							item.erase();
 							
 							throw (e);
 						}
 					});
 					
+					// Disable the Notifier during the commit
+					var disabled = Zotero.Notifier.disable();
+					
 					// The attachment is still incomplete here, but we can't risk
 					// leaving the transaction open if the callback never triggers
 					Zotero.DB.commitTransaction();
+					
+					if (disabled) {
+						Zotero.Notifier.enable();
+					}
 					
 					wbp.saveURI(nsIURL, null, null, null, null, file);
 				}
@@ -400,7 +402,8 @@ Zotero.Attachments = new function(){
 		// thread, but at least it lets the menu close)
 		setTimeout(function() {
 			if (Zotero.Fulltext.isCachedMIMEType(mimeType)) {
-				Zotero.Fulltext.indexItems([itemID]);
+				// No file, so no point running the PDF indexer
+				//Zotero.Fulltext.indexItems([itemID]);
 			}
 			else {
 				Zotero.Fulltext.indexDocument(document, itemID);
@@ -412,9 +415,7 @@ Zotero.Attachments = new function(){
 	
 	
 	/*
-	 * Save a snapshot -- uses synchronous WebPageDump
-	 *
-	 * Returns itemID of attachment
+	 * Save a snapshot -- uses synchronous WebPageDump or asynchronous saveURI()
 	 */
 	function importFromDocument(document, sourceItemID, forceTitle, parentCollectionIDs) {
 		Zotero.debug('Importing attachment from document');
@@ -456,50 +457,6 @@ Zotero.Attachments = new function(){
 			var fileName = _getFileNameFromURL(url, mimeType);
 			file.append(fileName);
 			
-			if (mimeType == 'text/html') {
-				// Load WebPageDump code
-				Components.classes["@mozilla.org/moz/jssubscript-loader;1"]
-					.getService(Components.interfaces.mozIJSSubScriptLoader)
-					.loadSubScript("chrome://zotero/content/webpagedump/common.js");
-				
-				Components.classes["@mozilla.org/moz/jssubscript-loader;1"]
-					.getService(Components.interfaces.mozIJSSubScriptLoader)
-					.loadSubScript("chrome://zotero/content/webpagedump/domsaver.js");
-				
-				wpdDOMSaver.init(file.path, document)
-				wpdDOMSaver.saveHTMLDocument()
-			}
-			else {
-				Zotero.debug('Saving with saveURI()');
-				const nsIWBP = Components.interfaces.nsIWebBrowserPersist;
-				var wbp = Components
-					.classes["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"]
-					.createInstance(nsIWBP);
-				wbp.persistFlags = nsIWBP.PERSIST_FLAGS_AUTODETECT_APPLY_CONVERSION
-					| nsIWBP.PERSIST_FLAGS_FROM_CACHE;
-				var ioService = Components.classes["@mozilla.org/network/io-service;1"]
-					.getService(Components.interfaces.nsIIOService);
-				var nsIURL = ioService.newURI(url, null, null);
-				wbp.saveURI(nsIURL, null, null, null, null, file);
-			}
-			
-			
-			_addToDB(file, url, title, Zotero.Attachments.LINK_MODE_IMPORTED_URL,
-				mimeType, charsetID, sourceItemID, itemID);
-			
-			Zotero.Notifier.trigger('add', 'item', itemID);
-			
-			// Add to collections
-			if (parentCollectionIDs){
-				var ids = Zotero.flattenArguments(parentCollectionIDs);
-				for each(var id in ids){
-					var col = Zotero.Collections.get(id);
-					col.addItem(itemID);
-				}
-			}
-			
-			Zotero.DB.commitTransaction();
-			
 			if (mimeType == 'application/pdf') {
 				var f = function() {
 					Zotero.Fulltext.indexPDF(file, itemID);
@@ -513,14 +470,92 @@ Zotero.Attachments = new function(){
 				};
 			}
 			
-			// We don't have any way of knowing that the file is flushed to
-			// disk, so we just wait a second and hope for the best --
-			// we'll index it later if it fails
-			var timer = Components.classes["@mozilla.org/timer;1"].
-				createInstance(Components.interfaces.nsITimer);
-			timer.initWithCallback({notify: f}, 1000,
-				Components.interfaces.nsITimer.TYPE_ONE_SHOT);
+			if (mimeType == 'text/html') {
+				var sync = true;
+				
+				// Load WebPageDump code
+				Components.classes["@mozilla.org/moz/jssubscript-loader;1"]
+					.getService(Components.interfaces.mozIJSSubScriptLoader)
+					.loadSubScript("chrome://zotero/content/webpagedump/common.js");
+				
+				Components.classes["@mozilla.org/moz/jssubscript-loader;1"]
+					.getService(Components.interfaces.mozIJSSubScriptLoader)
+					.loadSubScript("chrome://zotero/content/webpagedump/domsaver.js");
+				
+				wpdDOMSaver.init(file.path, document);
+				wpdDOMSaver.saveHTMLDocument();
+				
+				_addToDB(file, url, title, Zotero.Attachments.LINK_MODE_IMPORTED_URL,
+					mimeType, charsetID, sourceItemID, itemID);
+			}
+			else {
+				Zotero.debug('Saving with saveURI()');
+				const nsIWBP = Components.interfaces.nsIWebBrowserPersist;
+				var wbp = Components
+					.classes["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"]
+					.createInstance(nsIWBP);
+				wbp.persistFlags = nsIWBP.PERSIST_FLAGS_AUTODETECT_APPLY_CONVERSION
+					| nsIWBP.PERSIST_FLAGS_FROM_CACHE;
+				var ioService = Components.classes["@mozilla.org/network/io-service;1"]
+					.getService(Components.interfaces.nsIIOService);
+				var nsIURL = ioService.newURI(url, null, null);
+				wbp.progressListener = new Zotero.WebProgressFinishListener(function () {
+					try {
+						_addToDB(file, url, title, Zotero.Attachments.LINK_MODE_IMPORTED_URL,
+							mimeType, charsetID, sourceItemID, itemID);
+						
+						Zotero.Notifier.trigger('add', 'item', itemID);
+						
+						// We don't have any way of knowing that the file is flushed to
+						// disk, so we just wait a second and hope for the best --
+						// we'll index it later if it fails
+						//
+						// TODO: index later
+						var timer = Components.classes["@mozilla.org/timer;1"].
+							createInstance(Components.interfaces.nsITimer);
+						timer.initWithCallback({notify: f}, 1000,
+							Components.interfaces.nsITimer.TYPE_ONE_SHOT);
+					}
+					catch (e) {
+						// Clean up
+						var item = Zotero.Items.get(itemID);
+						item.erase();
+						
+						throw (e);
+					}
+				});
+				wbp.saveURI(nsIURL, null, null, null, null, file);
+			}
 			
+			// Add to collections
+			if (parentCollectionIDs){
+				var ids = Zotero.flattenArguments(parentCollectionIDs);
+				for each(var id in ids){
+					var col = Zotero.Collections.get(id);
+					col.addItem(itemID);
+				}
+			}
+			
+			// Disable the Notifier during the commit if this is async
+			if (!sync) {
+				var disabled = Zotero.Notifier.disable();
+			}
+			
+			Zotero.DB.commitTransaction();
+			
+			if (disabled) {
+				Zotero.Notifier.enable();
+			}
+			
+			if (sync) {
+				Zotero.Notifier.trigger('add', 'item', itemID);
+				
+				// Wait a second before indexing (see note above)
+				var timer = Components.classes["@mozilla.org/timer;1"].
+					createInstance(Components.interfaces.nsITimer);
+				timer.initWithCallback({notify: f}, 1000,
+					Components.interfaces.nsITimer.TYPE_ONE_SHOT);
+			}
 		}
 		catch (e) {
 			Zotero.DB.rollbackTransaction();
@@ -539,8 +574,6 @@ Zotero.Attachments = new function(){
 			
 			throw (e);
 		}
-		
-		return itemID;
 	}
 	
 	
