@@ -582,6 +582,11 @@ Zotero.Schema = new function(){
 			for (var i=0, len=styleUpdates.length; i<len; i++){
 				_styleXMLToDB(styleUpdates[i]);
 			}
+			
+			// Rebuild the translator cache
+			Zotero.debug("Clearing translator cache");
+			Zotero.Translate.cache = null;
+			Zotero.Translate.init();
 		}
 		catch (e) {
 			Zotero.debug(e, 1);
