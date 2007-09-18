@@ -388,6 +388,10 @@ To add a new preference:
 					<button label="&zotero.preferences.dataDir.choose;" oncommand="var file = Zotero.chooseZoteroDirectory(true); if (!file) { event.stopPropagation(); }"/>
 				</hbox>
 			</radiogroup>
+			
+			<hbox>
+				<button label="&zotero.preferences.dataDir.reveal;" oncommand="revealDataDirectory()"/>
+			</hbox>
 		</groupbox>
 		
 		<groupbox>

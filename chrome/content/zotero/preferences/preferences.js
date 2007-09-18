@@ -739,9 +739,6 @@ function updateIndexStats() {
 }
 
 
-/*
- * Unused
- */
 function revealDataDirectory() {
 	var dataDir = Zotero.getZoteroDirectory();
 	dataDir.QueryInterface(Components.interfaces.nsILocalFile);
@@ -749,7 +746,12 @@ function revealDataDirectory() {
 		dataDir.reveal();
 	}
 	catch (e) {
-		// TODO: This won't work on Linux
+		// On platforms that don't support nsILocalFile.reveal() (e.g. Linux), we
+		// open a small window with a selected read-only textbox containing the
+		// file path, so the user can open it, Control-c, Control-w, Alt-Tab, and
+		// Control-v the path into another app
+		var io = {alertText: dataDir.path};
+		window.openDialog('chrome://zotero/content/selectableAlert.xul', "zotero-reveal-window", "chrome", io);
 	}
 }
 

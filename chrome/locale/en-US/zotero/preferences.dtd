@@ -76,6 +76,7 @@
 <!ENTITY zotero.preferences.dataDir.useProfile			"Use Firefox profile directory">
 <!ENTITY zotero.preferences.dataDir.custom				"Custom:">
 <!ENTITY zotero.preferences.dataDir.choose				"Choose...">
+<!ENTITY zotero.preferences.dataDir.reveal				"Show Data Directory">
 
 <!ENTITY zotero.preferences.dbIntegrity				"Database Integrity">
 <!ENTITY zotero.preferences.dbIntegrity.integrityCheck	"Check Database Now">
