@@ -1419,6 +1419,30 @@ Zotero.CSL.Citation.prototype.remove = function(citationItems) {
 }
 
 /*
+ * copies a citation
+ */
+Zotero.CSL.Citation.prototype.clone = function() {
+	var clone = new Zotero.CSL.Citation();
+	
+	// copy items
+	for(var i=0; i<this.citationItems.length; i++) {
+		var oldCitationItem = this.citationItems[i];
+		var newCitationItem = new Zotero.CSL.CitationItem();
+		for(var key in oldCitationItem) {
+			newCitationItem[key] = oldCitationItem[key];
+		}
+		clone.citationItems.push(newCitationItem);
+	}
+	
+	// copy properties
+	for(var key in this.properties) {
+		clone.properties[key] = this.properties[key];
+	}
+	
+	return clone;
+}
+
+/*
  * This is an item wrapper class for Zotero items. If converting this code to
  * work with another application, this is what needs changing. Potentially, this
  * function could accept an ID or an XML data structure instead of an actual

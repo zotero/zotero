@@ -38,21 +38,32 @@
 					this._buttons = {
 						'italic':document.getAnonymousElementByAttribute(this, "anonid", "rt-italic"),
 						'bold':document.getAnonymousElementByAttribute(this, "anonid", "rt-bold"),
-						'underline':document.getAnonymousElementByAttribute(this, "anonid", "rt-underline")
+						'underline':document.getAnonymousElementByAttribute(this, "anonid", "rt-underline"),
+						'superscript':document.getAnonymousElementByAttribute(this, "anonid", "rt-superscript"),
+						'subscript':document.getAnonymousElementByAttribute(this, "anonid", "rt-subscript")
 					};
 					
 					// globals
 					this._formatMap = {
 						"Integration":{
 							"\\":"\\\\",
+							"&amp;":"&",
+							"&lt;":"<",
+							"&gt;":">",
 							"<i>":"\\i ",
 							"</i>":"\\i0 ",
 							"<b>":"\\b ",
 							"</b>":"\\b0 ",
 							"<u>":"\\ul ",
 							"</u>":"\\ul0 ",
-							"<br>":"\n",
-							"&amp;":"&"
+							"<br>":"\x0B",
+							"<sup>":"\\super ",
+							"</sup>":"\\super0 ",
+							"<sub>":"\\sub ",
+							"</sub>":"\\sub0 ",
+							// there's no way to mimic a tab stop in CSS without
+							// tables, which wouldn't work here.
+							'<span class="tab">&nbsp;</span>':"\t"
 						}
 					};
 					
@@ -114,7 +125,7 @@
 			<!-- Updates the status of text toggle buttons -->
 			<method name="_updateButtons">
 				<body><![CDATA[
-					for each(var command in ["bold", "italic", "underline"]) {
+					for each(var command in ["bold", "italic", "underline", "superscript", "subscript"]) {
 						try {
 							var enabled = this._browser.contentDocument.queryCommandState(command);
 							
@@ -193,7 +204,38 @@
 				<setter><![CDATA[
 					if(this._isLoaded) {
 						var html = val;
+						bodyStyle = "";
 						if(this._format != "HTML") {
+							if(this._format == "Integration") {
+								if(html.substr(0, 3) == "\\li") {
+									// try to show paragraph formatting
+									var returnIndex = html.indexOf("\r\n");
+									
+									var tags = html.substr(1, returnIndex).split("\\");
+									html = html.substr(returnIndex+2);
+									
+									for(var i=0; i<tags.length; i++) {
+										var tagName = tags[i].substr(0, 2);
+										var tagValue = tags[i].substring(2, tags[i].length-1);
+										if(tagName == "li") {
+											var li = parseInt(tagValue, 10);
+										} else if(tagName == "fi") {
+											var fi = parseInt(tagValue, 10);
+										}
+									}
+									
+									// don't negatively indent
+									Zotero.debug(li);
+									Zotero.debug(fi);
+									if(fi < 0 && li == 0) {
+										li = -fi;
+									}
+									
+									bodyStyle = "margin-left:"+(li/20+6)+"pt;text-indent:"+(fi/20)+"pt;";
+									Zotero.debug(bodyStyle);
+								}
+							}
+							
 							// do appropriate replacement operations for non-HTML
 							// formats
 							var replacements = this._formatMap[this._format];
@@ -203,7 +245,7 @@
 						}
 						
 						// write
-						this._browser.contentDocument.write("<body>"+html+"</body>");
+						this._browser.contentDocument.write('<body style="'+bodyStyle+'">'+html+"</body>");
 						this._browser.contentDocument.close();
 						this._browser.contentDocument.designMode = (this._readonly ? "off" : "on");
 						try {
@@ -235,6 +277,12 @@
 					<xul:toolbarbutton anonid="rt-underline" class="rt-underline rt-text-control"
 						tooltiptext="&zotero.richText.underline.label;"
 						oncommand="parentNode.parentNode.parentNode.toggle('underline');"/>
+					<xul:toolbarbutton anonid="rt-superscript" class="rt-superscript rt-text-control"
+						tooltiptext="&zotero.richText.superscript.label;"
+						oncommand="parentNode.parentNode.parentNode.toggle('superscript');"/>
+					<xul:toolbarbutton anonid="rt-subscript" class="rt-subscript rt-text-control"
+						tooltiptext="&zotero.richText.subscript.label;"
+						oncommand="parentNode.parentNode.parentNode.toggle('subscript');"/>
 				</xul:toolbar>
 				
 				<xul:browser flex="1" anonid="rt-view" class="rt-view"

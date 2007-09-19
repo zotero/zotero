@@ -773,7 +773,7 @@ Zotero.Integration.Session.prototype.editCitation = function(index, citation) {
 	var io = new function() { this.wrappedJSObject = this; }
 	
 	// create object to hold citation
-	io.citation = (citation ? citation : this.style.createCitation());
+	io.citation = (citation ? citation.clone() : this.style.createCitation());
 	io.citation.properties.index = index;
 	// assign preview function
 	io.previewFunction = function() {
@@ -784,7 +784,11 @@ Zotero.Integration.Session.prototype.editCitation = function(index, citation) {
 	          .getService(Components.interfaces.nsIWindowWatcher)
 	          .openWindow(null, 'chrome://zotero/content/addCitationDialog.xul', '',
 					  'chrome,modal'+(Zotero.isWin ? ',popup' : ''), io);
-
+	
+	if(citation && !io.citation.citationItems.length) {
+		io.citation = citation;
+	}
+	
 	if(io.citation.citationItems.length) {		// we have an item
 		this.addCitation(index, io.citation);
 		this.updateIndices[index] = true;

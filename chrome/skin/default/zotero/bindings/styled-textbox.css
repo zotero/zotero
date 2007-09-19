@@ -10,6 +10,14 @@
 	list-style-image: url('chrome://zotero/skin/text_underline.png');
 }
 
+.rt-superscript {
+	list-style-image: url('chrome://zotero/skin/text_superscript.png');
+}
+
+.rt-subscript {
+	list-style-image: url('chrome://zotero/skin/text_subscript.png');
+}
+
 .rt-toolbar {
 	padding: 2px;
 }

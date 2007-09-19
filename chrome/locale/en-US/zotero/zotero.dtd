@@ -130,6 +130,8 @@
 <!ENTITY zotero.richText.italic.label					"Italic">
 <!ENTITY zotero.richText.bold.label						"Bold">
 <!ENTITY zotero.richText.underline.label				"Underline">
+<!ENTITY zotero.richText.superscript.label				"Superscript">
+<!ENTITY zotero.richText.subscript.label				"Subscript">
 
 <!ENTITY zotero.annotate.toolbar.add.label				"Add Annotation">
 <!ENTITY zotero.annotate.toolbar.collapse.label			"Collapse All Annotations">
