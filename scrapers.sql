@@ -17491,10 +17491,10 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/asa.csl', '2007-
 </style>');
 
 
-REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/nature.csl', '2007-09-06 19:30:00', 'Nature Journal', 
+REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/nature.csl', '2007-09-19 04:01:40', 'Nature Journal', 
 '<?xml version="1.0" encoding="UTF-8"?>
 <?oxygen RNGSchema="file:/Users/mikowitz/Documents/Development/CSLs/csl.rnc" type="compact"?>
-<style xmlns="http://purl.org/net/xbiblio/csl" class="note" xml:lang="en">
+<style xmlns="http://purl.org/net/xbiblio/csl" class="in-text" xml:lang="en">
     <info>
         <title>Nature Journals</title>
         <id>http://purl.org/net/xbiblio/csl/styles/nature.csl</id>
@@ -17505,23 +17505,38 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/nature.csl', '20
         </author>
         <category term="biology"/>
         <category term="generic-base"/>
-        <updated>2007-08-29T15:15:00+08:00</updated>
+        <updated>2007-09-19T04:01:40+00:00</updated>
     </info>
     <macro name="author">
         <names variable="author">
             <name sort-separator=", " delimiter=", " and="symbol" initialize-with="." delimiter-precedes-last="never" name-as-sort-order="all"/>
         </names>
     </macro>
-    <macro name="access">
-        <text variable="DOI" prefix=" doi: "/>
-        <substitute>
-            <text variable="URL" prefix=" at &lt;" suffix="&gt;"/>
-        </substitute>
-    </macro>
-    <citation></citation>
+	<macro name="access">
+		<choose>
+			<if variable="volume"/>
+			<else-if variable="DOI">
+				<text variable="DOI" prefix="doi:"/>
+			</else-if>
+			<else-if variable="URL">
+				<text term="at"/>
+				<text variable="URL" prefix=" &lt;" suffix="&gt;"/>
+			</else-if>
+		</choose>
+	</macro>
+	<citation>
+		<option name="collapse" value="citation-number"/>
+		<sort>
+			<key variable="citation-number"/>
+		</sort>
+		<layout vertical-align="sup" delimiter=",">
+			<text variable="citation-number"/>
+		</layout>
+	</citation>
     <bibliography>
         <option name="et-al-min" value="4"/>
         <option name="et-al-use-first" value="1"/>
+        <option name="second-field-align" value="true"/>
         <layout>
             <text variable="citation-number" suffix=". "/>
             <text macro="author"/>
@@ -17538,7 +17553,7 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/nature.csl', '20
 </style>'
 );
 
-REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/nlm.csl', '2007-09-06 19:30:00', 'National Library of Medicine',
+REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/nlm.csl', '2007-09-19 04:01:40', 'National Library of Medicine',
 '<?xml version="1.0" encoding="UTF-8"?>
 <?oxygen RNGSchema="file:/Users/mikowitz/Documents/Development/CSLs/csl.rnc" type="compact"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="in-text" xml:lang="en">
@@ -17551,7 +17566,7 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/nlm.csl', '2007-
             <email>michael@songsaboutsnow.com</email>
         </author>
         <category term="generic-base"/>
-        <updated>2007-08-31T15:15:00+08:00</updated>
+        <updated>2007-09-19T04:01:40+00:00</updated>
     </info>
     <macro name="author">
         <names variable="author" suffix=". ">
@@ -17571,6 +17586,10 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/nlm.csl', '2007-
         </date>
     </macro>
     <citation>
+		<option name="collapse" value="citation-number"/>
+		<sort>
+			<key variable="citation-number"/>
+		</sort>
         <layout prefix="(" suffix=")" delimiter="; ">
             <text variable="citation-number"/>
         </layout>
@@ -17578,6 +17597,7 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/nlm.csl', '2007-
     <bibliography>
         <option name="et-al-min" value="7"/>
         <option name="et-al-use-first" value="6"/>
+        <option name="second-field-align" value="true"/>
         <layout>
             <text variable="citation-number" suffix=". "/>
             <text macro="author"/>
@@ -17611,7 +17631,7 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/nlm.csl', '2007-
     </bibliography>
 </style>');
 
-REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/ieee.csl', '2007-09-06 19:35:00', 'IEEE',
+REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/ieee.csl', '2007-09-19 04:01:40', 'IEEE',
 '<?xml version="1.0" encoding="UTF-8"?>
 <?oxygen RNGSchema="file:/Users/mikowitz/Documents/Development/CSLs/csl.rnc" type="compact"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="in-text" xml:lang="en">
@@ -17625,11 +17645,8 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/ieee.csl', '2007
         </author>
         <category term="engineering"/>
         <category term="generic-base"/>
-        <updated>2007-08-31T15:15:00+08:00</updated>
+        <updated>2007-09-19T04:01:40+00:00</updated>
     </info>
-    <macro name="citation-number">
-        <text variable="citation-number" prefix="[" suffix="]"/>
-    </macro>
     <macro name="author">
         <names variable="author">
             <name initialize-with="." delimiter=", " and="text" name-as-sort-order="all"/>
@@ -17653,16 +17670,21 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/ieee.csl', '2007
         </date>
     </macro>
     <citation>
-        <layout>
-            <text macro="citation-number"/>
+		<option name="collapse" value="citation-number"/>
+		<sort>
+			<key variable="citation-number"/>
+		</sort>
+        <layout prefix="[" suffix="]" delimiter=",">
+            <text variable="citation-number"/>
         </layout>
     </citation>
     <bibliography>
         <option name="et-al-min" value="4"/>
         <option name="et-al-use-first" value="1"/>
+        <option name="second-field-align" value="margin"/>
         <layout>
-            <text macro="citation-number"/>
-            <text macro="author" prefix="   " suffix=", "/>
+            <text variable="citation-number" prefix="[" suffix="]"/>
+            <text macro="author" prefix=" " suffix=", "/>
             <choose>
                 <if type="book">
                     <text macro="title" suffix=". "/>

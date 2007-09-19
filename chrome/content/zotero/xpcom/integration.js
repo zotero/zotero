@@ -915,9 +915,15 @@ Zotero.Integration.Session.prototype.updateItemSet = function() {
 Zotero.Integration.Session.prototype.sortItemSet = function() {
 	if(!this.itemSetIsSorted) {
 		if(!this.itemSet.sortable) {
-			// sort by order in document
+			// sort by order in document. we need a stable sort, so first we
+			// collect old indices.
+			var oldItemIndices = new Object();
+			for(var i=0; i<this.itemSet.items.length; i++) {
+				oldItemIndices[this.itemSet.items[i].getID()] = i;
+			}
+			
 			var me = this;
-			this.itemSet.items.sort(function(a, b) { return me.sortByOrderAdded(a, b) });
+			this.itemSet.items.sort(function(a, b) { return me.sortByOrderAdded(a, b, oldItemIndices) });
 		}
 		
 		var citationChanged = this.itemSet.resort();
@@ -934,18 +940,20 @@ Zotero.Integration.Session.prototype.sortItemSet = function() {
 /*
  * sorts items by order added
  */
-Zotero.Integration.Session.prototype.sortByOrderAdded = function(a, b) {
+Zotero.Integration.Session.prototype.sortByOrderAdded = function(a, b, oldItemIndices) {
 	var aID = a.getID();
 	var bID = b.getID();
 	
 	if(this.citationsByItemID[aID] && this.citationsByItemID[aID].length) {
 		if(!this.citationsByItemID[bID] || !this.citationsByItemID[bID].length) return -1;
-		return this.citationsByItemID[aID][0].properties.index-this.citationsByItemID[bID][0].properties.index;
+		
+		var diff = this.citationsByItemID[aID][0].properties.index-this.citationsByItemID[bID][0].properties.index;
+		if(diff != 0) return diff;
 	} else if(this.citationsByItemID[bID] && this.citationsByItemID[bID].length) {
 		return 1;
-	} else {
-		return 0;
 	}
+	
+	return oldItemIndices[aID]-oldItemIndices[bID];
 }
 
 /*

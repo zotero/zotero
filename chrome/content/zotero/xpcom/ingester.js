@@ -283,11 +283,11 @@ Zotero.OpenURL = new function() {
 			} else {
 				co += "&rft_val_fmt=info%3Aofi%2Ffmt%3Akev%3Amtx%3Ajournal&rft.genre=article";
 			}
-			co += _mapTag(item.title, "atitle", version)		
-			co += _mapTag(item.publicationTitle, (version == "0.1" ? "title" : "jtitle"), version)		
-			co += _mapTag(item.journalAbbreviation, "stitle", version);
-			co += _mapTag(item.volume, "volume", version);
-			co += _mapTag(item.issue, "issue", version);
+			if(item.title) co += _mapTag(item.title, "atitle", version)		
+			if(item.publicationTitle) co += _mapTag(item.publicationTitle, (version == "0.1" ? "title" : "jtitle"), version)		
+			if(item.journalAbbreviation) co += _mapTag(item.journalAbbreviation, "stitle", version);
+			if(item.volume) co += _mapTag(item.volume, "volume", version);
+			if(item.issue) co += _mapTag(item.issue, "issue", version);
 		} else if(item.itemType == "book" || item.itemType == "bookitem") {
 			if(version == "0.1") {
 				co += "&genre=book";
@@ -297,29 +297,29 @@ Zotero.OpenURL = new function() {
 			
 			if(item.itemType == "book") {
 				co += "&rft.genre=book";
-				co += _mapTag(item.title, (version == "0.1" ? "title" : "btitle"), version);
+				if(item.title) co += _mapTag(item.title, (version == "0.1" ? "title" : "btitle"), version);
 			} else {
 				co += "&rft.genre=bookitem";
-				co += _mapTag(item.title, "atitle", version)		
-				co += _mapTag(item.publicationTitle, (version == "0.1" ? "title" : "btitle"), version);
+				if(item.title) co += _mapTag(item.title, "atitle", version)		
+				if(item.publicationTitle) co += _mapTag(item.publicationTitle, (version == "0.1" ? "title" : "btitle"), version);
 			}
 			
-			co += _mapTag(item.place, "place", version);
-			co += _mapTag(item.publisher, "publisher", version)		
-			co += _mapTag(item.edition, "edition", version);
-			co += _mapTag(item.series, "series", version);
+			if(item.place) co += _mapTag(item.place, "place", version);
+			if(item.publisher) co += _mapTag(item.publisher, "publisher", version)		
+			if(item.edition) co += _mapTag(item.edition, "edition", version);
+			if(item.series) co += _mapTag(item.series, "series", version);
 		} else if(item.itemType == "thesis" && version == "1.0") {
 			co += "&rft_val_fmt=info%3Aofi%2Ffmt%3Akev%3Amtx%3Adissertation";
 			
-			_mapTag(item.title, "title", version);
-			_mapTag(item.publisher, "inst", version);
-			_mapTag(item.type, "degree", version);
+			if(item.title) co += _mapTag(item.title, "title", version);
+			if(item.publisher) co += _mapTag(item.publisher, "inst", version);
+			if(item.type) co += _mapTag(item.type, "degree", version);
 		} else if(item.itemType == "patent" && version == "1.0") {
 			co += "&rft_val_fmt=info%3Aofi%2Ffmt%3Akev%3Amtx%3Apatent";
 			
-			_mapTag(item.title, "title", version);
-			_mapTag(item.assignee, "assignee", version);
-			_mapTag(item.patentNumber, "number", version);
+			if(item.title) co += _mapTag(item.title, "title", version);
+			if(item.assignee) co += _mapTag(item.assignee, "assignee", version);
+			if(item.patentNumber) co += _mapTag(item.patentNumber, "number", version);
 			
 			if(item.issueDate) {
 				co += _mapTag(Zotero.Date.strToISO(item.issueDate), "date", version);
@@ -352,9 +352,9 @@ Zotero.OpenURL = new function() {
 		if(item.date) {
 			co += _mapTag(Zotero.Date.strToISO(item.date), (item.itemType == "patent" ? "appldate" : "date"), version);
 		}
-		co += _mapTag(item.pages, "pages", version);
-		co += _mapTag(item.ISBN, "isbn", version);
-		co += _mapTag(item.ISSN, "issn", version);
+		if(item.pages) co += _mapTag(item.pages, "pages", version);
+		if(item.ISBN) co += _mapTag(item.ISBN, "isbn", version);
+		if(item.ISSN) co += _mapTag(item.ISSN, "issn", version);
 		
 		if(version == "0.1") {
 			// chop off leading & sign if version is 0.1

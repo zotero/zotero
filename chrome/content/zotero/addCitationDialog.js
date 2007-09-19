@@ -165,6 +165,9 @@ var Zotero_Citation_Dialog = new function () {
 			
 			// delete item list
 			_itemData = new Object();
+			
+			// delete all items
+			_clearCitationList();
 		}
 		_updateAccept();
 		_updatePreview();
@@ -254,14 +257,11 @@ var Zotero_Citation_Dialog = new function () {
 			_getCitation();
 			
 			// delete all existing items from list
-			var citationList = document.getElementById("citation-list");
-			while(citationList.firstChild) {
-				citationList.removeChild(citationList.firstChild);
-			}
+			_clearCitationList();
 			
 			// run preview function to re-sort, if it hasn't already been
 			// run
-			if(!_previewShown) io.previewFunction();
+			io.previewFunction();
 			
 			// add items back to list
 			for(var i=0; i<io.citation.citationItems.length; i++) {
@@ -468,5 +468,15 @@ var Zotero_Citation_Dialog = new function () {
 		itemNode.setAttribute("class", "listitem-iconic");
 		itemNode.setAttribute("image", item.getImageSrc());
 		document.getElementById("citation-list").appendChild(itemNode);
+	}
+	
+	/*
+	 * Removes all items from the multiple sources list
+	 */
+	function _clearCitationList() {
+		var citationList = document.getElementById("citation-list");
+		while(citationList.firstChild) {
+			citationList.removeChild(citationList.firstChild);
+		}
 	}
 }
