@@ -196,27 +196,15 @@ Zotero.Attachments = new function(){
 			if (Zotero.MIME.hasNativeHandler(mimeType, ext)){
 				var browser = Zotero.Browser.createHiddenBrowser();
 				var onpageshow = function() {
-					try {
-						Zotero.Attachments.importFromDocument(browser.contentDocument,
-							sourceItemID, forceTitle, parentCollectionIDs);
-					}
-					finally {
-						browser.removeEventListener("pageshow", onpageshow, true);
-						Zotero.Browser.deleteHiddenBrowser(browser);
-					}
-					
-					/* Built-in method -- disabled in favor of WebPageDump
-					
 					var callback = function () {
-						browser.removeEventListener("pageshow", arguments.callee, true);
+						browser.removeEventListener("pageshow", onpageshow, false);
 						Zotero.Browser.deleteHiddenBrowser(browser);
 					};
 					
 					Zotero.Attachments.importFromDocument(browser.contentDocument,
 						sourceItemID, forceTitle, parentCollectionIDs, callback);
-					*/
 				};
-				browser.addEventListener("pageshow", onpageshow, true);
+				browser.addEventListener("pageshow", onpageshow, false);
 				browser.loadURI(url);
 			}
 			
@@ -417,7 +405,7 @@ Zotero.Attachments = new function(){
 	/*
 	 * Save a snapshot -- uses synchronous WebPageDump or asynchronous saveURI()
 	 */
-	function importFromDocument(document, sourceItemID, forceTitle, parentCollectionIDs) {
+	function importFromDocument(document, sourceItemID, forceTitle, parentCollectionIDs, callback) {
 		Zotero.debug('Importing attachment from document');
 		
 		var url = document.location.href;
@@ -467,6 +455,7 @@ Zotero.Attachments = new function(){
 				var f = function() {
 					Zotero.Fulltext.indexDocument(document, itemID);
 					Zotero.Notifier.trigger('refresh', 'item', itemID);
+					callback();
 				};
 			}
 			
