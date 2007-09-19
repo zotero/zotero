@@ -6534,9 +6534,9 @@ REPLACE INTO translators VALUES ('cf87eca8-041d-b954-795a-2d86348999d5', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('774d7dc2-3474-2684-392c-f787789ec63d', '1.0.0b3.r1', '', '2007-08-15 16:00:00', '1', '100', '4', 'Library Catalog (Dynix)', 'Simon Kornblith', 'ipac\.jsp\?.*(?:uri=full=[0-9]|menu=search)', 
+REPLACE INTO translators VALUES ('774d7dc2-3474-2684-392c-f787789ec63d', '1.0.0b3.r1', '', '2007-09-19 07:13:03', '1', '100', '4', 'Library Catalog (Dynix)', 'Simon Kornblith', 'ipac\.jsp\?.*(?:uri=(?:link|full)=[0-9]|menu=search)', 
 'function detectWeb(doc, url) {
-	var detailsRe = new RegExp(''ipac\.jsp\?.*uri=full=[0-9]'');
+	var detailsRe = new RegExp(''ipac\.jsp\?.*uri=(?:full|link)=[0-9]'');
 	if(detailsRe.test(doc.location.href)) {
 		return "book";
 	} else {
@@ -6550,13 +6550,13 @@ REPLACE INTO translators VALUES ('774d7dc2-3474-2684-392c-f787789ec63d', '1.0.0b
 	} : null;
 
 	var uri = doc.location.href;
-	var detailsRe = new RegExp(''ipac\.jsp\?.*uri=full=[0-9]'');
+	var detailsRe = new RegExp(''ipac\.jsp\?.*uri=(?:full|link)=[0-9]'');
 	
 	var uris = new Array();
 	if(detailsRe.test(uri)) {
 		uris.push(uri+''&fullmarc=true'');
 	} else {
-		var items = Zotero.Utilities.getItemArray(doc, doc, "ipac\.jsp\?.*uri=full=[0-9]|^javascript:buildNewList\\(''.*uri%3Dfull%3D[0-9]");
+		var items = Zotero.Utilities.getItemArray(doc, doc, "ipac\.jsp\?.*uri=(?:full|link)=[0-9]|^javascript:buildNewList\\(''.*uri%3Dfull%3D[0-9]");
 		items = Zotero.selectItems(items);
 		
 		if(!items) {

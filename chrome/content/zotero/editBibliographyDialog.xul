@@ -34,7 +34,7 @@
 	onload="Zotero_Bibliography_Dialog.load();"
 	onunload="doUnload();"
 	ondialogaccept="Zotero_Bibliography_Dialog.accept();"
-	buttons="cancel,accept"
+	buttons="accept"
 	xmlns:html="http://www.w3.org/1999/xhtml"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	style="padding: 0">
