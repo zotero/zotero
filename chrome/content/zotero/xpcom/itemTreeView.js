@@ -362,7 +362,7 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids)
 						sort = ids[i];
 					}
 					// If not moved from under one item to another
-					else if (parentIndex == -1 || !sourceItemID) {
+					else if (!(sourceItemID && parentIndex != -1 && this._itemRowMap[sourceItemID] != parentIndex)) {
 						sort = ids[i];
 					}
 					madeChanges = true;
@@ -738,6 +738,14 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 		this._needsSort = false;
 	}
 	
+	// Single child item sort -- just toggle parent open and closed
+	if (itemID && this._getItemAtRow(this._itemRowMap[itemID]).ref.getSource()) {
+		var parentIndex = this.getParentIndex(this._itemRowMap[itemID]);
+		this.toggleOpenState(parentIndex);
+		this.toggleOpenState(parentIndex);
+		return;
+	}
+	
 	var columnField = this.getSortField();
 	var order = this.getSortDirection() == 'ascending';
 	
@@ -930,9 +938,9 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 	this._refreshHashMap();
 	
 	// Reopen closed containers
-	for(var i = 0; i < openRows.length; i++)
+	for (var i = 0; i < openRows.length; i++) {
 		this.toggleOpenState(this._itemRowMap[openRows[i]]);
-	
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////

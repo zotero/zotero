@@ -1356,9 +1356,29 @@ Zotero.Item.prototype.getNotes = function(){
 		return [];
 	}
 	
-	var sql = "SELECT itemID FROM itemNotes NATURAL JOIN items "
-		+ "WHERE sourceItemID=" + this.getID() + " ORDER BY dateAdded";
-	return Zotero.DB.columnQuery(sql);
+	// DEBUG: Not just using itemNoteTitles just in case something went wrong
+	// during migration and there's no titles row
+	//
+	// TODO: move titles into itemNotes table
+	var sql = "SELECT N.itemID, title FROM itemNotes N NATURAL JOIN items "
+		+ "LEFT JOIN itemNoteTitles USING (itemID) WHERE sourceItemID=" + this.getID();
+	var notes = Zotero.DB.query(sql);
+	if (!notes) {
+		return false;
+	}
+	
+	// Sort by title
+	var collation = Zotero.getLocaleCollation();
+	var f = function (a, b) {
+		return collation.compareString(1, a.title, b.title);
+	}
+	
+	var noteIDs = [];
+	notes.sort(f);
+	for each(var note in notes) {
+		noteIDs.push(note.itemID);
+	}
+	return noteIDs;
 }
 
 
