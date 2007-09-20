@@ -129,7 +129,7 @@
 	</script>
 	
 	<vbox flex="1">
-		<menulist id="zotero-csl-list" initialized="false" oncommand="Zotero_CSL_Editor.loadCSL(this.selectedItem.value)"/>
+		<menulist id="zotero-csl-list" style="min-height: 1.6em" initialized="false" oncommand="Zotero_CSL_Editor.loadCSL(this.selectedItem.value)"/>
 		<textbox id="zotero-csl-editor" type="timed" timeout="250" multiline="true"
 			flex="1"
 			onkeypress="Zotero_CSL_Editor.handleKeyPress(event)"
