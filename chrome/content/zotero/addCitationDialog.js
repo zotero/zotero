@@ -239,6 +239,14 @@ var Zotero_Citation_Dialog = new function () {
 		// remove from _itemData
 		delete _itemData[itemID];
 		_itemData[itemID] = undefined;
+		_lastSelected = null;
+		
+		// re-select currently selected in left pane
+		var itemIDs = getSelectedItems(true);
+		if(itemIDs.length) {
+			document.getElementById("zotero-items-tree").focus();
+			treeItemSelected();
+		}
 		
 		// remove from list
 		citationList.removeChild(selectedListItem);
