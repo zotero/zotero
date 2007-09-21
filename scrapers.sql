@@ -1,4 +1,4 @@
--- 258
+-- 259
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-09-19 20:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-09-21 16:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1819,6 +1819,62 @@ REPLACE INTO translators VALUES ('e4660e05-a935-43ec-8eec-df0347362e4c', '1.0.0b
 			Zotero.done();
 		});
 		Zotero.wait();
+	}
+}');
+
+REPLACE INTO translators VALUES ('b86bb082-6310-4772-a93c-913eaa3dfa1b', '1.0.0b4.r5', '', '2007-09-21 16:00:00', '0', '100', '4', 'Early English Books Online', 'Michael Berkowitz', '^http://eebo.chadwyck.com/search', 
+'function detectWeb(doc, url) {
+	if (doc.title == "Search Results - EEBO") {
+		return "multiple";
+	} else if (doc.title != "Basic Search - EEBO") {
+		return "book";
+	}
+}', 
+'function doWeb(doc, url) {
+	var eeboIDs = new Array();
+	if (doc.title == "Search Results - EEBO") {
+		var items = new Object();
+		Zotero.debug("search page");
+		var IDxpath = ''//td[4]/script'';
+		var Titlexpath = ''//td[3]/i'';
+		var new_ids = doc.evaluate(IDxpath, doc, null, XPathResult.ANY_TYPE, null);
+		var new_titles = doc.evaluate(Titlexpath, doc, null, XPathResult.ANY_TYPE, null);
+		var next_id = new_ids.iterateNext();
+		var next_title = new_titles.iterateNext();
+		var IDRegex = /\'(\d+)\'/;
+		while (next_id) {
+			items[next_id.textContent.match(IDRegex)[1]] = next_title.textContent;
+			next_id = new_ids.iterateNext();
+			next_title = new_titles.iterateNext();
+		}
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			eeboIDs.push(i);
+		}
+	} else {
+		var IDRegex = /&ID=(\w+)&/
+		var eeboid = url.match(IDRegex)[1];
+		if (eeboid[0] == "D") {
+			eeboid = eeboid.slice(7, 14);
+		}
+		eeboIDs.push(eeboid);
+	}
+	Zotero.debug(eeboIDs);
+	for (var i = 0 ; i < eeboIDs.length ; i++) {
+		var postString = ''cit_format=RIS&Print=Print&cit_eeboid='' + eeboIDs[i] + ''&EeboId='' + eeboIDs[i];
+		var new_eeboid = eeboIDs[i]
+		Zotero.Utilities.HTTP.doPost(''http://eebo.chadwyck.com/search/print'', postString, function(text) {
+			// load translator for RIS
+			var translator = Zotero.loadTranslator("import");
+			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+			translator.setString(text.substring(17));
+			translator.setHandler("itemDone", function(obj, item) {
+				item.extra = ''http://eebo.chadwyck.com/search/full_rec?SOURCE=pgimages.cfg&ACTION=ByID&ID='' + new_eeboid + ''&FILE=../session/1190302085_15129&SEARCHSCREEN=CITATIONS&SEARCHCONFIG=config.cfg&DISPLAY=ALPHA'';
+				item.complete();
+			});
+			translator.translate();
+			Zotero.done();
+		});
 	}
 }');
 
