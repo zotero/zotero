@@ -1841,7 +1841,7 @@ REPLACE INTO translators VALUES ('b86bb082-6310-4772-a93c-913eaa3dfa1b', '1.0.0b
 		var new_titles = doc.evaluate(Titlexpath, doc, null, XPathResult.ANY_TYPE, null);
 		var next_id = new_ids.iterateNext();
 		var next_title = new_titles.iterateNext();
-		var IDRegex = /\'(\d+)\'/;
+		var IDRegex = /''(\d+)''/;
 		while (next_id) {
 			items[next_id.textContent.match(IDRegex)[1]] = next_title.textContent;
 			next_id = new_ids.iterateNext();
