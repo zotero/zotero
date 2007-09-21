@@ -739,7 +739,8 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 	}
 	
 	// Single child item sort -- just toggle parent open and closed
-	if (itemID && this._getItemAtRow(this._itemRowMap[itemID]).ref.getSource()) {
+	if (itemID && this._itemRowMap[itemID] &&
+			this._getItemAtRow(this._itemRowMap[itemID]).ref.getSource()) {
 		var parentIndex = this.getParentIndex(this._itemRowMap[itemID]);
 		this.toggleOpenState(parentIndex);
 		this.toggleOpenState(parentIndex);
@@ -991,12 +992,19 @@ Zotero.ItemTreeView.prototype.selectItem = function(id, expand, noRecurse)
 			
 			return false;
 		}
-		this.toggleOpenState(parentRow); //opens the parent of the item
+		
+		// If parent is already open and we haven't found the item, the child
+		// hasn't yet been added to the view, so close parent to allow refresh
+		if (this.isContainerOpen(parentRow)) {
+			this.toggleOpenState(parentRow);
+		}
+		// Open the parent
+		this.toggleOpenState(parentRow);
 		row = this._itemRowMap[id];
 	}
 	
 	this.selection.select(row);
-	// If _expand_, open container
+	// If |expand|, open row if container
 	if (expand && this.isContainer(row) && !this.isContainerOpen(row)) {
 		this.toggleOpenState(row);
 	}
@@ -1774,16 +1782,24 @@ Zotero.ItemTreeView.prototype.canDrop = function(row, orient)
 		// Directly on a row
 		if (orient == 0)
 		{
-			for each(var id in ids)
-			{
+			var canDrop = false;
+			for each(var id in ids) {
 				var item = Zotero.Items.get(id);
+				
+				// If any regular items, disallow drop
+				if (item.isRegularItem()) {
+					canDrop = false;
+					break;
+				}
+				
 				// Only allow dragging of notes and attachments
 				// that aren't already children of the item
-				if (!item.isRegularItem() && item.getSource()!=rowItem.getID())
-				{
-					return true;
+				if (item.getSource() != rowItem.getID()) {
+					canDrop = true;
 				}
 			}
+			
+			return canDrop;
 		}
 		
 		// In library, allow children to be dragged out of parent

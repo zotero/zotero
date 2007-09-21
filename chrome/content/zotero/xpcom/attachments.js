@@ -455,7 +455,9 @@ Zotero.Attachments = new function(){
 				var f = function() {
 					Zotero.Fulltext.indexDocument(document, itemID);
 					Zotero.Notifier.trigger('refresh', 'item', itemID);
-					callback();
+					if (callback) {
+						callback();
+					}
 				};
 			}
 			
