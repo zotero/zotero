@@ -7,8 +7,12 @@ description {
 	font-style: italic;
 }
 
+#zotero-unrelated-message {
+	margin: 1em 0 .5em;
+}
+
 #zotero-advance-message {
-	margin: 1.5em 0 .5em;
+	margin: .5em 0;
 }
 
 /* Additional Info pane */
@@ -25,7 +29,7 @@ description {
 }
 
 #zotero-error-steps-box description {
-	margin-bottom: .25em;
+	margin-bottom: .4em;
 }
 
 /* Submitted pane */
