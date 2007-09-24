@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-09-24 14:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-09-24 17:35:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1822,7 +1822,7 @@ REPLACE INTO translators VALUES ('e4660e05-a935-43ec-8eec-df0347362e4c', '1.0.0b
 	}
 }');
 
-REPLACE INTO translators VALUES ('b86bb082-6310-4772-a93c-913eaa3dfa1b', '1.0.0b4.r5', '', '2007-09-24 14:00:00', '0', '100', '4', 'Early English Books Online', 'Michael Berkowitz', '^http://eebo.chadwyck.com/search', 
+REPLACE INTO translators VALUES ('b86bb082-6310-4772-a93c-913eaa3dfa1b', '1.0.0b4.r5', '', '2007-09-24 17:35:00', '0', '100', '4', 'Early English Books Online', 'Michael Berkowitz', '^http://eebo.chadwyck.com/search', 
 'function detectWeb(doc, url) {
 	if (doc.title == "Search Results - EEBO") {
 		return "multiple";
@@ -1869,7 +1869,7 @@ REPLACE INTO translators VALUES ('b86bb082-6310-4772-a93c-913eaa3dfa1b', '1.0.0b
 			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 			translator.setString(text.substring(17));
 			translator.setHandler("itemDone", function(obj, item) {
-				item.URL = ''http://eebo.chadwyck.com/search/full_rec?SOURCE=pgimages.cfg&ACTION=ByID&ID='' + new_eeboid + ''&FILE=../session/1190302085_15129&SEARCHSCREEN=CITATIONS&SEARCHCONFIG=config.cfg&DISPLAY=ALPHA'';
+				item.url = ''http://eebo.chadwyck.com/search/full_rec?SOURCE=pgimages.cfg&ACTION=ByID&ID='' + new_eeboid + ''&FILE=../session/1190302085_15129&SEARCHSCREEN=CITATIONS&SEARCHCONFIG=config.cfg&DISPLAY=ALPHA'';
 				item.complete();
 			});
 			translator.translate();
