@@ -819,6 +819,7 @@ Zotero.Search.prototype._buildQuery = function(){
 						
 						condSQL += "valueID IN (SELECT valueID FROM "
 							+ "itemDataValues WHERE ";
+						
 						openParens++;
 						break;
 					
@@ -928,13 +929,17 @@ Zotero.Search.prototype._buildQuery = function(){
 					// Special handling for date fields
 					//
 					// Note: We assume full datetimes are already UTC and don't
-					// need to be handle specially
+					// need to be handled specially
 					if ((condition['name']=='dateAdded' ||
 							condition['name']=='dateModified' ||
 							condition['name']=='datefield') &&
 							!Zotero.Date.isSQLDateTime(condition['value'])){
 						
-						// TODO: document parseDate, alt, and useFreeform
+						// TODO: document these flags
+						var parseDate = null;
+						var alt = null;
+						var useFreeform = null;
+						
 						switch (condition['operator']){
 							case 'is':
 							case 'isNot':
@@ -1051,7 +1056,26 @@ Zotero.Search.prototype._buildQuery = function(){
 					
 					// Non-date fields
 					else {
-						condSQL += condition['field'];
+						switch (condition.operator) {
+							// Cast strings as integers for < and > comparisons,
+							// at least until 
+							case 'isLessThan':
+							case 'isGreaterThan':
+								condSQL += "CAST(" + condition['field'] + " AS INT)";
+								// Make sure either field is an integer or
+								// converting to an integer and back to a string
+								// yields the same result (i.e. it's numeric)
+								var opAppend = " AND (TYPEOF("
+									+ condition['field'] + ") = 'integer' OR "
+									+ "CAST("
+										+ "CAST(" + condition['field'] + " AS INT)"
+									+ " AS STRING) = " + condition['field'] + ")"
+								break;
+								
+							default:
+								condSQL += condition['field'];
+						}
+						
 						switch (condition['operator']){
 							case 'contains':
 							case 'doesNotContain': // excluded with NOT IN above
@@ -1070,7 +1094,14 @@ Zotero.Search.prototype._buildQuery = function(){
 								
 							case 'is':
 							case 'isNot': // excluded with NOT IN above
-								condSQL += '=?';
+								// Automatically cast values which might
+								// have been stored as integers
+								if (condition.value.match(/^[1-9]+[0-9]*$/)) {
+									condSQL += ' LIKE ?';
+								}
+								else {
+									condSQL += '=?';
+								}
 								condSQLParams.push(condition['value']);
 								break;
 							
@@ -1082,11 +1113,13 @@ Zotero.Search.prototype._buildQuery = function(){
 							case 'isLessThan':
 								condSQL += '<?';
 								condSQLParams.push({int:condition['value']});
+								condSQL += opAppend;
 								break;
 								
 							case 'isGreaterThan':
 								condSQL += '>?';
 								condSQLParams.push({int:condition['value']});
+								condSQL += opAppend;
 								break;
 							
 							// Next two only used with full datetimes

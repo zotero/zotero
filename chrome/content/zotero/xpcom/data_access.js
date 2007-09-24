@@ -792,9 +792,29 @@ Zotero.Item.prototype.save = function(){
 								Zotero.DB.query(sql, {int: valueID});
 							}
 							else {
-								if (Zotero.ItemFields.isInteger(fieldID)) {
-									insertStatement.
-										bindInt32Parameter(1, value);
+								// DISABLED
+								//if (Zotero.ItemFields.isInteger(fieldID)) {
+								
+								// If integer not beginning with 0, bind as integer
+								//
+								// If this is changed, search.js also needs to
+								// change
+								if (value.match(/^[1-9]+[0-9]*$/)) {
+									// Store as 32-bit signed integer
+									if (value <= 2147483647) {
+										insertStatement.
+											bindInt32Parameter(1, value);
+									}
+									// Store as 64-bit signed integer
+									else if (value < 9223372036800000000) {
+										insertStatement.
+											bindInt64Parameter(1, value);
+									}
+									// Store as string if larger then 64-bit
+									else {
+										insertStatement.
+											bindUTF8StringParameter(1, value);
+									}
 								}
 								else {
 									insertStatement.
