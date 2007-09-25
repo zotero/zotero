@@ -221,7 +221,16 @@ var Zotero = new function(){
 		}
 		// If no userdata upgrade, still might need to process system/scrapers
 		else {
-			Zotero.Schema.updateSchema();
+			try {
+				Zotero.Schema.updateSchema();
+			}
+			catch (e) {
+				if (typeof e == 'string' && e.match('newer than SQL file')) {
+					_startupError = e;
+				}
+				Components.utils.reportError(_startupError);
+				return false;
+			}
 		}
 		
 		Zotero.DB.startDummyStatement();

@@ -230,6 +230,7 @@ var ZoteroPane = new function()
 		// or load the default error page
 		if (makeVisible && (!Zotero || !Zotero.initialized)) {
 			if (Zotero) {
+				var errMsg = Zotero.startupError;
 				var errFunc = Zotero.startupErrorHandler;
 			}
 			
@@ -241,7 +242,7 @@ var ZoteroPane = new function()
 				// instructions
 				// window.loadURI('chrome://zotero/content/error.xul');
 				// TODO: localize if possible
-				alert("There was an error starting Zotero.");
+				alert(errMsg);
 			}
 			
 			return;
