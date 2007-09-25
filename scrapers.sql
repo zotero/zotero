@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-09-24 17:35:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-09-25 16:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -7216,7 +7216,7 @@ REPLACE INTO translators VALUES ('c54d1932-73ce-dfd4-a943-109380e06574', '1.0.0b
 	}
 }');
 
-REPLACE INTO translators VALUES ('fcf41bed-0cbc-3704-85c7-8062a0068a7a', '1.0.0b3.r1', '', '2007-05-24 19:30:00', '1', '100', '4', 'NCBI PubMed', 'Simon Kornblith', '^http://www\.ncbi\.nlm\.nih\.gov/(sites/entrez|entrez/query\.fcgi\?.*db=PubMed)', 
+REPLACE INTO translators VALUES ('fcf41bed-0cbc-3704-85c7-8062a0068a7a', '1.0.0b3.r1', '', '2007-09-25 16:00:00', '1', '100', '4', 'NCBI PubMed', 'Simon Kornblith and Michael Berkowitz', '^http://www\.ncbi\.nlm\.nih\.gov/(sites/entrez|entrez/query\.fcgi\?.*db=PubMed)', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -7334,9 +7334,19 @@ function detectSearch(item) {
 					}
 				}
 			}
-
+			
+			
+			if (citation.MeshHeadingList && citation.MeshHeadingList.MeshHeading) {
+				Zotero.debug("in the new loop");
+				var keywords = citation.MeshHeadingList.MeshHeading;
+				Zotero.debug(keywords);
+				for (var k = 0 ; k < keywords.length() ; k++) {
+					Zotero.debug(k);
+					newItem.tags.push(keywords[k].DescriptorName.text().toString());
+				}
+			}
 			newItem.abstractNote = article.Abstract.AbstractText.toString()
-
+			
 			newItem.complete();
 		}
 
