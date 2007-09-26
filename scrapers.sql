@@ -16393,7 +16393,7 @@ function doExport() {
 	}
 }');
 
-REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '2007-09-13 20:50:16', 'American Psychological Association',
+REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '2007-09-26 10:58:54', 'American Psychological Association',
 '<?oxygen RNGSchema="csl.rnc" type="compact"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="in-text" xml:lang="en">
   <info>
@@ -16407,7 +16407,7 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '2007-
     <category term="psychology"/>
     <category term="generic-base"/>
     <category term="author-date"/>
-    <updated>2007-09-06T06:36:07+00:00</updated>
+    <updated>2007-09-26T10:58:54+00:00</updated>
   </info>
   <macro name="editor-translator">
     <names variable="editor translator" prefix="(" suffix=")" delimiter=", ">
@@ -16524,9 +16524,9 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '2007-
         <else-if type="chapter">
           <text macro="title" prefix=" "/>
           <group class="container" prefix=". ">
-            <text term="in" text-transform="capitalize"/>
+            <text term="in" text-transform="capitalize" suffix=" "/>
             <group delimiter=", " suffix=".">
-              <names variable="editor translator" prefix=" " delimiter=", ">
+              <names variable="editor translator" delimiter=", ">
                 <name and="symbol" sort-separator=", " initialize-with=". "/>
                 <label form="short" prefix=" (" suffix=".)" text-transform="capitalize"/>
               </names>

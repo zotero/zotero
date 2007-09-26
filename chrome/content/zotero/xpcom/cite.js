@@ -1921,7 +1921,7 @@ Zotero.CSL.ItemSet.prototype.resort = function() {
 				if(nameType[lastName] === undefined) {
 					// determine how to format name
 					var theNames = allNames[lastName];
-					if(theNames.length > 1) {
+					if(theNames && theNames.length > 1) {
 						nameType[lastName] = Zotero.CSL.NAME_USE_INITIAL;					
 						// check initials to see if any match
 						var initials = new Object();
