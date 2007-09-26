@@ -430,7 +430,7 @@ Zotero.Translate.prototype.runHandler = function(type, argument) {
 	var returnValue = undefined;
 	if(this._handlers[type]) {
 		for(var i in this._handlers[type]) {
-			Zotero.debug("running handler "+i+" for "+type);
+			Zotero.debug("Translate: running handler "+i+" for "+type);
 			try {
 				if(this._parentTranslator) {
 					returnValue = this._handlers[type][i](null, argument);
@@ -446,7 +446,7 @@ Zotero.Translate.prototype.runHandler = function(type, argument) {
 				} else {
 					// otherwise, fail silently, so as not to interfere with
 					// interface cleanup
-					Zotero.debug(e+' in handler '+i+' for '+type);
+					Zotero.debug("Translate: "+e+' in handler '+i+' for '+type);
 				}
 			}
 		}
@@ -457,20 +457,7 @@ Zotero.Translate.prototype.runHandler = function(type, argument) {
 /*
  * gets all applicable translators
  *
- * for import, you should call this after setFile; otherwise, you'll just get
- * a list of all import filters, not filters equipped to handle a specific file
- *
- * this returns a list of translator objects, of which the following fields
- * are useful:
- *
- * translatorID - the GUID of the translator
- * label - the name of the translator
- * itemType - the type of item this scraper says it will scrape
- */
-/*
- * gets all applicable translators
- *
- * for import, you should call this after setFile; otherwise, you'll just get
+ * for import, you should call this after setLocation; otherwise, you'll just get
  * a list of all import filters, not filters equipped to handle a specific file
  *
  * this returns a list of translator objects, of which the following fields
@@ -501,7 +488,7 @@ Zotero.Translate.prototype.getTranslators = function() {
 	this._setSandboxMode("detect");
 	
 	var possibleTranslators = new Array();
-	Zotero.debug("searching for translators for "+(this.path ? this.path : "an undisclosed location"));
+	Zotero.debug("Translate: searching for translators for "+(this.path ? this.path : "an undisclosed location"));
 	
 	// see which translators can translate
 	this._translatorSearch = new Zotero.Translate.TranslatorSearch(this, translators);
@@ -527,7 +514,7 @@ Zotero.Translate.prototype._loadTranslator = function() {
 	// parse detect code for the translator
 	this._parseDetectCode(this.translator[0]);
 	
-	Zotero.debug("parsing code for "+this.translator[0].label);
+	Zotero.debug("Translate: parsing code for "+this.translator[0].label);
 	
 	try {
 		Components.utils.evalInSandbox(this.translator[0].code, this._sandbox);
@@ -641,7 +628,7 @@ Zotero.Translate.prototype._generateSandbox = function() {
 		if(this.type == "web") {
 			// use real URL, not proxied version, to create sandbox
 			sandboxLocation = this.document.defaultView;
-			Zotero.debug("binding sandbox to "+this.document.location.href);
+			Zotero.debug("Translate: binding sandbox to "+this.document.location.href);
 		} else {
 			// generate sandbox for search by extracting domain from translator
 			// target, if one exists
@@ -653,7 +640,7 @@ Zotero.Translate.prototype._generateSandbox = function() {
 					sandboxLocation = m[0];
 				}
 			}
-			Zotero.debug("binding sandbox to "+sandboxLocation);
+			Zotero.debug("Translate: binding sandbox to "+sandboxLocation);
 		}
 		this._sandbox = new Components.utils.Sandbox(sandboxLocation);
 		
@@ -810,7 +797,7 @@ Zotero.Translate.prototype._setSandboxMode = function(mode) {
  */
 Zotero.Translate.prototype._configure = function(option, value) {
 	this.configOptions[option] = value;
-	Zotero.debug("setting configure option "+option+" to "+value);
+	Zotero.debug("Translate: setting configure option "+option+" to "+value);
 }
 
 /*
@@ -822,7 +809,7 @@ Zotero.Translate.prototype._configure = function(option, value) {
  */
 Zotero.Translate.prototype._addOption = function(option, value) {
 	this.displayOptions[option] = value;
-	Zotero.debug("setting display option "+option+" to "+value);
+	Zotero.debug("Translate: setting display option "+option+" to "+value);
 }
 
 /*
@@ -895,7 +882,7 @@ Zotero.Translate.prototype._translationComplete = function(returnValue, error) {
 		if(this.type == "search" && !this._itemsDone) {
 			// if we're performing a search and didn't get any results, go on
 			// to the next translator
-			Zotero.debug("could not find a result using "+this.translator[0].label+": \n"
+			Zotero.debug("Translate: could not find a result using "+this.translator[0].label+": \n"
 			              +this._generateErrorString(error));
 			if(this.translator.length > 1) {
 				this.translator.shift();
@@ -1023,7 +1010,6 @@ Zotero.Translate.prototype._closeStreams = function() {
  * handles tags and see also data for notes and attachments
  */
 Zotero.Translate.prototype._itemTagsAndSeeAlso = function(item, newItem) {
-	Zotero.debug("handling notes and see also");
 	// add to ID map
 	if(item.itemID) {
 		this._IDMap[item.itemID] = newItem.getID();
@@ -1073,7 +1059,7 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 		if(this._parentTranslator) {
 			var pt = this._parentTranslator;
 			item.complete = function() { pt._itemDone(this) };
-			Zotero.debug("done from parent sandbox");
+			Zotero.debug("Translate: calling done from parent sandbox");
 		}
 		this.runHandler("itemDone", item);
 		return;
@@ -1100,11 +1086,11 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 		// create new item
 		if(type == "attachment") {
 			if(this.type != "import") {
-				Zotero.debug("discarding standalone attachment");
+				Zotero.debug("Translate: discarding standalone attachment");
 				return;
 			}
 			
-			Zotero.debug("adding attachment");
+			Zotero.debug("Translate: adding attachment");
 			
 			if(!item.path) {
 				// create from URL
@@ -1112,7 +1098,7 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 					var myID = Zotero.Attachments.linkFromURL(item.url, attachedTo,
 							(item.mimeType ? item.mimeType : undefined),
 							(item.title ? item.title : undefined));
-					Zotero.debug("created attachment; id is "+myID);
+					Zotero.debug("Translate: created attachment; id is "+myID);
 					if(!myID) {
 						// if we didn't get an ID, don't continue adding
 						// notes, because we can't without knowing the ID
@@ -1120,7 +1106,7 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 					}
 					var newItem = Zotero.Items.get(myID);
 				} else {
-					Zotero.debug("not adding attachment: no path or url specified");
+					Zotero.debug("Translate: not adding attachment: no path or url specified");
 					return;
 				}
 			} else {
@@ -1181,7 +1167,7 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 							try {
 								var creatorType = Zotero.CreatorTypes.getID(data[j].creatorType);
 							} catch(e) {
-								Zotero.debug("invalid creator type "+data[j].creatorType+" for creator index "+j);
+								Zotero.debug("Translate: invalid creator type "+data[j].creatorType+" for creator index "+j);
 							}
 						}
 						
@@ -1197,14 +1183,14 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 					// try to map from base field
 					if(Zotero.ItemFields.isBaseField(fieldID)) {
 						var fieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(typeID, fieldID);
-						if(fieldID) Zotero.debug("mapping "+field+" to "+Zotero.ItemFields.getName(fieldID));
+						if(fieldID) Zotero.debug("Translate: mapping "+field+" to "+Zotero.ItemFields.getName(fieldID));
 					}
 					
 					// if field is valid for this type, set field
 					if(fieldID && Zotero.ItemFields.isValidForType(fieldID, typeID)) {
 						newItem.setField(fieldID, data);
 					} else {
-						Zotero.debug("discarded field "+field+" for item: field not valid for type "+type);
+						Zotero.debug("Translate: discarded field "+field+" for item: field not valid for type "+type);
 					}
 				}
 			}
@@ -1266,11 +1252,10 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 		
 		// handle attachments
 		if(item.attachments && Zotero.Prefs.get("automaticSnapshots")) {
-			Zotero.debug("HANDLING ATTACHMENTS");
 			for each(var attachment in item.attachments) {
 				if(this.type == "web") {
 					if(!attachment.url && !attachment.document) {
-						Zotero.debug("not adding attachment: no URL specified");
+						Zotero.debug("Translate: not adding attachment: no URL specified");
 					} else {
 						if(attachment.snapshot === false) {
 							// if snapshot is explicitly set to false, attach as link
@@ -1280,7 +1265,7 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 										(attachment.title ? attachment.title : attachment.document.title));
 							} else {
 								if(!attachment.mimeType || !attachment.title) {
-									Zotero.debug("NOTICE: either mimeType or title is missing; attaching file will be slower");
+									Zotero.debug("Translate: NOTICE: either mimeType or title is missing; attaching file will be slower");
 								}
 								
 								attachmentID = Zotero.Attachments.linkFromURL(attachment.url, myID,
@@ -1294,8 +1279,6 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 							if(attachment.document) {
 								Zotero.Attachments.importFromDocument(attachment.document, myID, attachment.title);
 							} else {
-								Zotero.debug("GOT ATTACHMENT");
-								
 								var mimeType = null;
 								var title = null;
 								
@@ -1400,10 +1383,10 @@ Zotero.Translate.prototype._processCollection = function(collection, parentID) {
 		} else {
 			// add mapped items to collection
 			if(this._IDMap[child.id]) {
-				Zotero.debug("adding "+this._IDMap[child.id]);
+				Zotero.debug("Translate: adding "+this._IDMap[child.id]);
 				newCollection.addItem(this._IDMap[child.id]);
 			} else {
-				Zotero.debug("could not map "+child.id+" to an imported item");
+				Zotero.debug("Translate: could not map "+child.id+" to an imported item");
 			}
 		}
 	}
@@ -1721,8 +1704,6 @@ Zotero.Translate.prototype._export = function() {
 			this._collectionsLeft = Zotero.getCollections();
 		}
 	}
-	
-	Zotero.debug(this.displayOptions);
 	
 	// export file data, if requested
 	if(this.displayOptions["exportFileData"]) {
@@ -2082,7 +2063,7 @@ Zotero.Translate.TranslatorSearch.prototype.execute = function() {
 	// get next translator
 	var translator = this.translators.shift();
 	
-	if((this.translate.type == "import" || this.translate.type == "web") && !this.translate.location) {
+	if((this.translate.type == "import" || this.translate.type == "web") && !this.translate.location && !this.translate._storage) {
 		// if no location yet (e.g., getting list of possible web translators),
 		// just return true
 		this.addTranslator(translator);
@@ -2136,7 +2117,7 @@ Zotero.Translate.TranslatorSearch.prototype.execute = function() {
 			try {
 				this.translate._importConfigureIO();	// so it can read
 			} catch(e) {
-				Zotero.debug(e+' in opening IO for '+translator.label);
+				Zotero.debug("Translate: "+e+' in opening IO for '+translator.label);
 				this.execute();
 				return;
 			}
@@ -2164,7 +2145,7 @@ Zotero.Translate.TranslatorSearch.prototype.execute = function() {
 				return;
 			}
 			
-			Zotero.debug("executed detectCode for "+translator.label);
+			Zotero.debug("Translate: executed detectCode for "+translator.label);
 					
 			if(this.translate.type == "web" && this.translate.waitForCompletion) {
 				this.asyncMode = true;
@@ -2211,7 +2192,7 @@ Zotero.Translate.TranslatorSearch.prototype.checkDone = function() {
  * Processes the return value from a translator
  */
 Zotero.Translate.TranslatorSearch.prototype.processReturnValue = function(translator, returnValue) {
-	Zotero.debug("found translator "+translator.label);
+	Zotero.debug("Translate: found translator "+translator.label);
 	
 	if(typeof(returnValue) == "string") {
 		translator.itemType = returnValue;

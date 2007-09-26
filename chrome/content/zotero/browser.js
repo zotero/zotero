@@ -288,11 +288,10 @@ var Zotero_Browser = new function() {
 	 */
 	function contentLoad(event) {
 		var isHTML = event.originalTarget instanceof HTMLDocument;
+		var doc = event.originalTarget;
+		var rootDoc = doc;
 		
 		if(isHTML) {
-			var doc = event.originalTarget;
-			var rootDoc = doc;
-			
 			// get the appropriate root document to check which browser we're on
 			while(rootDoc.defaultView.frameElement) {
 				rootDoc = rootDoc.defaultView.frameElement.ownerDocument;
@@ -345,10 +344,10 @@ var Zotero_Browser = new function() {
 					}, false);
 				}
 			}
-			
-			// detect translators
-			tab.detectTranslators(rootDoc, doc);
 		}
+		
+		// detect translators
+		tab.detectTranslators(rootDoc, doc);
 		
 		// clear annotateNextLoad
 		if(tab.annotateNextLoad) {
@@ -590,13 +589,17 @@ Zotero_Browser.Tab.prototype.detectTranslators = function(rootDoc, doc) {
 		}
 	}
 	
-	// get translators
-	var me = this;
-	
-	var translate = new Zotero.Translate("web");
-	translate.setDocument(doc);
-	translate.setHandler("translators", function(obj, item) { me._translatorsAvailable(obj, item) });
-	var translators = translate.getTranslators();
+	if(doc instanceof HTMLDocument) {
+		// get translators
+		var me = this;
+		
+		var translate = new Zotero.Translate("web");
+		translate.setDocument(doc);
+		translate.setHandler("translators", function(obj, item) { me._translatorsAvailable(obj, item) });
+		translate.getTranslators();
+	} else if(doc.documentURI.length > 7 && doc.documentURI.substr(0, 7) == "file://") {
+		this._attemptLocalFileImport(doc);
+	}
 }
 
 
@@ -614,6 +617,21 @@ Zotero_Browser.Tab.prototype._searchFrames = function(rootDoc, searchDoc) {
 	}
 	
 	return false;
+}
+
+/*
+ * Attempts import of a file; to be run on local files only
+ */
+Zotero_Browser.Tab.prototype._attemptLocalFileImport = function(doc) {
+	var file = Components.classes["@mozilla.org/network/protocol;1?name=file"]
+								.getService(Components.interfaces.nsIFileProtocolHandler)
+								.getFileFromURLSpec(doc.documentURI);
+	
+	var me = this;
+	var translate = new Zotero.Translate("import");
+	translate.setLocation(file);
+	translate.setHandler("translators", function(obj, item) { me._translatorsAvailable(obj, item) });
+	translate.getTranslators();
 }
 
 /*
@@ -704,8 +722,10 @@ Zotero_Browser.Tab.prototype._translatorsAvailable = function(translate, transla
 		this.page.translate = translate;
 		this.page.translators = translators;
 		this.page.document = translate.document;
+	} else if(translate.type != "import" && translate.document.documentURI.length > 7
+			&& translate.document.documentURI.substr(0, 7) == "file://") {
+		this._attemptLocalFileImport(translate.document);
 	}
-	
 	Zotero_Browser.updateStatus();
 }
 
