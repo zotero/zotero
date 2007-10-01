@@ -29,24 +29,22 @@ CREATE TABLE IF NOT EXISTS userFieldMask (
 
 -- User-defined item types -- itemTypeIDs must be >= 1000
 CREATE TABLE IF NOT EXISTS userItemTypes (
-    itemTypeID INT,
+    itemTypeID INTEGER PRIMARY KEY,
     typeName TEXT,
-    templateItemTypeID INT,
-    PRIMARY KEY (itemTypeID)
+    templateItemTypeID INT
 );
 
 -- Control visibility and placement of system and user item types
 CREATE TABLE IF NOT EXISTS userItemTypeMask (
-    itemTypeID INT,
+    itemTypeID INTEGER PRIMARY KEY,
     display INT, -- 0 == hide, 1 == show, 2 == primary
-    PRIMARY KEY (itemTypeID)
+    FOREIGN KEY (itemTypeID) REFERENCES userItemTypes(itemTypeID)
 );
 
 -- User-defined fields
 CREATE TABLE IF NOT EXISTS userFields (
-    userFieldID INT,
-    fieldName TEXT,
-    PRIMARY KEY (userFieldID)
+    userFieldID INTEGER PRIMARY KEY,
+    fieldName TEXT
 );
 
 -- Map custom fields to system and custom item types
@@ -66,6 +64,11 @@ CREATE TABLE IF NOT EXISTS items (
     dateModified DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS itemDataValues (
+    valueID INTEGER PRIMARY KEY,
+    value
+);
+
 -- Type-specific data for individual items
 --
 -- Triggers specified in schema.js due to lack of trigger IF [NOT] EXISTS in Firefox 2.0
@@ -79,40 +82,31 @@ CREATE TABLE IF NOT EXISTS itemData (
     FOREIGN KEY (valueID) REFERENCES itemDataValues(valueID)
 );
 
-CREATE TABLE IF NOT EXISTS itemDataValues (
-    valueID INT,
-    value,
-    PRIMARY KEY (valueID)
-);
-
 -- Note data for note items
 CREATE TABLE IF NOT EXISTS itemNotes (
-    itemID INT,
+    itemID INTEGER PRIMARY KEY,
     sourceItemID INT,
     note TEXT,
-    PRIMARY KEY (itemID),
     FOREIGN KEY (itemID) REFERENCES items(itemID),
     FOREIGN KEY (sourceItemID) REFERENCES items(itemID)
 );
 CREATE INDEX IF NOT EXISTS itemNotes_sourceItemID ON itemNotes(sourceItemID);
 
 CREATE TABLE IF NOT EXISTS itemNoteTitles (
-    itemID INT,
+    itemID INTEGER PRIMARY KEY,
     title TEXT,
-    PRIMARY KEY (itemID),
     FOREIGN KEY (itemID) REFERENCES itemNotes(itemID)
 );
 
 -- Metadata for attachment items
 CREATE TABLE IF NOT EXISTS itemAttachments (
-    itemID INT,
+    itemID INTEGER PRIMARY KEY,
     sourceItemID INT,
     linkMode INT,
     mimeType TEXT,
     charsetID INT,
     path TEXT,
     originalPath TEXT,
-    PRIMARY KEY (itemID),
     FOREIGN KEY (itemID) REFERENCES items(itemID),
     FOREIGN KEY (sourceItemID) REFERENCES items(sourceItemID)
 );
@@ -121,10 +115,9 @@ CREATE INDEX IF NOT EXISTS itemAttachments_mimeType ON itemAttachments(mimeType)
 
 -- Individual entries for each tag
 CREATE TABLE IF NOT EXISTS tags (
-    tagID INT,
+    tagID INTEGER PRIMARY KEY,
     tag TEXT,
     tagType INT,
-    PRIMARY KEY (tagID),
     UNIQUE (tag, tagType)
 );
 
@@ -149,11 +142,10 @@ CREATE INDEX IF NOT EXISTS itemSeeAlso_linkedItemID ON itemSeeAlso(linkedItemID)
 
 -- Names of each individual "creator" (inc. authors, editors, etc.)
 CREATE TABLE IF NOT EXISTS creators (
-    creatorID INT,
+    creatorID INTEGER PRIMARY KEY,
     firstName TEXT,
     lastName TEXT,
-    fieldMode INT,
-    PRIMARY KEY (creatorID)
+    fieldMode INT
 );
 
 -- Associates single or multiple creators to items
@@ -170,10 +162,9 @@ CREATE TABLE IF NOT EXISTS itemCreators (
 
 -- Collections for holding items
 CREATE TABLE IF NOT EXISTS collections (
-    collectionID INT,
+    collectionID INTEGER PRIMARY KEY,
     collectionName TEXT,
     parentCollectionID INT,
-    PRIMARY KEY (collectionID),
     FOREIGN KEY (parentCollectionID) REFERENCES collections(collectionID)
 );
 
@@ -189,9 +180,8 @@ CREATE TABLE IF NOT EXISTS collectionItems (
 CREATE INDEX IF NOT EXISTS itemID ON collectionItems(itemID);
 
 CREATE TABLE IF NOT EXISTS savedSearches (
-    savedSearchID INT,
-    savedSearchName TEXT,
-    PRIMARY KEY(savedSearchID)
+    savedSearchID INTEGER PRIMARY KEY,
+    savedSearchName TEXT
 );
 
 CREATE TABLE IF NOT EXISTS savedSearchConditions (
@@ -201,18 +191,17 @@ CREATE TABLE IF NOT EXISTS savedSearchConditions (
     operator TEXT,
     value TEXT,
     required NONE,
-    PRIMARY KEY(savedSearchID, searchConditionID),
+    PRIMARY KEY (savedSearchID, searchConditionID),
     FOREIGN KEY (savedSearchID) REFERENCES savedSearches(savedSearchID)
 );
 
 CREATE TABLE IF NOT EXISTS fulltextItems (
-    itemID INT,
+    itemID INTEGER PRIMARY KEY,
     version INT,
     indexedPages INT,
     totalPages INT,
     indexedChars INT,
     totalChars INT,
-    PRIMARY KEY (itemID),
     FOREIGN KEY (itemID) REFERENCES items(itemID)
 );
 CREATE INDEX IF NOT EXISTS fulltextItems_version ON fulltextItems(version);
