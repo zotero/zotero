@@ -1900,6 +1900,12 @@ Zotero.Translate.prototype._exportGetItem = function() {
 
 Zotero.Translate.prototype._exportToArray = function(returnItem) {
 	var returnItemArray = returnItem.toArray();
+	
+	// Remove SQL date from multipart dates
+	if (returnItemArray.date) {
+		returnItemArray.date = Zotero.Date.multipartToStr(returnItemArray.date);
+	}
+	
 	returnItemArray.uniqueFields = new Object();
 	
 	// get base fields, not just the type-specific ones
