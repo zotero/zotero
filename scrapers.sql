@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-09-25 18:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-10-03 08:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -8779,10 +8779,10 @@ REPLACE INTO translators VALUES ('3e684d82-73a3-9a34-095f-19b112d88bbf', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('57a00950-f0d1-4b41-b6ba-44ff0fc30289', '1.0.0b3.r1', '', '2007-03-22 17:40:00', 1, 100, 4, 'Google Scholar', 'Simon Kornblith', '^http://scholar\.google\.[a-z]+/scholar',
+REPLACE INTO translators VALUES ('57a00950-f0d1-4b41-b6ba-44ff0fc30289', '1.0.0b3.r1', '', '2007-10-03 08:00:00', '1', '100', '4', 'Google Scholar', 'Simon Kornblith', '^http://scholar\.google\.[a-z]+/scholar', 
 'function detectWeb(doc, url) {
 	return "multiple";
-}',
+}', 
 'var haveEndNoteLinks;
 
 function scrape(doc) {
@@ -8790,6 +8790,7 @@ function scrape(doc) {
 	
 	var items = new Array();
 	var itemGrabLinks = new Array();
+	var itemGrabLink;
 	var links = new Array();
 	var types = new Array();
 	
@@ -8800,21 +8801,23 @@ function scrape(doc) {
 	                         XPathResult.ANY_TYPE, null);
 	var elmt;
 	var i=0;
-	Zotero.debug("get elms");
+	Zotero.debug("get elmts");
 	while(elmt = elmts.iterateNext()) {
 		var isCitation = doc.evaluate("./font[1]/b[1]/text()[1]", elmt, nsResolver,
 		                              XPathResult.ANY_TYPE, null).iterateNext();
+		                              
 		// use EndNote links if available
 		if(haveEndNoteLinks) {
-			var itemGrabLink = doc.evaluate(''.//a[text() = "Import into EndNote"]'',
+			itemGrabLink = doc.evaluate(''.//a[text() = "Import into EndNote"]'',
 										   elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext(); 
 		} else {
-			var itemGrabLink = doc.evaluate(''.//a[text() = "Related Articles"]'',
+			itemGrabLink = doc.evaluate(''.//a[text() = "Related Articles"]'',
 										   elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext(); 
 		}
-        
-        var noLinkRe = /^\[[^\]]+\]$/;
-		if(itemGrabLinks) {
+        	
+        	var noLinkRe = /^\[[^\]]+\]$/;
+		
+		if(itemGrabLink) {
 			itemGrabLinks[i] = itemGrabLink.href;
 			if(isCitation && noLinkRe.test(isCitation.textContent)) {
 				// get titles for [BOOK] or [CITATION] entries
@@ -8830,12 +8833,13 @@ function scrape(doc) {
 			}
 			
 			if(items[i]) {
-				i++;
+			i++;
 			}
 		}
 	}
 	
 	items = Zotero.selectItems(items);
+	
 	if(!items) {
 		if(Zotero.done) Zotero.done(true);
 		return true;
@@ -8877,7 +8881,8 @@ function scrape(doc) {
 function doWeb(doc, url) {
 	var nsResolver = doc.createNSResolver(doc.documentElement);
 	
-	doc.cookie = "GSP=ID=deadbeefdeadbeef:IN=ebe89f7e83a8fe75+7e6cc990821af63:CF=3; domain=.scholar.google.com";
+	//SR:Will use preference setting url instead of cookie to get EndNote links (works with ezproxy, doesn''t overwrite other prefs)
+	//doc.cookie = "GSP=ID=deadbeefdeadbeef:IN=ebe89f7e83a8fe75+7e6cc990821af63:CF=3; domain=.scholar.google.com";
 	
 	// determine if we need to reload the page
 	
@@ -8886,18 +8891,24 @@ function doWeb(doc, url) {
 	haveEndNoteLinks = doc.evaluate(''//a[text() = "Import into EndNote"]'', 
 			doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 	if(!haveEndNoteLinks) {
-		// next check if there are docs with no related articles
-		if(doc.evaluate(''//p[@class="g"][not(descendant-or-self::text() = "Related Articles")]'',
-				doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
-					// now it''s reload time
-					haveEndNoteLinks = true;
-					Zotero.Utilities.loadDocument(url, scrape);
-					
-					return;
-		}
+			// SR:Commenting out this bit as code for retrieving citations from "Related" links is unreliable and unnecessary
+			//// next check if there are docs with no related articles
+			//if(doc.evaluate(''''//p[@class="g"][not(descendant-or-self::text() = "Related Articles")]'''',
+			//	doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+			
+		// SR:Set preferences to show import links in English and do page reload
+		// (bit of a hack as it overwrites user prefs for language and import link type)
+		url = url.replace (/hl\=[^&]*&?/, "");
+		url = url.replace("scholar?", "scholar_setprefs?hl=en&scis=yes&scisf=3&submit=Save+Preferences&");
+		haveEndNoteLinks = true;
+		Zotero.Utilities.loadDocument(url, scrape);
+		Zotero.wait();
+		return;
+			//}
 	}
 	
 	scrape(doc, url);
+	Zotero.wait();
 }');
 
 REPLACE INTO translators VALUES ('9c335444-a562-4f88-b291-607e8f46a9bb', '1.0.0b3.r1', '', '2006-12-15 15:11:00', 1, 100, 4, 'Berkeley Library Catalog', 'Simon Kornblith', '^https?://[^/]*berkeley.edu[^/]*/WebZ/(?:html/results.html|FETCH)\?.*sessionid=',
