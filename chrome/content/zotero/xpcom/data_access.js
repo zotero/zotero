@@ -2549,7 +2549,7 @@ Zotero.Items = new function(){
 	 * If |onlyTopLevel|, don't include child items
 	 */
 	function getAll(onlyTopLevel) {
-		var sql = 'SELECT itemID FROM items';
+		var sql = 'SELECT A.itemID FROM items';
 		if (onlyTopLevel) {
 			sql += ' A LEFT JOIN itemNotes B USING (itemID) '
 			+ 'LEFT JOIN itemAttachments C ON (C.itemID=A.itemID) '
