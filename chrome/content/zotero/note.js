@@ -39,21 +39,18 @@ function onLoad()
 		
 		params[b[i].substr(0,mid)] = b[i].substr(mid+1);
 	}
-	var id = params['id'];
+	var itemID = params['id'];
 	var collectionID = params['coll'];
+	var parentItemID = params['p'];
 	
-	if(id && id != '' && id != 'undefined')
-	{
-		var ref = Zotero.Items.get(id);
-		if(ref.isNote())
-		{
-			noteEditor.note = ref;
-			document.title = Zotero.getString('noteEditor.editNote');
-		}
-		else
-		{
-			noteEditor.item = ref;
-		}
+	if (itemID) {
+		var ref = Zotero.Items.get(itemID);
+		noteEditor.note = ref;
+		document.title = ref.getNoteTitle();
+	}
+	else if (parentItemID) {
+		var ref = Zotero.Items.get(parentItemID);
+		noteEditor.item = ref;
 	}
 	else
 	{
@@ -77,6 +74,9 @@ var NotifyCallback = {
 		// DEBUG: why does this reset without checking the modified ids?
 		if (noteEditor.note){
 			noteEditor.note = noteEditor.note;
+			document.title = noteEditor.note.getNoteTitle();
+			// Update the window name (used for focusing) in case this is a new note
+			window.name = 'zotero-note-' + noteEditor.note.getID();
 		}
 	}
 }

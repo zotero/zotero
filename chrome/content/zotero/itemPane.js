@@ -1540,7 +1540,7 @@ var ZoteroItemPane = new function()
 	
 	function addNote()
 	{
-		ZoteroPane.openNoteWindow(_itemBeingEdited.getID());
+		ZoteroPane.openNoteWindow(null, null, _itemBeingEdited.getID());
 	}
 	
 	function _noteToTitle(text)

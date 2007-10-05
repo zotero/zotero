@@ -1785,14 +1785,33 @@ var ZoteroPane = new function()
 		return false;
 	}
 	
-	function openNoteWindow(id, parent)
+	function openNoteWindow(itemID, col, parentItemID)
 	{
-		if (id) {
-			var item = Zotero.Items.get(id)
+		var name = null;
+		
+		if (itemID) {
+			// Create a name for this window so we can focus it later
+			//
+			// Collection is only used on new notes, so we don't need to
+			// include it in the name
+			name = 'zotero-note-' + itemID;
+			
+			var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+					.getService(Components.interfaces.nsIWindowMediator);
+			var e = wm.getEnumerator('');
+			while (e.hasMoreElements()) {
+				var w = e.getNext();
+				if (w.name == name) {
+					w.focus();
+					return;
+				}
+			}
 		}
+		
 		window.open('chrome://zotero/content/note.xul?v=1'
-			+ (id ? '&id=' + id : '') + (parent ? '&coll=' + parent : ''),
-			'', 'chrome,resizable,centerscreen');
+			+ (itemID ? '&id=' + itemID : '') + (col ? '&coll=' + col : '')
+			+ (parentItemID ? '&p=' + parentItemID : ''),
+			name, 'chrome,resizable,centerscreen');
 	}
 	
 	
