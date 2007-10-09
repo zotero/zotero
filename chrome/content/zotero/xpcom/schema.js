@@ -282,6 +282,9 @@ Zotero.Schema = new function(){
 		var sql = "DELETE FROM version WHERE schema IN "
 			+ "('scrapers', 'repository', 'lastcheck')";
 		Zotero.DB.query(sql);
+		_dbVersions['scrapers'] = null;
+		_dbVersions['repository'] = null;
+		_dbVersions['lastcheck'] = null;
 		
 		// Rebuild from scrapers.sql
 		_updateSchema('scrapers');
