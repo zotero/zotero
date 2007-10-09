@@ -395,10 +395,14 @@ To add a new preference:
 		</groupbox>
 		
 		<groupbox>
-			<caption label="&zotero.preferences.dbIntegrity;"/>
+			<caption label="&zotero.preferences.dbMaintenance;"/>
 			
 			<hbox>
-				<button label="&zotero.preferences.dbIntegrity.integrityCheck;" oncommand="runIntegrityCheck()"/>
+				<button label="&zotero.preferences.dbMaintenance.integrityCheck;" oncommand="runIntegrityCheck()"/>
+			</hbox>
+			
+			<hbox>
+				<button label="&zotero.preferences.dbMaintenance.rebuildTranslators;" oncommand="rebuildTranslators()"/>
 			</hbox>
 		</groupbox>
 	</prefpane>

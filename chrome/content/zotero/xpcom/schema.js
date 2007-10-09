@@ -26,6 +26,7 @@ Zotero.Schema = new function(){
 	this.updateSchema = updateSchema;
 	this.updateScrapersRemote = updateScrapersRemote;
 	this.stopRepositoryTimer = stopRepositoryTimer;
+	this.rebuildTranslatorsTable = rebuildTranslatorsTable;
 	
 	this.dbInitialized = false;
 	this.upgradeFinished = false;
@@ -269,6 +270,32 @@ Zotero.Schema = new function(){
 		if (_repositoryTimer){
 			Zotero.debug('Stopping repository check timer');
 			_repositoryTimer.cancel();
+		}
+	}
+	
+	
+	function rebuildTranslatorsTable() {
+		Zotero.debug("Rebuilding translators table");
+		Zotero.DB.beginTransaction();
+		
+		Zotero.DB.query("DELETE FROM translators");
+		var sql = "DELETE FROM version WHERE schema IN "
+			+ "('scrapers', 'repository', 'lastcheck')";
+		Zotero.DB.query(sql);
+		
+		// Rebuild from scrapers.sql
+		_updateSchema('scrapers');
+		
+		// Rebuild the translator cache
+		Zotero.debug("Clearing translator cache");
+		Zotero.Translate.cache = null;
+		Zotero.Translate.init();
+		
+		Zotero.DB.commitTransaction();
+		
+		// Run a manual update from repository if pref set
+		if (Zotero.Prefs.get('automaticScraperUpdates')) {
+			this.updateScrapersRemote(2);
 		}
 	}
 	

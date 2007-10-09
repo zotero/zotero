@@ -78,5 +78,6 @@
 <!ENTITY zotero.preferences.dataDir.choose				"Choose...">
 <!ENTITY zotero.preferences.dataDir.reveal				"Show Data Directory">
 
-<!ENTITY zotero.preferences.dbIntegrity				"Database Integrity">
-<!ENTITY zotero.preferences.dbIntegrity.integrityCheck	"Check Database Now">
+<!ENTITY zotero.preferences.dbMaintenance							"Database Maintenance">
+<!ENTITY zotero.preferences.dbMaintenance.integrityCheck			"Check Database Integrity">
+<!ENTITY zotero.preferences.dbMaintenance.rebuildTranslators		"Rebuild Translators Table">
