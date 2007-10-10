@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-10-03 08:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-10-10 20:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -7063,22 +7063,22 @@ REPLACE INTO translators VALUES ('0f9fc2fc-306e-5204-1117-25bca009dffc', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('c54d1932-73ce-dfd4-a943-109380e06574', '1.0.0b3.r1', '', '2007-06-12 23:30:00', 1, 100, 4, 'Project MUSE', 'Simon Kornblith', '^https?://muse\.jhu\.edu[^/]*/(?:journals/[^/]+/[^/]+/[^/]+\.html|search/pia.cgi)',
+REPLACE INTO translators VALUES ('c54d1932-73ce-dfd4-a943-109380e06574', '1.0.0b4.r1', '', '2007-10-10 20:00:00', '1', '100', '4', 'Project MUSE', 'Simon Kornblith', '^https?://muse\.jhu\.edu[^/]*/(?:journals/[^/]+/[^/]+/[^/]+\.html|search/results)', 
 'function detectWeb(doc, url) {
-	var searchRe = new RegExp("^https?://[^/]+/search/pia\.cgi");
+	var searchRe = new RegExp("^https?://[^/]+/search/results");
 	if(searchRe.test(url)) {
 		return "multiple";
 	} else {
 		return "journalArticle";
 	}
-}',
+}', 
 'function doWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == ''x'') return namespace; else return null;
 	} : null;
 	
-	var searchRe = new RegExp("^https?://[^/]+/search/pia\.cgi");
+	var searchRe = new RegExp("^https?://[^/]+/search/results");
 	if(searchRe.test(doc.location.href)) {
 		var items = new Array();
 		var attachments = new Array();
@@ -7090,11 +7090,11 @@ REPLACE INTO translators VALUES ('c54d1932-73ce-dfd4-a943-109380e06574', '1.0.0b
 		var tableRow;
 		// Go through table rows
 		while(tableRow = tableRows.iterateNext()) {
-			// article_id is what we need to get it all as one file
-			var input = doc.evaluate(''./tbody/tr/td/input[@name="article_id"]'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-			var link = doc.evaluate(''.//b/i/text()'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-			if(input && input.value && link && link.nodeValue) {
-				items[input.value] = link.nodeValue;
+			// aid (article id) is what we need to get it all as one file
+			var input = doc.evaluate(''./tbody/tr/td/input[@name="aid"]'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+			var title = doc.evaluate(''.//b/i/text()'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+			if(input && input.value && title && title.nodeValue) {
+				items[input.value] = title.nodeValue;
 				
 				var aTags = tableRow.getElementsByTagName("a");
 				
@@ -7119,100 +7119,63 @@ REPLACE INTO translators VALUES ('c54d1932-73ce-dfd4-a943-109380e06574', '1.0.0b
 			return true;
 		}
 		
-		try {
-			var search_id = doc.forms.namedItem("results").elements.namedItem("search_id").value;
-		} catch(e) {
-			var search_id = "";
-		}
 		var articleString = "";
 		var newAttachments = new Array();
 		for(var i in items) {
-			articleString += "&article_id="+i;
+			articleString += "&aid="+i;
 			newAttachments.push(attachments[i]);
 		}
-		var savePostString = "actiontype=save&search_id="+search_id+articleString;
 		
-		Zotero.Utilities.HTTP.doGet("http://muse.jhu.edu/search/save.cgi?"+savePostString, function() {
-			Zotero.Utilities.HTTP.doGet("http://muse.jhu.edu/search/export.cgi?exporttype=endnote"+articleString, function(text) {
-				Zotero.debug(text);
-				// load translator for RIS
-				var translator = Zotero.loadTranslator("import");
-				translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-				translator.setString(text);
-				translator.setHandler("itemDone", function(obj, item) {
-					if(item.notes && item.notes[0]) {
-						Zotero.debug(item.notes);
-						item.extra = item.notes[0].note;
-						
-						delete item.notes;
-						item.notes = undefined;
-					}
-					item.attachments = newAttachments.shift();
-					Zotero.debug(item.attachments);
-					item.complete();
-				});
-				translator.translate();
-				Zotero.done();
-			}, function() {});
+		Zotero.Utilities.HTTP.doGet("http://muse.jhu.edu/search/export.cgi?exporttype=endnote"+articleString, function(text) {
+			// load translator for RIS
+			var translator = Zotero.loadTranslator("import");
+			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+			translator.setString(text);
+			translator.setHandler("itemDone", function(obj, item) {
+				if(item.notes && item.notes[0]) {
+					item.extra = item.notes[0].note;						
+					delete item.notes;
+					item.notes = undefined;
+				}
+				item.attachments = newAttachments.shift();
+				item.complete();
+			});
+			translator.translate();
+			Zotero.done();
 		}, function() {});
 		
 		Zotero.wait();
 	} else {
-		var newItem = new Zotero.Item("journalArticle");
-		newItem.url = url;
-		newItem.attachments.push({document:doc, title:"Project MUSE Snapshot"});
-		
+		var hostRe = new RegExp("^(http://[^/]+)/");
+		var m = hostRe.exec(url);
+		var host = m[1];
+
 		var getPDF = doc.evaluate(''//a[text() = "[Access article in PDF]"]'', doc,
-		                          nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-		if(getPDF) {
-			newItem.attachments.push({title:"Project MUSE Full Text PDF", mimeType:"application/pdf",
-			                         url:getPDF.href});
-		}
+		                          nsResolver, XPathResult.ANY_TYPE, null).iterateNext();		
 		
-		var elmts = doc.evaluate(''//comment()'', doc, nsResolver,
-		                         XPathResult.ANY_TYPE, null);
-		
-		var headerRegexp = /HeaderData((?:.|\n)*)\#\#EndHeaders/i
-		while(elmt = elmts.iterateNext()) {
-			if(elmt.nodeValue.substr(0, 10) == "HeaderData") {
-				var m = headerRegexp.exec(elmt.nodeValue);
-				var headerData = m[1];
-			}
-		}
-		
-		// Use E4X rather than DOM/XPath, because the Mozilla gods have decided not to
-		// expose DOM/XPath to sandboxed scripts
-		var newDOM = new XML(headerData);
-		
-		newItem.publicationTitle = newDOM.journal.text();
-		newItem.volume = newDOM.volume.text();
-		newItem.issue = newDOM.issue.text();
-		newItem.date = newDOM.pubdate.text().toString();
-		if(!newItem.date) {
-			newItem.date = newDOM.year.text();
-		}
-		newItem.title = newDOM.doctitle.text();
-		newItem.ISSN = newDOM.issn.text();
-		
-		// Do pages
-		var fpage = newDOM.fpage.text();
-		var lpage = newDOM.lpage.text();
-		if(fpage != "") {
-			newItem.pages = fpage;
-			if(lpage) {
-				newItem.pages += "-"+lpage;
-			}
-		}
-		
-		// Do authors
-		var elmts = newDOM.docauthor;
-		for(var i in elmts) {
-			var fname = elmts[i].fname.text();
-			var surname = elmts[i].surname.text();
-			newItem.creators.push({firstName:fname, lastName:surname, creatorType:"author"});
-		}
-		
-		newItem.complete();
+		var newUrl = url.replace(host, host+"/metadata/zotero");
+		Zotero.Utilities.HTTP.doGet(newUrl, function(text) {
+			var translator = Zotero.loadTranslator("import");
+			//set RIS translator
+			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+			translator.setString(text);
+			translator.setHandler("itemDone", function(obj, item) {
+				if(item.notes && item.notes[0]) {
+					item.extra = item.notes[0].note;						
+					delete item.notes;
+					item.notes = undefined;
+				}
+				item.attachments.splice(0);
+				item.attachments.push({document:doc, title:"Project MUSE Snapshot"});
+				if(getPDF) {
+					item.attachments.push({title:"Project MUSE Full Text PDF", mimeType:"application/pdf",
+					url:getPDF.href});
+				}
+				
+				item.complete();
+			});
+			translator.translate();
+		});
 	}
 }');
 
