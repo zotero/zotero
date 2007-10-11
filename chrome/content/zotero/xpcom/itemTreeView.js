@@ -228,7 +228,7 @@ Zotero.ItemTreeView.prototype.refresh = function()
 /*
  *  Called by Zotero.Notifier on any changes to items in the data layer
  */
-Zotero.ItemTreeView.prototype.notify = function(action, type, ids)
+Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 {
 	if (!this._treebox || !this._treebox.treeBody) {
 		Components.utils.reportError("Treebox didn't exist in itemTreeView.notify()");
@@ -543,9 +543,15 @@ Zotero.ItemTreeView.prototype.getCellText = function(row, column)
 	else if (column.id == "zotero-items-column-year") {
 		val = obj.getField('date', true).substr(0, 4)
 	}
-	else
-	{
-		val = obj.getField(column.id.substring(20));
+	else {
+		var col = column.id.substring(20);
+		
+		if (col == 'title') {
+			val = obj.ref.getDisplayTitle();
+		}
+		else {
+			val = obj.getField(col);
+		}
 	}
 	
 	if(column.id == 'zotero-items-column-dateAdded' || column.id == 'zotero-items-column-dateModified')		//this is not so much that we will use this format for date, but a simple template for later revisions.
@@ -776,14 +782,34 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 	// calls are relatively expensive
 	var cache = [];
 	
-	function columnSort(a,b) {
+	// Get the display field for a row (which might be a placeholder title)
+	function getField(row) {
+		var field;
+		var type = row.getType();
+		if (columnField == 'title') {
+			if (type == 8 || type == 10) { // 'letter' and 'interview' itemTypeIDs
+				field = row.ref.getDisplayTitle();
+			}
+			else {
+				field = row.getField(columnField, unformatted, true);
+			}
+			// Ignore some leading and trailing characters when sorting
+			field = Zotero.Items.getSortTitle(field);
+		}
+		else {
+			field = row.getField(columnField, unformatted, true);
+		}
+		return field;
+	}
+	
+	function rowSort(a,b) {
 		var cmp, fieldA, fieldB;
 		
-		var aItemID = a.ref.getID();
+		var aItemID = a.ref.id;
 		if (cache[aItemID]) {
 			fieldA = cache[aItemID];
 		}
-		var bItemID = b.ref.getID();
+		var bItemID = b.ref.id;
 		if (cache[bItemID]) {
 			fieldB = cache[bItemID];
 		}
@@ -808,12 +834,12 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 			
 			default:
 				if (fieldA == undefined) {
-					fieldA = a.getField(columnField, unformatted, true);
+					fieldA = getField(a);
 					cache[aItemID] = fieldA;
 				}
 				
 				if (fieldB == undefined) {
-					fieldB = b.getField(columnField, unformatted, true);
+					fieldB = getField(b);
 					cache[bItemID] = fieldB;
 				}
 				
@@ -826,7 +852,6 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 					}
 				}
 				
-				//cmp = (fieldA > fieldB) ? -1 : (fieldA < fieldB) ? 1 : 0;
 				cmp = collation.compareString(1, fieldB, fieldA);
 				if (cmp) {
 					return cmp;
@@ -875,12 +900,12 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 	
 	function doSort(a,b)
 	{
-		return columnSort(a,b);
+		return rowSort(a,b);
 	}
 	
 	function reverseSort(a,b)
 	{
-		return columnSort(a,b) * -1;
+		return rowSort(a,b) * -1;
 	}
 	
 	// Need to close all containers before sorting

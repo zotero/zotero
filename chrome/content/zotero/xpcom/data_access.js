@@ -636,6 +636,64 @@ Zotero.Item.prototype.setField = function(field, value, loadIn){
 
 
 /*
+ * Get the title for an item for display in the interface
+ *
+ * This is the same as the standard title field except for letters and interviews,
+ * which get placeholder titles in square braces (e.g. "[Letter to Thoreau]")
+ */
+Zotero.Item.prototype.getDisplayTitle = function () {
+	var title = this.getField('title');
+	
+	var itemTypeID = this.getType();
+	var itemTypeName = Zotero.ItemTypes.getName(itemTypeID);
+	
+	if (!title && (itemTypeID == 8 || itemTypeID == 10)) { // 'letter' and 'interview' itemTypeIDs
+		var creators = this.getCreators();
+		var participants = [];
+		if (creators) {
+			for each(var creator in creators) {
+				if ((itemTypeID == 8 && creator.creatorTypeID == 16) || // 'letter'/'recipient'
+					(itemTypeID == 10 && creator.creatorTypeID == 7)) { // 'interview'/'interviewee'
+					participants.push(creator);
+				}
+			}
+		}
+		
+		title = '[';
+		if (participants.length > 0) {
+			var names = [];
+			for each(participant in participants) {
+				names.push(participant.lastName);
+			}
+			switch (names.length) {
+				case 1:
+					var str = 'oneParticipant';
+					break;
+					
+				case 2:
+					var str = 'twoParticipants';
+					break;
+					
+				case 3:
+					var str = 'threeParticipants';
+					break;
+					
+				default:
+					var str = 'manyParticipants';
+			}
+			title += Zotero.getString('pane.items.' + itemTypeName + '.' + str, names);
+		}
+		else {
+			title += Zotero.getString('itemTypes.' + itemTypeName);
+		}
+		title += ']';
+	}
+	
+	return title;
+}
+
+
+/*
  * Save changes back to database
  *
  * Returns true on item update or itemID of new item
@@ -1402,7 +1460,9 @@ Zotero.Item.prototype.getNotes = function(){
 	// Sort by title
 	var collation = Zotero.getLocaleCollation();
 	var f = function (a, b) {
-		return collation.compareString(1, a.title, b.title);
+		var aTitle = Zotero.Items.getSortTitle(a.title);
+		var bTitle = Zotero.Items.getSortTitle(b.title);
+		return collation.compareString(1, aTitle, bTitle);
 	}
 	
 	var noteIDs = [];
@@ -2497,6 +2557,8 @@ Zotero.Items = new function(){
 	this.erase = erase;
 	this.purge = purge;
 	this.unload = unload;
+	this.getFirstCreatorSQL = getFirstCreatorSQL;
+	this.getSortTitle = getSortTitle;
 	
 	// Private members
 	var _items = [];
@@ -2916,6 +2978,11 @@ Zotero.Items = new function(){
 		
 		_firstCreatorSQL = sql;
 		return sql;
+	}
+	
+	
+	function getSortTitle(title) {
+		return title.replace(/^[\[\'\"](.*)[\'\"\]]?$/, '$1')
 	}
 	
 	
