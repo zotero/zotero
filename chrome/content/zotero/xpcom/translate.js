@@ -1099,11 +1099,6 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 							(item.mimeType ? item.mimeType : undefined),
 							(item.title ? item.title : undefined));
 					Zotero.debug("Translate: created attachment; id is "+myID);
-					if(!myID) {
-						// if we didn't get an ID, don't continue adding
-						// notes, because we can't without knowing the ID
-						return;
-					}
 					var newItem = Zotero.Items.get(myID);
 				} else {
 					Zotero.debug("Translate: not adding attachment: no path or url specified");
@@ -1260,7 +1255,7 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 						if(attachment.snapshot === false) {
 							// if snapshot is explicitly set to false, attach as link
 							if(attachment.document) {
-								attachmentID = Zotero.Attachments.linkFromURL(attachment.document.location.href, myID,
+								Zotero.Attachments.linkFromURL(attachment.document.location.href, myID,
 										(attachment.mimeType ? attachment.mimeType : attachment.document.contentType),
 										(attachment.title ? attachment.title : attachment.document.title));
 							} else {
@@ -1268,7 +1263,7 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 									Zotero.debug("Translate: NOTICE: either mimeType or title is missing; attaching file will be slower");
 								}
 								
-								attachmentID = Zotero.Attachments.linkFromURL(attachment.url, myID,
+								Zotero.Attachments.linkFromURL(attachment.url, myID,
 										(attachment.mimeType ? attachment.mimeType : undefined),
 										(attachment.title ? attachment.title : undefined));
 							}
@@ -1308,6 +1303,7 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 					}
 				} else if(this.type == "import") {
 					// create new attachments attached here
+					attachment.itemType = 'attachment';
 					this._itemDone(attachment, myID);
 				}
 			}
@@ -1880,7 +1876,7 @@ Zotero.Translate.prototype._exportGetItem = function() {
 			// is off
 			returnItemArray.attachments = new Array();
 			var attachments = returnItem.getAttachments();
-			for each(attachmentID in attachments) {
+			for each(var attachmentID in attachments) {
 				var attachment = Zotero.Items.get(attachmentID);
 				var attachmentInfo = this._exportGetAttachment(attachment);
 				

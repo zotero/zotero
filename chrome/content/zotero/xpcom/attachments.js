@@ -327,6 +327,11 @@ Zotero.Attachments = new function(){
 	}
 	
 	
+	/*
+	 * Create a link attachment from a URL
+	 *
+	 * Returns the itemID of the created attachment
+	 */
 	function linkFromURL(url, sourceItemID, mimeType, title){
 		Zotero.debug('Linking attachment from URL');
 		
@@ -335,29 +340,39 @@ Zotero.Attachments = new function(){
 			title = url.substring(url.lastIndexOf('/')+1);
 		}
 		
-		// If we have the title and mime type, skip loading
-		if (title && mimeType){
-			return _addToDB(null, url, title, this.LINK_MODE_LINKED_URL, mimeType,
-				null, sourceItemID);
+		// Override MIME type to application/pdf if extension is .pdf --
+		// workaround for sites that respond to the HEAD request with an
+		// invalid MIME type (https://www.zotero.org/trac/ticket/460)
+		var ext = _getExtensionFromURL(url);
+		if (ext == 'pdf') {
+			mimeType = 'application/pdf';
 		}
 		
-		// Otherwise do a head request for the mime type
+		// Disable the Notifier if we're going to do a HEAD for the MIME type
+		if (!mimeType) {
+			var disabled = Zotero.Notifier.disable();
+		}
+		
+		var itemID = _addToDB(null, url, title, this.LINK_MODE_LINKED_URL,
+			mimeType, null, sourceItemID);
+		
+		if (disabled) {
+			Zotero.Notifier.enable();
+		}
+		
+		// If we don't have the MIME type, do a HEAD request for it
 		Zotero.Utilities.HTTP.doHead(url, function(obj){
 			var mimeType = obj.channel.contentType;
 			
-			// Override MIME type to application/pdf if extension is .pdf --
-			// workaround for sites that respond to the HEAD request with an
-			// invalid MIME type (https://www.zotero.org/trac/ticket/460)
-			var ext = _getExtensionFromURL(url);
-			if (ext == 'pdf') {
-				mimeType = 'application/pdf';
+			if (mimeType) {
+				var sql = "UPDATE itemAttachments SET mimeType=? WHERE itemID=?";
+				Zotero.DB.query(sql, [mimeType, itemID]);
 			}
 			
-			_addToDB(null, url, title, Zotero.Attachments.LINK_MODE_LINKED_URL,
-				mimeType, null, sourceItemID);
+			Zotero.Notifier.trigger('add', 'item', itemID);
 		});
 		
-		return true;
+		return itemID;
 	}
 	
 	
@@ -969,11 +984,11 @@ Zotero.Attachments = new function(){
 			+ "mimeType, charsetID, path) VALUES (?,?,?,?,?,?)";
 		var bindParams = [
 			attachmentItem.getID(),
-			(sourceItemID ? {int:sourceItemID} : null),
+			sourceItemID ? {int:sourceItemID} : null,
 			{int:linkMode},
-			{string:mimeType},
-			(charsetID ? {int:charsetID} : null),
-			(path ? {string:path} : null)
+			mimeType ? {string:mimeType} : null,
+			charsetID ? {int:charsetID} : null,
+			path ? {string:path} : null
 		];
 		Zotero.DB.query(sql, bindParams);
 		
