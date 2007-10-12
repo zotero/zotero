@@ -80,6 +80,8 @@ var Zotero = new function(){
 	var _zoteroDirectory = false;
 	var _debugLogging;
 	var _debugLevel;
+	var _debugTime;
+	var _debugLastTime;
 	//var _shutdown = false;
 	var _localizedStringBundle;
 	
@@ -108,6 +110,7 @@ var Zotero = new function(){
 		
 		_debugLogging = Zotero.Prefs.get('debug.log');
 		_debugLevel = Zotero.Prefs.get('debug.level');
+		_debugTime = Zotero.Prefs.get('debug.time');
 		
 		// Load in the extension version from the extension manager
 		var nsIUpdateItem = Components.interfaces.nsIUpdateItem;
@@ -429,7 +432,23 @@ var Zotero = new function(){
 			return false;
 		}
 		
-		dump('zotero(' + level + '): ' + message + "\n\n");
+		var deltaStr = '';
+		if (_debugTime) {
+			var delta = 0;
+			var d = new Date();
+			if (_debugLastTime) {
+				delta = d - _debugLastTime;
+			}
+			_debugLastTime = d;
+			
+			while (("" + delta).length < 7) {
+				delta = '0' + delta;
+			}
+			
+			deltaStr = '(+' + delta + ')';
+		}
+		
+		dump('zotero(' + level + ')' + deltaStr + ': ' + message + "\n\n");
 		return true;
 	}
 	

@@ -2205,7 +2205,7 @@ Zotero.Item.prototype.erase = function(deleteChildren){
 	Zotero.debug('Deleting item ' + this.getID());
 	
 	var changedItems = [];
-	changedItemsNotifierData = {};
+	var changedItemsNotifierData = {};
 	
 	Zotero.DB.beginTransaction();
 	
