@@ -20,7 +20,7 @@
 	<vbox id="zotero-bibliography-container" style="padding: 0.5em">
 		<groupbox>
 			<caption label="&zotero.bibliography.style.label;"/>
-			<listbox id="style-listbox" oncommand="Zotero_File_Interface_Bibliography.styleChanged()"/>
+			<listbox id="style-listbox" onselect="Zotero_File_Interface_Bibliography.styleChanged()"/>
 		</groupbox>
 		
 		<groupbox>

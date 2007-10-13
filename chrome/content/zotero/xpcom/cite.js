@@ -1030,7 +1030,7 @@ Zotero.CSL.prototype._processElements = function(item, element, formattedString,
 											|| !citationItem.position
 											|| citationItem.position == Zotero.CSL.POSITION_FIRST;
 									} else if(variables[j] == "subsequent") {
-										var exists = citatonItem && citationItem.position >= Zotero.CSL.POSITION_SUBSEQUENT;
+										var exists = citationItem && citationItem.position >= Zotero.CSL.POSITION_SUBSEQUENT;
 									} else if(variables[j] == "ibid") {
 										var exists = citationItem && citationItem.position >= Zotero.CSL.POSITION_IBID;
 									} else if(variables[j] == "ibid-with-locator") {
