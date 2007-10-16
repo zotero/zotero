@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-10-10 20:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-10-16 22:10:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -8742,7 +8742,7 @@ REPLACE INTO translators VALUES ('3e684d82-73a3-9a34-095f-19b112d88bbf', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('57a00950-f0d1-4b41-b6ba-44ff0fc30289', '1.0.0b3.r1', '', '2007-10-03 08:00:00', '1', '100', '4', 'Google Scholar', 'Simon Kornblith', '^http://scholar\.google\.[a-z]+/scholar', 
+REPLACE INTO translators VALUES ('57a00950-f0d1-4b41-b6ba-44ff0fc30289', '1.0.0b3.r1', '', '2007-10-16 22:10:00', '1', '100', '4', 'Google Scholar', 'Simon Kornblith', '^http://scholar\.google\.(?:com|com?\.[a-z]{2}|[a-z]{2})/scholar', 
 'function detectWeb(doc, url) {
 	return "multiple";
 }', 
