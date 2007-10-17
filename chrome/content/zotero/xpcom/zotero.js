@@ -510,7 +510,8 @@ var Zotero = new function(){
 				'[JavaScript Error: "Components is not defined" {file: "chrome://nightly/content/talkback/talkback.js',
 				'[JavaScript Error: "document.getElementById("sanitizeItem")',
 				'chrome://webclipper',
-				'No chrome package registered for chrome://piggy-bank'
+				'No chrome package registered for chrome://piggy-bank',
+				'global/global.dtd'
 			];
 			
 			for (var i=0; i<blacklist.length; i++) {

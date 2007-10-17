@@ -22,11 +22,9 @@
 -->
 <?xml-stylesheet href="chrome://zotero/skin/overlay.css" type="text/css"?>
 
-<!DOCTYPE window [
-	<!ENTITY % globalDTD SYSTEM "chrome://global/locale/global.dtd">
-	%globalDTD;
-	<!ENTITY % zoteroDTD SYSTEM "chrome://zotero/locale/zotero.dtd">
-	%zoteroDTD;
+<!DOCTYPE overlay [
+	<!ENTITY % globalDTD SYSTEM "chrome://global/locale/global.dtd">	%globalDTD;
+	<!ENTITY % zoteroDTD SYSTEM "chrome://zotero/locale/zotero.dtd">	%zoteroDTD;
 ]>
 
 <overlay id="zotero"

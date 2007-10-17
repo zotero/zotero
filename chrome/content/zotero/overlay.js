@@ -115,6 +115,7 @@ var ZoteroPane = new function()
 			newPane.setAttribute('hidden', true);
 			newPane.setAttribute('onkeydown', 'ZoteroPane.handleKeyDown(event, this.id)');
 			newPane.setAttribute('onkeyup', 'ZoteroPane.handleKeyUp(event, this.id)');
+			newPane.setAttribute('chromedir', '&locale.dir;');
 			
 			newPane.height = oldPane.height;
 			while(oldPane.hasChildNodes())
