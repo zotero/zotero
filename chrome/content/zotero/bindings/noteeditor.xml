@@ -42,7 +42,7 @@
 						
 						if(this.item && !this.getAttribute('notitle')=='1')
 						{
-							citeLabel.appendChild(document.createTextNode(this.item.getField('title')));
+							citeLabel.appendChild(document.createTextNode(this.item.getDisplayTitle(true)));
 						}
 					]]>
 				</setter>
