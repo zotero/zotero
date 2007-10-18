@@ -171,10 +171,13 @@ function ChromeExtensionHandler() {
 						if (!searchChildIDs[id]) {
 							var children = [];
 							var item = Zotero.Items.get(id);
+							if (!item.isRegularItem()) {
+								continue;
+							}
 							var func = function (ids) {
 								if (ids) {
 									for (var i=0; i<ids.length; i++) {
-											searchChildIDs[ids[i]] = true;
+										searchChildIDs[ids[i]] = true;
 									}
 								}
 							};
