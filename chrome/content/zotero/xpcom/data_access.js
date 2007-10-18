@@ -641,7 +641,7 @@ Zotero.Item.prototype.setField = function(field, value, loadIn){
  * This is the same as the standard title field except for letters and interviews,
  * which get placeholder titles in square braces (e.g. "[Letter to Thoreau]")
  */
-Zotero.Item.prototype.getDisplayTitle = function () {
+Zotero.Item.prototype.getDisplayTitle = function (includeAuthorAndDate) {
 	var title = this.getField('title');
 	
 	var itemTypeID = this.getType();
@@ -649,17 +649,35 @@ Zotero.Item.prototype.getDisplayTitle = function () {
 	
 	if (!title && (itemTypeID == 8 || itemTypeID == 10)) { // 'letter' and 'interview' itemTypeIDs
 		var creators = this.getCreators();
+		var authors = [];
 		var participants = [];
 		if (creators) {
 			for each(var creator in creators) {
 				if ((itemTypeID == 8 && creator.creatorTypeID == 16) || // 'letter'/'recipient'
-					(itemTypeID == 10 && creator.creatorTypeID == 7)) { // 'interview'/'interviewee'
+						(itemTypeID == 10 && creator.creatorTypeID == 7)) { // 'interview'/'interviewer'
 					participants.push(creator);
+				}
+				else if ((itemTypeID == 8 && creator.creatorTypeID == 1) ||   // 'letter'/'author'
+						(itemTypeID == 10 && creator.creatorTypeID == 6)) { // 'interview'/'interviewee'
+					authors.push(creator);
 				}
 			}
 		}
 		
-		title = '[';
+		var strParts = [];
+		
+		if (includeAuthorAndDate) {
+			var names = [];
+			for each(author in authors) {
+				names.push(author.lastName);
+			}
+			
+			// TODO: Use same logic as getFirstCreatorSQL() (including "et al.")
+			if (names.length) {
+				strParts.push(Zotero.localeJoin(names, ', '));
+			}
+		}
+		
 		if (participants.length > 0) {
 			var names = [];
 			for each(participant in participants) {
@@ -681,11 +699,21 @@ Zotero.Item.prototype.getDisplayTitle = function () {
 				default:
 					var str = 'manyParticipants';
 			}
-			title += Zotero.getString('pane.items.' + itemTypeName + '.' + str, names);
+			strParts.push(Zotero.getString('pane.items.' + itemTypeName + '.' + str, names));
 		}
 		else {
-			title += Zotero.getString('itemTypes.' + itemTypeName);
+			strParts.push(Zotero.getString('itemTypes.' + itemTypeName));
 		}
+		
+		if (includeAuthorAndDate) {
+			var d = this.getField('date');
+			if (d) {
+				strParts.push(d);
+			}
+		}
+		
+		title = '[';
+		title += Zotero.localeJoin(strParts, '; ');
 		title += ']';
 	}
 	
@@ -2374,11 +2402,16 @@ Zotero.Item.prototype.isCollection = function(){
 }
 
 
-/**
-* Convert the item data into a multidimensional associative array
-*	for use by the export functions
-**/
-Zotero.Item.prototype.toArray = function(){
+/*
+ * Convert the item data into a multidimensional associative array
+ *	for use by the export functions
+ *
+ * Modes:
+ *
+ * 1 == e.g. [Letter to Valee]
+ * 2 == e.g. [Stothard; Letter to Valee; May 8, 1928]
+ */
+Zotero.Item.prototype.toArray = function(mode) {
 	if (this.getID() && !this._itemDataLoaded){
 		this._loadItemData();
 	}
@@ -2413,6 +2446,14 @@ Zotero.Item.prototype.toArray = function(){
 	// Item metadata
 	for (var i in this._itemData){
 		arr[Zotero.ItemFields.getName(i)] = this._itemData[i] ? this._itemData[i] : '';
+	}
+	
+	if (mode == 1 || mode == 2) {
+		if (!arr.title &&
+				(this.getType() == Zotero.ItemTypes.getID('letter') ||
+				this.getType() == Zotero.ItemTypes.getID('interview'))) {
+			arr.title = this.getDisplayTitle(mode == 2);
+		}
 	}
 	
 	if (!this.isNote() && !this.isAttachment()){

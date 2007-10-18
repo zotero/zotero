@@ -157,7 +157,7 @@ function ChromeExtensionHandler() {
 					// If combining children, add matching parents
 					else if (combineChildItems) {
 						itemsHash[results[i].getID()] = items.length;
-						items.push(results[i].toArray());
+						items.push(results[i].toArray(2));
 						// Flag item as a search match
 						items[items.length - 1].reportSearchMatch = true;
 					}
@@ -185,12 +185,12 @@ function ChromeExtensionHandler() {
 				}
 				
 				if (combineChildItems) {
-					// Add parents of matches if not parents aren't matches themselves
+					// Add parents of matches if parents aren't matches themselves
 					for (var id in searchParentIDs) {
 						if (!searchItemIDs[id]) {
 							var item = Zotero.Items.get(id);
 							itemsHash[id] = items.length;
-							items.push(item.toArray());
+							items.push(item.toArray(2));
 						}
 					}
 					
@@ -225,7 +225,7 @@ function ChromeExtensionHandler() {
 							// add on its own
 							if (searchItemIDs[parentID]) {
 								itemsHash[parentID] = [items.length];
-								items.push(parentItem.toArray());
+								items.push(parentItem.toArray(2));
 								items[items.length - 1].reportSearchMatch = true;
 							}
 							else {
@@ -235,7 +235,7 @@ function ChromeExtensionHandler() {
 						
 						// Now add parent and child
 						itemsHash[parentID].push(items.length);
-						items.push(parentItem.toArray());
+						items.push(parentItem.toArray(2));
 						if (item.isNote()) {
 							items[items.length - 1].reportChildren = {
 								notes: [item.toArray()],

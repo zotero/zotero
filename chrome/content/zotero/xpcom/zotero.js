@@ -635,13 +635,16 @@ var Zotero = new function(){
 	 *
 	 * |separator| defaults to a space (not a comma like Array.join()) if
 	 *   not specified
+	 *
+	 * TODO: Substitute localized characters (e.g. Arabic comma and semicolon)
 	 */
 	function localeJoin(arr, separator) {
 		if (typeof separator == 'undefined') {
 			separator = ' ';
 		}
 		if (this.dir == 'rtl') {
-			str.reverse();
+			arr.reverse();
+			separator.split('').reverse().join('');
 		}
 		return arr.join(separator);
 	}
