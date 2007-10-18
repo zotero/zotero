@@ -6,8 +6,8 @@
 <!ENTITY zotero.search.joinMode.suffix "volgende voorwaarden:">
 
 <!ENTITY zotero.search.recursive.label "Doorzoek onderliggende mappen">
-<!ENTITY zotero.search.noChildren "Only show top-level items">
-<!ENTITY zotero.search.includeParentsAndChildren "Include parent and child items of matching items">
+<!ENTITY zotero.search.noChildren "Laat alleen topniveau-objecten zien">
+<!ENTITY zotero.search.includeParentsAndChildren "Laat bij de zoekresultaten zowel het hoofdobject als de subobjecten zien">
 
 <!ENTITY zotero.search.textModes.phrase "Frase">
 <!ENTITY zotero.search.textModes.phraseBinary "Frase (binaire bestanden inbegrepen)">
@@ -18,6 +18,6 @@
 <!ENTITY zotero.search.date.units.months "maanden">
 <!ENTITY zotero.search.date.units.years "jaren">
 
-<!ENTITY zotero.search.search "Search">
-<!ENTITY zotero.search.clear "Clear">
-<!ENTITY zotero.search.saveSearch "Save Search">
+<!ENTITY zotero.search.search "Zoeken">
+<!ENTITY zotero.search.clear "Wissen">
+<!ENTITY zotero.search.saveSearch "Zoekopdracht bewaren">

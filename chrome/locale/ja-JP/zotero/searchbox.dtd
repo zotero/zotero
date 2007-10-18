@@ -1,4 +1,4 @@
-<!ENTITY zotero.search.name "検索式保存名:">
+<!ENTITY zotero.search.name "検索式保存名：">
 
 <!ENTITY zotero.search.joinMode.prefix "次の条件">
 <!ENTITY zotero.search.joinMode.any "のいずれか">
@@ -6,8 +6,8 @@
 <!ENTITY zotero.search.joinMode.suffix "を満たす：">
 
 <!ENTITY zotero.search.recursive.label "サブフォルダを検索する">
-<!ENTITY zotero.search.noChildren "Only show top-level items">
-<!ENTITY zotero.search.includeParentsAndChildren "Include parent and child items of matching items">
+<!ENTITY zotero.search.noChildren "トップレベルアイテムのみを表示">
+<!ENTITY zotero.search.includeParentsAndChildren "一致するアイテムの親アイテムと子アイテムを表示">
 
 <!ENTITY zotero.search.textModes.phrase "フレーズ">
 <!ENTITY zotero.search.textModes.phraseBinary "フレーズ (バイナリファイルを含む)">
@@ -18,6 +18,6 @@
 <!ENTITY zotero.search.date.units.months "ヶ月">
 <!ENTITY zotero.search.date.units.years "年間">
 
-<!ENTITY zotero.search.search "Search">
-<!ENTITY zotero.search.clear "Clear">
-<!ENTITY zotero.search.saveSearch "Save Search">
+<!ENTITY zotero.search.search "検索">
+<!ENTITY zotero.search.clear "クリア">
+<!ENTITY zotero.search.saveSearch "検索を保存">

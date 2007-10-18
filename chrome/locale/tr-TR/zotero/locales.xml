@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <terms xmlns="http://purl.org/net/xbiblio/csl">
   <locale xml:lang="tr">
-    <term name="in">içinde</term>
+    <term name="in">iÃ§inde</term>
     <term name="ibid">ibid</term>
-    <term name="accessed">erişildi</term>
-    <term name="retrieved">erişildi</term>
+    <term name="accessed">eriÅŸildi</term>
+    <term name="retrieved">eriÅŸildi</term>
     <term name="from">den</term>
     <term name="forthcoming">gelecek</term>
     <term name="references">referans</term>
     <term name="no date">tarih yok</term>
     <term name="and">ve</term>
-    <term name="et-al">ve diğ.</term>
+    <term name="et-al">ve diÄŸ.</term>
     
     <!-- LONG LOCATOR FORMS -->
     <term name="page">
@@ -22,11 +22,11 @@
       <multiple>paragraf</multiple>
     </term>
     <term name="line">
-      <single>satır</single>
-      <multiple>satır</multiple>
+      <single>satÄ±r</single>
+      <multiple>satÄ±r</multiple>
     </term>
     <term name="volume">cilt</term>
-    <term name="issue">sayı</term>
+    <term name="issue">sayÄ±</term>
     
     <!-- SHORT LOCATOR FORMS -->
     <term name="page" form="short">
@@ -34,24 +34,24 @@
       <multiple>pp</multiple>
     </term>
     <term name="paragraph" form="short">
-      <single>Â¶</single>
-      <multiple>Â¶Â¶</multiple>
+      <single>Ã‚Â¶</single>
+      <multiple>Ã‚Â¶Ã‚Â¶</multiple>
     </term>
     <term name="line" form="short">
-      <single>satır</single>
-      <multiple>satır</multiple>
+      <single>satÄ±r</single>
+      <multiple>satÄ±r</multiple>
     </term>
     <term name="volume" form="short">cilt</term>
-    <term name="issue" form="short">sayı</term>
+    <term name="issue" form="short">sayÄ±</term>
     
     <!-- LONG ROLE FORMS -->
     <term name="editor">
-      <single>editör</single>
-      <multiple>editörler</multiple>
+      <single>editÃ¶r</single>
+      <multiple>editÃ¶rler</multiple>
     </term>
     <term name="translator">
-      <single>çevirmen</single>
-      <multiple>çevirmenler</multiple>
+      <single>Ã§evirmen</single>
+      <multiple>Ã§evirmenler</multiple>
     </term>
     
     <!-- SHORT ROLE FORMS -->
@@ -60,41 +60,41 @@
       <multiple>ed</multiple>
     </term>
     <term name="translator" form="short">
-      <single>çev</single>
-      <multiple>çev</multiple>
+      <single>Ã§ev</single>
+      <multiple>Ã§ev</multiple>
     </term>
     
     <!-- VERB ROLE FORMS -->
-    <term name="editor" form="verb">editör</term>
-    <term name="translator" form="verb">çeviren</term>
+    <term name="editor" form="verb">editÃ¶r</term>
+    <term name="translator" form="verb">Ã§eviren</term>
     
     <!-- SHORT VERB ROLE FORMS -->
     <term name="editor" form="verb-short">ed</term>
-    <term name="translator" form="verb-short">çev</term>
+    <term name="translator" form="verb-short">Ã§ev</term>
     
     <!-- LONG MONTH FORMS -->
     <term name="month-01">Ocak</term>
-    <term name="month-02">Şubat</term>
+    <term name="month-02">Åubat</term>
     <term name="month-03">Mart</term>
     <term name="month-04">Nisan</term>
-    <term name="month-05">Mayıs</term>
+    <term name="month-05">MayÄ±s</term>
     <term name="month-06">Haziran</term>
     <term name="month-07">Temmuz</term>
-    <term name="month-08">Ağustos</term>
-    <term name="month-09">Eylül</term>
+    <term name="month-08">AÄŸustos</term>
+    <term name="month-09">EylÃ¼l</term>
     <term name="month-10">Ekim</term>
-    <term name="month-11">Kasım</term>
-    <term name="month-12">Aralık</term>
+    <term name="month-11">KasÄ±m</term>
+    <term name="month-12">AralÄ±k</term>
     
     <!-- SHORT MONTH FORMS -->
     <term name="month-01" form="short">Oca</term>
-    <term name="month-02" form="short">Şub</term>
+    <term name="month-02" form="short">Åub</term>
     <term name="month-03" form="short">Mar</term>
     <term name="month-04" form="short">Nis</term>
     <term name="month-05" form="short">May</term>
     <term name="month-06" form="short">Haz</term>
     <term name="month-07" form="short">Tem</term>
-    <term name="month-08" form="short">Ağu</term>
+    <term name="month-08" form="short">AÄŸu</term>
     <term name="month-09" form="short">Eyl</term>
     <term name="month-10" form="short">Eki</term>
     <term name="month-11" form="short">Kas</term>

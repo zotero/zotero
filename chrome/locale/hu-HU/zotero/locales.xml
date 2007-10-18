@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<terms xmlns="http://purl.org/net/xbiblio/csl">
+  <locale xml:lang="hu">
+    <term name="in">in</term>
+    <term name="ibid">ibid</term>
+    <term name="accessed">elérés</term>
+    <term name="retrieved">elérés</term>
+    <term name="from">forrás</term>
+    <term name="forthcoming">megjelenés alatt</term>
+    <term name="references">Hivatkozások</term>
+    <term name="no date">nd</term>
+    <term name="and">és</term>
+    <term name="et-al">et al.</term>
+
+    <!-- LONG LOCATOR FORMS -->
+    <term name="page">
+      <single>oldal</single>
+      <multiple>oldal</multiple>
+    </term>
+    <term name="paragraph">
+      <single>bekezdés</single>
+      <multiple>bekezdés</multiple>
+    </term>
+    <term name="line">
+      <single>sor</single>
+      <multiple>sor</multiple>
+    </term>
+    <term name="volume">kötet</term>
+    <term name="issue">szám</term>
+
+    <!-- SHORT LOCATOR FORMS -->
+    <term name="page" form="short">
+      <single>o</single>
+      <multiple>o</multiple>
+    </term>
+    <term name="paragraph" form="short">
+      <single>¶</single>
+      <multiple>¶¶</multiple>
+    </term>
+    <term name="line" form="short">
+      <single>sor</single>
+      <multiple>sor</multiple>
+    </term>
+    <term name="volume" form="short">vol</term>
+    <term name="issue" form="short">no</term>
+
+    <!-- LONG ROLE FORMS -->
+    <term name="editor">
+      <single>szerkesztő</single>
+      <multiple>szerkesztő</multiple>
+    </term>
+    <term name="translator">
+      <single>fordító</single>
+      <multiple>fordító</multiple>
+    </term>
+
+    <!-- SHORT ROLE FORMS -->
+    <term name="editor" form="short">
+      <single>szerk</single>
+      <multiple>szerk</multiple>
+    </term>
+    <term name="translator" form="short">
+      <single>ford</single>
+      <multiple>ford</multiple>
+    </term>
+
+    <!-- VERB ROLE FORMS -->
+    <term name="editor" form="verb">szerkesztette</term>
+    <term name="translator" form="verb">fordította</term>
+
+    <!-- SHORT VERB ROLE FORMS -->
+    <term name="editor" form="verb-short">szerk</term>
+    <term name="translator" form="verb-short">ford</term>
+
+    <!-- LONG MONTH FORMS -->
+    <term name="month-01">január</term>
+    <term name="month-02">február</term>
+    <term name="month-03">március</term>
+    <term name="month-04">április</term>
+    <term name="month-05">május</term>
+    <term name="month-06">június</term>
+    <term name="month-07">július/term>
+    <term name="month-08">augusztus</term>
+    <term name="month-09">szeptember</term>
+    <term name="month-10">október</term>
+    <term name="month-11">november</term>
+    <term name="month-12">december</term>
+
+    <!-- SHORT MONTH FORMS -->
+    <term name="month-01" form="short">jan</term>
+    <term name="month-02" form="short">febr</term>
+    <term name="month-03" form="short">márc</term>
+    <term name="month-04" form="short">ápr</term>
+    <term name="month-05" form="short">máj</term>
+    <term name="month-06" form="short">jún</term>
+    <term name="month-07" form="short">júl</term>
+    <term name="month-08" form="short">aug</term>
+    <term name="month-09" form="short">szept</term>
+    <term name="month-10" form="short">okt</term>
+    <term name="month-11" form="short">nov</term>
+    <term name="month-12" form="short">dec</term>
+  </locale>
+</terms>

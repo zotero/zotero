@@ -6,8 +6,8 @@
 <!ENTITY zotero.search.joinMode.suffix "下列的：">
 
 <!ENTITY zotero.search.recursive.label "搜尋子目錄">
-<!ENTITY zotero.search.noChildren "Only show top-level items">
-<!ENTITY zotero.search.includeParentsAndChildren "Include parent and child items of matching items">
+<!ENTITY zotero.search.noChildren "只顯示頂層的項目">
+<!ENTITY zotero.search.includeParentsAndChildren "包括符合項目的父母及子女項目">
 
 <!ENTITY zotero.search.textModes.phrase "詞語">
 <!ENTITY zotero.search.textModes.phraseBinary "詞語【含非文字檔】">
@@ -18,6 +18,6 @@
 <!ENTITY zotero.search.date.units.months "月">
 <!ENTITY zotero.search.date.units.years "年">
 
-<!ENTITY zotero.search.search "Search">
-<!ENTITY zotero.search.clear "Clear">
-<!ENTITY zotero.search.saveSearch "Save Search">
+<!ENTITY zotero.search.search "搜尋">
+<!ENTITY zotero.search.clear "清除">
+<!ENTITY zotero.search.saveSearch "貯存搜尋">

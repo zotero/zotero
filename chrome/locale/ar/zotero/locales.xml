@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<terms xmlns="http://purl.org/net/xbiblio/csl">
+  <locale xml:lang="ar">
+    <term name="in">في</term>
+    <term name="ibid">ibid</term>
+    <term name="accessed">زير</term>
+    <term name="retrieved">جلب</term>
+    <term name="from">من</term>
+    <term name="forthcoming">القادم</term>
+    <term name="references">مراجع</term>
+    <term name="no date"></term>
+    <term name="and">و</term>
+    <term name="et-al"></term>
+    
+    <!-- LONG LOCATOR FORMS -->
+    <term name="page">
+      <single>صفحة</single>
+      <multiple>صفحات</multiple>
+    </term>
+    <term name="paragraph">
+      <single>فقرة</single>
+      <multiple>فقرات</multiple>
+    </term>
+    <term name="line">
+      <single>سطر</single>
+      <multiple>أسطر</multiple>
+    </term>
+    <term name="volume">مجلد</term>
+    <term name="issue">عدد</term>
+
+    <!-- SHORT LOCATOR FORMS -->
+    <term name="page" form="short">
+      <single>ص</single>
+      <multiple>ص.ص</multiple>
+    </term>
+    <term name="paragraph" form="short">
+      <single>¶</single>
+      <multiple>¶¶</multiple>
+    </term>
+    <term name="line" form="short">
+      <single>سطر</single>
+      <multiple>أسطر</multiple>
+    </term>
+    <term name="volume" form="short">م</term>
+    <term name="issue" form="short">ع</term>
+
+    <!-- LONG ROLE FORMS -->
+    <term name="editor">
+      <single>تحرير</single>
+      <multiple>تحرير</multiple>
+    </term>
+    <term name="translator">
+      <single>ترجمة</single>
+      <multiple>ترجمة</multiple>
+    </term>
+
+    <!-- SHORT ROLE FORMS -->
+    <term name="editor" form="short">
+      <single>ت</single>
+      <multiple>ت</multiple>
+    </term>
+    <term name="translator" form="short">
+      <single>تر</single>
+      <multiple>تر</multiple>
+    </term>
+
+    <!-- VERB ROLE FORMS -->
+    <term name="editor" form="verb">حرره</term>
+    <term name="translator" form="verb">ترجمه</term>
+
+    <!-- SHORT VERB ROLE FORMS -->
+    <term name="editor" form="verb-short">ح</term>
+    <term name="translator" form="verb-short">تر</term>
+
+    <!-- LONG MONTH FORMS -->
+    <term name="month-01">يناير</term>
+    <term name="month-02">فبراير</term>
+    <term name="month-03">مارس</term>
+    <term name="month-04">ابريل</term>
+    <term name="month-05">مايو</term>
+    <term name="month-06">يونيو</term>
+    <term name="month-07">يوليو</term>
+    <term name="month-08">اغسطس</term>
+    <term name="month-09">سبتمبر</term>
+    <term name="month-10">اكتوبر</term>
+    <term name="month-11">نوفمبر</term>
+    <term name="month-12">ديسمبر</term>
+
+    <!-- SHORT MONTH FORMS -->
+
+    <term name="month-01" form="short">يناير</term>
+    <term name="month-02" form="short">فبراير</term>
+    <term name="month-03" form="short">مارس</term>
+    <term name="month-04" form="short">ابريل</term>
+    <term name="month-05" form="short">مايو</term>
+    <term name="month-06" form="short">يونيو</term>
+    <term name="month-07" form="short">يوليو</term>
+    <term name="month-08" form="short">اغسطس</term>
+    <term name="month-09" form="short">سبتمبر</term>
+    <term name="month-10" form="short">اكتوبر</term>
+    <term name="month-11" form="short">نوفمبر</term>
+    <term name="month-12" form="short">ديسمبر</term>
+  </locale>
+</terms>

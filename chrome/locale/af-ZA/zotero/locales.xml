@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<terms xmlns="http://purl.org/net/xbiblio/csl">
+  <locale xml:lang="en">
+    <term name="in">in</term>
+    <term name="ibid">ibid</term>
+    <term name="accessed">toegang verkry</term>
+    <term name="retrieved">opgehaal</term>
+    <term name="from">van</term>
+    <term name="forthcoming">voorhande</term>
+    <term name="references">Verwysings</term>
+    <term name="no date">n.d.</term>
+    <term name="and">en</term>
+    <term name="et-al">et al.</term>
+    
+    <!-- LONG LOCATOR FORMS -->
+    <term name="page">
+      <single>bladsy</single>
+      <multiple>bladsye</multiple>
+    </term>
+    <term name="paragraph">
+      <single>paragraaf</single>
+      <multiple>paragrawe</multiple>
+    </term>
+    <term name="line">
+      <single>reël</single>
+      <multiple>reëls</multiple>
+    </term>
+    <term name="volume">volume</term>
+    <term name="issue">nommer</term>
+    
+    <!-- SHORT LOCATOR FORMS -->
+    <term name="page" form="short">
+      <single>bl</single>
+      <multiple>bll</multiple>
+    </term>
+    <term name="paragraph" form="short">
+      <single>¶</single>
+      <multiple>¶¶</multiple>
+    </term>
+    <term name="line" form="short">
+      <single>reël</single>
+      <multiple>reëls</multiple>
+    </term>
+    <term name="volume" form="short">vol</term>
+    <term name="issue" form="short">no</term>
+    
+    <!-- LONG ROLE FORMS -->
+    <term name="editor">
+      <single>redakteur</single>
+      <multiple>redakteurs</multiple>
+    </term>
+    <term name="translator">
+      <single>vertaler</single>
+      <multiple>vertalers</multiple>
+    </term>
+    
+    <!-- SHORT ROLE FORMS -->
+    <term name="editor" form="short">
+      <single>red</single>
+      <multiple>reds</multiple>
+    </term>
+    <term name="translator" form="short">
+      <single>vert</single>
+      <multiple>verts</multiple>
+    </term>
+    
+    <!-- VERB ROLE FORMS -->
+    <term name="editor" form="verb">onder redaksie van</term>
+    <term name="translator" form="verb">vertaal deur</term>
+    
+    <!-- SHORT VERB ROLE FORMS -->
+    <term name="editor" form="verb-short">red</term>
+    <term name="translator" form="verb-short">verts</term>
+    
+    <!-- LONG MONTH FORMS -->
+    <term name="month-01">Januarie</term>
+    <term name="month-02">Februarie</term>
+    <term name="month-03">Maart</term>
+    <term name="month-04">April</term>
+    <term name="month-05">Mei</term>
+    <term name="month-06">Junie</term>
+    <term name="month-07">Julie</term>
+    <term name="month-08">Augustus</term>
+    <term name="month-09">September</term>
+    <term name="month-10">Oktober</term>
+    <term name="month-11">November</term>
+    <term name="month-12">Desember</term>
+    
+    <!-- SHORT MONTH FORMS -->
+    <term name="month-01" form="short">Jan</term>
+    <term name="month-02" form="short">Feb</term>
+    <term name="month-03" form="short">Mrt</term>
+    <term name="month-04" form="short">Apr</term>
+    <term name="month-05" form="short">Mei</term>
+    <term name="month-06" form="short">Jun</term>
+    <term name="month-07" form="short">Jul</term>
+    <term name="month-08" form="short">Aug</term>
+    <term name="month-09" form="short">Sep</term>
+    <term name="month-10" form="short">Okt</term>
+    <term name="month-11" form="short">Nov</term>
+    <term name="month-12" form="short">Des</term>
+  </locale>
+</terms>

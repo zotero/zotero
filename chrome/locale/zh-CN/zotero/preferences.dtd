@@ -1,6 +1,6 @@
 <!ENTITY zotero.preferences.title "Zotero 配置">
 
-<!ENTITY zotero.preferences.default "Default:">
+<!ENTITY zotero.preferences.default "默认:">
 
 <!ENTITY zotero.preferences.prefpane.general "常规">
 
@@ -11,18 +11,19 @@
 <!ENTITY zotero.preferences.position.browser "浏览器页面">
 <!ENTITY zotero.preferences.statusBarIcon "状态栏图标:">
 <!ENTITY zotero.preferences.statusBarIcon.none "None">
-<!ENTITY zotero.preferences.fontSize "Font size:">
-<!ENTITY zotero.preferences.fontSize.small "Small">
-<!ENTITY zotero.preferences.fontSize.medium "Medium">
-<!ENTITY zotero.preferences.fontSize.large "Large">
+<!ENTITY zotero.preferences.fontSize "字体大小:">
+<!ENTITY zotero.preferences.fontSize.small "小">
+<!ENTITY zotero.preferences.fontSize.medium "中">
+<!ENTITY zotero.preferences.fontSize.large "大">
 
-<!ENTITY zotero.preferences.miscellaneous "Miscellaneous">
+<!ENTITY zotero.preferences.miscellaneous "杂项">
+<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators">
 <!ENTITY zotero.preferences.updateNow "立刻更新">
 <!ENTITY zotero.preferences.reportTranslationFailure "报告失效的网站转换器">
 <!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded RIS/Refer files">
 <!ENTITY zotero.preferences.automaticSnapshots "从 Web 页面创建条目时自动生成快照">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "保存条目时自动附加关联的 PDFs 和其它文件">
-<!ENTITY zotero.preferences.automaticTags "Automatically tag items with keywords and subject headings">
+<!ENTITY zotero.preferences.automaticTags "自动使用关键词和主题标目标记条目">
 
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
@@ -31,28 +32,28 @@
 <!ENTITY zotero.preferences.openurl.server "解析器:">
 <!ENTITY zotero.preferences.openurl.version "版本">
 
-<!ENTITY zotero.preferences.prefpane.search "Search">
-<!ENTITY zotero.preferences.search.fulltextCache "Full-Text Cache">
-<!ENTITY zotero.preferences.search.pdfIndexing "PDF Indexing">
-<!ENTITY zotero.preferences.search.indexStats "Index Statistics">
+<!ENTITY zotero.preferences.prefpane.search "检索">
+<!ENTITY zotero.preferences.search.fulltextCache "全文缓存">
+<!ENTITY zotero.preferences.search.pdfIndexing "PDF索引">
+<!ENTITY zotero.preferences.search.indexStats "索引统计">
 
 <!ENTITY zotero.preferences.search.indexStats.indexed "Indexed:">
 <!ENTITY zotero.preferences.search.indexStats.partial "Partial:">
 <!ENTITY zotero.preferences.search.indexStats.unindexed "Unindexed:">
 <!ENTITY zotero.preferences.search.indexStats.words "Words:">
 
-<!ENTITY zotero.preferences.fulltext.textMaxLength "Maximum characters to index per file:">
-<!ENTITY zotero.preferences.fulltext.pdfMaxPages "Maximum pages to index per file:">
+<!ENTITY zotero.preferences.fulltext.textMaxLength "每文件索引字符数最大值:">
+<!ENTITY zotero.preferences.fulltext.pdfMaxPages "每文件索引页数最大值:">
 
-<!ENTITY zotero.preferences.prefpane.export "Export">
+<!ENTITY zotero.preferences.prefpane.export "导出">
 
-<!ENTITY zotero.preferences.quickCopy.caption "Quick Copy">
-<!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Default Output Format:">
-<!ENTITY zotero.preferences.quickCopy.macWarning "Note that rich-text formatting will be lost on Mac OS X.">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Site-Specific Settings:">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domain/Path">
+<!ENTITY zotero.preferences.quickCopy.caption "快拷">
+<!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "默认输出格式:">
+<!ENTITY zotero.preferences.quickCopy.macWarning "注意: 富文本格式在Mac OS X下将丢失.">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.setings "特定站点设置:">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "域/路径">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(e.g. wikipedia.org)">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Output Format">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "输出格式">
 
 <!ENTITY zotero.preferences.prefpane.keys "快捷键">
 
@@ -63,17 +64,20 @@
 <!ENTITY zotero.preferences.keys.newItem "新建条目">
 <!ENTITY zotero.preferences.keys.newNote "新建笔记">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "切换标签选择器">
-<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copy Selected Items to Clipboard">
-<!ENTITY zotero.preferences.keys.overrideGlobal "尝试覆盖相冲突的快捷键">
+<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copy Selected Item Citations to Clipboard">
+<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "复制选定条目到剪贴板">
+<!ENTITY zotero.preferences.keys.overrideGlobal "尝试覆盖有冲突的快捷键">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "更改仅在新开的窗口中生效">
 
 
-<!ENTITY zotero.preferences.prefpane.advanced "Advanced">
+<!ENTITY zotero.preferences.prefpane.advanced "高级">
 
-<!ENTITY zotero.preferences.dataDir "Storage Location">
-<!ENTITY zotero.preferences.dataDir.useProfile "Use Firefox profile directory">
-<!ENTITY zotero.preferences.dataDir.custom "Custom:">
-<!ENTITY zotero.preferences.dataDir.choose "Choose...">
+<!ENTITY zotero.preferences.dataDir "存储位置">
+<!ENTITY zotero.preferences.dataDir.useProfile "使用Firefox配置目录">
+<!ENTITY zotero.preferences.dataDir.custom "自定义:">
+<!ENTITY zotero.preferences.dataDir.choose "选择...">
+<!ENTITY zotero.preferences.dataDir.reveal "Show Data Directory">
 
-<!ENTITY zotero.preferences.dbIntegrity "Database Integrity">
-<!ENTITY zotero.preferences.dbIntegrity.integrityCheck "Check Database Now">
+<!ENTITY zotero.preferences.dbMaintenance "Database Maintenance">
+<!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Check Database Integrity">
+<!ENTITY zotero.preferences.dbMaintenance.rebuildTranslators "Rebuild Translators Table">

@@ -17,6 +17,7 @@
 <!ENTITY zotero.preferences.fontSize.large "Large">
 
 <!ENTITY zotero.preferences.miscellaneous "Miscellaneous">
+<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators">
 <!ENTITY zotero.preferences.updateNow "Actualizarse ahora">
 <!ENTITY zotero.preferences.reportTranslationFailure "Informar de traductores de sitio incorrectos">
 <!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded RIS/Refer files">
@@ -48,7 +49,7 @@
 
 <!ENTITY zotero.preferences.quickCopy.caption "Quick Copy">
 <!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Default Output Format:">
-<!ENTITY zotero.preferences.quickCopy.macWarning "Note that rich-text formatting will be lost on Mac OS X.">
+<!ENTITY zotero.preferences.quickCopy.macWarning "Note: Rich-text formatting will be lost on Mac OS X.">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Site-Specific Settings:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domain/Path">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(e.g. wikipedia.org)">
@@ -63,6 +64,7 @@
 <!ENTITY zotero.preferences.keys.newItem "Crear un nuevo ítem">
 <!ENTITY zotero.preferences.keys.newNote "Crear una nueva nota">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Conmutar el selector de marcas">
+<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copy Selected Item Citations to Clipboard">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copy Selected Items to Clipboard">
 <!ENTITY zotero.preferences.keys.overrideGlobal "Intentar eliminar los atajos contradictorios">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Los cambios tendrán efecto sólo en las ventanas nuevas">
@@ -74,6 +76,8 @@
 <!ENTITY zotero.preferences.dataDir.useProfile "Use Firefox profile directory">
 <!ENTITY zotero.preferences.dataDir.custom "Custom:">
 <!ENTITY zotero.preferences.dataDir.choose "Choose...">
+<!ENTITY zotero.preferences.dataDir.reveal "Show Data Directory">
 
-<!ENTITY zotero.preferences.dbIntegrity "Database Integrity">
-<!ENTITY zotero.preferences.dbIntegrity.integrityCheck "Check Database Now">
+<!ENTITY zotero.preferences.dbMaintenance "Database Maintenance">
+<!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Check Database Integrity">
+<!ENTITY zotero.preferences.dbMaintenance.rebuildTranslators "Rebuild Translators Table">

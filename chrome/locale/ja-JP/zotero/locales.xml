@@ -34,8 +34,8 @@
       <multiple>p</multiple>
     </term>
     <term name="paragraph" form="short">
-      <single>¶</single>
-      <multiple>¶</multiple>
+      <single>段落</single>
+      <multiple>段落</multiple>
     </term>
     <term name="line" form="short">
       <single>行</single>

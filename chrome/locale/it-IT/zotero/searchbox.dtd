@@ -6,8 +6,8 @@
 <!ENTITY zotero.search.joinMode.suffix "seguenti:">
 
 <!ENTITY zotero.search.recursive.label "Cerca nelle sottocartelle">
-<!ENTITY zotero.search.noChildren "Only show top-level items">
-<!ENTITY zotero.search.includeParentsAndChildren "Include parent and child items of matching items">
+<!ENTITY zotero.search.noChildren "Visualizza solo gli elementi principali">
+<!ENTITY zotero.search.includeParentsAndChildren "Includi elementi ai livelli superiore e inferiore rispetto a quelli trovati">
 
 <!ENTITY zotero.search.textModes.phrase "Frase">
 <!ENTITY zotero.search.textModes.phraseBinary "Frase (file binari inclusi)">
@@ -18,6 +18,6 @@
 <!ENTITY zotero.search.date.units.months "mesi">
 <!ENTITY zotero.search.date.units.years "anni">
 
-<!ENTITY zotero.search.search "Search">
-<!ENTITY zotero.search.clear "Clear">
-<!ENTITY zotero.search.saveSearch "Save Search">
+<!ENTITY zotero.search.search "Cerca">
+<!ENTITY zotero.search.clear "Pulisci">
+<!ENTITY zotero.search.saveSearch "Salva ricerca">

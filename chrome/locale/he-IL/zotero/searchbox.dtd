@@ -1,0 +1,23 @@
+<!ENTITY zotero.search.name "שם:">
+
+<!ENTITY zotero.search.joinMode.prefix "Match">
+<!ENTITY zotero.search.joinMode.any "any">
+<!ENTITY zotero.search.joinMode.all "הכל">
+<!ENTITY zotero.search.joinMode.suffix "of the following:">
+
+<!ENTITY zotero.search.recursive.label "חפש תיקיות משנה">
+<!ENTITY zotero.search.noChildren "Only show top-level items">
+<!ENTITY zotero.search.includeParentsAndChildren "Include parent and child items of matching items">
+
+<!ENTITY zotero.search.textModes.phrase "ביטוי">
+<!ENTITY zotero.search.textModes.phraseBinary "ביטוי (כולל קבצים בינאריים)">
+<!ENTITY zotero.search.textModes.regexp "Regexp">
+<!ENTITY zotero.search.textModes.regexpCS "Regexp (case-sensitive)">
+
+<!ENTITY zotero.search.date.units.days "ימים">
+<!ENTITY zotero.search.date.units.months "חודשים">
+<!ENTITY zotero.search.date.units.years "שנים">
+
+<!ENTITY zotero.search.search "חיפוש">
+<!ENTITY zotero.search.clear "Clear">
+<!ENTITY zotero.search.saveSearch "שמור חיפוש">

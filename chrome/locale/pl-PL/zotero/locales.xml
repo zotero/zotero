@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<terms xmlns="http://purl.org/net/xbiblio/csl">
+  <locale xml:lang="en">
+    <term name="in">[w:]</term>
+    <term name="ibid">ibid</term>
+    <term name="accessed">pobrano</term>
+    <term name="retrieved">pobrano</term>
+    <term name="from">z</term>
+    <term name="forthcoming">w druku</term>
+    <term name="references">Bibliografia</term>
+    <term name="no date">bez daty</term>
+    <term name="and">i</term>
+    <term name="et-al">et al.</term>
+    
+    <!-- LONG LOCATOR FORMS -->
+    <term name="page">
+      <single>strona</single>
+      <multiple>strony</multiple>
+    </term>
+    <term name="paragraph">
+      <single>akapit</single>
+      <multiple>akapity</multiple>
+    </term>
+    <term name="line">
+      <single>wiersz</single>
+      <multiple>wiersze</multiple>
+    </term>
+    <term name="volume">tom</term>
+    <term name="issue">zeszyt</term>
+    
+    <!-- SHORT LOCATOR FORMS -->
+    <term name="page" form="short">
+      <single>s.</single>
+      <multiple>s.</multiple>
+    </term>
+    <term name="paragraph" form="short">
+      <single>¶</single>
+      <multiple>¶¶</multiple>
+    </term>
+    <term name="line" form="short">
+      <single>wiersz</single>
+      <multiple>wiersze</multiple>
+    </term>
+    <term name="volume" form="short">t.</term>
+    <term name="issue" form="short">nr</term>
+    
+    <!-- LONG ROLE FORMS -->
+    <term name="editor">
+      <single>redaktor</single>
+      <multiple>redaktorzy</multiple>
+    </term>
+    <term name="translator">
+      <single>tłumacz</single>
+      <multiple>tłumacze</multiple>
+    </term>
+    
+    <!-- SHORT ROLE FORMS -->
+    <term name="editor" form="short">
+      <single>red.</single>
+      <multiple>red.</multiple>
+    </term>
+    <term name="translator" form="short">
+      <single>tłum.</single>
+      <multiple>tłum.</multiple>
+    </term>
+    
+    <!-- VERB ROLE FORMS -->
+    <term name="editor" form="verb">pod redakcją</term>
+    <term name="translator" form="verb">tłumaczenie</term>
+    
+    <!-- SHORT VERB ROLE FORMS -->
+    <term name="editor" form="verb-short">pod red.</term>
+    <term name="translator" form="verb-short">tłum.</term>
+    
+    <!-- LONG MONTH FORMS -->
+    <term name="month-01">styczeń</term>
+    <term name="month-02">luty</term>
+    <term name="month-03">marzec</term>
+    <term name="month-04">kwiecień</term>
+    <term name="month-05">maj</term>
+    <term name="month-06">czerwiec</term>
+    <term name="month-07">lipiec</term>
+    <term name="month-08">sierpień</term>
+    <term name="month-09">wrzesień</term>
+    <term name="month-10">październik</term>
+    <term name="month-11">listopad</term>
+    <term name="month-12">grudzień</term>
+    
+    <!-- SHORT MONTH FORMS -->
+    <term name="month-01" form="short">styczeń</term>
+    <term name="month-02" form="short">luty</term>
+    <term name="month-03" form="short">marzec</term>
+    <term name="month-04" form="short">kwiecień</term>
+    <term name="month-05" form="short">maj</term>
+    <term name="month-06" form="short">czerwiec</term>
+    <term name="month-07" form="short">lipiec</term>
+    <term name="month-08" form="short">sierpień</term>
+    <term name="month-09" form="short">wrzesień</term>
+    <term name="month-10" form="short">październik</term>
+    <term name="month-11" form="short">listopad</term>
+    <term name="month-12" form="short">grudzień</term>
+  </locale>
+</terms>

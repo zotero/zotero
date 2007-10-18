@@ -1,0 +1,23 @@
+<!ENTITY zotero.search.name "Nazwa:">
+
+<!ENTITY zotero.search.joinMode.prefix "Zawiera">
+<!ENTITY zotero.search.joinMode.any "jakikolwiek">
+<!ENTITY zotero.search.joinMode.all "wszystkie">
+<!ENTITY zotero.search.joinMode.suffix "z następujących:">
+
+<!ENTITY zotero.search.recursive.label "Szukaj w subfolderach">
+<!ENTITY zotero.search.noChildren "Wyświetl tylko elementy główne">
+<!ENTITY zotero.search.includeParentsAndChildren "Zawiera pasujące elementy główne i potomne">
+
+<!ENTITY zotero.search.textModes.phrase "Fraza">
+<!ENTITY zotero.search.textModes.phraseBinary "Fraza (włącznie z plikami binarnymi)">
+<!ENTITY zotero.search.textModes.regexp "Wyrażanie regularne">
+<!ENTITY zotero.search.textModes.regexpCS "Wyrażanie regularne (rozróżnia wielkość liter)">
+
+<!ENTITY zotero.search.date.units.days "dni">
+<!ENTITY zotero.search.date.units.months "miesiące(y)">
+<!ENTITY zotero.search.date.units.years "lat(a)">
+
+<!ENTITY zotero.search.search "Szukaj">
+<!ENTITY zotero.search.clear "Wyczyść">
+<!ENTITY zotero.search.saveSearch "Zapisz wyniki poszukiwań">

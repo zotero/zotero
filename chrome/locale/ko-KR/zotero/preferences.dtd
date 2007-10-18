@@ -1,6 +1,6 @@
 <!ENTITY zotero.preferences.title "Zotero 환경설정">
 
-<!ENTITY zotero.preferences.default "Default:">
+<!ENTITY zotero.preferences.default "기본:">
 
 <!ENTITY zotero.preferences.prefpane.general "일반">
 
@@ -11,18 +11,19 @@
 <!ENTITY zotero.preferences.position.browser "브라우저 화면">
 <!ENTITY zotero.preferences.statusBarIcon "상태 막대 아이콘:">
 <!ENTITY zotero.preferences.statusBarIcon.none "None">
-<!ENTITY zotero.preferences.fontSize "Font size:">
-<!ENTITY zotero.preferences.fontSize.small "Small">
-<!ENTITY zotero.preferences.fontSize.medium "Medium">
-<!ENTITY zotero.preferences.fontSize.large "Large">
+<!ENTITY zotero.preferences.fontSize "글꼴 크기:">
+<!ENTITY zotero.preferences.fontSize.small "작게">
+<!ENTITY zotero.preferences.fontSize.medium "중간">
+<!ENTITY zotero.preferences.fontSize.large "크게">
 
-<!ENTITY zotero.preferences.miscellaneous "Miscellaneous">
+<!ENTITY zotero.preferences.miscellaneous "기타">
+<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators">
 <!ENTITY zotero.preferences.updateNow "지금 갱신">
 <!ENTITY zotero.preferences.reportTranslationFailure "고장난 사이트 중계기 신고">
 <!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded RIS/Refer files">
 <!ENTITY zotero.preferences.automaticSnapshots "웹 페이지로 항목을 생성시 자동으로 스냅샷을 찍습니다">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "항목 저장시 PDF와 다른 파일의 조합을 자동으로 첨부합니다">
-<!ENTITY zotero.preferences.automaticTags "Automatically tag items with keywords and subject headings">
+<!ENTITY zotero.preferences.automaticTags "핵심어와 표제를 가진 자동 태그 항목">
 
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
@@ -31,28 +32,28 @@
 <!ENTITY zotero.preferences.openurl.server "해독기:">
 <!ENTITY zotero.preferences.openurl.version "버전:">
 
-<!ENTITY zotero.preferences.prefpane.search "Search">
-<!ENTITY zotero.preferences.search.fulltextCache "Full-Text Cache">
-<!ENTITY zotero.preferences.search.pdfIndexing "PDF Indexing">
-<!ENTITY zotero.preferences.search.indexStats "Index Statistics">
+<!ENTITY zotero.preferences.prefpane.search "검색">
+<!ENTITY zotero.preferences.search.fulltextCache "전문(全文) 캐쉬">
+<!ENTITY zotero.preferences.search.pdfIndexing "PDF 색인">
+<!ENTITY zotero.preferences.search.indexStats "색인 상태">
 
 <!ENTITY zotero.preferences.search.indexStats.indexed "Indexed:">
 <!ENTITY zotero.preferences.search.indexStats.partial "Partial:">
 <!ENTITY zotero.preferences.search.indexStats.unindexed "Unindexed:">
 <!ENTITY zotero.preferences.search.indexStats.words "Words:">
 
-<!ENTITY zotero.preferences.fulltext.textMaxLength "Maximum characters to index per file:">
-<!ENTITY zotero.preferences.fulltext.pdfMaxPages "Maximum pages to index per file:">
+<!ENTITY zotero.preferences.fulltext.textMaxLength "파일당 색인의 최대 문자수:">
+<!ENTITY zotero.preferences.fulltext.pdfMaxPages "파일당 색인의 최대 페이지수:">
 
-<!ENTITY zotero.preferences.prefpane.export "Export">
+<!ENTITY zotero.preferences.prefpane.export "내보내기">
 
-<!ENTITY zotero.preferences.quickCopy.caption "Quick Copy">
-<!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Default Output Format:">
-<!ENTITY zotero.preferences.quickCopy.macWarning "Note that rich-text formatting will be lost on Mac OS X.">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Site-Specific Settings:">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domain/Path">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(e.g. wikipedia.org)">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Output Format">
+<!ENTITY zotero.preferences.quickCopy.caption "빠른 복사">
+<!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "기본 출력 형식:">
+<!ENTITY zotero.preferences.quickCopy.macWarning "주: Rich-text 형식은 Mac OS X 상에선 손실됩니다.">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.setings "사이트 지정 설정:">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "도메인/경로">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(예. wikipedia.org)">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "출력 형식">
 
 <!ENTITY zotero.preferences.prefpane.keys "단축키">
 
@@ -63,17 +64,20 @@
 <!ENTITY zotero.preferences.keys.newItem "새 항목 작성">
 <!ENTITY zotero.preferences.keys.newNote "새 노트 작성">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "태그 선택기 끄기/켜기">
-<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copy Selected Items to Clipboard">
+<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copy Selected Item Citations to Clipboard">
+<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "선택된 항목을 클립보드에 복사">
 <!ENTITY zotero.preferences.keys.overrideGlobal "충돌하는 단축키는 무시합니다.">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "새 창에서만 변경한 효과가 나타납니다">
 
 
-<!ENTITY zotero.preferences.prefpane.advanced "Advanced">
+<!ENTITY zotero.preferences.prefpane.advanced "고급">
 
-<!ENTITY zotero.preferences.dataDir "Storage Location">
-<!ENTITY zotero.preferences.dataDir.useProfile "Use Firefox profile directory">
-<!ENTITY zotero.preferences.dataDir.custom "Custom:">
-<!ENTITY zotero.preferences.dataDir.choose "Choose...">
+<!ENTITY zotero.preferences.dataDir "저장 위치">
+<!ENTITY zotero.preferences.dataDir.useProfile "Firefox 프로필 디렉토리 이용">
+<!ENTITY zotero.preferences.dataDir.custom "사용자 지정:">
+<!ENTITY zotero.preferences.dataDir.choose "선택...">
+<!ENTITY zotero.preferences.dataDir.reveal "Show Data Directory">
 
-<!ENTITY zotero.preferences.dbIntegrity "Database Integrity">
-<!ENTITY zotero.preferences.dbIntegrity.integrityCheck "Check Database Now">
+<!ENTITY zotero.preferences.dbMaintenance "Database Maintenance">
+<!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Check Database Integrity">
+<!ENTITY zotero.preferences.dbMaintenance.rebuildTranslators "Rebuild Translators Table">

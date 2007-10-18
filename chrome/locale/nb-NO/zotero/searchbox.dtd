@@ -6,8 +6,8 @@
 <!ENTITY zotero.search.joinMode.suffix "av følgende:">
 
 <!ENTITY zotero.search.recursive.label "Søk i undermapper">
-<!ENTITY zotero.search.noChildren "Only show top-level items">
-<!ENTITY zotero.search.includeParentsAndChildren "Include parent and child items of matching items">
+<!ENTITY zotero.search.noChildren "Vis kun enheter på toppnivå">
+<!ENTITY zotero.search.includeParentsAndChildren "Inkluder foreldre- og barn av samsvarende enheter">
 
 <!ENTITY zotero.search.textModes.phrase "Frase">
 <!ENTITY zotero.search.textModes.phraseBinary "Frase (inkl. binærfiler)">
@@ -18,6 +18,6 @@
 <!ENTITY zotero.search.date.units.months "måneder">
 <!ENTITY zotero.search.date.units.years "år">
 
-<!ENTITY zotero.search.search "Search">
-<!ENTITY zotero.search.clear "Clear">
-<!ENTITY zotero.search.saveSearch "Save Search">
+<!ENTITY zotero.search.search "Søk">
+<!ENTITY zotero.search.clear "Fjern">
+<!ENTITY zotero.search.saveSearch "Lagre søk">

@@ -1,0 +1,23 @@
+<!ENTITY zotero.search.name "Nom:">
+
+<!ENTITY zotero.search.joinMode.prefix "Coincideix">
+<!ENTITY zotero.search.joinMode.any "qualsevol">
+<!ENTITY zotero.search.joinMode.all "totes">
+<!ENTITY zotero.search.joinMode.suffix "de les següents:">
+
+<!ENTITY zotero.search.recursive.label "Cerca dins les subcarpetes">
+<!ENTITY zotero.search.noChildren "Mostra només elements del nivell superior">
+<!ENTITY zotero.search.includeParentsAndChildren "Inclou pares i fills dels elements coincidents">
+
+<!ENTITY zotero.search.textModes.phrase "Frase">
+<!ENTITY zotero.search.textModes.phraseBinary "Frase (també dins dels arxius binaris)">
+<!ENTITY zotero.search.textModes.regexp "Expressió regular">
+<!ENTITY zotero.search.textModes.regexpCS "Expressió regular (distingir entre majúscules i minúscules)">
+
+<!ENTITY zotero.search.date.units.days "dies">
+<!ENTITY zotero.search.date.units.months "mesos">
+<!ENTITY zotero.search.date.units.years "anys">
+
+<!ENTITY zotero.search.search "Cerca">
+<!ENTITY zotero.search.clear "Neteja">
+<!ENTITY zotero.search.saveSearch "Desa la cerca">

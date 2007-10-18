@@ -6,8 +6,8 @@
 <!ENTITY zotero.search.joinMode.suffix "belirtilen">
 
 <!ENTITY zotero.search.recursive.label "Alt dizinleri araştır">
-<!ENTITY zotero.search.noChildren "Only show top-level items">
-<!ENTITY zotero.search.includeParentsAndChildren "Include parent and child items of matching items">
+<!ENTITY zotero.search.noChildren "Yalnızca üst-seviye eserleri göster">
+<!ENTITY zotero.search.includeParentsAndChildren "Eşleşen eserlerin üst ve alt eserlerini de dahil et">
 
 <!ENTITY zotero.search.textModes.phrase "Sözçük öbeği">
 <!ENTITY zotero.search.textModes.phraseBinary "Sözçük öbeği (ikili dosyalar içerir)">
@@ -18,6 +18,6 @@
 <!ENTITY zotero.search.date.units.months "ay">
 <!ENTITY zotero.search.date.units.years "yıl">
 
-<!ENTITY zotero.search.search "Search">
-<!ENTITY zotero.search.clear "Clear">
-<!ENTITY zotero.search.saveSearch "Save Search">
+<!ENTITY zotero.search.search "Arama">
+<!ENTITY zotero.search.clear "Temizle">
+<!ENTITY zotero.search.saveSearch "Aramayı Kaydet">

@@ -10,23 +10,23 @@
     <term name="references">Референце</term>
     <term name="no date">без датума</term>
     <term name="and">и</term>
-    <term name="et-al">et al.</term>
+    <term name="et-al">и остали</term>
     
     <!-- LONG LOCATOR FORMS -->
     <term name="page">
       <single>страница</single>
-      <multiple>странице</multiple>
+      <multiple>странице(а)</multiple>
     </term>
     <term name="paragraph">
       <single>параграф</single>
-      <multiple>параграфи</multiple>
+      <multiple>параграфа(и)</multiple>
     </term>
     <term name="line">
       <single>линија</single>
-      <multiple>линије</multiple>
+      <multiple>линије(а)</multiple>
     </term>
     <term name="volume">том</term>
-    <term name="issue">број</term>
+    <term name="issue">издање</term>
     
     <!-- SHORT LOCATOR FORMS -->
     <term name="page" form="short">
@@ -34,15 +34,15 @@
       <multiple>стр.</multiple>
     </term>
     <term name="paragraph" form="short">
-      <single>параграф</single>
-      <multiple>параграф</multiple>
+      <single>пар.</single>
+      <multiple>пар.</multiple>
     </term>
     <term name="line" form="short">
-      <single>линија</single>
-      <multiple>линије</multiple>
+      <single>лин.</single>
+      <multiple>лин.</multiple>
     </term>
     <term name="volume" form="short">том</term>
-    <term name="issue" form="short">бр.</term>
+    <term name="issue" form="short">изд.</term>
     
     <!-- LONG ROLE FORMS -->
     <term name="editor">
@@ -50,7 +50,7 @@
       <multiple>уредици</multiple>
     </term>
     <term name="translator">
-      <single>преводиоц</single>
+      <single>преводилац</single>
       <multiple>преводиоци</multiple>
     </term>
     

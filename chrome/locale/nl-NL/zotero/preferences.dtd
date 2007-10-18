@@ -1,28 +1,29 @@
 <!ENTITY zotero.preferences.title "Zotero Voorkeuren">
 
-<!ENTITY zotero.preferences.default "Default:">
+<!ENTITY zotero.preferences.default "Standaard:">
 
 <!ENTITY zotero.preferences.prefpane.general "Algemeen">
 
-<!ENTITY zotero.preferences.userInterface "Weergave">
+<!ENTITY zotero.preferences.userInterface "Gebruikersinterface">
 <!ENTITY zotero.preferences.position "Toon Zotero">
 <!ENTITY zotero.preferences.position.above "boven">
 <!ENTITY zotero.preferences.position.below "onder">
 <!ENTITY zotero.preferences.position.browser "webpagina&apos;s">
-<!ENTITY zotero.preferences.statusBarIcon "Statusbalk icoon:">
+<!ENTITY zotero.preferences.statusBarIcon "Statusbalk pictogram:">
 <!ENTITY zotero.preferences.statusBarIcon.none "None">
-<!ENTITY zotero.preferences.fontSize "Font size:">
-<!ENTITY zotero.preferences.fontSize.small "Small">
-<!ENTITY zotero.preferences.fontSize.medium "Medium">
-<!ENTITY zotero.preferences.fontSize.large "Large">
+<!ENTITY zotero.preferences.fontSize "Lettergrootte">
+<!ENTITY zotero.preferences.fontSize.small "Klein">
+<!ENTITY zotero.preferences.fontSize.medium "Middelgroot">
+<!ENTITY zotero.preferences.fontSize.large "Groot">
 
-<!ENTITY zotero.preferences.miscellaneous "Miscellaneous">
+<!ENTITY zotero.preferences.miscellaneous "Diversen">
+<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators">
 <!ENTITY zotero.preferences.updateNow "Nu bijwerken">
-<!ENTITY zotero.preferences.reportTranslationFailure "Defecte site-vertalers rapporteren">
+<!ENTITY zotero.preferences.reportTranslationFailure "Defecte webpagina-vertalers rapporteren">
 <!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded RIS/Refer files">
-<!ENTITY zotero.preferences.automaticSnapshots "Neem automatisch snapshots bij het maken van items van webpagina&apos;s">
-<!ENTITY zotero.preferences.downloadAssociatedFiles "Voeg automatisch geassocieerde PDFs en andere bestanden toe bij het opslaan van items">
-<!ENTITY zotero.preferences.automaticTags "Automatically tag items with keywords and subject headings">
+<!ENTITY zotero.preferences.automaticSnapshots "Neem automatisch snapshots bij het maken van objecten van webpagina&apos;s">
+<!ENTITY zotero.preferences.downloadAssociatedFiles "Voeg automatisch bijbehorende PDF&apos;s en andere bestanden toe bij het opslaan van objecten">
+<!ENTITY zotero.preferences.automaticTags "Objecten automatisch labelen met trefwoorden en onderwerpen">
 
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
@@ -31,49 +32,52 @@
 <!ENTITY zotero.preferences.openurl.server "Resolver:">
 <!ENTITY zotero.preferences.openurl.version "Versie:">
 
-<!ENTITY zotero.preferences.prefpane.search "Search">
-<!ENTITY zotero.preferences.search.fulltextCache "Full-Text Cache">
-<!ENTITY zotero.preferences.search.pdfIndexing "PDF Indexing">
-<!ENTITY zotero.preferences.search.indexStats "Index Statistics">
+<!ENTITY zotero.preferences.prefpane.search "Zoeken">
+<!ENTITY zotero.preferences.search.fulltextCache "Volledige-tekst Cache">
+<!ENTITY zotero.preferences.search.pdfIndexing "PDF-indexering">
+<!ENTITY zotero.preferences.search.indexStats "Indexstatistieken">
 
 <!ENTITY zotero.preferences.search.indexStats.indexed "Indexed:">
 <!ENTITY zotero.preferences.search.indexStats.partial "Partial:">
 <!ENTITY zotero.preferences.search.indexStats.unindexed "Unindexed:">
 <!ENTITY zotero.preferences.search.indexStats.words "Words:">
 
-<!ENTITY zotero.preferences.fulltext.textMaxLength "Maximum characters to index per file:">
-<!ENTITY zotero.preferences.fulltext.pdfMaxPages "Maximum pages to index per file:">
+<!ENTITY zotero.preferences.fulltext.textMaxLength "Maximaal aantal tekens dat per bestand wordt geindexeerd:">
+<!ENTITY zotero.preferences.fulltext.pdfMaxPages "Maximaal aantal pagina&apos;s dat per bestand wordt geindexeerd:">
 
-<!ENTITY zotero.preferences.prefpane.export "Export">
+<!ENTITY zotero.preferences.prefpane.export "Exporteren">
 
-<!ENTITY zotero.preferences.quickCopy.caption "Quick Copy">
-<!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Default Output Format:">
-<!ENTITY zotero.preferences.quickCopy.macWarning "Note that rich-text formatting will be lost on Mac OS X.">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Site-Specific Settings:">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domain/Path">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(e.g. wikipedia.org)">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Output Format">
+<!ENTITY zotero.preferences.quickCopy.caption "Snelle Kopie">
+<!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Standaard Uitvoerformaat:">
+<!ENTITY zotero.preferences.quickCopy.macWarning "Let op: onder Mac OS X gaat hierbij de tekstopmaak verloren.">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Webpagina-specifieke instellingen:">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domein/Pad">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(b.v. wikipedia.org)">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Uitvoerformaat">
 
 <!ENTITY zotero.preferences.prefpane.keys "Sneltoetsen">
 
-<!ENTITY zotero.preferences.keys.openZotero "Zotero-paneel Openen/Sluiten">
+<!ENTITY zotero.preferences.keys.openZotero "Openen/Sluiten van Zotero-paneel">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Volledige Schermweergave">
 <!ENTITY zotero.preferences.keys.library "Bibliotheek">
-<!ENTITY zotero.preferences.keys.quicksearch "Snelzoeken">
-<!ENTITY zotero.preferences.keys.newItem "Nieuw item aanmaken">
+<!ENTITY zotero.preferences.keys.quicksearch "Snel Zoeken">
+<!ENTITY zotero.preferences.keys.newItem "Nieuw object aanmaken">
 <!ENTITY zotero.preferences.keys.newNote "Nieuwe aantekening aanmaken">
-<!ENTITY zotero.preferences.keys.toggleTagSelector "Tag-kiezer Weergeven">
-<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copy Selected Items to Clipboard">
-<!ENTITY zotero.preferences.keys.overrideGlobal "Probeer conflicterende snelkoppelingen te overschrijven">
-<!ENTITY zotero.preferences.keys.changesTakeEffect "Aanpassingen zijn alleen zichtbaar in nieuwe vensters">
+<!ENTITY zotero.preferences.keys.toggleTagSelector "Label-kiezer Weergeven">
+<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copy Selected Item Citations to Clipboard">
+<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Geselecteerde objecten naar klembord kopiëren">
+<!ENTITY zotero.preferences.keys.overrideGlobal "Probeer voorrang te krijgen bij conflicterende sneltoetsen">
+<!ENTITY zotero.preferences.keys.changesTakeEffect "Aanpassingen worden pas zichtbaar in nieuwe vensters">
 
 
-<!ENTITY zotero.preferences.prefpane.advanced "Advanced">
+<!ENTITY zotero.preferences.prefpane.advanced "Geavanceerd">
 
-<!ENTITY zotero.preferences.dataDir "Storage Location">
-<!ENTITY zotero.preferences.dataDir.useProfile "Use Firefox profile directory">
-<!ENTITY zotero.preferences.dataDir.custom "Custom:">
-<!ENTITY zotero.preferences.dataDir.choose "Choose...">
+<!ENTITY zotero.preferences.dataDir "Opslaglocatie">
+<!ENTITY zotero.preferences.dataDir.useProfile "Gebruik de profielmap van Firefox">
+<!ENTITY zotero.preferences.dataDir.custom "Aangepast:">
+<!ENTITY zotero.preferences.dataDir.choose "Kiezen...">
+<!ENTITY zotero.preferences.dataDir.reveal "Show Data Directory">
 
-<!ENTITY zotero.preferences.dbIntegrity "Database Integrity">
-<!ENTITY zotero.preferences.dbIntegrity.integrityCheck "Check Database Now">
+<!ENTITY zotero.preferences.dbMaintenance "Database Maintenance">
+<!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Check Database Integrity">
+<!ENTITY zotero.preferences.dbMaintenance.rebuildTranslators "Rebuild Translators Table">

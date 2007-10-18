@@ -6,8 +6,8 @@
 <!ENTITY zotero.search.joinMode.suffix "일치하는 것을 검색:">
 
 <!ENTITY zotero.search.recursive.label "하위폴더 검색">
-<!ENTITY zotero.search.noChildren "Only show top-level items">
-<!ENTITY zotero.search.includeParentsAndChildren "Include parent and child items of matching items">
+<!ENTITY zotero.search.noChildren "최상위 항목만 표시">
+<!ENTITY zotero.search.includeParentsAndChildren "일치하는 항목의 부모및 자식 항목을 포함">
 
 <!ENTITY zotero.search.textModes.phrase "어구">
 <!ENTITY zotero.search.textModes.phraseBinary "어구(바이너리 파일 포함)">
@@ -18,6 +18,6 @@
 <!ENTITY zotero.search.date.units.months "월">
 <!ENTITY zotero.search.date.units.years "년">
 
-<!ENTITY zotero.search.search "Search">
-<!ENTITY zotero.search.clear "Clear">
-<!ENTITY zotero.search.saveSearch "Save Search">
+<!ENTITY zotero.search.search "검색">
+<!ENTITY zotero.search.clear "삭제">
+<!ENTITY zotero.search.saveSearch "검색내용 저장">

@@ -18,8 +18,24 @@
 			function onLoad()
 			{
 				var translators = {
+					afAZ: [
+						"leuce"
+					],
+					
+					ar: [
+						"fadhil"
+					],
+					
 					bgBG: [
 						"Peter Stoilov"
+					],
+					
+					caAD: [
+						"Joan Junyent"
+					],
+					
+					daDK: [
+						"Banta"
 					],
 					
 					deAT: [
@@ -36,14 +52,30 @@
 						"stw"
 					],
 					
+					elGR: [
+						"geraki"
+					],
+					
 					esES: [
 						"Alberto González Palomo"
+					],
+					
+					etEE: [
+						"brainbulb"
 					],
 					
 					frFR: [
 						"Pascal Pichon",
 						"Jojaba",
 						"La Luciole"
+					],
+					
+					heIL: [
+						"d_leaper"
+					],
+					
+					huHU: [
+						"tdombos"
 					],
 					
 					itIT: [
@@ -62,21 +94,48 @@
 						"wtspout"
 					],
 					
+					mnMN: [
+						"cybermon"
+					],
+					
 					nbNO: [
 						"Finn Arne Jørgensen"
 					],
 					
 					nlNL: [
 						"Andreas Bovens",
-						"Michael Schiltz"
+						"Michael Schiltz",
+						"Rintze Zelle"
+					],
+					
+					plPL: [
+						"krzywy",
+						"Trevor Owens"
 					],
 					
 					ptBR: [
 						"Humberto Sartini"
 					],
 					
+					ptPT: [
+						"gandrenf",
+						"XRex"
+					],
+					
+					roRO: [
+						"Turcan"
+					],
+					
+					ruRU: [
+						"Yar"
+					],
+					
 					srYU: [
 						"Igor_M"
+					],
+					
+					svSE: [
+						"mymarkup"
 					],
 					
 					trTR: [
@@ -89,7 +148,8 @@
 					],
 					
 					zhTW: [
-						"Chun-Chung Chen"
+						"Chun-Chung Chen",
+						"coolcd"
 					]
 				};
 				
@@ -97,7 +157,11 @@
 				
 				for (var locale in translators) {
 					var heading = document.createElement('label');
-					var str = locale.substr(0, 2) + '-' + locale.substr(2) + ':';
+					var str = locale.substr(0, 2);
+					if (locale.substr(2)) {
+						str += '-' + locale.substr(2);
+					}
+					str += ':';
 					heading.className = 'locale';
 					heading.setAttribute('value', str);
 					box.appendChild(heading);

@@ -5,19 +5,19 @@
 <!ENTITY zotero.search.joinMode.all "всички">
 <!ENTITY zotero.search.joinMode.suffix "от изброените:">
 
-<!ENTITY zotero.search.recursive.label "Търси в подпапките">
-<!ENTITY zotero.search.noChildren "Only show top-level items">
-<!ENTITY zotero.search.includeParentsAndChildren "Include parent and child items of matching items">
+<!ENTITY zotero.search.recursive.label "Търсене в подпапките">
+<!ENTITY zotero.search.noChildren "Показване само на главните обекти">
+<!ENTITY zotero.search.includeParentsAndChildren "Включване на подобектите на намерените обекти">
 
 <!ENTITY zotero.search.textModes.phrase "Израз">
 <!ENTITY zotero.search.textModes.phraseBinary "Фраза (вкл. двоичните файлове)">
-<!ENTITY zotero.search.textModes.regexp "Регулярен Израз">
-<!ENTITY zotero.search.textModes.regexpCS "Регулярен Израз (различаващ главни/малки булкви)">
+<!ENTITY zotero.search.textModes.regexp "Регулярен израз">
+<!ENTITY zotero.search.textModes.regexpCS "Регулярен израз (различаващ главни/малки булкви)">
 
 <!ENTITY zotero.search.date.units.days "дни">
 <!ENTITY zotero.search.date.units.months "месеци">
 <!ENTITY zotero.search.date.units.years "години">
 
-<!ENTITY zotero.search.search "Search">
-<!ENTITY zotero.search.clear "Clear">
-<!ENTITY zotero.search.saveSearch "Save Search">
+<!ENTITY zotero.search.search "Търсене">
+<!ENTITY zotero.search.clear "Изчистване">
+<!ENTITY zotero.search.saveSearch "Записване на търсенето">
