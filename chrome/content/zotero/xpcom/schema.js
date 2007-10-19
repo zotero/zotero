@@ -511,7 +511,7 @@ Zotero.Schema = new function(){
 			Zotero.debug(e, 1);
 			Components.utils.reportError(e);
 			Zotero.DB.rollbackTransaction();
-			alert('Error initializing Zotero database'); // TODO: localize
+			alert('Error initializing Zotero database');
 			throw(e);
 		}
 	}

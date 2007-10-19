@@ -235,6 +235,19 @@ var ZoteroPane = new function()
 				var errFunc = Zotero.startupErrorHandler;
 			}
 			
+			if (!errMsg) {
+				// Get the stringbundle manually
+				var src = 'chrome://zotero/locale/zotero.properties';
+				var localeService = Components.classes['@mozilla.org/intl/nslocaleservice;1'].
+						getService(Components.interfaces.nsILocaleService);
+				var appLocale = localeService.getApplicationLocale();
+				var stringBundleService = Components.classes["@mozilla.org/intl/stringbundle;1"]
+					.getService(Components.interfaces.nsIStringBundleService);
+				var stringBundle = stringBundleService.createBundle(src, appLocale);
+				
+				var errMsg = stringBundle.GetStringFromName('startupError');
+			}
+			
 			if (errFunc) {
 				errFunc();
 			}
@@ -242,7 +255,6 @@ var ZoteroPane = new function()
 				// TODO: Add a better error page/window here with reporting
 				// instructions
 				// window.loadURI('chrome://zotero/content/error.xul');
-				// TODO: localize if possible
 				alert(errMsg);
 			}
 			
