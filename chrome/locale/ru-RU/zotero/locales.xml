@@ -1,6 +1,7 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <terms xmlns="http://purl.org/net/xbiblio/csl">
-  <locale xml:lang="en">
+  <locale xml:lang="ru">
+    <term name="at">at</term>
     <term name="in">в</term>
     <term name="ibid">так же</term>
     <term name="accessed">вызвано</term>
@@ -11,8 +12,42 @@
     <term name="no date">нет даты</term>
     <term name="and">и</term>
     <term name="et-al">и др.</term>
-    
-    <!-- LONG LOCATOR FORMS -->
+    <term name="book">
+      <single>book</single>
+      <multiple>books</multiple>
+    </term>
+    <term name="chapter">
+      <single>chapter</single>
+      <multiple>chapters</multiple>
+    </term>
+    <term name="column">
+      <single>column</single>
+      <multiple>columns</multiple>
+    </term>
+    <term name="figure">
+      <single>figure</single>
+      <multiple>figures</multiple>
+    </term>
+    <term name="folio">
+      <single>folio</single>
+      <multiple>folios</multiple>
+    </term>
+    <term name="issue">
+      <single>number</single>
+      <multiple>numbers</multiple>
+    </term>
+    <term name="line">
+      <single>линия</single>
+      <multiple>линии</multiple>
+    </term>
+    <term name="note">
+      <single>note</single>
+      <multiple>notes</multiple>
+    </term>
+    <term name="opus">
+      <single>opus</single>
+      <multiple>opera</multiple>
+    </term>
     <term name="page">
       <single>страницы</single>
       <multiple>страницы</multiple>
@@ -21,30 +56,49 @@
       <single>параграф</single>
       <multiple>параграфы</multiple>
     </term>
-    <term name="line">
-      <single>линия</single>
-      <multiple>линии</multiple>
+    <term name="part">
+      <single>part</single>
+      <multiple>parts</multiple>
     </term>
-    <term name="volume">том</term>
-    <term name="issue">номер</term>
-    
-    <!-- SHORT LOCATOR FORMS -->
+    <term name="section">
+      <single>section</single>
+      <multiple>sections</multiple>
+    </term>
+    <term name="volume">
+      <single>volume</single>
+      <multiple>volumes</multiple>
+    </term>
+    <term name="verse">
+      <single>verse</single>
+      <multiple>verses</multiple>
+    </term>
+    <term name="book" form="short">bk</term>
+    <term name="chapter" form="short">chap</term>
+    <term name="column" form="short">col</term>
+    <term name="figure" form="short">fig</term>
+    <term name="folio" form="short">f</term>
+    <term name="issue" form="short">ном</term>
+    <term name="opus" form="short">op</term>
     <term name="page" form="short">
       <single>стр-а</single>
       <multiple>стр-ы</multiple>
     </term>
-    <term name="paragraph" form="short">
+    <term name="paragraph" form="short">para</term>
+    <term name="part" form="short">pt</term>
+    <term name="section" form="short">sec</term>
+    <term name="verse" form="short">
+      <single>v</single>
+      <multiple>vv</multiple>
+    </term>
+    <term name="volume" form="short">том</term>
+    <term name="paragraph" form="symbol">
       <single>¶</single>
       <multiple>¶¶</multiple>
     </term>
-    <term name="line" form="short">
-      <single>линия</single>
-      <multiple>линии</multiple>
+    <term name="section" form="symbol">
+      <single>§</single>
+      <multiple>§§</multiple>
     </term>
-    <term name="volume" form="short">том</term>
-    <term name="issue" form="short">ном</term>
-    
-    <!-- LONG ROLE FORMS -->
     <term name="editor">
       <single>редактор</single>
       <multiple>редакторы</multiple>
@@ -53,8 +107,6 @@
       <single>переводчик</single>
       <multiple>переводчики</multiple>
     </term>
-    
-    <!-- SHORT ROLE FORMS -->
     <term name="editor" form="short">
       <single>ред-р</single>
       <multiple>ред-ры</multiple>
@@ -63,16 +115,10 @@
       <single>перев-к</single>
       <multiple>перев-и</multiple>
     </term>
-    
-    <!-- VERB ROLE FORMS -->
     <term name="editor" form="verb">отредактировано</term>
     <term name="translator" form="verb">переведено</term>
-    
-    <!-- SHORT VERB ROLE FORMS -->
     <term name="editor" form="verb-short">ред</term>
     <term name="translator" form="verb-short">перев</term>
-    
-    <!-- LONG MONTH FORMS -->
     <term name="month-01">Январь</term>
     <term name="month-02">Февраль</term>
     <term name="month-03">Март</term>
@@ -85,8 +131,6 @@
     <term name="month-10">Октябрь</term>
     <term name="month-11">Ноябрь</term>
     <term name="month-12">Декабрь</term>
-    
-    <!-- SHORT MONTH FORMS -->
     <term name="month-01" form="short">Янв</term>
     <term name="month-02" form="short">Фев</term>
     <term name="month-03" form="short">Мар</term>

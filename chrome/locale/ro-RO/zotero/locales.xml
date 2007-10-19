@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <terms xmlns="http://purl.org/net/xbiblio/csl">
   <locale xml:lang="ro">
-    <term name="in">&#238;n</term>
+    <term name="at">at</term>
+    <term name="in">în</term>
     <term name="ibid">ibidem</term>
-    <term name="accessed">accesat &#238;n</term>
+    <term name="accessed">accesat în</term>
     <term name="retrieved">preluat în</term>
     <term name="from">din</term>
     <term name="forthcoming">în curs de apariţie</term>
@@ -11,8 +12,6 @@
     <term name="no date">f.a.</term>
     <term name="and">şi</term>
     <term name="et-al">ş.a.</term>
-    
-    <!-- LONG LOCATOR FORMS -->
     <term name="book">
       <single>carte</single>
       <multiple>cărţi</multiple>
@@ -73,8 +72,6 @@
       <single>verset</single>
       <multiple>versete</multiple>
     </term>
-    
-    <!-- SHORT LOCATOR FORMS -->
     <term name="book" form="short">car</term>
     <term name="chapter" form="short">cap</term>
     <term name="column" form="short">col</term>
@@ -86,7 +83,7 @@
       <single>p</single>
       <multiple>pp</multiple>
     </term>
-    <term name="paragraph" form="symbol">par</term>
+    <term name="paragraph" form="short">para</term>
     <term name="part" form="short">pt</term>
     <term name="section" form="short">sec</term>
     <term name="verse" form="short">
@@ -94,18 +91,14 @@
       <multiple>vv</multiple>
     </term>
     <term name="volume" form="short">vol</term>
-    
-    <!-- SYMBOL LOCATOR FORMS -->
     <term name="paragraph" form="symbol">
       <single>¶</single>
       <multiple>¶¶</multiple>
     </term>
-	<term name="section" form="symbol">
+    <term name="section" form="symbol">
       <single>§</single>
       <multiple>§§</multiple>
     </term>
-    
-    <!-- LONG ROLE FORMS -->
     <term name="editor">
       <single>editor</single>
       <multiple>editors</multiple>
@@ -114,8 +107,6 @@
       <single>translator</single>
       <multiple>translators</multiple>
     </term>
-    
-    <!-- SHORT ROLE FORMS -->
     <term name="editor" form="short">
       <single>ed</single>
       <multiple>eds</multiple>
@@ -124,16 +115,10 @@
       <single>tran</single>
       <multiple>trans</multiple>
     </term>
-    
-    <!-- VERB ROLE FORMS -->
     <term name="editor" form="verb">edited by</term>
     <term name="translator" form="verb">translated by</term>
-    
-    <!-- SHORT VERB ROLE FORMS -->
     <term name="editor" form="verb-short">ed</term>
     <term name="translator" form="verb-short">trans</term>
-    
-    <!-- LONG MONTH FORMS -->
     <term name="month-01">January</term>
     <term name="month-02">February</term>
     <term name="month-03">March</term>
@@ -146,12 +131,11 @@
     <term name="month-10">October</term>
     <term name="month-11">November</term>
     <term name="month-12">December</term>
-    
-    <!-- SHORT MONTH FORMS -->
     <term name="month-01" form="short">Jan</term>
     <term name="month-02" form="short">Feb</term>
     <term name="month-03" form="short">Mar</term>
     <term name="month-04" form="short">Apr</term>
+    <term name="month-05" form="short">May</term>
     <term name="month-06" form="short">Jun</term>
     <term name="month-07" form="short">Jul</term>
     <term name="month-08" form="short">Aug</term>

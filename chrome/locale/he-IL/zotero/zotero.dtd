@@ -98,7 +98,7 @@
 <!ENTITY zotero.tagSelector.deleteTag "מחק תג...">
 
 <!ENTITY zotero.selectitems.title "Select Items">
-<!ENTITY zotero.selectitems.intro.label "Select which items you&apos;d like to add to your library">
+<!ENTITY zotero.selectitems.intro.label "Select which items you'd like to add to your library">
 <!ENTITY zotero.selectitems.cancel.label "Cancel">
 <!ENTITY zotero.selectitems.select.label "אישור">
 

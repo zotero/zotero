@@ -25,7 +25,7 @@
 <!ENTITY zotero.contextMenu.saveLinkAsSnapshot "Save Link As Zotero Snapshot">
 <!ENTITY zotero.contextMenu.saveImageAsSnapshot "Save Image As Zotero Snapshot">
 
-<!ENTITY zotero.tabs.info.label "Information">
+<!ENTITY zotero.tabs.info.label "Info">
 <!ENTITY zotero.tabs.notes.label "Anteckningar">
 <!ENTITY zotero.tabs.attachments.label "Bifogade dokument">
 <!ENTITY zotero.tabs.tags.label "Etiketter">
