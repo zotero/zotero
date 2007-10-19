@@ -6,7 +6,7 @@
   
     <em:id>zotero@chnm.gmu.edu</em:id>
     <em:name>Zotero</em:name>
-    <em:version>1.0.0rc4.SVN</em:version>
+    <em:version>1.0.0rc5</em:version>
     <em:creator>Center for History and New Media<br/>George Mason University</em:creator>
     <em:contributor>Dan Cohen</em:contributor>
     <em:contributor>Sean Takats</em:contributor>
@@ -17,7 +17,7 @@
     <em:optionsURL>chrome://zotero/content/preferences/preferences.xul</em:optionsURL>
     <em:aboutURL>chrome://zotero/content/about.xul</em:aboutURL>
     <em:iconURL>chrome://zotero/skin/zotero_z_32px.png</em:iconURL>
-    <em:updateURL>https://www.zotero.org/download/update-svn.rdf</em:updateURL>
+    <em:updateURL>https://www.zotero.org/download/update.rdf</em:updateURL>
     <em:type>2</em:type> <!-- type=extension --> 
     
     <!-- Firefox -->
