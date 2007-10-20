@@ -60,7 +60,7 @@ var Zotero_File_Interface_Bibliography = new function() {
 		}
 		
 		// add styles to list
-		for(i in styles) {
+		for(var i in styles) {
 			var itemNode = document.createElement("listitem");
 			itemNode.setAttribute("value", i);
 			itemNode.setAttribute("label", styles[i]);
@@ -117,7 +117,7 @@ var Zotero_File_Interface_Bibliography = new function() {
 	 */
 	function styleChanged() {
 		// update status of displayAs box based
-		var selectedStyle = document.getElementById("style-listbox").selectedItem.value;
+		var selectedStyle = document.getElementById("style-listbox").selectedItem.getAttribute('value');
 		var styleClass = Zotero.Cite.getStyleClass(selectedStyle);
 		document.getElementById("displayAs").disabled = styleClass != "note";
 	}
