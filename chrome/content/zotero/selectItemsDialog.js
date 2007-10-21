@@ -84,37 +84,7 @@ function onItemSelected()
 	
 }
 
-function selectItem(itemID) {
-	var selected = itemsView.selectItem(itemID);
-	if (!selected) {
-		collectionsView.selection.select(0);
-		var selected = itemsView.selectItem(itemID);
-	}
-	return selected;
-}
-
-function getSelectedItems(byID) {
-	var start = new Object();
-	var end = new Object();
-	var returnArray = new Array();
-	
-	for(var i = 0, rangeCount = itemsView.selection.getRangeCount(); i < rangeCount; i++)
-	{
-		itemsView.selection.getRangeAt(i,start,end);
-		for(var j = start.value; j <= end.value; j++)
-		{
-			if(byID) {
-				returnArray.push(itemsView._getItemAtRow(j).ref.getID());
-			} else {
-				returnArray.push(itemsView._getItemAtRow(j).ref);
-			}
-		}
-	}
-	
-	return returnArray;
-}
-
 function doAccept()
 {
-	io.dataOut = getSelectedItems(true);
+	io.dataOut = itemsView.getSelectedItems(true);
 }

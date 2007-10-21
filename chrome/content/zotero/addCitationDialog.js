@@ -105,7 +105,7 @@ var Zotero_Citation_Dialog = new function () {
 			if(io.citation.citationItems.length == 1) {
 				// single citation
 				_suppressNextTreeSelect = true;
-				selectItem(io.citation.citationItems[0].itemID);	// from selectItemsDialog.js
+				itemsView.selectItem(io.citation.citationItems[0].itemID);	 // treeview from selectItemsDialog.js
 				for(var property in _preserveData) {
 					if(io.citation.citationItems[0][property]) {
 						if(property == "locatorType") {
@@ -182,8 +182,7 @@ var Zotero_Citation_Dialog = new function () {
 			_updateAccept();
 			return;
 		}
-		// get selected item (from selectItemsDialog.js)
-		var items = getSelectedItems(true);
+		var items = itemsView.getSelectedItems(true); // treeview from selectItemsDialog.js
 		var itemID = (items.length ? items[0] : false);
 		
 		if(_multipleSourcesOn) {
@@ -214,8 +213,7 @@ var Zotero_Citation_Dialog = new function () {
 	 * Adds a citation to the multipleSources list
 	 */
 	function add() {
-		// get selected item (from selectItemsDialog.js)
-		var item = getSelectedItems()[0];
+		var item = itemsView.getSelectedItems()[0]; // treeview from selectItemsDialog.js
 		_itemSelected(item.getID());
 		_addItem(item);
 		
@@ -242,7 +240,7 @@ var Zotero_Citation_Dialog = new function () {
 		_lastSelected = null;
 		
 		// re-select currently selected in left pane
-		var itemIDs = getSelectedItems(true);
+		var itemIDs = itemsView.getSelectedItems(true); // treeview from selectItemsDialog.js
 		if(itemIDs.length) {
 			document.getElementById("zotero-items-tree").focus();
 			treeItemSelected();
@@ -380,7 +378,7 @@ var Zotero_Citation_Dialog = new function () {
 		if(_multipleSourcesOn) {
 			_acceptButton.disabled = !document.getElementById("citation-list").childNodes.length;
 		} else {
-			_acceptButton.disabled = !getSelectedItems().length;
+			_acceptButton.disabled = !itemsView.getSelectedItems().length; // treeview from selectItemsDialog.js
 		}
 	}
 	
@@ -450,8 +448,7 @@ var Zotero_Citation_Dialog = new function () {
 				}
 			}
 		} else {
-			// get selected item (from selectItemsDialog.js)
-			var items = getSelectedItems(true);
+			var items = itemsView.getSelectedItems(true); // treeview from selectItemsDialog.js
 			
 			var citationItem = new Zotero.CSL.CitationItem();
 			citationItem.itemID = items[0];

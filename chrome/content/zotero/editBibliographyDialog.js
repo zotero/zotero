@@ -56,8 +56,7 @@ var Zotero_Bibliography_Dialog = new function () {
 	 * called when an item in the item selection tree is clicked
 	 */
 	function treeItemSelected() {
-		// get selected item (from selectItemsDialog.js)
-		var items = getSelectedItems(true);
+		var items = itemsView.getSelectedItems(true); // treeview from selectItemsDialog.js
 		
 		// disable add if item already in itemSet
 		document.getElementById("add").disabled = !items.length || itemSet.getItemsByIds([items[0]])[0];
@@ -83,8 +82,7 @@ var Zotero_Bibliography_Dialog = new function () {
 	 * Adds a citation to the reference list
 	 */
 	function add() {
-		// get selected item (from selectItemsDialog.js)
-		var item = getSelectedItems()[0];
+		var item = itemsView.getSelectedItems()[0]; // treeview from selectItemsDialog.js
 		
 		bibEditInterface.add(item);
 		document.getElementById("add").disabled = true;
