@@ -757,7 +757,7 @@ var ZoteroItemPane = new function()
 		if (singleField)
 		{
 			button.setAttribute('image', 'chrome://zotero/skin/textfield-dual.png');
-			button.setAttribute('tooltiptext', 'Switch to two fields');
+			button.setAttribute('tooltiptext', Zotero.getString('pane.item.switchFieldMode.two'));
 			lastName.setAttribute('singleField', 'true');
 			button.setAttribute('onclick', "ZoteroItemPane.switchCreatorMode(this.parentNode.parentNode, false)");
 			lastName.setAttribute('flex', '1');
@@ -792,7 +792,7 @@ var ZoteroItemPane = new function()
 		else
 		{
 			button.setAttribute('image', 'chrome://zotero/skin/textfield-single.png');
-			button.setAttribute('tooltiptext', 'Switch to single field');
+			button.setAttribute('tooltiptext', Zotero.getString('pane.item.switchFieldMode.one'));
 			lastName.setAttribute('singleField', 'false');
 			button.setAttribute('onclick', "ZoteroItemPane.switchCreatorMode(this.parentNode.parentNode, true)");
 			lastName.setAttribute('flex', '0');
