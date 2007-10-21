@@ -195,14 +195,21 @@ Zotero.Attachments = new function(){
 			// get the charset and title and index the document)
 			if (Zotero.MIME.hasNativeHandler(mimeType, ext)){
 				var browser = Zotero.Browser.createHiddenBrowser();
+				var imported = false;
 				var onpageshow = function() {
+					// pageshow can be triggered multiple times on some pages,
+					// so make sure we only import once
+					// (https://www.zotero.org/trac/ticket/795)
+					if (imported) {
+						return;
+					}
 					var callback = function () {
 						browser.removeEventListener("pageshow", onpageshow, false);
 						Zotero.Browser.deleteHiddenBrowser(browser);
 					};
-					
 					Zotero.Attachments.importFromDocument(browser.contentDocument,
 						sourceItemID, forceTitle, parentCollectionIDs, callback);
+					imported = true;
 				};
 				browser.addEventListener("pageshow", onpageshow, false);
 				browser.loadURI(url);
