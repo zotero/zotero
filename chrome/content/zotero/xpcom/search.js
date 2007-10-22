@@ -889,10 +889,22 @@ Zotero.Search.prototype._buildQuery = function(){
 						break;
 					
 					case 'fileTypeID':
-						condSQL += 'mimeType IN (SELECT mimeType FROM '
-							+ 'fileTypeMimeTypes WHERE fileTypeID IN ('
-							+ 'SELECT fileTypeID FROM fileTypes WHERE ';
-						openParens = openParens + 2;
+						var ftSQL = 'SELECT mimeType FROM fileTypeMimeTypes '
+							+ 'WHERE fileTypeID IN ('
+							+ 'SELECT fileTypeID FROM fileTypes WHERE '
+							+ 'fileTypeID=?)';
+						var patterns = Zotero.DB.columnQuery(ftSQL, { int: condition.value });
+						if (patterns) {
+							for each(str in patterns) {
+								condSQL += 'mimeType LIKE ? OR ';
+								condSQLParams.push(str + '%');
+							}
+							condSQL = condSQL.substring(0, condSQL.length - 4);
+						}
+						else {
+							throw ("Invalid fileTypeID '" + condition.value + "' specified in search.js")
+						}
+						skipOperators = true;
 						break;
 					
 					case 'tag':
