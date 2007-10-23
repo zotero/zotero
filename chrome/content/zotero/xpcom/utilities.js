@@ -32,10 +32,6 @@
 
 Zotero.Utilities = function () {}
 
-Zotero.Utilities.prototype.debug = function(msg) {
-	Zotero.debug(msg, 4);
-}
-
 /*
  * See Zotero.Date
  */
@@ -49,6 +45,7 @@ Zotero.Utilities.prototype.strToDate = function(date) {
 /*
  * Cleans extraneous punctuation off an author name
  */
+Zotero.Utilities._allCapsRe = /^[A-Z]+$/;
 Zotero.Utilities.prototype.cleanAuthor = function(author, type, useComma) {
 	if(typeof(author) != "string") {
 		throw "cleanAuthor: author must be a string";
@@ -58,10 +55,9 @@ Zotero.Utilities.prototype.cleanAuthor = function(author, type, useComma) {
 	author = author.replace(/[\s\,\/\[\]\:\.]+$/, '');
 	author = author.replace(/  +/, ' ');
 	if(useComma) {
-		// Add period for initials
-		if(author.substr(author.length-2, 1) == " " || author.substr(author.length-2, 1) == ".") {
-			author += ".";
-		}
+		// Add spaces between periods
+		author = author.replace(/\.([^ ])/, ". $1");
+		
 		var splitNames = author.split(/, ?/);
 		if(splitNames.length > 1) {
 			var lastName = splitNames[0];
@@ -74,21 +70,57 @@ Zotero.Utilities.prototype.cleanAuthor = function(author, type, useComma) {
 		var lastName = author.substring(spaceIndex+1);
 		var firstName = author.substring(0, spaceIndex);
 	}
-	// TODO: take type into account
+	
+	if(firstName && Zotero.Utilities._allCapsRe.test(firstName) &&
+			firstName.length < 4 &&
+			(firstName.length == 1 || lastName.toUpperCase() != lastName)) {
+		// first name is probably initials
+		var newFirstName = "";
+		for(var i=0; i<firstName.length; i++) {
+			newFirstName += " "+firstName[i]+".";
+		}
+		firstName = newFirstName.substr(1);
+	}
+	
 	return {firstName:firstName, lastName:lastName, creatorType:type};
 }
+
+
+/*
+ * Removes leading and trailing whitespace from a string
+ */
+Zotero.Utilities.prototype.trim = function(s) {
+	if (typeof(s) != "string") {
+		throw "trim: argument must be a string";
+	}
+	
+	s = s.replace(/^\s+/, "");
+	return s.replace(/\s+$/, "");
+}
+
 
 /*
  * Cleans whitespace off a string and replaces multiple spaces with one
  */
-Zotero.Utilities.prototype.cleanString = function(s) {
-	if(typeof(s) != "string") {
-		throw "cleanString: argument must be a string";
+Zotero.Utilities.prototype.trimInternal = function(s) {
+	if (typeof(s) != "string") {
+		throw "trimInternal: argument must be a string";
 	}
 	
 	s = s.replace(/[\xA0\r\n\s]+/g, " ");
-	s = s.replace(/^\s+/, "");
-	return s.replace(/\s+$/, "");
+	return this.trim(s);
+}
+
+
+
+/*
+ * Cleans whitespace off a string and replaces multiple spaces with one
+ *
+ * DEPRECATED: use trimInternal()
+ */
+Zotero.Utilities.prototype.cleanString = function(s) {
+	Zotero.debug("cleanString() is deprecated; use trimInternal() instead", 2);
+	return this.trimInternal(s);
 }
 
 /*
@@ -114,6 +146,102 @@ Zotero.Utilities.prototype.cleanTags = function(x) {
 	x = x.replace(/<br[^>]*>/gi, "\n");
 	return x.replace(/<[^>]+>/g, "");
 }
+
+/*
+ * Encode special XML/HTML characters
+ *
+ * Certain entities can be inserted manually:
+ *
+ *  <ZOTEROBREAK/> => <br/>
+ *  <ZOTEROHELLIP/> => &hellip;
+ */
+Zotero.Utilities.prototype.htmlSpecialChars = function(str) {
+	if (typeof str != 'string') {
+		throw "Argument '" + str + "' must be a string in Zotero.Utilities.htmlSpecialChars()";
+	}
+	
+	if (!str) {
+		return '';
+	}
+	
+	var chars = ['&', '"',"'",'<','>'];
+	var entities = ['amp', 'quot', 'apos', 'lt', 'gt'];
+	
+	var newString = str;
+	for (var i = 0; i < chars.length; i++) {
+		var re = new RegExp(chars[i], 'g');
+		newString = newString.replace(re, '&' + entities[i] + ';');
+	}
+	
+	newString = newString.replace(/&lt;ZOTERO([^\/]+)\/&gt;/g, function (str, p1, offset, s) {
+		switch (p1) {
+			case 'BREAK':
+				return '<br/>';
+			case 'HELLIP':
+				return '&hellip;';
+			default:
+				return p1;
+		}
+	});
+	
+	return newString;
+}
+
+
+Zotero.Utilities.prototype.unescapeHTML = function(str) {
+	var nsISUHTML = Components.classes["@mozilla.org/feed-unescapehtml;1"]
+		.getService(Components.interfaces.nsIScriptableUnescapeHTML);
+	return nsISUHTML.unescape(str);
+}
+
+
+/*
+ * Parses a text string for HTML/XUL markup and returns an array of parts
+ *
+ * Currently only finds HTML links (<a> tags)
+ *
+ * Returns an array of objects with the following form:
+ *     {
+ *         type: 'text'|'link',
+ *         text: "text content",
+ *         [ attributes: { key1: val [ , key2: val, ...] }
+ *     }
+ */
+Zotero.Utilities.prototype.parseMarkup = function(str) {
+	var parts = [];
+	var splits = str.split(/(<a [^>]+>[^<]*<\/a>)/);
+	
+	for each(var split in splits) {
+		// Link
+		if (split.indexOf('<a ') == 0) {
+			var matches = split.match(/<a ([^>]+)>([^<]*)<\/a>/);
+			if (matches) {
+				// Attribute pairs
+				var attributes = {};
+				var pairs = matches[1].match(/([^ =]+)="([^"]+")/g);
+				for each (var pair in pairs) {
+					var [key, val] = pair.split(/=/);
+					attributes[key] = val.substr(1, val.length - 2);
+				}
+				
+				parts.push({
+					type: 'link',
+					text: matches[2],
+					attributes: attributes
+				});
+				continue;
+			}
+		}
+		
+		parts.push({
+			type: 'text',
+			text: split
+		});
+	}
+	
+	return parts;
+}
+
 
 /*
  * Test if a string is an integer
@@ -158,7 +286,7 @@ Zotero.Utilities.prototype.inArray = Zotero.inArray;
  * pads a number or other string with a given string on the left
  */
 Zotero.Utilities.prototype.lpad = function(string, pad, length) {
-	string = string + '';
+	string = string ? string + '' : '';
 	while(string.length < length) {
 		string = pad + string;
 	}
@@ -177,14 +305,45 @@ Zotero.Utilities.prototype.itemTypeExists = function(type) {
 }
 
 /*
+ * returns an array of all (string) creatorTypes valid for a (string) itemType
+ */
+Zotero.Utilities.prototype.getCreatorsForType = function(type) {
+	var types = Zotero.CreatorTypes.getTypesForItemType(Zotero.ItemTypes.getID(type));
+	var cleanTypes = new Array();
+	for each(var type in types) {
+		cleanTypes.push(type.name);
+	}
+	return cleanTypes;
+}
+
+/*
+ * returns a localized creatorType name
+ */
+Zotero.Utilities.prototype.getLocalizedCreatorType = function(type) {
+	try {
+		return Zotero.getString("creatorTypes."+type);
+	} catch(e) {
+		return false;
+	}
+}
+
+/*
  * Cleans a title, capitalizing the proper words and replacing " :" with ":"
+ *
+ * Follows capitalizeTitles pref, unless |force| is true
  */
 Zotero.Utilities.capitalizeSkipWords = ["but", "or", "yet", "so", "for", "and",
 "nor", "a", "an", "the", "at", "by", "from", "in", "into", "of", "on", "to",
 "with", "up", "down"];
-Zotero.Utilities.prototype.capitalizeTitle = function(title) {
+Zotero.Utilities.prototype.capitalizeTitle = function(title, force) {
+	if (!Zotero.Prefs.get('capitalizeTitles') && !force) {
+		return title;
+	}
 	title = this.cleanString(title);
-	title = title.replace(/ : /g, ": ");	
+	if (!title) {
+		return '';
+	}
+	title = title.replace(/ : /g, ": ");
 	var words = title.split(" ");
 	
 	// always capitalize first
@@ -244,6 +403,9 @@ Zotero.Utilities.Ingester.prototype.gatherElementsOnXPath = function(doc, parent
 
 /*
  * Gets a given node as a string containing all child nodes
+ *
+ * WARNING: This is DEPRECATED and may be removed in the final release. Use
+ * doc.evaluate and the "nodeValue" or "textContent" property
  */
 Zotero.Utilities.Ingester.prototype.getNodeString = function(doc, contextNode, xpath, nsResolver) {
 	var elmts = this.gatherElementsOnXPath(doc, contextNode, xpath, nsResolver);
@@ -315,6 +477,7 @@ Zotero.Utilities.Ingester.prototype.parseContextObject = function(co, item) {
 	return Zotero.OpenURL.parseContextObject(co, item);
 }
 
+
 // Ingester adapters for Zotero.Utilities.HTTP to handle proxies
 
 Zotero.Utilities.Ingester.prototype.loadDocument = function(url, succeeded, failed) {
@@ -322,7 +485,7 @@ Zotero.Utilities.Ingester.prototype.loadDocument = function(url, succeeded, fail
 }
 
 Zotero.Utilities.Ingester._protocolRe = new RegExp();
-Zotero.Utilities.Ingester._protocolRe.compile("^(?:(?:http|https|ftp):|[^:]*/)", "i");
+Zotero.Utilities.Ingester._protocolRe.compile("^(?:(?:http|https|ftp):|[^:](?:/.*)?$)", "i");
 Zotero.Utilities.Ingester.prototype.processDocuments = function(urls, processor, done, exception) {
 	if(this.translate.locationIsProxied) {
 		for(var i in urls) {
@@ -341,7 +504,7 @@ Zotero.Utilities.Ingester.prototype.processDocuments = function(urls, processor,
 	if(!exception) {
 		var translate = this.translate;
 		exception = function(e) {
-			translate._translationComplete(false, e);
+			translate.error(false, e);
 		}
 	}
 	
@@ -352,7 +515,16 @@ Zotero.Utilities.Ingester.HTTP = function(translate) {
 	this.translate = translate;
 }
 
-Zotero.Utilities.Ingester.HTTP.prototype.doGet = function(url, onDone) {
+Zotero.Utilities.Ingester.HTTP.prototype.doGet = function(urls, processor, done) {
+	var callAgain = false;
+	
+	if(typeof(urls) == "string") {
+		var url = urls;
+	} else {
+		if(urls.length > 1) callAgain = true;
+		var url = urls.shift();
+	}
+	
 	if(this.translate.locationIsProxied) {
 		url = Zotero.Ingester.ProxyMonitor.properToProxy(url);
 	}
@@ -360,17 +532,28 @@ Zotero.Utilities.Ingester.HTTP.prototype.doGet = function(url, onDone) {
 		throw("invalid URL in processDocuments");
 	}
 	
-	var translate = this.translate;
+	var me = this;
+	
 	Zotero.Utilities.HTTP.doGet(url, function(xmlhttp) {
 		try {
-			onDone(xmlhttp.responseText, xmlhttp);
+			if(processor) {
+				processor(xmlhttp.responseText, xmlhttp, url);
+			}
+			
+			if(callAgain) {
+				me.doGet(urls, processor, done);
+			} else {
+				if(done) {
+					done();
+				}
+			}
 		} catch(e) {
-			translate._translationComplete(false, e);
+			me.translate.error(false, e);
 		}
-	})
+	});
 }
 
-Zotero.Utilities.Ingester.HTTP.prototype.doPost = function(url, body, onDone) {
+Zotero.Utilities.Ingester.HTTP.prototype.doPost = function(url, body, onDone, contentType) {
 	if(this.translate.locationIsProxied) {
 		url = Zotero.Ingester.ProxyMonitor.properToProxy(url);
 	}
@@ -383,9 +566,9 @@ Zotero.Utilities.Ingester.HTTP.prototype.doPost = function(url, body, onDone) {
 		try {
 			onDone(xmlhttp.responseText, xmlhttp);
 		} catch(e) {
-			translate._translationComplete(false, e);
+			translate.error(false, e);
 		}
-	})
+	}, contentType);
 }
 
 // These are front ends for XMLHttpRequest. XMLHttpRequest can't actually be
@@ -436,7 +619,7 @@ Zotero.Utilities.HTTP = new function() {
 	* doPost can be called as:
 	* Zotero.Utilities.HTTP.doPost(url, body, onDone)
 	**/
-	function doPost(url, body, onDone) {
+	function doPost(url, body, onDone, contentType) {
 		Zotero.debug("HTTP POST "+body+" to "+url);
 		if (this.browserIsOffline()){
 			return false;
@@ -446,7 +629,7 @@ Zotero.Utilities.HTTP = new function() {
 					.createInstance();
 		
 		xmlhttp.open('POST', url, true);
-		xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+		xmlhttp.setRequestHeader("Content-Type", (contentType ? contentType : "application/x-www-form-urlencoded" ));
 		
 		xmlhttp.onreadystatechange = function(){
 			_stateChange(xmlhttp, onDone);

@@ -31,17 +31,18 @@ var io;
  */
 function doLoad()
 {
+	// Set font size from pref
+	var sbc = document.getElementById('zotero-select-items-container');
+	Zotero.setFontSize(sbc);
+	
 	io = window.arguments[0];
 	
 	collectionsView = new Zotero.CollectionTreeView();
-	document.getElementById('collections-tree').view = collectionsView;
-
+	document.getElementById('zotero-collections-tree').view = collectionsView;
+	
 	// move to center of screen
 	window.sizeToContent();
-	window.moveTo(
-		(self.screen.width-window.innerWidth)/2,
-		(self.screen.height-window.innerHeight)/2
-	);
+	window.centerWindowOnScreen();
 }
 
 function doUnload()
@@ -62,7 +63,7 @@ function onCollectionSelected()
 		collection.setSearch('');
 
 		itemsView = new Zotero.ItemTreeView(collection, (window.arguments[1] ? true : false));
-		document.getElementById('items-tree').view = itemsView;
+		document.getElementById('zotero-items-tree').view = itemsView;
 	}
 
 }
@@ -71,10 +72,10 @@ function onSearch()
 {
 	if(itemsView)
 	{
-		var searchVal = document.getElementById('tb-search').value;
-		itemsView.searchText(searchVal);
+		var searchVal = document.getElementById('zotero-tb-search').value;
+		itemsView.setFilter('search', searchVal);
 		
-		document.getElementById('tb-search-cancel').hidden = searchVal == "";
+		document.getElementById('zotero-tb-search-cancel').hidden = searchVal == "";
 	}
 }
 
@@ -83,28 +84,7 @@ function onItemSelected()
 	
 }
 
-function getSelectedItems(byID) {
-	var start = new Object();
-	var end = new Object();
-	var returnArray = new Array();
-	
-	for(var i = 0, rangeCount = itemsView.selection.getRangeCount(); i < rangeCount; i++)
-	{
-		itemsView.selection.getRangeAt(i,start,end);
-		for(var j = start.value; j <= end.value; j++)
-		{
-			if(byID) {
-				returnArray.push(itemsView._getItemAtRow(j).ref.getID());
-			} else {
-				returnArray.push(itemsView._getItemAtRow(j).ref);
-			}
-		}
-	}
-	
-	return returnArray;
-}
-
 function doAccept()
 {
-	io.dataOut = getSelectedItems(true);
+	io.dataOut = itemsView.getSelectedItems(true);
 }

@@ -1,0 +1,10 @@
+<!ENTITY zotero.version "versie">
+<!ENTITY zotero.createdby "Gemaakt door:">
+<!ENTITY zotero.directors "Directeuren:">
+<!ENTITY zotero.developers "Ontwikkelaars:">
+<!ENTITY zotero.alumni "Alumni:">
+<!ENTITY zotero.about.localizations "Vertalingen:">
+<!ENTITY zotero.about.additionalSoftware "Third-Party Software and Standards:">
+<!ENTITY zotero.executiveProducer "Uitvoerend Producent:">
+<!ENTITY zotero.thanks "Met speciale dank aan:">
+<!ENTITY zotero.about.close "Sluiten">

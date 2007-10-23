@@ -1,3 +1,26 @@
+/* Font sizes */
+*[zoteroFontSize=medium] #zotero-tb-search, *[zoteroFontSize=large] #zotero-tb-search,
+*[zoteroFontSize=medium] zoterotagselector textbox, *[zoteroFontSize=large] zoterotagselector textbox
+{
+	font-size: 1em !important;
+}
+
+*[zoteroFontSize=medium] treechildren::-moz-tree-row
+{
+	height: 1.5em;
+}
+
+*[zoteroFontSize=large] treechildren::-moz-tree-row
+{
+	height: 1.5em;
+}
+
+*[zoteroFontSize=large] .treecol-text
+{
+	margin:0;
+	padding:0;
+}
+
 #zotero-toolbar-button
 {
 	list-style-image: url('chrome://zotero/skin/zotero-z-24px.png');
@@ -28,9 +51,21 @@ toolbar[iconsize="small"] #zotero-toolbar-button:active
 	list-style-image: url('chrome://zotero/skin/zotero-z-16px-active.png');
 }
 
+
+/* Bindings */
+textbox[type="conditional-timed"]
+{
+	-moz-binding: url('chrome://zotero/content/bindings/conditional-timed-textbox.xml#conditional-timed-textbox');
+}
+
 textbox[multiline="true"][type="timed"]
 {
 	-moz-binding: url('chrome://zotero/content/bindings/timedtextarea.xml#timed-textarea');
+}
+
+textbox[type="styled"]
+{
+	-moz-binding: url('chrome://zotero/content/bindings/styled-textbox.xml#styled-textbox');
 }
 
 noteeditor
@@ -56,137 +91,62 @@ tagsbox row
 seealsobox
 {
 	-moz-binding: url('chrome://zotero/content/bindings/relatedbox.xml#seealso-box');
+	-moz-user-focus: ignore;
 }
 
 zoterosearch
 {
 	-moz-binding: url('chrome://zotero/content/bindings/zoterosearch.xml#search-box');
-	width:60em;
 }
+
+zoterotagselector
+{
+	-moz-binding: url('chrome://zotero/content/bindings/tagselector.xml#tag-selector');
+}
+
 
 searchcondition
 {
 	-moz-binding: url('chrome://zotero/content/bindings/zoterosearch.xml#search-condition');
 }
 
-searchcondition menulist[id="operatorsmenu"]
-{
-	width:15em;
-}
-
 zoterosearchtextbox
 {
-	-moz-binding: url('chrome://zotero/content/bindings/searchtextbox.xml#zotero-search-textbox');
-}
-
-zoterosearchtextbox toolbarbutton
-{
-	padding:0;
-	cursor:default;
-}
-
-zoterosearchtextbox:not([hasOptions=true]) toolbarbutton
-{
-	display:none;
-}
-
-zoterosearchtextbox .toolbarbutton-text
-{
-	margin:0;
-	padding:0;
-}
-
-zoterosearchtextbox .toolbarbutton-menu-dropmarker
-{
-	padding:0 2px;
-}
-
-#editpane-dynamic-fields row, tagsbox row
-{
-	margin:0 0 1px;
-}
-
-#editpane-dynamic-fields textbox, tagsbox textbox
-{
-	margin-top:0;
-	margin-bottom:-1px;
-}
-
-/* DEBUG: this doesn't seem to work, unfortunately
-#editpane-dynamic-fields label[singleField=false]:after
-{
-	content:",";
-}
-*/
-
-/* creator switch button */
-#editpane-dynamic-fields row hbox toolbarbutton
-{
-	margin-right:5px;
-}
-
-/* metadata field names */
-#editpane-dynamic-fields row > label:first-child,
-#editpane-dynamic-fields row > toolbarbutton .toolbarbutton-text /* creator type menu */
-{
-	text-align: right;
-	font-weight: bold;
-}
-
- /* creator type menu */
-#editpane-dynamic-fields row > toolbarbutton 
-{
-	margin: 0;
-	padding: 0;
-	list-style-image: url("chrome://browser/skin/dropmark-nav-small.png");
-	-moz-image-region: rect(0px, 14px, 16px, 0px);
-}
-#editpane-dynamic-fields row > toolbarbutton .toolbarbutton-text
-{
-	margin-top: -1px;
-}
-#editpane-dynamic-fields row > toolbarbutton .toolbarbutton-icon,
-#editpane-dynamic-fields row > toolbarbutton .toolbarbutton-menu-dropmarker
-{
-	margin: 0;
-	padding: 0;
+	-moz-binding: url('chrome://zotero/content/bindings/zoterosearch.xml#search-textbox');
 }
 
 
-/* no space between last name and comma */
-#editpane-dynamic-fields row hbox label:first-child
+zoterosearchagefield
 {
-	margin-right:1px;
+	-moz-binding: url('chrome://zotero/content/bindings/zoterosearch.xml#search-in-the-last');
 }
 
-#editpane-dynamic-fields row hbox label.comma
-{
-	margin-left:0;
-}
-
-#editpane-dynamic-fields row vbox[fieldname=extra]
-{
-	margin-left:6px;
-}
-
-.clicky, .unclicky
+.zotero-clicky
 {	
 	-moz-border-radius: 6px;
 }
 
-.clicky[value="-"], .clicky[value="+"],
-.unclicky[value="-"], .unclicky[value="+"]
+.zotero-clicky[value="-"], .zotero-clicky[value="+"]
 {
 	margin: 0px;
 	padding-left: 4px;
 	padding-right: 4px;
 }
 
-.clicky:hover
+.zotero-clicky:not([disabled=true]):hover,
+.zotero-clicky:not([disabled=true]):hover .toolbarbutton-text
 {
 	color: white;
-	background: #666666;
+	background: #666;
 }
+
+.zotero-clicky:not([disabled=true]):active,
+.zotero-clicky:not([disabled=true]):active .toolbarbutton-text
+{
+	color: white;
+	background: #333;
+}
+
 
 #zotero-progress-box, #zotero-progress-box
 {
@@ -215,9 +175,14 @@ zoterosearchtextbox .toolbarbutton-menu-dropmarker
 	width: 210px;
 }
 
-.zotero-progress-description
+#zotero-progress-box description
 {
 	width: 220px;
+}
+
+#zotero-progress-box description label
+{
+	margin: 0;
 }
 
 .zotero-scrape-popup-library

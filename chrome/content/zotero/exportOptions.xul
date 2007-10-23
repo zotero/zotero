@@ -2,22 +2,24 @@
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 <!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
 <dialog xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-	title="&exportOptions.title;" buttons="cancel,accept"
+	title="&zotero.exportOptions.title;" buttons="cancel,accept"
 	ondialogaccept="Zotero_File_Interface_Export.accept()"
 	ondialogcancel="Zotero_File_Interface_Export.cancel()"
 	id="zotero-export-options"
 	onload="Zotero_File_Interface_Export.init()">
-
-<script src="include.js"/>
-<script src="exportOptions.js"/>
-<hbox>
-	<label value="&exportOptions.format.label;" control="format-menu"/>
-	<menulist id="format-menu" oncommand="Zotero_File_Interface_Export.updateOptions()">
-		<menupopup id="format-popup">
-		</menupopup>
-	</menulist>
-</hbox>
-<groupbox id="translator-options">
-	<caption label="&exportOptions.translatorOptions.label;"/>
-</groupbox>
+	
+	<script src="include.js"/>
+	<script src="exportOptions.js"/>
+	
+	<vbox id="zotero-export-options-container" flex="1">
+		<hbox>
+			<label value="&zotero.exportOptions.format.label;" control="format-menu"/>
+			<menulist id="format-menu" oncommand="Zotero_File_Interface_Export.updateOptions()">
+				<menupopup id="format-popup"/>
+			</menulist>
+		</hbox>
+		<groupbox id="translator-options">
+			<caption label="&zotero.exportOptions.translatorOptions.label;"/>
+		</groupbox>
+	</vbox>
 </dialog>

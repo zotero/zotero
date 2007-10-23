@@ -21,6 +21,8 @@
     ***** END LICENSE BLOCK *****
 -->
 
+<!DOCTYPE bindings SYSTEM "chrome://zotero/locale/zotero.dtd">
+
 <bindings 	xmlns="http://www.mozilla.org/xbl"
 			xmlns:xbl="http://www.mozilla.org/xbl"
 			xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
@@ -48,7 +50,7 @@
 							{
 								for(var i = 0; i < tags.length; i++)
 								{
-									r = r + tags[i] + ", ";
+									r = r + tags[i].tag + ", ";
 								}
 								r = r.substr(0,r.length-2);
 							}
@@ -71,8 +73,7 @@
 						
 						if(tags)
 						{
-							for(var i = 0; i < tags.length; i++)
-							{
+							for (var i=0; i<tags.length; i++) {
 								this.addDynamicRow(tags[i], i+1);
 							}
 							this.updateCount(tags.length);
@@ -88,27 +89,42 @@
 				</body>
 			</method>
 			<method name="addDynamicRow">
-				<parameter name="tag"/>
+				<parameter name="tagObj"/>
 				<parameter name="tabindex"/>
 				<body>
 					<![CDATA[
-						var id = tag ? Zotero.Tags.getID(tag) : null;
-						tag = tag ? tag : '';
+						if (tagObj) {
+							var tagID = tagObj.id;
+							var tag = tagObj.tag;
+							var type = tagObj.type;
+						}
+						if (!tag) {
+							tag = '';
+						}
 						
 						if (!tabindex)
 						{
 							if (this.id('tagRows').lastChild)
 							{
 								tabindex = parseInt(this.id('tagRows').lastChild.
-									firstChild.nextSibling.getAttribute('tabindex')) + 1;
+									firstChild.nextSibling.getAttribute('ztabindex')) + 1;
 							}
 							else {
 								tabindex = 1;
 							}
 						}
 						
-						var icon= document.createElement("image");
-						icon.setAttribute('src','chrome://zotero/skin/tag.png');
+						var icon = document.createElement("image");
+						var iconFile = 'tag';
+						if (type == 0) {
+							icon.setAttribute('tooltiptext', Zotero.getString('pane.item.tags.icon.user'));
+						}
+						else if (type == 1) {
+							iconFile += '-automatic';
+							icon.setAttribute('tooltiptext', Zotero.getString('pane.item.tags.icon.automatic'));
+						}
+						icon.setAttribute('src', 'chrome://zotero/skin/' + iconFile + '.png');
+						
 						// DEBUG: Why won't just this.nextSibling.blur() work?
 						icon.setAttribute('onclick','if (this.nextSibling.inputField){ this.nextSibling.inputField.blur() }');
 						
@@ -116,25 +132,26 @@
 						
 						var remove = document.createElement("label");
 						remove.setAttribute('value','-');
-						if (id)
+						remove.setAttribute('class','zotero-clicky');
+						if (tagID)
 						{
-							remove.setAttribute('tabindex', -1);
-							remove.setAttribute('onclick',"this.parentNode.parentNode.parentNode.parentNode.parentNode.remove('"+id+"');");
-							remove.setAttribute('class','clicky');
+							remove.setAttribute('ztabindex', -1);
+							remove.setAttribute('onclick',"this.parentNode.parentNode.parentNode.parentNode.parentNode.remove('"+ tagID +"');");
 						}
 						else
 						{
 							remove.setAttribute('disabled', true);
-							remove.setAttribute('class', 'unclicky');
 						}
 						
 						var row = document.createElement("row");
 						row.appendChild(icon);
 						row.appendChild(label);
 						row.appendChild(remove);
-						if (id)
+						
+						if (tagID)
 						{
-							row.setAttribute('id','tag-'+id);
+							row.setAttribute('id', 'tag-' + tagID);
+							row.setAttribute('tagType', type);
 						}
 						
 						this.id('tagRows').appendChild(row);
@@ -200,7 +217,20 @@
 								count = 0;
 						}
 						
-						this.id('tagsNum').value = count + ' tags:';
+						var str = 'pane.item.tags.count.';
+						switch (count){
+							case 0:
+								str += 'zero';
+								break;
+							case 1:
+								str += 'singular';
+								break;
+							default:
+								str += 'plural';
+								break;
+						}
+						
+						this.id('tagsNum').value = Zotero.getString(str, [count]);
 						this.count = count;
 					]]>
 				</body>
@@ -232,12 +262,28 @@
 					]]>
 				</body>
 			</method>
+			<method name="closePopup">
+				<body>
+					<![CDATA[
+						if (this.parentNode.getAttribute('showing')=='true') {
+							this.parentNode.setAttribute('showing', false);
+						}
+					]]>
+				</body>
+			</method>
+			<method name="getScrollBox">
+				<body>
+					<![CDATA[
+						return document.getAnonymousNodes(this)[0];
+					]]>
+				</body>
+			</method>
 		</implementation>
 		<content>
-			<xul:vbox xbl:inherits="flex">
+			<xul:scrollbox xbl:inherits="flex" orient="vertical" style="overflow:auto">
 				<xul:hbox align="center">
 					<xul:label id="tagsNum"/>
-					<xul:button label="Add" oncommand="this.parentNode.parentNode.parentNode.new();"/>
+					<xul:button label="&zotero.item.add;" oncommand="this.parentNode.parentNode.parentNode.new();"/>
 				</xul:hbox>
 				<xul:grid>
 					<xul:columns>
@@ -247,7 +293,7 @@
 					</xul:columns>
 					<xul:rows id="tagRows"/>
 				</xul:grid>
-			</xul:vbox>
+			</xul:scrollbox>
 		</content>
 	</binding>
 </bindings>

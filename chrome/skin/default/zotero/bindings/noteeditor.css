@@ -1,0 +1,10 @@
+/* Don't collapse blank note parent labels, since it prevents access to parent */
+#citeLabel
+{
+	min-height: 1.25em;
+}
+
+#citeLabel:hover
+{
+	cursor: pointer !important;
+}

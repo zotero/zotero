@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<terms xmlns="http://purl.org/net/xbiblio/csl">
+  <locale xml:lang="hu">
+    <term name="at">at</term>
+    <term name="in">in</term>
+    <term name="ibid">ibid</term>
+    <term name="accessed">elérés</term>
+    <term name="retrieved">elérés</term>
+    <term name="from">forrás</term>
+    <term name="forthcoming">megjelenés alatt</term>
+    <term name="references">Hivatkozások</term>
+    <term name="no date">nd</term>
+    <term name="and">és</term>
+    <term name="et-al">et al.</term>
+    <term name="book">
+      <single>book</single>
+      <multiple>books</multiple>
+    </term>
+    <term name="chapter">
+      <single>chapter</single>
+      <multiple>chapters</multiple>
+    </term>
+    <term name="column">
+      <single>column</single>
+      <multiple>columns</multiple>
+    </term>
+    <term name="figure">
+      <single>figure</single>
+      <multiple>figures</multiple>
+    </term>
+    <term name="folio">
+      <single>folio</single>
+      <multiple>folios</multiple>
+    </term>
+    <term name="issue">
+      <single>number</single>
+      <multiple>numbers</multiple>
+    </term>
+    <term name="line">
+      <single>sor</single>
+      <multiple>sor</multiple>
+    </term>
+    <term name="note">
+      <single>note</single>
+      <multiple>notes</multiple>
+    </term>
+    <term name="opus">
+      <single>opus</single>
+      <multiple>opera</multiple>
+    </term>
+    <term name="page">
+      <single>oldal</single>
+      <multiple>oldal</multiple>
+    </term>
+    <term name="paragraph">
+      <single>bekezdés</single>
+      <multiple>bekezdés</multiple>
+    </term>
+    <term name="part">
+      <single>part</single>
+      <multiple>parts</multiple>
+    </term>
+    <term name="section">
+      <single>section</single>
+      <multiple>sections</multiple>
+    </term>
+    <term name="volume">
+      <single>volume</single>
+      <multiple>volumes</multiple>
+    </term>
+    <term name="verse">
+      <single>verse</single>
+      <multiple>verses</multiple>
+    </term>
+    <term name="book" form="short">bk</term>
+    <term name="chapter" form="short">chap</term>
+    <term name="column" form="short">col</term>
+    <term name="figure" form="short">fig</term>
+    <term name="folio" form="short">f</term>
+    <term name="issue" form="short">no</term>
+    <term name="opus" form="short">op</term>
+    <term name="page" form="short">
+      <single>o</single>
+      <multiple>o</multiple>
+    </term>
+    <term name="paragraph" form="short">para</term>
+    <term name="part" form="short">pt</term>
+    <term name="section" form="short">sec</term>
+    <term name="verse" form="short">
+      <single>v</single>
+      <multiple>vv</multiple>
+    </term>
+    <term name="volume" form="short">vol</term>
+    <term name="paragraph" form="symbol">
+      <single>¶</single>
+      <multiple>¶¶</multiple>
+    </term>
+    <term name="section" form="symbol">
+      <single>§</single>
+      <multiple>§§</multiple>
+    </term>
+    <term name="editor">
+      <single>szerkesztő</single>
+      <multiple>szerkesztő</multiple>
+    </term>
+    <term name="translator">
+      <single>fordító</single>
+      <multiple>fordító</multiple>
+    </term>
+    <term name="editor" form="short">
+      <single>szerk</single>
+      <multiple>szerk</multiple>
+    </term>
+    <term name="translator" form="short">
+      <single>ford</single>
+      <multiple>ford</multiple>
+    </term>
+    <term name="editor" form="verb">szerkesztette</term>
+    <term name="translator" form="verb">fordította</term>
+    <term name="editor" form="verb-short">szerk</term>
+    <term name="translator" form="verb-short">ford</term>
+    <term name="month-01">január</term>
+    <term name="month-02">február</term>
+    <term name="month-03">március</term>
+    <term name="month-04">április</term>
+    <term name="month-05">május</term>
+    <term name="month-06">június</term>
+    <term name="month-07">július</term>
+    <term name="month-08">augusztus</term>
+    <term name="month-09">szeptember</term>
+    <term name="month-10">október</term>
+    <term name="month-11">november</term>
+    <term name="month-12">december</term>
+    <term name="month-01" form="short">jan</term>
+    <term name="month-02" form="short">febr</term>
+    <term name="month-03" form="short">márc</term>
+    <term name="month-04" form="short">ápr</term>
+    <term name="month-05" form="short">máj</term>
+    <term name="month-06" form="short">jún</term>
+    <term name="month-07" form="short">júl</term>
+    <term name="month-08" form="short">aug</term>
+    <term name="month-09" form="short">szept</term>
+    <term name="month-10" form="short">okt</term>
+    <term name="month-11" form="short">nov</term>
+    <term name="month-12" form="short">dec</term>
+  </locale>
+</terms>

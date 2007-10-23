@@ -21,32 +21,50 @@
 */
 
 Zotero.MIME = new function(){
+	this.isTextType = isTextType;
 	this.isExternalTextExtension = isExternalTextExtension;
+	this.getPrimaryExtension = getPrimaryExtension;
 	this.sniffForMIMEType = sniffForMIMEType;
 	this.sniffForBinary = sniffForBinary;
 	this.getMIMETypeFromData = getMIMETypeFromData;
 	this.getMIMETypeFromFile = getMIMETypeFromFile;
+	this.hasNativeHandler = hasNativeHandler;
 	this.hasInternalHandler = hasInternalHandler;
 	this.fileHasInternalHandler = fileHasInternalHandler;
 	
 	// Magic numbers
 	var _snifferEntries = [
-		["%PDF-", "application/pdf"],
-		["%!PS-Adobe-", 'application/postscript'],
-		["%! PS-Adobe-", 'application/postscript'],
-		["From", 'text/plain'],
-		[">From", 'text/plain'],
-		["#!", 'text/plain'],
-		["<?xml", 'text/xml']
+		["%PDF-", "application/pdf", 0],
+		["%!PS-Adobe-", 'application/postscript', 0],
+		["%! PS-Adobe-", 'application/postscript', 0],
+		["From", 'text/plain', 0],
+		[">From", 'text/plain', 0],
+		["#!", 'text/plain', 0],
+		["<?xml", 'text/xml', 0],
+		["<!DOCTYPE html", 'text/html', 0],
+		["<html", 'text/html', 0],
+		["\uFFFD\uFFFD", 'image/jpeg', 0],
+		["JFIF", 'image/jpeg'],
+		["GIF8", 'image/gif', 0],
+		["\uFFFDPNG", 'image/png', 0]
 	];
+	
+	var _textTypes = {
+		'application/xhtml+xml': true,
+		'application/xml': true,
+		'application/x-javascript': true
+	};
 	
 	// MIME types handled natively by Gecko
 	// DEBUG: There's definitely a better way of getting these
 	var _nativeMIMETypes = {
 		'text/html': true,
+		'text/css': true,
 		'image/jpeg': true,
 		'image/gif': true,
 		'text/xml': true,
+		'application/xhtml+xml': true,
+		'application/xml': true,
 		'text/plain': true,
 		'application/x-javascript': true
 	};
@@ -55,6 +73,12 @@ Zotero.MIME = new function(){
 	var _externalTextExtensions = {
 		'graffle': true
 	};
+	
+	
+	
+	function isTextType(mimeType) {
+		return mimeType.substr(0, 5) == 'text/' || _textTypes[mimeType];
+	}
 	
 	
 	/*
@@ -66,11 +90,50 @@ Zotero.MIME = new function(){
 	
 	
 	/*
+	 * Our own wrapper around the MIME service's getPrimaryExtension() that
+	 * works a little better
+	 */
+	function getPrimaryExtension(mimeType, ext) {
+		// Enforce some extensions
+		switch (mimeType) {
+			case 'text/html':
+				return 'html';
+			case 'application/pdf':
+				return 'pdf';
+		}
+		
+		try {
+			ext = Components.classes["@mozilla.org/mime;1"]
+				.getService(Components.interfaces.nsIMIMEService)
+				.getPrimaryExtension(mimeType, ext);
+		}
+		// nsIMIMEService.getPrimaryExtension() doesn't work on Linux and
+		// throws an error if it can't find an extension
+		catch (e) {}
+		
+		return ext ? ext : '';
+	}
+	
+	
+	/*
 	 * Searches string for magic numbers
 	 */
 	function sniffForMIMEType(str){
 		for (var i in _snifferEntries){
-			if (str.indexOf(_snifferEntries[i][0])==0){
+			var match = false;
+			// If an offset is defined, match only from there
+			if (typeof _snifferEntries[i][2] != 'undefined') {
+				if (str.substr(i[2]).indexOf(_snifferEntries[i][0]) == 0) {
+					match = true;
+				}
+			}
+			// Otherwise allow match anywhere in sample
+			// (128 bytes from getSample() by default)
+			else if (str.indexOf(_snifferEntries[i][0]) != -1) {
+				match = true;
+			}
+			
+			if (match) {
 				return _snifferEntries[i][1];
 			}
 		}
@@ -101,23 +164,25 @@ Zotero.MIME = new function(){
 	 * ext is an optional file extension hint if data sniffing is unsuccessful
 	 */
 	function getMIMETypeFromData(str, ext){
-		var mimeType = this.sniffForMIMEType(str);
+		var mimeType = sniffForMIMEType(str);
 		if (mimeType){
 			Zotero.debug('Detected MIME type ' + mimeType);
 			return mimeType;
 		}
 		
 		try {
-			var mimeType = Components.classes["@mozilla.org/uriloader/external-helper-app-service;1"]
-				.getService(Components.interfaces.nsIMIMEService).getTypeFromExtension(ext);
-			Zotero.debug('Got MIME type ' + mimeType + ' from extension');
-			return mimeType;
+			if (ext) {
+				var mimeType = Components.classes["@mozilla.org/uriloader/external-helper-app-service;1"]
+					.getService(Components.interfaces.nsIMIMEService).getTypeFromExtension(ext);
+				Zotero.debug('Got MIME type ' + mimeType + ' from extension');
+				return mimeType;
+			}
 		}
-		catch (e){
-			var mimeType = this.sniffForBinary(str);
-			Zotero.debug('Cannot determine MIME type -- settling for ' + mimeType);
-			return mimeType;
-		}
+		catch (e) {}
+		
+		var mimeType = sniffForBinary(str);
+		Zotero.debug('Cannot determine MIME type from magic number or extension -- settling for ' + mimeType);
+		return mimeType;
 	}
 	
 	
@@ -129,13 +194,13 @@ Zotero.MIME = new function(){
 		var str = Zotero.File.getSample(file);
 		var ext = Zotero.File.getExtension(file);
 		
-		return this.getMIMETypeFromData(str, ext);
+		return getMIMETypeFromData(str, ext);
 	}
 	
 	
 	/*
-	 * Determine if a MIME type can be handled internally (natively or with plugins)
-	 * or if it needs to be passed off to an external helper app
+	 * Determine if a MIME type can be handled natively
+	 * or if it needs to be passed off to a plugin or external helper app
 	 *
 	 * ext is an optional extension hint (only needed for text/plain files
 	 * that should be forced to open externally)
@@ -146,9 +211,9 @@ Zotero.MIME = new function(){
 	 * Note: nsIMIMEInfo provides a hasDefaultHandler() method, but it doesn't
 	 * do what we need
 	 */
-	function hasInternalHandler(mimeType, ext){
+	function hasNativeHandler(mimeType, ext) {
 		if (mimeType=='text/plain'){
-			if (this.isExternalTextExtension(ext)){
+			if (isExternalTextExtension(ext)){
 				Zotero.debug('text/plain file has extension that should be handled externally');
 				return false;
 			}
@@ -160,13 +225,29 @@ Zotero.MIME = new function(){
 			return true;
 		}
 		
+		return null;
+	}
+	
+	
+	/*
+	 * Determine if a MIME type can be handled internally
+	 * or if it needs to be passed off to an external helper app
+	 *
+	 * Similar to hasNativeHandler() but also includes plugins
+	 */
+	function hasInternalHandler(mimeType, ext) {
+		var isNative = hasNativeHandler(mimeType, ext);
+		if (isNative !== null) {
+			return isNative;
+		}
+		
 		// Is there a better way to get to navigator?
 		var types = Components.classes["@mozilla.org/appshell/appShellService;1"]
 				.getService(Components.interfaces.nsIAppShellService)
 				.hiddenDOMWindow.navigator.mimeTypes;
 		
 		for (var i in types){
-			if (types[i].type==mimeType){
+			if (types[i].type && types[i].type == mimeType){
 				Zotero.debug('MIME type ' + mimeType + ' can be handled by plugins');
 				return true;
 			}
@@ -178,9 +259,9 @@ Zotero.MIME = new function(){
 	
 	
 	function fileHasInternalHandler(file){
-		var mimeType = this.getMIMETypeFromFile(file);
+		var mimeType = getMIMETypeFromFile(file);
 		var ext = Zotero.File.getExtension(file);
-		return this.hasInternalHandler(mimeType, ext);
+		return hasInternalHandler(mimeType, ext);
 	}
 	
 	

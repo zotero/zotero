@@ -1,0 +1,10 @@
+<!ENTITY zotero.version "버전">
+<!ENTITY zotero.createdby "제작자:">
+<!ENTITY zotero.directors "감독:">
+<!ENTITY zotero.developers "개발자:">
+<!ENTITY zotero.alumni "Alumni:">
+<!ENTITY zotero.about.localizations "지역화 담당자:">
+<!ENTITY zotero.about.additionalSoftware "Third-Party Software and Standards:">
+<!ENTITY zotero.executiveProducer "행정 감독:">
+<!ENTITY zotero.thanks "감사드릴 분들:">
+<!ENTITY zotero.about.close "닫기">

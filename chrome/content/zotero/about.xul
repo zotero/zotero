@@ -5,22 +5,174 @@
 <!DOCTYPE window SYSTEM "chrome://zotero/locale/about.dtd">
 
 <dialog
-    id="zotero-about"
-    xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-    orient="vertical"
+	id="zotero-about"
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	orient="vertical"
 	buttons="accept"
 	buttonlabelaccept="&zotero.about.close;"
-	onload="onLoad();"
+	onload="onLoad(); moveToAlertPosition(); sizeToContent();"
 	ondialogaccept="return true;">
 	
 	<script>
 		<![CDATA[
 			function onLoad()
 			{
-				var labels = document.getElementsByTagName('label');
+				var translators = {
+					afAZ: [
+						"leuce"
+					],
+					
+					ar: [
+						"fadhil"
+					],
+					
+					bgBG: [
+						"Peter Stoilov"
+					],
+					
+					caAD: [
+						"Joan Junyent"
+					],
+					
+					daDK: [
+						"Banta"
+					],
+					
+					deAT: [
+						"stw"
+					],
+					
+					deCH: [
+						"stw"
+					],
+					
+					deDE: [
+						"Harald Kliems",
+						"jverber",
+						"stw"
+					],
+					
+					elGR: [
+						"geraki"
+					],
+					
+					esES: [
+						"Alberto González Palomo"
+					],
+					
+					etEE: [
+						"brainbulb"
+					],
+					
+					frFR: [
+						"Pascal Pichon",
+						"Jojaba",
+						"La Luciole"
+					],
+					
+					heIL: [
+						"d_leaper",
+						"Doron Tilleman"
+					],
+					
+					huHU: [
+						"tdombos"
+					],
+					
+					itIT: [
+						"Andrea",
+						"Elisabetta Manuele",
+						"Giuliano Masseroni",
+						"Luca Pedrazzi"
+					],
+					
+					jaJP: [
+						"Andreas Bovens",
+						"Michael Schiltz"
+					],
+					
+					koKR: [
+						"wtspout"
+					],
+					
+					mnMN: [
+						"cybermon"
+					],
+					
+					nbNO: [
+						"Finn Arne Jørgensen"
+					],
+					
+					nlNL: [
+						"Andreas Bovens",
+						"Michael Schiltz",
+						"Rintze Zelle"
+					],
+					
+					plPL: [
+						"krzywy",
+						"Trevor Owens"
+					],
+					
+					ptBR: [
+						"Humberto Sartini"
+					],
+					
+					ptPT: [
+						"gandrenf",
+						"XRex"
+					],
+					
+					roRO: [
+						"Turcan"
+					],
+					
+					ruRU: [
+						"Yar"
+					],
+					
+					srYU: [
+						"Igor_M"
+					],
+					
+					svSE: [
+						"mymarkup"
+					],
+					
+					trTR: [
+						"Zeki Celikbas"
+					],
+					
+					zhCN: [
+						"liyan",
+						"Wenping Guo"
+					],
+					
+					zhTW: [
+						"Chun-Chung Chen",
+						"coolcd"
+					]
+				};
 				
-				for(var i = 0; i<labels.length; i++)
-					labels[i].setAttribute('crop','end');
+				var box = document.getElementById('zotero-translators-list');
+				
+				for (var locale in translators) {
+					var heading = document.createElement('label');
+					var str = locale.substr(0, 2);
+					if (locale.substr(2)) {
+						str += '-' + locale.substr(2);
+					}
+					str += ':';
+					heading.className = 'locale';
+					heading.setAttribute('value', str);
+					box.appendChild(heading);
+					
+					for each(var person in translators[locale]) {
+						var label = document.createElement('label');
+						label.setAttribute('value', person);
+						box.appendChild(label);
+					}
+				}
 			}
 		]]>
 	</script>
@@ -28,7 +180,7 @@
 	<script src="include.js"/>
 	
 	<vbox id="aboutcontent">
-		<label id="name" value="&zotero.name;"/>
+		<label id="name" value="Zotero"/>
 		<label class="text-link" href="http://www.zotero.org" value="http://www.zotero.org"/>
 		<label id="version" value="&zotero.version; "/>
 		<script>
@@ -38,24 +190,46 @@
 		<vbox class="subcontent">
 			<label class="text-link" href="http://chnm.gmu.edu" value="Center for History and New Media"/>
 			<label value="George Mason University"/>
-			<label value="Fairfax, VA"/>
+			<label value="Fairfax, VA, USA"/>
 		</vbox>
 		<label class="subhead" value="&zotero.directors;"/>
 		<vbox class="subcontent">
 			<label value="Dan Cohen"/>
-			<label value="Josh Greenberg"/>
+			<label value="Sean Takats"/>
 		</vbox>
 		<label class="subhead" value="&zotero.developers;"/>
 		<vbox class="subcontent">
 			<label value="Dan Stillman"/>
 			<label value="Simon Kornblith"/>
-			<label value="David Norton"/>
+			
+		</vbox>
+		<label class="subhead" value="&zotero.alumni;"/>
+		<vbox class="subcontent">
+			<label value="Josh Greenberg (co-director)"/>
+			<label value="David Norton (developer)"/>
+		</vbox>
+		<label class="subhead" value="&zotero.about.localizations;"/>
+		<vbox class="subcontent">
+			<vbox id="zotero-translators-list"/>
+		</vbox>
+		<label class="subhead" value="&zotero.about.additionalSoftware;"/>
+		<vbox class="subcontent">
+			<label class="text-link" href="http://www.famfamfam.com/lab/icons/silk/" value="famfamfam (small icons)"/>
+			<label class="text-link" href="http://simile.mit.edu/timeline/" value="SIMILE Project (Timeline)"/>
+			<label class="text-link" href="http://tango.freedesktop.org/Tango_Desktop_Project" value="Tango Desktop Project (pref icons)"/>
+			<label class="text-link" href="http://www.dbai.tuwien.ac.at/user/pollak/webpagedump/" value="WebPageDump (snapshot code)"/>
+			<label class="text-link" href="http://xbiblio.sourceforge.net/" value="XBiblio (Citation Style Language)"/>
+			<label class="text-link" href="http://www.foolabs.com/xpdf/" value="Xpdf (pdftotext)"/>
+		</vbox>
+		<label class="subhead" value="&zotero.executiveProducer;"/>
+		<vbox class="subcontent">
+			<label value="Roy Rosenzweig"/>
 		</vbox>
 		<label class="subhead" value="&zotero.thanks;"/>
 		<vbox class="subcontent">
+			<label class="text-link" href="http://www.mellon.org/" value="Andrew W. Mellon Foundation"/>
 			<label class="text-link" href="http://www.imls.gov/" value="Institute of Museum and Library Services"/>
-			<label class="text-link" href="http://www.mozilla.org/" value="Mozilla Foundation"/>
-			<label class="text-link" href="http://www.famfamfam.com/lab/icons/silk/" value="famfamfam (icons)"/>
+			<label class="text-link" href="http://www.sloan.org/" value="Alfred P. Sloan Foundation"/>
 		</vbox>
 	</vbox>
 </dialog>

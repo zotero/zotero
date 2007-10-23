@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<terms xmlns="http://purl.org/net/xbiblio/csl">
+  <locale xml:lang="ro">
+    <term name="at">at</term>
+    <term name="in">în</term>
+    <term name="ibid">ibidem</term>
+    <term name="accessed">accesat în</term>
+    <term name="retrieved">preluat în</term>
+    <term name="from">din</term>
+    <term name="forthcoming">în curs de apariţie</term>
+    <term name="references">Bibliografie</term>
+    <term name="no date">f.a.</term>
+    <term name="and">şi</term>
+    <term name="et-al">ş.a.</term>
+    <term name="book">
+      <single>carte</single>
+      <multiple>cărţi</multiple>
+    </term>
+    <term name="chapter">
+      <single>capitol</single>
+      <multiple>capitole</multiple>
+    </term>
+    <term name="column">
+      <single>coloană</single>
+      <multiple>coloane</multiple>
+    </term>
+    <term name="figure">
+      <single>figură</single>
+      <multiple>figuri</multiple>
+    </term>
+    <term name="folio">
+      <single>folio</single>
+      <multiple>folios</multiple>
+    </term>
+    <term name="issue">
+      <single>număr</single>
+      <multiple>numere</multiple>
+    </term>
+    <term name="line">
+      <single>linie</single>
+      <multiple>linii</multiple>
+    </term>
+    <term name="note">
+      <single>notă</single>
+      <multiple>note</multiple>
+    </term>
+    <term name="opus">
+      <single>opus</single>
+      <multiple>operă</multiple>
+    </term>
+    <term name="page">
+      <single>pagină</single>
+      <multiple>pagini</multiple>
+    </term>
+    <term name="paragraph">
+      <single>paragraf</single>
+      <multiple>paragrafe</multiple>
+    </term>
+    <term name="part">
+      <single>parte</single>
+      <multiple>părţi</multiple>
+    </term>
+    <term name="section">
+      <single>secţiune</single>
+      <multiple>secţiuni</multiple>
+    </term>
+    <term name="volume">
+      <single>volum</single>
+      <multiple>volume</multiple>
+    </term>
+    <term name="verse">
+      <single>verset</single>
+      <multiple>versete</multiple>
+    </term>
+    <term name="book" form="short">car</term>
+    <term name="chapter" form="short">cap</term>
+    <term name="column" form="short">col</term>
+    <term name="figure" form="short">fig</term>
+    <term name="folio" form="short">f</term>
+    <term name="issue" form="short">nr</term>
+    <term name="opus" form="short">op</term>
+    <term name="page" form="short">
+      <single>p</single>
+      <multiple>pp</multiple>
+    </term>
+    <term name="paragraph" form="short">para</term>
+    <term name="part" form="short">pt</term>
+    <term name="section" form="short">sec</term>
+    <term name="verse" form="short">
+      <single>v</single>
+      <multiple>vv</multiple>
+    </term>
+    <term name="volume" form="short">vol</term>
+    <term name="paragraph" form="symbol">
+      <single>¶</single>
+      <multiple>¶¶</multiple>
+    </term>
+    <term name="section" form="symbol">
+      <single>§</single>
+      <multiple>§§</multiple>
+    </term>
+    <term name="editor">
+      <single>editor</single>
+      <multiple>editors</multiple>
+    </term>
+    <term name="translator">
+      <single>translator</single>
+      <multiple>translators</multiple>
+    </term>
+    <term name="editor" form="short">
+      <single>ed</single>
+      <multiple>eds</multiple>
+    </term>
+    <term name="translator" form="short">
+      <single>tran</single>
+      <multiple>trans</multiple>
+    </term>
+    <term name="editor" form="verb">edited by</term>
+    <term name="translator" form="verb">translated by</term>
+    <term name="editor" form="verb-short">ed</term>
+    <term name="translator" form="verb-short">trans</term>
+    <term name="month-01">January</term>
+    <term name="month-02">February</term>
+    <term name="month-03">March</term>
+    <term name="month-04">April</term>
+    <term name="month-05">May</term>
+    <term name="month-06">June</term>
+    <term name="month-07">July</term>
+    <term name="month-08">August</term>
+    <term name="month-09">September</term>
+    <term name="month-10">October</term>
+    <term name="month-11">November</term>
+    <term name="month-12">December</term>
+    <term name="month-01" form="short">Jan</term>
+    <term name="month-02" form="short">Feb</term>
+    <term name="month-03" form="short">Mar</term>
+    <term name="month-04" form="short">Apr</term>
+    <term name="month-05" form="short">May</term>
+    <term name="month-06" form="short">Jun</term>
+    <term name="month-07" form="short">Jul</term>
+    <term name="month-08" form="short">Aug</term>
+    <term name="month-09" form="short">Sep</term>
+    <term name="month-10" form="short">Oct</term>
+    <term name="month-11" form="short">Nov</term>
+    <term name="month-12" form="short">Dec</term>
+  </locale>
+</terms>

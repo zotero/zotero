@@ -21,6 +21,8 @@
     ***** END LICENSE BLOCK *****
 -->
 
+<!DOCTYPE bindings SYSTEM "chrome://zotero/locale/zotero.dtd">
+
 <bindings 	xmlns="http://www.mozilla.org/xbl"
 			xmlns:xbl="http://www.mozilla.org/xbl"
 			xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
@@ -106,7 +108,7 @@
 									
 									var box = document.createElement('box');
 									box.setAttribute('onclick',"this.parentNode.parentNode.parentNode.parentNode.parentNode.showItem('"+seealso[i].getID()+"')");
-									box.setAttribute('class','clicky');
+									box.setAttribute('class','zotero-clicky');
 									box.setAttribute('flex','1');
 									box.appendChild(icon);
 									box.appendChild(label);
@@ -114,7 +116,7 @@
 									var remove = document.createElement("label");
 									remove.setAttribute('value','-');
 									remove.setAttribute('onclick',"this.parentNode.parentNode.parentNode.parentNode.parentNode.remove('"+seealso[i].getID()+"');");
-									remove.setAttribute('class','clicky');
+									remove.setAttribute('class','zotero-clicky');
 							
 									var row = document.createElement("row");
 									row.appendChild(box);
@@ -211,7 +213,19 @@
 								count = 0;
 						}
 						
-						this.id('seeAlsoNum').value = count + ' related:';
+						var str = 'pane.item.related.count.';
+						switch (count){
+							case 0:
+								str += 'zero';
+								break;
+							case 1:
+								str += 'singular';
+								break;
+							default:
+								str += 'plural';
+								break;
+						}
+						this.id('seeAlsoNum').value = Zotero.getString(str, [count]);
 					]]>
 				</body>
 			</method>
@@ -228,7 +242,7 @@
 			<xul:vbox xbl:inherits="flex">
 				<xul:hbox align="center">
 					<xul:label id="seeAlsoNum"/>
-					<xul:button label="Add" oncommand="this.parentNode.parentNode.parentNode.add();"/>
+					<xul:button label="&zotero.item.add;" oncommand="this.parentNode.parentNode.parentNode.add();"/>
 				</xul:hbox>
 				<xul:grid flex="1">
 					<xul:columns>

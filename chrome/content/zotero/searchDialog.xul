@@ -2,7 +2,8 @@
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero/skin/overlay.css" type="text/css"?>
-<!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
+
+<!DOCTYPE bindings SYSTEM "chrome://zotero/locale/searchbox.dtd">
 
 <dialog
 	id="zotero-search-dialog"
@@ -18,6 +19,11 @@
 	<script src="include.js"/>
 	<script src="searchDialog.js"/>
 	
-	<hbox align="center"><label value="Name:"/><textbox id="search-name" flex="1"/></hbox>
-	<zoterosearch id="search-box" flex="1"/>
+	<vbox id="zotero-search-box-container" flex="1">
+		<hbox align="center">
+			<label value="&zotero.search.name;"/>
+			<textbox id="search-name" flex="1"/>
+		</hbox>
+		<zoterosearch id="search-box" flex="1"/>
+	</vbox>
 </dialog>

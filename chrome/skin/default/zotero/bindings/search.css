@@ -1,0 +1,67 @@
+#search-box
+{
+	width: 60em;
+}
+
+#search-condition menulist[id="operatorsmenu"]
+{
+	width: 15em;
+}
+
+#condition-tooltips tooltip
+{
+	background: red !important;
+}
+
+#condition-tooltips row > label
+{
+	font-weight: bold;
+}
+
+#search-textbox toolbarbutton
+{
+	padding: 0;
+	cursor: default;
+}
+
+#search-textbox:not([hasOptions=true]) toolbarbutton
+{
+	display: none;
+}
+
+#search-textbox .toolbarbutton-text
+{
+	margin: 0;
+	padding: 0;
+}
+
+#search-textbox .toolbarbutton-menu-dropmarker
+{
+	padding: 0 2px;
+}
+
+#search-in-the-last textbox
+{
+	min-width: 3em;
+}
+
+#zotero-advanced-search-dialog
+{
+	padding: 8px 8px 14px;
+	height: 400px;
+}
+
+#zotero-advanced-search-dialog #zotero-search-buttons
+{
+	margin: 3px 0;
+}
+
+#zotero-advanced-search-dialog checkbox
+{
+	margin-right: .5em;
+}
+
+#zotero-advanced-search-dialog #zotero-items-tree
+{
+	min-height: 170px;
+}

@@ -1,0 +1,23 @@
+<!ENTITY zotero.search.name "الإسم:">
+
+<!ENTITY zotero.search.joinMode.prefix "تطابق">
+<!ENTITY zotero.search.joinMode.any "أي">
+<!ENTITY zotero.search.joinMode.all "كل">
+<!ENTITY zotero.search.joinMode.suffix "من">
+
+<!ENTITY zotero.search.recursive.label "ابحث في المجلدات الفرعية">
+<!ENTITY zotero.search.noChildren "اعرض العناصر الرئيسية فقط">
+<!ENTITY zotero.search.includeParentsAndChildren "ادرج العناصر الرئيسة والفرعية المطابقة للبحث">
+
+<!ENTITY zotero.search.textModes.phrase "عبارة">
+<!ENTITY zotero.search.textModes.phraseBinary "عبارة (شاملاً الملفات الغير نصية)">
+<!ENTITY zotero.search.textModes.regexp "ٌُRegexp">
+<!ENTITY zotero.search.textModes.regexpCS "regexp حساس لحالة الأحرف">
+
+<!ENTITY zotero.search.date.units.days "أيام">
+<!ENTITY zotero.search.date.units.months "شهور">
+<!ENTITY zotero.search.date.units.years "سنوات">
+
+<!ENTITY zotero.search.search "بحث">
+<!ENTITY zotero.search.clear "مسح">
+<!ENTITY zotero.search.saveSearch "حفظ البحث">

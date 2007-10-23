@@ -1,0 +1,87 @@
+groupbox
+{
+	overflow: hidden;
+	min-height: 132px;
+	margin: 0;
+	padding: 1px 1px 0;
+}
+
+#tags-toggle
+{
+	overflow-x: hidden;
+	overflow-y: auto;
+	display: block; /* allow labels to wrap instead of all being in one line */
+}
+
+checkbox
+{
+	margin: .75em 0 .4em;
+}
+
+#tags-toggle label
+{
+	margin-right: .2em;
+	padding: .15em .25em;
+	-moz-user-focus: ignore;
+}
+
+#tags-toggle label[selected="true"]
+{
+	background: #a9c6f0 !important;
+}
+
+/* Visible out-of-scope tags should be grey */
+#tags-toggle label[inScope="false"]
+{
+	color: #666 !important;
+}
+
+/* Don't display clicky effect to out-of-scope icons */
+label.zotero-clicky[inScope="false"]:hover,
+label.zotero-clicky[inScope="false"]:active
+{
+	background: inherit !important;
+}
+
+#tags-toggle label[draggedOver="true"]
+{
+	color: white !important;
+	background: #666;
+}
+
+groupbox > hbox
+{
+	-moz-box-align: center;
+	-moz-box-pack: center;
+}
+
+textbox
+{
+	margin: 3px 0 1px;
+	font-size: 11px !important; /* Keep font size in Linux within reason */
+}
+
+#search-cancel
+{
+	width: 0;
+	height: 0;
+	margin: 0;
+	padding: 0;
+	cursor: default;
+	list-style-image: url('chrome://zotero/skin/search-cancel.png');
+	-moz-appearance: none !important; /* Fix rendering problems on Linux */
+}
+
+groupbox > hbox > hbox
+{
+	-moz-box-flex: 1;
+	-moz-box-align: center;
+}
+
+/* Bottom buttons */
+toolbarbutton.zotero-clicky
+{
+	margin:2px 5px 3px;
+	padding:1px;
+	height:1em;
+}

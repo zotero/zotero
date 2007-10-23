@@ -1,0 +1,83 @@
+<!ENTITY zotero.preferences.title "Préférences de Zotero">
+
+<!ENTITY zotero.preferences.default "Par défaut :">
+
+<!ENTITY zotero.preferences.prefpane.general "Générales">
+
+<!ENTITY zotero.preferences.userInterface "Interface utilisateur">
+<!ENTITY zotero.preferences.position "Afficher Zotero">
+<!ENTITY zotero.preferences.position.above "en haut">
+<!ENTITY zotero.preferences.position.below "en bas">
+<!ENTITY zotero.preferences.position.browser "de la fenêtre du navigateur">
+<!ENTITY zotero.preferences.statusBarIcon "Icône de la barre d&apos;état :">
+<!ENTITY zotero.preferences.statusBarIcon.none "None">
+<!ENTITY zotero.preferences.fontSize "Taille des caractères :">
+<!ENTITY zotero.preferences.fontSize.small "Petite">
+<!ENTITY zotero.preferences.fontSize.medium "Moyenne">
+<!ENTITY zotero.preferences.fontSize.large "Grande">
+
+<!ENTITY zotero.preferences.miscellaneous "Divers">
+<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators">
+<!ENTITY zotero.preferences.updateNow "Mettre à jour maintenant">
+<!ENTITY zotero.preferences.reportTranslationFailure "Signaler les collecteurs de données en ligne défectueux">
+<!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded RIS/Refer files">
+<!ENTITY zotero.preferences.automaticSnapshots "Faire une capture automatique de la page lors de la création d&apos;éléments à partir de pages Web">
+<!ENTITY zotero.preferences.downloadAssociatedFiles "Joindre automatiquement les fichers PDF associés lors de la sauvegarde d&apos;un élément">
+<!ENTITY zotero.preferences.automaticTags "Poser automatiquement des marqueurs sur les objets avec les mots-clés et en-têtes du sujet">
+
+<!ENTITY zotero.preferences.openurl.caption "OpenURL">
+
+<!ENTITY zotero.preferences.openurl.search "Search for resolvers">
+<!ENTITY zotero.preferences.openurl.custom "Personnaliser…">
+<!ENTITY zotero.preferences.openurl.server "Serveur de résolution :">
+<!ENTITY zotero.preferences.openurl.version "Version :">
+
+<!ENTITY zotero.preferences.prefpane.search "Recherche">
+<!ENTITY zotero.preferences.search.fulltextCache "Cache en texte intégral">
+<!ENTITY zotero.preferences.search.pdfIndexing "Indexation des PDF">
+<!ENTITY zotero.preferences.search.indexStats "Statistiques d&apos;indexation">
+
+<!ENTITY zotero.preferences.search.indexStats.indexed "Indexed:">
+<!ENTITY zotero.preferences.search.indexStats.partial "Partial:">
+<!ENTITY zotero.preferences.search.indexStats.unindexed "Unindexed:">
+<!ENTITY zotero.preferences.search.indexStats.words "Words:">
+
+<!ENTITY zotero.preferences.fulltext.textMaxLength "Nombre maximum de caractères à indexer par fichier :">
+<!ENTITY zotero.preferences.fulltext.pdfMaxPages "Nombre maximum de pages à indexer par fichier :">
+
+<!ENTITY zotero.preferences.prefpane.export "Exportation">
+
+<!ENTITY zotero.preferences.quickCopy.caption "Copie rapide">
+<!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Format de sortie par défaut :">
+<!ENTITY zotero.preferences.quickCopy.macWarning "Noter que le format texte enrichi (RTF) sera perdu sur Mac OS X.">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Paramètres spécifiques au site :">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domaine/Chemin">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(p. ex. wikipedia.org)">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Format de sortie">
+
+<!ENTITY zotero.preferences.prefpane.keys "Raccourcis clavier">
+
+<!ENTITY zotero.preferences.keys.openZotero "Ouvrir/fermer le panneau Zotero">
+<!ENTITY zotero.preferences.keys.toggleFullscreen "Bascule du mode plein écran">
+<!ENTITY zotero.preferences.keys.library "Bibliothèque">
+<!ENTITY zotero.preferences.keys.quicksearch "Recherche rapide">
+<!ENTITY zotero.preferences.keys.newItem "Créer un nouvel élément">
+<!ENTITY zotero.preferences.keys.newNote "Créer une nouvelle note">
+<!ENTITY zotero.preferences.keys.toggleTagSelector "Bascule du sélecteur de marqueurs">
+<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copy Selected Item Citations to Clipboard">
+<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copier les objets sélectionnés dans le presse-papiers">
+<!ENTITY zotero.preferences.keys.overrideGlobal "Essayer de gérer les conflits de raccourcis">
+<!ENTITY zotero.preferences.keys.changesTakeEffect "Les modifications ne prendront effet que dans une nouvelle fenêtre">
+
+
+<!ENTITY zotero.preferences.prefpane.advanced "Avancées">
+
+<!ENTITY zotero.preferences.dataDir "Emplacement des données Zotero">
+<!ENTITY zotero.preferences.dataDir.useProfile "Utiliser le répertoire de profil de Firefox">
+<!ENTITY zotero.preferences.dataDir.custom "Personnalisé :">
+<!ENTITY zotero.preferences.dataDir.choose "Choisir…">
+<!ENTITY zotero.preferences.dataDir.reveal "Show Data Directory">
+
+<!ENTITY zotero.preferences.dbMaintenance "Database Maintenance">
+<!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Check Database Integrity">
+<!ENTITY zotero.preferences.dbMaintenance.rebuildTranslators "Rebuild Translators Table">

@@ -1,0 +1,23 @@
+<!ENTITY zotero.search.name "Nombre:">
+
+<!ENTITY zotero.search.joinMode.prefix "Patrón">
+<!ENTITY zotero.search.joinMode.any "cualquiera de">
+<!ENTITY zotero.search.joinMode.all "todos">
+<!ENTITY zotero.search.joinMode.suffix "los siguientes:">
+
+<!ENTITY zotero.search.recursive.label "Buscar en carpetas interiores">
+<!ENTITY zotero.search.noChildren "Only show top-level items">
+<!ENTITY zotero.search.includeParentsAndChildren "Include parent and child items of matching items">
+
+<!ENTITY zotero.search.textModes.phrase "Frase">
+<!ENTITY zotero.search.textModes.phraseBinary "Frase (incl. archivos binarios)">
+<!ENTITY zotero.search.textModes.regexp "Expresión regular">
+<!ENTITY zotero.search.textModes.regexpCS "Expresión regular (distinguir mayúsculas)">
+
+<!ENTITY zotero.search.date.units.days "días">
+<!ENTITY zotero.search.date.units.months "meses">
+<!ENTITY zotero.search.date.units.years "años">
+
+<!ENTITY zotero.search.search "Search">
+<!ENTITY zotero.search.clear "Clear">
+<!ENTITY zotero.search.saveSearch "Save Search">

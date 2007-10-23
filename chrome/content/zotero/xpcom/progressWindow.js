@@ -20,45 +20,146 @@
     ***** END LICENSE BLOCK *****
 */
 
+
+Zotero.ProgressWindowSet = new function() {
+	this.add = add;
+	this.tile = tile;
+	this.remove = remove;
+	this.updateTimers = updateTimers;
+	
+	var _progressWindows = [];
+	
+	const X_OFFSET = 25;
+	const Y_OFFSET = 35;
+	const Y_SEPARATOR = 12;
+	const X_WINDOWLESS_OFFSET = 50;
+	const Y_WINDOWLESS_OFFSET = 100;
+	
+	function add(progressWindow, instance) {
+		_progressWindows.push({
+			progressWindow: progressWindow,
+			instance: instance
+		});
+	}
+	
+	
+	function tile(progressWin) {
+		var parent = progressWin.opener;
+		var y_sub = null;
+		
+		for (var i=0; i<_progressWindows.length; i++) {
+			var p = _progressWindows[i].progressWindow;
+			
+			// Skip progress windows from other windows
+			if (p.opener != parent) {
+				continue;
+			}
+			
+			if (!y_sub) {
+				y_sub = Y_OFFSET + p.outerHeight;
+			}
+			
+			if (parent) {
+				var right = parent.screenX + parent.outerWidth;
+				var bottom = parent.screenY + parent.outerHeight;
+				// On OS X outerHeight doesn't include 22px title bar and
+				// moveTo() positions popups 22px below the specified location
+				if (Zotero.isMac) {
+					bottom += (22 * 2);
+				}
+			}
+			else {
+				var right = progressWin.screen.width + X_OFFSET - X_WINDOWLESS_OFFSET;
+				var bottom = progressWin.screen.height + Y_OFFSET - Y_WINDOWLESS_OFFSET;
+			}
+			
+			p.moveTo(right - p.outerWidth - X_OFFSET, bottom - y_sub);
+			
+			y_sub += p.outerHeight + Y_SEPARATOR;
+		}
+	}
+	
+	
+	function remove(progressWin) {
+		for (var i=0; i<_progressWindows.length; i++) {
+			if (_progressWindows[i].progressWindow == progressWin) {
+				_progressWindows.splice(i, 1);
+			}
+		}
+	}
+	
+	
+	function updateTimers() {
+		if (!_progressWindows.length) {
+			return;
+		}
+		
+		for (var i=0; i<_progressWindows.length; i++) {
+			// Pass |requireMouseOver| so that the window only closes
+			// if the mouse was over it at some point
+			_progressWindows[i].instance.startCloseTimer(null, true);
+		}
+	}
+}
+
+
 /*
  * Handles the display of a div showing progress in scraping, indexing, etc.
  *
  * Pass the active window into the constructor
  */
 Zotero.ProgressWindow = function(_window){
-	if (!_window){
-		var _window =
-			Components.classes["@mozilla.org/embedcomp/window-watcher;1"].
-				getService(Components.interfaces.nsIWindowWatcher).
-				activeWindow;
-	}
-	
-	var _progressWindow = null;
-	var _windowLoaded = false;
-	var _windowLoading = false;
-	// keep track of all of these things in case they're called before we're
-	// done loading the progress window
-	var _loadDescription = null;
-	var _loadLines = new Array();
-	var _loadIcons = new Array();
-	var _loadHeadline = '';
-	
 	this.show = show;
 	this.changeHeadline = changeHeadline;
 	this.addLines = addLines;
 	this.addDescription = addDescription;
-	this.fade = fade;
-	this.kill = kill;
+	this.startCloseTimer = startCloseTimer;
+	this.close = close;
+	
+	var _window = null;
+	
+	var _progressWindow = null;
+	var _windowLoaded = false;
+	var _windowLoading = false;
+	var _timeoutID = false;
+	var _mouseWasOver = false
+	
+	// keep track of all of these things in case they're called before we're
+	// done loading the progress window
+	var _loadHeadline = '';
+	var _loadLines = [];
+	var _loadIcons = [];
+	var _loadDescription = null;
 	
 	
 	function show() {
 		if(_windowLoading || _windowLoaded) {	// already loading or loaded
 			return false;
 		}
-		_progressWindow = _window.openDialog("chrome://zotero/chrome/progressWindow.xul",
-		                                    "", "chrome,dialog=no,titlebar=no,popup=yes");
-		_progressWindow.addEventListener("load", _onWindowLoaded, false);
+		
+		var ww = Components.classes["@mozilla.org/embedcomp/window-watcher;1"].
+					getService(Components.interfaces.nsIWindowWatcher);
+		
+		if (!_window){
+			_window = ww.activeWindow;
+		}
+		
+		if (_window) {
+			_progressWindow = _window.openDialog("chrome://zotero/chrome/progressWindow.xul",
+				"", "chrome,dialog=no,titlebar=no,popup=yes");
+		}
+		else {
+			_progressWindow = ww.openWindow(null, "chrome://zotero/chrome/progressWindow.xul",
+				"", "chrome,dialog=no,titlebar=no,popup=yes", null);
+		}
+		_progressWindow.addEventListener("pageshow", _onWindowLoaded, false);
+		_progressWindow.addEventListener("mouseover", _onMouseOver, false);
+		_progressWindow.addEventListener("mouseout", _onMouseOut, false);
+		_progressWindow.addEventListener("mouseup", _onMouseUp, false);
+		
 		_windowLoading = true;
+		
+		Zotero.ProgressWindowSet.add(_progressWindow, this);
 		
 		return true;
 	}
@@ -73,7 +174,7 @@ Zotero.ProgressWindow = function(_window){
 	
 	function addLines(label, icon) {
 		if(_windowLoaded) {
-			for(i in label) {
+			for (var i in label) {
 				var newLabel = _progressWindow.document.createElement("label");
 				newLabel.setAttribute("class", "zotero-progress-item-label");
 				newLabel.setAttribute("crop", "end");
@@ -99,15 +200,42 @@ Zotero.ProgressWindow = function(_window){
 		}
 	}
 	
+	
+	/*
+	 * Add a description to the progress window
+	 *
+	 * <a> elements are turned into XUL links
+	 */
 	function addDescription(text) {
 		if(_windowLoaded) {
 			var newHB = _progressWindow.document.createElement("hbox");
 			newHB.setAttribute("class", "zotero-progress-item-hbox");
 			var newDescription = _progressWindow.document.createElement("description");
-			newDescription.setAttribute("class", "zotero-progress-description");
-			var newText = _progressWindow.document.createTextNode(text);
 			
-			newDescription.appendChild(newText);
+			var utils = new Zotero.Utilities();
+			var parts = utils.parseMarkup(text);
+			for each(var part in parts) {
+				if (part.type == 'text') {
+					var elem = _progressWindow.document.createTextNode(part.text);
+				}
+				else if (part.type == 'link') {
+					var elem = _progressWindow.document.createElement('label');
+					elem.setAttribute('value', part.text);
+					elem.setAttribute('class', 'text-link');
+					for (var i in part.attributes) {
+						elem.setAttribute(i, part.attributes[i]);
+						
+						if (i == 'href') {
+							// DEBUG: As of Fx2, 'mouseup' seems to be the only
+							// way to detect a click in a popup window
+							elem.addEventListener('mouseup', _handleLinkClick, false);
+						}
+					}
+				}
+				
+				newDescription.appendChild(elem);
+			}
+			
 			newHB.appendChild(newDescription);
 			_progressWindow.document.getElementById("zotero-progress-text-box").appendChild(newHB);
 			
@@ -117,15 +245,31 @@ Zotero.ProgressWindow = function(_window){
 		}
 	}
 	
-	function fade() {
-		if(_windowLoaded || _windowLoading) {
-			_window.setTimeout(_timeout, 2500);
+	
+	function startCloseTimer(ms, requireMouseOver) {
+		if (_windowLoaded || _windowLoading) {
+			if (requireMouseOver && !_mouseWasOver) {
+				return;
+			}
+			
+			if (_timeoutID) {
+				_disableTimeout();
+			}
+			
+			if (typeof ms != 'number') {
+				ms = 2500;
+			}
+			
+			_timeoutID = _progressWindow.setTimeout(_timeout, ms);
 		}
 	}
 	
-	function kill() {
+	function close() {
+		_disableTimeout();
 		_windowLoaded = false;
 		_windowLoading = false;
+		Zotero.ProgressWindowSet.remove(_progressWindow);
+		
 		try {
 			_progressWindow.close();
 		} catch(ex) {}
@@ -139,27 +283,74 @@ Zotero.ProgressWindow = function(_window){
 		// do things we delayed because the window was loading
 		changeHeadline(_loadHeadline);
 		addLines(_loadLines, _loadIcons);
-		if(_loadDescription) {
+		if (_loadDescription) {
 			addDescription(_loadDescription);
 		}
 		
 		// reset parameters
-		_loadDescription = null;
-		_loadLines = new Array();
-		_loadIcons = new Array();
 		_loadHeadline = '';
+		_loadLines = [];
+		_loadIcons = [];
+		_loadDescription = null;
 	}
 	
 	function _move() {
 		_progressWindow.sizeToContent();
-		_progressWindow.moveTo(
-			_window.screenX + _window.innerWidth - _progressWindow.outerWidth - 30,
-			_window.screenY + _window.innerHeight - _progressWindow.outerHeight - 10
-		);
+		Zotero.ProgressWindowSet.tile(_progressWindow);
 	}
 	
 	function _timeout() {
-		kill();	// could check to see if we're really supposed to fade yet
+		close();	// could check to see if we're really supposed to close yet
 				// (in case multiple scrapers are operating at once)
+		_timeoutID = false;
+	}
+	
+	function _disableTimeout() {
+		_progressWindow.clearTimeout(_timeoutID);
+		_timeoutID = false;
+	}
+	
+	
+	/*
+	 * Disable the close timer when the mouse is over the window
+	 */
+	function _onMouseOver(e) {
+		_mouseWasOver = true;
+		_disableTimeout();
+	}
+	
+	
+	/*
+	 * Start the close timer when the mouse leaves the window
+	 *
+	 * Note that this onmouseout doesn't work correctly on popups in Fx2,
+	 * so 1) we have to calculate the window borders manually to avoid fading
+	 * when the mouse is still over the box, and 2) this only does anything
+	 * when the mouse is moved off of the browser window -- otherwise the close
+	 * is triggered by onmousemove on appcontent in overlay.xul.
+	 */
+	function _onMouseOut(e) {
+		// |this| refers to progressWindow's XUL window
+		var top = this.screenY + (Zotero.isMac ? 22 : 0);
+		if ((e.screenX >= this.screenX && e.screenX <= (this.screenX + this.outerWidth))
+			&& (e.screenY >= top) && e.screenY <= (top + this.outerHeight)) {
+				return;
+		}
+		
+		startCloseTimer();
+	}
+	
+	
+	function _onMouseUp(e) {
+		close();
+	}
+	
+	
+	/*
+	 * Open URL specified in target's href attribute in a new window
+	 */
+	function _handleLinkClick(event) {
+		_progressWindow.open(event.target.getAttribute('href'), 'zotero-loaded-page',
+			'menubar=yes,location=yes,toolbar=yes,personalbar=yes,resizable=yes,scrollbars=yes,status=yes');
 	}
 }

@@ -1,8 +1,42 @@
 content	zotero				chrome/content/zotero/
+
 locale	zotero	en-US		chrome/locale/en-US/zotero/
-skin	zotero	default		chrome/skin/default/zotero/
+locale	zotero	af-ZA		chrome/locale/af-ZA/zotero/
+locale	zotero	ar			chrome/locale/ar/zotero/
+locale	zotero	bg-BG		chrome/locale/bg-BG/zotero/
+locale	zotero	ca-AD		chrome/locale/ca-AD/zotero/
+locale	zotero	da-DK		chrome/locale/da-DK/zotero/
+locale	zotero	de-AT		chrome/locale/de-AT/zotero/
+locale	zotero	de-CH		chrome/locale/de-CH/zotero/
+locale	zotero	de-DE		chrome/locale/de-DE/zotero/
+locale	zotero	el-GR		chrome/locale/el-GR/zotero/
+locale	zotero	es-ES		chrome/locale/es-ES/zotero/
+locale	zotero	et-EE		chrome/locale/et-EE/zotero/
+locale	zotero	fr-FR		chrome/locale/fr-FR/zotero/
+locale	zotero	he-IL		chrome/locale/he-IL/zotero/
+locale	zotero	hu-HU		chrome/locale/hu-HU/zotero/
+locale	zotero	is-IS		chrome/locale/is-IS/zotero/
+locale	zotero	it-IT		chrome/locale/it-IT/zotero/
+locale	zotero	ja-JP		chrome/locale/ja-JP/zotero/
+locale	zotero	ko-KR		chrome/locale/ko-KR/zotero/
+locale	zotero	mn-MN		chrome/locale/mn-MN/zotero/
+locale	zotero	nb-NO		chrome/locale/nb-NO/zotero/
+locale	zotero	nl-NL		chrome/locale/nl-NL/zotero/
+locale	zotero	pl-PL		chrome/locale/pl-PL/zotero/
+locale	zotero	pt-BR		chrome/locale/pt-BR/zotero/
+locale	zotero	pt-PT		chrome/locale/pt-PT/zotero/
+locale	zotero	ro-RO		chrome/locale/ro-RO/zotero/
+locale	zotero	ru-RU		chrome/locale/ru-RU/zotero/
+locale	zotero	sr-YU		chrome/locale/sr-YU/zotero/
+locale	zotero	sv-SE		chrome/locale/sv-SE/zotero/
+locale	zotero	tr-TR		chrome/locale/tr-TR/zotero/
+locale	zotero	zh-CN		chrome/locale/zh-CN/zotero/
+locale	zotero	zh-TW		chrome/locale/zh-TW/zotero/
+
+skin		zotero	default		chrome/skin/default/zotero/
 
 overlay	chrome://browser/content/browser.xul	chrome://zotero/content/overlay.xul
-overlay	chrome://browser/content/browser.xul	chrome://zotero/content/ingester/browser.xul
 style	chrome://browser/content/browser.xul	chrome://zotero/skin/zotero.css
 style	chrome://global/content/customizeToolbar.xul	chrome://zotero/skin/zotero.css
+
+content	zotero-platform		chrome/content/zotero-platform/		platform

@@ -1,0 +1,26 @@
+body {
+	font: 12pt "Times New Roman", Times, Georgia, serif;
+	margin: 0;
+	width: auto;
+	color: black;
+}
+
+/* Page Breaks (page-break-inside only recognized by Opera) */
+h1, h2, h3, h4, h5, h6 {
+	page-break-after: avoid;
+	page-break-inside: avoid;
+}
+
+ul, ol, dl {
+	page-break-inside: avoid;
+}
+
+h2 {
+	font-size: 1.3em;
+	line-height: 1.3em;
+}
+
+a {
+	color: #000;
+	text-decoration: none;
+}

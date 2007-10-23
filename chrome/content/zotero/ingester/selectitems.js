@@ -41,8 +41,11 @@ var Zotero_Ingester_Interface_SelectItems = function() {}
  * loading
  */
 Zotero_Ingester_Interface_SelectItems.init = function() {
+	// Set font size from pref
+	var sbc = document.getElementById('zotero-select-items-container');
+	Zotero.setFontSize(sbc);
+	
 	this.io = window.arguments[0];
-	this.Zotero_Ingester_Interface = window.arguments[1];
 	var listbox = document.getElementById("zotero-selectitems-links");
 	
 	for(i in this.io.dataIn) {	// we could use a tree for this if we wanted to
@@ -52,6 +55,13 @@ Zotero_Ingester_Interface_SelectItems.init = function() {
 		itemNode.setAttribute("label", this.io.dataIn[i]);
 		itemNode.setAttribute("checked", false);
 		listbox.appendChild(itemNode);
+	}
+}
+
+Zotero_Ingester_Interface_SelectItems.selectAll = function(deselect) {
+	var listbox = document.getElementById("zotero-selectitems-links");
+	for (var i=0; i<listbox.childNodes.length; i++){
+		listbox.childNodes[i].setAttribute('checked', !deselect);
 	}
 }
 

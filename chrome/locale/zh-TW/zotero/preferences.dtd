@@ -1,0 +1,83 @@
+<!ENTITY zotero.preferences.title "Zotero偏好設定">
+
+<!ENTITY zotero.preferences.default "預設：">
+
+<!ENTITY zotero.preferences.prefpane.general "一般">
+
+<!ENTITY zotero.preferences.userInterface "使用者介面">
+<!ENTITY zotero.preferences.position "顯示Zotero">
+<!ENTITY zotero.preferences.position.above "高於">
+<!ENTITY zotero.preferences.position.below "低於">
+<!ENTITY zotero.preferences.position.browser "瀏灠器內容">
+<!ENTITY zotero.preferences.statusBarIcon "狀態列圖標：">
+<!ENTITY zotero.preferences.statusBarIcon.none "None">
+<!ENTITY zotero.preferences.fontSize "字形大小：">
+<!ENTITY zotero.preferences.fontSize.small "小">
+<!ENTITY zotero.preferences.fontSize.medium "中">
+<!ENTITY zotero.preferences.fontSize.large "大">
+
+<!ENTITY zotero.preferences.miscellaneous "雜類的">
+<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators">
+<!ENTITY zotero.preferences.updateNow "立刻更新">
+<!ENTITY zotero.preferences.reportTranslationFailure "報告故障了的網站翻譯器">
+<!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded RIS/Refer files">
+<!ENTITY zotero.preferences.automaticSnapshots "在從網頁建立項目時自動攝取快照">
+<!ENTITY zotero.preferences.downloadAssociatedFiles "在貯存項目時自動附屬相關的PDF及其他檔案">
+<!ENTITY zotero.preferences.automaticTags "自動用關鍵字及主題標題來為項目加上標簽">
+
+<!ENTITY zotero.preferences.openurl.caption "開啟網址">
+
+<!ENTITY zotero.preferences.openurl.search "Search for resolvers">
+<!ENTITY zotero.preferences.openurl.custom "自行定義…">
+<!ENTITY zotero.preferences.openurl.server "解答器：">
+<!ENTITY zotero.preferences.openurl.version "版本：">
+
+<!ENTITY zotero.preferences.prefpane.search "搜尋">
+<!ENTITY zotero.preferences.search.fulltextCache "全文快取">
+<!ENTITY zotero.preferences.search.pdfIndexing "PDF索引">
+<!ENTITY zotero.preferences.search.indexStats "索引統計資料">
+
+<!ENTITY zotero.preferences.search.indexStats.indexed "Indexed:">
+<!ENTITY zotero.preferences.search.indexStats.partial "Partial:">
+<!ENTITY zotero.preferences.search.indexStats.unindexed "Unindexed:">
+<!ENTITY zotero.preferences.search.indexStats.words "Words:">
+
+<!ENTITY zotero.preferences.fulltext.textMaxLength "每個檔案做索引的最大字符數：">
+<!ENTITY zotero.preferences.fulltext.pdfMaxPages "每個檔案做索引的最大頁數：">
+
+<!ENTITY zotero.preferences.prefpane.export "輸出">
+
+<!ENTITY zotero.preferences.quickCopy.caption "快速複制">
+<!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "預設的輸出格式：">
+<!ENTITY zotero.preferences.quickCopy.macWarning "注意在Mac作業系統X下富文的格式化會消失掉。">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.setings "網站特有的設定：">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "網域／路徑">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "【例如wikipedia.org】">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "輸出格式">
+
+<!ENTITY zotero.preferences.prefpane.keys "快速鍵">
+
+<!ENTITY zotero.preferences.keys.openZotero "開／關Zotero窗格">
+<!ENTITY zotero.preferences.keys.toggleFullscreen "切換全螢幕模式">
+<!ENTITY zotero.preferences.keys.library "書庫">
+<!ENTITY zotero.preferences.keys.quicksearch "快速搜尋">
+<!ENTITY zotero.preferences.keys.newItem "建立一個新的項目">
+<!ENTITY zotero.preferences.keys.newNote "建立一個新的注記">
+<!ENTITY zotero.preferences.keys.toggleTagSelector "切換標簽選擇器">
+<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copy Selected Item Citations to Clipboard">
+<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "複制選定的項目到剪貼板">
+<!ENTITY zotero.preferences.keys.overrideGlobal "嘗試蓋過相衝突的快速鍵">
+<!ENTITY zotero.preferences.keys.changesTakeEffect "改變只會在新開的視窗中生效">
+
+
+<!ENTITY zotero.preferences.prefpane.advanced "進階">
+
+<!ENTITY zotero.preferences.dataDir "存儲位置">
+<!ENTITY zotero.preferences.dataDir.useProfile "使用Firefox描像設定目錄">
+<!ENTITY zotero.preferences.dataDir.custom "自定：">
+<!ENTITY zotero.preferences.dataDir.choose "選擇…">
+<!ENTITY zotero.preferences.dataDir.reveal "Show Data Directory">
+
+<!ENTITY zotero.preferences.dbMaintenance "Database Maintenance">
+<!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Check Database Integrity">
+<!ENTITY zotero.preferences.dbMaintenance.rebuildTranslators "Rebuild Translators Table">

@@ -1,0 +1,10 @@
+<!ENTITY zotero.version "version">
+<!ENTITY zotero.createdby "Skapat av:">
+<!ENTITY zotero.directors "Directors:">
+<!ENTITY zotero.developers "Utvecklare:">
+<!ENTITY zotero.alumni "Alumni:">
+<!ENTITY zotero.about.localizations "Localizations:">
+<!ENTITY zotero.about.additionalSoftware "Third-Party Software and Standards:">
+<!ENTITY zotero.executiveProducer "Executive Producer:">
+<!ENTITY zotero.thanks "Särskilt tack:">
+<!ENTITY zotero.about.close "Stäng">

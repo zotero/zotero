@@ -1,0 +1,83 @@
+<!ENTITY zotero.preferences.title "Zotero-voorkeure">
+
+<!ENTITY zotero.preferences.default "Verstek:">
+
+<!ENTITY zotero.preferences.prefpane.general "Algemeen">
+
+<!ENTITY zotero.preferences.userInterface "Gebruikerkoppelvlak">
+<!ENTITY zotero.preferences.position "Wys Zotero">
+<!ENTITY zotero.preferences.position.above "bokant">
+<!ENTITY zotero.preferences.position.below "onderkant">
+<!ENTITY zotero.preferences.position.browser "blaaierinhoud">
+<!ENTITY zotero.preferences.statusBarIcon "Statusbalk-ikoon:">
+<!ENTITY zotero.preferences.statusBarIcon.none "None">
+<!ENTITY zotero.preferences.fontSize "Fontgrootte:">
+<!ENTITY zotero.preferences.fontSize.small "Klein">
+<!ENTITY zotero.preferences.fontSize.medium "Medium">
+<!ENTITY zotero.preferences.fontSize.large "Groot">
+
+<!ENTITY zotero.preferences.miscellaneous "Diverse">
+<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators">
+<!ENTITY zotero.preferences.updateNow "Werk nóú by">
+<!ENTITY zotero.preferences.reportTranslationFailure "Rapporteer gebroke werfvertalers">
+<!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded RIS/Refer files">
+<!ENTITY zotero.preferences.automaticSnapshots "Neem outomaties kiekies wanneer items uit webbladsye geskep word">
+<!ENTITY zotero.preferences.downloadAssociatedFiles "Heg geassosieerde PDF&apos;s en ander lêers outomaties aan wanneer items gestoor word">
+<!ENTITY zotero.preferences.automaticTags "Merk items outomaties met sleutelwoorde en onderwerpopskrifte aan">
+
+<!ENTITY zotero.preferences.openurl.caption "OpenURL">
+
+<!ENTITY zotero.preferences.openurl.search "Search for resolvers">
+<!ENTITY zotero.preferences.openurl.custom "Doelmaak...">
+<!ENTITY zotero.preferences.openurl.server "Oplosser:">
+<!ENTITY zotero.preferences.openurl.version "Weergawe:">
+
+<!ENTITY zotero.preferences.prefpane.search "Soektog">
+<!ENTITY zotero.preferences.search.fulltextCache "Volteks-kas">
+<!ENTITY zotero.preferences.search.pdfIndexing "PDF-indeksering">
+<!ENTITY zotero.preferences.search.indexStats "Indekseerstatus">
+
+<!ENTITY zotero.preferences.search.indexStats.indexed "Indexed:">
+<!ENTITY zotero.preferences.search.indexStats.partial "Partial:">
+<!ENTITY zotero.preferences.search.indexStats.unindexed "Unindexed:">
+<!ENTITY zotero.preferences.search.indexStats.words "Words:">
+
+<!ENTITY zotero.preferences.fulltext.textMaxLength "Maksimum karakters per lêer om te indekseer:">
+<!ENTITY zotero.preferences.fulltext.pdfMaxPages "Maksimum bladsye per lêer om te indekseer:">
+
+<!ENTITY zotero.preferences.prefpane.export "Uitvoer">
+
+<!ENTITY zotero.preferences.quickCopy.caption "Kitskopieer">
+<!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Verstek-afvoerformaat:">
+<!ENTITY zotero.preferences.quickCopy.macWarning "Let wel: rykteksformatering sal op Mac OS X verlore gaan.">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Werfspesifieke instellings:">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domein/pad">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(bv wikipedia.org)">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Afvoerformaat">
+
+<!ENTITY zotero.preferences.prefpane.keys "Snelsleutels">
+
+<!ENTITY zotero.preferences.keys.openZotero "Open/sluit Zotero-paneel">
+<!ENTITY zotero.preferences.keys.toggleFullscreen "Verwissel volskermmodus">
+<!ENTITY zotero.preferences.keys.library "Programmateek">
+<!ENTITY zotero.preferences.keys.quicksearch "Kitssoektog">
+<!ENTITY zotero.preferences.keys.newItem "Skep nuwe item">
+<!ENTITY zotero.preferences.keys.newNote "Skep &apos;n nuwe nota">
+<!ENTITY zotero.preferences.keys.toggleTagSelector "Swik merkerselektor">
+<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copy Selected Item Citations to Clipboard">
+<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopieer geselekteerde items na knipbord">
+<!ENTITY zotero.preferences.keys.overrideGlobal "Probeer konflikterende snelsleutels oorheers">
+<!ENTITY zotero.preferences.keys.changesTakeEffect "Veranderinge vind net in nuwe vensters plaas">
+
+
+<!ENTITY zotero.preferences.prefpane.advanced "Gevorderd">
+
+<!ENTITY zotero.preferences.dataDir "Stoorligging">
+<!ENTITY zotero.preferences.dataDir.useProfile "Gebruik Firerfox-profielgids">
+<!ENTITY zotero.preferences.dataDir.custom "Doelmaak:">
+<!ENTITY zotero.preferences.dataDir.choose "Kies...">
+<!ENTITY zotero.preferences.dataDir.reveal "Show Data Directory">
+
+<!ENTITY zotero.preferences.dbMaintenance "Database Maintenance">
+<!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Check Database Integrity">
+<!ENTITY zotero.preferences.dbMaintenance.rebuildTranslators "Rebuild Translators Table">

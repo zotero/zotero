@@ -29,9 +29,10 @@
 // Class to provide options for bibliography
 
 var Zotero_File_Interface_Bibliography = new function() {
-	var _io;
+	var _io, _saveStyle;
 	
 	this.init = init;
+	this.styleChanged = styleChanged;
 	this.acceptSelection = acceptSelection;
 	
 	/*
@@ -39,46 +40,108 @@ var Zotero_File_Interface_Bibliography = new function() {
 	 * loading
 	 */
 	function init() {
-		_io = window.arguments[0];
+		// Set font size from pref
+		// Affects bibliography.xul and integrationDocPrefs.xul
+		var sbc = document.getElementById('zotero-bibliography-container');
+		Zotero.setFontSize(sbc);
 		
-		var listbox = document.getElementById("style-popup");
-		var styleMenu = document.getElementById("style-menu");
+		_io = window.arguments[0];
+		if(_io.wrappedJSObject){
+			_io = _io.wrappedJSObject;
+		}
+		
+		var listbox = document.getElementById("style-listbox");
 		var styles = Zotero.Cite.getStyles();
 		
+		// if no style is set, get the last style used
+		if(!_io.style) {
+			_io.style = Zotero.Prefs.get("export.lastStyle");
+			_saveStyle = true;
+		}
+		
 		// add styles to list
-		for(i in styles) {
-			var itemNode = document.createElement("menuitem");
+		for(var i in styles) {
+			var itemNode = document.createElement("listitem");
 			itemNode.setAttribute("value", i);
 			itemNode.setAttribute("label", styles[i]);
 			listbox.appendChild(itemNode);
 			
 			if(i == _io.style) {
-				styleMenu.selectedItem = itemNode;
+				listbox.selectedItem = itemNode;
 			}
 		}
 		
 		// select first item by default
-		if(styleMenu.selectedIndex == -1) {
-			styleMenu.selectedIndex = 0;
+		if(listbox.selectedIndex == -1) {
+			listbox.selectedIndex = 0;
 		}
 		
-		if(Zotero.isMac && document.getElementById("copy-to-clipboard")) {
-			document.getElementById("copy-to-clipboard").hidden = "true";
+		// ONLY FOR bibliography.xul: export options
+		if(document.getElementById("save-as-rtf")) {
+			// restore saved bibliographic settings
+			document.getElementById(Zotero.Prefs.get("export.bibliographySettings")).setAttribute("selected", "true");
+			
+			// disable clipboard on the Mac, because it can't support formatted
+			// output
+			if(Zotero.isMac) {
+				document.getElementById("mac-clipboard-warning").hidden = false;
+			}
 		}
 		
-		// move to center of screen
+		// ONLY FOR integrationDocPrefs.xul: update status of displayAs, set
+		// bookmarks text
+		if(document.getElementById("displayAs")) {
+			if(_io.useEndnotes && _io.useEndnotes == 1) document.getElementById("displayAs").selectedIndex = 1;
+			styleChanged();
+			
+			if(_io.useBookmarks && _io.useBookmarks == 1) document.getElementById("formatUsing").selectedIndex = 1;			
+			if(_io.openOffice) {
+				var formatOption = "referenceMarks";
+			} else {
+				var formatOption = "fields";
+			}
+			document.getElementById("fields").label = Zotero.getString("integration."+formatOption+".label");
+			document.getElementById("fields-caption").textContent = Zotero.getString("integration."+formatOption+".caption");
+			
+			// add border on Windows
+			if(Zotero.isWin) {
+				document.getElementById("zotero-bibliography-container").style.border = "1px solid black";
+			}
+		}
 		window.sizeToContent();
-		window.moveTo(
-			(self.screen.width-window.innerWidth)/2,
-			(self.screen.height-window.innerHeight)/2
-		);
+		window.centerWindowOnScreen();
+	}
+	
+	/*
+	 * ONLY FOR integrationDocPrefs.xul: called when style is changed
+	 */
+	function styleChanged() {
+		// update status of displayAs box based
+		var selectedStyle = document.getElementById("style-listbox").selectedItem.getAttribute('value');
+		var styleClass = Zotero.Cite.getStyleClass(selectedStyle);
+		document.getElementById("displayAs").disabled = styleClass != "note";
 	}
 
 	function acceptSelection() {
 		// collect code
-		_io.style = document.getElementById("style-menu").selectedItem.value;
+		_io.style = document.getElementById("style-listbox").selectedItem.value;
 		if(document.getElementById("output-radio")) {
+			// collect settings
 			_io.output = document.getElementById("output-radio").selectedItem.id;
+			// save settings
+			Zotero.Prefs.set("export.bibliographySettings", _io.output);
+		}
+		
+		// ONLY FOR integrationDocPrefs.xul: collect displayAs
+		if(document.getElementById("displayAs")) {
+			_io.useEndnotes = document.getElementById("displayAs").selectedIndex;
+			_io.useBookmarks = document.getElementById("formatUsing").selectedIndex;
+		}
+		
+		// save style (this happens only for "Export Bibliography," or Word
+		// integration when no bibliography style was previously selected)
+		if(_saveStyle) {
+			Zotero.Prefs.set("export.lastStyle", _io.style);
 		}
 	}
 }

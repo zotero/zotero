@@ -1,20 +1,45 @@
 <?xml version="1.0"?>
-<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://global/skin/global.css"?>
+<?xml-stylesheet href="chrome://browser/skin/preferences/preferences.css"?>
+<?xml-stylesheet href="chrome://zotero/skin/bibliography.css"?>
 <!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
-<dialog xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-	title="&integration.docPrefs.title;" buttons="accept"
-	ondialogaccept="Zotero_File_Interface_Bibliography.acceptSelection()"
-	id="zotero-bibliography"
-	onload="Zotero_File_Interface_Bibliography.init()">
 
-<script src="include.js"/>
-<script src="bibliography.js"/>
+<dialog
+	id="add-citation-dialog"
+	orient="vertical"
+	buttons="accept"
+	title="&zotero.integration.docPrefs.title;"
+	onload="Zotero_File_Interface_Bibliography.init();"
+	ondialogaccept="Zotero_File_Interface_Bibliography.acceptSelection();"
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	style="padding: 0">
+	
+	<script src="include.js"/>
+	<script src="bibliography.js"/>
 
-<hbox>
-	<label value="&bibliography.style.label;" control="style-menu"/>
-	<menulist id="style-menu">
-		<menupopup id="style-popup">
-		</menupopup>
-	</menulist>
-</hbox>
+	<vbox id="zotero-bibliography-container" style="padding: 0.5em">
+		<groupbox>
+			<caption label="&zotero.bibliography.style.label;"/>
+			<listbox id="style-listbox" onselect="Zotero_File_Interface_Bibliography.styleChanged()"/>
+		</groupbox>
+		
+		<groupbox>
+			<caption label="&zotero.integration.prefs.displayAs.label;"/>
+			<radiogroup id="displayAs" orient="horizontal">
+				<radio id="footnotes" label="&zotero.integration.prefs.footnotes.label;" selected="true"/>
+				<radio id="endnotes" label="&zotero.integration.prefs.endnotes.label;"/>
+			</radiogroup>
+		</groupbox>
+		
+		<groupbox>
+			<caption label="&zotero.integration.prefs.formatUsing.label;"/>
+			
+			<radiogroup id="formatUsing" orient="vertical">
+				<radio id="fields" selected="true"/>
+				<label class="radioDescription" id="fields-caption"/>
+				<radio id="bookmarks" label="&zotero.integration.prefs.bookmarks.label;"/>
+				<label class="radioDescription" id="bookmarks-caption">&zotero.integration.prefs.bookmarks.caption;</label>
+			</radiogroup>
+		</groupbox>
+	</vbox>
 </dialog>

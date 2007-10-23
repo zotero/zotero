@@ -259,6 +259,9 @@ Zotero.OpenURL = new function() {
 		}
 		
 		// encode ctx_ver (if available) and identifiers
+		// TODO identifiers may need to be encoded as follows:
+		// rft_id=info:doi/<the-url-encoded-doi>
+		// rft_id=http://<the-rest-of-the-url-encoded-url>
 		if(version == "0.1") {
 			var co = "";
 			
@@ -280,11 +283,11 @@ Zotero.OpenURL = new function() {
 			} else {
 				co += "&rft_val_fmt=info%3Aofi%2Ffmt%3Akev%3Amtx%3Ajournal&rft.genre=article";
 			}
-			co += _mapTag(item.title, "atitle", version)		
-			co += _mapTag(item.publicationTitle, (version == "0.1" ? "title" : "jtitle"), version)		
-			co += _mapTag(item.journalAbbreviation, "stitle", version);
-			co += _mapTag(item.volume, "volume", version);
-			co += _mapTag(item.issue, "issue", version);
+			if(item.title) co += _mapTag(item.title, "atitle", version)		
+			if(item.publicationTitle) co += _mapTag(item.publicationTitle, (version == "0.1" ? "title" : "jtitle"), version)		
+			if(item.journalAbbreviation) co += _mapTag(item.journalAbbreviation, "stitle", version);
+			if(item.volume) co += _mapTag(item.volume, "volume", version);
+			if(item.issue) co += _mapTag(item.issue, "issue", version);
 		} else if(item.itemType == "book" || item.itemType == "bookitem") {
 			if(version == "0.1") {
 				co += "&genre=book";
@@ -294,45 +297,64 @@ Zotero.OpenURL = new function() {
 			
 			if(item.itemType == "book") {
 				co += "&rft.genre=book";
-				co += _mapTag(item.title, (version == "0.1" ? "title" : "btitle"), version);
+				if(item.title) co += _mapTag(item.title, (version == "0.1" ? "title" : "btitle"), version);
 			} else {
 				co += "&rft.genre=bookitem";
-				co += _mapTag(item.title, "atitle", version)		
-				co += _mapTag(item.publicationTitle, (version == "0.1" ? "title" : "btitle"), version);
+				if(item.title) co += _mapTag(item.title, "atitle", version)		
+				if(item.publicationTitle) co += _mapTag(item.publicationTitle, (version == "0.1" ? "title" : "btitle"), version);
 			}
 			
-			co += _mapTag(item.place, "place", version);
-			co += _mapTag(item.publisher, "publisher", version)		
-			co += _mapTag(item.edition, "edition", version);
-			co += _mapTag(item.seriesTitle, "series", version);
+			if(item.place) co += _mapTag(item.place, "place", version);
+			if(item.publisher) co += _mapTag(item.publisher, "publisher", version)		
+			if(item.edition) co += _mapTag(item.edition, "edition", version);
+			if(item.series) co += _mapTag(item.series, "series", version);
 		} else if(item.itemType == "thesis" && version == "1.0") {
 			co += "&rft_val_fmt=info%3Aofi%2Ffmt%3Akev%3Amtx%3Adissertation";
 			
-			_mapTag(item.title, "title", version);
-			_mapTag(item.publisher, "inst", version);
-			_mapTag(item.type, "degree", version);
+			if(item.title) co += _mapTag(item.title, "title", version);
+			if(item.publisher) co += _mapTag(item.publisher, "inst", version);
+			if(item.type) co += _mapTag(item.type, "degree", version);
+		} else if(item.itemType == "patent" && version == "1.0") {
+			co += "&rft_val_fmt=info%3Aofi%2Ffmt%3Akev%3Amtx%3Apatent";
+			
+			if(item.title) co += _mapTag(item.title, "title", version);
+			if(item.assignee) co += _mapTag(item.assignee, "assignee", version);
+			if(item.patentNumber) co += _mapTag(item.patentNumber, "number", version);
+			
+			if(item.issueDate) {
+				co += _mapTag(Zotero.Date.strToISO(item.issueDate), "date", version);
+			}
 		} else {
 			return false;
 		}
 		
-		// encode fields on all items
-		for each(creator in item.creators) {
-			if(creator.firstName) {
-				co += _mapTag(creator.firstName, "aufirst", version);
-				co += _mapTag(creator.lastName, "aulast", version);
+		if(item.creators && item.creators.length) {
+			// encode first author as first and last
+			var firstCreator = item.creators[0];
+			if(item.itemType == "patent") {
+				co += _mapTag(firstCreator.firstName, "invfirst", version);
+				co += _mapTag(firstCreator.lastName, "invlast", version);
 			} else {
-				co += _mapTag(creator.lastName, "aucorp", version);
+				if(firstCreator.isInstitution) {
+					co += _mapTag(firstCreator.lastName, "aucorp", version);
+				} else {
+					co += _mapTag(firstCreator.firstName, "aufirst", version);
+					co += _mapTag(firstCreator.lastName, "aulast", version);
+				}
+			}
+			
+			// encode subsequent creators as au
+			for each(creator in item.creators) {
+				co += _mapTag((creator.firstName ? creator.firstName+" " : "")+creator.lastName, (item.itemType == "patent" ? "inventor" : "au"), version);
 			}
 		}
 		
 		if(item.date) {
-			co += _mapTag(item.date, "date", version);
-		} else {
-			co += _mapTag(item.year, "date", version);
+			co += _mapTag(Zotero.Date.strToISO(item.date), (item.itemType == "patent" ? "appldate" : "date"), version);
 		}
-		co += _mapTag(item.pages, "pages", version);
-		co += _mapTag(item.ISBN, "isbn", version);
-		co += _mapTag(item.ISSN, "issn", version);
+		if(item.pages) co += _mapTag(item.pages, "pages", version);
+		if(item.ISBN) co += _mapTag(item.ISBN, "isbn", version);
+		if(item.ISSN) co += _mapTag(item.ISSN, "issn", version);
 		
 		if(version == "0.1") {
 			// chop off leading & sign if version is 0.1
@@ -359,19 +381,29 @@ Zotero.OpenURL = new function() {
 		// get type
 		for each(var part in coParts) {
 			if(part.substr(0, 12) == "rft_val_fmt=") {
-				var format = unescape(part.substr(12));
+				var format = decodeURIComponent(part.substr(12));
 				if(format == "info:ofi/fmt:kev:mtx:journal") {
 					item.itemType = "journalArticle";
 					break;
 				} else if(format == "info:ofi/fmt:kev:mtx:book") {
 					if(Zotero.inArray("rft.genre=bookitem", coParts)) {
 						item.itemType = "bookSection";
+					} else if(Zotero.inArray("rft.genre=conference", coParts) || Zotero.inArray("rft.genre=proceeding", coParts)) {
+						item.itemType = "conferencePaper";
+					} else if(Zotero.inArray("rft.genre=report", coParts)) {
+						item.itemType = "report";
 					} else {
 						item.itemType = "book";
 					}
 					break;
 				} else if(format == "info:ofi/fmt:kev:mtx:dissertation") {
 					item.itemType = "thesis";
+					break;
+				} else if(format == "info:ofi/fmt:kev:mtx:patent") {
+					item.itemType = "patent";
+					break;
+				} else if(format == "info:ofi/fmt:kev:mtx:dc") {
+					item.itemType = "webpage";
 					break;
 				}
 			}
@@ -382,10 +414,13 @@ Zotero.OpenURL = new function() {
 		
 		var pagesKey = "";
 		
+		// keep track of "aucorp," "aufirst," "aulast"
+		var complexAu = new Array();
+		
 		for each(var part in coParts) {
 			var keyVal = part.split("=");
 			var key = keyVal[0];
-			var value = unescape(keyVal[1].replace(/\+|%2[bB]/g, " "));
+			var value = decodeURIComponent(keyVal[1].replace(/\+|%2[bB]/g, " "));
 			if(!value) {
 				continue;
 			}
@@ -401,7 +436,7 @@ Zotero.OpenURL = new function() {
 					item.accessDate = "";
 				}
 			} else if(key == "rft.btitle") {
-				if(item.itemType == "book") {
+				if(item.itemType == "book" || item.itemType == "conferencePaper" || item.itemType == "report") {
 					item.title = value;
 				} else if(item.itemType == "bookSection") {
 					item.publicationTitle = value;
@@ -420,7 +455,11 @@ Zotero.OpenURL = new function() {
 					item.title = value;
 				}
 			} else if(key == "rft.date") {
-				item.date = value;
+				if(item.itemType == "patent") {
+					item.issueDate = value;
+				} else {
+					item.date = value;
+				}
 			} else if(key == "rft.volume") {
 				item.volume = value;
 			} else if(key == "rft.issue") {
@@ -454,41 +493,105 @@ Zotero.OpenURL = new function() {
 				}
 			} else if(key == "rft.issn" || (key == "rft.eissn" && !item.ISSN)) {
 				item.ISSN = value;
-			} else if(key == "rft.aulast") {
-				var lastCreator = item.creators[item.creators.length-1];
-				if(item.creators.length && !lastCreator.lastName && !lastCreator.institutional) {
+			} else if(key == "rft.aulast" || key == "rft.invlast") {
+				var lastCreator = complexAu[complexAu.length-1];
+				if(complexAu.length && !lastCreator.lastName && !lastCreator.institutional) {
 					lastCreator.lastName = value;
 				} else {
-					item.creators.push({lastName:value});
+					complexAu.push({lastName:value, creatorType:(key == "rft.aulast" ? "author" : "inventor")});
 				}
-			} else if(key == "rft.aufirst") {
-				var lastCreator = item.creators[item.creators.length-1];
-				if(item.creators.length && !lastCreator.firstName && !lastCreator.institutional) {
+			} else if(key == "rft.aufirst" || key == "rft.invfirst") {
+				var lastCreator = complexAu[complexAu.length-1];
+				if(complexAu.length && !lastCreator.firstName && !lastCreator.institutional) {
 					lastCreator.firstName = value;
 				} else {
-					item.creators.push({firstName:value});
+					complexAu.push({firstName:value, creatorType:(key == "rft.aufirst" ? "author" : "inventor")});
 				}
-			} else if(key == "rft.au") {
-				item.creators.push(Zotero.Utilities.prototype.cleanAuthor(value, "author", true));
+			} else if(key == "rft.au" || key == "rft.creator" || key == "rft.contributor" || key == "rft.inventor") {
+				if(key == "rft.contributor") {
+					var type = "contributor";
+				} else if(key == "rft.inventor") {
+					var type = "inventor";
+				} else {
+					var type = "author";
+				}
+				
+				if(value.indexOf(",") !== -1) {
+					item.creators.push(Zotero.Utilities.prototype.cleanAuthor(value, type, true));
+				} else {
+					item.creators.push(Zotero.Utilities.prototype.cleanAuthor(value, type, false));
+				}
 			} else if(key == "rft.aucorp") {
-				item.creators.push({lastName:value, fieldMode:true});
+				complexAu.push({lastName:value, isInstitution:true});
 			} else if(key == "rft.isbn" && !item.ISBN) {
 				item.ISBN = value;
-			} else if(key == "rft.pub") {
+			} else if(key == "rft.pub" || key == "rft.publisher") {
 				item.publisher = value;
 			} else if(key == "rft.place") {
 				item.place = value;
 			} else if(key == "rft.edition") {
 				item.edition = value;
 			} else if(key == "rft.series") {
-				item.seriesTitle = value;
+				item.series = value;
 			} else if(item.itemType == "thesis") {
 				if(key == "rft.inst") {
 					item.publisher = value;
 				} else if(key == "rft.degree") {
 					item.type = value;
 				}
+			} else if(item.itemType == "patent") {
+				if(key == "rft.assignee") {
+					item.assignee = value;
+				} else if(key == "rft.number") {
+					item.patentNumber = value;
+				} else if(key == "rft.appldate") {
+					item.date = value;
+				}
+			} else if(format == "info:ofi/fmt:kev:mtx:dc") {
+				if(key == "rft.identifier") {
+					if(value.length > 8) {	// we could check length separately for
+											// each type, but all of these identifiers
+											// must be > 8 characters
+						if(value.substr(0, 5) == "ISBN ") {
+							item.ISBN = value.substr(5);
+						} else if(value.substr(0, 5) == "ISSN ") {
+							item.ISSN = value.substr(5);
+						} else if(value.substr(0, 8) == "urn:doi:") {
+							item.DOI = value.substr(4);
+						} else if(value.substr(0, 7) == "http://" || value.substr(0, 8) == "https://") {
+							item.url = value;
+						}
+					}
+				} else if(key == "rft.description") {
+					item.extra = value;
+				} else if(key == "rft.rights") {
+					item.rights = value;
+				} else if(key == "rft.subject") {
+					item.tags.push(value);
+				} else if(key == "rft.type") {
+					if(Zotero.ItemTypes.getID(value)) item.itemType = value;
+				} else if(key == "rft.source") {
+					item.publicationTitle = value;
+				}
 			}
+		}
+		
+		// combine two lists of authors, eliminating duplicates
+		for each(var au in complexAu) {
+			var pushMe = true;
+			for each(var pAu in item.creators) {
+				// if there's a plain author that is close to this author (the
+				// same last name, and the same first name up to a point), keep
+				// the plain author, since it might have a middle initial
+				if(pAu.lastName == au.lastName &&
+				   (pAu.firstName == au.firstName == "" ||
+				   (pAu.firstName.length >= au.firstName.length &&
+				   pAu.firstName.substr(0, au.firstName.length) == au.firstName))) {
+					pushMe = false;
+					break;
+				}
+			}
+			if(pushMe) item.creators.push(au);
 		}
 		
 		return item;
@@ -500,9 +603,9 @@ Zotero.OpenURL = new function() {
 	function _mapTag(data, tag, version) {
 		if(data) {
 			if(version == "0.1") {
-				return "&"+tag+"="+escape(data);
+				return "&"+tag+"="+encodeURIComponent(data);
 			} else {
-				return "&rft."+tag+"="+escape(data);
+				return "&rft."+tag+"="+encodeURIComponent(data);
 			}
 		} else {
 			return "";
@@ -599,7 +702,7 @@ Zotero.Ingester.MIMEHandler.StreamListener = function(request, contentType) {
 	var windowWatcher = Components.classes["@mozilla.org/embedcomp/window-watcher;1"].
 						getService(Components.interfaces.nsIWindowWatcher);
 	this._frontWindow = windowWatcher.activeWindow;
-	this._frontWindow.Zotero_Ingester_Interface.Progress.show();
+	this._frontWindow.Zotero_Browser.progress.show();
 	
 	Zotero.debug("EndNote prepared to grab content type "+contentType);
 }
@@ -643,18 +746,26 @@ Zotero.Ingester.MIMEHandler.StreamListener.prototype.onStopRequest = function(ch
 	var translation = new Zotero.Translate("import");
 	translation.setLocation(this._request.name);
 	translation.setString(this._readString);
-	translation.setHandler("itemDone", this._frontWindow.Zotero_Ingester_Interface._itemDone);
-	translation.setHandler("done", this._frontWindow.Zotero_Ingester_Interface._finishScraping);
+	
+	//  use front window's save functions and folder
+	var frontWindow = this._frontWindow;
+	
+	var saveLocation = null;
+	try {
+		saveLocation = frontWindow.ZoteroPane.getSelectedCollection();
+	} catch(e) {}
+	translation.setHandler("itemDone", function(obj, item) { frontWindow.Zotero_Browser.itemDone(obj, item, saveLocation) });
+	translation.setHandler("done", function(obj, item) { frontWindow.Zotero_Browser.finishScraping(obj, item, saveLocation) });
 	
 	// attempt to retrieve translators
 	var translators = translation.getTranslators();
 	if(!translators.length) {
 		// we lied. we can't really translate this file. call
 		// nsIExternalHelperAppService with the data
-		this._frontWindow.Zotero_Ingester_Interface.Progress.kill();
+		frontWindow.Zotero_Browser.progress.close();
 
 		var streamListener;
-		if(streamListener = externalHelperAppService.doContent(this._contentType, this._request, this._frontWindow)) {
+		if(streamListener = externalHelperAppService.doContent(this._contentType, this._request, frontWindow)) {
 			// create a string input stream
 			var inputStream = Components.classes["@mozilla.org/io/string-input-stream;1"].
 							  createInstance(Components.interfaces.nsIStringInputStream);

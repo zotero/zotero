@@ -1,0 +1,94 @@
+<?xml version="1.0"?>
+
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/upgrade.css" type="text/css"?>
+
+<!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
+
+<wizard id="zotero-schema-upgrade" title="Zotero"
+		xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	
+	<script>
+	<![CDATA[
+		var Zotero_Schema_Upgrade = new function() {
+			this.init = init;
+			this.onAdvance = onAdvance;
+			this.doUpgrade = doUpgrade;
+			this.onChangeLogLinkClick = onChangeLogLinkClick;
+			
+			var obj = window.arguments[0].wrappedJSObject;
+			var Zotero = obj.Zotero;
+			var data = obj.data;
+			
+			function init() {
+				var wizard = document.getElementById('zotero-schema-upgrade');
+				
+				var continueButtonName = wizard.getButton('next').getAttribute('label');
+				var str = Zotero.getString('upgrade.advanceMessage', continueButtonName);
+				document.getElementById('zotero-advance-message').setAttribute('value', str);
+			}
+			
+			
+			function onAdvance() {
+				var wizard = document.getElementById('zotero-schema-upgrade');
+				wizard.getButton('cancel').setAttribute('disabled', true);
+				wizard.canRewind = false;
+				wizard.getButton('finish').focus(); // prevent focusing of changelog link
+			}
+			
+			
+			function doUpgrade() {
+				var wizard = document.getElementById('zotero-schema-upgrade');
+				
+				onAdvance();
+				
+				try {
+					Zotero.Schema.updateSchema();
+				}
+				catch (e) {
+					data.msg = Zotero.getString('upgrade.failed');
+					data.e = e;
+					
+					Components.utils.reportError(e);
+					
+					var cancelButton = wizard.getButton('cancel');
+					cancelButton.setAttribute('disabled', false);
+					cancelButton.click();
+					return;
+				}
+				
+				data.success = true;
+				
+				wizard.advance();
+			}
+			
+			
+			function onChangeLogLinkClick() {
+				Zotero.initialURL = 'http://www.zotero.org/documentation/changelog';
+				document.getElementById('zotero-schema-upgrade').getButton('finish').click();
+			}
+		}
+	]]>
+	</script>
+	
+	<wizardpage onpageshow="Zotero_Schema_Upgrade.init()">
+		<description>&zotero.upgrade.newVersionInstalled;</description>
+		<description>&zotero.upgrade.upgradeRequired; &zotero.upgrade.autoBackup;</description>
+		<description id="zotero-advance-message"/>
+	</wizardpage>
+	
+	<wizardpage onpageshow="setTimeout('Zotero_Schema_Upgrade.doUpgrade()', 100)">
+		<description>&zotero.upgrade.upgradeInProgress;</description>
+		<progressmeter mode="undetermined"/>
+	</wizardpage>
+	
+	<wizardpage onpageshow="Zotero_Schema_Upgrade.onAdvance()">
+		<description>&zotero.upgrade.upgradeSucceeded;</description>
+		<description>
+			&zotero.upgrade.changeLogBeforeLink;
+			<label id="zotero-change-log-link" class="text-link" value="&zotero.upgrade.changeLogLink;"
+				onclick="Zotero_Schema_Upgrade.onChangeLogLinkClick()"/>
+			&zotero.upgrade.changeLogAfterLink;
+		</description>
+	</wizardpage>
+</wizard>

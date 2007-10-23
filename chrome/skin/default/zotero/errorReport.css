@@ -1,0 +1,40 @@
+description {
+	margin: 0 0 1.5em;
+}
+
+/* Intro pane */
+#zotero-error-message {
+	font-style: italic;
+}
+
+#zotero-unrelated-message {
+	margin: 1em 0 .5em;
+}
+
+#zotero-advance-message {
+	margin: .5em 0;
+}
+
+/* Additional Info pane */
+#zotero-email-address-box {
+	margin-bottom: 1.5em;
+}
+
+#zotero-email-address-box {
+	-moz-box-align: center;
+}
+
+#zotero-email-address-box label {
+	margin-left: 0;
+}
+
+#zotero-error-steps-box description {
+	margin-bottom: .4em;
+}
+
+/* Submitted pane */
+
+#zotero-report-id {
+	color: red;
+	font-weight: bold;
+}

@@ -1,0 +1,83 @@
+<!ENTITY zotero.preferences.title "詳細設定">
+
+<!ENTITY zotero.preferences.default "デフォルト：">
+
+<!ENTITY zotero.preferences.prefpane.general "一般">
+
+<!ENTITY zotero.preferences.userInterface "表示">
+<!ENTITY zotero.preferences.position "コンテンツの">
+<!ENTITY zotero.preferences.position.above "上">
+<!ENTITY zotero.preferences.position.below "下">
+<!ENTITY zotero.preferences.position.browser "にZoteroを表示する">
+<!ENTITY zotero.preferences.statusBarIcon "ステータスバーのアイコン：">
+<!ENTITY zotero.preferences.statusBarIcon.none "None">
+<!ENTITY zotero.preferences.fontSize "フォントサイズ：">
+<!ENTITY zotero.preferences.fontSize.small "小">
+<!ENTITY zotero.preferences.fontSize.medium "中">
+<!ENTITY zotero.preferences.fontSize.large "大">
+
+<!ENTITY zotero.preferences.miscellaneous "色々">
+<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators">
+<!ENTITY zotero.preferences.updateNow "アップデート">
+<!ENTITY zotero.preferences.reportTranslationFailure "壊れたスクレーパを報告する">
+<!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded RIS/Refer files">
+<!ENTITY zotero.preferences.automaticSnapshots "ウェブページのアイテムを作成するときに自動的にスナップショットを作成する">
+<!ENTITY zotero.preferences.downloadAssociatedFiles "アイテムを作成するときに自動的に関連PDFや他のファイルを添付する">
+<!ENTITY zotero.preferences.automaticTags "キーワードと件名標目のあるアイテムに自動的にタグを付ける">
+
+<!ENTITY zotero.preferences.openurl.caption "OpenURL">
+
+<!ENTITY zotero.preferences.openurl.search "Search for resolvers">
+<!ENTITY zotero.preferences.openurl.custom "カスタム...">
+<!ENTITY zotero.preferences.openurl.server "リンク・リゾルバ：">
+<!ENTITY zotero.preferences.openurl.version "バージョン：">
+
+<!ENTITY zotero.preferences.prefpane.search "検索">
+<!ENTITY zotero.preferences.search.fulltextCache "フルテキストキャッシュ">
+<!ENTITY zotero.preferences.search.pdfIndexing "PDF索引">
+<!ENTITY zotero.preferences.search.indexStats "索引統計">
+
+<!ENTITY zotero.preferences.search.indexStats.indexed "Indexed:">
+<!ENTITY zotero.preferences.search.indexStats.partial "Partial:">
+<!ENTITY zotero.preferences.search.indexStats.unindexed "Unindexed:">
+<!ENTITY zotero.preferences.search.indexStats.words "Words:">
+
+<!ENTITY zotero.preferences.fulltext.textMaxLength "各ファイルの索引の最大字数：">
+<!ENTITY zotero.preferences.fulltext.pdfMaxPages "各ファイルの索引の最大ページ数：">
+
+<!ENTITY zotero.preferences.prefpane.export "エクスポート">
+
+<!ENTITY zotero.preferences.quickCopy.caption "クィックコピー">
+<!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "標準アウトプットフォーマット：">
+<!ENTITY zotero.preferences.quickCopy.macWarning "注意：Mac OS Xにはリッチテキスト形式は失われます。">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.setings "サイト固有の設定：">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "ドメイン／パス">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "（例：wikipedia.org）">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "出力形式">
+
+<!ENTITY zotero.preferences.prefpane.keys "ショートカットキー">
+
+<!ENTITY zotero.preferences.keys.openZotero "Zoteroパネルを開く／閉じる">
+<!ENTITY zotero.preferences.keys.toggleFullscreen "全画面表示">
+<!ENTITY zotero.preferences.keys.library "ライブラリー">
+<!ENTITY zotero.preferences.keys.quicksearch "高速検索">
+<!ENTITY zotero.preferences.keys.newItem "新規アイテムを作成">
+<!ENTITY zotero.preferences.keys.newNote "新規メモを作成">
+<!ENTITY zotero.preferences.keys.toggleTagSelector "タグ・セレクターを表示">
+<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copy Selected Item Citations to Clipboard">
+<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "選択されたあいてむをクリップボードにコピー">
+<!ENTITY zotero.preferences.keys.overrideGlobal "矛盾するショートカットを上書く">
+<!ENTITY zotero.preferences.keys.changesTakeEffect "変更を有効にするために、新規画面を開いてください">
+
+
+<!ENTITY zotero.preferences.prefpane.advanced "詳細">
+
+<!ENTITY zotero.preferences.dataDir "保管場所">
+<!ENTITY zotero.preferences.dataDir.useProfile "Firefoxプロファイルダイレクトリーを使用する">
+<!ENTITY zotero.preferences.dataDir.custom "カストム：">
+<!ENTITY zotero.preferences.dataDir.choose "選択する...">
+<!ENTITY zotero.preferences.dataDir.reveal "Show Data Directory">
+
+<!ENTITY zotero.preferences.dbMaintenance "Database Maintenance">
+<!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Check Database Integrity">
+<!ENTITY zotero.preferences.dbMaintenance.rebuildTranslators "Rebuild Translators Table">

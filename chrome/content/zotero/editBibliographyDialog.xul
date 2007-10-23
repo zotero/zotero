@@ -1,0 +1,115 @@
+<?xml version="1.0"?>
+<!--
+    ***** BEGIN LICENSE BLOCK *****
+    
+    Copyright (c) 2006  Center for History and New Media
+                        George Mason University, Fairfax, Virginia, USA
+                        http://chnm.gmu.edu
+    
+    Licensed under the Educational Community License, Version 1.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+    
+    http://www.opensource.org/licenses/ecl1.php
+    
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+    
+    ***** END LICENSE BLOCK *****
+-->
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/overlay.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/integration.css" type="text/css"?>
+<!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
+
+<dialog
+	id="edit-bibliography-dialog"
+	orient="vertical"
+	title="&zotero.integration.editBibliography.title;"
+	width="750" height="450"
+	onload="Zotero_Bibliography_Dialog.load();"
+	onunload="doUnload();"
+	ondialogaccept="Zotero_Bibliography_Dialog.accept();"
+	buttons="accept"
+	xmlns:html="http://www.w3.org/1999/xhtml"
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	style="padding: 0">
+	
+	<script src="include.js"/>
+	<script src="selectItemsDialog.js"/>
+	<script src="editBibliographyDialog.js"/>
+	
+	<vbox id="zotero-select-items-container" flex="1" style="padding: 1em">
+		<vbox flex="1">
+			<hbox flex="1">
+				<vbox align="stretch" flex="1">
+					<hbox align="center" pack="end">
+						<label value="&zotero.toolbar.search.label;" control="zotero-tb-search"/>
+						<textbox id="zotero-tb-search" type="timed" timeout="250" oncommand="onSearch()" dir="reverse" onkeypress="if(event.keyCode == event.DOM_VK_ESCAPE) { this.value = ''; this.doCommand('cmd_zotero_search'); return false; } return true;">
+							<toolbarbutton id="zotero-tb-search-cancel" oncommand="this.parentNode.value='';" hidden="true"/>
+						</textbox>
+					</hbox>
+					<hbox flex="1" style="margin-top: 5px">
+						<tree id="zotero-collections-tree"
+							style="width: 150px;" hidecolumnpicker="true" seltype="single"
+							onselect="onCollectionSelected();">
+							<treecols>
+								<treecol
+									id="zotero-collections-name-column"
+									label="&zotero.collections.name_column;"
+									flex="1"
+									primary="true"/>
+							</treecols>
+							<treechildren/>
+						</tree>
+					
+						<tree id="zotero-items-tree"
+							flex="1" hidecolumnpicker="true" seltype="single"
+							onselect="Zotero_Bibliography_Dialog.treeItemSelected();">
+							<treecols>
+								<treecol
+									id="zotero-items-column-title" primary="true"
+									label="&zotero.items.title_column;"
+									flex="4" persist="width ordinal hidden sortActive sortDirection"/>
+								<splitter class="tree-splitter"/>
+								<treecol
+									id="zotero-items-column-firstCreator"
+									label="&zotero.items.creator_column;"
+									flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+								<splitter class="tree-splitter"/>
+								<treecol
+									id="zotero-items-column-dateAdded" hidden="true"
+									label="&zotero.items.dateAdded_column;"
+									flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+								<splitter class="tree-splitter"/>
+								<treecol
+									id="zotero-items-column-dateModified" hidden="true"
+									label="&zotero.items.dateModified_column;"
+									flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+							</treecols>				
+							<treechildren/>
+						</tree>
+					</hbox>
+				</vbox>
+						
+				<hbox id="source-list">
+					<vbox align="center" pack="center">
+						<toolbarbutton id="add" oncommand="Zotero_Bibliography_Dialog.add()" disabled="true"/>
+						<toolbarbutton id="remove" oncommand="Zotero_Bibliography_Dialog.remove()" disabled="true"/>
+					</vbox>
+					<vbox>
+						<label value="&zotero.integration.references.label;"/>
+						<listbox id="item-list" flex="1" align="stretch" seltype="single"
+							style="width: 250px;" onselect="Zotero_Bibliography_Dialog.listItemSelected();"/>
+					</vbox>
+				</hbox>
+			</hbox>
+		</vbox>
+		
+		<textbox id="editor" type="styled" flex="1"/>
+	</vbox>
+</dialog>

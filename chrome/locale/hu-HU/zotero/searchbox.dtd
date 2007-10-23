@@ -1,0 +1,23 @@
+<!ENTITY zotero.search.name "Név:">
+
+<!ENTITY zotero.search.joinMode.prefix "Találat">
+<!ENTITY zotero.search.joinMode.any "bármelyik">
+<!ENTITY zotero.search.joinMode.all "összes">
+<!ENTITY zotero.search.joinMode.suffix "a következők közül:">
+
+<!ENTITY zotero.search.recursive.label "Keresés az almappákban">
+<!ENTITY zotero.search.noChildren "Csak felsőszintű elemek megjelenítése">
+<!ENTITY zotero.search.includeParentsAndChildren "Szülő és gyerek elemek megjelenítése">
+
+<!ENTITY zotero.search.textModes.phrase "Kifejezés">
+<!ENTITY zotero.search.textModes.phraseBinary "Kifejezés (bináris állományokban is)">
+<!ENTITY zotero.search.textModes.regexp "Regexp">
+<!ENTITY zotero.search.textModes.regexpCS "Regexp (kis és nagybetűk megkülönböztetése)">
+
+<!ENTITY zotero.search.date.units.days "nap">
+<!ENTITY zotero.search.date.units.months "hónap">
+<!ENTITY zotero.search.date.units.years "év">
+
+<!ENTITY zotero.search.search "Keresés">
+<!ENTITY zotero.search.clear "Törlés">
+<!ENTITY zotero.search.saveSearch "Keresés mentése">

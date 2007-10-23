@@ -7,34 +7,14 @@
     <RDF:Seq>
       <RDF:li>
         <RDF:Description>
-          <version>1.0.0b2.SVN</version>
+          <version>1.0.0rc4.SVN</version>
           <targetApplication>
             <RDF:Description>
               <id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</id>
-              <minVersion>2.0a1+</minVersion>
-              <maxVersion>3.0+</maxVersion>
+              <minVersion>2.0</minVersion>
+              <maxVersion>2.0.0.*</maxVersion>
               <updateLink>http://www.zotero.org/download/zotero.xpi</updateLink>
-            </RDF:Description>
-          </targetApplication>
-        </RDF:Description>
-      </RDF:li>
-    </RDF:Seq>
-  </updates>
-</RDF:Description>
-
-<!-- This will disable old versions with a blank extension -->
-<RDF:Description about="urn:mozilla:extension:scholar@chnm.gmu.edu">
-  <updates>
-    <RDF:Seq>
-      <RDF:li>
-        <RDF:Description>
-          <version>1.0a1.SVN</version>
-          <targetApplication>
-            <RDF:Description>
-              <id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</id>
-              <minVersion>2.0a1+</minVersion>
-              <maxVersion>3.0+</maxVersion>
-              <updateLink>http://www.zotero.org/download/scholar-dev.xpi</updateLink>
+              <updateHash>sha1:</updateHash>
             </RDF:Description>
           </targetApplication>
         </RDF:Description>

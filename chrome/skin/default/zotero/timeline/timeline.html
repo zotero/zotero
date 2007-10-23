@@ -1,0 +1,100 @@
+<!DOCTYPE html SYSTEM "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<style type='text/css'>
+			.timeline {
+				margin: 0 0 10px;
+				padding: 0;
+				font-size: 11px;
+				font-family: Lucida Grande, Tahoma, sans-serif;
+			}
+			
+			.controls {
+				font-family: Arial, sans-serif;
+				font-size: 14px;
+			}
+		</style>
+		
+		<script src="chrome://zotero/content/include.js"></script>
+		<script src="chrome://zotero/skin/timeline/timelineControls.js" type="text/javascript"></script>
+		<script src="chrome://zotero/skin/timeline/timeline-api.js" type="text/javascript"></script>
+		<script type="text/javascript">
+			var tl;
+			function onLoad(a, b, c, date) {
+				var eventSource = new Timeline.DefaultEventSource();
+				
+				var theme = Timeline.ClassicTheme.create();
+				theme.event.label.width = 175;
+				date = createDate(date);
+				var bandInfos = [
+					Timeline.createBandInfo({
+					eventSource:	eventSource,
+					date:			date,
+					width:			"70%", 
+					intervalUnit:	a, 
+					intervalPixels: 100,
+					theme:			theme
+					}),
+					Timeline.createBandInfo({
+					showEventText:	false,
+					trackHeight:	0.5,
+					trackGap:		0.2,
+					eventSource:	eventSource,
+					date:			date,
+					width:			"25%", 
+					intervalUnit:	b, 
+					intervalPixels: 200,
+					theme:			theme
+					}),
+					Timeline.createBandInfo({
+					showEventText:	false,
+					trackHeight:	0.5,
+					trackGap:		0.2,
+					eventSource:	eventSource,
+					date:			date,
+					width:			"5%", 
+					intervalUnit:	c, 
+					intervalPixels: 200,
+					theme:			theme
+					})
+				];
+				bandInfos[1].syncWith = 0;
+				bandInfos[1].highlight = true;
+				bandInfos[1].eventPainter.setLayout(bandInfos[0].eventPainter.getLayout());
+				bandInfos[2].syncWith = 0;
+				bandInfos[2].highlight = true;
+			
+				tl = Timeline.create(document.getElementById("my-timeline"), bandInfos);
+				Timeline.loadXML("zotero://timeline/data/", function(xml, url) { eventSource.loadXML(xml, url); });
+				
+				setupFilterHighlightControls(document.getElementById("my-timeline-controls"), tl, [0,1,2], theme);
+				setupOtherControls(document.getElementById("my-other-controls"), tl, document.URL);
+			}
+			
+			function onResize() {
+				var curDate = tl.getBand(0).getCenterVisibleDate().toString();
+			    tl.layout();
+				centerTimeline(curDate);
+			}
+			
+			Timeline.DurationEventPainter.prototype._showBubble = function(x, y, evt) {
+				// Get ChromeWindow so we have access to ZoteroPane (overlay.js)
+				var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+					.getService(Components.interfaces.nsIWindowMediator);
+				var win = wm.getMostRecentWindow('navigator:browser');
+				var zp = win.ZoteroPane;
+				if (!zp.isShowing()) {
+					zp.toggleDisplay();
+				}
+				zp.selectItem(evt.getDescription());
+			}
+			
+			document.write("<title>" + getString("general.title") + "</title>");
+		</script>
+	</head>
+	<body onload="onLoad();" onresize="onResize()">
+		<script type="text/javascript">document.write(getTimeline());</script>
+		<div class="controls" id="my-timeline-controls"></div><br/>
+		<div class="controls" id="my-other-controls"></div>
+	</body>
+</html>

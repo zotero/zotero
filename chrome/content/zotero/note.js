@@ -28,6 +28,9 @@ function onLoad()
 	noteEditor = document.getElementById('note-editor');
 	noteEditor.focus();
 	
+	// Set font size from pref
+	Zotero.setFontSize(noteEditor);
+	
 	var params = new Array();
 	var b = document.location.href.substr(document.location.href.indexOf('?')+1).split('&');
 	for(var i = 0; i < b.length; i++)
@@ -36,31 +39,26 @@ function onLoad()
 		
 		params[b[i].substr(0,mid)] = b[i].substr(mid+1);
 	}
-	var id = params['id'];
+	var itemID = params['id'];
 	var collectionID = params['coll'];
+	var parentItemID = params['p'];
 	
-	if(id && id != '' && id != 'undefined')
-	{
-		var ref = Zotero.Items.get(id);
-		if(ref.isNote())
-		{
-			noteEditor.note = ref;
-			document.title = "Edit Note";
-		}
-		else
-		{
-			noteEditor.item = ref;
-			document.title = "Add Note";
-		}
+	if (itemID) {
+		var ref = Zotero.Items.get(itemID);
+		noteEditor.note = ref;
+		document.title = ref.getNoteTitle();
+	}
+	else if (parentItemID) {
+		var ref = Zotero.Items.get(parentItemID);
+		noteEditor.item = ref;
 	}
 	else
 	{
-		document.title = "Add Note";
 		if(collectionID && collectionID != '' && collectionID != 'undefined')
 			noteEditor.collection = Zotero.Collections.get(collectionID);
 	}
 	
-	notifierUnregisterID = Zotero.Notifier.registerItemObserver(NotifyCallback);
+	notifierUnregisterID = Zotero.Notifier.registerObserver(NotifyCallback, 'item');
 }
 
 function onUnload()
@@ -68,13 +66,17 @@ function onUnload()
 	if(noteEditor && noteEditor.value)
 		noteEditor.save();
 	
-	Zotero.Notifier.unregisterItemObserver(notifierUnregisterID);
+	Zotero.Notifier.unregisterObserver(notifierUnregisterID);
 }
 
 var NotifyCallback = {
-	notify: function(){
+	notify: function(action, type, ids){
+		// DEBUG: why does this reset without checking the modified ids?
 		if (noteEditor.note){
 			noteEditor.note = noteEditor.note;
+			document.title = noteEditor.note.getNoteTitle();
+			// Update the window name (used for focusing) in case this is a new note
+			window.name = 'zotero-note-' + noteEditor.note.getID();
 		}
 	}
 }

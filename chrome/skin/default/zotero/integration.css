@@ -1,0 +1,39 @@
+#add {
+	list-style-image: url('chrome://zotero/skin/citation-add.png');
+}
+
+#add[disabled="true"] {
+	list-style-image: url('chrome://zotero/skin/citation-add-gray.png');
+}
+
+#remove {
+	list-style-image: url('chrome://zotero/skin/citation-delete.png');
+}
+
+#remove[disabled="true"] {
+	list-style-image: url('chrome://zotero/skin/citation-delete-gray.png');
+}
+
+#add .toolbarbutton-text, #remove .toolbarbutton-text
+{
+	margin: 0 !important;
+	padding: 0 !important;
+}
+
+
+#prefix, #suffix {
+	width: 200px;
+}
+
+#tree-locator {
+	width: 60px;
+}
+
+#item-locator {
+	max-width:100px;
+}
+
+#editor {
+	margin-top: 10px;
+	max-height: 100px;
+}

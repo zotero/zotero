@@ -1,0 +1,10 @@
+<!ENTITY zotero.version "versión">
+<!ENTITY zotero.createdby "Una creación de:">
+<!ENTITY zotero.directors "Directores:">
+<!ENTITY zotero.developers "Desarrolladores:">
+<!ENTITY zotero.alumni "Alumni:">
+<!ENTITY zotero.about.localizations "Localizations:">
+<!ENTITY zotero.about.additionalSoftware "Third-Party Software and Standards:">
+<!ENTITY zotero.executiveProducer "Productor ejecutivo:">
+<!ENTITY zotero.thanks "Agradecimientos especiales:">
+<!ENTITY zotero.about.close "Cerrar">

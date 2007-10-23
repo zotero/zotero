@@ -1,0 +1,139 @@
+<?xml version="1.0"?>
+
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/errorReport.css" type="text/css"?>
+
+<!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
+
+<wizard xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	id="zotero-error-report" title="Zotero">
+	
+	<script>
+	<![CDATA[
+		var Zotero_Error_Report = new function() {
+			this.init = init;
+			this.sendErrorReport = sendErrorReport;
+			
+			var obj = window.arguments[0].wrappedJSObject;
+			var Zotero = obj.Zotero;
+			var data = obj.data;
+			var msg = data.msg;
+			var e = data.e;
+			var askForSteps = data.askForSteps;
+			var extraData = data.extraData ? data.extraData : '';
+			
+			function init() {
+				var wizard = document.getElementById('zotero-error-report');
+				
+				document.getElementById('zotero-failure-message').appendChild(document.createTextNode(msg));
+				document.getElementById('zotero-error-message').value = e;
+				
+				var continueButtonName = wizard.getButton('next').getAttribute('label');
+				var str = Zotero.getString('errorReport.advanceMessage', continueButtonName);
+				document.getElementById('zotero-advance-message').setAttribute('value', str);
+				
+				if (askForSteps) {
+					var str = Zotero.getString('errorReport.stepsToReproduce') + "\n\n1.\n2.\n3.\n\n"
+						+ Zotero.getString('errorReport.expectedResult') + "\n\n"
+						+ Zotero.getString('errorReport.actualResult') + "\n";
+					document.getElementById('zotero-error-steps').value = str;
+					document.getElementById('zotero-error-steps-box').setAttribute('hidden', false)
+				}
+			}
+			
+			function sendErrorReport() {
+				var parts = {
+					error: "true",
+					email: document.getElementById('zotero-email-address').value,
+					errorSteps: document.getElementById('zotero-error-steps').value,
+					errorData: Zotero.getErrors(true).join('\n'),
+					extraData: extraData,
+					diagnostic: Zotero.getSystemInfo()
+				};
+				
+				var body = '';
+				for (var key in parts) {
+					body += key + '=' + encodeURIComponent(parts[key]) + '&';
+				}
+				body = body.substr(0, body.length - 1);
+				Zotero.Utilities.HTTP.doPost("http://www.zotero.org/repo/report", body,
+					_sendErrorReportCallback);
+			}
+			
+			
+			function _sendErrorReportCallback(xmlhttp) {
+				var wizard = document.getElementById('zotero-error-report');
+				if (!wizard) {
+					return;
+				}
+				
+				if (!xmlhttp.responseXML){
+					try {
+						if (xmlhttp.status>1000){
+							alert('No network connection');
+						}
+						else {
+							alert('Invalid response from repository');
+						}
+					}
+					catch (e){
+						alert('Repository cannot be contacted');
+					}
+					
+					wizard.rewind();
+					return;
+				}
+				
+				
+				var reported = xmlhttp.responseXML.getElementsByTagName('reported');
+				if (reported.length != 1) {
+					alert('Invalid response from repository');
+					wizard.rewind();
+					return;
+				}
+				
+				wizard.advance();
+				wizard.getButton('cancel').setAttribute('disabled', true);
+				wizard.canRewind = false;
+				var reportID = reported[0].getAttribute('reportID');
+				document.getElementById('zotero-report-id').setAttribute('value', reportID);
+				document.getElementById('zotero-report-result').setAttribute('hidden', false);
+			}
+		}
+	]]>
+	</script>
+	
+	<wizardpage onpageshow="Zotero_Error_Report.init()">
+		<description id="zotero-failure-message"/>
+		<textbox id="zotero-error-message" class="plain" readonly="true" multiline="true" rows="6"/>
+		<!-- TODO: RTL language support -->
+		<description id="zotero-unrelated-message">&zotero.general.note; &zotero.errorReport.unrelatedMessages;</description>
+		<description id="zotero-advance-message"/>
+	</wizardpage>
+	
+	<wizardpage label="&zotero.errorReport.additionalInfo; &zotero.general.optional;">
+		<hbox id="zotero-email-address-box">
+			<label value="&zotero.errorReport.emailAddress;" control="zotero-email-address"/>
+			<textbox id="zotero-email-address" flex="1"/>
+		</hbox>
+		
+		<vbox id="zotero-error-steps-box" hidden="true">
+			<description control="zotero-error-steps">&zotero.errorReport.errorSteps;</description>
+			<textbox id="zotero-error-steps" multiline="true" rows="6"/>
+		</vbox>
+	</wizardpage>
+	
+	<wizardpage onpageshow="Zotero_Error_Report.sendErrorReport()">
+		<description>&zotero.errorReport.submissionInProgress;</description>
+	</wizardpage>
+	
+	<wizardpage>
+		<description>&zotero.errorReport.submitted;</description>
+		<description id="zotero-report-result" hidden="true">
+			&zotero.errorReport.reportID;
+			<textbox id="zotero-report-id" class="plain" readonly="true"/>
+		</description>
+		<description>&zotero.errorReport.includeReportID;</description>
+		<description>&zotero.errorReport.furtherAssistance;</description>
+	</wizardpage>
+</wizard>

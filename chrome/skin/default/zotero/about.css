@@ -33,3 +33,22 @@ dialog
 {
 	margin-left: 10px;
 }
+
+#zotero-translators-list {
+	margin: .3em 0;
+	height: 6.5em;
+	overflow: -moz-scrollbars-vertical;
+}
+
+#zotero-translators-list label.locale {
+	font-weight: bold;
+	margin-top: .5em;
+}
+
+#zotero-translators-list label.locale:first-child {
+	margin-top: 0;
+}
+
+#zotero-translators-list label:not(.locale) {
+	margin-left: 1.25em;
+}

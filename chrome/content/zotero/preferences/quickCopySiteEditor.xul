@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/preferences.css"?>
+
+<!DOCTYPE window SYSTEM "chrome://zotero/locale/preferences.dtd">
+<dialog xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	title="" buttons="cancel,accept"
+	id="zotero-quickCopySiteEditor"
+	onload="sizeToContent();"
+	ondialogaccept="Zotero_QuickCopySiteEditor.onAccept();">
+	
+	<script src="chrome://zotero/content/include.js"/>
+	<script src="preferences.js"/>
+	
+	<script>
+	<![CDATA[
+		var Zotero_QuickCopySiteEditor = new function () {
+			this.onAccept = onAccept;
+			
+			function onAccept() {
+				var io = window.arguments[0];
+				io.domain = document.getElementById('zotero-quickCopy-domain').value;
+				io.format = document.getElementById('zotero-quickCopy-format').value;
+				io.ok = true;
+			}
+		}
+	]]>
+	</script>
+	
+	<vbox id="zotero-preferences-quickCopySiteEditor">
+		<vbox>
+			<label value="&zotero.preferences.quickCopy.siteEditor.domainPath; &zotero.preferences.quickCopy.siteEditor.domainPath.example;" control="zotero-quickCopy-domain"/>
+			<textbox id="zotero-quickCopy-domain"/>
+		</vbox>
+		<vbox>
+			<label value="&zotero.preferences.quickCopy.siteEditor.outputFormat;" control="zotero-quickCopy-format"/>
+			<menulist id="zotero-quickCopy-format"/>
+		</vbox>
+	</vbox>
+	
+	<script>
+	<![CDATA[
+		var io = window.arguments[0];
+		document.getElementById('zotero-quickCopy-domain').value = io.domain ? io.domain : '';
+		buildQuickCopyFormatDropDown(document.getElementById('zotero-quickCopy-format'), io.format);
+	]]>
+	</script>
+</dialog>

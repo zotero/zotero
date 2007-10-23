@@ -6,30 +6,37 @@
   
     <em:id>zotero@chnm.gmu.edu</em:id>
     <em:name>Zotero</em:name>
-    <em:version>1.0.0b2.SVN</em:version>
-    <em:description>The Next-Generation Research Tool</em:description>
+    <em:version>1.0.0rc4.SVN</em:version>
     <em:creator>Center for History and New Media<br/>George Mason University</em:creator>
-	<em:contributor>Dan Cohen</em:contributor>
-	<em:contributor>Josh Greenberg</em:contributor>
+    <em:contributor>Dan Cohen</em:contributor>
+    <em:contributor>Sean Takats</em:contributor>
     <em:developer>Simon Kornblith</em:developer>
     <em:developer>David Norton</em:developer>
     <em:developer>Dan Stillman</em:developer>
     <em:homepageURL>http://www.zotero.org</em:homepageURL>
-    <em:optionsURL>chrome://zotero/content/preferences.xul</em:optionsURL>
+    <em:optionsURL>chrome://zotero/content/preferences/preferences.xul</em:optionsURL>
     <em:aboutURL>chrome://zotero/content/about.xul</em:aboutURL>
     <em:iconURL>chrome://zotero/skin/zotero_z_32px.png</em:iconURL>
-    <em:updateURL>http://www.zotero.org/download/update-svn.rdf</em:updateURL>
+    <em:updateURL>https://www.zotero.org/download/update-svn.rdf</em:updateURL>
     <em:type>2</em:type> <!-- type=extension --> 
     
     <!-- Firefox -->
     <em:targetApplication>
       <Description>
         <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
-        <em:minVersion>2.0a1+</em:minVersion>
-        <em:maxVersion>3.0+</em:maxVersion>
+        <em:minVersion>2.0</em:minVersion>
+        <em:maxVersion>2.0.0.*</em:maxVersion>
       </Description>
     </em:targetApplication>
-  
+    
+    <!-- Flock -->
+    <em:targetApplication>
+        <Description>
+            <em:id>{a463f10c-3994-11da-9945-000d60ca027b}</em:id>
+            <em:minVersion>0.9</em:minVersion>
+            <em:maxVersion>1.0.*</em:maxVersion>
+        </Description>
+    </em:targetApplication>
+    
   </Description>
-
 </RDF>

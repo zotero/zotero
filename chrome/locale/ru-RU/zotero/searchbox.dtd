@@ -1,0 +1,23 @@
+<!ENTITY zotero.search.name "Название">
+
+<!ENTITY zotero.search.joinMode.prefix "Совпадающее с">
+<!ENTITY zotero.search.joinMode.any "любым">
+<!ENTITY zotero.search.joinMode.all "всеми">
+<!ENTITY zotero.search.joinMode.suffix "из нижеследующего:">
+
+<!ENTITY zotero.search.recursive.label "искать в подпапках">
+<!ENTITY zotero.search.noChildren "Показывать документы только верхнего уровня">
+<!ENTITY zotero.search.includeParentsAndChildren "Включать родительские и дочернии документы совпадающих с искомым">
+
+<!ENTITY zotero.search.textModes.phrase "Фраза">
+<!ENTITY zotero.search.textModes.phraseBinary "Фраза (вкл. двоичные файлы)">
+<!ENTITY zotero.search.textModes.regexp "Типовое выражение">
+<!ENTITY zotero.search.textModes.regexpCS "Типовое выражение (с учетом регистра)">
+
+<!ENTITY zotero.search.date.units.days "дни">
+<!ENTITY zotero.search.date.units.months "месяцы">
+<!ENTITY zotero.search.date.units.years "года">
+
+<!ENTITY zotero.search.search "Искать">
+<!ENTITY zotero.search.clear "Очистить">
+<!ENTITY zotero.search.saveSearch "Сохранить поиск">

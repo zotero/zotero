@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+
+<window
+	orient="vertical"
+	width="400"
+	height="200"
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	
+	<keyset>
+		<key id="key_close" key="W" modifiers="accel" command="cmd_close"/>
+	</keyset>
+	<command id="cmd_close" oncommand="window.close();"/>
+	
+	<textbox id="alert-textbox" class="plain" flex="1" readonly="true"/>
+	
+	<script>
+	window.addEventListener('load', function(e){
+		document.getElementById('alert-textbox').value = window.arguments[0].alertText;
+		document.getElementById('alert-textbox').select();
+	}, false);
+	</script>
+</window>

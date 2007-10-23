@@ -22,8 +22,12 @@
 
 Zotero.File = new function(){
 	this.getExtension = getExtension;
+	this.getClosestDirectory = getClosestDirectory;
 	this.getSample = getSample;
 	this.getContents = getContents;
+	this.getContentsFromURL = getContentsFromURL;
+	this.putContents = putContents;
+	this.copyToUnique = this.copyToUnique;
 	this.getCharsetFromFile = getCharsetFromFile;
 	this.addCharsetListener = addCharsetListener;
 	
@@ -35,12 +39,30 @@ Zotero.File = new function(){
 	
 	
 	/*
+	 * Traverses up the filesystem from a file until it finds an existing
+	 *  directory, or false if it hits the root
+	 */
+	function getClosestDirectory(file) {
+		var dir = file.parent;
+		
+		while (dir && !dir.exists()) {
+			var dir = dir.parent;
+		}
+		
+		if (dir && dir.exists()) {
+			return dir;
+		}
+		return false;
+	}
+	
+	
+	/*
 	 * Get the first 128 bytes of the file as a string (multibyte-safe)
 	 */
 	function getSample(file){
 		var fis = Components.classes["@mozilla.org/network/file-input-stream;1"].
 			createInstance(Components.interfaces.nsIFileInputStream);
-		fis.init(file, false, false, false);
+		fis.init(file, 0x01, 0664, 0);
 		
 		const replacementChar
 			= Components.interfaces.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER;
@@ -48,17 +70,17 @@ Zotero.File = new function(){
 			.createInstance(Components.interfaces.nsIConverterInputStream);
 		is.init(fis, "UTF-8", 128, replacementChar);
 		var str = {};
-		var numChars = is.readString(512, str);
+		var numChars = is.readString(128, str);
 		is.close();
 		
 		return str.value;
 	}
 	
 	
-	function getContents(file, charset){
+	function getContents(file, charset, maxLength){
 		var fis = Components.classes["@mozilla.org/network/file-input-stream;1"].
 			createInstance(Components.interfaces.nsIFileInputStream);
-		fis.init(file, false, false, false);
+		fis.init(file, 0x01, 0664, 0);
 		
 		if (charset){
 			charset = Zotero.CharacterSets.getName(charset);
@@ -72,16 +94,68 @@ Zotero.File = new function(){
 			= Components.interfaces.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER;
 		var is = Components.classes["@mozilla.org/intl/converter-input-stream;1"]
 			.createInstance(Components.interfaces.nsIConverterInputStream);
-		is.init(fis, charset, 1024, replacementChar);
+		is.init(fis, charset, 4096, replacementChar);
+		var chars = 4096;
 		
 		var contents = [], str = {};
 		while (is.readString(4096, str) != 0) {
+			if (maxLength) {
+				chars += 4096;
+				if (chars >= maxLength) {
+					Zotero.debug('Stopping at ' + (chars - 4096)
+						+ ' characters in File.getContents()');
+					break;
+				}
+			}
+			
 			contents.push(str.value);
 		}
 		
 		is.close();
 		
 		return contents.join();
+	}
+	
+	
+	/*
+	 * Return the contents of a URL as a string
+	 *
+	 * Runs asynchronously, so should only be run on local (e.g. chrome) URLs
+	 */
+	function getContentsFromURL(url) {
+		var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
+						.createInstance();
+		xmlhttp.open('GET', url, false);
+		xmlhttp.send(null);
+		return xmlhttp.responseText;
+	}
+	
+	
+	/*
+	 * Write string to a file, overwriting existing file if necessary
+	 *
+	 * Note: Can only handle ASCII text!
+	 */
+	function putContents(file, str) {
+		if (file.exists()) {
+			file.remove(null);
+		}
+		var foStream = Components.classes["@mozilla.org/network/file-output-stream;1"]
+						 .createInstance(Components.interfaces.nsIFileOutputStream);
+		foStream.init(file, 0x02 | 0x08 | 0x20, 0664, 0); // write, create, truncate
+		foStream.write(str, str.length);
+		foStream.close();
+	}
+	
+	
+	function copyToUnique(file, newFile) {
+		newFile.createUnique(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0644);
+		var newName = newFile.leafName;
+		newFile.remove(null);
+		
+		// Copy file to unique name
+		file.copyTo(newFile.parent, newName);
+		return file;
 	}
 	
 	
@@ -147,7 +221,9 @@ Zotero.File = new function(){
 			prefService.setCharPref('intl.charset.detector', 'universal_charset_detector');
 		}
 		
-		browser.addEventListener("pageshow", function(){
+		var onpageshow = function(){
+			browser.removeEventListener("pageshow", onpageshow, false);
+			
 			var charset = browser.contentDocument.characterSet;
 			Zotero.debug("Detected character set '" + charset + "'");
 			
@@ -155,8 +231,8 @@ Zotero.File = new function(){
 			prefService.setCharPref('intl.charset.detector', oldPref);
 			
 			callback(charset, args);
-			
-			Zotero.Browser.deleteHiddenBrowser(browser);
-		}, false);
+		};
+		
+		browser.addEventListener("pageshow", onpageshow, false);
 	}
 }

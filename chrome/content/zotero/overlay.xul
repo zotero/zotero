@@ -21,7 +21,11 @@
     ***** END LICENSE BLOCK *****
 -->
 <?xml-stylesheet href="chrome://zotero/skin/overlay.css" type="text/css"?>
-<!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
+
+<!DOCTYPE overlay [
+	<!ENTITY % globalDTD SYSTEM "chrome://global/locale/global.dtd">	%globalDTD;
+	<!ENTITY % zoteroDTD SYSTEM "chrome://zotero/locale/zotero.dtd">	%zoteroDTD;
+]>
 
 <overlay id="zotero"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
@@ -32,178 +36,268 @@
 	
 	<script src="overlay.js"/>
     <script src="fileInterface.js"/>
+	<script src="reportInterface.js"/>
+	<script src="timelineInterface.js"/>
+	<script src="browser.js"/>
+	<script src="chrome://global/content/nsDragAndDrop.js"/>
+	<script src="chrome://global/content/nsTransferable.js"/>
 	
 	<commandset id="mainCommandSet">
-		<command id="cmd_zotero_newItem" oncommand="ZoteroPane.newItem(2);"/>
-		<command id="cmd_zotero_newCollection" oncommand="ZoteroPane.newCollection();"/>
 		<command id="cmd_zotero_search" oncommand="ZoteroPane.search();"/>
+		<command id="cmd_zotero_reportErrors" oncommand="ZoteroPane.reportErrors();"/>
 	</commandset>
+	
 	<toolbarpalette id="BrowserToolbarPalette">
 		<toolbarbutton id="scholar-toolbar-button"/> <!-- May be necessary to keep pre-1.0b2 installs from breaking -->
 		<toolbarbutton id="zotero-toolbar-button" class="toolbarbutton-1"
-						label="&zotero.name;"
+						label="Zotero"
 						oncommand="ZoteroPane.toggleDisplay();"/>
 	</toolbarpalette>
+	
+	<popup id="contentAreaContextMenu">
+		<menuseparator id="zotero-context-separator" hidden="true"/>
+		<menuitem id="zotero-context-add-to-current-note" class="menu-iconic"
+			label="&zotero.contextMenu.addTextToCurrentNote;" hidden="true"
+			oncommand="ZoteroPane.addTextToNote(window.content.getSelection().toString())"/>
+		<menuitem id="zotero-context-add-to-new-note" class="menu-iconic"
+			label="&zotero.contextMenu.addTextToNewNote;" hidden="true"
+			oncommand="var itemID = ZoteroPane.addItemFromPage(); ZoteroPane.newNote(false, itemID, window.content.getSelection().toString())"/>
+		<menuitem id="zotero-context-save-link-as-snapshot" class="menu-iconic"
+			label="&zotero.contextMenu.saveLinkAsSnapshot;" hidden="true"
+			oncommand="Zotero.Attachments.importFromURL(window.gContextMenu.linkURL, false, false, false, ZoteroPane.getSelectedCollection(true))"/>
+		<menuitem id="zotero-context-save-image-as-snapshot" class="menu-iconic"
+			label="&zotero.contextMenu.saveImageAsSnapshot;" hidden="true"
+			oncommand="Zotero.Attachments.importFromURL(window.gContextMenu.onImage ? window.gContextMenu.imageURL : window.gContextMenu.bgImageURL, false, false, false, ZoteroPane.getSelectedCollection(true))"/>
+	</popup>
+	
 	<vbox id="appcontent">
 		<!-- Changes to attributes of zotero-splitter and zotero-pane must be mirrored on overlay.js's onLoad() function -->
-		<splitter id="zotero-splitter" resizebefore="closest" resizeafter="closest" collapsed="true"/>
-		<hbox id="zotero-pane" persist="height" collapsed="true" flex="1">
+		<!-- onmouseup shouldn't be necessary but seems to help prevent tag selector from sometimes going off the screen -->
+		<splitter id="zotero-splitter" resizebefore="closest" resizeafter="closest" hidden="true"
+			onmouseup="ZoteroPane.updateTagSelectorSize()"/>
+		<hbox id="zotero-pane" persist="savedHeight" hidden="true"
+			onkeydown="ZoteroPane.handleKeyDown(event, this.id)"
+			onkeyup="ZoteroPane.handleKeyUp(event, this.id)"
+			chromedir="&locale.dir;">
 			<popupset>
 				<popup id="zotero-collectionmenu" onpopupshowing="ZoteroPane.buildCollectionContextMenu();">
-					<menuitem label="&toolbar.newCollection.label;" command="cmd_zotero_newCollection"/>
-					<menuitem label="&toolbar.newSavedSearch.label;" oncommand="ZoteroPane.newSearch()"/>
+					<menuitem label="&zotero.toolbar.newCollection.label;" oncommand="ZoteroPane.newCollection()"/>
+					<menuitem label="&zotero.toolbar.newSavedSearch.label;" oncommand="ZoteroPane.newSearch()"/>
+					<menuitem label="&zotero.toolbar.newSubcollection.label;" oncommand="ZoteroPane.newCollection(ZoteroPane.getSelectedCollection().getID())"/>
 					<menuseparator/>
-					<menuitem label="&toolbar.renameCollection.label;" oncommand="ZoteroPane.editSelectedCollection();"/>
-					<menuitem label="&toolbar.renameSavedSearch.label;" oncommand="ZoteroPane.editSelectedCollection()"/>
-					<menuitem label="&toolbar.removeCollection.label;" oncommand="ZoteroPane.deleteSelectedCollection();"/>
-					<menuitem label="&toolbar.removeSavedSearch.label;" oncommand="ZoteroPane.deleteSelectedCollection()"/>
+					<menuitem oncommand="ZoteroPane.editSelectedCollection();"/>
+					<menuitem oncommand="ZoteroPane.deleteSelectedCollection();"/>
 					<menuseparator/>
-					<menuitem label="&toolbar.exportCollection.label;" oncommand="Zotero_File_Interface.exportCollection();"/>
-					<menuitem label="&toolbar.exportSavedSearch.label;" oncommand="Zotero_File_Interface.exportCollection()"/>
-					<menuitem label="&toolbar.createBibCollection.label;" oncommand="Zotero_File_Interface.bibliographyFromCollection();"/>
-					<menuitem label="&toolbar.createBibSavedSearch.label;" oncommand="Zotero_File_Interface.bibliographyFromCollection()"/>
-					<menuitem label="&toolbar.export.label;" oncommand="Zotero_File_Interface.exportFile()"/>
+					<menuitem oncommand="Zotero_File_Interface.exportCollection();"/>
+					<menuitem oncommand="Zotero_File_Interface.bibliographyFromCollection();"/>
+					<menuitem label="&zotero.toolbar.export.label;" oncommand="Zotero_File_Interface.exportFile()"/>
+					<menuitem oncommand="Zotero_Report_Interface.loadCollectionReport()"/>
 				</popup>
 				<popup id="zotero-itemmenu" onpopupshowing="ZoteroPane.buildItemContextMenu();">
-					<menuitem label="&items.menu.attach.snapshot;" oncommand="ZoteroPane.addAttachmentFromPage(false, this.parentNode.getAttribute('itemID'));"/>
-					<menuitem label="&items.menu.attach.link;" oncommand="ZoteroPane.addAttachmentFromPage(true, this.parentNode.getAttribute('itemID'));"/>
+					<menuitem label="&zotero.items.menu.showInLibrary;" oncommand="ZoteroPane.selectItem(this.parentNode.getAttribute('itemID'), true)"/>
 					<menuseparator/>
+					<menuitem label="&zotero.items.menu.attach.note;" oncommand="ZoteroPane.newNote(false, this.parentNode.getAttribute('itemID'))"/>
+					<menuitem label="&zotero.items.menu.attach.snapshot;" oncommand="ZoteroPane.addAttachmentFromPage(false, this.parentNode.getAttribute('itemID'));"/>
+					<menuitem label="&zotero.items.menu.attach.link;" oncommand="ZoteroPane.addAttachmentFromPage(true, this.parentNode.getAttribute('itemID'));"/>
+					<menuseparator/>
+					<menuitem label="&zotero.items.menu.duplicateItem;" oncommand="ZoteroPane.duplicateSelectedItem();"/>
 					<menuitem oncommand="ZoteroPane.deleteSelectedItem();"/>
 					<menuitem oncommand="ZoteroPane.deleteSelectedItem(true);"/>
 					<menuseparator/>
 					<menuitem oncommand="Zotero_File_Interface.exportItems();"/>
 					<menuitem oncommand="Zotero_File_Interface.bibliographyFromItems();"/>
+					<menuitem oncommand="Zotero_Report_Interface.loadItemReport()"/>
+					<menuseparator/>
+					<menuitem oncommand="ZoteroPane.reindexItem();"/>
 				</popup>
 			</popupset>
-			<vbox id="collections-pane" persist="width" flex="1">
-				<toolbar>
-					<toolbarbutton id="tb-collection-add" tooltiptext="&toolbar.newCollection.label;" command="cmd_zotero_newCollection"/>
-					<toolbarbutton id="tb-collection-addsearch" tooltiptext="&toolbar.newSavedSearch.label;" oncommand="ZoteroPane.newSearch();"/>
-					<toolbarbutton id="tb-collection-rename" tooltiptext="&toolbar.renameCollection.label;" oncommand="ZoteroPane.editSelectedCollection();" disabled="true"/>
-					<spacer flex="1"/>
-					<toolbarbutton id="tb-collection-menu" type="menu">
-						<menupopup>
-							<menuitem label="&toolbar.import.label;" oncommand="Zotero_File_Interface.importFile();"/>
-							<menuitem label="&toolbar.export.label;" oncommand="Zotero_File_Interface.exportFile();"/>
-							<menuseparator/>
-							<menuitem label="&toolbar.preferences.label;" oncommand="window.openDialog('chrome://zotero/content/preferences.xul','prefs','chrome,modal')"/>
-							<menuitem label="&toolbar.about.label;" oncommand="window.openDialog('chrome://zotero/content/about.xul','about','chrome,left=' + (window.screenX + 200) + ',top=' + (window.screenY + 100))"/>
-						</menupopup>
-					</toolbarbutton>
-				</toolbar>
-				<tree id="collections-tree" hidecolumnpicker="true" context="zotero-collectionmenu"
-					onselect="ZoteroPane.onCollectionSelected();" seltype="single"
-					ondragdrop="nsDragAndDrop.drop(event,ZoteroPane.getCollectionsView())"
-					ondraggesture="if (event.target.localName == 'treechildren') nsDragAndDrop.startDrag(event,ZoteroPane.getCollectionsView());"
-					onkeypress="if (event.keyCode == event.DOM_VK_BACK_SPACE || event.keyCode == event.DOM_VK_DELETE){ ZoteroPane.deleteSelectedCollection(); }"
-					flex="1">
-					<treecols>
-						<treecol
-							id="name_column"
-							label="&collections.name_column;"
-							flex="1"
-							primary="true"/>
-					</treecols>
-					<treechildren/>
-				</tree>
+			
+			<vbox id="zotero-collections-pane" persist="width" flex="1">
+				<!-- This extra vbox prevents the toolbar from getting compressed when resizing
+						the tag selector to max height -->
+				<vbox flex="1">
+					<toolbar>
+						<toolbarbutton id="zotero-tb-collection-add" tooltiptext="&zotero.toolbar.newCollection.label;" oncommand="ZoteroPane.newCollection()"/>
+						<spacer flex="1"/>
+						<toolbarbutton id="zotero-tb-tag-selector" tooltiptext="&zotero.toolbar.tagSelector.label;" oncommand="ZoteroPane.toggleTagSelector()"/>
+						<toolbarbutton id="zotero-tb-actions-menu" tooltiptext="&zotero.toolbar.actions.label;" type="menu">
+							<menupopup id="zotero-tb-actions-popup" onpopupshowing="document.getElementById('cmd_zotero_reportErrors').setAttribute('disabled', Zotero.getErrors().length == 0)">
+								<menuitem id="zotero-tb-actions-import" label="&zotero.toolbar.import.label;" oncommand="Zotero_File_Interface.importFile();"/>
+								<menuitem id="zotero-tb-actions-export" label="&zotero.toolbar.export.label;" oncommand="Zotero_File_Interface.exportFile();"/>
+								<menuseparator id="zotero-tb-actions-utilities-separator"/>
+								<menuitem id="zotero-tb-actions-timeline" label="&zotero.toolbar.timeline.label;" oncommand="Zotero_Timeline_Interface.loadTimeline()"/>
+								<menuseparator id="zotero-tb-actions-separator"/>
+								<menuitem id="zotero-tb-actions-prefs" label="&zotero.toolbar.preferences.label;"
+									oncommand="window.openDialog('chrome://zotero/content/preferences/preferences.xul', 'zotero-prefs', 'chrome,titlebar,toolbar,' + Zotero.Prefs.get('browser.preferences.instantApply', true) ? 'dialog=no' : 'modal')"/>
+								<menuitem id="zotero-tb-actions-reportErrors" command="cmd_zotero_reportErrors" disabled="true"/>
+								<menuitem id="zotero-tb-actions-documentation" label="&zotero.toolbar.documentation.label;" oncommand="window.open('http://www.zotero.org/documentation/', '', 'menubar=yes,location=yes,toolbar=yes,personalbar=yes,resizable=yes,scrollbars=yes,status=yes');"/>
+								<menuitem id="zotero-tb-actions-about" label="&zotero.toolbar.about.label;" oncommand="window.openDialog('chrome://zotero/content/about.xul', 'about', 'chrome')"/>
+							</menupopup>
+						</toolbarbutton>
+					</toolbar>
+					<tree id="zotero-collections-tree" hidecolumnpicker="true" context="zotero-collectionmenu"
+						onmouseover="ZoteroPane.collectionsView.setHighlightedRows();"
+						ondblclick="ZoteroPane.onDoubleClick(event, this);"
+						onselect="ZoteroPane.onCollectionSelected();" seltype="single"
+						ondragdrop="nsDragAndDrop.drop(event, ZoteroPane.collectionsView)"
+						ondraggesture="if (event.target.localName == 'treechildren') nsDragAndDrop.startDrag(event, ZoteroPane.collectionsView);"
+						onkeypress="ZoteroPane.handleKeyPress(event, this.id)"
+						flex="1">
+						<treecols>
+							<treecol
+								id="zotero-collections-name-column"
+								label="&zotero.collections.name_column;"
+								flex="1"
+								primary="true"/>
+						</treecols>
+						<treechildren/>
+					</tree>
+				</vbox>
+				<splitter id="zotero-tags-splitter" persist="collapsed" onmouseup="ZoteroPane.updateTagSelectorSize()"/>
+				<zoterotagselector id="zotero-tag-selector" persist="height,collapsed,showAutomatic"
+					oncommand="ZoteroPane.updateTagFilter()"/>
 			</vbox>
+			
 			<splitter id="zotero-tree-splitter" resizebefore="closest" resizeafter="closest"/>
-			<vbox id="items-pane" persist="width" flex="1">
+			
+			<vbox id="zotero-items-pane" persist="width" flex="1">
 				<toolbar align="center">
-					<toolbarbutton id="tb-add" tooltiptext="&toolbar.newItem.label;" type="menu">
+					<toolbarbutton id="zotero-tb-add" tooltiptext="&zotero.toolbar.newItem.label;" type="menu">
 						<!-- New Item drop-down built in overlay.js::onLoad() -->
 						<menupopup>
 							<menuseparator/>
-							<menuitem label="&toolbar.attachment.linked;" oncommand="ZoteroPane.addAttachmentFromDialog(true);"/>
-							<menuitem label="&toolbar.attachment.add;" oncommand="ZoteroPane.addAttachmentFromDialog();"/>
+							<menuitem label="&zotero.toolbar.attachment.linked;" oncommand="ZoteroPane.addAttachmentFromDialog(true);"/>
+							<menuitem label="&zotero.toolbar.attachment.add;" oncommand="ZoteroPane.addAttachmentFromDialog();"/>
 							<menuseparator/>
-							<menu label="&toolbar.moreItemTypes.label;">
-								<menupopup id="tb-add-more"/>
+							<menu label="&zotero.toolbar.moreItemTypes.label;">
+								<menupopup id="zotero-tb-add-more"/>
 							</menu>
 						</menupopup>
 					</toolbarbutton>
-					<toolbarbutton id="tb-item-from-page" tooltiptext="&toolbar.newItemFromPage.label;" oncommand="ZoteroPane.addItemFromPage()"/>
+					<toolbarbutton id="zotero-tb-item-from-page" tooltiptext="&zotero.toolbar.newItemFromPage.label;" oncommand="ZoteroPane.addItemFromPage()"/>
 					<toolbarseparator/>
-					<toolbarbutton id="tb-link-page" tooltiptext="&toolbar.attachment.weblink;" oncommand="ZoteroPane.addAttachmentFromPage(true)"/>
-					<toolbarbutton id="tb-snapshot-page" tooltiptext="&toolbar.attachment.snapshot;" oncommand="ZoteroPane.addAttachmentFromPage()"/>
-					<toolbarbutton id="tb-note-add" tooltiptext="&toolbar.note.standalone;" oncommand="ZoteroPane.newNote(event.shiftKey);"/>
+					<toolbarbutton id="zotero-tb-link-page" tooltiptext="&zotero.toolbar.attachment.weblink;" oncommand="ZoteroPane.addAttachmentFromPage(true)"/>
+					<toolbarbutton id="zotero-tb-snapshot-page" tooltiptext="&zotero.toolbar.attachment.snapshot;" oncommand="ZoteroPane.addAttachmentFromPage()"/>
+					<toolbarbutton id="zotero-tb-note-add" tooltiptext="&zotero.toolbar.note.standalone;" oncommand="ZoteroPane.newNote(event.shiftKey);"/>
+					<toolbarseparator/>
+					<toolbarbutton id="zotero-tb-advanced-search" tooltiptext="&zotero.toolbar.advancedSearch;" oncommand="ZoteroPane.openAdvancedSearchWindow()"/>
 					<spacer flex="1"/>
-					<label value="&toolbar.search.label;" control="tb-search"/>
-					<textbox id="tb-search" type="timed" timeout="250" command="cmd_zotero_search" dir="reverse" onkeypress="if(event.keyCode == event.DOM_VK_ESCAPE) { this.value = ''; this.doCommand('cmd_zotero_search'); return false; }">
-						<toolbarbutton id="tb-search-cancel" oncommand="this.parentNode.value='';" hidden="true"/>
+					<label value="&zotero.toolbar.search.label;" control="zotero-tb-search"/>
+					<textbox id="zotero-tb-search" type="conditional-timed" timeout="250" command="cmd_zotero_search" dir="reverse"
+						onkeypress="ZoteroPane.handleSearchKeypress(this, event)"
+						oninput="ZoteroPane.handleSearchInput(this, event)"
+						testcode="me.value.indexOf('&quot;') == -1"
+						prefire="ZoteroPane.clearItemsPaneMessage()"
+						ontestfail="ZoteroPane.setItemsPaneMessage(Zotero.getString('advancedSearchMode'))">
+						<toolbarbutton id="zotero-tb-search-cancel" oncommand="this.parentNode.value='';" hidden="true"/>
 					</textbox>
 				</toolbar>
-				<tree 
-					id="items-tree" context="zotero-itemmenu"
-					ondblclick="ZoteroPane.onDoubleClick(event, this);"
-					enableColumnDrag="true"
-					onkeypress="if (event.keyCode == event.DOM_VK_BACK_SPACE || event.keyCode == event.DOM_VK_DELETE){ ZoteroPane.deleteSelectedItem(); }"
-					onselect="ZoteroPane.itemSelected();"
-					ondraggesture="if (event.target.localName == 'treechildren') nsDragAndDrop.startDrag(event,ZoteroPane.getItemsView());"
-					ondragover="nsDragAndDrop.dragOver(event,ZoteroPane.getItemsView())"
-					ondragdrop="nsDragAndDrop.drop(event,ZoteroPane.getItemsView())"
-					flex="1">
-					<treecols>
-						<treecol
-							id="title" primary="true"
-							label="&items.title_column;"
-							flex="4" persist="width ordinal hidden sortActive sortDirection"/>
-						<splitter class="tree-splitter"/>
-						<treecol
-							id="firstCreator"
-							label="&items.creator_column;"
-							flex="1" persist="width ordinal hidden sortActive sortDirection"/>
-						<splitter class="tree-splitter"/>
-						<treecol
-							id="numChildren"
-							label="&items.numChildren_column;"
-							persist="width ordinal hidden sortActive sortDirection"/>
-						<splitter class="tree-splitter"/>
-						<treecol
-							id="typeIcon" hidden="true"
-							label="&items.type_column;"
-							width="40" persist="width ordinal hidden sortActive sortDirection"/>
-						<splitter class="tree-splitter"/>
-						<treecol
-							id="source" hidden="true"
-							label="&items.source_column;"
-							flex="1" persist="width ordinal hidden sortActive sortDirection"/>
-						<splitter class="tree-splitter"/>
-						<treecol
-							id="rights" hidden="true"
-							label="&items.rights_column;"
-							flex="1" persist="width ordinal hidden sortActive sortDirection"/>
-						<splitter class="tree-splitter"/>
-						<treecol
-							id="dateAdded" hidden="true"
-							label="&items.dateAdded_column;"
-							flex="1" persist="width ordinal hidden sortActive sortDirection"/>
-						<splitter class="tree-splitter"/>
-						<treecol
-							id="dateModified" hidden="true"
-							label="&items.dateModified_column;"
-							flex="1" persist="width ordinal hidden sortActive sortDirection"/>
-					</treecols>				
-					<treechildren/>
-				</tree>
+				
+				<deck id="zotero-items-pane-content" selectedIndex="0" flex="1">
+					<tree 
+						id="zotero-items-tree" context="zotero-itemmenu"
+						ondblclick="ZoteroPane.onDoubleClick(event, this);"
+						enableColumnDrag="true"
+						onfocus="if (ZoteroPane.itemsView.rowCount &amp;&amp; !ZoteroPane.itemsView.selection.count) { ZoteroPane.itemsView.selection.select(0); }"
+						onkeypress="ZoteroPane.handleKeyPress(event, this.id)"
+						onselect="ZoteroPane.itemSelected();"
+						ondraggesture="if (event.target.localName == 'treechildren') nsDragAndDrop.startDrag(event,ZoteroPane.itemsView);"
+						ondragover="nsDragAndDrop.dragOver(event, ZoteroPane.itemsView)"
+						ondragdrop="nsDragAndDrop.drop(event, ZoteroPane.itemsView)"
+						flex="1">
+						<treecols>
+							<treecol
+								id="zotero-items-column-title" primary="true"
+								label="&zotero.items.title_column;"
+								flex="4" persist="width ordinal hidden sortActive sortDirection"/>
+							<splitter class="tree-splitter"/>
+							<treecol
+								id="zotero-items-column-firstCreator"
+								label="&zotero.items.creator_column;"
+								flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+							<splitter class="tree-splitter"/>
+							<treecol
+								id="zotero-items-column-type" hidden="true"
+								label="&zotero.items.type_column;"
+								width="40" persist="width ordinal hidden sortActive sortDirection"/>
+							<splitter class="tree-splitter"/>
+							<treecol
+								id="zotero-items-column-date" hidden="true"
+								label="&zotero.items.date_column;"
+								flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+							<splitter class="tree-splitter"/>
+							<treecol
+								id="zotero-items-column-year" hidden="true"
+								label="&zotero.items.year_column;"
+								flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+							<splitter class="tree-splitter"/>
+							<treecol
+								id="zotero-items-column-publisher" hidden="true"
+								label="&zotero.items.publisher_column;"
+								flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+							<splitter class="tree-splitter"/>
+							<treecol
+								id="zotero-items-column-language" hidden="true"
+								label="&zotero.items.language_column;"
+								flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+							<splitter class="tree-splitter"/>
+							<treecol
+								id="zotero-items-column-callNumber" hidden="true"
+								label="&zotero.items.callNumber_column;"
+								flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+							<splitter class="tree-splitter"/>
+							<treecol
+								id="zotero-items-column-repository" hidden="true"
+								label="&zotero.items.repository_column;"
+								flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+							<splitter class="tree-splitter"/>
+							<treecol
+								id="zotero-items-column-rights" hidden="true"
+								label="&zotero.items.rights_column;"
+								flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+							<splitter class="tree-splitter"/>
+							<treecol
+								id="zotero-items-column-dateAdded" hidden="true"
+								label="&zotero.items.dateAdded_column;"
+								flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+							<splitter class="tree-splitter"/>
+							<treecol
+								id="zotero-items-column-dateModified" hidden="true"
+								label="&zotero.items.dateModified_column;"
+								flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+							<splitter class="tree-splitter"/>
+							<treecol
+								id="zotero-items-column-numChildren"
+								label="&zotero.items.numChildren_column;"
+								persist="width ordinal hidden sortActive sortDirection"/>
+						</treecols>
+						<treechildren/>
+					</tree>
+					
+					<!-- Label for displaying messages when items pane is hidden
+					     (e.g. "Advanced search mode — press Enter to search.")-->
+					<vbox id="zotero-items-pane-message-box" pack="center" align="center"/>
+				</deck>
 			</vbox>
+			
 			<splitter id="zotero-view-splitter" resizebefore="closest" resizeafter="closest"/>
-			<vbox>
+			
+			<vbox id="zotero-item-pane" persist="width">
 				<toolbar align="right">
-					<toolbarbutton id="tb-fullscreen" tooltiptext="&toolbar.fullscreen.tooltip;" oncommand="ZoteroPane.fullScreen();"/>
+					<toolbarbutton id="zotero-tb-fullscreen" tooltiptext="&zotero.toolbar.fullscreen.tooltip;" oncommand="ZoteroPane.fullScreen();"/>
 					<toolbarbutton class="tabs-closebutton" oncommand="ZoteroPane.toggleDisplay()"/>
 				</toolbar>
 				<groupbox flex="1">
 					<caption>
 						<tabs id="zotero-view-tabs" onselect="document.getElementById('zotero-view-item').selectedIndex = this.selectedIndex;" hidden="true">
-							<tab label="&tabs.info.label;"/>
-							<tab label="&tabs.notes.label;"/>
-							<tab label="&tabs.attachments.label;"/>
-							<tab label="&tabs.tags.label;"/>
-							<tab label="&tabs.related.label;"/>
+							<tab label="&zotero.tabs.info.label;"/>
+							<tab label="&zotero.tabs.notes.label;"/>
+							<tab label="&zotero.tabs.attachments.label;"/>
+							<tab label="&zotero.tabs.tags.label;"/>
+							<tab label="&zotero.tabs.related.label;"/>
 						</tabs>
 					</caption>
-					<deck id="item-pane" selectedIndex="0" flex="1" onselect="document.getElementById('zotero-view-tabs').setAttribute('hidden',(this.selectedIndex != 1));">
+					<deck id="zotero-item-pane-content" selectedIndex="0" flex="1" onselect="document.getElementById('zotero-view-tabs').setAttribute('hidden',(this.selectedIndex != 1));">
 						<box pack="center" align="center">
 							<label id="zotero-view-selected-label"/>
 						</box>
@@ -211,53 +305,125 @@
 						<!-- Note info pane -->
 						<vbox id="zotero-view-note" flex="1">
 							<noteeditor id="zotero-note-editor" flex="1"/>
-							<button id="zotero-view-note-button" label="&notes.separate;" oncommand="ZoteroPane.openNoteWindow(this.getAttribute('noteID')); if(this.hasAttribute('sourceID')) ZoteroPane.selectItem(this.getAttribute('sourceID'));"/>
+							<button id="zotero-view-note-button" label="&zotero.notes.separate;" oncommand="ZoteroPane.openNoteWindow(this.getAttribute('noteID')); if(this.hasAttribute('sourceID')) ZoteroPane.selectItem(this.getAttribute('sourceID'));"/>
 						</vbox>
 						<!-- Attachment info pane -->
 						<vbox id="zotero-view-attachment" flex="1">
 							<label id="zotero-attachment-label"/>
 							<hbox>
-								<button id="zotero-attachment-view" flex="1" oncommand="ZoteroPane.viewSelectedAttachment();"/>
-								<button id="zotero-attachment-show" label="&item.attachment.file.show;" flex="1" oncommand="ZoteroPane.showSelectedAttachmentInFilesystem()"/>
+								<button id="zotero-attachment-view" flex="1" oncommand="ZoteroPane.viewSelectedAttachment(event);"/>
+								<button id="zotero-attachment-show" label="&zotero.item.attachment.file.show;" flex="1" oncommand="ZoteroPane.showSelectedAttachmentInFilesystem()"/>
 							</hbox>
-							<vbox>
-								<label id="zotero-attachment-url" class="text-link" crop="end" onclick="window.loadURI(this.value)"/>
-								<label id="zotero-attachment-accessed"/>
-							</vbox>
+							<label id="zotero-attachment-url" class="text-link" crop="end" onclick="ZoteroPane.loadURI(this.value, event)"/>
+							
+							
+							<label id="zotero-attachment-accessed"/>
+							<label id="zotero-attachment-pages"/>
+							
+							<hbox id="zotero-attachment-index-box">
+								<label id="zotero-attachment-index-status"/>
+								<toolbarbutton id="zotero-attachment-reindex" oncommand="ZoteroPane.reindexItem()"/>
+							</hbox>
+							
 							<noteeditor id="zotero-attachment-note-editor" notitle="1" flex="1"/>
 						</vbox>
 					</deck>
 				</groupbox>
 			</vbox>
 		</hbox>
+		
+		<!-- Annotation Toolbar -->
+		<toolbar id="zotero-annotate-tb" crop="end" insertbefore="content" hidden="true">
+			<toolbarbutton id="zotero-annotate-tb-add" tooltiptext="&zotero.annotate.toolbar.add.label;" oncommand="Zotero_Browser.toggleMode(this.id);"/>
+			<toolbarbutton id="zotero-annotate-tb-collapse" tooltiptext="&zotero.annotate.toolbar.collapse.label;" oncommand="Zotero_Browser.setCollapsed(true);"/>
+			<toolbarbutton id="zotero-annotate-tb-expand" tooltiptext="&zotero.annotate.toolbar.expand.label;" oncommand="Zotero_Browser.setCollapsed(false);"/>
+			<toolbarseparator/>
+			<toolbarbutton id="zotero-annotate-tb-highlight" tooltiptext="&zotero.annotate.toolbar.highlight.label;" oncommand="Zotero_Browser.toggleMode(this.id);"/>
+			<toolbarbutton id="zotero-annotate-tb-unhighlight" tooltiptext="&zotero.annotate.toolbar.unhighlight.label;" oncommand="Zotero_Browser.toggleMode(this.id);"/>
+		</toolbar>
 	</vbox>
 	
+	<!-- Scrape Code -->
+	<hbox id="urlbar-icons">
+		<image src="chrome://zotero/skin/treeitem-book.png" id="zotero-status-image" onclick="Zotero_Browser.scrapeThisPage()" position="1" hidden="true"/>
+	</hbox>
+	
 	<statusbar id="status-bar">
-		<statusbarpanel id="zotero-status-bar-icon"
-			src="chrome://zotero/skin/zotero_logo_18px.png"
-			class="statusbarpanel-iconic" onclick="ZoteroPane.toggleDisplay();"
-			hidden="true"/>
+		<statusbarpanel id="zotero-status-bar-icon" hidden="true"
+			class="statusbarpanel-iconic" onclick="ZoteroPane.toggleDisplay();"/>
 	</statusbar>
 	
 	<script>
+	<![CDATA[
 	window.addEventListener('load', function(e){
-		if (Zotero){
-			document.getElementById('zotero-status-bar-icon').setAttribute('hidden', 'false');
+		var icon = document.getElementById('zotero-status-bar-icon');
+		if (Zotero && Zotero.initialized){
+			switch (Zotero.Prefs.get('statusBarIcon')) {
+				case 2:
+					icon.setAttribute('hidden', false);
+					break;
+				case 1:
+					icon.setAttribute('hidden', false);
+					icon.setAttribute('compact', true);
+					break;
+			}
+			
+			// Set "Report Errors..." label via property rather than DTD entity,
+			// since we need to reference it in script elsewhere
+			document.getElementById('zotero-tb-actions-reportErrors').setAttribute('label',
+				Zotero.getString('errorReport.reportErrors'));
+			
+			// Used for loading the changelog after upgrades
+			if (Zotero.initialURL) {
+				setTimeout("gBrowser.selectedTab = gBrowser.addTab(Zotero.initialURL); Zotero.initialURL = null;", 1);
+			}
+		}
+		else {
+			if (Zotero) {
+				var errMsg = Zotero.startupError;
+			}
+			
+			// Use defaults if necessary
+			if (!errMsg) {
+				// Get the stringbundle manually
+				var src = 'chrome://zotero/locale/zotero.properties';
+				var localeService = Components.classes['@mozilla.org/intl/nslocaleservice;1'].
+						getService(Components.interfaces.nsILocaleService);
+				var appLocale = localeService.getApplicationLocale();
+				var stringBundleService = Components.classes["@mozilla.org/intl/stringbundle;1"]
+					.getService(Components.interfaces.nsIStringBundleService);
+				var stringBundle = stringBundleService.createBundle(src, appLocale);
+				
+				var errMsg = stringBundle.GetStringFromName('startupError');
+			}
+			
+			icon.setAttribute('tooltiptext', errMsg);
+			icon.setAttribute('error', 'true');
+			icon.setAttribute('hidden', false);
 		}
 	}, false);
+	
+	document.getElementById('appcontent').addEventListener('keydown', ZoteroPane.handleKeyDown, true);
+	// Make sure open progress windows are fading
+	document.getElementById('appcontent').addEventListener('mousemove', Zotero.ProgressWindowSet.updateTimers, false);
+	]]>
 	</script>
 	
 	<menupopup id="menu_ToolsPopup">
 		<menuseparator id="zoteroSeparator" insertbefore="devToolsSeparator"/>
 		<menuitem id="tools-zotero" insertbefore="devToolsSeparator"
-			oncommand="ZoteroPane.toggleDisplay();" label="&zotero.name;"
+			oncommand="ZoteroPane.toggleDisplay();" label="Zotero"
 			key="key_openZotero"/>
 	</menupopup>
-  
+	
 	<keyset id="mainKeyset">
+		<!--
+			The key can be changed by the pref extensions.zotero.keys.openZotero,
+			but if the values are changed here, the pref won't override them.
+		-->
 		<key id="key_openZotero"
 			 key="Z" 
 			 oncommand="ZoteroPane.toggleDisplay();"
-			 modifiers="shift accel" />
+			 modifiers="accel alt" />
 	</keyset>
 </overlay>

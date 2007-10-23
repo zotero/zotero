@@ -1,0 +1,42 @@
+/* Generic styles */
+body {
+	font: 62.5% Georgia, Times, serif;
+	width: 780px;
+	margin: 0 auto;
+}
+
+h2 {
+	font-size: 1.5em;
+	line-height: 1.5em;
+	font-family: Georgia, Times, serif;
+}
+
+p {
+	line-height: 1.5em;
+}
+
+a:link, a:visited {
+	color: #900;
+}
+
+a:hover, a:active {
+	color: #777;
+}
+
+
+ul.report {
+	font-size: 1.4em;
+	width: 680px;
+	margin: 0 auto;
+	overflow: auto;
+	padding: 20px 20px;
+}
+
+/* Metadata table */
+table {
+	border: 1px #ccc solid;
+	overflow: auto;
+	width: 100%;
+	margin: .1em auto .75em;
+	padding: 0.5em;
+}

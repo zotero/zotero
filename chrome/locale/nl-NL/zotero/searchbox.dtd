@@ -1,0 +1,23 @@
+<!ENTITY zotero.search.name "Naam:">
+
+<!ENTITY zotero.search.joinMode.prefix "Moet voldoen aan">
+<!ENTITY zotero.search.joinMode.any "één van de">
+<!ENTITY zotero.search.joinMode.all "alle">
+<!ENTITY zotero.search.joinMode.suffix "volgende voorwaarden:">
+
+<!ENTITY zotero.search.recursive.label "Doorzoek onderliggende mappen">
+<!ENTITY zotero.search.noChildren "Laat alleen topniveau-objecten zien">
+<!ENTITY zotero.search.includeParentsAndChildren "Laat bij de zoekresultaten zowel het hoofdobject als de subobjecten zien">
+
+<!ENTITY zotero.search.textModes.phrase "Frase">
+<!ENTITY zotero.search.textModes.phraseBinary "Frase (binaire bestanden inbegrepen)">
+<!ENTITY zotero.search.textModes.regexp "Regexp">
+<!ENTITY zotero.search.textModes.regexpCS "Regexp (hoofdlettergevoelig)">
+
+<!ENTITY zotero.search.date.units.days "dagen">
+<!ENTITY zotero.search.date.units.months "maanden">
+<!ENTITY zotero.search.date.units.years "jaren">
+
+<!ENTITY zotero.search.search "Zoeken">
+<!ENTITY zotero.search.clear "Wissen">
+<!ENTITY zotero.search.saveSearch "Zoekopdracht bewaren">

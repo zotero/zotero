@@ -23,9 +23,14 @@
 <bindings 	xmlns="http://www.mozilla.org/xbl"
 			xmlns:xbl="http://www.mozilla.org/xbl"
 			xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	
 	<binding id="note-editor">
+		<resources>
+			<stylesheet src="chrome://zotero/skin/bindings/noteeditor.css"/>
+		</resources>
+		
 		<implementation>
-			<field name="itemRef"/>
+			<field name="itemRef">null</field>
 			<property name="item" onget="return this.itemRef;">
 				<setter>
 					<![CDATA[
@@ -37,12 +42,12 @@
 						
 						if(this.item && !this.getAttribute('notitle')=='1')
 						{
-							citeLabel.appendChild(document.createTextNode(this.item.getField('title')));
+							citeLabel.appendChild(document.createTextNode(this.item.getDisplayTitle(true)));
 						}
 					]]>
 				</setter>
 			</property>
-			<field name="noteRef"/>
+			<field name="noteRef">null</field>
 			<property name="note" onget="return this.noteRef;">
 				<setter>
 					<![CDATA[
@@ -60,7 +65,7 @@
 					]]>
 				</setter>
 			</property>
-			<field name="collectionRef"/>
+			<field name="collectionRef">null</field>
 			<property name="collection" onget="return this.collectionRef;" onset="this.collectionRef = val;"/>
 			<property name="value" onget="return this.id('noteField').value;" onset="this.id('noteField').value = val;"/>
 			<method name="save">
@@ -87,6 +92,44 @@
 					]]>
 				</body>
 			</method>
+			
+			<method name="handleKeyDown">
+				<parameter name="event"/>
+				<body>
+				<![CDATA[
+					switch (event.keyCode) {
+						// Insert tab manually
+						case 9:
+							if (event.shiftKey || event.ctrlKey || event.altKey) {
+								return;
+							}
+							// From http://kb.mozillazine.org/Inserting_text_at_cursor
+							try {
+								var command = "cmd_insertText";
+								var controller = document.commandDispatcher.getControllerForCommand(command);
+								if (controller && controller.isCommandEnabled(command)) {
+									controller = controller.QueryInterface(Components.interfaces.nsICommandController);
+									var params = Components.classes["@mozilla.org/embedcomp/command-params;1"]
+									.createInstance(Components.interfaces.nsICommandParams);
+									params.setStringValue("state_data", "\t");
+									controller.doCommandWithParams(command, params);
+								}
+							}
+							catch (e) {
+								Zotero.debug("Can't do cmd_insertText!\n" + e, 1);
+							}
+							
+							event.stopPropagation();
+							event.preventDefault();
+							
+							// DEBUG: is there a better way to prevent blur()?
+							setTimeout(function() { event.target.focus(); }, 1);
+							break;
+					}
+				]]>
+				</body>
+			</method>
+			
 			<method name="focus">
 				<body>
 					<![CDATA[
@@ -94,6 +137,47 @@
 					]]>
 				</body>
 			</method>
+			
+			<method name="selectParent">
+				<body>
+				<![CDATA[
+					if (!this.item.getID()) {
+						return;
+					}
+					
+					if (document.getElementById('zotero-pane')) {
+						var zp = ZoteroPane;
+					}
+					else {
+						var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+									   .getService(Components.interfaces.nsIWindowMediator);
+						
+						var lastWin = wm.getMostRecentWindow("navigator:browser");
+						
+						if (!lastWin) {
+							window.open();
+							var newWindow = wm.getMostRecentWindow("navigator:browser");
+							var b = newWindow.getBrowser();
+							return;
+						}
+						
+						if (lastWin.document.getElementById('zotero-pane').getAttribute('hidden') == 'true') {
+							lastWin.ZoteroPane.toggleDisplay();
+							
+							// DEBUG: The actions below seem to crash Firefox 2.0.0.1 on OS X if
+							// the Z pane isn't already open, so we don't try
+							return;
+						}
+						
+						var zp = lastWin.ZoteroPane;
+					}
+					
+					zp.clearQuicksearch();
+					zp.selectItem(this.item.getID());
+				]]>
+				</body>
+			</method>
+			
 			<method name="id">
 				<parameter name="id"/>
 				<body>
@@ -103,12 +187,11 @@
 				</body>
 			</method>
 		</implementation>
-		<handlers>
-		</handlers>
+		
 		<content>
 			<xul:vbox xbl:inherits="flex">
-				<xul:label id="citeLabel"/>
-				<xul:textbox id="noteField" multiline="true" type="timed" timeout="1000" flex="1" oncommand="this.parentNode.parentNode.save();"/>
+				<xul:label id="citeLabel" onclick="document.getBindingParent(this).selectParent()"/>
+				<xul:textbox id="noteField" multiline="true" type="timed" timeout="1000" flex="1" onkeydown="document.getBindingParent(this).handleKeyDown(event)" oncommand="document.getBindingParent(this).save();"/>
 				<xul:hbox>
 					<xul:linksbox id="links" flex="1"/>
 				</xul:hbox>
@@ -145,10 +228,11 @@
 						// TODO: localize
 						var v = this.id('tags').summary;
 						
-						if(!v || v == "")
-							v = "[click here]";
+						if (!v || v == "") {
+							v = "[" + Zotero.getString('pane.item.noteEditor.clickHere') + "]";
+						}
 							
-						this.id('tagsLabel').value = "Tags: " + v;
+						this.id('tagsLabel').value = Zotero.getString('pane.item.tags') + " " + v;
 					]]>
 				</body>
 			</method>
@@ -168,10 +252,11 @@
 					<![CDATA[
 						var v = this.id('seeAlso').summary;
 						
-						if(!v || v == "")
-							v = "[click here]";
+						if (!v || v == "") {
+							v = "[" + Zotero.getString('pane.item.noteEditor.clickHere') + "]";
+						}
 						
-						this.id('seeAlsoLabel').value = "Related: " + v;
+						this.id('seeAlsoLabel').value = Zotero.getString('pane.item.related') + " " + v;
 					]]>
 				</body>
 			</method>
@@ -186,8 +271,8 @@
 		</implementation>
 		<content>
 			<xul:vbox xbl:inherits="flex">
-				<xul:label id="seeAlsoLabel" class="clicky" crop="end" onclick="this.parentNode.parentNode.seeAlsoClick();"/>
-				<xul:label id="tagsLabel" class="clicky" crop="end" onclick="this.parentNode.parentNode.tagsClick();"/>
+				<xul:label id="seeAlsoLabel" class="zotero-clicky" crop="end" onclick="this.parentNode.parentNode.seeAlsoClick();"/>
+				<xul:label id="tagsLabel" class="zotero-clicky" crop="end" onclick="this.parentNode.parentNode.tagsClick();"/>
 				<xul:popupset>
 					<xul:popup id="seeAlsoPopup" width="300" onpopupshowing="this.firstChild.reload();">
 						<xul:seealsobox id="seeAlso" flex="1"/>
