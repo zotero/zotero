@@ -1329,14 +1329,20 @@ Zotero.Date = new function(){
 		// MONTH
 		if(!date.month) {
 			// compile month regular expression
-			var months = Zotero.CSL.Global.getMonthStrings("short");
+			var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul',
+				+ 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+			// If using a non-English bibliography locale, try those too
+			if (Zotero.CSL.Global.locale != 'en-US') {
+				months = months.concat(Zotero.CSL.Global.getMonthStrings("short"));
+			}
 			if(!_monthRe) {
 				_monthRe = new RegExp("^(.*)\\b("+months.join("|")+")[^ ]*(?: (.*)$|$)", "i");
 			}
 			
 			var m = _monthRe.exec(date.part);
 			if(m) {
-				date.month = months.indexOf(m[2][0].toUpperCase()+m[2].substr(1).toLowerCase());
+				// Modulo 12 in case we have multiple languages
+				date.month = months.indexOf(m[2][0].toUpperCase()+m[2].substr(1).toLowerCase()) % 12;
 				date.part = m[1]+m[3];
 				Zotero.debug("DATE: got month ("+date.month+", "+date.part+")");
 			}

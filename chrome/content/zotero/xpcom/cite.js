@@ -1161,8 +1161,13 @@ Zotero.CSL.Global = new function() {
 	this.getLocatorStrings = getLocatorStrings;
 	this.cleanXML = cleanXML;
 	this.parseLocales = parseLocales;
-		
+	
 	this.ns = "http://purl.org/net/xbiblio/csl";
+	
+	this.locale = this.__defineGetter__("locale", function() {
+		Zotero.CSL.Global.init()
+		return Zotero.CSL.Global._xmlLang;
+	});
 	this.collation = Components.classes["@mozilla.org/intl/collation-factory;1"]
 	                       .getService(Components.interfaces.nsICollationFactory)
 	                       .CreateCollation(Components.classes["@mozilla.org/intl/nslocaleservice;1"]
