@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-10-18 22:45:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-10-23 18:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -16367,7 +16367,7 @@ function doExport() {
 	}
 }');
 
-REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '2007-10-18 22:45:00', 'American Psychological Association',
+REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '2007-10-23 18:00:00', 'American Psychological Association',
 '<?oxygen RNGSchema="csl.rnc" type="compact"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="in-text" xml:lang="en">
   <info>
@@ -16536,7 +16536,7 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '2007-
   </bibliography>
 </style>');
 
-REPLACE INTO csl VALUES('http://www.zotero.org/namespaces/CSL/chicago-author-date.csl', '2007-10-18 22:45:00', 'Chicago Manual of Style (Author-Date)',
+REPLACE INTO csl VALUES('http://www.zotero.org/namespaces/CSL/chicago-author-date.csl', '2007-10-23 18:00:00', 'Chicago Manual of Style (Author-Date)',
 '<?xml version="1.0" encoding="UTF-8"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="author-date" xml:lang="en">
 	<info>
@@ -16713,7 +16713,7 @@ REPLACE INTO csl VALUES('http://www.zotero.org/namespaces/CSL/chicago-author-dat
 	</bibliography>
 </style>');
 
-REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/chicago-note.csl', '2007-10-18 22:45:00', 'Chicago Manual of Style (Note without Reference List)',
+REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/chicago-note.csl', '2007-10-23 18:00:00', 'Chicago Manual of Style (Note without Reference List)',
 '<?xml version="1.0" encoding="UTF-8"?>
 <?oxygen RNGSchema="../schema/trunk/csl.rnc" type="compact"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="note" xml:lang="en">
@@ -16869,7 +16869,7 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/chicago-note.csl
   </citation>
 </style>');
 
-REPLACE INTO csl VALUES('http://www.zotero.org/namespaces/CSL/chicago-note-bibliography.csl', '2007-10-18 22:45:00', 'Chicago Manual of Style (Note with Reference List)',
+REPLACE INTO csl VALUES('http://www.zotero.org/namespaces/CSL/chicago-note-bibliography.csl', '2007-10-23 18:00:00', 'Chicago Manual of Style (Note with Reference List)',
 '<?xml version="1.0" encoding="UTF-8"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="note" xml:lang="en">
 	<info>
@@ -17060,7 +17060,7 @@ REPLACE INTO csl VALUES('http://www.zotero.org/namespaces/CSL/chicago-note-bibli
 	</bibliography>
 </style>');
 
-REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/mla.csl', '2007-10-18 22:45:00', 'Modern Language Association',
+REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/mla.csl', '2007-10-23 18:00:00', 'Modern Language Association',
 '<?oxygen RNGSchema="csl.rnc" type="compact"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="in-text" xml:lang="en">
   <info>
@@ -17225,7 +17225,7 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/mla.csl', '2007-
   </bibliography>
 </style>');
 
-REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/mhra_note_without_bibliography.csl', '2007-10-18 22:45:00', 'Modern Humanities Research Association (Note without Bibliography)',
+REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/mhra_note_without_bibliography.csl', '2007-10-23 18:00:00', 'Modern Humanities Research Association (Note without Bibliography)',
 '<?xml version="1.0" encoding="UTF-8"?>
 <?oxygen RNGSchema="../csl.rnc" type="compact"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="note">
@@ -17361,7 +17361,7 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/mhra_note_withou
     </citation>
 </style>');
 
-REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/asa.csl', '2007-10-18 22:45:00', 'American Sociological Association',
+REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/asa.csl', '2007-10-23 18:00:00', 'American Sociological Association',
 '<?xml version="1.0" encoding="UTF-8"?>
 <?oxygen RNGSchema="../csl.rnc" type="compact"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="author-date">
@@ -17528,7 +17528,7 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/asa.csl', '2007-
 </style>');
 
 
-REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/nature.csl', '2007-10-18 22:45:00', 'Nature Journal', 
+REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/nature.csl', '2007-10-23 18:00:00', 'Nature Journal', 
 '<?xml version="1.0" encoding="UTF-8"?>
 <?oxygen RNGSchema="file:/Users/mikowitz/Documents/Development/CSLs/csl.rnc" type="compact"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="in-text" xml:lang="en">
@@ -17590,7 +17590,7 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/nature.csl', '20
 </style>'
 );
 
-REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/nlm.csl', '2007-10-18 22:45:00', 'National Library of Medicine',
+REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/nlm.csl', '2007-10-23 18:00:00', 'National Library of Medicine',
 '<?xml version="1.0" encoding="UTF-8"?>
 <?oxygen RNGSchema="file:/Users/mikowitz/Documents/Development/CSLs/csl.rnc" type="compact"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="in-text" xml:lang="en">
@@ -17668,7 +17668,7 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/nlm.csl', '2007-
     </bibliography>
 </style>');
 
-REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/ieee.csl', '2007-10-18 22:45:00', 'IEEE',
+REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/ieee.csl', '2007-10-23 18:00:00', 'IEEE',
 '<?xml version="1.0" encoding="UTF-8"?>
 <?oxygen RNGSchema="file:/Users/mikowitz/Documents/Development/CSLs/csl.rnc" type="compact"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="in-text" xml:lang="en">
