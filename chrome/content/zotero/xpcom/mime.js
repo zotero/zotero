@@ -34,15 +34,19 @@ Zotero.MIME = new function(){
 	
 	// Magic numbers
 	var _snifferEntries = [
-		["%PDF-", "application/pdf"],
-		["%!PS-Adobe-", 'application/postscript'],
-		["%! PS-Adobe-", 'application/postscript'],
-		["From", 'text/plain'],
-		[">From", 'text/plain'],
-		["#!", 'text/plain'],
-		["<?xml", 'text/xml'],
-		["<!DOCTYPE html", 'text/html'],
-		["<html", 'text/html']
+		["%PDF-", "application/pdf", 0],
+		["%!PS-Adobe-", 'application/postscript', 0],
+		["%! PS-Adobe-", 'application/postscript', 0],
+		["From", 'text/plain', 0],
+		[">From", 'text/plain', 0],
+		["#!", 'text/plain', 0],
+		["<?xml", 'text/xml', 0],
+		["<!DOCTYPE html", 'text/html', 0],
+		["<html", 'text/html', 0],
+		["\uFFFD\uFFFD", 'image/jpeg', 0],
+		["JFIF", 'image/jpeg'],
+		["GIF8", 'image/gif', 0],
+		["\uFFFDPNG", 'image/png', 0]
 	];
 	
 	var _textTypes = {
@@ -116,7 +120,20 @@ Zotero.MIME = new function(){
 	 */
 	function sniffForMIMEType(str){
 		for (var i in _snifferEntries){
-			if (str.indexOf(_snifferEntries[i][0])==0){
+			var match = false;
+			// If an offset is defined, match only from there
+			if (typeof _snifferEntries[i][2] != 'undefined') {
+				if (str.substr(i[2]).indexOf(_snifferEntries[i][0]) == 0) {
+					match = true;
+				}
+			}
+			// Otherwise allow match anywhere in sample
+			// (128 bytes from getSample() by default)
+			else if (str.indexOf(_snifferEntries[i][0]) != -1) {
+				match = true;
+			}
+			
+			if (match) {
 				return _snifferEntries[i][1];
 			}
 		}
