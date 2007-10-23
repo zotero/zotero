@@ -1178,18 +1178,57 @@ Zotero.CSL.Global = new function() {
 	 */
 	function init() {
 		if(!Zotero.CSL.Global._xmlLang) {
-			// get XML lang
-			Zotero.CSL.Global._xmlLang = Zotero.locale;
+			var prefix = "chrome://zotero/content/locale/csl/locales-";
+			var ext = ".xml";
 			
-			// read locales.xml from directory
-			var req = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"].
-					  createInstance();
-			req.open("GET", "chrome://zotero/locale/locales.xml", false);
-			req.overrideMimeType("text/plain");
-			req.send(null);
+			// If explicit bib locale, try to use that
+			var bibLocale = Zotero.Prefs.get('export.bibliographyLocale');
+			if (bibLocale) {
+				var loc = bibLocale;
+				var req = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"].
+					createInstance();
+				req.open("GET", prefix + loc + ext, false);
+				req.overrideMimeType("text/plain");
+				req.send(null);
+				
+				if (req.responseText) {
+					Zotero.CSL.Global._xmlLang = loc;
+					var xml = req.responseText;
+				}
+			}
+			
+			// If no or invalid bib locale, try Firefox locale
+			if (!xml) {
+				var loc = Zotero.locale;
+				var req = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"].
+					createInstance();
+				req.open("GET", prefix + loc + ext, false);
+				req.overrideMimeType("text/plain");
+				req.send(null);
+				
+				if (req.responseText) {
+					Zotero.CSL.Global._xmlLang = loc;
+					var xml = req.responseText;
+				}
+			}
+			
+			// Fall back to en-US if no locales.xml
+			if (!xml) {
+				var loc = 'en-US';
+				var req = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"].
+					createInstance();
+				req.open("GET", prefix + loc + ext, false);
+				req.overrideMimeType("text/plain");
+				req.send(null);
+				
+				Zotero.CSL.Global._xmlLang = loc;
+				var xml = req.responseText;
+			}
+			
+			Zotero.debug('CSL: Using ' + loc + ' as bibliography locale');
 			
 			// get default terms
-			var locales = new XML(Zotero.CSL.Global.cleanXML(req.responseText));
+			var locales = new XML(Zotero.CSL.Global.cleanXML(xml));
 			Zotero.CSL.Global._defaultTerms = Zotero.CSL.Global.parseLocales(locales, true);
 		}
 	}
