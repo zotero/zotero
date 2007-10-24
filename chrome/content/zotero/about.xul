@@ -19,7 +19,7 @@
 			{
 				var translators = {
 					afAZ: [
-						"leuce"
+						"Samuel Murray"
 					],
 					
 					ar: [
@@ -48,7 +48,7 @@
 					
 					deDE: [
 						"Harald Kliems",
-						"jverber",
+						"Jason Verber",
 						"stw"
 					],
 					
@@ -131,11 +131,11 @@
 					],
 					
 					srYU: [
-						"Igor_M"
+						"Igor Miletic"
 					],
 					
 					svSE: [
-						"mymarkup"
+						"Erik Stattin"
 					],
 					
 					trTR: [
