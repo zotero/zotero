@@ -19,11 +19,11 @@
 			{
 				var translators = {
 					afAZ: [
-						"leuce"
+						"Samuel Murray"
 					],
 					
 					ar: [
-						"fadhil"
+						"Khaled Fadhel"
 					],
 					
 					bgBG: [
@@ -48,7 +48,7 @@
 					
 					deDE: [
 						"Harald Kliems",
-						"jverber",
+						"Jason Verber",
 						"stw"
 					],
 					
@@ -71,7 +71,6 @@
 					],
 					
 					heIL: [
-						"d_leaper",
 						"Doron Tilleman"
 					],
 					
@@ -92,7 +91,7 @@
 					],
 					
 					koKR: [
-						"wtspout"
+						"Wtspout"
 					],
 					
 					mnMN: [
@@ -110,7 +109,7 @@
 					],
 					
 					plPL: [
-						"krzywy",
+						"Pawel Krzyworzeka",
 						"Trevor Owens"
 					],
 					
@@ -132,11 +131,11 @@
 					],
 					
 					srYU: [
-						"Igor_M"
+						"Igor Miletic"
 					],
 					
 					svSE: [
-						"mymarkup"
+						"Erik Stattin"
 					],
 					
 					trTR: [
