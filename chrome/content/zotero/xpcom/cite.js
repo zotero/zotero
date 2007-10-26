@@ -2297,8 +2297,8 @@ Zotero.CSL.FormattedString.prototype.append = function(string, element, dontDeli
 			               .replace(/(\r\n|\r|\n)/g, "<br />")
 			               .replace(/[\x00-\x1F]/g, "");
 		} else if(this.format == "RTF") {
-			string = string.replace(/[\x7F-\uFFFF]/g, Zotero.CSL.FormattedString._rtfEscapeFunction)
-			               .replace("\\", "\\\\", "g")
+			string = string.replace("\\", "\\\\", "g")
+			               .replace(/[\x7F-\uFFFF]/g, Zotero.CSL.FormattedString._rtfEscapeFunction)
 			               .replace("\t", "\\tab ", "g")
 			               .replace(/(\r\n|\r|\n)/g, "\\line ");
 		} else if(this.format == "Integration") {

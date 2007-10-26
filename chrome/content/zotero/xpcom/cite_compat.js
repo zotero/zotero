@@ -1134,7 +1134,7 @@ Zotero.CSL.Compat.prototype._processCreators = function(type, element, creators,
 			var firstName, lastName;
 			for(var i=0; i<maxCreators; i++) {
 				var firstName = "";
-				if(element["form"] && element["form"] != "short") {
+				if(!element["form"] || element["form"] != "short") {
 					if(child["initialize-with"] != undefined) {
 						// even if initialize-with is simply an empty string, use
 						// initials
