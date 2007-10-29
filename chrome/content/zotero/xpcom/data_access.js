@@ -638,11 +638,12 @@ Zotero.Item.prototype.setField = function(field, value, loadIn){
 /*
  * Get the title for an item for display in the interface
  *
- * This is the same as the standard title field except for letters and interviews,
- * which get placeholder titles in square braces (e.g. "[Letter to Thoreau]")
+ * This is the same as the standard title field (with includeBaseMapped on)
+ * except for letters and interviews, which get placeholder titles in
+ * square braces (e.g. "[Letter to Thoreau]")
  */
 Zotero.Item.prototype.getDisplayTitle = function (includeAuthorAndDate) {
-	var title = this.getField('title');
+	var title = this.getField('title', false, true);
 	
 	var itemTypeID = this.getType();
 	var itemTypeName = Zotero.ItemTypes.getName(itemTypeID);
