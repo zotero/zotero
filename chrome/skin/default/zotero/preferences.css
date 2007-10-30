@@ -21,37 +21,11 @@ radio[pane]
 	-moz-box-pack: end;
 }
 
-/* Remove extraneous padding */
-vbox > *:first-child
+.statusLine
 {
-	margin-top: 0;
+	margin: .75em 0;
+	font-size: .85em;
 }
-
-vbox > *:last-child
-{
-	margin-bottom: 0;
-}
-
-hbox > *:first-child
-{
-	margin-left: 0;
-}
-
-/*
-hbox
-{
-	-moz-outline: 1px dashed green;
-}
-vbox
-{
-	-moz-outline: 1px dashed yellow;
-}
-label
-{
-	-moz-outline: 1px dashed pink;
-}
-*/
-
 
 /* Links within messages */
 label label[class=text-link]
@@ -59,13 +33,7 @@ label label[class=text-link]
 	margin: 0;
 }
 
-
 /* General pane */
-radio[pane=zotero-prefpane-general]
-{
-	list-style-image: url("chrome://zotero/skin/prefs-general.png");
-}
-
 grid row:not(:first-child)
 {
 	margin-top: .3em;
@@ -74,11 +42,6 @@ grid row:not(:first-child)
 grid row hbox:first-child
 {
 	-moz-box-pack: end; /* Right-justify left column */
-}
-
-#position-menu-box-label, #position-menu-box
-{
-	-moz-box-align: center;
 }
 
 #fontSize
@@ -111,44 +74,13 @@ grid row hbox:first-child
 	margin-left: 6px;
 }
 
-#statusLine
-{
-	margin-bottom:.75em;
-	color: red;
-}
-
 
 /*
  * Search pane
  */
-radio[pane=zotero-prefpane-search]
-{
-	list-style-image: url("chrome://zotero/skin/prefs-search.png");
-}
-
-#zotero-prefpane-search groupbox > label, #zotero-prefpane-search groupbox > vbox, #zotero-prefpane-search groupbox > hbox
-{
-	margin: .5em 0;
-}
-
-#zotero-prefpane-search groupbox > label:first-child
-{
-	margin-top: 0;
-}
-
 #pdfinfo-status
 {
 	margin-top: 0 !important;
-}
-
-#fulltext-settings hbox, #pdftools-settings hbox
-{
-	-moz-box-align: center;
-}
-
-#fulltext-settings row > hbox:last-child, #pdftools-settings row > hbox:last-child
-{
-	margin-left: .5em;
 }
 
 #fulltext-stats row > label:first-child
@@ -158,30 +90,14 @@ radio[pane=zotero-prefpane-search]
 
 
 /* Export pane */
-radio[pane=zotero-prefpane-export]
+#zotero-prefpane-export separator:not(.thin)
 {
-	list-style-image: url("chrome://zotero/skin/prefs-export.png");
-}
-
-#quickCopy-instructions, #zotero-prefpane-export vbox {
-	margin-bottom: 1em;
-}
-
-#quickCopy-menu
-{
-	margin-top: .4em;
-	margin-bottom: .6em;
+	height: 1em;
 }
 
 #quickCopy-instructions, #quickCopy-macWarning
 {
 	font-size: .85em;
-}
-
-#quickCopy-macWarning
-{
-	margin-top: .5em;
-	margin-bottom: 1em;
 }
 
 #zotero-quickCopy-format
@@ -191,11 +107,6 @@ radio[pane=zotero-prefpane-export]
 
 
 /* Shortcut Keys pane */
-radio[pane=zotero-prefpane-keys]
-{
-	list-style-image: url("chrome://zotero/skin/prefs-keys.png");
-}
-
 #zotero-prefpane-keys row
 {
 	-moz-box-align: center;
@@ -209,19 +120,4 @@ radio[pane=zotero-prefpane-keys]
 #zotero-prefpane-keys checkbox
 {
 	margin: .75em 0;
-}
-
-.statusLine
-{
-	margin: .75em 0;
-	font-size: .85em;
-}
-
-
-/*
- * Advanced pane
- */
-radio[pane=zotero-prefpane-advanced]
-{
-	list-style-image: url("chrome://zotero/skin/prefs-advanced.png");
 }
