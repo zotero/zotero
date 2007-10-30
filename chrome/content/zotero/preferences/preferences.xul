@@ -40,7 +40,9 @@ To add a new preference:
 <prefwindow id="zotero-prefs" title="&zotero.preferences.title;" onload="moveToAlertPosition(); init()"
 		windowtype="zotero:pref" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 	
-	<prefpane id="zotero-prefpane-general" label="&zotero.preferences.prefpane.general;">
+	<prefpane id="zotero-prefpane-general"
+						label="&zotero.preferences.prefpane.general;"
+						image="chrome://zotero/skin/prefs-general.png">
 		<preferences>
 			<preference id="pref-zoteroPaneOnTop" name="extensions.zotero.zoteroPaneOnTop" type="bool"/>
 			<preference id="pref-fontSize" name="extensions.zotero.fontSize" type="string"/>
@@ -65,11 +67,11 @@ To add a new preference:
 				</columns>
 			
 				<rows>
-					<row>
-						<hbox id="position-menu-box-label">
+					<row align="center">
+						<hbox align="center">
 							<label value="&zotero.preferences.position;" control="positionMenu"/>
 						</hbox>
-						<hbox id="position-menu-box">
+						<hbox id="position-menu-box" align="center">
 							<menulist id="positionMenu" preference="pref-zoteroPaneOnTop">
 								<menupopup>
 									<menuitem label="&zotero.preferences.position.above;" value="true"/>
@@ -81,7 +83,7 @@ To add a new preference:
 					</row>
 					
 					<row>
-						<hbox>
+						<hbox align="center">
 							<label value="&zotero.preferences.fontSize;" control="fontSize"/>
 						</hbox>
 						<radiogroup id="fontSize" orient="horizontal" preference="pref-fontSize">
@@ -92,7 +94,7 @@ To add a new preference:
 					</row>
 					
 					<row>
-						<hbox>
+						<hbox align="center">
 							<label value="&zotero.preferences.statusBarIcon;" control="statusBarIcon"/>
 						</hbox>
 						<radiogroup id="statusBarIcon" orient="horizontal" preference="pref-statusBarIcon">
@@ -151,8 +153,10 @@ To add a new preference:
 	</prefpane>
 	
 	
-	<prefpane id="zotero-prefpane-search" label="&zotero.preferences.prefpane.search;"
-			onpaneload="updateIndexStats()">
+	<prefpane id="zotero-prefpane-search"
+						label="&zotero.preferences.prefpane.search;"
+						onpaneload="updateIndexStats()"
+						image="chrome://zotero/skin/prefs-search.png">
 		<preferences>
 			<preference id="pref-fulltext-textMaxLength" name="extensions.zotero.fulltext.textMaxLength" type="int"/>
 			<preference id="pref-fulltext-pdfmaxpages" name="extensions.zotero.fulltext.pdfMaxPages" type="int"/>
@@ -166,55 +170,43 @@ To add a new preference:
 				<button id="fulltext-clearIndex" flex="1" oncommand="clearIndexPrompt()"/>
 			</hbox>
 			
-			<grid id="fulltext-settings">
-				<columns>
-					<column/>
-					<column flex="1"/>
-				</columns>
-				
-				<rows>
-					<row>
-						<hbox>
-							<label value="&zotero.preferences.fulltext.textMaxLength;"/>
-						</hbox>
-						<hbox>
-							<textbox size="10" preference="pref-fulltext-textMaxLength"/>
-							<label value="(&zotero.preferences.default; 500000)"/>
-						</hbox>
-					</row>
-				</rows>
-			</grid>
+			<separator/>
+			
+			<hbox align="center">
+				<label value="&zotero.preferences.fulltext.textMaxLength;"/>
+				<textbox size="10" preference="pref-fulltext-textMaxLength"/>
+				<label value="(&zotero.preferences.default; 500000)"/>
+			</hbox>
 		</groupbox>
 		
 		<groupbox id="pdftools-box">
 			<caption label="&zotero.preferences.search.pdfIndexing;"/>
 			
 			<label id="pdfconverter-status"/>
+			<separator class="thin"/>
 			<label id="pdfinfo-status"/>
+			
+			<separator class="thin"/>
+			
 			<label id="pdftools-required" hidden="true"/>
+			
+			<separator class="thin"/>
+			
 			<hbox>
 				<button id="pdftools-update-button" flex="1" oncommand="checkPDFToolsDownloadVersion()"/>
 			</hbox>
+			
+			<separator class="thin"/>
+			
 			<label id="pdftools-documentation-link" hidden="true"/>
 			
-			<grid id="pdftools-settings" hidden="true">
-				<columns>
-					<column/>
-					<column flex="1"/>
-				</columns>
-				
-				<rows>
-					<row>
-						<hbox>
-							<label value="&zotero.preferences.fulltext.pdfMaxPages;"/>
-						</hbox>
-						<hbox>
-							<textbox size="5" preference="pref-fulltext-pdfmaxpages"/>
-							<label value="(&zotero.preferences.default; 100)"/>
-						</hbox>
-					</row>
-				</rows>
-			</grid>
+			<separator class="thin"/>
+			
+			<hbox id="pdftools-settings" align="center" hidden="true">
+				<label value="&zotero.preferences.fulltext.pdfMaxPages;"/>
+				<textbox size="5" preference="pref-fulltext-pdfmaxpages"/>
+				<label value="(&zotero.preferences.default; 100)"/>
+			</hbox>
 		</groupbox>
 		
 		<groupbox id="fulltext-stats">
@@ -249,7 +241,9 @@ To add a new preference:
 	</prefpane>
 	
 	
-	<prefpane id="zotero-prefpane-export" label="&zotero.preferences.prefpane.export;">
+	<prefpane id="zotero-prefpane-export"
+						label="&zotero.preferences.prefpane.export;"
+						image="chrome://zotero/skin/prefs-export.png">
 		<preferences>
 			<preference id="pref-quickCopy-setting" name="extensions.zotero.export.quickCopy.setting" type="string"/>
 		</preferences>
@@ -259,10 +253,14 @@ To add a new preference:
 			
 			<label id="quickCopy-instructions"/>
 			
+			<separator/>
+			
 			<vbox>
 				<label value="&zotero.preferences.quickCopy.defaultOutputFormat;" control="quickCopy-menu"/>
 				<menulist id="quickCopy-menu"/>
 			</vbox>
+			
+			<separator/>
 			
 			<vbox>
 				<label value="&zotero.preferences.quickCopy.siteEditor.setings;" control="quickCopy-siteSettings"/>
@@ -275,18 +273,23 @@ To add a new preference:
 					</treecols>
 					<treechildren id="quickCopy-siteSettings-rows"/>
 				</tree>
+				<separator class="thin"/>
 				<hbox pack="end">
 					<button label="-" onclick="deleteSelectedQuickCopySite()"/>
 					<button label="+" onclick="showQuickCopySiteEditor()"/>
 				</hbox>
 			</vbox>
 			
+			<separator/>
+			
 			<label id="quickCopy-macWarning" hidden="true" value="&zotero.preferences.quickCopy.macWarning;"/>
 		</groupbox>
 	</prefpane>
 	
 	
-	<prefpane id="zotero-prefpane-keys" label="&zotero.preferences.prefpane.keys;">
+	<prefpane id="zotero-prefpane-keys"
+						label="&zotero.preferences.prefpane.keys;"
+						image="chrome://zotero/skin/prefs-keys.png">
 		<preferences>
 			<preference id="pref-keys-openZotero" name="extensions.zotero.keys.openZotero" type="string"/>
 			<preference id="pref-keys-toggleFullscreen" name="extensions.zotero.keys.toggleFullscreen" type="string"/>
@@ -371,7 +374,9 @@ To add a new preference:
 	</prefpane>
 	
 	
-	<prefpane id="zotero-prefpane-advanced" label="&zotero.preferences.prefpane.advanced;">
+	<prefpane id="zotero-prefpane-advanced"
+						label="&zotero.preferences.prefpane.advanced;"
+						image="chrome://zotero/skin/prefs-advanced.png">
 		<preferences>
 			<preference id="pref-useDataDir" name="extensions.zotero.useDataDir" type="bool"/>
 			<preference id="pref-dataDir" name="extensions.zotero.dataDir" type="string"/>
