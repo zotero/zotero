@@ -545,16 +545,20 @@ var wpdDOMSaver = {
 	{
     if ( (WPD_CSSSCROLLBUG) && ( aHTMLText.match(/background:/i)) ) {         
 			// Regex fixed by Dan for Zotero
+			//var re = new RegExp(/style=\"(.*)background:(.*)(repeat scroll 0(?:pt|px|%);)/);
 			var re = new RegExp(/style=\"([^\"]*)background:([^;\"]*)(repeat scroll 0(?:pt|px|%);?)/);
 			while ( re.exec( aHTMLText ) ) { 
   		  var firstPart = RegExp.$1;
         var secondPart = RegExp.$2;
-        var thirdPart = RegExp.$3.replace(/scroll 0(pt|px|%);/g, ';');  
+		// '?' added by Dan for Zotero
+		//var thirdPart = RegExp.$3.replace(/scroll 0(pt|px|%);/g, ';');
+        var thirdPart = RegExp.$3.replace(/scroll 0(pt|px|%);?/g, ';');  
         aHTMLText = aHTMLText.replace(re,"style=\""+firstPart+"background:"+secondPart+thirdPart);
 	    }
 		}	 
 		if ( (WPD_CSSBACKGROUNDPOSITIONBUG) && ( aHTMLText.match(/background-position: /i)) ) {
 			// Regex fixed by Dan for Zotero
+			//var re = new RegExp(/style=\"(.*)background-position: 0(?:pt|px|%);/);
 			var re = new RegExp(/style=\"([^\"]*)background-position: 0(?:pt|px|%);/);
 			while ( re.exec( aHTMLText ) ) { 
         aHTMLText = aHTMLText.replace(re,"style=\""+RegExp.$1+"background-position: ;");
