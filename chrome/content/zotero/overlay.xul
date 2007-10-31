@@ -23,13 +23,12 @@
 <?xml-stylesheet href="chrome://zotero/skin/overlay.css" type="text/css"?>
 
 <!DOCTYPE overlay [
-	<!ENTITY % globalDTD SYSTEM "chrome://global/locale/global.dtd">	%globalDTD;
-	<!ENTITY % zoteroDTD SYSTEM "chrome://zotero/locale/zotero.dtd">	%zoteroDTD;
+	<!ENTITY % globalDTD SYSTEM "chrome://global/locale/global.dtd"> %globalDTD;
+	<!ENTITY % zoteroDTD SYSTEM "chrome://zotero/locale/zotero.dtd"> %zoteroDTD;
 ]>
 
 <overlay id="zotero"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-	<?xul-overlay href="itemPane.xul" ?>
 	
     <!-- Include the global XPCOM object -->
 	<script src="include.js"/>

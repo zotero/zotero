@@ -8,3 +8,7 @@
 {
 	cursor: pointer !important;
 }
+
+#tagsPopup {
+	min-width: 300px;
+}
