@@ -1,14 +1,14 @@
 <!ENTITY zotero.general.optional "(Optionnel)">
-<!ENTITY zotero.general.note "Note:">
+<!ENTITY zotero.general.note "Note :">
 
-<!ENTITY zotero.errorReport.unrelatedMessages "The error log may include messages unrelated to Zotero.">
+<!ENTITY zotero.errorReport.unrelatedMessages "Le journal des erreurs peut comprendre des messages sans rapport avec Zotero.">
 <!ENTITY zotero.errorReport.additionalInfo "Information complémentaire">
 <!ENTITY zotero.errorReport.emailAddress "Votre adresse électronique :">
 <!ENTITY zotero.errorReport.errorSteps "Que faisiez-vous lorsque l&apos;erreur est survenue ? Merci d&apos;indiquer, si possible, les étapes permettant de reproduire l&apos;erreur.">
 <!ENTITY zotero.errorReport.submissionInProgress "Merci de patienter pendant la transmission du rapport d&apos;erreur.">
 <!ENTITY zotero.errorReport.submitted "Le rapport d&apos;erreur a été transmis.">
 <!ENTITY zotero.errorReport.reportID "ID du rapport :">
-<!ENTITY zotero.errorReport.furtherAssistance "See the Known Issues page and the forums for further assistance.">
+<!ENTITY zotero.errorReport.furtherAssistance "Consulter la page des problèmes connus et les forums pour davantage d&apos;aide.">
 <!ENTITY zotero.errorReport.includeReportID "Merci d&apos;indiquer l&apos;ID du rapport dans toute correspondance avec les développeurs de Zotero au sujet de ce problème.">
 
 <!ENTITY zotero.upgrade.newVersionInstalled "Vous avez installé une nouvelle version de Zotero.">
@@ -112,8 +112,8 @@
 <!ENTITY zotero.bibliography.print.label "Imprimer">
 
 <!ENTITY zotero.integration.docPrefs.title "Préférences du document">
-<!ENTITY zotero.integration.addEditCitation.title "Add/Edit Citation">
-<!ENTITY zotero.integration.editBibliography.title "Edit Bibliography">
+<!ENTITY zotero.integration.addEditCitation.title "Ajouter/Éditer la citation">
+<!ENTITY zotero.integration.editBibliography.title "Éditer la bibliographie">
 
 <!ENTITY zotero.progress.title "Progression">
 
@@ -121,20 +121,20 @@
 <!ENTITY zotero.exportOptions.format.label "Format :">
 <!ENTITY zotero.exportOptions.translatorOptions.label "Options du convertisseur">
 
-<!ENTITY zotero.citation.keepSorted.label "Keep Sources Sorted">
+<!ENTITY zotero.citation.keepSorted.label "Conserver les sources en ordre alphabétique">
 
 <!ENTITY zotero.citation.page "Page">
 <!ENTITY zotero.citation.paragraph "Paragraphe">
 <!ENTITY zotero.citation.line "Ligne">
-<!ENTITY zotero.citation.suppressAuthor.label "Suppress Author">
-<!ENTITY zotero.citation.prefix.label "Prefix:">
-<!ENTITY zotero.citation.suffix.label "Suffix:">
+<!ENTITY zotero.citation.suppressAuthor.label "Supprimer l&apos;auteur">
+<!ENTITY zotero.citation.prefix.label "Préfixe :">
+<!ENTITY zotero.citation.suffix.label "Suffixe :">
 
-<!ENTITY zotero.richText.italic.label "Italic">
-<!ENTITY zotero.richText.bold.label "Bold">
-<!ENTITY zotero.richText.underline.label "Underline">
-<!ENTITY zotero.richText.superscript.label "Superscript">
-<!ENTITY zotero.richText.subscript.label "Subscript">
+<!ENTITY zotero.richText.italic.label "Italique">
+<!ENTITY zotero.richText.bold.label "Gras">
+<!ENTITY zotero.richText.underline.label "Souligné">
+<!ENTITY zotero.richText.superscript.label "Exposant">
+<!ENTITY zotero.richText.subscript.label "Indice">
 
 <!ENTITY zotero.annotate.toolbar.add.label "Ajouter une annotation">
 <!ENTITY zotero.annotate.toolbar.collapse.label "Réduire toutes les annotations">
@@ -150,4 +150,4 @@
 <!ENTITY zotero.integration.prefs.bookmarks.label "Les marque-pages">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Les marque-pages sont conservés entre Microsoft Word et OpenOffice.org, mais peuvent être modifiés accidentellement.">
 
-<!ENTITY zotero.integration.references.label "References in Bibliography">
+<!ENTITY zotero.integration.references.label "Références dans la bibliographie">

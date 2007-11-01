@@ -10,24 +10,24 @@
 <!ENTITY zotero.preferences.position.below "en bas">
 <!ENTITY zotero.preferences.position.browser "de la fenêtre du navigateur">
 <!ENTITY zotero.preferences.statusBarIcon "Icône de la barre d&apos;état :">
-<!ENTITY zotero.preferences.statusBarIcon.none "None">
+<!ENTITY zotero.preferences.statusBarIcon.none "Aucune">
 <!ENTITY zotero.preferences.fontSize "Taille des caractères :">
 <!ENTITY zotero.preferences.fontSize.small "Petite">
 <!ENTITY zotero.preferences.fontSize.medium "Moyenne">
 <!ENTITY zotero.preferences.fontSize.large "Grande">
 
 <!ENTITY zotero.preferences.miscellaneous "Divers">
-<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators">
+<!ENTITY zotero.preferences.autoUpdate "Vérifier automatiquement les mises à jour des collecteurs">
 <!ENTITY zotero.preferences.updateNow "Mettre à jour maintenant">
 <!ENTITY zotero.preferences.reportTranslationFailure "Signaler les collecteurs de données en ligne défectueux">
-<!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded RIS/Refer files">
+<!ENTITY zotero.preferences.parseRISRefer "Utiliser Zotero pour télécharger les fichiers RIS/Refer">
 <!ENTITY zotero.preferences.automaticSnapshots "Faire une capture automatique de la page lors de la création d&apos;éléments à partir de pages Web">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Joindre automatiquement les fichers PDF associés lors de la sauvegarde d&apos;un élément">
 <!ENTITY zotero.preferences.automaticTags "Poser automatiquement des marqueurs sur les objets avec les mots-clés et en-têtes du sujet">
 
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
-<!ENTITY zotero.preferences.openurl.search "Search for resolvers">
+<!ENTITY zotero.preferences.openurl.search "Rechercher les serveurs de résolution">
 <!ENTITY zotero.preferences.openurl.custom "Personnaliser…">
 <!ENTITY zotero.preferences.openurl.server "Serveur de résolution :">
 <!ENTITY zotero.preferences.openurl.version "Version :">
@@ -37,10 +37,10 @@
 <!ENTITY zotero.preferences.search.pdfIndexing "Indexation des PDF">
 <!ENTITY zotero.preferences.search.indexStats "Statistiques d&apos;indexation">
 
-<!ENTITY zotero.preferences.search.indexStats.indexed "Indexed:">
-<!ENTITY zotero.preferences.search.indexStats.partial "Partial:">
-<!ENTITY zotero.preferences.search.indexStats.unindexed "Unindexed:">
-<!ENTITY zotero.preferences.search.indexStats.words "Words:">
+<!ENTITY zotero.preferences.search.indexStats.indexed "Indexés :">
+<!ENTITY zotero.preferences.search.indexStats.partial "Partiellement :">
+<!ENTITY zotero.preferences.search.indexStats.unindexed "Non indexés :">
+<!ENTITY zotero.preferences.search.indexStats.words "Mots :">
 
 <!ENTITY zotero.preferences.fulltext.textMaxLength "Nombre maximum de caractères à indexer par fichier :">
 <!ENTITY zotero.preferences.fulltext.pdfMaxPages "Nombre maximum de pages à indexer par fichier :">
@@ -64,10 +64,10 @@
 <!ENTITY zotero.preferences.keys.newItem "Créer un nouvel élément">
 <!ENTITY zotero.preferences.keys.newNote "Créer une nouvelle note">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Bascule du sélecteur de marqueurs">
-<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copy Selected Item Citations to Clipboard">
+<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copier les citations de l&apos;objet sélectionné vers le presse-papiers">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copier les objets sélectionnés dans le presse-papiers">
 <!ENTITY zotero.preferences.keys.overrideGlobal "Essayer de gérer les conflits de raccourcis">
-<!ENTITY zotero.preferences.keys.changesTakeEffect "Les modifications ne prendront effet que dans une nouvelle fenêtre">
+<!ENTITY zotero.preferences.keys.changesTakeEffect "Les modifications ne prendront effet que dans de nouvelles fenêtres">
 
 
 <!ENTITY zotero.preferences.prefpane.advanced "Avancées">
@@ -76,8 +76,8 @@
 <!ENTITY zotero.preferences.dataDir.useProfile "Utiliser le répertoire de profil de Firefox">
 <!ENTITY zotero.preferences.dataDir.custom "Personnalisé :">
 <!ENTITY zotero.preferences.dataDir.choose "Choisir…">
-<!ENTITY zotero.preferences.dataDir.reveal "Show Data Directory">
+<!ENTITY zotero.preferences.dataDir.reveal "Afficher le dossier contenant les données">
 
-<!ENTITY zotero.preferences.dbMaintenance "Database Maintenance">
-<!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Check Database Integrity">
-<!ENTITY zotero.preferences.dbMaintenance.rebuildTranslators "Rebuild Translators Table">
+<!ENTITY zotero.preferences.dbMaintenance "Maintenance de la base de données">
+<!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Vérifier l&apos;intégrité de la base de données">
+<!ENTITY zotero.preferences.dbMaintenance.rebuildTranslators "Reconstruire la table des collecteurs">

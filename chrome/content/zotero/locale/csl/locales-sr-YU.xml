@@ -5,48 +5,48 @@
     <term name="in">у</term>
     <term name="ibid">ibid</term>
     <term name="accessed">приступљено</term>
-    <term name="retrieved">обновљено</term>
+    <term name="retrieved">преузето</term>
     <term name="from">од</term>
     <term name="forthcoming">долазећи</term>
-    <term name="references">Референце</term>
+    <term name="references">референце</term>
     <term name="no date">без датума</term>
     <term name="and">и</term>
     <term name="et-al">и остали</term>
     <term name="book">
-      <single>book</single>
-      <multiple>books</multiple>
+      <single>књига</single>
+      <multiple>књиге(а)</multiple>
     </term>
     <term name="chapter">
-      <single>chapter</single>
-      <multiple>chapters</multiple>
+      <single>поглавље</single>
+      <multiple>поглавља</multiple>
     </term>
     <term name="column">
-      <single>column</single>
-      <multiple>columns</multiple>
+      <single>колона</single>
+      <multiple>колоне(а)</multiple>
     </term>
     <term name="figure">
-      <single>figure</single>
-      <multiple>figures</multiple>
+      <single>цртеж</single>
+      <multiple>цртежа</multiple>
     </term>
     <term name="folio">
-      <single>folio</single>
-      <multiple>folios</multiple>
+      <single>фолио</single>
+      <multiple>фолиа</multiple>
     </term>
     <term name="issue">
-      <single>number</single>
-      <multiple>numbers</multiple>
+      <single>број</single>
+      <multiple>бројеви</multiple>
     </term>
     <term name="line">
       <single>линија</single>
       <multiple>линије(а)</multiple>
     </term>
     <term name="note">
-      <single>note</single>
-      <multiple>notes</multiple>
+      <single>белешка</single>
+      <multiple>белешке(и)</multiple>
     </term>
     <term name="opus">
-      <single>opus</single>
-      <multiple>opera</multiple>
+      <single>опус</single>
+      <multiple>опера</multiple>
     </term>
     <term name="page">
       <single>страница</single>
@@ -57,38 +57,38 @@
       <multiple>параграфа(и)</multiple>
     </term>
     <term name="part">
-      <single>part</single>
-      <multiple>parts</multiple>
+      <single>део</single>
+      <multiple>дела(ова)</multiple>
     </term>
     <term name="section">
-      <single>section</single>
-      <multiple>sections</multiple>
+      <single>одељак</single>
+      <multiple>одељ(а)ка</multiple>
     </term>
     <term name="volume">
-      <single>volume</single>
-      <multiple>volumes</multiple>
+      <single>том</single>
+      <multiple>тома(ова)</multiple>
     </term>
     <term name="verse">
-      <single>verse</single>
-      <multiple>verses</multiple>
+      <single>строфа</single>
+      <multiple>строфе(а)</multiple>
     </term>
-    <term name="book" form="short">bk</term>
-    <term name="chapter" form="short">chap</term>
-    <term name="column" form="short">col</term>
-    <term name="figure" form="short">fig</term>
-    <term name="folio" form="short">f</term>
+    <term name="book" form="short">књига</term>
+    <term name="chapter" form="short">Пог.</term>
+    <term name="column" form="short">кол.</term>
+    <term name="figure" form="short">црт.</term>
+    <term name="folio" form="short">ф.</term>
     <term name="issue" form="short">изд.</term>
-    <term name="opus" form="short">op</term>
+    <term name="opus" form="short">оп.</term>
     <term name="page" form="short">
       <single>стр.</single>
       <multiple>стр.</multiple>
     </term>
-    <term name="paragraph" form="short">para</term>
-    <term name="part" form="short">pt</term>
-    <term name="section" form="short">sec</term>
+    <term name="paragraph" form="short">пар.</term>
+    <term name="part" form="short">део</term>
+    <term name="section" form="short">од.</term>
     <term name="verse" form="short">
-      <single>v</single>
-      <multiple>vv</multiple>
+      <single>ст.</single>
+      <multiple>ст.</multiple>
     </term>
     <term name="volume" form="short">том</term>
     <term name="paragraph" form="symbol">
@@ -101,11 +101,11 @@
     </term>
     <term name="editor">
       <single>уредник</single>
-      <multiple>уредици</multiple>
+      <multiple>уредика(ци)</multiple>
     </term>
     <term name="translator">
       <single>преводилац</single>
-      <multiple>преводиоци</multiple>
+      <multiple>преводиоца(и)</multiple>
     </term>
     <term name="editor" form="short">
       <single>Ур.</single>
@@ -117,8 +117,8 @@
     </term>
     <term name="editor" form="verb">уредио</term>
     <term name="translator" form="verb">превео</term>
-    <term name="editor" form="verb-short">ed</term>
-    <term name="translator" form="verb-short">trans</term>
+    <term name="editor" form="verb-short">ур.</term>
+    <term name="translator" form="verb-short">прев.</term>
     <term name="month-01">Јануар</term>
     <term name="month-02">Фебруар</term>
     <term name="month-03">Март</term>
@@ -138,7 +138,7 @@
     <term name="month-05" form="short">Мај</term>
     <term name="month-06" form="short">Јуни</term>
     <term name="month-07" form="short">Јули</term>
-    <term name="month-08" form="short">Ауг.</term>
+    <term name="month-08" form="short">Авг.</term>
     <term name="month-09" form="short">Сеп.</term>
     <term name="month-10" form="short">Окт.</term>
     <term name="month-11" form="short">Нов.</term>

@@ -10,24 +10,24 @@
 <!ENTITY zotero.preferences.position.below "alatta">
 <!ENTITY zotero.preferences.position.browser "a böngészőablaknak">
 <!ENTITY zotero.preferences.statusBarIcon "Ikon az állapotsorban:">
-<!ENTITY zotero.preferences.statusBarIcon.none "None">
+<!ENTITY zotero.preferences.statusBarIcon.none "Egyik sem">
 <!ENTITY zotero.preferences.fontSize "Betűméret">
 <!ENTITY zotero.preferences.fontSize.small "Kicsi">
 <!ENTITY zotero.preferences.fontSize.medium "Közepes">
 <!ENTITY zotero.preferences.fontSize.large "Nagy">
 
 <!ENTITY zotero.preferences.miscellaneous "Egyéb">
-<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators">
+<!ENTITY zotero.preferences.autoUpdate "Konverter-frissítések automatikus ellenőrzése">
 <!ENTITY zotero.preferences.updateNow "Frissítés indítása">
 <!ENTITY zotero.preferences.reportTranslationFailure "Hibás adatkonverterek jelentése">
-<!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded RIS/Refer files">
+<!ENTITY zotero.preferences.parseRISRefer "A Zotero használata RIS/Refer fájlok letöltésére">
 <!ENTITY zotero.preferences.automaticSnapshots "Weboldalon alapuló elem létrehozásakor automatikus pillanatfelvétel készítése">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "A kapcsolódó PDF és más fájlok automatikus csatolása">
 <!ENTITY zotero.preferences.automaticTags "Kulcsszavak és tárgyszavak automatikus hozzárendelése címkeként">
 
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
-<!ENTITY zotero.preferences.openurl.search "Search for resolvers">
+<!ENTITY zotero.preferences.openurl.search "Linkfeloldók keresése">
 <!ENTITY zotero.preferences.openurl.custom "Egyedi...">
 <!ENTITY zotero.preferences.openurl.server "Linkfeloldó:">
 <!ENTITY zotero.preferences.openurl.version "Verzió:">
@@ -37,17 +37,17 @@
 <!ENTITY zotero.preferences.search.pdfIndexing "PDF indexelés">
 <!ENTITY zotero.preferences.search.indexStats "Index statisztikák">
 
-<!ENTITY zotero.preferences.search.indexStats.indexed "Indexed:">
-<!ENTITY zotero.preferences.search.indexStats.partial "Partial:">
-<!ENTITY zotero.preferences.search.indexStats.unindexed "Unindexed:">
-<!ENTITY zotero.preferences.search.indexStats.words "Words:">
+<!ENTITY zotero.preferences.search.indexStats.indexed "Indexelve:">
+<!ENTITY zotero.preferences.search.indexStats.partial "Részlegesen indexelve:">
+<!ENTITY zotero.preferences.search.indexStats.unindexed "Nincs indexelve">
+<!ENTITY zotero.preferences.search.indexStats.words "Szavak száma:">
 
 <!ENTITY zotero.preferences.fulltext.textMaxLength "Indexelendő karakterek maximális száma egy fájlban:">
 <!ENTITY zotero.preferences.fulltext.pdfMaxPages "Indexelendő oldalak maximális száma egy fájlban:">
 
 <!ENTITY zotero.preferences.prefpane.export "Exportálás">
 
-<!ENTITY zotero.preferences.quickCopy.caption "Gyorsmásolat">
+<!ENTITY zotero.preferences.quickCopy.caption "Gyorsmásolás">
 <!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Alapértelmezett kimeneti formátum">
 <!ENTITY zotero.preferences.quickCopy.macWarning "Megjegyzés: A formázás Mac OS X alatt elveszik.">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Weboldal-specifikus beállítások:">
@@ -64,10 +64,10 @@
 <!ENTITY zotero.preferences.keys.newItem "Új elem létrehozása">
 <!ENTITY zotero.preferences.keys.newNote "Új jegyzet létrehozása">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Címkeválasztó mutatása/elrejtése">
-<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copy Selected Item Citations to Clipboard">
+<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kiválasztott hivatkozás másolása a vágólapra">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kiválasztott elemek másolása a vágólapra">
 <!ENTITY zotero.preferences.keys.overrideGlobal "Ellentmondó billentyűparancsok felülírása">
-<!ENTITY zotero.preferences.keys.changesTakeEffect "A változások csak új ablakban érvényesülnek">
+<!ENTITY zotero.preferences.keys.changesTakeEffect "A változások csak az új ablakokban érvényesülnek">
 
 
 <!ENTITY zotero.preferences.prefpane.advanced "Haladó">
@@ -76,8 +76,8 @@
 <!ENTITY zotero.preferences.dataDir.useProfile "Firefox profilkönyvtár">
 <!ENTITY zotero.preferences.dataDir.custom "Egyéni:">
 <!ENTITY zotero.preferences.dataDir.choose "Tallózás...">
-<!ENTITY zotero.preferences.dataDir.reveal "Show Data Directory">
+<!ENTITY zotero.preferences.dataDir.reveal "Az adatkönyvtár mutatása">
 
-<!ENTITY zotero.preferences.dbMaintenance "Database Maintenance">
-<!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Check Database Integrity">
-<!ENTITY zotero.preferences.dbMaintenance.rebuildTranslators "Rebuild Translators Table">
+<!ENTITY zotero.preferences.dbMaintenance "Adatbázis karbantartás">
+<!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Az adatbázis integritásának ellenőrzése">
+<!ENTITY zotero.preferences.dbMaintenance.rebuildTranslators "Konverter tábla újraépítése">

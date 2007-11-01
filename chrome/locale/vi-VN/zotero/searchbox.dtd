@@ -1,0 +1,23 @@
+<!ENTITY zotero.search.name "Tên:">
+
+<!ENTITY zotero.search.joinMode.prefix "Tìm các biểu ghi thỏa mãn">
+<!ENTITY zotero.search.joinMode.any "một trong">
+<!ENTITY zotero.search.joinMode.all "tất cả">
+<!ENTITY zotero.search.joinMode.suffix "các điều kiện sau:">
+
+<!ENTITY zotero.search.recursive.label "Tìm kiếm trong cả các thư mục con">
+<!ENTITY zotero.search.noChildren "Chỉ hiển thị các các biểu ghi cấp cao nhất">
+<!ENTITY zotero.search.includeParentsAndChildren "Hiển thị các biểu ghi mẹ và con của biểu ghi thỏa mãn điều kiện tìm kiếm">
+
+<!ENTITY zotero.search.textModes.phrase "Cụm từ">
+<!ENTITY zotero.search.textModes.phraseBinary "Cụm từ (bao gồm cả các tập tin nhị phân)">
+<!ENTITY zotero.search.textModes.regexp "Biểu thức chính quy">
+<!ENTITY zotero.search.textModes.regexpCS "Biểu thức chính quy (có phân biệt chữ thường/hoa)">
+
+<!ENTITY zotero.search.date.units.days "ngày">
+<!ENTITY zotero.search.date.units.months "tháng">
+<!ENTITY zotero.search.date.units.years "năm">
+
+<!ENTITY zotero.search.search "Thực hiện Tìm kiếm">
+<!ENTITY zotero.search.clear "Xóa">
+<!ENTITY zotero.search.saveSearch "Ghi nhớ Tìm kiếm Định sẵn">

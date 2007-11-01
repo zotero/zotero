@@ -10,24 +10,24 @@
 <!ENTITY zotero.preferences.position.below "dedesubtul">
 <!ENTITY zotero.preferences.position.browser "conţinutului browserului">
 <!ENTITY zotero.preferences.statusBarIcon "Imaginea din bara de stare:">
-<!ENTITY zotero.preferences.statusBarIcon.none "None">
+<!ENTITY zotero.preferences.statusBarIcon.none "Niciuna">
 <!ENTITY zotero.preferences.fontSize "Mărime caractere:">
 <!ENTITY zotero.preferences.fontSize.small "Mici">
 <!ENTITY zotero.preferences.fontSize.medium "Medii">
 <!ENTITY zotero.preferences.fontSize.large "Mari">
 
 <!ENTITY zotero.preferences.miscellaneous "Diverse">
-<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators">
+<!ENTITY zotero.preferences.autoUpdate "Controlează automat dacă există traduceri actualizate">
 <!ENTITY zotero.preferences.updateNow "Actualizează acum">
 <!ENTITY zotero.preferences.reportTranslationFailure "Raportează site-uri cu legături rupte (la translatare)">
-<!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded RIS/Refer files">
+<!ENTITY zotero.preferences.parseRISRefer "Foloseşte Zotero pentru a descărca fişiere RIS/Refer">
 <!ENTITY zotero.preferences.automaticSnapshots "Creează automat instantanee, atunci când sunt create înregistrări din paginile web">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Ataşează automat fişierele PDF asociate, precum şi alte fişiere, atunci când sunt salvate înregistrările">
 <!ENTITY zotero.preferences.automaticTags "Creează automat etichetele pentru înregistrări, împreună cu cuvintele cheie şi cu titlurile">
 
 <!ENTITY zotero.preferences.openurl.caption "Deschide URL">
 
-<!ENTITY zotero.preferences.openurl.search "Search for resolvers">
+<!ENTITY zotero.preferences.openurl.search "Caută rezolvatori">
 <!ENTITY zotero.preferences.openurl.custom "Personalizează...">
 <!ENTITY zotero.preferences.openurl.server "Rezolvator:">
 <!ENTITY zotero.preferences.openurl.version "Versiune:">
@@ -37,10 +37,10 @@
 <!ENTITY zotero.preferences.search.pdfIndexing "Indexare PDF">
 <!ENTITY zotero.preferences.search.indexStats "Statistici index">
 
-<!ENTITY zotero.preferences.search.indexStats.indexed "Indexed:">
-<!ENTITY zotero.preferences.search.indexStats.partial "Partial:">
-<!ENTITY zotero.preferences.search.indexStats.unindexed "Unindexed:">
-<!ENTITY zotero.preferences.search.indexStats.words "Words:">
+<!ENTITY zotero.preferences.search.indexStats.indexed "Indexate:">
+<!ENTITY zotero.preferences.search.indexStats.partial "Parţial:">
+<!ENTITY zotero.preferences.search.indexStats.unindexed "Neindexate:">
+<!ENTITY zotero.preferences.search.indexStats.words "Cuvinte:">
 
 <!ENTITY zotero.preferences.fulltext.textMaxLength "Numărul maxim de caractere al indexului per fişier">
 <!ENTITY zotero.preferences.fulltext.pdfMaxPages "Numărul maxim de pagini ale indexului per fişier">
@@ -64,7 +64,7 @@
 <!ENTITY zotero.preferences.keys.newItem "Creează o înregistrare nouă">
 <!ENTITY zotero.preferences.keys.newNote "Creează o notă nouă">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Afişează/ascunde selectorul de etichete">
-<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copy Selected Item Citations to Clipboard">
+<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copiază citările înregistrărilor selectate în memoria Clipboard">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copiază înregistrările selectate în memoria Clipboard">
 <!ENTITY zotero.preferences.keys.overrideGlobal "Încearcă să suprascrii scurtăturile care sunt în conflict">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Schimbările vor putea fi vizualizate doar într-o fereastră nouă">
@@ -76,8 +76,8 @@
 <!ENTITY zotero.preferences.dataDir.useProfile "Foloseşte dosarul de profil din Firefox">
 <!ENTITY zotero.preferences.dataDir.custom "Personalizare:">
 <!ENTITY zotero.preferences.dataDir.choose "Alege...">
-<!ENTITY zotero.preferences.dataDir.reveal "Show Data Directory">
+<!ENTITY zotero.preferences.dataDir.reveal "Afişează directorul de date">
 
-<!ENTITY zotero.preferences.dbMaintenance "Database Maintenance">
-<!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Check Database Integrity">
-<!ENTITY zotero.preferences.dbMaintenance.rebuildTranslators "Rebuild Translators Table">
+<!ENTITY zotero.preferences.dbMaintenance "Întreţinerea bazei de date">
+<!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Controlează integritatea bazei de date">
+<!ENTITY zotero.preferences.dbMaintenance.rebuildTranslators "Reconstruieşte tabelul traducătorilor">

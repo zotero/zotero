@@ -1,14 +1,14 @@
 <!ENTITY zotero.general.optional "(Optional)">
-<!ENTITY zotero.general.note "Note:">
+<!ENTITY zotero.general.note "Anmerkung:">
 
-<!ENTITY zotero.errorReport.unrelatedMessages "The error log may include messages unrelated to Zotero.">
+<!ENTITY zotero.errorReport.unrelatedMessages "Dieses Fehlerprotokoll kann unter Umständen Nachrichten enthalten, die nicht mit Zotero in Verbindung stehen.">
 <!ENTITY zotero.errorReport.additionalInfo "Zusätzliche Informationen">
 <!ENTITY zotero.errorReport.emailAddress "Ihre E-Mail-Adresse">
 <!ENTITY zotero.errorReport.errorSteps "Was haben Sie gemacht, als der Fehler auftrat? Falls möglich, beschreiben Sie bitte die Schritte zur Reproduktion des Fehlers.">
 <!ENTITY zotero.errorReport.submissionInProgress "Bitte warten Sie, während der Fehlerbericht übermittelt wird.">
 <!ENTITY zotero.errorReport.submitted "Der Fehlerbericht wurde übermittelt.">
 <!ENTITY zotero.errorReport.reportID "Bericht-ID:">
-<!ENTITY zotero.errorReport.furtherAssistance "See the Known Issues page and the forums for further assistance.">
+<!ENTITY zotero.errorReport.furtherAssistance "Bitte gehen Sie zur Seite mit bekannten Problemen oder wenden Sie sich an die Foren für weitere Unterstützung.">
 <!ENTITY zotero.errorReport.includeReportID "Bitte geben Sie die Bericht-ID immer mit an, wenn Sie die Zotero-Entwickler wegen des entsprechenden Problems kontaktieren.">
 
 <!ENTITY zotero.upgrade.newVersionInstalled "Sie haben eine neue Version von Zotero installiert.">
@@ -71,7 +71,7 @@
 <!ENTITY zotero.toolbar.about.label "Über Zotero">
 <!ENTITY zotero.toolbar.advancedSearch "Erweiterte Suche">
 <!ENTITY zotero.toolbar.search.label "Suche:">
-<!ENTITY zotero.toolbar.fullscreen.tooltip "VOllbild-Modus an/aus">
+<!ENTITY zotero.toolbar.fullscreen.tooltip "Vollbild-Modus an/aus">
 <!ENTITY zotero.toolbar.openURL.label "Finden">
 <!ENTITY zotero.toolbar.openURL.tooltip "In lokaler Bibliothek finden">
 
@@ -112,8 +112,8 @@
 <!ENTITY zotero.bibliography.print.label "Drucken">
 
 <!ENTITY zotero.integration.docPrefs.title "Dokument-Eigenschaften">
-<!ENTITY zotero.integration.addEditCitation.title "Add/Edit Citation">
-<!ENTITY zotero.integration.editBibliography.title "Edit Bibliography">
+<!ENTITY zotero.integration.addEditCitation.title "Zitation hinzufügen/ändern">
+<!ENTITY zotero.integration.editBibliography.title "Bibliographie editieren">
 
 <!ENTITY zotero.progress.title "Fortschritt">
 
@@ -121,20 +121,20 @@
 <!ENTITY zotero.exportOptions.format.label "Format:">
 <!ENTITY zotero.exportOptions.translatorOptions.label "Übersetzer-Einstellungen">
 
-<!ENTITY zotero.citation.keepSorted.label "Keep Sources Sorted">
+<!ENTITY zotero.citation.keepSorted.label "Quellen sortiert halten">
 
 <!ENTITY zotero.citation.page "Seite">
 <!ENTITY zotero.citation.paragraph "Absatz">
 <!ENTITY zotero.citation.line "Zeile">
-<!ENTITY zotero.citation.suppressAuthor.label "Suppress Author">
-<!ENTITY zotero.citation.prefix.label "Prefix:">
+<!ENTITY zotero.citation.suppressAuthor.label "Autor unterdrücken">
+<!ENTITY zotero.citation.prefix.label "Präfix:">
 <!ENTITY zotero.citation.suffix.label "Suffix:">
 
-<!ENTITY zotero.richText.italic.label "Italic">
-<!ENTITY zotero.richText.bold.label "Bold">
-<!ENTITY zotero.richText.underline.label "Underline">
-<!ENTITY zotero.richText.superscript.label "Superscript">
-<!ENTITY zotero.richText.subscript.label "Subscript">
+<!ENTITY zotero.richText.italic.label "Kursiv">
+<!ENTITY zotero.richText.bold.label "Fett">
+<!ENTITY zotero.richText.underline.label "Unterstrichen">
+<!ENTITY zotero.richText.superscript.label "Hochgestellt">
+<!ENTITY zotero.richText.subscript.label "Tiefgestellt">
 
 <!ENTITY zotero.annotate.toolbar.add.label "Anmerkung hinzufügen">
 <!ENTITY zotero.annotate.toolbar.collapse.label "Alle Anmerkungen einklappen">
@@ -150,4 +150,4 @@
 <!ENTITY zotero.integration.prefs.bookmarks.label "Lesezeichen">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Lesezeichen werden zwischen Microsoft Word und OpenOffice.org erhalten, können sich aber versehentlich verändern.">
 
-<!ENTITY zotero.integration.references.label "References in Bibliography">
+<!ENTITY zotero.integration.references.label "Literaturangaben in Bibliographie">

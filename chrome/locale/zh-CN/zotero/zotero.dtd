@@ -1,14 +1,14 @@
 <!ENTITY zotero.general.optional "(可选)">
-<!ENTITY zotero.general.note "Note:">
+<!ENTITY zotero.general.note "便笺:">
 
-<!ENTITY zotero.errorReport.unrelatedMessages "The error log may include messages unrelated to Zotero.">
+<!ENTITY zotero.errorReport.unrelatedMessages "错误日志里可能会包含与Zotero无关的信息.">
 <!ENTITY zotero.errorReport.additionalInfo "附加信息">
 <!ENTITY zotero.errorReport.emailAddress "您的e-mail地址:">
 <!ENTITY zotero.errorReport.errorSteps "当错误发生时您在做什么? 如果可能, 请描述用于重现这个错误的步骤.">
 <!ENTITY zotero.errorReport.submissionInProgress "正在提交错误报告, 请等待.">
 <!ENTITY zotero.errorReport.submitted "错误报告已经提交.">
 <!ENTITY zotero.errorReport.reportID "报告ID:">
-<!ENTITY zotero.errorReport.furtherAssistance "See the Known Issues page and the forums for further assistance.">
+<!ENTITY zotero.errorReport.furtherAssistance "查看已知问题和论坛以寻求更多帮助.">
 <!ENTITY zotero.errorReport.includeReportID "Please include the Report ID in any correspondence with the Zotero developers regarding this issue.">
 
 <!ENTITY zotero.upgrade.newVersionInstalled "您已经安装了一个新版本的Zotero.">
@@ -20,24 +20,24 @@
 <!ENTITY zotero.upgrade.changeLogLink "变更日志">
 <!ENTITY zotero.upgrade.changeLogAfterLink "以了解有哪些新的改动.">
 
-<!ENTITY zotero.contextMenu.addTextToCurrentNote "将所选内容添至 Zotero 笔记">
-<!ENTITY zotero.contextMenu.addTextToNewNote "由所选内容创建 Zotero 笔记">
+<!ENTITY zotero.contextMenu.addTextToCurrentNote "将所选内容添至 Zotero 便笺">
+<!ENTITY zotero.contextMenu.addTextToNewNote "由所选内容创建 Zotero 便笺">
 <!ENTITY zotero.contextMenu.saveLinkAsSnapshot "将链接保存为 Zotero 快照">
 <!ENTITY zotero.contextMenu.saveImageAsSnapshot "将图片保存为 Zotero 快照">
 
 <!ENTITY zotero.tabs.info.label "信息">
-<!ENTITY zotero.tabs.notes.label "笔记">
+<!ENTITY zotero.tabs.notes.label "便笺">
 <!ENTITY zotero.tabs.attachments.label "附件">
 <!ENTITY zotero.tabs.tags.label "标签">
 <!ENTITY zotero.tabs.related.label "相关条目">
-<!ENTITY zotero.notes.separate "在单独的窗口中编辑">
+<!ENTITY zotero.notes.separate "单独窗口编辑">
 
 <!ENTITY zotero.items.type_column "类型">
 <!ENTITY zotero.items.title_column "标题">
 <!ENTITY zotero.items.creator_column "作者">
 <!ENTITY zotero.items.date_column "日期">
 <!ENTITY zotero.items.year_column "年">
-<!ENTITY zotero.items.publisher_column "出版者(Publisher)">
+<!ENTITY zotero.items.publisher_column "出版者">
 <!ENTITY zotero.items.language_column "语言">
 <!ENTITY zotero.items.callNumber_column "Call Number">
 <!ENTITY zotero.items.repository_column "存储库">
@@ -46,8 +46,8 @@
 <!ENTITY zotero.items.dateModified_column "修改时间">
 <!ENTITY zotero.items.numChildren_column "+">
 
-<!ENTITY zotero.items.menu.showInLibrary "在图书馆中显示">
-<!ENTITY zotero.items.menu.attach.note "添加笔记">
+<!ENTITY zotero.items.menu.showInLibrary "在书库中显示">
+<!ENTITY zotero.items.menu.attach.note "添加便笺">
 <!ENTITY zotero.items.menu.attach.snapshot "附加当前页的快照">
 <!ENTITY zotero.items.menu.attach.link "附加当前页的链接">
 <!ENTITY zotero.items.menu.duplicateItem "生成所选条目复件">
@@ -73,19 +73,19 @@
 <!ENTITY zotero.toolbar.search.label "检索:">
 <!ENTITY zotero.toolbar.fullscreen.tooltip "切换全屏模式">
 <!ENTITY zotero.toolbar.openURL.label "定位">
-<!ENTITY zotero.toolbar.openURL.tooltip "在您的本地图书馆里查找">
+<!ENTITY zotero.toolbar.openURL.tooltip "在本地图书馆里查找">
 
 <!ENTITY zotero.item.add "添加">
 <!ENTITY zotero.item.attachment.file.show "显示文件">
 <!ENTITY zotero.item.textTransform "变换文本">
 <!ENTITY zotero.item.textTransform.lowercase "小写">
-<!ENTITY zotero.item.textTransform.titlecase "标题化(Title Case)">
+<!ENTITY zotero.item.textTransform.titlecase "标题式">
 
-<!ENTITY zotero.toolbar.note.standalone "新建笔记">
+<!ENTITY zotero.toolbar.note.standalone "新建独立便笺">
 <!ENTITY zotero.toolbar.attachment.linked "链接至文件...">
 <!ENTITY zotero.toolbar.attachment.add "存储文件的拷贝...">
-<!ENTITY zotero.toolbar.attachment.weblink "保存当前页的链接">
-<!ENTITY zotero.toolbar.attachment.snapshot "生成当前页的快照">
+<!ENTITY zotero.toolbar.attachment.weblink "保存当前页链接">
+<!ENTITY zotero.toolbar.attachment.snapshot "生成当前页快照">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "无标签可显示">
 <!ENTITY zotero.tagSelector.filter "过滤:">
@@ -103,7 +103,7 @@
 <!ENTITY zotero.selectitems.select.label "确定">
 
 <!ENTITY zotero.bibliography.title "创建文献目录">
-<!ENTITY zotero.bibliography.style.label "文献引用样式:">
+<!ENTITY zotero.bibliography.style.label "引文样式:">
 <!ENTITY zotero.bibliography.output.label "输出格式">
 <!ENTITY zotero.bibliography.saveAsRTF.label "另存为 RTF">
 <!ENTITY zotero.bibliography.saveAsHTML.label "另存为 HTML">
@@ -112,8 +112,8 @@
 <!ENTITY zotero.bibliography.print.label "打印">
 
 <!ENTITY zotero.integration.docPrefs.title "文档选项">
-<!ENTITY zotero.integration.addEditCitation.title "Add/Edit Citation">
-<!ENTITY zotero.integration.editBibliography.title "Edit Bibliography">
+<!ENTITY zotero.integration.addEditCitation.title "添加/编辑引文">
+<!ENTITY zotero.integration.editBibliography.title "编辑文献目录">
 
 <!ENTITY zotero.progress.title "进度">
 
@@ -126,15 +126,15 @@
 <!ENTITY zotero.citation.page "页">
 <!ENTITY zotero.citation.paragraph "段">
 <!ENTITY zotero.citation.line "行">
-<!ENTITY zotero.citation.suppressAuthor.label "Suppress Author">
-<!ENTITY zotero.citation.prefix.label "Prefix:">
-<!ENTITY zotero.citation.suffix.label "Suffix:">
+<!ENTITY zotero.citation.suppressAuthor.label "简略作者">
+<!ENTITY zotero.citation.prefix.label "前缀:">
+<!ENTITY zotero.citation.suffix.label "后缀:">
 
-<!ENTITY zotero.richText.italic.label "Italic">
-<!ENTITY zotero.richText.bold.label "Bold">
-<!ENTITY zotero.richText.underline.label "Underline">
-<!ENTITY zotero.richText.superscript.label "Superscript">
-<!ENTITY zotero.richText.subscript.label "Subscript">
+<!ENTITY zotero.richText.italic.label "斜体">
+<!ENTITY zotero.richText.bold.label "粗体">
+<!ENTITY zotero.richText.underline.label "下划线">
+<!ENTITY zotero.richText.superscript.label "上标">
+<!ENTITY zotero.richText.subscript.label "下标">
 
 <!ENTITY zotero.annotate.toolbar.add.label "添加标注">
 <!ENTITY zotero.annotate.toolbar.collapse.label "闭合所有标注">
@@ -142,7 +142,7 @@
 <!ENTITY zotero.annotate.toolbar.highlight.label "高亮文本">
 <!ENTITY zotero.annotate.toolbar.unhighlight.label "去高亮文本">
 
-<!ENTITY zotero.integration.prefs.displayAs.label "显示引用为:">
+<!ENTITY zotero.integration.prefs.displayAs.label "显示引文为:">
 <!ENTITY zotero.integration.prefs.footnotes.label "脚注">
 <!ENTITY zotero.integration.prefs.endnotes.label "尾注">
 

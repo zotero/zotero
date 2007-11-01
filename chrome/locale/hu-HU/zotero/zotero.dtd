@@ -1,14 +1,14 @@
 <!ENTITY zotero.general.optional "(Nem kötelező)">
-<!ENTITY zotero.general.note "Note:">
+<!ENTITY zotero.general.note "Jegyzet:">
 
-<!ENTITY zotero.errorReport.unrelatedMessages "The error log may include messages unrelated to Zotero.">
+<!ENTITY zotero.errorReport.unrelatedMessages "A hibanapló a Zoterohoz nem kapcsolódó bejegyzéseket is tartalmazhat">
 <!ENTITY zotero.errorReport.additionalInfo "További információk">
 <!ENTITY zotero.errorReport.emailAddress "Az Ön email címe:">
 <!ENTITY zotero.errorReport.errorSteps "Mikor jelentkezett a hiba? Adja meg lépésről lépére, hogy lehet reprodukálni a hibát.">
 <!ENTITY zotero.errorReport.submissionInProgress "Várjon a hibajelentés elküldéséig.">
 <!ENTITY zotero.errorReport.submitted "A hibajelentés elküldve.">
 <!ENTITY zotero.errorReport.reportID "Jelentés azonosítója:">
-<!ENTITY zotero.errorReport.furtherAssistance "See the Known Issues page and the forums for further assistance.">
+<!ENTITY zotero.errorReport.furtherAssistance "További segítséget található az Ismert problémák oldalon és a fórumokban">
 <!ENTITY zotero.errorReport.includeReportID "Hivatkozzon a jelentés azonosítójára a fejlesztőkkel folytatott levelezésben.">
 
 <!ENTITY zotero.upgrade.newVersionInstalled "A Zotero új verziójának telepítése sikerült.">
@@ -112,8 +112,8 @@
 <!ENTITY zotero.bibliography.print.label "Nyomtatás">
 
 <!ENTITY zotero.integration.docPrefs.title "Dokumentum beállításai">
-<!ENTITY zotero.integration.addEditCitation.title "Add/Edit Citation">
-<!ENTITY zotero.integration.editBibliography.title "Edit Bibliography">
+<!ENTITY zotero.integration.addEditCitation.title "Hivatkozás hozzáadása/szerkesztése">
+<!ENTITY zotero.integration.editBibliography.title "Bibliográfia szerkesztése">
 
 <!ENTITY zotero.progress.title "Folyamatban">
 
@@ -121,20 +121,20 @@
 <!ENTITY zotero.exportOptions.format.label "Formátum:">
 <!ENTITY zotero.exportOptions.translatorOptions.label "Adatkonverter beállításai">
 
-<!ENTITY zotero.citation.keepSorted.label "Keep Sources Sorted">
+<!ENTITY zotero.citation.keepSorted.label "Források sorbarendezése">
 
 <!ENTITY zotero.citation.page "Oldal">
 <!ENTITY zotero.citation.paragraph "Bekezdés">
 <!ENTITY zotero.citation.line "Sor">
-<!ENTITY zotero.citation.suppressAuthor.label "Suppress Author">
-<!ENTITY zotero.citation.prefix.label "Prefix:">
-<!ENTITY zotero.citation.suffix.label "Suffix:">
+<!ENTITY zotero.citation.suppressAuthor.label "Szerző figyelmen kívül hagyása">
+<!ENTITY zotero.citation.prefix.label "Előtag:">
+<!ENTITY zotero.citation.suffix.label "Utótag:">
 
-<!ENTITY zotero.richText.italic.label "Italic">
-<!ENTITY zotero.richText.bold.label "Bold">
-<!ENTITY zotero.richText.underline.label "Underline">
-<!ENTITY zotero.richText.superscript.label "Superscript">
-<!ENTITY zotero.richText.subscript.label "Subscript">
+<!ENTITY zotero.richText.italic.label "Dőlt">
+<!ENTITY zotero.richText.bold.label "Félkövér">
+<!ENTITY zotero.richText.underline.label "Aláhúzott">
+<!ENTITY zotero.richText.superscript.label "Felsőindex">
+<!ENTITY zotero.richText.subscript.label "Alsóindex">
 
 <!ENTITY zotero.annotate.toolbar.add.label "Új megjegyzés">
 <!ENTITY zotero.annotate.toolbar.collapse.label "Összes megjegyzés bezárása">
@@ -150,4 +150,4 @@
 <!ENTITY zotero.integration.prefs.bookmarks.label "Könyvjelzők">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "A könyvjelzők mind a Microsoft Word, mind az OpenOffice.org programokkal kompatibilisak, de könnyű véletlenül módosítani.">
 
-<!ENTITY zotero.integration.references.label "References in Bibliography">
+<!ENTITY zotero.integration.references.label "Hivatkozások a bibliográfiában">

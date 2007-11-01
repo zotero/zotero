@@ -1,74 +1,74 @@
-<!ENTITY zotero.general.optional "【可選擇的】">
-<!ENTITY zotero.general.note "Note:">
+<!ENTITY zotero.general.optional "（選用）">
+<!ENTITY zotero.general.note "注意：">
 
-<!ENTITY zotero.errorReport.unrelatedMessages "The error log may include messages unrelated to Zotero.">
+<!ENTITY zotero.errorReport.unrelatedMessages "錯誤記錄可能包括了一些和 Zotero 不相關的訊息。">
 <!ENTITY zotero.errorReport.additionalInfo "更多的資訊">
 <!ENTITY zotero.errorReport.emailAddress "你的電子郵件地址：">
-<!ENTITY zotero.errorReport.errorSteps "當錯誤發生時你正在做什麼？可能的話，請包含可以重覆產生這錯誤的步驟。">
-<!ENTITY zotero.errorReport.submissionInProgress "請等候錯誤報告的送交。">
-<!ENTITY zotero.errorReport.submitted "錯誤報告已經送交出去了。">
+<!ENTITY zotero.errorReport.errorSteps "錯誤發生時你正在做什麼？可能的話，請在錯誤報告內描述可以重複產生這個錯誤的步驟。">
+<!ENTITY zotero.errorReport.submissionInProgress "請等候錯誤報告送出。">
+<!ENTITY zotero.errorReport.submitted "錯誤報告已經送出。">
 <!ENTITY zotero.errorReport.reportID "報告識別號：">
-<!ENTITY zotero.errorReport.furtherAssistance "See the Known Issues page and the forums for further assistance.">
-<!ENTITY zotero.errorReport.includeReportID "在與Zotero發展者做關於這個問題的聯繫時，請附上報告識別號。">
+<!ENTITY zotero.errorReport.furtherAssistance "如需更多協助，請參看已知問題頁以及論壇。">
+<!ENTITY zotero.errorReport.includeReportID "與 Zotero 開發者做關於這個問題的聯繫時，請附上報告識別號。">
 
-<!ENTITY zotero.upgrade.newVersionInstalled "你安裝了一個新版的Zotero。">
-<!ENTITY zotero.upgrade.upgradeRequired "你的Zotero資料庫必須昇級才能在新版本中使用。">
-<!ENTITY zotero.upgrade.autoBackup "在任何改變前，你現存的資料庫將會被自動的備份起來。">
-<!ENTITY zotero.upgrade.upgradeInProgress "請等候昇級程序的完成。這可能會花幾分鐘。">
-<!ENTITY zotero.upgrade.upgradeSucceeded "你的Zotero資料庫已經成功的昇級了。">
+<!ENTITY zotero.upgrade.newVersionInstalled "你已安裝了新版的 Zotero。">
+<!ENTITY zotero.upgrade.upgradeRequired "你的 Zotero 資料庫必須升級才能在新版本中使用。">
+<!ENTITY zotero.upgrade.autoBackup "在做出任何改變前，會自動備份你現存的資料庫。">
+<!ENTITY zotero.upgrade.upgradeInProgress "請等候升級程序完成。這可能會花幾分鐘的時間。">
+<!ENTITY zotero.upgrade.upgradeSucceeded "已經成功的升級你的 Zotero 資料庫。">
 <!ENTITY zotero.upgrade.changeLogBeforeLink "請看">
-<!ENTITY zotero.upgrade.changeLogLink "變更記錄">
+<!ENTITY zotero.upgrade.changeLogLink "更新記錄">
 <!ENTITY zotero.upgrade.changeLogAfterLink "來知道有什麼新的。">
 
-<!ENTITY zotero.contextMenu.addTextToCurrentNote "把選定內容加到Zotero注記">
-<!ENTITY zotero.contextMenu.addTextToNewNote "從選定內容來建立Zotero項目及注記">
-<!ENTITY zotero.contextMenu.saveLinkAsSnapshot "把鏈結存成Zotero快照">
-<!ENTITY zotero.contextMenu.saveImageAsSnapshot "把影像存成Zotero快照">
+<!ENTITY zotero.contextMenu.addTextToCurrentNote "把選取區加入 Zotero 筆記">
+<!ENTITY zotero.contextMenu.addTextToNewNote "以選取區建立 Zotero 項目與筆記">
+<!ENTITY zotero.contextMenu.saveLinkAsSnapshot "把鏈結存成 Zotero 快照">
+<!ENTITY zotero.contextMenu.saveImageAsSnapshot "把影像存成 Zotero 快照">
 
 <!ENTITY zotero.tabs.info.label "資訊">
-<!ENTITY zotero.tabs.notes.label "注記">
+<!ENTITY zotero.tabs.notes.label "筆記">
 <!ENTITY zotero.tabs.attachments.label "附件">
-<!ENTITY zotero.tabs.tags.label "標簽">
+<!ENTITY zotero.tabs.tags.label "標籤">
 <!ENTITY zotero.tabs.related.label "相關的">
-<!ENTITY zotero.notes.separate "在另外的視窗中編輯">
+<!ENTITY zotero.notes.separate "分出一個獨立視窗來編輯">
 
-<!ENTITY zotero.items.type_column "類別">
+<!ENTITY zotero.items.type_column "類型">
 <!ENTITY zotero.items.title_column "標題">
 <!ENTITY zotero.items.creator_column "創作人">
 <!ENTITY zotero.items.date_column "日期">
 <!ENTITY zotero.items.year_column "年">
 <!ENTITY zotero.items.publisher_column "出版者">
 <!ENTITY zotero.items.language_column "語言">
-<!ENTITY zotero.items.callNumber_column "分類號">
-<!ENTITY zotero.items.repository_column "貯放庫">
-<!ENTITY zotero.items.rights_column "權限">
+<!ENTITY zotero.items.callNumber_column "索書號">
+<!ENTITY zotero.items.repository_column "儲存庫">
+<!ENTITY zotero.items.rights_column "權利">
 <!ENTITY zotero.items.dateAdded_column "加入日期">
 <!ENTITY zotero.items.dateModified_column "修改日期">
 <!ENTITY zotero.items.numChildren_column "＋">
 
-<!ENTITY zotero.items.menu.showInLibrary "在書庫中顯示">
-<!ENTITY zotero.items.menu.attach.note "加注記">
-<!ENTITY zotero.items.menu.attach.snapshot "附加上目前網頁的快照">
-<!ENTITY zotero.items.menu.attach.link "附加上到目前網頁的鏈結">
-<!ENTITY zotero.items.menu.duplicateItem "複制選定的項目">
+<!ENTITY zotero.items.menu.showInLibrary "在圖書館中顯示">
+<!ENTITY zotero.items.menu.attach.note "加入筆記">
+<!ENTITY zotero.items.menu.attach.snapshot "附上目前網頁的快照">
+<!ENTITY zotero.items.menu.attach.link "附上目前網頁的鏈結">
+<!ENTITY zotero.items.menu.duplicateItem "為選取的項目建立副本">
 
-<!ENTITY zotero.collections.name_column "聚集">
+<!ENTITY zotero.collections.name_column "收集">
 
-<!ENTITY zotero.toolbar.newItem.label "新的項目">
+<!ENTITY zotero.toolbar.newItem.label "新增項目">
 <!ENTITY zotero.toolbar.moreItemTypes.label "更多">
 <!ENTITY zotero.toolbar.newItemFromPage.label "從目前的頁面建立新的項目">
 <!ENTITY zotero.toolbar.removeItem.label "移除項目…">
-<!ENTITY zotero.toolbar.newCollection.label "新的聚集…">
-<!ENTITY zotero.toolbar.newSubcollection.label "新的子聚集…">
-<!ENTITY zotero.toolbar.newSavedSearch.label "新的存留搜尋…">
-<!ENTITY zotero.toolbar.tagSelector.label "顯示／隱藏標簽選擇器">
+<!ENTITY zotero.toolbar.newCollection.label "新增收集…">
+<!ENTITY zotero.toolbar.newSubcollection.label "新增子收集…">
+<!ENTITY zotero.toolbar.newSavedSearch.label "新增存留搜尋…">
+<!ENTITY zotero.toolbar.tagSelector.label "顯示／隱藏標籤選擇器">
 <!ENTITY zotero.toolbar.actions.label "行動">
-<!ENTITY zotero.toolbar.import.label "輸入…">
-<!ENTITY zotero.toolbar.export.label "輸出書庫…">
-<!ENTITY zotero.toolbar.timeline.label "建立時間列排">
+<!ENTITY zotero.toolbar.import.label "匯入…">
+<!ENTITY zotero.toolbar.export.label "匯出圖書館…">
+<!ENTITY zotero.toolbar.timeline.label "建立時序列表">
 <!ENTITY zotero.toolbar.preferences.label "偏好設定…">
 <!ENTITY zotero.toolbar.documentation.label "說明文件">
-<!ENTITY zotero.toolbar.about.label "關於Zotero…">
+<!ENTITY zotero.toolbar.about.label "關於 Zotero…">
 <!ENTITY zotero.toolbar.advancedSearch "進階搜尋">
 <!ENTITY zotero.toolbar.search.label "搜尋：">
 <!ENTITY zotero.toolbar.fullscreen.tooltip "切換全螢幕模式">
@@ -81,73 +81,73 @@
 <!ENTITY zotero.item.textTransform.lowercase "小寫">
 <!ENTITY zotero.item.textTransform.titlecase "標題大小寫">
 
-<!ENTITY zotero.toolbar.note.standalone "新的獨立注記">
-<!ENTITY zotero.toolbar.attachment.linked "到檔案的鏈結…">
-<!ENTITY zotero.toolbar.attachment.add "儲存檔案的備份…">
-<!ENTITY zotero.toolbar.attachment.weblink "儲存到目前頁面的鏈結">
-<!ENTITY zotero.toolbar.attachment.snapshot "攝取目前頁面的快照">
+<!ENTITY zotero.toolbar.note.standalone "新增獨立筆記">
+<!ENTITY zotero.toolbar.attachment.linked "檔案鏈結…">
+<!ENTITY zotero.toolbar.attachment.add "儲存檔案副本…">
+<!ENTITY zotero.toolbar.attachment.weblink "儲存目前網頁鏈結">
+<!ENTITY zotero.toolbar.attachment.snapshot "拍攝目前網頁快照">
 
-<!ENTITY zotero.tagSelector.noTagsToDisplay "沒有可顯示的標簽">
+<!ENTITY zotero.tagSelector.noTagsToDisplay "沒有標籤可顯示">
 <!ENTITY zotero.tagSelector.filter "篩選器：">
 <!ENTITY zotero.tagSelector.showAutomatic "顯示自動的">
-<!ENTITY zotero.tagSelector.displayAll "顯示所有的標簽">
-<!ENTITY zotero.tagSelector.selectVisible "選定可見的">
-<!ENTITY zotero.tagSelector.clearVisible "取消可見的選定">
-<!ENTITY zotero.tagSelector.clearAll "取消全部的選定">
-<!ENTITY zotero.tagSelector.renameTag "重新命名標簽…">
-<!ENTITY zotero.tagSelector.deleteTag "刪除標簽…">
+<!ENTITY zotero.tagSelector.displayAll "顯示所有標籤">
+<!ENTITY zotero.tagSelector.selectVisible "選取可見的">
+<!ENTITY zotero.tagSelector.clearVisible "取消可見的選取">
+<!ENTITY zotero.tagSelector.clearAll "取消全部的選取">
+<!ENTITY zotero.tagSelector.renameTag "重新命名標籤…">
+<!ENTITY zotero.tagSelector.deleteTag "刪除標籤…">
 
-<!ENTITY zotero.selectitems.title "選定項目">
-<!ENTITY zotero.selectitems.intro.label "選定你要加到你的書庫的項目">
+<!ENTITY zotero.selectitems.title "選取項目">
+<!ENTITY zotero.selectitems.intro.label "選取要加到圖書館的項目">
 <!ENTITY zotero.selectitems.cancel.label "取消">
 <!ENTITY zotero.selectitems.select.label "確定">
 
-<!ENTITY zotero.bibliography.title "建立文獻目錄">
-<!ENTITY zotero.bibliography.style.label "引用文獻的式樣：">
+<!ENTITY zotero.bibliography.title "建立參考書目">
+<!ENTITY zotero.bibliography.style.label "引用文獻樣式：">
 <!ENTITY zotero.bibliography.output.label "輸出格式">
-<!ENTITY zotero.bibliography.saveAsRTF.label "貯存成RTF檔">
-<!ENTITY zotero.bibliography.saveAsHTML.label "貯存成HTML檔">
-<!ENTITY zotero.bibliography.copyToClipboard.label "複製到剪貼板">
-<!ENTITY zotero.bibliography.macClipboardWarning "【富文本的格式化將會失去。】">
+<!ENTITY zotero.bibliography.saveAsRTF.label "儲存成 RTF 檔">
+<!ENTITY zotero.bibliography.saveAsHTML.label "儲存成 HTML 檔">
+<!ENTITY zotero.bibliography.copyToClipboard.label "複製到剪貼簿">
+<!ENTITY zotero.bibliography.macClipboardWarning "（會失去 rich-text 的格式。）">
 <!ENTITY zotero.bibliography.print.label "列印">
 
 <!ENTITY zotero.integration.docPrefs.title "文件的偏好設定">
-<!ENTITY zotero.integration.addEditCitation.title "Add/Edit Citation">
-<!ENTITY zotero.integration.editBibliography.title "Edit Bibliography">
+<!ENTITY zotero.integration.addEditCitation.title "新增／編輯引用文獻">
+<!ENTITY zotero.integration.editBibliography.title "編輯參考書目">
 
 <!ENTITY zotero.progress.title "進度">
 
-<!ENTITY zotero.exportOptions.title "輸出…">
+<!ENTITY zotero.exportOptions.title "匯出…">
 <!ENTITY zotero.exportOptions.format.label "格式：">
-<!ENTITY zotero.exportOptions.translatorOptions.label "翻譯器選項">
+<!ENTITY zotero.exportOptions.translatorOptions.label "轉譯器選項">
 
-<!ENTITY zotero.citation.keepSorted.label "Keep Sources Sorted">
+<!ENTITY zotero.citation.keepSorted.label "維持來源的排序">
 
 <!ENTITY zotero.citation.page "頁">
 <!ENTITY zotero.citation.paragraph "段落">
 <!ENTITY zotero.citation.line "行">
-<!ENTITY zotero.citation.suppressAuthor.label "Suppress Author">
-<!ENTITY zotero.citation.prefix.label "Prefix:">
-<!ENTITY zotero.citation.suffix.label "Suffix:">
+<!ENTITY zotero.citation.suppressAuthor.label "不顯示作者">
+<!ENTITY zotero.citation.prefix.label "前綴：">
+<!ENTITY zotero.citation.suffix.label "後綴：">
 
-<!ENTITY zotero.richText.italic.label "Italic">
-<!ENTITY zotero.richText.bold.label "Bold">
-<!ENTITY zotero.richText.underline.label "Underline">
-<!ENTITY zotero.richText.superscript.label "Superscript">
-<!ENTITY zotero.richText.subscript.label "Subscript">
+<!ENTITY zotero.richText.italic.label "斜體">
+<!ENTITY zotero.richText.bold.label "粗體">
+<!ENTITY zotero.richText.underline.label "底線">
+<!ENTITY zotero.richText.superscript.label "上標">
+<!ENTITY zotero.richText.subscript.label "下標">
 
-<!ENTITY zotero.annotate.toolbar.add.label "加標注">
-<!ENTITY zotero.annotate.toolbar.collapse.label "摺疊起所有的標注">
-<!ENTITY zotero.annotate.toolbar.expand.label "展開所有的標注">
-<!ENTITY zotero.annotate.toolbar.highlight.label "顯亮文字">
-<!ENTITY zotero.annotate.toolbar.unhighlight.label "去除顯亮文字">
+<!ENTITY zotero.annotate.toolbar.add.label "新增標註">
+<!ENTITY zotero.annotate.toolbar.collapse.label "收摺所有的標註">
+<!ENTITY zotero.annotate.toolbar.expand.label "展開所有的標註">
+<!ENTITY zotero.annotate.toolbar.highlight.label "高亮標示文字">
+<!ENTITY zotero.annotate.toolbar.unhighlight.label "去除文字的高亮標示">
 
-<!ENTITY zotero.integration.prefs.displayAs.label "顯示引用文獻成：">
-<!ENTITY zotero.integration.prefs.footnotes.label "腳注">
-<!ENTITY zotero.integration.prefs.endnotes.label "尾注">
+<!ENTITY zotero.integration.prefs.displayAs.label "將引用文獻顯示成：">
+<!ENTITY zotero.integration.prefs.footnotes.label "頁末註腳">
+<!ENTITY zotero.integration.prefs.endnotes.label "文末附註">
 
 <!ENTITY zotero.integration.prefs.formatUsing.label "用以格式化：">
-<!ENTITY zotero.integration.prefs.bookmarks.label "書簽">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "書簽在微軟的Word及OpenOffice.org之間會被保留，但是可能會意外的被更動。">
+<!ENTITY zotero.integration.prefs.bookmarks.label "書籤">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "書籤在微軟的 Word 與 OpenOffice.org 之間會被保留，但是可能會意外地被更動。">
 
-<!ENTITY zotero.integration.references.label "References in Bibliography">
+<!ENTITY zotero.integration.references.label "參考書目中的參考文獻">

@@ -1,14 +1,14 @@
 <!ENTITY zotero.general.optional "(Optioneel)">
-<!ENTITY zotero.general.note "Note:">
+<!ENTITY zotero.general.note "Let op:">
 
-<!ENTITY zotero.errorReport.unrelatedMessages "The error log may include messages unrelated to Zotero.">
+<!ENTITY zotero.errorReport.unrelatedMessages "Het foutenlogboek kan berichten bevatten die niet gerelateerd zijn aan Zotero.">
 <!ENTITY zotero.errorReport.additionalInfo "Extra Informatie">
 <!ENTITY zotero.errorReport.emailAddress "Uw e-mailadres:">
 <!ENTITY zotero.errorReport.errorSteps "Wat deed u toen de fout optrad? Geef indien mogelijk de stappen aan waarmee de fout gereproduceerd kan worden.">
 <!ENTITY zotero.errorReport.submissionInProgress "Even geduld a.u.b. totdat het fout-rapport is verstuurd.">
 <!ENTITY zotero.errorReport.submitted "Het fout-rapport is verstuurd.">
 <!ENTITY zotero.errorReport.reportID "Rapport ID:">
-<!ENTITY zotero.errorReport.furtherAssistance "See the Known Issues page and the forums for further assistance.">
+<!ENTITY zotero.errorReport.furtherAssistance "Bekijk de &quot;Known Issues&quot;-webpagina en de fora voor meer assistentie.">
 <!ENTITY zotero.errorReport.includeReportID "Vermeldt het rapport ID in verdere correspondentie met de Zotero-ontwikkelaars over dit onderwerp.">
 
 <!ENTITY zotero.upgrade.newVersionInstalled "U heeft een nieuwe versie van Zotero geinstalleerd.">
@@ -112,8 +112,8 @@
 <!ENTITY zotero.bibliography.print.label "Afdrukken">
 
 <!ENTITY zotero.integration.docPrefs.title "Documentvoorkeuren">
-<!ENTITY zotero.integration.addEditCitation.title "Add/Edit Citation">
-<!ENTITY zotero.integration.editBibliography.title "Edit Bibliography">
+<!ENTITY zotero.integration.addEditCitation.title "Citatie Toevoegen/Bijwerken">
+<!ENTITY zotero.integration.editBibliography.title "Bibliografie Bijwerken">
 
 <!ENTITY zotero.progress.title "Vooruitgang">
 
@@ -121,18 +121,18 @@
 <!ENTITY zotero.exportOptions.format.label "Formaat:">
 <!ENTITY zotero.exportOptions.translatorOptions.label "Vertaler-opties">
 
-<!ENTITY zotero.citation.keepSorted.label "Keep Sources Sorted">
+<!ENTITY zotero.citation.keepSorted.label "Bronnen Gesorteerd Houden">
 
 <!ENTITY zotero.citation.page "Pagina">
 <!ENTITY zotero.citation.paragraph "Paragraaf">
 <!ENTITY zotero.citation.line "Regel">
-<!ENTITY zotero.citation.suppressAuthor.label "Suppress Author">
-<!ENTITY zotero.citation.prefix.label "Prefix:">
-<!ENTITY zotero.citation.suffix.label "Suffix:">
+<!ENTITY zotero.citation.suppressAuthor.label "Auteur Weglaten">
+<!ENTITY zotero.citation.prefix.label "Voorvoegsel:">
+<!ENTITY zotero.citation.suffix.label "Achtervoegsel:">
 
-<!ENTITY zotero.richText.italic.label "Italic">
-<!ENTITY zotero.richText.bold.label "Bold">
-<!ENTITY zotero.richText.underline.label "Underline">
+<!ENTITY zotero.richText.italic.label "Cursief">
+<!ENTITY zotero.richText.bold.label "Vet">
+<!ENTITY zotero.richText.underline.label "Onderlijnen">
 <!ENTITY zotero.richText.superscript.label "Superscript">
 <!ENTITY zotero.richText.subscript.label "Subscript">
 
@@ -142,7 +142,7 @@
 <!ENTITY zotero.annotate.toolbar.highlight.label "Tekst Markeren">
 <!ENTITY zotero.annotate.toolbar.unhighlight.label "Tekstmarkering Weghalen">
 
-<!ENTITY zotero.integration.prefs.displayAs.label "Toon Literatuurverwijzingen als:">
+<!ENTITY zotero.integration.prefs.displayAs.label "Toon Citaties Als:">
 <!ENTITY zotero.integration.prefs.footnotes.label "Voetnoten">
 <!ENTITY zotero.integration.prefs.endnotes.label "Eindnoten">
 
@@ -150,4 +150,4 @@
 <!ENTITY zotero.integration.prefs.bookmarks.label "Bookmarks">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks worden behouden tussen Microsoft Word en OpenOffice.org, maar kunnen per ongeluk worden gewijzigd.">
 
-<!ENTITY zotero.integration.references.label "References in Bibliography">
+<!ENTITY zotero.integration.references.label "Verwijzingen in Bibliografie">

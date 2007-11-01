@@ -18,6 +18,6 @@
 <!ENTITY zotero.search.date.units.months "månader">
 <!ENTITY zotero.search.date.units.years "år">
 
-<!ENTITY zotero.search.search "Search">
-<!ENTITY zotero.search.clear "Clear">
-<!ENTITY zotero.search.saveSearch "Save Search">
+<!ENTITY zotero.search.search "Sök">
+<!ENTITY zotero.search.clear "Sudda">
+<!ENTITY zotero.search.saveSearch "Spara sökning">

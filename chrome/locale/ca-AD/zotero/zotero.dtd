@@ -1,17 +1,17 @@
 <!ENTITY zotero.general.optional "(Opciona1)">
-<!ENTITY zotero.general.note "Note:">
+<!ENTITY zotero.general.note "Nota:">
 
-<!ENTITY zotero.errorReport.unrelatedMessages "The error log may include messages unrelated to Zotero.">
+<!ENTITY zotero.errorReport.unrelatedMessages "El registre d&apos;error pot incloure missatges no relacionats amb Zotero.">
 <!ENTITY zotero.errorReport.additionalInfo "Informació adicional">
 <!ENTITY zotero.errorReport.emailAddress "La teva adreça de correu electrònic:">
 <!ENTITY zotero.errorReport.errorSteps "Què estaves fent quan s&apos;ha produït l&apos;error? Si es possible, si-us-plau inclou els passos que calen per a reproduir l&apos;error.">
-<!ENTITY zotero.errorReport.submissionInProgress "Si-us-plau espera mentre s&apos;envia l&apos;informe d&apos;error">
-<!ENTITY zotero.errorReport.submitted "L&apos;informe d&apos;error ha estat enviat correctament">
-<!ENTITY zotero.errorReport.reportID "Número de referència de l&apos;informe">
-<!ENTITY zotero.errorReport.furtherAssistance "See the Known Issues page and the forums for further assistance.">
-<!ENTITY zotero.errorReport.includeReportID "Si-us-plau, inclou el número de referència de l&apos;informe en qualsevol correspondència amb l&apos;equip de desenvolupadors de Zotero al respecte d&apos;aquest incident.Has">
+<!ENTITY zotero.errorReport.submissionInProgress "Si-us-plau espera mentre s&apos;envia l&apos;informe d&apos;error.">
+<!ENTITY zotero.errorReport.submitted "L&apos;informe d&apos;error ha estat enviat correctament.">
+<!ENTITY zotero.errorReport.reportID "Número de referència de l&apos;informe.">
+<!ENTITY zotero.errorReport.furtherAssistance "Consulta la pàgina d&apos;incidències conegudes i els fòrums per a més ajuda.">
+<!ENTITY zotero.errorReport.includeReportID "Si-us-plau, inclou el número de referència de l&apos;informe en qualsevol correspondència amb l&apos;equip de desenvolupadors de Zotero al respecte d&apos;aquest incident.">
 
-<!ENTITY zotero.upgrade.newVersionInstalled "instal·lat una nova versió de Zotero.">
+<!ENTITY zotero.upgrade.newVersionInstalled "Has instal·lat una nova versió de Zotero.">
 <!ENTITY zotero.upgrade.upgradeRequired "La teva base de dades s&apos;ha d&apos;actualitzar per a funcionar amb la nova versió.">
 <!ENTITY zotero.upgrade.autoBackup "Es farà una còpia de seguertat de la base de dades existent abans de fer cap canvi">
 <!ENTITY zotero.upgrade.upgradeInProgress "Si-us-plau espera que s&apos;acabi el procés d&apos;actualització. Pot trigar uns minuts.">
@@ -112,8 +112,8 @@
 <!ENTITY zotero.bibliography.print.label "Imprimeix">
 
 <!ENTITY zotero.integration.docPrefs.title "Preferències del document">
-<!ENTITY zotero.integration.addEditCitation.title "Add/Edit Citation">
-<!ENTITY zotero.integration.editBibliography.title "Edit Bibliography">
+<!ENTITY zotero.integration.addEditCitation.title "Afegeix/Edita cita">
+<!ENTITY zotero.integration.editBibliography.title "Edita bibliografia">
 
 <!ENTITY zotero.progress.title "Progrés">
 
@@ -121,20 +121,20 @@
 <!ENTITY zotero.exportOptions.format.label "Format:">
 <!ENTITY zotero.exportOptions.translatorOptions.label "Opcions del traductor">
 
-<!ENTITY zotero.citation.keepSorted.label "Keep Sources Sorted">
+<!ENTITY zotero.citation.keepSorted.label "Mantingues les fonts ordenades">
 
 <!ENTITY zotero.citation.page "Pàgina">
 <!ENTITY zotero.citation.paragraph "Paragraf">
 <!ENTITY zotero.citation.line "Línia">
-<!ENTITY zotero.citation.suppressAuthor.label "Suppress Author">
+<!ENTITY zotero.citation.suppressAuthor.label "Suprimeix autor">
 <!ENTITY zotero.citation.prefix.label "Prefix:">
-<!ENTITY zotero.citation.suffix.label "Suffix:">
+<!ENTITY zotero.citation.suffix.label "Sufix:">
 
-<!ENTITY zotero.richText.italic.label "Italic">
-<!ENTITY zotero.richText.bold.label "Bold">
-<!ENTITY zotero.richText.underline.label "Underline">
-<!ENTITY zotero.richText.superscript.label "Superscript">
-<!ENTITY zotero.richText.subscript.label "Subscript">
+<!ENTITY zotero.richText.italic.label "Cursiva">
+<!ENTITY zotero.richText.bold.label "Negreta">
+<!ENTITY zotero.richText.underline.label "Subratllat">
+<!ENTITY zotero.richText.superscript.label "superíndex">
+<!ENTITY zotero.richText.subscript.label "subíndex">
 
 <!ENTITY zotero.annotate.toolbar.add.label "Afegeix anotació">
 <!ENTITY zotero.annotate.toolbar.collapse.label "Col·lapsa totes les anotacions">
@@ -150,4 +150,4 @@
 <!ENTITY zotero.integration.prefs.bookmarks.label "Adreçes d&apos;interès">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Les adreces d&apos;interès es conserven entre Microsoft Word i OpenOffice.org però poden veure&apos;s accidentalment modificades.">
 
-<!ENTITY zotero.integration.references.label "References in Bibliography">
+<!ENTITY zotero.integration.references.label "Referències a la bibliografia">

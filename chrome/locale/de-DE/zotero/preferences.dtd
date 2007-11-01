@@ -10,24 +10,24 @@
 <!ENTITY zotero.preferences.position.below "unter">
 <!ENTITY zotero.preferences.position.browser "Browser-Inhalt">
 <!ENTITY zotero.preferences.statusBarIcon "Statusleisten-Icon:">
-<!ENTITY zotero.preferences.statusBarIcon.none "None">
+<!ENTITY zotero.preferences.statusBarIcon.none "Keine">
 <!ENTITY zotero.preferences.fontSize "Fontgröße">
 <!ENTITY zotero.preferences.fontSize.small "Klein">
 <!ENTITY zotero.preferences.fontSize.medium "Mittel">
 <!ENTITY zotero.preferences.fontSize.large "Groß">
 
 <!ENTITY zotero.preferences.miscellaneous "Verschiedenes">
-<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators">
+<!ENTITY zotero.preferences.autoUpdate "Automatisch nach neuen Übersetzern suchen">
 <!ENTITY zotero.preferences.updateNow "Jetzt aktualisieren">
 <!ENTITY zotero.preferences.reportTranslationFailure "Fehlerhafte Übersetzer melden">
-<!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded RIS/Refer files">
+<!ENTITY zotero.preferences.parseRISRefer "Zotero für heruntergeladene RIS/Refer-Dateien verwenden">
 <!ENTITY zotero.preferences.automaticSnapshots "Automatisch einen Schnappschuss erstellen, wenn ein Eintrag aus einer Webseite erstellt wird">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Automatisch zugehörige PDFs und andere Dateien beim Speichern von Einträgen anhängen">
 <!ENTITY zotero.preferences.automaticTags "Automatisch Tags aus Schlüsselwörtern und Schlagwörtern erstellen">
 
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
-<!ENTITY zotero.preferences.openurl.search "Search for resolvers">
+<!ENTITY zotero.preferences.openurl.search "Nach Resolvern suchen">
 <!ENTITY zotero.preferences.openurl.custom "Eigene...">
 <!ENTITY zotero.preferences.openurl.server "Resolver:">
 <!ENTITY zotero.preferences.openurl.version "Version:">
@@ -37,10 +37,10 @@
 <!ENTITY zotero.preferences.search.pdfIndexing "PDF-Indizierung">
 <!ENTITY zotero.preferences.search.indexStats "Index-Statistik">
 
-<!ENTITY zotero.preferences.search.indexStats.indexed "Indexed:">
-<!ENTITY zotero.preferences.search.indexStats.partial "Partial:">
-<!ENTITY zotero.preferences.search.indexStats.unindexed "Unindexed:">
-<!ENTITY zotero.preferences.search.indexStats.words "Words:">
+<!ENTITY zotero.preferences.search.indexStats.indexed "Indiziert:">
+<!ENTITY zotero.preferences.search.indexStats.partial "Teilweise:">
+<!ENTITY zotero.preferences.search.indexStats.unindexed "Nicht indiziert:">
+<!ENTITY zotero.preferences.search.indexStats.words "Wörter:">
 
 <!ENTITY zotero.preferences.fulltext.textMaxLength "Maximal indizierte Zeichenanzahl pro Datei:">
 <!ENTITY zotero.preferences.fulltext.pdfMaxPages "Maximal indizierte Seiten pro Datei:">
@@ -64,8 +64,8 @@
 <!ENTITY zotero.preferences.keys.newItem "Neuen Eintrag erstellen">
 <!ENTITY zotero.preferences.keys.newNote "Neue Notiz erstellen">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Tag-Selector an/aus">
-<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copy Selected Item Citations to Clipboard">
-<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Ausgewählte Items in die Zwischenablage kopieren">
+<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Ausgewählte Eintragszitationen in die Zwischenablage kopieren">
+<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Ausgewählte Einträge in die Zwischenablage kopieren">
 <!ENTITY zotero.preferences.keys.overrideGlobal "Versuche, konfligierende Tastenkombinationen zu überschreiben">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Änderungen werden nur in neuen Fenstern wirksam">
 
@@ -76,8 +76,8 @@
 <!ENTITY zotero.preferences.dataDir.useProfile "Verwende den Firefox-Profil-Ordner">
 <!ENTITY zotero.preferences.dataDir.custom "Eigene:">
 <!ENTITY zotero.preferences.dataDir.choose "Auswählen...">
-<!ENTITY zotero.preferences.dataDir.reveal "Show Data Directory">
+<!ENTITY zotero.preferences.dataDir.reveal "Datenverzeichnis anzeigen">
 
-<!ENTITY zotero.preferences.dbMaintenance "Database Maintenance">
-<!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Check Database Integrity">
-<!ENTITY zotero.preferences.dbMaintenance.rebuildTranslators "Rebuild Translators Table">
+<!ENTITY zotero.preferences.dbMaintenance "Datenbankwartung">
+<!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Integrität der Datenbank überprüfen">
+<!ENTITY zotero.preferences.dbMaintenance.rebuildTranslators "Tabelle der Übersetzern neu aufbauen">

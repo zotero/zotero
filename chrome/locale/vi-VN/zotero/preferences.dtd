@@ -1,0 +1,83 @@
+<!ENTITY zotero.preferences.title "Các tùy chọn của Zotero">
+
+<!ENTITY zotero.preferences.default "Mặc định:">
+
+<!ENTITY zotero.preferences.prefpane.general "Các tùy chọn chung">
+
+<!ENTITY zotero.preferences.userInterface "Giao diện người dùng">
+<!ENTITY zotero.preferences.position "Bố trí cửa sổ Zotero">
+<!ENTITY zotero.preferences.position.above "trên">
+<!ENTITY zotero.preferences.position.below "dưới">
+<!ENTITY zotero.preferences.position.browser "phần hiển thị nội dung của trình duyệt web">
+<!ENTITY zotero.preferences.statusBarIcon "Biểu tượng trong thanh trạng thái:">
+<!ENTITY zotero.preferences.statusBarIcon.none "Không biểu tượng">
+<!ENTITY zotero.preferences.fontSize "Cỡ chữ:">
+<!ENTITY zotero.preferences.fontSize.small "Nhỏ">
+<!ENTITY zotero.preferences.fontSize.medium "Trung bình">
+<!ENTITY zotero.preferences.fontSize.large "Lớn">
+
+<!ENTITY zotero.preferences.miscellaneous "Các tùy chọn khác">
+<!ENTITY zotero.preferences.autoUpdate "Tự động tìm kiếm các bản cập nhật cho các bộ biến đổi">
+<!ENTITY zotero.preferences.updateNow "Cập nhật ngay bây giờ">
+<!ENTITY zotero.preferences.reportTranslationFailure "Báo cáo các bộ biến đổi bị hỏng">
+<!ENTITY zotero.preferences.parseRISRefer "Dùng Zotero để tải các tệp tin RIS/Refer">
+<!ENTITY zotero.preferences.automaticSnapshots "Tự động tạo bản lưu khi tạo biểu ghi từ các trang web">
+<!ENTITY zotero.preferences.downloadAssociatedFiles "Tự động đính kèm các tập tin PDF và các tập tin liên đới khác khi lưu dữ các biểu ghi">
+<!ENTITY zotero.preferences.automaticTags "Tự động dùng các từ khóa và các tiêu đề, mục đề để gắn thẻ cho các biểu ghi">
+
+<!ENTITY zotero.preferences.openurl.caption "OpenURL">
+
+<!ENTITY zotero.preferences.openurl.search "Tìm kiếm các resolver">
+<!ENTITY zotero.preferences.openurl.custom "Tùy biến...">
+<!ENTITY zotero.preferences.openurl.server "Resolver:">
+<!ENTITY zotero.preferences.openurl.version "Phiên bản:">
+
+<!ENTITY zotero.preferences.prefpane.search "Tìm kiếm">
+<!ENTITY zotero.preferences.search.fulltextCache "Bộ nhớ đệm của Toàn văn tất cả các biểu ghi">
+<!ENTITY zotero.preferences.search.pdfIndexing "Tạo chỉ mục cho PDF">
+<!ENTITY zotero.preferences.search.indexStats "Các Số liệu thống kê về Chỉ mục">
+
+<!ENTITY zotero.preferences.search.indexStats.indexed "Đã được tạo chỉ mục toàn phần:">
+<!ENTITY zotero.preferences.search.indexStats.partial "Đã được tạo chỉ mục bán phần:">
+<!ENTITY zotero.preferences.search.indexStats.unindexed "Chưa được tạo chỉ mục:">
+<!ENTITY zotero.preferences.search.indexStats.words "Tổng số từ:">
+
+<!ENTITY zotero.preferences.fulltext.textMaxLength "Số ký tự tối đa trong mỗi tập tin được dùng để tạo chỉ mục:">
+<!ENTITY zotero.preferences.fulltext.pdfMaxPages "Số trang tối đa trong mỗi tập tin dùng để tạo chỉ mục:">
+
+<!ENTITY zotero.preferences.prefpane.export "Xuất khẩu">
+
+<!ENTITY zotero.preferences.quickCopy.caption "Sao chép nhanh">
+<!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Định dạng mặc định của dữ liệu đầu ra:">
+<!ENTITY zotero.preferences.quickCopy.macWarning "Chú ý: Định dạng rich-text sẽ bị mất khi dùng Mac OS X.">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Những thiết lập đặc thù cho từng Website:">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Tên miền/Đường dẫn">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(vd: wikipedia.org)">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Định dạng dữ liệu đầu ra">
+
+<!ENTITY zotero.preferences.prefpane.keys "Phím gõ tắt">
+
+<!ENTITY zotero.preferences.keys.openZotero "Mở/Đóng cửa sổ Zotero">
+<!ENTITY zotero.preferences.keys.toggleFullscreen "Bật/Tắt chế độ Toàn-màn-hình">
+<!ENTITY zotero.preferences.keys.library "Thư viện">
+<!ENTITY zotero.preferences.keys.quicksearch "Tìm kiếm nhanh">
+<!ENTITY zotero.preferences.keys.newItem "Tạo một biểu ghi mới">
+<!ENTITY zotero.preferences.keys.newNote "Tạo một ghi chép mới">
+<!ENTITY zotero.preferences.keys.toggleTagSelector "Bật/Tắt Bộ-chọn-thẻ">
+<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Sao chép các trích dẫn vừa chọn vào clipboard">
+<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Sao chép các biểu ghi vừa chọn vào clipboard">
+<!ENTITY zotero.preferences.keys.overrideGlobal "Thử ghi đè các phím gõ tắt có xung đột">
+<!ENTITY zotero.preferences.keys.changesTakeEffect "Các thay đổi chỉ có hiệu lực trong các cửa sổ mới">
+
+
+<!ENTITY zotero.preferences.prefpane.advanced "Nâng cao">
+
+<!ENTITY zotero.preferences.dataDir "Nơi lưu trữ dữ liệu">
+<!ENTITY zotero.preferences.dataDir.useProfile "Dùng thư mục profile của Firefox">
+<!ENTITY zotero.preferences.dataDir.custom "Tùy biến:">
+<!ENTITY zotero.preferences.dataDir.choose "Chọn...">
+<!ENTITY zotero.preferences.dataDir.reveal "Hiển thị Thư mục dữ liệu">
+
+<!ENTITY zotero.preferences.dbMaintenance "Bảo dưỡng Cơ sở dữ liệu">
+<!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Kiểm tra Tính toàn vẹn của Cơ sở dữ liệu">
+<!ENTITY zotero.preferences.dbMaintenance.rebuildTranslators "Tái lập Bảng các Bộ chuyển đổi">
