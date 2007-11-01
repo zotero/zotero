@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-10-23 18:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-11-01 23:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -16065,7 +16065,7 @@ function doImport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('3f50aaac-7acc-4350-acd0-59cb77faf620', '1.0.0b4.r1', '', '2007-04-24 15:30:00', 1, 100, 2, 'Wikipedia Citation Templates', 'Simon Kornblith', '', NULL,
+REPLACE INTO translators VALUES ('3f50aaac-7acc-4350-acd0-59cb77faf620', '1.0.0b4.r1', '', '2007-11-01 23:30:00', '1', '100', '2', 'Wikipedia Citation Templates', 'Simon Kornblith', '', '', 
 'var fieldMap = {
 	edition:"edition",
 	publisher:"publisher",
@@ -16336,7 +16336,29 @@ function doExport() {
 			if(type == "Cite email") {
 				properties.senddate = formatDate(item.date);
 			} else {
-				properties.date = formatDate(item.date);
+				var date = Zotero.Utilities.strToDate(item.date);
+				var mm = "00";
+				var dd = "00";
+				if (date["month"] != undefined){
+					mm = date["month"];
+					mm = mm + 1;
+					if (mm < 10){
+						mm = "0" + mm;
+					} 
+				}
+				if (date["day"] != undefined){
+					dd = date["day"];
+					if (dd < 10){
+						dd = "0" + dd;
+					} 
+				}
+				if (date["year"] != undefined){
+					var yyyy = date["year"].toString();
+					while (yyyy.length < 4){
+						yyyy = "0"+yyyy;
+					}
+					properties.date = formatDate(yyyy+"-"+mm+"-"+dd+" ");
+				}
 			}
 		}
 		
