@@ -1164,7 +1164,7 @@ Zotero.CSL.Global = new function() {
 	
 	this.ns = "http://purl.org/net/xbiblio/csl";
 	
-	this.locale = this.__defineGetter__("locale", function() {
+	this.__defineGetter__("locale", function() {
 		Zotero.CSL.Global.init()
 		return Zotero.CSL.Global._xmlLang;
 	});
