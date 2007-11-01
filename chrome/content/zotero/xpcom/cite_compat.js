@@ -143,15 +143,9 @@ Zotero.CSL.Compat.Global = new function() {
 					createInstance();
 				req.open("GET", prefix + loc + ext, false);
 				req.overrideMimeType("text/plain");
-				var fail = false;
-				try {
-					req.send(null);
-				}
-				catch (e) {
-					fail = true;
-				}
+				req.send(null);
 				
-				if (!fail) {
+				if (req.responseText) {
 					Zotero.CSL.Compat.Global._xmlLang = bibLocale;
 					var xml = req.responseText;
 				}
@@ -164,15 +158,9 @@ Zotero.CSL.Compat.Global = new function() {
 					createInstance();
 				req.open("GET", prefix + loc + ext, false);
 				req.overrideMimeType("text/plain");
-				var fail = false;
-				try {
-					req.send(null);
-				}
-				catch (e) {
-					fail = true;
-				}
+				req.send(null);
 				
-				if (!fail) {
+				if (req.responseText) {
 					Zotero.CSL.Compat.Global._xmlLang = loc;
 					var xml = req.responseText;
 				}
