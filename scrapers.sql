@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-11-02 08:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-11-03 19:45:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -17082,7 +17082,7 @@ REPLACE INTO csl VALUES('http://www.zotero.org/namespaces/CSL/chicago-note-bibli
 	</bibliography>
 </style>');
 
-REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/mla.csl', '2007-10-23 18:00:00', 'Modern Language Association',
+REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/mla.csl', '2007-11-03 19:45:00', 'Modern Language Association',
 '<?oxygen RNGSchema="csl.rnc" type="compact"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="in-text" xml:lang="en">
   <info>
@@ -17131,7 +17131,7 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/mla.csl', '2007-
 		<date-part name="month" form="short" include-period="true" suffix=" "/>
 		<date-part name="year"/>
       </date>
-      <text variable="URL" prefix="<" suffix=">"/>
+      <text variable="URL" prefix="&lt;" suffix="&gt;"/>
     </group>
   </macro>
   <macro name="title">
