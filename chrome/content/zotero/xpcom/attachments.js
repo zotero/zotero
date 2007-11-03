@@ -265,7 +265,8 @@ Zotero.Attachments = new function(){
 					wbp.progressListener = new Zotero.WebProgressFinishListener(function(){
 						try {
 							var str = Zotero.File.getSample(file);
-							if (Zotero.MIME.sniffForMIMEType(str) != 'application/pdf') {
+							if (mimeType == 'application/pdf' &&
+									Zotero.MIME.sniffForMIMEType(str) != 'application/pdf') {
 								Zotero.debug("Downloaded PDF did not have MIME type "
 									+ "'application/pdf' in Attachments.importFromURL()", 2);
 								var item = Zotero.Items.get(itemID);
