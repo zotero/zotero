@@ -2303,19 +2303,19 @@ Zotero.CSL.FormattedString.prototype.append = function(string, element, dontDeli
 	
 	if(!dontEscape) {
 		if(this.format == "HTML") {
-			string = string.replace("<", "&lt;", "g")
-			               .replace(">", "&gt;", "g")
-			               .replace("&", "&amp;", "g")
-			               .replace(/(\r\n|\r|\n)/g, "<br />")
-			               .replace(/[\x00-\x1F]/g, "");
+			string = string.replace("&", "&amp;", "g")
+							.replace("<", "&lt;", "g")
+							.replace(">", "&gt;", "g")
+							.replace(/(\r\n|\r|\n)/g, "<br />")
+							.replace(/[\x00-\x1F]/g, "");
 		} else if(this.format == "RTF") {
 			string = string.replace("\\", "\\\\", "g")
-			               .replace(/[\x7F-\uFFFF]/g, Zotero.CSL.FormattedString._rtfEscapeFunction)
-			               .replace("\t", "\\tab ", "g")
-			               .replace(/(\r\n|\r|\n)/g, "\\line ");
+							.replace(/[\x7F-\uFFFF]/g, Zotero.CSL.FormattedString._rtfEscapeFunction)
+							.replace("\t", "\\tab ", "g")
+							.replace(/(\r\n|\r|\n)/g, "\\line ");
 		} else if(this.format == "Integration") {
 			string = string.replace(/\\/g, "\\\\")
-			               .replace(/(\r\n|\r|\n)/g, "\\line ");
+							.replace(/(\r\n|\r|\n)/g, "\\line ");
 		} else {
 			string = string.replace(/(\r\n|\r|\n)/g, (Zotero.isWin ? "\r\n" : "\n"));
 		}
