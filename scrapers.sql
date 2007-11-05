@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-11-03 19:45:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-11-05 15:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -12476,11 +12476,11 @@ REPLACE INTO translators VALUES ('66928fe3-1e93-45a7-8e11-9df6de0a11b3', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('c73a4a8c-3ef1-4ec8-8229-7531ee384cc4', '1.0.0b3.r1', '', '2007-06-27 02:00:00', '1', '100', '4', 'Open WorldCat (Web)', 'Sean Takats', '^http://(?:www\.)?worldcat\.org/(?:search\?|profiles/[^/]+/lists/)', 
+REPLACE INTO translators VALUES ('c73a4a8c-3ef1-4ec8-8229-7531ee384cc4', '1.0.0b3.r1', '', '2007-11-05 15:00:00', '1', '100', '4', 'Open WorldCat (Web)', 'Sean Takats', '^http://(?:www\.)?worldcat\.org/(?:search\?|profiles/[^/]+/lists/)', 
 'function detectWeb(doc, url){
 	var nsResolver = doc.createNSResolver(doc.documentElement);
 
-	var xpath = ''//table[@class="tableResults" or @class="table-results"]/tbody/tr/td[2][@class="result"]/div[@class="name"]/a/strong'';
+	var xpath = ''//table[@class="tableResults" or @class="table-results"]/tbody/tr/td[3][@class="result"]/div[@class="name"]/a/strong'';
 	var results = doc.evaluate(xpath, doc,
 			       nsResolver, XPathResult.ANY_TYPE, null);
 	if(results.iterateNext()) {
@@ -12520,7 +12520,7 @@ function doWeb(doc, url){
 
 	var urls = new Array();
 	var items = new Array();
-	var xpath = ''//table[@class="tableResults" or @class="table-results"]/tbody/tr/td[2][@class="result"]/div[@class="name"]/a'';
+	var xpath = ''//table[@class="tableResults" or @class="table-results"]/tbody/tr/td[3][@class="result"]/div[@class="name"]/a'';
 	var titles = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
 	var title;
 	// Go through titles
