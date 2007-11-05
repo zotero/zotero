@@ -1481,6 +1481,12 @@ Zotero.Item.prototype.getNotes = function(){
 	// TODO: move titles into itemNotes table
 	var sql = "SELECT N.itemID, title FROM itemNotes N NATURAL JOIN items "
 		+ "LEFT JOIN itemNoteTitles USING (itemID) WHERE sourceItemID=" + this.getID();
+	
+	if (Zotero.Prefs.get('sortNotesChronologically')) {
+		sql += " ORDER BY dateAdded";
+		return Zotero.DB.columnQuery(sql);
+	}
+	
 	var notes = Zotero.DB.query(sql);
 	if (!notes) {
 		return false;

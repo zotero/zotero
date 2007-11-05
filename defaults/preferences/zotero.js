@@ -26,6 +26,7 @@ pref("extensions.zotero.recursiveCollections", false);
 pref("extensions.zotero.attachmentRenameFormatString", '{%c - }{%y - }{%t{50}}');
 pref("extensions.zotero.capitalizeTitles", true);
 pref("extensions.zotero.launchNonNativeFiles", false);
+pref("extensions.zotero.sortNotesChronologically", false);
 
 pref("extensions.zotero.lastCreatorFieldMode",0);
 pref("extensions.zotero.lastAbstractExpand",0);
