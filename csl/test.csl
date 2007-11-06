@@ -10,7 +10,7 @@
             <email>michael@songsaboutsnow.com</email>
         </author>
         <category term="generic-base"/>
-        <updated>2007-10-23T18:00:00</updated>
+        <updated>2007-10-23T19:00:00</updated>
     </info>
     <macro name="author">
         <names variable="author" suffix=". ">
