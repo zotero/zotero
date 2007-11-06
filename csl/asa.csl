@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?oxygen RNGSchema="csl.rnc" type="compact"?>
+<style xmlns="http://purl.org/net/xbiblio/csl" class="author-date">
+    <info>
+        <title>American Sociological Association</title>
+    	<id>http://purl.org/net/xbiblio/csl/styles/asa.csl</id>
+    	<link>http://purl.org/net/xbiblio/csl/styles/asa.csl</link>
+        <summary>Bibliography styles for the American Sociological Association.</summary>
+        <author>
+            <name>Jim Safley</name>
+            <email>jsafley@gmu.edu</email>
+        </author>
+        <updated>2007-10-23T18:00:00</updated>
+    </info>
+    <defaults>
+        <et-al min-authors="6" use-first="6"></et-al>
+        <contributor name-as-sort-order="no">
+            <label suffix=" " form="verb"></label>
+            <name and="text" delimiter=", "></name>
+        </contributor>
+        <author name-as-sort-order="first">
+            <name sort-separator=", " and="text" delimiter=", "></name>
+            <substitute>
+                <choose>
+                    <editor></editor>
+                    <translator></translator>
+                    <titles></titles>
+                </choose>
+            </substitute>
+        </author>
+        <locator>
+            <number></number>
+        </locator>
+        <identifier>
+            <number></number>
+        </identifier>
+        <titles>
+            <title></title>
+        </titles>
+        <date>
+            <year></year>
+        </date>
+        <publisher>
+            <place suffix=": "></place>
+            <name></name>
+        </publisher>
+        <access>
+            <text suffix=" " term-name="retrieved" text-transform="capitalize"></text>
+            <date>
+                <month suffix=" " text-transform="capitalize"></month>
+                <day suffix=", "></day>
+                <year></year>
+            </date>
+            <url prefix=" (" suffix=")"></url>
+        </access>
+    </defaults>
+    <citation prefix="(" suffix=")" delimiter="; ">
+        <et-al min-authors="3" use-first="3" position="first"/>
+        <et-al min-authors="3" use-first="1" position="subsequent"/>
+        <layout>
+            <item>
+            	<group delimiter=" ">
+					<author form="short"></author>
+					<group delimiter=":">
+						<date></date>
+						<locator></locator>
+					</group>
+				</group>
+            </item>
+        </layout>
+    </citation>
+    <bibliography hanging-indent="true" subsequent-author-substitute="------.">
+        <sort algorithm="author-date"></sort>
+        <layout>
+            <list>
+                <heading>
+                    <text term-name="references"></text>
+                </heading>
+            </list>
+            <item>
+                <choose>
+                    <type name="book">
+                        <author suffix=". "></author>
+                        <date suffix=". "></date>
+                        <group suffix=". " delimiter=", ">
+                            <titles>
+                                <title font-style="italic"></title>
+                            </titles>
+                            <editor></editor>
+                            <translator></translator>
+                        </group>
+                        <edition suffix=" ed. "></edition>
+                        <publisher suffix=". "></publisher>
+                        <access></access>
+                    </type>
+                    <type name="chapter">
+                        <author suffix=". "></author>
+                        <date suffix=". "></date>
+                        <titles>
+                            <title suffix=". " quotes="true"></title>
+                        </titles>
+                        <pages suffix=" ">
+                            <label suffix=". " form="short" text-transform="capitalize"></label>
+                            <number></number>
+                        </pages>
+                        <conditional>
+                            <if field="pages">
+                                <text suffix=" " term-name="in"></text>
+                            </if><else>
+                                <text suffix=" " term-name="in" text-transform="capitalize"></text>
+                            </else>
+                        </conditional>
+                        <group prefix=" " suffix=". " delimiter=", " class="container">
+                            <titles relation="container">
+                                <title font-style="italic"></title>
+                            </titles>
+                            <editor></editor>
+                            <translator></translator>
+                        </group>
+                        <edition suffix=" ed. "></edition>
+                        <publisher suffix=". "></publisher>
+                        <access></access>
+                    </type>
+                    <type name="article">
+                        <author suffix=". "></author>
+                        <date suffix=". "></date>
+                        <titles>
+                            <title suffix=". " quotes="true"></title>
+                        </titles>
+                        <group suffix=". " class="container">
+                            <titles relation="container">
+                                <title suffix=", " font-style="italic"></title>
+                            </titles>
+                            <date>
+                                <month suffix=" " text-transform="capitalize"></month>
+                                <day></day>
+                            </date>
+                            <volume prefix=", "></volume>
+                            <issue prefix="(" suffix=")"></issue>
+                            <pages prefix=":"></pages>
+                        </group>
+                        <access></access>
+                    </type>
+                    <type name="article-journal">
+                        <author suffix=". "></author>
+                        <date suffix=". "></date>
+                        <titles>
+                            <title suffix=". " quotes="true"></title>
+                        </titles>
+                        <group suffix=". " class="container">
+                            <titles relation="container">
+                                <title font-style="italic"></title>
+                            </titles>
+                            <volume prefix=" "></volume>			
+                            <issue prefix="(" suffix=")"></issue>
+                            <pages prefix=":"></pages>
+                        </group>
+                        <access></access>
+                    </type>
+                </choose>
+            </item>
+        </layout>
+    </bibliography>
+</style>

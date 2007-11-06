@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<style xmlns="http://purl.org/net/xbiblio/csl" class="note" xml:lang="en">
+	<info>
+		<title>Chicago Note With Bibliography Style</title>
+		<id>http://www.zotero.org/namespaces/CSL/chicago-note-bibliography.csl</id>
+		<author>
+			<name>Simon Kornblith</name>
+			<email>simon@simonster.com</email>
+		</author>
+		<updated>2007-10-23T18:00:00</updated>
+		<summary>The note-with-bibliography variant of the Chicago style.</summary>
+	</info>
+	<defaults>
+		<contributor name-as-sort-order="no">
+			<label form="verb" suffix=" "/>
+			<name and="text" delimiter=", "/>
+		</contributor>
+		<author name-as-sort-order="first">
+			<name and="text" sort-separator=", " delimiter=", " delimiter-precedes-last="always"/>
+			<label form="short" prefix=", " suffix="."/>
+			<substitute>
+				<choose>
+					<editor/>
+					<translator/>
+					<titles relation="container" font-style="italic"/>
+					<titles/>
+				</choose>
+			</substitute>
+		</author>
+		<locator>
+			<number/>
+		</locator>
+		<identifier>
+			<number/>
+		</identifier>
+		<titles>
+			<title/>
+		</titles>
+		<date>
+			<month suffix=" " text-transform="capitalize"/>
+			<day suffix=", "/>
+			<year/>
+		</date>
+		<access>
+			<url/>
+			<date prefix=" (" suffix=")">
+				<text term-name="accessed" suffix=" "/>
+				<month suffix=" " text-transform="capitalize"/>
+				<day suffix=", "/>
+				<year/>
+			</date>
+		</access>
+	</defaults>
+	<citation suffix="." delimiter="; ">
+		<et-al min-authors="3" use-first="1"/>
+		<layout>
+			<item suffix=".">
+				<group delimiter=", ">
+					<author form="short">
+						<name and="text" sort-separator=", " delimiter=", "/>
+					</author>
+					<conditional>
+						<if type="book">
+							<titles font-style="italic" form="short"/>
+						</if><else>
+							<titles quotes="true" form="short"/>
+						</else>
+					</conditional>
+					<pages/>
+				</group>
+			</item>
+			<item suffix="." position="subsequent" ibid="true">
+				<group delimiter=", ">
+					<author form="short">
+						<name and="text" sort-separator=", " delimiter=", "/>
+					</author>
+					<conditional>
+						<if type="book">
+							<titles font-style="italic" form="short"/>
+						</if><else>
+							<titles quotes="true" form="short"/>
+						</else>
+					</conditional>
+					<pages/>
+				</group>
+			</item>
+		</layout>
+	</citation>
+	<bibliography hanging-indent="true" subsequent-author-substitute="&#8212;&#8212;&#8212;">
+		<sort>
+			<author name-as-sort-order="all"/>
+			<titles/>
+		</sort>
+		<et-al min-authors="6" use-first="6"/>
+		<layout>
+			<list>
+				<heading>
+					<text term-name="works cited"/>
+				</heading>
+			</list>
+			<item suffix=".">
+				<choose>
+					<type name="book">
+						<author suffix="."/>
+						<titles prefix=" " suffix="." font-style="italic"/>
+						<group prefix=" " suffix="." delimiter=", " text-transform="capitalize">
+							<editor/>
+							<translator/>
+						</group>
+						<group prefix=" " suffix="." delimiter=", " text-transform="capitalize">
+              				<group delimiter=": ">
+            					<publisher><place/></publisher>
+            					<publisher><name/></publisher>
+              				</group>	
+							<conditional>
+								<if field="date">
+									<date><year/></date>
+								</if><else>
+									<text term-name="no date"/>
+								</else>
+							</conditional>
+						</group>
+						<access prefix=" "/>
+					</type>
+					<type name="chapter">
+						<author suffix="."/>
+						<titles prefix=" " suffix="." quotes="true"/>
+						<group class="container" suffix=".">
+							<text prefix=" " term-name="in" text-transform="capitalize"/>
+							<titles prefix=" " relation="container" font-style="italic"/>
+							<editor prefix=", "/>
+							<translator prefix=", "/>
+							<pages prefix=", "/>
+							<group prefix=". " delimiter=", ">
+              					<group delimiter=": ">
+            						<publisher><place/></publisher>
+            						<publisher><name/></publisher>
+              					</group>	
+								<conditional>
+									<if field="date">
+										<date><year/></date>
+									</if><else>
+										<text term-name="no date"/>
+									</else>
+								</conditional>
+							</group>
+						</group>
+						<access prefix=" "/>
+					</type>
+					<type name="article">
+						<author suffix="."/>
+						<titles prefix=" " quotes="true"/>
+						<group prefix=" " suffix="." delimiter=", " text-transform="capitalize">
+							<editor/>
+							<translator/>
+						</group>
+						<group class="container" prefix=" " suffix="." delimiter=", ">
+							<titles prefix=" " relation="container" font-style="italic"/>
+							<date/>
+						</group>
+						<access prefix=" "/>
+					</type>
+					<type name="article-journal">
+						<author suffix="."/>
+						<titles prefix=" " suffix="." quotes="true"/>
+						<group prefix=" " suffix="." delimiter=", " text-transform="capitalize">
+							<editor/>
+							<translator/>
+						</group>
+						<group class="container" prefix=" " suffix=".">
+							<titles relation="container" font-style="italic"/>
+							<volume prefix=" "/>			
+							<issue prefix=", no. "/>
+							<conditional>
+								<if field="date">
+									<date prefix=" (" suffix=")"/>	
+									<pages prefix=": "/>
+								</if><else>
+									<pages prefix=":"/>
+								</else>
+							</conditional>
+						</group>
+						<access prefix=" "/>
+					</type>
+				</choose>
+			</item>
+		</layout>
+	</bibliography>
+</style>

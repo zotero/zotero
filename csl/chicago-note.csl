@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?oxygen RNGSchema="csl.rnc" type="compact"?>
+<style xmlns="http://purl.org/net/xbiblio/csl" class="note" xml:lang="en">
+  <info>
+    <title>Chicago Note Sans Reference List</title>
+    <id>http://purl.org/net/xbiblio/csl/styles/chicago-note.csl</id>
+    <author>
+      <name>Bruce D’Arcus</name>
+      <email>bdarcus@sourceforge.net</email>
+    </author>
+    <contributor>
+      <name>Simon Kornblith</name>
+      <email>simon@simonster.com</email>
+    </contributor>
+    <contributor>
+      <name>Johan Kool</name>
+      <email>johankool@users.sourceforge.net</email>
+    </contributor>
+    <updated>2007-10-23T18:00:00</updated>
+    <summary>The note-without-bibliography variant of the Chicago style.</summary>
+  </info>
+  <defaults>
+    <contributor>
+      <label form="short" suffix=". " text-transform="lowercase"/>
+      <name and="text" delimiter=", "/>
+    </contributor>
+    <author>
+      <name and="text" delimiter=", "/>
+      <label form="short" prefix=", " suffix="." text-transform="lowercase"/>
+      <substitute>
+        <choose>
+          <editor/>
+          <translator/>
+        </choose>
+      </substitute>
+    </author>
+    <locator>
+      <number/>
+    </locator>
+    <titles>
+      <title/>
+    </titles>
+    <date>
+      <month suffix=" " text-transform="capitalize"/>
+      <day suffix=", "/>
+      <year/>
+    </date>
+    <access>
+      <url/>
+      <date prefix=" (" suffix=")">
+        <text term-name="accessed" suffix=" "/>
+        <month suffix=" " text-transform="capitalize"/>
+        <day suffix=", "/>
+        <year/>
+      </date>
+    </access>
+  </defaults>
+  <citation suffix="." delimiter="; ">
+    <et-al min-authors="4" use-first="1"/>
+    <layout>
+      <item>
+        <choose>
+          <type name="book">
+            <group delimiter=", ">
+              <author/>
+              <titles font-style="italic"/>
+              <editor/>
+              <translator/>
+            </group>
+            <group prefix=" (" suffix=")" delimiter=", ">
+              <group delimiter=": ">
+            	<publisher><place/></publisher>
+            	<publisher><name/></publisher>
+              </group>
+			  <conditional>
+				<if field="date">
+					<date><year/></date>
+				</if><else>
+					<text term-name="no date"/>
+				</else>
+			  </conditional>
+            </group>
+            <pages prefix=", "/>
+            <access prefix=", "/>
+          </type>
+          <type name="chapter">
+            <group delimiter=", ">
+              <author/>
+              <titles quotes="true"/>
+            </group>
+            <group class="container">
+              <text prefix=", " term-name="in" text-transform="lowercase"/>
+              <group delimiter=", ">
+                <titles relation="container" prefix=" " font-style="italic"/>
+                <editor/>
+                <translator/>
+              </group>
+              <group prefix=" (" suffix=")" delimiter=", ">
+                <group delimiter=": ">
+            	  <publisher><place/></publisher>
+            	  <publisher><name/></publisher>
+                </group>
+				<conditional>
+					<if field="date">
+						<date><year/></date>
+					</if><else>
+						<text term-name="no date"/>
+					</else>
+			    </conditional>
+              </group>
+              <pages prefix=", "/>
+              <access prefix=", "/>
+            </group>
+          </type>
+          <type name="article">
+            <group delimiter=", ">
+              <author/>
+              <titles quotes="true"/>
+              <titles relation="container" font-style="italic"/>
+              <date/>
+              <access/>
+            </group>
+          </type>
+          <type name="article-journal">
+            <group delimiter=", ">
+              <author/>
+              <titles quotes="true"/>
+              <titles relation="container" font-style="italic"/>
+            </group>
+            <volume prefix=" "/>
+            <issue prefix=", ">
+              <label form="short" text-transform="lowercase" suffix=". "/>
+              <number/>
+            </issue>
+            <date prefix=" (" suffix=")"/>
+            <pages prefix=": "/>
+            <access prefix=", "/>
+          </type>
+        </choose>
+      </item>
+      <item position="subsequent" ibid="true">
+        <author form="short"/>
+        <conditional>
+          <if type="book">
+            <titles prefix=", " font-style="italic" form="short"/>
+          </if><else>
+            <titles prefix=", " quotes="true" form="short"/>
+          </else>
+        </conditional>
+        <pages prefix=", "/>
+      </item>
+    </layout>
+  </citation>
+</style>
