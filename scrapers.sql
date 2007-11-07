@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-11-05 18:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-11-07 08:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -8954,15 +8954,15 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('d0b1914a-11f1-4dd7-8557-b32fe8a3dd47', '1.0.0b3.r1', '', '2007-09-18 07:10:00', '1', '100', '4', 'EBSCOhost', 'Simon Kornblith', '^https?://[^/]+/(?:bsi|ehost)/(?:results|detail)', 
+REPLACE INTO translators VALUES ('d0b1914a-11f1-4dd7-8557-b32fe8a3dd47', '1.0.0b3.r1', '', '2007-11-07 08:00:00', '1', '100', '4', 'EBSCOhost', 'Simon Kornblith', '^https?://[^/]+/(?:bsi|ehost)/(?:results|detail|folder)', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == ''x'') return namespace; else return null;
 	} : null;
 	
-	// See if this is a seach results page
-	var searchResult = doc.evaluate(''//ul[@class="result-list"]/li/div[@class="result-list-record"]'', doc, nsResolver,
+	// See if this is a search results or folder results page
+	var searchResult = doc.evaluate(''//ul[@class="result-list" or @class="folder-list"]/li/div[@class="result-list-record" or @class="folder-item"]'', doc, nsResolver,
 	                                XPathResult.ANY_TYPE, null).iterateNext();         
 	if(searchResult) {
 		return "multiple";
@@ -9035,20 +9035,20 @@ function doWeb(doc, url) {
 	var m = hostRe.exec(url);
 	host = m[1];
 	                                
-	var searchResult = doc.evaluate(''//ul[@class="result-list"]/li/div[@class="result-list-record"]'', doc, nsResolver,
+	var searchResult = doc.evaluate(''//ul[@class="result-list" or @class="folder-list"]/li/div[@class="result-list-record" or @class="folder-item"]'', doc, nsResolver,
 	                                XPathResult.ANY_TYPE, null).iterateNext();                              
-	
+
 	if(searchResult) {
-		var items = new Object();
-		var titles = doc.evaluate(''//div[@class="result-list-record"]/span[@class="medium-font"]/a'',
+		var titles = doc.evaluate(''//div[@class="result-list-record" or @class="folder-item-detail"]/span[@class="medium-font"]/a'',
 		                             doc, nsResolver, XPathResult.ANY_TYPE, null);
 		var title = titles.iterateNext();
 		if (!title){
-			titles = doc.evaluate(''//div[@class="result-list-record"]/a'',
+			titles = doc.evaluate(''//div[@class="result-list-record" or @class="folder-item-detail"]/a'',
 		                             doc, nsResolver, XPathResult.ANY_TYPE, null);
 		}
 		title = titles.iterateNext();
 		// Go through titles
+		var items = new Object();
 		do {
 			items[title.href] = title.textContent;
 		} while(title = titles.iterateNext());
@@ -15165,7 +15165,7 @@ function doExport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('9cb70025-a888-4a29-a210-93ec52da40d4', '1.0.0b4.r1', '', '2007-06-22 17:30:00', '1', '100', '3', 'BibTeX', 'Simon Kornblith', 'bib', 
+REPLACE INTO translators VALUES ('9cb70025-a888-4a29-a210-93ec52da40d4', '1.0.0b4.r1', '', '2007-11-07 08:00:00', '1', '100', '3', 'BibTeX', 'Simon Kornblith', 'bib', 
 'Zotero.configure("dataMode", "block");
 
 function detectImport() {
@@ -15203,6 +15203,7 @@ function detectImport() {
 	issn:"ISSN",
 	location:"archiveLocation",
 	url:"url",
+	doi:"DOI",
 	"abstract":"abstractNote"
 };
 
