@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-11-07 08:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-11-09 02:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -7179,7 +7179,7 @@ REPLACE INTO translators VALUES ('c54d1932-73ce-dfd4-a943-109380e06574', '1.0.0b
 	}
 }');
 
-REPLACE INTO translators VALUES ('fcf41bed-0cbc-3704-85c7-8062a0068a7a', '1.0.0b3.r1', '', '2007-09-25 18:00:00', '1', '100', '4', 'NCBI PubMed', 'Simon Kornblith and Michael Berkowitz', '^http://www\.ncbi\.nlm\.nih\.gov/(sites/entrez|entrez/query\.fcgi\?.*db=PubMed)', 
+REPLACE INTO translators VALUES ('fcf41bed-0cbc-3704-85c7-8062a0068a7a', '1.0.0b3.r1', '', '2007-11-09 02:00:00', '1', '100', '4', 'NCBI PubMed', 'Simon Kornblith and Michael Berkowitz', '^http://www\.ncbi\.nlm\.nih\.gov/(sites/entrez|entrez/query\.fcgi\?.*db=PubMed)', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -7326,15 +7326,15 @@ function doWeb(doc, url) {
 	if(uid) {
 		if (uids.iterateNext()){
 			var items = new Array();
-			var tableRows = doc.evaluate(''//div[@class="ResultSet"]/table/tbody | //table[@id="ResultPanel"]/tbody/tr[3]/td/div[5]/table/tbody'', doc, // edited for new PubMed
+			var tableRows = doc.evaluate(''//div[@class="rprt"]'', doc, // edited for new PubMed
 					     nsResolver, XPathResult.ANY_TYPE, null);
+			
 			var tableRow;
 			// Go through table rows
 			while(tableRow = tableRows.iterateNext()) {
-				var link = doc.evaluate(''.//a'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-				uid = doc.evaluate(''.//input[@id="UidCheckBox" or @name="uid"]'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-				var article = doc.evaluate(''./tr[2]/td[2]/text()[1]'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-				items[uid.value] = article.nodeValue;
+				uid = doc.evaluate(''.//input[@id="UidCheckBox"]'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+				var article = doc.evaluate(''.//div[@class="title"]'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+				items[uid.value] = article.textContent;
 			}
 
 			items = Zotero.selectItems(items);
