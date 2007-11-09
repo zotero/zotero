@@ -3,14 +3,14 @@
 <style xmlns="http://purl.org/net/xbiblio/csl" class="author-date">
     <info>
         <title>American Sociological Association</title>
-    	<id>http://purl.org/net/xbiblio/csl/styles/asa.csl</id>
-    	<link>http://purl.org/net/xbiblio/csl/styles/asa.csl</link>
-        <summary>Bibliography styles for the American Sociological Association.</summary>
+        <id>http://www.zotero.org/styles/asa</id>
+        <link>http://www.zotero.org/styles/asa</link>
+        <summary>Bibliography style for the American Sociological Association.</summary>
         <author>
             <name>Jim Safley</name>
             <email>jsafley@gmu.edu</email>
         </author>
-        <updated>2007-10-23T18:00:00</updated>
+        <updated></updated>
     </info>
     <defaults>
         <et-al min-authors="6" use-first="6"></et-al>

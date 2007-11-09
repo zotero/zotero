@@ -3,7 +3,7 @@
 <style xmlns="http://purl.org/net/xbiblio/csl" class="note" xml:lang="en">
   <info>
     <title>Chicago Note Sans Reference List</title>
-    <id>http://purl.org/net/xbiblio/csl/styles/chicago-note.csl</id>
+    <id>http://www.zotero.org/styles/chicago-note</id>
     <author>
       <name>Bruce D’Arcus</name>
       <email>bdarcus@sourceforge.net</email>
@@ -16,7 +16,7 @@
       <name>Johan Kool</name>
       <email>johankool@users.sourceforge.net</email>
     </contributor>
-    <updated>2007-10-23T18:00:00</updated>
+    <updated></updated>
     <summary>The note-without-bibliography variant of the Chicago style.</summary>
   </info>
   <defaults>

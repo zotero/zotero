@@ -2,12 +2,12 @@
 <style xmlns="http://purl.org/net/xbiblio/csl" class="note" xml:lang="en">
 	<info>
 		<title>Chicago Note With Bibliography Style</title>
-		<id>http://www.zotero.org/namespaces/CSL/chicago-note-bibliography.csl</id>
+		<id>http://www.zotero.org/styles/chicago-note-bibliography</id>
 		<author>
 			<name>Simon Kornblith</name>
 			<email>simon@simonster.com</email>
 		</author>
-		<updated>2007-10-23T18:00:00</updated>
+		<updated></updated>
 		<summary>The note-with-bibliography variant of the Chicago style.</summary>
 	</info>
 	<defaults>

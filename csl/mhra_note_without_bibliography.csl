@@ -3,14 +3,14 @@
 <style xmlns="http://purl.org/net/xbiblio/csl" class="note">
     <info>
         <title>Modern Humanities Research Association</title>
-    	<id>http://purl.org/net/xbiblio/csl/styles/mhra_note_without_bibliography.csl</id>
-    	<link>http://purl.org/net/xbiblio/csl/styles/mhra_note_without_bibliography.csl</link>
-        <summary>Bibliography styles for the Modern Humanities Research Association.</summary>
+        <id>http://www.zotero.org/styles/mhra_note_without_bibliography</id>
+        <link>http://www.zotero.org/styles/mhra_note_without_bibliography</link>
+        <summary>Bibliography style for the Modern Humanities Research Association</summary>
         <author>
             <name>Jim Safley</name>
             <email>jsafley@gmu.edu</email>
         </author>
-        <updated>2007-10-23T18:00:00</updated>
+        <updated></updated>
     </info>
     <defaults>
         <et-al min-authors="4" use-first="1" term-name="and-others"></et-al>

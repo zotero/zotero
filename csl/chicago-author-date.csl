@@ -2,12 +2,12 @@
 <style xmlns="http://purl.org/net/xbiblio/csl" class="author-date" xml:lang="en">
 	<info>
 		<title>Chicago Reference List Style</title>
-		<id>http://www.zotero.org/namespaces/CSL/chicago-author-date.csl</id>
+		<id>http://www.zotero.org/styles/chicago-author-date</id>
 		<author>
 			<name>Simon Kornblith</name>
 			<email>simon@simonster.com</email>
 		</author>
-		<updated>2007-10-23T18:00:00</updated>
+		<updated></updated>
 		<summary>The author-date variant of the Chicago style.</summary>
 	</info>
 	<defaults>

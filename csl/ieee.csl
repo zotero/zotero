@@ -3,15 +3,15 @@
 <style xmlns="http://purl.org/net/xbiblio/csl" class="in-text" xml:lang="en">
     <info>
         <title>IEEE</title>
-        <id>http://purl.org/net/xbiblio/csl/styles/ieee.csl</id>
-        <link>http://purl.org/net/xbiblio/csl/styles/ieee.csl</link>
+        <id>http://www.zotero.org/styles/ieee</id>
+        <link>http://www.zotero.org/styles/ieee</link>
         <author>
             <name>Michael Berkowitz</name>
-            <email>michael@songsaboutsnow.com</email>
+            <email>mberkowi@gmu.edu</email>
         </author>
         <category term="engineering"/>
         <category term="generic-base"/>
-        <updated>2007-10-23T18:00:00</updated>
+        <updated></updated>
     </info>
     <macro name="author">
         <names variable="author">

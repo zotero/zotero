@@ -1,9 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <?oxygen RNGSchema="csl.rnc" type="compact"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="in-text" xml:lang="en">
   <info>
     <title>American Psychological Association</title>
-    <id>http://purl.org/net/xbiblio/csl/styles/apa.csl</id>
-    <link>http://purl.org/net/xbiblio/csl/styles/apa.csl</link>
+    <id>http://www.zotero.org/styles/apa</id>
+    <link>http://www.zotero.org/styles/apa</link>
     <author>
       <name>Simon Kornblith</name>
       <email>simon@simonster.com</email>
@@ -11,7 +12,7 @@
     <category term="psychology"/>
     <category term="generic-base"/>
     <category term="author-date"/>
-    <updated>2007-10-23T18:00:00</updated>
+    <updated></updated>
   </info>
   <macro name="editor-translator">
     <names variable="editor translator" prefix="(" suffix=")" delimiter=", ">
