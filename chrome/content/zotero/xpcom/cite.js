@@ -1526,9 +1526,23 @@ Zotero.CSL.Item = function(item) {
 		throw "Zotero.CSL.Item called to wrap a non-item";
 	}
 	
-	this._dates = {};
 	this._properties = {};
+	this._refreshItem();
 }
+
+/**
+ * Refreshes item if it has been modified
+ */
+Zotero.CSL.Item.prototype._refreshItem = function() {
+	var previousChanged = this._lastChanged;
+	this._lastChanged = this.zoteroItem.getField("dateModified", false, true);
+	
+	if(this._lastChanged != previousChanged) {
+		this._names = undefined;
+		this._dates = {};
+	}
+}
+
 
 /*
  * Returns some identifier for the item. Used to create citations. In Zotero,
@@ -1537,11 +1551,11 @@ Zotero.CSL.Item = function(item) {
 Zotero.CSL.Item.prototype.getID = function() {
 	return this.zoteroItem.getID();
 }
-
 /*
  * Gets an array of Item.Name objects for a variable.
  */
 Zotero.CSL.Item.prototype.getNames = function(variable) {
+	this._refreshItem();
 	if(!this._names) {
 		this._separateNames();
 	}
@@ -1557,6 +1571,7 @@ Zotero.CSL.Item.prototype.getNames = function(variable) {
  */
 Zotero.CSL.Item.prototype.getDate = function(variable) {
 	// load date variable if possible
+	this._refreshItem();
 	if(this._dates[variable] == undefined) {
 		this._createDate(variable);
 	}
