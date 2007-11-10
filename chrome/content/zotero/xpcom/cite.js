@@ -911,10 +911,12 @@ Zotero.CSL.prototype._processElements = function(item, element, formattedString,
 								// date is in citationItem
 								var string = citationItem._csl[variables[j]][part];
 							} else {
-								var string = date.getDateVariable(part).toString();
-								if(string == "") continue;
+								var string = date.getDateVariable(part);
+								if(string === "") continue;
 								
 								if(part == "year") {
+									string = string.toString();
+									
 									// if 4 digits and no B.C., use short form
 									if(newForm == "short" && string.length == 4 && !isNaN(string*1)) {
 										string = string.substr(2, 2);
@@ -927,22 +929,29 @@ Zotero.CSL.prototype._processElements = function(item, element, formattedString,
 								} else if(part == "month") {
 									// if month is a numeric month, format as such
 									if(!isNaN(string*1)) {
-										if(form == "numeric-leading-zeros") {
+										if(newForm == "numeric-leading-zeros") {
 											if(string.length == 1) {
-												string = "0" + string;
+												string = ("0" + (1+string)).toString();
 											}
-										} else if(form == "short") {
+										} else if(newForm == "short") {
 											string = this._terms["short"]["_months"][string];
-										} else if(form != "numeric") {
+										} else if(newForm == "numeric") {
+											string = (1+string).toString();
+										} else {
 											string = this._terms["long"]["_months"][string];
 										}
-									} else if(form == "numeric") {
+									} else if(newForm == "numeric") {
 										string = "";
 									}
 								} else if(part == "day") {
+									string = string.toString();
 									if(form == "numeric-leading-zeros"
 											&& string.length() == 1) {
 										string = "0" + string;
+									} else if (newForm == "ordinal") {
+										var ind = parseInt(string);
+										var daySuffixes = Zotero.getString("date.daySuffixes").replace(/, ?/g, "|").split("|");
+										string += (parseInt(ind/10)%10) == 1 ? daySuffixes[3] : (ind % 10 == 1) ? daySuffixes[0] : (ind % 10 == 2) ? daySuffixes[1] : (ind % 10 == 3) ? daySuffixes[2] : daySuffixes[3];
 									}
 								}
 							}
@@ -1743,7 +1752,7 @@ Zotero.CSL.Item.Date = function(date, sort) {
  * Should accept the following variables:
  *
  * year - returns a year (optionally, with attached B.C.)
- * month - returns a month (numeric, or, if numeric is not available, long)
+ * month - returns a month (numeric from 0, or, if numeric is not available, long)
  * day - returns a day (numeric)
  * sort - a date that can be used for sorting purposes
  */
@@ -1757,7 +1766,7 @@ Zotero.CSL.Item.Date.prototype.getDateVariable = function(variable) {
 			this.dateArray = Zotero.Date.strToDate(this.date);
 		}
 		
-		if(this.dateArray[variable]) {
+		if(this.dateArray[variable] || this.dateArray[variable] === 0) {
 			return this.dateArray[variable];
 		} else if(variable == "month") {
 			if(this.dateArray.part) {
