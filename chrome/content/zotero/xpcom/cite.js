@@ -2182,7 +2182,7 @@ Zotero.CSL.ItemSet.prototype._copyDisambiguation = function(fromItem, toItem) {
 
 Zotero.CSL.FormattedString = function(context, format, delimiter, subsequent) {
 	this.context = context;
-	this.option = context.option;
+	this.option = context ? context.option : new XMLList();
 	this.format = format;
 	this.delimiter = delimiter;
 	this.string = "";
