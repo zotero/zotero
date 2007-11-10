@@ -1566,34 +1566,41 @@ Zotero.CSL.Item.prototype.getDate = function(variable) {
 }
 
 Zotero.CSL.Item._zoteroFieldMap = {
-	"title":"title",
-	"container-title":"publicationTitle",
-	"collection-title":["seriesTitle", "series"],
-	"publisher":"publisher",
-	"publisher-place":"place",
-	"page":"pages",
-	"volume":"volume",
-	"issue":"issue",
-	"number-of-volumes":"numberOfVolumes",
-	"edition":"edition",
-	"genre":"type",
-	"abstract":"abstract",
-	"URL":"url",
-	"DOI":"DOI"
+	"long":{
+		"title":"title",
+		"container-title":"publicationTitle",
+		"collection-title":["seriesTitle", "series"],
+		"publisher":"publisher",
+		"publisher-place":"place",
+		"page":"pages",
+		"volume":"volume",
+		"issue":"issue",
+		"number-of-volumes":"numberOfVolumes",
+		"edition":"edition",
+		"genre":"type",
+		"abstract":"abstract",
+		"URL":"url",
+		"DOI":"DOI",
+		"note":"extra"
+	},
+	"short":{
+		"title":["shortTitle", "title"],
+		"container-title":"journalAbbreviation"
+	}
 }
 
 /*
  * Gets a text object for a specific type.
  */
 Zotero.CSL.Item.prototype.getVariable = function(variable, form) {
-	if(!Zotero.CSL.Item._zoteroFieldMap[variable]) return "";
+	if(!Zotero.CSL.Item._zoteroFieldMap["long"][variable]) return "";
 	
-	if(variable == "title" && form == "short") {
-		var zoteroFields = ["shortTitle", "title"];
+	if(form == "short" && Zotero.CSL.Item._zoteroFieldMap["short"][variable]) {
+		var zoteroFields = Zotero.CSL.Item._zoteroFieldMap["short"][variable];
 	} else {
-		var zoteroFields = Zotero.CSL.Item._zoteroFieldMap[variable];
-		if(typeof zoteroFields == "string") zoteroFields = [zoteroFields];
+		var zoteroFields = Zotero.CSL.Item._zoteroFieldMap["long"][variable];
 	}
+	if(typeof zoteroFields == "string") zoteroFields = [zoteroFields];
 	
 	for each(var zoteroField in zoteroFields) {
 		var value = this.zoteroItem.getField(zoteroField, false, true);
