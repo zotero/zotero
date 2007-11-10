@@ -80,7 +80,7 @@
 				</else>
 			  </conditional>
             </group>
-            <pages prefix=", "/>
+            <locator prefix=", "/>
             <access prefix=", "/>
           </type>
           <type name="chapter">
@@ -108,7 +108,13 @@
 					</else>
 			    </conditional>
               </group>
-              <pages prefix=", "/>
+              <conditional>
+                <if field="locator">
+                  <locator prefix=", "/>
+                </if><else>
+                  <pages prefix=", "/>
+                </else>
+              </conditional>
               <access prefix=", "/>
             </group>
           </type>
@@ -118,6 +124,7 @@
               <titles quotes="true"/>
               <titles relation="container" font-style="italic"/>
               <date/>
+              <locator/>
               <access/>
             </group>
           </type>
@@ -133,7 +140,7 @@
               <number/>
             </issue>
             <date prefix=" (" suffix=")"/>
-            <pages prefix=": "/>
+            <locator prefix=": "/>
             <access prefix=", "/>
           </type>
         </choose>
