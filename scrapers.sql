@@ -16559,7 +16559,7 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/apa.csl', '2007-
   </bibliography>
 </style>');
 
-REPLACE INTO csl VALUES('http://www.zotero.org/namespaces/CSL/chicago-author-date.csl', '2007-10-23 18:00:00', 'Chicago Manual of Style (Author-Date)',
+REPLACE INTO csl VALUES('http://www.zotero.org/namespaces/CSL/chicago-author-date.csl', '2007-11-10 03:39:37', 'Chicago Manual of Style (Author-Date)',
 '<?xml version="1.0" encoding="UTF-8"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="author-date" xml:lang="en">
 	<info>
@@ -16569,7 +16569,7 @@ REPLACE INTO csl VALUES('http://www.zotero.org/namespaces/CSL/chicago-author-dat
 			<name>Simon Kornblith</name>
 			<email>simon@simonster.com</email>
 		</author>
-		<updated>2006-12-20T03:33:00+05:00</updated>
+		<updated>2007-11-10T03:39:37+00:00</updated>
 		<summary>The author-date variant of the Chicago style.</summary>
 	</info>
 	<defaults>
@@ -16736,7 +16736,7 @@ REPLACE INTO csl VALUES('http://www.zotero.org/namespaces/CSL/chicago-author-dat
 	</bibliography>
 </style>');
 
-REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/chicago-note.csl', '2007-10-23 18:00:00', 'Chicago Manual of Style (Note without Reference List)',
+REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/chicago-note.csl', '2007-11-10 03:39:37', 'Chicago Manual of Style (Note without Reference List)',
 '<?xml version="1.0" encoding="UTF-8"?>
 <?oxygen RNGSchema="../schema/trunk/csl.rnc" type="compact"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="note" xml:lang="en">
@@ -16755,7 +16755,7 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/chicago-note.csl
       <name>Johan Kool</name>
       <email>johankool@users.sourceforge.net</email>
     </contributor>
-    <updated>2006-12-20T04:20:00+05:00</updated>
+    <updated>2007-10-10T03:39:37+00:00</updated>
     <summary>The note-without-bibliography variant of the Chicago style.</summary>
   </info>
   <defaults>
@@ -16819,7 +16819,7 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/chicago-note.csl
 				</else>
 			  </conditional>
             </group>
-            <pages prefix=", "/>
+            <locator prefix=", "/>
             <access prefix=", "/>
           </type>
           <type name="chapter">
@@ -16847,7 +16847,13 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/chicago-note.csl
 					</else>
 			    </conditional>
               </group>
-              <pages prefix=", "/>
+              <conditional>
+                <if field="locator">
+                  <locator prefix=", "/>
+                </if><else>
+                  <pages prefix=", "/>
+                </else>
+              </conditional>
               <access prefix=", "/>
             </group>
           </type>
@@ -16857,6 +16863,7 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/chicago-note.csl
               <titles quotes="true"/>
               <titles relation="container" font-style="italic"/>
               <date/>
+              <locator/>
               <access/>
             </group>
           </type>
@@ -16872,7 +16879,7 @@ REPLACE INTO csl VALUES('http://purl.org/net/xbiblio/csl/styles/chicago-note.csl
               <number/>
             </issue>
             <date prefix=" (" suffix=")"/>
-            <pages prefix=": "/>
+            <locator prefix=": "/>
             <access prefix=", "/>
           </type>
         </choose>
@@ -16961,7 +16968,7 @@ REPLACE INTO csl VALUES('http://www.zotero.org/namespaces/CSL/chicago-note-bibli
 							<titles quotes="true" form="short"/>
 						</else>
 					</conditional>
-					<pages/>
+					<locator/>
 				</group>
 			</item>
 			<item suffix="." position="subsequent" ibid="true">
@@ -16976,7 +16983,7 @@ REPLACE INTO csl VALUES('http://www.zotero.org/namespaces/CSL/chicago-note-bibli
 							<titles quotes="true" form="short"/>
 						</else>
 					</conditional>
-					<pages/>
+					<locator/>
 				</group>
 			</item>
 		</layout>
