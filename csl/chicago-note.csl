@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?oxygen RNGSchema="csl.rnc" type="compact"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="note" xml:lang="en">
   <info>
-    <title>Chicago Note Sans Reference List</title>
+    <title>Chicago Manual of Style (Note without Reference List)</title>
     <id>http://www.zotero.org/styles/chicago-note</id>
     <author>
       <name>Bruce D’Arcus</name>

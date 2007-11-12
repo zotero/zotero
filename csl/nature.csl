@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?oxygen RNGSchema="csl.rnc" type="compact"?>
+<?oxygen RNGSchema="http://xbiblio.svn.sourceforge.net/viewvc/*checkout*/xbiblio/csl/schema/trunk/csl.rnc" type="compact"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="in-text" xml:lang="en">
     <info>
-        <title>Nature Journals</title>
+        <title>Nature Journal</title>
         <id>http://www.zotero.org/styles/nature</id>
         <link>http://www.zotero.org/styles/nature</link>
         <author>
