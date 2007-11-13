@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-11-09 05:50:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-11-13 04:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -5215,7 +5215,7 @@ REPLACE INTO translators VALUES ('0faa6714-927a-4b07-911e-7101895daae0', '1.0.0b
 		}
 }');
 
-REPLACE INTO translators VALUES ('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '1.0.0b3.r1', '', '2007-06-27 02:00:00', '1', '100', '4', 'Library Catalog (InnoPAC)', 'Simon Kornblith', '^https?://[^/]+/(?:search\??/|record=|search%7e/)', 
+REPLACE INTO translators VALUES ('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '1.0.0b3.r1', '', '2007-11-13 04:00:00', '1', '100', '4', 'Library Catalog (InnoPAC)', 'Simon Kornblith', '^https?://[^/]+/(?:search\??/|record=|search%7e/)', 
 'function detectWeb(doc, url) {
 	// First, check to see if the URL alone reveals InnoPAC, since some sites don''t reveal the MARC button
 	var matchRegexp = new RegExp(''^(https?://[^/]+/search\\??/[^/]+/[^/]+/[0-9]+\%2C[^/]+/)frameset(.+)$'');
@@ -5228,7 +5228,7 @@ REPLACE INTO translators VALUES ('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '1.0.0b
 		if (prefix == ''x'') return namespace; else return null;
 	} : null;
 	
-	var xpath = ''//a[img[@src="/screens/marcdisp.gif" or @alt="MARC Display" or @src="/screens/regdisp.gif" or @alt="REGULAR RECORD DISPLAY"]]'';
+	var xpath = ''//a[img[@src="/screens/marcdisp.gif" or starts-with(@alt, "MARC ") or @src="/screens/regdisp.gif" or @alt="REGULAR RECORD DISPLAY"]]'';
 	var elmt = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 	if(elmt) {
 		return "book";
@@ -5336,7 +5336,7 @@ function doWeb(doc, url) {
 			if (prefix == ''x'') return namespace; else return null;
 		} : null;
 	
-		var xpath = ''//a[img[@src="/screens/marcdisp.gif" or @alt="MARC Display"]]'';
+		var xpath = ''//a[img[@src="/screens/marcdisp.gif" or starts-with(@alt, "MARC ")]]'';
 		var aTag = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 		if(aTag) {
 			newUri = aTag.href;
