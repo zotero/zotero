@@ -80,4 +80,3 @@
 
 <!ENTITY zotero.preferences.dbMaintenance "Одржавање базе података">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Провери целовитост базе података">
-<!ENTITY zotero.preferences.dbMaintenance.rebuildTranslators "Поново изгради табелу преводилаца">

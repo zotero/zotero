@@ -80,4 +80,3 @@
 
 <!ENTITY zotero.preferences.dbMaintenance "Datenbankwartung">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Integrität der Datenbank überprüfen">
-<!ENTITY zotero.preferences.dbMaintenance.rebuildTranslators "Tabelle der Übersetzern neu aufbauen">

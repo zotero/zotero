@@ -80,4 +80,3 @@
 
 <!ENTITY zotero.preferences.dbMaintenance "資料庫維修">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "檢查資料庫完整性">
-<!ENTITY zotero.preferences.dbMaintenance.rebuildTranslators "重建轉譯器項目表">

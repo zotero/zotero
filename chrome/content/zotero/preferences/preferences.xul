@@ -114,7 +114,7 @@ To add a new preference:
 			
 			<hbox align="center">
 				<checkbox label="&zotero.preferences.autoUpdate;" preference="pref-automaticScraperUpdates"/>
-				<button id="updateButton" style="margin-top:0" label="&zotero.preferences.updateNow;" oncommand="Zotero.Schema.updateScrapersRemote(true)"/>
+				<button id="updateButton" style="margin-top:0" label="&zotero.preferences.updateNow;" oncommand="updateTranslators()"/>
 			</hbox>
 			
 			<checkbox label="&zotero.preferences.reportTranslationFailure;" preference="pref-reportTranslationFailure"/>
@@ -407,7 +407,7 @@ To add a new preference:
 			</hbox>
 			
 			<hbox>
-				<button label="&zotero.preferences.dbMaintenance.rebuildTranslators;" oncommand="rebuildTranslators()"/>
+				<button label="&zotero.preferences.dbMaintenance.resetTranslatorsAndStyles;" oncommand="resetTranslatorsAndStyles()"/>
 			</hbox>
 		</groupbox>
 	</prefpane>

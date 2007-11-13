@@ -80,4 +80,3 @@
 
 <!ENTITY zotero.preferences.dbMaintenance "Întreţinerea bazei de date">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Controlează integritatea bazei de date">
-<!ENTITY zotero.preferences.dbMaintenance.rebuildTranslators "Reconstruieşte tabelul traducătorilor">

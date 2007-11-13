@@ -105,6 +105,7 @@ var Zotero_Browser = new function() {
 		Zotero_Browser._scrapePopupShowing = false;
 		Zotero.Ingester.ProxyMonitor.init();
 		Zotero.Ingester.MIMEHandler.init();
+		Zotero.Cite.MIMEHandler.init();
 		Zotero.Translate.init();
 		
 		window.addEventListener("load",

@@ -80,4 +80,3 @@
 
 <!ENTITY zotero.preferences.dbMaintenance "Bảo dưỡng Cơ sở dữ liệu">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Kiểm tra Tính toàn vẹn của Cơ sở dữ liệu">
-<!ENTITY zotero.preferences.dbMaintenance.rebuildTranslators "Tái lập Bảng các Bộ chuyển đổi">

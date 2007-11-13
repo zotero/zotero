@@ -80,4 +80,3 @@
 
 <!ENTITY zotero.preferences.dbMaintenance "Manutenzione database">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Controlla l&apos;integrità del database">
-<!ENTITY zotero.preferences.dbMaintenance.rebuildTranslators "Ricrea la tabella dei motori di ricerca">

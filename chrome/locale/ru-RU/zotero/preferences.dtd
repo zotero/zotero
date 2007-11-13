@@ -80,4 +80,3 @@
 
 <!ENTITY zotero.preferences.dbMaintenance "Поддержка БД">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Проверить целостность БД">
-<!ENTITY zotero.preferences.dbMaintenance.rebuildTranslators "Перестроить таблицу трансляторов">

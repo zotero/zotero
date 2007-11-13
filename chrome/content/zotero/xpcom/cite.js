@@ -92,6 +92,164 @@ Zotero.Cite = new function() {
 	}
 }
 
+
+
+Zotero.Cite.MIMEHandler = new function () {
+	this.init = init;
+	
+	/*
+	 * registers URIContentListener to handle MIME types
+	 */
+	function init() {
+		Zotero.debug("Registering URIContentListener for text/x-csl");
+		var uriLoader = Components.classes["@mozilla.org/uriloader;1"]
+			.getService(Components.interfaces.nsIURILoader);
+		uriLoader.registerContentListener(Zotero.Cite.MIMEHandler.URIContentListener);
+	}
+}
+
+
+/*
+ * Zotero.Cite.MIMEHandler.URIContentListener: implements
+ * nsIURIContentListener interface to grab MIME types
+ */
+Zotero.Cite.MIMEHandler.URIContentListener = new function() {
+	// list of content types to capture
+	// NOTE: must be from shortest to longest length
+	this.desiredContentTypes = ["text/x-csl"];
+	
+	this.QueryInterface = QueryInterface;
+	this.canHandleContent = canHandleContent;
+	this.doContent = doContent;
+	this.isPreferred = isPreferred;
+	this.onStartURIOpen = onStartURIOpen;
+	
+	function QueryInterface(iid) {
+		if  (iid.equals(Components.interfaces.nsISupports)
+		   || iid.equals(Components.interfaces.nsISupportsWeakReference)
+		   || iid.equals(Components.interfaces.nsIURIContentListener)) {
+			return this;
+		}
+		throw Components.results.NS_ERROR_NO_INTERFACE;
+	}
+	
+	function canHandleContent(contentType, isContentPreferred, desiredContentType) {
+		if (this.desiredContentTypes.indexOf(contentType) != -1) {
+			return true;
+		}
+		return false;
+	}
+	
+	function doContent(contentType, isContentPreferred, request, contentHandler) {
+		Zotero.debug("Running doContent() for " + request.name);
+		contentHandler.value = new Zotero.Cite.MIMEHandler.StreamListener(request, contentType);
+		return false;
+	}
+	
+	function isPreferred(contentType, desiredContentType) {
+		if (this.desiredContentTypes.indexOf(contentType) != -1) {
+			return true;
+		}
+		return false;
+	}
+	
+	function onStartURIOpen(URI) {
+		return true;
+	}
+}
+
+/*
+ * Zotero.Cite.MIMEHandler.StreamListener: implements nsIStreamListener and
+ * nsIRequestObserver interfaces to download MIME types we've grabbed
+ */
+Zotero.Cite.MIMEHandler.StreamListener = function(request, contentType) {
+	this._request = request;
+	this._contentType = contentType
+	this._readString = "";
+	this._scriptableStream = null;
+	this._scriptableStreamInput = null
+	
+	Zotero.debug("Prepared to grab content type " + contentType);
+}
+
+Zotero.Cite.MIMEHandler.StreamListener.prototype.QueryInterface = function(iid) {
+	if (iid.equals(Components.interfaces.nsISupports)
+	   || iid.equals(Components.interfaces.nsIRequestObserver)
+	   || iid.equals(Components.interfaces.nsIStreamListener)) {
+		return this;
+	}
+	throw Components.results.NS_ERROR_NO_INTERFACE;
+}
+
+Zotero.Cite.MIMEHandler.StreamListener.prototype.onStartRequest = function(channel, context) {}
+
+/*
+ * Called when there's data available; basically, we just want to collect this data
+ */
+Zotero.Cite.MIMEHandler.StreamListener.prototype.onDataAvailable = function(request, context, inputStream, offset, count) {
+	Zotero.debug(count + " bytes available");
+	
+	if (inputStream != this._scriptableStreamInput) {
+		this._scriptableStream = Components.classes["@mozilla.org/scriptableinputstream;1"]
+			.createInstance(Components.interfaces.nsIScriptableInputStream);
+		this._scriptableStream.init(inputStream);
+		this._scriptableStreamInput = inputStream;
+	}
+	this._readString += this._scriptableStream.read(count);
+}
+
+/*
+ * Called when the request is done
+ */
+Zotero.Cite.MIMEHandler.StreamListener.prototype.onStopRequest = function(channel, context, status) {
+	Zotero.debug("Request finished");
+	var externalHelperAppService = Components.classes["@mozilla.org/uriloader/external-helper-app-service;1"]
+		.getService(Components.interfaces.nsIExternalHelperAppService);
+	
+	if (this._request.name) {
+		var loadURI = this._request.name;
+	}
+	else {
+		var loadURI = '';
+	}
+	
+	try {
+		var xml = new XML(Zotero.CSL.Global.cleanXML(this._readString));
+	}
+	catch (e) {
+		var error = true;
+		Components.utils.reportError(e);
+	}
+	
+	if (!xml || error) {
+		alert(Zotero.getString('styles.installError', loadURI));
+		return;
+	}
+	
+	var uri = xml.info.id.toString();
+	var title = xml.info.title.toString();
+	var updated = xml.info.updated.toString().replace(/(.+)T([^\+]+)\+?.*/, "$1 $2");
+	
+	var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+		.getService(Components.interfaces.nsIPromptService);
+	
+	var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
+		+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
+	var index = ps.confirmEx(null,
+		'',
+		Zotero.getString('styles.installStyle', [title, loadURI]),
+		buttonFlags,
+		Zotero.getString('general.install'), null, null, null, {});
+	
+	if (index == 0) {
+		var sql = "REPLACE INTO csl VALUES (?,?,?,?)";
+		Zotero.DB.query(sql, [uri, updated, title, this._readString]);
+		alert(Zotero.getString('styles.installed', title));
+	}
+}
+
+
+
 /*
  * CSL: a class for creating bibliographies from CSL files
  * this is abstracted as a separate class for the benefit of anyone who doesn't

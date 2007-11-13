@@ -80,4 +80,3 @@
 
 <!ENTITY zotero.preferences.dbMaintenance "데이터베이스 유지">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "데이터베이스 무결성 점검">
-<!ENTITY zotero.preferences.dbMaintenance.rebuildTranslators "중계기 테이블 재구축">

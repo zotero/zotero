@@ -80,4 +80,3 @@
 
 <!ENTITY zotero.preferences.dbMaintenance "Database Onderhoud">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Controleer Integriteit Database">
-<!ENTITY zotero.preferences.dbMaintenance.rebuildTranslators "Vertaler-tabel Herbouwen">

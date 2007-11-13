@@ -80,4 +80,3 @@
 
 <!ENTITY zotero.preferences.dbMaintenance "Подръжка на базата дани">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Проберка на цялостта на базата дани">
-<!ENTITY zotero.preferences.dbMaintenance.rebuildTranslators "Възстановяване на таблицата с преводачите">

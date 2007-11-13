@@ -80,4 +80,3 @@
 
 <!ENTITY zotero.preferences.dbMaintenance "Adatbázis karbantartás">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Az adatbázis integritásának ellenőrzése">
-<!ENTITY zotero.preferences.dbMaintenance.rebuildTranslators "Konverter tábla újraépítése">
