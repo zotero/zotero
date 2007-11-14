@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<style xmlns="http://purl.org/net/xbiblio/csl" class="in-text" xml:lang="en">
+  <info>
+    <title>Neuroreport</title>
+    <id>http://www.zotero.org/styles/neuroreport</id>
+    <link>http://www.zotero.org/styles/neuroreport</link>
+    <author>
+      <name>Julian Onions</name>
+      <email>julian.onions@gmail.com</email>
+    </author>
+    <category term="numeric"/>
+    <category term="biology"/>
+    <updated/>
+  </info>
+  <macro name="author">
+    <names variable="author" suffix=". ">
+      <name sort-separator=" " initialize-with="" name-as-sort-order="all" delimiter=", " delimiter-precedes-last="always"/>
+    </names>
+  </macro>
+  <macro name="editor">
+    <names variable="editor">
+      <name sort-separator=" " initialize-with="" name-as-sort-order="all" delimiter=", " delimiter-precedes-last="always"/>
+      <label form="short" prefix=" (" text-transform="lowercase" suffix=")"/>
+    </names>
+  </macro>
+  <macro name="publisher">
+    <text variable="publisher-place" suffix=": "/>
+    <text variable="publisher" suffix="; "/>
+    <date variable="issued">
+      <date-part name="year" suffix=". "/>
+    </date>
+  </macro>
+  <citation>
+    <option name="collapse" value="citation-number"/>
+    <sort>
+      <key variable="citation-number"/>
+    </sort>
+    <layout prefix="[" suffix="]" delimiter="; ">
+      <text variable="citation-number"/>
+    </layout>
+  </citation>
+  <bibliography>
+    <option name="et-al-min" value="7"/>
+    <option name="et-al-use-first" value="6"/>
+    <option name="second-field-align" value="true"/>
+    <layout>
+      <text variable="citation-number" suffix=". "/>
+      <text macro="author"/>
+      <choose>
+	<if type="book">
+	  <text variable="title" suffix=". " font-style="italic"/>
+	  <text variable="edition" prefix=" " suffix=" ed. "/>
+	  <text macro="publisher" prefix=" "/>
+	</if>
+	<else-if type="chapter">
+	  <text variable="title" suffix=". "/>
+	  <group prefix=" In: " delimiter=" " suffix=". ">
+	    <text macro="editor" suffix="."/>
+	    <text variable="container-title" font-style="italic"/>
+	  </group>
+	  <text macro="publisher" prefix=" "/>
+	  <label variable="page" form="short" suffix=". "/>
+	  <text variable="page" suffix="."/>
+	</else-if>
+	<else>
+	  <text variable="title" suffix=". "/>
+	  <group delimiter=" ">
+	    <text variable="container-title" form="short" font-style="italic"/>
+	    <date variable="issued" suffix=";">
+	      <date-part name="year"/>
+	    </date>
+	    <group delimiter=" " suffix=":">
+	      <text variable="volume" font-weight="bold"/>
+	      <text variable="issue" prefix="(" suffix=")" font-weight="bold"/>
+	    </group>
+	    <text variable="page" suffix="."/>
+	  </group>
+	</else>
+      </choose>
+    </layout>
+  </bibliography>
+</style>
