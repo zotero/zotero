@@ -1088,8 +1088,9 @@ Zotero.CSL.prototype._processElements = function(item, element, formattedString,
 									// if month is a numeric month, format as such
 									if(!isNaN(string*1)) {
 										if(newForm == "numeric-leading-zeros") {
+											string = (string+1).toString();
 											if(string.length == 1) {
-												string = ("0" + (1+string)).toString();
+												string = "0" + string;
 											}
 										} else if(newForm == "short") {
 											string = this._terms["short"]["_months"][string];
