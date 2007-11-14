@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" xml:lang="en" class="in-text" >
   <info>
-    <title>Cell Journal format</title>
+    <title>Cell Journal</title>
     <id>http://www.zotero.org/styles/cell</id>
     <link>http://www.zotero.org/styles/cell</link>
     <author>
@@ -10,7 +10,7 @@
     </author>
     <category term="author-date"/>
     <category term="biology"/>
-    <updated>2007-11-02T16:16:00+00:00</updated>
+    <updated></updated>
     <summary>The Cell Journal style.</summary>
     <source>http://www.cell.com/misc/page?page=authors</source>
   </info>

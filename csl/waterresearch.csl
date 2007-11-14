@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="in-text" xml:lang="en">
   <info>
-    <title>Water Research format</title>
-    <id>http://www.zotero.org/styles/waterresearch.csl</id>
-    <link>http://www.zotero.org/styles/waterresearch.csl</link>
+    <title>Water Research</title>
+    <id>http://www.zotero.org/styles/waterresearch</id>
+    <link>http://www.zotero.org/styles/waterresearch</link>
     <author>
       <name>Julian Onions</name>
       <email>julian.onions@gmail.com</email>
     </author>
-    <updated>2007-11-07T09:00:00</updated>
+    <updated></updated>
     <summary>Style for Water Research.</summary>
     <source>http://www.elsevier.com/wps/find/journaldescription.cws_home/309/authorinstructions?navopenmenu=4</source>
     <category label="Water Research" term="author-date"/>

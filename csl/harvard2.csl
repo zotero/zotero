@@ -8,8 +8,8 @@
       <email>julian.onions@gmail.com</email>
     </author>
     <category term="author-date"/>
-    <updated>2007-10-12T03:33:00+05:00</updated>
-    <summary>The harvard author-date style.</summary>
+    <updated></updated>
+    <summary>The Harvard author-date style</summary>
     <source>http://www.leeds.ac.uk/library/training/referencing/harvard.htm</source>
   </info>
   <macro name="editor">
