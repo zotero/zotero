@@ -1751,7 +1751,7 @@ Zotero.CSL.Item._zoteroFieldMap = {
 		"number-of-volumes":"numberOfVolumes",
 		"edition":"edition",
 		"genre":"type",
-		"abstract":"abstract",
+		"abstract":"abstractNote",
 		"URL":"url",
 		"DOI":"DOI",
 		"note":"extra"
