@@ -2,7 +2,8 @@
 <style xmlns="http://purl.org/net/xbiblio/csl" class="in-text" xml:lang="en">
   <info>
     <title>ALL - display all fields in a debug view</title>
-    <id>http://www.zotero.org/namespaces/CSL/ALL</id>
+    <id>http://www.zotero.org/styles/ALL</id>
+    <link>http://www.zotero.org/styles/ALL</link>
     <author>
       <name>Julian Onions</name>
       <email>julian.onions@gmail.com</email>
