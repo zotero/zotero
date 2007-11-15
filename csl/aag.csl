@@ -47,7 +47,7 @@
       <group prefix=" (" suffix=")">
 	<text term="accessed" text-transform="lowercase" prefix="last " suffix=" "/>
 	<date variable="accessed">
-	  <date-part name="day" suffix=", "/>
+	  <date-part name="day" suffix=" "/>
 	  <date-part name="month" suffix=" "/>
 	  <date-part name="year"/>
 	</date>
