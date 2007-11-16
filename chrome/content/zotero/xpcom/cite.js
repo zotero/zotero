@@ -1769,12 +1769,25 @@ Zotero.CSL.Item._zoteroFieldMap = {
 Zotero.CSL.Item.prototype.getVariable = function(variable, form) {
 	if(!Zotero.CSL.Item._zoteroFieldMap["long"][variable]) return "";
 	
+	var zoteroFields = [];
+	var field;
+	
 	if(form == "short" && Zotero.CSL.Item._zoteroFieldMap["short"][variable]) {
-		var zoteroFields = Zotero.CSL.Item._zoteroFieldMap["short"][variable];
-	} else {
-		var zoteroFields = Zotero.CSL.Item._zoteroFieldMap["long"][variable];
+		field = Zotero.CSL.Item._zoteroFieldMap["short"][variable];
+		if(typeof field == "string") {
+			zoteroFields.push(field);
+		} else {
+			zoteroFields = zoteroFields.concat(field);
+		}
 	}
-	if(typeof zoteroFields == "string") zoteroFields = [zoteroFields];
+	
+	field = Zotero.CSL.Item._zoteroFieldMap["long"][variable];
+	if(typeof field == "string") {
+		zoteroFields.push(field);
+	} else {
+		zoteroFields = zoteroFields.concat(field);
+	}
+	
 	
 	for each(var zoteroField in zoteroFields) {
 		var value = this.zoteroItem.getField(zoteroField, false, true);
