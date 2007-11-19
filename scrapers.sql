@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-11-14 20:45:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-11-19 23:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1822,133 +1822,141 @@ REPLACE INTO translators VALUES ('e4660e05-a935-43ec-8eec-df0347362e4c', '1.0.0b
 	}
 }');
 
-REPLACE INTO translators VALUES ('5dd22e9a-5124-4942-9b9e-6ee779f1023e', '1.0.0b4.r5', '', '2007-11-14 20:45:00', '0', '100', '6', 'Flickr.com', 'Michael Berkowitz', '^http://(?:www\.)?flickr\.com/.+', 
+REPLACE INTO translators VALUES ('5dd22e9a-5124-4942-9b9e-6ee779f1023e', '1.0.0b4.r5', '', '2007-11-19 23:00:00', '1', '100', '6', 'Flickr', 'Sean Takats', '^http://(?:www\.)?flickr\.com/', 
 'function detectWeb(doc, url) {
-	var multiple = false;
-	var xPaths = new Array(	    ''//p[@class="Photo"]/a/img'',
-							''//td[@class="DetailPic"]'',
-							''//a[substring(@id, 1, 3) = "set"]/img'',
-							''//p[@class="UserTagList"]/a/img'');
-	
-	for (var i = 0 ; i < xPaths.length ; i++) {
-		if (doc.evaluate(xPaths[i], doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-			multiple = true;
-		}
-	}
-	
-	if (multiple) {
-		return "multiple";
-	} else {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+			if (prefix == ''x'') return namespace; else return null;
+		} : null;
+
+	if (elmt = doc.evaluate(''//h1[@property="dc:title" and starts-with(@id, "title_div")]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){		                       
 		return "artwork";
+	} else if (doc.evaluate(''//td[@class="DetailPic"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
+		return "multiple";
+	} else if (doc.evaluate(''//div[@class="StreamView"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
+		return "multiple";
+	} else if (doc.evaluate(''//div[@id="setThumbs"]/a[starts-with(@id, "set_thumb_link_")]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
+		return "multiple";
+	} else if (doc.evaluate(''//p[@class="StreamList" or @class="UserTagList"]/a'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
+		return "multiple";
 	}
 }', 
-'function scrape(doc, url) {
-	var newItem = new Zotero.Item("artwork");
-	newItem.url = doc.location.href;
-	newItem.repository = "Flickr.com";
-	newItem.medium="photograph";
-	
-	//AUTHOR
-	var authorx = ''//div[@class="Widget"]/a/b'';
-	if (doc.evaluate(authorx, doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-		var author = doc.evaluate(authorx, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-		newItem.creators.push(Zotero.Utilities.cleanAuthor(author, "author"));
-	}
-	
-	//TITLE
-	var titlex = ''//div[@id="Main"]//h1'';
-	if (doc.evaluate(titlex, doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-		newItem.title = doc.evaluate(titlex, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-	} else {
-		newItem.title = "Untitled";
-	}
-	
-	//Comment
-	var commentx = ''//div[@class="photoDescription"]'';
-	if (doc.evaluate(commentx, doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-		newItem.abstractNote = doc.evaluate(commentx, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-	}
-	
-	//TAGS
-	var tagx = ''//div[@class="TagList"]//a[@class="Plain"]'';
-	if (doc.evaluate(tagx, doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-		var tags = doc.evaluate(tagx, doc, null, XPathResult.ANY_TYPE, null);
-		var tag = tags.iterateNext();
-		while (tag) {
-			if (tag.textContent.indexOf("machine tags") == -1) {
-				newItem.tags.push(tag.textContent);
-			}
-			tag = tags.iterateNext();
-		}
-	}
-	
-	//DATE
-	var datex = ''//div[@class="Widget"]/a[@class="Plain"]'';
-	if (doc.evaluate(datex, doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-		newItem.date = doc.evaluate(datex, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-	}
-	
-	//PHOTO
-	var picx = ''//li[@class="Stats"]/a[@class="Plain"][text() = "different sizes"]'';
-	if (doc.evaluate(picx, doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-		var new_url = doc.evaluate(picx, doc, null, XPathResult.ANY_TYPE, null).iterateNext().href + "&size=o";
-		Zotero.Utilities.HTTP.doGet(new_url, function(text) {
-			var regex = new RegExp(''<a\\s+href="([^"]*)">Download'');
-			Zotero.debug(regex);
-			var picurl = text.match(regex)[1].replace("_d", "");
-			newItem.attachments.push({url:picurl, title:newItem.title, mimeType:"image/jpg"});
-			Zotero.debug(newItem);
-			newItem.complete();
-		});
-
-	} else {
-		var picurl = doc.evaluate(''//div[@class="photoImgDiv"]/img'', doc, null, XPathResult.ANY_TYPE, null).iterateNext().src.match(/([^?]*)?/)[1];
-		newItem.attachments.push({url:picurl, title:newItem.title, mimeType:"image/jpg"});
-		Zotero.debug(newItem);
-		newItem.complete();
-	}
-	
-	//Zotero.wait();
-}
-
-function doWeb(doc, url) {
+'function doWeb(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+			if (prefix == ''x'') return namespace; else return null;
+		} : null;
+		
 	var items = new Object();
-	var pics = new Array();
-	if (doc.title == "Flickr: Search") {
-		var photoXpath = ''//td[1][@class="DetailPic"]/a'';
-	} else if (doc.title.indexOf("a photoset on Flickr") != -1) {
-		var photoXpath = ''//div[@id="setThumbs"]/a'';
-	} else if (doc.title.indexOf("Flickr: Photos from") != -1) {
-		var photoXpath = ''//div[@class="StreamView"]/p[@class="Photo"]/a'';
-	} else if (doc.title.indexOf("photos tagged with") != -1) {
-		var photoXpath = ''//p[@class="UserTagList"]/a'';
-	}
-	
-	if (photoXpath) {
-		var titleXpath = photoXpath + ''/img'';
-		var pictures = doc.evaluate(photoXpath, doc, null, XPathResult.ANY_TYPE, null);
-		var titles = doc.evaluate(titleXpath, doc, null, XPathResult.ANY_TYPE, null);
-		var next_pic = pictures.iterateNext();
-		var next_title = titles.iterateNext();
-		while (next_pic) {
-			items[next_pic.href] = next_title.alt;
-			next_pic = pictures.iterateNext();
-			next_title = titles.iterateNext();
+	var photo_ids = new Array();
+	var uris = new Array();
+	var key = "3cde2fca0879089abf827c1ec70268b5";
+
+	var elmts;
+	var elmt;
+
+// single result
+	if (elmt = doc.evaluate(''//h1[@property="dc:title" and starts-with(@id, "title_div")]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){		                       
+		var photo_id = elmt.id;
+		photo_id = photo_id.substr(9);
+		photo_ids.push(photo_id);
+	} else { //multiple results
+		var photoRe = /\/photos\/[^\/]*\/([0-9]+)\//;
+//search results
+		if (doc.evaluate(''//td[@class="DetailPic"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
+			elmts = doc.evaluate(''//td[@class="DetailPic"]/a'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+			while (elmt = elmts.iterateNext()){
+				var title = elmt.title;
+				title = Zotero.Utilities.trimInternal(title);
+				var link = elmt.href;
+				var m = photoRe(link);
+				var photo_id = m[1];
+				items[photo_id] = title;
+			}
+// photo stream
+		} else if (doc.evaluate(''//div[@class="StreamView"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
+			elmts = doc.evaluate(''//div[@class="StreamView" and starts-with(@id, "sv_title_")]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+			while (elmt = elmts.iterateNext()){
+				var title = Zotero.Utilities.trimInternal(elmt.textContent);
+				var photo_id = elmt.id;
+				photo_id = photo_id.substr(9);
+				items[photo_id] = title;
+			}
+// photo set
+		} else if (doc.evaluate(''//div[@id="setThumbs"]/a[starts-with(@id, "set_thumb_link_")]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
+			elmts = doc.evaluate(''//div[@id="setThumbs"]/a[starts-with(@id, "set_thumb_link_")]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+			while (elmt = elmts.iterateNext()){
+				var title = Zotero.Utilities.trimInternal(elmt.title);
+				var photo_id = elmt.id.substr(15);
+				items[photo_id] = title;
+			}
+// tagged with
+		} else if (doc.evaluate(''//p[@class="StreamList" or @class="UserTagList"]/a'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
+			var elmts = doc.evaluate(''//p[@class="StreamList" or @class="UserTagList"]/a[img]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+			while (elmt = elmts.iterateNext()){
+				var title = Zotero.Utilities.trimInternal(elmt.title);
+				var link = elmt.href;
+				var m = photoRe(link);
+				var photo_id = m[1];
+				items[photo_id] = title;
+			}
 		}
-		
 		items = Zotero.selectItems(items);
-		
-		for (var i in items) {
-			pics.push(i);
+		if(!items) return true;
+		for(var i in items) {
+			photo_ids.push(i);
 		}
-	} else {
-		pics.push(url);
 	}
-	var urlreg = new RegExp("(http://(www.)*flickr.com/photos/[^/]*/[^/]*/).*");
-	for (var i = 0 ; i < pics.length ; i++) {
-		pics[i] = pics[i].match(urlreg)[1];
+	for each(var photo_id in photo_ids){
+		uris.push("http://api.flickr.com/services/rest/?method=flickr.photos.getInfo&api_key="+key+"&photo_id="+photo_id);
 	}
-	Zotero.Utilities.processDocuments(pics, scrape, function() {Zotero.done()});
+	Zotero.Utilities.HTTP.doGet(uris, function(text) {
+		text = text.replace(/<\?xml[^>]*\?>/, "");
+		var xml = new XML(text);
+		var newItem = new Zotero.Item("artwork");
+		var title = "";
+		if (xml..title.length()){
+			var title = Zotero.Utilities.cleanString(xml..title[0].text().toString());
+			if (title == ""){
+				title = " ";
+			}
+			newItem.title = title;
+		}
+		for(var i=0; i<xml..tag.length(); i++) {
+			newItem.tags.push(Zotero.Utilities.cleanString(xml..tag[i].text().toString()));
+		}
+		if (xml..dates.length()){
+			var date = xml..dates[0].@taken.toString();
+			newItem.date = date.substr(0, 10);
+		}
+		if (xml..owner.length()){
+			var author = xml..owner[0].@realname.toString();
+			if (author == ""){
+				author = xml..owner[0].@username.toString();
+			}
+			newItem.creators.push(Zotero.Utilities.cleanAuthor(author, "artist"));
+		}
+		if (xml..url.length()){
+			newItem.url = xml..url[0].text().toString();
+		}
+		if (xml..description.length()){
+			newItem.abstractNote = xml..description[0].text().toString();
+		}
+		var format = xml..photo[0].@originalformat.toString();
+		var photo_id = xml..photo[0].@id.toString();
+		
+// get attachment code
+		var uri = "http://api.flickr.com/services/rest/?method=flickr.photos.getSizes&api_key="+key+"&photo_id="+photo_id;
+		Zotero.Utilities.HTTP.doGet(uri, function(text) {
+			text = text.replace(/<\?xml[^>]*\?>/, "");
+			var xml = new XML(text);
+			var last = xml..size.length() - 1;
+			var attachmentUri = xml..size[last].@source.toString();
+			newItem.attachments = [{title:title, url:attachmentUri}];
+			newItem.complete();
+		}, function(){Zotero.done();});	
+	});
+	Zotero.wait();
 }');
 
 REPLACE INTO translators VALUES ('bdae838b-3a58-461f-9e8a-142ed9de61dc', '1.0.0b4.r5', '', '2007-11-14 20:45:00', '0', '100', '4', 'PLoS Journals', 'Michael Berkowitz', '^http://[^.]+\.plosjournals\.org/', 
