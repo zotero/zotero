@@ -9214,7 +9214,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('d0b1914a-11f1-4dd7-8557-b32fe8a3dd47', '1.0.0b3.r1', '', '2007-11-07 08:00:00', '1', '100', '4', 'EBSCOhost', 'Simon Kornblith', '^https?://[^/]+/(?:bsi|ehost)/(?:results|detail|folder)', 
+REPLACE INTO translators VALUES ('d0b1914a-11f1-4dd7-8557-b32fe8a3dd47', '1.0.0b3.r1', '', '2007-11-19 23:00:00', '1', '100', '4', 'EBSCOhost', 'Simon Kornblith', '^https?://[^/]+/(?:bsi|ehost)/(?:results|detail|folder)', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -9247,7 +9247,7 @@ REPLACE INTO translators VALUES ('d0b1914a-11f1-4dd7-8557-b32fe8a3dd47', '1.0.0b
 		return "journalArticle";
 	}
 }', 
-'var viewStateMatch = /<input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="([^"]+)" \/>/
+'var customViewStateMatch = /<input type="hidden" name="__CUSTOMVIEWSTATE" id="__CUSTOMVIEWSTATE" value="([^"]+)" \/>/
 var host;
 
 function fullEscape(text) {
@@ -9261,8 +9261,8 @@ function downloadFunction(text) {
 	var postLocation = /<form name="aspnetForm" method="post" action="([^"]+)"/
 	var m = postLocation.exec(text);
 	var deliveryURL = m[1].replace(/&amp;/g, "&");
-	m = viewStateMatch.exec(text);
-	var downloadString = "__EVENTTARGET=&__EVENTARGUMENT=&__VIEWSTATE="+fullEscape(m[1])+"&ctl00%24ctl00%24MainContentArea%24MainContentArea%24ctl00%24btnSubmit=Save&ctl00%24ctl00%24MainContentArea%24MainContentArea%24ctl00%24BibFormat=1&ajax=enabled";
+	m = customViewStateMatch.exec(text);
+	var downloadString = "__EVENTTARGET=&__EVENTARGUMENT=&__CUSTOMVIEWSTATE="+fullEscape(m[1])+"&__VIEWSTATE=&ctl00%24ctl00%24MainContentArea%24MainContentArea%24ctl00%24btnSubmit=Save&ctl00%24ctl00%24MainContentArea%24MainContentArea%24ctl00%24BibFormat=1&ajax=enabled";
 
 	Zotero.Utilities.HTTP.doPost(host+"/ehost/"+deliveryURL,
 								 downloadString, function(text) {	// get marked records as RIS
@@ -9324,26 +9324,18 @@ function doWeb(doc, url) {
 		}
 		
 		Zotero.Utilities.processDocuments(uris, function(newDoc){
-			var xpath = ''/html/body/div[@class="indent"]/center//a[@class="nav"]'';
-			var elmts = newDoc.evaluate(xpath, newDoc, nsResolver, XPathResult.ANY_TYPE, null);
-			var saveCitation = elmts.iterateNext();
-			var viewSavedCitations = elmts.iterateNext();
-			var viewState = newDoc.evaluate(''//input[@name="__VIEWSTATE"]'', newDoc, nsResolver,
+			var customViewState = newDoc.evaluate(''//input[@name="__CUSTOMVIEWSTATE"]'', newDoc, nsResolver,
 								 XPathResult.ANY_TYPE, null).iterateNext();
-			viewState = fullEscape(viewState.value);
-			var deliverString = "__EVENTTARGET=ctl00%24ctl00%24MainContentArea%24MainContentArea%24topDeliveryControl%24deliveryButtonControl%24lnkExport&__EVENTARGUMENT=&__VIEWSTATE="+viewState+"&ajax=enabled";
+			customViewState = fullEscape(customViewState.value);
+			var deliverString = "__EVENTTARGET=ctl00%24ctl00%24MainContentArea%24MainContentArea%24topDeliveryControl%24deliveryButtonControl%24lnkExport&__EVENTARGUMENT=&__CUSTOMVIEWSTATE="+customViewState+"&__VIEWSTATE=&ajax=enabled";
 			Zotero.Utilities.HTTP.doPost(newDoc.location.href, deliverString, downloadFunction);
 		});
 	} else {
-		// If this is a view page, find the link to the citation		
-		var xpath = ''/html/body/div[@class="indent"]/center//a[@class="nav"]'';
-		var elmts = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
-		var saveCitation = elmts.iterateNext();
-		var viewSavedCitations = elmts.iterateNext();
-		var viewState = doc.evaluate(''//input[@name="__VIEWSTATE"]'', doc, nsResolver,
+		// get view state for post string		
+		var customViewState = doc.evaluate(''//input[@name="__CUSTOMVIEWSTATE"]'', doc, nsResolver,
 								 XPathResult.ANY_TYPE, null).iterateNext();
-		viewState = fullEscape(viewState.value);
-		var deliverString = "__EVENTTARGET=ctl00%24ctl00%24MainContentArea%24MainContentArea%24topDeliveryControl%24deliveryButtonControl%24lnkExport&__EVENTARGUMENT=&__VIEWSTATE="+viewState+"&ajax=enabled";
+		customViewState = fullEscape(customViewState.value);
+		var deliverString = "__EVENTTARGET=ctl00%24ctl00%24MainContentArea%24MainContentArea%24topDeliveryControl%24deliveryButtonControl%24lnkExport&__EVENTARGUMENT=&__CUSTOMVIEWSTATE="+customViewState+"&__VIEWSTATE=&ajax=enabled";
 		Zotero.Utilities.HTTP.doPost(url, deliverString, downloadFunction);
 	}
 	Zotero.wait();
@@ -14733,7 +14725,7 @@ function doImport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7', '1.0.0b4.r1', '', '2007-06-25 21:50:00', '1', '100', '3', 'RIS', 'Simon Kornblith', 'ris', 
+REPLACE INTO translators VALUES ('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7', '1.0.0b4.r1', '', '2007-11-19 23:00:00', '1', '100', '3', 'RIS', 'Simon Kornblith', 'ris', 
 'Zotero.configure("dataMode", "line");
 Zotero.addOption("exportNotes", true);
 
@@ -14946,11 +14938,13 @@ function processTag(item, tag, value) {
 	} else if(tag == "UR" || tag == "L1" || tag == "L2" || tag == "L4") {
 		// URL
 		if(!item.url) {
-			item.url = value;
+// commenting out until #821 is fixed
+//			item.url = value;
 		}
 
 		if(tag == "UR") {
-			item.attachments.push({url:value});
+// commenting out until #821 is fixed
+//			item.attachments.push({url:value});
 		} else if(tag == "L1") {
 			item.attachments.push({url:value, mimeType:"application/pdf",
 				title:"Full Text (PDF)", downloadable:true});
