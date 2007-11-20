@@ -70,9 +70,9 @@
     </date>
   </macro>
   <citation>
-    <option name="et-al-min" value="10"/>
+    <option name="et-al-min" value="2"/>
     <option name="et-al-use-first" value="1"/>
-    <option name="et-al-subsequent-min" value="6"/>
+    <option name="et-al-subsequent-min" value="2"/>
     <option name="et-al-subsequent-use-first" value="1"/>
     <option name="disambiguate-add-year-suffix" value="true"/>
     <option name="disambiguate-add-names" value="true"/>
