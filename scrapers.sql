@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-11-20 09:35:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-11-20 18:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1956,6 +1956,129 @@ REPLACE INTO translators VALUES ('5dd22e9a-5124-4942-9b9e-6ee779f1023e', '1.0.0b
 			newItem.complete();
 		}, function(){Zotero.done();});	
 	});
+	Zotero.wait();
+}');
+
+REPLACE INTO translators VALUES ('d3b1d34c-f8a1-43bb-9dd6-27aa6403b217', '1.0.0b4.r5', '', '2007-11-20 18:00:00', '0', '100', '4', 'YouTube', 'Sean Takats', '^https?://(?:www\.)?youtube\.com\/', 
+'function detectWeb(doc, url){
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+			if (prefix == ''x'') return namespace; else return null;
+		} : null;
+		
+	var xpath = ''//input[@type="hidden" and @name="video_id"]'';
+	if(doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+		return "videoRecording";
+	}
+	if (doc.evaluate(''//a[@class="newvtitlelink"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
+		return "multiple";
+	}
+	if (doc.evaluate(''//div[starts-with(@class, "vtitle")]/a'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){	
+		return "multiple";
+	}
+}
+
+', 
+'function doWeb(doc, url){
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+			if (prefix == ''x'') return namespace; else return null;
+		} : null;
+	var video_ids = new Array();
+	var xpath = ''//input[@type="hidden" and @name="video_id"]'';
+	var elmts;
+	var elmt;
+	elmts = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+	elmt = elmts.iterateNext();
+	if(elmt) {
+		//single video
+		var video_id = elmt.value;
+		video_ids.push(video_id);
+	} else {
+		// multiple videos
+		var items = new Object();
+		var videoRe = /\/watch\?v=([a-zA-Z0-9-]+)/;
+// search results		
+		if (elmt = doc.evaluate(''//a[@class="newvtitlelink"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
+			elmts = doc.evaluate(''//a[@class="newvtitlelink"]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+// categories and community pages and user pages and browse pages
+		} else if (doc.evaluate(''//div[starts-with(@class, "vtitle")]/a'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
+			elmts = doc.evaluate(''//div[starts-with(@class, "vtitle")]/a'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		}
+		while (elmt = elmts.iterateNext()){
+			var title = elmt.textContent;
+			title = Zotero.Utilities.trimInternal(title);
+			var link = elmt.href;
+			var m = videoRe(link);
+			var video_id = m[1];
+			items[video_id] = title;
+		}
+		items = Zotero.selectItems(items);
+		if(!items) return true;
+		for(var i in items) {
+			video_ids.push(i);
+		}
+	}
+	getData(video_ids);			
+}
+
+function getData(ids){
+	var uris = new Array();	
+	var url = "http://gdata.youtube.com/feeds/videos/";
+	for each(var id in ids){
+		uris.push(url+id);
+	}
+	Zotero.Utilities.HTTP.doGet(uris, function(text) {
+		// clean up header
+		text = text.replace(/<\?xml[^>]*\?>/, "");
+		text = text.replace(/<entry[^>]*>/, "<entry>");
+		// replace colons in XML tags
+		text = text.replace(/<media:/g, "<media_").replace(/<\/media:/g, "</media_");
+//		text = text.replace(/<yt:/g, "<yt_").replace(/<\/yt:/g, "</yt_");
+		text = text.replace(/yt:/g, "yt_");
+		text = text.replace(/<gd:/g, "<gd_").replace(/<\/gd:/g, "</gd_");
+		// pad xml
+		text = "<zotero>"+text+"</zotero>";
+		var xml = new XML(text);
+		var newItem = new Zotero.Item("videoRecording");
+		var title = "";
+		var title = xml..media_title[0].text().toString();
+		if (xml..media_title.length()){
+			var title = Zotero.Utilities.cleanString(xml..media_title[0].text().toString());
+			if (title == ""){
+				title = " ";
+			}
+			newItem.title = title;
+		}
+		if (xml..media_keywords.length()){
+			var keywords = xml..media_keywords[0].text().toString();
+			keywords = keywords.split(",");
+			for each(var tag in keywords){
+				newItem.tags.push(Zotero.Utilities.trimInternal(tag));
+			}
+		}
+		if (xml..published.length()){
+			var date = xml..published[0].text().toString();
+			newItem.date = date.substr(0, 10);
+		}
+		if (xml..author.name.length()){
+			var author = xml..author.name[0].text().toString();
+			newItem.creators.push(Zotero.Utilities.cleanAuthor(author, "contributor", true));
+		}
+		if (xml..media_player.length()){
+			var url = xml..media_player[0].@url.toString();
+			newItem.url = url;
+			newItem.attachments.push({title:"YouTube Link", snapshot:false, mimeType:"text/html", url:url});
+		}
+		if (xml..yt_duration.length()){
+			var runningTime = xml..yt_duration[0].@seconds.toString();
+			newItem.runningTime = runningTime + " seconds";
+		}
+		if (xml..media_description.length()){
+			newItem.abstractNote = xml..media_description[0].text().toString();
+		}
+		newItem.complete();		
+	}, function(){Zotero.done();});	
 	Zotero.wait();
 }');
 
