@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-11-20 18:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-11-20 23:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -9029,7 +9029,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('3e684d82-73a3-9a34-095f-19b112d88bbf', '1.0.0b3.r1', '', '2007-06-18 18:15:00', '1', '100', '4', 'Google Books', 'Simon Kornblith', '^http://books\.google\.[a-z]+/books\?(.*id=.*|.*q=.*)', 
+REPLACE INTO translators VALUES ('3e684d82-73a3-9a34-095f-19b112d88bbf', '1.0.0b3.r1', '', '2007-11-20 23:00:00', '1', '100', '4', 'Google Books', 'Simon Kornblith', '^http://books\.google\.[a-z]+/books\?(.*id=.*|.*q=.*)', 
 'function detectWeb(doc, url) {
 	var re = new RegExp(''^http://books\\.google\\.[a-z]+/books\\?id=([^&]+)'', ''i'');
 	if(re.test(doc.location.href)) {
@@ -9039,13 +9039,18 @@ REPLACE INTO translators VALUES ('3e684d82-73a3-9a34-095f-19b112d88bbf', '1.0.0b
 	}
 }', 
 'function doWeb(doc, url) {
+	// get local domain suffix
+	var suffixRe = new RegExp("https?://books\.google\.([^/]+)/");
+	var suffixMatch = suffixRe.exec(url);
+	var suffix = suffixMatch[1];
+	
 	var uri = doc.location.href;
 	var newUris = new Array();
 	
 	var re = new RegExp(''^http://books\\.google\\.[a-z]+/books\\?id=([^&]+)'', ''i'');
 	var m = re.exec(uri);
 	if(m) {
-		newUris.push(''http://books.google.com/books?id=''+m[1]);
+		newUris.push(''http://books.google.''+suffix+''/books?id=''+m[1]);
 	} else {
 		var items = Zotero.Utilities.getItemArray(doc, doc, ''http://books\\.google\\.[a-z]+/books\\?id=([^&]+)'', ''^(?:All matching pages|About this Book|Table of Contents|Index)'');
 	
@@ -9061,7 +9066,7 @@ REPLACE INTO translators VALUES ('3e684d82-73a3-9a34-095f-19b112d88bbf', '1.0.0b
 		
 		for(var i in items) {
 			var m = re.exec(i);
-			newUris.push(''http://books.google.com/books?id=''+m[1]);
+			newUris.push(''http://books.google.''+suffix+''/books?id=''+m[1]);
 		}
 	}
 	
