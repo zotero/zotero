@@ -8,6 +8,7 @@
       <email>julian.onions@gmail.com</email>
     </author>
     <category term="author-date"/>
+    <category term="generic-base"/>
     <updated/>
     <summary>The Harvard author-date style</summary>
     <source>http://libweb.anglia.ac.uk/referencing/harvard.htm</source>

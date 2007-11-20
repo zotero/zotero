@@ -8,6 +8,7 @@
       <name>Julian Onions</name>
       <email>julian.onions@gmail.com</email>
     </author>
+    <category term="generic-base"/>
     <updated/>
     <summary>The ALL style - a debugging view to show eveything. 
 Generated from a perl script.</summary>

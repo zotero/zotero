@@ -9,6 +9,7 @@
       <email>julian.onions@gmail.com</email>
     </author>
     <category term="numeric"/>
+    <category term="science"/>
     <updated/>
     <summary>The Council of Science Editors style.</summary>
     <source>http://www.dianahacker.com/resdoc/p04_c11_s1.html</source>
@@ -83,7 +84,6 @@
       </if>
     </choose>
   </macro>
-
   <citation>
     <option name="collapse" value="citation-number"/>
     <sort>

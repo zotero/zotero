@@ -14,6 +14,7 @@
     </contributor>
     <summary>Chicago format with short notes and full bibliography</summary>
     <category term="generic-base"/>
+    <category term="numeric"/>
     <updated/>
   </info>
   <macro name="editor-translator">
