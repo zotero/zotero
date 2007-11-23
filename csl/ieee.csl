@@ -11,6 +11,7 @@
         </author>
         <category term="engineering"/>
         <category term="generic-base"/>
+        <category term="numeric"/>
         <updated></updated>
     </info>
     <macro name="author">

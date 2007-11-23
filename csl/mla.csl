@@ -10,6 +10,7 @@
       <email>simon@simonster.com</email>
     </author>
     <category term="generic-base"/>
+    <category term="author-date"/>
     <updated></updated>
   </info>
   <macro name="editor-translator">

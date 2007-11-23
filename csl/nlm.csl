@@ -10,6 +10,7 @@
             <email>mberkowi@gmu.edu</email>
         </author>
         <category term="generic-base"/>
+	<category term="numeric"/>
         <updated></updated>
     </info>
     <macro name="author">
