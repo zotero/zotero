@@ -108,7 +108,8 @@
     <option name="et-al-use-first" value="6"/>
     <sort>
       <key macro="author"/>
-      <key variable="title"/>
+      <key macro="year-date"/>
+      <key variable="citation-number"/>
     </sort>
     <layout>
       <text macro="author" suffix=" "/>
