@@ -91,7 +91,7 @@
 				var items = mainWindow.ZoteroPane.getSelectedItems();
 				if (items.length == 0) {
 					iframe.contentDocument.documentElement.innerHTML = '<html><head><title></title></head><body><p style="color: red">No references selected in Zotero.</p></body></html>';
-					return;
+					return '';
 				}
 				
 				if (str.indexOf("<defaults") != -1) {
@@ -105,11 +105,11 @@
 				Zotero.debug("style class is " + csl.class);
 				if (document.getElementById("format-note").checked == false && csl.class == "note") {
 					Zotero.debug("CSL IGNORE NOTE one");
-					return;
+					return '';
 				}
 				if (document.getElementById("format-in-text").checked == false && csl.class == "in-text") {
 					Zotero.debug("CSL IGNORE IN-TEXT one");
-					return;
+					return '';
 				}
 				var xmlinfo = csl._csl.info;
 				var terms = new Object();
@@ -119,11 +119,11 @@
 				}
 				if (!numeric.checked && terms["numeric"]) {
 					Zotero.debug("CSL IGNORE this numeric");
-					return;
+					return '';
 				}
 				if (!authordate.checked && terms["author-date"]) {
 					Zotero.debug("CSL IGNORE this AD");
-					return;
+					return '';
 				}
 				var itemSet = csl.createItemSet(items);
 				
