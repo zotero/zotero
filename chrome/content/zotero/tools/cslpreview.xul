@@ -1,0 +1,164 @@
+<?xml version="1.0"?>
+<!--
+    ***** BEGIN LICENSE BLOCK *****
+    
+    Copyright (c) 2006  Center for History and New Media
+                        George Mason University, Fairfax, Virginia, USA
+                        http://chnm.gmu.edu
+    
+    Licensed under the Educational Community License, Version 1.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+    
+    http://www.opensource.org/licenses/ecl1.php
+    
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+    
+    ***** END LICENSE BLOCK *****
+    Contributed by Julian Onions
+-->
+<?xml-stylesheet href="chrome://global/skin/global.css"?>
+<?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
+
+<window
+	id="csl-preview"
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	onload="Zotero_CSL_Preview.init();"
+	title="Zotero Preview pane">
+	
+	<script src="chrome://zotero/content/include.js"/>
+	
+	<script>
+	<![CDATA[
+		default xml namespace = "http://purl.org/net/xbiblio/csl";
+
+		var Zotero_CSL_Preview = new function() {
+			var mainWindow = window.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
+				.getInterface(Components.interfaces.nsIWebNavigation)
+				.QueryInterface(Components.interfaces.nsIDocShellTreeItem)
+				.rootTreeItem
+				.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
+				.getInterface(Components.interfaces.nsIDOMWindow);
+			
+			this.init = init;
+			this.refresh = refresh;
+			this.generateBibliography = generateBibliography;
+
+			function init() { 
+				//refresh(); 
+			}
+			function refresh() {
+				var iframe = document.getElementById('zotero-csl-preview-box');
+				var items = mainWindow.ZoteroPane.getSelectedItems();
+				if (items.length == 0) {
+					iframe.contentDocument.documentElement.innerHTML = '<html><head><title></title></head><body><p style="color: red">No references selected in Zotero.</p></body></html>';
+					return;
+				}
+				var progressWin = new Zotero.ProgressWindow();
+				// XXX needs its own string really!
+				progressWin.changeHeadline(Zotero.getString("pane.items.menu.createBib.multiple"));
+				var icon = 'chrome://zotero/skin/treeitem-attachment-file.png';
+				progressWin.addLines(window.content.document.title, icon)
+				progressWin.show();
+				progressWin.startCloseTimer();
+				var f = function() {
+					var csls = Zotero.DB.query("SELECT title, csl FROM csl ORDER BY title");
+					// XXX needs its own string really for the title!
+					var str = '<html><head><title></title></head><body><h1>Citation/Bibliography list<h1>';
+					for (var i=0; i<csls.length; i++) {
+						Zotero.debug("Generate Bib for " + csls[i].title);
+						var cite = generateBibliography(csls[i].csl);
+						if (cite) {
+							str += '<hr><h2>' + csls[i].title + '</h2>';
+							str += cite;
+						}
+					}
+
+					str += '</body></html>';
+					iframe.contentDocument.documentElement.innerHTML = str;			
+				}
+				// Give progress window time to appear
+				setTimeout(f, 100);
+			}
+			 
+			function generateBibliography(str) {
+				var iframe = document.getElementById('zotero-csl-preview-box');
+				
+				var items = mainWindow.ZoteroPane.getSelectedItems();
+				if (items.length == 0) {
+					iframe.contentDocument.documentElement.innerHTML = '<html><head><title></title></head><body><p style="color: red">No references selected in Zotero.</p></body></html>';
+					return;
+				}
+				
+				if (str.indexOf("<defaults") != -1) {
+					csl = new Zotero.CSL.Compat(str);
+				}
+				else {
+					csl = new Zotero.CSL(str);
+				}
+				var authordate = document.getElementById("format-author-date");
+				var numeric = document.getElementById("format-numeric");
+				Zotero.debug("style class is " + csl.class);
+				if (document.getElementById("format-note").checked == false && csl.class == "note") {
+					Zotero.debug("CSL IGNORE NOTE one");
+					return;
+				}
+				if (document.getElementById("format-in-text").checked == false && csl.class == "in-text") {
+					Zotero.debug("CSL IGNORE IN-TEXT one");
+					return;
+				}
+				var xmlinfo = csl._csl.info;
+				var terms = new Object();
+				for each(var cat in xmlinfo.category.@term) {
+					Zotero.debug("TERM is " + cat.toString());
+					terms[cat.toString()] = true;
+				}
+				if (!numeric.checked && terms["numeric"]) {
+					Zotero.debug("CSL IGNORE this numeric");
+					return;
+				}
+				if (!authordate.checked && terms["author-date"]) {
+					Zotero.debug("CSL IGNORE this AD");
+					return;
+				}
+				var itemSet = csl.createItemSet(items);
+				
+				// Generate multiple citations
+				var citation = csl.createCitation(itemSet.items);
+				var citations = csl.formatCitation(citation, "HTML");
+			
+				// Generate bibliography
+				var bibliography = '<p>' + csl.formatBibliography(itemSet, "HTML");
+				return citations + bibliography;
+			}
+			
+			
+		}
+	]]>
+	</script>
+	<!-- NEEDS LOCALISING -->
+	<vbox flex="1">
+	   <hbox >
+		<hbox align="center">
+			<button id="preview-refresh-button" label="Refresh" oncommand="Zotero_CSL_Preview.refresh()"/>
+			<groupbox orient="horizontal" align="center">
+				<label value="Class:"/>
+				<checkbox id="format-in-text" label="In-Text" checked="true"/>
+				<checkbox id="format-note" label="Notes" checked="true"/>
+			</groupbox>
+			<groupbox orient="horizontal" align="center">
+				<label value="Citation form:"/>
+				<checkbox id="format-author-date" label="Author Date" checked="true"/>
+				<checkbox id="format-numeric" label="Numeric" checked="true"/>
+			</groupbox>
+		</hbox>
+	   </hbox>
+	   <splitter/>
+	   <iframe id="zotero-csl-preview-box" flex="1" style="padding: 0 1em; background:white;" overflow="auto"/>
+	</vbox>
+	
+</window>

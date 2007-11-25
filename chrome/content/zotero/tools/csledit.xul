@@ -20,12 +20,14 @@
     
     ***** END LICENSE BLOCK *****
 -->
+<?xml-stylesheet href="chrome://global/skin/global.css"?>
 <?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
 
 <window
 	id="csl-edit"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-	onload="Zotero_CSL_Editor.init();">
+	onload="Zotero_CSL_Editor.init();"
+	title="Zotero Reference Test pane">
 	
 	<script src="chrome://zotero/content/include.js"/>
 	
@@ -43,6 +45,7 @@
 			this.handleKeyPress = handleKeyPress;
 			this.loadCSL = loadCSL;
 			this.generateBibliography = generateBibliography;
+			this.refresh = refresh;
 			
 			function init() {
 				var cslList = document.getElementById('zotero-csl-list');
@@ -51,14 +54,25 @@
 				}
 				
 				var csls = Zotero.DB.query("SELECT title, cslID FROM csl ORDER BY title");
-				
 				for (var i=0; i<csls.length; i++) {
 					cslList.appendItem(csls[i].title, csls[i].cslID);
 				}
+				var pageList = document.getElementById('zotero-csl-page-type');
+				var locators = Zotero.CSL.Global.getLocatorStrings();
+				for each(var type in locators) {
+					var locator = type;
+					locator = locator[0].toUpperCase()+locator.substr(1);
+					pageList.appendItem(locator, type);
+				}
 				
+				pageList.selectedIndex = 0;
 				cslList.setAttribute('initialized', true)
 			}
-			
+			function refresh() {
+				var editor = document.getElementById('zotero-csl-editor')
+				generateBibliography(editor.value)
+
+			}
 			
 			function handleKeyPress(event) {
 				if (event.keyCode == 9 &&
@@ -97,18 +111,30 @@
 				
 				// Generate multiple citations
 				var citation = csl.createCitation(itemSet.items);
-				var multCitations = csl.formatCitation(citation, "HTML");
-				
 				// Generate single citations
-				var citations = '';
+				var author = document.getElementById("preview-suppress-author").checked;
+				var search = document.getElementById('preview-pages');
+				var loc = document.getElementById('zotero-csl-page-type');
+				var pos = document.getElementById('preview-subsequent').checked ? Zotero.CSL.POSITION_SUBSEQUENT : Zotero.CSL.POSITION_FIRST;
+				var citations = '<h1>Single Citations</h1>';
 				for (var i=0; i<citation.citationItems.length; i++) {
+					citation.citationItems[i].suppressAuthor = author;
+					if (search.value != '') {
+						citation.citationItems[i].locator = search.value;
+						citation.citationItems[i].locatorType = loc.selectedItem.value;
+					}
+					citation.citationItems[i].position = pos;
 					citations += csl.formatCitation(csl.createCitation([citation.citationItems[i]]), "HTML") + '<br />';
 				}
-				
+				var multCitations = '<hr><h1>Multi Citations</h1>' +
+					csl.formatCitation(citation, "HTML");
+
 				// Generate bibliography
-				var bibliography = csl.formatBibliography(itemSet, "HTML");
+				var bibliography = '<hr/><h1>Bibliography</h1>' + 
+					csl.formatBibliography(itemSet, "HTML");
 				iframe.contentDocument.documentElement.innerHTML =
-					citations + '<hr/>' + multCitations + '<hr/>' + bibliography;
+					citations + 
+					multCitations + bibliography;
 			}
 			
 			
@@ -129,13 +155,21 @@
 	</script>
 	
 	<vbox flex="1">
-		<menulist id="zotero-csl-list" style="min-height: 1.6em" initialized="false" oncommand="Zotero_CSL_Editor.loadCSL(this.selectedItem.value)"/>
+		<hbox align="center">
+		    <button id="preview-refresh-button" label="Refresh" oncommand="Zotero_CSL_Editor.refresh()"/>
+		    <menulist id="zotero-csl-page-type" style="min-height: 1.6em; min-width: 50px" oncommand="Zotero_CSL_Editor.refresh()" />
+		    <label value=":" />
+		    <textbox size="5" id="preview-pages" type="timed" timeout="250" oncommand="Zotero_CSL_Editor.refresh()"/>
+		    <checkbox oncommand="Zotero_CSL_Editor.refresh()" id="preview-suppress-author" label="Suppress author" />
+		    <checkbox oncommand="Zotero_CSL_Editor.refresh()" id="preview-subsequent" label="Subsequent citation" />
+		    <menulist id="zotero-csl-list" style="min-height: 1.6em; min-width: 100px" initialized="false" flex="1" oncommand="Zotero_CSL_Editor.loadCSL(this.selectedItem.value)"/>
+		</hbox>
 		<textbox id="zotero-csl-editor" type="timed" timeout="250" multiline="true"
 			flex="1"
 			onkeypress="Zotero_CSL_Editor.handleKeyPress(event)"
 			oncommand="document.getElementById('zotero-csl-list').selectedIndex = -1; Zotero_CSL_Editor.generateBibliography(this.value)"/>
 		<splitter/>
-		<iframe id="zotero-csl-preview-box" flex="1" style="padding: 0 1em" overflow="auto"/>
+		<iframe id="zotero-csl-preview-box" flex="1" style="padding: 0 1em;background:white" overflow="auto"/>
 	</vbox>
 	
 </window>
