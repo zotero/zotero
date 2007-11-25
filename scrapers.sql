@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-11-21 00:25:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-11-25 08:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -11344,6 +11344,79 @@ REPLACE INTO translators VALUES ('7bdb79e-a47f-4e3d-b317-ccd5a0a74456', '1.0.0b3
 		Zotero.done();
 	});
 		
+	Zotero.wait();
+}');
+
+REPLACE INTO translators VALUES ('850f4c5f-71fb-4669-b7da-7fb7a95500ef', '1.0.0b3r1', '', '2007-11-25 08:00:00', '0', '100', '4', 'Cambridge Journals Online', 'Sean Takats', '^https?://(?:www\.)?journals\.cambridge\.org/action/(quickSearch|search|displayAbstract|displayFulltext|displayIssue)', 
+'function detectWeb(doc, url)	{
+	var namespace=doc.documentElement.namespaceURI;
+	var nsResolver=namespace?function(prefix)	{
+		return (prefix=="x")?namespace:null;
+	}:null;
+	var xpath = ''//tr[td/input[@type="checkbox"][@name="toView"]]'';
+	if ((url.indexOf("/action/displayAbstract") != -1) || (url.indexOf("action/displayFulltext") != -1)){
+		return "journalArticle";
+	} else if (doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
+		return "multiple";			
+	}
+}', 
+'function doWeb(doc, url){
+	var namespace=doc.documentElement.namespaceURI;
+	var nsResolver=namespace?function(prefix)	{
+		return (prefix=="x")?namespace:null;
+	}:null;
+	var urlstring="http://journals.cambridge.org/action/exportCitation";
+	var datastring="format=RIS&emailId=&Download=Download&componentIds=";
+	var xpath = ''//tr[td/input[@type="checkbox"][@name="toView"]]'';
+	if(doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
+		var tableRows = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var tableRow;
+		var items=new Array();
+		while (tableRow = tableRows.iterateNext()){
+			var id = doc.evaluate(''./td/input[@type="checkbox"][@name="toView"]/@value'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+			var title = doc.evaluate(''./td/h3'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+			items[id.nodeValue]=Zotero.Utilities.trimInternal(title.textContent);	
+		}
+		items=Zotero.selectItems(items);
+		for(var id in items)
+			Zotero.Utilities.HTTP.doPost(urlstring, datastring+id, function(text)	{
+				var trans=Zotero.loadTranslator("import");
+				trans.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+				trans.setString(text);
+				trans.setHandler("itemDone", function(obj, newItem){
+					var pdfpath=''//tr[td/input/@value="''+id+''"]/td/ul/li/a[contains(text(), "PDF")]'';
+					var pdflink=doc.evaluate(pdfpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+					if (pdflink){
+						newItem.attachments.push({url:pdflink.href, title:newItem.title, mimeType:"application/pdf"});
+					}
+					newItem.complete();
+				});
+				trans.translate();
+				Zotero.done();
+			});
+	}
+	xpath = ''//div[@id="close"]/a[text()="close"]'';
+	if(doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext())	{
+		var pdfpath=''//div/ul/li/a[contains(text(), "PDF")]'';
+		var pdflink =doc.evaluate(pdfpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()
+		Zotero.debug(url);
+		idRe = /aid=([0-9]+)/
+		var m = idRe.exec(url);
+		var id = m[1];
+		Zotero.Utilities.HTTP.doPost(urlstring, datastring+id, function(text)	{
+			var trans=Zotero.loadTranslator("import");
+			trans.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+			trans.setString(text);
+			trans.setHandler("itemDone", function(obj, newItem){
+				if (pdflink){
+					newItem.attachments.push({url:pdflink.href, title:newItem.title, mimeType:"application/pdf"});
+				}
+				newItem.complete();
+			});
+			trans.translate();
+			Zotero.done();
+		});
+	}
 	Zotero.wait();
 }');
 
