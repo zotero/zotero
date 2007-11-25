@@ -28,7 +28,11 @@
       <substitute>
         <names variable="editor"/>
         <names variable="translator"/>
-        <text macro="title"/>
+        <choose>
+          <if type="article">
+            <text variable="container-title"/>
+          </if>
+        </choose>
       </substitute>
     </names>
   </macro>
