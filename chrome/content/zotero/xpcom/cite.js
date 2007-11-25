@@ -230,16 +230,30 @@ Zotero.Cite.MIMEHandler.StreamListener.prototype.onStopRequest = function(channe
 	var title = xml.info.title.toString();
 	var updated = xml.info.updated.toString().replace(/(.+)T([^\+]+)\+?.*/, "$1 $2");
 	
+	var sql = "SELECT title FROM csl WHERE cslID=?";
+	var existingTitle = Zotero.DB.valueQuery(sql, uri);
+	
 	var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 		.getService(Components.interfaces.nsIPromptService);
 	
 	var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
 		+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
+	
+	if (existingTitle) {
+		var text = Zotero.getString('styles.updateStyle', [existingTitle, title, loadURI]);
+	}
+	else {
+		var text = Zotero.getString('styles.installStyle', [title, loadURI]);
+	}
+	
+	var acceptButton = Zotero.getString('general.install');
+	
 	var index = ps.confirmEx(null,
 		'',
-		Zotero.getString('styles.installStyle', [title, loadURI]),
+		text,
 		buttonFlags,
-		Zotero.getString('general.install'), null, null, null, {});
+		acceptButton, null, null, null, {}
+	);
 	
 	if (index == 0) {
 		var sql = "REPLACE INTO csl VALUES (?,?,?,?)";
