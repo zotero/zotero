@@ -66,10 +66,10 @@
   <macro name="title">
     <choose>
       <if type="book">
-        <text variable="title" enforce-case="sentence" font-style="italic"/>
+        <text variable="title" text-case="sentence" font-style="italic"/>
       </if>
       <else>
-        <text variable="title" enforce-case="sentence"/>
+        <text variable="title" text-case="sentence"/>
       </else>
     </choose>
   </macro>
