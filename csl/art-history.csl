@@ -26,13 +26,13 @@
   <macro name="title">
     <choose>
       <if type="thesis">
-	<text variable="title" form="short" quotes="true"/>
+	<text variable="title" form="short"  prefix="&#8216;" suffix="&#8217;"/>
       </if>
       <else-if type="book">
 	<text variable="title" form="short" font-style="italic"/>
       </else-if>
       <else>
-	<text variable="title" form="short" quotes="true"/>
+	<text variable="title" form="short"  prefix="&#8216;" suffix="&#8217;"/>
       </else>
     </choose>
   </macro>
