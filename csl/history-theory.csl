@@ -11,6 +11,7 @@
     <summary>HistoryandTheory.Org is an international journal History and Theory, 
     which is devoted to the theory and philosophy of history</summary>
     <category term="numeric"/>
+    <category term="history"/>
     <updated/>
   </info>
   <macro name="editor">
@@ -109,7 +110,7 @@
 	    <group delimiter=", ">
 	      <group delimiter=" ">
 		<group delimiter=", ">
-	  	  <text macro="title" />
+		  <text macro="title" />
 		  <text macro="editor"/>
 		  <text macro="container"/>
 		</group>
