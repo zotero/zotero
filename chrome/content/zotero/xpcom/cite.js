@@ -34,6 +34,7 @@ Zotero.Cite = new function() {
 	this.getStyles = getStyles;
 	this.getStyleClass = getStyleClass;
 	this.getStyle = getStyle;
+	this.installStyle = installStyle;
 	
 	/*
 	 * returns an associative array of cslID => styleName pairs
@@ -89,6 +90,59 @@ Zotero.Cite = new function() {
 		var style = Zotero.DB.valueQuery("SELECT csl FROM csl WHERE cslID = ?", [cslID]);
 		if(!style) throw "Zotero.Cite: invalid CSL ID";
 		return style;
+	}
+	
+	/**
+	 * installs a style 
+	 **/
+	function installStyle(cslString, loadURI) {
+		try {
+			var xml = new XML(Zotero.CSL.Global.cleanXML(cslString));
+		}
+		catch (e) {
+			var error = true;
+			Components.utils.reportError(e);
+		}
+		
+		if (!xml || error) {
+			alert(Zotero.getString('styles.installError', loadURI));
+			return;
+		}
+		
+		var uri = xml.info.id.toString();
+		var title = xml.info.title.toString();
+		var updated = xml.info.updated.toString().replace(/(.+)T([^\+]+)\+?.*/, "$1 $2");
+		
+		var sql = "SELECT title FROM csl WHERE cslID=?";
+		var existingTitle = Zotero.DB.valueQuery(sql, uri);
+		
+		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+			.getService(Components.interfaces.nsIPromptService);
+		
+		var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
+			+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
+		
+		if (existingTitle) {
+			var text = Zotero.getString('styles.updateStyle', [existingTitle, title, loadURI]);
+		}
+		else {
+			var text = Zotero.getString('styles.installStyle', [title, loadURI]);
+		}
+		
+		var acceptButton = Zotero.getString('general.install');
+		
+		var index = ps.confirmEx(null,
+			'',
+			text,
+			buttonFlags,
+			acceptButton, null, null, null, {}
+		);
+		
+		if (index == 0) {
+			var sql = "REPLACE INTO csl VALUES (?,?,?,?)";
+			Zotero.DB.query(sql, [uri, updated, title, cslString]);
+			alert(Zotero.getString('styles.installed', title));
+		}
 	}
 }
 
@@ -213,55 +267,8 @@ Zotero.Cite.MIMEHandler.StreamListener.prototype.onStopRequest = function(channe
 		var loadURI = '';
 	}
 	
-	try {
-		var xml = new XML(Zotero.CSL.Global.cleanXML(this._readString));
-	}
-	catch (e) {
-		var error = true;
-		Components.utils.reportError(e);
-	}
-	
-	if (!xml || error) {
-		alert(Zotero.getString('styles.installError', loadURI));
-		return;
-	}
-	
-	var uri = xml.info.id.toString();
-	var title = xml.info.title.toString();
-	var updated = xml.info.updated.toString().replace(/(.+)T([^\+]+)\+?.*/, "$1 $2");
-	
-	var sql = "SELECT title FROM csl WHERE cslID=?";
-	var existingTitle = Zotero.DB.valueQuery(sql, uri);
-	
-	var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-		.getService(Components.interfaces.nsIPromptService);
-	
-	var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
-		+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
-	
-	if (existingTitle) {
-		var text = Zotero.getString('styles.updateStyle', [existingTitle, title, loadURI]);
-	}
-	else {
-		var text = Zotero.getString('styles.installStyle', [title, loadURI]);
-	}
-	
-	var acceptButton = Zotero.getString('general.install');
-	
-	var index = ps.confirmEx(null,
-		'',
-		text,
-		buttonFlags,
-		acceptButton, null, null, null, {}
-	);
-	
-	if (index == 0) {
-		var sql = "REPLACE INTO csl VALUES (?,?,?,?)";
-		Zotero.DB.query(sql, [uri, updated, title, this._readString]);
-		alert(Zotero.getString('styles.installed', title));
-	}
+	Zotero.Cite.installStyle(this._readString, loadURI);
 }
-
 
 
 /*
@@ -1974,7 +1981,7 @@ Zotero.CSL.Item.Date.prototype.getDateVariable = function(variable) {
 			this.dateArray = Zotero.Date.strToDate(this.date);
 		}
 		
-		if(this.dateArray[variable] || this.dateArray[variable] === 0) {
+		if(this.dateArray[variable] !== undefined && this.dateArray[variable] !== false) {
 			return this.dateArray[variable];
 		} else if(variable == "month") {
 			if(this.dateArray.part) {
@@ -2474,9 +2481,33 @@ Zotero.CSL.FormattedString.prototype.append = function(string, element, dontDeli
 			if(newPrefix != "" && newPrefix != prefix) {
 				this.suppressLeadingWhitespace = false;
 			}
-			prefix = newPrefix
+			prefix = newPrefix;
 		}
-		
+	}
+	
+	// append line before if display="block"
+	var closeDiv = false;
+	if(element && (element["@display"] == "block" || this.appendLine)) {
+		if(this.format == "HTML") {
+			if(this.option.(@name == "hanging-indent").@value == "true") {
+				this.string += '<div style="text-indent:0.5in;">'
+			} else {
+				this.string += '<div>';
+			}
+			var closeDiv;
+		} else {
+			if(this.format == "RTF") {
+				this.string += "\r\n\\line ";
+			} else if(this.format == "Integration") {
+				this.string += "\x0B";
+			} else {
+				this.string += (Zotero.isWin ? "\r\n" : "\n");
+			}
+			this.appendLine = element["@display"] == "block";
+		}
+	}
+	
+	if(prefix) {
 		this.append(prefix, null, true);
 	}
 	
@@ -2502,19 +2533,35 @@ Zotero.CSL.FormattedString.prototype.append = function(string, element, dontDeli
 		this.closePunctuation = false;
 	}
 	
-	// handle text transformation
-	if(element) {
-		if(element["@text-transform"].length()) {
-			if(element["@text-transform"] == "lowercase") {
-				// all lowercase
-				string = string.toLowerCase();
-			} else if(element["@text-transform"] == "uppercase") {
-				// all uppercase
-				string = string.toUpperCase();
-			} else if(element["@text-transform"] == "capitalize") {
-				// capitalize first
-				string = string[0].toUpperCase()+string.substr(1);
+	// handling of "text-transform" attribute (now obsolete)
+	if(element && element["@text-transform"].length() && !element["@text-case"].length()) {
+		var mapping = {"lowercase":"lowercase", "uppercase":"uppercase", "capitalize":"capitalize-first"};
+		element["@text-case"] = mapping[element["@text-transform"].toString()];
+	}
+	// handle text case
+	if(element && element["@text-case"].length()) {
+		if(element["@text-case"] == "lowercase") {
+			// all lowercase
+			string = string.toLowerCase();
+		} else if(element["@text-case"] == "uppercase") {
+			// all uppercase
+			string = string.toUpperCase();
+		} else if(element["@text-case"] == "capitalize-first") {
+			// capitalize first
+			string = string[0].toUpperCase()+string.substr(1).toLowerCase();
+		} else if(element["@text-case"] == "capitalize-all") {
+			// capitalize first
+			var strings = string.split(" ");
+			for(var i=0; i<strings.length; i++) {
+				if(strings[i].length > 1) {
+					strings[i] = strings[i][0].toUpperCase()+strings[i].substr(1).toLowerCase();
+				} else if(strings[i].length == 1) {
+					strings[i] = strings[i].toUpperCase();
+				}
 			}
+			string = strings.join(" ");
+		} else if(element["@text-case"] == "title") {
+			string = Zotero.Text.titleCase(string);
 		}
 	}
 	
@@ -2552,17 +2599,7 @@ Zotero.CSL.FormattedString.prototype.append = function(string, element, dontDeli
 				}
 			}
 			
-			if(element["@display"] == "block") {
-				if(this.option.(@name == "hanging-indent").@value == "true") {
-					style += "text-indent:0.5in;"
-				}
-				
-				if(style) {
-					string = '<div style="'+style+'">'+string+'</div>';
-				} else {
-					string = '<div>'+string+'</div>';
-				}
-			} else if(style) {
+			if(style) {
 				string = '<span style="'+style+'">'+string+'</span>';
 			}
 		} else {
@@ -2589,17 +2626,6 @@ Zotero.CSL.FormattedString.prototype.append = function(string, element, dontDeli
 					string = "\\sub "+string+"\\sub0 ";
 				}
 			}
-			
-			if(element["@display"] == "block" || this.appendLine) {
-				if(this.format == "RTF") {
-					string = "\r\n\\line "+string;
-				} else if(this.format == "Integration") {
-					string = "\x0B"+string;
-				} else {
-					string = (Zotero.isWin ? "\r\n" : "\n")+string;
-				}
-				this.appendLine = element["@display"] == "block";
-			}
 		}
 	
 		// add quotes if necessary
@@ -2616,11 +2642,14 @@ Zotero.CSL.FormattedString.prototype.append = function(string, element, dontDeli
 	
 	this.string += string;
 	
-	// special rule: if a variable ends in a punctuation mark, and the suffix
-	// begins with a period, chop the period off the suffix
 	var suffix;
 	if(element && element.@suffix.length()) {
 		this.append(element.@suffix.toString(), null, true);
+	}
+	
+	// close div for display=block in HTML
+	if(closeDiv) {
+		this.string += "</div>";
 	}
 	
 	// save for second-field-align
