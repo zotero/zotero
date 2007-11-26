@@ -19,13 +19,13 @@ FEMS Yeast Research</summary>
   </info>
   <macro name="editor">
     <names variable="editor">
-      <name and="symbol" delimiter=", " name-as-sort-order="all" sort-separator=", " initialize-with="" text-transform="capitalize"/>
-      <label form="short" text-transform="lowercase" prefix=", " />
+      <name and="symbol" delimiter=", " name-as-sort-order="all" sort-separator=", " initialize-with="" text-case="capitalize-first"/>
+      <label form="short" text-case="lowercase" prefix=", " />
     </names>
   </macro>
   <macro name="series-editor">
     <names variable="original-author">
-      <label form="short" text-transform="capitalize" suffix=". "/>
+      <label form="short" text-case="capitalize-first" suffix=". "/>
       <name and="text" delimiter=", "/>
     </names>
   </macro>
@@ -33,7 +33,7 @@ FEMS Yeast Research</summary>
     <names variable="author">
       <name and="symbol" name-as-sort-order="all" sort-separator=", " delimiter=", "
 	    delimiter-precedes-last="always" initialize-with=""/>
-      <label form="short" prefix=", " suffix="." text-transform="lowercase"/>
+      <label form="short" prefix=", " suffix="." text-case="lowercase"/>
       <substitute>
 	<names variable="editor"/>
 	<names variable="translator"/>
@@ -54,7 +54,7 @@ FEMS Yeast Research</summary>
     <group>
       <text variable="URL"/>
       <group prefix=" (" suffix=")">
-	<text term="accessed" text-transform="capitalize" suffix=" "/>
+	<text term="accessed" text-case="capitalize-first" suffix=" "/>
 	<date variable="accessed">
 	  <date-part name="month" suffix=" "/>
 	  <date-part name="day" suffix=", "/>

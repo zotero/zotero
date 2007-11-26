@@ -17,7 +17,7 @@
   <macro name="editor">
     <names variable="editor">
       <name name-as-sort-order="all" sort-separator=" " initialize-with="" delimiter=", " delimiter-precedes-last="always"/>
-      <label form="short" prefix=", " text-transform="lowercase" suffix="."/>
+      <label form="short" prefix=", " text-case="lowercase" suffix="."/>
     </names>
   </macro>
   <macro name="author">
@@ -25,7 +25,7 @@
       <names variable="author">
 	<name name-as-sort-order="all" sort-separator=" " initialize-with=""
 	      delimiter=", " delimiter-precedes-last="always"/>
-	<label form="short" prefix=" " suffix="" text-transform="lowercase"/>
+	<label form="short" prefix=" " suffix="" text-case="lowercase"/>
 	<substitute>
 	  <names variable="editor"/>
 	  <text value="Anon"/>
@@ -48,7 +48,7 @@
       <text value="Available at:" suffix=" "/>
       <text variable="URL"/>
       <group prefix=" [" suffix="]">
-	<text term="accessed" text-transform="capitalize" suffix=" "/>
+	<text term="accessed" text-case="capitalize-first" suffix=" "/>
 	<date variable="accessed">
 	  <date-part name="month" suffix=" "/>
 	  <date-part name="day" suffix=", "/>
@@ -125,7 +125,7 @@
 	<else-if type="chapter">
 	  <text macro="title" prefix=" " suffix="."/>
 	  <group class="container" prefix=" ">
-	    <text term="in" text-transform="capitalize" suffix=": "/>
+	    <text term="in" text-case="capitalize-first" suffix=": "/>
 	    <text macro="editor"/>
 	    <text variable="container-title" font-style="italic" prefix=" " suffix="."/>
 	    <text variable="volume" prefix="Vol " suffix="."/>

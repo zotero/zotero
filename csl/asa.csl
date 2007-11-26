@@ -16,13 +16,13 @@
   </info>
   <macro name="editor">
     <names variable="editor">
-      <label form="verb" text-transform="lowercase" suffix=" "/>
+      <label form="verb" text-case="lowercase" suffix=" "/>
       <name and="text" delimiter=", "/>
     </names>
   </macro>
   <macro name="series-editor">
     <names variable="original-author">
-      <label form="short" text-transform="capitalize" suffix=". "/>
+      <label form="short" text-case="capitalize-first" suffix=". "/>
       <name and="text" delimiter=", "/>
     </names>
   </macro>
@@ -33,7 +33,7 @@
     <names variable="author">
       <name and="text" name-as-sort-order="first" sort-separator=", " delimiter=", "
 	    delimiter-precedes-last="always"/>
-      <label form="short" prefix=", " suffix="." text-transform="lowercase"/>
+      <label form="short" prefix=", " suffix="." text-case="lowercase"/>
       <substitute>
 	<names variable="editor"/>
 	<names variable="translator"/>
@@ -55,7 +55,7 @@
     <group>
       <text variable="URL"/>
       <group prefix=" (" suffix=")">
-	<text term="accessed" text-transform="capitalize" suffix=" "/>
+	<text term="accessed" text-case="capitalize-first" suffix=" "/>
 	<date variable="accessed">
 	  <date-part name="month" suffix=" "/>
 	  <date-part name="day" suffix=", "/>
@@ -103,7 +103,7 @@
     
   </macro>
   <macro name="pages">
-    <label variable="page" form="short" suffix=". " text-transform="capitalize"/>
+    <label variable="page" form="short" suffix=". " text-case="capitalize-first"/>
     <text variable="page"/>
   </macro>
   <citation>
@@ -173,7 +173,7 @@
 	    <group class="container" delimiter=", " suffix=".">
 	      <group delimiter=" ">
 		<text macro="pages"/>
-		<text term="in" text-transform="lowercase"/>
+		<text term="in" text-case="lowercase"/>
 		<text variable="container-title" font-style="italic"/>
 	      </group>
 	      <text variable="volume" prefix="vol. "/>

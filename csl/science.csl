@@ -17,14 +17,14 @@
   <macro name="editor">
     <names variable="editor" prefix="" suffix="" delimiter=", ">
       <name initialize-with=". " delimiter=", " delimiter-precedes-last="always"/>
-      <label form="short" prefix=", " text-transform="capitalize" suffix="."/>
+      <label form="short" prefix=", " text-case="capitalize-first" suffix="."/>
     </names>
   </macro>
   <macro name="author">
     <names variable="author">
       <name  sort-separator=", " initialize-with=". "
 	     delimiter=", " delimiter-precedes-last="always"/>
-      <label form="short" prefix=", " suffix="." text-transform="capitalize"/>
+      <label form="short" prefix=", " suffix="." text-case="capitalize-first"/>
       <substitute>
 	<names variable="editor"/>
       </substitute>
@@ -95,7 +95,7 @@
 	</else-if>
 	<else-if type="chapter">
 	  <group class="container" prefix=" ">
-	    <text term="in" text-transform="lowercase"/>
+	    <text term="in" text-case="lowercase"/>
 	    <text variable="container-title" font-style="italic" prefix=" " suffix=","/>
 	    <text variable="collection-title" prefix=" " suffix="."/>
 	    <text macro="editor" prefix=" "/>

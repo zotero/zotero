@@ -15,13 +15,13 @@
   </info>
   <macro name="editor-translator">
     <names variable="editor translator" prefix="" suffix="" delimiter=", ">
-      <label form="verb-short" prefix=" " text-transform="lowercase" suffix=" "/>
+      <label form="verb-short" prefix=" " text-case="lowercase" suffix=" "/>
       <name and="text" delimiter=", "/>
     </names>
   </macro>
   <macro name="editor-translator-short">
     <names variable="editor translator" prefix="" suffix="" delimiter=", ">
-      <label form="short" prefix=" " text-transform="lowercase" suffix=". "/>
+      <label form="short" prefix=" " text-case="lowercase" suffix=". "/>
       <name and="text" delimiter=", "/>
     </names>
   </macro>
@@ -59,7 +59,7 @@
     <group>
       <text variable="URL"/>
       <group prefix=" (" suffix=")" delimiter=" ">
-	<text term="accessed" text-transform="lowercase" suffix=" "/>
+	<text term="accessed" text-case="lowercase" suffix=" "/>
 	<date variable="accessed" suffix=", ">
 	  <date-part name="month" suffix=" "/>
 	  <date-part name="day" suffix=", "/>
@@ -124,7 +124,7 @@
 	  </if>
 	  <else-if type="chapter">
 	    <group class="container" prefix=", ">
-	      <text term="in" text-transform="lowercase"/>
+	      <text term="in" text-case="lowercase"/>
 	      <text variable="container-title" font-style="italic" prefix=" " suffix=","/>
 	      <text variable="collection-title" prefix=" " suffix=","/>
 	      <text macro="editor-translator-short"/>
@@ -218,7 +218,7 @@
 	<else-if type="chapter">
 	  <text macro="title" prefix=" "/>
 	  <group class="container" prefix=", ">
-	    <text term="in" text-transform="lowercase"/>
+	    <text term="in" text-case="lowercase"/>
 	    <text variable="container-title" font-style="italic" prefix=" " suffix=","/>
 	    <text variable="collection-title" prefix=" " suffix=","/>
 	    <text macro="editor-translator-short"/>
@@ -268,7 +268,7 @@
 	    <text macro="editor-translator" prefix=" "/>
 	  </group>
 	  <group suffix="">
-	    <text value="paper presented at" text-transform="capitalize"/>
+	    <text value="paper presented at" text-case="capitalize-first"/>
 	    <text variable="event" prefix=" "/>
 	    <text variable="event-place"  prefix=", "/>
 	    <date variable="event">

@@ -14,7 +14,7 @@
   <macro name="editor-translator">
     <names variable="editor translator" prefix="(" suffix=")" delimiter=", ">
       <name and="symbol" initialize-with="." delimiter=", "/>
-      <label form="short" prefix=", " text-transform="capitalize" suffix="."/>
+      <label form="short" prefix=", " text-case="capitalize-first" suffix="."/>
     </names>
   </macro>
   <macro name="author">

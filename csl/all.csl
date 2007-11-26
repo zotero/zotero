@@ -17,7 +17,7 @@ Generated from a perl script.</summary>
     <names variable="author">
       <name name-as-sort-order="all" and="symbol" sort-separator=", " initialize-with=". "
 	    delimiter=", " delimiter-precedes-last="always"/>
-      <label form="short" prefix=" (" suffix=".)" text-transform="capitalize"/>
+      <label form="short" prefix=" (" suffix=".)" text-case="capitalize-first"/>
       <substitute>
 	<names variable="editor"/>
 	<names variable="translator"/>

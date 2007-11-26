@@ -20,7 +20,7 @@
   <macro name="editor">
     <names variable="editor">
       <name sort-separator=" " initialize-with="" name-as-sort-order="all" delimiter=", " delimiter-precedes-last="always"/>
-      <label form="short" prefix=" (" text-transform="lowercase" suffix=")"/>
+      <label form="short" prefix=" (" text-case="lowercase" suffix=")"/>
     </names>
   </macro>
   <macro name="publisher">

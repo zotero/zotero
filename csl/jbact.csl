@@ -26,7 +26,7 @@
     <names variable="editor">
       <name sort-separator=" " initialize-with=". " and="text"
 	    delimiter=", " delimiter-precedes-last="always"/>
-      <label form="short" prefix=" (" text-transform="lowercase" suffix=")"/>
+      <label form="short" prefix=" (" text-case="lowercase" suffix=")"/>
     </names>
   </macro>
   <macro name="publisher">
@@ -57,7 +57,7 @@
 	  <if type="chapter">
 	    <group class="container" delimiter=" ">
 	      <text variable="page" prefix="p. " suffix="."/>
-	      <text term="in" text-transform="capitalize" font-style="italic"/>
+	      <text term="in" text-case="capitalize-first" font-style="italic"/>
 	      <group delimiter=", ">
 		<text macro="editor"/>
 		<text variable="container-title" />

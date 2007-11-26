@@ -15,7 +15,7 @@
   </info>
   <macro name="editor">
     <names variable="editor">
-      <label form="verb" text-transform="lowercase" suffix=" " />
+      <label form="verb" text-case="lowercase" suffix=" " />
       <name and="text" name-as-sort-order="all" sort-separator=" " delimiter=", "
 	    delimiter-precedes-last="always" initialize-with=". "/>
     </names>
@@ -24,7 +24,7 @@
     <names variable="author">
       <name and="text" name-as-sort-order="all" sort-separator=" " delimiter=", "
 	    delimiter-precedes-last="always" initialize-with=". "/>
-      <label form="short" prefix=", " suffix="." text-transform="lowercase"/>
+      <label form="short" prefix=", " suffix="." text-case="lowercase"/>
       <substitute>
 	<names variable="editor"/>
 	<names variable="translator"/>
@@ -45,7 +45,7 @@
     <group>
       <text variable="URL"/>
       <group prefix=" (" suffix=")">
-	<text term="accessed" text-transform="capitalize" suffix=" "/>
+	<text term="accessed" text-case="capitalize-first" suffix=" "/>
 	<date variable="accessed">
 	  <date-part name="month" suffix=" "/>
 	  <date-part name="day" suffix=", "/>
@@ -93,7 +93,7 @@
     <label variable="page" prefix=" " suffix="." form="short"/>
   </macro>
   <macro name="container">
-    <text term="in" text-transform="capitalize" suffix=" "/>
+    <text term="in" text-case="capitalize-first" suffix=" "/>
     <text variable="container-title" font-style="italic"/>
   </macro>
   <citation>

@@ -19,7 +19,7 @@
   </info>
   <macro name="editor-translator">
     <names variable="editor translator" prefix="" suffix="" delimiter=", ">
-      <label form="verb" prefix=" " text-transform="lowercase" suffix=" "/>
+      <label form="verb" prefix=" " text-case="lowercase" suffix=" "/>
       <name and="text" delimiter=", "/>
     </names>
   </macro>
@@ -27,7 +27,7 @@
     <choose>
       <if variable="author">
 	<names variable="editor translator" prefix="" suffix="" delimiter=", ">
-	  <label form="short" prefix=" " text-transform="lowercase" suffix=". "/>
+	  <label form="short" prefix=" " text-case="lowercase" suffix=". "/>
 	  <name and="text" delimiter=", "/>
 	</names>
       </if>
@@ -79,7 +79,7 @@
     <group>
       <text variable="URL"/>
       <group prefix=" (" suffix=")" delimiter=" ">
-	<text term="accessed" text-transform="lowercase" suffix=" "/>
+	<text term="accessed" text-case="lowercase" suffix=" "/>
 	<date variable="accessed" suffix=", ">
 	  <date-part name="month" suffix=" "/>
 	  <date-part name="day" suffix=", "/>
@@ -127,7 +127,7 @@
 	  </if>
 	  <else-if type="chapter book" match="any">
 	    <group class="container" prefix=". ">
-	      <text term="in" text-transform="lowercase"/>
+	      <text term="in" text-case="lowercase"/>
 	      <text variable="container-title" font-style="italic" prefix=" " suffix=","/>
 	      <text variable="collection-title" prefix=" " suffix=","/>
 	    </group>
@@ -179,11 +179,11 @@
 	<else-if type="chapter">
 	  <text macro="title" prefix=" "/>
 	  <group class="container" prefix=". ">
-	    <text term="in" text-transform="capitalize"/>
+	    <text term="in" text-case="capitalize-first"/>
 	    <text variable="container-title" font-style="italic" prefix=" " suffix=","/>
 	    <text variable="collection-title" prefix=" " suffix=","/>
 	    <names variable="editor translator" prefix=" " suffix="," delimiter=", ">
-	      <label form="verb" text-transform="lowercase" suffix=" "/>
+	      <label form="verb" text-case="lowercase" suffix=" "/>
 	      <name and="text" sort-separator=", " />
 	    </names>
 	    <group suffix=".">
@@ -235,7 +235,7 @@
 	    <text macro="editor-translator" prefix=" "/>
 	  </group>
 	  <group suffix="">
-	    <text value="paper presented at" text-transform="capitalize"/>
+	    <text value="paper presented at" text-case="capitalize-first"/>
 	    <text variable="event" prefix=" "/>
 	    <text variable="event-place"  prefix=", "/>
 	    <date variable="event">

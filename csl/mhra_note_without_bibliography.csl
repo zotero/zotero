@@ -53,7 +53,7 @@
             <text prefix=" [" suffix=" " term-name="accessed"></text>
             <date suffix="]">
                 <day suffix=" "></day>
-                <month suffix=" " text-transform="capitalize"></month>
+                <month suffix=" " text-case="capitalize-first"></month>
                 <year></year>
             </date>
         </access>
@@ -109,7 +109,7 @@
                         <titles prefix=", " relation="container" font-style="italic"/>
                         <date prefix=", ">
                             <day suffix=" "></day>
-                            <month suffix=" " text-transform="capitalize"></month>
+                            <month suffix=" " text-case="capitalize-first"></month>
                             <year></year>
                         </date>
                         <pages prefix=", "></pages>

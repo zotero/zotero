@@ -16,14 +16,14 @@
   <macro name="editor">
     <names variable="editor" prefix="(" suffix=")" delimiter=", ">
       <name and="text" initialize-with=". " delimiter=", "/>
-      <label form="short" prefix=", " text-transform="lowercase" suffix="."/>
+      <label form="short" prefix=", " text-case="lowercase" suffix="."/>
     </names>
   </macro>
   <macro name="author">
     <names variable="author">
       <name name-as-sort-order="all" and="text" sort-separator=", " initialize-with=". "
 	    delimiter=", "/>
-      <label form="short" prefix=" (" suffix=".)" text-transform="lowercase"/>
+      <label form="short" prefix=" (" suffix=".)" text-case="lowercase"/>
       <substitute>
 	<names variable="editor"/>
 	<text macro="title"/>
@@ -63,7 +63,7 @@
       <text value="[online]" suffix=" "/>
       <text variable="URL"/>
       <group prefix=" (" suffix=")">
-	<text term="accessed" text-transform="capitalize" suffix=" "/>
+	<text term="accessed" text-case="capitalize-first" suffix=" "/>
 	<date variable="accessed">
 	  <date-part name="month" suffix=" "/>
 	  <date-part name="day" suffix=", "/>
@@ -127,10 +127,10 @@
 	<else-if type="chapter">
 	  <text macro="title" prefix=" " quotes="true"/>
 	  <group class="container" prefix=" ">
-	    <text term="in" text-transform="lowercase"/>
+	    <text term="in" text-case="lowercase"/>
 	    <names variable="editor" prefix=" " suffix="," delimiter=", ">
 	      <name and="text" sort-separator=", " initialize-with=". "/>
-	      <label form="short" prefix=" (" suffix=".)" text-transform="lowercase"/>
+	      <label form="short" prefix=" (" suffix=".)" text-case="lowercase"/>
 	    </names>
 	    <text variable="container-title" font-style="italic" prefix=" " suffix="."/>
 	    <text variable="collection-title" prefix=" " suffix="."/>

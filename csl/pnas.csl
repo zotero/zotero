@@ -16,7 +16,7 @@
   </info>
   <macro name="editor">
     <names variable="editor" delimiter=", ">
-      <label form="short" prefix="" text-transform="lowercase" suffix=" "/>
+      <label form="short" prefix="" text-case="lowercase" suffix=" "/>
       <name  initialize-with="" name-as-sort-order="all" sort-separator=" "
 	     delimiter=", " delimiter-precedes-last="always"/>
     </names>
@@ -25,7 +25,7 @@
     <names variable="author">
       <name name-as-sort-order="all" sort-separator=" " initialize-with=""
 	    delimiter=", " delimiter-precedes-last="always"/>
-      <label form="short" prefix=" " suffix="." text-transform="lowercase"/>
+      <label form="short" prefix=" " suffix="." text-case="lowercase"/>
       <substitute>
 	<names variable="editor"/>
 	<text variable="title"/>
@@ -37,7 +37,7 @@
       <text value="Available at:" suffix=" "/>
       <text variable="URL"/>
       <group prefix=" [" suffix="]">
-	<text term="accessed" text-transform="capitalize" suffix=" "/>
+	<text term="accessed" text-case="capitalize-first" suffix=" "/>
 	<date variable="accessed">
 	  <date-part name="month" suffix=" "/>
 	  <date-part name="day" suffix=", "/>
@@ -87,7 +87,7 @@
 	</if>
 	<else-if type="chapter">
 	  <group class="container" prefix=" " delimiter=" ">
-	    <text term="in" text-transform="lowercase"/>
+	    <text term="in" text-case="lowercase"/>
 	    <group delimiter=", ">
 	      <text variable="container-title" font-style="italic"/>
 	      <text variable="collection-title" prefix=" " suffix="."/>

@@ -17,14 +17,14 @@
   <macro name="editor-translator">
     <names variable="editor translator" prefix="(" suffix=")" delimiter=", ">
       <name and="symbol" initialize-with=". " delimiter=", "/>
-      <label form="short" prefix=", " text-transform="capitalize" suffix="."/>
+      <label form="short" prefix=", " text-case="capitalize-first" suffix="."/>
     </names>
   </macro>
   <macro name="author">
     <names variable="author">
       <name name-as-sort-order="all" and="symbol" sort-separator=", " initialize-with=". "
         delimiter=", " delimiter-precedes-last="always"/>
-      <label form="short" prefix=" (" suffix=".)" text-transform="capitalize"/>
+      <label form="short" prefix=" (" suffix=".)" text-case="capitalize-first"/>
       <substitute>
         <names variable="editor"/>
         <names variable="translator"/>
@@ -51,7 +51,7 @@
   </macro>
   <macro name="access">
     <group>
-      <text term="retrieved" text-transform="capitalize" suffix=" "/>
+      <text term="retrieved" text-case="capitalize-first" suffix=" "/>
       <date variable="accessed" suffix=", ">
         <date-part name="month" suffix=" "/>
         <date-part name="day" suffix=", "/>
@@ -129,11 +129,11 @@
         <else-if type="chapter">
           <text macro="title" prefix=" "/>
           <group class="container" prefix=". ">
-            <text term="in" text-transform="capitalize" suffix=" "/>
+            <text term="in" text-case="capitalize-first" suffix=" "/>
             <group delimiter=", " suffix=".">
               <names variable="editor translator" delimiter=", ">
                 <name and="symbol" sort-separator=", " initialize-with=". "/>
-                <label form="short" prefix=" (" suffix=".)" text-transform="capitalize"/>
+                <label form="short" prefix=" (" suffix=".)" text-case="capitalize-first"/>
               </names>
               <group delimiter=" ">
 	            <text variable="container-title" font-style="italic"/>
