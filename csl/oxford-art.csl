@@ -1,0 +1,108 @@
+<style xmlns="http://purl.org/net/xbiblio/csl" class="note" xml:lang="en"> 
+  <info>
+    <title>Art History Journal</title>
+    <id>http://www.zotero.org/styles/oxford-art</id>
+    <link>http://www.zotero.org/styles/oxford-art</link>
+    <source>http://www.oxfordjournals.org/oxartj/for_authors/index.html</source>
+    <author>
+      <name>Julian Onions</name>
+      <email>julian.onions@gmail.com</email>
+    </author>
+    <summary>Oxford Art journal style</summary>
+    <category term="numeric"/>
+    <updated/>
+  </info>
+  <macro name="author">
+    <names variable="author">
+      <name  and="text" delimiter=", " />
+      <label form="short" prefix=" (" suffix=".)"/>
+      <substitute>
+	<names variable="editor"/>
+	<names variable="translator"/>
+	<text macro="title"/>
+      </substitute>
+    </names>
+  </macro> 
+  <macro name="title">
+    <choose>
+      <if type="thesis">
+	<text variable="title" form="short" quotes="true"/>
+      </if>
+      <else-if type="book">
+	<text variable="title" form="short" font-style="italic"/>
+      </else-if>
+      <else>
+	<text variable="title" form="short" quotes="true"/>
+      </else>
+    </choose>
+  </macro>
+  <macro name="publisher">
+    <group delimiter=": ">
+    <text variable="publisher"/>
+    <text variable="publisher-place"/>
+    </group>
+  </macro>
+  <macro name="date">
+    <date variable="issued">
+      <date-part name="month" suffix=" "/>
+      <date-part name="year"/>
+    </date>
+  </macro>
+  <macro name="volumes">
+    <group>
+      <text variable="number-of-volumes"/>
+      <text value=" vols"/>
+    </group>
+  </macro>
+  <macro name="pageno">
+    <label variable="page" suffix=". " form="short"/>
+    <text variable="page"/>
+  </macro>
+  <macro name="pageref">
+    <text variable="locator"/>
+  </macro>
+  <macro name="volref">
+    <group delimiter=", ">
+      <text variable="volume" prefix="Vol. " />
+      <text variable="issue" prefix="no. "/>
+    </group>
+  </macro>
+  <macro name="container">
+    <text variable="container-title" font-style="italic"/>
+  </macro>
+  <citation>
+    <layout suffix="." delimiter="; ">
+      <group delimiter=", ">
+	<text macro="author"/>
+	<choose>
+	  <if type="book">
+	    <group delimiter=", ">
+            <text macro="title" />
+            <text macro="volumes"/>
+            </group>
+	    <group prefix=" (" suffix=")" delimiter=", ">
+		<text macro="publisher"/>
+		<text macro="container"/>
+		<text macro="volref"/>
+		<text macro="date"/>
+		<text macro="pageno"/>
+		<text macro="pageref"/>
+	    </group>
+	  </if>
+	  <else>
+	     <group delimiter=", ">
+		<text macro="title" />
+		<text macro="publisher"/>
+		<text macro="container"/>
+		<text macro="volref"/>
+		<text macro="date"/>
+		<text macro="volumes"/>
+		<text macro="pageno"/>
+		<text macro="pageref"/>
+	     </group>
+	  </else>
+	</choose>
+      </group>
+    </layout>
+  </citation>
+</style>
