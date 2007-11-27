@@ -2591,7 +2591,8 @@ Zotero.CSL.FormattedString.prototype.append = function(string, element, dontDeli
 			var style = "";
 			
 			var cssAttributes = ["font-family", "font-style", "font-variant",
-								 "font-weight", "vertical-align", "display"];
+						"font-weight", "vertical-align", "display",
+						"text-decoration" ];
 			for(var j in cssAttributes) {
 				var value = element["@"+cssAttributes[j]].toString();
 				if(value && value.indexOf('"') == -1) {
