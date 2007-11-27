@@ -1,0 +1,352 @@
+<?oxygen RNGSchema="csl.rnc" type="compact"?>
+<style xmlns="http://purl.org/net/xbiblio/csl" class="note" xml:lang="ro">
+    <info>
+        <title>Romanian Inter Institute Style</title>
+        <id>http://www.zotero.org/styles/inter-ro</id>
+        <link>http://purl.org/net/xbiblio/csl/styles/inter-ro.csl</link>
+        <author>
+            <name>Nicolae Turcan</name>
+            <email>nicturcan@gmail.com</email>
+        </author>
+        <category term="philosophy"/>
+        <category term="generic-base"/>
+        <category term="author-date"/>
+        <updated>2007-09-26T10:58:54+00:00</updated>
+    </info>
+    <macro name="editor-translator">
+        <names variable="editor translator" delimiter=", ">
+            <label form="verb"/>
+            <name and="text" delimiter=", " prefix=" " delimiter-precedes-last="never"/>
+        </names>
+    </macro>
+    <macro name="author">
+        <names variable="author">
+            <name form="long" delimiter=", " delimiter-precedes-last="always"
+                font-variant="small-caps"/>
+            <label form="short" prefix=" (" suffix=".)"/>
+            <substitute>
+                <names variable="editor" font-variant="small-caps"/>
+                <names variable="translator" font-variant="small-caps"/>
+                <text macro="title"/>
+            </substitute>
+        </names>
+    </macro>
+    <macro name="author-bibliography">
+        <names variable="author">
+            <name form="long" delimiter="; " delimiter-precedes-last="always"
+                font-variant="small-caps" name-as-sort-order="all"/>
+            <label form="short" prefix=" (" suffix=".)"/>
+            <substitute>
+                <names variable="editor" font-variant="small-caps"/>
+                <names variable="translator" font-variant="small-caps"/>
+                <text macro="title"/>
+            </substitute>
+        </names>
+    </macro>
+    <macro name="access">
+        <group>
+            <text term="accessed" suffix=" "/>
+            <date variable="accessed" suffix=", ">
+                <date-part name="day" suffix=" "/>
+                <date-part name="month" suffix=" " text-transform="lowercase"/>
+                <date-part name="year"/>
+            </date>
+            <group>
+                <text term="at" suffix=" "/>
+                <text variable="URL"/>
+            </group>
+        </group>
+    </macro>
+    <macro name="title">
+        <choose>
+            <if type="book">
+                <text variable="title" enforce-case="sentence" font-style="italic"/>
+            </if>
+            <else>
+                <text variable="title" enforce-case="sentence" prefix="&#8222;"
+                    suffix="&#8221;"/>
+            </else>
+        </choose>
+    </macro>
+    <macro name="title-short">
+        <choose>
+            <if type="book">
+                <text variable="title" enforce-case="sentence" font-style="italic" form="short"/>
+            </if>
+            <else>
+                <text variable="title" enforce-case="sentence" prefix="&#8222;"
+                    suffix="&#8221;" form="short"/>
+            </else>
+        </choose>
+    </macro>
+    <macro name="publisher">
+        <group delimiter=", ">
+            <text variable="publisher"/>
+            <text variable="publisher-place"/>
+        </group>
+    </macro>
+    <citation>
+        <option name="et-al-min" value="6"/>
+        <option name="et-al-use-first" value="1"/>
+        <option name="et-al-subsequent-min" value="3"/>
+        <option name="et-al-subsequent-use-first" value="1"/>
+        <option name="collapse" value="year"/>
+        <sort>
+            <key macro="author"/>
+            <key variable="issued"/>
+        </sort>
+        <layout suffix=".">
+            <choose>
+                <if position="first">
+                    <choose>
+                        <if type="book">
+                            <group delimiter=", ">
+                                <text macro="author"/>
+                                <group delimiter=" ">
+                                    <text macro="title"/>
+                                    <text variable="volume"/>
+                                    <text variable="collection-title" prefix="( = " suffix=")"/>
+                                </group>
+                                <text macro="editor-translator"/>
+                                <text variable="edition"/>
+                                <text macro="publisher"/>
+                                <date variable="issued">
+                                    <date-part name="year"/>
+                                </date>
+                                <group>
+                                    <label variable="locator" include-period="true" form="short"/>
+                                    <text variable="locator" prefix=" "/>
+                                </group>
+                                <text macro="access"/>
+                            </group>
+                        </if>
+                        <else-if type="chapter">
+                            <group delimiter=", ">
+                                <text macro="author"/>
+                                <text macro="title"/>
+                                <group delimiter=" " class="container">
+                                    <text term="in"/>
+                                    <names variable="editor translator" delimiter=", ">
+                                        <name sort-separator=", " font-variant="small-caps"/>
+                                        <label form="short" prefix="(" suffix=".)"
+                                            text-transform="lowercase"/>
+                                    </names>
+                                    <text variable="container-title" font-style="italic"/>
+                                    <text variable="volume"/>
+                                    <text variable="collection-title" prefix="( = " suffix=")"/>
+                                </group>
+                                <text macro="editor-translator"/>
+                                <text variable="edition"/>
+                                <text macro="publisher"/>
+                                <date variable="issued">
+                                    <date-part name="year"/>
+                                </date>
+                                <group>
+                                    <label variable="locator" include-period="true" form="short"/>
+                                    <text variable="locator" prefix=" "/>
+                                </group>
+                                <text macro="access"/>
+                            </group>
+                        </else-if>
+                        <else-if type="article">
+                            <group delimiter=", ">
+                                <text macro="author"/>
+                                <text macro="title"/>
+                                <group delimiter=" ">
+                                    <text variable="container-title" font-style="italic"/>
+                                    <group delimiter=", ">
+                                        <text variable="volume"/>
+                                        <text variable="issue"/>
+                                    </group>
+                                    <date variable="issued">
+                                        <date-part name="year" prefix="(" suffix=")"/>
+                                    </date>
+                                </group>
+                                <text macro="editor-translator"/>
+                                <text variable="edition"/>
+                                <text macro="publisher"/>
+                                <group>
+                                    <label variable="locator" include-period="true" form="short"/>
+                                    <text variable="locator" prefix=" "/>
+                                </group>
+                                <text macro="access"/>
+                            </group>
+                        </else-if>
+                        <else>
+                            <group delimiter=", ">
+                                <text macro="author"/>
+                                <text macro="title"/>
+                                <text macro="editor-translator"/>
+                                <group class="container" delimiter=" ">
+                                    <text variable="container-title" font-style="italic"/>
+                                    <group delimiter=", ">
+                                        <text variable="volume"/>
+                                        <text variable="issue"/>
+                                    </group>
+                                    <group>
+                                        <label variable="locator" include-period="true" form="short"/>
+                                        <text variable="locator" prefix=" "/>
+                                    </group>
+                                </group>
+                            </group>
+                        </else>
+                    </choose>
+                </if>
+                <else-if position="ibid-with-locator">
+                    <group delimiter=", ">
+                        <text term="ibid" form="long" font-style="italic"
+                            text-transform="capitalize"/>
+                        <group>
+                            <label variable="locator" include-period="true" form="short"/>
+                            <text variable="locator" prefix=" "/>
+                        </group>
+                    </group>
+                </else-if>
+                <else-if position="ibid">
+                    <text term="ibid" form="long" font-style="italic" text-transform="capitalize"/>
+                </else-if>
+                <else-if position="subsequent">
+                    <choose>
+                        <if type="book">
+                            <group delimiter=", ">
+                                <text macro="author"/>
+                                <group delimiter=" ">
+                                    <text macro="title-short"/>
+                                    <text variable="volume"/>
+                                </group>
+                                <group>
+                                    <label variable="locator" include-period="true" form="short"/>
+                                    <text variable="locator" prefix=" "/>
+                                </group>
+                            </group>
+                        </if>
+                        <else>
+                            <group delimiter=", ">
+                                <text macro="author"/>
+                                <text macro="title-short"/>
+                                <group>
+                                    <label variable="locator" include-period="true" form="short"/>
+                                    <text variable="locator" prefix=" "/>
+                                </group>
+                            </group>
+                        </else>
+                    </choose>
+                </else-if>
+            </choose>
+        </layout>
+    </citation>
+    <bibliography>
+        <option name="hanging-indent" value="true"/>
+        <option name="et-al-min" value="6"/>
+        <option name="et-al-use-first" value="6"/>
+        <sort>
+            <key macro="author"/>
+            <key variable="issued"/>
+        </sort>
+        <layout suffix=".">
+            <names variable="author" suffix=", ">
+                <name form="long" delimiter="; " delimiter-precedes-last="always"
+                    font-variant="small-caps" name-as-sort-order="all"/>
+                <label form="short" prefix=" (" suffix=".)"/>
+                <substitute>
+                    <names variable="editor" font-variant="small-caps">
+                        <name form="long" delimiter="; " delimiter-precedes-last="always"
+                            name-as-sort-order="all"/>
+                    </names>
+                    <names variable="translator" font-variant="small-caps">
+                        <name form="long" delimiter="; " delimiter-precedes-last="always"
+                            name-as-sort-order="all"/>
+                    </names>
+                    <text macro="title"/>
+                </substitute>
+            </names>
+            <choose>
+                <if type="book">
+                    <group delimiter=", ">
+                        <group delimiter=" ">
+                            <text macro="title"/>
+                            <text variable="volume"/>
+                            <text variable="collection-title" prefix="( = " suffix=")"/>
+                        </group>
+                        <text macro="editor-translator"/>
+                        <text variable="edition"/>
+                        <text macro="publisher"/>
+                        <date variable="issued">
+                            <date-part name="year"/>
+                        </date>
+                        <group>
+                            <label variable="page" include-period="true" form="short"/>
+                            <text variable="page" prefix=" "/>
+                        </group>
+                    </group>
+                </if>
+                <else-if type="chapter">
+                    <group delimiter=", ">
+                        <text macro="title"/>
+                        <group delimiter=" " class="container">
+                            <text term="in"/>
+                            <names variable="editor translator" delimiter=", ">
+                                <name sort-separator=", " font-variant="small-caps"/>
+                                <label form="short" prefix="(" suffix=".)"
+                                    text-transform="lowercase"/>
+                            </names>
+                            <text variable="container-title" font-style="italic"/>
+                            <text variable="volume"/>
+                            <text variable="collection-title" prefix="( = " suffix=")"/>
+                        </group>
+                        <text macro="editor-translator"/>
+                        <text variable="edition"/>
+                        <text macro="publisher"/>
+                        <date variable="issued">
+                            <date-part name="year"/>
+                        </date>
+                        <group>
+                            <label variable="page" include-period="true" form="short"/>
+                            <text variable="page" prefix=" "/>
+                        </group>
+                    </group>
+                </else-if>
+                <else-if type="article">
+                    <group delimiter=", ">
+                        <text macro="title"/>
+                        <group delimiter=" ">
+                            <text variable="container-title" font-style="italic"/>
+                            <group delimiter=", ">
+                                <text variable="volume"/>
+                                <text variable="issue"/>
+                            </group>
+                            <date variable="issued">
+                                <date-part name="year" prefix="(" suffix=")"/>
+                            </date>
+                        </group>
+                        <text macro="editor-translator"/>
+                        <text variable="edition"/>
+                        <text macro="publisher"/>
+                        <group>
+                            <label variable="page" include-period="true" form="short"/>
+                            <text variable="page" prefix=" "/>
+                        </group>
+                    </group>
+                </else-if>
+                <else>
+                    <group delimiter=", ">
+                        <text macro="title"/>
+                        <text macro="editor-translator"/>
+                        <group class="container" delimiter=" ">
+                            <text variable="container-title" font-style="italic"/>
+                            <group delimiter=", ">
+                                <text variable="volume"/>
+                                <text variable="issue"/>
+                            </group>
+                            <group>
+                                <label variable="page" include-period="true" form="short"/>
+                                <text variable="page" prefix=" "/>
+                            </group>
+                        </group>
+                    </group>
+                </else>
+            </choose>
+            <text prefix=", " macro="access"/>
+        </layout>
+    </bibliography>
+</style>
