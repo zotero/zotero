@@ -1,9 +1,9 @@
 <?oxygen RNGSchema="csl.rnc" type="compact"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="note" xml:lang="ro">
     <info>
-        <title>Romanian Inter Institute Style</title>
+        <title>INTER. Romanian Institute for Inter-Orthodox, Inter-Confessional and Inter-Religious Studies</title>
         <id>http://www.zotero.org/styles/inter-ro</id>
-        <link>http://purl.org/net/xbiblio/csl/styles/inter-ro.csl</link>
+        <link>https://www.zotero.org/svn/extension/trunk/csl/inter-ro.csl</link>
         <author>
             <name>Nicolae Turcan</name>
             <email>nicturcan@gmail.com</email>
@@ -23,18 +23,6 @@
         <names variable="author">
             <name form="long" delimiter=", " delimiter-precedes-last="always"
                 font-variant="small-caps"/>
-            <label form="short" prefix=" (" suffix=".)"/>
-            <substitute>
-                <names variable="editor" font-variant="small-caps"/>
-                <names variable="translator" font-variant="small-caps"/>
-                <text macro="title"/>
-            </substitute>
-        </names>
-    </macro>
-    <macro name="author-bibliography">
-        <names variable="author">
-            <name form="long" delimiter="; " delimiter-precedes-last="always"
-                font-variant="small-caps" name-as-sort-order="all"/>
             <label form="short" prefix=" (" suffix=".)"/>
             <substitute>
                 <names variable="editor" font-variant="small-caps"/>
