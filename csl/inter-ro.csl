@@ -1,7 +1,8 @@
-<?oxygen RNGSchema="csl.rnc" type="compact"?>
+<?oxygen RNGSchema="http://xbiblio.svn.sourceforge.net/viewvc/*checkout*/xbiblio/csl/schema/trunk/csl.rnc" type="compact"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="note" xml:lang="ro">
     <info>
-        <title>INTER. Romanian Institute for Inter-Orthodox, Inter-Confessional and Inter-Religious Studies</title>
+        <title>INTER. Romanian Institute for Inter-Orthodox, Inter-Confessional and Inter-Religious
+            Studies</title>
         <id>http://www.zotero.org/styles/inter-ro</id>
         <link>https://www.zotero.org/svn/extension/trunk/csl/inter-ro.csl</link>
         <author>
@@ -36,7 +37,7 @@
             <text term="accessed" suffix=" "/>
             <date variable="accessed" suffix=", ">
                 <date-part name="day" suffix=" "/>
-                <date-part name="month" suffix=" " text-transform="lowercase"/>
+                <date-part name="month" suffix=" " text-case="lowercase"/>
                 <date-part name="year"/>
             </date>
             <group>
@@ -48,10 +49,10 @@
     <macro name="title">
         <choose>
             <if type="book">
-                <text variable="title" enforce-case="sentence" font-style="italic"/>
+                <text variable="title" text-case="sentence" font-style="italic"/>
             </if>
             <else>
-                <text variable="title" enforce-case="sentence" prefix="&#8222;"
+                <text variable="title" text-case="sentence" prefix="&#8222;"
                     suffix="&#8221;"/>
             </else>
         </choose>
@@ -59,10 +60,10 @@
     <macro name="title-short">
         <choose>
             <if type="book">
-                <text variable="title" enforce-case="sentence" font-style="italic" form="short"/>
+                <text variable="title" text-case="sentence" font-style="italic" form="short"/>
             </if>
             <else>
-                <text variable="title" enforce-case="sentence" prefix="&#8222;"
+                <text variable="title" text-case="sentence" prefix="&#8222;"
                     suffix="&#8221;" form="short"/>
             </else>
         </choose>
@@ -117,7 +118,7 @@
                                     <names variable="editor translator" delimiter=", ">
                                         <name sort-separator=", " font-variant="small-caps"/>
                                         <label form="short" prefix="(" suffix=".)"
-                                            text-transform="lowercase"/>
+                                            text-case="lowercase"/>
                                     </names>
                                     <text variable="container-title" font-style="italic"/>
                                     <text variable="volume"/>
@@ -183,7 +184,7 @@
                 <else-if position="ibid-with-locator">
                     <group delimiter=", ">
                         <text term="ibid" form="long" font-style="italic"
-                            text-transform="capitalize"/>
+                             text-case="capitalize-first"/>
                         <group>
                             <label variable="locator" include-period="true" form="short"/>
                             <text variable="locator" prefix=" "/>
@@ -191,7 +192,7 @@
                     </group>
                 </else-if>
                 <else-if position="ibid">
-                    <text term="ibid" form="long" font-style="italic" text-transform="capitalize"/>
+                    <text term="ibid" form="long" font-style="italic" text-case="capitalize-first"/>
                 </else-if>
                 <else-if position="subsequent">
                     <choose>
@@ -276,7 +277,7 @@
                             <names variable="editor translator" delimiter=", ">
                                 <name sort-separator=", " font-variant="small-caps"/>
                                 <label form="short" prefix="(" suffix=".)"
-                                    text-transform="lowercase"/>
+                                    text-case="lowercase"/>
                             </names>
                             <text variable="container-title" font-style="italic"/>
                             <text variable="volume"/>
