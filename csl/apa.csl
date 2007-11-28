@@ -117,6 +117,8 @@
       <text macro="author" suffix="."/>
       <date variable="issued" prefix=" (" suffix=").">
         <date-part name="year"/>
+        <date-part prefix=", " name="month"/>
+        <date-part prefix=" " name="day"/>
       </date>
       <choose>
         <if type="book">
