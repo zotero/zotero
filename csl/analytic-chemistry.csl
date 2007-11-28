@@ -70,14 +70,12 @@
   </macro>
   <citation>
     <option name="collapse" value="citation-number"/>
-    <layout prefix="(" suffix=")" delimiter=", " font-style="italic">
-      <text variable="citation-number" />
+    <layout delimiter=", " >
+      <text variable="citation-number" vertical-align="sup"/>
     </layout>
   </citation>
   <bibliography>
     <option name="second-field-align" value="margin"/>
-    <option name="et-al-min" value="5"/>
-    <option name="et-al-use-first" value="1"/>
     <layout suffix=".">
       <text variable="citation-number" prefix="(" suffix=") "/>
       <text macro="author" suffix=" "/>
