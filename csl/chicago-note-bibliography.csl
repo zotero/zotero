@@ -134,6 +134,13 @@
   </macro>
   <macro name="date-main">
     <choose>
+      <if type="graphic report" match="any">
+    <date variable="issued">
+      <date-part name="month" suffix=" "/>
+	  <date-part name="day" suffix=", "/>
+	  <date-part name="year"/>
+    </date>
+      </if>
       <if type="book chapter thesis" match="any">
     <date variable="issued">
 	  <date-part name="year"/>
@@ -223,7 +230,7 @@
 	<else-if type="paper-conference">
 	  <text macro="editor-translator" suffix=". "/>
 	  <text variable="genre" text-case="capitalize-first" suffix=" presented at the "/>
-	  <text variable="event" prefix=" " suffix=", "/>
+	  <text variable="event" suffix=", "/>
 	  <text variable="event-place" suffix=", "/>
 	  <text macro="date-main"/>
 	</else-if>
@@ -247,24 +254,15 @@
 	  <text macro="date-main" prefix=". "/>
 	</else-if>
 	<else-if type="graphic">
-	  <text macro="editor-translator" suffix=". "/>
 	  <text variable="medium" text-case="capitalize-first" suffix=". "/>
 	  <text macro="publisher" suffix=", "/>
-      <date variable="issued">
-        <date-part name="month" suffix=" "/>
-	    <date-part name="day" suffix=", "/>
-	    <date-part name="year"/>
-      </date>
+	  <text macro="date-main"/>
 	</else-if>
 	<else-if type="report">
 	  <text macro="editor-translator" suffix=". "/>
 	  <text variable="genre" suffix=". "/>
 	  <text macro="publisher" suffix=", "/>
-      <date variable="issued">
-        <date-part name="month" suffix=" "/>
-	    <date-part name="day" suffix=", "/>
-	    <date-part name="year"/>
-      </date>
+	   <text macro="date-main"/>
 	</else-if>
 	<else-if type="book">
 	  <text macro="editor-translator" suffix=". "/>
