@@ -3,15 +3,13 @@
   <info>
     <title>ALL - display all fields in a debug view</title>
     <id>http://www.zotero.org/styles/all</id>
-    <link>http://www.zotero.org/styles/all</link>
     <author>
       <name>Julian Onions</name>
       <email>julian.onions@gmail.com</email>
     </author>
-    <category term="generic-base"/>
     <updated/>
-    <summary>The ALL style - a debugging view to show eveything. 
-Generated from a perl script.</summary>
+    <summary>The ALL style - a debugging view to show everything. 
+    Generated from a perl script.</summary>
   </info>
   <macro name="author">
     <names variable="author">
@@ -26,13 +24,6 @@ Generated from a perl script.</summary>
     </names>
   </macro>
   <citation>
-    <option name="et-al-min" value="6"/>
-    <option name="et-al-use-first" value="6"/>
-    <option name="et-al-subsequent-min" value="6"/>
-    <option name="et-al-subsequent-use-first" value="1"/>
-    <option name="disambiguate-add-year-suffix" value="true"/>
-    <option name="disambiguate-add-names" value="true"/>
-    <option name="disambiguate-add-givenname" value="true"/>
     <layout prefix="(" suffix=")" delimiter="; ">
       <text macro="author"/>
       <date variable="issued" prefix=", ">
@@ -43,212 +34,277 @@ Generated from a perl script.</summary>
     </layout>
   </citation>
   <bibliography>
-    <option name="hanging-indent" value="true"/>
-    <option name="et-al-min" value="6"/>
-    <option name="et-al-use-first" value="6"/>
     <layout>
       <choose>
 	<if type="article">
-	  <text value="Type is article"/>
+	  <text value="Type is article
+		       "/>
 	</if>
       </choose>
       <choose>
 	<if type="article-magazine">
-	  <text value="Type is article-magazine"/>
+	  <text value="Type is article-magazine
+		       "/>
 	</if>
       </choose>
       <choose>
 	<if type="article-newspaper">
-	  <text value="Type is article-newspaper"/>
+	  <text value="Type is article-newspaper
+		       "/>
 	</if>
       </choose>
       <choose>
 	<if type="article-journal">
-	  <text value="Type is article-journal"/>
+	  <text value="Type is article-journal
+		       "/>
 	</if>
       </choose>
       <choose>
 	<if type="bill">
-	  <text value="Type is bill"/>
+	  <text value="Type is bill
+		       "/>
 	</if>
       </choose>
       <choose>
 	<if type="book">
-	  <text value="Type is book"/>
+	  <text value="Type is book
+		       "/>
 	</if>
       </choose>
       <choose>
 	<if type="chapter">
-	  <text value="Type is chapter"/>
+	  <text value="Type is chapter
+		       "/>
 	</if>
       </choose>
       <choose>
 	<if type="entry">
-	  <text value="Type is entry"/>
+	  <text value="Type is entry
+		       "/>
 	</if>
       </choose>
       <choose>
 	<if type="entry-dictionary">
-	  <text value="Type is entry-dictionary"/>
+	  <text value="Type is entry-dictionary
+		       "/>
 	</if>
       </choose>
       <choose>
 	<if type="entry-encylopedia">
-	  <text value="Type is entry-encylopedia"/>
+	  <text value="Type is entry-encylopedia
+		       "/>
 	</if>
       </choose>
       <choose>
 	<if type="figure">
-	  <text value="Type is figure"/>
+	  <text value="Type is figure
+		       "/>
 	</if>
       </choose>
       <choose>
 	<if type="graphic">
-	  <text value="Type is graphic"/>
+	  <text value="Type is graphic
+		       "/>
 	</if>
       </choose>
       <choose>
 	<if type="interview">
-	  <text value="Type is interview"/>
+	  <text value="Type is interview
+		       "/>
 	</if>
       </choose>
       <choose>
 	<if type="legislation">
-	  <text value="Type is legislation"/>
+	  <text value="Type is legislation
+		       "/>
 	</if>
       </choose>
       <choose>
 	<if type="legal_case">
-	  <text value="Type is legal_case"/>
+	  <text value="Type is legal_case
+		       "/>
 	</if>
       </choose>
       <choose>
 	<if type="manuscript">
-	  <text value="Type is manuscript"/>
+	  <text value="Type is manuscript
+		       "/>
 	</if>
       </choose>
       <choose>
 	<if type="map">
-	  <text value="Type is map"/>
+	  <text value="Type is map
+		       "/>
 	</if>
       </choose>
       <choose>
 	<if type="motion_picture">
-	  <text value="Type is motion_picture"/>
+	  <text value="Type is motion_picture
+		       "/>
 	</if>
       </choose>
       <choose>
 	<if type="musical_score">
-	  <text value="Type is musical_score"/>
+	  <text value="Type is musical_score
+		       "/>
 	</if>
       </choose>
       <choose>
 	<if type="pamphlet">
-	  <text value="Type is pamphlet"/>
+	  <text value="Type is pamphlet
+		       "/>
 	</if>
       </choose>
       <choose>
 	<if type="paper-conference">
-	  <text value="Type is paper-conference"/>
+	  <text value="Type is paper-conference
+		       "/>
 	</if>
       </choose>
       <choose>
 	<if type="patent">
-	  <text value="Type is patent"/>
+	  <text value="Type is patent
+		       "/>
 	</if>
       </choose>
       <choose>
 	<if type="post">
-	  <text value="Type is post"/>
+	  <text value="Type is post
+		       "/>
 	</if>
       </choose>
       <choose>
 	<if type="post-weblog">
-	  <text value="Type is post-weblog"/>
+	  <text value="Type is post-weblog
+		       "/>
 	</if>
       </choose>
       <choose>
 	<if type="personal_communication">
-	  <text value="Type is personal_communication"/>
+	  <text value="Type is personal_communication
+		       "/>
 	</if>
       </choose>
       <choose>
 	<if type="report">
-	  <text value="Type is report"/>
+	  <text value="Type is report
+		       "/>
 	</if>
       </choose>
       <choose>
 	<if type="review">
-	  <text value="Type is review"/>
+	  <text value="Type is review
+		       "/>
 	</if>
       </choose>
       <choose>
 	<if type="review-book">
-	  <text value="Type is review-book"/>
+	  <text value="Type is review-book
+		       "/>
 	</if>
       </choose>
       <choose>
 	<if type="song">
-	  <text value="Type is song"/>
+	  <text value="Type is song
+		       "/>
 	</if>
       </choose>
       <choose>
 	<if type="speech">
-	  <text value="Type is speech"/>
+	  <text value="Type is speech
+		       "/>
 	</if>
       </choose>
       <choose>
 	<if type="thesis">
-	  <text value="Type is thesis"/>
+	  <text value="Type is thesis
+		       "/>
 	</if>
       </choose>
       <choose>
 	<if type="treaty">
-	  <text value="Type is treaty"/>
+	  <text value="Type is treaty
+		       "/>
 	</if>
       </choose>
       <choose>
 	<if type="webpage">
-	  <text value="Type is webpage"/>
+	  <text value="Type is webpage
+		       "/>
 	</if>
       </choose>
       <names variable="author">
-	<name prefix=" AUTHOR: " delimiter=", " delimiter-precedes-last="always" form="long"/>
+	<name prefix=" AUTHOR LONG=" delimiter=", " delimiter-precedes-last="always" form="long"/>
       </names>
       <names variable="author">
-	<name prefix=" AUTHOR (short): " delimiter=", " delimiter-precedes-last="always" form="short"/>
+	<name prefix=" SHORT=" delimiter=", " delimiter-precedes-last="always" form="short" suffix="
+												    "/>
       </names>
       <names variable="editor">
-	<name prefix=" EDITOR: " delimiter=", " delimiter-precedes-last="always" form="long"/>
+	<name prefix=" EDITOR LONG=" delimiter=", " delimiter-precedes-last="always" form="long"/>
       </names>
       <names variable="editor">
-	<name prefix=" EDITOR (short): " delimiter=", " delimiter-precedes-last="always" form="short"/>
+	<name prefix=" SHORT=" delimiter=", " delimiter-precedes-last="always" form="short" suffix="
+												    "/>
       </names>
       <names variable="translator">
-	<name prefix=" TRANSLATOR: " delimiter=", " delimiter-precedes-last="always" form="long"/>
+	<name prefix=" TRANSLATOR LONG=" delimiter=", " delimiter-precedes-last="always" form="long"/>
       </names>
       <names variable="translator">
-	<name prefix=" TRANSLATOR (short): " delimiter=", " delimiter-precedes-last="always" form="short"/>
+	<name prefix=" SHORT=" delimiter=", " delimiter-precedes-last="always" form="short" suffix="
+												    "/>
+      </names>
+      <names variable="recipient">
+	<name prefix=" RECIPIENT LONG=" delimiter=", " delimiter-precedes-last="always" form="long"/>
+      </names>
+      <names variable="recipient">
+	<name prefix=" SHORT=" delimiter=", " delimiter-precedes-last="always" form="short" suffix="
+												    "/>
+      </names>
+      <names variable="interviewer">
+	<name prefix=" INTERVIEWER LONG=" delimiter=", " delimiter-precedes-last="always" form="long"/>
+      </names>
+      <names variable="interviewer">
+	<name prefix=" SHORT=" delimiter=", " delimiter-precedes-last="always" form="short" suffix="
+												    "/>
       </names>
       <names variable="publisher">
-	<name prefix=" PUBLISHER: " delimiter=", " delimiter-precedes-last="always" form="long"/>
+	<name prefix=" PUBLISHER LONG=" delimiter=", " delimiter-precedes-last="always" form="long"/>
       </names>
       <names variable="publisher">
-	<name prefix=" PUBLISHER (short): " delimiter=", " delimiter-precedes-last="always" form="short"/>
+	<name prefix=" SHORT=" delimiter=", " delimiter-precedes-last="always" form="short" suffix="
+												    "/>
+      </names>
+      <names variable="series-editor">
+	<name prefix=" SERIES-EDITOR LONG=" delimiter=", " delimiter-precedes-last="always" form="long"/>
+      </names>
+      <names variable="series-editor">
+	<name prefix=" SHORT=" delimiter=", " delimiter-precedes-last="always" form="short" suffix="
+												    "/>
+      </names>
+      <names variable="composer">
+	<name prefix=" COMPOSER LONG=" delimiter=", " delimiter-precedes-last="always" form="long"/>
+      </names>
+      <names variable="composer">
+	<name prefix=" SHORT=" delimiter=", " delimiter-precedes-last="always" form="short" suffix="
+												    "/>
       </names>
       <names variable="original-author">
-	<name prefix=" ORIGINAL-AUTHOR: " delimiter=", " delimiter-precedes-last="always" form="long"/>
+	<name prefix=" ORIGINAL-AUTHOR LONG=" delimiter=", " delimiter-precedes-last="always" form="long"/>
       </names>
       <names variable="original-author">
-	<name prefix=" ORIGINAL-AUTHOR (short): " delimiter=", " delimiter-precedes-last="always" form="short"/>
+	<name prefix=" SHORT=" delimiter=", " delimiter-precedes-last="always" form="short" suffix="
+												    "/>
       </names>
       <names variable="original-publisher">
-	<name prefix=" ORIGINAL-PUBLISHER: " delimiter=", " delimiter-precedes-last="always" form="long"/>
+	<name prefix=" ORIGINAL-PUBLISHER LONG=" delimiter=", " delimiter-precedes-last="always" form="long"/>
       </names>
       <names variable="original-publisher">
-	<name prefix=" ORIGINAL-PUBLISHER (short): " delimiter=", " delimiter-precedes-last="always" form="short"/>
+	<name prefix=" SHORT=" delimiter=", " delimiter-precedes-last="always" form="short" suffix="
+												    "/>
       </names>
-      <date variable="issued" prefix=" ISSUED: ">
+      <date variable="issued" prefix="ISSUED: " suffix="
+							">
 	<date-part name="year" prefix=" YEAR=" form="long" />
 	<date-part name="year" prefix=" ("  suffix=")" form="short"/>
 	<date-part name="month" prefix=" MONTH=" form="long"/>
@@ -261,7 +317,8 @@ Generated from a perl script.</summary>
 	<date-part name="other" prefix=" OTHER=" form="long" />
 	<date-part name="other" prefix=" ("  suffix=")" form="short"/>
       </date>
-      <date variable="event" prefix=" EVENT: ">
+      <date variable="event" prefix="EVENT: " suffix="
+						      ">
 	<date-part name="year" prefix=" YEAR=" form="long" />
 	<date-part name="year" prefix=" ("  suffix=")" form="short"/>
 	<date-part name="month" prefix=" MONTH=" form="long"/>
@@ -274,7 +331,8 @@ Generated from a perl script.</summary>
 	<date-part name="other" prefix=" OTHER=" form="long" />
 	<date-part name="other" prefix=" ("  suffix=")" form="short"/>
       </date>
-      <date variable="accessed" prefix=" ACCESSED: ">
+      <date variable="accessed" prefix="ACCESSED: " suffix="
+							    ">
 	<date-part name="year" prefix=" YEAR=" form="long" />
 	<date-part name="year" prefix=" ("  suffix=")" form="short"/>
 	<date-part name="month" prefix=" MONTH=" form="long"/>
@@ -287,7 +345,8 @@ Generated from a perl script.</summary>
 	<date-part name="other" prefix=" OTHER=" form="long" />
 	<date-part name="other" prefix=" ("  suffix=")" form="short"/>
       </date>
-      <date variable="container" prefix=" CONTAINER: ">
+      <date variable="container" prefix="CONTAINER: " suffix="
+							      ">
 	<date-part name="year" prefix=" YEAR=" form="long" />
 	<date-part name="year" prefix=" ("  suffix=")" form="short"/>
 	<date-part name="month" prefix=" MONTH=" form="long"/>
@@ -300,60 +359,113 @@ Generated from a perl script.</summary>
 	<date-part name="other" prefix=" OTHER=" form="long" />
 	<date-part name="other" prefix=" ("  suffix=")" form="short"/>
       </date>
-      <text variable="title" prefix=" TITLE (short): " form="short"/>
-      <text variable="title" prefix=" TITLE (long): " form="long"/>
-      <text variable="container-title" prefix=" CONTAINER-TITLE (short): " form="short"/>
-      <text variable="container-title" prefix=" CONTAINER-TITLE (long): " form="long"/>
-      <text variable="collection-title" prefix=" COLLECTION-TITLE (short): " form="short"/>
-      <text variable="collection-title" prefix=" COLLECTION-TITLE (long): " form="long"/>
-      <text variable="original-title" prefix=" ORIGINAL-TITLE (short): " form="short"/>
-      <text variable="original-title" prefix=" ORIGINAL-TITLE (long): " form="long"/>
-      <text variable="publisher" prefix=" PUBLISHER (short): " form="short"/>
-      <text variable="publisher" prefix=" PUBLISHER (long): " form="long"/>
-      <text variable="publisher-place" prefix=" PUBLISHER-PLACE (short): " form="short"/>
-      <text variable="publisher-place" prefix=" PUBLISHER-PLACE (long): " form="long"/>
-      <text variable="event" prefix=" EVENT (short): " form="short"/>
-      <text variable="event" prefix=" EVENT (long): " form="long"/>
-      <text variable="event-place" prefix=" EVENT-PLACE (short): " form="short"/>
-      <text variable="event-place" prefix=" EVENT-PLACE (long): " form="long"/>
-      <text variable="page" prefix=" PAGE (short): " form="short"/>
-      <text variable="page" prefix=" PAGE (long): " form="long"/>
-      <text variable="locator" prefix=" LOCATOR (short): " form="short"/>
-      <text variable="locator" prefix=" LOCATOR (long): " form="long"/>
-      <text variable="version" prefix=" VERSION (short): " form="short"/>
-      <text variable="version" prefix=" VERSION (long): " form="long"/>
-      <text variable="volume" prefix=" VOLUME (short): " form="short"/>
-      <text variable="volume" prefix=" VOLUME (long): " form="long"/>
-      <text variable="number-of-volumes" prefix=" NUMBER-OF-VOLUMES (short): " form="short"/>
-      <text variable="number-of-volumes" prefix=" NUMBER-OF-VOLUMES (long): " form="long"/>
-      <text variable="issue" prefix=" ISSUE (short): " form="short"/>
-      <text variable="issue" prefix=" ISSUE (long): " form="long"/>
-      <text variable="medium" prefix=" MEDIUM (short): " form="short"/>
-      <text variable="medium" prefix=" MEDIUM (long): " form="long"/>
-      <text variable="status" prefix=" STATUS (short): " form="short"/>
-      <text variable="status" prefix=" STATUS (long): " form="long"/>
-      <text variable="edition" prefix=" EDITION (short): " form="short"/>
-      <text variable="edition" prefix=" EDITION (long): " form="long"/>
-      <text variable="genre" prefix=" GENRE (short): " form="short"/>
-      <text variable="genre" prefix=" GENRE (long): " form="long"/>
-      <text variable="note" prefix=" NOTE (short): " form="short"/>
-      <text variable="note" prefix=" NOTE (long): " form="long"/>
-      <text variable="annote" prefix=" ANNOTE (short): " form="short"/>
-      <text variable="annote" prefix=" ANNOTE (long): " form="long"/>
-      <text variable="keyword" prefix=" KEYWORD (short): " form="short"/>
-      <text variable="keyword" prefix=" KEYWORD (long): " form="long"/>
-      <text variable="number" prefix=" NUMBER (short): " form="short"/>
-      <text variable="number" prefix=" NUMBER (long): " form="long"/>
-      <text variable="URL" prefix=" URL (short): " form="short"/>
-      <text variable="URL" prefix=" URL (long): " form="long"/>
-      <text variable="DOI" prefix=" DOI (short): " form="short"/>
-      <text variable="DOI" prefix=" DOI (long): " form="long"/>
-      <text variable="ISBN" prefix=" ISBN (short): " form="short"/>
-      <text variable="ISBN" prefix=" ISBN (long): " form="long"/>
-      <text variable="citation-number" prefix=" CITATION-NUMBER (short): " form="short"/>
-      <text variable="citation-number" prefix=" CITATION-NUMBER (long): " form="long"/>
-      <text variable="citation-label" prefix=" CITATION-LABEL (short): " form="short"/>
-      <text variable="citation-label" prefix=" CITATION-LABEL (long): " form="long"/>
+      <date variable="original-date" prefix="ORIGINAL-DATE: " suffix="
+								      ">
+	<date-part name="year" prefix=" YEAR=" form="long" />
+	<date-part name="year" prefix=" ("  suffix=")" form="short"/>
+	<date-part name="month" prefix=" MONTH=" form="long"/>
+	<date-part name="month" prefix="(" form="short"/>
+	<date-part name="month" prefix="/" form="numeric"/>
+	<date-part name="month" prefix="/" suffix=")" form="numeric-leading-zeros" />
+	<date-part name="day" prefix=" DAY=" form="ordinal" />
+	<date-part name="day" prefix="/" form="numeric" />
+	<date-part name="day" prefix="/" form="numeric-leading-zeros" />
+	<date-part name="other" prefix=" OTHER=" form="long" />
+	<date-part name="other" prefix=" ("  suffix=")" form="short"/>
+      </date>
+      <text variable="title" prefix=" TITLE SHORT=" form="short"/>
+      <text variable="title" prefix=" LONG=" form="long" suffix="
+								 "/>
+      <text variable="container-title" prefix=" CONTAINER-TITLE SHORT=" form="short"/>
+      <text variable="container-title" prefix=" LONG=" form="long" suffix="
+									   "/>
+      <text variable="collection-title" prefix=" COLLECTION-TITLE SHORT=" form="short"/>
+      <text variable="collection-title" prefix=" LONG=" form="long" suffix="
+									    "/>
+      <text variable="original-title" prefix=" ORIGINAL-TITLE SHORT=" form="short"/>
+      <text variable="original-title" prefix=" LONG=" form="long" suffix="
+									  "/>
+      <text variable="publisher" prefix=" PUBLISHER SHORT=" form="short"/>
+      <text variable="publisher" prefix=" LONG=" form="long" suffix="
+								     "/>
+      <text variable="publisher-place" prefix=" PUBLISHER-PLACE SHORT=" form="short"/>
+      <text variable="publisher-place" prefix=" LONG=" form="long" suffix="
+									   "/>
+      <text variable="archive" prefix=" ARCHIVE SHORT=" form="short"/>
+      <text variable="archive" prefix=" LONG=" form="long" suffix="
+								   "/>
+      <text variable="archive-place" prefix=" ARCHIVE-PLACE SHORT=" form="short"/>
+      <text variable="archive-place" prefix=" LONG=" form="long" suffix="
+									 "/>
+      <text variable="event" prefix=" EVENT SHORT=" form="short"/>
+      <text variable="event" prefix=" LONG=" form="long" suffix="
+								 "/>
+      <text variable="event-place" prefix=" EVENT-PLACE SHORT=" form="short"/>
+      <text variable="event-place" prefix=" LONG=" form="long" suffix="
+								       "/>
+      <text variable="page" prefix=" PAGE SHORT=" form="short"/>
+      <text variable="page" prefix=" LONG=" form="long" suffix="
+								"/>
+      <text variable="locator" prefix=" LOCATOR SHORT=" form="short"/>
+      <text variable="locator" prefix=" LONG=" form="long" suffix="
+								   "/>
+      <text variable="version" prefix=" VERSION SHORT=" form="short"/>
+      <text variable="version" prefix=" LONG=" form="long" suffix="
+								   "/>
+      <text variable="volume" prefix=" VOLUME SHORT=" form="short"/>
+      <text variable="volume" prefix=" LONG=" form="long" suffix="
+								  "/>
+      <text variable="number-of-volumes" prefix=" NUMBER-OF-VOLUMES SHORT=" form="short"/>
+      <text variable="number-of-volumes" prefix=" LONG=" form="long" suffix="
+									     "/>
+      <text variable="issue" prefix=" ISSUE SHORT=" form="short"/>
+      <text variable="issue" prefix=" LONG=" form="long" suffix="
+								 "/>
+      <text variable="chapter-number" prefix=" CHAPTER-NUMBER SHORT=" form="short"/>
+      <text variable="chapter-number" prefix=" LONG=" form="long" suffix="
+									  "/>
+      <text variable="medium" prefix=" MEDIUM SHORT=" form="short"/>
+      <text variable="medium" prefix=" LONG=" form="long" suffix="
+								  "/>
+      <text variable="status" prefix=" STATUS SHORT=" form="short"/>
+      <text variable="status" prefix=" LONG=" form="long" suffix="
+								  "/>
+      <text variable="edition" prefix=" EDITION SHORT=" form="short"/>
+      <text variable="edition" prefix=" LONG=" form="long" suffix="
+								   "/>
+      <text variable="genre" prefix=" GENRE SHORT=" form="short"/>
+      <text variable="genre" prefix=" LONG=" form="long" suffix="
+								 "/>
+      <text variable="note" prefix=" NOTE SHORT=" form="short"/>
+      <text variable="note" prefix=" LONG=" form="long" suffix="
+								"/>
+      <text variable="annote" prefix=" ANNOTE SHORT=" form="short"/>
+      <text variable="annote" prefix=" LONG=" form="long" suffix="
+								  "/>
+      <text variable="abstract" prefix=" ABSTRACT SHORT=" form="short"/>
+      <text variable="abstract" prefix=" LONG=" form="long" suffix="
+								    "/>
+      <text variable="keyword" prefix=" KEYWORD SHORT=" form="short"/>
+      <text variable="keyword" prefix=" LONG=" form="long" suffix="
+								   "/>
+      <text variable="number" prefix=" NUMBER SHORT=" form="short"/>
+      <text variable="number" prefix=" LONG=" form="long" suffix="
+								  "/>
+      <text variable="URL" prefix=" URL SHORT=" form="short"/>
+      <text variable="URL" prefix=" LONG=" form="long" suffix="
+							       "/>
+      <text variable="DOI" prefix=" DOI SHORT=" form="short"/>
+      <text variable="DOI" prefix=" LONG=" form="long" suffix="
+							       "/>
+      <text variable="ISBN" prefix=" ISBN SHORT=" form="short"/>
+      <text variable="ISBN" prefix=" LONG=" form="long" suffix="
+								"/>
+      <text variable="citation-number" prefix=" CITATION-NUMBER SHORT=" form="short"/>
+      <text variable="citation-number" prefix=" LONG=" form="long" suffix="
+									   "/>
+      <text variable="citation-label" prefix=" CITATION-LABEL SHORT=" form="short"/>
+      <text variable="citation-label" prefix=" LONG=" form="long" suffix="
+									  "/>
 
     </layout>
   </bibliography>
