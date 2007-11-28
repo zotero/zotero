@@ -119,11 +119,19 @@
     </sort>
     <layout>
       <text macro="author" suffix="."/>
-      <date variable="issued" prefix=" (" suffix=").">
-        <date-part name="year"/>
-        <date-part prefix=", " name="month"/>
-        <date-part prefix=" " name="day"/>
-      </date>
+      <group prefix=" (" suffix=").">
+        <date variable="issued">
+          <date-part name="year"/>
+        </date>
+        <choose>
+          <if type="book chapter article-journal" match="none">
+            <date variable="issued">
+              <date-part prefix=", " name="month"/>
+              <date-part prefix=" " name="day"/>
+            </date>
+          </if>
+        </choose>
+      </group>
       <choose>
         <if type="book">
           <group suffix=".">
