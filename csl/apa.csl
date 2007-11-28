@@ -79,6 +79,10 @@
       <text variable="publisher"/>
     </group>
   </macro>
+  <macro name="event">
+    <text variable="event"/>
+    <text variable="event-place" prefix=", "/>
+  </macro>
   <citation>
     <option name="et-al-min" value="6"/>
     <option name="et-al-use-first" value="1"/>
