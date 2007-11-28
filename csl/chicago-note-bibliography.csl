@@ -70,7 +70,7 @@
     </names>
   </macro>
   <macro name="recipient">
-    <names variable="recipient" prefix="" suffix="" delimiter=", ">
+    <names variable="recipient" delimiter=", ">
       <label form="verb" prefix=" " text-case="lowercase" suffix=" "/>
       <name and="text" delimiter=", "/>
     </names>

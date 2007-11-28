@@ -132,7 +132,7 @@
       <text variable="archive-place"/>
     </group>
   </macro>
-  <macro name="date-main">
+  <macro name="issued">
     <choose>
       <if type="graphic report" match="any">
     <date variable="issued">
@@ -177,7 +177,7 @@
 	  <text value="interview" text-case="lowercase"/>
 	</if>
 	<else-if  variable="recipient">
-	  <text macro="date-main"/>
+	  <text macro="issued"/>
 	</else-if>
       </choose>
 	<text variable="locator"/>
@@ -196,7 +196,7 @@
 	    <group prefix=" (" delimiter=", " suffix=")">
 	      <text variable="genre"/>
 	      <text variable="publisher"/>
-	      <text macro="date-main"/>
+	      <text macro="issued"/>
 	    </group>
 	  </if>
 	  <else-if type="chapter">
@@ -207,7 +207,7 @@
 	    <text macro="editor-translator"/>
 	    <group prefix=" (" suffix=")" delimiter=", ">
 	      <text macro="publisher"/>
-	      <text macro="date-main"/>
+	      <text macro="issued"/>
 	    </group>
 	  </else-if>
 	  <else-if type="article-journal">
@@ -216,40 +216,40 @@
 	      <text macro="publisher"/>
 	      <text variable="volume" prefix=" "/>
 	      <text variable="issue" prefix=", no. "/>
-	      <text macro="date-main" prefix=" (" suffix=")"/>
+	      <text macro="issued" prefix=" (" suffix=")"/>
 	    </group>
 	  </else-if>
 	  <else-if type="article-newspaper article-magazine" match="any">
 	    <group prefix=", " delimiter=", ">
 	      <text macro="editor-translator"/>
 	      <text variable="container-title" font-style="italic"/>
-	      <text macro="date-main"/>
+	      <text macro="issued"/>
 	    </group>
 	  </else-if>
 	<else-if type="paper-conference">
 	  <text macro="editor-translator" prefix=", "/>
 	  <text variable="genre" prefix=", " suffix=" presented at the "/>
 	  <text macro="event" suffix=", "/>
-	  <text macro="date-main"/>
+	  <text macro="issued"/>
 	</else-if>
 	<else-if type="interview">
 	  <group prefix=", " delimiter=", ">
 	    <text macro="interviewer"/>
 	    <text variable="medium"/>
-	    <text macro="date-main"/>
+	    <text macro="issued"/>
 	  </group>
 	</else-if>
 	<else-if type="personal_communication">
 	  <group prefix=", " delimiter=", ">
 	    <text variable="genre"/>
-	    <text macro="date-main"/>
+	    <text macro="issued"/>
 	  </group>
 	</else-if>
 	<else-if type="graphic">
 	  <group prefix=", " delimiter=", ">
 	    <text variable="medium"/>
 	    <text macro="publisher"/>
-	    <text macro="date-main"/>
+	    <text macro="issued"/>
 	  </group>
 	</else-if>
 	<else-if type="report">
@@ -259,11 +259,11 @@
 	    <if variable="publisher publisher-place" match="all">
 	    <group prefix=" (" suffix=")" delimiter=", ">
 	  <text macro="publisher"/>
-	  <text macro="date-main"/>
+	  <text macro="issued"/>
 	    </group>
 	    </if>
 	    <else>
-	  <text macro="date-main" prefix=", "/>
+	  <text macro="issued" prefix=", "/>
 	    </else>
 	  </choose>
 	</else-if>
@@ -272,7 +272,7 @@
 	  <text variable="collection-title" prefix=", "/>
 	    <group prefix=" (" suffix=")" delimiter=", ">
 	  <text macro="publisher"/>
-	  <text macro="date-main"/>
+	  <text macro="issued"/>
 	    </group>
 	</else-if>
 	  <else>
@@ -282,7 +282,7 @@
 	  <text variable="collection-title" font-style="italic"/>
 	  <text variable="genre"/>
 	  <text variable="medium"/>
-	  <text macro="date-main"/>
+	  <text macro="issued"/>
 	    </group>
 	  </else>
 	</choose>
