@@ -1879,7 +1879,7 @@ Zotero.CSL.Compat.FormattedString.prototype.appendDate = function(date, element)
 	film:"motion picture",
 	artwork:"graphic",
 	webpage:"webpage",
-	report:"book",	// ??
+	report:"report",	// ??
 	bill:"bill",
 	case:"legal case",
 	hearing:"bill",				// ??
