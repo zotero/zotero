@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<style xmlns="http://purl.org/net/xbiblio/csl" xml:lang="en" class="in-text" >
+  <info>
+    <title>Analytical Chemistry</title>
+    <id>http://www.zotero.org/styles/analytic-chemistry</id>
+    <link>http://www.zotero.org/styles/analytic-chemistry</link>
+    <author>
+      <name>Julian Onions</name>
+      <email>julian.onions@gmail.com</email>
+    </author>
+    <category term="numeric"/>
+    <category term="chemistry"/>
+    <updated/>
+    <summary>The Analytical Chemistry style.</summary>
+    <source>http://pubs.acs.org/paragonplus/submission/ancham/ancham_authguide.pdf</source>
+  </info>
+  <macro name="editor">
+    <names variable="editor">
+      <name  sort-separator=", " initialize-with=". " name-as-sort-order="all"
+	     delimiter="; " delimiter-precedes-last="always"/>
+      <label form="short" prefix=", " text-case="capitalize-first" suffix="."/>
+    </names>
+  </macro>
+  <macro name="author">
+    <names variable="author">
+      <name  sort-separator=", " initialize-with=". " name-as-sort-order="all"
+	     delimiter="; " delimiter-precedes-last="always"/>
+      <label form="short" prefix=", " suffix="." text-case="capitalize-first"/>
+      <substitute>
+	<names variable="editor"/>
+      </substitute>
+    </names>
+  </macro>
+  <macro name="access">
+    <text variable="URL"/>
+  </macro>
+  <macro name="title">
+    <choose>
+      <if type="book">
+	<text variable="title" font-style="italic"/>
+      </if>
+      <else>
+	<text variable="title"/>
+      </else>
+    </choose>
+  </macro>
+  <macro name="publisher">
+    <group delimiter=": ">
+      <text variable="publisher"/>
+      <text variable="publisher-place"/>
+    </group>
+  </macro>
+  <macro name="volume">
+    <text variable="volume" prefix="vol. "/>
+  </macro>
+  <macro name="pages">
+    <label variable="page" form="short" suffix=". "/>
+    <text variable="page"/>
+  </macro>
+  <macro name="book-container">
+    <group delimiter=" ">
+      <text term="in" text-case="capitalize-first"/>
+      <text variable="container-title" font-style="italic"/>
+    </group>
+  </macro>
+  <macro name="issued">
+    <date variable="issued" delimiter=" ">
+      <date-part name="year"/>
+    </date>
+  </macro>
+  <citation>
+    <option name="collapse" value="citation-number"/>
+    <layout prefix="(" suffix=")" delimiter=", " font-style="italic">
+      <text variable="citation-number" />
+    </layout>
+  </citation>
+  <bibliography>
+    <option name="second-field-align" value="margin"/>
+    <option name="et-al-min" value="5"/>
+    <option name="et-al-use-first" value="1"/>
+    <layout suffix=".">
+      <text variable="citation-number" prefix="(" suffix=") "/>
+      <text macro="author" suffix=" "/>
+      <choose>
+	<if type="book">
+	  <text macro="title" suffix=", "/>
+	  <group delimiter="; ">
+	    <text macro="editor" prefix=" "/>
+	    <text variable="edition"/>
+	    <text macro="publisher"/>
+	    <text macro="issued"/>
+	  </group>
+	</if>
+	<else-if type="chapter">
+	  <group delimiter="; ">
+	    <text macro="book-container"/>
+	    <text macro="editor"/>
+	    <group delimiter=", ">
+	      <text macro="publisher" />
+	      <text macro="issued"/>
+	    </group>
+	    <text macro="pages"/>
+	  </group>
+	</else-if>
+	<else>
+	  <group delimiter=" ">
+	    <text variable="container-title" font-style="italic" suffix="."/>
+	    <group delimiter=", ">
+	      <text macro="issued" font-weight="bold"/>
+	      <text variable="volume" font-style="italic"/>
+	      <text variable="page" />
+	    </group>
+	  </group>
+	</else>
+      </choose>
+    </layout>
+  </bibliography>
+</style>
