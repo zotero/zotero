@@ -74,6 +74,8 @@ Zotero.CSL.Compat.Global = new function() {
 		author:"contributor",
 		editor:"contributor",
 		translator:"contributor",
+		recipient:"contributor",
+		interviewer:"contributor",
 		pages:"locator",
 		volume:"locator",
 		issue:"locator",
@@ -92,7 +94,7 @@ Zotero.CSL.Compat.Global = new function() {
 		"graphic":"article",
 		"interview":"article",
 		"legal case":"article",
-		"manuscript":"book",
+		"manuscript":"article",
 		"map":"article",
 		"motion picture":"book",
 		"musical score":"article",
@@ -103,7 +105,7 @@ Zotero.CSL.Compat.Global = new function() {
 		"report":"book",
 		"song":"article",
 		"speech":"article",
-		"thesis":"book",
+		"thesis":"article",
 		"treaty":"article",
 		"webpage":"article",
 	}
@@ -401,11 +403,13 @@ Zotero.CSL.Compat.ItemSet.prototype.resort = function() {
 			item._csl = new Object();
 			item._csl.dateModified = dateModified;
 			
-			// separate item into authors, editors, translators
+			// separate item into authors, editors, translators, recipients, interviewers
 			var creators = this.csl._separateItemCreators(item);
 			item._csl.authors = creators[0];
 			item._csl.editors = creators[1];
 			item._csl.translators = creators[2];
+			item._csl.recipients = creators[3];
+			item._csl.interviewers = creators[4];
 			
 			// parse date
 			item._csl.date = Zotero.CSL.Compat.prototype._processDate(this.csl._getField(item, "date"));
@@ -1284,6 +1288,10 @@ Zotero.CSL.Compat.prototype._getFieldValue = function(name, element, item, forma
 		dataAppended = formattedString.concat(this._processCreators(name, element, item._csl.editors, formattedString.format, bibCitElement, position), element);
 	} else if(name == "translator") {
 		dataAppended = formattedString.concat(this._processCreators(name, element, item._csl.translators, formattedString.format, bibCitElement, position), element);
+	} else if(name == "recipient") {
+		dataAppended = formattedString.concat(this._processCreators(name, element, item._csl.recipients, formattedString.format, bibCitElement, position), element);
+	} else if(name == "interviewer") {
+		dataAppended = formattedString.concat(this._processCreators(name, element, item._csl.interviewers, formattedString.format, bibCitElement, position), element);
 	} else if(name == "titles") {
 		var data = new Zotero.CSL.Compat.FormattedString(this, formattedString.format);
 		
@@ -1865,22 +1873,22 @@ Zotero.CSL.Compat.FormattedString.prototype.appendDate = function(date, element)
 	magazineArticle:"article-magazine",
 	newspaperArticle:"article-newspaper",
 	thesis:"thesis",
-	letter:"personal communication",
+	letter:"personal_communication",
 	manuscript:"manuscript",
 	interview:"interview",
 	film:"motion picture",
 	artwork:"graphic",
 	webpage:"webpage",
-	report:"paper-conference",	// ??
+	report:"book",	// ??
 	bill:"bill",
 	case:"legal case",
 	hearing:"bill",				// ??
 	patent:"patent",
 	statute:"bill",				// ??
-	email:"personal communication",
+	email:"personal_communication",
 	map:"map",
 	blogPost:"webpage",
-	instantMessage:"personal communication",
+	instantMessage:"personal_communication",
 	forumPost:"webpage",
 	audioRecording:"song",		// ??
 	presentation:"paper-conference",
@@ -1899,8 +1907,8 @@ Zotero.CSL.Compat.Global.fallbackTypeMappings = {
 	newspaperArticle:"article",
 	thesis:"book",
 	letter:"article",
-	manuscript:"book",
-	interview:"book",
+	manuscript:"article",
+	interview:"article",
 	film:"book",
 	artwork:"book",
 	webpage:"article",
@@ -1915,9 +1923,9 @@ Zotero.CSL.Compat.Global.fallbackTypeMappings = {
 	blogPost:"article",
 	instantMessage:"article",
 	forumPost:"article",
-	audioRecording:"article",
+	audioRecording:"book",
 	presentation:"article",
-	videoRecording:"article",
+	videoRecording:"book",
 	tvBroadcast:"article",
 	radioBroadcast:"article",
 	podcast:"article",
@@ -1948,16 +1956,20 @@ Zotero.CSL.Compat.prototype._getTypeFromItem = function(item) {
 }
 
 /*
- * separate creators object into authors, editors, and translators
+ * separate creators object into authors, editors, translators, recipients, and interviewers
  */
 Zotero.CSL.Compat.prototype._separateItemCreators = function(item) {
 	var authors = new Array();
 	var editors = new Array();
 	var translators = new Array();
+	var recipients = new Array();
+	var interviewers = new Array();
 	
 	var authorID = Zotero.CreatorTypes.getPrimaryIDForType(item.getType());
 	var editorID = Zotero.CreatorTypes.getID("editor");
 	var translatorID = Zotero.CreatorTypes.getID("translator");
+	var recipientID = Zotero.CreatorTypes.getID("recipient");
+	var interviewerID = Zotero.CreatorTypes.getID("interviewer");
 	
 	var creators = item.getCreators();
 	for each(var creator in creators) {
@@ -1965,13 +1977,17 @@ Zotero.CSL.Compat.prototype._separateItemCreators = function(item) {
 			editors.push(creator);
 		} else if(creator.creatorTypeID == translatorID) {
 			translators.push(creator);
+		} else if(creator.creatorTypeID == recipientID) {
+			recipients.push(creator);
+		} else if(creator.creatorTypeID == interviewerID) {
+			interviewers.push(creator);
 		} else if(creator.creatorTypeID == authorID) {
 			// TODO: do we just ignore contributors?
 			authors.push(creator);
 		}
 	}
 	
-	return [authors, editors, translators];
+	return [authors, editors, translators, recipients, interviewers];
 }
 
 /*

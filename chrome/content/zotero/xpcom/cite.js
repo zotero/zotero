@@ -309,6 +309,8 @@ Zotero.CSL._dateVariables = {
 Zotero.CSL._namesVariables = {
 	"editor":true,
 	"translator":true,
+	"recipient":true,
+	"interviewer":true,
 	"author":true
 }
 
@@ -1765,7 +1767,7 @@ Zotero.CSL.Item._zoteroFieldMap = {
 		"title":"title",
 		"container-title":"publicationTitle",
 		"collection-title":["seriesTitle", "series"],
-		"publisher":"publisher",
+		"publisher":["publisher", "distributor"],
 		"publisher-place":"place",
 		"page":"pages",
 		"volume":"volume",
@@ -1773,6 +1775,11 @@ Zotero.CSL.Item._zoteroFieldMap = {
 		"number-of-volumes":"numberOfVolumes",
 		"edition":"edition",
 		"genre":"type",
+		"medium":"medium",
+		"archive":"repository",
+		"archive_location":"archiveLocation",
+		"event":"meetingName",
+		"event-place":"place",
 		"abstract":"abstractNote",
 		"URL":"url",
 		"DOI":"DOI",
@@ -1843,7 +1850,7 @@ Zotero.CSL.Item._optionalTypeMap = {
 	film:"motion_picture",
 	artwork:"graphic",
 	webpage:"webpage",
-	report:"paper-conference",	// ??
+	report:"book",	// ??
 	bill:"bill",
 	case:"legal_case",
 	hearing:"bill",				// ??
@@ -1870,10 +1877,10 @@ Zotero.CSL.Item._fallbackTypeMap = {
 	journalArticle:"article",
 	magazineArticle:"article",
 	newspaperArticle:"article",
-	thesis:"book",
+	thesis:"article",
 	letter:"article",
-	manuscript:"book",
-	interview:"book",
+	manuscript:"article",
+	interview:"article",
 	film:"book",
 	artwork:"book",
 	webpage:"article",
@@ -1888,9 +1895,9 @@ Zotero.CSL.Item._fallbackTypeMap = {
 	blogPost:"article",
 	instantMessage:"article",
 	forumPost:"article",
-	audioRecording:"article",
+	audioRecording:"book",
 	presentation:"article",
-	videoRecording:"article",
+	videoRecording:"book",
 	tvBroadcast:"article",
 	radioBroadcast:"article",
 	podcast:"article",
@@ -2159,6 +2166,8 @@ Zotero.CSL.ItemSet.prototype.resort = function() {
 		var names = this.items[i].getNames("author");
 		if(!names) names = this.items[i].getNames("editor");
 		if(!names) names = this.items[i].getNames("translator");
+		if(!names) names = this.items[i].getNames("recipient");
+		if(!names) names = this.items[i].getNames("interviewer");
 		if(!names) continue;
 		namesByItem[i] = names;
 	}
