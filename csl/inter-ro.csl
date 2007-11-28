@@ -106,7 +106,7 @@
                                 <group delimiter=" ">
                                     <text macro="title"/>
                                     <text variable="volume"/>
-                                    <text variable="collection-title" prefix="( = " suffix=")"/>
+                                    <text variable="collection-title" prefix="(= " suffix=")"/>
                                 </group>
                                 <text macro="editor-translator"/>
                                 <text variable="edition"/>
