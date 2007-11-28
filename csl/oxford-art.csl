@@ -23,6 +23,20 @@
       </substitute>
     </names>
   </macro> 
+  <macro name="container-editor">
+    <group delimiter=" ">
+      <text term="in" suffix=" "/>
+      <names variable="editor">
+	<name  and="text" delimiter=", " />
+	<label form="short" prefix=" (" suffix=".)"/>
+	<substitute>
+	  <names variable="editor"/>
+	  <names variable="translator"/>
+	  <text macro="title"/>
+	</substitute>
+      </names>
+    </group>
+  </macro> 
   <macro name="title">
     <choose>
       <if type="thesis">
@@ -38,8 +52,8 @@
   </macro>
   <macro name="publisher">
     <group delimiter=": ">
-    <text variable="publisher"/>
-    <text variable="publisher-place"/>
+      <text variable="publisher"/>
+      <text variable="publisher-place"/>
     </group>
   </macro>
   <macro name="date">
@@ -59,6 +73,7 @@
     <text variable="page"/>
   </macro>
   <macro name="pageref">
+    <label variable="locator" suffix=". " form="short"/>
     <text variable="locator"/>
   </macro>
   <macro name="volref">
@@ -68,7 +83,14 @@
     </group>
   </macro>
   <macro name="container">
-    <text variable="container-title" font-style="italic"/>
+    <choose>
+      <if type="chapter">
+	<text variable="container-title" font-style="italic"/>
+      </if>
+      <else>
+	<text variable="container-title" font-style="italic"/>
+      </else>
+    </choose>      
   </macro>
   <citation>
     <layout suffix="." delimiter="; ">
@@ -77,29 +99,41 @@
 	<choose>
 	  <if type="book">
 	    <group delimiter=", ">
-            <text macro="title" />
-            <text macro="volumes"/>
-            </group>
-	    <group prefix=" (" suffix=")" delimiter=", ">
-		<text macro="publisher"/>
-		<text macro="container"/>
-		<text macro="volref"/>
-		<text macro="date"/>
-		<text macro="pageno"/>
-		<text macro="pageref"/>
+	      <text macro="title" />
+	      <text macro="volumes"/>
 	    </group>
+	    <group prefix=" (" suffix=")" delimiter=", ">
+	      <text macro="publisher"/>
+	      <text macro="container"/>
+	      <text macro="volref"/>
+	      <text macro="date"/>
+	    </group>
+	    <text macro="pageref" prefix=". "/>
 	  </if>
-	  <else>
-	     <group delimiter=", ">
-		<text macro="title" />
+	  <else-if type="chapter">
+	    <group delimiter=", ">
+	      <text macro="title" />
+	      <text macro="container-editor"/>
+	      <text macro="container"/>
+	      <text macro="volref"/>
+	      <text macro="volumes"/>
+	      <group prefix=" (" suffix=")" delimiter=", ">
 		<text macro="publisher"/>
-		<text macro="container"/>
-		<text macro="volref"/>
 		<text macro="date"/>
-		<text macro="volumes"/>
-		<text macro="pageno"/>
-		<text macro="pageref"/>
-	     </group>
+	      </group>
+	    </group>
+	    <text macro="pageref" prefix=", "/>
+	  </else-if>
+	  <else>
+	    <group delimiter=", ">
+	      <text macro="title" />
+	      <text macro="publisher"/>
+	      <text macro="container"/>
+	      <text macro="volref"/>
+	      <text macro="date"/>
+	      <text macro="volumes"/>
+	      <text macro="pageref"/>
+	    </group>
 	  </else>
 	</choose>
       </group>
