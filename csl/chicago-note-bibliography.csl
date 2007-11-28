@@ -132,7 +132,7 @@
       <text variable="archive-place"/>
     </group>
   </macro>
-  <macro name="date-main">
+  <macro name="issued">
     <choose>
       <if type="graphic report" match="any">
     <date variable="issued">
@@ -175,7 +175,7 @@
 	  <text value="interview" text-case="lowercase"/>
 	    </if>
 	    <else-if variable="recipient">
-	  <text macro="date-main"/>
+	  <text macro="issued"/>
 	    </else-if>
         </choose>
 	  <text variable="locator"/>
@@ -196,7 +196,7 @@
 	  <group delimiter=", ">
 	    <text variable="genre"/>
 	    <text variable="publisher"/>
-	    <text macro="date-main"/>
+	    <text macro="issued"/>
 	  </group>
 	</if>
 	<else-if type="chapter">
@@ -207,7 +207,7 @@
 	    <text macro="editor-translator" prefix=". "/>
 	    <text variable="page" prefix=", "/>
 	    <text macro="publisher" prefix=". "/>
-	    <text macro="date-main" prefix=", "/>
+	    <text macro="issued" prefix=", "/>
 	  </group>
 	</else-if>
 	<else-if type="article-journal">
@@ -216,7 +216,7 @@
 	    <text variable="container-title" font-style="italic"/>
 	    <text variable="volume"  prefix=" "/>
 	    <text variable="issue" prefix=", no. "/>
-	    <text macro="date-main" prefix=" (" suffix=")"/>
+	    <text macro="issued" prefix=" (" suffix=")"/>
 	    <text variable="page" prefix=": "/>
 	  </group>
 	</else-if>
@@ -224,7 +224,7 @@
 	  <text macro="editor-translator" suffix=". "/>
 	  <group delimiter=", ">
 	    <text variable="container-title" font-style="italic"/>
-	    <text macro="date-main"/>
+	    <text macro="issued"/>
 	  </group>
 	</else-if>
 	<else-if type="paper-conference">
@@ -232,13 +232,13 @@
 	  <text variable="genre" text-case="capitalize-first" suffix=" presented at the "/>
 	  <text variable="event" suffix=", "/>
 	  <text variable="event-place" suffix=", "/>
-	  <text macro="date-main"/>
+	  <text macro="issued"/>
 	</else-if>
 	<else-if type="interview">
 	  <group delimiter=". " suffix=".">
 	    <text macro="interviewer"/>
 	    <text variable="medium" text-case="capitalize-first"/>
-	    <text macro="date-main"/>
+	    <text macro="issued"/>
 	  </group>
 	</else-if>
 	<else-if type="personal_communication">
@@ -251,24 +251,24 @@
 	    </else>
 	  </choose>
 	  <text macro="recipient" prefix=" "/>
-	  <text macro="date-main" prefix=". "/>
+	  <text macro="issued" prefix=". "/>
 	</else-if>
 	<else-if type="graphic">
 	  <text variable="medium" text-case="capitalize-first" suffix=". "/>
 	  <text macro="publisher" suffix=", "/>
-	  <text macro="date-main"/>
+	  <text macro="issued"/>
 	</else-if>
 	<else-if type="report">
 	  <text macro="editor-translator" suffix=". "/>
 	  <text variable="genre" suffix=". "/>
 	  <text macro="publisher" suffix=", "/>
-	   <text macro="date-main"/>
+	   <text macro="issued"/>
 	</else-if>
 	<else-if type="book">
 	  <text macro="editor-translator" suffix=". "/>
 	  <text variable="collection-title" suffix=". "/>
 	  <text macro="publisher" suffix=", "/>
-	  <text macro="date-main"/>
+	  <text macro="issued"/>
 	</else-if>
 	<else>
 	  <group class="container" delimiter=". ">
@@ -277,7 +277,7 @@
 	    <text variable="collection-title" font-style="italic"/>
 	    <text variable="genre" text-case="capitalize-first"/>
 	    <text variable="medium" text-case="capitalize-first"/>
-	    <text macro="date-main"/>
+	    <text macro="issued"/>
 	  </group>
 	</else>
       </choose>
