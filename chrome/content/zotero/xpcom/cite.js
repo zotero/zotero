@@ -1778,7 +1778,7 @@ Zotero.CSL.Item._zoteroFieldMap = {
 		"medium":"medium",
 		"archive":"repository",
 		"archive_location":"archiveLocation",
-		"event":"meetingName",
+		"event":["meetingName", "conferenceName"],
 		"event-place":"place",
 		"abstract":"abstractNote",
 		"URL":"url",
