@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-11-29 18:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-11-29 21:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -14926,7 +14926,7 @@ function doImport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7', '1.0.0b4.r1', '', '2007-11-26 23:00:00', '1', '100', '3', 'RIS', 'Simon Kornblith', 'ris', 
+REPLACE INTO translators VALUES ('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7', '1.0.0b4.r1', '', '2007-11-29 21:00:00', '1', '100', '3', 'RIS', 'Simon Kornblith', 'ris', 
 'Zotero.configure("dataMode", "line");
 Zotero.addOption("exportNotes", true);
 
@@ -14951,10 +14951,7 @@ function detectImport() {
 	T1:"title",
 	T3:"series",
 	JF:"publicationTitle",
-	VL:"volume",
-	IS:"issue",
 	CP:"place",
-	PB:"publisher",
 	JA:"journalAbbreviation",
 	M3:"DOI"
 };
@@ -15058,13 +15055,30 @@ function processTag(item, tag, value) {
 	} else if(tag == "T2") {
 		item.backupPublicationTitle = value;
 	} else if(tag == "A1" || tag == "AU") {
-		// primary author
+		// primary author (patent: inventor)
+		// store Zotero "creator type" in temporary variable
+		var tempType;
+		if (item.itemType == "patent") {
+			tempType = "inventor";
+		} else {
+			tempType = "author";
+		}
 		var names = value.split(/, ?/);
-		item.creators.push({lastName:names[0], firstName:names[1], creatorType:"author"});
+		item.creators.push({lastName:names[0], firstName:names[1], creatorType:tempType});
 	} else if(tag == "A2" || tag == "ED") {
-		// contributing author
-		var names = value.split(/, ?/);
-		item.creators.push({lastName:names[0], firstName:names[1], creatorType:"contributor"});
+		// contributing author (patent: assignee)
+		if (item.itemType == "patent") {
+			if (item.assignee) {
+				// Patents can have multiple assignees (applicants) but Zotero only allows a single
+				// assignee field, so we  have to concatenate them together
+				item.assignee += ", "+value;
+			} else {
+				item.assignee =  value;
+			}
+		} else {
+			var names = value.split(/, ?/);
+			item.creators.push({lastName:names[0], firstName:names[1], creatorType:"contributor"});
+		}
 	} else if(tag == "Y1" || tag == "PY") {
 		// year or date
 		var dateParts = value.split("/");
@@ -15072,6 +15086,8 @@ function processTag(item, tag, value) {
 		if(dateParts.length == 1) {
 			// technically, if there''s only one date part, the file isn''t valid
 			// RIS, but EndNote writes this, so we have to too
+			// Nick: RIS spec example records also only contain a single part
+			// even though it says the slashes are not optional (?)
 			item.date = value;
 		} else {
 			// in the case that we have a year and other data, format that way
@@ -15091,21 +15107,26 @@ function processTag(item, tag, value) {
 	} else if(tag == "Y2") {
 		// the secondary date field can mean two things, a secondary date, or an
 		// invalid EndNote-style date. let''s see which one this is.
+		// patent: application (filing) date -- do not append to date field 
+		// for now. Zotero needs a filing date field added to make use of this.
 		var dateParts = value.split("/");
-		if(dateParts.length != 4) {
-			// an invalid date. it''s from EndNote.
+		if(dateParts.length != 4 && item.itemType != "patent") {
+			// an invalid date and not a patent. 
+			// It''s from EndNote or Delphion (YYYY-MM-DD)
 			if(item.date && value.indexOf(item.date) == -1) {
 				// append existing year
 				value += " " + item.date;
 			}
 			item.date = value;
-		}
+		} 
+		// ToDo: Handle correctly formatted Y2 fields (secondary date)
 	} else if(tag == "N1" || tag == "AB") {
 		// notes
 		if(value != item.title) {       // why does EndNote do this!?
 			item.notes.push({note:value});
 		}
 	} else if(tag == "N2") {
+		// abstract
 		item.abstractNote = value;
 	} else if(tag == "KW") {
 		// keywords/tags
@@ -15158,6 +15179,34 @@ function processTag(item, tag, value) {
 				item.attachments.push({url:value,
 					title:"Image", downloadable:true});
 			}
+		}
+	} else if (tag == "IS") {
+		// Issue Number (patent: patentNumber)
+		if (item.itemType == "patent") {
+			item.patentNumber = value;
+		} else {
+			item.issue = value;
+		}
+	} else if (tag == "VL") {
+		// Volume Number (patent: applicationNumber)
+		if (item.itemType == "patent") {
+			item.applicationNumber = value;
+		} else {
+			item.volume = value;
+		}
+	} else if (tag == "PB") {
+		// publisher (patent: references)
+		if (item.itemType == "patent") {
+			item.references = value;
+		} else {
+			item.publisher = value;
+		}
+	} else if (tag == "M1" || tag == "M2") {
+		// Miscellaneous fields
+		if (!item.extra) {
+			item.extra = value;
+		} else {
+			item.extra += "; "+value;
 		}
 	}
 }
@@ -15282,13 +15331,40 @@ function doExport() {
 		// creators
 		for(var j in item.creators) {
 			// only two types, primary and secondary
-			var risTag = "A1"
-			if(item.creators[j].creatorType != "author") {
+			var risTag;
+			// authors and inventors are primary creators
+			if (item.creators[j].creatorType == "author" || item.creators[j].creatorType == "inventor") {
+				risTag = "A1";
+			} else {
 				risTag = "A2";
 			}
 
 			addTag(risTag, item.creators[j].lastName+","+item.creators[j].firstName);
 		}
+		
+		// assignee (patent)
+		if(item.assignee) {
+			addTag("A2", item.assignee);
+		}
+		
+		// volume (patent: applicationNumber)
+		if(item.volume || item.applicationNumber) {
+			var value = (item.volume) ? item.volume : item.applicationNumber;
+			addTag("VL", value);
+		}
+		
+		// issue (patent: patentNumber)
+		if(item.issue || item.patentNumber) {
+			var value = (item.issue) ? item.issue : item.patentNumber;
+			addTag("IS", value);
+		}
+
+		// publisher (patent: references)
+		if(item.publisher || item.references) {
+			var value = (item.publisher) ? item.publisher : item.references;
+			addTag("PB", value);
+		}
+
 
 		// date
 		if(item.date) {
@@ -15321,6 +15397,10 @@ function doExport() {
 
 		if(item.abstractNote) {
 			addTag("N2", item.abstractNote.replace(/(?:\r\n?|\n)/g, "\r\n"));
+		}
+		else if(item.abstract) {
+			// patent type has abstract
+			addTag("N2", item.abstract.replace(/(?:\r\n?|\n)/g, "\r\n"));
 		}
 
 		// tags
