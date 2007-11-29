@@ -311,6 +311,7 @@ Zotero.CSL._namesVariables = {
 	"translator":true,
 	"recipient":true,
 	"interviewer":true,
+	"series-editor":true,
 	"author":true
 }
 
@@ -1734,9 +1735,18 @@ Zotero.CSL.Item.prototype.getID = function() {
 	return this.zoteroItem.getID();
 }
 /*
+ * Mappings for names
+ */
+Zotero.CSL.Item._zoteroNameMap = {
+	"series-editor":"seriesEditor"
+}
+
+/*
  * Gets an array of Item.Name objects for a variable.
  */
 Zotero.CSL.Item.prototype.getNames = function(variable) {
+	var field = Zotero.CSL.Item._zoteroNameMap[variable];
+	if (field) variable = field;
 	this._refreshItem();
 	if(!this._names) {
 		this._separateNames();
@@ -1783,7 +1793,9 @@ Zotero.CSL.Item._zoteroFieldMap = {
 		"abstract":"abstractNote",
 		"URL":"url",
 		"DOI":"DOI",
-		"note":"extra"
+		"note":"extra",
+		"number":["number", "documentNumber", "patentNumber", "billNumber",
+			"codeNumber", "episodeNumber"]
 	},
 	"short":{
 		"title":["shortTitle", "title"],
@@ -2168,6 +2180,7 @@ Zotero.CSL.ItemSet.prototype.resort = function() {
 		if(!names) names = this.items[i].getNames("translator");
 		if(!names) names = this.items[i].getNames("recipient");
 		if(!names) names = this.items[i].getNames("interviewer");
+		if(!names) names = this.items[i].getNames("series-editor");
 		if(!names) continue;
 		namesByItem[i] = names;
 	}
