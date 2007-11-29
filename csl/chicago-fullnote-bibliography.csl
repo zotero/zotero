@@ -12,6 +12,10 @@
       <name>Simon Kornblith</name>
       <email>simon@simonster.com</email> 
     </contributor>
+    <contributor>
+      <name>Elena Razlogova</name>
+      <email>elena.razlogova@gmail.com</email> 
+    </contributor>
     <summary>Chicago format with full notes and bibliography</summary>
     <category term="generic-base"/>
     <category term="numeric"/>
@@ -44,9 +48,9 @@
       </substitute>
     </names>
   </macro> 
-  <macro name="author-full">
+  <macro name="author-bib">
     <names variable="author">
-      <name and="text" sort-separator=", "
+      <name name-as-sort-order="all" and="text" sort-separator=", "
 	    delimiter=", " delimiter-precedes-last="always"/>
       <label form="short" prefix=", " suffix="."/>
       <substitute>
@@ -327,7 +331,7 @@
     <option name="subsequent-author-substitute" value="---"/>
     <layout suffix=".">
 	  <group delimiter=". ">
-      <text macro="author"/>
+      <text macro="author-bib"/>
 	  <text macro="title"/>
       <choose>
 	<if type="thesis">
