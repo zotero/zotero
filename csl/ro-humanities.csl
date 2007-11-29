@@ -24,8 +24,8 @@
             <name form="long" delimiter="; " delimiter-precedes-last="always" sort-separator=", "/>
             <label form="short" prefix=" (" suffix=".)"/>
             <substitute>
-                <names variable="editor" font-variant="small-caps"/>
-                <names variable="translator" font-variant="small-caps"/>
+                <names variable="editor"/>
+                <names variable="translator"/>
                 <text macro="title"/>
             </substitute>
         </names>
@@ -33,11 +33,11 @@
     <macro name="author-bibliography">
         <names variable="author">
             <name name-as-sort-order="all" form="long" delimiter="; "
-                delimiter-precedes-last="always" sort-separator=", "/>
+                delimiter-precedes-last="always" sort-separator=", " font-variant="small-caps"/>
             <label form="short" prefix=" (" suffix=".)"/>
             <substitute>
-                <names variable="editor"/>
-                <names variable="translator"/>
+                <names variable="editor" font-variant="small-caps"/>
+                <names variable="translator" font-variant="small-caps"/>
                 <text macro="title"/>
             </substitute>
         </names>
@@ -169,19 +169,15 @@
                                         text-case="lowercase"/>
                                     <text variable="volume"/>
                                 </group>
-                                <group delimiter=" ">
-                                    <text term="issue" form="short" include-period="true"
-                                        text-case="lowercase"/>
-                                    <text variable="issue"/>
-                                </group>
+                                <text variable="issue"/>
+                                <date variable="issued">
+                                    <date-part name="year"/>
+                                </date>
                                 <text macro="editor-translator"/>
                                 <text variable="edition"/>
-                                <text macro="publisher"/>
-                                <group>
-                                    <date variable="issued">
-                                        <date-part name="year"/>
-                                    </date>
-                                    <text variable="collection-title" prefix=" (" suffix=")"/>
+                                <group delimiter=" ">
+                                    <text macro="publisher"/>
+                                    <text variable="collection-title" prefix="(" suffix=")"/>
                                 </group>
                                 <group>
                                     <label variable="locator" include-period="true" form="short"/>
@@ -201,11 +197,7 @@
                                         text-case="lowercase"/>
                                     <text variable="volume"/>
                                 </group>
-                                <group delimiter=" ">
-                                    <text term="issue" form="short" include-period="true"
-                                        text-case="lowercase"/>
-                                    <text variable="issue"/>
-                                </group>
+                                <text variable="issue"/>
                                 <group>
                                     <label variable="locator" include-period="true" form="short"/>
                                     <text variable="locator" prefix=" "/>
@@ -272,6 +264,7 @@
             <choose>
                 <if type="book">
                     <group delimiter=", ">
+                        <text macro="author"/>
                         <group delimiter=" ">
                             <text macro="title"/>
                             <date variable="original-date" prefix="(" suffix=")">
@@ -293,11 +286,11 @@
                             <label variable="locator" include-period="true" form="short"/>
                             <text variable="locator" prefix=" "/>
                         </group>
-                        <text macro="access"/>
                     </group>
                 </if>
                 <else-if type="chapter">
                     <group delimiter=", ">
+                        <text macro="author"/>
                         <text macro="title"/>
                         <group delimiter=" " class="container">
                             <text term="in"/>
@@ -325,11 +318,11 @@
                             <label variable="locator" include-period="true" form="short"/>
                             <text variable="locator" prefix=" "/>
                         </group>
-                        <text macro="access"/>
                     </group>
                 </else-if>
                 <else-if type="article">
                     <group delimiter=", ">
+                        <text macro="author"/>
                         <text macro="title"/>
                         <text variable="container-title" font-style="italic"/>
                         <group delimiter=" ">
@@ -337,29 +330,25 @@
                                 text-case="lowercase"/>
                             <text variable="volume"/>
                         </group>
-                        <group delimiter=" ">
-                            <text term="issue" form="short" include-period="true"
-                                text-case="lowercase"/>
-                            <text variable="issue"/>
-                        </group>
+                        <text variable="issue"/>
+                        <date variable="issued">
+                            <date-part name="year"/>
+                        </date>
                         <text macro="editor-translator"/>
                         <text variable="edition"/>
-                        <text macro="publisher"/>
-                        <group>
-                            <date variable="issued">
-                                <date-part name="year"/>
-                            </date>
-                            <text variable="collection-title" prefix=" (" suffix=")"/>
+                        <group delimiter=" ">
+                            <text macro="publisher"/>
+                            <text variable="collection-title" prefix="(" suffix=")"/>
                         </group>
                         <group>
                             <label variable="locator" include-period="true" form="short"/>
                             <text variable="locator" prefix=" "/>
                         </group>
-                        <text macro="access"/>
                     </group>
                 </else-if>
                 <else>
                     <group delimiter=", ">
+                        <text macro="author"/>
                         <text macro="title"/>
                         <text macro="editor-translator"/>
                         <text variable="container-title" font-style="italic"/>
@@ -368,11 +357,7 @@
                                 text-case="lowercase"/>
                             <text variable="volume"/>
                         </group>
-                        <group delimiter=" ">
-                            <text term="issue" form="short" include-period="true"
-                                text-case="lowercase"/>
-                            <text variable="issue"/>
-                        </group>
+                        <text variable="issue"/>
                         <group>
                             <label variable="locator" include-period="true" form="short"/>
                             <text variable="locator" prefix=" "/>
