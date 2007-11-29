@@ -283,9 +283,19 @@
 	  </group>
 	</else>
       </choose>
+	<choose>
+	  <if type="book thesis chapter article-journal article-newspaper article-magazine" match="none">
+	<group delimiter=". ">
 	  <text variable="archive_location" text-case="title"/>
 	  <text macro="archive"/>
-      <text macro="access"/>
+	</group>
+	  </if>
+	</choose>
+	<choose>
+	  <if variable="page" match="none">
+      <text variable="URL"/>
+	  </if>
+	</choose>
 	  </group>
     </layout>
   </bibliography>
