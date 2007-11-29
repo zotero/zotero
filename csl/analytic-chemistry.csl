@@ -102,7 +102,7 @@
 	</else-if>
 	<else>
 	  <group delimiter=" ">
-	    <text variable="container-title" font-style="italic" suffix="."/>
+	    <text variable="container-title" font-style="italic" form="short" suffix="."/>
 	    <group delimiter=", ">
 	      <text macro="issued" font-weight="bold"/>
 	      <text variable="volume" font-style="italic"/>
