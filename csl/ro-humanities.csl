@@ -103,9 +103,11 @@
                                 <text macro="author"/>
                                 <group delimiter=" ">
                                     <text macro="title"/>
-                                    <date variable="original-date" prefix="(" suffix=")">
+                                    <!-- Here will be the original-date, when zotero will have an ui field for it.
+                                        <date variable="original-date" prefix="(" suffix=")">
                                         <date-part name="year"/>
-                                    </date>
+                                        </date>
+                                    -->
                                 </group>
                                 <group delimiter=" ">
                                     <text term="volume" form="short" include-period="true"
@@ -191,13 +193,15 @@
                                 <text macro="author"/>
                                 <text macro="title"/>
                                 <text macro="editor-translator"/>
-                                <text variable="container-title" font-style="italic"/>
-                                <group delimiter=" ">
-                                    <text term="volume" form="short" include-period="true"
-                                        text-case="lowercase"/>
-                                    <text variable="volume"/>
+                                <group class="containter-title" delimiter=", ">
+                                    <text variable="container-title" font-style="italic"/>
+                                    <group delimiter=" ">
+                                        <text term="volume" form="short" include-period="true"
+                                            text-case="lowercase"/>
+                                        <text variable="volume"/>
+                                    </group>
+                                    <text variable="issue"/>
                                 </group>
-                                <text variable="issue"/>
                                 <group>
                                     <label variable="locator" include-period="true" form="short"/>
                                     <text variable="locator" prefix=" "/>
@@ -264,12 +268,13 @@
             <choose>
                 <if type="book">
                     <group delimiter=", ">
-                        <text macro="author"/>
                         <group delimiter=" ">
                             <text macro="title"/>
-                            <date variable="original-date" prefix="(" suffix=")">
+                            <!-- Here will be the original-date, when zotero will have an ui field for it.
+                                <date variable="original-date" prefix="(" suffix=")">
                                 <date-part name="year"/>
-                            </date>
+                                </date>
+                            -->
                         </group>
                         <group delimiter=" ">
                             <text term="volume" form="short" include-period="true"
@@ -283,14 +288,13 @@
                             <date-part name="year"/>
                         </date>
                         <group>
-                            <label variable="locator" include-period="true" form="short"/>
-                            <text variable="locator" prefix=" "/>
+                            <label variable="page" include-period="true" form="short"/>
+                            <text variable="page" prefix=" "/>
                         </group>
                     </group>
                 </if>
                 <else-if type="chapter">
                     <group delimiter=", ">
-                        <text macro="author"/>
                         <text macro="title"/>
                         <group delimiter=" " class="container">
                             <text term="in"/>
@@ -315,14 +319,13 @@
                             <text variable="collection-title" prefix=" (" suffix=")"/>
                         </group>
                         <group>
-                            <label variable="locator" include-period="true" form="short"/>
-                            <text variable="locator" prefix=" "/>
+                            <label variable="page" include-period="true" form="short"/>
+                            <text variable="page" prefix=" "/>
                         </group>
                     </group>
                 </else-if>
                 <else-if type="article">
                     <group delimiter=", ">
-                        <text macro="author"/>
                         <text macro="title"/>
                         <text variable="container-title" font-style="italic"/>
                         <group delimiter=" ">
@@ -330,7 +333,10 @@
                                 text-case="lowercase"/>
                             <text variable="volume"/>
                         </group>
-                        <text variable="issue"/>
+                        <group delimiter=" ">
+                            <text term="issue" form="short" include-period="true" text-case="lowercase"/>
+                            <text variable="issue"/>
+                        </group>                        
                         <date variable="issued">
                             <date-part name="year"/>
                         </date>
@@ -341,14 +347,13 @@
                             <text variable="collection-title" prefix="(" suffix=")"/>
                         </group>
                         <group>
-                            <label variable="locator" include-period="true" form="short"/>
-                            <text variable="locator" prefix=" "/>
+                            <label variable="page" include-period="true" form="short"/>
+                            <text variable="page" prefix=" "/>
                         </group>
                     </group>
                 </else-if>
                 <else>
                     <group delimiter=", ">
-                        <text macro="author"/>
                         <text macro="title"/>
                         <text macro="editor-translator"/>
                         <text variable="container-title" font-style="italic"/>
@@ -357,10 +362,13 @@
                                 text-case="lowercase"/>
                             <text variable="volume"/>
                         </group>
-                        <text variable="issue"/>
                         <group>
-                            <label variable="locator" include-period="true" form="short"/>
-                            <text variable="locator" prefix=" "/>
+                            <text term="issue" form="short" include-period="true" text-case="lowercase"/>
+                            <text variable="issue"/>
+                        </group>
+                        <group>
+                            <label variable="page" include-period="true" form="short"/>
+                            <text variable="page" prefix=" "/>
                         </group>
                     </group>
                 </else>

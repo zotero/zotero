@@ -1,8 +1,7 @@
 <?oxygen RNGSchema="http://xbiblio.svn.sourceforge.net/viewvc/*checkout*/xbiblio/csl/schema/trunk/csl.rnc" type="compact"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="note" xml:lang="ro">
     <info>
-        <title>INTER. Romanian Institute for Inter-Orthodox, Inter-Confessional and Inter-Religious
-            Studies</title>
+        <title>INTER. Romanian Institute for Inter-Orthodox, Inter-Confessional and Inter-Religious Studies</title>
         <id>http://www.zotero.org/styles/inter-ro</id>
         <link>https://www.zotero.org/svn/extension/trunk/csl/inter-ro.csl</link>
         <author>
@@ -22,8 +21,7 @@
     </macro>
     <macro name="author">
         <names variable="author">
-            <name form="long" delimiter="; " delimiter-precedes-last="always"
-                font-variant="small-caps" sort-separator=", "/>
+            <name form="long" delimiter="; " delimiter-precedes-last="always" font-variant="small-caps" sort-separator=", "/>
             <label form="short" prefix=" (" suffix=".)"/>
             <substitute>
                 <names variable="editor" font-variant="small-caps"/>
@@ -34,8 +32,7 @@
     </macro>
     <macro name="author-bibliography">
         <names variable="author">
-            <name name-as-sort-order="all" form="long" delimiter="; "
-                delimiter-precedes-last="always" font-variant="small-caps" sort-separator=", "/>
+            <name name-as-sort-order="all" form="long" delimiter="; " delimiter-precedes-last="always" font-variant="small-caps" sort-separator=", "/>
             <label form="short" prefix=" (" suffix=".)"/>
             <substitute>
                 <names variable="editor" font-variant="small-caps"/>
