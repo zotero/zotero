@@ -183,6 +183,15 @@
 	<text variable="locator"/>
     </group>
   </if> 
+  <else-if position="ibid-with-locator">
+    <group delimiter=", ">
+      <text term="ibid" text-case="capitalize-first"/>
+      <text variable="locator"/>
+    </group>
+  </else-if>
+  <else-if position="ibid">
+    <text term="ibid" text-case="capitalize-first"/>
+  </else-if>
   <else>
     <group delimiter=", ">
       <group>
