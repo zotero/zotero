@@ -15,10 +15,10 @@
     <summary>Chicago format with full notes and no bibliography</summary>
     <category term="generic-base"/>
     <category term="numeric"/>
-    <updated/>
+    <updated></updated>
   </info>
   <macro name="editor-translator">
-    <names variable="editor translator" prefix="" suffix="" delimiter=", ">
+    <names variable="editor translator" delimiter=", ">
       <label form="verb" prefix=" " text-case="lowercase" suffix=" "/>
       <name and="text" delimiter=", "/>
     </names>
@@ -26,7 +26,7 @@
   <macro name="editor-translator-short">
     <choose>
       <if variable="author">
-	<names variable="editor translator" prefix="" suffix="" delimiter=", ">
+	<names variable="editor translator" delimiter=", ">
 	  <label form="short" prefix=" " text-case="lowercase" suffix=". "/>
 	  <name and="text" delimiter=", "/>
 	</names>
@@ -66,7 +66,7 @@
     </names>
   </macro>
   <macro name="recipient">
-    <names variable="recipient" prefix="" suffix="" delimiter=", ">
+    <names variable="recipient" delimiter=", ">
       <label form="verb" prefix=" " text-case="lowercase" suffix=" "/>
       <name and="text" delimiter=", "/>
     </names>
@@ -78,7 +78,7 @@
     </names>
   </macro>
   <macro name="interviewer">
-    <names variable="interviewer" prefix="" suffix="" delimiter=", ">
+    <names variable="interviewer" delimiter=", ">
       <label form="verb" prefix=" " text-case="lowercase" suffix=" "/>
       <name and="text" delimiter=", "/>
     </names>
@@ -141,11 +141,11 @@
 	  <date-part name="year"/>
     </date>
       </if>
-      <if type="book chapter thesis" match="any">
+      <else-if type="book chapter thesis" match="any">
     <date variable="issued">
 	  <date-part name="year"/>
     </date>
-      </if>
+      </else-if>
       <else>
     <date variable="issued">
       <date-part name="month" suffix=" "/>
