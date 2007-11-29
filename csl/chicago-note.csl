@@ -166,7 +166,7 @@
     <layout prefix="" suffix="." delimiter="; ">
 	<choose>
   <if position="subsequent">
-    <group delimiter=", " ibid="true">
+    <group delimiter=", ">
       <group>
 	<text macro="author-short"/>      
 	<text macro="recipient-short"/>
