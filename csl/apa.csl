@@ -50,18 +50,25 @@
     </names>
   </macro>
   <macro name="access">
-    <group>
-      <text term="retrieved" text-case="capitalize-first" suffix=" "/>
-      <date variable="accessed" suffix=", ">
-        <date-part name="month" suffix=" "/>
-        <date-part name="day" suffix=", "/>
-        <date-part name="year"/>
-      </date>
-      <group>
-        <text term="from" suffix=" "/>
-        <text variable="URL"/>
-      </group>
-    </group>
+    <choose>
+      <if variable="DOI">
+	<text variable="DOI" prefix="doi: "/>
+      </if>
+      <else>
+	<group>
+	  <text term="retrieved" text-case="capitalize-first" suffix=" "/>
+	  <date variable="accessed" suffix=", ">
+	    <date-part name="month" suffix=" "/>
+	    <date-part name="day" suffix=", "/>
+	    <date-part name="year"/>
+	  </date>
+	  <group>
+	    <text term="from" suffix=" "/>
+	    <text variable="URL"/>
+	  </group>
+	</group>
+      </else>
+    </choose>
   </macro>
   <macro name="title">
     <choose>
