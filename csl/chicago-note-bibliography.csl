@@ -137,23 +137,23 @@
   <macro name="issued">
     <choose>
       <if type="graphic report" match="any">
-    <date variable="issued">
-      <date-part name="month" suffix=" "/>
+	<date variable="issued">
+	  <date-part name="month" suffix=" "/>
 	  <date-part name="day" suffix=", "/>
 	  <date-part name="year"/>
-    </date>
+	</date>
       </if>
       <else-if type="book chapter thesis" match="any">
-    <date variable="issued">
+	<date variable="issued">
 	  <date-part name="year"/>
-    </date>
+	</date>
       </else-if>
       <else>
-    <date variable="issued">
-      <date-part name="month" suffix=" "/>
+	<date variable="issued">
+	  <date-part name="month" suffix=" "/>
 	  <date-part name="day" suffix=", "/>
 	  <date-part name="year"/>
-    </date>
+	</date>
       </else>
     </choose>
   </macro>
@@ -167,20 +167,20 @@
     <option name="disambiguate-add-givenname" value="true"/>
     <layout prefix="" suffix="." delimiter="; ">
       <group delimiter=", ">
-        <group>
+	<group>
 	  <text macro="author-short"/>      
 	  <text macro="recipient-short"/>
-        </group>
-	  <text macro="title-short"/>
-        <choose>
-	    <if type="interview">
-	  <text value="interview" text-case="lowercase"/>
-	    </if>
-	    <else-if variable="recipient">
-	  <text macro="issued"/>
-	    </else-if>
-        </choose>
-	  <text variable="locator"/>
+	</group>
+	<text macro="title-short"/>
+	<choose>
+	  <if type="interview">
+	    <text value="interview" text-case="lowercase"/>
+	  </if>
+	  <else-if variable="recipient">
+	    <text macro="issued"/>
+	  </else-if>
+	</choose>
+	<text variable="locator"/>
       </group>
     </layout>
   </citation> 
@@ -190,113 +190,113 @@
     <option name="et-al-use-first" value="6"/>
     <option name="subsequent-author-substitute" value="---"/>
     <layout suffix=".">
-	  <group delimiter=". ">
-      <text macro="author"/>
-	  <text macro="title"/>
-      <choose>
-	<if type="thesis">
-	  <group delimiter=", ">
-	    <text variable="genre"/>
-	    <text variable="publisher"/>
+      <group delimiter=". ">
+	<text macro="author"/>
+	<text macro="title"/>
+	<choose>
+	  <if type="thesis">
+	    <group delimiter=", ">
+	      <text variable="genre"/>
+	      <text variable="publisher"/>
+	      <text macro="issued"/>
+	    </group>
+	  </if>
+	  <else-if type="chapter">
+	    <group class="container">
+	      <text term="in" text-case="capitalize-first"/>
+	      <text variable="container-title" font-style="italic" prefix=" "/>
+	      <text variable="collection-title" prefix=". "/>
+	      <text macro="editor-translator" prefix=". "/>
+	      <text variable="page" prefix=", "/>
+	      <text macro="publisher" prefix=". "/>
+	      <text macro="issued" prefix=", "/>
+	    </group>
+	  </else-if>
+	  <else-if type="article-journal">
+	    <text macro="editor-translator" suffix=". "/>
+	    <group class="container">
+	      <text variable="container-title" font-style="italic"/>
+	      <text variable="volume"  prefix=" "/>
+	      <text variable="issue" prefix=", no. "/>
+	      <text macro="issued" prefix=" (" suffix=")"/>
+	      <text variable="page" prefix=": "/>
+	    </group>
+	  </else-if>
+	  <else-if type="article-newspaper article-magazine" match="any">
+	    <text macro="editor-translator" suffix=". "/>
+	    <group delimiter=", ">
+	      <text variable="container-title" font-style="italic"/>
+	      <text macro="issued"/>
+	    </group>
+	  </else-if>
+	  <else-if type="paper-conference">
+	    <text macro="editor-translator" suffix=". "/>
+	    <text variable="genre" text-case="capitalize-first" suffix=" presented at the "/>
+	    <text variable="event" suffix=", "/>
+	    <text variable="event-place" suffix=", "/>
 	    <text macro="issued"/>
-	  </group>
-	</if>
-	<else-if type="chapter">
-	  <group class="container">
-	    <text term="in" text-case="capitalize-first"/>
-	    <text variable="container-title" font-style="italic" prefix=" "/>
-	    <text variable="collection-title" prefix=". "/>
-	    <text macro="editor-translator" prefix=". "/>
-	    <text variable="page" prefix=", "/>
-	    <text macro="publisher" prefix=". "/>
-	    <text macro="issued" prefix=", "/>
-	  </group>
-	</else-if>
-	<else-if type="article-journal">
-	  <text macro="editor-translator" suffix=". "/>
-	  <group class="container">
-	    <text variable="container-title" font-style="italic"/>
-	    <text variable="volume"  prefix=" "/>
-	    <text variable="issue" prefix=", no. "/>
-	    <text macro="issued" prefix=" (" suffix=")"/>
-	    <text variable="page" prefix=": "/>
-	  </group>
-	</else-if>
-	<else-if type="article-newspaper article-magazine" match="any">
-	  <text macro="editor-translator" suffix=". "/>
-	  <group delimiter=", ">
-	    <text variable="container-title" font-style="italic"/>
+	  </else-if>
+	  <else-if type="interview">
+	    <group delimiter=". " suffix=".">
+	      <text macro="interviewer"/>
+	      <text variable="medium" text-case="capitalize-first"/>
+	      <text macro="issued"/>
+	    </group>
+	  </else-if>
+	  <else-if type="personal_communication">
+	    <choose>
+	      <if variable="genre">
+		<text variable="genre" text-case="capitalize-first"/>
+	      </if>
+	      <else>
+		<text value="letter" text-case="capitalize-first"/>
+	      </else>
+	    </choose>
+	    <text macro="recipient" prefix=" "/>
+	    <text macro="issued" prefix=". "/>
+	  </else-if>
+	  <else-if type="graphic">
+	    <text variable="medium" text-case="capitalize-first" suffix=". "/>
+	    <text macro="publisher" suffix=", "/>
 	    <text macro="issued"/>
-	  </group>
-	</else-if>
-	<else-if type="paper-conference">
-	  <text macro="editor-translator" suffix=". "/>
-	  <text variable="genre" text-case="capitalize-first" suffix=" presented at the "/>
-	  <text variable="event" suffix=", "/>
-	  <text variable="event-place" suffix=", "/>
-	  <text macro="issued"/>
-	</else-if>
-	<else-if type="interview">
-	  <group delimiter=". " suffix=".">
-	    <text macro="interviewer"/>
-	    <text variable="medium" text-case="capitalize-first"/>
+	  </else-if>
+	  <else-if type="report">
+	    <text macro="editor-translator" suffix=". "/>
+	    <text variable="genre" suffix=". "/>
+	    <text macro="publisher" suffix=", "/>
 	    <text macro="issued"/>
-	  </group>
-	</else-if>
-	<else-if type="personal_communication">
-	  <choose>
-	    <if variable="genre">
-	  <text variable="genre" text-case="capitalize-first"/>
-	    </if>
-	    <else>
-	  <text value="letter" text-case="capitalize-first"/>
-	    </else>
-	  </choose>
-	  <text macro="recipient" prefix=" "/>
-	  <text macro="issued" prefix=". "/>
-	</else-if>
-	<else-if type="graphic">
-	  <text variable="medium" text-case="capitalize-first" suffix=". "/>
-	  <text macro="publisher" suffix=", "/>
-	  <text macro="issued"/>
-	</else-if>
-	<else-if type="report">
-	  <text macro="editor-translator" suffix=". "/>
-	  <text variable="genre" suffix=". "/>
-	  <text macro="publisher" suffix=", "/>
-	   <text macro="issued"/>
-	</else-if>
-	<else-if type="book">
-	  <text macro="editor-translator" suffix=". "/>
-	  <text variable="collection-title" suffix=". "/>
-	  <text macro="publisher" suffix=", "/>
-	  <text macro="issued"/>
-	</else-if>
-	<else>
-	  <group class="container" delimiter=". ">
-	    <text macro="editor-translator"/>
-	    <text variable="container-title" font-style="italic"/>
-	    <text variable="collection-title" font-style="italic"/>
-	    <text variable="genre" text-case="capitalize-first"/>
-	    <text variable="medium" text-case="capitalize-first"/>
+	  </else-if>
+	  <else-if type="book">
+	    <text macro="editor-translator" suffix=". "/>
+	    <text variable="collection-title" suffix=". "/>
+	    <text macro="publisher" suffix=", "/>
 	    <text macro="issued"/>
-	  </group>
-	</else>
-      </choose>
+	  </else-if>
+	  <else>
+	    <group class="container" delimiter=". ">
+	      <text macro="editor-translator"/>
+	      <text variable="container-title" font-style="italic"/>
+	      <text variable="collection-title" font-style="italic"/>
+	      <text variable="genre" text-case="capitalize-first"/>
+	      <text variable="medium" text-case="capitalize-first"/>
+	      <text macro="issued"/>
+	    </group>
+	  </else>
+	</choose>
 	<choose>
 	  <if type="book thesis chapter article-journal article-newspaper article-magazine" match="none">
-	<group delimiter=". ">
-	  <text variable="archive_location" text-case="title"/>
-	  <text macro="archive"/>
-	</group>
+	    <group delimiter=". ">
+	      <text variable="archive_location" text-case="title"/>
+	      <text macro="archive"/>
+	    </group>
 	  </if>
 	</choose>
 	<choose>
 	  <if variable="page" match="none">
-      <text variable="URL"/>
+	    <text variable="URL"/>
 	  </if>
 	</choose>
-	  </group>
+      </group>
     </layout>
   </bibliography>
 </style>
