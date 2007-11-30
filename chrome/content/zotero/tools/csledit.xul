@@ -115,7 +115,7 @@
 				var author = document.getElementById("preview-suppress-author").checked;
 				var search = document.getElementById('preview-pages');
 				var loc = document.getElementById('zotero-csl-page-type');
-				var pos = document.getElementById('preview-subsequent').checked ? Zotero.CSL.POSITION_SUBSEQUENT : Zotero.CSL.POSITION_FIRST;
+				var pos = document.getElementById('zotero-ref-position').selectedItem.value;
 				var citations = '<h1>Single Citations</h1>';
 				for (var i=0; i<citation.citationItems.length; i++) {
 					citation.citationItems[i].suppressAuthor = author;
@@ -161,7 +161,15 @@
 		    <label value=":" />
 		    <textbox size="5" id="preview-pages" type="timed" timeout="250" oncommand="Zotero_CSL_Editor.refresh()"/>
 		    <checkbox oncommand="Zotero_CSL_Editor.refresh()" id="preview-suppress-author" label="Suppress author" />
-		    <checkbox oncommand="Zotero_CSL_Editor.refresh()" id="preview-subsequent" label="Subsequent citation" />
+		    <label value="Citation is:" />
+		    <menulist id="zotero-ref-position" oncommand="Zotero_CSL_Editor.refresh()">
+		    	<menupopup>
+		    	    <menuitem label="First" value="0"/>
+		    	    <menuitem label="Subsequent" value="1"/>
+		    	    <menuitem label="Ibid" value="2"/>
+		    	    <menuitem label="Ibid+Locator" value="3"/>
+		    	</menupopup>
+		    </menulist>
 		    <menulist id="zotero-csl-list" style="min-height: 1.6em; min-width: 100px" initialized="false" flex="1" oncommand="Zotero_CSL_Editor.loadCSL(this.selectedItem.value)"/>
 		</hbox>
 		<textbox id="zotero-csl-editor" type="timed" timeout="250" multiline="true"
