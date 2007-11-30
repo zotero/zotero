@@ -1197,7 +1197,11 @@ Zotero.CSL.prototype._processElements = function(item, element, formattedString,
 							var variables = newChild["@"+attribute].toString().split(" ");
 							for(var j=0; !done && j<variables.length; j++) {
 								if(attribute == "variable") {
-									if(Zotero.CSL._dateVariables[variables[j]]) {
+									if(variables[j] == "locator") {
+										// special case for locator
+										var exists = citationItem && citationItem.locator && citationItem.locator.length > 0
+									}
+									else if(Zotero.CSL._dateVariables[variables[j]]) {
 										// getDate not false/undefined
 										var exists = !!item.getDate(variables[j]);
 									} else if(Zotero.CSL._namesVariables[variables[j]]) {
