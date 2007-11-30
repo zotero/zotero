@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-11-29 21:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-11-30 21:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -6640,107 +6640,71 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('b047a13c-fe5c-6604-c997-bef15e502b09', '1.0.0b3.r1', '', '2007-03-24 22:20:00', 1, 100, 4, 'LexisNexis', 'Simon Kornblith', '^https?://web\.lexis-?nexis\.com[^/]*/universe/(?:document|doclist)',
+REPLACE INTO translators VALUES ('b047a13c-fe5c-6604-c997-bef15e502b09', '1.0.0b3.r1', '', '2007-11-30 21:00:00', '1', '100', '4', 'LexisNexis', 'Sean Takats', '^https?://(?:www\.|web\.)?lexis-?nexis\.com[^/]*/us/lnacademic', 
 'function detectWeb(doc, url) {
-	var detailRe = new RegExp("^https?://[^/]+/universe/document");
-	if(detailRe.test(doc.location.href)) {
-		return "newspaperArticle";
-	} else {
-		return "multiple";
-	}
-}',
-'function scrape(doc) {
-	var newItem = new Zotero.Item();
-	newItem.attachments.push({document:doc, title:"LexisNexis Snapshot"});
-	
-	var citationDataDiv;
-	var divs = doc.getElementsByTagName("div");
-	for(var i=0; i<divs.length; i++) {
-		if(divs[i].className == "bodytext") {
-			citationDataDiv = divs[i];
-			break;
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	Zotero.debug(doc.title);
+	if (doc.title.substr(doc.title.length-8, 8)=="Document"){
+		var xpath = ''//input[@name="cisb"]'';
+		var elmt = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+		if (elmt.iterateNext()){
+			return "newspaperArticle";
 		}
 	}
-	
-	centerElements = citationDataDiv.getElementsByTagName("center");
-	var elementParts = centerElements[0].innerHTML.split(/<br[^>]*>/gi);
-	newItem.publicationTitle = elementParts[elementParts.length-1];
-	
-	var dateRegexp = /<br[^>]*>(?:<b>)?([A-Z][a-z]+)(?:<\/b>)? ([0-9]+, [0-9]{4})/;
-	var m = dateRegexp.exec(centerElements[centerElements.length-1].innerHTML);
-	if(m) {
-		newItem.date = m[1]+" "+m[2];
-	} else {
-		var elementParts = centerElements[centerElements.length-1].innerHTML.split(/<br[^>]*>/gi);
-		newItem.date = elementParts[1];
-	}
-	
-	var cutIndex = citationDataDiv.innerHTML.indexOf("<b>BODY:</b>");
-	if(cutIndex < 0) {
-		cutIndex = citationDataDiv.innerHTML.indexOf("<b>TEXT:</b>");
-	}
-	if(cutIndex > 0) {
-		citationData = citationDataDiv.innerHTML.substring(0, cutIndex);
-	} else {
-		citationData = citationDataDiv.innerHTML;
-	}
-	
-	citationData = Zotero.Utilities.cleanTags(citationData);
-	
-	var headlineRegexp = /\n(?:HEADLINE|TITLE|ARTICLE): ([^\n]+)\n/;
-	var m = headlineRegexp.exec(citationData);
-	if(m) {
-		newItem.title = Zotero.Utilities.cleanTags(m[1]);
-	}
-	
-	var bylineRegexp = /\nBYLINE:  *(\w[\w\- ]+)/;
-	var m = bylineRegexp.exec(citationData);
-	if(m) {		// there is a byline; use it as an author
-		if(m[1].substring(0, 3).toLowerCase() == "by ") {
-			m[1] = m[1].substring(3);
-		}
-		newItem.creators.push(Zotero.Utilities.cleanAuthor(m[1], "author"));
-		
-		newItem.itemType = "newspaperArticle";
-	} else {	// no byline; must be a journal
-		newItem.itemType = "journalArticle";
-	}
-	
-	// other ways authors could be encoded
-	var authorRegexp = /\n(?:AUTHOR|NAME): ([^\n]+)\n/; 
-	var m = authorRegexp.exec(citationData);
-	if(m) {
-		var authors = m[1].split(/, (?:and )?/);
-		for(var i in authors) {
-			newItem.creators.push(Zotero.Utilities.cleanAuthor(authors[i].replace(" *", ""), "author"));
-		}
-	}
-	
-	newItem.complete();
-}
+}', 
+'function doWeb(doc, url) {
+	var hostRe = new RegExp("^http(?:s)?://[^/]+");
+	var m = hostRe.exec(doc.location.href);
+	var host = m[0];
 
-function doWeb(doc, url) {
-	var detailRe = new RegExp("^https?://[^/]+/universe/document");
-	if(detailRe.test(doc.location.href)) {
-		scrape(doc);
-	} else {
-		var items = Zotero.Utilities.getItemArray(doc, doc, "^https?://[^/]+/universe/document");
-		items = Zotero.selectItems(items);
-		
-		if(!items) {
-			return true;
-		}
-		
-		var uris = new Array();
-		for(var i in items) {
-			uris.push(i);
-		}
-		
-		Zotero.Utilities.processDocuments(uris, function(doc) { scrape(doc) },
-			function() { Zotero.done(); }, null);
-		
-		Zotero.wait();
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	var risb = doc.evaluate(''//input[@name="risb"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().value;
+	var cisb = doc.evaluate(''//input[@name="cisb"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().value;
+	var uri = host+"/us/lnacademic/results/listview/delPrep.do?cisb="+cisb+"&risb="+risb+"&mode=delivery_refworks";	
+	var hiddenInputs = doc.evaluate(''//form[@name="results_docview_DocumentForm"]//input[@type="hidden"]'', doc, nsResolver,
+		XPathResult.ANY_TYPE, null);
+	var hiddenInput;
+	var poststring="";
+	while(hiddenInput = hiddenInputs.iterateNext()) {
+		poststring = poststring+"&"+hiddenInput.name+"="+encodeURIComponent(hiddenInput.value);
 	}
+	poststring = poststring + "&hiddensearchfield=Narrow+Search&reloadClassif=&format=GNBFI&focusTerms=&nextSteps=0";
+	Zotero.Utilities.HTTP.doPost(uri, poststring, function(text) {
+		uri = host+"/us/lnacademic/delivery/refExport.do";
+		var disb = text.match(/<input type="hidden" name="disb" value="([^"]+)">/);
+		var poststring = "delRange=cur&selDocs=&disb="+disb[1]+"&initializationPage=0";
+		Zotero.Utilities.HTTP.doPost(uri, poststring, function(text) {
+			uri = text.match(/&amp;url=([^'']+)''/)
+			uri = decodeURIComponent(uri[1]);
+			var uris = new Array();
+			uris.push(uri);
+			Zotero.Utilities.processDocuments(uris, function(newDoc){
+				var newItem = new Zotero.Item("newspaperArticle");
+				var title = newDoc.evaluate(''//div[@class="HEADLINE"]'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+				newItem.title = title;
+				var date = newDoc.evaluate(''//meta[@name="_lndateissue"]/@content'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
+				date = date.substr(0,4) + "-" + date.substr(4,2) + "-" + date.substr(6,2);
+				newItem.date = date; 
+				var publicationTitle = newDoc.evaluate(''//div[@class="PUB"]'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+				newItem.publicationTitle = publicationTitle;
+				var section = newDoc.evaluate(''//div[@class="SECTION-INFO"]'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+				newItem.section = section;
+				var authors = newDoc.evaluate(''//div[@class="BYLINE"]'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+				newItem.creators.push(Zotero.Utilities.cleanAuthor(authors, "author"));
+				newItem.respository = "lexisnexis.com";
+				newItem.url = url;
+				newItem.complete();
+				Zotero.done();
+			});
+		});
+	});
+	Zotero.wait();
 }');
 
 REPLACE INTO translators VALUES ('5e3e6245-83da-4f55-a39b-b712df54a935', '1.0.0b3.r1', '', '2007-08-27 05:00:00', '0', '90', '4', 'Melvyl', 'Sean Takats', '^https?://(?:melvyl.cdlib.org|melvyl-dev.cdlib.org:8162)/F(?:/[A-Z0-9\-]+(?:\?.*)?$|\?func=find|\?func=scan)', 
