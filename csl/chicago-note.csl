@@ -40,7 +40,7 @@
   <macro name="author">
     <names variable="author">
       <name and="text" sort-separator=", "
-	    delimiter=", " delimiter-precedes-last="always"/>
+	    delimiter=", "/>
       <label form="short" prefix=", " suffix="."/>
       <substitute>
 	<names variable="editor"/>
@@ -51,7 +51,7 @@
   <macro name="author-full">
     <names variable="author">
       <name and="text" sort-separator=", "
-	    delimiter=", " delimiter-precedes-last="always"/>
+	    delimiter=", "/>
       <label form="short" prefix=", " suffix="."/>
       <substitute>
 	<names variable="editor"/>
