@@ -80,8 +80,12 @@
     </group>
   </macro>
   <macro name="pageno">
-    <label variable="page" suffix=". " form="short"/>
-    <text variable="page"/>
+    <choose>
+      <if variable="locator" match="none">
+        <label variable="page" suffix=". " form="short"/>
+        <text variable="page"/>
+      </if>
+    </choose>
   </macro>
   <macro name="pageref">
     <label variable="locator" suffix=". " form="short"/>
@@ -141,8 +145,9 @@
 		    <text macro="publisher"/>
 		    <text macro="date"/>
 		  </group>
+		<text macro="pageno"/>
+		<text macro="pageref"/>
 		</group>
-		<text macro="pageref" prefix=", "/>
 	      </else-if>
 	      <else>
 		<group delimiter=", ">
@@ -152,6 +157,7 @@
 		  <text macro="volref"/>
 		  <text macro="date"/>
 		  <text macro="volumes"/>
+		  <text macro="pageno"/>
 		  <text macro="pageref"/>
 		</group>
 	      </else>
