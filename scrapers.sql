@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-11-30 21:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-11-30 22:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -6640,7 +6640,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('b047a13c-fe5c-6604-c997-bef15e502b09', '1.0.0b3.r1', '', '2007-11-30 21:00:00', '1', '100', '4', 'LexisNexis', 'Sean Takats', '^https?://(?:www\.|web\.)?lexis-?nexis\.com[^/]*/us/lnacademic', 
+REPLACE INTO translators VALUES ('b047a13c-fe5c-6604-c997-bef15e502b09', '1.0.0b3.r1', '', '2007-11-30 22:00:00', '1', '100', '4', 'LexisNexis', 'Sean Takats', '^https?://(?:www\.|web\.)?lexis-?nexis\.com[^/]*/us/lnacademic', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -6686,17 +6686,37 @@ REPLACE INTO translators VALUES ('b047a13c-fe5c-6604-c997-bef15e502b09', '1.0.0b
 			uris.push(uri);
 			Zotero.Utilities.processDocuments(uris, function(newDoc){
 				var newItem = new Zotero.Item("newspaperArticle");
-				var title = newDoc.evaluate(''//div[@class="HEADLINE"]'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-				newItem.title = title;
-				var date = newDoc.evaluate(''//meta[@name="_lndateissue"]/@content'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
-				date = date.substr(0,4) + "-" + date.substr(4,2) + "-" + date.substr(6,2);
-				newItem.date = date; 
-				var publicationTitle = newDoc.evaluate(''//div[@class="PUB"]'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-				newItem.publicationTitle = publicationTitle;
-				var section = newDoc.evaluate(''//div[@class="SECTION-INFO"]'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-				newItem.section = section;
-				var authors = newDoc.evaluate(''//div[@class="BYLINE"]'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-				newItem.creators.push(Zotero.Utilities.cleanAuthor(authors, "author"));
+				var title = newDoc.evaluate(''//div[@class="HEADLINE"]'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+				if (title){
+					newItem.title = title.textContent;
+				}else{
+					newItem.title = " ";
+				}
+				var date = newDoc.evaluate(''//meta[@name="_lndateissue"]/@content'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+				if (date){
+					date = date.nodeValue;
+					var m = date.match(/([^T]+)T/);
+					date = m[1];
+					Zotero.debug(date);
+					if (date.length == 8){
+						date = date.substr(0,4) + "-" + date.substr(4,2) + "-" + date.substr(6,2);
+					} else if (date.length == 6){
+						date = date.substr(0,4) + "-" + date.substr(4,2);
+					}
+					newItem.date = date; 		
+				}
+				var publicationTitle = newDoc.evaluate(''//div[@class="PUB"]'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+				if (publicationTitle){
+					newItem.publicationTitle = publicationTitle.textContent;
+				}
+				var section = newDoc.evaluate(''//div[@class="SECTION-INFO"]'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+				if (section){
+					newItem.section = section.textContent;				
+				}
+				var author = newDoc.evaluate(''//div[@class="BYLINE"]'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+				if (author){
+					newItem.creators.push(Zotero.Utilities.cleanAuthor(author.textContent, "author"));
+				}
 				newItem.respository = "lexisnexis.com";
 				newItem.url = url;
 				newItem.complete();
