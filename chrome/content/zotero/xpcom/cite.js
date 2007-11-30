@@ -1866,7 +1866,7 @@ Zotero.CSL.Item._optionalTypeMap = {
 	film:"motion_picture",
 	artwork:"graphic",
 	webpage:"webpage",
-	report:"report",	// ??
+	report:"report",
 	bill:"bill",
 	case:"legal_case",
 	hearing:"bill",				// ??
