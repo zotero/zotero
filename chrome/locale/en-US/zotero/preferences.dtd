@@ -47,6 +47,10 @@
 
 <!ENTITY zotero.preferences.prefpane.export				"Export">
 
+<!ENTITY zotero.preferences.citationOptions.caption			"Citation Options">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Include URLs of paper journal articles in references">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "When this option is disabled, Zotero includes URLs when citing journal articles only if the article does not have a page range specified.">
+
 <!ENTITY zotero.preferences.quickCopy.caption				"Quick Copy">
 <!ENTITY zotero.preferences.quickCopy.defaultOutputFormat	"Default Output Format:">
 <!ENTITY zotero.preferences.quickCopy.macWarning			"Note: Rich-text formatting will be lost on Mac OS X.">

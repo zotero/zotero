@@ -60,6 +60,7 @@ pref("extensions.zotero.export.translatorSettings", 'true,false');
 pref("extensions.zotero.export.lastStyle", 'http://www.zotero.org/styles/chicago-note.csl');
 pref("extensions.zotero.export.bibliographySettings", 'save-as-rtf');
 pref("extensions.zotero.export.bibliographyLocale", '');
+pref("extensions.zotero.export.citePaperJournalArticleURL", false);
 
 pref("extensions.zotero.export.quickCopy.setting", 'bibliography=http://www.zotero.org/styles/chicago-note.csl');
 

@@ -1713,6 +1713,14 @@ Zotero.CSL.Item = function(item) {
 		throw "Zotero.CSL.Item called to wrap a non-item";
 	}
 	
+	// don't return URL or accessed information for journal articles if a
+	// pages field exists
+	if(!Zotero.Prefs.get("export.citePaperJournalArticleURL") 
+			&& Zotero.ItemTypes.getName(this.zoteroItem.getType()) == "journalArticle"
+			&& this.zoteroItem.getField("pages")) {
+		this._ignoreURL = true;
+	}
+	
 	this._properties = {};
 	this._refreshItem();
 }
@@ -1766,6 +1774,9 @@ Zotero.CSL.Item.prototype.getNames = function(variable) {
  * Gets an Item.Date object for a specific type.
  */
 Zotero.CSL.Item.prototype.getDate = function(variable) {
+	// ignore accessed date
+	if(this._ignoreURL && variable == "accessed") return false;
+	
 	// load date variable if possible
 	this._refreshItem();
 	if(this._dates[variable] == undefined) {
@@ -1813,6 +1824,9 @@ Zotero.CSL.Item._zoteroFieldMap = {
 Zotero.CSL.Item.prototype.getVariable = function(variable, form) {
 	if(!Zotero.CSL.Item._zoteroFieldMap["long"][variable]) return "";
 	
+	// ignore URL
+	if(this._ignoreURL && variable == "URL") return ""
+	
 	var zoteroFields = [];
 	var field;
 	
@@ -1831,7 +1845,6 @@ Zotero.CSL.Item.prototype.getVariable = function(variable, form) {
 	} else {
 		zoteroFields = zoteroFields.concat(field);
 	}
-	
 	
 	for each(var zoteroField in zoteroFields) {
 		var value = this.zoteroItem.getField(zoteroField, false, true);

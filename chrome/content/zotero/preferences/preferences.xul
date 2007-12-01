@@ -245,8 +245,15 @@ To add a new preference:
 						label="&zotero.preferences.prefpane.export;"
 						image="chrome://zotero/skin/prefs-export.png">
 		<preferences>
+			<preference id="pref-export-citePaperJournalArticleURL" name="extensions.zotero.export.citePaperJournalArticleURL" type="bool"/>
 			<preference id="pref-quickCopy-setting" name="extensions.zotero.export.quickCopy.setting" type="string"/>
 		</preferences>
+		
+		<groupbox>
+			<caption label="&zotero.preferences.citationOptions.caption;"/>
+			<checkbox label="&zotero.preferences.export.citePaperJournalArticleURL;" preference="pref-export-citePaperJournalArticleURL"/>
+			<label id="export-citePaperJournalArticleURL">&zotero.preferences.export.citePaperJournalArticleURL.description;</label>
+		</groupbox>
 		
 		<groupbox>
 			<caption label="&zotero.preferences.quickCopy.caption;"/>
