@@ -34,6 +34,7 @@ Zotero.Cite = new function() {
 	this.getStyles = getStyles;
 	this.getStyleClass = getStyleClass;
 	this.getStyle = getStyle;
+	this.installStyle = installStyle;
 	
 	/*
 	 * returns an associative array of cslID => styleName pairs
@@ -90,7 +91,185 @@ Zotero.Cite = new function() {
 		if(!style) throw "Zotero.Cite: invalid CSL ID";
 		return style;
 	}
+	
+	/**
+	 * installs a style 
+	 **/
+	function installStyle(cslString, loadURI) {
+		try {
+			var xml = new XML(Zotero.CSL.Global.cleanXML(cslString));
+		}
+		catch (e) {
+			var error = true;
+			Components.utils.reportError(e);
+		}
+		
+		if (!xml || error) {
+			alert(Zotero.getString('styles.installError', loadURI));
+			return;
+		}
+		
+		var uri = xml.info.id.toString();
+		var title = xml.info.title.toString();
+		var updated = xml.info.updated.toString().replace(/(.+)T([^\+]+)\+?.*/, "$1 $2");
+		
+		var sql = "SELECT title FROM csl WHERE cslID=?";
+		var existingTitle = Zotero.DB.valueQuery(sql, uri);
+		
+		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+			.getService(Components.interfaces.nsIPromptService);
+		
+		var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
+			+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
+		
+		if (existingTitle) {
+			var text = Zotero.getString('styles.updateStyle', [existingTitle, title, loadURI]);
+		}
+		else {
+			var text = Zotero.getString('styles.installStyle', [title, loadURI]);
+		}
+		
+		var acceptButton = Zotero.getString('general.install');
+		
+		var index = ps.confirmEx(null,
+			'',
+			text,
+			buttonFlags,
+			acceptButton, null, null, null, {}
+		);
+		
+		if (index == 0) {
+			var sql = "REPLACE INTO csl VALUES (?,?,?,?)";
+			Zotero.DB.query(sql, [uri, updated, title, cslString]);
+			alert(Zotero.getString('styles.installed', title));
+		}
+	}
 }
+
+
+
+Zotero.Cite.MIMEHandler = new function () {
+	this.init = init;
+	
+	/*
+	 * registers URIContentListener to handle MIME types
+	 */
+	function init() {
+		Zotero.debug("Registering URIContentListener for text/x-csl");
+		var uriLoader = Components.classes["@mozilla.org/uriloader;1"]
+			.getService(Components.interfaces.nsIURILoader);
+		uriLoader.registerContentListener(Zotero.Cite.MIMEHandler.URIContentListener);
+	}
+}
+
+
+/*
+ * Zotero.Cite.MIMEHandler.URIContentListener: implements
+ * nsIURIContentListener interface to grab MIME types
+ */
+Zotero.Cite.MIMEHandler.URIContentListener = new function() {
+	// list of content types to capture
+	// NOTE: must be from shortest to longest length
+	this.desiredContentTypes = ["text/x-csl"];
+	
+	this.QueryInterface = QueryInterface;
+	this.canHandleContent = canHandleContent;
+	this.doContent = doContent;
+	this.isPreferred = isPreferred;
+	this.onStartURIOpen = onStartURIOpen;
+	
+	function QueryInterface(iid) {
+		if  (iid.equals(Components.interfaces.nsISupports)
+		   || iid.equals(Components.interfaces.nsISupportsWeakReference)
+		   || iid.equals(Components.interfaces.nsIURIContentListener)) {
+			return this;
+		}
+		throw Components.results.NS_ERROR_NO_INTERFACE;
+	}
+	
+	function canHandleContent(contentType, isContentPreferred, desiredContentType) {
+		if (this.desiredContentTypes.indexOf(contentType) != -1) {
+			return true;
+		}
+		return false;
+	}
+	
+	function doContent(contentType, isContentPreferred, request, contentHandler) {
+		Zotero.debug("Running doContent() for " + request.name);
+		contentHandler.value = new Zotero.Cite.MIMEHandler.StreamListener(request, contentType);
+		return false;
+	}
+	
+	function isPreferred(contentType, desiredContentType) {
+		if (this.desiredContentTypes.indexOf(contentType) != -1) {
+			return true;
+		}
+		return false;
+	}
+	
+	function onStartURIOpen(URI) {
+		return true;
+	}
+}
+
+/*
+ * Zotero.Cite.MIMEHandler.StreamListener: implements nsIStreamListener and
+ * nsIRequestObserver interfaces to download MIME types we've grabbed
+ */
+Zotero.Cite.MIMEHandler.StreamListener = function(request, contentType) {
+	this._request = request;
+	this._contentType = contentType
+	this._readString = "";
+	this._scriptableStream = null;
+	this._scriptableStreamInput = null
+	
+	Zotero.debug("Prepared to grab content type " + contentType);
+}
+
+Zotero.Cite.MIMEHandler.StreamListener.prototype.QueryInterface = function(iid) {
+	if (iid.equals(Components.interfaces.nsISupports)
+	   || iid.equals(Components.interfaces.nsIRequestObserver)
+	   || iid.equals(Components.interfaces.nsIStreamListener)) {
+		return this;
+	}
+	throw Components.results.NS_ERROR_NO_INTERFACE;
+}
+
+Zotero.Cite.MIMEHandler.StreamListener.prototype.onStartRequest = function(channel, context) {}
+
+/*
+ * Called when there's data available; basically, we just want to collect this data
+ */
+Zotero.Cite.MIMEHandler.StreamListener.prototype.onDataAvailable = function(request, context, inputStream, offset, count) {
+	Zotero.debug(count + " bytes available");
+	
+	if (inputStream != this._scriptableStreamInput) {
+		this._scriptableStream = Components.classes["@mozilla.org/scriptableinputstream;1"]
+			.createInstance(Components.interfaces.nsIScriptableInputStream);
+		this._scriptableStream.init(inputStream);
+		this._scriptableStreamInput = inputStream;
+	}
+	this._readString += this._scriptableStream.read(count);
+}
+
+/*
+ * Called when the request is done
+ */
+Zotero.Cite.MIMEHandler.StreamListener.prototype.onStopRequest = function(channel, context, status) {
+	Zotero.debug("Request finished");
+	var externalHelperAppService = Components.classes["@mozilla.org/uriloader/external-helper-app-service;1"]
+		.getService(Components.interfaces.nsIExternalHelperAppService);
+	
+	if (this._request.name) {
+		var loadURI = this._request.name;
+	}
+	else {
+		var loadURI = '';
+	}
+	
+	Zotero.Cite.installStyle(this._readString, loadURI);
+}
+
 
 /*
  * CSL: a class for creating bibliographies from CSL files
@@ -130,6 +309,9 @@ Zotero.CSL._dateVariables = {
 Zotero.CSL._namesVariables = {
 	"editor":true,
 	"translator":true,
+	"recipient":true,
+	"interviewer":true,
+	"series-editor":true,
 	"author":true
 }
 
@@ -911,10 +1093,12 @@ Zotero.CSL.prototype._processElements = function(item, element, formattedString,
 								// date is in citationItem
 								var string = citationItem._csl[variables[j]][part];
 							} else {
-								var string = date.getDateVariable(part).toString();
-								if(string == "") continue;
+								var string = date.getDateVariable(part);
+								if(string === "") continue;
 								
 								if(part == "year") {
+									string = string.toString();
+									
 									// if 4 digits and no B.C., use short form
 									if(newForm == "short" && string.length == 4 && !isNaN(string*1)) {
 										string = string.substr(2, 2);
@@ -927,22 +1111,30 @@ Zotero.CSL.prototype._processElements = function(item, element, formattedString,
 								} else if(part == "month") {
 									// if month is a numeric month, format as such
 									if(!isNaN(string*1)) {
-										if(form == "numeric-leading-zeros") {
+										if(newForm == "numeric-leading-zeros") {
+											string = (string+1).toString();
 											if(string.length == 1) {
 												string = "0" + string;
 											}
-										} else if(form == "short") {
+										} else if(newForm == "short") {
 											string = this._terms["short"]["_months"][string];
-										} else if(form != "numeric") {
+										} else if(newForm == "numeric") {
+											string = (1+string).toString();
+										} else {
 											string = this._terms["long"]["_months"][string];
 										}
-									} else if(form == "numeric") {
+									} else if(newForm == "numeric") {
 										string = "";
 									}
 								} else if(part == "day") {
+									string = string.toString();
 									if(form == "numeric-leading-zeros"
 											&& string.length() == 1) {
 										string = "0" + string;
+									} else if (newForm == "ordinal") {
+										var ind = parseInt(string);
+										var daySuffixes = Zotero.getString("date.daySuffixes").replace(/, ?/g, "|").split("|");
+										string += (parseInt(ind/10)%10) == 1 ? daySuffixes[3] : (ind % 10 == 1) ? daySuffixes[0] : (ind % 10 == 2) ? daySuffixes[1] : (ind % 10 == 3) ? daySuffixes[2] : daySuffixes[3];
 									}
 								}
 							}
@@ -1005,7 +1197,11 @@ Zotero.CSL.prototype._processElements = function(item, element, formattedString,
 							var variables = newChild["@"+attribute].toString().split(" ");
 							for(var j=0; !done && j<variables.length; j++) {
 								if(attribute == "variable") {
-									if(Zotero.CSL._dateVariables[variables[j]]) {
+									if(variables[j] == "locator") {
+										// special case for locator
+										var exists = citationItem && citationItem.locator && citationItem.locator.length > 0
+									}
+									else if(Zotero.CSL._dateVariables[variables[j]]) {
 										// getDate not false/undefined
 										var exists = !!item.getDate(variables[j]);
 									} else if(Zotero.CSL._namesVariables[variables[j]]) {
@@ -1194,9 +1390,15 @@ Zotero.CSL.Global = new function() {
 					createInstance();
 				req.open("GET", prefix + loc + ext, false);
 				req.overrideMimeType("text/plain");
-				req.send(null);
+				var fail = false;
+				try {
+					req.send(null);
+				}
+				catch (e) {
+					fail = true;
+				}
 				
-				if (req.responseText) {
+				if (!fail) {
 					Zotero.CSL.Global._xmlLang = loc;
 					var xml = req.responseText;
 				}
@@ -1209,9 +1411,15 @@ Zotero.CSL.Global = new function() {
 					createInstance();
 				req.open("GET", prefix + loc + ext, false);
 				req.overrideMimeType("text/plain");
-				req.send(null);
+				var fail = false;
+				try {
+					req.send(null);
+				}
+				catch (e) {
+					fail = true;
+				}
 				
-				if (req.responseText) {
+				if (!fail) {
 					Zotero.CSL.Global._xmlLang = loc;
 					var xml = req.responseText;
 				}
@@ -1505,9 +1713,31 @@ Zotero.CSL.Item = function(item) {
 		throw "Zotero.CSL.Item called to wrap a non-item";
 	}
 	
-	this._dates = {};
+	// don't return URL or accessed information for journal articles if a
+	// pages field exists
+	if(!Zotero.Prefs.get("export.citePaperJournalArticleURL") 
+			&& Zotero.ItemTypes.getName(this.zoteroItem.getType()) == "journalArticle"
+			&& this.zoteroItem.getField("pages")) {
+		this._ignoreURL = true;
+	}
+	
 	this._properties = {};
+	this._refreshItem();
 }
+
+/**
+ * Refreshes item if it has been modified
+ */
+Zotero.CSL.Item.prototype._refreshItem = function() {
+	var previousChanged = this._lastChanged;
+	this._lastChanged = this.zoteroItem.getField("dateModified", false, true);
+	
+	if(this._lastChanged != previousChanged) {
+		this._names = undefined;
+		this._dates = {};
+	}
+}
+
 
 /*
  * Returns some identifier for the item. Used to create citations. In Zotero,
@@ -1516,11 +1746,20 @@ Zotero.CSL.Item = function(item) {
 Zotero.CSL.Item.prototype.getID = function() {
 	return this.zoteroItem.getID();
 }
+/*
+ * Mappings for names
+ */
+Zotero.CSL.Item._zoteroNameMap = {
+	"series-editor":"seriesEditor"
+}
 
 /*
  * Gets an array of Item.Name objects for a variable.
  */
 Zotero.CSL.Item.prototype.getNames = function(variable) {
+	var field = Zotero.CSL.Item._zoteroNameMap[variable];
+	if (field) variable = field;
+	this._refreshItem();
 	if(!this._names) {
 		this._separateNames();
 	}
@@ -1535,7 +1774,11 @@ Zotero.CSL.Item.prototype.getNames = function(variable) {
  * Gets an Item.Date object for a specific type.
  */
 Zotero.CSL.Item.prototype.getDate = function(variable) {
+	// ignore accessed date
+	if(this._ignoreURL && variable == "accessed") return false;
+	
 	// load date variable if possible
+	this._refreshItem();
 	if(this._dates[variable] == undefined) {
 		this._createDate(variable);
 	}
@@ -1545,33 +1788,62 @@ Zotero.CSL.Item.prototype.getDate = function(variable) {
 }
 
 Zotero.CSL.Item._zoteroFieldMap = {
-	"title":"title",
-	"container-title":"publicationTitle",
-	"collection-title":["seriesTitle", "series"],
-	"publisher":"publisher",
-	"publisher-place":"place",
-	"page":"pages",
-	"volume":"volume",
-	"issue":"issue",
-	"number-of-volumes":"numberOfVolumes",
-	"edition":"edition",
-	"genre":"type",
-	"abstract":"abstract",
-	"URL":"url",
-	"DOI":"DOI"
+	"long":{
+		"title":"title",
+		"container-title":"publicationTitle",
+		"collection-title":["seriesTitle", "series"],
+		"publisher":["publisher", "distributor"],
+		"publisher-place":"place",
+		"page":"pages",
+		"volume":"volume",
+		"issue":"issue",
+		"number-of-volumes":"numberOfVolumes",
+		"edition":"edition",
+		"genre":"type",
+		"medium":"medium",
+		"archive":"repository",
+		"archive_location":"archiveLocation",
+		"event":["meetingName", "conferenceName"],
+		"event-place":"place",
+		"abstract":"abstractNote",
+		"URL":"url",
+		"DOI":"DOI",
+		"note":"extra",
+		"number":["number", "documentNumber", "patentNumber", "billNumber",
+			"codeNumber", "episodeNumber"]
+	},
+	"short":{
+		"title":["shortTitle", "title"],
+		"container-title":"journalAbbreviation"
+	}
 }
 
 /*
  * Gets a text object for a specific type.
  */
 Zotero.CSL.Item.prototype.getVariable = function(variable, form) {
-	if(!Zotero.CSL.Item._zoteroFieldMap[variable]) return "";
+	if(!Zotero.CSL.Item._zoteroFieldMap["long"][variable]) return "";
 	
-	if(variable == "title" && form == "short") {
-		var zoteroFields = ["shortTitle", "title"];
+	// ignore URL
+	if(this._ignoreURL && variable == "URL") return ""
+	
+	var zoteroFields = [];
+	var field;
+	
+	if(form == "short" && Zotero.CSL.Item._zoteroFieldMap["short"][variable]) {
+		field = Zotero.CSL.Item._zoteroFieldMap["short"][variable];
+		if(typeof field == "string") {
+			zoteroFields.push(field);
+		} else {
+			zoteroFields = zoteroFields.concat(field);
+		}
+	}
+	
+	field = Zotero.CSL.Item._zoteroFieldMap["long"][variable];
+	if(typeof field == "string") {
+		zoteroFields.push(field);
 	} else {
-		var zoteroFields = Zotero.CSL.Item._zoteroFieldMap[variable];
-		if(typeof zoteroFields == "string") zoteroFields = [zoteroFields];
+		zoteroFields = zoteroFields.concat(field);
 	}
 	
 	for each(var zoteroField in zoteroFields) {
@@ -1607,7 +1879,7 @@ Zotero.CSL.Item._optionalTypeMap = {
 	film:"motion_picture",
 	artwork:"graphic",
 	webpage:"webpage",
-	report:"paper-conference",	// ??
+	report:"report",
 	bill:"bill",
 	case:"legal_case",
 	hearing:"bill",				// ??
@@ -1634,10 +1906,10 @@ Zotero.CSL.Item._fallbackTypeMap = {
 	journalArticle:"article",
 	magazineArticle:"article",
 	newspaperArticle:"article",
-	thesis:"book",
+	thesis:"article",
 	letter:"article",
-	manuscript:"book",
-	interview:"book",
+	manuscript:"article",
+	interview:"article",
 	film:"book",
 	artwork:"book",
 	webpage:"article",
@@ -1652,9 +1924,9 @@ Zotero.CSL.Item._fallbackTypeMap = {
 	blogPost:"article",
 	instantMessage:"article",
 	forumPost:"article",
-	audioRecording:"article",
+	audioRecording:"book",
 	presentation:"article",
-	videoRecording:"article",
+	videoRecording:"book",
 	tvBroadcast:"article",
 	radioBroadcast:"article",
 	podcast:"article",
@@ -1731,7 +2003,7 @@ Zotero.CSL.Item.Date = function(date, sort) {
  * Should accept the following variables:
  *
  * year - returns a year (optionally, with attached B.C.)
- * month - returns a month (numeric, or, if numeric is not available, long)
+ * month - returns a month (numeric from 0, or, if numeric is not available, long)
  * day - returns a day (numeric)
  * sort - a date that can be used for sorting purposes
  */
@@ -1745,7 +2017,7 @@ Zotero.CSL.Item.Date.prototype.getDateVariable = function(variable) {
 			this.dateArray = Zotero.Date.strToDate(this.date);
 		}
 		
-		if(this.dateArray[variable]) {
+		if(this.dateArray[variable] !== undefined && this.dateArray[variable] !== false) {
 			return this.dateArray[variable];
 		} else if(variable == "month") {
 			if(this.dateArray.part) {
@@ -1923,6 +2195,9 @@ Zotero.CSL.ItemSet.prototype.resort = function() {
 		var names = this.items[i].getNames("author");
 		if(!names) names = this.items[i].getNames("editor");
 		if(!names) names = this.items[i].getNames("translator");
+		if(!names) names = this.items[i].getNames("recipient");
+		if(!names) names = this.items[i].getNames("interviewer");
+		if(!names) names = this.items[i].getNames("series-editor");
 		if(!names) continue;
 		namesByItem[i] = names;
 	}
@@ -2161,7 +2436,7 @@ Zotero.CSL.ItemSet.prototype._copyDisambiguation = function(fromItem, toItem) {
 
 Zotero.CSL.FormattedString = function(context, format, delimiter, subsequent) {
 	this.context = context;
-	this.option = context.option;
+	this.option = context ? context.option : new XMLList();
 	this.format = format;
 	this.delimiter = delimiter;
 	this.string = "";
@@ -2245,9 +2520,33 @@ Zotero.CSL.FormattedString.prototype.append = function(string, element, dontDeli
 			if(newPrefix != "" && newPrefix != prefix) {
 				this.suppressLeadingWhitespace = false;
 			}
-			prefix = newPrefix
+			prefix = newPrefix;
 		}
-		
+	}
+	
+	// append line before if display="block"
+	var closeDiv = false;
+	if(element && (element["@display"] == "block" || this.appendLine)) {
+		if(this.format == "HTML") {
+			if(this.option.(@name == "hanging-indent").@value == "true") {
+				this.string += '<div style="text-indent:0.5in;">'
+			} else {
+				this.string += '<div>';
+			}
+			var closeDiv;
+		} else {
+			if(this.format == "RTF") {
+				this.string += "\r\n\\line ";
+			} else if(this.format == "Integration") {
+				this.string += "\x0B";
+			} else {
+				this.string += (Zotero.isWin ? "\r\n" : "\n");
+			}
+			this.appendLine = element["@display"] == "block";
+		}
+	}
+	
+	if(prefix) {
 		this.append(prefix, null, true);
 	}
 	
@@ -2273,37 +2572,53 @@ Zotero.CSL.FormattedString.prototype.append = function(string, element, dontDeli
 		this.closePunctuation = false;
 	}
 	
-	// handle text transformation
-	if(element) {
-		if(element["@text-transform"].length()) {
-			if(element["@text-transform"] == "lowercase") {
-				// all lowercase
-				string = string.toLowerCase();
-			} else if(element["@text-transform"] == "uppercase") {
-				// all uppercase
-				string = string.toUpperCase();
-			} else if(element["@text-transform"] == "capitalize") {
-				// capitalize first
-				string = string[0].toUpperCase()+string.substr(1);
+	// handling of "text-transform" attribute (now obsolete)
+	if(element && element["@text-transform"].length() && !element["@text-case"].length()) {
+		var mapping = {"lowercase":"lowercase", "uppercase":"uppercase", "capitalize":"capitalize-first"};
+		element["@text-case"] = mapping[element["@text-transform"].toString()];
+	}
+	// handle text case
+	if(element && element["@text-case"].length()) {
+		if(element["@text-case"] == "lowercase") {
+			// all lowercase
+			string = string.toLowerCase();
+		} else if(element["@text-case"] == "uppercase") {
+			// all uppercase
+			string = string.toUpperCase();
+		} else if(element["@text-case"] == "capitalize-first") {
+			// capitalize first
+			string = string[0].toUpperCase()+string.substr(1).toLowerCase();
+		} else if(element["@text-case"] == "capitalize-all") {
+			// capitalize first
+			var strings = string.split(" ");
+			for(var i=0; i<strings.length; i++) {
+				if(strings[i].length > 1) {
+					strings[i] = strings[i][0].toUpperCase()+strings[i].substr(1).toLowerCase();
+				} else if(strings[i].length == 1) {
+					strings[i] = strings[i].toUpperCase();
+				}
 			}
+			string = strings.join(" ");
+		} else if(element["@text-case"] == "title") {
+			string = Zotero.Text.titleCase(string);
 		}
 	}
 	
 	if(!dontEscape) {
 		if(this.format == "HTML") {
-			string = string.replace("<", "&lt;", "g")
-			               .replace(">", "&gt;", "g")
-			               .replace("&", "&amp;", "g")
-			               .replace(/(\r\n|\r|\n)/g, "<br />")
-			               .replace(/[\x00-\x1F]/g, "");
+			string = string.replace("&", "&amp;", "g")
+							.replace("<", "&lt;", "g")
+							.replace(">", "&gt;", "g")
+							.replace(/(\r\n|\r|\n)/g, "<br />")
+							.replace(/[\x00-\x1F]/g, "");
 		} else if(this.format == "RTF") {
 			string = string.replace("\\", "\\\\", "g")
-			               .replace(/[\x7F-\uFFFF]/g, Zotero.CSL.FormattedString._rtfEscapeFunction)
-			               .replace("\t", "\\tab ", "g")
-			               .replace(/(\r\n|\r|\n)/g, "\\line ");
+							.replace(/[\x7F-\uFFFF]/g, Zotero.CSL.FormattedString._rtfEscapeFunction)
+							.replace("\t", "\\tab ", "g")
+							.replace(/(\r\n|\r|\n)/g, "\\line ");
 		} else if(this.format == "Integration") {
 			string = string.replace(/\\/g, "\\\\")
-			               .replace(/(\r\n|\r|\n)/g, "\\line ");
+							.replace(/(\r\n|\r|\n)/g, "\\line ");
 		} else {
 			string = string.replace(/(\r\n|\r|\n)/g, (Zotero.isWin ? "\r\n" : "\n"));
 		}
@@ -2315,7 +2630,8 @@ Zotero.CSL.FormattedString.prototype.append = function(string, element, dontDeli
 			var style = "";
 			
 			var cssAttributes = ["font-family", "font-style", "font-variant",
-								 "font-weight", "vertical-align", "display"];
+						"font-weight", "vertical-align", "display",
+						"text-decoration" ];
 			for(var j in cssAttributes) {
 				var value = element["@"+cssAttributes[j]].toString();
 				if(value && value.indexOf('"') == -1) {
@@ -2323,17 +2639,7 @@ Zotero.CSL.FormattedString.prototype.append = function(string, element, dontDeli
 				}
 			}
 			
-			if(element["@display"] == "block") {
-				if(this.option.(@name == "hanging-indent").@value == "true") {
-					style += "text-indent:0.5in;"
-				}
-				
-				if(style) {
-					string = '<div style="'+style+'">'+string+'</div>';
-				} else {
-					string = '<div>'+string+'</div>';
-				}
-			} else if(style) {
+			if(style) {
 				string = '<span style="'+style+'">'+string+'</span>';
 			}
 		} else {
@@ -2360,17 +2666,6 @@ Zotero.CSL.FormattedString.prototype.append = function(string, element, dontDeli
 					string = "\\sub "+string+"\\sub0 ";
 				}
 			}
-			
-			if(element["@display"] == "block" || this.appendLine) {
-				if(this.format == "RTF") {
-					string = "\r\n\\line "+string;
-				} else if(this.format == "Integration") {
-					string = "\x0B"+string;
-				} else {
-					string = (Zotero.isWin ? "\r\n" : "\n")+string;
-				}
-				this.appendLine = element["@display"] == "block";
-			}
 		}
 	
 		// add quotes if necessary
@@ -2387,11 +2682,14 @@ Zotero.CSL.FormattedString.prototype.append = function(string, element, dontDeli
 	
 	this.string += string;
 	
-	// special rule: if a variable ends in a punctuation mark, and the suffix
-	// begins with a period, chop the period off the suffix
 	var suffix;
 	if(element && element.@suffix.length()) {
 		this.append(element.@suffix.toString(), null, true);
+	}
+	
+	// close div for display=block in HTML
+	if(closeDiv) {
+		this.string += "</div>";
 	}
 	
 	// save for second-field-align

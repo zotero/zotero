@@ -10,24 +10,24 @@
 <!ENTITY zotero.preferences.position.below "под">
 <!ENTITY zotero.preferences.position.browser "страницей в браузере">
 <!ENTITY zotero.preferences.statusBarIcon "Вид в строке состояния:">
-<!ENTITY zotero.preferences.statusBarIcon.none "None">
+<!ENTITY zotero.preferences.statusBarIcon.none "Ничего">
 <!ENTITY zotero.preferences.fontSize "Размер шрифта:">
 <!ENTITY zotero.preferences.fontSize.small "Маленький">
 <!ENTITY zotero.preferences.fontSize.medium "Средний">
 <!ENTITY zotero.preferences.fontSize.large "Большой">
 
 <!ENTITY zotero.preferences.miscellaneous "Разное">
-<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators">
+<!ENTITY zotero.preferences.autoUpdate "Автоматически проверять на наличие обновленных трансляторов">
 <!ENTITY zotero.preferences.updateNow "Обновить сейчас">
 <!ENTITY zotero.preferences.reportTranslationFailure "Сообщить о неработающих трансляторах сайта">
-<!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded RIS/Refer files">
+<!ENTITY zotero.preferences.parseRISRefer "Использовать Zotero для загруженных файлов RIS/Refer">
 <!ENTITY zotero.preferences.automaticSnapshots "Автоматически делать снимки при создании документов из веб-страниц">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Автоматически прикреплять связанные PDF и другие файлы при сохранении">
 <!ENTITY zotero.preferences.automaticTags "Автоматически помечать документы ключевыми словами и предметными заголовками">
 
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
-<!ENTITY zotero.preferences.openurl.search "Search for resolvers">
+<!ENTITY zotero.preferences.openurl.search "Поиск ресолверов">
 <!ENTITY zotero.preferences.openurl.custom "Пользовательское">
 <!ENTITY zotero.preferences.openurl.server "Сервер">
 <!ENTITY zotero.preferences.openurl.version "Версия">
@@ -37,10 +37,10 @@
 <!ENTITY zotero.preferences.search.pdfIndexing "Индексация PDF">
 <!ENTITY zotero.preferences.search.indexStats "Статистика индексации">
 
-<!ENTITY zotero.preferences.search.indexStats.indexed "Indexed:">
-<!ENTITY zotero.preferences.search.indexStats.partial "Partial:">
-<!ENTITY zotero.preferences.search.indexStats.unindexed "Unindexed:">
-<!ENTITY zotero.preferences.search.indexStats.words "Words:">
+<!ENTITY zotero.preferences.search.indexStats.indexed "Проиндексированных:">
+<!ENTITY zotero.preferences.search.indexStats.partial "Частично проиндескированных:">
+<!ENTITY zotero.preferences.search.indexStats.unindexed "Непроиндексированных:">
+<!ENTITY zotero.preferences.search.indexStats.words "Слов:">
 
 <!ENTITY zotero.preferences.fulltext.textMaxLength "Максимальное количество символов для индексирования на файл:">
 <!ENTITY zotero.preferences.fulltext.pdfMaxPages "Максимальное количество страниц для индексирования на файл:">
@@ -64,7 +64,7 @@
 <!ENTITY zotero.preferences.keys.newItem "Создать новый документ">
 <!ENTITY zotero.preferences.keys.newNote "Создать новую заметку">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Переключить панель выбора тэгов">
-<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copy Selected Item Citations to Clipboard">
+<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Скопировать цитаты из выбранного документа в буфер обмена">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Копировать выбранные документы в буфер обмена">
 <!ENTITY zotero.preferences.keys.overrideGlobal "Попытаться заместить конфликтующие ярлыки">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Изменения вступят в силу только в новых окнах">
@@ -76,8 +76,7 @@
 <!ENTITY zotero.preferences.dataDir.useProfile "Использовать папку профилей Firefox">
 <!ENTITY zotero.preferences.dataDir.custom "Пользовательская:">
 <!ENTITY zotero.preferences.dataDir.choose "Выбрать...">
-<!ENTITY zotero.preferences.dataDir.reveal "Show Data Directory">
+<!ENTITY zotero.preferences.dataDir.reveal "Показать директорию с данными">
 
-<!ENTITY zotero.preferences.dbMaintenance "Database Maintenance">
-<!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Check Database Integrity">
-<!ENTITY zotero.preferences.dbMaintenance.rebuildTranslators "Rebuild Translators Table">
+<!ENTITY zotero.preferences.dbMaintenance "Поддержка БД">
+<!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Проверить целостность БД">

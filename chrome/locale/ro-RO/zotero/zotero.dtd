@@ -1,14 +1,14 @@
 <!ENTITY zotero.general.optional "(Optional)">
-<!ENTITY zotero.general.note "Note:">
+<!ENTITY zotero.general.note "Notă:">
 
-<!ENTITY zotero.errorReport.unrelatedMessages "The error log may include messages unrelated to Zotero.">
+<!ENTITY zotero.errorReport.unrelatedMessages "Jurnalul de erori poate include mesaje fără legătură cu Zotero.">
 <!ENTITY zotero.errorReport.additionalInfo "Informaţii adiţionale">
 <!ENTITY zotero.errorReport.emailAddress "Adresa ta de e-mail:">
 <!ENTITY zotero.errorReport.errorSteps "Ce faci atunci când apare o eroare? Dacă e posibil, descrie, te rog, paşii care au dus la apariţia erorii.">
 <!ENTITY zotero.errorReport.submissionInProgress "Aşteaptă, te rog, ca raportul de eroare să fie trimis.">
 <!ENTITY zotero.errorReport.submitted "Raportul de eroare a fost trimis.">
 <!ENTITY zotero.errorReport.reportID "Raport ID:">
-<!ENTITY zotero.errorReport.furtherAssistance "See the Known Issues page and the forums for further assistance.">
+<!ENTITY zotero.errorReport.furtherAssistance "Vezi pagina de probleme cunoscute şi forumurile pentru o asistenţă suplimentară.">
 <!ENTITY zotero.errorReport.includeReportID "Include, te rog, ID-ul raportului în orice corespondenţă cu dezvoltatorii Zotero, privitoare la această problemă.">
 
 <!ENTITY zotero.upgrade.newVersionInstalled "Ai instalat o nouă versiune de Zotero.">
@@ -81,7 +81,7 @@
 <!ENTITY zotero.item.textTransform.lowercase "litere mici">
 <!ENTITY zotero.item.textTransform.titlecase "Litere de Titlu">
 
-<!ENTITY zotero.toolbar.note.standalone "Notă singură nouă">
+<!ENTITY zotero.toolbar.note.standalone "Notă nouă">
 <!ENTITY zotero.toolbar.attachment.linked "Legătură la fişier...">
 <!ENTITY zotero.toolbar.attachment.add "Memorează copia fişierului...">
 <!ENTITY zotero.toolbar.attachment.weblink "Salvează legătura la pagina curentă">
@@ -97,8 +97,8 @@
 <!ENTITY zotero.tagSelector.renameTag "Redenumeşte eticheta...">
 <!ENTITY zotero.tagSelector.deleteTag "Şterge eticheta...">
 
-<!ENTITY zotero.selectitems.title "Selectează înregistrări">
-<!ENTITY zotero.selectitems.intro.label "Selectează ce înregistrări ai vrea să adaugi bibliotecii tale">
+<!ENTITY zotero.selectitems.title "Selectează itemi">
+<!ENTITY zotero.selectitems.intro.label "Selectează itemii pe care ai vrea să-i adaugi în biblioteca ta">
 <!ENTITY zotero.selectitems.cancel.label "Anulare">
 <!ENTITY zotero.selectitems.select.label "OK">
 
@@ -112,8 +112,8 @@
 <!ENTITY zotero.bibliography.print.label "Imprimare">
 
 <!ENTITY zotero.integration.docPrefs.title "Preferinţe document">
-<!ENTITY zotero.integration.addEditCitation.title "Add/Edit Citation">
-<!ENTITY zotero.integration.editBibliography.title "Edit Bibliography">
+<!ENTITY zotero.integration.addEditCitation.title "Adaugă/Editează citarea">
+<!ENTITY zotero.integration.editBibliography.title "Editează bibliografia">
 
 <!ENTITY zotero.progress.title "Progres">
 
@@ -121,20 +121,20 @@
 <!ENTITY zotero.exportOptions.format.label "Format:">
 <!ENTITY zotero.exportOptions.translatorOptions.label "Opţiuni translator">
 
-<!ENTITY zotero.citation.keepSorted.label "Keep Sources Sorted">
+<!ENTITY zotero.citation.keepSorted.label "Păstrează sursele sortate">
 
 <!ENTITY zotero.citation.page "Pagină">
 <!ENTITY zotero.citation.paragraph "Paragraf">
 <!ENTITY zotero.citation.line "Linie">
-<!ENTITY zotero.citation.suppressAuthor.label "Suppress Author">
+<!ENTITY zotero.citation.suppressAuthor.label "Suprimă autor">
 <!ENTITY zotero.citation.prefix.label "Prefix:">
-<!ENTITY zotero.citation.suffix.label "Suffix:">
+<!ENTITY zotero.citation.suffix.label "Sufix:">
 
 <!ENTITY zotero.richText.italic.label "Italic">
 <!ENTITY zotero.richText.bold.label "Bold">
-<!ENTITY zotero.richText.underline.label "Underline">
-<!ENTITY zotero.richText.superscript.label "Superscript">
-<!ENTITY zotero.richText.subscript.label "Subscript">
+<!ENTITY zotero.richText.underline.label "Subliniat">
+<!ENTITY zotero.richText.superscript.label "Scris sus (superscript)">
+<!ENTITY zotero.richText.subscript.label "Scris jos (subscript)">
 
 <!ENTITY zotero.annotate.toolbar.add.label "Adaugă adnotare">
 <!ENTITY zotero.annotate.toolbar.collapse.label "Restrânge toate adnotările">
@@ -150,4 +150,4 @@
 <!ENTITY zotero.integration.prefs.bookmarks.label "Repere (Bookmarks)">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Reperele (bookmarks) sunt protejate în Microsoft Word şi OpenOffice.org, dar pot fi accidental modificate.">
 
-<!ENTITY zotero.integration.references.label "References in Bibliography">
+<!ENTITY zotero.integration.references.label "Referinţe în bibliografie">

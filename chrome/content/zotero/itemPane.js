@@ -1167,7 +1167,7 @@ var ZoteroItemPane = new function()
 		switch (event.keyCode)
 		{
 			case event.DOM_VK_RETURN:
-				// Prevent blur on textbox above
+				// Prevent blur on containing textbox
 				event.preventDefault();
 				
 				var fieldname = target.getAttribute('fieldname');

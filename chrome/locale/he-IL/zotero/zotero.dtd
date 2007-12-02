@@ -35,15 +35,15 @@
 <!ENTITY zotero.items.type_column "Type">
 <!ENTITY zotero.items.title_column "כותרת">
 <!ENTITY zotero.items.creator_column "יוצר">
-<!ENTITY zotero.items.date_column "Date">
-<!ENTITY zotero.items.year_column "Year">
+<!ENTITY zotero.items.date_column "תאריך">
+<!ENTITY zotero.items.year_column "שנה">
 <!ENTITY zotero.items.publisher_column "Publisher">
-<!ENTITY zotero.items.language_column "Language">
+<!ENTITY zotero.items.language_column "שפה">
 <!ENTITY zotero.items.callNumber_column "Call Number">
 <!ENTITY zotero.items.repository_column "Repository">
 <!ENTITY zotero.items.rights_column "זכויות">
-<!ENTITY zotero.items.dateAdded_column "Date Added">
-<!ENTITY zotero.items.dateModified_column "Date Modified">
+<!ENTITY zotero.items.dateAdded_column "תאריך הוספה">
+<!ENTITY zotero.items.dateModified_column "תאריך שינוי">
 <!ENTITY zotero.items.numChildren_column "+">
 
 <!ENTITY zotero.items.menu.showInLibrary "הצג בספרייה">
@@ -58,19 +58,19 @@
 <!ENTITY zotero.toolbar.moreItemTypes.label "More">
 <!ENTITY zotero.toolbar.newItemFromPage.label "Create New Item from Current Page">
 <!ENTITY zotero.toolbar.removeItem.label "הסר פריט">
-<!ENTITY zotero.toolbar.newCollection.label "New Collection...">
+<!ENTITY zotero.toolbar.newCollection.label "...אוסף חדש">
 <!ENTITY zotero.toolbar.newSubcollection.label "New Subcollection...">
-<!ENTITY zotero.toolbar.newSavedSearch.label "New Saved Search...">
+<!ENTITY zotero.toolbar.newSavedSearch.label "...חיפוש שמור חדש">
 <!ENTITY zotero.toolbar.tagSelector.label "Show/Hide Tag Selector">
 <!ENTITY zotero.toolbar.actions.label "Actions">
 <!ENTITY zotero.toolbar.import.label "Import...">
 <!ENTITY zotero.toolbar.export.label "Export Library...">
 <!ENTITY zotero.toolbar.timeline.label "Create Timeline">
-<!ENTITY zotero.toolbar.preferences.label "Preferences...">
+<!ENTITY zotero.toolbar.preferences.label "...העדפות">
 <!ENTITY zotero.toolbar.documentation.label "Documentation">
 <!ENTITY zotero.toolbar.about.label "About Zotero">
-<!ENTITY zotero.toolbar.advancedSearch "Advanced Search">
-<!ENTITY zotero.toolbar.search.label "חיפוש:">
+<!ENTITY zotero.toolbar.advancedSearch "חיפוש מתקדם">
+<!ENTITY zotero.toolbar.search.label ":חיפוש">
 <!ENTITY zotero.toolbar.fullscreen.tooltip "Toggle Fullscreen Mode">
 <!ENTITY zotero.toolbar.openURL.label "Locate">
 <!ENTITY zotero.toolbar.openURL.tooltip "Find through your local library">
@@ -99,7 +99,7 @@
 
 <!ENTITY zotero.selectitems.title "Select Items">
 <!ENTITY zotero.selectitems.intro.label "Select which items you'd like to add to your library">
-<!ENTITY zotero.selectitems.cancel.label "Cancel">
+<!ENTITY zotero.selectitems.cancel.label "בטל">
 <!ENTITY zotero.selectitems.select.label "אישור">
 
 <!ENTITY zotero.bibliography.title "צור ביבליוגרפיה">
@@ -109,7 +109,7 @@
 <!ENTITY zotero.bibliography.saveAsHTML.label "Save as HTML">
 <!ENTITY zotero.bibliography.copyToClipboard.label "Copy to Clipboard">
 <!ENTITY zotero.bibliography.macClipboardWarning "(Rich-text formatting will be lost.)">
-<!ENTITY zotero.bibliography.print.label "Print">
+<!ENTITY zotero.bibliography.print.label "הדפסה">
 
 <!ENTITY zotero.integration.docPrefs.title "Document Preferences">
 <!ENTITY zotero.integration.addEditCitation.title "Add/Edit Citation">

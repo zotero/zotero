@@ -64,7 +64,7 @@
 <!ENTITY zotero.preferences.keys.newItem "Utwórz nowy element">
 <!ENTITY zotero.preferences.keys.newNote "Utwórz nową notatkę">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Wyświetl/Ukryj wybór etykiet">
-<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copy Selected Item Citations to Clipboard">
+<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopiuje wybrane odnośniki bibliograficzne do schowka">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopiuj zaznaczony element do schowka">
 <!ENTITY zotero.preferences.keys.overrideGlobal "Spróbuj pominąć powtarzające się skróty">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Zmiany zostaną zastosowane w nowym oknie">
@@ -76,8 +76,7 @@
 <!ENTITY zotero.preferences.dataDir.useProfile "Użyj katalogu profilu Firefoksa">
 <!ENTITY zotero.preferences.dataDir.custom "Określ katalog:">
 <!ENTITY zotero.preferences.dataDir.choose "Przeglądaj">
-<!ENTITY zotero.preferences.dataDir.reveal "Show Data Directory">
+<!ENTITY zotero.preferences.dataDir.reveal "Wyświetl katalog bazy danych">
 
-<!ENTITY zotero.preferences.dbMaintenance "Database Maintenance">
-<!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Check Database Integrity">
-<!ENTITY zotero.preferences.dbMaintenance.rebuildTranslators "Rebuild Translators Table">
+<!ENTITY zotero.preferences.dbMaintenance "Konserwacja bazy danych">
+<!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Sprawdź spójność bazy danych">

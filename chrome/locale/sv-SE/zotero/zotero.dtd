@@ -1,22 +1,22 @@
 <!ENTITY zotero.general.optional "(Optional)">
-<!ENTITY zotero.general.note "Note:">
+<!ENTITY zotero.general.note "Anteckning:">
 
 <!ENTITY zotero.errorReport.unrelatedMessages "The error log may include messages unrelated to Zotero.">
 <!ENTITY zotero.errorReport.additionalInfo "Additional Information">
-<!ENTITY zotero.errorReport.emailAddress "Your e-mail address:">
-<!ENTITY zotero.errorReport.errorSteps "What were you doing when the error occurred? If possible, please include steps to reproduce the error.">
-<!ENTITY zotero.errorReport.submissionInProgress "Please wait while the error report is submitted.">
-<!ENTITY zotero.errorReport.submitted "The error report has been submitted.">
+<!ENTITY zotero.errorReport.emailAddress "Din e-postadress:">
+<!ENTITY zotero.errorReport.errorSteps "Vad gjorde du när felet uppstod? Om möjligt, var vänlig inludera stegen för att kunna återskapa felet.">
+<!ENTITY zotero.errorReport.submissionInProgress "Var vänlig vänta medan felrapporten skickas.">
+<!ENTITY zotero.errorReport.submitted "Felrapporten har skickats.">
 <!ENTITY zotero.errorReport.reportID "Report ID:">
 <!ENTITY zotero.errorReport.furtherAssistance "See the Known Issues page and the forums for further assistance.">
 <!ENTITY zotero.errorReport.includeReportID "Please include the Report ID in any correspondence with the Zotero developers regarding this issue.">
 
-<!ENTITY zotero.upgrade.newVersionInstalled "You have installed a new version of Zotero.">
-<!ENTITY zotero.upgrade.upgradeRequired "Your Zotero database must be upgraded to work with the new version.">
+<!ENTITY zotero.upgrade.newVersionInstalled "Du har installerat en ny version av Zotero.">
+<!ENTITY zotero.upgrade.upgradeRequired "Din Zoterodatabas måste uppgraderas för att fungera med den nya versionen.">
 <!ENTITY zotero.upgrade.autoBackup "Your existing database will be backed up automatically before any changes are made.">
 <!ENTITY zotero.upgrade.upgradeInProgress "Please wait for the upgrade process to finish. This may take a few minutes.">
 <!ENTITY zotero.upgrade.upgradeSucceeded "Your Zotero database has been successfully upgraded.">
-<!ENTITY zotero.upgrade.changeLogBeforeLink "Please see">
+<!ENTITY zotero.upgrade.changeLogBeforeLink "Var vänlig se">
 <!ENTITY zotero.upgrade.changeLogLink "the changelog">
 <!ENTITY zotero.upgrade.changeLogAfterLink "to find out what's new.">
 
@@ -35,11 +35,11 @@
 <!ENTITY zotero.items.type_column "Typ">
 <!ENTITY zotero.items.title_column "Titel">
 <!ENTITY zotero.items.creator_column "Skapare">
-<!ENTITY zotero.items.date_column "Date">
-<!ENTITY zotero.items.year_column "Year">
-<!ENTITY zotero.items.publisher_column "Publisher">
-<!ENTITY zotero.items.language_column "Language">
-<!ENTITY zotero.items.callNumber_column "Call Number">
+<!ENTITY zotero.items.date_column "Datum">
+<!ENTITY zotero.items.year_column "År">
+<!ENTITY zotero.items.publisher_column "Förlag">
+<!ENTITY zotero.items.language_column "Språk">
+<!ENTITY zotero.items.callNumber_column "Hyllkod">
 <!ENTITY zotero.items.repository_column "Repository">
 <!ENTITY zotero.items.rights_column "Rättigheter">
 <!ENTITY zotero.items.dateAdded_column "Tillagt datum">
@@ -130,24 +130,24 @@
 <!ENTITY zotero.citation.prefix.label "Prefix:">
 <!ENTITY zotero.citation.suffix.label "Suffix:">
 
-<!ENTITY zotero.richText.italic.label "Italic">
-<!ENTITY zotero.richText.bold.label "Bold">
-<!ENTITY zotero.richText.underline.label "Underline">
+<!ENTITY zotero.richText.italic.label "Kursiv">
+<!ENTITY zotero.richText.bold.label "Fet">
+<!ENTITY zotero.richText.underline.label "Understrykning">
 <!ENTITY zotero.richText.superscript.label "Superscript">
 <!ENTITY zotero.richText.subscript.label "Subscript">
 
 <!ENTITY zotero.annotate.toolbar.add.label "Add Annotation">
 <!ENTITY zotero.annotate.toolbar.collapse.label "Collapse All Annotations">
 <!ENTITY zotero.annotate.toolbar.expand.label "Expand All Annotations">
-<!ENTITY zotero.annotate.toolbar.highlight.label "Highlight Text">
-<!ENTITY zotero.annotate.toolbar.unhighlight.label "Unhighlight Text">
+<!ENTITY zotero.annotate.toolbar.highlight.label "Markera text">
+<!ENTITY zotero.annotate.toolbar.unhighlight.label "Avmarkera text">
 
 <!ENTITY zotero.integration.prefs.displayAs.label "Display Citations As:">
-<!ENTITY zotero.integration.prefs.footnotes.label "Footnotes">
+<!ENTITY zotero.integration.prefs.footnotes.label "Fotnoter">
 <!ENTITY zotero.integration.prefs.endnotes.label "Endnotes">
 
 <!ENTITY zotero.integration.prefs.formatUsing.label "Format Using:">
-<!ENTITY zotero.integration.prefs.bookmarks.label "Bookmarks">
+<!ENTITY zotero.integration.prefs.bookmarks.label "Bokmärken">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks are preserved across Microsoft Word and OpenOffice.org, but may be accidentally modified.">
 
-<!ENTITY zotero.integration.references.label "References in Bibliography">
+<!ENTITY zotero.integration.references.label "Referenser i bibliografi">

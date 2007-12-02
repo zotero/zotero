@@ -1115,7 +1115,64 @@ Zotero.Hash.prototype.has = function(in_key){
 	return typeof(this.items[in_key]) != 'undefined';
 }
 
-
+/**
+ * Singleton for common text formatting routines
+ **/
+Zotero.Text = new function() {
+	this.titleCase = titleCase;
+	
+	var skipWords = ["but", "or", "yet", "so", "for", "and", "nor", "a", "an",
+		"the", "at", "by", "from", "in", "into", "of", "on", "to", "with", "up",
+		"down", "as"];
+	// this may only match a single character
+	var delimiterRegexp = /([ \/\-–—])/;
+	
+	function titleCase(string) {
+		if (!string) {
+			return "";
+		}
+		
+		// split words
+		var words = string.split(delimiterRegexp);
+		var isUpperCase = string.toUpperCase() == string;
+		
+		var newString = "";
+		var delimiterOffset = words[0].length;
+		var lastWordIndex = words.length-1;
+		var previousWordIndex = -1;
+		for(var i=0; i<=lastWordIndex; i++) {
+			// only do manipulation if not a delimiter character
+			if(words[i].length != 0 && (words[i].length != 1 || !delimiterRegexp.test(words[i]))) {
+				var upperCaseVariant = words[i].toUpperCase();
+				var lowerCaseVariant = words[i].toLowerCase();
+				
+				// only use if word does not already possess some capitalization
+				if(isUpperCase || words[i] == lowerCaseVariant) {
+					if(
+						// a skip word
+						skipWords.indexOf(lowerCaseVariant.replace(/[^a-zA-Z]+/, "")) != -1
+						// not first or last word
+						&& i != 0 && i != lastWordIndex
+						// does not follow a colon
+						&& (previousWordIndex == -1 || words[previousWordIndex][words[previousWordIndex].length-1] != ":")
+					) {
+						words[i] = lowerCaseVariant;
+					} else {
+						// this is not a skip word or comes after a colon;
+						// we must capitalize
+						words[i] = upperCaseVariant[0] + lowerCaseVariant.substr(1);
+					}
+				}
+				
+				previousWordIndex = i;
+			}
+			
+			newString += words[i];
+		}
+		
+		return newString;
+	}
+}
 
 Zotero.Date = new function(){
 	this.sqlToDate = sqlToDate;

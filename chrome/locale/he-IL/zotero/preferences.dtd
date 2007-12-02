@@ -12,9 +12,9 @@
 <!ENTITY zotero.preferences.statusBarIcon "Status bar icon:">
 <!ENTITY zotero.preferences.statusBarIcon.none "None">
 <!ENTITY zotero.preferences.fontSize "Font size:">
-<!ENTITY zotero.preferences.fontSize.small "Small">
-<!ENTITY zotero.preferences.fontSize.medium "Medium">
-<!ENTITY zotero.preferences.fontSize.large "Large">
+<!ENTITY zotero.preferences.fontSize.small "קטן">
+<!ENTITY zotero.preferences.fontSize.medium "בינוני">
+<!ENTITY zotero.preferences.fontSize.large "גדול">
 
 <!ENTITY zotero.preferences.miscellaneous "Miscellaneous">
 <!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators">
@@ -70,7 +70,7 @@
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Changes take effect in new windows only">
 
 
-<!ENTITY zotero.preferences.prefpane.advanced "Advanced">
+<!ENTITY zotero.preferences.prefpane.advanced "מתקדם">
 
 <!ENTITY zotero.preferences.dataDir "Storage Location">
 <!ENTITY zotero.preferences.dataDir.useProfile "Use Firefox profile directory">
@@ -80,4 +80,3 @@
 
 <!ENTITY zotero.preferences.dbMaintenance "Database Maintenance">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Check Database Integrity">
-<!ENTITY zotero.preferences.dbMaintenance.rebuildTranslators "Rebuild Translators Table">

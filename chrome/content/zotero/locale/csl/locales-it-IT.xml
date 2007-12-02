@@ -1,91 +1,91 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <terms xmlns="http://purl.org/net/xbiblio/csl">
   <locale xml:lang="it">
-    <term name="at">at</term>
+    <term name="at">a</term>
     <term name="in">in</term>
     <term name="ibid">ibid</term>
     <term name="accessed">consultato</term>
     <term name="retrieved">recuperato</term>
     <term name="from">da</term>
     <term name="forthcoming">futuro</term>
-    <term name="references">Riferimenti</term>
+    <term name="references">Citazioni bibliografiche</term>
     <term name="no date">S.d.</term>
     <term name="and">e</term>
     <term name="et-al">et al.</term>
     <term name="book">
-      <single>book</single>
-      <multiple>books</multiple>
+      <single>libro</single>
+      <multiple>libri</multiple>
     </term>
     <term name="chapter">
-      <single>chapter</single>
-      <multiple>chapters</multiple>
+      <single>capitolo</single>
+      <multiple>capitoli</multiple>
     </term>
     <term name="column">
-      <single>column</single>
-      <multiple>columns</multiple>
+      <single>colonna</single>
+      <multiple>colonne</multiple>
     </term>
     <term name="figure">
-      <single>figure</single>
-      <multiple>figures</multiple>
+      <single>figura</single>
+      <multiple>figure</multiple>
     </term>
     <term name="folio">
-      <single>folio</single>
-      <multiple>folios</multiple>
+      <single>foglio</single>
+      <multiple>fogli</multiple>
     </term>
     <term name="issue">
-      <single>number</single>
-      <multiple>numbers</multiple>
+      <single>numero</single>
+      <multiple>numeri</multiple>
     </term>
     <term name="line">
       <single>riga</single>
       <multiple>righe</multiple>
     </term>
     <term name="note">
-      <single>note</single>
-      <multiple>notes</multiple>
+      <single>nota</single>
+      <multiple>note</multiple>
     </term>
     <term name="opus">
-      <single>opus</single>
-      <multiple>opera</multiple>
+      <single>opera</single>
+      <multiple>opere</multiple>
     </term>
     <term name="page">
       <single>pagina</single>
       <multiple>pagine</multiple>
     </term>
     <term name="paragraph">
+      <single>capoverso</single>
+      <multiple>capoversi</multiple>
+    </term>
+    <term name="part">
+      <single>parte</single>
+      <multiple>parti</multiple>
+    </term>
+    <term name="section">
       <single>paragrafo</single>
       <multiple>paragrafi</multiple>
     </term>
-    <term name="part">
-      <single>part</single>
-      <multiple>parts</multiple>
-    </term>
-    <term name="section">
-      <single>section</single>
-      <multiple>sections</multiple>
-    </term>
     <term name="volume">
       <single>volume</single>
-      <multiple>volumes</multiple>
+      <multiple>volumi</multiple>
     </term>
     <term name="verse">
-      <single>verse</single>
-      <multiple>verses</multiple>
+      <single>verso</single>
+      <multiple>versi</multiple>
     </term>
-    <term name="book" form="short">bk</term>
-    <term name="chapter" form="short">chap</term>
-    <term name="column" form="short">col</term>
-    <term name="figure" form="short">fig</term>
-    <term name="folio" form="short">f</term>
+    <term name="book" form="short">lib.</term>
+    <term name="chapter" form="short">cap.</term>
+    <term name="column" form="short">col.</term>
+    <term name="figure" form="short">fig.</term>
+    <term name="folio" form="short">fgl.</term>
     <term name="issue" form="short">n°</term>
-    <term name="opus" form="short">op</term>
+    <term name="opus" form="short">op.</term>
     <term name="page" form="short">
       <single>pag.</single>
       <multiple>pagg.</multiple>
     </term>
-    <term name="paragraph" form="short">para</term>
-    <term name="part" form="short">pt</term>
-    <term name="section" form="short">sec</term>
+    <term name="paragraph" form="short">cpv.</term>
+    <term name="part" form="short">pt.</term>
+    <term name="section" form="short">par.</term>
     <term name="verse" form="short">
       <single>v</single>
       <multiple>vv</multiple>

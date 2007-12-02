@@ -12,6 +12,8 @@
     <term name="no date">n.d.</term>
     <term name="and">and</term>
     <term name="et-al">et al.</term>
+    <term name="interview">interview</term>
+    <term name="letter">letter</term>
     
     <!-- LONG LOCATOR FORMS -->
     <term name="book">
@@ -129,6 +131,8 @@
     <!-- VERB ROLE FORMS -->
     <term name="editor" form="verb">edited by</term>
     <term name="translator" form="verb">translated by</term>
+    <term name="recipient" form="verb">to</term>
+    <term name="interviewer" form="verb">interview by</term>
     
     <!-- SHORT VERB ROLE FORMS -->
     <term name="editor" form="verb-short">ed</term>

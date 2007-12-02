@@ -1,14 +1,14 @@
 <!ENTITY zotero.general.optional "(По желание)">
-<!ENTITY zotero.general.note "Note:">
+<!ENTITY zotero.general.note "Бележка:">
 
-<!ENTITY zotero.errorReport.unrelatedMessages "The error log may include messages unrelated to Zotero.">
+<!ENTITY zotero.errorReport.unrelatedMessages "Дневника с грешките може да съдържа съобщения несвързани с Zotero.">
 <!ENTITY zotero.errorReport.additionalInfo "Допълнителна информация">
 <!ENTITY zotero.errorReport.emailAddress "Адресът на вашата електронна поща:">
 <!ENTITY zotero.errorReport.errorSteps "Какво правихте когато възникна грешката? Ако е възможно, моля опишете стъпките необходими, за да се възпроизведе грешката.">
 <!ENTITY zotero.errorReport.submissionInProgress "Моля изчакайте докато бъде подаден отчета с грешките.">
 <!ENTITY zotero.errorReport.submitted "Отчета с грешките беше подаден.">
 <!ENTITY zotero.errorReport.reportID "Идентификационен номер на отчета:">
-<!ENTITY zotero.errorReport.furtherAssistance "See the Known Issues page and the forums for further assistance.">
+<!ENTITY zotero.errorReport.furtherAssistance "За повече помощ разгледайте страницата с известните проблеми и форумите.">
 <!ENTITY zotero.errorReport.includeReportID "Моля включете идентификационият номер на отчета във всичката кореспонденция с разработчиците на зотеро, която касае този проблем.">
 
 <!ENTITY zotero.upgrade.newVersionInstalled "Инсталирахте нова версия на Zotero.">
@@ -112,8 +112,8 @@
 <!ENTITY zotero.bibliography.print.label "Печат">
 
 <!ENTITY zotero.integration.docPrefs.title "Настройки на докумета">
-<!ENTITY zotero.integration.addEditCitation.title "Add/Edit Citation">
-<!ENTITY zotero.integration.editBibliography.title "Edit Bibliography">
+<!ENTITY zotero.integration.addEditCitation.title "Добавяне/редактиране на цитат">
+<!ENTITY zotero.integration.editBibliography.title "Редактиране на библиографията">
 
 <!ENTITY zotero.progress.title "Напредък">
 
@@ -121,20 +121,20 @@
 <!ENTITY zotero.exportOptions.format.label "Формат:">
 <!ENTITY zotero.exportOptions.translatorOptions.label "Параметри на преводачите">
 
-<!ENTITY zotero.citation.keepSorted.label "Keep Sources Sorted">
+<!ENTITY zotero.citation.keepSorted.label "Запазване на подредбата на източниците">
 
 <!ENTITY zotero.citation.page "Страница">
 <!ENTITY zotero.citation.paragraph "Параграф">
 <!ENTITY zotero.citation.line "Ред">
-<!ENTITY zotero.citation.suppressAuthor.label "Suppress Author">
-<!ENTITY zotero.citation.prefix.label "Prefix:">
-<!ENTITY zotero.citation.suffix.label "Suffix:">
+<!ENTITY zotero.citation.suppressAuthor.label "Не показвай автора">
+<!ENTITY zotero.citation.prefix.label "Представка:">
+<!ENTITY zotero.citation.suffix.label "Надставка:">
 
-<!ENTITY zotero.richText.italic.label "Italic">
-<!ENTITY zotero.richText.bold.label "Bold">
-<!ENTITY zotero.richText.underline.label "Underline">
-<!ENTITY zotero.richText.superscript.label "Superscript">
-<!ENTITY zotero.richText.subscript.label "Subscript">
+<!ENTITY zotero.richText.italic.label "Наклонен">
+<!ENTITY zotero.richText.bold.label "Удебелен">
+<!ENTITY zotero.richText.underline.label "Подчертан">
+<!ENTITY zotero.richText.superscript.label "Суперскрипт">
+<!ENTITY zotero.richText.subscript.label "Субскрипт">
 
 <!ENTITY zotero.annotate.toolbar.add.label "Добавяне на анотация">
 <!ENTITY zotero.annotate.toolbar.collapse.label "Свиване на всичките анотации">
@@ -150,4 +150,4 @@
 <!ENTITY zotero.integration.prefs.bookmarks.label "Отметки">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Отметките се запазват при прехвърляне между Microsoft Word и OpenOffice.org, но могат да бъдат променени по грешка.">
 
-<!ENTITY zotero.integration.references.label "References in Bibliography">
+<!ENTITY zotero.integration.references.label "Препратки в библиографията">

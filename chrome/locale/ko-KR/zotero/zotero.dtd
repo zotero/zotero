@@ -1,14 +1,14 @@
 <!ENTITY zotero.general.optional "(선택항목)">
-<!ENTITY zotero.general.note "Note:">
+<!ENTITY zotero.general.note "노트:">
 
-<!ENTITY zotero.errorReport.unrelatedMessages "The error log may include messages unrelated to Zotero.">
+<!ENTITY zotero.errorReport.unrelatedMessages "오류 로그에는 Zotero와 관련이 없는 메시지가 포함될 수 있습니다.">
 <!ENTITY zotero.errorReport.additionalInfo "추가 정보">
 <!ENTITY zotero.errorReport.emailAddress "E-mail 주소:">
 <!ENTITY zotero.errorReport.errorSteps "무엇을 하고 있었을때 오류가 발생했습니까? 만약 가능하다면 오류를 재현하는 과정을 포함해 주십시오.">
 <!ENTITY zotero.errorReport.submissionInProgress "오류 보고가 제출되는 동안 기다려 주세요.">
 <!ENTITY zotero.errorReport.submitted "오류 보고가 제출되었습니다.">
 <!ENTITY zotero.errorReport.reportID "보고서 ID:">
-<!ENTITY zotero.errorReport.furtherAssistance "See the Known Issues page and the forums for further assistance.">
+<!ENTITY zotero.errorReport.furtherAssistance "추가 지원을 위해 알려진 문제 페이지와 포럼을 참조 하십시오.">
 <!ENTITY zotero.errorReport.includeReportID "이 문제에 관하여 Zotero 개발자에게 보고 ID를 포함해 어떻게든 연락해 주십시오.">
 
 <!ENTITY zotero.upgrade.newVersionInstalled "새 버전의 Zotero를 설치했습니다.">
@@ -112,8 +112,8 @@
 <!ENTITY zotero.bibliography.print.label "인쇄">
 
 <!ENTITY zotero.integration.docPrefs.title "문서 환경설정">
-<!ENTITY zotero.integration.addEditCitation.title "Add/Edit Citation">
-<!ENTITY zotero.integration.editBibliography.title "Edit Bibliography">
+<!ENTITY zotero.integration.addEditCitation.title "인용 추가/편집">
+<!ENTITY zotero.integration.editBibliography.title "저서 목록 편집">
 
 <!ENTITY zotero.progress.title "진행">
 
@@ -121,20 +121,20 @@
 <!ENTITY zotero.exportOptions.format.label "형식:">
 <!ENTITY zotero.exportOptions.translatorOptions.label "중계기 선택사항">
 
-<!ENTITY zotero.citation.keepSorted.label "Keep Sources Sorted">
+<!ENTITY zotero.citation.keepSorted.label "원본 정렬 유지">
 
 <!ENTITY zotero.citation.page "페이지">
 <!ENTITY zotero.citation.paragraph "단락">
 <!ENTITY zotero.citation.line "행">
-<!ENTITY zotero.citation.suppressAuthor.label "Suppress Author">
-<!ENTITY zotero.citation.prefix.label "Prefix:">
-<!ENTITY zotero.citation.suffix.label "Suffix:">
+<!ENTITY zotero.citation.suppressAuthor.label "비공개 저자">
+<!ENTITY zotero.citation.prefix.label "접두사:">
+<!ENTITY zotero.citation.suffix.label "접미사:">
 
-<!ENTITY zotero.richText.italic.label "Italic">
-<!ENTITY zotero.richText.bold.label "Bold">
-<!ENTITY zotero.richText.underline.label "Underline">
-<!ENTITY zotero.richText.superscript.label "Superscript">
-<!ENTITY zotero.richText.subscript.label "Subscript">
+<!ENTITY zotero.richText.italic.label "이탤릭">
+<!ENTITY zotero.richText.bold.label "굵게">
+<!ENTITY zotero.richText.underline.label "밑줄">
+<!ENTITY zotero.richText.superscript.label "윗첨자">
+<!ENTITY zotero.richText.subscript.label "아래첨자">
 
 <!ENTITY zotero.annotate.toolbar.add.label "주석 추가">
 <!ENTITY zotero.annotate.toolbar.collapse.label "모든 주석 접기">
@@ -150,4 +150,4 @@
 <!ENTITY zotero.integration.prefs.bookmarks.label "북마크">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "책갈피는 Microsoft Word와 OpenOffice.org에서 이해되게 보존되지만, 우연히 변경될지도 모릅니다.">
 
-<!ENTITY zotero.integration.references.label "References in Bibliography">
+<!ENTITY zotero.integration.references.label "저서 목록 내 참조">
