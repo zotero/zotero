@@ -177,7 +177,6 @@
             <text variable="container-title" font-style="italic"/>
             <group prefix=", ">
               <text variable="volume" font-style="italic"/>
-              <text variable="issue" prefix="(" suffix=")"/>
             </group>
             <text variable="page" prefix=", "/>
           </group>
