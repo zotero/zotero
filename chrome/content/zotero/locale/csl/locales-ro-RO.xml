@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <terms xmlns="http://purl.org/net/xbiblio/csl">
   <locale xml:lang="ro">
-    <term name="at">at</term>
+    <term name="at">la</term>
     <term name="in">în</term>
     <term name="ibid">ibidem</term>
     <term name="accessed">accesat în</term>
@@ -72,7 +72,7 @@
       <single>verset</single>
       <multiple>versete</multiple>
     </term>
-    <term name="book" form="short">car</term>
+    <term name="book" form="short">cart</term>
     <term name="chapter" form="short">cap</term>
     <term name="column" form="short">col</term>
     <term name="figure" form="short">fig</term>
@@ -83,8 +83,8 @@
       <single>p</single>
       <multiple>pp</multiple>
     </term>
-    <term name="paragraph" form="short">para</term>
-    <term name="part" form="short">pt</term>
+    <term name="paragraph" form="short">paragr</term>
+    <term name="part" form="short">part</term>
     <term name="section" form="short">sec</term>
     <term name="verse" form="short">
       <single>v</single>
@@ -101,47 +101,47 @@
     </term>
     <term name="editor">
       <single>editor</single>
-      <multiple>editors</multiple>
+      <multiple>editori</multiple>
     </term>
     <term name="translator">
-      <single>translator</single>
-      <multiple>translators</multiple>
+      <single>traducător</single>
+      <multiple>traducători</multiple>
     </term>
     <term name="editor" form="short">
       <single>ed</single>
-      <multiple>eds</multiple>
+      <multiple>ed</multiple>
     </term>
     <term name="translator" form="short">
-      <single>tran</single>
-      <multiple>trans</multiple>
+      <single>trad</single>
+      <multiple>trad</multiple>
     </term>
-    <term name="editor" form="verb">edited by</term>
-    <term name="translator" form="verb">translated by</term>
+    <term name="editor" form="verb">ediţie de</term>
+    <term name="translator" form="verb">traducere de</term>
     <term name="editor" form="verb-short">ed</term>
-    <term name="translator" form="verb-short">trans</term>
-    <term name="month-01">January</term>
-    <term name="month-02">February</term>
-    <term name="month-03">March</term>
-    <term name="month-04">April</term>
-    <term name="month-05">May</term>
-    <term name="month-06">June</term>
-    <term name="month-07">July</term>
-    <term name="month-08">August</term>
-    <term name="month-09">September</term>
-    <term name="month-10">October</term>
-    <term name="month-11">November</term>
-    <term name="month-12">December</term>
-    <term name="month-01" form="short">Jan</term>
-    <term name="month-02" form="short">Feb</term>
-    <term name="month-03" form="short">Mar</term>
-    <term name="month-04" form="short">Apr</term>
-    <term name="month-05" form="short">May</term>
-    <term name="month-06" form="short">Jun</term>
-    <term name="month-07" form="short">Jul</term>
-    <term name="month-08" form="short">Aug</term>
-    <term name="month-09" form="short">Sep</term>
-    <term name="month-10" form="short">Oct</term>
-    <term name="month-11" form="short">Nov</term>
-    <term name="month-12" form="short">Dec</term>
+    <term name="translator" form="verb-short">trad</term>
+    <term name="month-01">ianuarie</term>
+    <term name="month-02">februarie</term>
+    <term name="month-03">martie</term>
+    <term name="month-04">aprilie</term>
+    <term name="month-05">mai</term>
+    <term name="month-06">iunie</term>
+    <term name="month-07">iulie</term>
+    <term name="month-08">august</term>
+    <term name="month-09">septembrie</term>
+    <term name="month-10">octombrie</term>
+    <term name="month-11">noiembrie</term>
+    <term name="month-12">decembrie</term>
+    <term name="month-01" form="short">ian</term>
+    <term name="month-02" form="short">feb</term>
+    <term name="month-03" form="short">mar</term>
+    <term name="month-04" form="short">apr</term>
+    <term name="month-05" form="short">mai</term>
+    <term name="month-06" form="short">iun</term>
+    <term name="month-07" form="short">iul</term>
+    <term name="month-08" form="short">aug</term>
+    <term name="month-09" form="short">sep</term>
+    <term name="month-10" form="short">oct</term>
+    <term name="month-11" form="short">nov</term>
+    <term name="month-12" form="short">dec</term>
   </locale>
 </terms>

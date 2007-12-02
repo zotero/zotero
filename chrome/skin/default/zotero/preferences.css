@@ -95,7 +95,7 @@ grid row hbox:first-child
 	height: 1em;
 }
 
-#quickCopy-instructions, #quickCopy-macWarning
+#quickCopy-instructions, #quickCopy-macWarning, #export-citePaperJournalArticleURL
 {
 	font-size: .85em;
 }

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <terms xmlns="http://purl.org/net/xbiblio/csl">
   <locale xml:lang="zh">
-    <term name="at">at</term>
+    <term name="at">在</term>
     <term name="in">在</term>
     <term name="ibid">同上出處</term>
     <term name="accessed">被取用</term>
@@ -13,40 +13,40 @@
     <term name="and">及</term>
     <term name="et-al">等人</term>
     <term name="book">
-      <single>book</single>
-      <multiple>books</multiple>
+      <single>書</single>
+      <multiple>書</multiple>
     </term>
     <term name="chapter">
-      <single>chapter</single>
-      <multiple>chapters</multiple>
+      <single>章</single>
+      <multiple>章</multiple>
     </term>
     <term name="column">
-      <single>column</single>
-      <multiple>columns</multiple>
+      <single>欄</single>
+      <multiple>欄</multiple>
     </term>
     <term name="figure">
-      <single>figure</single>
-      <multiple>figures</multiple>
+      <single>圖</single>
+      <multiple>圖</multiple>
     </term>
     <term name="folio">
-      <single>folio</single>
-      <multiple>folios</multiple>
+      <single>對開紙</single>
+      <multiple>對開紙</multiple>
     </term>
     <term name="issue">
-      <single>number</single>
-      <multiple>numbers</multiple>
+      <single>期數</single>
+      <multiple>期數</multiple>
     </term>
     <term name="line">
       <single>行</single>
       <multiple>行</multiple>
     </term>
     <term name="note">
-      <single>note</single>
-      <multiple>notes</multiple>
+      <single>筆記</single>
+      <multiple>筆記</multiple>
     </term>
     <term name="opus">
-      <single>opus</single>
-      <multiple>opera</multiple>
+      <single>作品</single>
+      <multiple>作品</multiple>
     </term>
     <term name="page">
       <single>頁</single>
@@ -57,40 +57,40 @@
       <multiple>段落</multiple>
     </term>
     <term name="part">
-      <single>part</single>
-      <multiple>parts</multiple>
+      <single>部</single>
+      <multiple>部</multiple>
     </term>
     <term name="section">
-      <single>section</single>
-      <multiple>sections</multiple>
+      <single>節</single>
+      <multiple>節</multiple>
     </term>
     <term name="volume">
-      <single>volume</single>
-      <multiple>volumes</multiple>
+      <single>冊</single>
+      <multiple>冊</multiple>
     </term>
     <term name="verse">
-      <single>verse</single>
-      <multiple>verses</multiple>
+      <single>詩句</single>
+      <multiple>詩句</multiple>
     </term>
-    <term name="book" form="short">bk</term>
-    <term name="chapter" form="short">chap</term>
-    <term name="column" form="short">col</term>
-    <term name="figure" form="short">fig</term>
-    <term name="folio" form="short">f</term>
+    <term name="book" form="short">書</term>
+    <term name="chapter" form="short">章</term>
+    <term name="column" form="short">欄</term>
+    <term name="figure" form="short">圖</term>
+    <term name="folio" form="short">開</term>
     <term name="issue" form="short">期</term>
-    <term name="opus" form="short">op</term>
+    <term name="opus" form="short">作</term>
     <term name="page" form="short">
       <single>頁</single>
       <multiple>頁</multiple>
     </term>
-    <term name="paragraph" form="short">para</term>
-    <term name="part" form="short">pt</term>
-    <term name="section" form="short">sec</term>
+    <term name="paragraph" form="short">段</term>
+    <term name="part" form="short">部</term>
+    <term name="section" form="short">節</term>
     <term name="verse" form="short">
-      <single>v</single>
-      <multiple>vv</multiple>
+      <single>句</single>
+      <multiple>句</multiple>
     </term>
-    <term name="volume" form="short">卷</term>
+    <term name="volume" form="short">冊</term>
     <term name="paragraph" form="symbol">
       <single>¶</single>
       <multiple>¶¶</multiple>

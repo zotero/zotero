@@ -1,10 +1,10 @@
 <!ENTITY zotero.version "版本">
-<!ENTITY zotero.createdby "創建人是：">
-<!ENTITY zotero.directors "指導人員：">
-<!ENTITY zotero.developers "發展人員：">
-<!ENTITY zotero.alumni "Alumni:">
-<!ENTITY zotero.about.localizations "地方化：">
-<!ENTITY zotero.about.additionalSoftware "Third-Party Software and Standards:">
-<!ENTITY zotero.executiveProducer "執行制作人：">
+<!ENTITY zotero.createdby "創造者：">
+<!ENTITY zotero.directors "指導人：">
+<!ENTITY zotero.developers "開發者：">
+<!ENTITY zotero.alumni "前成員：">
+<!ENTITY zotero.about.localizations "在地化：">
+<!ENTITY zotero.about.additionalSoftware "第三方軟體與標準：">
+<!ENTITY zotero.executiveProducer "執行製作人：">
 <!ENTITY zotero.thanks "特別感謝：">
 <!ENTITY zotero.about.close "關閉">

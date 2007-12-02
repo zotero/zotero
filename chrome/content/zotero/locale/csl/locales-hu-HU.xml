@@ -8,41 +8,41 @@
     <term name="retrieved">elérés</term>
     <term name="from">forrás</term>
     <term name="forthcoming">megjelenés alatt</term>
-    <term name="references">Hivatkozások</term>
+    <term name="references">hivatkozások</term>
     <term name="no date">nd</term>
     <term name="and">és</term>
     <term name="et-al">et al.</term>
     <term name="book">
-      <single>book</single>
-      <multiple>books</multiple>
+      <single>könyv</single>
+      <multiple>könyv</multiple>
     </term>
     <term name="chapter">
-      <single>chapter</single>
-      <multiple>chapters</multiple>
+      <single>fejezet</single>
+      <multiple>fejezet</multiple>
     </term>
     <term name="column">
-      <single>column</single>
-      <multiple>columns</multiple>
+      <single>oszlop</single>
+      <multiple>oszlop</multiple>
     </term>
     <term name="figure">
-      <single>figure</single>
-      <multiple>figures</multiple>
+      <single>ábra</single>
+      <multiple>ábra</multiple>
     </term>
     <term name="folio">
-      <single>folio</single>
-      <multiple>folios</multiple>
+      <single>fóliáns</single>
+      <multiple>fóliáns</multiple>
     </term>
     <term name="issue">
-      <single>number</single>
-      <multiple>numbers</multiple>
+      <single>szám</single>
+      <multiple>szám</multiple>
     </term>
     <term name="line">
       <single>sor</single>
       <multiple>sor</multiple>
     </term>
     <term name="note">
-      <single>note</single>
-      <multiple>notes</multiple>
+      <single>jegyzet</single>
+      <multiple>jegyzet</multiple>
     </term>
     <term name="opus">
       <single>opus</single>
@@ -57,40 +57,40 @@
       <multiple>bekezdés</multiple>
     </term>
     <term name="part">
-      <single>part</single>
-      <multiple>parts</multiple>
+      <single>rész</single>
+      <multiple>rész</multiple>
     </term>
     <term name="section">
-      <single>section</single>
-      <multiple>sections</multiple>
+      <single>szakasz</single>
+      <multiple>szakasz</multiple>
     </term>
     <term name="volume">
-      <single>volume</single>
-      <multiple>volumes</multiple>
+      <single>kötet</single>
+      <multiple>kötet</multiple>
     </term>
     <term name="verse">
-      <single>verse</single>
-      <multiple>verses</multiple>
+      <single>versszak</single>
+      <multiple>versszak</multiple>
     </term>
-    <term name="book" form="short">bk</term>
-    <term name="chapter" form="short">chap</term>
-    <term name="column" form="short">col</term>
-    <term name="figure" form="short">fig</term>
-    <term name="folio" form="short">f</term>
-    <term name="issue" form="short">no</term>
+    <term name="book" form="short">könyv</term>
+    <term name="chapter" form="short">fej</term>
+    <term name="column" form="short">oszl</term>
+    <term name="figure" form="short">ábr</term>
+    <term name="folio" form="short">fol</term>
+    <term name="issue" form="short">sz</term>
     <term name="opus" form="short">op</term>
     <term name="page" form="short">
       <single>o</single>
       <multiple>o</multiple>
     </term>
-    <term name="paragraph" form="short">para</term>
-    <term name="part" form="short">pt</term>
-    <term name="section" form="short">sec</term>
+    <term name="paragraph" form="short">bek</term>
+    <term name="part" form="short">rész</term>
+    <term name="section" form="short">szak</term>
     <term name="verse" form="short">
-      <single>v</single>
-      <multiple>vv</multiple>
+      <single>vsz</single>
+      <multiple>vsz</multiple>
     </term>
-    <term name="volume" form="short">vol</term>
+    <term name="volume" form="short">köt</term>
     <term name="paragraph" form="symbol">
       <single>¶</single>
       <multiple>¶¶</multiple>

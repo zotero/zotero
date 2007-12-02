@@ -332,41 +332,14 @@ Zotero.Utilities.prototype.getLocalizedCreatorType = function(type) {
  *
  * Follows capitalizeTitles pref, unless |force| is true
  */
-Zotero.Utilities.capitalizeSkipWords = ["but", "or", "yet", "so", "for", "and",
-"nor", "a", "an", "the", "at", "by", "from", "in", "into", "of", "on", "to",
-"with", "up", "down"];
-Zotero.Utilities.prototype.capitalizeTitle = function(title, force) {
-	if (!Zotero.Prefs.get('capitalizeTitles') && !force) {
-		return title;
+Zotero.Utilities.prototype.capitalizeTitle = function(string, force) {
+	string = this.cleanString(string);
+	if(Zotero.Prefs.get('capitalizeTitles') || force) {
+		// fix colons
+		string = string.replace(" : ", ": ", "g");
+		string = Zotero.Text.titleCase(string.replace(/ : /g, ": "));
 	}
-	title = this.cleanString(title);
-	if (!title) {
-		return '';
-	}
-	title = title.replace(/ : /g, ": ");
-	var words = title.split(" ");
-	
-	// always capitalize first
-	words[0] = words[0][0].toUpperCase() + words[0].substr(1);
-	if(words.length > 1) {
-		var lastWordIndex = words.length-1;
-		// always capitalize last
-		words[lastWordIndex] = words[lastWordIndex][0].toUpperCase() + words[lastWordIndex].substr(1);
-		
-		if(words.length > 2) {
-			for(var i=1; i<lastWordIndex; i++) {
-				// if not a skip word
-				if(Zotero.Utilities.capitalizeSkipWords.indexOf(words[i].toLowerCase()) == -1 ||
-				   (words[i-1].length && words[i-1][words[i-1].length-1] == ":")) {
-					words[i] = words[i][0].toUpperCase() + words[i].substr(1);
-				} else {
-					words[i] = words[i].toLowerCase();
-				}
-			}
-		}
-	}
-	
-	return words.join(" ");
+	return string;
 }
 
 /*

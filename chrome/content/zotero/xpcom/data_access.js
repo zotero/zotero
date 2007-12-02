@@ -1481,6 +1481,12 @@ Zotero.Item.prototype.getNotes = function(){
 	// TODO: move titles into itemNotes table
 	var sql = "SELECT N.itemID, title FROM itemNotes N NATURAL JOIN items "
 		+ "LEFT JOIN itemNoteTitles USING (itemID) WHERE sourceItemID=" + this.getID();
+	
+	if (Zotero.Prefs.get('sortNotesChronologically')) {
+		sql += " ORDER BY dateAdded";
+		return Zotero.DB.columnQuery(sql);
+	}
+	
 	var notes = Zotero.DB.query(sql);
 	if (!notes) {
 		return false;
@@ -2669,9 +2675,9 @@ Zotero.Items = new function(){
 	 * If |onlyTopLevel|, don't include child items
 	 */
 	function getAll(onlyTopLevel) {
-		var sql = 'SELECT A.itemID FROM items';
+		var sql = 'SELECT A.itemID FROM items A';
 		if (onlyTopLevel) {
-			sql += ' A LEFT JOIN itemNotes B USING (itemID) '
+			sql += ' LEFT JOIN itemNotes B USING (itemID) '
 			+ 'LEFT JOIN itemAttachments C ON (C.itemID=A.itemID) '
 			+ 'WHERE B.sourceItemID IS NULL AND C.sourceItemID IS NULL';
 		}

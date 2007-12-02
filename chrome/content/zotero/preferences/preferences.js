@@ -146,6 +146,9 @@ function populateQuickCopyList() {
 
 
 function buildQuickCopyFormatDropDown(menulist, currentFormat) {
+	menulist.selectedItem = null;
+	menulist.removeAllItems();
+	
 	// Prevent Cmd-w from setting "Wikipedia"
 	menulist.onkeydown = function (event) {
 		if ((Zotero.isMac && event.metaKey) || event.ctrlKey) {
@@ -769,7 +772,26 @@ function runIntegrityCheck() {
 }
 
 
-function rebuildTranslators() {
+function updateTranslators() {
+	Zotero.Schema.updateScrapersRemote(true, function (xmlhttp, updated) {
+		var button = document.getElementById('updateButton');
+		if (button) {
+			if (updated===-1) {
+				var label = Zotero.getString('zotero.preferences.update.upToDate');
+			}
+			else if (updated) {
+				var label = Zotero.getString('zotero.preferences.update.updated');
+			}
+			else {
+				var label = Zotero.getString('zotero.preferences.update.error');
+			}
+			button.setAttribute('label', label);
+		}
+	});
+}
+
+
+function resetTranslatorsAndStyles() {
 	var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 		.getService(Components.interfaces.nsIPromptService);
 	
@@ -778,13 +800,57 @@ function rebuildTranslators() {
 	
 	var index = ps.confirmEx(null,
 		Zotero.getString('general.warning'),
-		Zotero.getString('zotero.preferences.advanced.rebuildTranslators.changesLost'),
+		Zotero.getString('zotero.preferences.advanced.resetTranslatorsAndStyles.changesLost'),
 		buttonFlags,
-		Zotero.getString('zotero.preferences.advanced.rebuildTranslators.rebuildTable'),
+		Zotero.getString('zotero.preferences.advanced.resetTranslatorsAndStyles'),
+		null, null, null, {});
+	
+	if (index == 0) {
+		Zotero.Schema.rebuildTranslatorsAndStylesTables(function (xmlhttp, updated) {
+			populateQuickCopyList();
+		});
+	}
+}
+
+
+function resetTranslators() {
+	var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+		.getService(Components.interfaces.nsIPromptService);
+	
+	var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
+		+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
+	
+	var index = ps.confirmEx(null,
+		Zotero.getString('general.warning'),
+		Zotero.getString('zotero.preferences.advanced.resetTranslators.changesLost'),
+		buttonFlags,
+		Zotero.getString('zotero.preferences.advanced.resetTranslators'),
 		null, null, null, {});
 	
 	if (index == 0) {
 		Zotero.Schema.rebuildTranslatorsTable();
+	}
+}
+
+
+function resetStyles() {
+	var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+		.getService(Components.interfaces.nsIPromptService);
+	
+	var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
+		+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
+	
+	var index = ps.confirmEx(null,
+		Zotero.getString('general.warning'),
+		Zotero.getString('zotero.preferences.advanced.resetStyles.changesLost'),
+		buttonFlags,
+		Zotero.getString('zotero.preferences.advanced.resetStyles'),
+		null, null, null, {});
+	
+	if (index == 0) {
+		Zotero.Schema.rebuildStylesTable(function (xmlhttp, updated) {
+			populateQuickCopyList();
+		});
 	}
 }
 

@@ -5,42 +5,42 @@
 <!ENTITY zotero.preferences.prefpane.general "General">
 
 <!ENTITY zotero.preferences.userInterface "Interfície d&apos;usuari">
-<!ENTITY zotero.preferences.position "Presenta Zotero">
+<!ENTITY zotero.preferences.position "Mostra Zotero">
 <!ENTITY zotero.preferences.position.above "sota">
 <!ENTITY zotero.preferences.position.below "sobre">
 <!ENTITY zotero.preferences.position.browser "contingut del navegador">
-<!ENTITY zotero.preferences.statusBarIcon "Icona de la barra d&apos;estatus">
-<!ENTITY zotero.preferences.statusBarIcon.none "None">
+<!ENTITY zotero.preferences.statusBarIcon "Icona a la barra d&apos;estatus">
+<!ENTITY zotero.preferences.statusBarIcon.none "Cap">
 <!ENTITY zotero.preferences.fontSize "Mida de la font:">
 <!ENTITY zotero.preferences.fontSize.small "Petita">
 <!ENTITY zotero.preferences.fontSize.medium "Mitjana">
 <!ENTITY zotero.preferences.fontSize.large "Gran">
 
 <!ENTITY zotero.preferences.miscellaneous "Miscel·lania">
-<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators">
+<!ENTITY zotero.preferences.autoUpdate "Automàticament cerca actualitzacions dels transcriptors">
 <!ENTITY zotero.preferences.updateNow "Actualitza ara">
 <!ENTITY zotero.preferences.reportTranslationFailure "Envia un informe dels transcriptors trencats">
-<!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded RIS/Refer files">
+<!ENTITY zotero.preferences.parseRISRefer "utilitza Zotero per a arxius RIS/Refer descarregats">
 <!ENTITY zotero.preferences.automaticSnapshots "Automàticament crea una captura quan es creïn elements des de pàgines web">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Automàticament adjunta documents PDF associats i altres arxius quan es desin els elements">
 <!ENTITY zotero.preferences.automaticTags "Automàticament etiqueta els elements amb les capçaleres de paraules clau i tema">
 
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
-<!ENTITY zotero.preferences.openurl.search "Search for resolvers">
+<!ENTITY zotero.preferences.openurl.search "Cerca resolutors">
 <!ENTITY zotero.preferences.openurl.custom "Personalitzat...">
-<!ENTITY zotero.preferences.openurl.server "Resolver:">
+<!ENTITY zotero.preferences.openurl.server "Resolutor:">
 <!ENTITY zotero.preferences.openurl.version "Versió:">
 
 <!ENTITY zotero.preferences.prefpane.search "Cerca">
-<!ENTITY zotero.preferences.search.fulltextCache "Memòria cau de Text-complet">
+<!ENTITY zotero.preferences.search.fulltextCache "Memòria cau de text-complet">
 <!ENTITY zotero.preferences.search.pdfIndexing "Indexat de PDF">
 <!ENTITY zotero.preferences.search.indexStats "Estadístiques d&apos;índex">
 
-<!ENTITY zotero.preferences.search.indexStats.indexed "Indexed:">
-<!ENTITY zotero.preferences.search.indexStats.partial "Partial:">
-<!ENTITY zotero.preferences.search.indexStats.unindexed "Unindexed:">
-<!ENTITY zotero.preferences.search.indexStats.words "Words:">
+<!ENTITY zotero.preferences.search.indexStats.indexed "Indexat:">
+<!ENTITY zotero.preferences.search.indexStats.partial "Parcialment:">
+<!ENTITY zotero.preferences.search.indexStats.unindexed "Sense indexar:">
+<!ENTITY zotero.preferences.search.indexStats.words "Paraules:">
 
 <!ENTITY zotero.preferences.fulltext.textMaxLength "Caràcters màxims indexats per arxiu:">
 <!ENTITY zotero.preferences.fulltext.pdfMaxPages "Pàgines màximes indexades per arxiu:">
@@ -48,26 +48,26 @@
 <!ENTITY zotero.preferences.prefpane.export "Exporta">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Còpia ràpida">
-<!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Format de sortida per defetce:">
+<!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Format de sortida per defecte:">
 <!ENTITY zotero.preferences.quickCopy.macWarning "Nota: el format de text enriquit es perdrà en Mac OS X">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Configuració específica per a llos web:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domini/Ruta">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(p.ex. wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Format de sortida">
 
-<!ENTITY zotero.preferences.prefpane.keys "Shortcut Keys">
+<!ENTITY zotero.preferences.prefpane.keys "Dreceres de teclat">
 
 <!ENTITY zotero.preferences.keys.openZotero "Obre/Tanca Zotero">
-<!ENTITY zotero.preferences.keys.toggleFullscreen "Toggle Fullscreen Mode">
+<!ENTITY zotero.preferences.keys.toggleFullscreen "Canvia a pantalla completa">
 <!ENTITY zotero.preferences.keys.library "Llibreria">
 <!ENTITY zotero.preferences.keys.quicksearch "Cerca ràpida">
 <!ENTITY zotero.preferences.keys.newItem "Crea un nou element">
 <!ENTITY zotero.preferences.keys.newNote "Crea una nova nota">
-<!ENTITY zotero.preferences.keys.toggleTagSelector "Toggle Tag Selector">
-<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copy Selected Item Citations to Clipboard">
-<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copia els elements seleccionats al portaretalls">
-<!ENTITY zotero.preferences.keys.overrideGlobal "Try to override conflicting shortcuts">
-<!ENTITY zotero.preferences.keys.changesTakeEffect "Changes take effect in new windows only">
+<!ENTITY zotero.preferences.keys.toggleTagSelector "Canvia el selector d&apos;etiquetes">
+<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copia les cites dels elements seleccionats al porta-retalls">
+<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copia els elements seleccionats al porta-retalls">
+<!ENTITY zotero.preferences.keys.overrideGlobal "intenta corregir els conflictes n les dreceres de teclat">
+<!ENTITY zotero.preferences.keys.changesTakeEffect "Els canvis tenen efecte només en noves finestres">
 
 
 <!ENTITY zotero.preferences.prefpane.advanced "Avançat">
@@ -76,8 +76,7 @@
 <!ENTITY zotero.preferences.dataDir.useProfile "Fer servir el directori del perfil del Firefox">
 <!ENTITY zotero.preferences.dataDir.custom "Personalitzat:">
 <!ENTITY zotero.preferences.dataDir.choose "Escull...">
-<!ENTITY zotero.preferences.dataDir.reveal "Show Data Directory">
+<!ENTITY zotero.preferences.dataDir.reveal "Mostra el directori de dades">
 
-<!ENTITY zotero.preferences.dbMaintenance "Database Maintenance">
-<!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Check Database Integrity">
-<!ENTITY zotero.preferences.dbMaintenance.rebuildTranslators "Rebuild Translators Table">
+<!ENTITY zotero.preferences.dbMaintenance "Manteniment de la base de dades">
+<!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Comprova la integritat de la base de dades">

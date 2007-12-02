@@ -114,7 +114,7 @@ To add a new preference:
 			
 			<hbox align="center">
 				<checkbox label="&zotero.preferences.autoUpdate;" preference="pref-automaticScraperUpdates"/>
-				<button id="updateButton" style="margin-top:0" label="&zotero.preferences.updateNow;" oncommand="Zotero.Schema.updateScrapersRemote(true)"/>
+				<button id="updateButton" style="margin-top:0" label="&zotero.preferences.updateNow;" oncommand="updateTranslators()"/>
 			</hbox>
 			
 			<checkbox label="&zotero.preferences.reportTranslationFailure;" preference="pref-reportTranslationFailure"/>
@@ -245,8 +245,15 @@ To add a new preference:
 						label="&zotero.preferences.prefpane.export;"
 						image="chrome://zotero/skin/prefs-export.png">
 		<preferences>
+			<preference id="pref-export-citePaperJournalArticleURL" name="extensions.zotero.export.citePaperJournalArticleURL" type="bool"/>
 			<preference id="pref-quickCopy-setting" name="extensions.zotero.export.quickCopy.setting" type="string"/>
 		</preferences>
+		
+		<groupbox>
+			<caption label="&zotero.preferences.citationOptions.caption;"/>
+			<checkbox label="&zotero.preferences.export.citePaperJournalArticleURL;" preference="pref-export-citePaperJournalArticleURL"/>
+			<label id="export-citePaperJournalArticleURL">&zotero.preferences.export.citePaperJournalArticleURL.description;</label>
+		</groupbox>
 		
 		<groupbox>
 			<caption label="&zotero.preferences.quickCopy.caption;"/>
@@ -407,7 +414,7 @@ To add a new preference:
 			</hbox>
 			
 			<hbox>
-				<button label="&zotero.preferences.dbMaintenance.rebuildTranslators;" oncommand="rebuildTranslators()"/>
+				<button label="&zotero.preferences.dbMaintenance.resetTranslatorsAndStyles;" oncommand="resetTranslatorsAndStyles()"/>
 			</hbox>
 		</groupbox>
 	</prefpane>

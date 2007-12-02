@@ -1,14 +1,14 @@
 <!ENTITY zotero.general.optional "(Изборно)">
-<!ENTITY zotero.general.note "Note:">
+<!ENTITY zotero.general.note "Белешка:">
 
-<!ENTITY zotero.errorReport.unrelatedMessages "The error log may include messages unrelated to Zotero.">
+<!ENTITY zotero.errorReport.unrelatedMessages "Днвеник грешака може да садржи поруке невезане за Зотеро.">
 <!ENTITY zotero.errorReport.additionalInfo "Додатни подаци">
 <!ENTITY zotero.errorReport.emailAddress "Ваша ел. адреса:">
 <!ENTITY zotero.errorReport.errorSteps "Шта сте радили када је дошло до грешке? Ако је могуће, укључите кораке како доћи до грешке.">
 <!ENTITY zotero.errorReport.submissionInProgress "Сачекајте док се извештај о грешци шаље.">
 <!ENTITY zotero.errorReport.submitted "Извештај о грешци је послат.">
 <!ENTITY zotero.errorReport.reportID "Бр. извештаја:">
-<!ENTITY zotero.errorReport.furtherAssistance "See the Known Issues page and the forums for further assistance.">
+<!ENTITY zotero.errorReport.furtherAssistance "Погледајте страницу Познати проблеми и форуме за даљу помоћ.">
 <!ENTITY zotero.errorReport.includeReportID "Укључите број извештаја са током било које преписке са програмерима Зотера у вези ове грешке.">
 
 <!ENTITY zotero.upgrade.newVersionInstalled "Инсталирали сте нову верзију Зотера.">
@@ -112,8 +112,8 @@
 <!ENTITY zotero.bibliography.print.label "Штампај">
 
 <!ENTITY zotero.integration.docPrefs.title "Поставке документа">
-<!ENTITY zotero.integration.addEditCitation.title "Add/Edit Citation">
-<!ENTITY zotero.integration.editBibliography.title "Edit Bibliography">
+<!ENTITY zotero.integration.addEditCitation.title "Додај/уреди цитације">
+<!ENTITY zotero.integration.editBibliography.title "Уреди библиографију">
 
 <!ENTITY zotero.progress.title "Напредак">
 
@@ -121,20 +121,20 @@
 <!ENTITY zotero.exportOptions.format.label "Формат:">
 <!ENTITY zotero.exportOptions.translatorOptions.label "Опције преводиоца">
 
-<!ENTITY zotero.citation.keepSorted.label "Keep Sources Sorted">
+<!ENTITY zotero.citation.keepSorted.label "Држи изворе поредане">
 
 <!ENTITY zotero.citation.page "Страна">
 <!ENTITY zotero.citation.paragraph "Параграф">
 <!ENTITY zotero.citation.line "Ред">
-<!ENTITY zotero.citation.suppressAuthor.label "Suppress Author">
-<!ENTITY zotero.citation.prefix.label "Prefix:">
-<!ENTITY zotero.citation.suffix.label "Suffix:">
+<!ENTITY zotero.citation.suppressAuthor.label "Потисни аутора">
+<!ENTITY zotero.citation.prefix.label "Префикс:">
+<!ENTITY zotero.citation.suffix.label "Суфикс:">
 
-<!ENTITY zotero.richText.italic.label "Italic">
-<!ENTITY zotero.richText.bold.label "Bold">
-<!ENTITY zotero.richText.underline.label "Underline">
-<!ENTITY zotero.richText.superscript.label "Superscript">
-<!ENTITY zotero.richText.subscript.label "Subscript">
+<!ENTITY zotero.richText.italic.label "Курзив">
+<!ENTITY zotero.richText.bold.label "Подебљана">
+<!ENTITY zotero.richText.underline.label "Подвучена">
+<!ENTITY zotero.richText.superscript.label "Суперскрипт">
+<!ENTITY zotero.richText.subscript.label "Супскрипт">
 
 <!ENTITY zotero.annotate.toolbar.add.label "Додај напомену">
 <!ENTITY zotero.annotate.toolbar.collapse.label "Скупи све напомене">
@@ -150,4 +150,4 @@
 <!ENTITY zotero.integration.prefs.bookmarks.label "Пречице">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Пречице су сачуване кроз Microsoft Word и OpenOffice.org, али могу бити нехотично промењене.">
 
-<!ENTITY zotero.integration.references.label "References in Bibliography">
+<!ENTITY zotero.integration.references.label "Референце у библиографији">

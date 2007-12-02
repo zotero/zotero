@@ -26,6 +26,7 @@ Zotero.Schema = new function(){
 	this.updateSchema = updateSchema;
 	this.updateScrapersRemote = updateScrapersRemote;
 	this.stopRepositoryTimer = stopRepositoryTimer;
+	this.rebuildTranslatorsAndStylesTables = rebuildTranslatorsAndStylesTables;
 	this.rebuildTranslatorsTable = rebuildTranslatorsTable;
 	
 	this.dbInitialized = false;
@@ -201,7 +202,7 @@ Zotero.Schema = new function(){
 	* _force_ forces a repository query regardless of how long it's been
 	* 	since the last check
 	**/
-	function updateScrapersRemote(force){
+	function updateScrapersRemote(force, callback) {
 		if (!force){
 			if (_remoteUpdateInProgress) {
 				Zotero.debug("A remote update is already in progress -- not checking repository");
@@ -243,20 +244,25 @@ Zotero.Schema = new function(){
 			+ (lastUpdated ? 'last=' + lastUpdated + '&' : '')
 			+ 'version=' + Zotero.version;
 		
-		Zotero.debug('Checking repository for updates (' + url + ')');
+		Zotero.debug('Checking repository for updates');
 		
 		_remoteUpdateInProgress = true;
 		
-		if (force === true) {
-			url += '&m=1';
-			var get = Zotero.Utilities.HTTP.doGet(url, _updateScrapersRemoteCallbackManual);
-		}
-		else {
+		if (force) {
 			if (force == 2) {
 				url += '&m=2';
 			}
-			var get = Zotero.Utilities.HTTP.doGet(url, _updateScrapersRemoteCallback);
+			else {
+				url += '&m=1';
+			}
 		}
+		
+		var get = Zotero.Utilities.HTTP.doGet(url, function (xmlhttp) {
+			var updated = _updateScrapersRemoteCallback(xmlhttp, !!force);
+			if (callback) {
+				callback(xmlhttp, updated)
+			}
+		});
 		
 		// TODO: instead, add an observer to start and stop timer on online state change
 		if (!get){
@@ -274,7 +280,37 @@ Zotero.Schema = new function(){
 	}
 	
 	
-	function rebuildTranslatorsTable() {
+	function rebuildTranslatorsAndStylesTables(callback) {
+		Zotero.debug("Rebuilding translators and styles tables");
+		Zotero.DB.beginTransaction();
+		
+		Zotero.DB.query("DELETE FROM translators");
+		Zotero.DB.query("DELETE FROM csl");
+		var sql = "DELETE FROM version WHERE schema IN "
+			+ "('scrapers', 'repository', 'lastcheck')";
+		Zotero.DB.query(sql);
+		_dbVersions['scrapers'] = null;
+		_dbVersions['repository'] = null;
+		_dbVersions['lastcheck'] = null;
+		
+		// Rebuild from scrapers.sql
+		_updateSchema('scrapers');
+		
+		// Rebuild the translator cache
+		Zotero.debug("Clearing translator cache");
+		Zotero.Translate.cache = null;
+		Zotero.Translate.init();
+		
+		Zotero.DB.commitTransaction();
+		
+		// Run a manual update from repository if pref set
+		if (Zotero.Prefs.get('automaticScraperUpdates')) {
+			this.updateScrapersRemote(2, callback);
+		}
+	}
+	
+	
+	function rebuildTranslatorsTable(callback) {
 		Zotero.debug("Rebuilding translators table");
 		Zotero.DB.beginTransaction();
 		
@@ -298,11 +334,10 @@ Zotero.Schema = new function(){
 		
 		// Run a manual update from repository if pref set
 		if (Zotero.Prefs.get('automaticScraperUpdates')) {
-			this.updateScrapersRemote(2);
+			this.updateScrapersRemote(2, callback);
 		}
 	}
 	
-
 	
 	/////////////////////////////////////////////////////////////////
 	//
@@ -637,32 +672,6 @@ Zotero.Schema = new function(){
 	}
 	
 	
-	function _updateScrapersRemoteCallbackManual(xmlhttp){
-		var updated = _updateScrapersRemoteCallback(xmlhttp, true);
-		
-		// Update the "Update Now" button in the pref dialog with the result
-		var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-			.getService(Components.interfaces.nsIWindowMediator);
-		var enumerator = wm.getEnumerator('zotero:pref');
-		while (enumerator.hasMoreElements()){
-			var win = enumerator.getNext();
-			var button = win.window.document.getElementById('updateButton');
-			if (button){
-				if (updated===-1){
-					var label = Zotero.getString('zotero.preferences.update.upToDate');
-				}
-				else if (updated){
-					var label = Zotero.getString('zotero.preferences.update.updated');
-				}
-				else {
-					var label = Zotero.getString('zotero.preferences.update.error');
-				}
-				button.setAttribute('label', label);
-			}
-		}
-	}
-	
-	
 	/**
 	* Set the interval between repository queries
 	*
@@ -742,6 +751,32 @@ Zotero.Schema = new function(){
 		// Don't split >4K chunks into multiple nodes
 		// https://bugzilla.mozilla.org/show_bug.cgi?id=194231
 		xmlnode.normalize();
+		
+		var uri = xmlnode.getAttribute('id');
+		
+		//
+		// Workaround for URI change -- delete existing versions with old URIs of updated styles
+		//
+		var re = new RegExp("http://www.zotero.org/styles/(.+)");
+		var matches = uri.match(re);
+		
+		if (matches) {
+			var zoteroReplacements = ['chicago-author-date', 'chicago-note-bibliography'];
+			var purlReplacements = [
+				'apa', 'asa', 'chicago-note', 'ieee', 'mhra_note_without_bibliography',
+				'mla', 'nature', 'nlm'
+			];
+			
+			if (zoteroReplacements.indexOf(matches[1]) != -1) {
+				var sql = "DELETE FROM csl WHERE cslID=?";
+				Zotero.DB.query(sql, 'http://www.zotero.org/namespaces/CSL/' + matches[1] + '.csl');
+			}
+			else if (purlReplacements.indexOf(matches[1]) != -1) {
+				var sql = "DELETE FROM csl WHERE cslID=?";
+				Zotero.DB.query(sql, 'http://purl.org/net/xbiblio/csl/styles/' + matches[1] + '.csl');
+			}
+		}
+		
 		
 		var sqlValues = [
 			{string: xmlnode.getAttribute('id')},

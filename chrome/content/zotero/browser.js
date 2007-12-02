@@ -105,6 +105,7 @@ var Zotero_Browser = new function() {
 		Zotero_Browser._scrapePopupShowing = false;
 		Zotero.Ingester.ProxyMonitor.init();
 		Zotero.Ingester.MIMEHandler.init();
+		Zotero.Cite.MIMEHandler.init();
 		Zotero.Translate.init();
 		
 		window.addEventListener("load",
@@ -623,15 +624,25 @@ Zotero_Browser.Tab.prototype._searchFrames = function(rootDoc, searchDoc) {
  * Attempts import of a file; to be run on local files only
  */
 Zotero_Browser.Tab.prototype._attemptLocalFileImport = function(doc) {
-	var file = Components.classes["@mozilla.org/network/protocol;1?name=file"]
-								.getService(Components.interfaces.nsIFileProtocolHandler)
-								.getFileFromURLSpec(doc.documentURI);
-	
-	var me = this;
-	var translate = new Zotero.Translate("import");
-	translate.setLocation(file);
-	translate.setHandler("translators", function(obj, item) { me._translatorsAvailable(obj, item) });
-	translate.getTranslators();
+	if(doc.documentURI.substr(doc.documentURI.length-4).toLowerCase() == ".csl") {
+		// read CSL string
+		var csl = Zotero.File.getContentsFromURL(doc.documentURI);
+		if(csl.indexOf("http://purl.org/net/xbiblio/csl") != -1) {
+			// looks like a CSL; try to import
+			Zotero.Cite.installStyle(csl, doc.documentURI);
+		}
+	} else {
+		// see if we can import this file
+		var file = Components.classes["@mozilla.org/network/protocol;1?name=file"]
+									.getService(Components.interfaces.nsIFileProtocolHandler)
+									.getFileFromURLSpec(doc.documentURI);
+		
+		var me = this;
+		var translate = new Zotero.Translate("import");
+		translate.setLocation(file);
+		translate.setHandler("translators", function(obj, item) { me._translatorsAvailable(obj, item) });
+		translate.getTranslators();
+	}
 }
 
 /*

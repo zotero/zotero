@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <terms xmlns="http://purl.org/net/xbiblio/csl">
   <locale xml:lang="bg">
-    <term name="at">at</term>
+    <term name="at">в</term>
     <term name="in">в</term>
     <term name="ibid">пак там</term>
     <term name="accessed">отворен на</term>
@@ -13,40 +13,40 @@
     <term name="and">и</term>
     <term name="et-al">и съавт.</term>
     <term name="book">
-      <single>book</single>
-      <multiple>books</multiple>
+      <single>книга</single>
+      <multiple>книги</multiple>
     </term>
     <term name="chapter">
-      <single>chapter</single>
-      <multiple>chapters</multiple>
+      <single>глава</single>
+      <multiple>глави</multiple>
     </term>
     <term name="column">
-      <single>column</single>
-      <multiple>columns</multiple>
+      <single>колона</single>
+      <multiple>колони</multiple>
     </term>
     <term name="figure">
-      <single>figure</single>
-      <multiple>figures</multiple>
+      <single>фигура</single>
+      <multiple>фигури</multiple>
     </term>
     <term name="folio">
-      <single>folio</single>
-      <multiple>folios</multiple>
+      <single>фолио</single>
+      <multiple>фолия</multiple>
     </term>
     <term name="issue">
-      <single>number</single>
-      <multiple>numbers</multiple>
+      <single>брой</single>
+      <multiple>броеве</multiple>
     </term>
     <term name="line">
       <single>ред</single>
       <multiple>редове</multiple>
     </term>
     <term name="note">
-      <single>note</single>
-      <multiple>notes</multiple>
+      <single>бележка</single>
+      <multiple>бележки</multiple>
     </term>
     <term name="opus">
-      <single>opus</single>
-      <multiple>opera</multiple>
+      <single>опус</single>
+      <multiple>опуси</multiple>
     </term>
     <term name="page">
       <single>страница</single>
@@ -57,38 +57,38 @@
       <multiple>параграфи</multiple>
     </term>
     <term name="part">
-      <single>part</single>
-      <multiple>parts</multiple>
+      <single>част</single>
+      <multiple>части</multiple>
     </term>
     <term name="section">
-      <single>section</single>
-      <multiple>sections</multiple>
+      <single>раздел</single>
+      <multiple>раздели</multiple>
     </term>
     <term name="volume">
-      <single>volume</single>
-      <multiple>volumes</multiple>
+      <single>том</single>
+      <multiple>томове</multiple>
     </term>
     <term name="verse">
-      <single>verse</single>
-      <multiple>verses</multiple>
+      <single>стих</single>
+      <multiple>стихове</multiple>
     </term>
-    <term name="book" form="short">bk</term>
-    <term name="chapter" form="short">chap</term>
-    <term name="column" form="short">col</term>
-    <term name="figure" form="short">fig</term>
-    <term name="folio" form="short">f</term>
-    <term name="issue" form="short">бр.</term>
-    <term name="opus" form="short">op</term>
+    <term name="book" form="short">кн</term>
+    <term name="chapter" form="short">гл</term>
+    <term name="column" form="short">кол</term>
+    <term name="figure" form="short">фиг</term>
+    <term name="folio" form="short">фол</term>
+    <term name="issue" form="short">бр</term>
+    <term name="opus" form="short">оп</term>
     <term name="page" form="short">
-      <single>с.</single>
+      <single>с</single>
       <multiple>с-ци</multiple>
     </term>
-    <term name="paragraph" form="short">para</term>
-    <term name="part" form="short">pt</term>
-    <term name="section" form="short">sec</term>
+    <term name="paragraph" form="short">п</term>
+    <term name="part" form="short">ч</term>
+    <term name="section" form="short">разд</term>
     <term name="verse" form="short">
-      <single>v</single>
-      <multiple>vv</multiple>
+      <single>ст</single>
+      <multiple>ст-ове</multiple>
     </term>
     <term name="volume" form="short">т.</term>
     <term name="paragraph" form="symbol">
