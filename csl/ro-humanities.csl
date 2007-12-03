@@ -11,7 +11,7 @@
         <category term="humanities"/>
         <category term="generic-base"/>
         <category term="author-date"/>
-        <updated>2007-11-28T23:44:54+00:00</updated>
+        <updated>2007-11-28T10:10:10</updated>
     </info>
     <macro name="editor-translator">
         <names variable="editor translator" delimiter=", ">
