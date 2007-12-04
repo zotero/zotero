@@ -14,6 +14,10 @@
     <term name="et-al">et al.</term>
     <term name="interview">interview</term>
     <term name="letter">letter</term>
+    <term name="anonymous">anonymous</term>
+    <term name="anonymous" form="short">anon</term>
+    <term name="and others">and others</term>
+    <term name="in press">in press</term>
     
     <!-- LONG LOCATOR FORMS -->
     <term name="book">
@@ -96,7 +100,10 @@
       <single>v</single>
       <multiple>vv</multiple>
     </term>
-    <term name="volume" form="short">vol</term>
+    <term name="volume" form="short">
+      <single>vol</single>
+      <multiple>vols</multiple>
+    </term>
     
     <!-- SYMBOL LOCATOR FORMS -->
     <term name="paragraph" form="symbol">
