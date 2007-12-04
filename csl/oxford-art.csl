@@ -74,9 +74,9 @@
     </date>
   </macro>
   <macro name="volumes">
-    <group>
+    <group delimiter=" ">
       <text variable="number-of-volumes"/>
-      <text value=" vols"/>
+      <text term="volume" form="short" plural="true"/>
     </group>
   </macro>
   <macro name="pageno">
