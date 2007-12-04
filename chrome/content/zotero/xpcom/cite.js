@@ -1808,9 +1808,9 @@ Zotero.CSL.Item._zoteroFieldMap = {
 		"abstract":"abstractNote",
 		"URL":"url",
 		"DOI":"DOI",
+		"ISBN" : "ISBN",
 		"note":"extra",
-		"number":["number", "documentNumber", "patentNumber", "billNumber",
-			"codeNumber", "episodeNumber"]
+		"number":"number"
 	},
 	"short":{
 		"title":["shortTitle", "title"],
