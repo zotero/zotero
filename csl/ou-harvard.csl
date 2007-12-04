@@ -20,7 +20,7 @@
     </names>
   </macro>
   <macro name="anon">
-    <text value="Anon"/>
+    <text term="anonymous" form="short" text-case="capitalize-first"/>
   </macro>
   <macro name="author">
     <names variable="author">
@@ -83,7 +83,7 @@
 	</date>
       </if>
       <else>
-	<text value="n.d."/>
+	<text term="no date"/>
       </else>
     </choose>
   </macro>

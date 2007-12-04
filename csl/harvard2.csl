@@ -19,6 +19,9 @@
       <label form="short" prefix=", " text-case="lowercase" suffix="."/>
     </names>
   </macro>
+  <macro name="anon">
+    <text term="anonymous" form="short" text-case="capitalize-first"/>
+  </macro>
   <macro name="author">
     <names variable="author">
       <name name-as-sort-order="all" and="symbol" sort-separator=", " initialize-with="."
@@ -26,7 +29,7 @@
       <label form="short" prefix=" (" suffix=")." text-case="lowercase"/>
       <substitute>
 	<names variable="editor"/>
-	<text value="Anon"/>
+	<text macro="anon"/>
       </substitute>
     </names>
   </macro>
@@ -36,7 +39,7 @@
       <substitute>
 	<names variable="editor"/>
 	<names variable="translator"/>
-	<text value="Anon"/>
+	<text macro="anon"/>
       </substitute>
     </names>
   </macro>
@@ -79,7 +82,7 @@
 	  </date>
 	</if>
 	<else>
-	  <text value="n.d."/>
+	  <text term="no date"/>
 	</else>
       </choose>
     </group>
