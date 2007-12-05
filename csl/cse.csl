@@ -67,8 +67,9 @@
       <date-part name="month" prefix=" "/>
       <date-part name="day" prefix=" "/>
     </date>
-    <group prefix=" [cited " suffix="]">
-      <date variable="accessed" delimiter=" ">
+    <group prefix=" [" suffix="]" delimiter=" ">
+      <text term="cited"/>   
+      <date variable="accessed" >
 	<date-part name="year"/>
 	<date-part name="month" prefix=" "/>
 	<date-part name="day" prefix=" "/>
@@ -83,7 +84,7 @@
     <text variable="container-title"/>
     <choose>
       <if variable="URL">
-	<text value=" [Internet]"/>
+	<text term="internet" prefix=" [" suffix="]" text-case="capitalize-first"/>
       </if>
     </choose>
   </macro>
