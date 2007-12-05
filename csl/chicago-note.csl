@@ -187,7 +187,7 @@
 	    <text macro="title-short"/>
 	    <choose>
 	      <if type="interview">
-		<text value="interview" text-case="lowercase"/>
+		<text term="interview" text-case="lowercase"/>
 	      </if>
 	      <else-if  variable="recipient">
 		<text macro="issued"/>
@@ -318,9 +318,7 @@
 	    </if>
 	  </choose>
 	  <choose>
-	    <if variable="page" match="none">
 	      <text variable="URL" prefix=", "/>
-	    </if>
 	  </choose>
 	</else>
       </choose>
