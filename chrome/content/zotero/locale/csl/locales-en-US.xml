@@ -18,6 +18,9 @@
     <term name="anonymous" form="short">anon</term>
     <term name="and others">and others</term>
     <term name="in press">in press</term>
+    <term name="online">online</term>
+    <term name="cited">cited</term>
+    <term name="internet">internet</term>
     
     <!-- LONG LOCATOR FORMS -->
     <term name="book">
@@ -104,6 +107,8 @@
       <single>vol</single>
       <multiple>vols</multiple>
     </term>
+    <term name="edition">edition</term>
+    <term name="edition" form="short">ed</term>
     
     <!-- SYMBOL LOCATOR FORMS -->
     <term name="paragraph" form="symbol">
