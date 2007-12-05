@@ -87,6 +87,12 @@
       <name and="text" delimiter=", "/>
     </names>
   </macro>
+  <macro name="interviewer-bib">
+    <names variable="interviewer" delimiter=", ">
+      <label form="verb" prefix=" " text-case="capitalize-first" suffix=" "/>
+      <name and="text" delimiter=", "/>
+    </names>
+  </macro>
   <macro name="access">
     <group>
       <text variable="URL"/>
@@ -187,7 +193,7 @@
 	    <text macro="title-short"/>
 	    <choose>
 	      <if type="interview">
-		<text term="interview" text-case="lowercase"/>
+		<text value="interview" text-case="lowercase"/>
 	      </if>
 	      <else-if  variable="recipient">
 		<text macro="issued"/>
@@ -384,7 +390,7 @@
 	  </else-if>
 	  <else-if type="interview">
 	    <group delimiter=". " suffix=".">
-	      <text macro="interviewer"/>
+	      <text macro="interviewer-bib"/>
 	      <text variable="medium" text-case="capitalize-first"/>
 	      <text macro="issued"/>
 	    </group>
@@ -395,7 +401,7 @@
 		<text variable="genre" text-case="capitalize-first"/>
 	      </if>
 	      <else>
-		<text term="letter" text-case="capitalize-first"/>
+		<text value="letter" text-case="capitalize-first"/>
 	      </else>
 	    </choose>
 	    <text macro="recipient" prefix=" "/>
