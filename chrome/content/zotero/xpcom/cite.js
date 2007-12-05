@@ -997,7 +997,7 @@ Zotero.CSL.prototype._processElements = function(item, element, formattedString,
 				}
 				
 				if(term !== false && value) {
-					var isPlural = value.indexOf("-") != -1 || value.indexOf(",") != -1;
+					var isPlural = value.indexOf("-") != -1 || value.indexOf(",") != -1 || value.indexOf("\u2013") != -1;
 					var text = this._getTerm(term, isPlural, child.@form.toString(), child["@include-period"] == "true");
 					
 					if(text) {
