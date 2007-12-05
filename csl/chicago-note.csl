@@ -317,9 +317,7 @@
 	      </group>
 	    </if>
 	  </choose>
-	  <choose>
 	      <text variable="URL" prefix=", "/>
-	  </choose>
 	</else>
       </choose>
     </layout>
