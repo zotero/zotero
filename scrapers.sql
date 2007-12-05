@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-12-03 22:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-12-05 17:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -2082,7 +2082,7 @@ function getData(ids){
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('bdae838b-3a58-461f-9e8a-142ed9de61dc', '1.0.0b4.r5', '', '2007-11-14 20:45:00', '0', '100', '4', 'PLoS Journals', 'Michael Berkowitz', '^http://[^.]+\.plosjournals\.org/', 
+REPLACE INTO translators VALUES ('bdae838b-3a58-461f-9e8a-142ed9de61dc', '1.0.0b4.r5', '', '2007-12-05 17:00:00', '0', '100', '4', 'PLoS Journals', 'Michael Berkowitz', '^http://[^.]+\.plosjournals\.org/', 
 'function detectWeb(doc, url)	{
 	if (doc.evaluate(''//div[@class="search"][@id="browseResults"]/ul/li/span/a'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
@@ -2137,7 +2137,7 @@ function doWeb(doc, url) {
 			trans.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 			trans.setString(text);
 			trans.setHandler("itemDone", function(obj, newItem)	{
-				var urlstring= bits[1]+ ''get-pdf&'' +bits[2].replace("doi=", "file=").replace("/", "_") + ''-S.pdf'';
+				var urlstring= bits[1]+ ''get-pdf&'' +bits[2].replace("doi=", "file=").replace("/", "_").replace("%2F", "_") + ''-S.pdf'';
 				newItem.attachments.push({url:urlstring, title:newItem.title, mimeType:"application/pdf"});
 				
 				var urlRE = /http:\/\/dx.doi.org\/(.*)$/;
