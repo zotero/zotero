@@ -50,7 +50,7 @@
   </macro>
   <macro name="access">
     <group>
-      <text value="[online]" suffix=" "/>
+      <text term="online" prefix="[" suffix="] "/>
       <text variable="URL"/>
       <group prefix=" (" suffix=")">
 	<text term="accessed" text-case="capitalize-first" suffix=" "/>

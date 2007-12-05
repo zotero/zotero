@@ -46,7 +46,8 @@
   <macro name="access">
     <choose>
       <if variable="URL">
-	<text value="[online] Available from: " />
+	<text term="online" prefix="[" suffix="]"/>
+	<text value=" Available from: " />
 	<text variable="URL"/>
 	<group prefix=" (" delimiter=" " suffix=")">
 	  <text term="accessed" text-case="capitalize-first"/>

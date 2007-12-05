@@ -33,7 +33,7 @@
   <macro name="access">
     <group delimiter=" ">
       <group prefix="[" suffix="]" delimiter=" ">
-	<text value="cited" text-case="lowercase"/>
+	<text term="cited" text-case="lowercase"/>
 	<date variable="accessed" suffix=" ">
 	  <date-part name="year"/>
 	  <date-part name="month" prefix=" " form="short"/>
@@ -51,7 +51,7 @@
       <text variable="title"/>
       <choose>
 	<if variable="URL">
-	  <text value="[Internet]"/>
+	  <text term="internet" prefix="[" suffix="]" text-case="capitalize-first"/>
 	</if>
       </choose>
     </group>
