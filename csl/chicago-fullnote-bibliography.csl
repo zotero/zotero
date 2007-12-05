@@ -437,9 +437,7 @@
 	    </group>
 	  </if>
 	</choose>
-	<choose>
 	    <text variable="URL"/>
-	</choose>
       </group>
     </layout>
   </bibliography>
