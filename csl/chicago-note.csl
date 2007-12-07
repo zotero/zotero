@@ -317,7 +317,11 @@
 	      </group>
 	    </if>
 	  </choose>
+	  <choose>
+	    <if variable="page" match="none">
 	      <text variable="URL" prefix=", "/>
+	    </if>
+	  </choose>
 	</else>
       </choose>
     </layout>
