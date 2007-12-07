@@ -291,7 +291,11 @@
 	    </group>
 	  </if>
 	</choose>
+	<choose>
+	  <if variable="page" match="none">
 	    <text variable="URL"/>
+	  </if>
+	</choose>
       </group>
     </layout>
   </bibliography>
