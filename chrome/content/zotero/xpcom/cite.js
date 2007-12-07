@@ -1715,8 +1715,9 @@ Zotero.CSL.Item = function(item) {
 	
 	// don't return URL or accessed information for journal articles if a
 	// pages field exists
+	var itemType = Zotero.ItemTypes.getName(this.zoteroItem.getType());
 	if(!Zotero.Prefs.get("export.citePaperJournalArticleURL") 
-			&& Zotero.ItemTypes.getName(this.zoteroItem.getType()) == "journalArticle"
+			&& ["journalArticle", "newspaperArticle", "magazineArticle"].indexOf(itemType) !== -1
 			&& this.zoteroItem.getField("pages")) {
 		this._ignoreURL = true;
 	}
