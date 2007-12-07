@@ -1790,7 +1790,7 @@ Zotero.CSL.Item.prototype.getDate = function(variable) {
 Zotero.CSL.Item._zoteroFieldMap = {
 	"long":{
 		"title":"title",
-		"container-title":"publicationTitle",
+		"container-title":["publicationTitle",  "reporter", "code"], /* reporter and code should move to SQL mapping tables */
 		"collection-title":["seriesTitle", "series"],
 		"publisher":["publisher", "distributor"],
 		"publisher-place":"place",
