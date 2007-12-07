@@ -1792,7 +1792,7 @@ Zotero.CSL.Item._zoteroFieldMap = {
 		"title":"title",
 		"container-title":["publicationTitle",  "reporter", "code"], /* reporter and code should move to SQL mapping tables */
 		"collection-title":["seriesTitle", "series"],
-		"publisher":["publisher", "distributor"],
+		"publisher":["publisher", "distributor"], /* distributor should move to SQL mapping tables */
 		"publisher-place":"place",
 		"page":"pages",
 		"volume":"volume",
@@ -1803,7 +1803,7 @@ Zotero.CSL.Item._zoteroFieldMap = {
 		"medium":"medium",
 		"archive":"repository",
 		"archive_location":"archiveLocation",
-		"event":["meetingName", "conferenceName"],
+		"event":["meetingName", "conferenceName"], /* these should be mapped to the same base field in SQL mapping tables */
 		"event-place":"place",
 		"abstract":"abstractNote",
 		"URL":"url",
