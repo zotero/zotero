@@ -661,6 +661,7 @@ Zotero.Translate.prototype._generateSandbox = function() {
 		this._sandbox.Zotero.Utilities = new Zotero.Utilities();
 	}
 	
+	this._sandbox.Zotero.useBibtexUTF8 = Zotero.Prefs.get("export.unicodeBibTeX");
 	
 	if(this.type == "export") {
 		// add routines to retrieve items and collections
@@ -690,7 +691,7 @@ Zotero.Translate.prototype._generateSandbox = function() {
 	this._sandbox.Zotero.addOption = function(option, value) {me._addOption(option, value) };
 	// for getting the value of displayed options
 	this._sandbox.Zotero.getOption = function(option) { return me._getOption(option) };
-	
+
 	// for loading other translators and accessing their methods
 	this._sandbox.Zotero.loadTranslator = function(type) {
 		var translation = new Zotero.Translate(type, false);
