@@ -75,8 +75,8 @@
       <text macro="author"/>
       <text macro="title" prefix=", "/>
       <text variable="volume" prefix=", "/>
+      <text variable="container-title" prefix=" "/>
       <text variable="page" prefix=", "/>
-      <text variable="container-title" prefix=", "/>
       <text variable="locator" prefix=": "/>
       <text macro="issuance"/>
       <text macro="access" prefix=", "/>
