@@ -1800,7 +1800,7 @@ Zotero.CSL.Item._zoteroFieldMap = {
 		"issue":"issue",
 		"number-of-volumes":"numberOfVolumes",
 		"edition":"edition",
-		"genre":"type",
+		"genre":["type", "artworkSize", "history"], /* history should be a relation in hierarchical version; artworkSize should move to SQL mapping tables */
 		"medium":"medium",
 		"archive":"repository",
 		"archive_location":"archiveLocation",
@@ -1815,7 +1815,8 @@ Zotero.CSL.Item._zoteroFieldMap = {
 	},
 	"short":{
 		"title":["shortTitle", "title"],
-		"container-title":"journalAbbreviation"
+		"container-title":"journalAbbreviation",
+		"genre":["shortTitle", "type"] /* needed for subsequent citations of items with no title */ 
 	}
 }
 
