@@ -1800,7 +1800,7 @@ Zotero.CSL.Item._zoteroFieldMap = {
 		"issue":"issue",
 		"number-of-volumes":"numberOfVolumes",
 		"edition":"edition",
-		"genre":["type", "artworkSize", "history"], /* history should be a relation in hierarchical version; artworkSize should move to SQL mapping tables */
+		"genre":["type", "artworkSize"], /* artworkSize should move to SQL mapping tables, or added as a CSL variable */
 		"medium":"medium",
 		"archive":"repository",
 		"archive_location":"archiveLocation",
