@@ -15780,8 +15780,9 @@ function doExport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('9cb70025-a888-4a29-a210-93ec52da40d4', '1.0.0b4.r1', '', '2007-12-12 12:00:00', '1', '100', '3', 'BibTeX', 'Simon Kornblith', 'bib', 
+REPLACE INTO translators VALUES ('9cb70025-a888-4a29-a210-93ec52da40d4', '1.0.0b4.r1', '', '2007-12-16 03:13:58', '1', '100', '3', 'BibTeX', 'Simon Kornblith', 'bib', 
 'Zotero.configure("dataMode", "block");
+Zotero.addOption("UTF8", false);
 
 function detectImport() {
 	var block = "";
@@ -17482,10 +17483,8 @@ function doImport() {
 	var read = "", text = "", recordCloseElement = false;
 	var type = false;
 	
-	if (Zotero.useBibtexUTF8) {
-	    Zotero.debug("Setting UTF-8 on import");
-	    Zotero.setCharacterSet("UTF-8");
-	}
+	Zotero.setCharacterSet("UTF-8");
+	
 	while(read = Zotero.read(1)) {
 		if(read == "@") {
 			type = "";
@@ -17511,7 +17510,7 @@ function writeMacroField(field, value) {
 	}
 	
 	Zotero.write(",\n\t"+field+" = ");
-	if (!Zotero.useBibtexUTF8) {
+	if (!Zotero.getOption("UTF8")) {
 	    var tvalue = value.toString();
 	    value = "";
 	    for (var j in tvalue) {
@@ -17529,7 +17528,7 @@ function writeMacroField(field, value) {
 function writeField(field, value) {
 	if(!value) return;
 	Zotero.write(",\n\t"+field+" = {");
-	if (!Zotero.useBibtexUTF8) {
+	if (!Zotero.getOption("UTF8")) {
 	    var tvalue = value.toString();
 	    value = "";
 	    for (var j in tvalue) {
@@ -17547,8 +17546,7 @@ function writeField(field, value) {
 
 var numberRe = /^[0-9]+/;
 function doExport() {
-	if (Zotero.useBibtexUTF8) {
-	    Zotero.debug("Setting UTF-8 on import");
+	if(Zotero.getOption("UTF8")) {
 	    Zotero.setCharacterSet("UTF-8");
 	}
 	
@@ -17565,33 +17563,37 @@ function doExport() {
 		// create a unique citation key
 		var basekey = "";
 		if(item.creators && item.creators[0] && item.creators[0].lastName) {
-			basekey = item.creators[0].lastName.toLowerCase().replace(/ /g,"_").replace(/,/g,"");
+			basekey += "_" + item.creators[0].lastName.toLowerCase().replace(/ /g,"_").replace(/,/g,"");
 		}
 		
 		// include the item title as part of the citation key
 		if (item["title"]) {
 			// this is a list of words that should not appear as part of the citation key
-			var bannedTitleKeys = {"a" : 1, "an" : 1, "does": 1, "how": 1, "it''s": 1, "on" : 1, "some": 1, "the" : 1, "this" : 1, "why" : 1 };
-			var titleElements = item["title"].split(" ");
-			var appendKey = "";
-			for (te in titleElements) {
-				if (!bannedTitleKeys[titleElements[te].toLowerCase()]) {
-					appendKey = "_" + titleElements[te].toLowerCase() + "_";
+			var bannedTitleKeys = ["a", "an", "from", "does", "how", "it''s", "its", "on", "some", "the", "this", "why"];
+			var titleElements = item["title"].toLowerCase().split(" ");
+			for(var te in titleElements) {
+				if (bannedTitleKeys.indexOf(titleElements[te]) == -1) {
+					basekey += "_" + titleElements[te];
 					break;
-					}
 				}
-				basekey = basekey + appendKey;
+			}
         }
 
 		if(item.date) {
 			var date = Zotero.Utilities.strToDate(item.date);
 			if(date.year && numberRe.test(date.year)) {
-				basekey += date.year;
+				basekey += "_" + date.year;
 			}
 		}
 		
-		// make sure we do not have any other funny characters
-		basekey = basekey.replace(/[\. ,'':\"!&]/g,"");
+		// for now, remove any characters not explicitly known to be allowed;
+		// we might want to allow UTF-8 citation keys in the future, depending
+		// on implementation support.
+		//
+		// no matter what, we want to make sure we exclude
+		// " # % '' ( ) , = { } ~ and backslash
+		
+		basekey = basekey.substr(1).replace(/[^a-z0-9\!\$\&\*\+\-\.\/\:\;\<\>\?\[\]\^\_\`\|]+/g,"");
 		var citekey = basekey;
 		var i = 0;
 		while(citekeys[citekey]) {

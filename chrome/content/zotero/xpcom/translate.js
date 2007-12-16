@@ -661,8 +661,6 @@ Zotero.Translate.prototype._generateSandbox = function() {
 		this._sandbox.Zotero.Utilities = new Zotero.Utilities();
 	}
 	
-	this._sandbox.Zotero.useBibtexUTF8 = Zotero.Prefs.get("export.unicodeBibTeX");
-	
 	if(this.type == "export") {
 		// add routines to retrieve items and collections
 		this._sandbox.Zotero.nextItem = function() { return me._exportGetItem() };

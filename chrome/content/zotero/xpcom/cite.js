@@ -802,6 +802,21 @@ Zotero.CSL.prototype._processNames = function(item, element, formattedString, co
 							if(formattedString.format == "Sort") {
 								// for sort, we use the plain names
 								var name = creators[i].getNameVariable("lastName");
+								
+								// cut off lowercase parts of otherwise capitalized names (e.g., "de")
+								var lastNameParts = name.split(" ");
+								if(lastNameParts.length > 1 && lastNameParts[0].length <= 4
+										&& lastNameParts[0][0].toLowerCase() == lastNameParts[0][0]
+										&& lastNameParts[lastNameParts.length-1][0].toUpperCase() == lastNameParts[lastNameParts.length-1][0]) {
+									name = "";
+									for(var k=1; k<lastNameParts.length; k++) {
+										if(lastNameParts[k][0].toUpperCase() == lastNameParts[k][0]) {
+											name += " "+lastNameParts[k];
+										}
+									}
+									name = name.substr(1);
+								}
+								
 								var firstName = creators[i].getNameVariable("firstName");
 								if(name && firstName) name += ", ";
 								name += firstName;

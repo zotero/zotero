@@ -109,6 +109,8 @@ var Zotero_File_Interface_Export = new function() {
 		}
 		
 		var optionsBox = document.getElementById("translator-options");
+		optionsBox.hidden = true;
+		var haveOption = false;
 		for(var i=0; i<optionsBox.childNodes.length; i++) {
 			// loop through options to see which should be enabled
 			var node = optionsBox.childNodes[i];
@@ -116,7 +118,8 @@ var Zotero_File_Interface_Export = new function() {
 			
 			if(translatorOptions[optionName] != undefined) {
 				// option should be enabled
-				node.disabled = undefined;
+				optionsBox.hidden = undefined;
+				node.hidden = undefined;
 				
 				var defValue = translatorOptions[optionName];
 				if(typeof(defValue) == "boolean") {
@@ -131,10 +134,12 @@ var Zotero_File_Interface_Export = new function() {
 				}
 			} else {
 				// option should be disabled and unchecked to prevent confusion
-				node.disabled = true;
+				node.hidden = true;
 				node.setAttribute("checked", "false");
 			}
 		}
+		
+		window.sizeToContent();
 	}
 	
 	/*
