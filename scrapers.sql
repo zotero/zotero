@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-12-16 08:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-12-17 23:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1085,7 +1085,7 @@ REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('d921155f-0186-1684-615c-ca57682ced9b', '1.0.0b4.r1', '', '2007-03-28 16:00:00', 1, 100, 4, 'JSTOR', 'Simon Kornblith', '^https?://(?:www\.|ocrpdf-sandbox\.)jstor\.org[^/]*/(?:view|browse/[^/]+/[^/]+\?|search/|cgi-bin/jstor/viewitem)', 
+REPLACE INTO translators VALUES ('d921155f-0186-1684-615c-ca57682ced9b', '1.0.0b4.r1', '', '2007-12-17 23:00:00', '1', '100', '4', 'JSTOR', 'Simon Kornblith', '^https?://(?:www\.|ocrpdf-sandbox\.)jstor\.org[^/]*/(?:view|browse/[^/]+/[^/]+\?|search/|cgi-bin/jstor/viewitem)', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -1105,7 +1105,7 @@ REPLACE INTO translators VALUES ('d921155f-0186-1684-615c-ca57682ced9b', '1.0.0b
 	if(elmts.iterateNext()) {
 		return "journalArticle";
 	}
-}',
+}', 
 'function getJSTORAttachment(viewURL) {
 	var viewRe = new RegExp("(^https?://[^/]+/)view([^?]+)");
 	var m = viewRe.exec(viewURL);
@@ -1140,6 +1140,10 @@ function doWeb(doc, url) {
 	var saveCitations = new Array();
 	var viewPages = new Array();
 	
+	var hostRegexp = new RegExp("^(https?://[^/]+)/");
+	var hMatch = hostRegexp.exec(url);
+	var host = hMatch[1];
+	
 	if(doc.title == "JSTOR: Search Results") {
 		var availableItems = new Object();
 		
@@ -1167,7 +1171,7 @@ function doWeb(doc, url) {
 					
 					var text = doc.evaluate(''.//strong/text()'', tableRow, null, XPathResult.ANY_TYPE, null).iterateNext();
 					if(text && text.nodeValue) {
-						text = Zotero.Utilities.cleanString(text.nodeValue);
+						text = Zotero.Utilities.trimInternal(text.nodeValue);
 						if(availableItems[i]) {
 							availableItems[i] += " "+text;
 						} else {
@@ -1199,7 +1203,7 @@ function doWeb(doc, url) {
 			if(link.href.indexOf("/view/") != -1) {
 				articleTitle = link.textContent;
 				viewPage = link.href;
-			} else if(link.href.indexOf("citationAction=") != -1) {
+			} else if(link.href.indexOf("citationAction=save&") != -1) {
 				items[link.href] = articleTitle;
 				tableView[link.href] = viewPage;
 			}
@@ -1227,10 +1231,10 @@ function doWeb(doc, url) {
 		}
 	}
 	
-	Zotero.Utilities.HTTP.doGet(''http://www.jstor.org/browse?citationAction=removeAll&confirmRemAll=on&viewCitations=1'', function() {	// clear marked
+	Zotero.Utilities.HTTP.doGet(host+''/browse?citationAction=removeAll&confirmRemAll=on&viewCitations=1'', function() {	// clear marked
 		// Mark all our citations
 		Zotero.Utilities.HTTP.doGet(saveCitations, null, function() {						// mark this
-			Zotero.Utilities.HTTP.doGet(''http://www.jstor.org/browse/citations.txt?exportAction=Save+as+Text+File&exportFormat=cm&viewCitations=1'', function(text) {
+			Zotero.Utilities.HTTP.doGet(host+''/browse/citations.txt?exportAction=Save+as+Text+File&exportFormat=cm&viewCitations=1'', function(text) {
 																							// get marked
 				var k = 0;
 				var lines = text.split("\n");
@@ -1295,7 +1299,7 @@ function doWeb(doc, url) {
 					itemComplete(newItem, url);
 				}
 				
-				Zotero.Utilities.HTTP.doGet(''http://www.jstor.org/browse?citationAction=removeAll&confirmRemAll=on&viewCitations=1'', function() {	// clear marked
+				Zotero.Utilities.HTTP.doGet(host+''/browse?citationAction=removeAll&confirmRemAll=on&viewCitations=1'', function() {	// clear marked
 					Zotero.done();
 				});
 			});
