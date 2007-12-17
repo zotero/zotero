@@ -11,7 +11,7 @@
     <category term="generic-base"/>
     <updated></updated>
     <summary>The Harvard author-date style</summary>
-    <source>http://library.curtin.edu.au/referencing/harvard.pdf</source>
+    <link href="http://library.curtin.edu.au/referencing/harvard.pdf" rel="documentation"/>
   </info>
   <macro name="editor">
     <names variable="editor" delimiter=", ">

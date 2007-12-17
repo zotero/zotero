@@ -3,7 +3,6 @@
   <info>
     <title>Annals of the Association of American Geographers</title>
     <id>http://www.zotero.org/styles/aag</id>
-    <link>http://www.zotero.org/styles/aag</link>
     <author>
       <name>Julian Onions</name>
       <email>julian.onions@gmail.com</email>
@@ -12,7 +11,6 @@
     <category term="geography"/>
     <updated/>
     <summary>The Annals of the Association of American Geographers style.</summary>
-    <source></source>
   </info>
   <macro name="editor">
     <names variable="editor" prefix="" suffix="" delimiter=", ">

@@ -3,7 +3,6 @@
   <info>
     <title>American Political Science Association</title>
     <id>http://www.zotero.org/styles/apsa</id>
-    <link>http://www.zotero.org/styles/apsa</link>
     <author>
       <name>Julian Onions</name>
       <email>julian.onions@gmail.com</email>
@@ -12,7 +11,7 @@
     <category term="political_science"/>
     <updated/>
     <summary>The American Political Science Association style.</summary>
-    <source>http://www.wisc.edu/writing/Handbook/DocAPSA.html</source>
+    <link href="http://www.wisc.edu/writing/Handbook/DocAPSA.html" rel="documentation"/>
   </info>
   <macro name="editor">
     <names variable="editor" delimiter=", ">

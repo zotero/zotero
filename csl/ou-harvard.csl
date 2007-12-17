@@ -11,7 +11,7 @@
     <category term="generic-base"/>
     <updated></updated>
     <summary>The Open University Harvard author-date style</summary>
-    <source>http://library.open.ac.uk/research/citastyle/index.cfm</source>
+    <link href="http://library.open.ac.uk/research/citastyle/index.cfm" rel="documentation"/>
   </info>
   <macro name="editor">
     <names variable="editor" delimiter=", ">

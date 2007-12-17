@@ -11,7 +11,7 @@
     <category term="biology"/>
     <updated/>
     <summary>The Metabolic Engineering Journal style</summary>
-    <source>http://www.elsevier.com/wps/find/journaldescription.cws_home/622913/authorinstructions</source>
+    <link href="http://www.elsevier.com/wps/find/journaldescription.cws_home/622913/authorinstructions" rel="documentation"/>
   </info>
   <macro name="editor">
     <names variable="editor">

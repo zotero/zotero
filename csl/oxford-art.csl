@@ -2,8 +2,7 @@
   <info>
     <title>Oxford Art Journal</title>
     <id>http://www.zotero.org/styles/oxford-art</id>
-    <link>http://www.zotero.org/styles/oxford-art</link>
-    <source>http://www.oxfordjournals.org/oxartj/for_authors/index.html</source>
+    <link href="http://www.oxfordjournals.org/oxartj/for_authors/index.html" rel="documentation"/>
     <author>
       <name>Julian Onions</name>
       <email>julian.onions@gmail.com</email>

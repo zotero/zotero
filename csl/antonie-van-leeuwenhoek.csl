@@ -3,7 +3,6 @@
   <info>
     <title>Antonie van Leeuwenhoek Journal</title>
     <id>http://www.zotero.org/styles/antonie-van-leeuwenhoek</id>
-    <link>http://www.zotero.org/styles/antonie-van-leeuwenhoek</link>
     <author>
       <name>Julian Onions</name>
       <email>julian.onions@gmail.com</email>
@@ -13,7 +12,7 @@
     <updated/>
     <summary>Antonie van Leeuwenhoek
 International Journal of General and Molecular Microbiology.</summary>
-    <source>http://www.springer.com/east/home/life+sci/microbiology?SGWID=5-10037-70-35549341-0%38detailsPage=contentItemPage%38contentItemId=138521%38CIPageCounter=CI_FOR_AUTHORS_AND_EDITORS_PAGE0#anchor4</source>
+    <link href="http://www.springer.com/east/home/life+sci/microbiology?SGWID=5-10037-70-35549341-0%38detailsPage=contentItemPage%38contentItemId=138521%38CIPageCounter=CI_FOR_AUTHORS_AND_EDITORS_PAGE0#anchor4" rel="documentation"/>
   </info>
   <macro name="editor">
     <names variable="editor" delimiter=", ">

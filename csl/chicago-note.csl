@@ -2,8 +2,7 @@
   <info>
     <title>Chicago Manual of Style (Note without Bibliography)</title>
     <id>http://www.zotero.org/styles/chicago-note</id>
-    <link>http://www.zotero.org/styles/chicago-note</link>
-    <source>http://www.chicagomanualofstyle.org/tools_citationguide.html</source>
+    <link href="http://www.chicagomanualofstyle.org/tools_citationguide.html" rel="documentation"/>
     <author>
       <name>Julian Onions</name>
       <email>julian.onions@gmail.com</email>

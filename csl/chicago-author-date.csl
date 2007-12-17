@@ -11,7 +11,7 @@
     <category term="generic-base"/>
     <updated/>
     <summary>The author-date variant of the Chicago style</summary>
-    <source>http://www.chicagomanualofstyle.org/tools_citationguide.html</source>
+    <link href="http://www.chicagomanualofstyle.org/tools_citationguide.html" rel="documentation"/>
   </info>
   <macro name="editor">
     <names variable="editor">

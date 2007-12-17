@@ -3,7 +3,6 @@
   <info>
     <title>American Medical Association</title>
     <id>http://www.zotero.org/syles/ama</id>
-    <link>http://www.zotero.org/syles/ama</link>
     <author>
       <name>Julian Onions</name>
       <email>julian.onions@gmail.com</email>
@@ -12,7 +11,7 @@
     <category term="medicine"/>
     <updated/>
     <summary>The American Medical Association style as used in JAMA.</summary>
-    <source>http://www.samford.edu/schools/pharmacy/dic/amaquickref07.pdf</source>
+    <link href="http://www.samford.edu/schools/pharmacy/dic/amaquickref07.pdf" rel="documentation"/>
   </info>
   <macro name="editor">
     <names variable="editor">
