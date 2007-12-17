@@ -15780,9 +15780,9 @@ function doExport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('9cb70025-a888-4a29-a210-93ec52da40d4', '1.0.0b4.r1', '', '2007-12-16 03:13:58', '1', '100', '3', 'BibTeX', 'Simon Kornblith', 'bib', 
+REPLACE INTO translators VALUES ('9cb70025-a888-4a29-a210-93ec52da40d4', '1.0.0b4.r1', '', '2007-12-17 00:28:06', '1', '100', '3', 'BibTeX', 'Simon Kornblith', 'bib', 
 'Zotero.configure("dataMode", "block");
-Zotero.addOption("UTF8", false);
+Zotero.addOption("UTF8", true);
 
 function detectImport() {
 	var block = "";
@@ -15871,11 +15871,6 @@ var months = ["jan", "feb", "mar", "apr", "may", "jun",
  */
 
 var mappingTable = {
-    "\u0023":"$\\#$", // NUMBER SIGN
-    "\u0025":"\\%", // PERCENT SIGN
-    "\u0026":"\\&", // AMPERSAND
-    "\u0027":"{\\textquoteright}", // APOSTROPHE
-    "\u0060":"{\\textquoteleft}", // GRAVE ACCENT
     "\u00A0":"~", // NO-BREAK SPACE
     "\u00A1":"{\\textexclamdown}", // INVERTED EXCLAMATION MARK
     "\u00A2":"{\\textcent}", // CENT SIGN
@@ -16795,11 +16790,6 @@ var mappingTable = {
 
 /* unfortunately the mapping isn''t reversible - hence this second table - sigh! */
 var reversemappingTable = {
-    "\u0023":"$\\#$", // NUMBER SIGN
-    "\u0025":"\\%", // PERCENT SIGN
-    "\u0026":"\\&", // AMPERSAND
-    "\u0027":"{\\textquoteright}", // APOSTROPHE
-    "\u0060":"{\\textquoteleft}", // GRAVE ACCENT
     "\u00A0":"~", // NO-BREAK SPACE
     "\u00A1":"{\\textexclamdown}", // INVERTED EXCLAMATION MARK
     "\u00A2":"{\\textcent}", // CENT SIGN
@@ -17270,7 +17260,16 @@ var reversemappingTable = {
     "\u1EF5":"\\d{y}", // LATIN SMALL LETTER Y WITH DOT BELOW
     "\u1EF8":"\\~{Y}", // LATIN CAPITAL LETTER Y WITH TILDE
     "\u1EF9":"\\~{y}", // LATIN SMALL LETTER Y WITH TILDE
+	
+};
 
+var alwaysMap = {
+	"|":"{\\textbar}",
+	"<":"{\\textless}",
+	">":"{\\textgreater}",
+	"~":"{\\textasciitilde}",
+	"^":"{\\textasciicircum}",
+	"\\":"{\\textbackslash}"
 };
 
 function processField(item, field, value) {
@@ -17404,16 +17403,13 @@ function getFieldValue() {
 		for (var i in reversemappingTable) { // really really slow!
 			var mapped = reversemappingTable[i];
 			if (value.indexOf(mapped) != -1) {
-				var re = new RegExp(mapped.replace("\\", "\\\\"), "g");
 				Zotero.debug("Replace " + mapped + " in " + value + " with " + i);
-
-				value = value.replace(re, i);
+				value = value.replace(mapped, i, "g");
 			}
 			mapped = mapped.replace(/[{}]/, "");
 			if (value.indexOf(mapped) != -1) {
-				var re = new RegExp(mapped.replace("\\", "\\\\"), "g");
 				Zotero.debug("Replace(2) " + mapped + " in " + value + " with " + i);
-				value = value.replace(re, i);
+				value = value.replace(mapped, i, "g");
 			}
 		}
 		
@@ -17504,44 +17500,25 @@ function doImport() {
 
 // some fields are, in fact, macros.  If that is the case then we should not put the
 // data in the braces as it will cause the macros to not expand properly
-function writeMacroField(field, value) {
-	if (!value) {
-		return;
-	}
-	
+function writeField(field, value, isMacro) {
+	if(!value) return;
 	Zotero.write(",\n\t"+field+" = ");
+	if(!isMacro) Zotero.write("{");
+	// I hope these are all the escape characters!
+	value = value.replace(/[|\<\>\~\^\\]/g, mapEscape).replace(/([\#\$\%\&\_])/g, "\\$1");
 	if (!Zotero.getOption("UTF8")) {
-	    var tvalue = value.toString();
-	    value = "";
-	    for (var j in tvalue) {
-	    	var repl = mappingTable[tvalue[j]]
-	    	if (!repl) {
-	    	    repl = tvalue[j];
-	    	    repl.replace(/[\u0080-\uFFFF]/g, "?");
-	    	}
-	    	value += repl;
-	    }
+		value = value.replace(/[\u0080-\uFFFF]/g, mapAccent);
 	}
 	Zotero.write(value);
+	if(!isMacro) Zotero.write("}");
 }
 
-function writeField(field, value) {
-	if(!value) return;
-	Zotero.write(",\n\t"+field+" = {");
-	if (!Zotero.getOption("UTF8")) {
-	    var tvalue = value.toString();
-	    value = "";
-	    for (var j in tvalue) {
-	    	var repl = mappingTable[tvalue[j]]
-	    	if (!repl) {
-	    	    repl = tvalue[j];
-	    	    repl.replace(/[\u0080-\uFFFF]/g, "?");
-	    	}
-	    	value += repl;
-	    }
-	}
-	Zotero.write(value);
-	Zotero.write("}");
+function mapEscape(character) {
+	return alwaysMap[character];
+}
+
+function mapAccent(character) {
+	return (mappingTable[character] ? mappingTable[character] : "?");
 }
 
 var numberRe = /^[0-9]+/;
@@ -17664,7 +17641,7 @@ function doExport() {
 		if(item.date) {
 			// need to use non-localized abbreviation
 			if(date.month) {
-				writeMacroField("month", months[date.month]);
+				writeField("month", months[date.month], true);
 			}
 			if(date.year) {
 				writeField("year", date.year);
