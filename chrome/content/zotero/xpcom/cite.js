@@ -1826,7 +1826,8 @@ Zotero.CSL.Item._zoteroFieldMap = {
 		"DOI":"DOI",
 		"ISBN" : "ISBN",
 		"note":"extra",
-		"number":"number"
+		"number":"number",
+		"references":"history"
 	},
 	"short":{
 		"title":["shortTitle", "title"],
