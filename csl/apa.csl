@@ -144,6 +144,7 @@
           <group suffix=".">
             <text macro="title" prefix=" "/>
             <text macro="editor-translator" prefix=" "/>
+            <text variable="edition" prefix=" (" suffix=")"/>
           </group>
           <text prefix=" " suffix="." macro="publisher"/>
         </if>
