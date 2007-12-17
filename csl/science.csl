@@ -3,7 +3,6 @@
   <info>
     <title>Science journal</title>
     <id>http://www.zotero.org/styles/science</id>
-    <link>http://www.zotero.org/styles/science</link>
     <author>
       <name>Julian Onions</name>
       <email>julian.onions@gmail.com</email>
@@ -12,7 +11,7 @@
     <category term="science"/>
     <updated/>
     <summary>The Science journal style.</summary>
-    <source>http://www.sciencemag.org/about/authors/prep/res/refs.dtl</source>
+    <link href="http://www.sciencemag.org/about/authors/prep/res/refs.dtl" rel="documentation"/>
   </info>
   <macro name="editor">
     <names variable="editor" prefix="" suffix="" delimiter=", ">

@@ -3,7 +3,6 @@
   <info>
     <title>Journal of Bacteriology</title>
     <id>http://www.zotero.org/styles/jbact</id>
-    <link>http://www.zotero.org/styles/jbact</link>
     <author>
       <name>Julian Onions</name>
       <email>julian.onions@gmail.com</email>
@@ -12,7 +11,7 @@
     <category term="biology"/>
     <updated/>
     <summary>Journal Of Bacteriology style.</summary>
-    <source>http://jb.asm.org/cgi/content/full/189/1/1#References.</source>
+    <link href="http://jb.asm.org/cgi/content/full/189/1/1#References" rel="documentation"/>
   </info>
   <macro name="author">
     <names variable="author" suffix=". ">

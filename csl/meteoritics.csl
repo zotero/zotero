@@ -11,7 +11,7 @@
     <category term="astronomy"/>
     <updated/>
     <summary>The Meteoritics &amp; Planetary Science Journal style</summary>
-    <source>http://meteoritics.org/Instructions%20for%20authors.htm</source>
+    <link href="http://meteoritics.org/Instructions%20for%20authors.htm" rel="documentation"/>
   </info>
   <macro name="editor">
     <names variable="editor">

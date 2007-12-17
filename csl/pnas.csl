@@ -3,7 +3,6 @@
   <info>
     <title>PNAS Journal</title>
     <id>http://www.zotero.org/styles/pnas</id>
-    <link>http://www.zotero.org/styles/pnas</link>
     <author>
       <name>Julian Onions</name>
       <email>julian.onions@gmail.com</email>
@@ -12,7 +11,7 @@
     <category term="science"/>
     <updated/>
     <summary>The Proceedings of the National Academy of Sciences Journal style.</summary>
-    <source>http://www.pnas.org/misc/iforc.shtml</source>
+    <link href="http://www.pnas.org/misc/iforc.shtml" rel="documentation"/>
   </info>
   <macro name="editor">
     <names variable="editor" delimiter=", ">

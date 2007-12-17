@@ -11,7 +11,7 @@
     <category term="generic-base"/>
     <updated></updated>
     <summary>The Harvard author-date style</summary>
-    <source>http://www.leeds.ac.uk/library/training/referencing/harvard.htm</source>
+    <link href="http://www.leeds.ac.uk/library/training/referencing/harvard.htm" rel="documentation"/>
   </info>
   <macro name="editor">
     <names variable="editor" prefix="" suffix="" delimiter=", ">

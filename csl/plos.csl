@@ -3,7 +3,6 @@
   <info>
     <title>Public Library of Science Journal</title>
     <id>http://www.zotero.org/styles/plos</id>
-    <link>http://www.zotero.org/styles/plos</link>
     <author>
       <name>Julian Onions</name>
       <email>julian.onions@gmail.com</email>
@@ -12,7 +11,7 @@
     <category term="science"/>
     <updated/>
     <summary>Public Library of Science Journal style.</summary>
-    <source>http://journals.plos.org/plosbiology/guidelines.php</source>
+    <link href="http://journals.plos.org/plosbiology/guidelines.php" rel="documentation"/>
   </info>
   <macro name="editor">
     <names variable="editor" delimiter=", ">

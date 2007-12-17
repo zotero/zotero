@@ -3,14 +3,13 @@
   <info>
     <title>Journal of Biological Chemistry</title>
     <id>http://www.zotero.org/styles/jbc</id>
-    <link>http://www.zotero.org/styles/jbc</link>
     <author>
       <name>Julian Onions</name>
       <email>julian.onions@gmail.com</email>
     </author>
     <updated></updated>
     <summary>Style for Journal of Biological Chemistry</summary>
-    <source>http://www.jbc.org/misc/ifora.shtml#_References</source>
+    <link href="http://www.jbc.org/misc/ifora.shtml#_References" rel="documentation"/>
     <category term="numeric"/>
     <category term="biology"/>
   </info>

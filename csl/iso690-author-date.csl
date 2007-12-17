@@ -11,7 +11,7 @@
     <category term="generic-base"/>
     <updated/>
     <summary>The author-date variant of the ISO 690 style</summary>
-    <source>http://www.collectionscanada.ca/iso/tc46sc9/standard/690-2e.htm</source>
+    <link href="http://www.collectionscanada.ca/iso/tc46sc9/standard/690-2e.htm" rel="documentation"/>
   </info>
   <macro name="editor">
     <names variable="editor">

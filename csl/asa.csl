@@ -3,7 +3,6 @@
   <info>
     <title>American Sociological Association (Author-Date)</title>
     <id>http://www.zotero.org/styles/asa</id>
-    <link>http://www.zotero.org/styles/asa</link>
     <author>
       <name>Julian Onions</name>
       <email>julian.onions@gmail.com</email>
@@ -12,7 +11,7 @@
     <category term="sociology"/>
     <updated/>
     <summary>The ASA style.</summary>
-    <source>http://www.asanet.org/page.ww?name=Quick+Style+Guide%38section=Sociology+Depts</source>
+    <link href="http://www.asanet.org/page.ww?name=Quick+Style+Guide%38section=Sociology+Depts" rel="documentation"/>
   </info>
   <macro name="editor">
     <names variable="editor">

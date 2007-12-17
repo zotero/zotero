@@ -3,14 +3,13 @@
   <info>
     <title>Water Research</title>
     <id>http://www.zotero.org/styles/waterresearch</id>
-    <link>http://www.zotero.org/styles/waterresearch</link>
     <author>
       <name>Julian Onions</name>
       <email>julian.onions@gmail.com</email>
     </author>
     <updated></updated>
     <summary>Style for Water Research.</summary>
-    <source>http://www.elsevier.com/wps/find/journaldescription.cws_home/309/authorinstructions?navopenmenu=4</source>
+    <link href="http://www.elsevier.com/wps/find/journaldescription.cws_home/309/authorinstructions?navopenmenu=4" rel="documentation"/>
     <category label="Water Research" term="author-date"/>
     <category term="engineering"/>
   </info>
