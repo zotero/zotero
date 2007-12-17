@@ -174,6 +174,13 @@ Zotero.Attachments = new function(){
 	function importFromURL(url, sourceItemID, forceTitle, forceFileBaseName, parentCollectionIDs){
 		Zotero.debug('Importing attachment from URL');
 		
+		// Throw error on invalid URLs
+		urlRe = /^https?:\/\/[^\s]*$/;
+		var matches = urlRe.exec(url);
+		if (!matches) {
+			throw ("Invalid URL '" + url + "' in Zotero.Attachments.importFromURL()");
+		}
+		
 		Zotero.Utilities.HTTP.doHead(url, function(obj){
 			var mimeType = obj.channel.contentType;
 			
@@ -342,6 +349,13 @@ Zotero.Attachments = new function(){
 	 */
 	function linkFromURL(url, sourceItemID, mimeType, title){
 		Zotero.debug('Linking attachment from URL');
+		
+		// Throw error on invalid URLs
+		urlRe = /^https?:\/\/[^\s]*$/;
+		var matches = urlRe.exec(url);
+		if (!matches) {
+			throw ("Invalid URL '" + url + "' in Zotero.Attachments.linkFromURL()");
+		}
 		
 		// If no title provided, figure it out from the URL
 		if (!title){
