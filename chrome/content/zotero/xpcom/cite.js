@@ -340,6 +340,7 @@ Zotero.CSL.prototype.createCitation = function(citationItems) {
  */
 Zotero.CSL._firstNameRegexp = /^[a-zA-Z0-9]*/;
 Zotero.CSL._textCharRegexp = /[a-zA-Z0-9]/;
+Zotero.CSL._numberRegexp = /\d+/;
 Zotero.CSL.prototype.formatCitation = function(citation, format) {
 	var context = this._csl.citation;
 	if(!context) {
@@ -991,6 +992,28 @@ Zotero.CSL.prototype._processElements = function(item, element, formattedString,
 			} else if(child.@value.length()) {
 				formattedString.append(child.@value.toString(), child);
 			}
+		} else if(name == "number") {
+			if(child.@variable.length()) {
+				var form = child.@form.toString();
+				var variables = child["@variable"].toString().split(" ");
+				var newString = formattedString.clone(child.@delimiter.toString());
+				var success = false;
+				
+				for(var j=0; j<variables.length; j++) {
+					if(ignore[0][variables[j]]) continue;
+					
+					var text = item.getNumericVariable(variables[j], form);
+					if(text) {
+						newString.append(text);
+						success = true;
+					}
+				}
+				
+				if(success) {
+					formattedString.concat(newString, child);
+					dataAppended = true;
+				}
+			}
 		} else if(name == "label") {
 			var form = child.@form.toString();
 			var variables = child["@variable"].toString().split(" ");
@@ -1008,7 +1031,7 @@ Zotero.CSL.prototype._processElements = function(item, element, formattedString,
 					var value = citationItem && citationItem.locator ? citationItem.locator : false;
 				} else {
 					var term = variables[j];
-					var value = item.getVariable(variables[j]);
+					var value = item.getVariable(variables[j]).toString();
 				}
 				
 				if(term !== false && value) {
@@ -1192,6 +1215,8 @@ Zotero.CSL.prototype._processElements = function(item, element, formattedString,
 					
 					var matchAny = newChild.@match == "any";
 					var matchNone = newChild.@match == "none";
+					var matchNumber = newChild.@datatype == "number";
+					var matchDate = newChild.@datatype == "date";
 					if(matchAny) {
 						// if matching any, begin with false, then set to true
 						// if a condition is true
@@ -1219,12 +1244,14 @@ Zotero.CSL.prototype._processElements = function(item, element, formattedString,
 									else if(Zotero.CSL._dateVariables[variables[j]]) {
 										// getDate not false/undefined
 										var exists = !!item.getDate(variables[j]);
+										// XXXX need to check it is a real date here if matchDate is set.
 									} else if(Zotero.CSL._namesVariables[variables[j]]) {
 										// getNames not false/undefined, not empty
 										var exists = item.getNames(variables[j]);
 										if(exists) exists = !!exists.length;
 									} else {
-										var exists = item.getVariable(variables[j]) !== "";
+										var exists = (matchNumber ? item.getNumericVariable(variables[j]) : item.getVariable(variables[i]));
+										if (exists) exists = !!exists.length;
 									}
 								} else if(attribute == "type") {
 									var exists = item.isType(variables[j]);
@@ -1869,6 +1896,96 @@ Zotero.CSL.Item.prototype.getVariable = function(variable, form) {
 		if(value != "") return value;
 	}
 	
+	return "";
+}
+
+/*
+ * convert a number into a ordinal number 1st, 2nd, 3rd etc.
+ */
+Zotero.CSL.Item.prototype.makeOrdinal = function(value) {
+	var ind = parseInt(value);
+	var daySuffixes = Zotero.getString("date.daySuffixes").replace(/, ?/g, "|").split("|");
+	value += (parseInt(ind/10)%10) == 1 ? daySuffixes[3] : (ind % 10 == 1) ? daySuffixes[0] : (ind % 10 == 2) ? daySuffixes[1] : (ind % 10 == 3) ? daySuffixes[2] : daySuffixes[3];
+	return value;
+}
+
+
+Zotero.CSL.Item._zoteroRomanNumerals = {
+	"0" : [ "", "i", "ii", "iii", "iv", "v", "vi", "vii", "viii", "ix" ],
+	"1" : [ "", "x", "xx", "xxx", "xl", "l", "lx", "lxx", "lxxx", "xc" ],
+	"2" : [ "", "c", "cc", "ccc", "cd", "d", "dc", "dcc", "dccc", "cm" ],
+	"3" : [ "", "m", "mm", "mmm", "mmmm", "mmmmm"],
+	}
+
+/*
+ * Convert a number into a roman numeral.
+ */
+Zotero.CSL.Item.prototype.makeRoman = function(value) {
+
+	var number = parseInt(value);
+	var result = "";
+	if (number > 5000) return "";
+	var thousands = parseInt(number/1000);
+	if (thousands > 0) {
+		result += Zotero.CSL.Item._zoteroRomanNumerals[3][thousands];
+	}
+	number = number % 1000;
+	var hundreds = parseInt(number/100);
+	if (hundreds > 0) {
+		result += Zotero.CSL.Item._zoteroRomanNumerals[2][hundreds];
+	}
+	number = number % 100;
+	var tens = parseInt(number/10);
+	if (tens > 0) {
+		result += Zotero.CSL.Item._zoteroRomanNumerals[1][tens];
+	}
+	number = number % 10;
+	if (number > 0) {
+		result += Zotero.CSL.Item._zoteroRomanNumerals[0][number];
+	}
+	return result;
+}
+
+Zotero.CSL.Item._zoteroNumberFieldMap = {
+	"volume":"volume",
+	"issue":"issue",
+	"number-of-volumes":"numberOfVolumes",
+	"edition":"edition",
+	"number":"number"
+}
+/*
+ * Gets a numeric object for a specific type. <number variable="edition" form="roman"/>
+ */
+Zotero.CSL.Item.prototype.getNumericVariable = function(variable, form) {
+
+	if(!Zotero.CSL.Item._zoteroNumberFieldMap[variable]) return "";
+	
+	var zoteroFields = [];
+	var field;
+	
+	field = Zotero.CSL.Item._zoteroNumberFieldMap[variable];
+	if(typeof field == "string") {
+		zoteroFields.push(field);
+	} else {
+		zoteroFields = zoteroFields.concat(field);
+	}
+	
+	var matches;
+	for each(var zoteroField in zoteroFields) {
+		var value = this.zoteroItem.getField(zoteroField, false, true);
+		var matches;
+		if(value != "" && (matches = value.toString().match(Zotero.CSL._numberRegexp)) ) {
+			value = matches[0];
+			if (form == "ordinal") {
+				return this.makeOrdinal(value);
+			}
+			else if (form == "roman") { 
+				return this.makeRoman(value);
+			}
+			else
+				return value;
+		}
+	}
 	return "";
 }
 
