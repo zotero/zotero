@@ -76,6 +76,25 @@
       </else>
     </choose>
   </macro>
+  <macro name="edition">
+    <choose>
+      <if datatype="number" variable="edition">
+	<group delimiter=" ">
+	  <number variable="edition" form="ordinal"/>
+	  <text term="edition" form="short" suffix="."/>
+	</group>
+      </if>
+      <else>
+	  <text variable="edition" suffix="."/>
+      </else>
+    </choose>
+  </macro>
+  <macro name="volumes">
+    <group delimiter=" ">
+      <number variable="number-of-volumes" form="numeric"/>
+      <text term="volume" form="short" suffix="." plural="true"/>
+    </group>
+  </macro>
   <macro name="publisher">
     <group delimiter=": " >
       <text variable="publisher-place"/>
@@ -148,7 +167,8 @@
 	<else-if type="book">
 	  <group delimiter=" ">
 	    <text macro="title" prefix=" " suffix="."/>
-	    <text variable="edition" suffix=" ed."/>
+	    <text macro="edition"/>
+	    <text macro="volumes"/>
 	    <text macro="editor" suffix="."/>
 	    <text macro="publisher"/>
 	  </group>
