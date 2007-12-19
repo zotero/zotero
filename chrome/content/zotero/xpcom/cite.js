@@ -978,7 +978,7 @@ Zotero.CSL.prototype._processElements = function(item, element, formattedString,
 				}
 			} else if(child.@macro.length()) {
 				var macro = this._csl.macro.(@name == child.@macro);
-				if(!macro.length()) throw "CSL: style references undefined macro";
+				if(!macro.length()) throw "CSL: style references undefined macro " + child.@macro;
 				
 				// If not ignored (bc already used as a substitution)
 				if(!ignore[1][child.@macro.toString()]) {
@@ -1215,8 +1215,6 @@ Zotero.CSL.prototype._processElements = function(item, element, formattedString,
 					
 					var matchAny = newChild.@match == "any";
 					var matchNone = newChild.@match == "none";
-					var matchNumber = newChild.@datatype == "number";
-					var matchDate = newChild.@datatype == "date";
 					if(matchAny) {
 						// if matching any, begin with false, then set to true
 						// if a condition is true
@@ -1229,7 +1227,7 @@ Zotero.CSL.prototype._processElements = function(item, element, formattedString,
 					
 					// inspect variables
 					var done = false;
-					var attributes = ["variable", "type", "disambiguate", "locator", "position"];
+					var attributes = ["variable", "is-date", "is-numeric", "type", "disambiguate", "locator", "position"];
 					for(var k=0; !done && k<attributes.length; k++) {
 						var attribute = attributes[k];
 						
@@ -1244,15 +1242,19 @@ Zotero.CSL.prototype._processElements = function(item, element, formattedString,
 									else if(Zotero.CSL._dateVariables[variables[j]]) {
 										// getDate not false/undefined
 										var exists = !!item.getDate(variables[j]);
-										// XXXX need to check it is a real date here if matchDate is set.
 									} else if(Zotero.CSL._namesVariables[variables[j]]) {
 										// getNames not false/undefined, not empty
 										var exists = item.getNames(variables[j]);
 										if(exists) exists = !!exists.length;
 									} else {
-										var exists = (matchNumber ? item.getNumericVariable(variables[j]) : item.getVariable(variables[i]));
+										var exists = item.getVariable(variables[i]);
 										if (exists) exists = !!exists.length;
 									}
+								} else if (attribute == "is-numeric") {
+									var exists = item.getNumericVariable(variables[i]);
+								} else if (attribute == "is-date") { // XXX - this needs improving
+									if (Zotero.CSL._dateVariables[variables[j]]) 
+										var exists = !!item.getDate(variables[j]);
 								} else if(attribute == "type") {
 									var exists = item.isType(variables[j]);
 								} else if(attribute == "disambiguate") {
@@ -1324,13 +1326,16 @@ Zotero.CSL.prototype._compareItem = function(a, b, context) {
 	var sortA = [];
 	var sortB = [];
 	
+	Zotero.debug("CompareItem");
 	// author
 	if(context.sort.key.length()) {
+		Zotero.debug("Context Sort by " + context.sort.key.length + " keys");
 		for each(var key in context.sort.key) {
 			var keyA = new Zotero.CSL.SortString();
 			var keyB = new Zotero.CSL.SortString();
 			
 			if(key.@macro.length()) {
+				Zotero.debug("Context macro ");
 				this._processElements(a, this._csl.macro.(@name == key.@macro), keyA);
 				this._processElements(b, this._csl.macro.(@name == key.@macro), keyB);
 			} else if(key.@variable.length()) {
@@ -1348,6 +1353,8 @@ Zotero.CSL.prototype._compareItem = function(a, b, context) {
 					this._processNames(a, element, keyA, context, null, [variable]);
 					this._processNames(b, element, keyB, context, null, [variable]);
 				} else {												// text
+					Zotero.debug("Context key " + variable);
+
 					if(variable == "citation-number") {
 						keyA.append(a.getProperty(variable));
 						keyB.append(b.getProperty(variable));
@@ -2302,6 +2309,8 @@ Zotero.CSL.ItemSet.prototype.remove = function(items) {
  * citations have changed
  */
 Zotero.CSL.ItemSet.prototype.resort = function() {
+	Zotero.debug("RESORT");
+
 	// sort, if necessary
 	if(this.sortable) {
 		var me = this;
@@ -2532,8 +2541,9 @@ Zotero.CSL.ItemSet.prototype.resort = function() {
 			}
 		}
 		
+		Zotero.debug("Set citation-number to " + citationNumber + " for " + item.getID() );
 		item.setProperty("citation-number", citationNumber++);
-		
+
 		lastItem = item;
 		lastNames = names;
 		lastYear = year;
