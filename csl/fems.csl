@@ -97,6 +97,19 @@ FEMS Yeast Research</summary>
     <label variable="page" suffix=". " form="short"/>
     <text variable="page"/>
   </macro>
+  <macro name="edition">
+    <choose>
+      <if datatype="number" variable="edition">
+	<group delimiter=" ">
+	  <number variable="edition" form="ordinal"/>
+	  <text term="edition" form="short" suffix="."/>
+	</group>
+      </if>
+      <else>
+	  <text variable="edition" suffix="."/>
+      </else>
+    </choose>
+  </macro>
   <citation>
     <option name="et-al-min" value="10"/>
     <option name="et-al-use-first" value="1"/>
@@ -143,7 +156,7 @@ FEMS Yeast Research</summary>
 	<else-if type="thesis">
 	  <text macro="title" prefix=" " suffix="."/>
 	  <group prefix=" " delimiter=", ">
-	    <text variable="edition" suffix=" ed."/>
+	    <text macro="edition" />
 	    <text macro="editor" suffix="."/>
 	    <text variable="genre"/>
 	    <text macro="publisher"/>
@@ -152,7 +165,7 @@ FEMS Yeast Research</summary>
 	<else-if type="book">
 	  <group delimiter=" ">
 	    <text macro="title" prefix=" " suffix="."/>
-	    <text variable="edition" suffix=" ed."/>
+	    <text macro="edition" />
 	    <text macro="editor" suffix="."/>
 	    <text macro="publisher"/>
 	  </group>

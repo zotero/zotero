@@ -89,6 +89,19 @@
       </choose>
     </group>
   </macro>
+  <macro name="edition">
+    <choose>
+      <if datatype="number" variable="edition">
+	<group delimiter=" ">
+	  <number variable="edition" form="ordinal"/>
+	  <text term="edition" form="short" suffix="."/>
+	</group>
+      </if>
+      <else>
+	  <text variable="edition" suffix="."/>
+      </else>
+    </choose>
+  </macro>
   <citation>
     <option name="collapse" value="citation-number"/>
     <sort>
@@ -113,7 +126,7 @@
 	<if type="book">
 	  <group suffix=".">
 	    <text macro="title" prefix=" " suffix="."/>
-	    <text variable="edition" prefix=" " suffix=" ed."/>
+	    <text macro="edition" prefix=" " />
 	    <text macro="editor" prefix=" (" suffix=")"/>
 	  </group>
 	  <text prefix=" " suffix="" macro="publisher"/>
@@ -131,7 +144,7 @@
 	    <text macro="editor"/>
 	    <text variable="container-title" font-style="italic" prefix=" " suffix="."/>
 	    <text variable="volume" prefix="Vol " suffix="."/>
-	    <text variable="edition" prefix=" " suffix=" ed."/>
+	    <text macro="edition" prefix=" "/>
 	    <text variable="collection-title" prefix=" " suffix="."/>
 	    <group suffix=".">
 	      <text macro="publisher" prefix=" "/>

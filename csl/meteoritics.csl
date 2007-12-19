@@ -92,6 +92,19 @@
     <text variable="page"/>
     <label variable="page" prefix=" " suffix="." form="short"/>
   </macro>
+  <macro name="edition">
+    <choose>
+      <if datatype="number" variable="edition">
+	<group delimiter=" ">
+	  <number variable="edition" form="ordinal"/>
+	  <text term="edition" form="short" suffix="."/>
+	</group>
+      </if>
+      <else>
+	  <text variable="edition" suffix="."/>
+      </else>
+    </choose>
+  </macro>
   <macro name="container">
     <text term="in" text-case="capitalize-first" suffix=" "/>
     <text variable="container-title" font-style="italic"/>
@@ -140,7 +153,7 @@
 	<else-if type="thesis">
 	  <text macro="title" prefix=" " suffix="."/>
 	  <group prefix=" " delimiter=", ">
-	    <text variable="edition" suffix=" ed."/>
+	    <text macro="edition" />
 	    <text macro="editor" suffix="."/>
 	    <text variable="genre"/>
 	    <text macro="publisher"/>
@@ -150,7 +163,7 @@
 	  <group delimiter=". ">
 	    <group delimiter=" ">
 	      <text macro="title" prefix=" " suffix=","/>
-	      <text variable="edition" suffix=" ed."/>
+	      <text macro="edition" />
 	      <text macro="editor" suffix="."/>
 	      <text macro="publisher"/>
 	    </group>
@@ -163,7 +176,7 @@
 	    <group class="container" delimiter=" ">
 	      <group delimiter=", ">
 		<text macro="container"/>
-		<text variable="edition" suffix=" ed."/>
+		<text macro="edition" />
 		<text macro="editor" />
 	      </group>
 	    </group>
