@@ -29,6 +29,19 @@
       <date-part name="year" suffix=". "/>
     </date>
   </macro>
+  <macro name="edition">
+    <choose>
+      <if datatype="number" variable="edition">
+	<group delimiter=" ">
+	  <number variable="edition" form="ordinal"/>
+	  <text term="edition" form="short" suffix="."/>
+	</group>
+      </if>
+      <else>
+	  <text variable="edition" suffix="."/>
+      </else>
+    </choose>
+  </macro>
   <citation>
     <option name="collapse" value="citation-number"/>
     <sort>
@@ -47,13 +60,16 @@
       <text macro="author"/>
       <choose>
 	<if type="book">
-	  <text variable="title" suffix=". " font-style="italic"/>
-	  <text variable="edition" prefix=" " suffix=" ed. "/>
-	  <text macro="publisher" prefix=" "/>
+	  <group delimiter=" ">
+	  <text variable="title" suffix="." font-style="italic"/>
+	  <text macro="edition"/>
+	  <text macro="publisher" />
+	  </group>
 	</if>
 	<else-if type="chapter">
 	  <text variable="title" suffix=". "/>
-	  <group prefix=" In: " delimiter=" " suffix=". ">
+	  <group delimiter=" " suffix=". ">
+	    <text term="in" text-case="capitalize-first" suffix=":"/>
 	    <text macro="editor" suffix="."/>
 	    <text variable="container-title" font-style="italic"/>
 	  </group>

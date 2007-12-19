@@ -65,6 +65,19 @@ International Journal of General and Molecular Microbiology.</summary>
       <text variable="publisher-place"/>
     </group>
   </macro>
+  <macro name="edition">
+    <choose>
+      <if datatype="number" variable="edition">
+	<group delimiter=" ">
+	  <number variable="edition" form="ordinal"/>
+	  <text term="edition" form="short" suffix="."/>
+	</group>
+      </if>
+      <else>
+	  <text variable="edition" suffix="."/>
+      </else>
+    </choose>
+  </macro>
   <macro name="year-date">
     <date variable="issued">
       <date-part name="year"/>
@@ -102,7 +115,7 @@ International Journal of General and Molecular Microbiology.</summary>
 	<if type="book">
 	  <group delimiter=" " prefix=" ">
 	    <text macro="title"/>
-	    <text variable="edition" suffix=" ed."/>
+	    <text macro="edition"/>
 	    <text macro="editor" />
 	    <text macro="publisher" />
 	  </group>
@@ -115,7 +128,7 @@ International Journal of General and Molecular Microbiology.</summary>
 	      <text macro="editor"/>
 	      <text variable="container-title" />
 	      <text variable="collection-title" prefix=" " suffix="."/>
-	    <text variable="edition" suffix=" edn."/>
+	    <text macro="edition" />
 	    </group>
 	  </group>
 	  <group suffix=".">

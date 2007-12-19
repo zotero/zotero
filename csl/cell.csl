@@ -68,6 +68,19 @@
       <date-part name="year"/>
     </date>
   </macro>
+  <macro name="edition">
+    <choose>
+      <if datatype="number" variable="edition">
+	<group delimiter=" ">
+	  <number variable="edition" form="ordinal"/>
+	  <text term="edition" form="short" suffix="."/>
+	</group>
+      </if>
+      <else>
+	  <text variable="edition" suffix="."/>
+      </else>
+    </choose>
+  </macro>
   <citation>
     <option name="et-al-min" value="2"/>
     <option name="et-al-use-first" value="1"/>
@@ -104,7 +117,7 @@
 	<if type="book">
 	  <group delimiter=" " prefix=" ">
 	    <text macro="title"/>
-	    <text variable="edition" suffix=" ed."/>
+	    <text macro="edition"/>
 	    <text macro="editor" />
 	    <text macro="publisher" />
 	  </group>

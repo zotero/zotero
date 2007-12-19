@@ -87,6 +87,19 @@
       </if>
     </choose>
   </macro>
+  <macro name="edition">
+    <choose>
+      <if datatype="number" variable="edition">
+	<group delimiter=" ">
+	  <number variable="edition" form="ordinal"/>
+	  <text term="edition" form="short" suffix="."/>
+	</group>
+      </if>
+      <else>
+	  <text variable="edition" suffix="."/>
+      </else>
+    </choose>
+  </macro>
   <citation>
     <option name="collapse" value="citation-number"/>
     <sort>
@@ -109,10 +122,10 @@
       <text macro="author" suffix=""/>
       <choose>
 	<if type="book">
-	  <group suffix=".">
-	    <text macro="title" prefix=" " suffix="."/>
-	    <text variable="edition" prefix=" " suffix=" ed."/>
-	    <text macro="editor" prefix=" (" suffix=")"/>
+	  <group prefix=" " suffix="." delimiter=" ">
+	    <text macro="title" suffix="."/>
+	    <text macro="edition" />
+	    <text macro="editor" prefix="(" suffix=")"/>
 	  </group>
 	  <text prefix=" " suffix="" macro="publisher"/>
 	  <group suffix="." prefix="; " delimiter=" ">
@@ -124,15 +137,15 @@
 	</if>
 	<else-if type="chapter">
 	  <text macro="title" prefix=" " suffix="."/>
-	  <group class="container" prefix=" ">
-	    <text term="in" text-case="capitalize-first" suffix=": "/>
+	  <group class="container" prefix=" " delimiter=" ">
+	    <text term="in" text-case="capitalize-first" suffix=":"/>
 	    <text macro="editor"/>
-	    <text variable="container-title"  prefix=" " suffix="."/>
-	    <text variable="volume" prefix=" Vol. " suffix="."/>
-	    <text variable="edition" prefix=" " suffix=" ed."/>
-	    <text variable="collection-title" prefix=" " suffix="."/>
+	    <text variable="container-title" suffix="."/>
+	    <text variable="volume" prefix="Vol. " suffix="."/>
+	    <text macro="edition"/>
+	    <text variable="collection-title" suffix="."/>
 	    <group suffix=".">
-	      <text macro="publisher" prefix=" "/>
+	      <text macro="publisher"/>
 	      <group suffix="." prefix="; " delimiter=". ">
 		<date variable="issued">
 		  <date-part name="year"/>

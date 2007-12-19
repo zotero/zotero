@@ -68,6 +68,19 @@
       <date-part name="year"/>
     </date>
   </macro>
+  <macro name="edition">
+    <choose>
+      <if datatype="number" variable="edition">
+	<group delimiter=" ">
+	  <number variable="edition" form="ordinal"/>
+	  <text value="edn" suffix="."/>
+	</group>
+      </if>
+      <else>
+	<text variable="edition" suffix="."/>
+      </else>
+    </choose>
+  </macro>
   <citation>
     <option name="collapse" value="citation-number"/>
     <layout delimiter=", " vertical-align="sup">
@@ -91,7 +104,7 @@
 	  <text macro="title" suffix=", "/>
 	  <group delimiter=", ">
 	    <text macro="publisher"/>
-	    <text variable="edition" suffix=" edn."/>
+	    <text macro="edition"/>
 	    <text macro="issued"/>
 	    <text variable="volume" prefix="vol. "/>
 	  </group>
@@ -100,7 +113,7 @@
 	  <group delimiter=", ">
 	    <text macro="book-container"/>
 	    <text macro="publisher" />
-	    <text variable="edition" suffix=" edn."/>
+	    <text macro="edition"/>
 	    <text macro="issued"/>
 	    <text variable="volume" prefix="vol. "/>
 	    <text macro="pages"/>
