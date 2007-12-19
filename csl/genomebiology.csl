@@ -68,7 +68,7 @@
   </macro>
   <macro name="edition">
     <choose>
-      <if datatype="number" variable="edition">
+      <if is-numeric="edition">
 	<group delimiter=" ">
 	  <number variable="edition" form="ordinal"/>
 	  <text term="edition" form="short" suffix="."/>
