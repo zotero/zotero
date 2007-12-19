@@ -109,6 +109,7 @@
     <option name="hanging-indent" value="true"/>
     <option name="et-al-min" value="4"/>
     <option name="et-al-use-first" value="1"/>
+    <option name="line-spacing" value="2"/>
     <sort>
       <key macro="author"/>
       <key variable="title"/>

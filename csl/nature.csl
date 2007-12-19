@@ -43,6 +43,7 @@
         <option name="et-al-min" value="4"/>
         <option name="et-al-use-first" value="1"/>
         <option name="second-field-align" value="true"/>
+        <option name="entry-spacing" value="0"/>
         <layout>
             <text variable="citation-number" suffix=". "/>
             <text macro="author"/>
