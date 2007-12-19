@@ -544,35 +544,63 @@ Zotero.CSL.prototype.formatBibliography = function(itemSet, format) {
 	
 	var hangingIndent = !!(context.option.(@name == "hanging-indent").@value == "true");
 	var secondFieldAlign = context.option.(@name == "second-field-align").@value.toString();
+	var lineSpacing = context.option.(@name == "line-spacing").@value.toString();
+	lineSpacing = (lineSpacing === "" ? 1 : parseInt(lineSpacing, 10));
+	if(lineSpacing == NaN) throw "Invalid line spacing";
+	var entrySpacing = context.option.(@name == "entry-spacing").@value.toString();
+	entrySpacing = (entrySpacing === "" ? 1 : parseInt(entrySpacing, 10));
+	if(entrySpacing == NaN) throw "Invalid entry spacing";
 	
 	var index = 0;
 	var output = "";
 	var preamble = "";
 	if(format == "HTML") {
 		if(this.class == "note" && isCitation) {
+			// note citations are formatted as an ordered list
 			preamble = '<ol>\r\n';
 			secondFieldAlign = false;
 		} else {
+			// needed bc HTML doesn't force lines to be at least as big as the
+			// tallest character
+			if(lineSpacing <= 1.1) lineSpacing = 1.1;
+			
+			// add style
+			var style = 'line-height:'+lineSpacing+'em;'
 			 if(hangingIndent) {
-				preamble = '<div style="margin-left:0.5in;text-indent:-0.5in;">\r\n';
+				style += 'margin-left:0.5in;text-indent:-0.5in;';
 			}
 			
 			if(secondFieldAlign) {
-				preamble += '<table style="border-collapse:collapse;">\r\n';
+				preamble += '<table style="border-collapse:collapse;'+style+'">\r\n';
+			} else {
+				preamble += '<div style="'+style+'">\r\n';
 			}
 		}
-	} else if(format == "RTF" || format == "Integration") {
-		if(format == "RTF") {
-			preamble = "{\\rtf\\ansi{\\fonttbl\\f0\\froman Times New Roman;}{\\colortbl;\\red255\\green255\\blue255;}\\pard\\f0";
+	} else {
+		if(format == "RTF" || format == "Integration") {
+			if(format == "RTF") {
+				preamble = "{\\rtf\\ansi{\\fonttbl\\f0\\froman Times New Roman;}{\\colortbl;\\red255\\green255\\blue255;}\\pard\\f0";
+			}
+			
+			var tabStop = null;
+			if(hangingIndent) {
+				var indent = 720;			// 720 twips = 0.5 in
+				var firstLineIndent = -720;	// -720 twips = -0.5 in
+			} else {
+				var indent = 0;
+				var firstLineIndent = 0;
+			}
 		}
 		
-		var tabStop = null;
-		if(hangingIndent) {
-			var indent = 720;			// 720 twips = 0.5 in
-			var firstLineIndent = -720;	// -720 twips = -0.5 in
-		} else {
-			var indent = 0;
-			var firstLineIndent = 0;
+		var returnChars = "";
+		for(j=0; j<=entrySpacing; j++) {
+			if(format == "RTF") {
+				returnChars += "\\\r\n";
+			} else if(Zotero.isWin) {
+				returnChars += "\r\n";
+			} else {
+				returnChars += "\n";
+			}
 		}
 	}
 	
@@ -598,7 +626,7 @@ Zotero.CSL.prototype.formatBibliography = function(itemSet, format) {
 			
 			string = string.get();
 		}
-			
+		
 		if(secondFieldAlign && (format == "RTF" || format == "Integration")) {
 			if(format == "RTF") {
 				var tab = string.indexOf("\\tab ");
@@ -619,38 +647,40 @@ Zotero.CSL.prototype.formatBibliography = function(itemSet, format) {
 			if(this.class == "note" && isCitation) {
 				output += "<li>"+string+span+"</li>\r\n";
 			} else if(secondFieldAlign) {
-				output += '<tr style="vertical-align:top;"><td>'+string+span+"<td></tr>\r\n"
-					+'<tr><td colspan="2">&nbsp;</td></tr>\r\n';
+				output += '<tr style="vertical-align:top;"><td>'+string+span+"<td></tr>\r\n";
+				for(var j=0; j<entrySpacing; j++) {
+					output += '<tr><td colspan="2">&nbsp;</td></tr>\r\n';
+				}
 			} else {
-				output += "<p>"+string+span+"</p>\r\n";
+				if(i == 0) {
+					// first p has no margins
+					var margin = "0";
+				} else {
+					var margin = (entrySpacing*lineSpacing).toString()+"em 0 0 0";
+				}
+				output += '<p style="margin:'+margin+'">'+string+span+"</p>\r\n";
 			}
-		} else if(format == "RTF") {
+		} else  {
 			if(this.class == "note" && isCitation) {
-				index++;
-				output += index+". ";
+				if(format == "RTF") {
+					index++;
+					output += index+". ";
+				} else if(format == "Text") {
+					index++;
+					output += index+". ";
+				}
 			}
-			output += string+"\\\r\n\\\r\n";
-		} else {
-			if(format == "Text" && this.class == "note" && isCitation) {
-				index++;
-				output += index+". ";
-			}
-			// attach \n on mac (since both \r and \n count as newlines for
-			// clipboard purposes)
-			output += string+(Zotero.isWin ? "\r\n\r\n" : "\n\n");
+			output += string+returnChars;
 		}
 	}
 	
 	if(format == "HTML") {
 		if(this.class == "note" && isCitation) {
 			output += '</ol>';
+		} else if(secondFieldAlign) {
+			output += '</table>';
 		} else {
-			if(secondFieldAlign) {
-				output += '</table>';
-			}
-			if(hangingIndent) {
-				output += '</div>';
-			}
+			output += '</div>';
 		}
 	} else if(format == "RTF" || format == "Integration") {
 		if(secondFieldAlign) {
@@ -670,18 +700,22 @@ Zotero.CSL.prototype.formatBibliography = function(itemSet, format) {
 		}
 		
 		preamble += "\\li"+indent+" \\fi"+firstLineIndent+" ";
+		if(format == "Integration") {
+			preamble += "\\sl"+lineSpacing+" ";
+		} else if(format == "RTF" && lineSpacing != 1) {
+			preamble += "\\sl"+(240*lineSpacing)+" \\slmult1 ";
+		}
+		
 		if(tabStop !== null) {
 			preamble += "\\tx"+tabStop+" ";
 		}
-		
-		if(format == "RTF") {
-			// drop last 6 characters of output (last two returns)
-			output = output.substr(0, output.length-6)+"}";
-		} else {
-			// drop last 4 characters (last two returns)
-			output = output.substr(0, (Zotero.isWin ? output.length-4 : output.length-2));
-		}
 		preamble += "\r\n";
+		
+		// drop last returns
+		output = output.substr(0, output.length-returnChars.length);
+		
+		// add bracket for RTF
+		if(format == "RTF") output += "}";
 	}
 	
 	return preamble+output;
@@ -1375,6 +1409,16 @@ Zotero.CSL.prototype._compareItem = function(a, b, context) {
 			}
 		}
 	}
+	
+	// sort by index
+	var aIndex = a.getProperty("index");
+	var bIndex = b.getProperty("index");
+	if(aIndex !== "" && (bIndex === "" || aIndex < bIndex)) {
+		return -1;
+	} else if(aIndex != bIndex) {
+		return 1;
+	}
+	
 	return 0;
 }
 
@@ -1653,6 +1697,8 @@ Zotero.CSL.Global = new function() {
  * locatorType
  * locator
  * suppressAuthor
+ * item
+ * itemID
  */
 Zotero.CSL.CitationItem = function(item) {
 	if(item) {
@@ -2007,7 +2053,7 @@ Zotero.CSL.Item.prototype.setProperty = function(property, value) {
  * Sets an item-specific property to a given value.
  */
 Zotero.CSL.Item.prototype.getProperty = function(property, value) {
-	return (this._properties[property] ? this._properties[property] : "");
+	return (this._properties[property] !== undefined ? this._properties[property] : "");
 }
 
 Zotero.CSL.Item._optionalTypeMap = {
@@ -2309,28 +2355,21 @@ Zotero.CSL.ItemSet.prototype.remove = function(items) {
  * citations have changed
  */
 Zotero.CSL.ItemSet.prototype.resort = function() {
-	Zotero.debug("RESORT");
-
-	// sort, if necessary
-	if(this.sortable) {
-		var me = this;
-		
-		this.items = this.items.sort(function(a, b) {
-			return me.csl._compareItem(a, b, me.bibliography);
-		});
-	}
+	// sort
+	var me = this;
+	this.items = this.items.sort(function(a, b) {
+		return me.csl._compareItem(a, b, me.bibliography);
+	});
 	
 	// first loop through to collect disambiguation data by item, so we can
 	// see if any items have changed; also collect last names
-	if(this._citationChangingOptions.length) {
-		var oldOptions = new Array();
-		for(var i in this._citationChangingOptions) {
-			oldOptions[i] = new Array();
-			for(var j in this.items) {
-				if(this.items[j] == undefined) continue;
-				oldOptions[i][j] = this.items[j].getProperty(this._citationChangingOptions[i]);
-				this.items[j].setProperty(this._citationChangingOptions[i], "");
-			}
+	var oldOptions = new Array();
+	for(var i in this._citationChangingOptions) {
+		oldOptions[i] = new Array();
+		for(var j in this.items) {
+			if(this.items[j] == undefined) continue;
+			oldOptions[i][j] = this.items[j].getProperty(this._citationChangingOptions[i]);
+			this.items[j].setProperty(this._citationChangingOptions[i], "");
 		}
 	}
 	
@@ -2541,7 +2580,6 @@ Zotero.CSL.ItemSet.prototype.resort = function() {
 			}
 		}
 		
-		Zotero.debug("Set citation-number to " + citationNumber + " for " + item.getID() );
 		item.setProperty("citation-number", citationNumber++);
 
 		lastItem = item;
@@ -2551,13 +2589,11 @@ Zotero.CSL.ItemSet.prototype.resort = function() {
 	
 	// find changed citations
 	var changedCitations = new Array();
-	if(this._citationChangingOptions.length) {
-		for(var j in this.items) {
-			if(this.items[j] == undefined) continue;
-			for(var i in this._citationChangingOptions) {
-				if(this.items[j].getProperty(this._citationChangingOptions[i]) != oldOptions[i][j]) {
-					changedCitations.push(this.items[j]);
-				}
+	for(var j in this.items) {
+		if(this.items[j] == undefined) continue;
+		for(var i in this._citationChangingOptions) {
+			if(this.items[j].getProperty(this._citationChangingOptions[i]) != oldOptions[i][j]) {
+				changedCitations.push(this.items[j]);
 			}
 		}
 	}

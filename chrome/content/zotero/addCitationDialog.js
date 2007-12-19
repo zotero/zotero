@@ -459,6 +459,11 @@ var Zotero_Citation_Dialog = new function () {
 					citationItem[property] = document.getElementById(property)[_preserveData[property]];
 				}
 			}
+			
+			if(citationItem["locator"] == "") {
+				citationItem["locator"] = citationItem["locatorType"] = undefined;
+			}
+			
 			io.citation.citationItems = [citationItem];
 		}
 	}
