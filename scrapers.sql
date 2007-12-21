@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-12-17 23:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-12-21 16:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -5113,7 +5113,7 @@ REPLACE INTO translators VALUES ('b61c224b-34b6-4bfd-8a76-a476e7092d43', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('1c34744d-690f-4cac-b31b-b7f0c90ac14d', '1.0.0b3.r1', '', '2007-07-31 16:45:00', '0', '100', '4', 'RSC Publishing', 'Ramesh Srigiriraju', 'http://(:?www\.|google\.)?rsc\.org/', 
+REPLACE INTO translators VALUES ('1c34744d-690f-4cac-b31b-b7f0c90ac14d', '1.0.0b3.r1', '', '2007-12-21 16:00:00', '0', '100', '4', 'RSC Publishing', 'Ramesh Srigiriraju', 'http://(:?www\.|google\.)?rsc\.org/', 
 'function detectWeb(doc, url)	{
 	var namespace=doc.documentElement.namespaceURI;
 	var nsResolver=namespace?function(prefix)	{
@@ -5281,6 +5281,8 @@ function doWeb(doc, url)	{
 				Zotero.Utilities.HTTP.doGet(string, function(text)	{
 					var trans=Zotero.loadTranslator("import");
 					trans.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+					// fix bad Y1 tags, which have wrong spacing and typically terminate with "///"
+					text = text.replace("Y1 -  ", "Y1  - ");
 					trans.setString(text);
 					trans.translate();
 					Zotero.done();	
@@ -5305,6 +5307,8 @@ function doWeb(doc, url)	{
 				Zotero.Utilities.HTTP.doGet(string, function(text)	{
 					var trans=Zotero.loadTranslator("import");
 					trans.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+					// fix bad Y1 tags, which have wrong spacing and typically terminate with "///"
+					text = text.replace("Y1 -  ", "Y1  - ");
 					trans.setString(text);
 					trans.translate();
 					Zotero.done();
@@ -5321,6 +5325,8 @@ function doWeb(doc, url)	{
 			Zotero.Utilities.HTTP.doGet(string, function(text)	{
 				var trans=Zotero.loadTranslator("import");
 				trans.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+				// fix bad Y1 tags, which have wrong spacing and typically terminate with "///"
+				text = text.replace("Y1 -  ", "Y1  - ");				
 				trans.setString(text);
 				trans.setHandler("itemDone", function(obj, newItem)	{
 					var url2=newItem.url;
