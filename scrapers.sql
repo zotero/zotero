@@ -15790,7 +15790,7 @@ function doExport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('9cb70025-a888-4a29-a210-93ec52da40d4', '1.0.0b4.r1', '', '2007-12-17 00:28:06', '1', '100', '3', 'BibTeX', 'Simon Kornblith', 'bib', 
+REPLACE INTO translators VALUES ('9cb70025-a888-4a29-a210-93ec52da40d4', '1.0.0b4.r1', '', '2007-12-21 15:30:00', '1', '100', '3', 'BibTeX', 'Simon Kornblith', 'bib', 
 'Zotero.configure("dataMode", "block");
 Zotero.addOption("UTF8", true);
 
@@ -17512,6 +17512,7 @@ function doImport() {
 // data in the braces as it will cause the macros to not expand properly
 function writeField(field, value, isMacro) {
 	if(!value) return;
+	value = value + ""; // convert integers to strings
 	Zotero.write(",\n\t"+field+" = ");
 	if(!isMacro) Zotero.write("{");
 	// I hope these are all the escape characters!
