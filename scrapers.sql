@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-12-21 22:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2007-12-22 06:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -10133,9 +10133,9 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('ecddda2e-4fc6-4aea-9f17-ef3b56d7377a', '1.0.0b3.r1', '', '2007-08-10 19:45:00', '1', '100', '4', 'arXiv.org', 'Sean Takats', '^http://(?:www\.)?(?:arxiv\.org/(?:find/\w|list/\w|abs/)|eprintweb.org/S/(?:search|archive|article)(?!.*refs$)(?!.*cited$))', 
+REPLACE INTO translators VALUES ('ecddda2e-4fc6-4aea-9f17-ef3b56d7377a', '1.0.0b3.r1', '', '2007-12-22 06:00:00', '1', '100', '4', 'arXiv.org', 'Sean Takats', '^http://(?:www\.)?(?:(arxiv\.org|xxx.lanl.gov)/(?:find/\w|list/\w|abs/)|eprintweb.org/S/(?:search|archive|article)(?!.*refs$)(?!.*cited$))', 
 'function detectWeb(doc, url) {
-	var searchRe = /^http:\/\/(?:www\.)?(?:arxiv\.org\/(?:find|list)|eprintweb.org\/S\/(?:archive|search$))/;
+	var searchRe = /^http:\/\/(?:www\.)?(?:(arxiv\.org|xxx\.lanl\.gov)\/(?:find|list)|eprintweb.org\/S\/(?:archive|search$))/;
 	if(searchRe.test(url)) {
 		return "multiple";
 	} else {
