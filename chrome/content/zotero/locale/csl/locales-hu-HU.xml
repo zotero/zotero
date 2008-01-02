@@ -12,6 +12,16 @@
     <term name="no date">nd</term>
     <term name="and">és</term>
     <term name="et-al">et al.</term>
+    <term name="interview">interview</term>
+    <term name="letter">letter</term>
+    <term name="anonymous">anonymous</term>
+    <term name="anonymous" form="short">anon</term>
+    <term name="and others">and others</term>
+    <term name="in press">in press</term>
+    <term name="online">online</term>
+    <term name="cited">cited</term>
+    <term name="internet">internet</term>
+    <term name="presented at">presented at the</term>
     <term name="book">
       <single>könyv</single>
       <multiple>könyv</multiple>
@@ -68,6 +78,10 @@
       <single>kötet</single>
       <multiple>kötet</multiple>
     </term>
+    <term name="edition">
+      <single>edition</single>
+      <multiple>editions</multiple>
+    </term>
     <term name="verse">
       <single>versszak</single>
       <multiple>versszak</multiple>
@@ -90,7 +104,12 @@
       <single>vsz</single>
       <multiple>vsz</multiple>
     </term>
-    <term name="volume" form="short">köt</term>
+    <term name="volume" form="short">
+      <single>vol</single>
+      <multiple>vols</multiple>
+    </term>
+    <term name="edition">edition</term>
+    <term name="edition" form="short">ed</term>
     <term name="paragraph" form="symbol">
       <single>¶</single>
       <multiple>¶¶</multiple>
@@ -117,6 +136,8 @@
     </term>
     <term name="editor" form="verb">szerkesztette</term>
     <term name="translator" form="verb">fordította</term>
+    <term name="recipient" form="verb">to</term>
+    <term name="interviewer" form="verb">interview by</term>
     <term name="editor" form="verb-short">szerk</term>
     <term name="translator" form="verb-short">ford</term>
     <term name="month-01">január</term>

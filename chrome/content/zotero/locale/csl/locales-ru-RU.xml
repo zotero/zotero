@@ -12,6 +12,16 @@
     <term name="no date">нет даты</term>
     <term name="and">и</term>
     <term name="et-al">и др.</term>
+    <term name="interview">interview</term>
+    <term name="letter">letter</term>
+    <term name="anonymous">anonymous</term>
+    <term name="anonymous" form="short">anon</term>
+    <term name="and others">and others</term>
+    <term name="in press">in press</term>
+    <term name="online">online</term>
+    <term name="cited">cited</term>
+    <term name="internet">internet</term>
+    <term name="presented at">presented at the</term>
     <term name="book">
       <single>book</single>
       <multiple>books</multiple>
@@ -68,6 +78,10 @@
       <single>volume</single>
       <multiple>volumes</multiple>
     </term>
+    <term name="edition">
+      <single>edition</single>
+      <multiple>editions</multiple>
+    </term>
     <term name="verse">
       <single>verse</single>
       <multiple>verses</multiple>
@@ -90,7 +104,12 @@
       <single>v</single>
       <multiple>vv</multiple>
     </term>
-    <term name="volume" form="short">том</term>
+    <term name="volume" form="short">
+      <single>vol</single>
+      <multiple>vols</multiple>
+    </term>
+    <term name="edition">edition</term>
+    <term name="edition" form="short">ed</term>
     <term name="paragraph" form="symbol">
       <single>¶</single>
       <multiple>¶¶</multiple>
@@ -117,6 +136,8 @@
     </term>
     <term name="editor" form="verb">отредактировано</term>
     <term name="translator" form="verb">переведено</term>
+    <term name="recipient" form="verb">to</term>
+    <term name="interviewer" form="verb">interview by</term>
     <term name="editor" form="verb-short">ред</term>
     <term name="translator" form="verb-short">перев</term>
     <term name="month-01">Январь</term>

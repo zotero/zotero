@@ -12,6 +12,16 @@
     <term name="no date">S.d.</term>
     <term name="and">e</term>
     <term name="et-al">et al.</term>
+    <term name="interview">interview</term>
+    <term name="letter">letter</term>
+    <term name="anonymous">anonymous</term>
+    <term name="anonymous" form="short">anon</term>
+    <term name="and others">and others</term>
+    <term name="in press">in press</term>
+    <term name="online">online</term>
+    <term name="cited">cited</term>
+    <term name="internet">internet</term>
+    <term name="presented at">presented at the</term>
     <term name="book">
       <single>libro</single>
       <multiple>libri</multiple>
@@ -68,6 +78,10 @@
       <single>volume</single>
       <multiple>volumi</multiple>
     </term>
+    <term name="edition">
+      <single>edition</single>
+      <multiple>editions</multiple>
+    </term>
     <term name="verse">
       <single>verso</single>
       <multiple>versi</multiple>
@@ -90,7 +104,12 @@
       <single>v</single>
       <multiple>vv</multiple>
     </term>
-    <term name="volume" form="short">vol.</term>
+    <term name="volume" form="short">
+      <single>vol</single>
+      <multiple>vols</multiple>
+    </term>
+    <term name="edition">edition</term>
+    <term name="edition" form="short">ed</term>
     <term name="paragraph" form="symbol">
       <single>¶</single>
       <multiple>¶¶</multiple>
@@ -117,6 +136,8 @@
     </term>
     <term name="editor" form="verb">a cura di</term>
     <term name="translator" form="verb">tradotto da</term>
+    <term name="recipient" form="verb">to</term>
+    <term name="interviewer" form="verb">interview by</term>
     <term name="editor" form="verb-short">cur. da</term>
     <term name="translator" form="verb-short">trad. da</term>
     <term name="month-01">Gennaio</term>

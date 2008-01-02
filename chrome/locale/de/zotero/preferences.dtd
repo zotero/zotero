@@ -47,6 +47,10 @@
 
 <!ENTITY zotero.preferences.prefpane.export "Export">
 
+<!ENTITY zotero.preferences.citationOptions.caption "Citation Options">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Include URLs of paper articles in references">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "When this option is disabled, Zotero includes URLs when citing journal, magazine, and newspaper articles only if the article does not have a page range specified.">
+
 <!ENTITY zotero.preferences.quickCopy.caption "Quick-Copy">
 <!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Standardausgabeformat">
 <!ENTITY zotero.preferences.quickCopy.macWarning "Achtung: Rich-Text-Formatierungen gehen unter Mac OS X verloren.">
@@ -54,6 +58,8 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domain/Pfad">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(z.B. wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Ausgabeformat">
+
+<!ENTITY zotero.preferences.export.getAdditionalStyles "Get additional styles...">
 
 <!ENTITY zotero.preferences.prefpane.keys "Tastenkombinationen">
 
@@ -80,3 +86,6 @@
 
 <!ENTITY zotero.preferences.dbMaintenance "Datenbankwartung">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Integrität der Datenbank überprüfen">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reset Translators and Styles...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset Translators...">
+<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset Styles...">
