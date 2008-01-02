@@ -110,7 +110,7 @@ Zotero.Item.prototype.loadFromID = function(id) {
 					break;
 				
 				case 'firstCreator':
-					colSQL = Zotero.Items.getfirstCreatorSQL();
+					colSQL = Zotero.Items.getFirstCreatorSQL();
 					break;
 					
 				case 'numNotes':
