@@ -59,6 +59,8 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(e.g. wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Output Format">
 
+<!ENTITY zotero.preferences.export.getAdditionalStyles			"Get additional styles...">
+
 <!ENTITY zotero.preferences.prefpane.keys				"Shortcut Keys">
 
 <!ENTITY zotero.preferences.keys.openZotero				"Open/Close Zotero Pane">

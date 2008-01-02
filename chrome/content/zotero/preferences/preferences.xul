@@ -290,6 +290,8 @@ To add a new preference:
 			<separator/>
 			
 			<label id="quickCopy-macWarning" hidden="true" value="&zotero.preferences.quickCopy.macWarning;"/>
+			<separator/>
+			<label class="text-link" href="http://www.zotero.org/styles/" value="&zotero.preferences.export.getAdditionalStyles;"/>
 		</groupbox>
 	</prefpane>
 	
