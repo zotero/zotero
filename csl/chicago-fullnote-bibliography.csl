@@ -26,6 +26,12 @@
       <name and="text" delimiter=", "/>
     </names>
   </macro>
+  <macro name="editor-translator-bib">
+    <names variable="editor translator" delimiter=". ">
+      <label form="verb" prefix=" " text-case="capitalize-first" suffix=" "/>
+      <name and="text" delimiter=", "/>
+    </names>
+  </macro>
   <macro name="editor-translator-short">
     <choose>
       <if variable="author">
@@ -163,6 +169,11 @@
 	</date>
       </else>
     </choose>
+  </macro>
+  <macro name="sort-key">
+      <text macro="author-bib" suffix=" "/>
+      <text variable="title" suffix=" "/>
+      <text variable="genre"/>
   </macro>
   <citation>
     <option name="et-al-min" value="4"/>
@@ -336,6 +347,9 @@
     <option name="et-al-min" value="6"/>
     <option name="et-al-use-first" value="6"/>
     <option name="subsequent-author-substitute" value="---"/>
+    <sort>
+      <key macro="sort-key"/>
+    </sort>
     <layout suffix=".">
       <group delimiter=". ">
 	<text macro="author-bib"/>
@@ -356,7 +370,7 @@
 		  <text variable="container-title" font-style="italic" />
 		</group>
 		<text variable="collection-title"/>
-		<text macro="editor-translator" />
+		<text macro="editor-translator-bib" />
 	      </group>
 	      <text variable="page" prefix=", "/>
 	      <text macro="publisher" prefix=". "/>
@@ -364,7 +378,7 @@
 	    </group>
 	  </else-if>
 	  <else-if type="article-journal">
-	    <text macro="editor-translator" suffix=". "/>
+	    <text macro="editor-translator-bib" suffix=". "/>
 	    <group class="container">
 	      <text variable="container-title" font-style="italic"/>
 	      <text variable="volume"  prefix=" "/>
@@ -374,14 +388,14 @@
 	    </group>
 	  </else-if>
 	  <else-if type="article-newspaper article-magazine" match="any">
-	    <text macro="editor-translator" suffix=". "/>
+	    <text macro="editor-translator-bib" suffix=". "/>
 	    <group delimiter=", ">
 	      <text variable="container-title" font-style="italic"/>
 	      <text macro="issued"/>
 	    </group>
 	  </else-if>
 	  <else-if type="paper-conference">
-	    <text macro="editor-translator" suffix=". "/>
+	    <text macro="editor-translator-bib" suffix=". "/>
 	    <text variable="genre" text-case="capitalize-first" suffix=" presented at the "/>
 	    <text variable="event" suffix=", "/>
 	    <text variable="event-place" suffix=", "/>
@@ -412,20 +426,20 @@
 	    <text macro="issued"/>
 	  </else-if>
 	  <else-if type="report">
-	    <text macro="editor-translator" suffix=". "/>
+	    <text macro="editor-translator-bib" suffix=". "/>
 	    <text variable="genre" suffix=". "/>
 	    <text macro="publisher" suffix=", "/>
 	    <text macro="issued"/>
 	  </else-if>
 	  <else-if type="book">
-	    <text macro="editor-translator" suffix=". "/>
+	    <text macro="editor-translator-bib" suffix=". "/>
 	    <text variable="collection-title" suffix=". "/>
 	    <text macro="publisher" suffix=", "/>
 	    <text macro="issued"/>
 	  </else-if>
 	  <else>
 	    <group class="container" delimiter=". ">
-	      <text macro="editor-translator"/>
+	      <text macro="editor-translator-bib"/>
 	      <text variable="container-title" font-style="italic"/>
 	      <text variable="collection-title" font-style="italic"/>
 	      <text variable="genre" text-case="capitalize-first"/>
