@@ -3,6 +3,7 @@
 	<info>
 		<title>Test</title>
 		<id>http://www.zotero.org/styles/test</id>
+		<link href="http://www.zotero.org/styles/test"/>
 		<author>
 			<name>Dan Stillman</name>
 		</author>
