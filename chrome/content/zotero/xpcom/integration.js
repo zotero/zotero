@@ -684,6 +684,7 @@ Zotero.Integration.Session.prototype.completeCitation = function(object) {
 			
 			this.dateModified[citationItem.itemID] = item.zoteroItem.getField("dateModified", true, true);
 			this.updateItemIDs[citationItem.itemID] = true;
+			this.bibliographyHasChanged = true;
 		}
 		
 		citationItem.item = item;
@@ -968,7 +969,6 @@ Zotero.Integration.Session.prototype.getBibliography = function() {
  */
 Zotero.Integration.Session.prototype.getCitations = function(regenerateAll) {
 	if(regenerateAll || this.regenerateAll) {
-		Zotero.debug("regenerating all!");
 		// update all indices
 		for(var i=0; i<this.citationsByIndex.length; i++) {
 			this.updateIndices[i] = true;
