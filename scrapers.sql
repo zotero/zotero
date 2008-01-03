@@ -15001,7 +15001,7 @@ function doImport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7', '1.0.0b4.r1', '', '2007-11-29 21:00:00', '1', '100', '3', 'RIS', 'Simon Kornblith', 'ris', 
+REPLACE INTO translators VALUES ('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7', '1.0.0b4.r1', '', '2008-01-03 09:44:52', '1', '100', '3', 'RIS', 'Simon Kornblith', 'ris', 
 'Zotero.configure("dataMode", "line");
 Zotero.addOption("exportNotes", true);
 
@@ -15234,26 +15234,20 @@ function processTag(item, tag, value) {
 		}
 	} else if(tag == "UR" || tag == "L1" || tag == "L2" || tag == "L4") {
 		// URL
-		//using regex to test URL until #821 is fixed
-		urlRe = /(https?:\/\/[^\s]*)/;
-		var m = urlRe.exec(value);
-		if (m){
-			value = m[1];
-			if(!item.url) {
+		if(!item.url) {
 			item.url = value;
-			}
-			if(tag == "UR") {
-				item.attachments.push({url:value});
-			} else if(tag == "L1") {
-				item.attachments.push({url:value, mimeType:"application/pdf",
-					title:"Full Text (PDF)", downloadable:true});
-			} else if(tag == "L2") {
-				item.attachments.push({url:value, mimeType:"text/html",
-					title:"Full Text (HTML)", downloadable:true});
-			} else if(tag == "L4") {
-				item.attachments.push({url:value,
-					title:"Image", downloadable:true});
-			}
+		}
+		if(tag == "UR") {
+			item.attachments.push({url:value});
+		} else if(tag == "L1") {
+			item.attachments.push({url:value, mimeType:"application/pdf",
+				title:"Full Text (PDF)", downloadable:true});
+		} else if(tag == "L2") {
+			item.attachments.push({url:value, mimeType:"text/html",
+				title:"Full Text (HTML)", downloadable:true});
+		} else if(tag == "L4") {
+			item.attachments.push({url:value,
+				title:"Image", downloadable:true});
 		}
 	} else if (tag == "IS") {
 		// Issue Number (patent: patentNumber)
