@@ -263,6 +263,10 @@ function ChromeExtensionHandler() {
 				var sorts = sortBy.split(',');
 				for (var i=0; i<sorts.length; i++) {
 					var [field, order] = sorts[i].split('/');
+					// Year field is really date field
+					if (field == 'year') {
+						field = 'date';
+					}
 					switch (order) {
 						case 'd':
 						case 'desc':
