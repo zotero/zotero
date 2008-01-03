@@ -154,8 +154,8 @@ function ChromeExtensionHandler() {
 						// items were selected
 						includeAllChildItems = false;
 					}
-					// If combining children, add matching parents
-					else if (combineChildItems) {
+					// If combining children or standalone note/attachment, add matching parents
+					else if (combineChildItems || !results[i].isRegularItem()) {
 						itemsHash[results[i].getID()] = items.length;
 						items.push(results[i].toArray(2));
 						// Flag item as a search match
@@ -290,10 +290,45 @@ function ChromeExtensionHandler() {
 					
 					// Multidimensional sort
 					do {
-						var cmp = collation.compareString(0,
-							a[sorts[index].field],
-							b[sorts[index].field]
-						);
+						// Note and attachment sorting when combineChildItems is false
+						if (!combineChildItems && sorts[index].field == 'note') {
+							if (a.itemType == 'note' || a.itemType == 'attachment') {
+								var valA = a.note;
+							}
+							else if (a.reportChildren) {
+								var valA = a.reportChildren.notes[0].note;
+							}
+							else {
+								var valA = '';
+							}
+							
+							if (b.itemType == 'note' || b.itemType == 'attachment') {
+								var valB = b.note;
+							}
+							else if (b.reportChildren) {
+								var valB = b.reportChildren.notes[0].note;
+							}
+							else {
+								var valB = '';
+							}
+							
+							// Put items without notes last
+							if (valA == '' && valB != '') {
+								var cmp = 1;
+							}
+							else if (valA != '' && valB == '') {
+								var cmp = -1;
+							}
+							else {
+								var cmp = collation.compareString(0, valA, valB);
+							}
+						}
+						else {
+							var cmp = collation.compareString(0,
+								a[sorts[index].field],
+								b[sorts[index].field]
+							);
+						}
 						
 						if (cmp == 0) {
 							continue;
