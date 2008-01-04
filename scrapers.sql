@@ -5539,75 +5539,6 @@ function doWeb(doc, url)	{
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('0faa6714-927a-4b07-911e-7101895daae0', '1.0.0b4.r1', '', '2007-07-31 16:45:00', '0', '100', '4', 'GBV', 'Ramesh Srigiriraju', '^http://(?:www\.|gso\.)?gbv\.de/', 
-'function detectWeb(doc, url)	{
-	var namespace=doc.documentElement.namespaceURI;
-	var nsResolver=namespace?function(prefix){
-		return (prefix=="x")?namespace:null;
-	}:null;
-	var searchpath=''//tr/td[@class="tab1"][text()="shortlist" or text()="Kurzliste"]'';
-	if(doc.evaluate(searchpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext())
-		return "multiple";
-	var singpath=''//tr/td[@class="tab1"][text()="title data" or text()="Titeldaten"]'';
-	var singpath2=''//tr/td[@class="tab1"][text()="availability" or text()="Nachweisinformationen"]'';
-	if(doc.evaluate(singpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()||
-		doc.evaluate(singpath2, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext())
-		return "website";
-}', 
-'function doWeb(doc, url)	{
-	var namespace=doc.documentElement.namespaceURI;
-	var nsResolver=namespace?function(prefix){
-		return (prefix=="x")?namespace:null;
-	}:null;
-	var searchpath=''//tr/td[@class="tab1"][text()="shortlist" or text()="Kurzliste"]'';
-	if(doc.evaluate(searchpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext())	{
-		var titlpath=''//tr/td[@class="hit"]/a/text()'';
-		var idpath=''//tr/td[@class="hit"][@align="right"]/text()'';
-		var titles=doc.evaluate(titlpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
-		var ids=doc.evaluate(idpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
-		var items=new Array();
-		var id;
-		while(id=ids.iterateNext())	{
-			var str=id.nodeValue;
-			str=str.substring(0, str.indexOf("."));
-			items[str]=titles.iterateNext().nodeValue;
-		}
-		items=Zotero.selectItems(items);
-		var string="http://gso.gbv.de/DWN";
-		for(var linx in items)	{
-			var datastr="FRST="+linx+"&LAST="+linx+"&NORND=1&UFRST="
-			+linx+"&ULAST="+linx+"&PRS=RIS&CHARSET_ONCE=UTF-8&MAXLINE=77&EMAIL=";
-			Zotero.Utilities.HTTP.doPost(string, datastr, function(text)	{
-				var trans=Zotero.loadTranslator("import");
-				trans.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-				trans.setString(text);
-				trans.translate();
-				Zotero.done();
-			});
-		}
-		Zotero.wait();
-	}
-	var singpath=''//tr/td[@class="tab1"][text()="title data" or text()="Titeldaten"]'';
-	var singpath2=''//tr/td[@class="tab1"][text()="availability" or text()="Nachweisinformationen"]'';
-	if(doc.evaluate(singpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()||
-		doc.evaluate(singpath2, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext())	{
-			var pagepath=''//tr/td[@class="h2"]/strong[@class="pages"]/text()'';
-			var str=doc.evaluate(pagepath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
-			var string="http://gso.gbv.de/DWN";
-			var regex=new RegExp("^([\\d]+)");
-			var nums=regex.exec(str);
-			var datastr="FRST="+nums[0]+"&LAST="+nums[0]+"&NORND=1&UFRST="
-			+nums[0]+"&ULAST="+nums[0]+"&PRS=RIS&CHARSET_ONCE=UTF-8&MAXLINE=77&EMAIL=";
-			Zotero.Utilities.HTTP.doPost(string, datastr, function(text)	{
-				var trans=Zotero.loadTranslator("import");
-				trans.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-				trans.setString(text);
-				trans.translate();
-				Zotero.done();
-			});
-		}
-}');
-
 REPLACE INTO translators VALUES ('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '1.0.0b3.r1', '', '2007-11-14 17:20:00', '1', '100', '4', 'Library Catalog (InnoPAC)', 'Simon Kornblith', '^https?://[^/]+/(?:search\??/|record=|search%7e/)', 
 'function detectWeb(doc, url) {
 	// First, check to see if the URL alone reveals InnoPAC, since some sites don''t reveal the MARC button
@@ -19423,6 +19354,17 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-fullnote-bibliogr
   </macro> 
   <macro name="author-bib">
     <names variable="author">
+      <name name-as-sort-order="first" and="text" sort-separator=", "
+	    delimiter=", " delimiter-precedes-last="always"/>
+      <label form="short" prefix=", " suffix="."/>
+      <substitute>
+	<names variable="editor"/>
+	<names variable="translator"/>
+      </substitute>
+    </names>
+  </macro>
+  <macro name="author-full">
+    <names variable="author">
       <name name-as-sort-order="all" and="text" sort-separator=", "
 	    delimiter=", " delimiter-precedes-last="always"/>
       <label form="short" prefix=", " suffix="."/>
@@ -19539,7 +19481,7 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-fullnote-bibliogr
     </choose>
   </macro>
   <macro name="sort-key">
-      <text macro="author-bib" suffix=" "/>
+      <text macro="author-full" suffix=" "/>
       <text variable="title" suffix=" "/>
       <text variable="genre"/>
   </macro>
@@ -19655,7 +19597,7 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-fullnote-bibliogr
 	      <text macro="editor-translator" prefix=", "/>
 	      <text variable="genre" prefix=", "/>
 	      <choose>
-		<if variable="publisher publisher-place" match="all">
+		<if variable="publisher-place publisher" match="any">
 		  <group prefix=" (" suffix=")" delimiter=", ">
 		    <text macro="publisher"/>
 		    <text macro="issued"/>
@@ -19995,6 +19937,11 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-note-bibliography
       </else>
     </choose>
   </macro>
+  <macro name="sort-key">
+      <text macro="author-full" suffix=" "/>
+      <text variable="title" suffix=" "/>
+      <text variable="genre"/>
+  </macro>
   <citation>
     <option name="et-al-min" value="4"/>
     <option name="et-al-use-first" value="1"/>
@@ -20027,6 +19974,9 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-note-bibliography
     <option name="et-al-min" value="6"/>
     <option name="et-al-use-first" value="6"/>
     <option name="subsequent-author-substitute" value="---"/>
+    <sort>
+      <key macro="sort-key"/>
+    </sort>
     <layout suffix=".">
       <group delimiter=". ">
 	<text macro="author"/>
