@@ -56,6 +56,17 @@
   </macro> 
   <macro name="author-bib">
     <names variable="author">
+      <name name-as-sort-order="first" and="text" sort-separator=", "
+	    delimiter=", " delimiter-precedes-last="always"/>
+      <label form="short" prefix=", " suffix="."/>
+      <substitute>
+	<names variable="editor"/>
+	<names variable="translator"/>
+      </substitute>
+    </names>
+  </macro>
+  <macro name="author-full">
+    <names variable="author">
       <name name-as-sort-order="all" and="text" sort-separator=", "
 	    delimiter=", " delimiter-precedes-last="always"/>
       <label form="short" prefix=", " suffix="."/>
@@ -172,7 +183,7 @@
     </choose>
   </macro>
   <macro name="sort-key">
-      <text macro="author-bib" suffix=" "/>
+      <text macro="author-full" suffix=" "/>
       <text variable="title" suffix=" "/>
       <text variable="genre"/>
   </macro>
@@ -288,7 +299,7 @@
 	      <text macro="editor-translator" prefix=", "/>
 	      <text variable="genre" prefix=", "/>
 	      <choose>
-		<if variable="publisher publisher-place" match="all">
+		<if variable="publisher-place publisher" match="any">
 		  <group prefix=" (" suffix=")" delimiter=", ">
 		    <text macro="publisher"/>
 		    <text macro="issued"/>
