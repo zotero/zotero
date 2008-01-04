@@ -157,6 +157,11 @@
       </else>
     </choose>
   </macro>
+  <macro name="sort-key">
+      <text macro="author-full" suffix=" "/>
+      <text variable="title" suffix=" "/>
+      <text variable="genre"/>
+  </macro>
   <citation>
     <option name="et-al-min" value="4"/>
     <option name="et-al-use-first" value="1"/>
@@ -189,6 +194,9 @@
     <option name="et-al-min" value="6"/>
     <option name="et-al-use-first" value="6"/>
     <option name="subsequent-author-substitute" value="---"/>
+    <sort>
+      <key macro="sort-key"/>
+    </sort>
     <layout suffix=".">
       <group delimiter=". ">
 	<text macro="author"/>
