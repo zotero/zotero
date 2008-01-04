@@ -15001,7 +15001,7 @@ function doImport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7', '1.0.0b4.r1', '', '2008-01-03 09:44:52', '1', '100', '3', 'RIS', 'Simon Kornblith', 'ris', 
+REPLACE INTO translators VALUES ('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7', '1.0.2', '', '2008-01-04 02:47:18', '1', '100', '3', 'RIS', 'Simon Kornblith', 'ris', 
 'Zotero.configure("dataMode", "line");
 Zotero.addOption("exportNotes", true);
 
