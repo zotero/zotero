@@ -1019,9 +1019,8 @@ Zotero.CSL.prototype._processElements = function(item, element, formattedString,
 					var newString = formattedString.clone(child.@delimiter.toString());
 					var success = this._processElements(item, macro, newString,
 						context, citationItem, ignore);
-					
+					if(success) dataAppended = true;
 					formattedString.concat(newString, child);
-					dataAppended = true;
 				}
 			} else if(child.@value.length()) {
 				formattedString.append(child.@value.toString(), child);
@@ -1261,54 +1260,68 @@ Zotero.CSL.prototype._processElements = function(item, element, formattedString,
 					
 					// inspect variables
 					var done = false;
-					var attributes = ["variable", "is-date", "is-numeric", "type", "disambiguate", "locator", "position"];
+					var attributes = ["variable", "is-date", "is-numeric", "is-plural", "type", "disambiguate", "locator", "position"];
 					for(var k=0; !done && k<attributes.length; k++) {
 						var attribute = attributes[k];
 						
 						if(newChild["@"+attribute].length()) {
 							var variables = newChild["@"+attribute].toString().split(" ");
 							for(var j=0; !done && j<variables.length; j++) {
+								var exists = false;
 								if(attribute == "variable") {
 									if(variables[j] == "locator") {
 										// special case for locator
-										var exists = citationItem && citationItem.locator && citationItem.locator.length > 0
+										exists = citationItem && citationItem.locator && citationItem.locator.length > 0
 									}
 									else if(Zotero.CSL._dateVariables[variables[j]]) {
 										// getDate not false/undefined
-										var exists = !!item.getDate(variables[j]);
+										exists = !!item.getDate(variables[j]);
 									} else if(Zotero.CSL._namesVariables[variables[j]]) {
 										// getNames not false/undefined, not empty
-										var exists = item.getNames(variables[j]);
+										exists = item.getNames(variables[j]);
 										if(exists) exists = !!exists.length;
 									} else {
-										var exists = item.getVariable(variables[i]);
+										exists = item.getVariable(variables[j]);
 										if (exists) exists = !!exists.length;
 									}
 								} else if (attribute == "is-numeric") {
-									var exists = item.getNumericVariable(variables[i]);
+									exists = item.getNumericVariable(variables[j]);
 								} else if (attribute == "is-date") { // XXX - this needs improving
-									if (Zotero.CSL._dateVariables[variables[j]]) 
-										var exists = !!item.getDate(variables[j]);
+									if (Zotero.CSL._dateVariables[variables[j]]) {
+										exists = !!item.getDate(variables[j]);
+									}
+								} else if(attribute == "is-plural") {
+									if(Zotero.CSL._namesVariables[variables[j]]) {
+										exists = item.getNames(variables[j]);
+										if(exists) exists = exists.length > 1;
+									} else if(variables[j] == "page" || variables[j] == "locator") {
+										if(variables[j] == "page") {
+											var value = item.getVariable("page");
+										} else {
+											var value = citationItem && citationItem.locator ? citationItem.locator : "";
+										}
+										exists = value.indexOf("-") != -1 || value.indexOf(",") != -1 || value.indexOf("\u2013") != -1;
+									}
 								} else if(attribute == "type") {
-									var exists = item.isType(variables[j]);
+									exists = item.isType(variables[j]);
 								} else if(attribute == "disambiguate") {
-									var exists = (variables[j] == "true" && item.getProperty("disambiguate-condition"))
+									exists = (variables[j] == "true" && item.getProperty("disambiguate-condition"))
 										|| (variables[j] == "false" && !item.getProperty("disambiguate-condition"));
 								} else if(attribute == "locator") {
-									var exists = citationItem && citationItem.locator &&
+									exists = citationItem && citationItem.locator &&
 										(citationItem.locatorType == variables[j]
 										|| (!citation.locatorType && variables[j] == "page"));
 								} else {	// attribute == "position"
 									if(variables[j] == "first") {
-										var exists = !citationItem
+										exists = !citationItem
 											|| !citationItem.position
 											|| citationItem.position == Zotero.CSL.POSITION_FIRST;
 									} else if(variables[j] == "subsequent") {
-										var exists = citationItem && citationItem.position >= Zotero.CSL.POSITION_SUBSEQUENT;
+										exists = citationItem && citationItem.position >= Zotero.CSL.POSITION_SUBSEQUENT;
 									} else if(variables[j] == "ibid") {
-										var exists = citationItem && citationItem.position >= Zotero.CSL.POSITION_IBID;
+										exists = citationItem && citationItem.position >= Zotero.CSL.POSITION_IBID;
 									} else if(variables[j] == "ibid-with-locator") {
-										var exists = citationItem && citationItem.position == Zotero.CSL.POSITION_IBID_WITH_LOCATOR;
+										exists = citationItem && citationItem.position == Zotero.CSL.POSITION_IBID_WITH_LOCATOR;
 									}
 								}
 								
@@ -1336,9 +1349,8 @@ Zotero.CSL.prototype._processElements = function(item, element, formattedString,
 					var newString = formattedString.clone(newChild.@delimiter.toString());			
 					var success = this._processElements(item, newChild,
 						newString, context, citationItem, ignore);
-					
+					if(success) dataAppended = true;
 					formattedString.concat(newString, child);
-					dataAppended = true;
 					
 					// then break
 					break;
@@ -2640,7 +2652,7 @@ Zotero.CSL.FormattedString = function(context, format, delimiter, subsequent) {
 	}
 }
 
-Zotero.CSL.FormattedString._punctuation = "!.,?";
+Zotero.CSL.FormattedString._punctuation = "!.,?:";
 
 /*
  * attaches another formatted string to the end of the current one
@@ -2741,6 +2753,10 @@ Zotero.CSL.FormattedString.prototype.append = function(string, element, dontDeli
 	   // if string already ends in punctuation, preserve the existing stuff
 	   // and don't add a period
 		string = string.substr(1);
+	} else if(this.string[this.string.length-1] == "(" && string[0] == " ") {
+		string = string.substr(1);
+	} else if(this.string[this.string.length-1] == " " && string[0] == ")") {
+		this.string = this.string.substr(0, this.string.length-1);
 	}
 	
 	// close quotes, etc. using punctuation
