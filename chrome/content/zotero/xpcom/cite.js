@@ -2337,6 +2337,8 @@ Zotero.CSL.ItemSet.prototype.add = function(items) {
 			var newItem = new Zotero.CSL.Item(items[i]);
 		}
 		
+		newItem.setProperty("index", this.items.length);
+		
 		this.itemsById[newItem.getID()] = newItem;
 		this.items.push(newItem);
 		newItems.push(newItem);
