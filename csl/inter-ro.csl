@@ -192,7 +192,7 @@
                 </if>
                 <else-if position="ibid-with-locator">
                     <group delimiter=", ">
-                        <text term="ibid" form="long" font-style="italic" text-case="capitalize-first"/>
+                        <text term="ibid" form="long" font-style="italic" text-case="capitalize-first" include-period="true"/>
                         <group>
                             <label variable="locator" include-period="true" form="short"/>
                             <text variable="locator" prefix=" "/>
@@ -200,7 +200,7 @@
                     </group>
                 </else-if>
                 <else-if position="ibid">
-                    <text term="ibid" form="long" font-style="italic" text-case="capitalize-first"/>
+                    <text term="ibid" form="long" include-period="true" font-style="italic" text-case="capitalize-first"/>
                 </else-if>
                 <else-if position="subsequent">
                     <choose>
