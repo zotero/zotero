@@ -10,8 +10,8 @@
         </author>
         <category term="theology"/>
         <category term="generic-base"/>
-        <category term="author-date"/>
-        <updated>2007-09-26T10:58:54+00:00</updated>
+        <category term="numeric"/>
+        <updated>2008-01-11T01:13:54+00:00</updated>
     </info>
     <macro name="editor-translator">
         <names variable="editor translator" delimiter=", ">
