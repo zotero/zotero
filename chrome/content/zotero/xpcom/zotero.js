@@ -1387,7 +1387,7 @@ Zotero.Date = new function(){
 		if(!date.month) {
 			// compile month regular expression
 			var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul',
-				+ 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+				'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 			// If using a non-English bibliography locale, try those too
 			if (Zotero.CSL.Global.locale != 'en-US') {
 				months = months.concat(Zotero.CSL.Global.getMonthStrings("short"));
