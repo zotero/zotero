@@ -647,7 +647,7 @@ Zotero.CSL.prototype.formatBibliography = function(itemSet, format) {
 			if(this.class == "note" && isCitation) {
 				output += "<li>"+string+span+"</li>\r\n";
 			} else if(secondFieldAlign) {
-				output += '<tr style="vertical-align:top;"><td>'+string+span+"<td></tr>\r\n";
+				output += '<tr style="vertical-align:top;"><td>'+string+span+"</td></tr>\r\n";
 				for(var j=0; j<entrySpacing; j++) {
 					output += '<tr><td colspan="2">&nbsp;</td></tr>\r\n';
 				}
