@@ -91,12 +91,14 @@
       <group delimiter=" ">
         <choose>
           <if variable="author editor translator" match="any">
-            <text macro="author-short"/>
-            <choose>
-              <if disambiguate="true">
-                <text macro="title-short" prefix=", "/>
-              </if>
-            </choose>
+            <group delimiter=", ">
+          <text macro="author-short"/>
+          <choose>
+            <if disambiguate="true">
+              <text macro="title-short"/>
+            </if>
+          </choose>
+            </group>
           </if>
           <else>
             <text macro="title-short"/>
