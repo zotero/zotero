@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-01-13 17:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-01-13 19:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1309,7 +1309,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('e85a3134-8c1a-8644-6926-584c8565f23e', '1.0.0b4.r1', '', '2008-01-13 17:00:00', '1', '100', '4', 'History Cooperative', 'Simon Kornblith', 'https?://[^/]*historycooperative\.org[^/]*/(?:journals/.+/.+/.+\.s?html$|cgi-bin/search.cgi|journals/.+/.+/)', 
+REPLACE INTO translators VALUES ('e85a3134-8c1a-8644-6926-584c8565f23e', '1.0.0b4.r1', '', '2008-01-13 19:30:00', '1', '100', '4', 'History Cooperative', 'Simon Kornblith', 'https?://[^/]*historycooperative\.org[^/]*/(?:journals/.+/.+/.+\.s?html$|cgi-bin/search.cgi|journals/.+/.+/)', 
 'function detectWeb(doc, url) {
 	var contents = doc.title.replace("Contents", "");
 	if(doc.title != contents || doc.title == "History Cooperative: Search Results") {
@@ -7497,7 +7497,7 @@ REPLACE INTO translators VALUES ('0f9fc2fc-306e-5204-1117-25bca009dffc', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('c54d1932-73ce-dfd4-a943-109380e06574', '1.0.0b4.r1', '', '2008-01-13 17:00:00', '1', '100', '4', 'Project MUSE', 'Simon Kornblith', 'https?://[^/]*muse\.jhu\.edu[^/]*/(?:journals/[^/]+/[^/]+/[^/]+\.html|search/results)', 
+REPLACE INTO translators VALUES ('c54d1932-73ce-dfd4-a943-109380e06574', '1.0.0b4.r1', '', '2008-01-13 19:30:00', '1', '100', '4', 'Project MUSE', 'Simon Kornblith', 'https?://[^/]*muse\.jhu\.edu[^/]*/(?:journals/[^/]+/[^/]+/[^/]+\.html|search/results)', 
 'function detectWeb(doc, url) {
 	var searchRe = new RegExp("^https?://[^/]+/search/results");
 	if(searchRe.test(url)) {
