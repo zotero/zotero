@@ -840,7 +840,7 @@ Zotero.CSL.prototype._processNames = function(item, element, formattedString, co
 								
 								// cut off lowercase parts of otherwise capitalized names (e.g., "de")
 								var lastNameParts = name.split(" ");
-								if(lastNameParts.length > 1 && lastNameParts[0].length <= 4
+								if(lastNameParts.length > 1 && lastNameParts[0] !== "" && lastNameParts[0].length <= 4
 										&& lastNameParts[0][0].toLowerCase() == lastNameParts[0][0]
 										&& lastNameParts[lastNameParts.length-1][0].toUpperCase() == lastNameParts[lastNameParts.length-1][0]) {
 									name = "";
