@@ -58,6 +58,10 @@
     </layout>
   </citation>
   <bibliography>
+    <sort>
+      <key macro="author"/>
+      <key variable="title"/>
+    </sort>
     <layout suffix="." >
       <group delimiter=" ">
 	<text variable="citation-number" suffix=". "/>
