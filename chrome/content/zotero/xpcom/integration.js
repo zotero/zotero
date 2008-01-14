@@ -454,7 +454,7 @@ Zotero.Integration.SOAP = new function() {
 	 */
 	function restoreSession(vars) {
 		if(!vars || !_checkVersion(vars[0])) {
-			return "ERROR:"+Zotero.getString("integration.incompatibleVersion");
+			return "ERROR:"+Zotero.getString("integration.incompatibleVersion", Zotero.version);
 		}
 
 		try {
@@ -490,7 +490,7 @@ Zotero.Integration.SOAP = new function() {
 	 */
 	function setDocPrefs(vars) {
 		if(!vars || !vars.length || !_checkVersion(vars[1])) {
-			return "ERROR:"+Zotero.getString("integration.incompatibleVersion");
+			return "ERROR:"+Zotero.getString("integration.incompatibleVersion", Zotero.version);
 		}
 		
 		var io = new function() {

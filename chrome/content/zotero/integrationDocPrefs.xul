@@ -5,7 +5,7 @@
 <!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
 
 <dialog
-	id="add-citation-dialog"
+	id="doc-prefs-dialog"
 	orient="vertical"
 	buttons="accept"
 	title="&zotero.integration.docPrefs.title;"
