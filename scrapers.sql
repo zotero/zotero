@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-01-13 19:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-01-14 17:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -2083,6 +2083,79 @@ function getData(ids){
 		}
 		newItem.complete();		
 	}, function(){Zotero.done();});	
+	Zotero.wait();
+}');
+
+REPLACE INTO translators VALUES ('27ee5b2c-2a5a-4afc-a0aa-d386642d4eed', '1.0.0b4.r5', '', '2008-01-14 10:47:34', '0', '100', '4', 'PubMed Central', 'Michael Berkowitz', 'http://[^/]*.nih.gov/', 
+'function detectWeb(doc, url) {
+	if (doc.evaluate(''//table[@id="ResultPanel"]//td[2]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+		return "multiple";
+	} else if (url.indexOf("articlerender") != -1) {
+		return "journalArticle";
+	}
+}', 
+'function doWeb(doc, url) {
+	var tagMap = {journal_title:"publicationTitle",
+					title:"title",
+					date:"date",
+					issue:"issue",
+					volume:"volume",
+					doi:"DOI",
+					fulltext_html_url:"url"
+				}
+	var URIs = new Array();
+	var items = new Object();
+	if (doc.title.indexOf("PMC Results") != -1) {
+		var titlex = ''//table[@id="ResultPanel"]/tbody/tr[3]/td/div/table/tbody/tr/td[2]/div[@class="portal-tocentry"]/div[@class="toc-entry"]/div/div[@class="toc-title"]'';
+		var linkx = ''//table[@id="ResultPanel"]/tbody/tr[3]/td/div/table/tbody/tr/td[2]/div[@class="portal-tocentry"]/div[@class="toc-entry"]/div/a[@class="toc-link"][2]'';
+		
+		var titles = doc.evaluate(titlex, doc, null, XPathResult.ANY_TYPE, null);
+		var next_title = titles.iterateNext();
+		var links = doc.evaluate(linkx, doc, null, XPathResult.ANY_TYPE, null);
+		var next_link = links.iterateNext();
+		while (next_title && next_link) {
+			items[next_link.href] = next_title.textContent;
+			next_title = titles.iterateNext();
+			next_link = links.iterateNext();
+		}
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			var artid= i.match(/\d+/)[0];
+			URIs.push(artid);
+		}
+	} else {
+		URIs.push(url.match(/\d+/)[0]);
+	}
+	for (var id in URIs) {	
+		Zotero.Utilities.HTTP.doGet(''http://www.pubmedcentral.nih.gov/articlerender.fcgi?tool=pmcentrez&artid='' + URIs[id], function(text) {
+			var tags = new Object();
+			var meta = text.match(/<meta[^>]*>/gi);
+			for (var i in meta) {
+				var item = meta[i].match(/=\"([^"]*)\"/g);
+				if (item[0].substring(2, 10) == ''citation'') {
+					tags[item[0].substring(11, item[0].length - 1)] = item[1].substring(2, item[1].length - 1);
+				}
+			}
+			var newItem = new Zotero.Item("journalArticle");
+			
+			for (var tag in tagMap) {
+				newItem[tagMap[tag]] = tags[tag];
+			}
+			
+			for (var i in meta) {
+				if (meta[i].match(/DC.Contributor/)) {
+					newItem.creators.push(Zotero.Utilities.cleanAuthor(meta[i].match(/content=\"([^"]*)\">/)[1], "author"));
+				}
+			}
+			
+			newItem.attachments = [
+				{url:tags["fulltext_html_url"], title:"PubMed Central Snapshot", mimeType:"text/html"},
+				{url:tags["pdf_url"], title:"PubMed Central Full Text PDF", mimeType:"application/pdf"}
+			];
+			
+			newItem.complete();
+		});
+	}
 	Zotero.wait();
 }');
 
@@ -7613,7 +7686,7 @@ REPLACE INTO translators VALUES ('c54d1932-73ce-dfd4-a943-109380e06574', '1.0.0b
 	}
 }');
 
-REPLACE INTO translators VALUES ('fcf41bed-0cbc-3704-85c7-8062a0068a7a', '1.0.0b3.r1', '', '2008-01-02 18:15:00', '1', '100', '4', 'NCBI PubMed', 'Simon Kornblith and Michael Berkowitz', '^http://www\.ncbi\.nlm\.nih\.gov/(pubmed|sites/entrez|entrez/query\.fcgi\?.*db=PubMed)', 
+REPLACE INTO translators VALUES ('fcf41bed-0cbc-3704-85c7-8062a0068a7a', '1.0.0b3.r1', '', '2008-01-14 17:00:00', '1', '100', '4', 'NCBI PubMed', 'Simon Kornblith and Michael Berkowitz', 'http://www\.ncbi\.nlm\.nih\.gov/(pubmed|sites/entrez|entrez/query\.fcgi\?.*db=PubMed)', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -7622,8 +7695,8 @@ REPLACE INTO translators VALUES ('fcf41bed-0cbc-3704-85c7-8062a0068a7a', '1.0.0b
 
 	var uids = doc.evaluate(''//input[@id="UidCheckBox" or @name="uid"]'', doc,
 			       nsResolver, XPathResult.ANY_TYPE, null);
-	if(uids.iterateNext()) {
-		if (uids.iterateNext()){
+	if(uids.iterateNext() && doc.title.indexOf("PMC Results") == -1) {
+		if (uids.iterateNext() && doc.title.indexOf("PMC Results") == -1){
 			return "multiple";
 		}
 		return "journalArticle";
