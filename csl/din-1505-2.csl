@@ -2,8 +2,8 @@
 <?oxygen RNGSchema="file:/C:/Dokumente%20und%20Einstellungen/Administrator/Desktop/csl.rnc" type="compact"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="in-text" xml:lang="en">
     <info>
-        <title>DIN 1505-2(author-date)</title>
-        <id>http://www.zotero.org/styles/DIN 1505-2(author-date)</id>
+        <title>DIN 1505-2 (author-date)</title>
+        <id>http://www.zotero.org/styles/din-1505-2</id>
         <author>
             <name>Sven Rothe</name>
             <email>mmoole@googlemail.com</email>
