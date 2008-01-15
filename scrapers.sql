@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-01-14 20:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-01-15 21:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -8339,133 +8339,66 @@ function doWeb() {
 	getAllIds();
 }');
 
-REPLACE INTO translators VALUES ('3af43735-36d3-46ae-9ca8-506ff032b0d3', '1.0.0b4.r1', '', '2007-06-21 06:30:00', '0', '100', '4', 'HeinOnline', 'Bill McKinney', 'http:\/\/heinonline\.org\/HOL\/Page\?handle\=hein\.journals\/.+', 
+REPLACE INTO translators VALUES ('37445f52-64fa-4a2a-9532-35753520a0f0', '1.0.0b4.r5', '', '2008-01-15 21:00:00', '0', '100', '4', 'HeinOnline', 'Michael Berkowitz', 'http://heinonline\.org/HOL/', 
 'function detectWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == ''x'') return namespace; else return null;
-	} : null;
-	
-	var re = /http:\/\/heinonline\.org\/HOL\/Page\?handle\=hein\.journals\/.+/
-	if(re.test(url)) {
-		return "book";
-	} else {
-		var aTags = doc.getElementsByTagName("a");
-		for(var i=0; i<aTags.length; i++) {
-			if(articleRegexp.test(aTags[i].href)) {
-				return "multiple";
-			}
-		}
+	if (url.indexOf("LuceneSearch") != -1) {
+		return "multiple";
+	} else if (url.indexOf("handle=hein.journals")) {
+		return "journalArticle";
 	}
 }', 
-'function scrape(doc) {
-
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == ''x'') return namespace; else return null;
-	} : null;
+'function doWeb(doc, url) {
+	
+	var handle = url.match(/handle=([^&]*)&/)[1];
+	if (url.match(/&id=(\d+)/)) {
+		var id= url.match(/&id=(\d+)/)[1];
+	} else if (url.match(/&div=(\d+)/)) {
+		var ids = new Array();
+		var id = doc.evaluate(''//option[@selected="selected"]/@value'', doc, null, XPathResult.ANY_TYPE, null);
+		var next_id = id.iterateNext();
+		while (next_id) {
+			ids.push(next_id.textContent);
+			next_id = id.iterateNext();
+		}
+		id = ids[ids.length - 1];
+	}
+	
+	var citationurl = ''http://heinonline.org/HOL/citation-info?handle='' + handle + ''&id='' + id;
+	var xpath = ''//div[@id="guide"]/ul/li[3]/a'';
+	var journal = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent.match(/([^\d]*)/)[1];
 	
 	var newItem = new Zotero.Item("journalArticle");
-	newItem.url = doc.location.href;
+	newItem.publicationTitle = Zotero.Utilities.trimInternal(journal);
+	newItem.repository = "HeinOnline";
+	newItem.url = url;
 	
-	// publicaton
-	var tmpTitle = doc.title;
-	var titleRe= /Law Journal Library (.+)\s+-\s+HeinOnline\.org/
-	var titleMatch = titleRe.exec(tmpTitle);
-	if (titleMatch) {
-		newItem.publicationTitle = titleMatch[1];
-	} else {
-		newItem.publicationTitle = doc.title;
-	}
-	
-	// default title
-	newItem.title = doc.title;
-	
-	// get selected page
-	var selectedPage = "1";
-	var pageNum = "1";
-	var p= doc.getElementsByTagName("select");
-	if (p.length > 0) {
-		for (var i = 0; i < p[4].options.length; i++) {
-			if (p[4].options[ i ].selected) {
-				selectedPage = p[4].options[i].value;
-				pageNum = p[4].options[i].innerHTML;
-				newItem.pages = pageNum.replace(/^Page\s+/,"") + "-";
+	Zotero.Utilities.HTTP.doGet(citationurl, function(text) {
+		var stuff = text.match(/(\d+)\s+([^\d]+)\s+(\d+)\s+\(([-\d]+)\)\s+<br>\s+([^;]+)(;\s*(.*))?/);
+		newItem.volume = stuff[1];
+		newItem.journalAbbreviation = stuff[2];
+		newItem.pages = stuff[3];
+		newItem.date = stuff[4];
+		newItem.title = Zotero.Utilities.trimInternal(stuff[5]);
+		
+		if (stuff[7]) {
+			var authors = stuff[7].split('';'');
+			for (var i in authors) {
+				authors[i] = authors[i].split('','');
+				newItem.creators.push({lastName:authors[i][0], firstName:authors[i][1], creatorType:"author"});
 			}
 		}
-	}
-
-
-	// get handle
-	var handle="";
-	var handleRe = /handle=([^\&]+)\&/
-	var handleMatch = handleRe.exec(doc.location.href);
-	if (handleMatch) {
-		handle = handleMatch[1];
-	}
-	
-	// fetch citation
-	var url = "http://heinonline.org/HOL/citation-info?handle="+handle+"&id="+selectedPage+"&rand=12345&collection=journals";
-	Zotero.Utilities.HTTP.doGet(url, function(text) {
 		
-		var tmpTxt = text;
-		var citeRe = /(\d+)\s+(.+)\s+(\d+)\s+\(([^\)]+)\)\s+<br>\s+([^;]+)(;\s.+[\S])/
-		var citeMatch = citeRe.exec(tmpTxt)
-		if (citeMatch) {
-			
-			newItem.volume = citeMatch[1];
-			//newItem.issue= citeMatch[3];
-			newItem.date = citeMatch[4];
-			newItem.journalAbbreviation = citeMatch[2];
-			newItem.title = citeMatch[5];
-			
-			var tmpAuthors = citeMatch[6];
-			var authors = tmpAuthors.split(";");
-			for (i=1;i<authors .length;i++) {
-				
-				var name = authors[i].split(",");
-				var fname = name[1].replace(/^\s+/,"");
-				var lname= name[0].replace(/^\s+/,"");
-				newItem.creators.push({lastName:lname, firstName:fname, creatorType:"author", fieldMode:true});
-			}
-			newItem.abstractNote =  citeMatch[0];
-		}	
-	
-		var getSectionUrl = "http://heinonline.org/HOL/ajaxcalls/get-section-id?base=js&handle="+handle+"&id="+selectedPage;
-		Zotero.Utilities.HTTP.doGet(getSectionUrl, function(sectionRes) {
-		
-			var pdfUrl = "http://heinonline.org/HOL/PDF?handle="+handle+"&id="+selectedPage+"&print=section&section="+sectionRes+"&ext=.pdf";
-			newItem.attachments.push({url:pdfUrl, title:"PDF version", mimeType:"application/pdf", downloadable:true});
-			newItem.notes.push({note:"PDF version: "+pdfUrl});
+		var pdfurl = ''http://heinonline.org/HOL/Print?handle='' + handle + ''&id='' + id;
+		Zotero.Utilities.HTTP.doGet(pdfurl, function(text) {
+			var newurl = text.match(/<a\s+href=\"(PDF[^"]+)\"/i)[1];
+			newItem.attachments = [
+				{url:url, title:"HeinOnline Snapshot", mimeType:"text/html"},
+				{url:''http://heinonline.org/HOL/'' + newurl, title:"HeinOnline PDF", mimeType:"application/pdf"}
+			];
 			newItem.complete();
-		});	
-	});	
-	
-	
-	// print page: PDF?handle=hein.journals/adelrev11&id=150&print=section&section=16&ext=.pdf"
-}
-
-function doWeb(doc, url) {
-	var re=  /http:\/\/heinonline\.org\/HOL\/Page\?handle\=hein\.journals\/.+/
-	if(re.test(url)) {
-		scrape(doc);
-	} else {
-		
-		var items = Zotero.Utilities.getItemArray(doc, doc, re);
-		items = Zotero.selectItems(items);
-		
-		if(!items) {
-			return true;
-		}
-		
-		var urls = new Array();
-		for(var i in items) {
-			urls.push(i);
-		}
-		
-		Zotero.Utilities.processDocuments(urls, scrape, function() { Zotero.done(); });
-		Zotero.wait();
-	}
+		});
+	});
+	Zotero.wait();
 }');
 
 REPLACE INTO translators VALUES ('dede653d-d1f8-411e-911c-44a0219bbdad', '1.0.0b4.r1', '', '2007-06-18 18:15:00', '0', '100', '4', 'GPO Access e-CFR', 'Bill McKinney', '^http://ecfr\.gpoaccess\.gov/cgi/t/text/text-idx.+', 
