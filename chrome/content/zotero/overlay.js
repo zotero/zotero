@@ -1139,13 +1139,14 @@ var ZoteroPane = new function()
 		
 		var url = window.content.location.href;
 		var [mode, format] = Zotero.QuickCopy.getFormatFromURL(url).split('=');
+		var [mode, contentType] = mode.split('/');
 		
 		if (mode == 'bibliography') {
 			if (asCitations) {
-				Zotero_File_Interface.copyCitationToClipboard(items, format);
+				Zotero_File_Interface.copyCitationToClipboard(items, format, contentType == 'html');
 			}
 			else {
-				Zotero_File_Interface.copyItemsToClipboard(items, format);
+				Zotero_File_Interface.copyItemsToClipboard(items, format, contentType == 'html');
 			}
 		}
 		else if (mode == 'export') {

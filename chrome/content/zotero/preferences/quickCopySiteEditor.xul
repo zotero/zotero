@@ -20,7 +20,7 @@
 			function onAccept() {
 				var io = window.arguments[0];
 				io.domain = document.getElementById('zotero-quickCopy-domain').value;
-				io.format = document.getElementById('zotero-quickCopy-format').value;
+				io.format = document.getElementById('zotero-quickCopy-menu').value;
 				io.ok = true;
 			}
 		}
@@ -28,21 +28,22 @@
 	</script>
 	
 	<vbox id="zotero-preferences-quickCopySiteEditor">
-		<vbox>
-			<label value="&zotero.preferences.quickCopy.siteEditor.domainPath; &zotero.preferences.quickCopy.siteEditor.domainPath.example;" control="zotero-quickCopy-domain"/>
-			<textbox id="zotero-quickCopy-domain"/>
-		</vbox>
-		<vbox>
-			<label value="&zotero.preferences.quickCopy.siteEditor.outputFormat;" control="zotero-quickCopy-format"/>
-			<menulist id="zotero-quickCopy-format"/>
-		</vbox>
+		<label value="&zotero.preferences.quickCopy.siteEditor.domainPath; &zotero.preferences.quickCopy.siteEditor.domainPath.example;" control="zotero-quickCopy-domain"/>
+		<textbox id="zotero-quickCopy-domain"/>
+		<separator class="thin"/>
+		<label value="&zotero.preferences.quickCopy.siteEditor.outputFormat;" control="zotero-quickCopy-menu"/>
+		<menulist id="zotero-quickCopy-menu"/>
+		<separator class="thin"/>
+		<checkbox id="zotero-quickCopy-copyAsHTML" label="&zotero.preferences.quickCopy.copyAsHTML;"
+			oncommand="buildQuickCopyFormatDropDown(document.getElementById('zotero-quickCopy-menu'), this.checked ? 'html' : '')"/>
 	</vbox>
 	
 	<script>
 	<![CDATA[
 		var io = window.arguments[0];
 		document.getElementById('zotero-quickCopy-domain').value = io.domain ? io.domain : '';
-		buildQuickCopyFormatDropDown(document.getElementById('zotero-quickCopy-format'), io.format);
+		buildQuickCopyFormatDropDown(document.getElementById('zotero-quickCopy-menu'), Zotero.QuickCopy.getContentType(io.format), io.format);
+		updateQuickCopyHTMLCheckbox();
 	]]>
 	</script>
 </dialog>

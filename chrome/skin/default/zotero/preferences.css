@@ -100,6 +100,14 @@ grid row hbox:first-child
 	font-size: .85em;
 }
 
+#quickCopy-siteSettings-rows::-moz-tree-cell(quickCopy-copyAsHTML) {
+	/*
+	DEBUG: possible to center checkmark here instead of with spaces?
+	
+	Tried text-align, -moz-box-align, and -moz-box-pack
+	*/
+}
+
 #zotero-quickCopy-format
 {
 	min-height: 1.5em; /* Fix collapse on Windows */

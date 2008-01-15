@@ -312,7 +312,7 @@ var Zotero_File_Interface = new function() {
 	 *
 	 * Does not check that items are actual references (and not notes or attachments)
 	 */
-	function copyItemsToClipboard(items, style) {
+	function copyItemsToClipboard(items, style, asHTML) {
 		// copy to clipboard
 		var transferable = Components.classes["@mozilla.org/widget/transferable;1"].
 						   createInstance(Components.interfaces.nsITransferable);
@@ -329,8 +329,8 @@ var Zotero_File_Interface = new function() {
 		transferable.addDataFlavor("text/html");
 		transferable.setTransferData("text/html", str, bibliography.length*2);
 		
-		// add text
-		var bibliography = csl.formatBibliography(itemSet, "Text");
+		// add text (or HTML source)
+		var bibliography = csl.formatBibliography(itemSet, asHTML ? 'HTML' : 'Text');
 		var str = Components.classes["@mozilla.org/supports-string;1"].
 				  createInstance(Components.interfaces.nsISupportsString);
 		str.data = bibliography;
@@ -345,8 +345,10 @@ var Zotero_File_Interface = new function() {
 	 * Copies HTML and text citations for passed items in given style
 	 *
 	 * Does not check that items are actual references (and not notes or attachments)
+	 *
+	 * if |asHTML| is true, copy HTML source as text
 	 */
-	function copyCitationToClipboard(items, style) {
+	function copyCitationToClipboard(items, style, asHTML) {
 		// copy to clipboard
 		var transferable = Components.classes["@mozilla.org/widget/transferable;1"].
 						   createInstance(Components.interfaces.nsITransferable);
@@ -369,8 +371,8 @@ var Zotero_File_Interface = new function() {
 		transferable.addDataFlavor("text/html");
 		transferable.setTransferData("text/html", str, bibliography.length*2);
 		
-		// add text
-		var bibliography = csl.formatCitation(citation, "Text");
+		// add text (or HTML source)
+		var bibliography = csl.formatCitation(citation, asHTML ? 'HTML' : 'Text');
 		var str = Components.classes["@mozilla.org/supports-string;1"].
 				  createInstance(Components.interfaces.nsISupportsString);
 		str.data = bibliography;
