@@ -85,18 +85,26 @@
     <option name="disambiguate-add-names" value="true"/>
     <option name="disambiguate-add-givenname" value="true"/>
     <layout prefix="(" suffix=")" delimiter="; ">
-      <text macro="author-short"/>
-      <date variable="issued" prefix=", ">
-	<date-part name="year"/>
-      </date>
-      <label variable="locator" prefix=", " suffix="." form="short"/>
-      <text variable="locator" prefix=" "/>
+      <group delimiter=", ">
+	<text macro="author-short"/>
+	<date variable="issued" >
+	  <date-part name="year"/>
+	</date>
+	<group>
+	  <label variable="locator" suffix="." form="short"/>
+	  <text variable="locator" prefix=" "/>
+	</group>
+      </group>
     </layout>
   </citation>
   <bibliography>
     <option name="hanging-indent" value="true"/>
     <option name="et-al-min" value="15"/>
     <option name="et-al-use-first" value="15"/>
+    <sort>
+      <key macro="author-short"/>
+      <key macro="title"/>
+    </sort>
     <layout>
       <text macro="author" suffix="."/>
       <date variable="issued" prefix=" " suffix=".">
