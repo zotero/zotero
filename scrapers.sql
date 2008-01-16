@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-01-16 06:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-01-16 21:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -2083,6 +2083,67 @@ function getData(ids){
 		}
 		newItem.complete();		
 	}, function(){Zotero.done();});	
+	Zotero.wait();
+}');
+
+REPLACE INTO translators VALUES ('303c2744-ea37-4806-853d-e1ca67be6818', '1.0.0b4.r5', '', '2008-01-16 21:00:00', '0', '100', '4', 'CSIRO Publishing', 'Michael Berkowitz', 'http://www.publish.csiro.au/', 
+'function detectWeb(doc, url) {
+	if (doc.evaluate(''//a[@class="searchBoldBlue"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext() || doc.evaluate(''//td[2]/a[@class="linkJournal"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+		return "multiple";
+	} else if (url.indexOf("/view/journals/") != -1 || url.indexOf("paper") != -1) {
+		return "journalArticle";
+	}
+}', 
+'function doWeb(doc, url) {
+	var links = new Array();
+	if (detectWeb(doc, url) == "multiple") {
+		var items = new Object();
+		if (doc.evaluate(''//a[@class="searchBoldBlue"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+			var arts = doc.evaluate(''//a[@class="searchBoldBlue"]'', doc, null, XPathResult.ANY_TYPE, null);
+			var art = arts.iterateNext();
+			while (art) {
+				items[art.href] = art.textContent;
+				art = arts.iterateNext();
+			}
+		} else if (doc.evaluate(''//td[2]/a[@class="linkJournal"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+			var arts = doc.evaluate(''//td[2]/a[@class="linkJournal"]'', doc, null, XPathResult.ANY_TYPE, null);
+			var titles = doc.evaluate(''//td[3]//td[1]/table/tbody/tr/td/b'', doc, null, XPathResult.ANY_TYPE, null);
+			var art = arts.iterateNext();
+			var title = titles.iterateNext();
+			while (art) {
+				items[art.href] = title.textContent;
+				art = arts.iterateNext();
+				title = titles.iterateNext();
+			}
+		}
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			links.push(i.match(/([^/=.htm]*)(.htm)?$/)[1]);
+		}
+	} else {
+		links.push(url.match(/([^/=.htm]*)(.htm)?$/)[1]);
+	}
+	for (var i in links) {
+		var newURL = ''http://www.publish.csiro.au/view/journals/dsp_journal_retrieve_citation.cfm?ct='' + links[i] + ''.ris'';
+		var pdfURL = ''http://www.publish.csiro.au/?act=view_file&file_id='' + links[i] + ''.pdf'';
+		Zotero.Utilities.HTTP.doGet(newURL, function(text) {
+			var translator = Zotero.loadTranslator("import");
+			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+			translator.setString(text);
+			translator.setHandler("itemDone", function(obj, item) {
+				item.itemType = "journalArticle";
+				if (item.notes[0]) {
+					item.abstractNote = item.notes[0].note;
+				}
+				item.attachments = [
+					{url:pdfURL, title:"CSIRO Publishing PDF", mimeType:"application/pdf"},
+					{url:newURL, title:"CSIRO Publishing Snaphost", mimeType:"text/html"}
+				];
+				item.complete();
+			});
+			translator.translate();
+		});
+	}
 	Zotero.wait();
 }');
 
