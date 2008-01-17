@@ -1003,7 +1003,9 @@ Zotero.Integration.Session.prototype.getCitations = function(regenerateAll) {
 			if(citation.properties.custom) {
 				output.push(citation.properties.custom);
 			} else {
-				output.push(this.style.formatCitation(citation, "Integration"));
+				var citation = this.style.formatCitation(citation, "Integration");
+				if(citation == "") citation = " ";
+				output.push(citation);
 			}
 		}
 	}

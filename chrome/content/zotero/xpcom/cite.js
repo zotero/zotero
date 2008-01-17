@@ -516,7 +516,7 @@ Zotero.CSL.prototype.formatCitation = function(citation, format) {
 	}
 	
 	var returnString = string.clone();
-	returnString.append(string.get(), context.layout, false, true);
+	returnString.concat(string, context.layout);
 	var returnString = returnString.get();
 	
 	// loop through to remove _csl property
@@ -2636,6 +2636,7 @@ Zotero.CSL.FormattedString = function(context, format, delimiter, subsequent) {
 	this.delimiter = delimiter;
 	this.string = "";
 	this.closePunctuation = false;
+	this.closeFormatting = "";
 	this.useBritishStyleQuotes = false;
 	
 	// insert tab iff second-field-align is on
@@ -2668,25 +2669,32 @@ Zotero.CSL.FormattedString.prototype.concat = function(formattedString, element)
 		throw "CSL: cannot concatenate formatted strings: formats do not match";
 	}
 	
-	if(formattedString.string) {
-		// first, append the actual string
-		var haveAppended = this.append(formattedString.string, element, false, true);
-		
-		// if there's close punctuation to append, that also counts
-		if(formattedString.closePunctuation) {
-			haveAppended = true;
-			if(this.closePunctuation) {
-				// if there's existing close punctuation and punctuation to
-				// append, we need to append that
-				this.string += this.closePunctuation;
-			}
-			// add the new close punctuation
-			this.closePunctuation = formattedString.closePunctuation;
+	var haveAppended = false;
+	var suffix = false;
+	if(formattedString.string !== "") {
+		// first, append the actual string without its suffix
+		if(element && element.@suffix.length()) {
+			// don't edit original element
+			element = element.copy();
+			// let us decide to add the suffix
+			suffix = element.@suffix.toString();
+			element.@suffix = [];
 		}
-		
-		return haveAppended;
+		haveAppended = this.append(formattedString.string, element, false, true);
 	}
-	return false;
+	
+	// if there's close punctuation to append, that also counts
+	if(formattedString.closePunctuation || formattedString.closeFormatting) {
+		haveAppended = true;
+		// add the new close punctuation
+		this.closeFormatting = formattedString.closeFormatting;
+		this.closePunctuation = formattedString.closePunctuation;
+	}
+	
+	// append suffix, if we didn't before
+	if(haveAppended && suffix !== false) this.append(suffix, null, true);
+	
+	return haveAppended;
 }
 
 Zotero.CSL.FormattedString._rtfEscapeFunction = function(aChar) {
@@ -2697,10 +2705,10 @@ Zotero.CSL.FormattedString._rtfEscapeFunction = function(aChar) {
  * appends a string (with format parameters) to the current one
  */
 Zotero.CSL.FormattedString.prototype.append = function(string, element, dontDelimit, dontEscape) {
-	if(!string) return false;
 	if(typeof(string) != "string") {
 		string = string.toString();
 	}
+	if(string.toString() === "") return false;
 	
 	// append delimiter if necessary
 	if(this.delimiter && this.string && !dontDelimit) {
@@ -2719,46 +2727,37 @@ Zotero.CSL.FormattedString.prototype.append = function(string, element, dontDeli
 		}
 	}
 	
+	if(prefix) {
+		this.append(prefix, null, true);
+	}
+	
+	var addBefore = "";
+	var addAfter = "";
+	
 	// append line before if display="block"
-	var closeDiv = false;
 	if(element && (element["@display"] == "block" || this.appendLine)) {
 		if(this.format == "HTML") {
 			if(this.option.(@name == "hanging-indent").@value == "true") {
-				this.string += '<div style="text-indent:0.5in;">'
+				addBefore += '<div style="text-indent:0.5in;">'
 			} else {
-				this.string += '<div>';
+				addBefore += '<div>';
 			}
-			var closeDiv;
+			addAfter = '</div>';
 		} else {
 			if(this.format == "RTF") {
-				this.string += "\r\n\\line ";
+				addBefore += "\r\n\\line ";
 			} else if(this.format == "Integration") {
-				this.string += "\x0B";
+				addBefore += "\x0B";
 			} else {
-				this.string += (Zotero.isWin ? "\r\n" : "\n");
+				addBefore += (Zotero.isWin ? "\r\n" : "\n");
 			}
 			this.appendLine = element["@display"] == "block";
 		}
 	}
 	
-	if(prefix) {
-		this.append(prefix, null, true);
-	}
-	
 	if(this.suppressLeadingWhitespace) {
 		string = string.replace(/^\s+/, "");
 		this.suppressLeadingWhitespace = false;
-	}
-	
-	if(string.length && string[0] == "." &&
-	   Zotero.CSL.FormattedString._punctuation.indexOf(this.string[this.string.length-1]) != -1) {
-	   // if string already ends in punctuation, preserve the existing stuff
-	   // and don't add a period
-		string = string.substr(1);
-	} else if(this.string[this.string.length-1] == "(" && string[0] == " ") {
-		string = string.substr(1);
-	} else if(this.string[this.string.length-1] == " " && string[0] == ")") {
-		this.string = this.string.substr(0, this.string.length-1);
 	}
 	
 	// close quotes, etc. using punctuation
@@ -2771,59 +2770,56 @@ Zotero.CSL.FormattedString.prototype.append = function(string, element, dontDeli
 		this.closePunctuation = false;
 	}
 	
+	// clean up
+	if(string.length && string[0] == "." &&
+	   Zotero.CSL.FormattedString._punctuation.indexOf(this.string[this.string.length-1]) != -1) {
+	   // if string already ends in punctuation, preserve the existing stuff
+	   // and don't add a period
+		string = string.substr(1);
+	} else if(this.string[this.string.length-1] == "(" && string[0] == " ") {
+		string = string.substr(1);
+	} else if(this.string[this.string.length-1] == " " && string[0] == ")") {
+		this.string = this.string.substr(0, this.string.length-1);
+	}
+	
+	// close previous formatting
+	this.string += this.closeFormatting;
+	this.closeFormatting = "";
+	
 	// handling of "text-transform" attribute (now obsolete)
 	if(element && element["@text-transform"].length() && !element["@text-case"].length()) {
 		var mapping = {"lowercase":"lowercase", "uppercase":"uppercase", "capitalize":"capitalize-first"};
 		element["@text-case"] = mapping[element["@text-transform"].toString()];
 	}
+	
 	// handle text case
-	if(element && element["@text-case"].length()) {
-		if(element["@text-case"] == "lowercase") {
-			// all lowercase
-			string = string.toLowerCase();
-		} else if(element["@text-case"] == "uppercase") {
-			// all uppercase
-			string = string.toUpperCase();
-		} else if(element["@text-case"] == "capitalize-first") {
-			// capitalize first
-			string = string[0].toUpperCase()+string.substr(1).toLowerCase();
-		} else if(element["@text-case"] == "capitalize-all") {
-			// capitalize first
-			var strings = string.split(" ");
-			for(var i=0; i<strings.length; i++) {
-				if(strings[i].length > 1) {
-					strings[i] = strings[i][0].toUpperCase()+strings[i].substr(1).toLowerCase();
-				} else if(strings[i].length == 1) {
-					strings[i] = strings[i].toUpperCase();
-				}
-			}
-			string = strings.join(" ");
-		} else if(element["@text-case"] == "title") {
-			string = Zotero.Text.titleCase(string);
-		}
-	}
-	
-	if(!dontEscape) {
-		if(this.format == "HTML") {
-			string = string.replace("&", "&amp;", "g")
-							.replace("<", "&lt;", "g")
-							.replace(">", "&gt;", "g")
-							.replace(/(\r\n|\r|\n)/g, "<br />")
-							.replace(/[\x00-\x1F]/g, "");
-		} else if(this.format == "RTF") {
-			string = string.replace("\\", "\\\\", "g")
-							.replace(/[\x7F-\uFFFF]/g, Zotero.CSL.FormattedString._rtfEscapeFunction)
-							.replace("\t", "\\tab ", "g")
-							.replace(/(\r\n|\r|\n)/g, "\\line ");
-		} else if(this.format == "Integration") {
-			string = string.replace(/\\/g, "\\\\")
-							.replace(/(\r\n|\r|\n)/g, "\\line ");
-		} else {
-			string = string.replace(/(\r\n|\r|\n)/g, (Zotero.isWin ? "\r\n" : "\n"));
-		}
-	}
-	
 	if(element) {
+		if(element["@text-case"].length()) {
+			if(element["@text-case"] == "lowercase") {
+				// all lowercase
+				string = string.toLowerCase();
+			} else if(element["@text-case"] == "uppercase") {
+				// all uppercase
+				string = string.toUpperCase();
+			} else if(element["@text-case"] == "capitalize-first") {
+				// capitalize first
+				string = string[0].toUpperCase()+string.substr(1).toLowerCase();
+			} else if(element["@text-case"] == "capitalize-all") {
+				// capitalize first
+				var strings = string.split(" ");
+				for(var i=0; i<strings.length; i++) {
+					if(strings[i].length > 1) {
+						strings[i] = strings[i][0].toUpperCase()+strings[i].substr(1).toLowerCase();
+					} else if(strings[i].length == 1) {
+						strings[i] = strings[i].toUpperCase();
+					}
+				}
+				string = strings.join(" ");
+			} else if(element["@text-case"] == "title") {
+				string = Zotero.Text.titleCase(string);
+			}
+		}
+		
 		// style attributes
 		if(this.format == "HTML") {
 			var style = "";
@@ -2839,30 +2835,26 @@ Zotero.CSL.FormattedString.prototype.append = function(string, element, dontDeli
 			}
 			
 			if(style) {
-				string = '<span style="'+style+'">'+string+'</span>';
+				addBefore += '<span style="'+style+'">';
+				addAfter = '</span>'+addAfter;
 			}
 		} else {
 			if(this.format == "RTF" || this.format == "Integration") {
-				if(element["@font-style"] == "oblique" || element["@font-style"] == "italic") {
-					string = "\\i "+string+"\\i0 ";
+				var rtfAttributes = {
+					"font-style":{"oblique":"i", "italic":"i"},
+					"font-variant":{"small-caps":"scaps"},
+					"font-weight":{"bold":"b"},
+					"text-decoration":{"underline":"ul"},
+					"vertical-align":{"sup":"super", "sub":"sub"}
 				}
 				
-				if(element["@font-variant"] == "small-caps") {
-					string = "\\scaps "+string+"\\scaps0 ";
-				}
-				
-				if(element["@font-weight"] == "bold") {
-					string = "\\b "+string+"\\b0 ";
-				}
-				
-				if(element["@text-decoration"] == "underline") {
-					string = "\\ul "+string+"\\ul0 ";
-				}
-				
-				if(element["@vertical-align"] == "sup") {
-					string = "\\super "+string+"\\super0 ";
-				} else if(element["@vertical-align"] == "sub") {
-					string = "\\sub "+string+"\\sub0 ";
+				for(var j in rtfAttributes) {
+					for(var k in rtfAttributes[j]) {
+						if(element["@"+j] == k) {
+							addBefore += "\\"+rtfAttributes[j][k]+" ";
+							addAfter = "\\"+rtfAttributes[j][k]+"0 "+addAfter;
+						}
+					}
 				}
 			}
 		}
@@ -2879,7 +2871,36 @@ Zotero.CSL.FormattedString.prototype.append = function(string, element, dontDeli
 		}
 	}
 	
-	this.string += string;
+	if(!dontEscape) {
+		if(this.format == "HTML") {
+			string = string.replace("&", "&amp;", "g")
+							.replace("<", "&lt;", "g")
+							.replace(">", "&gt;", "g")
+							.replace(/(\r\n|\r|\n)/g, "<br />")
+							.replace(/[\x00-\x1F]/g, "");
+		} else if(this.format == "RTF" || this.format == "Integration") {
+			string = string.replace("\\", "\\\\", "g")
+							.replace(/(\r\n|\r|\n)/g, "\\line ");
+			if(string.substr(string.length-6) == "\\line ") {
+				string = string.substr(0, string.length-6);
+				addAfter = "\\line "+addAfter;
+			}
+			
+			if(this.format == "RTF") {
+				string = string.replace(/[\x7F-\uFFFF]/g, Zotero.CSL.FormattedString._rtfEscapeFunction)
+							.replace("\t", "\\tab ", "g");
+				
+				if(string.substr(string.length-5) == "\\tab ") {
+					string = string.substr(0, string.length-5);
+					addAfter = "\\tab "+addAfter;
+				}
+			}
+		} else {
+			string = string.replace(/(\r\n|\r|\n)/g, (Zotero.isWin ? "\r\n" : "\n"));
+		}
+	}
+	
+	this.string += addBefore+string;
 	
 	var suffix;
 	if(element && element.@suffix.length()) {
@@ -2887,9 +2908,6 @@ Zotero.CSL.FormattedString.prototype.append = function(string, element, dontDeli
 	}
 	
 	// close div for display=block in HTML
-	if(closeDiv) {
-		this.string += "</div>";
-	}
 	
 	// save for second-field-align
 	if(!dontDelimit && this.insertTabAfterField) {
@@ -2897,18 +2915,20 @@ Zotero.CSL.FormattedString.prototype.append = function(string, element, dontDeli
 		this.string = this.string.replace(/\s+$/, "");
 		
 		if(this.format == "HTML") {
-			this.string += '</td><td style="padding-left:4pt;">';
+			addAfter += '</td><td style="padding-left:4pt;">';
 		} else if(this.format == "RTF") {
-			this.string += "\\tab ";
+			addAfter += "\\tab ";
 		} else if(this.format == "Integration") {
-			this.string += "\t";
+			addAfter += "\t";
 		} else {
-			this.string += " ";
+			addAfter += " ";
 		}
 		
 		this.insertTabAfterField = false;
 		this.suppressLeadingWhitespace = true;
 	}
+	
+	this.closeFormatting = addAfter;
 	
 	return true;
 }
@@ -2917,7 +2937,7 @@ Zotero.CSL.FormattedString.prototype.append = function(string, element, dontDeli
  * gets the formatted string
  */
 Zotero.CSL.FormattedString.prototype.get = function() {
-	return this.string+(this.closePunctuation ? this.closePunctuation : "");
+	return this.string+(this.closeFormatting ? this.closeFormatting : "")+(this.closePunctuation ? this.closePunctuation : "");
 }
 
 /*
