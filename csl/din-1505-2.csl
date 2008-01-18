@@ -8,32 +8,39 @@
             <name>Sven Rothe</name>
             <email>mmoole@googlemail.com</email>
         </author>
-        <!--        this is just a beginning to try to have a DIN 1505 citation style,
-    since i am not a pro, the xml coding style may not be ideal :-) 
-    Feel free to send me any comments, suggestions etc...
-    todo:
-        * basic media types (book, journal article, etc..)
-        * more media types (according DINxxx) audio video etc...
-        * fine tuning
-        * correcting errors
-    known bugs, help appreciated
-        * Abbreviations (Mitarb.) & (Hrsg. der Reihe) are missing (contributor, seriesEditor labels)
-        * "contributor" is not valid as a name variable , nevertheless it works but doesnt validate! 
-        * Name of Volumes seems not to exist (type book) ("Sachtitel des (Teil.-)Bandes")
-        * author etc. first names should not be abbreviated
-        * scale of maps seems not to be available as variable
-        * reviewed author seems to be not available as variable (newspaper article)
-        * thesis type does notoffer a PLACE or FACULTY as variable! 
-           how to show the place if it is not included in the University title!?!?
-        * thesis type: publisher (university), genre (type) dont seem to get through!?
-        
-
--->
+        <contributor>
+            <name>Julian Onions</name>
+            <email>julian.onions@gmail.com</email>
+        </contributor>
         <category term="generic-base"/>
         <category term="author-date"/>
         <updated>2007-12-31T11:11:11+00:00</updated>
         <summary>Style oriented by DIN 1505-2, for other media types on additional
         standards</summary>
+        <link href="http://www.bui.haw-hamburg.de/pers/klaus.lorenzen/ASP/litverz.pdf" rel="documentation"/>
+        <link href="http://www.uni-muenster.de/imperia/md/content/fachbereich_physik/didaktik_physik/materialien/materialschlichting/zitierregeln.pdf" rel="documentation"></link>
+        
+        <!--        this is just a beginning to try to have a DIN 1505 citation style,
+            since i am not a pro, the xml coding style may not be ideal :-) 
+            Feel free to send me any comments, suggestions etc...
+            todo:
+            * basic media types (book, journal article, etc..)
+            * more media types (according DINxxx) audio video etc...
+            * fine tuning
+            * correcting errors
+            known bugs, help appreciated
+            * Abbreviations (Mitarb.) & (Hrsg. der Reihe) are missing (contributor, seriesEditor labels)
+            * "contributor" is not valid as a name variable , nevertheless it works but doesnt validate! 
+            * Name of Volumes seems not to exist (type book) ("Sachtitel des (Teil.-)Bandes")
+            * author etc. first names should not be abbreviated
+            * scale of maps seems not to be available as variable
+            * reviewed author seems to be not available as variable (newspaper article)
+            * thesis type does notoffer a PLACE or FACULTY as variable! 
+            how to show the place if it is not included in the University title!?!?
+            * thesis type: publisher (university), genre (type) dont seem to get through!?
+
+        -->
+        
     </info>
 
     <macro name="author" >
@@ -199,9 +206,9 @@
                     </date>
                     <!-- " (1. Gesamttitel mit Zählung)"
                     " (2. Gesamttitel mit Zählung)" -->
- <!--             <text prefix=" –&#160;" macro="scale"/> -->
-                    <text prefix=".  –&#160;" variable="note"/>
-                    <text prefix=" – ISBN&#160;" variable="ISBN"/>
+ <!--             <text prefix=" &#8211;&#160;" macro="scale"/> -->
+                    <text prefix=".  &#8211;&#160;" variable="note"/>
+                    <text prefix=" &#8211; ISBN&#160;" variable="ISBN"/>
                 </if>
 
                 <!-- Tabelle 3 aus litverz.ps -->
@@ -221,8 +228,8 @@
                     </date>
                     <!-- " (1. Gesamttitel mit Zählung)"
                         " (2. Gesamttitel mit Zählung)"    -->
-                    <text prefix=".  –&#160;" variable="note"/>
-                    <text prefix=" – ISBN&#160;" variable="ISBN"/>
+                    <text prefix=".  &#8211;&#160;" variable="note"/>
+                    <text prefix=" &#8211; ISBN&#160;" variable="ISBN"/>
                     <group prefix=", ">
                         <label variable="page" form="short" include-period="false"
                             suffix="&#160;"/> <!--  but it should be include-period="true"-->
@@ -242,7 +249,7 @@
                     <date prefix=", " variable="issued">
                         <date-part name="year"/>
                     </date>
-                    <text prefix=".  –&#160;" variable="note"/>
+                    <text prefix=".  &#8211;&#160;" variable="note"/>
                 </else-if>
                 
                 <else-if type="webpage">
@@ -250,7 +257,7 @@
                     <text prefix="URL " variable="URL" suffix=""/>
                     <text prefix=". - " macro="access"/>
                     <text prefix=". -&#160;" variable="container-title"/>  
-                    <text prefix=".  –&#160;" variable="note"/>
+                    <text prefix=".  &#8211;&#160;" variable="note"/>
                 </else-if>
                 
                 <!-- Tabelle 2 aus litverz.ps  UND -->
@@ -278,8 +285,8 @@
                         <!--  but logically it should be include-period="true"-->
                         <text variable="page"/>
                     </group>
-                    <text prefix=".  –&#160;" variable="note"/>
-                    <text prefix=" – ISBN&#160;" variable="ISBN"/>
+                    <text prefix=".  &#8211;&#160;" variable="note"/>
+                    <text prefix=" &#8211; ISBN&#160;" variable="ISBN"/>
                 </else-if>
                 
                     <!-- keiner der oben genannten fälle -->
