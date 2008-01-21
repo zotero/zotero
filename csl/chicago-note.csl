@@ -23,36 +23,26 @@
     <category term="note"/>
     <updated/>
   </info>
-  <macro name="editor-translator">
-    <names variable="editor translator" delimiter=", ">
-      <label form="verb" prefix=" " text-case="lowercase" suffix=" "/>
-      <name and="text" delimiter=", "/>
-    </names>
-  </macro>
-  <macro name="editor-translator-short">
-    <choose>
-      <if variable="author">
-        <names variable="editor translator" delimiter=", ">
-          <label form="short" prefix=" " text-case="lowercase" suffix=". "/>
-          <name and="text" delimiter=", "/>
-        </names>
-      </if>
-    </choose>
+  <macro name="secondary-contributor">
+    <group delimiter=", ">
+      <names variable="editor" delimiter=", ">
+        <label form="verb-short" prefix=" " text-case="lowercase" suffix=". "/>
+        <name and="text" delimiter=", "/>
+      </names>
+      <choose>
+        <if variable="author editor" match="any">
+      <names variable="translator" delimiter=", ">
+        <label form="verb-short" prefix=" " text-case="lowercase" suffix=". "/>
+        <name and="text" delimiter=", "/>
+      </names>
+        </if>
+      </choose>
+    </group>
   </macro>
   <macro name="author">
     <names variable="author">
       <name and="text" sort-separator=", " delimiter=", "/>
-      <label form="short" prefix=", " suffix="."/>
-      <substitute>
-        <names variable="editor"/>
-        <names variable="translator"/>
-      </substitute>
-    </names>
-  </macro>
-  <macro name="author-full">
-    <names variable="author">
-      <name and="text" sort-separator=", " delimiter=", "/>
-      <label form="short" prefix=", " suffix="."/>
+      <label form="verb-short" prefix=", " suffix="."/>
       <substitute>
         <names variable="editor"/>
         <names variable="translator"/>
@@ -62,7 +52,7 @@
   <macro name="author-short">
     <names variable="author">
       <name form="short" and="text" delimiter=", "/>
-      <label form="short" prefix=", " suffix="."/>
+      <label form="verb-short" prefix=", " suffix="."/>
       <substitute>
         <names variable="editor"/>
         <names variable="translator"/>
@@ -86,19 +76,6 @@
       <label form="verb" prefix=" " text-case="lowercase" suffix=" "/>
       <name and="text" delimiter=", "/>
     </names>
-  </macro>
-  <macro name="access">
-    <group>
-      <text variable="URL"/>
-      <group prefix=" (" suffix=")" delimiter=" ">
-        <text term="accessed" text-case="lowercase" suffix=" "/>
-        <date variable="accessed" suffix=", ">
-          <date-part name="month" suffix=" "/>
-          <date-part name="day" suffix=", "/>
-          <date-part name="year"/>
-        </date>
-      </group>
-    </group>
   </macro>
   <macro name="title">
     <choose>
@@ -136,7 +113,7 @@
       </else>
     </choose>
   </macro>
-  <macro name="genre-medium">
+  <macro name="description">
     <group delimiter=", ">
       <text macro="interviewer"/>
       <text variable="medium"/>
@@ -149,18 +126,44 @@
       </choose>
     </group>
   </macro>
-  <macro name="container">
-    <group delimiter=", ">
-      <group delimiter=" ">
-        <choose>
-          <if type="chapter">
-            <text term="in" text-case="lowercase"/>
-          </if>
-        </choose>
-        <text variable="container-title" font-style="italic"/>
-      </group>
-      <text macro="editor-translator"/>
-      <text variable="collection-title"/>
+  <macro name="container-prefix">
+    <text term="in" text-case="lowercase" suffix=" "/>
+  </macro>
+  <macro name="locators">
+    <choose>
+      <if type="article-journal">
+        <text variable="volume" prefix=" "/>
+        <text variable="issue" prefix=", no. "/>
+      </if>
+      <else-if type="book">
+        <group prefix=", " delimiter=", ">
+          <group>
+            <text term="volume" form="short" suffix=". "/>
+            <number variable="volume" form="numeric"/>
+          </group>
+          <choose>
+            <if variable="locator" match="none">
+          <group>
+            <number variable="number-of-volumes" form="numeric"/>
+            <text term="volume" form="short" prefix=" " suffix="." plural="true"/>
+          </group>
+            </if>
+          </choose>
+          <text variable="edition"/>
+        </group>
+      </else-if>
+    </choose>
+  </macro>
+  <macro name="event">
+    <group>
+      <text term="presented at" suffix=" "/>
+      <text variable="event"/>
+    </group>
+  </macro>
+  <macro name="publisher">
+    <group delimiter=": ">
+      <text variable="publisher-place"/>
+      <text variable="publisher"/>
     </group>
   </macro>
   <macro name="issued">
@@ -189,8 +192,6 @@
   <macro name="issue">
     <choose>
       <if type="article-journal">
-        <text variable="volume" prefix=" "/>
-        <text variable="issue" prefix=", no. "/>
         <text macro="issued" prefix=" (" suffix=")"/>
       </if>
       <else-if variable="publisher-place publisher" match="any">
@@ -202,17 +203,9 @@
                 <text variable="genre"/>
               </else-if>
             </choose>
-            <choose>
-              <if variable="event">
-                <text term="presented at" suffix=" "/>
-                <text variable="event"/>
-              </if>
-            </choose>
+            <text macro="event"/>
           </group>
-          <group delimiter=": ">
-            <text variable="publisher-place"/>
-            <text variable="publisher"/>
-          </group>
+          <text macro="publisher"/>
           <text macro="issued"/>
         </group>
       </else-if>
@@ -223,9 +216,30 @@
   </macro>
   <macro name="locator">
     <choose>
-      <if type="article-journal">
-        <text variable="locator" prefix=": "/>
+      <if type="article-newspaper">
+        <group delimiter=", ">
+          <group>
+        <text variable="edition" suffix=" "/>
+        <text term="edition" prefix=" "/>
+          </group>
+          <group>
+        <text term="section" form="short" suffix=". "/>
+        <text variable="section"/>
+          </group>
+        </group>
       </if>
+    </choose>
+    <choose>
+      <if variable="locator" match="none">
+        <choose>
+          <if type="article-journal article-magazine chapter" match="any">
+        <text variable="page" prefix=", "/>
+          </if>
+        </choose>
+      </if>
+      <else-if type="article-journal">
+        <text variable="locator" prefix=": "/>
+      </else-if>
       <else>
         <text variable="locator" prefix=", "/>
       </else>
@@ -236,6 +250,12 @@
       <text variable="archive_location"/>
       <text variable="archive"/>
       <text variable="archive-place"/>
+    </group>
+  </macro>
+  <macro name="access">
+    <group delimiter=", ">
+      <text macro="archive"/>
+      <text variable="URL"/>
     </group>
   </macro>
   <citation>
@@ -274,23 +294,18 @@
               <text macro="recipient"/>
             </group>
             <text macro="title"/>
-            <text macro="genre-medium"/>
-            <text macro="container"/>
+            <text macro="description"/>
+            <group>
+              <text macro="container-prefix"/>
+              <text variable="container-title" font-style="italic"/>
+            </group>
+            <text macro="secondary-contributor"/>
           </group>
+          <text macro="locators"/>
+          <text variable="collection-title" prefix=", "/>
           <text macro="issue"/>
           <text macro="locator"/>
-          <group prefix=", " delimiter=", ">
-            <choose>
-              <if type="graphic report" match="any">
-                <text macro="archive"/>
-              </if>
-              <else-if type="book thesis chapter article-journal article-newspaper article-magazine"
-                match="none">
-                <text macro="archive"/>
-              </else-if>
-            </choose>
-            <text variable="URL"/>
-          </group>
+          <text macro="access" prefix=", "/>
         </else>
       </choose>
     </layout>
