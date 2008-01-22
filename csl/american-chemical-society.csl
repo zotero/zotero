@@ -93,12 +93,16 @@
   </macro>
   <citation>
     <option name="collapse" value="citation-number"/>
+    <sort>
+       <key variable="citation-number"/>
+    </sort>
     <layout delimiter=", " prefix="(" suffix=")">
       <text variable="citation-number"/>
     </layout>
   </citation>
   <bibliography>
     <option name="second-field-align" value="margin"/>
+    <option name="entry-spacing" value="0"/>
     <layout suffix=".">
       <text variable="citation-number" prefix="(" suffix=") "/>
       <text macro="author" suffix=" "/>
