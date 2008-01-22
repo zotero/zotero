@@ -246,11 +246,22 @@
     </choose>
   </macro>
   <macro name="archive">
-    <group delimiter=", ">
+	<choose>
+	  <if type="graphic report" match="any">
+        <group delimiter=", ">
       <text variable="archive_location"/>
       <text variable="archive"/>
       <text variable="archive-place"/>
-    </group>
+        </group>
+	  </if>
+	  <else-if type="book thesis chapter article-journal article-newspaper article-magazine" match="none">
+        <group delimiter=", ">
+      <text variable="archive_location"/>
+      <text variable="archive"/>
+      <text variable="archive-place"/>
+        </group>
+	  </else-if>
+	</choose>
   </macro>
   <macro name="access">
     <group delimiter=", ">
