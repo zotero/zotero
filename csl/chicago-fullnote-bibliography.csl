@@ -338,12 +338,18 @@
 	    </else>
 	  </choose>
 	  <choose>
-	    <if type="book thesis chapter article-journal article-newspaper article-magazine" match="none">
+	    <if type="graphic report" match="any">
 	      <group prefix=", " delimiter=", ">
 		<text variable="archive_location"/>
 		<text macro="archive"/>
 	      </group>
 	    </if>
+	    <else-if type="book thesis chapter article-journal article-newspaper article-magazine" match="none">
+	      <group prefix=", " delimiter=", ">
+		<text variable="archive_location"/>
+		<text macro="archive"/>
+	      </group>
+	    </else-if>
 	  </choose>
 	  <choose>
 	    <if variable="page" match="none">
