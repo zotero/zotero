@@ -91,7 +91,7 @@
 	</if>
       </choose>
       <choose>
-	<if type="entry-encylopedia">
+	<if type="entry-encyclopedia">
 	  <text value="Type is entry-encylopedia
 		       "/>
 	</if>
