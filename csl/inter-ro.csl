@@ -12,7 +12,7 @@
     <summary>Romanian INTER Institute format with full notes and bibliography</summary>
     <category term="theology"/>
     <category term="numeric"/>
-    <updated>2008-01-11T01:13:54+00:00</updated>
+    <updated></updated> 
   </info>
   <macro name="editor">
     <names variable="editor" delimiter=", ">
@@ -150,7 +150,7 @@
       <choose>
 	<if position="ibid-with-locator">
 	  <group delimiter=", ">
-	    <text term="ibid" form="long" font-style="italic" text-case="capitalize-first" suffix="."/>
+	    <text term="ibid" form="long" font-style="italic" text-case="capitalize-first"/>
 	    <group>
 	      <label variable="locator" suffix="." form="short"/>
 	      <text variable="locator" prefix=" "/>
@@ -158,7 +158,7 @@
 	  </group>
 	</if>
 	<else-if position="ibid">
-	  <text term="ibid" form="long" font-style="italic" text-case="capitalize-first" suffix="."/>
+	  <text term="ibid" form="long" font-style="italic" text-case="capitalize-first"/>
 	</else-if>
 	<else-if position="subsequent">
 	  <group delimiter=", ">
@@ -196,7 +196,7 @@
 		  <text variable="container-title" font-style="italic"/>
 		</group>
 		<text variable="volume" prefix=" "/>
-		<text variable="collection-title" prefix=" (= " suffix=")"/>
+		<text variable="collection-title" prefix=" (=" suffix=")"/>
 	      </group>		   
 	      <text variable="edition" prefix=", "/>
 	      <text macro="publisher" prefix=", "/>
