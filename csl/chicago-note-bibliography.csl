@@ -105,20 +105,20 @@
   <macro name="title">
     <choose>
       <if type="book">
-	<text variable="title" font-style="italic" text-case="title"/>
+	<text variable="title" font-style="italic"/>
       </if>
       <else>
-	<text variable="title" quotes="true" text-case="title"/>
+	<text variable="title" quotes="true"/>
       </else>
     </choose>
   </macro>
   <macro name="title-short">
     <choose>
       <if type="book">
-	<text variable="title" form="short" font-style="italic" text-case="title"/>
+	<text variable="title" form="short" font-style="italic"/>
       </if>
       <else>
-	<text variable="title" form="short" quotes="true" text-case="title"/>
+	<text variable="title" form="short" quotes="true"/>
       </else>
     </choose>
   </macro>
