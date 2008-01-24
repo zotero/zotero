@@ -210,6 +210,7 @@ Zotero.Schema = new function(){
 			if (syncVersion < syncTargetVersion) {
 				_updateDBVersion('sync', syncTargetVersion);
 				force = true;
+				var uriChangeFix = true;
 			}
 		}
 		
@@ -264,6 +265,11 @@ Zotero.Schema = new function(){
 			}
 			else {
 				url += '&m=1';
+			}
+			
+			// Fix for styles with new URIs in 1.0.3
+			if (uriChangeFix) {
+				url += '&urifix=1';
 			}
 		}
 		
