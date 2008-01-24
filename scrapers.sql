@@ -16007,7 +16007,7 @@ function doExport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('9cb70025-a888-4a29-a210-93ec52da40d4', '1.0.0b4.r1', '', '2007-12-21 15:30:00', '1', '100', '3', 'BibTeX', 'Simon Kornblith', 'bib', 
+REPLACE INTO translators VALUES ('9cb70025-a888-4a29-a210-93ec52da40d4', '1.0.0b4.r1', '', '2008-01-12 08:30:00', '1', '100', '3', 'BibTeX', 'Simon Kornblith', 'bib', 
 'Zotero.configure("dataMode", "block");
 Zotero.addOption("UTF8", true);
 
@@ -17029,7 +17029,6 @@ var reversemappingTable = {
     "\u00AA":"{\\textordfeminine}", // FEMININE ORDINAL INDICATOR
     "\u00AB":"{\\guillemotleft}", // LEFT-POINTING DOUBLE ANGLE QUOTATION MARK
     "\u00AC":"{\\textlnot}", // NOT SIGN
-    "\u00AD":"-", // SOFT HYPHEN
     "\u00AE":"{\\textregistered}", // REGISTERED SIGN
     "\u00AF":"{\\textasciimacron}", // MACRON
     "\u00B0":"{\\textdegree}", // DEGREE SIGN
@@ -17129,7 +17128,6 @@ var reversemappingTable = {
     "\u2103":"{\\textcelsius}", // DEGREE CELSIUS
     "\u2105":"c/o", // CARE OF
     "\u2106":"c/u", // CADA UNA
-    "\u2109":"F", // DEGREE FAHRENHEIT
     "\u2116":"{\\textnumero}", // NUMERO SIGN
     "\u2117":"{\\textcircledP}", // SOUND RECORDING COPYRIGHT
     "\u2120":"{\\textservicemark}", // SERVICE MARK
