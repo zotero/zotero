@@ -1597,8 +1597,6 @@ Zotero.Date = new function(){
 	/**
 	 * Figure out the date order from the output of toLocaleDateString()
 	 *
-	 * Note: Currently unused
-	 *
 	 * Returns a string with y, m, and d (e.g. 'ymd', 'mdy')
 	 */
 	function getLocaleDateOrder(){

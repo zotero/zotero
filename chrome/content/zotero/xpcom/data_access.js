@@ -1789,9 +1789,34 @@ Zotero.Item.prototype.getAttachments = function(){
 		return [];
 	}
 	
-	var sql = "SELECT itemID FROM itemAttachments NATURAL JOIN items "
-		+ "WHERE sourceItemID=" + this.getID() + " ORDER BY dateAdded";
-	return Zotero.DB.columnQuery(sql);
+	var sql = "SELECT A.itemID, value AS title FROM itemAttachments A "
+		+ "NATURAL JOIN items I LEFT JOIN itemData ID USING (itemID) "
+		+ "LEFT JOIN itemDataValues IDV "
+		+ "ON (fieldID=110 AND ID.valueID=IDV.valueID) "
+		+ "WHERE sourceItemID=?";
+		
+	if (Zotero.Prefs.get('sortAttachmentsChronologically')) {
+		sql +=  " ORDER BY dateAdded";
+		return Zotero.DB.columnQuery(sql, this.getID());
+	}
+	
+	var attachments = Zotero.DB.query(sql, this.getID());
+	if (!attachments) {
+		return false;
+	}
+	
+	// Sort by title
+	var collation = Zotero.getLocaleCollation();
+	var f = function (a, b) {
+		return collation.compareString(1, a.title, b.title);
+	}
+	
+	var attachmentIDs = [];
+	attachments.sort(f);
+	for each(var attachment in attachments) {
+		attachmentIDs.push(attachment.itemID);
+	}
+	return attachmentIDs;
 }
 
 
@@ -3153,7 +3178,7 @@ Zotero.Notes = new function(){
 /*
  * Constructor for Collection object
  *
- * Generally should be called from Zotero.Collection rather than directly
+ * Generally should be called from Zotero.Collections rather than directly
  */
 Zotero.Collection = function(){
 	 this._init();
