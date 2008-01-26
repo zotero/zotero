@@ -88,8 +88,8 @@
 	<text variable="title" text-case="sentence" font-style="italic"/>
       </if>
       <else>
-	<text variable="title" text-case="sentence" prefix="&#8222;"
-	      suffix="&#8221;"/>
+	<text variable="title" text-case="sentence" prefix="„"
+	      suffix="”"/>
       </else>
     </choose>
   </macro>
@@ -99,8 +99,8 @@
 	<text variable="title" text-case="sentence" font-style="italic" form="short"/>
       </if>
       <else>
-	<text variable="title" text-case="sentence" prefix="&#8222;"
-	      suffix="&#8221;" form="short"/>
+	<text variable="title" text-case="sentence" prefix="„"
+	      suffix="”" form="short"/>
       </else>
     </choose>
   </macro>
@@ -196,7 +196,10 @@
 		  <text variable="container-title" font-style="italic"/>
 		</group>
 		<text variable="volume" prefix=" "/>
-		<text variable="collection-title" prefix=" (=" suffix=")"/>
+		<group prefix=" (= " suffix=")" delimiter=" ">
+		  <text variable="collection-title"/>
+		  <text variable="collection-number"/>
+		</group>
 	      </group>		   
 	      <text variable="edition" prefix=", "/>
 	      <text macro="publisher" prefix=", "/>
@@ -231,7 +234,10 @@
 	    <else-if type="book">
 	      <group>
 		<text variable="volume" prefix=" "/>
-		<text variable="collection-title" prefix=" (= " suffix=")"/>
+		<group prefix=" (= " suffix=")" delimiter=" ">
+		  <text variable="collection-title"/>
+		  <text variable="collection-number"/>
+		</group>
 	      </group>
 	      <text macro="translator" prefix=", "/>
 	      <text macro="editor" prefix=", "/>
@@ -279,7 +285,10 @@
 	      <text variable="container-title" font-style="italic"/>
 	    </group>
 	    <text variable="volume" prefix=" "/>
-	    <text variable="collection-title" prefix=" (= " suffix=")"/>
+	    <group prefix=" (= " suffix=")" delimiter=" ">
+	      <text variable="collection-title"/>
+	      <text variable="collection-number"/>
+	    </group>
 	  </group>		   
 	  <text variable="edition" prefix=", "/>
 	  <text macro="publisher" prefix=", "/>
@@ -316,7 +325,10 @@
 	<else-if type="book">
 	  <group>
 	    <text variable="volume" prefix=" "/>
-	    <text variable="collection-title" prefix=" (= " suffix=")"/>
+	    <group prefix=" (= " suffix=")" delimiter=" ">
+	      <text variable="collection-title"/>
+	      <text variable="collection-number"/>
+	    </group>
 	  </group>
 	  <text macro="translator" prefix=", "/>
 	  <text macro="editor" prefix=", "/>
