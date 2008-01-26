@@ -393,7 +393,7 @@ Zotero.Integration.SOAP = new function() {
 				}
 			} else if(editCitationIndex !== false && vars[i] == editCitationIndex) {
 				// save citation data
-				editCitation = session.unserializeCitation(vars[i+1]);
+				editCitation = session.unserializeCitation(vars[i+1], vars[i]);
 			} else {
 				session.addCitation(vars[i], vars[i+1]);
 			}
@@ -627,12 +627,7 @@ Zotero.Integration.Session.prototype.addCitation = function(index, arg) {
 	if(typeof(arg) == "string") {	// text field
 		if(arg == "!" || arg == "X") return;
 		
-		var citation = this.unserializeCitation(arg);
-		if(arg[0] == "{") {		// JSON
-			citation.properties.field = arg;
-		} else {
-			this.updateIndices[citation.properties.index];
-		}
+		var citation = this.unserializeCitation(arg, index);
 	} else {					// a citation already
 		var citation = arg;
 	}
@@ -695,10 +690,19 @@ Zotero.Integration.Session.prototype.completeCitation = function(object) {
 /*
  * unserializes a JSON citation into a citation object (sans items)
  */
-Zotero.Integration.Session.prototype.unserializeCitation = function(arg) {
+Zotero.Integration.Session.prototype.unserializeCitation = function(arg, index) {
 	if(arg[0] == "{") {		// JSON field
 		// create citation
 		var citation = this.style.createCitation();
+		
+		// fix for corrupted fields
+		var lastBracket = arg.lastIndexOf("}");
+		if(lastBracket+1 != arg.length) {
+			arg = arg.substr(0, lastBracket+1);
+			this.updateIndices[index] = true;
+		} else {
+			citation.properties.field = arg;
+		}
 		
 		// get JSON
 		var object = Zotero.JSON.unserialize(arg);
@@ -732,6 +736,7 @@ Zotero.Integration.Session.prototype.unserializeCitation = function(arg) {
 		}
 		
 		var citation = this.style.createCitation(citationItems);
+		this.updateIndices[index] = true;
 	}
 	
 	return citation;
