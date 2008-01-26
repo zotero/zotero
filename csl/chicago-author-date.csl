@@ -14,11 +14,21 @@
     <summary>The author-date variant of the Chicago style</summary>
     <link href="http://www.chicagomanualofstyle.org/tools_citationguide.html" rel="documentation"/>
   </info>
-  <macro name="editor">
-    <names variable="editor">
-      <label form="short" text-case="capitalize-first" suffix=". "/>
-      <name and="text" delimiter=", "/>
-    </names>
+  <macro name="secondary-contributor">
+    <group delimiter=". ">
+      <names variable="editor">
+        <label form="verb-short" prefix=" " text-case="capitalize-first" suffix=". "/>
+        <name and="text" delimiter=", "/>
+      </names>
+      <choose>
+        <if variable="author editor" match="any">
+      <names variable="translator">
+        <label form="verb-short" prefix=" " text-case="capitalize-first" suffix=". "/>
+        <name and="text" delimiter=", "/>
+      </names>
+        </if>
+      </choose>
+    </group>
   </macro>
   <macro name="series-editor">
     <names variable="original-author">
@@ -33,7 +43,7 @@
     <names variable="author">
       <name and="text" name-as-sort-order="first" sort-separator=", " delimiter=", "
 	    delimiter-precedes-last="always"/>
-      <label form="short" prefix=", " suffix="." text-case="lowercase"/>
+      <label form="verb-short" prefix=", " suffix="." text-case="lowercase"/>
       <substitute>
 	<names variable="editor"/>
 	<names variable="translator"/>
@@ -43,7 +53,7 @@
   </macro>
   <macro name="author-short">
     <names variable="author">
-      <name form="short" and="text" delimiter=", "/>
+      <name form="verb-short" and="text" delimiter=", "/>
       <substitute>
 	<names variable="editor"/>
 	<names variable="translator"/>
@@ -160,7 +170,7 @@
 	  <text macro="title" prefix=" " suffix="."/>
 	  <group prefix=" " delimiter=", ">
 	    <text variable="edition" suffix=" ed."/>
-	    <text macro="editor" suffix="."/>
+	    <text macro="secondary-contributor" suffix="."/>
 	    <text variable="genre"/>
 	    <text macro="publisher"/>
 	  </group>
@@ -170,7 +180,7 @@
 	    <text macro="title" prefix=" " suffix="."/>
 	    <text macro="edition"/>
 	    <text macro="volumes"/>
-	    <text macro="editor" suffix="."/>
+	    <text macro="secondary-contributor" suffix="."/>
 	    <text macro="publisher"/>
 	  </group>
 	</else-if>
@@ -182,7 +192,7 @@
 		<text term="in" text-case="capitalize-first"/>
 		<text variable="container-title" font-style="italic"/>
 	      </group>
-	      <text macro="editor" prefix=" "/>
+	      <text macro="secondary-contributor" prefix=" "/>
 	      <group delimiter=" ">
 		<text variable="volume" prefix="Vol. " suffix=" of"/>
 		<text variable="collection-title" font-style="italic"/>
@@ -196,7 +206,7 @@
 	<else>
 	  <group suffix="." >
 	    <text macro="title" prefix=" " />
-	    <text macro="editor" prefix=" "/>
+	    <text macro="secondary-contributor" prefix=" "/>
 	  </group>
 	  <group class="container" prefix=" " suffix="." delimiter=" ">
 	    <text variable="container-title" font-style="italic"/>
