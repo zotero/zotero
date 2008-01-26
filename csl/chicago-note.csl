@@ -127,7 +127,11 @@
     </group>
   </macro>
   <macro name="container-prefix">
+    <choose>
+      <if type="chapter">
     <text term="in" text-case="lowercase" suffix=" "/>
+      </if>
+    </choose>
   </macro>
   <macro name="locators">
     <choose>
@@ -189,31 +193,6 @@
       </else>
     </choose>
   </macro>
-  <macro name="issue">
-    <choose>
-      <if type="article-journal">
-        <text macro="issued" prefix=" (" suffix=")"/>
-      </if>
-      <else-if variable="publisher-place publisher" match="any">
-        <group prefix=" (" suffix=")" delimiter=", ">
-          <group delimiter=" ">
-            <choose>
-              <if variable="title" match="none"> </if>
-              <else-if type="thesis paper-conference" match="any">
-                <text variable="genre"/>
-              </else-if>
-            </choose>
-            <text macro="event"/>
-          </group>
-          <text macro="publisher"/>
-          <text macro="issued"/>
-        </group>
-      </else-if>
-      <else>
-        <text macro="issued" prefix=", "/>
-      </else>
-    </choose>
-  </macro>
   <macro name="locator">
     <choose>
       <if type="article-newspaper">
@@ -251,6 +230,31 @@
       <text variable="archive"/>
       <text variable="archive-place"/>
     </group>
+  </macro>
+  <macro name="issue">
+    <choose>
+      <if type="article-journal">
+        <text macro="issued" prefix=" (" suffix=")"/>
+      </if>
+      <else-if variable="publisher-place publisher" match="any">
+        <group prefix=" (" suffix=")" delimiter=", ">
+          <group delimiter=" ">
+            <choose>
+              <if variable="title" match="none"> </if>
+              <else-if type="thesis paper-conference" match="any">
+                <text variable="genre"/>
+              </else-if>
+            </choose>
+            <text macro="event"/>
+          </group>
+          <text macro="publisher"/>
+          <text macro="issued"/>
+        </group>
+      </else-if>
+      <else>
+        <text macro="issued" prefix=", "/>
+      </else>
+    </choose>
   </macro>
   <macro name="access">
     <group delimiter=", ">
