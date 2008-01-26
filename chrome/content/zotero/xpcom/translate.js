@@ -1022,16 +1022,34 @@ Zotero.Translate.prototype._itemTagsAndSeeAlso = function(item, newItem) {
 		}
 	}
 	if(item.tags) {
+		var tagsToAdd = {};
+		tagsToAdd[0] = []; // user tags
+		tagsToAdd[1] = []; // automatic tags
+		
 		for each(var tag in item.tags) {
 			if(typeof(tag) == "string") {
 				// accept strings in tag array as automatic tags, or, if
 				// importing, as non-automatic tags
-				newItem.addTag(tag, (this.type == "import" ? 0 : 1));
+				if (this.type == 'import') {
+					tagsToAdd[0].push(tag);
+				}
+				else {
+					tagsToAdd[1].push(tag);
+				}
 			} else if(typeof(tag) == "object") {
 				// also accept objects
 				if(tag.tag) {
-					newItem.addTag(tag.tag, tag.type ? tag.type : 0);
+					if (!tagsToAdd[tag.type]) {
+						tagsToAdd[tag.type] = [];
+					}
+					tagsToAdd[tag.type].push(tag.tag);
 				}
+			}
+		}
+		
+		for (var type in tagsToAdd) {
+			if (tagsToAdd[type].length) {
+				newItem.addTags(tagsToAdd[type], type);
 			}
 		}
 	}
@@ -1364,21 +1382,40 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 	// enabled in the preferences (as it is by default)
 	if(item.tags &&
 	  (this.type == "import" || Zotero.Prefs.get("automaticTags"))) {
+		var tagsToAdd = {};
+		tagsToAdd[0] = []; // user tags
+		tagsToAdd[1] = []; // automatic tags
+		
 		for each(var tag in item.tags) {
 			if(typeof(tag) == "string") {
 				// accept strings in tag array as automatic tags, or, if
 				// importing, as non-automatic tags
-				newItem.addTag(tag, (this.type == "import" ? 0 : 1));
+				if (this.type == 'import') {
+					tagsToAdd[0].push(tag);
+				}
+				else {
+					tagsToAdd[1].push(tag);
+				}
 			} else if(typeof(tag) == "object") {
 				// also accept objects
 				if(tag.tag) {
-					if(this.type == "import") {
-						newItem.addTag(tag.tag, tag.type ? tag.type : 0);
-					} else {
-						// force web imports to automatic
-						newItem.addTag(tag.tag, 1);
+					if (this.type == "import") {
+						if (!tagsToAdd[tag.type]) {
+							tagsToAdd[tag.type] = [];
+						}
+						tagsToAdd[tag.type].push(tag.tag);
+					}
+					// force web imports to automatic
+					else {
+						tagsToAdd[1].push(tag.tag);
 					}
 				}
+			}
+		}
+		
+		for (var type in tagsToAdd) {
+			if (tagsToAdd[type].length) {
+				newItem.addTags(tagsToAdd[type], type);
 			}
 		}
 	}

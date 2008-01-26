@@ -1901,6 +1901,21 @@ Zotero.Item.prototype.addTag = function(tag, type){
 }
 
 
+Zotero.Item.prototype.addTags = function (tags, type) {
+	Zotero.DB.beginTransaction();
+	try {
+		for each(var tag in tags) {
+			this.addTag(tag, type);
+		}
+		Zotero.DB.commitTransaction();
+	}
+	catch (e) {
+		Zotero.DB.rollbackTransaction();
+		throw (e);
+	}
+}
+
+
 Zotero.Item.prototype.addTagByID = function(tagID) {
 	if (!this.getID()) {
 		throw ('Cannot add tag to unsaved item in Item.addTagByID()');
