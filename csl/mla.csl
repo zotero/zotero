@@ -136,6 +136,7 @@
         <else>
           <group class="container" prefix=" " suffix="." delimiter=": ">
             <group delimiter=" ">
+              <text macro="editor-translator" suffix="."/>
               <text variable="container-title" text-decoration="underline"/>
               <choose>
                 <if type="article-journal">
