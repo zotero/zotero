@@ -2707,10 +2707,11 @@ Zotero.CSL.FormattedString._rtfEscapeFunction = function(aChar) {
  * appends a string (with format parameters) to the current one
  */
 Zotero.CSL.FormattedString.prototype.append = function(string, element, dontDelimit, dontEscape) {
+	if(!string && string !== 0) return false;
+	
 	if(typeof(string) != "string") {
 		string = string.toString();
 	}
-	if(string.toString() === "") return false;
 	
 	// append delimiter if necessary
 	if(this.delimiter && this.string && !dontDelimit) {
