@@ -88,8 +88,8 @@
 	<text variable="title" text-case="sentence" font-style="italic"/>
       </if>
       <else>
-	<text variable="title" text-case="sentence" prefix="„"
-	      suffix="”"/>
+	<text variable="title" text-case="sentence" prefix="&#8222;"
+	      suffix="&#8221;"/>
       </else>
     </choose>
   </macro>
@@ -99,8 +99,8 @@
 	<text variable="title" text-case="sentence" font-style="italic" form="short"/>
       </if>
       <else>
-	<text variable="title" text-case="sentence" prefix="„"
-	      suffix="”" form="short"/>
+	<text variable="title" text-case="sentence" prefix="&#8222;"
+	      suffix="&#8221;" form="short"/>
       </else>
     </choose>
   </macro>
