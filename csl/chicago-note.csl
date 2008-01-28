@@ -23,6 +23,16 @@
     <category term="note"/>
     <updated/>
   </info>
+  <macro name="translator">
+    <choose>
+      <if variable="author editor" match="any">
+    <names variable="translator" delimiter=", ">
+      <label form="verb-short" prefix=" " text-case="lowercase" suffix=". "/>
+      <name and="text" delimiter=", "/>
+    </names>
+      </if>
+    </choose>
+  </macro>
   <macro name="secondary-contributor">
     <group delimiter=", ">
       <names variable="editor" delimiter=", ">
@@ -30,14 +40,18 @@
         <name and="text" delimiter=", "/>
       </names>
       <choose>
-        <if variable="author editor" match="any">
-      <names variable="translator" delimiter=", ">
-        <label form="verb-short" prefix=" " text-case="lowercase" suffix=". "/>
-        <name and="text" delimiter=", "/>
-      </names>
+        <if type="article-journal article-magazine article-newspaper" match="none">
+      <text macro="translator"/>
         </if>
       </choose>
     </group>
+  </macro>
+  <macro name="translator-article">
+    <choose>
+      <if type="article-journal article-magazine article-newspaper" match="any">
+        <text macro="translator"/>
+      </if>
+    </choose>
   </macro>
   <macro name="author">
     <names variable="author">
@@ -306,6 +320,7 @@
             </group>
             <text macro="title"/>
             <text macro="description"/>
+            <text macro="translator-article"/>
             <group>
               <text macro="container-prefix"/>
               <text variable="container-title" font-style="italic"/>
