@@ -2109,6 +2109,7 @@ Zotero.CSL.Item._fallbackTypeMap = {
 	magazineArticle:"article",
 	newspaperArticle:"article",
 	thesis:"article",
+	conferencePaper:"chapter",
 	letter:"article",
 	manuscript:"article",
 	interview:"article",
