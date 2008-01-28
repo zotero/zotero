@@ -44,6 +44,15 @@ Zotero.DBConnection = function(dbName) {
 //
 /////////////////////////////////////////////////////////////////
 
+/**
+ * Test a connection to the database, throwing any errors that occur
+ *
+ * @return	void
+ */
+Zotero.DBConnection.prototype.test = function () {
+	this._getDBConnection();
+}
+
 /*
  * Run an SQL query
  *

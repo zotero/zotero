@@ -206,6 +206,15 @@ var Zotero = new function(){
 		// Initialize keyboard shortcuts
 		Zotero.Keys.init();
 		
+		try {
+			Zotero.DB.test();
+		}
+		catch (e) {
+			this.skipLoading = true;
+			Zotero.DB.skipBackup = true;
+			return;
+		}
+		
 		// Add notifier queue callbacks to the DB layer
 		Zotero.DB.addCallback('begin', Zotero.Notifier.begin);
 		Zotero.DB.addCallback('commit', Zotero.Notifier.commit);
