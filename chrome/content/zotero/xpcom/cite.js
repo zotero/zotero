@@ -2120,7 +2120,7 @@ Zotero.CSL.Item._fallbackTypeMap = {
 	bill:"book",
 	case:"book",
 	hearing:"book",
-	patent:"book",
+	patent:"article",
 	statute:"book",
 	email:"article",
 	map:"article",
