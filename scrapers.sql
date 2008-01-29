@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-01-29 19:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-01-29 20:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -2084,6 +2084,57 @@ function getData(ids){
 		newItem.complete();		
 	}, function(){Zotero.done();});	
 	Zotero.wait();
+}');
+
+REPLACE INTO translators VALUES ('4345839f-b4fd-4e3f-a73d-268b6f280f6e', '1.0.0b4.r5', '', '2008-01-29 20:00:00', '0', '100', '4', 'Journal of Vision', 'Michael Berkowitz', 'http://(www.)?journalofvision.org/', 
+'function detectWeb(doc, url) {
+	if (url.indexOf("search.aspx?") != -1 ||  url.match(/\d+/g).length == 2) {
+		return "multiple";
+	} else if (url.match(/\d+/g).length == 3) {
+		return "journalArticle";
+	}
+}', 
+'function doWeb(doc, url) {
+	var urls = new Array();
+	if (detectWeb(doc, url) == "multiple") {
+		var items = new Object();
+		 if (doc.evaluate(''//a[@class="AbsTitle"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+		 	var xpath = ''//a[@class="AbsTitle"]'';
+		 } else if (doc.evaluate(''//a[@class="toc_ArticleTitle"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+		 	var xpath = ''//a[@class="toc_ArticleTitle"]'';
+		 }
+		 var articles = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
+		 var next_art;
+		 while (next_art = articles.iterateNext()) {
+			 items[next_art.href] = next_art.textContent;
+		 }
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			urls.push(i);
+		}
+	} else {
+		urls.push(url);
+	}
+	Zotero.debug(urls);
+	
+	Zotero.Utilities.processDocuments(urls, function(newDoc) {
+		var rislink = newDoc.evaluate(''//div[@id="block0"]/table/tbody/tr/td[@class="body"]/a'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().href.replace("info/GetCitation", "AutomaticCitationDownload") + ''&type=ReferenceManager'';
+		var DOI = newDoc.evaluate(''//td[2]/span[@class="toc_VolumeLine"]'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent.match(/doi:\s*(.*)$/)[1];
+		var PDF = newDoc.evaluate(''//div[@class="jovHistory"]//td[2]/a'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().href;
+		Zotero.debug(rislink);
+		Zotero.Utilities.HTTP.doGet(rislink, function(text) {
+			var translator = Zotero.loadTranslator("import");
+			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+			translator.setString(text);
+			translator.setHandler("itemDone", function(obj, item) {
+				item.DOI = DOI;
+				item.publicationTitle = "Journal of Vision";
+				item.attachments = [{url:PDF, title:"Journal of Vision Full Text PDF", mimeType:"application/pdf"}];
+				item.complete();
+			});
+			translator.translate();
+		});
+	}, function() {Zotero.done;});
 }');
 
 REPLACE INTO translators VALUES ('966a7612-900c-42d9-8780-2a3247548588', '1.0.0b4.r5', '', '2008-01-25 20:00:00', '0', '100', '4', 'eMJA', 'Michael Berkowitz', 'http://www.mja.com.au/', 
