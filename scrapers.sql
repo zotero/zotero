@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-01-29 17:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-01-29 19:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -11073,7 +11073,7 @@ REPLACE INTO translators VALUES ('2c310a37-a4dd-48d2-82c9-bd29c53c1c76', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('cde4428-5434-437f-9cd9-2281d14dbf9', '1.0.0b3.r1', '', '2008-01-28 21:30:00', 1, 100, 4, 'Ovid', 'Simon Kornblith', '/gw2/ovidweb\.cgi', 
+REPLACE INTO translators VALUES ('cde4428-5434-437f-9cd9-2281d14dbf9', '1.0.0b3.r1', '', '2008-01-29 19:00:00', '1', '100', '4', 'Ovid', 'Simon Kornblith and Michael Berkowitz', '/(gw2|spa)/ovidweb\.cgi', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -11094,26 +11094,36 @@ REPLACE INTO translators VALUES ('cde4428-5434-437f-9cd9-2281d14dbf9', '1.0.0b3.
 	}
 	
 	return false;
-}',
-'function doWeb(doc, url) {
+}', 
+'function senCase(string) {
+	var words = string.split(/\b/);
+	for (var i = 0 ; i < words.length ; i++) {
+		if (words[i].match(/[A-Z]/)) {
+			words[i] = words[i][0] + words[i].substring(1).toLowerCase();
+		} 
+	}
+	return words.join("");
+}
+
+function doWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == ''x'') return namespace; else return null;
 	} : null;
 	
-	var results = Zotero.Utilities.cleanString(doc.evaluate(''//div[@class="bibheader-resultsrange"]/b'', doc, nsResolver,
-		XPathResult.ANY_TYPE, null).iterateNext().textContent);
-	
-	var post = "S="+doc.evaluate(''.//input[@name="S"]'', doc, nsResolver, XPathResult.ANY_TYPE,
-		null).iterateNext().value;
-	
+	var results = Zotero.Utilities.cleanString(doc.evaluate(''//div[@class="bibheader-resultsrange"]/b'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+	var post = "S="+doc.evaluate(''.//input[@name="S"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().value;
+
 	if(results.indexOf("-") != -1) {
-		var items = new Array();
+		var items = new Object();
 		
-		var tableRows = doc.evaluate(''/html/body/form/div[substring(@class, 1, 10)="titles-row"]'', doc,
-			nsResolver, XPathResult.ANY_TYPE, null);
-		var tableRow;
 		// Go through table rows
+		if (doc.evaluate(''/html/body/form/div[substring(@class, 1, 10)="titles-row"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+			var tableRows = doc.evaluate(''/html/body/form/div[substring(@class, 1, 10)="titles-row"]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		} else if (doc.evaluate(''//div[@id="titles-records"]/table[@class="titles-row"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+			var tableRows = doc.evaluate(''//div[@id="titles-records"]/table[@class="titles-row"]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		}
+		var tableRow;
 		while(tableRow = tableRows.iterateNext()) {
 			var id = doc.evaluate(''.//input[@name="R"]'', tableRow, nsResolver, XPathResult.ANY_TYPE,
 				null).iterateNext().value;
@@ -11142,7 +11152,6 @@ REPLACE INTO translators VALUES ('cde4428-5434-437f-9cd9-2281d14dbf9', '1.0.0b3.
 	post += "&cmRecordSelect=SELECTED&cmFields=ALL&cmFormat=export&cmsave.x=12&cmsave.y=7";
 		
 	Zotero.Utilities.HTTP.doPost(url, post, function(text) {
-		Zotero.debug(text);
 		var lines = text.split("\n");
 		var haveStarted = false;
 		var newItemRe = /^<[0-9]+>/;
@@ -11177,22 +11186,18 @@ REPLACE INTO translators VALUES ('cde4428-5434-437f-9cd9-2281d14dbf9', '1.0.0b3.
 						newItem.creators.push({lastName:names[0], isInstitution:true, creatorType:"author"});
 					}
 				} else if(fieldCode == "SO") {
-					// make a vague attempt at getting a volume and pages
-					var m = fieldContent.match(/([0-9]+)\(([0-9]+)\):([A-Z]?[0-9]+(?:\-[A-Z]?[0-9]+))/);
-					if(m) {
-						newItem.volume = m[1];
-						newItem.issue = m[2];
-						newItem.pages = m[3];
-						fieldContent = fieldContent.replace(m[0], "");
+					var m = fieldContent.split(".");
+					newItem.publicationTitle = Zotero.Utilities.cleanString(m[0]);
+					if (m[1].match(/\d+\(\d+\)/)) {
+						var n = m[1].match(/(\d+)\((\d+)\)/);
+						Zotero.debug(n);
+						newItem.volume = n[1];
+						newItem.issue = n[2];
+					} else {
+						newItem.volume = m[1].match(/\d+/)[0];
 					}
-					// try to get the date, too
-					var m = fieldContent.match(/((?:January|February|March|April|May|June|July|August|September|October|November|December).*[0-9]{4});$/);
-					if(m) {
-						newItem.date = m[1];
-						fieldContent = fieldContent.replace(m[0], "");
-					}
-					
-					newItem.publicationTitle = Zotero.Utilities.superCleanString(fieldContent);
+					newItem.date = senCase(Zotero.Utilities.cleanString(m[2]));
+					newItem.pages = Zotero.Utilities.cleanString(m[3]);
 				} else if(fieldCode == "SB") {
 					newItem.tags.push(Zotero.Utilities.superCleanString(fieldContent));
 				} else if(fieldCode == "KW") {
@@ -11211,10 +11216,7 @@ REPLACE INTO translators VALUES ('cde4428-5434-437f-9cd9-2281d14dbf9', '1.0.0b3.
 		if(haveStarted) {
 			newItem.complete();
 		}
-		
-		Zotero.done();
 	});
-		
 	Zotero.wait();
 }');
 
