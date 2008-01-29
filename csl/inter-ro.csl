@@ -17,7 +17,7 @@
   <macro name="editor">
     <names variable="editor" delimiter=", ">
       <label form="verb" text-case="lowercase"/>
-      <name and="text" delimiter=", " prefix=" " delimiter-precedes-last="never"/>
+      <name delimiter=", " prefix=" " delimiter-precedes-last="always"/>
     </names>
   </macro>
   <macro name="translator">
@@ -30,8 +30,8 @@
     <choose>
       <if variable="author">
 	<names variable="editor" delimiter=", ">
-	  <name and="text" delimiter=", " delimiter-precedes-last="never"/>
-	  <label form="short" text-case="lowercase" prefix="(" suffix=".)" />
+	  <name delimiter=", " delimiter-precedes-last="always"/>
+	  <label form="short" text-case="lowercase" prefix=" (" suffix=".)"/>
 	</names>
       </if>
     </choose>
@@ -192,7 +192,7 @@
 	      <group class="container">
 		<text term="in" text-case="lowercase" prefix=", "/>
 		<group delimiter=", " prefix=" ">
-		  <text macro="editor-short" suffix=","/>
+		  <text macro="editor-short"/>
 		  <text variable="container-title" font-style="italic"/>
 		</group>
 		<text variable="volume" prefix=" "/>
@@ -281,7 +281,7 @@
 	  <group class="container"> 
 	    <text term="in" text-case="lowercase" prefix=", "/>
 	    <group delimiter=", " prefix=" ">
-	      <text macro="editor-short" suffix=","/>
+	      <text macro="editor-short"/>
 	      <text variable="container-title" font-style="italic"/>
 	    </group>
 	    <text variable="volume" prefix=" "/>
