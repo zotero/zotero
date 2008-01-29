@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-01-29 20:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-01-29 23:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -7005,7 +7005,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('b047a13c-fe5c-6604-c997-bef15e502b09', '1.0.0b3.r1', '', '2008-01-09 20:00:00', '1', '100', '4', 'LexisNexis', 'Sean Takats', 'https?://[^/]*lexis-?nexis\.com[^/]*/us/lnacademic', 
+REPLACE INTO translators VALUES ('b047a13c-fe5c-6604-c997-bef15e502b09', '1.0.0b3.r1', '', '2008-01-29 23:00:00', '1', '100', '4', 'LexisNexis', 'Sean Takats', 'https?://[^/]*lexis-?nexis\.com[^/]*/us/lnacademic', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -7047,6 +7047,7 @@ REPLACE INTO translators VALUES ('b047a13c-fe5c-6604-c997-bef15e502b09', '1.0.0b
 		Zotero.Utilities.HTTP.doPost(uri, poststring, function(text) {
 			uri = text.match(/&amp;url=([^'']+)''/)
 			uri = decodeURIComponent(uri[1]);
+			uri = uri.replace(/http:\/\/[^/]*\//, host+"/");
 			var uris = new Array();
 			uris.push(uri);
 			Zotero.Utilities.processDocuments(uris, function(newDoc){
