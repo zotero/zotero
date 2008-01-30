@@ -61,11 +61,26 @@ function onCollectionSelected()
 	{
 		var collection = collectionsView._getItemAtRow(collectionsView.selection.currentIndex);
 		collection.setSearch('');
-
-		itemsView = new Zotero.ItemTreeView(collection, (window.arguments[1] ? true : false));
-		document.getElementById('zotero-items-tree').view = itemsView;
+		
+		try {
+			Zotero.UnresponsiveScriptIndicator.disable();
+			itemsView = new Zotero.ItemTreeView(collection, (window.arguments[1] ? true : false));
+			document.getElementById('zotero-items-tree').view = itemsView;
+		}
+		finally {
+			Zotero.UnresponsiveScriptIndicator.enable();
+		}
+		
+		if (collection.isLibrary()) {
+			Zotero.Prefs.set('lastViewedFolder', 'L');
+		}
+		if (collection.isCollection()) {
+			Zotero.Prefs.set('lastViewedFolder', 'C' + collection.ref.getID());
+		}
+		else if (collection.isSearch()) {
+			Zotero.Prefs.set('lastViewedFolder', 'S' + collection.ref.id);
+		}
 	}
-
 }
 
 function onSearch()
