@@ -58,9 +58,9 @@
       <if type="book">
         <text variable="title" font-variant="small-caps"/>
       </if>
-      <if type="article">
+      <else-if type="article">
         <text variable="title" font-style="italic"/>
-      </if>
+      </else-if>
       <else>
         <text variable="title"/>
       </else>
