@@ -110,7 +110,7 @@ Zotero.Item.prototype.loadFromID = function(id) {
 					break;
 				
 				case 'firstCreator':
-					colSQL = Zotero.Items.getfirstCreatorSQL();
+					colSQL = Zotero.Items.getFirstCreatorSQL();
 					break;
 					
 				case 'numNotes':
@@ -1789,9 +1789,34 @@ Zotero.Item.prototype.getAttachments = function(){
 		return [];
 	}
 	
-	var sql = "SELECT itemID FROM itemAttachments NATURAL JOIN items "
-		+ "WHERE sourceItemID=" + this.getID() + " ORDER BY dateAdded";
-	return Zotero.DB.columnQuery(sql);
+	var sql = "SELECT A.itemID, value AS title FROM itemAttachments A "
+		+ "NATURAL JOIN items I LEFT JOIN itemData ID USING (itemID) "
+		+ "LEFT JOIN itemDataValues IDV "
+		+ "ON (fieldID=110 AND ID.valueID=IDV.valueID) "
+		+ "WHERE sourceItemID=?";
+		
+	if (Zotero.Prefs.get('sortAttachmentsChronologically')) {
+		sql +=  " ORDER BY dateAdded";
+		return Zotero.DB.columnQuery(sql, this.getID());
+	}
+	
+	var attachments = Zotero.DB.query(sql, this.getID());
+	if (!attachments) {
+		return false;
+	}
+	
+	// Sort by title
+	var collation = Zotero.getLocaleCollation();
+	var f = function (a, b) {
+		return collation.compareString(1, a.title, b.title);
+	}
+	
+	var attachmentIDs = [];
+	attachments.sort(f);
+	for each(var attachment in attachments) {
+		attachmentIDs.push(attachment.itemID);
+	}
+	return attachmentIDs;
 }
 
 
@@ -1873,6 +1898,21 @@ Zotero.Item.prototype.addTag = function(tag, type){
 	}
 	
 	return result ? tagID : false;
+}
+
+
+Zotero.Item.prototype.addTags = function (tags, type) {
+	Zotero.DB.beginTransaction();
+	try {
+		for each(var tag in tags) {
+			this.addTag(tag, type);
+		}
+		Zotero.DB.commitTransaction();
+	}
+	catch (e) {
+		Zotero.DB.rollbackTransaction();
+		throw (e);
+	}
 }
 
 
@@ -3153,7 +3193,7 @@ Zotero.Notes = new function(){
 /*
  * Constructor for Collection object
  *
- * Generally should be called from Zotero.Collection rather than directly
+ * Generally should be called from Zotero.Collections rather than directly
  */
 Zotero.Collection = function(){
 	 this._init();

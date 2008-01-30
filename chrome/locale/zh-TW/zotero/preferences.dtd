@@ -47,6 +47,10 @@
 
 <!ENTITY zotero.preferences.prefpane.export "匯出">
 
+<!ENTITY zotero.preferences.citationOptions.caption "Citation Options">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Include URLs of paper articles in references">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "When this option is disabled, Zotero includes URLs when citing journal, magazine, and newspaper articles only if the article does not have a page range specified.">
+
 <!ENTITY zotero.preferences.quickCopy.caption "快速複製">
 <!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "預設輸出格式：">
 <!ENTITY zotero.preferences.quickCopy.macWarning "注意！在 Mac OS X 平台下會失去富文本的格式。">
@@ -54,6 +58,8 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "網域／路徑">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "（例如 wikipedia.org）">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "輸出格式">
+
+<!ENTITY zotero.preferences.export.getAdditionalStyles "Get additional styles...">
 
 <!ENTITY zotero.preferences.prefpane.keys "快速鍵">
 
@@ -80,3 +86,6 @@
 
 <!ENTITY zotero.preferences.dbMaintenance "資料庫維修">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "檢查資料庫完整性">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reset Translators and Styles...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset Translators...">
+<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset Styles...">

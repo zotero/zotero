@@ -203,6 +203,17 @@ Zotero.Schema = new function(){
 	* 	since the last check
 	**/
 	function updateScrapersRemote(force, callback) {
+		// Little hack to manually update from repo on upgrade to 1.0.3
+		if (!force) {
+			var syncTargetVersion = 2; // increment this when releasing new version that requires it
+			var syncVersion = _getDBVersion('sync');
+			if (syncVersion < syncTargetVersion) {
+				_updateDBVersion('sync', syncTargetVersion);
+				force = true;
+				var uriChangeFix = true;
+			}
+		}
+		
 		if (!force){
 			if (_remoteUpdateInProgress) {
 				Zotero.debug("A remote update is already in progress -- not checking repository");
@@ -254,6 +265,11 @@ Zotero.Schema = new function(){
 			}
 			else {
 				url += '&m=1';
+			}
+			
+			// Fix for styles with new URIs in 1.0.3
+			if (uriChangeFix) {
+				url += '&urifix=1';
 			}
 		}
 		

@@ -174,6 +174,13 @@ Zotero.Attachments = new function(){
 	function importFromURL(url, sourceItemID, forceTitle, forceFileBaseName, parentCollectionIDs){
 		Zotero.debug('Importing attachment from URL');
 		
+		// Throw error on invalid URLs
+		urlRe = /^https?:\/\/[^\s]*$/;
+		var matches = urlRe.exec(url);
+		if (!matches) {
+			throw ("Invalid URL '" + url + "' in Zotero.Attachments.importFromURL()");
+		}
+		
 		Zotero.Utilities.HTTP.doHead(url, function(obj){
 			var mimeType = obj.channel.contentType;
 			
@@ -342,6 +349,13 @@ Zotero.Attachments = new function(){
 	 */
 	function linkFromURL(url, sourceItemID, mimeType, title){
 		Zotero.debug('Linking attachment from URL');
+		
+		// Throw error on invalid URLs
+		urlRe = /^https?:\/\/[^\s]*$/;
+		var matches = urlRe.exec(url);
+		if (!matches) {
+			throw ("Invalid URL '" + url + "' in Zotero.Attachments.linkFromURL()");
+		}
 		
 		// If no title provided, figure it out from the URL
 		if (!title){
@@ -814,21 +828,21 @@ Zotero.Attachments = new function(){
 					var value = item.getField(field, false, true);
 			}
 			
+			var re = new RegExp("\{?([^%\{\}]*)" + rpl + "(\{[0-9]+\})?" + "([^%\{\}]*)\}?");
+			
 			// If no value for this field, strip entire conditional block
 			// (within curly braces)
 			if (!value) {
-				var re = new RegExp("\{[^%]*" + rpl + "(\{[0-9]+\})?" + "[^%]*\}");
 				if (str.match(re)) {
 					return str.replace(re, '')
 				}
 			}
 			
-			var f = function(match) {
-				var chars = match.match(/{([0-9]+)}/);
-				return (chars) ? value.substr(0, chars[1]) : value;
+			var f = function(match, p1, p2, p3) {
+				var maxChars = p2 ? p2.replace(/[^0-9]+/g, '') : false;
+				return p1 + (maxChars ? value.substr(0, maxChars) : value) + p3;
 			}
 			
-			var re = new RegExp("(\{[^%]*)?" + rpl + "(\{[0-9]+\})?" + "([^%]*\})?");
 			return str.replace(re, f);
 		}
 		

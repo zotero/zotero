@@ -45,7 +45,14 @@ function onLoad()
 	
 	if (itemID) {
 		var ref = Zotero.Items.get(itemID);
+		
+		// Make sure Undo doesn't wipe out the note
+		if (!noteEditor.note || noteEditor.note.getID() != ref.getID()) {
+			noteEditor.id('noteField').editor.enableUndo(false);
+		}
 		noteEditor.note = ref;
+		noteEditor.id('noteField').editor.enableUndo(true);
+		
 		document.title = ref.getNoteTitle();
 	}
 	else if (parentItemID) {
@@ -72,9 +79,18 @@ function onUnload()
 var NotifyCallback = {
 	notify: function(action, type, ids){
 		// DEBUG: why does this reset without checking the modified ids?
-		if (noteEditor.note){
+		if (noteEditor.note) {
 			noteEditor.note = noteEditor.note;
-			document.title = noteEditor.note.getNoteTitle();
+			
+			// If the document title hasn't yet been set, reset undo so
+			// undoing to empty isn't possible
+			var noteTitle = noteEditor.note.getNoteTitle();
+			if (!document.title && noteTitle != '') {
+				noteEditor.id('noteField').editor.enableUndo(false);
+				noteEditor.id('noteField').editor.enableUndo(true);
+				document.title = noteTitle;
+			}
+			
 			// Update the window name (used for focusing) in case this is a new note
 			window.name = 'zotero-note-' + noteEditor.note.getID();
 		}

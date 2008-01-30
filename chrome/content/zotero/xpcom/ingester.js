@@ -288,11 +288,11 @@ Zotero.OpenURL = new function() {
 			if(item.journalAbbreviation) co += _mapTag(item.journalAbbreviation, "stitle", version);
 			if(item.volume) co += _mapTag(item.volume, "volume", version);
 			if(item.issue) co += _mapTag(item.issue, "issue", version);
-		} else if(item.itemType == "book" || item.itemType == "bookitem") {
+		} else if(item.itemType == "book" || item.itemType == "bookSection") {
 			if(version == "0.1") {
 				co += "&genre=book";
 			} else {
-				co += "&rft_val_fmt=info%3Aofi%2Ffmt%3Akev%3Amtx%3Abook&rft.genre=book";
+				co += "&rft_val_fmt=info%3Aofi%2Ffmt%3Akev%3Amtx%3Abook";
 			}
 			
 			if(item.itemType == "book") {

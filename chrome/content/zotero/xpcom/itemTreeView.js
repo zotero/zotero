@@ -1432,9 +1432,6 @@ Zotero.ItemTreeCommandController.prototype.onEvent = function(evt)
  */
 Zotero.ItemTreeView.prototype.onDragStart = function (evt,transferData,action)
 { 
-	try {
-	
-	
 	transferData.data = new TransferData();
 	transferData.data.addDataForFlavour("zotero/item", this.saveSelection());
 	
@@ -1472,17 +1469,13 @@ Zotero.ItemTreeView.prototype.onDragStart = function (evt,transferData,action)
 	if (mode == 'export') {
 		Zotero.QuickCopy.getContentFromItems(items, format, exportCallback);
 	}
-	else if (mode == 'bibliography') {
+	else if (mode.indexOf('bibliography') == 0) {
 		var content = Zotero.QuickCopy.getContentFromItems(items, format);
 		transferData.data.addDataForFlavour("text/unicode", content.text);
 		transferData.data.addDataForFlavour("text/html", content.html);
 	}
-	
-	
-	
-	}
-	catch (e) {
-		Zotero.debug(e);
+	else {
+		Components.utils.reportError("Invalid Quick Copy mode '" + mode + "'");
 	}
 }
 

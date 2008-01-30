@@ -1,4 +1,5 @@
 content	zotero				chrome/content/zotero/
+content	zotero-platform		chrome/content/zotero-platform/		platform
 
 locale	zotero	en-US		chrome/locale/en-US/zotero/
 locale	zotero	af-ZA		chrome/locale/af-ZA/zotero/
@@ -42,5 +43,3 @@ overlay	chrome://browser/content/browser.xul	chrome://zotero/content/itemPane.xu
 
 style	chrome://browser/content/browser.xul	chrome://zotero/skin/zotero.css
 style	chrome://global/content/customizeToolbar.xul	chrome://zotero/skin/zotero.css
-
-content	zotero-platform		chrome/content/zotero-platform/		platform

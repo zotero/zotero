@@ -101,6 +101,7 @@
 				<body>
 					<![CDATA[
 						var conditionsBox = this.id('conditions');
+						
 						this.search.removeCondition(id);
 						
 						for (var i = 0, len=conditionsBox.childNodes.length; i < len; i++){
@@ -164,7 +165,7 @@
 				<body>
 					<![CDATA[
 						this.updateSearch();
-						return this.search.save();
+						return this.search.save(true);
 					]]>
 				</body>
 			</method>
@@ -200,11 +201,11 @@
 		</implementation>
 		
 		<content>
-			<xul:vbox id="search-box" flex="1" onkeypress="this.parentNode.handleKeyPress(event)">
+			<xul:vbox id="search-box" flex="1" onkeypress="document.getBindingParent(this).handleKeyPress(event)">
 				<xul:groupbox xbl:inherits="flex">
 					<xul:caption align="center">
 						<xul:label value="&zotero.search.joinMode.prefix;"/>
-						<xul:menulist id="joinModeMenu" oncommand="this.parentNode.parentNode.parentNode.parentNode.updateJoinMode(); event.stopPropagation()">
+						<xul:menulist id="joinModeMenu" oncommand="document.getBindingParent(this).updateJoinMode(); event.stopPropagation()">
 							<xul:menupopup>
 								<xul:menuitem label="&zotero.search.joinMode.any;" value="any"/>
 								<xul:menuitem label="&zotero.search.joinMode.all;" value="all" selected="true"/>
@@ -215,8 +216,8 @@
 					<xul:vbox id="conditions"/>
 				</xul:groupbox>
 				<xul:hbox>
-					<xul:checkbox id="recursiveCheckbox" label="&zotero.search.recursive.label;" oncommand="this.parentNode.parentNode.parentNode.updateCheckbox('recursive'); event.stopPropagation()"/>
-					<xul:checkbox id="noChildrenCheckbox" label="&zotero.search.noChildren;" oncommand="this.parentNode.parentNode.parentNode.updateCheckbox('noChildren'); event.stopPropagation()"/>
+					<xul:checkbox id="recursiveCheckbox" label="&zotero.search.recursive.label;" oncommand="document.getBindingParent(this).updateCheckbox('recursive'); event.stopPropagation()"/>
+					<xul:checkbox id="noChildrenCheckbox" label="&zotero.search.noChildren;" oncommand="document.getBindingParent(this).updateCheckbox('noChildren'); event.stopPropagation()"/>
 				</xul:hbox>
 				<xul:checkbox id="includeParentsAndChildrenCheckbox" label="&zotero.search.includeParentsAndChildren;" oncommand="document.getBindingParent(this).updateCheckbox('includeParentsAndChildren'); event.stopPropagation()"/>
 			</xul:vbox>

@@ -111,9 +111,13 @@ Zotero.Search.prototype.getName = function(){
 /*
  * Save the search to the DB and return a savedSearchID
  *
+ * If there are gaps in the searchConditionIDs, |fixGaps| must be true
+ * and the caller must dispose of the search or reload the condition ids,
+ * which may change after the save.
+ *
  * For new searches, setName() must be called before saving
  */
-Zotero.Search.prototype.save = function(){
+Zotero.Search.prototype.save = function(fixGaps) {
 	if (!this._savedSearchName){
 		throw('Name not provided for saved search');
 	}
@@ -138,6 +142,20 @@ Zotero.Search.prototype.save = function(){
 		Zotero.DB.query(sql,
 			[this._savedSearchID, {string: this._savedSearchName}]);
 	}
+	
+	// Close gaps in savedSearchIDs
+	var saveConditions = {};
+	var i = 1;
+	for (var id in this._conditions) {
+		if (!fixGaps && id != i) {
+			Zotero.DB.rollbackTransaction();
+			throw ('searchConditionIDs not contiguous and |fixGaps| not set in save() of saved search ' + this._savedSearchID);
+		}
+		saveConditions[i] = this._conditions[id];
+		i++;
+	}
+	
+	this._conditions = saveConditions;
 	
 	// TODO: use proper bound parameters once DB class is updated
 	for (var i in this._conditions){
@@ -331,7 +349,10 @@ Zotero.Search.prototype.search = function(asTempTable){
 		this._buildQuery();
 	}
 	
+	// Default to 'all' mode
 	var joinMode = 'all';
+	
+	// Set some variables for conditions to avoid further lookups
 	for each(var condition in this._conditions) {
 		switch (condition.condition) {
 			case 'joinMode':
@@ -368,6 +389,7 @@ Zotero.Search.prototype.search = function(asTempTable){
 		}
 	}
 	
+	// Run a subsearch to define the superset of possible results
 	if (this._scope) {
 		Zotero.DB.beginTransaction();
 		
@@ -405,23 +427,33 @@ Zotero.Search.prototype.search = function(asTempTable){
 		sql += ")";
 		
 		var ids = Zotero.DB.columnQuery(sql, this._sqlParams);
+		/*
+		// DEBUG: Should this be here?
+		//
+		if (!ids) {
+			Zotero.DB.query("DROP TABLE " + tmpTable);
+			Zotero.DB.commitTransaction();
+			return false;
+		}
+		*/
 	}
+	// Or just run main search
 	else {
 		var ids = Zotero.DB.columnQuery(this._sql, this._sqlParams);
 	}
 	
-	//Zotero.debug('IDs from main search: ');
+	//Zotero.debug('IDs from main search or subsearch: ');
 	//Zotero.debug(ids);
 	
 	//Zotero.debug('Join mode: ' + joinMode);
 	
 	// Filter results with fulltext search
 	//
-	// If join mode ALL, return the (union of main and fulltext word search)
+	// If join mode ALL, return the (intersection of main and fulltext word search)
 	// filtered by fulltext content
 	//
 	// If join mode ANY or there's a quicksearch (which we assume
-	// fulltextContent is part of), return the superset of the main search and
+	// fulltextContent is part of), return the union of the main search and
 	// (a separate fulltext word search filtered by fulltext content)
 	for each(var condition in this._conditions){
 		if (condition['condition']=='fulltextContent'){
@@ -485,8 +517,10 @@ Zotero.Search.prototype.search = function(asTempTable){
 				}
 				var fulltextWordIDs = s.search();
 				
+				//Zotero.debug("Fulltext word IDs");
+				//Zotero.debug(fulltextWordIDs);
 				
-				// If ALL mode, set union of main search and fulltext word index
+				// If ALL mode, set intersection of main search and fulltext word index
 				// as the scope for the fulltext content search
 				if (joinMode == 'all' && !hasQuicksearch) {
 					var hash = {};
@@ -508,16 +542,16 @@ Zotero.Search.prototype.search = function(asTempTable){
 				}
 			}
 			
-			var fulltextIDs = Zotero.Fulltext.findTextInItems(scopeIDs,
-				condition['value'],	condition['mode']);
-			
-			if (scopeIDs) {
+			if (scopeIDs && scopeIDs.length) {
+				var fulltextIDs = Zotero.Fulltext.findTextInItems(scopeIDs,
+					condition['value'], condition['mode']);
+				
 				var hash = {};
 				for each(var val in fulltextIDs){
 					hash[val.id] = true;
 				}
 				
-				var filteredIDs = scopeIDs.filter(filter);
+				filteredIDs = scopeIDs.filter(filter);
 			}
 			else {
 				var filteredIDs = [];

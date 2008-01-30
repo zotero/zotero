@@ -867,8 +867,8 @@ Zotero.Annotation.prototype._confirmDelete = function(event) {
 	var dontShowAgain = { value: false };
 	var del = promptService.confirmCheck(
 		this.window,
-		Zotero.getString('annotations.regenerate.title'),
-		Zotero.getString('annotations.regenerate.body'),
+		Zotero.getString('annotations.confirmClose.title'),
+		Zotero.getString('annotations.confirmClose.body'),
 		Zotero.getString('general.dontShowWarningAgain'),
 		dontShowAgain
 	);

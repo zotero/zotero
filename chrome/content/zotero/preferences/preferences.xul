@@ -262,34 +262,38 @@ To add a new preference:
 			
 			<separator/>
 			
-			<vbox>
-				<label value="&zotero.preferences.quickCopy.defaultOutputFormat;" control="quickCopy-menu"/>
-				<menulist id="quickCopy-menu"/>
-			</vbox>
+			<label value="&zotero.preferences.quickCopy.defaultOutputFormat;" control="quickCopy-menu"/>
+			<menulist id="zotero-quickCopy-menu"/>
 			
 			<separator/>
 			
-			<vbox>
-				<label value="&zotero.preferences.quickCopy.siteEditor.setings;" control="quickCopy-siteSettings"/>
-				<tree flex="1" id="quickCopy-siteSettings" hidecolumnpicker="true" rows="6" seltype="single"
-						ondblclick="showQuickCopySiteEditor(this.currentIndex)"
-						onkeypress="if (event.keyCode == event.DOM_VK_DELETE) { deleteSelectedQuickCopySite(); }">
-					<treecols>
-						<treecol id="quickCopy-urlColumn" label="&zotero.preferences.quickCopy.siteEditor.domainPath;" flex="1"/>
-						<treecol id="quickCopy-formatColumn" label="&zotero.preferences.quickCopy.siteEditor.outputFormat;" flex="2"/>
-					</treecols>
-					<treechildren id="quickCopy-siteSettings-rows"/>
-				</tree>
-				<separator class="thin"/>
-				<hbox pack="end">
-					<button label="-" onclick="deleteSelectedQuickCopySite()"/>
-					<button label="+" onclick="showQuickCopySiteEditor()"/>
-				</hbox>
-			</vbox>
+			<checkbox id="zotero-quickCopy-copyAsHTML" label="&zotero.preferences.quickCopy.copyAsHTML;"
+				oncommand="buildQuickCopyFormatDropDown(document.getElementById('zotero-quickCopy-menu'), this.checked ? 'html' : '');"/>
+			
+			<separator/>
+			
+			<label value="&zotero.preferences.quickCopy.siteEditor.setings;" control="quickCopy-siteSettings"/>
+			<tree flex="1" id="quickCopy-siteSettings" hidecolumnpicker="true" rows="6" seltype="single"
+					ondblclick="showQuickCopySiteEditor(this.currentIndex)"
+					onkeypress="if (event.keyCode == event.DOM_VK_DELETE) { deleteSelectedQuickCopySite(); }">
+				<treecols>
+					<treecol id="quickCopy-urlColumn" label="&zotero.preferences.quickCopy.siteEditor.domainPath;" flex="1"/>
+					<treecol id="quickCopy-formatColumn" label="&zotero.preferences.quickCopy.siteEditor.outputFormat;" flex="2"/>
+					<treecol id="quickCopy-copyAsHTML" label="HTML"/>
+				</treecols>
+				<treechildren id="quickCopy-siteSettings-rows"/>
+			</tree>
+			<separator class="thin"/>
+			<hbox pack="end">
+				<button label="-" onclick="deleteSelectedQuickCopySite()"/>
+				<button label="+" onclick="showQuickCopySiteEditor()"/>
+			</hbox>
 			
 			<separator/>
 			
 			<label id="quickCopy-macWarning" hidden="true" value="&zotero.preferences.quickCopy.macWarning;"/>
+			<separator/>
+			<label class="text-link" href="http://www.zotero.org/styles/" value="&zotero.preferences.export.getAdditionalStyles;"/>
 		</groupbox>
 	</prefpane>
 	

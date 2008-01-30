@@ -763,8 +763,18 @@ var ZoteroPane = new function()
 			if(item.isNote())
 			{
 				var noteEditor = document.getElementById('zotero-note-editor');
+				
+				// If loading new or different note, disable undo while we repopulate the text field
+				// so Undo doesn't end up clearing the field. This also ensures that Undo doesn't
+				// undo content from another note into the current one.
+				if (!noteEditor.note || noteEditor.note.getID() != item.ref.getID()) {
+					noteEditor.id('noteField').editor.enableUndo(false);
+				}
 				noteEditor.item = null;
 				noteEditor.note = item.ref;
+				
+				noteEditor.id('noteField').editor.enableUndo(true);
+				
 				document.getElementById('zotero-view-note-button').setAttribute('noteID',item.ref.getID());
 				if(item.ref.getSource())
 				{
@@ -1129,13 +1139,14 @@ var ZoteroPane = new function()
 		
 		var url = window.content.location.href;
 		var [mode, format] = Zotero.QuickCopy.getFormatFromURL(url).split('=');
+		var [mode, contentType] = mode.split('/');
 		
 		if (mode == 'bibliography') {
 			if (asCitations) {
-				Zotero_File_Interface.copyCitationToClipboard(items, format);
+				Zotero_File_Interface.copyCitationToClipboard(items, format, contentType == 'html');
 			}
 			else {
-				Zotero_File_Interface.copyItemsToClipboard(items, format);
+				Zotero_File_Interface.copyItemsToClipboard(items, format, contentType == 'html');
 			}
 		}
 		else if (mode == 'export') {
