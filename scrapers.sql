@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-01-30 20:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-01-30 21:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -2086,6 +2086,43 @@ function getData(ids){
 		newItem.complete();		
 	}, function(){Zotero.done();});	
 	Zotero.wait();
+}');
+
+REPLACE INTO translators VALUES ('0cdc6a07-38cf-4ec1-b9d5-7a3c0cc89b15', '1.0.0b4.r5', '', '2008-01-30 21:00:00', '0', '100', '4', 'OSTI Energy Citations', 'Michael Berkowitz', 'http://www.osti.gov/energycitations', 
+'function detectWeb(doc, url) {
+	if (doc.evaluate(''//table[@class="searchresults"]//a[@class="citation"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+		return "multiple";
+	} else if (url.indexOf("product.biblio.jsp") != -1) {
+		return "journalArticle";
+	}
+}', 
+'function doWeb(doc, url) {
+	var urls = new Array();
+	if (detectWeb(doc, url) == "multiple") {
+		var items = new Object();
+		var xpath = ''//table[@class="searchresults"]//a[@class="citation"]'';
+		var links = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
+		var next_link;
+		while (next_link = links.iterateNext()) {
+			items[next_link.href] = next_link.textContent;
+		}
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			urls.push(i.match(/osti_id=\d+/)[0]);
+		}
+	} else {
+		urls = [url.match(/osti_id=\d+/)[0]];
+	}
+	for (var i = 0 ; i < urls.length ; i++) {
+		var getstr = ''http://www.osti.gov/energycitations/endnote?osti_id=140097'';
+		Zotero.Utilities.HTTP.doGet(getstr, function(text) {
+			text = text.replace(/(%.)/g, "$1 ");
+			var trans = Zotero.loadTranslator("import");
+			trans.setTranslator("881f60f2-0802-411a-9228-ce5f47b64c7d");
+			trans.setString(text);
+			trans.translate();
+		});
+	}
 }');
 
 REPLACE INTO translators VALUES ('4345839f-b4fd-4e3f-a73d-268b6f280f6e', '1.0.0b4.r5', '', '2008-01-29 20:00:00', '0', '100', '4', 'Journal of Vision', 'Michael Berkowitz', 'http://(www.)?journalofvision.org/', 
