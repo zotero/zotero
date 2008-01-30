@@ -99,7 +99,7 @@
 					iframe.contentDocument.documentElement.innerHTML = '<html><head><title></title></head><body><p style="color: red">No references selected in Zotero.</p></body></html>';
 					return;
 				}
-				
+				var csl;
 				if (str.indexOf("<defaults") != -1) {
 					csl = new Zotero.CSL.Compat(str);
 				}

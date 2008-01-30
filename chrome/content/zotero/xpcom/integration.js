@@ -20,7 +20,7 @@
     ***** END LICENSE BLOCK *****
 */
 
-const API_VERSION = 3;
+const API_VERSION = 4;
 
 Zotero.Integration = new function() {
 	var _contentLengthRe = /[\r\n]Content-Length: *([0-9]+)/i;
@@ -393,7 +393,7 @@ Zotero.Integration.SOAP = new function() {
 				}
 			} else if(editCitationIndex !== false && vars[i] == editCitationIndex) {
 				// save citation data
-				editCitation = session.unserializeCitation(vars[i+1]);
+				editCitation = session.unserializeCitation(vars[i+1], vars[i]);
 			} else {
 				session.addCitation(vars[i], vars[i+1]);
 			}
@@ -422,7 +422,7 @@ Zotero.Integration.SOAP = new function() {
 		// update
 		var output = new Array();
 		if((bibliographyMode == "updated"			// if we want updated bib
-				&& session.itemSetHasChanged)		// and bibliography changed
+				&& session.bibliographyHasChanged)	// and bibliography changed
 				|| bibliographyMode == "true") {	// or if we should generate regardless of changes
 			var bibliography = session.getBibliography();
 			if(!bibliography) bibliography = "!";
@@ -454,11 +454,16 @@ Zotero.Integration.SOAP = new function() {
 	 */
 	function restoreSession(vars) {
 		if(!vars || !_checkVersion(vars[0])) {
-			return "ERROR:"+Zotero.getString("integration.incompatibleVersion");
+			return "ERROR:"+Zotero.getString("integration.incompatibleVersion", Zotero.version);
+		}
+
+		try {
+			Zotero.Cite.getStyle(vars[2]);
+		} catch(e) {
+			return "ERROR:prefsNeedReset";
 		}
 		
 		var sessionID = Zotero.randomString();
-		
 		var session = _sessions[sessionID] = new Zotero.Integration.Session();
 		session.setStyle(vars[2], vars[3], vars[4]);
 		
@@ -472,6 +477,7 @@ Zotero.Integration.SOAP = new function() {
 		
 		session.updateItemSet(session.citationsByItemID);
 		if(vars[1] != "!") session.loadDocumentData(vars[1]);
+		session.sortItemSet();
 		session.resetRequest();
 		
 		return [sessionID];
@@ -484,7 +490,7 @@ Zotero.Integration.SOAP = new function() {
 	 */
 	function setDocPrefs(vars) {
 		if(!vars || !vars.length || !_checkVersion(vars[1])) {
-			return "ERROR:"+Zotero.getString("integration.incompatibleVersion");
+			return "ERROR:"+Zotero.getString("integration.incompatibleVersion", Zotero.version);
 		}
 		
 		var io = new function() {
@@ -496,6 +502,7 @@ Zotero.Integration.SOAP = new function() {
 			io.openOffice = true;
 		}
 		
+		var oldStyle = false;
 		if(vars[0] == "!") {
 			// no session ID; generate a new one
 			var sessionID = Zotero.randomString();
@@ -506,7 +513,7 @@ Zotero.Integration.SOAP = new function() {
 			var session = _sessions[sessionID];
 			if(!session) return "ERROR:sessionExpired";
 			
-			io.style = session.styleID;
+			oldStyle = io.style = session.styleID;
 			io.useEndnotes = session.useEndnotes;
 			io.useBookmarks = session.useBookmarks;
 		}
@@ -514,6 +521,9 @@ Zotero.Integration.SOAP = new function() {
 		watcher.openWindow(null, 'chrome://zotero/content/integrationDocPrefs.xul', '',
 		                   'chrome,modal'+(Zotero.isWin ? ',popup' : ''), io, true);
 		session.setStyle(io.style, io.useEndnotes, io.useBookmarks);
+		if(!oldStyle || oldStyle == io.style) {
+			session.regenerateAll = session.bibliographyHasChanged = true;
+		}
 		
 		return [sessionID, io.style, session.style.class, session.style.hasBibliography ? "1" : "0", io.useEndnotes, io.useBookmarks];
 	}
@@ -548,10 +558,8 @@ Zotero.Integration.Session.prototype.setStyle = function(styleID, useEndnotes, u
 	this.style = Zotero.Cite.getStyle(styleID);
 	this.useEndnotes = useEndnotes;
 	this.useBookmarks = useBookmarks;
-	
 	this.itemSet = this.style.createItemSet();
 	this.dateModified = new Object();
-	this.itemSetIsSorted = true;
 	
 	this.loadUncitedItems();
 }
@@ -563,7 +571,8 @@ Zotero.Integration.Session.prototype.resetRequest = function() {
 	this.citationsByItemID = new Object();
 	this.citationsByIndex = new Array();
 	
-	this.itemSetHasChanged = false;
+	this.regenerateAll = false;
+	this.bibliographyHasChanged = false;
 	this.documentDataHasChanged = false;
 	this.updateItemIDs = new Object();
 	this.updateIndices = new Object()
@@ -613,15 +622,12 @@ Zotero.Integration._oldCitationLocatorMap = {
  * gets a Zotero.CSL.Citation object given a field name
  */
 Zotero.Integration.Session.prototype.addCitation = function(index, arg) {
+	var index = parseInt(index, 10);
+	
 	if(typeof(arg) == "string") {	// text field
 		if(arg == "!" || arg == "X") return;
 		
-		var citation = this.unserializeCitation(arg);
-		if(arg[0] == "{") {		// JSON
-			citation.properties.field = arg;
-		} else {
-			this.updateIndices[citation.properties.index];
-		}
+		var citation = this.unserializeCitation(arg, index);
 	} else {					// a citation already
 		var citation = arg;
 	}
@@ -673,7 +679,7 @@ Zotero.Integration.Session.prototype.completeCitation = function(object) {
 			
 			this.dateModified[citationItem.itemID] = item.zoteroItem.getField("dateModified", true, true);
 			this.updateItemIDs[citationItem.itemID] = true;
-			this.itemSetChanged();
+			this.bibliographyHasChanged = true;
 		}
 		
 		citationItem.item = item;
@@ -684,10 +690,19 @@ Zotero.Integration.Session.prototype.completeCitation = function(object) {
 /*
  * unserializes a JSON citation into a citation object (sans items)
  */
-Zotero.Integration.Session.prototype.unserializeCitation = function(arg) {
+Zotero.Integration.Session.prototype.unserializeCitation = function(arg, index) {
 	if(arg[0] == "{") {		// JSON field
 		// create citation
 		var citation = this.style.createCitation();
+		
+		// fix for corrupted fields
+		var lastBracket = arg.lastIndexOf("}");
+		if(lastBracket+1 != arg.length) {
+			arg = arg.substr(0, lastBracket+1);
+			this.updateIndices[index] = true;
+		} else {
+			citation.properties.field = arg;
+		}
 		
 		// get JSON
 		var object = Zotero.JSON.unserialize(arg);
@@ -721,6 +736,7 @@ Zotero.Integration.Session.prototype.unserializeCitation = function(arg) {
 		}
 		
 		var citation = this.style.createCitation(citationItems);
+		this.updateIndices[index] = true;
 	}
 	
 	return citation;
@@ -758,7 +774,6 @@ Zotero.Integration.Session.prototype.previewCitation = function(citation) {
 	// delete from item set
 	if(deleteItems.length) {
 		this.itemSet.remove(deleteItems);
-		this.itemSetIsSorted = false;
 	}
 	
 	return text;
@@ -774,7 +789,7 @@ Zotero.Integration.Session.prototype.editCitation = function(index, citation) {
 	
 	// create object to hold citation
 	io.citation = (citation ? citation.clone() : this.style.createCitation());
-	io.citation.properties.index = index;
+	io.citation.properties.index = parseInt(index, 10);
 	// assign preview function
 	io.previewFunction = function() {
 		return me.previewCitation(io.citation);
@@ -881,7 +896,6 @@ Zotero.Integration.Session.prototype.updateItemSet = function() {
 					citation.properties.delete = true;
 				}
 			}
-			this.itemSetChanged();
 		}
 	}
 	
@@ -892,7 +906,6 @@ Zotero.Integration.Session.prototype.updateItemSet = function() {
 		// see if items were removed 
 		if(!this.citationsByItemID[itemID] && !this.uncitedItems[itemID]) {
 			deleteItems.push(itemID);
-			this.itemSetChanged();
 			continue;
 		}
 
@@ -901,13 +914,12 @@ Zotero.Integration.Session.prototype.updateItemSet = function() {
 			this.dateModified[itemID] = item.zoteroItem.getField("dateModified", true, true);
 			// add to list of updated item IDs
 			this.updateItemIDs[itemID] = true;
-			// need to resort now
-			this.itemSetChanged();
 		}
 	}
 	
 	if(deleteItems.length) {
 		this.itemSet.remove(deleteItems);
+		this.bibliographyHasChanged = true;
 	}
 	
 	this.sortItemSet();
@@ -917,55 +929,21 @@ Zotero.Integration.Session.prototype.updateItemSet = function() {
  * sorts the ItemSet (what did you think it did?)
  */
 Zotero.Integration.Session.prototype.sortItemSet = function() {
-	if(!this.itemSetIsSorted) {
-		if(!this.itemSet.sortable) {
-			// sort by order in document. we need a stable sort, so first we
-			// collect old indices.
-			var oldItemIndices = new Object();
-			for(var i=0; i<this.itemSet.items.length; i++) {
-				oldItemIndices[this.itemSet.items[i].getID()] = i;
-			}
-			
-			var me = this;
-			this.itemSet.items.sort(function(a, b) { return me.sortByOrderAdded(a, b, oldItemIndices) });
+	// save first index
+	for(var itemID in this.citationsByItemID) {
+		if(this.citationsByItemID[itemID]) {
+			var item = this.itemSet.getItemsByIds([itemID])[0];
+			if(item) item.setProperty("index", this.citationsByItemID[itemID][0].properties.index);
 		}
-		
-		var citationChanged = this.itemSet.resort();
-		
-		// add to list of updated item IDs
-		for each(var item in citationChanged) {
-			this.updateItemIDs[item.getID()] = true;
-		}
-		
-		this.itemSetIsSorted = true;
-	}
-}
-
-/*
- * sorts items by order added
- */
-Zotero.Integration.Session.prototype.sortByOrderAdded = function(a, b, oldItemIndices) {
-	var aID = a.getID();
-	var bID = b.getID();
-	
-	if(this.citationsByItemID[aID] && this.citationsByItemID[aID].length) {
-		if(!this.citationsByItemID[bID] || !this.citationsByItemID[bID].length) return -1;
-		
-		var diff = this.citationsByItemID[aID][0].properties.index-this.citationsByItemID[bID][0].properties.index;
-		if(diff != 0) return diff;
-	} else if(this.citationsByItemID[bID] && this.citationsByItemID[bID].length) {
-		return 1;
 	}
 	
-	return oldItemIndices[aID]-oldItemIndices[bID];
-}
-
-/*
- * marks an itemSet as changed
- */
-Zotero.Integration.Session.prototype.itemSetChanged = function() {
-	this.itemSetIsSorted = false;
-	this.itemSetHasChanged = true;
+	var citationChanged = this.itemSet.resort();
+	
+	// add to list of updated item IDs
+	for each(var item in citationChanged) {
+		this.updateItemIDs[item.getID()] = true;
+		this.bibliographyHasChanged = true;
+	}
 }
 
 /*
@@ -975,8 +953,7 @@ Zotero.Integration.Session.prototype.editBibliography = function() {
 	var bibliographyEditor = new Zotero.Integration.Session.BibliographyEditInterface(this);
 	var io = new function() { this.wrappedJSObject = bibliographyEditor; }
 	
-	this.documentDataHasChanged = true;
-	this.itemSetHasChanged = true;
+	this.documentDataHasChanged = this.bibliographyHasChanged = true;
 	
 	Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
 	          .getService(Components.interfaces.nsIWindowWatcher)
@@ -996,7 +973,7 @@ Zotero.Integration.Session.prototype.getBibliography = function() {
  * gets citations in need of update
  */
 Zotero.Integration.Session.prototype.getCitations = function(regenerateAll) {
-	if(regenerateAll) {
+	if(regenerateAll || this.regenerateAll) {
 		// update all indices
 		for(var i=0; i<this.citationsByIndex.length; i++) {
 			this.updateIndices[i] = true;
@@ -1031,7 +1008,9 @@ Zotero.Integration.Session.prototype.getCitations = function(regenerateAll) {
 			if(citation.properties.custom) {
 				output.push(citation.properties.custom);
 			} else {
-				output.push(this.style.formatCitation(citation, "Integration"));
+				var citation = this.style.formatCitation(citation, "Integration");
+				if(citation == "") citation = " ";
+				output.push(citation);
 			}
 		}
 	}
@@ -1056,9 +1035,7 @@ Zotero.Integration.Session.prototype.loadDocumentData = function(json) {
 	// set custom bibliography entries
 	if(documentData.custom) {
 		for(var itemID in documentData.custom) {
-			Zotero.debug("getting item "+itemID);
 			var item = this.itemSet.getItemsByIds([itemID])[0];
-			Zotero.debug(item.toSource());
 			item.setProperty("bibliography-Integration", documentData.custom[itemID]);
 		}
 	}
@@ -1130,14 +1107,12 @@ Zotero.Integration.Session.BibliographyEditInterface.prototype.add = function(it
 	// create new item
 	this.session.itemSet.add([item]);
 	this.session.uncitedItems[item.getID()] = true;
-	this.session.itemSetChanged();
 	this.session.sortItemSet();
 }
 
 Zotero.Integration.Session.BibliographyEditInterface.prototype.remove = function(item) {
 	// create new item
 	this.session.itemSet.remove([item]);
-	this.session.itemSetChanged();
 	this.session.sortItemSet();
 	
 	// delete citations if necessary

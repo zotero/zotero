@@ -206,6 +206,15 @@ var Zotero = new function(){
 		// Initialize keyboard shortcuts
 		Zotero.Keys.init();
 		
+		try {
+			Zotero.DB.test();
+		}
+		catch (e) {
+			this.skipLoading = true;
+			Zotero.DB.skipBackup = true;
+			return;
+		}
+		
 		// Add notifier queue callbacks to the DB layer
 		Zotero.DB.addCallback('begin', Zotero.Notifier.begin);
 		Zotero.DB.addCallback('commit', Zotero.Notifier.commit);
@@ -1387,7 +1396,7 @@ Zotero.Date = new function(){
 		if(!date.month) {
 			// compile month regular expression
 			var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul',
-				+ 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+				'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 			// If using a non-English bibliography locale, try those too
 			if (Zotero.CSL.Global.locale != 'en-US') {
 				months = months.concat(Zotero.CSL.Global.getMonthStrings("short"));
@@ -1596,8 +1605,6 @@ Zotero.Date = new function(){
 	
 	/**
 	 * Figure out the date order from the output of toLocaleDateString()
-	 *
-	 * Note: Currently unused
 	 *
 	 * Returns a string with y, m, and d (e.g. 'ymd', 'mdy')
 	 */

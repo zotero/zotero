@@ -661,7 +661,6 @@ Zotero.Translate.prototype._generateSandbox = function() {
 		this._sandbox.Zotero.Utilities = new Zotero.Utilities();
 	}
 	
-	
 	if(this.type == "export") {
 		// add routines to retrieve items and collections
 		this._sandbox.Zotero.nextItem = function() { return me._exportGetItem() };
@@ -690,7 +689,7 @@ Zotero.Translate.prototype._generateSandbox = function() {
 	this._sandbox.Zotero.addOption = function(option, value) {me._addOption(option, value) };
 	// for getting the value of displayed options
 	this._sandbox.Zotero.getOption = function(option) { return me._getOption(option) };
-	
+
 	// for loading other translators and accessing their methods
 	this._sandbox.Zotero.loadTranslator = function(type) {
 		var translation = new Zotero.Translate(type, false);
@@ -1023,16 +1022,34 @@ Zotero.Translate.prototype._itemTagsAndSeeAlso = function(item, newItem) {
 		}
 	}
 	if(item.tags) {
+		var tagsToAdd = {};
+		tagsToAdd[0] = []; // user tags
+		tagsToAdd[1] = []; // automatic tags
+		
 		for each(var tag in item.tags) {
 			if(typeof(tag) == "string") {
 				// accept strings in tag array as automatic tags, or, if
 				// importing, as non-automatic tags
-				newItem.addTag(tag, (this.type == "import" ? 0 : 1));
+				if (this.type == 'import') {
+					tagsToAdd[0].push(tag);
+				}
+				else {
+					tagsToAdd[1].push(tag);
+				}
 			} else if(typeof(tag) == "object") {
 				// also accept objects
 				if(tag.tag) {
-					newItem.addTag(tag.tag, tag.type ? tag.type : 0);
+					if (!tagsToAdd[tag.type]) {
+						tagsToAdd[tag.type] = [];
+					}
+					tagsToAdd[tag.type].push(tag.tag);
 				}
+			}
+		}
+		
+		for (var type in tagsToAdd) {
+			if (tagsToAdd[type].length) {
+				newItem.addTags(tagsToAdd[type], type);
 			}
 		}
 	}
@@ -1041,6 +1058,7 @@ Zotero.Translate.prototype._itemTagsAndSeeAlso = function(item, newItem) {
 /*
  * executed when an item is done and ready to be loaded into the database
  */
+Zotero.Translate._urlRe = /(([A-Za-z]+):\/\/[^\s]*)/i;
 Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 	if(this.type == "web") {
 		// store repository if this item was captured from a website, and
@@ -1092,18 +1110,36 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 			
 			Zotero.debug("Translate: adding attachment");
 			
+			if(!item.url && !item.path) {
+				Zotero.debug("Translate: ignoring attachment: no path or URL specified");
+				return;
+			}
+			
+			if(!item.path) {
+				// see if this is actually a file URL
+				var m = Zotero.Translate._urlRe.exec(item.url);
+				var protocol = m ? m[2].toLowerCase() : "";
+				if(protocol == "file") {
+					item.path = item.url;
+					item.url = false;
+				} else if(protocol != "http" && protocol != "https") {
+					Zotero.debug("Translate: unrecognized protocol "+protocol);
+					return;
+				}
+			}
+			
 			if(!item.path) {
 				// create from URL
-				if(item.url) {
+				try {
 					var myID = Zotero.Attachments.linkFromURL(item.url, attachedTo,
 							(item.mimeType ? item.mimeType : undefined),
 							(item.title ? item.title : undefined));
-					Zotero.debug("Translate: created attachment; id is "+myID);
-					var newItem = Zotero.Items.get(myID);
-				} else {
-					Zotero.debug("Translate: not adding attachment: no path or url specified");
+				} catch(e) {
+					Zotero.debug("Translate: error adding attachment "+item.url);
 					return;
 				}
+				Zotero.debug("Translate: created attachment; id is "+myID);
+				var newItem = Zotero.Items.get(myID);
 			} else {
 				// generate nsIFile
 				var IOService = Components.classes["@mozilla.org/network/io-service;1"].
@@ -1112,10 +1148,14 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 				var file = uri.QueryInterface(Components.interfaces.nsIFileURL).file;
 				
 				if (!file.exists()) {
+					// use item title if possible, or else file leaf name
+					var title = item.title;
+					if(!title) title = file.leafName;
+					
 					var myID = Zotero.Attachments.createMissingAttachment(
 						item.url ? Zotero.Attachments.LINK_MODE_IMPORTED_URL
 							: Zotero.Attachments.LINK_MODE_IMPORTED_FILE,
-						file, item.url ? item.url : null, item.title,
+						file, item.url ? item.url : null, title,
 						item.mimeType, item.charset, attachedTo);
 				}
 				else if (item.url) {
@@ -1263,16 +1303,24 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 									Zotero.debug("Translate: NOTICE: either mimeType or title is missing; attaching file will be slower");
 								}
 								
-								Zotero.Attachments.linkFromURL(attachment.url, myID,
-										(attachment.mimeType ? attachment.mimeType : undefined),
-										(attachment.title ? attachment.title : undefined));
+								try {
+									Zotero.Attachments.linkFromURL(attachment.url, myID,
+											(attachment.mimeType ? attachment.mimeType : undefined),
+											(attachment.title ? attachment.title : undefined));
+								} catch(e) {
+									Zotero.debug("Translate: error adding attachment "+attachment.url);
+								}
 							}
 						} else if(attachment.document
 						|| (attachment.mimeType && attachment.mimeType == "text/html")
 						|| Zotero.Prefs.get("downloadAssociatedFiles")) {
 							// if snapshot is not explicitly set to false, retrieve snapshot
 							if(attachment.document) {
-								Zotero.Attachments.importFromDocument(attachment.document, myID, attachment.title);
+								try {
+									Zotero.Attachments.importFromDocument(attachment.document, myID, attachment.title);
+								} catch(e) {
+									Zotero.debug("Translate: error attaching document");
+								}
 							} else {
 								var mimeType = null;
 								var title = null;
@@ -1297,7 +1345,11 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 								}
 								
 								var fileBaseName = Zotero.Attachments.getFileBaseNameFromItem(myID);
-								Zotero.Attachments.importFromURL(attachment.url, myID, title, fileBaseName);
+								try {
+									Zotero.Attachments.importFromURL(attachment.url, myID, title, fileBaseName);
+								} catch(e) {
+									Zotero.debug("Zotero.Translate: error adding attachment "+attachment.url);
+								}
 							}
 						}
 					}
@@ -1330,21 +1382,40 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 	// enabled in the preferences (as it is by default)
 	if(item.tags &&
 	  (this.type == "import" || Zotero.Prefs.get("automaticTags"))) {
+		var tagsToAdd = {};
+		tagsToAdd[0] = []; // user tags
+		tagsToAdd[1] = []; // automatic tags
+		
 		for each(var tag in item.tags) {
 			if(typeof(tag) == "string") {
 				// accept strings in tag array as automatic tags, or, if
 				// importing, as non-automatic tags
-				newItem.addTag(tag, (this.type == "import" ? 0 : 1));
+				if (this.type == 'import') {
+					tagsToAdd[0].push(tag);
+				}
+				else {
+					tagsToAdd[1].push(tag);
+				}
 			} else if(typeof(tag) == "object") {
 				// also accept objects
 				if(tag.tag) {
-					if(this.type == "import") {
-						newItem.addTag(tag.tag, tag.type ? tag.type : 0);
-					} else {
-						// force web imports to automatic
-						newItem.addTag(tag.tag, 1);
+					if (this.type == "import") {
+						if (!tagsToAdd[tag.type]) {
+							tagsToAdd[tag.type] = [];
+						}
+						tagsToAdd[tag.type].push(tag.tag);
+					}
+					// force web imports to automatic
+					else {
+						tagsToAdd[1].push(tag.tag);
 					}
 				}
+			}
+		}
+		
+		for (var type in tagsToAdd) {
+			if (tagsToAdd[type].length) {
+				newItem.addTags(tagsToAdd[type], type);
 			}
 		}
 	}

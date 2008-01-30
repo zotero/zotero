@@ -60,21 +60,28 @@ var Zotero_File_Interface_Bibliography = new function() {
 		}
 		
 		// add styles to list
-		for(var i in styles) {
+		var index = 0;
+		for (var i in styles) {
 			var itemNode = document.createElement("listitem");
 			itemNode.setAttribute("value", i);
 			itemNode.setAttribute("label", styles[i]);
 			listbox.appendChild(itemNode);
 			
 			if(i == _io.style) {
-				listbox.selectedItem = itemNode;
+				var selectIndex = index;
 			}
+			index++;
 		}
 		
-		// select first item by default
-		if(listbox.selectedIndex == -1) {
-			listbox.selectedIndex = 0;
+		if (selectIndex < 1) {
+			selectIndex = 0;
 		}
+		
+		// Can't select below-the-fold listitems inline in Firefox 2, because that would be too easy
+		setTimeout(function () {
+			listbox.ensureIndexIsVisible(selectIndex);
+			listbox.selectedIndex = selectIndex;
+		}, 1);
 		
 		// ONLY FOR bibliography.xul: export options
 		if(document.getElementById("save-as-rtf")) {
@@ -92,7 +99,7 @@ var Zotero_File_Interface_Bibliography = new function() {
 		// bookmarks text
 		if(document.getElementById("displayAs")) {
 			if(_io.useEndnotes && _io.useEndnotes == 1) document.getElementById("displayAs").selectedIndex = 1;
-			styleChanged();
+			styleChanged(selectIndex);
 			
 			if(_io.useBookmarks && _io.useBookmarks == 1) document.getElementById("formatUsing").selectedIndex = 1;			
 			if(_io.openOffice) {
@@ -105,7 +112,7 @@ var Zotero_File_Interface_Bibliography = new function() {
 			
 			// add border on Windows
 			if(Zotero.isWin) {
-				document.getElementById("zotero-bibliography-container").style.border = "1px solid black";
+				document.getElementById("doc-prefs-dialog").style.border = "1px solid black";
 			}
 		}
 		window.sizeToContent();
@@ -115,9 +122,19 @@ var Zotero_File_Interface_Bibliography = new function() {
 	/*
 	 * ONLY FOR integrationDocPrefs.xul: called when style is changed
 	 */
-	function styleChanged() {
+	function styleChanged(index) {
+		// When called from init(), selectedItem isn't yet set
+		if (index != undefined) {
+			var selectedItem = document.getElementById("style-listbox").getItemAtIndex(index);
+		}
+		else {
+			var selectedItem = document.getElementById("style-listbox").selectedItem;
+		}
+		
+		var selectedStyle = selectedItem.getAttribute('value');
+		
 		// update status of displayAs box based
-		var selectedStyle = document.getElementById("style-listbox").selectedItem.getAttribute('value');
+		
 		var styleClass = Zotero.Cite.getStyleClass(selectedStyle);
 		document.getElementById("displayAs").disabled = styleClass != "note";
 	}

@@ -488,7 +488,7 @@ Zotero.Utilities.Ingester.HTTP = function(translate) {
 	this.translate = translate;
 }
 
-Zotero.Utilities.Ingester.HTTP.prototype.doGet = function(urls, processor, done) {
+Zotero.Utilities.Ingester.HTTP.prototype.doGet = function(urls, processor, done, responseCharset) {
 	var callAgain = false;
 	
 	if(typeof(urls) == "string") {
@@ -523,10 +523,10 @@ Zotero.Utilities.Ingester.HTTP.prototype.doGet = function(urls, processor, done)
 		} catch(e) {
 			me.translate.error(false, e);
 		}
-	});
+	}, responseCharset);
 }
 
-Zotero.Utilities.Ingester.HTTP.prototype.doPost = function(url, body, onDone, contentType) {
+Zotero.Utilities.Ingester.HTTP.prototype.doPost = function(url, body, onDone, requestContentType, responseCharset) {
 	if(this.translate.locationIsProxied) {
 		url = Zotero.Ingester.ProxyMonitor.properToProxy(url);
 	}
@@ -541,7 +541,7 @@ Zotero.Utilities.Ingester.HTTP.prototype.doPost = function(url, body, onDone, co
 		} catch(e) {
 			translate.error(false, e);
 		}
-	}, contentType);
+	}, requestContentType, responseCharset);
 }
 
 // These are front ends for XMLHttpRequest. XMLHttpRequest can't actually be
@@ -563,7 +563,7 @@ Zotero.Utilities.HTTP = new function() {
 	* doGet can be called as:
 	* Zotero.Utilities.HTTP.doGet(url, onDone)
 	**/
-	function doGet(url, onDone, onError) {
+	function doGet(url, onDone, onError, responseCharset) {
 		Zotero.debug("HTTP GET "+url);
 		if (this.browserIsOffline()){
 			return false;
@@ -575,7 +575,7 @@ Zotero.Utilities.HTTP = new function() {
 		var test = xmlhttp.open('GET', url, true);
 		
 		xmlhttp.onreadystatechange = function(){
-			_stateChange(xmlhttp, onDone);
+			_stateChange(xmlhttp, onDone, responseCharset);
 		};
 		
 		xmlhttp.send(null);
@@ -592,7 +592,7 @@ Zotero.Utilities.HTTP = new function() {
 	* doPost can be called as:
 	* Zotero.Utilities.HTTP.doPost(url, body, onDone)
 	**/
-	function doPost(url, body, onDone, contentType) {
+	function doPost(url, body, onDone, requestContentType, responseCharset) {
 		Zotero.debug("HTTP POST "+body+" to "+url);
 		if (this.browserIsOffline()){
 			return false;
@@ -602,10 +602,10 @@ Zotero.Utilities.HTTP = new function() {
 					.createInstance();
 		
 		xmlhttp.open('POST', url, true);
-		xmlhttp.setRequestHeader("Content-Type", (contentType ? contentType : "application/x-www-form-urlencoded" ));
+		xmlhttp.setRequestHeader("Content-Type", (requestContentType ? requestContentType : "application/x-www-form-urlencoded" ));
 		
 		xmlhttp.onreadystatechange = function(){
-			_stateChange(xmlhttp, onDone);
+			_stateChange(xmlhttp, onDone, responseCharset);
 		};
 		
 		xmlhttp.send(body);
@@ -671,7 +671,7 @@ Zotero.Utilities.HTTP = new function() {
 	}
 	
 	
-	function _stateChange(xmlhttp, onDone){
+	function _stateChange(xmlhttp, onDone, responseCharset){
 		switch (xmlhttp.readyState){
 			// Request not yet made
 			case 1:
@@ -684,6 +684,10 @@ Zotero.Utilities.HTTP = new function() {
 			// Download complete
 			case 4:
 				if(onDone){
+					// Override the content charset
+					if (responseCharset) {
+						xmlhttp.channel.contentCharset = responseCharset;
+					}
 					onDone(xmlhttp);
 				}
 			break;

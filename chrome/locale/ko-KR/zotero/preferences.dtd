@@ -47,6 +47,10 @@
 
 <!ENTITY zotero.preferences.prefpane.export "내보내기">
 
+<!ENTITY zotero.preferences.citationOptions.caption "Citation Options">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Include URLs of paper articles in references">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "When this option is disabled, Zotero includes URLs when citing journal, magazine, and newspaper articles only if the article does not have a page range specified.">
+
 <!ENTITY zotero.preferences.quickCopy.caption "빠른 복사">
 <!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "기본 출력 형식:">
 <!ENTITY zotero.preferences.quickCopy.macWarning "주: Rich-text 형식은 Mac OS X 상에선 손실됩니다.">
@@ -54,6 +58,8 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "도메인/경로">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(예. wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "출력 형식">
+
+<!ENTITY zotero.preferences.export.getAdditionalStyles "Get additional styles...">
 
 <!ENTITY zotero.preferences.prefpane.keys "단축키">
 
@@ -80,3 +86,6 @@
 
 <!ENTITY zotero.preferences.dbMaintenance "데이터베이스 유지">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "데이터베이스 무결성 점검">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reset Translators and Styles...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset Translators...">
+<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset Styles...">

@@ -134,18 +134,32 @@ function populateOpenURLResolvers() {
 }
 
 
+/*
+ * Builds the main Quick Copy drop-down from the current global pref
+ */
 function populateQuickCopyList() {
 	// Initialize default format drop-down
-	var formatMenu = document.getElementById("quickCopy-menu");
 	var format = Zotero.Prefs.get("export.quickCopy.setting");
-	buildQuickCopyFormatDropDown(formatMenu, format);
-	formatMenu.setAttribute('preference', "pref-quickCopy-setting");
+	var menulist = document.getElementById("zotero-quickCopy-menu");
+	buildQuickCopyFormatDropDown(menulist, Zotero.QuickCopy.getContentType(format), format);
+	menulist.setAttribute('preference', "pref-quickCopy-setting");
+	updateQuickCopyHTMLCheckbox();
 	
 	refreshQuickCopySiteList();
 }
 
 
-function buildQuickCopyFormatDropDown(menulist, currentFormat) {
+/*
+ * Builds a Quick Copy drop-down 
+ */
+function buildQuickCopyFormatDropDown(menulist, contentType, currentFormat) {
+	if (!currentFormat) {
+		currentFormat = menulist.value;
+	}
+	// Strip contentType from mode
+	currentFormat = Zotero.QuickCopy.stripContentType(currentFormat);
+		
+	
 	menulist.selectedItem = null;
 	menulist.removeAllItems();
 	
@@ -167,13 +181,15 @@ function buildQuickCopyFormatDropDown(menulist, currentFormat) {
 	// add styles to list
 	var styles = Zotero.Cite.getStyles();
 	for (var i in styles) {
-		var val = 'bibliography=' + i;
+		var baseVal = 'bibliography=' + i;
+		var val = 'bibliography' + (contentType == 'html' ? '/html' : '') + '=' + i;
 		var itemNode = document.createElement("menuitem");
 		itemNode.setAttribute("value", val);
 		itemNode.setAttribute("label", styles[i]);
+		itemNode.setAttribute("oncommand", 'updateQuickCopyHTMLCheckbox()');
 		popup.appendChild(itemNode);
 		
-		if (val == currentFormat) {
+		if (baseVal == currentFormat) {
 			menulist.selectedItem = itemNode;
 		}
 	}
@@ -198,6 +214,7 @@ function buildQuickCopyFormatDropDown(menulist, currentFormat) {
 		var itemNode = document.createElement("menuitem");
 		itemNode.setAttribute("value", val);
 		itemNode.setAttribute("label", translators[i].label);
+		itemNode.setAttribute("oncommand", 'updateQuickCopyHTMLCheckbox()');
 		popup.appendChild(itemNode);
 		
 		if (val == currentFormat) {
@@ -205,7 +222,21 @@ function buildQuickCopyFormatDropDown(menulist, currentFormat) {
 		}
 	}
 	
+	menulist.click();
+	
 	return popup;
+}
+
+function updateQuickCopyHTMLCheckbox() {
+	var format = document.getElementById('zotero-quickCopy-menu').value;
+	var mode, contentType;
+	
+	var checkbox = document.getElementById('zotero-quickCopy-copyAsHTML');
+	[mode, format] = format.split('=');
+	[mode, contentType] = mode.split('/');
+	
+	checkbox.checked = contentType == 'html';
+	checkbox.disabled = mode != 'bibliography';
 }
 
 function showQuickCopySiteEditor(index) {
@@ -213,11 +244,15 @@ function showQuickCopySiteEditor(index) {
 	
 	if (index != undefined && index > -1 && index < treechildren.childNodes.length) {
 		var treerow = treechildren.childNodes[index].firstChild;
-		var domain = treerow.childNodes[0].getAttribute('label')
-		var format = treerow.childNodes[1].getAttribute('label')
+		var domain = treerow.childNodes[0].getAttribute('label');
+		var format = treerow.childNodes[1].getAttribute('label');
+		var asHTML = treerow.childNodes[2].getAttribute('label') != '';
 	}
 	
 	var format = Zotero.QuickCopy.getSettingFromFormattedName(format);
+	if (asHTML) {
+		format = format.replace('bibliography=', 'bibliography/html=');
+	}
 	
 	var io = {domain: domain, format: format, ok: false};
 	window.openDialog('chrome://zotero/content/preferences/quickCopySiteEditor.xul', "zotero-preferences-quickCopySiteEditor", "chrome, modal", io);
@@ -254,14 +289,18 @@ function refreshQuickCopySiteList() {
 		var treerow = document.createElement('treerow');
 		var domainCell = document.createElement('treecell');
 		var formatCell = document.createElement('treecell');
+		var HTMLCell = document.createElement('treecell');
 		
 		domainCell.setAttribute('label', siteData[i].domainPath);
 		
 		var formatted = Zotero.QuickCopy.getFormattedNameFromSetting(siteData[i].format);
 		formatCell.setAttribute('label', formatted);
+		var copyAsHTML = Zotero.QuickCopy.getContentType(siteData[i].format) == 'html';
+		HTMLCell.setAttribute('label', copyAsHTML ? '   ✓   ' : '');
 		
 		treerow.appendChild(domainCell);
 		treerow.appendChild(formatCell);
+		treerow.appendChild(HTMLCell);
 		treeitem.appendChild(treerow);
 		treechildren.appendChild(treeitem);
 	}

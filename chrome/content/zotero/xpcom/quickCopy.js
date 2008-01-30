@@ -1,6 +1,8 @@
 Zotero.QuickCopy = new function() {
 	this.getFormattedNameFromSetting = getFormattedNameFromSetting;
 	this.getSettingFromFormattedName = getSettingFromFormattedName;
+	this.getContentType = getContentType;
+	this.stripContentType = stripContentType;
 	this.getFormatFromURL = getFormatFromURL;
 	this.getContentFromItems = getContentFromItems;
 	
@@ -13,7 +15,7 @@ Zotero.QuickCopy = new function() {
 			_init();
 		}
 		
-		return _formattedNames[setting];
+		return _formattedNames[this.stripContentType(setting)];
 	}
 	
 	function getSettingFromFormattedName(name) {
@@ -28,6 +30,23 @@ Zotero.QuickCopy = new function() {
 		}
 		
 		return '';
+	}
+	
+	
+	/*
+	 * Returns the setting with any contentType stripped from the mode part
+	 */
+	function getContentType(setting) {
+		var matches = setting.match(/(?:bibliography|export)\/([^=]+)=.+$/, '$1');
+		return matches ? matches[1] : '';
+	}
+	
+	
+	/*
+	 * Returns the setting with any contentType stripped from the mode part
+	 */
+	function stripContentType(setting) {
+		return setting.replace(/(bibliography|export)(?:\/[^=]+)?=(.+)$/, '$1=$2');
 	}
 	
 	
@@ -51,9 +70,9 @@ Zotero.QuickCopy = new function() {
 		var matches = [];
 		
 		var sql = "SELECT key AS domainPath, value AS format FROM settings "
-			+ "WHERE setting='quickCopySite' AND key LIKE ?";
+			+ "WHERE setting='quickCopySite' AND (key LIKE ? OR key LIKE ?)";
 		var urlDomain = urlHostPort.match(/[^\.]+\.[^\.]+$/);
-		var rows = Zotero.DB.query(sql, ['%' + urlDomain + '%']);
+		var rows = Zotero.DB.query(sql, ['%' + urlDomain + '%', '/%']);
 		for each(var row in rows) {
 			var [domain, path] = row.domainPath.split(/\//);
 			path = '/' + (path ? path : '');
@@ -113,6 +132,7 @@ Zotero.QuickCopy = new function() {
 	 */
 	function getContentFromItems(items, format, callback) {
 		var [mode, format] = format.split('=');
+		var [mode, contentType] = mode.split('/');
 		
 		if (mode == 'export') {
 			var translation = new Zotero.Translate("export");
@@ -127,7 +147,7 @@ Zotero.QuickCopy = new function() {
 			var csl = Zotero.Cite.getStyle(format);
 			var itemSet = csl.createItemSet(items);
 			var bibliography = {
-				text: csl.formatBibliography(itemSet, "Text"),
+				text: csl.formatBibliography(itemSet, contentType == "html" ? "HTML" : "Text"),
 				html: csl.formatBibliography(itemSet, "HTML")
 			};
 			return bibliography;
