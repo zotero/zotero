@@ -179,7 +179,7 @@
   <macro name="title-bib">
     <choose>
       <if variable="title" match="none">
-        <text variable="genre" text-case="capitalize-first"/>
+        <text variable="genre"/>
       </if>
       <else-if type="book">
         <text variable="title" font-style="italic"/>
@@ -226,9 +226,11 @@
     </group>
   </macro>
   <macro name="description-bib">
-    <group prefix=". " delimiter=", ">
-      <text macro="interviewer-bib"/>
-      <text variable="medium" text-case="capitalize-first"/>
+    <group delimiter=", ">
+      <group delimiter=". ">
+        <text macro="interviewer-bib"/>
+        <text variable="medium" text-case="capitalize-first"/>
+      </group>
       <choose>
         <if variable="title" match="none"> </if>
         <else-if type="thesis paper-conference" match="any"> </else-if>
@@ -356,7 +358,7 @@
   <macro name="locator">
     <choose>
       <if variable="locator" match="none">
-        <text macro="pages" prefix=", "/>
+        <text macro="pages"/>
       </if>
       <else-if type="article-journal">
         <text variable="locator" prefix=": "/>
@@ -368,9 +370,12 @@
   </macro>
   <macro name="pages">
     <choose>
-      <if type="article-journal article-magazine chapter" match="any">
-    <text variable="page"/>
+      <if type="article-journal">
+    <text variable="page" prefix=": "/>
       </if>
+      <else-if type="chapter">
+    <text variable="page" prefix=", "/>
+      </else-if>
     </choose>
   </macro>
   <macro name="pages-chapter">
@@ -382,8 +387,8 @@
   </macro>
   <macro name="pages-article">
     <choose>
-      <if type="article-journal article-magazine" match="any">
-    <text variable="page" prefix=", "/>
+      <if type="article-journal">
+    <text variable="page" prefix=": "/>
       </if>
     </choose>
   </macro>
@@ -396,7 +401,7 @@
   </macro>
   <macro name="archive-bib">
     <group delimiter=". ">
-      <text variable="archive_location" text-case="capitalize-first"/>
+      <text variable="archive_location"/>
       <text variable="archive"/>
       <text variable="archive-place"/>
     </group>
@@ -432,16 +437,19 @@
         <text macro="issued" prefix=" (" suffix=")"/>
       </if>
       <else-if variable="publisher-place publisher" match="any">
-        <group delimiter=" ">
-          <choose>
-            <if variable="title" match="none"> </if>
-            <else-if type="thesis paper-conference" match="any">
-              <text variable="genre" text-case="capitalize-first" prefix=". "/>
-            </else-if>
-          </choose>
-          <text macro="event" prefix=" "/>
-        </group>
+        <choose>
+          <if variable="title" match="none"> </if>
+          <else-if type="paper-conference">
+            <text variable="genre" text-case="capitalize-first" prefix=". "/>
+          </else-if>
+        </choose>
+        <text macro="event" prefix=" "/>
         <group prefix=". " delimiter=", ">
+          <choose>
+            <if type="thesis">
+              <text variable="genre"/>
+            </if>
+          </choose>
           <text macro="publisher"/>
           <text macro="issued"/>
         </group>
@@ -548,10 +556,8 @@
       <group delimiter=". ">
         <text macro="author-bib"/>
         <text macro="recipient-bib"/>
-        <group>
-          <text macro="title-bib"/>
-          <text macro="description-bib"/>
-        </group>
+        <text macro="title-bib"/>
+        <text macro="description-bib"/>
         <text macro="translator-article-bib"/>
         <group>
           <text macro="container-prefix-bib"/>
