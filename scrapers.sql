@@ -2391,7 +2391,7 @@ REPLACE INTO translators VALUES ('303c2744-ea37-4806-853d-e1ca67be6818', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('27ee5b2c-2a5a-4afc-a0aa-d386642d4eed', '1.0.0b4.r5', '', '2008-01-31 09:28:00', '0', '100', '4', 'PubMed Central', 'Michael Berkowitz', 'http://[^/]*.nih.gov/', 
+REPLACE INTO translators VALUES ('27ee5b2c-2a5a-4afc-a0aa-d386642d4eed', '1.0.0b4.r5', '', '2008-01-31 20:00:00', '0', '100', '4', 'PubMed Central', 'Michael Berkowitz', 'http://[^/]*.nih.gov/', 
 'function detectWeb(doc, url) {
 	if (doc.evaluate(''//table[@id="ResultPanel"]//td[2]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
