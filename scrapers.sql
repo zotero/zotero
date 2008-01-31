@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-01-31 20:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-01-31 23:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -10555,7 +10555,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('8917b41c-8527-4ee7-b2dd-bcbc3fa5eabd', '1.0.0b4.r5', '', '2008-01-30 20:00:00', '0', '100', '4', 'CiteULike', 'Sean Takats', 'https?://(?:www\.)?citeulike.org/(?:journal/|group/[0-9]+/library$|\?page=[0-9]+$|.*article/[0-9]+$|$)', 
+REPLACE INTO translators VALUES ('8917b41c-8527-4ee7-b2dd-bcbc3fa5eabd', '1.0.0b4.r5', '', '2008-01-31 23:00:00', '1', '100', '4', 'CiteULike', 'Sean Takats', 'https?://(?:www\.)?citeulike.org(?:.*/tag/[^/]*$|/search/|/journal/|/group/[0-9]+/library$|/\?page=[0-9]+$|/.*article/[0-9]+$|/$)', 
 'function detectWeb(doc, url){
 	var articleRe = /\/article\/[0-9]+$/;
 	var m = url.match(articleRe);
@@ -10592,11 +10592,11 @@ REPLACE INTO translators VALUES ('8917b41c-8527-4ee7-b2dd-bcbc3fa5eabd', '1.0.0b
 		}
 	}
 	Zotero.Utilities.HTTP.doGet(newUris, function(text) {
-			var translator = Zotero.loadTranslator("import");
-			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-			translator.setString(text);
-			translator.translate();
-			Zotero.done();
+		var translator = Zotero.loadTranslator("import");
+		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+		translator.setString(text);
+		translator.translate();
+		Zotero.done();
 	});
 	Zotero.wait();
 }');
