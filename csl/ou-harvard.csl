@@ -26,7 +26,7 @@
   <macro name="author">
     <names variable="author">
       <name name-as-sort-order="all" and="text" sort-separator=", " 
-	    delimiter=", " form="long"/>
+	    delimiter=", " delimiter-precedes-last="never" form="long"/>
       <label form="short" prefix=" (" suffix=".)" text-case="lowercase"/>
       <substitute>
 	<names variable="editor"/>
@@ -36,7 +36,7 @@
   </macro>
   <macro name="author-short">
     <names variable="author">
-      <name form="short" and="symbol" delimiter=", " initialize-with=". "/>
+      <name form="short" and="symbol" delimiter=", " delimiter-precedes-last="never" initialize-with=". "/>
       <substitute>
 	<names variable="editor"/>
 	<names variable="translator"/>
