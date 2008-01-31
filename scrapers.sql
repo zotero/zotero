@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-01-30 21:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-01-31 20:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -2086,6 +2086,47 @@ function getData(ids){
 		newItem.complete();		
 	}, function(){Zotero.done();});	
 	Zotero.wait();
+}');
+
+REPLACE INTO translators VALUES ('f880bf79-d42f-4337-b0d2-7a7de4a48b7d', '1.0.0b4.r5', '', '2008-01-31 20:00:00', '0', '100', '6', 'Library Catalog (X-OPAC)', 'Michael Berkowitz', '(xopac|hylib)', 
+'function detectWeb(doc, url) {
+	if (url.indexOf("&nd=") != -1) {
+		return "book";
+	} else if (url.indexOf("Aktion") != -1) {
+		return "multiple";
+	}
+}', 
+'function doWeb(doc, url) {
+	var ids = new Array();
+	if (detectWeb(doc, url) == "multiple") {
+		var xpath = ''//table/tbody/tr/td//a'';
+		var links = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
+		var link = links.iterateNext();
+		var items = new Object();
+		while (link) {
+			if (link.href.match(/&nd=\d+/)) {
+				items[link.href.match(/&nd=(\d+)/)[1]] = Zotero.Utilities.trimInternal(link.textContent);
+			}
+			link = links.iterateNext();
+		}
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			ids.push(i);
+		}
+	} else {
+		ids = [url.match(/&nd=(\d+)/)[1]];
+	}
+	Zotero.debug(ids);
+	for (var i = 0 ; i < ids.length ; i++) {
+		var post = ''db=ubfr&nd='' + ids[i] + ''&counter=0&Aktion=S&VomOLAF=0&links=1&gk=&format=ris'';
+		Zotero.Utilities.HTTP.doPost(''http://www.ub.uni-freiburg.de/cgi-bin/refman'', post, function(text) {
+			//Zotero.debug(text);
+			var translator = Zotero.loadTranslator("import");
+			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+			translator.setString(text);
+			translator.translate();
+		});
+	}
 }');
 
 REPLACE INTO translators VALUES ('0cdc6a07-38cf-4ec1-b9d5-7a3c0cc89b15', '1.0.0b4.r5', '', '2008-01-30 21:00:00', '0', '100', '4', 'OSTI Energy Citations', 'Michael Berkowitz', 'http://www.osti.gov/energycitations', 
