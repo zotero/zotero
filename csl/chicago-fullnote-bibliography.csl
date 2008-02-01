@@ -179,7 +179,7 @@
   <macro name="title-bib">
     <choose>
       <if variable="title" match="none">
-        <text variable="genre"/>
+        <text variable="genre" text-case="capitalize-first"/>
       </if>
       <else-if type="book">
         <text variable="title" font-style="italic"/>
@@ -288,7 +288,7 @@
       <else-if type="book">
         <group prefix=". " delimiter=". ">
           <group>
-            <text term="volume" form="short"  text-case="capitalize-first" suffix=". "/>
+            <text term="volume" form="short" text-case="capitalize-first" suffix=". "/>
             <number variable="volume" form="numeric"/>
           </group>
           <choose>
@@ -401,7 +401,7 @@
   </macro>
   <macro name="archive-bib">
     <group delimiter=". ">
-      <text variable="archive_location"/>
+      <text variable="archive_location" text-case="capitalize-first"/>
       <text variable="archive"/>
       <text variable="archive-place"/>
     </group>
@@ -447,7 +447,7 @@
         <group prefix=". " delimiter=", ">
           <choose>
             <if type="thesis">
-              <text variable="genre"/>
+              <text variable="genre" text-case="capitalize-first"/>
             </if>
           </choose>
           <text macro="publisher"/>
@@ -567,7 +567,7 @@
         <text macro="secondary-contributor-bib"/>
       </group>
       <text macro="locators-bib"/>
-      <text variable="collection-title" prefix=". "/>
+      <text variable="collection-title" text-case="capitalize-first" prefix=". "/>
       <text macro="issue-bib"/>
       <text macro="locators-newspaper" prefix=", "/>
       <text macro="pages-article"/>
