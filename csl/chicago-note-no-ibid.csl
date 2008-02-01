@@ -2,9 +2,9 @@
 <?oxygen RNGSchema="http://xbiblio.svn.sourceforge.net/viewvc/*checkout*/xbiblio/csl/schema/trunk/csl.rnc" type="compact"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="note" xml:lang="en">
   <info>
-    <title>Chicago Manual of Style (Note without Bibliography)</title>
-    <id>http://www.zotero.org/styles/chicago-note</id>
-    <link href="http://www.zotero.org/styles/chicago-note"/>
+    <title>Chicago Manual of Style (Note without Bibliography, No Ibid.)</title>
+    <id>http://www.zotero.org/styles/chicago-note-no-ibid</id>
+    <link href="http://www.zotero.org/styles/chicago-note-no-ibid"/>
     <link href="http://www.chicagomanualofstyle.org/tools_citationguide.html" rel="documentation"/>
     <author>
       <name>Julian Onions</name>
@@ -18,7 +18,7 @@
       <name>Elena Razlogova</name>
       <email>elena.razlogova@gmail.com</email>
     </contributor>
-    <summary>Chicago format with full notes and no bibliography</summary>
+    <summary>Chicago format with full notes, no bibliography, and no ibid.</summary>
     <category term="generic-base"/>
     <category term="note"/>
     <updated/>
