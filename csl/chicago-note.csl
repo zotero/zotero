@@ -172,6 +172,22 @@
       </else-if>
     </choose>
   </macro>
+  <macro name="locators-newspaper">
+    <choose>
+      <if type="article-newspaper">
+        <group delimiter=", ">
+          <group>
+        <text variable="edition" suffix=" "/>
+        <text term="edition" prefix=" "/>
+          </group>
+          <group>
+        <text term="section" form="short" suffix=". "/>
+        <text variable="section"/>
+          </group>
+        </group>
+      </if>
+    </choose>
+  </macro>
   <macro name="event">
     <group>
       <text term="presented at" suffix=" "/>
@@ -207,28 +223,20 @@
       </else>
     </choose>
   </macro>
+  <macro name="pages">
+    <choose>
+      <if type="article-journal">
+    <text variable="page" prefix=": "/>
+      </if>
+      <else-if type="chapter">
+    <text variable="page" prefix=", "/>
+      </else-if>
+    </choose>
+  </macro>
   <macro name="locator">
     <choose>
-      <if type="article-newspaper">
-        <group delimiter=", ">
-          <group>
-        <text variable="edition" suffix=" "/>
-        <text term="edition" prefix=" "/>
-          </group>
-          <group>
-        <text term="section" form="short" suffix=". "/>
-        <text variable="section"/>
-          </group>
-        </group>
-      </if>
-    </choose>
-    <choose>
       <if variable="locator" match="none">
-        <choose>
-          <if type="article-journal article-magazine chapter" match="any">
-        <text variable="page" prefix=", "/>
-          </if>
-        </choose>
+        <text macro="pages"/>
       </if>
       <else-if type="article-journal">
         <text variable="locator" prefix=": "/>
@@ -330,6 +338,7 @@
           <text macro="locators"/>
           <text variable="collection-title" prefix=", "/>
           <text macro="issue"/>
+          <text macro="locators-newspaper" prefix=", "/>
           <text macro="locator"/>
           <text macro="access" prefix=", "/>
         </else>

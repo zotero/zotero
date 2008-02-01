@@ -2,9 +2,9 @@
 <?oxygen RNGSchema="http://xbiblio.svn.sourceforge.net/viewvc/*checkout*/xbiblio/csl/schema/trunk/csl.rnc" type="compact"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="note" xml:lang="en">
   <info>
-    <title>Chicago Manual of Style (Note without Bibliography, no Ibid.)</title>
-    <id>http://www.zotero.org/styles/chicago-note-no-ibid</id>
-    <link href="http://www.zotero.org/styles/chicago-note-no-ibid"/>
+    <title>Chicago Manual of Style (Note without Bibliography)</title>
+    <id>http://www.zotero.org/styles/chicago-note</id>
+    <link href="http://www.zotero.org/styles/chicago-note"/>
     <link href="http://www.chicagomanualofstyle.org/tools_citationguide.html" rel="documentation"/>
     <author>
       <name>Julian Onions</name>
@@ -18,11 +18,21 @@
       <name>Elena Razlogova</name>
       <email>elena.razlogova@gmail.com</email>
     </contributor>
-    <summary>Chicago format with full notes, no bibliography, and no ibid.</summary>
+    <summary>Chicago format with full notes and no bibliography</summary>
     <category term="generic-base"/>
     <category term="note"/>
     <updated/>
   </info>
+  <macro name="translator">
+    <choose>
+      <if variable="author editor" match="any">
+    <names variable="translator" delimiter=", ">
+      <label form="verb-short" prefix=" " text-case="lowercase" suffix=". "/>
+      <name and="text" delimiter=", "/>
+    </names>
+      </if>
+    </choose>
+  </macro>
   <macro name="secondary-contributor">
     <group delimiter=", ">
       <names variable="editor" delimiter=", ">
@@ -30,14 +40,18 @@
         <name and="text" delimiter=", "/>
       </names>
       <choose>
-        <if variable="author editor" match="any">
-      <names variable="translator" delimiter=", ">
-        <label form="verb-short" prefix=" " text-case="lowercase" suffix=". "/>
-        <name and="text" delimiter=", "/>
-      </names>
+        <if type="article-journal article-magazine article-newspaper" match="none">
+      <text macro="translator"/>
         </if>
       </choose>
     </group>
+  </macro>
+  <macro name="translator-article">
+    <choose>
+      <if type="article-journal article-magazine article-newspaper" match="any">
+        <text macro="translator"/>
+      </if>
+    </choose>
   </macro>
   <macro name="author">
     <names variable="author">
@@ -127,7 +141,11 @@
     </group>
   </macro>
   <macro name="container-prefix">
+    <choose>
+      <if type="chapter">
     <text term="in" text-case="lowercase" suffix=" "/>
+      </if>
+    </choose>
   </macro>
   <macro name="locators">
     <choose>
@@ -152,6 +170,22 @@
           <text variable="edition"/>
         </group>
       </else-if>
+    </choose>
+  </macro>
+  <macro name="locators-newspaper">
+    <choose>
+      <if type="article-newspaper">
+        <group delimiter=", ">
+          <group>
+        <text variable="edition" suffix=" "/>
+        <text term="edition" prefix=" "/>
+          </group>
+          <group>
+        <text term="section" form="short" suffix=". "/>
+        <text variable="section"/>
+          </group>
+        </group>
+      </if>
     </choose>
   </macro>
   <macro name="event">
@@ -189,6 +223,36 @@
       </else>
     </choose>
   </macro>
+  <macro name="pages">
+    <choose>
+      <if type="article-journal">
+    <text variable="page" prefix=": "/>
+      </if>
+      <else-if type="chapter">
+    <text variable="page" prefix=", "/>
+      </else-if>
+    </choose>
+  </macro>
+  <macro name="locator">
+    <choose>
+      <if variable="locator" match="none">
+        <text macro="pages"/>
+      </if>
+      <else-if type="article-journal">
+        <text variable="locator" prefix=": "/>
+      </else-if>
+      <else>
+        <text variable="locator" prefix=", "/>
+      </else>
+    </choose>
+  </macro>
+  <macro name="archive">
+    <group delimiter=", ">
+      <text variable="archive_location"/>
+      <text variable="archive"/>
+      <text variable="archive-place"/>
+    </group>
+  </macro>
   <macro name="issue">
     <choose>
       <if type="article-journal">
@@ -213,44 +277,6 @@
         <text macro="issued" prefix=", "/>
       </else>
     </choose>
-  </macro>
-  <macro name="locator">
-    <choose>
-      <if type="article-newspaper">
-        <group delimiter=", ">
-          <group>
-        <text variable="edition" suffix=" "/>
-        <text term="edition" prefix=" "/>
-          </group>
-          <group>
-        <text term="section" form="short" suffix=". "/>
-        <text variable="section"/>
-          </group>
-        </group>
-      </if>
-    </choose>
-    <choose>
-      <if variable="locator" match="none">
-        <choose>
-          <if type="article-journal article-magazine chapter" match="any">
-        <text variable="page" prefix=", "/>
-          </if>
-        </choose>
-      </if>
-      <else-if type="article-journal">
-        <text variable="locator" prefix=": "/>
-      </else-if>
-      <else>
-        <text variable="locator" prefix=", "/>
-      </else>
-    </choose>
-  </macro>
-  <macro name="archive">
-    <group delimiter=", ">
-      <text variable="archive_location"/>
-      <text variable="archive"/>
-      <text variable="archive-place"/>
-    </group>
   </macro>
   <macro name="access">
     <group delimiter=", ">
@@ -293,6 +319,7 @@
             </group>
             <text macro="title"/>
             <text macro="description"/>
+            <text macro="translator-article"/>
             <group>
               <text macro="container-prefix"/>
               <text variable="container-title" font-style="italic"/>
@@ -302,6 +329,7 @@
           <text macro="locators"/>
           <text variable="collection-title" prefix=", "/>
           <text macro="issue"/>
+          <text macro="locators-newspaper" prefix=", "/>
           <text macro="locator"/>
           <text macro="access" prefix=", "/>
         </else>
