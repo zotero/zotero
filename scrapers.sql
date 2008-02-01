@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-01 19:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-01 21:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -2086,6 +2086,80 @@ function getData(ids){
 		newItem.complete();		
 	}, function(){Zotero.done();});	
 	Zotero.wait();
+}');
+
+REPLACE INTO translators VALUES ('8b35ab14-f18a-4f69-8472-b2df18c984da', '1.0.0b4.r5', '', '2008-02-01 21:00:00', '0', '100', '4', 'Davidson College Library', 'Michael Berkowitz', 'http://www3.davidson.edu/', 
+'function detectWeb(doc, url) {
+	if (url.indexOf("log_in") == -1) {
+		if (url.indexOf("screen=Record") != -1) {
+			return "book";
+		} else {
+			return "multiple";
+		}
+	}
+}', 
+'function doWeb(doc, url) {
+	var ids = new Array();
+	if (detectWeb(doc, url) == "multiple") {
+		var posturl = doc.evaluate(''//table/tbody/tr[2]/td[1]/table/tbody/tr[2]/td/a[1]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext().href.match(/[^?]*/)[0];
+		var items = new Object();
+		var xpath = ''//span[@class="smalllinks"]/a'';
+		var titles = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
+		var title = titles.iterateNext();
+		var i = 1;
+		while (title) {
+			items[i] =Zotero.Utilities.trimInternal(title.textContent);
+			title = titles.iterateNext();
+			i++;
+		}
+		items = Zotero.selectItems(items);
+		Zotero.debug(items);
+		for (var i in items) {
+			ids.push(i);
+		}
+	} else {
+		ids.push(url.match(/item=(\d+)/)[1]);
+		var posturl = url.match(/[^?]*/)[0];
+	}
+	Zotero.debug(ids);
+	var posturl2 = posturl.replace("goto", "cart_add");
+	var deletepost = posturl.replace("goto", "cart_remove");
+	
+	Zotero.Utilities.HTTP.doPost(deletepost, ''screen=Hitlist.html&records=all&server=1home'', function() {});
+	
+	for (var i = 0; i < ids.length ; i++) {
+		Zotero.debug(ids[i]);
+		
+		Zotero.Utilities.HTTP.doPost(deletepost, ''screen=Hitlist.html&records=all&server=1home'', function() {});
+		
+		Zotero.Utilities.HTTP.doPost(posturl2, ''screen=Hitlist.html&server=1home&item='' + ids[i] + ''&item_source=1home'', function() {});
+	
+		Zotero.Utilities.HTTP.doPost(posturl, ''screen=SelectListBriefCiteRefworks.html&server=cart&item_source=1home'', function(text) {
+			text = Zotero.Utilities.unescapeHTML(text);
+			text = text.replace(/RT/, "TY");
+			text = text.replace(/VO/, "VL");
+			text = text.replace(/LK/, "UR");
+			text = text.replace(/YR/, "PY");
+			text = text.replace(/([A-Z][A-Z\d]\s)/g, "$1 - ");
+			Zotero.debug(text);
+			var translator = Zotero.loadTranslator("import");
+			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+			translator.setString(text);
+			translator.setHandler("itemDone", function(obj, item) {
+				item.itemType = "book";
+				for (var i in item.creators) {
+					var name = item.creators[i].lastName.match(/(\w+)\s+(.*)/);
+					item.creators[i].lastName = name[1];
+					item.creators[i].firstName = name[2];
+				}
+				item.complete();
+			});
+			translator.translate();
+			
+		});
+		
+		Zotero.Utilities.HTTP.doPost(deletepost, ''screen=Hitlist.html&records=all&server=1home'', function() {});
+	}
 }');
 
 REPLACE INTO translators VALUES ('1885b93c-cf37-4b25-aef5-283f42eada9d', '1.0.0b4.r5', '', '2008-02-01 19:30:00', '0', '100', '4', 'Informaworld', 'Michael Berkowitz', 'http://www.informaworld.com', 
