@@ -1,10 +1,10 @@
 <!ENTITY zotero.version "versjon">
-<!ENTITY zotero.createdby "Skapt av:">
+<!ENTITY zotero.createdby "Utviklet av:">
 <!ENTITY zotero.directors "Direksjonsmedlemmer:">
 <!ENTITY zotero.developers "Utviklere:">
 <!ENTITY zotero.alumni "Alumni:">
 <!ENTITY zotero.about.localizations "Lokaliseringer:">
-<!ENTITY zotero.about.additionalSoftware "Third-Party Software and Standards:">
+<!ENTITY zotero.about.additionalSoftware "Tredjeparts programvare og standarder:">
 <!ENTITY zotero.executiveProducer "Ledende produsent:">
 <!ENTITY zotero.thanks "Spesiell takk til:">
 <!ENTITY zotero.about.close "Lukk">

@@ -53,6 +53,7 @@
 
 <!ENTITY zotero.preferences.quickCopy.caption "Kitskopieer">
 <!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Verstek-afvoerformaat:">
+<!ENTITY zotero.preferences.quickCopy.copyAsHTML "Copy as HTML">
 <!ENTITY zotero.preferences.quickCopy.macWarning "Let wel: rykteksformatering sal op Mac OS X verlore gaan.">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Werfspesifieke instellings:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domein/pad">

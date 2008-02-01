@@ -6,8 +6,8 @@
 <!ENTITY zotero.search.joinMode.suffix "los siguientes:">
 
 <!ENTITY zotero.search.recursive.label "Buscar en carpetas interiores">
-<!ENTITY zotero.search.noChildren "Only show top-level items">
-<!ENTITY zotero.search.includeParentsAndChildren "Include parent and child items of matching items">
+<!ENTITY zotero.search.noChildren "Mostrar sólo los ítems de primer nivel">
+<!ENTITY zotero.search.includeParentsAndChildren "Incluír los ítems padres e hijos de los encontrados">
 
 <!ENTITY zotero.search.textModes.phrase "Frase">
 <!ENTITY zotero.search.textModes.phraseBinary "Frase (incl. archivos binarios)">
@@ -18,6 +18,6 @@
 <!ENTITY zotero.search.date.units.months "meses">
 <!ENTITY zotero.search.date.units.years "años">
 
-<!ENTITY zotero.search.search "Search">
-<!ENTITY zotero.search.clear "Clear">
-<!ENTITY zotero.search.saveSearch "Save Search">
+<!ENTITY zotero.search.search "Buscar">
+<!ENTITY zotero.search.clear "Borrar">
+<!ENTITY zotero.search.saveSearch "Guardar búsqueda">

@@ -1,51 +1,51 @@
-<!ENTITY zotero.preferences.title "Zotero innstillinger">
+<!ENTITY zotero.preferences.title "Zotero Preferences">
 
-<!ENTITY zotero.preferences.default "Standard:">
+<!ENTITY zotero.preferences.default "พื้นฐาน:">
 
-<!ENTITY zotero.preferences.prefpane.general "Generelt">
+<!ENTITY zotero.preferences.prefpane.general "ทั่วไป">
 
-<!ENTITY zotero.preferences.userInterface "Brukergrensesnitt">
-<!ENTITY zotero.preferences.position "Vis Zotero">
-<!ENTITY zotero.preferences.position.above "over">
-<!ENTITY zotero.preferences.position.below "under">
-<!ENTITY zotero.preferences.position.browser "nettleserinnhold">
-<!ENTITY zotero.preferences.statusBarIcon "Ikon på statuslinje:">
-<!ENTITY zotero.preferences.statusBarIcon.none "Ingen">
-<!ENTITY zotero.preferences.fontSize "Skriftstørrelse">
-<!ENTITY zotero.preferences.fontSize.small "Liten">
-<!ENTITY zotero.preferences.fontSize.medium "Medium">
-<!ENTITY zotero.preferences.fontSize.large "Stor">
+<!ENTITY zotero.preferences.userInterface "ส่วนต่อประสานกับผู้ใช้">
+<!ENTITY zotero.preferences.position "แสดงโซแทโร">
+<!ENTITY zotero.preferences.position.above "above">
+<!ENTITY zotero.preferences.position.below "below">
+<!ENTITY zotero.preferences.position.browser "browser content">
+<!ENTITY zotero.preferences.statusBarIcon "Status bar icon:">
+<!ENTITY zotero.preferences.statusBarIcon.none "ว่างเปล่า">
+<!ENTITY zotero.preferences.fontSize "ขนาดฟ้อนท์:">
+<!ENTITY zotero.preferences.fontSize.small "เล็ก">
+<!ENTITY zotero.preferences.fontSize.medium "กลาง">
+<!ENTITY zotero.preferences.fontSize.large "ใหญ่">
 
-<!ENTITY zotero.preferences.miscellaneous "Diverse">
-<!ENTITY zotero.preferences.autoUpdate "Sjekk automatisk for oppdaterte oversettere">
-<!ENTITY zotero.preferences.updateNow "Oppdater nå">
-<!ENTITY zotero.preferences.reportTranslationFailure "Rapporter ødelagte nettstedoversettere">
-<!ENTITY zotero.preferences.parseRISRefer "Bruk Zotero for nedlastede RIS/Refer-filer">
-<!ENTITY zotero.preferences.automaticSnapshots "Ta automatisk øyeblikksbilder når du lager elementer fra nettsider">
-<!ENTITY zotero.preferences.downloadAssociatedFiles "Lagre assosierte PDF-filer og andre filer når du lagrer elementer">
+<!ENTITY zotero.preferences.miscellaneous "Miscellaneous">
+<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators">
+<!ENTITY zotero.preferences.updateNow "Update now">
+<!ENTITY zotero.preferences.reportTranslationFailure "Report broken site translators">
+<!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded RIS/Refer files">
+<!ENTITY zotero.preferences.automaticSnapshots "Automatically take snapshots when creating items from web pages">
+<!ENTITY zotero.preferences.downloadAssociatedFiles "Automatically attach associated PDFs and other files when saving items">
 <!ENTITY zotero.preferences.automaticTags "Automatically tag items with keywords and subject headings">
 
-<!ENTITY zotero.preferences.openurl.caption "Åpne URL">
+<!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
 <!ENTITY zotero.preferences.openurl.search "Search for resolvers">
-<!ENTITY zotero.preferences.openurl.custom "Egendefinert...">
+<!ENTITY zotero.preferences.openurl.custom "Custom...">
 <!ENTITY zotero.preferences.openurl.server "Resolver:">
-<!ENTITY zotero.preferences.openurl.version "Versjon:">
+<!ENTITY zotero.preferences.openurl.version "Version:">
 
-<!ENTITY zotero.preferences.prefpane.search "Søk">
+<!ENTITY zotero.preferences.prefpane.search "Search">
 <!ENTITY zotero.preferences.search.fulltextCache "Full-Text Cache">
 <!ENTITY zotero.preferences.search.pdfIndexing "PDF Indexing">
 <!ENTITY zotero.preferences.search.indexStats "Index Statistics">
 
-<!ENTITY zotero.preferences.search.indexStats.indexed "Indeksert:">
+<!ENTITY zotero.preferences.search.indexStats.indexed "Indexed:">
 <!ENTITY zotero.preferences.search.indexStats.partial "Partial:">
 <!ENTITY zotero.preferences.search.indexStats.unindexed "Unindexed:">
-<!ENTITY zotero.preferences.search.indexStats.words "Ord:">
+<!ENTITY zotero.preferences.search.indexStats.words "Words:">
 
 <!ENTITY zotero.preferences.fulltext.textMaxLength "Maximum characters to index per file:">
 <!ENTITY zotero.preferences.fulltext.pdfMaxPages "Maximum pages to index per file:">
 
-<!ENTITY zotero.preferences.prefpane.export "Eksporter:">
+<!ENTITY zotero.preferences.prefpane.export "Export">
 
 <!ENTITY zotero.preferences.citationOptions.caption "Citation Options">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Include URLs of paper articles in references">
@@ -62,27 +62,27 @@
 
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Get additional styles...">
 
-<!ENTITY zotero.preferences.prefpane.keys "Hurtigtaster">
+<!ENTITY zotero.preferences.prefpane.keys "Shortcut Keys">
 
-<!ENTITY zotero.preferences.keys.openZotero "Åpne/lukk Zotero-panelet">
-<!ENTITY zotero.preferences.keys.toggleFullscreen "Fullskjerm av/på">
-<!ENTITY zotero.preferences.keys.library "Bibliotek">
-<!ENTITY zotero.preferences.keys.quicksearch "Hurtigsøk">
-<!ENTITY zotero.preferences.keys.newItem "Lag et nytt element">
-<!ENTITY zotero.preferences.keys.newNote "Lag et nytt notat">
-<!ENTITY zotero.preferences.keys.toggleTagSelector "Slå taggvelgeren av/på">
+<!ENTITY zotero.preferences.keys.openZotero "Open/Close Zotero Pane">
+<!ENTITY zotero.preferences.keys.toggleFullscreen "Toggle Fullscreen Mode">
+<!ENTITY zotero.preferences.keys.library "Library">
+<!ENTITY zotero.preferences.keys.quicksearch "Quick Search">
+<!ENTITY zotero.preferences.keys.newItem "Create a new item">
+<!ENTITY zotero.preferences.keys.newNote "Create a new note">
+<!ENTITY zotero.preferences.keys.toggleTagSelector "Toggle Tag Selector">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copy Selected Item Citations to Clipboard">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copy Selected Items to Clipboard">
-<!ENTITY zotero.preferences.keys.overrideGlobal "Forsøk å overstyre snarveier i konflikt">
-<!ENTITY zotero.preferences.keys.changesTakeEffect "Endringer gjelder kun for nye vinduer">
+<!ENTITY zotero.preferences.keys.overrideGlobal "Try to override conflicting shortcuts">
+<!ENTITY zotero.preferences.keys.changesTakeEffect "Changes take effect in new windows only">
 
 
-<!ENTITY zotero.preferences.prefpane.advanced "Avansert">
+<!ENTITY zotero.preferences.prefpane.advanced "Advanced">
 
 <!ENTITY zotero.preferences.dataDir "Storage Location">
 <!ENTITY zotero.preferences.dataDir.useProfile "Use Firefox profile directory">
 <!ENTITY zotero.preferences.dataDir.custom "Custom:">
-<!ENTITY zotero.preferences.dataDir.choose "Velg...">
+<!ENTITY zotero.preferences.dataDir.choose "Choose...">
 <!ENTITY zotero.preferences.dataDir.reveal "Show Data Directory">
 
 <!ENTITY zotero.preferences.dbMaintenance "Database Maintenance">

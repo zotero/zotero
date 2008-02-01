@@ -47,19 +47,20 @@
 
 <!ENTITY zotero.preferences.prefpane.export "Exportálás">
 
-<!ENTITY zotero.preferences.citationOptions.caption "Citation Options">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Include URLs of paper articles in references">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "When this option is disabled, Zotero includes URLs when citing journal, magazine, and newspaper articles only if the article does not have a page range specified.">
+<!ENTITY zotero.preferences.citationOptions.caption "Hivatkozási beállítások">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "URL megjelenítése a nyomtatásban megjelent cikkeknél">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Ha ez a lehetőség nincs bekapcsolva, a Zotero csak akkor jeleníti meg az URL-t folyóirat-, újság- vagy magazincikkeknél, ha nincs megadva oldalszám.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Gyorsmásolás">
 <!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Alapértelmezett kimeneti formátum">
+<!ENTITY zotero.preferences.quickCopy.copyAsHTML "Copy as HTML">
 <!ENTITY zotero.preferences.quickCopy.macWarning "Megjegyzés: A formázás Mac OS X alatt elveszik.">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Weboldal-specifikus beállítások:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domain/Path">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(pl: wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Kimeneti formátum">
 
-<!ENTITY zotero.preferences.export.getAdditionalStyles "Get additional styles...">
+<!ENTITY zotero.preferences.export.getAdditionalStyles "További stílusok telepítése...">
 
 <!ENTITY zotero.preferences.prefpane.keys "Billentyűparancsok">
 
@@ -86,6 +87,6 @@
 
 <!ENTITY zotero.preferences.dbMaintenance "Adatbázis karbantartás">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Az adatbázis integritásának ellenőrzése">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reset Translators and Styles...">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset Translators...">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset Styles...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Fordítók és stílusok visszaállítása...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Fordítók visszaállítása">
+<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Stílusok visszaállítása...">

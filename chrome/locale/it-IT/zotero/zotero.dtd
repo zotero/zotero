@@ -33,7 +33,7 @@
 <!ENTITY zotero.notes.separate "Modifica in una nuova finestra">
 
 <!ENTITY zotero.items.type_column "Tipo">
-<!ENTITY zotero.items.title_column "Titolo dell&apos;articolo">
+<!ENTITY zotero.items.title_column "Titolo">
 <!ENTITY zotero.items.creator_column "Autore">
 <!ENTITY zotero.items.date_column "Data">
 <!ENTITY zotero.items.year_column "Anno">

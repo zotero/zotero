@@ -10,7 +10,7 @@ locale	zotero	cs-CZ		chrome/locale/cs-CZ/zotero/
 locale	zotero	da-DK		chrome/locale/da-DK/zotero/
 locale	zotero	de-AT		chrome/locale/de-AT/zotero/
 locale	zotero	de-CH		chrome/locale/de-CH/zotero/
-locale	zotero	de		chrome/locale/de/zotero/
+locale	zotero	de-DE		chrome/locale/de-DE/zotero/
 locale	zotero	el-GR		chrome/locale/el-GR/zotero/
 locale	zotero	es-ES		chrome/locale/es-ES/zotero/
 locale	zotero	et-EE		chrome/locale/et-EE/zotero/
@@ -31,6 +31,7 @@ locale	zotero	ro-RO		chrome/locale/ro-RO/zotero/
 locale	zotero	ru-RU		chrome/locale/ru-RU/zotero/
 locale	zotero	sr-YU		chrome/locale/sr-YU/zotero/
 locale	zotero	sv-SE		chrome/locale/sv-SE/zotero/
+locale  zotero  th-TH		chrome/locale/th-TH/zotero/
 locale	zotero	tr-TR		chrome/locale/tr-TR/zotero/
 locale	zotero	vi-VN		chrome/locale/vi-VN/zotero/
 locale	zotero	zh-CN		chrome/locale/zh-CN/zotero/

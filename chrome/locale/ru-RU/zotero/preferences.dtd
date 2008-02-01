@@ -38,7 +38,7 @@
 <!ENTITY zotero.preferences.search.indexStats "Статистика индексации">
 
 <!ENTITY zotero.preferences.search.indexStats.indexed "Проиндексированных:">
-<!ENTITY zotero.preferences.search.indexStats.partial "Частично проиндескированных:">
+<!ENTITY zotero.preferences.search.indexStats.partial "Частично проиндексированных:">
 <!ENTITY zotero.preferences.search.indexStats.unindexed "Непроиндексированных:">
 <!ENTITY zotero.preferences.search.indexStats.words "Слов:">
 
@@ -47,19 +47,20 @@
 
 <!ENTITY zotero.preferences.prefpane.export "Экспортировать">
 
-<!ENTITY zotero.preferences.citationOptions.caption "Citation Options">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Include URLs of paper articles in references">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "When this option is disabled, Zotero includes URLs when citing journal, magazine, and newspaper articles only if the article does not have a page range specified.">
+<!ENTITY zotero.preferences.citationOptions.caption "Опции цитирования">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Включать URL бумажных статей в ссылках">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Когда эта опция отключена, Zotero включает URL, при цитировании журнала и газетную статью только если статья не имеет указанной страницы.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Быстро копировать">
 <!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Выходящий формат по умолчанию:">
+<!ENTITY zotero.preferences.quickCopy.copyAsHTML "Copy as HTML">
 <!ENTITY zotero.preferences.quickCopy.macWarning "Примечание: форматирование RTF будет утрачено в Mac OS X">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Установки для сайта:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Домен/путь">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(например wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Выходной формат">
 
-<!ENTITY zotero.preferences.export.getAdditionalStyles "Get additional styles...">
+<!ENTITY zotero.preferences.export.getAdditionalStyles "Загрузить дополнительные стили...">
 
 <!ENTITY zotero.preferences.prefpane.keys "Горячие клавиши">
 
@@ -86,6 +87,6 @@
 
 <!ENTITY zotero.preferences.dbMaintenance "Поддержка БД">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Проверить целостность БД">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reset Translators and Styles...">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset Translators...">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset Styles...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Обнулить трансляторы и стили...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Обнулить трансляторы...">
+<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Обнулить стили...">

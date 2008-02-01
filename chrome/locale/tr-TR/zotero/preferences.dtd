@@ -10,24 +10,24 @@
 <!ENTITY zotero.preferences.position.below "Alt">
 <!ENTITY zotero.preferences.position.browser "tarayıcı içeriği">
 <!ENTITY zotero.preferences.statusBarIcon "Durum çubuğu simgesi:">
-<!ENTITY zotero.preferences.statusBarIcon.none "None">
+<!ENTITY zotero.preferences.statusBarIcon.none "Hiçbiri">
 <!ENTITY zotero.preferences.fontSize "Font boyu:">
 <!ENTITY zotero.preferences.fontSize.small "Küçük">
 <!ENTITY zotero.preferences.fontSize.medium "Orta">
 <!ENTITY zotero.preferences.fontSize.large "Büyük">
 
 <!ENTITY zotero.preferences.miscellaneous "Çeşitli">
-<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators">
+<!ENTITY zotero.preferences.autoUpdate "Güncel çevirmenler için otomatik kontrol yap">
 <!ENTITY zotero.preferences.updateNow "Şimdi Güncelle">
 <!ENTITY zotero.preferences.reportTranslationFailure "Bozuk site çevirilerini raporla">
-<!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded RIS/Refer files">
+<!ENTITY zotero.preferences.parseRISRefer "İndirilmiş RIS/Refer dosyaları için Zotero&apos;yu kullan">
 <!ENTITY zotero.preferences.automaticSnapshots "Web sayfalarından eserler yaratılırken sayfa görünümü otomatik olarak kaydet">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Eserleri kaydederken birleşik PDF ve diğer dosyaları da otomatik olarak ekle">
 <!ENTITY zotero.preferences.automaticTags "Anahtar kelimeler ve konu başlıkları ile eserleri otomatik olarak etiketle">
 
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
-<!ENTITY zotero.preferences.openurl.search "Search for resolvers">
+<!ENTITY zotero.preferences.openurl.search "Resolvers&apos;ler için ara">
 <!ENTITY zotero.preferences.openurl.custom "Özel">
 <!ENTITY zotero.preferences.openurl.server "Resolver:">
 <!ENTITY zotero.preferences.openurl.version "Sürüm:">
@@ -37,10 +37,10 @@
 <!ENTITY zotero.preferences.search.pdfIndexing "PDF Dizinleme">
 <!ENTITY zotero.preferences.search.indexStats "Dizin İstatistikleri">
 
-<!ENTITY zotero.preferences.search.indexStats.indexed "Indexed:">
-<!ENTITY zotero.preferences.search.indexStats.partial "Partial:">
-<!ENTITY zotero.preferences.search.indexStats.unindexed "Unindexed:">
-<!ENTITY zotero.preferences.search.indexStats.words "Words:">
+<!ENTITY zotero.preferences.search.indexStats.indexed "Dizinli">
+<!ENTITY zotero.preferences.search.indexStats.partial "Kısmi:">
+<!ENTITY zotero.preferences.search.indexStats.unindexed "Dizinlenmemiş:">
+<!ENTITY zotero.preferences.search.indexStats.words "Kelimeler:">
 
 <!ENTITY zotero.preferences.fulltext.textMaxLength "Her dosyayı dizinlemek için en fazla karakter:">
 <!ENTITY zotero.preferences.fulltext.pdfMaxPages "Her dosyada dizinlenecek en fazla sayfa sayısı:">
@@ -53,6 +53,7 @@
 
 <!ENTITY zotero.preferences.quickCopy.caption "Çabuk Kopyala">
 <!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Varsayılan Çıktı Biçimi:">
+<!ENTITY zotero.preferences.quickCopy.copyAsHTML "Copy as HTML">
 <!ENTITY zotero.preferences.quickCopy.macWarning "Uyarı: Zengin-metin biçimi Mac OS X&apos;de kaybolacaktır.">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Siteye Özgü Ayarlar:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Etki alanı/Yol">
@@ -70,7 +71,7 @@
 <!ENTITY zotero.preferences.keys.newItem "Yeni eser yarat">
 <!ENTITY zotero.preferences.keys.newNote "Yeni not yarat">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Konu Seçiciyi Aç">
-<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copy Selected Item Citations to Clipboard">
+<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Seçili eserin Atıflarını Pano&apos;ya kopyala">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Seçilen eserleri panoya kopyala">
 <!ENTITY zotero.preferences.keys.overrideGlobal "Çelişen kısayolların üzerine yazdırmayı dene">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Değişiklikler yeni açılan pencerelerde etkili olacaktır.">
@@ -82,10 +83,10 @@
 <!ENTITY zotero.preferences.dataDir.useProfile "Firefox profil dizinini kullan">
 <!ENTITY zotero.preferences.dataDir.custom "Özel:">
 <!ENTITY zotero.preferences.dataDir.choose "Seç...">
-<!ENTITY zotero.preferences.dataDir.reveal "Show Data Directory">
+<!ENTITY zotero.preferences.dataDir.reveal "Veri Dizinini Göster">
 
-<!ENTITY zotero.preferences.dbMaintenance "Database Maintenance">
-<!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Check Database Integrity">
+<!ENTITY zotero.preferences.dbMaintenance "Veritabanı Bakımı">
+<!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Veritabanı Bütünlüğünü Kontrol et">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reset Translators and Styles...">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset Translators...">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset Styles...">

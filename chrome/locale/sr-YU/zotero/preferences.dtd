@@ -47,19 +47,20 @@
 
 <!ENTITY zotero.preferences.prefpane.export "Извоз">
 
-<!ENTITY zotero.preferences.citationOptions.caption "Citation Options">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Include URLs of paper articles in references">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "When this option is disabled, Zotero includes URLs when citing journal, magazine, and newspaper articles only if the article does not have a page range specified.">
+<!ENTITY zotero.preferences.citationOptions.caption "Опције за цитате">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Укључи УРЛе чланака у референцама">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Када је ова опција искључена, Zoterо ће ставити УРЛе при цитирању чланака из журнала, магазина и новина само ако чланак нема наведен опсег страница.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Брзо умножавање">
 <!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Подразумевани излазни формат:">
+<!ENTITY zotero.preferences.quickCopy.copyAsHTML "Copy as HTML">
 <!ENTITY zotero.preferences.quickCopy.macWarning "Белешка: Rich-text формат ће бити изгубљен на Mac OS X.">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Поставке нарочите за веб место:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Домен/путања">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(нпр. sr.wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Излазни формат">
 
-<!ENTITY zotero.preferences.export.getAdditionalStyles "Get additional styles...">
+<!ENTITY zotero.preferences.export.getAdditionalStyles "Добави додатне стилове...">
 
 <!ENTITY zotero.preferences.prefpane.keys "Пречице на тастатури">
 
@@ -86,6 +87,6 @@
 
 <!ENTITY zotero.preferences.dbMaintenance "Одржавање базе података">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Провери целовитост базе података">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reset Translators and Styles...">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset Translators...">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset Styles...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Постави на почетне вредности преводиоце и стилове...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Постави на почетне вредности преводиоце...">
+<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Постави на почетне вредности стилове...">

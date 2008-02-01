@@ -47,19 +47,20 @@
 
 <!ENTITY zotero.preferences.prefpane.export "Exporta">
 
-<!ENTITY zotero.preferences.citationOptions.caption "Citation Options">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Include URLs of paper articles in references">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "When this option is disabled, Zotero includes URLs when citing journal, magazine, and newspaper articles only if the article does not have a page range specified.">
+<!ENTITY zotero.preferences.citationOptions.caption "Opcions de cita">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Incloure URLs d&apos;articles en paper a les referències">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Quan aquesta opció està deshabilitada, Zotero inclou URLs quan es citen articles de premsa, revistes i revistes acadèmiques només si l&apos;article no té un ranc de pàgines assignat.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Còpia ràpida">
 <!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Format de sortida per defecte:">
+<!ENTITY zotero.preferences.quickCopy.copyAsHTML "Copy as HTML">
 <!ENTITY zotero.preferences.quickCopy.macWarning "Nota: el format de text enriquit es perdrà en Mac OS X">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Configuració específica per a llos web:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domini/Ruta">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(p.ex. wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Format de sortida">
 
-<!ENTITY zotero.preferences.export.getAdditionalStyles "Get additional styles...">
+<!ENTITY zotero.preferences.export.getAdditionalStyles "Aconsegueix estils adicionals...">
 
 <!ENTITY zotero.preferences.prefpane.keys "Dreceres de teclat">
 
@@ -86,6 +87,6 @@
 
 <!ENTITY zotero.preferences.dbMaintenance "Manteniment de la base de dades">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Comprova la integritat de la base de dades">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reset Translators and Styles...">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset Translators...">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset Styles...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reinicialitza traductors i estils...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reinicialitza traductors...">
+<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reinicialitza estils...">
