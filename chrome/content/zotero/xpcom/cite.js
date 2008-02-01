@@ -2805,9 +2805,12 @@ Zotero.CSL.FormattedString.prototype.append = function(string, element, dontDeli
 			} else if(element["@text-case"] == "uppercase") {
 				// all uppercase
 				string = string.toUpperCase();
+			} else if(element["@text-case"] == "sentence") {
+				// for now capitalizes only the first letter, the rest are lowercase
+				string = string[0].toUpperCase()+string.substr(1).toLowerCase();
 			} else if(element["@text-case"] == "capitalize-first") {
 				// capitalize first
-				string = string[0].toUpperCase()+string.substr(1).toLowerCase();
+				string = string[0].toUpperCase()+string.substr(1);
 			} else if(element["@text-case"] == "capitalize-all") {
 				// capitalize first
 				var strings = string.split(" ");
