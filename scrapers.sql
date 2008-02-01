@@ -10650,7 +10650,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('8917b41c-8527-4ee7-b2dd-bcbc3fa5eabd', '1.0.0b4.r5', '', '2008-01-31 23:00:00', '1', '100', '4', 'CiteULike', 'Sean Takats', 'https?://(?:www\.)?citeulike.org(?:.*/tag/[^/]*$|/search/|/journal/|/group/[0-9]+/library$|/\?page=[0-9]+$|/.*article/[0-9]+$|/$)', 
+REPLACE INTO translators VALUES ('8917b41c-8527-4ee7-b2dd-bcbc3fa5eabd', '1.0.0b4.r5', '', '2008-02-01 18:00:00', '1', '100', '4', 'CiteULike', 'Sean Takats', 'https?://(?:www\.)?citeulike.org(?:.*/tag/[^/]*$|/search/|/journal/|/group/[0-9]+/library$|/\?page=[0-9]+$|/.*article/[0-9]+$|/$)', 
 'function detectWeb(doc, url){
 	var articleRe = /\/article\/[0-9]+$/;
 	var m = url.match(articleRe);
