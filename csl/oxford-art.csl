@@ -61,6 +61,19 @@
       </else>
     </choose>
   </macro>
+  <macro name="title-short">
+    <choose>
+      <if type="thesis">
+	<text variable="title" form="short" prefix="&#8216;" suffix="&#8217;"/>
+      </if>
+      <else-if type="book">
+	<text variable="title" form="short" font-style="italic"/>
+      </else-if>
+      <else>
+	<text variable="title" form="short" prefix="&#8216;" suffix="&#8217;"/>
+      </else>
+    </choose>
+  </macro>
   <macro name="publisher">
     <group delimiter=": ">
       <text variable="publisher"/>
@@ -113,7 +126,7 @@
 	<if position="subsequent">
 	  <group delimiter=", ">
 	    <text macro="author-short"/>
-	    <text macro="title"/>
+	    <text macro="title-short"/>
 	    <text macro="pageref"/>
 	  </group>
 	</if>
