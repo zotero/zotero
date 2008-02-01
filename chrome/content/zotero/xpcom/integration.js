@@ -20,7 +20,7 @@
     ***** END LICENSE BLOCK *****
 */
 
-const API_VERSION = 4;
+const API_VERSION = 5;
 
 Zotero.Integration = new function() {
 	var _contentLengthRe = /[\r\n]Content-Length: *([0-9]+)/i;
