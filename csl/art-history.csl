@@ -23,16 +23,34 @@
       </substitute>
     </names>
   </macro> 
+  <macro name="author-short">
+    <names variable="author">
+      <name form="short" and="text" delimiter=", " />
+      <label form="short" prefix=", "/>
+      <substitute>
+	<names variable="editor"/>
+	<names variable="translator"/>
+	<text macro="title"/>
+      </substitute>
+    </names>
+  </macro> 
   <macro name="title">
     <choose>
-      <if type="thesis">
-	<text variable="title" form="short"  prefix="&#8216;" suffix="&#8217;"/>
+      <if type="book">
+	<text variable="title" font-style="italic"/>
       </if>
-      <else-if type="book">
-	<text variable="title" form="short" font-style="italic"/>
-      </else-if>
       <else>
-	<text variable="title" form="short"  prefix="&#8216;" suffix="&#8217;"/>
+	<text variable="title" prefix="&#8216;" suffix="&#8217;"/>
+      </else>
+    </choose>
+  </macro>
+  <macro name="title-short">
+    <choose>
+      <if type="book">
+	<text variable="title" form="short" font-style="italic"/>
+      </if>
+      <else>
+	<text variable="title" form="short" prefix="&#8216;" suffix="&#8217;"/>
       </else>
     </choose>
   </macro>
@@ -68,6 +86,15 @@
   </macro>
   <citation>
     <layout suffix="." delimiter="; ">
+      <choose>
+	<if position="subsequent">
+	  <group delimiter=", ">
+	    <text macro="author-short"/>
+	    <text macro="title-short"/>
+	    <text macro="pageref"/>
+	  </group>
+	</if>
+	<else>
       <group delimiter=", ">
 	<text macro="author"/>
 	<text macro="title" />
@@ -79,6 +106,8 @@
 	<text macro="pageno"/>
 	<text macro="pageref"/>
       </group>
+	</else>
+      </choose>
     </layout>
   </citation>
 </style>
