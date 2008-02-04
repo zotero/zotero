@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-03 21:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-04 22:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -11420,7 +11420,7 @@ REPLACE INTO translators VALUES ('2c310a37-a4dd-48d2-82c9-bd29c53c1c76', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('cde4428-5434-437f-9cd9-2281d14dbf9', '1.0.0b3.r1', '', '2008-01-29 19:00:00', '1', '100', '4', 'Ovid', 'Simon Kornblith and Michael Berkowitz', '/(gw2|spa)/ovidweb\.cgi', 
+REPLACE INTO translators VALUES ('cde4428-5434-437f-9cd9-2281d14dbf9', '1.0.0b3.r1', '', '2008-02-04 22:30:00', '1', '100', '4', 'Ovid', 'Simon Kornblith and Michael Berkowitz', '/(gw2|spa|spb)/ovidweb\.cgi', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -11490,8 +11490,13 @@ function doWeb(doc, url) {
 		post += "&R="+id;
 	}
 	
-	post += "&SELECT="+doc.evaluate(''.//input[@name="SELECT"]'', doc, nsResolver, XPathResult.ANY_TYPE,
-		null).iterateNext().value;
+	if (detectWeb(doc, url) == "multiple") {
+		var selectvar = doc.evaluate(''.//input[@name="SELECT"]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var nextselect = selectvar.iterateNext();
+		post += "&SELECT="+ selectvar.iterateNext().value;
+	} else {
+		post += "&SELECT=" + doc.evaluate(''.//input[@name="SELECT"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().value;
+	}
 	post += "&CitMan="+doc.evaluate(''.//input[@name="CitMan"]'', doc, nsResolver, XPathResult.ANY_TYPE,
 		null).iterateNext().value;
 	post += "&CitManPrev="+doc.evaluate(''.//input[@name="CitManPrev"]'', doc, nsResolver, XPathResult.ANY_TYPE,
