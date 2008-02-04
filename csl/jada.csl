@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<?oxygen RNGSchema="http://xbiblio.svn.sourceforge.net/viewvc/*checkout*/xbiblio/csl/schema/trunk/csl.rnc" type="compact"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="in-text" xml:lang="en">
   <info>
     <title>Journal of the American Dietetic Association</title>
     <id>http://www.zotero.org/syles/jada</id>
     <link href="http://www.zotero.org/syles/jada"/>
-    <link href="http://www.zotero.org/syles/ama" rel="based_on"/>
+    <link href="http://www.zotero.org/syles/ama" rel="template"/>
     <author>
       <name>Julian Onions</name>
       <email>julian.onions@gmail.com</email>
