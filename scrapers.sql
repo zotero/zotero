@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-04 23:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-05 23:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -12560,262 +12560,100 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('21ad38-3830-4836-aed7-7b5c2dbfa740', '1.0.0b3.r1', '', '2007-01-10 05:00:00', '1', '100', '4', 'ISI Web of Knowledge', 'Simon Kornblith', '^https?://[^/]+/(?:[^/]+/CIW\.cgi|portal\.cgi)', 
+REPLACE INTO translators VALUES ('594ebe3c-90a0-4830-83bc-9502825a6810', '1.0.0b4.r5', '', '2008-02-05 23:30:00', '0', '100', '4', 'ISI Web of Knowledge', 'Michael Berkowitz', 'http://apps.isiknowledge.com', 
 'function detectWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == ''x'') return namespace; else return null;
-	} : null;
-	
-	// require a link to Thomson at the bottom, to weed out other CGIs that
-	// happen to be called CIW.cgi
-	if(!doc.evaluate(''//p[@class="copyright"]/a[@href="http://www.thomson.com/scientific/scientific.jsp"]'',
-		doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
-		return false;
-	}
-	
-	if(doc.title.substr(0, 11) == "Full Record") {
-		return "journalArticle";
-	} else if(doc.title.substr(0, 14) == "Search Results") {
+	if (doc.title.indexOf("Web of Science Results") != -1) {
 		return "multiple";
+	} else if (url.indexOf("full_record.do") != -1) {
+		return "journalArticle";
 	}
-	
-	return false;
 }', 
-'function query(formAction, post, docOrUrls, done) {
-	post = post.substr(1)+"&fields=FullNoCitRef";
-	
-	Zotero.Utilities.HTTP.doPost(formAction, post, function(text) {
-		var m = text.match(/<a href="(uml_view.cgi[^"]+)">/);
-		var newURL = "http://portal.isiknowledge.com/uml/"+m[1];
-		Zotero.Utilities.HTTP.doGet(newURL, function(text) {
-			var lines = text.split("\n");
-			
-			var fieldRe = /^[A-Z0-9]{2}(?: |$)/;
-			var field, content, item, authors;
-			
-			for each(var line in lines) {
-				if(fieldRe.test(line)) {
-					if(item && field && content) {
-						if(field == "AF") {
-							// returns need to be processed separately when dealing with authors
-							authors = content;
-						} else if(field == "AU" && !authors)  {
-							authors = content;
-						} else {
-							content = content.replace(/\n/g, " ");
-							if(field == "TI") {
-								item.title = content;
-							} else if(field == "SO") {
-								item.publicationTitle = content;
-							} else if(field == "DE" || field == "ID" || field == "SC") {
-								item.tags = item.tags.concat(content.split("; "));
-							} else if(field == "AB") {
-								item.abstractNote = content;
-							} else if(field == "PB") {
-								item.publisher = content;
-							} else if(field == "PI") {
-								item.place = content;
-							} else if(field == "SN") {
-								item.ISSN = content;
-							} else if(field == "JI") {
-								item.journalAbbreviation = content;
-							} else if(field == "PD") {
-								if(item.date) {
-									item.date = content+" "+item.date;
-								} else {
-									item.date = content;
-								}
-							} else if(field == "PY") {
-								if(item.date) {
-									item.date += " "+content;
-								} else {
-									item.date = content;
-								}
-							} else if(field == "VL") {
-								item.volume = content;
-							} else if(field == "IS") {
-								item.issue = content;
-							} else if(field == "BP") {
-								item.pages = content;
-							} else if(field == "EP") {
-								if(!item.pages) {
-									item.pages = content;
-								} else if(item.pages != content) {
-									item.pages += "-"+content;
-								}
-							}
-						}
-					}
-					
-					var field = line.substr(0, 2);
-					var content = Zotero.Utilities.cleanString(line.substr(3));
-					if(field == "PT") {
-						// theoretically, there could be book types, but I don''t know what the codes
-						// are and Thomson is unlikely to help me figure that out
-						item = new Zotero.Item("journalArticle");
-						if(docOrUrls.location) {
-							item.attachments = [{title:"ISI Web of Science Snapshot", document:docOrUrls}];
-						} else {
-							item.attachments = [{title:"ISI Web of Science Snapshot", url:docOrUrls.shift(), mimeType:"text/html"}];
-						}
-						field = content = undefined;
-					} else if(field == "ER") {
-						if(authors) {
-							authors = authors.split("\n");
-							for each(var author in authors) {
-								item.creators.push(Zotero.Utilities.cleanAuthor(author, "author", true));
-							}
-						}
-						
-						item.complete();
-						item = field = content = authors = undefined;
-					}
-				} else {
-					content += "\n"+Zotero.Utilities.cleanString(line);
-				}
-			}
-			
-			if(done) {
-				done();
-			} else {
-				Zotero.done();
-			}
-		});
-	});
-}
-
-function crossSearchFetch(services, SID) {
-	// if we''ve fetched everything, we''re done
-	if(!services.length) {
-		Zotero.done();
-		return;
-	}
-	var service = services.shift();
-	Zotero.debug(service);
-	
-	// execute requests
-	var post = "&SID="+SID+"&all_summary_UTs="+service.items.join("%3B");
-	
-	// add marked_list_candidates
-	var i = 1;
-	for each(var marked_list_candidate in service.items) {
-		post += "&marked_list_candidates="+marked_list_candidate+"%2F"+i;
-	}
-	post += "&mark_selection=selected_records&Export.x=10&Export.y=10";
-	
-	// do query
-	query(service.URL, post, service.itemURLs, function() { crossSearchFetch(services, SID) });
-}
-
-function doWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == ''x'') return namespace; else return null;
-	} : null;
-	
-	var post = "";
-	
-	// get hidden fields to add to post string
-	var hiddenFields = doc.evaluate(''//input[@type="hidden"]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
-	var hiddenField;
-	while(hiddenField = hiddenFields.iterateNext()) {
-		post += "&"+hiddenField.name+"="+encodeURIComponent(hiddenField.value);
-	}
-	
-	if(doc.title.substr(0, 14) == "Search Results") {
-		var items = new Array();
-		var links = new Array();
-		var tableRow;
-		
-		if(url.indexOf("/portal.cgi") != -1 || url.indexOf("/XS/CIW.cgi") != -1) {
-			// CrossSearch
-			var tableRows = doc.evaluate(''//tr[td/span/input[@name="marked_list_candidates"]]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
-			while(tableRow = tableRows.iterateNext()) {
-				var id = tableRow.getElementsByTagName("input")[0].value;
-				
-				items[id] = tableRow.getElementsByTagName("b")[0].textContent;
-				
-				var linkList = tableRow.getElementsByTagName("a");
-				for each(var link in linkList) {
-					if(link.href && link.href.indexOf("&Func=TransferToPublisher&") != -1) {
-						links[id] = link.href;
-						break;
-					}
-				}
-			}
-			
-			items = Zotero.selectItems(items);
-			if(!items) return true;
-			
-			var serviceRe = /^(https?:\/\/[^\/]+\/).*%26SrcAuth%3D([^%]+)%26/;
-			var queries = new Object();
-			var urls = new Object();
-			
-			// contains an array of service objects with service, URL, itemURLs, and items properties
-			var services = new Array();
-			
-			// build up object of request URL => [marked_list_candidates]
-			for(var id in items) {
-				var foundService = null;
-				
-				var m = serviceRe.exec(links[id]);
-				for each(var service in services) {
-					if(service.service == m[2]) {
-						foundService = service;
-						break;
-					}
-				}
-				
-				if(!foundService) {
-					foundService = new Object();
-					foundService.service = m[2];
-					foundService.URL = m[1]+m[2]+"/CIW.cgi";
-					foundService.itemURLs = new Array();
-					foundService.items = new Array();
-					services.push(foundService);
-				}
-				
-				foundService.items.push(id.substr(id.indexOf(":")+1));
-				foundService.itemURLs.push(links[id]);
-			}
-			
-			var SID = doc.getElementsByName("SID")[0].value;
-			crossSearchFetch(services, SID);
-		} else {
-			var tableRows = doc.evaluate(''//tr[td/input[@name="marked_list_candidates"]]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
-			while(tableRow = tableRows.iterateNext()) {
-				var id = tableRow.getElementsByTagName("input")[0].value;
-				var link = tableRow.getElementsByTagName("a")[0];
-				items[id] = link.textContent;
-				links[id] = link.href;
-			}
-			
-			items = Zotero.selectItems(items);
-			if(!items) return true;
-			
-			var urls = new Array();
-			for(var code in items) {
-				post += "&marked_list_candidates="+encodeURIComponent(code);
-				urls.push(links[id]);
-			}
-			post += "&mark_selection=selected_records&Export.x=10&Export.y=10";
-			
-			// get form action
-			var formAction = doc.getElementsByTagName("form")[0].action;
-			// run query
-			query(formAction, post, urls);
+'function doWeb(doc, url) {
+	var ids = new Array();
+	if (detectWeb(doc, url) == "multiple") {
+		var items = new Object;
+		var xpath = ''//a[@class="smallV110"]'';
+		var titles = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
+		var next_title = titles.iterateNext();
+		while (next_title) {
+			var id = doc.evaluate(''.//@onclick'', next_title, null, XPathResult.ANY_TYPE, null).iterateNext().value.match(/\?([^'']+)\'/)[1];
+			items[id] = next_title.textContent;
+			next_title = titles.iterateNext();
 		}
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			ids.push(i);
+		} 
 	} else {
-		post += "&ExportOne.x=10&ExportOne.y=10"
-		
-		// get form action
-		var formAction = doc.getElementsByTagName("form")[0].action;
-		// run query
-		query(formAction, post, doc);
+		ids.push(url.match(/\?(.*)/)[1]);
 	}
+	for (var i in ids) {
+		ids[i] = ''http://apps.isiknowledge.com/full_record.do?'' + ids[i];
+	}
+	Zotero.Utilities.processDocuments(ids, function(newDoc) {
+		var url = newDoc.location.href;
+		var sid = newDoc.evaluate(''//input[@name="selectedIds"]'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().value;
+		var nid = newDoc.evaluate(''//input[@name="SID"]'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().value;
+		var post2 = ''product=WOS&product_sid='' + nid + ''&plugin=&product_st_thomas=http://esti.isiknowledge.com:8360/esti/xrpc&export_ref.x=0&export_ref.y=0'';
+		var post = ''action=go&mode=quickOutput&product=WOS&SID=2FdJf1h%40dmoO2l2adCP&format=ref&fields=Bib&mark_id=WOS&count_new_items_marked=0&selectedIds='' + sid + ''&qo_fields=bib&endnote.x=95&endnote.y=12&save_options=default'';
+		Zotero.Utilities.HTTP.doPost(''http://apps.isiknowledge.com/OutboundService.do'', post, function() {
+			Zotero.Utilities.HTTP.doPost(''http://pcs.isiknowledge.com/uml/uml_view.cgi'', post2, function(text) {
+				var lines = text.split("\n");
+				Zotero.debug(lines);
+				var field = " ";
+				var content = " ";
+				if (field) {
+					Zotero.debug("field");
+				}
+				var item = new Zotero.Item("journalArticle");
+				item.url = url;
+				var authors;
+				var fieldRe = /^[A-Z0-9]{2}(?: |$)/;
+				
+				for each(var line in lines) {
+					if(line.match(fieldRe)) {
+						field = line.match(fieldRe)[0].substr(0,2);
+						content = line.substr(3);
+						if (field == "AF") {
+							var author = content.split(",");
+							item.creators.push({firstName:author[1], lastName:author[0], creatorType:"author"});
+						} else if (field == "TI") {
+							item.title = content;
+						} else if (field == "SO") {
+							item.publicationTitle = content;
+						} else if (field == "SN") {
+							item.ISSN = content;
+						} else if (field == "PD" || field == "PY") {
+							if (item.date) {
+								item.date += " " + content;
+							} else {
+								item.date = content;
+							}
+						} else if (field == "VL") {
+							item.volume = content;
+						} else if (field == "IS") {
+							item.issue = content;
+						} else if (field == "BP") {
+							item.pages = content;
+						} else if (field == "EP") {
+							item.pages += "-" + content;
+						}
+					} else {
+						content = Zotero.Utilities.trimInternal(line);
+						if (field == "AF") {
+							var author = content.split(",");
+							item.creators.push({firstName:author[1], lastName:author[0], creatorType:"author"});
+						} else if (field == "TI") {
+							item.title += " " + content;
+						}
+					}
+				}
+				Zotero.debug(item);
+				item.complete();
+			});
+		});
+	}, function() {Zotero.done;});
 	
-	Zotero.wait();
 }');
 
 REPLACE INTO translators VALUES ('84564450-d633-4de2-bbcc-451ea580f0d6', '1.0.0b3.r1', '', '2007-03-28 20:00:00', '1', '100', '4', 'Gale Literature Resource Center', 'Simon Kornblith', '^https?://[^/]+/servlet/LitRC?(?:|.*&)srchtp=(?:adv)?mla(?:&|$)', 
