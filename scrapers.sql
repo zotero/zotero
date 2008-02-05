@@ -12576,7 +12576,7 @@ REPLACE INTO translators VALUES ('594ebe3c-90a0-4830-83bc-9502825a6810', '1.0.0b
 		var titles = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
 		var next_title = titles.iterateNext();
 		while (next_title) {
-			var id = doc.evaluate(''.//@onclick'', next_title, null, XPathResult.ANY_TYPE, null).iterateNext().value.match(/\?([^'']+)\'/)[1];
+			var id = doc.evaluate(''.//@onclick'', next_title, null, XPathResult.ANY_TYPE, null).iterateNext().value.match(/\?([^'']+)''/)[1];
 			items[id] = next_title.textContent;
 			next_title = titles.iterateNext();
 		}
@@ -12653,7 +12653,6 @@ REPLACE INTO translators VALUES ('594ebe3c-90a0-4830-83bc-9502825a6810', '1.0.0b
 			});
 		});
 	}, function() {Zotero.done;});
-	
 }');
 
 REPLACE INTO translators VALUES ('84564450-d633-4de2-bbcc-451ea580f0d6', '1.0.0b3.r1', '', '2007-03-28 20:00:00', '1', '100', '4', 'Gale Literature Resource Center', 'Simon Kornblith', '^https?://[^/]+/servlet/LitRC?(?:|.*&)srchtp=(?:adv)?mla(?:&|$)', 
