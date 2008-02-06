@@ -10754,7 +10754,7 @@ REPLACE INTO translators VALUES ('a07bb62a-4d2d-4d43-ba08-d9679a0122f8', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('fa396dd4-7d04-4f99-95e1-93d6f355441d', '1.0.0b3.r1', '', '2006-12-11 18:37:00', 1, 100, 4, 'CiteSeer', 'Simon Kornblith', '^http://(?:citeseer\.ist\.psu\.edu/|citeseer\.csail\.mit\.edu/|citeseer\.ifi\.unizh\.ch/|citeseer\.comp\.nus\.edu\.sg/)', 
+REPLACE INTO translators VALUES ('fa396dd4-7d04-4f99-95e1-93d6f355441d', '1.0.0b3.r1', '', '2008-02-06 21:00:00', 1, 100, 4, 'CiteSeer', 'Simon Kornblith', '^http://(?:citeseer\.ist\.psu\.edu/|citeseer\.csail\.mit\.edu/|citeseer\.ifi\.unizh\.ch/|citeseer\.comp\.nus\.edu\.sg/)', 
 'function detectWeb(doc, url) {
 	var searchRe = /http:\/\/[^\/]+\/ci?s/;
 	if(searchRe.test(url)) {
@@ -10770,7 +10770,7 @@ REPLACE INTO translators VALUES ('fa396dd4-7d04-4f99-95e1-93d6f355441d', '1.0.0b
 			return "journalArticle";
 		}
 	}
-}',
+}', 
 'function scrape(doc) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -10785,17 +10785,24 @@ REPLACE INTO translators VALUES ('fa396dd4-7d04-4f99-95e1-93d6f355441d', '1.0.0b
 	
 	var acceptableTypes = ["PDF", "PS", "PS.gz"];
 	var mimeTypes = ["application/pdf", "application/postscript", "application/gzip"];
-	while(elmt = results.iterateNext()) {
+	var resultsArray = [];
+	while (elmt = results.iterateNext()) {
+		resultsArray.push(elmt);
+	}
+	resultsArray = resultsArray.filter(function (element, index, array) {
+		return (acceptableTypes.indexOf(element.textContent.toString()) != -1);
+	});
+	resultsArray = resultsArray.sort(function (a,b) {
+		return (acceptableTypes.indexOf(a.textContent.toString()) -
+			acceptableTypes.indexOf(b.textContent.toString()));
+	});
+	if (resultsArray.length > 0) {
+		var elmt = resultsArray[0];
 		var kind = elmt.textContent.toString();
 		var index = acceptableTypes.indexOf(kind);
-		if(index != -1) {
-			var attachment = {url:elmt.href, mimeType:mimeTypes[index],
-			                  title:"CiteSeer Full Text "+kind};
-			attachments.push(attachment);
-			
-			// only get one of thse files
-			break;
-		}
+	       	var attachment = {url:elmt.href, mimeType:mimeTypes[index],
+			       	  title:"CiteSeer Full Text "+kind};
+		attachments.push(attachment);
 	}
 	
 	var bibtex = doc.evaluate(''/html/body/span[@class="m"]/pre/text()'', doc, nsResolver,
