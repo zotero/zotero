@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-06 18:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-06 20:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1400,7 +1400,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('7987b420-e8cb-4bea-8ef7-61c2377cd686', '1.0.0b4.r1', '', '2007-06-27 02:00:00', '0', '100', '4', 'NASA ADS', 'Asa Kusuma and Ramesh Srigiriraju', '^http://adsabs\.harvard\.edu/(?:cgi-bin|abs)/', 
+REPLACE INTO translators VALUES ('7987b420-e8cb-4bea-8ef7-61c2377cd686', '1.0.0b4.r1', '', '2008-02-06 20:00:00', '0', '100', '4', 'NASA ADS', 'Asa Kusuma and Ramesh Srigiriraju', 'http://(ukads|cdsads|ads|adsabs|esoads|adswww|www.ads)\.(inasan|iucaa.ernet|nottingham.ac|harvard|eso|u-strasbg|nao.ac|astro.puc|bao.ac|on|kasi.re|grangenet|lipi.go|mao.kiev)\.(edu|org|net|fr|jp|cl|id|uk|cn|ua|in|ru|br|kr)/(?:cgi-bin|abs)/', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -1416,8 +1416,8 @@ REPLACE INTO translators VALUES ('7987b420-e8cb-4bea-8ef7-61c2377cd686', '1.0.0b
 		return "journalArticle";
 	}
 }', 
-'function parseRIS(bibcodes){
-	var getURL = "http://adsabs.harvard.edu/cgi-bin/nph-bib_query?"
+'function parseRIS(bibcodes, hostname){
+	var getURL = "http://" + hostname + "/cgi-bin/nph-bib_query?"
 		+ bibcodes + "data_type=REFMAN&nocookieset=1";
 	Zotero.Utilities.HTTP.doGet(getURL, function(text){	
 		// load translator for RIS
@@ -1439,7 +1439,7 @@ function doWeb(doc, url) {
 	var singXpath = ''//input[@name="bibcode"][@type="hidden"]'';
 	var multXpath = ''//input[@name="bibcode"][@type="checkbox"]'';
 	var titleXpath = ''//table/tbody/tr/td[4]''; //will find scores and titles
-
+	var hostname = doc.location.host
 	var bibElmts = doc.evaluate(multXpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
 	var titleElmts = doc.evaluate(titleXpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
 	var titleElmt;
@@ -1453,7 +1453,6 @@ function doWeb(doc, url) {
 			titleElmt = titleElmts.iterateNext(); //iterate a second time to avoid score
 			items[bibElmt.value] = Zotero.Utilities.cleanString(titleElmt.textContent);
 		} while((bibElmt = bibElmts.iterateNext()) && (titleElmt = titleElmts.iterateNext()));
-
 		items = Zotero.selectItems(items);
 		if(!items) return true;
 
@@ -1461,12 +1460,12 @@ function doWeb(doc, url) {
 		for(var bibcode in items) {
 			bibcodes = bibcodes + "bibcode="+encodeURIComponent(bibcode) + "&";
 		}
-		parseRIS(bibcodes);		
+		parseRIS(bibcodes, hostname);		
 				
 	} else if (bibElmt = doc.evaluate(singXpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
 		var bibcode = bibElmt.value;
 		var bibcodes = "bibcode="+encodeURIComponent(bibcode) + "&";
-		parseRIS(bibcodes);
+		parseRIS(bibcodes, hostname);
 	}
 }');
 
