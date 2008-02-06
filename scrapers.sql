@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-06 01:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-06 18:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -11093,7 +11093,7 @@ REPLACE INTO translators VALUES ('fe728bc9-595a-4f03-98fc-766f1d8d0936', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('b6d0a7a-d076-48ae-b2f0-b6de28b194e', '1.0.0b3.r1', '', '2007-04-16 17:00:00', '1', '100', '4', 'ScienceDirect', 'Simon Kornblith', '^https?://www\.sciencedirect\.com[^/]*/science\?(?:.+\&|)_ob=(?:ArticleURL|ArticleListURL|PublicationURL)', 
+REPLACE INTO translators VALUES ('b6d0a7a-d076-48ae-b2f0-b6de28b194e', '1.0.0b3.r1', '', '2008-02-06 18:00:00', '1', '100', '4', 'ScienceDirect', 'Simon Kornblith and Michael Berkowitz', 'https?://www\.sciencedirect\.com[^/]*/science\?(?:.+\&|)_ob=(?:ArticleURL|ArticleListURL|PublicationURL)', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -11209,7 +11209,6 @@ function doWeb(doc, url) {
 			var alid = doc.evaluate(''//input[@name="_ArticleListID"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().value;
 			var getURL = "http://www.sciencedirect.com/science?_ob=ArticleListURL&_method=tag&refSource=search&_st="+st+"&count="+count+"&_chunk="+chunk+"&NEXT_LIST=1&view=c&md5="+md5+"&_ArticleListID="+alid+"&export.x=21&export.y=6&sort=d"+itemList;
 		}
-
 		Zotero.Utilities.HTTP.doGet(getURL, function(text) {
 			var md5 = text.match(/<input type=hidden name=md5 value=([^>]+)>/);
 			var acct = url.match(/_acct=([^&]+)/);
@@ -11224,7 +11223,9 @@ function doWeb(doc, url) {
 		});
 	} else {
 		var get = doc.evaluate(''//a[img[contains(@alt, "Export citation")]]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
-
+		var idstring = doc.evaluate(''/html/body/table/tbody/tr/td[1]/a'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
+		var acct = idstring.match(/_acct=([^&]+)/);
+		var userid = idstring.match(/_userid=([^&]+)/);
 		var PDFs = [];
 
 		var link = doc.evaluate(''//a[substring(text(), 1, 3) = "PDF"]'',
@@ -11232,11 +11233,8 @@ function doWeb(doc, url) {
 		if(link) {
 			var PDFs = [link.href];
 		}
-
 		Zotero.Utilities.HTTP.doGet(get, function(text) {
 			var md5 = text.match(/<input type=hidden name=md5 value=([^>]+)>/);
-			var acct = url.match(/_acct=([^&]+)/);
-			var userid = url.match(/_userid=([^&]+)/);
 			var alid = url.match(/_alid=([0-9]+)/);
 			var udi = url.match(/_udi=([^&]+)/);
 			var uoikey = text.match(/<input type=hidden name=_uoikey value=([^>]+)>/);
@@ -11245,8 +11243,7 @@ function doWeb(doc, url) {
 			} else {
 				var docIdentifier = "_uoikey="+uoikey[1];
 			}
-
-			var post = "_ob=DownloadURL&_method=finish&_acct="+acct[1]+"&_userid="+userid[1]+"&_docType=FLA&"+docIdentifier+"&md5="+md5[1]+"&JAVASCRIPT_ON=Y&format=cite-abs&citation-type=RIS&x=26&y=17";
+			var post = "_ob=DownloadURL&_method=finish&_acct=" + acct[1] + "&_userid=" + userid[1] + "&_docType=FLA&"+docIdentifier+"&md5="+md5[1]+"&JAVASCRIPT_ON=Y&format=cite-abs&citation-type=RIS&Export=Export&x=26&y=17";
 			Zotero.Utilities.HTTP.doPost("http://www.sciencedirect.com/science", post, function(text) { handleRIS(text, PDFs) });
 		});
 	}
