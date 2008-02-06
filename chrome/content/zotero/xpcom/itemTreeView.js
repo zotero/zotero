@@ -1516,6 +1516,12 @@ Zotero.ItemTreeView.fileDragDataProvider.prototype = {
 			// Make sure files exist
 			var notFoundNames = [];
 			for (var i=0; i<draggedItems.length; i++) {
+				// TODO create URL?
+				if (!draggedItems[i].isAttachment() ||
+						draggedItems[i].getAttachmentLinkMode() == Zotero.Attachments.LINK_MODE_LINKED_URL) {
+					continue;
+				}
+				
 				if (draggedItems[i].getFile()) {
 					items.push(draggedItems[i]);
 				}
@@ -1540,12 +1546,6 @@ Zotero.ItemTreeView.fileDragDataProvider.prototype = {
 			var existingFileNames = [];
 			
 			for (var i=0; i<items.length; i++) {
-				// TODO create URL?
-				if (!items[i].isAttachment() ||
-						items[i].getAttachmentLinkMode() == Zotero.Attachments.LINK_MODE_LINKED_URL) {
-					continue;
-				}
-				
 				var file = items[i].getFile();
 				
 				// Determine if we need to copy multiple files for this item
