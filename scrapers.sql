@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-05 23:55:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-06 01:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -12560,7 +12560,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('594ebe3c-90a0-4830-83bc-9502825a6810', '1.0.0b4.r5', '', '2008-02-05 23:55:00', '0', '100', '4', 'ISI Web of Knowledge', 'Michael Berkowitz', 'http://[^/]*isiknowledge.com[^/]*/', 
+REPLACE INTO translators VALUES ('594ebe3c-90a0-4830-83bc-9502825a6810', '1.0.0b4.r5', '', '2008-02-06 01:00:00', '0', '100', '4', 'ISI Web of Knowledge', 'Michael Berkowitz', 'http://[^/]*isiknowledge.com[^/]*/', 
 'function detectWeb(doc, url) {
 	if (doc.title.indexOf("Web of Science Results") != -1) {
 		return "multiple";
@@ -12595,16 +12595,12 @@ REPLACE INTO translators VALUES ('594ebe3c-90a0-4830-83bc-9502825a6810', '1.0.0b
 		var sid = newDoc.evaluate(''//input[@name="selectedIds"]'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().value;
 		var nid = newDoc.evaluate(''//input[@name="SID"]'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().value;
 		var post2 = ''product=WOS&product_sid='' + nid + ''&plugin=&product_st_thomas=http://esti.isiknowledge.com:8360/esti/xrpc&export_ref.x=0&export_ref.y=0'';
-		var post = ''action=go&mode=quickOutput&product=WOS&SID=2FdJf1h%40dmoO2l2adCP&format=ref&fields=Bib&mark_id=WOS&count_new_items_marked=0&selectedIds='' + sid + ''&qo_fields=bib&endnote.x=95&endnote.y=12&save_options=default'';
+		var post = ''action=go&mode=quickOutput&product=WOS&SID='' + nid + ''&format=ref&fields=Bib&mark_id=WOS&count_new_items_marked=0&selectedIds='' + sid + ''&qo_fields=bib&endnote.x=95&endnote.y=12&save_options=default'';
 		Zotero.Utilities.HTTP.doPost(''http://apps.isiknowledge.com/OutboundService.do'', post, function() {
 			Zotero.Utilities.HTTP.doPost(''http://pcs.isiknowledge.com/uml/uml_view.cgi'', post2, function(text) {
 				var lines = text.split("\n");
-				Zotero.debug(lines);
 				var field = " ";
 				var content = " ";
-				if (field) {
-					Zotero.debug("field");
-				}
 				var item = new Zotero.Item("journalArticle");
 				item.url = url;
 				var authors;
@@ -12648,7 +12644,6 @@ REPLACE INTO translators VALUES ('594ebe3c-90a0-4830-83bc-9502825a6810', '1.0.0b
 						}
 					}
 				}
-				Zotero.debug(item);
 				item.complete();
 			});
 		});
