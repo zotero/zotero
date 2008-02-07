@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-07 03:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-07 16:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -12388,7 +12388,7 @@ REPLACE INTO translators VALUES ('850f4c5f-71fb-4669-b7da-7fb7a95500ef', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('82174f4f-8c13-403b-99b2-affc7bc7769b', '1.0.0b3.r1', '', '2007-03-28 00:45:00', '1', '100', '4', 'Cambridge Scientific Abstracts', 'Simon Kornblith', 'https?://[^/]+/ids70/(?:results.php|view_record.php)', 
+REPLACE INTO translators VALUES ('82174f4f-8c13-403b-99b2-affc7bc7769b', '1.0.0b3.r1', '', '2008-02-07 16:30:00', '1', '100', '4', 'Cambridge Scientific Abstracts', 'Simon Kornblith and Michael Berkowitz', 'https?://[^/]+/ids70/(?:results.php|view_record.php)', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -12471,36 +12471,18 @@ REPLACE INTO translators VALUES ('82174f4f-8c13-403b-99b2-affc7bc7769b', '1.0.0b
 			}
 		} else if(heading == "source") {
 			if(itemType == "journalArticle") {
-				var parts = content.split(",");
+				var parts = content.split(/(,|;)/);
 				newItem.publicationTitle = parts.shift();
-				
 				var last = parts.pop();
 				var m = last.match(/([0-9]+)\(([0-9]+)\):([0-9]+)$/);
 				if(m) {
 					newItem.volume = m[1];
 					newItem.issue = m[2];
 					newItem.pages = m[3];
-				}
-				
-				var volMatch = /vol\.? ([0-9]+)/i;
-				var noMatch = /no\.? ([0-9]+)/i;
-				var ppMatch = /pp\.? ([\-0-9]+)/i;
-				
-				for each(var part in parts) {
-					var m = volMatch.exec(part);
-					if(m) {
-						newItem.volume = m[1];
-					} else {
-						var m = noMatch.exec(part);
-						if(m) {
-							newItem.issue = m[1];
-						} else {
-							var m = ppMatch.exec(part);
-							if(m) {
-								newItem.pages = m[1];
-							}
-						}
-					}
+				} else {
+					newItem.volume = last.match(/v(\d+)/)[1];
+					newItem.issue = last.match(/n(\d+)/)[1];
+					newItem.pages = last.match(/p([-\d]+)/)[1];
 				}
 			} else if(itemType == "book") {
 				var m = content.match(/^([^:]+): ([^,0-9]+)/);
