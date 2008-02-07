@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-06 21:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-07 03:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -7591,7 +7591,7 @@ REPLACE INTO translators VALUES ('5e3e6245-83da-4f55-a39b-b712df54a935', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('cf87eca8-041d-b954-795a-2d86348999d5', '1.0.0b3.r1', '', '2006-12-15 15:11:00', 1, 100, 4, 'Library Catalog (Aleph)', 'Simon Kornblith', '^https?://[^/]+/F(?:/[A-Z0-9\-]+(?:\?.*)?$|\?func=find|\?func=scan)',
+REPLACE INTO translators VALUES ('cf87eca8-041d-b954-795a-2d86348999d5', '1.0.0b3.r1', '', '2008-02-07 03:00:00', 1, 100, 4, 'Library Catalog (Aleph)', 'Simon Kornblith', '^https?://[^/]+/F(?:/[A-Z0-9\-]+(?:\?.*)?$|\?func=find|\?func=scan)',
 'function detectWeb(doc, url) {
 	var singleRe = new RegExp("^https?://[^/]+/F/[A-Z0-9\-]+\?.*(?:func=full-set-set.*\&format=[0-9]{3}|func=direct)");
 	
@@ -7662,23 +7662,27 @@ REPLACE INTO translators VALUES ('cf87eca8-041d-b954-795a-2d86348999d5', '1.0.0b
 		var record = new marc.record();
 		while(elmt = elmts.iterateNext()) {
 			var field = Zotero.Utilities.superCleanString(doc.evaluate(''./TD[1]/text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue);
-			var value = doc.evaluate(''./TD[2]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 			
-			if(field == "LDR") {
-				record.leader = value;
-			} else if(field != "FMT") {
-				value = value.replace(/\|([a-z]) /g, marc.subfieldDelimiter+"$1");
+			if(field) {
+			
+				var value = doc.evaluate(''./TD[2]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+			
+				if(field == "LDR") {
+					record.leader = value;
+				} else if(field != "FMT") {
+					value = value.replace(/\|([a-z]) /g, marc.subfieldDelimiter+"$1");
 				
-				var code = field.substring(0, 3);
-				var ind = "";
-				if(field.length > 3) {
-					ind = field[3];
-					if(field.length > 4) {
-						ind += field[4];
+					var code = field.substring(0, 3);
+					var ind = "";
+					if(field.length > 3) {
+						ind = field[3];
+						if(field.length > 4) {
+							ind += field[4];
+						}
 					}
-				}
 				
-				record.addField(code, ind, value);
+					record.addField(code, ind, value);
+				}
 			}
 		}
 		
