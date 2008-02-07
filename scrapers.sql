@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-07 16:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-07 17:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -577,7 +577,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('838d8849-4ffb-9f44-3d0d-aa8a0a079afe', '1.0.0b3.r1', '', '2007-12-12 05:00:00', 1, 100, 4, 'OCLC WorldCat FirstSearch', 'Simon Kornblith', '^https?://(?:new)?firstsearch\.oclc\.org[^/]*/WebZ/',
+REPLACE INTO translators VALUES ('838d8849-4ffb-9f44-3d0d-aa8a0a079afe', '1.0.0b3.r1', '', '2008-02-07 17:00:00', 1, 100, 4, 'OCLC WorldCat FirstSearch', 'Simon Kornblith', 'https?://[^/]*firstsearch\.oclc\.org[^/]*/WebZ/',
 'function detectWeb(doc, url) {
 	var detailRe = /FirstSearch: [\w ]+ Detailed Record/;
 	var searchRe = /FirstSearch: [\w ]+ List of Records/;
@@ -11550,7 +11550,7 @@ REPLACE INTO translators VALUES ('2c310a37-a4dd-48d2-82c9-bd29c53c1c76', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('cde4428-5434-437f-9cd9-2281d14dbf9', '1.0.0b3.r1', '', '2008-02-04 22:30:00', '1', '100', '4', 'Ovid', 'Simon Kornblith and Michael Berkowitz', '/(gw2|spa|spb)/ovidweb\.cgi', 
+REPLACE INTO translators VALUES ('cde4428-5434-437f-9cd9-2281d14dbf9', '1.0.0b3.r1', '', '2008-02-07 17:00:00', '1', '100', '4', 'Ovid', 'Simon Kornblith and Michael Berkowitz', '/(gw2|spa|spb)/ovidweb\.cgi', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -11668,18 +11668,23 @@ function doWeb(doc, url) {
 						newItem.creators.push({lastName:names[0], isInstitution:true, creatorType:"author"});
 					}
 				} else if(fieldCode == "SO") {
-					var m = fieldContent.split(".");
-					newItem.publicationTitle = Zotero.Utilities.cleanString(m[0]);
-					if (m[1].match(/\d+\(\d+\)/)) {
-						var n = m[1].match(/(\d+)\((\d+)\)/);
-						Zotero.debug(n);
-						newItem.volume = n[1];
-						newItem.issue = n[2];
-					} else {
-						newItem.volume = m[1].match(/\d+/)[0];
+					if (fieldContent.match(/\s+\w+\s+\d{4}/)) {
+						newItem.date = fieldContent.match(/\w+\s+\d{4}/)[0];
+					} else if (fieldContent.match(/\d{4}/)) {
+						newItem.date = fieldContent.match(/\d{4}/)[0];
 					}
-					newItem.date = senCase(Zotero.Utilities.cleanString(m[2]));
-					newItem.pages = Zotero.Utilities.cleanString(m[3]);
+					if (fieldContent.match(/(\d+)\((\d+)\)/)) {
+						var voliss = fieldContent.match(/(\d+)\((\d+)\)/);
+						newItem.volume = voliss[1];
+						newItem.issue = voliss[2];
+					}
+					if (fieldContent.match(/\d+\-\d+/)[0])
+						newItem.pages = fieldContent.match(/\d+\-\d+/)[0];
+					if (fieldContent.match(/[J|j]ournal/)) {
+						newItem.publicationTitle = fieldContent.match(/[J|j]ournal[-\s\w]+/)[0];
+					} else {
+						newItem.publicationTitle = Zotero.Utilities.trimInternal(fieldContent.split(/(\.|;)/)[0]);
+					}
 				} else if(fieldCode == "SB") {
 					newItem.tags.push(Zotero.Utilities.superCleanString(fieldContent));
 				} else if(fieldCode == "KW") {
