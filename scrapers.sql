@@ -14580,7 +14580,7 @@ function doImport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('14763d24-8ba0-45df-8f52-b8d1108e7ac9', '1.0.0b4.r1', '', '2008-01-10 22:00:00', 1, 25, 2, 'Zotero RDF', 'Simon Kornblith', 'rdf',
+REPLACE INTO translators VALUES ('14763d24-8ba0-45df-8f52-b8d1108e7ac9', '1.0.0b4.r1', '', '2008-02-08 05:24:30', 1, 25, 2, 'Zotero RDF', 'Simon Kornblith', 'rdf',
 'Zotero.configure("getCollections", true);
 Zotero.configure("dataMode", "rdf");
 Zotero.addOption("exportNotes", true);
@@ -14597,8 +14597,6 @@ var n = {
 	link:"http://purl.org/rss/1.0/modules/link/",
 	z:"http://www.zotero.org/namespaces/export#"
 };
-
-var container, containerElement;
 
 function generateSeeAlso(resource, seeAlso) {
 	for(var i in seeAlso) {
@@ -14642,8 +14640,8 @@ function generateCollection(collection) {
 }
 
 function generateItem(item, zoteroType, resource) {
-	container = null;
-	containerElement = null;
+	var container = null;
+	var containerElement = null;
 	
 	/** CORE FIELDS **/
 	
@@ -14746,7 +14744,7 @@ function generateItem(item, zoteroType, resource) {
 	if(container) {
 		if(item.ISSN && !Zotero.RDF.getArcsIn("urn:issn:"+item.ISSN)) {
 			// use ISSN as container URI if no other item is
-			containerElement = "urn:issn:"+item.ISSN
+			containerElement = "urn:issn:"+item.ISSN;
 		} else {
 			containerElement = Zotero.RDF.newResource();
 		}
