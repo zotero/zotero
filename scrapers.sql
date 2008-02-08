@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-08 19:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-08 19:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -12082,7 +12082,7 @@ REPLACE INTO translators VALUES ('6614a99-479a-4524-8e30-686e4d66663e', '1.0.0b3
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('92d4ed84-8d0-4d3c-941f-d4b9124cfbb', '1.0.0b3.r1', '', '2008-02-08 19:00:00', '1', '100', '4', 'IEEE Xplore', 'Simon Kornblith and Michael Berkowitz', 'https?://[^/]*ieeexplore.ieee.org[^/]*/(?:[^\?]+\?(?:|.*&)arnumber=[0-9]+|search/(?:searchresult.jsp|selected.jsp))', 
+REPLACE INTO translators VALUES ('92d4ed84-8d0-4d3c-941f-d4b9124cfbb', '1.0.0b3.r1', '', '2008-02-08 19:30:00', '1', '100', '4', 'IEEE Xplore', 'Simon Kornblith and Michael Berkowitz', 'https?://[^/]*ieeexplore.ieee.org[^/]*/(?:[^\?]+\?(?:|.*&)arnumber=[0-9]+|search/(?:searchresult.jsp|selected.jsp))', 
 'function detectWeb(doc, url) {
 	var articleRe = /[?&]arnumber=([0-9]+)/;
 	var m = articleRe.exec(url);
