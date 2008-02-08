@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-08 19:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-08 20:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -772,7 +772,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('a2363670-7040-4cb9-8c48-6b96584e92ee', '1.0.0b4r1', '', '2007-09-13 12:00:00', '0', '100', '4', 'Florida University Libraries (Endeca 1)', 'Sean Takats', '^http://[^/]+/[^\.]+.jsp\?Nt.=', 
+REPLACE INTO translators VALUES ('a2363670-7040-4cb9-8c48-6b96584e92ee', '1.0.0b4r1', '', '2008-02-08 20:00:00', '0', '100', '4', 'Florida University Libraries (Endeca 1)', 'Sean Takats', '^http://[^/]+/[^\.]+.jsp\?[^/]*(?:Ntt=|NttWRD=)', 
 'function detectWeb(doc, url){
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
