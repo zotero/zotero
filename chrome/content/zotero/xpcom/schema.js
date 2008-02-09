@@ -916,7 +916,7 @@ Zotero.Schema = new function(){
 							var values = Zotero.DB.columnQuery("SELECT DISTINCT value FROM itemData");
 							if (values) {
 								for (var j=0; j<values.length; j++) {
-									var valueID = Zotero.getRandomID('itemDataValues', 'valueID', 2097152); // Stored in 3 bytes
+									var valueID = Zotero.ID.get('itemDataValues');
 									Zotero.DB.query("INSERT INTO itemDataValues VALUES (?,?)", [valueID, values[j]]);
 								}
 							}
@@ -935,7 +935,7 @@ Zotero.Schema = new function(){
 						if (rows) {
 							for (var j=0; j<rows.length; j++) {
 								for (var j=0; j<values.length; j++) {
-									var valueID = Zotero.getRandomID('itemDataValues', 'valueID', 2097152); // Stored in 3 bytes
+									var valueID = Zotero.ID.get('itemDataValues');
 									Zotero.DB.query("INSERT INTO itemDataValues VALUES (?,?)", [valueID, values[j]]);
 									Zotero.DB.query("UPDATE itemData SET valueID=? WHERE itemID=? AND fieldID=?", [valueID, rows[j]['itemID'], rows[j]['fieldID']]);
 								}
@@ -1021,14 +1021,14 @@ Zotero.Schema = new function(){
 				
 				if (i==22) {
 					if (Zotero.DB.valueQuery("SELECT COUNT(*) FROM items WHERE itemID=0")) {
-						var itemID = Zotero.getRandomID('items', 'itemID');
+						var itemID = Zotero.ID.get('items', true);
 						Zotero.DB.query("UPDATE items SET itemID=? WHERE itemID=?", [itemID, 0]);
 						Zotero.DB.query("UPDATE itemData SET itemID=? WHERE itemID=?", [itemID, 0]);
 						Zotero.DB.query("UPDATE itemNotes SET itemID=? WHERE itemID=?", [itemID, 0]);
 						Zotero.DB.query("UPDATE itemAttachments SET itemID=? WHERE itemID=?", [itemID, 0]);
 					}
 					if (Zotero.DB.valueQuery("SELECT COUNT(*) FROM collections WHERE collectionID=0")) {
-						var collectionID = Zotero.getRandomID('collections', 'collectionID');
+						var collectionID = Zotero.ID.get('collections');
 						Zotero.DB.query("UPDATE collections SET collectionID=? WHERE collectionID=0", [collectionID]);
 						Zotero.DB.query("UPDATE collectionItems SET collectionID=? WHERE collectionID=0", [collectionID]);
 					}
@@ -1051,7 +1051,7 @@ Zotero.Schema = new function(){
 					var values = Zotero.DB.columnQuery("SELECT DISTINCT value FROM itemData");
 					if (values) {
 						for (var j=0; j<values.length; j++) {
-							var valueID = Zotero.getRandomID('itemDataValues', 'valueID', 2097152); // Stored in 3 bytes
+							var valueID = Zotero.ID.get('itemDataValues');
 							Zotero.DB.query("INSERT INTO itemDataValues VALUES (?,?)", [valueID, values[j]]);
 						}
 					}
@@ -1071,7 +1071,7 @@ Zotero.Schema = new function(){
 								var value = Zotero.Date.strToMultipart(rows[j]['value']);
 								var valueID = Zotero.DB.valueQuery("SELECT valueID FROM itemDataValues WHERE value=?", rows[j]['value']);
 								if (!valueID) {
-									var valueID = Zotero.getRandomID('itemDataValues', 'valueID', 2097152);
+									var valueID = Zotero.ID.get('itemDataValues');
 									Zotero.DB.query("INSERT INTO itemDataValues VALUES (?,?)", [valueID, value]);
 								}
 								Zotero.DB.query("UPDATE itemData SET valueID=? WHERE itemID=? AND fieldID=?", [valueID, rows[j]['itemID'], rows[j]['fieldID']]);
@@ -1145,7 +1145,7 @@ Zotero.Schema = new function(){
 				if (i==33) {
 					var rows = Zotero.DB.query("SELECT * FROM itemNotes WHERE itemID NOT IN (SELECT itemID FROM items)");
 					if (rows) {
-						var colID = Zotero.getRandomID('collections', 'collectionID');
+						var colID = Zotero.ID.get('collections');
 						Zotero.DB.query("INSERT INTO collections VALUES (?,?,?)", [colID, "[Recovered Notes]", null]);
 						
 						for (var j=0; j<rows.length; j++) {
@@ -1164,7 +1164,7 @@ Zotero.Schema = new function(){
 								}
 								var exists = Zotero.DB.valueQuery("SELECT COUNT(*) FROM itemNotes WHERE itemID=?", rows[j].note);
 								if (exists) {
-									var noteItemID = Zotero.getRandomID('items', 'itemID');
+									var noteItemID = Zotero.ID.get('items', true);
 								}
 								else {
 									var noteItemID = rows[j].note;
