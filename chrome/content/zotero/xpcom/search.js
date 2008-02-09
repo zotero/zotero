@@ -134,8 +134,7 @@ Zotero.Search.prototype.save = function(fixGaps) {
 	else {
 		var isNew = true;
 		
-		this._savedSearchID
-			= Zotero.getRandomID('savedSearches', 'savedSearchID');
+		this._savedSearchID = Zotero.ID.get('savedSearches');
 		
 		var sql = "INSERT INTO savedSearches (savedSearchID, savedSearchName) "
 			+ "VALUES (?,?)";
