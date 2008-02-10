@@ -333,7 +333,7 @@ Zotero.Utilities.prototype.getLocalizedCreatorType = function(type) {
  * Follows capitalizeTitles pref, unless |force| is true
  */
 Zotero.Utilities.prototype.capitalizeTitle = function(string, force) {
-	string = this.cleanString(string);
+	string = this.trimInternal(string);
 	if(Zotero.Prefs.get('capitalizeTitles') || force) {
 		// fix colons
 		string = string.replace(" : ", ": ", "g");
