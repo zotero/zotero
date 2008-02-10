@@ -424,7 +424,7 @@ Zotero.Utilities.Ingester.prototype.getItemArray = function(doc, inHere, urlRe, 
 			if(!urlRe || urlRegexp.test(links[i].href)) {
 				var text = links[i].textContent;
 				if(text) {
-					text = this.cleanString(text);
+					text = this.trimInternal(text);
 					if(!rejectRe || !rejectRegexp.test(text)) {
 						if(availableItems[links[i].href]) {
 							if(text != availableItems[links[i].href]) {

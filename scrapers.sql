@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-08 20:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-10 23:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -12567,7 +12567,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('e78d20f7-488-4023-831-dfe39679f3f', '1.0.0b3.r1', '', '2008-01-10 09:45:00', '1', '100', '4', 'ACM', 'Simon Kornblith', 'https?://[^/]*portal\.acm\.org[^/]*/(?:results\.cfm|citation\.cfm)', 
+REPLACE INTO translators VALUES ('e78d20f7-488-4023-831-dfe39679f3f', '1.0.0b3.r1', '', '2008-02-10 23:00:00', '1', '100', '4', 'ACM', 'Simon Kornblith', 'https?://[^/]*portal\.acm\.org[^/]*/(?:results\.cfm|citation\.cfm)', 
 'function detectWeb(doc, url) {
 	if(url.indexOf("/results.cfm") != -1) {
 		var items = Zotero.Utilities.getItemArray(doc, doc, ''^https?://[^/]+/citation.cfm\\?[^#]+$'');
@@ -12640,7 +12640,11 @@ function scrape(doc) {
 		if (m[1]) {
 			var text = m[1];
 		}
-   		
+   		// unescape HTML for extended characters
+		function unescapeHTML(str, p1){
+			return Zotero.Utilities.unescapeHTML("&#"+p1);
+		}
+   		text = text.replace(/\\&\\#([^;]+;)/g, unescapeHTML);  
 		// load Refer translator
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("881f60f2-0802-411a-9228-ce5f47b64c7d");
