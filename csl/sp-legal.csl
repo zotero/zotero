@@ -2,13 +2,13 @@
 <style xmlns="http://purl.org/net/xbiblio/csl" class="note" xml:lang="sp">
   <info>
     <title>Spanish Legal (dev)</title>
-    <id>http://www.zotero.org/styles/sp-legal (dev)</id>
+    <id>http://www.zotero.org/styles/sp-legal</id>
     <link href="http://www.zotero.org/styles/sp-legal (dev)"/>
     <author>
       <name>Pedro Herrera</name>
       <email>pedro.m.herrera@gmail.com</email>
     </author>
-    <category term="legal"/>
+    <category term="humanities"/>
     <category term="generic-base"/>
     <category term="author-date"/>
     <updated>2008-01-14T08:50:29+00:00</updated>
