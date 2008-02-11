@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-11 17:35:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-11 19:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -3025,7 +3025,7 @@ REPLACE INTO translators VALUES ('9575e804-219e-4cd6-813d-9b690cbfc0fc', '1.0.0b
 	}, function() {Zotero.done()});
 }');
 
-REPLACE INTO translators VALUES ('b86bb082-6310-4772-a93c-913eaa3dfa1b', '1.0.0b4.r5', '', '2008-02-11 17:35:00', '0', '100', '4', 'Early English Books Online', 'Michael Berkowitz', 'http://[^/]*eebo.chadwyck.com[^/]*/search', 
+REPLACE INTO translators VALUES ('b86bb082-6310-4772-a93c-913eaa3dfa1b', '1.0.0b4.r5', '', '2008-02-11 19:30:00', '0', '100', '4', 'Early English Books Online', 'Michael Berkowitz', 'http://[^/]*eebo.chadwyck.com[^/]*/search', 
 'function detectWeb(doc, url) {
 	if (doc.title == "Search Results - EEBO") {
 		return "multiple";
