@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-11 01:45:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-11 17:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -354,7 +354,7 @@ function doWeb(doc, url){
 	}
 }');
 
-REPLACE INTO translators VALUES ('0dda3f89-15de-4479-987f-cc13f1ba7999', '1.0.0b4.r1', '', '2007-09-08 12:00:00', '0', '100', '4', 'Ancestry.com US Federal Census', 'Elena Razlogova', '^https?://search.ancestry.com/(.*)usfedcen|1890orgcen|1910uscenindex', 
+REPLACE INTO translators VALUES ('0dda3f89-15de-4479-987f-cc13f1ba7999', '1.0.0b4.r1', '', '2008-02-11 17:00:00', '0', '100', '4', 'Ancestry.com US Federal Census', 'Elena Razlogova', '^https?://search.ancestry.com/(.*)usfedcen|1890orgcen|1910uscenindex', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -478,13 +478,13 @@ function scrape(doc) {
 	var creator = new Array();
 	creator.firstName = firstName;
 	creator.lastName = lastName;
-	creator.creatorType = "contributor";
+	creator.creatorType = "author";
 	newItem.creators.push(creator);
 	
 	//add proper author for citation
 	var creator = new Array();
 	creator.lastName = "United States of America, Bureau of the Census";
-	creator.creatorType = "author";
+	creator.creatorType = "contributor";
 	newItem.creators.push(creator);
 
 	// get scan of the census image
