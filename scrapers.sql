@@ -3043,7 +3043,7 @@ REPLACE INTO translators VALUES ('b86bb082-6310-4772-a93c-913eaa3dfa1b', '1.0.0b
 	if (doc.title == "Search Results - EEBO") {
 		var items = new Object();
 		Zotero.debug("search page");
-		var IDxpath = ''//td[4]/script'';
+		var IDxpath = ''//td[3]/script'';
 		var Titlexpath = ''//td[3]/i'';
 		var new_ids = doc.evaluate(IDxpath, doc, null, XPathResult.ANY_TYPE, null);
 		var new_titles = doc.evaluate(Titlexpath, doc, null, XPathResult.ANY_TYPE, null);
