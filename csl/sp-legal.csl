@@ -1,14 +1,14 @@
-<?xml version="1.0"?>
+﻿<?xml version="1.0"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="note" xml:lang="sp">
   <info>
-    <title>Spanish Legal (dev)</title>
+    <title>Spanish Legal</title>
     <id>http://www.zotero.org/styles/sp-legal</id>
     <link href="http://www.zotero.org/styles/sp-legal"/>
     <author>
       <name>Pedro Herrera based on Romanian Humanities by Nicolae Turcan</name>
       <email>pedro.m.herrera@gmail.com</email>
     </author>
-    <category term="humanities"/>
+    <category term="social_science"/>
     <category term="generic-base"/>
     <category term="author-date"/>
     <updated>2008-01-14T08:50:29+00:00</updated>
