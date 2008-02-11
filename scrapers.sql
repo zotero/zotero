@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-11 22:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-11 23:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -2208,6 +2208,52 @@ function getData(ids){
 		newItem.complete();		
 	}, function(){Zotero.done();});	
 	Zotero.wait();
+}');
+
+REPLACE INTO translators VALUES ('0cc8e259-106e-4793-8c26-6ec8114a9160', '1.0.0b4.r5', '', '2008-02-11 23:00:00', '0', '99', '4', 'SlideShare', 'Michael Berkowitz', 'http://www.slideshare.net/', 
+'function detectWeb(doc, url) {
+	if (url.indexOf("search") != -1) {
+		return "multiple";
+	} else if (doc.evaluate(''//div[@class="slideProfile"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+		return "presentation";
+	}
+}', 
+'function doWeb(doc, url) {
+	var shows = new Array();
+	if (detectWeb(doc, url) == "multiple") {
+		var items = new Object();
+		var links = doc.evaluate(''//div[@class="search_list_box"]/div[@class="text_12"]/a'', doc, null, XPathResult.ANY_TYPE, null);
+		var next_link;
+		while (next_link = links.iterateNext()) {
+			items[next_link.href] = Zotero.Utilities.trimInternal(next_link.textContent);
+		}
+		items = Zotero.selectItems(items);
+		if (!items) {
+			return true;
+		}
+		for (var i in items) {
+			shows.push(i);
+		}
+	} else {
+		shows = [url];
+	}
+	Zotero.debug(shows);
+	Zotero.Utilities.processDocuments(shows, function(newDoc) {
+		var item = new Zotero.Item("presentation");
+		item.title = newDoc.evaluate(''//div[@class="slideProfile"]//h3'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		var creator = newDoc.evaluate(''//div[@class="slideProfile"]//p/a[@class="blue_link_normal"]'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		item.creators.push(Zotero.Utilities.cleanAuthor(creator, "author"));
+		var tags = newDoc.evaluate(''//a[@class="grey_tags"]'', newDoc, null, XPathResult.ANY_TYPE, null);
+		var next_tag;
+		while (next_tag = tags.iterateNext()) {
+			item.tags.push(Zotero.Utilities.trimInternal(next_tag.textContent));
+		}
+		item.url = newDoc.location.href;
+		item.repository = "SlideShare";
+		item.attachments.push({url:newDoc.location.href + "/download", title:"SlideShare Slide Show", mimeType:"application/pdf"});
+		Zotero.debug(item);
+		item.complete();
+	}, function() {Zotero.done;});
 }');
 
 REPLACE INTO translators VALUES ('8b35ab14-f18a-4f69-8472-b2df18c984da', '1.0.0b4.r5', '', '2008-02-01 21:00:00', '0', '100', '4', 'Davidson College Library', 'Michael Berkowitz', 'http://www3.davidson.edu/', 
@@ -13218,7 +13264,7 @@ REPLACE INTO translators VALUES ('a354331-981b-43de-a61-bc26dd1be3a9', '1.0.0b3.
 	});
 }');
 
-REPLACE INTO translators VALUES ('938ebe32-2b2e-4349-a5b3-b3a05d3de627', '1.0.0b3.r1', '', '2008-02-11 22:00:00', '1', '100', '4', 'ACS Publications', 'Sean Takats and Michael Berkowitz', '[^/]*/(?:wls/journals/query/(?:subscriberResults|query)\.html|acs/journals/toc.page|cgi-bin/(?:article|abstract|sample).cgi)', 
+REPLACE INTO translators VALUES ('938ebe32-2b2e-4349-a5b3-b3a05d3de627', '1.0.0b3.r1', '', '2008-02-11 23:00:00', '1', '100', '4', 'ACS Publications', 'Sean Takats and Michael Berkowitz', '[^/]*/(?:wls/journals/query/(?:subscriberResults|query)\.html|acs/journals/toc.page|cgi-bin/(?:article|abstract|sample|asap).cgi)?', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -13278,12 +13324,14 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		// search page
 		var items = new Array();
-		var titles = doc.evaluate(''//form[@name="citationSelect"]//tbody/tr[1]//span[@class="textbold"][1]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
-		if (!titles.iterateNext()) {
+		if (doc.evaluate(''//form[@name="citationSelect"]//tbody/tr[1]//span[@class="textbold"][1]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+			var titles = doc.evaluate(''//form[@name="citationSelect"]//tbody/tr[1]//span[@class="textbold"][1]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		} else if (doc.evaluate(''//form/div[@class="artBox"]/div[@class="artBody"]/div[@class="artTitle"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
 			var titles = doc.evaluate(''//form/div[@class="artBox"]/div[@class="artBody"]/div[@class="artTitle"]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
 		}
-		var jids = doc.evaluate(''//form[@name="citationSelect"]//input[@name="jid"]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
-		if (!jids.iterateNext()) {
+		if (doc.evaluate(''//form[@name="citationSelect"]//input[@name="jid"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+			var jids = doc.evaluate(''//form[@name="citationSelect"]//input[@name="jid"]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		} else if (doc.evaluate(''//div[@id="content"]/form/div[@class="artBox"]/div[@class="artHeadBox"]/div[@class="artHeader"]/input'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
 			var jids = doc.evaluate(''//div[@id="content"]/form/div[@class="artBox"]/div[@class="artHeadBox"]/div[@class="artHeader"]/input'', doc, nsResolver, XPathResult.ANY_TYPE, null);
 		}
 		var links = doc.evaluate(''//form[@name="citationSelect"]//tbody/tr[2]//a[@class="link"]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
@@ -13293,7 +13341,7 @@ function doWeb(doc, url) {
 		var link;
 		while ((title = titles.iterateNext()) && (jid = jids.iterateNext())){
 			id = jid.value
-			items[id] = Zotero.Utilities.cleanString(title.textContent);
+			items[id] = Zotero.Utilities.trimInternal(title.textContent);
 
 			var link = doc.evaluate(''../../..//a[contains(text(), "PDF")]'', title, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 				if(link) {
