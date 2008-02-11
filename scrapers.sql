@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-11 17:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-11 17:35:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -3025,7 +3025,7 @@ REPLACE INTO translators VALUES ('9575e804-219e-4cd6-813d-9b690cbfc0fc', '1.0.0b
 	}, function() {Zotero.done()});
 }');
 
-REPLACE INTO translators VALUES ('b86bb082-6310-4772-a93c-913eaa3dfa1b', '1.0.0b4.r5', '', '2007-09-24 17:35:00', '0', '100', '4', 'Early English Books Online', 'Michael Berkowitz', '^http://eebo.chadwyck.com/search', 
+REPLACE INTO translators VALUES ('b86bb082-6310-4772-a93c-913eaa3dfa1b', '1.0.0b4.r5', '', '2007-02-11 17:35:00', '0', '100', '4', 'Early English Books Online', 'Michael Berkowitz', 'http://[^/]*eebo.chadwyck.com[^/]*/search', 
 'function detectWeb(doc, url) {
 	if (doc.title == "Search Results - EEBO") {
 		return "multiple";
@@ -3035,6 +3035,11 @@ REPLACE INTO translators VALUES ('b86bb082-6310-4772-a93c-913eaa3dfa1b', '1.0.0b
 }', 
 'function doWeb(doc, url) {
 	var eeboIDs = new Array();
+	
+	var hostRegexp = new RegExp("^(https?://[^/]+)/");
+	var hMatch = hostRegexp.exec(url);
+	var host = hMatch[1];
+
 	if (doc.title == "Search Results - EEBO") {
 		var items = new Object();
 		Zotero.debug("search page");
@@ -3066,13 +3071,13 @@ REPLACE INTO translators VALUES ('b86bb082-6310-4772-a93c-913eaa3dfa1b', '1.0.0b
 	for (var i = 0 ; i < eeboIDs.length ; i++) {
 		var postString = ''cit_format=RIS&Print=Print&cit_eeboid='' + eeboIDs[i] + ''&EeboId='' + eeboIDs[i];
 		var new_eeboid = eeboIDs[i]
-		Zotero.Utilities.HTTP.doPost(''http://eebo.chadwyck.com/search/print'', postString, function(text) {
+		Zotero.Utilities.HTTP.doPost(host+''/search/print'', postString, function(text) {
 			// load translator for RIS
 			var translator = Zotero.loadTranslator("import");
 			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 			translator.setString(text.substring(17));
 			translator.setHandler("itemDone", function(obj, item) {
-				item.url = ''http://eebo.chadwyck.com/search/full_rec?SOURCE=pgimages.cfg&ACTION=ByID&ID='' + new_eeboid + ''&FILE=../session/1190302085_15129&SEARCHSCREEN=CITATIONS&SEARCHCONFIG=config.cfg&DISPLAY=ALPHA'';
+				item.url = host+''/search/full_rec?SOURCE=pgimages.cfg&ACTION=ByID&ID='' + new_eeboid + ''&FILE=../session/1190302085_15129&SEARCHSCREEN=CITATIONS&SEARCHCONFIG=config.cfg&DISPLAY=ALPHA'';
 				item.complete();
 			});
 			translator.translate();
