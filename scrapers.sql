@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-11 21:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-11 22:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -13218,7 +13218,7 @@ REPLACE INTO translators VALUES ('a354331-981b-43de-a61-bc26dd1be3a9', '1.0.0b3.
 	});
 }');
 
-REPLACE INTO translators VALUES ('938ebe32-2b2e-4349-a5b3-b3a05d3de627', '1.0.0b3.r1', '', '2007-12-21 22:00:00', '1', '100', '4', 'ACS Publications', 'Sean Takats', '[^/]*/(?:wls/journals/query/(?:subscriberResults|query)\.html|acs/journals/toc.page|cgi-bin/(?:article|abstract|sample).cgi/[^/]+/[0-9]+/[0-9]+/i[0-9]+/(?:html|abs)/[^\.]+.html)', 
+REPLACE INTO translators VALUES ('938ebe32-2b2e-4349-a5b3-b3a05d3de627', '1.0.0b3.r1', '', '2008-02-11 22:00:00', '1', '100', '4', 'ACS Publications', 'Sean Takats and Michael Berkowitz', '[^/]*/(?:wls/journals/query/(?:subscriberResults|query)\.html|acs/journals/toc.page|cgi-bin/(?:article|abstract|sample).cgi)', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -13255,6 +13255,8 @@ REPLACE INTO translators VALUES ('938ebe32-2b2e-4349-a5b3-b3a05d3de627', '1.0.0b
 					url:pdf, mimeType:"application/pdf"
 					});
 				}
+				if (!item.attachments[0].title)
+					item.attachments[0].title = "ACS Snapshot";
 				item.complete();
 				});
 			translator.translate();
@@ -13272,14 +13274,18 @@ function doWeb(doc, url) {
 
 	var pdfs = new Array();
 	var requests = new Array();
-
-	var jids = doc.evaluate(''//tr[td//input[@name="jid"]]'',doc, nsResolver, XPathResult.ANY_TYPE, null);
-	var jid = jids.iterateNext();
-	if(jid) {
+	
+	if (detectWeb(doc, url) == "multiple") {
 		// search page
 		var items = new Array();
 		var titles = doc.evaluate(''//form[@name="citationSelect"]//tbody/tr[1]//span[@class="textbold"][1]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		if (!titles.iterateNext()) {
+			var titles = doc.evaluate(''//form/div[@class="artBox"]/div[@class="artBody"]/div[@class="artTitle"]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		}
 		var jids = doc.evaluate(''//form[@name="citationSelect"]//input[@name="jid"]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		if (!jids.iterateNext()) {
+			var jids = doc.evaluate(''//div[@id="content"]/form/div[@class="artBox"]/div[@class="artHeadBox"]/div[@class="artHeader"]/input'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		}
 		var links = doc.evaluate(''//form[@name="citationSelect"]//tbody/tr[2]//a[@class="link"]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
 		var title;
 		var jid;
@@ -13289,7 +13295,7 @@ function doWeb(doc, url) {
 			id = jid.value
 			items[id] = Zotero.Utilities.cleanString(title.textContent);
 
-			var link = doc.evaluate(''../../..//a[substring(text(), 1, 3) = "PDF"]'', title, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+			var link = doc.evaluate(''../../..//a[contains(text(), "PDF")]'', title, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 				if(link) {
 					links[id] = link.href.replace("searchRedirect.cgi", "article.cgi");
 				}
@@ -13303,21 +13309,22 @@ function doWeb(doc, url) {
 			getstring = getstring + "jid=" + encodeURIComponent(i) + "&";
 			pdfs.push(links[i]+"?sessid=");
 		}
-		Zotero.debug(getstring);
 		requests.push({jid:getstring});
 	} else {
 		// single page
 		var jid = doc.evaluate(''//jid'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 		jid = jid.substr(jid.indexOf("/")+1);
-		var pdf = doc.evaluate(''/html/body/a[text()="[PDF version of this article]"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+		var pdf = doc.evaluate(''/html/body//a[contains(text(), "PDF")]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+		if (!pdf) {
+			var pdf = doc.evaluate(''/html/body//a[contains(@href, "/pdf/")]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+		}
 		if (pdf) {
-            pdf = pdf.href;
-            pdf = pdf.replace("searchRedirect.cgi", "article.cgi");
-            pdfs.push(pdf+"?sessid=");
-        }
+           		pdf = pdf.href;
+           		pdf = pdf.replace("searchRedirect.cgi", "article.cgi");
+           		pdfs.push(pdf+"?sessid=");
+        	}
 		var requests = [{jid:"jid=" + encodeURIComponent(jid)}]; 
 	}
-
 	handleRequests(requests, pdfs);
 
 	Zotero.wait();
