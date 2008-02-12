@@ -153,7 +153,7 @@
         <text variable="volume" prefix=" "/>
         <text variable="issue" prefix=", no. "/>
       </if>
-      <else-if type="book">
+      <else-if type="book chapter" match="any">
         <group prefix=", " delimiter=", ">
           <group>
             <text term="volume" form="short" suffix=". "/>
