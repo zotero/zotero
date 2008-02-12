@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-12 05:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-12 10:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1311,7 +1311,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('e8fc7ebc-b63d-4eb3-a16c-91da232f7220', '1.0.0b4.r5', '', '2008-02-12 05:00:00', '0', '100', '4', 'Aluka', 'Sean Takats', 'https?://(?:www\.)aluka.org/action/(?:showMetadata\?doi=[^&]+|doSearch\?|doBrowseResults\?)', 
+REPLACE INTO translators VALUES ('e8fc7ebc-b63d-4eb3-a16c-91da232f7220', '1.0.0b4.r5', '', '2008-02-12 10:00:00', '0', '100', '4', 'Aluka', 'Sean Takats', 'https?://(?:www\.)aluka.org/action/(?:showMetadata\?doi=[^&]+|doSearch\?|doBrowseResults\?)', 
 'function detectWeb(doc, url){
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -2389,7 +2389,7 @@ function getData(ids){
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('0cc8e259-106e-4793-8c26-6ec8114a9160', '1.0.0b4.r5', '', '2008-02-11 23:00:00', '0', '99', '4', 'SlideShare', 'Michael Berkowitz', 'http://www.slideshare.net/', 
+REPLACE INTO translators VALUES ('0cc8e259-106e-4793-8c26-6ec8114a9160', '1.0.0b4.r5', '', '2008-02-12 10:00:00', '0', '99', '4', 'SlideShare', 'Michael Berkowitz', 'http://www.slideshare.net/', 
 'function detectWeb(doc, url) {
 	if (url.indexOf("search") != -1) {
 		return "multiple";
@@ -13443,7 +13443,7 @@ REPLACE INTO translators VALUES ('a354331-981b-43de-a61-bc26dd1be3a9', '1.0.0b3.
 	});
 }');
 
-REPLACE INTO translators VALUES ('938ebe32-2b2e-4349-a5b3-b3a05d3de627', '1.0.0b3.r1', '', '2008-02-11 23:00:00', '1', '100', '4', 'ACS Publications', 'Sean Takats and Michael Berkowitz', '[^/]*/(?:wls/journals/query/(?:subscriberResults|query)\.html|acs/journals/toc.page|cgi-bin/(?:article|abstract|sample|asap).cgi)?', 
+REPLACE INTO translators VALUES ('938ebe32-2b2e-4349-a5b3-b3a05d3de627', '1.0.0b3.r1', '', '2008-02-12 10:00:00', '1', '100', '4', 'ACS Publications', 'Sean Takats and Michael Berkowitz', '[^/]*/(?:wls/journals/query/(?:subscriberResults|query)\.html|acs/journals/toc.page|cgi-bin/(?:article|abstract|sample|asap).cgi)?', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
