@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-12 10:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-12 17:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -16741,7 +16741,7 @@ function doExport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('9cb70025-a888-4a29-a210-93ec52da40d4', '1.0.0b4.r1', '', '2008-02-06 19:15:00', '1', '100', '3', 'BibTeX', 'Simon Kornblith', 'bib', 
+REPLACE INTO translators VALUES ('9cb70025-a888-4a29-a210-93ec52da40d4', '1.0.0b4.r1', '', '2008-02-12 17:30:00', '1', '100', '3', 'BibTeX', 'Simon Kornblith', 'bib', 
 'Zotero.configure("dataMode", "block");
 Zotero.addOption("UTF8", true);
 
@@ -18436,7 +18436,9 @@ function doImport() {
 		if(read == "@") {
 			type = "";
 		} else if(type !== false) {
-			if(read == "{") {				// possible open character
+			if (type == "comment") {
+				type = false;
+			} else if (read == "{") {		// possible open character
 				beginRecord(type, "}");
 				type = false;
 			} else if(read == "(") {		// possible open character
