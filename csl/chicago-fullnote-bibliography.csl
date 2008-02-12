@@ -312,7 +312,7 @@
         <text variable="volume" prefix=" "/>
         <text variable="issue" prefix=", no. "/>
       </if>
-      <else-if type="book chapter" match="any">
+      <else-if type="book" match="any">
         <group prefix=". " delimiter=". ">
           <group>
             <text term="volume" form="short" text-case="capitalize-first" suffix=". "/>
@@ -404,7 +404,12 @@
   <macro name="pages-chapter">
     <choose>
       <if type="chapter">
-    <text variable="page"/>
+        <choose>
+          <if variable="volume">
+        <text variable="volume" suffix=":"/>
+          </if>
+        </choose>
+        <text variable="page"/>
       </if>
     </choose>
   </macro>
