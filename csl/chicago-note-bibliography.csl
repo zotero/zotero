@@ -33,7 +33,19 @@
       </if>
     </choose>
   </macro>
+  <macro name="translator-chapter-bib">
+    <choose>
+      <if variable="author editor" match="any">
+    <names variable="translator" delimiter=", ">
+      <label form="verb" prefix=" " text-case="lowercase" suffix=" "/>
+      <name and="text" delimiter=", "/>
+    </names>
+      </if>
+    </choose>
+  </macro>
   <macro name="secondary-contributor-bib">
+    <choose>
+      <if type="chapter" match="none">
     <group delimiter=". ">
       <names variable="editor" delimiter=". ">
         <label form="verb" prefix=" " text-case="capitalize-first" suffix=" "/>
@@ -45,6 +57,21 @@
         </if>
       </choose>
     </group>
+      </if>
+    </choose>
+  </macro>
+  <macro name="secondary-contributor-chapter-bib">
+    <choose>
+      <if type="chapter">
+    <group delimiter=", ">
+      <names variable="editor" delimiter=", ">
+        <label form="verb" prefix=" " text-case="lowercase" suffix=" "/>
+        <name and="text" delimiter=", "/>
+      </names>
+      <text macro="translator-chapter-bib"/>
+    </group>
+      </if>
+    </choose>
   </macro>
   <macro name="translator-article-bib">
     <choose>
@@ -255,7 +282,7 @@
   <macro name="pages-chapter">
     <choose>
       <if type="chapter">
-    <text variable="page" prefix=", "/>
+    <text variable="page"/>
       </if>
     </choose>
   </macro>
@@ -366,9 +393,12 @@
         <text macro="title-bib"/>
         <text macro="description-bib"/>
         <text macro="translator-article-bib"/>
-        <group>
-          <text macro="container-prefix-bib"/>
-          <text variable="container-title" font-style="italic"/>
+        <group delimiter=", ">
+          <group>
+            <text macro="container-prefix-bib"/>
+            <text variable="container-title" font-style="italic"/>
+          </group>
+          <text macro="secondary-contributor-chapter-bib"/>
           <text macro="pages-chapter"/>
         </group>
         <text macro="secondary-contributor-bib"/>
