@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-12 17:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-12 20:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -2389,7 +2389,7 @@ function getData(ids){
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('0cc8e259-106e-4793-8c26-6ec8114a9160', '1.0.0b4.r5', '', '2008-02-12 10:00:00', '0', '99', '4', 'SlideShare', 'Michael Berkowitz', 'http://www.slideshare.net/', 
+REPLACE INTO translators VALUES ('0cc8e259-106e-4793-8c26-6ec8114a9160', '1.0.0b4.r5', '', '2008-02-12 20:00:00', '1', '99', '4', 'SlideShare', 'Michael Berkowitz', 'http://www.slideshare.net/', 
 'function detectWeb(doc, url) {
 	if (url.indexOf("search") != -1) {
 		return "multiple";
@@ -2398,6 +2398,10 @@ REPLACE INTO translators VALUES ('0cc8e259-106e-4793-8c26-6ec8114a9160', '1.0.0b
 	}
 }', 
 'function doWeb(doc, url) {
+	var loggedin = false;
+	if (doc.evaluate(''//a[@class="green_link"][text() = "logout"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+		loggedin = true;
+	}
 	var shows = new Array();
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
@@ -2416,8 +2420,11 @@ REPLACE INTO translators VALUES ('0cc8e259-106e-4793-8c26-6ec8114a9160', '1.0.0b
 	} else {
 		shows = [url];
 	}
-	Zotero.debug(shows);
 	Zotero.Utilities.processDocuments(shows, function(newDoc) {
+		var downloadable = true;
+		if (newDoc.evaluate(''//p[@class="upload_p_left"][contains(text(), "Download not available")]'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+			downloadable = false;
+		}
 		var item = new Zotero.Item("presentation");
 		item.title = newDoc.evaluate(''//div[@class="slideProfile"]//h3'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 		var creator = newDoc.evaluate(''//div[@class="slideProfile"]//p/a[@class="blue_link_normal"]'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
@@ -2427,10 +2434,20 @@ REPLACE INTO translators VALUES ('0cc8e259-106e-4793-8c26-6ec8114a9160', '1.0.0b
 		while (next_tag = tags.iterateNext()) {
 			item.tags.push(Zotero.Utilities.trimInternal(next_tag.textContent));
 		}
-		item.url = newDoc.location.href;
+		var newurl = newDoc.location.href;
+		item.url = newurl;
 		item.repository = "SlideShare";
-		item.attachments.push({url:newDoc.location.href + "/download", title:"SlideShare Slide Show", mimeType:"application/pdf"});
-		Zotero.debug(item);
+		var pdfurl;
+		if (newurl.substr(-1) == "/") {
+			pdfurl = newurl + "download";
+		} else {
+			pdfurl = newurl + "/download";
+		}
+		if (loggedin) {
+			if (downloadable) {
+				item.attachments.push({url:pdfurl, title:"SlideShare Slide Show", mimeType:"application/pdf"});
+			}
+		}
 		item.complete();
 	}, function() {Zotero.done;});
 }');
