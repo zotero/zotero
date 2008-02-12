@@ -209,20 +209,16 @@
         <text variable="volume" prefix=" "/>
         <text variable="issue" prefix=", no. "/>
       </if>
-      <else-if type="book">
+      <else-if type="book chapter" match="any">
         <group prefix=". " delimiter=". ">
           <group>
-            <text term="volume" form="short"  text-case="capitalize-first" suffix=". "/>
+            <text term="volume" form="short" text-case="capitalize-first" suffix=". "/>
             <number variable="volume" form="numeric"/>
           </group>
-          <choose>
-            <if variable="locator" match="none">
           <group>
             <number variable="number-of-volumes" form="numeric"/>
             <text term="volume" form="short" prefix=" " suffix="." plural="true"/>
           </group>
-            </if>
-          </choose>
           <text variable="edition"/>
         </group>
       </else-if>
