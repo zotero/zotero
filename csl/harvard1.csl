@@ -99,6 +99,12 @@
       </else>
     </choose>
   </macro>
+  <macro name="pages">
+    <group>
+        <label variable="page" form="short" include-period="true" suffix=" "/>
+  	<text variable="page"/>
+    </group>
+  </macro>
   <citation>
     <option name="et-al-min" value="4"/>
     <option name="et-al-use-first" value="1"/>
@@ -114,7 +120,10 @@
 	  <text macro="author-short"/>
 	  <text macro="year-date"/>
 	</group>
-	<text variable="locator" prefix="p."/>
+	<group>
+	  <label variable="locator" suffix="." form="short"/>
+	  <text variable="locator"/>
+	</group>
       </group>
     </layout>
   </citation>
@@ -142,16 +151,14 @@
 	</if>
 	<else-if type="chapter">
 	  <text macro="title" prefix=" " suffix="."/>
-	  <group class="container" prefix=" ">
+	  <group class="container" prefix=" " delimiter=" ">
 	    <text term="in" text-case="capitalize-first"/>
-	    <text macro="editor" prefix=" "/>
-	    <text variable="container-title" font-style="italic" prefix=" " suffix="."/>
-	    <text variable="collection-title" prefix=" " suffix="."/>
-	    <group suffix=".">
+	    <text macro="editor"/>
+	    <text variable="container-title" font-style="italic" suffix="."/>
+	    <text variable="collection-title" suffix="."/>
+	    <group suffix="." delimiter=", ">
 	      <text macro="publisher" prefix=" "/>
-	      <group prefix=", ">
-		<text variable="page" prefix="p. "/>
-	      </group>
+	      <text macro="pages" />
 	    </group>
 	  </group>
 	</else-if>
@@ -167,7 +174,8 @@
 	      <text variable="issue" prefix="(" suffix=")"/>
 	    </group>
 	    <group prefix=", ">
-	      <text variable="page" prefix="p."/>
+	      <label variable="locator" suffix="." form="short"/>
+	      <text variable="page"/>
 	    </group>
 	  </group>
 	</else>
