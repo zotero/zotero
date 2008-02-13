@@ -80,7 +80,7 @@
       </if>
     </choose>
   </macro>
-  <macro name="author-bib">
+  <macro name="author">
     <names variable="author">
       <name name-as-sort-order="first" and="text" sort-separator=", "
 	    delimiter=", " delimiter-precedes-last="always"/>
@@ -389,7 +389,7 @@
     </sort>
     <layout suffix=".">
       <group delimiter=". ">
-        <text macro="author-bib"/>
+        <text macro="author"/>
         <text macro="recipient-bib"/>
         <text macro="title-bib"/>
         <text macro="description-bib"/>
