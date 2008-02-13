@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-13 11:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-13 17:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -11954,7 +11954,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('cb48083-4d9-4ed-ac95-2e93dceea0ec', '1.0.0b3.r1', '', '2007-11-27 03:00:00', '1', '100', '4', 'Blackwell Synergy', 'Simon Kornblith', '^https?://www\.blackwell-synergy\.com[^/]*/(?:action/doSearch|doi/|links/doi/)', 
+REPLACE INTO translators VALUES ('cb48083-4d9-4ed-ac95-2e93dceea0ec', '1.0.0b3.r1', '', '2008-02-13 17:30:00', '1', '100', '4', 'Blackwell Synergy', 'Simon Kornblith and Michael Berkowitz', '^https?://www\.blackwell-synergy\.com[^/]*/(?:action/doSearch|doi/|links/doi/)', 
 'function detectWeb(doc, url) {
 	if(url.indexOf("doSearch") != -1) {
 		return "multiple";
@@ -12017,8 +12017,10 @@ REPLACE INTO translators VALUES ('cb48083-4d9-4ed-ac95-2e93dceea0ec', '1.0.0b3.r
 			m = url.match(/https?:\/\/[^\/]+\/links\/doi\/([^\?]+)(\?|$)/);
 			var doi = m[1];
 		}
+		if (doi.match(/\/abs$/)) {
+			doi = doi.substr(0, doi.length - 4);
+		}
 		post += "doi="+encodeURIComponent(doi)+"&";
-		
 		if(url.indexOf("doi/full") != -1 ||
 		  doc.evaluate(''//img[@alt="Full Text Article"]'', doc, nsResolver, XPathResult.ANY_TYPE,
 		  null).iterateNext()) {
@@ -12033,7 +12035,7 @@ REPLACE INTO translators VALUES ('cb48083-4d9-4ed-ac95-2e93dceea0ec', '1.0.0b3.r
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 		translator.setString(text);
-		translator.setHandler("itemDone", function(obj, item) {
+		translator.setHandler("itemDone", function(obj, item) { 
 			item.attachments = [
 				{url:item.url, title:"Blackwell Synergy Snapshot", mimeType:"text/html"},
 				{url:item.url.replace("/doi/abs", "/doi/pdf"), title:"Blackwell Synergy Full Text PDF", mimeType:"application/pdf"}
@@ -12049,7 +12051,6 @@ REPLACE INTO translators VALUES ('cb48083-4d9-4ed-ac95-2e93dceea0ec', '1.0.0b3.r
 		
 		Zotero.done();
 	});
-		
 	Zotero.wait();
 }');
 
