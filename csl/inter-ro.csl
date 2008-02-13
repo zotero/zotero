@@ -85,10 +85,10 @@
   <macro name="title">
     <choose>
       <if type="book">
-	<text variable="title" text-case="sentence" font-style="italic"/>
+	<text variable="title" font-style="italic"/>
       </if>
       <else>
-	<text variable="title" text-case="sentence" prefix="&#8222;"
+	<text variable="title" prefix="&#8222;"
 	      suffix="&#8221;"/>
       </else>
     </choose>
@@ -96,10 +96,10 @@
   <macro name="title-short">
     <choose>
       <if type="book">
-	<text variable="title" text-case="sentence" font-style="italic" form="short"/>
+	<text variable="title" font-style="italic" form="short"/>
       </if>
       <else>
-	<text variable="title" text-case="sentence" prefix="&#8222;"
+	<text variable="title" prefix="&#8222;"
 	      suffix="&#8221;" form="short"/>
       </else>
     </choose>
