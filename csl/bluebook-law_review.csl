@@ -18,16 +18,32 @@
       <label form="short" prefix=", " text-case="capitalize-first" suffix="."/>
     </names>
   </macro>
-  <macro name="author">
+  <macro name="name-macro">
     <names variable="author">
       <name and="symbol" delimiter=", " delimiter-precedes-last="never"/>
       <label form="short" prefix=" " suffix="."/>
       <substitute>
         <names variable="editor"/>
         <names variable="translator"/>
-        <text macro="title"/>
       </substitute>
     </names>
+  </macro>
+  <macro name="author">
+    <choose>
+      <if variable="author editor translator" match="any">
+        <choose>
+          <if type="book">
+            <text macro="name-macro" font-variant="small-caps"/>
+          </if>
+          <else>
+            <text macro="name-macro"/>
+          </else>
+        </choose>
+      </if>
+      <else>
+        <text macro="title"/>
+      </else>
+    </choose>
   </macro>
   <macro name="access">
     <text variable="URL"/>
@@ -35,17 +51,21 @@
   <macro name="issuance">
     <choose>
       <if type="article">
+        <group suffix=", ">
+          <date variable="issued">
+            <date-part name="month"/>
+            <date-part name="day"/>
+          </date>
+        </group>
         <date variable="issued">
-          <date-part name="month"/>
-          <date-part name="day"/>
-          <date-part name="year" prefix=", "/>
+          <date-part name="year"/>
         </date>
       </if>
       <else>
         <group prefix=" (" suffix=")" delimiter=" ">
           <text variable="edition"/>
           <text macro="editor-translator"/>
-          <text macro="publisher" prefix=", "/>
+          <text macro="publisher"/>
           <date variable="issued">
             <date-part name="year"/>
           </date>
@@ -77,13 +97,17 @@
     <option name="et-al-use-first" value="1"/>
     <layout suffix="." delimiter="; ">
       <text macro="author"/>
-      <text macro="title" prefix=", "/>
-      <text variable="volume" prefix=", "/>
-      <text variable="container-title" prefix=" "/>
-      <text variable="page" prefix=", "/>
-      <text variable="locator" prefix=": "/>
-      <text macro="issuance"/>
-      <text macro="access" prefix=", "/>
+      <choose>
+        <if position="first">
+          <text macro="title" prefix=", "/>
+          <text variable="volume" prefix=", "/>
+          <text variable="container-title" prefix=" "/>
+          <text variable="page" prefix=", "/>
+          <text variable="locator" prefix=" "/>
+          <text macro="issuance" prefix=" "/>
+          <text macro="access" prefix=", "/>
+        </if>
+      </choose>
     </layout>
   </citation>
 </style>
