@@ -148,7 +148,11 @@
   <macro name="title-bib">
     <choose>
       <if variable="title" match="none">
+        <choose>
+          <if type="personal_communication" match="none">
         <text variable="genre" text-case="capitalize-first"/>
+          </if>
+        </choose>
       </if>
       <else-if type="book">
         <text variable="title" font-style="italic"/>
