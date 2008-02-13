@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-12 20:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-13 11:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -2389,7 +2389,7 @@ function getData(ids){
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('0cc8e259-106e-4793-8c26-6ec8114a9160', '1.0.0b4.r5', '', '2008-02-12 20:00:00', '1', '99', '4', 'SlideShare', 'Michael Berkowitz', 'http://www.slideshare.net/', 
+REPLACE INTO translators VALUES ('0cc8e259-106e-4793-8c26-6ec8114a9160', '1.0.0b4.r5', '', '2008-02-13 11:30:00', '1', '99', '4', 'SlideShare', 'Michael Berkowitz', 'http://www.slideshare.net/', 
 'function detectWeb(doc, url) {
 	if (url.indexOf("search") != -1) {
 		return "multiple";
