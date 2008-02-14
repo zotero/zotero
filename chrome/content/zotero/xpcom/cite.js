@@ -775,7 +775,7 @@ Zotero.CSL.prototype._processNames = function(item, element, formattedString, co
 		var newString = formattedString.clone();
 		
 		if(formattedString.format != "Sort" && variables[j] == "author" && context
-				&& context.option.(@name == "subsequent-author-substitute") == "true"
+				&& context.option.(@name == "subsequent-author-substitute").length()
 				&& item.getProperty("subsequent-author-substitute")
 				&& context.localName() == "bibliography") {
 			newString.append(context.option.(@name == "subsequent-author-substitute").@value.toString());
@@ -2584,17 +2584,16 @@ Zotero.CSL.ItemSet.prototype.resort = function() {
 			}
 		}
 		
-		if(this.options["subsequent-author-substitute"]) {
+		if(this.options["subsequent-author-substitute"]
+				&& lastNames && lastNames.length == names.length) {
 			var namesDiffer = false;
-			for(var j=0; j<numberOfNames; j++) {
+			for(var j=0; j<names.length; j++) {
 				namesDiffer = (names[j].getNameVariable("lastName") != lastNames[j].getNameVariable("lastName")
 						|| (names[j].getNameVariable("firstName") != lastNames[j].getNameVariable("firstName")));
 				if(namesDiffer) break;
 			}
 			
-			if(!namesDiffer) {
-				item.setProperty("subsequent-author-substitute", true);
-			}
+			if(!namesDiffer) item.setProperty("subsequent-author-substitute", true);
 		}
 		
 		item.setProperty("citation-number", citationNumber++);
