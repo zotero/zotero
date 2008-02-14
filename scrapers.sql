@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-13 20:05:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-14 19:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -2387,6 +2387,140 @@ function getData(ids){
 		newItem.complete();		
 	}, function(){Zotero.done();});	
 	Zotero.wait();
+}');
+
+REPLACE INTO translators VALUES ('0a01d85e-483c-4998-891b-24707728d83e', '1.0.0b4.r5', '', '2008-02-14 19:00:00', '0', '100', '4', 'AJHG', 'Michael Berkowitz', 'http://(www.)?ajhg.org/', 
+'function detectWeb(doc, url) {
+	if (doc.evaluate(''//div[@class="article_links"]/a[1]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+		return "multiple";
+	} else if (url.indexOf("abstract") != -1 || url.indexOf("fulltext") != -1) {
+		return "journalArticle";
+	}
+}', 
+'function getID(str) {
+	str =  str.match(/\/([^/]+)$/)[1];
+	if (str.indexOf("#") != -1) {
+		str = str.substr(0, str.length - 1);
+	}
+	return str;
+}
+
+function doWeb(doc, url) {
+	var articles = new Array();
+	if (detectWeb(doc, url) == "multiple") {
+		var items = new Object();
+		if (doc.title.indexOf("Search Results") != -1) {
+			var xpath = ''//table[@id="search_results"]/tbody/tr/td[1]'';
+			var titlex = ''./strong'';
+			var linkx = ''./div/a[1]'';
+		} else {
+			var xpath = ''//div[@id="main_toc"]/dl'';
+			var titlex = ''./dt'';
+			var linkx = ''./dd/div/a[1]'';
+		}
+		var blocks = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
+		var next_block;
+		while (next_block = blocks.iterateNext()) {
+			var title = doc.evaluate(titlex, next_block, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+			var link = doc.evaluate(linkx, next_block, null, XPathResult.ANY_TYPE, null).iterateNext().href;
+			items[link] = title;
+		}
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			articles.push(getID(i));
+		}
+	} else {
+		articles = [getID(url)];
+	}
+	Zotero.debug(articles);
+	for (var i in articles) {
+		var poststr = ''format=cite-abs&citation-type=RIS&pii='' + articles[i] + ''&action=download&Submit=Export'';
+		var pdfurl = ''http://download.ajhg.org/AJHG/pdf/PII'' + articles[i].replace(/(\(|\)|\-)/g, "") + ''.pdf'';
+		var newurl = ''http://www.ajhg.org/AJHG/fulltext/'' + articles[i];
+		Zotero.Utilities.HTTP.doPost(''http://ajhg.org/AJHG/citationexport'', poststr, function(text) {
+			var trans = Zotero.loadTranslator("import");
+			trans.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+			trans.setString(text);
+			trans.setHandler("itemDone", function(obj, item) {
+				item.attachments = [
+					{url:newurl, title:"AJHG Snapshot", mimeType:"text/html"},
+					{url:pdfurl, title:"AJHG Full Text PDF", mimeType:"application/pdf"}
+				];
+				
+				if (item.notes[0]["note"]) {
+					item.abstractNote = item.notes[0]["note"];
+				}
+				item.notes = [];
+				item.complete();
+			});
+			trans.translate();
+			Zotero.done();
+		});
+	}
+	Zotero.wait();
+	
+}');
+
+REPLACE INTO translators VALUES ('f26cfb71-efd7-47ae-a28c-d4d8852096bd', '1.0.0b4.r5', '', '2008-02-14 19:00:00', '0', '99', '4', 'Cell Press', 'Michael Berkowitz', 'http://www.(cancercell|cell|cellhostandmicrobe|cellmetabolism|cellstemcell|chembiol|current-biology|developmentalcell|immunity|molecule|neuron|structure).(org|com)', 
+'function detectWeb(doc, url) {
+	if (url.indexOf("search/results?") != -1) {
+		return "multiple";
+	} else if (url.indexOf("content/article") != -1) {
+		return "journalArticle";
+	}
+}', 
+'function doWeb(doc, url) {
+	var articles = new Array();
+	if (detectWeb(doc, url) == "multiple") {
+		var items = new Object();
+		var xpath = ''//form[@id="search_results_form"]/dl/dd'';
+		var arts = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
+		var next_art;
+		while (next_art = arts.iterateNext()) {
+			var title = doc.evaluate(''./strong'', next_art, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+			var link = doc.evaluate(''./nobr[1]/a'', next_art, null, XPathResult.ANY_TYPE, null).iterateNext().href;
+			items[link] = title;
+		}
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			articles.push(i);
+		}
+	} else {
+		articles = [url];
+	}
+	Zotero.Utilities.processDocuments(articles, function(newDoc) {
+		var newItem = new Zotero.Item("journalArticle");
+		newItem.title = newDoc.evaluate(''//h1[@class="article_title"]'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		var voliss = newDoc.evaluate(''//div[@class="article_citation"]/p[1]'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent.split(".")[2].split(",");
+		newItem.publicationTitle = voliss[0];
+		newItem.volume = voliss[1].match(/\d+/)[0];
+		newItem.pages = voliss[2];
+		newItem.date = voliss[3];
+		newItem.abstractNote = newDoc.evaluate(''//div[@class="panelcontent article_summary"]/p[contains(text(), " ")]'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		var authors = newDoc.evaluate(''//p[@class="authors"]'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent.split(",");
+		for (var i in authors) {
+			var next_author = authors[i];
+			if (next_author.match(/[a-z]/)) {
+				next_author = Zotero.Utilities.trimInternal(next_author.match(/[\w\s\.\-]+/)[0].replace(/\d/g, ""));
+				if (next_author.substr(0, 3) == "and") {
+					next_author = next_author.substr(4);
+				}
+				newItem.creators.push(Zotero.Utilities.cleanAuthor(next_author, "author"));
+			}
+		}
+		var pdfx = ''//a[contains(text(), "PDF")]'';
+		var pdfurl = newDoc.evaluate(pdfx, newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().href;
+		var newurl = newDoc.location.href;
+		if (newurl.indexOf("abstract") != -1) {
+			newurl = newurl.replace("abstract", "fulltext");
+		}
+		newItem.attachments = [
+			{url:url, title:"Cell Press Snapshot", mimeType:"text/html"},
+			{url:pdfurl, title:"Cell Press Full Text PDF", mimeType:"application/pdf"}
+		];
+		newItem.complete();
+	}, function() {Zotero.done;});
+	
 }');
 
 REPLACE INTO translators VALUES ('0cc8e259-106e-4793-8c26-6ec8114a9160', '1.0.0b4.r5', '', '2008-02-13 11:30:00', '1', '99', '4', 'SlideShare', 'Michael Berkowitz', 'http://www.slideshare.net/', 
