@@ -12287,7 +12287,7 @@ REPLACE INTO translators VALUES ('df966c80-c199-4329-ab02-fa410c8eb6dc', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('f8765470-5ace-4a31-b4bd-4327b960ccd', '1.0.0b3.r1', '', '2007-03-24 22:20:00', 1, 100, 4, 'SpringerLink', 'Simon Kornblith', '^https?://(?:www\.springerlink\.com|springerlink.metapress.com)[^/]*/content/', 
+REPLACE INTO translators VALUES ('f8765470-5ace-4a31-b4bd-4327b960ccd', '1.0.0b3.r1', '', '2008-02-14 19:00:00', '1', '100', '4', 'SpringerLink', 'Simon Kornblith', '^https?://(?:www\.springerlink\.com|springerlink.metapress.com)[^/]*/content/', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -12302,7 +12302,7 @@ REPLACE INTO translators VALUES ('f8765470-5ace-4a31-b4bd-4327b960ccd', '1.0.0b3
 	          doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "journalArticle";
 	}
-}',
+}', 
 'function doWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -12340,7 +12340,7 @@ REPLACE INTO translators VALUES ('f8765470-5ace-4a31-b4bd-4327b960ccd', '1.0.0b3
 		translator.setString(text);
 		translator.setHandler("itemDone", function(obj, item) {
 			var url = urls.shift();
-			var m = url.match(/https?:\/\/[^\/]+\/content\/[^\/]+\//);
+			var m = url.match(/https?:\/\/[^\/]+\/content\/[^\/]+\/?/);
 			item.attachments = [
 				{url:url, title:"SpringerLink Snapshot", mimeType:"text/html"},
 				{url:m[0]+"fulltext.pdf", title:"SpringerLink Full Text PDF", mimeType:"application/pdf"}
