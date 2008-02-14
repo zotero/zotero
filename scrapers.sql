@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-14 19:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-14 23:15:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -2389,7 +2389,7 @@ function getData(ids){
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('0a01d85e-483c-4998-891b-24707728d83e', '1.0.0b4.r5', '', '2008-02-14 19:00:00', '0', '100', '4', 'AJHG', 'Michael Berkowitz', 'http://(www.)?ajhg.org/', 
+REPLACE INTO translators VALUES ('0a01d85e-483c-4998-891b-24707728d83e', '1.0.0b4.r5', '', '2008-02-14 23:15:00', '0', '100', '4', 'AJHG', 'Michael Berkowitz', 'http://(www.)?ajhg.org/', 
 'function detectWeb(doc, url) {
 	if (doc.evaluate(''//div[@class="article_links"]/a[1]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
@@ -2461,7 +2461,7 @@ function doWeb(doc, url) {
 	
 }');
 
-REPLACE INTO translators VALUES ('f26cfb71-efd7-47ae-a28c-d4d8852096bd', '1.0.0b4.r5', '', '2008-02-14 19:00:00', '0', '99', '4', 'Cell Press', 'Michael Berkowitz', 'http://www.(cancercell|cell|cellhostandmicrobe|cellmetabolism|cellstemcell|chembiol|current-biology|developmentalcell|immunity|molecule|neuron|structure).(org|com)', 
+REPLACE INTO translators VALUES ('f26cfb71-efd7-47ae-a28c-d4d8852096bd', '1.0.0b4.r5', '', '2008-02-14 23:15:00', '0', '99', '4', 'Cell Press', 'Michael Berkowitz', 'http://www.(cancercell|cell|cellhostandmicrobe|cellmetabolism|cellstemcell|chembiol|current-biology|developmentalcell|immunity|molecule|neuron|structure).(org|com)', 
 'function detectWeb(doc, url) {
 	if (url.indexOf("search/results?") != -1) {
 		return "multiple";
@@ -12287,7 +12287,7 @@ REPLACE INTO translators VALUES ('df966c80-c199-4329-ab02-fa410c8eb6dc', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('f8765470-5ace-4a31-b4bd-4327b960ccd', '1.0.0b3.r1', '', '2008-02-14 19:00:00', '1', '100', '4', 'SpringerLink', 'Simon Kornblith', '^https?://(?:www\.springerlink\.com|springerlink.metapress.com)[^/]*/content/', 
+REPLACE INTO translators VALUES ('f8765470-5ace-4a31-b4bd-4327b960ccd', '1.0.0b3.r1', '', '2008-02-14 23:15:00', '1', '100', '4', 'SpringerLink', 'Simon Kornblith', '^https?://(?:www\.springerlink\.com|springerlink.metapress.com)[^/]*/content/', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
