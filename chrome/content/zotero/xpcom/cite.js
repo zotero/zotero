@@ -1368,24 +1368,40 @@ Zotero.CSL.prototype._processElements = function(item, element, formattedString,
  * Compares two items, in order to sort the reference list
  * Returns -1 if A comes before B, 1 if B comes before A, or 0 if they are equal
  */
-Zotero.CSL.prototype._compareItem = function(a, b, context) {
+Zotero.CSL.prototype._compareItem = function(a, b, context, cache) {
 	var sortA = [];
 	var sortB = [];
 	
-	Zotero.debug("CompareItem");
+	var aID = a.getID();
+	var bID = b.getID();
+	
 	// author
 	if(context.sort.key.length()) {
-		Zotero.debug("Context Sort by " + context.sort.key.length + " keys");
+		var keyA, keyB;
 		for each(var key in context.sort.key) {
-			var keyA = new Zotero.CSL.SortString();
-			var keyB = new Zotero.CSL.SortString();
-			
 			if(key.@macro.length()) {
-				Zotero.debug("Context macro ");
-				this._processElements(a, this._csl.macro.(@name == key.@macro), keyA);
-				this._processElements(b, this._csl.macro.(@name == key.@macro), keyB);
+				var aCacheKey = aID+"-macro-"+key.@macro;
+				var bCacheKey = bID+"-macro-"+key.@macro;
+				
+				if(cache[aCacheKey]) {
+					keyA = cache[aCacheKey];
+				} else {
+					keyA = new Zotero.CSL.SortString();
+					this._processElements(a, this._csl.macro.(@name == key.@macro), keyA);
+					cache[aCacheKey] = keyA;
+				}
+				
+				if(cache[bCacheKey]) {
+					keyB = cache[bCacheKey];
+				} else {
+					keyB = new Zotero.CSL.SortString();
+					this._processElements(b, this._csl.macro.(@name == key.@macro), keyB);
+					cache[bCacheKey] = keyB;
+				}
 			} else if(key.@variable.length()) {
 				var variable = key.@variable.toString();
+				var keyA = new Zotero.CSL.SortString();
+				var keyB = new Zotero.CSL.SortString();
 				
 				if(Zotero.CSL._dateVariables[variable]) {				// date
 					var date = a.getDate(variable);
@@ -1399,8 +1415,6 @@ Zotero.CSL.prototype._compareItem = function(a, b, context) {
 					this._processNames(a, element, keyA, context, null, [variable]);
 					this._processNames(b, element, keyB, context, null, [variable]);
 				} else {												// text
-					Zotero.debug("Context key " + variable);
-
 					if(variable == "citation-number") {
 						keyA.append(a.getProperty(variable));
 						keyB.append(b.getProperty(variable));
@@ -1434,10 +1448,57 @@ Zotero.CSL.prototype._compareItem = function(a, b, context) {
 	return 0;
 }
 
+
+/**
+ * Sorts a list of items, keeping a cache of processed keys
+ **/
+Zotero.CSL.prototype.cachedSort = function(items, context, field) {
+	var me = this;
+	var cache = new Object();
+	
+	if(field) {
+		var newItems = items.sort(function(a, b) {
+			return me._compareItem(a[field], b[field], context, cache);
+		});
+	} else {
+		var newItems = items.sort(function(a, b) {
+			return me._compareItem(a, b, context, cache);
+		});
+	}
+	
+	delete cache;
+	return newItems;
+}
+
+Zotero.CSL.prototype.getEqualCitations = function(items) {
+	var citationsEqual = [];
+	
+	if(items) {
+		var context = this._csl.citation;
+		
+		var string = new Zotero.CSL.FormattedString(context.options, "Text");
+		this._processElements(items[0], context.layout, string,
+			context, "subsequent");
+		var lastString = string.get();
+		
+		for(var i=1; i<items.length; i++) {
+			string = new Zotero.CSL.FormattedString(context.option, "Text");
+			this._processElements(items[i], context.layout, string,
+				context, "subsequent");
+			string = string.get();
+			
+			citationsEqual[i] = string == lastString;
+			lastString = string;
+		}
+	}
+	
+	return citationsEqual;
+}
+
 /*
  * Compares two citations; returns true if they are different, false if they are equal
  */
-Zotero.CSL.prototype._compareCitations = function(a, b, context) {
+Zotero.CSL.prototype.compareCitations = function(a, b, context) {
 	if((!a && b) || (a && !b)) {
 		return true;
 	} else if(!a && !b) {
@@ -1743,10 +1804,7 @@ Zotero.CSL.Citation = function(citationItems, csl) {
  */
 Zotero.CSL.Citation.prototype.sort = function() {
 	if(this.sortable) {
-		var me = this;
-		this.citationItems = this.citationItems.sort(function(a, b) {
-			return me._csl._compareItem(a.item, b.item, me._citation);
-		});
+		this.citationItems = this._csl.cachedSort(this.citationItems, this._citation, "item");
 	}
 }
 
@@ -2373,10 +2431,7 @@ Zotero.CSL.ItemSet.prototype.remove = function(items) {
  */
 Zotero.CSL.ItemSet.prototype.resort = function() {
 	// sort
-	var me = this;
-	this.items = this.items.sort(function(a, b) {
-		return me.csl._compareItem(a, b, me.bibliography);
-	});
+	this.items = this.csl.cachedSort(this.items, this.bibliography);
 	
 	// first loop through to collect disambiguation data by item, so we can
 	// see if any items have changed; also collect last names
@@ -2465,11 +2520,8 @@ Zotero.CSL.ItemSet.prototype.resort = function() {
 	}
 	
 	// loop through once to determine where items equal the previous item
-	if(this._disambiguate) {
-		var citationsEqual = [];
-		for(var i=1; i<this.items.length; i++) {
-			citationsEqual[i] = this.csl._compareCitations(this.items[i-1], this.items[i], this.citation);
-		}
+	if(this._disambiguate && this.items.length) {
+		var citationsEqual = this.csl.getEqualCitations(this.items, this.citation);
 	}
 	
 	var allNames = {};
@@ -2575,7 +2627,7 @@ Zotero.CSL.ItemSet.prototype.resort = function() {
 				item.setProperty("disambiguate-condition", true);
 				
 				// if we cannot disambiguate with the conditional, revert
-				if(me.csl._compareCitations(lastItem, item) == 0) {
+				if(this.csl.compareCitations(lastItem, item) == 0) {
 					if(!oldCondition) {
 						lastItem.setProperty("disambiguate-condition", undefined);
 					}
