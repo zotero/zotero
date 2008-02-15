@@ -49,7 +49,7 @@
             <text variable="citation-number" suffix=". "/>
             <text macro="author"/>
             <text variable="title" prefix=" " suffix=". "/>
-            <text variable="container-title" font-style="italic" suffix=" "/>
+            <text variable="container-title" font-style="italic" suffix=" " form="short"/>
             <text variable="volume" suffix=", " font-weight="bold"/>
             <text variable="page"/>
             <text macro="access"/>
