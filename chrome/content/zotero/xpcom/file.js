@@ -120,7 +120,7 @@ Zotero.File = new function(){
 	/*
 	 * Return the contents of a URL as a string
 	 *
-	 * Runs asynchronously, so should only be run on local (e.g. chrome) URLs
+	 * Runs synchronously, so should only be run on local (e.g. chrome) URLs
 	 */
 	function getContentsFromURL(url) {
 		var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
