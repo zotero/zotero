@@ -135,7 +135,7 @@
   </macro>
   <macro name="sort-key">
     <text macro="author-bib" suffix=" "/>
-    <text variable="title" suffix=" "/>
+    <text variable="issue" suffix=" "/>
     <text variable="genre"/>
   </macro>
   <citation>
@@ -143,7 +143,7 @@
     <option name="et-al-use-first" value="1"/>
     <option name="et-al-subsequent-min" value="4"/>
     <option name="et-al-subsequent-use-first" value="1"/>
-    <option name="disambiguate-add-year-suffix" value="true"/>
+    <option name="disambiguate-add-year-suffix" value="false"/>
     <option name="disambiguate-add-names" value="true"/>
     <option name="disambiguate-add-givenname" value="true"/>
     <layout prefix="" suffix="." delimiter="; ">
@@ -166,7 +166,10 @@
 	      <text macro="author"/>
 	      <text macro="recipient"/>
 	    </group>
-	    <text macro="title-short"/>
+	    <group delimiter=" ">
+	      <text macro="title-short"/>
+	      <text variable="volume"/>
+	    </group>
 	    <choose>
 	      <if type="interview">
 		<text term="interview" text-case="lowercase"/>
@@ -214,11 +217,11 @@
 	      <group>
 		<group class="container" delimiter=" ">
 		  <text variable="container-title" font-style="italic" prefix=", "/>
-		  <group delimiter=", " prefix=" ">
+		  <group delimiter=", ">
 		    <text variable="volume"/>
 		    <text variable="issue"/>
 		  </group>
-		  <text macro="issued" prefix=" (" suffix=")"/>
+		  <text macro="issued" prefix="(" suffix=")"/>
 		</group>
 		<text macro="editor" prefix=", "/>
 		<text macro="translator" prefix=", "/>
@@ -306,11 +309,11 @@
 	<else-if type="article-journal article-newspaper article-magazine" match="any">
 	  <group class="container" delimiter=" ">
 	    <text variable="container-title" font-style="italic" prefix=", "/>
-	    <group delimiter=", " prefix=" ">
+	    <group delimiter=", ">
 	      <text variable="volume"/>
 	      <text variable="issue"/>
 	    </group>
-	    <text macro="issued" prefix=" (" suffix=")"/>
+	    <text macro="issued" prefix="(" suffix=")"/>
 	  </group>
 	  <text macro="editor" prefix=", "/>
 	  <text macro="translator" prefix=", "/>
