@@ -1123,6 +1123,10 @@ var ZoteroItemPane = new function()
 		// If result uses two fields, save both
 		if (numFields==2)
 		{
+			// Manually clear autocomplete controller's reference to
+			// textbox to prevent error next time around
+			textbox.mController.input = null;
+
 			var [field, creatorIndex, creatorField] =
 				textbox.getAttribute('fieldname').split('-');
 			
