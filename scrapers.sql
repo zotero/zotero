@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-14 23:15:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-16 23:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -13063,7 +13063,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('594ebe3c-90a0-4830-83bc-9502825a6810', '1.0.0b4.r5', '', '2008-02-11 21:00:00', '1', '100', '4', 'ISI Web of Knowledge', 'Michael Berkowitz', 'http://[^/]*isiknowledge.com[^/]*/', 
+REPLACE INTO translators VALUES ('594ebe3c-90a0-4830-83bc-9502825a6810', '1.0.0b4.r5', '', '2008-02-16 23:00:00', '1', '100', '4', 'ISI Web of Knowledge', 'Michael Berkowitz', 'http://[^/]*isiknowledge.com[^/]*/', 
 'function detectWeb(doc, url) {
 	if (doc.title.indexOf("Web of Science Results") != -1) {
 		return "multiple";
@@ -13090,8 +13090,11 @@ REPLACE INTO translators VALUES ('594ebe3c-90a0-4830-83bc-9502825a6810', '1.0.0b
 	} else {
 		ids.push(url.match(/\?(.*)/)[1]);
 	}
+	var hostRegexp = new RegExp("^(https?://[^/]+)/");
+	var m = hostRegexp.exec(url);
+	var host = m[1];
 	for (var i in ids) {
-		ids[i] = ''http://apps.isiknowledge.com/full_record.do?'' + ids[i];
+		ids[i] = host+"/full_record.do?" + ids[i];
 	}
 	Zotero.Utilities.processDocuments(ids, function(newDoc) {
 		var url = newDoc.location.href;
