@@ -2637,7 +2637,7 @@ Zotero.CSL.ItemSet.prototype.resort = function() {
 		}
 		
 		if(this.options["subsequent-author-substitute"]
-				&& lastNames && lastNames.length == names.length) {
+				&& lastNames && names.length && lastNames.length == names.length) {
 			var namesDiffer = false;
 			for(var j=0; j<names.length; j++) {
 				namesDiffer = (names[j].getNameVariable("lastName") != lastNames[j].getNameVariable("lastName")
