@@ -296,7 +296,6 @@
     <option name="et-al-use-first" value="1"/>
     <option name="et-al-subsequent-min" value="4"/>
     <option name="et-al-subsequent-use-first" value="1"/>
-    <option name="disambiguate-add-year-suffix" value="true"/>
     <option name="disambiguate-add-names" value="true"/>
     <option name="disambiguate-add-givenname" value="true"/>
     <layout prefix="" suffix="." delimiter="; ">
