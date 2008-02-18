@@ -282,11 +282,7 @@
   <macro name="pages-chapter">
     <choose>
       <if type="chapter">
-        <choose>
-          <if variable="volume">
         <text variable="volume" suffix=":"/>
-          </if>
-        </choose>
         <text variable="page"/>
       </if>
     </choose>

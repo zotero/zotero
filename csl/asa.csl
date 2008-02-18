@@ -122,7 +122,7 @@
   <citation>
     <option name="et-al-min" value="3"/>
     <option name="et-al-use-first" value="1"/>
-    <option name="et-al-subsequent-min" value="6"/>
+    <option name="et-al-subsequent-min" value="3"/>
     <option name="et-al-subsequent-use-first" value="1"/>
     <option name="disambiguate-add-year-suffix" value="true"/>
     <option name="disambiguate-add-names" value="true"/>
