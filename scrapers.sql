@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-19 21:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-19 21:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -13092,7 +13092,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('e78d20f7-488-4023-831-dfe39679f3f', '1.0.0b3.r1', '', '2008-02-11 01:45:00', '1', '100', '4', 'ACM', 'Simon Kornblith', 'https?://[^/]*portal\.acm\.org[^/]*/(?:results\.cfm|citation\.cfm)', 
+REPLACE INTO translators VALUES ('e78d20f7-488-4023-831-dfe39679f3f', '1.0.0b3.r1', '', '2008-02-19 21:30:00', '1', '100', '4', 'ACM', 'Simon Kornblith', 'https?://[^/]*portal\.acm\.org[^/]*/(?:results\.cfm|citation\.cfm)', 
 'function detectWeb(doc, url) {
 	if(url.indexOf("/results.cfm") != -1) {
 		var items = Zotero.Utilities.getItemArray(doc, doc, ''^https?://[^/]+/citation.cfm\\?[^#]+$'');
@@ -13156,8 +13156,9 @@ function scrape(doc) {
 		XPathResult.ANY_TYPE, null);
 	var keywordLink;
 	while(keywordLink = keywordLinks.iterateNext()) {
-		keywords.push(keywordLink.textContent.toLowerCase());
+		keywords.push(Zotero.Utilities.trimInternal(keywordLink.textContent.toLowerCase()));
 	}
+	var doi = doc.evaluate(''/html/body/div/table/tbody/tr[4]/td/table/tbody/tr/td/table/tbody/tr[3]/td[2][@class="small-text"]/a'', doc, null, XPathResult.ANY_TYPE, null).iterateNext().href.match(/org\/(.*)/)[1];
 	
 	Zotero.Utilities.HTTP.doGet("http://portal.acm.org/"+m[1], function(text) {
 		// split() may no longer be necessary
@@ -13178,7 +13179,7 @@ function scrape(doc) {
 			if(abstract) item.abstractNote = abstract;
 			item.attachments = attachments;
 			item.tags = keywords;
-			item.type = undefined;
+			item.doi = doi;
 			item.complete();
 		});
 		translator.translate();
