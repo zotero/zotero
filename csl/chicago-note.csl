@@ -23,43 +23,54 @@
     <category term="note"/>
     <updated/>
   </info>
-  <macro name="translator">
-    <choose>
-      <if variable="author editor" match="any">
-    <names variable="translator" delimiter=", ">
-      <label form="verb-short" prefix=" " text-case="lowercase" suffix=". "/>
-      <name and="text" delimiter=", "/>
-    </names>
-      </if>
-    </choose>
-  </macro>
-  <macro name="secondary-contributor">
+  <macro name="secondary-contributors">
     <group delimiter=", ">
       <names variable="editor" delimiter=", ">
         <label form="verb-short" prefix=" " text-case="lowercase" suffix=". "/>
         <name and="text" delimiter=", "/>
       </names>
       <choose>
-        <if type="article-journal article-magazine article-newspaper" match="none">
-      <text macro="translator"/>
+        <if variable="author editor" match="any">
+      <names variable="translator" delimiter=", ">
+        <label form="verb-short" prefix=" " text-case="lowercase" suffix=". "/>
+        <name and="text" delimiter=", "/>
+      </names>
         </if>
       </choose>
     </group>
   </macro>
-  <macro name="translator-article">
+  <macro name="contributors">
     <choose>
-      <if type="article-journal article-magazine article-newspaper" match="any">
-        <text macro="translator"/>
+      <if type="chapter" match="none">
+        <text macro="secondary-contributors"/>
       </if>
     </choose>
+  </macro>
+  <macro name="container-contributors">
+    <choose>
+      <if type="chapter">
+        <text macro="secondary-contributors"/>
+      </if>
+    </choose>
+  </macro>
+  <macro name="editor">
+    <names variable="editor">
+      <name and="text" sort-separator=", " delimiter=", "/>
+      <label form="short" prefix=", " suffix="."/>
+    </names>
+  </macro>
+  <macro name="translator">
+    <names variable="translator">
+      <name and="text" sort-separator=", " delimiter=", "/>
+      <label form="verb-short" prefix=", " suffix="."/>
+    </names>
   </macro>
   <macro name="author">
     <names variable="author">
       <name and="text" sort-separator=", " delimiter=", "/>
-      <label form="verb-short" prefix=", " suffix="."/>
       <substitute>
-        <names variable="editor"/>
-        <names variable="translator"/>
+	<text macro="editor"/>
+	<text macro="translator"/>
       </substitute>
     </names>
   </macro>
@@ -232,7 +243,7 @@
       </else-if>
     </choose>
   </macro>
-  <macro name="locator">
+  <macro name="point-locators">
     <choose>
       <if variable="locator" match="none">
         <text macro="pages"/>
@@ -326,18 +337,18 @@
             </group>
             <text macro="title"/>
             <text macro="description"/>
-            <text macro="translator-article"/>
+            <text macro="contributors"/>
             <group>
               <text macro="container-prefix"/>
               <text variable="container-title" font-style="italic"/>
             </group>
-            <text macro="secondary-contributor"/>
+            <text macro="container-contributors"/>
           </group>
           <text macro="locators"/>
           <text variable="collection-title" prefix=", "/>
           <text macro="issue"/>
           <text macro="locators-newspaper" prefix=", "/>
-          <text macro="locator"/>
+          <text macro="point-locators"/>
           <text macro="access" prefix=", "/>
         </else>
       </choose>
