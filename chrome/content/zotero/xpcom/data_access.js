@@ -3070,6 +3070,9 @@ Zotero.Items = new function(){
 	
 	
 	function getSortTitle(title) {
+		if (typeof title == 'number') {
+			return title + '';
+		}
 		return title.replace(/^[\[\'\"](.*)[\'\"\]]?$/, '$1')
 	}
 	
