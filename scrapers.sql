@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-20 17:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-20 19:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -13209,7 +13209,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('594ebe3c-90a0-4830-83bc-9502825a6810', '1.0.0b4.r5', '', '2008-02-17 07:00:00', '1', '100', '4', 'ISI Web of Knowledge', 'Michael Berkowitz', 'http://[^/]*isiknowledge.com[^/]*/', 
+REPLACE INTO translators VALUES ('594ebe3c-90a0-4830-83bc-9502825a6810', '1.0.0b4.r5', '', '2008-02-20 19:00:00', '1', '100', '4', 'ISI Web of Knowledge', 'Michael Berkowitz', 'http://[^/]*isiknowledge.com[^/]*/', 
 'function detectWeb(doc, url) {
 	if (doc.title.indexOf("Web of Science Results") != -1) {
 		return "multiple";
@@ -13262,9 +13262,13 @@ REPLACE INTO translators VALUES ('594ebe3c-90a0-4830-83bc-9502825a6810', '1.0.0b
 					if(line.match(fieldRe)) {
 						field = line.match(fieldRe)[0].substr(0,2);
 						content = line.substr(3);
-						if (field == "AF") {
-							var author = content.split(",");
-							item.creators.push({firstName:author[1], lastName:author[0], creatorType:"author"});
+						if ((field == "AF" || field == "AU")) {
+							if (!item.creators[0]) {
+								var author = content.split(",");
+								item.creators.push({firstName:author[1], lastName:author[0], creatorType:"author"});
+							} else {
+								field = "";
+							}
 						} else if (field == "TI") {
 							item.title = content;
 						} else if (field == "SO") {
@@ -13290,7 +13294,7 @@ REPLACE INTO translators VALUES ('594ebe3c-90a0-4830-83bc-9502825a6810', '1.0.0b
 						}
 					} else {
 						content = Zotero.Utilities.trimInternal(line);
-						if (field == "AF") {
+						if (field == "AF" || field == "AU") {
 							var author = content.split(",");
 							item.creators.push({firstName:author[1], lastName:author[0], creatorType:"author"});
 						} else if (field == "TI") {
@@ -13300,6 +13304,7 @@ REPLACE INTO translators VALUES ('594ebe3c-90a0-4830-83bc-9502825a6810', '1.0.0b
 						}
 					}
 				}
+				item.attachments = [{url:item.url, title:"ISI Web of Knowledge Snapshot", mimeType:"text/html"}];
 				item.complete();
 			});
 		});
