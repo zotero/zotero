@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-19 22:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-20 17:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -3132,7 +3132,7 @@ REPLACE INTO translators VALUES ('303c2744-ea37-4806-853d-e1ca67be6818', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('27ee5b2c-2a5a-4afc-a0aa-d386642d4eed', '1.0.0b4.r5', '', '2008-01-31 20:00:00', '0', '100', '4', 'PubMed Central', 'Michael Berkowitz', 'http://[^/]*.nih.gov/', 
+REPLACE INTO translators VALUES ('27ee5b2c-2a5a-4afc-a0aa-d386642d4eed', '1.0.0b4.r5', '', '2008-02-20 17:00:00', '1', '100', '4', 'PubMed Central', 'Michael Berkowitz', 'http://[^/]*.nih.gov/', 
 'function detectWeb(doc, url) {
 	if (doc.evaluate(''//table[@id="ResultPanel"]//td[2]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
@@ -3152,8 +3152,8 @@ REPLACE INTO translators VALUES ('27ee5b2c-2a5a-4afc-a0aa-d386642d4eed', '1.0.0b
 	var URIs = new Array();
 	var items = new Object();
 	if (doc.title.indexOf("PMC Results") != -1) {
-		var titlex = ''//table[@id="ResultPanel"]/tbody/tr[3]/td/div/table/tbody/tr/td[2]/div[@class="portal-tocentry"]/div[@class="toc-entry"]/div/div[@class="toc-title"]'';
-		var linkx = ''//table[@id="ResultPanel"]/tbody/tr[3]/td/div/table/tbody/tr/td[2]/div[@class="portal-tocentry"]/div[@class="toc-entry"]/div/a[@class="toc-link"][2]'';
+		var titlex = ''//div[@class="toc-entry"]/div/div[@class="toc-title"]'';
+		var linkx = ''//div[@class="toc-entry"]/div/a[@class="toc-link"][1]'';
 		
 		var titles = doc.evaluate(titlex, doc, null, XPathResult.ANY_TYPE, null);
 		var next_title = titles.iterateNext();
@@ -3166,14 +3166,15 @@ REPLACE INTO translators VALUES ('27ee5b2c-2a5a-4afc-a0aa-d386642d4eed', '1.0.0b
 		}
 		items = Zotero.selectItems(items);
 		for (var i in items) {
-			var artid= i.match(/\d+/)[0];
-			URIs.push(artid);
+			URIs.push(i);
 		}
 	} else {
-		URIs.push(url.match(/\d+/)[0]);
+		URIs.push(url);
 	}
-	for (var id in URIs) {	
-		Zotero.Utilities.HTTP.doGet(''http://www.pubmedcentral.nih.gov/articlerender.fcgi?tool=pmcentrez&artid='' + URIs[id], function(text) {
+	Zotero.Utilities.processDocuments(URIs, function(newDoc) {
+		var newUrl = newDoc.location.href;
+		var abs = newDoc.evaluate(''//td[@class="content-cell"]/div[@class="section-content"]'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		Zotero.Utilities.HTTP.doGet(newDoc.location.href, function(text) {
 			var tags = new Object();
 			var meta = text.match(/<meta[^>]*>/gi);
 			for (var i in meta) {
@@ -3193,15 +3194,15 @@ REPLACE INTO translators VALUES ('27ee5b2c-2a5a-4afc-a0aa-d386642d4eed', '1.0.0b
 					newItem.creators.push(Zotero.Utilities.cleanAuthor(meta[i].match(/content=\"([^"]*)\">/)[1], "author"));
 				}
 			}
-			
-			newItem.attachments = [
-				{url:tags["fulltext_html_url"], title:"PubMed Central Snapshot", mimeType:"text/html"},
-				{url:tags["pdf_url"], title:"PubMed Central Full Text PDF", mimeType:"application/pdf"}
-			];
-			
+			newItem.attachments.push({url:newUrl, title:"PubMed Central Snapshot", mimeType:"text/html"});
+			if (tags["pdf_url"]) {	
+				newItem.attachments.push({url:tags["pdf_url"], title:"PubMed Central Full Text PDF", mimeType:"application/pdf"});
+			}
+			newItem.url = newUrl;
+			newItem.abstractNote = abs;
 			newItem.complete();
 		});
-	}
+	}, function() {Zotero.done;});
 	Zotero.wait();
 }');
 
