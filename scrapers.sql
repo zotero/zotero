@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-20 19:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-21 22:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -11688,159 +11688,93 @@ REPLACE INTO translators VALUES ('fe728bc9-595a-4f03-98fc-766f1d8d0936', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('b6d0a7a-d076-48ae-b2f0-b6de28b194e', '1.0.0b3.r1', '', '2008-02-19 19:30:00', '1', '100', '4', 'ScienceDirect', 'Simon Kornblith and Michael Berkowitz', 'https?://www\.sciencedirect\.com[^/]*/science\?(?:.+\&|)_ob=(?:ArticleURL|ArticleListURL|PublicationURL)', 
+REPLACE INTO translators VALUES ('b6d0a7a-d076-48ae-b2f0-b6de28b194e', '1.0.0b3.r1', '', '2008-02-21 22:00:00', '1', '100', '4', 'ScienceDirect', 'Michael Berkowitz', 'https?://www\.sciencedirect\.com[^/]*/science\?(?:.+\&|)_ob=(?:ArticleURL|ArticleListURL|PublicationURL)', 
 'function detectWeb(doc, url) {
+	if (url.indexOf("_ob=DownloadURL") != -1) {
+		return false;
+	}
 	if(url.indexOf("_ob=ArticleURL") == -1) {
 		return "multiple";
 	} else {
 		return "journalArticle";
 	}
 }', 
-'function handleRIS(text, PDFs, doi) {
-	// load translator for RIS
-	var translator = Zotero.loadTranslator("import");
-	translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-	translator.setString(text);
-	translator.setHandler("itemDone", function(obj, item) {
-		if(item.attachments[0]) {
-			item.attachments[0].title = "ScienceDirect Snapshot";
-			item.attachments[0].mimeType = "text/html";
-		}
-
-		var pdf = PDFs.shift();
-		if(pdf) {
-			item.attachments.push({
-				title:"ScienceDirect Full Text PDF",
-				url:pdf, mimeType:"application/pdf"
-			});
-		}
-
-		if(item.notes[0]) {
-			item.abstractNote = item.notes[0].note;
-			item.notes = new Array();
-		}
-		if (doi) {
-			item.DOI = doi;
-		}
-		item.complete();
-	});
-	translator.translate();
-	Zotero.done();
-}
-
-function doWeb(doc, url) {
+'function doWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == ''x'') return namespace; else return null;
 	} : null;
 
 	if (!doc.evaluate(''//img[contains(@src, "guest_user.gif")]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+		var articles = new Array();
 		if(url.indexOf("_ob=ArticleURL") == -1) {
-			// search page
-			var items = new Array();
-			var links = new Array();
-	
-			var isPublication = url.indexOf("_ob=PublicationURL") != -1;
-			if(isPublication) {
-				var xpath = ''//table[@class="txt"][@id="pubBody"]//tr'';
+			//search page
+			var items = new Object();
+			var xpath;
+			if (url.indexOf("_ob=PublicationURL") != -1) {
+				xpath = ''//table[@class="txt"]/tbody/tr/td[2]'';
 			} else {
-				var xpath = ''//table[@class="tableResults-T"]//tr'';
+				xpath = ''//table[@class="tableResults-T"]/tbody/tr/td[2]'';
 			}
-	
-			var arts = new Object();
-	
-			var tableRows = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
-			// Go through table rows
-			var tableRow;
-			var i = 0;
-			while(tableRow = tableRows.iterateNext()) {
-				i++;
-	
-				var checkboxes = tableRow.getElementsByTagName("input");
-				var title = doc.evaluate(''.//span[@class="bf"]'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-	
-				if(checkboxes[0] && title) {
-					var index = checkboxes[0].value;
-					items[index] = Zotero.Utilities.cleanString(title.textContent);
-	
-					var link = doc.evaluate(''.//a[substring(text(), 1, 3) = "PDF"]'',
-						tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-					if(link) {
-						links[index] = link.href;
-					}
-				}
+			var rows = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+			var next_row;
+			while (next_row = rows.iterateNext()) {
+				var title = doc.evaluate(''./span[@class="bf"]'', next_row, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+				var link = doc.evaluate(''.//a[1]'', next_row, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
+				items[link] = title;
 			}
-	
 			items = Zotero.selectItems(items);
-			if(!items) return true;
-	
-			var PDFs = new Array();
-	
-			var itemCount = 0;
-			var itemList = "";
-			for(var i in items) {
-				itemList += "&art="+i;
-				PDFs.push(links[i]);
-				itemCount++;
+			for (var i in items) {
+				articles.push(i);
 			}
-	
-			var count = doc.evaluate(''//input[@name="count"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().value;
-	
-			var md5 = doc.getElementsByName("md5")[1].value;
-			if(isPublication) {
-				var tockey = escape(doc.evaluate(''//input[@name="_tockey"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().value);
-				var chunk = doc.evaluate(''//input[@name="chunk"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().value;
-				var pubType = doc.evaluate(''//input[@name="_pubType"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().value;
-				var cdi = url.match(/_cdi=([^&]+)/);
-				var getURL = "http://www.sciencedirect.com/science?_ob=PublicationURL&_method=list&_tockey="+tockey+"&_auth=y&_version=1&refSource=toc&_pubType="+pubType+"&_cdi="+cdi[1]+"&md5="+md5+"&chunk="+chunk+"&view=c&export.x=21&export.y=14&count="+count+itemList;
-			} else {
-				var st = doc.evaluate(''//input[@name="_st"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().value;
-				var chunk = doc.evaluate(''//input[@name="_chunk"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().value;
-				var count = doc.evaluate(''//input[@name="count"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().value;
-				var alid = doc.evaluate(''//input[@name="_ArticleListID"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().value;
-				var getURL = "http://www.sciencedirect.com/science?_ob=ArticleListURL&_method=tag&refSource=search&_st="+st+"&count="+count+"&_chunk="+chunk+"&NEXT_LIST=1&view=c&md5="+md5+"&_ArticleListID="+alid+"&export.x=21&export.y=6&sort=d"+itemList;
-			}
-			Zotero.Utilities.HTTP.doGet(getURL, function(text) {
-				var md5 = text.match(/<input type=hidden name=md5 value=([^>]+)>/);
-				var acct = url.match(/_acct=([^&]+)/);
-				var userid = url.match(/_userid=([^&]+)/);
-				var subid = text.match(/<input type=hidden name=_subId value=([^>]+)>/);
-				if(isPublication) {
-					var post = "_ob=DownloadURL&_method=finish&_acct="+acct[1]+"&_userid="+userid[1]+"&_subId="+subid[1]+"&_tockey="+tockey+"&count="+itemCount+"&md5="+md5[1]+"&JAVASCRIPT_ON=Y&format=cite-abs&citation-type=RIS&x=12&y=15";
-				} else {
-					var post = "_ob=DownloadURL&_method=finish&_acct="+acct[1]+"&_userid="+userid[1]+"&_ArticleListID="+alid+"&_subId="+subid[1]+"&count="+itemCount+"&md5="+md5[1]+"&JAVASCRIPT_ON=Y&limiter=selected&format=cite-abs&citation-type=RIS";
-				}
-				Zotero.Utilities.HTTP.doPost("http://www.sciencedirect.com/science", post, function(text) { handleRIS(text, PDFs) });
-			});
 		} else {
-			var get = doc.evaluate(''//a[img[contains(@alt, "Export citation")]]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
-			var idstring = doc.evaluate(''/html/body/table/tbody/tr/td[1]/a'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
-			var doi = doc.evaluate(''//div[@class="pageText"][@id="sdBody"]/a[1]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.substr(4);
-			Zotero.debug(doi);
-			var acct = idstring.match(/_acct=([^&]+)/);
-			var userid = idstring.match(/_userid=([^&]+)/);
-			var PDFs = [];
-	
-			var link = doc.evaluate(''//a[substring(text(), 1, 3) = "PDF"]'',
-				doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-			if(link) {
-				var PDFs = [link.href];
-			}
-			Zotero.Utilities.HTTP.doGet(get, function(text) {
-				var md5 = text.match(/<input type=hidden name=md5 value=([^>]+)>/);
-				var alid = url.match(/_alid=([0-9]+)/);
-				var udi = url.match(/_udi=([^&]+)/);
-				var uoikey = text.match(/<input type=hidden name=_uoikey value=([^>]+)>/);
-				if(alid) {
-					var docIdentifier = "_ArticleListID="+alid[1]+"&_uoikey="+uoikey[1];
-				} else {
-					var docIdentifier = "_uoikey="+uoikey[1];
-				}
-				var post = "_ob=DownloadURL&_method=finish&_acct=" + acct[1] + "&_userid=" + userid[1] + "&_docType=FLA&"+docIdentifier+"&md5="+md5[1]+"&JAVASCRIPT_ON=Y&format=cite-abs&citation-type=RIS&Export=Export&x=26&y=17";
-				Zotero.Utilities.HTTP.doPost("http://www.sciencedirect.com/science", post, function(text) { handleRIS(text, PDFs, doi) });
-			});
+			articles = [url];
 		}
-		Zotero.wait();
+		Zotero.Utilities.processDocuments(articles, function(newDoc) {
+			var doi = newDoc.evaluate(''//div[@class="pageText"][@id="sdBody"]/a[contains(@href, "dx.doi")]'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.substr(4);
+			var PDF = newDoc.evaluate(''//a[contains(text(), "PDF")]'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
+			var url = newDoc.location.href;
+			var get = newDoc.evaluate(''//a[img[contains(@alt, "Export citation")]]'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
+			Zotero.Utilities.HTTP.doGet(get, function(text) {
+				var md5 = text.match(/<input type=hidden name=md5 value=([^>]+)>/)[1];
+				var acct = text.match(/<input type=hidden name=_acct value=([^>]+)>/)[1];
+				var userid = text.match(/<input type=hidden name=_userid value=([^>]+)>/)[1];
+				var uoikey = text.match(/<input type=hidden name=_uoikey value=([^>]+)>/)[1];
+				if (text.match(/<input type=hidden name=_ArticleListID value=([^>]+)>/)) {
+					var alid = text.match(/<input type=hidden name=_ArticleListID value=([^>]+)>/)[1];
+				}
+				if (alid) {
+					var docID = "_ArticleListID=" + alid + "&_uoikey=" + uoikey;
+				} else {
+					var docID = "_uoikey=" + uoikey;
+				}
+				var post = "_ob=DownloadURL&_method=finish&_acct=" + acct + "&_userid=" + userid + "&_docType=FLA&" + docID + "&md5=" + md5 + "&count=1&JAVASCRIPT_ON=Y&format=cite-abs&citation-type=RIS&Export=Export&x=26&y=17";
+				Zotero.Utilities.HTTP.doPost(''http://www.sciencedirect.com/science'', post, function(text) { 
+					var translator = Zotero.loadTranslator("import");
+					translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+					translator.setString(text);
+					translator.setHandler("itemDone", function(obj, item) {
+						item.attachments = [
+							{url:url, title:"ScienceDirect Snapshot", mimeType:"text/html"},
+							{url:PDF, title:"ScienceDirect Full Text PDF", mimeType:"application/pdf"}
+						];
+				
+				
+						if(item.notes[0]) {
+							item.abstractNote = item.notes[0].note;
+							item.notes = new Array();
+						}
+						if (doi) {
+							item.DOI = doi;
+						}
+						item.complete();
+					});
+					translator.translate();
+					Zotero.done();
+				});
+				Zotero.wait();
+			});
+		}, function() {Zotero.done;});
 	} else {
 		var articles = new Array();
 		Zotero.debug("not logged in");
@@ -11851,7 +11785,7 @@ function doWeb(doc, url) {
 			var next_row = rows.iterateNext();
 			while (next_row) {
 				var title = doc.evaluate(''.//span[@class="bf"]'', next_row, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-				var link = doc.evaluate(''.//td[1]/a[1]'', next_row, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
+				var link = doc.evaluate(''.//a[1]'', next_row, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
 				items[link] = title;
 				next_row = rows.iterateNext();
 			}
