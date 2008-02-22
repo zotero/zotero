@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-21 22:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-22 16:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -11688,7 +11688,7 @@ REPLACE INTO translators VALUES ('fe728bc9-595a-4f03-98fc-766f1d8d0936', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('b6d0a7a-d076-48ae-b2f0-b6de28b194e', '1.0.0b3.r1', '', '2008-02-21 22:00:00', '1', '100', '4', 'ScienceDirect', 'Michael Berkowitz', 'https?://www\.sciencedirect\.com[^/]*/science\?(?:.+\&|)_ob=(?:ArticleURL|ArticleListURL|PublicationURL)', 
+REPLACE INTO translators VALUES ('b6d0a7a-d076-48ae-b2f0-b6de28b194e', '1.0.0b3.r1', '', '2008-02-22 16:30:00', '1', '100', '4', 'ScienceDirect', 'Michael Berkowitz', 'https?://www\.sciencedirect\.com[^/]*/science\?(?:.+\&|)_ob=(?:ArticleURL|ArticleListURL|PublicationURL)', 
 'function detectWeb(doc, url) {
 	if (url.indexOf("_ob=DownloadURL") != -1) {
 		return false;
@@ -11730,8 +11730,10 @@ REPLACE INTO translators VALUES ('b6d0a7a-d076-48ae-b2f0-b6de28b194e', '1.0.0b3.
 		} else {
 			articles = [url];
 		}
+		Zotero.debug(articles);
 		Zotero.Utilities.processDocuments(articles, function(newDoc) {
-			var doi = newDoc.evaluate(''//div[@class="pageText"][@id="sdBody"]/a[contains(@href, "dx.doi")]'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.substr(4);
+			var doi = newDoc.evaluate(''//div[@class="pageText"][@id="sdBody"]/a[contains(text(), "doi")]'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.substr(4);
+			Zotero.debug(doi);
 			var PDF = newDoc.evaluate(''//a[contains(text(), "PDF")]'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
 			var url = newDoc.location.href;
 			var get = newDoc.evaluate(''//a[img[contains(@alt, "Export citation")]]'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
@@ -11770,7 +11772,6 @@ REPLACE INTO translators VALUES ('b6d0a7a-d076-48ae-b2f0-b6de28b194e', '1.0.0b3.
 						item.complete();
 					});
 					translator.translate();
-					Zotero.done();
 				});
 				Zotero.wait();
 			});
@@ -11780,7 +11781,11 @@ REPLACE INTO translators VALUES ('b6d0a7a-d076-48ae-b2f0-b6de28b194e', '1.0.0b3.
 		Zotero.debug("not logged in");
 		if (detectWeb(doc, url) == "multiple") {
 			var items = new Object();
-			var xpath = ''//table[@class="tableResults-T"]/tbody/tr/td[2]'';
+			if (url.indexOf("_ob=PublicationURL") != -1) {
+				xpath = ''//table[@class="txt"]/tbody/tr/td[2]'';
+			} else {
+				var xpath = ''//table[@class="tableResults-T"]/tbody/tr/td[2]'';
+			}
 			var rows = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
 			var next_row = rows.iterateNext();
 			while (next_row) {
@@ -11803,11 +11808,14 @@ REPLACE INTO translators VALUES ('b6d0a7a-d076-48ae-b2f0-b6de28b194e', '1.0.0b3.
 			var title = doc2.title.split(/\s+\-\s+/)[1].split(/\s+:\s+/);
 			item.title = title[1];
 			item.publicationTitle = title[0];
-			var voliss = Zotero.Utilities.trimInternal(doc2.evaluate(''//div[@class="pageText"][@id="sdBody"]/table/tbody/tr/td[1]'', doc2, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent)	.split(/,/);
-			item.volume = voliss[0].match(/\d+/)[0];
-			item.issue = voliss[1].match(/[\-\d]+/)[0];
-			item.date = Zotero.Utilities.trimInternal(voliss[2]);
-			item.pages = voliss[3].match(/[\-\d]+/)[0];
+			var voliss = Zotero.Utilities.trimInternal(doc2.evaluate(''//div[@class="pageText"][@id="sdBody"]/table/tbody/tr/td[1]'', doc2, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent).split(/,/);
+			Zotero.debug(voliss);
+			if (voliss[0].match(/\d+/)) {
+				item.volume = voliss[0].match(/\d+/)[0];
+				item.issue = voliss[1].match(/[\-\d]+/)[0];
+				item.date = Zotero.Utilities.trimInternal(voliss[2]);
+				item.pages = voliss[3].match(/[\-\d]+/)[0];
+			}
 			item.DOI = doc2.evaluate(''//div[@class="pageText"][@id="sdBody"]/a[contains(@href, "dx.doi")]'', doc2, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href.match(/dx\.doi\.org\/(.*)/)[1];
 			var abspath = ''//div[@class="pageText"][@id="sdBody"]/div[@class="artAbs"]/p'';
 			var absx = doc2.evaluate(abspath, doc2, nsResolver, XPathResult.ANY_TYPE, null);
@@ -11820,11 +11828,13 @@ REPLACE INTO translators VALUES ('b6d0a7a-d076-48ae-b2f0-b6de28b194e', '1.0.0b3.
 				item.abstractNote = item.abstractNote.substr(9);
 			}
 			var tagpath = ''//div[@class="pageText"][@id="sdBody"]/div[@class="art"]/p'';
-			var tags = doc2.evaluate(tagpath, doc2, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.split(":")[1].split(";");
-			for (var i in tags) {
-				item.tags.push(Zotero.Utilities.trimInternal(tags[i]));
+			if (doc2.evaluate(tagpath, doc2, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.split(":")[1]) {
+				var tags = doc2.evaluate(tagpath, doc2, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.split(":")[1].split(";");
+				for (var i in tags) {
+					item.tags.push(Zotero.Utilities.trimInternal(tags[i]));
+				}
 			}
-			
+			item.attachments.push({url:doc2.location.href, title:"ScienceDirect Snapshot", mimeType:"text/html"});
 			Zotero.Utilities.HTTP.doGet(item.url, function(text) {
 				var aus = text.match(/<strong>\s+<p>.*<\/strong>/)[0].replace(/<sup>/g, "$").replace(/<\/sup>/g, "$");
 				aus = aus.replace(/\$[^$]*\$/g, "");
@@ -11833,13 +11843,14 @@ REPLACE INTO translators VALUES ('b6d0a7a-d076-48ae-b2f0-b6de28b194e', '1.0.0b3.
 				aus = Zotero.Utilities.cleanTags(aus);
 				aus = aus.split(/(,|and)/);
 				for (var a in aus) {
-					if (aus[a] != "," && aus[a] != "and") {
+					if (aus[a] != "," && aus[a] != "and" && aus[a].match(/\w+/)) {
 						item.creators.push(Zotero.Utilities.cleanAuthor(Zotero.Utilities.trimInternal(aus[a]), "author"));
 					}
 				}
 				item.complete();
 			});
 		}, function() {Zotero.done;});
+		Zotero.wait();
 	}
 }');
 
