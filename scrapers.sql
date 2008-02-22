@@ -1579,7 +1579,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('c073446d-b90b-47be-a29d-785995d38d87', '1.0.0b4.r5', '', '2008-02-22 20:30:00', '0', '100', '4', 'DSpace', 'Michael Berkowitz', 'dspace',
+REPLACE INTO translators VALUES ('0abd577b-ec45-4e9f-9081-448737e2fd34', '1.0.0b4.r5', '', '2008-02-22 20:30:00', '0', '100', '4', 'DSpace', 'Michael Berkowitz', 'dspace',
 'function detectWeb(doc, url) {
 	if (doc.evaluate(''//center/table[@class="itemDisplayTable"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "document";
