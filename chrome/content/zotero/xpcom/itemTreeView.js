@@ -1465,17 +1465,22 @@ Zotero.ItemTreeView.prototype.onDragStart = function (evt,transferData,action)
 		transferData.data.addDataForFlavour("text/unicode", text);
 	}
 	
-	var [mode, ] = format.split('=');
-	if (mode == 'export') {
-		Zotero.QuickCopy.getContentFromItems(items, format, exportCallback);
+	try {
+		var [mode, ] = format.split('=');
+		if (mode == 'export') {
+			Zotero.QuickCopy.getContentFromItems(items, format, exportCallback);
+		}
+		else if (mode.indexOf('bibliography') == 0) {
+			var content = Zotero.QuickCopy.getContentFromItems(items, format);
+			transferData.data.addDataForFlavour("text/unicode", content.text);
+			transferData.data.addDataForFlavour("text/html", content.html);
+		}
+		else {
+			Components.utils.reportError("Invalid Quick Copy mode '" + mode + "'");
+		}
 	}
-	else if (mode.indexOf('bibliography') == 0) {
-		var content = Zotero.QuickCopy.getContentFromItems(items, format);
-		transferData.data.addDataForFlavour("text/unicode", content.text);
-		transferData.data.addDataForFlavour("text/html", content.html);
-	}
-	else {
-		Components.utils.reportError("Invalid Quick Copy mode '" + mode + "'");
+	catch (e) {
+		Components.utils.reportError(e + " with format '" + format + "'");
 	}
 }
 
