@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-27 17:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-27 22:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -6251,212 +6251,72 @@ function doWeb(doc,url)
 }
 ');
 
-REPLACE INTO translators VALUES ('a1a97ad4-493a-45f2-bd46-016069de4162', '1.0.0b4.r1', '', '2007-07-03 18:05:11', '0', '100', '4', 'OpticsInfoBase', 'Ben Parr','^https?://(?:www\.)?opticsinfobase.org',
-'function detectWeb(doc,url)
-{
-       var namespace = doc.documentElement.namespaceURI;
-       var nsResolver = namespace ? function(prefix) {
-       if (prefix == ''x'') return namespace; else return null;
-       } : null;
-
-
-        var xpath=''//div[@id="abstract"]/p/strong''
-        var rows= doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
-        var row;
-        while(row=rows.iterateNext())
-        {
-                if(row.textContent=="Citation")
-                       {return "journalArticle";}
-        }
-
-        xpath=''//form[@id="searchform"]/table/tbody/tr/td[1]/h1'';
-       var temp=doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE,null).iterateNext();
-       if(temp&&temp.textContent=="Search Results")
-               {return "multiple";}
-}',
-'function processList(items)
-{
-       items = Zotero.selectItems(items);
-       var uris=new Array();
-       if (!items)
-               {return true;}
-
-       for (var i in items)
-               {uris.push(i);}
-
-       Zotero.Utilities.processDocuments(uris, scrape,function() {Zotero.done(); });
-       Zotero.wait();
-
-       return true;
-}
-
-
-function scrape(doc,url)
-{
-       var namespace = doc.documentElement.namespaceURI;
-       var nsResolver = namespace ? function(prefix) {
-       if (prefix == ''x'') return namespace; else return null;
-       } : null;
-
-       var newItem=new Zotero.Item("journalArticle");
-
-       var xpath=''//div[@id="abstract"]/h1'';
-       var temp=doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE,null).iterateNext();
-       if(temp)
-       {
-               temp=temp.textContent;
-               if(temp[temp.length-1]==".")
-                       {temp=temp.substr(0,temp.length-1);}
-               newItem.title=Zotero.Utilities.cleanString(temp);
-       }
-
-       xpath=''//div[@id="abstract"]/p'';
-       var rows= doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
-       var row;
-       while(row=rows.iterateNext())
-       {
-               temp=row.textContent;
-               if(temp.substr(0,8)=="Abstract")
-               {
-                       temp=temp.replace("Abstract","");
-                       temp=Zotero.Utilities.cleanString(temp);
-                       temp=Zotero.Utilities.cleanTags(temp);
-                       newItem.abstractNote=temp;
-               }
-       }
-
-       xpath=''//div[@id="abstract"]/p'';
-       rows= doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
-       while(row=rows.iterateNext())
-       {
-               temp=Zotero.Utilities.cleanString(row.textContent);
-               if(temp.substr(0,8)=="Citation")
-                       {temp=temp.split(" ");
-                       newItem.url=temp[temp.length-1];}
-       }
-
-       xpath=''//div[@id="abstract"]/h3''
-       temp=doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE,null).iterateNext();
-       if(temp)
-       {
-               temp=temp.textContent;
-               temp=temp.replace(" and ",",");
-               temp=temp.replace(" and,",",");
-               var authors=temp.split("\n")[0].split(",");
-               for(var a in authors)
-               {
-                       if(Zotero.Utilities.cleanString(authors[a]))
-                               {newItem.creators.push(Zotero.Utilities.cleanAuthor(authors[a], "author"));}
-               }
-
-               temp=temp.replace(temp.split("\n")[0],'''');
-               temp=Zotero.Utilities.cleanString(temp);
-               var i=temp.split(",");
-               for(var b in i)
-               {
-                       if(i[b].indexOf("Vol. ")>-1)
-                               {newItem.volume=i[b].replace("Vol. ","");}
-                       else if(i[b].indexOf("Issue ")>-1)
-                               {newItem.issue=i[b].replace("Issue ","");}
-                       else if(i[b].indexOf("pp. ")>-1)
-                       {
-                               var pages=i[b];
-                               if(pages[pages.length-1]=="-")
-                                       {pages=pages.substr(0,pages.length-1);}
-                               newItem.pages=pages.replace("pp. ","");
-                       }
-               }
-       }
-       xpath=''//div[@id="abstract"]'';
-       temp=doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE,null).iterateNext();
-       if(temp)
-       {
-               temp=Zotero.Utilities.cleanString(temp.textContent);
-               if(temp.substr(0,16)=="Conference Paper")
-               {
-                       newItem.itemType="conferencePaper";
-                       xpath=''//div[@id="abstract"]'';
-                       temp=doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE,null).iterateNext().textContent;
-                       var journalsub=false;
-                       var next=true;
-                       temp=temp.replace("Conference Paper","");
-                       temp=temp.split("\n");
-                       for(var  x in temp)
-                       {
-                               temp[x]=Zotero.Utilities.cleanString(temp[x]);
-                               if(temp[x]&&!journalsub)
-                                       {newItem.publisher=temp[x];     journalsub=true;}
-                               else if(temp[x]&&next)
-                                       {next=false;}
-                               else if(temp[x]&&!next)
-                                       {newItem.date=temp[x];          break;}
-                       }
-               }
-               else
-               {
-                       xpath=''//div[@id="abstract"]/p'';
-                       rows= doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
-                       while(row=rows.iterateNext())
-                       {
-                               temp=Zotero.Utilities.cleanString(row.textContent);
-                               if(temp.substr(0,8)=="Citation")
-                               {
-                                       temp=temp.replace("Citation","");
-                                       temp=Zotero.Utilities.cleanString(temp);
-                                       temp=temp.replace(newItem.title,'''');
-                                       var journal=temp.split('',"'');
-                                       if(journal[1])
-                                       {
-                                               journal=journal[1];
-                                               var c=journal.split(",");
-                                               journal=c[0];
-                                               if(c[1])
-                                               {
-                                                       var year=c[1].split("(");
-                                                       if(year[1])
-                                                       {newItem.date=Zotero.Utilities.cleanString(year[1].split(")")[0]);}
-                                               }
-
-                                               journal=journal.replace(newItem.volume,'''');
-                                               newItem.publicationTitle=Zotero.Utilities.cleanString(journal);
-                                       }
-                                       break;
-                               }
-                       }
-               }
-       }
-       newItem.complete();
-
-}
-
-function doWeb(doc,url)
-{
-       var namespace = doc.documentElement.namespaceURI;
-       var nsResolver = namespace ? function(prefix) {
-       if (prefix == ''x'') return namespace; else return null;
-       } : null;
-
-       var xpath=''//div[@id="abstract"]/p/strong''
-       var rows= doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
-       var row;
-       while(row=rows.iterateNext())
-       {
-               if(row.textContent=="Citation")
-                       {scrape(doc,url);return true;}
-       }
-
-       xpath=''//form[@id="searchform"]/table/tbody/tr/td[1]/h1'';
-       var temp=doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE,null).iterateNext();
-       if(temp&&temp.textContent=="Search Results")
-       {
-               var items=new Array();
-               xpath=''//div[@id="col2"]/p/strong/a'';
-               rows=doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
-               while(row=rows.iterateNext())
-                       {items[row.href]=Zotero.Utilities.cleanString(row.textContent);}
-
-               processList(items);
-       }
+REPLACE INTO translators VALUES ('a1a97ad4-493a-45f2-bd46-016069de4162', '1.0.0b4.r1', '', '2008-02-27 22:30:00', '0', '100', '4', 'Optics Society of America', 'Michael Berkowitz', 'https?://[^.]+\.(opticsinfobase|osa)\.org', 
+'function detectWeb(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	var searchpath = ''//div[@id="col2"]/p/strong/a'';
+	if (doc.evaluate(searchpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+		return "multiple";
+	} else if (url.indexOf("abstract.cfm") != -1) {
+		return "journalArticle";
+	}
+}', 
+'function doWeb(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	var host = doc.location.host;
+	var articles = new Array();
+	if (detectWeb(doc, url) == "multiple") {
+		var items = new Object();
+		var xpath = ''//div[@id="col2"]/p/strong/a'';
+		var arts = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var next_art;
+		while (next_art = arts.iterateNext()) {
+			items[next_art.href] = Zotero.Utilities.trimInternal(next_art.textContent);
+		}
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			articles.push(i);
+		}
+	} else {
+		articles = [url];
+	}
+	Zotero.debug(articles);
+	Zotero.Utilities.processDocuments(articles, function(newDoc) {
+		Zotero.debug(newDoc.location.href);
+		var osalink = newDoc.evaluate(''//div[@id="abstract"]/p/a[contains(text(), "opticsinfobase")]'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
+		Zotero.debug(osalink);
+		Zotero.Utilities.HTTP.doGet(osalink, function(text) {
+			var action = text.match(/select\s+name=\"([^"]+)\"/)[1];
+			var id = text.match(/input\s+type=\"hidden\"\s+name=\"articles\"\s+value=\"([^"]+)\"/)[1];
+			var get = ''http://'' + host + ''/custom_tags/IB_Download_Citations.cfm'';
+			var post = ''articles='' + id + ''&ArticleAction=save_endnote2&'' + action + ''=save_endnote2'';
+			Zotero.Utilities.HTTP.doPost(get, post, function(text) {
+				var translator = Zotero.loadTranslator("import");
+				translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+				translator.setString(text);
+				translator.setHandler("itemDone", function(obj, item) {
+					var pubName;
+					if (item.journalAbbreviation) {
+						pubName = item.journalAbbreviation;
+					} else {
+						pubName = item.publicationTitle;
+					}
+					Zotero.debug(pubName);
+					item.attachments = [{url:osalink, title:pubName + " Snapshot", mimeType:"text/html"}];
+					item.complete();
+				});
+				translator.translate();
+			});
+		});
+	}, function() {Zotero.done;});
+	
 }');
 
 REPLACE INTO translators VALUES ('b61c224b-34b6-4bfd-8a76-a476e7092d43', '1.0.0b4.r5', '', '2008-01-10 21:00:00', '0', '100', '4', 'SSRN', 'Michael Berkowitz', '^http://papers\.ssrn\.com/', 
