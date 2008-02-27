@@ -12567,9 +12567,7 @@ REPLACE INTO translators VALUES ('92d4ed84-8d0-4d3c-941f-d4b9124cfbb', '1.0.0b3.
 		var urls = new Array();
 		for(var url in items) {
 			urls.push(url);
-			Zotero.debug(url);
 		}
-		return false;
 	} else {
 		var urls = [url];
 	}
