@@ -23,7 +23,7 @@
     <category term="note"/>
     <updated/>
   </info>
-  <macro name="secondary-contributors">
+  <macro name="editor-translator">
     <group delimiter=", ">
       <names variable="editor" delimiter=", ">
         <label form="verb-short" prefix=" " text-case="lowercase" suffix=". "/>
@@ -39,55 +39,47 @@
       </choose>
     </group>
   </macro>
-  <macro name="contributors">
+  <macro name="secondary-contributors-note">
     <choose>
       <if type="chapter" match="none">
-        <text macro="secondary-contributors"/>
+        <text macro="editor-translator"/>
       </if>
     </choose>
   </macro>
-  <macro name="container-contributors">
+  <macro name="container-contributors-note">
     <choose>
       <if type="chapter">
-        <text macro="secondary-contributors"/>
+        <text macro="editor-translator"/>
       </if>
     </choose>
   </macro>
-  <macro name="editor">
+  <macro name="editor-note">
     <names variable="editor">
       <name and="text" sort-separator=", " delimiter=", "/>
       <label form="short" prefix=", " suffix="."/>
     </names>
   </macro>
-  <macro name="translator">
+  <macro name="translator-note">
     <names variable="translator">
       <name and="text" sort-separator=", " delimiter=", "/>
       <label form="verb-short" prefix=", " suffix="."/>
     </names>
   </macro>
-  <macro name="author">
-    <names variable="author">
-      <name and="text" sort-separator=", " delimiter=", "/>
-      <substitute>
-	<text macro="editor"/>
-	<text macro="translator"/>
-      </substitute>
-    </names>
-  </macro>
-  <macro name="author-short">
-    <names variable="author">
-      <name form="short" and="text" delimiter=", "/>
-      <substitute>
-        <names variable="editor"/>
-        <names variable="translator"/>
-      </substitute>
-    </names>
-  </macro>
-  <macro name="recipient">
+  <macro name="recipient-note">
     <names variable="recipient" delimiter=", ">
       <label form="verb" prefix=" " text-case="lowercase" suffix=" "/>
       <name and="text" delimiter=", "/>
     </names>
+  </macro>
+  <macro name="contributors-note">
+    <names variable="author">
+      <name and="text" sort-separator=", " delimiter=", "/>
+      <substitute>
+	<text macro="editor-note"/>
+	<text macro="translator-note"/>
+      </substitute>
+    </names>
+    <text macro="recipient-note"/>
   </macro>
   <macro name="recipient-short">
     <names variable="recipient">
@@ -95,13 +87,23 @@
       <name form="short" and="text" delimiter=", "/>
     </names>
   </macro>
-  <macro name="interviewer">
+  <macro name="contributors-short">
+    <names variable="author">
+      <name form="short" and="text" delimiter=", "/>
+      <substitute>
+        <names variable="editor"/>
+        <names variable="translator"/>
+      </substitute>
+    </names>
+    <text macro="recipient-short"/>
+  </macro>
+  <macro name="interviewer-note">
     <names variable="interviewer" delimiter=", ">
       <label form="verb" prefix=" " text-case="lowercase" suffix=" "/>
       <name and="text" delimiter=", "/>
     </names>
   </macro>
-  <macro name="title">
+  <macro name="title-note">
     <choose>
       <if variable="title" match="none">
         <text variable="genre"/>
@@ -137,9 +139,9 @@
       </else>
     </choose>
   </macro>
-  <macro name="description">
+  <macro name="description-note">
     <group delimiter=", ">
-      <text macro="interviewer"/>
+      <text macro="interviewer-note"/>
       <text variable="medium"/>
       <choose>
         <if variable="title" match="none"> </if>
@@ -150,14 +152,14 @@
       </choose>
     </group>
   </macro>
-  <macro name="container-prefix">
+  <macro name="container-prefix-note">
     <choose>
       <if type="chapter">
     <text term="in" text-case="lowercase" suffix=" "/>
       </if>
     </choose>
   </macro>
-  <macro name="locators">
+  <macro name="locators-note">
     <choose>
       <if type="article-journal">
         <text variable="volume" prefix=" "/>
@@ -243,6 +245,16 @@
       </else-if>
     </choose>
   </macro>
+  <macro name="point-locators-subsequent">
+    <group>
+      <choose>
+	    <if locator="page" match="none">
+	  <label variable="locator" form="short" include-period="true" suffix=" "/>
+	    </if>
+	  </choose>
+      <text variable="locator"/>
+	</group>
+  </macro>
   <macro name="point-locators">
     <choose>
       <if variable="locator" match="none">
@@ -252,18 +264,18 @@
         <text variable="locator" prefix=": "/>
       </else-if>
       <else>
-        <text variable="locator" prefix=", "/>
+        <text macro="point-locators-subsequent" prefix=", "/>
       </else>
     </choose>
   </macro>
-  <macro name="archive">
+  <macro name="archive-note">
     <group delimiter=", ">
       <text variable="archive_location"/>
       <text variable="archive"/>
       <text variable="archive-place"/>
     </group>
   </macro>
-  <macro name="issue">
+  <macro name="issue-note">
     <choose>
       <if type="article-journal">
         <text macro="issued" prefix=" (" suffix=")"/>
@@ -288,14 +300,14 @@
       </else>
     </choose>
   </macro>
-  <macro name="access">
+  <macro name="access-note">
     <group delimiter=", ">
 	  <choose>
 	    <if type="graphic report" match="any">
-      <text macro="archive"/>
+      <text macro="archive-note"/>
 	    </if>
 	    <else-if type="book thesis chapter article-journal article-newspaper article-magazine" match="none">
-      <text macro="archive"/>
+      <text macro="archive-note"/>
 	    </else-if>
 	  </choose>
       <text variable="URL"/>
@@ -313,7 +325,7 @@
         <if position="ibid-with-locator">
           <group delimiter=", ">
             <text term="ibid" text-case="capitalize-first" suffix="."/>
-            <text variable="locator"/>
+            <text macro="point-locators-subsequent"/>
           </group>
         </if>
         <else-if position="ibid">
@@ -321,35 +333,29 @@
         </else-if>
         <else-if position="subsequent">
           <group delimiter=", ">
-            <group>
-              <text macro="author-short"/>
-              <text macro="recipient-short"/>
-            </group>
+            <text macro="contributors-short"/>
             <text macro="title-short"/>
-            <text variable="locator"/>
+            <text macro="point-locators-subsequent"/>
           </group>
         </else-if>
         <else>
           <group delimiter=", ">
+            <text macro="contributors-note"/>
+            <text macro="title-note"/>
+            <text macro="description-note"/>
+            <text macro="secondary-contributors-note"/>
             <group>
-              <text macro="author"/>
-              <text macro="recipient"/>
-            </group>
-            <text macro="title"/>
-            <text macro="description"/>
-            <text macro="contributors"/>
-            <group>
-              <text macro="container-prefix"/>
+              <text macro="container-prefix-note"/>
               <text variable="container-title" font-style="italic"/>
             </group>
-            <text macro="container-contributors"/>
+            <text macro="container-contributors-note"/>
           </group>
-          <text macro="locators"/>
+          <text macro="locators-note"/>
           <text variable="collection-title" prefix=", "/>
-          <text macro="issue"/>
+          <text macro="issue-note"/>
           <text macro="locators-newspaper" prefix=", "/>
           <text macro="point-locators"/>
-          <text macro="access" prefix=", "/>
+          <text macro="access-note" prefix=", "/>
         </else>
       </choose>
     </layout>
