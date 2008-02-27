@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-22 20:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-27 04:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -12518,7 +12518,7 @@ REPLACE INTO translators VALUES ('6614a99-479a-4524-8e30-686e4d66663e', '1.0.0b3
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('92d4ed84-8d0-4d3c-941f-d4b9124cfbb', '1.0.0b3.r1', '', '2008-02-08 19:30:00', '1', '100', '4', 'IEEE Xplore', 'Simon Kornblith and Michael Berkowitz', 'https?://[^/]*ieeexplore.ieee.org[^/]*/(?:[^\?]+\?(?:|.*&)arnumber=[0-9]+|search/(?:searchresult.jsp|selected.jsp))', 
+REPLACE INTO translators VALUES ('92d4ed84-8d0-4d3c-941f-d4b9124cfbb', '1.0.0b3.r1', '', '2008-02-27 04:00:00', '1', '100', '4', 'IEEE Xplore', 'Simon Kornblith and Michael Berkowitz', 'https?://[^/]*ieeexplore.ieee.org[^/]*/(?:[^\?]+\?(?:|.*&)arnumber=[0-9]+|search/(?:searchresult.jsp|selected.jsp))', 
 'function detectWeb(doc, url) {
 	var articleRe = /[?&]arnumber=([0-9]+)/;
 	var m = articleRe.exec(url);
@@ -12567,7 +12567,9 @@ REPLACE INTO translators VALUES ('92d4ed84-8d0-4d3c-941f-d4b9124cfbb', '1.0.0b3.
 		var urls = new Array();
 		for(var url in items) {
 			urls.push(url);
+			Zotero.debug(url);
 		}
+		return false;
 	} else {
 		var urls = [url];
 	}
@@ -12615,14 +12617,18 @@ REPLACE INTO translators VALUES ('92d4ed84-8d0-4d3c-941f-d4b9124cfbb', '1.0.0b3.
 				
 				Zotero.Utilities.processDocuments(newurls, function(newDoc) {
 					var xpath = ''//p[@class="bodyCopyBlackLargeSpaced"]'';
-					var text = newDoc.evaluate(xpath, newDoc, namespace, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-					var m = text.match(/Identifier:\s+([^\n]*)\n/);
-					if (m){
-						item.DOI = m[1];
+					var textElmt = newDoc.evaluate(xpath, newDoc, namespace, XPathResult.ANY_TYPE, null).iterateNext();
+					if (textElmt) {
+						var m = textElmt.textContent.match(/Identifier:\s+([^\n]*)\n/);
+						if (m){
+							item.DOI = m[1];
+						}
 					}
 					var pdfpath = ''//td[2][@class="bodyCopyBlackLarge"]/a[@class="bodyCopy"][substring(text(), 1, 3) = "PDF"]'';
-					var pdfurl = newDoc.evaluate(pdfpath, newDoc, namespace, XPathResult.ANY_TYPE, null).iterateNext().href;
-					item.attachments = [{url:pdfurl, title:"IEEE Xplore Full Text PDF", mimeType:"application/pdf"}];
+					var pdfurlElmt = newDoc.evaluate(pdfpath, newDoc, namespace, XPathResult.ANY_TYPE, null).iterateNext();
+					if (pdfurlElmt) {
+						item.attachments = [{url:pdfurlElmt.href, title:"IEEE Xplore Full Text PDF", mimeType:"application/pdf"}];
+					}
 					item.complete();
 				}, function() {Zotero.done;});
 			});
