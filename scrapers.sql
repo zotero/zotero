@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-27 22:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-27 23:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -6251,7 +6251,75 @@ function doWeb(doc,url)
 }
 ');
 
-REPLACE INTO translators VALUES ('a1a97ad4-493a-45f2-bd46-016069de4162', '1.0.0b4.r1', '', '2008-02-27 22:30:00', '0', '100', '4', 'Optics Society of America', 'Michael Berkowitz', 'https?://[^.]+\.(opticsinfobase|osa)\.org', 
+REPLACE INTO translators VALUES ('8a07dd43-2bce-47bf-b4bf-c0fc441b79a9', '1.0.0b4.r5', '', '2008-02-27 23:00:00', '0', '100', '4', 'Optics Express', 'Michael Berkowitz', 'http://(www.)?opticsexpress\.org', 
+'function detectWeb(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	var searchpath = ''//div[@id="col2"]/p/strong/a'';
+	if (doc.evaluate(searchpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+		return "multiple";
+	} else if (url.indexOf("abstract.cfm") != -1) {
+		return "journalArticle";
+	}
+}', 
+'function doWeb(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	var  articles = new Array();
+	
+	if (detectWeb(doc, url) == "multiple") {
+		var items = new Object();
+		var xpath = ''//div[@id="col2"]/p/strong/a'';
+		var art = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var next_art;
+		while (next_art = art.iterateNext()) {
+			items[next_art.href] = Zotero.Utilities.trimInternal(next_art.textContent);
+		}
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			articles.push(i);
+		}
+	} else {
+		articles = [url];
+	}
+	for (var a in articles) {
+		var link = articles[a];
+		Zotero.Utilities.HTTP.doGet(link, function(text) {
+			var id = text.match(/name=\"articles\"\s+value=\"([^"]+)\"/)[1];
+			var action = text.match(/select\s+name=\"([^"]+)\"/)[1];
+			Zotero.debug(id);
+			Zotero.debug(action);
+			var get = ''http://www.opticsinfobase.org/custom_tags/IB_Download_Citations.cfm'';
+			var post = ''articles='' + id + ''&ArticleAction=save_endnote2&'' + action + ''=save_endnote2'';
+			Zotero.debug(get + "?" + post);
+			Zotero.Utilities.HTTP.doPost(get, post, function(text) {
+				var translator = Zotero.loadTranslator("import");
+				translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+				translator.setString(text);
+				translator.setHandler("itemDone", function(obj, item) {
+					var pubName;
+					if (item.journalAbbreviation) {
+						pubName = item.journalAbbreviation;
+					} else {
+						pubName = item.publicationTitle;
+					}
+					Zotero.debug(pubName);
+					item.attachments = [{url:articles[a], title:pubName + " Snapshot", mimeType:"text/html"}];
+					item.complete();
+				});
+				translator.translate();
+			});
+		});
+	}
+}');
+
+REPLACE INTO translators VALUES ('a1a97ad4-493a-45f2-bd46-016069de4162', '1.0.0b4.r1', '', '2008-02-27 23:00:00', '0', '100', '4', 'Optical Society of America', 'Michael Berkowitz', 'https?://[^.]+\.(opticsinfobase|osa)\.org', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
