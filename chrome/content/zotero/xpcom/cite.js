@@ -1310,7 +1310,7 @@ Zotero.CSL.prototype._processElements = function(item, element, formattedString,
 								} else if(attribute == "locator") {
 									exists = citationItem && citationItem.locator &&
 										(citationItem.locatorType == variables[j]
-										|| (!citation.locatorType && variables[j] == "page"));
+										|| (!citationItem.locatorType && variables[j] == "page"));
 								} else {	// attribute == "position"
 									if(variables[j] == "first") {
 										exists = !citationItem
