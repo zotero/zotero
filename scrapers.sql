@@ -13034,13 +13034,16 @@ REPLACE INTO translators VALUES ('82174f4f-8c13-403b-99b2-affc7bc7769b', '1.0.0b
 			if(itemType == "journalArticle") {
 				var parts = content.split(/(,|;)/);
 				newItem.publicationTitle = parts.shift();
-				newItem.date = parts.pop();
 				Zotero.debug(parts);
 				for each (var i in parts) {
 					if (i.match(/v(ol)?/)) {
 						newItem.volume = i.match(/\d+/)[0];
 					} else if (i.match(/pp/)) {
 						newItem.pages = i.match(/[\d\-]+/)[0];
+					} else if (i.match(/no?/)) {
+						newItem.issue = i.match(/\d+/)[0];
+					} else if (i.match(/\d{4}/)) {
+						newItem.date = i;
 					}
 				}
 			} else if(itemType == "book") {
