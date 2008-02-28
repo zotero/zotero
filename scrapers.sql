@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-27 23:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-28 17:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -12455,7 +12455,7 @@ REPLACE INTO translators VALUES ('df966c80-c199-4329-ab02-fa410c8eb6dc', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('f8765470-5ace-4a31-b4bd-4327b960ccd', '1.0.0b3.r1', '', '2008-02-14 23:15:00', '1', '100', '4', 'SpringerLink', 'Simon Kornblith', '^https?://(?:www\.springerlink\.com|springerlink.metapress.com)[^/]*/content/', 
+REPLACE INTO translators VALUES ('f8765470-5ace-4a31-b4bd-4327b960ccd', '1.0.0b3.r1', '', '2008-02-28 17:00:00', '1', '100', '4', 'SpringerLink', 'Simon Kornblith and Michael Berkowitz', 'https?://(?:www\.springerlink\.com|springerlink.metapress.com)[^/]*/content/', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -12521,6 +12521,13 @@ REPLACE INTO translators VALUES ('f8765470-5ace-4a31-b4bd-4327b960ccd', '1.0.0b3
 				item.creators.push(Zotero.Utilities.cleanAuthor(creator.lastName, "author"));
 			}
 			
+			var oldCreators = item.creators;
+			item.creators = new Array();
+			for each (var creator in oldCreators) {
+				if (creator[''lastName''] + creator[''firstName''] != "") {
+					item.creators.push({firstName:creator[''firstName''], lastName:creator[''lastName''], creatorType:"author"});
+				}
+			}
 			// fix incorrect chapters
 			Zotero.debug(item);
 			if(item.publicationTitle && item.itemType == "book") item.itemType = "bookSection";
@@ -12529,7 +12536,6 @@ REPLACE INTO translators VALUES ('f8765470-5ace-4a31-b4bd-4327b960ccd', '1.0.0b3
 			if(item.volume) {
 				item.volume = item.volume.replace("V", "");
 			}
-			
 			item.complete();
 		});
 		translator.translate();
