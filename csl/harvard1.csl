@@ -113,7 +113,6 @@
     <option name="disambiguate-add-year-suffix" value="true"/>
     <option name="disambiguate-add-names" value="true"/>
     <option name="disambiguate-add-givenname" value="true"/>
-    <option name="collapse" value="year"/>
     <layout prefix="(" suffix=")" delimiter="; ">
       <group delimiter=", ">
 	<group delimiter=" ">
