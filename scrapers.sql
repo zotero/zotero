@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-28 17:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-28 20:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -12950,7 +12950,7 @@ REPLACE INTO translators VALUES ('850f4c5f-71fb-4669-b7da-7fb7a95500ef', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('82174f4f-8c13-403b-99b2-affc7bc7769b', '1.0.0b3.r1', '', '2008-02-07 21:00:00', '1', '100', '4', 'Cambridge Scientific Abstracts', 'Simon Kornblith and Michael Berkowitz', 'https?://[^/]+/ids70/(?:results.php|view_record.php)', 
+REPLACE INTO translators VALUES ('82174f4f-8c13-403b-99b2-affc7bc7769b', '1.0.0b3.r1', '', '2008-02-28 20:00:00', '1', '100', '4', 'Cambridge Scientific Abstracts', 'Simon Kornblith and Michael Berkowitz', 'https?://[^/]+/ids70/(?:results.php|view_record.php)', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -13023,7 +13023,6 @@ REPLACE INTO translators VALUES ('82174f4f-8c13-403b-99b2-affc7bc7769b', '1.0.0b
 		var tds = dataRow.getElementsByTagName("td");
 		var heading = Zotero.Utilities.cleanString(tds[0].textContent).toLowerCase();
 		var content = Zotero.Utilities.cleanString(tds[2].textContent);
-		
 		if(heading == "database") {
 			newItem.repository = "Cambridge Scientific Abstracts ("+content+")";
 		} else if(heading == "author") {
@@ -13035,16 +13034,14 @@ REPLACE INTO translators VALUES ('82174f4f-8c13-403b-99b2-affc7bc7769b', '1.0.0b
 			if(itemType == "journalArticle") {
 				var parts = content.split(/(,|;)/);
 				newItem.publicationTitle = parts.shift();
-				var last = parts.pop();
-				var m = last.match(/([0-9]+)\(([0-9]+)\):([0-9]+)$/);
-				if(m) {
-					newItem.volume = m[1];
-					newItem.issue = m[2];
-					newItem.pages = m[3];
-				} else {
-					newItem.volume = last.match(/v(\d+)/)[1];
-					newItem.issue = last.match(/n(\d+)/)[1];
-					newItem.pages = last.match(/p([-\d]+)/)[1];
+				newItem.date = parts.pop();
+				Zotero.debug(parts);
+				for each (var i in parts) {
+					if (i.match(/v(ol)?/)) {
+						newItem.volume = i.match(/\d+/)[0];
+					} else if (i.match(/pp/)) {
+						newItem.pages = i.match(/[\d\-]+/)[0];
+					}
 				}
 			} else if(itemType == "book") {
 				var m = content.match(/^([^:]+): ([^,0-9]+)/);
