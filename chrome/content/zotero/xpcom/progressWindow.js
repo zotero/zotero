@@ -62,11 +62,6 @@ Zotero.ProgressWindowSet = new function() {
 			if (parent) {
 				var right = parent.screenX + parent.outerWidth;
 				var bottom = parent.screenY + parent.outerHeight;
-				// On OS X outerHeight doesn't include 22px title bar and
-				// moveTo() positions popups 22px below the specified location
-				if (Zotero.isMac) {
-					bottom += (22 * 2);
-				}
 			}
 			else {
 				var right = progressWin.screen.width + X_OFFSET - X_WINDOWLESS_OFFSET;
@@ -145,11 +140,11 @@ Zotero.ProgressWindow = function(_window){
 		}
 		
 		if (_window) {
-			_progressWindow = _window.openDialog("chrome://zotero/chrome/progressWindow.xul",
+			_progressWindow = _window.openDialog("chrome://zotero/content/progressWindow.xul",
 				"", "chrome,dialog=no,titlebar=no,popup=yes");
 		}
 		else {
-			_progressWindow = ww.openWindow(null, "chrome://zotero/chrome/progressWindow.xul",
+			_progressWindow = ww.openWindow(null, "chrome://zotero/content/progressWindow.xul",
 				"", "chrome,dialog=no,titlebar=no,popup=yes", null);
 		}
 		_progressWindow.addEventListener("pageshow", _onWindowLoaded, false);
