@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?oxygen RNGSchema="http://xbiblio.svn.sourceforge.net/viewvc/*checkout*/xbiblio/csl/schema/trunk/csl.rnc" type="compact"?>
+<style xmlns="http://purl.org/net/xbiblio/csl" class="in-text" xml:lang="en">
+  <info>
+    <title>Clinical Cancer Research</title>
+    <id>http://www.zotero.org/styles/clinical-cancer-research</id>
+    <link href="http://www.zotero.org/styles/clinical-cancer-research"/>
+    <link href="http://clincancerres.aacrjournals.org/misc/ifora.shtml#g"/>
+    <author>
+      <name>Maxime Rigo</name>
+	<email>lemaxx@gmail.com</email>
+<!-- modified from National Library of Medicine style by Michael Berkowitz-->
+    </author>
+    <category term="biology"/>
+    <category term="numeric"/>
+    <updated></updated>
+  </info>
+  <macro name="author">
+    <names variable="author" suffix=". ">
+
+      <name sort-separator=" " initialize-with="" name-as-sort-order="all" delimiter=", " delimiter-precedes-last="always"/>
+    </names>
+  </macro>
+  <macro name="editor">
+    <names variable="editor" suffix=", editor(s). ">
+      <name sort-separator=" " initialize-with="" name-as-sort-order="all" delimiter=", " delimiter-precedes-last="always"/>
+    </names>
+  </macro>
+  <macro name="publisher">
+
+    <text variable="publisher-place" suffix=": "/>
+    <text variable="publisher" suffix="; "/>
+    <date variable="issued">
+      <date-part name="year" suffix=". "/>
+    </date>
+  </macro>
+  <macro name="access">
+    <group delimiter=" ">
+      <group prefix="[" suffix="]" delimiter=" ">
+
+	<text term="cited" text-case="lowercase"/>
+	<date variable="accessed" suffix=" ">
+	  <date-part name="year"/>
+	  <date-part name="month" prefix=" " form="short"/>
+	  <date-part name="day" prefix=" "/>
+	</date>
+      </group>
+      <group>
+	<text value="Available from: "/>
+
+	<text variable="URL"/>
+      </group>
+    </group>
+  </macro>
+  <macro name="title">
+    <group delimiter=" ">
+      <text variable="title"/>
+      <choose>
+	<if variable="URL">
+
+	  <text term="internet" prefix="[" suffix="]" text-case="capitalize-first"/>
+	</if>
+      </choose>
+    </group>
+  </macro>
+  <macro name="edition">
+    <choose>
+      <if is-numeric="edition">
+	<group delimiter=" ">
+
+	  <number variable="edition" form="ordinal"/>
+	  <text term="edition" form="short" suffix="."/>
+	</group>
+      </if>
+      <else>
+	  <text variable="edition" suffix="."/>
+      </else>
+    </choose>
+  </macro>
+
+  <citation>
+    <option name="collapse" value="citation-number"/>
+    <sort>
+      <key variable="citation-number"/>
+    </sort>
+    <layout prefix="(" suffix=")" delimiter="; ">
+      <text variable="citation-number"/>
+    </layout>
+  </citation>
+
+  <bibliography>
+    <option name="et-al-min" value="7"/>
+    <option name="et-al-use-first" value="3"/>
+    <option name="second-field-align" value="true"/>
+    <layout>
+      <text variable="citation-number" suffix=". "/>
+      <text macro="author"/>
+      <text macro="title" suffix=". "/>
+      <choose>
+
+	<if type="book">
+	  <text macro="edition" prefix=" " suffix=" "/>
+	  <text macro="publisher" prefix=" "/>
+	</if>
+	<else-if type="chapter">
+	  <group prefix=" " suffix=". ">
+	    <text term="in" suffix=": " text-case="capitalize-first"/>
+	    <text macro="editor"/>
+	    <text variable="container-title"/>
+
+	  </group>
+	  <text macro="publisher" prefix=" "/>
+	  <text variable="page" prefix=" p. " suffix="."/>
+	</else-if>
+	<else>
+	  <text variable="container-title" suffix=" " form="short"/>
+	  <date variable="issued" suffix=";">
+	    <date-part name="year" suffix=" "/>
+	  </date>
+	  <text variable="volume" suffix=":"/>
+	  <text variable="page" suffix="."/>
+	</else>
+      </choose>
+      <text macro="access"/>
+    </layout>
+
+  </bibliography>
+</style>
+
