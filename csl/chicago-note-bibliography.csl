@@ -163,7 +163,7 @@
           <if type="interview">
             <text term="interview" text-case="lowercase"/>
           </if>
-          <else-if type="manuscript paper-conference" match="any">
+          <else-if type="manuscript speech" match="any">
             <text variable="genre" form="short"/>
           </else-if>
           <else-if type="personal_communication">
@@ -187,7 +187,7 @@
       </group>
       <choose>
         <if variable="title" match="none"> </if>
-        <else-if type="thesis paper-conference" match="any"> </else-if>
+        <else-if type="thesis speech" match="any"> </else-if>
         <else>
           <text variable="genre" text-case="capitalize-first"/>
         </else>
@@ -313,7 +313,7 @@
       <else-if variable="publisher-place publisher" match="any">
         <choose>
           <if variable="title" match="none"> </if>
-          <else-if type="paper-conference">
+          <else-if type="speech">
             <text variable="genre" text-case="capitalize-first" prefix=". "/>
           </else-if>
         </choose>
