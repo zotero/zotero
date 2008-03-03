@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-02-28 20:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-03 21:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1577,6 +1577,94 @@ function doWeb(doc, url) {
 	} else {
 		scrape(doc);
 	}
+}');
+
+REPLACE INTO translators VALUES ('3eabecf9-663a-4774-a3e6-0790d2732eed', '1.0.0b4.r5', '', '2008-03-03 21:00:00', '0', '100', '4', 'SciELO Brazil', 'Michael Berkowitz', 'http://www.scielo.br/', 
+'function detectWeb(doc, url) {
+	if (url.indexOf("wxis.exe/iah") != -1) {
+		if (doc.evaluate(''//font[@class="isoref"]/a[@class="isoref"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+			return "multiple";
+		}
+	} else if (url.indexOf("&pid=") != -1) {
+		return "journalArticle";
+	}
+}', 
+'function doWeb(doc, url) {
+	var arts = new Array();
+	if (detectWeb(doc, url) == "multiple") {
+		var items = new Object();
+		var titlepath = ''//font[@class="isoref"]/font[@class="negrito"]/b[1]'';
+		var linkpath = ''//font[@class="isoref"]/a[@class="isoref"]'';
+		var titles = doc.evaluate(titlepath, doc, null, XPathResult.ANY_TYPE, null);
+		var links = doc.evaluate(linkpath, doc, null, XPathResult.ANY_TYPE, null);
+		var next_title;
+		var next_link;
+		while ((next_title = titles.iterateNext()) && (next_link = links.iterateNext())) {
+			items[next_link.href] = next_title.textContent;
+		}
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			arts.push(i);
+		}
+	} else {
+		arts = [url];
+	}
+	Zotero.debug(arts);
+	Zotero.Utilities.processDocuments(arts, function(newDoc) {
+		var url = newDoc.location.href;
+		var pid = url.match(/pid=([^&]+)/)[1];
+		var get = ''http://www.scielo.br/scieloOrg/php/articleXML.php?pid='' + pid + ''&lang=en'';
+		Zotero.Utilities.HTTP.doGet(get, function(text) {
+			var item = new Zotero.Item("journalArticle");
+			
+			text = text.replace(/<!DOCTYPE[^>]*>/, "").replace(/<\?xml[^>]*\?>/, "").replace(/<self-uri.*\/self\-uri>/g, "");
+			var journal = text.split("<journal-meta>")[1].split("</journal-meta>")[0];
+			journal = "<journal>" + journal + "</journal>";
+			journal = journal.replace(/\-([a-z])/g, "$1");
+			var xml2 = new XML(journal);
+			var art = text.split("<article-meta>")[1].split("</article-meta>")[0];
+			art = "<article>" + art + "</article>";
+			art = art.replace(/\-([a-z])/g, "$1");
+			var xml3 = new XML(art);
+			
+			item.publicationTitle = xml2..journaltitle.text().toString();
+			item.journalAbbreviation = xml2..abbrevjournaltitle.text().toString();
+			item.ISSN = xml2..issn.text().toString();
+			item.publisher = xml2..publisher..publishername.text().toString();
+			
+			item.title = xml3..titlegroup..articletitle.text().toString();
+			for (var i = 0 ; i < xml3..contribgroup..contrib.length() ; i++) {
+				var name = xml3..contribgroup..contrib[i]..name;
+				item.creators.push({firstName:name..givennames.text().toString(), lastName:name..surname.text().toString(), creatorType:"author"});
+			}
+			
+			var date = xml3..pubdate[0];
+			var day = date..day.text().toString();
+			var month = date..month.text().toString();
+			var year = date..year.text().toString();
+			
+			date =  year;
+			if (month != "00") {
+				date = month + "/" + date;
+			}
+			if (day != "00") {
+				date = day + "/" + date;
+			}
+			item.date = date;
+			item.volume = xml3..volume.text().toString();
+			item.pages = xml3..fpage.text().toString() + "-" + xml3..lpage.text().toString();
+			
+			for (var i = 0 ; i < xml3..kwdgroup..kwd.length() ; i++) {
+				item.tags.push(xml3..kwdgroup..kwd[i].text().toString());
+			}
+			
+			item.attachments = [
+				{url:url, title:"SciELO Snapshot", mimeType:"text/html"}
+			];
+	
+			item.complete();
+		});
+	}, function() {Zotero.done;});
 }');
 
 REPLACE INTO translators VALUES ('0a84a653-79ea-4c6a-8a68-da933e3b504a', '1.0.0b4.r5', '', '2008-02-27 17:00:00', '0', '100', '4', 'Alexander Street Press', 'John West and Michael Berkowitz', '^http://(?:www\.)|(?:asp6new\.)alexanderstreet', 
