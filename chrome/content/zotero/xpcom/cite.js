@@ -311,7 +311,7 @@ Zotero.CSL._namesVariables = {
 	"translator":true,
 	"recipient":true,
 	"interviewer":true,
-	"series-editor":true,
+	"collection-editor":true,
 	"author":true
 }
 
@@ -1916,7 +1916,7 @@ Zotero.CSL.Item.prototype.getID = function() {
  * Mappings for names
  */
 Zotero.CSL.Item._zoteroNameMap = {
-	"series-editor":"seriesEditor"
+	"collection-editor":"seriesEditor"
 }
 
 /*
@@ -1977,6 +1977,7 @@ Zotero.CSL.Item._zoteroFieldMap = {
 		"URL":"url",
 		"DOI":"DOI",
 		"ISBN" : "ISBN",
+		"call-number":"callNumber",
 		"note":"extra",
 		"number":"number",
 		"references":"history"
@@ -2133,6 +2134,7 @@ Zotero.CSL.Item._optionalTypeMap = {
 	magazineArticle:"article-magazine",
 	newspaperArticle:"article-newspaper",
 	thesis:"thesis",
+	conferencePaper:"paper-conference",
 	letter:"personal_communication",
 	manuscript:"manuscript",
 	interview:"interview",
@@ -2151,11 +2153,11 @@ Zotero.CSL.Item._optionalTypeMap = {
 	instantMessage:"personal_communication",
 	forumPost:"webpage",
 	audioRecording:"song",		// ??
-	presentation:"paper-conference",
+	presentation:"speech",
 	videoRecording:"motion_picture",
 	tvBroadcast:"motion_picture",
 	radioBroadcast:"motion_picture",
-	podcast:"speech",			// ??
+	podcast:"song",			// ??
 	computerProgram:"book"		// ??
 };
 
@@ -2452,7 +2454,7 @@ Zotero.CSL.ItemSet.prototype.resort = function() {
 		if(!names) names = this.items[i].getNames("translator");
 		if(!names) names = this.items[i].getNames("recipient");
 		if(!names) names = this.items[i].getNames("interviewer");
-		if(!names) names = this.items[i].getNames("series-editor");
+		if(!names) names = this.items[i].getNames("collection-editor");
 		if(!names) continue;
 		namesByItem[i] = names;
 	}
