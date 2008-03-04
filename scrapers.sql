@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-04 18:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-04 20:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -12629,7 +12629,7 @@ REPLACE INTO translators VALUES ('f8765470-5ace-4a31-b4bd-4327b960ccd', '1.0.0b3
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('6614a99-479a-4524-8e30-686e4d66663e', '1.0.0b3.r1', '', '2007-03-24 22:20:00', 1, 100, 4, 'Nature', 'Simon Kornblith', '^https?://www\.nature\.com[^/]*/(?:[^/]+/journal/v[^/]+/n[^/]+/(?:(?:full|abs)/.+\.html|index.html)|search/executeSearch)', 
+REPLACE INTO translators VALUES ('6614a99-479a-4524-8e30-686e4d66663e', '1.0.0b3.r1', '', '2008-03-04 20:00:00', '1', '100', '4', 'Nature', 'Simon Kornblith', '^https?://www\.nature\.com[^/]*/(?:[^/]+/journal/v[^/]+/n[^/]+/(?:(?:full|abs)/.+\.html|index.html)|search/executeSearch)', 
 'function detectWeb(doc, url) {
 	var articleRe = /(https?:\/\/[^\/]+\/[^\/]+\/journal\/v[^\/]+\/n[^\/]+\/)(full|abs)(\/.+\.)html/;
 	
@@ -12652,7 +12652,7 @@ REPLACE INTO translators VALUES ('6614a99-479a-4524-8e30-686e4d66663e', '1.0.0b3
 	}
 	
 	return false;
-}',
+}', 
 'function doWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -12700,7 +12700,6 @@ REPLACE INTO translators VALUES ('6614a99-479a-4524-8e30-686e4d66663e', '1.0.0b3
 	
 	Zotero.Utilities.HTTP.doGet(RIS, function(text) {
 		var url = urls.shift();
-		
 		// load translator for RIS
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
@@ -12713,7 +12712,7 @@ REPLACE INTO translators VALUES ('6614a99-479a-4524-8e30-686e4d66663e', '1.0.0b3
 			]
 			
 			item.notes = new Array();
-			item.date = item.date.replace("print ", "");
+			if (item.date) item.date = item.date.replace("print ", "");
 			
 			item.complete();
 		});
