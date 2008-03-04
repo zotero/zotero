@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-04 16:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-04 18:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -3666,7 +3666,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('9575e804-219e-4cd6-813d-9b690cbfc0fc', '1.0.0b4.r5', '', '2007-11-14 20:45:00', '0', '100', '4', 'PLoS One and PLoS Neglected Tropical Diseases', 'Michael Berkowitz', '^http://www\.(plosone|plosntds)\.org/(search|article)/', 
+REPLACE INTO translators VALUES ('9575e804-219e-4cd6-813d-9b690cbfc0fc', '1.0.0b4.r5', '', '2008-03-04 18:00:00', '1', '100', '4', 'PLoS One, Neglected Tropical Diseases and Computational Biology', 'Michael Berkowitz', '^http://www\.(plosone|plosntds|ploscompbiol)\.org/(search|article)/', 
 'function detectWeb(doc, url) {
 	if (url.indexOf("Search.action") != -1 || url.indexOf("browse.action") != -1) {
 		return "multiple";
@@ -3685,7 +3685,6 @@ REPLACE INTO translators VALUES ('9575e804-219e-4cd6-813d-9b690cbfc0fc', '1.0.0b
 			items[next_art.href] = next_art.textContent;
 			next_art = articles.iterateNext();
 		}
-		
 		items = Zotero.selectItems(items);
 		for (var i in items) {
 			texts.push(i);
@@ -3693,25 +3692,23 @@ REPLACE INTO translators VALUES ('9575e804-219e-4cd6-813d-9b690cbfc0fc', '1.0.0b
 	} else {
 		texts.push(url);
 	}
-	
-	Zotero.debug(texts);
-	
-	Zotero.Utilities.processDocuments(texts, function(doc, url) {
-		var newURL = doc.location.href.replace("info", "getRisCitation.action?articleURI=info");
-		var pdfURL = doc.location.href.replace("info", "fetchObjectAttachment.action?uri=info") + ''&representation=PDF'';
-		Zotero.debug(newURL);
+	Zotero.Utilities.processDocuments(texts, function(newDoc, url) {
+		var newURL = newDoc.location.href.replace("info", "getRisCitation.action?articleURI=info");
+		var pdfURL = newDoc.location.href.replace("info", "fetchObjectAttachment.action?uri=info") + ''&representation=PDF'';
+		var doi = newDoc.location.href.match(/doi\/(.*)$/)[1];
 		Zotero.Utilities.HTTP.doGet(newURL, function(text) {
 			var translator = Zotero.loadTranslator("import");
 			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 			translator.setString(text);
 			translator.setHandler("itemDone", function(obj, item) {
 				item.attachments.push({url:pdfURL, title:"PLoS One Full Text PDF", mimeType:"application/pdf"});
+				item.DOI = doi;
+				item.repository = item.publicationTitle;
 				item.complete();
 			});
 			translator.translate();
 			Zotero.done();
-		});
-		
+		});	
 	}, function() {Zotero.done()});
 }');
 
