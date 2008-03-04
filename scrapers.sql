@@ -3666,7 +3666,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('9575e804-219e-4cd6-813d-9b690cbfc0fc', '1.0.0b4.r5', '', '2008-03-04 18:00:00', '1', '100', '4', 'PLoS One, Neglected Tropical Diseases and Computational Biology', 'Michael Berkowitz', '^http://www\.(plosone|plosntds|ploscompbiol)\.org/(search|article)/', 
+REPLACE INTO translators VALUES ('9575e804-219e-4cd6-813d-9b690cbfc0fc', '1.0.0b4.r5', '', '2008-03-04 20:00:00', '1', '100', '4', 'PLoS One, Neglected Tropical Diseases and Computational Biology', 'Michael Berkowitz', '^http://www\.(plosone|plosntds|ploscompbiol)\.org/(search|article)/', 
 'function detectWeb(doc, url) {
 	if (url.indexOf("Search.action") != -1 || url.indexOf("browse.action") != -1) {
 		return "multiple";
@@ -13208,7 +13208,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('e78d20f7-488-4023-831-dfe39679f3f', '1.0.0b3.r1', '', '2008-03-04 16:00:00', '1', '100', '4', 'ACM', 'Simon Kornblith', 'https?://[^/]*portal\.acm\.org[^/]*/(?:results\.cfm|citation\.cfm)', 
+REPLACE INTO translators VALUES ('e78d20f7-488-4023-831-dfe39679f3f', '1.0.0b3.r1', '', '2008-03-04 20:00:00', '1', '100', '4', 'ACM', 'Simon Kornblith', 'https?://[^/]*portal\.acm\.org[^/]*/(?:results\.cfm|citation\.cfm)', 
 'function detectWeb(doc, url) {
 	if(url.indexOf("/results.cfm") != -1) {
 		var items = Zotero.Utilities.getItemArray(doc, doc, ''^https?://[^/]+/citation.cfm\\?[^#]+$'');
