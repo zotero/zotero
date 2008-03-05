@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-05 17:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-05 17:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -6964,7 +6964,7 @@ function doWeb(doc, url)	{
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '1.0.0b3.r1', '', '2007-11-14 17:20:00', '1', '100', '4', 'Library Catalog (InnoPAC)', 'Simon Kornblith', '^https?://[^/]+/(?:search\??/|record=|search%7e/)', 
+REPLACE INTO translators VALUES ('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '1.0.0b3.r1', '', '2008-03-05 17:30:00', '1', '100', '4', 'Library Catalog (InnoPAC)', 'Simon Kornblith', 'https?://[^/]+/(?:search\??/|record=?|search%7e/|search~S0\?)', 
 'function detectWeb(doc, url) {
 	// First, check to see if the URL alone reveals InnoPAC, since some sites don''t reveal the MARC button
 	var matchRegexp = new RegExp(''^(https?://[^/]+/search\\??/[^/]+/[^/]+/[0-9]+\%2C[^/]+/)frameset(.+)$'');
@@ -6985,7 +6985,7 @@ REPLACE INTO translators VALUES ('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '1.0.0b
 	// Also, check for links to an item display page
 	var tags = doc.getElementsByTagName("a");
 	for(var i=0; i<tags.length; i++) {
-		if(matchRegexp.test(tags[i].href)) {
+		if(matchRegexp.test(tags[i].href) || tags[i].href.match(/^https?:\/\/[^/]+\/(?:search\??\/|record=?|search%7e\/)/)) {
 			return "multiple";
 		}
 	}
@@ -7076,6 +7076,7 @@ function doWeb(doc, url) {
 	var marc = translator.getTranslatorObject();
 	
 	var matchRegexp = new RegExp(''^(https?://[^/]+/search\\??/[^/]+/[^/]+/[0-9]+\%2C[^/]+/)frameset(.+)$'');
+	Zotero.debug(matchRegexp);
 	var m = matchRegexp.exec(uri);
 	if(m) {
 		newUri = m[1]+''marc''+m[2];
@@ -7133,19 +7134,7 @@ function doWeb(doc, url) {
 				
 				// Go through links
 				while(link) {
-					if(tagRegexp.test(link.href)) {
-						if(!firstURL) firstURL = link.href;
-						
-						var text = link.textContent;
-						if(text) {
-							text = Zotero.Utilities.cleanString(text);
-							if(availableItems[link.href]) {
-								availableItems[link.href] += " "+text;
-							} else {
-								availableItems[link.href] = text;
-							}
-						}
-					}
+					availableItems[link.href] = link.textContent;
 					link = links.iterateNext();
 				}
 				i++;
@@ -7160,11 +7149,7 @@ function doWeb(doc, url) {
 		
 		var newUrls = new Array();
 		for(var url in items) {
-			var m = matchRegexp.exec(url);
-			if(!m) {
-				throw("matchRegexp choked on "+url);
-			}
-			newUrls.push(m[1]+"marc"+m[2]);
+			newUrls.push(url.replace("frameset", "marc"));
 		}
 		
 		pageByPage(marc, newUrls);
