@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-04 20:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-05 17:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -3376,7 +3376,7 @@ REPLACE INTO translators VALUES ('303c2744-ea37-4806-853d-e1ca67be6818', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('27ee5b2c-2a5a-4afc-a0aa-d386642d4eed', '1.0.0b4.r5', '', '2008-02-20 17:00:00', '1', '100', '4', 'PubMed Central', 'Michael Berkowitz', 'http://[^/]*.nih.gov/', 
+REPLACE INTO translators VALUES ('27ee5b2c-2a5a-4afc-a0aa-d386642d4eed', '1.0.0b4.r5', '', '2008-03-05 17:00:00', '1', '100', '4', 'PubMed Central', 'Michael Berkowitz', 'http://[^/]*.nih.gov/', 
 'function detectWeb(doc, url) {
 	if (doc.evaluate(''//table[@id="ResultPanel"]//td[2]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
@@ -3417,7 +3417,12 @@ REPLACE INTO translators VALUES ('27ee5b2c-2a5a-4afc-a0aa-d386642d4eed', '1.0.0b
 	}
 	Zotero.Utilities.processDocuments(URIs, function(newDoc) {
 		var newUrl = newDoc.location.href;
-		var abs = newDoc.evaluate(''//td[@class="content-cell"]/div[@class="section-content"]'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		if (newDoc.evaluate(''//td[@class="content-cell"]//div[@class="section-content"]'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+			var abs = newDoc.evaluate(''//td[@class="content-cell"]//div[@class="section-content"]'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		}
+		if (abs) {
+			if (abs.substr(0,8) == "Abstract") abs = abs.substr(8);
+		}
 		Zotero.Utilities.HTTP.doGet(newDoc.location.href, function(text) {
 			var tags = new Object();
 			var meta = text.match(/<meta[^>]*>/gi);
@@ -3443,7 +3448,7 @@ REPLACE INTO translators VALUES ('27ee5b2c-2a5a-4afc-a0aa-d386642d4eed', '1.0.0b
 				newItem.attachments.push({url:tags["pdf_url"], title:"PubMed Central Full Text PDF", mimeType:"application/pdf"});
 			}
 			newItem.url = newUrl;
-			newItem.abstractNote = abs;
+			if (abs) newItem.abstractNote = abs;
 			newItem.complete();
 		});
 	}, function() {Zotero.done;});
