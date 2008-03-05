@@ -2505,7 +2505,7 @@ REPLACE INTO translators VALUES ('5dd22e9a-5124-4942-9b9e-6ee779f1023e', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('d3b1d34c-f8a1-43bb-9dd6-27aa6403b217', '1.0.0b4.r5', '', '2008-01-09 20:00:00', '0', '100', '4', 'YouTube', 'Sean Takats', 'https?://[^/]*youtube\.com\/', 
+REPLACE INTO translators VALUES ('d3b1d34c-f8a1-43bb-9dd6-27aa6403b217', '1.0.0b4.r5', '', '2008-03-05 16:00:00', '0', '100', '4', 'YouTube', 'Sean Takats', 'https?://[^/]*youtube\.com\/', 
 'function detectWeb(doc, url){
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -2516,10 +2516,13 @@ REPLACE INTO translators VALUES ('d3b1d34c-f8a1-43bb-9dd6-27aa6403b217', '1.0.0b
 	if(doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "videoRecording";
 	}
-	if (doc.evaluate(''//a[@class="newvtitlelink"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
+	if (doc.evaluate(''//div[@class="vtitle"]/a[@class="vtitlelink" and contains(@href, "/watch?v=")]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
 		return "multiple";
 	}
-	if (doc.evaluate(''//div[starts-with(@class, "vtitle")]/a'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){	
+	if (doc.evaluate(''//div[starts-with(@class, "vtitle")]/a[contains(@href, "/watch?v=")]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){	
+		return "multiple";
+	}
+	if (doc.evaluate(''//div[@class="vltitle"]/div[@class="vlshortTitle"]/a[contains(@href, "/watch?v=")]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){	
 		return "multiple";
 	}
 }
@@ -2543,13 +2546,15 @@ REPLACE INTO translators VALUES ('d3b1d34c-f8a1-43bb-9dd6-27aa6403b217', '1.0.0b
 	} else {
 		// multiple videos
 		var items = new Object();
-		var videoRe = /\/watch\?v=([a-zA-Z0-9-]+)/;
+		var videoRe = /\/watch\?v=([a-zA-Z0-9-_]+)/;
 // search results		
-		if (elmt = doc.evaluate(''//a[@class="newvtitlelink"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
-			elmts = doc.evaluate(''//a[@class="newvtitlelink"]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		if (elmt = doc.evaluate(''//div[@class="vtitle"]/a[@class="vtitlelink" and contains(@href, "/watch?v=")]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
+			elmts = doc.evaluate(''//div[@class="vtitle"]/a[@class="vtitlelink" and contains(@href, "/watch?v=")]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
 // categories and community pages and user pages and browse pages
-		} else if (doc.evaluate(''//div[starts-with(@class, "vtitle")]/a'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
-			elmts = doc.evaluate(''//div[starts-with(@class, "vtitle")]/a'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		} else if (doc.evaluate(''//div[starts-with(@class, "vtitle")]/a[contains(@href, "/watch?v=")]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
+			elmts = doc.evaluate(''//div[starts-with(@class, "vtitle")]/a[contains(@href, "/watch?v=")]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		} else if (doc.evaluate(''//div[@class="vltitle"]/div[@class="vlshortTitle"]/a[contains(@href, "/watch?v=")]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
+			elmts = doc.evaluate(''//div[@class="vltitle"]/div[@class="vlshortTitle"]/a[contains(@href, "/watch?v=")]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
 		}
 		while (elmt = elmts.iterateNext()){
 			var title = elmt.textContent;
