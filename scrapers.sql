@@ -2505,7 +2505,7 @@ REPLACE INTO translators VALUES ('5dd22e9a-5124-4942-9b9e-6ee779f1023e', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('d3b1d34c-f8a1-43bb-9dd6-27aa6403b217', '1.0.0b4.r5', '', '2008-03-05 16:00:00', '0', '100', '4', 'YouTube', 'Sean Takats', 'https?://[^/]*youtube\.com\/', 
+REPLACE INTO translators VALUES ('d3b1d34c-f8a1-43bb-9dd6-27aa6403b217', '1.0.0b4.r5', '', '2008-03-05 18:00:00', '0', '100', '4', 'YouTube', 'Sean Takats', 'https?://[^/]*youtube\.com\/', 
 'function detectWeb(doc, url){
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -3376,7 +3376,7 @@ REPLACE INTO translators VALUES ('303c2744-ea37-4806-853d-e1ca67be6818', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('27ee5b2c-2a5a-4afc-a0aa-d386642d4eed', '1.0.0b4.r5', '', '2008-03-05 17:00:00', '1', '100', '4', 'PubMed Central', 'Michael Berkowitz', 'http://[^/]*.nih.gov/', 
+REPLACE INTO translators VALUES ('27ee5b2c-2a5a-4afc-a0aa-d386642d4eed', '1.0.0b4.r5', '', '2008-03-05 18:00:00', '1', '100', '4', 'PubMed Central', 'Michael Berkowitz', 'http://[^/]*.nih.gov/', 
 'function detectWeb(doc, url) {
 	if (doc.evaluate(''//table[@id="ResultPanel"]//td[2]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
