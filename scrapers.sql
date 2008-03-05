@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-05 18:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-05 20:15:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1577,6 +1577,63 @@ function doWeb(doc, url) {
 	} else {
 		scrape(doc);
 	}
+}');
+
+REPLACE INTO translators VALUES ('636c8ea6-2af7-4488-8ccd-ea280e4a7a98', '1.0.0b4.r5', '', '2008-03-05 20:15:00', '0', '100', '4', 'Sage Journals Online', 'Michael Berkowitz', 'http://(.*)\.sagepub\.com/', 
+'function detectWeb(doc, url) {
+	if (url.indexOf("searchresults?") != -1) {
+		return "multiple";
+	} else if (url.indexOf("cgi/content") != -1) {
+		return "journalArticle";
+	}
+}', 
+'function doWeb(doc, url) {
+	var arts = new Array();
+	if (detectWeb(doc, url) == "multiple") {
+		var items = new Object();
+		var searchx = ''//form[@id="search_results"]/div[@class="resultsitem"]/div[2]'';
+		var searchres = doc.evaluate(searchx, doc, null, XPathResult.ANY_TYPE, null);
+		var next_res;
+		while (next_res = searchres.iterateNext()) {
+			var titlex = ''.//label'';
+			var linkx = ''.//a[1]'';
+			var title = doc.evaluate(titlex, next_res, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+			var link = doc.evaluate(linkx, next_res, null, XPathResult.ANY_TYPE, null).iterateNext().href;
+			items[link] = title;
+		}
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			arts.push(i);
+		} 
+	} else {
+		arts = [url];
+	}
+	Zotero.debug(arts);
+	Zotero.Utilities.processDocuments(arts, function(newDoc) {
+		var risurl = newDoc.evaluate(''//a[contains(text(), "Download to citation manager")]'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().href.replace("?", "?type=refman&");
+		var newurl = newDoc.location.href;
+		var pdfurl = newurl.replace(/content\/[^/]+/, "reprint") + ".pdf";
+		Zotero.debug(pdfurl);
+		Zotero.Utilities.HTTP.doGet(risurl, function(text) {
+			var translator = Zotero.loadTranslator("import");
+			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+			translator.setString(text);
+			if (text.match(/N1(.*)\n/)) {
+				var doi = text.match(/N1\s+\-\s+(.*)\n/)[1];
+			}
+			translator.setHandler("itemDone", function(obj, item) {
+				item.attachments = [
+					{url:newurl, title:"Sage Journals Snapshot", mimeType:"text/html"},
+					{url:pdfurl, title:"Sage Journals Full Text PDF", mimeType:"application/pdf"}
+				];
+				if (doi) item.DOI = doi;
+				if (item.notes) item.notes = [];
+				item.complete();
+			});
+			translator.translate();
+		});
+	}, function() {Zotero.done;});
+	Zotero.wait();
 }');
 
 REPLACE INTO translators VALUES ('3eabecf9-663a-4774-a3e6-0790d2732eed', '1.0.0b4.r5', '', '2008-03-03 21:00:00', '0', '100', '4', 'SciELO Brazil', 'Michael Berkowitz', 'http://www.scielo.br/', 
