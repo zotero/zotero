@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-06 19:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-06 23:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -12384,7 +12384,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('cb48083-4d9-4ed-ac95-2e93dceea0ec', '1.0.0b3.r1', '', '2008-02-13 20:05:00', '1', '100', '4', 'Blackwell Synergy', 'Simon Kornblith and Michael Berkowitz', '^https?://www\.blackwell-synergy\.com[^/]*/(?:action/doSearch|doi/|links/doi/)', 
+REPLACE INTO translators VALUES ('cb48083-4d9-4ed-ac95-2e93dceea0ec', '1.0.0b3.r1', '', '2008-03-06 23:00:00', '1', '100', '4', 'Blackwell Synergy', 'Michael Berkowitz', 'https?://www\.blackwell-synergy\.com[^/]*/(?:action/doSearch|doi/|links/doi/)', 
 'function detectWeb(doc, url) {
 	if(url.indexOf("doSearch") != -1) {
 		return "multiple";
@@ -12393,75 +12393,31 @@ REPLACE INTO translators VALUES ('cb48083-4d9-4ed-ac95-2e93dceea0ec', '1.0.0b3.r
 	}
 }', 
 'function doWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == ''x'') return namespace; else return null;
-	} : null;
-	
-	var post = "";
-	
-	var fulltext = new Object();
-	
-	if(url.indexOf("doSearch") != -1) {
-		var items = new Array();
-		var links = new Array();
-		
-		var tableRows = doc.evaluate(''//div[@class="toc_item"]'', doc,
-			nsResolver, XPathResult.ANY_TYPE, null);
-		var tableRow;
-		// Go through table rows
-		while(tableRow = tableRows.iterateNext()) {
-			var id = doc.evaluate(''.//input[@name="doi"]'', tableRow, nsResolver, XPathResult.ANY_TYPE,
-				null).iterateNext().value;
-			items[id] = Zotero.Utilities.cleanString(doc.evaluate(''.//label'', tableRow,
-				nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+	var articles = new Array();
+	if (detectWeb(doc, url) == "multiple") {
+		var items = new Object();
+		var rows = doc.evaluate(''//div[@class="toc_item"]'', doc, null, XPathResult.ANY_TYPE, null);
+		var row;
+		while (row = rows.iterateNext()) {
+			var title = Zotero.Utilities.trimInternal(doc.evaluate(''.//label'', row, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+			var id = doc.evaluate(''.//input[@name="doi"]'', row, null, XPathResult.ANY_TYPE, null).iterateNext().value;
+			items[id] = title;
 		}
-		
-		var items = Zotero.selectItems(items);
-		if(!items) return true;
-		
-		// find all fulltext links so we can determine where we can scrape the fulltext article
-		var fulltextLinks = doc.evaluate(''//a[img[@alt="Full Text Article"]]'', doc,
-			nsResolver, XPathResult.ANY_TYPE, null);
-		var fulltextLink;
-		while(fulltextLink = fulltextLinks.iterateNext()) {
-			links.push(fulltextLink.href.toString());
-		}
-		
-		for(var i in items) {
-			post += "doi="+encodeURIComponent(i)+"&";
-			
-			// check for fulltext links
-			for each(var link in links) {
-				if(link.indexOf(i) != -1) {
-					fulltext[i] = true;
-					break;
-				}
-			}
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			articles.push(i);
 		}
 	} else {
-		var m = url.match(/https?:\/\/[^\/]+\/doi\/[^\/]+\/([^\?]+)(\?|$)/);
-		if (m) {
-			var doi = m[1];
-		} else {
-			m = url.match(/https?:\/\/[^\/]+\/links\/doi\/([^\?]+)(\?|$)/);
-			var doi = m[1];
-		}
-		if (doi.match(/\/abs$/)) {
-			doi = doi.substr(0, doi.length - 4);
-		}
-		post += "doi="+encodeURIComponent(doi)+"&";
-		if(url.indexOf("doi/full") != -1 ||
-		  doc.evaluate(''//img[@alt="Full Text Article"]'', doc, nsResolver, XPathResult.ANY_TYPE,
-		  null).iterateNext()) {
-			fulltext[doi] = true;
-		}
+		articles = [url.match(/doi\/[^/]+\/([^\?]+)(\?|$)/)[1]];
 	}
 	
-	post += "include=abs&format=refman&direct=on&submit=Download+references";
-	
-	Zotero.Utilities.HTTP.doPost("http://www.blackwell-synergy.com/action/downloadCitation", post, function(text) {
-		// load translator for RIS
+	var post = "";
+	for each (var doi in articles) {
+		post += "doi=" + encodeURIComponent(doi) + "&"
+	}
+	post += "include=abs&format=refman&submit=Download+references";
+	Zotero.debug(post);
+	Zotero.Utilities.HTTP.doPost(''http://www.blackwell-synergy.com/action/downloadCitation'', post, function(text) {
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 		translator.setString(text);
@@ -12471,17 +12427,20 @@ REPLACE INTO translators VALUES ('cb48083-4d9-4ed-ac95-2e93dceea0ec', '1.0.0b3.r
 				{url:item.url.replace("/doi/abs", "/doi/pdf"), title:"Blackwell Synergy Full Text PDF", mimeType:"application/pdf"}
 			];
 			// use fulltext if possible
-			if(fulltext[item.DOI.substr(4)]) {
-				item.attachments[0].url = item.attachments[0].url.replace("/doi/abs", "/doi/full");
+			var oldCreators = item.creators;
+			item.creators = []
+			Zotero.debug(oldCreators);
+			for each (var author in oldCreators) {
+				if (author["lastName"] != "") {
+					item.creators.push(author);
+				}
 			}
-			
 			item.complete();
 		});
 		translator.translate();
 		
 		Zotero.done();
 	});
-	Zotero.wait();
 }');
 
 REPLACE INTO translators VALUES ('df966c80-c199-4329-ab02-fa410c8eb6dc', '1.0.0b3.r1', '', '2008-01-23 20:00:00', '1', '100', '4', 'University of Chicago', 'Sean Takats', 'https?://[^/]*journals\.uchicago\.edu[^/]*/(?:doi/abs|doi/full|toc)', 
