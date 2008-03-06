@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-05 21:15:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-06 19:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -3433,7 +3433,7 @@ REPLACE INTO translators VALUES ('303c2744-ea37-4806-853d-e1ca67be6818', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('27ee5b2c-2a5a-4afc-a0aa-d386642d4eed', '1.0.0b4.r5', '', '2008-03-05 18:00:00', '1', '100', '4', 'PubMed Central', 'Michael Berkowitz', 'http://[^/]*.nih.gov/', 
+REPLACE INTO translators VALUES ('27ee5b2c-2a5a-4afc-a0aa-d386642d4eed', '1.0.0b4.r5', '', '2008-03-06 19:00:00', '1', '100', '4', 'PubMed Central', 'Michael Berkowitz', 'http://[^/]*.nih.gov/', 
 'function detectWeb(doc, url) {
 	if (doc.evaluate(''//table[@id="ResultPanel"]//td[2]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
@@ -3472,15 +3472,9 @@ REPLACE INTO translators VALUES ('27ee5b2c-2a5a-4afc-a0aa-d386642d4eed', '1.0.0b
 	} else {
 		URIs.push(url);
 	}
-	Zotero.Utilities.processDocuments(URIs, function(newDoc) {
-		var newUrl = newDoc.location.href;
-		if (newDoc.evaluate(''//td[@class="content-cell"]//div[@class="section-content"]'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-			var abs = newDoc.evaluate(''//td[@class="content-cell"]//div[@class="section-content"]'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-		}
-		if (abs) {
-			if (abs.substr(0,8) == "Abstract") abs = abs.substr(8);
-		}
-		Zotero.Utilities.HTTP.doGet(newDoc.location.href, function(text) {
+	
+	for each (var link in URIs) {
+		Zotero.Utilities.HTTP.doGet(link, function(text) {
 			var tags = new Object();
 			var meta = text.match(/<meta[^>]*>/gi);
 			for (var i in meta) {
@@ -3490,25 +3484,23 @@ REPLACE INTO translators VALUES ('27ee5b2c-2a5a-4afc-a0aa-d386642d4eed', '1.0.0b
 				}
 			}
 			var newItem = new Zotero.Item("journalArticle");
-			
 			for (var tag in tagMap) {
 				newItem[tagMap[tag]] = Zotero.Utilities.unescapeHTML(tags[tag]);
 			}
-			
 			for (var i in meta) {
 				if (meta[i].match(/DC.Contributor/)) {
 					newItem.creators.push(Zotero.Utilities.cleanAuthor(meta[i].match(/content=\"([^"]*)\">/)[1], "author"));
 				}
 			}
-			newItem.attachments.push({url:newUrl, title:"PubMed Central Snapshot", mimeType:"text/html"});
+			newItem.attachments.push({url:tags["fulltext_html_url"], title:"PubMed Central Snapshot", mimeType:"text/html"});
 			if (tags["pdf_url"]) {	
 				newItem.attachments.push({url:tags["pdf_url"], title:"PubMed Central Full Text PDF", mimeType:"application/pdf"});
 			}
-			newItem.url = newUrl;
-			if (abs) newItem.abstractNote = abs;
+			newItem.url = tags["fulltext_html_url"];
+			newItem.extra = text.match(/PMC\d+/)[0];
 			newItem.complete();
 		});
-	}, function() {Zotero.done;});
+	}
 	Zotero.wait();
 }');
 
