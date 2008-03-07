@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-07 17:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-07 18:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -11897,7 +11897,7 @@ REPLACE INTO translators VALUES ('fe728bc9-595a-4f03-98fc-766f1d8d0936', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('b6d0a7a-d076-48ae-b2f0-b6de28b194e', '1.0.0b3.r1', '', '2008-02-22 16:30:00', '1', '100', '4', 'ScienceDirect', 'Michael Berkowitz', 'https?://www\.sciencedirect\.com[^/]*/science\?(?:.+\&|)_ob=(?:ArticleURL|ArticleListURL|PublicationURL)', 
+REPLACE INTO translators VALUES ('b6d0a7a-d076-48ae-b2f0-b6de28b194e', '1.0.0b3.r1', '', '2008-03-07 18:00:00', '1', '100', '4', 'ScienceDirect', 'Michael Berkowitz', 'https?://www\.sciencedirect\.com[^/]*/science\?(?:.+\&|)_ob=(?:ArticleURL|ArticleListURL|PublicationURL)', 
 'function detectWeb(doc, url) {
 	if (url.indexOf("_ob=DownloadURL") != -1) {
 		return false;
@@ -11923,7 +11923,7 @@ REPLACE INTO translators VALUES ('b6d0a7a-d076-48ae-b2f0-b6de28b194e', '1.0.0b3.
 			if (url.indexOf("_ob=PublicationURL") != -1) {
 				xpath = ''//table[@class="txt"]/tbody/tr/td[2]'';
 			} else {
-				xpath = ''//table[@class="tableResults-T"]/tbody/tr/td[2]'';
+				xpath = ''//table[@class="tableResults-T"]/tbody/tr[1]/td[2]'';
 			}
 			var rows = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
 			var next_row;
@@ -11939,7 +11939,6 @@ REPLACE INTO translators VALUES ('b6d0a7a-d076-48ae-b2f0-b6de28b194e', '1.0.0b3.
 		} else {
 			articles = [url];
 		}
-		Zotero.debug(articles);
 		Zotero.Utilities.processDocuments(articles, function(newDoc) {
 			var doi = newDoc.evaluate(''//div[@class="pageText"][@id="sdBody"]/a[contains(text(), "doi")]'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.substr(4);
 			Zotero.debug(doi);
