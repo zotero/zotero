@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-07 18:45:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-07 22:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1577,6 +1577,61 @@ function doWeb(doc, url) {
 	} else {
 		scrape(doc);
 	}
+}');
+
+REPLACE INTO translators VALUES ('9e306d5d-193f-44ae-9dd6-ace63bf47689', '1.0.0b3r1', '', '2008-03-07 22:00:00', '0', '100', '4', 'IngentaConnect', 'Michael Berkowitz', 'http://(www.)?ingentaconnect.com', 
+'function detectWeb(doc, url) {
+	if (url.indexOf("article?") != -1) {
+		return "journalArticle";
+	} else if (url.indexOf("search?") !=-1) {
+		return "multiple";
+	}
+}', 
+'function doWeb(doc, url) {
+	var articles = new Array();
+	if (detectWeb(doc, url) == "multiple") {
+		var items = new Object();
+		var artlink = ''//div/p/strong/a'';
+		var links = doc.evaluate(artlink, doc, null, XPathResult.ANY_TYPE, null);
+		var next_link;
+		while (next_link = links.iterateNext()) {
+			items[next_link.href] = next_link.textContent;
+		}
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			articles.push(i);
+		}
+	} else {
+		articles = [url];
+	}
+	Zotero.Utilities.processDocuments(articles, function(newDoc) {
+		var risurl = newDoc.evaluate(''//div[@id="export-formats"]/ul/li/a[@title="EndNote Export"]'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().href;
+		var abs = Zotero.Utilities.trimInternal(newDoc.evaluate(''//div[@id="abstract"]'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent).substr(10);
+		var keywords = newDoc.evaluate(''//div[@id="info"]/p[1]/a'', newDoc, null, XPathResult.ANY_TYPE, null);
+		var key;
+		var keys = new Array();
+		while (key = keywords.iterateNext()) {
+			keys.push(key.textContent);
+		}
+		Zotero.Utilities.HTTP.doGet(risurl, function(text) {
+			Zotero.debug(text);
+			var translator = Zotero.loadTranslator("import");
+			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+			translator.setString(text);
+			translator.setHandler("itemDone", function(obj, item) {
+				item.abstractNote = abs;
+				item.attachments = [{url:item.url, title:"IngentaConnect Snapshot", mimeType:"text/html"}];
+				item.tags = keys;
+				if (item.DOI) {
+					if (item.DOI.match(/doi/)) {
+						item.DOI = item.DOI.substr(4);
+					}
+				}
+				item.complete();
+			});
+			translator.translate();
+		});
+	}, function() {Zotero.done;});
 }');
 
 REPLACE INTO translators VALUES ('636c8ea6-2af7-4488-8ccd-ea280e4a7a98', '1.0.0b4.r5', '', '2008-03-05 21:15:00', '0', '100', '4', 'Sage Journals Online', 'Michael Berkowitz', 'http://(.*)\.sagepub\.com/', 
