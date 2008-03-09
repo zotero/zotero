@@ -131,8 +131,11 @@
 	  <text macro="author-short"/>
 	  <text macro="year-date"/>
 	</group>
-	<text variable="locator" prefix="p."/>
-      </group>
+	<group>
+	  <text term="page" form="short" suffix=". "/>
+	  <text variable="locator"/>
+     </group>
+	 </group>
     </layout>
   </citation>
   <bibliography>
