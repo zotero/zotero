@@ -310,14 +310,18 @@
       <if type="article-journal">
         <text macro="issued" prefix=" (" suffix=")"/>
       </if>
-      <else-if variable="publisher-place publisher" match="any">
+      <else-if type="speech">
         <choose>
           <if variable="title" match="none"> </if>
-          <else-if type="speech">
+          <else>
             <text variable="genre" text-case="capitalize-first" prefix=". "/>
-          </else-if>
+          </else>
         </choose>
         <text macro="event" prefix=" "/>
+        <text variable="event-place" prefix=", "/>
+        <text macro="issued" prefix=", "/>
+      </else-if>
+      <else-if variable="publisher-place publisher" match="any">
         <group prefix=". " delimiter=", ">
           <choose>
             <if type="thesis">
