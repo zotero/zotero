@@ -16454,7 +16454,7 @@ function doImport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7', '1.0.2', '', '2008-01-04 02:47:18', '1', '100', '3', 'RIS', 'Simon Kornblith', 'ris', 
+REPLACE INTO translators VALUES ('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7', '1.0.2', '', '2008-03-10 19:45:00', '1', '100', '3', 'RIS', 'Simon Kornblith', 'ris', 
 'Zotero.configure("dataMode", "line");
 Zotero.addOption("exportNotes", true);
 
@@ -16464,7 +16464,7 @@ function detectImport() {
 	while((line = Zotero.read()) !== "false") {
 		line = line.replace(/^\s+/, "");
 		if(line != "") {
-			if(line.substr(0, 6) == "TY  - ") {
+			if(line.substr(0, 6).match(/^TY {1,2}- /)) {
 				return true;
 			} else {
 				if(i++ > 3) {
@@ -16760,7 +16760,7 @@ function doImport(attachments) {
 		Zotero.debug("ignoring "+line);
 		line = Zotero.read();
 		line = line.replace(/^\s+/, "");
-	} while(line !== false && line.substr(0, 6) != "TY  - ");
+	} while(line !== false && line.substr(0, 6).match(/^TY {1,2}- /));
 
 	var item = new Zotero.Item();
 	var i = 0;
@@ -16775,7 +16775,8 @@ function doImport(attachments) {
 		// trim leading space if this line is not part of a note
 		line = rawLine.replace(/^\s+/, "");
 		Zotero.debug("line is "+rawLine);
-		if(line.substr(2, 4) == "  - " || line == "ER  -") {
+		if(line.substr(2, 4) == "  - " || line == "ER  -"
+				|| line.substr(0, 6).match(/^TY {1,2}- /)) {
 			// if this line is a tag, take a look at the previous line to map
 			// its tag
 			if(tag) {
@@ -16784,7 +16785,14 @@ function doImport(attachments) {
 
 			// then fetch the tag and data from this line
 			tag = line.substr(0,2);
-			data = line.substr(6);
+			
+			// Handle out-of-spec old EndNote exports
+			if (line.substr(0, 5).match(/TY - /)) {
+				data = line.substr(5);
+			}
+			else {
+				data = line.substr(6);
+			}
 
 			Zotero.debug("tag: ''"+tag+"''; data: ''"+data+"''");
 
