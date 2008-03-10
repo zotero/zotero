@@ -233,15 +233,16 @@
       <text variable="locator"/>
 	</group>
   </macro>
-  <macro name="container-title">
-    <text variable="container-title" font-style="italic"/>
-  </macro>
   <macro name="container-prefix">
+    <text term="in" text-case="capitalize-first"/>
+  </macro>
+  <macro name="container-title">
     <choose>
       <if type="chapter">
-        <text term="in" text-case="capitalize-first" suffix=" "/>
+        <text macro="container-prefix" suffix=" "/>
       </if>
     </choose>
+    <text variable="container-title" font-style="italic"/>
   </macro>
   <macro name="publisher">
     <group delimiter=": ">
@@ -270,19 +271,17 @@
     </group>
   </macro>
   <macro name="description">
-    <group delimiter=", ">
-      <group delimiter=". ">
-        <text macro="interviewer"/>
-        <text variable="medium" text-case="capitalize-first"/>
-      </group>
-      <choose>
-        <if variable="title" match="none"> </if>
-        <else-if type="thesis"> </else-if>
-        <else>
-          <text variable="genre" text-case="capitalize-first"/>
-        </else>
-      </choose>
+    <group delimiter=". ">
+      <text macro="interviewer"/>
+      <text variable="medium" text-case="capitalize-first"/>
     </group>
+    <choose>
+      <if variable="title" match="none"> </if>
+      <else-if type="thesis"> </else-if>
+      <else>
+        <text variable="genre" text-case="capitalize-first" prefix=". "/>
+      </else>
+    </choose>
   </macro>
   <macro name="issue">
     <choose>
@@ -339,20 +338,15 @@
       <key variable="title"/>
     </sort>
     <layout suffix=".">
-      <group delimiter=". ">
-        <text macro="contributors"/>
-        <text macro="date"/>
-        <text macro="title"/>
-        <text macro="description"/>
-        <text macro="secondary-contributors"/>
-        <group>
-          <text macro="container-prefix"/>
-          <text macro="container-title"/>
-          <text macro="container-contributors"/>
-          <text macro="chapter-locators"/>
-        </group>
-        <text macro="edition"/>
-      </group>
+      <text macro="contributors" suffix=". "/>
+      <text macro="date" suffix=". "/>
+      <text macro="title"/>
+      <text macro="description"/>
+      <text macro="secondary-contributors" prefix=". "/>
+      <text macro="container-title" prefix=". "/>
+      <text macro="container-contributors"/>
+      <text macro="chapter-locators"/>
+      <text macro="edition" prefix=". "/>
       <text macro="locators"/>
       <text macro="collection-title" prefix=". "/>
       <text macro="issue"/>
