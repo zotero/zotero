@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-07 22:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-10 17:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -11952,9 +11952,9 @@ REPLACE INTO translators VALUES ('fe728bc9-595a-4f03-98fc-766f1d8d0936', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('b6d0a7a-d076-48ae-b2f0-b6de28b194e', '1.0.0b3.r1', '', '2008-03-07 18:45:00', '1', '100', '4', 'ScienceDirect', 'Michael Berkowitz', 'https?://www\.sciencedirect\.com[^/]*/science\?(?:.+\&|)_ob=(?:ArticleURL|ArticleListURL|PublicationURL)', 
+REPLACE INTO translators VALUES ('b6d0a7a-d076-48ae-b2f0-b6de28b194e', '1.0.0b3.r1', '', '2008-03-10 17:00:00', '1', '100', '4', 'ScienceDirect', 'Michael Berkowitz', 'https?://www\.sciencedirect\.com[^/]*/science\?(?:.+\&|)_ob=(?:ArticleURL|ArticleListURL|PublicationURL)', 
 'function detectWeb(doc, url) {
-	if (url.indexOf("_ob=DownloadURL") != -1) {
+	if ((url.indexOf("_ob=DownloadURL") != -1) || doc.title == "ScienceDirect Login") {
 		return false;
 	}
 	if(url.indexOf("_ob=ArticleURL") == -1) {
@@ -12045,17 +12045,19 @@ REPLACE INTO translators VALUES ('b6d0a7a-d076-48ae-b2f0-b6de28b194e', '1.0.0b3.
 		if (detectWeb(doc, url) == "multiple") {
 			var items = new Object();
 			if (url.indexOf("_ob=PublicationURL") != -1) {
-				xpath = ''//table[@class="txt"]/tbody/tr/td[2]'';
+				xpath = ''//table[@class="txt"]/tbody/tr[1]/td[2]'';
 			} else {
 				var xpath = ''//table[@class="tableResults-T"]/tbody/tr/td[2]'';
 			}
-			var rows = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
-			var next_row = rows.iterateNext();
-			while (next_row) {
-				var title = doc.evaluate(''.//span[@class="bf"]'', next_row, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-				var link = doc.evaluate(''.//a[1]'', next_row, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
-				items[link] = title;
-				next_row = rows.iterateNext();
+			
+			var titlepath = xpath + ''//span[@class="bf"]'';
+			var linkpath = xpath + ''//tr/td[1]/a[1]'';
+			var titles = doc.evaluate(titlepath, doc, null, XPathResult.ANY_TYPE, null);
+			var links = doc.evaluate(linkpath, doc, null, XPathResult.ANY_TYPE, null);
+			var next_title;
+			var next_link;
+			while ((next_title = titles.iterateNext()) && (next_link = links.iterateNext())) {
+				items[next_link.href] = next_title.textContent;
 			}
 			items = Zotero.selectItems(items);
 			for (var i in items) {
@@ -12068,16 +12070,19 @@ REPLACE INTO translators VALUES ('b6d0a7a-d076-48ae-b2f0-b6de28b194e', '1.0.0b3.
 			var item = new Zotero.Item("journalArticle");
 			item.repository = "ScienceDirect";
 			item.url = doc2.location.href;
-			var title = doc2.title.split(/\s+\-\s+/)[1].split(/\s+:\s+/);
-			item.title = title[1];
-			item.publicationTitle = title[0];
+			var title = doc2.title.match(/^[^-]+\-([^:]+):(.*)$/);
+			item.title = Zotero.Utilities.trimInternal(title[2]);
+			item.publicationTitle = Zotero.Utilities.trimInternal(title[1]);
 			var voliss = Zotero.Utilities.trimInternal(doc2.evaluate(''//div[@class="pageText"][@id="sdBody"]/table/tbody/tr/td[1]'', doc2, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent).split(/,/);
-			Zotero.debug(voliss);
-			if (voliss[0].match(/\d+/)) {
+			if (voliss[3] && voliss[3].match(/[\-\d]+/)) {
 				item.volume = voliss[0].match(/\d+/)[0];
 				item.issue = voliss[1].match(/[\-\d]+/)[0];
 				item.date = Zotero.Utilities.trimInternal(voliss[2]);
-				item.pages = voliss[3].match(/[\-\d]+/)[0];
+				item.pages = voliss[3].match(/[R\-\d]+/)[0];
+			} else if (voliss[2]) {
+				item.volume = voliss[0].match(/\d+/)[0];
+				item.date = Zotero.Utilities.trimInternal(voliss[1]);
+				item.pages = voliss[2].match(/[R\-\d]+/)[0];
 			}
 			item.DOI = doc2.evaluate(''//div[@class="pageText"][@id="sdBody"]/a[contains(@href, "dx.doi")]'', doc2, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href.match(/dx\.doi\.org\/(.*)/)[1];
 			var abspath = ''//div[@class="pageText"][@id="sdBody"]/div[@class="artAbs"]/p'';
@@ -12091,10 +12096,12 @@ REPLACE INTO translators VALUES ('b6d0a7a-d076-48ae-b2f0-b6de28b194e', '1.0.0b3.
 				item.abstractNote = item.abstractNote.substr(9);
 			}
 			var tagpath = ''//div[@class="pageText"][@id="sdBody"]/div[@class="art"]/p'';
-			if (doc2.evaluate(tagpath, doc2, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.split(":")[1]) {
-				var tags = doc2.evaluate(tagpath, doc2, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.split(":")[1].split(";");
-				for (var i in tags) {
-					item.tags.push(Zotero.Utilities.trimInternal(tags[i]));
+			if (doc2.evaluate(tagpath, doc2, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+				if (doc2.evaluate(tagpath, doc2, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.split(":")[1]) {
+					var tags = doc2.evaluate(tagpath, doc2, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.split(":")[1].split(";");
+					for (var i in tags) {
+						item.tags.push(Zotero.Utilities.trimInternal(tags[i]));
+					}
 				}
 			}
 			item.attachments.push({url:doc2.location.href, title:"ScienceDirect Snapshot", mimeType:"text/html"});
