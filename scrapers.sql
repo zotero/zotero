@@ -16760,7 +16760,7 @@ function doImport(attachments) {
 		Zotero.debug("ignoring "+line);
 		line = Zotero.read();
 		line = line.replace(/^\s+/, "");
-	} while(line !== false && line.substr(0, 6).match(/^TY {1,2}- /));
+	} while(line !== false && !line.substr(0, 6).match(/^TY {1,2}- /));
 
 	var item = new Zotero.Item();
 	var i = 0;
@@ -16769,14 +16769,21 @@ function doImport(attachments) {
 	}
 
 	var tag = "TY";
-	var data = line.substr(6);
+	
+	// Handle out-of-spec old EndNote exports
+	if (line.substr(0, 5) == "TY - ") {
+		var data = line.substr(5);
+	}
+	else {
+		var data = line.substr(6);
+	}
+	
 	var rawLine;
 	while((rawLine = Zotero.read()) !== false) {    // until EOF
 		// trim leading space if this line is not part of a note
 		line = rawLine.replace(/^\s+/, "");
 		Zotero.debug("line is "+rawLine);
-		if(line.substr(2, 4) == "  - " || line == "ER  -"
-				|| line.substr(0, 6).match(/^TY {1,2}- /)) {
+		if(line.substr(2, 4) == "  - " || line == "ER  -" || line.substr(0, 5) == "TY - ") {
 			// if this line is a tag, take a look at the previous line to map
 			// its tag
 			if(tag) {
@@ -16787,7 +16794,7 @@ function doImport(attachments) {
 			tag = line.substr(0,2);
 			
 			// Handle out-of-spec old EndNote exports
-			if (line.substr(0, 5).match(/TY - /)) {
+			if (line.substr(0, 5) == "TY - ") {
 				data = line.substr(5);
 			}
 			else {
