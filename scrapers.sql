@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-10 17:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-10 19:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1634,7 +1634,7 @@ REPLACE INTO translators VALUES ('9e306d5d-193f-44ae-9dd6-ace63bf47689', '1.0.0b
 	}, function() {Zotero.done;});
 }');
 
-REPLACE INTO translators VALUES ('636c8ea6-2af7-4488-8ccd-ea280e4a7a98', '1.0.0b4.r5', '', '2008-03-05 21:15:00', '0', '100', '4', 'Sage Journals Online', 'Michael Berkowitz', 'http://(.*)\.sagepub\.com/', 
+REPLACE INTO translators VALUES ('636c8ea6-2af7-4488-8ccd-ea280e4a7a98', '1.0.0b4.r5', '', '2008-03-10 19:00:00', '1', '100', '4', 'Sage Journals Online', 'Michael Berkowitz', 'http://[^/]*\.sagepub\.com[^/]*/', 
 'function detectWeb(doc, url) {
 	if (url.indexOf("searchresults?") != -1) {
 		return "multiple";
