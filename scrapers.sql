@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-10 20:15:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-11 20:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1577,6 +1577,93 @@ function doWeb(doc, url) {
 	} else {
 		scrape(doc);
 	}
+}');
+
+REPLACE INTO translators VALUES ('0863b8ec-e717-4b6d-9e35-0b2db2ac6b0f', '1.0.0b4.r5', '', '2008-03-11 20:30:00', '0', '100', '4', 'Institute of Pure and Applied Physics', 'Michael Berkowitz', 'http://(.*)\.ipap\.jp/', 
+'function detectWeb(doc, url) {
+	if (doc.title.indexOf("Table of Contents") != -1 || doc.title.indexOf("search result") != -1) {
+		return "multiple";
+	} else if (url.indexOf("link?") != -1) {
+		return "journalArticle";
+	}
+}', 
+'function doWeb(doc, url) {
+	var articles = new Array();
+	if (detectWeb(doc, url) == "multiple") {
+		var items = new Object();
+		if (url.indexOf("journal") != -1) {
+			var linkx = ''//dt/a/b'';
+			var links = doc.evaluate(linkx, doc, null, XPathResult.ANY_TYPE, null);
+			var next_link;
+			while (next_link = links.iterateNext()) {
+				items[next_link.href] = next_link.textContent;
+			}
+		} else if (url.indexOf("cgi-bin/findarticle") != -1) {
+			var boxx = ''//ol/li'';
+			var boxes = doc.evaluate(boxx, doc, null, XPathResult.ANY_TYPE, null);
+			var box;
+			while (box = boxes.iterateNext()) {
+				var title = doc.evaluate(''.//b'', box, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+				var link = doc.evaluate(''./a'', box, null, XPathResult.ANY_TYPE, null).iterateNext().href;
+				items[link] = title;
+			}
+		}
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			articles.push(i);
+		}
+		
+	} else {
+		articles = [url];
+	}
+		Zotero.debug(articles);
+		Zotero.Utilities.processDocuments(articles, function(newDoc) {
+		var item = new Zotero.Item("journalArticle");
+		item.title = Zotero.Utilities.trimInternal(newDoc.evaluate(''/html/body/h2[@class="title"]'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+
+		var authors = Zotero.Utilities.trimInternal(newDoc.evaluate(''/html/body/p[@class="author"]'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+		authors = authors.replace(/\band\b/, ", ").split(",");
+		Zotero.debug(authors);
+		for each (var author in authors) {
+			author = author.replace(/\d/g, "");
+			if (author.match(/\w+/)) item.creators.push(Zotero.Utilities.cleanAuthor(author, "author"));
+		}
+		
+		var info = Zotero.Utilities.trimInternal(newDoc.evaluate(''/html/body/h4[@class="info"]'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+		if (info.match(/(.+)Vol.\s+(\d+),\s+No.\s+([\d\w]+),\s+(\d+),\s+pp.\s+([\w\d\-]+)\s+URL\s*:\s*(.*)\s*DOI\s*:\s*(.*)$/)) {
+			info2 = info.match(/(.+)Vol.\s+(\d+),\s+No.\s+([\d\w]+),\s+(\d+),\s+pp.\s+([\w\d\-]+)\s+URL\s*:\s*(.*)\s*DOI\s*:\s*(.*)$/);
+			item.publicationTitle = info2[1];
+			item.volume = info2[2];
+			item.issue = info2[3];
+			item.date = info2[4];
+			item.pages = info2[5];
+			item.url = info2[6];
+			item.DOI = info2[7];
+		} else {
+			Zotero.debug(info);
+			info2 = info.match(/(.+)Vol.\s+(\d+)\s+\(\d+\)\s+([\w\d\-]+)[^,]+,[^,]+,(.*)\s*URL\s*:\s*(.*)\s*DOI\s*:\s*(.*)$/);
+			Zotero.debug(info2);
+			item.publicationTitle = info2[1];
+			item.volume = info2[2];
+			item.pages = info2[3];
+			item.date = info2[4];
+			item.url = info2[5];
+			item.DOI = info2[6];
+		}
+		if (newDoc.evaluate(''/html/body/p[@class="abstract"]'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+			item.abstractNote = Zotero.Utilities.trimInternal(newDoc.evaluate(''/html/body/p[@class="abstract"]'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+		}
+		
+		if (newDoc.evaluate(''/html/body/p[@class="keyword"]'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+			var tags = Zotero.Utilities.trimInternal(newDoc.evaluate(''/html/body/p[@class="keyword"]'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent).split(",");
+			for each (var tag in tags) {
+				item.tags.push(Zotero.Utilities.trimInternal(tag));
+			}
+		}
+		item.attachments.push({url:item.url, title:"IPAP Snapshot", mimeType:"text/html"});
+		item.complete();
+	}, function() {Zotero.done;});
+	Zotero.wait();
 }');
 
 REPLACE INTO translators VALUES ('9e306d5d-193f-44ae-9dd6-ace63bf47689', '1.0.0b3r1', '', '2008-03-07 22:00:00', '0', '100', '4', 'IngentaConnect', 'Michael Berkowitz', 'http://(www.)?ingentaconnect.com', 
