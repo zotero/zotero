@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-11 20:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-12 18:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -10873,7 +10873,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('d0b1914a-11f1-4dd7-8557-b32fe8a3dd47', '1.0.0b3.r1', '', '2008-01-09 20:00:00', '1', '100', '4', 'EBSCOhost', 'Simon Kornblith', 'https?://[^/]+/(?:bsi|ehost)/(?:results|detail|folder)', 
+REPLACE INTO translators VALUES ('d0b1914a-11f1-4dd7-8557-b32fe8a3dd47', '1.0.0b3.r1', '', '2008-03-12 18:00:00', '1', '100', '4', 'EBSCOhost', 'Simon Kornblith', 'https?://[^/]+/(?:bsi|ehost)/(?:results|detail|folder)', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -10958,11 +10958,11 @@ function doWeb(doc, url) {
 	                                XPathResult.ANY_TYPE, null).iterateNext();                              
 
 	if(searchResult) {
-		var titles = doc.evaluate(''//div[@class="result-list-record" or @class="folder-item-detail"]/span[@class="medium-font"]/a'',
+		var titles = doc.evaluate(''//div[@class="result-list-record" or @class="folder-item-detail"]/a'',
 		                             doc, nsResolver, XPathResult.ANY_TYPE, null);
 		var title = titles.iterateNext();
 		if (!title){
-			titles = doc.evaluate(''//div[@class="result-list-record" or @class="folder-item-detail"]/a'',
+			titles = doc.evaluate(''//div[@class="result-list-record" or @class="folder-item-detail"]/span[@class="medium-font"]/a'',
 		                             doc, nsResolver, XPathResult.ANY_TYPE, null);
 		}
 		title = titles.iterateNext();
