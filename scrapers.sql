@@ -12744,7 +12744,7 @@ REPLACE INTO translators VALUES ('df966c80-c199-4329-ab02-fa410c8eb6dc', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('f8765470-5ace-4a31-b4bd-4327b960ccd', '1.0.0b3.r1', '', '2008-02-28 17:00:00', '1', '100', '4', 'SpringerLink', 'Simon Kornblith and Michael Berkowitz', 'https?://(?:www\.springerlink\.com|springerlink.metapress.com)[^/]*/content/', 
+REPLACE INTO translators VALUES ('f8765470-5ace-4a31-b4bd-4327b960ccd', '1.0.0b3.r1', '', '2008-03-13 21:00:00', '1', '100', '4', 'SpringerLink', 'Simon Kornblith and Michael Berkowitz', 'https?://(www\.)*springerlink\.com|springerlink.metapress.com[^/]*/content/', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -12789,9 +12789,9 @@ REPLACE INTO translators VALUES ('f8765470-5ace-4a31-b4bd-4327b960ccd', '1.0.0b3
 		var m = item.match(/\/content\/([^/]+)/);
 		RIS.push(host+"/export.mpx?code="+m[1]+"&mode=ris");
 	}
-	
 	Zotero.Utilities.HTTP.doGet(RIS, function(text) {
 		// load translator for RIS
+		text = text.replace("CHAPTER", "CHAP");
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 		translator.setString(text);
@@ -12818,9 +12818,7 @@ REPLACE INTO translators VALUES ('f8765470-5ace-4a31-b4bd-4327b960ccd', '1.0.0b3
 				}
 			}
 			// fix incorrect chapters
-			Zotero.debug(item);
 			if(item.publicationTitle && item.itemType == "book") item.itemType = "bookSection";
-			
 			// fix "V" in volume
 			if(item.volume) {
 				item.volume = item.volume.replace("V", "");
