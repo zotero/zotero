@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-13 21:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-13 22:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1579,7 +1579,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('62c0e36a-ee2f-4aa0-b111-5e2cbd7bb5ba', '1.0.0b4.r5', '', '2008-03-13 21:00:00', '0', '100', '4', 'MetaPress', 'Michael Berkowitz', 'https?://(.*).metapress.com/', 
+REPLACE INTO translators VALUES ('62c0e36a-ee2f-4aa0-b111-5e2cbd7bb5ba', '1.0.0b4.r5', '', '2008-03-13 22:30:00', '0', '100', '4', 'MetaPress', 'Michael Berkowitz', 'https?://(.*).metapress.com/', 
 'function detectWeb(doc, url) {
 	if (doc.title.indexOf("Search Results") != -1) {
 		return "multiple";
@@ -12744,7 +12744,7 @@ REPLACE INTO translators VALUES ('df966c80-c199-4329-ab02-fa410c8eb6dc', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('f8765470-5ace-4a31-b4bd-4327b960ccd', '1.0.0b3.r1', '', '2008-03-13 21:00:00', '1', '100', '4', 'SpringerLink', 'Simon Kornblith and Michael Berkowitz', 'https?://(www\.)*springerlink\.com|springerlink.metapress.com[^/]*/content/', 
+REPLACE INTO translators VALUES ('f8765470-5ace-4a31-b4bd-4327b960ccd', '1.0.0b3.r1', '', '2008-03-13 22:30:00', '1', '100', '4', 'SpringerLink', 'Simon Kornblith and Michael Berkowitz', 'https?://(www\.)*springerlink\.com|springerlink.metapress.com[^/]*/content/', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
