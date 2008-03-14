@@ -9145,7 +9145,7 @@ REPLACE INTO translators VALUES ('c54d1932-73ce-dfd4-a943-109380e06574', '1.0.0b
 	}
 }');
 
-REPLACE INTO translators VALUES ('fcf41bed-0cbc-3704-85c7-8062a0068a7a', '1.0.0b3.r1', '', '2008-03-14 15:00:00', '1', '100', '4', 'NCBI PubMed', 'Simon Kornblith and Michael Berkowitz', 'http://[^/]*www\.ncbi\.nlm\.nih\.gov[^/]*/(pubmed|sites/entrez|entrez/query\.fcgi\?.*db=PubMed)', 
+REPLACE INTO translators VALUES ('fcf41bed-0cbc-3704-85c7-8062a0068a7a', '1.0.0b3.r1', '', '2008-03-14 18:00:00', '1', '100', '4', 'NCBI PubMed', 'Simon Kornblith and Michael Berkowitz', 'http://[^/]*www\.ncbi\.nlm\.nih\.gov[^/]*/(pubmed|sites/entrez|entrez/query\.fcgi\?.*db=PubMed)', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
