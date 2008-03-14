@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-14 15:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-14 18:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -9333,10 +9333,10 @@ function doSearch(item) {
 	lookupPMIDs([getPMID(item.contextObject)]);
 }');
 
-REPLACE INTO translators VALUES ('951c027d-74ac-47d4-a107-9c3069ab7b48', '1.0.0b3.r1', '', '2007-08-04 23:15:00', 1, 400, 4, 'Embedded RDF', 'Simon Kornblith', NULL,
+REPLACE INTO translators VALUES ('951c027d-74ac-47d4-a107-9c3069ab7b48', '1.0.0b3.r1', '', '2008-03-14 18:00:00', '1', '400', '4', 'Embedded RDF', 'Simon Kornblith', '', 
 'function detectWeb(doc, url) {
+	if (url.indexOf("reprint") != -1) return false;
 	var metaTags = doc.getElementsByTagName("meta");
-	
 	for(var i=0; i<metaTags.length; i++) {
 		var tag = metaTags[i].getAttribute("name");
 		if(tag && tag.substr(0, 3).toLowerCase() == "dc.") {
@@ -9345,7 +9345,7 @@ REPLACE INTO translators VALUES ('951c027d-74ac-47d4-a107-9c3069ab7b48', '1.0.0b
 	}
 	
 	return false;
-}',
+}', 
 'function doWeb(doc, url) {
 	var dc = "http://purl.org/dc/elements/1.1/";
 
