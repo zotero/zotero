@@ -1579,7 +1579,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('4654c76f-451c-4ae6-9a36-575e982b3cdb', '1.0.0b4.r5', '', '2008-03-14 19:00:00', '0', '100', '4', 'Investigative Ophthalmology and Visual Science', 'Michael Berkowitz', 'http://www.iovs.org/', 
+REPLACE INTO translators VALUES ('4654c76f-451c-4ae6-9a36-575e982b3cdb', '1.0.0b4.r5', '', '2008-03-14 19:10:00', '0', '100', '4', 'Investigative Ophthalmology and Visual Science', 'Michael Berkowitz', 'http://www.iovs.org/', 
 'function detectWeb(doc, url) {
 	if (doc.title.indexOf("Table of Contents") != -1 || doc.title.indexOf("Search Result") != -1) {
 		return "multiple"
