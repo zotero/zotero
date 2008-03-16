@@ -194,7 +194,7 @@
       </else-if>
     </choose>
   </macro>
-  <macro name="chapter-locators">
+  <macro name="locators-chapter">
     <choose>
       <if type="chapter">
         <group prefix=", ">
@@ -204,7 +204,7 @@
       </if>
     </choose>
   </macro>
-  <macro name="article-locators">
+  <macro name="locators-article">
     <choose>
       <if type="article-newspaper">
         <group prefix=", " delimiter=", ">
@@ -333,9 +333,10 @@
     <option name="hanging-indent" value="true"/>
     <option name="et-al-min" value="6"/>
     <option name="et-al-use-first" value="3"/>
+    <option name="subsequent-author-substitute" value="---"/>
     <sort>
       <key macro="contributors"/>
-      <key variable="title"/>
+      <key variable="issued"/>
     </sort>
     <layout suffix=".">
       <text macro="contributors" suffix=". "/>
@@ -345,12 +346,12 @@
       <text macro="secondary-contributors" prefix=". "/>
       <text macro="container-title" prefix=". "/>
       <text macro="container-contributors"/>
-      <text macro="chapter-locators"/>
+      <text macro="locators-chapter"/>
       <text macro="edition" prefix=". "/>
       <text macro="locators"/>
       <text macro="collection-title" prefix=". "/>
       <text macro="issue"/>
-      <text macro="article-locators"/>
+      <text macro="locators-article"/>
       <text macro="access" prefix=". "/>
     </layout>
   </bibliography>
