@@ -8422,7 +8422,7 @@ REPLACE INTO translators VALUES ('b047a13c-fe5c-6604-c997-bef15e502b09', '1.0.0b
 					if (author){
 						newItem.creators.push(Zotero.Utilities.cleanAuthor(author.textContent, "author"));
 					}
-					newItem.respository = "lexisnexis.com";
+					newItem.repository = "lexisnexis.com";
 					newItem.url = url;
 					newItem.complete()
 				}
