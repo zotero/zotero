@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-17 18:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-17 19:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -11042,7 +11042,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('d0b1914a-11f1-4dd7-8557-b32fe8a3dd47', '1.0.0b3.r1', '', '2008-03-13 17:00:00', '1', '100', '4', 'EBSCOhost', 'Simon Kornblith', 'https?://[^/]+/(?:bsi|ehost)/(?:results|detail|folder)', 
+REPLACE INTO translators VALUES ('d0b1914a-11f1-4dd7-8557-b32fe8a3dd47', '1.0.0b3.r1', '', '2008-03-17 19:00:00', '1', '100', '4', 'EBSCOhost', 'Simon Kornblith', 'https?://[^/]+/(?:bsi|ehost)/(?:results|detail|folder)', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -11095,15 +11095,19 @@ function downloadFunction(text) {
 	Zotero.Utilities.HTTP.doPost(host+"/ehost/"+deliveryURL,
 								 downloadString, function(text) {	// get marked records as RIS
 		// load translator for RIS
+		var test = text.match(/UR\s+\-(.*)/g);
+		if (test[0].match("@")) text = text.replace(/UR\s+\-(.*)/, "");
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 		translator.setString(text);
 		translator.setHandler("itemDone", function(obj, item) {
+			if (text.match("L3")) {
+				item.DOI = text.match(/L3\s+\-\s*(.*)/)[1];
+			}
+			
 			if(item.notes && item.notes[0]) {
 				item.extra = item.notes[0].note;
-				
-				delete item.notes;
-				item.notes = undefined;
+				item.notes = new Array();
 			}
 			item.complete();
 		});
@@ -11127,19 +11131,17 @@ function doWeb(doc, url) {
 	                                XPathResult.ANY_TYPE, null).iterateNext();                              
 
 	if(searchResult) {
-		var titles = doc.evaluate(''//div[@class="result-list-record" or @class="folder-item-detail"]/a'',
-		                             doc, nsResolver, XPathResult.ANY_TYPE, null);
-		var title = titles.iterateNext();
-		if (!title){
-			titles = doc.evaluate(''//div[@class="result-list-record" or @class="folder-item-detail"]/span[@class="medium-font"]/a'',
-		                             doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var titlex = ''//div[@class="result-list-record" or @class="folder-item-detail"]/a'';
+		if (doc.evaluate(titlex, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+			var titles = doc.evaluate(titlex, doc, nsResolver, XPathResult.ANY_TYPE, null);
+		} else {
+			var titles = doc.evaluate(''//div[@class="result-list-record" or @class="folder-item-detail"]/span[@class="medium-font"]/a'', doc, nsResolver, XPathResult.ANY_TYPE, null);
 		}
-		title = titles.iterateNext();
-		// Go through titles
 		var items = new Object();
-		do {
+		var title;
+		while (title = titles.iterateNext()) {
 			items[title.href] = title.textContent;
-		} while(title = titles.iterateNext());
+		}
 		
 		var items = Zotero.selectItems(items);
 		if(!items) {
