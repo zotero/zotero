@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-17 16:15:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-17 16:45:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -7273,7 +7273,7 @@ function doWeb(doc, url)	{
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '1.0.0b3.r1', '', '2008-03-07 18:45:00', '1', '100', '4', 'Library Catalog (InnoPAC)', 'Simon Kornblith and Michael Berkowitz', 'https?://[^/]+/(search(\?|~)?)/(a|X|t)?\??', 
+REPLACE INTO translators VALUES ('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '1.0.0b3.r1', '', '2008-03-17 16:45:00', '1', '100', '4', 'Library Catalog (InnoPAC)', 'Simon Kornblith and Michael Berkowitz', 'https?://[^/]+/(search(\?|~(S0)?)?)/(a|X|t)?\??', 
 'function detectWeb(doc, url) {
 	// First, check to see if the URL alone reveals InnoPAC, since some sites don''t reveal the MARC button
 	var matchRegexp = new RegExp(''^(https?://[^/]+/search\\??/[^/]+/[^/]+/[0-9]+\%2C[^/]+/)frameset(.+)$'');
@@ -7310,13 +7310,20 @@ REPLACE INTO translators VALUES ('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '1.0.0b
 	} : null;
 	
 	var xpath = ''//pre/text()'';
-	var elmts = newDoc.evaluate(xpath, newDoc, nsResolver,
-			   XPathResult.ANY_TYPE, null);
+	if (newDoc.evaluate(xpath, newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+		var elmts = newDoc.evaluate(xpath, newDoc, null, XPathResult.ANY_TYPE, null);
+		var useNodeValue = true;
+	} else {
+		var elmts = newDoc.evaluate(''//pre'', newDoc, nsResolver, XPathResult.ANY_TYPE, null);
+		var useNodeValue = false;
+	}
 	var elmt;
-	
 	while(elmt = elmts.iterateNext()) {
-		var text = elmt.nodeValue;
-		
+		if (useNodeValue) {
+			var text = elmt.nodeValue;
+		} else {
+			var text = elmt.textContent;
+		}
 		var newItem = new Zotero.Item();
 		var record = new marc.record();
 		
@@ -7352,7 +7359,7 @@ REPLACE INTO translators VALUES ('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '1.0.0b
 					var tagValue = value;
 				}
 			}
-		}	
+		}
 		if(tagValue) {
 			tagValue = tagValue.replace(/\|(.)/g, marc.subfieldDelimiter+"$1");
 			if(tagValue[0] != marc.subfieldDelimiter) {
@@ -7461,7 +7468,6 @@ function doWeb(doc, url) {
 		for(var url in items) {
 			newUrls.push(url.replace("frameset", "marc"));
 		}
-		
 		pageByPage(marc, newUrls);
 	}
 
