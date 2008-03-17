@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-17 16:45:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-17 18:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -3221,7 +3221,7 @@ REPLACE INTO translators VALUES ('0cc8e259-106e-4793-8c26-6ec8114a9160', '1.0.0b
 	}, function() {Zotero.done;});
 }');
 
-REPLACE INTO translators VALUES ('8b35ab14-f18a-4f69-8472-b2df18c984da', '1.0.0b4.r5', '', '2008-02-01 21:00:00', '0', '100', '4', 'Davidson College Library', 'Michael Berkowitz', 'http://www3.davidson.edu/', 
+REPLACE INTO translators VALUES ('8b35ab14-f18a-4f69-8472-b2df18c984da', '1.0.0b4.r5', '', '2008-03-17 18:00:00', '1', '100', '4', 'Davidson College Library', 'Michael Berkowitz', 'http://www.lib.davidson.edu/', 
 'function detectWeb(doc, url) {
 	if (url.indexOf("log_in") == -1) {
 		if (url.indexOf("screen=Record") != -1) {
