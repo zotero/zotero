@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-17 19:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-17 21:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1838,9 +1838,9 @@ REPLACE INTO translators VALUES ('9e306d5d-193f-44ae-9dd6-ace63bf47689', '1.0.0b
 	}, function() {Zotero.done;});
 }');
 
-REPLACE INTO translators VALUES ('636c8ea6-2af7-4488-8ccd-ea280e4a7a98', '1.0.0b4.r5', '', '2008-03-10 19:45:00', '1', '100', '4', 'Sage Journals Online', 'Michael Berkowitz', 'http://[^/]*\.sagepub\.com[^/]*/', 
+REPLACE INTO translators VALUES ('636c8ea6-2af7-4488-8ccd-ea280e4a7a98', '1.0.0b4.r5', '', '2008-03-17 21:00:00', '1', '100', '4', 'Sage Journals Online', 'Michael Berkowitz', 'http://[^/]*\.sagepub\.com[^/]*/', 
 'function detectWeb(doc, url) {
-	if (url.indexOf("searchresults?") != -1) {
+	if (url.indexOf("searchresults") != -1) {
 		return "multiple";
 	} else if (url.indexOf("cgi/content") != -1) {
 		return "journalArticle";
@@ -1867,13 +1867,16 @@ REPLACE INTO translators VALUES ('636c8ea6-2af7-4488-8ccd-ea280e4a7a98', '1.0.0b
 	} else {
 		arts = [url];
 	}
-	Zotero.debug(arts);
-	Zotero.Utilities.processDocuments(arts, function(newDoc) {
-		var risurl = newDoc.evaluate(''//a[contains(text(), "Download to citation manager")]'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().href.replace("?", "?type=refman&");
-		var newurl = newDoc.location.href;
+	var newurls = new Array();
+	for each (var i in arts) {
+		newurls.push(i);
+	}
+	Zotero.Utilities.HTTP.doGet(arts, function(text) {
+		var id = text.match(/=([^=]+)\">\s*Add to Saved Citations/)[1];
+		var newurl = newurls.shift();
 		var pdfurl = newurl.replace(/content\/[^/]+/, "reprint") + ".pdf";
-		Zotero.debug(pdfurl);
-		Zotero.Utilities.HTTP.doGet(risurl, function(text) {
+		var get = ''http://online.sagepub.com/cgi/citmgr?type=refman&gca='' + id;
+		Zotero.Utilities.HTTP.doGet(get, function(text) {
 			var translator = Zotero.loadTranslator("import");
 			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 			translator.setString(text);
@@ -1891,7 +1894,7 @@ REPLACE INTO translators VALUES ('636c8ea6-2af7-4488-8ccd-ea280e4a7a98', '1.0.0b
 			});
 			translator.translate();
 		});
-	}, function() {Zotero.done;});
+	});
 	Zotero.wait();
 }');
 
