@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-17 08:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-17 16:15:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -2821,7 +2821,7 @@ REPLACE INTO translators VALUES ('5dd22e9a-5124-4942-9b9e-6ee779f1023e', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('d3b1d34c-f8a1-43bb-9dd6-27aa6403b217', '1.0.0b4.r5', '', '2008-03-05 18:00:00', '0', '100', '4', 'YouTube', 'Sean Takats', 'https?://[^/]*youtube\.com\/', 
+REPLACE INTO translators VALUES ('d3b1d34c-f8a1-43bb-9dd6-27aa6403b217', '1.0.0b4.r5', '', '2008-03-17 16:15:00', '0', '100', '4', 'YouTube', 'Sean Takats', 'https?://[^/]*youtube\.com\/', 
 'function detectWeb(doc, url){
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -2904,6 +2904,7 @@ function getData(ids){
 //		text = text.replace(/<yt:/g, "<yt_").replace(/<\/yt:/g, "</yt_");
 		text = text.replace(/yt:/g, "yt_");
 		text = text.replace(/<gd:/g, "<gd_").replace(/<\/gd:/g, "</gd_");
+		text = text.replace(/<\/?(georss|gml)[^>]+>/g, "");
 		// pad xml
 		text = "<zotero>"+text+"</zotero>";
 		var xml = new XML(text);
