@@ -1006,7 +1006,7 @@ var ZoteroItemPane = new function()
 			_dynamicFields.focus();
 		}
 		
-		//Zotero.debug('Showing editor');
+		Zotero.debug('Showing editor');
 		
 		var fieldName = elem.getAttribute('fieldname');
 		var tabindex = elem.getAttribute('ztabindex');
@@ -1123,6 +1123,10 @@ var ZoteroItemPane = new function()
 		// If result uses two fields, save both
 		if (numFields==2)
 		{
+			// Manually clear autocomplete controller's reference to
+			// textbox to prevent error next time around
+			textbox.mController.input = null;
+
 			var [field, creatorIndex, creatorField] =
 				textbox.getAttribute('fieldname').split('-');
 			
@@ -1167,6 +1171,9 @@ var ZoteroItemPane = new function()
 		switch (event.keyCode)
 		{
 			case event.DOM_VK_RETURN:
+				// Prevent blur on textbox above
+				event.preventDefault();
+				
 				var fieldname = target.getAttribute('fieldname');
 				// Use shift-enter as the save action for the larger fields
 				if ((fieldname == 'abstractNote' || fieldname == 'extra')
@@ -1220,7 +1227,14 @@ var ZoteroItemPane = new function()
 			case event.DOM_VK_ESCAPE:
 				// Reset field to original value
 				target.value = target.getAttribute('value');
+				
+				var tagsbox = Zotero.getAncestorByTagName(focused, 'tagsbox');
+				
 				focused.blur();
+				
+				if (tagsbox) {
+					tagsbox.closePopup();
+				}
 				
 				// Return focus to items pane
 				var tree = document.getElementById('zotero-items-tree');
@@ -1243,12 +1257,13 @@ var ZoteroItemPane = new function()
 	
 	function hideEditor(t, saveChanges)
 	{
-		//Zotero.debug('Hiding editor');
+		Zotero.debug('Hiding editor');
 		var textbox = Zotero.getAncestorByTagName(t, 'textbox');
 		if (!textbox){
 			Zotero.debug('Textbox not found in hideEditor');
 			return;
 		}
+		
 		var fieldName = textbox.getAttribute('fieldname');
 		var tabindex = textbox.getAttribute('ztabindex');
 		
@@ -1349,10 +1364,7 @@ var ZoteroItemPane = new function()
 					if (existingTypes && existingTypes.indexOf(1) != -1) {
 						_lastTabIndex--;
 					}
-					
 					var id = tagsbox.add(value);
-					
-					// DEBUG: why does this need to continue if added?
 				}
 			}
 			
@@ -1370,6 +1382,7 @@ var ZoteroItemPane = new function()
 				}
 				catch (e) {}
 				tagsbox.fixPopup();
+				tagsbox.closePopup();
 				
 				_tabDirection = false;
 				return;

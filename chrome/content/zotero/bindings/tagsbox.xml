@@ -265,8 +265,8 @@
 			<method name="closePopup">
 				<body>
 					<![CDATA[
-						if (this.parentNode.getAttribute('showing')=='true') {
-							this.parentNode.setAttribute('showing', false);
+						if (this.parentNode.hidePopup) {
+							this.parentNode.hidePopup()
 						}
 					]]>
 				</body>
@@ -283,7 +283,7 @@
 			<xul:scrollbox xbl:inherits="flex" orient="vertical" style="overflow:auto">
 				<xul:hbox align="center">
 					<xul:label id="tagsNum"/>
-					<xul:button label="&zotero.item.add;" oncommand="this.parentNode.parentNode.parentNode.new();"/>
+					<xul:button label="&zotero.item.add;" oncommand="document.getBindingParent(this).new();"/>
 				</xul:hbox>
 				<xul:grid>
 					<xul:columns>
