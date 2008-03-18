@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-18 02:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-18 16:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -6794,7 +6794,7 @@ REPLACE INTO translators VALUES ('a1a97ad4-493a-45f2-bd46-016069de4162', '1.0.0b
 	
 }');
 
-REPLACE INTO translators VALUES ('b61c224b-34b6-4bfd-8a76-a476e7092d43', '1.0.0b4.r5', '', '2008-01-10 21:00:00', '0', '100', '4', 'SSRN', 'Michael Berkowitz', '^http://papers\.ssrn\.com/', 
+REPLACE INTO translators VALUES ('b61c224b-34b6-4bfd-8a76-a476e7092d43', '1.0.0b4.r5', '', '2008-03-18 16:30:00', '1', '100', '4', 'SSRN', 'Michael Berkowitz', 'http://papers\.ssrn\.com/', 
 'function detectWeb(doc, url)	{
 	var namespace=doc.documentElement.namespaceURI;
 	var nsResolver=namespace?function(prefix)	{
@@ -6834,6 +6834,7 @@ REPLACE INTO translators VALUES ('b61c224b-34b6-4bfd-8a76-a476e7092d43', '1.0.0b
 	
 	Zotero.Utilities.processDocuments(uris, function(newDoc) {
 		var id = newDoc.location.href.match(/abstract_id=(\d+)/)[1];
+		var pdfurl = newDoc.evaluate(''//a[@title="Download from Social Science Research Network"]'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
 		var newURL = ''http://papers.ssrn.com/sol3/RefExport.cfm?abstract_id='' + id + ''&format=3'';
 		Zotero.Utilities.HTTP.doGet(newURL, function(text) {
 			var ris=text.match(/<input type=\"Hidden\"\s+name=\"hdnContent\"\s+value=\"([^"]*)\">/)[1];
@@ -6842,6 +6843,16 @@ REPLACE INTO translators VALUES ('b61c224b-34b6-4bfd-8a76-a476e7092d43', '1.0.0b
 			trans.setString(ris);
 			trans.setHandler("itemDone", function(obj, item) {
 				item.itemType = "journalArticle";
+				var tags = new Array();
+				for each (var tag in item.tags) {
+					var newtags = tag.split(",");
+					for each (var newtag in newtags) tags.push(newtag);
+				}
+				item.tags = tags;
+				item.attachments = [
+					{url:item.url, title:"SSRN Snapshot", mimeType:"text/html"},
+					{url:pdfurl, title:"SSRN Full Text PDF", mimeType:"application/pdf"}
+				];
 				item.complete();
 			});
 			trans.translate();
