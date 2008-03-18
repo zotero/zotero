@@ -120,6 +120,13 @@ var Zotero = new function(){
 		this.version
 			= gExtensionManager.getItemForID(ZOTERO_CONFIG['GUID']).version;
 		
+		var appInfo =
+			Components.classes["@mozilla.org/xre/app-info;1"].
+				getService(Components.interfaces.nsIXULAppInfo)
+		// TODO: fix for Flock, etc.
+		this.isFx2 = appInfo.version.indexOf('2.0') === 0;
+		this.isFx3 = appInfo.version.indexOf('3.0') === 0;
+		
 		// OS platform
 		var win = Components.classes["@mozilla.org/appshell/appShellService;1"]
 			   .getService(Components.interfaces.nsIAppShellService)

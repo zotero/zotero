@@ -20,6 +20,14 @@
     ***** END LICENSE BLOCK *****
 */
 
+// Quick hack to make the Zotero object accessible in item pane in Fx2
+// with Fx3-compatible XUL inclusion method
+//
+// Might be a better way
+var Zotero = Components.classes["@zotero.org/Zotero;1"]
+				.getService(Components.interfaces.nsISupports)
+				.wrappedJSObject;
+
 var ZoteroItemPane = new function()
 {
 	var _dynamicFields;

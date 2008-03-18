@@ -62,6 +62,12 @@ Zotero.ProgressWindowSet = new function() {
 			if (parent) {
 				var right = parent.screenX + parent.outerWidth;
 				var bottom = parent.screenY + parent.outerHeight;
+				
+				// On OS X in Fx2, outerHeight doesn't include 22px title bar and
+				// moveTo() positions popups 22px below the specified location
+				if (Zotero.isFx2 && Zotero.isMac) {
+					bottom += (22 * 2);
+				}
 			}
 			else {
 				var right = progressWin.screen.width + X_OFFSET - X_WINDOWLESS_OFFSET;
