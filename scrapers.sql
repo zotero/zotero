@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-19 19:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-19 20:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -8621,7 +8621,7 @@ REPLACE INTO translators VALUES ('5e3e6245-83da-4f55-a39b-b712df54a935', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('cf87eca8-041d-b954-795a-2d86348999d5', '1.0.0b3.r1', '', '2008-02-19 21:00:00', '1', '100', '4', 'Library Catalog (Aleph)', 'Simon Kornblith', '^https?://[^/]+/F(?:/[A-Z0-9\-]+(?:\?.*)?$|\?func=find|\?func=scan)', 
+REPLACE INTO translators VALUES ('cf87eca8-041d-b954-795a-2d86348999d5', '1.0.0b3.r1', '', '2008-03-19 20:00:00', '1', '100', '4', 'Library Catalog (Aleph)', 'Simon Kornblith and Michael Berkowitz', '^https?://[^/]+/F(?:/[A-Z0-9\-]+(?:\?.*)?$|\?func=find|\?func=scan)', 
 'function detectWeb(doc, url) {
 	var singleRe = new RegExp("^https?://[^/]+/F/[A-Z0-9\-]+\?.*(?:func=full-set-set.*\&format=[0-9]{3}|func=direct)");
 	
@@ -8682,13 +8682,16 @@ REPLACE INTO translators VALUES ('cf87eca8-041d-b954-795a-2d86348999d5', '1.0.0b
 		var nsResolver = namespace ? function(prefix) {
 		  if (prefix == ''x'') return namespace; else return null;
 		} : null;
-		
-		var xpath = ''//*[tr[td/text()="LDR"]]/tr'';
-		var fieldpath = ''./td[1]/text()[1]'';
-		var valuexpath = ''./td[2]'';
-		if (!newDoc.evaluate(xpath, newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
-			var xpath = ''//tr[2]//table[2]//tr'';
-			var nonstandard = true;
+		var nonstandard = false;
+		var xpath;
+		if (newDoc.evaluate(''//*[tr[td/text()="LDR"]]/tr'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+			xpath = ''//*[tr[td/text()="LDR"]]/tr'';
+		} else if (newDoc.evaluate(''//tr[2]//table[2]//tr'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+			xpath = ''//tr[2]//table[2]//tr'';
+			nonstandard = true;
+		} else if (newDoc.evaluate(''//table//tr[td[2][@class="td1"]]'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+			xpath = ''//table//tr[td[2][@class="td1"]]'';
+			nonstandard = true;
 		}
 		var elmts = newDoc.evaluate(xpath, newDoc, nsResolver, XPathResult.ANY_TYPE, null);
 		var elmt;
@@ -8700,10 +8703,9 @@ REPLACE INTO translators VALUES ('cf87eca8-041d-b954-795a-2d86348999d5', '1.0.0b
 			} else {
 				var field = Zotero.Utilities.superCleanString(doc.evaluate(''./TD[1]/text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue);
 			}
+			var field = Zotero.Utilities.superCleanString(doc.evaluate(''./td[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
 			if(field) {
-			
 				var value = doc.evaluate(''./TD[2]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-			
 				if(field == "LDR") {
 					record.leader = value;
 				} else if(field != "FMT") {
@@ -19451,14 +19453,14 @@ function doExport() {
 }');
 
 
-REPLACE INTO translators VALUES ('a6ee60df-1ddc-4aae-bb25-45e0537be973', '1.0.0b3.r1', '', '2007-03-28 19:15:00', 1, 100, 1, 'MARC', 'Simon Kornblith', 'marc',
+REPLACE INTO translators VALUES ('a6ee60df-1ddc-4aae-bb25-45e0537be973', '1.0.0b3.r1', '', '2008-03-19 20:00:00', '1', '100', '1', 'MARC', 'Simon Kornblith', 'marc', 
 'function detectImport() {
 	var marcRecordRegexp = /^[0-9]{5}[a-z ]{3}$/
 	var read = Zotero.read(8);
 	if(marcRecordRegexp.test(read)) {
 		return true;
 	}
-}',
+}', 
 'var fieldTerminator = "\x1E";
 var recordTerminator = "\x1D";
 var subfieldDelimiter = "\x1F";
@@ -19784,6 +19786,9 @@ record.prototype.translate = function(item) {
 	this._associateDBField(item, "060", "ab", "callNumber");
 	this._associateDBField(item, "050", "ab", "callNumber");
 	
+	if (!item.title) this._associateDBField(item, "331", "a", "title");
+	if (!item.date) this._associateDBField(item, "425", "a", "date", pullNumber);
+	if (!item.date) this._associateDBField(item, "595", "a", "date", pullNumber);
 	if(item.title) {
 		item.title = Zotero.Utilities.capitalizeTitle(item.title);
 	}
