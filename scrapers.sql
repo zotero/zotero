@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-19 16:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-19 19:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -12924,7 +12924,7 @@ REPLACE INTO translators VALUES ('df966c80-c199-4329-ab02-fa410c8eb6dc', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('f8765470-5ace-4a31-b4bd-4327b960ccd', '1.0.0b3.r1', '', '2008-03-13 22:30:00', '1', '100', '4', 'SpringerLink', 'Simon Kornblith and Michael Berkowitz', 'https?://(www\.)*springerlink\.com|springerlink.metapress.com[^/]*/content/', 
+REPLACE INTO translators VALUES ('f8765470-5ace-4a31-b4bd-4327b960ccd', '1.0.0b3.r1', '', '2008-03-19 19:00:00', '1', '100', '4', 'SpringerLink', 'Simon Kornblith and Michael Berkowitz', 'https?://(www\.)*springerlink\.com|springerlink.metapress.com[^/]*/content/', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -12949,8 +12949,12 @@ REPLACE INTO translators VALUES ('f8765470-5ace-4a31-b4bd-4327b960ccd', '1.0.0b3
 	var m = url.match(/https?:\/\/[^\/]+/);
 	var host = m[0];
 	
-	if(doc.title == "SpringerLink - All Search Results" || doc.title == "SpringerLink - Journal Issue") {		
-		var items = Zotero.Utilities.getItemArray(doc, doc, ''/content/[^/]+/\\?p=[^&]+&pi='');
+	if(detectWeb(doc, url) == "multiple") {
+		if (doc.title == "SpringerLink - Journal Issue") {
+			var items = Zotero.Utilities.getItemArray(doc, doc.getElementsByTagName("table")[8], ''/content/[^/]+/\\?p=[^&]+&pi='');
+		} else {
+			var items = Zotero.Utilities.getItemArray(doc, doc, ''/content/[^/]+/\\?p=[^&]+&pi='');
+		}
 		
 		items = Zotero.selectItems(items);
 		if(!items) return true;
