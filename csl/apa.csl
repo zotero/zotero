@@ -119,7 +119,7 @@
   <macro name="container-prefix">
     <choose>
       <if type="chapter">
-        <text term="in" text-case="capitalize-first" suffix=" "/>
+        <text term="in" text-case="capitalize-first"/>
       </if>
     </choose>
   </macro>
@@ -172,7 +172,7 @@
       <text macro="author" suffix="."/>
       <text macro="issued"/>
       <text macro="title" prefix=" " suffix=". "/>
-      <text macro="container-prefix" prefix=" "/>
+      <text macro="container-prefix"/>
       <text macro="editor-translator" prefix=" " suffix=", "/>
       <text variable="container-title" font-style="italic"/>
       <text variable="collection-title" prefix=", " suffix="."/>
