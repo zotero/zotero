@@ -171,10 +171,10 @@
     <layout suffix=".">
       <text macro="author" suffix="."/>
       <text macro="issued"/>
-      <text macro="title" prefix=" "/>
+      <text macro="title" prefix=" " suffix=". "/>
       <text macro="container-prefix" prefix=" "/>
-      <text macro="editor-translator" prefix=" "/>
-      <text variable="container-title" prefix=", " font-style="italic"/>
+      <text macro="editor-translator" prefix=" " suffix=", "/>
+      <text variable="container-title" font-style="italic"/>
       <text variable="collection-title" prefix=", " suffix="."/>
       <text macro="edition" prefix=" (" suffix=")"/>
       <text variable="volume" prefix=", "/>
