@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-20 00:15:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-20 14:45:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -12586,28 +12586,52 @@ REPLACE INTO translators VALUES ('d75381ee-7d8d-4a3b-a595-b9190a06f43f', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('2c310a37-a4dd-48d2-82c9-bd29c53c1c76', '1.0.0b3.r1', '', '2007-04-05 19:45:00', '0', '100', '4', 'PROLA', 'Eugeniy Mikhailov', '^https?://(?:www\.)?prola.aps.org/(searchabstract|abstract)/', 
+REPLACE INTO translators VALUES ('2c310a37-a4dd-48d2-82c9-bd29c53c1c76', '1.0.0b3.r1', '', '2008-03-20 14:45:00', '0', '100', '4', 'PROLA', 'Eugeniy Mikhailov and Michael Berkowitz', 'https?://(?:www\.)?prola.aps.org/(toc|searchabstract|abstract)/', 
 'function detectWeb(doc, url) {
-	return "journalArticle";
+	if (url.indexOf("toc") != -1) {
+		return "multiple";
+	} else {
+		return "journalArticle";
+	}
 }	', 
 'function doWeb(doc, url) {
-    var urlRIS = url;
-	// so far several more or less  identical url possible
-	// one is with "abstract" other with "searchabstract"
-	urlRIS = urlRIS.replace("searchabstract","export");
-	urlRIS = urlRIS.replace("abstract","export");
-	var post = "type=ris";
-	
-	Zotero.Utilities.HTTP.doPost(urlRIS, post, function(text) {
-		// load translator for RIS
-		var translator = Zotero.loadTranslator("import");
-		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-		Zotero.debug(text);
-		translator.setString(text);
-		translator.translate();
-
-		Zotero.done();
-	 });
+    	var arts = new Array();
+    	if (detectWeb(doc, url) == "multiple") {
+	    	var items = Zotero.Utilities.getItemArray(doc, doc, "(abstract|abstractsearch)");
+	    	items = Zotero.selectItems(items);
+	    	for (var i in items) {
+		    	arts.push(i);
+	    	}
+    	} else {
+	    	arts = [url];
+    	}
+    	
+    	Zotero.Utilities.processDocuments(arts, function(newDoc) {
+    	var urlRIS = newDoc.location.href;
+		// so far several more or less  identical url possible
+		// one is with "abstract" other with "searchabstract"
+		urlRIS = urlRIS.replace(/(searchabstract|abstract)/,"export");
+		var post = "type=ris";
+		var snapurl = newDoc.location.href;
+		var pdfurl = snapurl.replace(/(searchabstract|abstract)/, "pdf");
+		Zotero.Utilities.HTTP.doPost(urlRIS, post, function(text) {
+			// load translator for RIS
+			var translator = Zotero.loadTranslator("import");
+			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+			translator.setString(text);
+			translator.setHandler("itemDone", function(obj, item) {
+				if (item.itemID) {
+					item.DOI = item.itemID;
+				}
+				item.attachments = [
+					{url:snapurl, title:"PROLA Snapshot", mimeType:"text/html"},
+					{url:pdfurl, title:"PROLA Full Text PDF", mimeType:"application/pdf"}
+				];
+				item.complete();
+			});
+			translator.translate();
+		 });
+	}, function() {Zotero.done;});
 	Zotero.wait();
 }');
 
