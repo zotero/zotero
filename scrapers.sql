@@ -13748,7 +13748,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('594ebe3c-90a0-4830-83bc-9502825a6810', '1.0.0b4.r5', '', '2008-03-21 14:00:00', '1', '100', '4', 'ISI Web of Knowledge', 'Michael Berkowitz', '(WOS_GeneralSearch|product=WOS)', 
+REPLACE INTO translators VALUES ('594ebe3c-90a0-4830-83bc-9502825a6810', '1.0.0b4.r5', '', '2008-03-21 15:30:00', '1', '100', '4', 'ISI Web of Knowledge', 'Michael Berkowitz', '(WOS_GeneralSearch|product=WOS)', 
 'function detectWeb(doc, url) {
 	if (doc.title.indexOf("Web of Science Results") != -1) {
 		return "multiple";
