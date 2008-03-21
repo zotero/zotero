@@ -51,14 +51,8 @@
   <macro name="issuance">
     <choose>
       <if type="article">
-        <group suffix=", ">
-          <date variable="issued">
-            <date-part name="month"/>
-            <date-part name="day"/>
-          </date>
-        </group>
         <date variable="issued">
-          <date-part name="year"/>
+          <date-part name="year" prefix="(" suffix=")"/>
         </date>
       </if>
       <else>
@@ -67,7 +61,7 @@
           <text macro="editor-translator"/>
           <text macro="publisher"/>
           <date variable="issued">
-            <date-part name="year"/>
+            <date-part name="year" prefix="(" suffix=")"/>
           </date>
         </group>
       </else>
