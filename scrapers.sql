@@ -22,9 +22,9 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-21 15:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-21 20:00:00'));
 
-REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2007-06-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats', '^https?://(?:www\.)?amazon', 
+REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
 
 	var suffixRe = new RegExp("https?://(?:www\.)?amazon\.([^/]+)/");
@@ -81,6 +81,7 @@ REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b
 	if (suffix == "co.jp"){
 		suffix = "jp";
 	}
+	if (suffix == ".com") suffix = "com";
 	if(m) {
 		var xpath = ''//a/span[@class="srTitle"]'';
 		var elmts = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
@@ -93,11 +94,12 @@ REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b
 		do {
 			var link = doc.evaluate(''../@href'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
 			var searchTitle = elmt.textContent;
-			availableItems[i] = searchTitle;
-			var asinMatch = asinRe.exec(link);
-			asins[i] = asinMatch[2];
-			Zotero.debug(searchTitle + " @ " + asins[i]);
-			i++;
+			if  (asinRe.exec(link)) {
+				var asinMatch = asinRe.exec(link);
+				availableItems[i] = searchTitle;
+				asins[i] = asinMatch[2];
+				i++;
+			}
 		} while (elmt = elmts.iterateNext());
 		var items = Zotero.selectItems(availableItems);
 		
@@ -118,16 +120,14 @@ REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b
 		}
 		uris.push("http://ecs.amazonaws." + suffix + "/onca/xml?Service=AWSECommerceService&Version=2006-06-28&Operation=ItemLookup&SubscriptionId=0H174V5J5R5BE02YQN02&ItemId=" + asin + "&ResponseGroup=ItemAttributes");
 	}
-	
 	Zotero.Utilities.HTTP.doGet(uris, function(text) {
 		text = text.replace(/<!DOCTYPE[^>]*>/, "").replace(/<\?xml[^>]*\?>/, "");
 		var texts = text.split("<Items>");
 		texts = texts[1].split("</ItemLookupResponse>");
 		text = "<Items>" + texts[0];
 		var xml = new XML(text);
-		Zotero.debug(text);
-
 		var publisher = "";
+		
 		if (xml..Publisher.length()){
 			publisher = Zotero.Utilities.cleanString(xml..Publisher[0].text().toString());
 		}
@@ -176,7 +176,7 @@ REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b
 		
 		// Retrieve authors and other creators
 		for(var i=0; i<xml..Author.length(); i++) {
-			newItem.creators.push(Zotero.Utilities.cleanAuthor(xml..Author[i].text().toString()));
+			newItem.creators.push(Zotero.Utilities.cleanAuthor(xml..Author[i].text().toString(), "author"));
 		}
 		if (newItem.creators.length == 0){
 			for(var i=0; i<xml..Creator.length(); i++) {
