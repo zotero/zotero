@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-21 20:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-22 01:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -354,7 +354,7 @@ function doWeb(doc, url){
 	}
 }');
 
-REPLACE INTO translators VALUES ('0dda3f89-15de-4479-987f-cc13f1ba7999', '1.0.0b4.r1', '', '2008-02-11 19:30:00', '0', '100', '4', 'Ancestry.com US Federal Census', 'Elena Razlogova', '^https?://search.ancestry.com/(.*)usfedcen|1890orgcen|1910uscenindex', 
+REPLACE INTO translators VALUES ('0dda3f89-15de-4479-987f-cc13f1ba7999', '1.0.0b4.r1', '', '2008-03-22 01:00:00', '0', '100', '4', 'Ancestry.com US Federal Census', 'Elena Razlogova', '^https?://search.ancestry.com/(.*)usfedcen|1890orgcen|1910uscenindex', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -405,7 +405,7 @@ function scrape(doc) {
 	} : null;
 	
 	// get initial census data; a proper census record item type should have separate fields for all of these except perhaps dbid
-	var info = doc.evaluate(''//div[@class="g_container"]/div[@class="g_panelWrap"]/div[@class="g_panelCore"]/div[@class="g_right"]/div[@class="g_box"]/p/a'', 
+	var info = doc.evaluate(''//div[@class="facets"][@id="connect"]/div[@class="g_box"]/p/a'', 
 		doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();	
 		
 	if(info) {	
@@ -488,7 +488,7 @@ function scrape(doc) {
 	newItem.creators.push(creator);
 
 	// get scan of the census image
-	var scanInfo = doc.evaluate(''//div[@class="g_container"]/div[@class="g_panelWrap"]/div[@class="g_panelCore"]/div[@class="g_main"]/div[@class="g_outerBox"]/div[@class="s_container"]/div[@class="g_box2"]/table[@class="p_recTable"]/tbody/tr/td[2][@class="recordTN"]/a'', 
+	var scanInfo = doc.evaluate(''//div[@id="record-main"]/table[@class="p_recTable"]/tbody/tr/td[2][@class="recordTN"]/a'', 
 		doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 	
 	if(scanInfo) {
@@ -553,7 +553,7 @@ function doWeb(doc, url) {
 		var name;
 		while (listElt = listElts.iterateNext()) {		
 			recInfo = doc.evaluate(''.//a'', listElt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-			var recidRe = /^javascript:go[0-9]+_([0-9]+)/;
+			var recidRe = /recid=([0-9]+)/;
 			var m = recidRe.exec(recInfo);
 			if(m) {
 				recid = m[1];
