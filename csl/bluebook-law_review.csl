@@ -57,14 +57,14 @@
               <group suffix=", ">
                 <date variable="issued">
                   <date-part name="month"/>
-                  <date-part name="day"/>
+                  <date-part name="day" prefix=" "/>
                 </date>
               </group>
-              <date variable="issued">
-                <date-part name="year"/>
-              </date>
             </if>
-          </choose>
+         </choose>
+          <date variable="issued">
+             <date-part name="year"/>
+           </date>
         </group>
       </if>
       <else>
