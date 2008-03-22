@@ -34,6 +34,9 @@
       <if type="book">
         <text macro="name-macro" font-variant="small-caps"/>
       </if>
+      <if type="legal_case">
+        <text macro="name-macro"/>
+      </if>
       <else>
         <text macro="name-macro"/>
       </else>
