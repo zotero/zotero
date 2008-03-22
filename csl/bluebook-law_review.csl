@@ -25,23 +25,17 @@
       <substitute>
         <names variable="editor"/>
         <names variable="translator"/>
+        <text variable="title"/>
       </substitute>
     </names>
   </macro>
   <macro name="author">
     <choose>
-      <if variable="author editor translator" match="any">
-        <choose>
-          <if type="book">
-            <text macro="name-macro" font-variant="small-caps"/>
-          </if>
-          <else>
-            <text macro="name-macro"/>
-          </else>
-        </choose>
+      <if type="book">
+        <text macro="name-macro" font-variant="small-caps"/>
       </if>
       <else>
-        <text macro="title"/>
+        <text macro="name-macro"/>
       </else>
     </choose>
   </macro>
