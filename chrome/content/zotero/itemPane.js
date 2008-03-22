@@ -1179,9 +1179,6 @@ var ZoteroItemPane = new function()
 		switch (event.keyCode)
 		{
 			case event.DOM_VK_RETURN:
-				// Prevent blur on textbox above
-				event.preventDefault();
-				
 				var fieldname = target.getAttribute('fieldname');
 				// Use shift-enter as the save action for the larger fields
 				if ((fieldname == 'abstractNote' || fieldname == 'extra')
@@ -1189,7 +1186,12 @@ var ZoteroItemPane = new function()
 				{
 					break;
 				}
-				else if (fieldname == 'tag')
+				
+				// Prevent blur on textbox above
+				// DEBUG: what happens if this isn't present?
+				event.preventDefault();
+				
+				if (fieldname == 'tag')
 				{
 					// If last tag row, create new one
 					var row = target.parentNode.parentNode;
