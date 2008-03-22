@@ -105,7 +105,7 @@
           <text macro="title" prefix=", "/>
           <text variable="volume" prefix=", "/>
           <text variable="container-title" prefix=" "/>
-          <text variable="page" prefix=", "/>
+          <text variable="page" prefix=" "/>
           <text variable="locator" prefix=" "/>
           <text macro="issuance" prefix=" "/>
           <text macro="access" prefix=", "/>
