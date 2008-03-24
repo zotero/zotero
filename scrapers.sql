@@ -7580,7 +7580,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('add7c71c-21f3-ee14-d188-caf9da12728b', '1.0.0b3.r1', '', '2007-06-12 23:00:00', '1', '100', '4', 'Library Catalog (SIRSI)', 'Sean Takats', '/uhtbin/cgisirsi', 
+REPLACE INTO translators VALUES ('add7c71c-21f3-ee14-d188-caf9da12728b', '1.0.0b3.r1', '', '2007-03-24 21:55:38', '1', '100', '4', 'Library Catalog (SIRSI)', 'Sean Takats', '/uhtbin/cgisirsi', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -7670,7 +7670,9 @@ REPLACE INTO translators VALUES ('add7c71c-21f3-ee14-d188-caf9da12728b', '1.0.0b
 					newItem.creators.push(Zotero.Utilities.cleanAuthor(value, "contributor", true));
 				} else if(field == "corporate author") {
 					newItem.creators.push({lastName:author, fieldMode:true});
-				} else if(field == "subject term" || field == "corporate subject" || field == "geographic term") {
+				} else if(field == "edition") {
+					newItem.tags = newItem.edition = value;
+				} else if(field == "subject term" || field == "corporate subject" || field == "geographic term" || field == "subject") {
 					var subjects = value.split("--");
 					newItem.tags = newItem.tags.concat(subjects);
 				} else if(field == "personal subject") {
