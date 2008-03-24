@@ -338,7 +338,7 @@ Zotero.CSL.prototype.createCitation = function(citationItems) {
 /*
  * create a citation (in-text or footnote)
  */
-Zotero.CSL._firstNameRegexp = /^[a-zA-Z0-9]*/;
+Zotero.CSL._firstNameRegexp = /^[^\s]*/;
 Zotero.CSL._textCharRegexp = /[a-zA-Z0-9]/;
 Zotero.CSL._numberRegexp = /\d+/;
 Zotero.CSL.prototype.formatCitation = function(citation, format) {
@@ -2508,15 +2508,18 @@ Zotero.CSL.ItemSet.prototype.resort = function() {
 					// determine how to format name
 					var theNames = allNames[lastName];
 					if(theNames && theNames.length > 1) {
-						nameType[lastName] = Zotero.CSL.NAME_USE_INITIAL;					
+						// have two items with identical last names but different
+						// first names
+						nameType[lastName] = Zotero.CSL.NAME_USE_INITIAL;	
+						
 						// check initials to see if any match
 						var initials = new Object();
 						for(var k=0; k<theNames.length; k++) {
 							if(initials[theNames[k][0]]) {
 								nameType[lastName] = Zotero.CSL.NAME_USE_FULL;
+								break;
 							}
 							initials[theNames[k][0]] = true;
-							break;
 						}
 					}
 				}
@@ -2552,7 +2555,7 @@ Zotero.CSL.ItemSet.prototype.resort = function() {
 		var names = namesByItem[i];
 		var disambiguated = false;
 		
-		if(this._disambiguate && i != 0 && citationsEqual[i] == 0) {
+		if(this._disambiguate && i != 0 && citationsEqual[i] == true) {
 			// some options can only be applied if there are actual authors
 			if(names && lastNames && this.options["disambiguate-add-names"]) {
 				// try adding names to disambiguate
