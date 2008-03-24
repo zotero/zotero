@@ -615,7 +615,7 @@ var wpdDOMSaver = {
 		if ( medium != "" && medium.indexOf("screen") < 0 && medium.indexOf("all") < 0 ) {
 			return "";
 		}
-		if ( aCSS.href.indexOf("chrome") == 0 ) return "";
+		if ( aCSS.href != null && aCSS.href.indexOf("chrome") == 0 ) return "";
 		var flag = "";
 		for ( var i=0; i<aCSS.cssRules.length; i++ ) {
 			if ( aCSS.cssRules[i].type == 1 || aCSS.cssRules[i].type == 4 ) {
