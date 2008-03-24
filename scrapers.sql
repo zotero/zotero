@@ -1579,6 +1579,60 @@ function doWeb(doc, url) {
 	}
 }');
 
+REPLACE INTO translators VALUES ('a14ac3eb-64a0-4179-970c-92ecc2fec992', '1.0.0b4.r5', '', '2008-03-24 20:00:00', '0', '100', '4', 'Scopus', 'Michael Berkowitz', 'http://www.scopus.com', 
+'function detectWeb(doc, url) {
+	if (url.indexOf("/results/") != -1) {
+		return "multiple";
+	} else if (url.indexOf("/record/") != -1) {
+		return "journalArticle";
+	}
+}', 
+'function doWeb(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+	if (prefix == ''x'') return namespace; else return null;
+	} : null;
+
+	var articles = new Array();
+	if (detectWeb(doc, url) == "multiple") {
+		items = new Object();
+		var boxes = doc.evaluate(''//table/tbody/tr[@class]/td[@class="fldtextPad"][1]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var box;
+		while (box = boxes.iterateNext()) {
+			var title = Zotero.Utilities.trimInternal(doc.evaluate(''.//span[@class="txtBoldOnly"]'', box, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+			var link = doc.evaluate(''.//a[@class="outwardLink"]'', box, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
+			items[link] = title;
+		}
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			articles.push(i);
+		}
+	} else {
+		articles = [url];
+	}
+	Zotero.Utilities.processDocuments(articles, function(newDoc) {
+		var eid = newDoc.location.href.match(/eid=([^&]+)/)[1];
+		var get = ''http://www.scopus.com/scopus/citation/export.url'';
+		var post = ''origin=recordpage&sid=&src=s&stateKey=OFD_31989952&eid='' + eid + ''&sort=&exportFormat=RIS&view=CiteAbsKeyws&selectedCitationInformationItemsAll=on'';
+		Zotero.debug(get + "?" + post);
+		Zotero.Utilities.HTTP.doPost(get, post, function(text) {
+			// load translator for RIS
+			var translator = Zotero.loadTranslator("import");
+			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+			translator.setString(text);
+			translator.setHandler("itemDone", function(obj, item) {
+				if (item.notes[0][''note'']) {
+					item.abstractNote = item.notes[0][''note''];
+					item.notes = new Array();
+					item.complete();
+				}
+			});
+			translator.translate();
+		});
+	}, function() {Zotero.done;});
+	Zotero.wait();
+}');
+
 REPLACE INTO translators VALUES ('e1140aa1-3bcf-4226-9099-78ef0b63bb3e', '1.0.0b4.r5', '', '2008-03-19 16:00:00', '0', '100', '4', 'Osterreichischer Bibliothekenverbund', 'Michael Berkowitz', 'http://meteor.bibvb.ac.at/F', 
 'function detectWeb(doc, url) {
 	if (doc.evaluate(''//td[@class="bar"]/a[@class="blue"]/img'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
