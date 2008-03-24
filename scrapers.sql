@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-24 02:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-24 15:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -2864,7 +2864,7 @@ REPLACE INTO translators VALUES ('5dd22e9a-5124-4942-9b9e-6ee779f1023e', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('d3b1d34c-f8a1-43bb-9dd6-27aa6403b217', '1.0.0b4.r5', '', '2008-03-24 02:30:00', '1', '100', '4', 'YouTube', 'Sean Takats and Michael Berkowitz', 'https?://[^/]*youtube\.com\/', 
+REPLACE INTO translators VALUES ('d3b1d34c-f8a1-43bb-9dd6-27aa6403b217', '1.0.0b4.r5', '', '2008-03-24 15:30:00', '1', '100', '4', 'YouTube', 'Sean Takats and Michael Berkowitz', 'https?://[^/]*youtube\.com\/', 
 'function detectWeb(doc, url){
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -2892,6 +2892,7 @@ REPLACE INTO translators VALUES ('d3b1d34c-f8a1-43bb-9dd6-27aa6403b217', '1.0.0b
 	var nsResolver = namespace ? function(prefix) {
 			if (prefix == ''x'') return namespace; else return null;
 		} : null;
+	var host = doc.location.host;
 	var video_ids = new Array();
 	var xpath = ''//input[@type="hidden" and @name="video_id"]'';
 	var elmts;
@@ -2929,10 +2930,10 @@ REPLACE INTO translators VALUES ('d3b1d34c-f8a1-43bb-9dd6-27aa6403b217', '1.0.0b
 			video_ids.push(i);
 		}
 	}
-	getData(video_ids);			
+	getData(video_ids, host);			
 }
 
-function getData(ids){
+function getData(ids, host){
 	var uris = new Array();	
 	var url = "http://gdata.youtube.com/feeds/videos/";
 	for each(var id in ids){
@@ -2989,10 +2990,9 @@ function getData(ids){
 			newItem.abstractNote = xml..media_description[0].text().toString();
 		}
 		
-		var next_url = newItem.url.replace("watch?v=", "v/") + ''&rel=1'';
+		var next_url = newItem.url.replace(/\/\/([^/]+)/, "//" + host).replace("watch?v=", "v/") + ''&rel=1'';
 		Zotero.Utilities.loadDocument(next_url, function(newDoc) {
 			var new_url = newDoc.location.href.replace("swf/l.swf", "get_video");
-			Zotero.debug(new_url);
 			newItem.attachments.push({url:new_url, title:"YouTube Video Recording", mimeType:"video/x-flv"});
 			newItem.complete();
 		}, function() {Zotero.done;});
