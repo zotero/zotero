@@ -112,7 +112,7 @@
         </if>
         <else>
           <text value="supra" prefix=", "/>
-          <text value="note" prefix=", "/>
+          <text value="note" prefix=" "/>
           <text variable="citation-number" prefix=" "/>
         </else>
       </choose>
