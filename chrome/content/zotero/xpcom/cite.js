@@ -1444,12 +1444,21 @@ Zotero.CSL.prototype._compareItem = function(a, b, context, cache) {
 		}
 	}
 	
-	// sort by index
+	// sort by index in document
 	var aIndex = a.getProperty("index");
 	var bIndex = b.getProperty("index");
 	if(aIndex !== "" && (bIndex === "" || aIndex < bIndex)) {
 		return -1;
 	} else if(aIndex != bIndex) {
+		return 1;
+	}
+	
+	// sort by old index (to make this a stable sort)
+	var aOldIndex = a.getProperty("oldIndex");
+	var bOldIndex = b.getProperty("oldIndex");
+	if(aOldIndex < bOldIndex) {
+		return -1;
+	} else if(aOldIndex != bOldIndex) {
 		return 1;
 	}
 	
@@ -1463,6 +1472,10 @@ Zotero.CSL.prototype._compareItem = function(a, b, context, cache) {
 Zotero.CSL.prototype.cachedSort = function(items, context, field) {
 	var me = this;
 	var cache = new Object();
+	
+	for(var i=0; i<items.length; i++) {
+		items[i].setProperty("oldIndex", i);
+	}
 	
 	if(field) {
 		var newItems = items.sort(function(a, b) {
