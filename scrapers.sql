@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-24 15:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-24 18:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -5275,7 +5275,7 @@ function doWeb(doc, url) {
 }
 ');
 
-REPLACE INTO translators VALUES ('5af42734-7cd5-4c69-97fc-bc406999bdba', '1.0.0b4.r5', '', '2008-01-06 23:55:00', '0', '100', '4', 'ESA Journals', 'Michael Berkowitz', '^http://www.esajournals.org/*', 
+REPLACE INTO translators VALUES ('5af42734-7cd5-4c69-97fc-bc406999bdba', '1.0.0b4.r5', '', '2008-03-24 18:00:00', '1', '100', '4', 'ESA Journals', 'Michael Berkowitz', 'http://www.esajournals.org/', 
 'function detectWeb(doc, url) {
 	if (url.indexOf("get-toc") != -1 || url.indexOf("searchtype") != -1) {
 		return "multiple";
@@ -5298,83 +5298,72 @@ REPLACE INTO translators VALUES ('5af42734-7cd5-4c69-97fc-bc406999bdba', '1.0.0b
 	return sen.join("");
 }
 
+function fixURL(doistr) {
+	var swapTable = {
+		"%2F":"/",
+		"%28":"(",
+		"%29":")",
+		"%5B":"[",
+		"%5D":"]",
+		"%3A":":",
+		"%3B":";"
+	}
+	for (var probstr in swapTable) {
+		doistr = doistr.replace(probstr, swapTable[probstr]);
+	}
+	return doistr;
+}
+
 function doWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
 	if (prefix == ''x'') return namespace; else return null;
        	} : null;
 	
-	var items = new Array();
-	if (url.indexOf("get-toc") != -1) {
-		var titlesAr = new Array();
-		var linksAr = new Array();
-		
-		var group_xpath = ''//div[@class="group"]'';
-		var articles = doc.evaluate(group_xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
-		while (group = articles.iterateNext()) {
-			//gets article titles
-			titlesAr.push(doc.evaluate(''.//p[@class="title"]'', group, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
-			
-			//gets full text links, or abstracts if that''s all that''s available
-			var link_xpath = ''.//p[@class="link"]'';
-			if (group.textContent.indexOf("Full Text") != -1) {
-			link_xpath += ''/a[substring(text(), 1, 4) = "Full"]'';
-			} else if (group.textContent.indexOf("Abstract") != -1) {
-				link_xpath += ''/a[substring(text(), 1, 8) = "Abstract"]'';
-			}
-			linksAr.push(doc.evaluate(link_xpath, group, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href);
+	var articles = new Array();
+	if (detectWeb(doc, url) == "multiple") {
+		var items = new Object();
+		var resultItems = doc.evaluate(''//div[@class="nocolumn"][@id="content"]/div//*[@class="group"]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var next_item;
+		while (next_item = resultItems.iterateNext()) {
+			var link = doc.evaluate(''.//a[1]'', next_item, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
+			var title = senCase(doc.evaluate(''.//*[@class="title"]'', next_item, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+			items[link] = title;
 		}
-		
-		var articles = new Object();
-		for (var i = 0 ; i < linksAr.length ; i++) {
-			articles[linksAr[i]] = senCase(titlesAr[i]);
-		}
-		
-		articles = Zotero.selectItems(articles);
-		
-		
-		
-		for (var i in articles) {
-			items.push(i);
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			articles.push(i);
 		}
 	} else {
-		items.push(url);
+		articles.push(url);
 	}
-	
-	for (var i = 0 ; i < items.length ; i++) {
-		var re= /<a href=\"([^"]*)\"?>RefWorks Format/;
-		var doi = items[i].split("doi=")[1];
-		var URI = "http://www.esajournals.org/perlserv/?request=cite-builder&doi=" + doi;
-		Zotero.Utilities.HTTP.doGet(URI, function(text) {
-			var newURI = Zotero.Utilities.unescapeHTML(text.match(re)[1]);
-			Zotero.Utilities.HTTP.doGet("http://" + doc.location.host + "/perlserv/" + newURI, function(text) {
-				var translator = Zotero.loadTranslator("import");
-				text = text.replace(/RT/, "TY");
-				text = text.replace(/VO/, "VL");
-				text = text.replace(/LK/, "UR");
-				text = text.replace(/YR/, "PY");
-				translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-				translator.setString(text.replace(/([A-Z][A-Z\d]\s)/g, "$1 - "));
-				translator.setHandler("itemDone", function(obj, item) {
-					item.attachments = [
-						{url:item.url, title:"EAS Snapshot", mimeType:"text/html"},
-						{url:"http://www.esajournals.org/perlserv/?request=res-loc&uri=urn%3Aap%3Apdf%3Adoi%3A" + doi, title:"EAS Full Text PDF", mimeType:"application/pdf"}
-					];
-					item.itemType = "journalArticle";
-					item.title = item.title.replace(/\s+\-\s+/g, " ");
-					if (item.title.indexOf("JF") != -1) {
-						item.title = item.title.substring(0, item.title.indexOf("JF") - 1);
-					}
-					item.title = senCase(item.title);
-					item.abstractNote = item.notes[0][''note''];
-					item.complete();
-				});
-				translator.translate();
-				Zotero.wait();
-				Zotero.done();
+	Zotero.Utilities.processDocuments(articles, function(newDoc) {
+		var newlink = newDoc.evaluate(''//a[text() = "Create Reference"]'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
+		var itemurl = newDoc.location.href;
+		var doi = itemurl.match(/doi=([^&]+)/)[1];
+		var issn = newDoc.evaluate(''//div[@id="pageTitle"]/p/a'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href.match(/issn=([^&]+)/)[1];
+		newlink = newlink.replace(''cite-builder'', ''download-citation&t=refman&site=esaonline'');
+		Zotero.Utilities.HTTP.doGet(newlink, function(text) {
+			// load translator for RIS
+			var translator = Zotero.loadTranslator("import");
+			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+			translator.setString(text);
+			translator.setHandler("itemDone", function(obj, item) {
+				item.url = fixURL(itemurl);
+				item.DOI = fixURL(doi);
+				var bits = new Array(issn, item.volume, item.issue);
+				var pdfurl = ''http://www.esajournals.org/archive/'' + bits.join("/") + "/pdf/i" + bits.join("-") + "-" + item.pages.match(/\d+/)[0] + ".pdf";
+				item.attachments = [
+					{url:item.url, title:"ESA Journals Snapshot", mimeType:"text/html"},
+					{url:pdfurl, title:"ESA Full Text PDF", mimeType:"application/pdf"}
+				];
+				item.complete();
 			});
+			translator.translate();
+			
+			Zotero.done();
 		});
-	}
+	}, function() {Zotero.done;});
 	Zotero.wait();
 }');
 
