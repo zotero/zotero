@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-24 02:15:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-24 02:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -2864,7 +2864,7 @@ REPLACE INTO translators VALUES ('5dd22e9a-5124-4942-9b9e-6ee779f1023e', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('d3b1d34c-f8a1-43bb-9dd6-27aa6403b217', '1.0.0b4.r5', '', '2008-03-18 02:30:00', '0', '100', '4', 'YouTube', 'Sean Takats', 'https?://[^/]*youtube\.com\/', 
+REPLACE INTO translators VALUES ('d3b1d34c-f8a1-43bb-9dd6-27aa6403b217', '1.0.0b4.r5', '', '2008-03-24 02:30:00', '1', '100', '4', 'YouTube', 'Sean Takats and Michael Berkowitz', 'https?://[^/]*youtube\.com\/', 
 'function detectWeb(doc, url){
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -2988,8 +2988,15 @@ function getData(ids){
 		if (xml..media_description.length()){
 			newItem.abstractNote = xml..media_description[0].text().toString();
 		}
-		newItem.complete();		
-	}, function(){Zotero.done();});	
+		
+		var next_url = newItem.url.replace("watch?v=", "v/") + ''&rel=1'';
+		Zotero.Utilities.loadDocument(next_url, function(newDoc) {
+			var new_url = newDoc.location.href.replace("swf/l.swf", "get_video");
+			Zotero.debug(new_url);
+			newItem.attachments.push({url:new_url, title:"YouTube Video Recording", mimeType:"video/x-flv"});
+			newItem.complete();
+		}, function() {Zotero.done;});
+	});
 	Zotero.wait();
 }');
 
