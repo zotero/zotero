@@ -110,6 +110,11 @@
           <text macro="issuance" prefix=" "/>
           <text macro="access" prefix=", "/>
         </if>
+        <else>
+          <text value="supra" font-style="italic"/>
+          <text value="note" prefix=", "/>
+          <text variable="citation-number"/>
+        </else>
       </choose>
     </layout>
   </citation>
