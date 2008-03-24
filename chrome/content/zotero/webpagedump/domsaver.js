@@ -624,7 +624,7 @@ var wpdDOMSaver = {
 					flag = aCSS.href; 
 				}                             
 				var ref=aCSS.href;
-				if (flag.indexOf(".css")==-1) ref=this.currentURL;
+				if (flag == null || flag.indexOf(".css")==-1) ref=this.currentURL;
 				content += this.processCSSText(aCSS.cssRules[i].cssText, ref, false) + "\n";
 			} else if ( aCSS.cssRules[i].type == 3 ) {
 				content += this.processCSSRecursively(aCSS.cssRules[i].styleSheet);
