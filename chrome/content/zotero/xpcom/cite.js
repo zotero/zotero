@@ -375,8 +375,10 @@ Zotero.CSL.prototype.formatCitation = function(citation, format) {
 			var span = [];
 			// loop through citation numbers and collect ranges in span
 			for(var i in citationNumbers) {
-				if(i == parseInt(previousI, 10)+1) {	// could be part of a range
-														// including the previous number
+				if(i != -1 && !citation.citationItems[citationNumbers[i]].prefix
+						&& !citation.citationItems[citationNumbers[i]].suffix
+						&& i == parseInt(previousI, 10)+1) {
+					// could be part of a range including the previous number
 					span.push(citationNumbers[i]);
 				} else {				// not part of a range
 					if(span.length) citationItems[span[0]] = citation.citationItems[span[0]];
@@ -1474,7 +1476,7 @@ Zotero.CSL.prototype.cachedSort = function(items, context, field) {
 	var cache = new Object();
 	
 	for(var i=0; i<items.length; i++) {
-		items[i].setProperty("oldIndex", i);
+		if(items[i].setProperty) items[i].setProperty("oldIndex", i);
 	}
 	
 	if(field) {
@@ -2717,15 +2719,14 @@ Zotero.CSL.FormattedString = function(context, format, delimiter, subsequent) {
 	this.format = format;
 	this.delimiter = delimiter;
 	this.string = "";
-	this.closePunctuation = false;
+	this.closePunctuation = "";
 	this.closeFormatting = "";
 	this.useBritishStyleQuotes = false;
 	
 	// insert tab iff second-field-align is on
 	this.insertTabAfterField = (!subsequent && this.option.(@name == "second-field-align").@value.toString());
-	// whether to remove whitespace from next appended string
-	this.suppressLeadingWhitespace = false;
-	// whether to prepend a newline to the next appended string
+	this.insertTabBeforeField = false;
+	// append line before next
 	this.prependLine = false;
 	
 	if(format == "RTF") {
@@ -2769,8 +2770,8 @@ Zotero.CSL.FormattedString.prototype.concat = function(formattedString, element)
 	if(formattedString.closePunctuation || formattedString.closeFormatting) {
 		haveAppended = true;
 		// add the new close punctuation
-		this.closeFormatting = formattedString.closeFormatting;
-		this.closePunctuation = formattedString.closePunctuation;
+		this.closeFormatting += formattedString.closeFormatting;
+		this.closePunctuation += formattedString.closePunctuation;
 	}
 	
 	// append suffix, if we didn't before
@@ -2787,10 +2788,40 @@ Zotero.CSL.FormattedString._rtfEscapeFunction = function(aChar) {
  * appends a string (with format parameters) to the current one
  */
 Zotero.CSL.FormattedString.prototype.append = function(string, element, dontDelimit, dontEscape) {
+	
 	if(!string && string !== 0) return false;
 	
 	if(typeof(string) != "string") {
 		string = string.toString();
+	}
+	
+	// get prefix
+	var prefix = "";
+	if(element && element.@prefix.length()) {
+		var prefix = element.@prefix.toString();
+	}
+	
+	// append tab before if necessary
+	if(!dontDelimit && this.insertTabBeforeField) {
+		// replace any space preceding tab
+		this.string = this.string.replace(/\s+$/, "");
+		
+		if(this.format == "HTML") {
+			this.string += '</td><td style="padding-left:4pt;">';
+		} else if(this.format == "RTF") {
+			this.string += "\\tab ";
+		} else if(this.format == "Integration") {
+			this.string += "\t";
+		} else {
+			this.string += " ";
+		}
+		
+		this.insertTabBeforeField = false;
+		if(prefix !== "") {
+			prefix = prefix.replace(/^\s+/, "");
+		} else {
+			string = string.replace(/^\s+/, "");
+		}
 	}
 	
 	// append delimiter if necessary
@@ -2799,26 +2830,15 @@ Zotero.CSL.FormattedString.prototype.append = function(string, element, dontDeli
 	}
 	
 	// append prefix before closing punctuation
-	if(element && element.@prefix.length()) {
-		var prefix = element.@prefix.toString();
-		if(this.suppressLeadingWhitespace) {
-			var newPrefix = prefix.replace(/^\s+/, "");
-			if(newPrefix != "" && newPrefix != prefix) {
-				this.suppressLeadingWhitespace = false;
-			}
-			prefix = newPrefix;
-		}
-	}
-	
-	if(prefix) {
+	if(prefix !== "") {
 		this.append(prefix, null, true);
 	}
 	
 	var addBefore = "";
 	var addAfter = "";
 	
-	// append line before if display="block"
-	if(element && (element["@display"] == "block" || this.appendLine)) {
+	// prepend line before if display="block"
+	if(element && (element["@display"] == "block" || this.prependLine)) {
 		if(this.format == "HTML") {
 			if(this.option.(@name == "hanging-indent").@value == "true") {
 				addBefore += '<div style="text-indent:0.5in;">'
@@ -2834,13 +2854,8 @@ Zotero.CSL.FormattedString.prototype.append = function(string, element, dontDeli
 			} else {
 				addBefore += (Zotero.isWin ? "\r\n" : "\n");
 			}
-			this.appendLine = element["@display"] == "block";
+			this.prependLine = element["@display"] == "block";
 		}
-	}
-	
-	if(this.suppressLeadingWhitespace) {
-		string = string.replace(/^\s+/, "");
-		this.suppressLeadingWhitespace = false;
 	}
 	
 	// close quotes, etc. using punctuation
@@ -2850,7 +2865,7 @@ Zotero.CSL.FormattedString.prototype.append = function(string, element, dontDeli
 			string = string.substr(1);
 		}
 		this.string += this.closePunctuation;
-		this.closePunctuation = false;
+		this.closePunctuation = "";
 	}
 	
 	// clean up
@@ -2988,30 +3003,14 @@ Zotero.CSL.FormattedString.prototype.append = function(string, element, dontDeli
 	
 	this.string += addBefore+string;
 	
-	var suffix;
 	if(element && element.@suffix.length()) {
 		this.append(element.@suffix.toString(), null, true);
 	}
 	
-	// close div for display=block in HTML
-	
 	// save for second-field-align
 	if(!dontDelimit && this.insertTabAfterField) {
-		// replace any space following this entry
-		this.string = this.string.replace(/\s+$/, "");
-		
-		if(this.format == "HTML") {
-			addAfter += '</td><td style="padding-left:4pt;">';
-		} else if(this.format == "RTF") {
-			addAfter += "\\tab ";
-		} else if(this.format == "Integration") {
-			addAfter += "\t";
-		} else {
-			addAfter += " ";
-		}
-		
 		this.insertTabAfterField = false;
-		this.suppressLeadingWhitespace = true;
+		this.insertTabBeforeField = true;
 	}
 	
 	this.closeFormatting = addAfter;
@@ -3023,7 +3022,7 @@ Zotero.CSL.FormattedString.prototype.append = function(string, element, dontDeli
  * gets the formatted string
  */
 Zotero.CSL.FormattedString.prototype.get = function() {
-	return this.string+(this.closeFormatting ? this.closeFormatting : "")+(this.closePunctuation ? this.closePunctuation : "");
+	return this.string+this.closeFormatting+this.closePunctuation;
 }
 
 /*
