@@ -131,8 +131,8 @@ Zotero.Utilities.prototype.superCleanString = function(x) {
 		throw "superCleanString: argument must be a string";
 	}
 	
-	var x = x.replace(/^[\x00-\x27\x29-\2F\x3A-\x40\x5B-\x60\x7B-\x7F]+/, "");
-	return x.replace(/[\x00-\x28\x2A-\2F\x3A-\x40\x5B-\x60\x7B-\x7F]+$/, "");
+	var x = x.replace(/^[^\w(]+/, "");
+	return x.replace(/[^\w)]+$/, "");
 }
 
 /*
