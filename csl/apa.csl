@@ -9,6 +9,9 @@
       <name>Simon Kornblith</name>
       <email>simon@simonster.com</email>
     </author>
+    <contributor>
+      <name>Bruce D'Arcus</name>
+    </contributor>
     <category term="psychology"/>
     <category term="generic-base"/>
     <category term="author-date"/>
@@ -179,9 +182,11 @@
       <text macro="edition" prefix=" (" suffix=")"/>
       <text variable="volume" prefix=", "/>
       <text variable="issue" prefix="(" suffix=")"/>
-      <text macro="pages"/>
-      <text macro="publisher" prefix=". "/>
-      <text macro="access" prefix=". " />
+      <group delimiter=". ">
+	<text macro="pages"/>
+	<text macro="publisher" prefix=". "/>
+	<text macro="access" prefix=". " />
+      </group>
     </layout>
   </bibliography>
 </style>
