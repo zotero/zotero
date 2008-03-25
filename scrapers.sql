@@ -17792,7 +17792,7 @@ function doExport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('9cb70025-a888-4a29-a210-93ec52da40d4', '1.0.0b4.r1', '', '2008-02-12 17:30:00', '1', '100', '3', 'BibTeX', 'Simon Kornblith', 'bib', 
+REPLACE INTO translators VALUES ('9cb70025-a888-4a29-a210-93ec52da40d4', '1.0.0b4.r1', '', '2008-03-25 17:32:09', '1', '100', '3', 'BibTeX', 'Simon Kornblith', 'bib', 
 'Zotero.configure("dataMode", "block");
 Zotero.addOption("UTF8", true);
 
@@ -17817,7 +17817,12 @@ function detectImport() {
 		return true;
 	}
 }', 
-'var fieldMap = {
+'//%a = first author surname
+//%y = year
+//%t = first word of title
+var citeKeyFormat = "%a_%t_%y";
+
+var fieldMap = {
 	address:"place",
 	chapter:"section",
 	edition:"edition",
@@ -17841,32 +17846,46 @@ var inputFieldMap = {
 	publisher:"publisher"
 };
 
-var typeMap = {
-	book:"book",
-	bookSection:"inbook",
-	journalArticle:"article",
-	magazineArticle:"article",
-	newspaperArticle:"article",
-	thesis:"phdthesis",
-	letter:"misc",
-	manuscript:"unpublished",
-	interview:"misc",
-	film:"misc",
-	artwork:"misc",
-	webpage:"misc",
-	conferencePaper:"inproceedings"
+var zotero2bibtexTypeMap = {
+	"book":"book",
+	"bookSection": function (item) {
+		var hasAuthor = false;
+		var hasEditor = false;
+		for each(var creator in item.creators) {
+			if (creator.creatorType == "editor") { hasEditor = true; }
+			if (creator.creatorType == "author") { hasAuthor = true; }
+		}
+		if (hasAuthor && hasEditor) { return "incollection"; }
+		return "inbook";
+		},
+	"journalArticle":"article",
+	"magazineArticle":"article",
+	"newspaperArticle":"article",
+	"thesis":"phdthesis",
+	"letter":"misc",
+	"manuscript":"unpublished",
+	"interview":"misc",
+	"film":"misc",
+	"artwork":"misc",
+	"webpage":"misc",
+	"conferencePaper":"inproceedings"
 };
 
-// supplements outputTypeMap for importing
-var inputTypeMap = {
-	conference:"inproceedings",
-	techreport:"report",
-	booklet:"book",
-	incollection:"bookSection",
-	manual:"book",
-	mastersthesis:"thesis",
-	misc:"book",
-	proceedings:"book"
+var bibtex2zoteroTypeMap = {
+	"book":"book", // or booklet,  proceedings
+	"inbook":"bookSection",
+	"incollection":"bookSection",
+	"article":"journalArticle", // or magazineArticle or newspaperArticle
+	"phdthesis":"thesis",
+	"unpublished":"manuscript",
+	"inproceedings":"conferencePaper", // check for conference also
+	"techreport":"report",
+	"booklet":"book",
+	"incollection":"bookSection",
+	"manual":"book",
+	"mastersthesis":"thesis",
+	"misc":"book",
+	"proceedings":"conference"
 };
 
 /*
@@ -19339,7 +19358,14 @@ function processField(item, field, value) {
 	} else if(field == "note" || field == "annote") {
 		item.extra += "\n"+value;
 	} else if(field == "howpublished") {
-		item.extra += "\nPublished: "+value;
+		if(value.length >= 7) {
+			var str = value.substr(0, 7);
+			if(str == "http://" || str == "https:/" || str == "mailto:") {
+				item.url = value;
+			} else {
+				item.extra += "\nPublished: "+value;
+			}
+		}
 	} else if(field == "keywords") {
 		if(value.indexOf(",") == -1) {
 			// keywords/tags
@@ -19439,19 +19465,11 @@ function getFieldValue() {
 
 function beginRecord(type, closeChar) {
 	type = Zotero.Utilities.cleanString(type.toLowerCase());
-	if(inputTypeMap[type]) {
-		var item = new Zotero.Item(inputTypeMap[type]);
-	} else {
-		for(var i in typeMap) {
-			if(typeMap[i] == type) {
-				var item = new Zotero.Item(i);
-				break;
-			}
-		}
-		if(!item) {
-			Zotero.debug("discarded item from BibTeX; type was "+type);
-		}
+	zoteroType = bibtex2zoteroTypeMap[type];
+	if (!zoteroType) {
+		Zotero.debug("discarded item from BibTeX; type was "+type);
 	}
+	var item = new Zotero.Item(zoteroType);
 	
 	item.extra = "";
 	
@@ -19527,6 +19545,83 @@ function mapAccent(character) {
 }
 
 var numberRe = /^[0-9]+/;
+// this is a list of words that should not appear as part of the citation key
+var citeKeyTitleBannedRe = /(\s+|\b)(a|an|from|does|how|it\''s|its|on|some|the|this|why)(\s+|\b)/g;
+var citeKeyConversionsRe = /%([a-zA-Z])/;
+var citeKeyCleanRe = /[^a-z0-9\!\$\&\*\+\-\.\/\:\;\<\>\?\[\]\^\_\`\|]+/g;
+
+var citeKeyConversions = {
+    "a":function (flags, item) {
+        if(item.creators && item.creators[0] && item.creators[0].lastName) {
+            return item.creators[0].lastName.toLowerCase().replace(/ /g,"_").replace(/,/g,"");
+        }
+        return "";
+    },
+    "t":function (flags, item) {
+        if (item["title"]) {
+            return item["title"].toLowerCase().replace(citeKeyTitleBannedRe, "").split(" ")[0];
+        }
+        return "";
+    },
+    "y":function (flags, item) {
+        if(item.date) {
+            var date = Zotero.Utilities.strToDate(item.date);
+            if(date.year && numberRe.test(date.year)) {
+                return date.year;
+            }
+        }
+        return "????";
+    }
+}
+
+
+function buildCiteKey (item,citekeys) {
+    var basekey = "";
+    var counter = 0;
+    citeKeyFormatRemaining = citeKeyFormat;
+    while (citeKeyConversionsRe.test(citeKeyFormatRemaining)) {
+        if (counter > 100) {
+            Zotero.debug("Pathological BibTeX format: " + citeKeyFormat);
+            break;
+        }
+        var m = citeKeyFormatRemaining.match(citeKeyConversionsRe);
+        if (m.index > 0) {
+            //add data before the conversion match to basekey
+            basekey = basekey + citeKeyFormatRemaining.substr(0, m.index);
+        }
+        var flags = ""; // for now
+        var f = citeKeyConversions[m[1]];
+        if (typeof(f) == "function") {
+            var value = f(flags, item);
+            Zotero.debug("Got value " + value + " for %" + m[1]);
+            //add conversion to basekey
+            basekey = basekey + value;
+        }
+        citeKeyFormatRemaining = citeKeyFormatRemaining.substr(m.index + m.length);
+        counter++;
+    }
+    if (citeKeyFormatRemaining.length > 0) {
+        basekey = basekey + citeKeyFormatRemaining;
+    }
+
+    // for now, remove any characters not explicitly known to be allowed;
+    // we might want to allow UTF-8 citation keys in the future, depending
+    // on implementation support.
+    //
+    // no matter what, we want to make sure we exclude
+    // " # % '' ( ) , = { } ~ and backslash
+
+    basekey = basekey.replace(citeKeyCleanRe, "");
+    var citekey = basekey;
+    var i = 0;
+    while(citekeys[citekey]) {
+        i++;
+        citekey = basekey + "-" + i;
+    }
+    citekeys[citekey] = true;
+    return citekey;
+}
+
 function doExport() {
 	if(Zotero.getOption("UTF8")) {
 	    Zotero.setCharacterSet("UTF-8");
@@ -19542,50 +19637,12 @@ function doExport() {
 	var item;
 	while(item = Zotero.nextItem()) {
 		// determine type
-		var type = typeMap[item.itemType];
+		var type = zotero2bibtexTypeMap[item.itemType];
+		if (typeof(type) == "function") { type = type(item); }
 		if(!type) type = "misc";
 		
 		// create a unique citation key
-		var basekey = "";
-		if(item.creators && item.creators[0] && item.creators[0].lastName) {
-			basekey += "_" + item.creators[0].lastName.toLowerCase().replace(/ /g,"_").replace(/,/g,"");
-		}
-		
-		// include the item title as part of the citation key
-		if (item["title"]) {
-			// this is a list of words that should not appear as part of the citation key
-			var bannedTitleKeys = ["a", "an", "from", "does", "how", "it''s", "its", "on", "some", "the", "this", "why"];
-			var titleElements = item["title"].toLowerCase().split(" ");
-			for(var te in titleElements) {
-				if (bannedTitleKeys.indexOf(titleElements[te]) == -1) {
-					basekey += "_" + titleElements[te];
-					break;
-				}
-			}
-        }
-
-		if(item.date) {
-			var date = Zotero.Utilities.strToDate(item.date);
-			if(date.year && numberRe.test(date.year)) {
-				basekey += "_" + date.year;
-			}
-		}
-		
-		// for now, remove any characters not explicitly known to be allowed;
-		// we might want to allow UTF-8 citation keys in the future, depending
-		// on implementation support.
-		//
-		// no matter what, we want to make sure we exclude
-		// " # % '' ( ) , = { } ~ and backslash
-		
-		basekey = basekey.substr(1).replace(/[^a-z0-9\!\$\&\*\+\-\.\/\:\;\<\>\?\[\]\^\_\`\|]+/g,"");
-		var citekey = basekey;
-		var i = 0;
-		while(citekeys[citekey]) {
-			i++;
-			citekey = basekey+"-"+i;
-		}
-		citekeys[citekey] = true;
+		var citekey = buildCiteKey(item, citekeys);
 		
 		// write citation key
 		Zotero.write((first ? "" : ",\n\n") + "@"+type+"{"+citekey);
@@ -19597,8 +19654,8 @@ function doExport() {
 			}
 		}
 		
-		if(item.conferenceName) {
-			writeField("booktitle", item.conferenceName);
+		if(item.proceedingsTitle || item.conferenceName) {
+			writeField("booktitle", item.proceedingsTitle || item.conferenceName);
 		}
 
 		if(item.publicationTitle) {
@@ -19644,6 +19701,7 @@ function doExport() {
 		}
 		
 		if(item.date) {
+                    var date = item.date;
 			// need to use non-localized abbreviation
 			if(date.month) {
 				writeField("month", months[date.month], true);
@@ -19664,8 +19722,13 @@ function doExport() {
 			}
 			writeField("keywords", tagString.substr(1));
 		}
+		
 		if(item.pages) {
 			writeField("pages", item.pages);
+		}
+		
+		if(item.itemType == "webpage") {
+			writeField("howpublished", item.url);
 		}
 		
 		Zotero.write("\n}");
