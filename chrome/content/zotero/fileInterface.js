@@ -547,7 +547,7 @@ Zotero_File_Interface.Progress = new function() {
 		_outOf = 0;
 		_callback = callback;
 		
-		_progressWindow = window.openDialog("chrome://zotero/chrome/fileProgress.xul", "", "chrome,resizable=no,close=no,dependent,dialog,centerscreen");
+		_progressWindow = window.openDialog("chrome://zotero/content/fileProgress.xul", "", "chrome,resizable=no,close=no,dependent,dialog,centerscreen");
 		_progressWindow.addEventListener("pageshow", _onWindowLoaded, false);
 		
 		return true;
