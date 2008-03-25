@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-25 16:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-25 17:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -13232,12 +13232,14 @@ REPLACE INTO translators VALUES ('f8765470-5ace-4a31-b4bd-4327b960ccd', '1.0.0b3
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('6614a99-479a-4524-8e30-686e4d66663e', '1.0.0b3.r1', '', '2008-03-04 20:00:00', '1', '100', '4', 'Nature', 'Simon Kornblith', '^https?://www\.nature\.com[^/]*/(?:[^/]+/journal/v[^/]+/n[^/]+/(?:(?:full|abs)/.+\.html|index.html)|search/executeSearch)', 
+REPLACE INTO translators VALUES ('6614a99-479a-4524-8e30-686e4d66663e', '1.0.0b3.r1', '', '2008-03-25 17:00:00', '1', '100', '4', 'Nature', 'Simon Kornblith', 'https?://www\.nature\.com[^/]*/(?:[^/]+/journal/v[^/]+/n[^/]+/(?:(?:full|abs)/.+\.html|index.html)|search/executeSearch)', 
 'function detectWeb(doc, url) {
 	var articleRe = /(https?:\/\/[^\/]+\/[^\/]+\/journal\/v[^\/]+\/n[^\/]+\/)(full|abs)(\/.+\.)html/;
 	
-	if(articleRe.test(url)) {
-		return "journalArticle";
+	if (articleRe.test(url)) {
+		if (doc.evaluate(''//a[contains(@href, ".ris")]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+			return "journalArticle";
+		} else { return false; }
 	} else {
 		var namespace = doc.documentElement.namespaceURI;
 		var nsResolver = namespace ? function(prefix) {
