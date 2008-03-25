@@ -17792,7 +17792,7 @@ function doExport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('9cb70025-a888-4a29-a210-93ec52da40d4', '1.0.0b4.r1', '', '2008-03-25 17:32:09', '1', '100', '3', 'BibTeX', 'Simon Kornblith', 'bib', 
+REPLACE INTO translators VALUES ('9cb70025-a888-4a29-a210-93ec52da40d4', '1.0.0b4.r1', '', '2008-03-25 17:45:53', '1', '100', '3', 'BibTeX', 'Simon Kornblith', 'bib', 
 'Zotero.configure("dataMode", "block");
 Zotero.addOption("UTF8", true);
 
@@ -19701,7 +19701,7 @@ function doExport() {
 		}
 		
 		if(item.date) {
-                    var date = item.date;
+			var date = Zotero.Utilities.strToDate(item.date);
 			// need to use non-localized abbreviation
 			if(date.month) {
 				writeField("month", months[date.month], true);
