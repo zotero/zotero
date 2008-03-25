@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-25 17:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-25 21:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -4225,7 +4225,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('9575e804-219e-4cd6-813d-9b690cbfc0fc', '1.0.0b4.r5', '', '2008-03-04 20:00:00', '1', '100', '4', 'PLoS One, Neglected Tropical Diseases and Computational Biology', 'Michael Berkowitz', '^http://www\.(plosone|plosntds|ploscompbiol)\.org/(search|article)/', 
+REPLACE INTO translators VALUES ('9575e804-219e-4cd6-813d-9b690cbfc0fc', '1.0.0b4.r5', '', '2008-03-25 21:30:00', '1', '100', '4', 'PLoS One, Neglected Tropical Diseases and Computational Biology', 'Michael Berkowitz', '^http://www\.(plosone|plosntds|ploscompbiol)\.org/(search|article)/', 
 'function detectWeb(doc, url) {
 	if (url.indexOf("Search.action") != -1 || url.indexOf("browse.action") != -1) {
 		return "multiple";
@@ -4252,9 +4252,9 @@ REPLACE INTO translators VALUES ('9575e804-219e-4cd6-813d-9b690cbfc0fc', '1.0.0b
 		texts.push(url);
 	}
 	Zotero.Utilities.processDocuments(texts, function(newDoc, url) {
+		var doi = newDoc.location.href.match(/doi(\/|%2F)(.*)$/)[2];
 		var newURL = newDoc.location.href.replace("info", "getRisCitation.action?articleURI=info");
 		var pdfURL = newDoc.location.href.replace("info", "fetchObjectAttachment.action?uri=info") + ''&representation=PDF'';
-		var doi = newDoc.location.href.match(/doi\/(.*)$/)[1];
 		Zotero.Utilities.HTTP.doGet(newURL, function(text) {
 			var translator = Zotero.loadTranslator("import");
 			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
@@ -4266,9 +4266,9 @@ REPLACE INTO translators VALUES ('9575e804-219e-4cd6-813d-9b690cbfc0fc', '1.0.0b
 				item.complete();
 			});
 			translator.translate();
-			Zotero.done();
 		});	
-	}, function() {Zotero.done()});
+	}, function() {Zotero.done;});
+	Zotero.wait();
 }');
 
 REPLACE INTO translators VALUES ('b86bb082-6310-4772-a93c-913eaa3dfa1b', '1.0.0b4.r5', '', '2008-02-11 19:30:00', '0', '100', '4', 'Early English Books Online', 'Michael Berkowitz', 'http://[^/]*eebo.chadwyck.com[^/]*/search', 
