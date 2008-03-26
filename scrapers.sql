@@ -4341,7 +4341,7 @@ REPLACE INTO translators VALUES ('b86bb082-6310-4772-a93c-913eaa3dfa1b', '1.0.0b
 	}
 }');
 
-REPLACE INTO translators VALUES ('d9be934c-edb9-490c-a88d-34e2ee106cd7', '1.0.0b4.r5', '', '2007-07-31 16:45:00', '0', '100', '4', 'Time.com', 'Michael Berkowitz', '^http://www.time.com/time/', 
+REPLACE INTO translators VALUES ('d9be934c-edb9-490c-a88d-34e2ee106cd7', '1.0.0b4.r5', '', '2008-03-25 18:20:36', '0', '100', '4', 'Time.com', 'Michael Berkowitz', '^http://www.time.com/time/', 
 'function detectWeb(doc, url) {
 	if (doc.title == "TIME Magazine - Search Results") {
 		return "multiple";
@@ -4479,10 +4479,10 @@ function doWeb(doc, url) {
 				urls.push(i);
 			}
 		}
+		Zotero.Utilities.processDocuments(urls, scrape, function() { Zotero.done(); } );
 	} else if (doc.evaluate(''//meta[@name="byline"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext() || doc.evaluate(''//div[@class="byline"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext() || doc.evaluate(''//div[@class="copy"]/div[@class="byline"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext() ) {
-		urls.push(doc.location.href);
+		scrape(doc, doc.location.href);
 	}
-	Zotero.Utilities.processDocuments(urls, scrape, function() { Zotero.done(); } );
 	
 	Zotero.wait();
 }');
@@ -17801,29 +17801,31 @@ function doExport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('9cb70025-a888-4a29-a210-93ec52da40d4', '1.0.0b4.r1', '', '2008-03-25 17:45:53', '1', '100', '3', 'BibTeX', 'Simon Kornblith', 'bib', 
+REPLACE INTO translators VALUES ('9cb70025-a888-4a29-a210-93ec52da40d4', '1.0.0b4.r1', '', '2008-03-26 16:04:37', '1', '200', '3', 'BibTeX', 'Simon Kornblith', 'bib', 
 'Zotero.configure("dataMode", "block");
 Zotero.addOption("UTF8", true);
 
 function detectImport() {
 	var block = "";
 	var read;
-	// read 20 chars out of the file
+	
+	var re = /^\s*@[a-zA-Z]+[\(\{]/;
+	var lines_read = 0;
 	while(read = Zotero.read(1)) {
 		if(read == "%") {
 			// read until next newline
 			block = "";
-			while(Zotero.read(1) != "\n") {}
-		} else if(read == "\n" && block) {
-			break;
+			while((read = Zotero.read(1)) && read != "\r" && read != "\n") {}
+		} else if((read == "\n" || read == "\r") && block) {
+			// check if this is a BibTeX entry
+			if(re.test(block)) {
+				return true;
+			}
+			
+			block = "";
 		} else if(" \n\r\t".indexOf(read) == -1) {
 			block += read;
 		}
-	}
-	
-	var re = /^@[a-zA-Z]+[\(\{]/;
-	if(re.test(block)) {
-		return true;
 	}
 }', 
 '//%a = first author surname
@@ -18541,53 +18543,53 @@ var mappingTable = {
     "\u00C1":"\\''{A}", // LATIN CAPITAL LETTER A WITH ACUTE
     "\u00C2":"\\^{A}", // LATIN CAPITAL LETTER A WITH CIRCUMFLEX
     "\u00C3":"\\~{A}", // LATIN CAPITAL LETTER A WITH TILDE
-    "\u00C4":"\\~{A}", // LATIN CAPITAL LETTER A WITH DIAERESIS
+    "\u00C4":"\\\"{A}", // LATIN CAPITAL LETTER A WITH DIAERESIS
     "\u00C7":"\\c{C}", // LATIN CAPITAL LETTER C WITH CEDILLA
     "\u00C8":"\\`{E}", // LATIN CAPITAL LETTER E WITH GRAVE
     "\u00C9":"\\''{E}", // LATIN CAPITAL LETTER E WITH ACUTE
     "\u00CA":"\\^{E}", // LATIN CAPITAL LETTER E WITH CIRCUMFLEX
-    "\u00CB":"\\~{E}", // LATIN CAPITAL LETTER E WITH DIAERESIS
+    "\u00CB":"\\\"{E}", // LATIN CAPITAL LETTER E WITH DIAERESIS
     "\u00CC":"\\`{I}", // LATIN CAPITAL LETTER I WITH GRAVE
     "\u00CD":"\\''{I}", // LATIN CAPITAL LETTER I WITH ACUTE
     "\u00CE":"\\^{I}", // LATIN CAPITAL LETTER I WITH CIRCUMFLEX
-    "\u00CF":"\\~{I}", // LATIN CAPITAL LETTER I WITH DIAERESIS
+    "\u00CF":"\\\"{I}", // LATIN CAPITAL LETTER I WITH DIAERESIS
     "\u00D1":"\\~{N}", // LATIN CAPITAL LETTER N WITH TILDE
     "\u00D2":"\\`{O}", // LATIN CAPITAL LETTER O WITH GRAVE
     "\u00D3":"\\''{O}", // LATIN CAPITAL LETTER O WITH ACUTE
     "\u00D4":"\\^{O}", // LATIN CAPITAL LETTER O WITH CIRCUMFLEX
     "\u00D5":"\\~{O}", // LATIN CAPITAL LETTER O WITH TILDE
-    "\u00D6":"\\~{O}", // LATIN CAPITAL LETTER O WITH DIAERESIS
+    "\u00D6":"\\\"{O}", // LATIN CAPITAL LETTER O WITH DIAERESIS
     "\u00D9":"\\`{U}", // LATIN CAPITAL LETTER U WITH GRAVE
     "\u00DA":"\\''{U}", // LATIN CAPITAL LETTER U WITH ACUTE
     "\u00DB":"\\^{U}", // LATIN CAPITAL LETTER U WITH CIRCUMFLEX
-    "\u00DC":"\\~{U}", // LATIN CAPITAL LETTER U WITH DIAERESIS
+    "\u00DC":"\\\"{U}", // LATIN CAPITAL LETTER U WITH DIAERESIS
     "\u00DD":"\\''{Y}", // LATIN CAPITAL LETTER Y WITH ACUTE
     "\u00E0":"\\`{a}", // LATIN SMALL LETTER A WITH GRAVE
     "\u00E1":"\\''{a}", // LATIN SMALL LETTER A WITH ACUTE
     "\u00E2":"\\^{a}", // LATIN SMALL LETTER A WITH CIRCUMFLEX
     "\u00E3":"\\~{a}", // LATIN SMALL LETTER A WITH TILDE
-    "\u00E4":"\\~{a}", // LATIN SMALL LETTER A WITH DIAERESIS
+    "\u00E4":"\\\"{a}", // LATIN SMALL LETTER A WITH DIAERESIS
     "\u00E7":"\\c{c}", // LATIN SMALL LETTER C WITH CEDILLA
     "\u00E8":"\\`{e}", // LATIN SMALL LETTER E WITH GRAVE
     "\u00E9":"\\''{e}", // LATIN SMALL LETTER E WITH ACUTE
     "\u00EA":"\\^{e}", // LATIN SMALL LETTER E WITH CIRCUMFLEX
-    "\u00EB":"\\~{e}", // LATIN SMALL LETTER E WITH DIAERESIS
+    "\u00EB":"\\\"{e}", // LATIN SMALL LETTER E WITH DIAERESIS
     "\u00EC":"\\`{i}", // LATIN SMALL LETTER I WITH GRAVE
     "\u00ED":"\\''{i}", // LATIN SMALL LETTER I WITH ACUTE
     "\u00EE":"\\^{i}", // LATIN SMALL LETTER I WITH CIRCUMFLEX
-    "\u00EF":"\\~{i}", // LATIN SMALL LETTER I WITH DIAERESIS
+    "\u00EF":"\\\"{i}", // LATIN SMALL LETTER I WITH DIAERESIS
     "\u00F1":"\\~{n}", // LATIN SMALL LETTER N WITH TILDE
     "\u00F2":"\\`{o}", // LATIN SMALL LETTER O WITH GRAVE
     "\u00F3":"\\''{o}", // LATIN SMALL LETTER O WITH ACUTE
     "\u00F4":"\\^{o}", // LATIN SMALL LETTER O WITH CIRCUMFLEX
     "\u00F5":"\\~{o}", // LATIN SMALL LETTER O WITH TILDE
-    "\u00F6":"\\~{o}", // LATIN SMALL LETTER O WITH DIAERESIS
+    "\u00F6":"\\\"{o}", // LATIN SMALL LETTER O WITH DIAERESIS
     "\u00F9":"\\`{u}", // LATIN SMALL LETTER U WITH GRAVE
     "\u00FA":"\\''{u}", // LATIN SMALL LETTER U WITH ACUTE
     "\u00FB":"\\^{u}", // LATIN SMALL LETTER U WITH CIRCUMFLEX
-    "\u00FC":"\\~{u}", // LATIN SMALL LETTER U WITH DIAERESIS
+    "\u00FC":"\\\"{u}", // LATIN SMALL LETTER U WITH DIAERESIS
     "\u00FD":"\\''{y}", // LATIN SMALL LETTER Y WITH ACUTE
-    "\u00FF":"\\~{y}", // LATIN SMALL LETTER Y WITH DIAERESIS
+    "\u00FF":"\\\"{y}", // LATIN SMALL LETTER Y WITH DIAERESIS
     "\u0100":"\\={A}", // LATIN CAPITAL LETTER A WITH MACRON
     "\u0101":"\\={a}", // LATIN SMALL LETTER A WITH MACRON
     "\u0102":"\\u{A}", // LATIN CAPITAL LETTER A WITH BREVE
@@ -18687,7 +18689,7 @@ var mappingTable = {
     "\u0175":"\\^{w}", // LATIN SMALL LETTER W WITH CIRCUMFLEX
     "\u0176":"\\^{Y}", // LATIN CAPITAL LETTER Y WITH CIRCUMFLEX
     "\u0177":"\\^{y}", // LATIN SMALL LETTER Y WITH CIRCUMFLEX
-    "\u0178":"\\~{Y}", // LATIN CAPITAL LETTER Y WITH DIAERESIS
+    "\u0178":"\\\"{Y}", // LATIN CAPITAL LETTER Y WITH DIAERESIS
     "\u0179":"\\''{Z}", // LATIN CAPITAL LETTER Z WITH ACUTE
     "\u017A":"\\''{z}", // LATIN SMALL LETTER Z WITH ACUTE
     "\u017B":"\\.{Z}", // LATIN CAPITAL LETTER Z WITH DOT ABOVE
@@ -18733,8 +18735,8 @@ var mappingTable = {
     "\u1E23":"\\.{h}", // LATIN SMALL LETTER H WITH DOT ABOVE
     "\u1E24":"\\d{H}", // LATIN CAPITAL LETTER H WITH DOT BELOW
     "\u1E25":"\\d{h}", // LATIN SMALL LETTER H WITH DOT BELOW
-    "\u1E26":"\\~{H}", // LATIN CAPITAL LETTER H WITH DIAERESIS
-    "\u1E27":"\\~{h}", // LATIN SMALL LETTER H WITH DIAERESIS
+    "\u1E26":"\\\"{H}", // LATIN CAPITAL LETTER H WITH DIAERESIS
+    "\u1E27":"\\\"{h}", // LATIN SMALL LETTER H WITH DIAERESIS
     "\u1E28":"\\c{H}", // LATIN CAPITAL LETTER H WITH CEDILLA
     "\u1E29":"\\c{h}", // LATIN SMALL LETTER H WITH CEDILLA
     "\u1E30":"\\''{K}", // LATIN CAPITAL LETTER K WITH ACUTE
@@ -18787,16 +18789,16 @@ var mappingTable = {
     "\u1E81":"\\`{w}", // LATIN SMALL LETTER W WITH GRAVE
     "\u1E82":"\\''{W}", // LATIN CAPITAL LETTER W WITH ACUTE
     "\u1E83":"\\''{w}", // LATIN SMALL LETTER W WITH ACUTE
-    "\u1E84":"\\~{W}", // LATIN CAPITAL LETTER W WITH DIAERESIS
-    "\u1E85":"\\~{w}", // LATIN SMALL LETTER W WITH DIAERESIS
+    "\u1E84":"\\\"{W}", // LATIN CAPITAL LETTER W WITH DIAERESIS
+    "\u1E85":"\\\"{w}", // LATIN SMALL LETTER W WITH DIAERESIS
     "\u1E86":"\\.{W}", // LATIN CAPITAL LETTER W WITH DOT ABOVE
     "\u1E87":"\\.{w}", // LATIN SMALL LETTER W WITH DOT ABOVE
     "\u1E88":"\\d{W}", // LATIN CAPITAL LETTER W WITH DOT BELOW
     "\u1E89":"\\d{w}", // LATIN SMALL LETTER W WITH DOT BELOW
     "\u1E8A":"\\.{X}", // LATIN CAPITAL LETTER X WITH DOT ABOVE
     "\u1E8B":"\\.{x}", // LATIN SMALL LETTER X WITH DOT ABOVE
-    "\u1E8C":"\\~{X}", // LATIN CAPITAL LETTER X WITH DIAERESIS
-    "\u1E8D":"\\~{x}", // LATIN SMALL LETTER X WITH DIAERESIS
+    "\u1E8C":"\\\"{X}", // LATIN CAPITAL LETTER X WITH DIAERESIS
+    "\u1E8D":"\\\"{x}", // LATIN SMALL LETTER X WITH DIAERESIS
     "\u1E8E":"\\.{Y}", // LATIN CAPITAL LETTER Y WITH DOT ABOVE
     "\u1E8F":"\\.{y}", // LATIN SMALL LETTER Y WITH DOT ABOVE
     "\u1E90":"\\^{Z}", // LATIN CAPITAL LETTER Z WITH CIRCUMFLEX
@@ -18806,7 +18808,7 @@ var mappingTable = {
     "\u1E94":"\\b{Z}", // LATIN CAPITAL LETTER Z WITH LINE BELOW
     "\u1E95":"\\b{z}", // LATIN SMALL LETTER Z WITH LINE BELOW
     "\u1E96":"\\b{h}", // LATIN SMALL LETTER H WITH LINE BELOW
-    "\u1E97":"\\~{t}", // LATIN SMALL LETTER T WITH DIAERESIS
+    "\u1E97":"\\\"{t}", // LATIN SMALL LETTER T WITH DIAERESIS
     "\u1EA0":"\\d{A}", // LATIN CAPITAL LETTER A WITH DOT BELOW
     "\u1EA1":"\\d{a}", // LATIN SMALL LETTER A WITH DOT BELOW
     "\u1EB8":"\\d{E}", // LATIN CAPITAL LETTER E WITH DOT BELOW
@@ -19006,53 +19008,53 @@ var reversemappingTable = {
     "\u00C1":"\\''{A}", // LATIN CAPITAL LETTER A WITH ACUTE
     "\u00C2":"\\^{A}", // LATIN CAPITAL LETTER A WITH CIRCUMFLEX
     "\u00C3":"\\~{A}", // LATIN CAPITAL LETTER A WITH TILDE
-    "\u00C4":"\\~{A}", // LATIN CAPITAL LETTER A WITH DIAERESIS
+    "\u00C4":"\\\"{A}", // LATIN CAPITAL LETTER A WITH DIAERESIS
     "\u00C7":"\\c{C}", // LATIN CAPITAL LETTER C WITH CEDILLA
     "\u00C8":"\\`{E}", // LATIN CAPITAL LETTER E WITH GRAVE
     "\u00C9":"\\''{E}", // LATIN CAPITAL LETTER E WITH ACUTE
     "\u00CA":"\\^{E}", // LATIN CAPITAL LETTER E WITH CIRCUMFLEX
-    "\u00CB":"\\~{E}", // LATIN CAPITAL LETTER E WITH DIAERESIS
+    "\u00CB":"\\\"{E}", // LATIN CAPITAL LETTER E WITH DIAERESIS
     "\u00CC":"\\`{I}", // LATIN CAPITAL LETTER I WITH GRAVE
     "\u00CD":"\\''{I}", // LATIN CAPITAL LETTER I WITH ACUTE
     "\u00CE":"\\^{I}", // LATIN CAPITAL LETTER I WITH CIRCUMFLEX
-    "\u00CF":"\\~{I}", // LATIN CAPITAL LETTER I WITH DIAERESIS
+    "\u00CF":"\\\"{I}", // LATIN CAPITAL LETTER I WITH DIAERESIS
     "\u00D1":"\\~{N}", // LATIN CAPITAL LETTER N WITH TILDE
     "\u00D2":"\\`{O}", // LATIN CAPITAL LETTER O WITH GRAVE
     "\u00D3":"\\''{O}", // LATIN CAPITAL LETTER O WITH ACUTE
     "\u00D4":"\\^{O}", // LATIN CAPITAL LETTER O WITH CIRCUMFLEX
     "\u00D5":"\\~{O}", // LATIN CAPITAL LETTER O WITH TILDE
-    "\u00D6":"\\~{O}", // LATIN CAPITAL LETTER O WITH DIAERESIS
+    "\u00D6":"\\\"{O}", // LATIN CAPITAL LETTER O WITH DIAERESIS
     "\u00D9":"\\`{U}", // LATIN CAPITAL LETTER U WITH GRAVE
     "\u00DA":"\\''{U}", // LATIN CAPITAL LETTER U WITH ACUTE
     "\u00DB":"\\^{U}", // LATIN CAPITAL LETTER U WITH CIRCUMFLEX
-    "\u00DC":"\\~{U}", // LATIN CAPITAL LETTER U WITH DIAERESIS
+    "\u00DC":"\\\"{U}", // LATIN CAPITAL LETTER U WITH DIAERESIS
     "\u00DD":"\\''{Y}", // LATIN CAPITAL LETTER Y WITH ACUTE
     "\u00E0":"\\`{a}", // LATIN SMALL LETTER A WITH GRAVE
     "\u00E1":"\\''{a}", // LATIN SMALL LETTER A WITH ACUTE
     "\u00E2":"\\^{a}", // LATIN SMALL LETTER A WITH CIRCUMFLEX
     "\u00E3":"\\~{a}", // LATIN SMALL LETTER A WITH TILDE
-    "\u00E4":"\\~{a}", // LATIN SMALL LETTER A WITH DIAERESIS
+    "\u00E4":"\\\"{a}", // LATIN SMALL LETTER A WITH DIAERESIS
     "\u00E7":"\\c{c}", // LATIN SMALL LETTER C WITH CEDILLA
     "\u00E8":"\\`{e}", // LATIN SMALL LETTER E WITH GRAVE
     "\u00E9":"\\''{e}", // LATIN SMALL LETTER E WITH ACUTE
     "\u00EA":"\\^{e}", // LATIN SMALL LETTER E WITH CIRCUMFLEX
-    "\u00EB":"\\~{e}", // LATIN SMALL LETTER E WITH DIAERESIS
+    "\u00EB":"\\\"{e}", // LATIN SMALL LETTER E WITH DIAERESIS
     "\u00EC":"\\`{i}", // LATIN SMALL LETTER I WITH GRAVE
     "\u00ED":"\\''{i}", // LATIN SMALL LETTER I WITH ACUTE
     "\u00EE":"\\^{i}", // LATIN SMALL LETTER I WITH CIRCUMFLEX
-    "\u00EF":"\\~{i}", // LATIN SMALL LETTER I WITH DIAERESIS
+    "\u00EF":"\\\"{i}", // LATIN SMALL LETTER I WITH DIAERESIS
     "\u00F1":"\\~{n}", // LATIN SMALL LETTER N WITH TILDE
     "\u00F2":"\\`{o}", // LATIN SMALL LETTER O WITH GRAVE
     "\u00F3":"\\''{o}", // LATIN SMALL LETTER O WITH ACUTE
     "\u00F4":"\\^{o}", // LATIN SMALL LETTER O WITH CIRCUMFLEX
     "\u00F5":"\\~{o}", // LATIN SMALL LETTER O WITH TILDE
-    "\u00F6":"\\~{o}", // LATIN SMALL LETTER O WITH DIAERESIS
+    "\u00F6":"\\\"{o}", // LATIN SMALL LETTER O WITH DIAERESIS
     "\u00F9":"\\`{u}", // LATIN SMALL LETTER U WITH GRAVE
     "\u00FA":"\\''{u}", // LATIN SMALL LETTER U WITH ACUTE
     "\u00FB":"\\^{u}", // LATIN SMALL LETTER U WITH CIRCUMFLEX
-    "\u00FC":"\\~{u}", // LATIN SMALL LETTER U WITH DIAERESIS
+    "\u00FC":"\\\"{u}", // LATIN SMALL LETTER U WITH DIAERESIS
     "\u00FD":"\\''{y}", // LATIN SMALL LETTER Y WITH ACUTE
-    "\u00FF":"\\~{y}", // LATIN SMALL LETTER Y WITH DIAERESIS
+    "\u00FF":"\\\"{y}", // LATIN SMALL LETTER Y WITH DIAERESIS
     "\u0100":"\\={A}", // LATIN CAPITAL LETTER A WITH MACRON
     "\u0101":"\\={a}", // LATIN SMALL LETTER A WITH MACRON
     "\u0102":"\\u{A}", // LATIN CAPITAL LETTER A WITH BREVE
@@ -19152,7 +19154,7 @@ var reversemappingTable = {
     "\u0175":"\\^{w}", // LATIN SMALL LETTER W WITH CIRCUMFLEX
     "\u0176":"\\^{Y}", // LATIN CAPITAL LETTER Y WITH CIRCUMFLEX
     "\u0177":"\\^{y}", // LATIN SMALL LETTER Y WITH CIRCUMFLEX
-    "\u0178":"\\~{Y}", // LATIN CAPITAL LETTER Y WITH DIAERESIS
+    "\u0178":"\\\"{Y}", // LATIN CAPITAL LETTER Y WITH DIAERESIS
     "\u0179":"\\''{Z}", // LATIN CAPITAL LETTER Z WITH ACUTE
     "\u017A":"\\''{z}", // LATIN SMALL LETTER Z WITH ACUTE
     "\u017B":"\\.{Z}", // LATIN CAPITAL LETTER Z WITH DOT ABOVE
@@ -19198,8 +19200,8 @@ var reversemappingTable = {
     "\u1E23":"\\.{h}", // LATIN SMALL LETTER H WITH DOT ABOVE
     "\u1E24":"\\d{H}", // LATIN CAPITAL LETTER H WITH DOT BELOW
     "\u1E25":"\\d{h}", // LATIN SMALL LETTER H WITH DOT BELOW
-    "\u1E26":"\\~{H}", // LATIN CAPITAL LETTER H WITH DIAERESIS
-    "\u1E27":"\\~{h}", // LATIN SMALL LETTER H WITH DIAERESIS
+    "\u1E26":"\\\"{H}", // LATIN CAPITAL LETTER H WITH DIAERESIS
+    "\u1E27":"\\\"{h}", // LATIN SMALL LETTER H WITH DIAERESIS
     "\u1E28":"\\c{H}", // LATIN CAPITAL LETTER H WITH CEDILLA
     "\u1E29":"\\c{h}", // LATIN SMALL LETTER H WITH CEDILLA
     "\u1E30":"\\''{K}", // LATIN CAPITAL LETTER K WITH ACUTE
@@ -19252,16 +19254,16 @@ var reversemappingTable = {
     "\u1E81":"\\`{w}", // LATIN SMALL LETTER W WITH GRAVE
     "\u1E82":"\\''{W}", // LATIN CAPITAL LETTER W WITH ACUTE
     "\u1E83":"\\''{w}", // LATIN SMALL LETTER W WITH ACUTE
-    "\u1E84":"\\~{W}", // LATIN CAPITAL LETTER W WITH DIAERESIS
-    "\u1E85":"\\~{w}", // LATIN SMALL LETTER W WITH DIAERESIS
+    "\u1E84":"\\\"{W}", // LATIN CAPITAL LETTER W WITH DIAERESIS
+    "\u1E85":"\\\"{w}", // LATIN SMALL LETTER W WITH DIAERESIS
     "\u1E86":"\\.{W}", // LATIN CAPITAL LETTER W WITH DOT ABOVE
     "\u1E87":"\\.{w}", // LATIN SMALL LETTER W WITH DOT ABOVE
     "\u1E88":"\\d{W}", // LATIN CAPITAL LETTER W WITH DOT BELOW
     "\u1E89":"\\d{w}", // LATIN SMALL LETTER W WITH DOT BELOW
     "\u1E8A":"\\.{X}", // LATIN CAPITAL LETTER X WITH DOT ABOVE
     "\u1E8B":"\\.{x}", // LATIN SMALL LETTER X WITH DOT ABOVE
-    "\u1E8C":"\\~{X}", // LATIN CAPITAL LETTER X WITH DIAERESIS
-    "\u1E8D":"\\~{x}", // LATIN SMALL LETTER X WITH DIAERESIS
+    "\u1E8C":"\\\"{X}", // LATIN CAPITAL LETTER X WITH DIAERESIS
+    "\u1E8D":"\\\"{x}", // LATIN SMALL LETTER X WITH DIAERESIS
     "\u1E8E":"\\.{Y}", // LATIN CAPITAL LETTER Y WITH DOT ABOVE
     "\u1E8F":"\\.{y}", // LATIN SMALL LETTER Y WITH DOT ABOVE
     "\u1E90":"\\^{Z}", // LATIN CAPITAL LETTER Z WITH CIRCUMFLEX
@@ -19271,7 +19273,7 @@ var reversemappingTable = {
     "\u1E94":"\\b{Z}", // LATIN CAPITAL LETTER Z WITH LINE BELOW
     "\u1E95":"\\b{z}", // LATIN SMALL LETTER Z WITH LINE BELOW
     "\u1E96":"\\b{h}", // LATIN SMALL LETTER H WITH LINE BELOW
-    "\u1E97":"\\~{t}", // LATIN SMALL LETTER T WITH DIAERESIS
+    "\u1E97":"\\\"{t}", // LATIN SMALL LETTER T WITH DIAERESIS
     "\u1EA0":"\\d{A}", // LATIN CAPITAL LETTER A WITH DOT BELOW
     "\u1EA1":"\\d{a}", // LATIN SMALL LETTER A WITH DOT BELOW
     "\u1EB8":"\\d{E}", // LATIN CAPITAL LETTER E WITH DOT BELOW
@@ -19301,6 +19303,9 @@ var alwaysMap = {
 	"^":"{\\textasciicircum}",
 	"\\":"{\\textbackslash}"
 };
+
+var strings = new Object();
+var keyRe = /[a-zA-Z0-9\-]/;
 
 function processField(item, field, value) {
 	if(fieldMap[field]) {
@@ -19385,22 +19390,10 @@ function processField(item, field, value) {
 	}
 }
 
-function getFieldValue() {
-	// read whitespace
-	var read = Zotero.read(1);
-	while(" \n\r\t".indexOf(read) != -1) {
-		read = Zotero.read(1);
-	}
-	
+function getFieldValue(read) {
 	var value = "";
 	// now, we have the first character of the field
-	if("0123456789".indexOf(read) != -1) {
-		value += read;
-		// character is a number
-		while((read = Zotero.read(1)) && ("0123456789".indexOf(read) != -1)) {
-			value += read;
-		}
-	} else if(read == "{") {
+	if(read == "{") {
 		// character is a brace
 		var openBraces = 1;
 		while(read = Zotero.read(1)) {
@@ -19437,6 +19430,7 @@ function getFieldValue() {
 	
 	if(value.length > 1) {
 		// replace accented characters (yucky slow)
+		value = value.replace(/{(\\[`"''^~=a-z])([A-Za-z])}/g, "$1{$2}");
 		for (var i in reversemappingTable) { // really really slow!
 			var mapped = reversemappingTable[i];
 			if (value.indexOf(mapped) != -1) {
@@ -19474,20 +19468,57 @@ function getFieldValue() {
 
 function beginRecord(type, closeChar) {
 	type = Zotero.Utilities.cleanString(type.toLowerCase());
-	zoteroType = bibtex2zoteroTypeMap[type];
-	if (!zoteroType) {
-		Zotero.debug("discarded item from BibTeX; type was "+type);
+	if(type != "string") {
+		zoteroType = bibtex2zoteroTypeMap[type];
+		if (!zoteroType) {
+			Zotero.debug("discarded item from BibTeX; type was "+type);
+		}
+		var item = new Zotero.Item(zoteroType);
+		
+		item.extra = "";
 	}
-	var item = new Zotero.Item(zoteroType);
-	
-	item.extra = "";
 	
 	var field = "";
-	while(read = Zotero.read(1)) {
+	
+	// by setting dontRead to true, we can skip a read on the next iteration
+	// of this loop. this is useful after we read past the end of a string.
+	var dontRead = false;
+	
+	while(dontRead || (read = Zotero.read(1))) {
+		dontRead = false;
+		
 		if(read == "=") {								// equals begin a field
-			var value = getFieldValue();
+		// read whitespace
+			var read = Zotero.read(1);
+			while(" \n\r\t".indexOf(read) != -1) {
+				read = Zotero.read(1);
+			}
+			
+			if(keyRe.test(read)) {
+				// read numeric data here, since we might get an end bracket
+				// that we should care about
+				value = "";
+				value += read;
+				
+				// character is a number
+				while((read = Zotero.read(1)) && keyRe.test(read)) {
+					value += read;
+				}
+				
+				// don''t read the next char; instead, process the character
+				// we already read past the end of the string
+				dontRead = true;
+				
+				// see if there''s a defined string
+				if(strings[value]) value = strings[value];
+			} else {
+				var value = getFieldValue(read);
+			}
+			
 			if(item) {
 				processField(item, field.toLowerCase(), value);
+			} else if(type == "string") {
+				strings[field] = value;
 			}
 			field = "";
 		} else if(read == ",") {						// commas reset
@@ -19514,9 +19545,9 @@ function doImport() {
 		if(read == "@") {
 			type = "";
 		} else if(type !== false) {
-			if (type == "comment") {
+			if(type == "comment") {
 				type = false;
-			} else if (read == "{") {		// possible open character
+			} else if(read == "{") {		// possible open character
 				beginRecord(type, "}");
 				type = false;
 			} else if(read == "(") {		// possible open character
