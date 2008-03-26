@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-25 21:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-26 16:15:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1579,7 +1579,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('a14ac3eb-64a0-4179-970c-92ecc2fec992', '1.0.0b4.r5', '', '2008-03-25 00:50:00', '0', '100', '4', 'Scopus', 'Michael Berkowitz', 'http://www.scopus.com', 
+REPLACE INTO translators VALUES ('a14ac3eb-64a0-4179-970c-92ecc2fec992', '1.0.0b4.r5', '', '2008-03-26 16:15:00', '1', '100', '4', 'Scopus', 'Michael Berkowitz', 'http://www.scopus.com', 
 'function detectWeb(doc, url) {
 	if (url.indexOf("/results/") != -1) {
 		return "multiple";
@@ -1587,7 +1587,16 @@ REPLACE INTO translators VALUES ('a14ac3eb-64a0-4179-970c-92ecc2fec992', '1.0.0b
 		return "journalArticle";
 	}
 }', 
-'function doWeb(doc, url) {
+'function getEID(url) {
+	return url.match(/eid=([^&]+)/)[1];
+}
+
+function returnURL(eid) {
+	return ''http://www.scopus.com/scopus/citation/output.url?origin=recordpage&eid='' + eid + ''&src=s&view=CiteAbsKeywsRefs'';
+}
+
+
+function doWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
 	if (prefix == ''x'') return namespace; else return null;
@@ -1605,16 +1614,16 @@ REPLACE INTO translators VALUES ('a14ac3eb-64a0-4179-970c-92ecc2fec992', '1.0.0b
 		}
 		items = Zotero.selectItems(items);
 		for (var i in items) {
-			articles.push(i);
+			articles.push(returnURL(getEID(i)));
 		}
 	} else {
-		articles = [url];
+		articles = [returnURL(getEID(url))];
 	}
 	Zotero.Utilities.processDocuments(articles, function(newDoc) {
-		var eid = newDoc.location.href.match(/eid=([^&]+)/)[1];
+		var eid = getEID(newDoc.location.href);
+		var stateKey = newDoc.evaluate(''//input[@name="stateKey"]'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().value;
 		var get = ''http://www.scopus.com/scopus/citation/export.url'';
-		var post = ''origin=recordpage&sid=&src=s&stateKey=OFD_31989952&eid='' + eid + ''&sort=&exportFormat=RIS&view=CiteAbsKeyws&selectedCitationInformationItemsAll=on'';
-		Zotero.debug(get + "?" + post);
+		var post = ''origin=recordpage&sid=&src=s&stateKey='' + stateKey + ''&eid='' + eid + ''&sort=&exportFormat=RIS&view=CiteAbsKeyws&selectedCitationInformationItemsAll=on'';
 		Zotero.Utilities.HTTP.doPost(get, post, function(text) {
 			// load translator for RIS
 			var translator = Zotero.loadTranslator("import");
