@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-26 18:45:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-26 19:15:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -2089,7 +2089,7 @@ REPLACE INTO translators VALUES ('3eabecf9-663a-4774-a3e6-0790d2732eed', '1.0.0b
 	}, function() {Zotero.done;});
 }');
 
-REPLACE INTO translators VALUES ('0a84a653-79ea-4c6a-8a68-da933e3b504a', '1.0.0b4.r5', '', '2008-02-27 17:00:00', '0', '100', '4', 'Alexander Street Press', 'John West and Michael Berkowitz', '^http://(?:www\.)|(?:asp6new\.)alexanderstreet', 
+REPLACE INTO translators VALUES ('0a84a653-79ea-4c6a-8a68-da933e3b504a', '1.0.0b4.r5', '', '2008-03-26 19:15:00', '0', '100', '4', 'Alexander Street Press', 'John West and Michael Berkowitz', 'http://(?:www\.)alexanderstreet', 
 'function detectWeb(doc, url) {
 	if( url.indexOf("object.details.aspx") != -1 ) {
 		var zitemtype = doc.getElementById("ctl00_ctl00_MasterContentBody_ContentPlaceHolder1_txtZType").value;
@@ -2132,7 +2132,6 @@ REPLACE INTO translators VALUES ('0a84a653-79ea-4c6a-8a68-da933e3b504a', '1.0.0b
 	}
 }', 
 'function scrape(doc, url) {
-
 	// set prefix for serverside control
 	var p = "ctl00_ctl00_MasterContentBody_ContentPlaceHolder1_txtZ";
 
@@ -2202,7 +2201,7 @@ REPLACE INTO translators VALUES ('0a84a653-79ea-4c6a-8a68-da933e3b504a', '1.0.0b
 	for (var i=0; i< aus.length ; i++) {
 		 newArticle.creators.push(Zotero.Utilities.cleanAuthor(aus[i], "author", true));
 	}
-	
+
 	newArticle.attachments = [{url:doc.location.href, title:"Alexander Street Press Snapshot", mimeType:"text/html"}];
 	if (doc.evaluate(''//a[contains(@href, "get.pdf")]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		var pdfurl = doc.evaluate(''//a[contains(@href, "get.pdf")]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext().href;
@@ -2271,7 +2270,7 @@ function doWeb(doc, url) {
 	} else {
 		articles = [url];
 	}
-	Zotero.debug(articles);
+
 	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done;});
 }');
 
