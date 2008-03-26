@@ -184,8 +184,8 @@
       <text variable="issue" prefix="(" suffix=")"/>
       <group delimiter=". ">
 	<text macro="pages"/>
-	<text macro="publisher" prefix=". "/>
-	<text macro="access" prefix=". " />
+	<text macro="publisher"/>
+	<text macro="access"/>
       </group>
     </layout>
   </bibliography>
