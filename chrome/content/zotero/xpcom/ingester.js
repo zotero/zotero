@@ -41,15 +41,17 @@ Zotero.Ingester = new Object();
  * Precompile proxy regexps
  */
 Zotero.Ingester.ProxyMonitor = new function() {
-	var _ezProxyRe = new RegExp();
-	_ezProxyRe.compile("\\?(?:.+&)?(url|qurl)=([^&]+)", "i");
+	var _ezProxyRe = /\?(?:.+&)?(url|qurl)=([^&]+)/i;
+	var _juniperProxyRe = /^(https?:\/\/[^\/:]+(?:\:[0-9]+)?)\/(.*)?,DanaInfo=([^+,]*)([^+]*)(?:\+(.*))?$/;
+	var _pathRe = /([^?]*\/)([^?\/]*)(\?(.*))?$/
 	/*var _hostRe = new RegExp();
 	_hostRe.compile("^https?://(([^/:]+)(?:\:([0-9]+))?)");*/
 	var ioService = Components.classes["@mozilla.org/network/io-service;1"]
 							  .getService(Components.interfaces.nsIIOService);
 	var on = false;
-	var _mapFromProxy = null;
-	var _mapToProxy = null;
+	var _mapFromEZProxy = null;
+	var _mapToJuniperProxy = null;
+	var _mapToEZProxy = null;
 	
 	this.init = init;
 	this.proxyToProper = proxyToProper;
@@ -125,12 +127,12 @@ Zotero.Ingester.ProxyMonitor = new function() {
 					Zotero.debug("EZProxy: host "+newURI.hostPort+" is really "+properURI.hostPort);
 					// Initialize variables here so people who never use EZProxies
 					// don't get the (very very minor) speed hit
-					if(!_mapFromProxy) {
-						_mapFromProxy = new Object();
-						_mapToProxy = new Object();
+					if(!_mapFromEZProxy) {
+						_mapFromEZProxy = new Object();
+						_mapToEZProxy = new Object();
 					}
-					_mapFromProxy[newURI.hostPort] = properURI.hostPort;
-					_mapToProxy[properURI.hostPort] = newURI.hostPort;
+					_mapFromEZProxy[newURI.hostPort] = properURI.hostPort;
+					_mapToEZProxy[properURI.hostPort] = newURI.hostPort;
 				}
 			}
 		} catch(e) {}
@@ -140,12 +142,20 @@ Zotero.Ingester.ProxyMonitor = new function() {
 	 * Returns a page's proper url, adjusting for proxying
 	 */
 	function proxyToProper(url) {
-		if(_mapFromProxy) {
+		var m = _juniperProxyRe.exec(url);
+		if(m) {
+			url = "http://"+m[3]+"/"+m[2]+m[5];
+			
+			if(!_mapToJuniperProxy) _mapToJuniperProxy = new Object();
+			_mapToJuniperProxy[m[3]] = {prePath:m[1], additionalInfo:m[4], danaInfoBeforeFile:(m[2].substr(m[2].length-1) == "/")};
+			
+			Zotero.debug("Juniper Proxy: proper url is "+url);
+		} else if(_mapFromEZProxy) {
 			// EZProxy detection is active
 			
 			var uri = _parseURL(url);
-			if(uri && _mapFromProxy[uri.hostPort]) {
-				url = url.replace(uri.hostPort, _mapFromProxy[uri.hostPort]);
+			if(uri && _mapFromEZProxy[uri.hostPort]) {
+				url = url.replace(uri.hostPort, _mapFromEZProxy[uri.hostPort]);
 				Zotero.debug("EZProxy: proper url is "+url);
 			}
 		}
@@ -157,14 +167,26 @@ Zotero.Ingester.ProxyMonitor = new function() {
 	 * Returns a page's proxied url from the proper url
 	 */
 	function properToProxy(url) {
-		if(_mapToProxy) {
-			// EZProxy detection is active
-			
+		if(_mapToJuniperProxy || _mapToEZProxy) {
+			// Proxy detection is active
 			var uri = _parseURL(url);
-			if(uri && _mapToProxy[uri.hostPort]) {
-				// Actually need to map
-				url = url.replace(uri.hostPort, _mapToProxy[uri.hostPort]);
-				Zotero.debug("EZProxy: proxied url is "+url);
+			
+			if(uri) {
+				if(_mapToEZProxy && _mapToEZProxy[uri.hostPort]) {
+					// Actually need to map
+					url = url.replace(uri.hostPort, _mapToEZProxy[uri.hostPort]);
+					Zotero.debug("EZProxy: proxied url is "+url);
+				} else if(_mapToJuniperProxy && _mapToJuniperProxy[uri.hostPort]) {
+					var m = _pathRe.exec(uri.path);
+					
+					if(_mapToJuniperProxy[uri.hostPort].danaInfoBeforeFile) {
+						url = _mapToJuniperProxy[uri.hostPort].prePath+m[1]+",DanaInfo="+uri.hostPort+_mapToJuniperProxy[uri.hostPort].additionalInfo+"+";
+						if(m[2]) url += m[2];
+					} else {
+						url = _mapToJuniperProxy[uri.hostPort].prePath+m[1]+m[2]+",DanaInfo="+uri.hostPort+_mapToJuniperProxy[uri.hostPort].additionalInfo+"+";
+					}
+					if(m[3]) url += m[3];
+				}
 			}
 		}
 		
