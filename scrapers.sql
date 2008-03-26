@@ -866,7 +866,7 @@ REPLACE INTO translators VALUES ('a2363670-7040-4cb9-8c48-6b96584e92ee', '1.0.0b
 	Zotero.wait();	
 }');
 
-REPLACE INTO translators VALUES ('da440efe-646c-4a18-9958-abe1f7d55cde', '1.0.0b4.r1', '', '2008-03-25 16:30:00', '0', '100', '4', 'NCSU Library (Endeca 2)', 'Sean Takats', '^https?://[^\.]+.lib.ncsu.edu/(?:web2/tramp2\.exe|catalog/\?)', 
+REPLACE INTO translators VALUES ('da440efe-646c-4a18-9958-abe1f7d55cde', '1.0.0b4.r1', '', '2008-03-26 03:00:00', '0', '100', '4', 'NCSU Library (Endeca 2)', 'Sean Takats', '^https?://[^\.]+.lib.ncsu.edu/(?:web2/tramp2\.exe|catalog/\?)', 
 'function detectWeb(doc, url) { 
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -1877,7 +1877,7 @@ REPLACE INTO translators VALUES ('0863b8ec-e717-4b6d-9e35-0b2db2ac6b0f', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('9e306d5d-193f-44ae-9dd6-ace63bf47689', '1.0.0b3r1', '', '2008-03-25 16:00:00', '0', '100', '4', 'IngentaConnect', 'Michael Berkowitz', 'http://(www.)?ingentaconnect.com', 
+REPLACE INTO translators VALUES ('9e306d5d-193f-44ae-9dd6-ace63bf47689', '1.0.0b3r1', '', '2008-03-26 02:45:00', '0', '100', '4', 'IngentaConnect', 'Michael Berkowitz', 'http://(www.)?ingentaconnect.com', 
 'function detectWeb(doc, url) {
 	if (url.indexOf("article?") != -1) {
 		return "journalArticle";
@@ -2918,7 +2918,7 @@ REPLACE INTO translators VALUES ('5dd22e9a-5124-4942-9b9e-6ee779f1023e', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('d3b1d34c-f8a1-43bb-9dd6-27aa6403b217', '1.0.0b4.r5', '1.0.0rc3', '2008-03-25 16:30:00', '1', '100', '4', 'YouTube (legacy)', 'Sean Takats and Michael Berkowitz', 'https?://[^/]*youtube\.com\/', 
+REPLACE INTO translators VALUES ('d3b1d34c-f8a1-43bb-9dd6-27aa6403b217', '1.0.0b4.r5', '1.0.0rc3', '2008-03-26 03:00:00', '1', '100', '4', 'YouTube (legacy)', 'Sean Takats and Michael Berkowitz', 'https?://[^/]*youtube\.com\/', 
 'function detectWeb(doc, url){
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -3054,7 +3054,7 @@ function getData(ids, host){
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('360da304-5a4c-44ea-b655-28dcb5ebfa25', '1.0.0rc4', '', '2008-03-25 16:30:00', '1', '100', '4', 'YouTube', 'Sean Takats and Michael Berkowitz', 'https?://[^/]*youtube\.com\/', 
+REPLACE INTO translators VALUES ('360da304-5a4c-44ea-b655-28dcb5ebfa25', '1.0.0rc4', '', '2008-03-26 03:00:00', '1', '100', '4', 'YouTube', 'Sean Takats and Michael Berkowitz', 'https?://[^/]*youtube\.com\/', 
 'function detectWeb(doc, url){
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -4225,7 +4225,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('9575e804-219e-4cd6-813d-9b690cbfc0fc', '1.0.0b4.r5', '', '2008-03-25 21:30:00', '1', '100', '4', 'PLoS One, Neglected Tropical Diseases and Computational Biology', 'Michael Berkowitz', '^http://www\.(plosone|plosntds|ploscompbiol)\.org/(search|article)/', 
+REPLACE INTO translators VALUES ('9575e804-219e-4cd6-813d-9b690cbfc0fc', '1.0.0b4.r5', '', '2008-03-26 03:00:00', '1', '100', '4', 'PLoS One, Neglected Tropical Diseases and Computational Biology', 'Michael Berkowitz', '^http://www\.(plosone|plosntds|ploscompbiol)\.org/(search|article)/', 
 'function detectWeb(doc, url) {
 	if (url.indexOf("Search.action") != -1 || url.indexOf("browse.action") != -1) {
 		return "multiple";
@@ -13232,7 +13232,7 @@ REPLACE INTO translators VALUES ('f8765470-5ace-4a31-b4bd-4327b960ccd', '1.0.0b3
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('6614a99-479a-4524-8e30-686e4d66663e', '1.0.0b3.r1', '', '2008-03-25 17:00:00', '1', '100', '4', 'Nature', 'Simon Kornblith', 'https?://www\.nature\.com[^/]*/(?:[^/]+/journal/v[^/]+/n[^/]+/(?:(?:full|abs)/.+\.html|index.html)|search/executeSearch)', 
+REPLACE INTO translators VALUES ('6614a99-479a-4524-8e30-686e4d66663e', '1.0.0b3.r1', '', '2008-03-26 03:00:00', '1', '100', '4', 'Nature', 'Simon Kornblith', 'https?://www\.nature\.com[^/]*/(?:[^/]+/journal/v[^/]+/n[^/]+/(?:(?:full|abs)/.+\.html|index.html)|search/executeSearch)', 
 'function detectWeb(doc, url) {
 	var articleRe = /(https?:\/\/[^\/]+\/[^\/]+\/journal\/v[^\/]+\/n[^\/]+\/)(full|abs)(\/.+\.)html/;
 	
