@@ -186,6 +186,7 @@ Zotero.Ingester.ProxyMonitor = new function() {
 						url = _mapToJuniperProxy[uri.hostPort].prePath+m[1]+m[2]+",DanaInfo="+uri.hostPort+_mapToJuniperProxy[uri.hostPort].additionalInfo+"+";
 					}
 					if(m[3]) url += m[3];
+					Zotero.debug("Juniper Proxy: proxied url is "+url);
 				}
 			}
 		}
