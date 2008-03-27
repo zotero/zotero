@@ -182,10 +182,10 @@
       <text macro="edition" prefix=" (" suffix=")"/>
       <text variable="volume" prefix=", "/>
       <text variable="issue" prefix="(" suffix=")"/>
-      <group delimiter=". ">
-	<text macro="pages"/>
-	<text macro="publisher"/>
-	<text macro="access"/>
+      <group delimiter=". " prefix=". ">
+	      <text macro="pages"/>
+	      <text macro="publisher"/>
+	      <text macro="access"/>
       </group>
     </layout>
   </bibliography>
