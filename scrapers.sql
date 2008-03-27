@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-27 15:45:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-27 20:15:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -13148,7 +13148,7 @@ REPLACE INTO translators VALUES ('df966c80-c199-4329-ab02-fa410c8eb6dc', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('f8765470-5ace-4a31-b4bd-4327b960ccd', '1.0.0b3.r1', '', '2008-03-19 19:00:00', '1', '100', '4', 'SpringerLink', 'Simon Kornblith and Michael Berkowitz', 'https?://(www\.)*springerlink\.com|springerlink.metapress.com[^/]*/content/', 
+REPLACE INTO translators VALUES ('f8765470-5ace-4a31-b4bd-4327b960ccd', '1.0.0b3.r1', '', '2008-03-27 20:15:00', '1', '100', '4', 'SpringerLink', 'Simon Kornblith and Michael Berkowitz', 'https?://(www\.)*springerlink\.com|springerlink.metapress.com[^/]*/content/', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -13159,6 +13159,8 @@ REPLACE INTO translators VALUES ('f8765470-5ace-4a31-b4bd-4327b960ccd', '1.0.0b3
 		return "multiple";
 	} else if(doc.title == "SpringerLink - Book Chapter") {
 		return "bookSection";
+	} else if (doc.title == "SpringerLink - Book") {
+		return "book";
 	} else if(doc.evaluate(''//a[text() = "RIS"]'',
 	          doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "journalArticle";
@@ -13226,7 +13228,7 @@ REPLACE INTO translators VALUES ('f8765470-5ace-4a31-b4bd-4327b960ccd', '1.0.0b3
 				}
 			}
 			// fix incorrect chapters
-			if(item.publicationTitle && item.itemType == "book") item.itemType = "bookSection";
+			if(item.publicationTitle && item.itemType == "book") item.title = item.publicationTitle;
 			// fix "V" in volume
 			if(item.volume) {
 				item.volume = item.volume.replace("V", "");
