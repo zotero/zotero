@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-27 20:45:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-28 17:45:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1577,6 +1577,68 @@ function doWeb(doc, url) {
 	} else {
 		scrape(doc);
 	}
+}');
+
+REPLACE INTO translators VALUES ('b8a86e36-c270-48c9-bdd1-22aaa167ef46', '1.0.0b4.r5', '', '2008-03-28 17:45:00', '0', '100', '4', 'Agencia del ISBN', 'Michael Berkowitz', 'http://www.mcu.es/cgi-brs/BasesHTML', 
+'function detectWeb(doc, url) {
+	if (doc.evaluate(''//div[@id="formularios"]/div[@class="isbnResultado"]/div[@class="isbnResDescripcion"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+		return "multiple";
+	} else if (doc.evaluate(''//div[@id="fichaISBN"]/table/tbody/tr'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+		return "book";
+	}
+}', 
+'function doWeb(doc, url) {
+	var books = new Array();
+	if (detectWeb(doc, url) == "multiple") {
+		var items = new Object();
+		var boxes = doc.evaluate(''//div[@id="formularios"]/div[@class="isbnResultado"]/div[@class="isbnResDescripcion"]'', doc, null, XPathResult.ANY_TYPE, null);
+		var box;
+		while (box = boxes.iterateNext()) {
+			var book = doc.evaluate(''./p/span/strong/a'', box, null, XPathResult.ANY_TYPE, null).iterateNext();
+			items[book.href] = book.textContent;
+		}
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			books.push(i);
+		}
+	} else {
+		books = [url];
+	}
+	Zotero.Utilities.processDocuments(books, function(newDoc) {
+		var data = new Object();
+		var rows = newDoc.evaluate(''//div[@id="fichaISBN"]/table/tbody/tr'', newDoc, null, XPathResult.ANY_TYPE, null);
+		var next_row;
+		while (next_row = rows.iterateNext()) {
+			var heading = newDoc.evaluate(''./th'', next_row, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+			var value = newDoc.evaluate(''./td'', next_row, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+			data[heading] = Zotero.Utilities.trimInternal(value);
+		}
+		var isbn = Zotero.Utilities.trimInternal(newDoc.evaluate(''//span[@class="cabTitulo"]/strong'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+		var item = new Zotero.Item("book");
+		item.ISBN = isbn;
+		item.title = data[''Título:''];
+		author = data[''Autor:''];
+		if (author) {
+			if (author.match(/tr\.$/)) {
+				item.creators.push(Zotero.Utilities.cleanAuthor(author.match(/([\w\s,]+)/)[1], "author"));
+				if (author.match(/\[([^\]]+)\]/)) {
+					item.creators.push(Zotero.Utilities.cleanAuthor(author.match(/\[([^\]]+)\]/)[1], "translator"));
+				} else {
+					item.creators.push(Zotero.Utilities.cleanAuthor(author.match(/\)(.*)tr\./)[1], "translator"));
+				}
+			} else {
+				item.creators.push(Zotero.Utilities.cleanAuthor(author, "author"));
+			}
+		}
+		if (data[''Publicación:'']) {
+			var pub = data[''Publicación:''].match(/([^.]+)\.([\D]+)([\d\/]+)$/);
+			item.place = pub[1];
+			item.publisher = Zotero.Utilities.trimInternal(pub[2]).replace(/[\s,]+$/, "");
+			item.date = pub[3];
+		}
+		item.complete();
+	}, function() {Zotero.done;});
+	Zotero.wait();
 }');
 
 REPLACE INTO translators VALUES ('a14ac3eb-64a0-4179-970c-92ecc2fec992', '1.0.0b4.r5', '', '2008-03-26 18:45:00', '1', '100', '4', 'Scopus', 'Michael Berkowitz', 'http://[^/]*www.scopus.com[^/*]', 
