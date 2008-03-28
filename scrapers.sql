@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-28 18:15:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-28 20:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1577,6 +1577,70 @@ function doWeb(doc, url) {
 	} else {
 		scrape(doc);
 	}
+}');
+
+REPLACE INTO translators VALUES ('7cb0089b-9551-44b2-abca-eb03cbf586d9', '1.0.0b4.r5', '', '2008-03-28 20:00:00', '0', '100', '4', 'BioOne', 'Michael Berkowitz', 'http://[^/]*www.bioone.org[^/]*/', 
+'function detectWeb(doc, url) {
+	if (url.indexOf("searchtype") != -1) {
+		return "multiple";
+	} else if (url.indexOf("get-document") != -1 || url.indexOf("get-abstract") != -1) {
+		return "journalArticle";
+	}
+}', 
+'function createCitationURL(str) {
+	str = str.match(/doi=([^&]+)/)[1];
+	return "http://www.bioone.org/perlserv/?request=cite-builder&doi=" + str;
+}
+
+function getPDFurl(item) {
+	var bits = new Array(
+		item.DOI.match(/\/([^(]+)\(/)[1],
+		item.volume,
+		item.issue,
+		item.pages.match(/^([^-]+)\-/)[1]
+	);
+	return "http://www.bioone.org/archive/" + bits.slice(0,3).join("/") + "/pdf/i" + bits.join("-") + ".pdf";
+}
+
+function doWeb(doc, url) {
+	var articles = new Array();
+	if (detectWeb(doc, url) == "multiple") {
+		var items = new Object();
+		var results = doc.evaluate(''//div[@class="content"]/table/tbody/tr/td[3][@class="group"]'', doc, null, XPathResult.ANY_TYPE, null);
+		var next_result;
+		while (next_result = results.iterateNext()) {
+			var title = doc.evaluate(''.//span[@class="title"]'', next_result, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+			var link = doc.evaluate(''.//tr[4]/td/a[1]'', next_result, null, XPathResult.ANY_TYPE, null).iterateNext().href;
+			items[link] = title;
+		}
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			articles.push(createCitationURL(i));
+		}
+	} else {
+		articles = [createCitationURL(url)];
+	}
+	Zotero.debug(articles);
+	Zotero.Utilities.processDocuments(articles, function(newDoc) {
+		var newlink = newDoc.evaluate(''//a[contains(@href, "refman")]'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().href;
+		Zotero.Utilities.HTTP.doGet(newlink, function(text) {
+			var translator = Zotero.loadTranslator("import");
+			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+			translator.setString(text);
+			translator.setHandler("itemDone", function(obj, item) {
+				item.url = decodeURIComponent(item.url);
+				item.DOI = item.url.match(/http:\/\/dx\.doi\.org\/(.*)$/)[1];
+				var pdfurl = getPDFurl(item);
+				item.attachments = [
+					{url:item.url, title:item.title, mimeType:"text/html"},
+					{url:pdfurl, title:"BioOne Full Text PDF", mimeType:"application/pdf"}
+				];
+				item.complete();
+			});
+			translator.translate();
+		});
+	}, function() {Zotero.done;});
+	Zotero.wait();
 }');
 
 REPLACE INTO translators VALUES ('b8a86e36-c270-48c9-bdd1-22aaa167ef46', '1.0.0b4.r5', '', '2008-03-28 17:45:00', '0', '100', '4', 'Agencia del ISBN', 'Michael Berkowitz', 'http://www.mcu.es/cgi-brs/BasesHTML', 
