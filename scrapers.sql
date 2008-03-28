@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-28 17:45:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-28 18:15:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -12209,9 +12209,9 @@ REPLACE INTO translators VALUES ('8917b41c-8527-4ee7-b2dd-bcbc3fa5eabd', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('ecddda2e-4fc6-4aea-9f17-ef3b56d7377a', '1.0.0b3.r1', '', '2007-12-22 06:00:00', '1', '100', '4', 'arXiv.org', 'Sean Takats', '^http://(?:www\.)?(?:(arxiv\.org|xxx.lanl.gov)/(?:find/\w|list/\w|abs/)|eprintweb.org/S/(?:search|archive|article)(?!.*refs$)(?!.*cited$))', 
+REPLACE INTO translators VALUES ('ecddda2e-4fc6-4aea-9f17-ef3b56d7377a', '1.0.0b3.r1', '', '2008-03-28 18:15:00', '1', '100', '4', 'arXiv.org', 'Sean Takats', '^http://(?:(www|uk)\.)?(?:(arxiv\.org|xxx.lanl.gov)/(?:find/\w|list/\w|abs/)|eprintweb.org/S/(?:search|archive|article)(?!.*refs$)(?!.*cited$))', 
 'function detectWeb(doc, url) {
-	var searchRe = /^http:\/\/(?:www\.)?(?:(arxiv\.org|xxx\.lanl\.gov)\/(?:find|list)|eprintweb.org\/S\/(?:archive|search$))/;
+	var searchRe = /^http:\/\/(?:(www|uk)\.)?(?:(arxiv\.org|xxx\.lanl\.gov)\/(?:find|list)|eprintweb.org\/S\/(?:archive|search$))/;
 	if(searchRe.test(url)) {
 		return "multiple";
 	} else {
@@ -12270,7 +12270,7 @@ function doWeb(doc, url) {
 				var newID= elmt.textContent;
 				newID = newID.replace(/arXiv:/, "");
 				newID = newID.replace(/\//g, "%2F"); 
-				availableItems[i] = Zotero.Utilities.cleanString(title.textContent); 
+				availableItems[i] = Zotero.Utilities.cleanString(title.textContent.replace(/^\s*Title:\s+/, "")); 
 				arXivIDs[i] = newID;
 				i++;
 			} while ((elmt = elmts.iterateNext()) && (title = titles.iterateNext()));
