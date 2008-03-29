@@ -101,7 +101,23 @@
     <layout suffix="." delimiter="; ">
       <text macro="author"/>
       <choose>
-        <if position="first">
+	<if position="ibid-with-locator">
+	  <group delimiter=", ">
+	    <text value="id" text-case="capitalize-first" suffix="."/>
+	  </group>
+	</if>
+	<else-if position="ibid">
+	  <group delimiter=", ">
+	    <text value="id" text-case="capitalize-first" suffix="."/>
+	  </group>
+	</else-if>
+        <else-if position="subsequent">
+          <text value="supra" prefix=", "/>
+          <text value="note" prefix=" "/>
+	  <!-- CSL does not currently support reference to a note number, so we leave a blank space for correction now -->
+          <text value="___"/>
+        </else-if>
+        <else>
           <text macro="title" prefix=", "/>
           <text variable="volume" prefix=", "/>
           <text variable="container-title" prefix=" "/>
@@ -109,11 +125,6 @@
           <text variable="locator" prefix=" "/>
           <text macro="issuance" prefix=" "/>
           <text macro="access" prefix=", "/>
-        </if>
-        <else>
-          <text value="supra" prefix=", "/>
-          <text value="note" prefix=" "/>
-          <text variable="citation-number" prefix=" "/>
         </else>
       </choose>
     </layout>
