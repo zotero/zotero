@@ -98,8 +98,64 @@ Zotero.MIME = new function(){
 		switch (mimeType) {
 			case 'text/html':
 				return 'html';
+			
 			case 'application/pdf':
+			case 'application/x-pdf':
+			case 'application/acrobat':
+			case 'applications/vnd.pdf':
+			case 'text/pdf':
+			case 'text/x-pdf':
 				return 'pdf';
+			
+			case 'image/jpg':
+			case 'image/jpeg':
+				return 'jpg';
+			
+			case 'image/gif':
+				return 'gif';
+			
+			case 'video/flv':
+			case 'video/x-flv':
+				return 'flv';
+			
+			case 'image/tif':
+			case 'image/tiff':
+			case 'image/tif':
+			case 'image/x-tif':
+			case 'image/tiff':
+			case 'image/x-tiff':
+			case 'application/tif':
+			case 'application/x-tif':
+			case 'application/tiff':
+			case 'application/x-tiff':
+				return 'tiff';
+			
+			case 'application/zip':
+			case 'application/x-zip':
+			case 'application/x-zip-compressed':
+			case 'application/x-compress':
+			case 'application/x-compressed':
+			case 'multipart/x-zip':
+				return 'zip';
+				
+			case 'video/quicktime':
+			case 'video/x-quicktime':
+				return 'mov';
+				
+			case 'video/avi':
+			case 'video/msvideo':
+			case 'video/x-msvideo':
+				return 'avi';
+				
+			case 'audio/wav':
+			case 'audio/x-wav':
+			case 'audio/wave':
+				return 'wav';
+				
+			case 'audio/aiff':
+			case 'audio/x-aiff':
+			case 'sound/aiff':
+				return 'aiff';
 		}
 		
 		try {
