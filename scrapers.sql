@@ -1705,7 +1705,7 @@ REPLACE INTO translators VALUES ('b8a86e36-c270-48c9-bdd1-22aaa167ef46', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('a14ac3eb-64a0-4179-970c-92ecc2fec992', '1.0.0b4.r5', '', '2008-03-31 16:30:00', '1', '100', '4', 'Scopus', 'Michael Berkowitz', 'http://[^/]*www.scopus.com[^/*]', 
+REPLACE INTO translators VALUES ('a14ac3eb-64a0-4179-970c-92ecc2fec992', '1.0.0b4.r5', '', '2008-03-31 16:30:00', '1', '100', '4', 'Scopus', 'Michael Berkowitz', 'http://[^/]*www.scopus.com[^/]*', 
 'function detectWeb(doc, url) {
 	if (url.indexOf("/results/") != -1) {
 		return "multiple";
