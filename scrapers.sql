@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-31 16:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-31 17:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -3458,7 +3458,7 @@ REPLACE INTO translators VALUES ('0cc8e259-106e-4793-8c26-6ec8114a9160', '1.0.0b
 	}, function() {Zotero.done;});
 }');
 
-REPLACE INTO translators VALUES ('8b35ab14-f18a-4f69-8472-b2df18c984da', '1.0.0b4.r5', '', '2008-03-18 02:30:00', '1', '100', '4', 'Davidson College Library', 'Michael Berkowitz', 'http://www.lib.davidson.edu/', 
+REPLACE INTO translators VALUES ('8b35ab14-f18a-4f69-8472-b2df18c984da', '1.0.0b4.r5', '', '2008-03-31 17:30:00', '1', '100', '4', 'Davidson College Library', 'Michael Berkowitz', 'http://www.lib.davidson.edu/', 
 'function detectWeb(doc, url) {
 	if (url.indexOf("log_in") == -1) {
 		if (url.indexOf("screen=Record") != -1) {
@@ -3469,67 +3469,62 @@ REPLACE INTO translators VALUES ('8b35ab14-f18a-4f69-8472-b2df18c984da', '1.0.0b
 	}
 }', 
 'function doWeb(doc, url) {
-	var ids = new Array();
+	var books = new Array();
 	if (detectWeb(doc, url) == "multiple") {
-		var posturl = doc.evaluate(''//table/tbody/tr[2]/td[1]/table/tbody/tr[2]/td/a[1]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext().href.match(/[^?]*/)[0];
-		var items = new Object();
-		var xpath = ''//span[@class="smalllinks"]/a'';
-		var titles = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
-		var title = titles.iterateNext();
-		var i = 1;
-		while (title) {
-			items[i] =Zotero.Utilities.trimInternal(title.textContent);
-			title = titles.iterateNext();
-			i++;
-		}
+		var items = Zotero.Utilities.getItemArray(doc, doc, ''screen=Record.html'');
 		items = Zotero.selectItems(items);
-		Zotero.debug(items);
 		for (var i in items) {
-			ids.push(i);
+			books.push(i.replace("Record.html", "MARCRecord.html"));
 		}
 	} else {
-		ids.push(url.match(/item=(\d+)/)[1]);
-		var posturl = url.match(/[^?]*/)[0];
+		books = [url.replace("Record.html", "MARCRecord.html")];
 	}
-	Zotero.debug(ids);
-	var posturl2 = posturl.replace("goto", "cart_add");
-	var deletepost = posturl.replace("goto", "cart_remove");
 	
-	Zotero.Utilities.HTTP.doPost(deletepost, ''screen=Hitlist.html&records=all&server=1home'', function() {});
-	
-	for (var i = 0; i < ids.length ; i++) {
-		Zotero.debug(ids[i]);
-		
-		Zotero.Utilities.HTTP.doPost(deletepost, ''screen=Hitlist.html&records=all&server=1home'', function() {});
-		
-		Zotero.Utilities.HTTP.doPost(posturl2, ''screen=Hitlist.html&server=1home&item='' + ids[i] + ''&item_source=1home'', function() {});
-	
-		Zotero.Utilities.HTTP.doPost(posturl, ''screen=SelectListBriefCiteRefworks.html&server=cart&item_source=1home'', function(text) {
-			text = Zotero.Utilities.unescapeHTML(text);
-			text = text.replace(/RT/, "TY");
-			text = text.replace(/VO/, "VL");
-			text = text.replace(/LK/, "UR");
-			text = text.replace(/YR/, "PY");
-			text = text.replace(/([A-Z][A-Z\d]\s)/g, "$1 - ");
-			Zotero.debug(text);
-			var translator = Zotero.loadTranslator("import");
-			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-			translator.setString(text);
-			translator.setHandler("itemDone", function(obj, item) {
-				item.itemType = "book";
-				for (var i in item.creators) {
-					var name = item.creators[i].lastName.match(/(\w+)\s+(.*)/);
-					item.creators[i].lastName = name[1];
-					item.creators[i].firstName = name[2];
+	var translator = Zotero.loadTranslator("import");
+	translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
+	var marc = translator.getTranslatorObject();
+	Zotero.Utilities.processDocuments(books, function(newDoc) {
+		var uri = newDoc.location.href;
+		var namespace = newDoc.documentElement.namespaceURI;
+		var nsResolver = namespace ? function(prefix) {
+		  if (prefix == ''x'') return namespace; else return null;
+		} : null;
+		var nonstandard = false;
+		var xpath;
+		var xpath = ''//td[@class="body"]/p/table/tbody/tr[td[3]]'';
+		var elmts = newDoc.evaluate(xpath, newDoc, nsResolver, XPathResult.ANY_TYPE, null);
+		var elmt;
+		var record = new marc.record();
+		while(elmt = elmts.iterateNext()) {
+			var field = Zotero.Utilities.trimInternal(newDoc.evaluate(''./td[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+			if(field) {
+				var value = newDoc.evaluate(''./td[3]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+				if(field == "LDR") {
+					record.leader = value;
+				} else if(field != "FMT") {
+					value = value.replace(/\$([a-z]) /g, marc.subfieldDelimiter+"$1");
+					var code = field.substring(0, 3);
+					var ind = "";
+					if(field.length > 3) {
+						ind = field[3];
+						if(field.length > 4) {
+							ind += field[4];
+						}
+					}
+				
+					record.addField(code, ind, value);
 				}
-				item.complete();
-			});
-			translator.translate();
-			
-		});
+			}
+		}
 		
-		Zotero.Utilities.HTTP.doPost(deletepost, ''screen=Hitlist.html&records=all&server=1home'', function() {});
-	}
+		var newItem = new Zotero.Item();
+		record.translate(newItem);
+		
+		var domain = url.match(/https?:\/\/([^/]+)/);
+		newItem.repository = "Davidson College Library Catalog";
+		newItem.complete();
+	}, function() {Zotero.done;});
+	Zotero.wait();
 }');
 
 REPLACE INTO translators VALUES ('1885b93c-cf37-4b25-aef5-283f42eada9d', '1.0.0b4.r5', '', '2008-02-01 19:30:00', '0', '100', '4', 'Informaworld', 'Michael Berkowitz', 'http://www.informaworld.com', 
