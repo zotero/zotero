@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-31 17:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-31 18:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1577,6 +1577,78 @@ function doWeb(doc, url) {
 	} else {
 		scrape(doc);
 	}
+}');
+
+REPLACE INTO translators VALUES ('2a5dc3ed-ee5e-4bfb-baad-36ae007e40ce', '1.0.0b4.r5', '', '2008-03-31 18:30:00', '0', '100', '4', 'Berkeley Electronic Press', 'Michael Berkowitz', 'http://www.bepress.com/', 
+'function detectWeb(doc, url) {
+	if (url.match("cgi/query.cgi")) {
+		return "multiple";
+	} else if (url.match(/vol[\d+]\/iss[\d]+/)) {
+		return "journalArticle";
+	}
+}', 
+'var tagMap = {
+	journal_title:"publicationTitle",
+	title:"title",
+	date:"date",
+	volume:"volume",
+	issue:"issue",
+	abstract_html_url:"url",
+	doi:"DOI"
+}
+
+function doWeb(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+	if (prefix == ''x'') return namespace; else return null;
+	} : null;
+
+	var articles = new Array();
+	if (detectWeb(doc, url) == "multiple") {
+		var items = new Object();
+		var titles = doc.evaluate(''//table[@id="query"]/tbody/tr/td[4]/a'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var next_title;
+		while (next_title = titles.iterateNext()) {
+			items[next_title.href] = next_title.textContent;
+		}
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			articles.push(i);
+		}
+	} else {
+		articles = [url];
+	}
+	Zotero.debug(articles);
+	Zotero.Utilities.processDocuments(articles, function(newDoc) {
+		var metatags = new Object();
+		var metas = newDoc.evaluate(''//meta[contains(@name, "bepress_citation")]'', newDoc, null, XPathResult.ANY_TYPE, null);
+		var next_meta;
+		while (next_meta = metas.iterateNext()) {
+			metatags[next_meta.name.replace("bepress_citation_", "")] = next_meta.content;
+		}
+		var item = new Zotero.Item("journalArticle");
+		
+		//regularly mapped tags
+		for (var tag in tagMap) {
+			if (metatags[tag]) {
+				item[tagMap[tag]] = metatags[tag];
+			}
+		}
+		
+		//authors
+		var authors = metatags[''authors''].split(";");
+		for each (var author in authors) {
+			item.creators.push(Zotero.Utilities.cleanAuthor(author, "author"));
+		}
+		
+		//attachments
+		item.attachments = [
+			{url:item.url, title:item.title, mimeType:"text/html"},
+			{url:metatags[''pdf_url''], title:"Berkeley Electronic Press Full Text PDF", mimeType:"application/pdf"}
+		];
+		item.complete();
+	}, function() {Zotero.done;});
+	Zotero.wait();
 }');
 
 REPLACE INTO translators VALUES ('7cb0089b-9551-44b2-abca-eb03cbf586d9', '1.0.0b4.r5', '', '2008-03-30 08:00:00', '0', '100', '4', 'BioOne', 'Michael Berkowitz', 'http://[^/]*www.bioone.org[^/]*/', 
