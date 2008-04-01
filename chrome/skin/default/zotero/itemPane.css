@@ -39,8 +39,8 @@
 {
 	margin: 0 2px 0 0;
 	padding: 0 0 0 5px;
-	list-style-image: url("chrome://browser/skin/dropmark-nav.png");
-	-moz-image-region: rect(3px, 14px, 19px, 0px);
+	list-style-image: url("chrome://global/skin/arrow/arrow-dn.gif");
+	
 }
 #zotero-editpane-dynamic-fields row > toolbarbutton .toolbarbutton-text
 {
