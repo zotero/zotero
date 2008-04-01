@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-01 16:45:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-01 18:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -4340,7 +4340,7 @@ REPLACE INTO translators VALUES ('ca6e95d1-46b9-4535-885c-df0c2d4b7f7a', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('bdae838b-3a58-461f-9e8a-142ed9de61dc', '1.0.0b4.r5', '', '2008-01-10 21:00:00', '1', '100', '4', 'PLoS Journals', 'Michael Berkowitz', 'http://[^.]+\.plosjournals\.org/', 
+REPLACE INTO translators VALUES ('bdae838b-3a58-461f-9e8a-142ed9de61dc', '1.0.0b4.r5', '', '2008-04-01 18:30:00', '1', '100', '4', 'PLoS Biology and Medicine', 'Michael Berkowitz', 'http://[^.]+\.plosjournals\.org/', 
 'function detectWeb(doc, url)	{
 	if (doc.evaluate(''//div[@class="search"][@id="browseResults"]/ul/li/span/a'', doc, null, XPathResult.ANY_TYPE, null).iterateNext() ||
 		doc.evaluate(''//div[@id="toclist"]/dl/dt/a'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
@@ -4415,7 +4415,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('9575e804-219e-4cd6-813d-9b690cbfc0fc', '1.0.0b4.r5', '', '2008-03-26 03:00:00', '1', '100', '4', 'PLoS One, Neglected Tropical Diseases and Computational Biology', 'Michael Berkowitz', '^http://www\.(plosone|plosntds|ploscompbiol)\.org/(search|article)/', 
+REPLACE INTO translators VALUES ('9575e804-219e-4cd6-813d-9b690cbfc0fc', '1.0.0b4.r5', '', '2008-04-01 18:30:00', '1', '100', '4', 'PLoS Journals', 'Michael Berkowitz', 'http://www\.plos(one|ntds|compbiol|pathogens|genetics)\.org/(search|article)/', 
 'function detectWeb(doc, url) {
 	if (url.indexOf("Search.action") != -1 || url.indexOf("browse.action") != -1) {
 		return "multiple";
