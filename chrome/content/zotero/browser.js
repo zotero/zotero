@@ -268,11 +268,25 @@ var Zotero_Browser = new function() {
 		this.tabbrowser.addEventListener("resize",
 			function(e) { Zotero_Browser.resize(e) }, false);
 		// Resize on text zoom changes
-		document.getElementById('cmd_textZoomReduce').addEventListener("command",
+		
+		// Fx2
+		var reduce = document.getElementById('cmd_textZoomReduce');
+		if (reduce) {
+			var enlarge = document.getElementById('cmd_textZoomEnlarge');
+			var reset = document.getElementById('cmd_textZoomReset');
+		}
+		// Fx3
+		else {
+			var reduce = document.getElementById('cmd_fullZoomReduce');
+			var enlarge = document.getElementById('cmd_fullZoomEnlarge');
+			var reset = document.getElementById('cmd_fullZoomReset');
+		}
+		
+		reduce.addEventListener("command",
 			function(e) { Zotero_Browser.resize(e) }, false);
-		document.getElementById('cmd_textZoomEnlarge').addEventListener("command",
+		enlarge.addEventListener("command",
 			function(e) { Zotero_Browser.resize(e) }, false);
-		document.getElementById('cmd_textZoomReset').addEventListener("command",
+		reset.addEventListener("command",
 			function(e) { Zotero_Browser.resize(e) }, false);
 	}
 	
