@@ -12922,7 +12922,7 @@ REPLACE INTO translators VALUES ('d75381ee-7d8d-4a3b-a595-b9190a06f43f', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('2c310a37-a4dd-48d2-82c9-bd29c53c1c76', '1.0.0b3.r1', '', '2008-03-20 15:30:00', '0', '100', '4', 'PROLA', 'Eugeniy Mikhailov and Michael Berkowitz', 'https?://(?:www\.)?prola.aps.org/(toc|searchabstract|abstract)/', 
+REPLACE INTO translators VALUES ('2c310a37-a4dd-48d2-82c9-bd29c53c1c76', '1.0.0b3.r1', '', '2008-04-01 15:30:00', '0', '100', '4', 'PROLA', 'Eugeniy Mikhailov and Michael Berkowitz', 'https?://(?:www\.)?prola.aps.org/(toc|searchabstract|abstract)/', 
 'function detectWeb(doc, url) {
 	if (url.indexOf("toc") != -1) {
 		return "multiple";
@@ -12943,7 +12943,9 @@ REPLACE INTO translators VALUES ('2c310a37-a4dd-48d2-82c9-bd29c53c1c76', '1.0.0b
     	}
     	
     	Zotero.Utilities.processDocuments(arts, function(newDoc) {
-    	var urlRIS = newDoc.location.href;
+    		Zotero.debug(newDoc.title);
+    		var abs = Zotero.Utilities.trimInternal(newDoc.evaluate(''//div[@class="aps-abstractbox aps-mediumfont"]/p'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+    		var urlRIS = newDoc.location.href;
 		// so far several more or less  identical url possible
 		// one is with "abstract" other with "searchabstract"
 		urlRIS = urlRIS.replace(/(searchabstract|abstract)/,"export");
@@ -12963,6 +12965,7 @@ REPLACE INTO translators VALUES ('2c310a37-a4dd-48d2-82c9-bd29c53c1c76', '1.0.0b
 					{url:snapurl, title:"PROLA Snapshot", mimeType:"text/html"},
 					{url:pdfurl, title:"PROLA Full Text PDF", mimeType:"application/pdf"}
 				];
+				item.abstractNote = abs;
 				item.complete();
 			});
 			translator.translate();
