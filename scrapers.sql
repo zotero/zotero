@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-03-31 21:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-01 15:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -12280,7 +12280,7 @@ REPLACE INTO translators VALUES ('8917b41c-8527-4ee7-b2dd-bcbc3fa5eabd', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('ecddda2e-4fc6-4aea-9f17-ef3b56d7377a', '1.0.0b3.r1', '', '2008-03-30 08:00:00', '1', '100', '4', 'arXiv.org', 'Sean Takats', '^http://(?:(www|uk)\.)?(?:(arxiv\.org|xxx.lanl.gov)/(?:find/\w|list/\w|abs/)|eprintweb.org/S/(?:search|archive|article)(?!.*refs$)(?!.*cited$))', 
+REPLACE INTO translators VALUES ('ecddda2e-4fc6-4aea-9f17-ef3b56d7377a', '1.0.0b3.r1', '', '2008-04-01 15:30:00', '1', '100', '4', 'arXiv.org', 'Sean Takats and Michael Berkowitz', 'http://(?:(www|uk)\.)?(?:(arxiv\.org|xxx.lanl.gov)/(?:find/\w|list/\w|abs/)|eprintweb.org/S/(?:search|archive|article)(?!.*refs$)(?!.*cited$))', 
 'function detectWeb(doc, url) {
 	var searchRe = /^http:\/\/(?:(www|uk)\.)?(?:(arxiv\.org|xxx\.lanl\.gov)\/(?:find|list)|eprintweb.org\/S\/(?:archive|search$))/;
 	if(searchRe.test(url)) {
@@ -12290,7 +12290,7 @@ REPLACE INTO translators VALUES ('ecddda2e-4fc6-4aea-9f17-ef3b56d7377a', '1.0.0b
 	}
 }', 
 'function getPDF(articleID) {
-	return {url:"http://www.arxiv.org/pdf/" + articleID,
+	return {url:"http://www.arxiv.org/pdf/" + articleID + "v1.pdf",
 			mimeType:"application/pdf", title:articleID + " PDF"};
 }
 
@@ -12440,7 +12440,12 @@ function doWeb(doc, url) {
 			newItem.publicationTitle = articleID;
 		}
 //		TODO add "arXiv.org" to bib data?
+		newItem.attachments.push({url:newItem.url, title:"arXiv.org Snapshot", mimeType:"text/html"});
 		newItem.attachments.push(getPDF(articleID));
+		if (newItem.notes[0][''note'']) {
+			newItem.abstractNote = newItem.notes[0][''note''];
+			newItem.notes = new Array();
+		}
 		newItem.complete();
 	}, function() {Zotero.done();}, null);
 	Zotero.wait();
