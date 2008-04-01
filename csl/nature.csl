@@ -74,7 +74,7 @@
         <option name="second-field-align" value="true"/>
         <option name="entry-spacing" value="0"/>
         <layout>
-            <text variable="citation-number" suffix=". "/>
+            <text variable="citation-number" suffix="."/>
             <text macro="author"/>
             <text macro="title" prefix=" " suffix=". "/>
             <text variable="container-title" font-style="italic" suffix=" " form="short"/>
