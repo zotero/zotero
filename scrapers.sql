@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-01 15:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-01 16:45:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1576,6 +1576,56 @@ function doWeb(doc, url) {
 		Zotero.wait();
 	} else {
 		scrape(doc);
+	}
+}');
+
+REPLACE INTO translators VALUES ('2e43f4a9-d2e2-4112-a6ef-b3528b39b4d2', '1.0.0b4.r5', '', '2008-04-01 16:45:00', '0', '100', '4', 'MIT Press Journals', 'Michael Berkowitz', 'http://www.mitpressjournals.org/', 
+'function detectWeb(doc, url) {
+	if (url.match(/action\/doSearch/) || url.match(/toc\//)) {
+		return "multiple";
+	} else if (url.match(/doi\/abs\//)) {
+		return "journalArticle";
+	}
+}', 
+'function getDOI(str) {
+	return str.match(/doi\/abs\/([^?]+)/)[1];
+}
+	
+function doWeb(doc, url) {
+	var articles = new Array();
+	if (detectWeb(doc, url) == "multiple") {
+		var items = new Object();
+		var links = doc.evaluate(''//table[@class="articleEntry"]/tbody/tr//a[text() = "First Page" or text() = "Citation"]'', doc, null, XPathResult.ANY_TYPE, null);
+		var titles = doc.evaluate(''//table[@class="articleEntry"]/tbody/tr//div[@class="arttitle"]'', doc, null, XPathResult.ANY_TYPE, null);
+		var link, title;
+		while ((link = links.iterateNext()) && (title = titles.iterateNext())) {
+			items[link.href] = Zotero.Utilities.trimInternal(title.textContent);
+		}
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			articles.push(getDOI(i));
+		}
+	} else {
+		articles = [getDOI(url)];
+	}
+	for each (var doi in articles) {
+		var risurl = ''http://www.mitpressjournals.org/action/downloadCitation?doi='' + doi + ''&include=cit&format=refman&direct=on&submit=Download+article+metadata'';
+		var pdfurl = ''http://www.mitpressjournals.org/doi/pdf/'' + doi;
+		Zotero.Utilities.HTTP.doGet(risurl, function(text) {
+			Zotero.debug(text);
+			var translator = Zotero.loadTranslator("import");
+			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+			translator.setString(text);
+			translator.setHandler("itemDone", function(obj, item) {
+				item.DOI = item.DOI.substr(4);
+				item.attachments[0].title= item.publicationTitle + " Snapshot";
+				item.attachments[0].mimeType = "text/html";
+				item.attachments.push({url:pdfurl, title:item.publicationTitle + " Full Text PDF", mimeType:"application/pdf"});
+				http://www.mitpressjournals.org/doi/pdf/10.1162/afar.2008.41.1.1
+				item.complete();	
+			});
+			translator.translate();
+		});
 	}
 }');
 
