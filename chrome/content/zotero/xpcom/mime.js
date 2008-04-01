@@ -37,16 +37,18 @@ Zotero.MIME = new function(){
 		["%PDF-", "application/pdf", 0],
 		["%!PS-Adobe-", 'application/postscript', 0],
 		["%! PS-Adobe-", 'application/postscript', 0],
+		["\uFFFD\uFFFD\x11\u0871\x1A\uFFFD\x00\x00", "application/msword", 0],
 		["From", 'text/plain', 0],
 		[">From", 'text/plain', 0],
 		["#!", 'text/plain', 0],
 		["<?xml", 'text/xml', 0],
 		["<!DOCTYPE html", 'text/html', 0],
 		["<html", 'text/html', 0],
-		["\uFFFD\uFFFD", 'image/jpeg', 0],
-		["JFIF", 'image/jpeg'],
+		["\uFFFD\uFFFD\uFFFD\uFFFD", 'image/jpeg', 0],
 		["GIF8", 'image/gif', 0],
-		["\uFFFDPNG", 'image/png', 0]
+		["\uFFFDPNG", 'image/png', 0],
+		["PK\x03\x04", "application/vnd.oasis.opendocument.text", 0],
+		["JFIF", 'image/jpeg']
 	];
 	
 	var _textTypes = {
@@ -113,6 +115,20 @@ Zotero.MIME = new function(){
 			
 			case 'image/gif':
 				return 'gif';
+			
+			case 'application/msword':
+			case 'application/doc':
+			case 'application/vnd.msword':
+			case 'application/vnd.ms-word':
+			case 'application/winword':
+			case 'application/word':
+			case 'application/x-msw6':
+			case 'application/x-msword':
+				return 'doc';
+			
+			case 'application/vnd.oasis.opendocument.text':
+			case 'application/x-vnd.oasis.opendocument.text':
+				return 'odt';
 			
 			case 'video/flv':
 			case 'video/x-flv':
