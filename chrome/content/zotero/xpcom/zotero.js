@@ -163,6 +163,7 @@ var Zotero = new function(){
 		var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
 						.createInstance();
 		xmlhttp.open('GET', 'chrome://global/locale/global.dtd', false);
+		xmlhttp.overrideMimeType('text/plain');
 		xmlhttp.send(null);
 		this.dir = xmlhttp.responseText.match(/(ltr|rtl)/)[0];
 		
@@ -527,7 +528,6 @@ var Zotero = new function(){
 				'[JavaScript Error: "document.getElementById("sanitizeItem")',
 				'chrome://webclipper',
 				'No chrome package registered for chrome://piggy-bank',
-				'global/global.dtd'
 			];
 			
 			for (var i=0; i<blacklist.length; i++) {
