@@ -9066,8 +9066,8 @@ REPLACE INTO translators VALUES ('cf87eca8-041d-b954-795a-2d86348999d5', '1.0.0b
 		} : null;
 		var nonstandard = false;
 		var xpath;
-		if (newDoc.evaluate(''//*[tr[td/text()="LDR"]]/tr'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
-			xpath = ''//*[tr[td/text()="LDR"]]/tr'';
+		if (newDoc.evaluate(''//*[tr[td/text()="LDR"]]/tr[td[2]]'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+			xpath = ''//*[tr[td/text()="LDR"]]/tr[td[2]]'';
 		} else if (newDoc.evaluate(''//tr[2]//table[2]//tr'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
 			xpath = ''//tr[2]//table[2]//tr'';
 			nonstandard = true;
@@ -9077,7 +9077,6 @@ REPLACE INTO translators VALUES ('cf87eca8-041d-b954-795a-2d86348999d5', '1.0.0b
 		}
 		var elmts = newDoc.evaluate(xpath, newDoc, nsResolver, XPathResult.ANY_TYPE, null);
 		var elmt;
-		
 		var record = new marc.record();
 		while(elmt = elmts.iterateNext()) {
 			if (nonstandard) {
