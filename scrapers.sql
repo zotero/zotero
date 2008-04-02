@@ -4415,7 +4415,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('9575e804-219e-4cd6-813d-9b690cbfc0fc', '1.0.0b4.r5', '', '2008-04-01 18:30:00', '1', '100', '4', 'PLoS Journals', 'Michael Berkowitz', 'http://www\.plos(one|ntds|compbiol|pathogens|genetics)\.org/(search|article)/', 
+REPLACE INTO translators VALUES ('9575e804-219e-4cd6-813d-9b690cbfc0fc', '1.0.0b4.r5', '', '2008-04-02 08:30:00', '1', '100', '4', 'PLoS Journals', 'Michael Berkowitz', 'http://www\.plos(one|ntds|compbiol|pathogens|genetics)\.org/(search|article)/', 
 'function detectWeb(doc, url) {
 	if (url.indexOf("Search.action") != -1 || url.indexOf("browse.action") != -1) {
 		return "multiple";
