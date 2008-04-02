@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-02 16:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-02 16:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -9001,7 +9001,7 @@ REPLACE INTO translators VALUES ('5e3e6245-83da-4f55-a39b-b712df54a935', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('cf87eca8-041d-b954-795a-2d86348999d5', '1.0.0b3.r1', '', '2008-04-02 14:30:00', '1', '100', '4', 'Library Catalog (Aleph)', 'Simon Kornblith and Michael Berkowitz', 'https?://[^/]+/F(?:/[A-Z0-9\-]+(?:\?.*)?$|\?func=find|\?func=scan)', 
+REPLACE INTO translators VALUES ('cf87eca8-041d-b954-795a-2d86348999d5', '1.0.0b3.r1', '', '2008-04-02 16:30:00', '1', '100', '4', 'Library Catalog (Aleph)', 'Simon Kornblith and Michael Berkowitz', 'https?://[^/]+/F(?:/[A-Z0-9\-]+(?:\?.*)?$|\?func=find|\?func=scan)', 
 'function detectWeb(doc, url) {
 	var singleRe = new RegExp("^https?://[^/]+/F/[A-Z0-9\-]+\?.*(?:func=full-set-set.*\&format=[0-9]{3}|func=direct)");
 	
@@ -9110,7 +9110,21 @@ REPLACE INTO translators VALUES ('cf87eca8-041d-b954-795a-2d86348999d5', '1.0.0b
 		
 		var domain = url.match(/https?:\/\/([^/]+)/);
 		newItem.repository = domain[1]+" Library Catalog";
-		
+
+		var oldCreators = newItem.creators;
+		newItem.creators = new Array();
+		var transient = new Array();
+		for each (var a in oldCreators) {
+			if (a.lastName) {
+				if (!a.lastName.match(/\d+/)) transient.push(a);
+			}
+		}
+		for each (var a in transient) {
+			if (a.firstName) {
+				if (a.firstName.match(/|/)) a.firstName = a.firstName.match(/([^|]+)\s+|/)[1];
+			}
+		}
+		newItem.creators = transient;
 		newItem.complete();
 	}, function() {Zotero.done;});
 	Zotero.wait();
@@ -13339,7 +13353,7 @@ REPLACE INTO translators VALUES ('df966c80-c199-4329-ab02-fa410c8eb6dc', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('f8765470-5ace-4a31-b4bd-4327b960ccd', '1.0.0b3.r1', '', '2008-04-02 16:00:00', '1', '100', '4', 'SpringerLink', 'Simon Kornblith and Michael Berkowitz', 'https?://(www\.)*springerlink\.com|springerlink.metapress.com[^/]*/content/', 
+REPLACE INTO translators VALUES ('f8765470-5ace-4a31-b4bd-4327b960ccd', '1.0.0b3.r1', '', '2008-04-02 11:36:18', '1', '100', '4', 'SpringerLink', 'Simon Kornblith and Michael Berkowitz', 'https?://(www\.)*springerlink\.com|springerlink.metapress.com[^/]*/content/', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -13413,7 +13427,7 @@ REPLACE INTO translators VALUES ('f8765470-5ace-4a31-b4bd-4327b960ccd', '1.0.0b3
 			item.creators = new Array();
 			for each (var creator in oldCreators) {
 				if (creator[''lastName''] + creator[''firstName''] != "") {
-					item.creators.push({firstName:creator[''firstName''], lastName:creator[''lastName''], creatorType:"author"});
+					item.creators.push({firstName:Zotero.Utilities.trimInternal(creator[''firstName'']), lastName:creator[''lastName''], creatorType:"author"});
 				}
 			}
 			
@@ -13427,7 +13441,7 @@ REPLACE INTO translators VALUES ('f8765470-5ace-4a31-b4bd-4327b960ccd', '1.0.0b3
 			item.complete();
 		});
 		translator.translate();
-	}, function() { Zotero.done() });	
+	}, function() { Zotero.done() });
 	Zotero.wait();
 }');
 
@@ -19966,7 +19980,7 @@ function doExport() {
 }');
 
 
-REPLACE INTO translators VALUES ('a6ee60df-1ddc-4aae-bb25-45e0537be973', '1.0.0b3.r1', '', '2008-03-20 00:15:00', '1', '100', '1', 'MARC', 'Simon Kornblith', 'marc', 
+REPLACE INTO translators VALUES ('a6ee60df-1ddc-4aae-bb25-45e0537be973', '1.0.0b3.r1', '', '2008-04-02 16:30:00', '1', '100', '1', 'MARC', 'Simon Kornblith', 'marc', 
 'function detectImport() {
 	var marcRecordRegexp = /^[0-9]{5}[a-z ]{3}$/
 	var read = Zotero.read(8);
@@ -20299,6 +20313,8 @@ record.prototype.translate = function(item) {
 	this._associateDBField(item, "060", "ab", "callNumber");
 	this._associateDBField(item, "050", "ab", "callNumber");
 	
+	if (!item.place) this._associateDBField(item, "410", "a", "place");
+	if (!item.publisher) this._associateDBField(item, "412", "a", "publisher");
 	if (!item.title) this._associateDBField(item, "331", "a", "title");
 	if (!item.date) this._associateDBField(item, "425", "a", "date", pullNumber);
 	if (!item.date) this._associateDBField(item, "595", "a", "date", pullNumber);
