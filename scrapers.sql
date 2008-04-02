@@ -1579,7 +1579,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('2e43f4a9-d2e2-4112-a6ef-b3528b39b4d2', '1.0.0b4.r5', '', '2008-04-01 16:45:00', '0', '100', '4', 'MIT Press Journals', 'Michael Berkowitz', 'http://www.mitpressjournals.org/', 
+REPLACE INTO translators VALUES ('2e43f4a9-d2e2-4112-a6ef-b3528b39b4d2', '1.0.0b4.r5', '', '2008-04-02 08:10:00', '0', '100', '4', 'MIT Press Journals', 'Michael Berkowitz', 'http://www.mitpressjournals.org/', 
 'function detectWeb(doc, url) {
 	if (url.match(/action\/doSearch/) || url.match(/toc\//)) {
 		return "multiple";
@@ -1629,7 +1629,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('b0abb562-218c-4bf6-af66-c320fdb8ddd3', '1.0.0b4.r5', '', '2008-03-31 21:30:00', '0', '100', '4', 'Philosopher''s Imprint', 'Michael Berkowitz', 'http://quod.lib.umich.edu/cgi/t/', 
+REPLACE INTO translators VALUES ('b0abb562-218c-4bf6-af66-c320fdb8ddd3', '1.0.0b4.r5', '', '2008-04-01 04:50:00', '0', '100', '4', 'Philosopher''s Imprint', 'Michael Berkowitz', 'http://quod.lib.umich.edu/cgi/t/', 
 'function detectWeb(doc, url) {
 	if (doc.evaluate(''//div/span[text() = "Search Results"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
@@ -1705,7 +1705,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('2a5dc3ed-ee5e-4bfb-baad-36ae007e40ce', '1.0.0b4.r5', '', '2008-03-31 18:30:00', '0', '100', '4', 'Berkeley Electronic Press', 'Michael Berkowitz', 'http://www.bepress.com/', 
+REPLACE INTO translators VALUES ('2a5dc3ed-ee5e-4bfb-baad-36ae007e40ce', '1.0.0b4.r5', '', '2008-04-01 04:50:00', '0', '100', '4', 'Berkeley Electronic Press', 'Michael Berkowitz', 'http://www.bepress.com/', 
 'function detectWeb(doc, url) {
 	if (url.match("cgi/query.cgi")) {
 		return "multiple";
@@ -1903,7 +1903,7 @@ REPLACE INTO translators VALUES ('b8a86e36-c270-48c9-bdd1-22aaa167ef46', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('a14ac3eb-64a0-4179-970c-92ecc2fec992', '1.0.0b4.r5', '', '2008-03-31 16:30:00', '1', '100', '4', 'Scopus', 'Michael Berkowitz', 'http://[^/]*www.scopus.com[^/]*', 
+REPLACE INTO translators VALUES ('a14ac3eb-64a0-4179-970c-92ecc2fec992', '1.0.0b4.r5', '', '2008-04-01 04:50:00', '1', '100', '4', 'Scopus', 'Michael Berkowitz', 'http://[^/]*www.scopus.com[^/]*', 
 'function detectWeb(doc, url) {
 	if (url.indexOf("/results/") != -1) {
 		return "multiple";
@@ -3656,7 +3656,7 @@ REPLACE INTO translators VALUES ('0cc8e259-106e-4793-8c26-6ec8114a9160', '1.0.0b
 	}, function() {Zotero.done;});
 }');
 
-REPLACE INTO translators VALUES ('8b35ab14-f18a-4f69-8472-b2df18c984da', '1.0.0b4.r5', '', '2008-03-31 17:30:00', '1', '100', '4', 'Davidson College Library', 'Michael Berkowitz', 'http://www.lib.davidson.edu/', 
+REPLACE INTO translators VALUES ('8b35ab14-f18a-4f69-8472-b2df18c984da', '1.0.0b4.r5', '', '2008-04-01 04:50:00', '1', '100', '4', 'Davidson College Library', 'Michael Berkowitz', 'http://www.lib.davidson.edu/', 
 'function detectWeb(doc, url) {
 	if (url.indexOf("log_in") == -1) {
 		if (url.indexOf("screen=Record") != -1) {
@@ -4062,7 +4062,7 @@ function doWeb(doc, url) {
 	}, function() {Zotero.done;});
 }');
 
-REPLACE INTO translators VALUES ('303c2744-ea37-4806-853d-e1ca67be6818', '1.0.0b4.r5', '', '2008-03-31 20:15:00', '0', '100', '4', 'CSIRO Publishing', 'Michael Berkowitz', 'http://(www.)?publish.csiro.au/', 
+REPLACE INTO translators VALUES ('303c2744-ea37-4806-853d-e1ca67be6818', '1.0.0b4.r5', '', '2008-04-01 04:50:00', '0', '100', '4', 'CSIRO Publishing', 'Michael Berkowitz', 'http://(www.)?publish.csiro.au/', 
 'function detectWeb(doc, url) {
 	if (doc.evaluate(''//a[@class="searchBoldBlue"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext() || doc.evaluate(''//td[2]/a[@class="linkJournal"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
@@ -4340,7 +4340,7 @@ REPLACE INTO translators VALUES ('ca6e95d1-46b9-4535-885c-df0c2d4b7f7a', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('bdae838b-3a58-461f-9e8a-142ed9de61dc', '1.0.0b4.r5', '', '2008-04-01 18:30:00', '1', '100', '4', 'PLoS Biology and Medicine', 'Michael Berkowitz', 'http://[^.]+\.plosjournals\.org/', 
+REPLACE INTO translators VALUES ('bdae838b-3a58-461f-9e8a-142ed9de61dc', '1.0.0b4.r5', '', '2008-04-02 08:10:00', '1', '100', '4', 'PLoS Biology and Medicine', 'Michael Berkowitz', 'http://[^.]+\.plosjournals\.org/', 
 'function detectWeb(doc, url)	{
 	if (doc.evaluate(''//div[@class="search"][@id="browseResults"]/ul/li/span/a'', doc, null, XPathResult.ANY_TYPE, null).iterateNext() ||
 		doc.evaluate(''//div[@id="toclist"]/dl/dt/a'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
@@ -12330,7 +12330,7 @@ REPLACE INTO translators VALUES ('8917b41c-8527-4ee7-b2dd-bcbc3fa5eabd', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('ecddda2e-4fc6-4aea-9f17-ef3b56d7377a', '1.0.0b3.r1', '', '2008-04-01 15:30:00', '1', '100', '4', 'arXiv.org', 'Sean Takats and Michael Berkowitz', 'http://(?:(www|uk)\.)?(?:(arxiv\.org|xxx.lanl.gov)/(?:find/\w|list/\w|abs/)|eprintweb.org/S/(?:search|archive|article)(?!.*refs$)(?!.*cited$))', 
+REPLACE INTO translators VALUES ('ecddda2e-4fc6-4aea-9f17-ef3b56d7377a', '1.0.0b3.r1', '', '2008-04-02 08:10:00', '1', '100', '4', 'arXiv.org', 'Sean Takats and Michael Berkowitz', 'http://(?:(www|uk)\.)?(?:(arxiv\.org|xxx.lanl.gov)/(?:find/\w|list/\w|abs/)|eprintweb.org/S/(?:search|archive|article)(?!.*refs$)(?!.*cited$))', 
 'function detectWeb(doc, url) {
 	var searchRe = /^http:\/\/(?:(www|uk)\.)?(?:(arxiv\.org|xxx\.lanl\.gov)\/(?:find|list)|eprintweb.org\/S\/(?:archive|search$))/;
 	if(searchRe.test(url)) {
@@ -12972,7 +12972,7 @@ REPLACE INTO translators VALUES ('d75381ee-7d8d-4a3b-a595-b9190a06f43f', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('2c310a37-a4dd-48d2-82c9-bd29c53c1c76', '1.0.0b3.r1', '', '2008-04-01 15:30:00', '0', '100', '4', 'PROLA', 'Eugeniy Mikhailov and Michael Berkowitz', 'https?://(?:www\.)?prola.aps.org/(toc|searchabstract|abstract)/', 
+REPLACE INTO translators VALUES ('2c310a37-a4dd-48d2-82c9-bd29c53c1c76', '1.0.0b3.r1', '', '2008-04-02 08:10:00', '0', '100', '4', 'PROLA', 'Eugeniy Mikhailov and Michael Berkowitz', 'https?://(?:www\.)?prola.aps.org/(toc|searchabstract|abstract)/', 
 'function detectWeb(doc, url) {
 	if (url.indexOf("toc") != -1) {
 		return "multiple";
