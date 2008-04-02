@@ -108,7 +108,7 @@
     </sort>
     <layout>
       <text macro="author" suffix=" "/>
-      <date variable="issued" prefix=" (" suffix=")">
+      <date variable="issued" prefix="  (" suffix=")">
 	<date-part name="year"/>
       </date>
       <choose>
