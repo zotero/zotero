@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-02 14:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-02 16:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -13339,21 +13339,22 @@ REPLACE INTO translators VALUES ('df966c80-c199-4329-ab02-fa410c8eb6dc', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('f8765470-5ace-4a31-b4bd-4327b960ccd', '1.0.0b3.r1', '', '2008-03-28 16:30:00', '1', '100', '4', 'SpringerLink', 'Simon Kornblith and Michael Berkowitz', 'https?://(www\.)*springerlink\.com|springerlink.metapress.com[^/]*/content/', 
+REPLACE INTO translators VALUES ('f8765470-5ace-4a31-b4bd-4327b960ccd', '1.0.0b3.r1', '', '2008-04-02 16:00:00', '1', '100', '4', 'SpringerLink', 'Simon Kornblith and Michael Berkowitz', 'https?://(www\.)*springerlink\.com|springerlink.metapress.com[^/]*/content/', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == ''x'') return namespace; else return null;
 	} : null;
 	
-	if(doc.title == "SpringerLink - All Search Results" || doc.title == "SpringerLink - Journal Issue") {
+	if((doc.title == "SpringerLink - All Search Results") || (doc.title == "SpringerLink - Journal Issue")) {
 		return "multiple";
 	} else if(doc.title == "SpringerLink - Book Chapter") {
 		return "bookSection";
 	} else if (doc.title == "SpringerLink - Book") {
 		return "book";
-	} else if(doc.evaluate(''//a[text() = "RIS"]'',
-	          doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+	} else if (doc.title == "SpringerLink - Journal Article") {
+		return "journalArticle";
+	} else if(doc.evaluate(''//a[text() = "RIS"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "journalArticle";
 	}
 }', 
@@ -13367,12 +13368,16 @@ REPLACE INTO translators VALUES ('f8765470-5ace-4a31-b4bd-4327b960ccd', '1.0.0b3
 	var host = m[0];
 	
 	if(detectWeb(doc, url) == "multiple") {
+		var items = new Object();
 		if (doc.title == "SpringerLink - Journal Issue") {
 			var items = Zotero.Utilities.getItemArray(doc, doc.getElementsByTagName("table")[8], ''/content/[^/]+/\\?p=[^&]+&pi='');
 		} else {
-			var items = Zotero.Utilities.getItemArray(doc, doc, ''/content/[^/]+/\\?p=[^&]+&pi='');
+			var results = doc.evaluate(''//div[@class="listItemName"]/a'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+			var result;
+			while (result = results.iterateNext()) {
+				items[result.href] = Zotero.Utilities.trimInternal(result.textContent);
+			}
 		}
-		
 		items = Zotero.selectItems(items);
 		if(!items) return true;
 		
@@ -13404,13 +13409,6 @@ REPLACE INTO translators VALUES ('f8765470-5ace-4a31-b4bd-4327b960ccd', '1.0.0b3
 				{url:m[0]+"fulltext.pdf", title:"SpringerLink Full Text PDF", mimeType:"application/pdf"}
 			];
 			
-			// fix incorrect authors
-			var oldCreators = item.creators;
-			item.creators = new Array();
-			for each(var creator in oldCreators) {
-				item.creators.push(Zotero.Utilities.cleanAuthor(creator.lastName, "author"));
-			}
-			
 			var oldCreators = item.creators;
 			item.creators = new Array();
 			for each (var creator in oldCreators) {
@@ -13418,8 +13416,10 @@ REPLACE INTO translators VALUES ('f8765470-5ace-4a31-b4bd-4327b960ccd', '1.0.0b3
 					item.creators.push({firstName:creator[''firstName''], lastName:creator[''lastName''], creatorType:"author"});
 				}
 			}
+			
 			// fix incorrect chapters
 			if(item.publicationTitle && item.itemType == "book") item.title = item.publicationTitle;
+			
 			// fix "V" in volume
 			if(item.volume) {
 				item.volume = item.volume.replace("V", "");
@@ -13427,8 +13427,7 @@ REPLACE INTO translators VALUES ('f8765470-5ace-4a31-b4bd-4327b960ccd', '1.0.0b3
 			item.complete();
 		});
 		translator.translate();
-	}, function() { Zotero.done() });
-		
+	}, function() { Zotero.done() });	
 	Zotero.wait();
 }');
 
