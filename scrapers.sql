@@ -1579,7 +1579,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('4c9dbe33-e64f-4536-a02f-f347fa1f187d', '1.0.0b4.r5', '', '2008-04-02 19:45:00', '0', '100', '4', 'BioInfoBank', 'Michael Berkowitz', 'http://lib.bioinfo.pl/', 
+REPLACE INTO translators VALUES ('4c9dbe33-e64f-4536-a02f-f347fa1f187d', '1.0.0b4.r5', '', '2008-04-03 19:45:00', '0', '100', '4', 'BioInfoBank', 'Michael Berkowitz', 'http://lib.bioinfo.pl/', 
 'function detectWeb(doc, url) {
 	return "multiple";
 }', 
