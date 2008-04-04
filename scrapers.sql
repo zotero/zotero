@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-03 16:15:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-04 15:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -2379,9 +2379,9 @@ REPLACE INTO translators VALUES ('9e306d5d-193f-44ae-9dd6-ace63bf47689', '1.0.0b
 	}, function() {Zotero.done;});
 }');
 
-REPLACE INTO translators VALUES ('636c8ea6-2af7-4488-8ccd-ea280e4a7a98', '1.0.0b4.r5', '', '2008-03-18 02:30:00', '1', '100', '4', 'Sage Journals Online', 'Michael Berkowitz', 'http://[^/]*\.sagepub\.com[^/]*/', 
+REPLACE INTO translators VALUES ('636c8ea6-2af7-4488-8ccd-ea280e4a7a98', '1.0.0b4.r5', '', '2008-04-04 15:00:00', '1', '100', '4', 'Sage Journals Online', 'Michael Berkowitz', 'http://[^/]*\.sagepub\.com[^/]*/', 
 'function detectWeb(doc, url) {
-	if (url.indexOf("searchresults") != -1) {
+	if (url.indexOf("searchresults") != -1 || (doc.title.indexOf("Table of Contents") != -1)) {
 		return "multiple";
 	} else if (url.indexOf("cgi/content") != -1) {
 		return "journalArticle";
@@ -2391,12 +2391,17 @@ REPLACE INTO translators VALUES ('636c8ea6-2af7-4488-8ccd-ea280e4a7a98', '1.0.0b
 	var arts = new Array();
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
-		var searchx = ''//form[@id="search_results"]/div[@class="resultsitem"]/div[2]'';
+		if (doc.title.indexOf("Table of Contents") != -1) {
+			var searchx = ''//div[@id="maincontent"]/div[@class="contentarea"]/table[@class="toc"]/tbody/tr/td[2][@class="rightcol"]/form/dl/dd''; 
+			var titlex = ''.//strong'';
+		} else {
+			var searchx = ''//form[@id="search_results"]/div[@class="resultsitem"]/div[2]'';
+			var titlex = ''.//label'';
+		}	
+		var linkx = ''.//a[1]'';
 		var searchres = doc.evaluate(searchx, doc, null, XPathResult.ANY_TYPE, null);
 		var next_res;
 		while (next_res = searchres.iterateNext()) {
-			var titlex = ''.//label'';
-			var linkx = ''.//a[1]'';
 			var title = doc.evaluate(titlex, next_res, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 			var link = doc.evaluate(linkx, next_res, null, XPathResult.ANY_TYPE, null).iterateNext().href;
 			items[link] = title;
