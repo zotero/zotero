@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-04 15:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-04 20:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1087,7 +1087,7 @@ REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('d921155f-0186-1684-615c-ca57682ced9b', '1.0.0b4.r1', '', '2008-01-09 20:00:00', '1', '100', '4', 'JSTOR', 'Simon Kornblith', 'https?://[^/]*jstor\.org[^/]*/(?:view|browse/[^/]+/[^/]+\?|search/|cgi-bin/jstor/viewitem)', 
+REPLACE INTO translators VALUES ('d921155f-0186-1684-615c-ca57682ced9b', '1.0.0b4.r1', '', '2008-04-04 20:30:00', '1', '100', '4', 'JSTOR', 'Simon Kornblith, Sean Takats and Michael Berkowitz', 'https?://[^/]*jstor\.org[^/]*/(action/(showArticle|doBasicSearch|doAdvancedSearch)|stable/)', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -1095,220 +1095,105 @@ REPLACE INTO translators VALUES ('d921155f-0186-1684-615c-ca57682ced9b', '1.0.0b
 	} : null;
 	
 	// See if this is a seach results page
-	if(doc.title == "JSTOR: Search Results" || url.indexOf("/browse/") != -1) {
+	if(doc.title == "JSTOR: Search Results" || url.indexOf("/stable/i") != -1) {
 		return "multiple";
 	} else if(url.indexOf("/search/") != -1) {
 		return false;
 	}
 	
 	// If this is a view page, find the link to the citation
-	var xpath = ''/html/body/div[@class="indent"]//a[@class="nav"]'';
+	var xpath = ''//a[@id="favorites"]'';
 	var elmts = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
 	if(elmts.iterateNext()) {
 		return "journalArticle";
 	}
 }', 
-'function getJSTORAttachment(viewURL) {
-	var viewRe = new RegExp("(^https?://[^/]+/)view([^?]+)");
-	var m = viewRe.exec(viewURL);
-	if(m) {
-		return {url:m[1]+"cgi-bin/jstor/printpage"+m[2]+".pdf?dowhat=Acrobat",
-		        mimeType:"application/pdf", title:"JSTOR Full Text PDF"};
-	} else {
-		return false;
-	}
-}
-
-function itemComplete(newItem, url) {
-	if(newItem.url) {
-		newItem.attachments.push({url:newItem.url, mimeType:"text/html",
-			                      title:"JSTOR Link", snapshot:false});
-	} else {
-		if(newItem.ISSN) {
-			newItem.url = "http://www.jstor.org/browse/"+newItem.ISSN;
-		} else {
-			newItem.url = url;
-		}
-	}
-	
-	newItem.complete();
-}
-
-function doWeb(doc, url) {
+'function doWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == ''x'') return namespace; else return null;
 	} : null;
-	var saveCitations = new Array();
-	var viewPages = new Array();
-	
+
 	var hostRegexp = new RegExp("^(https?://[^/]+)/");
 	var hMatch = hostRegexp.exec(url);
 	var host = hMatch[1];
-	
-	if(doc.title == "JSTOR: Search Results") {
-		var availableItems = new Object();
-		
-		// Require link to match this
-		var tagRegexp = new RegExp();
-		tagRegexp.compile(''citationAction='');
-		
-		var tableRows = doc.evaluate(''//tr[td/span[@class="printDownloadSaveLinks"]]'', doc, nsResolver, XPathResult.ANY_TYPE, null);		
-		var tableRow;
-		// Go through table rows
-		var tableView = new Array();
-		var tableSave = new Array();
-		var i = 0;
-		while(tableRow = tableRows.iterateNext()) {
-			i++;
-			var links = tableRow.getElementsByTagName("a");
-			// Go through links
-			for(var j=0; j<links.length; j++) {
-				if(links[j].href.indexOf("citationAction=") != -1) {
-					tableSave[i] = links[j].href;
-					var link = doc.evaluate(''.//a[strong]'', tableRow, null, XPathResult.ANY_TYPE, null).iterateNext();
-					if(link) {
-						tableView[i] = link.href;
-					}
-					
-					var text = doc.evaluate(''.//strong/text()'', tableRow, null, XPathResult.ANY_TYPE, null).iterateNext();
-					if(text && text.nodeValue) {
-						text = Zotero.Utilities.trimInternal(text.nodeValue);
-						if(availableItems[i]) {
-							availableItems[i] += " "+text;
-						} else {
-							availableItems[i] = text;
-						}
-					}
-				}
-			}
+
+	// If this is a view page, find the link to the citation
+	var xpath = ''//a[@id="favorites"]'';
+	var elmts = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+	if(elmts.iterateNext()) {
+			var jid;
+		var jidRe1 = new RegExp("doi=[0-9\.]+/([0-9]+)");
+		var jidRe2 = new RegExp("stable/view/([0-9]+)");
+		var jidRe3 = new RegExp("stable/([0-9]+)");
+		var jidmatch1 = jidRe1.exec(url);
+		var jidmatch2 = jidRe2.exec(url);
+		var jidmatch3 = jidRe3.exec(url);
+		if (jidmatch1) {
+			jid = jidmatch1[1];
+		} else if (jidmatch2) {
+			jid = jidmatch2[1];
+		} else if (jidmatch3) {
+			jid = jidmatch3[1];
+		} else {
+			return false;
 		}
-		
+		var downloadString = "&noDoi=yesDoi&downloadFileName=deadbeef&suffix="+jid;
+	}
+	else{
+		var availableItems = new Object();
+		var tableRows = doc.evaluate(''//li[ul/li/a[@class="title"]]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var tableRow;
+		var jid;
+		var title;
+		var jidRe = new RegExp("[0-9\.]+/([0-9]+)");
+		while(tableRow = tableRows.iterateNext()) {
+			title = doc.evaluate(''./ul/li/a[@class="title"]'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+			jid = doc.evaluate(''.//input[@name="doi"]'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().value;
+			var m = jidRe.exec(jid);
+			if (m) {
+				jid = m[1];
+			}
+			availableItems[jid] = title;
+		}
+
 		var items = Zotero.selectItems(availableItems);
 		if(!items) {
 			return true;
 		}
-		
+		var downloadString="&noDoi=yesDoi&downloadFileName=deadbeef";
 		for(var i in items) {
-			viewPages.push(tableView[i]);
-			saveCitations.push(tableSave[i].replace(''citationAction=remove'', ''citationAction=save''));
-		}
-	} else if(url.indexOf("/browse/") != -1) {
-		var tableView = new Object();
-		var items = new Object();
-		
-		var articleTitle, viewPage;
-		var links = doc.evaluate("//a", doc, nsResolver, XPathResult.ANY_TYPE, null);
-		var link;
-		// get article and save citation links
-		while(link = links.iterateNext()) {
-			if(link.href.indexOf("/view/") != -1) {
-				articleTitle = link.textContent;
-				viewPage = link.href;
-			} else if(link.href.indexOf("citationAction=save&") != -1) {
-				items[link.href] = articleTitle;
-				tableView[link.href] = viewPage;
-			}
-		}
-		
-		var items = Zotero.selectItems(items);
-		if(!items) return true;
-		
-		for(var i in items) {
-			viewPages.push(tableView[i]);
-			saveCitations.push(i.replace(''citationAction=remove'', ''citationAction=save''));
-		}
-	} else {
-		// If this is a view page, find the link to the citation
-		var xpath = ''/html/body/div[@class="indent"]//a[@class="nav"]'';
-		var elmts = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
-		var saveCitation = elmts.iterateNext();
-		var viewSavedCitations = elmts.iterateNext();
-		
-		if(saveCitation && viewSavedCitations) {
-			viewPages.push(url);
-			saveCitations.push(saveCitation.href.replace(''citationAction=remove'', ''citationAction=save''));
-		} else {
-			throw("Could not find citation save links");
+			downloadString+="&suffix="+i;
 		}
 	}
-	
-	Zotero.Utilities.HTTP.doGet(host+''/browse?citationAction=removeAll&confirmRemAll=on&viewCitations=1'', function() {	// clear marked
-		// Mark all our citations
-		Zotero.Utilities.HTTP.doGet(saveCitations, null, function() {						// mark this
-			Zotero.Utilities.HTTP.doGet(host+''/browse/citations.txt?exportAction=Save+as+Text+File&exportFormat=cm&viewCitations=1'', function(text) {
-																							// get marked
-				var k = 0;
-				var lines = text.split("\n");
-				var haveStarted = false;
-				var newItemRe = /^<[0-9]+>/;
-				
-				var newItem = new Zotero.Item("journalArticle");
-				newItem.attachments.push(getJSTORAttachment(viewPages[k]));
-				
-				for(var i in lines) {
-					if(lines[i].substring(0,3) == "<1>") {
-						haveStarted = true;
-					} else if(newItemRe.test(lines[i])) {
-						itemComplete(newItem, url);
-						k++;
-						
-						newItem = new Zotero.Item("journalArticle");
-						newItem.attachments.push(getJSTORAttachment(viewPages[k]));
-					} else if(lines[i].substring(2, 5) == " : " && haveStarted) {
-						var fieldCode = lines[i].substring(0, 2);
-						var fieldContent = Zotero.Utilities.cleanString(lines[i].substring(5))
-						
-						if(fieldCode == "TI") {
-							if(fieldContent) {
-								newItem.title = fieldContent;
-							} else {
-								newItem.title = "[untitled]";
-							}
-						} else if(fieldCode == "AU") {
-							var authors = fieldContent.split(";");
-							for(j in authors) {
-								if(authors[j]) {
-									newItem.creators.push(Zotero.Utilities.cleanAuthor(authors[j], "author", true));
-								}
-							}
-						} else if(fieldCode == "SO") {
-							newItem.publicationTitle = fieldContent;
-						} else if(fieldCode == "VO") {
-							newItem.volume = fieldContent;
-						} else if(fieldCode == "NO") {
-							newItem.issue = fieldContent;
-						} else if(fieldCode == "SE") {
-							newItem.series = fieldContent;
-						} else if(fieldCode == "DA") {
-							newItem.date = fieldContent;
-						} else if(fieldCode == "PP") {
-							newItem.pages = fieldContent;
-						} else if(fieldCode == "EI") {
-							newItem.url = fieldContent;
-						} else if(fieldCode == "IN") {
-							newItem.ISSN = fieldContent;
-						} else if(fieldCode == "PB") {
-							newItem.publisher = fieldContent;
-						} else if(fieldCode == "AB") {
-							newItem.abstractNote = fieldContent;
-						}
-					}
-				}
-				
-				// last item is complete
-				if(haveStarted) {
-					itemComplete(newItem, url);
-				}
-				
-				Zotero.Utilities.HTTP.doGet(host+''/browse?citationAction=removeAll&confirmRemAll=on&viewCitations=1'', function() {	// clear marked
-					Zotero.done();
-				});
-			});
+
+	Zotero.Utilities.HTTP.doPost(host+"/action/downloadCitation?format=refman&direct=true",
+								 downloadString, function(text) {
+		// load translator for RIS
+		Zotero.debug(text);
+		var translator = Zotero.loadTranslator("import");
+		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+		translator.setString(text);
+		translator.setHandler("itemDone", function(obj, item) {
+			if(item.notes && item.notes[0]) {
+				item.extra = item.notes[0].note;
+
+				delete item.notes;
+				item.notes = undefined;
+			}
+			item.attachments[0].title = item.title;
+			item.attachments[0].mimeType = "text/html";
+			Zotero.debug(host);
+			var pdfurl = item.url.replace(/([^\d]+)(\d+)$/, host + "/stable/pdfplus/$2") + ".pdf";
+			item.attachments.push({url:pdfurl, title:"JSTOR Full Text PDF", mimeType:"application/pdf"});
+			item.complete();
 		});
+		
+		translator.translate();
+
+		Zotero.done();
 	});
-	
-	Zotero.wait();
+
 }');
 
 REPLACE INTO translators VALUES ('e8fc7ebc-b63d-4eb3-a16c-91da232f7220', '1.0.0b4.r5', '', '2008-02-12 10:00:00', '0', '100', '4', 'Aluka', 'Sean Takats', 'https?://(?:www\.)aluka.org/action/(?:showMetadata\?doi=[^&]+|doSearch\?|doBrowseResults\?)', 
