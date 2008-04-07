@@ -1589,7 +1589,7 @@ function doWeb(doc, url) {
 	var articles = new Array();
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
-		var links = doc.evaluate(''//table[@class="articleEntry"]/tbody/tr//a[text() = "First Page" or text() = "Citation"]'', doc, null, XPathResult.ANY_TYPE, null);
+		var links = doc.evaluate(''//table[@class="articleEntry"]/tbody/tr//a[text() = "First Page" or text() = "Citation" or text() = "Abstract"]'', doc, null, XPathResult.ANY_TYPE, null);
 		var titles = doc.evaluate(''//table[@class="articleEntry"]/tbody/tr//div[@class="arttitle"]'', doc, null, XPathResult.ANY_TYPE, null);
 		var link, title;
 		while ((link = links.iterateNext()) && (title = titles.iterateNext())) {
@@ -1611,7 +1611,6 @@ function doWeb(doc, url) {
 				var abs = Zotero.Utilities.trimInternal(newDoc.evaluate(''//div[@class="abstractSection"]/p[contains(@class, "last") or contains(@class, "first")]'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
 			}
 			Zotero.Utilities.HTTP.doGet(risurl, function(text) {
-				Zotero.debug(text);
 				var translator = Zotero.loadTranslator("import");
 				translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 				translator.setString(text);
