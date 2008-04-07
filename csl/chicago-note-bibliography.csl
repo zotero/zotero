@@ -194,12 +194,13 @@
       </choose>
     </group>
   </macro>
-  <macro name="container-prefix">
+  <macro name="container-title">
     <choose>
       <if type="chapter">
     <text term="in" text-case="capitalize-first" suffix=" "/>
       </if>
     </choose>
+    <text variable="container-title" font-style="italic"/>
   </macro>
   <macro name="locators">
     <choose>
@@ -387,6 +388,7 @@
     <option name="et-al-min" value="6"/>
     <option name="et-al-use-first" value="6"/>
     <option name="subsequent-author-substitute" value="---"/>
+    <option name="entry-spacing" value="0"/>
     <sort>
       <key macro="sort-key"/>
     </sort>
@@ -397,10 +399,7 @@
         <text macro="description"/>
         <text macro="secondary-contributors"/>
         <group delimiter=", ">
-          <group>
-            <text macro="container-prefix"/>
-            <text variable="container-title" font-style="italic"/>
-          </group>
+          <text macro="container-title"/>
           <text macro="container-contributors"/>
           <text macro="pages-chapter"/>
         </group>

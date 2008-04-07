@@ -334,6 +334,7 @@
     <option name="et-al-min" value="6"/>
     <option name="et-al-use-first" value="3"/>
     <option name="subsequent-author-substitute" value="---"/>
+    <option name="entry-spacing" value="0"/>
     <sort>
       <key macro="contributors"/>
       <key variable="issued"/>

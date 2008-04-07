@@ -288,19 +288,21 @@
       </choose>
     </group>
   </macro>
-  <macro name="container-prefix-note">
+  <macro name="container-title-note">
     <choose>
       <if type="chapter">
     <text term="in" text-case="lowercase" suffix=" "/>
       </if>
     </choose>
+    <text variable="container-title" font-style="italic"/>
   </macro>
-  <macro name="container-prefix">
+  <macro name="container-title">
     <choose>
       <if type="chapter">
     <text term="in" text-case="capitalize-first" suffix=" "/>
       </if>
     </choose>
+    <text variable="container-title" font-style="italic"/>
   </macro>
   <macro name="locators-note">
     <choose>
@@ -432,7 +434,7 @@
       </else-if>
     </choose>
   </macro>
-  <macro name="pages-chapter">
+  <macro name="locators-chapter">
     <choose>
       <if type="chapter">
         <text variable="volume" suffix=":"/>
@@ -440,7 +442,7 @@
       </if>
     </choose>
   </macro>
-  <macro name="pages-article">
+  <macro name="locators-journal">
     <choose>
       <if type="article-journal">
     <text variable="page" prefix=": "/>
@@ -579,13 +581,9 @@
             <text macro="title-note"/>
             <text macro="description-note"/>
             <text macro="secondary-contributors-note"/>
-            <group>
-              <text macro="container-prefix-note"/>
-              <text variable="container-title" font-style="italic"/>
-            </group>
+            <text macro="container-title-note"/>
             <text macro="container-contributors-note"/>
           </group>
-          <text macro="locators-note"/>
           <text variable="collection-title" prefix=", "/>
           <text macro="issue-note"/>
           <text macro="locators-newspaper" prefix=", "/>
@@ -600,6 +598,7 @@
     <option name="et-al-min" value="6"/>
     <option name="et-al-use-first" value="6"/>
     <option name="subsequent-author-substitute" value="---"/>
+    <option name="entry-spacing" value="0"/>
     <sort>
       <key macro="sort-key"/>
     </sort>
@@ -610,19 +609,16 @@
         <text macro="description"/>
         <text macro="secondary-contributors"/>
         <group delimiter=", ">
-          <group>
-            <text macro="container-prefix"/>
-            <text variable="container-title" font-style="italic"/>
-          </group>
+          <text macro="container-title"/>
           <text macro="container-contributors"/>
-          <text macro="pages-chapter"/>
+          <text macro="locators-chapter"/>
         </group>
       </group>
       <text macro="locators"/>
       <text variable="collection-title" text-case="capitalize-first" prefix=". "/>
       <text macro="issue"/>
       <text macro="locators-newspaper" prefix=", "/>
-      <text macro="pages-article"/>
+      <text macro="locators-journal"/>
       <text macro="access" prefix=". "/>
     </layout>
   </bibliography>
