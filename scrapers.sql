@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-04 20:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-07 15:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -5660,7 +5660,7 @@ function doWeb(doc, url) {
 }
 ');
 
-REPLACE INTO translators VALUES ('5af42734-7cd5-4c69-97fc-bc406999bdba', '1.0.0b4.r5', '', '2008-03-25 00:50:00', '1', '100', '4', 'ESA Journals', 'Michael Berkowitz', 'http://www.esajournals.org/', 
+REPLACE INTO translators VALUES ('5af42734-7cd5-4c69-97fc-bc406999bdba', '1.0.0b4.r5', '', '2008-04-07 15:30:00', '1', '100', '4', 'ESA Journals', 'Michael Berkowitz', 'http://www.esajournals.org/', 
 'function detectWeb(doc, url) {
 	if (url.indexOf("get-toc") != -1 || url.indexOf("searchtype") != -1) {
 		return "multiple";
@@ -5681,22 +5681,6 @@ REPLACE INTO translators VALUES ('5af42734-7cd5-4c69-97fc-bc406999bdba', '1.0.0b
 		}
 	}
 	return sen.join("");
-}
-
-function fixURL(doistr) {
-	var swapTable = {
-		"%2F":"/",
-		"%28":"(",
-		"%29":")",
-		"%5B":"[",
-		"%5D":"]",
-		"%3A":":",
-		"%3B":";"
-	}
-	for (var probstr in swapTable) {
-		doistr = doistr.replace(probstr, swapTable[probstr]);
-	}
-	return doistr;
 }
 
 function doWeb(doc, url) {
@@ -5725,7 +5709,11 @@ function doWeb(doc, url) {
 	Zotero.Utilities.processDocuments(articles, function(newDoc) {
 		var newlink = newDoc.evaluate(''//a[text() = "Create Reference"]'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
 		var itemurl = newDoc.location.href;
-		var doi = itemurl.match(/doi=([^&]+)/)[1];
+		if (newDoc.evaluate(''//a[text() = "Full Text"]'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+			itemurl = newDoc.evaluate(''//a[text() = "Full Text"]'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
+		}
+		var doi = newDoc.evaluate(''//div[@class="doc-head"]/p[contains(text(), "DOI")][@class="info"]'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		doi = Zotero.Utilities.trimInternal(doi.substr(4));
 		var issn = newDoc.evaluate(''//div[@id="pageTitle"]/p/a'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href.match(/issn=([^&]+)/)[1];
 		newlink = newlink.replace(''cite-builder'', ''download-citation&t=refman&site=esaonline'');
 		Zotero.Utilities.HTTP.doGet(newlink, function(text) {
@@ -5734,8 +5722,8 @@ function doWeb(doc, url) {
 			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 			translator.setString(text);
 			translator.setHandler("itemDone", function(obj, item) {
-				item.url = fixURL(itemurl);
-				item.DOI = fixURL(doi);
+				item.url = decodeURIComponent(itemurl);
+				item.DOI = decodeURIComponent(doi);
 				var bits = new Array(issn, item.volume, item.issue);
 				var pdfurl = ''http://www.esajournals.org/archive/'' + bits.join("/") + "/pdf/i" + bits.join("-") + "-" + item.pages.match(/\d+/)[0] + ".pdf";
 				item.attachments = [
