@@ -158,6 +158,7 @@
     <text term="in" text-case="lowercase" suffix=" "/>
       </if>
     </choose>
+    <text variable="container-title" font-style="italic"/>
   </macro>
   <macro name="locators-note">
     <choose>
@@ -335,10 +336,7 @@
             <text macro="title-note"/>
             <text macro="description-note"/>
             <text macro="secondary-contributors-note"/>
-            <group>
-              <text macro="container-prefix-note"/>
-              <text variable="container-title" font-style="italic"/>
-            </group>
+            <text macro="container-title-note"/>
             <text macro="container-contributors-note"/>
           </group>
           <text macro="locators-note"/>
