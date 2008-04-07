@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-07 19:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-07 21:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1084,6 +1084,67 @@ REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b
 		
 		Zotero.done();
 	})
+	Zotero.wait();
+}');
+
+REPLACE INTO translators VALUES ('a69deb08-47d9-46ad-afca-bc3a2499ad34', '1.0.0b4.r5', '', '2008-04-07 21:00:00', '0', '100', '4', 'Royal Historical Society', 'Michael Berkowitz', 'http://www.rhs.ac.uk/bibl/', 
+'function detectWeb(doc, url) {
+	if (doc.evaluate(''//tr/td[3][@class="bib_data"]/a[@class="bibref"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+		return "multiple";
+	} else if (doc.evaluate(''//a[text() = "View records in XML"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+		return "book";
+	}
+}', 
+'function doWeb(doc, url) {
+	var books = new Array();
+	if (detectWeb(doc, url) == "multiple") {
+		var items = new Object();
+		var xpath = ''//a[@class="bibref"]'';
+		var results = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
+		var result;
+		while (result = results.iterateNext()) {
+			items[result.href] = Zotero.Utilities.trimInternal(result.textContent);
+		}
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			books.push(i.replace(/DATABASE=[^&]+/, "DATABASE=xmlcatalo"));
+		}
+	} else {
+		books = [url.replace(/DATABASE=[^&]+/, "DATABASE=xmlcatalo")];
+	}
+	for each (var link in books) {
+		Zotero.Utilities.HTTP.doGet(link, function(text) {
+			text = text.replace(/<\?[^?]+\?>/, "");
+			var xml = new XML(text);
+			xml = xml..recordList;
+			
+			var itemtype = "book";
+			if (xml..journal_title.length() != 0) itemtype = "journalArticle";
+			
+			var item = new Zotero.Item(itemtype);
+			item.title = xml..title;
+			for (var i = 0; i < xml..author.length(); i++) {
+				var name = xml..author[i].toString().match(/^[^,]+,[^,]+/)[0].split(/,\s+/);
+				item.creators.push({lastName:name[0], firstName:name[1], creatorType:"author"});
+			}
+			if (item.itemType == "book") {
+				item.place = xml..place_of_publication.toString();
+				item.publisher = xml..publisher.toString();
+				item.date = xml..publication_year.toString();
+			} else if (item.itemType == "journalArticle") {
+				item.publicationTitle = xml..journal_title.toString();
+				var voliss = xml..journal_number.split(":");
+				Zotero.debug(voliss);
+				item.volume = voliss[0];
+				item.issue = voliss[1];
+				item.date = xml..journal_issue_year;
+				item.pages = xml..journal_pages;
+			}
+			
+			item.complete();
+		});
+		Zotero.done;
+	}
 	Zotero.wait();
 }');
 
