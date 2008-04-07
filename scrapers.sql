@@ -13195,7 +13195,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('cb48083-4d9-4ed-ac95-2e93dceea0ec', '1.0.0b3.r1', '', '2008-03-06 23:15:00', '1', '100', '4', 'Blackwell Synergy', 'Michael Berkowitz', 'https?://www\.blackwell-synergy\.com[^/]*/(?:action/doSearch|doi/|links/doi/)', 
+REPLACE INTO translators VALUES ('cb48083-4d9-4ed-ac95-2e93dceea0ec', '1.0.0b3.r1', '', '2008-04-07 19:00:00', '1', '100', '4', 'Blackwell Synergy', 'Michael Berkowitz', 'https?://www\.blackwell-synergy\.com[^/]*/(?:action/doSearch|doi/|links/doi/)', 
 'function detectWeb(doc, url) {
 	if(url.indexOf("doSearch") != -1) {
 		return "multiple";
@@ -13219,7 +13219,7 @@ REPLACE INTO translators VALUES ('cb48083-4d9-4ed-ac95-2e93dceea0ec', '1.0.0b3.r
 			articles.push(i);
 		}
 	} else {
-		articles = [url.match(/doi\/[^/]+\/([^\?]+)(\?|$)/)[1]];
+		articles = [decodeURIComponent(url).match(/doi\/(abs\/)?([^\?]+)(\?|$)/)[2]];
 	}
 	
 	var post = "";
@@ -13227,7 +13227,6 @@ REPLACE INTO translators VALUES ('cb48083-4d9-4ed-ac95-2e93dceea0ec', '1.0.0b3.r
 		post += "doi=" + encodeURIComponent(doi) + "&"
 	}
 	post += "include=abs&format=refman&submit=Download+references";
-	Zotero.debug(post);
 	Zotero.Utilities.HTTP.doPost(''http://www.blackwell-synergy.com/action/downloadCitation'', post, function(text) {
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
