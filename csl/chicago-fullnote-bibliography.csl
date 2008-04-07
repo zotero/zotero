@@ -584,6 +584,7 @@
             <text macro="container-title-note"/>
             <text macro="container-contributors-note"/>
           </group>
+          <text macro="locators-note"/>
           <text variable="collection-title" prefix=", "/>
           <text macro="issue-note"/>
           <text macro="locators-newspaper" prefix=", "/>
