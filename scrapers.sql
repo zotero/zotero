@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-07 17:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-07 19:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -8998,7 +8998,7 @@ REPLACE INTO translators VALUES ('5e3e6245-83da-4f55-a39b-b712df54a935', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('cf87eca8-041d-b954-795a-2d86348999d5', '1.0.0b3.r1', '', '2008-04-02 17:00:00', '1', '100', '4', 'Library Catalog (Aleph)', 'Simon Kornblith and Michael Berkowitz', 'https?://[^/]+/F(?:/[A-Z0-9\-]+(?:\?.*)?$|\?func=find|\?func=scan)', 
+REPLACE INTO translators VALUES ('cf87eca8-041d-b954-795a-2d86348999d5', '1.0.0b3.r1', '', '2008-04-07 19:00:00', '1', '100', '4', 'Library Catalog (Aleph)', 'Simon Kornblith and Michael Berkowitz', 'https?://[^/]+/F(?:/[A-Z0-9\-]+(?:\?.*)?$|\?func=find|\?func=scan)', 
 'function detectWeb(doc, url) {
 	var singleRe = new RegExp("^https?://[^/]+/F/[A-Z0-9\-]+\?.*(?:func=full-set-set.*\&format=[0-9]{3}|func=direct)");
 	
@@ -9070,6 +9070,9 @@ REPLACE INTO translators VALUES ('cf87eca8-041d-b954-795a-2d86348999d5', '1.0.0b
 			nonstandard = true;
 		} else if (newDoc.evaluate(''//table//tr[td[2][@class="td1"]]'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
 			xpath = ''//table//tr[td[2][@class="td1"]]'';
+			nonstandard = true;
+		} else if (newDoc.evaluate(''//tr/td[2]/table/tbody[tr/td[contains(text(), "LDR")]]'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+			xpath = ''//tr/td[2]/table/tbody[tr/td[contains(text(), "LDR")]]/tr'';
 			nonstandard = true;
 		}
 		var elmts = newDoc.evaluate(xpath, newDoc, nsResolver, XPathResult.ANY_TYPE, null);
