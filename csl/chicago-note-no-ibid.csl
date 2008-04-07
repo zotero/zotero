@@ -152,7 +152,7 @@
       </choose>
     </group>
   </macro>
-  <macro name="container-prefix-note">
+  <macro name="container-title-note">
     <choose>
       <if type="chapter">
     <text term="in" text-case="lowercase" suffix=" "/>
