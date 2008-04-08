@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-08 20:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-08 20:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -14213,7 +14213,7 @@ REPLACE INTO translators VALUES ('7bdb79e-a47f-4e3d-b317-ccd5a0a74456', '1.0.0b3
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('850f4c5f-71fb-4669-b7da-7fb7a95500ef', '1.0.0b3r1', '', '2008-03-18 02:30:00', '1', '100', '4', 'Cambridge Journals Online', 'Sean Takats', 'https?://[^/]*journals.cambridge.org[^/]*//?action/(quickSearch|search|displayAbstract|displayFulltext|displayIssue)', 
+REPLACE INTO translators VALUES ('850f4c5f-71fb-4669-b7da-7fb7a95500ef', '1.0.0b3r1', '', '2008-04-08 20:30:00', '1', '100', '4', 'Cambridge Journals Online', 'Sean Takats and Michael Berkowitz', 'https?://[^/]*journals.cambridge.org[^/]*//?action/(quickSearch|search|displayAbstract|displayFulltext|displayIssue)', 
 'function detectWeb(doc, url)	{
 	var namespace=doc.documentElement.namespaceURI;
 	var nsResolver=namespace?function(prefix)	{
@@ -14246,10 +14246,11 @@ REPLACE INTO translators VALUES ('850f4c5f-71fb-4669-b7da-7fb7a95500ef', '1.0.0b
 		items=Zotero.selectItems(items);
 		for(var id in items)
 			Zotero.Utilities.HTTP.doPost(urlstring, datastring+id, function(text)	{
-				var trans=Zotero.loadTranslator("import");
-				trans.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-				trans.setString(text);
-				trans.setHandler("itemDone", function(obj, newItem){
+				text = text.replace(/(^|\n)?([A-Z\d]{2})\s*\-\s*(\n)?/g, "\n$2  - $3");
+				var translator = Zotero.loadTranslator("import");
+				translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+				translator.setString(text);
+				translator.setHandler("itemDone", function(obj, newItem){
 					var pdfpath=''//tr[td/input/@value="''+id+''"]/td/ul/li/a[contains(text(), "PDF")]'';
 					var pdflink=doc.evaluate(pdfpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 					if (pdflink){
@@ -14257,7 +14258,7 @@ REPLACE INTO translators VALUES ('850f4c5f-71fb-4669-b7da-7fb7a95500ef', '1.0.0b
 					}
 					newItem.complete();
 				});
-				trans.translate();
+				translator.translate();
 				Zotero.done();
 			});
 	}
@@ -14269,17 +14270,14 @@ REPLACE INTO translators VALUES ('850f4c5f-71fb-4669-b7da-7fb7a95500ef', '1.0.0b
 		idRe = /aid=([0-9]+)/
 		var m = idRe.exec(url);
 		var id = m[1];
-		Zotero.Utilities.HTTP.doPost(urlstring, datastring+id, function(text)	{
-			var trans=Zotero.loadTranslator("import");
-			trans.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-			trans.setString(text);
-			trans.setHandler("itemDone", function(obj, newItem){
-				if (pdflink){
-					newItem.attachments.push({url:pdflink.href, title:newItem.title, mimeType:"application/pdf"});
-				}
-				newItem.complete();
-			});
-			trans.translate();
+		Zotero.debug(urlstring);
+		Zotero.debug(datastring + id);
+		Zotero.Utilities.HTTP.doGet(urlstring + "?" + datastring+id, function(text) {
+			text = text.replace(/(^|\n)?([A-Z\d]{2})\s*\-\s*(\n)?/g, "\n$2  - $3");
+			var translator = Zotero.loadTranslator("import");
+			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+			translator.setString(text);
+			translator.translate();
 			Zotero.done();
 		});
 	}
