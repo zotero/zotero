@@ -9594,6 +9594,13 @@ REPLACE INTO translators VALUES ('cf87eca8-041d-b954-795a-2d86348999d5', '1.0.0b
 		var domain = url.match(/https?:\/\/([^/]+)/);
 		newItem.repository = domain[1]+" Library Catalog";
 
+		newItem.creators = transient;
+		for (var i in newItem.creators) {
+			if (!newItem.creators[i][''firstName'']) {
+				var name = newItem.creators[i][''lastName''].split(/([^\s]+)\s+(.*)$/);
+				newItem.creators[i] = {lastName:name[1], firstName:name[2], creatorType:''author''};
+			}
+		}
 		var oldCreators = newItem.creators;
 		Zotero.debug(newItem.creators);
 		newItem.creators = new Array();
@@ -9606,13 +9613,6 @@ REPLACE INTO translators VALUES ('cf87eca8-041d-b954-795a-2d86348999d5', '1.0.0b
 		for each (var a in transient) {
 			if (a.firstName) {
 				if (a.firstName.match(/|/)) a.firstName = a.firstName.match(/([^|]+)\s+|/)[1];
-			}
-		}
-		newItem.creators = transient;
-		for (var i in newItem.creators) {
-			if (!newItem.creators[i][''firstName'']) {
-				var name = newItem.creators[i][''lastName''].split(/([^\s]+)\s+(.*)$/);
-				newItem.creators[i] = {lastName:name[1], firstName:name[2], creatorType:''author''};
 			}
 		}
 		newItem.complete();
