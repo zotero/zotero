@@ -1087,7 +1087,7 @@ REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('409c520b-0720-4011-8fce-70fcd9806493', '1.0.0b4.r5', '', '2008-04-08 20:00:00', '0', '100', '4', 'InderScience', 'Michael Berkowitz', 'http://www.inderscience.com/', 
+REPLACE INTO translators VALUES ('409c520b-0720-4011-8fce-70fcd9806493', '1.0.0b4.r5', '', '2008-04-09 00:45:00', '0', '100', '4', 'InderScience', 'Michael Berkowitz', 'http://www.inderscience.com/', 
 'function detectWeb(doc, url) {
 	if (doc.evaluate(''/html/body/table/tbody/tr/td[2]/table[tbody/tr/td[3]][2]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext() 
 		|| doc.evaluate(''//td[1][@class="textcontent"]/table/tbody/tr/td[2]/b/u/a'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
@@ -1158,7 +1158,7 @@ function scrape(link) {
   	}, function() {Zotero.done;});
 }');
 
-REPLACE INTO translators VALUES ('8381bf68-11fa-418c-8530-2e00284d3efd', '1.0.0b4.r5', '', '2008-04-08 15:30:00', '0', '100', '4', 'IRIS translator', 'Chad Mills and Michael Berkowitz', 'http://[^/]*www.iris.rutgers.edu[^/]*/', 
+REPLACE INTO translators VALUES ('8381bf68-11fa-418c-8530-2e00284d3efd', '1.0.0b4.r5', '', '2008-04-09 00:45:00', '0', '100', '4', 'IRIS translator', 'Chad Mills and Michael Berkowitz', 'http://[^/]*www.iris.rutgers.edu[^/]*/', 
 'function detectWeb(doc, url) {
 	if (doc.evaluate(''//tr/td[1][@class="searchsum"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
@@ -14213,7 +14213,7 @@ REPLACE INTO translators VALUES ('7bdb79e-a47f-4e3d-b317-ccd5a0a74456', '1.0.0b3
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('850f4c5f-71fb-4669-b7da-7fb7a95500ef', '1.0.0b3r1', '', '2008-04-08 20:30:00', '1', '100', '4', 'Cambridge Journals Online', 'Sean Takats and Michael Berkowitz', 'https?://[^/]*journals.cambridge.org[^/]*//?action/(quickSearch|search|displayAbstract|displayFulltext|displayIssue)', 
+REPLACE INTO translators VALUES ('850f4c5f-71fb-4669-b7da-7fb7a95500ef', '1.0.0b3r1', '', '2008-04-09 00:45:00', '1', '100', '4', 'Cambridge Journals Online', 'Sean Takats and Michael Berkowitz', 'https?://[^/]*journals.cambridge.org[^/]*//?action/(quickSearch|search|displayAbstract|displayFulltext|displayIssue)', 
 'function detectWeb(doc, url)	{
 	var namespace=doc.documentElement.namespaceURI;
 	var nsResolver=namespace?function(prefix)	{
