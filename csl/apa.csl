@@ -175,8 +175,8 @@
       <text macro="author" suffix="."/>
       <text macro="issued"/>
       <text macro="title" prefix=" " suffix=". "/>
-      <text macro="container-prefix"/>
-      <text macro="editor-translator" prefix=" " suffix=", "/>
+      <text macro="container-prefix" suffix=" "/>
+      <text macro="editor-translator" suffix=", "/>
       <text variable="container-title" font-style="italic"/>
       <text variable="collection-title" prefix=", " suffix="."/>
       <text macro="edition" prefix=" (" suffix=")"/>
