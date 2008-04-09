@@ -1126,6 +1126,12 @@ var ZoteroItemPane = new function()
 			return;
 		}
 		
+		// Manually clear autocomplete controller's reference to
+		// textbox to prevent error next time around
+		if (textbox.mController && textbox.mController.input) {
+			textbox.mController.input = null;
+		}
+		
 		var [creatorID, numFields] = comment.split('-');
 		
 		// If result uses two fields, save both
