@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-08 20:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-09 18:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1084,6 +1084,51 @@ REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b
 		
 		Zotero.done();
 	})
+	Zotero.wait();
+}');
+
+REPLACE INTO translators VALUES ('fb342bae-7727-483b-a871-c64c663c2fae', '1.0.0b4.r5', '', '2008-04-09 18:00:00', '0', '100', '4', 'BusinessWeek', 'Michael Berkowitz', 'http://(www\.)?businessweek.com', 
+'function detectWeb(doc, url) {
+	if (doc.title == "BusinessWeek Search Results") {
+		return "multiple";
+	} else if (doc.evaluate(''//meta[@name="headline"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+		return "magazineArticle";
+	}
+}', 
+'function doWeb(doc, url) {
+	var articles = new Array();
+	if (detectWeb(doc, url) == "multiple") {
+		var results = doc.evaluate(''//div[@class="result"]/h3[@class="story"]/a'', doc, null, XPathResult.ANY_TYPE, null);
+		var result;
+		var items = new Object();
+		while (result = results.iterateNext()) {
+			items[result.href] = Zotero.Utilities.trimInternal(result.textContent);
+		}
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			articles.push(i);
+		}
+	} else {
+		articles = [url];
+	}
+	Zotero.debug(articles);
+	Zotero.Utilities.processDocuments(articles, function(newDoc) {
+		var metaTags = new Object();
+		var metas = newDoc.evaluate(''//meta'', newDoc, null, XPathResult.ANY_TYPE, null);
+		var meta;
+		while (meta = metas.iterateNext()) {
+			metaTags[meta.name] = meta.content;
+		}
+		Zotero.debug(metaTags);
+		var item = new Zotero.Item("magazineArticle");
+		item.title = metaTags[''headline''];
+		item.abstractNote = metaTags[''abstract''];
+		item.tags = metaTags[''keywords''].split(/\s*,\s*/);
+		item.creators.push(Zotero.Utilities.cleanAuthor(metaTags[''author''], "author"));
+		item.publicationTitle = "BusinessWeek: " + metaTags[''channel''];
+		item.url = newDoc.location.href;
+		item.complete();
+	}, function() {Zotero.done;});
 	Zotero.wait();
 }');
 
