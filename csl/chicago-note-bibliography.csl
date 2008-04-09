@@ -202,6 +202,23 @@
     </choose>
     <text variable="container-title" font-style="italic"/>
   </macro>
+  <macro name="edition">
+    <choose>
+      <if type="book chapter" match="any">
+    <choose>
+      <if is-numeric="edition">
+        <group delimiter=" ">
+          <number variable="edition" form="ordinal"/>
+          <text term="edition" form="short" suffix="."/>
+        </group>
+      </if>
+      <else>
+        <text variable="edition" text-case="capitalize-first" suffix="."/>
+      </else>
+    </choose>
+      </if>
+    </choose>
+  </macro>
   <macro name="locators">
     <choose>
       <if type="article-journal">
@@ -218,7 +235,7 @@
             <number variable="number-of-volumes" form="numeric"/>
             <text term="volume" form="short" prefix=" " suffix="." plural="true"/>
           </group>
-          <text variable="edition"/>
+          <text macro="edition"/>
         </group>
       </else-if>
     </choose>

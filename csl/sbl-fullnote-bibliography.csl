@@ -1,9 +1,10 @@
 <style xmlns="http://purl.org/net/xbiblio/csl" class="note" xml:lang="en"> 
   <info>
-    <title>Chicago Manual of Style (Full Note with Bibliography)</title>
-    <id>http://www.zotero.org/styles/chicago-fullnote-bibliography</id>
-    <link href="http://www.zotero.org/styles/chicago-fullnote-bibliography"/>
-    <link href="http://www.chicagomanualofstyle.org/tools_citationguide.html" rel="documentation"/>
+    <title>Society of Biblical Literature (Full Note with Bibliography)</title>
+    <id>http://www.zotero.org/styles/sbl-fullnote-bibliography</id>
+    <link href="http://www.zotero.org/styles/sbl-fullnote-bibliography"/>
+    <link href="http://www.sbl-site.org/assets/pdfs/SBLHS.pdf" rel="documentation"/>
+    <link href="http://www.zotero.org/styles/chicago-fullnote-bibliography" rel="template"/>
     <author>
       <name>Julian Onions</name>
       <email>julian.onions@gmail.com</email>
@@ -16,8 +17,8 @@
       <name>Elena Razlogova</name>
       <email>elena.razlogova@gmail.com</email> 
     </contributor>
-    <summary>Chicago format with full notes and bibliography</summary>
-    <category term="generic-base"/>
+    <summary>Society of Biblical Literature format with full notes and bibliography</summary>
+    <category term="theology"/>
     <category term="numeric"/>
     <updated></updated>
   </info>
@@ -43,15 +44,32 @@
   </macro>
   <macro name="secondary-contributors-note">
     <choose>
-      <if type="chapter" match="none">
+      <if type="chapter book" match="none">
         <text macro="editor-translator"/>
       </if>
     </choose>
   </macro>
   <macro name="container-contributors-note">
     <choose>
-      <if type="chapter">
-        <text macro="editor-translator"/>
+      <if type="chapter book" match="any">
+    <group delimiter="; ">
+      <choose>
+        <if variable="author">
+      <names variable="editor" delimiter=", ">
+        <label form="verb-short" text-case="lowercase" suffix=". "/>
+        <name and="text" delimiter=", "/>
+      </names>
+        </if>
+      </choose>
+      <choose>
+        <if variable="author editor" match="any">
+      <names variable="translator" delimiter=", ">
+        <label form="verb-short" text-case="lowercase" suffix=". "/>
+        <name and="text" delimiter=", "/>
+      </names>
+        </if>
+      </choose>
+    </group>
       </if>
     </choose>
   </macro>
@@ -86,7 +104,7 @@
       <choose>
         <if variable="author">
       <names variable="editor" delimiter=", ">
-        <label form="verb" prefix=" " text-case="lowercase" suffix=" "/>
+        <label form="verb" prefix=" " text-case="capitalize-first" suffix=" "/>
         <name and="text" delimiter=", "/>
       </names>
         </if>
@@ -94,7 +112,7 @@
       <choose>
         <if variable="author editor" match="any">
       <names variable="translator" delimiter=", ">
-        <label form="verb" prefix=" " text-case="lowercase" suffix=" "/>
+        <label form="verb" prefix=" " text-case="capitalize-first" suffix=" "/>
         <name and="text" delimiter=", "/>
       </names>
         </if>
@@ -299,7 +317,11 @@
   <macro name="container-title">
     <choose>
       <if type="chapter">
-    <text term="in" text-case="capitalize-first" suffix=" "/>
+      	<group delimiter=" " suffix=" ">
+      <label variable="page" form="long" text-case="capitalize-first"/>
+      <text variable="page"/>
+      <text term="in" text-case="lowercase"/>
+        </group>
       </if>
     </choose>
     <text variable="container-title" font-style="italic"/>
@@ -340,12 +362,8 @@
   </macro>
   <macro name="locators-note">
     <choose>
-      <if type="article-journal">
-        <text variable="volume" prefix=" "/>
-        <text variable="issue" prefix=", no. "/>
-      </if>
-      <else-if type="book chapter" match="any">
-        <group prefix=", " delimiter=", ">
+      <if type="book chapter" match="any">
+        <group delimiter=", ">
           <group>
             <text term="volume" form="short" suffix=". "/>
             <number variable="volume" form="numeric"/>
@@ -360,7 +378,7 @@
           </choose>
           <text macro="edition-note"/>
         </group>
-      </else-if>
+      </if>
     </choose>
   </macro>
   <macro name="locators">
@@ -369,7 +387,7 @@
         <text variable="volume" prefix=" "/>
         <text variable="issue" prefix=", no. "/>
       </if>
-      <else-if type="book" match="any">
+      <else-if type="book">
         <group prefix=". " delimiter=". ">
           <group>
             <text term="volume" form="short" text-case="capitalize-first" suffix=". "/>
@@ -468,14 +486,6 @@
       </else-if>
     </choose>
   </macro>
-  <macro name="locators-chapter">
-    <choose>
-      <if type="chapter">
-        <text variable="volume" suffix=":"/>
-        <text variable="page"/>
-      </if>
-    </choose>
-  </macro>
   <macro name="locators-journal">
     <choose>
       <if type="article-journal">
@@ -500,10 +510,18 @@
   <macro name="issue-note">
     <choose>
       <if type="article-journal">
+        <text variable="volume" prefix=" "/>
+        <text variable="issue" prefix=", no. "/>
         <text macro="issued" prefix=" (" suffix=")"/>
       </if>
       <else-if variable="publisher-place publisher" match="any">
-        <group prefix=" (" suffix=")" delimiter=", ">
+        <group prefix=" (" suffix=")">
+          <group delimiter="; " suffix="; ">
+            <text macro="container-contributors-note"/>
+            <text macro="locators-note"/>
+            <text variable="collection-title"/>
+          </group>
+          <group delimiter=", ">
           <group delimiter=" ">
             <choose>
               <if variable="title" match="none"> </if>
@@ -515,6 +533,7 @@
           </group>
           <text macro="publisher"/>
           <text macro="issued"/>
+        </group>
         </group>
       </else-if>
       <else>
@@ -616,10 +635,7 @@
             <text macro="description-note"/>
             <text macro="secondary-contributors-note"/>
             <text macro="container-title-note"/>
-            <text macro="container-contributors-note"/>
           </group>
-          <text macro="locators-note"/>
-          <text variable="collection-title" prefix=", "/>
           <text macro="issue-note"/>
           <text macro="locators-newspaper" prefix=", "/>
           <text macro="point-locators"/>
@@ -643,11 +659,8 @@
         <text macro="title"/>
         <text macro="description"/>
         <text macro="secondary-contributors"/>
-        <group delimiter=", ">
-          <text macro="container-title"/>
-          <text macro="container-contributors"/>
-          <text macro="locators-chapter"/>
-        </group>
+        <text macro="container-title"/>
+        <text macro="container-contributors"/>
       </group>
       <text macro="locators"/>
       <text variable="collection-title" text-case="capitalize-first" prefix=". "/>
