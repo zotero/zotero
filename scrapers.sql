@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-10 15:45:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-10 19:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -13478,7 +13478,7 @@ REPLACE INTO translators VALUES ('d75381ee-7d8d-4a3b-a595-b9190a06f43f', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('2c310a37-a4dd-48d2-82c9-bd29c53c1c76', '1.0.0b3.r1', '', '2008-04-02 08:10:00', '0', '100', '4', 'PROLA', 'Eugeniy Mikhailov and Michael Berkowitz', 'https?://(?:www\.)?prola.aps.org/(toc|searchabstract|abstract)/', 
+REPLACE INTO translators VALUES ('2c310a37-a4dd-48d2-82c9-bd29c53c1c76', '1.0.0b3.r1', '', '2008-04-10 19:00:00', '1', '100', '4', 'PROLA', 'Eugeniy Mikhailov and Michael Berkowitz', 'https?://(?:www\.)?prola.aps.org/(toc|searchabstract|abstract)/', 
 'function detectWeb(doc, url) {
 	if (url.indexOf("toc") != -1) {
 		return "multiple";
@@ -13500,7 +13500,7 @@ REPLACE INTO translators VALUES ('2c310a37-a4dd-48d2-82c9-bd29c53c1c76', '1.0.0b
     	
     	Zotero.Utilities.processDocuments(arts, function(newDoc) {
     		Zotero.debug(newDoc.title);
-    		var abs = Zotero.Utilities.trimInternal(newDoc.evaluate(''//div[@class="aps-abstractbox aps-mediumfont"]/p'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+    		var abs = Zotero.Utilities.trimInternal(newDoc.evaluate(''//div[@class="aps-abstractbox"]/p'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
     		var urlRIS = newDoc.location.href;
 		// so far several more or less  identical url possible
 		// one is with "abstract" other with "searchabstract"
