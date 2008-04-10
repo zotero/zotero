@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-09 22:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-10 15:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -9478,7 +9478,7 @@ REPLACE INTO translators VALUES ('5e3e6245-83da-4f55-a39b-b712df54a935', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('cf87eca8-041d-b954-795a-2d86348999d5', '1.0.0b3.r1', '', '2008-04-10 03:00:00', '1', '100', '4', 'Library Catalog (Aleph)', 'Simon Kornblith and Michael Berkowitz', 'https?://[^/]+/F(?:/[A-Z0-9\-]+(?:\?.*)?$|\?func=find|\?func=scan)', 
+REPLACE INTO translators VALUES ('cf87eca8-041d-b954-795a-2d86348999d5', '1.0.0b3.r1', '', '2008-04-10 15:30:00', '1', '100', '4', 'Library Catalog (Aleph)', 'Simon Kornblith and Michael Berkowitz', 'https?://[^/]+/F(?:/[A-Z0-9\-]+(?:\?.*)?$|\?func=find|\?func=scan)', 
 'function detectWeb(doc, url) {
 	var singleRe = new RegExp("^https?://[^/]+/F/[A-Z0-9\-]+\?.*(?:func=full-set-set.*\&format=[0-9]{3}|func=direct)");
 	
@@ -9594,15 +9594,14 @@ REPLACE INTO translators VALUES ('cf87eca8-041d-b954-795a-2d86348999d5', '1.0.0b
 		var domain = url.match(/https?:\/\/([^/]+)/);
 		newItem.repository = domain[1]+" Library Catalog";
 
-		newItem.creators = transient;
 		for (var i in newItem.creators) {
 			if (!newItem.creators[i][''firstName'']) {
 				var name = newItem.creators[i][''lastName''].split(/([^\s]+)\s+(.*)$/);
 				newItem.creators[i] = {lastName:name[1], firstName:name[2], creatorType:''author''};
 			}
 		}
+		
 		var oldCreators = newItem.creators;
-		Zotero.debug(newItem.creators);
 		newItem.creators = new Array();
 		var transient = new Array();
 		for each (var a in oldCreators) {
@@ -9615,6 +9614,8 @@ REPLACE INTO translators VALUES ('cf87eca8-041d-b954-795a-2d86348999d5', '1.0.0b
 				if (a.firstName.match(/|/)) a.firstName = a.firstName.match(/([^|]+)\s+|/)[1];
 			}
 		}
+		newItem.creators = transient;
+
 		newItem.complete();
 	}, function() {Zotero.done;});
 	Zotero.wait();
@@ -20467,7 +20468,7 @@ function doExport() {
 }');
 
 
-REPLACE INTO translators VALUES ('a6ee60df-1ddc-4aae-bb25-45e0537be973', '1.0.0b3.r1', '', '2008-04-10 03:00:00', '1', '100', '1', 'MARC', 'Simon Kornblith', 'marc', 
+REPLACE INTO translators VALUES ('a6ee60df-1ddc-4aae-bb25-45e0537be973', '1.0.0b3.r1', '', '2008-04-10 15:30:00', '1', '100', '1', 'MARC', 'Simon Kornblith', 'marc', 
 'function detectImport() {
 	var marcRecordRegexp = /^[0-9]{5}[a-z ]{3}$/
 	var read = Zotero.read(8);
@@ -20807,6 +20808,9 @@ record.prototype.translate = function(item) {
 	if (!item.title) this._associateDBField(item, "1300", "a", "title");
 	if (!item.date) this._associateDBField(item, "425", "a", "date", pullNumber);
 	if (!item.date) this._associateDBField(item, "595", "a", "date", pullNumber);
+	this._associateDBField(item, "104", "a", "creator", author, "author", true);
+	this._associateDBField(item, "800", "a", "creator", author, "author", true);
+	if (this.getFieldSubfields("335")) item.title = item.title + ": " + this.getFieldSubfields("335")[0][''a''];
 	
 	//Spanish
 	if (!item.title) this._associateDBField(item, "200", "a", "title");
