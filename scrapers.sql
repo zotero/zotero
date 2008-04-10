@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-10 15:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-10 15:45:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1087,7 +1087,7 @@ REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('fb342bae-7727-483b-a871-c64c663c2fae', '1.0.0b4.r5', '', '2008-04-10 03:00:00', '0', '100', '4', 'BusinessWeek', 'Michael Berkowitz', 'http://(www\.)?businessweek.com', 
+REPLACE INTO translators VALUES ('fb342bae-7727-483b-a871-c64c663c2fae', '1.0.0b4.r5', '', '2008-04-10 15:45:00', '0', '100', '4', 'BusinessWeek', 'Michael Berkowitz', 'http://(www\.)?businessweek.com', 
 'function detectWeb(doc, url) {
 	if (doc.title == "BusinessWeek Search Results") {
 		return "multiple";
@@ -1127,6 +1127,7 @@ REPLACE INTO translators VALUES ('fb342bae-7727-483b-a871-c64c663c2fae', '1.0.0b
 		item.creators.push(Zotero.Utilities.cleanAuthor(metaTags[''author''], "author"));
 		item.publicationTitle = "BusinessWeek: " + metaTags[''channel''];
 		item.url = newDoc.location.href;
+		item.date = metaTags[''pub_date''].replace(/(\d{4})(\d{2})(\d{2})/, "$2/$3/$1");
 		item.complete();
 	}, function() {Zotero.done;});
 	Zotero.wait();
