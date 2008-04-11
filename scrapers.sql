@@ -1087,7 +1087,7 @@ REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('fb342bae-7727-483b-a871-c64c663c2fae', '1.0.0b4.r5', '', '2008-04-10 15:45:00', '0', '100', '4', 'BusinessWeek', 'Michael Berkowitz', 'http://(www\.)?businessweek.com', 
+REPLACE INTO translators VALUES ('fb342bae-7727-483b-a871-c64c663c2fae', '1.0.0b4.r5', '', '2008-04-11 08:30:00', '0', '100', '4', 'BusinessWeek', 'Michael Berkowitz', 'http://(www\.)?businessweek.com', 
 'function detectWeb(doc, url) {
 	if (doc.title == "BusinessWeek Search Results") {
 		return "multiple";
@@ -9479,7 +9479,7 @@ REPLACE INTO translators VALUES ('5e3e6245-83da-4f55-a39b-b712df54a935', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('cf87eca8-041d-b954-795a-2d86348999d5', '1.0.0b3.r1', '', '2008-04-10 15:30:00', '1', '100', '4', 'Library Catalog (Aleph)', 'Simon Kornblith and Michael Berkowitz', 'https?://[^/]+/F(?:/[A-Z0-9\-]+(?:\?.*)?$|\?func=find|\?func=scan)', 
+REPLACE INTO translators VALUES ('cf87eca8-041d-b954-795a-2d86348999d5', '1.0.0b3.r1', '', '2008-04-11 08:30:00', '1', '100', '4', 'Library Catalog (Aleph)', 'Simon Kornblith and Michael Berkowitz', 'https?://[^/]+/F(?:/[A-Z0-9\-]+(?:\?.*)?$|\?func=find|\?func=scan)', 
 'function detectWeb(doc, url) {
 	var singleRe = new RegExp("^https?://[^/]+/F/[A-Z0-9\-]+\?.*(?:func=full-set-set.*\&format=[0-9]{3}|func=direct)");
 	
@@ -13478,7 +13478,7 @@ REPLACE INTO translators VALUES ('d75381ee-7d8d-4a3b-a595-b9190a06f43f', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('2c310a37-a4dd-48d2-82c9-bd29c53c1c76', '1.0.0b3.r1', '', '2008-04-10 19:00:00', '1', '100', '4', 'PROLA', 'Eugeniy Mikhailov and Michael Berkowitz', 'https?://(?:www\.)?prola.aps.org/(toc|searchabstract|abstract)/', 
+REPLACE INTO translators VALUES ('2c310a37-a4dd-48d2-82c9-bd29c53c1c76', '1.0.0b3.r1', '', '2008-04-11 08:30:00', '1', '100', '4', 'PROLA', 'Eugeniy Mikhailov and Michael Berkowitz', 'https?://(?:www\.)?prola.aps.org/(toc|searchabstract|abstract)/', 
 'function detectWeb(doc, url) {
 	if (url.indexOf("toc") != -1) {
 		return "multiple";
@@ -20469,7 +20469,7 @@ function doExport() {
 }');
 
 
-REPLACE INTO translators VALUES ('a6ee60df-1ddc-4aae-bb25-45e0537be973', '1.0.0b3.r1', '', '2008-04-10 15:30:00', '1', '100', '1', 'MARC', 'Simon Kornblith', 'marc', 
+REPLACE INTO translators VALUES ('a6ee60df-1ddc-4aae-bb25-45e0537be973', '1.0.0b3.r1', '', '2008-04-11 08:30:00', '1', '100', '1', 'MARC', 'Simon Kornblith', 'marc', 
 'function detectImport() {
 	var marcRecordRegexp = /^[0-9]{5}[a-z ]{3}$/
 	var read = Zotero.read(8);
