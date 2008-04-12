@@ -63,6 +63,11 @@ ZoteroAutoCompleteResult.prototype.getCommentAt = function(index){
 }
 
 
+ZoteroAutoCompleteResult.prototype.getImageAt = function(index) {
+	return null;
+}
+
+
 ZoteroAutoCompleteResult.prototype.getStyleAt = function(index){
 	return null;
 }
