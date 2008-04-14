@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-14 19:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-14 22:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -20466,7 +20466,7 @@ function doExport() {
 }');
 
 
-REPLACE INTO translators VALUES ('a6ee60df-1ddc-4aae-bb25-45e0537be973', '1.0.0b3.r1', '', '2008-04-14 18:15:00', '1', '100', '1', 'MARC', 'Simon Kornblith', 'marc', 
+REPLACE INTO translators VALUES ('a6ee60df-1ddc-4aae-bb25-45e0537be973', '1.0.0b3.r1', '', '2008-04-14 22:00:00', '1', '100', '1', 'MARC', 'Simon Kornblith', 'marc', 
 'function detectImport() {
 	var marcRecordRegexp = /^[0-9]{5}[a-z ]{3}$/
 	var read = Zotero.read(8);
@@ -20814,17 +20814,21 @@ record.prototype.translate = function(item) {
 	if (!item.place) this._associateDBField(item, "210", "a", "place");
 	if (!item.publisher) this._associateDBField(item, "210", "c", "publisher");
 	if (!item.date) this._associateDBField(item, "210", "d", "date");
-	for (var i = 700; i < 703; i++) {
-		if (this.getFieldSubfields(i)[0]) {
-			Zotero.debug(i + " is AOK");
-			Zotero.debug(this.getFieldSubfields(i.toString()));
-			var aut = this.getFieldSubfields(i)[0];
-			aut = aut[''b''].replace(/,\W+/g, "") + " " + aut[''a''].replace(/,\s/g, "");
-			Zotero.debug(aut);
-			item.creators.push(Zotero.Utilities.cleanAuthor(aut, "author"));
+	if (!item.creators) {
+		for (var i = 700; i < 703; i++) {
+			if (this.getFieldSubfields(i)[0]) {
+				Zotero.debug(i + " is AOK");
+				Zotero.debug(this.getFieldSubfields(i.toString()));
+				var aut = this.getFieldSubfields(i)[0];
+				if (aut.b) {
+					aut = aut[''b''].replace(/,\W+/g, "") + " " + aut[''a''].replace(/,\s/g, "");
+				} else {
+					aut = aut[''a''].split(", ").join(" ");
+				}
+				item.creators.push(Zotero.Utilities.cleanAuthor(aut, "author"));
+			}
 		}
 	}
-
 	if(item.title) {
 		item.title = Zotero.Utilities.capitalizeTitle(item.title);
 	}
