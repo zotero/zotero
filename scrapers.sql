@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-13 05:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-14 16:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -20466,7 +20466,7 @@ function doExport() {
 }');
 
 
-REPLACE INTO translators VALUES ('a6ee60df-1ddc-4aae-bb25-45e0537be973', '1.0.0b3.r1', '', '2008-04-12 18:40:00', '1', '100', '1', 'MARC', 'Simon Kornblith', 'marc', 
+REPLACE INTO translators VALUES ('a6ee60df-1ddc-4aae-bb25-45e0537be973', '1.0.0b3.r1', '', '2008-04-14 16:30:00', '1', '100', '1', 'MARC', 'Simon Kornblith', 'marc', 
 'function detectImport() {
 	var marcRecordRegexp = /^[0-9]{5}[a-z ]{3}$/
 	var read = Zotero.read(8);
@@ -20806,6 +20806,8 @@ record.prototype.translate = function(item) {
 	if (!item.title) this._associateDBField(item, "1300", "a", "title");
 	if (!item.date) this._associateDBField(item, "425", "a", "date", pullNumber);
 	if (!item.date) this._associateDBField(item, "595", "a", "date", pullNumber);
+	if (this.getFieldSubfields("104")[0]) this._associateDBField(item, "104", "a", "creator", author, "author", true);
+	if (this.getFieldSubfields("800")[0]) this._associateDBField(item, "800", "a", "creator", author, "author", true);
 	
 	//Spanish
 	if (!item.title) this._associateDBField(item, "200", "a", "title");
@@ -20819,6 +20821,9 @@ record.prototype.translate = function(item) {
 	}
 	if(item.title) {
 		item.title = Zotero.Utilities.capitalizeTitle(item.title);
+	}
+	if (this.getFieldSubfields("335")[0]) {
+		item.title = item.title + ": " + this.getFieldSubfields("335")[0][''a''];
 	}
 	
 	if (!item.creators[0][''firstName'']) {
