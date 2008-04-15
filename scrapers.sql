@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-15 03:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-15 16:15:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -13683,7 +13683,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('cb48083-4d9-4ed-ac95-2e93dceea0ec', '1.0.0b3.r1', '', '2008-04-08 03:00:00', '1', '100', '4', 'Blackwell Synergy', 'Michael Berkowitz', 'https?://www\.blackwell-synergy\.com[^/]*/(?:action/doSearch|doi/|links/doi/)', 
+REPLACE INTO translators VALUES ('cb48083-4d9-4ed-ac95-2e93dceea0ec', '1.0.0b3.r1', '', '2008-04-15 16:15:00', '1', '100', '4', 'Blackwell Synergy', 'Michael Berkowitz', 'https?://www\.blackwell-synergy\.com[^/]*/(?:action/doSearch|doi/|links/doi/)', 
 'function detectWeb(doc, url) {
 	if(url.indexOf("doSearch") != -1) {
 		return "multiple";
@@ -13692,6 +13692,7 @@ REPLACE INTO translators VALUES ('cb48083-4d9-4ed-ac95-2e93dceea0ec', '1.0.0b3.r
 	}
 }', 
 'function doWeb(doc, url) {
+	var host = doc.location.host;
 	var articles = new Array();
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
@@ -13720,9 +13721,11 @@ REPLACE INTO translators VALUES ('cb48083-4d9-4ed-ac95-2e93dceea0ec', '1.0.0b3.r
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 		translator.setString(text);
 		translator.setHandler("itemDone", function(obj, item) { 
+			item.DOI = Zotero.Utilities.trimInternal(item.notes[0][''note''].substr(4));
+			item.notes = new Array();
 			item.attachments = [
 				{url:item.url, title:"Blackwell Synergy Snapshot", mimeType:"text/html"},
-				{url:item.url.replace("/doi/abs", "/doi/pdf"), title:"Blackwell Synergy Full Text PDF", mimeType:"application/pdf"}
+				{url:item.url.replace(/\/\/[^/]*/, "//" + host).replace("/doi/abs", "/doi/pdf"), title:"Blackwell Synergy Full Text PDF", mimeType:"application/pdf"}
 			];
 			// use fulltext if possible
 			var oldCreators = item.creators;
