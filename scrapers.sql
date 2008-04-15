@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-15 16:15:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-15 20:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1085,6 +1085,55 @@ REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b
 		Zotero.done();
 	})
 	Zotero.wait();
+}');
+
+REPLACE INTO translators VALUES ('bbad0221-134b-495a-aa56-d77cfaa67ab5', '1.0.0b4.r5', '', '2008-04-15 20:00:00', '0', '100', '4', 'Digital Humanities Quarterly', 'Michael Berkowitz', 'http://www.digitalhumanities.org/(dhq)?', 
+'function detectWeb(doc, url) {
+	if (doc.evaluate(''//div[@class="DHQarticle"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+		return "journalArticle";
+	} else if (doc.evaluate(''//div[@id="mainContent"]/div/p'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+		return "multiple";
+	}
+}', 
+'function scrape(doc, xpath, xdoc) {
+	return Zotero.Utilities.trimInternal(doc.evaluate(xpath, xdoc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+}
+
+function doWeb(doc, url) {
+	var articles = new Array();
+	if (detectWeb(doc, url) == "multiple") {
+		var items = new Object;
+		var arts = doc.evaluate(''//div[@id="mainContent"]/div/p/a'', doc, null, XPathResult.ANY_TYPE, null);
+		var art;
+		while (art = arts.iterateNext()) {
+			items[art.href] = art.textContent;
+		}
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			articles.push(i)
+		}
+	} else {
+		articles = [url];
+	}
+	Zotero.debug(articles);
+
+	Zotero.Utilities.processDocuments(articles, function(newDoc) {
+		var item = new Zotero.Item("journalArticle");
+		item.url = newDoc.location.href;
+		item.title = scrape(newDoc, ''//h1[@class="articleTitle"]'', newDoc);
+		var voliss = scrape(newDoc, ''//div[@id="pubInfo"]'', newDoc);
+		voliss = voliss.match(/(.*)Volume\s+(\d+)\s+Number\s+(\d+)/);
+		item.date = voliss[1];
+		item.volume = voliss[2];
+		item.issue = voliss[3];		
+		var authors = newDoc.evaluate(''//div[@class="author"]'', newDoc, null, XPathResult.ANY_TYPE, null);
+		var aut;
+		while (aut = authors.iterateNext()) {
+			item.creators.push(Zotero.Utilities.cleanAuthor(scrape(newDoc, ''./a[1]'', aut), "author"));
+		}
+		item.attachments = [{url:item.url, title:"DHQ Snapshot", mimeType:"text/html"}];
+		item.complete();
+	}, function() {Zotero.done;});
 }');
 
 REPLACE INTO translators VALUES ('fb342bae-7727-483b-a871-c64c663c2fae', '1.0.0b4.r5', '', '2008-04-11 08:30:00', '0', '100', '4', 'BusinessWeek', 'Michael Berkowitz', 'http://(www\.)?businessweek.com', 
