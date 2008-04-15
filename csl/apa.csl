@@ -180,10 +180,10 @@
       <text variable="container-title" font-style="italic"/>
       <text variable="collection-title" prefix=", " suffix="."/>
       <text macro="edition" prefix=" (" suffix=")"/>
-      <text variable="volume" prefix=", "/>
+      <text variable="volume" prefix=", " font-style="italic"/>
       <text variable="issue" prefix="(" suffix=")"/>
+      <text macro="pages"/>
       <group delimiter=". " prefix=". ">
-	      <text macro="pages"/>
 	      <text macro="publisher"/>
 	      <text macro="access"/>
       </group>
