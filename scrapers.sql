@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-16 15:15:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-16 16:45:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1905,7 +1905,7 @@ function doWeb(doc, url){
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('e85a3134-8c1a-8644-6926-584c8565f23e', '1.0.0b4.r1', '', '2008-01-13 19:30:00', '1', '100', '4', 'History Cooperative', 'Simon Kornblith', 'https?://[^/]*historycooperative\.org[^/]*/(?:journals/.+/.+/.+\.s?html$|cgi-bin/search.cgi|journals/.+/.+/)', 
+REPLACE INTO translators VALUES ('e85a3134-8c1a-8644-6926-584c8565f23e', '1.0.0b4.r1', '', '2008-04-16 16:45:00', '1', '100', '4', 'History Cooperative', 'Simon Kornblith', 'https?://[^/]*historycooperative\.org[^/]*/(?:journals/.+/.+/.+\.s?html$|cgi-bin/search.cgi|journals/.+/.+/)', 
 'function detectWeb(doc, url) {
 	var contents = doc.title.replace("Contents", "");
 	if(doc.title != contents || doc.title == "History Cooperative: Search Results") {
@@ -1927,28 +1927,72 @@ function scrape(doc) {
 	
 	var month, year;
 	var metaTags = doc.getElementsByTagName("meta");
-	
+
+	associateMeta(newItem, metaTags, "Journal", "publicationTitle");
+	associateMeta(newItem, metaTags, "Volume", "volume");
+	associateMeta(newItem, metaTags, "Issue", "issue");
+
 	// grab title without using meta tag, since when titles have quotes History
 	// Cooperative can''t create a proper meta tag
+
+	// 16apr08 - fwg
+	// as of now, title meta tags are properly escaped, but 
+	// in the case of book reviews, the title field is set to one of many (~10) variations
+	// of "Book Review", so it''s easiest to get the book title from the proprietary tags (below) as originally coded.
+	
 	var titleRe = /<!--_title_-->(.*)<!--_\/title_-->/;
-	var m = titleRe.exec(doc.getElementsByTagName("body")[0].innerHTML);
+	
+	// 16apr08 - fwg
+	// added trimInteral, since some pages have extraneous line breaks in source code
+	// added unescapeHTML to make quotes nice 
+	var m = titleRe.exec(Zotero.Utilities.trimInternal(doc.getElementsByTagName("body")[0].innerHTML));
 	if(m) {
-		newItem.title = m[1];
+		newItem.title = Zotero.Utilities.trimInternal(Zotero.Utilities.unescapeHTML(m[1]));
 	} else {
 		var namespace = doc.documentElement.namespaceURI;
 		var nsResolver = namespace ? function(prefix) {
 			if (prefix == ''x'') return namespace; else return null;
 		} : null;
+
+	var bookTitle;
 	
-		var bookTitle = doc.evaluate(''/html/body/form/table/tbody/tr/td[3]/table/tbody/tr/td/i'',
-			doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();	
-		bookTitle = bookTitle.textContent;
-		newItem.title = "Review of "+bookTitle;
+	//different journals want their reviewed book titles formatted in different ways (or have bizarre markup)
+	jNames = new Array ("The Western Historical Quarterly", "Journal of American Ethnic History", "Labour History","Environmental History",
+						"New York History","Indiana Magazine of History");
+					       
+	jXpaths = new Array("//tr[4]/td[3]/table/tbody/tr[1]/td/b/i",
+						"//[4]/td[3]/table/tbody/tr[1]/td/b/i",
+						"//tr[4]/td[3]/table/tbody/tr[1]/td/b/b/i",
+						"//tr[4]/td[3]/table/tbody/tr[1]/td/b[1]",
+						"//tr[4]/td[3]/p[1]/font/b/i",
+						"//tr[4]/td[3]/table[1]/tbody/tr[1]/td/h4/font/i"
+						);
+	
+	// 16apr08 - fwg
+	// figure out which Xpath to use
+	// the below Xpath seems to work much of the time, so we default to it
+	var jXpath =''//tr[4]/td[3]/table/tbody/tr[1]/td/i'';
+	
+	for (var i=0; i < jNames.length; i++) {
+		if (newItem.publicationTitle == jNames[i]) {
+			//Zotero.debug("using Xpath for: " + jNames[i]);
+			//Zotero.debug("Xpath is: " + jXpaths[i]);
+			jXpath = jXpaths[i];
+		}
+	}	
+	
+	bookTitle = doc.evaluate(jXpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+	//Zotero.debug("bookTitle: " + bookTitle);
+		
+	// 16apr08 - fwg
+	//instead of general failure, let''s admit we can''t get the title and save everything else
+	// this is useful when a book review page has a one-off introduction or strange formatting that we can''t anticipate.
+	if (bookTitle) {
+		newItem.title = "Review of " + bookTitle.textContent;
+	} else {
+		newItem.title = "Review of <unable to get title from page>";
+		}
 	}
-	
-	associateMeta(newItem, metaTags, "Journal", "publicationTitle");
-	associateMeta(newItem, metaTags, "Volume", "volume");
-	associateMeta(newItem, metaTags, "Issue", "issue");
 	
 	var author = metaTags.namedItem("Author");
 	if(author) {
