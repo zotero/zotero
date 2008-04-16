@@ -1087,7 +1087,7 @@ REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('bbad0221-134b-495a-aa56-d77cfaa67ab5', '1.0.0b4.r5', '', '2008-04-15 20:00:00', '0', '100', '4', 'Digital Humanities Quarterly', 'Michael Berkowitz', 'http://www.digitalhumanities.org/(dhq)?', 
+REPLACE INTO translators VALUES ('bbad0221-134b-495a-aa56-d77cfaa67ab5', '1.0.0b4.r5', '', '2008-04-16 04:45:00', '0', '100', '4', 'Digital Humanities Quarterly', 'Michael Berkowitz', 'http://www.digitalhumanities.org/(dhq)?', 
 'function detectWeb(doc, url) {
 	if (doc.evaluate(''//div[@class="DHQarticle"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "journalArticle";
@@ -13732,7 +13732,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('cb48083-4d9-4ed-ac95-2e93dceea0ec', '1.0.0b3.r1', '', '2008-04-15 16:15:00', '1', '100', '4', 'Blackwell Synergy', 'Michael Berkowitz', 'https?://www\.blackwell-synergy\.com[^/]*/(?:action/doSearch|doi/|links/doi/)', 
+REPLACE INTO translators VALUES ('cb48083-4d9-4ed-ac95-2e93dceea0ec', '1.0.0b3.r1', '', '2008-04-16 04:45:00', '1', '100', '4', 'Blackwell Synergy', 'Michael Berkowitz', 'https?://www\.blackwell-synergy\.com[^/]*/(?:action/doSearch|doi/|links/doi/)', 
 'function detectWeb(doc, url) {
 	if(url.indexOf("doSearch") != -1) {
 		return "multiple";
