@@ -1136,6 +1136,7 @@ function doWeb(doc, url) {
 				if (voliss.match(/v/)) item.volume = voliss.match(/v(ol\.)?\s+(\d+)/)[2];
 				if (voliss.match(/n/)) item.issue = voliss.match(/n(o\.)?\s+(\d+)/)[2];
 				if (voliss.match(/p(age)?/)) item.pages = voliss.match(/\d+\-\d+/)[0];
+				item.date = voliss.match(/\(([^)]+)\)/)[1];
 				item.attachments[0].title = "African Journals Online Snapshot";
 				item.attachments[0].mimeType = "text/html";
 				item.complete();
