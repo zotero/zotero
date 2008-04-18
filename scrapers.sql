@@ -1087,7 +1087,7 @@ REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('9d822257-2eec-4674-b6d0-2504f54c8890', '1.0.0b4.r5', '', '2008-04-17 19:00:00', '0', '100', '4', 'African Journals Online', 'Michael Berkowitz', 'http://www.ajol.info', 
+REPLACE INTO translators VALUES ('9d822257-2eec-4674-b6d0-2504f54c8890', '1.0.0b4.r5', '', '2008-04-18 08:55:00', '0', '100', '4', 'African Journals Online', 'Michael Berkowitz', 'http://www.ajol.info', 
 'function detectWeb(doc, url) {
 	if (url.match(/viewarticle.php/)) {
 		return "journalArticle";
@@ -1146,7 +1146,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('dedcae51-073c-48fb-85ce-2425e97f128d', '1.0.0b4.r5', '', '2008-04-17 21:00:00', '0', '100', '4', 'Archive Ouverte en Sciences de l''Information et de la Communication  (AOSIC)', 'Michael Berkowitz', 'http://archivesic.ccsd.cnrs.fr/', 
+REPLACE INTO translators VALUES ('dedcae51-073c-48fb-85ce-2425e97f128d', '1.0.0b4.r5', '', '2008-04-18 08:55:00', '0', '100', '4', 'Archive Ouverte en Sciences de l''Information et de la Communication  (AOSIC)', 'Michael Berkowitz', 'http://archivesic.ccsd.cnrs.fr/', 
 'function detectWeb(doc, url) {
 	if (doc.title.toLowerCase().match("fulltext search")) {
 		return "multiple";
@@ -1209,7 +1209,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('4afb932d-9211-4c0b-a31c-cfa984d62b66', '1.0.0b4.r5', '', '2008-04-17 17:00:00', '0', '100', '4', 'OAIster', 'Michael Berkowitz', 'http://quod.lib.umich.edu/cgi/b/', 
+REPLACE INTO translators VALUES ('4afb932d-9211-4c0b-a31c-cfa984d62b66', '1.0.0b4.r5', '', '2008-04-18 08:55:00', '0', '100', '4', 'OAIster', 'Michael Berkowitz', 'http://quod.lib.umich.edu/cgi/b/', 
 'function detectWeb(doc, url) {
 	if (doc.title.indexOf("OAIster") != -1) {
 		return "multiple";
@@ -1283,7 +1283,7 @@ REPLACE INTO translators VALUES ('4afb932d-9211-4c0b-a31c-cfa984d62b66', '1.0.0b
 	}
 }');
 
-REPLACE INTO translators VALUES ('675306d2-fca9-466f-b33d-1e3cc1bfd091', '1.0.0b4.r5', '', '2008-04-17 15:15:00', '0', '100', '4', 'Universiteit van Amsterdam', 'Michael Berkowitz', 'http://opc.uva.nl:8080/', 
+REPLACE INTO translators VALUES ('675306d2-fca9-466f-b33d-1e3cc1bfd091', '1.0.0b4.r5', '', '2008-04-18 08:55:00', '0', '100', '4', 'Universiteit van Amsterdam', 'Michael Berkowitz', 'http://opc.uva.nl:8080/', 
 'function detectWeb(doc, url) {
 	if (doc.evaluate(''//td[3][@class="hit"]/a'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
@@ -2195,7 +2195,7 @@ function doWeb(doc, url){
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('e85a3134-8c1a-8644-6926-584c8565f23e', '1.0.0b4.r1', '', '2008-04-16 16:45:00', '1', '100', '4', 'History Cooperative', 'Simon Kornblith', 'https?://[^/]*historycooperative\.org[^/]*/(?:journals/.+/.+/.+\.s?html$|cgi-bin/search.cgi|journals/.+/.+/)', 
+REPLACE INTO translators VALUES ('e85a3134-8c1a-8644-6926-584c8565f23e', '1.0.0b4.r1', '', '2008-04-18 08:55:00', '1', '100', '4', 'History Cooperative', 'Simon Kornblith', 'https?://[^/]*historycooperative\.org[^/]*/(?:journals/.+/.+/.+\.s?html$|cgi-bin/search.cgi|journals/.+/.+/)', 
 'function detectWeb(doc, url) {
 	var contents = doc.title.replace("Contents", "");
 	if(doc.title != contents || doc.title == "History Cooperative: Search Results") {
