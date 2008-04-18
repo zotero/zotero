@@ -2017,12 +2017,22 @@ var ZoteroPane = new function()
 						file.reveal();
 					}
 					catch (e) {
-						// On platforms that don't support nsILocalFile.reveal() (e.g. Linux), we
-						// open a small window with a selected read-only textbox containing the
-						// file path, so the user can open it, Control-c, Control-w, Alt-Tab, and
-						// Control-v the path into another app
-						var io = {alertText: file.path};
-						window.openDialog('chrome://zotero/content/selectableAlert.xul', "zotero-reveal-window", "chrome", io);
+						// On platforms that don't support nsILocalFile.reveal() (e.g. Linux),
+						// "double-click" the parent directory
+						try {
+							var parent = file.parent.QueryInterface(Components.interfaces.nsILocalFile);
+							parent.launch();
+						}
+						// If launch also fails, try the OS handler
+						catch (e) {
+							var uri = Components.classes["@mozilla.org/network/io-service;1"].
+										getService(Components.interfaces.nsIIOService).
+										newFileURI(parent);
+							var protocolService =
+								Components.classes["@mozilla.org/uriloader/external-protocol-service;1"].
+									getService(Components.interfaces.nsIExternalProtocolService);
+							protocolService.loadUrl(uri);
+						}
 					}
 				}
 				else {
