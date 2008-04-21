@@ -201,8 +201,11 @@ Zotero.Fulltext = new function(){
 		
 		Zotero.DB.beginTransaction();
 		
+		var origWords = [];
+		
 		do {
 			var chunk = words.splice(0, maxWords);
+			origWords = origWords.concat(chunk);
 			
 			var sqlQues = [];
 			var sqlParams = [];
@@ -232,7 +235,7 @@ Zotero.Fulltext = new function(){
 		var statement1 = Zotero.DB.getStatement("INSERT INTO fulltextWords (word) VALUES (?)");
 		var statement2 = Zotero.DB.getStatement("INSERT OR IGNORE INTO fulltextItemWords VALUES (?,?)");
 		
-		for each(var word in words){
+		for each(var word in origWords) {
 			if (existing['_' + word]){
 				var wordID = existing['_' + word];
 			}
