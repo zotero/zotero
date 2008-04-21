@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-17 21:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-21 15:15:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -2991,7 +2991,7 @@ REPLACE INTO translators VALUES ('62c0e36a-ee2f-4aa0-b111-5e2cbd7bb5ba', '1.0.0b
 	}
 }');
 
-REPLACE INTO translators VALUES ('0863b8ec-e717-4b6d-9e35-0b2db2ac6b0f', '1.0.0b4.r5', '', '2008-03-13 17:00:00', '0', '100', '4', 'Institute of Pure and Applied Physics', 'Michael Berkowitz', 'http://(.*)\.ipap\.jp/', 
+REPLACE INTO translators VALUES ('0863b8ec-e717-4b6d-9e35-0b2db2ac6b0f', '1.0.0b4.r5', '', '2008-04-21 15:15:00', '0', '100', '4', 'Institute of Pure and Applied Physics', 'Michael Berkowitz', 'http://(jjap|apex|jpsj)\.ipap\.jp/', 
 'function detectWeb(doc, url) {
 	if (doc.title.indexOf("Table of Contents") != -1 || doc.title.indexOf("search result") != -1) {
 		return "multiple";
@@ -2999,81 +2999,103 @@ REPLACE INTO translators VALUES ('0863b8ec-e717-4b6d-9e35-0b2db2ac6b0f', '1.0.0b
 		return "journalArticle";
 	}
 }', 
-'function doWeb(doc, url) {
-	var articles = new Array();
+'var journalNames = {
+	jpsj:["Journal of the Physical Society of Japan", "0031-9015"],
+	jjap:["Japanese Journal of Applied Physics", "0021-4922"],
+	apex:["Applied Physics Express", "1882-0778"]
+}
+
+function doWeb(doc, url) {
+	var arts = new Array();
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
-		if (url.indexOf("journal") != -1) {
-			var linkx = ''//dt/a/b'';
-			var links = doc.evaluate(linkx, doc, null, XPathResult.ANY_TYPE, null);
-			var next_link;
-			while (next_link = links.iterateNext()) {
-				items[next_link.href] = next_link.textContent;
+		if (doc.title.toLowerCase().indexOf("table of contents") != -1) {
+			if (url.match(/apex/)) {
+				var titlesx = ''//div[@id="contents"]/dl/dt'';
+				var linksx = ''//div[@id="contents"]/dl/dd/a[1]'';
+			} else if (url.match(/jjap/)) {
+				var xpath = ''/html/body/dt/a'';
+			} else if (url.match(/jpsj/)) {
+				var xpath = ''/html/body/dl/dt/a[contains(@href, "link")]'';
 			}
-		} else if (url.indexOf("cgi-bin/findarticle") != -1) {
-			var boxx = ''//ol/li'';
-			var boxes = doc.evaluate(boxx, doc, null, XPathResult.ANY_TYPE, null);
-			var box;
-			while (box = boxes.iterateNext()) {
-				var title = doc.evaluate(''.//b'', box, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-				var link = doc.evaluate(''./a'', box, null, XPathResult.ANY_TYPE, null).iterateNext().href;
-				items[link] = title;
+		} else if (doc.title.toLowerCase().indexOf("search result") != -1) {
+			var linksx = ''/html/body//li/a'';
+			var titlesx = ''/html/body//li//b'';
+		}
+		if (xpath) {
+			var titles = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
+			var title;
+			while (title = titles.iterateNext()) {
+				items[title.href] = Zotero.Utilities.trimInternal(title.textContent);
+			}
+		} else {
+			var titles = doc.evaluate(titlesx, doc, null, XPathResult.ANY_TYPE, null);
+			var links = doc.evaluate(linksx, doc, null, XPathResult.ANY_TYPE, null);
+			var title;
+			var link;
+			while ((title = titles.iterateNext()) && (link = links.iterateNext())) {
+				items[link.href] = Zotero.Utilities.trimInternal(title.textContent);
 			}
 		}
 		items = Zotero.selectItems(items);
 		for (var i in items) {
-			articles.push(i);
+			arts.push(i);
 		}
-		
 	} else {
-		articles = [url];
+		arts = [url];
 	}
-		Zotero.debug(articles);
-		Zotero.Utilities.processDocuments(articles, function(newDoc) {
+	Zotero.Utilities.processDocuments(arts, function(doc) {
 		var item = new Zotero.Item("journalArticle");
-		item.title = Zotero.Utilities.trimInternal(newDoc.evaluate(''/html/body/h2[@class="title"]'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
-
-		var authors = Zotero.Utilities.trimInternal(newDoc.evaluate(''/html/body/p[@class="author"]'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
-		authors = authors.replace(/\band\b/, ", ").split(",");
-		Zotero.debug(authors);
-		for each (var author in authors) {
-			author = author.replace(/\d/g, "");
-			if (author.match(/\w+/)) item.creators.push(Zotero.Utilities.cleanAuthor(author, "author"));
-		}
-		
-		var info = Zotero.Utilities.trimInternal(newDoc.evaluate(''/html/body/h4[@class="info"]'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
-		if (info.match(/(.+)Vol.\s+(\d+),\s+No.\s+([\d\w]+),\s+(\d+),\s+pp.\s+([\w\d\-]+)\s+URL\s*:\s*(.*)\s*DOI\s*:\s*(.*)$/)) {
-			info2 = info.match(/(.+)Vol.\s+(\d+),\s+No.\s+([\d\w]+),\s+(\d+),\s+pp.\s+([\w\d\-]+)\s+URL\s*:\s*(.*)\s*DOI\s*:\s*(.*)$/);
-			item.publicationTitle = info2[1];
-			item.volume = info2[2];
-			item.issue = info2[3];
-			item.date = info2[4];
-			item.pages = info2[5];
-			item.url = info2[6];
-			item.DOI = info2[7];
-		} else {
-			Zotero.debug(info);
-			info2 = info.match(/(.+)Vol.\s+(\d+)\s+\(\d+\)\s+([\w\d\-]+)[^,]+,[^,]+,(.*)\s*URL\s*:\s*(.*)\s*DOI\s*:\s*(.*)$/);
-			Zotero.debug(info2);
-			item.publicationTitle = info2[1];
-			item.volume = info2[2];
-			item.pages = info2[3];
-			item.date = info2[4];
-			item.url = info2[5];
-			item.DOI = info2[6];
-		}
-		if (newDoc.evaluate(''/html/body/p[@class="abstract"]'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-			item.abstractNote = Zotero.Utilities.trimInternal(newDoc.evaluate(''/html/body/p[@class="abstract"]'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
-		}
-		
-		if (newDoc.evaluate(''/html/body/p[@class="keyword"]'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-			var tags = Zotero.Utilities.trimInternal(newDoc.evaluate(''/html/body/p[@class="keyword"]'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent).split(",");
-			for each (var tag in tags) {
-				item.tags.push(Zotero.Utilities.trimInternal(tag));
+		item.url = doc.location.href;
+		var jour = item.url.match(/http:\/\/([^.]+)\./)[1];
+		item.publicationTitle = journalNames[jour][0];
+		item.ISSN = journalNames[jour][1];
+		item.title = Zotero.Utilities.trimInternal(doc.evaluate(''//h2[@class="title"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+		var authors = Zotero.Utilities.trimInternal(doc.evaluate(''//p[@class="author"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+		authors = authors.replace(/\d+/g, "");
+		authors = authors.split(/,\s+(and)?\s*/);
+		for each (var aut in authors) {
+			if ((aut != "") && (aut != "and")) {
+				item.creators.push(Zotero.Utilities.cleanAuthor(aut, "author"));
 			}
 		}
-		item.attachments.push({url:item.url, title:"IPAP Snapshot", mimeType:"text/html"});
+
+		//get info
+		var infos = doc.evaluate(''//p[@class="info"]'', doc, null, XPathResult.ANY_TYPE, null);
+		var voliss = infos.iterateNext().textContent;
+		var keys = infos.iterateNext().textContent;
+		if (voliss.match(/([^\d]+)(\d+)\s+\((\d+)\)\s+([\d\-]+)/)) {
+			voliss = voliss.match(/([^\d]+)(\d+)\s+\((\d+)\)\s+([\d\-]+)/);
+			var x = 4
+		} else {
+			voliss = voliss.match(/([^\d]+)(\d+)\s+\((\d+)\)\s+(pp\.)?\s+([\d\-]+)/);
+			var x = 5
+		}
+		item.journalAbbreviation = Zotero.Utilities.trimInternal(voliss[1]);
+		item.volume = voliss[2];
+		item.date = voliss[3];
+		item.pages = voliss[x];		
+		
+		keys = Zotero.Utilities.trimInternal(keys);
+
+		if (keys.match(/KEYWORDS/)) {
+			keys = keys.match(/KEYWORDS:\s+(.*)URL:\s+(.*)DOI:\s+(.*)$/);
+			var a = 1;
+			var c = 3;
+		} else {
+			keys = keys.match(/URL:\s+(.*)DOI:\s+(.*)$/);
+			var c = 2;
+		}
+		if (a) {
+			item.tags = keys[a].split(/,\s+/);
+		}
+		item.DOI = keys[c];
+		item.abstractNote = Zotero.Utilities.trimInternal(doc.evaluate(''//p[@class="abstract"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
 		item.complete();
+		var pdfurl = doc.evaluate(''//a[contains(text(), "PDF")]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext().href;
+		item.attachments = [
+			{url:item.url, title:"IPAP Snapshot", mimeType:"text/html"}
+		];
 	}, function() {Zotero.done;});
 	Zotero.wait();
 }');
