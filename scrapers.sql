@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-21 17:45:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-21 18:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -13998,7 +13998,7 @@ REPLACE INTO translators VALUES ('2c310a37-a4dd-48d2-82c9-bd29c53c1c76', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('cde4428-5434-437f-9cd9-2281d14dbf9', '1.0.0b3.r1', '', '2008-02-07 21:00:00', '1', '100', '4', 'Ovid', 'Simon Kornblith and Michael Berkowitz', '/(gw2|spa|spb)/ovidweb\.cgi', 
+REPLACE INTO translators VALUES ('cde4428-5434-437f-9cd9-2281d14dbf9', '1.0.0b3.r1', '', '2008-04-21 18:30:00', '1', '100', '4', 'Ovid', 'Simon Kornblith and Michael Berkowitz', '/(gw2|spa|spb)/ovidweb\.cgi', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -14098,7 +14098,6 @@ function doWeb(doc, url) {
 			} else if(lines[i].substr(2, 4) == "  - " && haveStarted) {
 				var fieldCode = lines[i].substr(0, 2);
 				var fieldContent = Zotero.Utilities.cleanString(lines[i].substr(6));
-				
 				if(fieldCode == "TI") {
 					newItem.title = fieldContent.replace(/\. \[\w+\]$/, "");
 				} else if(fieldCode == "AU") {
@@ -14116,9 +14115,7 @@ function doWeb(doc, url) {
 						newItem.creators.push({lastName:names[0], isInstitution:true, creatorType:"author"});
 					}
 				} else if(fieldCode == "SO") {
-					if (fieldContent.match(/\s+\w+\s+\d{4}/)) {
-						newItem.date = fieldContent.match(/\w+\s+\d{4}/)[0];
-					} else if (fieldContent.match(/\d{4}/)) {
+					if (fieldContent.match(/\d{4}/)) {
 						newItem.date = fieldContent.match(/\d{4}/)[0];
 					}
 					if (fieldContent.match(/(\d+)\((\d+)\)/)) {
@@ -14126,7 +14123,7 @@ function doWeb(doc, url) {
 						newItem.volume = voliss[1];
 						newItem.issue = voliss[2];
 					}
-					if (fieldContent.match(/\d+\-\d+/)[0])
+					if (fieldContent.match(/\d+\-\d+/))
 						newItem.pages = fieldContent.match(/\d+\-\d+/)[0];
 					if (fieldContent.match(/[J|j]ournal/)) {
 						newItem.publicationTitle = fieldContent.match(/[J|j]ournal[-\s\w]+/)[0];
