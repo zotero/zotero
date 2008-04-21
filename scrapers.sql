@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-21 15:15:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-21 15:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -2991,7 +2991,7 @@ REPLACE INTO translators VALUES ('62c0e36a-ee2f-4aa0-b111-5e2cbd7bb5ba', '1.0.0b
 	}
 }');
 
-REPLACE INTO translators VALUES ('0863b8ec-e717-4b6d-9e35-0b2db2ac6b0f', '1.0.0b4.r5', '', '2008-04-21 15:15:00', '0', '100', '4', 'Institute of Pure and Applied Physics', 'Michael Berkowitz', 'http://(jjap|apex|jpsj)\.ipap\.jp/', 
+REPLACE INTO translators VALUES ('0863b8ec-e717-4b6d-9e35-0b2db2ac6b0f', '1.0.0b4.r5', '', '2008-04-21 15:30:00', '0', '100', '4', 'Institute of Pure and Applied Physics', 'Michael Berkowitz', 'http://(jjap|apex|jpsj)\.ipap\.jp/', 
 'function detectWeb(doc, url) {
 	if (doc.title.indexOf("Table of Contents") != -1 || doc.title.indexOf("search result") != -1) {
 		return "multiple";
