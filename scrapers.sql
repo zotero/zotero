@@ -5219,9 +5219,9 @@ function doWeb(doc, url) {
 	}, function() {Zotero.done;});
 }');
 
-REPLACE INTO translators VALUES ('303c2744-ea37-4806-853d-e1ca67be6818', '1.0.0b4.r5', '', '2008-04-01 04:50:00', '0', '100', '4', 'CSIRO Publishing', 'Michael Berkowitz', 'http://(www.)?publish.csiro.au/', 
+REPLACE INTO translators VALUES ('303c2744-ea37-4806-853d-e1ca67be6818', '1.0.0b4.r5', '', '2008-04-22 21:00:00', '1', '100', '4', 'CSIRO Publishing', 'Michael Berkowitz', 'http://(www.)?publish.csiro.au/', 
 'function detectWeb(doc, url) {
-	if (doc.evaluate(''//a[@class="searchBoldBlue"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext() || doc.evaluate(''//td[2]/a[@class="linkJournal"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+	if (doc.evaluate(''//a[@class="searchBoldBlue"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext() || doc.evaluate(''//a[@class="linkjournal"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
 	} else if (url.indexOf("/view/journals/") != -1 || url.indexOf("paper") != -1) {
 		return "journalArticle";
@@ -5238,15 +5238,13 @@ REPLACE INTO translators VALUES ('303c2744-ea37-4806-853d-e1ca67be6818', '1.0.0b
 				items[art.href] = art.textContent;
 				art = arts.iterateNext();
 			}
-		} else if (doc.evaluate(''//td[2]/a[@class="linkJournal"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-			var arts = doc.evaluate(''//td[2]/a[@class="linkJournal"]'', doc, null, XPathResult.ANY_TYPE, null);
+		} else if (doc.evaluate(''//a[@class="linkjournal"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+			var arts = doc.evaluate(''//a[@class="linkjournal"]'', doc, null, XPathResult.ANY_TYPE, null);
 			var titles = doc.evaluate(''//td[3]//td[1]/table/tbody/tr/td/b'', doc, null, XPathResult.ANY_TYPE, null);
-			var art = arts.iterateNext();
-			var title = titles.iterateNext();
-			while (art) {
+			var art;
+			var title;
+			while ((art = arts.iterateNext()) && (title = titles.iterateNext())) {
 				items[art.href] = title.textContent;
-				art = arts.iterateNext();
-				title = titles.iterateNext();
 			}
 		}
 		items = Zotero.selectItems(items);
