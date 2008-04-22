@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-22 17:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-22 19:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1085,6 +1085,59 @@ REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b
 		Zotero.done();
 	})
 	Zotero.wait();
+}');
+
+REPLACE INTO translators VALUES ('56ea09bc-57ee-4f50-976e-cf7cb1f6c6d8', '1.0.0b4.r5', '', '2008-04-22 19:30:00', '0', '100', '4', 'Royal Society Publishing', 'Michael Berkowitz', 'http://journals.royalsociety.org/', 
+'function detectWeb(doc, url) {
+	if (doc.evaluate(''//div[@class="listItemName"]/a'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+		return "multiple";
+	} else if (doc.evaluate(''//div[contains(@id, "ExportDiv")]/a'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+		return "journalArticle";
+	}
+}', 
+'function makeURL(str, type) {
+	var m = str.match(/content\/([^/]+)/)[1];
+	if (type == "ris") {
+		return "http://journals.royalsociety.org/export.mpx?code=" + m + "&mode=ris";
+	} else if (type == "pdf") {
+		return "http://journals.royalsociety.org/content/" + m + "/fulltext.pdf";
+	}
+}
+
+function doWeb(doc, url) {
+	var arts = new Array();
+	if (detectWeb(doc, url) == "multiple") {
+		var items = new Object();
+		var links = doc.evaluate(''//div[@class="listItemName"]/a'', doc, null, XPathResult.ANY_TYPE, null);
+		var link;
+		while (link = links.iterateNext()) {
+			items[link.href] = link.textContent;
+		}
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			arts.push(i);
+		}
+	} else {
+		arts = [url];
+	}
+	for each (var link in arts) {
+		var newurl = makeURL(link, "ris");
+		var pdfurl = makeURL(link, "pdf");
+		Zotero.Utilities.HTTP.doGet(newurl, function(text) {
+			Zotero.debug(text);
+			var translator = Zotero.loadTranslator("import");
+			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+			translator.setString(text);
+			translator.setHandler("itemDone", function(obj, item) {
+				item.attachments = [
+					{url:link, title:"Royal Society Snapshot", mimeType:"text/html"},
+					{url:pdfurl, title:"Royal Society PDF", mimeType:"application/pdf"}
+				];
+				item.complete();
+			});
+			translator.translate();
+		});
+	}
 }');
 
 REPLACE INTO translators VALUES ('0eeb2ac0-fbaf-4994-b98f-203d273eb9fa', '1.0.0b4.r5', '', '2008-04-22 17:30:00', '0', '100', '4', 'Inter-Research Science Center', 'Michael Berkowitz', 'http://www.int-res.com/', 
