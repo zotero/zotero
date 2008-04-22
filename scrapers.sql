@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-22 19:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-22 21:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -8850,7 +8850,7 @@ function doWeb(doc, url)	{
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '1.0.0b3.r1', '', '2008-04-22 16:00:00', '1', '100', '4', 'Library Catalog (InnoPAC)', 'Simon Kornblith and Michael Berkowitz', 'https?://[^/]+/(search(\?|~(S[\d])?)?)\??/(a|X|t)?\??', 
+REPLACE INTO translators VALUES ('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '1.0.0b3.r1', '', '2008-04-22 21:00:00', '1', '100', '4', 'Library Catalog (InnoPAC)', 'Simon Kornblith and Michael Berkowitz', 'https?://[^/]+/(search(\*spi)?(\?|~(S[\d])?)?)\??/(a|X|t)?\??', 
 'function detectWeb(doc, url) {
 	// First, check to see if the URL alone reveals InnoPAC, since some sites don''t reveal the MARC button
 	var matchRegexp = new RegExp(''^https?://[^/]+/search[^/]*\\??/[^/]+(/[^/]+/[0-9]+\%2C[^/]+/frameset(.+))?$'');
