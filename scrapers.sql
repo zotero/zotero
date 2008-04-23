@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-22 21:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-23 15:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1085,6 +1085,51 @@ REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b
 		Zotero.done();
 	})
 	Zotero.wait();
+}');
+
+REPLACE INTO translators VALUES ('f203db7f-7b7b-4dc4-b018-115b7885fe3b', '1.0.0b4.r5', '', '2008-04-23 15:00:00', '0', '100', '4', 'Oxford Music Online', 'Michael Berkowitz', 'http://[^/]*www.oxfordmusiconline.com[^/]*/', 
+'function detectWeb(doc, url) {
+	if (url.match(/search_results/)) {
+		return "multiple";
+	} else if (url.match(/\/article\//)) {
+		return "journalArticle";
+	}
+}', 
+'function doWeb(doc, url) {
+	var ids = new Array();
+	if (detectWeb(doc, url) == "multiple") {
+		var items = new Object();
+		var links = doc.evaluate(''//ul[@class="search_result_list"]/li/p/a'', doc, null, XPathResult.ANY_TYPE, null);
+		var link;
+		while (link = links.iterateNext()) {
+			items[link.href] = link.textContent;
+		}
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			ids.push(i.match(/music\/(\d+)/)[1]);
+		}
+	} else {
+		ids = [url.match(/music\/(\d+)/)[1]];
+	}
+	Zotero.debug(ids);
+	for each (var id in ids) {
+		var get = ''http://www.oxfordmusiconline.com/subscriber/article_export_citation/grove/music/'' + id;
+		Zotero.Utilities.HTTP.doGet(get, function(text) {
+			var translator = Zotero.loadTranslator("import");
+			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+			translator.setString(text);
+			translator.setHandler("itemDone", function(obj, item) {
+				var authors = new Array();
+				for (var i in item.creators) {
+					names = item.creators[i].lastName.match(/(.*)\s([^\s]+)$/);
+					authors.push({firstName:names[1], lastName:names[2], creatorType:"author"});
+				}
+				item.creators = authors;
+				item.complete();
+			});
+			translator.translate();
+		});
+	}
 }');
 
 REPLACE INTO translators VALUES ('56ea09bc-57ee-4f50-976e-cf7cb1f6c6d8', '1.0.0b4.r5', '', '2008-04-23 09:45:00', '0', '100', '4', 'Royal Society Publishing', 'Michael Berkowitz', 'http://journals.royalsociety.org/', 
