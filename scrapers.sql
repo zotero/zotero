@@ -1087,7 +1087,7 @@ REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('56ea09bc-57ee-4f50-976e-cf7cb1f6c6d8', '1.0.0b4.r5', '', '2008-04-22 19:30:00', '0', '100', '4', 'Royal Society Publishing', 'Michael Berkowitz', 'http://journals.royalsociety.org/', 
+REPLACE INTO translators VALUES ('56ea09bc-57ee-4f50-976e-cf7cb1f6c6d8', '1.0.0b4.r5', '', '2008-04-23 09:45:00', '0', '100', '4', 'Royal Society Publishing', 'Michael Berkowitz', 'http://journals.royalsociety.org/', 
 'function detectWeb(doc, url) {
 	if (doc.evaluate(''//div[@class="listItemName"]/a'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
@@ -1140,7 +1140,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('0eeb2ac0-fbaf-4994-b98f-203d273eb9fa', '1.0.0b4.r5', '', '2008-04-22 17:30:00', '0', '100', '4', 'Inter-Research Science Center', 'Michael Berkowitz', 'http://www.int-res.com/', 
+REPLACE INTO translators VALUES ('0eeb2ac0-fbaf-4994-b98f-203d273eb9fa', '1.0.0b4.r5', '', '2008-04-23 09:45:00', '0', '100', '4', 'Inter-Research Science Center', 'Michael Berkowitz', 'http://www.int-res.com/', 
 'function detectWeb(doc, url) {
 	if (doc.evaluate(''//div[@class="journal-index"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext() ||
 		doc.evaluate(''//div[@class="tx-indexedsearch-res"]//tr[1]/td[2]//a'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
@@ -1234,7 +1234,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('70295509-4c29-460f-81a3-16d4ddbb93f6', '1.0.0b4.r5', '', '2008-04-21 21:30:00', '0', '100', '4', 'GSA Journals Online', 'Michael Berkowitz', 'http://www.gsajournals.org/', 
+REPLACE INTO translators VALUES ('70295509-4c29-460f-81a3-16d4ddbb93f6', '1.0.0b4.r5', '', '2008-04-23 09:45:00', '0', '100', '4', 'GSA Journals Online', 'Michael Berkowitz', 'http://www.gsajournals.org/', 
 'function detectWeb(doc, url) {
 	if (url.indexOf("request=search") != -1 || url.indexOf("request=get-toc") != -1) {
 		return "multiple";
@@ -3186,7 +3186,7 @@ REPLACE INTO translators VALUES ('62c0e36a-ee2f-4aa0-b111-5e2cbd7bb5ba', '1.0.0b
 	}
 }');
 
-REPLACE INTO translators VALUES ('0b356cb6-7fa1-4662-b6e8-7ffc9ca2cd4a', '1.0.0b4.r5', '', '2008-04-21 17:45:00', '0', '100', '4', 'Progress of Theoretical Physics', 'Michael Berkowitz', 'http://ptp.ipap.jp/', 
+REPLACE INTO translators VALUES ('0b356cb6-7fa1-4662-b6e8-7ffc9ca2cd4a', '1.0.0b4.r5', '', '2008-04-23 09:45:00', '0', '100', '4', 'Progress of Theoretical Physics', 'Michael Berkowitz', 'http://ptp.ipap.jp/', 
 'function detectWeb(doc, url) {
 	if (doc.title.match(/search result/) || doc.title.match(/Table of Contents/)) {
 		return "multiple";
@@ -3253,7 +3253,7 @@ REPLACE INTO translators VALUES ('0b356cb6-7fa1-4662-b6e8-7ffc9ca2cd4a', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('0863b8ec-e717-4b6d-9e35-0b2db2ac6b0f', '1.0.0b4.r5', '', '2008-04-21 15:30:00', '0', '100', '4', 'Institute of Pure and Applied Physics', 'Michael Berkowitz', 'http://(jjap|apex|jpsj)\.ipap\.jp/', 
+REPLACE INTO translators VALUES ('0863b8ec-e717-4b6d-9e35-0b2db2ac6b0f', '1.0.0b4.r5', '', '2008-04-23 09:45:00', '0', '100', '4', 'Institute of Pure and Applied Physics', 'Michael Berkowitz', 'http://(jjap|apex|jpsj)\.ipap\.jp/', 
 'function detectWeb(doc, url) {
 	if (doc.title.indexOf("Table of Contents") != -1 || doc.title.indexOf("search result") != -1) {
 		return "multiple";
@@ -5219,7 +5219,7 @@ function doWeb(doc, url) {
 	}, function() {Zotero.done;});
 }');
 
-REPLACE INTO translators VALUES ('303c2744-ea37-4806-853d-e1ca67be6818', '1.0.0b4.r5', '', '2008-04-22 21:00:00', '1', '100', '4', 'CSIRO Publishing', 'Michael Berkowitz', 'http://(www.)?publish.csiro.au/', 
+REPLACE INTO translators VALUES ('303c2744-ea37-4806-853d-e1ca67be6818', '1.0.0b4.r5', '', '2008-04-23 09:45:00', '1', '100', '4', 'CSIRO Publishing', 'Michael Berkowitz', 'http://(www.)?publish.csiro.au/', 
 'function detectWeb(doc, url) {
 	if (doc.evaluate(''//a[@class="searchBoldBlue"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext() || doc.evaluate(''//a[@class="linkjournal"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
@@ -8848,7 +8848,7 @@ function doWeb(doc, url)	{
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '1.0.0b3.r1', '', '2008-04-22 21:00:00', '1', '100', '4', 'Library Catalog (InnoPAC)', 'Simon Kornblith and Michael Berkowitz', 'https?://[^/]+/(search(\*spi)?(\?|~(S[\d])?)?)\??/(a|X|t)?\??', 
+REPLACE INTO translators VALUES ('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '1.0.0b3.r1', '', '2008-04-23 09:45:00', '1', '100', '4', 'Library Catalog (InnoPAC)', 'Simon Kornblith and Michael Berkowitz', 'https?://[^/]+/(search(\*spi)?(\?|~(S[\d])?)?)\??/(a|X|t)?\??', 
 'function detectWeb(doc, url) {
 	// First, check to see if the URL alone reveals InnoPAC, since some sites don''t reveal the MARC button
 	var matchRegexp = new RegExp(''^https?://[^/]+/search[^/]*\\??/[^/]+(/[^/]+/[0-9]+\%2C[^/]+/frameset(.+))?$'');
@@ -14191,7 +14191,7 @@ REPLACE INTO translators VALUES ('2c310a37-a4dd-48d2-82c9-bd29c53c1c76', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('cde4428-5434-437f-9cd9-2281d14dbf9', '1.0.0b3.r1', '', '2008-04-21 18:30:00', '1', '100', '4', 'Ovid', 'Simon Kornblith and Michael Berkowitz', '/(gw2|spa|spb)/ovidweb\.cgi', 
+REPLACE INTO translators VALUES ('cde4428-5434-437f-9cd9-2281d14dbf9', '1.0.0b3.r1', '', '2008-04-23 09:45:00', '1', '100', '4', 'Ovid', 'Simon Kornblith and Michael Berkowitz', '/(gw2|spa|spb)/ovidweb\.cgi', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
