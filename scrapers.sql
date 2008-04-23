@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-23 16:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-23 17:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1087,7 +1087,7 @@ REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('a8df3cb0-f76c-4e2c-a11e-5fa283f8010c', '1.0.0b4.r5', '', '2008-04-23 16:30:00', '0', '100', '4', 'Advances in Geoscience', 'Michael Berkowitz', 'http://www.adv-geosci.net/', 
+REPLACE INTO translators VALUES ('a8df3cb0-f76c-4e2c-a11e-5fa283f8010c', '1.0.0b4.r5', '', '2008-04-23 17:30:00', '0', '100', '4', 'Copernicus', 'Michael Berkowitz', 'http://www.(adv-geosci|adv-radio-sci|ann-geophys).net/', 
 'function detectWeb(doc, url) {
 	if (doc.evaluate(''//iframe'', doc, null, XPathResult.ANY_TYPE, null).iterateNext() || doc.evaluate(''//li[a[contains(text(), "Abstract")]]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
@@ -1099,12 +1099,14 @@ REPLACE INTO translators VALUES ('a8df3cb0-f76c-4e2c-a11e-5fa283f8010c', '1.0.0b
 	var item = new Zotero.Item("journalArticle");
 	item.url = doc.location.href;
 	item.title = doc.evaluate(''//span[@class="inhaltueber_16f"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-	item.publicationTitle = doc.evaluate(''//span[@class="ueberschrift"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;	
+	item.publicationTitle = doc.evaluate(''//span[@class="ueberschrift"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent.split(/\n/)[0];	
+	item.repository = item.publicationTitle;
 	var authors = doc.evaluate(''//td/span[3]/b'', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-	authors = authors.replace(/\d/g, "").replace(/,,/, ",").split(/,\s*(and)?\s*/);
+	authors = authors.replace(/\d/g, "").replace(/,,/, ",").split(/(,|and)/);
 	for each (var aut in authors) {
-		if (aut.match(/[A-Z]/)) {
-			names = aut.match(/(.*)\s([^\s]+)$/);
+		if (!(aut == "and") && (aut.match(/\w/))) {
+			aut = Zotero.Utilities.trimInternal(aut);
+			names = aut.match(/(.*)\s([^\s]+)/);
 			item.creators.push({firstName:names[1], lastName:names[2], creatorType:"author"});
 		}
 	}
@@ -1163,7 +1165,6 @@ function doWeb(doc, url) {
 		}, function() {Zotero.done;});
 	}
 	Zotero.wait();
-
 }');
 
 REPLACE INTO translators VALUES ('f203db7f-7b7b-4dc4-b018-115b7885fe3b', '1.0.0b4.r5', '', '2008-04-23 15:00:00', '0', '100', '4', 'Oxford Music Online', 'Michael Berkowitz', 'http://[^/]*www.oxfordmusiconline.com[^/]*/', 
