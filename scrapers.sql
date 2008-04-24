@@ -1087,7 +1087,7 @@ REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('8082115d-5bc6-4517-a4e8-abed1b2a784a', '1.0.0b4.r5', '', '2008-04-23 18:00:00', '0', '100', '4', 'Copernicus2', 'Michael Berkowitz', 'http://www.(adv-sci-res|astrophys-space-sci-trans|atmos-chem-phys|biogeosciences|clim-past|electronic-earth|hydrol-earth-syst-sci|nat-hazards-earth-syst-sci|nonlin-processes-geophys|ocean-sci|soc-geogr|surv-perspect-integr-environ-soc|the-cryosphere).net/', 
+REPLACE INTO translators VALUES ('8082115d-5bc6-4517-a4e8-abed1b2a784a', '1.0.0b4.r5', '', '2008-04-24 14:30:00', '0', '100', '4', 'Copernicus2', 'Michael Berkowitz', 'http://www.(adv-sci-res|astrophys-space-sci-trans|atmos-chem-phys|biogeosciences|clim-past|electronic-earth|hydrol-earth-syst-sci|nat-hazards-earth-syst-sci|nonlin-processes-geophys|ocean-sci|soc-geogr|surv-perspect-integr-environ-soc|the-cryosphere).net/', 
 'function detectWeb(doc, url) {
 	if (doc.evaluate(''//div[@id="publisher"]/iframe'', doc, null, XPathResult.ANY_TYPE, null).iterateNext() || doc.evaluate(''//td[*[a[contains(text(), "Abstract")]]]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
@@ -1147,7 +1147,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('a8df3cb0-f76c-4e2c-a11e-5fa283f8010c', '1.0.0b4.r5', '', '2008-04-23 17:30:00', '0', '100', '4', 'Copernicus', 'Michael Berkowitz', 'http://www.(adv-geosci|adv-radio-sci|ann-geophys).net/', 
+REPLACE INTO translators VALUES ('a8df3cb0-f76c-4e2c-a11e-5fa283f8010c', '1.0.0b4.r5', '', '2008-04-24 14:30:00', '0', '100', '4', 'Copernicus', 'Michael Berkowitz', 'http://www.(adv-geosci|adv-radio-sci|ann-geophys).net/', 
 'function detectWeb(doc, url) {
 	if (doc.evaluate(''//iframe'', doc, null, XPathResult.ANY_TYPE, null).iterateNext() || doc.evaluate(''//li[a[contains(text(), "Abstract")]]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
@@ -1227,7 +1227,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('f203db7f-7b7b-4dc4-b018-115b7885fe3b', '1.0.0b4.r5', '', '2008-04-23 15:00:00', '0', '100', '4', 'Oxford Music Online', 'Michael Berkowitz', 'http://[^/]*www.oxfordmusiconline.com[^/]*/', 
+REPLACE INTO translators VALUES ('f203db7f-7b7b-4dc4-b018-115b7885fe3b', '1.0.0b4.r5', '', '2008-04-24 14:30:00', '0', '100', '4', 'Oxford Music Online', 'Michael Berkowitz', 'http://[^/]*www.oxfordmusiconline.com[^/]*/', 
 'function detectWeb(doc, url) {
 	if (url.match(/search_results/)) {
 		return "multiple";
