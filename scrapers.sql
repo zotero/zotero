@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-24 15:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-24 16:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -9034,12 +9034,14 @@ function doWeb(doc, url)	{
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '1.0.0b3.r1', '', '2008-04-23 09:45:00', '1', '100', '4', 'Library Catalog (InnoPAC)', 'Simon Kornblith and Michael Berkowitz', 'https?://[^/]+/(search(\*spi)?(\?|~(S[\d])?)?)\??/(a|X|t)?\??', 
+REPLACE INTO translators VALUES ('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '1.0.0b3.r1', '', '2008-04-24 16:00:00', '1', '100', '4', 'Library Catalog (InnoPAC)', 'Simon Kornblith and Michael Berkowitz', 'https?://[^/]+/(search(\*spi)?(\?|~(S[\d]+)?)?)\??/(a|X|t)?\??', 
 'function detectWeb(doc, url) {
 	// First, check to see if the URL alone reveals InnoPAC, since some sites don''t reveal the MARC button
-	var matchRegexp = new RegExp(''^https?://[^/]+/search[^/]*\\??/[^/]+(/[^/]+/[0-9]+\%2C[^/]+/frameset(.+))?$'');
+	var matchRegexp = new RegExp(''^https?://[^/]+/search[^/]*\\??/[^/]+(/[^/]+/[0-9]+\%2C[^/]+/frameset(.+)$)?'');
 	if(matchRegexp.test(doc.location.href)) {
-		return "book";
+		if (!url.match("SEARCH") && !url.match("searchtype")) {
+			return "book";
+		}
 	}
 	// Next, look for the MARC button
 	var namespace = doc.documentElement.namespaceURI;
@@ -9056,9 +9058,7 @@ REPLACE INTO translators VALUES ('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '1.0.0b
 	var tags = doc.getElementsByTagName("a");
 	for(var i=0; i<tags.length; i++) {
 		if(matchRegexp.test(tags[i].href) || tags[i].href.match(/^https?:\/\/[^/]+\/(?:search\??\/|record=?|search%7e\/)/)) {
-			if (doc.evaluate(''//span[@class="briefcitTitle"]/a'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-				return "multiple";
-			}
+			return "multiple";
 		}
 	}
 	
@@ -9153,32 +9153,19 @@ function doWeb(doc, url) {
 	var translator = Zotero.loadTranslator("import");
 	translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
 	var marc = translator.getTranslatorObject();
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
 	
-	var matchRegexp = new RegExp(''^(https?://[^/]+/search[^/]*\\??/[^/]+/[^/]+/[0-9]+\%2C[^/]+/)frameset(.+)$'');
-	var m = matchRegexp.exec(uri);
-	if(m) {
-		newUri = m[1]+''marc''+m[2];
-	} else {
-		var namespace = doc.documentElement.namespaceURI;
-		var nsResolver = namespace ? function(prefix) {
-			if (prefix == ''x'') return namespace; else return null;
-		} : null;
-	
-		var xpath = ''//a[img[@src="/screens/marcdisp.gif" or starts-with(@alt, "MARC ")]]'';
-		var aTag = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-		if(aTag) {
-			newUri = aTag.href;
+	if (!url.match("SEARCH") && !url.match("searchtype")) {
+		var matchRegexp = new RegExp(''^(.*)frameset(.+)$'');
+		var m = matchRegexp.exec(uri);
+		if (m) {
+			newUri = uri.replace(/frameset/, "marc");
 		} else {
-			var xpath = ''//a[img[@src="/screens/regdisp.gif" or @alt="REGULAR RECORD DISPLAY"]]'';
-			var aTag = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-			if(aTag) {
-				scrape(marc.getTranslatorObject(), doc);
-				return;
-			}
+			newUri = doc.evaluate(''//a[contains(@href, "frameset")]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext().href.replace(/frameset/, ''marc'');
 		}
-	}
-	
-	if(newUri) {	// single page
 		pageByPage(marc, [newUri]);
 	} else {	// Search results page
 		// Require link to match this
