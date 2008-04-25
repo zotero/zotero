@@ -528,11 +528,14 @@ var Zotero = new function(){
 				'[JavaScript Error: "document.getElementById("sanitizeItem")',
 				'chrome://webclipper',
 				'No chrome package registered for chrome://piggy-bank',
+				'[JavaScript Error: "[Exception... "\'Component is not available\' when calling method: [nsIHandlerService::getTypeFromExtension',
+				'[JavaScript Error: "this._uiElement is null',
+				'Error: a._updateVisibleText is not a function'
 			];
 			
 			for (var i=0; i<blacklist.length; i++) {
 				if (msg.message.indexOf(blacklist[i]) != -1) {
-					Zotero.debug("Skipping blacklisted error: " + msg.message);
+					//Zotero.debug("Skipping blacklisted error: " + msg.message);
 					continue msgblock;
 				}
 			}
