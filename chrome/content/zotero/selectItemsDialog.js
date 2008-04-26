@@ -39,10 +39,6 @@ function doLoad()
 	
 	collectionsView = new Zotero.CollectionTreeView();
 	document.getElementById('zotero-collections-tree').view = collectionsView;
-	
-	// move to center of screen
-	window.sizeToContent();
-	window.centerWindowOnScreen();
 }
 
 function doUnload()

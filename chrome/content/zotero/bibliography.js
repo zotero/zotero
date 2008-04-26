@@ -112,7 +112,7 @@ var Zotero_File_Interface_Bibliography = new function() {
 			
 			// add border on Windows
 			if(Zotero.isWin) {
-				document.getElementById("doc-prefs-dialog").style.border = "1px solid black";
+				document.getElementById("zotero-doc-prefs-dialog").style.border = "1px solid black";
 			}
 		}
 		window.sizeToContent();

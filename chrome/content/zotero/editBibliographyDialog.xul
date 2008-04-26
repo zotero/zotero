@@ -27,7 +27,7 @@
 <!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
 
 <dialog
-	id="edit-bibliography-dialog"
+	id="zotero-edit-bibliography-dialog"
 	orient="vertical"
 	title="&zotero.integration.editBibliography.title;"
 	width="750" height="450"
@@ -37,7 +37,8 @@
 	buttons="accept"
 	xmlns:html="http://www.w3.org/1999/xhtml"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-	style="padding: 0">
+	style="padding: 0"
+	persist="screenX screenY">
 	
 	<script src="include.js"/>
 	<script src="selectItemsDialog.js"/>
