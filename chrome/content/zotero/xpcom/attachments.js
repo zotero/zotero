@@ -928,6 +928,8 @@ Zotero.Attachments = new function(){
 			nsIURL.fileBaseName = nsIURL.fileBaseName + '.' + tld;
 		}
 		
+		nsIURL.fileBaseName = Zotero.File.getValidFileName(nsIURL.fileBaseName);
+		
 		return nsIURL.fileName;
 	}
 	
@@ -992,7 +994,7 @@ Zotero.Attachments = new function(){
 			// relative path (since getPath() doesn't work on non-existent files)
 			else if (linkMode == self.LINK_MODE_IMPORTED_URL ||
 					linkMode == self.LINK_MODE_IMPORTED_FILE) {
-				var missingFile = self.createDirectoryForItem(attachmentItem.getID());
+				var missingFile = self.createDirectoryForItem(attachmentItem.id);
 				missingFile.append(file.leafName);
 				missingFile.create(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0644);
 				var path = getPath(missingFile, linkMode);

@@ -27,6 +27,7 @@ Zotero.File = new function(){
 	this.getContents = getContents;
 	this.getContentsFromURL = getContentsFromURL;
 	this.putContents = putContents;
+	this.getValidFileName = getValidFileName;
 	this.copyToUnique = this.copyToUnique;
 	this.getCharsetFromFile = getCharsetFromFile;
 	this.addCharsetListener = addCharsetListener;
@@ -156,6 +157,20 @@ Zotero.File = new function(){
 		// Copy file to unique name
 		file.copyTo(newFile.parent, newName);
 		return file;
+	}
+	
+	
+	// Strip potentially invalid characters
+	// See http://en.wikipedia.org/wiki/Filename#Reserved_characters_and_words
+	function getValidFileName(fileName) {
+		// TODO: use space instead, and figure out what's doing extra
+		// URL encode when saving attachments that trigger this
+		fileName = fileName.replace(/[\/\\\?%\*:|"<>\.]/g, '');
+		// Don't allow blank filename
+		if (!fileName) {
+			fileName = '_';
+		}
+		return fileName;
 	}
 	
 	
