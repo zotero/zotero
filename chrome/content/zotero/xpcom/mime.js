@@ -48,7 +48,9 @@ Zotero.MIME = new function(){
 		["GIF8", 'image/gif', 0],
 		["\uFFFDPNG", 'image/png', 0],
 		["PK\x03\x04", "application/vnd.oasis.opendocument.text", 0],
-		["JFIF", 'image/jpeg']
+		["JFIF", 'image/jpeg'],
+		["FLV", "video/x-flv", 0]
+		
 	];
 	
 	var _textTypes = {
@@ -73,7 +75,8 @@ Zotero.MIME = new function(){
 	
 	// Extensions of text files (generally XML) to force to be external
 	var _externalTextExtensions = {
-		'graffle': true
+		graffle: true,
+		mm: true
 	};
 	
 	
