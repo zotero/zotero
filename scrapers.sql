@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-24 16:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-27 06:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -2817,7 +2817,7 @@ REPLACE INTO translators VALUES ('4c9dbe33-e64f-4536-a02f-f347fa1f187d', '1.0.0b
 	});
 }');
 
-REPLACE INTO translators VALUES ('2e43f4a9-d2e2-4112-a6ef-b3528b39b4d2', '1.0.0b4.r5', '', '2008-04-08 03:00:00', '1', '100', '4', 'MIT Press Journals', 'Michael Berkowitz', 'http://www.mitpressjournals.org/', 
+REPLACE INTO translators VALUES ('2e43f4a9-d2e2-4112-a6ef-b3528b39b4d2', '1.0.0b4.r5', '', '2008-04-27 06:00:00', '1', '100', '4', 'MIT Press Journals', 'Michael Berkowitz', 'http://www.mitpressjournals.org/', 
 'function detectWeb(doc, url) {
 	if (url.match(/action\/doSearch/) || url.match(/toc\//)) {
 		return "multiple";
@@ -2841,40 +2841,37 @@ function doWeb(doc, url) {
 		}
 		items = Zotero.selectItems(items);
 		for (var i in items) {
-			articles.push(getDOI(i));
+			articles.push(''http://www.mitpressjournals.org/doi/abs/'' + getDOI(i));
 		}
 	} else {
-		articles = [getDOI(url)];
+		articles = [''http://www.mitpressjournals.org/doi/abs/'' + getDOI(url)];
 	}
-	for each (var doi in articles) {
-		var risurl = ''http://www.mitpressjournals.org/action/downloadCitation?doi='' + doi + ''&include=cit&format=refman&direct=on&submit=Download+article+metadata'';
-		var pdfurl = ''http://www.mitpressjournals.org/doi/pdf/'' + doi;
-		var newurl = ''http://www.mitpressjournals.org/doi/abs/'' + doi;
-		Zotero.Utilities.processDocuments([newurl], function(newDoc) {
-			if (newDoc.evaluate(''//div[@class="abstractSection"]/p[contains(@class, "last") or contains(@class, "first")]'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-				var abs = Zotero.Utilities.trimInternal(newDoc.evaluate(''//div[@class="abstractSection"]/p[contains(@class, "last") or contains(@class, "first")]'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
-			}
-			Zotero.Utilities.HTTP.doGet(risurl, function(text) {
-				var translator = Zotero.loadTranslator("import");
-				translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-				translator.setString(text);
-				translator.setHandler("itemDone", function(obj, item) {
-					if (item.notes[0][''note''].match(/doi:/)) {
-						item.DOI = item.notes[0][''note''].substr(5);
-						item.notes = new Array();
-					}
-					item.attachments[0].title= item.publicationTitle + " Snapshot";
-					item.attachments[0].mimeType = "text/html";
-					item.attachments.push({url:pdfurl, title:item.publicationTitle + " Full Text PDF", mimeType:"application/pdf"});
-					//http://www.mitpressjournals.org/doi/pdf/10.1162/afar.2008.41.1.1
-					if (abs) item.abstractNote = abs;
-					item.complete();	
-				});
-				translator.translate();
+	Zotero.Utilities.processDocuments(articles, function(newDoc) {
+		if (newDoc.evaluate(''//div[@class="abstractSection"]/p[contains(@class, "last") or contains(@class, "first")]'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+			var abs = Zotero.Utilities.trimInternal(newDoc.evaluate(''//div[@class="abstractSection"]/p[contains(@class, "last") or contains(@class, "first")]'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+		}
+		var doi = getDOI(newDoc.location.href);
+		var risurl = ''http://www.mitpressjournals.org/action/downloadCitation?doi='' + doi + ''&include=cit&format=refman&direct=on&submit=Download+article+metadata'';		
+		var pdfurl = newDoc.location.href.replace("/doi/abs/", "/doi/pdf/");
+		Zotero.Utilities.HTTP.doGet(risurl, function(text) {
+			var translator = Zotero.loadTranslator("import");
+			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+			translator.setString(text);
+			translator.setHandler("itemDone", function(obj, item) {
+				if (item.notes[0][''note''].match(/doi:/)) {
+					item.DOI = item.notes[0][''note''].substr(5);
+					item.notes = new Array();
+				}
+				item.attachments[0].title= item.publicationTitle + " Snapshot";
+				item.attachments[0].mimeType = "text/html";
+				item.attachments.push({url:pdfurl, title:item.publicationTitle + " Full Text PDF", mimeType:"application/pdf"});
+				if (abs) item.abstractNote = abs;
+				item.complete();	
 			});
-		}, function() {Zotero.done;});
-		Zotero.wait();
-	}
+			translator.translate();
+		});
+	}, function() {Zotero.done;});
+	Zotero.wait();
 }');
 
 REPLACE INTO translators VALUES ('b0abb562-218c-4bf6-af66-c320fdb8ddd3', '1.0.0b4.r5', '', '2008-04-01 04:50:00', '0', '100', '4', 'Philosopher''s Imprint', 'Michael Berkowitz', 'http://quod.lib.umich.edu/cgi/t/', 
