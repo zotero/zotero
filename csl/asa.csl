@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" xml:lang="en" class="in-text" >
   <info>
-    <title>American Sociological Association (Author-Date)</title>
+    <title>American Sociological Association</title>
     <id>http://www.zotero.org/styles/asa</id>
     <link href="http://www.zotero.org/styles/asa"/>
     <author>
@@ -100,7 +100,6 @@
       <date-part name="month"/>
       <date-part name="day" prefix=" "/>
     </date>
-    
   </macro>
   <macro name="pages">
     <label variable="page" form="short" suffix=". " text-case="capitalize-first"/>
@@ -121,7 +120,7 @@
   </macro>
   <citation>
     <option name="et-al-min" value="3"/>
-    <option name="et-al-use-first" value="1"/>
+    <option name="et-al-use-first" value="3"/>
     <option name="et-al-subsequent-min" value="3"/>
     <option name="et-al-subsequent-use-first" value="1"/>
     <option name="disambiguate-add-year-suffix" value="true"/>
