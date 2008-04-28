@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-28 14:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-28 17:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -6137,120 +6137,69 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('9346ddef-126b-47ec-afef-8809ed1972ab', '1.0.0b4.r5', '', '2007-07-31 16:45:00', '1', '99', '4', 'Institute of Physics', 'Michael Berkowitz', '^http://www.iop.org/EJ/(toc|abstract|search)', 
+REPLACE INTO translators VALUES ('9346ddef-126b-47ec-afef-8809ed1972ab', '1.0.0b4.r5', '', '2008-04-28 17:00:00', '1', '99', '4', 'Institute of Physics', 'Michael Berkowitz', '^http://www.iop.org/EJ/(toc|abstract|search|article)', 
 'function detectWeb(doc, url) {
 	if ((doc.location.href.indexOf("toc") == -1) && (doc.location.href.indexOf("search") == -1)) {
-		Zotero.debug("journalArticle");
 		return "journalArticle";
 	} else {
-		Zotero.debug("multiple");
 		return "multiple";
 	}
 }', 
 'function parseRIS(getURL, pdfURL) {   
-    Zotero.Utilities.HTTP.doGet(getURL, function(text){
+    var newGet = getURL.replace(/EJ\/[^/]+/, "EJ/sview") + "?format=refmgr&submit=1";
+    Zotero.Utilities.HTTP.doGet(newGet, function(text){
         // load translator for RIS
         var translator = Zotero.loadTranslator ("import");
         translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
         translator.setString(text);
         translator.setHandler("itemDone", function(obj, item) { 
+		item.url = getURL;
 		item.attachments = [
-	    		{url:pdfURL, title:"IOP Full Text PDF", mimeType:"application/pdf"}
+	    		{url:item.url, title:"IOP Snapshot", mimeType:"text/html"}
 	    	];
+	    	if (pdfURL != null) {
+		    	item.attachments.push({url:pdfURL, title:"IOP Full Text PDF", mimeType:"application/pdf"});
+	    	}
 	    	item.complete();
 	});
 	translator.translate();
         Zotero.done();
     }, function() {}); 
-
     Zotero.wait();
 }
-
 
 function doWeb(doc, url) {
-    var namespace = doc.documentElement.namespaceURI;
-    var nsResolver = namespace ? function(prefix) {
-        if (prefix == "x" ) return namespace; else return null; 
-    } : null;
-    
-    var xpath = ''//td[1][@id="toc-opts-left"]/span[@class="toclink"]/a[contains(text(), "Abstract")]'';
-    var PDFs = new Array();
-    var urls = new Array();
-    var pdfurls = new Array();
-    var items = new Array();
-    
-    if (doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
-        var links = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
-        var url = links.iterateNext();
-        while (url) {
-	        items.push(url.href);
-	url = links.iterateNext ();
-        }
-        
-        var titles = new Array();
-        var xpath2 = ''//strong[@class="tocTitle"]'';
-	var stuff = doc.evaluate(xpath2, doc, nsResolver, XPathResult.ANY_TYPE, null);
-	var title = stuff.iterateNext();
-	while (title) {
-		titles.push(title.textContent);
-		title = stuff.iterateNext();
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == "x") return namespace; else return null;
+	} : null;
+	
+	var arts = new Array();
+	if (detectWeb(doc, url) == "multiple") {
+		var items = new Object();
+		var results = doc.evaluate(''//td[*//td[*//a[contains(text(), "Abstract")]]]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var result;
+		while (result = results.iterateNext()) {
+			var title = doc.evaluate(''.//strong'', result, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+			var link = doc.evaluate(''.//a[contains(text(), "Abstract")]'', result, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
+			var pdflink = doc.evaluate(''.//a[contains(text(), "PDF")]'', result, nsResolver, XPathResult.ANY_TYPE, null).iterateNext() ? doc.evaluate(''.//a[contains(text(), "PDF")]'', result, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href : null;
+			var links = new Array(link, pdflink);
+			items[links] = title;
+		}
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			arts.push(i);
+		}
+	} else {
+		var pdfurl = doc.evaluate(''//a[contains(text(), "PDF")]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
+		var links = url + '','' + pdfurl;
+		arts = [links];
 	}
-        
-        var xpath3 = ''//table/tbody/tr/td[2]/span[@class="toclink"]/a'';
-        var PDFlinks = doc.evaluate(xpath3, doc, nsResolver, XPathResult.ANY_TYPE, null);
-        var newPDF = PDFlinks.iterateNext();
-        while (newPDF) {
-	        PDFs.push(newPDF.href);
-	        newPDF = PDFlinks.iterateNext();
-        }
-        
-        var newItems = new Object();
-        
-        Zotero.debug(items.length);
-        Zotero.debug(titles.length);
-        for (var x = 0 ; x < items.length ; x++) {
-            newItems[items[x]] = [titles[x], PDFs[x]];
-        }
-        
-        
-        Zotero.debug(newItems); 
-        
-        
-        newItems = Zotero.selectItems(newItems);
-
-        if (!newItems) {
-            return true;
-        }
-        
-        for (var i in newItems) {
-            Zotero.debug(i);
-            urls.push (i);
-            var newStuff = newItems[i].split('','');
-            pdfurls.push(Zotero.Utilities.cleanString(newStuff[newStuff.length - 1]));
-        }
-        
-    } else {
-        urls.push(doc.location.href);
-        var xpath4 = ''//div[@id="abstract"]//td[2]/a'';
-        pdfurls.push(doc.evaluate(xpath4, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href);
-    }
-    
-    for (var i = 0 ; i < urls.length ; i++) {
-        urls[i] = urls[i].replace("abstract", "sview"); 
-    }
-    
-    Zotero.debug(urls);
-    Zotero.debug(pdfurls);
-    Zotero.Utilities.HTTP.doPost(urls, "format=refmgr&submit=1", function(text) {
-        for (var j = 0 ; j < urls.length ; j++) {
-            parseRIS(urls[j] + "?format=refmgr&submit=1", pdfurls[j]); 
-        }
-    });
-    
-    Zotero.wait();
-}
-
-');
+	for each (var linkset in arts) {
+		var urls = linkset.split('','');
+		parseRIS(urls[0], urls[1]);
+	}
+}');
 
 REPLACE INTO translators VALUES ('6ec8008d-b206-4a4c-8d0a-8ef33807703b', '1.0.0b4.r5', '', '2007-08-27 02:00:00', '1', '100', '4', 'The Economist', 'Michael Berkowitz', '^http://(www.)?economist.com/', 
 'function detectWeb(doc, url) {
@@ -14002,7 +13951,7 @@ REPLACE INTO translators VALUES ('fe728bc9-595a-4f03-98fc-766f1d8d0936', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('b6d0a7a-d076-48ae-b2f0-b6de28b194e', '1.0.0b3.r1', '', '2008-04-15 07:30:00', '1', '100', '4', 'ScienceDirect', 'Michael Berkowitz', 'https?://www\.sciencedirect\.com[^/]*/science\?(?:.+\&|)_ob=(?:ArticleURL|ArticleListURL|PublicationURL)', 
+REPLACE INTO translators VALUES ('b6d0a7a-d076-48ae-b2f0-b6de28b194e', '1.0.0b3.r1', '', '2008-04-28 17:00:00', '1', '100', '4', 'ScienceDirect', 'Michael Berkowitz', 'https?://www\.sciencedirect\.com[^/]*/science(\/article)?\?(?:.+\&|)_ob=(?:ArticleURL|ArticleListURL|PublicationURL)', 
 'function detectWeb(doc, url) {
 	if ((url.indexOf("_ob=DownloadURL") != -1) || doc.title == "ScienceDirect Login") {
 		return false;
@@ -14021,7 +13970,7 @@ REPLACE INTO translators VALUES ('b6d0a7a-d076-48ae-b2f0-b6de28b194e', '1.0.0b3.
 
 	if (!doc.evaluate(''//img[contains(@src, "guest_user.gif")]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
 		var articles = new Array();
-		if(url.indexOf("_ob=ArticleURL") == -1) {
+		if(detectWeb(doc, url) == "multiple") {
 			//search page
 			var items = new Object();
 			var xpath;
@@ -14519,7 +14468,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('cb48083-4d9-4ed-ac95-2e93dceea0ec', '1.0.0b3.r1', '', '2008-04-16 04:45:00', '1', '100', '4', 'Blackwell Synergy', 'Michael Berkowitz', 'https?://www\.blackwell-synergy\.com[^/]*/(?:action/doSearch|doi/|links/doi/)', 
+REPLACE INTO translators VALUES ('cb48083-4d9-4ed-ac95-2e93dceea0ec', '1.0.0b3.r1', '', '2008-04-28 17:00:00', '1', '100', '4', 'Blackwell Synergy', 'Michael Berkowitz', 'https?://www\.blackwell-synergy\.com[^/]*/(?:action/doSearch|doi/|links/doi/)', 
 'function detectWeb(doc, url) {
 	if(url.indexOf("doSearch") != -1) {
 		return "multiple";
@@ -14527,7 +14476,24 @@ REPLACE INTO translators VALUES ('cb48083-4d9-4ed-ac95-2e93dceea0ec', '1.0.0b3.r
 		return "journalArticle";
 	}
 }', 
-'function doWeb(doc, url) {
+'function titleCase(str) {
+	var skipWords = ["but", "or", "yet", "so", "for", "and", "nor", "a", "an", "the", "at", "by", "from", "in", "into", "of", "on", "to", "with", "up", "down", "as"];
+	var words = str.toLowerCase().split(/\s+/);
+	var newstr = "";
+	for each (var word in words) {
+		if (skipWords.indexOf(word.replace(/[^a-zA-Z]+/, "")) != -1) {
+			newstr += " " + word;
+		} else if (word.indexOf("-") != -1) {
+			newword = word.split("-");
+			newstr += " " + newword[0][0].toUpperCase() + newword[0].substr(1) + "-" + newword[1][0].toUpperCase() + newword[1].substr(1);
+		} else {
+			newstr += " " + word[0].toUpperCase() + word.substr(1);
+		}
+	}
+	return Zotero.Utilities.trimInternal(newstr);
+}
+
+function doWeb(doc, url) {
 	var host = doc.location.host;
 	var articles = new Array();
 	if (detectWeb(doc, url) == "multiple") {
@@ -14553,6 +14519,7 @@ REPLACE INTO translators VALUES ('cb48083-4d9-4ed-ac95-2e93dceea0ec', '1.0.0b3.r
 	}
 	post += "include=abs&format=refman&submit=Download+references";
 	Zotero.Utilities.HTTP.doPost(''http://www.blackwell-synergy.com/action/downloadCitation'', post, function(text) {
+		text = text.replace(/(Y1\s+\-\s+)(\d{4}\/\d{2}).*\n/, "$1$2\n");
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 		translator.setString(text);
@@ -14566,12 +14533,12 @@ REPLACE INTO translators VALUES ('cb48083-4d9-4ed-ac95-2e93dceea0ec', '1.0.0b3.r
 			// use fulltext if possible
 			var oldCreators = item.creators;
 			item.creators = []
-			Zotero.debug(oldCreators);
 			for each (var author in oldCreators) {
 				if (author["lastName"] != "") {
-					item.creators.push(author);
+					item.creators.push({firstName:titleCase(author.firstName), lastName:titleCase(author.lastName), creatorType:"author"});
 				}
 			}
+			item.title = titleCase(item.title);
 			item.complete();
 		});
 		translator.translate();
