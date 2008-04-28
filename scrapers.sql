@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-27 06:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-28 14:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -14580,7 +14580,7 @@ REPLACE INTO translators VALUES ('cb48083-4d9-4ed-ac95-2e93dceea0ec', '1.0.0b3.r
 	});
 }');
 
-REPLACE INTO translators VALUES ('df966c80-c199-4329-ab02-fa410c8eb6dc', '1.0.0b3.r1', '', '2008-01-23 20:00:00', '1', '100', '4', 'University of Chicago', 'Sean Takats', 'https?://[^/]*journals\.uchicago\.edu[^/]*/(?:doi/abs|doi/full|toc)', 
+REPLACE INTO translators VALUES ('df966c80-c199-4329-ab02-fa410c8eb6dc', '1.0.0b3.r1', '', '2008-04-28 14:30:00', '1', '100', '4', 'University of Chicago', 'Sean Takats', 'https?://[^/]*journals\.uchicago\.edu[^/]*/(?:doi/abs|doi/full|toc)', 
 'function detectWeb(doc, url) {
 	if(url.indexOf("toc") != -1) {
 		return "multiple";
@@ -14644,7 +14644,7 @@ REPLACE INTO translators VALUES ('df966c80-c199-4329-ab02-fa410c8eb6dc', '1.0.0b
 			var doi = m[1];
 		}
 		post += "doi="+encodeURIComponent(doi)+"&";
-		
+			
 		if(url.indexOf("doi/full") != -1 ||
 		  doc.evaluate(''//img[@alt="Full Text Article"]'', doc, nsResolver, XPathResult.ANY_TYPE,
 		  null).iterateNext()) {
@@ -14653,7 +14653,6 @@ REPLACE INTO translators VALUES ('df966c80-c199-4329-ab02-fa410c8eb6dc', '1.0.0b
 	}
 	
 	post += "include=cit&downloadFileName=deadbeef&format=refman&direct=on&submit=Download+article+citation+data";
-	
 	Zotero.Utilities.HTTP.doPost("http://www.journals.uchicago.edu/action/downloadCitation", post, function(text) {
 		// load translator for RIS
 		var translator = Zotero.loadTranslator("import");
@@ -14664,8 +14663,10 @@ REPLACE INTO translators VALUES ('df966c80-c199-4329-ab02-fa410c8eb6dc', '1.0.0b
 				{url:item.url, title:"University of Chicago Journals Snapshot", mimeType:"text/html"},
 				{url:item.url.replace("/doi/abs", "/doi/pdf"), title:"University of Chicago Full Text PDF", mimeType:"application/pdf"}
 			];
+			if (item.notes[0][''note'']) item.DOI = Zotero.Utilities.trimInternal(item.notes[0][''note''].substr(4));
+			item.notes = new Array();
 			// use fulltext if possible
-			if(fulltext[item.DOI.substr(4)]) {
+			if(fulltext[item.DOI]) {
 				item.attachments[0].url = item.attachments[0].url.replace("/doi/abs", "/doi/full");
 			}
 			
