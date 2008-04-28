@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-28 17:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-28 18:45:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -4097,26 +4097,17 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('99f958ab-0732-483d-833f-6bd8e42f6277', '1.0.0b4.r1', '', '2007-06-27 02:00:00', '0', '100', '4', 'National Bureau of Economic Research', 'Asa Kusuma', '^https?://(?:papers\.|www\.)?nber\.org/papers', 
+REPLACE INTO translators VALUES ('99f958ab-0732-483d-833f-6bd8e42f6277', '1.0.0b4.r1', '', '2008-04-28 18:45:00', '0', '100', '4', 'National Bureau of Economic Research', 'Michael Berkowitz', '^https?://(?:papers\.|www\.)?nber\.org/(papers|s|new)', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == ''x'') return namespace; else return null;
 	} : null;
-	
-	var singXpath = ''//h1[@class="title"]'';
-	var multXpath = ''//input[@name="module"][@type="hidden"]'';
-	var singleXpath = ''//input[@name="domains"][@type="hidden"]'';
-	
-	var str=doc.evaluate(singXpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 
-	if (doc.evaluate(multXpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+	if (doc.evaluate(''//a[contains(text(), "RIS")]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+		return "journalArticle";
+	} else if (doc.evaluate(''//div[@class="maintd"][@id="maine"]/table/tbody/tr/td[1]//a[contains(@href, "papers/w")]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
-	} else if (url.indexOf("byprog")==-1 && doc.evaluate(singXpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.indexOf("Working Paper Search Results")==-1){
-		
-		if(doc.evaluate(singleXpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext() && doc.evaluate(singXpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.indexOf("NBER Working Papers")==-1) {
-			return "journalArticle";
-		}
 	}
 }', 
 'function parseRIS(uris){
@@ -4138,50 +4129,33 @@ function doWeb(doc, url) {
 		if (prefix == ''x'') return namespace; else return null;
 	} : null;
 	
-	var singXpath = ''//h1[@class="title"]'';
-	var multXpath = ''//input[@name="module"]'';
-	var str=doc.evaluate(singXpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-
-	if (doc.evaluate(multXpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
-		
-		var bibXpath=''//table/tbody/tr/td/nobr/b'';
-		var titleXpath=''//table/tbody/tr/td/a'';
-		
-		var bibElmts = doc.evaluate(bibXpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
-		var titleElmts = doc.evaluate(titleXpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
-		var titleElmt;
-		var bibElmt;
-		bibElmt = bibElmts.iterateNext();
-		titleElmt = titleElmts.iterateNext();
-		
-		var items = new Array();
-
-		do {
-			items[bibElmt.textContent] = Zotero.Utilities.cleanString(titleElmt.textContent);
-		} while((bibElmt = bibElmts.iterateNext()) && (titleElmt = titleElmts.iterateNext()));
-
-		items = Zotero.selectItems(items);
-		if(!items) return true;
-
-		var bibcodes="";
-		var uris = new Array();
-		for(var bibcode in items) {
-			var getURL = "http://www.nber.org/papers/"
-				+ bibcode + ".ris";
-			uris.push(getURL);
+	var arts = new Array();
+	if (detectWeb(doc, url) == "multiple") {
+		var items = new Object();
+		var links = doc.evaluate(''//div[@class="maintd"][@id="maine"]/table/tbody/tr/td[1]//a[contains(@href, "papers/w")]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var link;
+		while (link = links.iterateNext()) {
+			items[link.href] = link.textContent;
 		}
-		
-		parseRIS(uris);
-
-
-	} else if (doc.evaluate(singXpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.indexOf("Working Paper Search Results")==-1){
-		bibcode=url.substr(url.indexOf("/papers/")+8,url.length);
-		var uris = new Array();
-		var getURL = "http://www.nber.org/papers/"
-			+ bibcode + ".ris";
-		uris.push(getURL);
-		parseRIS(uris);
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			arts.push(i + ''.ris'');
+		}
+	} else {
+		arts = [url + ''.ris''];
 	}
+	Zotero.Utilities.HTTP.doGet(arts, function(text) {
+		var translator = Zotero.loadTranslator("import");
+		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+		translator.setString(text);
+		translator.setHandler("itemDone", function(obj, item) {
+			if (text.match(/AB\s+\-\s+/)) item.abstractNote = text.match(/AB\s+\-\s+((.|\s)+)\n([A-Z]{2})/)[1];
+			item.notes = new Array();
+			item.complete();	
+		});
+		translator.translate();
+	});
+	Zotero.wait();
 }');
 
 REPLACE INTO translators VALUES ('411f9a8b-64f3-4465-b7df-a3c988b602f3', '1.0.0b4.r1', '', '2007-06-26 15:17:22', '0', '100', '4', 'RePEc', 'Asa Kusuma', '^https?://ideas\.repec\.org/', 
