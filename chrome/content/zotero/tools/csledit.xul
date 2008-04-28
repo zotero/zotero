@@ -132,9 +132,10 @@
 				// Generate bibliography
 				var bibliography = '<hr/><h1>Bibliography</h1>' + 
 					csl.formatBibliography(itemSet, "HTML");
-				iframe.contentDocument.documentElement.innerHTML =
-					citations + 
-					multCitations + bibliography;
+				iframe.contentDocument.documentElement.innerHTML = 
+					'<div style="white-space: pre">'
+					+ citations + multCitations + bibliography
+					+ '</div>';
 			}
 			
 			
