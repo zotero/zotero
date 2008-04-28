@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-28 18:45:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-28 19:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -4097,7 +4097,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('99f958ab-0732-483d-833f-6bd8e42f6277', '1.0.0b4.r1', '', '2008-04-28 17:50:00', '0', '100', '4', 'National Bureau of Economic Research', 'Michael Berkowitz', '^https?://(?:papers\.|www\.)?nber\.org/(papers|s|new)', 
+REPLACE INTO translators VALUES ('99f958ab-0732-483d-833f-6bd8e42f6277', '1.0.0b4.r1', '', '2008-04-28 19:30:00', '0', '100', '4', 'National Bureau of Economic Research', 'Michael Berkowitz', '^https?://(?:papers\.|www\.)?nber\.org/(papers|s|new)', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -4135,7 +4135,7 @@ function doWeb(doc, url) {
 		var links = doc.evaluate(''//div[@class="maintd"][@id="maine"]/table/tbody/tr/td[1]//a[contains(@href, "papers/w")]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
 		var link;
 		while (link = links.iterateNext()) {
-			items[link.href] = link.textContent;
+			if (!link.href.match(/\.pdf$/)) items[link.href] = link.textContent;
 		}
 		items = Zotero.selectItems(items);
 		for (var i in items) {
