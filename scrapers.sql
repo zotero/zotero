@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-29 16:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-29 19:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1084,6 +1084,55 @@ REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b
 		
 		Zotero.done();
 	})
+	Zotero.wait();
+}');
+
+REPLACE INTO translators VALUES ('1e1e35be-6264-45a0-ad2e-7212040eb984', '1.0.0b4.r5', '', '2008-04-29 19:00:00', '0', '100', '4', 'APA PsycNET', 'Michael Berkowitz', 'http://psycnet\.apa\.org/', 
+'function detectWeb(doc, url) {
+	if (url.match(/search\.searchResults/)) {
+		return "multiple";
+	} else if (url.match(/search\.displayRecord/)) {
+		return "journalArticle";
+	}
+}', 
+'function doWeb(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	var arts = new Array();
+	if (detectWeb(doc, url) == "multiple") {
+		var items = new Object();
+		var titles = doc.evaluate(''//div[@class="srhcTitle"]/a'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var title;
+		while (title = titles.iterateNext()) {
+			items[title.href] = title.textContent;
+		}
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			arts.push(i);
+		}
+	} else {
+		arts = [url];
+	}
+	Zotero.Utilities.processDocuments(arts, function(doc) {
+		var newurl = doc.location.href;
+		var id = doc.evaluate(''//input[@name="id"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().value;
+		var lstSelectedUIDs = doc.evaluate(''//input[@name="lstUIDs"][@id="srhLstUIDs"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().value;
+		var get = ''http://psycnet.apa.org/index.cfm?fa=search.export&id='' + id + ''&lstSelectedUIDs='' + lstSelectedUIDs + ''&lstUIDs=&records=selected&displayFormat=&exportFormat=referenceSoftware&printDoc=0'';
+		Zotero.Utilities.HTTP.doGet(get, function(text) {
+			var translator = Zotero.loadTranslator("import");
+			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+			translator.setString(text);
+			translator.setHandler("itemDone", function(obj, item) {
+				item.url = newurl;
+				item.attachments = [{url:newurl, title:"APA PsycNET Snapshot", mimeType:"text/html"}];
+				item.complete();
+			});
+			translator.translate();
+		});
+	}, function() {Zotero.done;});
 	Zotero.wait();
 }');
 
