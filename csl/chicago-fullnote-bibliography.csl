@@ -86,7 +86,7 @@
       <choose>
         <if variable="author">
       <names variable="editor" delimiter=", ">
-        <label form="verb" prefix=" " text-case="lowercase" suffix=" "/>
+        <label form="verb" text-case="lowercase" suffix=" "/>
         <name and="text" delimiter=", "/>
       </names>
         </if>
@@ -94,7 +94,7 @@
       <choose>
         <if variable="author editor" match="any">
       <names variable="translator" delimiter=", ">
-        <label form="verb" prefix=" " text-case="lowercase" suffix=" "/>
+        <label form="verb" text-case="lowercase" suffix=" "/>
         <name and="text" delimiter=", "/>
       </names>
         </if>
