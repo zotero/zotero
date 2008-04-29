@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-28 19:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-29 16:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -15048,7 +15048,7 @@ REPLACE INTO translators VALUES ('7bdb79e-a47f-4e3d-b317-ccd5a0a74456', '1.0.0b3
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('850f4c5f-71fb-4669-b7da-7fb7a95500ef', '1.0.0b3r1', '', '2008-04-09 00:45:00', '1', '100', '4', 'Cambridge Journals Online', 'Sean Takats and Michael Berkowitz', 'https?://[^/]*journals.cambridge.org[^/]*//?action/(quickSearch|search|displayAbstract|displayFulltext|displayIssue)', 
+REPLACE INTO translators VALUES ('850f4c5f-71fb-4669-b7da-7fb7a95500ef', '1.0.0b3r1', '', '2008-04-29 16:00:00', '1', '100', '4', 'Cambridge Journals Online', 'Sean Takats and Michael Berkowitz', 'https?://[^/]*journals.cambridge.org[^/]*//?action/(quickSearch|search|displayAbstract|displayFulltext|displayIssue)', 
 'function detectWeb(doc, url)	{
 	var namespace=doc.documentElement.namespaceURI;
 	var nsResolver=namespace?function(prefix)	{
@@ -15061,61 +15061,87 @@ REPLACE INTO translators VALUES ('850f4c5f-71fb-4669-b7da-7fb7a95500ef', '1.0.0b
 		return "multiple";			
 	}
 }', 
-'function doWeb(doc, url){
+'function titleCase(str) {
+	var skipWords = ["but", "or", "yet", "so", "for", "and", "nor", "a", "an", "the", "at", "by", "from", "in", "into", "of", "on", "to", "with", "up", "down", "as"];
+	var words = str.toLowerCase().split(/\s+/);
+	var newstr = "";
+	for (var i in words) {
+		if (i == 0) {
+			newstr += words[i][0].toUpperCase() + words[i].substr(1);
+		} else if (skipWords.indexOf(words[i].replace(/[^a-zA-Z]+/, "")) != -1) {
+			newstr += " " + words[i];
+		} else if (words[i].indexOf("-") != -1) {
+			newword = words[i].split("-");
+			newstr += " " + newword[0][0].toUpperCase() + newword[0].substr(1) + "-" + newword[1][0].toUpperCase() + newword[1].substr(1);
+		} else {
+			newstr += " " + words[i][0].toUpperCase() + words[i].substr(1);
+		}
+	}
+	return Zotero.Utilities.trimInternal(newstr);
+}
+
+function doWeb(doc, url){
 	var namespace=doc.documentElement.namespaceURI;
 	var nsResolver=namespace?function(prefix)	{
 		return (prefix=="x")?namespace:null;
 	}:null;
-	var urlstring="http://journals.cambridge.org/action/exportCitation";
+	var host = doc.location.host;
+	var urlstring="http://" + host + "/action/exportCitation";
 	var datastring="format=RIS&emailId=&Download=Download&componentIds=";
-	var xpath = ''//tr[td/input[@type="checkbox"][@name="toView"]]'';
-	if(doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
+	var links = new Array();
+	if(detectWeb(doc, url) == "multiple"){
+		var xpath = ''//tr[td/input[@type="checkbox"][@name="toView"]]'';
 		var tableRows = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
 		var tableRow;
 		var items=new Array();
 		while (tableRow = tableRows.iterateNext()){
 			var id = doc.evaluate(''./td/input[@type="checkbox"][@name="toView"]/@value'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 			var title = doc.evaluate(''./td/h3'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-			items[id.nodeValue]=Zotero.Utilities.trimInternal(title.textContent);	
+			items[''http://'' + host + ''/action/displayAbstract?aid='' + id.nodeValue]=titleCase(title.textContent);
 		}
 		items=Zotero.selectItems(items);
-		for(var id in items)
-			Zotero.Utilities.HTTP.doPost(urlstring, datastring+id, function(text)	{
-				text = text.replace(/(^|\n)?([A-Z\d]{2})\s*\-\s*(\n)?/g, "\n$2  - $3");
-				var translator = Zotero.loadTranslator("import");
-				translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-				translator.setString(text);
-				translator.setHandler("itemDone", function(obj, newItem){
-					var pdfpath=''//tr[td/input/@value="''+id+''"]/td/ul/li/a[contains(text(), "PDF")]'';
-					var pdflink=doc.evaluate(pdfpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-					if (pdflink){
-						newItem.attachments.push({url:pdflink.href, title:newItem.title, mimeType:"application/pdf"});
-					}
-					newItem.complete();
-				});
-				translator.translate();
-				Zotero.done();
-			});
+		for (var i in items) {
+			links.push(i);
+		}
+	} else {
+		links = [url];
 	}
-	xpath = ''//div[@id="close"]/a[text()="close"]'';
-	if(doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext())	{
+	Zotero.Utilities.processDocuments(links, function(doc) {
+		if (doc.evaluate(''//p[@class="AbsType"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+			var abs = doc.evaluate(''//p[@class="AbsType"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		}
+		if (doc.evaluate(''//p[@class="KeyWords"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+			var kws = doc.evaluate(''//p[@class="KeyWords"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.substr(11).split(''; '');
+		}
 		var pdfpath=''//div/ul/li/a[contains(text(), "PDF")]'';
-		var pdflink =doc.evaluate(pdfpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()
-		Zotero.debug(url);
+		var pdflink =doc.evaluate(pdfpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
 		idRe = /aid=([0-9]+)/
-		var m = idRe.exec(url);
+		var m = idRe.exec(doc.location.href);
 		var id = m[1];
-		Zotero.debug(urlstring);
-		Zotero.debug(datastring + id);
 		Zotero.Utilities.HTTP.doGet(urlstring + "?" + datastring+id, function(text) {
-			text = text.replace(/(^|\n)?([A-Z\d]{2})\s*\-\s*(\n)?/g, "\n$2  - $3");
+			text = text.replace(/(^|\n)?([A-Z\d]{2})\s+\-\s+(\n)?/g, "\n$2  - $3");
 			var translator = Zotero.loadTranslator("import");
 			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 			translator.setString(text);
+			translator.setHandler("itemDone", function(obj, item) {
+				item.attachments = 	[
+					{url:url, title:"Cambridge Journals Snapshot", mimeType:"text/html"},
+					{url:pdflink, title:"Cambridge Journals PDF", mimeType:"application/pdf"}
+				];
+				item.url = url;
+				item.title = titleCase(item.title);
+				var authors = item.creators;
+				item.creators = new Array();
+				for each (var aut in authors) {
+					item.creators.push({firstName:titleCase(aut.firstName), lastName:titleCase(aut.lastName), creatorType:"author"});
+				}
+				if (kws) item.tags = kws;
+				if (abs) item.abstractNote = Zotero.Utilities.trimInternal(abs);
+				item.complete();
+			});
 			translator.translate();
-			Zotero.done();
 		});
-	}
+	}, function() {Zotero.done;});
 	Zotero.wait();
 }');
 
