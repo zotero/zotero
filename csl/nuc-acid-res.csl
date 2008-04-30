@@ -57,8 +57,6 @@
   </macro>
   <macro name="cite-date">
     <date variable="issued">
-      <date-part name="month" suffix=" "/>
-      <date-part name="day" suffix=", "/>
       <date-part name="year"/>
     </date>
   </macro>
@@ -84,7 +82,7 @@
   <bibliography>
     <option name="hanging-indent" value="true"/>
     <option name="et-al-min" value="11"/>
-    <option name="et-al-use-first" value="1"/>
+    <option name="et-al-use-first" value="10"/>
     <layout suffix=".">
       <text variable="citation-number" suffix=". "/>
       <text macro="author"/>
