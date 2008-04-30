@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-30 21:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-30 21:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1823,7 +1823,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('0eeb2ac0-fbaf-4994-b98f-203d273eb9fa', '1.0.0b4.r5', '', '2008-04-23 09:45:00', '0', '100', '4', 'Inter-Research Science Center', 'Michael Berkowitz', 'http://www.int-res.com/', 
+REPLACE INTO translators VALUES ('0eeb2ac0-fbaf-4994-b98f-203d273eb9fa', '1.0.0b4.r5', '', '2008-04-30 21:30:00', '1', '100', '4', 'Inter-Research Science Center', 'Michael Berkowitz', 'http://www.int-res.com/', 
 'function detectWeb(doc, url) {
 	if (doc.evaluate(''//div[@class="journal-index"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext() ||
 		doc.evaluate(''//div[@class="tx-indexedsearch-res"]//tr[1]/td[2]//a'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
@@ -1887,10 +1887,10 @@ function doWeb(doc, url) {
 		var item = new Zotero.Item("journalArticle");
 		item.title = Zotero.Utilities.trimInternal(doc.evaluate(''//div[@class="bb"]/h2'', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
 		item.url = doc.location.href;
-		var voliss = item.url.match(/v(\d+)\/n(\d+)\/p([^/]+)\//);
+		var voliss = item.url.match(/v(\d+)\/(n(\d+)\/)?p([^/]+)\//);
 		item.volume = voliss[1];
-		item.issue = voliss[2];
-		item.pages = voliss[3];
+		item.pages = voliss[4];
+		if (voliss[2]) item.issue = voliss[3];
 		var jour = item.url.match(/abstracts\/([^/]+)\//)[1];
 		item.publicationTitle = journals[jour][0];
 		item.journalAbbreviation = journals[jour][1];
