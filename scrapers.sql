@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-30 18:15:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-30 19:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1086,6 +1086,78 @@ REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b
 		
 		Zotero.done();
 	})
+	Zotero.wait();
+}');
+
+REPLACE INTO translators VALUES ('79f6f9ed-537a-4d4f-8270-c4fbaafdf327', '1.0.0b4.r5', '', '2008-04-30 19:30:00', '0', '100', '4', 'Emerald Publishing', 'Michael Berkowitz', 'www.emeraldinsight.com/', 
+'function detectWeb(doc, url) {
+	if (url.match(''searchQuickOptions.do'')) {
+		return "multiple"
+	} else if (url.match(''viewContentItem'')) {
+		return "journalArticle";
+	}
+}', 
+'var tags  = {
+	journal:"publicationTitle",
+	year:"date",
+	volume:"volume",
+	issue:"issue",
+	page:"pages",
+	doi:"DOI",
+//	publisher:"repository",
+	''article url'':"url",
+	abstract:"abstractNote"
+}
+
+function doWeb(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	var arts = new Array();
+	if (detectWeb(doc, url) == "multiple") {
+		var items = new Object();
+		var links = doc.evaluate(''//td[3][@class="resultTd"]/a[1]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var link;
+		while (link = links.iterateNext()) {
+			items[link.href] = link.textContent;
+		}
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			arts.push(i);
+		}
+	} else {
+		arts = [url];
+	}
+	Zotero.Utilities.processDocuments(arts, function(doc) {
+		var item = new Zotero.Item("journalArticle");
+		item.title = Zotero.Utilities.trimInternal(doc.title.split(''-'')[1]);
+		
+		var data = new Object();
+		var values = doc.evaluate(''//div[@class="browseBoxGreen"]/div[@class="toc"]/p[@class="inline"]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var fields = doc.evaluate(''//div[@class="browseBoxGreen"]/div[@class="toc"]/h3'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var value;
+		var field;
+		while ((field = fields.iterateNext()) && (value = values.iterateNext())) {
+			data[Zotero.Utilities.trimInternal(field.textContent.toLowerCase()).replace('':'', '''')] = value.textContent;
+		}
+		var values = doc.evaluate(''//div[@id="centerLeft"]/p[@class="inline"]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var fields = doc.evaluate(''//div[@id="centerLeft"]/h3[@class="inline"]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		while ((field = fields.iterateNext()) && (value = values.iterateNext())) {
+			data[Zotero.Utilities.trimInternal(field.textContent.toLowerCase()).replace('':'', '''')] = value.textContent;
+		}
+		for (var tag in data) {
+			if (tags[tag]) item[tags[tag]] = Zotero.Utilities.trimInternal(data[tag]);
+		}
+		item.attachments = [{url:item.url, title:"Emerald Insight Snapshot", mimeType:"text/html"}];
+		item.tags = Zotero.Utilities.trimInternal(data[''keywords'']).split(/,\s+/);
+		var authors = data[''author(s)''].split(/,\s+/);
+		for each (var aut in authors) {
+			item.creators.push(Zotero.Utilities.cleanAuthor(aut, "author"));
+		}
+		item.complete();
+	}, function() {Zotero.done;});
 	Zotero.wait();
 }');
 
