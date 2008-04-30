@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-30 17:15:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-04-30 18:15:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -930,7 +930,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b3.r1', '', '2008-01-30 07:30:00', '1', '100', '4', 'Library Catalog (Voyager)', 'Simon Kornblith', 'Pwebrecon\.cgi', 
+REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b3.r1', '', '2008-04-30 18:15:00', '1', '100', '4', 'Library Catalog (Voyager)', 'Simon Kornblith', 'Pwebrecon\.cgi', 
 'function detectWeb(doc, url) {
 	var export_options = doc.forms.namedItem(''frm'').elements.namedItem(''RD'').options;
 	for(var i in export_options) {
@@ -942,7 +942,8 @@ REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b
 		|| export_options[i].text == ''MARC UTF-8''
 		|| export_options[i].text == ''UTF-8 MARC (Unicode)''
 		|| export_options[i].text == ''UTF8-Unicode''
-		|| export_options[i].text == ''MARC (non-Unicode/MARC-8)'') {
+		|| export_options[i].text == ''MARC (non-Unicode/MARC-8)''
+		|| export_options[i].text == ''MARC communication format'') {
 			// We have an exportable single record
 			if(doc.forms.namedItem(''frm'').elements.namedItem(''RC'')) {
 				return "multiple";
@@ -1042,7 +1043,8 @@ REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b
 		|| export_options[i].text == ''UTF-8 MARC (Unicode)''
 		|| export_options[i].text == ''UTF8-Unicode''
 		|| export_options[i].text == ''MARC UTF-8''
-		|| export_options[i].text == ''MARC (Unicode/UTF-8)'') {
+		|| export_options[i].text == ''MARC (Unicode/UTF-8)''
+		|| export_options[i].text == ''MARC communication format'') {
 			unicode = i;
 		}
 	}
@@ -21464,7 +21466,7 @@ function doExport() {
 }');
 
 
-REPLACE INTO translators VALUES ('a6ee60df-1ddc-4aae-bb25-45e0537be973', '1.0.0b3.r1', '', '2008-04-28 17:50:00', '1', '100', '1', 'MARC', 'Simon Kornblith', 'marc', 
+REPLACE INTO translators VALUES ('a6ee60df-1ddc-4aae-bb25-45e0537be973', '1.0.0b3.r1', '', '2008-04-30 18:15:00', '1', '100', '1', 'MARC', 'Simon Kornblith', 'marc', 
 'function detectImport() {
 	var marcRecordRegexp = /^[0-9]{5}[a-z ]{3}$/
 	var read = Zotero.read(8);
@@ -21798,6 +21800,7 @@ record.prototype.translate = function(item) {
 	this._associateDBField(item, "050", "ab", "callNumber");
 	this._associateDBField(item, "090", "a", "callNumber");
 	this._associateDBField(item, "099", "a", "callNumber");
+	this._associateDBField(item, "955", "a", "callNumber");
 	
 	//German
 	if (!item.place) this._associateDBField(item, "410", "a", "place");
