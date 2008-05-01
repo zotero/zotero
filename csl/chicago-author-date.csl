@@ -263,6 +263,7 @@
   </macro>
   <macro name="collection-title">
     <text variable="collection-title"/>
+    <text variable="collection-number" prefix=" "/>
   </macro>
   <macro name="event">
     <group>

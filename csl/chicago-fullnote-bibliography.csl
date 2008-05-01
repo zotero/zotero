@@ -304,6 +304,10 @@
     </choose>
     <text variable="container-title" font-style="italic"/>
   </macro>
+  <macro name="collection-title">
+    <text variable="collection-title"/>
+    <text variable="collection-number" prefix=" "/>
+  </macro>
   <macro name="edition-note">
     <choose>
       <if type="book chapter" match="any">
@@ -619,7 +623,7 @@
             <text macro="container-contributors-note"/>
           </group>
           <text macro="locators-note"/>
-          <text variable="collection-title" prefix=", "/>
+          <text macro="collection-title" prefix=", "/>
           <text macro="issue-note"/>
           <text macro="locators-newspaper" prefix=", "/>
           <text macro="point-locators"/>
@@ -650,7 +654,7 @@
         </group>
       </group>
       <text macro="locators"/>
-      <text variable="collection-title" text-case="capitalize-first" prefix=". "/>
+      <text macro="collection-title" prefix=". "/>
       <text macro="issue"/>
       <text macro="locators-newspaper" prefix=", "/>
       <text macro="locators-journal"/>
