@@ -219,6 +219,10 @@
       </if>
     </choose>
   </macro>
+  <macro name="collection-title">
+    <text variable="collection-title"/>
+    <text variable="collection-number" prefix=" "/>
+  </macro>
   <macro name="locators">
     <choose>
       <if type="article-journal">
@@ -422,7 +426,7 @@
         </group>
       </group>
       <text macro="locators"/>
-      <text variable="collection-title" text-case="capitalize-first" prefix=". "/>
+      <text macro="collection-title" prefix=". "/>
       <text macro="issue"/>
       <text macro="locators-newspaper" prefix=", "/>
       <text macro="pages-article"/>
