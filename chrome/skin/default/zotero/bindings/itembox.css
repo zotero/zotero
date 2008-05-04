@@ -1,0 +1,104 @@
+scrollbox
+{
+	overflow: visible;
+}
+
+row, tagsbox row
+{
+	margin: 0 0 1px;
+	min-height: 1em;
+}
+
+textbox, tagsbox textbox
+{
+	margin-top: 0;
+	margin-bottom: -1px;
+}
+
+#go-buttons button
+{
+	list-style-image: url('chrome://zotero/skin/toolbar-go-arrow.png');
+	-moz-box-direction: reverse;
+	-moz-box-flex: 1;
+}
+
+#go-buttons button[disabled=true]
+{
+	list-style-image: url('chrome://zotero/skin/toolbar-go-arrow-disabled.png');
+}
+
+
+/* DEBUG: this doesn't seem to work, unfortunately
+label[singleField=false]:after
+{
+	content:",";
+}
+*/
+
+/* metadata field names */
+row > label:first-child,
+row > toolbarbutton .toolbarbutton-text /* creator type menu */
+{
+	text-align: right;
+	font-weight: bold;
+}
+
+row label:first-child[isButton=true]:hover
+{
+	cursor: pointer;
+}
+
+row label
+{
+	-moz-user-focus: ignore;
+}
+
+ /* creator type menu */
+row > toolbarbutton
+{
+	margin: 0 2px 0 0;
+	padding: 0 0 0 5px;
+	list-style-image: url("chrome://browser/skin/dropmark-nav.png");
+	-moz-image-region: rect(3px, 14px, 19px, 0px);
+}
+row > toolbarbutton .toolbarbutton-text
+{
+	margin-top: -1px;
+}
+row > toolbarbutton .toolbarbutton-icon,
+row > toolbarbutton .toolbarbutton-menu-dropmarker
+{
+	margin: 0;
+	padding: 0;
+}
+
+
+/* no space between last name and comma */
+row hbox label:first-child
+{
+	margin-right: 1px;
+}
+
+row hbox label.comma
+{
+	
+}
+
+row vbox[fieldname=abstractNote],
+row vbox[fieldname=extra]
+{
+	margin-top: 1px;
+	margin-left: 6px;
+}
+
+hbox.zotero-date-field-status
+{
+	margin-right: 5px;
+}
+
+hbox.zotero-date-field-status label
+{
+	font-weight: bold;
+	color: #666;
+	margin: 0 0 0 1px;
+}

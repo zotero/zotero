@@ -1,4 +1,4 @@
--- 20
+-- 21
 
 -- This file creates system tables that can be safely wiped and reinitialized
 -- at any time, as long as existing ids are preserved.
@@ -101,6 +101,13 @@ CREATE TABLE itemTypeCreatorTypes (
     FOREIGN KEY (creatorTypeID) REFERENCES creatorTypes(creatorTypeID)
 );
     
+DROP TABLE IF EXISTS syncObjectTypes;
+CREATE TABLE syncObjectTypes (
+    syncObjectTypeID INTEGER PRIMARY KEY,
+    name TEXT
+);
+CREATE INDEX syncObjectTypes_name ON syncObjectTypes(name);
+
 DROP TABLE IF EXISTS transactionSets;
 CREATE TABLE transactionSets (
     transactionSetID INTEGER PRIMARY KEY,
@@ -1237,3 +1244,8 @@ INSERT INTO "charsets" VALUES(165, 'x-unicode-2-0-utf-7');
 INSERT INTO "charsets" VALUES(166, 'x-x-big5');
 INSERT INTO "charsets" VALUES(167, 'x0201');
 INSERT INTO "charsets" VALUES(168, 'x0212');
+
+INSERT INTO "syncObjectTypes" VALUES(1, 'collection');
+INSERT INTO "syncObjectTypes" VALUES(2, 'creator');
+INSERT INTO "syncObjectTypes" VALUES(3, 'item');
+INSERT INTO "syncObjectTypes" VALUES(4, 'savedSearch');

@@ -1,0 +1,2076 @@
+<?xml version="1.0"?>
+<!--
+    ***** BEGIN LICENSE BLOCK *****
+    
+    Copyright (c) 2006  Center for History and New Media
+                        George Mason University, Fairfax, Virginia, USA
+                        http://chnm.gmu.edu
+    
+    Licensed under the Educational Community License, Version 1.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+    
+    http://www.opensource.org/licenses/ecl1.php
+    
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+    
+    ***** END LICENSE BLOCK *****
+-->
+
+<!DOCTYPE bindings SYSTEM "chrome://zotero/locale/zotero.dtd">
+<!-- <!DOCTYPE bindings SYSTEM "chrome://zotero/locale/itembox.dtd"> -->
+
+<bindings xmlns="http://www.mozilla.org/xbl"
+		  xmlns:xbl="http://www.mozilla.org/xbl"
+		  xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	
+	<binding id="item-box">
+		<resources>
+			<stylesheet src="chrome://zotero/skin/bindings/itembox.css"/>
+			<stylesheet src="chrome://zotero-platform/content/itembox.css"/>
+		</resources>
+		
+		<implementation>
+			<!--
+				Public properties
+			-->
+			<field name="clickable">false</field>
+			<field name="editable">false</field>
+			<field name="saveOnEdit">false</field>
+			<field name="displayGoButtons">false</field>
+			<field name="showTypeMenu">false</field>
+			<field name="hideEmptyFields">false</field>
+			<field name="clickByRow">false</field> <!-- Click entire row rather than just field value -->
+			<field name="clickByItem">false</field>
+			
+			<field name="clickHandler"/>
+			<field name="blurHandler"/>
+			
+			<!-- Modes are predefined settings groups for particular tasks -->
+			<field name="_mode">"view"</field>
+			<property name="mode" onget="return this._mode;">
+				<setter>
+				<![CDATA[
+					this.clickable = false;
+					this.editable = false;
+					this.saveOnEdit = false;
+					this.displayGoButtons = false;
+					this.showTypeMenu = false;
+					this.hideEmptyFields = false;
+					this.clickByRow = false;
+					this.clickByItem = false;
+					
+					switch (val) {
+						case 'view':
+							break;
+						
+						case 'edit':
+							this.clickable = true;
+							this.editable = true;
+							this.saveOnEdit = true
+							this.displayGoButtons = true;
+							this.showTypeMenu = true;
+							this.clickHandler = this.showEditor;
+							this.blurHandler = this.hideEditor;
+							break;
+						
+						case 'merge':
+							//this.hideEmptyFields = true;
+							this.clickByItem = true;
+							break;
+						
+						case 'mergeedit':
+							this.clickable = true;
+							this.editable = true;
+							this.saveOnEdit = false;
+							this.displayGoButtons = false;
+							this.showTypeMenu = true;
+							this.clickHandler = this.showEditor;
+							this.blurHandler = this.hideEditor;
+							break;
+						
+						default:
+							throw ("Invalid mode '" + val + "' in itembox.xml");
+					}
+					
+					this._mode = val;
+					document.getAnonymousNodes(this)[0].setAttribute('mode', val);
+				]]>
+				</setter>
+			</property>
+			
+			<field name="_item"/>
+			<property name="item"
+				onget="return this._item;"
+				onset="this._item = val; this.refresh();">
+			</property>
+			
+			<!-- .ref is an alias for .item -->
+			<property name="ref"
+				onget="return this._item;"
+				onset="this._item = val; this.refresh();">
+			</property>
+			
+			
+			<!--
+				 An array of field names that should be shown
+				 even if they're empty and hideEmptyFields is set
+			-->
+			<field name="_visibleFields">[]</field>
+			<property name="visibleFields">
+				<setter>
+				<![CDATA[
+					if (val.constructor.name != 'Array') {
+						throw ('visibleFields must be an array in <itembox>.visibleFields');
+					}
+					
+					this._visibleFields = val;
+				]]>
+				</setter>
+			</property>
+			
+			<!--
+				 An array of field names that should be clickable
+				 even if this.clickable is false
+			-->
+			<field name="_clickableFields">[]</field>
+			<property name="clickableFields">
+				<setter>
+				<![CDATA[
+					if (val.constructor.name != 'Array') {
+						throw ('clickableFields must be an array in <itembox>.clickableFields');
+					}
+					
+					this._clickableFields = val;
+				]]>
+				</setter>
+			</property>
+			
+			<!--
+				 An array of field names that should be editable
+				 even if this.editable is false
+			-->
+			<field name="_editableFields">[]</field>
+			<property name="editableFields">
+				<setter>
+				<![CDATA[
+					if (val.constructor.name != 'Array') {
+						throw ('editableFields must be an array in <itembox>.editableFields');
+					}
+					
+					this._editableFields = val;
+				]]>
+				</setter>
+			</property>
+			
+			
+			<!--
+				 An array of field names in the order they should appear
+				 in the list; empty spaces can be created with null
+			-->
+			<field name="_fieldOrder">[]</field>
+			<property name="fieldOrder">
+				<setter>
+				<![CDATA[
+					if (val.constructor.name != 'Array') {
+						throw ('fieldOrder must be an array in <itembox>.fieldOrder');
+					}
+					
+					this._fieldOrder = val;
+				]]>
+				</setter>
+			</property>
+			
+			
+			<!-- Private properties -->
+			<property name="_dynamicFields" onget="return this._id('dynamic-fields')"/>
+			<property name="_itemTypeMenu" onget="return this._id('item-type-menu')"/>
+			<property name="_creatorTypeMenu" onget="return this._id('creator-type-menu')"/>
+			
+			<field name="_selectField"/>
+			<field name="_beforeRow"/>
+			<field name="_activeScrollbox"/>
+			<field name="_addCreatorRow"/>
+			<field name="_creatorCount"/>
+			
+			<field name="_lastTabIndex"/>
+			<field name="_tabDirection"/>
+			<field name="_tabIndexMinCreators" readonly="true">10</field>
+			<field name="_tabIndexMaxCreators" readonly="true">0</field>
+			<field name="_tabIndexMinFields" readonly="true">1000</field>
+			<field name="_tabIndexMaxInfoFields" readonly="true">0</field>
+			<field name="_tabIndexMaxTagsFields" readonly="true">0</field>
+			
+			<property name="_defaultFirstName"
+				onget="return '(' + Zotero.getString('pane.item.defaultFirstName') + ')'"/>
+			<property name="_defaultLastName"
+				onget="return '(' + Zotero.getString('pane.item.defaultLastName') + ')'"/>
+			<property name="_defaultFullName"
+				onget="return '(' + Zotero.getString('pane.item.defaultFullName') + ')'"/>
+			
+			<method name="refresh">
+				<body>
+				<![CDATA[
+					Zotero.debug('Refreshing item box');
+					
+					if (this.clickByItem) {
+						var itemBox = document.getAnonymousNodes(this)[0];
+						itemBox.setAttribute('onclick',
+							'document.getBindingParent(this).clickHandler(this)');
+					}
+					
+					if (this.displayGoButtons) {
+						// Enable/disable "View =>" button
+						testView: try {
+							var viewButton = document.getElementById('view-button');
+							
+							viewButton.removeAttribute('viewSnapshot');
+							viewButton.removeAttribute('viewURL');
+							viewButton.setAttribute('label',
+								Zotero.getString('pane.item.goToURL.online.label'));
+							viewButton.setAttribute('tooltiptext',
+								Zotero.getString('pane.item.goToURL.online.tooltip'));
+							
+							var spec = false, validURI = false;
+							
+							var uri = Components.classes["@mozilla.org/network/standard-url;1"].
+									createInstance(Components.interfaces.nsIURI);
+							
+							// First try to find a snapshot matching the item's URL field
+							var snapID = this.item.getBestSnapshot();
+							if (snapID) {
+								spec = Zotero.Items.get(snapID).getLocalFileURL();
+								uri.spec = spec;
+								if (!uri.scheme || uri.scheme != 'file') {
+									snapID = false;
+									spec = false;
+								}
+							}
+							
+							// If that fails, try the URL field itself
+							if (!spec) {
+								spec = this.item.getField('url');
+								uri.spec = spec;
+								if (!(uri.scheme && (uri.host || uri.scheme == 'file'))) {
+									spec = false;
+								}
+							}
+							
+							if (!spec) {
+								break testView;
+							}
+							
+							validURI = true;
+							
+							if (snapID) {
+								viewButton.setAttribute('label',
+									Zotero.getString('pane.item.goToURL.snapshot.label'));
+								viewButton.setAttribute('tooltiptext',
+									Zotero.getString('pane.item.goToURL.snapshot.tooltip'));
+								viewButton.setAttribute('viewSnapshot', snapID);
+							}
+							else {
+								viewButton.setAttribute('viewURL', spec);
+							}
+						}
+						catch (e) {
+							Zotero.debug(e);
+						}
+						viewButton.setAttribute('disabled', !validURI);
+						
+						// Enable/disable "Locate =>" (OpenURL) button
+						switch (this.item.itemTypeID)
+						{
+							// DEBUG: handle descendents of these types as well?
+							case Zotero.ItemTypes.getID('book'):
+							case Zotero.ItemTypes.getID('bookSection'):
+							case Zotero.ItemTypes.getID('journalArticle'):
+							case Zotero.ItemTypes.getID('thesis'):
+								var openURL = true;
+								break;
+							
+							default:
+								var openURL = false;
+						}
+						document.getElementById('openurl-button').setAttribute('disabled', !openURL);
+						
+						this._id('go-buttons').hidden = false;
+					}
+					else {
+						this._id('go-buttons').hidden = true;
+					}
+					
+					// Item type menu
+					if (this.showTypeMenu) {
+						// Build item type menu if it hasn't been built yet
+						if (!this._itemTypeMenu.firstChild.hasChildNodes()) {
+							var itemTypes = Zotero.ItemTypes.getTypes();
+							for (var i=0; i<itemTypes.length; i++) {
+								var name = itemTypes[i].name;
+								if (name != 'attachment' && name != 'note') {
+									this._itemTypeMenu.appendItem(Zotero.getString("itemTypes." + name), itemTypes[i].id);
+								}
+							}
+						}
+						
+						var listitems = this._itemTypeMenu.firstChild.childNodes;
+						for (var i=0, len=listitems.length; i < len; i++) {
+							if (listitems[i].getAttribute('value') == this.item.itemTypeID) {
+								this._itemTypeMenu.selectedIndex = i;
+							}
+						}
+						
+						this._itemTypeMenu.parentNode.hidden = false;
+					}
+					else {
+						this._itemTypeMenu.parentNode.hidden = true;
+					}
+					
+					
+					//
+					// Clear and rebuild metadata fields
+					//
+					while (this._dynamicFields.hasChildNodes()) {
+						this._dynamicFields.removeChild(this._dynamicFields.firstChild);
+					}
+					
+					var fieldNames = [];
+					
+					// Manual field order
+					if (this._fieldOrder.length) {
+						for each(var field in this._fieldOrder) {
+							fieldNames.push(field);
+						}
+					}
+					// Get field order from database
+					else {
+						if (!this.showTypeMenu) {
+							fieldNames.push("itemType");
+						}
+						
+						var fields = Zotero.ItemFields.getItemTypeFields(this.item.getField("itemTypeID"));
+						
+						for (var i=0; i<fields.length; i++) {
+							fieldNames.push(Zotero.ItemFields.getName(fields[i]));
+						}
+						
+						fieldNames.push("dateAdded", "dateModified");
+					}
+					
+					for (var i=0; i<fieldNames.length; i++) {
+						var fieldName = fieldNames[i];
+						var val = '';
+						
+						if (fieldName) {
+							var fieldID = Zotero.ItemFields.getID(fieldName);
+							if (fieldID && !Zotero.ItemFields.isValidForType(fieldID, this.item.itemTypeID)) {
+								fieldName = null;
+							}
+						}
+						
+						if (fieldName) {
+							// createValueElement() adds the itemTypeID as an attribute
+							// and converts it to a localized string for display
+							if (fieldName == 'itemType') {
+								val = this.item.getField('itemTypeID');
+							}
+							else {
+								val = this.item.getField(fieldName);
+							}
+							
+							var fieldIsClickable = this._fieldIsClickable(fieldName);
+							
+							if (!val && this.hideEmptyFields
+									&& this._visibleFields.indexOf(fieldName) == -1) {
+								continue;
+							}
+							
+							// Start tabindex at 1000 after creators
+							var tabindex = fieldIsClickable
+								? (i>0 ? this._tabIndexMinFields + i : 1) : 0;
+							this._tabIndexMaxInfoFields = Math.max(this._tabIndexMaxInfoFields, tabindex);
+							
+							if (fieldIsClickable &&
+									!this.item.isPrimaryField(fieldName) &&
+									Zotero.ItemFields.isFieldOfBase(Zotero.ItemFields.getID(fieldName), 'date')) {
+								this.addDateRow(fieldNames[i], this.item.getField(fieldName, true), tabindex);
+								continue;
+							}
+						}
+						
+						var valueElement = this.createValueElement(
+							val, fieldName, tabindex
+						);
+						
+						var label = document.createElement("label");
+						label.setAttribute('fieldname', fieldName);
+						
+						var prefix = '';
+						// Add '(...)' before 'Abstract:' for collapsed abstracts
+						if (fieldName == 'abstractNote') {
+							if (val && !Zotero.Prefs.get('lastAbstractExpand')) {
+								prefix = '(...) ';
+							}
+						}
+						
+						if (fieldName) {
+							label.setAttribute("value", prefix +
+								Zotero.ItemFields.getLocalizedString(this.item.itemTypeID, fieldName) + ":");
+						}
+						
+						if (fieldName == 'url' && val) {
+							label.setAttribute("isButton", true);
+							// TODO: make getFieldValue non-private and use below instead
+							label.setAttribute("onclick", "ZoteroPane.loadURI(this.nextSibling.firstChild ? this.nextSibling.firstChild.nodeValue : this.nextSibling.value, event)");
+							label.setAttribute("tooltiptext", Zotero.getString('pane.item.goToURL.online.tooltip'));
+						}
+						else if (fieldName == 'abstractNote') {
+							label.setAttribute("onclick",
+								"if (this.nextSibling.inputField) { this.nextSibling.inputField.blur(); } "
+								+ "else { document.getBindingParent(this).toggleAbstractExpand(this); }");
+						}
+						else {
+							label.setAttribute("onclick",
+								"if (this.nextSibling.inputField) { this.nextSibling.inputField.blur(); }");
+						}
+						
+						this.addDynamicRow(label, valueElement);
+						
+						if (fieldName && this._selectField == fieldName) {
+							this.showEditor(valueElement);
+						}
+					}
+					this._selectField = false;
+					
+					//
+					// Creators
+					//
+					
+					// Creator type menu
+					if (this.editable) {
+						while (this._creatorTypeMenu.hasChildNodes()) {
+							this._creatorTypeMenu.removeChild(this._creatorTypeMenu.firstChild);
+						}
+						
+						var creatorTypes = Zotero.CreatorTypes.getTypesForItemType(this.item.itemTypeID);
+						var localized = {};
+						for (var i=0; i<creatorTypes.length; i++) {
+							localized[creatorTypes[i]['name']]
+								= Zotero.getString('creatorTypes.' + creatorTypes[i]['name']);
+						}
+						
+						for (var i in localized) {
+							var menuitem = document.createElement("menuitem");
+							menuitem.setAttribute("label", localized[i]);
+							menuitem.setAttribute("typeid", Zotero.CreatorTypes.getID(i));
+							this._creatorTypeMenu.appendChild(menuitem);
+						}
+					}
+					
+					// Creator rows
+					
+					// Place, in order of preference, after title, after type,
+					// or at beginning
+					var field = this._dynamicFields.getElementsByAttribute('fieldname', 'title').item(0);
+					if (!field) {
+						var field = this._dynamicFields.getElementsByAttribute('fieldname', 'itemType').item(0);
+					}
+					if (field) {
+						this._beforeRow = field.parentNode.nextSibling;
+					}
+					else {
+						this._beforeRow = this._dynamicFields.firstChild;
+					}
+					
+					this._creatorCount = 0;
+					if (this.item.numCreators() > 0) {
+						for (var i = 0, len=this.item.numCreators(); i<len; i++) {
+							this.addCreatorRow(this.item.getCreator(i).ref,
+								this.item.getCreator(i).creatorTypeID);
+						}
+						
+						if (this._addCreatorRow) {
+							this.addCreatorRow(false, false, true);
+							this._addCreatorRow = false;
+						}
+					}
+					else if (this.editable) {
+						// Add default row
+						this.addCreatorRow(false, false, true, true);
+					}
+					
+					
+					var focusMode = 'info';
+					var focusBox = this._dynamicFields;
+				]]>
+				</body>
+			</method>
+			
+			
+			<method name="addDynamicRow">
+				<parameter name="label"/>
+				<parameter name="value"/>
+				<parameter name="beforeElement"/>
+				<body>
+				<![CDATA[
+					var row = document.createElement("row");
+					
+					// Add click event to row
+					if (this._rowIsClickable(value.getAttribute('fieldname'))) {
+						row.className = 'zotero-clicky';
+						row.addEventListener('click', function (event) {
+							document.getBindingParent(this).clickHandler(this);
+						}, false);
+					}
+					
+					row.appendChild(label);
+					row.appendChild(value);
+					if (beforeElement) {
+						this._dynamicFields.insertBefore(row, this._beforeRow);
+					}
+					else {
+						this._dynamicFields.appendChild(row);
+					}
+				]]>
+				</body>
+			</method>
+			
+			
+			<method name="addCreatorRow">
+				<parameter name="creator"/>
+				<parameter name="creatorTypeID"/>
+				<parameter name="unsaved"/>
+				<parameter name="defaultRow"/>
+				<body>
+				<![CDATA[
+					if (!creator) {
+						creator = {
+							firstName: '',
+							lastName: '',
+							fieldMode: Zotero.Prefs.get('lastCreatorFieldMode')
+						};
+					}
+					
+					// Disable the "+" button on previous rows
+					var elems = this._dynamicFields.getElementsByAttribute('value', '+');
+					if (elems.length) {
+						this.disableButton(elems[elems.length-1]);
+					}
+					
+					if (creator.fieldMode == 1) {
+						var firstName = '';
+						var lastName = creator.lastName ? creator.lastName : this._defaultFullName;
+					}
+					else {
+						var firstName = creator.firstName ? creator.firstName : this._defaultFirstName;
+						var lastName = creator.lastName ? creator.lastName : this._defaultLastName;
+					}
+					
+					// Use the first entry in the drop-down for the default type if none specified
+					var typeID = creatorTypeID ?
+						creatorTypeID : this._creatorTypeMenu.childNodes[0].getAttribute('typeid');
+					
+					var label = document.createElement("toolbarbutton");
+					label.setAttribute("label",
+						Zotero.getString('creatorTypes.'
+							+ Zotero.CreatorTypes.getName(typeID)) + ":");
+					label.setAttribute("typeid", typeID);
+					label.setAttribute("popup", "creator-type-menu");
+					label.setAttribute("fieldname", 'creator-' + this._creatorCount + '-typeID');
+					label.className = 'zotero-clicky';
+					
+					// getCreatorFields(), switchCreatorMode() and handleCreatorAutoCompleteSelect()
+					// may need need to be adjusted if this DOM structure changes
+					var hbox = document.createElement("hbox");
+					
+					// Name
+					var firstlast = document.createElement("hbox");
+					firstlast.setAttribute("flex","1");
+					var tabindex = this._tabIndexMinCreators + (this._creatorCount * 2);
+					var fieldName = 'creator-' + this._creatorCount + '-lastName';
+					var lastNameLabel = firstlast.appendChild(
+						this.createValueElement(
+							lastName,
+							fieldName,
+							tabindex
+						)
+					);
+					
+					// Comma
+					var comma = document.createElement('label');
+					comma.setAttribute('value', ',');
+					comma.className = 'comma';
+					firstlast.appendChild(comma);
+					
+					var fieldName = 'creator-' + this._creatorCount + '-firstName';
+					firstlast.appendChild(
+						this.createValueElement(
+							firstName,
+							fieldName,
+							tabindex + 1
+						)
+					);
+					if (creator.fieldMode) {
+						firstlast.lastChild.setAttribute('hidden', true);
+					}
+					this._tabIndexMaxCreators = Math.max(this._tabIndexMaxCreators, tabindex);
+					
+					hbox.appendChild(firstlast);
+					
+					// Single/double field toggle
+					var toggleButton = document.createElement('toolbarbutton');
+					toggleButton.setAttribute('fieldname',
+						'creator-' + this._creatorCount + '-fieldMode');
+					toggleButton.className = 'zotero-clicky';
+					hbox.appendChild(toggleButton);
+					
+					// Minus (-) button
+					var removeButton = document.createElement('label');
+					removeButton.setAttribute("value","-");
+					// If default first row, don't let user remove it
+					if (defaultRow) {
+						this.disableButton(removeButton);
+					}
+					else {
+						removeButton.setAttribute("class","zotero-clicky");
+						removeButton.setAttribute("onclick",
+							"document.getBindingParent(this).removeCreator("
+							+ this._creatorCount
+							+ ", this.parentNode.parentNode)");
+					}
+					hbox.appendChild(removeButton);
+					
+					// Plus (+) button
+					var addButton = document.createElement('label');
+					addButton.setAttribute("value","+");
+					addButton.setAttribute("class", "zotero-clicky");
+					// If row isn't saved, don't let user add more
+					if (unsaved) {
+						this.disableButton(addButton);
+					}
+					else {
+						this._enablePlusButton(addButton, typeID, creator.fieldMode);
+					}
+					hbox.appendChild(addButton);
+					
+					this._creatorCount++;
+					
+					if (!this.editable) {
+						toggleButton.hidden = true;
+						removeButton.hidden = true;
+						addButton.hidden = true;
+					}
+					
+					this.addDynamicRow(label, hbox, true);
+					
+					// Set single/double field toggle mode
+					if (creator.fieldMode) {
+						this.switchCreatorMode(hbox.parentNode, 1, true);
+					}
+					else {
+						this.switchCreatorMode(hbox.parentNode, 0, true);
+					}
+					
+					// Focus new rows
+					if (unsaved && !defaultRow){
+						lastNameLabel.click();
+					}
+				]]>
+				</body>
+			</method>
+			
+			
+			<method name="addDateRow">
+				<parameter name="field"/>
+				<parameter name="value"/>
+				<parameter name="tabindex"/>
+				<body>
+				<![CDATA[
+					var label = document.createElement("label");
+					label.setAttribute("value", Zotero.getString("itemFields." + field) + ':');
+					label.setAttribute("fieldname", field);
+					label.setAttribute("onclick", "this.nextSibling.firstChild.blur()");
+					
+					var hbox = document.createElement("hbox");
+					var elem = this.createValueElement(
+						Zotero.Date.multipartToStr(value),
+						field,
+						tabindex
+					);
+					
+					// y-m-d status indicator
+					var datebox = document.createElement('hbox');
+					datebox.className = 'zotero-date-field-status';
+					var year = document.createElement('label');
+					var month = document.createElement('label');
+					var day = document.createElement('label');
+					year.setAttribute('value', Zotero.getString('date.abbreviation.year'));
+					month.setAttribute('value', Zotero.getString('date.abbreviation.month'));
+					day.setAttribute('value', Zotero.getString('date.abbreviation.day'));
+					
+					// Display the date parts we have and hide the others
+					var sqldate = Zotero.Date.multipartToSQL(value);
+					year.setAttribute('hidden', !Zotero.Date.sqlHasYear(sqldate));
+					month.setAttribute('hidden', !Zotero.Date.sqlHasMonth(sqldate));
+					day.setAttribute('hidden', !Zotero.Date.sqlHasDay(sqldate));
+					
+					datebox.appendChild(year);
+					datebox.appendChild(month);
+					datebox.appendChild(day);
+					
+					var hbox = document.createElement('hbox');
+					hbox.setAttribute('flex', 1);
+					hbox.appendChild(elem);
+					hbox.appendChild(datebox);
+					
+					this.addDynamicRow(label, hbox);
+				]]>
+				</body>
+			</method>
+			
+			
+			<method name="switchCreatorMode">
+				<parameter name="row"/>
+				<parameter name="fieldMode"/>
+				<parameter name="initial"/>
+				<body>
+				<![CDATA[
+					// Change if button position changes
+					// row->hbox->label->label->toolbarbutton
+					var button = row.lastChild.lastChild.previousSibling.previousSibling;
+					var hbox = button.previousSibling;
+					var lastName = hbox.firstChild;
+					var comma = hbox.firstChild.nextSibling;
+					var firstName = hbox.lastChild;
+					
+					// Switch to single-field mode
+					if (fieldMode == 1) {
+						button.setAttribute('image', 'chrome://zotero/skin/textfield-dual.png');
+						button.setAttribute('tooltiptext', Zotero.getString('pane.item.switchFieldMode.two'));
+						lastName.setAttribute('fieldMode', '1');
+						button.setAttribute('onclick', "document.getBindingParent(this).switchCreatorMode(this.parentNode.parentNode, 0)");
+						lastName.setAttribute('flex', '1');
+						
+						// Remove firstname field from tabindex
+						var tab = parseInt(firstName.getAttribute('ztabindex'));
+						firstName.setAttribute('ztabindex', -1);
+						if (this._tabIndexMaxCreators == tab) {
+							this._tabIndexMaxCreators--;
+						}
+						
+						// Hide first name field and prepend to last name field
+						firstName.setAttribute('hidden', true);
+						comma.setAttribute('hidden', true);
+						
+						if (!initial) {
+							var first = this._getFieldValue(firstName);
+							if (first && first != this._defaultFirstName) {
+								var last = this._getFieldValue(lastName);
+								this._setFieldValue(lastName, first + ' ' + last);
+							}
+						}
+						
+						if (this._getFieldValue(lastName) == this._defaultLastName) {
+							this._setFieldValue(lastName, this._defaultFullName);
+						}
+					}
+					// Switch to two-field mode
+					else {
+						button.setAttribute('image', 'chrome://zotero/skin/textfield-single.png');
+						button.setAttribute('tooltiptext', Zotero.getString('pane.item.switchFieldMode.one'));
+						lastName.setAttribute('fieldMode', '0');
+						button.setAttribute('onclick', "document.getBindingParent(this).switchCreatorMode(this.parentNode.parentNode, 1)");
+						lastName.setAttribute('flex', '0');
+						
+						// Add firstname field to tabindex
+						var tab = parseInt(lastName.getAttribute('ztabindex'));
+						firstName.setAttribute('ztabindex', tab + 1);
+						if (this._tabIndexMaxCreators == tab)
+						{
+							this._tabIndexMaxCreators++;
+						}
+						
+						if (!initial) {
+							// Move all but last word to first name field and show it
+							var last = this._getFieldValue(lastName);
+							if (last && last != this._defaultFullName) {
+								var lastNameRE = /(.*?)[ ]*([^ ]+[ ]*)$/;
+								var parts = lastNameRE.exec(last);
+								if (parts[2] && parts[2] != last)
+								{
+									this._setFieldValue(lastName, parts[2]);
+									this._setFieldValue(firstName, parts[1]);
+								}
+							}
+						}
+						
+						if (!this._getFieldValue(firstName)) {
+							this._setFieldValue(firstName, this._defaultFirstName);
+						}
+						
+						if (this._getFieldValue(lastName) == this._defaultFullName) {
+							this._setFieldValue(lastName, this._defaultLastName);
+						}
+						
+						firstName.setAttribute('hidden', false);
+						comma.setAttribute('hidden', false);
+					}
+					
+					// Save the last-used field mode
+					Zotero.debug("Switching lastCreatorFieldMode to " + fieldMode);
+					Zotero.Prefs.set('lastCreatorFieldMode', fieldMode);
+					
+					if (!initial)
+					{
+						var index = button.getAttribute('fieldname').split('-')[1];
+						var fields = this.getCreatorFields(row);
+						fields.fieldMode = fieldMode;
+						this.modifyCreator(index, fields);
+					}
+				]]>
+				</body>
+			</method>
+			
+			
+			<method name="scrollToTop">
+				<body>
+				<![CDATA[
+					if (!this._activeScrollbox) {
+						return;
+					}
+					var sbo = this._activeScrollbox.boxObject;
+					sbo.QueryInterface(Components.interfaces.nsIScrollBoxObject);
+					sbo.scrollTo(0,0);
+				]]>
+				</body>
+			</method>
+			
+			
+			<method name="ensureElementIsVisible">
+				<parameter name="elem"/>
+				<body>
+				<![CDATA[
+					if (!this._activeScrollbox) {
+						return;
+					}
+					var sbo = this._activeScrollbox.boxObject;
+					sbo.QueryInterface(Components.interfaces.nsIScrollBoxObject);
+					sbo.ensureElementIsVisible(elem);
+				]]>
+				</body>
+			</method>
+			
+			
+			<method name="changeTypeTo">
+				<parameter name="itemTypeID"/>
+				<parameter name="menu"/>
+				<body>
+				<![CDATA[
+					if (itemTypeID == this.item.itemTypeID) {
+						return true;
+					}
+					
+					var fieldsToDelete = this.item.getFieldsNotInType(itemTypeID, true);
+					
+					// Generate list of localized field names for display in pop-up
+					if (fieldsToDelete) {
+						var fieldNames = "";
+						for (var i=0; i<fieldsToDelete.length; i++) {
+							fieldNames += "\n - " +
+								Zotero.ItemFields.getLocalizedString(this.item.itemTypeID, fieldsToDelete[i]);
+						}
+						
+						var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+							.getService(Components.interfaces.nsIPromptService);
+					}
+					
+					if (!fieldsToDelete ||
+							promptService.confirm(null,
+								Zotero.getString('pane.item.changeType.title'),
+								Zotero.getString('pane.item.changeType.text') + "\n" + fieldNames)) {
+						this.item.setType(itemTypeID);
+						
+						if (this.saveOnEdit) {
+							this.item.save();
+						}
+						else {
+							this.refresh();
+						}
+						
+						return true;
+					}
+					
+					// Revert the menu (which changes before the pop-up)
+					if (menu) {
+						menu.value = this.item.itemTypeID;
+					}
+					
+					return false;
+				]]>
+				</body>
+			</method>
+			
+			
+			<method name="onViewClick">
+				<parameter name="button"/>
+				<parameter name="event"/>
+				<body>
+				<![CDATA[
+					if (button.getAttribute('viewURL')) {
+						ZoteroPane.loadURI(button.getAttribute('viewURL'), event);
+					}
+					else if (button.getAttribute('viewSnapshot')) {
+						ZoteroPane.viewAttachment(button.getAttribute('viewSnapshot'), event);
+					}
+				]]>
+				</body>
+			</method>
+			
+			
+			<method name="onOpenURLClick">
+				<parameter name="event"/>
+				<body>
+				<![CDATA[
+					var url = Zotero.OpenURL.resolve(this.item);
+					if (url) {
+						ZoteroPane.loadURI(url, event);
+					}
+				]]>
+				</body>
+			</method>
+			
+			
+			<method name="toggleAbstractExpand">
+				<parameter name="label"/>
+				<body>
+				<![CDATA[
+					var cur = Zotero.Prefs.get('lastAbstractExpand');
+					Zotero.Prefs.set('lastAbstractExpand', !cur);
+					
+					var ab = label.nextSibling;
+					var valueText = this.item.getField('abstractNote');
+					var tabindex = ab.getAttribute('ztabindex');
+					var elem = this.createValueElement(
+						valueText,
+						'abstractNote',
+						tabindex
+					);
+					ab.parentNode.replaceChild(elem, ab);
+					
+					var text = Zotero.ItemFields.getLocalizedString(this.item.itemTypeID, 'abstractNote') + ':';
+					// Add '(...)' before "Abstract:" for collapsed abstracts
+					if (valueText && cur) {
+						text = '(...) ' + text;
+					}
+					label.setAttribute('value', text);
+				]]>
+				</body>
+			</method>
+			
+			
+			<method name="disableButton">
+				<parameter name="button"/>
+				<body>
+				<![CDATA[
+					button.setAttribute('disabled', true);
+					button.setAttribute('onclick', false); 
+				]]>
+				</body>
+			</method>
+			
+			
+			<method name="_enablePlusButton">
+				<parameter name="button"/>
+				<parameter name="creatorTypeID"/>
+				<parameter name="fieldMode"/>
+				<body>
+				<![CDATA[
+					button.setAttribute('disabled', false);
+					button.setAttribute("onclick",
+						"document.getBindingParent(this).disableButton(this); "
+						+ "var creator = new Zotero.Creator; "
+						+ "creator.fieldMode = " + (fieldMode ? fieldMode : 0) + "; "
+						+ "document.getBindingParent(this).addCreatorRow(creator, "
+						+ (creatorTypeID ? creatorTypeID : 'false') + ", true);");
+				]]>
+				</body>
+			</method>
+			
+			
+			
+			
+			
+			
+			<method name="createValueElement">
+				<parameter name="valueText"/>
+				<parameter name="fieldName"/>
+				<parameter name="tabindex"/>
+				<body>
+				<![CDATA[
+					if (fieldName) {
+						var fieldID = Zotero.ItemFields.getID(fieldName);
+					}
+					
+					// If an abstract, check last expand state
+					var abstractAsVbox = (fieldName == 'abstractNote') &&
+						Zotero.Prefs.get('lastAbstractExpand');
+					
+					if (fieldName == 'extra' || abstractAsVbox) {
+						var valueElement = document.createElement("vbox");
+					}
+					else {
+						var valueElement = document.createElement("label");
+					}
+					
+					valueElement.setAttribute('fieldname', fieldName);
+					valueElement.setAttribute('flex', 1);
+					
+					if (this._fieldIsClickable(fieldName)) {
+						valueElement.setAttribute('ztabindex', tabindex);
+						valueElement.addEventListener('click', function (event) {
+							/* Skip right-click on Windows */
+							if (event.button) {
+								return;
+							}
+							document.getBindingParent(this).clickHandler(this);
+						}, false);
+						valueElement.className = 'zotero-clicky';
+					}
+					
+					switch (fieldName) {
+						case 'itemType':
+							valueElement.setAttribute('itemTypeID', valueText);
+							valueText = Zotero.ItemTypes.getLocalizedString(valueText);
+							break;
+						
+						case 'tag':
+							this._tabIndexMaxTagsFields = Math.max(this._tabIndexMaxTagsFields, tabindex);
+							break;
+						
+						// Convert dates from UTC
+						case 'dateAdded':
+						case 'dateModified':
+						case 'accessDate':
+							if (valueText) {
+								var date = Zotero.Date.sqlToDate(valueText, true);
+								valueText = date ? date.toLocaleString() : '';
+								
+								// Don't show time for access date if none
+								if (fieldName == 'accessDate') {
+									valueText = valueText.replace('00:00:00 ', '');
+								}
+							}
+							break;
+					}
+					
+					if (fieldID) {
+						// Display the SQL date as a tooltip for date fields
+						if (Zotero.ItemFields.isFieldOfBase(fieldID, 'date')) {
+							valueElement.setAttribute('tooltiptext',
+								Zotero.Date.multipartToSQL(this.item.getField(fieldName, true)));
+						}
+						
+						// Display a context menu for certain fields
+						if (fieldName == 'seriesTitle' || fieldName == 'shortTitle' ||
+								Zotero.ItemFields.isFieldOfBase(fieldID, 'title') ||
+								Zotero.ItemFields.isFieldOfBase(fieldID, 'publicationTitle')) {
+							valueElement.setAttribute('contextmenu', 'field-menu');
+						}
+					}
+					
+					
+					if (fieldName && fieldName.indexOf('firstName') != -1) {
+						valueElement.setAttribute('flex', '1');
+					}
+					
+					var firstSpace;
+					if (typeof valueText == 'string') {
+						firstSpace = valueText.indexOf(" ");
+					}
+					
+					// To support newlines in 'extra' fields, we use multiple
+					// <description> elements inside a vbox
+					if (fieldName == 'extra' || abstractAsVbox) {
+						var lines = valueText.split("\n");
+						for (var i = 0; i < lines.length; i++) {
+							var descriptionNode = document.createElement("description");
+							var linetext = document.createTextNode(lines[i]);
+							descriptionNode.appendChild(linetext);
+							valueElement.appendChild(descriptionNode);
+						}
+					}
+					// 29 == arbitrary length at which to chop uninterrupted text
+					else if ((firstSpace == -1 && valueText.length > 29 ) || firstSpace > 29
+						|| (fieldName &&
+							(fieldName.substr(0, 7) == 'creator') || fieldName == 'abstractNote')) {
+						if (fieldName == 'abstractNote') {
+							valueText = valueText.replace(/[\t\n]/g, ' ');
+						}
+						valueElement.setAttribute('crop', 'end');
+						valueElement.setAttribute('value',valueText);
+					}
+					else {
+						// Wrap to multiple lines
+						valueElement.appendChild(document.createTextNode(valueText));
+					}
+					
+					return valueElement;
+				]]>
+				</body>
+			</method>
+			
+			
+			<method name="removeCreator">
+				<parameter name="index"/>
+				<parameter name="labelToDelete"/>
+				<body>
+				<![CDATA[
+					// If unsaved row, just remove element
+					if (!this.item.hasCreatorAt(index)) {
+						labelToDelete.parentNode.removeChild(labelToDelete);
+						
+						// Enable the "+" button on the previous row
+						var elems = this._dynamicFields.getElementsByAttribute('value', '+');
+						var button = elems[elems.length-1];
+						var creatorFields = this.getCreatorFields(Zotero.getAncestorByTagName(button, 'row'));
+						this._enablePlusButton(button, creatorFields.typeID, creatorFields.fieldMode);
+						
+						this._creatorCount--;
+						return;
+					}
+					this.item.removeCreator(index);
+					this.item.save();
+				]]>
+				</body>
+			</method>
+			
+			
+			<method name="showEditor">
+				<parameter name="elem"/>
+				<body>
+				<![CDATA[
+					// Blur any active fields
+					if (this._dynamicFields) {
+						this._dynamicFields.focus();
+					}
+					
+					Zotero.debug('Showing editor');
+					
+					var fieldName = elem.getAttribute('fieldname');
+					var tabindex = elem.getAttribute('ztabindex');
+					
+					var [field, creatorIndex, creatorField] = fieldName.split('-');
+					if (field == 'creator') {
+						var c = this.item.getCreator(creatorIndex);
+						var value = c ? c.ref[creatorField] : '';
+						var itemID = this.item.id;
+					}
+					else if (fieldName=='tag') {
+						var tagID = elem.parentNode.getAttribute('id').split('-')[1];
+						var value = tagID ? Zotero.Tags.getName(tagID) : '';
+						var itemID = Zotero.getAncestorByTagName(elem, 'tagsbox').item.id;
+					}
+					else {
+						var value = this.item.getField(fieldName);
+						var itemID = this.item.id;
+						
+						// Access date needs to be converted from UTC
+						if (fieldName=='accessDate' && value!='') {
+							var localDate = Zotero.Date.sqlToDate(value, true);
+							var value = Zotero.Date.dateToSQL(localDate);
+						}
+					}
+					
+					var t = document.createElement("textbox");
+					t.setAttribute('value', value);
+					t.setAttribute('fieldname', fieldName);
+					t.setAttribute('ztabindex', tabindex);
+					t.setAttribute('flex', '1');
+					
+					if (creatorField=='lastName') {
+						t.setAttribute('fieldMode', elem.getAttribute('fieldMode'));
+					}
+					
+					if (['title', 'abstractNote', 'extra'].indexOf(fieldName) != -1) {
+						t.setAttribute('multiline', true);
+						t.setAttribute('rows', 8);
+					}
+					else {
+						var autoCompleteFields = [
+							'creator',
+							'journalAbbreviation',
+							'seriesTitle',
+							'seriesText',
+							'repository',
+							'callNumber',
+							'archiveLocation',
+							'language',
+							'rights',
+							'tag'
+						];
+						
+						// Add the type-specific versions of these base fields
+						var baseACFields = ['publisher', 'publicationTitle', 'type',
+							'medium', 'place'];
+						autoCompleteFields = autoCompleteFields.concat(baseACFields);
+						
+						for (var i=0; i<baseACFields.length; i++) {
+							var add = Zotero.ItemFields.getTypeFieldsFromBase(baseACFields[i], true)
+							autoCompleteFields = autoCompleteFields.concat(add);
+						}
+						
+						// Add auto-complete for certain fields
+						if (autoCompleteFields.indexOf(field) != -1) {
+							t.setAttribute('type', 'autocomplete');
+							t.setAttribute('autocompletesearch', 'zotero');
+							var suffix = itemID ? itemID : '';
+							if (field=='creator') {
+								suffix = elem.getAttribute('fieldMode') + '-' + suffix;
+							}
+							t.setAttribute('autocompletesearchparam', fieldName + '/' + suffix);
+							t.setAttribute('ontextentered',
+								'document.getBindingParent(this).handleCreatorAutoCompleteSelect(this)');
+						}
+					}
+					var box = elem.parentNode;
+					box.replaceChild(t, elem);
+					
+					// Prevent error when clicking between a changed field
+					// and another -- there's probably a better way
+					if (!t.select) {
+						return;
+					}
+					
+					t.select();
+					
+					t.addEventListener('blur', function () {
+						document.getBindingParent(this).blurHandler(this);
+					}, false);
+					t.setAttribute('onkeypress', "return document.getBindingParent(this).handleKeyPress(event)");
+					
+					this._tabDirection = false;
+					this._lastTabIndex = tabindex;
+					
+					return t;
+				]]>
+				</body>
+			</method>
+			
+			
+			<!--
+			 Save a multiple-field selection for the creator autocomplete
+			 (e.g. "Shakespeare, William")
+			-->
+			<method name="handleCreatorAutoCompleteSelect">
+				<parameter name="textbox"/>
+				<body>
+				<![CDATA[
+					var comment = Zotero.Utilities.AutoComplete.getResultComment(textbox);
+					if (!comment)
+					{
+						return;
+					}
+					
+					var [creatorID, numFields] = comment.split('-');
+					
+					// If result uses two fields, save both
+					if (numFields==2)
+					{
+						// Manually clear autocomplete controller's reference to
+						// textbox to prevent error next time around
+						textbox.mController.input = null;
+						
+						var [field, creatorIndex, creatorField] =
+							textbox.getAttribute('fieldname').split('-');
+						
+						var creator = Zotero.Creators.get(creatorID);
+						
+						var otherField = creatorField == 'lastName' ? 'firstName' : 'lastName';
+						
+						// Update this textbox
+						textbox.setAttribute('value', creator[creatorField]);
+						textbox.value = creator[creatorField];
+						
+						// Update the other label
+						if (otherField=='firstName'){
+							var label = textbox.nextSibling.nextSibling;
+						}
+						else if (otherField=='lastName'){
+							var label = textbox.previousSibling.previousSibling;
+						}
+						
+						//this._setFieldValue(label, creator[otherField]);
+						if (label.firstChild){
+							label.firstChild.nodeValue = creator[otherField];
+						}
+						else {
+							label.value = creator[otherField];
+						}
+						
+						var row = textbox.parentNode.parentNode.parentNode;
+						
+						var fields = this.getCreatorFields(row);
+						fields[creatorField] = creator[creatorField];
+						fields[otherField] = creator[otherField];
+						this.modifyCreator(creatorIndex, fields);
+					}
+					
+					// Otherwise let the autocomplete popup handle matters
+				]]>
+				</body>
+			</method>
+			
+			
+			<method name="handleKeyPress">
+				<parameter name="event"/>
+				<body>
+				<![CDATA[
+					var target = event.target;
+					var focused = document.commandDispatcher.focusedElement;
+					
+					switch (event.keyCode)
+					{
+						case event.DOM_VK_RETURN:
+							var fieldname = target.getAttribute('fieldname');
+							// Use shift-enter as the save action for the larger fields
+							if ((fieldname == 'abstractNote' || fieldname == 'extra')
+								&& !event.shiftKey)
+							{
+								break;
+							}
+							
+							
+							// Prevent blur on containing textbox
+							// DEBUG: what happens if this isn't present?
+							event.preventDefault();
+							
+							if (fieldname == 'tag')
+							{
+								// If last tag row, create new one
+								var row = target.parentNode.parentNode;
+								if (row == row.parentNode.lastChild)
+								{
+									this._tabDirection = 1;
+									var lastTag = true;
+								}
+							}
+							// Shift-enter adds new creator row
+							else if (fieldname.indexOf('creator-') == 0 && event.shiftKey) {
+								// Value hasn't changed
+								if (target.getAttribute('value') == target.value) {
+									Zotero.debug("Value hasn't changed");
+									// If + button is disabled, just focus next creator row
+									if (Zotero.getAncestorByTagName(target, 'row').lastChild.lastChild.disabled) {
+										this._focusNextField('info', this._dynamicFields, this._lastTabIndex, false);
+									}
+									else {
+										// TODO: should use current creator type
+										this.addCreatorRow(false, false, true);
+									}
+								}
+								// Value has changed
+								else {
+									this._tabDirection = 1;
+									this._addCreatorRow = true;
+									focused.blur();
+								}
+								return false;
+							}
+							focused.blur();
+							
+							// Return focus to items pane
+							if (!lastTag) {
+								var tree = document.getElementById('zotero-items-tree');
+								if (tree) {
+									tree.focus();
+								}
+							}
+							
+							return false;
+							
+						case event.DOM_VK_ESCAPE:
+							// Reset field to original value
+							target.value = target.getAttribute('value');
+							
+							var tagsbox = Zotero.getAncestorByTagName(focused, 'tagsbox');
+							
+							focused.blur();
+							
+							if (tagsbox) {
+								tagsbox.closePopup();
+							}
+							
+							// Return focus to items pane
+							var tree = document.getElementById('zotero-items-tree');
+							if (tree) {
+								tree.focus();
+							}
+							
+							return false;
+							
+						case event.DOM_VK_TAB:
+							this._tabDirection = event.shiftKey ? -1 : 1;
+							// Blur the old manually -- not sure why this is necessary,
+							// but it prevents an immediate blur() on the next tag
+							focused.blur();
+							return false;
+					}
+					
+					return true;
+				]]>
+				</body>
+			</method>
+			
+			
+			<method name="hideEditor">
+				<parameter name="textbox"/>
+				<body>
+				<![CDATA[
+					Zotero.debug('Hiding editor');
+					/*
+					var textbox = Zotero.getAncestorByTagName(t, 'textbox');
+					if (!textbox){
+						Zotero.debug('Textbox not found in hideEditor');
+						return;
+					}
+					*/
+					
+					// TODO: get rid of this?
+					var saveChanges = this.saveOnEdit;
+					
+					// Prevent autocomplete breakage in Firefox 3
+					if (textbox.mController) {
+						textbox.mController.input = null;
+					}
+					
+					var fieldName = textbox.getAttribute('fieldname');
+					var tabindex = textbox.getAttribute('ztabindex');
+					
+					//var value = t.value;
+					var value = textbox.value;
+					
+					var elem;
+					var [field, creatorIndex, creatorField] = fieldName.split('-');
+					
+					// Creator fields
+					if (field == 'creator') {
+						var row = textbox.parentNode.parentNode.parentNode;
+						
+						var otherFields = this.getCreatorFields(row);
+						otherFields[creatorField] = value;
+						
+						this.modifyCreator(creatorIndex, otherFields);
+						
+						var val = this.item.getCreator(creatorIndex);
+						val = val ? val.ref[creatorField] : null;
+						
+						if (!val) {
+							// Reset to '(first)'/'(last)'/'(name)'
+							if (creatorField == 'lastName') {
+								val = otherFields.fieldMode
+									? this._defaultFullName : this._defaultLastName;
+							}
+							else if (creatorField == 'firstName') {
+								val = this._defaultFirstName;
+							}
+						}
+						
+						elem = this.createValueElement(
+							val,
+							fieldName,
+							tabindex
+						);
+						
+						// Reset creator mode settings
+						if (otherFields.fieldMode) {
+							this.switchCreatorMode(row, 1, true);
+						}
+						else {
+							this.switchCreatorMode(row, 0, true);
+						}
+					}
+					
+					// Tags
+					else if (fieldName=='tag') {
+						var tagsbox = Zotero.getAncestorByTagName(textbox, 'tagsbox');
+						if (!tagsbox)
+						{
+							Zotero.debug('Tagsbox not found', 1);
+							return;
+						}
+						
+						var row = textbox.parentNode;
+						var rows = row.parentNode;
+						
+						// Tag id encoded as 'tag-1234'
+						var id = row.getAttribute('id').split('-')[1];
+						
+						if (saveChanges) {
+							if (id) {
+								if (value) {
+									// If trying to replace with another existing tag
+									// (which causes a delete of the row),
+									// clear the tab direction so we don't advance
+									// when the notifier kicks in
+									var existing = Zotero.Tags.getID(value, 0);
+									if (existing && id != existing)
+									{
+										this._tabDirection = false;
+									}
+									var changed = tagsbox.replace(id, value);
+									if (changed)
+									{
+										return;
+									}
+								}
+								else {
+									tagsbox.remove(id);
+									return;
+								}
+							}
+							// New tag
+							else {
+								// If this is an existing automatic tag, it's going to be
+								// deleted and the number of rows will stay the same,
+								// so we have to compensate
+								var existingTypes = Zotero.Tags.getTypes(value);
+								if (existingTypes && existingTypes.indexOf(1) != -1) {
+									this._lastTabIndex--;
+								}
+								var id = tagsbox.add(value);
+							}
+						}
+						
+						if (id) {
+							elem = this.createValueElement(
+								value,
+								'tag',
+								tabindex
+							);
+						}
+						else {
+							// Just remove the row
+							//
+							// If there's an open popup, this throws NODE CANNOT BE FOUND
+							try {
+								var row = rows.removeChild(row);
+							}
+							catch (e) {}
+							tagsbox.fixPopup();
+							tagsbox.closePopup();
+							
+							this._tabDirection = false;
+							return;
+						}
+						
+						var focusMode = 'tags';
+						var focusBox = tagsbox;
+					}
+					
+					// Fields
+					else {
+						// Access date needs to be parsed and converted to UTC
+						if (fieldName=='accessDate' && value!='') {
+							if (Zotero.Date.isSQLDate(value) || Zotero.Date.isSQLDateTime(value)) {
+								var localDate = Zotero.Date.sqlToDate(value);
+								value = Zotero.Date.dateToSQL(localDate, true);
+							}
+							else {
+								var d = Zotero.Date.strToDate(value);
+								value = null;
+								if (d.year && d.month != undefined && d.day) {
+									d = new Date(d.year, d.month, d.day);
+									value = Zotero.Date.dateToSQL(d, true);
+								}
+							}
+						}
+						
+						this._modifyField(fieldName, value, this.saveOnEdit);
+						
+						elem = this.createValueElement(
+							this.item.getField(fieldName),
+							fieldName,
+							tabindex
+						);
+					}
+					
+					var box = textbox.parentNode;
+					box.replaceChild(elem,textbox);
+					
+					if (this._tabDirection) {
+						if (!focusMode) {
+							var focusMode = 'info';
+							var focusBox = this._dynamicFields;
+						}
+						this._focusNextField(focusMode, focusBox, this._lastTabIndex, this._tabDirection == -1);
+					}
+				]]>
+				</body>
+			</method>
+			
+			
+			<method name="_rowIsClickable">
+				<parameter name="fieldName"/>
+				<body>
+				<![CDATA[
+				 	return this.clickByRow &&
+						(this.clickable ||
+							this._clickableFields.indexOf(fieldName) != -1);
+				]]>
+				</body>
+			</method>
+			
+			
+			<method name="_fieldIsClickable">
+				<parameter name="fieldName"/>
+				<body>
+				<![CDATA[
+					return !this.clickByRow &&
+						((this.clickable && !this.item.isPrimaryField(fieldName))
+							|| this._clickableFields.indexOf(fieldName) != -1);
+				]]>
+				</body>
+			</method>
+			
+			<method name="_modifyField">
+				<parameter name="field"/>
+				<parameter name="value"/>
+				<parameter name="save"/>
+				<body>
+				<![CDATA[
+					this.item.setField(field,value);
+					if (save) {
+						this.item.save();
+					}
+				]]>
+				</body>
+			</method>
+			
+			
+			<method name="_getFieldValue">
+				<parameter name="label"/>
+				<body>
+				<![CDATA[
+					return label.firstChild
+						? label.firstChild.nodeValue : label.value;
+				]]>
+				</body>
+			</method>
+			
+			
+			<method name="_setFieldValue">
+				<parameter name="label"/>
+				<parameter name="value"/>
+				<body>
+				<![CDATA[
+					if (label.firstChild) {
+						label.firstChild.nodeValue = value;
+					}
+					else {
+						label.value = value;
+					}
+				]]>
+				</body>
+			</method>
+			
+			
+			<!-- TODO: work with textboxes too -->
+			<method name="textTransform">
+				<parameter name="label"/>
+				<parameter name="mode"/>
+				<body>
+				<![CDATA[
+					var val = this._getFieldValue(label);
+					switch (mode) {
+						case 'lower':
+							var newVal = val.toLowerCase();
+							break;
+						case 'title':
+							var utils = new Zotero.Utilities();
+							var newVal = utils.capitalizeTitle(val.toLowerCase(), true);
+							break;
+						default:
+							throw ("Invalid transform mode '" + mode + "' in zoteroitembox.textTransform()");
+					}
+					this._setFieldValue(label, newVal);
+					this._modifyField(label.getAttribute('fieldname'), newVal, this.saveOnEdit);
+
+				]]>
+				</body>
+			</method>
+			
+			
+			<method name="getCreatorFields">
+				<parameter name="row"/>
+				<body>
+				<![CDATA[
+					var typeID = row.getElementsByTagName('toolbarbutton')[0].getAttribute('typeid');
+					var label1 = row.getElementsByTagName('hbox')[0].firstChild.firstChild;
+					var label2 = label1.parentNode.lastChild;
+					
+					var fields = {
+						lastName: label1.firstChild ? label1.firstChild.nodeValue
+							: label1.value,
+						firstName: label2.firstChild ? label2.firstChild.nodeValue
+							: label2.value,
+						fieldMode: label1.getAttribute('fieldMode')
+							? parseInt(label1.getAttribute('fieldMode')) : 0,
+						creatorTypeID: parseInt(typeID),
+					};
+					
+					// Ignore '(first)'
+					if (fields.fieldMode == 1 || fields.firstName == this._defaultFirstName) {
+						fields.firstName = '';
+					}
+					// Ignore '(last)' or '(name)'
+					if (fields.lastName == this._defaultFullName
+							|| fields.lastName == this._defaultLastName) {
+						fields.lastName = '';
+					}
+					
+					return fields;
+				]]>
+				</body>
+			</method>
+			
+			
+			<method name="modifyCreator">
+				<parameter name="index"/>
+				<parameter name="fields"/>
+				<parameter name="changeGlobally"/>
+				<body>
+				<![CDATA[
+					var firstName = fields.firstName;
+					var lastName = fields.lastName;
+					//var shortName = fields.shortName;
+					var fieldMode = fields.fieldMode;
+					var creatorTypeID = fields.creatorTypeID;
+					
+					var oldCreator = this.item.getCreator(index);
+					
+					// Don't save empty creators
+					if (!firstName && !lastName){
+						if (!oldCreator) {
+							return;
+						}
+						this.item.removeCreator(index);
+						this.item.save();
+						return;
+					}
+					
+					Zotero.DB.beginTransaction();
+					
+					var newCreator = new Zotero.Creator;
+					newCreator.setFields(fields);
+					
+					var newLinkedCreators = [];
+					var creatorDataID = Zotero.Creators.getDataID(fields);
+					if (creatorDataID) {
+						newLinkedCreators = Zotero.Creators.getCreatorsWithData(creatorDataID);
+					}
+					
+					if (oldCreator) {
+						if (oldCreator.ref.equals(newCreator)) {
+							if (oldCreator.creatorTypeID == creatorTypeID) {
+								Zotero.debug("Creator " + oldCreator.ref.id + " hasn't changed");
+							}
+							// Just change creatorTypeID
+							else {
+								this.item.setCreator(index, oldCreator.ref, creatorTypeID);
+								if (this.saveOnEdit) {
+									this.item.save();
+								}
+							}
+							Zotero.DB.commitTransaction();
+							return;
+						}
+						
+						oldCreator = oldCreator.ref;
+					}
+					
+					var creator;
+					var creatorID;
+					
+					if (oldCreator) {
+						var numLinkedItems = oldCreator.countLinkedItems();
+						// Creator is linked only to the current item
+						if (numLinkedItems == 1) {
+							if (newLinkedCreators.length) {
+								// Use the first creator found with this data
+								// TODO: support choosing among options
+								creatorID = newLinkedCreators[0];
+								creator = Zotero.Creators.get(creatorID);
+							}
+							else {
+								oldCreator.setFields(fields);
+								//creatorID = oldCreator.save();
+								creator = oldCreator;
+							}
+						}
+						// Creator is linked to multiple items with changeGlobally off
+						else if (!changeGlobally) {
+							if (newLinkedCreators.length) {
+								// Use the first creator found with this data
+								// TODO: support choosing among options
+								creatorID = newLinkedCreators[0];
+								creator = Zotero.Creators.get(creatorID);
+							}
+							else {
+								//creatorID = newCreator.save();
+								creator = newCreator;
+							}
+						}
+						// Creator is linked to multiple items with changeGlobally on
+						else {
+							throw ('changeGlobally unimplemented');
+							if (newLinkedCreators.length) {
+								// Use the first creator found with this data
+								// TODO: support choosing among options
+								creatorID = newLinkedCreators[0];
+								
+								// TODO: switch all linked items to this creator
+							}
+							else {
+								creatorID = newCreator.save();
+								
+								// TODO: switch all linked items to new creatorID
+							}
+						}
+					}
+					// No existing creator
+					else {
+						if (newLinkedCreators.length) {
+							creatorID = newLinkedCreators[0];
+							creator = Zotero.Creators.get(creatorID);
+						}
+						else {
+							//creatorID = newCreator.save();
+							creator = newCreator;
+						}
+					}
+					
+					this.item.setCreator(index, creator, creatorTypeID);
+					if (this.saveOnEdit) {
+						this.item.save();
+					}
+					
+					Zotero.DB.commitTransaction();
+				]]>
+				</body>
+			</method>
+			
+			<!--
+			/*
+			function modifyCreatorByID(index, creatorID, creatorTypeID) {
+				throw ('Unimplemented');
+				var oldCreator = _itemBeingEdited.getCreator(index);
+				if (creator) {
+					oldCreator = creator.ref;
+					var oldCreatorID = oldCreator.creatorID;
+				}
+				
+				Zotero.debug("Old creatorID is " + oldCreatorID);
+				
+				_itemBeingEdited.setCreator(index, firstName, lastName, typeID, fieldMode);
+				_itemBeingEdited.save();
+			}
+			*/
+			-->
+			
+			
+			<method name="focusFirstField">
+				<parameter name="mode"/>
+				<body>
+				<![CDATA[
+					switch (mode) {
+						case 'info':
+							this._focusNextField('info', this._dynamicFields, 0, false);
+							break;
+					}
+				]]>
+				</body>
+			</method>
+			
+			
+			<!-- 
+				Advance the field focus forward or backward
+				
+				Note: We're basically replicating the built-in tabindex functionality,
+				which doesn't work well with the weird label/textbox stuff we're doing.
+				(The textbox being tabbed away from is deleted before the blur()
+				completes, so it doesn't know where it's supposed to go next.)
+			-->
+			<method name="_focusNextField">
+				<parameter name="mode"/>
+				<parameter name="box"/>
+				<parameter name="tabindex"/>
+				<parameter name="back"/>
+				<body>
+				<![CDATA[
+					tabindex = parseInt(tabindex);
+					if (back)
+					{
+						if (mode=='info')
+						{
+							switch (tabindex)
+							{
+								case 1:
+									//Zotero.debug('At beginning');
+									document.getElementById('item-type-menu').focus();
+									return false;
+								
+								case this._tabIndexMinCreators:
+									var nextIndex = 1;
+									break;
+								
+								case this._tabIndexMinFields:
+									var nextIndex = this._tabIndexMaxCreators;
+									break;
+								
+								default:
+									var nextIndex = tabindex - 1;
+							}
+						}
+						else if (mode=='tags')
+						{
+							switch (tabindex)
+							{
+								case 1:
+									return false;
+								
+								default:
+									var nextIndex = tabindex - 1;
+							}
+						}
+					}
+					else
+					{
+						if (mode=='info')
+						{
+							switch (tabindex)
+							{
+								case 1:
+									var nextIndex = this._tabIndexMinCreators;
+									break;
+								
+								case this._tabIndexMaxCreators:
+									var nextIndex = this._tabIndexMinFields;
+									break;
+								
+								case this._tabIndexMaxInfoFields:
+									//Zotero.debug('At end');
+									return false;
+								
+								default:
+									var nextIndex = tabindex + 1;
+							}
+						}
+						else if (mode=='tags')
+						{
+							switch (tabindex)
+							{
+								case this._tabIndexMaxTagsFields:
+									// In tags box, keep going to create new row
+									var nextIndex = tabindex + 1;
+									break;
+								
+								default:
+									var nextIndex = tabindex + 1;
+							}
+						}
+					}
+					
+					Zotero.debug('Looking for tabindex ' + nextIndex, 4);
+					switch (mode)
+					{
+						case 'info':
+							var next = box.getElementsByAttribute('ztabindex', nextIndex);
+							if (!next[0])
+							{
+								//Zotero.debug("Next field not found");
+								return this._focusNextField(mode, box, nextIndex, back);
+							}
+							break;
+						
+						// Tags pane
+						case 'tags':
+							var next = document.getAnonymousNodes(box)[0].
+								getElementsByAttribute('ztabindex', nextIndex);
+							if (!next[0]) {
+								next[0] = box.addDynamicRow();
+							}
+							break;
+					}
+					
+					next[0].click();
+					this.ensureElementIsVisible(next[0]);
+					return true;
+				]]>
+				</body>
+			</method>
+			
+			<method name="_id">
+				<parameter name="id"/>
+				<body>
+				<![CDATA[
+					return document.getAnonymousNodes(this)[0].getElementsByAttribute('id', id)[0];
+				]]>
+				</body>
+			</method>
+		</implementation>
+		
+		<content>
+			<scrollbox id="item-box" flex="1" orient="vertical"
+				 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+				<popupset>
+					<popup id="creator-type-menu" position="after_start"
+						oncommand="var fields = document.getBindingParent(this).getCreatorFields(document.popupNode.parentNode);
+							var typeID = event.explicitOriginalTarget.getAttribute('typeid');
+							fields['creatorTypeID'] = typeID;
+							document.popupNode.setAttribute('label',
+								Zotero.getString('creatorTypes.' + Zotero.CreatorTypes.getName(typeID)) + ':');
+							document.popupNode.setAttribute('typeid', typeID);
+							var index = document.popupNode.getAttribute('fieldname').split('-')[1];
+							document.getBindingParent(this).modifyCreator(index, fields)"/>
+					<popup id="field-menu">
+						<menu label="&zotero.item.textTransform;">
+							<menupopup>
+								<menuitem label="&zotero.item.textTransform.lowercase;" class="menuitem-non-iconic"
+									oncommand="document.getBindingParent(this).textTransform(document.popupNode, 'lower')"/>
+								<menuitem label="&zotero.item.textTransform.titlecase;" class="menuitem-non-iconic"
+									oncommand="document.getBindingParent(this).textTransform(document.popupNode, 'title')"/>
+							</menupopup>
+						</menu>
+					</popup>
+				</popupset>
+				<hbox id="go-buttons" align="center" hidden="true">
+					<button id="view-button"
+						onfocus="document.getBindingParent(this).ensureElementIsVisible(this)"
+						oncommand="document.getBindingParent(this).onViewClick(this, event)" disabled="false"/>
+					<button id="openurl-button" label="&zotero.toolbar.openURL.label;"
+						tooltiptext="&zotero.toolbar.openURL.tooltip;"
+						onfocus="document.getBindingParent(this).ensureElementIsVisible(this)"
+						oncommand="document.getBindingParent(this).onOpenURLClick(event);"/>
+				</hbox>
+				<hbox align="center" hidden="true">
+					<menulist id="item-type-menu" oncommand="document.getBindingParent(this).changeTypeTo(this.value, this)" flex="1"
+						onfocus="document.getBindingParent(this).ensureElementIsVisible(this)"
+						onkeypress="if (event.keyCode == event.DOM_VK_TAB){ if (!event.shiftKey) { document.getBindingParent(this).focusFirstField('info'); event.preventDefault(); } }">
+						<menupopup/>
+					</menulist>
+				</hbox>
+				<grid flex="1">
+					<columns>
+						<column/>
+						<column flex="1"/>
+					</columns>
+					<rows id="dynamic-fields" flex="1"/>
+				</grid>
+			</scrollbox>
+		</content>
+	</binding>
+</bindings>

@@ -229,7 +229,6 @@
 	list-style-image: url('chrome://zotero/skin/search-cancel-active.png');
 }
 
-#zotero-go-to-url, #zotero-openurl,
 #zotero-attachment-view, #zotero-attachment-show
 {
 	list-style-image: url('chrome://zotero/skin/toolbar-go-arrow.png');
@@ -257,11 +256,6 @@
 	padding: 0;
 }
 
-
-#zotero-go-to-url[disabled=true], #zotero-openurl[disabled=true]
-{
-	list-style-image: url('chrome://zotero/skin/toolbar-go-arrow-disabled.png');
-}
 
 #zotero-view-item > vbox
 {

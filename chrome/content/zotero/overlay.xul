@@ -82,7 +82,7 @@
 				<popup id="zotero-collectionmenu" onpopupshowing="ZoteroPane.buildCollectionContextMenu();">
 					<menuitem label="&zotero.toolbar.newCollection.label;" oncommand="ZoteroPane.newCollection()"/>
 					<menuitem label="&zotero.toolbar.newSavedSearch.label;" oncommand="ZoteroPane.newSearch()"/>
-					<menuitem label="&zotero.toolbar.newSubcollection.label;" oncommand="ZoteroPane.newCollection(ZoteroPane.getSelectedCollection().getID())"/>
+					<menuitem label="&zotero.toolbar.newSubcollection.label;" oncommand="ZoteroPane.newCollection(ZoteroPane.getSelectedCollection().id)"/>
 					<menuseparator/>
 					<menuitem oncommand="ZoteroPane.editSelectedCollection();"/>
 					<menuitem oncommand="ZoteroPane.deleteSelectedCollection();"/>
@@ -125,6 +125,10 @@
 								<menuitem id="zotero-tb-actions-export" label="&zotero.toolbar.export.label;" oncommand="Zotero_File_Interface.exportFile();"/>
 								<menuseparator id="zotero-tb-actions-utilities-separator"/>
 								<menuitem id="zotero-tb-actions-timeline" label="&zotero.toolbar.timeline.label;" oncommand="Zotero_Timeline_Interface.loadTimeline()"/>
+								<menuseparator id="zotero-tb-actions-sync-separator"/>
+								<menuitem label="Clear Server Data" oncommand="Zotero.Sync.Server.clear()"/>
+								<menuitem label="Reset Server Lock" oncommand="Zotero.Sync.Server.resetServer()"/>
+								<menuitem label="Reset Client" oncommand="Zotero.Sync.Server.resetClient()"/>
 								<menuseparator id="zotero-tb-actions-separator"/>
 								<menuitem id="zotero-tb-actions-prefs" label="&zotero.toolbar.preferences.label;"
 									oncommand="window.openDialog('chrome://zotero/content/preferences/preferences.xul', 'zotero-prefs', 'chrome,titlebar,toolbar,' + Zotero.Prefs.get('browser.preferences.instantApply', true) ? 'dialog=no' : 'modal')"/>
@@ -283,6 +287,8 @@
 			
 			<vbox id="zotero-item-pane" persist="width">
 				<toolbar align="right">
+					<toolbarbutton tooltiptext="Sync with Zotero Server" image="chrome://zotero/skin/arrow_refresh.png" oncommand="Zotero.Sync.Server.sync()"/>
+					<toolbarseparator/>
 					<toolbarbutton id="zotero-tb-fullscreen" tooltiptext="&zotero.toolbar.fullscreen.tooltip;" oncommand="ZoteroPane.fullScreen();"/>
 					<toolbarbutton class="tabs-closebutton" oncommand="ZoteroPane.toggleDisplay()"/>
 				</toolbar>
@@ -303,7 +309,7 @@
 						<deck id="zotero-view-item" flex="1"/>
 						<!-- Note info pane -->
 						<vbox id="zotero-view-note" flex="1">
-							<noteeditor id="zotero-note-editor" flex="1"/>
+							<zoteronoteeditor id="zotero-note-editor" flex="1"/>
 							<button id="zotero-view-note-button" label="&zotero.notes.separate;" oncommand="ZoteroPane.openNoteWindow(this.getAttribute('noteID')); if(this.hasAttribute('sourceID')) ZoteroPane.selectItem(this.getAttribute('sourceID'));"/>
 						</vbox>
 						<!-- Attachment info pane -->
@@ -324,7 +330,7 @@
 								<toolbarbutton id="zotero-attachment-reindex" oncommand="ZoteroPane.reindexItem()"/>
 							</hbox>
 							
-							<noteeditor id="zotero-attachment-note-editor" notitle="1" flex="1"/>
+							<zoteronoteeditor id="zotero-attachment-note-editor" notitle="1" flex="1"/>
 						</vbox>
 					</deck>
 				</groupbox>

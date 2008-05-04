@@ -99,14 +99,19 @@ Zotero.Search.prototype.load = function(savedSearchID){
 
 
 Zotero.Search.prototype.getID = function(){
+	Zotero.debug('Zotero.Search.getName() is deprecated -- use Search.id');
 	return this._savedSearchID;
 }
 
+Zotero.Search.prototype.__defineGetter__('id', function () { return this._savedSearchID; });
 
-Zotero.Search.prototype.getName = function(){
+
+Zotero.Search.prototype.getName = function() {
+	Zotero.debug('Zotero.Search.getName() is deprecated -- use Search.name');
 	return this._savedSearchName;
 }
 
+Zotero.Search.prototype.__defineGetter__('name', function () { return this._savedSearchName; });
 
 /*
  * Save the search to the DB and return a savedSearchID
@@ -634,11 +639,11 @@ Zotero.Search.prototype.search = function(asTempTable){
 	//Zotero.debug('Final result set');
 	//Zotero.debug(ids);
 	
+	if (!ids || !ids.length) {
+		return false;
+	}
+	
 	if (asTempTable) {
-		if (!ids) {
-			return false;
-		}
-		
 		return this._idsToTempTable(ids);
 	}
 	
@@ -947,7 +952,7 @@ Zotero.Search.prototype._buildQuery = function(){
 					
 					case 'creator':
 						condSQL += "creatorID IN (SELECT creatorID FROM creators "
-							+ "WHERE ";
+							+ "NATURAL JOIN creatorData WHERE ";
 						openParens++;
 						break;
 					
@@ -1329,6 +1334,7 @@ Zotero.Searches = new function(){
 }
 
 
+
 Zotero.SearchConditions = new function(){
 	this.get = get;
 	this.getStandardConditions = getStandardConditions;
@@ -1338,7 +1344,7 @@ Zotero.SearchConditions = new function(){
 	this.parseCondition = parseCondition;
 	
 	var _initialized = false;
-	var _conditions = [];
+	var _conditions = {};
 	var _standardConditions = [];
 	
 	var self = this;
@@ -1375,7 +1381,7 @@ Zotero.SearchConditions = new function(){
 	 *  - template
 	 */
 	function _init(){
-		_conditions = [
+		var conditions = [
 			//
 			// Special conditions
 			//
@@ -1658,19 +1664,17 @@ Zotero.SearchConditions = new function(){
 				},
 				special: false
 			}
-
 		];
 		
 		// Index conditions by name and aliases
-		for (var i in _conditions){
-			_conditions[_conditions[i]['name']] = _conditions[i];
-			if (_conditions[i]['aliases']){
-				for (var j in _conditions[i]['aliases']){
-					_conditions[_conditions[i]['aliases'][j]] = _conditions[i];
+		for (var i in conditions) {
+			_conditions[conditions[i]['name']] = conditions[i];
+			if (conditions[i]['aliases']) {
+				for (var j in conditions[i]['aliases']) {
+					_conditions[conditions[i]['aliases'][j]] = conditions[i];
 				}
 			}
-			_conditions[_conditions[i]['name']] = _conditions[i];
-			delete _conditions[i];
+			_conditions[conditions[i]['name']] = conditions[i];
 		}
 		
 		var sortKeys = [];

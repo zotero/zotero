@@ -1,0 +1,31 @@
+row > hbox,
+row > vbox
+{
+	margin-top: 0 !important;
+	margin-bottom: 0 !important;
+	padding-top: 0 !important;
+	padding-bottom: 0 !important;
+}
+
+row > hbox > hbox
+{
+	-moz-box-align: center;
+}
+
+row hbox hbox label
+{
+	margin-top: 0;
+	margin-bottom: 0;
+}
+
+row > toolbarbutton
+{
+	margin-right: 5px;
+	-moz-image-region: rect(2px, 14px, 18px, 0px);
+}
+
+row vbox[fieldname=abstractNote],
+row vbox[fieldname=extra]
+{
+	margin-left: 1px;
+}

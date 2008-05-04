@@ -194,25 +194,39 @@ Zotero.Fulltext = new function(){
 			return false;
 		}
 		
-		var sqlQues = [];
-		var sqlParams = [];
-		
-		for each(var word in words){
-			sqlQues.push('?');
-			sqlParams.push({string:word});
-		}
+		var existing = [];
+		var done = 0;
+		var maxWords = 500;
+		var numWords = words.length;
 		
 		Zotero.DB.beginTransaction();
 		
-		var sql = "SELECT word, wordID from fulltextWords WHERE word IN ("
-		sql += sqlQues.join() + ")";
-		var wordIDs = Zotero.DB.query(sql, sqlParams);
+		var origWords = [];
 		
-		var existing = [];
-		for (var i in wordIDs){
-			// Underscore avoids problems with JS reserved words
-			existing['_' + wordIDs[i]['word']] = wordIDs[i]['wordID'];
+		do {
+			var chunk = words.splice(0, maxWords);
+			origWords = origWords.concat(chunk);
+			
+			var sqlQues = [];
+			var sqlParams = [];
+			
+			for each(var word in chunk) {
+				sqlQues.push('?');
+				sqlParams.push( { string: word } );
+			}
+			
+			var sql = "SELECT word, wordID from fulltextWords WHERE word IN ("
+			sql += sqlQues.join() + ")";
+			var wordIDs = Zotero.DB.query(sql, sqlParams);
+			
+			for (var i in wordIDs) {
+				// Underscore avoids problems with JS reserved words
+				existing['_' + wordIDs[i].word] = wordIDs[i].wordID;
+			}
+			
+			done += chunk.length;
 		}
+		while (done < numWords);
 		
 		Zotero.DB.query("REPLACE INTO fulltextItems (itemID, version) VALUES (?,?)",
 			[itemID, FULLTEXT_VERSION]);
@@ -221,7 +235,7 @@ Zotero.Fulltext = new function(){
 		var statement1 = Zotero.DB.getStatement("INSERT INTO fulltextWords (word) VALUES (?)");
 		var statement2 = Zotero.DB.getStatement("INSERT OR IGNORE INTO fulltextItemWords VALUES (?,?)");
 		
-		for each(var word in words){
+		for each(var word in origWords) {
 			if (existing['_' + word]){
 				var wordID = existing['_' + word];
 			}

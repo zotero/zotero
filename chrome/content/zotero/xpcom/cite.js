@@ -1822,7 +1822,7 @@ Zotero.CSL.Item = function(item) {
 	
 	// don't return URL or accessed information for journal articles if a
 	// pages field exists
-	var itemType = Zotero.ItemTypes.getName(this.zoteroItem.getType());
+	var itemType = Zotero.ItemTypes.getName(this.zoteroItem.itemTypeID);
 	if(!Zotero.Prefs.get("export.citePaperJournalArticleURL") 
 			&& ["journalArticle", "newspaperArticle", "magazineArticle"].indexOf(itemType) !== -1
 			&& this.zoteroItem.getField("pages")) {
@@ -2140,7 +2140,7 @@ Zotero.CSL.Item._fallbackTypeMap = {
  * Determines whether this item is of a given type
  */
 Zotero.CSL.Item.prototype.isType = function(type) {
-	var zoteroType = Zotero.ItemTypes.getName(this.zoteroItem.getType());
+	var zoteroType = Zotero.ItemTypes.getName(this.zoteroItem.itemTypeID);
 	
 	return (Zotero.CSL.Item._optionalTypeMap[zoteroType]
 		&& Zotero.CSL.Item._optionalTypeMap[zoteroType] == type)
@@ -2153,7 +2153,7 @@ Zotero.CSL.Item.prototype.isType = function(type) {
 Zotero.CSL.Item.prototype._separateNames = function() {
 	this._names = [];
 	
-	var authorID = Zotero.CreatorTypes.getPrimaryIDForType(this.zoteroItem.getType());
+	var authorID = Zotero.CreatorTypes.getPrimaryIDForType(this.zoteroItem.itemTypeID);
 	
 	var creators = this.zoteroItem.getCreators();
 	for each(var creator in creators) {

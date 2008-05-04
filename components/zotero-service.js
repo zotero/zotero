@@ -14,101 +14,19 @@ var ZoteroWrapped = this;
 * Include the core objects to be stored within XPCOM
 *********************************************************************/
 
-Cc["@mozilla.org/moz/jssubscript-loader;1"]
-	.getService(Ci.mozIJSSubScriptLoader)
-	.loadSubScript("chrome://zotero/content/xpcom/zotero.js");
+var xpcomFiles = [ 'zotero',
+	'annotate', 'attachments', 'cite', 'cite_compat', 'collectionTreeView',
+	'data_access', 'data/item', 'data/items', 'data/collection', 'data/collections',
+	'data/cachedTypes', 'data/creator', 'data/creators', 'data/itemFields',
+	'data/notes', 'data/tags', 'db', 'file', 'fulltext', 'id', 'ingester', 'integration',
+	'itemTreeView', 'mime', 'notifier',  'progressWindow', 'quickCopy', 'report',
+	'schema', 'search', 'sync', 'timeline', 'translate', 'utilities'];
 
-Cc["@mozilla.org/moz/jssubscript-loader;1"]
-	.getService(Ci.mozIJSSubScriptLoader)
-	.loadSubScript("chrome://zotero/content/xpcom/db.js");
-
-Cc["@mozilla.org/moz/jssubscript-loader;1"]
-	.getService(Ci.mozIJSSubScriptLoader)
-	.loadSubScript("chrome://zotero/content/xpcom/schema.js");
-
-Cc["@mozilla.org/moz/jssubscript-loader;1"]
-	.getService(Ci.mozIJSSubScriptLoader)
-	.loadSubScript("chrome://zotero/content/xpcom/data_access.js");
-
-Cc["@mozilla.org/moz/jssubscript-loader;1"]
-	.getService(Ci.mozIJSSubScriptLoader)
-	.loadSubScript("chrome://zotero/content/xpcom/attachments.js");
-
-Cc["@mozilla.org/moz/jssubscript-loader;1"]
-	.getService(Ci.mozIJSSubScriptLoader)
-	.loadSubScript("chrome://zotero/content/xpcom/notifier.js");
-
-Cc["@mozilla.org/moz/jssubscript-loader;1"]
-	.getService(Ci.mozIJSSubScriptLoader)
-	.loadSubScript("chrome://zotero/content/xpcom/history.js");
-
-Cc["@mozilla.org/moz/jssubscript-loader;1"]
-	.getService(Ci.mozIJSSubScriptLoader)
-	.loadSubScript("chrome://zotero/content/xpcom/search.js");
-
-Cc["@mozilla.org/moz/jssubscript-loader;1"]
-	.getService(Ci.mozIJSSubScriptLoader)
-	.loadSubScript("chrome://zotero/content/xpcom/ingester.js");
-	
-Cc["@mozilla.org/moz/jssubscript-loader;1"]
-	.getService(Ci.mozIJSSubScriptLoader)
-	.loadSubScript("chrome://zotero/content/xpcom/translate.js");
-	
-Cc["@mozilla.org/moz/jssubscript-loader;1"]
-	.getService(Ci.mozIJSSubScriptLoader)
-	.loadSubScript("chrome://zotero/content/xpcom/cite.js");
-	
-Cc["@mozilla.org/moz/jssubscript-loader;1"]
-	.getService(Ci.mozIJSSubScriptLoader)
-	.loadSubScript("chrome://zotero/content/xpcom/cite_compat.js");
-	
-Cc["@mozilla.org/moz/jssubscript-loader;1"]
-	.getService(Ci.mozIJSSubScriptLoader)
-	.loadSubScript("chrome://zotero/content/xpcom/quickCopy.js");
-
-Cc["@mozilla.org/moz/jssubscript-loader;1"]
-	.getService(Ci.mozIJSSubScriptLoader)
-	.loadSubScript("chrome://zotero/content/xpcom/report.js");
-
-Cc["@mozilla.org/moz/jssubscript-loader;1"]
-	.getService(Ci.mozIJSSubScriptLoader)
-	.loadSubScript("chrome://zotero/content/xpcom/timeline.js");
-	
-Cc["@mozilla.org/moz/jssubscript-loader;1"]
-	.getService(Ci.mozIJSSubScriptLoader)
-	.loadSubScript("chrome://zotero/content/xpcom/utilities.js");
-
-Cc["@mozilla.org/moz/jssubscript-loader;1"]
-	.getService(Ci.mozIJSSubScriptLoader)
-	.loadSubScript("chrome://zotero/content/xpcom/integration.js");
-
-Cc["@mozilla.org/moz/jssubscript-loader;1"]
-	.getService(Ci.mozIJSSubScriptLoader)
-	.loadSubScript("chrome://zotero/content/xpcom/file.js");
-
-Cc["@mozilla.org/moz/jssubscript-loader;1"]
-	.getService(Ci.mozIJSSubScriptLoader)
-	.loadSubScript("chrome://zotero/content/xpcom/fulltext.js");
-
-Cc["@mozilla.org/moz/jssubscript-loader;1"]
-	.getService(Ci.mozIJSSubScriptLoader)
-	.loadSubScript("chrome://zotero/content/xpcom/mime.js");
-
-Cc["@mozilla.org/moz/jssubscript-loader;1"]
-	.getService(Ci.mozIJSSubScriptLoader)
-	.loadSubScript("chrome://zotero/content/xpcom/itemTreeView.js");
-
-Cc["@mozilla.org/moz/jssubscript-loader;1"]
-	.getService(Ci.mozIJSSubScriptLoader)
-	.loadSubScript("chrome://zotero/content/xpcom/collectionTreeView.js");
-
-Cc["@mozilla.org/moz/jssubscript-loader;1"]
-	.getService(Ci.mozIJSSubScriptLoader)
-	.loadSubScript("chrome://zotero/content/xpcom/progressWindow.js");
-
-Cc["@mozilla.org/moz/jssubscript-loader;1"]
-	.getService(Ci.mozIJSSubScriptLoader)
-	.loadSubScript("chrome://zotero/content/xpcom/annotate.js");
+for (var i=0; i<xpcomFiles.length; i++) {
+	Cc["@mozilla.org/moz/jssubscript-loader;1"]
+		.getService(Ci.mozIJSSubScriptLoader)
+		.loadSubScript("chrome://zotero/content/xpcom/" + xpcomFiles[i] + ".js");
+}
 
 Cc["@mozilla.org/moz/jssubscript-loader;1"]
 	.getService(Ci.mozIJSSubScriptLoader)

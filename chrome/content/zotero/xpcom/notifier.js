@@ -23,7 +23,10 @@
 Zotero.Notifier = new function(){
 	var _observers = new Zotero.Hash();
 	var _disabled = false;
-	var _types = ['collection', 'search', 'item', 'collection-item', 'item-tag', 'tag'];
+	var _types = [
+		'collection', 'creator', 'search', 'item',
+		'collection-item', 'item-tag', 'tag'
+	];
 	var _inTransaction;
 	var _locked = false;
 	var _queue = [];
@@ -31,6 +34,7 @@ Zotero.Notifier = new function(){
 	this.registerObserver = registerObserver;
 	this.unregisterObserver = unregisterObserver;
 	this.trigger = trigger;
+	this.untrigger = untrigger;
 	this.begin = begin;
 	this.commit = commit;
 	this.reset = reset;
@@ -108,9 +112,6 @@ Zotero.Notifier = new function(){
 				if (!extraData) {
 					throw ("Extra data must be supplied with Notifier type '" + type + "'");
 				}
-				if (extraData.constructor.name != 'Array') {
-					extraData = [extraData];
-				}
 		}
 		
 		ids = Zotero.flattenArguments(ids);
@@ -120,6 +121,7 @@ Zotero.Notifier = new function(){
 		Zotero.debug("Notifier.trigger('" + event + "', '" + type + "', " + '[' + ids.join() + '])'
 			+ (queue ? " queued" : " called " + "[observers: " + _observers.length + "]"));
 		
+		// Merge with existing queue
 		if (queue) {
 			if (!_queue[type]) {
 				_queue[type] = [];
@@ -129,11 +131,18 @@ Zotero.Notifier = new function(){
 			}
 			if (!_queue[type][event].ids) {
 				_queue[type][event].ids = [];
-				_queue[type][event].data = [];
+				_queue[type][event].data = {};
 			}
 			
+			// Merge ids
 			_queue[type][event].ids = _queue[type][event].ids.concat(ids);
-			_queue[type][event].data = _queue[type][event].data.concat(extraData);
+			
+			// Merge extraData keys
+			if (extraData) {
+				for (var dataID in extraData) {
+					_queue[type][event].data[dataID] = extraData[dataID];
+				}
+			}
 			
 			return true;
 		}
@@ -148,12 +157,33 @@ Zotero.Notifier = new function(){
 					_observers.get(i).ref.notify(event, type, ids, extraData);
 				}
 				catch (e) {
+					Zotero.debug(e);
 					Components.utils.reportError(e);
 				}
 			}
 		}
 		
 		return true;
+	}
+	
+	
+	function untrigger(event, type, ids) {
+		if (!_inTransaction) {
+			throw ("Zotero.Notifier.untrigger() called with no active event queue")
+		}
+		
+		ids = Zotero.flattenArguments(ids);
+		
+		for each(var id in ids) {
+			var index = _queue[type][event].ids.indexOf(id);
+			if (index == -1) {
+				Zotero.debug(event + '-' + type + ' id ' + id +
+					' not found in queue in Zotero.Notifier.untrigger()');
+				continue;
+			}
+			_queue[type][event].ids.splice(index, 1);
+			delete _queue[type][event].data[id];
+		}
 	}
 	
 	
@@ -219,13 +249,13 @@ Zotero.Notifier = new function(){
 			for (var event in _queue[type]) {
 				runQueue[type][event] = {
 					ids: [],
-					data: []
+					data: {}
 				};
 				
 				// Remove redundant ids
 				for (var i=0; i<_queue[type][event].ids.length; i++) {
 					var id = _queue[type][event].ids[i];
-					var data = _queue[type][event].data[i];
+					var data = _queue[type][event].data[id];
 					
 					// Don't send modify on nonexistent items or tags
 					if (event == 'modify') {
@@ -239,7 +269,7 @@ Zotero.Notifier = new function(){
 					
 					if (runQueue[type][event].ids.indexOf(id) == -1) {
 						runQueue[type][event].ids.push(id);
-						runQueue[type][event].data.push(data);
+						runQueue[type][event].data[id] = data;
 					}
 				}
 				

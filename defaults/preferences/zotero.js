@@ -70,3 +70,7 @@ pref("extensions.zotero.integration.autoRegenerate", -1);	// -1 = ask; 0 = no; 1
 
 // Annotation settings
 pref("extensions.zotero.annotations.warnOnClose", true);
+
+// Server
+pref("extensions.zotero.sync.server.username", '');
+pref("extensions.zotero.sync.server.compressData", true);

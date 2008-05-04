@@ -1011,7 +1011,7 @@ Zotero.Translate.prototype._closeStreams = function() {
 Zotero.Translate.prototype._itemTagsAndSeeAlso = function(item, newItem) {
 	// add to ID map
 	if(item.itemID) {
-		this._IDMap[item.itemID] = newItem.getID();
+		this._IDMap[item.itemID] = newItem.id;
 	}
 	// add see alsos
 	if(item.seeAlso) {
@@ -1087,7 +1087,10 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 	var type = (item.itemType ? item.itemType : "webpage");
 	
 	if(type == "note") {	// handle notes differently
-		var myID = Zotero.Notes.add(item.note);
+		var item = new Zotero.Item(false, 'note');
+		item.setNote(item.note);
+		var myID = item.save();
+		
 		// re-retrieve the item
 		var newItem = Zotero.Items.get(myID);
 	} else {
@@ -1173,11 +1176,11 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 			
 			// add note if necessary
 			if(item.note) {
-				newItem.updateNote(item.note);
+				newItem.setNote(item.note);
 			}
 		} else {
 			var typeID = Zotero.ItemTypes.getID(type);
-			var newItem = new Zotero.Item(typeID);
+			var newItem = new Zotero.Item(false, typeID);
 		}
 		
 		// makes looping through easier
@@ -1196,17 +1199,32 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 			if(data) {						// if field has content
 				if(field == "creators") {		// creators are a special case
 					for(var j in data) {
-						var creatorType = 1;
 						// try to assign correct creator type
 						if(data[j].creatorType) {
-							try {
-								var creatorType = Zotero.CreatorTypes.getID(data[j].creatorType);
-							} catch(e) {
-								Zotero.debug("Translate: invalid creator type "+data[j].creatorType+" for creator index "+j);
-							}
+							var creatorTypeID = Zotero.CreatorTypes.getID(data[j].creatorType);
+						}
+						if(!creatorTypeID) {
+							var creatorTypeID = 1;
 						}
 						
-						newItem.setCreator(j, data[j].firstName, data[j].lastName, creatorType);
+						var fields = {
+							firstName: data[j].firstName,
+							lastName: data[j].lastName
+						};
+						
+						var creatorDataID = Zotero.Creators.getDataID(fields);
+						if(creatorDataID) {
+							var linkedCreators = Zotero.Creators.getCreatorsWithData(creatorDataID);
+							// TODO: support identical creators via popup? ugh...
+							var creatorID = linkedCreators[0];
+							var creator = Zotero.Creators.get(creatorID);
+						} else {
+							var creator = new Zotero.Creator;
+							creator.setFields(fields);
+							var creatorID = creator.save();
+						}
+						
+						newItem.setCreator(j, creator, creatorTypeID);
 					}
 				} else if(field == "seeAlso") {
 					newItem.translateSeeAlso = data;
@@ -1270,14 +1288,19 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 		} else {
 			var myID = newItem.save();
 			if(myID == true || !myID) {
-				myID = newItem.getID();
+				myID = newItem.id;
 			}
 		}
 		
 		// handle notes
 		if(item.notes) {
 			for each(var note in item.notes) {
-				var noteID = Zotero.Notes.add(note.note, myID);
+				var item = new Zotero.Item(false, 'note');
+				item.setNote(note.note);
+				if (myID) {
+					item.setSource(myID);
+				}
+				var noteID = item.save();
 				
 				// handle see also
 				var myNote = Zotero.Items.get(noteID);
@@ -1420,7 +1443,11 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 		}
 	}
 	
-	if(!attachedTo) this.runHandler("itemDone", newItem);
+	if(!attachedTo) {
+		// Re-retrieve item before passing to handler
+		newItem = Zotero.Items.get(newItem.id);
+		this.runHandler("itemDone", newItem);
+	}
 	
 	delete item;
 }
@@ -1439,7 +1466,7 @@ Zotero.Translate.prototype._collectionDone = function(collection) {
  */
 Zotero.Translate.prototype._processCollection = function(collection, parentID) {
 	var newCollection = Zotero.Collections.add(collection.name, parentID);
-	var myID = newCollection.getID();
+	var myID = newCollection.id;
 	
 	this.newCollections.push(myID);
 	
@@ -1756,7 +1783,7 @@ Zotero.Translate.prototype._export = function() {
 		
 		if(this.configOptions.getCollections) {
 			// get child collections
-			this._collectionsLeft = Zotero.getCollections(this.collection.getID(), true);
+			this._collectionsLeft = Zotero.getCollections(this.collection.id, true);
 			// get items in child collections
 			for each(var collection in this._collectionsLeft) {
 				this._itemsLeft = this._itemsLeft.concat(collection.getChildItems());
@@ -1976,7 +2003,7 @@ Zotero.Translate.prototype._exportToArray = function(returnItem) {
 	returnItemArray.uniqueFields = new Object();
 	
 	// get base fields, not just the type-specific ones
-	var itemTypeID = returnItem.getType();
+	var itemTypeID = returnItem.itemTypeID;
 	var allFields = Zotero.ItemFields.getItemTypeFields(itemTypeID);
 	for each(var field in allFields) {
 		var fieldName = Zotero.ItemFields.getName(field);

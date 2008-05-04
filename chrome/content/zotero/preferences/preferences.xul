@@ -153,6 +153,37 @@ To add a new preference:
 	</prefpane>
 	
 	
+	<!-- localize -->
+	<prefpane id="zotero-prefpane-sync"
+						label="Sync"
+						onpaneload="document.getElementById('sync-password').value = Zotero.Sync.Server.password;"
+						image="chrome://zotero/skin/prefs-sync.png">
+		<preferences>
+			<preference id="pref-sync-username" name="extensions.zotero.sync.server.username" type="string"/>
+		</preferences>
+		
+		<grid>
+			<columns>
+				<columns/>
+				<columns/>
+			</columns>
+			
+			<rows>
+				<row>
+					<label value="Username:"/>
+					<textbox preference="pref-sync-username"
+						onchange="Zotero.Prefs.set('sync.server.username', this.value); var pass = document.getElementById('sync-password'); if (pass.value) { Zotero.Sync.Server.password = pass.value; }"/>
+				</row>
+				<row>
+					<label value="Password:"/>
+					<textbox id="sync-password" type="password"
+						onchange="Zotero.Sync.Server.password = this.value"/>
+				</row>
+			</rows>
+		</grid>
+	</prefpane>
+	
+	
 	<prefpane id="zotero-prefpane-search"
 						label="&zotero.preferences.prefpane.search;"
 						onpaneload="updateIndexStats()"

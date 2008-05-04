@@ -244,7 +244,8 @@ var Zotero_File_Interface = new function() {
 	 * collections
 	 */
 	function _importCollectionDone(obj, collection) {
-		collection.changeParent(_importCollection.getID());
+		collection.parent = _importCollection.id;
+		collection.save();
 	}
 	
 	/*
