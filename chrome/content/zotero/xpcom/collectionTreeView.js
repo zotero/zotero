@@ -125,7 +125,7 @@ Zotero.CollectionTreeView.prototype.reload = function()
 	
 	for (var i=0; i<this.rowCount; i++) {
 		if (this.isContainer(i) && this.isContainerOpen(i)) {
-			openCollections.push(this._getItemAtRow(i).ref.getID());
+			openCollections.push(this._getItemAtRow(i).ref.id);
 		}
 	}
 	
@@ -149,6 +149,11 @@ Zotero.CollectionTreeView.prototype.reload = function()
 Zotero.CollectionTreeView.prototype.notify = function(action, type, ids)
 {
 	if (!ids || ids.length == 0) {
+		return;
+	}
+	
+	if (!this._collectionRowMap) {
+		Zotero.debug("Collection row map didn't exist in collectionTreeView.notify()");
 		return;
 	}
 	
@@ -225,7 +230,7 @@ Zotero.CollectionTreeView.prototype.notify = function(action, type, ids)
 		{
 			case 'collection':
 				var collection = Zotero.Collections.get(ids);
-				var collectionID = collection.getID();
+				var collectionID = collection.id;
 				// Open container if creating subcollection
 				var parentID = collection.getParent();
 				if (parentID) {
@@ -379,7 +384,7 @@ Zotero.CollectionTreeView.prototype.toggleOpenState = function(row)
 	}
 	else
 	{
-		var newRows = Zotero.getCollections(this._getItemAtRow(row).ref.getID()); //Get children
+		var newRows = Zotero.getCollections(this._getItemAtRow(row).ref.id); //Get children
 		
 		for(var i = 0; i < newRows.length; i++)
 		{
@@ -516,7 +521,7 @@ Zotero.CollectionTreeView.prototype.saveSelection = function()
 				return 'L';
 			}
 			else if (this._getItemAtRow(i).isCollection()) {
-				return 'C' + this._getItemAtRow(i).ref.getID();
+				return 'C' + this._getItemAtRow(i).ref.id;
 			}
 			else if (this._getItemAtRow(i).isSearch()) {
 				return 'S' + this._getItemAtRow(i).ref.id;
@@ -568,7 +573,7 @@ Zotero.CollectionTreeView.prototype._refreshHashMap = function()
 	this._searchRowMap = [];
 	for(var i=0; i < this.rowCount; i++){
 		if (this.isCollection(i)){
-			this._collectionRowMap[this._getItemAtRow(i).ref.getID()] = i;
+			this._collectionRowMap[this._getItemAtRow(i).ref.id] = i;
 		}
 		else if (this.isSearch(i)){
 			this._searchRowMap[this._getItemAtRow(i).ref.id] = i;
@@ -680,8 +685,8 @@ Zotero.CollectionTreeView.prototype.canDrop = function(row, orient)
 			return true;
 		}
 		else if (dataType == 'zotero/collection'
-				&& data.data != rowCollection.getID()
-				&& !Zotero.Collections.get(data.data).hasDescendent('collection', rowCollection.getID())) {
+				&& data.data != rowCollection.id
+				&& !Zotero.Collections.get(data.data).hasDescendent('collection', rowCollection.id)) {
 			return true;//collections cannot be dropped on themselves, nor in their children
 		}
 	}
@@ -705,9 +710,10 @@ Zotero.CollectionTreeView.prototype.drop = function(row, orient)
 	{
 		var targetCollectionID;
 		if(this._getItemAtRow(row).isCollection())
-			targetCollectionID = this._getItemAtRow(row).ref.getID();
+			targetCollectionID = this._getItemAtRow(row).ref.id;
 		var droppedCollection = Zotero.Collections.get(data.data);
-		droppedCollection.changeParent(targetCollectionID);
+		droppedCollection.parent = targetCollectionID;
+		droppedCollection.save();
 	}
 	else if (dataType == 'zotero/item') {
 		var ids = data.data.split(',');
@@ -730,7 +736,7 @@ Zotero.CollectionTreeView.prototype.drop = function(row, orient)
 	}
 	else if (dataType == 'text/x-moz-url' || dataType == 'application/x-moz-file') {
 		if (this._getItemAtRow(row).isCollection()) {
-			var parentCollectionID = this._getItemAtRow(row).ref.getID();
+			var parentCollectionID = this._getItemAtRow(row).ref.id;
 		}
 		else {
 			var parentCollectionID = false;
@@ -804,7 +810,7 @@ Zotero.CollectionTreeView.prototype.onDragStart = function(evt,transferData,acti
 	transferData.data=new TransferData();
 	
 	//attach ID
-	transferData.data.addDataForFlavour("zotero/collection",this._getItemAtRow(this.selection.currentIndex).ref.getID());
+	transferData.data.addDataForFlavour("zotero/collection",this._getItemAtRow(this.selection.currentIndex).ref.id);
 }
 
 /*
@@ -881,14 +887,18 @@ Zotero.ItemGroup.prototype.isSearch = function()
 
 Zotero.ItemGroup.prototype.getName = function()
 {
-	if(this.isCollection())
-		return this.ref.getName();
-	else if(this.isLibrary())
+	if (this.isCollection()) {
+		return this.ref.name;
+	}
+	else if (this.isLibrary()) {
 		return Zotero.getString('pane.collections.library');
-	else if(this.isSearch())
-		return this.ref['name'];
-	else
+	}
+	else if (this.isSearch()) {
+		return this.ref.name;
+	}
+	else {
 		return "";
+	}
 }
 
 Zotero.ItemGroup.prototype.getChildItems = function()
@@ -927,7 +937,7 @@ Zotero.ItemGroup.prototype.getSearchObject = function() {
 	}
 	else if (this.isCollection()) {
 		s.addCondition('noChildren', 'true');
-		s.addCondition('collectionID', 'is', this.ref.getID());
+		s.addCondition('collectionID', 'is', this.ref.id);
 		if (Zotero.Prefs.get('recursiveCollections')) {
 			s.addCondition('recursive', 'true');
 		}

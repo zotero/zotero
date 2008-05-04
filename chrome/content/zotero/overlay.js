@@ -504,7 +504,7 @@ var ZoteroPane = new function()
 			return false;
 		}
 		
-		var item = new Zotero.Item(typeID);
+		var item = new Zotero.Item(false, typeID);
 		
 		for (var i in data)
 		{
@@ -514,13 +514,13 @@ var ZoteroPane = new function()
 		item.save();
 		
 		if (this.itemsView && this.itemsView._itemGroup.isCollection()) {
-			this.itemsView._itemGroup.ref.addItem(item.getID());
+			this.itemsView._itemGroup.ref.addItem(item.id);
 		}
 		
 		//set to Info tab
 		document.getElementById('zotero-view-item').selectedIndex = 0;
 		
-		this.selectItem(item.getID());
+		this.selectItem(item.id);
 		
 		return item;
 	}
@@ -548,7 +548,10 @@ var ZoteroPane = new function()
 			newName.value = untitled;
 		}
 		
-		Zotero.Collections.add(newName.value, parent);
+		var collection = new Zotero.Collection;
+		collection.name = newName.value;
+		collection.parent = parent;
+		collection.save();
 	}
 	
 	function newSearch()
@@ -737,7 +740,7 @@ var ZoteroPane = new function()
 				Zotero.Prefs.set('lastViewedFolder', 'L');
 			}
 			if (itemgroup.isCollection()) {
-				Zotero.Prefs.set('lastViewedFolder', 'C' + itemgroup.ref.getID());
+				Zotero.Prefs.set('lastViewedFolder', 'C' + itemgroup.ref.id);
 			}
 			else if (itemgroup.isSearch()) {
 				Zotero.Prefs.set('lastViewedFolder', 'S' + itemgroup.ref.id);
@@ -760,22 +763,23 @@ var ZoteroPane = new function()
 		{
 			var item = this.itemsView._getItemAtRow(this.itemsView.selection.currentIndex);
 			
-			if(item.isNote())
+			if(item.ref.isNote())
 			{
 				var noteEditor = document.getElementById('zotero-note-editor');
+				noteEditor.mode = 'edit';
 				
 				// If loading new or different note, disable undo while we repopulate the text field
 				// so Undo doesn't end up clearing the field. This also ensures that Undo doesn't
 				// undo content from another note into the current one.
-				if (!noteEditor.note || noteEditor.note.getID() != item.ref.getID()) {
-					noteEditor.id('noteField').editor.enableUndo(false);
+				if (!noteEditor.item || noteEditor.item.id != item.ref.id) {
+					noteEditor.disableUndo();
 				}
-				noteEditor.item = null;
-				noteEditor.note = item.ref;
+				noteEditor.parent = null;
+				noteEditor.item = item.ref;
 				
-				noteEditor.id('noteField').editor.enableUndo(true);
+				noteEditor.enableUndo();
 				
-				document.getElementById('zotero-view-note-button').setAttribute('noteID',item.ref.getID());
+				document.getElementById('zotero-view-note-button').setAttribute('noteID',item.ref.id);
 				if(item.ref.getSource())
 				{
 					document.getElementById('zotero-view-note-button').setAttribute('sourceID',item.ref.getSource());
@@ -786,7 +790,7 @@ var ZoteroPane = new function()
 				}
 				document.getElementById('zotero-item-pane-content').selectedIndex = 2;
 			}
-			else if(item.isAttachment())
+			else if(item.ref.isAttachment())
 			{
 				// DEBUG: this is annoying -- we really want to use an abstracted
 				// version of createValueElement() from itemPane.js
@@ -904,7 +908,7 @@ var ZoteroPane = new function()
 				document.getElementById('zotero-attachment-view').setAttribute('label', str);
 				
 				// Display page count
-				var pages = Zotero.Fulltext.getPages(item.ref.getID());
+				var pages = Zotero.Fulltext.getPages(item.ref.id);
 				var pages = pages ? pages.total : null;
 				var pagesRow = document.getElementById('zotero-attachment-pages');
 				if (pages) {
@@ -919,8 +923,9 @@ var ZoteroPane = new function()
 				this.updateItemIndexedState();
 				
 				var noteEditor = document.getElementById('zotero-attachment-note-editor');
-				noteEditor.item = null;
-				noteEditor.note = item.ref;
+				noteEditor.mode = 'edit';
+				noteEditor.parent = null;
+				noteEditor.item = item.ref;
 				
 				document.getElementById('zotero-item-pane-content').selectedIndex = 3;
 			}
@@ -956,7 +961,7 @@ var ZoteroPane = new function()
 		var reindexButton = document.getElementById('zotero-attachment-reindex');
 		
 		var item = this.itemsView._getItemAtRow(this.itemsView.selection.currentIndex);
-		var status = Zotero.Fulltext.getIndexedState(item.ref.getID());
+		var status = Zotero.Fulltext.getIndexedState(item.ref.id);
 		var str = 'fulltext.indexState.';
 		switch (status) {
 			case Zotero.Fulltext.INDEX_STATE_UNAVAILABLE:
@@ -980,7 +985,7 @@ var ZoteroPane = new function()
 		var str = Zotero.getString('pane.items.menu.reindexItem');
 		reindexButton.setAttribute('tooltiptext', str);
 		
-		if (Zotero.Fulltext.canReindex(item.ref.getID())) {
+		if (Zotero.Fulltext.canReindex(item.ref.id)) {
 			reindexButton.setAttribute('hidden', false);
 		}
 		else {
@@ -999,7 +1004,7 @@ var ZoteroPane = new function()
 			if (!items[i].isAttachment()) {
 				continue;
 			}
-			var itemID = items[i].getID();
+			var itemID = items[i].id;
 			Zotero.Fulltext.indexItems(itemID, true);
 		}
 		this.updateItemIndexedState();
@@ -1007,11 +1012,12 @@ var ZoteroPane = new function()
 	
 	
 	function duplicateSelectedItem() {
-		var newItemID = this.getSelectedItems()[0].clone();
+		var newItem = this.getSelectedItems()[0].clone();
+		var newItemID = newItem.save()
 		var newItem = Zotero.Items.get(newItemID);
 		
 		if (this.itemsView._itemGroup.isCollection()) {
-			this.itemsView._itemGroup.ref.addItem(newItem.getID());
+			this.itemsView._itemGroup.ref.addItem(newItem.id);
 			this.selectItem(newItemID);
 		}
 	}
@@ -1089,30 +1095,29 @@ var ZoteroPane = new function()
 	function editSelectedCollection()
 	{
 		if (this.collectionsView.selection.count > 0) {
-			var collection = this.collectionsView._getItemAtRow(this.collectionsView.selection.currentIndex);
+			var row = this.collectionsView._getItemAtRow(this.collectionsView.selection.currentIndex);
 			
-			if(collection.isCollection())
-			{
+			if (row.isCollection()) {
 				var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 										.getService(Components.interfaces.nsIPromptService);
 				
-				var newName = { value: collection.getName() };
+				var newName = { value: row.getName() };
 				var result = promptService.prompt(window, "",
 					Zotero.getString('pane.collections.rename'), newName, "", {});
 				
-				if (result && newName.value)
-				{
-					collection.ref.rename(newName.value);
+				if (result && newName.value) {
+					row.ref.name = newName.value;
+					row.ref.save();
 				}
 			}
-			else
-			{
+			else {
 				var s = new Zotero.Search();
-				s.load(collection.ref['id']);
-				var io = {dataIn: {search: s, name: collection.getName()}, dataOut: null};
+				s.load(row.ref.id);
+				var io = {dataIn: {search: s, name: row.getName()}, dataOut: null};
 				window.openDialog('chrome://zotero/content/searchDialog.xul','','chrome,modal',io);
-				if(io.dataOut)
+				if (io.dataOut) {
 					this.onCollectionSelected(); //reload itemsView
+				}
 			}
 		}
 	}
@@ -1243,7 +1248,7 @@ var ZoteroPane = new function()
 				&& this.collectionsView.selection.currentIndex != -1) {
 			var collection = this.collectionsView._getItemAtRow(this.collectionsView.selection.currentIndex);
 			if (collection && collection.isCollection()) {
-				return asID ? collection.ref.getID() : collection.ref;
+				return asID ? collection.ref.id : collection.ref;
 			}
 		}
 		// If the Zotero pane hasn't yet been opened, use the lastViewedFolder pref
@@ -1253,7 +1258,7 @@ var ZoteroPane = new function()
 			if (matches && matches[1] == 'C') {
 				var col = Zotero.Collections.get(matches[2]);
 				if (col) {
-					return asID ? col.getID() : col;
+					return asID ? col.id : col;
 				}
 			}
 		}
@@ -1470,7 +1475,7 @@ var ZoteroPane = new function()
 			else
 			{
 				var item = this.itemsView._getItemAtRow(this.itemsView.selection.currentIndex).ref;
-				var itemID = item.getID();
+				var itemID = item.id;
 				menu.setAttribute('itemID', itemID);
 				
 				// Show in Library
@@ -1493,7 +1498,7 @@ var ZoteroPane = new function()
 				if (item.isAttachment()) {
 					hide.push(m.duplicateItem);
 					// If not linked URL, show reindex line
-					if (Zotero.Fulltext.canReindex(item.getID())) {
+					if (Zotero.Fulltext.canReindex(item.id)) {
 						show.push(m.sep4, m.reindexItem);
 					}
 					else {
@@ -1757,7 +1762,12 @@ var ZoteroPane = new function()
 			}
 			catch (e){}
 			
-			var itemID = Zotero.Notes.add(text, parent);
+			var item = new Zotero.Item(false, 'note');
+			item.setNote(text);
+			if (parent) {
+				item.setSource(parent);
+			}
+			var itemID = item.save();
 			
 			if (this.itemsView && this.itemsView._itemGroup.isCollection()) {
 				this.itemsView._itemGroup.ref.addItem(itemID);
@@ -1772,7 +1782,7 @@ var ZoteroPane = new function()
 			// TODO: _text_
 			var c = this.getSelectedCollection();
 			if (c) {
-				this.openNoteWindow(null, c.getID());
+				this.openNoteWindow(null, c.id);
 			}
 			else {
 				this.openNoteWindow();
@@ -1796,10 +1806,13 @@ var ZoteroPane = new function()
 		var items = this.getSelectedItems();
 		if (this.itemsView.selection.count == 1 && items[0] && items[0].isNote()) {
 			var note = items[0].getNote()
-			items[0].updateNote(note == '' ? text : note + "\n\n" + text);
+			
+			items[0].setNote(note == '' ? text : note + "\n\n" + text);
+			items[0].save();
+			
 			var noteElem = document.getElementById('zotero-note-editor')
 			noteElem.focus();
-			noteElem.id('noteField').inputField.editor.
+			noteElem.noteField.inputField.editor.
 				selectionController.scrollSelectionIntoView(1,
 					1,
 					true);
@@ -1892,17 +1905,17 @@ var ZoteroPane = new function()
 		var item = this.newItem(Zotero.ItemTypes.getID('webpage'), data);
 		
 		// Automatically save snapshot if pref set
-		if (item.getID() && Zotero.Prefs.get('automaticSnapshots'))
+		if (item.id && Zotero.Prefs.get('automaticSnapshots'))
 		{
 			var f = function() {
 				// We set |noParent|, since child items don't belong to collections
-				ZoteroPane.addAttachmentFromPage(false, item.getID(), true);
+				ZoteroPane.addAttachmentFromPage(false, item.id, true);
 			}
 			// Give progress window time to appear
 			setTimeout(f, 300);
 		}
 		
-		return item.getID();
+		return item.id;
 	}
 	
 	
@@ -1930,7 +1943,7 @@ var ZoteroPane = new function()
 			progressWin.startCloseTimer();
 			
 			if (this.itemsView && this.itemsView._itemGroup.isCollection()) {
-				var parentCollectionID = this.itemsView._itemGroup.ref.getID();
+				var parentCollectionID = this.itemsView._itemGroup.ref.id;
 			}
 		}
 		
@@ -2026,7 +2039,7 @@ var ZoteroPane = new function()
 					}
 				}
 				else {
-					this.showAttachmentNotFoundDialog(attachment.getID())
+					this.showAttachmentNotFoundDialog(attachment.id)
 				}
 			}
 		}

@@ -121,7 +121,8 @@ Zotero.Schema = new function(){
 				
 				var up1 = _migrateUserDataSchema(dbVersion);
 				var up2 = _updateSchema('system');
-				var up3 = _updateSchema('scrapers');
+				var up3 = _updateSchema('triggers');
+				var up4 = _updateSchema('scrapers');
 				
 				Zotero.DB.commitTransaction();
 			}
@@ -149,7 +150,7 @@ Zotero.Schema = new function(){
 				}
 			}
 			
-			if (up2 || up3) {
+			if (up2 || up3 || up4) {
 				// Run a manual scraper update if upgraded and pref set
 				if (Zotero.Prefs.get('automaticScraperUpdates')){
 					this.updateScrapersRemote(2);
@@ -331,11 +332,6 @@ Zotero.Schema = new function(){
 	 * Retrieve the DB schema version
 	 */
 	function _getDBVersion(schema){
-		// Default to schema.sql
-		if (!schema){
-			schema = 'schema';
-		}
-		
 		if (_dbVersions[schema]){
 			return _dbVersions[schema];
 		}
@@ -487,39 +483,44 @@ Zotero.Schema = new function(){
 		Zotero.DB.beginTransaction();
 		try {
 			// Enable auto-vacuuming
+			Zotero.DB.query("PRAGMA page_size = 4096");
+			Zotero.DB.query("PRAGMA encoding = 'UTF-8'");
 			Zotero.DB.query("PRAGMA auto_vacuum = 1");
 			
-			Zotero.DB.query(_getSchemaSQL('userdata'));
-			_updateFailsafeSchema();
-			_updateDBVersion('userdata', _getSchemaSQLVersion('userdata'));
-			
 			Zotero.DB.query(_getSchemaSQL('system'));
-			_updateDBVersion('system', _getSchemaSQLVersion('system'));
-			
+			Zotero.DB.query(_getSchemaSQL('userdata'));
+			Zotero.DB.query(_getSchemaSQL('triggers'));
 			Zotero.DB.query(_getSchemaSQL('scrapers'));
+			
+			_updateDBVersion('system', _getSchemaSQLVersion('system'));
+			_updateDBVersion('userdata', _getSchemaSQLVersion('userdata'));
+			_updateDBVersion('triggers', _getSchemaSQLVersion('triggers'));
 			_updateDBVersion('scrapers', _getSchemaSQLVersion('scrapers'));
 			
-			var sql = "INSERT INTO items VALUES(123456789, 14, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)";
+			/*
+			TODO: uncomment for release
+			var sql = "INSERT INTO items VALUES(1, 14, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'AJ4PT6IT')";
 			Zotero.DB.query(sql);
-			var sql = "INSERT INTO itemAttachments VALUES(123456789, NULL, 3, 'text/html', 25, NULL, NULL)";
+			var sql = "INSERT INTO itemAttachments VALUES (1, NULL, 3, 'text/html', 25, NULL, NULL)";
 			Zotero.DB.query(sql);
 			var sql = "INSERT INTO itemDataValues VALUES (?, ?)";
 			Zotero.DB.query(sql, [1, "Zotero - " + Zotero.getString('install.quickStartGuide')]);
-			var sql = "INSERT INTO itemData VALUES(123456789, 110, 1)";
+			var sql = "INSERT INTO itemData VALUES (1, 110, 1)";
 			Zotero.DB.query(sql);
 			var sql = "INSERT INTO itemDataValues VALUES (2, 'http://www.zotero.org/documentation/quick_start_guide')";
 			Zotero.DB.query(sql);
-			var sql = "INSERT INTO itemData VALUES(123456789, 1, 2)";
+			var sql = "INSERT INTO itemData VALUES (1, 1, 2)";
 			Zotero.DB.query(sql);
 			var sql = "INSERT INTO itemDataValues VALUES (3, CURRENT_TIMESTAMP)";
 			Zotero.DB.query(sql);
-			var sql = "INSERT INTO itemData VALUES(123456789, 27, 3)";
+			var sql = "INSERT INTO itemData VALUES (1, 27, 3)";
 			Zotero.DB.query(sql);
-			var sql = "INSERT INTO itemNotes (itemID, sourceItemID, note) VALUES(123456789, NULL, ?)";
+			var sql = "INSERT INTO itemNotes (itemID, sourceItemID, note) VALUES (1, NULL, ?)";
 			var msg = Zotero.getString('install.quickStartGuide.message.welcome')
 				+ " " + Zotero.getString('install.quickStartGuide.message.clickViewPage')
 				+ "\n\n" + Zotero.getString('install.quickStartGuide.message.thanks');
 			Zotero.DB.query(sql, msg);
+			*/
 			Zotero.DB.commitTransaction();
 			
 			self.dbInitialized = true;
@@ -787,6 +788,8 @@ Zotero.Schema = new function(){
 		}
 		
 		Zotero.debug('Updating user data tables from version ' + fromVersion + ' to ' + toVersion);
+		
+		var ZU = new Zotero.Utilities;
 		
 		Zotero.DB.beginTransaction();
 		
@@ -1222,10 +1225,214 @@ Zotero.Schema = new function(){
 					Zotero.DB.query("ALTER TABLE fulltextItems ADD totalChars INT");
 					Zotero.DB.query("DELETE FROM version WHERE schema='fulltext'");
 				}
+				
+				// 1.5
+				
+				if (i==37) {
+					// Some data cleanup from the pre-FK-trigger days
+					Zotero.DB.query("DELETE FROM annotations WHERE itemID NOT IN (SELECT itemID FROM items)");
+					Zotero.DB.query("DELETE FROM collectionItems WHERE itemID NOT IN (SELECT itemID FROM items)");
+					Zotero.DB.query("DELETE FROM fulltextItems WHERE itemID NOT IN (SELECT itemID FROM items)");
+					Zotero.DB.query("DELETE FROM fulltextItemWords WHERE itemID NOT IN (SELECT itemID FROM items)");
+					Zotero.DB.query("DELETE FROM highlights WHERE itemID NOT IN (SELECT itemID FROM items)");
+					Zotero.DB.query("DELETE FROM itemAttachments WHERE itemID NOT IN (SELECT itemID FROM items)");
+					Zotero.DB.query("DELETE FROM itemCreators WHERE itemID NOT IN (SELECT itemID FROM items)");
+					Zotero.DB.query("DELETE FROM itemData WHERE itemID NOT IN (SELECT itemID FROM items)");
+					Zotero.DB.query("DELETE FROM itemNotes WHERE itemID NOT IN (SELECT itemID FROM items)");
+					Zotero.DB.query("DELETE FROM itemNoteTitles WHERE itemID NOT IN (SELECT itemID FROM itemNotes)");
+					Zotero.DB.query("DELETE FROM itemSeeAlso WHERE itemID NOT IN (SELECT itemID FROM items)");
+					Zotero.DB.query("DELETE FROM itemSeeAlso WHERE linkedItemID NOT IN (SELECT itemID FROM items)");
+					Zotero.DB.query("DELETE FROM itemTags WHERE itemID NOT IN (SELECT itemID FROM items)");
+					Zotero.DB.query("DELETE FROM itemTags WHERE tagID NOT IN (SELECT tagID FROM tags)");
+					Zotero.DB.query("DELETE FROM savedSearchConditions WHERE savedSearchID NOT IN (select savedSearchID FROM savedSearches)");
+					
+					Zotero.DB.query("DELETE FROM itemData WHERE valueID NOT IN (SELECT valueID FROM itemDataValues)");
+					Zotero.DB.query("DELETE FROM fulltextItemWords WHERE wordID NOT IN (SELECT wordID FROM fulltextWords)");
+					Zotero.DB.query("DELETE FROM collectionItems WHERE collectionID NOT IN (SELECT collectionID FROM collections)");
+					Zotero.DB.query("DELETE FROM itemCreators WHERE creatorID NOT IN (SELECT creatorID FROM creators)");
+					Zotero.DB.query("DELETE FROM itemTags WHERE tagID NOT IN (SELECT tagID FROM tags)");
+					Zotero.DB.query("DELETE FROM itemData WHERE fieldID NOT IN (SELECT fieldID FROM fields)");
+					Zotero.DB.query("DELETE FROM itemData WHERE valueID NOT IN (SELECT valueID FROM itemDataValues)");
+					
+					Zotero.DB.query("DROP TABLE IF EXISTS userFieldMask");
+					Zotero.DB.query("DROP TABLE IF EXISTS userItemTypes");
+					Zotero.DB.query("DROP TABLE IF EXISTS userItemTypeMask");
+					Zotero.DB.query("DROP TABLE IF EXISTS userFields");
+					Zotero.DB.query("DROP TABLE IF EXISTS userItemTypeFields");
+					
+					var wordIDs = Zotero.DB.columnQuery("SELECT GROUP_CONCAT(wordID) AS wordIDs FROM fulltextWords GROUP BY word HAVING COUNT(*)>1");
+					if (wordIDs.length) {
+						Zotero.DB.query("CREATE TEMPORARY TABLE deleteWordIDs (wordID INTEGER PRIMARY KEY)");
+						for (var j=0, len=wordIDs.length; j<len; j++) {
+							var ids = wordIDs[j].split(',');
+							for (var k=1; k<ids.length; k++) {
+								Zotero.DB.query("INSERT INTO deleteWordIDs VALUES (?)", ids[k]);
+							}
+						}
+						Zotero.DB.query("DELETE FROM fulltextWords WHERE wordID IN (SELECT wordID FROM deleteWordIDs)");
+						Zotero.DB.query("DROP TABLE deleteWordIDs");
+					}
+					
+					Zotero.DB.query("REINDEX");
+					Zotero.DB.transactionVacuum = true;
+					
+					// Set page cache size to 8MB
+					var pageSize = Zotero.DB.valueQuery("PRAGMA page_size");
+					var cacheSize = 8192000 / pageSize;
+					Zotero.DB.query("PRAGMA default_cache_size=" + cacheSize);
+					
+					Zotero.DB.query("UPDATE itemAttachments SET sourceItemID=NULL WHERE sourceItemID NOT IN (SELECT itemID FROM items)");
+					Zotero.DB.query("UPDATE itemNotes SET sourceItemID=NULL WHERE sourceItemID NOT IN (SELECT itemID FROM items)");
+					
+					Zotero.DB.query("CREATE TABLE syncDeleteLog (\n    syncObjectTypeID INT NOT NULL,\n    objectID INT NOT NULL,\n    key TEXT NOT NULL,\n    timestamp INT NOT NULL,\n    FOREIGN KEY (syncObjectTypeID) REFERENCES syncObjectTypes(syncObjectTypeID)\n);");
+					Zotero.DB.query("CREATE INDEX syncDeleteLog_timestamp ON syncDeleteLog(timestamp);");
+					
+					// Note titles
+					Zotero.DB.query("ALTER TABLE itemNotes ADD COLUMN title TEXT");
+					var notes = Zotero.DB.query("SELECT itemID, title FROM itemNoteTitles");
+					if (notes) {
+						var statement = Zotero.DB.getStatement("UPDATE itemNotes SET title=? WHERE itemID=?");
+						for (var j=0, len=notes.length; j<len; j++) {
+							statement.bindUTF8StringParameter(0, notes[j].title);
+							statement.bindInt32Parameter(1, notes[j].itemID);
+							try {
+								statement.execute();
+							}
+							catch (e) {
+								throw (Zotero.DB.getLastErrorString());
+							}
+						}
+						statement.reset();
+					}
+					Zotero.DB.query("DROP TABLE itemNoteTitles");
+					
+					// Creator data
+					Zotero.DB.query("CREATE TABLE creatorData (\n    creatorDataID INTEGER PRIMARY KEY,\n    firstName TEXT,\n    lastName TEXT,\n    shortName TEXT,\n    fieldMode INT,\n    birthYear INT\n)");
+					Zotero.DB.query("INSERT INTO creatorData SELECT NULL, firstName, lastName, NULL, fieldMode, NULL FROM creators WHERE creatorID IN (SELECT creatorID FROM itemCreators)");
+					var creatorsOld = Zotero.DB.query("SELECT * FROM creators");
+					Zotero.DB.query("DROP TABLE creators");
+					Zotero.DB.query("CREATE TABLE creators (\n    creatorID INTEGER PRIMARY KEY,\n    creatorDataID INT,\n    dateModified DEFAULT CURRENT_TIMESTAMP NOT NULL,\n    key TEXT NOT NULL,\n    FOREIGN KEY (creatorDataID) REFERENCES creatorData(creatorDataID)\n);");
+					
+					var data = Zotero.DB.query("SELECT * FROM creatorData");
+					if (data) {
+						var oldCreatorIDHash = {};
+						for (var j=0, len=creatorsOld.length; j<len; j++) {
+							oldCreatorIDHash[
+								ZU.md5(
+									creatorsOld[j].firstName + '_' +
+									creatorsOld[j].lastName + '_' +
+									creatorsOld[j].fieldMode
+								)
+							] = creatorsOld[j].creatorID;
+						}
+						
+						var updatedIDs = {};
+						var insertStatement = Zotero.DB.getStatement("INSERT INTO creators (creatorID, creatorDataID, key) VALUES (?, ?, ?)");
+						var updateStatement = Zotero.DB.getStatement("UPDATE itemCreators SET creatorID=? WHERE creatorID=?");
+						for (var j=0, len=data.length; j<len; j++) {
+							insertStatement.bindInt32Parameter(0, data[j].creatorDataID);
+							insertStatement.bindInt32Parameter(1, data[j].creatorDataID);
+							var key = Zotero.ID.getKey();
+							insertStatement.bindStringParameter(2, key);
+							
+							var oldCreatorID = oldCreatorIDHash[
+								ZU.md5(
+									data[j].firstName + '_' +
+									data[j].lastName + '_' +
+									data[j].fieldMode
+								)
+							];
+							
+							if (updatedIDs[oldCreatorID]) {
+								continue;
+							}
+							updatedIDs[oldCreatorID] = true;
+							
+							updateStatement.bindInt32Parameter(0, data[j].creatorDataID);
+							updateStatement.bindInt32Parameter(1, oldCreatorID);
+							
+							try {
+								insertStatement.execute();
+								updateStatement.execute();
+							}
+							catch (e) {
+								throw (Zotero.DB.getLastErrorString());
+							}
+						}
+						insertStatement.reset();
+						updateStatement.reset();
+					}
+					
+					Zotero.DB.query("CREATE INDEX creators_creatorDataID ON creators(creatorDataID)");
+					
+					// Items
+					Zotero.DB.query("ALTER TABLE items ADD COLUMN key TEXT");
+					var items = Zotero.DB.query("SELECT itemID, itemTypeID, dateAdded FROM items");
+					var titles = Zotero.DB.query("SELECT itemID, value FROM itemData NATURAL JOIN itemDataValues WHERE fieldID BETWEEN 110 AND 112");
+					var statement = Zotero.DB.getStatement("UPDATE items SET key=? WHERE itemID=?");
+					for (var j=0, len=items.length; j<len; j++) {
+						var key = Zotero.ID.getKey();
+						statement.bindStringParameter(0, key);
+						statement.bindInt32Parameter(1, items[j].itemID);
+						try {
+							statement.execute();
+						}
+						catch (e) {
+							throw (Zotero.DB.getLastErrorString());
+						}
+					}
+					statement.reset();
+					Zotero.DB.query("CREATE UNIQUE INDEX items_key ON items(key)");
+					
+					// Collections
+					var collections = Zotero.DB.query("SELECT * FROM collections");
+					Zotero.DB.query("DROP TABLE collections");
+					Zotero.DB.query("CREATE TABLE collections (\n    collectionID INTEGER PRIMARY KEY,\n    collectionName TEXT,\n    parentCollectionID INT,\n    dateModified DEFAULT CURRENT_TIMESTAMP NOT NULL,\n    key TEXT NOT NULL UNIQUE,\n    FOREIGN KEY (parentCollectionID) REFERENCES collections(collectionID)\n);");
+					var statement = Zotero.DB.getStatement("INSERT INTO collections (collectionID, collectionName, parentCollectionID, key) VALUES (?,?,?,?)");
+					for (var j=0, len=collections.length; j<len; j++) {
+						statement.bindInt32Parameter(0, collections[j].collectionID);
+						statement.bindUTF8StringParameter(1, collections[j].collectionName);
+						if (collections[j].parentCollectionID) {
+							statement.bindInt32Parameter(2, collections[j].parentCollectionID);
+						}
+						else {
+							statement.bindNullParameter(2);
+						}
+						var key = Zotero.ID.getKey();
+						statement.bindStringParameter(3, key);
+						
+						try {
+							statement.execute();
+						}
+						catch (e) {
+							throw (Zotero.DB.getLastErrorString());
+						}
+					}
+					statement.reset();
+					
+					// Saved searches
+					var searches = Zotero.DB.query("SELECT * FROM savedSearches");
+					Zotero.DB.query("DROP TABLE savedSearches");
+					Zotero.DB.query("CREATE TABLE savedSearches (\n    savedSearchID INTEGER PRIMARY KEY,\n    savedSearchName TEXT,\n    dateModified DEFAULT CURRENT_TIMESTAMP NOT NULL,\n    key TEXT NOT NULL UNIQUE\n);");
+					var statement = Zotero.DB.getStatement("INSERT INTO savedSearches (savedSearchID, savedSearchName, key) VALUES (?,?,?)");
+					for (var j=0, len=searches.length; j<len; j++) {
+						statement.bindInt32Parameter(0, searches[j].savedSearchID);
+						statement.bindUTF8StringParameter(1, searches[j].savedSearchName);
+						var key = Zotero.ID.getKey();
+						statement.bindStringParameter(2, key);
+
+						try {
+							statement.execute();
+						}
+						catch (e) {
+							throw (Zotero.DB.getLastErrorString());
+						}
+					}
+					statement.reset();
+				}
 			}
 			
-			_updateSchema('userdata');
-			_updateFailsafeSchema();
+			_updateDBVersion('userdata', toVersion);
 			
 			Zotero.DB.commitTransaction();
 		}
@@ -1235,42 +1442,5 @@ Zotero.Schema = new function(){
 		}
 		
 		return true;
-	}
-	
-	
-	function _updateFailsafeSchema(){
-		// This is super-annoying, but SQLite didn't have IF [NOT] EXISTS
-		// on trigger statements until 3.3.8, which didn't make it into
-		// Firefox 2.0, so we just throw the triggers at the DB on every
-		// userdata update and catch errors individually
-		//
-		
-		try { Zotero.DB.query("DROP TRIGGER insert_date_field"); } catch (e) {}
-		try { Zotero.DB.query("DROP TRIGGER update_date_field"); } catch (e) {}
-		
-		var itemDataTrigger = "  FOR EACH ROW WHEN NEW.fieldID IN (14, 27, 52, 96, 100)\n"
-			+ "  BEGIN\n"
-			+ "    SELECT CASE\n"
-			+ "        CAST(SUBSTR((SELECT value FROM itemDataValues WHERE valueID=NEW.valueID), 1, 4) AS INT) BETWEEN 0 AND 9999 AND\n"
-			+ "        SUBSTR((SELECT value FROM itemDataValues WHERE valueID=NEW.valueID), 5, 1) = '-' AND\n"
-			+ "        CAST(SUBSTR((SELECT value FROM itemDataValues WHERE valueID=NEW.valueID), 6, 2) AS INT) BETWEEN 0 AND 12 AND\n"
-			+ "        SUBSTR((SELECT value FROM itemDataValues WHERE valueID=NEW.valueID), 8, 1) = '-' AND\n"
-			+ "        CAST(SUBSTR((SELECT value FROM itemDataValues WHERE valueID=NEW.valueID), 9, 2) AS INT) BETWEEN 0 AND 31\n"
-			+ "      WHEN 0 THEN RAISE (ABORT, 'Date field must begin with SQL date') END;\n"
-			+ "  END;\n";
-		
-		try {
-			var sql = "CREATE TRIGGER insert_date_field BEFORE INSERT ON itemData\n"
-				+ itemDataTrigger;
-			Zotero.DB.query(sql);
-		}
-		catch (e){}
-		
-		try {
-			var sql = "CREATE TRIGGER update_date_field BEFORE UPDATE ON itemData\n"
-				+ itemDataTrigger;
-			Zotero.DB.query(sql);
-		}
-		catch (e){}
 	}
 }

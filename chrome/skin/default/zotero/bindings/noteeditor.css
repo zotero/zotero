@@ -1,12 +1,8 @@
 /* Don't collapse blank note parent labels, since it prevents access to parent */
-#citeLabel
-{
-	min-height: 1.25em;
-}
-
-#citeLabel:hover
+#citeLabel[onclick]:hover
 {
 	cursor: pointer !important;
+	min-height: 1.25em;
 }
 
 #tagsPopup {

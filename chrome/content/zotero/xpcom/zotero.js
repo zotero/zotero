@@ -60,6 +60,7 @@ var Zotero = new function(){
 	this.hasValues = hasValues;
 	this.randomString = randomString;
 	this.moveToUnique = moveToUnique;
+	this.reloadDataObjects = reloadDataObjects;
 	
 	// Public properties
 	this.initialized = false;
@@ -250,6 +251,8 @@ var Zotero = new function(){
 		// Initialize integration web server
 		Zotero.Integration.SOAP.init();
 		Zotero.Integration.init();
+		
+		Zotero.Sync.init();
 		
 		this.initialized = true;
 		
@@ -467,8 +470,7 @@ var Zotero = new function(){
 	 * |type| is a string with one of the flag types in nsIScriptError:
 	 *    'error', 'warning', 'exception', 'strict'
 	 */
-	function log(message, type, sourceName, sourceLine, lineNumber,
-			columnNumber, category) {
+	function log(message, type, sourceName, sourceLine, lineNumber, columnNumber) {
 		var consoleService = Components.classes["@mozilla.org/consoleservice;1"]
 			.getService(Components.interfaces.nsIConsoleService);
 		var scriptError = Components.classes["@mozilla.org/scripterror;1"]
@@ -486,7 +488,7 @@ var Zotero = new function(){
 			lineNumber != undefined ? lineNumber : null, 
 			columnNumber != undefined ? columnNumber : null,
 			flags,
-			category
+			'XUL javascript' // DEBUG: this doesn't seem to work
 		);
 		consoleService.logMessage(scriptError);
 	}
@@ -798,9 +800,11 @@ var Zotero = new function(){
 	/**
 	* Generate a random string of length 'len' (defaults to 8)
 	**/
-	function randomString(len) {
-		var chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz";
-		if (!len){
+	function randomString(len, chars) {
+		if (!chars) {
+			chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz";
+		}
+		if (!len) {
 			len = 8;
 		}
 		var randomstring = '';
@@ -820,6 +824,13 @@ var Zotero = new function(){
 		// Move file to unique name
 		file.moveTo(newFile.parent, newName);
 		return file;
+	}
+	
+	
+	function reloadDataObjects() {
+		Zotero.Collections.reloadAll();
+		Zotero.Creators.reloadAll();
+		Zotero.Items.reloadAll();
 	}
 };
 
@@ -1163,6 +1174,8 @@ Zotero.Date = new function(){
 	this.sqlHasYear = sqlHasYear;
 	this.sqlHasMonth = sqlHasMonth;
 	this.sqlHasDay = sqlHasDay;
+	this.getUnixTimestamp = getUnixTimestamp;
+	this.toUnixTimestamp = toUnixTimestamp;
 	this.getFileDateString = getFileDateString;
 	this.getFileTimeString = getFileTimeString;
 	this.getLocaleDateOrder = getLocaleDateOrder;
@@ -1223,12 +1236,7 @@ Zotero.Date = new function(){
 				var seconds = date.getUTCSeconds();
 			}
 			else {
-				var year = date.getFullYear();
-				var month = date.getMonth();
-				var day = date.getDate();
-				var hours = date.getHours();
-				var minutes = date.getMinutes();
-				var seconds = date.getSeconds();
+				return date.toLocaleFormat('%Y-%m-%d %T');
 			}
 			
 			var utils = new Zotero.Utilities();
@@ -1483,9 +1491,12 @@ Zotero.Date = new function(){
 	}
 	
 	// Regexes for multipart and SQL dates
-	var _multipartRE = /^[0-9]{4}\-[0-9]{2}\-[0-9]{2} /;
-	var _sqldateRE = /^[0-9]{4}\-[0-9]{2}\-[0-9]{2}/;
-	var _sqldatetimeRE = /^[0-9]{4}\-[0-9]{2}\-[0-9]{2} ([0-1][0-9]|[2][0-3]):([0-5][0-9]):([0-5][0-9])/;
+	// Allow zeroes in multipart dates
+	var _multipartRE = /^\-?[0-9]{4}\-[0-9]{2}\-[0-9]{2} /;
+	//var _sqldateRE = /^\-?[0-9]{4}\-[0-9]{2}\-[0-9]{2}/;
+	//var _sqldatetimeRE = /^\-?[0-9]{4}\-[0-9]{2}\-[0-9]{2} ([0-1][0-9]|[2][0-3]):([0-5][0-9]):([0-5][0-9])/;
+	var _sqldateRE = /^\-?[0-9]{4}\-(0[1-9]|10|11|12)\-(0[1-9]|[1-2][0-9]|30|31)$/;
+	var _sqldatetimeRE = /^\-?[0-9]{4}\-(0[1-9]|10|11|12)\-(0[1-9]|[1-2][0-9]|30|31) ([0-1][0-9]|[2][0-3]):([0-5][0-9]):([0-5][0-9])$/;
 	
 	/**
 	 * Tests if a string is a multipart date string
@@ -1552,6 +1563,20 @@ Zotero.Date = new function(){
 	
 	function sqlHasDay(sqldate){
 		return isSQLDate(sqldate) && sqldate.substr(8,2)!='00';
+	}
+	
+	
+	function getUnixTimestamp() {
+		return Math.round(Date.now() / 1000);
+	}
+	
+	
+	function toUnixTimestamp(date) {
+		if (date === null || typeof date != 'object' ||
+				date.constructor.name != 'Date') {
+			throw ('Not a valid date in Zotero.Date.toUnixTimestamp()');
+		}
+		return Math.round(date.getTime() / 1000);
 	}
 	
 	

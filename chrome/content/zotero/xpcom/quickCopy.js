@@ -136,7 +136,6 @@ Zotero.QuickCopy = new function() {
 		
 		if (mode == 'export') {
 			var translation = new Zotero.Translate("export");
-			Zotero.debug(items);
 			translation.setItems(items);
 			translation.setTranslator(format);
 			translation.setHandler("done", callback);

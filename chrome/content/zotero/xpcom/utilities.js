@@ -253,6 +253,56 @@ Zotero.Utilities.prototype.isInt = function(x) {
 	return false;
 }
 
+
+/**
+ * Determine the necessary data type for SQLite parameter binding
+ *
+ * @return	int		0 for string, 32 for int32, 64 for int64
+ */
+Zotero.Utilities.prototype.getSQLDataType = function(value) {
+	var strVal = value + '';
+	if (strVal.match(/^[1-9]+[0-9]*$/)) {
+		// These upper bounds also specified in Zotero.DB
+		//
+		// Store as 32-bit signed integer
+		if (value <= 2147483647) {
+			return 32;
+		}
+		// Store as 64-bit signed integer
+		// 2^53 is JS's upper-bound for decimal integers
+		else if (value < 9007199254740992) {
+			return 64;
+		}
+	}
+	return 0;
+}
+
+
+/*
+ * From http://developer.mozilla.org/en/docs/nsICryptoHash#Computing_the_Hash_of_a_String
+ */
+Zotero.Utilities.prototype.md5 = function(str) {
+	var converter = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"].
+		createInstance(Components.interfaces.nsIScriptableUnicodeConverter);
+	converter.charset = "UTF-8";
+	var result = {};
+	var data = converter.convertToByteArray(str, result);
+	var ch = Components.classes["@mozilla.org/security/hash;1"]
+		.createInstance(Components.interfaces.nsICryptoHash);
+	ch.init(ch.MD5);
+	ch.update(data, data.length);
+	var hash = ch.finish(false);
+	
+	// return the two-digit hexadecimal code for a byte
+	function toHexString(charCode) {
+		return ("0" + charCode.toString(16)).slice(-2);
+	}
+	
+	// convert the binary hash data to a hex string.
+	return [toHexString(hash.charCodeAt(i)) for (i in hash)].join("");
+}
+
+
 /*
  * Get current zotero version
  */
@@ -562,8 +612,10 @@ Zotero.Utilities.HTTP = new function() {
 	*
 	* doGet can be called as:
 	* Zotero.Utilities.HTTP.doGet(url, onDone)
+	*
+	* Returns the XMLHTTPRequest object
 	**/
-	function doGet(url, onDone, onError, responseCharset) {
+	function doGet(url, onDone, responseCharset) {
 		Zotero.debug("HTTP GET "+url);
 		if (this.browserIsOffline()){
 			return false;
@@ -580,7 +632,7 @@ Zotero.Utilities.HTTP = new function() {
 		
 		xmlhttp.send(null);
 		
-		return true;
+		return xmlhttp;
 	}
 	
 	
@@ -591,9 +643,19 @@ Zotero.Utilities.HTTP = new function() {
 	*
 	* doPost can be called as:
 	* Zotero.Utilities.HTTP.doPost(url, body, onDone)
+	*
+	* Returns the XMLHTTPRequest object
 	**/
 	function doPost(url, body, onDone, requestContentType, responseCharset) {
-		Zotero.debug("HTTP POST "+body+" to "+url);
+		var bodyStart = body.substr(0, 1024);
+		// Don't display password in console
+		bodyStart = bodyStart.replace(/password=[^&]+/, 'password=********');
+		
+		Zotero.debug("HTTP POST "
+			+ (body.length > 1024 ?
+				bodyStart + '... (' + body.length + ' chars)' : bodyStart)
+			+ " to " + url);
+		
 		if (this.browserIsOffline()){
 			return false;
 		}
@@ -610,7 +672,7 @@ Zotero.Utilities.HTTP = new function() {
 		
 		xmlhttp.send(body);
 		
-		return true;
+		return xmlhttp;
 	}
 	
 	
@@ -631,7 +693,7 @@ Zotero.Utilities.HTTP = new function() {
 		
 		xmlhttp.send(null);
 		
-		return true;
+		return xmlhttp;
 	}
 	
 	
@@ -641,8 +703,7 @@ Zotero.Utilities.HTTP = new function() {
 	* doOptions can be called as:
 	* Zotero.Utilities.HTTP.doOptions(url, body, onDone)
 	*
-	* The status handler, which doesn't really serve a very noticeable purpose
-	* in our code, is required for compatiblity with the Piggy Bank project
+	* Returns the XMLHTTPRequest object
 	**/
 	function doOptions(url, body, onDone) {
 		Zotero.debug("HTTP OPTIONS "+url);
@@ -661,7 +722,7 @@ Zotero.Utilities.HTTP = new function() {
 		
 		xmlhttp.send(body);
 		
-		return true;
+		return xmlhttp;
 	}
 	
 	

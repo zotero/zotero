@@ -1,78 +1,38 @@
--- 36
+-- 37
 
--- This file creates tables containing user-specific data -- any changes
--- to existing tables made here must be mirrored in transition steps in
--- schema.js::_migrateSchema()
+-- This file creates tables containing user-specific data -- any changes made
+-- here must be mirrored in transition steps in schema.js::_migrateSchema()
 
 
-CREATE TABLE IF NOT EXISTS version (
+CREATE TABLE version (
     schema TEXT PRIMARY KEY,
     version INT NOT NULL
 );
-CREATE INDEX IF NOT EXISTS schema ON version(schema);
+CREATE INDEX schema ON version(schema);
 
-CREATE TABLE IF NOT EXISTS settings (
+CREATE TABLE settings (
     setting TEXT,
     key TEXT,
     value,
     PRIMARY KEY (setting, key)
 );
 
--- Show or hide pre-mapped fields for system item types
-CREATE TABLE IF NOT EXISTS userFieldMask (
-    itemTypeID INT,
-    fieldID INT,
-    hide INT,
-    PRIMARY KEY (itemTypeID, fieldID),
-    FOREIGN KEY (itemTypeID, fieldID) REFERENCES itemTypeFields(itemTypeID, fieldID)
-);
-
--- User-defined item types -- itemTypeIDs must be >= 1000
-CREATE TABLE IF NOT EXISTS userItemTypes (
-    itemTypeID INTEGER PRIMARY KEY,
-    typeName TEXT,
-    templateItemTypeID INT
-);
-
--- Control visibility and placement of system and user item types
-CREATE TABLE IF NOT EXISTS userItemTypeMask (
-    itemTypeID INTEGER PRIMARY KEY,
-    display INT, -- 0 == hide, 1 == show, 2 == primary
-    FOREIGN KEY (itemTypeID) REFERENCES userItemTypes(itemTypeID)
-);
-
--- User-defined fields
-CREATE TABLE IF NOT EXISTS userFields (
-    userFieldID INTEGER PRIMARY KEY,
-    fieldName TEXT
-);
-
--- Map custom fields to system and custom item types
-CREATE TABLE IF NOT EXISTS userItemTypeFields (
-    itemTypeID INT,
-    userFieldID INT,
-    orderIndex INT,
-    PRIMARY KEY (itemTypeID, userFieldID),
-    FOREIGN KEY (userFieldID) REFERENCES userFields(userFieldID)
-);
-
 -- The foundational table; every item collected has a unique record here
-CREATE TABLE IF NOT EXISTS items (
+CREATE TABLE items (
     itemID INTEGER PRIMARY KEY,
     itemTypeID INT,
     dateAdded DATETIME DEFAULT CURRENT_TIMESTAMP,
-    dateModified DATETIME DEFAULT CURRENT_TIMESTAMP
+    dateModified DATETIME DEFAULT CURRENT_TIMESTAMP,
+    key TEXT NOT NULL UNIQUE
 );
 
-CREATE TABLE IF NOT EXISTS itemDataValues (
+CREATE TABLE itemDataValues (
     valueID INTEGER PRIMARY KEY,
     value
 );
 
 -- Type-specific data for individual items
---
--- Triggers specified in schema.js due to lack of trigger IF [NOT] EXISTS in Firefox 2.0
-CREATE TABLE IF NOT EXISTS itemData (
+CREATE TABLE itemData (
     itemID INT,
     fieldID INT,
     valueID,
@@ -83,23 +43,18 @@ CREATE TABLE IF NOT EXISTS itemData (
 );
 
 -- Note data for note items
-CREATE TABLE IF NOT EXISTS itemNotes (
+CREATE TABLE itemNotes (
     itemID INTEGER PRIMARY KEY,
     sourceItemID INT,
     note TEXT,
+    title TEXT,
     FOREIGN KEY (itemID) REFERENCES items(itemID),
     FOREIGN KEY (sourceItemID) REFERENCES items(itemID)
 );
-CREATE INDEX IF NOT EXISTS itemNotes_sourceItemID ON itemNotes(sourceItemID);
-
-CREATE TABLE IF NOT EXISTS itemNoteTitles (
-    itemID INTEGER PRIMARY KEY,
-    title TEXT,
-    FOREIGN KEY (itemID) REFERENCES itemNotes(itemID)
-);
+CREATE INDEX itemNotes_sourceItemID ON itemNotes(sourceItemID);
 
 -- Metadata for attachment items
-CREATE TABLE IF NOT EXISTS itemAttachments (
+CREATE TABLE itemAttachments (
     itemID INTEGER PRIMARY KEY,
     sourceItemID INT,
     linkMode INT,
@@ -110,11 +65,11 @@ CREATE TABLE IF NOT EXISTS itemAttachments (
     FOREIGN KEY (itemID) REFERENCES items(itemID),
     FOREIGN KEY (sourceItemID) REFERENCES items(sourceItemID)
 );
-CREATE INDEX IF NOT EXISTS itemAttachments_sourceItemID ON itemAttachments(sourceItemID);
-CREATE INDEX IF NOT EXISTS itemAttachments_mimeType ON itemAttachments(mimeType);
+CREATE INDEX itemAttachments_sourceItemID ON itemAttachments(sourceItemID);
+CREATE INDEX itemAttachments_mimeType ON itemAttachments(mimeType);
 
 -- Individual entries for each tag
-CREATE TABLE IF NOT EXISTS tags (
+CREATE TABLE tags (
     tagID INTEGER PRIMARY KEY,
     tag TEXT,
     tagType INT,
@@ -122,34 +77,46 @@ CREATE TABLE IF NOT EXISTS tags (
 );
 
 -- Associates items with keywords
-CREATE TABLE IF NOT EXISTS itemTags (
+CREATE TABLE itemTags (
     itemID INT,
     tagID INT,
     PRIMARY KEY (itemID, tagID),
     FOREIGN KEY (itemID) REFERENCES items(itemID),
     FOREIGN KEY (tagID) REFERENCES tags(tagID)
 );
-CREATE INDEX IF NOT EXISTS itemTags_tagID ON itemTags(tagID);
+CREATE INDEX itemTags_tagID ON itemTags(tagID);
 
-CREATE TABLE IF NOT EXISTS itemSeeAlso (
+CREATE TABLE itemSeeAlso (
     itemID INT,
     linkedItemID INT,
     PRIMARY KEY (itemID, linkedItemID),
     FOREIGN KEY (itemID) REFERENCES items(itemID),
     FOREIGN KEY (linkedItemID) REFERENCES items(itemID)
 );
-CREATE INDEX IF NOT EXISTS itemSeeAlso_linkedItemID ON itemSeeAlso(linkedItemID);
+CREATE INDEX itemSeeAlso_linkedItemID ON itemSeeAlso(linkedItemID);
 
--- Names of each individual "creator" (inc. authors, editors, etc.)
-CREATE TABLE IF NOT EXISTS creators (
+
+CREATE TABLE creators (
     creatorID INTEGER PRIMARY KEY,
+    creatorDataID INT,
+    dateModified DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    key TEXT NOT NULL UNIQUE,
+    FOREIGN KEY (creatorDataID) REFERENCES creatorData(creatorDataID)
+);
+CREATE INDEX creators_creatorDataID ON creators(creatorDataID);
+
+-- Each individual creator
+CREATE TABLE creatorData (
+    creatorDataID INTEGER PRIMARY KEY,
     firstName TEXT,
     lastName TEXT,
-    fieldMode INT
+    shortName TEXT,
+    fieldMode INT,
+    birthYear INT
 );
 
 -- Associates single or multiple creators to items
-CREATE TABLE IF NOT EXISTS itemCreators (
+CREATE TABLE itemCreators (
     itemID INT,
     creatorID INT,
     creatorTypeID INT DEFAULT 1,
@@ -161,15 +128,17 @@ CREATE TABLE IF NOT EXISTS itemCreators (
 );
 
 -- Collections for holding items
-CREATE TABLE IF NOT EXISTS collections (
+CREATE TABLE collections (
     collectionID INTEGER PRIMARY KEY,
     collectionName TEXT,
     parentCollectionID INT,
+    dateModified DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    key TEXT NOT NULL UNIQUE,
     FOREIGN KEY (parentCollectionID) REFERENCES collections(collectionID)
 );
 
 -- Associates items with the various collections they belong to
-CREATE TABLE IF NOT EXISTS collectionItems (
+CREATE TABLE collectionItems (
     collectionID INT,
     itemID INT,
     orderIndex INT DEFAULT 0,
@@ -177,14 +146,16 @@ CREATE TABLE IF NOT EXISTS collectionItems (
     FOREIGN KEY (collectionID) REFERENCES collections(collectionID),
     FOREIGN KEY (itemID) REFERENCES items(itemID)
 );
-CREATE INDEX IF NOT EXISTS itemID ON collectionItems(itemID);
+CREATE INDEX itemID ON collectionItems(itemID);
 
-CREATE TABLE IF NOT EXISTS savedSearches (
+CREATE TABLE savedSearches (
     savedSearchID INTEGER PRIMARY KEY,
-    savedSearchName TEXT
+    savedSearchName TEXT,
+    dateModified DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    key TEXT NOT NULL UNIQUE
 );
 
-CREATE TABLE IF NOT EXISTS savedSearchConditions (
+CREATE TABLE savedSearchConditions (
     savedSearchID INT,
     searchConditionID INT,
     condition TEXT,
@@ -195,7 +166,7 @@ CREATE TABLE IF NOT EXISTS savedSearchConditions (
     FOREIGN KEY (savedSearchID) REFERENCES savedSearches(savedSearchID)
 );
 
-CREATE TABLE IF NOT EXISTS fulltextItems (
+CREATE TABLE fulltextItems (
     itemID INTEGER PRIMARY KEY,
     version INT,
     indexedPages INT,
@@ -204,24 +175,33 @@ CREATE TABLE IF NOT EXISTS fulltextItems (
     totalChars INT,
     FOREIGN KEY (itemID) REFERENCES items(itemID)
 );
-CREATE INDEX IF NOT EXISTS fulltextItems_version ON fulltextItems(version);
+CREATE INDEX fulltextItems_version ON fulltextItems(version);
 
-CREATE TABLE IF NOT EXISTS fulltextWords (
+CREATE TABLE fulltextWords (
     wordID INTEGER PRIMARY KEY,
     word TEXT UNIQUE
 );
-CREATE INDEX IF NOT EXISTS fulltextWords_word ON fulltextWords(word);
+CREATE INDEX fulltextWords_word ON fulltextWords(word);
 
-CREATE TABLE IF NOT EXISTS fulltextItemWords (
+CREATE TABLE fulltextItemWords (
     wordID INT,
     itemID INT,
     PRIMARY KEY (wordID, itemID),
     FOREIGN KEY (wordID) REFERENCES fulltextWords(wordID),
     FOREIGN KEY (itemID) REFERENCES items(itemID)
 );
-CREATE INDEX IF NOT EXISTS fulltextItemWords_itemID ON fulltextItemWords(itemID);
+CREATE INDEX fulltextItemWords_itemID ON fulltextItemWords(itemID);
 
-CREATE TABLE IF NOT EXISTS translators (
+CREATE TABLE syncDeleteLog (
+    syncObjectTypeID INT NOT NULL,
+    objectID INT NOT NULL,
+    key TEXT NOT NULL UNIQUE,
+    timestamp INT NOT NULL,
+    FOREIGN KEY (syncObjectTypeID) REFERENCES syncObjectTypes(syncObjectTypeID)
+);
+CREATE INDEX syncDeleteLog_timestamp ON syncDeleteLog(timestamp);
+
+CREATE TABLE translators (
     translatorID TEXT PRIMARY KEY,
     minVersion TEXT,
     maxVersion TEXT,
@@ -235,16 +215,16 @@ CREATE TABLE IF NOT EXISTS translators (
     detectCode TEXT,
     code TEXT
 );
-CREATE INDEX IF NOT EXISTS translators_type ON translators(translatorType);
+CREATE INDEX translators_type ON translators(translatorType);
 
-CREATE TABLE IF NOT EXISTS csl (
+CREATE TABLE csl (
     cslID TEXT PRIMARY KEY,
     updated DATETIME,
     title TEXT,
     csl TEXT
 );
 
-CREATE TABLE IF NOT EXISTS annotations (
+CREATE TABLE annotations (
     annotationID INTEGER PRIMARY KEY,
     itemID INT,
     parent TEXT,
@@ -259,9 +239,9 @@ CREATE TABLE IF NOT EXISTS annotations (
     dateModified DATE,
     FOREIGN KEY (itemID) REFERENCES itemAttachments(itemID)
 );
-CREATE INDEX IF NOT EXISTS annotations_itemID ON annotations(itemID);
+CREATE INDEX annotations_itemID ON annotations(itemID);
 
-CREATE TABLE IF NOT EXISTS highlights (
+CREATE TABLE highlights (
     highlightID INTEGER PRIMARY KEY,
     itemID INTEGER,
     startParent TEXT,
@@ -273,4 +253,4 @@ CREATE TABLE IF NOT EXISTS highlights (
     dateModified DATE,
     FOREIGN KEY (itemID) REFERENCES itemAttachments(itemID)
 );
-CREATE INDEX IF NOT EXISTS highlights_itemID ON highlights(itemID);
+CREATE INDEX highlights_itemID ON highlights(itemID);

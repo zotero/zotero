@@ -22,5 +22,5 @@
 	</keyset>
 	<command id="cmd_close" oncommand="window.close();"/>
 	
-	<noteeditor id="note-editor" flex="1"/>
+	<zoteronoteeditor id="zotero-note-editor" flex="1"/>
 </window>

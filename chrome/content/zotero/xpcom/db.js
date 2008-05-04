@@ -26,11 +26,33 @@ Zotero.DBConnection = function(dbName) {
 	}
 	
 	this.skipBackup = false;
+	this.transactionVacuum = false;
+	
+	// JS Date
+	this.__defineGetter__('transactionDate', function () {
+		if (this._transactionDate) {
+			return this._transactionDate;
+		}
+		// Use second granularity rather than millisecond
+		// for comparison purposes
+		return new Date(Math.floor(new Date / 1000) * 1000);
+	});
+	// SQL DATETIME
+	this.__defineGetter__('transactionDateTime', function () {
+		var d = this.transactionDate;
+		return Zotero.Date.dateToSQL(d, true);
+	});
+	// Unix timestamp
+	this.__defineGetter__('transactionTimestamp', function () {
+		var d = this.transactionDate;
+		return Zotero.Date.toUnixTimestamp(d);
+	});
 	
 	// Private members
 	this._dbName = dbName;
 	this._shutdown = false;
 	this._connection = null;
+	this._transactionDate = null;
 	this._transactionRollback = null;
 	this._transactionNestingLevel = 0;
 	this._callbacks = { begin: [], commit: [], rollback: [] };
@@ -76,7 +98,7 @@ Zotero.DBConnection.prototype.query = function (sql,params) {
 		}
 		
 		// If SELECT statement, return result
-		if (op=='select') {
+		if (op == 'select') {
 			// Until the native dataset methods work (or at least exist),
 			// we build a multi-dimensional associative array manually
 			
@@ -105,7 +127,7 @@ Zotero.DBConnection.prototype.query = function (sql,params) {
 				db.executeSimpleSQL(sql);
 			}
 			
-			if (op=='insert') {
+			if (op == 'insert' || op == 'replace') {
 				return db.lastInsertRowID;
 			}
 			// DEBUG: Can't get affected rows for UPDATE or DELETE?
@@ -201,6 +223,12 @@ Zotero.DBConnection.prototype.getStatement = function (sql, params) {
 			params = [params];
 		}
 		
+		var matches = sql.match(/\?([^0-9]|$)/g);
+		if (matches && matches.length != params.length) {
+			throw ('Incorrect number of parameters in query ('
+				+ params.length + ', expecting ' + matches.length + ')');
+		}
+		
 		for (var i=0; i<params.length; i++) {
 			// Integer
 			if (params[i]!==null && typeof params[i]['int'] != 'undefined') {
@@ -241,9 +269,28 @@ Zotero.DBConnection.prototype.getStatement = function (sql, params) {
 			// Bind the parameter as the correct type
 			switch (type) {
 				case 'int':
-					this._debug('Binding parameter ' + (i+1)
-						+ ' of type int: ' + value, 5);
-					statement.bindInt32Parameter(i, value);
+					var intVal = parseInt(value);
+					if (isNaN(intVal)) {
+						throw ("Invalid integer value '" + value + "'")
+					}
+					
+					// Store as 32-bit signed integer
+					if (intVal <= 2147483647) {
+						this._debug('Binding parameter ' + (i+1)
+							+ ' of type int: ' + value, 5);
+						statement.bindInt32Parameter(i, intVal);
+					}
+					// Store as 64-bit signed integer
+					// 2^53 is JS's upper-bound for decimal integers
+					else if (intVal < 9007199254740992) {
+						this._debug('Binding parameter ' + (i+1)
+							+ ' of type int64: ' + value, 5);
+						statement.bindInt64Parameter(i, intVal);
+					}
+					else {
+						throw ("Integer value '" + intVal + "' too large");
+					}
+					
 					break;
 					
 				case 'string':
@@ -294,6 +341,9 @@ Zotero.DBConnection.prototype.beginTransaction = function () {
 		this._debug('Beginning DB transaction', 5);
 		db.beginTransaction();
 		
+		// Set a timestamp for this transaction
+		this._transactionDate = new Date(Math.floor(new Date / 1000) * 1000);
+		
 		// Run callbacks
 		for (var i=0; i<this._callbacks.begin.length; i++) {
 			if (this._callbacks.begin[i]) {
@@ -317,8 +367,18 @@ Zotero.DBConnection.prototype.commitTransaction = function () {
 	}
 	else {
 		this._debug('Committing transaction',5);
+		
+		// Clear transaction timestamp
+		this._transactionDate = null;
+		
 		try {
 			db.commitTransaction();
+			
+			if (this.transactionVacuum) {
+				Zotero.debug('Vacuuming database');
+				db.executeSimpleSQL('VACUUM');
+				this.transactionVacuum = false;
+			}
 			
 			// Run callbacks
 			for (var i=0; i<this._callbacks.commit.length; i++) {
@@ -882,7 +942,10 @@ Zotero.DBConnection.prototype._getDBConnection = function () {
 		throw (e);
 	}
 	
-	// Register shutdown handler to call this.onShutdown() for DB backup
+	// Get exclusive lock on DB
+	Zotero.DB.query("PRAGMA locking_mode=EXCLUSIVE");
+	
+	// Register shutdown handler to call this.observe() for DB backup
 	var observerService = Components.classes["@mozilla.org/observer-service;1"]
 		.getService(Components.interfaces.nsIObserverService);
 	observerService.addObserver(this, "xpcom-shutdown", false);
@@ -919,8 +982,6 @@ Zotero.DBConnection.prototype._getTypedValue = function (statement, i) {
 	
 	return func(i);
 }
-
-
 
 
 // Initialize main database connection

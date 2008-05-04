@@ -23,15 +23,15 @@
 var noteEditor;
 var notifierUnregisterID;
 
-function onLoad()
-{
-	noteEditor = document.getElementById('note-editor');
+function onLoad() {
+	noteEditor = document.getElementById('zotero-note-editor');
+	noteEditor.mode = 'edit';
 	noteEditor.focus();
 	
 	// Set font size from pref
 	Zotero.setFontSize(noteEditor);
 	
-	var params = new Array();
+	var params = [];
 	var b = document.location.href.substr(document.location.href.indexOf('?')+1).split('&');
 	for(var i = 0; i < b.length; i++)
 	{
@@ -39,30 +39,33 @@ function onLoad()
 		
 		params[b[i].substr(0,mid)] = b[i].substr(mid+1);
 	}
-	var itemID = params['id'];
-	var collectionID = params['coll'];
-	var parentItemID = params['p'];
+	var itemID = params.id;
+	var collectionID = params.coll;
+	var parentItemID = params.p;
 	
 	if (itemID) {
 		var ref = Zotero.Items.get(itemID);
 		
 		// Make sure Undo doesn't wipe out the note
-		if (!noteEditor.note || noteEditor.note.getID() != ref.getID()) {
-			noteEditor.id('noteField').editor.enableUndo(false);
+		if (!noteEditor.item || noteEditor.item.id != ref.id) {
+			noteEditor.disableUndo();
 		}
-		noteEditor.note = ref;
-		noteEditor.id('noteField').editor.enableUndo(true);
+		noteEditor.item = ref;
+		noteEditor.enableUndo();
 		
 		document.title = ref.getNoteTitle();
 	}
-	else if (parentItemID) {
-		var ref = Zotero.Items.get(parentItemID);
-		noteEditor.item = ref;
-	}
-	else
-	{
-		if(collectionID && collectionID != '' && collectionID != 'undefined')
-			noteEditor.collection = Zotero.Collections.get(collectionID);
+	else {
+		if (parentItemID) {
+			var ref = Zotero.Items.get(parentItemID);
+			noteEditor.parent = ref;
+		}
+		else {
+			if (collectionID && collectionID != '' && collectionID != 'undefined') {
+				noteEditor.collection = Zotero.Collections.get(collectionID);
+			}
+		}
+		noteEditor.refresh();
 	}
 	
 	notifierUnregisterID = Zotero.Notifier.registerObserver(NotifyCallback, 'item');
@@ -79,20 +82,19 @@ function onUnload()
 var NotifyCallback = {
 	notify: function(action, type, ids){
 		// DEBUG: why does this reset without checking the modified ids?
-		if (noteEditor.note) {
-			noteEditor.note = noteEditor.note;
+		if (noteEditor.item) {
+			noteEditor.item = noteEditor.item;
 			
 			// If the document title hasn't yet been set, reset undo so
 			// undoing to empty isn't possible
 			var noteTitle = noteEditor.note.getNoteTitle();
 			if (!document.title && noteTitle != '') {
-				noteEditor.id('noteField').editor.enableUndo(false);
-				noteEditor.id('noteField').editor.enableUndo(true);
+				noteEditor.clearUndo();
 				document.title = noteTitle;
 			}
 			
 			// Update the window name (used for focusing) in case this is a new note
-			window.name = 'zotero-note-' + noteEditor.note.getID();
+			window.name = 'zotero-note-' + noteEditor.item.id;
 		}
 	}
 }

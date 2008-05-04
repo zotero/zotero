@@ -63,6 +63,11 @@ ZoteroAutoCompleteResult.prototype.getCommentAt = function(index){
 }
 
 
+ZoteroAutoCompleteResult.prototype.getImageAt = function(index) {
+	return null;
+}
+
+
 ZoteroAutoCompleteResult.prototype.getStyleAt = function(index){
 	return null;
 }
@@ -151,7 +156,7 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParam,
 			{
 				var sql = "SELECT DISTINCT CASE fieldMode WHEN 1 THEN lastName "
 					+ "WHEN 0 THEN firstName || ' ' || lastName END AS name "
-					+ "FROM creators WHERE CASE fieldMode "
+					+ "FROM creators NATURAL JOIN creatorData WHERE CASE fieldMode "
 					+ "WHEN 1 THEN lastName "
 					+ "WHEN 0 THEN firstName || ' ' || lastName END "
 					+ "LIKE ? ORDER BY name";
@@ -179,9 +184,10 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParam,
 						+ "ELSE 2 END AS creatorID";
 				}
 				
-				var fromSQL = " FROM creators WHERE " + searchParts[2]
-					+ " LIKE ?1 " + "AND fieldMode=?2";
-				var sqlParams = [searchString + '%', parseInt(fieldMode)];
+				var fromSQL = " FROM creators NATURAL JOIN creatorData "
+					+ "WHERE " + searchParts[2] + " LIKE ?1 " + "AND fieldMode=?2";
+				var sqlParams = [searchString + '%',
+					fieldMode ? parseInt(fieldMode) : 0];
 				if (itemID){
 					fromSQL += " AND creatorID NOT IN (SELECT creatorID FROM "
 						+ "itemCreators WHERE itemID=?3)";

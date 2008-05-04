@@ -113,7 +113,7 @@ Zotero.File = new function(){
 		
 		is.close();
 		
-		return contents.join();
+		return contents.join('');
 	}
 	
 	

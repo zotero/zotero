@@ -68,7 +68,7 @@ textbox[type="styled"]
 	-moz-binding: url('chrome://zotero/content/bindings/styled-textbox.xml#styled-textbox');
 }
 
-noteeditor
+zoteronoteeditor
 {
 	-moz-binding: url('chrome://zotero/content/bindings/noteeditor.xml#note-editor');
 }
@@ -119,6 +119,18 @@ zoterosearchtextbox
 zoterosearchagefield
 {
 	-moz-binding: url('chrome://zotero/content/bindings/zoterosearch.xml#search-in-the-last');
+}
+
+zoteroitembox {
+	-moz-binding: url('chrome://zotero/content/bindings/itembox.xml#item-box');
+}
+
+zoteromergegroup {
+	-moz-binding: url('chrome://zotero/content/bindings/merge.xml#merge-group');
+}
+
+zoteromergepane {
+	-moz-binding: url('chrome://zotero/content/bindings/merge.xml#merge-pane');
 }
 
 .zotero-clicky

@@ -51,10 +51,11 @@ Zotero.Attachments = new function(){
 		
 		try {
 			// Create a new attachment
-			var attachmentItem = new Zotero.Item('attachment');
+			var attachmentItem = new Zotero.Item(false, 'attachment');
 			attachmentItem.setField('title', title);
-			attachmentItem.save();
-			var itemID = attachmentItem.getID();
+			attachmentItem.setSource(sourceItemID);
+			attachmentItem.attachmentLinkMode = this.LINK_MODE_IMPORTED_FILE;
+			var itemID = attachmentItem.save();
 			
 			// Create directory for attachment files within storage directory
 			var destDir = this.createDirectoryForItem(itemID);
@@ -69,8 +70,9 @@ Zotero.Attachments = new function(){
 			
 			var mimeType = Zotero.MIME.getMIMETypeFromFile(newFile);
 			
-			_addToDB(newFile, null, null, this.LINK_MODE_IMPORTED_FILE,
-				mimeType, null, sourceItemID, itemID);
+			attachmentItem.attachmentMIMEType = mimeType;
+			attachmentItem.attachmentPath = this.getPath(newFile, this.LINK_MODE_IMPORTED_FILE);
+			attachmentItem.save();
 			
 			Zotero.DB.commitTransaction();
 			
@@ -124,14 +126,18 @@ Zotero.Attachments = new function(){
 		
 		try {
 			// Create a new attachment
-			var attachmentItem = new Zotero.Item('attachment');
+			var attachmentItem = new Zotero.Item(false, 'attachment');
 			attachmentItem.setField('title', title);
 			attachmentItem.setField('url', url);
+			attachmentItem.setSource(sourceItemID);
+			attachmentItem.attachmentLinkMode = this.LINK_MODE_IMPORTED_URL;
+			attachmentItem.attachmentMIMEType = mimeType;
+			attachmentItem.attachmentCharset = charset;
+			
 			// DEBUG: this should probably insert access date too so as to
 			// create a proper item, but at the moment this is only called by
 			// translate.js, which sets the metadata fields itself
-			attachmentItem.save();
-			var itemID = attachmentItem.getID();
+			var itemID = attachmentItem.save();
 			
 			var storageDir = Zotero.getStorageDirectory();
 			file.parent.copyTo(storageDir, itemID);
@@ -143,8 +149,9 @@ Zotero.Attachments = new function(){
 			newFile.append(itemID);
 			newFile.append(file.leafName);
 			
-			_addToDB(newFile, url, null, this.LINK_MODE_IMPORTED_URL, mimeType,
-				charsetID, sourceItemID, itemID);
+			attachmentItem.path = this.getPath(newFile, this.LINK_MODE_IMPORTED_URL);
+			attachmentItem.save();
+			
 			Zotero.DB.commitTransaction();
 			
 			// Determine charset and build fulltext index
@@ -245,11 +252,13 @@ Zotero.Attachments = new function(){
 				
 				try {
 					// Create a new attachment
-					var attachmentItem = new Zotero.Item('attachment');
+					var attachmentItem = new Zotero.Item(false, 'attachment');
 					attachmentItem.setField('title', title);
 					attachmentItem.setField('url', url);
 					attachmentItem.setField('accessDate', "CURRENT_TIMESTAMP");
-					// Don't send a Notifier event on the incomplete item
+					attachmentItem.setSource(sourceItemID);
+					attachmentItem.attachmentLinkMode = Zotero.Attachments.LINK_MODE_IMPORTED_URL;
+					attachmentItem.attachmentMIMEType = mimeType;
 					var itemID = attachmentItem.save();
 					
 					// Add to collections
@@ -271,18 +280,21 @@ Zotero.Attachments = new function(){
 					
 					wbp.progressListener = new Zotero.WebProgressFinishListener(function(){
 						try {
+							var attachmentItem = Zotero.Items.get(itemID);
+							
 							var str = Zotero.File.getSample(file);
 							if (mimeType == 'application/pdf' &&
 									Zotero.MIME.sniffForMIMEType(str) != 'application/pdf') {
 								Zotero.debug("Downloaded PDF did not have MIME type "
 									+ "'application/pdf' in Attachments.importFromURL()", 2);
-								var item = Zotero.Items.get(itemID);
-								item.erase();
+								attachmentItem.erase();
 								return;
 							}
 							
-							_addToDB(file, url, title, Zotero.Attachments.LINK_MODE_IMPORTED_URL,
-								mimeType, null, sourceItemID, itemID);
+							attachmentItem.attachmentPath = Zotero.Attachments.getPath(
+								file, Zotero.Attachments.LINK_MODE_IMPORTED_URL, itemID
+							);
+							attachmentItem.save();
 							
 							Zotero.Notifier.trigger('add', 'item', itemID);
 							
@@ -300,8 +312,7 @@ Zotero.Attachments = new function(){
 						}
 						catch (e) {
 							// Clean up
-							var item = Zotero.Items.get(itemID);
-							item.erase();
+							attachmentItem.erase();
 							
 							throw (e);
 						}
@@ -387,8 +398,15 @@ Zotero.Attachments = new function(){
 			var mimeType = obj.channel.contentType;
 			
 			if (mimeType) {
-				var sql = "UPDATE itemAttachments SET mimeType=? WHERE itemID=?";
-				Zotero.DB.query(sql, [mimeType, itemID]);
+				var disabled = Zotero.Notifier.disable();
+				
+				var item = Zotero.Items.get(itemID);
+				item.attachmentMIMEType = mimeType;
+				item.save();
+				
+				if (disabled) {
+					Zotero.Notifier.enable();
+				}
 			}
 			
 			Zotero.Notifier.trigger('add', 'item', itemID);
@@ -466,11 +484,16 @@ Zotero.Attachments = new function(){
 		
 		try {
 			// Create a new attachment
-			var attachmentItem = new Zotero.Item('attachment');
+			var attachmentItem = new Zotero.Item(false, 'attachment');
 			attachmentItem.setField('title', title);
 			attachmentItem.setField('url', url);
 			attachmentItem.setField('accessDate', "CURRENT_TIMESTAMP");
+			attachmentItem.setSource(sourceItemID);
+			attachmentItem.attachmentLinkMode = Zotero.Attachments.LINK_MODE_IMPORTED_URL;
+			attachmentItem.attachmentCharset = charsetID;
+			attachmentItem.attachmentMIMEType = mimeType;
 			var itemID = attachmentItem.save();
+			attachmentItem = Zotero.Items.get(itemID);
 			
 			// Create a new folder for this item in the storage directory
 			var destDir = this.createDirectoryForItem(itemID);
@@ -513,8 +536,9 @@ Zotero.Attachments = new function(){
 				wpdDOMSaver.init(file.path, document);
 				wpdDOMSaver.saveHTMLDocument();
 				
-				_addToDB(file, url, title, Zotero.Attachments.LINK_MODE_IMPORTED_URL,
-					mimeType, charsetID, sourceItemID, itemID);
+				var path = this.getPath(file, Zotero.Attachments.LINK_MODE_IMPORTED_URL, itemID);
+				attachmentItem.attachmentPath = path;
+				attachmentItem.save();
 			}
 			else {
 				Zotero.debug('Saving with saveURI()');
@@ -529,8 +553,9 @@ Zotero.Attachments = new function(){
 				var nsIURL = ioService.newURI(url, null, null);
 				wbp.progressListener = new Zotero.WebProgressFinishListener(function () {
 					try {
-						_addToDB(file, url, title, Zotero.Attachments.LINK_MODE_IMPORTED_URL,
-							mimeType, charsetID, sourceItemID, itemID);
+						var path = this.getPath(file, Zotero.Attachments.LINK_MODE_IMPORTED_URL, itemID);
+						attachmentItem.attachmentPath = path;
+						attachmentItem.save();
 						
 						Zotero.Notifier.trigger('add', 'item', itemID);
 						
@@ -640,7 +665,7 @@ Zotero.Attachments = new function(){
 		
 		try {
 			// Create a new attachment
-			var attachmentItem = new Zotero.Item('attachment');
+			var attachmentItem = new Zotero.Item(false, 'attachment');
 			attachmentItem.setField('title', title);
 			attachmentItem.setField('url', url);
 			attachmentItem.setField('accessDate', "CURRENT_TIMESTAMP");
@@ -879,10 +904,32 @@ Zotero.Attachments = new function(){
 	/*
 	 * Gets a relative descriptor for imported attachments and a persistent
 	 * descriptor for files outside the storage directory
+	 *
+	 * @param	int		missingItemID		Item id to use if file is missing to
+	 *										generate suitable path
 	 */
-	function getPath(file, linkMode) {
-		if (!file.exists()) {
-			throw ('Zotero.Attachments.getPath() cannot be called on non-existent file');
+	function getPath(file, linkMode, missingItemID) {
+		var exists = file.exists();
+		// TODO: can we get the itemID from the path?
+		if (!missingItemID && !exists) {
+			throw ('Zotero.Attachments.getPath() cannot be called on non-existent file without missingItemID');
+		}
+		
+		// If imported file doesn't exist, create one temporarily so we can get
+		// the relative path (which doesn't work on non-existent files)
+		if (!exists && (linkMode == self.LINK_MODE_IMPORTED_URL ||
+				linkMode == self.LINK_MODE_IMPORTED_FILE)) {
+			var missingFile = self.createDirectoryForItem(missingItemID);
+			missingFile.append(file.leafName);
+			missingFile.create(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0644);
+			
+			var descriptor = Zotero.Attachments.getPath(missingFile, linkMode);
+			
+			var parentDir = missingFile.parent;
+			missingFile.remove(null);
+			parentDir.remove(null);
+			
+			return descriptor;
 		}
 		
 		file.QueryInterface(Components.interfaces.nsILocalFile);
@@ -943,85 +990,34 @@ Zotero.Attachments = new function(){
 	/**
 	* Create a new item of type 'attachment' and add to the itemAttachments table
 	*
-	* Passing an itemID causes it to skip new item creation and use the specified
-	* item instead -- used when importing files (since we have to know
-	* the itemID before copying in a file and don't want to update the DB before
-	* the file is saved)
-	*
 	* Returns the itemID of the new attachment
 	**/
-	function _addToDB(file, url, title, linkMode, mimeType, charsetID, sourceItemID, itemID){
+	function _addToDB(file, url, title, linkMode, mimeType, charsetID, sourceItemID) {
 		Zotero.DB.beginTransaction();
 		
-		if (sourceItemID){
-			var sourceItem = Zotero.Items.get(sourceItemID);
-			if (!sourceItem){
-				Zotero.DB.commitTransaction();
-				throw ("Cannot set attachment source to invalid item " + sourceItemID);
-			}
-			if (sourceItem.isAttachment()){
-				Zotero.DB.commitTransaction();
-				throw ("Cannot set attachment source to another file (" + sourceItemID + ")");
-			}
+		var attachmentItem = new Zotero.Item(false, 'attachment');
+		attachmentItem.setField('title', title);
+		if (linkMode == self.LINK_MODE_IMPORTED_URL
+				|| linkMode == self.LINK_MODE_LINKED_URL) {
+			attachmentItem.setField('url', url);
+			attachmentItem.setField('accessDate', "CURRENT_TIMESTAMP");
 		}
 		
-		// If an itemID is provided, use that
-		if (itemID){
-			var attachmentItem = Zotero.Items.get(itemID);
-			if (!attachmentItem.isAttachment()){
-				throw ("Item " + itemID + " is not a valid attachment in _addToDB()");
-			}
-		}
-		// Otherwise create a new attachment
-		else {
-			var attachmentItem = new Zotero.Item('attachment');
-			attachmentItem.setField('title', title);
-			if (linkMode==self.LINK_MODE_IMPORTED_URL
-				|| linkMode==self.LINK_MODE_LINKED_URL){
-				attachmentItem.setField('url', url);
-				attachmentItem.setField('accessDate', "CURRENT_TIMESTAMP");
-			}
-			attachmentItem.save();
-		}
-		
+		// Get path
 		if (file) {
-			if (file.exists()) {
-				var path = getPath(file, linkMode);
-			}
-			// If file doesn't exist, create one temporarily so we can get the
-			// relative path (since getPath() doesn't work on non-existent files)
-			else if (linkMode == self.LINK_MODE_IMPORTED_URL ||
-					linkMode == self.LINK_MODE_IMPORTED_FILE) {
-				var missingFile = self.createDirectoryForItem(attachmentItem.getID());
-				missingFile.append(file.leafName);
-				missingFile.create(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0644);
-				var path = getPath(missingFile, linkMode);
-				var parentDir = missingFile.parent;
-				missingFile.remove(null);
-				parentDir.remove(null);
-			}
+			var path = Zotero.Attachments.getPath(file, linkMode, attachmentItem.id);
+			attachmentItem.attachmentPath = path;
 		}
 		
-		var sql = "INSERT INTO itemAttachments (itemID, sourceItemID, linkMode, "
-			+ "mimeType, charsetID, path) VALUES (?,?,?,?,?,?)";
-		var bindParams = [
-			attachmentItem.getID(),
-			sourceItemID ? {int:sourceItemID} : null,
-			{int:linkMode},
-			mimeType ? {string:mimeType} : null,
-			charsetID ? {int:charsetID} : null,
-			path ? {string:path} : null
-		];
-		Zotero.DB.query(sql, bindParams);
-		
-		if (sourceItemID){
-			sourceItem.incrementAttachmentCount();
-			Zotero.Notifier.trigger('modify', 'item', sourceItemID);
-		}
+		attachmentItem.setSource(sourceItemID);
+		attachmentItem.attachmentLinkMode = linkMode;
+		attachmentItem.attachmentMIMEType = mimeType;
+		attachmentItem.attachmentCharset = charsetID;
+		attachmentItem.save();
 		
 		Zotero.DB.commitTransaction();
 		
-		return attachmentItem.getID();
+		return attachmentItem.id;
 	}
 	
 	
@@ -1050,10 +1046,15 @@ Zotero.Attachments = new function(){
 		Zotero.File.addCharsetListener(browser, new function(){
 			return function(charset, id){
 				var charsetID = Zotero.CharacterSets.getID(charset);
-				if (charsetID){
-					var sql = "UPDATE itemAttachments SET charsetID=" + charsetID
-						+ " WHERE itemID=" + itemID;
-					Zotero.DB.query(sql);
+				
+				var disabled = Zotero.Notifier.disable();
+				
+				var item = Zotero.Items.get(itemID);
+				item.attachmentCharset = charsetID;
+				item.save();
+				
+				if (disabled) {
+					Zotero.Notifier.enable();
 				}
 				
 				// Chain fulltext indexer inside the charset callback,

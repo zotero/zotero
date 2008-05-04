@@ -114,12 +114,12 @@ Zotero.ItemTreeView.prototype.setTree = function(treebox)
 			var key = String.fromCharCode(event.which);
 			
 			if (key == '+' && !(event.ctrlKey || event.altKey || event.metaKey)) {
-				expandAllRows(treebox);
+				obj.expandAllRows(treebox);
 				return;
 			}
 			else if (key == '-' && !(event.shiftKey || event.ctrlKey ||
 					event.altKey || event.metaKey)) {
-				collapseAllRows(treebox);
+				obj.collapseAllRows(treebox);
 				return;
 			}
 		}, false);
@@ -152,6 +152,7 @@ Zotero.ItemTreeView.prototype.setTree = function(treebox)
  */
 Zotero.ItemTreeView.prototype.refresh = function()
 {
+	Zotero.debug('Refreshing items list');
 	this._searchMode = this._itemGroup.isSearchMode();
 	
 	var oldRows = this.rowCount;
@@ -160,6 +161,7 @@ Zotero.ItemTreeView.prototype.refresh = function()
 	this._searchParentIDs = {};
 	this.rowCount = 0;
 	var cacheFields = ['title', 'date'];
+	
 	// Cache the visible fields so they don't load individually
 	try {
 		var visibleFields = this.getVisibleFields();
@@ -168,6 +170,7 @@ Zotero.ItemTreeView.prototype.refresh = function()
 	catch (e) {
 		return;
 	}
+	
 	for (var i=0; i<visibleFields.length; i++) {
 		var field = visibleFields[i];
 		if (field == 'year') {
@@ -201,7 +204,7 @@ Zotero.ItemTreeView.prototype.refresh = function()
 			this._showItem(new Zotero.ItemTreeView.TreeRow(newRows[i], 0, false), added + 1); //item ref, before row
 			added++;
 		}
-		this._searchItemIDs[newRows[i].getID()] = true;
+		this._searchItemIDs[newRows[i].id] = true;
 	}
 	
 	// Add parents of matches if not matches themselves
@@ -218,7 +221,8 @@ Zotero.ItemTreeView.prototype.refresh = function()
 	this._refreshHashMap();
 	
 	// Update the treebox's row count
-	var diff = this.rowCount - oldRows;
+	// this.rowCount isn't always up-to-date, so use the view's count
+	var diff = this._treebox.view.rowCount - oldRows;
 	if (diff != 0) {
 		this._treebox.rowCountChanged(0, diff);
 	}
@@ -232,6 +236,11 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 {
 	if (!this._treebox || !this._treebox.treeBody) {
 		Components.utils.reportError("Treebox didn't exist in itemTreeView.notify()");
+		return;
+	}
+	
+	if (!this._itemRowMap) {
+		Zotero.debug("Item row map didn't exist in itemTreeView.notify()");
 		return;
 	}
 	
@@ -267,7 +276,7 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 		for each(var id in ids) {
 			var split = id.split('-');
 			// Skip if not collection or not an item in this collection
-			if (!this._itemGroup.isCollection() || split[0] != this._itemGroup.ref.getID()) {
+			if (!this._itemGroup.isCollection() || split[0] != this._itemGroup.ref.id) {
 				continue;
 			}
 			splitIDs.push(split[1]);
@@ -281,15 +290,23 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 		}
 	}
 	
-	if((action == 'remove' && !this._itemGroup.isLibrary()) || action == 'delete')
-	{
-		//Since a remove involves shifting of rows, we have to do it in order
+	if ((action == 'remove' && !this._itemGroup.isLibrary())
+			|| action == 'delete' || action == 'id-change') {
 		
-		//sort the ids by row
-		var rows = new Array();
+		// We only care about the old ids
+		if (action == 'id-change') {
+			for (var i=0, len=ids.length; i<len; i++) {
+				ids[i] = ids[i].split('-')[0];
+			}
+		}
+		
+		// Since a remove involves shifting of rows, we have to do it in order,
+		// so sort the ids by row
+		var rows = [];
 		for(var i=0, len=ids.length; i<len; i++)
 		{
-			if (action == 'delete' || !this._itemGroup.ref.hasItem(ids[i])) {
+			if (action == 'delete' || action == 'id-change' ||
+					!this._itemGroup.ref.hasItem(ids[i])) {
 				// Row might already be gone (e.g. if this is a child and
 				// 'modify' was sent to parent)
 				if (this._itemRowMap[ids[i]] != undefined) {
@@ -417,9 +434,9 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 			for (var i in items)
 			{
 				// if the item belongs in this collection
-				if((this._itemGroup.isLibrary() || items[i].inCollection(this._itemGroup.ref.getID()))
+				if((this._itemGroup.isLibrary() || items[i].inCollection(this._itemGroup.ref.id))
 					// if we haven't already added it to our hash map
-					&& this._itemRowMap[items[i].getID()] == null
+					&& this._itemRowMap[items[i].id] == null
 					// Regular item or standalone note/attachment
 					&& (items[i].isRegularItem() || !items[i].getSource()))
 				{
@@ -489,13 +506,28 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 		}
 		else
 		{
+			var previousRow = this._itemRowMap[ids[0]];
+			
 			if (sort) {
 				this.sort(typeof sort == 'number' ? sort : false);
 			}
 			else {
 				this._refreshHashMap();
 			}
-			this.rememberSelection(savedSelection);
+			
+			// On delete, select item at previous position
+			if (action == 'delete') {
+				if (this._dataItems[previousRow]) {
+					this.selection.select(previousRow);
+				}
+				// If no item at previous position, select last item in list
+				else if (this._dataItems[this._dataItems.length - 1]) {
+					this.selection.select(this._dataItems.length - 1);
+				}
+			}
+			else {
+				this.rememberSelection(savedSelection);
+			}
 		}
 		
 		this._treebox.invalidate();
@@ -528,17 +560,20 @@ Zotero.ItemTreeView.prototype.unregister = function()
 Zotero.ItemTreeView.prototype.getCellText = function(row, column)
 {
 	var obj = this._getItemAtRow(row);
+	
 	var val;
 	
 	if(column.id == "zotero-items-column-numChildren")
 	{
 		var c = obj.numChildren();
-		if(c)	//don't display '0'
+		// Don't display '0'
+		if(c && parseInt(c) > 0) {
 			val = c;
+		}
 	}
 	else if(column.id == "zotero-items-column-type")
 	{
-		val = Zotero.getString('itemTypes.'+Zotero.ItemTypes.getName(obj.getType()));
+		val = Zotero.getString('itemTypes.'+Zotero.ItemTypes.getName(obj.ref.itemTypeID));
 	}
 	// Year column is just date field truncated
 	else if (column.id == "zotero-items-column-year") {
@@ -595,7 +630,7 @@ Zotero.ItemTreeView.prototype.getImageSrc = function(row, col)
 
 Zotero.ItemTreeView.prototype.isContainer = function(row)
 {
-	return this._getItemAtRow(row).isRegularItem();
+	return this._getItemAtRow(row).ref.isRegularItem();
 }
 
 Zotero.ItemTreeView.prototype.isContainerOpen = function(row)
@@ -643,7 +678,7 @@ Zotero.ItemTreeView.prototype.hasNextSibling = function(row,afterIndex)
 	}
 }
 
-Zotero.ItemTreeView.prototype.toggleOpenState = function(row)
+Zotero.ItemTreeView.prototype.toggleOpenState = function(row, skipItemMapRefresh)
 {
 	// Shouldn't happen but does if an item is dragged over a closed
 	// container until it opens and then released, since the container
@@ -655,16 +690,16 @@ Zotero.ItemTreeView.prototype.toggleOpenState = function(row)
 	var count = 0;		//used to tell the tree how many rows were added/removed
 	var thisLevel = this.getLevel(row);
 	
-	if(this.isContainerOpen(row))
-	{
+	// Close
+	if (this.isContainerOpen(row)) {
 		while((row + 1 < this._dataItems.length) && (this.getLevel(row + 1) > thisLevel))
 		{
 			this._hideItem(row+1);
 			count--;	//count is negative when closing a container because we are removing rows
 		}
 	}
-	else
-	{
+	// Open
+	else {
 		var item = this._getItemAtRow(row).ref;
 		//Get children
 		var attachments = item.getAttachments();
@@ -683,19 +718,35 @@ Zotero.ItemTreeView.prototype.toggleOpenState = function(row)
 			
 			for(var i = 0; i < newRows.length; i++)
 			{
+				// If item already exists elsewhere in the tree, we have to
+				// remove it -- this can happen when moving an item into a
+				// collection if the collection gets the modify event before
+				// the item
+				var existingRow = this._itemRowMap[newRows[i].id];
+				if (existingRow != null) {
+					/*
+					this._hideItem(existingRow);
+					this._treebox.rowCountChanged(existingRow + 1, -1);
+					if (existingRow < row) {
+						row--;
+					}
+					*/
+					throw ("Item already exists outside of collection in Zotero.ItemTreeView.toggleOpenRow()");
+				}
 				count++;
 				this._showItem(new Zotero.ItemTreeView.TreeRow(newRows[i], thisLevel + 1, false), row + i + 1); // item ref, before row
 			}
 		}
 	}
 	
-	this._treebox.beginUpdateBatch();
-	
 	this._dataItems[row].isOpen = !this._dataItems[row].isOpen;
 	this._treebox.rowCountChanged(row+1, count); //tell treebox to repaint these
 	this._treebox.invalidateRow(row);
-	this._treebox.endUpdateBatch();
-	this._refreshHashMap();
+	
+	if (!skipItemMapRefresh) {
+		Zotero.debug('Refreshing hash map');
+		this._refreshHashMap();
+	}
 }
 
 
@@ -786,7 +837,7 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 	// Get the display field for a row (which might be a placeholder title)
 	function getField(row) {
 		var field;
-		var type = row.getType();
+		var type = row.ref.itemTypeID;
 		if (columnField == 'title') {
 			if (type == 8 || type == 10) { // 'letter' and 'interview' itemTypeIDs
 				field = row.ref.getDisplayTitle();
@@ -817,8 +868,8 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 		
 		switch (columnField) {
 			case 'type':
-				var typeA = Zotero.getString('itemTypes.'+Zotero.ItemTypes.getName(a.getType()));
-				var typeB = Zotero.getString('itemTypes.'+Zotero.ItemTypes.getName(b.getType()));
+				var typeA = Zotero.getString('itemTypes.'+Zotero.ItemTypes.getName(a.ref.itemTypeID));
+				var typeB = Zotero.getString('itemTypes.'+Zotero.ItemTypes.getName(b.ref.itemTypeID));
 				
 				cmp = (typeA > typeB) ? -1 : (typeA < typeB) ? 1 : 0;
 				if (cmp) {
@@ -914,10 +965,11 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 	for (var i=0; i<this._dataItems.length; i++) {
 		if(this.isContainer(i) && this.isContainerOpen(i))
 		{
-			openRows.push(this._getItemAtRow(i).ref.getID());
-			this.toggleOpenState(i);
+			openRows.push(this._getItemAtRow(i).ref.id);
+			this.toggleOpenState(i, true);
 		}
 	}
+	this._refreshHashMap();
 	
 	// Single-row sort
 	if (itemID) {
@@ -961,13 +1013,13 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 			this._dataItems.sort(reverseSort);
 		}
 	}
-		
-	this._refreshHashMap();
 	
 	// Reopen closed containers
 	for (var i = 0; i < openRows.length; i++) {
-		this.toggleOpenState(this._itemRowMap[openRows[i]]);
+		this.toggleOpenState(this._itemRowMap[openRows[i]], true);
 	}
+	
+	this._refreshHashMap();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1070,7 +1122,7 @@ Zotero.ItemTreeView.prototype.getSelectedItems = function(asIDs)
 		this.selection.getRangeAt(i,start,end);
 		for (var j=start.value; j<=end.value; j++) {
 			if (asIDs) {
-				items.push(this._getItemAtRow(j).ref.getID());
+				items.push(this._getItemAtRow(j).ref.id);
 			}
 			else {
 				items.push(this._getItemAtRow(j).ref);
@@ -1088,16 +1140,21 @@ Zotero.ItemTreeView.prototype.getSelectedItems = function(asIDs)
  */
 Zotero.ItemTreeView.prototype.deleteSelection = function(eraseChildren, force)
 {
-	if(this.selection.count == 0)
+	if (this.selection.count == 0) {
 		return;
-		
-	//collapse open items
-	for(var i=0; i<this.rowCount; i++)
-		if(this.selection.isSelected(i) && this.isContainer(i) && this.isContainerOpen(i))
-			this.toggleOpenState(i);
+	}
+	
+	this._treebox.beginUpdateBatch();
+	
+	// Collapse open items
+	for (var i=0; i<this.rowCount; i++) {
+		if (this.selection.isSelected(i) && this.isContainer(i) && this.isContainerOpen(i)) {
+			this.toggleOpenState(i, true);
+		}
+	}
 	this._refreshHashMap();
 	
-	//create an array of selected items
+	// Create an array of selected items
 	var ids = [];
 	var start = {};
 	var end = {};
@@ -1105,11 +1162,8 @@ Zotero.ItemTreeView.prototype.deleteSelection = function(eraseChildren, force)
 	{
 		this.selection.getRangeAt(i,start,end);
 		for (var j=start.value; j<=end.value; j++)
-			ids.push(this._getItemAtRow(j).ref.getID());
+			ids.push(this._getItemAtRow(j).ref.id);
 	}
-	
-	//iterate and erase...
-	this._treebox.beginUpdateBatch();
 	
 	// Erase item(s) from DB
 	if (this._itemGroup.isLibrary() || force) {
@@ -1197,12 +1251,12 @@ Zotero.ItemTreeView.prototype._getItemAtRow = function(row)
  */
 Zotero.ItemTreeView.prototype._refreshHashMap = function()
 {
-	this._itemRowMap = new Array();
-	for(var i=0; i < this.rowCount; i++)
-	{
+	var rowMap = {};
+	for (var i=0, len=this.rowCount; i<len; i++) {
 		var row = this._getItemAtRow(i);
-		this._itemRowMap[row.ref.getID()] = i;
+		rowMap[row.ref.id] = i;
 	}
+	this._itemRowMap = rowMap;
 }
 
 /*
@@ -1223,7 +1277,7 @@ Zotero.ItemTreeView.prototype.saveSelection = function()
 			if (!item) {
 				continue;
 			}
-			savedSelection.push(item.ref.getID());
+			savedSelection.push(item.ref.id);
 		}
 	}
 	return savedSelection;
@@ -1269,7 +1323,7 @@ Zotero.ItemTreeView.prototype.saveOpenState = function() {
 	var ids = [];
 	for (var i=0, len=this.rowCount; i<len; i++) {
 		if (this.isContainer(i) && this.isContainerOpen(i)) {
-			ids.push(this._getItemAtRow(i).ref.getID());
+			ids.push(this._getItemAtRow(i).ref.id);
 		}
 	}
 	return ids;
@@ -1277,33 +1331,50 @@ Zotero.ItemTreeView.prototype.saveOpenState = function() {
 
 
 Zotero.ItemTreeView.prototype.rememberOpenState = function(ids) {
+	var hash = {};
 	for each(var id in ids) {
-		var row = this._itemRowMap[id];
-		if (row == undefined || !this.isContainer(row) || this.isContainerOpen(row)) {
-			continue;
-		}
-		this.toggleOpenState(row);
+		hash[id] = true;
 	}
+	
+	this._treebox.beginUpdateBatch();
+	for (var i=0; i<this.rowCount; i++) {
+		var id = this._getItemAtRow(i).ref.id;
+		if (hash[id] && this.isContainer(i) && this.isContainerOpen(i)) {
+			this.toggleOpenState(i, true);
+		}
+	}
+	this._refreshHashMap();
+	this._treebox.endUpdateBatch();
 }
 
 
 Zotero.ItemTreeView.prototype.expandMatchParents = function () {
 	// Expand parents of child matches
-	if (this._searchMode) {
-		var view = this._treebox.view;
-		for (var id in this._searchParentIDs) {
-			if (!view.isContainerOpen(this._itemRowMap[id])) {
-				view.toggleOpenState(this._itemRowMap[id]);
-			}
+	if (!this._searchMode) {
+		return;
+	}
+	
+	var hash = {};
+	for (var id in this._searchParentIDs) {
+		hash[id] = true;
+	}
+	
+	this._treebox.beginUpdateBatch();
+	for (var i=0; i<this.rowCount; i++) {
+		var id = this._getItemAtRow(i).ref.id;
+		if (hash[id] && this.isContainer(i) && !this.isContainerOpen(i)) {
+			this.toggleOpenState(i, true);
 		}
 	}
+	this._refreshHashMap();
+	this._treebox.endUpdateBatch();
 }
 
 
 Zotero.ItemTreeView.prototype.saveFirstRow = function() {
 	var row = this._treebox.getFirstVisibleRow();
 	if (row) {
-		return this._getItemAtRow(row).ref.getID();
+		return this._getItemAtRow(row).ref.id;
 	}
 	return false;
 }
@@ -1317,26 +1388,26 @@ Zotero.ItemTreeView.prototype.rememberFirstRow = function(firstRow) {
 
 
 Zotero.ItemTreeView.prototype.expandAllRows = function(treebox) {
-	var view = treebox.view;
-	treebox.beginUpdateBatch();
-	for (var i=0; i<view.rowCount; i++) {
-		if (view.isContainer(i) && !view.isContainerOpen(i)) {
-			view.toggleOpenState(i);
+	this._treebox.beginUpdateBatch();
+	for (var i=0; i<this.rowCount; i++) {
+		if (this.isContainer(i) && !this.isContainerOpen(i)) {
+			this.toggleOpenState(i, true);
 		}
 	}
-	treebox.endUpdateBatch();
+	this._refreshHashMap();
+	this._treebox.endUpdateBatch();
 }
 
 
 Zotero.ItemTreeView.prototype.collapseAllRows = function(treebox) {
-	var view = treebox.view;
-	treebox.beginUpdateBatch();
-	for (var i=0; i<view.rowCount; i++) {
-		if (view.isContainer(i) && view.isContainerOpen(i)) {
-			view.toggleOpenState(i);
+	this._treebox.beginUpdateBatch();
+	for (var i=0; i<this.rowCount; i++) {
+		if (this.isContainer(i) && this.isContainerOpen(i)) {
+			this.toggleOpenState(i, true);
 		}
 	}
-	treebox.endUpdateBatch();
+	this._refreshHashMap();
+	this._treebox.endUpdateBatch();
 }
 
 
@@ -1358,7 +1429,7 @@ Zotero.ItemTreeView.prototype.getVisibleFields = function() {
 Zotero.ItemTreeView.prototype.getSortedItems = function() {
 	var ids = [];
 	for each(var item in this._dataItems) {
-		ids.push(item.ref.getID());
+		ids.push(item.ref.id);
 	}
 	return ids;
 }
@@ -1441,7 +1512,7 @@ Zotero.ItemTreeView.prototype.onDragStart = function (evt,transferData,action)
 	// enable dragging to file system
 	for (var i=0; i<items.length; i++) {
 		if (items[i].isAttachment() &&
-				items[i].getAttachmentLinkMode() != Zotero.Attachments.LINK_MODE_LINKED_URL
+				items[i].attachmentLinkMode != Zotero.Attachments.LINK_MODE_LINKED_URL
 					&& items[i].getFile()) {
 			transferData.data.addDataForFlavour("application/x-moz-file-promise",
 				new Zotero.ItemTreeView.fileDragDataProvider(), 0, Components.interfaces.nsISupports);
@@ -1542,7 +1613,7 @@ Zotero.ItemTreeView.fileDragDataProvider.prototype = {
 			for (var i=0; i<items.length; i++) {
 				// TODO create URL?
 				if (!items[i].isAttachment() ||
-						items[i].getAttachmentLinkMode() == Zotero.Attachments.LINK_MODE_LINKED_URL) {
+						items[i].attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) {
 					continue;
 				}
 				
@@ -1550,7 +1621,7 @@ Zotero.ItemTreeView.fileDragDataProvider.prototype = {
 				
 				// Determine if we need to copy multiple files for this item
 				// (web page snapshots)
-				if (items[i].getAttachmentLinkMode() != Zotero.Attachments.LINK_MODE_LINKED_FILE) {
+				if (items[i].attachmentLinkMode != Zotero.Attachments.LINK_MODE_LINKED_FILE) {
 					var parentDir = file.parent;
 					var files = parentDir.directoryEntries;
 					var numFiles = 0;
@@ -1565,7 +1636,7 @@ Zotero.ItemTreeView.fileDragDataProvider.prototype = {
 				
 				// Create folder if multiple files
 				if (numFiles > 1) {
-					var dirName = Zotero.Attachments.getFileBaseNameFromItem(items[i].getID());
+					var dirName = Zotero.Attachments.getFileBaseNameFromItem(items[i].id);
 					try {
 						if (useTemp) {
 							var copiedFile = destDir.clone();
@@ -1597,7 +1668,7 @@ Zotero.ItemTreeView.fileDragDataProvider.prototype = {
 					catch (e) {
 						if (e.name == 'NS_ERROR_FILE_ALREADY_EXISTS') {
 							// Keep track of items that already existed
-							existingItems.push(items[i].getID());
+							existingItems.push(items[i].id);
 							existingFileNames.push(dirName);
 						}
 						else {
@@ -1637,7 +1708,7 @@ Zotero.ItemTreeView.fileDragDataProvider.prototype = {
 					}
 					catch (e) {
 						if (e.name == 'NS_ERROR_FILE_ALREADY_EXISTS') {
-							existingItems.push(items[i].getID());
+							existingItems.push(items[i].id);
 							existingFileNames.push(items[i].getFile().leafName);
 						}
 						else {
@@ -1813,7 +1884,7 @@ Zotero.ItemTreeView.prototype.canDrop = function(row, orient)
 				
 				// Only allow dragging of notes and attachments
 				// that aren't already children of the item
-				if (item.getSource() != rowItem.getID()) {
+				if (item.getSource() != rowItem.id) {
 					canDrop = true;
 				}
 			}
@@ -1893,7 +1964,8 @@ Zotero.ItemTreeView.prototype.drop = function(row, orient)
 			for each(var id in ids)
 			{
 				var item = Zotero.Items.get(id);
-				item.setSource(rowItem.getID());
+				item.setSource(rowItem.id);
+				item.save();
 			}
 		}
 		
@@ -1909,6 +1981,7 @@ Zotero.ItemTreeView.prototype.drop = function(row, orient)
 					if (!item.isRegularItem())
 					{
 						item.setSource();
+						item.save()
 					}
 				}
 			}
@@ -1923,6 +1996,7 @@ Zotero.ItemTreeView.prototype.drop = function(row, orient)
 					// Top-level item
 					if (source) {
 						item.setSource();
+						item.save()
 					}
 					this._itemGroup.ref.addItem(id);
 				}
@@ -1934,10 +2008,10 @@ Zotero.ItemTreeView.prototype.drop = function(row, orient)
 		var parentCollectionID = false;
 		
 		if (orient == 0) {
-			sourceItemID = this._getItemAtRow(row).ref.getID()
+			sourceItemID = this._getItemAtRow(row).ref.id
 		}
 		else if (this._itemGroup.isCollection()) {
-			var parentCollectionID = this._itemGroup.ref.getID();
+			var parentCollectionID = this._itemGroup.ref.id;
 		}
 		
 		var unlock = Zotero.Notifier.begin(true);
@@ -2019,7 +2093,7 @@ Zotero.ItemTreeView.prototype.getColumnProperties = function(col, prop) 		{ }
 
 /* Mark items not matching search as context rows, displayed in gray */
 Zotero.ItemTreeView.prototype.getCellProperties = function(row, col, prop) {
-	if (this._searchMode && !this._searchItemIDs[this._getItemAtRow(row).ref.getID()]) {
+	if (this._searchMode && !this._searchItemIDs[this._getItemAtRow(row).ref.id]) {
 		var aServ = Components.classes["@mozilla.org/atom-service;1"].
 			getService(Components.interfaces.nsIAtomService);
 		prop.AppendElement(aServ.getAtom("contextRow"));
@@ -2033,34 +2107,14 @@ Zotero.ItemTreeView.TreeRow = function(ref, level, isOpen)
 	this.isOpen = isOpen;
 }
 
-Zotero.ItemTreeView.TreeRow.prototype.isNote = function()
-{
-	return this.ref.isNote();
-}
-
-Zotero.ItemTreeView.TreeRow.prototype.isAttachment = function()
-{
-	return this.ref.isAttachment();
-}
-
-Zotero.ItemTreeView.TreeRow.prototype.isRegularItem = function()
-{
-	return this.ref.isRegularItem();
-}
-
 Zotero.ItemTreeView.TreeRow.prototype.getField = function(field, unformatted)
 {
 	return this.ref.getField(field, unformatted, true);
 }
 
-Zotero.ItemTreeView.TreeRow.prototype.getType = function()
-{
-	return this.ref.getType();
-}
-
 Zotero.ItemTreeView.TreeRow.prototype.numChildren = function()
 {
-	if(this.isRegularItem())
+	if(this.ref.isRegularItem())
 		return this.ref.numChildren();
 	else
 		return 0;
@@ -2068,7 +2122,7 @@ Zotero.ItemTreeView.TreeRow.prototype.numChildren = function()
 
 Zotero.ItemTreeView.TreeRow.prototype.numNotes = function()
 {
-	if(this.isRegularItem())
+	if(this.ref.isRegularItem())
 		return this.ref.numNotes();
 	else
 		return 0;
@@ -2076,7 +2130,7 @@ Zotero.ItemTreeView.TreeRow.prototype.numNotes = function()
 
 Zotero.ItemTreeView.TreeRow.prototype.numAttachments = function()
 {
-	if(this.isRegularItem())
+	if(this.ref.isRegularItem())
 		return this.ref.numAttachments();
 	else
 		return 0;
