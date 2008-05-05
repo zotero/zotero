@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-05-05 18:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-05-05 20:45:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -10150,7 +10150,7 @@ function doWeb(doc, url){
 	}
 }');
 
-REPLACE INTO translators VALUES ('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '1.0.0b3.r1', '', '2007-12-03 03:00:00', '1', '100', '4', 'ProQuest', 'Simon Kornblith', '^https?://[^/]+/pqdweb\?((?:.*\&)?did=.*&Fmt=[0-9]|(?:.*\&)Fmt=[0-9].*&did=|(?:.*\&)searchInterface=|(?:.*\&)TS=[0-9])', 
+REPLACE INTO translators VALUES ('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '1.0.0b3.r1', '', '2008-05-05 20:45:00', '1', '100', '4', 'ProQuest', 'Simon Kornblith', '^https?://[^/]+/pqdweb\?((?:.*\&)?did=.*&Fmt=[0-9]|(?:.*\&)Fmt=[0-9].*&did=|(?:.*\&)searchInterface=|(?:.*\&)TS=[0-9])', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -10198,7 +10198,6 @@ REPLACE INTO translators VALUES ('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '1.0.0b
 	
 	Zotero.Utilities.HTTP.doGet(uris, function(text, xmlhttp, url){	
 		// load translator for RIS
-
 		if(url.match("exportFormat=1")=="exportFormat=1") {
 			var translator = Zotero.loadTranslator("import");
 			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
@@ -10222,7 +10221,7 @@ REPLACE INTO translators VALUES ('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '1.0.0b
 						}
 					}
 				}
-
+				item.publicationTitle = Zotero.Utilities.trimInternal(item.publicationTitle.replace(/\([\d\-]+\)/g, ""));
 				item.complete();
 			});
 		
