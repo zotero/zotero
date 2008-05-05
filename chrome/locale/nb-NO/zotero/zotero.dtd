@@ -1,4 +1,4 @@
-<!ENTITY zotero.general.optional "(Optional)">
+<!ENTITY zotero.general.optional "(Valgfri)">
 <!ENTITY zotero.general.note "Note:">
 
 <!ENTITY zotero.errorReport.unrelatedMessages "The error log may include messages unrelated to Zotero.">
@@ -11,14 +11,14 @@
 <!ENTITY zotero.errorReport.furtherAssistance "See the Known Issues page and the forums for further assistance.">
 <!ENTITY zotero.errorReport.includeReportID "Please include the Report ID in any correspondence with the Zotero developers regarding this issue.">
 
-<!ENTITY zotero.upgrade.newVersionInstalled "You have installed a new version of Zotero.">
-<!ENTITY zotero.upgrade.upgradeRequired "Your Zotero database must be upgraded to work with the new version.">
-<!ENTITY zotero.upgrade.autoBackup "Your existing database will be backed up automatically before any changes are made.">
-<!ENTITY zotero.upgrade.upgradeInProgress "Please wait for the upgrade process to finish. This may take a few minutes.">
-<!ENTITY zotero.upgrade.upgradeSucceeded "Your Zotero database has been successfully upgraded.">
-<!ENTITY zotero.upgrade.changeLogBeforeLink "Please see">
-<!ENTITY zotero.upgrade.changeLogLink "the changelog">
-<!ENTITY zotero.upgrade.changeLogAfterLink "to find out what's new.">
+<!ENTITY zotero.upgrade.newVersionInstalled "Du ha installert en ny versjon av Zotero.">
+<!ENTITY zotero.upgrade.upgradeRequired "Zotero-databasen din må oppgraderes for å fungere med den nye versjonen.">
+<!ENTITY zotero.upgrade.autoBackup "Det lages en sikkerhetskopi av den eksisterende databasen før den oppgraderes.">
+<!ENTITY zotero.upgrade.upgradeInProgress "Vennligst vent mens oppgraderingen utføres. Dette kan ta noen minutter.">
+<!ENTITY zotero.upgrade.upgradeSucceeded "Oppgraderingen av Zotero-databasen din var vellykket.">
+<!ENTITY zotero.upgrade.changeLogBeforeLink "Vennligst se">
+<!ENTITY zotero.upgrade.changeLogLink "endringslogg">
+<!ENTITY zotero.upgrade.changeLogAfterLink "for å finne ut hva som er nytt.">
 
 <!ENTITY zotero.contextMenu.addTextToCurrentNote "Legg valgt til Zotero Note">
 <!ENTITY zotero.contextMenu.addTextToNewNote "Lag Zotero Note fra valgte">
@@ -35,10 +35,10 @@
 <!ENTITY zotero.items.type_column "Type">
 <!ENTITY zotero.items.title_column "Tittel">
 <!ENTITY zotero.items.creator_column "Skaper">
-<!ENTITY zotero.items.date_column "Date">
-<!ENTITY zotero.items.year_column "Year">
-<!ENTITY zotero.items.publisher_column "Publisher">
-<!ENTITY zotero.items.language_column "Language">
+<!ENTITY zotero.items.date_column "Dato">
+<!ENTITY zotero.items.year_column "År">
+<!ENTITY zotero.items.publisher_column "Utgiver">
+<!ENTITY zotero.items.language_column "Språk">
 <!ENTITY zotero.items.callNumber_column "Call Number">
 <!ENTITY zotero.items.repository_column "Repository">
 <!ENTITY zotero.items.rights_column "Rettigheter">
@@ -50,7 +50,7 @@
 <!ENTITY zotero.items.menu.attach.note "Legg til notat">
 <!ENTITY zotero.items.menu.attach.snapshot "Legg til snapshot av gjeldende side">
 <!ENTITY zotero.items.menu.attach.link "Legg til lenke til gjeldende side">
-<!ENTITY zotero.items.menu.duplicateItem "Duplicate Selected Item">
+<!ENTITY zotero.items.menu.duplicateItem "Dupliser det valgte elementet">
 
 <!ENTITY zotero.collections.name_column "Samlinger">
 
@@ -65,11 +65,11 @@
 <!ENTITY zotero.toolbar.actions.label "Handlinger">
 <!ENTITY zotero.toolbar.import.label "Importer...">
 <!ENTITY zotero.toolbar.export.label "Eksporter bibliotek...">
-<!ENTITY zotero.toolbar.timeline.label "Create Timeline">
+<!ENTITY zotero.toolbar.timeline.label "Lag tidslinje">
 <!ENTITY zotero.toolbar.preferences.label "Innstillinger...">
-<!ENTITY zotero.toolbar.documentation.label "Documentation">
+<!ENTITY zotero.toolbar.documentation.label "Dokumentasjon">
 <!ENTITY zotero.toolbar.about.label "Om Zotero">
-<!ENTITY zotero.toolbar.advancedSearch "Advanced Search">
+<!ENTITY zotero.toolbar.advancedSearch "Avansert søk">
 <!ENTITY zotero.toolbar.search.label "Søk:">
 <!ENTITY zotero.toolbar.fullscreen.tooltip "Velg fullskjermmodus">
 <!ENTITY zotero.toolbar.openURL.label "Lokaliser">

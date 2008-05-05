@@ -156,6 +156,7 @@ var Zotero = new function(){
 		var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
 						.createInstance();
 		xmlhttp.open('GET', 'chrome://global/locale/global.dtd', false);
+		xmlhttp.overrideMimeType('text/plain');
 		xmlhttp.send(null);
 		this.dir = xmlhttp.responseText.match(/(ltr|rtl)/)[0];
 		
@@ -521,12 +522,14 @@ var Zotero = new function(){
 				'[JavaScript Error: "document.getElementById("sanitizeItem")',
 				'chrome://webclipper',
 				'No chrome package registered for chrome://piggy-bank',
-				'global/global.dtd'
+				'[JavaScript Error: "[Exception... "\'Component is not available\' when calling method: [nsIHandlerService::getTypeFromExtension',
+				'[JavaScript Error: "this._uiElement is null',
+				'Error: a._updateVisibleText is not a function'
 			];
 			
 			for (var i=0; i<blacklist.length; i++) {
 				if (msg.message.indexOf(blacklist[i]) != -1) {
-					Zotero.debug("Skipping blacklisted error: " + msg.message);
+					//Zotero.debug("Skipping blacklisted error: " + msg.message);
 					continue msgblock;
 				}
 			}

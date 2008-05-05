@@ -1,4 +1,4 @@
-<!ENTITY zotero.preferences.title "Zotero Voorkeuren">
+<!ENTITY zotero.preferences.title "Zotero voorkeuren">
 
 <!ENTITY zotero.preferences.default "Standaard:">
 
@@ -33,7 +33,7 @@
 <!ENTITY zotero.preferences.openurl.version "Versie:">
 
 <!ENTITY zotero.preferences.prefpane.search "Zoeken">
-<!ENTITY zotero.preferences.search.fulltextCache "Volledige-tekst Cache">
+<!ENTITY zotero.preferences.search.fulltextCache "Volledige-tekst cache">
 <!ENTITY zotero.preferences.search.pdfIndexing "PDF-indexering">
 <!ENTITY zotero.preferences.search.indexStats "Indexstatistieken">
 
@@ -47,19 +47,20 @@
 
 <!ENTITY zotero.preferences.prefpane.export "Exporteren">
 
-<!ENTITY zotero.preferences.citationOptions.caption "Citation Options">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Include URLs of paper articles in references">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "When this option is disabled, Zotero includes URLs when citing journal, magazine, and newspaper articles only if the article does not have a page range specified.">
+<!ENTITY zotero.preferences.citationOptions.caption "Citatie opties">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Voeg URLs van atikelen toe aan referenties">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Als deze optie uitgeschakeld wordt zal Zotero de URLs van geciteerde tijdschrift-, magazine en kranteartilels enkel citeren indien van het artikel geen paginering gespecifieerd werd.">
 
-<!ENTITY zotero.preferences.quickCopy.caption "Snelle Kopie">
-<!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Standaard Uitvoerformaat:">
+<!ENTITY zotero.preferences.quickCopy.caption "Snelle kopie">
+<!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Standaard uitvoerformaat:">
+<!ENTITY zotero.preferences.quickCopy.copyAsHTML "Copy as HTML">
 <!ENTITY zotero.preferences.quickCopy.macWarning "Let op: onder Mac OS X gaat hierbij de tekstopmaak verloren.">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Webpagina-specifieke instellingen:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domein/Pad">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(b.v. wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Uitvoerformaat">
 
-<!ENTITY zotero.preferences.export.getAdditionalStyles "Get additional styles...">
+<!ENTITY zotero.preferences.export.getAdditionalStyles "Bijkomende stijlen ophalen...">
 
 <!ENTITY zotero.preferences.prefpane.keys "Sneltoetsen">
 
@@ -70,8 +71,8 @@
 <!ENTITY zotero.preferences.keys.newItem "Nieuw object aanmaken">
 <!ENTITY zotero.preferences.keys.newNote "Nieuwe aantekening aanmaken">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Label-kiezer Weergeven">
-<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Citaties van Geselecteerde Objecten naar Klembord Kopiëren">
-<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Geselecteerde Objecten naar Klembord Kopiëren">
+<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Verwijzingen van geselecteerde objecten naar klembord kopiëren">
+<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Geselecteerde objecten naar klembord kopiëren">
 <!ENTITY zotero.preferences.keys.overrideGlobal "Probeer voorrang te krijgen bij conflicterende sneltoetsen">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Aanpassingen worden pas zichtbaar in nieuwe vensters">
 
@@ -82,10 +83,10 @@
 <!ENTITY zotero.preferences.dataDir.useProfile "Gebruik de profielmap van Firefox">
 <!ENTITY zotero.preferences.dataDir.custom "Aangepast:">
 <!ENTITY zotero.preferences.dataDir.choose "Kiezen...">
-<!ENTITY zotero.preferences.dataDir.reveal "Data-map Tonen">
+<!ENTITY zotero.preferences.dataDir.reveal "Opslagmap tonen">
 
 <!ENTITY zotero.preferences.dbMaintenance "Database Onderhoud">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Controleer Integriteit Database">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reset Translators and Styles...">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset Translators...">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset Styles...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Vertalers en stijlen opnieuw instellen...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Vertalers opnieuw instellen...">
+<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Stijlen opnieuw instellen...">

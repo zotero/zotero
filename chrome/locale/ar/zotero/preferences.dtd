@@ -53,6 +53,7 @@
 
 <!ENTITY zotero.preferences.quickCopy.caption "نسخ سريع">
 <!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "شكل المخرجات الإفتراضي:">
+<!ENTITY zotero.preferences.quickCopy.copyAsHTML "Copy as HTML">
 <!ENTITY zotero.preferences.quickCopy.macWarning "ملاحظة: التنسيق الغني للنصوص سيفقد عند استخدام نظام ماكنتوش.">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "إعدادات خاصة حسب الموقع:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "المجال/المسار">

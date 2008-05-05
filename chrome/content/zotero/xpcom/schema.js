@@ -171,7 +171,7 @@ Zotero.Schema = new function(){
 	**/
 	function updateScrapersRemote(force, callback) {
 		// Little hack to manually update from repo on upgrade to 1.0.3
-		if (!force) {
+		if (!force && Zotero.Prefs.get('automaticScraperUpdates')) {
 			var syncTargetVersion = 2; // increment this when releasing new version that requires it
 			var syncVersion = _getDBVersion('sync');
 			if (syncVersion < syncTargetVersion) {

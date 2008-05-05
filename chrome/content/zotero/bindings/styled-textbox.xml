@@ -181,7 +181,10 @@
 							this._styleWithCSS = true;
 						}
 						
-						this._browser.contentDocument.execCommand("styleWithCSS", false, this._styleWithCSS);
+						try {
+							this._browser.contentDocument.execCommand("styleWithCSS", false, this._styleWithCSS);
+						}
+						catch (e) {}
 					}
 					return val;
 				]]></setter>

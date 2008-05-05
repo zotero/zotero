@@ -47,19 +47,20 @@
 
 <!ENTITY zotero.preferences.prefpane.export "Exportation">
 
-<!ENTITY zotero.preferences.citationOptions.caption "Citation Options">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Include URLs of paper articles in references">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "When this option is disabled, Zotero includes URLs when citing journal, magazine, and newspaper articles only if the article does not have a page range specified.">
+<!ENTITY zotero.preferences.citationOptions.caption "Options de citation">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Inclure les URLs des articles de journaux dans les références">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Quand cette option est désactivée, Zotero inclut les URLs en citant les articles de revue, magazine et journal seulement si l&apos;article n&apos;indique pas une série de pages.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Copie rapide">
 <!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Format de sortie par défaut :">
+<!ENTITY zotero.preferences.quickCopy.copyAsHTML "Copy as HTML">
 <!ENTITY zotero.preferences.quickCopy.macWarning "Noter que le format texte enrichi (RTF) sera perdu sur Mac OS X.">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Paramètres spécifiques au site :">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domaine/Chemin">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(p. ex. wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Format de sortie">
 
-<!ENTITY zotero.preferences.export.getAdditionalStyles "Get additional styles...">
+<!ENTITY zotero.preferences.export.getAdditionalStyles "Obtenir des styles complémentaires…">
 
 <!ENTITY zotero.preferences.prefpane.keys "Raccourcis clavier">
 
@@ -86,6 +87,6 @@
 
 <!ENTITY zotero.preferences.dbMaintenance "Maintenance de la base de données">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Vérifier l&apos;intégrité de la base de données">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reset Translators and Styles...">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset Translators...">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset Styles...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Réinitialiser les convertisseurs et les styles…">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Réinitialiser les convertisseurs…">
+<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Réinitialiser les styles…">

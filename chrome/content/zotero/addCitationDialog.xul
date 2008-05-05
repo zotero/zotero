@@ -27,7 +27,7 @@
 <!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
 
 <dialog
-	id="add-citation-dialog"
+	id="zotero-add-citation-dialog"
 	orient="vertical"
 	title="&zotero.integration.addEditCitation.title;"
 	width="600" height="450"
@@ -37,7 +37,8 @@
 	ondialogcancel="Zotero_Citation_Dialog.cancel();"
 	xmlns:html="http://www.w3.org/1999/xhtml"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-	style="padding: 0">
+	style="padding: 0"
+	persist="screenX screenY">
 	
 	<script src="include.js"/>
 	<script src="selectItemsDialog.js"/>
@@ -49,7 +50,8 @@
 				<vbox align="stretch" flex="1">
 					<hbox align="center" pack="end">
 						<label value="&zotero.toolbar.search.label;" control="zotero-tb-search"/>
-						<textbox id="zotero-tb-search" type="timed" timeout="250" oncommand="onSearch()" dir="reverse" onkeypress="if(event.keyCode == event.DOM_VK_ESCAPE) { this.value = ''; this.doCommand('cmd_zotero_search'); return false; } return true;">
+						<textbox id="zotero-tb-search" type="timed" timeout="250" oncommand="onSearch()" dir="reverse"
+								onkeypress="if(event.keyCode == event.DOM_VK_ESCAPE) { if (this.value == '') { cancelDialog(); return false; } this.value = ''; this.doCommand('cmd_zotero_search'); return false; } return true;">
 							<toolbarbutton id="zotero-tb-search-cancel" oncommand="this.parentNode.value='';" hidden="true"/>
 						</textbox>
 					</hbox>

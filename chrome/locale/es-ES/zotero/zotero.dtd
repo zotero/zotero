@@ -1,7 +1,7 @@
 <!ENTITY zotero.general.optional "(Opcional)">
 <!ENTITY zotero.general.note "Nota:">
 
-<!ENTITY zotero.errorReport.unrelatedMessages "The informe de errores puede incluir mensajes sin relación con Zotero.">
+<!ENTITY zotero.errorReport.unrelatedMessages "El informe de errores puede incluir mensajes sin relación con Zotero.">
 <!ENTITY zotero.errorReport.additionalInfo "Información adicional">
 <!ENTITY zotero.errorReport.emailAddress "Tu dirección de correo electrónico:">
 <!ENTITY zotero.errorReport.errorSteps "¿Qué estabas haciendo cuando ocurrió el error? Si es posible, incluye los pasos necesarios para repetir el error.">
@@ -14,9 +14,9 @@
 <!ENTITY zotero.upgrade.newVersionInstalled "Has instalado una versión nueva de Zotero.">
 <!ENTITY zotero.upgrade.upgradeRequired "Tu base de datos de Zotero debe actualizarse para funcionar con la versión nueva.">
 <!ENTITY zotero.upgrade.autoBackup "Se hará una copia de seguridad de tu base de datos antes de hacer cambios.">
-<!ENTITY zotero.upgrade.upgradeInProgress "Por favor, espera a que finalice el proceso de actualización. Puede llevar algunos minutos.">
+<!ENTITY zotero.upgrade.upgradeInProgress "Por favor, espera a que finalice el proceso de actualización. Puede tardar algunos minutos.">
 <!ENTITY zotero.upgrade.upgradeSucceeded "Tu base de datos se ha actualizado correctamente.">
-<!ENTITY zotero.upgrade.changeLogBeforeLink "Por favor, mira en">
+<!ENTITY zotero.upgrade.changeLogBeforeLink "Véase">
 <!ENTITY zotero.upgrade.changeLogLink "el informe de cambios">
 <!ENTITY zotero.upgrade.changeLogAfterLink "para ver qué hay de nuevo.">
 
@@ -39,8 +39,8 @@
 <!ENTITY zotero.items.year_column "Año">
 <!ENTITY zotero.items.publisher_column "Editorial">
 <!ENTITY zotero.items.language_column "Idioma">
-<!ENTITY zotero.items.callNumber_column "Call Number">
-<!ENTITY zotero.items.repository_column "Repository">
+<!ENTITY zotero.items.callNumber_column "Número de catálogo">
+<!ENTITY zotero.items.repository_column "Repositorio">
 <!ENTITY zotero.items.rights_column "Derechos">
 <!ENTITY zotero.items.dateAdded_column "Fecha de adición">
 <!ENTITY zotero.items.dateModified_column "Fecha de modificación">
@@ -89,18 +89,18 @@
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "No hay marcas que mostrar">
 <!ENTITY zotero.tagSelector.filter "Filtro:">
-<!ENTITY zotero.tagSelector.showAutomatic "Mostrar automáticas">
+<!ENTITY zotero.tagSelector.showAutomatic "Mostrar las automáticas">
 <!ENTITY zotero.tagSelector.displayAll "Mostrar todas las marcas">
 <!ENTITY zotero.tagSelector.selectVisible "Seleccionar las visibles">
-<!ENTITY zotero.tagSelector.clearVisible "Deseleccionar las visibles">
-<!ENTITY zotero.tagSelector.clearAll "Deseleccionar todas">
-<!ENTITY zotero.tagSelector.renameTag "Renombrar marca...">
+<!ENTITY zotero.tagSelector.clearVisible "Descartar las visibles">
+<!ENTITY zotero.tagSelector.clearAll "Sin selección">
+<!ENTITY zotero.tagSelector.renameTag "Cambiar nombre...">
 <!ENTITY zotero.tagSelector.deleteTag "Borrar marca...">
 
 <!ENTITY zotero.selectitems.title "Seleccionar ítems">
-<!ENTITY zotero.selectitems.intro.label "Seleccionar qué ítems te apetece añadir a tu biblioteca">
+<!ENTITY zotero.selectitems.intro.label "Marca los ítems que te apetezca añadir a tu biblioteca">
 <!ENTITY zotero.selectitems.cancel.label "Cancelar">
-<!ENTITY zotero.selectitems.select.label "Seleccionar">
+<!ENTITY zotero.selectitems.select.label "Añadir">
 
 <!ENTITY zotero.bibliography.title "Crear bibliografía">
 <!ENTITY zotero.bibliography.style.label "Estilo de cita:">
@@ -143,7 +143,7 @@
 <!ENTITY zotero.annotate.toolbar.unhighlight.label "Normalizar">
 
 <!ENTITY zotero.integration.prefs.displayAs.label "Mostrar citas como:">
-<!ENTITY zotero.integration.prefs.footnotes.label "notas al pié">
+<!ENTITY zotero.integration.prefs.footnotes.label "notas al pie">
 <!ENTITY zotero.integration.prefs.endnotes.label "notas al final">
 
 <!ENTITY zotero.integration.prefs.formatUsing.label "Dar formato mediante:">

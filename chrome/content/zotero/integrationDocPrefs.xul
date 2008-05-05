@@ -5,14 +5,15 @@
 <!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
 
 <dialog
-	id="doc-prefs-dialog"
+	id="zotero-doc-prefs-dialog"
 	orient="vertical"
 	buttons="accept"
 	title="&zotero.integration.docPrefs.title;"
 	onload="Zotero_File_Interface_Bibliography.init();"
 	ondialogaccept="Zotero_File_Interface_Bibliography.acceptSelection();"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-	style="padding: 0">
+	style="padding: 0"
+	persist="screenX screenY">
 	
 	<script src="include.js"/>
 	<script src="bibliography.js"/>

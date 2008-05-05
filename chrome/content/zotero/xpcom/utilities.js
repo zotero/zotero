@@ -131,8 +131,8 @@ Zotero.Utilities.prototype.superCleanString = function(x) {
 		throw "superCleanString: argument must be a string";
 	}
 	
-	var x = x.replace(/^[^\w(]+/, "");
-	return x.replace(/[^\w)]+$/, "");
+	var x = x.replace(/^[\x00-\x27\x29-\x2F\x3A-\x40\x5B-\x60\x7B-\x7F]+/, "");
+	return x.replace(/[\x00-\x28\x2A-\x2F\x3A-\x40\x5B-\x60\x7B-\x7F]+$/, "");
 }
 
 /*
@@ -383,7 +383,7 @@ Zotero.Utilities.prototype.getLocalizedCreatorType = function(type) {
  * Follows capitalizeTitles pref, unless |force| is true
  */
 Zotero.Utilities.prototype.capitalizeTitle = function(string, force) {
-	string = this.cleanString(string);
+	string = this.trimInternal(string);
 	if(Zotero.Prefs.get('capitalizeTitles') || force) {
 		// fix colons
 		string = string.replace(" : ", ": ", "g");
@@ -474,7 +474,7 @@ Zotero.Utilities.Ingester.prototype.getItemArray = function(doc, inHere, urlRe, 
 			if(!urlRe || urlRegexp.test(links[i].href)) {
 				var text = links[i].textContent;
 				if(text) {
-					text = this.cleanString(text);
+					text = this.trimInternal(text);
 					if(!rejectRe || !rejectRegexp.test(text)) {
 						if(availableItems[links[i].href]) {
 							if(text != availableItems[links[i].href]) {
@@ -831,7 +831,7 @@ Zotero.Utilities.HTTP.processDocuments = function(firstDoc, urls, processor, don
 		}
 	};
 	var init = function() {
-		hiddenBrowser.addEventListener("load", onLoad, true);
+		hiddenBrowser.addEventListener("pageshow", onLoad, true);
 		
 		if (firstDoc) {
 			processor(firstDoc, doLoad);

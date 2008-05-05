@@ -407,7 +407,7 @@ Zotero.Fulltext = new function(){
 		if (_pdfInfo) {
 			var infoFile = cacheFile.parent;
 			infoFile.append(this.pdfInfoCacheFile);
-			Zotero.debug('Running pdfinfo ' + file.path + '" "' + infoFile.path + '"');
+			Zotero.debug('Running pdfinfo "' + file.path + '" "' + infoFile.path + '"');
 			
 			var proc = Components.classes["@mozilla.org/process/util;1"].
 					createInstance(Components.interfaces.nsIProcess);
@@ -424,7 +424,7 @@ Zotero.Fulltext = new function(){
 		
 		var maxPages = Zotero.Prefs.get('fulltext.pdfMaxPages');
 		
-		Zotero.debug('Running pdftotext -nopgbrk '
+		Zotero.debug('Running pdftotext -enc UTF-8 -nopgbrk '
 			+ (allPages ? '' : '-l ' + maxPages) + ' "' + file.path + '" "'
 			+ cacheFile.path + '"');
 		
@@ -432,7 +432,7 @@ Zotero.Fulltext = new function(){
 				createInstance(Components.interfaces.nsIProcess);
 		proc.init(_pdfConverter);
 		
-		var args = ['-nopgbrk'];
+		var args = ['-enc', 'UTF-8', '-nopgbrk'];
 		if (allPages) {
 			if (totalPages) {
 				var pagesIndexed = totalPages;

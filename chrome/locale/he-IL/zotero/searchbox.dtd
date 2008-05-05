@@ -1,9 +1,9 @@
 <!ENTITY zotero.search.name "שם:">
 
-<!ENTITY zotero.search.joinMode.prefix "Match">
-<!ENTITY zotero.search.joinMode.any "any">
+<!ENTITY zotero.search.joinMode.prefix "השווה">
+<!ENTITY zotero.search.joinMode.any "כל אחד">
 <!ENTITY zotero.search.joinMode.all "הכל">
-<!ENTITY zotero.search.joinMode.suffix "of the following:">
+<!ENTITY zotero.search.joinMode.suffix "מהבאים:">
 
 <!ENTITY zotero.search.recursive.label "חפש תיקיות משנה">
 <!ENTITY zotero.search.noChildren "Only show top-level items">
@@ -19,5 +19,5 @@
 <!ENTITY zotero.search.date.units.years "שנים">
 
 <!ENTITY zotero.search.search "חיפוש">
-<!ENTITY zotero.search.clear "Clear">
+<!ENTITY zotero.search.clear "נקה">
 <!ENTITY zotero.search.saveSearch "שמור חיפוש">

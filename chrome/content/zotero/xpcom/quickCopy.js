@@ -15,7 +15,8 @@ Zotero.QuickCopy = new function() {
 			_init();
 		}
 		
-		return _formattedNames[this.stripContentType(setting)];
+		var name = _formattedNames[this.stripContentType(setting)];
+		return name ? name : '';
 	}
 	
 	function getSettingFromFormattedName(name) {

@@ -1,7 +1,7 @@
 <!ENTITY zotero.general.optional "(По желание)">
 <!ENTITY zotero.general.note "Бележка:">
 
-<!ENTITY zotero.errorReport.unrelatedMessages "Дневника с грешките може да съдържа съобщения несвързани с Zotero.">
+<!ENTITY zotero.errorReport.unrelatedMessages "Дневника с грешките може да съдържа съобщения несвързани с Зотеро.">
 <!ENTITY zotero.errorReport.additionalInfo "Допълнителна информация">
 <!ENTITY zotero.errorReport.emailAddress "Адресът на вашата електронна поща:">
 <!ENTITY zotero.errorReport.errorSteps "Какво правихте когато възникна грешката? Ако е възможно, моля опишете стъпките необходими, за да се възпроизведе грешката.">
@@ -11,19 +11,19 @@
 <!ENTITY zotero.errorReport.furtherAssistance "За повече помощ разгледайте страницата с известните проблеми и форумите.">
 <!ENTITY zotero.errorReport.includeReportID "Моля включете идентификационият номер на отчета във всичката кореспонденция с разработчиците на зотеро, която касае този проблем.">
 
-<!ENTITY zotero.upgrade.newVersionInstalled "Инсталирахте нова версия на Zotero.">
-<!ENTITY zotero.upgrade.upgradeRequired "Вашата база дани на Zotero трябва да бъде осъвременена за да може да работи с новата версия.">
+<!ENTITY zotero.upgrade.newVersionInstalled "Инсталирахте нова версия на Зотеро.">
+<!ENTITY zotero.upgrade.upgradeRequired "Вашата база дани на Зотеро трябва да бъде осъвременена за да може да работи с новата версия.">
 <!ENTITY zotero.upgrade.autoBackup "Автоматично ще бъде направено копие на вашата база дани, преди да бъдат въвеждани каквито и да било промени.">
 <!ENTITY zotero.upgrade.upgradeInProgress "Моля изчакайте процеса на осъвременяване да приключи. Това може да отнеме няколко минути.">
-<!ENTITY zotero.upgrade.upgradeSucceeded "Вашата база дани на Zotero беше осъвременена успешно.">
+<!ENTITY zotero.upgrade.upgradeSucceeded "Вашата база дани на Зотеро беше осъвременена успешно.">
 <!ENTITY zotero.upgrade.changeLogBeforeLink "Моля вижте">
 <!ENTITY zotero.upgrade.changeLogLink "дневника на промените">
 <!ENTITY zotero.upgrade.changeLogAfterLink "за да откриете новото.">
 
-<!ENTITY zotero.contextMenu.addTextToCurrentNote "Добавяне избраното към бележка в Zotero">
-<!ENTITY zotero.contextMenu.addTextToNewNote "Създаване на обект и бележка в Zotero от избраното.">
-<!ENTITY zotero.contextMenu.saveLinkAsSnapshot "Запазване на копие на връзката в Zotero">
-<!ENTITY zotero.contextMenu.saveImageAsSnapshot "Запазване на копие образа в Zotero">
+<!ENTITY zotero.contextMenu.addTextToCurrentNote "Добавяне избраното към бележка в Зотеро">
+<!ENTITY zotero.contextMenu.addTextToNewNote "Създаване на обект и бележка в Зотеро от избраното.">
+<!ENTITY zotero.contextMenu.saveLinkAsSnapshot "Запазване на копие на връзката в Зотеро">
+<!ENTITY zotero.contextMenu.saveImageAsSnapshot "Запазване на копие образа в Зотеро">
 
 <!ENTITY zotero.tabs.info.label "Информация">
 <!ENTITY zotero.tabs.notes.label "Бележки">
@@ -68,7 +68,7 @@
 <!ENTITY zotero.toolbar.timeline.label "Създаване на хронология">
 <!ENTITY zotero.toolbar.preferences.label "Настройки...">
 <!ENTITY zotero.toolbar.documentation.label "Документация">
-<!ENTITY zotero.toolbar.about.label "За Zotero">
+<!ENTITY zotero.toolbar.about.label "За Зотеро">
 <!ENTITY zotero.toolbar.advancedSearch "Търсене за напреднали">
 <!ENTITY zotero.toolbar.search.label "Търсене:">
 <!ENTITY zotero.toolbar.fullscreen.tooltip "Превключване в режим на цял екран">

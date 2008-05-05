@@ -1,14 +1,14 @@
 <!ENTITY zotero.general.optional "(Seçimli)">
-<!ENTITY zotero.general.note "Note:">
+<!ENTITY zotero.general.note "Not:">
 
-<!ENTITY zotero.errorReport.unrelatedMessages "The error log may include messages unrelated to Zotero.">
+<!ENTITY zotero.errorReport.unrelatedMessages "Hata kaydı Zotero ile ilgili olmayan iletileri de içerebilir.">
 <!ENTITY zotero.errorReport.additionalInfo "Ek Bilgi">
 <!ENTITY zotero.errorReport.emailAddress "e-posta adresiniz:">
 <!ENTITY zotero.errorReport.errorSteps "Hata meydana geldiğinde ne yapıyordunuz? Eğer mümkünse, lütfen hatayı üreten adımları dahil ediniz.">
 <!ENTITY zotero.errorReport.submissionInProgress "Lütfen hata raporu gönderilene kadar bekleyiniz.">
 <!ENTITY zotero.errorReport.submitted "Hata raporu gönderilmiştir.">
 <!ENTITY zotero.errorReport.reportID "Rapor ID:">
-<!ENTITY zotero.errorReport.furtherAssistance "See the Known Issues page and the forums for further assistance.">
+<!ENTITY zotero.errorReport.furtherAssistance "Daha fazla yardım için Bilinen Sorunlar sayfasına ve forumlara bakınız.">
 <!ENTITY zotero.errorReport.includeReportID "Lütfen bu konu ile ilgili olarak Zotero geliştiricileri ile yapacağınız tüm yazışmalarda bu Rapor ID&apos;sini kullanınız.">
 
 <!ENTITY zotero.upgrade.newVersionInstalled "Zotero&apos;nun yeni bir sürümünü kurdunuz.">
@@ -112,8 +112,8 @@
 <!ENTITY zotero.bibliography.print.label "Yazdır">
 
 <!ENTITY zotero.integration.docPrefs.title "Döküman Tercihleri">
-<!ENTITY zotero.integration.addEditCitation.title "Add/Edit Citation">
-<!ENTITY zotero.integration.editBibliography.title "Edit Bibliography">
+<!ENTITY zotero.integration.addEditCitation.title "Atıf Ekle/Düzenle">
+<!ENTITY zotero.integration.editBibliography.title "Kaynakça Düzenle">
 
 <!ENTITY zotero.progress.title "İşlem">
 
@@ -121,20 +121,20 @@
 <!ENTITY zotero.exportOptions.format.label "Biçim">
 <!ENTITY zotero.exportOptions.translatorOptions.label "Çeviri Seçenekleri">
 
-<!ENTITY zotero.citation.keepSorted.label "Keep Sources Sorted">
+<!ENTITY zotero.citation.keepSorted.label "Kaynakları Sıralı Tut">
 
 <!ENTITY zotero.citation.page "Sayfa">
 <!ENTITY zotero.citation.paragraph "Paragraf">
 <!ENTITY zotero.citation.line "Satır">
-<!ENTITY zotero.citation.suppressAuthor.label "Suppress Author">
-<!ENTITY zotero.citation.prefix.label "Prefix:">
-<!ENTITY zotero.citation.suffix.label "Suffix:">
+<!ENTITY zotero.citation.suppressAuthor.label "Yazarı Sakla">
+<!ENTITY zotero.citation.prefix.label "Önek:">
+<!ENTITY zotero.citation.suffix.label "Sonek:">
 
-<!ENTITY zotero.richText.italic.label "Italic">
-<!ENTITY zotero.richText.bold.label "Bold">
-<!ENTITY zotero.richText.underline.label "Underline">
-<!ENTITY zotero.richText.superscript.label "Superscript">
-<!ENTITY zotero.richText.subscript.label "Subscript">
+<!ENTITY zotero.richText.italic.label "İtalik">
+<!ENTITY zotero.richText.bold.label "Kalın">
+<!ENTITY zotero.richText.underline.label "Altçizgi">
+<!ENTITY zotero.richText.superscript.label "Üstsimge">
+<!ENTITY zotero.richText.subscript.label "Altsimge">
 
 <!ENTITY zotero.annotate.toolbar.add.label "Dipnot Ekle">
 <!ENTITY zotero.annotate.toolbar.collapse.label "Tüm Dipnotları Daralt">
@@ -150,4 +150,4 @@
 <!ENTITY zotero.integration.prefs.bookmarks.label "Yer imleri">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Yerimleri Microsoft Word ve OpenOffice.org karşısında korunmuştur, fakat yanlışlıkla değiştirilebilir.">
 
-<!ENTITY zotero.integration.references.label "References in Bibliography">
+<!ENTITY zotero.integration.references.label "Kaynakçadaki Kaynaklar">
