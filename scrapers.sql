@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-05-05 17:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-05-05 18:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1089,7 +1089,7 @@ REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('291934d5-36ec-4b81-ac9c-c5ad5313dba4', '1.0.0b4.r5', '', '2008-05-05 17:00:00', '0', '100', '4', 'Environment and Planning', 'Michael Berkowitz', 'http://(www.)?envplan.com/', 
+REPLACE INTO translators VALUES ('291934d5-36ec-4b81-ac9c-c5ad5313dba4', '1.0.0b4.r5', '', '2008-05-05 18:30:00', '0', '100', '4', 'Pion Journals', 'Michael Berkowitz', 'http://(www.)?(hthpweb|envplan|perceptionweb).com/', 
 'function detectWeb(doc, url) {
 	if (url.match(/search\.cgi/) || url.match(/ranking/) || url.match(/volume=/)) {
 		return "multiple";
@@ -1105,11 +1105,15 @@ REPLACE INTO translators VALUES ('291934d5-36ec-4b81-ac9c-c5ad5313dba4', '1.0.0b
 	
 	var arts = new Array();
 	if (detectWeb(doc, url) == "multiple") {
-		
+		var items = Zotero.Utilities.getItemArray(doc, doc, "abstract.cgi\\?id=");
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			arts.push(i);
+		}
 	} else {
 		arts = [url];
 	}
-	
+	Zotero.debug(arts);
 	Zotero.Utilities.processDocuments(arts, function(doc) {
 		var item = new Zotero.Item("journalArticle");
 		item.publicationTitle = Zotero.Utilities.trimInternal(doc.evaluate(''//div[@id="footer"]/div[@class="left"]/i'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
@@ -1118,14 +1122,18 @@ REPLACE INTO translators VALUES ('291934d5-36ec-4b81-ac9c-c5ad5313dba4', '1.0.0b
 		for each (var aut in authors) {
 			item.creators.push(Zotero.Utilities.cleanAuthor(aut, "author"));
 		}
-		var voliss = doc.evaluate(''//div[@id="title"]/div[@class="left"]/font'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.match(/(\d+)\s+volume\s+(\d+)\s*\((\d+)\)\s+pages\s+(.*)$/);
-		item.date = voliss[1];
-		item.volume = voliss[2];
-		item.issue = voliss[3];
-		item.pages = voliss[4];		
+		if (doc.evaluate(''//div[@id="title"]/div[@class="left"]/font'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.match(/\d+/)) {
+			var voliss = doc.evaluate(''//div[@id="title"]/div[@class="left"]/font'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.match(/(\d+)\s+volume\s+(\d+)\s*\((\d+)\)\s+(pages\s+(.*))?$/);
+			Zotero.debug(voliss);
+			item.date = voliss[1];
+			item.volume = voliss[2];
+			item.issue = voliss[3];
+			if (voliss[5]) item.pages = voliss[5];
+		} else {
+			item.date = Zotero.Utilities.trimInternal(doc.evaluate(''//div[@id="total"]/p[4]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent).match(/(\d+)$/)[1];
+		}
 		item.DOI = Zotero.Utilities.trimInternal(doc.evaluate(''//div[@id="title"]/div[@class="right"]/font'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent).substr(4);
 		
-
 		if (doc.evaluate(''//a[contains(@href, ".pdf")]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) var pdfurl = doc.evaluate(''//a[contains(@href, ".pdf")]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
 		item.url = doc.location.href;
 		var pub = item.publicationTitle;
