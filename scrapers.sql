@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-05-03 06:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-05-05 14:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -19935,7 +19935,7 @@ function doExport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('9cb70025-a888-4a29-a210-93ec52da40d4', '1.0.0b4.r1', '', '2008-03-26 16:04:37', '1', '200', '3', 'BibTeX', 'Simon Kornblith', 'bib', 
+REPLACE INTO translators VALUES ('9cb70025-a888-4a29-a210-93ec52da40d4', '1.0.0b4.r1', '', '2008-05-05 14:30:00', '1', '200', '3', 'BibTeX', 'Simon Kornblith', 'bib', 
 'Zotero.configure("dataMode", "block");
 Zotero.addOption("UTF8", true);
 
@@ -21521,6 +21521,8 @@ function processField(item, field, value) {
 		} else {
 			item.tags = value.split(/, ?/g);
 		}
+	} else if (field == "comment") {
+		item.notes.push({note:value});
 	}
 }
 
@@ -21904,7 +21906,11 @@ function doExport() {
 		if(item.itemType == "webpage") {
 			writeField("howpublished", item.url);
 		}
-		
+		if (item.notes) {
+			for each (var note in item.notes) {
+				writeField("comment", note['note']);
+			}
+		}		
 		Zotero.write("\n}");
 	}
 }');
