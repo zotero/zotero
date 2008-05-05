@@ -1,14 +1,14 @@
 <!ENTITY zotero.general.optional "（オプショナル）">
-<!ENTITY zotero.general.note "Note:">
+<!ENTITY zotero.general.note "メモ：">
 
-<!ENTITY zotero.errorReport.unrelatedMessages "The error log may include messages unrelated to Zotero.">
+<!ENTITY zotero.errorReport.unrelatedMessages "エラー･ログはZoteroとは関係していないメッセージを含んでいる可能性があります。">
 <!ENTITY zotero.errorReport.additionalInfo "追加情報">
 <!ENTITY zotero.errorReport.emailAddress "あなたの電子メールアドレス:">
 <!ENTITY zotero.errorReport.errorSteps "エラーが発生したときに何をしていましたか？可能であれば、エラー発生までのステップを説明してください。">
 <!ENTITY zotero.errorReport.submissionInProgress "エラーレポートは送信されるまでお待ちください。">
 <!ENTITY zotero.errorReport.submitted "エラーレポートは送信されました。">
 <!ENTITY zotero.errorReport.reportID "レポートID:">
-<!ENTITY zotero.errorReport.furtherAssistance "See the Known Issues page and the forums for further assistance.">
+<!ENTITY zotero.errorReport.furtherAssistance "さらにヘルプが必要な場合、既知問題のページとフォーラムを参照して下さい。">
 <!ENTITY zotero.errorReport.includeReportID "Zotero開発者と連絡する際に、この問題に関するレポートIDを報告してください。">
 
 <!ENTITY zotero.upgrade.newVersionInstalled "Zoteroの新しいバージョンはインストールされました。">
@@ -102,7 +102,7 @@
 <!ENTITY zotero.selectitems.cancel.label "キャンセル">
 <!ENTITY zotero.selectitems.select.label "OK">
 
-<!ENTITY zotero.bibliography.title "参考文献を作成">
+<!ENTITY zotero.bibliography.title "参照文献を作成">
 <!ENTITY zotero.bibliography.style.label "引用スタイル">
 <!ENTITY zotero.bibliography.output.label "アウトプット・フォーマット">
 <!ENTITY zotero.bibliography.saveAsRTF.label "RTFとして保存">
@@ -112,8 +112,8 @@
 <!ENTITY zotero.bibliography.print.label "印刷">
 
 <!ENTITY zotero.integration.docPrefs.title "ドキュメントの設定">
-<!ENTITY zotero.integration.addEditCitation.title "Add/Edit Citation">
-<!ENTITY zotero.integration.editBibliography.title "Edit Bibliography">
+<!ENTITY zotero.integration.addEditCitation.title "引用を追加・編集">
+<!ENTITY zotero.integration.editBibliography.title "参照文献リストを編集">
 
 <!ENTITY zotero.progress.title "進行">
 
@@ -121,20 +121,20 @@
 <!ENTITY zotero.exportOptions.format.label "フォーマット：">
 <!ENTITY zotero.exportOptions.translatorOptions.label "トランスレーターのオプション">
 
-<!ENTITY zotero.citation.keepSorted.label "Keep Sources Sorted">
+<!ENTITY zotero.citation.keepSorted.label "参照文献の配列をキープ">
 
 <!ENTITY zotero.citation.page "ページ">
 <!ENTITY zotero.citation.paragraph "段落">
 <!ENTITY zotero.citation.line "行">
-<!ENTITY zotero.citation.suppressAuthor.label "Suppress Author">
-<!ENTITY zotero.citation.prefix.label "Prefix:">
-<!ENTITY zotero.citation.suffix.label "Suffix:">
+<!ENTITY zotero.citation.suppressAuthor.label "著者名の非表示">
+<!ENTITY zotero.citation.prefix.label "接頭辞">
+<!ENTITY zotero.citation.suffix.label "接尾辞">
 
-<!ENTITY zotero.richText.italic.label "Italic">
-<!ENTITY zotero.richText.bold.label "Bold">
-<!ENTITY zotero.richText.underline.label "Underline">
-<!ENTITY zotero.richText.superscript.label "Superscript">
-<!ENTITY zotero.richText.subscript.label "Subscript">
+<!ENTITY zotero.richText.italic.label "イタリック">
+<!ENTITY zotero.richText.bold.label "太字">
+<!ENTITY zotero.richText.underline.label "下線">
+<!ENTITY zotero.richText.superscript.label "上付き文字">
+<!ENTITY zotero.richText.subscript.label "下付き文字">
 
 <!ENTITY zotero.annotate.toolbar.add.label "アノテーションを追加">
 <!ENTITY zotero.annotate.toolbar.collapse.label "すべてのアノテーションを折りたたみ表示">
@@ -150,4 +150,4 @@
 <!ENTITY zotero.integration.prefs.bookmarks.label "ブックマーク">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "ブックマークはMicrosoft Word、OpenOffice.org双方で保存されますが、偶然に変更されてしまう場合があります。">
 
-<!ENTITY zotero.integration.references.label "References in Bibliography">
+<!ENTITY zotero.integration.references.label "参照文献リストの中の参照文献">

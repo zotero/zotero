@@ -37,16 +37,20 @@ Zotero.MIME = new function(){
 		["%PDF-", "application/pdf", 0],
 		["%!PS-Adobe-", 'application/postscript', 0],
 		["%! PS-Adobe-", 'application/postscript', 0],
+		["\uFFFD\uFFFD\x11\u0871\x1A\uFFFD\x00\x00", "application/msword", 0],
 		["From", 'text/plain', 0],
 		[">From", 'text/plain', 0],
 		["#!", 'text/plain', 0],
 		["<?xml", 'text/xml', 0],
 		["<!DOCTYPE html", 'text/html', 0],
 		["<html", 'text/html', 0],
-		["\uFFFD\uFFFD", 'image/jpeg', 0],
-		["JFIF", 'image/jpeg'],
+		["\uFFFD\uFFFD\uFFFD\uFFFD", 'image/jpeg', 0],
 		["GIF8", 'image/gif', 0],
-		["\uFFFDPNG", 'image/png', 0]
+		["\uFFFDPNG", 'image/png', 0],
+		["PK\x03\x04", "application/vnd.oasis.opendocument.text", 0],
+		["JFIF", 'image/jpeg'],
+		["FLV", "video/x-flv", 0]
+		
 	];
 	
 	var _textTypes = {
@@ -71,7 +75,8 @@ Zotero.MIME = new function(){
 	
 	// Extensions of text files (generally XML) to force to be external
 	var _externalTextExtensions = {
-		'graffle': true
+		graffle: true,
+		mm: true
 	};
 	
 	
@@ -98,8 +103,78 @@ Zotero.MIME = new function(){
 		switch (mimeType) {
 			case 'text/html':
 				return 'html';
+			
 			case 'application/pdf':
+			case 'application/x-pdf':
+			case 'application/acrobat':
+			case 'applications/vnd.pdf':
+			case 'text/pdf':
+			case 'text/x-pdf':
 				return 'pdf';
+			
+			case 'image/jpg':
+			case 'image/jpeg':
+				return 'jpg';
+			
+			case 'image/gif':
+				return 'gif';
+			
+			case 'application/msword':
+			case 'application/doc':
+			case 'application/vnd.msword':
+			case 'application/vnd.ms-word':
+			case 'application/winword':
+			case 'application/word':
+			case 'application/x-msw6':
+			case 'application/x-msword':
+				return 'doc';
+			
+			case 'application/vnd.oasis.opendocument.text':
+			case 'application/x-vnd.oasis.opendocument.text':
+				return 'odt';
+			
+			case 'video/flv':
+			case 'video/x-flv':
+				return 'flv';
+			
+			case 'image/tif':
+			case 'image/tiff':
+			case 'image/tif':
+			case 'image/x-tif':
+			case 'image/tiff':
+			case 'image/x-tiff':
+			case 'application/tif':
+			case 'application/x-tif':
+			case 'application/tiff':
+			case 'application/x-tiff':
+				return 'tiff';
+			
+			case 'application/zip':
+			case 'application/x-zip':
+			case 'application/x-zip-compressed':
+			case 'application/x-compress':
+			case 'application/x-compressed':
+			case 'multipart/x-zip':
+				return 'zip';
+				
+			case 'video/quicktime':
+			case 'video/x-quicktime':
+				return 'mov';
+				
+			case 'video/avi':
+			case 'video/msvideo':
+			case 'video/x-msvideo':
+				return 'avi';
+				
+			case 'audio/wav':
+			case 'audio/x-wav':
+			case 'audio/wave':
+				return 'wav';
+				
+			case 'audio/aiff':
+			case 'audio/x-aiff':
+			case 'sound/aiff':
+				return 'aiff';
 		}
 		
 		try {

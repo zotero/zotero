@@ -63,7 +63,7 @@
 <!ENTITY zotero.toolbar.newSavedSearch.label "Căutare salvată nouă...">
 <!ENTITY zotero.toolbar.tagSelector.label "Arată/Ascunde selectorul de etichete">
 <!ENTITY zotero.toolbar.actions.label "Acţiuni">
-<!ENTITY zotero.toolbar.import.label "Import...">
+<!ENTITY zotero.toolbar.import.label "Importă...">
 <!ENTITY zotero.toolbar.export.label "Exportă biblioteca...">
 <!ENTITY zotero.toolbar.timeline.label "Creează cronologie">
 <!ENTITY zotero.toolbar.preferences.label "Preferinţe...">

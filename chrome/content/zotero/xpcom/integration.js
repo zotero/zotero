@@ -20,7 +20,7 @@
     ***** END LICENSE BLOCK *****
 */
 
-const API_VERSION = 4;
+const API_VERSION = 5;
 
 Zotero.Integration = new function() {
 	var _contentLengthRe = /[\r\n]Content-Length: *([0-9]+)/i;
@@ -519,7 +519,7 @@ Zotero.Integration.SOAP = new function() {
 		}
 		
 		watcher.openWindow(null, 'chrome://zotero/content/integrationDocPrefs.xul', '',
-		                   'chrome,modal'+(Zotero.isWin ? ',popup' : ''), io, true);
+		                   'chrome,modal,centerscreen' + (Zotero.isWin ? ',popup' : ''), io, true);
 		session.setStyle(io.style, io.useEndnotes, io.useBookmarks);
 		if(!oldStyle || oldStyle == io.style) {
 			session.regenerateAll = session.bibliographyHasChanged = true;
@@ -798,7 +798,7 @@ Zotero.Integration.Session.prototype.editCitation = function(index, citation) {
 	Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
 	          .getService(Components.interfaces.nsIWindowWatcher)
 	          .openWindow(null, 'chrome://zotero/content/addCitationDialog.xul', '',
-					  'chrome,modal'+(Zotero.isWin ? ',popup' : ''), io);
+					  'chrome,modal,centerscreen' + (Zotero.isWin ? ',popup' : ''), io);
 	
 	if(citation && !io.citation.citationItems.length) {
 		io.citation = citation;
@@ -958,7 +958,7 @@ Zotero.Integration.Session.prototype.editBibliography = function() {
 	Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
 	          .getService(Components.interfaces.nsIWindowWatcher)
 	          .openWindow(null, 'chrome://zotero/content/editBibliographyDialog.xul', '',
-					  'chrome,modal'+(Zotero.isWin ? ',popup' : ''), io, true);
+					  'chrome,modal,centerscreen' + (Zotero.isWin ? ',popup' : ''), io, true);
 	
 }
 

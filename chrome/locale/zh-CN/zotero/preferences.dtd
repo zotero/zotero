@@ -47,19 +47,20 @@
 
 <!ENTITY zotero.preferences.prefpane.export "导出">
 
-<!ENTITY zotero.preferences.citationOptions.caption "Citation Options">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Include URLs of paper articles in references">
+<!ENTITY zotero.preferences.citationOptions.caption "引文选项">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "在参考文献里包含文章链接">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "When this option is disabled, Zotero includes URLs when citing journal, magazine, and newspaper articles only if the article does not have a page range specified.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "快速复制">
 <!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "默认输出格式:">
-<!ENTITY zotero.preferences.quickCopy.macWarning "注意: 富文本格式在Mac OS X下将丢失.">
+<!ENTITY zotero.preferences.quickCopy.copyAsHTML "Copy as HTML">
+<!ENTITY zotero.preferences.quickCopy.macWarning "注意: 在Mac OS X下富文本格式将丢失.">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "特定站点设置:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "域/路径">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(e.g. wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "输出格式">
 
-<!ENTITY zotero.preferences.export.getAdditionalStyles "Get additional styles...">
+<!ENTITY zotero.preferences.export.getAdditionalStyles "获取更多样式...">
 
 <!ENTITY zotero.preferences.prefpane.keys "快捷键">
 
@@ -86,6 +87,6 @@
 
 <!ENTITY zotero.preferences.dbMaintenance "数据库维护">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "数据库完整性检测">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reset Translators and Styles...">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset Translators...">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset Styles...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "重设转换器和样式...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "重设转换器...">
+<!ENTITY zotero.preferences.dbMaintenance.resetStyles "重设样式...">

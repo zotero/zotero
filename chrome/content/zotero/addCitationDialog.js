@@ -66,7 +66,7 @@ var Zotero_Citation_Dialog = new function () {
 		io = window.arguments[0].wrappedJSObject;
 		
 		// find accept button
-		_acceptButton = document.getElementById("add-citation-dialog").getButton("accept");
+		_acceptButton = document.getElementById("zotero-add-citation-dialog").getButton("accept");
 		_autoRegeneratePref = Zotero.Prefs.get("integration.autoRegenerate");
 		
 		// if a style with sortable citations, present checkbox
@@ -144,7 +144,7 @@ var Zotero_Citation_Dialog = new function () {
 		_multipleSourcesOn = !_multipleSourcesOn;
 		if(_multipleSourcesOn) {
 			document.getElementById("multiple-sources").hidden = undefined;
-			document.getElementById("add-citation-dialog").width = "750";
+			document.getElementById("zotero-add-citation-dialog").width = "750";
 			document.getElementById("multiple-sources-button").label = Zotero.getString("citation.singleSource");			
 			window.sizeToContent();
 			window.moveTo((window.screenX-75), window.screenY);
@@ -153,7 +153,7 @@ var Zotero_Citation_Dialog = new function () {
 			_itemSelected(false);
 		} else {
 			document.getElementById("multiple-sources").hidden = true;
-			document.getElementById("add-citation-dialog").width = "600";
+			document.getElementById("zotero-add-citation-dialog").width = "600";
 			document.getElementById("multiple-sources-button").label = Zotero.getString("citation.multipleSources");			
 			window.sizeToContent();
 			window.moveTo((window.screenX+75), window.screenY);

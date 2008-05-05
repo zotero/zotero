@@ -53,6 +53,7 @@
 
 <!ENTITY zotero.preferences.quickCopy.caption "Copia veloce">
 <!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Formato di output predefinito">
+<!ENTITY zotero.preferences.quickCopy.copyAsHTML "Copy as HTML">
 <!ENTITY zotero.preferences.quickCopy.macWarning "Nota: la formattazione RTF verrà persa su Mac OS X">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Impostazioni specifiche per sito:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Dominio o percorso">

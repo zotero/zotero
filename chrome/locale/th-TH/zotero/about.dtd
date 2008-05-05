@@ -1,0 +1,10 @@
+<!ENTITY zotero.version "รุ่น">
+<!ENTITY zotero.createdby "สร้างโดย:">
+<!ENTITY zotero.directors "ผู้ควบคุม:">
+<!ENTITY zotero.developers "ผู้พัฒนา:">
+<!ENTITY zotero.alumni "Alumni:">
+<!ENTITY zotero.about.localizations "Localizations:">
+<!ENTITY zotero.about.additionalSoftware "Third-Party Software and Standards:">
+<!ENTITY zotero.executiveProducer "Executive Producer:">
+<!ENTITY zotero.thanks "ขอบคุณเป็นพิเศษ:">
+<!ENTITY zotero.about.close "ปิด">

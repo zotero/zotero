@@ -975,6 +975,8 @@ Zotero.Attachments = new function(){
 			nsIURL.fileBaseName = nsIURL.fileBaseName + '.' + tld;
 		}
 		
+		nsIURL.fileBaseName = Zotero.File.getValidFileName(nsIURL.fileBaseName);
+		
 		return nsIURL.fileName;
 	}
 	
