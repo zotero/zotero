@@ -3215,7 +3215,7 @@ function doWeb(doc, url){
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('e85a3134-8c1a-8644-6926-584c8565f23e', '1.0.0b4.r1', '', '2008-04-18 08:55:00', '1', '100', '4', 'History Cooperative', 'Simon Kornblith', 'https?://[^/]*historycooperative\.org[^/]*/(?:journals/.+/.+/.+\.s?html$|cgi-bin/search.cgi|journals/.+/.+/)', 
+REPLACE INTO translators VALUES ('e85a3134-8c1a-8644-6926-584c8565f23e', '1.0.0b4.r1', '', '2008-05-05 16:00:00', '1', '100', '4', 'History Cooperative', 'Simon Kornblith', 'https?://[^/]*historycooperative\.org[^/]*/(?:journals/.+/.+/.+\.s?html$|cgi-bin/search.cgi|journals/(?!cp|whc).+/.+/)', 
 'function detectWeb(doc, url) {
 	var contents = doc.title.replace("Contents", "");
 	if(doc.title != contents || doc.title == "History Cooperative: Search Results") {
@@ -12325,6 +12325,161 @@ REPLACE INTO translators VALUES ('a326fc49-60c2-405b-8f44-607e5d18b9ad', '1.0.0b
 	Zotero.wait();
 }');
 
+REPLACE INTO translators VALUES ('c3edb423-f267-47a1-a8c2-158c247f87c2', '1.0.0b4.r5', '', '2008-05-05 16:00:00', '0', '100', '4', 'Common-Place', 'Frederick Gibbs', 'http://www.common-place\.|historycooperative\.org/journals/cp', 
+'function detectWeb(doc, url) {
+	if(doc.title.indexOf("Previous Issues") != -1 || doc.title.indexOf("Search Site") != -1 ) {
+		return "multiple";
+	} else {
+		return "journalArticle";
+	}
+}', 
+'function scrape(doc) {
+	
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	var newItem = new Zotero.Item("journalArticle");
+	newItem.publicationTitle = "Common-Place";
+	newItem.url = doc.location.href;
+
+
+	//get issue year and month
+	//these will determine what xpaths we use for title and author
+	var pubDate;
+	var dateRe = /<a href="\/vol-[0-9]{2}\/no-[0-9]{2}\/">(.*)<\/a><\/b>/;
+	var m = dateRe.exec(Zotero.Utilities.trimInternal(doc.getElementsByTagName("body")[0].innerHTML));
+
+	if(m) {
+		//newItem.title = Zotero.Utilities.trimInternal(Zotero.Utilities.unescapeHTML(m[1]));
+		pubDate = m[1];
+	} else {
+	pubDate = doc.evaluate(''//div[@id="container"]/div[@id="top"]/p/b/a[2]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+	}
+	var d;
+	//Zotero.debug(pubDate);
+	pubDateVolRE = /vol. (.*) · no. /;
+	d = pubDateVolRE.exec(pubDate);
+	newItem.volume = d[1];
+
+	pubDateVolRE = /no. (.*) ·/;
+	d = pubDateVolRE.exec(pubDate);
+	newItem.issue = d[1];
+
+	pubDateVolRE = /no. [0-9] · (.*)/;
+	d = pubDateVolRE.exec(pubDate);
+	newItem.date = d[1];
+
+	//usually the page begins with the article title or book title (of reviewed book)
+	//some pages have an image just before them, so we need to skip it if it''s there.
+	var pLevel;
+	var m=doc.evaluate(''//div[@id="content"]/p[1]/img'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+	
+	//if there is an image here, offset the xpath
+	if (m == null) {
+		pLevel = ''//div[@id="content"]/p[1]'';
+	} else { 
+		pLevel = ''//div[@id="content"]/p[2]'';
+	}
+	
+	//issues before 2004 have a table based layout, so a totally different xpath.
+	//check to see if we have anything, then try again if we don''t.
+	var author;
+	var title;
+		
+	author = doc.evaluate(pLevel+''/span[1]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+	author = author.iterateNext();
+
+	if (author != null) {
+		//Zotero.debug("au"+author+"au");
+		var title = doc.evaluate(pLevel+''/span[2]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		//Zotero.debug("ti"+title+"ti");
+		title = title.iterateNext().textContent;		
+
+		//determine if we have a book review
+		// if so, get the publication information
+		if (author.textContent.indexOf("Review by") != -1 ) {
+			newItem.title = String.concat("Review of ", title);
+			newItem.author = author.textContent.substring(10);
+		} else {
+			newItem.author = author.textContent;
+			newItem.title = title;
+		}
+
+	}	
+	else { //we have older issue
+		
+		//check if we are on a review
+		var review = doc.evaluate(''/html/body/table/tbody/tr/td[2]/p[2]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+		var temp = review.textContent;
+		if (temp.indexOf("Review") != -1) {
+			title = doc.evaluate(''/html/body/table/tbody/tr/td[2]/p/i'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+			title = "Review of " + title; 
+			author = review.textContent.substring(10);
+		} else { //for articles
+			title = doc.evaluate(''/html/body/table/tbody/tr/td[2]/p/b'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+			author = doc.evaluate(''/html/body/table/tbody/tr/td[2]/p[1]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent.split(/\n/)[1];
+			//Zotero.debug(author);	
+		}
+		newItem.author = author;
+		newItem.title = title;
+	}
+	
+	newItem.attachments.push({document:doc, title:doc.title});
+	
+	newItem.complete();
+}
+
+function doWeb(doc, url) {
+var type = detectWeb(doc, url);
+if (type == "multiple") {
+		
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+		//create list of items
+		//what about home page (current issue table of contents?)
+		//for search result links: /html/body/table[2]/tbody/tr/td[2]/li[3]/a
+		//for previous issues: //tr/td/p/a/b (but we need to strip out volume links (starts with ''Volume'')
+		
+	var link;
+	var title;
+	var items = new Object();
+	var searchLinks = doc.evaluate(''/html/body/table[2]/tbody/tr/td[2]/li/a'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+
+		while (elmt = searchLinks.iterateNext()) {
+			Zotero.debug(elmt.textContent);
+			title = elmt.textContent;
+			link = elmt.href;
+			if (title && link){
+				items[link] = title;
+			}
+		}
+		
+		items = Zotero.selectItems(items);
+		
+		if(!items) {
+			return true;
+		}
+		
+		var uris = new Array();
+		for(var i in items) {
+			uris.push(i);
+		}
+		
+		Zotero.Utilities.processDocuments(uris, function(doc) { scrape(doc) },
+			function() { Zotero.done(); }, null);
+		
+		Zotero.wait();
+	} else {
+		scrape(doc);
+	}
+}');
+
+
 REPLACE INTO translators VALUES ('37445f52-64fa-4a2a-9532-35753520a0f0', '1.0.0b4.r5', '', '2008-01-16 06:30:00', '0', '100', '4', 'HeinOnline', 'Michael Berkowitz', 'http://heinonline\.org/HOL/', 
 'function detectWeb(doc, url) {
 	if (url.indexOf("LuceneSearch") != -1) {
@@ -17143,6 +17298,121 @@ REPLACE INTO translators VALUES ('66928fe3-1e93-45a7-8e11-9df6de0a11b3', '1.0.0b
 		translator.translate();
 	}, function() {Zotero.done();}, null);
 	Zotero.wait();
+}');
+
+
+REPLACE INTO translators VALUES ('0507797c-9bc4-4374-92ca-9e3763b6922b', '1.0.0b4.r5', '', '2008-05-05 16384:00:00', '0', '100', '4', 'World History Connected', 'Frederick Gibbs', 'worldhistoryconnected\.press|historycooperative.*/whc/', '', 
+'function associateMeta(newItem, metaTags, field, zoteroField) {
+	var field = metaTags.namedItem(field);
+	if(field) {
+		newItem[zoteroField] = field.getAttribute("content");
+	}
+}
+
+function scrape(doc) {
+	
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	var newItem = new Zotero.Item("journalArticle");
+	newItem.url = doc.location.href;
+	
+	var titlePath;
+	var bookTitle;
+	var month, year;
+	var metaTags = doc.getElementsByTagName("meta");
+
+	associateMeta(newItem, metaTags, "Journal", "publicationTitle");
+	associateMeta(newItem, metaTags, "Volume", "volume");
+	associateMeta(newItem, metaTags, "Issue", "issue");
+
+	// in the case of book reviews, the title field is blank
+	//but quotes are not escaped properly, so if an article title begins with quotes, then the title tag looks blank even though it is not.
+	//(though semantically it is)
+	//they use the meta tag ''FileType'' to indicate Aritlce or Book Review. silly, but we can use it.
+	
+	if (metaTags.namedItem(''FileType'').getAttribute("content") == ''Book Review'') {
+		//for a book review, title of reviewed book is
+		titlePath = ''/html/body/table[4]/tbody/tr[3]/td[1]/i'';	
+		newItem.title = "Review of " + doc.evaluate(titlePath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+
+	} else {
+		//it would be nice to grab the title from the meta tags, but quotations are properly escaped and the tags are therefore malformed.
+		titlePath = ''/html/body/table[4]/tbody/tr[2]/td[1]/h2/font/b'';
+		newItem.title = Zotero.Utilities.superCleanString(doc.evaluate(titlePath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+	}
+
+	var author = metaTags.namedItem("Author");
+	if(author) {
+		var authors = author.getAttribute("content").split(" and ");
+		for(j in authors) {
+			authors[j] = authors[j].replace("Reviewed by ", "");
+			newItem.creators.push(Zotero.Utilities.cleanAuthor(authors[j], "author"));
+		}
+	}
+	
+	var month = metaTags.namedItem("PublicationMonth");
+	var year = metaTags.namedItem("PublicationYear");
+	if(month && year) {
+		newItem.date = month.getAttribute("content")+" "+year.getAttribute("content");
+	}
+	
+	newItem.attachments.push({document:doc, title:"World History Connected Snapshot"});
+	
+	newItem.complete();
+}
+
+function doWeb(doc, url) {
+	
+	var searchLinks;
+	
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+
+	if(doc.title.indexOf("Contents") != -1 || doc.title.indexOf("Search results") != -1) {
+
+		if(doc.title.indexOf("Contents") != -1) {
+		searchLinks = doc.evaluate(''//tbody/tr[2]/td[1]/table/tbody/tr/td/a'', doc, nsResolver, XPathResult.ANY_TYPE, null);	
+		} 
+		else if ( doc.title.indexOf("Search results") != -1) {
+		searchLinks = doc.evaluate(''/html/body/dl/dt/strong/a'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		}
+		
+		var link;
+		var title;
+		var items = new Object();
+		
+		while (elmt = searchLinks.iterateNext()) {
+			Zotero.debug(elmt.href);
+			title = Zotero.Utilities.superCleanString(elmt.textContent);
+			link = elmt.href;
+			if (title && link){
+				items[link] = title;
+			}
+		}
+	
+		items = Zotero.selectItems(items);
+		
+		if(!items) {
+			return true;
+		}
+		
+		var uris = new Array();
+		for(var i in items) {
+			uris.push(i);
+		}
+		
+		Zotero.Utilities.processDocuments(uris, function(doc) { scrape(doc) },
+			function() { Zotero.done(); }, null);
+		
+		Zotero.wait();
+	} else {
+		scrape(doc);
+	}
 }');
 
 REPLACE INTO translators VALUES ('c73a4a8c-3ef1-4ec8-8229-7531ee384cc4', '1.0.0b3.r1', '', '2007-11-05 18:00:00', '1', '100', '4', 'Open WorldCat (Web)', 'Sean Takats', '^http://(?:www\.)?worldcat\.org/(?:search\?|profiles/[^/]+/lists/)', 
