@@ -2,13 +2,13 @@
 <style xmlns="http://purl.org/net/xbiblio/csl" class="in-text" xml:lang="en">
 <info>
  <title>Briefings in Bioinformatics</title>
- <id>http://www.zotero.org/namespaces/CSL/briefing_in_bioinform</id>
+ <id>http://www.zotero.org/styles/briefings_in_bioinformatics</id>
  <author>
   <name>Malay K Basu</name>
   <email>malay@bioinformatics.org</email>
  </author>
  <updated>2008-04-30 03:34:00+05:00</updated>
- <summary>The Briefings in Bioinformatics Journal style.</summary>
+ <summary>The Briefings in Bioinformatics Journal style</summary>
 </info>
 
  <macro name="author">
@@ -42,8 +42,6 @@
 	    <text variable="volume" suffix=":"/>
 	    <text variable="page"/>
       
-            
-
      </layout> 
   </bibliography>
 
