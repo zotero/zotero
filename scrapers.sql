@@ -930,7 +930,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b3.r1', '', '2008-04-30 18:15:00', '1', '100', '4', 'Library Catalog (Voyager)', 'Simon Kornblith', 'Pwebrecon\.cgi', 
+REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b3.r1', '', '2008-05-05 07:45:00', '1', '100', '4', 'Library Catalog (Voyager)', 'Simon Kornblith', 'Pwebrecon\.cgi', 
 'function detectWeb(doc, url) {
 	var export_options = doc.forms.namedItem(''frm'').elements.namedItem(''RD'').options;
 	for(var i in export_options) {
@@ -1089,7 +1089,7 @@ REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('2e304579-dd7b-4770-85e9-0d724c9b49a5', '1.0.0b4.r5', '', '2008-05-01 20:30:00', '0', '100', '4', 'European Educational Research Journal', 'Michael Berkowitz', 'http://www.wwwords.co.uk/eerj/', 
+REPLACE INTO translators VALUES ('2e304579-dd7b-4770-85e9-0d724c9b49a5', '1.0.0b4.r5', '', '2008-05-05 07:45:00', '0', '100', '4', 'European Educational Research Journal', 'Michael Berkowitz', 'http://www.wwwords.co.uk/eerj/', 
 'function detectWeb(doc, url) {
 	if (doc.evaluate(''//div[@id="maincontent"]/table[*//p[@class="articletitle"]]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
@@ -1164,7 +1164,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('bdaac15c-b0ee-453f-9f1d-f35d00c7a994', '1.0.0b4.r5', '', '2008-05-01 16:30:00', '0', '100', '4', 'AMS Journals', 'Michael Berkowitz', 'http://www.ams.org/', 
+REPLACE INTO translators VALUES ('bdaac15c-b0ee-453f-9f1d-f35d00c7a994', '1.0.0b4.r5', '', '2008-05-05 07:45:00', '0', '100', '4', 'AMS Journals', 'Michael Berkowitz', 'http://www.ams.org/', 
 'function detectWeb(doc, url) {
 	if (url.match(/jour(nals|search)/)) {
 		return "multiple";
@@ -1231,7 +1231,7 @@ REPLACE INTO translators VALUES ('bdaac15c-b0ee-453f-9f1d-f35d00c7a994', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('5278b20c-7c2c-4599-a785-12198ea648bf', '1.0.0b4.r5', '', '2008-04-30 21:00:00', '0', '100', '4', 'ARTstor', 'Ameer Ahmed and Michael Berkowitz', 'http://web2.artstor.org', 
+REPLACE INTO translators VALUES ('5278b20c-7c2c-4599-a785-12198ea648bf', '1.0.0b4.r5', '', '2008-05-05 07:45:00', '0', '100', '4', 'ARTstor', 'Ameer Ahmed and Michael Berkowitz', 'http://web2.artstor.org', 
 'function detectWeb(doc, url) {
 	if (url.match(''Search'')) return "multiple"
 }', 
@@ -1464,7 +1464,7 @@ function scrape(doc, url){
 Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('79f6f9ed-537a-4d4f-8270-c4fbaafdf327', '1.0.0b4.r5', '', '2008-04-30 19:30:00', '0', '100', '4', 'Emerald Publishing', 'Michael Berkowitz', 'www.emeraldinsight.com/', 
+REPLACE INTO translators VALUES ('79f6f9ed-537a-4d4f-8270-c4fbaafdf327', '1.0.0b4.r5', '', '2008-05-05 07:45:00', '0', '100', '4', 'Emerald Publishing', 'Michael Berkowitz', 'www.emeraldinsight.com/', 
 'function detectWeb(doc, url) {
 	if (url.match(''searchQuickOptions.do'')) {
 		return "multiple"
@@ -1536,7 +1536,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('bc39e05b-141a-4322-85f0-a5b86edf896b', '1.0.0b4.r5', '', '2008-04-30 17:15:00', '0', '100', '4', 'Hindawi Publishing Corporation', 'Michael Berkowitz', 'http://www.hindawi.com/', 
+REPLACE INTO translators VALUES ('bc39e05b-141a-4322-85f0-a5b86edf896b', '1.0.0b4.r5', '', '2008-05-05 07:45:00', '0', '100', '4', 'Hindawi Publishing Corporation', 'Michael Berkowitz', 'http://www.hindawi.com/', 
 'function detectWeb(doc, url) {
 	if (url.match(''GetArticle.aspx'')) {
 		return "journalArticle";
@@ -1599,7 +1599,7 @@ REPLACE INTO translators VALUES ('bc39e05b-141a-4322-85f0-a5b86edf896b', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('252c6a50-0900-41c5-a66b-ec456137c43c', '1.0.0b4.r5', '', '2008-04-29 21:30:00', '0', '100', '4', 'AcademicJournals.net', 'Michael Berkowitz', 'http://www.academicjournals.net/', 
+REPLACE INTO translators VALUES ('252c6a50-0900-41c5-a66b-ec456137c43c', '1.0.0b4.r5', '', '2008-05-05 07:45:00', '0', '100', '4', 'AcademicJournals.net', 'Michael Berkowitz', 'http://www.academicjournals.net/', 
 'function detectWeb(doc, url) {
 	if (url.match(''articleno='')) {
 		return "journalArticle";
@@ -1678,7 +1678,7 @@ REPLACE INTO translators VALUES ('252c6a50-0900-41c5-a66b-ec456137c43c', '1.0.0b
 	}, function() {Zotero.done;});
 }');
 
-REPLACE INTO translators VALUES ('1e1e35be-6264-45a0-ad2e-7212040eb984', '1.0.0b4.r5', '', '2008-04-29 19:00:00', '0', '100', '4', 'APA PsycNET', 'Michael Berkowitz', 'http://psycnet\.apa\.org/', 
+REPLACE INTO translators VALUES ('1e1e35be-6264-45a0-ad2e-7212040eb984', '1.0.0b4.r5', '', '2008-05-05 07:45:00', '0', '100', '4', 'APA PsycNET', 'Michael Berkowitz', 'http://psycnet\.apa\.org/', 
 'function detectWeb(doc, url) {
 	if (url.match(/search\.searchResults/)) {
 		return "multiple";
@@ -1965,7 +1965,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('0eeb2ac0-fbaf-4994-b98f-203d273eb9fa', '1.0.0b4.r5', '', '2008-04-30 21:30:00', '1', '100', '4', 'Inter-Research Science Center', 'Michael Berkowitz', 'http://www.int-res.com/', 
+REPLACE INTO translators VALUES ('0eeb2ac0-fbaf-4994-b98f-203d273eb9fa', '1.0.0b4.r5', '', '2008-05-05 07:45:00', '1', '100', '4', 'Inter-Research Science Center', 'Michael Berkowitz', 'http://www.int-res.com/', 
 'function detectWeb(doc, url) {
 	if (doc.evaluate(''//div[@class="journal-index"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext() ||
 		doc.evaluate(''//div[@class="tx-indexedsearch-res"]//tr[1]/td[2]//a'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
@@ -4737,7 +4737,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('99f958ab-0732-483d-833f-6bd8e42f6277', '1.0.0b4.r1', '', '2008-04-28 19:30:00', '0', '100', '4', 'National Bureau of Economic Research', 'Michael Berkowitz', '^https?://(?:papers\.|www\.)?nber\.org/(papers|s|new)', 
+REPLACE INTO translators VALUES ('99f958ab-0732-483d-833f-6bd8e42f6277', '1.0.0b4.r1', '', '2008-05-05 07:45:00', '0', '100', '4', 'National Bureau of Economic Research', 'Michael Berkowitz', '^https?://(?:papers\.|www\.)?nber\.org/(papers|s|new)', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -9103,7 +9103,7 @@ REPLACE INTO translators VALUES ('a1a97ad4-493a-45f2-bd46-016069de4162', '1.0.0b
 	
 }');
 
-REPLACE INTO translators VALUES ('b61c224b-34b6-4bfd-8a76-a476e7092d43', '1.0.0b4.r5', '', '2008-05-01 15:00:00', '1', '100', '4', 'SSRN', 'Michael Berkowitz', 'http://papers\.ssrn\.com/', 
+REPLACE INTO translators VALUES ('b61c224b-34b6-4bfd-8a76-a476e7092d43', '1.0.0b4.r5', '', '2008-05-05 07:45:00', '1', '100', '4', 'SSRN', 'Michael Berkowitz', 'http://papers\.ssrn\.com/', 
 'function detectWeb(doc, url)	{
 	var namespace=doc.documentElement.namespaceURI;
 	var nsResolver=namespace?function(prefix)	{
@@ -13382,7 +13382,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('d0b1914a-11f1-4dd7-8557-b32fe8a3dd47', '1.0.0b3.r1', '', '2008-05-03 06:00:00', '1', '100', '4', 'EBSCOhost', 'Simon Kornblith', 'https?://[^/]+/(?:bsi|ehost)/(?:results|detail|folder)', 
+REPLACE INTO translators VALUES ('d0b1914a-11f1-4dd7-8557-b32fe8a3dd47', '1.0.0b3.r1', '', '2008-05-05 07:45:00', '1', '100', '4', 'EBSCOhost', 'Simon Kornblith', 'https?://[^/]+/(?:bsi|ehost)/(?:results|detail|folder)', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -15685,7 +15685,7 @@ REPLACE INTO translators VALUES ('7bdb79e-a47f-4e3d-b317-ccd5a0a74456', '1.0.0b3
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('850f4c5f-71fb-4669-b7da-7fb7a95500ef', '1.0.0b3r1', '', '2008-04-29 16:00:00', '1', '100', '4', 'Cambridge Journals Online', 'Sean Takats and Michael Berkowitz', 'https?://[^/]*journals.cambridge.org[^/]*//?action/(quickSearch|search|displayAbstract|displayFulltext|displayIssue)', 
+REPLACE INTO translators VALUES ('850f4c5f-71fb-4669-b7da-7fb7a95500ef', '1.0.0b3r1', '', '2008-05-05 07:45:00', '1', '100', '4', 'Cambridge Journals Online', 'Sean Takats and Michael Berkowitz', 'https?://[^/]*journals.cambridge.org[^/]*//?action/(quickSearch|search|displayAbstract|displayFulltext|displayIssue)', 
 'function detectWeb(doc, url)	{
 	var namespace=doc.documentElement.namespaceURI;
 	var nsResolver=namespace?function(prefix)	{
@@ -21910,7 +21910,7 @@ function doExport() {
 }');
 
 
-REPLACE INTO translators VALUES ('a6ee60df-1ddc-4aae-bb25-45e0537be973', '1.0.0b3.r1', '', '2008-04-30 18:15:00', '1', '100', '1', 'MARC', 'Simon Kornblith', 'marc', 
+REPLACE INTO translators VALUES ('a6ee60df-1ddc-4aae-bb25-45e0537be973', '1.0.0b3.r1', '', '2008-05-05 07:45:00', '1', '100', '1', 'MARC', 'Simon Kornblith', 'marc', 
 'function detectImport() {
 	var marcRecordRegexp = /^[0-9]{5}[a-z ]{3}$/
 	var read = Zotero.read(8);
