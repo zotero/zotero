@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-05-05 20:45:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-05-05 22:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1087,6 +1087,53 @@ REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b
 		Zotero.done();
 	})
 	Zotero.wait();
+}');
+
+REPLACE INTO translators VALUES ('2cd7d362-5fba-423a-887f-579ed343e751', '1.0.0b4.r5', '', '2008-05-05 22:00:00', '0', '100', '4', 'The Microfinance Gateway', 'Michael Berkowitz', 'http://(www.)?microfinancegateway.org/', 
+'function detectWeb(doc, url) {
+	if (url.match(/results\.php/) || url.match(/search/)) {
+		return "multiple";
+	} else if (url.match(/content\/article/)) {
+		return "journalArticle";
+	}
+}', 
+'function doWeb(doc, url) {
+	var ns = doc.documentElement.namespaceURI;
+	var nsResolver = ns ? function (prefix) {
+		if (prefix == ''x'') return ns; else return null;
+	} : null;
+	
+	var arts = new Array();
+	if (detectWeb(doc, url) == "multiple") {
+		var items = Zotero.Utilities.getItemArray(doc, doc, "content/article/detail");
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			arts.push(i);
+		}
+	} else {
+		arts = [url];
+	}
+	Zotero.Utilities.processDocuments(arts, function(doc) {
+		var item = new Zotero.Item("journalArticle");
+		item.title = Zotero.Utilities.trimInternal(doc.evaluate(''//td[2][@class="main_content_box"]/h1'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+		var authors = Zotero.Utilities.trimInternal(doc.evaluate(''//div[@class="source"]/strong'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent).split(/(\.,|&)/);
+		for each (var aut in authors) {
+			if (aut.match(/\w+/)) {
+				item.creators.push(Zotero.Utilities.cleanAuthor(Zotero.Utilities.trimInternal(aut), "author", true));
+			}
+		}
+		item.url = doc.location.href;
+		item.date = Zotero.Utilities.trimInternal(doc.evaluate(''//span[@class="date"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+		item.abstractNote = Zotero.Utilities.trimInternal(doc.evaluate(''//span[@class="summary"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+		var pdfurl = doc.evaluate(''//div[@class="articleTopics"]/div/a[1]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
+		item.publicationTitle = doc.evaluate(''//div[@class="articleTopics"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.match(/Published\s+by:\s+(.*)\n/)[1];
+		item.attachments = [
+			{url:item.url, title:item.title + " Snapshot", mimeType:"text/html"},
+			{url:pdfurl, title:item.title + " PDF", mimeType:"application/pdf"}
+		];
+		
+		item.complete();
+	}, function() {Zotero.done;});
 }');
 
 REPLACE INTO translators VALUES ('291934d5-36ec-4b81-ac9c-c5ad5313dba4', '1.0.0b4.r5', '', '2008-05-05 18:30:00', '0', '100', '4', 'Pion Journals', 'Michael Berkowitz', 'http://(www.)?(hthpweb|envplan|perceptionweb).com/', 
