@@ -1089,7 +1089,7 @@ REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('2cd7d362-5fba-423a-887f-579ed343e751', '1.0.0b4.r5', '', '2008-05-05 22:00:00', '0', '100', '4', 'The Microfinance Gateway', 'Michael Berkowitz', 'http://(www.)?microfinancegateway.org/', 
+REPLACE INTO translators VALUES ('2cd7d362-5fba-423a-887f-579ed343e751', '1.0.0b4.r5', '', '2008-05-06 08:15:00', '0', '100', '4', 'The Microfinance Gateway', 'Michael Berkowitz', 'http://(www.)?microfinancegateway.org/', 
 'function detectWeb(doc, url) {
 	if (url.match(/results\.php/) || url.match(/search/)) {
 		return "multiple";
@@ -1136,7 +1136,7 @@ REPLACE INTO translators VALUES ('2cd7d362-5fba-423a-887f-579ed343e751', '1.0.0b
 	}, function() {Zotero.done;});
 }');
 
-REPLACE INTO translators VALUES ('291934d5-36ec-4b81-ac9c-c5ad5313dba4', '1.0.0b4.r5', '', '2008-05-05 18:30:00', '0', '100', '4', 'Pion Journals', 'Michael Berkowitz', 'http://(www.)?(hthpweb|envplan|perceptionweb).com/', 
+REPLACE INTO translators VALUES ('291934d5-36ec-4b81-ac9c-c5ad5313dba4', '1.0.0b4.r5', '', '2008-05-06 08:15:00', '0', '100', '4', 'Pion Journals', 'Michael Berkowitz', 'http://(www.)?(hthpweb|envplan|perceptionweb).com/', 
 'function detectWeb(doc, url) {
 	if (url.match(/search\.cgi/) || url.match(/ranking/) || url.match(/volume=/)) {
 		return "multiple";
@@ -3317,7 +3317,7 @@ function doWeb(doc, url){
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('e85a3134-8c1a-8644-6926-584c8565f23e', '1.0.0b4.r1', '', '2008-05-05 16:00:00', '1', '100', '4', 'History Cooperative', 'Simon Kornblith', 'https?://[^/]*historycooperative\.org[^/]*/(?:journals/.+/.+/.+\.s?html$|cgi-bin/search.cgi|journals/(?!cp|whc).+/.+/)', 
+REPLACE INTO translators VALUES ('e85a3134-8c1a-8644-6926-584c8565f23e', '1.0.0b4.r1', '', '2008-05-06 08:15:00', '1', '100', '4', 'History Cooperative', 'Simon Kornblith', 'https?://[^/]*historycooperative\.org[^/]*/(?:journals/.+/.+/.+\.s?html$|cgi-bin/search.cgi|journals/(?!cp|whc).+/.+/)', 
 'function detectWeb(doc, url) {
 	var contents = doc.title.replace("Contents", "");
 	if(doc.title != contents || doc.title == "History Cooperative: Search Results") {
@@ -10197,7 +10197,7 @@ function doWeb(doc, url){
 	}
 }');
 
-REPLACE INTO translators VALUES ('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '1.0.0b3.r1', '', '2008-05-05 20:45:00', '1', '100', '4', 'ProQuest', 'Simon Kornblith', '^https?://[^/]+/pqdweb\?((?:.*\&)?did=.*&Fmt=[0-9]|(?:.*\&)Fmt=[0-9].*&did=|(?:.*\&)searchInterface=|(?:.*\&)TS=[0-9])', 
+REPLACE INTO translators VALUES ('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '1.0.0b3.r1', '', '2008-05-06 08:15:00', '1', '100', '4', 'ProQuest', 'Simon Kornblith', '^https?://[^/]+/pqdweb\?((?:.*\&)?did=.*&Fmt=[0-9]|(?:.*\&)Fmt=[0-9].*&did=|(?:.*\&)searchInterface=|(?:.*\&)TS=[0-9])', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -12426,7 +12426,7 @@ REPLACE INTO translators VALUES ('a326fc49-60c2-405b-8f44-607e5d18b9ad', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('c3edb423-f267-47a1-a8c2-158c247f87c2', '1.0.0b4.r5', '', '2008-05-05 16:00:00', '0', '100', '4', 'Common-Place', 'Frederick Gibbs', 'http://www.common-place\.|historycooperative\.org/journals/cp', 
+REPLACE INTO translators VALUES ('c3edb423-f267-47a1-a8c2-158c247f87c2', '1.0.0b4.r5', '', '2008-05-06 08:15:00', '0', '100', '4', 'Common-Place', 'Frederick Gibbs', 'http://www.common-place\.|historycooperative\.org/journals/cp', 
 'function detectWeb(doc, url) {
 	if(doc.title.indexOf("Previous Issues") != -1 || doc.title.indexOf("Search Site") != -1 ) {
 		return "multiple";
@@ -16878,7 +16878,7 @@ REPLACE INTO translators VALUES ('a354331-981b-43de-a61-bc26dd1be3a9', '1.0.0b3.
 	});
 }');
 
-REPLACE INTO translators VALUES ('938ebe32-2b2e-4349-a5b3-b3a05d3de627', '1.0.0b3.r1', '', '2008-05-05 16:00:00', '1', '100', '4', 'ACS Publications', 'Sean Takats and Michael Berkowitz', 'http://[^/]*pubs3?.acs.org[^/]*/(?:wls/journals/query/(?:subscriberResults|query)\.html|acs/journals/toc.page|cgi-bin/(?:article|abstract|sample|asap).cgi)?', 
+REPLACE INTO translators VALUES ('938ebe32-2b2e-4349-a5b3-b3a05d3de627', '1.0.0b3.r1', '', '2008-05-06 08:15:00', '1', '100', '4', 'ACS Publications', 'Sean Takats and Michael Berkowitz', 'http://[^/]*pubs3?.acs.org[^/]*/(?:wls/journals/query/(?:subscriberResults|query)\.html|acs/journals/toc.page|cgi-bin/(?:article|abstract|sample|asap).cgi)?', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -17402,7 +17402,7 @@ REPLACE INTO translators VALUES ('66928fe3-1e93-45a7-8e11-9df6de0a11b3', '1.0.0b
 }');
 
 
-REPLACE INTO translators VALUES ('0507797c-9bc4-4374-92ca-9e3763b6922b', '1.0.0b4.r5', '', '2008-05-05 16384:00:00', '0', '100', '4', 'World History Connected', 'Frederick Gibbs', 'worldhistoryconnected\.press|historycooperative.*/whc/', '', 
+REPLACE INTO translators VALUES ('0507797c-9bc4-4374-92ca-9e3763b6922b', '1.0.0b4.r5', '', '2008-05-06 08:15:00', '0', '100', '4', 'World History Connected', 'Frederick Gibbs', 'worldhistoryconnected\.press|historycooperative.*/whc/', '', 
 'function associateMeta(newItem, metaTags, field, zoteroField) {
 	var field = metaTags.namedItem(field);
 	if(field) {
