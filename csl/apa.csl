@@ -17,11 +17,26 @@
     <category term="author-date"/>
     <updated/>
   </info>
-  <macro name="editor-translator">
-    <names variable="editor translator" delimiter=", ">
+  <macro name="container-contributors">
+    <choose>
+      <if type="chapter">
+    <text term="in" text-case="capitalize-first" suffix=" "/>
+    <names variable="editor translator" delimiter=", " suffix=", ">
       <name and="symbol" initialize-with=". " delimiter=", "/>
       <label form="short" prefix=" (" text-case="capitalize-first" suffix=".)"/>
     </names>
+      </if>
+    </choose>
+  </macro>
+  <macro name="secondary-contributors">
+    <choose>
+      <if type="chapter" match="none">
+    <names variable="editor translator" delimiter=", " prefix=" (" suffix=")">
+      <name and="symbol" initialize-with=". " delimiter=", "/>
+      <label form="short" prefix=", " text-case="capitalize-first" suffix="."/>
+    </names>
+      </if>
+    </choose>
   </macro>
   <macro name="author">
     <names variable="author">
@@ -75,15 +90,16 @@
   </macro>
   <macro name="title">
     <choose>
-      <if type="book">
+      <if type="book thesis" match="any">
         <text variable="title" font-style="italic"/>
       </if>
       <else>
-        <text variable="title"/>
+        <text variable="title" suffix=". "/>
       </else>
     </choose>
   </macro>
   <macro name="publisher">
+    <text variable="genre" suffix=", "/>
     <group delimiter=": ">
       <text variable="publisher-place"/>
       <text variable="publisher"/>
@@ -113,34 +129,58 @@
       <date-part name="year"/>
     </date>
   </macro>
+  <macro name="edition">
+    <choose>
+      <if type="book chapter" match="any">
+    <choose>
+      <if is-numeric="edition">
+        <group delimiter=" ">
+          <number variable="edition" form="ordinal"/>
+          <text term="edition" form="short" suffix="."/>
+        </group>
+      </if>
+      <else>
+        <text variable="edition" suffix="."/>
+      </else>
+    </choose>
+      </if>
+    </choose>
+  </macro>
+  <macro name="locators">
+    <choose>
+      <if type="article-journal article-magazine article-newspaper" match="any">
+        <group prefix=", " delimiter=", ">
+          <group>
+            <text variable="volume" font-style="italic"/>
+            <text variable="issue" prefix="(" suffix=")"/>
+          </group>
+          <text variable="page"/>
+         </group>
+      </if>
+      <else-if type="book chapter" match="any">
+        <group prefix=" (" suffix=")" delimiter=", ">
+          <text macro="edition"/>
+          <group>
+            <text term="volume" form="short" plural="true" text-case="capitalize-first" suffix=". "/>
+            <number variable="number-of-volumes" form="numeric" prefix="1-"/>
+          </group>
+          <group>
+            <text term="volume" form="short" text-case="capitalize-first" suffix=". "/>
+            <number variable="volume" form="numeric"/>
+          </group>
+          <group>
+            <label variable="page" form="short" include-period="true" suffix=" "/>
+            <text variable="page"/>
+          </group>
+        </group>
+      </else-if>
+    </choose>
+  </macro>
   <macro name="citation-locator">
     <group>
       <label variable="locator" include-period="true" form="short"/>
       <text variable="locator" prefix=" "/>
     </group>
-  </macro>
-  <macro name="container-prefix">
-    <choose>
-      <if type="chapter">
-        <text term="in" text-case="capitalize-first"/>
-      </if>
-    </choose>
-  </macro>
-  <macro name="pages">
-    <choose>
-      <if type="chapter">
-        <group prefix=" (" suffix=")">
-          <label variable="page" form="short" include-period="true" suffix=" "/>
-          <text variable="page"/>
-        </group>
-      </if>
-      <else>
-        <text variable="page" prefix=", "/>
-      </else>
-    </choose>
-  </macro>
-  <macro name="edition">
-      <text variable="edition"/>
   </macro>
   <citation>
     <option name="et-al-min" value="6"/>
@@ -174,18 +214,15 @@
     <layout suffix=".">
       <text macro="author" suffix="."/>
       <text macro="issued"/>
-      <text macro="title" prefix=" " suffix=". "/>
-      <text macro="container-prefix" suffix=" "/>
-      <text macro="editor-translator" suffix=", "/>
+      <text macro="title" prefix=" "/>
+      <text macro="container-contributors"/>
+      <text macro="secondary-contributors"/>
       <text variable="container-title" font-style="italic"/>
       <text variable="collection-title" prefix=", " suffix="."/>
-      <text macro="edition" prefix=" (" suffix=")"/>
-      <text variable="volume" prefix=", " font-style="italic"/>
-      <text variable="issue" prefix="(" suffix=")"/>
-      <text macro="pages"/>
+      <text macro="locators"/>
       <group delimiter=". " prefix=". ">
-	      <text macro="publisher"/>
-	      <text macro="access"/>
+	    <text macro="publisher"/>
+	    <text macro="access"/>
       </group>
     </layout>
   </bibliography>
