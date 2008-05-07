@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-05-07 16:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-05-07 18:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -15242,7 +15242,7 @@ REPLACE INTO translators VALUES ('2c310a37-a4dd-48d2-82c9-bd29c53c1c76', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('cde4428-5434-437f-9cd9-2281d14dbf9', '1.0.0b3.r1', '', '2008-04-23 09:45:00', '1', '100', '4', 'Ovid', 'Simon Kornblith and Michael Berkowitz', '/(gw2|spa|spb)/ovidweb\.cgi', 
+REPLACE INTO translators VALUES ('cde4428-5434-437f-9cd9-2281d14dbf9', '1.0.0b3.r1', '', '2008-05-07 18:00:00', '1', '100', '4', 'Ovid', 'Simon Kornblith and Michael Berkowitz', '/(gw2|spa|spb)/ovidweb\.cgi', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -15314,8 +15314,12 @@ function doWeb(doc, url) {
 	
 	if (detectWeb(doc, url) == "multiple") {
 		var selectvar = doc.evaluate(''.//input[@name="SELECT"]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
-		var nextselect = selectvar.iterateNext();
-		post += "&SELECT="+ selectvar.iterateNext().value;
+		var nextselect = selectvar.iterateNext().value;
+		if (next = selectvar.iterateNext()) {
+			post += "&SELECT=" + next.value;
+		} else {
+			post += "&SELECT="+ nextselect;
+		}
 	} else {
 		post += "&SELECT=" + doc.evaluate(''.//input[@name="SELECT"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().value;
 	}
