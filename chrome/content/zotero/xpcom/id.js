@@ -26,6 +26,7 @@ Zotero.ID = new function () {
 	this.getBigInt = getBigInt;
 	
 	_available = {};
+	_min = {};
 	
 	/*
 	 * Gets an unused primary key id for a DB table
@@ -107,6 +108,7 @@ Zotero.ID = new function () {
 				delete _available[table];
 			}
 			
+			_min[table] = id;
 			return id;
 		}
 		return null;
@@ -138,6 +140,7 @@ Zotero.ID = new function () {
 	function _loadAvailable(table) {
 		Zotero.debug("Loading available ids for table '" + table + "'");
 		
+		var minID = _min[table] ? _min[table] + 1 : 1;
 		var numIDs = 3; // Number of ids to compare against at a time
 		var maxTries = 3; // Number of times to try increasing the maxID
 		var maxToFind = 1000;
@@ -161,42 +164,40 @@ Zotero.ID = new function () {
 				throw ("Unsupported table '" + table + "' in Zotero.ID._loadAvailable()");
 		}
 		
-		var maxID = numIDs;
+		var maxID = minID + numIDs - 1;
 		var sql = "SELECT " + column + " FROM " + table
-			+ " WHERE " + column + "<=? ORDER BY " + column;
-		var ids = Zotero.DB.columnQuery(sql, maxID);
+			+ " WHERE " + column + " BETWEEN ? AND ? ORDER BY " + column;
+		var ids = Zotero.DB.columnQuery(sql, [minID, maxID]);
 		// If no ids found, we have maxID unused ids
 		if (!ids) {
-			Zotero.debug('none found');
-			var found = Math.min(maxID, maxToFind);
-			Zotero.debug("Found " + found + " available ids in table '" + table + "'");
-			_available[table] = [[1, found]];
+			maxID = Math.min(maxID, maxToFind);
+			Zotero.debug("Found " + (maxID - minID + 1) + " available ids in table '" + table + "'");
+			_available[table] = [[minID, maxID]];
 			return;
 		}
 			
 		// If we didn't find any unused ids, try increasing maxID a few times
-		while (ids.length == maxID && maxTries>0) {
-			Zotero.debug('nope');
-			maxID = maxID + numIDs;
-			ids = Zotero.DB.columnQuery(sql, maxID);
+		while (ids.length == numIDs && maxTries>0) {
+			Zotero.debug('No available ids found between ' + minID + ' and ' + maxID + '; trying next ' + numIDs);
+			minID = maxID + 1;
+			maxID = minID + numIDs - 1;
+			ids = Zotero.DB.columnQuery(sql, [minID, maxID]);
 			maxTries--;
 		}
 		
 		// Didn't find any unused ids
-		if (ids.length == maxID) {
-			Zotero.debug('none!');
+		if (ids.length == numIDs) {
 			Zotero.debug("Found 0 available ids in table '" + table + "'");
 			_available[table] = [];
 			return;
 		}
 		
-		var available = [], found = 0, j=0, availableStart = null;
+		var available = [], found = 0, j = 0, availableStart = null;
 		
-		for (var i=1; i<=maxID && found<maxToFind; i++) {
+		for (var i=minID; i<=maxID && found<maxToFind; i++) {
 			// We've gone past the found ids, so all remaining ids up to maxID
 			// are available
 			if (!ids[j]) {
-				Zotero.debug('all remaining are available');
 				available.push([i, maxID]);
 				found += (maxID - i) + 1;
 				break;
@@ -204,14 +205,12 @@ Zotero.ID = new function () {
 			
 			// Skip ahead while ids are occupied
 			if (ids[j] == i) {
-				Zotero.debug('skipping');
 				j++;
 				continue;
 			}
 			
 			// Advance counter while it's below the next used id
 			while (ids[j] > i && i<=maxID) {
-				Zotero.debug('b');
 				if (!availableStart) {
 					availableStart = i;
 				}
@@ -233,7 +232,6 @@ Zotero.ID = new function () {
 		Zotero.debug("Found " + found + " available ids in table '" + table + "'");
 		
 		_available[table] = available;
-		Zotero.debug(available);
 	}
 	
 	
