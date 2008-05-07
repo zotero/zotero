@@ -35,7 +35,10 @@
 <!ENTITY zotero.items.date_column						"Date">
 <!ENTITY zotero.items.year_column						"Year">
 <!ENTITY zotero.items.publisher_column					"Publisher">
+<!ENTITY zotero.items.publication_column				"Publication">
+<!ENTITY zotero.items.journalAbbr_column				"Journal Abbr">
 <!ENTITY zotero.items.language_column					"Language">
+<!ENTITY zotero.items.accessDate_column				"Accessed">
 <!ENTITY zotero.items.callNumber_column					"Call Number">
 <!ENTITY zotero.items.repository_column					"Repository">
 <!ENTITY zotero.items.rights_column						"Rights">
