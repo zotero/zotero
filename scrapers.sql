@@ -1089,7 +1089,7 @@ REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('9499c586-d672-42d6-9ec4-ee9594dcc571', '1.0.0b4.r5', '', '2008-05-08 21:00:00', '0', '100', '4', 'The Hindu', 'Prashant Iyengar and Michael Berkowitz', 'http://(www.)?hindu.com', 
+REPLACE INTO translators VALUES ('9499c586-d672-42d6-9ec4-ee9594dcc571', '1.0.0b4.r5', '', '2008-05-08 20:30:00', '0', '100', '4', 'The Hindu', 'Prashant Iyengar and Michael Berkowitz', 'http://(www.)?hindu.com', 
 'function detectWeb(doc, url) {
 	if (doc.evaluate(''//h2[@class="r"]/a[@class="l"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
       		return "multiple";
@@ -1230,7 +1230,7 @@ REPLACE INTO translators VALUES ('e8d40f4b-c4c9-41ca-a59f-cf4deb3d3dc5', '1.0.0b
 }
 ');
 
-REPLACE INTO translators VALUES ('fe39e97d-7397-4f3f-a5f3-396a1a79213c', '1.0.0b4.r5', '', '2008-05-08 18:30:00', '0', '100', '4', 'OpenJudis - Indian Supreme Court cases', 'Prashant Iyengar and Michael Berkowitz', 'http://(www.)?openarchive.in/(judis|newcases)', 
+REPLACE INTO translators VALUES ('fe39e97d-7397-4f3f-a5f3-396a1a79213c', '1.0.0b4.r5', '', '2008-05-08 20:30:00', '0', '100', '4', 'OpenJudis - Indian Supreme Court cases', 'Prashant Iyengar and Michael Berkowitz', 'http://(www.)?openarchive.in/(judis|newcases)', 
 'function detectWeb(doc, url) {
 	if (doc.evaluate(''//div[@id="footer"]/dl/dt/a'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
@@ -1319,7 +1319,7 @@ function doWeb(doc, url) {
 }
 ');
 
-REPLACE INTO translators VALUES ('c0d7d260-d795-4782-9446-f6c403a7922c', '1.0.0b4.r5', '', '2008-05-07 16:00:00', '0', '100', '4', 'Science Links Japan', 'Michael Berkowitz', 'http://sciencelinks.jp/', 
+REPLACE INTO translators VALUES ('c0d7d260-d795-4782-9446-f6c403a7922c', '1.0.0b4.r5', '', '2008-05-08 20:30:00', '0', '100', '4', 'Science Links Japan', 'Michael Berkowitz', 'http://sciencelinks.jp/', 
 'function detectWeb(doc, url) {
 	if (url.match(/result/) || url.match(/journal/)) {
 		return "multiple";
@@ -1624,7 +1624,7 @@ REPLACE INTO translators VALUES ('bdaac15c-b0ee-453f-9f1d-f35d00c7a994', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('5278b20c-7c2c-4599-a785-12198ea648bf', '1.0.0b4.r5', '', '2008-05-08 18:30:00', '1', '100', '4', 'ARTstor', 'Ameer Ahmed and Michael Berkowitz', 'http://web2.artstor.org', 
+REPLACE INTO translators VALUES ('5278b20c-7c2c-4599-a785-12198ea648bf', '1.0.0b4.r5', '', '2008-05-08 20:30:00', '1', '100', '4', 'ARTstor', 'Ameer Ahmed and Michael Berkowitz', 'http://web2.artstor.org', 
 'function detectWeb(doc, url) {
 	if (url.match(/(S|s)earch/)) return "multiple"
 }', 
@@ -15484,7 +15484,7 @@ REPLACE INTO translators VALUES ('2c310a37-a4dd-48d2-82c9-bd29c53c1c76', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('cde4428-5434-437f-9cd9-2281d14dbf9', '1.0.0b3.r1', '', '2008-05-07 18:00:00', '1', '100', '4', 'Ovid', 'Simon Kornblith and Michael Berkowitz', '/(gw2|spa|spb)/ovidweb\.cgi', 
+REPLACE INTO translators VALUES ('cde4428-5434-437f-9cd9-2281d14dbf9', '1.0.0b3.r1', '', '2008-05-08 20:30:00', '1', '100', '4', 'Ovid', 'Simon Kornblith and Michael Berkowitz', '/(gw2|spa|spb)/ovidweb\.cgi', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -16009,7 +16009,7 @@ REPLACE INTO translators VALUES ('6614a99-479a-4524-8e30-686e4d66663e', '1.0.0b3
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('92d4ed84-8d0-4d3c-941f-d4b9124cfbb', '1.0.0b3.r1', '', '2008-05-07 18:30:00', '1', '100', '4', 'IEEE Xplore', 'Simon Kornblith and Michael Berkowitz', 'https?://[^/]*ieeexplore.ieee.org[^/]*/(?:[^\?]+\?(?:|.*&)arnumber=[0-9]+|search/(?:searchresult.jsp|selected.jsp))', 
+REPLACE INTO translators VALUES ('92d4ed84-8d0-4d3c-941f-d4b9124cfbb', '1.0.0b3.r1', '', '2008-05-08 20:30:00', '1', '100', '4', 'IEEE Xplore', 'Simon Kornblith and Michael Berkowitz', 'https?://[^/]*ieeexplore.ieee.org[^/]*/(?:[^\?]+\?(?:|.*&)arnumber=[0-9]+|search/(?:searchresult.jsp|selected.jsp))', 
 'function detectWeb(doc, url) {
 	var articleRe = /[?&]ar(N|n)umber=([0-9]+)/;
 	var m = articleRe.exec(url);
