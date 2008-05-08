@@ -1,6 +1,6 @@
 <!ENTITY zotero.preferences.title "تفضيلات زوتيرو">
 
-<!ENTITY zotero.preferences.default "الإفتراضي">
+<!ENTITY zotero.preferences.default "الإفتراضي:">
 
 <!ENTITY zotero.preferences.prefpane.general "عام">
 
@@ -10,24 +10,24 @@
 <!ENTITY zotero.preferences.position.below "تحت">
 <!ENTITY zotero.preferences.position.browser "محتوى المتصفح">
 <!ENTITY zotero.preferences.statusBarIcon "ايقونة شريط الحالة:">
-<!ENTITY zotero.preferences.statusBarIcon.none "None">
+<!ENTITY zotero.preferences.statusBarIcon.none "لاشيء">
 <!ENTITY zotero.preferences.fontSize "حجم الخط">
 <!ENTITY zotero.preferences.fontSize.small "صغير">
 <!ENTITY zotero.preferences.fontSize.medium "متوسط">
 <!ENTITY zotero.preferences.fontSize.large "كبير">
 
 <!ENTITY zotero.preferences.miscellaneous "أخرى">
-<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators">
+<!ENTITY zotero.preferences.autoUpdate "تأكد تلقائياً من وجود مترجـِمات محدَّثة">
 <!ENTITY zotero.preferences.updateNow "تحديث الآن">
 <!ENTITY zotero.preferences.reportTranslationFailure "ابلغ عن ترجمة غير صحيحة">
-<!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded RIS/Refer files">
+<!ENTITY zotero.preferences.parseRISRefer "استخدم زوتيرو لملفات آراياس(RIS) أو Refer">
 <!ENTITY zotero.preferences.automaticSnapshots "أخذ لقطات تلقائية عند إنشاء عناصر من صفحة ويب">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "ارفق ملفات PDF و الملفات الأخرى عند حفظ العناصر">
 <!ENTITY zotero.preferences.automaticTags "اضف اوسمة تلقائية بالكلمات المفتاحية وعناوين الموضوع">
 
 <!ENTITY zotero.preferences.openurl.caption "افتح رابط">
 
-<!ENTITY zotero.preferences.openurl.search "Search for resolvers">
+<!ENTITY zotero.preferences.openurl.search "بحث عن رابط للمرجع">
 <!ENTITY zotero.preferences.openurl.custom "تخصيص...">
 <!ENTITY zotero.preferences.openurl.server "معالجة الأخطاء:">
 <!ENTITY zotero.preferences.openurl.version "إصدارة">
@@ -37,30 +37,30 @@
 <!ENTITY zotero.preferences.search.pdfIndexing "فهرسة PDF">
 <!ENTITY zotero.preferences.search.indexStats "أحصائيات الفهرسة">
 
-<!ENTITY zotero.preferences.search.indexStats.indexed "Indexed:">
-<!ENTITY zotero.preferences.search.indexStats.partial "Partial:">
-<!ENTITY zotero.preferences.search.indexStats.unindexed "Unindexed:">
-<!ENTITY zotero.preferences.search.indexStats.words "Words:">
+<!ENTITY zotero.preferences.search.indexStats.indexed "مفهرس:">
+<!ENTITY zotero.preferences.search.indexStats.partial "مفهرس جزئياً:">
+<!ENTITY zotero.preferences.search.indexStats.unindexed "غير مفهرس:">
+<!ENTITY zotero.preferences.search.indexStats.words "كلمات:">
 
 <!ENTITY zotero.preferences.fulltext.textMaxLength "الحد الأقصى لعدد الحروف عند فهرسة ملف">
 <!ENTITY zotero.preferences.fulltext.pdfMaxPages "الحد الأقصى لعدد الصفحات عند فهرسة ملف:">
 
 <!ENTITY zotero.preferences.prefpane.export "تصدير">
 
-<!ENTITY zotero.preferences.citationOptions.caption "Citation Options">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Include URLs of paper articles in references">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "When this option is disabled, Zotero includes URLs when citing journal, magazine, and newspaper articles only if the article does not have a page range specified.">
+<!ENTITY zotero.preferences.citationOptions.caption "خيارات التوثيق">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "تضمين روابط المقالات البحثية في المراجع">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "عند تعطيل هذا الخيار, يقوم زوتيرو بإدراج الروابط ،فقط عند توثيق المجلات العلمية، والمجلات، ومقالات الجرائد التي لم يعين لها مدى للصفحات.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "نسخ سريع">
 <!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "شكل المخرجات الإفتراضي:">
-<!ENTITY zotero.preferences.quickCopy.copyAsHTML "Copy as HTML">
+<!ENTITY zotero.preferences.quickCopy.copyAsHTML "نسخ كترميز هتمل">
 <!ENTITY zotero.preferences.quickCopy.macWarning "ملاحظة: التنسيق الغني للنصوص سيفقد عند استخدام نظام ماكنتوش.">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "إعدادات خاصة حسب الموقع:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "المجال/المسار">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(مثال: wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "شكل المخرجات">
 
-<!ENTITY zotero.preferences.export.getAdditionalStyles "Get additional styles...">
+<!ENTITY zotero.preferences.export.getAdditionalStyles "احصل على أشكال إضافية...">
 
 <!ENTITY zotero.preferences.prefpane.keys "اختصارات">
 
@@ -71,7 +71,7 @@
 <!ENTITY zotero.preferences.keys.newItem "انشئ عنصر جديد">
 <!ENTITY zotero.preferences.keys.newNote "انشئ ملاحظة جديدة">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "تنشيط منقي الأوسمة">
-<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copy Selected Item Citations to Clipboard">
+<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "نسخ توثيقات العنصر المختار إلى الحافظة">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "انسخ العناصر المحددة للذاكرة">
 <!ENTITY zotero.preferences.keys.overrideGlobal "حاول تجنب الإختصارات المتعارضة">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "التغييرات يتم تفعيلها في النوافذ الجديدة فقط">
@@ -83,10 +83,10 @@
 <!ENTITY zotero.preferences.dataDir.useProfile "استخدم مجلد فايرفوكس الجانبي">
 <!ENTITY zotero.preferences.dataDir.custom "تخصيص:">
 <!ENTITY zotero.preferences.dataDir.choose "اختر...">
-<!ENTITY zotero.preferences.dataDir.reveal "Show Data Directory">
+<!ENTITY zotero.preferences.dataDir.reveal "عرض مجلد البيانات">
 
-<!ENTITY zotero.preferences.dbMaintenance "Database Maintenance">
-<!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Check Database Integrity">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reset Translators and Styles...">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset Translators...">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset Styles...">
+<!ENTITY zotero.preferences.dbMaintenance "صيانة قاعدة البيانات">
+<!ENTITY zotero.preferences.dbMaintenance.integrityCheck "التأكد من سلامة قاعدة البيانات">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "تنظيف المترجـِمات والأشكال...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "تنظيف المترجـِمات...">
+<!ENTITY zotero.preferences.dbMaintenance.resetStyles "تنظيف الأشكال...">

@@ -1,0 +1,23 @@
+<!ENTITY zotero.search.name "Nome:">
+
+<!ENTITY zotero.search.joinMode.prefix "Encaixa">
+<!ENTITY zotero.search.joinMode.any "calquera">
+<!ENTITY zotero.search.joinMode.all "todos">
+<!ENTITY zotero.search.joinMode.suffix "dos seguintes:">
+
+<!ENTITY zotero.search.recursive.label "Procurar en sub-cartafois">
+<!ENTITY zotero.search.noChildren "Só mostrar temas de nivel superior">
+<!ENTITY zotero.search.includeParentsAndChildren "Incluír artigos pais e fillos de artigos coincidentes">
+
+<!ENTITY zotero.search.textModes.phrase "Frase">
+<!ENTITY zotero.search.textModes.phraseBinary "Frase (incl. arquivos binarios)">
+<!ENTITY zotero.search.textModes.regexp "Regexp">
+<!ENTITY zotero.search.textModes.regexpCS "Regexp (Sensible a maiúsculas e minúsculas)">
+
+<!ENTITY zotero.search.date.units.days "días">
+<!ENTITY zotero.search.date.units.months "meses">
+<!ENTITY zotero.search.date.units.years "anos">
+
+<!ENTITY zotero.search.search "Procura">
+<!ENTITY zotero.search.clear "Borrar">
+<!ENTITY zotero.search.saveSearch "Gardar procura">

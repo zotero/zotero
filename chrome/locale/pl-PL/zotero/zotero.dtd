@@ -2,14 +2,11 @@
 <!ENTITY zotero.general.note "Notatka:">
 
 <!ENTITY zotero.errorReport.unrelatedMessages "Wykaz błędów może zawierać informacje nie związnae z Zotero.">
-<!ENTITY zotero.errorReport.additionalInfo "Informacje dodatkowe">
-<!ENTITY zotero.errorReport.emailAddress "Adres e-mail:">
-<!ENTITY zotero.errorReport.errorSteps "Jakie czynności były wykonywane, gdy pojawił się błąd? Jeśli to możliwe, proszę opisać kolejne kroki, aby można było wywołać ten błąd.">
 <!ENTITY zotero.errorReport.submissionInProgress "Proszę czekać... Informacje o błędzie są wysyłane.">
 <!ENTITY zotero.errorReport.submitted "Informacje o błędzie zostały wysłane.">
 <!ENTITY zotero.errorReport.reportID "ID raportu:">
-<!ENTITY zotero.errorReport.furtherAssistance "Więcej pomocy na stronie Znane Sprawy oraz na forum.">
-<!ENTITY zotero.errorReport.includeReportID "Proszę dołączyć identyfikator raportu do każdej korespondencji z twórcami Zotero dotyczącej tej sprawy.">
+<!ENTITY zotero.errorReport.postToForums "Please post a message to the Zotero forums (forums.zotero.org) with this Report ID, a description of the problem, and any steps necessary to reproduce it.">
+<!ENTITY zotero.errorReport.notReviewed "Error reports are generally not reviewed unless referred to in the forums.">
 
 <!ENTITY zotero.upgrade.newVersionInstalled "Nowa wersja Zotero została zainstalowana.">
 <!ENTITY zotero.upgrade.upgradeRequired "Baza danych Zotero musi zostać zaktualizowana, aby współpracowała z nową wersją programu.">
@@ -38,7 +35,10 @@
 <!ENTITY zotero.items.date_column "Data">
 <!ENTITY zotero.items.year_column "Rok">
 <!ENTITY zotero.items.publisher_column "Wydawca">
+<!ENTITY zotero.items.publication_column "Publication">
+<!ENTITY zotero.items.journalAbbr_column "Journal Abbr">
 <!ENTITY zotero.items.language_column "Język">
+<!ENTITY zotero.items.accessDate_column "Accessed">
 <!ENTITY zotero.items.callNumber_column "Numer klasyfikacyjny">
 <!ENTITY zotero.items.repository_column "Repozytorium">
 <!ENTITY zotero.items.rights_column "Prawa autorskie">
@@ -139,8 +139,8 @@
 <!ENTITY zotero.annotate.toolbar.add.label "Dodaj adnotację">
 <!ENTITY zotero.annotate.toolbar.collapse.label "Zwiń wszystkie adnotacje">
 <!ENTITY zotero.annotate.toolbar.expand.label "Rozwiń wszystkie adnotacje">
-<!ENTITY zotero.annotate.toolbar.highlight.label "Wyróżnij tekst po zaznaczeniu">
-<!ENTITY zotero.annotate.toolbar.unhighlight.label "Nie wyróżniaj tekstu po zaznaczeniu">
+<!ENTITY zotero.annotate.toolbar.highlight.label "Wyróżnij tekst">
+<!ENTITY zotero.annotate.toolbar.unhighlight.label "Zdejmij wyróżnienie">
 
 <!ENTITY zotero.integration.prefs.displayAs.label "Wyświetl prośby jako:">
 <!ENTITY zotero.integration.prefs.footnotes.label "Przypis dolny">

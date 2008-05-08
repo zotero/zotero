@@ -2,14 +2,11 @@
 <!ENTITY zotero.general.note "Not:">
 
 <!ENTITY zotero.errorReport.unrelatedMessages "Hata kaydı Zotero ile ilgili olmayan iletileri de içerebilir.">
-<!ENTITY zotero.errorReport.additionalInfo "Ek Bilgi">
-<!ENTITY zotero.errorReport.emailAddress "e-posta adresiniz:">
-<!ENTITY zotero.errorReport.errorSteps "Hata meydana geldiğinde ne yapıyordunuz? Eğer mümkünse, lütfen hatayı üreten adımları dahil ediniz.">
 <!ENTITY zotero.errorReport.submissionInProgress "Lütfen hata raporu gönderilene kadar bekleyiniz.">
 <!ENTITY zotero.errorReport.submitted "Hata raporu gönderilmiştir.">
 <!ENTITY zotero.errorReport.reportID "Rapor ID:">
-<!ENTITY zotero.errorReport.furtherAssistance "Daha fazla yardım için Bilinen Sorunlar sayfasına ve forumlara bakınız.">
-<!ENTITY zotero.errorReport.includeReportID "Lütfen bu konu ile ilgili olarak Zotero geliştiricileri ile yapacağınız tüm yazışmalarda bu Rapor ID&apos;sini kullanınız.">
+<!ENTITY zotero.errorReport.postToForums "Please post a message to the Zotero forums (forums.zotero.org) with this Report ID, a description of the problem, and any steps necessary to reproduce it.">
+<!ENTITY zotero.errorReport.notReviewed "Error reports are generally not reviewed unless referred to in the forums.">
 
 <!ENTITY zotero.upgrade.newVersionInstalled "Zotero&apos;nun yeni bir sürümünü kurdunuz.">
 <!ENTITY zotero.upgrade.upgradeRequired "Zotero veri tabanınız yeni sürüm ile birlikte çalışabilmesi için yükseltilmesi gerekir.">
@@ -38,7 +35,10 @@
 <!ENTITY zotero.items.date_column "Tarih">
 <!ENTITY zotero.items.year_column "Yıl">
 <!ENTITY zotero.items.publisher_column "Yayıncı">
+<!ENTITY zotero.items.publication_column "Publication">
+<!ENTITY zotero.items.journalAbbr_column "Journal Abbr">
 <!ENTITY zotero.items.language_column "Dil">
+<!ENTITY zotero.items.accessDate_column "Accessed">
 <!ENTITY zotero.items.callNumber_column "Yer Numarası">
 <!ENTITY zotero.items.repository_column "Havuz">
 <!ENTITY zotero.items.rights_column "Telif">

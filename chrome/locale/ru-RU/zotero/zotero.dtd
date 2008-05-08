@@ -2,14 +2,11 @@
 <!ENTITY zotero.general.note "Примечение:">
 
 <!ENTITY zotero.errorReport.unrelatedMessages "Журнал ошибок может содержать сообщения не относяшиеся к Zotero">
-<!ENTITY zotero.errorReport.additionalInfo "Дополнительная информация">
-<!ENTITY zotero.errorReport.emailAddress "Ваш e-mail:">
-<!ENTITY zotero.errorReport.errorSteps "Что Вы делали, когда произошла ошибка? Если возможно, опиши шаги, чтобы мы их повторили">
 <!ENTITY zotero.errorReport.submissionInProgress "Подождите, пока отчет об ошибке будет отослан">
 <!ENTITY zotero.errorReport.submitted "Отчет об ошибке отослан">
 <!ENTITY zotero.errorReport.reportID "Номер отчета:">
-<!ENTITY zotero.errorReport.furtherAssistance "Посмотрите страницу &quot;Известные проблемы&quot; и форумы для дальнейшей помощи">
-<!ENTITY zotero.errorReport.includeReportID "Включайте номер отчета в переписку с разработчиками Zotero относительно этой проблемы">
+<!ENTITY zotero.errorReport.postToForums "Please post a message to the Zotero forums (forums.zotero.org) with this Report ID, a description of the problem, and any steps necessary to reproduce it.">
+<!ENTITY zotero.errorReport.notReviewed "Error reports are generally not reviewed unless referred to in the forums.">
 
 <!ENTITY zotero.upgrade.newVersionInstalled "Вы установили новую версию Zotero">
 <!ENTITY zotero.upgrade.upgradeRequired "Ваша база данных Zotero должна быть обновлена для работы с новой версией">
@@ -38,7 +35,10 @@
 <!ENTITY zotero.items.date_column "Дата">
 <!ENTITY zotero.items.year_column "Год">
 <!ENTITY zotero.items.publisher_column "Издатель">
+<!ENTITY zotero.items.publication_column "Publication">
+<!ENTITY zotero.items.journalAbbr_column "Journal Abbr">
 <!ENTITY zotero.items.language_column "Язык">
+<!ENTITY zotero.items.accessDate_column "Accessed">
 <!ENTITY zotero.items.callNumber_column "Шифт">
 <!ENTITY zotero.items.repository_column "Хранилище">
 <!ENTITY zotero.items.rights_column "Права">

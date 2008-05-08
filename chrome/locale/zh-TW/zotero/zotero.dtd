@@ -2,14 +2,11 @@
 <!ENTITY zotero.general.note "注意：">
 
 <!ENTITY zotero.errorReport.unrelatedMessages "錯誤記錄可能包括了一些和 Zotero 不相關的訊息。">
-<!ENTITY zotero.errorReport.additionalInfo "更多的資訊">
-<!ENTITY zotero.errorReport.emailAddress "你的電子郵件地址：">
-<!ENTITY zotero.errorReport.errorSteps "錯誤發生時你正在做什麼？可能的話，請在錯誤報告內描述可以重複產生這個錯誤的步驟。">
 <!ENTITY zotero.errorReport.submissionInProgress "請等候錯誤報告送出。">
 <!ENTITY zotero.errorReport.submitted "錯誤報告已經送出。">
 <!ENTITY zotero.errorReport.reportID "報告識別號：">
-<!ENTITY zotero.errorReport.furtherAssistance "如需更多協助，請參看已知問題頁以及論壇。">
-<!ENTITY zotero.errorReport.includeReportID "與 Zotero 開發者做關於這個問題的聯繫時，請附上報告識別號。">
+<!ENTITY zotero.errorReport.postToForums "Please post a message to the Zotero forums (forums.zotero.org) with this Report ID, a description of the problem, and any steps necessary to reproduce it.">
+<!ENTITY zotero.errorReport.notReviewed "Error reports are generally not reviewed unless referred to in the forums.">
 
 <!ENTITY zotero.upgrade.newVersionInstalled "你已安裝了新版的 Zotero。">
 <!ENTITY zotero.upgrade.upgradeRequired "你的 Zotero 資料庫必須升級才能在新版本中使用。">
@@ -38,7 +35,10 @@
 <!ENTITY zotero.items.date_column "日期">
 <!ENTITY zotero.items.year_column "年">
 <!ENTITY zotero.items.publisher_column "出版者">
+<!ENTITY zotero.items.publication_column "Publication">
+<!ENTITY zotero.items.journalAbbr_column "Journal Abbr">
 <!ENTITY zotero.items.language_column "語言">
+<!ENTITY zotero.items.accessDate_column "Accessed">
 <!ENTITY zotero.items.callNumber_column "索書號">
 <!ENTITY zotero.items.repository_column "儲存庫">
 <!ENTITY zotero.items.rights_column "權利">

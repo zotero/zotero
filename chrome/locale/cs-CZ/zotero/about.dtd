@@ -1,10 +1,10 @@
-<!ENTITY zotero.version "version">
-<!ENTITY zotero.createdby "Created By:">
-<!ENTITY zotero.directors "Directors:">
-<!ENTITY zotero.developers "Developers:">
+<!ENTITY zotero.version "verze">
+<!ENTITY zotero.createdby "Vytvořili:">
+<!ENTITY zotero.directors "Vedoucí:">
+<!ENTITY zotero.developers "Vývojáři:">
 <!ENTITY zotero.alumni "Alumni:">
-<!ENTITY zotero.about.localizations "Localizations:">
-<!ENTITY zotero.about.additionalSoftware "Third-Party Software and Standards:">
-<!ENTITY zotero.executiveProducer "Executive Producer:">
-<!ENTITY zotero.thanks "Special Thanks:">
-<!ENTITY zotero.about.close "Close">
+<!ENTITY zotero.about.localizations "Lokalizace:">
+<!ENTITY zotero.about.additionalSoftware "Software třetích stran a standardy:">
+<!ENTITY zotero.executiveProducer "Výkonný producent:">
+<!ENTITY zotero.thanks "Zváštní poděkování:">
+<!ENTITY zotero.about.close "Zavřít">

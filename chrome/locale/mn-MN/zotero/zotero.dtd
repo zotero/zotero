@@ -1,15 +1,12 @@
 <!ENTITY zotero.general.optional "(Optional)">
-<!ENTITY zotero.general.note "Note:">
+<!ENTITY zotero.general.note "Тэмдэглэл:">
 
 <!ENTITY zotero.errorReport.unrelatedMessages "The error log may include messages unrelated to Zotero.">
-<!ENTITY zotero.errorReport.additionalInfo "Additional Information">
-<!ENTITY zotero.errorReport.emailAddress "Your e-mail address:">
-<!ENTITY zotero.errorReport.errorSteps "What were you doing when the error occurred? If possible, please include steps to reproduce the error.">
 <!ENTITY zotero.errorReport.submissionInProgress "Please wait while the error report is submitted.">
-<!ENTITY zotero.errorReport.submitted "The error report has been submitted.">
+<!ENTITY zotero.errorReport.submitted "Your error report has been submitted.">
 <!ENTITY zotero.errorReport.reportID "Report ID:">
-<!ENTITY zotero.errorReport.furtherAssistance "See the Known Issues page and the forums for further assistance.">
-<!ENTITY zotero.errorReport.includeReportID "Please include the Report ID in any correspondence with the Zotero developers regarding this issue.">
+<!ENTITY zotero.errorReport.postToForums "Please post a message to the Zotero forums (forums.zotero.org) with this Report ID, a description of the problem, and any steps necessary to reproduce it.">
+<!ENTITY zotero.errorReport.notReviewed "Error reports are generally not reviewed unless referred to in the forums.">
 
 <!ENTITY zotero.upgrade.newVersionInstalled "You have installed a new version of Zotero.">
 <!ENTITY zotero.upgrade.upgradeRequired "Your Zotero database must be upgraded to work with the new version.">
@@ -25,20 +22,23 @@
 <!ENTITY zotero.contextMenu.saveLinkAsSnapshot "Save Link As Zotero Snapshot">
 <!ENTITY zotero.contextMenu.saveImageAsSnapshot "Save Image As Zotero Snapshot">
 
-<!ENTITY zotero.tabs.info.label "Info">
-<!ENTITY zotero.tabs.notes.label "Notes">
+<!ENTITY zotero.tabs.info.label "Мэдээлэл">
+<!ENTITY zotero.tabs.notes.label "Тэмдэглэлүүд">
 <!ENTITY zotero.tabs.attachments.label "Attachments">
 <!ENTITY zotero.tabs.tags.label "Tags">
 <!ENTITY zotero.tabs.related.label "Related">
 <!ENTITY zotero.notes.separate "Edit in a separate window">
 
-<!ENTITY zotero.items.type_column "Type">
-<!ENTITY zotero.items.title_column "Title">
+<!ENTITY zotero.items.type_column "Төрөл">
+<!ENTITY zotero.items.title_column "Гарчиг">
 <!ENTITY zotero.items.creator_column "Creator">
-<!ENTITY zotero.items.date_column "Date">
-<!ENTITY zotero.items.year_column "Year">
-<!ENTITY zotero.items.publisher_column "Publisher">
-<!ENTITY zotero.items.language_column "Language">
+<!ENTITY zotero.items.date_column "Хугацаа">
+<!ENTITY zotero.items.year_column "Жил">
+<!ENTITY zotero.items.publisher_column "Хэвлэлийн газар">
+<!ENTITY zotero.items.publication_column "Publication">
+<!ENTITY zotero.items.journalAbbr_column "Journal Abbr">
+<!ENTITY zotero.items.language_column "Хэл">
+<!ENTITY zotero.items.accessDate_column "Accessed">
 <!ENTITY zotero.items.callNumber_column "Call Number">
 <!ENTITY zotero.items.repository_column "Repository">
 <!ENTITY zotero.items.rights_column "Rights">
@@ -47,15 +47,15 @@
 <!ENTITY zotero.items.numChildren_column "+">
 
 <!ENTITY zotero.items.menu.showInLibrary "Show in Library">
-<!ENTITY zotero.items.menu.attach.note "Add Note">
+<!ENTITY zotero.items.menu.attach.note "Тэмдэглэл нэмэх">
 <!ENTITY zotero.items.menu.attach.snapshot "Attach Snapshot of Current Page">
 <!ENTITY zotero.items.menu.attach.link "Attach Link to Current Page">
 <!ENTITY zotero.items.menu.duplicateItem "Duplicate Selected Item">
 
 <!ENTITY zotero.collections.name_column "Collections">
 
-<!ENTITY zotero.toolbar.newItem.label "New Item">
-<!ENTITY zotero.toolbar.moreItemTypes.label "More">
+<!ENTITY zotero.toolbar.newItem.label "Шинэ бүтээл">
+<!ENTITY zotero.toolbar.moreItemTypes.label "Бусад">
 <!ENTITY zotero.toolbar.newItemFromPage.label "Create New Item from Current Page">
 <!ENTITY zotero.toolbar.removeItem.label "Remove Item...">
 <!ENTITY zotero.toolbar.newCollection.label "New Collection...">
@@ -68,27 +68,27 @@
 <!ENTITY zotero.toolbar.timeline.label "Create Timeline">
 <!ENTITY zotero.toolbar.preferences.label "Preferences...">
 <!ENTITY zotero.toolbar.documentation.label "Documentation">
-<!ENTITY zotero.toolbar.about.label "About Zotero">
+<!ENTITY zotero.toolbar.about.label "Зотерогийн тухай">
 <!ENTITY zotero.toolbar.advancedSearch "Advanced Search">
-<!ENTITY zotero.toolbar.search.label "Search:">
+<!ENTITY zotero.toolbar.search.label "Хайх:">
 <!ENTITY zotero.toolbar.fullscreen.tooltip "Toggle Fullscreen Mode">
 <!ENTITY zotero.toolbar.openURL.label "Locate">
 <!ENTITY zotero.toolbar.openURL.tooltip "Find through your local library">
 
-<!ENTITY zotero.item.add "Add">
-<!ENTITY zotero.item.attachment.file.show "Show File">
+<!ENTITY zotero.item.add "Нэм">
+<!ENTITY zotero.item.attachment.file.show "Файлыг харуулах">
 <!ENTITY zotero.item.textTransform "Transform Text">
 <!ENTITY zotero.item.textTransform.lowercase "lower case">
 <!ENTITY zotero.item.textTransform.titlecase "Title Case">
 
 <!ENTITY zotero.toolbar.note.standalone "New Standalone Note">
-<!ENTITY zotero.toolbar.attachment.linked "Link to File...">
+<!ENTITY zotero.toolbar.attachment.linked "Файлыг холбох...">
 <!ENTITY zotero.toolbar.attachment.add "Store Copy of File...">
 <!ENTITY zotero.toolbar.attachment.weblink "Save Link to Current Page">
 <!ENTITY zotero.toolbar.attachment.snapshot "Take Snapshot of Current Page">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "No tags to display">
-<!ENTITY zotero.tagSelector.filter "Filter:">
+<!ENTITY zotero.tagSelector.filter "Шүүлтүүр">
 <!ENTITY zotero.tagSelector.showAutomatic "Show automatic">
 <!ENTITY zotero.tagSelector.displayAll "Display all tags">
 <!ENTITY zotero.tagSelector.selectVisible "Select visible">
@@ -99,17 +99,17 @@
 
 <!ENTITY zotero.selectitems.title "Select Items">
 <!ENTITY zotero.selectitems.intro.label "Select which items you'd like to add to your library">
-<!ENTITY zotero.selectitems.cancel.label "Cancel">
-<!ENTITY zotero.selectitems.select.label "OK">
+<!ENTITY zotero.selectitems.cancel.label "Цуцлах">
+<!ENTITY zotero.selectitems.select.label "ОК">
 
 <!ENTITY zotero.bibliography.title "Create Bibliography">
 <!ENTITY zotero.bibliography.style.label "Citation Style:">
 <!ENTITY zotero.bibliography.output.label "Output Format">
-<!ENTITY zotero.bibliography.saveAsRTF.label "Save as RTF">
-<!ENTITY zotero.bibliography.saveAsHTML.label "Save as HTML">
+<!ENTITY zotero.bibliography.saveAsRTF.label "RTF-р хадгалах">
+<!ENTITY zotero.bibliography.saveAsHTML.label "HTML-р хадгалах">
 <!ENTITY zotero.bibliography.copyToClipboard.label "Copy to Clipboard">
 <!ENTITY zotero.bibliography.macClipboardWarning "(Rich-text formatting will be lost.)">
-<!ENTITY zotero.bibliography.print.label "Print">
+<!ENTITY zotero.bibliography.print.label "Хэвлэх">
 
 <!ENTITY zotero.integration.docPrefs.title "Document Preferences">
 <!ENTITY zotero.integration.addEditCitation.title "Add/Edit Citation">
@@ -117,22 +117,22 @@
 
 <!ENTITY zotero.progress.title "Progress">
 
-<!ENTITY zotero.exportOptions.title "Export...">
-<!ENTITY zotero.exportOptions.format.label "Format:">
+<!ENTITY zotero.exportOptions.title "Экспорт...">
+<!ENTITY zotero.exportOptions.format.label "Формат:">
 <!ENTITY zotero.exportOptions.translatorOptions.label "Translator Options">
 
 <!ENTITY zotero.citation.keepSorted.label "Keep Sources Sorted">
 
-<!ENTITY zotero.citation.page "Page">
+<!ENTITY zotero.citation.page "Хуудас">
 <!ENTITY zotero.citation.paragraph "Paragraph">
-<!ENTITY zotero.citation.line "Line">
+<!ENTITY zotero.citation.line "Шугам">
 <!ENTITY zotero.citation.suppressAuthor.label "Suppress Author">
 <!ENTITY zotero.citation.prefix.label "Prefix:">
 <!ENTITY zotero.citation.suffix.label "Suffix:">
 
-<!ENTITY zotero.richText.italic.label "Italic">
-<!ENTITY zotero.richText.bold.label "Bold">
-<!ENTITY zotero.richText.underline.label "Underline">
+<!ENTITY zotero.richText.italic.label "Налуу">
+<!ENTITY zotero.richText.bold.label "Тодруул">
+<!ENTITY zotero.richText.underline.label "Доогуур зураас">
 <!ENTITY zotero.richText.superscript.label "Superscript">
 <!ENTITY zotero.richText.subscript.label "Subscript">
 

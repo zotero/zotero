@@ -2,14 +2,11 @@
 <!ENTITY zotero.general.note "노트:">
 
 <!ENTITY zotero.errorReport.unrelatedMessages "오류 로그에는 Zotero와 관련이 없는 메시지가 포함될 수 있습니다.">
-<!ENTITY zotero.errorReport.additionalInfo "추가 정보">
-<!ENTITY zotero.errorReport.emailAddress "E-mail 주소:">
-<!ENTITY zotero.errorReport.errorSteps "무엇을 하고 있었을때 오류가 발생했습니까? 만약 가능하다면 오류를 재현하는 과정을 포함해 주십시오.">
 <!ENTITY zotero.errorReport.submissionInProgress "오류 보고가 제출되는 동안 기다려 주세요.">
 <!ENTITY zotero.errorReport.submitted "오류 보고가 제출되었습니다.">
 <!ENTITY zotero.errorReport.reportID "보고서 ID:">
-<!ENTITY zotero.errorReport.furtherAssistance "추가 지원을 위해 알려진 문제 페이지와 포럼을 참조 하십시오.">
-<!ENTITY zotero.errorReport.includeReportID "이 문제에 관하여 Zotero 개발자에게 보고 ID를 포함해 어떻게든 연락해 주십시오.">
+<!ENTITY zotero.errorReport.postToForums "Please post a message to the Zotero forums (forums.zotero.org) with this Report ID, a description of the problem, and any steps necessary to reproduce it.">
+<!ENTITY zotero.errorReport.notReviewed "Error reports are generally not reviewed unless referred to in the forums.">
 
 <!ENTITY zotero.upgrade.newVersionInstalled "새 버전의 Zotero를 설치했습니다.">
 <!ENTITY zotero.upgrade.upgradeRequired "Zotero 데이터베이스는 반드시 새 버전으로 작업하기 위해 업그레이드 해야 합니다.">
@@ -38,7 +35,10 @@
 <!ENTITY zotero.items.date_column "날짜">
 <!ENTITY zotero.items.year_column "년">
 <!ENTITY zotero.items.publisher_column "출판자">
+<!ENTITY zotero.items.publication_column "Publication">
+<!ENTITY zotero.items.journalAbbr_column "Journal Abbr">
 <!ENTITY zotero.items.language_column "언어">
+<!ENTITY zotero.items.accessDate_column "Accessed">
 <!ENTITY zotero.items.callNumber_column "호출 번호">
 <!ENTITY zotero.items.repository_column "저장소">
 <!ENTITY zotero.items.rights_column "권리">
@@ -148,6 +148,6 @@
 
 <!ENTITY zotero.integration.prefs.formatUsing.label "사용 형식:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "북마크">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "책갈피는 Microsoft Word와 OpenOffice.org에서 이해되게 보존되지만, 우연히 변경될지도 모릅니다.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "책갈피는 Microsoft Word와 OpenOffice.org에서 알아 주도록 보존되지만, 우연히 변경될지도 모릅니다.">
 
 <!ENTITY zotero.integration.references.label "저서 목록 내 참조">

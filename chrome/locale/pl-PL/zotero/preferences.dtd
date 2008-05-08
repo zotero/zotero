@@ -53,7 +53,7 @@
 
 <!ENTITY zotero.preferences.quickCopy.caption "Szybka kopia">
 <!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Domyślny format wyjściowy">
-<!ENTITY zotero.preferences.quickCopy.copyAsHTML "Copy as HTML">
+<!ENTITY zotero.preferences.quickCopy.copyAsHTML "Kopiuj jako HTML">
 <!ENTITY zotero.preferences.quickCopy.macWarning "Uwaga: formatowanie RTF zostanie utracone w systemie Mac OS X.">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Ustawienia właściwe tylko dla danej strony:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domena/Ścieżka dostępu">

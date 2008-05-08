@@ -2,9 +2,9 @@
 <!ENTITY zotero.createdby "أنشيء بواسطة:">
 <!ENTITY zotero.directors "المدراء:">
 <!ENTITY zotero.developers "المطورين:">
-<!ENTITY zotero.alumni "Alumni:">
+<!ENTITY zotero.alumni "الخريجين">
 <!ENTITY zotero.about.localizations "اللغات:">
-<!ENTITY zotero.about.additionalSoftware "Third-Party Software and Standards:">
+<!ENTITY zotero.about.additionalSoftware "معايير وبرامج طرف ثالث">
 <!ENTITY zotero.executiveProducer "المنتج المنفذ:">
 <!ENTITY zotero.thanks "شكر خاص:">
 <!ENTITY zotero.about.close "إغلاق">

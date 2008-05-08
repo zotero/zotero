@@ -2,14 +2,11 @@
 <!ENTITY zotero.general.note "Notă:">
 
 <!ENTITY zotero.errorReport.unrelatedMessages "Jurnalul de erori poate include mesaje fără legătură cu Zotero.">
-<!ENTITY zotero.errorReport.additionalInfo "Informaţii adiţionale">
-<!ENTITY zotero.errorReport.emailAddress "Adresa ta de e-mail:">
-<!ENTITY zotero.errorReport.errorSteps "Ce faci atunci când apare o eroare? Dacă e posibil, descrie, te rog, paşii care au dus la apariţia erorii.">
 <!ENTITY zotero.errorReport.submissionInProgress "Aşteaptă, te rog, ca raportul de eroare să fie trimis.">
 <!ENTITY zotero.errorReport.submitted "Raportul de eroare a fost trimis.">
 <!ENTITY zotero.errorReport.reportID "Raport ID:">
-<!ENTITY zotero.errorReport.furtherAssistance "Vezi pagina de probleme cunoscute şi forumurile pentru o asistenţă suplimentară.">
-<!ENTITY zotero.errorReport.includeReportID "Include, te rog, ID-ul raportului în orice corespondenţă cu dezvoltatorii Zotero, privitoare la această problemă.">
+<!ENTITY zotero.errorReport.postToForums "Please post a message to the Zotero forums (forums.zotero.org) with this Report ID, a description of the problem, and any steps necessary to reproduce it.">
+<!ENTITY zotero.errorReport.notReviewed "Error reports are generally not reviewed unless referred to in the forums.">
 
 <!ENTITY zotero.upgrade.newVersionInstalled "Ai instalat o nouă versiune de Zotero.">
 <!ENTITY zotero.upgrade.upgradeRequired "Baza de date Zotero trebui actualizată în aşa fel încât să meargă cu noua versiune.">
@@ -38,7 +35,10 @@
 <!ENTITY zotero.items.date_column "Dată">
 <!ENTITY zotero.items.year_column "An">
 <!ENTITY zotero.items.publisher_column "Editură">
+<!ENTITY zotero.items.publication_column "Publication">
+<!ENTITY zotero.items.journalAbbr_column "Journal Abbr">
 <!ENTITY zotero.items.language_column "Limbă">
+<!ENTITY zotero.items.accessDate_column "Accessed">
 <!ENTITY zotero.items.callNumber_column "Număr de telefon">
 <!ENTITY zotero.items.repository_column "Depozit">
 <!ENTITY zotero.items.rights_column "Drepturi">

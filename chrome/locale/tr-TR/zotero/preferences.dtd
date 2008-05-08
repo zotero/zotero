@@ -47,20 +47,20 @@
 
 <!ENTITY zotero.preferences.prefpane.export "Dışarı Aktar">
 
-<!ENTITY zotero.preferences.citationOptions.caption "Citation Options">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Include URLs of paper articles in references">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "When this option is disabled, Zotero includes URLs when citing journal, magazine, and newspaper articles only if the article does not have a page range specified.">
+<!ENTITY zotero.preferences.citationOptions.caption "Kaynakça Seçenekleri">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Kaynakçalara makale URL&apos;leri dahil edilsin">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Bu seçenek iptal edildiğinde, Bilimsel dergi, magazin ve gazete makaleleri kaynak gösterilirken eğer bir sayfa aralığı belirtilmezse Zotero URL&apos;leri dahil eder.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Çabuk Kopyala">
 <!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Varsayılan Çıktı Biçimi:">
-<!ENTITY zotero.preferences.quickCopy.copyAsHTML "Copy as HTML">
+<!ENTITY zotero.preferences.quickCopy.copyAsHTML "HTML olarak kopyala">
 <!ENTITY zotero.preferences.quickCopy.macWarning "Uyarı: Zengin-metin biçimi Mac OS X&apos;de kaybolacaktır.">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Siteye Özgü Ayarlar:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Etki alanı/Yol">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(ör. wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Çıktı Biçimi">
 
-<!ENTITY zotero.preferences.export.getAdditionalStyles "Get additional styles...">
+<!ENTITY zotero.preferences.export.getAdditionalStyles "Ek sitiller indir...">
 
 <!ENTITY zotero.preferences.prefpane.keys "Kısayol Tuşları">
 
@@ -87,6 +87,6 @@
 
 <!ENTITY zotero.preferences.dbMaintenance "Veritabanı Bakımı">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Veritabanı Bütünlüğünü Kontrol et">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reset Translators and Styles...">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset Translators...">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset Styles...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Çevirileri ve Stilleri Sıfırla">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Çevirileri Sıfırla...">
+<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Stilleri Sıfırla...">

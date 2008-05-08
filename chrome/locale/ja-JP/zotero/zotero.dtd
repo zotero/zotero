@@ -2,14 +2,11 @@
 <!ENTITY zotero.general.note "メモ：">
 
 <!ENTITY zotero.errorReport.unrelatedMessages "エラー･ログはZoteroとは関係していないメッセージを含んでいる可能性があります。">
-<!ENTITY zotero.errorReport.additionalInfo "追加情報">
-<!ENTITY zotero.errorReport.emailAddress "あなたの電子メールアドレス:">
-<!ENTITY zotero.errorReport.errorSteps "エラーが発生したときに何をしていましたか？可能であれば、エラー発生までのステップを説明してください。">
-<!ENTITY zotero.errorReport.submissionInProgress "エラーレポートは送信されるまでお待ちください。">
+<!ENTITY zotero.errorReport.submissionInProgress "エラーレポートが送信されるまでお待ちください。">
 <!ENTITY zotero.errorReport.submitted "エラーレポートは送信されました。">
 <!ENTITY zotero.errorReport.reportID "レポートID:">
-<!ENTITY zotero.errorReport.furtherAssistance "さらにヘルプが必要な場合、既知問題のページとフォーラムを参照して下さい。">
-<!ENTITY zotero.errorReport.includeReportID "Zotero開発者と連絡する際に、この問題に関するレポートIDを報告してください。">
+<!ENTITY zotero.errorReport.postToForums "Please post a message to the Zotero forums (forums.zotero.org) with this Report ID, a description of the problem, and any steps necessary to reproduce it.">
+<!ENTITY zotero.errorReport.notReviewed "Error reports are generally not reviewed unless referred to in the forums.">
 
 <!ENTITY zotero.upgrade.newVersionInstalled "Zoteroの新しいバージョンはインストールされました。">
 <!ENTITY zotero.upgrade.upgradeRequired "新しいバージョンを使用する前にZoteroのデータベースをアップグレードする必要があります。">
@@ -38,7 +35,10 @@
 <!ENTITY zotero.items.date_column "日時">
 <!ENTITY zotero.items.year_column "年">
 <!ENTITY zotero.items.publisher_column "出版社">
+<!ENTITY zotero.items.publication_column "Publication">
+<!ENTITY zotero.items.journalAbbr_column "Journal Abbr">
 <!ENTITY zotero.items.language_column "言語">
+<!ENTITY zotero.items.accessDate_column "Accessed">
 <!ENTITY zotero.items.callNumber_column "請求記号">
 <!ENTITY zotero.items.repository_column "リポジトリ">
 <!ENTITY zotero.items.rights_column "権利">

@@ -2,14 +2,11 @@
 <!ENTITY zotero.general.note "Nota:">
 
 <!ENTITY zotero.errorReport.unrelatedMessages "El registre d&apos;error pot incloure missatges no relacionats amb Zotero.">
-<!ENTITY zotero.errorReport.additionalInfo "Informació adicional">
-<!ENTITY zotero.errorReport.emailAddress "La teva adreça de correu electrònic:">
-<!ENTITY zotero.errorReport.errorSteps "Què estaves fent quan s&apos;ha produït l&apos;error? Si es possible, si-us-plau inclou els passos que calen per a reproduir l&apos;error.">
 <!ENTITY zotero.errorReport.submissionInProgress "Si-us-plau espera mentre s&apos;envia l&apos;informe d&apos;error.">
 <!ENTITY zotero.errorReport.submitted "L&apos;informe d&apos;error ha estat enviat correctament.">
 <!ENTITY zotero.errorReport.reportID "Número de referència de l&apos;informe.">
-<!ENTITY zotero.errorReport.furtherAssistance "Consulta la pàgina d&apos;incidències conegudes i els fòrums per a més ajuda.">
-<!ENTITY zotero.errorReport.includeReportID "Si-us-plau, inclou el número de referència de l&apos;informe en qualsevol correspondència amb l&apos;equip de desenvolupadors de Zotero al respecte d&apos;aquest incident.">
+<!ENTITY zotero.errorReport.postToForums "Please post a message to the Zotero forums (forums.zotero.org) with this Report ID, a description of the problem, and any steps necessary to reproduce it.">
+<!ENTITY zotero.errorReport.notReviewed "Error reports are generally not reviewed unless referred to in the forums.">
 
 <!ENTITY zotero.upgrade.newVersionInstalled "Has instal·lat una nova versió de Zotero.">
 <!ENTITY zotero.upgrade.upgradeRequired "La teva base de dades s&apos;ha d&apos;actualitzar per a funcionar amb la nova versió.">
@@ -38,7 +35,10 @@
 <!ENTITY zotero.items.date_column "Data">
 <!ENTITY zotero.items.year_column "Any">
 <!ENTITY zotero.items.publisher_column "Editorial">
+<!ENTITY zotero.items.publication_column "Publication">
+<!ENTITY zotero.items.journalAbbr_column "Journal Abbr">
 <!ENTITY zotero.items.language_column "Llengua">
+<!ENTITY zotero.items.accessDate_column "Accessed">
 <!ENTITY zotero.items.callNumber_column "Codi de Catàleg">
 <!ENTITY zotero.items.repository_column "Repositori">
 <!ENTITY zotero.items.rights_column "Drets">

@@ -2,14 +2,11 @@
 <!ENTITY zotero.general.note "Chú ý:">
 
 <!ENTITY zotero.errorReport.unrelatedMessages "Sổ nhật ký lỗi có thể chứa các thông báo lỗi không liên quan tới Zotero.">
-<!ENTITY zotero.errorReport.additionalInfo "Thông tin Bổ sung">
-<!ENTITY zotero.errorReport.emailAddress "Thư điện tử của bạn:">
-<!ENTITY zotero.errorReport.errorSteps "Bạn đang làm gì khi lỗi này xảy ra? Nếu có thể, xin hãy kèm theo các bước để tái lập lỗi này.">
 <!ENTITY zotero.errorReport.submissionInProgress "Xin vui lòng chờ trong khi báo cáo lỗi được gửi đi.">
 <!ENTITY zotero.errorReport.submitted "Báo cáo lỗi đã được gửi đi">
 <!ENTITY zotero.errorReport.reportID "ID của Báo cáo:">
-<!ENTITY zotero.errorReport.furtherAssistance "Xem trang Known Issues và các diễn đàn trực tuyến để có thêm sự hỗ trợ.">
-<!ENTITY zotero.errorReport.includeReportID "Xin hãy vui lòng cung cấp ID của báo cáo lỗi trong tất cả các trao đổi với các tác giả của Zetero về vấn đề này.">
+<!ENTITY zotero.errorReport.postToForums "Please post a message to the Zotero forums (forums.zotero.org) with this Report ID, a description of the problem, and any steps necessary to reproduce it.">
+<!ENTITY zotero.errorReport.notReviewed "Error reports are generally not reviewed unless referred to in the forums.">
 
 <!ENTITY zotero.upgrade.newVersionInstalled "Bạn đã cài đặt một phiên bản mới của Zotero.">
 <!ENTITY zotero.upgrade.upgradeRequired "Cơ sở dữ liệu Zotero của bạn phải được nâng cấp để có thể làm việc với phiên bản mới.">
@@ -38,7 +35,10 @@
 <!ENTITY zotero.items.date_column "Ngày">
 <!ENTITY zotero.items.year_column "Năm">
 <!ENTITY zotero.items.publisher_column "Nhà xuất bản">
+<!ENTITY zotero.items.publication_column "Publication">
+<!ENTITY zotero.items.journalAbbr_column "Journal Abbr">
 <!ENTITY zotero.items.language_column "Ngôn ngữ">
+<!ENTITY zotero.items.accessDate_column "Accessed">
 <!ENTITY zotero.items.callNumber_column "Ký hiệu xếp giá">
 <!ENTITY zotero.items.repository_column "Kho lưu trữ">
 <!ENTITY zotero.items.rights_column "Quyền hạn">

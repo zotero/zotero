@@ -1,15 +1,12 @@
 <!ENTITY zotero.general.optional "(可选)">
 <!ENTITY zotero.general.note "便笺:">
 
-<!ENTITY zotero.errorReport.unrelatedMessages "错误日志里可能会包含与Zotero无关的信息.">
-<!ENTITY zotero.errorReport.additionalInfo "附加信息">
-<!ENTITY zotero.errorReport.emailAddress "您的e-mail地址:">
-<!ENTITY zotero.errorReport.errorSteps "当错误发生时您在做什么? 如果可能, 请描述用于重现这个错误的步骤.">
+<!ENTITY zotero.errorReport.unrelatedMessages "错误日志里可能会包含一些与Zotero无关的信息.">
 <!ENTITY zotero.errorReport.submissionInProgress "正在提交错误报告, 请等待.">
 <!ENTITY zotero.errorReport.submitted "错误报告已经提交.">
 <!ENTITY zotero.errorReport.reportID "报告ID:">
-<!ENTITY zotero.errorReport.furtherAssistance "查看已知问题和论坛以寻求更多帮助.">
-<!ENTITY zotero.errorReport.includeReportID "Please include the Report ID in any correspondence with the Zotero developers regarding this issue.">
+<!ENTITY zotero.errorReport.postToForums "Please post a message to the Zotero forums (forums.zotero.org) with this Report ID, a description of the problem, and any steps necessary to reproduce it.">
+<!ENTITY zotero.errorReport.notReviewed "Error reports are generally not reviewed unless referred to in the forums.">
 
 <!ENTITY zotero.upgrade.newVersionInstalled "您已经安装了一个新版本的Zotero.">
 <!ENTITY zotero.upgrade.upgradeRequired "为了使用这个新版本您必须升级您的数据库.">
@@ -38,7 +35,10 @@
 <!ENTITY zotero.items.date_column "日期">
 <!ENTITY zotero.items.year_column "年">
 <!ENTITY zotero.items.publisher_column "出版者">
+<!ENTITY zotero.items.publication_column "Publication">
+<!ENTITY zotero.items.journalAbbr_column "Journal Abbr">
 <!ENTITY zotero.items.language_column "语言">
+<!ENTITY zotero.items.accessDate_column "Accessed">
 <!ENTITY zotero.items.callNumber_column "Call Number">
 <!ENTITY zotero.items.repository_column "存储库">
 <!ENTITY zotero.items.rights_column "权限">

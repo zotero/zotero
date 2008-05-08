@@ -1,0 +1,23 @@
+<!ENTITY zotero.search.name "Nimi:">
+
+<!ENTITY zotero.search.joinMode.prefix "Vertaa">
+<!ENTITY zotero.search.joinMode.any "joku">
+<!ENTITY zotero.search.joinMode.all "kaikki">
+<!ENTITY zotero.search.joinMode.suffix "seuraavista">
+
+<!ENTITY zotero.search.recursive.label "Etsi alikansioista">
+<!ENTITY zotero.search.noChildren "Näytä vain ylätason kohteet">
+<!ENTITY zotero.search.includeParentsAndChildren "Ota mukaan vertailua vastaavien kohteiden isäntä- ja lapsikohteet">
+
+<!ENTITY zotero.search.textModes.phrase "Lause">
+<!ENTITY zotero.search.textModes.phraseBinary "Lause (sis. binääritiedostot)">
+<!ENTITY zotero.search.textModes.regexp "Säännöllinen lauseke">
+<!ENTITY zotero.search.textModes.regexpCS "Säännöllinen lauseke (kirjaintaso)">
+
+<!ENTITY zotero.search.date.units.days "päivää">
+<!ENTITY zotero.search.date.units.months "kuukautta">
+<!ENTITY zotero.search.date.units.years "vuotta">
+
+<!ENTITY zotero.search.search "Hae">
+<!ENTITY zotero.search.clear "Tyhjennä">
+<!ENTITY zotero.search.saveSearch "Tallenna haku">

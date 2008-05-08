@@ -2,19 +2,16 @@
 <!ENTITY zotero.general.note "Note :">
 
 <!ENTITY zotero.errorReport.unrelatedMessages "Le journal des erreurs peut comprendre des messages sans rapport avec Zotero.">
-<!ENTITY zotero.errorReport.additionalInfo "Information complémentaire">
-<!ENTITY zotero.errorReport.emailAddress "Votre adresse électronique :">
-<!ENTITY zotero.errorReport.errorSteps "Que faisiez-vous lorsque l&apos;erreur est survenue ? Merci d&apos;indiquer, si possible, les étapes permettant de reproduire l&apos;erreur.">
-<!ENTITY zotero.errorReport.submissionInProgress "Merci de patienter pendant la transmission du rapport d&apos;erreur.">
+<!ENTITY zotero.errorReport.submissionInProgress "Veuillez patienter pendant la transmission du rapport d&apos;erreur.">
 <!ENTITY zotero.errorReport.submitted "Le rapport d&apos;erreur a été transmis.">
 <!ENTITY zotero.errorReport.reportID "ID du rapport :">
-<!ENTITY zotero.errorReport.furtherAssistance "Consulter la page des problèmes connus et les forums pour davantage d&apos;aide.">
-<!ENTITY zotero.errorReport.includeReportID "Merci d&apos;indiquer l&apos;ID du rapport dans toute correspondance avec les développeurs de Zotero au sujet de ce problème.">
+<!ENTITY zotero.errorReport.postToForums "Please post a message to the Zotero forums (forums.zotero.org) with this Report ID, a description of the problem, and any steps necessary to reproduce it.">
+<!ENTITY zotero.errorReport.notReviewed "Error reports are generally not reviewed unless referred to in the forums.">
 
 <!ENTITY zotero.upgrade.newVersionInstalled "Vous avez installé une nouvelle version de Zotero.">
 <!ENTITY zotero.upgrade.upgradeRequired "Votre base de données Zotero doit être mise à jour pour fonctionner avec cette nouvelle version.">
 <!ENTITY zotero.upgrade.autoBackup "Votre base de données actuelle va être sauvegardée automatiquement avant toute modification.">
-<!ENTITY zotero.upgrade.upgradeInProgress "Merci de patienter jusqu&apos;à la fin du processus de mise à jour. Cela peut prendre quelques minutes.">
+<!ENTITY zotero.upgrade.upgradeInProgress "Veuillez patienter jusqu&apos;à la fin du processus de mise à jour. Cela peut prendre quelques minutes.">
 <!ENTITY zotero.upgrade.upgradeSucceeded "Votre base de données Zotero a été mise à jour avec succès.">
 <!ENTITY zotero.upgrade.changeLogBeforeLink "Veuillez consulter">
 <!ENTITY zotero.upgrade.changeLogLink "le journal des changements">
@@ -38,7 +35,10 @@
 <!ENTITY zotero.items.date_column "Date">
 <!ENTITY zotero.items.year_column "Année">
 <!ENTITY zotero.items.publisher_column "Éditeur">
+<!ENTITY zotero.items.publication_column "Publication">
+<!ENTITY zotero.items.journalAbbr_column "Journal Abbr">
 <!ENTITY zotero.items.language_column "Langue">
+<!ENTITY zotero.items.accessDate_column "Accessed">
 <!ENTITY zotero.items.callNumber_column "Numéro d&apos;appel">
 <!ENTITY zotero.items.repository_column "Dépôt">
 <!ENTITY zotero.items.rights_column "Autorisations">
