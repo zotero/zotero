@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-05-07 18:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-05-08 18:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1089,6 +1089,95 @@ REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b
 	Zotero.wait();
 }');
 
+REPLACE INTO translators VALUES ('fe39e97d-7397-4f3f-a5f3-396a1a79213c', '1.0.0b4.r5', '', '2008-05-08 18:30:00', '0', '100', '4', 'OpenJudis - Indian Supreme Court cases', 'Prashant Iyengar and Michael Berkowitz', 'http://(www.)?openarchive.in/(judis|newcases)', 
+'function detectWeb(doc, url) {
+	if (doc.evaluate(''//div[@id="footer"]/dl/dt/a'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+		return "multiple";
+	} else if (url.match(/\d+\.htm/)) {
+		return "case";
+	}
+}', 
+'function regexMeta(stuff, item) {	
+        if (stuff) {
+                if (stuff[0] == "Origlink") {
+			item.source = stuff[1].split(/\s+/)[0];
+	        }
+		if (stuff[0] == "Acts") {
+			if (stuff[1].indexOf("|")!=-0) {
+				echts=stuff[1].split(" | ");
+				for (i=0;i<echts.length;i++) {
+					item.tags.push(echts[i]);
+				}
+	        	} else {
+	        		item.tags.push(stuff[1]);
+	        	}
+	        }
+		if (stuff[0] == "Citations" && stuff[1].length > 1) {
+			item.reporter=stuff[1];
+		}
+		if (stuff[0] == "Judges") {
+			if (stuff[1].indexOf(";")!=-0) {
+				jedges=stuff[1].split(" ; ");
+				for (i=0;i<jedges.length;i++) {
+	       				item.creators.push(Zotero.Utilities.cleanAuthor(jedges[i], "author"));
+	        		}
+	        	} else {
+	        		item.creators.push(Zotero.Utilities.cleanAuthor(stuff[1], "author"));
+	        	}
+		}
+	        if (stuff[0] == "Jday") {
+	       		item.dateDecided= stuff[1];
+		}
+	}
+}
+
+
+
+function doWeb(doc, url) {
+	var arts = new Array();
+	if (detectWeb(doc, url) == "multiple") {
+		var items = Zotero.Utilities.getItemArray(doc, doc, "^http:\/\/openarchive\.in\/[^/]+\/[0-9]+.htm$");
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			arts.push(i);
+		}
+	} else { arts = [url]; }
+	Zotero.debug(arts);
+	for each (var art in arts) {
+		var newurl = art;
+		Zotero.Utilities.HTTP.doGet(art, function(text) {
+			var newItem = new Zotero.Item("case");
+			newItem.publicationTitle = "OpenJudis - http://judis.openarchive.in";
+			newItem.url = url;
+			
+			//title
+			var t = /\<title\>([\w\W]*?)<\/title/;
+			newItem.title = Zotero.Utilities.trimInternal(t.exec(text)[1]);
+			newItem.caseName = newItem.title;
+			newItem.url = newurl;
+			newItem.court="The Supreme Court of India";
+	
+			newItem.websiteTitle="OpenJudis - http://judis.openarchive.in";
+			newItem.edition="Online";
+			
+			var metareg = /<META NAME[^>]+\>/g;
+			var tags = text.match(metareg);
+			for each (var tag in tags) {
+				var stuff = tag.match(/NAME=\"([^"]+)\"\s+CONTENT=\"([^"]+)\"/);
+				regexMeta([stuff[1], stuff[2]], newItem);
+			}
+			pdfurl = ''http://judis.openarchive.in/makepdf.php?filename='' + newItem.url;
+			newItem.attachments = [
+				{url:newItem.url, title:"OpenJudis Snapshot", mimeType:"text/html"},
+				{url:pdfurl, title:"OpenJudis PDF", mimeType:"application/pdf"}
+			];
+			newItem.complete();
+		}, function() {Zotero.done;});
+		Zotero.wait();
+	}
+}
+');
+
 REPLACE INTO translators VALUES ('c0d7d260-d795-4782-9446-f6c403a7922c', '1.0.0b4.r5', '', '2008-05-07 16:00:00', '0', '100', '4', 'Science Links Japan', 'Michael Berkowitz', 'http://sciencelinks.jp/', 
 'function detectWeb(doc, url) {
 	if (url.match(/result/) || url.match(/journal/)) {
@@ -1394,9 +1483,9 @@ REPLACE INTO translators VALUES ('bdaac15c-b0ee-453f-9f1d-f35d00c7a994', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('5278b20c-7c2c-4599-a785-12198ea648bf', '1.0.0b4.r5', '', '2008-05-05 07:45:00', '0', '100', '4', 'ARTstor', 'Ameer Ahmed and Michael Berkowitz', 'http://web2.artstor.org', 
+REPLACE INTO translators VALUES ('5278b20c-7c2c-4599-a785-12198ea648bf', '1.0.0b4.r5', '', '2008-05-08 18:30:00', '1', '100', '4', 'ARTstor', 'Ameer Ahmed and Michael Berkowitz', 'http://web2.artstor.org', 
 'function detectWeb(doc, url) {
-	if (url.match(''Search'')) return "multiple"
+	if (url.match(/(S|s)earch/)) return "multiple"
 }', 
 'function doWeb(doc, url) {
 	if (url.indexOf("|")!=-1){	
@@ -1529,9 +1618,21 @@ function scrape(doc, url){
 				}
 			}
 			if (child.fieldName.indexOf("Creator")!=-1){
-				var aut = child.fieldValue.match(/^([^,]+),\s+(.*)$/);
-				newArticle.notes.push({note:"Artist information: " + aut[2]});
-				newArticle.creators.push(Zotero.Utilities.cleanAuthor(aut[1], "artist"));
+				if (child.fieldValue != "") {
+					if (child.fieldValue.match(/,/)) {
+						var aut = child.fieldValue.match(/^([^,]+),\s+(.*)$/);
+						if (aut[1].match(/\s/)) {
+							newArticle.notes.push({note:"Artist information: " + aut[2]});
+							newArticle.creators.push(Zotero.Utilities.cleanAuthor(aut[1], "artist"));
+						} else {
+							var extras = aut[2].match(/^([^,]+),\s+(.*)$/);
+							newArticle.creators.push({firstName:extras[1], lastName:aut[1], creatorType:"author"});
+							newArticle.notes.push({note:"Artist information: " + extras[2]});
+						}
+					} else {
+						newArticle.creators.push(Zotero.Utilities.cleanAuthor(child.fieldValue, "artist"));
+					}
+				}
 			}
 			if (child.fieldName.indexOf("Culture")!=-1){
 				newArticle.creators.push(Zotero.Utilities.cleanAuthor(child.fieldValue, "producer", true));
