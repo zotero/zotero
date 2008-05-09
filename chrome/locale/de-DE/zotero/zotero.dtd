@@ -5,8 +5,8 @@
 <!ENTITY zotero.errorReport.submissionInProgress "Bitte warten Sie, während der Fehlerbericht übermittelt wird.">
 <!ENTITY zotero.errorReport.submitted "Der Fehlerbericht wurde übermittelt.">
 <!ENTITY zotero.errorReport.reportID "Bericht-ID:">
-<!ENTITY zotero.errorReport.postToForums "Please post a message to the Zotero forums (forums.zotero.org) with this Report ID, a description of the problem, and any steps necessary to reproduce it.">
-<!ENTITY zotero.errorReport.notReviewed "Error reports are generally not reviewed unless referred to in the forums.">
+<!ENTITY zotero.errorReport.postToForums "Bitte erstellen Sie einen Beitrag in den Zotero-Foren (forums.zotero.org) mit dieser Berichts-ID, einer Beschreibung des Problems und den Schritten, die notwendig sind, um es zu reproduzieren.">
+<!ENTITY zotero.errorReport.notReviewed "Fehlerberichte werden im Allgemeinen nicht bearbeitet, wenn sie nicht in den Foren gepostet werden.">
 
 <!ENTITY zotero.upgrade.newVersionInstalled "Sie haben eine neue Version von Zotero installiert.">
 <!ENTITY zotero.upgrade.upgradeRequired "Ihre Zotero-Datenbank muss aktualisiert werden, damit sie mit der neuen Version funktioniert.">
@@ -35,10 +35,10 @@
 <!ENTITY zotero.items.date_column "Datum">
 <!ENTITY zotero.items.year_column "Jahr">
 <!ENTITY zotero.items.publisher_column "Verlag">
-<!ENTITY zotero.items.publication_column "Publication">
-<!ENTITY zotero.items.journalAbbr_column "Journal Abbr">
+<!ENTITY zotero.items.publication_column "Zeitschriftentitel">
+<!ENTITY zotero.items.journalAbbr_column "Abkürzung der Zeitschrift">
 <!ENTITY zotero.items.language_column "Sprache">
-<!ENTITY zotero.items.accessDate_column "Accessed">
+<!ENTITY zotero.items.accessDate_column "Zugriffsdatum">
 <!ENTITY zotero.items.callNumber_column "Signatur">
 <!ENTITY zotero.items.repository_column "Repository">
 <!ENTITY zotero.items.rights_column "Rechte">
@@ -106,7 +106,7 @@
 <!ENTITY zotero.bibliography.style.label "Zitationsstil:">
 <!ENTITY zotero.bibliography.output.label "Ausgabeformat">
 <!ENTITY zotero.bibliography.saveAsRTF.label "Als RTF speichern">
-<!ENTITY zotero.bibliography.saveAsHTML.label "Als HTML speicher">
+<!ENTITY zotero.bibliography.saveAsHTML.label "Als HTML speichern">
 <!ENTITY zotero.bibliography.copyToClipboard.label "In die Zwischenablage kopieren">
 <!ENTITY zotero.bibliography.macClipboardWarning "(Rich-Text-Formatierung geht dabei verloren.)">
 <!ENTITY zotero.bibliography.print.label "Drucken">

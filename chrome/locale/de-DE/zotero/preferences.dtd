@@ -21,7 +21,7 @@
 <!ENTITY zotero.preferences.updateNow "Jetzt aktualisieren">
 <!ENTITY zotero.preferences.reportTranslationFailure "Fehlerhafte Übersetzer melden">
 <!ENTITY zotero.preferences.parseRISRefer "Zotero für heruntergeladene RIS/Refer-Dateien verwenden">
-<!ENTITY zotero.preferences.automaticSnapshots "Automatisch einen Schnappschuss erstellen, wenn ein Eintrag aus einer Webseite erstellt wird">
+<!ENTITY zotero.preferences.automaticSnapshots "Automatisch einen Schnappschuss erstellen, sobald ein Eintrag aus einer Webseite erstellt wird">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Automatisch zugehörige PDFs und andere Dateien beim Speichern von Einträgen anhängen">
 <!ENTITY zotero.preferences.automaticTags "Automatisch Tags aus Schlüsselwörtern und Schlagwörtern erstellen">
 

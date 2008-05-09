@@ -5,8 +5,8 @@
 <!ENTITY zotero.errorReport.submissionInProgress "Aşteaptă, te rog, ca raportul de eroare să fie trimis.">
 <!ENTITY zotero.errorReport.submitted "Raportul de eroare a fost trimis.">
 <!ENTITY zotero.errorReport.reportID "Raport ID:">
-<!ENTITY zotero.errorReport.postToForums "Please post a message to the Zotero forums (forums.zotero.org) with this Report ID, a description of the problem, and any steps necessary to reproduce it.">
-<!ENTITY zotero.errorReport.notReviewed "Error reports are generally not reviewed unless referred to in the forums.">
+<!ENTITY zotero.errorReport.postToForums "Te rog trimite un mesaj către forumul Zotero (forums.zotero.org) cu acest Raport ID, o descriere a problemei şi orice alt pas necesar pentru a o reproduce.">
+<!ENTITY zotero.errorReport.notReviewed "În mod curent, raporturile de eroare nu sunt luate în considerare atâta timp cât nu se află pe forum.">
 
 <!ENTITY zotero.upgrade.newVersionInstalled "Ai instalat o nouă versiune de Zotero.">
 <!ENTITY zotero.upgrade.upgradeRequired "Baza de date Zotero trebui actualizată în aşa fel încât să meargă cu noua versiune.">
@@ -35,10 +35,10 @@
 <!ENTITY zotero.items.date_column "Dată">
 <!ENTITY zotero.items.year_column "An">
 <!ENTITY zotero.items.publisher_column "Editură">
-<!ENTITY zotero.items.publication_column "Publication">
-<!ENTITY zotero.items.journalAbbr_column "Journal Abbr">
+<!ENTITY zotero.items.publication_column "Publicaţie">
+<!ENTITY zotero.items.journalAbbr_column "Abrev. revistă">
 <!ENTITY zotero.items.language_column "Limbă">
-<!ENTITY zotero.items.accessDate_column "Accessed">
+<!ENTITY zotero.items.accessDate_column "Accesat(ă)">
 <!ENTITY zotero.items.callNumber_column "Număr de telefon">
 <!ENTITY zotero.items.repository_column "Depozit">
 <!ENTITY zotero.items.rights_column "Drepturi">

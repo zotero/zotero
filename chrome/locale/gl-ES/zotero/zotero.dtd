@@ -5,8 +5,8 @@
 <!ENTITY zotero.errorReport.submissionInProgress "Por favor, espere mentres que se presenta o informe de erro.">
 <!ENTITY zotero.errorReport.submitted "Presentouse o informe de erro .">
 <!ENTITY zotero.errorReport.reportID "ID (identificación) do Informe:">
-<!ENTITY zotero.errorReport.postToForums "Please post a message to the Zotero forums (forums.zotero.org) with this Report ID, a description of the problem, and any steps necessary to reproduce it.">
-<!ENTITY zotero.errorReport.notReviewed "Error reports are generally not reviewed unless referred to in the forums.">
+<!ENTITY zotero.errorReport.postToForums "Envie unha mensaxe aos foros do Zotero (forums.zotero.org) con este ID (identificador) do Informe, unha descrición do problema, e os pasos necesarios para reproducilo.">
+<!ENTITY zotero.errorReport.notReviewed "Non se adoita revisar os informes de Erro , a non ser a que nos foros haxa referencia a eles .">
 
 <!ENTITY zotero.upgrade.newVersionInstalled "Instalou unha nova versión de Zotero.">
 <!ENTITY zotero.upgrade.upgradeRequired "A súa base de datos de Zotero débese actualizar para traballar coa nova versión.">
@@ -35,10 +35,10 @@
 <!ENTITY zotero.items.date_column "Data">
 <!ENTITY zotero.items.year_column "Ano">
 <!ENTITY zotero.items.publisher_column "Editorial">
-<!ENTITY zotero.items.publication_column "Publication">
-<!ENTITY zotero.items.journalAbbr_column "Journal Abbr">
+<!ENTITY zotero.items.publication_column "Publicación">
+<!ENTITY zotero.items.journalAbbr_column "Abrev de Revista">
 <!ENTITY zotero.items.language_column "Lingua">
-<!ENTITY zotero.items.accessDate_column "Accessed">
+<!ENTITY zotero.items.accessDate_column "Consultado">
 <!ENTITY zotero.items.callNumber_column "Número localización">
 <!ENTITY zotero.items.repository_column "Repositorio">
 <!ENTITY zotero.items.rights_column "Dereitos">

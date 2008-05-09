@@ -5,8 +5,8 @@
 <!ENTITY zotero.errorReport.submissionInProgress "Várjon a hibajelentés elküldéséig.">
 <!ENTITY zotero.errorReport.submitted "A hibajelentés elküldve.">
 <!ENTITY zotero.errorReport.reportID "Jelentés azonosítója:">
-<!ENTITY zotero.errorReport.postToForums "Please post a message to the Zotero forums (forums.zotero.org) with this Report ID, a description of the problem, and any steps necessary to reproduce it.">
-<!ENTITY zotero.errorReport.notReviewed "Error reports are generally not reviewed unless referred to in the forums.">
+<!ENTITY zotero.errorReport.postToForums "Küldje el a Zotero fórumba (forums.zotero.hu) a probléma leírását, hogy hogyan jutott idáig, ill. a hibaüzenet ID-jét .">
+<!ENTITY zotero.errorReport.notReviewed "A fórumba be nem küldött hibaüzenetek nem kerülnek kivizsgálásra.">
 
 <!ENTITY zotero.upgrade.newVersionInstalled "A Zotero új verziójának telepítése sikerült.">
 <!ENTITY zotero.upgrade.upgradeRequired "Frissíteni kell a Zotero adatbázist, hogy működjön az új verzióval.">
@@ -35,10 +35,10 @@
 <!ENTITY zotero.items.date_column "Dátum">
 <!ENTITY zotero.items.year_column "Év">
 <!ENTITY zotero.items.publisher_column "Kiadó">
-<!ENTITY zotero.items.publication_column "Publication">
-<!ENTITY zotero.items.journalAbbr_column "Journal Abbr">
+<!ENTITY zotero.items.publication_column "Kiadvány">
+<!ENTITY zotero.items.journalAbbr_column "Rövidített cím">
 <!ENTITY zotero.items.language_column "Nyelv">
-<!ENTITY zotero.items.accessDate_column "Accessed">
+<!ENTITY zotero.items.accessDate_column "Hozzáférés dátuma">
 <!ENTITY zotero.items.callNumber_column "Raktári jelzet">
 <!ENTITY zotero.items.repository_column "Gyűjtemény">
 <!ENTITY zotero.items.rights_column "Jogok">

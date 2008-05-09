@@ -27,7 +27,7 @@
 <!ENTITY zotero.tabs.attachments.label "附件">
 <!ENTITY zotero.tabs.tags.label "标签">
 <!ENTITY zotero.tabs.related.label "相关条目">
-<!ENTITY zotero.notes.separate "单独窗口编辑">
+<!ENTITY zotero.notes.separate "独立窗口编辑">
 
 <!ENTITY zotero.items.type_column "类型">
 <!ENTITY zotero.items.title_column "标题">
@@ -36,9 +36,9 @@
 <!ENTITY zotero.items.year_column "年">
 <!ENTITY zotero.items.publisher_column "出版者">
 <!ENTITY zotero.items.publication_column "Publication">
-<!ENTITY zotero.items.journalAbbr_column "Journal Abbr">
+<!ENTITY zotero.items.journalAbbr_column "期刊缩写">
 <!ENTITY zotero.items.language_column "语言">
-<!ENTITY zotero.items.accessDate_column "Accessed">
+<!ENTITY zotero.items.accessDate_column "访问时间">
 <!ENTITY zotero.items.callNumber_column "Call Number">
 <!ENTITY zotero.items.repository_column "存储库">
 <!ENTITY zotero.items.rights_column "权限">

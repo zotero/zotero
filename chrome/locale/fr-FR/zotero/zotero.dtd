@@ -5,8 +5,8 @@
 <!ENTITY zotero.errorReport.submissionInProgress "Veuillez patienter pendant la transmission du rapport d&apos;erreur.">
 <!ENTITY zotero.errorReport.submitted "Le rapport d&apos;erreur a été transmis.">
 <!ENTITY zotero.errorReport.reportID "ID du rapport :">
-<!ENTITY zotero.errorReport.postToForums "Please post a message to the Zotero forums (forums.zotero.org) with this Report ID, a description of the problem, and any steps necessary to reproduce it.">
-<!ENTITY zotero.errorReport.notReviewed "Error reports are generally not reviewed unless referred to in the forums.">
+<!ENTITY zotero.errorReport.postToForums "Veuillez poster un message sur les forums Zotero (forums.zotero.org) avec cet ID du rapport, une description du problème et les étapes nécessaires pour le reproduire.">
+<!ENTITY zotero.errorReport.notReviewed "Les rapports d&apos;erreurs ne sont généralement pas étudiés sauf sauf s&apos;ils sont référencés dans les forums.">
 
 <!ENTITY zotero.upgrade.newVersionInstalled "Vous avez installé une nouvelle version de Zotero.">
 <!ENTITY zotero.upgrade.upgradeRequired "Votre base de données Zotero doit être mise à jour pour fonctionner avec cette nouvelle version.">
@@ -36,9 +36,9 @@
 <!ENTITY zotero.items.year_column "Année">
 <!ENTITY zotero.items.publisher_column "Éditeur">
 <!ENTITY zotero.items.publication_column "Publication">
-<!ENTITY zotero.items.journalAbbr_column "Journal Abbr">
+<!ENTITY zotero.items.journalAbbr_column "Abrév. de journal">
 <!ENTITY zotero.items.language_column "Langue">
-<!ENTITY zotero.items.accessDate_column "Accessed">
+<!ENTITY zotero.items.accessDate_column "Accédé">
 <!ENTITY zotero.items.callNumber_column "Numéro d&apos;appel">
 <!ENTITY zotero.items.repository_column "Dépôt">
 <!ENTITY zotero.items.rights_column "Autorisations">

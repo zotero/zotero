@@ -36,9 +36,9 @@
 <!ENTITY zotero.items.year_column "Año">
 <!ENTITY zotero.items.publisher_column "Editorial">
 <!ENTITY zotero.items.publication_column "Publication">
-<!ENTITY zotero.items.journalAbbr_column "Journal Abbr">
+<!ENTITY zotero.items.journalAbbr_column "Abrev. de la revista">
 <!ENTITY zotero.items.language_column "Idioma">
-<!ENTITY zotero.items.accessDate_column "Accessed">
+<!ENTITY zotero.items.accessDate_column "Visto">
 <!ENTITY zotero.items.callNumber_column "Número de catálogo">
 <!ENTITY zotero.items.repository_column "Repositorio">
 <!ENTITY zotero.items.rights_column "Derechos">

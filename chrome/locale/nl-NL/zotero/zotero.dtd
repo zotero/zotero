@@ -5,8 +5,8 @@
 <!ENTITY zotero.errorReport.submissionInProgress "Even geduld a.u.b. totdat het fout-rapport is verstuurd.">
 <!ENTITY zotero.errorReport.submitted "Het fout-rapport is verstuurd.">
 <!ENTITY zotero.errorReport.reportID "Rapport ID:">
-<!ENTITY zotero.errorReport.postToForums "Please post a message to the Zotero forums (forums.zotero.org) with this Report ID, a description of the problem, and any steps necessary to reproduce it.">
-<!ENTITY zotero.errorReport.notReviewed "Error reports are generally not reviewed unless referred to in the forums.">
+<!ENTITY zotero.errorReport.postToForums "Plaats een bericht op het (Engels-talige) Zotero forum (forums.zotero.org) onder vermelding van het Rapport ID, een omschrijving van het probleem, en de stappen die nodig zijn om het probleem te reproduceren.">
+<!ENTITY zotero.errorReport.notReviewed "Fout-rapporten worden in het algemeen niet bekeken tenzij u ernaar verwijst op het online forum.">
 
 <!ENTITY zotero.upgrade.newVersionInstalled "U heeft een nieuwe versie van Zotero geinstalleerd.">
 <!ENTITY zotero.upgrade.upgradeRequired "Uw Zotero database moet bijgewerkt worden om te kunnen werken met de nieuwe versie.">
@@ -24,7 +24,7 @@
 
 <!ENTITY zotero.tabs.info.label "Info">
 <!ENTITY zotero.tabs.notes.label "Aantekeningen">
-<!ENTITY zotero.tabs.attachments.label "Bijlages">
+<!ENTITY zotero.tabs.attachments.label "Bijlagen">
 <!ENTITY zotero.tabs.tags.label "Labels">
 <!ENTITY zotero.tabs.related.label "Gerelateerd">
 <!ENTITY zotero.notes.separate "In een nieuw venster bewerken">
@@ -35,10 +35,10 @@
 <!ENTITY zotero.items.date_column "Datum">
 <!ENTITY zotero.items.year_column "Jaar">
 <!ENTITY zotero.items.publisher_column "Uitgever">
-<!ENTITY zotero.items.publication_column "Publication">
-<!ENTITY zotero.items.journalAbbr_column "Journal Abbr">
+<!ENTITY zotero.items.publication_column "Tijdschrift">
+<!ENTITY zotero.items.journalAbbr_column "Tijdschrift Afkorting">
 <!ENTITY zotero.items.language_column "Taal">
-<!ENTITY zotero.items.accessDate_column "Accessed">
+<!ENTITY zotero.items.accessDate_column "Laatst benaderd">
 <!ENTITY zotero.items.callNumber_column "Referentienummer">
 <!ENTITY zotero.items.repository_column "Repositorium">
 <!ENTITY zotero.items.rights_column "Rechten">

@@ -5,8 +5,8 @@
 <!ENTITY zotero.errorReport.submissionInProgress "請等候錯誤報告送出。">
 <!ENTITY zotero.errorReport.submitted "錯誤報告已經送出。">
 <!ENTITY zotero.errorReport.reportID "報告識別號：">
-<!ENTITY zotero.errorReport.postToForums "Please post a message to the Zotero forums (forums.zotero.org) with this Report ID, a description of the problem, and any steps necessary to reproduce it.">
-<!ENTITY zotero.errorReport.notReviewed "Error reports are generally not reviewed unless referred to in the forums.">
+<!ENTITY zotero.errorReport.postToForums "請在 Zotero 論壇 (forums.zotero.org) 上張貼一個含有這個報告識別號、問題的描述、及任何產生問題的必要步驟的訊息。">
+<!ENTITY zotero.errorReport.notReviewed "一般來說，除非在論壇上有提到，錯誤報告是不會受到檢閱的。">
 
 <!ENTITY zotero.upgrade.newVersionInstalled "你已安裝了新版的 Zotero。">
 <!ENTITY zotero.upgrade.upgradeRequired "你的 Zotero 資料庫必須升級才能在新版本中使用。">
@@ -35,10 +35,10 @@
 <!ENTITY zotero.items.date_column "日期">
 <!ENTITY zotero.items.year_column "年">
 <!ENTITY zotero.items.publisher_column "出版者">
-<!ENTITY zotero.items.publication_column "Publication">
-<!ENTITY zotero.items.journalAbbr_column "Journal Abbr">
+<!ENTITY zotero.items.publication_column "出版物">
+<!ENTITY zotero.items.journalAbbr_column "期刊簡寫">
 <!ENTITY zotero.items.language_column "語言">
-<!ENTITY zotero.items.accessDate_column "Accessed">
+<!ENTITY zotero.items.accessDate_column "受使用的">
 <!ENTITY zotero.items.callNumber_column "索書號">
 <!ENTITY zotero.items.repository_column "儲存庫">
 <!ENTITY zotero.items.rights_column "權利">
