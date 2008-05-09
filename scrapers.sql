@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-05-09 20:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-05-09 20:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1149,7 +1149,7 @@ REPLACE INTO translators VALUES ('83538f48-906f-40ef-bdb3-e94f63676307', '1.0.0b
 	}, function() {Zotero.done;});
 }');
 
-REPLACE INTO translators VALUES ('635c1246-e0c8-40a0-8799-a73a0b013ad8', '1.0.0b4.r5', '', '2008-05-09 20:00:00', '0', '100', '4', 'Bryn Mawr Classical Review', 'Michael Berkowitz', 'http://ccat.sas.upenn.edu/bmcr/', 
+REPLACE INTO translators VALUES ('635c1246-e0c8-40a0-8799-a73a0b013ad8', '1.0.0b4.r5', '', '2008-05-09 20:30:00', '0', '100', '4', 'Bryn Mawr Classical Review', 'Michael Berkowitz', 'http://ccat.sas.upenn.edu/bmcr/', 
 'function detectWeb(doc, url) {
 	if (url.match(/by_reviewer/) || url.match(/by_author/) || url.match(/recent.html/) || url.match(/\/\d{4}\/$/)) {
 		return "multiple";
@@ -1164,29 +1164,59 @@ REPLACE INTO translators VALUES ('635c1246-e0c8-40a0-8799-a73a0b013ad8', '1.0.0b
 	} : null;
 	var arts = new Array();
 	if (detectWeb(doc, url) == "multiple") {
-		
+		var items = new Object();
+		if (doc.evaluate(''//table/tbody/tr/td/ul/li/i'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+			var boxes = doc.evaluate(''//table/tbody/tr/td/ul/li'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+			var box;
+			while (box = boxes.iterateNext()) {
+				var link = doc.evaluate(''./a'', box, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
+				var title = doc.evaluate(''./i'', box, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+				items[link] = title;
+			}
+		} else if (doc.evaluate(''//table/tbody/tr/td/ul/li'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+			var title = doc.evaluate(''//table/tbody/tr/td/ul/li'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+			var next;
+			while (next = title.iterateNext()) {
+				items[next.href]  = Zotero.Utilities.trimInternal(next.textContent);
+			}
+		} else if (url.match(/google\.com/)) {
+			var titles = doc.evaluate(''//h2[@class="r"]/a[@class="l"]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+			var title;
+			while (title = titles.iterateNext()) {
+				items[title.href] = title.textContent;
+			}
+		}
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			arts.push(i);
+		}
 	} else {
 		arts = [url];
 	}
 	Zotero.Utilities.processDocuments(arts, function(doc) {
 		var item = new Zotero.Item("journalArticle");
-		var title = doc.evaluate(''/html/body/center/table/tbody/tr/td/center/table/tbody/tr/td/h3/i'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-		item.title = "Review of: " + title;
-		var data = doc.evaluate(''/html/body/center/table/tbody/tr/td/center/table/tbody/tr/td/h3'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		var title = doc.evaluate(''//h3/i'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		item.title = "Review of: " + Zotero.Utilities.trimInternal(title);
+		var data = doc.evaluate(''//h3[i]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 		var title = title.replace("(", "\\(").replace(")", "\\)");
-		var author = doc.evaluate(''/html/body/center/table/tbody/tr/td/center/table/tbody/tr/td/b'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.match(/Reviewed by\s+([^,]+),/)[1];
+		var author = doc.evaluate(''//b[contains(text(), "Reviewed")]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.match(/Reviewed by\s+([^,]+),/)[1];
 		item.creators.push(Zotero.Utilities.cleanAuthor(author, "author"));
 		var splitRe = new RegExp(title);
-		var authors = data.split(splitRe)[0].split(/,\s+/);
+		var authors = data.split(splitRe)[0].replace(/\([^)]+\)/, "").split(/(,|and)\s+/);
+		Zotero.debug(authors);
 		Zotero.debug(authors);
 		for each (var aut in authors) {
-			if (aut.match(/\w/)) {
+			if (aut.match(/\w/) && (aut != "and")) {
 				item.creators.push(Zotero.Utilities.cleanAuthor(aut, "reviewedAuthor"));
 			}
 		}
 		item.url = doc.location.href;
 		item.attachments = [{url:item.url, title:item.title, mimeType:"text/html"}];
-		item.date = Zotero.Utilities.trimInternal(doc.evaluate(''/html/body/center/table/tbody/tr/td/center/table/tbody/tr/td/center/font'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.replace("Bryn Mawr Classical Review ", "").replace(/\./g, "/"));
+		if (doc.evaluate(''/html/body/center/table/tbody/tr/td/center/table/tbody/tr/td/center/font'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+			item.date = Zotero.Utilities.trimInternal(doc.evaluate(''/html/body/center/table/tbody/tr/td/center/table/tbody/tr/td/center/font'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.replace("Bryn Mawr Classical Review ", "").replace(/\./g, "/"));
+		} else {
+			item.date = Zotero.Utilities.trimInternal(doc.evaluate(''/html/body/h3'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.replace("Bryn Mawr Classical Review ", "").replace(/\./g, "/"))
+		}
 		item.complete();
 	}, function() {Zotero.done;});
 	Zotero.wait();
