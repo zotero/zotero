@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-05-09 19:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-05-09 20:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1147,6 +1147,49 @@ REPLACE INTO translators VALUES ('83538f48-906f-40ef-bdb3-e94f63676307', '1.0.0b
 		item.complete();
 		
 	}, function() {Zotero.done;});
+}');
+
+REPLACE INTO translators VALUES ('635c1246-e0c8-40a0-8799-a73a0b013ad8', '1.0.0b4.r5', '', '2008-05-09 20:00:00', '0', '100', '4', 'Bryn Mawr Classical Review', 'Michael Berkowitz', 'http://ccat.sas.upenn.edu/bmcr/', 
+'function detectWeb(doc, url) {
+	if (url.match(/by_reviewer/) || url.match(/by_author/) || url.match(/recent.html/) || url.match(/\/\d{4}\/$/)) {
+		return "multiple";
+	} else if (url.match(/[\d\-]+\.html$/)) {
+		return "journalArticle";
+	}
+}', 
+'function doWeb(doc, url) {
+	var ns = doc.documentElement.namespaceURI;
+	var nsResolver = ns ? function(prefix) {
+		if (prefix == ''x'') return ns; else return null;
+	} : null;
+	var arts = new Array();
+	if (detectWeb(doc, url) == "multiple") {
+		
+	} else {
+		arts = [url];
+	}
+	Zotero.Utilities.processDocuments(arts, function(doc) {
+		var item = new Zotero.Item("journalArticle");
+		var title = doc.evaluate(''/html/body/center/table/tbody/tr/td/center/table/tbody/tr/td/h3/i'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		item.title = "Review of: " + title;
+		var data = doc.evaluate(''/html/body/center/table/tbody/tr/td/center/table/tbody/tr/td/h3'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		var title = title.replace("(", "\\(").replace(")", "\\)");
+		var author = doc.evaluate(''/html/body/center/table/tbody/tr/td/center/table/tbody/tr/td/b'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.match(/Reviewed by\s+([^,]+),/)[1];
+		item.creators.push(Zotero.Utilities.cleanAuthor(author, "author"));
+		var splitRe = new RegExp(title);
+		var authors = data.split(splitRe)[0].split(/,\s+/);
+		Zotero.debug(authors);
+		for each (var aut in authors) {
+			if (aut.match(/\w/)) {
+				item.creators.push(Zotero.Utilities.cleanAuthor(aut, "reviewedAuthor"));
+			}
+		}
+		item.url = doc.location.href;
+		item.attachments = [{url:item.url, title:item.title, mimeType:"text/html"}];
+		item.date = Zotero.Utilities.trimInternal(doc.evaluate(''/html/body/center/table/tbody/tr/td/center/table/tbody/tr/td/center/font'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.replace("Bryn Mawr Classical Review ", "").replace(/\./g, "/"));
+		item.complete();
+	}, function() {Zotero.done;});
+	Zotero.wait();
 }');
 
 REPLACE INTO translators VALUES ('9499c586-d672-42d6-9ec4-ee9594dcc571', '1.0.0b4.r5', '', '2008-05-08 20:30:00', '0', '100', '4', 'The Hindu', 'Prashant Iyengar and Michael Berkowitz', 'http://(www.)?hindu.com', 
