@@ -83,8 +83,8 @@
   </macro>
   <citation>
     <option name="collapse" value="citation-number"/>
-    <layout delimiter=", " >
-      <text variable="citation-number" vertical-align="sup"/>
+    <layout delimiter=", " vertical-align="sup">
+      <text variable="citation-number" />
     </layout>
   </citation>
   <bibliography>
