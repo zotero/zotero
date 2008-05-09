@@ -1089,7 +1089,7 @@ REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('83538f48-906f-40ef-bdb3-e94f63676307', '1.0.0b4.r5', '', '2008-05-09 19:00:00', '0', '100', '4', 'NAA RecordSearch', 'Tim Sherratt', 'http://naa12.naa.gov.au/scripts/', 
+REPLACE INTO translators VALUES ('83538f48-906f-40ef-bdb3-e94f63676307', '1.0.0b4.r5', '', '2008-05-09 23:15:00', '0', '100', '4', 'NAA RecordSearch', 'Tim Sherratt', 'http://naa12.naa.gov.au/scripts/', 
 'function detectWeb(doc, url) {
     if (url.match("Items_listing")) {
         return "multiple";
@@ -1149,7 +1149,7 @@ REPLACE INTO translators VALUES ('83538f48-906f-40ef-bdb3-e94f63676307', '1.0.0b
 	}, function() {Zotero.done;});
 }');
 
-REPLACE INTO translators VALUES ('635c1246-e0c8-40a0-8799-a73a0b013ad8', '1.0.0b4.r5', '', '2008-05-09 20:30:00', '0', '100', '4', 'Bryn Mawr Classical Review', 'Michael Berkowitz', 'http://ccat.sas.upenn.edu/bmcr/', 
+REPLACE INTO translators VALUES ('635c1246-e0c8-40a0-8799-a73a0b013ad8', '1.0.0b4.r5', '', '2008-05-09 23:15:00', '0', '100', '4', 'Bryn Mawr Classical Review', 'Michael Berkowitz', 'http://ccat.sas.upenn.edu/bmcr/', 
 'function detectWeb(doc, url) {
 	if (url.match(/by_reviewer/) || url.match(/by_author/) || url.match(/recent.html/) || url.match(/\/\d{4}\/$/)) {
 		return "multiple";
@@ -10133,7 +10133,7 @@ function doWeb(doc, url)	{
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '1.0.0b3.r1', '', '2008-05-09 15:00:00', '1', '100', '4', 'Library Catalog (InnoPAC)', 'Simon Kornblith and Michael Berkowitz', 'https?://[^/]+/(search(\*spi)?(\?|~(S[\d]+)?)?)\??/(a|X|t)?\??', 
+REPLACE INTO translators VALUES ('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '1.0.0b3.r1', '', '2008-05-09 23:15:00', '1', '100', '4', 'Library Catalog (InnoPAC)', 'Simon Kornblith and Michael Berkowitz', 'https?://[^/]+/(search(\*spi)?(\?|~(S[\d]+)?)?)\??/(a|X|t)?\??', 
 'function detectWeb(doc, url) {
 	// First, check to see if the URL alone reveals InnoPAC, since some sites don''t reveal the MARC button
 	var matchRegexp = new RegExp(''^https?://[^/]+/search[^/]*\\??/[^/]+(/[^/]+/[0-9]+\%2C[^/]+/frameset(.+)$)?'');
