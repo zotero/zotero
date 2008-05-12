@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-05-09 23:15:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-05-12 18:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -3465,7 +3465,7 @@ REPLACE INTO translators VALUES ('a69deb08-47d9-46ad-afca-bc3a2499ad34', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('d921155f-0186-1684-615c-ca57682ced9b', '1.0.0b4.r1', '', '2008-04-04 20:00:00', '1', '100', '4', 'JSTOR', 'Simon Kornblith, Sean Takats and Michael Berkowitz', 'https?://[^/]*jstor\.org[^/]*/(action/(showArticle|doBasicSearch|doAdvancedSearch)|stable/)', 
+REPLACE INTO translators VALUES ('d921155f-0186-1684-615c-ca57682ced9b', '1.0.0b4.r1', '', '2008-05-12 18:30:00', '1', '100', '4', 'JSTOR', 'Simon Kornblith, Sean Takats and Michael Berkowitz', 'https?://[^/]*jstor\.org[^/]*/(action/(showArticle|doBasicSearch|doAdvancedSearch)|stable/|pss)', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -3482,7 +3482,7 @@ REPLACE INTO translators VALUES ('d921155f-0186-1684-615c-ca57682ced9b', '1.0.0b
 	// If this is a view page, find the link to the citation
 	var xpath = ''//a[@id="favorites"]'';
 	var elmts = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
-	if(elmts.iterateNext()) {
+	if(elmts.iterateNext() || url.match(/pss/)) {
 		return "journalArticle";
 	}
 }', 
@@ -3499,50 +3499,57 @@ REPLACE INTO translators VALUES ('d921155f-0186-1684-615c-ca57682ced9b', '1.0.0b
 	// If this is a view page, find the link to the citation
 	var xpath = ''//a[@id="favorites"]'';
 	var elmts = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
-	if(elmts.iterateNext()) {
-			var jid;
-		var jidRe1 = new RegExp("doi=[0-9\.]+/([0-9]+)");
-		var jidRe2 = new RegExp("stable/view/([0-9]+)");
-		var jidRe3 = new RegExp("stable/([0-9]+)");
-		var jidmatch1 = jidRe1.exec(url);
-		var jidmatch2 = jidRe2.exec(url);
-		var jidmatch3 = jidRe3.exec(url);
-		if (jidmatch1) {
-			jid = jidmatch1[1];
-		} else if (jidmatch2) {
-			jid = jidmatch2[1];
-		} else if (jidmatch3) {
-			jid = jidmatch3[1];
-		} else {
-			return false;
-		}
-		var downloadString = "&noDoi=yesDoi&downloadFileName=deadbeef&suffix="+jid;
-	}
-	else{
-		var availableItems = new Object();
-		var tableRows = doc.evaluate(''//li[ul/li/a[@class="title"]]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
-		var tableRow;
-		var jid;
-		var title;
-		var jidRe = new RegExp("[0-9\.]+/([0-9]+)");
-		while(tableRow = tableRows.iterateNext()) {
-			title = doc.evaluate(''./ul/li/a[@class="title"]'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-			jid = doc.evaluate(''.//input[@name="doi"]'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().value;
-			var m = jidRe.exec(jid);
-			if (m) {
-				jid = m[1];
+	if (url.match(/pss/)) {
+		var jid = url.match(/\d+/);
+		var downloadString = "&noDoi=yesDoi&downloadFileName=deadbeef&suffix=" + jid;
+		var pdfYes = false;
+	} else {
+		if(elmts.iterateNext()) {
+				var jid;
+			var jidRe1 = new RegExp("doi=[0-9\.]+/([0-9]+)");
+			var jidRe2 = new RegExp("stable/view/([0-9]+)");
+			var jidRe3 = new RegExp("stable/([0-9]+)");
+			var jidmatch1 = jidRe1.exec(url);
+			var jidmatch2 = jidRe2.exec(url);
+			var jidmatch3 = jidRe3.exec(url);
+			if (jidmatch1) {
+				jid = jidmatch1[1];
+			} else if (jidmatch2) {
+				jid = jidmatch2[1];
+			} else if (jidmatch3) {
+				jid = jidmatch3[1];
+			} else {
+				return false;
 			}
-			availableItems[jid] = title;
+			var downloadString = "&noDoi=yesDoi&downloadFileName=deadbeef&suffix="+jid;
 		}
-
-		var items = Zotero.selectItems(availableItems);
-		if(!items) {
-			return true;
+		else{
+			var availableItems = new Object();
+			var tableRows = doc.evaluate(''//li[ul/li/a[@class="title"]]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+			var tableRow;
+			var jid;
+			var title;
+			var jidRe = new RegExp("[0-9\.]+/([0-9]+)");
+			while(tableRow = tableRows.iterateNext()) {
+				title = doc.evaluate(''./ul/li/a[@class="title"]'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+				jid = doc.evaluate(''.//input[@name="doi"]'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().value;
+				var m = jidRe.exec(jid);
+				if (m) {
+					jid = m[1];
+				}
+				availableItems[jid] = title;
+			}
+	
+			var items = Zotero.selectItems(availableItems);
+			if(!items) {
+				return true;
+			}
+			var downloadString="&noDoi=yesDoi&downloadFileName=deadbeef";
+			for(var i in items) {
+				downloadString+="&suffix="+i;
+			}
 		}
-		var downloadString="&noDoi=yesDoi&downloadFileName=deadbeef";
-		for(var i in items) {
-			downloadString+="&suffix="+i;
-		}
+		var pdfYes = true;
 	}
 
 	Zotero.Utilities.HTTP.doPost(host+"/action/downloadCitation?format=refman&direct=true",
@@ -3563,7 +3570,7 @@ REPLACE INTO translators VALUES ('d921155f-0186-1684-615c-ca57682ced9b', '1.0.0b
 			item.attachments[0].mimeType = "text/html";
 			Zotero.debug(host);
 			var pdfurl = item.url.replace(/([^\d]+)(\d+)$/, host + "/stable/pdfplus/$2") + ".pdf";
-			item.attachments.push({url:pdfurl, title:"JSTOR Full Text PDF", mimeType:"application/pdf"});
+			if (pdfYes == true) item.attachments.push({url:pdfurl, title:"JSTOR Full Text PDF", mimeType:"application/pdf"});
 			item.complete();
 		});
 		
