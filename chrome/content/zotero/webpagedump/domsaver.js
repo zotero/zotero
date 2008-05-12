@@ -583,7 +583,7 @@ var wpdDOMSaver = {
 	
 	// Added by Dan S. for Zotero to restore relative links,
 	// which are prepended with "about:blank?" to fix a bug in Scrapbook/WPD
-	// that sending an invalid request to the server when the img src
+	// that sends an invalid request to the server when the img src
 	// is a relative link to a file in a different directory
 	repairRelativeLinks : function(aHTMLText)
 	{
