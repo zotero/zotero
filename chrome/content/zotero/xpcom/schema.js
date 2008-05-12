@@ -203,14 +203,13 @@ Zotero.Schema = new function(){
 	* 	since the last check
 	**/
 	function updateScrapersRemote(force, callback) {
-		// Little hack to manually update from repo on upgrade to 1.0.3
+		// Little hack to manually update CSLs from repo on upgrades
 		if (!force && Zotero.Prefs.get('automaticScraperUpdates')) {
-			var syncTargetVersion = 2; // increment this when releasing new version that requires it
+			var syncTargetVersion = 3; // increment this when releasing new version that requires it
 			var syncVersion = _getDBVersion('sync');
 			if (syncVersion < syncTargetVersion) {
-				_updateDBVersion('sync', syncTargetVersion);
 				force = true;
-				var uriChangeFix = true;
+				var forceCSLUpdate = true;
 			}
 		}
 		
@@ -267,9 +266,9 @@ Zotero.Schema = new function(){
 				url += '&m=1';
 			}
 			
-			// Fix for styles with new URIs in 1.0.3
-			if (uriChangeFix) {
-				url += '&urifix=1';
+			// Force updating of all public CSLs
+			if (forceCSLUpdate) {
+				url += '&cslup=' + syncTargetVersion;
 			}
 		}
 		
@@ -636,6 +635,17 @@ Zotero.Schema = new function(){
 		
 		Zotero.DB.beginTransaction();
 		
+		try {
+			var re = /cslup=([0-9]+)/;
+			var matches = re.exec(xmlhttp.channel.URI.spec);
+			if (matches) {
+				_updateDBVersion('sync', matches[1]);
+			}
+		}
+		catch (e) {
+			Zotero.debug(e);
+		}
+		
 		// Store the timestamp provided by the server
 		_updateDBVersion('repository', currentTime);
 		
@@ -793,9 +803,17 @@ Zotero.Schema = new function(){
 			}
 		}
 		
+		var uri = xmlnode.getAttribute('id');
+		
+		// Delete local style if CSL code is empty
+		if (!xmlnode.getElementsByTagName('csl')[0].firstChild) {
+			var sql = "DELETE FROM csl WHERE cslID=?";
+			Zotero.DB.query(sql, uri);
+			return true;
+		}
 		
 		var sqlValues = [
-			{string: xmlnode.getAttribute('id')},
+			{string: uri},
 			{string: xmlnode.getAttribute('updated')},
 			{string: xmlnode.getElementsByTagName('title')[0].firstChild.nodeValue},
 			{string: xmlnode.getElementsByTagName('csl')[0].firstChild.nodeValue}
