@@ -987,7 +987,7 @@ Zotero.Keys = new function() {
 	this.windowInit = windowInit;
 	this.getCommand = getCommand;
 	
-	_keys = {};
+	var _keys = {};
 	
 	
 	/*
@@ -1019,7 +1019,7 @@ Zotero.Keys = new function() {
 		// Only override the default with the pref if the <key> hasn't been manually changed
 		// and the pref has been
 		if (keyElem.getAttribute('key') == 'Z' && keyElem.getAttribute('modifiers') == 'accel alt'
-			&& (zKey != 'Z' || useShift)) {
+				&& (zKey != 'Z' || useShift)) {
 			keyElem.setAttribute('key', zKey);
 			if (useShift) {
 				keyElem.setAttribute('modifiers', 'accel shift');
@@ -1050,6 +1050,12 @@ Zotero.Keys = new function() {
 				}
 				
 				if (_keys[key.getAttribute('key')] || key.getAttribute('key') == zKey) {
+					// Don't override Redo on Fx3 Mac, since Redo and Zotero can coexist
+					if (zKey == 'Z' && key.getAttribute('key') == 'Z'
+							&& id == 'key_redo' && Zotero.isFx3 && Zotero.isMac) {
+						continue;
+					}
+					
 					Zotero.debug('Removing key ' + id + ' with accesskey ' + key.getAttribute('key'));
 					key.parentNode.removeChild(key);
 				}

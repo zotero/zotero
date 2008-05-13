@@ -349,6 +349,16 @@ var ZoteroPane = new function()
 	 * Trigger actions based on keyboard shortcuts
 	 */
 	function handleKeyDown(event, from) {
+		try {
+			// Ignore keystrokes outside of Zotero pane
+			if (!(event.originalTarget.ownerDocument instanceof XULDocument)) {
+				return;
+			}
+		}
+		catch (e) {
+			Zotero.debug(e);
+		}
+		
 		if (from == 'zotero-pane') {
 			// Highlight collections containing selected items
 			//
@@ -406,6 +416,9 @@ var ZoteroPane = new function()
 		Zotero.debug(command);
 		
 		switch (command) {
+			case 'openZotero':
+				ZoteroPane.toggleDisplay()
+				break;
 			case 'library':
 				document.getElementById('zotero-collections-tree').focus();
 				ZoteroPane.collectionsView.selection.select(0);
