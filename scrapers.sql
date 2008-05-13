@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-05-12 19:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-05-13 20:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1147,6 +1147,61 @@ REPLACE INTO translators VALUES ('83538f48-906f-40ef-bdb3-e94f63676307', '1.0.0b
 		item.complete();
 		
 	}, function() {Zotero.done;});
+}');
+
+REPLACE INTO translators VALUES ('46291dc3-5cbd-47b7-8af4-d009078186f6', '1.0.0b4.r5', '', '2008-05-13 20:00:00', '0', '100', '4', 'CiNii', 'Michael Berkowitz', 'http://ci.nii.ac.jp/naid/', 
+'function detectWeb(doc, url) {
+	if (url.match(/(naid|QuotDisp)/)) {
+		return "journalArticle";
+	} else if (doc.evaluate(''//a[contains(@href, "QuotDisp") or contains(@href, "/naid/")]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+		return "multiple";
+	}
+}', 
+'function doWeb(doc, url) {
+	var n = doc.documentElement.namespaceURI;
+	var ns = n ? function(prefix) {
+		if (prefix == ''x'') return n; else return null;
+	} : null;
+	var arts = new Array();
+	if (detectWeb(doc, url) == "multiple") {
+		var items = new Object();
+		var links = doc.evaluate(''//a[contains(@href, "QuotDisp") or contains(@href, "/naid/")]'', doc, ns, XPathResult.ANY_TYPE, null);
+		var link;
+		while (link = links.iterateNext()) {
+			items[link.href] = Zotero.Utilities.trimInternal(link.textContent);
+		}
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			arts.push(i);
+		}
+	} else {
+		arts = [url];
+	}
+	Zotero.Utilities.processDocuments(arts, function(doc) {
+		var biblink = doc.evaluate(''//a[contains(text(), "BibTex")]'', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().href;
+		var newurl = doc.location.href;
+		var tags = new Array();
+		if (doc.evaluate(''//a[@class="keyword"]'', doc, ns, XPathResult.ANY_TYPE, null).iterateNext()) {
+			var kws = doc.evaluate(''//a[@class="keyword"]'', doc, ns, XPathResult.ANY_TYPE, null);
+			var kw;
+			while (kw = kws.iterateNext()) {
+				tags.push(Zotero.Utilities.trimInternal(kw.textContent));
+			}
+		}
+		Zotero.Utilities.HTTP.doGet(biblink, function(text) {
+			var trans = Zotero.loadTranslator("import");
+			trans.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
+			trans.setString(text);
+			trans.setHandler("itemDone", function(obj, item) {
+				item.url = newurl;
+				item.attachments = [{url:item.url, title:item.title + " Snapshot", mimeType:"text/html"}];
+				item.tags = tags;
+				item.complete();	
+			});
+			trans.translate();
+		});
+	}, function() {Zotero.done;});
+	Zotero.wait();
 }');
 
 REPLACE INTO translators VALUES ('75edc5a1-6470-465a-a928-ccb77d95eb72', '1.0.0b4.r5', '', '2008-05-12 19:00:00', '0', '100', '4', 'American Institute of Aeronautics and Astronautics', 'Michael Berkowitz', 'http://www.aiaa.org/', 
