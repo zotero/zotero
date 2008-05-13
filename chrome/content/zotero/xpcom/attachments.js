@@ -382,17 +382,19 @@ Zotero.Attachments = new function(){
 			Zotero.Notifier.enable();
 		}
 		
-		// If we don't have the MIME type, do a HEAD request for it
-		Zotero.Utilities.HTTP.doHead(url, function(obj){
-			var mimeType = obj.channel.contentType;
-			
-			if (mimeType) {
-				var sql = "UPDATE itemAttachments SET mimeType=? WHERE itemID=?";
-				Zotero.DB.query(sql, [mimeType, itemID]);
-			}
-			
-			Zotero.Notifier.trigger('add', 'item', itemID);
-		});
+		if (!mimeType) {
+			// If we don't have the MIME type, do a HEAD request for it
+			Zotero.Utilities.HTTP.doHead(url, function(obj){
+				var mimeType = obj.channel.contentType;
+				
+				if (mimeType) {
+					var sql = "UPDATE itemAttachments SET mimeType=? WHERE itemID=?";
+					Zotero.DB.query(sql, [mimeType, itemID]);
+				}
+				
+				Zotero.Notifier.trigger('add', 'item', itemID);
+			});
+		}
 		
 		return itemID;
 	}
