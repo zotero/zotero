@@ -137,6 +137,7 @@
       <text macro="archive"/>
 	    </else-if>
 	  </choose>
+      <text variable="DOI" prefix="doi:"/>
       <text variable="URL"/>
     </group>
   </macro>
