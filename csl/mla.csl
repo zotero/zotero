@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?oxygen RNGSchema="http://xbiblio.svn.sourceforge.net/viewvc/*checkout*/xbiblio/csl/schema/trunk/csl.rnc" type="compact"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="in-text" xml:lang="en">
   <info>
     <title>Modern Language Association</title>
@@ -9,6 +8,10 @@
       <name>Simon Kornblith</name>
       <email>simon@simonster.com</email>
     </author>
+    <contributor>
+      <name> modified by Christian Werthschulte</name>
+      <email>Christian.Werthschulte@rub.de</email>
+    </contributor>
     <category term="generic-base"/>
     <category term="author-date"/>
     <updated></updated>
@@ -44,9 +47,9 @@
   <macro name="access">
     <group delimiter=" ">
       <date variable="accessed">
-		<date-part name="day" suffix=" "/>
-		<date-part name="month" form="short" include-period="true" suffix=" "/>
-		<date-part name="year"/>
+        <date-part name="day" suffix=" "/>
+        <date-part name="month" form="short" include-period="true" suffix=" "/>
+        <date-part name="year"/>
       </date>
       <text variable="URL" prefix="&lt;" suffix="&gt;"/>
     </group>
@@ -54,7 +57,7 @@
   <macro name="title">
     <choose>
       <if type="book">
-        <text variable="title" text-decoration="underline"/>
+        <text variable="title" font-style="italic"/>
       </if>
       <else>
         <text variable="title" quotes="true"/>
@@ -64,7 +67,7 @@
   <macro name="title-short">
     <choose>
       <if type="book">
-        <text variable="title" form="short" text-decoration="underline"/>
+        <text variable="title" form="short" font-style="italic"/>
       </if>
       <else>
         <text variable="title" form="short" quotes="true"/>
@@ -92,12 +95,12 @@
         <choose>
           <if variable="author editor translator" match="any">
             <group delimiter=", ">
-          <text macro="author-short"/>
-          <choose>
-            <if disambiguate="true">
-              <text macro="title-short"/>
-            </if>
-          </choose>
+              <text macro="author-short"/>
+              <choose>
+                <if disambiguate="true">
+                  <text macro="title-short"/>
+                </if>
+              </choose>
             </group>
           </if>
           <else>
@@ -128,7 +131,7 @@
         </if>
         <else-if type="chapter">
           <group class="container">
-            <text variable="container-title" text-decoration="underline" prefix=" " suffix="."/>
+            <text variable="container-title" font-style="italic" prefix=" " suffix="."/>
             <text macro="editor-translator" prefix=" " suffix="."/>
             <text macro="publisher-year"  prefix=" " suffix="."/>
           </group>
@@ -138,7 +141,7 @@
           <group class="container" prefix=" " suffix="." delimiter=": ">
             <group delimiter=" ">
               <text macro="editor-translator" suffix="."/>
-              <text variable="container-title" text-decoration="underline"/>
+              <text variable="container-title" font-style="italic"/>
               <choose>
                 <if type="article-journal">
                   <group delimiter=" ">
