@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-05-14 15:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-05-14 16:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -10281,7 +10281,7 @@ function doWeb(doc, url)	{
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '1.0.0b3.r1', '', '2008-05-09 23:15:00', '1', '100', '4', 'Library Catalog (InnoPAC)', 'Simon Kornblith and Michael Berkowitz', 'https?://[^/]+/(search(\*spi)?(\?|~(S[\d]+)?)?)\??/(a|X|t)?\??', 
+REPLACE INTO translators VALUES ('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '1.0.0b3.r1', '', '2008-05-14 16:30:00', '1', '200', '4', 'Library Catalog (InnoPAC)', 'Simon Kornblith and Michael Berkowitz', 'https?://[^/]+/(search(\*spi)?(\?|~(S[\d]+)?)?)\??/(a|X|t)?\??', 
 'function detectWeb(doc, url) {
 	// First, check to see if the URL alone reveals InnoPAC, since some sites don''t reveal the MARC button
 	var matchRegexp = new RegExp(''^https?://[^/]+/search[^/]*\\??/[^/]+(/[^/]+/[0-9]+\%2C[^/]+/frameset(.+)$)?'');
@@ -15318,7 +15318,7 @@ REPLACE INTO translators VALUES ('232903bc-7307-4058-bb1a-27cfe3e4e655', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('fe728bc9-595a-4f03-98fc-766f1d8d0936', '1.0.0b4.r5', '', '2007-12-03 22:00:00', '0', '100', '4', 'Wiley InterScience', 'Sean Takats', 'https?:\/\/(?:www3\.|www\.)?interscience\.wiley\.com[^\/]*\/(?:search\/|cgi-bin\/abstract\/[0-9]+)', 
+REPLACE INTO translators VALUES ('fe728bc9-595a-4f03-98fc-766f1d8d0936', '1.0.0b4.r5', '', '2008-05-14 16:30:00', '0', '100', '4', 'Wiley InterScience', 'Sean Takats and Michael Berkowitz', 'https?:\/\/(?:www3\.|www\.)?interscience\.wiley\.com[^\/]*\/(?:search\/|(cgi-bin|journal)\/[0-9]+\/abstract|journal)', 
 'function detectWeb(doc, url){
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -15329,33 +15329,50 @@ REPLACE INTO translators VALUES ('fe728bc9-595a-4f03-98fc-766f1d8d0936', '1.0.0b
 	if(doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
 	}
-	var m = url.match(/https?:\/\/[^\/]*\/cgi-bin\/abstract\/[0-9]+/);
+	if (doc.evaluate(''//div[@id="contentCell"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+		return "multiple";
+	}
+	var m = url.match(/https?:\/\/[^\/]*\/(cgi-bin|journal)(\/abstract)?\/[0-9]+(\/abstract)?/);
 	if (m){
 		return "journalArticle";
 	}
 }', 
 'function doWeb(doc, url){
+	Zotero.debug(doc.location.host);
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == ''x'') return namespace; else return null;
 	} : null;
 
-	var m = url.match(/https?:\/\/[^\/]*\/cgi-bin\/abstract\/([0-9]+)/);
+	var m = url.match(/https?:\/\/[^\/]*\/journal\/([0-9]+)\/abstract/);
 	var ids = new Array();
-	var xpath = ''//tr[td/input[@name="ID"][@type="checkbox"]]'';
+	/*var xpath = ''//tr[td/input[@name="ID"][@type="checkbox"]]'';
 	var elmt;
 	var elmts = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null); 
-	elmt = elmts.iterateNext();
-	if(elmt) {  //search
+	elmt = elmts.iterateNext();*/
+	if(detectWeb(doc, url) == "multiple") {  //search
 		var id;
 		var title;
 		var availableItems = new Array();
-		do {
-			title = doc.evaluate(''./td/strong'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-			id = doc.evaluate(''./td/input[@name="ID"][@type="checkbox"]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().value;
-			availableItems[id] = title;
-		} while (elmt = elmts.iterateNext())
-
+		var xpath = ''//tr[td/input[@name="ID"][@type="checkbox"]]'';
+		if (doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+			elmts = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+			var elmt = elmts.iterateNext();
+			do {
+				title = doc.evaluate(''./td/strong'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+				id = doc.evaluate(''./td/input[@name="ID"][@type="checkbox"]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().value;
+				availableItems[id] = title;
+			} while (elmt = elmts.iterateNext())
+		} else {
+			var xpath = ''//div[@id="contentCell"]/div[*/a]'';
+			var elmts = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+			var elmt = elmts.iterateNext();
+			do {
+				title = Zotero.Utilities.trimInternal(doc.evaluate(''.//strong'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+				id = doc.evaluate(''.//a[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href.match(/abstract\/([\d]+)\//)[1];
+				availableItems[id] = title;
+			} while (elmt = elmts.iterateNext())
+		}
 		var items = Zotero.selectItems(availableItems);
 		if(!items) {
 			return true;
@@ -15367,7 +15384,6 @@ REPLACE INTO translators VALUES ('fe728bc9-595a-4f03-98fc-766f1d8d0936', '1.0.0b
 	} else if (m){ //single article
 		ids.push(m[1]);
 	}
-	
 	var hostRe = new RegExp("^http(?:s)?://[^/]+");
 	var m = hostRe.exec(doc.location.href);
 	var host = m[0];
@@ -15387,7 +15403,7 @@ REPLACE INTO translators VALUES ('fe728bc9-595a-4f03-98fc-766f1d8d0936', '1.0.0b
 				var authors = m[1].split(",")
 				for each (var author in authors){
 					if (author != ""){
-						newauthors = newauthors + "%A "+Zotero.Utilities.trimInternal(author)+"\n";
+						newauthors = newauthors + "%A "+Zotero.Utilities.unescapeHTML(Zotero.Utilities.trimInternal(author))+"\n";
 					}
 				}
 				text = text.replace(/%A\s.*\n/, newauthors);
@@ -15395,6 +15411,10 @@ REPLACE INTO translators VALUES ('fe728bc9-595a-4f03-98fc-766f1d8d0936', '1.0.0b
 			var translator = Zotero.loadTranslator("import");
 			translator.setTranslator("881f60f2-0802-411a-9228-ce5f47b64c7d"); //EndNote/Refer/BibIX
 			translator.setString(text);
+			translator.setHandler("itemDone", function(obj, item) {
+				item.DOI = item.url.match(/\.org\/(.*)$/)[1];
+				item.complete();
+			});
 			translator.translate();
 			Zotero.done();
 		});
