@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-05-13 20:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-05-14 14:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -3543,7 +3543,7 @@ function doWeb(doc, url){
   }
 }');
 
-REPLACE INTO translators VALUES ('a69deb08-47d9-46ad-afca-bc3a2499ad34', '1.0.0b4.r5', '', '2008-04-08 03:00:00', '0', '100', '4', 'Royal Historical Society', 'Michael Berkowitz', 'http://www.rhs.ac.uk/bibl/', 
+REPLACE INTO translators VALUES ('a69deb08-47d9-46ad-afca-bc3a2499ad34', '1.0.0b4.r5', '', '2008-05-14 14:30:00', '1', '100', '4', 'Royal Historical Society', 'Michael Berkowitz', 'http://www.rhs.ac.uk/bibl/', 
 'function detectWeb(doc, url) {
 	if (doc.evaluate(''//tr/td[3][@class="bib_data"]/a[@class="bibref"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
@@ -3578,7 +3578,7 @@ REPLACE INTO translators VALUES ('a69deb08-47d9-46ad-afca-bc3a2499ad34', '1.0.0b
 			if (xml..journal_title.length() != 0) itemtype = "journalArticle";
 			
 			var item = new Zotero.Item(itemtype);
-			item.title = xml..title;
+			item.title = Zotero.Utilities.capitalizeTitle(xml..title.toString());
 			for (var i = 0; i < xml..author.length(); i++) {
 				var name = xml..author[i].toString().match(/^[^,]+,[^,]+/)[0].split(/,\s+/);
 				item.creators.push({lastName:name[0], firstName:name[1], creatorType:"author"});
