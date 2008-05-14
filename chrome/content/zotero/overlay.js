@@ -146,8 +146,6 @@ var ZoteroPane = new function()
 		var itemsTree = document.getElementById('zotero-items-tree');
 		itemsTree.controllers.appendController(new Zotero.ItemTreeCommandController(itemsTree));
 		
-		this.updateTagSelectorSize();
-		
 		// Create the New Item (+) menu with each item type
 		var addMenu = document.getElementById('zotero-tb-add').firstChild;
 		var separator = document.getElementById('zotero-tb-add').firstChild.firstChild;

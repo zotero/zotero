@@ -39,7 +39,7 @@
 			<field name="_dirty">null</field>
 			<field name="_empty">null</field>
 			<field name="selection"/>
-			<property name="showAutomatic" onget="return this.getAttribute('showAutomatic')"/>
+			<property name="showAutomatic" onget="return this.getAttribute('showAutomatic') != 'false'"/>
 			<property name="_types">
 				<getter>
 					<![CDATA[
@@ -97,7 +97,8 @@
 			<property name="filterToScope">
 				<getter>
 				<![CDATA[
-					return this.getAttribute('filterToScope') == 'true';
+					// Default is to filter, so test for explicit 'false'
+					return this.getAttribute('filterToScope') != 'false';
 				]]>
 				</getter>
 				<setter>
@@ -110,8 +111,8 @@
 			
 			<constructor>
 				<![CDATA[
-					this.setAttribute('filterToScope', true);
-					this.id('show-automatic').setAttribute('checked', this.getAttribute('showAutomatic'));
+					this.id('display-all-tags').setAttribute('checked', !this.filterToScope);
+					this.id('show-automatic').setAttribute('checked', this.showAutomatic);
 					this.dragObserver = new this._dragObserverConstructor;
 				]]>
 			</constructor>
@@ -642,8 +643,8 @@
 				
 				<xul:hbox>
 					<xul:hbox pack="start">
-						<xul:checkbox label="&zotero.tagSelector.displayAll;"
-							oncommand="this.parentNode.parentNode.parentNode.parentNode.filterToScope = !this.checked; event.stopPropagation();">
+						<xul:checkbox id="display-all-tags" label="&zotero.tagSelector.displayAll;"
+							oncommand="var ts = document.getBindingParent(this); ts.filterToScope = !this.checked; event.stopPropagation();">
 						</xul:checkbox>
 					</xul:hbox>
 					
