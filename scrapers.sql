@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-05-14 16:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-05-14 20:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1147,6 +1147,23 @@ REPLACE INTO translators VALUES ('83538f48-906f-40ef-bdb3-e94f63676307', '1.0.0b
 		item.complete();
 		
 	}, function() {Zotero.done;});
+}');
+
+REPLACE INTO translators VALUES ('0c661209-5ec8-402b-8f18-7dec6ae37d95', '1.0.0b4.r5', '', '2008-05-14 20:00:00', '0', '100', '4', 'The Free Dictionary', 'Michael Berkowitz', 'http://(.*\.)?thefreedictionary.com/(\w+)', 
+'function detectWeb(doc, url) {
+	return "dictionaryEntry";
+}', 
+'function doWeb(doc, url) {
+	var item = new Zotero.Item(''dictionaryEntry'');
+	item.title = Zotero.Utilities.capitalizeTitle(url.replace("+", " ").match(/[^/]+$/)[0]);
+	item.dictionaryTitle = "The Free Dictionary";
+	var defs = doc.evaluate(''//div[@class="pseg"]'', doc, null, XPathResult.ANY_TYPE, null);
+	var def;
+	while (def = defs.iterateNext()) {
+		item.notes.push({note:Zotero.Utilities.trimInternal(def.textContent)});
+	}
+	item.url = 
+	item.complete();
 }');
 
 REPLACE INTO translators VALUES ('46291dc3-5cbd-47b7-8af4-d009078186f6', '1.0.0b4.r5', '', '2008-05-13 20:00:00', '0', '100', '4', 'CiNii', 'Michael Berkowitz', 'http://ci.nii.ac.jp/naid/', 
