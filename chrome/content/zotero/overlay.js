@@ -635,7 +635,7 @@ var ZoteroPane = new function()
 			tagSelector.setAttribute('height', maxTS);
 		}
 		
-		height = tagSelector.boxObject.height;
+		var height = tagSelector.boxObject.height;
 		
 		/*
 		Zotero.debug("tagSelector.boxObject.height: " + tagSelector.boxObject.height);
