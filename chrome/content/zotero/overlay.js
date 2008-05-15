@@ -415,6 +415,17 @@ var ZoteroPane = new function()
 		
 		switch (command) {
 			case 'openZotero':
+				try {
+					// Ignore Cmd-Shift-Z keystroke in text areas
+					if (Zotero.isMac && key == 'Z' &&
+							event.originalTarget.localName == 'textarea') {
+						Zotero.debug('Ignoring keystroke in text area');
+						return;
+					}
+				}
+				catch (e) {
+					Zotero.debug(e);
+				}
 				ZoteroPane.toggleDisplay()
 				break;
 			case 'library':
