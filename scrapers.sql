@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-05-15 18:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-05-15 19:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1147,6 +1147,58 @@ REPLACE INTO translators VALUES ('83538f48-906f-40ef-bdb3-e94f63676307', '1.0.0b
 		item.complete();
 		
 	}, function() {Zotero.done;});
+}');
+
+REPLACE INTO translators VALUES ('4363275e-5cc5-4627-9a7f-951fb58a02c3', '1.0.0b4.r5', '', '2008-05-15 19:30:00', '0', '100', '4', 'Cornell University Press', 'Michael Berkowitz', 'http://www.cornellpress.cornell.edu/', 
+'function detectWeb(doc, url) {
+	if (url.match("detail.taf")) {
+		return "book";
+	} else if (url.match("list.taf") || url.match("listsearch.taf")) {
+		return "multiple";
+	}
+}', 
+'function doWeb(doc, url) {
+	var n = doc.documentElement.namespaceURI;
+	var ns = n ? function (prefix) {
+	    if (prefix == ''x'') return n; else return null;
+	} : null;
+	
+	var books = new Array();
+	if (detectWeb(doc, url) == "multiple") {
+		var items = new Object();
+		var titles = doc.evaluate(''//tr/td[2]/a'', doc, ns, XPathResult.ANY_TYPE, null);
+		var title;
+		while (title = titles.iterateNext()) {
+			if (title.textContent.match(/\w+/)) items[title.href] = Zotero.Utilities.trimInternal(title.textContent);
+		}
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			books.push(i);
+		}
+	} else {
+		books = [url];
+	}
+	Zotero.Utilities.processDocuments(books, function(doc) {
+		var item = new Zotero.Item("book");
+		item.title = Zotero.Utilities.capitalizeTitle(doc.evaluate(''//span[@class="bktitle"]'', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+		var authors = doc.evaluate(''//div[@id="detail"]/table/tbody/tr/td/form/a'', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent.split(/;/);
+		Zotero.debug(authors);
+		for each (var aut in authors) {
+			if (aut.match(/Translator/)) {
+				item.creators.push(Zotero.Utilities.cleanAuthor(aut.match(/^(.*)\s+\(/)[1], "translator"));
+			} else if (aut.match(/Editor/)) {
+				item.creators.push(Zotero.Utilities.cleanAuthor(aut.match(/^(.*)\s+\(/)[1], "editor"));
+			} else {
+				item.creators.push(Zotero.Utilities.cleanAuthor(aut, "author"));
+			}
+		}
+		var bits = doc.evaluate(''//div[@id="detail"]/table/tbody/tr/td/form'', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		item.ISBN = bits.match(/ISBN:\s+([\d\-]+)/)[1];
+		item.date = bits.match(/\d{4}/)[0];
+		item.abstractNote = Zotero.Utilities.trimInternal(doc.evaluate(''//div[@id="description"]'', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+		item.complete();
+	}, function() {Zotero.done;});
+	Zotero.wait();
 }');
 
 REPLACE INTO translators VALUES ('a75e0594-a9e8-466e-9ce8-c10560ea59fd', '1.0.0b4.r5', '', '2008-05-15 18:30:00', '0', '100', '4', 'Columbia University Press', 'Michael Berkowitz', 'http://www.cup.columbia.edu/', 
