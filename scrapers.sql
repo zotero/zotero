@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-05-15 00:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-05-15 01:15:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -24463,7 +24463,7 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/asa', '2008-05-08 19:00:0
 </style>
 ');
 
-REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-author-date', '2008-05-08 19:00:00', 'Chicago Manual of Style (Author-Date format)',
+REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-author-date', '2008-05-15 01:15:00', 'Chicago Manual of Style (Author-Date format)',
 '<?xml version="1.0" encoding="UTF-8"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" xml:lang="en" class="in-text" >
   <info>
@@ -24476,7 +24476,7 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-author-date', '20
     </author>
     <category term="author-date"/>
     <category term="generic-base"/>
-    <updated>2008-05-08T19:00:00+00:00</updated>
+    <updated>2008-05-15T01:15:00+00:00</updated>
     <summary>The author-date variant of the Chicago style</summary>
     <link href="http://www.chicagomanualofstyle.org/tools_citationguide.html" rel="documentation"/>
   </info>
@@ -24603,6 +24603,7 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-author-date', '20
       <text macro="archive"/>
 	    </else-if>
 	  </choose>
+      <text variable="DOI" prefix="doi:"/>
       <text variable="URL"/>
     </group>
   </macro>
@@ -24826,7 +24827,7 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-author-date', '20
 </style>
 ');
 
-REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-fullnote-bibliography', '2008-05-08 19:00:00', 'Chicago Manual of Style (Full Note with Bibliography)',
+REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-fullnote-bibliography', '2008-05-15 01:15:00', 'Chicago Manual of Style (Full Note with Bibliography)',
 '<style xmlns="http://purl.org/net/xbiblio/csl" class="note" xml:lang="en"> 
   <info>
     <title>Chicago Manual of Style (Full Note with Bibliography)</title>
@@ -24848,7 +24849,7 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-fullnote-bibliogr
     <summary>Chicago format with full notes and bibliography</summary>
     <category term="generic-base"/>
     <category term="numeric"/>
-    <updated>2008-05-08T19:00:00+00:00</updated>
+    <updated>2008-05-15T01:15:00+00:00</updated>
   </info>
   <macro name="editor-translator">
     <group delimiter=", ">
@@ -25397,6 +25398,7 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-fullnote-bibliogr
       <text macro="archive-note"/>
 	    </else-if>
 	  </choose>
+      <text variable="DOI" prefix="doi:"/>
       <text variable="URL"/>
     </group>
   </macro>
@@ -25493,7 +25495,7 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-fullnote-bibliogr
 </style>
 ');
 
-REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-note-bibliography', '2008-05-08 19:00:00', 'Chicago Manual of Style (Note with Bibliography)',
+REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-note-bibliography', '2008-05-15 01:15:00', 'Chicago Manual of Style (Note with Bibliography)',
 '<?xml version="1.0" encoding="UTF-8"?>
 <?oxygen RNGSchema="http://xbiblio.svn.sourceforge.net/viewvc/*checkout*/xbiblio/csl/schema/trunk/csl.rnc" type="compact"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="note" xml:lang="en"> 
@@ -25517,7 +25519,7 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-note-bibliography
     <summary>Chicago format with short notes and full bibliography</summary>
     <category term="generic-base"/>
     <category term="numeric"/>
-    <updated>2008-05-08T19:00:00+00:00</updated>
+    <updated>2008-05-15T01:15:00+00:00</updated>
   </info>
   <macro name="secondary-contributors">
     <choose>
@@ -25865,6 +25867,7 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-note-bibliography
       <text macro="archive"/>
 	    </else-if>
 	  </choose>
+      <text variable="DOI" prefix="doi:"/>
       <text variable="URL"/>
     </group>
   </macro>
@@ -25932,7 +25935,7 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-note-bibliography
 </style>
 ');
 
-REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-note', '2008-05-08 19:00:00', 'Chicago Manual of Style (Note without Bibliography)',
+REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-note', '2008-05-15 01:15:00', 'Chicago Manual of Style (Note without Bibliography)',
 '<?xml version="1.0" encoding="UTF-8"?>
 <?oxygen RNGSchema="http://xbiblio.svn.sourceforge.net/viewvc/*checkout*/xbiblio/csl/schema/trunk/csl.rnc" type="compact"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="note" xml:lang="en">
@@ -25956,7 +25959,7 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-note', '2008-05-0
     <summary>Chicago format with full notes and no bibliography</summary>
     <category term="generic-base"/>
     <category term="note"/>
-    <updated>2008-05-08T19:00:00+00:00</updated>
+    <updated>2008-05-15T01:15:00+00:00</updated>
   </info>
   <macro name="editor-translator">
     <group delimiter=", ">
@@ -26267,6 +26270,7 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-note', '2008-05-0
       <text macro="archive-note"/>
 	    </else-if>
 	  </choose>
+      <text variable="DOI" prefix="doi:"/>
       <text variable="URL"/>
     </group>
   </macro>
