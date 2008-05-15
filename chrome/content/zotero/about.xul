@@ -18,138 +18,163 @@
 			function onLoad()
 			{
 				var translators = {
-					afAZ: [
+					"af-ZA": [
 						"Samuel Murray"
 					],
 					
-					ar: [
+					"ar": [
 						"Khaled Fadhel"
 					],
 					
-					bgBG: [
+					"bg-BG": [
 						"Peter Stoilov"
 					],
 					
-					caAD: [
+					"ca-AD": [
 						"Joan Junyent"
 					],
 					
-					daDK: [
+					"cs-CZ": [
+						"loyz",
+						"ffvii"
+					],
+					
+					"da-DK": [
 						"Banta"
 					],
 					
-					deAT: [
+					"de-AT": [
 						"stw"
 					],
 					
-					deCH: [
+					"de-CH": [
 						"stw"
 					],
 					
-					deDE: [
+					"de-DE": [
 						"Harald Kliems",
 						"Jason Verber",
-						"stw"
+						"Helga"
 					],
 					
-					elGR: [
-						"geraki"
+					"el-GR": [
+						"geraki",
+						"sarandos"
 					],
 					
-					esES: [
+					"es-ES": [
 						"Alberto González Palomo"
 					],
 					
-					etEE: [
+					"et-EE": [
 						"brainbulb"
 					],
 					
-					frFR: [
+					"fi-FI": [
+						"hirvela"
+					],
+					
+					"fr-FR": [
 						"Pascal Pichon",
 						"Jojaba",
 						"La Luciole"
 					],
 					
-					heIL: [
+					"gl-ES": [
+						"Manuel Meixide"
+					],
+					
+					"he-IL": [
 						"Doron Tilleman"
 					],
 					
-					huHU: [
-						"tdombos"
+					"hu-HU": [
+						"Tamas Dombos"
 					],
 					
-					itIT: [
+					"it-IT": [
 						"Andrea",
 						"Elisabetta Manuele",
 						"Giuliano Masseroni",
 						"Luca Pedrazzi"
 					],
 					
-					jaJP: [
+					"ja-JP": [
 						"Andreas Bovens",
-						"Michael Schiltz"
+						"Michael Schiltz",
+						"ehito"
 					],
 					
-					koKR: [
-						"Wtspout"
+					"ko-KR": [
+						"wtspout"
 					],
 					
-					mnMN: [
-						"cybermon"
+					"mn-MN": [
+						"L. Gantulga"
 					],
 					
-					nbNO: [
-						"Finn Arne Jørgensen"
+					"nb-NO": [
+						"Finn Arne Jørgensen",
+						"Bernt Øyvind Thorvaldsen"
 					],
 					
-					nlNL: [
+					"nl-NL": [
 						"Andreas Bovens",
 						"Michael Schiltz",
 						"Rintze Zelle"
 					],
 					
-					plPL: [
+					"pl-PL": [
 						"Pawel Krzyworzeka",
 						"Trevor Owens"
 					],
 					
-					ptBR: [
+					"pt-BR": [
 						"Humberto Sartini"
 					],
 					
-					ptPT: [
+					"pt-PT": [
+						"Manuel Menezes de Sequeira",
 						"gandrenf",
-						"XRex"
+						"tmfs"
 					],
 					
-					roRO: [
+					"ro-RO": [
 						"Turcan"
 					],
 					
-					ruRU: [
-						"Yar"
+					"ru-RU": [
+						"Yaroslav"
 					],
 					
-					srYU: [
+					"sl-SI": [
+						"Martin Srebotnjak"
+					],
+					
+					"sr-RS": [
 						"Igor Miletic"
 					],
-					
-					svSE: [
+						
+					"sv-SE": [
 						"Erik Stattin"
 					],
 					
-					trTR: [
+					"tr-TR": [
 						"Zeki Celikbas"
 					],
 					
-					zhCN: [
-						"liyan",
-						"Wenping Guo"
+					"vi-VN": [
+						"Đoàn Như Tùng"
 					],
 					
-					zhTW: [
+					"zh-CN": [
+						"Wenping Guo",
+						"liyan"
+					],
+					
+					"zh-TW": [
 						"Chun-Chung Chen",
-						"coolcd"
+						"Alen Cheng"
 					]
 				};
 				
@@ -157,13 +182,8 @@
 				
 				for (var locale in translators) {
 					var heading = document.createElement('label');
-					var str = locale.substr(0, 2);
-					if (locale.substr(2)) {
-						str += '-' + locale.substr(2);
-					}
-					str += ':';
 					heading.className = 'locale';
-					heading.setAttribute('value', str);
+					heading.setAttribute('value', locale + ':');
 					box.appendChild(heading);
 					
 					for each(var person in translators[locale]) {
@@ -195,12 +215,14 @@
 		<vbox class="subcontent">
 			<label value="Dan Cohen"/>
 			<label value="Sean Takats"/>
+			<label value="Connie Sehat"/>
 		</vbox>
 		<label class="subhead" value="&zotero.developers;"/>
 		<vbox class="subcontent">
 			<label value="Dan Stillman"/>
 			<label value="Simon Kornblith"/>
-			
+			<label value="Michael Berkowitz"/>
+			<label value="Fred Gibbs"/>
 		</vbox>
 		<label class="subhead" value="&zotero.alumni;"/>
 		<vbox class="subcontent">
