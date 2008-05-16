@@ -2,14 +2,11 @@
 <!ENTITY zotero.general.note "Nota:">
 
 <!ENTITY zotero.errorReport.unrelatedMessages "El informe de errores puede incluir mensajes sin relación con Zotero.">
-<!ENTITY zotero.errorReport.additionalInfo "Información adicional">
-<!ENTITY zotero.errorReport.emailAddress "Tu dirección de correo electrónico:">
-<!ENTITY zotero.errorReport.errorSteps "¿Qué estabas haciendo cuando ocurrió el error? Si es posible, incluye los pasos necesarios para repetir el error.">
 <!ENTITY zotero.errorReport.submissionInProgress "Por favor, espera mientras se envía el informe de error.">
 <!ENTITY zotero.errorReport.submitted "Se ha enviado el informe de error.">
 <!ENTITY zotero.errorReport.reportID "Identificador de informe:">
-<!ENTITY zotero.errorReport.furtherAssistance "Mira la página de problemas conocidos y los foros para más ayuda.">
-<!ENTITY zotero.errorReport.includeReportID "Incluye el identificador de informe en toda correspondencia con los creadores de Zotero relacionada con este problema.">
+<!ENTITY zotero.errorReport.postToForums "Please post a message to the Zotero forums (forums.zotero.org) with this Report ID, a description of the problem, and any steps necessary to reproduce it.">
+<!ENTITY zotero.errorReport.notReviewed "Error reports are generally not reviewed unless referred to in the forums.">
 
 <!ENTITY zotero.upgrade.newVersionInstalled "Has instalado una versión nueva de Zotero.">
 <!ENTITY zotero.upgrade.upgradeRequired "Tu base de datos de Zotero debe actualizarse para funcionar con la versión nueva.">
@@ -38,7 +35,10 @@
 <!ENTITY zotero.items.date_column "Fecha">
 <!ENTITY zotero.items.year_column "Año">
 <!ENTITY zotero.items.publisher_column "Editorial">
+<!ENTITY zotero.items.publication_column "Publication">
+<!ENTITY zotero.items.journalAbbr_column "Abrev. de la revista">
 <!ENTITY zotero.items.language_column "Idioma">
+<!ENTITY zotero.items.accessDate_column "Visto">
 <!ENTITY zotero.items.callNumber_column "Número de catálogo">
 <!ENTITY zotero.items.repository_column "Repositorio">
 <!ENTITY zotero.items.rights_column "Derechos">

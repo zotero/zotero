@@ -4,7 +4,7 @@
 
 <!ENTITY zotero.preferences.prefpane.general "כללי">
 
-<!ENTITY zotero.preferences.userInterface "User Interface">
+<!ENTITY zotero.preferences.userInterface "ממשק משתמש">
 <!ENTITY zotero.preferences.position "Zotero הצג את">
 <!ENTITY zotero.preferences.position.above "מתחת">
 <!ENTITY zotero.preferences.position.below "מעל">
@@ -19,7 +19,7 @@
 <!ENTITY zotero.preferences.miscellaneous "שונות">
 <!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators">
 <!ENTITY zotero.preferences.updateNow "עדכן עכשיו">
-<!ENTITY zotero.preferences.reportTranslationFailure "Report broken site translators">
+<!ENTITY zotero.preferences.reportTranslationFailure "דווח על מתרגמי אתרים פגומים">
 <!ENTITY zotero.preferences.parseRISRefer "השתמש ב-Zotero להורדה של קבצי RIS/Refer">
 <!ENTITY zotero.preferences.automaticSnapshots "Automatically take snapshots when creating items from web pages">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Automatically attach associated PDFs and other files when saving items">
@@ -47,13 +47,13 @@
 
 <!ENTITY zotero.preferences.prefpane.export "Export">
 
-<!ENTITY zotero.preferences.citationOptions.caption "Citation Options">
+<!ENTITY zotero.preferences.citationOptions.caption "אפשרויות ציטוט">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Include URLs of paper articles in references">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "When this option is disabled, Zotero includes URLs when citing journal, magazine, and newspaper articles only if the article does not have a page range specified.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "העתקה מהירה">
 <!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "ברירת מחדל של פורמט פלט:">
-<!ENTITY zotero.preferences.quickCopy.copyAsHTML "Copy as HTML">
+<!ENTITY zotero.preferences.quickCopy.copyAsHTML "העתק בתור HTML">
 <!ENTITY zotero.preferences.quickCopy.macWarning "Note: Rich-text formatting will be lost on Mac OS X.">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Site-Specific Settings:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domain/Path">

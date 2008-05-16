@@ -49,11 +49,11 @@
 
 <!ENTITY zotero.preferences.citationOptions.caption "인용 선택사항">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL "참조 내 신문 기사의 URL포함">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "When this option is disabled, Zotero includes URLs when citing journal, magazine, and newspaper articles only if the article does not have a page range specified.">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "이 선택사항을 사용안함으로 할 경우, 기사의 페이지 범위를 지정하고 있지 않는 인용된 잡지 및 신문 기사의 경우에만 Zotero에 URL을 삽입합니다.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "빠른 복사">
 <!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "기본 출력 형식:">
-<!ENTITY zotero.preferences.quickCopy.copyAsHTML "Copy as HTML">
+<!ENTITY zotero.preferences.quickCopy.copyAsHTML "HTML로 복사">
 <!ENTITY zotero.preferences.quickCopy.macWarning "주: Rich-text 형식은 Mac OS X 상에선 손실됩니다.">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "사이트 지정 설정:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "도메인/경로">

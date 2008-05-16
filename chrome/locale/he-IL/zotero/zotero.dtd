@@ -2,14 +2,11 @@
 <!ENTITY zotero.general.note "Note:">
 
 <!ENTITY zotero.errorReport.unrelatedMessages "The error log may include messages unrelated to Zotero.">
-<!ENTITY zotero.errorReport.additionalInfo "Additional Information">
-<!ENTITY zotero.errorReport.emailAddress "Your e-mail address:">
-<!ENTITY zotero.errorReport.errorSteps "What were you doing when the error occurred? If possible, please include steps to reproduce the error.">
 <!ENTITY zotero.errorReport.submissionInProgress "Please wait while the error report is submitted.">
-<!ENTITY zotero.errorReport.submitted "The error report has been submitted.">
+<!ENTITY zotero.errorReport.submitted "Your error report has been submitted.">
 <!ENTITY zotero.errorReport.reportID "Report ID:">
-<!ENTITY zotero.errorReport.furtherAssistance "See the Known Issues page and the forums for further assistance.">
-<!ENTITY zotero.errorReport.includeReportID "Please include the Report ID in any correspondence with the Zotero developers regarding this issue.">
+<!ENTITY zotero.errorReport.postToForums "Please post a message to the Zotero forums (forums.zotero.org) with this Report ID, a description of the problem, and any steps necessary to reproduce it.">
+<!ENTITY zotero.errorReport.notReviewed "Error reports are generally not reviewed unless referred to in the forums.">
 
 <!ENTITY zotero.upgrade.newVersionInstalled "You have installed a new version of Zotero.">
 <!ENTITY zotero.upgrade.upgradeRequired "Your Zotero database must be upgraded to work with the new version.">
@@ -38,7 +35,10 @@
 <!ENTITY zotero.items.date_column "תאריך">
 <!ENTITY zotero.items.year_column "שנה">
 <!ENTITY zotero.items.publisher_column "Publisher">
+<!ENTITY zotero.items.publication_column "Publication">
+<!ENTITY zotero.items.journalAbbr_column "Journal Abbr">
 <!ENTITY zotero.items.language_column "שפה">
+<!ENTITY zotero.items.accessDate_column "Accessed">
 <!ENTITY zotero.items.callNumber_column "Call Number">
 <!ENTITY zotero.items.repository_column "Repository">
 <!ENTITY zotero.items.rights_column "זכויות">
@@ -82,7 +82,7 @@
 <!ENTITY zotero.item.textTransform.titlecase "Title Case">
 
 <!ENTITY zotero.toolbar.note.standalone "New Standalone Note">
-<!ENTITY zotero.toolbar.attachment.linked "Link to File...">
+<!ENTITY zotero.toolbar.attachment.linked "קישור לקובץ...">
 <!ENTITY zotero.toolbar.attachment.add "Store Copy of File...">
 <!ENTITY zotero.toolbar.attachment.weblink "שמור קישור לעמוד נוכחי">
 <!ENTITY zotero.toolbar.attachment.snapshot "Take Snapshot of Current Page">
@@ -105,15 +105,15 @@
 <!ENTITY zotero.bibliography.title "צור ביבליוגרפיה">
 <!ENTITY zotero.bibliography.style.label "Citation Style:">
 <!ENTITY zotero.bibliography.output.label "Output Format">
-<!ENTITY zotero.bibliography.saveAsRTF.label "Save as RTF">
-<!ENTITY zotero.bibliography.saveAsHTML.label "Save as HTML">
+<!ENTITY zotero.bibliography.saveAsRTF.label "שמור כ-RTF">
+<!ENTITY zotero.bibliography.saveAsHTML.label "שמור כ-HTML">
 <!ENTITY zotero.bibliography.copyToClipboard.label "Copy to Clipboard">
 <!ENTITY zotero.bibliography.macClipboardWarning "(Rich-text formatting will be lost.)">
 <!ENTITY zotero.bibliography.print.label "הדפסה">
 
 <!ENTITY zotero.integration.docPrefs.title "Document Preferences">
 <!ENTITY zotero.integration.addEditCitation.title "Add/Edit Citation">
-<!ENTITY zotero.integration.editBibliography.title "Edit Bibliography">
+<!ENTITY zotero.integration.editBibliography.title "ערוך ביבליוגרפיה">
 
 <!ENTITY zotero.progress.title "Progress">
 
@@ -131,7 +131,7 @@
 <!ENTITY zotero.citation.suffix.label "Suffix:">
 
 <!ENTITY zotero.richText.italic.label "Italic">
-<!ENTITY zotero.richText.bold.label "Bold">
+<!ENTITY zotero.richText.bold.label "מודגש">
 <!ENTITY zotero.richText.underline.label "Underline">
 <!ENTITY zotero.richText.superscript.label "Superscript">
 <!ENTITY zotero.richText.subscript.label "Subscript">

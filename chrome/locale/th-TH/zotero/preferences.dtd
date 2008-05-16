@@ -1,4 +1,4 @@
-<!ENTITY zotero.preferences.title "Zotero Preferences">
+<!ENTITY zotero.preferences.title "การปรับแต่งโซแทโร">
 
 <!ENTITY zotero.preferences.default "พื้นฐาน:">
 
@@ -6,58 +6,58 @@
 
 <!ENTITY zotero.preferences.userInterface "ส่วนต่อประสานกับผู้ใช้">
 <!ENTITY zotero.preferences.position "แสดงโซแทโร">
-<!ENTITY zotero.preferences.position.above "above">
-<!ENTITY zotero.preferences.position.below "below">
-<!ENTITY zotero.preferences.position.browser "browser content">
-<!ENTITY zotero.preferences.statusBarIcon "Status bar icon:">
+<!ENTITY zotero.preferences.position.above "ด้านบน">
+<!ENTITY zotero.preferences.position.below "ด้านล่าง">
+<!ENTITY zotero.preferences.position.browser "เนื้อหาของบราวเซอร์">
+<!ENTITY zotero.preferences.statusBarIcon "ไอคอนแถบสถานะ:">
 <!ENTITY zotero.preferences.statusBarIcon.none "ว่างเปล่า">
 <!ENTITY zotero.preferences.fontSize "ขนาดฟ้อนท์:">
 <!ENTITY zotero.preferences.fontSize.small "เล็ก">
 <!ENTITY zotero.preferences.fontSize.medium "กลาง">
 <!ENTITY zotero.preferences.fontSize.large "ใหญ่">
 
-<!ENTITY zotero.preferences.miscellaneous "Miscellaneous">
-<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators">
-<!ENTITY zotero.preferences.updateNow "Update now">
+<!ENTITY zotero.preferences.miscellaneous "อื่น ๆ">
+<!ENTITY zotero.preferences.autoUpdate "ตรวจสอบการอัพเดตอัตโนมัติ">
+<!ENTITY zotero.preferences.updateNow "อัพเดตเดี๋ยวนี้">
 <!ENTITY zotero.preferences.reportTranslationFailure "Report broken site translators">
-<!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded RIS/Refer files">
+<!ENTITY zotero.preferences.parseRISRefer "ใช้โซแทโรเพื่อดาวน์โหลดไฟล์ RIS/Refer">
 <!ENTITY zotero.preferences.automaticSnapshots "Automatically take snapshots when creating items from web pages">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Automatically attach associated PDFs and other files when saving items">
 <!ENTITY zotero.preferences.automaticTags "Automatically tag items with keywords and subject headings">
 
-<!ENTITY zotero.preferences.openurl.caption "OpenURL">
+<!ENTITY zotero.preferences.openurl.caption "เปิดยูอาแอล">
 
 <!ENTITY zotero.preferences.openurl.search "Search for resolvers">
 <!ENTITY zotero.preferences.openurl.custom "Custom...">
 <!ENTITY zotero.preferences.openurl.server "Resolver:">
-<!ENTITY zotero.preferences.openurl.version "Version:">
+<!ENTITY zotero.preferences.openurl.version "รุ่น:">
 
-<!ENTITY zotero.preferences.prefpane.search "Search">
-<!ENTITY zotero.preferences.search.fulltextCache "Full-Text Cache">
-<!ENTITY zotero.preferences.search.pdfIndexing "PDF Indexing">
-<!ENTITY zotero.preferences.search.indexStats "Index Statistics">
+<!ENTITY zotero.preferences.prefpane.search "ค้นหา">
+<!ENTITY zotero.preferences.search.fulltextCache "ฟูลเท็กซ์แคช">
+<!ENTITY zotero.preferences.search.pdfIndexing "ทำดัชนี PDF">
+<!ENTITY zotero.preferences.search.indexStats "สถิติดัชนี">
 
-<!ENTITY zotero.preferences.search.indexStats.indexed "Indexed:">
-<!ENTITY zotero.preferences.search.indexStats.partial "Partial:">
-<!ENTITY zotero.preferences.search.indexStats.unindexed "Unindexed:">
-<!ENTITY zotero.preferences.search.indexStats.words "Words:">
+<!ENTITY zotero.preferences.search.indexStats.indexed "ดัชนี:">
+<!ENTITY zotero.preferences.search.indexStats.partial "บางส่วน:">
+<!ENTITY zotero.preferences.search.indexStats.unindexed "ไม่ทำดัชนี:">
+<!ENTITY zotero.preferences.search.indexStats.words "คำ:">
 
-<!ENTITY zotero.preferences.fulltext.textMaxLength "Maximum characters to index per file:">
-<!ENTITY zotero.preferences.fulltext.pdfMaxPages "Maximum pages to index per file:">
+<!ENTITY zotero.preferences.fulltext.textMaxLength "จำนวนตัวอักษรสูงสุดที่จะทำดัชนีต่อแฟ้ม:">
+<!ENTITY zotero.preferences.fulltext.pdfMaxPages "จำนวนหน้าสูงสุดที่จะทำดัชนีต่อแฟ้ม:">
 
-<!ENTITY zotero.preferences.prefpane.export "Export">
+<!ENTITY zotero.preferences.prefpane.export "ส่งออก">
 
 <!ENTITY zotero.preferences.citationOptions.caption "Citation Options">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Include URLs of paper articles in references">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "รวม URLS ของบทความในเอกสารอ้างอิง">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "When this option is disabled, Zotero includes URLs when citing journal, magazine, and newspaper articles only if the article does not have a page range specified.">
 
-<!ENTITY zotero.preferences.quickCopy.caption "Quick Copy">
+<!ENTITY zotero.preferences.quickCopy.caption "ทำสำเนาอย่างเร็ว">
 <!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Default Output Format:">
-<!ENTITY zotero.preferences.quickCopy.copyAsHTML "Copy as HTML">
+<!ENTITY zotero.preferences.quickCopy.copyAsHTML "ทำสำเนาเป็น HTML">
 <!ENTITY zotero.preferences.quickCopy.macWarning "Note: Rich-text formatting will be lost on Mac OS X.">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Site-Specific Settings:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domain/Path">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(e.g. wikipedia.org)">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(เช่น wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Output Format">
 
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Get additional styles...">
@@ -67,26 +67,26 @@
 <!ENTITY zotero.preferences.keys.openZotero "Open/Close Zotero Pane">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Toggle Fullscreen Mode">
 <!ENTITY zotero.preferences.keys.library "Library">
-<!ENTITY zotero.preferences.keys.quicksearch "Quick Search">
-<!ENTITY zotero.preferences.keys.newItem "Create a new item">
-<!ENTITY zotero.preferences.keys.newNote "Create a new note">
+<!ENTITY zotero.preferences.keys.quicksearch "ค้นหาด่วน">
+<!ENTITY zotero.preferences.keys.newItem "สร้างไอเทมใหม่">
+<!ENTITY zotero.preferences.keys.newNote "สร้างโน๊ตใหม่">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Toggle Tag Selector">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copy Selected Item Citations to Clipboard">
-<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copy Selected Items to Clipboard">
+<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "ทำสำเนาไอเทมไปที่คลิปบอร์ด">
 <!ENTITY zotero.preferences.keys.overrideGlobal "Try to override conflicting shortcuts">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Changes take effect in new windows only">
 
 
 <!ENTITY zotero.preferences.prefpane.advanced "Advanced">
 
-<!ENTITY zotero.preferences.dataDir "Storage Location">
-<!ENTITY zotero.preferences.dataDir.useProfile "Use Firefox profile directory">
+<!ENTITY zotero.preferences.dataDir "ที่ตั้งของพื้นที่เก็บข้อมูล">
+<!ENTITY zotero.preferences.dataDir.useProfile "ใช้ไดเรคทอรีของโปรไฟล์ไฟร์ฟ๊อกซ์">
 <!ENTITY zotero.preferences.dataDir.custom "Custom:">
-<!ENTITY zotero.preferences.dataDir.choose "Choose...">
+<!ENTITY zotero.preferences.dataDir.choose "โปรดเลือก...">
 <!ENTITY zotero.preferences.dataDir.reveal "Show Data Directory">
 
 <!ENTITY zotero.preferences.dbMaintenance "Database Maintenance">
-<!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Check Database Integrity">
+<!ENTITY zotero.preferences.dbMaintenance.integrityCheck "ตรวจสอบความถูกต้องของฐานข้อมูล">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reset Translators and Styles...">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset Translators...">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset Styles...">

@@ -1,0 +1,23 @@
+<!ENTITY zotero.search.name "Ime:">
+
+<!ENTITY zotero.search.joinMode.prefix "Ujemanje z">
+<!ENTITY zotero.search.joinMode.any "katerimkoli">
+<!ENTITY zotero.search.joinMode.all "vsemi">
+<!ENTITY zotero.search.joinMode.suffix "izmed naslednjih:">
+
+<!ENTITY zotero.search.recursive.label "Išči v podmapah">
+<!ENTITY zotero.search.noChildren "Pokaži le vrhnje zadetke">
+<!ENTITY zotero.search.includeParentsAndChildren "Vključi med zadetke starše in otroke">
+
+<!ENTITY zotero.search.textModes.phrase "Fraza">
+<!ENTITY zotero.search.textModes.phraseBinary "Fraza (vključno z bin. datotekami)">
+<!ENTITY zotero.search.textModes.regexp "Reg. izraz">
+<!ENTITY zotero.search.textModes.regexpCS "Reg. izraz (razl. velike in male črke)">
+
+<!ENTITY zotero.search.date.units.days "dni">
+<!ENTITY zotero.search.date.units.months "mesecev">
+<!ENTITY zotero.search.date.units.years "let">
+
+<!ENTITY zotero.search.search "Išči">
+<!ENTITY zotero.search.clear "Počisti">
+<!ENTITY zotero.search.saveSearch "Shrani iskanje">

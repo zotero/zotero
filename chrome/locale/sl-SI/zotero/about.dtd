@@ -1,0 +1,10 @@
+<!ENTITY zotero.version "različica">
+<!ENTITY zotero.createdby "Avtor:">
+<!ENTITY zotero.directors "Vodje:">
+<!ENTITY zotero.developers "Razvijalci:">
+<!ENTITY zotero.alumni "Alumni:">
+<!ENTITY zotero.about.localizations "Lokalizacije:">
+<!ENTITY zotero.about.additionalSoftware "Uporabljena prog. oprema in podprti standardi:">
+<!ENTITY zotero.executiveProducer "Izvršni producent:">
+<!ENTITY zotero.thanks "Posebna zahvala:">
+<!ENTITY zotero.about.close "Zapri">

@@ -1,4 +1,4 @@
-<!ENTITY zotero.preferences.title "Zotero innstillinger">
+<!ENTITY zotero.preferences.title "Innstillinger for Zotero">
 
 <!ENTITY zotero.preferences.default "Standard:">
 
@@ -21,46 +21,46 @@
 <!ENTITY zotero.preferences.updateNow "Oppdater nå">
 <!ENTITY zotero.preferences.reportTranslationFailure "Rapporter ødelagte nettstedoversettere">
 <!ENTITY zotero.preferences.parseRISRefer "Bruk Zotero for nedlastede RIS/Refer-filer">
-<!ENTITY zotero.preferences.automaticSnapshots "Ta automatisk øyeblikksbilder når du lager elementer fra nettsider">
+<!ENTITY zotero.preferences.automaticSnapshots "Ta snapshot automatisk når du genererer elementer fra nettsider">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Lagre assosierte PDF-filer og andre filer når du lagrer elementer">
-<!ENTITY zotero.preferences.automaticTags "Automatically tag items with keywords and subject headings">
+<!ENTITY zotero.preferences.automaticTags "Legg til tagger automatisk når elementer inneholder nøkkel- og emneord i hodeteksten">
 
 <!ENTITY zotero.preferences.openurl.caption "Åpne URL">
 
-<!ENTITY zotero.preferences.openurl.search "Search for resolvers">
+<!ENTITY zotero.preferences.openurl.search "Let etter &quot;resolvers&quot;">
 <!ENTITY zotero.preferences.openurl.custom "Egendefinert...">
 <!ENTITY zotero.preferences.openurl.server "Resolver:">
 <!ENTITY zotero.preferences.openurl.version "Versjon:">
 
 <!ENTITY zotero.preferences.prefpane.search "Søk">
-<!ENTITY zotero.preferences.search.fulltextCache "Full-Text Cache">
-<!ENTITY zotero.preferences.search.pdfIndexing "PDF Indexing">
-<!ENTITY zotero.preferences.search.indexStats "Index Statistics">
+<!ENTITY zotero.preferences.search.fulltextCache "Fulltekst-mellomlager">
+<!ENTITY zotero.preferences.search.pdfIndexing "PDF-registrering">
+<!ENTITY zotero.preferences.search.indexStats "Registerstatistikk">
 
 <!ENTITY zotero.preferences.search.indexStats.indexed "Indeksert:">
-<!ENTITY zotero.preferences.search.indexStats.partial "Partial:">
-<!ENTITY zotero.preferences.search.indexStats.unindexed "Unindexed:">
+<!ENTITY zotero.preferences.search.indexStats.partial "Delvis:">
+<!ENTITY zotero.preferences.search.indexStats.unindexed "Uregistrert:">
 <!ENTITY zotero.preferences.search.indexStats.words "Ord:">
 
-<!ENTITY zotero.preferences.fulltext.textMaxLength "Maximum characters to index per file:">
-<!ENTITY zotero.preferences.fulltext.pdfMaxPages "Maximum pages to index per file:">
+<!ENTITY zotero.preferences.fulltext.textMaxLength "Maksimalt antall tegn å registrere per fil:">
+<!ENTITY zotero.preferences.fulltext.pdfMaxPages "Maksimalt antall sider å registrere per fil:">
 
-<!ENTITY zotero.preferences.prefpane.export "Eksporter:">
+<!ENTITY zotero.preferences.prefpane.export "Eksporter">
 
-<!ENTITY zotero.preferences.citationOptions.caption "Citation Options">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Include URLs of paper articles in references">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "When this option is disabled, Zotero includes URLs when citing journal, magazine, and newspaper articles only if the article does not have a page range specified.">
+<!ENTITY zotero.preferences.citationOptions.caption "Valg for henvisninger">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Inkluderer URL til trykte artikler i referansene">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Når dette alternativet ikke er valgt, vil Zotero kun oppgi URL til tidsskriftet, magasinet eller avisen, dersom artikkelen er registrert uten sidetall.">
 
-<!ENTITY zotero.preferences.quickCopy.caption "Quick Copy">
-<!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Default Output Format:">
-<!ENTITY zotero.preferences.quickCopy.copyAsHTML "Copy as HTML">
-<!ENTITY zotero.preferences.quickCopy.macWarning "Note: Rich-text formatting will be lost on Mac OS X.">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Site-Specific Settings:">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domain/Path">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(e.g. wikipedia.org)">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Output Format">
+<!ENTITY zotero.preferences.quickCopy.caption "Kvikk-kopi">
+<!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Standard utdata-format:">
+<!ENTITY zotero.preferences.quickCopy.copyAsHTML "Kopier som HTML">
+<!ENTITY zotero.preferences.quickCopy.macWarning "Obs: Rik-tekst-formatering blir borte i Mac OS X.">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Innstillinger">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domene/sti">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(f.eks. wikipedia.org)">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Utdata-format">
 
-<!ENTITY zotero.preferences.export.getAdditionalStyles "Get additional styles...">
+<!ENTITY zotero.preferences.export.getAdditionalStyles "Hent flere stiler...">
 
 <!ENTITY zotero.preferences.prefpane.keys "Hurtigtaster">
 
@@ -71,22 +71,22 @@
 <!ENTITY zotero.preferences.keys.newItem "Lag et nytt element">
 <!ENTITY zotero.preferences.keys.newNote "Lag et nytt notat">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Slå taggvelgeren av/på">
-<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copy Selected Item Citations to Clipboard">
-<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copy Selected Items to Clipboard">
+<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopier de valgte element-henvisningene til utklippstavla.">
+<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopier de valgte elementene til utklippstavla.">
 <!ENTITY zotero.preferences.keys.overrideGlobal "Forsøk å overstyre snarveier i konflikt">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Endringer gjelder kun for nye vinduer">
 
 
 <!ENTITY zotero.preferences.prefpane.advanced "Avansert">
 
-<!ENTITY zotero.preferences.dataDir "Storage Location">
-<!ENTITY zotero.preferences.dataDir.useProfile "Use Firefox profile directory">
-<!ENTITY zotero.preferences.dataDir.custom "Custom:">
+<!ENTITY zotero.preferences.dataDir "Lagringsplass">
+<!ENTITY zotero.preferences.dataDir.useProfile "Bruk profilmappa til Firefox.">
+<!ENTITY zotero.preferences.dataDir.custom "Egendefinert:">
 <!ENTITY zotero.preferences.dataDir.choose "Velg...">
-<!ENTITY zotero.preferences.dataDir.reveal "Show Data Directory">
+<!ENTITY zotero.preferences.dataDir.reveal "Vis datamappe">
 
-<!ENTITY zotero.preferences.dbMaintenance "Database Maintenance">
-<!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Check Database Integrity">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reset Translators and Styles...">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset Translators...">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset Styles...">
+<!ENTITY zotero.preferences.dbMaintenance "Vedlikehold av database">
+<!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Kontroller databasen">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Nullstill oversettere og stiler...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Nullstill oversettere...">
+<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Nullstill stiler...">

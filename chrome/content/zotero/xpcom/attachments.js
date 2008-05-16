@@ -393,24 +393,26 @@ Zotero.Attachments = new function(){
 			Zotero.Notifier.enable();
 		}
 		
-		// If we don't have the MIME type, do a HEAD request for it
-		Zotero.Utilities.HTTP.doHead(url, function(obj){
-			var mimeType = obj.channel.contentType;
-			
-			if (mimeType) {
-				var disabled = Zotero.Notifier.disable();
+		if (!mimeType) {
+			// If we don't have the MIME type, do a HEAD request for it
+			Zotero.Utilities.HTTP.doHead(url, function(obj){
+				var mimeType = obj.channel.contentType;
 				
-				var item = Zotero.Items.get(itemID);
-				item.attachmentMIMEType = mimeType;
-				item.save();
-				
-				if (disabled) {
-					Zotero.Notifier.enable();
+				if (mimeType) {
+					var disabled = Zotero.Notifier.disable();
+					
+					var item = Zotero.Items.get(itemID);
+					item.attachmentMIMEType = mimeType;
+					item.save();
+					
+					if (disabled) {
+						Zotero.Notifier.enable();
+					}
 				}
-			}
-			
-			Zotero.Notifier.trigger('add', 'item', itemID);
-		});
+				
+				Zotero.Notifier.trigger('add', 'item', itemID);
+			});
+		}
 		
 		return itemID;
 	}

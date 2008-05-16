@@ -2,14 +2,11 @@
 <!ENTITY zotero.general.note "Nota:">
 
 <!ENTITY zotero.errorReport.unrelatedMessages "Il log degli errori potrebbe includere messaggi non riferibili a Zotero">
-<!ENTITY zotero.errorReport.additionalInfo "Informazioni aggiuntive">
-<!ENTITY zotero.errorReport.emailAddress "Indirizzo di posta elettronica personale:">
-<!ENTITY zotero.errorReport.errorSteps "Indicare le operazioni in corso al verificarsi dell&apos;errore. Si raccomanda la massima precisione nell&apos;esposizione dei passaggi che hanno condotto all&apos;errore.">
 <!ENTITY zotero.errorReport.submissionInProgress "Attendere, rapporto di errore in fase di invio.">
 <!ENTITY zotero.errorReport.submitted "Il rapporto di errore è stato inviato.">
 <!ENTITY zotero.errorReport.reportID "ID rapporto:">
-<!ENTITY zotero.errorReport.furtherAssistance "Consultare la pagina degli Errori conosciuti per ulteriore assistenza.">
-<!ENTITY zotero.errorReport.includeReportID "Riportare il numero ID del rapporto di errore in ogni comunicazione con gli sviluppatori di Zotero.">
+<!ENTITY zotero.errorReport.postToForums "Please post a message to the Zotero forums (forums.zotero.org) with this Report ID, a description of the problem, and any steps necessary to reproduce it.">
+<!ENTITY zotero.errorReport.notReviewed "Error reports are generally not reviewed unless referred to in the forums.">
 
 <!ENTITY zotero.upgrade.newVersionInstalled "Nuova versione di Zotero installata correttamente.">
 <!ENTITY zotero.upgrade.upgradeRequired "Il database deve essere aggiornato alla nuova versione di Zotero.">
@@ -38,7 +35,10 @@
 <!ENTITY zotero.items.date_column "Data">
 <!ENTITY zotero.items.year_column "Anno">
 <!ENTITY zotero.items.publisher_column "Editore">
+<!ENTITY zotero.items.publication_column "Publication">
+<!ENTITY zotero.items.journalAbbr_column "Journal Abbr">
 <!ENTITY zotero.items.language_column "Lingua">
+<!ENTITY zotero.items.accessDate_column "Accessed">
 <!ENTITY zotero.items.callNumber_column "Segnatura">
 <!ENTITY zotero.items.repository_column "Deposito">
 <!ENTITY zotero.items.rights_column "Diritti">

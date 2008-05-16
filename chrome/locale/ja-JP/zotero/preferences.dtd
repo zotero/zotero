@@ -47,20 +47,20 @@
 
 <!ENTITY zotero.preferences.prefpane.export "エクスポート">
 
-<!ENTITY zotero.preferences.citationOptions.caption "Citation Options">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Include URLs of paper articles in references">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "When this option is disabled, Zotero includes URLs when citing journal, magazine, and newspaper articles only if the article does not have a page range specified.">
+<!ENTITY zotero.preferences.citationOptions.caption "引用オプション">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "紙媒体の論文のURLアドレスを参考文献目録に含む">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "このオプションが無効にされている時は、Zoteroはページ範囲が指定されない場合に限り、学術雑誌、雑誌論文、新聞記事を引用する際に、このURLアドレスを含む。">
 
 <!ENTITY zotero.preferences.quickCopy.caption "クィックコピー">
 <!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "標準アウトプットフォーマット：">
-<!ENTITY zotero.preferences.quickCopy.copyAsHTML "Copy as HTML">
+<!ENTITY zotero.preferences.quickCopy.copyAsHTML "HTMLとしてコピー">
 <!ENTITY zotero.preferences.quickCopy.macWarning "注意：Mac OS Xにはリッチテキスト形式は失われます。">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "サイト固有の設定：">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "ドメイン／パス">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "（例：wikipedia.org）">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "出力形式">
 
-<!ENTITY zotero.preferences.export.getAdditionalStyles "Get additional styles...">
+<!ENTITY zotero.preferences.export.getAdditionalStyles "スタイルをダウンロードする...">
 
 <!ENTITY zotero.preferences.prefpane.keys "ショートカットキー">
 
@@ -87,6 +87,6 @@
 
 <!ENTITY zotero.preferences.dbMaintenance "データベースの管理">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "データベースの整合性をチェック">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reset Translators and Styles...">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset Translators...">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset Styles...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "翻訳者とスタイルをリセットする...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "翻訳者をリセットする...">
+<!ENTITY zotero.preferences.dbMaintenance.resetStyles "スタイルをリセットする...">

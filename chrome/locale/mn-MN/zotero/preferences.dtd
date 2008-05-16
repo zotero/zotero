@@ -1,10 +1,10 @@
 <!ENTITY zotero.preferences.title "Zotero Preferences">
 
-<!ENTITY zotero.preferences.default "Default:">
+<!ENTITY zotero.preferences.default "Анхдагч">
 
-<!ENTITY zotero.preferences.prefpane.general "General">
+<!ENTITY zotero.preferences.prefpane.general "Ерөнхий">
 
-<!ENTITY zotero.preferences.userInterface "User Interface">
+<!ENTITY zotero.preferences.userInterface "Хэрэглэгчийн">
 <!ENTITY zotero.preferences.position "Display Zotero">
 <!ENTITY zotero.preferences.position.above "above">
 <!ENTITY zotero.preferences.position.below "below">
@@ -12,9 +12,9 @@
 <!ENTITY zotero.preferences.statusBarIcon "Status bar icon:">
 <!ENTITY zotero.preferences.statusBarIcon.none "None">
 <!ENTITY zotero.preferences.fontSize "Font size:">
-<!ENTITY zotero.preferences.fontSize.small "Small">
-<!ENTITY zotero.preferences.fontSize.medium "Medium">
-<!ENTITY zotero.preferences.fontSize.large "Large">
+<!ENTITY zotero.preferences.fontSize.small "Бага">
+<!ENTITY zotero.preferences.fontSize.medium "Дунд">
+<!ENTITY zotero.preferences.fontSize.large "Том">
 
 <!ENTITY zotero.preferences.miscellaneous "Miscellaneous">
 <!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators">
@@ -30,9 +30,9 @@
 <!ENTITY zotero.preferences.openurl.search "Search for resolvers">
 <!ENTITY zotero.preferences.openurl.custom "Custom...">
 <!ENTITY zotero.preferences.openurl.server "Resolver:">
-<!ENTITY zotero.preferences.openurl.version "Version:">
+<!ENTITY zotero.preferences.openurl.version "Хувилбар">
 
-<!ENTITY zotero.preferences.prefpane.search "Search">
+<!ENTITY zotero.preferences.prefpane.search "Хайх">
 <!ENTITY zotero.preferences.search.fulltextCache "Full-Text Cache">
 <!ENTITY zotero.preferences.search.pdfIndexing "PDF Indexing">
 <!ENTITY zotero.preferences.search.indexStats "Index Statistics">
@@ -45,13 +45,13 @@
 <!ENTITY zotero.preferences.fulltext.textMaxLength "Maximum characters to index per file:">
 <!ENTITY zotero.preferences.fulltext.pdfMaxPages "Maximum pages to index per file:">
 
-<!ENTITY zotero.preferences.prefpane.export "Export">
+<!ENTITY zotero.preferences.prefpane.export "Е">
 
 <!ENTITY zotero.preferences.citationOptions.caption "Citation Options">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Include URLs of paper articles in references">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "When this option is disabled, Zotero includes URLs when citing journal, magazine, and newspaper articles only if the article does not have a page range specified.">
 
-<!ENTITY zotero.preferences.quickCopy.caption "Quick Copy">
+<!ENTITY zotero.preferences.quickCopy.caption "Хурдан хуулах">
 <!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Default Output Format:">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "Copy as HTML">
 <!ENTITY zotero.preferences.quickCopy.macWarning "Note: Rich-text formatting will be lost on Mac OS X.">
@@ -66,8 +66,8 @@
 
 <!ENTITY zotero.preferences.keys.openZotero "Open/Close Zotero Pane">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Toggle Fullscreen Mode">
-<!ENTITY zotero.preferences.keys.library "Library">
-<!ENTITY zotero.preferences.keys.quicksearch "Quick Search">
+<!ENTITY zotero.preferences.keys.library "Номын сан">
+<!ENTITY zotero.preferences.keys.quicksearch "Хурдан хайх">
 <!ENTITY zotero.preferences.keys.newItem "Create a new item">
 <!ENTITY zotero.preferences.keys.newNote "Create a new note">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Toggle Tag Selector">
