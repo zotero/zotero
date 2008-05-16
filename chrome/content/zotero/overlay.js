@@ -146,8 +146,6 @@ var ZoteroPane = new function()
 		var itemsTree = document.getElementById('zotero-items-tree');
 		itemsTree.controllers.appendController(new Zotero.ItemTreeCommandController(itemsTree));
 		
-		this.updateTagSelectorSize();
-		
 		// Create the New Item (+) menu with each item type
 		var addMenu = document.getElementById('zotero-tb-add').firstChild;
 		var separator = document.getElementById('zotero-tb-add').firstChild.firstChild;
@@ -349,6 +347,16 @@ var ZoteroPane = new function()
 	 * Trigger actions based on keyboard shortcuts
 	 */
 	function handleKeyDown(event, from) {
+		try {
+			// Ignore keystrokes outside of Zotero pane
+			if (!(event.originalTarget.ownerDocument instanceof XULDocument)) {
+				return;
+			}
+		}
+		catch (e) {
+			Zotero.debug(e);
+		}
+		
 		if (from == 'zotero-pane') {
 			// Highlight collections containing selected items
 			//
@@ -406,6 +414,20 @@ var ZoteroPane = new function()
 		Zotero.debug(command);
 		
 		switch (command) {
+			case 'openZotero':
+				try {
+					// Ignore Cmd-Shift-Z keystroke in text areas
+					if (Zotero.isMac && key == 'Z' &&
+							event.originalTarget.localName == 'textarea') {
+						Zotero.debug('Ignoring keystroke in text area');
+						return;
+					}
+				}
+				catch (e) {
+					Zotero.debug(e);
+				}
+				ZoteroPane.toggleDisplay()
+				break;
 			case 'library':
 				document.getElementById('zotero-collections-tree').focus();
 				ZoteroPane.collectionsView.selection.select(0);
@@ -627,7 +649,7 @@ var ZoteroPane = new function()
 			tagSelector.setAttribute('height', maxTS);
 		}
 		
-		height = tagSelector.boxObject.height;
+		var height = tagSelector.boxObject.height;
 		
 		/*
 		Zotero.debug("tagSelector.boxObject.height: " + tagSelector.boxObject.height);

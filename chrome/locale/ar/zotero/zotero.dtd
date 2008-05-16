@@ -1,15 +1,12 @@
 <!ENTITY zotero.general.optional "(اختياري)">
-<!ENTITY zotero.general.note "Note:">
+<!ENTITY zotero.general.note "ملاحظة:">
 
-<!ENTITY zotero.errorReport.unrelatedMessages "The error log may include messages unrelated to Zotero.">
-<!ENTITY zotero.errorReport.additionalInfo "معلومات إضافية">
-<!ENTITY zotero.errorReport.emailAddress "بريدك الإلكتروني:">
-<!ENTITY zotero.errorReport.errorSteps "ماذا كنت تفعل عندما حصل الخطأ؟ إن أمكن اذكر الخطوات التي احدثت الخطأ.">
+<!ENTITY zotero.errorReport.unrelatedMessages "سجل الأخطاء قد يحتوي رسائل ليس لها علاقة بزوتيرو.">
 <!ENTITY zotero.errorReport.submissionInProgress "فضلاً انتظر حتى يتم إرسال البلاغ.">
 <!ENTITY zotero.errorReport.submitted "تم إرسال البلاغ.">
 <!ENTITY zotero.errorReport.reportID "رقم التقرير:">
-<!ENTITY zotero.errorReport.furtherAssistance "See the Known Issues page and the forums for further assistance.">
-<!ENTITY zotero.errorReport.includeReportID "فضلاً اذكر رقم التقرير في أي مراسلات تتعلق بنفس المشكلة.">
+<!ENTITY zotero.errorReport.postToForums "Please post a message to the Zotero forums (forums.zotero.org) with this Report ID, a description of the problem, and any steps necessary to reproduce it.">
+<!ENTITY zotero.errorReport.notReviewed "Error reports are generally not reviewed unless referred to in the forums.">
 
 <!ENTITY zotero.upgrade.newVersionInstalled "لقد قمتَ بتنصيب نسخة جديدة من زوتيرو.">
 <!ENTITY zotero.upgrade.upgradeRequired "يجب ترقية قاعدة بيانات زوتيرو كي تعمل مع النسخة الجديدة.">
@@ -38,7 +35,10 @@
 <!ENTITY zotero.items.date_column "التاريخ">
 <!ENTITY zotero.items.year_column "السنة">
 <!ENTITY zotero.items.publisher_column "الناشر">
+<!ENTITY zotero.items.publication_column "Publication">
+<!ENTITY zotero.items.journalAbbr_column "Journal Abbr">
 <!ENTITY zotero.items.language_column "اللغة">
+<!ENTITY zotero.items.accessDate_column "Accessed">
 <!ENTITY zotero.items.callNumber_column "رقم الإستدعاء">
 <!ENTITY zotero.items.repository_column "المخزن">
 <!ENTITY zotero.items.rights_column "الحقوق">
@@ -112,8 +112,8 @@
 <!ENTITY zotero.bibliography.print.label "طباعة">
 
 <!ENTITY zotero.integration.docPrefs.title "تفضيلات المستند">
-<!ENTITY zotero.integration.addEditCitation.title "Add/Edit Citation">
-<!ENTITY zotero.integration.editBibliography.title "Edit Bibliography">
+<!ENTITY zotero.integration.addEditCitation.title "إضافة/تحرير توثيق">
+<!ENTITY zotero.integration.editBibliography.title "تحرير قائمة المؤلفات">
 
 <!ENTITY zotero.progress.title "التقدم">
 
@@ -121,20 +121,20 @@
 <!ENTITY zotero.exportOptions.format.label "الشكل:">
 <!ENTITY zotero.exportOptions.translatorOptions.label "خيارات المترجم">
 
-<!ENTITY zotero.citation.keepSorted.label "Keep Sources Sorted">
+<!ENTITY zotero.citation.keepSorted.label "الاحتفاظ بمصادر مرتبة">
 
 <!ENTITY zotero.citation.page "الصفحة">
 <!ENTITY zotero.citation.paragraph "الفقرة">
 <!ENTITY zotero.citation.line "السطر">
-<!ENTITY zotero.citation.suppressAuthor.label "Suppress Author">
-<!ENTITY zotero.citation.prefix.label "Prefix:">
-<!ENTITY zotero.citation.suffix.label "Suffix:">
+<!ENTITY zotero.citation.suppressAuthor.label "طمس المؤلف">
+<!ENTITY zotero.citation.prefix.label "سابقة">
+<!ENTITY zotero.citation.suffix.label "لاحقة">
 
-<!ENTITY zotero.richText.italic.label "Italic">
-<!ENTITY zotero.richText.bold.label "Bold">
-<!ENTITY zotero.richText.underline.label "Underline">
-<!ENTITY zotero.richText.superscript.label "Superscript">
-<!ENTITY zotero.richText.subscript.label "Subscript">
+<!ENTITY zotero.richText.italic.label "خط مائل">
+<!ENTITY zotero.richText.bold.label "خط ثخين">
+<!ENTITY zotero.richText.underline.label "تسطير">
+<!ENTITY zotero.richText.superscript.label "حرف مرتفع">
+<!ENTITY zotero.richText.subscript.label "حرف منخفض">
 
 <!ENTITY zotero.annotate.toolbar.add.label "إضافة حاشية">
 <!ENTITY zotero.annotate.toolbar.collapse.label "تقليص جميع الحواشي">
@@ -150,4 +150,4 @@
 <!ENTITY zotero.integration.prefs.bookmarks.label "تأشيرات">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "التأشيرات تظل محفوظة في مايكروسوفت وورد و OpenOffice.org. ولكنها قد تكون عرضة للتغيير الغير مقصود.">
 
-<!ENTITY zotero.integration.references.label "References in Bibliography">
+<!ENTITY zotero.integration.references.label "مراجع في قائمة المؤلفات">

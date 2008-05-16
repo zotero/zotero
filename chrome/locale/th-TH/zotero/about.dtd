@@ -2,9 +2,9 @@
 <!ENTITY zotero.createdby "สร้างโดย:">
 <!ENTITY zotero.directors "ผู้ควบคุม:">
 <!ENTITY zotero.developers "ผู้พัฒนา:">
-<!ENTITY zotero.alumni "Alumni:">
-<!ENTITY zotero.about.localizations "Localizations:">
-<!ENTITY zotero.about.additionalSoftware "Third-Party Software and Standards:">
-<!ENTITY zotero.executiveProducer "Executive Producer:">
+<!ENTITY zotero.alumni "ศิษย์เก่า:">
+<!ENTITY zotero.about.localizations "หลากภาษา:">
+<!ENTITY zotero.about.additionalSoftware "ซอฟต์แวร์อื่นและมาตรฐาน:">
+<!ENTITY zotero.executiveProducer "ผู้อำนวยการสร้างฝ่ายบริหาร:">
 <!ENTITY zotero.thanks "ขอบคุณเป็นพิเศษ:">
 <!ENTITY zotero.about.close "ปิด">

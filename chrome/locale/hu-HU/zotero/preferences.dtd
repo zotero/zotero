@@ -53,7 +53,7 @@
 
 <!ENTITY zotero.preferences.quickCopy.caption "Gyorsmásolás">
 <!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Alapértelmezett kimeneti formátum">
-<!ENTITY zotero.preferences.quickCopy.copyAsHTML "Copy as HTML">
+<!ENTITY zotero.preferences.quickCopy.copyAsHTML "Másolás HTML-ként">
 <!ENTITY zotero.preferences.quickCopy.macWarning "Megjegyzés: A formázás Mac OS X alatt elveszik.">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Weboldal-specifikus beállítások:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domain/Path">

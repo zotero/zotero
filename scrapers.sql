@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-05-03 06:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-05-15 21:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -930,7 +930,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b3.r1', '', '2008-04-30 18:15:00', '1', '100', '4', 'Library Catalog (Voyager)', 'Simon Kornblith', 'Pwebrecon\.cgi', 
+REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b3.r1', '', '2008-05-05 07:45:00', '1', '100', '4', 'Library Catalog (Voyager)', 'Simon Kornblith', 'Pwebrecon\.cgi', 
 'function detectWeb(doc, url) {
 	var export_options = doc.forms.namedItem(''frm'').elements.namedItem(''RD'').options;
 	for(var i in export_options) {
@@ -1089,7 +1089,869 @@ REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('2e304579-dd7b-4770-85e9-0d724c9b49a5', '1.0.0b4.r5', '', '2008-05-01 20:30:00', '0', '100', '4', 'European Educational Research Journal', 'Michael Berkowitz', 'http://www.wwwords.co.uk/eerj/', 
+REPLACE INTO translators VALUES ('83538f48-906f-40ef-bdb3-e94f63676307', '1.0.0b4.r5', '', '2008-05-09 23:15:00', '0', '100', '4', 'NAA RecordSearch', 'Tim Sherratt', 'http://naa12.naa.gov.au/scripts/', 
+'function detectWeb(doc, url) {
+    if (url.match("Items_listing")) {
+        return "multiple";
+    } else if (url.match("ItemDetail")) {
+	return "manuscript";
+    }
+}', 
+'function doWeb(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+			if (prefix == ''x'') return namespace; else return null;
+		} : null;
+	if (detectWeb(doc, url) == "multiple") {
+		var records = new Array();
+		var items = new Object();
+		var titles = doc.evaluate(''//form[2]/table/tbody/tr/td[b="Title"]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var links = doc.evaluate(''//form[2]/table/tbody/tr/td[b="Control symbol"]/a'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var title;
+		var link;
+		while ((title = titles.iterateNext()) && (link = links.iterateNext())) {
+			items[link.href] = Zotero.Utilities.trimInternal(title.lastChild.textContent);
+		}
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			records.push(i);
+		}
+	} else {
+		records = [url]; 
+	}
+	Zotero.Utilities.processDocuments(records, function(doc) {
+		var title = Zotero.Utilities.cleanString(doc.evaluate(''//table/tbody/tr/td[b="Title"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext().lastChild.textContent);
+		var series = Zotero.Utilities.cleanString(doc.evaluate(''//table/tbody/tr/td[b="Series number"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext().lastChild.textContent);
+		var control = Zotero.Utilities.cleanString(doc.evaluate(''//table/tbody/tr/td[b="Control symbol"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext().lastChild.textContent);
+		var date = Zotero.Utilities.cleanString(doc.evaluate(''//table/tbody/tr/td[b="Contents date range"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext().lastChild.textContent);
+		var access = Zotero.Utilities.cleanString(doc.evaluate(''//table/tbody/tr/td[b="Access status"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext().lastChild.textContent);
+		var location = Zotero.Utilities.cleanString(doc.evaluate(''//table/tbody/tr/td[b="Location"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext().lastChild.textContent);
+		var barcode = Zotero.Utilities.cleanString(doc.evaluate(''//table/tbody/tr/td[b="Barcode"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext().lastChild.textContent);
+		if (doc.body.innerHTML.match("View digital copy")) {
+			var digitised = "yes";
+		} else {
+			var digitised = "no";
+		}
+		var repository ="National Archives of Australia, " + location;
+		var url = "http://www.aa.gov.au/cgi-bin/Search?O=I&Number=" + barcode;
+		var ref_number = series + ", " + control;
+		var type = "file";
+		var item = new Zotero.Item("manuscript");
+		item.title = title;
+		item.archiveLocation = ref_number;
+		item.url = url;
+		item.date = date;
+		item.manuscriptType = type;
+		item.extra = "Access: " + access + "\nDigitised: " + digitised;
+		item.repository = repository;
+		item.complete();
+		
+	}, function() {Zotero.done;});
+}');
+
+REPLACE INTO translators VALUES ('882f70a8-b8ad-403e-bd76-cb160224999d', '1.0.0b4.r5', '', '2008-05-15 21:30:00', '0', '100', '4', 'Vanderbilt eJournals', 'Michael Berkowitz', 'http://ejournals.library.vanderbilt.edu/', 
+'function detectWeb(doc, url) {
+	if (url.match(/viewarticle.php/)) {
+		return "journalArticle";
+	} else if (url.match(/viewissue.php/) || url.match(/search.php/)) {
+		return "multiple";
+	}
+}', 
+'function doWeb(doc, url) {
+	var n = doc.documentElement.namespaceURI;
+	var ns = n ? function (prefix) {
+	    if (prefix == ''x'') return n; else return null;
+	} : null;
+	var arts = new Array();
+	if (detectWeb(doc, url) == "multiple") {
+		var items = new Object();
+		if (doc.evaluate(''/html/body/table/tbody/tr/td[2]/ul/li'', doc, ns, XPathResult.ANY_TYPE, null).iterateNext()) {
+			var results = doc.evaluate(''/html/body/table/tbody/tr/td[2]/ul/li'', doc, ns, XPathResult.ANY_TYPE, null);
+			var titleX = ''./span[@class="toctitle"]'';
+			var linkX = ''.//a[contains(text(), "Abstract")]'';
+			/*var res;
+			while (res = results.iterateNext()) {
+				var title = doc.evaluate(''./span[@class="toctitle"]'', res, ns, XPathResult.ANY_TYPE, null).iterateNext.textContent;
+				var link = doc.evaluate(''.//a[contains(text(), "Abstract")]'', res, ns, XPathResult.ANY_TYPE, null).iterateNext.href;
+				items[link] = title;
+			}*/
+		} else {
+			var results = doc.evaluate(''//tr[td[3]//a[contains(text(), "Abstract")]]'', doc, ns, XPathResult.ANY_TYPE, null);
+			var titleX = ''./td[2]'';
+			var linkX = ''./td[3]//a'';
+		}
+		var res;
+		while (res = results.iterateNext()) {
+			var title = doc.evaluate(titleX, res, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+			var link = doc.evaluate(linkX, res, ns, XPathResult.ANY_TYPE, null).iterateNext().href;
+			items[link] = Zotero.Utilities.trimInternal(title);
+		}
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			arts.push(i);
+		}
+	} else {
+		arts = [url];
+	}
+	Zotero.Utilities.processDocuments(arts, function(doc) {
+		var pdfurl = doc.evaluate(''//a[contains(text(), "PDF")]'', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().href;
+		var gets = doc.location.href.match(/^(http:\/\/[^/]+\/[^/]+\/).*id=(\d+)/);
+		var risurl = gets[1] + ''rst/rst.php?op=capture_cite&id='' + gets[2] + ''&cite=refman'';
+		Zotero.Utilities.HTTP.doGet(risurl, function(text) {
+			var translator = Zotero.loadTranslator("import");
+			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+			translator.setString(text);
+			translator.setHandler("itemDone", function(obj, item) {
+				var voliss = item.publicationTitle.split(/;/);
+				item.publicationTitle = voliss[0];
+				voliss = voliss[1].match(/Vol\.\s+(\d+)(,\s+No\.\s+(\d+))?\s+\((\d+)\)/);
+				item.volume = voliss[1];
+				if (voliss[3]) item.issue = voliss[3];
+				item.date = voliss[4];				
+				item.attachments = [
+					{url:item.url, title:item.publicationTitle + " Snapshot", mimeType:"text/html"},
+					{url:pdfurl, title:item.publicationTitle + " PDF", mimeType:"application/pdf"}
+				];
+				item.complete();	
+			});
+			translator.translate();
+		});
+	}, function() {Zotero.done;});
+	Zotero.wait();
+}');
+
+REPLACE INTO translators VALUES ('4363275e-5cc5-4627-9a7f-951fb58a02c3', '1.0.0b4.r5', '', '2008-05-15 19:30:00', '0', '100', '4', 'Cornell University Press', 'Michael Berkowitz', 'http://www.cornellpress.cornell.edu/', 
+'function detectWeb(doc, url) {
+	if (url.match("detail.taf")) {
+		return "book";
+	} else if (url.match("list.taf") || url.match("listsearch.taf")) {
+		return "multiple";
+	}
+}', 
+'function doWeb(doc, url) {
+	var n = doc.documentElement.namespaceURI;
+	var ns = n ? function (prefix) {
+	    if (prefix == ''x'') return n; else return null;
+	} : null;
+	
+	var books = new Array();
+	if (detectWeb(doc, url) == "multiple") {
+		var items = new Object();
+		var titles = doc.evaluate(''//tr/td[2]/a'', doc, ns, XPathResult.ANY_TYPE, null);
+		var title;
+		while (title = titles.iterateNext()) {
+			if (title.textContent.match(/\w+/)) items[title.href] = Zotero.Utilities.trimInternal(title.textContent);
+		}
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			books.push(i);
+		}
+	} else {
+		books = [url];
+	}
+	Zotero.Utilities.processDocuments(books, function(doc) {
+		var item = new Zotero.Item("book");
+		item.title = Zotero.Utilities.capitalizeTitle(doc.evaluate(''//span[@class="bktitle"]'', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+		var authors = doc.evaluate(''//div[@id="detail"]/table/tbody/tr/td/form/a'', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent.split(/;/);
+		Zotero.debug(authors);
+		for each (var aut in authors) {
+			if (aut.match(/Translator/)) {
+				item.creators.push(Zotero.Utilities.cleanAuthor(aut.match(/^(.*)\s+\(/)[1], "translator"));
+			} else if (aut.match(/Editor/)) {
+				item.creators.push(Zotero.Utilities.cleanAuthor(aut.match(/^(.*)\s+\(/)[1], "editor"));
+			} else {
+				item.creators.push(Zotero.Utilities.cleanAuthor(aut, "author"));
+			}
+		}
+		var bits = doc.evaluate(''//div[@id="detail"]/table/tbody/tr/td/form'', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		item.ISBN = bits.match(/ISBN:\s+([\d\-]+)/)[1];
+		item.date = bits.match(/\d{4}/)[0];
+		item.abstractNote = Zotero.Utilities.trimInternal(doc.evaluate(''//div[@id="description"]'', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+		item.complete();
+	}, function() {Zotero.done;});
+	Zotero.wait();
+}');
+
+REPLACE INTO translators VALUES ('a75e0594-a9e8-466e-9ce8-c10560ea59fd', '1.0.0b4.r5', '', '2008-05-15 18:30:00', '0', '100', '4', 'Columbia University Press', 'Michael Berkowitz', 'http://www.cup.columbia.edu/', 
+'function detectWeb(doc, url) {
+	if (url.match(/book\//)) {
+		return "book";
+	} else if (doc.evaluate(''//p[@class="header"]/a/span[@class="_booktitle"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+		return "multiple";
+	}
+}', 
+'function addTag(item, tag, xpath) {
+	item[tag] = Zotero.Utilities.trimInternal(doc.evaluate(xpath, doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+}
+
+function doWeb(doc, url) {
+	var n = doc.documentElement.namespaceURI;
+	var ns = n ? function(prefix) {
+		if (prefix == ''x'') return n; else return null;
+	} : null;
+	
+	var books = new Array();
+	
+	if (detectWeb(doc, url) == "multiple") {
+		var items = new Object();
+		var titles = doc.evaluate(''//p[@class="header"]/a'', doc, ns, XPathResult.ANY_TYPE, null);
+		var title;
+		while (title = titles.iterateNext()) {
+			items[title.href] = title.textContent;
+		}
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			books.push(i);
+		}
+	} else {
+		books = [url];
+	}
+	Zotero.Utilities.processDocuments(books, function(doc) {
+		var item = new Zotero.Item("book");
+		item.title = Zotero.Utilities.trimInternal(doc.evaluate(''//h1[@id="_booktitle"]'', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+		var authors = Zotero.Utilities.trimInternal(doc.evaluate(''//p[@id="_authors"]'', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+		if (authors.match(/Edited/)) {
+			authors = Zotero.Utilities.trimInternal(authors.replace("Edited by", ""));
+			var autType = "editor";
+		} else {
+			var autType = "author";
+		}
+		var auts = authors.split(/,|\band\b/);
+		for each (var aut in auts) {
+			item.creators.push(Zotero.Utilities.cleanAuthor(aut, autType));
+		}
+		item.abstractNote = Zotero.Utilities.trimInternal(doc.evaluate(''//p[@id="_desc"]'', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+		item.date = Zotero.Utilities.trimInternal(doc.evaluate(''//span[@id="_publishDate"]'', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+		item.ISBN = Zotero.Utilities.trimInternal(doc.evaluate(''//span[@id="_isbn"]'', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+		item.publisher = Zotero.Utilities.trimInternal(doc.evaluate(''//span[@id="_publisher"]'', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+		item.complete();
+	}, function() {Zotero.done;});
+	Zotero.wait();
+}');
+
+REPLACE INTO translators VALUES ('0c661209-5ec8-402b-8f18-7dec6ae37d95', '1.0.0b4.r5', '', '2008-05-15 00:30:00', '0', '100', '4', 'The Free Dictionary', 'Michael Berkowitz', 'http://(.*\.)?thefreedictionary.com/(\w+)', 
+'function detectWeb(doc, url) {
+	return "dictionaryEntry";
+}', 
+'function doWeb(doc, url) {
+	var item = new Zotero.Item(''dictionaryEntry'');
+	item.title = Zotero.Utilities.capitalizeTitle(url.replace("+", " ").match(/[^/]+$/)[0]);
+	item.dictionaryTitle = "The Free Dictionary";
+	var defs = doc.evaluate(''//div[@class="pseg"]'', doc, null, XPathResult.ANY_TYPE, null);
+	var def;
+	while (def = defs.iterateNext()) {
+		item.notes.push({note:Zotero.Utilities.trimInternal(def.textContent)});
+	}
+	item.url = 
+	item.complete();
+}');
+
+REPLACE INTO translators VALUES ('46291dc3-5cbd-47b7-8af4-d009078186f6', '1.0.0b4.r5', '', '2008-05-15 00:30:00', '0', '100', '4', 'CiNii', 'Michael Berkowitz', 'http://ci.nii.ac.jp/naid/', 
+'function detectWeb(doc, url) {
+	if (url.match(/(naid|QuotDisp)/)) {
+		return "journalArticle";
+	} else if (doc.evaluate(''//a[contains(@href, "QuotDisp") or contains(@href, "/naid/")]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+		return "multiple";
+	}
+}', 
+'function doWeb(doc, url) {
+	var n = doc.documentElement.namespaceURI;
+	var ns = n ? function(prefix) {
+		if (prefix == ''x'') return n; else return null;
+	} : null;
+	var arts = new Array();
+	if (detectWeb(doc, url) == "multiple") {
+		var items = new Object();
+		var links = doc.evaluate(''//a[contains(@href, "QuotDisp") or contains(@href, "/naid/")]'', doc, ns, XPathResult.ANY_TYPE, null);
+		var link;
+		while (link = links.iterateNext()) {
+			items[link.href] = Zotero.Utilities.trimInternal(link.textContent);
+		}
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			arts.push(i);
+		}
+	} else {
+		arts = [url];
+	}
+	Zotero.Utilities.processDocuments(arts, function(doc) {
+		var biblink = doc.evaluate(''//a[contains(text(), "BibTex")]'', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().href;
+		var newurl = doc.location.href;
+		var tags = new Array();
+		if (doc.evaluate(''//a[@class="keyword"]'', doc, ns, XPathResult.ANY_TYPE, null).iterateNext()) {
+			var kws = doc.evaluate(''//a[@class="keyword"]'', doc, ns, XPathResult.ANY_TYPE, null);
+			var kw;
+			while (kw = kws.iterateNext()) {
+				tags.push(Zotero.Utilities.trimInternal(kw.textContent));
+			}
+		}
+		Zotero.Utilities.HTTP.doGet(biblink, function(text) {
+			var trans = Zotero.loadTranslator("import");
+			trans.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
+			trans.setString(text);
+			trans.setHandler("itemDone", function(obj, item) {
+				item.url = newurl;
+				item.attachments = [{url:item.url, title:item.title + " Snapshot", mimeType:"text/html"}];
+				item.tags = tags;
+				item.complete();	
+			});
+			trans.translate();
+		});
+	}, function() {Zotero.done;});
+	Zotero.wait();
+}');
+
+REPLACE INTO translators VALUES ('75edc5a1-6470-465a-a928-ccb77d95eb72', '1.0.0b4.r5', '', '2008-05-12 19:00:00', '0', '100', '4', 'American Institute of Aeronautics and Astronautics', 'Michael Berkowitz', 'http://www.aiaa.org/', 
+'function detectWeb(doc, url) {
+	if (doc.evaluate(''//td/div[@class="title"]/b/div[@class="centerHeadlines"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+		return "multiple";
+	}
+}', 
+'function doWeb(doc, url) {
+	var n = doc.documentElement.namespaceURI;
+	var ns = n ? function(prefix) {
+		if (prefix == ''x'') return n; else return null;
+	} : null;
+	
+	var items = new Object();
+	var oldItems = doc.evaluate(''//table/tbody/tr/td[div[@class="title"]]'', doc, ns, XPathResult.ANY_TYPE, null);
+	var nextItem;
+	while (nextItem = oldItems.iterateNext()) {
+		var data = new Object();
+		data[''title''] = Zotero.Utilities.trimInternal(doc.evaluate(''./div[@class="title"]//div[@class="centerHeadlines"]'', nextItem, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+		data[''pages''] = Zotero.Utilities.trimInternal(doc.evaluate(''./div[@class="title"]//div[@class="centerHeadlinesSub2"]'', nextItem, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent.match(/[\d\w]+\-[\d\w]+/)[0]);
+		data[''authors''] = Zotero.Utilities.trimInternal(doc.evaluate(''./ul/i'', nextItem, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+		var extra = Zotero.Utilities.trimInternal(doc.evaluate(''./ul'', nextItem, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+		var extra = extra.replace(data[''authors''], "");
+		data[''extra''] = Zotero.Utilities.trimInternal(extra);
+		var pdf = doc.evaluate(''.//a'', nextItem, ns, XPathResult.ANY_TYPE, null).iterateNext().href;
+		Zotero.debug(pdf);
+		data[''pdfurl''] = pdf;
+		items[data[''title'']] = data;
+	}
+	var volume;
+	var issue;
+	var date;
+	if (doc.evaluate(''//td[2]/table/tbody/tr/td[1]/strong'', doc, ns, XPathResult.ANY_TYPE, null).iterateNext()) {
+		var voliss = Zotero.Utilities.trimInternal(doc.evaluate(''//td[2]/table/tbody/tr/td[1]/strong'', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+		voliss = voliss.match(/(\d+)\s+vol\.\s*(\d+)\s+no\.\s*(\d+)/);
+		volume = voliss[2];
+		issue = voliss[3];
+		date = voliss[1];
+	} else if (doc.evaluate(''//select'', doc, ns, XPathResult.ANY_TYPE, null).iterateNext()) {
+		var voliss = Zotero.Utilities.trimInternal(doc.evaluate(''//select[@name="volume"]/option[@selected]'', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+		var issue = Zotero.Utilities.trimInternal(doc.evaluate(''//select[@name="issue"]/option[@selected]'', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+		voliss = voliss.match(/vol\.\s*(\d+)\s*\-\s*(\d+)/);
+		volume = voliss[1];
+		date = voliss[2];
+	}
+	if (doc.evaluate(''//tr[1]/td/b/div[@class="centerHeadlines"]'', doc, ns, XPathResult.ANY_TYPE, null).iterateNext()) {
+		var journal = Zotero.Utilities.trimInternal(doc.evaluate(''//tr[1]/td/b/div[@class="centerHeadlines"]'', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+		var ISSN = Zotero.Utilities.trimInternal(doc.evaluate(''//tr[1]/td/font[@class="centerHeadlinesSub2"]'', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent.replace(/(\(|\))/g, ""));
+	} else if (doc.evaluate(''//div[@class="centerHeadlinesTitle"]'', doc, ns, XPathResult.ANY_TYPE, null).iterateNext()) {
+		var journal = Zotero.Utilities.trimInternal(doc.evaluate(''//div[@class="centerHeadlinesTitle"]'', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+		var ISSN = Zotero.Utilities.trimInternal(doc.evaluate(''//tr/td[1]/table/tbody/tr[2]/td/div'', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent.match(/ISSN\s*([\d\-]+)/)[1]);
+	}
+	var searchItems = new Array();
+	for (var i in items) {
+		searchItems.push(i);
+	}
+
+	searchItems = Zotero.selectItems(searchItems);
+	for (var i in items) {
+		for each (var title in searchItems) {
+			if (i == title) {
+				var data = items[i];
+				var item = new Zotero.Item("journalArticle");
+				item.volume = volume;
+				item.issue = issue;
+				item.date = date;
+				item.title = data[''title''];
+				item.pages = data[''pages''];
+				item.publicationTitle = Zotero.Utilities.capitalizeTitle(journal);
+				item.ISSN = ISSN;
+				if (data[''authors''].match(/\w+/)) {
+					var authors = data[''authors''].split(/(\band\b|,|;)/);
+					for each (var aut in authors) {
+						if (aut.match(/\w+/) && aut != "and") {
+							item.creators.push(Zotero.Utilities.cleanAuthor(aut, "author"));
+						}
+					}
+				}
+				item.attachments = [{url:data[''pdfurl''], title:"AIAA PDF (first page)", mimeType:"application/pdf"}];
+				item.complete();
+			}
+		}
+	}
+}');
+
+REPLACE INTO translators VALUES ('635c1246-e0c8-40a0-8799-a73a0b013ad8', '1.0.0b4.r5', '', '2008-05-09 23:15:00', '0', '100', '4', 'Bryn Mawr Classical Review', 'Michael Berkowitz', 'http://ccat.sas.upenn.edu/bmcr/', 
+'function detectWeb(doc, url) {
+	if (url.match(/by_reviewer/) || url.match(/by_author/) || url.match(/recent.html/) || url.match(/\/\d{4}\/$/)) {
+		return "multiple";
+	} else if (url.match(/[\d\-]+\.html$/)) {
+		return "journalArticle";
+	}
+}', 
+'function doWeb(doc, url) {
+	var ns = doc.documentElement.namespaceURI;
+	var nsResolver = ns ? function(prefix) {
+		if (prefix == ''x'') return ns; else return null;
+	} : null;
+	var arts = new Array();
+	if (detectWeb(doc, url) == "multiple") {
+		var items = new Object();
+		if (doc.evaluate(''//table/tbody/tr/td/ul/li/i'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+			var boxes = doc.evaluate(''//table/tbody/tr/td/ul/li'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+			var box;
+			while (box = boxes.iterateNext()) {
+				var link = doc.evaluate(''./a'', box, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
+				var title = doc.evaluate(''./i'', box, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+				items[link] = title;
+			}
+		} else if (doc.evaluate(''//table/tbody/tr/td/ul/li'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+			var title = doc.evaluate(''//table/tbody/tr/td/ul/li'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+			var next;
+			while (next = title.iterateNext()) {
+				items[next.href]  = Zotero.Utilities.trimInternal(next.textContent);
+			}
+		} else if (url.match(/google\.com/)) {
+			var titles = doc.evaluate(''//h2[@class="r"]/a[@class="l"]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+			var title;
+			while (title = titles.iterateNext()) {
+				items[title.href] = title.textContent;
+			}
+		}
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			arts.push(i);
+		}
+	} else {
+		arts = [url];
+	}
+	Zotero.Utilities.processDocuments(arts, function(doc) {
+		var item = new Zotero.Item("journalArticle");
+		var title = doc.evaluate(''//h3/i'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		item.title = "Review of: " + Zotero.Utilities.trimInternal(title);
+		var data = doc.evaluate(''//h3[i]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		var title = title.replace("(", "\\(").replace(")", "\\)");
+		var author = doc.evaluate(''//b[contains(text(), "Reviewed")]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.match(/Reviewed by\s+([^,]+),/)[1];
+		item.creators.push(Zotero.Utilities.cleanAuthor(author, "author"));
+		var splitRe = new RegExp(title);
+		var authors = data.split(splitRe)[0].replace(/\([^)]+\)/, "").split(/(,|and)\s+/);
+		Zotero.debug(authors);
+		Zotero.debug(authors);
+		for each (var aut in authors) {
+			if (aut.match(/\w/) && (aut != "and")) {
+				item.creators.push(Zotero.Utilities.cleanAuthor(aut, "reviewedAuthor"));
+			}
+		}
+		item.url = doc.location.href;
+		item.attachments = [{url:item.url, title:item.title, mimeType:"text/html"}];
+		if (doc.evaluate(''/html/body/center/table/tbody/tr/td/center/table/tbody/tr/td/center/font'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+			item.date = Zotero.Utilities.trimInternal(doc.evaluate(''/html/body/center/table/tbody/tr/td/center/table/tbody/tr/td/center/font'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.replace("Bryn Mawr Classical Review ", "").replace(/\./g, "/"));
+		} else {
+			item.date = Zotero.Utilities.trimInternal(doc.evaluate(''/html/body/h3'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.replace("Bryn Mawr Classical Review ", "").replace(/\./g, "/"))
+		}
+		item.complete();
+	}, function() {Zotero.done;});
+	Zotero.wait();
+}');
+
+REPLACE INTO translators VALUES ('9499c586-d672-42d6-9ec4-ee9594dcc571', '1.0.0b4.r5', '', '2008-05-08 20:30:00', '0', '100', '4', 'The Hindu', 'Prashant Iyengar and Michael Berkowitz', 'http://(www.)?hindu.com', 
+'function detectWeb(doc, url) {
+	if (doc.evaluate(''//h2[@class="r"]/a[@class="l"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+      		return "multiple";
+      	} else {
+	      	return "newspaperArticle";
+	}
+}
+   ', 
+'function regexMeta(str, item) {
+	var re = /NAME\=\"([\w\W]*?)\"\s+CONTENT\=\"([\w\W]*?)\"/;
+	var stuff = str.match(re);
+        if (stuff)
+        {
+        if (stuff[1] == "PAGEHEAD") {
+		item.section = stuff[2].split(/\s+/)[0];
+	}
+	if (stuff[1] == "ZONE") {
+		item.place = stuff[2].split(/\s+/)[0];
+	}
+	if (stuff[1] == "PAGENUMBER") {
+		item.pages = stuff[2].split(/\s+/)[0];
+	}
+	
+	
+	
+	}
+}
+
+
+
+function doWeb(doc, url) {
+	var arts = new Array();
+	if (detectWeb(doc, url) == "multiple") {
+		var xpath = ''//h2[@class="r"]/a[@class="l"]'';
+		var links = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
+		var link;
+		var items = new Object();
+		while (link = links.iterateNext()) {
+			items[link.href] = link.textContent;
+		}
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			arts.push(i);
+		}
+		
+	} else { arts = [url]; }
+	for each (var art in arts) {
+		Zotero.debug(art);
+		Zotero.Utilities.HTTP.doGet(art, function(text) {
+			var newItem = new Zotero.Item("newspaperArticle");
+			newItem.publicationTitle = "The Hindu";
+			newItem.url = art;
+			//title
+			var t = /\<TITLE\>[\w\W]*\:([\w\W]*?)<\/TITLE/;
+			newItem.title = Zotero.Utilities.unescapeHTML(Zotero.Utilities.capitalizeTitle(text.match(t)[1]));
+	
+	                        var ti = /\<FONT color\=black\>(.*)?\<\/FONT\>/;
+			newItem.date = text.match(ti)[1];
+			
+			var auth = 	/\<font class\=storyhead[\w\W]*?justify\>([\w\W]*?)\<p\>/;
+			if (text.match(auth))
+			{
+			//newItem.author=Zotero.Utilities.cleanAuthor(text.match(auth)[1]);
+			cleanauth=Zotero.Utilities.cleanTags(text.match(auth)[1]);
+			newItem.creators.push(Zotero.Utilities.cleanAuthor(cleanauth, "author"));
+			
+			}
+	
+			newItem.websiteTitle="The Hindu";
+			newItem.edition="Online";
+	
+			//hooray for real meta tags!
+			var meta = /<META NAME[\w\W]*?\>/g;
+			var metaTags = text.match(meta);
+			for (var i = 0 ; i <metaTags.length ; i++) {
+				regexMeta(metaTags[i], newItem);
+			}
+			newItem.complete();
+			Zotero.done();
+		});
+		Zotero.wait();
+	}
+}');
+
+REPLACE INTO translators VALUES ('e8d40f4b-c4c9-41ca-a59f-cf4deb3d3dc5', '1.0.0b4.r5', '', '2008-05-08 20:30:00', '0', '100', '4', 'Business Standard', 'Prashant Iyengar and Michael Berkowitz', 'http://www.business-standard.com', 
+'function detectWeb(doc, url) {
+	if (url.match(/googlesearch/)) {
+		return "multiple";
+	} else if (url.match(/common/)) {
+		return "newspaperArticle";
+	}
+}', 
+'function doWeb(doc, url) {
+	var arts = new Array();
+	if (detectWeb(doc, url) == "multiple") {
+		var links = doc.evaluate(''//a[@class="NewsHead"]'', doc, null, XPathResult.ANY_TYPE, null);
+		var link;
+		var items = new Object();
+		while (link = links.iterateNext()) {
+			items[link.href] = Zotero.Utilities.cleanTags(link.textContent);
+		}
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			arts.push(i);
+		}
+	} else {
+		arts = [url];
+	}
+	Zotero.Utilities.processDocuments(arts, function(doc) {
+		var newItem = new Zotero.Item("newspaperArticle");
+		newItem.publicationTitle = "The Business Standard";
+		newItem.url = doc.location.href;
+		newItem.websiteTitle="The Business Standard";
+		newItem.edition="Online";
+		newItem.title = Zotero.Utilities.cleanTags(doc.title);
+
+                        
+		if (doc.evaluate(''//td[@class="author"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+			var bits = doc.evaluate(''//td[@class="author"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent.split(/\s+\/\s+/);
+			newItem.creators.push(Zotero.Utilities.cleanAuthor(bits[0], "author"));
+			extras = Zotero.Utilities.trimInternal(bits[1]).match(/^(.*)(\s\w+\s+\d+,\s*\d+)$/);
+			newItem.place = extras[1];
+			newItem.date = Zotero.Utilities.trimInternal(extras[2]);
+			newItem.complete();
+		} else if (doc.evaluate(''//td[@class="NewsSummary"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+			var author = Zotero.Utilities.trimInternal(doc.evaluate(''//td[@class="NewsSummary"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+			newItem.creators.push(Zotero.Utilities.cleanAuthor(author, "author"));
+			var printurl = ''http://www.business-standard.com/general/printpage.php?autono='' + newItem.url.match(/autono=(\d+)/)[1];
+			Zotero.debug(printurl);
+			Zotero.Utilities.HTTP.doGet(printurl, function(text) {
+				var date = text.match(/<td class=author>([^<]+)</)[1];
+				newItem.date = Zotero.Utilities.trimInternal(date.split("&nbsp;")[1]);
+				newItem.complete();
+			});
+		}
+	}, function() {Zotero.done;});
+	Zotero.wait();
+}
+');
+
+REPLACE INTO translators VALUES ('fe39e97d-7397-4f3f-a5f3-396a1a79213c', '1.0.0b4.r5', '', '2008-05-08 20:30:00', '0', '100', '4', 'OpenJudis - Indian Supreme Court cases', 'Prashant Iyengar and Michael Berkowitz', 'http://(www.)?openarchive.in/(judis|newcases)', 
+'function detectWeb(doc, url) {
+	if (doc.evaluate(''//div[@id="footer"]/dl/dt/a'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+		return "multiple";
+	} else if (url.match(/\d+\.htm/)) {
+		return "case";
+	}
+}', 
+'function regexMeta(stuff, item) {	
+        if (stuff) {
+                if (stuff[0] == "Origlink") {
+			item.source = stuff[1].split(/\s+/)[0];
+	        }
+		if (stuff[0] == "Acts") {
+			if (stuff[1].indexOf("|")!=-0) {
+				echts=stuff[1].split(" | ");
+				for (i=0;i<echts.length;i++) {
+					item.tags.push(echts[i]);
+				}
+	        	} else {
+	        		item.tags.push(stuff[1]);
+	        	}
+	        }
+		if (stuff[0] == "Citations" && stuff[1].length > 1) {
+			item.reporter=stuff[1];
+		}
+		if (stuff[0] == "Judges") {
+			if (stuff[1].indexOf(";")!=-0) {
+				jedges=stuff[1].split(" ; ");
+				for (i=0;i<jedges.length;i++) {
+	       				item.creators.push(Zotero.Utilities.cleanAuthor(jedges[i], "author"));
+	        		}
+	        	} else {
+	        		item.creators.push(Zotero.Utilities.cleanAuthor(stuff[1], "author"));
+	        	}
+		}
+	        if (stuff[0] == "Jday") {
+	       		item.dateDecided= stuff[1];
+		}
+	}
+}
+
+
+
+function doWeb(doc, url) {
+	var arts = new Array();
+	if (detectWeb(doc, url) == "multiple") {
+		var items = Zotero.Utilities.getItemArray(doc, doc, "^http:\/\/openarchive\.in\/[^/]+\/[0-9]+.htm$");
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			arts.push(i);
+		}
+	} else { arts = [url]; }
+	Zotero.debug(arts);
+	for each (var art in arts) {
+		var newurl = art;
+		Zotero.Utilities.HTTP.doGet(art, function(text) {
+			var newItem = new Zotero.Item("case");
+			newItem.publicationTitle = "OpenJudis - http://judis.openarchive.in";
+			newItem.url = url;
+			
+			//title
+			var t = /\<title\>([\w\W]*?)<\/title/;
+			newItem.title = Zotero.Utilities.trimInternal(t.exec(text)[1]);
+			newItem.caseName = newItem.title;
+			newItem.url = newurl;
+			newItem.court="The Supreme Court of India";
+	
+			newItem.websiteTitle="OpenJudis - http://judis.openarchive.in";
+			newItem.edition="Online";
+			
+			var metareg = /<META NAME[^>]+\>/g;
+			var tags = text.match(metareg);
+			for each (var tag in tags) {
+				var stuff = tag.match(/NAME=\"([^"]+)\"\s+CONTENT=\"([^"]+)\"/);
+				regexMeta([stuff[1], stuff[2]], newItem);
+			}
+			pdfurl = ''http://judis.openarchive.in/makepdf.php?filename='' + newItem.url;
+			newItem.attachments = [
+				{url:newItem.url, title:"OpenJudis Snapshot", mimeType:"text/html"},
+				{url:pdfurl, title:"OpenJudis PDF", mimeType:"application/pdf"}
+			];
+			newItem.complete();
+		}, function() {Zotero.done;});
+		Zotero.wait();
+	}
+}
+');
+
+REPLACE INTO translators VALUES ('c0d7d260-d795-4782-9446-f6c403a7922c', '1.0.0b4.r5', '', '2008-05-08 20:30:00', '0', '100', '4', 'Science Links Japan', 'Michael Berkowitz', 'http://sciencelinks.jp/', 
+'function detectWeb(doc, url) {
+	if (url.match(/result/) || url.match(/journal/)) {
+		return "multiple";
+	} else if (url.match(/article/)) {
+		return "journalArticle";
+	}
+}', 
+'function doWeb(doc, url) {
+	var ns = doc.documentElement.namespaceURI;
+	nsR = ns ? function(prefix) {
+		if (prefix == ''x'') return ns; else return null;
+	} : null;
+	
+	var arts = new Array();
+	if (detectWeb(doc, url) == "multiple") {
+		var items = Zotero.Utilities.getItemArray(doc, doc, "(article|display\.php)");
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			arts.push(i);
+		}
+	} else {
+		arts = [url];
+	}
+	Zotero.Utilities.processDocuments(arts, function(doc) {
+		var data = new Array();
+		var bits = doc.evaluate(''//div[@id="result_detail"]/table/tbody/tr/td'', doc, nsR, XPathResult.ANY_TYPE, null);
+		var bit;
+		while (bit = bits.iterateNext()) {
+			data.push(Zotero.Utilities.trimInternal(bit.textContent));
+		}
+		var item = new Zotero.Item("journalArticle");
+		for each (var datum in data) {
+			if (datum.match(/^Title;/)) {
+				item.title = Zotero.Utilities.capitalizeTitle(datum.match(/Title;(.*)$/)[1]);
+			} else if (datum.match(/^Author;/)) {
+				var auts = datum.match(/\b[A-Z''\-]+\s+[A-Z''\-]+/g);
+				for each (var aut in auts) {
+					item.creators.push(Zotero.Utilities.cleanAuthor(Zotero.Utilities.capitalizeTitle(aut, true), "author"));
+				}
+			} else if (datum.match(/^Journal Title;/)) {
+				item.publicationTitle = datum.match(/;(.*)$/)[1];
+			} else if (datum.match(/^ISSN/)) {
+				item.ISSN = datum.match(/[\d\-]+/)[0];
+			} else if (datum.match(/^VOL/)) {
+				var voliss = datum.match(/^VOL\.([^;]*);NO\.([^;]*);PAGE\.([^(]*)\((\d+)\)/);
+				item.volume = voliss[1];
+				item.issue = voliss[2];
+				item.pages = voliss[3];
+				item.date = voliss[4];
+			} else if (datum.match(/^Abstract/)) {
+				item.abstractNote = datum.match(/;(.*)/)[1];
+			}
+		}
+		item.url = doc.location.href;
+		item.attachments = [{url:item.url, title:"Science Links Japan Snapshot", mimeType:"text/html"}];
+		item.complete();
+	}, function() {Zotero.done;});
+	Zotero.wait();
+}');
+
+REPLACE INTO translators VALUES ('2cd7d362-5fba-423a-887f-579ed343e751', '1.0.0b4.r5', '', '2008-05-06 08:15:00', '0', '100', '4', 'The Microfinance Gateway', 'Michael Berkowitz', 'http://(www.)?microfinancegateway.org/', 
+'function detectWeb(doc, url) {
+	if (url.match(/results\.php/) || url.match(/search/)) {
+		return "multiple";
+	} else if (url.match(/content\/article/)) {
+		return "journalArticle";
+	}
+}', 
+'function doWeb(doc, url) {
+	var ns = doc.documentElement.namespaceURI;
+	var nsResolver = ns ? function (prefix) {
+		if (prefix == ''x'') return ns; else return null;
+	} : null;
+	
+	var arts = new Array();
+	if (detectWeb(doc, url) == "multiple") {
+		var items = Zotero.Utilities.getItemArray(doc, doc, "content/article/detail");
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			arts.push(i);
+		}
+	} else {
+		arts = [url];
+	}
+	Zotero.Utilities.processDocuments(arts, function(doc) {
+		var item = new Zotero.Item("journalArticle");
+		item.title = Zotero.Utilities.trimInternal(doc.evaluate(''//td[2][@class="main_content_box"]/h1'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+		var authors = Zotero.Utilities.trimInternal(doc.evaluate(''//div[@class="source"]/strong'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent).split(/(\.,|&)/);
+		for each (var aut in authors) {
+			if (aut.match(/\w+/)) {
+				item.creators.push(Zotero.Utilities.cleanAuthor(Zotero.Utilities.trimInternal(aut), "author", true));
+			}
+		}
+		item.url = doc.location.href;
+		item.date = Zotero.Utilities.trimInternal(doc.evaluate(''//span[@class="date"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+		item.abstractNote = Zotero.Utilities.trimInternal(doc.evaluate(''//span[@class="summary"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+		var pdfurl = doc.evaluate(''//div[@class="articleTopics"]/div/a[1]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
+		item.publicationTitle = doc.evaluate(''//div[@class="articleTopics"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.match(/Published\s+by:\s+(.*)\n/)[1];
+		item.attachments = [
+			{url:item.url, title:item.title + " Snapshot", mimeType:"text/html"},
+			{url:pdfurl, title:item.title + " PDF", mimeType:"application/pdf"}
+		];
+		
+		item.complete();
+	}, function() {Zotero.done;});
+}');
+
+REPLACE INTO translators VALUES ('291934d5-36ec-4b81-ac9c-c5ad5313dba4', '1.0.0b4.r5', '', '2008-05-06 08:15:00', '0', '100', '4', 'Pion Journals', 'Michael Berkowitz', 'http://(www.)?(hthpweb|envplan|perceptionweb).com/', 
+'function detectWeb(doc, url) {
+	if (url.match(/search\.cgi/) || url.match(/ranking/) || url.match(/volume=/)) {
+		return "multiple";
+	} else if (url.match(/abstract\.cgi/)) {
+		return "journalArticle";
+	}
+}', 
+'function doWeb(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	var arts = new Array();
+	if (detectWeb(doc, url) == "multiple") {
+		var items = Zotero.Utilities.getItemArray(doc, doc, "abstract.cgi\\?id=");
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			arts.push(i);
+		}
+	} else {
+		arts = [url];
+	}
+	Zotero.debug(arts);
+	Zotero.Utilities.processDocuments(arts, function(doc) {
+		var item = new Zotero.Item("journalArticle");
+		item.publicationTitle = Zotero.Utilities.trimInternal(doc.evaluate(''//div[@id="footer"]/div[@class="left"]/i'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+		item.title = Zotero.Utilities.trimInternal(doc.evaluate(''//div[@id="total"]/p[2]/font/b'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+		var authors = Zotero.Utilities.trimInternal(doc.evaluate(''//div[@id="total"]/p[3]/b'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent).split(/,\s*/);
+		for each (var aut in authors) {
+			item.creators.push(Zotero.Utilities.cleanAuthor(aut, "author"));
+		}
+		if (doc.evaluate(''//div[@id="title"]/div[@class="left"]/font'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.match(/\d+/)) {
+			var voliss = doc.evaluate(''//div[@id="title"]/div[@class="left"]/font'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.match(/(\d+)\s+volume\s+(\d+)\s*\((\d+)\)\s+(pages\s+(.*))?$/);
+			Zotero.debug(voliss);
+			item.date = voliss[1];
+			item.volume = voliss[2];
+			item.issue = voliss[3];
+			if (voliss[5]) item.pages = voliss[5];
+		} else {
+			item.date = Zotero.Utilities.trimInternal(doc.evaluate(''//div[@id="total"]/p[4]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent).match(/(\d+)$/)[1];
+		}
+		item.DOI = Zotero.Utilities.trimInternal(doc.evaluate(''//div[@id="title"]/div[@class="right"]/font'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent).substr(4);
+		
+		if (doc.evaluate(''//a[contains(@href, ".pdf")]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) var pdfurl = doc.evaluate(''//a[contains(@href, ".pdf")]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
+		item.url = doc.location.href;
+		var pub = item.publicationTitle;
+		item.attachments = [{url:item.url, title:pub + " Snapshot", mimeType:"text/html"}];
+		if (pdfurl) item.attachments.push({url:pdfurl, title:pub + " Full Text PDF", mimeType:"application/pdf"});
+		item.abstractNote = Zotero.Utilities.trimInternal(doc.evaluate(''//div[@id="total"]/p[5]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent).substr(10);
+		item.complete();
+	}, function() {Zotero.done;});
+}');
+
+REPLACE INTO translators VALUES ('2e304579-dd7b-4770-85e9-0d724c9b49a5', '1.0.0b4.r5', '', '2008-05-05 07:45:00', '0', '100', '4', 'European Educational Research Journal', 'Michael Berkowitz', 'http://www.wwwords.co.uk/eerj/', 
 'function detectWeb(doc, url) {
 	if (doc.evaluate(''//div[@id="maincontent"]/table[*//p[@class="articletitle"]]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
@@ -1164,7 +2026,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('bdaac15c-b0ee-453f-9f1d-f35d00c7a994', '1.0.0b4.r5', '', '2008-05-01 16:30:00', '0', '100', '4', 'AMS Journals', 'Michael Berkowitz', 'http://www.ams.org/', 
+REPLACE INTO translators VALUES ('bdaac15c-b0ee-453f-9f1d-f35d00c7a994', '1.0.0b4.r5', '', '2008-05-05 07:45:00', '0', '100', '4', 'AMS Journals', 'Michael Berkowitz', 'http://www.ams.org/', 
 'function detectWeb(doc, url) {
 	if (url.match(/jour(nals|search)/)) {
 		return "multiple";
@@ -1231,9 +2093,9 @@ REPLACE INTO translators VALUES ('bdaac15c-b0ee-453f-9f1d-f35d00c7a994', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('5278b20c-7c2c-4599-a785-12198ea648bf', '1.0.0b4.r5', '', '2008-04-30 21:00:00', '0', '100', '4', 'ARTstor', 'Ameer Ahmed and Michael Berkowitz', 'http://web2.artstor.org', 
+REPLACE INTO translators VALUES ('5278b20c-7c2c-4599-a785-12198ea648bf', '1.0.0b4.r5', '', '2008-05-08 20:30:00', '1', '100', '4', 'ARTstor', 'Ameer Ahmed and Michael Berkowitz', 'http://web2.artstor.org', 
 'function detectWeb(doc, url) {
-	if (url.match(''Search'')) return "multiple"
+	if (url.match(/(S|s)earch/)) return "multiple"
 }', 
 'function doWeb(doc, url) {
 	if (url.indexOf("|")!=-1){	
@@ -1366,9 +2228,21 @@ function scrape(doc, url){
 				}
 			}
 			if (child.fieldName.indexOf("Creator")!=-1){
-				var aut = child.fieldValue.match(/^([^,]+),\s+(.*)$/);
-				newArticle.notes.push({note:"Artist information: " + aut[2]});
-				newArticle.creators.push(Zotero.Utilities.cleanAuthor(aut[1], "artist"));
+				if (child.fieldValue != "") {
+					if (child.fieldValue.match(/,/)) {
+						var aut = child.fieldValue.match(/^([^,]+),\s+(.*)$/);
+						if (aut[1].match(/\s/)) {
+							newArticle.notes.push({note:"Artist information: " + aut[2]});
+							newArticle.creators.push(Zotero.Utilities.cleanAuthor(aut[1], "artist"));
+						} else {
+							var extras = aut[2].match(/^([^,]+),\s+(.*)$/);
+							newArticle.creators.push({firstName:extras[1], lastName:aut[1], creatorType:"author"});
+							newArticle.notes.push({note:"Artist information: " + extras[2]});
+						}
+					} else {
+						newArticle.creators.push(Zotero.Utilities.cleanAuthor(child.fieldValue, "artist"));
+					}
+				}
 			}
 			if (child.fieldName.indexOf("Culture")!=-1){
 				newArticle.creators.push(Zotero.Utilities.cleanAuthor(child.fieldValue, "producer", true));
@@ -1464,7 +2338,7 @@ function scrape(doc, url){
 Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('79f6f9ed-537a-4d4f-8270-c4fbaafdf327', '1.0.0b4.r5', '', '2008-04-30 19:30:00', '0', '100', '4', 'Emerald Publishing', 'Michael Berkowitz', 'www.emeraldinsight.com/', 
+REPLACE INTO translators VALUES ('79f6f9ed-537a-4d4f-8270-c4fbaafdf327', '1.0.0b4.r5', '', '2008-05-05 07:45:00', '0', '100', '4', 'Emerald Publishing', 'Michael Berkowitz', 'www.emeraldinsight.com/', 
 'function detectWeb(doc, url) {
 	if (url.match(''searchQuickOptions.do'')) {
 		return "multiple"
@@ -1536,7 +2410,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('bc39e05b-141a-4322-85f0-a5b86edf896b', '1.0.0b4.r5', '', '2008-04-30 17:15:00', '0', '100', '4', 'Hindawi Publishing Corporation', 'Michael Berkowitz', 'http://www.hindawi.com/', 
+REPLACE INTO translators VALUES ('bc39e05b-141a-4322-85f0-a5b86edf896b', '1.0.0b4.r5', '', '2008-05-05 07:45:00', '0', '100', '4', 'Hindawi Publishing Corporation', 'Michael Berkowitz', 'http://www.hindawi.com/', 
 'function detectWeb(doc, url) {
 	if (url.match(''GetArticle.aspx'')) {
 		return "journalArticle";
@@ -1599,7 +2473,7 @@ REPLACE INTO translators VALUES ('bc39e05b-141a-4322-85f0-a5b86edf896b', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('252c6a50-0900-41c5-a66b-ec456137c43c', '1.0.0b4.r5', '', '2008-04-29 21:30:00', '0', '100', '4', 'AcademicJournals.net', 'Michael Berkowitz', 'http://www.academicjournals.net/', 
+REPLACE INTO translators VALUES ('252c6a50-0900-41c5-a66b-ec456137c43c', '1.0.0b4.r5', '', '2008-05-05 07:45:00', '0', '100', '4', 'AcademicJournals.net', 'Michael Berkowitz', 'http://www.academicjournals.net/', 
 'function detectWeb(doc, url) {
 	if (url.match(''articleno='')) {
 		return "journalArticle";
@@ -1678,7 +2552,7 @@ REPLACE INTO translators VALUES ('252c6a50-0900-41c5-a66b-ec456137c43c', '1.0.0b
 	}, function() {Zotero.done;});
 }');
 
-REPLACE INTO translators VALUES ('1e1e35be-6264-45a0-ad2e-7212040eb984', '1.0.0b4.r5', '', '2008-04-29 19:00:00', '0', '100', '4', 'APA PsycNET', 'Michael Berkowitz', 'http://psycnet\.apa\.org/', 
+REPLACE INTO translators VALUES ('1e1e35be-6264-45a0-ad2e-7212040eb984', '1.0.0b4.r5', '', '2008-05-05 07:45:00', '0', '100', '4', 'APA PsycNET', 'Michael Berkowitz', 'http://psycnet\.apa\.org/', 
 'function detectWeb(doc, url) {
 	if (url.match(/search\.searchResults/)) {
 		return "multiple";
@@ -1965,7 +2839,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('0eeb2ac0-fbaf-4994-b98f-203d273eb9fa', '1.0.0b4.r5', '', '2008-04-30 21:30:00', '1', '100', '4', 'Inter-Research Science Center', 'Michael Berkowitz', 'http://www.int-res.com/', 
+REPLACE INTO translators VALUES ('0eeb2ac0-fbaf-4994-b98f-203d273eb9fa', '1.0.0b4.r5', '', '2008-05-05 07:45:00', '1', '100', '4', 'Inter-Research Science Center', 'Michael Berkowitz', 'http://www.int-res.com/', 
 'function detectWeb(doc, url) {
 	if (doc.evaluate(''//div[@class="journal-index"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext() ||
 		doc.evaluate(''//div[@class="tx-indexedsearch-res"]//tr[1]/td[2]//a'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
@@ -2866,7 +3740,7 @@ function doWeb(doc, url){
   }
 }');
 
-REPLACE INTO translators VALUES ('a69deb08-47d9-46ad-afca-bc3a2499ad34', '1.0.0b4.r5', '', '2008-04-08 03:00:00', '0', '100', '4', 'Royal Historical Society', 'Michael Berkowitz', 'http://www.rhs.ac.uk/bibl/', 
+REPLACE INTO translators VALUES ('a69deb08-47d9-46ad-afca-bc3a2499ad34', '1.0.0b4.r5', '', '2008-05-15 00:30:00', '1', '100', '4', 'Royal Historical Society', 'Michael Berkowitz', 'http://www.rhs.ac.uk/bibl/', 
 'function detectWeb(doc, url) {
 	if (doc.evaluate(''//tr/td[3][@class="bib_data"]/a[@class="bibref"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
@@ -2901,7 +3775,7 @@ REPLACE INTO translators VALUES ('a69deb08-47d9-46ad-afca-bc3a2499ad34', '1.0.0b
 			if (xml..journal_title.length() != 0) itemtype = "journalArticle";
 			
 			var item = new Zotero.Item(itemtype);
-			item.title = xml..title;
+			item.title = Zotero.Utilities.capitalizeTitle(xml..title.toString());
 			for (var i = 0; i < xml..author.length(); i++) {
 				var name = xml..author[i].toString().match(/^[^,]+,[^,]+/)[0].split(/,\s+/);
 				item.creators.push({lastName:name[0], firstName:name[1], creatorType:"author"});
@@ -2927,7 +3801,7 @@ REPLACE INTO translators VALUES ('a69deb08-47d9-46ad-afca-bc3a2499ad34', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('d921155f-0186-1684-615c-ca57682ced9b', '1.0.0b4.r1', '', '2008-04-04 20:00:00', '1', '100', '4', 'JSTOR', 'Simon Kornblith, Sean Takats and Michael Berkowitz', 'https?://[^/]*jstor\.org[^/]*/(action/(showArticle|doBasicSearch|doAdvancedSearch)|stable/)', 
+REPLACE INTO translators VALUES ('d921155f-0186-1684-615c-ca57682ced9b', '1.0.0b4.r1', '', '2008-05-15 18:30:00', '1', '100', '4', 'JSTOR', 'Simon Kornblith, Sean Takats and Michael Berkowitz', 'https?://[^/]*jstor\.org[^/]*/(action/(showArticle|doBasicSearch|doAdvancedSearch)|stable/|pss)', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -2935,7 +3809,7 @@ REPLACE INTO translators VALUES ('d921155f-0186-1684-615c-ca57682ced9b', '1.0.0b
 	} : null;
 	
 	// See if this is a seach results page
-	if(doc.title == "JSTOR: Search Results" || url.indexOf("/stable/i") != -1) {
+	if (doc.title == "JSTOR: Search Results" || url.match(/\/i\d+/)) {
 		return "multiple";
 	} else if(url.indexOf("/search/") != -1) {
 		return false;
@@ -2944,7 +3818,7 @@ REPLACE INTO translators VALUES ('d921155f-0186-1684-615c-ca57682ced9b', '1.0.0b
 	// If this is a view page, find the link to the citation
 	var xpath = ''//a[@id="favorites"]'';
 	var elmts = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
-	if(elmts.iterateNext()) {
+	if(elmts.iterateNext() || url.match(/pss/)) {
 		return "journalArticle";
 	}
 }', 
@@ -2961,50 +3835,57 @@ REPLACE INTO translators VALUES ('d921155f-0186-1684-615c-ca57682ced9b', '1.0.0b
 	// If this is a view page, find the link to the citation
 	var xpath = ''//a[@id="favorites"]'';
 	var elmts = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
-	if(elmts.iterateNext()) {
-			var jid;
-		var jidRe1 = new RegExp("doi=[0-9\.]+/([0-9]+)");
-		var jidRe2 = new RegExp("stable/view/([0-9]+)");
-		var jidRe3 = new RegExp("stable/([0-9]+)");
-		var jidmatch1 = jidRe1.exec(url);
-		var jidmatch2 = jidRe2.exec(url);
-		var jidmatch3 = jidRe3.exec(url);
-		if (jidmatch1) {
-			jid = jidmatch1[1];
-		} else if (jidmatch2) {
-			jid = jidmatch2[1];
-		} else if (jidmatch3) {
-			jid = jidmatch3[1];
-		} else {
-			return false;
-		}
-		var downloadString = "&noDoi=yesDoi&downloadFileName=deadbeef&suffix="+jid;
-	}
-	else{
-		var availableItems = new Object();
-		var tableRows = doc.evaluate(''//li[ul/li/a[@class="title"]]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
-		var tableRow;
-		var jid;
-		var title;
-		var jidRe = new RegExp("[0-9\.]+/([0-9]+)");
-		while(tableRow = tableRows.iterateNext()) {
-			title = doc.evaluate(''./ul/li/a[@class="title"]'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-			jid = doc.evaluate(''.//input[@name="doi"]'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().value;
-			var m = jidRe.exec(jid);
-			if (m) {
-				jid = m[1];
+	if (url.match(/pss/)) {
+		var jid = url.match(/\d+/);
+		var downloadString = "&noDoi=yesDoi&downloadFileName=deadbeef&suffix=" + jid;
+		var pdfYes = false;
+	} else {
+		if(elmts.iterateNext()) {
+				var jid;
+			var jidRe1 = new RegExp("doi=[0-9\.]+/([0-9]+)");
+			var jidRe2 = new RegExp("stable/view/([0-9]+)");
+			var jidRe3 = new RegExp("stable/([0-9]+)");
+			var jidmatch1 = jidRe1.exec(url);
+			var jidmatch2 = jidRe2.exec(url);
+			var jidmatch3 = jidRe3.exec(url);
+			if (jidmatch1) {
+				jid = jidmatch1[1];
+			} else if (jidmatch2) {
+				jid = jidmatch2[1];
+			} else if (jidmatch3) {
+				jid = jidmatch3[1];
+			} else {
+				return false;
 			}
-			availableItems[jid] = title;
+			var downloadString = "&noDoi=yesDoi&downloadFileName=deadbeef&suffix="+jid;
 		}
-
-		var items = Zotero.selectItems(availableItems);
-		if(!items) {
-			return true;
+		else{
+			var availableItems = new Object();
+			var tableRows = doc.evaluate(''//li[ul/li/a[@class="title"]]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+			var tableRow;
+			var jid;
+			var title;
+			var jidRe = new RegExp("[0-9\.]+/([0-9]+)");
+			while(tableRow = tableRows.iterateNext()) {
+				title = doc.evaluate(''./ul/li/a[@class="title"]'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+				jid = doc.evaluate(''.//input[@name="doi"]'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().value;
+				var m = jidRe.exec(jid);
+				if (m) {
+					jid = m[1];
+				}
+				availableItems[jid] = title;
+			}
+	
+			var items = Zotero.selectItems(availableItems);
+			if(!items) {
+				return true;
+			}
+			var downloadString="&noDoi=yesDoi&downloadFileName=deadbeef";
+			for(var i in items) {
+				downloadString+="&suffix="+i;
+			}
 		}
-		var downloadString="&noDoi=yesDoi&downloadFileName=deadbeef";
-		for(var i in items) {
-			downloadString+="&suffix="+i;
-		}
+		var pdfYes = true;
 	}
 
 	Zotero.Utilities.HTTP.doPost(host+"/action/downloadCitation?format=refman&direct=true",
@@ -3025,7 +3906,7 @@ REPLACE INTO translators VALUES ('d921155f-0186-1684-615c-ca57682ced9b', '1.0.0b
 			item.attachments[0].mimeType = "text/html";
 			Zotero.debug(host);
 			var pdfurl = item.url.replace(/([^\d]+)(\d+)$/, host + "/stable/pdfplus/$2") + ".pdf";
-			item.attachments.push({url:pdfurl, title:"JSTOR Full Text PDF", mimeType:"application/pdf"});
+			if (pdfYes == true) item.attachments.push({url:pdfurl, title:"JSTOR Full Text PDF", mimeType:"application/pdf"});
 			item.complete();
 		});
 		
@@ -3215,7 +4096,7 @@ function doWeb(doc, url){
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('e85a3134-8c1a-8644-6926-584c8565f23e', '1.0.0b4.r1', '', '2008-04-18 08:55:00', '1', '100', '4', 'History Cooperative', 'Simon Kornblith', 'https?://[^/]*historycooperative\.org[^/]*/(?:journals/.+/.+/.+\.s?html$|cgi-bin/search.cgi|journals/.+/.+/)', 
+REPLACE INTO translators VALUES ('e85a3134-8c1a-8644-6926-584c8565f23e', '1.0.0b4.r1', '', '2008-05-06 08:15:00', '1', '100', '4', 'History Cooperative', 'Simon Kornblith', 'https?://[^/]*historycooperative\.org[^/]*/(?:journals/.+/.+/.+\.s?html$|cgi-bin/search.cgi|journals/(?!cp|whc).+/.+/)', 
 'function detectWeb(doc, url) {
 	var contents = doc.title.replace("Contents", "");
 	if(doc.title != contents || doc.title == "History Cooperative: Search Results") {
@@ -4303,24 +5184,36 @@ REPLACE INTO translators VALUES ('636c8ea6-2af7-4488-8ccd-ea280e4a7a98', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('3eabecf9-663a-4774-a3e6-0790d2732eed', '1.0.0b4.r5', '', '2008-04-28 17:50:00', '0', '100', '4', 'SciELO', 'Michael Berkowitz', 'http://www.scielo.(org|br)/', 
+REPLACE INTO translators VALUES ('3eabecf9-663a-4774-a3e6-0790d2732eed', '1.0.0b4.r5', '', '2008-05-15 00:30:00', '1', '100', '4', 'SciELO', 'Michael Berkowitz', 'http://(www.)?scielo.(org|br)/', 
 'function detectWeb(doc, url) {
 	if (url.indexOf("wxis.exe") != -1) {
 		if (doc.evaluate(''//*[@class="isoref"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 			return "multiple";
 		}
+	} else if (url.indexOf("issuetoc") != -1) {
+		return "multiple"
 	} else if (url.indexOf("&pid=") != -1) {
 		return "journalArticle";
 	} else {
 		Zotero.debug("ok");
 	}
 }', 
-'function doWeb(doc, url) {
+'function makeURL(host, str) {
+	return ''http://'' + host + ''/scieloOrg/php/articleXML.php?pid='' + str.match(/pid=([^&]+)/)[1] + ''&lang=en'';
+}
+
+function doWeb(doc, url) {
+	var host = doc.location.host;
 	var arts = new Array();
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
-		var titlepath = ''//font[@class="isoref"]/font[@class="negrito"]'';
-		var linkpath = ''//font[@class="isoref"]/a[@class="isoref"]'';
+		if (url.indexOf(".exe") != -1) {
+			var titlepath = ''//font[@class="isoref"]/font[@class="negrito"]'';
+			var linkpath = ''//font[@class="isoref"]/a[@class="isoref"]'';
+		} else {
+			var titlepath = ''//font[@class="normal"]/b/b[1]'';
+			var linkpath = ''//tr/td/div/a[1]'';
+		}
 		var titles = doc.evaluate(titlepath, doc, null, XPathResult.ANY_TYPE, null);
 		var links = doc.evaluate(linkpath, doc, null, XPathResult.ANY_TYPE, null);
 		var next_title;
@@ -4330,69 +5223,59 @@ REPLACE INTO translators VALUES ('3eabecf9-663a-4774-a3e6-0790d2732eed', '1.0.0b
 		}
 		items = Zotero.selectItems(items);
 		for (var i in items) {
-			arts.push(i);
+			arts.push(makeURL(host, i));
 		}
 	} else {
-		arts = [url];
+		arts = [makeURL(host, url)];
 	}
-	for each (var url in arts) {
-		Zotero.debug(url);
-		Zotero.Utilities.HTTP.doGet(url, function(text) {
-			var link = text.match(/\"([^"]+articleXML[^"]+)\"/)[1];
-			Zotero.debug(link);
-
-			Zotero.Utilities.HTTP.doGet(link, function(text) {
-				var item = new Zotero.Item("journalArticle");
-				
-				text = text.replace(/<!DOCTYPE[^>]*>/, "").replace(/<\?xml[^>]*\?>/, "").replace(/<self-uri.*\/self\-uri>/g, "");
-				var journal = text.split("<journal-meta>")[1].split("</journal-meta>")[0];
-				journal = "<journal>" + journal + "</journal>";
-				journal = journal.replace(/\-([a-z])/g, "$1");
-				var xml2 = new XML(journal);
-				var art = text.split("<article-meta>")[1].split("</article-meta>")[0];
-				art = "<article>" + art + "</article>";
-				art = art.replace(/\-([a-z])/g, "$1");
-				var xml3 = new XML(art);
-				
-				item.publicationTitle = xml2..journaltitle.text().toString();
-				item.journalAbbreviation = xml2..abbrevjournaltitle.text().toString();
-				item.ISSN = xml2..issn.text().toString();
-				item.publisher = xml2..publisher..publishername.text().toString();
-				
-				item.title = xml3..titlegroup..articletitle.text().toString();
-				for (var i = 0 ; i < xml3..contribgroup..contrib.length() ; i++) {
-					var name = xml3..contribgroup..contrib[i]..name;
-					item.creators.push({firstName:name..givennames.text().toString(), lastName:name..surname.text().toString(), creatorType:"author"});
-				}
-				
-				var date = xml3..pubdate[0];
-				var day = date..day.text().toString();
-				var month = date..month.text().toString();
-				var year = date..year.text().toString();
-				
-				date =  year;
-				if (month != "00") {
-					date = month + "/" + date;
-				}
-				if (day != "00") {
-					date = day + "/" + date;
-				}
-				item.date = date;
-				item.volume = xml3..volume.text().toString();
-				item.pages = xml3..fpage.text().toString() + "-" + xml3..lpage.text().toString();
-				
-				for (var i = 0 ; i < xml3..kwdgroup..kwd.length() ; i++) {
-					item.tags.push(xml3..kwdgroup..kwd[i].text().toString());
-				}
-				
-				item.attachments = [
-					{url:url, title:"SciELO Snapshot", mimeType:"text/html"}
-				];
+	Zotero.Utilities.HTTP.doGet(arts, function(text) {
+		var item = new Zotero.Item("journalArticle");
+		text = text.replace(/<!DOCTYPE[^>]*>/, "").replace(/<\?xml[^>]*\?>/, "").replace(/<self-uri.*\/self\-uri>/g, "");
+		var journal = text.split("<journal-meta>")[1].split("</journal-meta>")[0];
+		journal = "<journal>" + journal + "</journal>";
+		journal = journal.replace(/\-([a-z])/g, "$1");
+		var xml2 = new XML(journal);
+		var art = text.split("<article-meta>")[1].split("</article-meta>")[0];
+		art = "<article>" + art + "</article>";
+		art = art.replace(/\-([a-z])/g, "$1");
+		var xml3 = new XML(art);
 		
-				item.complete();
-			});
-		});
-	}
+		item.publicationTitle = xml2..journaltitle.text().toString();
+		item.journalAbbreviation = xml2..abbrevjournaltitle.text().toString();
+		item.ISSN = xml2..issn.text().toString();
+		item.publisher = xml2..publisher..publishername.text().toString();
+		item.title = xml3..titlegroup..articletitle.text().toString();
+		for (var i = 0 ; i < xml3..contribgroup..contrib.length() ; i++) {
+			var name = xml3..contribgroup..contrib[i]..name;
+			item.creators.push({firstName:name..givennames.text().toString(), lastName:name..surname.text().toString(), creatorType:"author"});
+		}
+		
+		var date = xml3..pubdate[0];
+		var day = date..day.text().toString();
+		var month = date..month.text().toString();
+		var year = date..year.text().toString();
+		
+		date =  year;
+		if (month != "00") {
+			date = month + "/" + date;
+		}
+		if (day != "00") {
+			date = day + "/" + date;
+		}
+		item.date = date;
+		item.volume = xml3..volume.text().toString();
+		item.pages = xml3..fpage.text().toString() + "-" + xml3..lpage.text().toString();
+		
+		for (var i = 0 ; i < xml3..kwdgroup..kwd.length() ; i++) {
+			item.tags.push(xml3..kwdgroup..kwd[i].text().toString());
+		}
+		
+		item.attachments = [
+			{url:url, title:"SciELO Snapshot", mimeType:"text/html"}
+		];
+
+		item.complete();
+	});
 }');
 
 REPLACE INTO translators VALUES ('0a84a653-79ea-4c6a-8a68-da933e3b504a', '1.0.0b4.r5', '', '2008-03-28 16:30:00', '0', '100', '4', 'Alexander Street Press', 'John West and Michael Berkowitz', 'http://(?:www\.)alexanderstreet', 
@@ -4737,7 +5620,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('99f958ab-0732-483d-833f-6bd8e42f6277', '1.0.0b4.r1', '', '2008-04-28 19:30:00', '0', '100', '4', 'National Bureau of Economic Research', 'Michael Berkowitz', '^https?://(?:papers\.|www\.)?nber\.org/(papers|s|new)', 
+REPLACE INTO translators VALUES ('99f958ab-0732-483d-833f-6bd8e42f6277', '1.0.0b4.r1', '', '2008-05-05 07:45:00', '0', '100', '4', 'National Bureau of Economic Research', 'Michael Berkowitz', '^https?://(?:papers\.|www\.)?nber\.org/(papers|s|new)', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -9103,7 +9986,7 @@ REPLACE INTO translators VALUES ('a1a97ad4-493a-45f2-bd46-016069de4162', '1.0.0b
 	
 }');
 
-REPLACE INTO translators VALUES ('b61c224b-34b6-4bfd-8a76-a476e7092d43', '1.0.0b4.r5', '', '2008-05-01 15:00:00', '1', '100', '4', 'SSRN', 'Michael Berkowitz', 'http://papers\.ssrn\.com/', 
+REPLACE INTO translators VALUES ('b61c224b-34b6-4bfd-8a76-a476e7092d43', '1.0.0b4.r5', '', '2008-05-05 07:45:00', '1', '100', '4', 'SSRN', 'Michael Berkowitz', 'http://papers\.ssrn\.com/', 
 'function detectWeb(doc, url)	{
 	var namespace=doc.documentElement.namespaceURI;
 	var nsResolver=namespace?function(prefix)	{
@@ -9595,7 +10478,7 @@ function doWeb(doc, url)	{
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '1.0.0b3.r1', '', '2008-04-28 17:50:00', '1', '100', '4', 'Library Catalog (InnoPAC)', 'Simon Kornblith and Michael Berkowitz', 'https?://[^/]+/(search(\*spi)?(\?|~(S[\d]+)?)?)\??/(a|X|t)?\??', 
+REPLACE INTO translators VALUES ('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '1.0.0b3.r1', '', '2008-05-15 00:30:00', '1', '200', '4', 'Library Catalog (InnoPAC)', 'Simon Kornblith and Michael Berkowitz', 'https?://[^/]+/(search(\*spi)?(\?|~(S[\d]+)?)?)\??/(a|X|t)?\??', 
 'function detectWeb(doc, url) {
 	// First, check to see if the URL alone reveals InnoPAC, since some sites don''t reveal the MARC button
 	var matchRegexp = new RegExp(''^https?://[^/]+/search[^/]*\\??/[^/]+(/[^/]+/[0-9]+\%2C[^/]+/frameset(.+)$)?'');
@@ -9719,7 +10602,7 @@ function doWeb(doc, url) {
 		if (prefix == ''x'') return namespace; else return null;
 	} : null;
 	
-	if (!url.match("SEARCH") && !url.match("searchtype")) {
+	if (detectWeb(doc, url) == "book") {
 		var matchRegexp = new RegExp(''^(.*)frameset(.+)$'');
 		var m = matchRegexp.exec(uri);
 		if (m) {
@@ -10095,7 +10978,7 @@ function doWeb(doc, url){
 	}
 }');
 
-REPLACE INTO translators VALUES ('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '1.0.0b3.r1', '', '2007-12-03 03:00:00', '1', '100', '4', 'ProQuest', 'Simon Kornblith', '^https?://[^/]+/pqdweb\?((?:.*\&)?did=.*&Fmt=[0-9]|(?:.*\&)Fmt=[0-9].*&did=|(?:.*\&)searchInterface=|(?:.*\&)TS=[0-9])', 
+REPLACE INTO translators VALUES ('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '1.0.0b3.r1', '', '2008-05-15 18:30:00', '1', '100', '4', 'ProQuest', 'Simon Kornblith', '^https?://[^/]+/pqdweb\?((?:.*\&)?did=.*&Fmt=[0-9]|(?:.*\&)Fmt=[0-9].*&did=|(?:.*\&)searchInterface=|(?:.*\&)TS=[0-9])', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -10140,10 +11023,8 @@ REPLACE INTO translators VALUES ('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '1.0.0b
 
 //^https?://[^/]+/pqdweb\?((?:.*\&)?did=.*&Fmt=[0-9]|(?:.*\&)Fmt=[0-9].*&did=|(?:.*\&)searchInterface=)', 
 'function parseRIS(uris) {
-	
 	Zotero.Utilities.HTTP.doGet(uris, function(text, xmlhttp, url){	
 		// load translator for RIS
-
 		if(url.match("exportFormat=1")=="exportFormat=1") {
 			var translator = Zotero.loadTranslator("import");
 			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
@@ -10167,7 +11048,7 @@ REPLACE INTO translators VALUES ('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '1.0.0b
 						}
 					}
 				}
-
+				if (item.publicationTitle) item.publicationTitle = Zotero.Utilities.trimInternal(item.publicationTitle.replace(/\([\d\-]+\)/g, ""));
 				item.complete();
 			});
 		
@@ -12325,6 +13206,161 @@ REPLACE INTO translators VALUES ('a326fc49-60c2-405b-8f44-607e5d18b9ad', '1.0.0b
 	Zotero.wait();
 }');
 
+REPLACE INTO translators VALUES ('c3edb423-f267-47a1-a8c2-158c247f87c2', '1.0.0b4.r5', '', '2008-05-06 08:15:00', '0', '100', '4', 'Common-Place', 'Frederick Gibbs', 'http://www.common-place\.|historycooperative\.org/journals/cp', 
+'function detectWeb(doc, url) {
+	if(doc.title.indexOf("Previous Issues") != -1 || doc.title.indexOf("Search Site") != -1 ) {
+		return "multiple";
+	} else {
+		return "journalArticle";
+	}
+}', 
+'function scrape(doc) {
+	
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	var newItem = new Zotero.Item("journalArticle");
+	newItem.publicationTitle = "Common-Place";
+	newItem.url = doc.location.href;
+
+
+	//get issue year and month
+	//these will determine what xpaths we use for title and author
+	var pubDate;
+	var dateRe = /<a href="\/vol-[0-9]{2}\/no-[0-9]{2}\/">(.*)<\/a><\/b>/;
+	var m = dateRe.exec(Zotero.Utilities.trimInternal(doc.getElementsByTagName("body")[0].innerHTML));
+
+	if(m) {
+		//newItem.title = Zotero.Utilities.trimInternal(Zotero.Utilities.unescapeHTML(m[1]));
+		pubDate = m[1];
+	} else {
+	pubDate = doc.evaluate(''//div[@id="container"]/div[@id="top"]/p/b/a[2]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+	}
+	var d;
+	//Zotero.debug(pubDate);
+	pubDateVolRE = /vol. (.*) · no. /;
+	d = pubDateVolRE.exec(pubDate);
+	newItem.volume = d[1];
+
+	pubDateVolRE = /no. (.*) ·/;
+	d = pubDateVolRE.exec(pubDate);
+	newItem.issue = d[1];
+
+	pubDateVolRE = /no. [0-9] · (.*)/;
+	d = pubDateVolRE.exec(pubDate);
+	newItem.date = d[1];
+
+	//usually the page begins with the article title or book title (of reviewed book)
+	//some pages have an image just before them, so we need to skip it if it''s there.
+	var pLevel;
+	var m=doc.evaluate(''//div[@id="content"]/p[1]/img'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+	
+	//if there is an image here, offset the xpath
+	if (m == null) {
+		pLevel = ''//div[@id="content"]/p[1]'';
+	} else { 
+		pLevel = ''//div[@id="content"]/p[2]'';
+	}
+	
+	//issues before 2004 have a table based layout, so a totally different xpath.
+	//check to see if we have anything, then try again if we don''t.
+	var author;
+	var title;
+		
+	author = doc.evaluate(pLevel+''/span[1]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+	author = author.iterateNext();
+
+	if (author != null) {
+		//Zotero.debug("au"+author+"au");
+		var title = doc.evaluate(pLevel+''/span[2]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		//Zotero.debug("ti"+title+"ti");
+		title = title.iterateNext().textContent;		
+
+		//determine if we have a book review
+		// if so, get the publication information
+		if (author.textContent.indexOf("Review by") != -1 ) {
+			newItem.title = String.concat("Review of ", title);
+			newItem.author = author.textContent.substring(10);
+		} else {
+			newItem.author = author.textContent;
+			newItem.title = title;
+		}
+
+	}	
+	else { //we have older issue
+		
+		//check if we are on a review
+		var review = doc.evaluate(''/html/body/table/tbody/tr/td[2]/p[2]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+		var temp = review.textContent;
+		if (temp.indexOf("Review") != -1) {
+			title = doc.evaluate(''/html/body/table/tbody/tr/td[2]/p/i'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+			title = "Review of " + title; 
+			author = review.textContent.substring(10);
+		} else { //for articles
+			title = doc.evaluate(''/html/body/table/tbody/tr/td[2]/p/b'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+			author = doc.evaluate(''/html/body/table/tbody/tr/td[2]/p[1]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent.split(/\n/)[1];
+			//Zotero.debug(author);	
+		}
+		newItem.author = author;
+		newItem.title = title;
+	}
+	
+	newItem.attachments.push({document:doc, title:doc.title});
+	
+	newItem.complete();
+}
+
+function doWeb(doc, url) {
+var type = detectWeb(doc, url);
+if (type == "multiple") {
+		
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+		//create list of items
+		//what about home page (current issue table of contents?)
+		//for search result links: /html/body/table[2]/tbody/tr/td[2]/li[3]/a
+		//for previous issues: //tr/td/p/a/b (but we need to strip out volume links (starts with ''Volume'')
+		
+	var link;
+	var title;
+	var items = new Object();
+	var searchLinks = doc.evaluate(''/html/body/table[2]/tbody/tr/td[2]/li/a'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+
+		while (elmt = searchLinks.iterateNext()) {
+			Zotero.debug(elmt.textContent);
+			title = elmt.textContent;
+			link = elmt.href;
+			if (title && link){
+				items[link] = title;
+			}
+		}
+		
+		items = Zotero.selectItems(items);
+		
+		if(!items) {
+			return true;
+		}
+		
+		var uris = new Array();
+		for(var i in items) {
+			uris.push(i);
+		}
+		
+		Zotero.Utilities.processDocuments(uris, function(doc) { scrape(doc) },
+			function() { Zotero.done(); }, null);
+		
+		Zotero.wait();
+	} else {
+		scrape(doc);
+	}
+}');
+
+
 REPLACE INTO translators VALUES ('37445f52-64fa-4a2a-9532-35753520a0f0', '1.0.0b4.r5', '', '2008-01-16 06:30:00', '0', '100', '4', 'HeinOnline', 'Michael Berkowitz', 'http://heinonline\.org/HOL/', 
 'function detectWeb(doc, url) {
 	if (url.indexOf("LuceneSearch") != -1) {
@@ -13382,7 +14418,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('d0b1914a-11f1-4dd7-8557-b32fe8a3dd47', '1.0.0b3.r1', '', '2008-05-03 06:00:00', '1', '100', '4', 'EBSCOhost', 'Simon Kornblith', 'https?://[^/]+/(?:bsi|ehost)/(?:results|detail|folder)', 
+REPLACE INTO translators VALUES ('d0b1914a-11f1-4dd7-8557-b32fe8a3dd47', '1.0.0b3.r1', '', '2008-05-05 07:45:00', '1', '100', '4', 'EBSCOhost', 'Simon Kornblith', 'https?://[^/]+/(?:bsi|ehost)/(?:results|detail|folder)', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -14478,7 +15514,7 @@ REPLACE INTO translators VALUES ('232903bc-7307-4058-bb1a-27cfe3e4e655', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('fe728bc9-595a-4f03-98fc-766f1d8d0936', '1.0.0b4.r5', '', '2007-12-03 22:00:00', '0', '100', '4', 'Wiley InterScience', 'Sean Takats', 'https?:\/\/(?:www3\.|www\.)?interscience\.wiley\.com[^\/]*\/(?:search\/|cgi-bin\/abstract\/[0-9]+)', 
+REPLACE INTO translators VALUES ('fe728bc9-595a-4f03-98fc-766f1d8d0936', '1.0.0b4.r5', '', '2008-05-15 00:30:00', '0', '100', '4', 'Wiley InterScience', 'Sean Takats and Michael Berkowitz', 'https?:\/\/(?:www3\.|www\.)?interscience\.wiley\.com[^\/]*\/(?:search\/|(cgi-bin|journal)\/[0-9]+\/abstract|journal)', 
 'function detectWeb(doc, url){
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -14489,33 +15525,50 @@ REPLACE INTO translators VALUES ('fe728bc9-595a-4f03-98fc-766f1d8d0936', '1.0.0b
 	if(doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
 	}
-	var m = url.match(/https?:\/\/[^\/]*\/cgi-bin\/abstract\/[0-9]+/);
+	if (doc.evaluate(''//div[@id="contentCell"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+		return "multiple";
+	}
+	var m = url.match(/https?:\/\/[^\/]*\/(cgi-bin|journal)(\/abstract)?\/[0-9]+(\/abstract)?/);
 	if (m){
 		return "journalArticle";
 	}
 }', 
 'function doWeb(doc, url){
+	Zotero.debug(doc.location.host);
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == ''x'') return namespace; else return null;
 	} : null;
 
-	var m = url.match(/https?:\/\/[^\/]*\/cgi-bin\/abstract\/([0-9]+)/);
+	var m = url.match(/https?:\/\/[^\/]*\/journal\/([0-9]+)\/abstract/);
 	var ids = new Array();
-	var xpath = ''//tr[td/input[@name="ID"][@type="checkbox"]]'';
+	/*var xpath = ''//tr[td/input[@name="ID"][@type="checkbox"]]'';
 	var elmt;
 	var elmts = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null); 
-	elmt = elmts.iterateNext();
-	if(elmt) {  //search
+	elmt = elmts.iterateNext();*/
+	if(detectWeb(doc, url) == "multiple") {  //search
 		var id;
 		var title;
 		var availableItems = new Array();
-		do {
-			title = doc.evaluate(''./td/strong'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-			id = doc.evaluate(''./td/input[@name="ID"][@type="checkbox"]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().value;
-			availableItems[id] = title;
-		} while (elmt = elmts.iterateNext())
-
+		var xpath = ''//tr[td/input[@name="ID"][@type="checkbox"]]'';
+		if (doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+			elmts = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+			var elmt = elmts.iterateNext();
+			do {
+				title = doc.evaluate(''./td/strong'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+				id = doc.evaluate(''./td/input[@name="ID"][@type="checkbox"]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().value;
+				availableItems[id] = title;
+			} while (elmt = elmts.iterateNext())
+		} else {
+			var xpath = ''//div[@id="contentCell"]/div[*/a]'';
+			var elmts = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+			var elmt = elmts.iterateNext();
+			do {
+				title = Zotero.Utilities.trimInternal(doc.evaluate(''.//strong'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+				id = doc.evaluate(''.//a[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href.match(/abstract\/([\d]+)\//)[1];
+				availableItems[id] = title;
+			} while (elmt = elmts.iterateNext())
+		}
 		var items = Zotero.selectItems(availableItems);
 		if(!items) {
 			return true;
@@ -14527,7 +15580,6 @@ REPLACE INTO translators VALUES ('fe728bc9-595a-4f03-98fc-766f1d8d0936', '1.0.0b
 	} else if (m){ //single article
 		ids.push(m[1]);
 	}
-	
 	var hostRe = new RegExp("^http(?:s)?://[^/]+");
 	var m = hostRe.exec(doc.location.href);
 	var host = m[0];
@@ -14547,7 +15599,7 @@ REPLACE INTO translators VALUES ('fe728bc9-595a-4f03-98fc-766f1d8d0936', '1.0.0b
 				var authors = m[1].split(",")
 				for each (var author in authors){
 					if (author != ""){
-						newauthors = newauthors + "%A "+Zotero.Utilities.trimInternal(author)+"\n";
+						newauthors = newauthors + "%A "+Zotero.Utilities.unescapeHTML(Zotero.Utilities.trimInternal(author))+"\n";
 					}
 				}
 				text = text.replace(/%A\s.*\n/, newauthors);
@@ -14555,6 +15607,10 @@ REPLACE INTO translators VALUES ('fe728bc9-595a-4f03-98fc-766f1d8d0936', '1.0.0b
 			var translator = Zotero.loadTranslator("import");
 			translator.setTranslator("881f60f2-0802-411a-9228-ce5f47b64c7d"); //EndNote/Refer/BibIX
 			translator.setString(text);
+			translator.setHandler("itemDone", function(obj, item) {
+				item.DOI = item.url.match(/\.org\/(.*)$/)[1];
+				item.complete();
+			});
 			translator.translate();
 			Zotero.done();
 		});
@@ -14925,7 +15981,7 @@ REPLACE INTO translators VALUES ('2c310a37-a4dd-48d2-82c9-bd29c53c1c76', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('cde4428-5434-437f-9cd9-2281d14dbf9', '1.0.0b3.r1', '', '2008-04-23 09:45:00', '1', '100', '4', 'Ovid', 'Simon Kornblith and Michael Berkowitz', '/(gw2|spa|spb)/ovidweb\.cgi', 
+REPLACE INTO translators VALUES ('cde4428-5434-437f-9cd9-2281d14dbf9', '1.0.0b3.r1', '', '2008-05-08 20:30:00', '1', '100', '4', 'Ovid', 'Simon Kornblith and Michael Berkowitz', '/(gw2|spa|spb)/ovidweb\.cgi', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -14997,8 +16053,12 @@ function doWeb(doc, url) {
 	
 	if (detectWeb(doc, url) == "multiple") {
 		var selectvar = doc.evaluate(''.//input[@name="SELECT"]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
-		var nextselect = selectvar.iterateNext();
-		post += "&SELECT="+ selectvar.iterateNext().value;
+		var nextselect = selectvar.iterateNext().value;
+		if (next = selectvar.iterateNext()) {
+			post += "&SELECT=" + next.value;
+		} else {
+			post += "&SELECT="+ nextselect;
+		}
 	} else {
 		post += "&SELECT=" + doc.evaluate(''.//input[@name="SELECT"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().value;
 	}
@@ -15446,9 +16506,9 @@ REPLACE INTO translators VALUES ('6614a99-479a-4524-8e30-686e4d66663e', '1.0.0b3
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('92d4ed84-8d0-4d3c-941f-d4b9124cfbb', '1.0.0b3.r1', '', '2008-02-27 15:00:00', '1', '100', '4', 'IEEE Xplore', 'Simon Kornblith and Michael Berkowitz', 'https?://[^/]*ieeexplore.ieee.org[^/]*/(?:[^\?]+\?(?:|.*&)arnumber=[0-9]+|search/(?:searchresult.jsp|selected.jsp))', 
+REPLACE INTO translators VALUES ('92d4ed84-8d0-4d3c-941f-d4b9124cfbb', '1.0.0b3.r1', '', '2008-05-08 20:30:00', '1', '100', '4', 'IEEE Xplore', 'Simon Kornblith and Michael Berkowitz', 'https?://[^/]*ieeexplore.ieee.org[^/]*/(?:[^\?]+\?(?:|.*&)arnumber=[0-9]+|search/(?:searchresult.jsp|selected.jsp))', 
 'function detectWeb(doc, url) {
-	var articleRe = /[?&]arnumber=([0-9]+)/;
+	var articleRe = /[?&]ar(N|n)umber=([0-9]+)/;
 	var m = articleRe.exec(url);
 	
 	if(m) {
@@ -15465,10 +16525,10 @@ REPLACE INTO translators VALUES ('92d4ed84-8d0-4d3c-941f-d4b9124cfbb', '1.0.0b3.
 		if (prefix == ''x'') return namespace; else return null;
 	} : null;
 	
-	var articleRe = /[?&]arnumber=([0-9]+)/;
+	var articleRe = /[?&]ar(N|n)umber=([0-9]+)/;
 	var m = articleRe.exec(url);
 	
-	if(!m) {
+	if(detectWeb(doc, url) == "multiple") {
 		// search page
 		var items = new Array();
 		
@@ -15502,7 +16562,7 @@ REPLACE INTO translators VALUES ('92d4ed84-8d0-4d3c-941f-d4b9124cfbb', '1.0.0b3.
 	var arnumber = "";
 	for each(var url in urls) {
 		var m = articleRe.exec(url);
-		arnumber = "%3Carnumber%3E"+m[1]+"%3C%2Farnumber%3E";
+		arnumber = "%3Carnumber%3E"+m[2]+"%3C%2Farnumber%3E";
 		var post = "dlSelect=cite_abs&fileFormate=ris&arnumber="+arnumber+"&x=5&y=10";
 		var isRe = /[?&]isnumber=([0-9]+)/;
 		var puRe = /[?&]punumber=([0-9]+)/;
@@ -15685,7 +16745,7 @@ REPLACE INTO translators VALUES ('7bdb79e-a47f-4e3d-b317-ccd5a0a74456', '1.0.0b3
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('850f4c5f-71fb-4669-b7da-7fb7a95500ef', '1.0.0b3r1', '', '2008-04-29 16:00:00', '1', '100', '4', 'Cambridge Journals Online', 'Sean Takats and Michael Berkowitz', 'https?://[^/]*journals.cambridge.org[^/]*//?action/(quickSearch|search|displayAbstract|displayFulltext|displayIssue)', 
+REPLACE INTO translators VALUES ('850f4c5f-71fb-4669-b7da-7fb7a95500ef', '1.0.0b3r1', '', '2008-05-05 07:45:00', '1', '100', '4', 'Cambridge Journals Online', 'Sean Takats and Michael Berkowitz', 'https?://[^/]*journals.cambridge.org[^/]*//?action/(quickSearch|search|displayAbstract|displayFulltext|displayIssue)', 
 'function detectWeb(doc, url)	{
 	var namespace=doc.documentElement.namespaceURI;
 	var nsResolver=namespace?function(prefix)	{
@@ -16622,7 +17682,7 @@ REPLACE INTO translators VALUES ('a354331-981b-43de-a61-bc26dd1be3a9', '1.0.0b3.
 	});
 }');
 
-REPLACE INTO translators VALUES ('938ebe32-2b2e-4349-a5b3-b3a05d3de627', '1.0.0b3.r1', '', '2008-03-18 02:30:00', '1', '100', '4', 'ACS Publications', 'Sean Takats and Michael Berkowitz', 'http://[^/]*pubs.acs.org[^/]*/(?:wls/journals/query/(?:subscriberResults|query)\.html|acs/journals/toc.page|cgi-bin/(?:article|abstract|sample|asap).cgi)?', 
+REPLACE INTO translators VALUES ('938ebe32-2b2e-4349-a5b3-b3a05d3de627', '1.0.0b3.r1', '', '2008-05-06 08:15:00', '1', '100', '4', 'ACS Publications', 'Sean Takats and Michael Berkowitz', 'http://[^/]*pubs3?.acs.org[^/]*/(?:wls/journals/query/(?:subscriberResults|query)\.html|acs/journals/toc.page|cgi-bin/(?:article|abstract|sample|asap).cgi)?', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -17143,6 +18203,121 @@ REPLACE INTO translators VALUES ('66928fe3-1e93-45a7-8e11-9df6de0a11b3', '1.0.0b
 		translator.translate();
 	}, function() {Zotero.done();}, null);
 	Zotero.wait();
+}');
+
+
+REPLACE INTO translators VALUES ('0507797c-9bc4-4374-92ca-9e3763b6922b', '1.0.0b4.r5', '', '2008-05-06 08:15:00', '0', '100', '4', 'World History Connected', 'Frederick Gibbs', 'worldhistoryconnected\.press|historycooperative.*/whc/', '', 
+'function associateMeta(newItem, metaTags, field, zoteroField) {
+	var field = metaTags.namedItem(field);
+	if(field) {
+		newItem[zoteroField] = field.getAttribute("content");
+	}
+}
+
+function scrape(doc) {
+	
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	var newItem = new Zotero.Item("journalArticle");
+	newItem.url = doc.location.href;
+	
+	var titlePath;
+	var bookTitle;
+	var month, year;
+	var metaTags = doc.getElementsByTagName("meta");
+
+	associateMeta(newItem, metaTags, "Journal", "publicationTitle");
+	associateMeta(newItem, metaTags, "Volume", "volume");
+	associateMeta(newItem, metaTags, "Issue", "issue");
+
+	// in the case of book reviews, the title field is blank
+	//but quotes are not escaped properly, so if an article title begins with quotes, then the title tag looks blank even though it is not.
+	//(though semantically it is)
+	//they use the meta tag ''FileType'' to indicate Aritlce or Book Review. silly, but we can use it.
+	
+	if (metaTags.namedItem(''FileType'').getAttribute("content") == ''Book Review'') {
+		//for a book review, title of reviewed book is
+		titlePath = ''/html/body/table[4]/tbody/tr[3]/td[1]/i'';	
+		newItem.title = "Review of " + doc.evaluate(titlePath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+
+	} else {
+		//it would be nice to grab the title from the meta tags, but quotations are properly escaped and the tags are therefore malformed.
+		titlePath = ''/html/body/table[4]/tbody/tr[2]/td[1]/h2/font/b'';
+		newItem.title = Zotero.Utilities.superCleanString(doc.evaluate(titlePath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+	}
+
+	var author = metaTags.namedItem("Author");
+	if(author) {
+		var authors = author.getAttribute("content").split(" and ");
+		for(j in authors) {
+			authors[j] = authors[j].replace("Reviewed by ", "");
+			newItem.creators.push(Zotero.Utilities.cleanAuthor(authors[j], "author"));
+		}
+	}
+	
+	var month = metaTags.namedItem("PublicationMonth");
+	var year = metaTags.namedItem("PublicationYear");
+	if(month && year) {
+		newItem.date = month.getAttribute("content")+" "+year.getAttribute("content");
+	}
+	
+	newItem.attachments.push({document:doc, title:"World History Connected Snapshot"});
+	
+	newItem.complete();
+}
+
+function doWeb(doc, url) {
+	
+	var searchLinks;
+	
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+
+	if(doc.title.indexOf("Contents") != -1 || doc.title.indexOf("Search results") != -1) {
+
+		if(doc.title.indexOf("Contents") != -1) {
+		searchLinks = doc.evaluate(''//tbody/tr[2]/td[1]/table/tbody/tr/td/a'', doc, nsResolver, XPathResult.ANY_TYPE, null);	
+		} 
+		else if ( doc.title.indexOf("Search results") != -1) {
+		searchLinks = doc.evaluate(''/html/body/dl/dt/strong/a'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		}
+		
+		var link;
+		var title;
+		var items = new Object();
+		
+		while (elmt = searchLinks.iterateNext()) {
+			Zotero.debug(elmt.href);
+			title = Zotero.Utilities.superCleanString(elmt.textContent);
+			link = elmt.href;
+			if (title && link){
+				items[link] = title;
+			}
+		}
+	
+		items = Zotero.selectItems(items);
+		
+		if(!items) {
+			return true;
+		}
+		
+		var uris = new Array();
+		for(var i in items) {
+			uris.push(i);
+		}
+		
+		Zotero.Utilities.processDocuments(uris, function(doc) { scrape(doc) },
+			function() { Zotero.done(); }, null);
+		
+		Zotero.wait();
+	} else {
+		scrape(doc);
+	}
 }');
 
 REPLACE INTO translators VALUES ('c73a4a8c-3ef1-4ec8-8229-7531ee384cc4', '1.0.0b3.r1', '', '2007-11-05 18:00:00', '1', '100', '4', 'Open WorldCat (Web)', 'Sean Takats', '^http://(?:www\.)?worldcat\.org/(?:search\?|profiles/[^/]+/lists/)', 
@@ -19935,7 +21110,7 @@ function doExport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('9cb70025-a888-4a29-a210-93ec52da40d4', '1.0.0b4.r1', '', '2008-03-26 16:04:37', '1', '200', '3', 'BibTeX', 'Simon Kornblith', 'bib', 
+REPLACE INTO translators VALUES ('9cb70025-a888-4a29-a210-93ec52da40d4', '1.0.0b4.r1', '', '2008-05-06 18:45:00', '1', '200', '3', 'BibTeX', 'Simon Kornblith', 'bib', 
 'Zotero.configure("dataMode", "block");
 Zotero.addOption("UTF8", true);
 
@@ -21521,6 +22696,8 @@ function processField(item, field, value) {
 		} else {
 			item.tags = value.split(/, ?/g);
 		}
+	} else if (field == "comment") {
+		item.notes.push({note:value});
 	}
 }
 
@@ -21904,13 +23081,17 @@ function doExport() {
 		if(item.itemType == "webpage") {
 			writeField("howpublished", item.url);
 		}
-		
+		if (item.notes) {
+			for each (var note in item.notes) {
+				writeField("comment", note["note"]);
+			}
+		}		
 		Zotero.write("\n}");
 	}
 }');
 
 
-REPLACE INTO translators VALUES ('a6ee60df-1ddc-4aae-bb25-45e0537be973', '1.0.0b3.r1', '', '2008-04-30 18:15:00', '1', '100', '1', 'MARC', 'Simon Kornblith', 'marc', 
+REPLACE INTO translators VALUES ('a6ee60df-1ddc-4aae-bb25-45e0537be973', '1.0.0b3.r1', '', '2008-05-05 07:45:00', '1', '100', '1', 'MARC', 'Simon Kornblith', 'marc', 
 'function detectImport() {
 	var marcRecordRegexp = /^[0-9]{5}[a-z ]{3}$/
 	var read = Zotero.read(8);
@@ -22645,20 +23826,20 @@ function doExport() {
 --  CSL styles
 --
 -- ----------------------------------------------------------------
-REPLACE INTO csl VALUES ('http://www.zotero.org/syles/ama', '2008-02-02 00:00:00', 'American Medical Association',
+REPLACE INTO csl VALUES ('http://www.zotero.org/styles/ama', '2008-05-08 19:00:00', 'American Medical Association',
 '<?xml version="1.0" encoding="UTF-8"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="in-text" xml:lang="en">
   <info>
     <title>American Medical Association</title>
-    <id>http://www.zotero.org/syles/ama</id>
-    <link href="http://www.zotero.org/syles/ama"/>
+    <id>http://www.zotero.org/styles/ama</id>
+    <link href="http://www.zotero.org/styles/ama"/>
     <author>
       <name>Julian Onions</name>
       <email>julian.onions@gmail.com</email>
     </author>
     <category term="numeric"/>
     <category term="medicine"/>
-    <updated>2008-02-02T00:00:00+00:00</updated>
+    <updated>2008-05-08T19:00:00+00:00</updated>
     <summary>The American Medical Association style as used in JAMA.</summary>
     <link href="http://www.samford.edu/schools/pharmacy/dic/amaquickref07.pdf" rel="documentation"/>
   </info>
@@ -22832,7 +24013,7 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/syles/ama', '2008-02-02 00:00:00
 </style>
 ');
 
-REPLACE INTO csl VALUES ('http://www.zotero.org/styles/apa', '2008-02-02 00:00:00', 'American Psychological Association',
+REPLACE INTO csl VALUES ('http://www.zotero.org/styles/apa', '2008-05-08 19:00:00', 'American Psychological Association',
 '<?xml version="1.0" encoding="UTF-8"?>
 <?oxygen RNGSchema="http://xbiblio.svn.sourceforge.net/viewvc/*checkout*/xbiblio/csl/schema/trunk/csl.rnc" type="compact"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="in-text" xml:lang="en">
@@ -22844,16 +24025,34 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/apa', '2008-02-02 00:00:0
       <name>Simon Kornblith</name>
       <email>simon@simonster.com</email>
     </author>
+    <contributor>
+      <name>Bruce D''Arcus</name>
+    </contributor>
     <category term="psychology"/>
     <category term="generic-base"/>
     <category term="author-date"/>
-    <updated>2008-02-02T00:00:00+00:00</updated>
+    <updated>2008-05-08T19:00:00+00:00</updated>
   </info>
-  <macro name="editor-translator">
-    <names variable="editor translator" delimiter=", ">
+  <macro name="container-contributors">
+    <choose>
+      <if type="chapter">
+    <text term="in" text-case="capitalize-first" suffix=" "/>
+    <names variable="editor translator" delimiter=", " suffix=", ">
       <name and="symbol" initialize-with=". " delimiter=", "/>
       <label form="short" prefix=" (" text-case="capitalize-first" suffix=".)"/>
     </names>
+      </if>
+    </choose>
+  </macro>
+  <macro name="secondary-contributors">
+    <choose>
+      <if type="chapter" match="none">
+    <names variable="editor translator" delimiter=", " prefix=" (" suffix=")">
+      <name and="symbol" initialize-with=". " delimiter=", "/>
+      <label form="short" prefix=", " text-case="capitalize-first" suffix="."/>
+    </names>
+      </if>
+    </choose>
   </macro>
   <macro name="author">
     <names variable="author">
@@ -22907,15 +24106,16 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/apa', '2008-02-02 00:00:0
   </macro>
   <macro name="title">
     <choose>
-      <if type="book">
-        <text variable="title" text-case="sentence" font-style="italic"/>
+      <if type="book thesis" match="any">
+        <text variable="title" font-style="italic"/>
       </if>
       <else>
-        <text variable="title" text-case="sentence"/>
+        <text variable="title" suffix=". "/>
       </else>
     </choose>
   </macro>
   <macro name="publisher">
+    <text variable="genre" suffix=", "/>
     <group delimiter=": ">
       <text variable="publisher-place"/>
       <text variable="publisher"/>
@@ -22945,34 +24145,58 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/apa', '2008-02-02 00:00:0
       <date-part name="year"/>
     </date>
   </macro>
+  <macro name="edition">
+    <choose>
+      <if type="book chapter" match="any">
+    <choose>
+      <if is-numeric="edition">
+        <group delimiter=" ">
+          <number variable="edition" form="ordinal"/>
+          <text term="edition" form="short" suffix="."/>
+        </group>
+      </if>
+      <else>
+        <text variable="edition" suffix="."/>
+      </else>
+    </choose>
+      </if>
+    </choose>
+  </macro>
+  <macro name="locators">
+    <choose>
+      <if type="article-journal article-magazine article-newspaper" match="any">
+        <group prefix=", " delimiter=", ">
+          <group>
+            <text variable="volume" font-style="italic"/>
+            <text variable="issue" prefix="(" suffix=")"/>
+          </group>
+          <text variable="page"/>
+         </group>
+      </if>
+      <else-if type="book chapter" match="any">
+        <group prefix=" (" suffix=")" delimiter=", ">
+          <text macro="edition"/>
+          <group>
+            <text term="volume" form="short" plural="true" text-case="capitalize-first" suffix=". "/>
+            <number variable="number-of-volumes" form="numeric" prefix="1-"/>
+          </group>
+          <group>
+            <text term="volume" form="short" text-case="capitalize-first" suffix=". "/>
+            <number variable="volume" form="numeric"/>
+          </group>
+          <group>
+            <label variable="page" form="short" include-period="true" suffix=" "/>
+            <text variable="page"/>
+          </group>
+        </group>
+      </else-if>
+    </choose>
+  </macro>
   <macro name="citation-locator">
     <group>
       <label variable="locator" include-period="true" form="short"/>
       <text variable="locator" prefix=" "/>
     </group>
-  </macro>
-  <macro name="container-prefix">
-    <choose>
-      <if type="chapter">
-        <text term="in" text-case="capitalize-first" suffix=" "/>
-      </if>
-    </choose>
-  </macro>
-  <macro name="pages">
-    <choose>
-      <if type="chapter">
-        <group prefix=" (" suffix=")">
-          <label variable="page" form="short" include-period="true" suffix=" "/>
-          <text variable="page"/>
-        </group>
-      </if>
-      <else>
-        <text variable="page" prefix=", "/>
-      </else>
-    </choose>
-  </macro>
-  <macro name="edition">
-      <text variable="edition"/>
   </macro>
   <citation>
     <option name="et-al-min" value="6"/>
@@ -22999,6 +24223,7 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/apa', '2008-02-02 00:00:0
     <option name="hanging-indent" value="true"/>
     <option name="et-al-min" value="6"/>
     <option name="et-al-use-first" value="6"/>
+    <option name="entry-spacing" value="0"/>
     <sort>
       <key macro="author"/>
       <key variable="issued"/>
@@ -23007,16 +24232,15 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/apa', '2008-02-02 00:00:0
       <text macro="author" suffix="."/>
       <text macro="issued"/>
       <text macro="title" prefix=" "/>
-      <text macro="container-prefix" prefix=" "/>
-      <text macro="editor-translator" prefix=" "/>
-      <text variable="container-title" prefix=", " font-style="italic"/>
+      <text macro="container-contributors"/>
+      <text macro="secondary-contributors"/>
+      <text variable="container-title" font-style="italic"/>
       <text variable="collection-title" prefix=", " suffix="."/>
-      <text macro="edition" prefix=" (" suffix=")"/>
-      <text variable="volume" prefix=", "/>
-      <text variable="issue" prefix="(" suffix=")"/>
-      <text macro="pages"/>
-      <text macro="publisher" prefix=". "/>
-      <text macro="access" prefix=". " />
+      <text macro="locators"/>
+      <group delimiter=". " prefix=". ">
+	    <text macro="publisher"/>
+	    <text macro="access"/>
+      </group>
     </layout>
   </bibliography>
 </style>
@@ -23200,11 +24424,11 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/apsa', '2008-02-02 00:00:
 </style>
 ');
 
-REPLACE INTO csl VALUES ('http://www.zotero.org/styles/asa', '2008-02-02 00:00:00', 'American Sociological Association (Author-Date)',
+REPLACE INTO csl VALUES ('http://www.zotero.org/styles/asa', '2008-05-08 19:00:00', 'American Sociological Association',
 '<?xml version="1.0" encoding="UTF-8"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" xml:lang="en" class="in-text" >
   <info>
-    <title>American Sociological Association (Author-Date)</title>
+    <title>American Sociological Association</title>
     <id>http://www.zotero.org/styles/asa</id>
     <link href="http://www.zotero.org/styles/asa"/>
     <author>
@@ -23213,7 +24437,7 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/asa', '2008-02-02 00:00:0
     </author>
     <category term="author-date"/>
     <category term="sociology"/>
-    <updated>2008-02-02T00:00:00+00:00</updated>
+    <updated>2008-05-08T19:00:00+00:00</updated>
     <summary>The ASA style.</summary>
     <link href="http://www.asanet.org/page.ww?name=Quick+Style+Guide%38section=Sociology+Depts" rel="documentation"/>
   </info>
@@ -23303,7 +24527,6 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/asa', '2008-02-02 00:00:0
       <date-part name="month"/>
       <date-part name="day" prefix=" "/>
     </date>
-    
   </macro>
   <macro name="pages">
     <label variable="page" form="short" suffix=". " text-case="capitalize-first"/>
@@ -23323,9 +24546,9 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/asa', '2008-02-02 00:00:0
     </choose>
   </macro>
   <citation>
-    <option name="et-al-min" value="3"/>
+    <option name="et-al-min" value="4"/>
     <option name="et-al-use-first" value="1"/>
-    <option name="et-al-subsequent-min" value="6"/>
+    <option name="et-al-subsequent-min" value="3"/>
     <option name="et-al-subsequent-use-first" value="1"/>
     <option name="disambiguate-add-year-suffix" value="true"/>
     <option name="disambiguate-add-names" value="true"/>
@@ -23419,7 +24642,7 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/asa', '2008-02-02 00:00:0
 </style>
 ');
 
-REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-author-date', '2008-02-02 00:00:00', 'Chicago Manual of Style (Author-Date format)',
+REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-author-date', '2008-05-15 01:15:00', 'Chicago Manual of Style (Author-Date format)',
 '<?xml version="1.0" encoding="UTF-8"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" xml:lang="en" class="in-text" >
   <info>
@@ -23432,11 +24655,13 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-author-date', '20
     </author>
     <category term="author-date"/>
     <category term="generic-base"/>
-    <updated>2008-02-02T00:00:00+00:00</updated>
+    <updated>2008-05-15T01:15:00+00:00</updated>
     <summary>The author-date variant of the Chicago style</summary>
     <link href="http://www.chicagomanualofstyle.org/tools_citationguide.html" rel="documentation"/>
   </info>
-  <macro name="secondary-contributor">
+  <macro name="secondary-contributors">
+    <choose>
+      <if type="chapter" match="none">
     <group delimiter=". ">
       <names variable="editor">
         <label form="verb-short" prefix=" " text-case="capitalize-first" suffix=". "/>
@@ -23444,97 +24669,234 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-author-date', '20
       </names>
       <choose>
         <if variable="author editor" match="any">
-      <names variable="translator">
-        <label form="verb-short" prefix=" " text-case="capitalize-first" suffix=". "/>
-        <name and="text" delimiter=", "/>
-      </names>
+          <names variable="translator">
+            <label form="verb-short" prefix=" " text-case="capitalize-first" suffix=". "/>
+            <name and="text" delimiter=", "/>
+          </names>
         </if>
       </choose>
     </group>
+      </if>
+    </choose>
   </macro>
-  <macro name="series-editor">
-    <names variable="original-author">
-      <label form="short" text-case="capitalize-first" suffix=". "/>
+  <macro name="container-contributors">
+    <choose>
+      <if type="chapter">
+    <group prefix="," delimiter=", ">
+      <names variable="editor">
+        <label form="verb-short" prefix=" " text-case="lowercase" suffix=". "/>
+        <name and="text" delimiter=", "/>
+      </names>
+      <choose>
+        <if variable="author editor" match="any">
+          <names variable="translator">
+            <label form="verb-short" prefix=" " text-case="lowercase" suffix=". "/>
+            <name and="text" delimiter=", "/>
+          </names>
+        </if>
+      </choose>
+    </group>
+      </if>
+    </choose>
+  </macro>
+  <macro name="anon">
+    <choose>
+      <if variable="author editor translator" match="none">
+    <text term="anonymous" form="short" text-case="capitalize-first"/>
+	  </if>
+	</choose>
+  </macro>
+  <macro name="editor">
+    <names variable="editor">
+      <name name-as-sort-order="first" and="text" sort-separator=", " delimiter=", " delimiter-precedes-last="always"/>
+      <label form="short" prefix=", " suffix="."/>
+    </names>
+  </macro>
+  <macro name="translator">
+    <names variable="translator">
+      <name name-as-sort-order="first" and="text" sort-separator=", " delimiter=", " delimiter-precedes-last="always"/>
+      <label form="verb-short" prefix=", " suffix="."/>
+    </names>
+  </macro>
+  <macro name="recipient">
+    <choose>
+      <if type="personal_communication">
+    	<choose>
+	  	  <if variable="genre">
+		<text variable="genre" text-case="capitalize-first"/>
+	  	  </if>
+	  	  <else>
+		<text term="letter" text-case="capitalize-first"/>
+		  </else>
+	    </choose>
+	  </if>
+	</choose>
+    <names variable="recipient" delimiter=", ">
+      <label form="verb" prefix=" " text-case="lowercase" suffix=" "/>
       <name and="text" delimiter=", "/>
     </names>
   </macro>
-  <macro name="anon">
-    <text term="anonymous" form="short" text-case="capitalize-first"/>
-  </macro>
-  <macro name="author">
+  <macro name="contributors">
     <names variable="author">
       <name and="text" name-as-sort-order="first" sort-separator=", " delimiter=", "
-	    delimiter-precedes-last="always"/>
+        delimiter-precedes-last="always"/>
       <label form="verb-short" prefix=", " suffix="." text-case="lowercase"/>
       <substitute>
-	<names variable="editor"/>
-	<names variable="translator"/>
-	<text macro="anon"/>
+        <text macro="editor"/>
+        <text macro="translator"/>
       </substitute>
     </names>
+    <text macro="anon"/>
+    <text macro="recipient"/>
   </macro>
-  <macro name="author-short">
+  <macro name="contributors-short">
     <names variable="author">
       <name form="short" and="text" delimiter=", "/>
       <substitute>
-	<names variable="editor"/>
-	<names variable="translator"/>
-	<text macro="anon"/>
+        <names variable="editor"/>
+        <names variable="translator"/>
       </substitute>
     </names>
+    <text macro="anon"/>
+  </macro>
+  <macro name="interviewer">
+    <names variable="interviewer" delimiter=", ">
+      <label form="verb" prefix=" " text-case="capitalize-first" suffix=" "/>
+      <name and="text" delimiter=", "/>
+    </names>
+  </macro>
+  <macro name="archive">
+    <group delimiter=". ">
+      <text variable="archive_location" text-case="capitalize-first"/>
+      <text variable="archive"/>
+      <text variable="archive-place"/>
+    </group>
   </macro>
   <macro name="access">
-    <group>
+    <group delimiter=". ">
+	  <choose>
+	    <if type="graphic report" match="any">
+      <text macro="archive"/>
+	    </if>
+	    <else-if type="book thesis chapter article-journal article-newspaper article-magazine" match="none">
+      <text macro="archive"/>
+	    </else-if>
+	  </choose>
+      <text variable="DOI" prefix="doi:"/>
       <text variable="URL"/>
-      <group prefix=" (" suffix=")">
-	<text term="accessed" text-case="capitalize-first" suffix=" "/>
-	<date variable="accessed">
-	  <date-part name="month" suffix=" "/>
-	  <date-part name="day" suffix=", "/>
-	  <date-part name="year"/>
-	</date>
-      </group>
     </group>
   </macro>
   <macro name="title">
     <choose>
-      <if type="thesis">
-	<text variable="title"/>
+      <if variable="title" match="none">
+        <choose>
+          <if type="personal_communication" match="none">
+        <text variable="genre" text-case="capitalize-first"/>
+          </if>
+        </choose>
       </if>
       <else-if type="book">
-	<text variable="title" font-style="italic"/>
+        <text variable="title" font-style="italic"/>
       </else-if>
       <else>
-	<text variable="title"/>
+        <text variable="title"/>
       </else>
     </choose>
   </macro>
   <macro name="edition">
     <choose>
+      <if type="book chapter" match="any">
+    <choose>
       <if is-numeric="edition">
-	<group delimiter=" ">
-	  <number variable="edition" form="ordinal"/>
-	  <text term="edition" form="short" suffix="."/>
-	</group>
+        <group delimiter=" ">
+          <number variable="edition" form="ordinal"/>
+          <text term="edition" form="short" suffix="."/>
+        </group>
       </if>
       <else>
-	  <text variable="edition" suffix="."/>
+        <text variable="edition" suffix="."/>
       </else>
     </choose>
+      </if>
+    </choose>
   </macro>
-  <macro name="volumes">
-    <group delimiter=" ">
-      <number variable="number-of-volumes" form="numeric"/>
-      <text term="volume" form="short" suffix="." plural="true"/>
-    </group>
+  <macro name="locators">
+    <choose>
+      <if type="article-journal">
+        <text variable="volume" prefix=" "/>
+        <text variable="issue" prefix=", no. "/>
+      </if>
+      <else-if type="book">
+        <group prefix=". " delimiter=". ">
+          <group>
+            <text term="volume" form="short" text-case="capitalize-first" suffix=". "/>
+            <number variable="volume" form="numeric"/>
+          </group>
+          <group>
+            <number variable="number-of-volumes" form="numeric"/>
+            <text term="volume" form="short" prefix=" " suffix="." plural="true"/>
+          </group>
+        </group>
+      </else-if>
+    </choose>
+  </macro>
+  <macro name="locators-chapter">
+    <choose>
+      <if type="chapter">
+        <group prefix=", ">
+          <text variable="volume" suffix=":"/>
+          <text variable="page"/>
+        </group>
+      </if>
+    </choose>
+  </macro>
+  <macro name="locators-article">
+    <choose>
+      <if type="article-newspaper">
+        <group prefix=", " delimiter=", ">
+          <group>
+        <text variable="edition" suffix=" "/>
+        <text term="edition" prefix=" "/>
+          </group>
+          <group>
+        <text term="section" form="short" suffix=". "/>
+        <text variable="section"/>
+          </group>
+        </group>
+      </if>
+      <else-if type="article-journal">
+    <text variable="page" prefix=": "/>
+      </else-if>
+    </choose>
+  </macro>
+  <macro name="point-locators">
+    <group>
+      <choose>
+	    <if locator="page" match="none">
+	  <label variable="locator" form="short" include-period="true" suffix=" "/>
+	    </if>
+	  </choose>
+      <text variable="locator"/>
+	</group>
+  </macro>
+  <macro name="container-prefix">
+    <text term="in" text-case="capitalize-first"/>
+  </macro>
+  <macro name="container-title">
+    <choose>
+      <if type="chapter">
+        <text macro="container-prefix" suffix=" "/>
+      </if>
+    </choose>
+    <text variable="container-title" font-style="italic"/>
   </macro>
   <macro name="publisher">
-    <group delimiter=": " >
+    <group delimiter=": ">
       <text variable="publisher-place"/>
       <text variable="publisher"/>
     </group>
   </macro>
-  <macro name="year-date">
+  <macro name="date">
     <date variable="issued">
       <date-part name="year"/>
     </date>
@@ -23545,110 +24907,106 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-author-date', '20
       <date-part name="day" prefix=" "/>
     </date>
   </macro>
+  <macro name="collection-title">
+    <text variable="collection-title"/>
+    <text variable="collection-number" prefix=" "/>
+  </macro>
+  <macro name="event">
+    <group>
+      <text term="presented at" suffix=" "/>
+      <text variable="event"/>
+    </group>
+  </macro>
+  <macro name="description">
+    <group delimiter=". ">
+      <text macro="interviewer"/>
+      <text variable="medium" text-case="capitalize-first"/>
+    </group>
+    <choose>
+      <if variable="title" match="none"> </if>
+      <else-if type="thesis"> </else-if>
+      <else>
+        <text variable="genre" text-case="capitalize-first" prefix=". "/>
+      </else>
+    </choose>
+  </macro>
+  <macro name="issue">
+    <choose>
+      <if type="article-journal">
+        <text macro="day-month" prefix=" (" suffix=")"/>
+      </if>
+      <else-if type="speech">
+        <group prefix=" " delimiter=", ">
+          <text macro="event"/>
+          <text macro="day-month"/>
+          <text variable="event-place"/>
+        </group>
+      </else-if>
+      <else-if type="article-newspaper article-magazine" match="any">
+        <text macro="day-month" prefix=", "/>
+      </else-if>
+      <else>
+        <group prefix=". " delimiter=", ">
+          <choose>
+            <if type="thesis">
+              <text variable="genre" text-case="capitalize-first"/>
+            </if>
+          </choose>
+          <text macro="publisher"/>
+          <text macro="day-month"/>
+        </group>
+      </else>
+    </choose>
+  </macro>
   <citation>
     <option name="et-al-min" value="4"/>
     <option name="et-al-use-first" value="1"/>
-    <option name="et-al-subsequent-min" value="6"/>
+    <option name="et-al-subsequent-min" value="4"/>
     <option name="et-al-subsequent-use-first" value="1"/>
     <option name="disambiguate-add-year-suffix" value="true"/>
     <option name="disambiguate-add-names" value="true"/>
     <option name="disambiguate-add-givenname" value="true"/>
-    <option name="collapse" value="year"/>
     <layout prefix="(" suffix=")" delimiter="; ">
       <group delimiter=", ">
-	<group delimiter=" ">
-	  <text macro="author-short"/>
-	  <text macro="year-date"/>
-	</group>
-	<text variable="locator"/>
+        <group delimiter=" ">
+          <text macro="contributors-short"/>
+          <text macro="date"/>
+        </group>
+        <text macro="point-locators"/>
       </group>
     </layout>
   </citation>
   <bibliography>
     <option name="hanging-indent" value="true"/>
     <option name="et-al-min" value="6"/>
-    <option name="et-al-use-first" value="1"/>
+    <option name="et-al-use-first" value="3"/>
+    <option name="subsequent-author-substitute" value="---"/>
+    <option name="entry-spacing" value="0"/>
     <sort>
-      <key macro="author"/>
-      <key variable="title"/>
+      <key macro="contributors"/>
+      <key variable="issued"/>
     </sort>
     <layout suffix=".">
-      <group delimiter=" ">
-	<text macro="author" suffix="."/>
-	<text macro="year-date" suffix="."/>
-      </group>
-      <choose>
-	<if type="article-newspaper article-magazine" match="any">
-	  <group delimiter=" ">
-	    <text macro="title" prefix=" " suffix="."/>
-	  </group>
-	  <group prefix=" " delimiter=", ">
-	    <text variable="container-title" font-style="italic"/>
-	    <text macro="day-month"/>
-	    <text variable="edition"/>
-	  </group>
-	</if>
-	<else-if type="thesis">
-	  <text macro="title" prefix=" " suffix="."/>
-	  <group prefix=" " delimiter=", ">
-	    <text variable="edition" suffix=" ed."/>
-	    <text macro="secondary-contributor" suffix="."/>
-	    <text variable="genre"/>
-	    <text macro="publisher"/>
-	  </group>
-	</else-if>
-	<else-if type="book">
-	  <group delimiter=" ">
-	    <text macro="title" prefix=" " suffix="."/>
-	    <text macro="edition"/>
-	    <text macro="volumes"/>
-	    <text macro="secondary-contributor" suffix="."/>
-	    <text macro="publisher"/>
-	  </group>
-	</else-if>
-	<else-if type="chapter">
-	  <group delimiter=" ">
-	    <text macro="title" prefix=" " suffix="."/>
-	    <group class="container" delimiter=", ">
-	      <group delimiter=" ">
-		<text term="in" text-case="capitalize-first"/>
-		<text variable="container-title" font-style="italic"/>
-	      </group>
-	      <text macro="secondary-contributor" prefix=" "/>
-	      <group delimiter=" ">
-		<text variable="volume" prefix="Vol. " suffix=" of"/>
-		<text variable="collection-title" font-style="italic"/>
-		<text macro="series-editor"/>
-	      </group>
-	      <text variable="page"/>
-	      <text macro="publisher" prefix=" "/>
-	    </group>
-	  </group>
-	</else-if>
-	<else>
-	  <group suffix="." >
-	    <text macro="title" prefix=" " />
-	    <text macro="secondary-contributor" prefix=" "/>
-	  </group>
-	  <group class="container" prefix=" " suffix="." delimiter=" ">
-	    <text variable="container-title" font-style="italic"/>
-	    <group delimiter=":">
-	      <group delimiter=", ">
-		<text variable="volume" />
-		<text variable="issue" prefix="no. "/>
-	      </group>
-	      <text variable="page"/>
-	    </group>
-	  </group>
-	</else>
-      </choose>
-      <text prefix=" " macro="access" suffix="."/>
+      <text macro="contributors" suffix=". "/>
+      <text macro="date" suffix=". "/>
+      <text macro="title"/>
+      <text macro="description"/>
+      <text macro="secondary-contributors" prefix=". "/>
+      <text macro="container-title" prefix=". "/>
+      <text macro="container-contributors"/>
+      <text macro="locators-chapter"/>
+      <text macro="edition" prefix=". "/>
+      <text macro="locators"/>
+      <text macro="collection-title" prefix=". "/>
+      <text macro="issue"/>
+      <text macro="locators-article"/>
+      <text macro="access" prefix=". "/>
     </layout>
   </bibliography>
 </style>
 ');
 
-REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-fullnote-bibliography', '2008-02-02 00:00:00', 'Chicago Manual of Style (Full Note with Bibliography)',
+REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-fullnote-bibliography', '2008-05-15 01:15:00', 'Chicago Manual of Style (Full Note with Bibliography)',
 '<style xmlns="http://purl.org/net/xbiblio/csl" class="note" xml:lang="en"> 
   <info>
     <title>Chicago Manual of Style (Full Note with Bibliography)</title>
@@ -23670,118 +25028,131 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-fullnote-bibliogr
     <summary>Chicago format with full notes and bibliography</summary>
     <category term="generic-base"/>
     <category term="numeric"/>
-    <updated>2008-02-02T00:00:00+00:00</updated>
+    <updated>2008-05-15T01:15:00+00:00</updated>
   </info>
-  <macro name="translator">
-    <choose>
-      <if variable="author editor" match="any">
-    <names variable="translator" delimiter=", ">
-      <label form="verb-short" prefix=" " text-case="lowercase" suffix=". "/>
-      <name and="text" delimiter=", "/>
-    </names>
-      </if>
-    </choose>
-  </macro>
-  <macro name="translator-bib">
-    <choose>
-      <if variable="author editor" match="any">
-    <names variable="translator" delimiter=". ">
-      <label form="verb" prefix=" " text-case="capitalize-first" suffix=" "/>
-      <name and="text" delimiter=", "/>
-    </names>
-      </if>
-    </choose>
-  </macro>
-  <macro name="secondary-contributor">
+  <macro name="editor-translator">
     <group delimiter=", ">
+      <choose>
+        <if variable="author">
       <names variable="editor" delimiter=", ">
-        <label form="verb-short" prefix=" " text-case="lowercase" suffix=". "/>
+        <label form="verb-short" text-case="lowercase" suffix=". "/>
         <name and="text" delimiter=", "/>
       </names>
+        </if>
+      </choose>
       <choose>
-        <if type="article-journal article-magazine article-newspaper" match="none">
-      <text macro="translator"/>
+        <if variable="author editor" match="any">
+      <names variable="translator" delimiter=", ">
+        <label form="verb-short" text-case="lowercase" suffix=". "/>
+        <name and="text" delimiter=", "/>
+      </names>
         </if>
       </choose>
     </group>
   </macro>
-  <macro name="secondary-contributor-bib">
+  <macro name="secondary-contributors-note">
+    <choose>
+      <if type="chapter" match="none">
+        <text macro="editor-translator"/>
+      </if>
+    </choose>
+  </macro>
+  <macro name="container-contributors-note">
+    <choose>
+      <if type="chapter">
+        <text macro="editor-translator"/>
+      </if>
+    </choose>
+  </macro>
+  <macro name="secondary-contributors">
+    <choose>
+      <if type="chapter" match="none">
     <group delimiter=". ">
+      <choose>
+        <if variable="author">
       <names variable="editor" delimiter=". ">
         <label form="verb" prefix=" " text-case="capitalize-first" suffix=" "/>
         <name and="text" delimiter=", "/>
       </names>
+        </if>
+      </choose>
       <choose>
-        <if type="article-journal article-magazine article-newspaper" match="none">
-      <text macro="translator-bib"/>
+        <if variable="author editor" match="any">
+      <names variable="translator" delimiter=". ">
+        <label form="verb" prefix=" " text-case="capitalize-first" suffix=" "/>
+        <name and="text" delimiter=", "/>
+      </names>
         </if>
       </choose>
     </group>
-  </macro>
-  <macro name="translator-article">
-    <choose>
-      <if type="article-journal article-magazine article-newspaper" match="any">
-        <text macro="translator"/>
       </if>
     </choose>
   </macro>
-  <macro name="translator-article-bib">
+  <macro name="container-contributors">
     <choose>
-      <if type="article-journal article-magazine article-newspaper" match="any">
-        <text macro="translator-bib"/>
+      <if type="chapter">
+    <group delimiter=", ">
+      <choose>
+        <if variable="author">
+      <names variable="editor" delimiter=", ">
+        <label form="verb" text-case="lowercase" suffix=" "/>
+        <name and="text" delimiter=", "/>
+      </names>
+        </if>
+      </choose>
+      <choose>
+        <if variable="author editor" match="any">
+      <names variable="translator" delimiter=", ">
+        <label form="verb" text-case="lowercase" suffix=" "/>
+        <name and="text" delimiter=", "/>
+      </names>
+        </if>
+      </choose>
+    </group>
       </if>
     </choose>
   </macro>
-  <macro name="author">
-    <names variable="author">
-      <name and="text" sort-separator=", "
-	    delimiter=", "/>
-      <label form="verb-short" prefix=", " suffix="."/>
-      <substitute>
-	<names variable="editor"/>
-	<names variable="translator"/>
-      </substitute>
-    </names>
-  </macro> 
-  <macro name="author-bib">
-    <names variable="author">
-      <name name-as-sort-order="first" and="text" sort-separator=", "
-	    delimiter=", " delimiter-precedes-last="always"/>
-      <label form="verb-short" prefix=", " suffix="."/>
-      <substitute>
-	<names variable="editor"/>
-	<names variable="translator"/>
-      </substitute>
+  <macro name="editor-note">
+    <names variable="editor">
+      <name and="text" sort-separator=", " delimiter=", "/>
+      <label form="short" prefix=", " suffix="."/>
     </names>
   </macro>
-  <macro name="author-short">
-    <names variable="author">
-      <name form="short" and="text" delimiter=", " />
+  <macro name="translator-note">
+    <names variable="translator">
+      <name and="text" sort-separator=", " delimiter=", "/>
       <label form="verb-short" prefix=", " suffix="."/>
-      <substitute>
-	<names variable="editor"/>
-	<names variable="translator"/>
-      </substitute>
     </names>
   </macro>
-  <macro name="author-sort">
-    <names variable="author">
-      <name name-as-sort-order="all" and="text" sort-separator=", "
-	    delimiter=", " delimiter-precedes-last="always"/>
-      <label form="verb-short" prefix=", " suffix="."/>
-      <substitute>
-	<names variable="editor"/>
-	<names variable="translator"/>
-      </substitute>
-    </names>
-  </macro>
-  <macro name="recipient">
+  <macro name="recipient-note">
     <names variable="recipient" delimiter=", ">
       <label form="verb" prefix=" " text-case="lowercase" suffix=" "/>
       <name and="text" delimiter=", "/>
     </names>
   </macro>
-  <macro name="recipient-bib">
+  <macro name="contributors-note">
+    <names variable="author">
+      <name and="text" sort-separator=", " delimiter=", "/>
+      <substitute>
+	<text macro="editor-note"/>
+	<text macro="translator-note"/>
+      </substitute>
+    </names>
+    <text macro="recipient-note"/>
+  </macro>
+  <macro name="editor">
+    <names variable="editor">
+      <name name-as-sort-order="first" and="text" sort-separator=", " delimiter=", " delimiter-precedes-last="always"/>
+      <label form="short" prefix=", " suffix="."/>
+    </names>
+  </macro>
+  <macro name="translator">
+    <names variable="translator">
+      <name name-as-sort-order="first" and="text" sort-separator=", " delimiter=", " delimiter-precedes-last="always"/>
+      <label form="verb-short" prefix=", " suffix="."/>
+    </names>
+  </macro>
+  <macro name="recipient">
     <choose>
       <if type="personal_communication">
     	<choose>
@@ -23794,7 +25165,17 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-fullnote-bibliogr
 	    </choose>
 	  </if>
 	</choose>
-	<text macro="recipient" prefix=" "/>
+	<text macro="recipient-note" prefix=" "/>
+  </macro>
+  <macro name="contributors">
+    <names variable="author">
+      <name name-as-sort-order="first" and="text" sort-separator=", " delimiter=", " delimiter-precedes-last="always"/>
+      <substitute>
+	<text macro="editor"/>
+	<text macro="translator"/>
+      </substitute>
+    </names>
+    <text macro="recipient" prefix=". "/>
   </macro>
   <macro name="recipient-short">
     <names variable="recipient"> 
@@ -23802,19 +25183,40 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-fullnote-bibliogr
       <name form="short" and="text" delimiter=", " />
     </names>
   </macro>
-  <macro name="interviewer">
+  <macro name="contributors-short">
+    <names variable="author">
+      <name form="short" and="text" delimiter=", " />
+      <substitute>
+	<names variable="editor"/>
+	<names variable="translator"/>
+      </substitute>
+    </names>
+    <text macro="recipient-short"/>
+  </macro>
+  <macro name="contributors-sort">
+    <names variable="author">
+      <name name-as-sort-order="all" and="text" sort-separator=", "
+	    delimiter=", " delimiter-precedes-last="always"/>
+      <label form="verb-short" prefix=", " suffix="."/>
+      <substitute>
+	<names variable="editor"/>
+	<names variable="translator"/>
+      </substitute>
+    </names>
+  </macro>
+  <macro name="interviewer-note">
     <names variable="interviewer" delimiter=", ">
       <label form="verb" prefix=" " text-case="lowercase" suffix=" "/>
       <name and="text" delimiter=", "/>
     </names>
   </macro>
-  <macro name="interviewer-bib">
+  <macro name="interviewer">
     <names variable="interviewer" delimiter=", ">
       <label form="verb" prefix=" " text-case="capitalize-first" suffix=" "/>
       <name and="text" delimiter=", "/>
     </names>
   </macro>
-  <macro name="title">
+  <macro name="title-note">
     <choose>
       <if variable="title" match="none">
         <text variable="genre"/>
@@ -23827,10 +25229,14 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-fullnote-bibliogr
       </else>
     </choose>
   </macro>
-  <macro name="title-bib">
+  <macro name="title">
     <choose>
       <if variable="title" match="none">
+        <choose>
+          <if type="personal_communication" match="none">
         <text variable="genre" text-case="capitalize-first"/>
+          </if>
+        </choose>
       </if>
       <else-if type="book">
         <text variable="title" font-style="italic"/>
@@ -23847,7 +25253,7 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-fullnote-bibliogr
           <if type="interview">
             <text term="interview" text-case="lowercase"/>
           </if>
-          <else-if type="manuscript paper-conference" match="any">
+          <else-if type="manuscript speech" match="any">
             <text variable="genre" form="short"/>
           </else-if>
           <else-if type="personal_communication">
@@ -23863,55 +25269,95 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-fullnote-bibliogr
       </else>
     </choose>
   </macro>
-  <macro name="description">
+  <macro name="description-note">
     <group delimiter=", ">
-      <text macro="interviewer"/>
+      <text macro="interviewer-note"/>
       <text variable="medium"/>
       <choose>
         <if variable="title" match="none"> </if>
-        <else-if type="thesis paper-conference" match="any"> </else-if>
+        <else-if type="thesis speech" match="any"> </else-if>
         <else>
           <text variable="genre"/>
         </else>
       </choose>
     </group>
   </macro>
-  <macro name="description-bib">
+  <macro name="description">
     <group delimiter=", ">
       <group delimiter=". ">
-        <text macro="interviewer-bib"/>
+        <text macro="interviewer"/>
         <text variable="medium" text-case="capitalize-first"/>
       </group>
       <choose>
         <if variable="title" match="none"> </if>
-        <else-if type="thesis paper-conference" match="any"> </else-if>
+        <else-if type="thesis speech" match="any"> </else-if>
         <else>
           <text variable="genre" text-case="capitalize-first"/>
         </else>
       </choose>
     </group>
   </macro>
-  <macro name="container-prefix">
+  <macro name="container-title-note">
     <choose>
       <if type="chapter">
     <text term="in" text-case="lowercase" suffix=" "/>
       </if>
     </choose>
+    <text variable="container-title" font-style="italic"/>
   </macro>
-  <macro name="container-prefix-bib">
+  <macro name="container-title">
     <choose>
       <if type="chapter">
     <text term="in" text-case="capitalize-first" suffix=" "/>
       </if>
     </choose>
+    <text variable="container-title" font-style="italic"/>
   </macro>
-  <macro name="locators">
+  <macro name="collection-title">
+    <text variable="collection-title"/>
+    <text variable="collection-number" prefix=" "/>
+  </macro>
+  <macro name="edition-note">
+    <choose>
+      <if type="book chapter" match="any">
+    <choose>
+      <if is-numeric="edition">
+        <group delimiter=" ">
+          <number variable="edition" form="ordinal"/>
+          <text term="edition" form="short" suffix="."/>
+        </group>
+      </if>
+      <else>
+        <text variable="edition" suffix="."/>
+      </else>
+    </choose>
+      </if>
+    </choose>
+  </macro>
+  <macro name="edition">
+    <choose>
+      <if type="book chapter" match="any">
+    <choose>
+      <if is-numeric="edition">
+        <group delimiter=" ">
+          <number variable="edition" form="ordinal"/>
+          <text term="edition" form="short" suffix="."/>
+        </group>
+      </if>
+      <else>
+        <text variable="edition" text-case="capitalize-first" suffix="."/>
+      </else>
+    </choose>
+      </if>
+    </choose>
+  </macro>
+  <macro name="locators-note">
     <choose>
       <if type="article-journal">
         <text variable="volume" prefix=" "/>
         <text variable="issue" prefix=", no. "/>
       </if>
-      <else-if type="book">
+      <else-if type="book chapter" match="any">
         <group prefix=", " delimiter=", ">
           <group>
             <text term="volume" form="short" suffix=". "/>
@@ -23925,32 +25371,28 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-fullnote-bibliogr
           </group>
             </if>
           </choose>
-          <text variable="edition"/>
+          <text macro="edition-note"/>
         </group>
       </else-if>
     </choose>
   </macro>
-  <macro name="locators-bib">
+  <macro name="locators">
     <choose>
       <if type="article-journal">
         <text variable="volume" prefix=" "/>
         <text variable="issue" prefix=", no. "/>
       </if>
-      <else-if type="book">
+      <else-if type="book" match="any">
         <group prefix=". " delimiter=". ">
           <group>
             <text term="volume" form="short" text-case="capitalize-first" suffix=". "/>
             <number variable="volume" form="numeric"/>
           </group>
-          <choose>
-            <if variable="locator" match="none">
           <group>
             <number variable="number-of-volumes" form="numeric"/>
             <text term="volume" form="short" prefix=" " suffix="." plural="true"/>
           </group>
-            </if>
-          </choose>
-          <text variable="edition"/>
+          <text macro="edition"/>
         </group>
       </else-if>
     </choose>
@@ -24006,7 +25448,17 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-fullnote-bibliogr
       </else>
     </choose>
   </macro>
-  <macro name="locator">
+  <macro name="point-locators-subsequent">
+    <group>
+      <choose>
+	    <if locator="page" match="none">
+	  <label variable="locator" form="short" include-period="true" suffix=" "/>
+	    </if>
+	  </choose>
+      <text variable="locator"/>
+	</group>
+  </macro>
+  <macro name="point-locators">
     <choose>
       <if variable="locator" match="none">
         <text macro="pages"/>
@@ -24015,7 +25467,7 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-fullnote-bibliogr
         <text variable="locator" prefix=": "/>
       </else-if>
       <else>
-        <text variable="locator" prefix=", "/>
+        <text macro="point-locators-subsequent" prefix=", "/>
       </else>
     </choose>
   </macro>
@@ -24029,35 +25481,36 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-fullnote-bibliogr
       </else-if>
     </choose>
   </macro>
-  <macro name="pages-chapter">
+  <macro name="locators-chapter">
     <choose>
       <if type="chapter">
-    <text variable="page" prefix=", "/>
+        <text variable="volume" suffix=":"/>
+        <text variable="page"/>
       </if>
     </choose>
   </macro>
-  <macro name="pages-article">
+  <macro name="locators-journal">
     <choose>
       <if type="article-journal">
     <text variable="page" prefix=": "/>
       </if>
     </choose>
   </macro>
-  <macro name="archive">
+  <macro name="archive-note">
     <group delimiter=", ">
       <text variable="archive_location"/>
       <text variable="archive"/>
       <text variable="archive-place"/>
     </group>
   </macro>
-  <macro name="archive-bib">
+  <macro name="archive">
     <group delimiter=". ">
       <text variable="archive_location" text-case="capitalize-first"/>
       <text variable="archive"/>
       <text variable="archive-place"/>
     </group>
   </macro>
-  <macro name="issue">
+  <macro name="issue-note">
     <choose>
       <if type="article-journal">
         <text macro="issued" prefix=" (" suffix=")"/>
@@ -24067,7 +25520,7 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-fullnote-bibliogr
           <group delimiter=" ">
             <choose>
               <if variable="title" match="none"> </if>
-              <else-if type="thesis paper-conference" match="any">
+              <else-if type="thesis speech" match="any">
                 <text variable="genre"/>
               </else-if>
             </choose>
@@ -24082,19 +25535,23 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-fullnote-bibliogr
       </else>
     </choose>
   </macro>
-  <macro name="issue-bib">
+  <macro name="issue">
     <choose>
       <if type="article-journal">
         <text macro="issued" prefix=" (" suffix=")"/>
       </if>
-      <else-if variable="publisher-place publisher" match="any">
+      <else-if type="speech">
         <choose>
           <if variable="title" match="none"> </if>
-          <else-if type="paper-conference">
+          <else>
             <text variable="genre" text-case="capitalize-first" prefix=". "/>
-          </else-if>
+          </else>
         </choose>
         <text macro="event" prefix=" "/>
+        <text variable="event-place" prefix=", "/>
+        <text macro="issued" prefix=", "/>
+      </else-if>
+      <else-if variable="publisher-place publisher" match="any">
         <group prefix=". " delimiter=", ">
           <choose>
             <if type="thesis">
@@ -24110,34 +25567,35 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-fullnote-bibliogr
       </else>
     </choose>
   </macro>
-  <macro name="access">
+  <macro name="access-note">
     <group delimiter=", ">
 	  <choose>
 	    <if type="graphic report" match="any">
-      <text macro="archive"/>
+      <text macro="archive-note"/>
 	    </if>
 	    <else-if type="book thesis chapter article-journal article-newspaper article-magazine" match="none">
-      <text macro="archive"/>
+      <text macro="archive-note"/>
 	    </else-if>
 	  </choose>
+      <text variable="DOI" prefix="doi:"/>
       <text variable="URL"/>
     </group>
   </macro>
-  <macro name="access-bib">
+  <macro name="access">
     <group delimiter=". ">
 	  <choose>
 	    <if type="graphic report" match="any">
-      <text macro="archive-bib"/>
+      <text macro="archive"/>
 	    </if>
 	    <else-if type="book thesis chapter article-journal article-newspaper article-magazine" match="none">
-      <text macro="archive-bib"/>
+      <text macro="archive"/>
 	    </else-if>
 	  </choose>
       <text variable="URL"/>
     </group>
   </macro>
   <macro name="sort-key">
-      <text macro="author-sort" suffix=" "/>
+      <text macro="contributors-sort" suffix=" "/>
       <text variable="title" suffix=" "/>
       <text variable="genre"/>
   </macro>
@@ -24146,15 +25604,13 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-fullnote-bibliogr
     <option name="et-al-use-first" value="1"/>
     <option name="et-al-subsequent-min" value="4"/>
     <option name="et-al-subsequent-use-first" value="1"/>
-    <option name="disambiguate-add-year-suffix" value="true"/>
     <option name="disambiguate-add-names" value="true"/>
-    <option name="disambiguate-add-givenname" value="true"/>
     <layout prefix="" suffix="." delimiter="; ">
       <choose>
         <if position="ibid-with-locator">
           <group delimiter=", ">
             <text term="ibid" text-case="capitalize-first" suffix="."/>
-            <text variable="locator"/>
+            <text macro="point-locators-subsequent"/>
           </group>
         </if>
         <else-if position="ibid">
@@ -24162,35 +25618,26 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-fullnote-bibliogr
         </else-if>
         <else-if position="subsequent">
           <group delimiter=", ">
-            <group>
-              <text macro="author-short"/>
-              <text macro="recipient-short"/>
-            </group>
+            <text macro="contributors-short"/>
             <text macro="title-short"/>
-            <text variable="locator"/>
+            <text macro="point-locators-subsequent"/>
           </group>
         </else-if>
         <else>
           <group delimiter=", ">
-            <group>
-              <text macro="author"/>
-              <text macro="recipient"/>
-            </group>
-            <text macro="title"/>
-            <text macro="description"/>
-            <text macro="translator-article"/>
-            <group>
-              <text macro="container-prefix"/>
-              <text variable="container-title" font-style="italic"/>
-            </group>
-            <text macro="secondary-contributor"/>
+            <text macro="contributors-note"/>
+            <text macro="title-note"/>
+            <text macro="description-note"/>
+            <text macro="secondary-contributors-note"/>
+            <text macro="container-title-note"/>
+            <text macro="container-contributors-note"/>
           </group>
-          <text macro="locators"/>
-          <text variable="collection-title" prefix=", "/>
-          <text macro="issue"/>
+          <text macro="locators-note"/>
+          <text macro="collection-title" prefix=", "/>
+          <text macro="issue-note"/>
           <text macro="locators-newspaper" prefix=", "/>
-          <text macro="locator"/>
-          <text macro="access" prefix=", "/>
+          <text macro="point-locators"/>
+          <text macro="access-note" prefix=", "/>
         </else>
       </choose>
     </layout>
@@ -24200,35 +25647,34 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-fullnote-bibliogr
     <option name="et-al-min" value="6"/>
     <option name="et-al-use-first" value="6"/>
     <option name="subsequent-author-substitute" value="---"/>
+    <option name="entry-spacing" value="0"/>
     <sort>
       <key macro="sort-key"/>
     </sort>
     <layout suffix=".">
       <group delimiter=". ">
-        <text macro="author-bib"/>
-        <text macro="recipient-bib"/>
-        <text macro="title-bib"/>
-        <text macro="description-bib"/>
-        <text macro="translator-article-bib"/>
-        <group>
-          <text macro="container-prefix-bib"/>
-          <text variable="container-title" font-style="italic"/>
-          <text macro="pages-chapter"/>
+        <text macro="contributors"/>
+        <text macro="title"/>
+        <text macro="description"/>
+        <text macro="secondary-contributors"/>
+        <group delimiter=", ">
+          <text macro="container-title"/>
+          <text macro="container-contributors"/>
+          <text macro="locators-chapter"/>
         </group>
-        <text macro="secondary-contributor-bib"/>
       </group>
-      <text macro="locators-bib"/>
-      <text variable="collection-title" text-case="capitalize-first" prefix=". "/>
-      <text macro="issue-bib"/>
+      <text macro="locators"/>
+      <text macro="collection-title" prefix=". "/>
+      <text macro="issue"/>
       <text macro="locators-newspaper" prefix=", "/>
-      <text macro="pages-article"/>
-      <text macro="access-bib" prefix=". "/>
+      <text macro="locators-journal"/>
+      <text macro="access" prefix=". "/>
     </layout>
   </bibliography>
 </style>
 ');
 
-REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-note-bibliography', '2008-02-02 00:00:00', 'Chicago Manual of Style (Note with Bibliography)',
+REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-note-bibliography', '2008-05-15 01:15:00', 'Chicago Manual of Style (Note with Bibliography)',
 '<?xml version="1.0" encoding="UTF-8"?>
 <?oxygen RNGSchema="http://xbiblio.svn.sourceforge.net/viewvc/*checkout*/xbiblio/csl/schema/trunk/csl.rnc" type="compact"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="note" xml:lang="en"> 
@@ -24252,77 +25698,67 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-note-bibliography
     <summary>Chicago format with short notes and full bibliography</summary>
     <category term="generic-base"/>
     <category term="numeric"/>
-    <updated>2008-02-02T00:00:00+00:00</updated>
+    <updated>2008-05-15T01:15:00+00:00</updated>
   </info>
-  <macro name="translator-bib">
+  <macro name="secondary-contributors">
     <choose>
-      <if variable="author editor" match="any">
-    <names variable="translator" delimiter=". ">
-      <label form="verb" prefix=" " text-case="capitalize-first" suffix=" "/>
-      <name and="text" delimiter=", "/>
-    </names>
-      </if>
-    </choose>
-  </macro>
-  <macro name="secondary-contributor-bib">
+      <if type="chapter" match="none">
     <group delimiter=". ">
       <names variable="editor" delimiter=". ">
         <label form="verb" prefix=" " text-case="capitalize-first" suffix=" "/>
         <name and="text" delimiter=", "/>
       </names>
       <choose>
-        <if type="article-journal article-magazine article-newspaper" match="none">
-      <text macro="translator-bib"/>
+        <if variable="author editor" match="any">
+      <names variable="translator" delimiter=". ">
+        <label form="verb" prefix=" " text-case="capitalize-first" suffix=" "/>
+        <name and="text" delimiter=", "/>
+      </names>
         </if>
       </choose>
     </group>
-  </macro>
-  <macro name="translator-article-bib">
-    <choose>
-      <if type="article-journal article-magazine article-newspaper" match="any">
-        <text macro="translator-bib"/>
       </if>
     </choose>
   </macro>
-  <macro name="author-bib">
-    <names variable="author">
-      <name name-as-sort-order="first" and="text" sort-separator=", "
-	    delimiter=", " delimiter-precedes-last="always"/>
-      <label form="verb-short" prefix=", " suffix="."/>
-      <substitute>
-	<names variable="editor"/>
-	<names variable="translator"/>
-      </substitute>
+  <macro name="container-contributors">
+    <choose>
+      <if type="chapter">
+    <group delimiter=", ">
+      <names variable="editor" delimiter=", ">
+        <label form="verb" text-case="lowercase" suffix=" "/>
+        <name and="text" delimiter=", "/>
+      </names>
+      <choose>
+        <if variable="author editor" match="any">
+      <names variable="translator" delimiter=", ">
+        <label form="verb" text-case="lowercase" suffix=" "/>
+        <name and="text" delimiter=", "/>
+      </names>
+        </if>
+      </choose>
+    </group>
+      </if>
+    </choose>
+  </macro>
+  <macro name="editor">
+    <names variable="editor">
+      <name name-as-sort-order="first" and="text" sort-separator=", " delimiter=", " delimiter-precedes-last="always"/>
+      <label form="short" prefix=", " suffix="."/>
     </names>
   </macro>
-  <macro name="author-short">
-    <names variable="author">
-      <name form="short" and="text" delimiter=", " />
+  <macro name="translator">
+    <names variable="translator">
+      <name name-as-sort-order="first" and="text" sort-separator=", " delimiter=", " delimiter-precedes-last="always"/>
       <label form="verb-short" prefix=", " suffix="."/>
-      <substitute>
-	<names variable="editor"/>
-	<names variable="translator"/>
-      </substitute>
     </names>
   </macro>
-  <macro name="author-sort">
-    <names variable="author">
-      <name name-as-sort-order="all" and="text" sort-separator=", "
-	    delimiter=", " delimiter-precedes-last="always"/>
-      <label form="verb-short" prefix=", " suffix="."/>
-      <substitute>
-	<names variable="editor"/>
-	<names variable="translator"/>
-      </substitute>
-    </names>
-  </macro>
-  <macro name="recipient">
+  <macro name="recipient-note">
     <names variable="recipient" delimiter=", ">
       <label form="verb" prefix=" " text-case="lowercase" suffix=" "/>
       <name and="text" delimiter=", "/>
     </names>
   </macro>
-  <macro name="recipient-bib">
+  <macro name="recipient">
     <choose>
       <if type="personal_communication">
     	<choose>
@@ -24335,7 +25771,17 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-note-bibliography
 	    </choose>
 	  </if>
 	</choose>
-	<text macro="recipient" prefix=" "/>
+	<text macro="recipient-note" prefix=" "/>
+  </macro>
+  <macro name="contributors">
+    <names variable="author">
+      <name name-as-sort-order="first" and="text" sort-separator=", " delimiter=", " delimiter-precedes-last="always"/>
+      <substitute>
+	<text macro="editor"/>
+	<text macro="translator"/>
+      </substitute>
+    </names>
+    <text macro="recipient" prefix=". "/>
   </macro>
   <macro name="recipient-short">
     <names variable="recipient"> 
@@ -24343,16 +25789,41 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-note-bibliography
       <name form="short" and="text" delimiter=", " />
     </names>
   </macro>
-  <macro name="interviewer-bib">
+  <macro name="contributors-short">
+    <names variable="author">
+      <name form="short" and="text" delimiter=", " />
+      <substitute>
+	<names variable="editor"/>
+	<names variable="translator"/>
+      </substitute>
+    </names>
+    <text macro="recipient-short"/>
+  </macro>
+  <macro name="contributors-sort">
+    <names variable="author">
+      <name name-as-sort-order="all" and="text" sort-separator=", "
+	    delimiter=", " delimiter-precedes-last="always"/>
+      <label form="verb-short" prefix=", " suffix="."/>
+      <substitute>
+	<names variable="editor"/>
+	<names variable="translator"/>
+      </substitute>
+    </names>
+  </macro>
+  <macro name="interviewer">
     <names variable="interviewer" delimiter=", ">
       <label form="verb" prefix=" " text-case="capitalize-first" suffix=" "/>
       <name and="text" delimiter=", "/>
     </names>
   </macro>
-  <macro name="title-bib">
+  <macro name="title">
     <choose>
       <if variable="title" match="none">
+        <choose>
+          <if type="personal_communication" match="none">
         <text variable="genre" text-case="capitalize-first"/>
+          </if>
+        </choose>
       </if>
       <else-if type="book">
         <text variable="title" font-style="italic"/>
@@ -24369,7 +25840,7 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-note-bibliography
           <if type="interview">
             <text term="interview" text-case="lowercase"/>
           </if>
-          <else-if type="manuscript paper-conference" match="any">
+          <else-if type="manuscript speech" match="any">
             <text variable="genre" form="short"/>
           </else-if>
           <else-if type="personal_communication">
@@ -24385,29 +25856,51 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-note-bibliography
       </else>
     </choose>
   </macro>
-  <macro name="description-bib">
+  <macro name="description">
     <group delimiter=", ">
       <group delimiter=". ">
-        <text macro="interviewer-bib"/>
+        <text macro="interviewer"/>
         <text variable="medium" text-case="capitalize-first"/>
       </group>
       <choose>
         <if variable="title" match="none"> </if>
-        <else-if type="thesis paper-conference" match="any"> </else-if>
+        <else-if type="thesis speech" match="any"> </else-if>
         <else>
           <text variable="genre" text-case="capitalize-first"/>
         </else>
       </choose>
     </group>
   </macro>
-  <macro name="container-prefix-bib">
+  <macro name="container-title">
     <choose>
       <if type="chapter">
     <text term="in" text-case="capitalize-first" suffix=" "/>
       </if>
     </choose>
+    <text variable="container-title" font-style="italic"/>
   </macro>
-  <macro name="locators-bib">
+  <macro name="edition">
+    <choose>
+      <if type="book chapter" match="any">
+    <choose>
+      <if is-numeric="edition">
+        <group delimiter=" ">
+          <number variable="edition" form="ordinal"/>
+          <text term="edition" form="short" suffix="."/>
+        </group>
+      </if>
+      <else>
+        <text variable="edition" text-case="capitalize-first" suffix="."/>
+      </else>
+    </choose>
+      </if>
+    </choose>
+  </macro>
+  <macro name="collection-title">
+    <text variable="collection-title"/>
+    <text variable="collection-number" prefix=" "/>
+  </macro>
+  <macro name="locators">
     <choose>
       <if type="article-journal">
         <text variable="volume" prefix=" "/>
@@ -24416,18 +25909,14 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-note-bibliography
       <else-if type="book">
         <group prefix=". " delimiter=". ">
           <group>
-            <text term="volume" form="short"  text-case="capitalize-first" suffix=". "/>
+            <text term="volume" form="short" text-case="capitalize-first" suffix=". "/>
             <number variable="volume" form="numeric"/>
           </group>
-          <choose>
-            <if variable="locator" match="none">
           <group>
             <number variable="number-of-volumes" form="numeric"/>
             <text term="volume" form="short" prefix=" " suffix="." plural="true"/>
           </group>
-            </if>
-          </choose>
-          <text variable="edition"/>
+          <text macro="edition"/>
         </group>
       </else-if>
     </choose>
@@ -24486,7 +25975,8 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-note-bibliography
   <macro name="pages-chapter">
     <choose>
       <if type="chapter">
-    <text variable="page" prefix=", "/>
+        <text variable="volume" suffix=":"/>
+        <text variable="page"/>
       </if>
     </choose>
   </macro>
@@ -24497,26 +25987,40 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-note-bibliography
       </if>
     </choose>
   </macro>
-  <macro name="archive-bib">
+  <macro name="point-locators-subsequent">
+    <group>
+      <choose>
+	    <if locator="page" match="none">
+	  <label variable="locator" form="short" include-period="true" suffix=" "/>
+	    </if>
+	  </choose>
+      <text variable="locator"/>
+	</group>
+  </macro>
+  <macro name="archive">
     <group delimiter=". ">
       <text variable="archive_location" text-case="capitalize-first"/>
       <text variable="archive"/>
       <text variable="archive-place"/>
     </group>
   </macro>
-  <macro name="issue-bib">
+  <macro name="issue">
     <choose>
       <if type="article-journal">
         <text macro="issued" prefix=" (" suffix=")"/>
       </if>
-      <else-if variable="publisher-place publisher" match="any">
+      <else-if type="speech">
         <choose>
           <if variable="title" match="none"> </if>
-          <else-if type="paper-conference">
+          <else>
             <text variable="genre" text-case="capitalize-first" prefix=". "/>
-          </else-if>
+          </else>
         </choose>
         <text macro="event" prefix=" "/>
+        <text variable="event-place" prefix=", "/>
+        <text macro="issued" prefix=", "/>
+      </else-if>
+      <else-if variable="publisher-place publisher" match="any">
         <group prefix=". " delimiter=", ">
           <choose>
             <if type="thesis">
@@ -24532,21 +26036,22 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-note-bibliography
       </else>
     </choose>
   </macro>
-  <macro name="access-bib">
+  <macro name="access">
     <group delimiter=". ">
 	  <choose>
 	    <if type="graphic report" match="any">
-      <text macro="archive-bib"/>
+      <text macro="archive"/>
 	    </if>
 	    <else-if type="book thesis chapter article-journal article-newspaper article-magazine" match="none">
-      <text macro="archive-bib"/>
+      <text macro="archive"/>
 	    </else-if>
 	  </choose>
+      <text variable="DOI" prefix="doi:"/>
       <text variable="URL"/>
     </group>
   </macro>
   <macro name="sort-key">
-      <text macro="author-sort" suffix=" "/>
+      <text macro="contributors-sort" suffix=" "/>
       <text variable="title" suffix=" "/>
       <text variable="genre"/>
   </macro>
@@ -24555,15 +26060,13 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-note-bibliography
     <option name="et-al-use-first" value="1"/>
     <option name="et-al-subsequent-min" value="4"/>
     <option name="et-al-subsequent-use-first" value="1"/>
-    <option name="disambiguate-add-year-suffix" value="true"/>
     <option name="disambiguate-add-names" value="true"/>
-    <option name="disambiguate-add-givenname" value="true"/>
     <layout prefix="" suffix="." delimiter="; ">
       <choose>
         <if position="ibid-with-locator">
           <group delimiter=", ">
             <text term="ibid" text-case="capitalize-first" suffix="."/>
-            <text variable="locator"/>
+            <text macro="point-locators-subsequent"/>
           </group>
         </if>
         <else-if position="ibid">
@@ -24571,12 +26074,9 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-note-bibliography
         </else-if>
         <else>
           <group delimiter=", ">
-            <group>
-              <text macro="author-short"/>
-              <text macro="recipient-short"/>
-            </group>
+            <text macro="contributors-short"/>
             <text macro="title-short"/>
-            <text variable="locator"/>
+            <text macro="point-locators-subsequent"/>
           </group>
         </else>
       </choose>
@@ -24587,35 +26087,34 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-note-bibliography
     <option name="et-al-min" value="6"/>
     <option name="et-al-use-first" value="6"/>
     <option name="subsequent-author-substitute" value="---"/>
+    <option name="entry-spacing" value="0"/>
     <sort>
       <key macro="sort-key"/>
     </sort>
     <layout suffix=".">
       <group delimiter=". ">
-        <text macro="author-bib"/>
-        <text macro="recipient-bib"/>
-        <text macro="title-bib"/>
-        <text macro="description-bib"/>
-        <text macro="translator-article-bib"/>
-        <group>
-          <text macro="container-prefix-bib"/>
-          <text variable="container-title" font-style="italic"/>
+        <text macro="contributors"/>
+        <text macro="title"/>
+        <text macro="description"/>
+        <text macro="secondary-contributors"/>
+        <group delimiter=", ">
+          <text macro="container-title"/>
+          <text macro="container-contributors"/>
           <text macro="pages-chapter"/>
         </group>
-        <text macro="secondary-contributor-bib"/>
       </group>
-      <text macro="locators-bib"/>
-      <text variable="collection-title" text-case="capitalize-first" prefix=". "/>
-      <text macro="issue-bib"/>
+      <text macro="locators"/>
+      <text macro="collection-title" prefix=". "/>
+      <text macro="issue"/>
       <text macro="locators-newspaper" prefix=", "/>
       <text macro="pages-article"/>
-      <text macro="access-bib" prefix=". "/>
+      <text macro="access" prefix=". "/>
     </layout>
   </bibliography>
 </style>
 ');
 
-REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-note', '2008-02-02 00:00:00', 'Chicago Manual of Style (Note without Bibliography)',
+REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-note', '2008-05-15 01:15:00', 'Chicago Manual of Style (Note without Bibliography)',
 '<?xml version="1.0" encoding="UTF-8"?>
 <?oxygen RNGSchema="http://xbiblio.svn.sourceforge.net/viewvc/*checkout*/xbiblio/csl/schema/trunk/csl.rnc" type="compact"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="note" xml:lang="en">
@@ -24639,63 +26138,65 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-note', '2008-02-0
     <summary>Chicago format with full notes and no bibliography</summary>
     <category term="generic-base"/>
     <category term="note"/>
-    <updated>2008-02-02T00:00:00+00:00</updated>
+    <updated>2008-05-15T01:15:00+00:00</updated>
   </info>
-  <macro name="translator">
-    <choose>
-      <if variable="author editor" match="any">
-    <names variable="translator" delimiter=", ">
-      <label form="verb-short" prefix=" " text-case="lowercase" suffix=". "/>
-      <name and="text" delimiter=", "/>
-    </names>
-      </if>
-    </choose>
-  </macro>
-  <macro name="secondary-contributor">
+  <macro name="editor-translator">
     <group delimiter=", ">
       <names variable="editor" delimiter=", ">
-        <label form="verb-short" prefix=" " text-case="lowercase" suffix=". "/>
+        <label form="verb-short" text-case="lowercase" suffix=". "/>
         <name and="text" delimiter=", "/>
       </names>
       <choose>
-        <if type="article-journal article-magazine article-newspaper" match="none">
-      <text macro="translator"/>
+        <if variable="author editor" match="any">
+      <names variable="translator" delimiter=", ">
+        <label form="verb-short" text-case="lowercase" suffix=". "/>
+        <name and="text" delimiter=", "/>
+      </names>
         </if>
       </choose>
     </group>
   </macro>
-  <macro name="translator-article">
+  <macro name="secondary-contributors-note">
     <choose>
-      <if type="article-journal article-magazine article-newspaper" match="any">
-        <text macro="translator"/>
+      <if type="chapter" match="none">
+        <text macro="editor-translator"/>
       </if>
     </choose>
   </macro>
-  <macro name="author">
-    <names variable="author">
+  <macro name="container-contributors-note">
+    <choose>
+      <if type="chapter">
+        <text macro="editor-translator"/>
+      </if>
+    </choose>
+  </macro>
+  <macro name="editor-note">
+    <names variable="editor">
+      <name and="text" sort-separator=", " delimiter=", "/>
+      <label form="short" prefix=", " suffix="."/>
+    </names>
+  </macro>
+  <macro name="translator-note">
+    <names variable="translator">
       <name and="text" sort-separator=", " delimiter=", "/>
       <label form="verb-short" prefix=", " suffix="."/>
-      <substitute>
-        <names variable="editor"/>
-        <names variable="translator"/>
-      </substitute>
     </names>
   </macro>
-  <macro name="author-short">
-    <names variable="author">
-      <name form="short" and="text" delimiter=", "/>
-      <label form="verb-short" prefix=", " suffix="."/>
-      <substitute>
-        <names variable="editor"/>
-        <names variable="translator"/>
-      </substitute>
-    </names>
-  </macro>
-  <macro name="recipient">
+  <macro name="recipient-note">
     <names variable="recipient" delimiter=", ">
       <label form="verb" prefix=" " text-case="lowercase" suffix=" "/>
       <name and="text" delimiter=", "/>
     </names>
+  </macro>
+  <macro name="contributors-note">
+    <names variable="author">
+      <name and="text" sort-separator=", " delimiter=", "/>
+      <substitute>
+	<text macro="editor-note"/>
+	<text macro="translator-note"/>
+      </substitute>
+    </names>
+    <text macro="recipient-note"/>
   </macro>
   <macro name="recipient-short">
     <names variable="recipient">
@@ -24703,13 +26204,23 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-note', '2008-02-0
       <name form="short" and="text" delimiter=", "/>
     </names>
   </macro>
-  <macro name="interviewer">
+  <macro name="contributors-short">
+    <names variable="author">
+      <name form="short" and="text" delimiter=", "/>
+      <substitute>
+        <names variable="editor"/>
+        <names variable="translator"/>
+      </substitute>
+    </names>
+    <text macro="recipient-short"/>
+  </macro>
+  <macro name="interviewer-note">
     <names variable="interviewer" delimiter=", ">
       <label form="verb" prefix=" " text-case="lowercase" suffix=" "/>
       <name and="text" delimiter=", "/>
     </names>
   </macro>
-  <macro name="title">
+  <macro name="title-note">
     <choose>
       <if variable="title" match="none">
         <text variable="genre"/>
@@ -24729,7 +26240,7 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-note', '2008-02-0
           <if type="interview">
             <text term="interview" text-case="lowercase"/>
           </if>
-          <else-if type="manuscript paper-conference" match="any">
+          <else-if type="manuscript speech" match="any">
             <text variable="genre" form="short"/>
           </else-if>
           <else-if type="personal_communication">
@@ -24745,33 +26256,55 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-note', '2008-02-0
       </else>
     </choose>
   </macro>
-  <macro name="description">
+  <macro name="description-note">
     <group delimiter=", ">
-      <text macro="interviewer"/>
+      <text macro="interviewer-note"/>
       <text variable="medium"/>
       <choose>
         <if variable="title" match="none"> </if>
-        <else-if type="thesis paper-conference" match="any"> </else-if>
+        <else-if type="thesis speech" match="any"> </else-if>
         <else>
           <text variable="genre"/>
         </else>
       </choose>
     </group>
   </macro>
-  <macro name="container-prefix">
+  <macro name="container-title-note">
     <choose>
       <if type="chapter">
     <text term="in" text-case="lowercase" suffix=" "/>
       </if>
     </choose>
+    <text variable="container-title" font-style="italic"/>
   </macro>
-  <macro name="locators">
+  <macro name="edition-note">
+    <choose>
+      <if type="book chapter" match="any">
+    <choose>
+      <if is-numeric="edition">
+        <group delimiter=" ">
+          <number variable="edition" form="ordinal"/>
+          <text term="edition" form="short" suffix="."/>
+        </group>
+      </if>
+      <else>
+        <text variable="edition" suffix="."/>
+      </else>
+    </choose>
+      </if>
+    </choose>
+  </macro>
+  <macro name="collection-title">
+    <text variable="collection-title"/>
+    <text variable="collection-number" prefix=" "/>
+  </macro>
+  <macro name="locators-note">
     <choose>
       <if type="article-journal">
         <text variable="volume" prefix=" "/>
         <text variable="issue" prefix=", no. "/>
       </if>
-      <else-if type="book">
+      <else-if type="book chapter" match="any">
         <group prefix=", " delimiter=", ">
           <group>
             <text term="volume" form="short" suffix=". "/>
@@ -24785,7 +26318,7 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-note', '2008-02-0
           </group>
             </if>
           </choose>
-          <text variable="edition"/>
+          <text macro="edition-note"/>
         </group>
       </else-if>
     </choose>
@@ -24851,7 +26384,17 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-note', '2008-02-0
       </else-if>
     </choose>
   </macro>
-  <macro name="locator">
+  <macro name="point-locators-subsequent">
+    <group>
+      <choose>
+	    <if locator="page" match="none">
+	  <label variable="locator" form="short" include-period="true" suffix=" "/>
+	    </if>
+	  </choose>
+      <text variable="locator"/>
+	</group>
+  </macro>
+  <macro name="point-locators">
     <choose>
       <if variable="locator" match="none">
         <text macro="pages"/>
@@ -24860,18 +26403,18 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-note', '2008-02-0
         <text variable="locator" prefix=": "/>
       </else-if>
       <else>
-        <text variable="locator" prefix=", "/>
+        <text macro="point-locators-subsequent" prefix=", "/>
       </else>
     </choose>
   </macro>
-  <macro name="archive">
+  <macro name="archive-note">
     <group delimiter=", ">
       <text variable="archive_location"/>
       <text variable="archive"/>
       <text variable="archive-place"/>
     </group>
   </macro>
-  <macro name="issue">
+  <macro name="issue-note">
     <choose>
       <if type="article-journal">
         <text macro="issued" prefix=" (" suffix=")"/>
@@ -24881,7 +26424,7 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-note', '2008-02-0
           <group delimiter=" ">
             <choose>
               <if variable="title" match="none"> </if>
-              <else-if type="thesis paper-conference" match="any">
+              <else-if type="thesis speech" match="any">
                 <text variable="genre"/>
               </else-if>
             </choose>
@@ -24896,16 +26439,17 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-note', '2008-02-0
       </else>
     </choose>
   </macro>
-  <macro name="access">
+  <macro name="access-note">
     <group delimiter=", ">
 	  <choose>
 	    <if type="graphic report" match="any">
-      <text macro="archive"/>
+      <text macro="archive-note"/>
 	    </if>
 	    <else-if type="book thesis chapter article-journal article-newspaper article-magazine" match="none">
-      <text macro="archive"/>
+      <text macro="archive-note"/>
 	    </else-if>
 	  </choose>
+      <text variable="DOI" prefix="doi:"/>
       <text variable="URL"/>
     </group>
   </macro>
@@ -24914,7 +26458,6 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-note', '2008-02-0
     <option name="et-al-use-first" value="1"/>
     <option name="et-al-subsequent-min" value="4"/>
     <option name="et-al-subsequent-use-first" value="1"/>
-    <option name="disambiguate-add-year-suffix" value="true"/>
     <option name="disambiguate-add-names" value="true"/>
     <option name="disambiguate-add-givenname" value="true"/>
     <layout prefix="" suffix="." delimiter="; ">
@@ -24922,7 +26465,7 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-note', '2008-02-0
         <if position="ibid-with-locator">
           <group delimiter=", ">
             <text term="ibid" text-case="capitalize-first" suffix="."/>
-            <text variable="locator"/>
+            <text macro="point-locators-subsequent"/>
           </group>
         </if>
         <else-if position="ibid">
@@ -24930,35 +26473,26 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-note', '2008-02-0
         </else-if>
         <else-if position="subsequent">
           <group delimiter=", ">
-            <group>
-              <text macro="author-short"/>
-              <text macro="recipient-short"/>
-            </group>
+            <text macro="contributors-short"/>
             <text macro="title-short"/>
-            <text variable="locator"/>
+            <text macro="point-locators-subsequent"/>
           </group>
         </else-if>
         <else>
           <group delimiter=", ">
-            <group>
-              <text macro="author"/>
-              <text macro="recipient"/>
-            </group>
-            <text macro="title"/>
-            <text macro="description"/>
-            <text macro="translator-article"/>
-            <group>
-              <text macro="container-prefix"/>
-              <text variable="container-title" font-style="italic"/>
-            </group>
-            <text macro="secondary-contributor"/>
+            <text macro="contributors-note"/>
+            <text macro="title-note"/>
+            <text macro="description-note"/>
+            <text macro="secondary-contributors-note"/>
+            <text macro="container-title-note"/>
+            <text macro="container-contributors-note"/>
           </group>
-          <text macro="locators"/>
-          <text variable="collection-title" prefix=", "/>
-          <text macro="issue"/>
+          <text macro="locators-note"/>
+          <text macro="collection-title" prefix=", "/>
+          <text macro="issue-note"/>
           <text macro="locators-newspaper" prefix=", "/>
-          <text macro="locator"/>
-          <text macro="access" prefix=", "/>
+          <text macro="point-locators"/>
+          <text macro="access-note" prefix=", "/>
         </else>
       </choose>
     </layout>
@@ -24966,7 +26500,7 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/chicago-note', '2008-02-0
 </style>
 ');
 
-REPLACE INTO csl VALUES ('http://www.zotero.org/styles/ieee', '2008-02-02 00:00:00', 'IEEE',
+REPLACE INTO csl VALUES ('http://www.zotero.org/styles/ieee', '2008-05-08 19:00:00', 'IEEE',
 '<?xml version="1.0" encoding="UTF-8"?>
 <?oxygen RNGSchema="http://xbiblio.svn.sourceforge.net/viewvc/*checkout*/xbiblio/csl/schema/trunk/csl.rnc" type="compact"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="in-text" xml:lang="en">
@@ -24985,7 +26519,7 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/ieee', '2008-02-02 00:00:
     <category term="engineering"/>
     <category term="generic-base"/>
     <category term="numeric"/>
-    <updated>2008-02-02T00:00:00+00:00</updated>
+    <updated>2008-05-08T19:00:00+00:00</updated>
   </info>
   <macro name="author">
     <names variable="author">
@@ -25041,7 +26575,7 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/ieee', '2008-02-02 00:00:
   <bibliography>
     <option name="et-al-min" value="4"/>
     <option name="et-al-use-first" value="1"/>
-    <option name="second-field-align" value="margin"/>
+    <option name="second-field-align" value="true"/>
     <layout suffix=".">
       <text variable="citation-number" prefix="[" suffix="]"/>
       <text macro="author" prefix=" " suffix=", "/>
@@ -25080,7 +26614,7 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/ieee', '2008-02-02 00:00:
 </style>
 ');
 
-REPLACE INTO csl VALUES ('http://www.zotero.org/styles/harvard1', '2008-02-02 00:00:00', 'Harvard Reference format 1 (Author-Date)',
+REPLACE INTO csl VALUES ('http://www.zotero.org/styles/harvard1', '2008-05-08 19:00:00', 'Harvard Reference format 1 (Author-Date)',
 '<?xml version="1.0" encoding="UTF-8"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" xml:lang="en" class="in-text" >
   <info>
@@ -25093,7 +26627,7 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/harvard1', '2008-02-02 00
     </author>
     <category term="author-date"/>
     <category term="generic-base"/>
-    <updated>2008-02-02T00:00:00+00:00</updated>
+    <updated>2008-05-08T19:00:00+00:00</updated>
     <summary>The Harvard author-date style</summary>
     <link href="http://libweb.anglia.ac.uk/referencing/harvard.htm" rel="documentation"/>
   </info>
@@ -25182,22 +26716,30 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/harvard1', '2008-02-02 00
       </else>
     </choose>
   </macro>
+  <macro name="pages">
+    <group>
+        <label variable="page" form="short" include-period="true" suffix=" "/>
+  	<text variable="page"/>
+    </group>
+  </macro>
   <citation>
     <option name="et-al-min" value="4"/>
     <option name="et-al-use-first" value="1"/>
-    <option name="et-al-subsequent-min" value="6"/>
+    <option name="et-al-subsequent-min" value="4"/>
     <option name="et-al-subsequent-use-first" value="1"/>
     <option name="disambiguate-add-year-suffix" value="true"/>
     <option name="disambiguate-add-names" value="true"/>
     <option name="disambiguate-add-givenname" value="true"/>
-    <option name="collapse" value="year"/>
     <layout prefix="(" suffix=")" delimiter="; ">
       <group delimiter=", ">
 	<group delimiter=" ">
 	  <text macro="author-short"/>
 	  <text macro="year-date"/>
 	</group>
-	<text variable="locator" prefix="p."/>
+	<group>
+	  <label variable="locator" suffix="." form="short"/>
+	  <text variable="locator"/>
+	</group>
       </group>
     </layout>
   </citation>
@@ -25225,16 +26767,14 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/harvard1', '2008-02-02 00
 	</if>
 	<else-if type="chapter">
 	  <text macro="title" prefix=" " suffix="."/>
-	  <group class="container" prefix=" ">
+	  <group class="container" prefix=" " delimiter=" ">
 	    <text term="in" text-case="capitalize-first"/>
-	    <text macro="editor" prefix=" "/>
-	    <text variable="container-title" font-style="italic" prefix=" " suffix="."/>
-	    <text variable="collection-title" prefix=" " suffix="."/>
-	    <group suffix=".">
+	    <text macro="editor"/>
+	    <text variable="container-title" font-style="italic" suffix="."/>
+	    <text variable="collection-title" suffix="."/>
+	    <group suffix="." delimiter=", ">
 	      <text macro="publisher" prefix=" "/>
-	      <group prefix=", ">
-		<text variable="page" prefix="p. "/>
-	      </group>
+	      <text macro="pages" />
 	    </group>
 	  </group>
 	</else-if>
@@ -25250,7 +26790,8 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/harvard1', '2008-02-02 00
 	      <text variable="issue" prefix="(" suffix=")"/>
 	    </group>
 	    <group prefix=", ">
-	      <text variable="page" prefix="p."/>
+	      <label variable="locator" suffix="." form="short"/>
+	      <text variable="page"/>
 	    </group>
 	  </group>
 	</else>
@@ -25718,7 +27259,7 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/mhra_note_without_bibliog
 </style>
 ');
 
-REPLACE INTO csl VALUES ('http://www.zotero.org/styles/mla', '2008-02-02 00:00:00', 'Modern Language Association',
+REPLACE INTO csl VALUES ('http://www.zotero.org/styles/mla', '2008-05-08 19:00:00', 'Modern Language Association',
 '<?xml version="1.0" encoding="UTF-8"?>
 <?oxygen RNGSchema="http://xbiblio.svn.sourceforge.net/viewvc/*checkout*/xbiblio/csl/schema/trunk/csl.rnc" type="compact"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="in-text" xml:lang="en">
@@ -25732,7 +27273,7 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/mla', '2008-02-02 00:00:0
     </author>
     <category term="generic-base"/>
     <category term="author-date"/>
-    <updated>2008-02-02T00:00:00+00:00</updated>
+    <updated>2008-05-08T19:00:00+00:00</updated>
   </info>
   <macro name="editor-translator">
     <names variable="editor translator" delimiter=". ">
@@ -25834,6 +27375,7 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/mla', '2008-02-02 00:00:0
     <option name="et-al-min" value="4"/>
     <option name="et-al-use-first" value="1"/>
     <option name="line-spacing" value="2"/>
+    <option name="subsequent-author-substitute" value="---"/>
     <sort>
       <key macro="author"/>
       <key variable="title"/>
@@ -25890,7 +27432,7 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/mla', '2008-02-02 00:00:0
 </style>
 ');
 
-REPLACE INTO csl VALUES ('http://www.zotero.org/styles/nature', '2008-02-02 00:00:00', 'Nature Journal',
+REPLACE INTO csl VALUES ('http://www.zotero.org/styles/nature', '2008-05-08 19:00:00', 'Nature Journal',
 '<?xml version="1.0" encoding="UTF-8"?>
 <?oxygen RNGSchema="http://xbiblio.svn.sourceforge.net/viewvc/*checkout*/xbiblio/csl/schema/trunk/csl.rnc" type="compact"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="in-text" xml:lang="en">
@@ -25905,8 +27447,18 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/nature', '2008-02-02 00:0
         <category term="biology"/>
         <category term="generic-base"/>
         <category term="numeric"/>
-        <updated>2008-02-02T00:00:00+00:00</updated>
+        <updated>2008-05-08T19:00:00+00:00</updated>
     </info>
+    <macro name="title">
+        <choose>
+            <if type="book">
+                <text variable="title" font-style="italic"/>
+            </if>
+            <else>
+                <text variable="title"/>
+            </else>
+        </choose>
+    </macro>
     <macro name="author">
         <names variable="author">
             <name sort-separator=", " delimiter=", " and="symbol" initialize-with="." delimiter-precedes-last="never" name-as-sort-order="all"/>
@@ -25924,6 +27476,24 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/nature', '2008-02-02 00:0
 			</else-if>
 		</choose>
 	</macro>
+    <macro name="issuance">
+        <choose>
+            <if type="book">
+                <group prefix="(" suffix=").">
+                    <text variable="publisher" suffix=": " />
+                    <text variable="publisher-place" suffix=", " />
+                    <date variable="issued">
+                        <date-part name="year"/>
+                    </date>
+                </group>
+            </if>
+            <else>
+                <date prefix="(" suffix=")." variable="issued">
+                    <date-part name="year"/>
+                </date>
+            </else>
+        </choose>
+    </macro>
 	<citation>
 		<option name="collapse" value="citation-number"/>
 		<sort>
@@ -25939,16 +27509,14 @@ REPLACE INTO csl VALUES ('http://www.zotero.org/styles/nature', '2008-02-02 00:0
         <option name="second-field-align" value="true"/>
         <option name="entry-spacing" value="0"/>
         <layout>
-            <text variable="citation-number" suffix=". "/>
+            <text variable="citation-number" suffix="."/>
             <text macro="author"/>
-            <text variable="title" prefix=" " suffix=". "/>
-            <text variable="container-title" font-style="italic" suffix=" "/>
+            <text macro="title" prefix=" " suffix=". "/>
+            <text variable="container-title" font-style="italic" suffix=" " form="short"/>
             <text variable="volume" suffix=", " font-weight="bold"/>
             <text variable="page"/>
-            <text macro="access"/>
-            <date prefix=" (" suffix=")." variable="issued">
-                <date-part name="year"/>
-            </date>
+            <text macro="issuance" />
+            <text macro="access" />
         </layout>
     </bibliography>
 </style>

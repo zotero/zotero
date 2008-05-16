@@ -47,20 +47,20 @@
 
 <!ENTITY zotero.preferences.prefpane.export "Esportazione">
 
-<!ENTITY zotero.preferences.citationOptions.caption "Citation Options">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Include URLs of paper articles in references">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "When this option is disabled, Zotero includes URLs when citing journal, magazine, and newspaper articles only if the article does not have a page range specified.">
+<!ENTITY zotero.preferences.citationOptions.caption "Citazione">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Inserisci gli URL degli articoli di giornale nelle citazioni">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Se l&apos;opzione è disattivata, Zotero includerà gli URL soltanto nelle citazioni degli articoli di giornale, rivista e quotidiano che non contengono un intervallo di pagine specificato.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Copia veloce">
 <!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Formato di output predefinito">
-<!ENTITY zotero.preferences.quickCopy.copyAsHTML "Copy as HTML">
+<!ENTITY zotero.preferences.quickCopy.copyAsHTML "Copia in formato HTML">
 <!ENTITY zotero.preferences.quickCopy.macWarning "Nota: la formattazione RTF verrà persa su Mac OS X">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Impostazioni specifiche per sito:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Dominio o percorso">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(per es. wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Formato di output">
 
-<!ENTITY zotero.preferences.export.getAdditionalStyles "Get additional styles...">
+<!ENTITY zotero.preferences.export.getAdditionalStyles "Scarica ulteriori stili...">
 
 <!ENTITY zotero.preferences.prefpane.keys "Scorciatoie da tastiera">
 
@@ -71,8 +71,8 @@
 <!ENTITY zotero.preferences.keys.newItem "Crea nuovo elemento">
 <!ENTITY zotero.preferences.keys.newNote "Crea nuova nota">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Attiva o disattiva selettore tag">
-<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copia le citazioni selezionate negli Appunti">
-<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copia gli oggetti selezionati negli Appunti">
+<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copia l&apos;elemento selezionato negli Appunti">
+<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copia gli elementi selezionati negli Appunti">
 <!ENTITY zotero.preferences.keys.overrideGlobal "Sovrascrivi le scorciatoie in conflitto">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Le modifiche avranno effetto nelle nuove finestre">
 
@@ -87,6 +87,6 @@
 
 <!ENTITY zotero.preferences.dbMaintenance "Manutenzione database">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Controlla l&apos;integrità del database">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reset Translators and Styles...">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset Translators...">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset Styles...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reimposta motori di ricerca e stili...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reimposta motori di ricerca...">
+<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reimposta stili...">

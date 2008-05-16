@@ -2,14 +2,11 @@
 <!ENTITY zotero.general.note "Let op:">
 
 <!ENTITY zotero.errorReport.unrelatedMessages "Het foutenlogboek kan berichten bevatten die niet gerelateerd zijn aan Zotero.">
-<!ENTITY zotero.errorReport.additionalInfo "Extra informatie">
-<!ENTITY zotero.errorReport.emailAddress "Uw e-mailadres:">
-<!ENTITY zotero.errorReport.errorSteps "Wat deed u toen de fout optrad? Geef indien mogelijk de stappen aan waarmee de fout gereproduceerd kan worden.">
 <!ENTITY zotero.errorReport.submissionInProgress "Even geduld a.u.b. totdat het fout-rapport is verstuurd.">
 <!ENTITY zotero.errorReport.submitted "Het fout-rapport is verstuurd.">
 <!ENTITY zotero.errorReport.reportID "Rapport ID:">
-<!ENTITY zotero.errorReport.furtherAssistance "Bekijk de &quot;Known Issues&quot;-webpagina en de fora voor meer assistentie.">
-<!ENTITY zotero.errorReport.includeReportID "Vermeld het rapport ID in verdere correspondentie met de Zotero-ontwikkelaars over dit onderwerp.">
+<!ENTITY zotero.errorReport.postToForums "Plaats een bericht op het (Engels-talige) Zotero forum (forums.zotero.org) onder vermelding van het Rapport ID, een omschrijving van het probleem, en de stappen die nodig zijn om het probleem te reproduceren.">
+<!ENTITY zotero.errorReport.notReviewed "Fout-rapporten worden in het algemeen niet bekeken tenzij u ernaar verwijst op het online forum.">
 
 <!ENTITY zotero.upgrade.newVersionInstalled "U heeft een nieuwe versie van Zotero geinstalleerd.">
 <!ENTITY zotero.upgrade.upgradeRequired "Uw Zotero database moet bijgewerkt worden om te kunnen werken met de nieuwe versie.">
@@ -27,7 +24,7 @@
 
 <!ENTITY zotero.tabs.info.label "Info">
 <!ENTITY zotero.tabs.notes.label "Aantekeningen">
-<!ENTITY zotero.tabs.attachments.label "Bijlages">
+<!ENTITY zotero.tabs.attachments.label "Bijlagen">
 <!ENTITY zotero.tabs.tags.label "Labels">
 <!ENTITY zotero.tabs.related.label "Gerelateerd">
 <!ENTITY zotero.notes.separate "In een nieuw venster bewerken">
@@ -38,7 +35,10 @@
 <!ENTITY zotero.items.date_column "Datum">
 <!ENTITY zotero.items.year_column "Jaar">
 <!ENTITY zotero.items.publisher_column "Uitgever">
+<!ENTITY zotero.items.publication_column "Tijdschrift">
+<!ENTITY zotero.items.journalAbbr_column "Tijdschrift Afkorting">
 <!ENTITY zotero.items.language_column "Taal">
+<!ENTITY zotero.items.accessDate_column "Laatst benaderd">
 <!ENTITY zotero.items.callNumber_column "Referentienummer">
 <!ENTITY zotero.items.repository_column "Repositorium">
 <!ENTITY zotero.items.rights_column "Rechten">

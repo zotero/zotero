@@ -2,14 +2,11 @@
 <!ENTITY zotero.general.note "Jegyzet:">
 
 <!ENTITY zotero.errorReport.unrelatedMessages "A hibanapló a Zoterohoz nem kapcsolódó bejegyzéseket is tartalmazhat">
-<!ENTITY zotero.errorReport.additionalInfo "További információk">
-<!ENTITY zotero.errorReport.emailAddress "Az Ön email címe:">
-<!ENTITY zotero.errorReport.errorSteps "Mikor jelentkezett a hiba? Adja meg lépésről lépére, hogy lehet reprodukálni a hibát.">
 <!ENTITY zotero.errorReport.submissionInProgress "Várjon a hibajelentés elküldéséig.">
 <!ENTITY zotero.errorReport.submitted "A hibajelentés elküldve.">
 <!ENTITY zotero.errorReport.reportID "Jelentés azonosítója:">
-<!ENTITY zotero.errorReport.furtherAssistance "További segítséget található az Ismert problémák oldalon és a fórumokban">
-<!ENTITY zotero.errorReport.includeReportID "Hivatkozzon a jelentés azonosítójára a fejlesztőkkel folytatott levelezésben.">
+<!ENTITY zotero.errorReport.postToForums "Küldje el a Zotero fórumba (forums.zotero.hu) a probléma leírását, hogy hogyan jutott idáig, ill. a hibaüzenet ID-jét .">
+<!ENTITY zotero.errorReport.notReviewed "A fórumba be nem küldött hibaüzenetek nem kerülnek kivizsgálásra.">
 
 <!ENTITY zotero.upgrade.newVersionInstalled "A Zotero új verziójának telepítése sikerült.">
 <!ENTITY zotero.upgrade.upgradeRequired "Frissíteni kell a Zotero adatbázist, hogy működjön az új verzióval.">
@@ -38,7 +35,10 @@
 <!ENTITY zotero.items.date_column "Dátum">
 <!ENTITY zotero.items.year_column "Év">
 <!ENTITY zotero.items.publisher_column "Kiadó">
+<!ENTITY zotero.items.publication_column "Kiadvány">
+<!ENTITY zotero.items.journalAbbr_column "Rövidített cím">
 <!ENTITY zotero.items.language_column "Nyelv">
+<!ENTITY zotero.items.accessDate_column "Hozzáférés dátuma">
 <!ENTITY zotero.items.callNumber_column "Raktári jelzet">
 <!ENTITY zotero.items.repository_column "Gyűjtemény">
 <!ENTITY zotero.items.rights_column "Jogok">

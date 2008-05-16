@@ -70,8 +70,8 @@
 						</tree>
 					
 						<tree id="zotero-items-tree"
-							flex="1" hidecolumnpicker="true" seltype="single"
-							onselect="Zotero_Citation_Dialog.treeItemSelected();">
+								enableColumnDrag="true" flex="1" seltype="single"
+								onselect="Zotero_Citation_Dialog.treeItemSelected();">
 							<treecols>
 								<treecol
 									id="zotero-items-column-title" primary="true"
@@ -84,6 +84,61 @@
 									flex="1" persist="width ordinal hidden sortActive sortDirection"/>
 								<splitter class="tree-splitter"/>
 								<treecol
+									id="zotero-items-column-type" hidden="true"
+									label="&zotero.items.type_column;"
+									width="40" persist="width ordinal hidden sortActive sortDirection"/>
+								<splitter class="tree-splitter"/>
+								<treecol
+									id="zotero-items-column-date" hidden="true"
+									label="&zotero.items.date_column;"
+									flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+								<splitter class="tree-splitter"/>
+								<treecol
+									id="zotero-items-column-year" hidden="true"
+									label="&zotero.items.year_column;"
+									flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+								<splitter class="tree-splitter"/>
+								<treecol
+									id="zotero-items-column-publisher" hidden="true"
+									label="&zotero.items.publisher_column;"
+									flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+								<splitter class="tree-splitter"/>
+								<treecol
+									id="zotero-items-column-publicationTitle" hidden="true"
+									label="&zotero.items.publication_column;"
+									flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+								<splitter class="tree-splitter"/>
+								<treecol
+									id="zotero-items-column-journalAbbreviation" hidden="true"
+									label="&zotero.items.journalAbbr_column;"
+									flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+								<splitter class="tree-splitter"/>
+								<treecol
+									id="zotero-items-column-language" hidden="true"
+									label="&zotero.items.language_column;"
+									flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+								<splitter class="tree-splitter"/>
+								<treecol
+									id="zotero-items-column-accessDate" hidden="true"
+									label="&zotero.items.accessDate_column;"
+									flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+								<splitter class="tree-splitter"/>
+								<treecol
+									id="zotero-items-column-callNumber" hidden="true"
+									label="&zotero.items.callNumber_column;"
+									flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+								<splitter class="tree-splitter"/>
+								<treecol
+									id="zotero-items-column-repository" hidden="true"
+									label="&zotero.items.repository_column;"
+									flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+								<splitter class="tree-splitter"/>
+								<treecol
+									id="zotero-items-column-rights" hidden="true"
+									label="&zotero.items.rights_column;"
+									flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+								<splitter class="tree-splitter"/>
+								<treecol
 									id="zotero-items-column-dateAdded" hidden="true"
 									label="&zotero.items.dateAdded_column;"
 									flex="1" persist="width ordinal hidden sortActive sortDirection"/>
@@ -92,7 +147,7 @@
 									id="zotero-items-column-dateModified" hidden="true"
 									label="&zotero.items.dateModified_column;"
 									flex="1" persist="width ordinal hidden sortActive sortDirection"/>
-							</treecols>				
+							</treecols>	
 							<treechildren/>
 						</tree>
 					</hbox>

@@ -53,7 +53,7 @@
 
 <!ENTITY zotero.preferences.quickCopy.caption "Бързо копиране">
 <!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Изходящ формат по подразбиране:">
-<!ENTITY zotero.preferences.quickCopy.copyAsHTML "Copy as HTML">
+<!ENTITY zotero.preferences.quickCopy.copyAsHTML "Копиране в HTML формат">
 <!ENTITY zotero.preferences.quickCopy.macWarning "Внимание: Rich-text formatting ще бъде загубен при Mac OS X.">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Настройки специфични за страницата:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Домен/пътека">

@@ -6,8 +6,8 @@
 <!ENTITY zotero.search.joinMode.suffix "av følgende:">
 
 <!ENTITY zotero.search.recursive.label "Søk i undermapper">
-<!ENTITY zotero.search.noChildren "Vis kun enheter på toppnivå">
-<!ENTITY zotero.search.includeParentsAndChildren "Inkluder foreldre- og barn av samsvarende enheter">
+<!ENTITY zotero.search.noChildren "Vis kun overordnede elementer">
+<!ENTITY zotero.search.includeParentsAndChildren "Inkluder under- og overordnede elementer">
 
 <!ENTITY zotero.search.textModes.phrase "Frase">
 <!ENTITY zotero.search.textModes.phraseBinary "Frase (inkl. binærfiler)">

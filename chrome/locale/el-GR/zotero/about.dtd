@@ -1,10 +1,10 @@
-<!ENTITY zotero.version "version">
-<!ENTITY zotero.createdby "Created By:">
-<!ENTITY zotero.directors "Directors:">
-<!ENTITY zotero.developers "Developers:">
-<!ENTITY zotero.alumni "Alumni:">
-<!ENTITY zotero.about.localizations "Localizations:">
-<!ENTITY zotero.about.additionalSoftware "Third-Party Software and Standards:">
-<!ENTITY zotero.executiveProducer "Executive Producer:">
-<!ENTITY zotero.thanks "Special Thanks:">
-<!ENTITY zotero.about.close "Close">
+<!ENTITY zotero.version "έκδοση">
+<!ENTITY zotero.createdby "Δημιουργήθηκε Από:">
+<!ENTITY zotero.directors "Διευθυντές:">
+<!ENTITY zotero.developers "Προγραμματιστές:">
+<!ENTITY zotero.alumni "Απόφοιτοι:">
+<!ENTITY zotero.about.localizations "Μεταφράσεις:">
+<!ENTITY zotero.about.additionalSoftware "Λογισμικό και Πρότυπα Τρίτων:">
+<!ENTITY zotero.executiveProducer "Εκτελεστικός Παραγωγός:">
+<!ENTITY zotero.thanks "Ειδικές Ευχαριστίες:">
+<!ENTITY zotero.about.close "Κλείσιμο">

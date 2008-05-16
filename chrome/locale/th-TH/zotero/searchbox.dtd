@@ -3,16 +3,16 @@
 <!ENTITY zotero.search.joinMode.prefix "ตรงกัน">
 <!ENTITY zotero.search.joinMode.any "ใด ๆ">
 <!ENTITY zotero.search.joinMode.all "ทั้งหมด">
-<!ENTITY zotero.search.joinMode.suffix "of the following:">
+<!ENTITY zotero.search.joinMode.suffix "ของรายการดังต่อไปนี้:">
 
-<!ENTITY zotero.search.recursive.label "Search subfolders">
+<!ENTITY zotero.search.recursive.label "ค้นหาในโฟลเดอร์ย่อย">
 <!ENTITY zotero.search.noChildren "แสดงเฉพาะไอเทมบนสุด">
 <!ENTITY zotero.search.includeParentsAndChildren "Include parent and child items of matching items">
 
-<!ENTITY zotero.search.textModes.phrase "Phrase">
-<!ENTITY zotero.search.textModes.phraseBinary "Phrase (incl. binary files)">
+<!ENTITY zotero.search.textModes.phrase "พยางค์">
+<!ENTITY zotero.search.textModes.phraseBinary "พยางค์ (รวมแฟ้มไบนารี)">
 <!ENTITY zotero.search.textModes.regexp "Regexp">
-<!ENTITY zotero.search.textModes.regexpCS "Regexp (case-sensitive)">
+<!ENTITY zotero.search.textModes.regexpCS "Regexp (แยกตัวพิมพ์เล็ก-พิมพ์ใหญ่)">
 
 <!ENTITY zotero.search.date.units.days "วัน">
 <!ENTITY zotero.search.date.units.months "เดือน">

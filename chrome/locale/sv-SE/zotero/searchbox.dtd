@@ -1,18 +1,18 @@
 <!ENTITY zotero.search.name "Namn:">
 
-<!ENTITY zotero.search.joinMode.prefix "Match">
+<!ENTITY zotero.search.joinMode.prefix "Matcha">
 <!ENTITY zotero.search.joinMode.any "any">
 <!ENTITY zotero.search.joinMode.all "alla">
-<!ENTITY zotero.search.joinMode.suffix "följande:">
+<!ENTITY zotero.search.joinMode.suffix "av följande:">
 
 <!ENTITY zotero.search.recursive.label "Sök i undermappar">
-<!ENTITY zotero.search.noChildren "Only show top-level items">
-<!ENTITY zotero.search.includeParentsAndChildren "Include parent and child items of matching items">
+<!ENTITY zotero.search.noChildren "Visa bara poster på högst nivå">
+<!ENTITY zotero.search.includeParentsAndChildren "Inkludera över- och underordnade poster för matchande poster">
 
 <!ENTITY zotero.search.textModes.phrase "Fras">
 <!ENTITY zotero.search.textModes.phraseBinary "Fras (inkl. binära filer)">
 <!ENTITY zotero.search.textModes.regexp "Reguljärt uttryck">
-<!ENTITY zotero.search.textModes.regexpCS "Reguljärt uttryck (skift-känsligt)">
+<!ENTITY zotero.search.textModes.regexpCS "Reguljärt uttryck (tecken-känsligt)">
 
 <!ENTITY zotero.search.date.units.days "dagar">
 <!ENTITY zotero.search.date.units.months "månader">

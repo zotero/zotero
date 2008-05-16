@@ -49,11 +49,11 @@
 
 <!ENTITY zotero.preferences.citationOptions.caption "Citatie opties">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Voeg URLs van atikelen toe aan referenties">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Als deze optie uitgeschakeld wordt zal Zotero de URLs van geciteerde tijdschrift-, magazine en kranteartilels enkel citeren indien van het artikel geen paginering gespecifieerd werd.">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Als deze optie uitgeschakeld wordt zal Zotero de URLs van geciteerde tijdschrift-, magazine en krantenartikels enkel citeren indien van het artikel geen paginering gespecifieerd werd.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Snelle kopie">
 <!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Standaard uitvoerformaat:">
-<!ENTITY zotero.preferences.quickCopy.copyAsHTML "Copy as HTML">
+<!ENTITY zotero.preferences.quickCopy.copyAsHTML "Kopieer als HTML">
 <!ENTITY zotero.preferences.quickCopy.macWarning "Let op: onder Mac OS X gaat hierbij de tekstopmaak verloren.">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Webpagina-specifieke instellingen:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domein/Pad">
