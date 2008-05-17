@@ -30,7 +30,7 @@
         fieldID INTEGER PRIMARY KEY,
         fieldName TEXT,
         fieldFormatID INT,
-        FOREIGN KEY (fieldFormatID) REFERENCES fieldFormat(fieldFormatID)
+        FOREIGN KEY (fieldFormatID) REFERENCES fieldFormats(fieldFormatID)
     );
     
     -- Defines valid fields for each itemType, their display order, and their default visibility
