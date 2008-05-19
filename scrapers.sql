@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-05-19 17:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-05-19 17:45:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -11632,7 +11632,7 @@ REPLACE INTO translators VALUES ('b047a13c-fe5c-6604-c997-bef15e502b09', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('5e3e6245-83da-4f55-a39b-b712df54a935', '1.0.0b3.r1', '', '2007-08-27 05:00:00', '0', '90', '4', 'Melvyl', 'Sean Takats', '^https?://(?:melvyl.cdlib.org|melvyl-dev.cdlib.org:8162)/F(?:/[A-Z0-9\-]+(?:\?.*)?$|\?func=find|\?func=scan)', 
+REPLACE INTO translators VALUES ('5e3e6245-83da-4f55-a39b-b712df54a935', '1.0.0b3.r1', '', '2008-05-19 17:45:00', '0', '90', '4', 'Melvyl', 'Sean Takats and Michael Berkowitz', '^https?://(?:melvyl.cdlib.org|melvyl-dev.cdlib.org:8162)/F(?:/[A-Z0-9\-]+(?:\?.*)?$|\?func=find|\?func=scan)', 
 'function detectWeb(doc, url) {
 	var singleRe = new RegExp("^https?://[^/]+/F/[A-Z0-9\-]+\?.*(?:func=full-set-set.*\&format=[0-9]{3}|func=direct)");
 	
@@ -11712,7 +11712,7 @@ REPLACE INTO translators VALUES ('5e3e6245-83da-4f55-a39b-b712df54a935', '1.0.0b
 	var marc = translator.getTranslatorObject();
 	Zotero.Utilities.processDocuments(newUris, function(newDoc) {
 		var uri = newDoc.location.href;
-		
+
 		var namespace = newDoc.documentElement.namespaceURI;
 		var nsResolver = namespace ? function(prefix) {
 		  if (prefix == ''x'') return namespace; else return null;
@@ -11724,14 +11724,13 @@ REPLACE INTO translators VALUES ('5e3e6245-83da-4f55-a39b-b712df54a935', '1.0.0b
 		
 		var record = new marc.record();
 		while(elmt = elmts.iterateNext()) {
-			var field = Zotero.Utilities.superCleanString(doc.evaluate(''./TD[1]/strong/text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue);
-			var value = doc.evaluate(''./TD[2]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+			var field = Zotero.Utilities.trimInternal(newDoc.evaluate(''./TD[1]/strong/text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue);
+			var value = newDoc.evaluate(''./TD[2]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 			
 			if(field == "LDR") {
 				record.leader = value;
 			} else if(field != "FMT") {
 				
-				Zotero.debug("field=" + field);
 				value = value.replace(/\|([a-z]) /g, marc.subfieldDelimiter+"$1");
 				
 				var code = field.substring(0, 3);
@@ -11742,7 +11741,6 @@ REPLACE INTO translators VALUES ('5e3e6245-83da-4f55-a39b-b712df54a935', '1.0.0b
 						ind += field[4];
 					}
 				}
-				
 				record.addField(code, ind, value);
 			}
 		}
