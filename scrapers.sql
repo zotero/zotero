@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-05-16 22:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-05-19 16:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -17955,7 +17955,7 @@ function doWeb(doc, url) {
 		
 }');
 
-REPLACE INTO translators VALUES ('1b9ed730-69c7-40b0-8a06-517a89a3a278', '1.0.0b3.r1', '', '2007-01-24 01:35:00', '0', '100', '4', 'Sudoc', 'Sean Takats', '^http://www\.sudoc\.abes\.fr', 
+REPLACE INTO translators VALUES ('1b9ed730-69c7-40b0-8a06-517a89a3a278', '1.0.0b3.r1', '', '2008-05-19 16:30:00', '0', '100', '4', 'Sudoc', 'Sean Takats and Michael Berkowitz', '^http://www\.sudoc\.abes\.fr', 
 'function detectWeb(doc, url) {
 		var namespace = doc.documentElement.namespaceURI;
 		var nsResolver = namespace ? function(prefix) {
@@ -18030,7 +18030,7 @@ REPLACE INTO translators VALUES ('1b9ed730-69c7-40b0-8a06-517a89a3a278', '1.0.0b
 				var field = doc.evaluate(''./td[1]'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 				var value = doc.evaluate(''./td[2]'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 				field = Zotero.Utilities.superCleanString(field);
-
+				field = field.replace(/(\(s\))?\s*:\s*$/, "");
 				if (field == "Titre" || field == "Title"){
 						Zotero.debug("title = " + value);
 						value = value.replace(/(\[[^\]]+\])/g,"");
@@ -18042,7 +18042,7 @@ REPLACE INTO translators VALUES ('1b9ed730-69c7-40b0-8a06-517a89a3a278', '1.0.0b
 						while (author = authors.iterateNext()){
 								var authorText = author.textContent;
 								var authorParts = authorText.split(" ("); 
-								newItem.creators.push(Zotero.Utilities.cleanAuthor(authorParts[0], 1, true));
+								newItem.creators.push(Zotero.Utilities.cleanAuthor(authorParts[0], "author", true));
 						}
 				}
 				if (field.substr(0,4) == "Date"){
