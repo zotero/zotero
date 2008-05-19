@@ -123,9 +123,8 @@ var Zotero = new function(){
 		var appInfo =
 			Components.classes["@mozilla.org/xre/app-info;1"].
 				getService(Components.interfaces.nsIXULAppInfo)
-		// TODO: fix for Flock, etc.
-		this.isFx2 = appInfo.version.indexOf('2.0') === 0;
-		this.isFx3 = appInfo.version.indexOf('3.0') === 0;
+		this.isFx2 = appInfo.platformVersion.indexOf('1.8') === 0;
+		this.isFx3 = appInfo.platformVersion.indexOf('1.9') === 0;
 		
 		// OS platform
 		var win = Components.classes["@mozilla.org/appshell/appShellService;1"]
