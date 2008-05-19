@@ -1149,7 +1149,7 @@ REPLACE INTO translators VALUES ('83538f48-906f-40ef-bdb3-e94f63676307', '1.0.0b
 	}, function() {Zotero.done;});
 }');
 
-REPLACE INTO translators VALUES ('882f70a8-b8ad-403e-bd76-cb160224999d', '1.0.0b4.r5', '', '2008-05-15 21:30:00', '0', '100', '4', 'Vanderbilt eJournals', 'Michael Berkowitz', 'http://ejournals.library.vanderbilt.edu/', 
+REPLACE INTO translators VALUES ('882f70a8-b8ad-403e-bd76-cb160224999d', '1.0.0b4.r5', '', '2008-05-19 17:20:00', '0', '100', '4', 'Vanderbilt eJournals', 'Michael Berkowitz', 'http://ejournals.library.vanderbilt.edu/', 
 'function detectWeb(doc, url) {
 	if (url.match(/viewarticle.php/)) {
 		return "journalArticle";
@@ -11632,7 +11632,7 @@ REPLACE INTO translators VALUES ('b047a13c-fe5c-6604-c997-bef15e502b09', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('5e3e6245-83da-4f55-a39b-b712df54a935', '1.0.0b3.r1', '', '2008-05-19 17:45:00', '0', '90', '4', 'Melvyl', 'Sean Takats and Michael Berkowitz', '^https?://(?:melvyl.cdlib.org|melvyl-dev.cdlib.org:8162)/F(?:/[A-Z0-9\-]+(?:\?.*)?$|\?func=find|\?func=scan)', 
+REPLACE INTO translators VALUES ('5e3e6245-83da-4f55-a39b-b712df54a935', '1.0.0b3.r1', '', '2008-05-19 17:20:00', '0', '90', '4', 'Melvyl', 'Sean Takats and Michael Berkowitz', '^https?://(?:melvyl.cdlib.org|melvyl-dev.cdlib.org:8162)/F(?:/[A-Z0-9\-]+(?:\?.*)?$|\?func=find|\?func=scan)', 
 'function detectWeb(doc, url) {
 	var singleRe = new RegExp("^https?://[^/]+/F/[A-Z0-9\-]+\?.*(?:func=full-set-set.*\&format=[0-9]{3}|func=direct)");
 	
