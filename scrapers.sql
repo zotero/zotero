@@ -17954,7 +17954,7 @@ function doWeb(doc, url) {
 		
 }');
 
-REPLACE INTO translators VALUES ('1b9ed730-69c7-40b0-8a06-517a89a3a278', '1.0.0b3.r1', '', '2008-05-19 16:30:00', '0', '100', '4', 'Sudoc', 'Sean Takats and Michael Berkowitz', '^http://www\.sudoc\.abes\.fr', 
+REPLACE INTO translators VALUES ('1b9ed730-69c7-40b0-8a06-517a89a3a278', '1.0.0b3.r1', '', '2008-05-19 17:30:00', '0', '100', '4', 'Sudoc', 'Sean Takats and Michael Berkowitz', '^http://www\.sudoc\.abes\.fr', 
 'function detectWeb(doc, url) {
 		var namespace = doc.documentElement.namespaceURI;
 		var nsResolver = namespace ? function(prefix) {
