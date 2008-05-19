@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-05-19 17:45:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-05-19 19:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -2093,9 +2093,9 @@ REPLACE INTO translators VALUES ('bdaac15c-b0ee-453f-9f1d-f35d00c7a994', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('5278b20c-7c2c-4599-a785-12198ea648bf', '1.0.0b4.r5', '', '2008-05-08 20:30:00', '1', '100', '4', 'ARTstor', 'Ameer Ahmed and Michael Berkowitz', 'http://web2.artstor.org', 
+REPLACE INTO translators VALUES ('5278b20c-7c2c-4599-a785-12198ea648bf', '1.0.0b4.r5', '', '2008-05-19 19:00:00', '1', '100', '4', 'ARTstor', 'Ameer Ahmed and Michael Berkowitz', 'http://[^/]*web2.artstor.org[^/]*', 
 'function detectWeb(doc, url) {
-	if (url.match(/(S|s)earch/)) return "multiple"
+	if (url.match(/(S|s)earch/) && (doc.evaluate(''//div[@id="thumbContentWrap"]/div'', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent.match(/\w+/))) return "multiple"
 }', 
 'function doWeb(doc, url) {
 	if (url.indexOf("|")!=-1){	
