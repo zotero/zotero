@@ -770,7 +770,8 @@ Zotero.Utilities.HTTP.processDocuments = function(firstDoc, urls, processor, don
 		}
 	};
 	var init = function() {
-		hiddenBrowser.addEventListener("pageshow", onLoad, true);
+		var loadEvent = Zotero.isFx2 ? "load" : "pageshow";
+		hiddenBrowser.addEventListener(loadEvent, onLoad, true);
 		
 		if (firstDoc) {
 			processor(firstDoc, doLoad);
