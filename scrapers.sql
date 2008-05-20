@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-05-20 15:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-05-20 17:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1149,7 +1149,7 @@ REPLACE INTO translators VALUES ('83538f48-906f-40ef-bdb3-e94f63676307', '1.0.0b
 	}, function() {Zotero.done;});
 }');
 
-REPLACE INTO translators VALUES ('4f62425a-c99f-4ce1-b7c1-5a3ac0d636a3', '1.0.0b4.r5', '', '2008-05-19 20:45:00', '0', '100', '4', 'AfroEuropa', 'Michael Berkowitz', 'http://journal.afroeuropa.eu/', 
+REPLACE INTO translators VALUES ('4f62425a-c99f-4ce1-b7c1-5a3ac0d636a3', '1.0.0b4.r5', '', '2008-05-20 17:00:00', '0', '100', '4', 'AfroEuropa', 'Michael Berkowitz', 'http://journal.afroeuropa.eu/', 
 'function detectWeb(doc, url) {
 	if (doc.evaluate(''//tr[td/a[2]]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
@@ -1157,10 +1157,10 @@ REPLACE INTO translators VALUES ('4f62425a-c99f-4ce1-b7c1-5a3ac0d636a3', '1.0.0b
 		return "journalArticle";
 	}
 }', 
-'function makeExport(str) {
+'function makeExport(site, str) {
 	var nums = str.match(/\d+(\/\d+)?/)[0];
 	if (!nums.match(/\//)) nums += "/0";
-	return ''http://journal.afroeuropa.eu/index.php/afroeuropa/rt/captureCite/'' + nums + ''/referenceManager'';
+	return site + ''rt/captureCite/'' + nums + ''/referenceManager'';
 }
 
 function doWeb(doc, url) {
@@ -1169,6 +1169,7 @@ function doWeb(doc, url) {
 		if (prefix == ''x'') return n; else return null;
 	} : null;
 	
+	var site = url.match(/^http:\/\/([^/]*\/)+index\.php\/[^/]*\//)[0];
 	var arts = new Array();
 	if (detectWeb(doc, url) == "multiple") {
 		var xpath = ''//tr[td/a]'';
@@ -1185,16 +1186,15 @@ function doWeb(doc, url) {
 		while (result = results.iterateNext()) {
 			var title = Zotero.Utilities.trimInternal(doc.evaluate(titlex, result, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent);
 			var link = doc.evaluate(linkx, result, ns, XPathResult.ANY_TYPE, null).iterateNext().href;
-			items[makeExport(link)] = title;
+			items[makeExport(site, link)] = title;
 		}
 		items = Zotero.selectItems(items);
 		for (var i in items) {
 			arts.push(i);
 		}
 	} else {
-		arts = [makeExport(url)];
+		arts = [makeExport(cite, url)];
 	}
-	Zotero.debug(arts);
 	Zotero.Utilities.HTTP.doGet(arts, function(text) {
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
