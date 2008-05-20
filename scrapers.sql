@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-05-20 18:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-05-20 19:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -3251,7 +3251,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('4afb932d-9211-4c0b-a31c-cfa984d62b66', '1.0.0b4.r5', '', '2008-04-18 08:55:00', '0', '100', '4', 'OAIster', 'Michael Berkowitz', 'http://quod.lib.umich.edu/cgi/b/', 
+REPLACE INTO translators VALUES ('4afb932d-9211-4c0b-a31c-cfa984d62b66', '1.0.0b4.r5', '', '2008-05-20 19:00:00', '1', '100', '4', 'OAIster', 'Michael Berkowitz', 'http://quod.lib.umich.edu/cgi/b/', 
 'function detectWeb(doc, url) {
 	if (doc.title.indexOf("OAIster") != -1) {
 		return "multiple";
@@ -3300,17 +3300,21 @@ REPLACE INTO translators VALUES ('4afb932d-9211-4c0b-a31c-cfa984d62b66', '1.0.0b
 			item.itemType = "journalArticle";
 		} else if (itemType.match(/(T|t)hesis/)) {
 			item.itemType = "thesis";
+		} else if (itemType == "image") {
+			item.itemType = "artwork";
 		}
 		item.title = data[''Title''];
-		var authors = data[''Author/Creator''].split(/;/);
-		for each (var aut in authors) {
-			if (aut.match(/,/)) {
-				aut = aut.split(/,\s+/);
-				aut = aut[1] + " " + aut[0];
+		if (data[''Author/Creator'']) {
+			var authors = data[''Author/Creator''].split(/;/);
+			for each (var aut in authors) {
+				if (aut.match(/,/)) {
+					aut = aut.split(/,\s+/);
+					aut = aut[1] + " " + aut[0];
+				}
+				item.creators.push(Zotero.Utilities.cleanAuthor(aut, "author"));
 			}
-			item.creators.push(Zotero.Utilities.cleanAuthor(aut, "author"));
 		}
-		item.date = data[''Year''].match(/\d{4}\-\d{2}\-\d{2}/)[0];
+		item.date = data[''Year'']; //.match(/\d{4}\-\d{2}\-\d{2}/)[0];
 		item.url = data[''URL''];
 		if (data[''Note'']) item.abstractNote = Zotero.Utilities.trimInternal(data[''Note'']);
 		if (data[''Subject'']) {
