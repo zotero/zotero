@@ -21186,7 +21186,7 @@ function doExport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('9cb70025-a888-4a29-a210-93ec52da40d4', '1.0.0b4.r1', '', '2008-05-06 18:45:00', '1', '200', '3', 'BibTeX', 'Simon Kornblith', 'bib', 
+REPLACE INTO translators VALUES ('9cb70025-a888-4a29-a210-93ec52da40d4', '1.0.0b4.r1', '', '2008-05-20 06:00:00', '1', '200', '3', 'BibTeX', 'Simon Kornblith', 'bib', 
 'Zotero.configure("dataMode", "block");
 Zotero.addOption("UTF8", true);
 
@@ -21239,6 +21239,7 @@ var fieldMap = {
 var inputFieldMap = {
 	booktitle :"publicationTitle",
 	school:"publisher",
+	institution:"publisher",
 	publisher:"publisher"
 };
 
@@ -21264,7 +21265,8 @@ var zotero2bibtexTypeMap = {
 	"film":"misc",
 	"artwork":"misc",
 	"webpage":"misc",
-	"conferencePaper":"inproceedings"
+	"conferencePaper":"inproceedings",
+	"report":"techreport"
 };
 
 var bibtex2zoteroTypeMap = {
@@ -22283,7 +22285,8 @@ var reversemappingTable = {
     "\u2026":"{\\textellipsis}", // HORIZONTAL ELLIPSIS
     "\u2030":"{\\textperthousand}", // PER MILLE SIGN
     "\u2034":"''''''", // TRIPLE PRIME
-    "\u2036":"``", // REVERSED DOUBLE PRIME
+    "\u201D":"''''", // RIGHT DOUBLE QUOTATION MARK (could be a double prime)
+    "\u201C":"``", // LEFT DOUBLE QUOTATION MARK (could be a reversed double prime)
     "\u2037":"```", // REVERSED TRIPLE PRIME
     "\u2039":"{\\guilsinglleft}", // SINGLE LEFT-POINTING ANGLE QUOTATION MARK
     "\u203A":"{\\guilsinglright}", // SINGLE RIGHT-POINTING ANGLE QUOTATION MARK
@@ -23080,13 +23083,13 @@ function doExport() {
 				writeField(field, item[fieldMap[field]]);
 			}
 		}
-		
-		if(item.proceedingsTitle || item.conferenceName) {
-			writeField("booktitle", item.proceedingsTitle || item.conferenceName);
+
+		if(item.reportNumber || item.issue) {
+			writeField("number", item.reportNumber || item.issue);
 		}
 
 		if(item.publicationTitle) {
-			if(item.itemType == "chapter") {
+			if(item.itemType == "chapter" || item.itemType == "conferencePaper") {
 				writeField("booktitle", item.publicationTitle);
 			} else {
 				writeField("journal", item.publicationTitle);
@@ -23096,6 +23099,8 @@ function doExport() {
 		if(item.publisher) {
 			if(item.itemType == "thesis") {
 				writeField("school", item.publisher);
+			} else if(item.itemType =="report") {
+				writeField("institution", item.publisher);
 			} else {
 				writeField("publisher", item.publisher);
 			}
@@ -23151,7 +23156,7 @@ function doExport() {
 		}
 		
 		if(item.pages) {
-			writeField("pages", item.pages);
+			writeField("pages", item.pages.replace("-","--"));
 		}
 		
 		if(item.itemType == "webpage") {
