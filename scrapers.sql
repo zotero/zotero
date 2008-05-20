@@ -1149,7 +1149,7 @@ REPLACE INTO translators VALUES ('83538f48-906f-40ef-bdb3-e94f63676307', '1.0.0b
 	}, function() {Zotero.done;});
 }');
 
-REPLACE INTO translators VALUES ('d2416f31-4f24-4e18-8c66-06122af5bc2c', '1.0.0b4.r5', '', '2008-05-20 18:30:00', '0', '100', '4', 'Women in Judaism', 'Michael Berkowitz', 'http://jps.library.utoronto.ca/', 
+REPLACE INTO translators VALUES ('d2416f31-4f24-4e18-8c66-06122af5bc2c', '1.0.0b4.r5', '', '2008-05-20 19:10:00', '0', '100', '4', 'Women in Judaism', 'Michael Berkowitz', 'http://jps.library.utoronto.ca/', 
 'function detectWeb(doc, url) {
 	if (doc.evaluate(''//tr[td/a[2]]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
@@ -1222,7 +1222,7 @@ REPLACE INTO translators VALUES ('d2416f31-4f24-4e18-8c66-06122af5bc2c', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('4f62425a-c99f-4ce1-b7c1-5a3ac0d636a3', '1.0.0b4.r5', '', '2008-05-20 17:00:00', '0', '100', '4', 'AfroEuropa', 'Michael Berkowitz', 'http://journal.afroeuropa.eu/', 
+REPLACE INTO translators VALUES ('4f62425a-c99f-4ce1-b7c1-5a3ac0d636a3', '1.0.0b4.r5', '', '2008-05-20 19:10:00', '0', '100', '4', 'AfroEuropa', 'Michael Berkowitz', 'http://journal.afroeuropa.eu/', 
 'function detectWeb(doc, url) {
 	if (doc.evaluate(''//tr[td/a[2]]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
@@ -3251,7 +3251,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('4afb932d-9211-4c0b-a31c-cfa984d62b66', '1.0.0b4.r5', '', '2008-05-20 19:00:00', '1', '100', '4', 'OAIster', 'Michael Berkowitz', 'http://quod.lib.umich.edu/cgi/b/', 
+REPLACE INTO translators VALUES ('4afb932d-9211-4c0b-a31c-cfa984d62b66', '1.0.0b4.r5', '', '2008-05-20 19:10:00', '1', '100', '4', 'OAIster', 'Michael Berkowitz', 'http://quod.lib.umich.edu/cgi/b/', 
 'function detectWeb(doc, url) {
 	if (doc.title.indexOf("OAIster") != -1) {
 		return "multiple";
@@ -16773,7 +16773,7 @@ REPLACE INTO translators VALUES ('92d4ed84-8d0-4d3c-941f-d4b9124cfbb', '1.0.0b3.
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('7bdb79e-a47f-4e3d-b317-ccd5a0a74456', '1.0.0b3.r1', '', '2008-05-20 15:30:00', '1', '100', '4', 'Factiva', 'Simon Kornblith', 'https?://[^/]*global\.factiva\.com[^/]*/ha/default\.aspx$', 
+REPLACE INTO translators VALUES ('7bdb79e-a47f-4e3d-b317-ccd5a0a74456', '1.0.0b3.r1', '', '2008-05-20 19:10:00', '1', '100', '4', 'Factiva', 'Simon Kornblith', 'https?://[^/]*global\.factiva\.com[^/]*/ha/default\.aspx$', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
