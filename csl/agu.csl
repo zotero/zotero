@@ -37,7 +37,7 @@
   </macro>
   <macro name="author-short">
     <names variable="author">
-      <name form="short" and="symbol" delimiter=", " initialize-with=". "/>
+      <name form="short" and="text" delimiter=", " initialize-with=". "/>
       <substitute>
 	<names variable="editor"/>
 	<names variable="translator"/>
@@ -145,10 +145,10 @@
     <option name="disambiguate-add-names" value="true"/>
     <option name="disambiguate-add-givenname" value="false"/>
     <option name="collapse" value="year"/>
-    <layout prefix="(" suffix=")" delimiter="; ">
+    <layout prefix="[" suffix="]" delimiter="; ">
       <group delimiter=", ">
 	<group delimiter=", ">
-	  <text macro="author-short"/>
+	  <text macro="author-short" font-style="italic"/>
 	  <text macro="year-date"/>
 	</group>
 	<text variable="locator" prefix="p."/>
@@ -195,7 +195,7 @@
 	    <text variable="container-title" font-style="italic"/>
 	    <group prefix=", "  delimiter=", ">
 	      <group>
-		<text variable="volume" />
+		<text variable="volume" font-style="italic"/>
 		<text variable="issue" prefix="(" suffix=")"/>
 		<text macro="published-date"/>
 	      </group>
