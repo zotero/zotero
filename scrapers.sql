@@ -10889,7 +10889,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('add7c71c-21f3-ee14-d188-caf9da12728b', '1.0.0b3.r1', '', '2008-05-21 07:45:00', '1', '100', '4', 'Library Catalog (SIRSI)', 'Sean Takats', '/uhtbin/cgisirsi', 
+REPLACE INTO translators VALUES ('add7c71c-21f3-ee14-d188-caf9da12728b', '1.0.0b3.r1', '', '2008-05-21 11:39:30', '1', '100', '4', 'Library Catalog (SIRSI)', 'Sean Takats', '/uhtbin/cgisirsi', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -10993,7 +10993,7 @@ REPLACE INTO translators VALUES ('add7c71c-21f3-ee14-d188-caf9da12728b', '1.0.0b
 						authors.push(value);
 					}
 				} else if(field == "edition") {
-					newItem.tags = newItem.edition = value;
+					newItem.edition = value;
 				} else if(field == "subject term" || field == "corporate subject" || field == "geographic term" || field == "subject") {
 					var subjects = value.split("--");
 					for(var i=0; i<subjects.length; i++) {
