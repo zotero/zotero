@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-05-21 17:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-05-21 19:15:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1149,7 +1149,7 @@ REPLACE INTO translators VALUES ('83538f48-906f-40ef-bdb3-e94f63676307', '1.0.0b
 	}, function() {Zotero.done;});
 }');
 
-REPLACE INTO translators VALUES ('cdf8269c-86b9-4039-9bc4-9d998c67740e', '1.0.0b4.r5', '', '2008-05-21 16:00:00', '0', '100', '4', 'Verniana-Jules Verne Studies', 'Michael Berkowitz', 'http://jv.gilead.org.il/studies/', 
+REPLACE INTO translators VALUES ('cdf8269c-86b9-4039-9bc4-9d998c67740e', '1.0.0b4.r5', '', '2008-05-21 19:15:00', '0', '100', '4', 'Verniana-Jules Verne Studies', 'Michael Berkowitz', 'http://jv.gilead.org.il/studies/', 
 'function detectWeb(doc, url) {
 	if (url.match(/article\/view/)) {
 		return "journalArticle";
@@ -1220,7 +1220,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('b33af0e1-d122-45b2-b144-4b4eedd12d5d', '1.0.0b4.r5', '', '2008-05-20 21:30:00', '0', '100', '4', 'Wildlife Biology in Practice', 'Michael Berkowitz', 'http://www.socpvs.org/journals/index.php/wbp', 
+REPLACE INTO translators VALUES ('b33af0e1-d122-45b2-b144-4b4eedd12d5d', '1.0.0b4.r5', '', '2008-05-21 19:15:00', '0', '100', '4', 'Wildlife Biology in Practice', 'Michael Berkowitz', 'http://www.socpvs.org/journals/index.php/wbp', 
 'function detectWeb(doc, url) {
 	if (url.match(/showToc/) || url.match(/advancedResults/)) {
 		return "multiple";
@@ -7655,7 +7655,7 @@ REPLACE INTO translators VALUES ('b86bb082-6310-4772-a93c-913eaa3dfa1b', '1.0.0b
 	}
 }');
 
-REPLACE INTO translators VALUES ('d9be934c-edb9-490c-a88d-34e2ee106cd7', '1.0.0b4.r5', '', '2008-05-21 14:30:00', '0', '100', '4', 'Time.com', 'Michael Berkowitz', 'http://www.time.com/time/', 
+REPLACE INTO translators VALUES ('d9be934c-edb9-490c-a88d-34e2ee106cd7', '1.0.0b4.r5', '', '2008-05-21 19:15:00', '0', '100', '4', 'Time.com', 'Michael Berkowitz', 'http://www.time.com/time/', 
 'function detectWeb(doc, url) {
 	if (doc.title == "TIME Magazine - Search Results") {
 		return "multiple";
@@ -10771,7 +10771,7 @@ function doWeb(doc, url)	{
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '1.0.0b3.r1', '', '2008-05-21 17:30:00', '1', '200', '4', 'Library Catalog (InnoPAC)', 'Simon Kornblith and Michael Berkowitz', '(search~|search\?|(a|X|t|Y|w)\?|\?(searchtype|searchscope)|frameset&FF)', 
+REPLACE INTO translators VALUES ('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '1.0.0b3.r1', '', '2008-05-21 19:15:00', '1', '200', '4', 'Library Catalog (InnoPAC)', 'Simon Kornblith and Michael Berkowitz', '(search~|search\?|(a|X|t|Y|w)\?|\?(searchtype|searchscope)|frameset&FF)', 
 'function detectWeb(doc, url) {
 	// First, check to see if the URL alone reveals InnoPAC, since some sites don''t reveal the MARC button
 	var matchRegexp = new RegExp(''^https?://[^/]+/search[^/]*\\??/[^/]+/[^/]+/[0-9]+\%2C[^/]+/frameset(.+)$'');
@@ -10957,7 +10957,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('add7c71c-21f3-ee14-d188-caf9da12728b', '1.0.0b3.r1', '', '2008-05-21 11:39:30', '1', '100', '4', 'Library Catalog (SIRSI)', 'Sean Takats', '/uhtbin/cgisirsi', 
+REPLACE INTO translators VALUES ('add7c71c-21f3-ee14-d188-caf9da12728b', '1.0.0b3.r1', '', '2008-05-21 19:15:00', '1', '100', '4', 'Library Catalog (SIRSI)', 'Sean Takats', '/uhtbin/cgisirsi', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
