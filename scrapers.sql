@@ -10889,7 +10889,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('add7c71c-21f3-ee14-d188-caf9da12728b', '1.0.0b3.r1', '', '2007-03-25 00:50:00', '1', '100', '4', 'Library Catalog (SIRSI)', 'Sean Takats', '/uhtbin/cgisirsi', 
+REPLACE INTO translators VALUES ('add7c71c-21f3-ee14-d188-caf9da12728b', '1.0.0b3.r1', '', '2008-05-21 07:26:32', '1', '100', '4', 'Library Catalog (SIRSI)', 'Sean Takats', '/uhtbin/cgisirsi', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -10944,6 +10944,7 @@ REPLACE INTO translators VALUES ('add7c71c-21f3-ee14-d188-caf9da12728b', '1.0.0b
 	var newItem = new Zotero.Item("book");
 	newItem.extra = "";
 	
+	authors = [];
 	while(elmt) {
 		try {
 			var node = doc.evaluate(''./TD[1]/A[1]/text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
@@ -10972,21 +10973,40 @@ REPLACE INTO translators VALUES ('add7c71c-21f3-ee14-d188-caf9da12728b', '1.0.0b
 					var pubParts = value.split(" : ");
 					newItem.place = pubParts[0];
 				} else if(field == "personal author") {
-					newItem.creators.push(Zotero.Utilities.cleanAuthor(value, "author", true));
-				} else if(field == "author"){				 
-					newItem.creators.push(Zotero.Utilities.cleanAuthor(value, "author", true));
+					if(authors.indexOf(value) == -1) {
+						newItem.creators.push(Zotero.Utilities.cleanAuthor(value, "author", true));
+						authors.push(value);
+					}
+				} else if(field == "author"){		
+					if(authors.indexOf(value) == -1) { 
+						newItem.creators.push(Zotero.Utilities.cleanAuthor(value, "author", true));
+						authors.push(value);
+					}
 				} else if(field == "added author") {
-					newItem.creators.push(Zotero.Utilities.cleanAuthor(value, "contributor", true));
+					if(authors.indexOf(value) == -1) {
+						newItem.creators.push(Zotero.Utilities.cleanAuthor(value, "contributor", true));
+						authors.push(value);
+					}
 				} else if(field == "corporate author") {
-					newItem.creators.push({lastName:author, fieldMode:true});
+					if(authors.indexOf(value) == -1) {
+						newItem.creators.push({lastName:value, fieldMode:true});
+						authors.push(value);
+					}
 				} else if(field == "edition") {
 					newItem.tags = newItem.edition = value;
 				} else if(field == "subject term" || field == "corporate subject" || field == "geographic term" || field == "subject") {
 					var subjects = value.split("--");
-					newItem.tags = newItem.tags.concat(subjects);
+					for(var i=0; i<subjects.length; i++) {
+						if(newItem.tags.indexOf(subjects[i]) == -1) {
+							newItem.tags.push(subjects[i]);
+						}
+					}
 				} else if(field == "personal subject") {
 					var subjects = value.split(", ");
-					newItem.tags = newItem.tags.push(value[0]+", "+value[1]);
+					var tag = value[0]+", "+value[1];
+					if(newItems.tag.indexOf(tag) == -1) {
+						newItem.tags.push(tag);
+					}
 				} else if(value && field != "http") {
 					newItem.extra += casedField+": "+value+"\n";
 				}
