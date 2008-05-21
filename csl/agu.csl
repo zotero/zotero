@@ -142,7 +142,7 @@
     <option name="et-al-subsequent-min" value="3"/>
     <option name="et-al-subsequent-use-first" value="1"/>
     <option name="disambiguate-add-year-suffix" value="true"/>
-    <option name="disambiguate-add-names" value="true"/>
+    <option name="disambiguate-add-names" value="false"/>
     <option name="disambiguate-add-givenname" value="false"/>
     <option name="collapse" value="year"/>
     <layout prefix="[" suffix="]" delimiter="; ">
