@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-05-21 16:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-05-21 17:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -10771,10 +10771,10 @@ function doWeb(doc, url)	{
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '1.0.0b3.r1', '', '2008-05-15 00:30:00', '1', '200', '4', 'Library Catalog (InnoPAC)', 'Simon Kornblith and Michael Berkowitz', 'https?://[^/]+/(search(\*spi)?(\?|~(S[\d]+)?)?)\??/(a|X|t)?\??', 
+REPLACE INTO translators VALUES ('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '1.0.0b3.r1', '', '2008-05-21 17:30:00', '1', '200', '4', 'Library Catalog (InnoPAC)', 'Simon Kornblith and Michael Berkowitz', '(search~|search\?|(a|X|t|Y|w)\?|\?(searchtype|searchscope)|frameset&FF)', 
 'function detectWeb(doc, url) {
 	// First, check to see if the URL alone reveals InnoPAC, since some sites don''t reveal the MARC button
-	var matchRegexp = new RegExp(''^https?://[^/]+/search[^/]*\\??/[^/]+(/[^/]+/[0-9]+\%2C[^/]+/frameset(.+)$)?'');
+	var matchRegexp = new RegExp(''^https?://[^/]+/search[^/]*\\??/[^/]+/[^/]+/[0-9]+\%2C[^/]+/frameset(.+)$'');
 	if(matchRegexp.test(doc.location.href)) {
 		if (!url.match("SEARCH") && !url.match("searchtype")) {
 			return "book";
@@ -10919,12 +10919,10 @@ function doWeb(doc, url) {
 		var i = 0;
 		while(tableRow = tableRows.iterateNext()) {
 			// get link
-			var links = doc.evaluate(''.//span[@class="briefcitTitle"]/a'', tableRow,
-									 nsResolver, XPathResult.ANY_TYPE, null);
+			var links = doc.evaluate(''.//span[@class="briefcitTitle"]/a'', tableRow, nsResolver, XPathResult.ANY_TYPE, null);
 			var link = links.iterateNext();
 			if(!link) {
-				var links = doc.evaluate(".//a", tableRow, nsResolver, 
-										 XPathResult.ANY_TYPE, null);
+				var links = doc.evaluate(".//a", tableRow, nsResolver, XPathResult.ANY_TYPE, null);
 				link = links.iterateNext();
 			}
 			
@@ -10936,7 +10934,7 @@ function doWeb(doc, url) {
 				
 				// Go through links
 				while(link) {
-					availableItems[link.href] = link.textContent;
+					if (link.textContent.match(/\w+/)) availableItems[link.href] = link.textContent;
 					link = links.iterateNext();
 				}
 				i++;
