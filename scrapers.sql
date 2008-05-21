@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-05-20 21:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-05-21 14:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -7584,7 +7584,7 @@ REPLACE INTO translators VALUES ('b86bb082-6310-4772-a93c-913eaa3dfa1b', '1.0.0b
 	}
 }');
 
-REPLACE INTO translators VALUES ('d9be934c-edb9-490c-a88d-34e2ee106cd7', '1.0.0b4.r5', '', '2008-03-25 18:20:36', '0', '100', '4', 'Time.com', 'Michael Berkowitz', '^http://www.time.com/time/', 
+REPLACE INTO translators VALUES ('d9be934c-edb9-490c-a88d-34e2ee106cd7', '1.0.0b4.r5', '', '2008-05-21 14:30:00', '0', '100', '4', 'Time.com', 'Michael Berkowitz', 'http://www.time.com/time/', 
 'function detectWeb(doc, url) {
 	if (doc.title == "TIME Magazine - Search Results") {
 		return "multiple";
@@ -7607,7 +7607,7 @@ REPLACE INTO translators VALUES ('d9be934c-edb9-490c-a88d-34e2ee106cd7', '1.0.0b
 ', 
 'function associateMeta(newItem, metaTags, field, zoteroField) {
 	if (metaTags[field]) {
-		newItem[zoteroField] = metaTags[field];
+		newItem[zoteroField] = Zotero.Utilities.trimInternal(metaTags[field]);
 	}
 }
 
@@ -7616,7 +7616,6 @@ function scrape(doc, url) {
 	newItem.publicationTitle = "Time Magazine";
 	newItem.ISSN = "0040-718X";
 	newItem.url = doc.location.href;
-	
 	var metaTags = new Object();
 	
 	var metaTagHTML = doc.getElementsByTagName("meta")
@@ -7654,7 +7653,7 @@ function scrape(doc, url) {
 		 newItem.date = date.join(", ");
 	 }
 	if (metaTags["keywords"]) {
-		newItem.tags = Zotero.Utilities.cleanString(metaTags["keywords"]).split(", ");
+		newItem.tags = Zotero.Utilities.trimInternal(metaTags["keywords"]).split(", ");
 		for (var i in newItem.tags) {
 			if (newItem.tags[i] == "" || newItem.tags[i] == " ") {
 				break;
@@ -7672,12 +7671,12 @@ function scrape(doc, url) {
 	}
 	
 	if (metaTags["byline"]) {
-		var byline = Zotero.Utilities.cleanString(metaTags["byline"]);
+		var byline = Zotero.Utilities.trimInternal(metaTags["byline"]);
 		var byline1 = byline.split(" and ");
 		for (var i = 0 ; i < byline1.length ; i++) {
 			var byline2 = byline1[i].split("/");
 			for (var j = 0 ; j < byline2.length ; j++) {
-				byline2[j] = Zotero.Utilities.cleanString(byline2[j]);
+				byline2[j] = Zotero.Utilities.trimInternal(byline2[j]);
 				if (byline2[j].indexOf(" ") == -1) {
 					if (byline2[j].length == 2) {
 						newItem.extra = byline2[j];
@@ -7709,7 +7708,6 @@ function doWeb(doc, url) {
 	if (doc.title == "TIME Magazine - Search Results") {
 		var items = new Array();
 		var items = Zotero.Utilities.getItemArray(doc, doc.getElementById("search_results").getElementsByTagName("h3"), ''^http://www.time.com/time/.*\.html$'');
-		Zotero.debug(items);
 
 		items = Zotero.selectItems(items);
 	
@@ -7722,11 +7720,12 @@ function doWeb(doc, url) {
 				urls.push(i);
 			}
 		}
-		Zotero.Utilities.processDocuments(urls, scrape, function() { Zotero.done(); } );
 	} else if (doc.evaluate(''//meta[@name="byline"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext() || doc.evaluate(''//div[@class="byline"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext() || doc.evaluate(''//div[@class="copy"]/div[@class="byline"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext() ) {
-		scrape(doc, doc.location.href);
+		urls.push(doc.location.href);
 	}
-	
+	Zotero.Utilities.processDocuments(urls, function(newDoc) {
+		scrape(newDoc);
+	}, function() { Zotero.done; } );
 	Zotero.wait();
 }');
 
