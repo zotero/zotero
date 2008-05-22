@@ -723,7 +723,8 @@ Zotero.Utilities.HTTP.processDocuments = function(firstDoc, urls, processor, don
 	var urlIndex = -1;
 	
 	var removeListeners = function() {
-		hiddenBrowser.removeEventListener("load", onLoad, true);
+		var loadEvent = Zotero.isFx2 ? "load" : "pageshow";
+		hiddenBrowser.removeEventListener(loadEvent, onLoad, true);
 		if(!saveBrowser) {
 			Zotero.Browser.deleteHiddenBrowser(hiddenBrowser);
 		}

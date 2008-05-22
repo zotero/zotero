@@ -1706,6 +1706,7 @@ Zotero.Browser = new function() {
 		
 		// Create a hidden browser
 		var hiddenBrowser = win.document.createElement("browser");
+		hiddenBrowser.setAttribute('disablehistory', 'true');
 		win.document.documentElement.appendChild(hiddenBrowser);
 		Zotero.debug("created hidden browser ("
 			+ win.document.getElementsByTagName('browser').length + ")");
