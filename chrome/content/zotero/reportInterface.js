@@ -36,10 +36,10 @@ var Zotero_Report_Interface = new function() {
 		var id = ZoteroPane.getSelectedCollection(true);
 		var sortColumn = ZoteroPane.getSortField();
 		var sortDirection = ZoteroPane.getSortDirection();
-		
-		if (sortColumn != 'title' || sortDirection != 'ascending') {
+		// See note re: 'ascending'/'descending' for ItemTreeView.getSortDirection()
+		if (sortColumn != 'title' || sortDirection != 'descending') {
 			queryString = '?sort=' + sortColumn +
-				(sortDirection != 'ascending' ? '/d' : '');
+				(sortDirection != 'descending' ? '/d' : '');
 		}
 		
 		if (id) {

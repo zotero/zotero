@@ -142,6 +142,7 @@ function ChromeExtensionHandler() {
 				var includeAllChildItems = Zotero.Prefs.get('report.includeAllChildItems');
 				var combineChildItems = Zotero.Prefs.get('report.combineChildItems');
 				
+				var unhandledParents = {};
 				for (var i=0; i<results.length; i++) {
 					// Don't add child items directly
 					// (instead mark their parents for inclusion below)
@@ -155,11 +156,15 @@ function ChromeExtensionHandler() {
 						includeAllChildItems = false;
 					}
 					// If combining children or standalone note/attachment, add matching parents
-					else if (combineChildItems || !results[i].isRegularItem()) {
-						itemsHash[results[i].getID()] = items.length;
+					else if (combineChildItems || !results[i].isRegularItem()
+							|| results[i].numChildren() == 0) {
+						itemsHash[results[i].getID()] = [items.length];
 						items.push(results[i].toArray(2));
 						// Flag item as a search match
 						items[items.length - 1].reportSearchMatch = true;
+					}
+					else {
+						unhandledParents[i] = true;
 					}
 					searchItemIDs[results[i].getID()] = true;
 				}
@@ -186,11 +191,21 @@ function ChromeExtensionHandler() {
 						}
 					}
 				}
+				// If not including all children, add matching parents,
+				// in case they don't have any matching children below
+				else {
+					for (var i in unhandledParents) {
+						itemsHash[results[i].id] = [items.length];
+						items.push(results[i].toArray(2));
+						// Flag item as a search match
+						items[items.length - 1].reportSearchMatch = true;
+					}
+				}
 				
 				if (combineChildItems) {
 					// Add parents of matches if parents aren't matches themselves
 					for (var id in searchParentIDs) {
-						if (!searchItemIDs[id]) {
+						if (!searchItemIDs[id] && !itemsHash[id]) {
 							var item = Zotero.Items.get(id);
 							itemsHash[id] = items.length;
 							items.push(item.toArray(2));
@@ -290,51 +305,65 @@ function ChromeExtensionHandler() {
 					
 					// Multidimensional sort
 					do {
-						// Note and attachment sorting when combineChildItems is false
-						if (!combineChildItems && sorts[index].field == 'note') {
-							if (a.itemType == 'note' || a.itemType == 'attachment') {
-								var valA = a.note;
-							}
-							else if (a.reportChildren) {
-								var valA = a.reportChildren.notes[0].note;
-							}
-							else {
-								var valA = '';
-							}
-							
-							if (b.itemType == 'note' || b.itemType == 'attachment') {
-								var valB = b.note;
-							}
-							else if (b.reportChildren) {
-								var valB = b.reportChildren.notes[0].note;
-							}
-							else {
-								var valB = '';
+						// In combineChildItems, use note or attachment as item
+						if (!combineChildItems) {
+							if (a.reportChildren) {
+								if (a.reportChildren.notes.length) {
+									a = a.reportChildren.notes[0];
+								}
+								else {
+									a = a.reportChildren.attachments[0];
+								}
 							}
 							
-							// Put items without notes last
-							if (valA == '' && valB != '') {
-								var cmp = 1;
+							if (b.reportChildren) {
+								if (b.reportChildren.notes.length) {
+									b = b.reportChildren.notes[0];
+								}
+								else {
+									b = b.reportChildren.attachments[0];
+								}
 							}
-							else if (valA != '' && valB == '') {
-								var cmp = -1;
+						}
+						
+						var valA, valB;
+						
+						if (sorts[index].field == 'title') {
+							// For notes, use content for 'title'
+							if (a.itemType == 'note') {
+								valA = a.note;
 							}
 							else {
-								var cmp = collation.compareString(0, valA, valB);
+								valA = a.title; 
+							}
+							
+							if (b.itemType == 'note') {
+								valB = b.note;
+							}
+							else {
+								valB = b.title; 
 							}
 						}
 						else {
-							var cmp = collation.compareString(0,
-								a[sorts[index].field],
-								b[sorts[index].field]
-							);
+							var valA = a[sorts[index].field];
+							var valB = b[sorts[index].field];
 						}
 						
-						if (cmp == 0) {
-							continue;
+						// Put empty values last
+						if (!valA && valB) {
+							var cmp = 1;
+						}
+						else if (valA && !valB) {
+							var cmp = -1;
+						}
+						else {
+							var cmp = collation.compareString(0, valA, valB);
 						}
 						
-						var result = cmp * sorts[index].order;
+						var result = 0;
+						if (cmp != 0) {
+							result = cmp * sorts[index].order;
+						}
 						index++;
 					}
 					while (result == 0 && sorts[index]);
