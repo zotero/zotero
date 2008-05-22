@@ -3452,7 +3452,7 @@ Zotero.Collection.prototype.removeItems = function(itemIDs) {
 
 
 /*
- * Returns an array of child items of this collecetion as Zotero.Item instances,
+ * Returns an array of child items of this collection as Zotero.Item instances,
  * or FALSE if none
  */
 Zotero.Collection.prototype.getChildItems = function () {
@@ -3561,8 +3561,14 @@ Zotero.Collection.prototype.toArray = function() {
 Zotero.Collection.prototype._loadChildItems = function(){
 	this._childItems = new Zotero.Hash();
 	
-	var sql = "SELECT itemID FROM collectionItems WHERE collectionID=" + this._id;
-	var itemIDs = Zotero.DB.columnQuery(sql);
+	var sql = "SELECT itemID FROM collectionItems WHERE collectionID=? "
+		// DEBUG: Fix for child items created via context menu on parent within
+		// a collection being added to the current collection
+		+ "AND itemID NOT IN "
+			+ "(SELECT itemID FROM itemNotes WHERE sourceItemID IS NOT NULL) "
+		+ "AND itemID NOT IN "
+			+ "(SELECT itemID FROM itemAttachments WHERE sourceItemID IS NOT NULL)";
+	var itemIDs = Zotero.DB.columnQuery(sql, this._id);
 	
 	if (itemIDs){
 		for (var i=0; i<itemIDs.length; i++){
