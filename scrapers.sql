@@ -7991,7 +7991,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('6ec8008d-b206-4a4c-8d0a-8ef33807703b', '1.0.0b4.r5', '', '2007-08-27 02:00:00', '1', '100', '4', 'The Economist', 'Michael Berkowitz', '^http://(www.)?economist.com/', 
+REPLACE INTO translators VALUES ('6ec8008d-b206-4a4c-8d0a-8ef33807703b', '1.0.0b4.r5', '', '2008-05-22 20:30:00', '1', '100', '4', 'The Economist', 'Michael Berkowitz', '^http://(www.)?economist.com/', 
 'function detectWeb(doc, url) {
        if (doc.location.href.indexOf("search") != -1) {
                return "multiple";
@@ -8037,12 +8037,10 @@ REPLACE INTO translators VALUES ('6ec8008d-b206-4a4c-8d0a-8ef33807703b', '1.0.0b
                newItem.abstractNote = doc.evaluate(''//div[@id="content"]/div[@class="clear top-border"]/div[@class="col-left"]/h2'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
        } else if (doc.evaluate(''//div[@class="clear"][@id="pay-barrier"]/div[@class="col-left"]/div[@class="article"]/p/strong'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext() ) {
                newItem.abstractNote = doc.evaluate(''//div[@class="clear"][@id="pay-barrier"]/div[@class="col-left"]/div[@class="article"]/p/strong'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+       } else if (doc.evaluate(''//div[@id="content"]/div[@class="clear top-border"]/div[@class="col-left"]/p[3]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+       		newItem.abstractNote = doc.evaluate(''//div[@id="content"]/div[@class="clear top-border"]/div[@class="col-left"]/p[3]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
        }
-       
-       if (newItem.abstractNote[newItem.abstractNote.length - 1] != ".") {
-	       newItem.abstractNote += ".";
-       }
-
+       if (newItem.abstractNote) newItem.abstractNote = Zotero.Utilities.trimInternal(newItem.abstractNote);
        //get date and extra stuff
        if (doc.evaluate(''//div[@class="col-left"]/p[@class="info"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext() ) {
                newItem.date = doc.evaluate(''//div[@class="col-left"]/p[@class="info"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.substr(0,13);
@@ -8096,7 +8094,6 @@ function doWeb(doc, url) {
        Zotero.Utilities.processDocuments(urls, scrape, function() { Zotero.done(); });
        
        Zotero.wait();
-
 }');
 
 REPLACE INTO translators VALUES ('84bd421d-c6d1-4223-ab80-a156f98a8e30', '1.0.0b4.r1', '', '2007-07-31 16:45:00', '0', '100', '4', 'International Herald Tribune', 'Michael Berkowitz', '^http://(www.)?iht.com/',
