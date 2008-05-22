@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-05-21 21:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-05-22 15:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -15952,7 +15952,7 @@ REPLACE INTO translators VALUES ('fe728bc9-595a-4f03-98fc-766f1d8d0936', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('b6d0a7a-d076-48ae-b2f0-b6de28b194e', '1.0.0b3.r1', '', '2008-04-28 17:50:00', '1', '100', '4', 'ScienceDirect', 'Michael Berkowitz', 'https?://www\.sciencedirect\.com[^/]*/science(\/article)?\?(?:.+\&|)_ob=(?:ArticleURL|ArticleListURL|PublicationURL)', 
+REPLACE INTO translators VALUES ('b6d0a7a-d076-48ae-b2f0-b6de28b194e', '1.0.0b3.r1', '', '2008-05-22 15:30:00', '1', '100', '4', 'ScienceDirect', 'Michael Berkowitz', 'https?://www\.sciencedirect\.com[^/]*/science(\/article)?\?(?:.+\&|)_ob=(?:ArticleURL|ArticleListURL|PublicationURL)', 
 'function detectWeb(doc, url) {
 	if ((url.indexOf("_ob=DownloadURL") != -1) || doc.title == "ScienceDirect Login") {
 		return false;
@@ -16071,17 +16071,11 @@ REPLACE INTO translators VALUES ('b6d0a7a-d076-48ae-b2f0-b6de28b194e', '1.0.0b3.
 			var title = doc2.title.match(/^[^-]+\-([^:]+):(.*)$/);
 			item.title = Zotero.Utilities.trimInternal(title[2]);
 			item.publicationTitle = Zotero.Utilities.trimInternal(title[1]);
-			var voliss = Zotero.Utilities.trimInternal(doc2.evaluate(''//div[@class="pageText"][@id="sdBody"]/table/tbody/tr/td[1]'', doc2, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent).split(/,/);
-			if (voliss[3] && voliss[3].match(/[\-\d]+/)) {
-				item.volume = voliss[0].match(/\d+/)[0];
-				item.issue = voliss[1].match(/[\-\d]+/)[0];
-				item.date = Zotero.Utilities.trimInternal(voliss[2]);
-				item.pages = voliss[3].match(/[R\-\d]+/)[0];
-			} else if (voliss[2]) {
-				item.volume = voliss[0].match(/\d+/)[0];
-				item.date = Zotero.Utilities.trimInternal(voliss[1]);
-				item.pages = voliss[2].match(/[R\-\d]+/)[0];
-			}
+			voliss = doc2.evaluate(''//div[@class="pageText"][@id="sdBody"]/table/tbody/tr/td[1]'', doc2, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+			if (voliss.match(/Volume\s+\d+/)) item.volume = voliss.match(/Volume\s+(\d+)/)[1];
+			if (voliss.match(/Issues?\s+[^,]+/)) item.issue = voliss.match(/Issues?\s+([^,]+)/)[1];
+			if (voliss.match(/(J|F|M|A|S|O|N|D)\w+\s+\d{4}/)) item.date = voliss.match(/(J|F|M|A|S|O|N|D)\w+\s+\d{4}/)[0];
+			if (voliss.match(/Pages?\s+[^,^\s]+/)) item.pages = voliss.match(/Pages?\s+([^,^\s]+)/)[1];
 			item.DOI = doc2.evaluate(''//div[@class="articleHeaderInner"][@id="articleHeader"]/a[contains(text(), "doi")]'', doc2, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.substr(4);
 			var abspath = ''//div[@class="articleHeaderInner"][@id="articleHeader"]/div[@class="articleText"]/p'';
 			var absx = doc2.evaluate(abspath, doc2, nsResolver, XPathResult.ANY_TYPE, null);
