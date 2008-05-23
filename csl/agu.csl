@@ -16,7 +16,7 @@
   </info>
   <macro name="editor">
     <names variable="editor" delimiter=", ">
-      <label form="verb" prefix=" "  text-case="lowercase" suffix=" "/>
+      <label form="verb" text-case="lowercase" suffix=" "/>
       <name and="text" initialize-with=". " delimiter=", " name-as-sort-order="all"/>
     </names>
   </macro>
@@ -145,6 +145,10 @@
     <option name="disambiguate-add-names" value="false"/>
     <option name="disambiguate-add-givenname" value="false"/>
     <option name="collapse" value="year"/>
+    <sort>
+      <key macro="author"/>
+      <key macro="year-date"/>
+    </sort>
     <layout prefix="[" suffix="]" delimiter="; ">
       <group delimiter=", ">
 	<group delimiter=", ">
@@ -161,16 +165,17 @@
     <option name="et-al-use-first" value="1"/>
     <sort>
       <key macro="author"/>
+      <key macro="year-date"/>
       <key variable="title"/>
     </sort>
     <layout>
-      <group delimiter=" " suffix=", ">
+      <group delimiter=" " suffix=",">
 	<text macro="author" />
 	<text macro="year-date" prefix="(" suffix=")"/>
       </group>
       <choose>
 	<if type="book">
-	  <group delimiter=", " suffix=".">
+	  <group delimiter=", " prefix=" " suffix=".">
 	    <text macro="title"/>
 	    <text macro="edition"/>
 	    <text macro="editor" />
@@ -179,17 +184,17 @@
 	  </group>
 	</if>
 	<else-if type="chapter">
-	  <group delimiter=", " suffix=".">
-	    <text macro="title" prefix=" "/>
+	  <group delimiter=", " prefix=" " suffix=".">
+	    <text macro="title"/>
 	    <text macro="container"/>
 	    <text macro="refpages"/>
-	    <text macro="publisher" prefix=" "/>
+	    <text macro="publisher"/>
 	  </group>
 	</else-if>
 	<else>
-	  <group suffix=",">
-	    <text macro="title" prefix=" " />
-	    <text macro="editor" prefix=" "/>
+	  <group delimiter=", " suffix="," prefix=" ">
+	    <text macro="title"/>
+	    <text macro="editor"/>
 	  </group>
 	  <group class="container" prefix=" " suffix=".">
 	    <text variable="container-title" font-style="italic"/>
