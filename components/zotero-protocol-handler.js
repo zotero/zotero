@@ -343,6 +343,9 @@ function ChromeExtensionHandler() {
 							else {
 								valB = b.title; 
 							}
+							
+							valA = Zotero.Items.getSortTitle(valA);
+							valB = Zotero.Items.getSortTitle(valB);
 						}
 						else {
 							var valA = a[sorts[index].field];
