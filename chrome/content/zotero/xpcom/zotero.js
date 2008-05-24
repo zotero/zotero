@@ -217,6 +217,7 @@ var Zotero = new function(){
 			Zotero.DB.test();
 		}
 		catch (e) {
+			Components.utils.reportError(e);
 			this.skipLoading = true;
 			Zotero.DB.skipBackup = true;
 			return;
