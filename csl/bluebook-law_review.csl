@@ -31,6 +31,9 @@
     <names variable="author">
       <name form="short" and="text" delimiter=", " />
       <label form="verb-short" prefix=", " suffix="."/>
+      <substitute>
+	<text variable="title" form="short"/>
+      </substitute>
     </names>
   </macro>  
   <macro name="author">
