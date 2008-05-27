@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-05-27 14:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-05-27 15:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -4095,7 +4095,7 @@ REPLACE INTO translators VALUES ('a69deb08-47d9-46ad-afca-bc3a2499ad34', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('d921155f-0186-1684-615c-ca57682ced9b', '1.0.0b4.r1', '', '2008-05-15 18:30:00', '1', '100', '4', 'JSTOR', 'Simon Kornblith, Sean Takats and Michael Berkowitz', 'https?://[^/]*jstor\.org[^/]*/(action/(showArticle|doBasicSearch|doAdvancedSearch)|stable/|pss)', 
+REPLACE INTO translators VALUES ('d921155f-0186-1684-615c-ca57682ced9b', '1.0.0b4.r1', '', '2008-05-27 15:30:00', '1', '100', '4', 'JSTOR', 'Simon Kornblith, Sean Takats and Michael Berkowitz', 'https?://[^/]*jstor\.org[^/]*/(action/(showArticle|doBasicSearch|doAdvancedSearch)|stable/|pss|sici)', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -4134,8 +4134,8 @@ REPLACE INTO translators VALUES ('d921155f-0186-1684-615c-ca57682ced9b', '1.0.0b
 		var downloadString = "&noDoi=yesDoi&downloadFileName=deadbeef&suffix=" + jid;
 		var pdfYes = false;
 	} else {
-		if(elmts.iterateNext()) {
-				var jid;
+		if(elmt = elmts.iterateNext()) {
+			var jid;
 			var jidRe1 = new RegExp("doi=[0-9\.]+/([0-9]+)");
 			var jidRe2 = new RegExp("stable/view/([0-9]+)");
 			var jidRe3 = new RegExp("stable/([0-9]+)");
@@ -4149,7 +4149,7 @@ REPLACE INTO translators VALUES ('d921155f-0186-1684-615c-ca57682ced9b', '1.0.0b
 			} else if (jidmatch3) {
 				jid = jidmatch3[1];
 			} else {
-				return false;
+				jid = elmt.href.match(/jid=([0-9]+)/)[1];
 			}
 			var downloadString = "&noDoi=yesDoi&downloadFileName=deadbeef&suffix="+jid;
 		}
