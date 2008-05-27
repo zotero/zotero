@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-05-22 21:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-05-27 14:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -5359,9 +5359,9 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('9e306d5d-193f-44ae-9dd6-ace63bf47689', '1.0.0b3r1', '', '2008-03-28 16:30:00', '1', '100', '4', 'IngentaConnect', 'Michael Berkowitz', 'http://(www.)?ingentaconnect.com', 
+REPLACE INTO translators VALUES ('9e306d5d-193f-44ae-9dd6-ace63bf47689', '1.0.0b3r1', '', '2008-05-27 14:00:00', '1', '100', '4', 'IngentaConnect', 'Michael Berkowitz', 'http://(www.)?ingentaconnect.com', 
 'function detectWeb(doc, url) {
-	if (url.indexOf("article?") != -1 || url.indexOf("article;") != -1) {
+	if (url.indexOf("article?") != -1 || url.indexOf("article;") != -1 || url.indexOf("/art") != -1) {
 		return "journalArticle";
 	} else if (url.indexOf("search?") !=-1 || url.indexOf("search;") != -1) {
 		return "multiple";
@@ -5391,7 +5391,7 @@ REPLACE INTO translators VALUES ('9e306d5d-193f-44ae-9dd6-ace63bf47689', '1.0.0b
 		var key;
 		var keys = new Array();
 		while (key = keywords.iterateNext()) {
-			keys.push(key.textContent);
+			keys.push(Zotero.Utilities.capitalizeTitle(key.textContent));
 		}
 		Zotero.Utilities.HTTP.doGet(risurl, function(text) {
 			var translator = Zotero.loadTranslator("import");
