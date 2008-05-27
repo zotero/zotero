@@ -5,8 +5,8 @@
 <!ENTITY zotero.errorReport.submissionInProgress "Lütfen hata raporu gönderilene kadar bekleyiniz.">
 <!ENTITY zotero.errorReport.submitted "Hata raporu gönderilmiştir.">
 <!ENTITY zotero.errorReport.reportID "Rapor ID:">
-<!ENTITY zotero.errorReport.postToForums "Please post a message to the Zotero forums (forums.zotero.org) with this Report ID, a description of the problem, and any steps necessary to reproduce it.">
-<!ENTITY zotero.errorReport.notReviewed "Error reports are generally not reviewed unless referred to in the forums.">
+<!ENTITY zotero.errorReport.postToForums "Lütfen bu Rapor ile ilgili olarak Zotero forumlarına ileti gönderiniz, ayrıca iletinizde sorunun bir tanımı ve sorunu oluşturan adımları da yazınız.">
+<!ENTITY zotero.errorReport.notReviewed "Genellikle hata raporları forumlara gönderilmediği sürece incelenmez.">
 
 <!ENTITY zotero.upgrade.newVersionInstalled "Zotero&apos;nun yeni bir sürümünü kurdunuz.">
 <!ENTITY zotero.upgrade.upgradeRequired "Zotero veri tabanınız yeni sürüm ile birlikte çalışabilmesi için yükseltilmesi gerekir.">
@@ -35,12 +35,12 @@
 <!ENTITY zotero.items.date_column "Tarih">
 <!ENTITY zotero.items.year_column "Yıl">
 <!ENTITY zotero.items.publisher_column "Yayıncı">
-<!ENTITY zotero.items.publication_column "Publication">
-<!ENTITY zotero.items.journalAbbr_column "Journal Abbr">
+<!ENTITY zotero.items.publication_column "Yayın">
+<!ENTITY zotero.items.journalAbbr_column "Dergi Kısaltması">
 <!ENTITY zotero.items.language_column "Dil">
-<!ENTITY zotero.items.accessDate_column "Accessed">
+<!ENTITY zotero.items.accessDate_column "Erişildi">
 <!ENTITY zotero.items.callNumber_column "Yer Numarası">
-<!ENTITY zotero.items.repository_column "Havuz">
+<!ENTITY zotero.items.repository_column "Depo">
 <!ENTITY zotero.items.rights_column "Telif">
 <!ENTITY zotero.items.dateAdded_column "Eklendiği Tarih">
 <!ENTITY zotero.items.dateModified_column "Değiştirildiği Tarih">

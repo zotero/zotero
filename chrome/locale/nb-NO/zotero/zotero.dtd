@@ -5,8 +5,8 @@
 <!ENTITY zotero.errorReport.submissionInProgress "Vennligst vent mens feilrapporten blir levert.">
 <!ENTITY zotero.errorReport.submitted "Feilrapporten er levert.">
 <!ENTITY zotero.errorReport.reportID "Rapport-ID:">
-<!ENTITY zotero.errorReport.postToForums "Please post a message to the Zotero forums (forums.zotero.org) with this Report ID, a description of the problem, and any steps necessary to reproduce it.">
-<!ENTITY zotero.errorReport.notReviewed "Error reports are generally not reviewed unless referred to in the forums.">
+<!ENTITY zotero.errorReport.postToForums "Vennligst skriv en melding i Zotero-forumene (forums.zotero.org) med denne rapport-IDen, en beskrivelse av problemet og nødvendige steg for å reprodusere problemet.">
+<!ENTITY zotero.errorReport.notReviewed "Feilrapporter blir vanligvis ikke kommentert, dersom problemet ikke tas opp i forumene.">
 
 <!ENTITY zotero.upgrade.newVersionInstalled "Du ha installert en ny versjon av Zotero.">
 <!ENTITY zotero.upgrade.upgradeRequired "Zotero-databasen din må oppgraderes for å fungere med den nye versjonen.">
@@ -35,10 +35,10 @@
 <!ENTITY zotero.items.date_column "Dato">
 <!ENTITY zotero.items.year_column "År">
 <!ENTITY zotero.items.publisher_column "Utgiver">
-<!ENTITY zotero.items.publication_column "Publication">
-<!ENTITY zotero.items.journalAbbr_column "Journal Abbr">
+<!ENTITY zotero.items.publication_column "Publikasjon">
+<!ENTITY zotero.items.journalAbbr_column "Tidsskriftsforkortelse">
 <!ENTITY zotero.items.language_column "Språk">
-<!ENTITY zotero.items.accessDate_column "Accessed">
+<!ENTITY zotero.items.accessDate_column "Sist åpnet">
 <!ENTITY zotero.items.callNumber_column "Plass-signatur">
 <!ENTITY zotero.items.repository_column "Oppbevaringsplass">
 <!ENTITY zotero.items.rights_column "Rettigheter">

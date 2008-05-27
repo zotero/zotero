@@ -1,8 +1,8 @@
 <!ENTITY zotero.search.name "Ime:">
 
-<!ENTITY zotero.search.joinMode.prefix "Ujemanje z">
-<!ENTITY zotero.search.joinMode.any "katerimkoli">
-<!ENTITY zotero.search.joinMode.all "vsemi">
+<!ENTITY zotero.search.joinMode.prefix "Ujemanje">
+<!ENTITY zotero.search.joinMode.any "s katerimkoli">
+<!ENTITY zotero.search.joinMode.all "z vsemi">
 <!ENTITY zotero.search.joinMode.suffix "izmed naslednjih:">
 
 <!ENTITY zotero.search.recursive.label "Išči v podmapah">

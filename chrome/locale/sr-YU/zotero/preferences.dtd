@@ -53,7 +53,7 @@
 
 <!ENTITY zotero.preferences.quickCopy.caption "Брзо умножавање">
 <!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Подразумевани излазни формат:">
-<!ENTITY zotero.preferences.quickCopy.copyAsHTML "Copy as HTML">
+<!ENTITY zotero.preferences.quickCopy.copyAsHTML "Умножи у HTML облику">
 <!ENTITY zotero.preferences.quickCopy.macWarning "Белешка: Rich-text формат ће бити изгубљен на Mac OS X.">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Поставке нарочите за веб место:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Домен/путања">

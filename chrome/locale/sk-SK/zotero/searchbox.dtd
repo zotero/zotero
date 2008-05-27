@@ -1,0 +1,23 @@
+<!ENTITY zotero.search.name "Meno:">
+
+<!ENTITY zotero.search.joinMode.prefix "Zodpovedá">
+<!ENTITY zotero.search.joinMode.any "ktorémukoľvek">
+<!ENTITY zotero.search.joinMode.all "všetkým">
+<!ENTITY zotero.search.joinMode.suffix "z nasledujúcich pravidiel">
+
+<!ENTITY zotero.search.recursive.label "Hľadaj v podpriečinkoch">
+<!ENTITY zotero.search.noChildren "Zobrazuj iba položky z prvej úrovne">
+<!ENTITY zotero.search.includeParentsAndChildren "K nájdeným položkám zahrň aj všetky rodičovské a dcérske položky">
+
+<!ENTITY zotero.search.textModes.phrase "Výraz">
+<!ENTITY zotero.search.textModes.phraseBinary "Výraz (vrátane binárnych súborov)">
+<!ENTITY zotero.search.textModes.regexp "regulárny výraz">
+<!ENTITY zotero.search.textModes.regexpCS "regulárny výraz (rozliš. malé a veľké)">
+
+<!ENTITY zotero.search.date.units.days "dni">
+<!ENTITY zotero.search.date.units.months "mesiace">
+<!ENTITY zotero.search.date.units.years "roky">
+
+<!ENTITY zotero.search.search "Hľadaj">
+<!ENTITY zotero.search.clear "Vymaž">
+<!ENTITY zotero.search.saveSearch "Ulož vyhľadávanie">

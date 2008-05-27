@@ -5,8 +5,8 @@
 <!ENTITY zotero.errorReport.submissionInProgress "Čekejte, prosím, dokud nebude chybová zpráva podána.">
 <!ENTITY zotero.errorReport.submitted "Hlášení o chybách bylo odesláno.">
 <!ENTITY zotero.errorReport.reportID "ID hlášení:">
-<!ENTITY zotero.errorReport.postToForums "Please post a message to the Zotero forums (forums.zotero.org) with this Report ID, a description of the problem, and any steps necessary to reproduce it.">
-<!ENTITY zotero.errorReport.notReviewed "Error reports are generally not reviewed unless referred to in the forums.">
+<!ENTITY zotero.errorReport.postToForums "Prosím, napište zprávu do Zotero fóra (forums.zotero.org). Napište ID hlášení, popis problému a postupné kroky k jeho reprodukování.">
+<!ENTITY zotero.errorReport.notReviewed "Chybová hlášení nejsou zpracovávána, dokud nahlášena do fóra.">
 
 <!ENTITY zotero.upgrade.newVersionInstalled "Nainstalovali jste novou verzi Zotero.">
 <!ENTITY zotero.upgrade.upgradeRequired "Databáze vašeho Zotera musí být upgradeována, aby mohla pracovat s novou verzí.">
@@ -35,10 +35,10 @@
 <!ENTITY zotero.items.date_column "Datum">
 <!ENTITY zotero.items.year_column "Rok">
 <!ENTITY zotero.items.publisher_column "Vydavatel">
-<!ENTITY zotero.items.publication_column "Publication">
-<!ENTITY zotero.items.journalAbbr_column "Journal Abbr">
+<!ENTITY zotero.items.publication_column "Publikace">
+<!ENTITY zotero.items.journalAbbr_column "Zkratka časopisu">
 <!ENTITY zotero.items.language_column "Jazyk">
-<!ENTITY zotero.items.accessDate_column "Accessed">
+<!ENTITY zotero.items.accessDate_column "Přistoupeno">
 <!ENTITY zotero.items.callNumber_column "Signatura">
 <!ENTITY zotero.items.repository_column "Repozitář">
 <!ENTITY zotero.items.rights_column "Práva">

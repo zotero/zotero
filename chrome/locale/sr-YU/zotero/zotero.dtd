@@ -2,14 +2,11 @@
 <!ENTITY zotero.general.note "Белешка:">
 
 <!ENTITY zotero.errorReport.unrelatedMessages "Днвеник грешака може да садржи поруке невезане за Зотеро.">
-<!ENTITY zotero.errorReport.additionalInfo "Додатни подаци">
-<!ENTITY zotero.errorReport.emailAddress "Ваша ел. адреса:">
-<!ENTITY zotero.errorReport.errorSteps "Шта сте радили када је дошло до грешке? Ако је могуће, укључите кораке како доћи до грешке.">
 <!ENTITY zotero.errorReport.submissionInProgress "Сачекајте док се извештај о грешци шаље.">
 <!ENTITY zotero.errorReport.submitted "Извештај о грешци је послат.">
 <!ENTITY zotero.errorReport.reportID "Бр. извештаја:">
-<!ENTITY zotero.errorReport.furtherAssistance "Погледајте страницу Познати проблеми и форуме за даљу помоћ.">
-<!ENTITY zotero.errorReport.includeReportID "Укључите број извештаја са током било које преписке са програмерима Зотера у вези ове грешке.">
+<!ENTITY zotero.errorReport.postToForums "Оставите поруку на форуму за Зотеро (forums.zotero.org) са овим бројем извештаја, описом проблема и свим корацима потребним да се понови грешка.">
+<!ENTITY zotero.errorReport.notReviewed "Извештаји о грешкама се обично не прегледају, осим ако pomiǌu у форумима.">
 
 <!ENTITY zotero.upgrade.newVersionInstalled "Инсталирали сте нову верзију Зотера.">
 <!ENTITY zotero.upgrade.upgradeRequired "Ваша Зотеро база података мора бити надограђена да би радила са новом верзијом.">
@@ -38,7 +35,10 @@
 <!ENTITY zotero.items.date_column "Датум">
 <!ENTITY zotero.items.year_column "Година">
 <!ENTITY zotero.items.publisher_column "Издавач">
+<!ENTITY zotero.items.publication_column "Издање">
+<!ENTITY zotero.items.journalAbbr_column "Скраћеница за журнал">
 <!ENTITY zotero.items.language_column "Језик">
+<!ENTITY zotero.items.accessDate_column "Приступљено">
 <!ENTITY zotero.items.callNumber_column "Сигнатура">
 <!ENTITY zotero.items.repository_column "Ризница">
 <!ENTITY zotero.items.rights_column "Права">

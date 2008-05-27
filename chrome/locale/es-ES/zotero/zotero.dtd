@@ -5,8 +5,8 @@
 <!ENTITY zotero.errorReport.submissionInProgress "Por favor, espera mientras se envía el informe de error.">
 <!ENTITY zotero.errorReport.submitted "Se ha enviado el informe de error.">
 <!ENTITY zotero.errorReport.reportID "Identificador de informe:">
-<!ENTITY zotero.errorReport.postToForums "Please post a message to the Zotero forums (forums.zotero.org) with this Report ID, a description of the problem, and any steps necessary to reproduce it.">
-<!ENTITY zotero.errorReport.notReviewed "Error reports are generally not reviewed unless referred to in the forums.">
+<!ENTITY zotero.errorReport.postToForums "Envía un mensaje a los foros de Zotero (forums.zotero.org) con este identificador de informe, una descripción del problema, y los pasos necesarios para repetirlo.">
+<!ENTITY zotero.errorReport.notReviewed "Los informes de error, en general, no se revisan a menos que se los mencione en los foros.">
 
 <!ENTITY zotero.upgrade.newVersionInstalled "Has instalado una versión nueva de Zotero.">
 <!ENTITY zotero.upgrade.upgradeRequired "Tu base de datos de Zotero debe actualizarse para funcionar con la versión nueva.">
@@ -35,7 +35,7 @@
 <!ENTITY zotero.items.date_column "Fecha">
 <!ENTITY zotero.items.year_column "Año">
 <!ENTITY zotero.items.publisher_column "Editorial">
-<!ENTITY zotero.items.publication_column "Publication">
+<!ENTITY zotero.items.publication_column "Publicación">
 <!ENTITY zotero.items.journalAbbr_column "Abrev. de la revista">
 <!ENTITY zotero.items.language_column "Idioma">
 <!ENTITY zotero.items.accessDate_column "Visto">
