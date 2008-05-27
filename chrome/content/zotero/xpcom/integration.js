@@ -42,7 +42,7 @@ Zotero.Integration = new function() {
 		
 		try {
 			// bind to a random port on loopback only
-			serv.init(50001, true, -1);
+			serv.init(Zotero.Prefs.get('integration.port'), true, -1);
 			serv.asyncListen(Zotero.Integration.SocketListener);
 			
 			Zotero.debug("Integration HTTP server listening on 127.0.0.1:"+serv.port);
