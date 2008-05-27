@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-05-27 17:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-05-27 20:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -10978,7 +10978,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('add7c71c-21f3-ee14-d188-caf9da12728b', '1.0.0b3.r1', '', '2008-05-21 19:15:00', '1', '100', '4', 'Library Catalog (SIRSI)', 'Sean Takats', '/uhtbin/cgisirsi', 
+REPLACE INTO translators VALUES ('add7c71c-21f3-ee14-d188-caf9da12728b', '1.0.0b3.r1', '', '2008-05-27 20:00:00', '1', '100', '4', 'Library Catalog (SIRSI)', 'Sean Takats', '/uhtbin/cgisirsi', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -11055,14 +11055,16 @@ REPLACE INTO translators VALUES ('add7c71c-21f3-ee14-d188-caf9da12728b', '1.0.0b
 					var re = /^[0-9](?:[0-9X]+)/;
 					var m = re.exec(value);
 					newItem.ISBN = m[0];
-				} else if(field == "title") {
+				} else if(field == "title" || field == "título") {
 					var titleParts = value.split(" / ");
 					newItem.title = Zotero.Utilities.capitalizeTitle(titleParts[0]);
-				} else if(field == "publication info") {
+				} else if(field == "publication info" || field == "publicación") {
 					var pubParts = value.split(" : ");
 					newItem.place = pubParts[0];
-				} else if(field == "personal author") {
+					if (pubParts[1].match(/\d+/)) newItem.date = pubParts[1].match(/\d+/)[0];
+				} else if(field == "personal author" || field == "autor personal") {
 					if(authors.indexOf(value) == -1) {
+						value = value.replace(/(\(|\)|\d+|\-)/g, "");
 						newItem.creators.push(Zotero.Utilities.cleanAuthor(value, "author", true));
 						authors.push(value);
 					}
