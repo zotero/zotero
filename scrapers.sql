@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-05-27 20:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-05-28 16:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -17165,7 +17165,7 @@ function doWeb(doc, url){
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('82174f4f-8c13-403b-99b2-affc7bc7769b', '1.0.0b3.r1', '', '2008-03-20 20:00:00', '1', '100', '4', 'Cambridge Scientific Abstracts', 'Simon Kornblith and Michael Berkowitz', 'https?://[^/]+/ids70/(?:results.php|view_record.php)', 
+REPLACE INTO translators VALUES ('82174f4f-8c13-403b-99b2-affc7bc7769b', '1.0.0b3.r1', '', '2008-05-28 16:30:00', '1', '100', '4', 'Cambridge Scientific Abstracts', 'Simon Kornblith and Michael Berkowitz', 'https?://[^/]+/ids70/(?:results.php|view_record.php)', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -17243,16 +17243,14 @@ REPLACE INTO translators VALUES ('82174f4f-8c13-403b-99b2-affc7bc7769b', '1.0.0b
 		} else if(heading == "author") {
 			var authors = content.split("; ");
 			for each(var author in authors) {
-				newItem.creators.push(Zotero.Utilities.cleanAuthor(author, "author", true));
+				newItem.creators.push(Zotero.Utilities.cleanAuthor(author.replace(/\d+/g, ""), "author", true));
 			}
 		} else if(heading == "source") {
 			if(itemType == "journalArticle") {
 				var parts = content.split(/(,|;)/);
 				newItem.publicationTitle = parts.shift();
-				Zotero.debug(parts);
 				for each (var i in parts) {
 					if (i.match(/\d+/)) {
-						Zotero.debug(i);
 						if (i.match(/v(ol)?/)) {
 							newItem.volume = i.match(/\d+/)[0];
 						} else if (i.match(/pp/)) {
