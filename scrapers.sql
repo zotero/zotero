@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-05-28 17:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-05-28 18:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -10791,7 +10791,7 @@ function doWeb(doc, url)	{
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '1.0.0b3.r1', '', '2008-05-28 17:00:00', '1', '200', '4', 'Library Catalog (InnoPAC)', 'Simon Kornblith and Michael Berkowitz', '(search~|\/search\?|(a|X|t|Y|w)\?|\?(searchtype|searchscope)|frameset&FF)', 
+REPLACE INTO translators VALUES ('4fd6b89b-2316-2dc4-fd87-61a97dd941e8', '1.0.0b3.r1', '', '2008-05-28 18:30:00', '1', '200', '4', 'Library Catalog (InnoPAC)', 'Simon Kornblith and Michael Berkowitz', '(search~|\/search\?|(a|X|t|Y|w)\?|\?(searchtype|searchscope)|frameset&FF)', 
 'function detectWeb(doc, url) {
 	if (!url.match(/SEARCH=/) && !url.match(/searchargs?=/) && !url.match(/&FF/)) return false;
 	// First, check to see if the URL alone reveals InnoPAC, since some sites don''t reveal the MARC button
@@ -17165,7 +17165,7 @@ function doWeb(doc, url){
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('82174f4f-8c13-403b-99b2-affc7bc7769b', '1.0.0b3.r1', '', '2008-05-28 16:30:00', '1', '100', '4', 'Cambridge Scientific Abstracts', 'Simon Kornblith and Michael Berkowitz', 'https?://[^/]+/ids70/(?:results.php|view_record.php)', 
+REPLACE INTO translators VALUES ('82174f4f-8c13-403b-99b2-affc7bc7769b', '1.0.0b3.r1', '', '2008-05-28 18:30:00', '1', '100', '4', 'Cambridge Scientific Abstracts', 'Simon Kornblith and Michael Berkowitz', 'https?://[^/]+/ids70/(?:results.php|view_record.php)', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
