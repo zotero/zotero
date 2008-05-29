@@ -1089,11 +1089,11 @@ REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('83538f48-906f-40ef-bdb3-e94f63676307', '1.0.0b4.r5', '', '2008-05-09 23:15:00', '0', '100', '4', 'NAA RecordSearch', 'Tim Sherratt', 'http://naa12.naa.gov.au/scripts/', 
+REPLACE INTO translators VALUES ('83538f48-906f-40ef-bdb3-e94f63676307', '1.0.0b4.r5', '', '2008-05-29 17:00:00', '1', '100', '4', 'NAA RecordSearch', 'Tim Sherratt', 'http://naa12.naa.gov.au/scripts/', 
 'function detectWeb(doc, url) {
-    if (url.match("Items_listing")) {
+    if (url.match(/Items_listing.asp/i)) {
         return "multiple";
-    } else if (url.match("ItemDetail")) {
+    } else if (url.match(/ItemDetail.asp/i)) {
 	return "manuscript";
     }
 }', 
