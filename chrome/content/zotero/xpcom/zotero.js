@@ -526,11 +526,14 @@ var Zotero = new function(){
 				"No chrome package registered for chrome://communicator",
 				'[JavaScript Error: "Components is not defined" {file: "chrome://nightly/content/talkback/talkback.js',
 				'[JavaScript Error: "document.getElementById("sanitizeItem")',
-				'chrome://webclipper',
 				'No chrome package registered for chrome://piggy-bank',
 				'[JavaScript Error: "[Exception... "\'Component is not available\' when calling method: [nsIHandlerService::getTypeFromExtension',
 				'[JavaScript Error: "this._uiElement is null',
-				'Error: a._updateVisibleText is not a function'
+				'Error: a._updateVisibleText is not a function',
+				'[JavaScript Error: "Warning: unrecognized command line flag -psn',
+				'LibX:',
+				'function skype_',
+				'[JavaScript Error: "uncaught exception: Permission denied to call method Location.toString"]'
 			];
 			
 			for (var i=0; i<blacklist.length; i++) {
