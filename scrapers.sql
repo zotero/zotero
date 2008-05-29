@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-05-28 20:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-05-29 17:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -5479,7 +5479,7 @@ REPLACE INTO translators VALUES ('636c8ea6-2af7-4488-8ccd-ea280e4a7a98', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('3eabecf9-663a-4774-a3e6-0790d2732eed', '1.0.0b4.r5', '', '2008-05-15 00:30:00', '1', '100', '4', 'SciELO', 'Michael Berkowitz', 'http://(www.)?scielo.(org|br)/', 
+REPLACE INTO translators VALUES ('3eabecf9-663a-4774-a3e6-0790d2732eed', '1.0.0b4.r5', '', '2008-05-29 17:00:00', '1', '100', '4', 'SciELO', 'Michael Berkowitz', 'http://(www.)?scielo.(org|br)/', 
 'function detectWeb(doc, url) {
 	if (url.indexOf("wxis.exe") != -1) {
 		if (doc.evaluate(''//*[@class="isoref"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
@@ -5494,7 +5494,7 @@ REPLACE INTO translators VALUES ('3eabecf9-663a-4774-a3e6-0790d2732eed', '1.0.0b
 	}
 }', 
 'function makeURL(host, str) {
-	return ''http://'' + host + ''/scieloOrg/php/articleXML.php?pid='' + str.match(/pid=([^&]+)/)[1] + ''&lang=en'';
+	return ''http://www.scielo.br/scieloOrg/php/articleXML.php?pid='' + str.match(/pid=([^&]+)/)[1];
 }
 
 function doWeb(doc, url) {
