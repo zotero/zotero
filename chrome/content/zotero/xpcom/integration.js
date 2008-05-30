@@ -25,6 +25,8 @@ const API_VERSION = 5;
 Zotero.Integration = new function() {
 	var _contentLengthRe = /[\r\n]Content-Length: *([0-9]+)/i;
 	var _XMLRe = /<\?[^>]+\?>/;
+	var _onlineObserverRegistered;
+	
 	this.ns = "http://www.zotero.org/namespaces/SOAP";
 	
 	this.init = init;
@@ -35,11 +37,13 @@ Zotero.Integration = new function() {
 	 * initializes a very rudimentary web server used for SOAP RPC
 	 */
 	function init() {
-		// start listening on socket
-		var sock = Components.classes["@mozilla.org/network/server-socket;1"];
-		serv = sock.createInstance();
-		serv = serv.QueryInterface(Components.interfaces.nsIServerSocket);
+		if (Zotero.Utilities.HTTP.browserIsOffline()) {
+			throw ('Browser is offline -- not initializing integration HTTP server');
+		}
 		
+		// start listening on socket
+		var serv = Components.classes["@mozilla.org/network/server-socket;1"]
+					.createInstance(Components.interfaces.nsIServerSocket);
 		try {
 			// bind to a random port on loopback only
 			serv.init(Zotero.Prefs.get('integration.port'), true, -1);
@@ -47,8 +51,10 @@ Zotero.Integration = new function() {
 			
 			Zotero.debug("Integration HTTP server listening on 127.0.0.1:"+serv.port);
 		} catch(e) {
-			Zotero.debug("Not initializing integration HTTP");
+			Zotero.debug("Not initializing integration HTTP server");
 		}
+		
+		_registerOnlineObserver()
 	}
 	
 	/*
@@ -173,10 +179,34 @@ Zotero.Integration = new function() {
 		
 		return response;
 	}
+	
+	
+	function _registerOnlineObserver() {
+		if (_onlineObserverRegistered) {
+			return;
+		}
+		
+		// Observer to enable the integration when we go online
+		var observer = {
+			observe: function(subject, topic, data) {
+				if (data == 'online') {
+					Zotero.Integration.init();
+				}
+			}
+		};
+		
+		var observerService =
+			Components.classes["@mozilla.org/observer-service;1"]
+				.getService(Components.interfaces.nsIObserverService);
+		observerService.addObserver(observer, "network:offline-status-changed", false);
+		
+		_onlineObserverRegistered = true;
+	}
 }
 
 Zotero.Integration.SocketListener = new function() {
 	this.onSocketAccepted = onSocketAccepted;
+	this.onStopListening = onStopListening;
 	
 	/*
 	 * called when a socket is opened
@@ -191,6 +221,10 @@ Zotero.Integration.SocketListener = new function() {
 							 .createInstance(Components.interfaces.nsIInputStreamPump);
 		pump.init(iStream, -1, -1, 0, 0, false);
 		pump.asyncRead(dataListener, null);
+	}
+	
+	function onStopListening(serverSocket, status) {
+		Zotero.debug("Integration HTTP server going offline");
 	}
 }
 
