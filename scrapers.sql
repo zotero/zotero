@@ -1089,7 +1089,7 @@ REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('0aea3026-a246-4201-a4b5-265f75b9a6a7', '1.0.0b4.r5', '', '2008-05-29 17:30:00', '0', '100', '4', 'Australian Dictionary of Biography', 'Tim Sherratt and Michael Berkowitz', 'http://www.adb.online.anu.edu.au', 
+REPLACE INTO translators VALUES ('0aea3026-a246-4201-a4b5-265f75b9a6a7', '1.0.0b4.r5', '', '2008-05-30 08:00:00', '0', '100', '4', 'Australian Dictionary of Biography', 'Tim Sherratt and Michael Berkowitz', 'http://www.adb.online.anu.edu.au', 
 'function detectWeb(doc, url) {
     if (url.match(/adbp-ent_search|browse_people|browse_authors/)) {
         return "multiple";
@@ -1155,7 +1155,7 @@ REPLACE INTO translators VALUES ('0aea3026-a246-4201-a4b5-265f75b9a6a7', '1.0.0b
 	}, function() {Zotero.done;});
 }');
 
-REPLACE INTO translators VALUES ('83538f48-906f-40ef-bdb3-e94f63676307', '1.0.0b4.r5', '', '2008-05-29 17:00:00', '1', '100', '4', 'NAA RecordSearch', 'Tim Sherratt', 'http://naa12.naa.gov.au/scripts/', 
+REPLACE INTO translators VALUES ('83538f48-906f-40ef-bdb3-e94f63676307', '1.0.0b4.r5', '', '2008-05-30 08:00:00', '1', '100', '4', 'NAA RecordSearch', 'Tim Sherratt', 'http://naa12.naa.gov.au/scripts/', 
 'function detectWeb(doc, url) {
     if (url.match(/Items_listing.asp/i)) {
         return "multiple";
@@ -5425,7 +5425,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('9e306d5d-193f-44ae-9dd6-ace63bf47689', '1.0.0b3r1', '', '2008-05-28 20:00:00', '1', '100', '4', 'IngentaConnect', 'Michael Berkowitz', 'http://(www.)?ingentaconnect.com', 
+REPLACE INTO translators VALUES ('9e306d5d-193f-44ae-9dd6-ace63bf47689', '1.0.0b3r1', '', '2008-05-30 08:00:00', '1', '100', '4', 'IngentaConnect', 'Michael Berkowitz', 'http://(www.)?ingentaconnect.com', 
 'function detectWeb(doc, url) {
 	if (url.indexOf("article?") != -1 || url.indexOf("article;") != -1 || url.indexOf("/art") != -1) {
 		return "journalArticle";
@@ -5545,7 +5545,7 @@ REPLACE INTO translators VALUES ('636c8ea6-2af7-4488-8ccd-ea280e4a7a98', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('3eabecf9-663a-4774-a3e6-0790d2732eed', '1.0.0b4.r5', '', '2008-05-29 17:00:00', '1', '100', '4', 'SciELO', 'Michael Berkowitz', 'http://(www.)?scielo.(org|br)/', 
+REPLACE INTO translators VALUES ('3eabecf9-663a-4774-a3e6-0790d2732eed', '1.0.0b4.r5', '', '2008-05-30 08:00:00', '1', '100', '4', 'SciELO', 'Michael Berkowitz', 'http://(www.)?scielo.(org|br)/', 
 'function detectWeb(doc, url) {
 	if (url.indexOf("wxis.exe") != -1) {
 		if (doc.evaluate(''//*[@class="isoref"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
