@@ -38,7 +38,9 @@ Zotero.Integration = new function() {
 	 */
 	function init() {
 		if (Zotero.Utilities.HTTP.browserIsOffline()) {
-			throw ('Browser is offline -- not initializing integration HTTP server');
+			Zotero.debug('Browser is offline -- not initializing integration HTTP server');
+			_registerOnlineObserver()
+			return;
 		}
 		
 		// start listening on socket
