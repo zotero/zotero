@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?oxygen RNGSchema="file:/C:/Dokumente%20und%20Einstellungen/Administrator/Desktop/csl.rnc" type="compact"?>
+<?oxygen RNGSchema="http://xbiblio.svn.sourceforge.net/viewvc/*checkout*/xbiblio/csl/schema/trunk/csl.rnc" type="compact"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="in-text" xml:lang="en">
     <info>
         <title>DIN 1505-2 (author-date)</title>
@@ -15,10 +15,12 @@
         <category term="generic-base"/>
         <category term="author-date"/>
         <updated>2007-12-31T11:11:11+00:00</updated>
-        <summary>Style oriented by DIN 1505-2, for other media types on additional
-        standards</summary>
-        <link href="http://www.bui.haw-hamburg.de/pers/klaus.lorenzen/ASP/litverz.pdf" rel="documentation"/>
-        <link href="http://www.uni-muenster.de/imperia/md/content/fachbereich_physik/didaktik_physik/materialien/materialschlichting/zitierregeln.pdf" rel="documentation"/>
+        <summary>Style oriented by DIN 1505-2, for other media types on additional standards</summary>
+        <link href="http://www.bui.haw-hamburg.de/pers/klaus.lorenzen/ASP/litverz.pdf"
+            rel="documentation"/>
+        <link
+            href="http://www.uni-muenster.de/imperia/md/content/fachbereich_physik/didaktik_physik/materialien/materialschlichting/zitierregeln.pdf"
+            rel="documentation"/>
         <link href="http://forums.zotero.org/discussion/1857"/>
         <!--        this is just a beginning to try to have a DIN 1505 citation style,
             since i am not a pro, the xml coding style may not be ideal :-) 
@@ -38,13 +40,10 @@
             * thesis type does notoffer a PLACE or FACULTY as variable! 
             how to show the place if it is not included in the University title!?!?
             * thesis type: publisher (university), genre (type) dont seem to get through!?
-
         -->
-        
     </info>
-
-    <macro name="author" >
-        <names variable="author composer series-editor" delimiter=" ; ">
+    <macro name="author">
+        <names variable="author composer collection-editor" delimiter=" ; ">
             <name name-as-sort-order="all" sort-separator=", " initialize-with=". " delimiter=" ; "
                 delimiter-precedes-last="always" font-variant="small-caps"/>
             <label form="short" prefix=" (" suffix=".)"/>
@@ -58,7 +57,7 @@
             <label form="short" prefix=" (" suffix=".)"/>
         </names>
     </macro>
-<!--
+    <!--
     <macro name="contributor">
         <names variable="contributor " delimiter=" ; ">
             <name name-as-sort-order="all" sort-separator=", " initialize-with=". " delimiter=" ; "
@@ -138,8 +137,8 @@
             <text term="edition" form="short" plural="false"/>
         </group>
     </macro>
-    
-<!--    sadly "scale" doesnt seem to exist!?!?!?
+
+    <!--    sadly "scale" doesnt seem to exist!?!?!?
     <macro name="scale"> 
         <group>
             <text term="scale"/>
@@ -173,7 +172,7 @@
             </group>
         </layout>
     </citation>
-    
+
     <bibliography>
         <option name="hanging-indent" value="true"/>
         <option name="et-al-min" value="9"/>
@@ -183,11 +182,11 @@
             <key variable="issued"/>
         </sort>
         <layout>
-          
+
             <group delimiter=" ; " suffix=": ">
                 <text macro="author"/>
                 <text macro="editor"/>
-<!--                <text macro="contributor"/> -->
+                <!--                <text macro="contributor"/> -->
                 <text macro="translator"/>
             </group>
             <choose>
@@ -206,7 +205,7 @@
                     </date>
                     <!-- " (1. Gesamttitel mit Zählung)"
                     " (2. Gesamttitel mit Zählung)" -->
- <!--             <text prefix=" &#8211;&#160;" macro="scale"/> -->
+                    <!--             <text prefix=" &#8211;&#160;" macro="scale"/> -->
                     <text prefix=".  &#8211;&#160;" variable="note"/>
                     <text prefix=" &#8211; ISBN&#160;" variable="ISBN"/>
                 </if>
@@ -232,7 +231,8 @@
                     <text prefix=" &#8211; ISBN&#160;" variable="ISBN"/>
                     <group prefix=", ">
                         <label variable="page" form="short" include-period="false"
-                            suffix="&#160;"/> <!--  but it should be include-period="true"-->
+                            suffix="&#160;"/>
+                        <!--  but it should be include-period="true"-->
                         <text variable="page"/>
                     </group>
                 </else-if>
@@ -244,25 +244,26 @@
                     <text prefix=". " macro="edition"/>
                     <text prefix=". " variable="publisher-place"/>
                     <text prefix=", " variable="publisher" form="long"/>
-<!--                    <text prefix=", " variable="faculty"/> -->
+                    <!--                    <text prefix=", " variable="faculty"/> -->
                     <text prefix=", " variable="genre" form="short"/>
                     <date prefix=", " variable="issued">
                         <date-part name="year"/>
                     </date>
                     <text prefix=".  &#8211;&#160;" variable="note"/>
                 </else-if>
-                
+
                 <else-if type="webpage">
                     <text prefix=" " macro="title" suffix=". " font-style="italic"/>
                     <text prefix="URL " variable="URL" suffix=""/>
                     <text prefix=". - " macro="access"/>
-                    <text prefix=". -&#160;" variable="container-title"/>  
+                    <text prefix=". -&#160;" variable="container-title"/>
                     <text prefix=".  &#8211;&#160;" variable="note"/>
                 </else-if>
-                
+
                 <!-- Tabelle 2 aus litverz.ps  UND -->
                 <!-- Tabelle 4 aus litverz.ps - Schriften von Tagungen, Konferenzen, Symposien, ...-->
-                <else-if type=" article article-journal article-magazine article-newspaper" match="any">
+                <else-if type=" article article-journal article-magazine article-newspaper"
+                    match="any">
                     <text prefix="" variable="title"/>
                     <!-- " : Zusatz zum Sachtitel"
                         ". Angabe des Teils"
@@ -281,15 +282,16 @@
                     </date>
                     <text prefix=", Nr.&#160;" variable="issue"/>
                     <group prefix=", ">
-                        <label variable="page" form="short" include-period="false" suffix="&#160;"/>
+                        <label variable="page" form="short" include-period="false"
+                            suffix="&#160;"/>
                         <!--  but logically it should be include-period="true"-->
                         <text variable="page"/>
                     </group>
                     <text prefix=".  &#8211;&#160;" variable="note"/>
                     <text prefix=" &#8211; ISBN&#160;" variable="ISBN"/>
                 </else-if>
-                
-                    <!-- keiner der oben genannten fälle -->
+
+                <!-- keiner der oben genannten fälle -->
                 <else>
                     <group suffix=".">
                         <text macro="title" prefix=" "/>
@@ -304,8 +306,6 @@
                         <text variable="page" prefix=", "/>
                     </group>
                 </else>
-
-
             </choose>
 
         </layout>
