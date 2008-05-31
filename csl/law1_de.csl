@@ -160,7 +160,7 @@
                 <text variable="title" font-style="italic"/>
             </else-if>
             <else>
-                <text variable="title" quotes="true"/>
+                <text variable="title" prefix="&#8222;" suffix="&#8220;"/>
             </else>
         </choose>
     </macro>
@@ -183,7 +183,7 @@
                 <text variable="title" form="short" font-style="italic"/>
             </else-if>
             <else>
-                <text variable="title" form="short" quotes="true"/>
+                <text variable="title" form="short" prefix="&#8222;" suffix="&#8220;"/>
             </else>
         </choose>
     </macro>
@@ -284,8 +284,8 @@
         <choose>
             <if type="graphic report" match="any">
                 <date variable="issued">
-                    <date-part name="month" suffix=" "/>
-                    <date-part name="day" suffix=", "/>
+                    <date-part name="day" suffix="."/>
+                    <date-part name="month" suffix="."/>
                     <date-part name="year"/>
                 </date>
             </if>
@@ -296,8 +296,8 @@
             </else-if>
             <else>
                 <date variable="issued">
-                    <date-part name="month" suffix=" "/>
-                    <date-part name="day" suffix=", "/>
+                    <date-part name="day" suffix="."/>
+                    <date-part name="month" suffix="."/>
                     <date-part name="year"/>
                 </date>
             </else>
@@ -380,7 +380,7 @@
                 </else-if>
             </choose>
             <text variable="DOI" prefix="doi:"/>
-            <text variable="URL"/>
+            <text variable="URL" prefix="&lt;" suffix="&gt;"/>
         </group>
     </macro>
     <macro name="sort-key">
@@ -395,7 +395,7 @@
         <option name="et-al-subsequent-use-first" value="1"/>
         <option name="disambiguate-add-names" value="true"/>
         <layout prefix="" suffix="." delimiter="; ">
-            <choose>
+<!--            <choose>
                 <if position="ibid-with-locator">
                     <group delimiter=", ">
                         <text term="ibid"  suffix="."/>
@@ -405,14 +405,14 @@
                 <else-if position="ibid">
                     <text term="ibid"  suffix="."/>
                 </else-if>
-                <else>
+                <else>-->
                     <group delimiter=", ">
                         <text macro="contributors-short"/>
                         <text macro="title-short"/>
                         <text macro="point-locators-subsequent"/>
                     </group>
-                </else>
-            </choose>
+<!--                </else>-->
+<!--            </choose>-->
         </layout>
     </citation>
     <bibliography>
