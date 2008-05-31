@@ -281,7 +281,7 @@ var Zotero_Citation_Dialog = new function () {
 	 * Ask whether to modfiy the preview
 	 */
 	function confirmRegenerate(focusShifted) {
-		if(document.getElementById('editor').value == _originalHTML) {
+		if(document.getElementById('editor').value == _originalHTML || _originalHTML === undefined) {
 			// no changes; just update without asking
 			_updatePreview();
 			return;
