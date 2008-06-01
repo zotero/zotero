@@ -157,7 +157,7 @@
                 </choose>
             </if>
             <else-if type="book">
-                <text variable="title" font-style="italic"/>
+                <text variable="title"/>
             </else-if>
             <else>
                 <text variable="title" prefix="&#8222;" suffix="&#8220;"/>
@@ -380,7 +380,15 @@
                 </else-if>
             </choose>
             <text variable="DOI" prefix="doi:"/>
-            <text variable="URL" prefix="&lt;" suffix="&gt;"/>
+            <group>
+                <text variable="URL" prefix="&lt;" suffix="&gt;"/>
+                <text term="retrieved" prefix=", " suffix=" "/>
+                <date variable="accessed">
+                    <date-part name="day" form="numeric-leading-zeros" suffix="."/>
+                    <date-part name="month" form="numeric-leading-zeros" suffix="."/>
+                    <date-part name="year" form="long"/>
+                </date>
+            </group>
         </group>
     </macro>
     <macro name="sort-key">
