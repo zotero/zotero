@@ -25,7 +25,6 @@
  * this class handles pulling the CSL file and item data out of the database,
  * while CSL, below, handles the actual generation of the bibliography
  */
-default xml namespace = "http://purl.org/net/xbiblio/csl";
 
 /*
  * CSL: a class for creating bibliographies from CSL files
@@ -33,6 +32,8 @@ default xml namespace = "http://purl.org/net/xbiblio/csl";
  * want to use the Scholar data model, but does want to use CSL in JavaScript
  */
 Zotero.CSL.Compat = function(csl) {
+	default xml namespace = "http://purl.org/net/xbiblio/csl";
+	
 	this._csl = new XML(Zotero.CSL.Compat.Global.cleanXML(csl));
 	
 	// initialize CSL
@@ -69,6 +70,8 @@ Zotero.CSL.Compat = function(csl) {
 
 
 Zotero.CSL.Compat.Global = new function() {
+	default xml namespace = "http://purl.org/net/xbiblio/csl";
+	
 	// for elements that inherit defaults from each other
 	this.inherit = {
 		author:"contributor",
@@ -125,8 +128,6 @@ Zotero.CSL.Compat.Global = new function() {
 		}
 	};
 	
-	
-
 	this.ns = "http://purl.org/net/xbiblio/csl";
 
 	/*
