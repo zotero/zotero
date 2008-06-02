@@ -25,9 +25,9 @@
  * this class handles pulling the CSL file and item data out of the database,
  * while CSL, below, handles the actual generation of the bibliography
  */
-default xml namespace = "http://purl.org/net/xbiblio/csl";
-
 Zotero.Cite = new function() {
+	default xml namespace = "http://purl.org/net/xbiblio/csl";
+	
 	var _lastCSL = null;
 	var _lastStyle = null;
 	
@@ -277,6 +277,8 @@ Zotero.Cite.MIMEHandler.StreamListener.prototype.onStopRequest = function(channe
  * want to use the Scholar data model, but does want to use CSL in JavaScript
  */
 Zotero.CSL = function(csl) {
+	default xml namespace = "http://purl.org/net/xbiblio/csl";
+	
 	this._csl = new XML(Zotero.CSL.Global.cleanXML(csl));
 	
 	// initialize CSL
@@ -1547,6 +1549,7 @@ Zotero.CSL.Global = new function() {
 	this.cleanXML = cleanXML;
 	this.parseLocales = parseLocales;
 	
+	default xml namespace = "http://purl.org/net/xbiblio/csl";
 	this.ns = "http://purl.org/net/xbiblio/csl";
 	
 	this.__defineGetter__("locale", function() {
@@ -1890,6 +1893,8 @@ Zotero.CSL.Citation.prototype.clone = function() {
  * with "_") are implemented.
  */
 Zotero.CSL.Item = function(item) {
+	default xml namespace = "http://purl.org/net/xbiblio/csl";
+	
 	if(item instanceof Zotero.Item) {
 		this.zoteroItem = item;
 	} else if(parseInt(item, 10) == item) {
@@ -2339,6 +2344,8 @@ Zotero.CSL.Item.Name.prototype.getNameVariable = function(variable) {
  * in an item wrapper.
  */
 Zotero.CSL.ItemSet = function(items, csl) {
+	default xml namespace = "http://purl.org/net/xbiblio/csl";
+	
 	this.csl = csl;
 	
 	this.citation = csl._csl.citation;
@@ -2714,6 +2721,8 @@ Zotero.CSL.ItemSet.prototype._copyDisambiguation = function(fromItem, toItem) {
 }
 
 Zotero.CSL.FormattedString = function(context, format, delimiter, subsequent) {
+	default xml namespace = "http://purl.org/net/xbiblio/csl";
+	
 	this.context = context;
 	this.option = context ? context.option : new XMLList();
 	this.format = format;
@@ -3036,6 +3045,8 @@ Zotero.CSL.FormattedString.prototype.clone = function(delimiter) {
  * Implementation of FormattedString for sort purposes.
  */
 Zotero.CSL.SortString = function() {
+	default xml namespace = "http://purl.org/net/xbiblio/csl";
+	
 	this.format = "Sort";
 	this.string = [];
 }
