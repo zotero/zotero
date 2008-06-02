@@ -302,7 +302,18 @@
 			
 			<vbox id="zotero-item-pane" persist="width">
 				<toolbar align="right">
-					<toolbarbutton tooltiptext="Sync with Zotero Server" image="chrome://zotero/skin/arrow_refresh.png" oncommand="Zotero.Sync.Server.sync()"/>
+					<toolbarbutton
+							id="zotero-tb-sync"
+							image="chrome://zotero/skin/arrow_refresh.png"
+							tooltip="_child"
+							oncommand="Zotero.Sync.Server.sync()">
+						<tooltip
+								onpopupshowing="this.firstChild.nextSibling.value = 'Last sync: ' + (Zotero.Sync.Server.lastLocalSyncTime ? new Date(Zotero.Sync.Server.lastLocalSyncTime * 1000).toLocaleString() : 'Not yet synced')"
+								noautohide="true"><!-- localize -->
+							<label value="Sync with Zotero Server"/>
+							<label id="zotero-last-sync-time"/>
+						</tooltip>
+					</toolbarbutton>
 					<toolbarseparator/>
 					<toolbarbutton id="zotero-tb-fullscreen" tooltiptext="&zotero.toolbar.fullscreen.tooltip;" oncommand="ZoteroPane.fullScreen();"/>
 					<toolbarbutton class="tabs-closebutton" oncommand="ZoteroPane.toggleDisplay()"/>

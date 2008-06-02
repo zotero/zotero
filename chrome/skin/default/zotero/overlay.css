@@ -191,6 +191,11 @@
 	list-style-image: url('chrome://zotero/skin/toolbar-advanced-search.png');
 }
 
+#zotero-tb-sync #zotero-last-sync-time
+{
+	color: gray;
+}
+
 #zotero-tb-fullscreen
 {
 	list-style-image: url('chrome://zotero/skin/toolbar-fullscreen-bottom.png');

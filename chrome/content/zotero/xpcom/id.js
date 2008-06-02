@@ -32,6 +32,11 @@ Zotero.ID = new function () {
 	 * Gets an unused primary key id for a DB table
 	 */
 	function get(table, notNull, skip) {
+		// Used in sync.js
+		if (table == 'searches') {
+			table = 'savedSearches';
+		}
+		
 		switch (table) {
 			// Autoincrement tables
 			//
