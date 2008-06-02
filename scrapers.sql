@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-06-01 17:20:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-06-02 19:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -6211,7 +6211,7 @@ function doWeb(doc, url) {
 
 }');
 
-REPLACE INTO translators VALUES ('e4660e05-a935-43ec-8eec-df0347362e4c', '1.0.0b4.r1', '', '2007-07-31 16:45:00', '0', '100', '4', 'ERIC', 'Ramesh Srigiriraju', '^http://(?:www\.)?eric\.ed\.gov/', 
+REPLACE INTO translators VALUES ('e4660e05-a935-43ec-8eec-df0347362e4c', '1.0.0b4.r1', '', '2008-06-02 19:30:00', '0', '100', '4', 'ERIC', 'Ramesh Srigiriraju', '^http://(?:www\.)?eric\.ed\.gov/', 
 'function detectWeb(doc, url)	{
 	var namespace=doc.documentElement.namespaceURI;
 	var nsResolver=namespace?function(prefix)	{
@@ -6287,14 +6287,9 @@ REPLACE INTO translators VALUES ('e4660e05-a935-43ec-8eec-df0347362e4c', '1.0.0b
 	if(doc.evaluate(singpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext())	{
 		var idpath=''//input[@type="hidden"][@name="accno"]/@value'';
 		var idpath2=''//meta[@name="eric #"]/@content'';
-		var id;
-		var temp=doc.evaluate(idpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-		if(temp)
-			id=temp.nodeValue;
-		else
-			id=doc.evaluate(idpath2, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
+		var id = url.match(/accno=([^&]+)/)[1];
 		var string="http://eric.ed.gov/ERICWebPortal/custom/portlets/clipboard/performExport.jsp?accno=";
-		string+=id+"&texttype=endnote&citationtype=brief&Download.x=86&Download.y=14";
+		string+= id+"&texttype=endnote&citationtype=brief&Download.x=86&Download.y=14";
 		Zotero.Utilities.HTTP.doGet(string, function(text)	{
 			var trans=Zotero.loadTranslator("import");
 			trans.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
