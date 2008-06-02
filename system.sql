@@ -30,7 +30,7 @@ CREATE TABLE fields (
     fieldID INTEGER PRIMARY KEY,
     fieldName TEXT,
     fieldFormatID INT,
-    FOREIGN KEY (fieldFormatID) REFERENCES fieldFormat(fieldFormatID)
+    FOREIGN KEY (fieldFormatID) REFERENCES fieldFormats(fieldFormatID)
 );
 
 -- Defines valid fields for each itemType, their display order, and their default visibility
@@ -1248,4 +1248,4 @@ INSERT INTO "charsets" VALUES(168, 'x0212');
 INSERT INTO "syncObjectTypes" VALUES(1, 'collection');
 INSERT INTO "syncObjectTypes" VALUES(2, 'creator');
 INSERT INTO "syncObjectTypes" VALUES(3, 'item');
-INSERT INTO "syncObjectTypes" VALUES(4, 'savedSearch');
+INSERT INTO "syncObjectTypes" VALUES(4, 'search');

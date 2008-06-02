@@ -1133,8 +1133,7 @@ var ZoteroPane = new function()
 				}
 			}
 			else {
-				var s = new Zotero.Search();
-				s.load(row.ref.id);
+				var s = new Zotero.Search(row.ref.id);
 				var io = {dataIn: {search: s, name: row.getName()}, dataOut: null};
 				window.openDialog('chrome://zotero/content/searchDialog.xul','','chrome,modal',io);
 				if (io.dataOut) {

@@ -26,12 +26,16 @@ Zotero.Collection = function(collectionID) {
 	this._init();
 }
 
-Zotero.Collection.prototype._init = function (collectionID) {
+Zotero.Collection.prototype._init = function () {
 	// Public members for access by public methods -- do not access directly
 	this._name = null;
 	this._parent = null;
 	this._dateModified = null;
 	this._key = null;
+	
+	this._loaded = false;
+	this._changed = false;
+	this._previousData = false;
 	
 	this._hasChildCollections = false;
 	this._childCollections = [];
@@ -40,8 +44,6 @@ Zotero.Collection.prototype._init = function (collectionID) {
 	this._hasChildItems = false;
 	this._childItems = [];
 	this._childItemsLoaded = false;
-	
-	this._previousData = false;
 }
 
 
@@ -122,7 +124,6 @@ Zotero.Collection.prototype.load = function() {
 		+ "(SELECT COUNT(*) FROM collectionItems WHERE "
 			+ "collectionID=C.collectionID)!=0 AS hasChildItems "
 		+ "FROM collections C WHERE collectionID=?";
-	
 	var data = Zotero.DB.rowQuery(sql, this.id);
 	
 	this._init();

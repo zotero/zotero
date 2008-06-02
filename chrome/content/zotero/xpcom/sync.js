@@ -9,8 +9,26 @@ Zotero.Sync = new function() {
 	this.purgeDeletedObjects = purgeDeletedObjects;
 	this.removeFromDeleted = removeFromDeleted;
 	
+	// Keep in sync with syncObjectTypes table
 	this.__defineGetter__('syncObjects', function () {
-		return ['Creator', 'Item', 'Collection'];
+		return {
+			creator: {
+				singular: 'Creator',
+				plural: 'Creators'
+			},
+			item: {
+				singular: 'Item',
+				plural: 'Items'
+			},
+			collection: {
+				singular: 'Collection',
+				plural: 'Collections'
+			},
+			search: {
+				singular: 'Search',
+				plural: 'Searches'
+			}
+		};
 	});
 	
 	default xml namespace = '';
@@ -47,7 +65,7 @@ Zotero.Sync = new function() {
 	}
 	
 	
-	function getObjectTypeName(typeID) {
+	function getObjectTypeName(typeID, plural) {
 		if (!_typesLoaded) {
 			_loadObjectTypes();
 		}
@@ -64,10 +82,8 @@ Zotero.Sync = new function() {
 		uploadIDs.changed = {};
 		uploadIDs.deleted = {};
 		
-		for each(var Type in Zotero.Sync.syncObjects) {
-			var Types = Type + 's'; // 'Items'
-			var type = Type.toLowerCase(); // 'item'
-			var types = type + 's'; // 'items'
+		for each(var syncObject in Zotero.Sync.syncObjects) {
+			var types = syncObject.plural.toLowerCase(); // 'items'
 			
 			uploadIDs.updated[types] = [];
 			uploadIDs.changed[types] = {};
@@ -89,10 +105,9 @@ Zotero.Sync = new function() {
 		}
 		
 		var updatedIDs = {};
-		for each(var Type in this.syncObjects) {
-			var Types = Type + 's'; // 'Items'
-			var type = Type.toLowerCase(); // 'item'
-			var types = type + 's'; // 'items'
+		for each(var syncObject in this.syncObjects) {
+			var Types = syncObject.plural; // 'Items'
+			var types = syncObject.plural.toLowerCase(); // 'items'
 			
 			Zotero.debug("Getting updated local " + types);
 			
@@ -156,12 +171,14 @@ Zotero.Sync = new function() {
 		}
 		
 		var deletedIDs = {};
-		for each(var Type in this.syncObjects) {
-			deletedIDs[Type.toLowerCase() + 's'] = [];
+		for each(var syncObject in this.syncObjects) {
+			deletedIDs[syncObject.plural.toLowerCase()] = [];
 		}
 		
 		for each(var row in rows) {
-			deletedIDs[this.getObjectTypeName(row.syncObjectTypeID) + 's'].push({
+			var type = this.getObjectTypeName(row.syncObjectTypeID);
+			type = this.syncObjects[type].plural.toLowerCase()
+			deletedIDs[type].push({
 				id: row.objectID,
 				key: row.key
 			});
@@ -239,8 +256,7 @@ Zotero.Sync.EventListener = new function () {
 	 * Blacklist objects from going into the sync delete log
 	 */
 	function ignoreDeletions(type, ids) {
-		var cap = type[0].toUpperCase() + type.substr(1);
-		if (Zotero.Sync.syncObjects.indexOf(cap) == -1) {
+		if (!Zotero.Sync.syncObjects[type]) {
 			throw ("Invalid type '" + type +
 				"' in Zotero.Sync.EventListener.ignoreDeletions()");
 		}
@@ -260,8 +276,7 @@ Zotero.Sync.EventListener = new function () {
 	 * Remove objects blacklisted from the sync delete log
 	 */
 	function unignoreDeletions(type, ids) {
-		var cap = type[0].toUpperCase() + type.substr(1);
-		if (Zotero.Sync.syncObjects.indexOf(cap) == -1) {
+		if (!Zotero.Sync.syncObjects[type]) {
 			throw ("Invalid type '" + type +
 				"' in Zotero.Sync.EventListener.ignoreDeletions()");
 		}
@@ -521,9 +536,7 @@ Zotero.Sync.Server = new function () {
 		}
 		
 		if (_syncInProgress) {
-			Zotero.log("Sync operation already in progress", 'error');
-			return;
-			
+			_error("Sync operation already in progress");
 		}
 		
 		_syncInProgress = true;
@@ -990,8 +1003,14 @@ Zotero.Sync.Server = new function () {
 	
 	
 	function _error(e) {
+		_syncInProgress = false;
 		_resetAttempts();
 		Zotero.DB.rollbackAllTransactions();
+		
+		if (_sessionID && _sessionLock) {
+			Zotero.Sync.Server.unlock()
+		}
+		
 		throw(e);
 	}
 }
@@ -1047,6 +1066,10 @@ Zotero.Sync.Server.Data = new function() {
 	this.xmlToCollection = xmlToCollection;
 	this.creatorToXML = creatorToXML;
 	this.xmlToCreator = xmlToCreator;
+	this.searchToXML = searchToXML;
+	this.xmlToSearch = xmlToSearch;
+	
+	var _noMergeTypes = ['search'];
 	
 	default xml namespace = '';
 	
@@ -1061,10 +1084,11 @@ Zotero.Sync.Server.Data = new function() {
 		
 		Zotero.DB.beginTransaction();
 		
-		for each(var Type in Zotero.Sync.syncObjects) {
-			var Types = Type + 's'; // 'Items'
+		for each(var syncObject in Zotero.Sync.syncObjects) {
+			var Type = syncObject.singular; // 'Item'
+			var Types = syncObject.plural; // 'Items'
 			var type = Type.toLowerCase(); // 'item'
-			var types = type + 's'; // 'items'
+			var types = Types.toLowerCase(); // 'items'
 			
 			if (!xml[types]) {
 				continue;
@@ -1092,48 +1116,61 @@ Zotero.Sync.Server.Data = new function() {
 						
 						// Local object has been modified since last sync
 						if ((objDate > lastLocalSyncDate &&
-								objDate < Zotero.Sync.Server.nextLocalSyncDate)
-							// Check for object in updated array, since it might
-							// have been modified during sync process, making its
-							// date equal to Zotero.Sync.Server.nextLocalSyncDate
-							// and therefore excluded above (example: an item
-							// linked to a creator whose id changed)
-							|| uploadIDs.updated[types].indexOf(obj.id) != -1) {
+									objDate < Zotero.Sync.Server.nextLocalSyncDate)
+								// Check for object in updated array, since it might
+								// have been modified during sync process, making its
+								// date equal to Zotero.Sync.Server.nextLocalSyncDate
+								// and therefore excluded above (example: an item
+								// linked to a creator whose id changed)
+								|| uploadIDs.updated[types].indexOf(obj.id) != -1) {
 							
 							var remoteObj = Zotero.Sync.Server.Data['xmlTo' + Type](xmlNode);
 							
-							/*
-							// For now, show item conflicts even if only
-							// dateModified changed, since we need to handle
-							// creator conflicts there
-							if (type != 'item') {
-								// Skip if only dateModified changed
-								var diff = obj.diff(remoteObj, false, true);
-								if (!diff) {
+							// Some types we don't bother to reconcile
+							if (_noMergeTypes.indexOf(type) != -1) {
+								if (obj.dateModified > remoteObj.dateModified) {
+									Zotero.Sync.addToUpdated(uploadIDs.updated.items, obj.id);
 									continue;
 								}
+								else {
+									obj = Zotero.Sync.Server.Data['xmlTo' + Type](xmlNode, obj);
+								}
 							}
-							*/
-							
-							// Will be handled by item CR for now
-							if (type == 'creator') {
-								remoteCreatorStore[remoteObj.id] = remoteObj;
+							// Mark other types for conflict resolution
+							else {
+								/*
+								// For now, show item conflicts even if only
+								// dateModified changed, since we need to handle
+								// creator conflicts there
+								if (type != 'item') {
+									// Skip if only dateModified changed
+									var diff = obj.diff(remoteObj, false, true);
+									if (!diff) {
+										continue;
+									}
+								}
+								*/
+								
+								// Will be handled by item CR for now
+								if (type == 'creator') {
+									remoteCreatorStore[remoteObj.id] = remoteObj;
+									continue;
+								}
+								
+								if (type != 'item') {
+									alert('Reconciliation unimplemented for ' + types);
+									throw ('Reconciliation unimplemented for ' + types);
+								}
+								
+								// TODO: order reconcile by parent/child?
+								
+								toReconcile.push([
+									obj,
+									remoteObj
+								]);
+								
 								continue;
 							}
-							
-							if (type != 'item') {
-								alert('Reconciliation unimplemented for ' + types);
-								_error('Reconciliation unimplemented for ' + types);
-							}
-							
-							// TODO: order reconcile by parent/child?
-							
-							toReconcile.push([
-								obj,
-								remoteObj
-							]);
-							
-							continue;
 						}
 						// Local object hasn't been modified -- overwrite
 						else {
@@ -1216,11 +1253,14 @@ Zotero.Sync.Server.Data = new function() {
 							continue;
 						}
 						
-						var remoteObj = Zotero.Sync.Server.Data['xmlTo' + Type](xmlNode);
+						// TODO: non-merged items
+						
 						if (type != 'item') {
-							alert('Reconciliation unimplemented for ' + types);
-							_error('Reconciliation unimplemented for ' + types);
+							alert('Delete reconciliation unimplemented for ' + types);
+							_error('Delete reconciliation unimplemented for ' + types);
 						}
+						
+						var remoteObj = Zotero.Sync.Server.Data['xmlTo' + Type](xmlNode);
 						
 						// TODO: order reconcile by parent/child?
 						
@@ -1229,7 +1269,7 @@ Zotero.Sync.Server.Data = new function() {
 							remoteObj
 						]);
 						
-						break typeloop;
+						continue typeloop;
 					}
 
 					// Create locally
@@ -1245,7 +1285,10 @@ Zotero.Sync.Server.Data = new function() {
 				}
 			}
 			
+			
+			//
 			// Handle deleted objects
+			//
 			if (xml.deleted && xml.deleted[types]) {
 				Zotero.debug("Processing remotely deleted " + types);
 				
@@ -1275,7 +1318,9 @@ Zotero.Sync.Server.Data = new function() {
 				}
 			}
 			
+			//
 			// Reconcile objects that have changed locally and remotely
+			//
 			if (toReconcile.length) {
 				var io = {
 					dataIn: {
@@ -1345,11 +1390,11 @@ Zotero.Sync.Server.Data = new function() {
 				}
 			}
 			
+			// Sort collections in order of parent collections,
+			// so referenced parent collections always exist when saving
 			if (type == 'collection') {
 				var collections = [];
 				
-				// Sort collections in order of parent collections,
-				// so referenced parent collections always exist when saving
 				var cmp = function (a, b) {
 					var pA = a.parent;
 					var pB = b.parent;
@@ -1421,8 +1466,10 @@ Zotero.Sync.Server.Data = new function() {
 	
 	/**
 	 *  ids = {
-	 *		items: [123, 234, 345, 456],
-	 *		creators: [321, 432, 543, 654],
+	 *		updated: {
+	 *			items: [123, 234, 345, 456],
+	 *			creators: [321, 432, 543, 654]
+	 *		},
 	 *		changed: {
 	 *			items: {
 	 * 				oldID: { oldID: 1234, newID: 5678 }, ...
@@ -1449,10 +1496,11 @@ Zotero.Sync.Server.Data = new function() {
 		
 		
 		// Updates
-		for each(var Type in Zotero.Sync.syncObjects) {
-			var Types = Type + 's'; // 'Items'
+		for each(var syncObject in Zotero.Sync.syncObjects) {
+			var Type = syncObject.singular; // 'Item'
+			var Types = syncObject.plural; // 'Items'
 			var type = Type.toLowerCase(); // 'item'
-			var types = type + 's'; // 'items'
+			var types = Types.toLowerCase(); // 'items'
 			
 			if (!ids.updated[types]) {
 				continue;
@@ -1462,7 +1510,7 @@ Zotero.Sync.Server.Data = new function() {
 			
 			switch (type) {
 				// Items.get() can take multiple ids,
-				// so we handle it differently
+				// so we handle them differently
 				case 'item':
 					var objs = Zotero[Types].get(ids.updated[types]);
 					for each(var obj in objs) {
@@ -1481,10 +1529,11 @@ Zotero.Sync.Server.Data = new function() {
 		// TODO: handle changed ids
 		
 		// Deletions
-		for each(var Type in Zotero.Sync.syncObjects) {
-			var Types = Type + 's'; // 'Items'
+		for each(var syncObject in Zotero.Sync.syncObjects) {
+			var Type = syncObject.singular; // 'Item'
+			var Types = syncObject.plural; // 'Items'
 			var type = Type.toLowerCase(); // 'item'
-			var types = type + 's'; // 'items'
+			var types = Types.toLowerCase(); // 'items'
 			
 			if (!ids.deleted[types]) {
 				continue;
@@ -1848,5 +1897,107 @@ Zotero.Sync.Server.Data = new function() {
 		creator.setFields(data);
 		
 		return creator;
+	}
+	
+	
+	function searchToXML(search) {
+		var xml = <search/>;
+		
+		xml.@id = search.id;
+		xml.@name = search.name;
+		xml.@dateModified = search.dateModified;
+		xml.@key = search.key;
+		
+		var conditions = search.getSearchConditions();
+		if (conditions) {
+			for each(var condition in conditions) {
+				var conditionXML = <condition/>
+				conditionXML.@id = condition.id;
+				conditionXML.@condition = condition.condition;
+				if (condition.mode) {
+					conditionXML.@mode = condition.mode;
+				}
+				conditionXML.@operator = condition.operator;
+				conditionXML.@value = condition.value;
+				if (condition.required) {
+					conditionXML.@required = 1;
+				}
+				xml.condition += conditionXML;
+			}
+		}
+		
+		return xml;
+	}
+	
+	
+	/**
+	 * Convert E4X <search> object into an unsaved Zotero.Search
+	 *
+	 * @param	object	xmlSearch	E4X XML node with search data
+	 * @param	object	item		(Optional) Existing Zotero.Search to update
+	 * @param	bool	newID		(Optional) Ignore passed searchID and choose new one
+	 */
+	function xmlToSearch(xmlSearch, search, newID) {
+		if (!search) {
+			if (newID) {
+				search = new Zotero.Search(null);
+			}
+			else {
+				search = new Zotero.Search(parseInt(xmlSearch.@id));
+				/*
+				if (search.exists()) {
+					throw ("Search specified in XML node already exists "
+						+ "in Zotero.Sync.Server.Data.xmlToSearch()");
+				}
+				*/
+			}
+		}
+		else if (newID) {
+			_error("Cannot use new id with existing search in "
+					+ "Zotero.Sync.Server.Data.xmlToSearch()");
+		}
+		
+		search.name = xmlSearch.@name.toString();
+		search.dateModified = xmlSearch.@dateModified.toString();
+		search.key = xmlSearch.@key.toString();
+		
+		var conditionID = -1;
+		
+		// Search conditions
+		for each(var condition in xmlSearch.condition) {
+			conditionID = parseInt(condition.@id);
+			var name = condition.@condition.toString();
+			var mode = condition.@mode.toString();
+			if (mode) {
+				name = name + '/' + mode;
+			}
+			if (search.getSearchCondition(conditionID)) {
+				search.updateCondition(
+					conditionID,
+					name,
+					condition.@operator.toString(),
+					condition.@value.toString(),
+					!!condition.@required.toString()
+				);
+			}
+			else {
+				var newID = search.addCondition(
+					name,
+					condition.@operator.toString(),
+					condition.@value.toString(),
+					!!condition.@required.toString()
+				);
+				if (newID != conditionID) {
+					throw ("Search condition ids not contiguous in Zotero.Sync.Server.xmlToSearch()");
+				}
+			}
+		}
+		
+		conditionID++;
+		while (search.getSearchCondition(conditionID)) {
+			search.removeCondition(conditionID);
+		}
+		
+		return search;
 	}
 }

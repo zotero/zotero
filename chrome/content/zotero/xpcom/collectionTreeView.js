@@ -244,9 +244,8 @@ Zotero.CollectionTreeView.prototype.notify = function(action, type, ids)
 				break;
 				
 			case 'search':
-				var search = Zotero.Searches.get(ids);
 				this.reload();
-				this.selection.select(this._searchRowMap[search.id]);
+				this.selection.select(this._searchRowMap[ids]);
 				break;
 		}
 	}
@@ -930,7 +929,7 @@ Zotero.ItemGroup.prototype.getSearchObject = function() {
 	var includeScopeChildren = false;
 	
 	// Create/load the inner search
-	var s = new Zotero.Search();
+	var s = new Zotero.Search(this.isSearch() ? this.ref.id : null);
 	if (this.isLibrary()) {
 		s.addCondition('noChildren', 'true');
 		includeScopeChildren = true;
@@ -943,10 +942,7 @@ Zotero.ItemGroup.prototype.getSearchObject = function() {
 		}
 		includeScopeChildren = true;
 	}
-	else if (this.isSearch()){
-		s.load(this.ref['id']);
-	}
-	else {
+	else if (!this.isSearch()) {
 		throw ('Invalid search mode in Zotero.ItemGroup.getSearchObject()');
 	}
 	

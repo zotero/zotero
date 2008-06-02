@@ -608,29 +608,29 @@ CREATE TRIGGER fkd_itemTags_tagID_tags_tagID
     WHERE (SELECT COUNT(*) FROM itemTags WHERE tagID = OLD.tagID) > 0;
   END;
 
--- savedSearchConditions/searchConditionID
-DROP TRIGGER IF EXISTS fki_savedSearchConditions_searchConditionID_savedSearches_savedSearchID;
-CREATE TRIGGER fki_savedSearchConditions_searchConditionID_savedSearches_savedSearchID
+-- savedSearchConditions/savedSearchID
+DROP TRIGGER IF EXISTS fki_savedSearchConditions_savedSearchID_savedSearches_savedSearchID;
+CREATE TRIGGER fki_savedSearchConditions_savedSearchID_savedSearches_savedSearchID
   BEFORE INSERT ON savedSearchConditions
   FOR EACH ROW BEGIN
-    SELECT RAISE(ABORT, 'insert on table "savedSearchConditions" violates foreign key constraint "fki_savedSearchConditions_searchConditionID_savedSearches_savedSearchID"')
-    WHERE NEW.searchConditionID IS NOT NULL AND (SELECT COUNT(*) FROM savedSearches WHERE savedSearchID = NEW.searchConditionID) = 0;
+    SELECT RAISE(ABORT, 'insert on table "savedSearchConditions" violates foreign key constraint "fki_savedSearchConditions_savedSearchID_savedSearches_savedSearchID"')
+    WHERE (SELECT COUNT(*) FROM savedSearches WHERE savedSearchID = NEW.savedSearchID) = 0;
   END;
 
-DROP TRIGGER IF EXISTS fku_savedSearchConditions_searchConditionID_savedSearches_savedSearchID;
-CREATE TRIGGER fku_savedSearchConditions_searchConditionID_savedSearches_savedSearchID
-  BEFORE UPDATE OF searchConditionID ON savedSearchConditions
+DROP TRIGGER IF EXISTS fku_savedSearchConditions_savedSearchID_savedSearches_savedSearchID;
+CREATE TRIGGER fku_savedSearchConditions_savedSearchID_savedSearches_savedSearchID
+  BEFORE UPDATE OF savedSearchID ON savedSearchConditions
   FOR EACH ROW BEGIN
-    SELECT RAISE(ABORT, 'update on table "savedSearchConditions" violates foreign key constraint "fku_savedSearchConditions_searchConditionID_savedSearches_savedSearchID"')
-    WHERE NEW.searchConditionID IS NOT NULL AND (SELECT COUNT(*) FROM savedSearches WHERE savedSearchID = NEW.searchConditionID) = 0;
+    SELECT RAISE(ABORT, 'update on table "savedSearchConditions" violates foreign key constraint "fku_savedSearchConditions_savedSearchID_savedSearches_savedSearchID"')
+    WHERE (SELECT COUNT(*) FROM savedSearches WHERE savedSearchID = NEW.savedSearchID) = 0;
   END;
 
-DROP TRIGGER IF EXISTS fkd_savedSearchConditions_searchConditionID_savedSearches_savedSearchID;
-CREATE TRIGGER fkd_savedSearchConditions_searchConditionID_savedSearches_savedSearchID
+DROP TRIGGER IF EXISTS fkd_savedSearchConditions_savedSearchID_savedSearches_savedSearchID;
+CREATE TRIGGER fkd_savedSearchConditions_savedSearchID_savedSearches_savedSearchID
   BEFORE DELETE ON savedSearches
   FOR EACH ROW BEGIN
-    SELECT RAISE(ABORT, 'delete on table "savedSearches" violates foreign key constraint "fkd_savedSearchConditions_searchConditionID_savedSearches_savedSearchID"')
-    WHERE (SELECT COUNT(*) FROM savedSearchConditions WHERE searchConditionID = OLD.savedSearchID) > 0;
+    SELECT RAISE(ABORT, 'delete on table "savedSearches" violates foreign key constraint "fkd_savedSearchConditions_savedSearchID_savedSearches_savedSearchID"')
+    WHERE (SELECT COUNT(*) FROM savedSearchConditions WHERE savedSearchID = OLD.savedSearchID) > 0;
   END;
 
 -- syncDeleteLog/syncObjectTypeID

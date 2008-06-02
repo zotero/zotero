@@ -145,9 +145,8 @@ var Zotero_File_Interface = new function() {
 			// find name
 			var searchRef = ZoteroPane.getSelectedSavedSearch();
 			if(searchRef) {
-				var search = new Zotero.Search();
-				search.load(searchRef['id']);
-				exporter.name = search.getName();
+				var search = new Zotero.Search(searchRef.id);
+				exporter.name = search.name;
 			}
 		}
 		exporter.save();
@@ -285,9 +284,8 @@ var Zotero_File_Interface = new function() {
 		} else {
 			var searchRef = ZoteroPane.getSelectedSavedSearch();
 			if(searchRef) {
-				var search = new Zotero.Search();
-				search.load(searchRef['id']);
-				name = search.getName();
+				var search = new Zotero.Search(searchRef.id);
+				name = search.name;
 			}
 		}
 		
