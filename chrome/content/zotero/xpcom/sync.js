@@ -455,7 +455,7 @@ Zotero.Sync.Server = new function () {
 	var _loginManagerHost = 'chrome://zotero';
 	var _loginManagerURL = 'Zotero Sync Server';
 	
-	var _serverURL = "https://syncdev.zotero.org/";
+	var _serverURL = "https://sync.zotero.org/";
 	
 	var _maxAttempts = 3;
 	var _attempts = _maxAttempts;
@@ -572,7 +572,7 @@ Zotero.Sync.Server = new function () {
 				_error(response.firstChild.firstChild.nodeValue);
 			}
 			
-			// Strip XML declaration
+			// Strip XML declaration and convert to E4X
 			var xml = new XML(xmlhttp.responseText.replace(/<\?xml.*\?>/, ''));
 			
 			Zotero.DB.beginTransaction();
