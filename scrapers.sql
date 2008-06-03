@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-06-02 19:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-06-03 16:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -5824,11 +5824,11 @@ function doWeb(doc, url) {
 	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done;});
 }');
 
-REPLACE INTO translators VALUES ('0abd577b-ec45-4e9f-9081-448737e2fd34', '1.0.0b4.r5', '', '2008-02-22 20:30:00', '0', '100', '4', 'DSpace', 'Michael Berkowitz', 'dspace',
+REPLACE INTO translators VALUES ('0abd577b-ec45-4e9f-9081-448737e2fd34', '1.0.0b4.r5', '', '2008-06-03 16:00:00', '0', '100', '4', 'DSpace', 'Michael Berkowitz', 'dspace', 
 'function detectWeb(doc, url) {
-	if (doc.evaluate(''//center/table[@class="itemDisplayTable"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+	if (doc.evaluate(''//table[@class="itemDisplayTable"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "document";
-	} else if (doc.evaluate(''//table[@class="miscTable"]//td[2]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+	} else if (doc.evaluate(''//table[@class="miscTable"]//td[2]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext() || doc.evaluate(''//div[@id="main"]/ul[@class="browselist"]/li/a'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
 	}
 }', 
@@ -5844,7 +5844,12 @@ function doWeb(doc, url) {
 	var records = new Array();
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
-		var xpath = ''//table[@class="miscTable"]/tbody/tr/td[2]/a'';
+		if (doc.evaluate(''//div[@id="main"]/ul[@class="browselist"]/li/a'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+			var xpath = ''//div[@id="main"]/ul[@class="browselist"]/li/a'';
+		} else {
+			var xpath = ''//table[@class="miscTable"]//td[2]//a'';
+		}
+		Zotero.debug(xpath);
 		var rows = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
 		var row;
 		while (row = rows.iterateNext()) {
@@ -5902,12 +5907,11 @@ function doWeb(doc, url) {
 				newItem.rights = datum;
 			}
 		}
-		var pdf = newDoc.evaluate(''//td[@class="standard"]/a'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().href;
-		newItem.attachments = [
-			{url:newDoc.location.href, title:"DSpace Snapshot", mimeType:"text/html"},
-			{url:pdf, title:"DSpace PDF", mimeType:"application/pdf"}
-		];
-		Zotero.debug(newItem);
+		if (newDoc.evaluate(''//td[@class="standard"]/a'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) var pdf = newDoc.evaluate(''//td[@class="standard"]/a'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().href;
+		newItem.attachments = [{url:newDoc.location.href, title:"DSpace Snapshot", mimeType:"text/html"}];
+		if (pdf) {
+			newItem.attachments.push({url:pdf, title:"DSpace PDF", mimeType:"application/pdf"});
+		}
 		newItem.complete();
 	}, function() {Zotero.done;});
 }');
