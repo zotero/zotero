@@ -68,6 +68,9 @@ pref("extensions.zotero.export.quickCopy.setting", 'bibliography=http://www.zote
 // Integration settings
 pref("extensions.zotero.integration.autoRegenerate", -1);	// -1 = ask; 0 = no; 1 = yes
 
+// Zeroconf
+pref("extensions.zotero.zeroconf.server.enabled", false);
+
 // Annotation settings
 pref("extensions.zotero.annotations.warnOnClose", true);
 

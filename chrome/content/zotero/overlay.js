@@ -788,7 +788,12 @@ var ZoteroPane = new function()
 			if(item.ref.isNote())
 			{
 				var noteEditor = document.getElementById('zotero-note-editor');
-				noteEditor.mode = 'edit';
+				if (this.itemsView.readOnly) {
+					noteEditor.mode = 'view';
+				}
+				else {
+					noteEditor.mode = 'edit';
+				}
 				
 				// If loading new or different note, disable undo while we repopulate the text field
 				// so Undo doesn't end up clearing the field. This also ensures that Undo doesn't
@@ -953,7 +958,7 @@ var ZoteroPane = new function()
 			}
 			else
 			{
-				ZoteroItemPane.viewItem(item.ref);
+				ZoteroItemPane.viewItem(item.ref, this.itemsView.readOnly ? 'view' : false);
 				document.getElementById('zotero-item-pane-content').selectedIndex = 1;
 			}
 		}
@@ -1056,7 +1061,8 @@ var ZoteroPane = new function()
 					var noPrompt = true;
 				}
 				// Do nothing in search view
-				else if (this.itemsView._itemGroup.isSearch()) {
+				else if (this.itemsView._itemGroup.isSearch() ||
+						this.itemsView._itemGroup.isShare()) {
 					return;
 				}
 			}
@@ -1465,7 +1471,14 @@ var ZoteroPane = new function()
 		
 		var enable = [], disable = [], show = [], hide = [], multiple = '';
 		
-		if (this.itemsView && this.itemsView.selection.count > 0) {
+		// TODO: implement menu for remote items
+		if (this.itemsView.readOnly) {
+			for each(var pos in m) {
+				disable.push(pos);
+			}
+		}
+		
+		else if (this.itemsView && this.itemsView.selection.count > 0) {
 			enable.push(m.showInLibrary, m.addNote, m.attachSnapshot, m.attachLink,
 				m.sep2, m.duplicateItem, m.deleteItem, m.deleteFromLibrary,
 				m.exportItems, m.createBib, m.loadReport);
@@ -1607,6 +1620,10 @@ var ZoteroPane = new function()
 				}
 			}
 			else if (tree.id == 'zotero-items-tree') {
+				if (this.itemsView.readOnly) {
+					return;
+				}
+				
 				if (this.itemsView && this.itemsView.selection.currentIndex > -1) {
 					var item = this.getSelectedItems()[0];
 					if (item && item.isNote()) {

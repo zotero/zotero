@@ -24,7 +24,7 @@ Zotero.Notifier = new function(){
 	var _observers = new Zotero.Hash();
 	var _disabled = false;
 	var _types = [
-		'collection', 'creator', 'search', 'item',
+		'collection', 'creator', 'search', 'share', 'share-items', 'item',
 		'collection-item', 'item-tag', 'tag'
 	];
 	var _inTransaction;

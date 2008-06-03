@@ -70,7 +70,7 @@ var ZoteroItemPane = new function() {
 	/*
 	 * Loads an item 
 	 */
-	function viewItem(thisItem) {
+	function viewItem(thisItem, mode) {
 		//Zotero.debug('Viewing item');
 		
 		// Force blur() when clicking off a textbox to another item in middle
@@ -100,11 +100,11 @@ var ZoteroItemPane = new function() {
 		_itemBeingEdited = thisItem;
 		_loaded = {};
 		
-		loadPane(_tabs.selectedIndex);
+		loadPane(_tabs.selectedIndex, mode);
 	}
 	
 	
-	function loadPane(index) {
+	function loadPane(index, mode) {
 		//Zotero.debug('Loading item pane ' + index);
 		
 		// Clear the tab index when switching panes
@@ -121,7 +121,14 @@ var ZoteroItemPane = new function() {
 		// Info pane
 		if (index == 0) {
 			var itembox = document.getElementById('zotero-editpane-item-box');
-			itembox.mode = 'edit';
+			// Hack to allow read-only mode in right pane -- probably a better
+			// way to allow access to this
+			if (mode) {
+				itembox.mode = mode;
+			}
+			else {
+				itembox.mode = 'edit';
+			}
 			itembox.item = _itemBeingEdited;
 		}
 		

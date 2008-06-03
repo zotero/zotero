@@ -47,7 +47,7 @@ Zotero.ItemTreeView = function(itemGroup, sourcesOnly)
 	this._dataItems = [];
 	this.rowCount = 0;
 	
-	this._unregisterID = Zotero.Notifier.registerObserver(this, ['item', 'collection-item']);
+	this._unregisterID = Zotero.Notifier.registerObserver(this, ['item', 'collection-item', 'share-items']);
 }
 
 
@@ -229,6 +229,13 @@ Zotero.ItemTreeView.prototype.refresh = function()
 }
 
 
+Zotero.ItemTreeView.prototype.__defineGetter__('readOnly', function () {
+	if (this._itemGroup.isShare()) {
+		return true;
+	}
+	return false;
+});
+
 /*
  *  Called by Zotero.Notifier on any changes to items in the data layer
  */
@@ -251,11 +258,20 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 	
 	// If refreshing a single item, just unselect and reselect it
 	if (action == 'refresh') {
-		if (savedSelection.length == 1 && savedSelection[0] == ids[0]) {
+		if (type == 'share-items') {
+			if (this._itemGroup.isShare()) {
+				this.refresh();
+			}
+		}
+		else if (savedSelection.length == 1 && savedSelection[0] == ids[0]) {
 			this.selection.clearSelection();
 			this.rememberSelection(savedSelection);
 		}
 		
+		return;
+	}
+	
+	if (this._itemGroup.isShare()) {
 		return;
 	}
 	
@@ -1502,7 +1518,22 @@ Zotero.ItemTreeCommandController.prototype.onEvent = function(evt)
  *  Begin a drag
  */
 Zotero.ItemTreeView.prototype.onDragStart = function (evt,transferData,action)
-{ 
+{
+	// Quick implementation of dragging of XML item format
+	if (this.readOnly) {
+		var items = this.getSelectedItems();
+		
+		var xml = <data/>;
+		for (var i=0; i<items.length; i++) {
+			var xmlNode = Zotero.Sync.Server.Data.itemToXML(items[i]);
+			xml.items.item += xmlNode;
+		}
+		Zotero.debug(xml.toXMLString());
+		transferData.data = new TransferData();
+		transferData.data.addDataForFlavour("zotero/item-xml", xml.toXMLString());
+		return;
+	}
+	
 	transferData.data = new TransferData();
 	transferData.data.addDataForFlavour("zotero/item", this.saveSelection());
 	
@@ -1783,6 +1814,7 @@ Zotero.ItemTreeView.prototype.getSupportedFlavours = function ()
 { 
 	var flavors = new FlavourSet();
 	flavors.appendFlavour("zotero/item");
+	flavors.appendFlavour("zotero/item-xml");
 	flavors.appendFlavour("text/x-moz-url");
 	flavors.appendFlavour("application/x-moz-file", "nsIFile");
 	return flavors; 
@@ -1878,8 +1910,7 @@ Zotero.ItemTreeView.prototype.canDrop = function(row, orient)
 	// Highlight the rows correctly on drag
 	
 	var rowItem = this._getItemAtRow(row).ref; //the item we are dragging over
-	if (dataType == 'zotero/item')
-	{
+	if (dataType == 'zotero/item') {
 		// Directly on a row
 		if (orient == 0)
 		{

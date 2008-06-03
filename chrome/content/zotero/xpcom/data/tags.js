@@ -163,7 +163,8 @@ Zotero.Tags = new function() {
 			var tmpTable = search.search(true);
 		}
 		catch (e) {
-			if (e.match(/Saved search [0-9]+ does not exist/)) {
+			if (typeof e == 'string'
+					&& e.match(/Saved search [0-9]+ does not exist/)) {
 				Zotero.DB.rollbackTransaction();
 				Zotero.debug(e, 2);
 			}

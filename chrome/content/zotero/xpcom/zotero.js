@@ -253,6 +253,10 @@ var Zotero = new function(){
 		Zotero.Integration.SOAP.init();
 		Zotero.Integration.init();
 		
+		// Initialize data web server
+		Zotero.DataServer.init();
+		Zotero.Zeroconf.init();
+		
 		Zotero.Sync.init();
 		
 		this.initialized = true;
