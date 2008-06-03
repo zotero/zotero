@@ -1072,6 +1072,9 @@ Zotero.Integration.Session.prototype.loadDocumentData = function(json) {
 	if(documentData.custom) {
 		for(var itemID in documentData.custom) {
 			var item = this.itemSet.getItemsByIds([itemID])[0];
+			if (!item) {
+				continue;
+			}
 			item.setProperty("bibliography-Integration", documentData.custom[itemID]);
 		}
 	}
