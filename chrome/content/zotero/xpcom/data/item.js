@@ -1765,6 +1765,10 @@ Zotero.Item.prototype.getNoteTitle = function() {
 		return this._noteTitle;
 	}
 	
+	if (!this.id) {
+		return '';
+	}
+	
 	var sql = "SELECT title FROM itemNotes WHERE itemID=?";
 	var title = Zotero.DB.valueQuery(sql, this.id);
 	
@@ -1782,15 +1786,15 @@ Zotero.Item.prototype.getNote = function() {
 		throw ("getNote() can only be called on notes and attachments");
 	}
 	
-	if (!this.id) {
-		return '';
-	}
-	
 	// Store access time for later garbage collection
 	this._noteAccessTime = new Date();
 	
 	if (this._noteText !== null) {
 		return this._noteText;
+	}
+	
+	if (!this.id) {
+		return '';
 	}
 	
 	var sql = "SELECT note FROM itemNotes WHERE itemID=" + this.id;

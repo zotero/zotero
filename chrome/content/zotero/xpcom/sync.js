@@ -1073,7 +1073,6 @@ Zotero.Sync.Server.Data = new function() {
 	
 	default xml namespace = '';
 	
-	
 	function processUpdatedXML(xml, lastLocalSyncDate, uploadIDs) {
 		if (xml.children().length() == 0) {
 			Zotero.debug('No changes received from server');
@@ -1636,11 +1635,11 @@ Zotero.Sync.Server.Data = new function() {
 	 *
 	 * @param	object	xmlItem		E4X XML node with item data
 	 * @param	object	item			(Optional) Existing Zotero.Item to update
-	 * @param	bool		newID		(Optional) Ignore passed itemID and choose new one
+	 * @param	bool	skipPrimary		(Optional) Ignore passed primary fields (except itemTypeID)
 	 */
-	function xmlToItem(xmlItem, item, newID) {
+	function xmlToItem(xmlItem, item, skipPrimary) {
 		if (!item) {
-			if (newID) {
+			if (skipPrimary) {
 				item = new Zotero.Item(null);
 			}
 			else {
@@ -1653,19 +1652,21 @@ Zotero.Sync.Server.Data = new function() {
 				*/
 			}
 		}
-		else if (newID) {
-			_error("Cannot use new id with existing item in "
+		else if (skipPrimary) {
+			_error("Cannot use skipPrimary with existing item in "
 					+ "Zotero.Sync.Server.Data.xmlToItem()");
 		}
 		
 		// TODO: add custom item types
 		
 		var data = {
-			itemTypeID: Zotero.ItemTypes.getID(xmlItem.@itemType.toString()),
-			dateAdded: xmlItem.@dateAdded.toString(),
-			dateModified: xmlItem.@dateModified.toString(),
-			key: xmlItem.@key.toString()
+			itemTypeID: Zotero.ItemTypes.getID(xmlItem.@itemType.toString())
 		};
+		if (!skipPrimary) {
+			data.dateAdded = xmlItem.@dateAdded.toString();
+			data.dateModified = xmlItem.@dateModified.toString();
+			data.key = xmlItem.@key.toString();
+		}
 		
 		var changedFields = {};
 		
@@ -1780,11 +1781,11 @@ Zotero.Sync.Server.Data = new function() {
 	 *
 	 * @param	object	xmlCollection	E4X XML node with collection data
 	 * @param	object	item		(Optional) Existing Zotero.Collection to update
-	 * @param	bool	newID		(Optional) Ignore passed collectionID and choose new one
+	 * @param	bool	skipPrimary		(Optional) Ignore passed primary fields (except itemTypeID)
 	 */
-	function xmlToCollection(xmlCollection, collection, newID) {
+	function xmlToCollection(xmlCollection, collection, skipPrimary) {
 		if (!collection) {
-			if (newID) {
+			if (skipPrimary) {
 				collection = new Zotero.Collection(null);
 			}
 			else {
@@ -1797,16 +1798,19 @@ Zotero.Sync.Server.Data = new function() {
 				*/
 			}
 		}
-		else if (newID) {
-			_error("Cannot use new id with existing collection in "
+		else if (skipPrimary) {
+			_error("Cannot use skipPrimary with existing collection in "
 					+ "Zotero.Sync.Server.Data.xmlToCollection()");
 		}
 		
 		collection.name = xmlCollection.@name.toString();
-		collection.parent = xmlCollection.@parent.toString() ?
-			parseInt(xmlCollection.@parent) : false;
-		collection.dateModified = xmlCollection.@dateModified.toString();
-		collection.key = xmlCollection.@key.toString();
+		if (!skipPrimary) {
+			collection.parent = xmlCollection.@parent.toString() ?
+				parseInt(xmlCollection.@parent) : false;
+			collection.dateAdded = xmlCollection.@dateAdded.toString();
+			collection.dateModified = xmlCollection.@dateModified.toString();
+			collection.key = xmlCollection.@key.toString();
+		}
 		
 		// Subcollections
 		var str = xmlCollection.collections.toString();
@@ -1855,11 +1859,11 @@ Zotero.Sync.Server.Data = new function() {
 	 *
 	 * @param	object	xmlCreator	E4X XML node with creator data
 	 * @param	object	item		(Optional) Existing Zotero.Creator to update
-	 * @param	bool	newID		(Optional) Ignore passed creatorID and choose new one
+	 * @param	bool	skipPrimary	(Optional) Ignore passed primary fields (except itemTypeID)
 	 */
-	function xmlToCreator(xmlCreator, creator, newID) {
+	function xmlToCreator(xmlCreator, creator, skipPrimary) {
 		if (!creator) {
-			if (newID) {
+			if (skipPrimary) {
 				creator = new Zotero.Creator(null);
 			}
 			else {
@@ -1872,16 +1876,19 @@ Zotero.Sync.Server.Data = new function() {
 				*/
 			}
 		}
-		else if (newID) {
-			_error("Cannot use new id with existing creator in "
+		else if (skipPrimary) {
+			_error("Cannot use skipPrimary with existing creator in "
 					+ "Zotero.Sync.Server.Data.xmlToCreator()");
 		}
 		
 		var data = {
-			dateModified: xmlCreator.@dateModified.toString(),
-			key: xmlCreator.@key.toString(),
 			birthYear: xmlCreator.birthYear.toString()
 		};
+		if (!skipPrimary) {
+			data.dateAdded = xmlCreator.@dateAdded.toString();
+			data.dateModified = xmlCreator.@dateModified.toString();
+			data.key = xmlCreator.@key.toString();
+		}
 		
 		if (xmlCreator.fieldMode == 1) {
 			data.firstName = '';
@@ -1935,11 +1942,11 @@ Zotero.Sync.Server.Data = new function() {
 	 *
 	 * @param	object	xmlSearch	E4X XML node with search data
 	 * @param	object	item		(Optional) Existing Zotero.Search to update
-	 * @param	bool	newID		(Optional) Ignore passed searchID and choose new one
+	 * @param	bool	skipPrimary		(Optional) Ignore passed primary fields (except itemTypeID)
 	 */
-	function xmlToSearch(xmlSearch, search, newID) {
+	function xmlToSearch(xmlSearch, search, skipPrimary) {
 		if (!search) {
-			if (newID) {
+			if (skipPrimary) {
 				search = new Zotero.Search(null);
 			}
 			else {
@@ -1952,14 +1959,17 @@ Zotero.Sync.Server.Data = new function() {
 				*/
 			}
 		}
-		else if (newID) {
+		else if (skipPrimary) {
 			_error("Cannot use new id with existing search in "
 					+ "Zotero.Sync.Server.Data.xmlToSearch()");
 		}
 		
 		search.name = xmlSearch.@name.toString();
-		search.dateModified = xmlSearch.@dateModified.toString();
-		search.key = xmlSearch.@key.toString();
+		if (!skipPrimary) {
+			search.dateAdded = xmlSearch.@dateAdded.toString();
+			search.dateModified = xmlSearch.@dateModified.toString();
+			search.key = xmlSearch.@key.toString();
+		}
 		
 		var conditionID = -1;
 		
