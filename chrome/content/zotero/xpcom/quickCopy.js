@@ -167,7 +167,6 @@ Zotero.QuickCopy = new function() {
 				
 				default xml namespace = '';
 				var html = <div/>;
-				var firstp = true;
 				for (var i=0; i<content.length; i++) {
 					var p = <p>{content[i]}</p>;
 					p.@style = 'white-space: pre-wrap';
@@ -177,7 +176,7 @@ Zotero.QuickCopy = new function() {
 				html = html.toXMLString();
 				
 				var content = {
-					text: contentType == "html" ? html : content.join('\n\n'),
+					text: contentType == "html" ? html : content.join('\n\n\n'),
 					html: html
 				};
 				
