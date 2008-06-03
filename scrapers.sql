@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-06-03 16:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-06-03 18:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1087,6 +1087,42 @@ REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b
 		Zotero.done();
 	})
 	Zotero.wait();
+}');
+
+REPLACE INTO translators VALUES ('bbf1617b-d836-4665-9aae-45f223264460', '1.0.0b4.r5', '', '2008-06-03 18:00:00', '0', '100', '4', 'A Contra Corriente', 'Michael Berkowitz', 'http://www.ncsu.edu/project/acontracorriente', 
+'function detectWeb(doc, url) {
+	if (doc.evaluate(''//tr[td[1]//img][td[3]]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+		return "multiple";
+	}
+}', 
+'function doWeb(doc, url) {
+	var arts = doc.evaluate(''//tr[td[1]//img][td[3]]'', doc, null, XPathResult.ANY_TYPE, null);
+	var art;
+	var selectList = new Object();
+	var items = new Object();
+	while (art = arts.iterateNext()) {
+		var item = new Object();
+		var title = doc.evaluate(''.//a'', art, null, XPathResult.ANY_TYPE, null).iterateNext();
+		item[''title''] = Zotero.Utilities.trimInternal(title.textContent);
+		item[''pdfurl''] = title.href;
+		item[''author''] = doc.evaluate(''.//strong'', art, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		selectList[item.title] = item.title;
+		items[item.title] = item;
+	}
+	var selected = Zotero.selectItems(selectList);
+	var voliss = Zotero.Utilities.trimInternal(doc.evaluate(''//td[@class="red01"]/font[2]/strong'', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+	voliss = voliss.match(/Vol\.\s+(\d+),\s+No\.\s+(\d+)\.\s+([^|]+)|/);
+	Zotero.debug(voliss);
+	for each (var title in selected) {
+		var item = new Zotero.Item("journalArticle");
+		var olditem = items[title];
+		item.title = olditem.title;
+		item.creators = [Zotero.Utilities.cleanAuthor(olditem.author, "author")];
+		item.volume = voliss[1];
+		item.issue = voliss[2]
+		item.date = Zotero.Utilities.trimInternal(voliss[3]);
+		item.complete();
+	}
 }');
 
 REPLACE INTO translators VALUES ('0aea3026-a246-4201-a4b5-265f75b9a6a7', '1.0.0b4.r5', '', '2008-05-30 08:00:00', '0', '100', '4', 'Australian Dictionary of Biography', 'Tim Sherratt and Michael Berkowitz', 'http://www.adb.online.anu.edu.au', 
