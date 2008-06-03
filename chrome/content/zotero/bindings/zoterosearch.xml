@@ -542,7 +542,9 @@
 							
 							this.mode = condition['mode'];
 							this.id('operatorsmenu').value = condition['operator'];
-							this.value = prefix + condition['value'];
+							this.value = prefix +
+								(condition.value ? condition.value : '');
+
 							this.dontupdate = false;
 						}
 						
