@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-06-03 18:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-06-03 19:40:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1089,7 +1089,7 @@ REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('bbf1617b-d836-4665-9aae-45f223264460', '1.0.0b4.r5', '', '2008-06-03 18:00:00', '0', '100', '4', 'A Contra Corriente', 'Michael Berkowitz', 'http://www.ncsu.edu/project/acontracorriente', 
+REPLACE INTO translators VALUES ('bbf1617b-d836-4665-9aae-45f223264460', '1.0.0b4.r5', '', '2008-06-03 19:40:00', '0', '100', '4', 'A Contra Corriente', 'Michael Berkowitz', 'http://www.ncsu.edu/project/acontracorriente', 
 'function detectWeb(doc, url) {
 	if (doc.evaluate(''//tr[td[1]//img][td[3]]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
@@ -5860,7 +5860,7 @@ function doWeb(doc, url) {
 	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done;});
 }');
 
-REPLACE INTO translators VALUES ('0abd577b-ec45-4e9f-9081-448737e2fd34', '1.0.0b4.r5', '', '2008-06-03 16:00:00', '0', '100', '4', 'DSpace', 'Michael Berkowitz', 'dspace', 
+REPLACE INTO translators VALUES ('0abd577b-ec45-4e9f-9081-448737e2fd34', '1.0.0b4.r5', '', '2008-06-03 19:40:00', '0', '100', '4', 'DSpace', 'Michael Berkowitz', 'dspace', 
 'function detectWeb(doc, url) {
 	if (doc.evaluate(''//table[@class="itemDisplayTable"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "document";
@@ -6251,7 +6251,7 @@ function doWeb(doc, url) {
 
 }');
 
-REPLACE INTO translators VALUES ('e4660e05-a935-43ec-8eec-df0347362e4c', '1.0.0b4.r1', '', '2008-06-02 19:30:00', '0', '100', '4', 'ERIC', 'Ramesh Srigiriraju', '^http://(?:www\.)?eric\.ed\.gov/', 
+REPLACE INTO translators VALUES ('e4660e05-a935-43ec-8eec-df0347362e4c', '1.0.0b4.r1', '', '2008-06-03 19:40:00', '0', '100', '4', 'ERIC', 'Ramesh Srigiriraju', '^http://(?:www\.)?eric\.ed\.gov/', 
 'function detectWeb(doc, url)	{
 	var namespace=doc.documentElement.namespaceURI;
 	var nsResolver=namespace?function(prefix)	{
