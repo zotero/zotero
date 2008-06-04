@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-06-04 18:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-06-04 20:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -17439,7 +17439,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('e78d20f7-488-4023-831-dfe39679f3f', '1.0.0b3.r1', '', '2008-05-19 17:30:00', '1', '100', '4', 'ACM', 'Simon Kornblith and Michael Berkowitz', 'https?://[^/]*portal\.acm\.org[^/]*/(?:results\.cfm|citation\.cfm)', 
+REPLACE INTO translators VALUES ('e78d20f7-488-4023-831-dfe39679f3f', '1.0.0b3.r1', '', '2008-06-04 20:30:00', '1', '100', '4', 'ACM', 'Simon Kornblith and Michael Berkowitz', 'https?://[^/]*portal\.acm\.org[^/]*/(?:results\.cfm|citation\.cfm)', 
 'function detectWeb(doc, url) {
 	if(url.indexOf("/results.cfm") != -1) {
 		var items = Zotero.Utilities.getItemArray(doc, doc, ''^https?://[^/]+/citation.cfm\\?[^#]+$'');
@@ -17475,11 +17475,13 @@ function scrape(doc) {
 		null).iterateNext().getAttribute("onClick");
 	var m = onClick.match(/''([^'']+)''/);
 	
-	var abstract = doc.evaluate(''//div[@class="abstract"]/p[@class="abstract"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
-	if (!abstract.textContent.match(/\w+/)) {
-		var abstract = doc.evaluate(''//div[@class="abstract"]/p[2]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
+	if (doc.evaluate(''//div[@class="abstract"]/p[@class="abstract"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+		var abstract = doc.evaluate(''//div[@class="abstract"]/p[@class="abstract"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
+		if (!abstract.textContent.match(/\w+/)) {
+			var abstract = doc.evaluate(''//div[@class="abstract"]/p[2]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
+		}
+		if(abstract) abstract = Zotero.Utilities.cleanString(abstract.textContent);
 	}
-	if(abstract) abstract = Zotero.Utilities.cleanString(abstract.textContent);
 	var snapshot = doc.location.href;
 	
 	var attachments = new Array();
