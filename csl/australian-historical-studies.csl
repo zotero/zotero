@@ -128,7 +128,7 @@
 
       </else-if>
       <else>
-        <text variable="title" prefix="‘" suffix="’"/>
+        <text variable="title" prefix="&#8216;" suffix="&#8217;"/>
       </else>
     </choose>
   </macro>
@@ -153,7 +153,7 @@
         <text variable="title" form="short" font-style="italic"/>
       </else-if>
       <else>
-        <text variable="title" form="short" prefix="‘" suffix="’"/>
+        <text variable="title" form="short" prefix="&#8216;" suffix="&#8217;"/>
       </else>
 
     </choose>
