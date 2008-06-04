@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-06-03 19:40:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-06-04 18:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -5860,7 +5860,7 @@ function doWeb(doc, url) {
 	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done;});
 }');
 
-REPLACE INTO translators VALUES ('0abd577b-ec45-4e9f-9081-448737e2fd34', '1.0.0b4.r5', '', '2008-06-03 19:40:00', '0', '100', '4', 'DSpace', 'Michael Berkowitz', 'dspace', 
+REPLACE INTO translators VALUES ('0abd577b-ec45-4e9f-9081-448737e2fd34', '1.0.0b4.r5', '', '2008-06-04 18:30:00', '0', '100', '4', 'DSpace', 'Michael Berkowitz', '(dspace|upcommons.upc.edu)', 
 'function detectWeb(doc, url) {
 	if (doc.evaluate(''//table[@class="itemDisplayTable"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "document";
@@ -5885,7 +5885,6 @@ function doWeb(doc, url) {
 		} else {
 			var xpath = ''//table[@class="miscTable"]//td[2]//a'';
 		}
-		Zotero.debug(xpath);
 		var rows = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
 		var row;
 		while (row = rows.iterateNext()) {
@@ -5898,9 +5897,7 @@ function doWeb(doc, url) {
 	} else {
 		records = [url.match(/^([^?]+)\??/)[1] + "?mode=full"];
 	}
-	Zotero.debug(records);
 	Zotero.Utilities.processDocuments(records, function(newDoc) {
-		Zotero.debug(newDoc.location.href);
 		var values = new Object();
 		var fields = newDoc.evaluate(''//table[@class="itemDisplayTable"]/tbody/tr/td[1]'', newDoc, null, XPathResult.ANY_TYPE, null);
 		var data = newDoc.evaluate(''//table[@class="itemDisplayTable"]/tbody/tr/td[2]'', newDoc, null, XPathResult.ANY_TYPE, null);
