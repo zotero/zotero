@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-06-04 21:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-06-05 21:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1086,6 +1086,305 @@ REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b
 		
 		Zotero.done();
 	})
+	Zotero.wait();
+}');
+
+REPLACE INTO translators VALUES ('2d174277-7651-458f-86dd-20e168d2f1f3', '1.0.0b4.r5', '', '2008-06-05 21:00:00', '0', '100', '4', 'Canadiana.org', 'Adam Crymble', 'http://(www.)?canadiana.org', 
+'function detectWeb(doc, url) {
+   
+   //checks the title of the webpage. If it matches, then the little blue book symbol appears in the address bar.
+   //works for English and French versions of the page.
+    
+   	 if(doc.title == "Early Canadiana Online - Item Record"|doc.title == "Notre mémoire en ligne - Notice") {
+        	return "book";
+	} else if (doc.evaluate(''//div[@id="Content"]/div[@class="NormalRecord"]/h3/a'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+		return  "multiple";
+	}
+}
+
+', 
+'//Canadiana Translator Coding by Adam Crymble
+//because the site uses so many random formats for the "Imprint" field, it''s not always perfect. But it works for MOST entries
+
+function associateData (newItem, dataTags, field, zoteroField) {
+	if (dataTags[field]) {
+		newItem[zoteroField] = dataTags[field];
+	}
+}
+
+function scrape(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == "x" ) return namespace; else return null;
+	} : null;
+        	
+       	//declaring variables to be used later.
+	var newItem = new Zotero.Item("book");
+	newItem.url = doc.location.href;
+	
+	var dataTags = new Object();
+	var fieldTitle;
+	var tagsContent= new Array();
+        
+        //these variables tell the program where to find the data we want in the HTML file we''re looking at.
+        //in this case, the data is found in a table.
+        var xPath1 = ''//tr/td[1][@class="Label"]'';
+        var xPath2 = ''//tr/td[2]'';
+       
+      
+       //at this point, all the data we want has been saved into the following 2 Objects: one for the headings, one for the content.
+       // The 3rd object tells us how many items we''ve found.
+       if (doc.evaluate(''//tr/td[1][@class="Label"]'', doc, nsResolver, XPathResult.ANY_TYPE, null)) {
+       		 var xPath1Results = doc.evaluate(xPath1, doc, nsResolver, XPathResult.ANY_TYPE, null);
+      		  var xPath2Results = doc.evaluate(xPath2, doc, nsResolver, XPathResult.ANY_TYPE, null);
+      		  var xPathCount = doc.evaluate( ''count (//tr/td[1][@class="Label"])'', doc, nsResolver, XPathResult.ANY_TYPE, null);       	
+  	}  
+  
+  	//At this point we have two lists (xPath1Results and xPath2Results). this loop matches the first item in the first list
+  	//with the first item in the second list, and on until the end. 
+  	//If we then ask for the "Principal Author" the program returns "J.K. Rowling" instead of "Principal Author"
+   	if (doc.evaluate(''//tr/td[1][@class="Label"]'', doc, nsResolver, XPathResult.ANY_TYPE, null)) {
+	   	for (i=0; i<xPathCount.numberValue; i++) {	 	
+	     			
+	     		fieldTitle=xPath1Results.iterateNext().textContent.replace(/\s+/g, '''');
+	     		
+	     			//gets the author''s name without cleaning it away using cleanTags.
+	     		if (fieldTitle =="PrincipalAuthor:" || fieldTitle == "Auteurprincipal:") {
+		     		
+		     		fieldTitle="PrincipalAuthor:";
+		     		dataTags[fieldTitle]=(xPath2Results.iterateNext().textContent);
+		     		var authorName =dataTags["PrincipalAuthor:"].split(",");
+		     		authorName[0]=authorName[0].replace(/\s+/g, '''');
+		     		dataTags["PrincipalAuthor:"]= (authorName[1] + (" ") + authorName[0]);
+		     		newItem.creators.push(Zotero.Utilities.cleanAuthor(dataTags["PrincipalAuthor:"], "author"));
+	     		
+		     		//Splits Adressebibliographique or Imprint into 3 fields and cleans away any extra whitespace or unwanted characters.      		
+	     		} else if (fieldTitle =="Adressebibliographique:" || fieldTitle == "Imprint:") {
+	     		     	
+	     		     	fieldTitle = "Imprint:";
+	     		     	dataTags[fieldTitle] = Zotero.Utilities.cleanTags(xPath2Results.iterateNext().textContent);
+	     		     	
+	     		     	var separateImprint = dataTags["Imprint:"].split(":");
+	     		     	separateImprint[0]= separateImprint[0].replace(/^\s*|\[|\]/g,'''');
+		     		dataTags["Place:"]=separateImprint[0];
+		     		
+		     		var justDate = separateImprint[1].replace(/\D/g, '''');
+		     		dataTags["Date:"]= justDate;
+		     		
+		     		separateImprint[1] = separateImprint[1].replace(/\d|\[|\]|\./g, '''');
+		     		separateImprint[1] = separateImprint[1].replace(/^\s*|\s*$/g, '''');
+		     		dataTags["Publisher:"]= separateImprint[1];
+		     		
+		     		// determines how many tags there will be, pushes them into an array and clears away whitespace.
+		     	} else if (fieldTitle == "Subject:" || fieldTitle == "Sujet:") {
+			     	
+			     	tagsContent.push(Zotero.Utilities.cleanTags(xPath2Results.iterateNext().textContent.replace(/^\s*|\s*$/g, '''')));
+			     	while (fieldTitle != "Collection:") {
+				     	i=i+1;
+				     	tagsContent.push(Zotero.Utilities.cleanTags(xPath2Results.iterateNext().textContent.replace(/^\s*|\s*$/g, '''')));
+				     	fieldTitle=xPath1Results.iterateNext().textContent.replace(/\s+/g, '''');
+			     	}
+	    
+	     		} else {
+	     			
+	     			dataTags[fieldTitle] = Zotero.Utilities.cleanTags(xPath2Results.iterateNext().textContent.replace(/^\s*|\s*$/g, ''''));
+	     		
+	     		}
+	     	}
+     	}
+     		//Adds a string to CIHM no: and ICMH no: so that the resulting number makes sense to the reader.
+     		if (dataTags["CIHMno.:"]) {
+	     		
+	     		dataTags["CIHMno.:"]=("CIHM Number: " + dataTags["CIHMno.:"]);
+     		}
+     		
+     		if (dataTags["ICMHno:"]) {
+	     		
+	     		dataTags["ICMHno:"]=("ICMH nombre: " + dataTags["ICMHno:"]);
+     		}
+     		
+     		//makes tags of the items in the "tagsContent" array.
+     		for (var i = 0; i < tagsContent.length; i++) {
+	     		newItem.tags[i] = tagsContent[i];
+     		}
+     	
+     	//calls the associateData function to put the data in the correct Zotero field.	
+	associateData (newItem, dataTags, "Title:", "title");
+	associateData (newItem, dataTags, "Place:", "place");
+     	associateData (newItem, dataTags, "Publisher:", "publisher");
+     	associateData (newItem, dataTags, "Date:", "date");			
+	associateData (newItem, dataTags, "PageCount:", "pages");
+	associateData (newItem, dataTags, "CIHMno.:", "extra");
+	associateData (newItem, dataTags, "DocumentSource:", "rights");
+	
+	associateData (newItem, dataTags, "Titre:", "title" );
+	associateData (newItem, dataTags, "Nombredepages:", "pages");
+	associateData (newItem, dataTags, "ICMHno:", "extra");
+	associateData (newItem, dataTags, "Documentoriginal:", "rights");
+	
+	//Saves everything to Zotero.	
+	newItem.complete();
+
+}
+
+
+function doWeb(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	var articles = new Array();
+	
+	if (detectWeb(doc, url) == "multiple") {
+		var items = new Object();
+		var titles = doc.evaluate(''//div[@id="Content"]/div[@class="NormalRecord"]/h3/a'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var next_title;
+		while (next_title = titles.iterateNext()) {
+			items[next_title.href] = next_title.textContent;
+		}
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			articles.push(i);
+		}
+	} else {
+		articles = [url];
+	}
+	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
+	Zotero.wait();
+	
+	
+	
+}');
+
+REPLACE INTO translators VALUES ('1f245496-4c1b-406a-8641-d286b3888231', '1.0.0b4.r5', '', '2008-06-05 21:00:00', '0', '100', '4', 'The Boston Globe', 'Adam Crymble', 'http://(www|search).boston.com/', 
+'function detectWeb(doc, url) {
+	if (url.match("search.boston.com")) {
+		return "multiple";
+	} else if (doc.evaluate(''//div[@id="headTools"]/h1'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+		return "newspaperArticle";
+	} else if (doc.evaluate(''//div[@id="blogEntry"]/h1/a'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+		return "blogPost";
+	} 
+}', 
+'//Boston Globe and Boston.com Translator. Code by Adam Crymble
+
+function scrape (doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+	}: null;
+		
+	//sets variables that remain constant in both formats
+					
+		if (doc.evaluate(''//span[@id="dateline"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext())  {
+			var xPathDateResults = doc.evaluate (''//span[@id="dateline"]'', doc, nsResolver, XPathResult.ANY_TYPE, null);	
+		}
+		
+		if (doc.evaluate(''//span[@id="byline"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext())  {
+			var xPathAuthorResults= doc.evaluate (''//span[@id="byline"]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		}	
+		
+	
+	//sets variables unique to the blog posts on Boston.com		
+	
+		if (doc.evaluate(''//div[@id="blogEntry"]/h1/a'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+			
+			var newItem =new Zotero.Item("blogPost");
+			newItem.publicationTitle = "Boston.com";
+			
+			//title
+			var xPathTitle = ''//div[@id="blogEntry"]/h1/a'';
+			
+			//date
+			var articleDate = xPathDateResults.iterateNext().textContent;
+			newItem.date = articleDate;
+			
+			//author
+			var articleAuthor = xPathAuthorResults.iterateNext().textContent.replace(/Posted by /i, '''');
+			articleAuthor = articleAuthor.split('','');
+			var authorName = articleAuthor[0].split("and ");
+	
+	//else it sets the variables unique to the articles on the Boston Globe	
+	
+		} else if (doc.evaluate(''//div[@id="headTools"]/h1'', doc, null, XPathResult.ANY_TYPE, null).iterateNext())  {
+			
+			var newItem = new Zotero.Item("newspaperArticle");
+			newItem.publicationTitle = "The Boston Globe";
+		
+			//title
+			var xPathTitle = ''//div[@id="headTools"]/h1'';
+			
+			//date
+			if (doc.evaluate(''//span[@id="dateline"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext())  {
+				var articleDate = xPathDateResults.iterateNext().textContent;
+				if (articleDate.match(''/'')) {
+					articleDate = articleDate.split(''/'');
+				newItem.date = articleDate[1];	
+				} else {
+					newItem.date = articleDate;
+				}
+				
+			}			
+			
+			//author(s)
+				var articleAuthor = xPathAuthorResults.iterateNext().textContent.replace(/^\s*|\s*$/g, '''');
+				articleAuthor= articleAuthor.substr(3);
+				var authorName = articleAuthor.split("and ");
+			
+			
+			//byline	
+			if (doc.evaluate(''//div[@id="headTools"]/h2'', doc, null, XPathResult.ANY_TYPE, null).iterateNext())  {		
+				newItem.abstractNote = doc.evaluate (''//div[@id="headTools"]/h2'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+			}
+		}
+			
+		//creates title using xPaths defined above
+			var xPathTitleResults = doc.evaluate (xPathTitle, doc, nsResolver, XPathResult.ANY_TYPE, null);
+			newItem.title = xPathTitleResults.iterateNext().textContent;
+		
+		//pushes author(s)	
+			
+			for (var i=0; i<authorName.length; i++) {
+				newItem.creators.push(Zotero.Utilities.cleanAuthor(authorName[i], "author"));
+			}	
+		
+		newItem.url = doc.location.href;
+			
+		newItem.complete();
+}
+
+
+function doWeb (doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+	}: null;
+	
+	var uris= new Array();
+
+	if (detectWeb(doc, url) == "multiple") {
+		var items = new Object();
+		var result =  doc.evaluate(''//div[@class="regTZ"]/a[@class="titleLink"]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var elmt = result.iterateNext();
+		Zotero.debug(elmt);
+		while (elmt) {
+			//items.push(elmt.href);
+			items[elmt.href] = elmt.textContent;
+			elmt = result.iterateNext();
+		}
+		
+		items = Zotero.selectItems(items);
+		
+		if (!items) {
+			return true;
+		}
+		
+		for (var i in items) {
+			uris.push(i);
+		}
+	} else
+		uris.push(url);
+		Zotero.debug(uris);
+	Zotero.Utilities.processDocuments(uris, scrape, function() {Zotero.done();});
 	Zotero.wait();
 }');
 
