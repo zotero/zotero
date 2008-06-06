@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-06-05 21:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-06-06 08:45:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1089,7 +1089,7 @@ REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('2d174277-7651-458f-86dd-20e168d2f1f3', '1.0.0b4.r5', '', '2008-06-05 21:00:00', '0', '100', '4', 'Canadiana.org', 'Adam Crymble', 'http://(www.)?canadiana.org', 
+REPLACE INTO translators VALUES ('2d174277-7651-458f-86dd-20e168d2f1f3', '1.0.0b4.r5', '', '2008-06-06 08:45:00', '0', '100', '4', 'Canadiana.org', 'Adam Crymble', 'http://(www.)?canadiana.org', 
 'function detectWeb(doc, url) {
    
    //checks the title of the webpage. If it matches, then the little blue book symbol appears in the address bar.
@@ -1257,7 +1257,7 @@ function doWeb(doc, url) {
 	
 }');
 
-REPLACE INTO translators VALUES ('1f245496-4c1b-406a-8641-d286b3888231', '1.0.0b4.r5', '', '2008-06-05 21:00:00', '0', '100', '4', 'The Boston Globe', 'Adam Crymble', 'http://(www|search).boston.com/', 
+REPLACE INTO translators VALUES ('1f245496-4c1b-406a-8641-d286b3888231', '1.0.0b4.r5', '', '2008-06-06 08:45:00', '0', '100', '4', 'The Boston Globe', 'Adam Crymble', 'http://(www|search).boston.com/', 
 'function detectWeb(doc, url) {
 	if (url.match("search.boston.com")) {
 		return "multiple";
@@ -1388,7 +1388,7 @@ function doWeb (doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('e40a27bc-0eef-4c50-b78b-37274808d7d2', '1.0.0b4.r5', '', '2008-06-04 21:30:00', '0', '100', '4', 'J-Stage', 'Michael Berkowitz', 'http://www.jstage.jst.go.jp/', 
+REPLACE INTO translators VALUES ('e40a27bc-0eef-4c50-b78b-37274808d7d2', '1.0.0b4.r5', '', '2008-06-06 08:45:00', '0', '100', '4', 'J-Stage', 'Michael Berkowitz', 'http://www.jstage.jst.go.jp/', 
 'function detectWeb(doc, url) {
 	if (doc.evaluate(''//a[contains(@href, "_ris")]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "journalArticle";
@@ -6232,7 +6232,7 @@ function doWeb(doc, url) {
 	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done;});
 }');
 
-REPLACE INTO translators VALUES ('0abd577b-ec45-4e9f-9081-448737e2fd34', '1.0.0b4.r5', '', '2008-06-04 18:30:00', '0', '100', '4', 'DSpace', 'Michael Berkowitz', '(dspace|upcommons.upc.edu)', 
+REPLACE INTO translators VALUES ('0abd577b-ec45-4e9f-9081-448737e2fd34', '1.0.0b4.r5', '', '2008-06-06 08:45:00', '0', '100', '4', 'DSpace', 'Michael Berkowitz', '(dspace|upcommons.upc.edu)', 
 'function detectWeb(doc, url) {
 	if (doc.evaluate(''//table[@class="itemDisplayTable"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "document";
@@ -17811,7 +17811,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('e78d20f7-488-4023-831-dfe39679f3f', '1.0.0b3.r1', '', '2008-06-04 20:30:00', '1', '100', '4', 'ACM', 'Simon Kornblith and Michael Berkowitz', 'https?://[^/]*portal\.acm\.org[^/]*/(?:results\.cfm|citation\.cfm)', 
+REPLACE INTO translators VALUES ('e78d20f7-488-4023-831-dfe39679f3f', '1.0.0b3.r1', '', '2008-06-06 08:45:00', '1', '100', '4', 'ACM', 'Simon Kornblith and Michael Berkowitz', 'https?://[^/]*portal\.acm\.org[^/]*/(?:results\.cfm|citation\.cfm)', 
 'function detectWeb(doc, url) {
 	if(url.indexOf("/results.cfm") != -1) {
 		var items = Zotero.Utilities.getItemArray(doc, doc, ''^https?://[^/]+/citation.cfm\\?[^#]+$'');
