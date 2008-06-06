@@ -1321,6 +1321,7 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 						} else if(attachment.document
 						|| (attachment.mimeType && attachment.mimeType == "text/html")
 						|| downloadAssociatedFiles) {
+						
 							// if snapshot is not explicitly set to false, retrieve snapshot
 							if(attachment.document) {
 								try {
@@ -1328,7 +1329,10 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 								} catch(e) {
 									Zotero.debug("Translate: error attaching document");
 								}
-							} else if(attachment.url != item.url || automaticSnapshots) {
+							// Save attachment if snapshot pref enabled or not HTML
+							// (in which case downloadAssociatedFiles applies)
+							} else if(automaticSnapshots || !attachment.mimeType
+									|| attachment.mimeType != "text/html") {
 								var mimeType = null;
 								var title = null;
 
@@ -1356,7 +1360,7 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 									Zotero.Attachments.importFromURL(attachment.url, myID, title, fileBaseName);
 								} catch(e) {
 									Zotero.debug("Zotero.Translate: error adding attachment "+attachment.url);
-								}   
+								}
 							}
 						}
 					}
