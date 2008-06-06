@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-06-06 18:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-06-06 19:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -5375,11 +5375,11 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('b8a86e36-c270-48c9-bdd1-22aaa167ef46', '1.0.0b4.r5', '', '2008-03-30 08:00:00', '0', '100', '4', 'Agencia del ISBN', 'Michael Berkowitz', 'http://www.mcu.es/cgi-brs/BasesHTML', 
+REPLACE INTO translators VALUES ('b8a86e36-c270-48c9-bdd1-22aaa167ef46', '1.0.0b4.r5', '', '2008-06-06 19:00:00', '0', '100', '4', 'Agencia del ISBN', 'Michael Berkowitz', 'http://www.mcu.es/webISBN', 
 'function detectWeb(doc, url) {
-	if (doc.evaluate(''//div[@id="formularios"]/div[@class="isbnResultado"]/div[@class="isbnResDescripcion"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+	if (doc.evaluate(''//div[@class="isbnResultado"]/div[@class="isbnResDescripcion"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
-	} else if (doc.evaluate(''//div[@id="fichaISBN"]/table/tbody/tr'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+	} else if (doc.evaluate(''//div[@class="fichaISBN"]/div[@class="cabecera"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "book";
 	}
 }', 
@@ -5387,7 +5387,7 @@ REPLACE INTO translators VALUES ('b8a86e36-c270-48c9-bdd1-22aaa167ef46', '1.0.0b
 	var books = new Array();
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
-		var boxes = doc.evaluate(''//div[@id="formularios"]/div[@class="isbnResultado"]/div[@class="isbnResDescripcion"]'', doc, null, XPathResult.ANY_TYPE, null);
+		var boxes = doc.evaluate(''//div[@class="isbnResultado"]/div[@class="isbnResDescripcion"]'', doc, null, XPathResult.ANY_TYPE, null);
 		var box;
 		while (box = boxes.iterateNext()) {
 			var book = doc.evaluate(''./p/span/strong/a'', box, null, XPathResult.ANY_TYPE, null).iterateNext();
@@ -5402,36 +5402,27 @@ REPLACE INTO translators VALUES ('b8a86e36-c270-48c9-bdd1-22aaa167ef46', '1.0.0b
 	}
 	Zotero.Utilities.processDocuments(books, function(newDoc) {
 		var data = new Object();
-		var rows = newDoc.evaluate(''//div[@id="fichaISBN"]/table/tbody/tr'', newDoc, null, XPathResult.ANY_TYPE, null);
+		var rows = newDoc.evaluate(''//div[@class="fichaISBN"]/table/tbody/tr'', newDoc, null, XPathResult.ANY_TYPE, null);
 		var next_row;
 		while (next_row = rows.iterateNext()) {
 			var heading = newDoc.evaluate(''./th'', next_row, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 			var value = newDoc.evaluate(''./td'', next_row, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-			data[heading] = Zotero.Utilities.trimInternal(value);
+			data[heading.replace(/\W/g, "")] = value;
 		}
 		var isbn = Zotero.Utilities.trimInternal(newDoc.evaluate(''//span[@class="cabTitulo"]/strong'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
 		var item = new Zotero.Item("book");
 		item.ISBN = isbn;
-		item.title = data[''Título:''];
-		author = data[''Autor:''];
+		item.title = Zotero.Utilities.trimInternal(data[''Ttulo'']);
+		
+		author = data[''Autores''];
 		if (author) {
-			if (author.match(/tr\.$/)) {
-				item.creators.push(Zotero.Utilities.cleanAuthor(author.match(/([\w\s,]+)/)[1], "author"));
-				if (author.match(/\[([^\]]+)\]/)) {
-					item.creators.push(Zotero.Utilities.cleanAuthor(author.match(/\[([^\]]+)\]/)[1], "translator"));
-				} else {
-					item.creators.push(Zotero.Utilities.cleanAuthor(author.match(/\)(.*)tr\./)[1], "translator"));
-				}
-			} else {
-				item.creators.push(Zotero.Utilities.cleanAuthor(author, "author"));
+			var authors = author.match(/\b.*,\s+\w+[^([]/g);
+			for each (aut in authors) {
+				item.creators.push(Zotero.Utilities.cleanAuthor(Zotero.Utilities.trimInternal(aut), "author", true));
 			}
 		}
-		if (data[''Publicación:'']) {
-			var pub = data[''Publicación:''].match(/([^.]+)\.([\D]+)([\d\/]+)$/);
-			item.place = pub[1];
-			item.publisher = Zotero.Utilities.trimInternal(pub[2]).replace(/[\s,]+$/, "");
-			item.date = pub[3];
-		}
+		if (data[''Publicacin'']) item.publisher = Zotero.Utilities.trimInternal(data[''Publicacin'']);
+		if (data[''FechaEdicin'']) item.date = Zotero.Utilities.trimInternal(data[''FechaEdicin'']);
 		item.complete();
 	}, function() {Zotero.done;});
 	Zotero.wait();
