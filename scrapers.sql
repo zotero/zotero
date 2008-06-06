@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-06-06 19:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-06-06 22:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1385,6 +1385,60 @@ function doWeb (doc, url) {
 		uris.push(url);
 		Zotero.debug(uris);
 	Zotero.Utilities.processDocuments(uris, scrape, function() {Zotero.done();});
+	Zotero.wait();
+}');
+
+REPLACE INTO translators VALUES ('fc410e64-0252-4cd3-acb1-25e584775fa2', '1.0.0b4.r5', '', '2008-06-06 22:00:00', '0', '100', '4', 'National Library of Australia', 'Michael Berkowitz', 'http://librariesaustralia.nla.gov.au/', 
+'function detectWeb(doc, url) {
+	if (url.match("action=Search")) {
+		return "multiple";
+	} else if (url.match("action=Display")) {
+		return "book";
+	}
+}', 
+'function doWeb(doc, url) {
+	var n = doc.documentElement.namespaceURI;
+	var ns = n ? function(prefix) {
+		if (prefix == ''x'') return n; else return null;
+	} : null;
+	var books = new Array();
+	if (detectWeb(doc, url) == "multiple") {
+		var items = Zotero.Utilities.getItemArray(doc, doc, ''action=Display&'');
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			books.push(i);
+		}
+	} else {
+		books = [url];
+	}
+	Zotero.Utilities.processDocuments(books, function(doc) {
+		var table = doc.evaluate(''//tbody/tr[td[1][@class="CellAlignRight"]/strong]'', doc, ns, XPathResult.ANY_TYPE, null);
+		var row;
+		var data = new Object();
+		while (row = table.iterateNext()) {
+			var heading = doc.evaluate(''./td[1]'', row, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+			var value = doc.evaluate(''./td[2]'', row, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+			data[Zotero.Utilities.trimInternal(heading)] = value;
+		}
+		item = new Zotero.Item("book");
+		item.title = Zotero.Utilities.trimInternal(data[''Title:''].match(/^[^/]+/)[0]);
+		if (data[''Author:''].match(/\w+/)) item.creators.push(Zotero.Utilities.cleanAuthor(data[''Author:''], "author", true));
+		if (data[''Published:''].match(/\w+/)) {
+			var pub = data[''Published:''].match(/^([^:]+):([^,]+),(.*)$/);
+			item.location = Zotero.Utilities.trimInternal(pub[1]);
+			item.publisher = Zotero.Utilities.trimInternal(pub[2]);
+			item.date = Zotero.Utilities.trimInternal(pub[3].replace(/\D/g, ""));
+		}
+		if (data[''Subjects:'']) {
+			var kws = data[''Subjects:''].split(".");
+			Zotero.debug(kws);
+			for each (var key in kws) {
+				if (key.match(/\w+/)) item.tags.push(key);
+			}
+		}
+		if (data[''ISBN:''].match(/\w+/)) item.ISBN = Zotero.Utilities.trimInternal(data[''ISBN:''].match(/^[^(]+/)[0]);
+		item.complete();
+	}, function() {Zotero.done;});
 	Zotero.wait();
 }');
 
