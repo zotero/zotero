@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-06-06 22:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-06-08 23:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1388,7 +1388,7 @@ function doWeb (doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('fc410e64-0252-4cd3-acb1-25e584775fa2', '1.0.0b4.r5', '', '2008-06-06 22:00:00', '0', '100', '4', 'National Library of Australia', 'Michael Berkowitz', 'http://librariesaustralia.nla.gov.au/', 
+REPLACE INTO translators VALUES ('fc410e64-0252-4cd3-acb1-25e584775fa2', '1.0.0b4.r5', '', '2008-06-08 23:00:00', '0', '100', '4', 'National Library of Australia', 'Michael Berkowitz', 'http://librariesaustralia.nla.gov.au/', 
 'function detectWeb(doc, url) {
 	if (url.match("action=Search")) {
 		return "multiple";
@@ -5429,7 +5429,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('b8a86e36-c270-48c9-bdd1-22aaa167ef46', '1.0.0b4.r5', '', '2008-06-06 19:00:00', '0', '100', '4', 'Agencia del ISBN', 'Michael Berkowitz', 'http://www.mcu.es/webISBN', 
+REPLACE INTO translators VALUES ('b8a86e36-c270-48c9-bdd1-22aaa167ef46', '1.0.0b4.r5', '', '2008-06-08 23:00:00', '0', '100', '4', 'Agencia del ISBN', 'Michael Berkowitz', 'http://www.mcu.es/webISBN', 
 'function detectWeb(doc, url) {
 	if (doc.evaluate(''//div[@class="isbnResultado"]/div[@class="isbnResDescripcion"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
