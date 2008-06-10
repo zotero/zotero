@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-06-10 21:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-06-10 22:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1089,7 +1089,7 @@ REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('59cce211-9d77-4cdd-876d-6229ea20367f', '1.0.0b4.r5', '', '2008-06-10 21:30:00', '0', '100', '4', 'Bibliothèque et Archives nationales du Québec', 'Adam Crymble', 'http://catalogue.banq.qc.ca', 
+REPLACE INTO translators VALUES ('59cce211-9d77-4cdd-876d-6229ea20367f', '1.0.0b4.r5', '', '2008-06-10 22:30:00', '0', '100', '4', 'Bibliothèque et Archives nationales du Québec', 'Adam Crymble', 'http://catalogue.banq.qc.ca', 
 'function detectWeb(doc, url) {
 	if (doc.title.match("Search")) {
 		return "multiple";
@@ -1640,7 +1640,7 @@ function doWeb (doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('91acf493-0de7-4473-8b62-89fd141e6c74', '1.0.0b3.r1', '', '2008-06-10 19:30:00', '1', '100', '1', 'MAB2', 'Simon Kornblith. Adaptions for MAB2: Leon Krauthausen (FUB)', 'mab2', 
+REPLACE INTO translators VALUES ('91acf493-0de7-4473-8b62-89fd141e6c74', '1.0.0b3.r1', '', '2008-06-10 22:30:00', '1', '100', '1', 'MAB2', 'Simon Kornblith. Adaptions for MAB2: Leon Krauthausen (FUB)', 'mab2', 
 'function detectImport() {
 	var mab2RecordRegexp = /^[0-9]{3}[a-z ]{2}[a-z ]{3}$/
 	var read = Zotero.read(8);
@@ -1987,7 +1987,7 @@ function doImport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('b662c6eb-e478-46bd- bad4-23cdfd0c9d67', '1.0.0b4.r5', '', '2008-06-10 19:00:00', '0', '100', '4', 'JurPC', 'Oliver Vivell and Michael Berkowitz', 'http://www.jurpc.de/', 
+REPLACE INTO translators VALUES ('b662c6eb-e478-46bd- bad4-23cdfd0c9d67', '1.0.0b4.r5', '', '2008-06-10 22:30:00', '0', '100', '4', 'JurPC', 'Oliver Vivell and Michael Berkowitz', 'http://www.jurpc.de/', 
 'function detectWeb(doc, url) {
         var doctype = doc.evaluate(''//meta/@doctype'', doc, null,XPathResult.ANY_TYPE, null).iterateNext().textContent;
 
@@ -2102,7 +2102,7 @@ function parseDoc(xpath, doc) {
         return content;
 }');
 
-REPLACE INTO translators VALUES ('cae7d3ec-bc8d-465b-974f-8b0dcfe24290', '1.0.0b4.r5', '', '2008-06-10 15:45:00', '0', '100', '4', 'BIUM', 'Michael Berkowitz', 'http://hip.bium.univ-paris5.fr/', 
+REPLACE INTO translators VALUES ('cae7d3ec-bc8d-465b-974f-8b0dcfe24290', '1.0.0b4.r5', '', '2008-06-10 22:30:00', '0', '100', '4', 'BIUM', 'Michael Berkowitz', 'http://hip.bium.univ-paris5.fr/', 
 'function detectWeb(doc, url) {
 	if (doc.evaluate(''//td/a[@class="itemTitle"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
@@ -13406,7 +13406,7 @@ REPLACE INTO translators VALUES ('5e3e6245-83da-4f55-a39b-b712df54a935', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('cf87eca8-041d-b954-795a-2d86348999d5', '1.0.0b3.r1', '', '2008-06-10 19:30:00', '1', '100', '4', 'Library Catalog (Aleph)', 'Simon Kornblith and Michael Berkowitz', 'https?://[^/]+/F(?:/[A-Z0-9\-]+(?:\?.*)?$|\?func=find|\?func=scan|\?func=short)', 
+REPLACE INTO translators VALUES ('cf87eca8-041d-b954-795a-2d86348999d5', '1.0.0b3.r1', '', '2008-06-10 22:30:00', '1', '100', '4', 'Library Catalog (Aleph)', 'Simon Kornblith and Michael Berkowitz', 'https?://[^/]+/F(?:/[A-Z0-9\-]+(?:\?.*)?$|\?func=find|\?func=scan|\?func=short)', 
 'function detectWeb(doc, url) {
 	var singleRe = new RegExp("^https?://[^/]+/F/[A-Z0-9\-]+\?.*(?:func=full-set-set.*\&format=[0-9]{3}|func=direct|func=myshelf-full.*)");
 	
