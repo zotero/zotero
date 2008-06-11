@@ -399,9 +399,18 @@ Zotero.Item.prototype.setType = function(itemTypeID, loadIn) {
 		if (creators) {
 			for (var i in creators) {
 				if (!Zotero.CreatorTypes.isValidForItemType(creators[i].creatorTypeID, itemTypeID)) {
+					// Convert existing primary creator type to new item type's
+					// primary creator type, or contributor (creatorTypeID 2)
+					// if none or not currently primary
+					var oldPrimary = Zotero.CreatorTypes.getPrimaryIDForType(this.getType());
+					if (oldPrimary == creators[i].creatorTypeID) {
+						var newPrimary = Zotero.CreatorTypes.getPrimaryIDForType(itemTypeID);
+					}
+					var target = newPrimary ? newPrimary : 2;
+					
 					// Reset to contributor (creatorTypeID 2), which exists in all
-					this.setCreator(i, creators[i].ref, 2);
-				}
+					this.setCreator(i, creators[i].firstName,
+						creators[i].lastName, target, creators[i].fieldMode);				}
 			}
 		}
 	}

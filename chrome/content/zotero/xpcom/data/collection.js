@@ -911,8 +911,14 @@ Zotero.Collection.prototype._loadChildCollections = function () {
 }
 
 Zotero.Collection.prototype._loadChildItems = function() {
-	var sql = "SELECT itemID FROM collectionItems WHERE collectionID=?";
-	var ids = Zotero.DB.columnQuery(sql, this.id);
+	var sql = "SELECT itemID FROM collectionItems WHERE collectionID=? ";
+		// DEBUG: Fix for child items created via context menu on parent within
+		// a collection being added to the current collection
+		+ "AND itemID NOT IN "
+			+ "(SELECT itemID FROM itemNotes WHERE sourceItemID IS NOT NULL) "
+		+ "AND itemID NOT IN "
+			+ "(SELECT itemID FROM itemAttachments WHERE sourceItemID IS NOT NULL)";
+	var ids = Zotero.DB.columnQuery(sql, this._id);
 	
 	this._childItems = [];
 	

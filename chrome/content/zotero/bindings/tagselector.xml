@@ -44,7 +44,7 @@
 				<getter>
 					<![CDATA[
 					var types = [0];
-					if (this.showAutomatic == 'true') {
+					if (this.showAutomatic) {
 						types.push(1);
 					}
 					return types;

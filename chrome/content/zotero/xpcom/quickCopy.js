@@ -144,6 +144,44 @@ Zotero.QuickCopy = new function() {
 			return true;
 		}
 		else if (mode == 'bibliography') {
+			// Move notes to separate array
+			var allNotes = true;
+			var notes = [];
+			for (var i=0; i<items.length; i++) {
+				if (items[i].isNote()) {
+					notes.push(items.splice(i, 1)[0]);
+					i--;
+				}
+				else {
+					allNotes = false;
+				}
+			}
+			
+			// If all notes, export full content
+			if (allNotes) {
+				var content = [];
+				for (var i=0; i<notes.length; i++) {
+					content.push(notes[i].getNote());
+				}
+				
+				default xml namespace = '';
+				var html = <div/>;
+				for (var i=0; i<content.length; i++) {
+					var p = <p>{content[i]}</p>;
+					p.@style = 'white-space: pre-wrap';
+					html.p += p;
+				}
+				
+				html = html.toXMLString();
+				
+				var content = {
+					text: contentType == "html" ? html : content.join('\n\n\n'),
+					html: html
+				};
+				
+				return content;
+			}
+			
 			var csl = Zotero.Cite.getStyle(format);
 			var itemSet = csl.createItemSet(items);
 			var bibliography = {

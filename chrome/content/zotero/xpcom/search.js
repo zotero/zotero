@@ -1329,7 +1329,8 @@ Zotero.Search.prototype._buildQuery = function(){
 							case 'isNot': // excluded with NOT IN above
 								// Automatically cast values which might
 								// have been stored as integers
-								if (condition.value.match(/^[1-9]+[0-9]*$/)) {
+								if (condition.value
+										&& condition.value.match(/^[1-9]+[0-9]*$/)) {
 									condSQL += ' LIKE ?';
 								}
 								else {
