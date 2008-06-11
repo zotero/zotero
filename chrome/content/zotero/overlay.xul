@@ -171,10 +171,10 @@
 						<!-- New Item drop-down built in overlay.js::onLoad() -->
 						<menupopup>
 							<menuseparator/>
-							<menuitem label="&zotero.toolbar.attachment.linked;" oncommand="ZoteroPane.addAttachmentFromDialog(true);"/>
-							<menuitem label="&zotero.toolbar.attachment.add;" oncommand="ZoteroPane.addAttachmentFromDialog();"/>
+							<menuitem label="&zotero.toolbar.attachment.linked;" oncommand="ZoteroPane.addAttachmentFromDialog(true);" tooltiptext=""/>
+							<menuitem label="&zotero.toolbar.attachment.add;" oncommand="ZoteroPane.addAttachmentFromDialog();"  tooltiptext=""/>
 							<menuseparator/>
-							<menu label="&zotero.toolbar.moreItemTypes.label;">
+							<menu label="&zotero.toolbar.moreItemTypes.label;" tooltiptext="">
 								<menupopup id="zotero-tb-add-more"/>
 							</menu>
 						</menupopup>
