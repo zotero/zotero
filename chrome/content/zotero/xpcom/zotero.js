@@ -120,6 +120,12 @@ var Zotero = new function(){
 		this.version
 			= gExtensionManager.getItemForID(ZOTERO_CONFIG['GUID']).version;
 		
+		var appInfo =
+			Components.classes["@mozilla.org/xre/app-info;1"].
+				getService(Components.interfaces.nsIXULAppInfo)
+		this.isFx2 = appInfo.platformVersion.indexOf('1.8') === 0; // TODO: remove
+		this.isFx3 = appInfo.platformVersion.indexOf('1.9') === 0;
+		
 		// OS platform
 		var win = Components.classes["@mozilla.org/appshell/appShellService;1"]
 			   .getService(Components.interfaces.nsIAppShellService)
@@ -211,6 +217,7 @@ var Zotero = new function(){
 			Zotero.DB.test();
 		}
 		catch (e) {
+			Components.utils.reportError(e);
 			this.skipLoading = true;
 			Zotero.DB.skipBackup = true;
 			return;
@@ -524,11 +531,14 @@ var Zotero = new function(){
 				"No chrome package registered for chrome://communicator",
 				'[JavaScript Error: "Components is not defined" {file: "chrome://nightly/content/talkback/talkback.js',
 				'[JavaScript Error: "document.getElementById("sanitizeItem")',
-				'chrome://webclipper',
 				'No chrome package registered for chrome://piggy-bank',
 				'[JavaScript Error: "[Exception... "\'Component is not available\' when calling method: [nsIHandlerService::getTypeFromExtension',
 				'[JavaScript Error: "this._uiElement is null',
-				'Error: a._updateVisibleText is not a function'
+				'Error: a._updateVisibleText is not a function',
+				'[JavaScript Error: "Warning: unrecognized command line flag -psn',
+				'LibX:',
+				'function skype_',
+				'[JavaScript Error: "uncaught exception: Permission denied to call method Location.toString"]'
 			];
 			
 			for (var i=0; i<blacklist.length; i++) {
@@ -1694,6 +1704,7 @@ Zotero.Browser = new function() {
 		
 		// Create a hidden browser
 		var hiddenBrowser = win.document.createElement("browser");
+		hiddenBrowser.setAttribute('disablehistory', 'true');
 		win.document.documentElement.appendChild(hiddenBrowser);
 		Zotero.debug("created hidden browser ("
 			+ win.document.getElementsByTagName('browser').length + ")");

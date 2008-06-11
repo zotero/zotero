@@ -54,7 +54,7 @@
 <!ENTITY zotero.preferences.quickCopy.caption "ทำสำเนาอย่างเร็ว">
 <!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Default Output Format:">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "ทำสำเนาเป็น HTML">
-<!ENTITY zotero.preferences.quickCopy.macWarning "Note: Rich-text formatting will be lost on Mac OS X.">
+<!ENTITY zotero.preferences.quickCopy.macWarning "โน๊ต: การจัดหน้าจะสูญหายไปบน Mac OS X">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Site-Specific Settings:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domain/Path">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(เช่น wikipedia.org)">
@@ -62,16 +62,16 @@
 
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Get additional styles...">
 
-<!ENTITY zotero.preferences.prefpane.keys "Shortcut Keys">
+<!ENTITY zotero.preferences.prefpane.keys "คีย์ลัด">
 
 <!ENTITY zotero.preferences.keys.openZotero "Open/Close Zotero Pane">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Toggle Fullscreen Mode">
-<!ENTITY zotero.preferences.keys.library "Library">
+<!ENTITY zotero.preferences.keys.library "ไลบรารี่">
 <!ENTITY zotero.preferences.keys.quicksearch "ค้นหาด่วน">
 <!ENTITY zotero.preferences.keys.newItem "สร้างไอเทมใหม่">
 <!ENTITY zotero.preferences.keys.newNote "สร้างโน๊ตใหม่">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Toggle Tag Selector">
-<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copy Selected Item Citations to Clipboard">
+<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "ทำสำเนาอ้างอิงที่เลือกไว้ไปที่คลิปบอร์ด">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "ทำสำเนาไอเทมไปที่คลิปบอร์ด">
 <!ENTITY zotero.preferences.keys.overrideGlobal "Try to override conflicting shortcuts">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Changes take effect in new windows only">
@@ -83,7 +83,7 @@
 <!ENTITY zotero.preferences.dataDir.useProfile "ใช้ไดเรคทอรีของโปรไฟล์ไฟร์ฟ๊อกซ์">
 <!ENTITY zotero.preferences.dataDir.custom "Custom:">
 <!ENTITY zotero.preferences.dataDir.choose "โปรดเลือก...">
-<!ENTITY zotero.preferences.dataDir.reveal "Show Data Directory">
+<!ENTITY zotero.preferences.dataDir.reveal "แสดงไดเรคทอรีข้อมูล">
 
 <!ENTITY zotero.preferences.dbMaintenance "Database Maintenance">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "ตรวจสอบความถูกต้องของฐานข้อมูล">

@@ -1308,14 +1308,21 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 			}
 		}
 		
+		var automaticSnapshots = Zotero.Prefs.get("automaticSnapshots");
+		var downloadAssociatedFiles = Zotero.Prefs.get("downloadAssociatedFiles");
+		
 		// handle attachments
-		if(item.attachments && Zotero.Prefs.get("automaticSnapshots")) {
+		if(item.attachments && (automaticSnapshots || downloadAssociatedFiles)) {
 			for each(var attachment in item.attachments) {
 				if(this.type == "web") {
 					if(!attachment.url && !attachment.document) {
 						Zotero.debug("Translate: not adding attachment: no URL specified");
 					} else {
 						if(attachment.snapshot === false) {
+							if(!automaticSnapshots) {
+								continue;
+							}
+							
 							// if snapshot is explicitly set to false, attach as link
 							if(attachment.document) {
 								Zotero.Attachments.linkFromURL(attachment.document.location.href, myID,
@@ -1336,7 +1343,8 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 							}
 						} else if(attachment.document
 						|| (attachment.mimeType && attachment.mimeType == "text/html")
-						|| Zotero.Prefs.get("downloadAssociatedFiles")) {
+						|| downloadAssociatedFiles) {
+						
 							// if snapshot is not explicitly set to false, retrieve snapshot
 							if(attachment.document) {
 								try {
@@ -1344,10 +1352,13 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 								} catch(e) {
 									Zotero.debug("Translate: error attaching document");
 								}
-							} else {
+							// Save attachment if snapshot pref enabled or not HTML
+							// (in which case downloadAssociatedFiles applies)
+							} else if(automaticSnapshots || !attachment.mimeType
+									|| attachment.mimeType != "text/html") {
 								var mimeType = null;
 								var title = null;
-								
+
 								if(attachment.mimeType) {
 									// first, try to extract mime type from mimeType attribute
 									mimeType = attachment.mimeType;
@@ -1355,18 +1366,18 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 									// if that fails, use document if possible
 									mimeType = attachment.document.contentType
 								}
-								
+
 								// same procedure for title as mime type
 								if(attachment.title) {
 									title = attachment.title;
 								} else if(attachment.document && attachment.document.title) {
 									title = attachment.document.title;
 								}
-								
+
 								if(this.locationIsProxied) {
 									attachment.url = Zotero.Ingester.ProxyMonitor.properToProxy(attachment.url);
 								}
-								
+
 								var fileBaseName = Zotero.Attachments.getFileBaseNameFromItem(myID);
 								try {
 									Zotero.Attachments.importFromURL(attachment.url, myID, title, fileBaseName);

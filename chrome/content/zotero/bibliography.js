@@ -110,13 +110,19 @@ var Zotero_File_Interface_Bibliography = new function() {
 			document.getElementById("fields").label = Zotero.getString("integration."+formatOption+".label");
 			document.getElementById("fields-caption").textContent = Zotero.getString("integration."+formatOption+".caption");
 			
-			// add border on Windows
 			if(Zotero.isWin) {
+				// add border on Windows
 				document.getElementById("zotero-doc-prefs-dialog").style.border = "1px solid black";
 			}
 		}
-		window.sizeToContent();
-		window.centerWindowOnScreen();
+		
+		// Center popup manually after a delay on Windows, since window
+		// isn't resizable and there might be a persisted position
+		if (Zotero.isWin) {
+			setTimeout(function () {
+				window.centerWindowOnScreen();
+			}, 1);
+		}
 	}
 	
 	/*

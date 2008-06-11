@@ -35,7 +35,8 @@
 	onload="doLoad();"
 	onunload="doUnload();"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-	style="padding:2em">
+	style="padding:2em"
+	persist="screenX screenY">
 	
 	<script src="include.js"/>
 	<script src="selectItemsDialog.js"/>
@@ -44,7 +45,8 @@
 	
 	<hbox align="center" pack="end">
 		<label value="&zotero.toolbar.search.label;" control="zotero-tb-search"/>
-		<textbox id="zotero-tb-search" type="timed" timeout="250" oncommand="onSearch()" dir="reverse" onkeypress="if(event.keyCode == event.DOM_VK_ESCAPE) { this.value = ''; this.doCommand('cmd_zotero_search'); return false; }">
+		<textbox id="zotero-tb-search" type="timed" timeout="250" oncommand="onSearch()" dir="reverse"
+				onkeypress="if(event.keyCode == event.DOM_VK_ESCAPE) { if (this.value == '') { cancelDialog(); return false; } this.value = ''; this.doCommand('cmd_zotero_search'); return false; } return true;">
 			<toolbarbutton id="zotero-tb-search-cancel" oncommand="this.parentNode.value='';" hidden="true"/>
 		</textbox>
 	</hbox>

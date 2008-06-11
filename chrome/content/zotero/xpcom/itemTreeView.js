@@ -1463,7 +1463,9 @@ Zotero.ItemTreeView.prototype.getSortField = function() {
 /*
  * Returns 'ascending' or 'descending'
  *
- * A-Z == 'descending'
+ * A-Z == 'descending', because Mozilla is confused
+ *	(an upwards-facing triangle is A-Z on OS X and Windows,
+ *   but Firefox uses the opposite)
  */
 Zotero.ItemTreeView.prototype.getSortDirection = function() {
 	var column = this._treebox.columns.getSortedColumn();

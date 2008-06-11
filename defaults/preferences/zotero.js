@@ -66,6 +66,7 @@ pref("extensions.zotero.export.citePaperJournalArticleURL", false);
 pref("extensions.zotero.export.quickCopy.setting", 'bibliography=http://www.zotero.org/styles/chicago-note');
 
 // Integration settings
+pref("extensions.zotero.integration.port", 50001);
 pref("extensions.zotero.integration.autoRegenerate", -1);	// -1 = ask; 0 = no; 1 = yes
 
 // Zeroconf

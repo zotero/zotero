@@ -138,8 +138,12 @@
 				<body>
 					<![CDATA[
 						var io = {dataIn: null, dataOut: null};
-						window.openDialog('chrome://zotero/content/selectItemsDialog.xul','','chrome,modal',io);
-
+						
+						Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
+							.getService(Components.interfaces.nsIWindowWatcher)
+							.openWindow(null, 'chrome://zotero/content/selectItemsDialog.xul', '',
+								'chrome,modal,centerscreen', io);
+						
 						if(io.dataOut && this.item)
 						{
 							for(var i = 0; i < io.dataOut.length; i++)

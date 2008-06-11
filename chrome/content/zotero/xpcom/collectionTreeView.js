@@ -965,14 +965,9 @@ Zotero.ItemGroup.prototype.getChildItems = function()
 		var ids = s.search();
 	}
 	catch (e) {
-		if (typeof e == 'string' && e.match(/Saved search [0-9]+ does not exist/)) {
-			Zotero.DB.rollbackTransaction();
-			Zotero.debug(e, 2);
-			return false;
-		}
-		else {
-			throw (e);
-		}
+		Zotero.DB.rollbackAllTransactions();
+		Zotero.debug(e, 2);
+		throw (e);
 	}
 	return Zotero.Items.get(ids);
 }
