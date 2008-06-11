@@ -647,11 +647,13 @@ Zotero.Ingester.MIMEHandler = new function() {
 	function init() {
 		var prefStatus = Zotero.Prefs.get("parseEndNoteMIMETypes");
 		if(!on && prefStatus) {
+			Zotero.debug("Registering URIContentListener for RIS/Refer");
 			var uriLoader = Components.classes["@mozilla.org/uriloader;1"].
 			                getService(Components.interfaces.nsIURILoader);
 			uriLoader.registerContentListener(Zotero.Ingester.MIMEHandler.URIContentListener);
 			on = true;
 		} else if(on && !prefStatus) {
+			Zotero.debug("Unregistering URIContentListener for RIS/Refer");
 			var uriLoader = Components.classes["@mozilla.org/uriloader;1"].
 			                getService(Components.interfaces.nsIURILoader);
 			uriLoader.unRegisterContentListener(Zotero.Ingester.MIMEHandler.URIContentListener);
