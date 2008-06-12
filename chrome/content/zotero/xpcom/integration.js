@@ -743,6 +743,28 @@ Zotero.Integration.Session.prototype.unserializeCitation = function(arg, index) 
 		// get JSON
 		var object = Zotero.JSON.unserialize(arg);
 		
+		// Fix uppercase citation codes
+		if(object.CITATIONITEMS) {
+			object.citationItems = [];
+			for (var i=0; i<object.CITATIONITEMS.length; i++) {
+				for (var j in object.CITATIONITEMS[i]) {
+					switch (j) {
+						case 'ITEMID':
+							var field = 'itemID';
+							break;
+							
+						// 'position', 'custom'
+						default:
+							var field = j.toLowerCase();
+					}
+					if (!object.citationItems[i]) {
+						object.citationItems[i] = {};
+					}
+					object.citationItems[i][field] = object.CITATIONITEMS[i][j];
+				}
+			}
+		}
+		
 		// copy properties
 		for(var i in object) {
 			if(Zotero.Integration.Session._saveProperties.indexOf(i) != -1) {
