@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-06-12 15:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-06-12 19:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1640,7 +1640,7 @@ function doWeb (doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('91acf493-0de7-4473-8b62-89fd141e6c74', '1.0.0b3.r1', '', '2008-06-10 22:30:00', '1', '100', '1', 'MAB2', 'Simon Kornblith. Adaptions for MAB2: Leon Krauthausen (FUB)', 'mab2', 
+REPLACE INTO translators VALUES ('91acf493-0de7-4473-8b62-89fd141e6c74', '1.0.0b3.r1', '', '2008-06-12 19:00:00', '1', '100', '1', 'MAB2', 'Simon Kornblith. Adaptions for MAB2: Leon Krauthausen (FUB)', 'mab2', 
 'function detectImport() {
 	var mab2RecordRegexp = /^[0-9]{3}[a-z ]{2}[a-z ]{3}$/
 	var read = Zotero.read(8);
@@ -1987,7 +1987,7 @@ function doImport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('2943d7fc-3ce8-401c-afd5-ee1f70b7aae0', '1.0.0b4.r5', '', '2008-06-11 20:00:00', '0', '100', '4', 'Helsinki University of Technology', 'Michael Berkowitz', 'https?://teemu.linneanet.fi/', 
+REPLACE INTO translators VALUES ('2943d7fc-3ce8-401c-afd5-ee1f70b7aae0', '1.0.0b4.r5', '', '2008-06-12 19:00:00', '0', '100', '4', 'Helsinki University of Technology', 'Michael Berkowitz', 'https?://teemu.linneanet.fi/', 
 'function detectWeb(doc, url) {
 	if (url.match(/v\d+=\d+/)) {
 		return "book";
@@ -14211,7 +14211,7 @@ REPLACE INTO translators VALUES ('c54d1932-73ce-dfd4-a943-109380e06574', '1.0.0b
 	}
 }');
 
-REPLACE INTO translators VALUES ('fcf41bed-0cbc-3704-85c7-8062a0068a7a', '1.0.0b3.r1', '', '2008-06-12 15:00:00', '1', '100', '4', 'NCBI PubMed', 'Simon Kornblith and Michael Berkowitz', 'http://[^/]*www\.ncbi\.nlm\.nih\.gov[^/]*/(pubmed|sites/entrez|entrez/query\.fcgi\?.*db=PubMed)', 
+REPLACE INTO translators VALUES ('fcf41bed-0cbc-3704-85c7-8062a0068a7a', '1.0.0b3.r1', '', '2008-06-12 19:00:00', '1', '100', '4', 'NCBI PubMed', 'Simon Kornblith and Michael Berkowitz', 'http://[^/]*www\.ncbi\.nlm\.nih\.gov[^/]*/(pubmed|sites/entrez|entrez/query\.fcgi\?.*db=PubMed)', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
