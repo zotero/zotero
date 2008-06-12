@@ -175,9 +175,17 @@ Zotero.QuickCopy = new function() {
 				
 				html = html.toXMLString();
 				
+				// Don't copy HTML, since we don't have rich-text notes and
+				// copying HTML on Windows just loses newlines (due to
+				// unsupported white-space: pre-wrap in Word and OO).
+				/*
 				var content = {
 					text: contentType == "html" ? html : content.join('\n\n\n'),
 					html: html
+				};
+				*/
+				var content = {
+					text: contentType == "html" ? html : content.join('\n\n\n')
 				};
 				
 				return content;
