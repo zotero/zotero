@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-06-12 19:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-06-12 19:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1089,7 +1089,7 @@ REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('59cce211-9d77-4cdd-876d-6229ea20367f', '1.0.0b4.r5', '', '2008-06-10 22:30:00', '0', '100', '4', 'Bibliothèque et Archives nationales du Québec', 'Adam Crymble', 'http://catalogue.banq.qc.ca', 
+REPLACE INTO translators VALUES ('59cce211-9d77-4cdd-876d-6229ea20367f', '1.0.0b4.r5', '', '2008-06-12 19:30:00', '0', '100', '4', 'Bibliothèque et Archives nationales du Québec', 'Adam Crymble', 'http://catalogue.banq.qc.ca', 
 'function detectWeb(doc, url) {
 	if (doc.title.match("Search")) {
 		return "multiple";
@@ -1341,7 +1341,7 @@ function doWeb(doc, url) {
 	
 }');
 
-REPLACE INTO translators VALUES ('2d174277-7651-458f-86dd-20e168d2f1f3', '1.0.0b4.r5', '', '2008-06-06 08:45:00', '0', '100', '4', 'Canadiana.org', 'Adam Crymble', 'http://(www.)?canadiana.org', 
+REPLACE INTO translators VALUES ('2d174277-7651-458f-86dd-20e168d2f1f3', '1.0.0b4.r5', '', '2008-06-12 19:30:00', '0', '100', '4', 'Canadiana.org', 'Adam Crymble', 'http://(www.)?canadiana.org', 
 'function detectWeb(doc, url) {
    
    //checks the title of the webpage. If it matches, then the little blue book symbol appears in the address bar.
@@ -2056,7 +2056,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('b662c6eb-e478-46bd- bad4-23cdfd0c9d67', '1.0.0b4.r5', '', '2008-06-10 22:30:00', '0', '100', '4', 'JurPC', 'Oliver Vivell and Michael Berkowitz', 'http://www.jurpc.de/', 
+REPLACE INTO translators VALUES ('b662c6eb-e478-46bd- bad4-23cdfd0c9d67', '1.0.0b4.r5', '', '2008-06-12 19:30:00', '0', '100', '4', 'JurPC', 'Oliver Vivell and Michael Berkowitz', 'http://www.jurpc.de/', 
 'function detectWeb(doc, url) {
         var doctype = doc.evaluate(''//meta/@doctype'', doc, null,XPathResult.ANY_TYPE, null).iterateNext().textContent;
 
@@ -2171,7 +2171,7 @@ function parseDoc(xpath, doc) {
         return content;
 }');
 
-REPLACE INTO translators VALUES ('cae7d3ec-bc8d-465b-974f-8b0dcfe24290', '1.0.0b4.r5', '', '2008-06-10 22:30:00', '0', '100', '4', 'BIUM', 'Michael Berkowitz', 'http://hip.bium.univ-paris5.fr/', 
+REPLACE INTO translators VALUES ('cae7d3ec-bc8d-465b-974f-8b0dcfe24290', '1.0.0b4.r5', '', '2008-06-12 19:30:00', '0', '100', '4', 'BIUM', 'Michael Berkowitz', 'http://hip.bium.univ-paris5.fr/', 
 'function detectWeb(doc, url) {
 	if (doc.evaluate(''//td/a[@class="itemTitle"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
@@ -12362,7 +12362,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('add7c71c-21f3-ee14-d188-caf9da12728b', '1.0.0b3.r1', '', '2008-05-27 20:00:00', '1', '100', '4', 'Library Catalog (SIRSI)', 'Sean Takats', '/uhtbin/cgisirsi', 
+REPLACE INTO translators VALUES ('add7c71c-21f3-ee14-d188-caf9da12728b', '1.0.0b3.r1', '', '2008-06-12 19:30:00', '1', '100', '4', 'Library Catalog (SIRSI)', 'Sean Takats', '/uhtbin/cgisirsi', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -14928,7 +14928,7 @@ REPLACE INTO translators VALUES ('a326fc49-60c2-405b-8f44-607e5d18b9ad', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('c3edb423-f267-47a1-a8c2-158c247f87c2', '1.0.0b4.r5', '', '2008-05-06 08:15:00', '0', '100', '4', 'Common-Place', 'Frederick Gibbs', 'http://www.common-place\.|historycooperative\.org/journals/cp', 
+REPLACE INTO translators VALUES ('c3edb423-f267-47a1-a8c2-158c247f87c2', '1.0.0b4.r5', '', '2008-06-12 19:30:00', '0', '100', '4', 'Common-Place', 'Frederick Gibbs', 'http://www.common-place\.|historycooperative\.org/journals/cp', 
 'function detectWeb(doc, url) {
 	if(doc.title.indexOf("Previous Issues") != -1 || doc.title.indexOf("Search Site") != -1 ) {
 		return "multiple";
@@ -16140,7 +16140,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('d0b1914a-11f1-4dd7-8557-b32fe8a3dd47', '1.0.0b3.r1', '', '2008-05-22 20:30:00', '1', '100', '4', 'EBSCOhost', 'Simon Kornblith', 'https?://[^/]+/(?:bsi|ehost)/(?:results|detail|folder)', 
+REPLACE INTO translators VALUES ('d0b1914a-11f1-4dd7-8557-b32fe8a3dd47', '1.0.0b3.r1', '', '2008-06-12 19:30:00', '1', '100', '4', 'EBSCOhost', 'Simon Kornblith', 'https?://[^/]+/(?:bsi|ehost)/(?:results|detail|folder)', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -19508,7 +19508,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('72cb2536-3211-41e0-ae8b-974c0385e085', '1.0.0b4.r1', '', '2007-06-21 07:00:00', '0', '100', '4', 'ARTFL Encyclopedie', 'Sean Takats', '/cgi-bin/philologic31/(getobject\.pl\?c\.[0-9]+:[0-9]+\.encyclopedie|search3t\?dbname=encyclopedie0507)', 
+REPLACE INTO translators VALUES ('72cb2536-3211-41e0-ae8b-974c0385e085', '1.0.0b4.r1', '', '2008-06-12 19:30:00', '0', '100', '4', 'ARTFL Encyclopedie', 'Sean Takats', '/cgi-bin/philologic31/(getobject\.pl\?c\.[0-9]+:[0-9]+\.encyclopedie|search3t\?dbname=encyclopedie0507)', 
 'function detectWeb(doc, url) {
 	if (url.indexOf("getobject.pl") != -1){
 		return "encyclopediaArticle";
