@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-06-11 20:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-06-12 15:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -14211,7 +14211,7 @@ REPLACE INTO translators VALUES ('c54d1932-73ce-dfd4-a943-109380e06574', '1.0.0b
 	}
 }');
 
-REPLACE INTO translators VALUES ('fcf41bed-0cbc-3704-85c7-8062a0068a7a', '1.0.0b3.r1', '', '2008-06-11 05:00:00', '1', '100', '4', 'NCBI PubMed', 'Simon Kornblith and Michael Berkowitz', 'http://[^/]*www\.ncbi\.nlm\.nih\.gov[^/]*/(pubmed|sites/entrez|entrez/query\.fcgi\?.*db=PubMed)', 
+REPLACE INTO translators VALUES ('fcf41bed-0cbc-3704-85c7-8062a0068a7a', '1.0.0b3.r1', '', '2008-06-12 15:00:00', '1', '100', '4', 'NCBI PubMed', 'Simon Kornblith and Michael Berkowitz', 'http://[^/]*www\.ncbi\.nlm\.nih\.gov[^/]*/(pubmed|sites/entrez|entrez/query\.fcgi\?.*db=PubMed)', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -14264,7 +14264,6 @@ function detectSearch(item) {
 			var citation = xml.PubmedArticle[i].MedlineCitation;
 
 			var PMID = citation.PMID.text().toString();
-//			newItem.accessionNumber = "PMID "+PMID;
 			newItem.extra = "PMID: "+PMID;
 			// add attachments
 			if(doc) {
@@ -14294,7 +14293,7 @@ function detectSearch(item) {
 					newItem.ISSN = issn;
 				}
 
-				newItem.journalAbbreviation = Zotero.Utilities.superCleanString(citation.MedlineJournalInfo.MedlineTA.text().toString());
+				newItem.journalAbbreviation = Zotero.Utilities.superCleanString(citation.Article.Journal.ISOAbbreviation.text().toString());
 				if(article.Journal.Title.length()) {
 					newItem.publicationTitle = Zotero.Utilities.superCleanString(article.Journal.Title.text().toString());
 				} else if(citation.MedlineJournalInfo.MedlineTA.length()) {
@@ -14340,7 +14339,6 @@ function detectSearch(item) {
 			newItem.abstractNote = article.Abstract.AbstractText.toString()
 			
 			newItem.DOI = xml.PubmedArticle[i].PubmedData.ArticleIdList.ArticleId[0].text().toString();
-			newItem.journalAbbreviation = newItem.journalAbbreviation.replace(/(\w\b)/g, "$1.");
 			newItem.publicationTitle = Zotero.Utilities.capitalizeTitle(newItem.publicationTitle);
 			newItem.complete();
 		}
