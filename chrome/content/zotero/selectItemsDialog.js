@@ -40,10 +40,10 @@ function doLoad()
 	collectionsView = new Zotero.CollectionTreeView();
 	document.getElementById('zotero-collections-tree').view = collectionsView;
 	
-	// Center popup manually after a delay on Windows, since window
-	// isn't resizable and there might be a persisted position
+	// Center citation popups manually after a delay on Windows, since windows
+	// aren't resizable and there might be persisted positions
 	if (Zotero.isWin &&
-			window.document.activeElement.id != 'zotero-select-items-dialog') {
+			window.document.documentURI != 'chrome://zotero/content/selectItemsDialog.xul') {
 		setTimeout(function () {
 			window.centerWindowOnScreen();
 		}, 1);

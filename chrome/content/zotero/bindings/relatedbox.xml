@@ -139,10 +139,8 @@
 					<![CDATA[
 						var io = {dataIn: null, dataOut: null};
 						
-						Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
-							.getService(Components.interfaces.nsIWindowWatcher)
-							.openWindow(null, 'chrome://zotero/content/selectItemsDialog.xul', '',
-								'chrome,modal,centerscreen', io);
+						window.openDialog('chrome://zotero/content/selectItemsDialog.xul', '',
+								'chrome,dialog=no,modal,centerscreen', io);
 						
 						if(io.dataOut && this.item)
 						{
