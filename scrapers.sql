@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-06-13 21:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-06-13 20:10:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1987,7 +1987,7 @@ function doImport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('58a778cc-25e2-4884-95b3-6b22d7571183', '1.0.0b4.r5', '', '2008-06-13 21:00:00', '0', '100', '4', 'GMail', 'Michael Berkowitz', 'http://mail.google.com/', 
+REPLACE INTO translators VALUES ('58a778cc-25e2-4884-95b3-6b22d7571183', '1.0.0b4.r5', '', '2008-06-13 20:10:00', '0', '100', '4', 'Gmail', 'Michael Berkowitz', 'http://mail.google.com/', 
 'function detectWeb(doc, url) {
 	if (url.match(/#inbox\/[\w\d]+/)) {
 		return "email";
@@ -2021,7 +2021,7 @@ REPLACE INTO translators VALUES ('58a778cc-25e2-4884-95b3-6b22d7571183', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('490909d7-7d79-4c7a-a136-77df618d4db2', '1.0.0b4.r5', '', '2008-06-13 16:00:00', '0', '100', '4', 'Worldcat.org', 'Michael Berkowitz', 'http://(www.)?worldcat.org/', 
+REPLACE INTO translators VALUES ('490909d7-7d79-4c7a-a136-77df618d4db2', '1.0.0b4.r5', '', '2008-06-13 20:10:00', '0', '100', '4', 'Worldcat.org', 'Michael Berkowitz', 'http://(www.)?worldcat.org/', 
 'function detectWeb(doc, url) {
 	if (url.match(/search?/)) {
 		return "multiple";
