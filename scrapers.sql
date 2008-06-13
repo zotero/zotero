@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-06-12 19:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-06-13 16:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1984,6 +1984,57 @@ function doImport() {
 		} else {
 			holdOver += text;
 		}
+	}
+}');
+
+REPLACE INTO translators VALUES ('490909d7-7d79-4c7a-a136-77df618d4db2', '1.0.0b4.r5', '', '2008-06-13 16:00:00', '0', '100', '4', 'Worldcat.org', 'Michael Berkowitz', 'http://(www.)?worldcat.org/', 
+'function detectWeb(doc, url) {
+	if (url.match(/search?/)) {
+		return "multiple";
+	} else if (url.match(/oclc/)) {
+		var type = doc.evaluate(''//tbody/tr/td[2][img]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent.toLowerCase().match(/(\w+);/)[1];
+		switch (type) {
+			case "book": return "book";
+			case "article": return "journalArticle";
+			case "recording":
+			case "disc": return "audioRecording";
+			case "tape": return "videoRecording";
+		}
+	}
+}', 
+'function ENify(str) {
+	return str.match(/^[^&]+/)[0] + ''?page=endnote&client=worldcat.org-detailed_record'';
+}
+function doWeb(doc, url) {
+	var n = doc.documentElement.namespaceURI;
+	var ns = n ? function(prefix) {
+		if (prefix == ''x'') return n; else return null;
+	} : null;
+	
+	var books = new Array();
+	if (detectWeb(doc, url) == "multiple") {
+		var items = new Object();
+		var titles = doc.evaluate(''//div[@class="name"]/a'', doc, ns, XPathResult.ANY_TYPE, null);
+		var title;
+		while (title = titles.iterateNext()) {
+			items[title.href] = Zotero.Utilities.trimInternal(title.textContent);
+		}
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			books.push(ENify(i));
+		}
+	} else {
+		books = [ENify(url)]
+	}
+	for each (var book in books) {
+		Zotero.Utilities.HTTP.doGet(book, function(text) {
+			text = text.replace("MUSIC", "PAMP");
+			var translator = Zotero.loadTranslator("import");
+			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+			translator.setString(text);
+			translator.translate();
+		});
+		Zotero.wait();
 	}
 }');
 
