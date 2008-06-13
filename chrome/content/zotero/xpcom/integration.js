@@ -856,7 +856,7 @@ Zotero.Integration.Session.prototype.editCitation = function(index, citation) {
 	Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
 	          .getService(Components.interfaces.nsIWindowWatcher)
 	          .openWindow(null, 'chrome://zotero/content/addCitationDialog.xul', '',
-					  'chrome,modal,centerscreen' + (Zotero.isWin ? ',popup' : ''), io);
+					  'chrome,modal,centerscreen,resizable=yes' + (Zotero.isWin ? ',popup' : ''), io);
 	
 	if(citation && !io.citation.citationItems.length) {
 		io.citation = citation;
@@ -1016,7 +1016,7 @@ Zotero.Integration.Session.prototype.editBibliography = function() {
 	Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
 	          .getService(Components.interfaces.nsIWindowWatcher)
 	          .openWindow(null, 'chrome://zotero/content/editBibliographyDialog.xul', '',
-					  'chrome,modal,centerscreen' + (Zotero.isWin ? ',popup' : ''), io, true);
+					  'chrome,modal,centerscreen,resizable=yes' + (Zotero.isWin ? ',popup' : ''), io, true);
 	
 }
 

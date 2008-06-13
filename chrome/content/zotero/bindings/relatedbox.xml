@@ -140,7 +140,7 @@
 						var io = {dataIn: null, dataOut: null};
 						
 						window.openDialog('chrome://zotero/content/selectItemsDialog.xul', '',
-								'chrome,dialog=no,modal,centerscreen', io);
+								'chrome,dialog=no,modal,centerscreen,resizable=yes', io);
 						
 						if(io.dataOut && this.item)
 						{

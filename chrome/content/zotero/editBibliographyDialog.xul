@@ -37,8 +37,8 @@
 	buttons="accept"
 	xmlns:html="http://www.w3.org/1999/xhtml"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-	style="padding: 0"
-	persist="screenX screenY">
+	style="padding: 0 5px 15px"
+	persist="screenX screenY width height">
 	
 	<script src="include.js"/>
 	<script src="selectItemsDialog.js"/>
