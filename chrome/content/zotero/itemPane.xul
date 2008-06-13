@@ -28,7 +28,9 @@
 <overlay 
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 	
-	<script src="itemPane.js"/>	
+	<script src="include.js"/>
+	<script src="itemPane.js"/>
+	
 	<deck id="zotero-view-item" flex="1" onselect="if (this.selectedIndex!==''){ ZoteroItemPane.loadPane(this.selectedIndex) }">
 			<scrollbox id="zotero-info" flex="1" orient="vertical" style="overflow:auto">
 				<popupset>
