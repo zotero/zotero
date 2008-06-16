@@ -1453,7 +1453,7 @@ Zotero.Schema = new function(){
 					Zotero.DB.query("DROP TABLE tags");
 					Zotero.DB.query("CREATE TABLE tags (\n    tagID INTEGER PRIMARY KEY,\n    name TEXT,\n    type INT,\n    dateModified DEFAULT CURRENT_TIMESTAMP NOT NULL,\n    key TEXT NOT NULL UNIQUE,\n    UNIQUE (name, type)\n)");
 					var statement = Zotero.DB.getStatement("INSERT INTO tags (tagID, name, type, key) VALUES (?,?,?,?)");
-					for (var j=0, len=searches.length; j<len; j++) {
+					for (var j=0, len=tags.length; j<len; j++) {
 						statement.bindInt32Parameter(0, tags[j].tagID);
 						statement.bindUTF8StringParameter(1, tags[j].tag);
 						statement.bindInt32Parameter(2, tags[j].tagType);
