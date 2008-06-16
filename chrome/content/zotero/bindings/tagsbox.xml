@@ -28,16 +28,49 @@
 			xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 	<binding id="tags-box">
 		<implementation>
-			<field name="itemRef"/>
-			<property name="item" onget="return this.itemRef;">
+			<field name="clickHandler"/>
+			
+			<!-- Modes are predefined settings groups for particular tasks -->
+			<field name="_mode">"view"</field>
+			<property name="mode" onget="return this._mode;">
+				<setter>
+				<![CDATA[
+					this.clickable = false;
+					this.editable = false;
+					
+					switch (val) {
+						case 'view':
+							break;
+						
+						case 'edit':
+							this.clickable = true;
+							this.editable = true;
+							this.clickHandler = this.showEditor;
+							this.blurHandler = this.hideEditor;
+							break;
+						
+						default:
+							throw ("Invalid mode '" + val + "' in tagsbox.xml");
+					}
+					
+					this._mode = val;
+					document.getAnonymousNodes(this)[0].setAttribute('mode', val);
+				]]>
+				</setter>
+			</property>
+			
+			<field name="_item"/>
+			<property name="item" onget="return this._item;">
 				<setter>
 					<![CDATA[
-						this.itemRef = val;
+						this._item = val;
 						this.reload();
 					]]>
 				</setter>
 			</property>
+			
 			<property name="count"/>
+			
 			<property name="summary">
 				<getter>
 					<![CDATA[
@@ -50,7 +83,7 @@
 							{
 								for(var i = 0; i < tags.length; i++)
 								{
-									r = r + tags[i].tag + ", ";
+									r = r + tags[i].name + ", ";
 								}
 								r = r.substr(0,r.length-2);
 							}
@@ -60,10 +93,13 @@
 					]]>
 				</getter>
 			</property>
+			
+			
+			
 			<method name="reload">
 				<body>
 					<![CDATA[
-						//Zotero.debug('Reloading tags');
+						Zotero.debug('Reloading tags');
 						
 						var rows = this.id('tagRows');
 						while(rows.hasChildNodes())
@@ -88,6 +124,8 @@
 					]]>
 				</body>
 			</method>
+			
+			
 			<method name="addDynamicRow">
 				<parameter name="tagObj"/>
 				<parameter name="tabindex"/>
@@ -95,11 +133,11 @@
 					<![CDATA[
 						if (tagObj) {
 							var tagID = tagObj.id;
-							var tag = tagObj.tag;
+							var name = tagObj.name;
 							var type = tagObj.type;
 						}
-						if (!tag) {
-							tag = '';
+						if (!name) {
+							name = '';
 						}
 						
 						if (!tabindex)
@@ -128,7 +166,7 @@
 						// DEBUG: Why won't just this.nextSibling.blur() work?
 						icon.setAttribute('onclick','if (this.nextSibling.inputField){ this.nextSibling.inputField.blur() }');
 						
-						var label = ZoteroItemPane.createValueElement(tag, 'tag', tabindex);
+						var label = this.createValueElement(name, tabindex);
 						
 						var remove = document.createElement("label");
 						remove.setAttribute('value','-');
@@ -159,6 +197,284 @@
 					]]>
 				</body>
 			</method>
+			
+			
+			<method name="createValueElement">
+				<parameter name="valueText"/>
+				<parameter name="tabindex"/>
+				<body>
+				<![CDATA[
+					var valueElement = document.createElement("label");
+					valueElement.setAttribute('fieldname', 'tag');
+					valueElement.setAttribute('flex', 1);
+					
+					if (this.clickable) {
+						valueElement.setAttribute('ztabindex', tabindex);
+						valueElement.addEventListener('click', function (event) {
+							/* Skip right-click on Windows */
+							if (event.button) {
+								return;
+							}
+							document.getBindingParent(this).clickHandler(this);
+						}, false);
+						valueElement.className = 'zotero-clicky';
+					}
+					
+					this._tabIndexMaxTagsFields = Math.max(this._tabIndexMaxTagsFields, tabindex);
+					
+					var firstSpace;
+					if (typeof valueText == 'string') {
+						firstSpace = valueText.indexOf(" ");
+					}
+					
+					// 29 == arbitrary length at which to chop uninterrupted text
+					if ((firstSpace == -1 && valueText.length > 29 ) || firstSpace > 29) {
+						valueElement.setAttribute('crop', 'end');
+						valueElement.setAttribute('value',valueText);
+					}
+					else {
+						// Wrap to multiple lines
+						valueElement.appendChild(document.createTextNode(valueText));
+					}
+					
+					return valueElement;
+				]]>
+				</body>
+			</method>
+			
+			
+			<method name="showEditor">
+				<parameter name="elem"/>
+				<body>
+				<![CDATA[
+					// Blur any active fields
+					/*
+					if (this._dynamicFields) {
+						this._dynamicFields.focus();
+					}
+					*/
+					
+					Zotero.debug('Showing editor');
+					
+					var fieldName = 'tag';
+					var tabindex = elem.getAttribute('ztabindex');
+					
+					var tagID = elem.parentNode.getAttribute('id').split('-')[1];
+					var value = tagID ? Zotero.Tags.getName(tagID) : '';
+					var itemID = Zotero.getAncestorByTagName(elem, 'tagsbox').item.id;
+					
+					var t = document.createElement("textbox");
+					t.setAttribute('value', value);
+					t.setAttribute('fieldname', fieldName);
+					t.setAttribute('ztabindex', tabindex);
+					t.setAttribute('flex', '1');
+					
+					// Add auto-complete
+					t.setAttribute('type', 'autocomplete');
+					t.setAttribute('autocompletesearch', 'zotero');
+					var suffix = itemID ? itemID : '';
+					t.setAttribute('autocompletesearchparam', fieldName + '/' + suffix);
+					
+					var box = elem.parentNode;
+					box.replaceChild(t, elem);
+					
+					// Prevent error when clicking between a changed field
+					// and another -- there's probably a better way
+					if (!t.select) {
+						return;
+					}
+					
+					t.select();
+					
+					t.addEventListener('blur', function () {
+						document.getBindingParent(this).blurHandler(this);
+					}, false);
+					t.setAttribute('onkeypress', "return document.getBindingParent(this).handleKeyPress(event)");
+					
+					this._tabDirection = false;
+					this._lastTabIndex = tabindex;
+					
+					return t;
+				]]>
+				</body>
+			</method>
+			
+			
+			<method name="handleKeyPress">
+				<parameter name="event"/>
+				<body>
+				<![CDATA[
+					var target = event.target;
+					var focused = document.commandDispatcher.focusedElement;
+					
+					switch (event.keyCode) {
+						case event.DOM_VK_RETURN:
+							var fieldname = 'tag';
+							
+							// Prevent blur on containing textbox
+							// DEBUG: what happens if this isn't present?
+							event.preventDefault();
+							
+							// If last tag row, create new one
+							var row = target.parentNode.parentNode;
+							if (row == row.parentNode.lastChild) {
+								this._tabDirection = 1;
+								var lastTag = true;
+							}
+							focused.blur();
+							
+							// Return focus to items pane
+							if (!lastTag) {
+								var tree = document.getElementById('zotero-items-tree');
+								if (tree) {
+									tree.focus();
+								}
+							}
+							
+							return false;
+							
+						case event.DOM_VK_ESCAPE:
+							// Reset field to original value
+							target.value = target.getAttribute('value');
+							
+							var tagsbox = Zotero.getAncestorByTagName(focused, 'tagsbox');
+							
+							focused.blur();
+							
+							if (tagsbox) {
+								tagsbox.closePopup();
+							}
+							
+							// Return focus to items pane
+							var tree = document.getElementById('zotero-items-tree');
+							if (tree) {
+								tree.focus();
+							}
+							
+							return false;
+							
+						case event.DOM_VK_TAB:
+							this._tabDirection = event.shiftKey ? -1 : 1;
+							// Blur the old manually -- not sure why this is necessary,
+							// but it prevents an immediate blur() on the next tag
+							focused.blur();
+							return false;
+					}
+					
+					return true;
+				]]>
+				</body>
+			</method>
+			
+			
+			<method name="hideEditor">
+				<parameter name="textbox"/>
+				<body>
+				<![CDATA[
+					Zotero.debug('Hiding editor');
+					/*
+					var textbox = Zotero.getAncestorByTagName(t, 'textbox');
+					if (!textbox){
+						Zotero.debug('Textbox not found in hideEditor');
+						return;
+					}
+					*/
+					
+					// TODO: get rid of this?
+					//var saveChanges = this.saveOnEdit;
+					var saveChanges = true;
+					
+					var fieldName = 'tag';
+					var tabindex = textbox.getAttribute('ztabindex');
+					
+					//var value = t.value;
+					var value = textbox.value;
+					
+					var elem;
+					
+					var tagsbox = Zotero.getAncestorByTagName(textbox, 'tagsbox');
+					if (!tagsbox)
+					{
+						Zotero.debug('Tagsbox not found', 1);
+						return;
+					}
+					
+					var row = textbox.parentNode;
+					var rows = row.parentNode;
+					
+					// Tag id encoded as 'tag-1234'
+					var id = row.getAttribute('id').split('-')[1];
+					
+					if (saveChanges) {
+						if (id) {
+							if (value) {
+								// If trying to replace with another existing tag
+								// (which causes a delete of the row),
+								// clear the tab direction so we don't advance
+								// when the notifier kicks in
+								var existing = Zotero.Tags.getID(value, 0);
+								if (existing && id != existing) {
+									this._tabDirection = false;
+								}
+								var changed = tagsbox.replace(id, value);
+								if (changed) {
+									return;
+								}
+							}
+							else {
+								tagsbox.remove(id);
+								return;
+							}
+						}
+						// New tag
+						else {
+							// If this is an existing automatic tag, it's going to be
+							// deleted and the number of rows will stay the same,
+							// so we have to compensate
+							var existingTypes = Zotero.Tags.getTypes(value);
+							if (existingTypes && existingTypes.indexOf(1) != -1) {
+								this._lastTabIndex--;
+							}
+							var id = tagsbox.add(value);
+						}
+					}
+					
+					if (id) {
+						elem = this.createValueElement(
+							value,
+							'tag',
+							tabindex
+						);
+					}
+					else {
+						// Just remove the row
+						//
+						// If there's an open popup, this throws NODE CANNOT BE FOUND
+						try {
+							var row = rows.removeChild(row);
+						}
+						catch (e) {}
+						tagsbox.fixPopup();
+						tagsbox.closePopup();
+						
+						this._tabDirection = false;
+						return;
+					}
+					
+					var focusMode = 'tags';
+					var focusBox = tagsbox;
+					
+					var box = textbox.parentNode;
+					box.replaceChild(elem,textbox);
+					
+					if (this._tabDirection) {
+						this._focusNextField(focusBox, this._lastTabIndex, this._tabDirection == -1);
+					}
+				]]>
+				</body>
+			</method>
+			
+			
 			<method name="new">
 				<body>
 					<![CDATA[
@@ -167,18 +483,21 @@
 					]]>
 				</body>
 			</method>
+			
+			
 			<method name="add">
 				<parameter name="value"/>
 				<body>
 					<![CDATA[
-						if (value)
-						{
+						if (value) {
 							return this.item.addTag(value);
 						}
 						return false;
 					]]>
 				</body>
 			</method>
+			
+			
 			<method name="replace">
 				<parameter name="oldTagID"/>
 				<parameter name="newTag"/>
@@ -196,6 +515,8 @@
 					]]>
 				</body>
 			</method>
+			
+			
 			<method name="remove">
 				<parameter name="id"/>
 				<body>
@@ -204,6 +525,8 @@
 					]]>
 				</body>
 			</method>
+			
+			
 			<method name="updateCount">
 				<parameter name="count"/>
 				<body>
@@ -235,14 +558,8 @@
 					]]>
 				</body>
 			</method>
-			<method name="id">
-				<parameter name="id"/>
-				<body>
-					<![CDATA[
-						return document.getAnonymousNodes(this)[0].getElementsByAttribute('id',id)[0];
-					]]>
-				</body>
-			</method>
+			
+			
 			<method name="fixPopup">
 				<body>
 					<![CDATA[
@@ -262,6 +579,8 @@
 					]]>
 				</body>
 			</method>
+			
+			
 			<method name="closePopup">
 				<body>
 					<![CDATA[
@@ -271,10 +590,78 @@
 					]]>
 				</body>
 			</method>
-			<method name="getScrollBox">
+			
+			
+			<!-- 
+				Advance the field focus forward or backward
+				
+				Note: We're basically replicating the built-in tabindex functionality,
+				which doesn't work well with the weird label/textbox stuff we're doing.
+				(The textbox being tabbed away from is deleted before the blur()
+				completes, so it doesn't know where it's supposed to go next.)
+			-->
+			<method name="_focusNextField">
+				<parameter name="box"/>
+				<parameter name="tabindex"/>
+				<parameter name="back"/>
+				<body>
+				<![CDATA[
+					tabindex = parseInt(tabindex);
+					if (back) {
+						switch (tabindex) {
+							case 1:
+								return false;
+							
+							default:
+								var nextIndex = tabindex - 1;
+						}
+					}
+					else {
+						switch (tabindex) {
+							case this._tabIndexMaxTagsFields:
+								// In tags box, keep going to create new row
+								var nextIndex = tabindex + 1;
+								break;
+							
+							default:
+								var nextIndex = tabindex + 1;
+						}
+					}
+					
+					Zotero.debug('Looking for tabindex ' + nextIndex, 4);
+					
+					var next = document.getAnonymousNodes(box)[0].
+						getElementsByAttribute('ztabindex', nextIndex);
+					if (!next[0]) {
+						next[0] = box.addDynamicRow();
+					}
+					
+					next[0].click();
+					this.ensureElementIsVisible(next[0]);
+					return true;
+				]]>
+				</body>
+			</method>
+			
+			
+			<method name="ensureElementIsVisible">
+				<parameter name="elem"/>
+				<body>
+				<![CDATA[
+					var scrollbox = document.getAnonymousNodes(this)[0];
+					var sbo = scrollbox.boxObject;
+					sbo.QueryInterface(Components.interfaces.nsIScrollBoxObject);
+					sbo.ensureElementIsVisible(elem);
+				]]>
+				</body>
+			</method>
+			
+			
+			<method name="id">
+				<parameter name="id"/>
 				<body>
 					<![CDATA[
-						return document.getAnonymousNodes(this)[0];
+						return document.getAnonymousNodes(this)[0].getElementsByAttribute('id',id)[0];
 					]]>
 				</body>
 			</method>

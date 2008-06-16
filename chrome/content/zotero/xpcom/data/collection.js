@@ -551,11 +551,14 @@ Zotero.Collection.prototype.addItems = function(itemIDs) {
 * Remove an item from the collection (does not delete item from library)
 **/
 Zotero.Collection.prototype.removeItem = function(itemID) {
-	var index = this.getChildItems(true).indexOf(itemID);
-	if (index == -1) {
-		Zotero.debug("Item " + itemID + " not a child of collection "
-			+ this.id + " in Zotero.Collection.removeItem()");
-		return false;
+	var childItems = this.getChildItems(true);
+	if (childItems) {
+		var index = childItems.indexOf(itemID);
+		if (index == -1) {
+			Zotero.debug("Item " + itemID + " not a child of collection "
+				+ this.id + " in Zotero.Collection.removeItem()");
+			return false;
+		}
 	}
 	
 	Zotero.DB.beginTransaction();

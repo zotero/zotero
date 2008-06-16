@@ -785,8 +785,7 @@ var ZoteroPane = new function()
 		{
 			var item = this.itemsView._getItemAtRow(this.itemsView.selection.currentIndex);
 			
-			if(item.ref.isNote())
-			{
+			if(item.ref.isNote()) {
 				var noteEditor = document.getElementById('zotero-note-editor');
 				if (this.itemsView.readOnly) {
 					noteEditor.mode = 'view';
@@ -817,8 +816,8 @@ var ZoteroPane = new function()
 				}
 				document.getElementById('zotero-item-pane-content').selectedIndex = 2;
 			}
-			else if(item.ref.isAttachment())
-			{
+			
+			else if(item.ref.isAttachment()) {
 				// DEBUG: this is annoying -- we really want to use an abstracted
 				// version of createValueElement() from itemPane.js
 				// (ideally in an XBL binding)
@@ -956,6 +955,8 @@ var ZoteroPane = new function()
 				
 				document.getElementById('zotero-item-pane-content').selectedIndex = 3;
 			}
+			
+			// Regular item
 			else
 			{
 				ZoteroItemPane.viewItem(item.ref, this.itemsView.readOnly ? 'view' : false);

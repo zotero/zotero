@@ -14,13 +14,14 @@ var ZoteroWrapped = this;
 * Include the core objects to be stored within XPCOM
 *********************************************************************/
 
-var xpcomFiles = [ 'zotero',
+var xpcomFiles = ['zotero',
 	'annotate', 'attachments', 'cite', 'cite_compat', 'collectionTreeView',
-	'dataServer', 'data_access', 'data/item', 'data/items', 'data/collection', 'data/collections',
-	'data/cachedTypes', 'data/creator', 'data/creators', 'data/itemFields',
-	'data/notes', 'data/tags', 'db', 'file', 'fulltext', 'id', 'ingester', 'integration',
-	'itemTreeView', 'mime', 'notifier',  'progressWindow', 'quickCopy', 'report',
-	'schema', 'search', 'sync', 'timeline', 'translate', 'utilities', 'zeroconf'];
+	'dataServer', 'data_access', 'data/item', 'data/items', 'data/collection',
+	'data/collections', 'data/cachedTypes', 'data/creator', 'data/creators',
+	'data/itemFields', 'data/notes', 'data/tag', 'data/tags', 'db', 'file',
+	'fulltext', 'id', 'ingester', 'integration', 'itemTreeView', 'mime',
+	'notifier', 'progressWindow', 'quickCopy', 'report', 'schema', 'search',
+	'sync', 'timeline', 'translate', 'utilities', 'zeroconf'];
 
 for (var i=0; i<xpcomFiles.length; i++) {
 	Cc["@mozilla.org/moz/jssubscript-loader;1"]

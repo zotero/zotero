@@ -27,7 +27,12 @@ Zotero.Sync = new function() {
 			search: {
 				singular: 'Search',
 				plural: 'Searches'
+			},
+			tag: {
+				singular: 'Tag',
+				plural: 'Tags'
 			}
+
 		};
 	});
 	
@@ -1068,6 +1073,8 @@ Zotero.Sync.Server.Data = new function() {
 	this.xmlToCreator = xmlToCreator;
 	this.searchToXML = searchToXML;
 	this.xmlToSearch = xmlToSearch;
+	this.tagToXML = tagToXML;
+	this.xmlToTag = xmlToTag;
 	
 	var _noMergeTypes = ['search'];
 	
@@ -1208,7 +1215,7 @@ Zotero.Sync.Server.Data = new function() {
 						// Update id in local updates array
 						var index = uploadIDs.updated[types].indexOf(oldID);
 						if (index == -1) {
-							_error("Local " + type + " " + oldID + " not in "
+							throw ("Local " + type + " " + oldID + " not in "
 								+ "update array when changing id");
 						}
 						uploadIDs.updated[types][index] = newID;
@@ -1256,7 +1263,7 @@ Zotero.Sync.Server.Data = new function() {
 						
 						if (type != 'item') {
 							alert('Delete reconciliation unimplemented for ' + types);
-							_error('Delete reconciliation unimplemented for ' + types);
+							throw ('Delete reconciliation unimplemented for ' + types);
 						}
 						
 						var remoteObj = Zotero.Sync.Server.Data['xmlTo' + Type](xmlNode);
@@ -1653,7 +1660,7 @@ Zotero.Sync.Server.Data = new function() {
 			}
 		}
 		else if (skipPrimary) {
-			_error("Cannot use skipPrimary with existing item in "
+			throw ("Cannot use skipPrimary with existing item in "
 					+ "Zotero.Sync.Server.Data.xmlToItem()");
 		}
 		
@@ -1699,7 +1706,7 @@ Zotero.Sync.Server.Data = new function() {
 		for each(var creator in xmlItem.creator) {
 			var pos = parseInt(creator.@index);
 			if (pos != i) {
-				_error('No creator in position ' + i);
+				throw ('No creator in position ' + i);
 			}
 			
 			item.setCreator(
@@ -1799,7 +1806,7 @@ Zotero.Sync.Server.Data = new function() {
 			}
 		}
 		else if (skipPrimary) {
-			_error("Cannot use skipPrimary with existing collection in "
+			throw ("Cannot use skipPrimary with existing collection in "
 					+ "Zotero.Sync.Server.Data.xmlToCollection()");
 		}
 		
@@ -1877,7 +1884,7 @@ Zotero.Sync.Server.Data = new function() {
 			}
 		}
 		else if (skipPrimary) {
-			_error("Cannot use skipPrimary with existing creator in "
+			throw ("Cannot use skipPrimary with existing creator in "
 					+ "Zotero.Sync.Server.Data.xmlToCreator()");
 		}
 		
@@ -1960,7 +1967,7 @@ Zotero.Sync.Server.Data = new function() {
 			}
 		}
 		else if (skipPrimary) {
-			_error("Cannot use new id with existing search in "
+			throw ("Cannot use new id with existing search in "
 					+ "Zotero.Sync.Server.Data.xmlToSearch()");
 		}
 		
@@ -2009,5 +2016,64 @@ Zotero.Sync.Server.Data = new function() {
 		}
 		
 		return search;
+	}
+	
+	
+	function tagToXML(tag) {
+		var xml = <tag/>;
+		
+		xml.@id = tag.id;
+		xml.@name = tag.name;
+		if (tag.type) {
+			xml.@type = tag.type;
+		}
+		xml.@dateModified = tag.dateModified;
+		xml.@key = tag.key;
+		var linkedItems = tag.getLinkedItems(true);
+		if (linkedItems) {
+			xml.items = linkedItems.join(' ');
+		}
+		return xml;
+	}
+	
+	
+	/**
+	 * Convert E4X <tag> object into an unsaved Zotero.Tag
+	 *
+	 * @param	object	xmlTag			E4X XML node with tag data
+	 * @param	object	tag				(Optional) Existing Zotero.Tag to update
+	 * @param	bool	skipPrimary		(Optional) Ignore passed primary fields
+	 */
+	function xmlToTag(xmlTag, tag, skipPrimary) {
+		if (!tag) {
+			if (skipPrimary) {
+				tag = new Zotero.Tag;
+			}
+			else {
+				tag = new Zotero.Tag(parseInt(xmlTag.@id));
+				/*
+				if (tag.exists()) {
+					throw ("Tag specified in XML node already exists "
+						+ "in Zotero.Sync.Server.Data.xmlToTag()");
+				}
+				*/
+			}
+		}
+		else if (skipPrimary) {
+			throw ("Cannot use new id with existing tag in "
+					+ "Zotero.Sync.Server.Data.xmlToTag()");
+		}
+		
+		tag.name = xmlTag.@name.toString();
+		tag.type = parseInt(xmlTag.@type);
+		if (!skipPrimary) {
+			tag.dateModified = xmlTag.@dateModified.toString();
+			tag.key = xmlTag.@key.toString();
+		}
+		
+		var str = xmlTag.items ? xmlTag.items.toString() : false;
+		tag.linkedItems = str ? str.split(' ') : [];
+		
+		return tag;
 	}
 }

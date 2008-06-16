@@ -2364,12 +2364,12 @@ Zotero.Item.prototype.getBestSnapshot = function() {
 //
 // save() is not required for tag functions
 //
-Zotero.Item.prototype.addTag = function(tag, type) {
+Zotero.Item.prototype.addTag = function(name, type) {
 	if (!this.id) {
 		throw ('Cannot add tag to unsaved item in Item.addTag()');
 	}
 	
-	if (!tag) {
+	if (!name) {
 		Zotero.debug('Not saving empty tag in Item.addTag()', 2);
 		return false;
 	}
@@ -2378,18 +2378,13 @@ Zotero.Item.prototype.addTag = function(tag, type) {
 		type = 0;
 	}
 	
-	if (type !=0 && type !=1) {
-		throw ('Invalid tag type in Item.addTag()');
-	}
-	
 	Zotero.DB.beginTransaction();
-	var tagID = Zotero.Tags.getID(tag, type);
-	var existingTypes = Zotero.Tags.getTypes(tag);
 	
+	var existingTypes = Zotero.Tags.getTypes(name);
 	if (existingTypes) {
 		// If existing automatic and adding identical user, remove automatic
 		if (type == 0 && existingTypes.indexOf(1) != -1) {
-			this.removeTag(Zotero.Tags.getID(tag, 1));
+			this.removeTag(Zotero.Tags.getID(name, 1));
 		}
 		// If existing user and adding automatic, skip
 		else if (type == 1 && existingTypes.indexOf(0) != -1) {
@@ -2399,8 +2394,12 @@ Zotero.Item.prototype.addTag = function(tag, type) {
 		}
 	}
 	
+	var tagID = Zotero.Tags.getID(name, type);
 	if (!tagID) {
-		var tagID = Zotero.Tags.add(tag, type);
+		var tag = new Zotero.Tag;
+		tag.name = name;
+		tag.type = type;
+		var tagID = tag.save();
 	}
 	
 	try {
@@ -2433,38 +2432,20 @@ Zotero.Item.prototype.addTags = function (tags, type) {
 
 Zotero.Item.prototype.addTagByID = function(tagID) {
 	if (!this.id) {
-		throw ('Cannot add tag to unsaved item in Item.addTagByID()');
+		throw ('Cannot add tag to unsaved item in Zotero.Item.addTagByID()');
 	}
 	
 	if (!tagID) {
-		Zotero.debug('Not saving nonexistent tag in Item.addTagByID()', 2);
-		return false;
+		throw ('tagID not provided in Zotero.Item.addTagByID()');
 	}
 	
-	var sql = "SELECT COUNT(*) FROM tags WHERE tagID = ?";
-	var count = !!Zotero.DB.valueQuery(sql, tagID);
-	
-	if (!count) {
-		throw ('Cannot add invalid tag id ' + tagID + ' in Item.addTagByID()');
+	var tag = Zotero.Tags.get(tagID);
+	if (!tag) {
+		throw ('Cannot add invalid tag ' + tagID + ' in Zotero.Item.addTagByID()');
 	}
 	
-	Zotero.DB.beginTransaction();
-	
-	// If INSERT OR IGNORE gave us affected rows, we wouldn't need this...
-	if (this.hasTag(tagID)) {
-		Zotero.debug('Item ' + this.id + ' already has tag ' + tagID + ' in Item.addTagByID()');
-		Zotero.DB.commitTransaction();
-		return false;
-	}
-	
-	var sql = "INSERT INTO itemTags VALUES (?,?)";
-	Zotero.DB.query(sql, [this.id, tagID]);
-	
-	Zotero.DB.commitTransaction();
-	Zotero.Notifier.trigger('modify', 'item', this.id);
-	Zotero.Notifier.trigger('add', 'item-tag', this.id + '-' + tagID);
-	
-	return true;
+	tag.addItem(this.id);
+	tag.save();
 }
 
 Zotero.Item.prototype.hasTag = function(tagID) {
@@ -2484,28 +2465,38 @@ Zotero.Item.prototype.hasTags = function(tagIDs) {
 	return !!Zotero.DB.valueQuery(sql, [this.id].concat(tagIDs));
 }
 
+/**
+ * Returns all tags assigned to an item
+ *
+ * @return	array			Array of Zotero.Tag objects
+ */
 Zotero.Item.prototype.getTags = function() {
 	if (!this.id) {
 		return false;
 	}
-	var sql = "SELECT tagID AS id, tag, tagType AS type FROM tags WHERE tagID IN "
-		+ "(SELECT tagID FROM itemTags WHERE itemID=" + this.id + ")";
-	
-	var tags = Zotero.DB.query(sql);
+	var sql = "SELECT tagID, name FROM tags WHERE tagID IN "
+		+ "(SELECT tagID FROM itemTags WHERE itemID=?)";
+	var tags = Zotero.DB.query(sql, this.id);
 	if (!tags) {
 		return false;
 	}
 	
 	var collation = Zotero.getLocaleCollation();
 	tags.sort(function(a, b) {
-		return collation.compareString(1, a.tag, b.tag);
+		return collation.compareString(1, a.name, b.name);
 	});
-	return tags;
+	
+	var tagObjs = [];
+	for (var i=0; i<tags.length; i++) {
+		var tag = Zotero.Tags.get(tags[i].tagID, true);
+		tagObjs.push(tag);
+	}
+	return tagObjs;
 }
 
 Zotero.Item.prototype.getTagIDs = function() {
-	var sql = "SELECT tagID FROM itemTags WHERE itemID=" + this.id;
-	return Zotero.DB.columnQuery(sql);
+	var sql = "SELECT tagID FROM itemTags WHERE itemID=?";
+	return Zotero.DB.columnQuery(sql, this.id);
 }
 
 Zotero.Item.prototype.replaceTag = function(oldTagID, newTag) {
@@ -2537,16 +2528,20 @@ Zotero.Item.prototype.replaceTag = function(oldTagID, newTag) {
 
 Zotero.Item.prototype.removeTag = function(tagID) {
 	if (!this.id) {
-		throw ('Cannot remove tag on unsaved item');
+		throw ('Cannot remove tag on unsaved item in Zotero.Item.removeTag()');
 	}
 	
-	Zotero.DB.beginTransaction();
-	var sql = "DELETE FROM itemTags WHERE itemID=? AND tagID=?";
-	Zotero.DB.query(sql, [this.id, { int: tagID }]);
-	Zotero.Tags.purge();
-	Zotero.DB.commitTransaction();
-	Zotero.Notifier.trigger('modify', 'item', this.id);
-	Zotero.Notifier.trigger('remove', 'item-tag', this.id + '-' + tagID);
+	if (!tagID) {
+		throw ('tagID not provided in Zotero.Item.removeTag()');
+	}
+	
+	var tag = Zotero.Tags.get(tagID);
+	if (!tag) {
+		throw ('Cannot remove invalid tag ' + tagID + ' in Zotero.Item.removeTag()');
+	}
+	
+	tag.removeItem(this.id);
+	tag.save();
 }
 
 Zotero.Item.prototype.removeAllTags = function() {
@@ -3188,10 +3183,14 @@ Zotero.Item.prototype.toArray = function (mode) {
 		}
 	}
 	
-	arr.tags = this.getTags();
-	if (!arr.tags) {
-		arr.tags = [];
+	arr.tags = [];
+	var tags = this.getTags();
+	if (tags) {
+		for (var i=0; i<tags.length; i++) {
+			arr.tags.push(tags[i].serialize());
+		}
 	}
+	
 	arr.related = this.getSeeAlso();
 	if (!arr.related) {
 		arr.related = [];
@@ -3312,10 +3311,14 @@ Zotero.Item.prototype.serialize = function(mode) {
 		}
 	}
 	
-	arr.tags = this.getTags();
-	if (!arr.tags) {
-		arr.tags = [];
+	arr.tags = [];
+	var tags = this.getTags();
+	if (tags) {
+		for (var i=0; i<tags.length; i++) {
+			arr.tags.push(tags[i].serialize());
+		}
 	}
+	
 	arr.related = this.getSeeAlso();
 	if (!arr.related) {
 		arr.related = [];
