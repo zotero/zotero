@@ -1449,14 +1449,72 @@ Zotero.Schema = new function(){
 					statement.reset();
 					
 					// Tags
-					var tags = Zotero.DB.query("SELECT * FROM tags");
+					var tags = Zotero.DB.query("SELECT tagID, tag AS tag, tagType FROM tags");
+					var newTags = [];
+					var cases = {};
+					if (tags) {
+						// Find tags with multiple case forms
+						for each(var row in tags) {
+							var l = row.tag.toLowerCase();
+							if (!cases[l]) {
+								cases[l] = [];
+							}
+							if (cases[l].indexOf(row.tag) == -1) {
+								cases[l].push(row.tag);
+							}
+						}
+						var done = {};
+						for each(var row in tags) {
+							var l = row.tag.toLowerCase();
+							
+							if (done[l]) {
+								continue;
+							}
+							done[l] = true;
+							
+							// Only one tag -- use
+							if (cases[l].length == 1) {
+								newTags.push(row);
+								continue;
+							}
+							
+							// Use most frequent
+							var counts = Zotero.DB.query("SELECT tag, COUNT(*) AS numItems FROM tags NATURAL JOIN itemTags WHERE tag LIKE ? GROUP BY tag ORDER BY numItems DESC", l);
+							if (counts[0].numItems != counts[1].numItems) {
+								var newTag = counts[0].tag;
+							}
+							// Use earliest
+							else {
+								var newTag = Zotero.DB.valueQuery("SELECT tag FROM tags NATURAL JOIN itemTags WHERE tag IN (SELECT tag FROM tags NATURAL JOIN itemTags NATURAL JOIN items WHERE tag LIKE ? ORDER BY dateAdded LIMIT 1) GROUP BY tag", l);
+							}
+							
+							// Point old to new
+							var types = Zotero.DB.columnQuery("SELECT DISTINCT tagType FROM tags WHERE tag LIKE ?", l);
+							for each(var type in types) {
+								var newTagID = Zotero.DB.valueQuery("SELECT tagID FROM tags WHERE tag=? AND tagType=?", [newTag, type]);
+								var oldIDs = Zotero.DB.columnQuery("SELECT tagID FROM tags WHERE tag LIKE ? AND tag != ? AND tagType=?", [l, l, type]);
+								if (!newTagID) {
+									if (oldIDs) {
+										newTagID = oldIDs[0];
+									}
+									else {
+										newTagID = Zotero.DB.valueQuery("SELECT MAX(tagID)+1 FROM tags");
+										Zotero.DB.query("INSERT INTO tags VALUES (?,?,?)", [newTagID, newTag, type]);
+									}
+								}
+								Zotero.DB.query("UPDATE OR REPLACE itemTags SET tagID=? WHERE tagID IN (" + oldIDs.map(function () '?').join() + ")", [newTagID].concat(oldIDs));
+								newTags.push({ tagID: newTagID, tag: newTag, tagType: type });
+							}
+						}
+					}
+					
 					Zotero.DB.query("DROP TABLE tags");
-					Zotero.DB.query("CREATE TABLE tags (\n    tagID INTEGER PRIMARY KEY,\n    name TEXT,\n    type INT,\n    dateModified DEFAULT CURRENT_TIMESTAMP NOT NULL,\n    key TEXT NOT NULL UNIQUE,\n    UNIQUE (name, type)\n)");
+					Zotero.DB.query("CREATE TABLE tags (\n    tagID INTEGER PRIMARY KEY,\n    name TEXT COLLATE NOCASE,\n    type INT,\n    dateModified DEFAULT CURRENT_TIMESTAMP NOT NULL,\n    key TEXT NOT NULL UNIQUE,\n    UNIQUE (name, type)\n)");
 					var statement = Zotero.DB.getStatement("INSERT INTO tags (tagID, name, type, key) VALUES (?,?,?,?)");
-					for (var j=0, len=tags.length; j<len; j++) {
-						statement.bindInt32Parameter(0, tags[j].tagID);
-						statement.bindUTF8StringParameter(1, tags[j].tag);
-						statement.bindInt32Parameter(2, tags[j].tagType);
+					for (var j=0, len=newTags.length; j<len; j++) {
+						statement.bindInt32Parameter(0, newTags[j].tagID);
+						statement.bindUTF8StringParameter(1, newTags[j].tag);
+						statement.bindInt32Parameter(2, newTags[j].tagType);
 						var key = Zotero.ID.getKey();
 						statement.bindStringParameter(3, key);
 

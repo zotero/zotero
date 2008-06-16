@@ -75,6 +75,7 @@ Zotero.Tags = new function() {
 			return _tagsByID[tagID].name;
 		}
 		
+		// Populate cache
 		var tag = this.get(tagID);
 		
 		return _tagsByID[tagID] ? _tagsByID[tagID].name : false;
@@ -85,6 +86,8 @@ Zotero.Tags = new function() {
 	 * Returns the tagID matching given tag and type
 	 */
 	function getID(name, type) {
+		name = name.toLowerCase();
+		
 		if (_tags[type] && _tags[type]['_' + name]) {
 			return _tags[type]['_' + name];
 		}
@@ -252,17 +255,26 @@ Zotero.Tags = new function() {
 		var oldName = tagObj.name;
 		var oldType = tagObj.type;
 		var notifierData = {};
-		notifierData[tagID] = { old: tag.serialize() };
+		notifierData[tagID] = { old: tagObj.serialize() };
 		
 		if (oldName == name) {
 			Zotero.DB.commitTransaction();
 			return;
 		}
 		
-		// Check if the new tag already exists
 		var sql = "SELECT tagID FROM tags WHERE name=? AND type=0";
 		var existingTagID = Zotero.DB.valueQuery(sql, name);
-		if (existingTagID) {
+		// New tag already exists as manual tag
+		if (existingTagID
+				// Tag check is case-insensitive, so make sure we have a
+				// different tag
+				&& existingTagID != tagID) {
+			// Change case of existing manual tag before switching automatic
+			if (oldName.toLowerCase() == name.toLowerCase()) {
+				var sql = "UPDATE tags SET name=? WHERE tagID=?";
+				Zotero.DB.query(sql, [name, existingTagID]);
+			}
+			
 			var itemIDs = this.getTagItems(tagID);
 			var existingItemIDs = this.getTagItems(existingTagID);
 			
