@@ -71,9 +71,11 @@ CREATE INDEX itemAttachments_mimeType ON itemAttachments(mimeType);
 -- Individual entries for each tag
 CREATE TABLE tags (
     tagID INTEGER PRIMARY KEY,
-    tag TEXT,
-    tagType INT,
-    UNIQUE (tag, tagType)
+    name TEXT,
+    type INT,
+    dateModified DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    key TEXT NOT NULL UNIQUE,
+    UNIQUE (name, type)
 );
 
 -- Associates items with keywords

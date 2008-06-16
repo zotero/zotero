@@ -1447,6 +1447,27 @@ Zotero.Schema = new function(){
 						}
 					}
 					statement.reset();
+					
+					// Tags
+					var tags = Zotero.DB.query("SELECT * FROM tags");
+					Zotero.DB.query("DROP TABLE tags");
+					Zotero.DB.query("CREATE TABLE tags (\n    tagID INTEGER PRIMARY KEY,\n    name TEXT,\n    type INT,\n    dateModified DEFAULT CURRENT_TIMESTAMP NOT NULL,\n    key TEXT NOT NULL UNIQUE,\n    UNIQUE (name, type)\n)");
+					var statement = Zotero.DB.getStatement("INSERT INTO tags (tagID, name, type, key) VALUES (?,?,?,?)");
+					for (var j=0, len=searches.length; j<len; j++) {
+						statement.bindInt32Parameter(0, tags[j].tagID);
+						statement.bindUTF8StringParameter(1, tags[j].tag);
+						statement.bindInt32Parameter(2, tags[j].tagType);
+						var key = Zotero.ID.getKey();
+						statement.bindStringParameter(3, key);
+
+						try {
+							statement.execute();
+						}
+						catch (e) {
+							throw (Zotero.DB.getLastErrorString());
+						}
+					}
+					statement.reset();
 				}
 			}
 			

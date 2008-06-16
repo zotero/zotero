@@ -28,45 +28,49 @@
 <overlay 
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 	
+	<script src="include.js"/>
 	<script src="itemPane.js"/>
 	
 	<deck id="zotero-view-item" flex="1" onselect="if (this.selectedIndex !== '') { ZoteroItemPane.loadPane(this.selectedIndex); }">
 		<zoteroitembox id="zotero-editpane-item-box" flex="1"/>
 		
-			<vbox flex="1">
-				<hbox align="center">
-					<label id="zotero-editpane-notes-label"/>
-					<button label="&zotero.item.add;" oncommand="ZoteroItemPane.addNote();"/>
-				</hbox>
-				<grid flex="1">
-					<columns>
-						<column flex="1"/>
-						<column/>
-					</columns>
-					<rows id="zotero-editpane-dynamic-notes" flex="1"/>
-				</grid>
-			</vbox>
-			<vbox flex="1">
-				<hbox align="center">
-					<label id="zotero-editpane-attachments-label"/>
-					<button id="zotero-tb-item-attachments-add" type="menu" label="&zotero.item.add;">
-						<menupopup>
-							<menuitem class="menuitem-iconic" id="zotero-tb-item-attachments-link" label="&zotero.toolbar.attachment.linked;" oncommand="ZoteroItemPane.addAttachmentFromDialog(true);"/>
-							<menuitem class="menuitem-iconic" id="zotero-tb-item-attachments-file" label="&zotero.toolbar.attachment.add;" oncommand="ZoteroItemPane.addAttachmentFromDialog();"/>
-							<menuitem class="menuitem-iconic" id="zotero-tb-item-attachments-web-link" label="&zotero.toolbar.attachment.weblink;" oncommand="ZoteroItemPane.addAttachmentFromPage(true);"/>
-							<menuitem class="menuitem-iconic" id="zotero-tb-item-attachments-snapshot" label="&zotero.toolbar.attachment.snapshot;" oncommand="ZoteroItemPane.addAttachmentFromPage();"/>
-						</menupopup>
-					</button>
-				</hbox>
-				<grid flex="1">
-					<columns>
-						<column flex="1"/>
-						<column/>
-					</columns>
-					<rows id="zotero-editpane-dynamic-attachments" flex="1"/>
-				</grid>
-			</vbox>
-			<tagsbox id="zotero-editpane-tags" flex="1"/>
-			<seealsobox id="zotero-editpane-related" flex="1"/>
+		<vbox flex="1">
+			<hbox align="center">
+				<label id="zotero-editpane-notes-label"/>
+				<button label="&zotero.item.add;" oncommand="ZoteroItemPane.addNote();"/>
+			</hbox>
+			<grid flex="1">
+				<columns>
+					<column flex="1"/>
+					<column/>
+				</columns>
+				<rows id="zotero-editpane-dynamic-notes" flex="1"/>
+			</grid>
+		</vbox>
+		
+		<vbox flex="1">
+			<hbox align="center">
+				<label id="zotero-editpane-attachments-label"/>
+				<button id="zotero-tb-item-attachments-add" type="menu" label="&zotero.item.add;">
+					<menupopup>
+						<menuitem class="menuitem-iconic" id="zotero-tb-item-attachments-link" label="&zotero.toolbar.attachment.linked;" oncommand="ZoteroItemPane.addAttachmentFromDialog(true);"/>
+						<menuitem class="menuitem-iconic" id="zotero-tb-item-attachments-file" label="&zotero.toolbar.attachment.add;" oncommand="ZoteroItemPane.addAttachmentFromDialog();"/>
+						<menuitem class="menuitem-iconic" id="zotero-tb-item-attachments-web-link" label="&zotero.toolbar.attachment.weblink;" oncommand="ZoteroItemPane.addAttachmentFromPage(true);"/>
+						<menuitem class="menuitem-iconic" id="zotero-tb-item-attachments-snapshot" label="&zotero.toolbar.attachment.snapshot;" oncommand="ZoteroItemPane.addAttachmentFromPage();"/>
+					</menupopup>
+				</button>
+			</hbox>
+			<grid flex="1">
+				<columns>
+					<column flex="1"/>
+					<column/>
+				</columns>
+				<rows id="zotero-editpane-dynamic-attachments" flex="1"/>
+			</grid>
+		</vbox>
+		
+		<tagsbox id="zotero-editpane-tags" flex="1"/>
+		
+		<seealsobox id="zotero-editpane-related" flex="1"/>
 	</deck>
 </overlay>

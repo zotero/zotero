@@ -353,6 +353,7 @@ Zotero.Creator.prototype.erase = function () {
 	
 	Zotero.debug("Deleting creator " + this.id);
 	
+	// TODO: notifier
 	var changedItems = [];
 	var changedItemsNotifierData = {};
 	

@@ -120,16 +120,15 @@ var ZoteroItemPane = new function() {
 		
 		// Info pane
 		if (index == 0) {
-			var itembox = document.getElementById('zotero-editpane-item-box');
 			// Hack to allow read-only mode in right pane -- probably a better
 			// way to allow access to this
 			if (mode) {
-				itembox.mode = mode;
+				_itemBox.mode = mode;
 			}
 			else {
-				itembox.mode = 'edit';
+				_itemBox.mode = 'edit';
 			}
-			itembox.item = _itemBeingEdited;
+			_itemBox.item = _itemBeingEdited;
 		}
 		
 		// Notes pane
@@ -147,7 +146,9 @@ var ZoteroItemPane = new function() {
 					icon.setAttribute('src','chrome://zotero/skin/treeitem-note.png');
 				
 					var label = document.createElement('label');
-					label.setAttribute('value',_noteToTitle(notes[i].getNote()));
+					var title = Zotero.Notes.noteToTitle(notes[i].getNote());
+					title = title ? title : Zotero.getString('pane.item.notes.untitled');
+					label.setAttribute('value', title);
 					label.setAttribute('flex','1');	//so that the long names will flex smaller
 					label.setAttribute('crop','end');
 				
@@ -236,6 +237,13 @@ var ZoteroItemPane = new function() {
 		// Tags pane
 		else if(index == 3)
 		{
+			if (mode) {
+				_tagsBox.mode = mode;
+			}
+			else {
+				_tagsBox.mode = 'edit';
+			}
+			
 			var focusMode = 'tags';
 			var focusBox = _tagsBox;
 			_tagsBox.item = _itemBeingEdited;
@@ -267,27 +275,6 @@ var ZoteroItemPane = new function() {
 	function addNote()
 	{
 		ZoteroPane.openNoteWindow(null, null, _itemBeingEdited.id);
-	}
-	
-	function _noteToTitle(text)
-	{
-		var MAX_LENGTH = 100;
-		
-		var t = text.substring(0, MAX_LENGTH);
-		var ln = t.indexOf("\n");
-		if (ln>-1 && ln<MAX_LENGTH)
-		{
-			t = t.substring(0, ln);
-		}
-		
-		if(t == "")
-		{
-			return Zotero.getString('pane.item.notes.untitled');
-		}
-		else
-		{
-			return t;
-		}
 	}
 	
 	function _updateNoteCount()

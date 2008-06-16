@@ -1249,3 +1249,4 @@ INSERT INTO "syncObjectTypes" VALUES(1, 'collection');
 INSERT INTO "syncObjectTypes" VALUES(2, 'creator');
 INSERT INTO "syncObjectTypes" VALUES(3, 'item');
 INSERT INTO "syncObjectTypes" VALUES(4, 'search');
+INSERT INTO "syncObjectTypes" VALUES(5, 'tag');

@@ -50,14 +50,14 @@ Zotero.Creators = new function() {
 			return _creatorsByID[creatorID];
 		}
 		
-		var sql = 'SELECT * FROM creators WHERE creatorID=?';
-		var result = Zotero.DB.rowQuery(sql, creatorID);
+		var sql = 'SELECT COUNT(*) FROM creators WHERE creatorID=?';
+		var result = Zotero.DB.valueQuery(sql, creatorID);
 		
 		if (!result) {
 			return false;
 		}
 		
-		_creatorsByID[creatorID] = new Zotero.Creator(result.creatorID);
+		_creatorsByID[creatorID] = new Zotero.Creator(creatorID);
 		return _creatorsByID[creatorID];
 	}
 	

@@ -134,15 +134,21 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParam,
 			break;
 		
 		case 'tag':
-			var sql = "SELECT tag FROM tags WHERE tag LIKE ?";
+			var sql = "SELECT name FROM tags WHERE name LIKE ?";
 			var sqlParams = [searchString + '%'];
 			if (extra){
 				sql += " AND tagID NOT IN (SELECT tagID FROM itemTags WHERE "
 					+ "itemID = ?)";
 				sqlParams.push(extra);
 			}
-			sql += " ORDER BY tag";
 			var results = this._zotero.DB.columnQuery(sql, sqlParams);
+			if (results) {
+				var collation = Zotero.getLocaleCollation();
+				results.sort(function(a, b) {
+					return collation.compareString(1, a, b);
+				});
+			}
+			
 			break;
 		
 		case 'creator':

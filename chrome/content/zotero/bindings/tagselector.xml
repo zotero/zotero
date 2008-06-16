@@ -181,7 +181,7 @@
 						for (var tagID in this._tags) {
 							// If the last tag was the same, add this tagID and tagType to it
 							if (tagsToggleBox.lastChild &&
-									tagsToggleBox.lastChild.getAttribute('value') == this._tags[tagID].tag) {
+									tagsToggleBox.lastChild.getAttribute('value') == this._tags[tagID].name) {
 								tagsToggleBox.lastChild.setAttribute('tagID', tagsToggleBox.lastChild.getAttribute('tagID') + '-' + tagID);
 								tagsToggleBox.lastChild.setAttribute('tagType', tagsToggleBox.lastChild.getAttribute('tagType') + '-' + this._tags[tagID].type);
 								continue;
@@ -190,7 +190,7 @@
 							var label = document.createElement('label');
 							label.setAttribute('onclick', "this.parentNode.parentNode.parentNode.handleTagClick(event, this)");
 							label.className = 'zotero-clicky';
-							label.setAttribute('value', this._tags[tagID].tag);
+							label.setAttribute('value', this._tags[tagID].name);
 							label.setAttribute('tagID', tagID);
 							label.setAttribute('tagType', this._tags[tagID].type);
 							label.setAttribute('context', 'tag-menu');

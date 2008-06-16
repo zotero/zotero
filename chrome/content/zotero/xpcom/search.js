@@ -1765,7 +1765,7 @@ Zotero.SearchConditions = new function(){
 					doesNotContain: true
 				},
 				table: 'itemTags',
-				field: 'tag'
+				field: 'name'
 			},
 			
 			{

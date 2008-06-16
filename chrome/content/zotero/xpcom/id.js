@@ -47,6 +47,7 @@ Zotero.ID = new function () {
 			case 'creatorData':
 			case 'collections':
 			case 'savedSearches':
+			case 'tags':
 				var id = _getNextAvailable(table, skip);
 				if (!id && notNull) {
 					return _getNext(table, skip);
@@ -57,7 +58,6 @@ Zotero.ID = new function () {
 			//
 			// TODO: use autoincrement instead where available in 1.5
 			case 'itemDataValues':
-			case 'tags':
 				var id = _getNextAvailable(table, skip);
 				if (!id) {
 					// If we can't find an empty id quickly, just use MAX() + 1
