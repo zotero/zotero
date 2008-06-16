@@ -18,7 +18,7 @@
     <names variable="editor" delimiter=", ">
       <name  initialize-with="" name-as-sort-order="all" sort-separator=" "
 	     delimiter=", " delimiter-precedes-last="always"/>
-      <label form="long" text-case="lowercase" prefix=" "/>
+      <label form="long" text-case="lowercase" prefix=", "/>
     </names>
   </macro>
   <macro name="author">
@@ -55,13 +55,26 @@
       <text variable="publisher"/>
     </group>
   </macro>
-  <macro name="cite-date">
+  <macro name="year-date">
+    <choose>
+      <if variable="issued">
+	<date variable="issued">
+	  <date-part name="year"/>
+	</date>
+      </if>
+      <else>
+	<text term="no date"/>
+      </else>
+    </choose>
+  </macro>
+<!--  <macro name="cite-date">
     <date variable="issued">
       <date-part name="month" suffix=" "/>
       <date-part name="day" suffix=", "/>
       <date-part name="year"/>
     </date>
   </macro>
+-->
   <macro name="edition">
     <choose>
       <if is-numeric="edition">
@@ -87,48 +100,49 @@
     <layout suffix=".">
       <text variable="citation-number" suffix=". "/>
       <text macro="author"/>
-      <text macro="cite-date" prefix=" (" suffix=")"/>
+      <text macro="year-date" prefix=" (" suffix=")"/>
       <choose>
 	<if type="book">
 	  <group delimiter=" " prefix=" ">
 	    <text macro="title" suffix="."/>
 	    <text macro="edition"/>
 	    <text macro="editor" />
-	    <text macro="publisher" />
-	    <text variable="page" suffix=" "/>
-	    <label variable="page" form="short" />
+	    <text macro="publisher" suffix="." />
+	    <text variable="page"/>
+	    <label variable="page" form="short" suffix="." />
 	  </group>
 	</if>
 	<else-if type="chapter">
-	  <text macro="title" prefix=" " suffix=". "/>
-	  <group class="container" prefix=" " delimiter=" " suffix=".">
-	    <text term="in" text-case="capitalize-first" suffix=":"/>
-	    <group delimiter=". ">
-	      <text macro="editor"/>
-	      <text variable="container-title"/>
-	      <text variable="collection-title" prefix=" " suffix="."/>
+	  <text macro="title" prefix=" " suffix="."/>
+	  <group class="container" prefix=" " delimiter=". " suffix=".">
+	    <group>
+	      <text term="in" text-case="capitalize-first"
+	      suffix=":"/>
+	      <text macro="editor" prefix=" "/>
 	    </group>
+	    <text variable="container-title"/>
+	    <text variable="collection-title"/>
 	  </group>
 	  <group suffix="." delimiter=", ">
 	    <text macro="publisher" prefix=" "/>
 	    <text variable="volume" prefix="Vol. "/>
-	    <group>
-	      <label variable="page" suffix=". " form="short"/>
-	      <text variable="page"/>
-	    </group>
+	  </group>
+	  <group prefix=" ">
+	    <label variable="page" suffix=". " form="short"/>
+	    <text variable="page" suffix="." />
 	  </group>
 	</else-if>
 	<else>
 	  <text macro="title" prefix=" " suffix="."/>
-	  <group class="container" delimiter=" " prefix=" " suffix=".">
+	  <group class="container" delimiter=" " prefix=" " suffix="">
 	    <text variable="container-title" form="short"/>
 	    <text variable="volume"/>
 	  </group>
-	  <text variable="page" prefix=":"/>
-	  <text variable="DOI"/>
+	  <text variable="page" prefix=":" suffix="." />
 	</else>
       </choose>
       <text prefix=" " macro="access" />
+      <!-- <text variable="DOI"/> -->
     </layout>
   </bibliography>
 </style>
