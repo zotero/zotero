@@ -555,9 +555,7 @@
 							}
 						}
 						
-						for each(var tagID in tagIDs) {
-							Zotero.Tags.remove(tagID);
-						}
+						Zotero.Tags.erase(tagIDs);
 						
 						Zotero.DB.commitTransaction()
 					}
