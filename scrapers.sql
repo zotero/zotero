@@ -22,9 +22,9 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-06-15 17:10:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-06-16 22:00:00'));
 
-REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
+REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-06-16 22:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
 
 	var suffixRe = new RegExp("https?://(?:www\.)?amazon\.([^/]+)/");
@@ -70,7 +70,8 @@ REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b
 	var nsResolver = namespace ? function(prefix) {
 			if (prefix == ''x'') return namespace; else return null;
 		} : null;
-		
+	
+
 	var suffixRe = new RegExp("https?://(?:www\.)?amazon\.([^/]+)/");
 	var suffixMatch = suffixRe.exec(url);
 	var suffix = suffixMatch[1];
@@ -83,16 +84,15 @@ REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b
 	}
 	if (suffix == ".com") suffix = "com";
 	if(m) {
-		var xpath = ''//a/span[@class="srTitle"]'';
+		var xpath = ''//div[@class="productTitle"]/a'';
 		var elmts = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
 		var elmt = elmts.iterateNext();
 		var asins = new Array();
 		var availableItems = new Array();
 		var i = 0;
 		var asinRe = new RegExp(''/(dp|product)/([^/]+)/'');
-
 		do {
-			var link = doc.evaluate(''../@href'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
+			var link = elmt.href;
 			var searchTitle = elmt.textContent;
 			if  (asinRe.exec(link)) {
 				var asinMatch = asinRe.exec(link);
@@ -127,93 +127,95 @@ REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b
 		text = "<Items>" + texts[0];
 		var xml = new XML(text);
 		var publisher = "";
-		
-		if (xml..Publisher.length()){
-			publisher = Zotero.Utilities.cleanString(xml..Publisher[0].text().toString());
-		}
-		
-		var binding = "";
-		if (xml..Binding.length()){
-			binding = Zotero.Utilities.cleanString(xml..Binding[0].text().toString());
-		}
-		
-		var productGroup = "";
-		if (xml..ProductGroup.length()){
-			productGroup = Zotero.Utilities.cleanString(xml..ProductGroup[0].text().toString());
-		}
+	
+		if (!xml..Errors.length()) {
+			if (xml..Publisher.length()){
+				publisher = Zotero.Utilities.cleanString(xml..Publisher[0].text().toString());
+			}
 			
-		if (productGroup=="Book") {
-			var newItem = new Zotero.Item("book");
-			newItem.publisher = publisher;
-		}
-		else if (productGroup == "Music") {
-			var newItem = new Zotero.Item("audioRecording");
-			newItem.label = publisher;
-			newItem.audioRecordingType = binding;
-			for(var i=0; i<xml..Artist.length(); i++) {
-				newItem.creators.push(Zotero.Utilities.cleanAuthor(xml..Artist[i].text().toString(), "performer"));
+			var binding = "";
+			if (xml..Binding.length()){
+				binding = Zotero.Utilities.cleanString(xml..Binding[0].text().toString());
 			}
-		}
-		else if (productGroup == "DVD" | productGroup == "Video") {
-			var newItem = new Zotero.Item("videoRecording");
-			newItem.studio = publisher;
-			newItem.videoRecordingType = binding;
-			for(var i=0; i<xml..Actor.length(); i++) {
-				newItem.creators.push(Zotero.Utilities.cleanAuthor(xml..Actor[i].text().toString(), "castMember"));
+			
+			var productGroup = "";
+			if (xml..ProductGroup.length()){
+				productGroup = Zotero.Utilities.cleanString(xml..ProductGroup[0].text().toString());
 			}
-			for(var i=0; i<xml..Director.length(); i++) {
-				newItem.creators.push(Zotero.Utilities.cleanAuthor(xml..Director[i].text().toString(), "director"));
-			}		
-		}
-		else{
-			var newItem = new Zotero.Item("book");
-			newItem.publisher = publisher;
-		}
-		
-		if(xml..RunningTime.length()){
-			newItem.runningTime = Zotero.Utilities.cleanString(xml..RunningTime[0].text().toString());
-		}
-		
-		// Retrieve authors and other creators
-		for(var i=0; i<xml..Author.length(); i++) {
-			newItem.creators.push(Zotero.Utilities.cleanAuthor(xml..Author[i].text().toString(), "author"));
-		}
-		if (newItem.creators.length == 0){
-			for(var i=0; i<xml..Creator.length(); i++) {
-				newItem.creators.push(Zotero.Utilities.cleanAuthor(xml..Creator[i].text().toString()));
+				
+			if (productGroup=="Book") {
+				var newItem = new Zotero.Item("book");
+				newItem.publisher = publisher;
 			}
+			else if (productGroup == "Music") {
+				var newItem = new Zotero.Item("audioRecording");
+				newItem.label = publisher;
+				newItem.audioRecordingType = binding;
+				for(var i=0; i<xml..Artist.length(); i++) {
+					newItem.creators.push(Zotero.Utilities.cleanAuthor(xml..Artist[i].text().toString(), "performer"));
+				}
+			}
+			else if (productGroup == "DVD" | productGroup == "Video") {
+				var newItem = new Zotero.Item("videoRecording");
+				newItem.studio = publisher;
+				newItem.videoRecordingType = binding;
+				for(var i=0; i<xml..Actor.length(); i++) {
+					newItem.creators.push(Zotero.Utilities.cleanAuthor(xml..Actor[i].text().toString(), "castMember"));
+				}
+				for(var i=0; i<xml..Director.length(); i++) {
+					newItem.creators.push(Zotero.Utilities.cleanAuthor(xml..Director[i].text().toString(), "director"));
+				}		
+			}
+			else{
+				var newItem = new Zotero.Item("book");
+				newItem.publisher = publisher;
+			}
+			
+			if(xml..RunningTime.length()){
+				newItem.runningTime = Zotero.Utilities.cleanString(xml..RunningTime[0].text().toString());
+			}
+			
+			// Retrieve authors and other creators
+			for(var i=0; i<xml..Author.length(); i++) {
+				newItem.creators.push(Zotero.Utilities.cleanAuthor(xml..Author[i].text().toString(), "author"));
+			}
+			if (newItem.creators.length == 0){
+				for(var i=0; i<xml..Creator.length(); i++) {
+					newItem.creators.push(Zotero.Utilities.cleanAuthor(xml..Creator[i].text().toString()));
+				}
+			}
+			
+			if (xml..PublicationDate.length()){
+				newItem.date = Zotero.Utilities.cleanString(xml..PublicationDate[0].text().toString());
+			} else if (xml..ReleaseDate.length()){
+				newItem.date = Zotero.Utilities.cleanString(xml..ReleaseDate[0].text().toString());
+			}
+			if (xml..Edition.length()){
+				newItem.edition = Zotero.Utilities.cleanString(xml..Edition[0].text().toString());
+			}
+			if (xml..ISBN.length()){
+				newItem.ISBN = Zotero.Utilities.cleanString(xml..ISBN[0].text().toString());
+			}
+			if (xml..NumberOfPages.length()){
+				newItem.pages = Zotero.Utilities.cleanString(xml..NumberOfPages[0].text().toString());
+			}
+			var title = Zotero.Utilities.cleanString(xml..Title[0].text().toString());
+			if(title.lastIndexOf("(") != -1 && title.lastIndexOf(")") == title.length-1) {
+				title = title.substring(0, title.lastIndexOf("(")-1);
+			}
+			if (xml..ASIN.length()){
+				var url = "http://www.amazon." + suffix + "/dp/" + Zotero.Utilities.cleanString(xml..ASIN[0].text().toString());
+				newItem.attachments.push({title:"Amazon.com Link", snapshot:false, mimeType:"text/html", url:url});
+			}
+			
+			if (xml..OriginalReleaseDate.length()){
+				newItem.extra = Zotero.Utilities.cleanString(xml..OriginalReleaseDate[0].text().toString());
+			}
+			
+			newItem.title = title;
+			newItem.complete();
 		}
-		
-		if (xml..PublicationDate.length()){
-			newItem.date = Zotero.Utilities.cleanString(xml..PublicationDate[0].text().toString());
-		} else if (xml..ReleaseDate.length()){
-			newItem.date = Zotero.Utilities.cleanString(xml..ReleaseDate[0].text().toString());
-		}
-		if (xml..Edition.length()){
-			newItem.edition = Zotero.Utilities.cleanString(xml..Edition[0].text().toString());
-		}
-		if (xml..ISBN.length()){
-			newItem.ISBN = Zotero.Utilities.cleanString(xml..ISBN[0].text().toString());
-		}
-		if (xml..NumberOfPages.length()){
-			newItem.pages = Zotero.Utilities.cleanString(xml..NumberOfPages[0].text().toString());
-		}
-		var title = Zotero.Utilities.cleanString(xml..Title[0].text().toString());
-		if(title.lastIndexOf("(") != -1 && title.lastIndexOf(")") == title.length-1) {
-			title = title.substring(0, title.lastIndexOf("(")-1);
-		}
-		if (xml..ASIN.length()){
-			var url = "http://www.amazon." + suffix + "/dp/" + Zotero.Utilities.cleanString(xml..ASIN[0].text().toString());
-			newItem.attachments.push({title:"Amazon.com Link", snapshot:false, mimeType:"text/html", url:url});
-		}
-		
-		if (xml..OriginalReleaseDate.length()){
-			newItem.extra = Zotero.Utilities.cleanString(xml..OriginalReleaseDate[0].text().toString());
-		}
-		
-		newItem.title = title;
-		newItem.complete();			
-	}, function() {Zotero.done();}, null);
+	}, function() {Zotero.done;}, null);
 	Zotero.wait();
 }');
 
