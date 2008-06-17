@@ -139,15 +139,24 @@ var Zotero_File_Interface = new function() {
 			exporter.collection = collection;
 		} else {
 			// find sorted items
-			exporter.items = ZoteroPane.getSortedItems();
+			var items = [];
+			var ids = ZoteroPane.getSortedItems();
+			if (ids.length) {
+				for (var i=0; i<ids.length; i++) {
+					var item = Zotero.Items.get(ids[i]);
+					if (item) {
+						items.push(item);
+					}
+				}
+			}
+			
+			exporter.items = items;
 			if(!exporter.items) throw ("No items to save");
 			
 			// find name
-			var searchRef = ZoteroPane.getSelectedSavedSearch();
-			if(searchRef) {
-				var search = new Zotero.Search();
-				search.load(searchRef['id']);
-				exporter.name = search.getName();
+			var search = ZoteroPane.getSelectedSavedSearch();
+			if(search) {
+				exporter.name = search.name;
 			}
 		}
 		exporter.save();
