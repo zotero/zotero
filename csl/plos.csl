@@ -97,6 +97,7 @@
   <bibliography>
     <option name="et-al-min" value="6"/>
     <option name="et-al-use-first" value="5"/>
+    <option name="second-field-align" value="true"/>
     <layout suffix=".">
       <text variable="citation-number" suffix=". "/>
       <text macro="author"/>
