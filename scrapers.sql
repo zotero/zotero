@@ -22,9 +22,9 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-06-11 05:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-06-17 19:30:00'));
 
-REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-03-21 20:00:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
+REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-06-16 21:30:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
 
 	var suffixRe = new RegExp("https?://(?:www\.)?amazon\.([^/]+)/");
@@ -70,7 +70,8 @@ REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b
 	var nsResolver = namespace ? function(prefix) {
 			if (prefix == ''x'') return namespace; else return null;
 		} : null;
-		
+	
+
 	var suffixRe = new RegExp("https?://(?:www\.)?amazon\.([^/]+)/");
 	var suffixMatch = suffixRe.exec(url);
 	var suffix = suffixMatch[1];
@@ -83,16 +84,15 @@ REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b
 	}
 	if (suffix == ".com") suffix = "com";
 	if(m) {
-		var xpath = ''//a/span[@class="srTitle"]'';
+		var xpath = ''//div[@class="productTitle"]/a'';
 		var elmts = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
 		var elmt = elmts.iterateNext();
 		var asins = new Array();
 		var availableItems = new Array();
 		var i = 0;
 		var asinRe = new RegExp(''/(dp|product)/([^/]+)/'');
-
 		do {
-			var link = doc.evaluate(''../@href'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
+			var link = elmt.href;
 			var searchTitle = elmt.textContent;
 			if  (asinRe.exec(link)) {
 				var asinMatch = asinRe.exec(link);
@@ -127,93 +127,95 @@ REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b
 		text = "<Items>" + texts[0];
 		var xml = new XML(text);
 		var publisher = "";
-		
-		if (xml..Publisher.length()){
-			publisher = Zotero.Utilities.cleanString(xml..Publisher[0].text().toString());
-		}
-		
-		var binding = "";
-		if (xml..Binding.length()){
-			binding = Zotero.Utilities.cleanString(xml..Binding[0].text().toString());
-		}
-		
-		var productGroup = "";
-		if (xml..ProductGroup.length()){
-			productGroup = Zotero.Utilities.cleanString(xml..ProductGroup[0].text().toString());
-		}
+	
+		if (!xml..Errors.length()) {
+			if (xml..Publisher.length()){
+				publisher = Zotero.Utilities.cleanString(xml..Publisher[0].text().toString());
+			}
 			
-		if (productGroup=="Book") {
-			var newItem = new Zotero.Item("book");
-			newItem.publisher = publisher;
-		}
-		else if (productGroup == "Music") {
-			var newItem = new Zotero.Item("audioRecording");
-			newItem.label = publisher;
-			newItem.audioRecordingType = binding;
-			for(var i=0; i<xml..Artist.length(); i++) {
-				newItem.creators.push(Zotero.Utilities.cleanAuthor(xml..Artist[i].text().toString(), "performer"));
+			var binding = "";
+			if (xml..Binding.length()){
+				binding = Zotero.Utilities.cleanString(xml..Binding[0].text().toString());
 			}
-		}
-		else if (productGroup == "DVD" | productGroup == "Video") {
-			var newItem = new Zotero.Item("videoRecording");
-			newItem.studio = publisher;
-			newItem.videoRecordingType = binding;
-			for(var i=0; i<xml..Actor.length(); i++) {
-				newItem.creators.push(Zotero.Utilities.cleanAuthor(xml..Actor[i].text().toString(), "castMember"));
+			
+			var productGroup = "";
+			if (xml..ProductGroup.length()){
+				productGroup = Zotero.Utilities.cleanString(xml..ProductGroup[0].text().toString());
 			}
-			for(var i=0; i<xml..Director.length(); i++) {
-				newItem.creators.push(Zotero.Utilities.cleanAuthor(xml..Director[i].text().toString(), "director"));
-			}		
-		}
-		else{
-			var newItem = new Zotero.Item("book");
-			newItem.publisher = publisher;
-		}
-		
-		if(xml..RunningTime.length()){
-			newItem.runningTime = Zotero.Utilities.cleanString(xml..RunningTime[0].text().toString());
-		}
-		
-		// Retrieve authors and other creators
-		for(var i=0; i<xml..Author.length(); i++) {
-			newItem.creators.push(Zotero.Utilities.cleanAuthor(xml..Author[i].text().toString(), "author"));
-		}
-		if (newItem.creators.length == 0){
-			for(var i=0; i<xml..Creator.length(); i++) {
-				newItem.creators.push(Zotero.Utilities.cleanAuthor(xml..Creator[i].text().toString()));
+				
+			if (productGroup=="Book") {
+				var newItem = new Zotero.Item("book");
+				newItem.publisher = publisher;
 			}
+			else if (productGroup == "Music") {
+				var newItem = new Zotero.Item("audioRecording");
+				newItem.label = publisher;
+				newItem.audioRecordingType = binding;
+				for(var i=0; i<xml..Artist.length(); i++) {
+					newItem.creators.push(Zotero.Utilities.cleanAuthor(xml..Artist[i].text().toString(), "performer"));
+				}
+			}
+			else if (productGroup == "DVD" | productGroup == "Video") {
+				var newItem = new Zotero.Item("videoRecording");
+				newItem.studio = publisher;
+				newItem.videoRecordingType = binding;
+				for(var i=0; i<xml..Actor.length(); i++) {
+					newItem.creators.push(Zotero.Utilities.cleanAuthor(xml..Actor[i].text().toString(), "castMember"));
+				}
+				for(var i=0; i<xml..Director.length(); i++) {
+					newItem.creators.push(Zotero.Utilities.cleanAuthor(xml..Director[i].text().toString(), "director"));
+				}		
+			}
+			else{
+				var newItem = new Zotero.Item("book");
+				newItem.publisher = publisher;
+			}
+			
+			if(xml..RunningTime.length()){
+				newItem.runningTime = Zotero.Utilities.cleanString(xml..RunningTime[0].text().toString());
+			}
+			
+			// Retrieve authors and other creators
+			for(var i=0; i<xml..Author.length(); i++) {
+				newItem.creators.push(Zotero.Utilities.cleanAuthor(xml..Author[i].text().toString(), "author"));
+			}
+			if (newItem.creators.length == 0){
+				for(var i=0; i<xml..Creator.length(); i++) {
+					newItem.creators.push(Zotero.Utilities.cleanAuthor(xml..Creator[i].text().toString()));
+				}
+			}
+			
+			if (xml..PublicationDate.length()){
+				newItem.date = Zotero.Utilities.cleanString(xml..PublicationDate[0].text().toString());
+			} else if (xml..ReleaseDate.length()){
+				newItem.date = Zotero.Utilities.cleanString(xml..ReleaseDate[0].text().toString());
+			}
+			if (xml..Edition.length()){
+				newItem.edition = Zotero.Utilities.cleanString(xml..Edition[0].text().toString());
+			}
+			if (xml..ISBN.length()){
+				newItem.ISBN = Zotero.Utilities.cleanString(xml..ISBN[0].text().toString());
+			}
+			if (xml..NumberOfPages.length()){
+				newItem.pages = Zotero.Utilities.cleanString(xml..NumberOfPages[0].text().toString());
+			}
+			var title = Zotero.Utilities.cleanString(xml..Title[0].text().toString());
+			if(title.lastIndexOf("(") != -1 && title.lastIndexOf(")") == title.length-1) {
+				title = title.substring(0, title.lastIndexOf("(")-1);
+			}
+			if (xml..ASIN.length()){
+				var url = "http://www.amazon." + suffix + "/dp/" + Zotero.Utilities.cleanString(xml..ASIN[0].text().toString());
+				newItem.attachments.push({title:"Amazon.com Link", snapshot:false, mimeType:"text/html", url:url});
+			}
+			
+			if (xml..OriginalReleaseDate.length()){
+				newItem.extra = Zotero.Utilities.cleanString(xml..OriginalReleaseDate[0].text().toString());
+			}
+			
+			newItem.title = title;
+			newItem.complete();
 		}
-		
-		if (xml..PublicationDate.length()){
-			newItem.date = Zotero.Utilities.cleanString(xml..PublicationDate[0].text().toString());
-		} else if (xml..ReleaseDate.length()){
-			newItem.date = Zotero.Utilities.cleanString(xml..ReleaseDate[0].text().toString());
-		}
-		if (xml..Edition.length()){
-			newItem.edition = Zotero.Utilities.cleanString(xml..Edition[0].text().toString());
-		}
-		if (xml..ISBN.length()){
-			newItem.ISBN = Zotero.Utilities.cleanString(xml..ISBN[0].text().toString());
-		}
-		if (xml..NumberOfPages.length()){
-			newItem.pages = Zotero.Utilities.cleanString(xml..NumberOfPages[0].text().toString());
-		}
-		var title = Zotero.Utilities.cleanString(xml..Title[0].text().toString());
-		if(title.lastIndexOf("(") != -1 && title.lastIndexOf(")") == title.length-1) {
-			title = title.substring(0, title.lastIndexOf("(")-1);
-		}
-		if (xml..ASIN.length()){
-			var url = "http://www.amazon." + suffix + "/dp/" + Zotero.Utilities.cleanString(xml..ASIN[0].text().toString());
-			newItem.attachments.push({title:"Amazon.com Link", snapshot:false, mimeType:"text/html", url:url});
-		}
-		
-		if (xml..OriginalReleaseDate.length()){
-			newItem.extra = Zotero.Utilities.cleanString(xml..OriginalReleaseDate[0].text().toString());
-		}
-		
-		newItem.title = title;
-		newItem.complete();			
-	}, function() {Zotero.done();}, null);
+	}, function() {Zotero.done;}, null);
 	Zotero.wait();
 }');
 
@@ -1089,7 +1091,7 @@ REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('59cce211-9d77-4cdd-876d-6229ea20367f', '1.0.0b4.r5', '', '2008-06-10 22:30:00', '0', '100', '4', 'Bibliothèque et Archives nationales du Québec', 'Adam Crymble', 'http://catalogue.banq.qc.ca', 
+REPLACE INTO translators VALUES ('59cce211-9d77-4cdd-876d-6229ea20367f', '1.0.0b4.r5', '', '2008-06-12 19:30:00', '0', '100', '4', 'Bibliothèque et Archives nationales du Québec', 'Adam Crymble', 'http://catalogue.banq.qc.ca', 
 'function detectWeb(doc, url) {
 	if (doc.title.match("Search")) {
 		return "multiple";
@@ -1341,7 +1343,7 @@ function doWeb(doc, url) {
 	
 }');
 
-REPLACE INTO translators VALUES ('2d174277-7651-458f-86dd-20e168d2f1f3', '1.0.0b4.r5', '', '2008-06-06 08:45:00', '0', '100', '4', 'Canadiana.org', 'Adam Crymble', 'http://(www.)?canadiana.org', 
+REPLACE INTO translators VALUES ('2d174277-7651-458f-86dd-20e168d2f1f3', '1.0.0b4.r5', '', '2008-06-12 19:30:00', '0', '100', '4', 'Canadiana.org', 'Adam Crymble', 'http://(www.)?canadiana.org', 
 'function detectWeb(doc, url) {
    
    //checks the title of the webpage. If it matches, then the little blue book symbol appears in the address bar.
@@ -1640,7 +1642,7 @@ function doWeb (doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('91acf493-0de7-4473-8b62-89fd141e6c74', '1.0.0b3.r1', '', '2008-06-10 22:30:00', '1', '100', '1', 'MAB2', 'Simon Kornblith. Adaptions for MAB2: Leon Krauthausen (FUB)', 'mab2', 
+REPLACE INTO translators VALUES ('91acf493-0de7-4473-8b62-89fd141e6c74', '1.0.0b3.r1', '', '2008-06-12 19:00:00', '1', '100', '1', 'MAB2', 'Simon Kornblith. Adaptions for MAB2: Leon Krauthausen (FUB)', 'mab2', 
 'function detectImport() {
 	var mab2RecordRegexp = /^[0-9]{3}[a-z ]{2}[a-z ]{3}$/
 	var read = Zotero.read(8);
@@ -1987,7 +1989,163 @@ function doImport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('b662c6eb-e478-46bd- bad4-23cdfd0c9d67', '1.0.0b4.r5', '', '2008-06-10 22:30:00', '0', '100', '4', 'JurPC', 'Oliver Vivell and Michael Berkowitz', 'http://www.jurpc.de/', 
+REPLACE INTO translators VALUES ('58a778cc-25e2-4884-95b3-6b22d7571183', '1.0.0b4.r5', '', '2008-06-17 19:30:00', '1', '100', '4', 'Gmail', 'Michael Berkowitz', 'http://mail.google.com/', 
+'function detectWeb(doc, url) {
+	if (url.match(/#inbox\/[\w\d]+/)) {
+		return "document";
+	}
+}', 
+'function doWeb(doc, url) {
+	var n = doc.documentElement.namespaceURI;
+	var ns = n ? function(prefix) {
+		if (prefix == ''x'') return n; else return null;
+	} : null;
+	
+	var scripts = doc.evaluate(''//script'', doc, ns, XPathResult.ANY_TYPE, null);
+	var script;
+	var text = "";
+	while (script = scripts.iterateNext()) {
+		text += script.textContent;
+	}
+	var ik = text.match(/ID_KEY:\"([^"]+)\"/)[1]
+	var th = url.match(/#inbox\/(.*)$/)[1];
+	var newurl = ''http://mail.google.com/mail/?ui=2&ik='' + ik + ''&view=om&th='' + th;
+	Zotero.Utilities.HTTP.doGet(newurl, function(text) {
+		var item = new Zotero.Item("email");
+		var to = text.match(/\nTo:\s+([^\n]+)\n/)[1];
+		item.creators.push(Zotero.Utilities.cleanAuthor(Zotero.Utilities.trimInternal(to.replace(/<.*>/g, "")), "recipient"));
+		var from = text.match(/\nFrom:\s+([^\n]+)\n/)[1];
+		item.creators.push(Zotero.Utilities.cleanAuthor(Zotero.Utilities.trimInternal(from.replace(/<.*>/g, "")), "author"));
+		item.date = text.match(/\nDate:\s+(.*,\s+\d+\s+\w+\s+\d{4})/)[1];
+		item.subject = text.match(/\nSubject:\s+([^\n]+)/)[1];
+		if (item.subject == "") item.subject = "<No Subject>";
+		item.title = item.subject;
+		item.complete();
+	});
+	Zotero.wait();
+}');
+
+REPLACE INTO translators VALUES ('490909d7-7d79-4c7a-a136-77df618d4db2', '1.0.0b4.r5', '', '2008-06-13 20:10:00', '0', '100', '4', 'Worldcat.org', 'Michael Berkowitz', 'http://(www.)?worldcat.org/', 
+'function detectWeb(doc, url) {
+	if (url.match(/search?/)) {
+		return "multiple";
+	} else if (url.match(/oclc/)) {
+		var type = doc.evaluate(''//tbody/tr/td[2][img]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent.toLowerCase().match(/(\w+);/)[1];
+		switch (type) {
+			case "book": return "book";
+			case "article": return "journalArticle";
+			case "recording":
+			case "disc": return "audioRecording";
+			case "tape": return "videoRecording";
+		}
+	}
+}', 
+'function ENify(str) {
+	return str.match(/^[^&]+/)[0] + ''?page=endnote&client=worldcat.org-detailed_record'';
+}
+function doWeb(doc, url) {
+	var n = doc.documentElement.namespaceURI;
+	var ns = n ? function(prefix) {
+		if (prefix == ''x'') return n; else return null;
+	} : null;
+	
+	var books = new Array();
+	if (detectWeb(doc, url) == "multiple") {
+		var items = new Object();
+		var titles = doc.evaluate(''//div[@class="name"]/a'', doc, ns, XPathResult.ANY_TYPE, null);
+		var title;
+		while (title = titles.iterateNext()) {
+			items[title.href] = Zotero.Utilities.trimInternal(title.textContent);
+		}
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			books.push(ENify(i));
+		}
+	} else {
+		books = [ENify(url)]
+	}
+	for each (var book in books) {
+		Zotero.Utilities.HTTP.doGet(book, function(text) {
+			text = text.replace("MUSIC", "PAMP");
+			var translator = Zotero.loadTranslator("import");
+			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+			translator.setString(text);
+			translator.translate();
+		});
+		Zotero.wait();
+	}
+}');
+
+REPLACE INTO translators VALUES ('2943d7fc-3ce8-401c-afd5-ee1f70b7aae0', '1.0.0b4.r5', '', '2008-06-12 19:00:00', '0', '100', '4', 'Helsinki University of Technology', 'Michael Berkowitz', 'https?://teemu.linneanet.fi/', 
+'function detectWeb(doc, url) {
+	if (url.match(/v\d+=\d+/)) {
+		return "book";
+	} else if (url.match(/Search_Arg/)) {
+		return "multiple";
+	}
+}', 
+'function MARCify(str) {
+	return str.replace(/v\d+=([^&]+)/, "v3=$1");
+}
+
+function doWeb(doc, url) {
+	var n = doc.documentElement.namespaceURI;
+	var ns = n ? function(prefix) {
+		if (prefix == ''x'') return n; else return null;
+	} : null;
+	
+	var books = new Array();
+	if (detectWeb(doc, url) == "multiple") {
+		var titles = doc.evaluate(''/html/body/form/table/tbody/tr/td[3]/a'', doc, ns, XPathResult.ANY_TYPE, null);
+		var title;
+		var items = new Object();
+		while (title = titles.iterateNext()) {
+			items[title.href] = Zotero.Utilities.trimInternal(title.textContent);
+		}
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			books.push(MARCify(i));
+		}
+	} else {
+		books = [MARCify(url)];
+	}
+	var translator = Zotero.loadTranslator("import");
+	translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
+	var marc = translator.getTranslatorObject();
+	Zotero.Utilities.processDocuments(books, function(doc) {
+		var elmts = doc.evaluate(''/html/body/form/table/tbody/tr[th]'', doc, ns, XPathResult.ANY_TYPE, null);
+		var record = new marc.record();
+		var elmt;
+		while (elmt = elmts.iterateNext()) {
+			var field = Zotero.Utilities.superCleanString(doc.evaluate(''./th'', elmt, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+			if (field) {
+				var value = doc.evaluate(''./td[1]'', elmt, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+				if (value.split(/\n/)[1]) value = Zotero.Utilities.trimInternal(value.split(/\n/)[1]);
+				if(field == "LDR") {
+					record.leader = value;
+				} else if(field != "FMT") {
+					value = value.replace(/\|([a-z]) /g, marc.subfieldDelimiter+"$1");
+					var code = field.substring(0, 3);
+					var ind = "";
+					if(field.length > 3) {
+						ind = field[3];
+						if(field.length > 4) {
+							ind += field[4];
+						}
+					}
+				
+					record.addField(code, ind, value);
+				}
+			}
+		}
+		var item = new Zotero.Item("book");
+		record.translate(item);
+		item.complete();
+	}, function() {Zotero.done;});
+	Zotero.wait();
+}');
+
+REPLACE INTO translators VALUES ('b662c6eb-e478-46bd- bad4-23cdfd0c9d67', '1.0.0b4.r5', '', '2008-06-12 19:30:00', '0', '100', '4', 'JurPC', 'Oliver Vivell and Michael Berkowitz', 'http://www.jurpc.de/', 
 'function detectWeb(doc, url) {
         var doctype = doc.evaluate(''//meta/@doctype'', doc, null,XPathResult.ANY_TYPE, null).iterateNext().textContent;
 
@@ -2102,7 +2260,7 @@ function parseDoc(xpath, doc) {
         return content;
 }');
 
-REPLACE INTO translators VALUES ('cae7d3ec-bc8d-465b-974f-8b0dcfe24290', '1.0.0b4.r5', '', '2008-06-10 22:30:00', '0', '100', '4', 'BIUM', 'Michael Berkowitz', 'http://hip.bium.univ-paris5.fr/', 
+REPLACE INTO translators VALUES ('cae7d3ec-bc8d-465b-974f-8b0dcfe24290', '1.0.0b4.r5', '', '2008-06-12 19:30:00', '0', '100', '4', 'BIUM', 'Michael Berkowitz', 'http://hip.bium.univ-paris5.fr/', 
 'function detectWeb(doc, url) {
 	if (doc.evaluate(''//td/a[@class="itemTitle"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
@@ -12293,7 +12451,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('add7c71c-21f3-ee14-d188-caf9da12728b', '1.0.0b3.r1', '', '2008-05-27 20:00:00', '1', '100', '4', 'Library Catalog (SIRSI)', 'Sean Takats', '/uhtbin/cgisirsi', 
+REPLACE INTO translators VALUES ('add7c71c-21f3-ee14-d188-caf9da12728b', '1.0.0b3.r1', '', '2008-06-12 19:30:00', '1', '100', '4', 'Library Catalog (SIRSI)', 'Sean Takats', '/uhtbin/cgisirsi', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -14142,7 +14300,7 @@ REPLACE INTO translators VALUES ('c54d1932-73ce-dfd4-a943-109380e06574', '1.0.0b
 	}
 }');
 
-REPLACE INTO translators VALUES ('fcf41bed-0cbc-3704-85c7-8062a0068a7a', '1.0.0b3.r1', '', '2008-06-11 05:00:00', '1', '100', '4', 'NCBI PubMed', 'Simon Kornblith and Michael Berkowitz', 'http://[^/]*www\.ncbi\.nlm\.nih\.gov[^/]*/(pubmed|sites/entrez|entrez/query\.fcgi\?.*db=PubMed)', 
+REPLACE INTO translators VALUES ('fcf41bed-0cbc-3704-85c7-8062a0068a7a', '1.0.0b3.r1', '', '2008-06-12 19:00:00', '1', '100', '4', 'NCBI PubMed', 'Simon Kornblith and Michael Berkowitz', 'http://[^/]*www\.ncbi\.nlm\.nih\.gov[^/]*/(pubmed|sites/entrez|entrez/query\.fcgi\?.*db=PubMed)', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -14195,7 +14353,6 @@ function detectSearch(item) {
 			var citation = xml.PubmedArticle[i].MedlineCitation;
 
 			var PMID = citation.PMID.text().toString();
-//			newItem.accessionNumber = "PMID "+PMID;
 			newItem.extra = "PMID: "+PMID;
 			// add attachments
 			if(doc) {
@@ -14225,7 +14382,7 @@ function detectSearch(item) {
 					newItem.ISSN = issn;
 				}
 
-				newItem.journalAbbreviation = Zotero.Utilities.superCleanString(citation.MedlineJournalInfo.MedlineTA.text().toString());
+				newItem.journalAbbreviation = Zotero.Utilities.superCleanString(citation.Article.Journal.ISOAbbreviation.text().toString());
 				if(article.Journal.Title.length()) {
 					newItem.publicationTitle = Zotero.Utilities.superCleanString(article.Journal.Title.text().toString());
 				} else if(citation.MedlineJournalInfo.MedlineTA.length()) {
@@ -14271,7 +14428,6 @@ function detectSearch(item) {
 			newItem.abstractNote = article.Abstract.AbstractText.toString()
 			
 			newItem.DOI = xml.PubmedArticle[i].PubmedData.ArticleIdList.ArticleId[0].text().toString();
-			newItem.journalAbbreviation = newItem.journalAbbreviation.replace(/(\w\b)/g, "$1.");
 			newItem.publicationTitle = Zotero.Utilities.capitalizeTitle(newItem.publicationTitle);
 			newItem.complete();
 		}
@@ -14861,7 +15017,7 @@ REPLACE INTO translators VALUES ('a326fc49-60c2-405b-8f44-607e5d18b9ad', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('c3edb423-f267-47a1-a8c2-158c247f87c2', '1.0.0b4.r5', '', '2008-05-06 08:15:00', '0', '100', '4', 'Common-Place', 'Frederick Gibbs', 'http://www.common-place\.|historycooperative\.org/journals/cp', 
+REPLACE INTO translators VALUES ('c3edb423-f267-47a1-a8c2-158c247f87c2', '1.0.0b4.r5', '', '2008-06-12 19:30:00', '0', '100', '4', 'Common-Place', 'Frederick Gibbs', 'http://www.common-place\.|historycooperative\.org/journals/cp', 
 'function detectWeb(doc, url) {
 	if(doc.title.indexOf("Previous Issues") != -1 || doc.title.indexOf("Search Site") != -1 ) {
 		return "multiple";
@@ -16073,7 +16229,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('d0b1914a-11f1-4dd7-8557-b32fe8a3dd47', '1.0.0b3.r1', '', '2008-05-22 20:30:00', '1', '100', '4', 'EBSCOhost', 'Simon Kornblith', 'https?://[^/]+/(?:bsi|ehost)/(?:results|detail|folder)', 
+REPLACE INTO translators VALUES ('d0b1914a-11f1-4dd7-8557-b32fe8a3dd47', '1.0.0b3.r1', '', '2008-06-12 19:30:00', '1', '100', '4', 'EBSCOhost', 'Simon Kornblith', 'https?://[^/]+/(?:bsi|ehost)/(?:results|detail|folder)', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -17268,12 +17424,12 @@ REPLACE INTO translators VALUES ('fe728bc9-595a-4f03-98fc-766f1d8d0936', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('b6d0a7a-d076-48ae-b2f0-b6de28b194e', '1.0.0b3.r1', '', '2008-05-27 17:30:00', '1', '100', '4', 'ScienceDirect', 'Michael Berkowitz', 'https?://www\.sciencedirect\.com[^/]*/science(\/article)?\?(?:.+\&|)_ob=(?:ArticleURL|ArticleListURL|PublicationURL)', 
+REPLACE INTO translators VALUES ('b6d0a7a-d076-48ae-b2f0-b6de28b194e', '1.0.0b3.r1', '', '2008-06-15 17:10:00', '1', '100', '4', 'ScienceDirect', 'Michael Berkowitz', 'https?://www\.sciencedirect\.com[^/]*/science(\/article)?(\?(?:.+\&|)ob=(?:ArticleURL|ArticleListURL|PublicationURL))?', 
 'function detectWeb(doc, url) {
 	if ((url.indexOf("_ob=DownloadURL") != -1) || doc.title == "ScienceDirect Login") {
 		return false;
 	}
-	if(url.indexOf("_ob=ArticleURL") == -1 || url.indexOf("/journal/") != -1) {
+	if((url.indexOf("_ob=ArticleURL") == -1 && url.indexOf("/article/") == -1) || url.indexOf("/journal/") != -1) {
 		return "multiple";
 	} else {
 		return "journalArticle";
@@ -19441,7 +19597,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('72cb2536-3211-41e0-ae8b-974c0385e085', '1.0.0b4.r1', '', '2007-06-21 07:00:00', '0', '100', '4', 'ARTFL Encyclopedie', 'Sean Takats', '/cgi-bin/philologic31/(getobject\.pl\?c\.[0-9]+:[0-9]+\.encyclopedie|search3t\?dbname=encyclopedie0507)', 
+REPLACE INTO translators VALUES ('72cb2536-3211-41e0-ae8b-974c0385e085', '1.0.0b4.r1', '', '2008-06-12 19:30:00', '0', '100', '4', 'ARTFL Encyclopedie', 'Sean Takats', '/cgi-bin/philologic31/(getobject\.pl\?c\.[0-9]+:[0-9]+\.encyclopedie|search3t\?dbname=encyclopedie0507)', 
 'function detectWeb(doc, url) {
 	if (url.indexOf("getobject.pl") != -1){
 		return "encyclopediaArticle";
