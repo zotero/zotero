@@ -743,6 +743,28 @@ Zotero.Integration.Session.prototype.unserializeCitation = function(arg, index) 
 		// get JSON
 		var object = Zotero.JSON.unserialize(arg);
 		
+		// Fix uppercase citation codes
+		if(object.CITATIONITEMS) {
+			object.citationItems = [];
+			for (var i=0; i<object.CITATIONITEMS.length; i++) {
+				for (var j in object.CITATIONITEMS[i]) {
+					switch (j) {
+						case 'ITEMID':
+							var field = 'itemID';
+							break;
+							
+						// 'position', 'custom'
+						default:
+							var field = j.toLowerCase();
+					}
+					if (!object.citationItems[i]) {
+						object.citationItems[i] = {};
+					}
+					object.citationItems[i][field] = object.CITATIONITEMS[i][j];
+				}
+			}
+		}
+		
 		// copy properties
 		for(var i in object) {
 			if(Zotero.Integration.Session._saveProperties.indexOf(i) != -1) {
@@ -834,7 +856,7 @@ Zotero.Integration.Session.prototype.editCitation = function(index, citation) {
 	Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
 	          .getService(Components.interfaces.nsIWindowWatcher)
 	          .openWindow(null, 'chrome://zotero/content/addCitationDialog.xul', '',
-					  'chrome,modal,centerscreen' + (Zotero.isWin ? ',popup' : ''), io);
+					  'chrome,modal,centerscreen,resizable=yes' + (Zotero.isWin ? ',popup' : ''), io);
 	
 	if(citation && !io.citation.citationItems.length) {
 		io.citation = citation;
@@ -994,7 +1016,7 @@ Zotero.Integration.Session.prototype.editBibliography = function() {
 	Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
 	          .getService(Components.interfaces.nsIWindowWatcher)
 	          .openWindow(null, 'chrome://zotero/content/editBibliographyDialog.xul', '',
-					  'chrome,modal,centerscreen' + (Zotero.isWin ? ',popup' : ''), io, true);
+					  'chrome,modal,centerscreen,resizable=yes' + (Zotero.isWin ? ',popup' : ''), io, true);
 	
 }
 

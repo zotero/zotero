@@ -36,7 +36,7 @@
 	onunload="doUnload();"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	style="padding:2em"
-	persist="screenX screenY">
+	persist="screenX screenY width height">
 	
 	<script src="include.js"/>
 	<script src="selectItemsDialog.js"/>
