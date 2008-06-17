@@ -460,7 +460,7 @@ Zotero.Sync.Server = new function () {
 	var _loginManagerHost = 'chrome://zotero';
 	var _loginManagerURL = 'Zotero Sync Server';
 	
-	var _serverURL = "https://sync.zotero.org/";
+	var _serverURL = ZOTERO_CONFIG.SYNC_URL;
 	
 	var _maxAttempts = 3;
 	var _attempts = _maxAttempts;

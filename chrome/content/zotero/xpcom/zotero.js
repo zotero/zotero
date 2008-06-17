@@ -25,7 +25,8 @@ const ZOTERO_CONFIG = {
 	DB_REBUILD: false, // erase DB and recreate from schema
 	REPOSITORY_URL: 'http://www.zotero.org/repo',
 	REPOSITORY_CHECK_INTERVAL: 86400, // 24 hours
-	REPOSITORY_RETRY_INTERVAL: 3600 // 1 hour
+	REPOSITORY_RETRY_INTERVAL: 3600, // 1 hour
+	SYNC_URL: 'http://sync.zotero.org/'
 };
 
 /*
