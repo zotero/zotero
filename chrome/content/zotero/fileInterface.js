@@ -143,9 +143,8 @@ var Zotero_File_Interface = new function() {
 			if(!exporter.items) throw ("No items to save");
 			
 			// find name
-			var searchRef = ZoteroPane.getSelectedSavedSearch();
-			if(searchRef) {
-				var search = new Zotero.Search(searchRef.id);
+			var search = ZoteroPane.getSelectedSavedSearch();
+			if(search) {
 				exporter.name = search.name;
 			}
 		}

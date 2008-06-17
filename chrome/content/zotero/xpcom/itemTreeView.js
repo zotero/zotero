@@ -1439,16 +1439,25 @@ Zotero.ItemTreeView.prototype.getVisibleFields = function() {
 }
 
 
-/*
- * Returns an array of item ids of visible items in current sort order
+/**
+ * Returns an array of items of visible items in current sort order
+ *
+ * @param	bool	asIDs		Return itemIDs
+ * @return	array				An array of Zotero.Item objects or itemIDs
  */
-Zotero.ItemTreeView.prototype.getSortedItems = function() {
-	var ids = [];
+Zotero.ItemTreeView.prototype.getSortedItems = function(asIDs) {
+	var items = [];
 	for each(var item in this._dataItems) {
-		ids.push(item.ref.id);
+		if (asIDs) {
+			items.push(item.ref.id);
+		}
+		else {
+			items.push(item.ref);
+		}
 	}
-	return ids;
+	return items;
 }
+
 
 Zotero.ItemTreeView.prototype.getSortField = function() {
 	var column = this._treebox.columns.getSortedColumn()
