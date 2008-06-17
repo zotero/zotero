@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-06-16 21:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-06-17 20:15:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-06-16 21:30:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1989,10 +1989,10 @@ function doImport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('58a778cc-25e2-4884-95b3-6b22d7571183', '1.0.0b4.r5', '', '2008-06-13 20:10:00', '0', '100', '4', 'Gmail', 'Michael Berkowitz', 'http://mail.google.com/', 
+REPLACE INTO translators VALUES ('58a778cc-25e2-4884-95b3-6b22d7571183', '1.0.0b4.r5', '', '2008-06-17 20:15:00', '1', '100', '4', 'Gmail', 'Michael Berkowitz', 'http://mail.google.com/', 
 'function detectWeb(doc, url) {
 	if (url.match(/#inbox\/[\w\d]+/)) {
-		return "email";
+		return "document";
 	}
 }', 
 'function doWeb(doc, url) {
@@ -2018,6 +2018,8 @@ REPLACE INTO translators VALUES ('58a778cc-25e2-4884-95b3-6b22d7571183', '1.0.0b
 		item.creators.push(Zotero.Utilities.cleanAuthor(Zotero.Utilities.trimInternal(from.replace(/<.*>/g, "")), "author"));
 		item.date = text.match(/\nDate:\s+(.*,\s+\d+\s+\w+\s+\d{4})/)[1];
 		item.subject = text.match(/\nSubject:\s+([^\n]+)/)[1];
+		if (item.subject == "") item.subject = "<No Subject>";
+		item.title = item.subject;
 		item.complete();
 	});
 	Zotero.wait();
