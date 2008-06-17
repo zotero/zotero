@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-06-17 20:15:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-06-17 19:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-06-16 21:30:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1989,7 +1989,7 @@ function doImport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('58a778cc-25e2-4884-95b3-6b22d7571183', '1.0.0b4.r5', '', '2008-06-17 20:15:00', '1', '100', '4', 'Gmail', 'Michael Berkowitz', 'http://mail.google.com/', 
+REPLACE INTO translators VALUES ('58a778cc-25e2-4884-95b3-6b22d7571183', '1.0.0b4.r5', '', '2008-06-17 19:30:00', '1', '100', '4', 'Gmail', 'Michael Berkowitz', 'http://mail.google.com/', 
 'function detectWeb(doc, url) {
 	if (url.match(/#inbox\/[\w\d]+/)) {
 		return "document";
