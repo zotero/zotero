@@ -1322,22 +1322,25 @@ var ZoteroPane = new function()
 	 */
 	function getSelectedItems(asIDs)
 	{
-		if (this.itemsView) {
-			return this.itemsView.getSelectedItems(asIDs);
+		if (!this.itemsView) {
+			return [];
 		}
-		return [];
+		
+		return this.itemsView.getSelectedItems(asIDs);
 	}
 	
 	
 	/*
-	 * Returns an array of item ids of visible items in current sort order
+	 * Returns an array of Zotero.Item objects of visible items in current sort order
+	 *
+	 * If asIDs is true, return an array of itemIDs instead
 	 */
-	function getSortedItems() {
+	function getSortedItems(asIDs) {
 		if (!this.itemsView) {
-			return false;
+			return [];
 		}
 		
-		return this.itemsView.getSortedItems();
+		return this.itemsView.getSortedItems(asIDs);
 	}
 	
 	
