@@ -397,7 +397,7 @@ Zotero.Tag.prototype.save = function () {
 			//Zotero.Notifier.trigger('add', 'tag-item', this.id + '-' + itemID);
 			
 			// TODO: notify linked items of name changes?
-			// Zotero.Notifier.trigger('modify', 'item', itemIDs);
+			Zotero.Notifier.trigger('modify', 'item', removed.concat(newids));
 		}
 		
 		Zotero.DB.commitTransaction();
