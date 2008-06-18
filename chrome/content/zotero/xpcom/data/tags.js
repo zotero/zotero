@@ -370,7 +370,9 @@ Zotero.Tags = new function() {
 			var toDelete = Zotero.DB.columnQuery(sql);
 			
 			if (!toDelete) {
-				Zotero.DB.rollbackTransaction();
+				sql = "DROP TABLE tagDelete";
+				Zotero.DB.query(sql);
+				Zotero.DB.commitTransaction();
 				return;
 			}
 			
