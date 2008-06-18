@@ -262,6 +262,13 @@ Zotero.Utilities.prototype.isInt = function(x) {
 Zotero.Utilities.prototype.getSQLDataType = function(value) {
 	var strVal = value + '';
 	if (strVal.match(/^[1-9]+[0-9]*$/)) {
+		// 2^53 (9007199254740992) is JS's upper-bound for decimal integers,
+		// but since integer comparisons above that won't work,
+		// we use a string past 15 digits
+		if (strVal.length > 15) {
+			return 0;
+		}
+		
 		// These upper bounds also specified in Zotero.DB
 		//
 		// Store as 32-bit signed integer
@@ -269,8 +276,7 @@ Zotero.Utilities.prototype.getSQLDataType = function(value) {
 			return 32;
 		}
 		// Store as 64-bit signed integer
-		// 2^53 is JS's upper-bound for decimal integers
-		else if (value < 9007199254740992) {
+		else {
 			return 64;
 		}
 	}
