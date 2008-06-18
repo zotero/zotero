@@ -26,7 +26,7 @@ const ZOTERO_CONFIG = {
 	REPOSITORY_URL: 'http://www.zotero.org/repo',
 	REPOSITORY_CHECK_INTERVAL: 86400, // 24 hours
 	REPOSITORY_RETRY_INTERVAL: 3600, // 1 hour
-	SYNC_URL: 'http://sync.zotero.org/'
+	SYNC_URL: 'https://sync.zotero.org/'
 };
 
 /*
