@@ -1473,7 +1473,7 @@ Zotero.ItemTreeView.prototype.onDragStart = function (evt,transferData,action)
 			Zotero.QuickCopy.getContentFromItems(items, format, exportCallback);
 		}
 		else if (mode.indexOf('bibliography') == 0) {
-			var content = Zotero.QuickCopy.getContentFromItems(items, format);
+			var content = Zotero.QuickCopy.getContentFromItems(items, format, null, evt.shiftKey);
 			transferData.data.addDataForFlavour("text/unicode", content.text);
 			if (content.html) {
 				transferData.data.addDataForFlavour("text/html", content.html);
