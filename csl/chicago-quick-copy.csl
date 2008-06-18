@@ -607,9 +607,6 @@
   <bibliography>
     <option name="et-al-min" value="4"/>
     <option name="et-al-use-first" value="1"/>
-    <option name="et-al-subsequent-min" value="4"/>
-    <option name="et-al-subsequent-use-first" value="1"/>
-    <option name="disambiguate-add-names" value="true"/>
     <layout suffix=".">
           <group delimiter=", ">
             <text macro="contributors-note"/>
