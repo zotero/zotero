@@ -1091,6 +1091,255 @@ REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b
 	Zotero.wait();
 }');
 
+REPLACE INTO translators VALUES ('18bc329c-51af-497e-a7cf-aa572fae363d', '1.0.0b4.r5', '', '2008-06-18 10:26:16', '0', '100', '4', 'Archives Canada', 'Adam Crymble', 'http://(www.)?archivescanada.ca', 
+'function detectWeb (doc, url) {
+	if (doc.location.href.match("RouteRqst")) {
+		return "multiple";
+	} else if (doc.location.href.match("ItemDisplay")) {
+		return "book";
+	}	
+}', 
+'function associateData (newItem, dataTags, field, zoteroField) {
+	if (dataTags[field]) {
+		newItem[zoteroField] = dataTags[field];
+	}
+}
+
+function scrape(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	var dataTags = new Object();
+	var tagsContent = new Array();
+	var cainNo;
+	var newItem = new Zotero.Item("book");
+
+	var data = doc.evaluate(''//td/p'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+	var dataCount = doc.evaluate(''count (//td/p)'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+
+	for (i=0; i<dataCount.numberValue; i++) {	 	
+     		data1 = data.iterateNext().textContent.replace(/^\s*|\s*$/g, '''').split(":");
+     		fieldTitle = data1[0].replace(/\s+/g, '''');
+
+     		if (fieldTitle == "PROVENANCE") {
+	     		
+	     		var multiAuthors = data1[1].split(/\n/);
+	     		
+	     		for (var j = 0; j < multiAuthors.length; j++) {
+		     		if (multiAuthors[j].match(",")) {
+			     		
+			     		var authorName = multiAuthors[j].replace(/^\s*|\s*$/g, '''').split(",");
+			     	
+			     		authorName[0] = authorName[0].replace(/\s+/g, '''');
+			     		dataTags["PROVENANCE"] = (authorName[1] + (" ") + authorName[0]);
+			     		newItem.creators.push(Zotero.Utilities.cleanAuthor(dataTags["PROVENANCE"], "author")); 	
+ 		
+		     		} else {	
+		     		
+		     			newItem.creators.push({lastName: multiAuthors[j].replace(/^\s*|\s*$/g, ''''), creatorType: "creator"});
+	     			}
+	     		} 		
+	     		
+     		} else if (fieldTitle == "SUBJECTS" | fieldTitle == "MATIÈRES") {
+	     		tagsContent = data1[1].split(/\n/);
+	     		     		
+     		} else {
+     		
+     			dataTags[fieldTitle] = data1[1];
+     		}
+     	}
+     	
+     	if (doc.evaluate(''//tr[3]/td/table/tbody/tr[1]/td/table/tbody/tr[2]/td/table/tbody/tr/td[1]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+     		cainNo = doc.evaluate(''//tr[3]/td/table/tbody/tr[1]/td/table/tbody/tr[2]/td/table/tbody/tr/td[1]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+     		newItem.extra = cainNo.replace(/^\s*|\s*$/g, '''');
+     	}
+     		for (var i = 0; i < tagsContent.length; i++) {
+	     		newItem.tags[i] = tagsContent[i].replace(/^\s*|\s*$/g, '''');
+     		}
+     		
+     	associateData (newItem, dataTags, "TITLE", "title" );
+     	associateData (newItem, dataTags, "REPOSITORY", "repository" );
+     	associateData (newItem, dataTags, "RETRIEVALNUMBER", "callNumber" );
+     	associateData (newItem, dataTags, "DATES", "date" );
+     	associateData (newItem, dataTags, "SCOPEANDCONTENT", "abstractNote" );
+     	associateData (newItem, dataTags, "LANGUAGE", "language" );
+     	
+     	associateData (newItem, dataTags, "LANGUE", "language" );
+     	associateData (newItem, dataTags, "TITRE", "title" );
+     	associateData (newItem, dataTags, "CENTRED''ARCHIVES", "repository" );
+     	associateData (newItem, dataTags, "NUMÉROD''EXTRACTION", "callNumber" );
+     	associateData (newItem, dataTags, "PORTÉEETCONTENU", "abstractNote" );
+	
+	newItem.url = doc.location.href;
+
+	newItem.complete();
+}
+
+function doWeb(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	var articles = new Array();
+	
+	if (detectWeb(doc, url) == "multiple") {
+		var items = new Object();
+		
+		var titles = doc.evaluate(''//td[3]/a'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+
+		var next_title;
+		while (next_title = titles.iterateNext()) {
+			items[next_title.href] = next_title.textContent;
+		}
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			articles.push(i);
+		}
+	} else {
+		articles = [url];
+	}
+	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
+	Zotero.wait();
+}');
+
+REPLACE INTO translators VALUES ('c76d6c19-b4c6-4e51-bd7a-0a81752305ae', '1.0.0b4.r5', '', '2008-06-18 10:30:08', '0', '100', '4', 'BC Archival Information Network', 'Adam Crymble', 'http://(mayne.)?aabc.bc.ca/', 
+'function detectWeb(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	
+	var entryType = (doc.evaluate(''/html/body/h3'', doc, nsResolver, XPathResult.ANY_TYPE, null));
+	if (entryType.iterateNext()) {
+		var entryType1 = entryType.iterateNext().textContent;
+	
+		if (entryType1.match("Search") && entryType1 != ("Search Results - BCAUL Repositories")) {
+			return "multiple";
+		} else if (entryType1.match("Display") && entryType1 != ("Display - BCAUL Repositories") && doc.location.href.match("display")) {
+			return "book";
+		}
+	}
+}', 
+'//BCAIN translator. Code by Adam Crymble
+
+function associateData (newItem, dataTags, field, zoteroField) {
+	if (dataTags[field]) {
+		newItem[zoteroField] = dataTags[field];
+	}
+}
+
+function scrape(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	var newItem = new Zotero.Item("book");
+	
+	var dataTags = new Object();
+	var manyAuthors = new Array();
+	var tagsContent = new Array();
+	
+	var xPathHeaders = doc.evaluate(''//td[1][@class="datalabel"]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+	var xPathContent = doc.evaluate(''//td[2][@class="datatext"]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+	var xPathCount = doc.evaluate(''count (//td[1][@class="datalabel"])'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+	
+	Zotero.debug(xPathCount.numberValue);
+	
+	for (var i = 0; i < xPathCount.numberValue; i++) {
+		fieldTitle = xPathHeaders.iterateNext().textContent.replace(/\s+/g, '''');
+		
+		if (fieldTitle =="Provenance:") {
+	     		
+	     		dataTags[fieldTitle] = (xPathContent.iterateNext().textContent.replace(/^\s*|\s*$/g, ''''));
+	     		
+	     		if (dataTags[fieldTitle].match("; ")) {
+		     		manyAuthors = dataTags[fieldTitle].split("; ");
+	     		} else {
+		     		manyAuthors.push(dataTags[fieldTitle]);
+	     		}
+	     		
+	     		for (var j = 0; j < manyAuthors.length; j++) {
+	     			if (manyAuthors[j].match(", ")) {
+		     			var authorName = manyAuthors[j].split(",");
+		     			authorName[0] = authorName[0].replace(/^\s*|\s*$/g, '''');
+		     			newItem.creators.push(Zotero.Utilities.cleanAuthor((authorName[1] + (" ") + authorName[0]), "author"));
+	     			} else {
+		     			newItem.creators.push({lastName: dataTags["Provenance:"], creatorType: "creator"}); 
+	     			}
+	     		}
+	     		
+		} else if (fieldTitle == "Partof:") {
+			
+			dataTags[fieldTitle] = ("Part of " + Zotero.Utilities.cleanTags(xPathContent.iterateNext().textContent.replace(/^\s*|\s*$/g, '''')));
+
+		} else if (fieldTitle == "OnlineFindingAid:") {
+			dataTags[fieldTitle] = ("Online Finding Aid: " + xPathContent.iterateNext().textContent);	
+			Zotero.debug(dataTags["OnlineFindingAid:"]);
+			
+		} else if (fieldTitle == "Names:")  { 
+			dataTags[fieldTitle] = (xPathContent.iterateNext().textContent.replace(/^\s*|\s*$/g, ''''));
+			tagsContent = dataTags[fieldTitle].split(";");
+			
+		} else {
+		
+			dataTags[fieldTitle] = Zotero.Utilities.cleanTags(xPathContent.iterateNext().textContent.replace(/^\s*|\s*$/g, ''''));
+		}
+	}
+	
+	for (var i = 0; i < tagsContent.length; i++) {
+	  	tagsContent[i] = tagsContent[i].replace(/^\s*|\s*$/g, '''');
+	  	newItem.tags[i] = tagsContent[i];
+     	}
+     		
+	associateData (newItem, dataTags, "Title:", "title");
+	associateData (newItem, dataTags, "Dates:", "date");
+	associateData (newItem, dataTags, "Physicaldesc.:", "pages");
+	associateData (newItem, dataTags, "Repository:", "repository");
+	associateData (newItem, dataTags, "Scope/Content:", "abstractNote");
+	associateData (newItem, dataTags, "Partof:", "series");
+	associateData (newItem, dataTags, "OnlineFindingAid:", "extra");
+	
+	newItem.notes.push({title:"Title", note:"To view this entry in your browser, please go to''http://aabc.bc.ca/WWW.aabc.archbc/access'' and search for the entry Title "});
+	newItem.complete();
+}
+
+function doWeb(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	var articles = new Array();
+	
+	if (detectWeb(doc, url) == "multiple") {
+		var items = new Object();
+		
+		var xPathTitles = doc.evaluate(''//tr[1]/td[2][@class="datatext"]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var nextTitle;
+		
+		var xPathLinks = doc.evaluate(''//td[1][@class="dataleft"]/a'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var nextLink;
+		
+		while (nextTitle = xPathTitles.iterateNext()) {
+			items[xPathLinks.iterateNext().href] = nextTitle.textContent;	
+		}
+		
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			articles.push(i);
+		}
+	} else {
+		articles = [url];
+	}
+	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
+	Zotero.wait();
+}');
+
 REPLACE INTO translators VALUES ('59cce211-9d77-4cdd-876d-6229ea20367f', '1.0.0b4.r5', '', '2008-06-12 19:30:00', '0', '100', '4', 'Bibliothèque et Archives nationales du Québec', 'Adam Crymble', 'http://catalogue.banq.qc.ca', 
 'function detectWeb(doc, url) {
 	if (doc.title.match("Search")) {
