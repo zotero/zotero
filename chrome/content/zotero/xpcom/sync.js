@@ -1189,15 +1189,7 @@ Zotero.Sync.Server.Data = new function() {
 					else {
 						var oldID = parseInt(xmlNode.@id);
 						
-						// Don't use assigned-but-unsaved ids for the new id
-						var skip = [];
-						for each(var o in toSaveParents) {
-							skip.push(o.id);
-						}
-						for each(var o in toSaveChildren) {
-							skip.push(o.id);
-						}
-						var newID = Zotero.ID.get(types, true, skip);
+						var newID = Zotero.ID.get(types, true);
 						
 						Zotero.debug("Changing " + type + " " + oldID + " id to " + newID);
 						
@@ -1289,6 +1281,9 @@ Zotero.Sync.Server.Data = new function() {
 				else {
 					toSaveParents.push(obj);
 				}
+				
+				// Don't use assigned-but-unsaved ids for new ids
+				Zotero.ID.skip(types, obj.id);
 			}
 			
 			
@@ -1377,6 +1372,9 @@ Zotero.Sync.Server.Data = new function() {
 						else {
 							toSaveChildren.push(obj.ref);
 						}
+						
+						// Don't use assigned-but-unsaved ids for new ids
+						Zotero.ID.skip(types, obj.id);
 						
 						// Item had been deleted locally, so remove from
 						// deleted array
