@@ -24,18 +24,19 @@ Zotero.ID = new function () {
 	this.get = get;
 	this.getKey = getKey;
 	this.getBigInt = getBigInt;
+	this.skip = skip;
+	this.getTableName = getTableName;
 	
 	_available = {};
 	_min = {};
+	_skip = {};
+	
 	
 	/*
 	 * Gets an unused primary key id for a DB table
 	 */
-	function get(table, notNull, skip) {
-		// Used in sync.js
-		if (table == 'searches') {
-			table = 'savedSearches';
-		}
+	function get(table, notNull) {
+		table = this.getTableName(table);
 		
 		switch (table) {
 			// Autoincrement tables
@@ -48,9 +49,9 @@ Zotero.ID = new function () {
 			case 'collections':
 			case 'savedSearches':
 			case 'tags':
-				var id = _getNextAvailable(table, skip);
+				var id = _getNextAvailable(table);
 				if (!id && notNull) {
-					return _getNext(table, skip);
+					return _getNext(table);
 				}
 				return id;
 			
@@ -58,10 +59,10 @@ Zotero.ID = new function () {
 			//
 			// TODO: use autoincrement instead where available in 1.5
 			case 'itemDataValues':
-				var id = _getNextAvailable(table, skip);
+				var id = _getNextAvailable(table);
 				if (!id) {
 					// If we can't find an empty id quickly, just use MAX() + 1
-					return _getNext(table, skip);
+					return _getNext(table);
 				}
 				return id;
 			
@@ -82,10 +83,67 @@ Zotero.ID = new function () {
 	}
 	
 	
+	/**
+	 * Mark ids as used
+	 *
+	 * @param	string		table
+	 * @param	int|array	ids			Item ids to skip
+	 */
+	function skip(table, ids) {
+		table = this.getTableName(table);
+		
+		switch (ids.constructor.name) {
+			case 'Array':
+				break;
+				
+			case 'Number':
+				ids = [ids];
+				break;
+				
+			default:
+				throw ("ids must be an int or array of ints in Zotero.ID.skip()");
+		}
+		
+		if (!ids.length) {
+			return;
+		}
+		
+		if (!_skip[table]) {
+			_skip[table] = {};
+		}
+		
+		for (var i=0, len=ids.length; i<len; i++) {
+			_skip[table][ids[i]] = true;
+		}
+	}
+	
+	
+	function getTableName(table) {
+		// Used in sync.js
+		if (table == 'searches') {
+			table = 'savedSearches';
+		}
+		
+		switch (table) {
+			case 'collections':
+			case 'creators':
+			case 'creatorData':
+			case 'itemDataValues':
+			case 'items':
+			case 'savedSearches':
+			case 'tags':
+				return table;
+				
+			default:
+				throw ("Invalid table '" + table + "' in Zotero.ID");
+		}
+	}
+	
+	
 	/*
 	 * Returns the lowest available unused primary key id for table
 	 */
-	function _getNextAvailable(table, skip) {
+	function _getNextAvailable(table) {
 		if (!_available[table]) {
 			_loadAvailable(table);
 		}
@@ -95,7 +153,7 @@ Zotero.ID = new function () {
 		for (var i in arr) {
 			var id = arr[i][0];
 			
-			if (skip && skip.indexOf(id) != -1) {
+			if (_skip[table] && _skip[table][id]) {
 				continue;
 			}
 			
@@ -123,12 +181,20 @@ Zotero.ID = new function () {
 	/*
 	 * Get MAX(id) + 1 from table
 	 */
-	function _getNext(table, skip) {
+	function _getNext(table) {
 		var column = _getTableColumn(table);
 		
 		var sql = 'SELECT MAX(';
-		if (skip && skip.length) {
-			var max = Math.max.apply(this, skip);
+		if (_skip[table]) {
+			var max = 0;
+			for (var id in _skip[table]) {
+				if (id > max) {
+					max = id;
+				}
+			}
+			if (!max) {
+				throw ("_skip['" + table + "'] must contain positive values in Zotero.ID._getNext()");
+			}
 			sql += 'MAX(' + column + ', ' + max + ')';
 		}
 		else {
@@ -283,6 +349,34 @@ Zotero.ID = new function () {
 			
 			default:
 				return table.substr(0, table.length - 1) + 'ID';
+		}
+	}
+}
+
+
+
+/**
+ * Notifier observer to mark saved object ids as used
+ */
+Zotero.ID.EventListener = new function () {
+	this.init = init;
+	this.notify = notify;
+	
+	function init() {
+		Zotero.Notifier.registerObserver(this);
+	}
+	
+	
+	function notify(event, type, ids) {
+		if (event == 'add') {
+			try {
+				var table = Zotero.ID.getTableName(type);
+			}
+			// Skip if not a table we handle
+			catch (e) {
+				return;
+			}
+			Zotero.ID.skip(table, ids);
 		}
 	}
 }
