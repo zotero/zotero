@@ -18,8 +18,8 @@ var xpcomFiles = ['zotero',
 	'annotate', 'attachments', 'cite', 'cite_compat', 'collectionTreeView',
 	'dataServer', 'data_access', 'data/item', 'data/items', 'data/collection',
 	'data/collections', 'data/cachedTypes', 'data/creator', 'data/creators',
-	'data/itemFields', 'data/notes', 'data/tag', 'data/tags', 'db', 'file',
-	'fulltext', 'id', 'ingester', 'integration', 'itemTreeView', 'mime',
+	'data/itemFields', 'data/notes', 'data/tag', 'data/tags', 'db', 'enstyle',
+	'file', 'fulltext', 'id', 'ingester', 'integration', 'itemTreeView', 'mime',
 	'notifier', 'progressWindow', 'quickCopy', 'report', 'schema', 'search',
 	'sync', 'timeline', 'translate', 'utilities', 'zeroconf'];
 

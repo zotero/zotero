@@ -31,6 +31,7 @@ function init()
 		rows[i].firstChild.nextSibling.value = Zotero.isMac ? 'Cmd+Shift+' : 'Ctrl+Alt+';
 	}
 	
+	refreshStylesList();
 	populateQuickCopyList();
 	updateQuickCopyInstructions();
 	initSearchPane();
@@ -912,4 +913,134 @@ function onOpenURLSelected()
 function onOpenURLCustomized()
 {
 	document.getElementById('openURLMenu').value = "custom";
+}
+
+/** STYLES **/
+
+/**
+ * Refreshes the list of styles in the styles pane
+ **/
+function refreshStylesList(cslID) {
+	var treechildren = document.getElementById('styleManager-rows');
+	while (treechildren.hasChildNodes()) {
+		treechildren.removeChild(treechildren.firstChild);
+	}
+	
+	var sql = "SELECT cslID, title, updated FROM csl ORDER BY title";
+	var styleData = Zotero.DB.query(sql);
+	if (!styleData) return;
+	
+	Zotero.debug("ASKED FOR "+cslID);
+	
+	var selectIndex = false;
+	for (var i=0; i<styleData.length; i++) {
+		var treeitem = document.createElement('treeitem');
+		var treerow = document.createElement('treerow');
+		var titleCell = document.createElement('treecell');
+		var updatedCell = document.createElement('treecell');
+		
+		var updatedDate = Zotero.Date.formatDate(Zotero.Date.strToDate(styleData[i].updated), true);
+		
+		treeitem.setAttribute('id', 'zotero-csl-'+styleData[i].cslID);
+		titleCell.setAttribute('label', styleData[i].title);
+		updatedCell.setAttribute('label', updatedDate);
+		
+		treerow.appendChild(titleCell);
+		treerow.appendChild(updatedCell);
+		treeitem.appendChild(treerow);
+		treechildren.appendChild(treeitem);
+		
+		if(cslID == styleData[i].cslID) {
+			document.getElementById('styleManager').view.selection.select(i);
+		}
+	}
+}
+
+/**
+ * Adds a new style to the style pane
+ **/
+function addStyle() {	
+	const nsIFilePicker = Components.interfaces.nsIFilePicker;
+	var fp = Components.classes["@mozilla.org/filepicker;1"]
+			.createInstance(nsIFilePicker);
+	fp.init(window, Zotero.getString("zotero.preferences.styles.addStyle"), nsIFilePicker.modeOpen);
+	
+	fp.appendFilter("CSL Style", "*.csl");
+	fp.appendFilter("EndNote Style", "*.ens");
+	
+	var rv = fp.show();
+	if (rv == nsIFilePicker.returnOK || rv == nsIFilePicker.returnReplace) {
+		var file = fp.file;
+		
+		// read file
+		var iStream = Components.classes["@mozilla.org/network/file-input-stream;1"]
+					 .createInstance(Components.interfaces.nsIFileInputStream);
+		iStream.init(file, 0x01, 0664, 0);
+		var bStream = Components.classes["@mozilla.org/binaryinputstream;1"]
+					 .createInstance(Components.interfaces.nsIBinaryInputStream);
+		bStream.setInputStream(iStream);
+		
+		var read = bStream.readBytes(6);
+		
+		if(read == "\x00\x08\xFF\x00\x00\x00") {
+			// EndNote style
+			
+			// read the rest of the bytes in the file
+			read += bStream.readBytes(file.fileSize-6);
+			
+			// get fallback name and modification date
+			var fallbackName = file.leafName;
+			fallbackName = fallbackName.replace(/\.ens$/i, "");
+			var date = new Date(file.lastModifiedTime);
+			Zotero.debug(file.lastModifiedTime);
+			Zotero.debug(date);
+			
+			try {
+				var enConverter = new Zotero.ENConverter(read, date, fallbackName);
+				var xml = enConverter.parse();
+			} catch(e) {
+				styleImportError();
+				throw e;
+			}
+			var cslID = Zotero.Cite.installStyle(xml.toXMLString());
+		} else {
+			// This _should_ get the right charset for us automatically
+			var fileURI = Components.classes["@mozilla.org/network/protocol;1?name=file"]
+									.getService(Components.interfaces.nsIFileProtocolHandler)
+									.getURLSpecFromFile(file);
+			var req = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"].
+				createInstance();
+			req.open("GET", fileURI, false);
+			req.overrideMimeType("text/plain");
+			try {
+				req.send(null);
+			} catch(e) {
+				styleImportError();
+				throw e;
+			}
+			var cslID = Zotero.Cite.installStyle(req.responseText);
+		}
+	}
+	
+	if(cslID !== false) this.refreshStylesList(cslID);
+}
+
+/**
+ * Deletes a style from the style pane
+ **/
+function deleteStyle() {
+	var tree = document.getElementById('styleManager');
+	var treeitem = tree.lastChild.childNodes[tree.currentIndex];
+	Zotero.debug(treeitem.getAttribute('id'));
+	var cslID = treeitem.getAttribute('id').substr(11);
+	
+	Zotero.Cite.deleteStyle(cslID);
+	this.refreshStylesList();
+}
+
+/**
+ * Shows an error if import fails
+ **/
+function styleImportError() {
+	alert(Zotero.getString('styles.installError', "This"));
 }

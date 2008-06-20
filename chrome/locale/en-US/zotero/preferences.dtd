@@ -60,6 +60,10 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(e.g. wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Output Format">
 
+<!ENTITY zotero.preferences.prefpane.styles					"Styles">
+<!ENTITY zotero.preferences.styles.styleManager				"Style Manager">
+<!ENTITY zotero.preferences.styles.styleManager.title		"Title">
+<!ENTITY zotero.preferences.styles.styleManager.updated		"Updated">
 <!ENTITY zotero.preferences.export.getAdditionalStyles			"Get additional styles...">
 
 <!ENTITY zotero.preferences.prefpane.keys				"Shortcut Keys">

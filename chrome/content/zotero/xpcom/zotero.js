@@ -1450,31 +1450,42 @@ Zotero.Date = new function(){
 		return date;
 	}
 	
-	/*
+	/**
 	 * does pretty formatting of a date object returned by strToDate()
 	 *
-	 * |date| is *not* a JS Date object
-	 */
-	function formatDate(date) {
-		var string = "";
-		
-		if(date.part) {
-			string += date.part+" ";
-		}
-		
-		var months = Zotero.CSL.Global.getMonthStrings("long");
-		if(date.month != undefined && months[date.month]) {
-			// get short month strings from CSL interpreter
-			string += months[date.month];
-			if(date.day) {
-				string += " "+date.day+", ";
-			} else {
-				string += " ";
+	 * @param {Object} date A date object, as returned from strToDate()
+	 * @param {Boolean} shortFormat Whether to return a short (12/1/95) date
+	 * @return A formatted date string
+	 * @type String
+	 **/
+	function formatDate(date, shortFormat) {
+		if(shortFormat) {
+			var localeDateOrder = getLocaleDateOrder();
+			var string = localeDateOrder[0]+"/"+localeDateOrder[1]+"/"+localeDateOrder[2];
+			return string.replace("y", (date.year !== undefined ? date.year : "00"))
+			             .replace("m", (date.month !== undefined ? 1+date.month : "0"))
+			             .replace("d", (date.day !== undefined ? date.day : "0"));
+		} else {
+			var string = "";
+			
+			if(date.part) {
+				string += date.part+" ";
 			}
-		}
-		
-		if(date.year) {
-			string += date.year;
+			
+			var months = Zotero.CSL.Global.getMonthStrings("long");
+			if(date.month != undefined && months[date.month]) {
+				// get short month strings from CSL interpreter
+				string += months[date.month];
+				if(date.day) {
+					string += " "+date.day+", ";
+				} else {
+					string += " ";
+				}
+			}
+			
+			if(date.year) {
+				string += date.year;
+			}
 		}
 		
 		return string;

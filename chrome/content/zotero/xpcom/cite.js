@@ -25,9 +25,9 @@
  * this class handles pulling the CSL file and item data out of the database,
  * while CSL, below, handles the actual generation of the bibliography
  */
+default xml namespace = "http://purl.org/net/xbiblio/csl";
+
 Zotero.Cite = new function() {
-	default xml namespace = "http://purl.org/net/xbiblio/csl";
-	
 	var _lastCSL = null;
 	var _lastStyle = null;
 	
@@ -35,6 +35,7 @@ Zotero.Cite = new function() {
 	this.getStyleClass = getStyleClass;
 	this.getStyle = getStyle;
 	this.installStyle = installStyle;
+	this.deleteStyle = deleteStyle;
 	
 	/*
 	 * returns an associative array of cslID => styleName pairs
@@ -105,8 +106,8 @@ Zotero.Cite = new function() {
 		}
 		
 		if (!xml || error) {
-			alert(Zotero.getString('styles.installError', loadURI));
-			return;
+			alert(Zotero.getString('styles.installError', (loadURI ? loadURI : "This")));
+			return false;
 		}
 		
 		var uri = xml.info.id.toString();
@@ -123,10 +124,18 @@ Zotero.Cite = new function() {
 			+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
 		
 		if (existingTitle) {
-			var text = Zotero.getString('styles.updateStyle', [existingTitle, title, loadURI]);
+			if(loadURI) {
+				var text = Zotero.getString('styles.updateStyleURI', [existingTitle, title, loadURI]);
+			} else {
+				var text = Zotero.getString('styles.updateStyle', [existingTitle, title]);
+			}
 		}
 		else {
-			var text = Zotero.getString('styles.installStyle', [title, loadURI]);
+			if(loadURI) {
+				var text = Zotero.getString('styles.installStyleURI', [title, loadURI]);
+			} else {
+				var text = Zotero.getString('styles.installStyle', [title]);
+			}
 		}
 		
 		var acceptButton = Zotero.getString('general.install');
@@ -142,6 +151,27 @@ Zotero.Cite = new function() {
 			var sql = "REPLACE INTO csl VALUES (?,?,?,?)";
 			Zotero.DB.query(sql, [uri, updated, title, cslString]);
 			alert(Zotero.getString('styles.installed', title));
+			return uri;
+		}
+	}
+	
+	/**
+	 * deletes a style
+	 **/
+	function deleteStyle(uri) {
+		var sql = "SELECT title FROM csl WHERE cslID=?";
+		var title = Zotero.DB.valueQuery(sql, uri);
+		
+		if(!title) throw "Cite: style to delete does not exist!"
+		
+		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+			.getService(Components.interfaces.nsIPromptService);
+		
+		var text = Zotero.getString('styles.deleteStyle', [title]);
+		
+		if(ps.confirm(null, '', text)) {
+			var sql = "DELETE FROM csl WHERE cslID=?";
+			Zotero.DB.query(sql, uri);
 		}
 	}
 }
@@ -277,7 +307,7 @@ Zotero.Cite.MIMEHandler.StreamListener.prototype.onStopRequest = function(channe
  * want to use the Scholar data model, but does want to use CSL in JavaScript
  */
 Zotero.CSL = function(csl) {
-	default xml namespace = "http://purl.org/net/xbiblio/csl";
+	default xml namespace = "http://purl.org/net/xbiblio/csl"; with ({});
 	
 	this._csl = new XML(Zotero.CSL.Global.cleanXML(csl));
 	
@@ -292,6 +322,7 @@ Zotero.CSL = function(csl) {
 	Zotero.debug("CSL: style class is "+this.class);
 	
 	this.hasBibliography = (this._csl.bibliography.length() ? 1 : 0);
+	Zotero.debug("hasBibliography "+this.hasBibliography);
 }
 
 /*
@@ -344,6 +375,8 @@ Zotero.CSL._firstNameRegexp = /^[^\s]*/;
 Zotero.CSL._textCharRegexp = /[a-zA-Z0-9]/;
 Zotero.CSL._numberRegexp = /\d+/;
 Zotero.CSL.prototype.formatCitation = function(citation, format) {
+	default xml namespace = "http://purl.org/net/xbiblio/csl"; with({});
+	
 	var context = this._csl.citation;
 	if(!context) {
 		throw "CSL: formatCitation called on style with no citation context";
@@ -535,6 +568,8 @@ Zotero.CSL.prototype.formatCitation = function(citation, format) {
  * create a bibliography
  */
 Zotero.CSL.prototype.formatBibliography = function(itemSet, format) {
+	default xml namespace = "http://purl.org/net/xbiblio/csl"; with({});
+	
 	var context = this._csl.bibliography;
 	if(!context.length()) {
 		context = this._csl.citation;
@@ -770,6 +805,8 @@ Zotero.CSL.prototype._getTerm = function(term, plural, form, includePeriod) {
  * non-Western names better than ours, this would be the function to change
  */
 Zotero.CSL.prototype._processNames = function(item, element, formattedString, context, citationItem, variables) {
+	default xml namespace = "http://purl.org/net/xbiblio/csl"; with({});
+	
 	var children = element.children();
 	if(!children.length()) return false;
 	var variableSucceeded = false;
@@ -953,6 +990,8 @@ Zotero.CSL.prototype._processNames = function(item, element, formattedString, co
  */
 Zotero.CSL.prototype._processElements = function(item, element, formattedString,
 		context, citationItem, ignore, isSingle) {
+	default xml namespace = "http://purl.org/net/xbiblio/csl"; with({});
+	
 	if(!ignore) {
 		ignore = [[], []];
 		// ignore[0] is for variables; ignore[1] is for macros
@@ -1381,6 +1420,8 @@ Zotero.CSL.prototype._processElements = function(item, element, formattedString,
  * Returns -1 if A comes before B, 1 if B comes before A, or 0 if they are equal
  */
 Zotero.CSL.prototype._compareItem = function(a, b, context, cache) {
+	default xml namespace = "http://purl.org/net/xbiblio/csl"; with({});
+	
 	var sortA = [];
 	var sortB = [];
 	
@@ -1496,6 +1537,8 @@ Zotero.CSL.prototype.cachedSort = function(items, context, field) {
 }
 
 Zotero.CSL.prototype.getEqualCitations = function(items) {
+	default xml namespace = "http://purl.org/net/xbiblio/csl"; with({});
+	
 	var citationsEqual = [];
 	
 	if(items) {
@@ -1524,6 +1567,8 @@ Zotero.CSL.prototype.getEqualCitations = function(items) {
  * Compares two citations; returns true if they are different, false if they are equal
  */
 Zotero.CSL.prototype.compareCitations = function(a, b, context) {
+	default xml namespace = "http://purl.org/net/xbiblio/csl"; with({});
+	
 	if((!a && b) || (a && !b)) {
 		return true;
 	} else if(!a && !b) {
@@ -1549,7 +1594,7 @@ Zotero.CSL.Global = new function() {
 	this.cleanXML = cleanXML;
 	this.parseLocales = parseLocales;
 	
-	default xml namespace = "http://purl.org/net/xbiblio/csl";
+	default xml namespace = "http://purl.org/net/xbiblio/csl"; with({});
 	this.ns = "http://purl.org/net/xbiblio/csl";
 	
 	this.__defineGetter__("locale", function() {
@@ -1810,6 +1855,8 @@ Zotero.CSL.CitationItem = function(item) {
  * the Citation object represents a citation.
  */
 Zotero.CSL.Citation = function(citationItems, csl) {
+	default xml namespace = "http://purl.org/net/xbiblio/csl"; with({});
+	
 	if(csl) {
 		this._csl = csl;
 		this._citation = csl._csl.citation;
@@ -1893,8 +1940,6 @@ Zotero.CSL.Citation.prototype.clone = function() {
  * with "_") are implemented.
  */
 Zotero.CSL.Item = function(item) {
-	default xml namespace = "http://purl.org/net/xbiblio/csl";
-	
 	if(item instanceof Zotero.Item) {
 		this.zoteroItem = item;
 	} else if(parseInt(item, 10) == item) {
@@ -2337,7 +2382,7 @@ Zotero.CSL.Item.Name = function(zoteroCreator) {
  * lastName - last name
  */
 Zotero.CSL.Item.Name.prototype.getNameVariable = function(variable) {
-	return this._zoteroCreator[variable] ? this._zoteroCreator[variable] : "";
+	return this._zoteroCreator.ref[variable] ? this._zoteroCreator.ref[variable] : "";
 }
 
 /*
@@ -2345,7 +2390,7 @@ Zotero.CSL.Item.Name.prototype.getNameVariable = function(variable) {
  * in an item wrapper.
  */
 Zotero.CSL.ItemSet = function(items, csl) {
-	default xml namespace = "http://purl.org/net/xbiblio/csl";
+	default xml namespace = "http://purl.org/net/xbiblio/csl"; with({});
 	
 	this.csl = csl;
 	
@@ -2465,6 +2510,8 @@ Zotero.CSL.ItemSet.prototype.remove = function(items) {
  * citations have changed
  */
 Zotero.CSL.ItemSet.prototype.resort = function() {
+	default xml namespace = "http://purl.org/net/xbiblio/csl"; with({});
+	
 	// sort
 	this.items = this.csl.cachedSort(this.items, this.bibliography);
 	
@@ -2722,7 +2769,7 @@ Zotero.CSL.ItemSet.prototype._copyDisambiguation = function(fromItem, toItem) {
 }
 
 Zotero.CSL.FormattedString = function(context, format, delimiter, subsequent) {
-	default xml namespace = "http://purl.org/net/xbiblio/csl";
+	default xml namespace = "http://purl.org/net/xbiblio/csl"; with({});
 	
 	this.context = context;
 	this.option = context ? context.option : new XMLList();
@@ -2754,6 +2801,8 @@ Zotero.CSL.FormattedString._punctuation = "!.,?:";
  * attaches another formatted string to the end of the current one
  */
 Zotero.CSL.FormattedString.prototype.concat = function(formattedString, element) {
+	default xml namespace = "http://purl.org/net/xbiblio/csl"; with({});
+	
 	if(!formattedString || !formattedString.string) {
 		return false;
 	}
@@ -2798,6 +2847,7 @@ Zotero.CSL.FormattedString._rtfEscapeFunction = function(aChar) {
  * appends a string (with format parameters) to the current one
  */
 Zotero.CSL.FormattedString.prototype.append = function(string, element, dontDelimit, dontEscape) {
+	default xml namespace = "http://purl.org/net/xbiblio/csl"; with({});
 	
 	if(!string && string !== 0) return false;
 	
