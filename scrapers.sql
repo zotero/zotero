@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-06-17 19:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-06-20 20:45:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-06-16 21:30:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1091,7 +1091,7 @@ REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('a7c8b759-6f8a-4875-9d6e-cc0a99fe8f43', '1.0.0b4.r5', '', '2008-06-20 09:39:46', '0', '100', '4', 'Canadian Letters and Images', 'Adam Crymble', 'http://(www.)?canadianletters.ca/', 
+REPLACE INTO translators VALUES ('a7c8b759-6f8a-4875-9d6e-cc0a99fe8f43', '1.0.0b4.r5', '', '2008-06-20 20:45:00', '0', '100', '4', 'Canadian Letters and Images', 'Adam Crymble', 'http://(www.)?canadianletters.ca/', 
 'function detectWeb(doc, url) {
 	if (doc.location.href.match("results")) {
 		return "multiple";
@@ -1203,7 +1203,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('3f44a651-8b6b-4591-8ca4-4bfb943a13f4', '1.0.0b4.r5', '', '2008-06-20 10:02:00', '0', '100', '4', 'Edutopia', 'Adam Crymble', 'http://www.edutopia.org', 
+REPLACE INTO translators VALUES ('3f44a651-8b6b-4591-8ca4-4bfb943a13f4', '1.0.0b4.r5', '', '2008-06-20 20:45:00', '0', '100', '4', 'Edutopia', 'Adam Crymble', 'http://www.edutopia.org', 
 'function detectWeb(doc, url) {
 	
 	var blog1 = 0;
@@ -1330,7 +1330,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('18bc329c-51af-497e-a7cf-aa572fae363d', '1.0.0b4.r5', '', '2008-06-18 10:26:16', '0', '100', '4', 'Archives Canada', 'Adam Crymble', 'http://(www.)?archivescanada.ca', 
+REPLACE INTO translators VALUES ('18bc329c-51af-497e-a7cf-aa572fae363d', '1.0.0b4.r5', '', '2008-06-20 20:45:00', '0', '100', '4', 'Archives Canada', 'Adam Crymble', 'http://(www.)?archivescanada.ca', 
 'function detectWeb (doc, url) {
 	if (doc.location.href.match("RouteRqst")) {
 		return "multiple";
@@ -1444,7 +1444,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('c76d6c19-b4c6-4e51-bd7a-0a81752305ae', '1.0.0b4.r5', '', '2008-06-18 10:30:08', '0', '100', '4', 'BC Archival Information Network', 'Adam Crymble', 'http://(mayne.)?aabc.bc.ca/', 
+REPLACE INTO translators VALUES ('c76d6c19-b4c6-4e51-bd7a-0a81752305ae', '1.0.0b4.r5', '', '2008-06-20 20:45:00', '0', '100', '4', 'BC Archival Information Network', 'Adam Crymble', 'http://(mayne.)?aabc.bc.ca/', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -2477,7 +2477,7 @@ function doImport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('d93c14fb-d327-4540-b60a-327309ea512b', '1.0.0b4.r5', '', '2008-06-18 11:39:10', '0', '100', '4', 'Journal of Electronic Publishing', 'Michael Berkowitz', 'http://quod.lib.umich.edu/.*c=jep', 
+REPLACE INTO translators VALUES ('d93c14fb-d327-4540-b60a-327309ea512b', '1.0.0b4.r5', '', '2008-06-20 20:45:00', '0', '100', '4', 'Journal of Electronic Publishing', 'Michael Berkowitz', 'http://quod.lib.umich.edu/.*c=jep', 
 'function detectWeb(doc, url) {
 	if (doc.evaluate(''//div/span[text() = "Search Results"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
@@ -2569,7 +2569,7 @@ REPLACE INTO translators VALUES ('58a778cc-25e2-4884-95b3-6b22d7571183', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('490909d7-7d79-4c7a-a136-77df618d4db2', '1.0.0b4.r5', '', '2008-06-20 09:19:16', '1', '100', '4', 'Worldcat.org', 'Michael Berkowitz', 'http://(www.)?worldcat.org/', 
+REPLACE INTO translators VALUES ('490909d7-7d79-4c7a-a136-77df618d4db2', '1.0.0b4.r5', '', '2008-06-20 20:45:00', '1', '100', '4', 'Worldcat.org', 'Michael Berkowitz', 'http://(www.)?worldcat.org/', 
 'function detectWeb(doc, url) {
 	if (url.match(/search?/) && doc.evaluate(''//input[@id="itemid"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
