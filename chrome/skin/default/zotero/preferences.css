@@ -113,6 +113,11 @@ grid row hbox:first-child
 	min-height: 1.5em; /* Fix collapse on Windows */
 }
 
+/* Styles pane */
+#styleManager
+{
+	height: 250px;
+}
 
 /* Shortcut Keys pane */
 #zotero-prefpane-keys row

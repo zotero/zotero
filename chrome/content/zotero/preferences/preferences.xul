@@ -323,6 +323,29 @@ To add a new preference:
 			<separator/>
 			
 			<label id="quickCopy-macWarning" hidden="true" value="&zotero.preferences.quickCopy.macWarning;"/>
+		</groupbox>
+	</prefpane>
+	
+	
+	<prefpane id="zotero-prefpane-styles"
+						label="&zotero.preferences.prefpane.styles;"
+						image="chrome://zotero/skin/prefs-styles.png">
+		<groupbox flex="1">
+			<caption label="&zotero.preferences.styles.styleManager;"/>
+			
+			<tree flex="1" id="styleManager" hidecolumnpicker="true" rows="6"
+					onkeypress="if (event.keyCode == event.DOM_VK_DELETE) { deleteSelectedStyle(); }">
+				<treecols>
+					<treecol id="styleManager-title" label="&zotero.preferences.styles.styleManager.title;" flex="3"/>
+					<treecol id="styleManager-updated" label="&zotero.preferences.styles.styleManager.updated;" flex="1"/>
+				</treecols>
+				<treechildren id="styleManager-rows"/>
+			</tree>
+			<separator class="thin"/>
+			<hbox pack="end">
+				<button label="-" onclick="deleteStyle()"/>
+				<button label="+" onclick="addStyle()"/>
+			</hbox>
 			<separator/>
 			<label class="text-link" href="http://www.zotero.org/styles/" value="&zotero.preferences.export.getAdditionalStyles;"/>
 		</groupbox>
