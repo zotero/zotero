@@ -921,7 +921,7 @@ Zotero.Collection.prototype._loadChildItems = function() {
 			+ "(SELECT itemID FROM itemNotes WHERE sourceItemID IS NOT NULL) "
 		+ "AND itemID NOT IN "
 			+ "(SELECT itemID FROM itemAttachments WHERE sourceItemID IS NOT NULL)";
-	var ids = Zotero.DB.columnQuery(sql, this._id);
+	var ids = Zotero.DB.columnQuery(sql, this.id);
 	
 	this._childItems = [];
 	
