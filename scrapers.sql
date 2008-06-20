@@ -2330,11 +2330,11 @@ REPLACE INTO translators VALUES ('58a778cc-25e2-4884-95b3-6b22d7571183', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('490909d7-7d79-4c7a-a136-77df618d4db2', '1.0.0b4.r5', '', '2008-06-13 20:10:00', '0', '100', '4', 'Worldcat.org', 'Michael Berkowitz', 'http://(www.)?worldcat.org/', 
+REPLACE INTO translators VALUES ('490909d7-7d79-4c7a-a136-77df618d4db2', '1.0.0b4.r5', '', '2008-06-20 09:19:16', '1', '100', '4', 'Worldcat.org', 'Michael Berkowitz', 'http://(www.)?worldcat.org/', 
 'function detectWeb(doc, url) {
-	if (url.match(/search?/)) {
+	if (url.match(/search?/) && doc.evaluate(''//input[@id="itemid"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
-	} else if (url.match(/oclc/)) {
+	} else {
 		var type = doc.evaluate(''//tbody/tr/td[2][img]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent.toLowerCase().match(/(\w+);/)[1];
 		switch (type) {
 			case "book": return "book";
@@ -2367,7 +2367,8 @@ function doWeb(doc, url) {
 			books.push(ENify(i));
 		}
 	} else {
-		books = [ENify(url)]
+		var link = doc.evaluate(''//a[contains(text(), "EndNote")]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext().href;
+		books = [link];
 	}
 	for each (var book in books) {
 		Zotero.Utilities.HTTP.doGet(book, function(text) {
