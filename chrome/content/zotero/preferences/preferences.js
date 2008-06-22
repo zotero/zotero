@@ -938,15 +938,23 @@ function refreshStylesList(cslID) {
 		var treerow = document.createElement('treerow');
 		var titleCell = document.createElement('treecell');
 		var updatedCell = document.createElement('treecell');
+		var cslCell = document.createElement('treecell');
 		
 		var updatedDate = Zotero.Date.formatDate(Zotero.Date.strToDate(styleData[i].updated), true);
 		
 		treeitem.setAttribute('id', 'zotero-csl-'+styleData[i].cslID);
 		titleCell.setAttribute('label', styleData[i].title);
 		updatedCell.setAttribute('label', updatedDate);
+		// if not EN
+		if(styleData[i].cslID.length < Zotero.ENConverter.uriPrefix.length ||
+				styleData[i].cslID.substr(0, Zotero.ENConverter.uriPrefix.length) != Zotero.ENConverter.uriPrefix) {
+			cslCell.setAttribute('src', 'chrome://zotero/skin/tick.png');
+			Zotero.debug("ISCSL");
+		}
 		
 		treerow.appendChild(titleCell);
 		treerow.appendChild(updatedCell);
+		treerow.appendChild(cslCell);
 		treeitem.appendChild(treerow);
 		treechildren.appendChild(treeitem);
 		
@@ -988,21 +996,11 @@ function addStyle() {
 			// read the rest of the bytes in the file
 			read += bStream.readBytes(file.fileSize-6);
 			
-			// get fallback name and modification date
-			var fallbackName = file.leafName;
-			fallbackName = fallbackName.replace(/\.ens$/i, "");
+			// get name and modification date
+			var name = file.leafName.replace(/\.ens$/i, "");
 			var date = new Date(file.lastModifiedTime);
-			Zotero.debug(file.lastModifiedTime);
-			Zotero.debug(date);
 			
-			try {
-				var enConverter = new Zotero.ENConverter(read, date, fallbackName);
-				var xml = enConverter.parse();
-			} catch(e) {
-				styleImportError();
-				throw e;
-			}
-			var cslID = Zotero.Cite.installStyle(xml.toXMLString());
+			var cslID = Zotero.Cite.installStyle(read, false, date, name);
 		} else {
 			// This _should_ get the right charset for us automatically
 			var fileURI = Components.classes["@mozilla.org/network/protocol;1?name=file"]
@@ -1018,6 +1016,7 @@ function addStyle() {
 				styleImportError();
 				throw e;
 			}
+			
 			var cslID = Zotero.Cite.installStyle(req.responseText);
 		}
 	}

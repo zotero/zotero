@@ -338,6 +338,7 @@ To add a new preference:
 				<treecols>
 					<treecol id="styleManager-title" label="&zotero.preferences.styles.styleManager.title;" flex="3"/>
 					<treecol id="styleManager-updated" label="&zotero.preferences.styles.styleManager.updated;" flex="1"/>
+					<treecol id="styleManager-csl" label="&zotero.preferences.styles.styleManager.csl;"/>
 				</treecols>
 				<treechildren id="styleManager-rows"/>
 			</tree>

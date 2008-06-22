@@ -76,6 +76,11 @@ Zotero.Cite = new function() {
 			if(csl.indexOf("<defaults") != -1) {
 				_lastCSL = new Zotero.CSL.Compat(csl);
 			} else {
+				if(csl.substr(0, 6) == "\x00\x08\xFF\x00\x00\x00") {	
+					// EN style
+					var enConverter = new Zotero.ENConverter(csl);
+					csl = enConverter.parse();
+				}
 				_lastCSL = new Zotero.CSL(csl);
 			}
 			
@@ -96,12 +101,20 @@ Zotero.Cite = new function() {
 	/**
 	 * installs a style 
 	 **/
-	function installStyle(cslString, loadURI) {
+	function installStyle(cslString, loadURI, date, name) {
+		var error = false;
 		try {
-			var xml = new XML(Zotero.CSL.Global.cleanXML(cslString));
+			if(cslString.substr(0, 6) == "\x00\x08\xFF\x00\x00\x00") { 			
+				// EN style
+				var enConverter = new Zotero.ENConverter(cslString, date, name);
+				var xml = enConverter.parse();
+			} else {
+				// CSL
+				var xml = new XML(Zotero.CSL.Global.cleanXML(cslString));
+			}
 		}
 		catch (e) {
-			var error = true;
+			error = true;
 			Components.utils.reportError(e);
 		}
 		
@@ -309,7 +322,11 @@ Zotero.Cite.MIMEHandler.StreamListener.prototype.onStopRequest = function(channe
 Zotero.CSL = function(csl) {
 	default xml namespace = "http://purl.org/net/xbiblio/csl"; with ({});
 	
-	this._csl = new XML(Zotero.CSL.Global.cleanXML(csl));
+	if(typeof csl != "XML") {
+		this._csl = new XML(Zotero.CSL.Global.cleanXML(csl));
+	} else {
+		this._csl = CSL;
+	}
 	
 	// initialize CSL
 	Zotero.CSL.Global.init();
