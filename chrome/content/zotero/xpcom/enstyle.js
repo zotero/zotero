@@ -35,6 +35,9 @@ Zotero.ENConverter = function(styleData, date, fileTitle) {
 	}
 }
 
+// The URI prefix for EN styles
+Zotero.ENConverter.uriPrefix = "http://zotero.org/styles/en-converted/";
+
 /**
  * Mappings for item types
  *
@@ -201,31 +204,35 @@ Zotero.ENConverter.seriesCodes = ["\x01", "\x09", "\x0A", "\x0B", "\x15", "\x1D"
  **/
 Zotero.ENConverter.prototype.parseInfo = function() {
 	default xml namespace = "http://purl.org/net/xbiblio/csl"; with({});
-	
-	var guid = "";
-	for(var i=0; i<16; i++) {
-		var bite = Math.floor(Math.random() * 255);
-		
-		if(i == 4 || i == 6 || i == 8 || i == 10) {
-			guid += "-";
-			
-			// version
-			if(i == 6) bite = bite & 0x0f | 0x40;
-			// variant
-			if(i == 8) bite = bite & 0x3f | 0x80;
-		}
-		var str = bite.toString(16);
-		guid += str.length == 1 ? '0' + str : str;
-	}
-	
-	this.xml.info.id = "urn:uuid:"+guid;
+
 	if(this.fileTitle) {
 		var title = this.fileTitle;
 	} else {
 		var title = this.convertFromUTF16(this.findField(this.fields, "\x10")[0].data.replace("\xFB", "", "g"));
-		if(!title) title = "Untitled Style";
 	}
+	if(!title) {
+		var title = "Untitled Style";	
+		var identifier = "";
+		for(var i=0; i<16; i++) {
+			var bite = Math.floor(Math.random() * 255);
+			
+			if(i == 4 || i == 6 || i == 8 || i == 10) {
+				identifier += "-";
+				
+				// version
+				if(i == 6) bite = bite & 0x0f | 0x40;
+				// variant
+				if(i == 8) bite = bite & 0x3f | 0x80;
+			}
+			var str = bite.toString(16);
+			identifier += str.length == 1 ? '0' + str : str;
+		}
+	} else {
+		var identifier = encodeURIComponent(title);
+	}
+	
 	this.xml.info.title = title;
+	this.xml.info.id = Zotero.ENConverter.uriPrefix+identifier;
 	
 	if(this.date) {
 		var date = this.date;
@@ -1369,6 +1376,5 @@ Zotero.ENConverter.prototype.parse = function() {
 	this.parseCitation();
 	this.parseBibliography();
 	
-	Zotero.debug(this.xml);
 	return this.xml;
 }

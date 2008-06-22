@@ -64,6 +64,7 @@
 <!ENTITY zotero.preferences.styles.styleManager				"Style Manager">
 <!ENTITY zotero.preferences.styles.styleManager.title		"Title">
 <!ENTITY zotero.preferences.styles.styleManager.updated		"Updated">
+<!ENTITY zotero.preferences.styles.styleManager.csl		"CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles			"Get additional styles...">
 
 <!ENTITY zotero.preferences.prefpane.keys				"Shortcut Keys">
