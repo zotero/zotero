@@ -25,9 +25,10 @@
  * this class handles pulling the CSL file and item data out of the database,
  * while CSL, below, handles the actual generation of the bibliography
  */
-default xml namespace = "http://purl.org/net/xbiblio/csl";
 
 Zotero.Cite = new function() {
+	default xml namespace = "http://purl.org/net/xbiblio/csl";4
+	
 	var _lastCSL = null;
 	var _lastStyle = null;
 	
