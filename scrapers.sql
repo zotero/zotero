@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-06-20 20:45:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-06-23 16:45:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-06-16 21:30:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -4872,7 +4872,7 @@ REPLACE INTO translators VALUES ('252c6a50-0900-41c5-a66b-ec456137c43c', '1.0.0b
 	}, function() {Zotero.done;});
 }');
 
-REPLACE INTO translators VALUES ('1e1e35be-6264-45a0-ad2e-7212040eb984', '1.0.0b4.r5', '', '2008-06-23 11:17:50', '0', '100', '4', 'APA PsycNET', 'Michael Berkowitz', 'http://psycnet\.apa\.org/', 
+REPLACE INTO translators VALUES ('1e1e35be-6264-45a0-ad2e-7212040eb984', '1.0.0b4.r5', '', '2008-06-23 16:45:00', '0', '100', '4', 'APA PsycNET', 'Michael Berkowitz', 'http://psycnet\.apa\.org/', 
 'function detectWeb(doc, url) {
 	if (url.match(/search\.searchResults/)) {
 		return "multiple";
@@ -7401,7 +7401,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('9e306d5d-193f-44ae-9dd6-ace63bf47689', '1.0.0b3r1', '', '2008-06-23 12:07:40', '1', '100', '4', 'IngentaConnect', 'Michael Berkowitz', 'http://(www.)?ingentaconnect.com', 
+REPLACE INTO translators VALUES ('9e306d5d-193f-44ae-9dd6-ace63bf47689', '1.0.0b3r1', '', '2008-06-23 16:45:00', '1', '100', '4', 'IngentaConnect', 'Michael Berkowitz', 'http://(www.)?ingentaconnect.com', 
 'function detectWeb(doc, url) {
 	if (url.indexOf("article?") != -1 || url.indexOf("article;") != -1 || url.indexOf("/art") != -1) {
 		return "journalArticle";
@@ -17886,7 +17886,7 @@ REPLACE INTO translators VALUES ('232903bc-7307-4058-bb1a-27cfe3e4e655', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('fe728bc9-595a-4f03-98fc-766f1d8d0936', '1.0.0b4.r5', '', '2008-06-23 11:36:32', '0', '100', '4', 'Wiley InterScience', 'Sean Takats and Michael Berkowitz', 'https?:\/\/(?:www3\.|www\.)?interscience\.wiley\.com[^\/]*\/(?:search\/|(cgi-bin|journal)\/[0-9]+\/abstract|journal)', 
+REPLACE INTO translators VALUES ('fe728bc9-595a-4f03-98fc-766f1d8d0936', '1.0.0b4.r5', '', '2008-06-23 16:45:00', '0', '100', '4', 'Wiley InterScience', 'Sean Takats and Michael Berkowitz', 'https?:\/\/(?:www3\.|www\.)?interscience\.wiley\.com[^\/]*\/(?:search\/|(cgi-bin|journal)\/[0-9]+\/abstract|journal)', 
 'function detectWeb(doc, url){
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
