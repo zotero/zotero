@@ -251,6 +251,43 @@ Zotero.Utilities.prototype.parseMarkup = function(str) {
 }
 
 
+Zotero.Utilities.prototype.min3 = function (a, b, c) {
+	var min;
+	min = a;
+	if (b < min) {
+		min = b;
+	}
+	if (c < min) {
+		min = c;
+	}
+	return min;
+}
+
+
+Zotero.Utilities.prototype.levenshtein = function (a, b) {
+	var arr = new Array(a.length+1);
+	var i, j, cost;
+
+	for(i=0; i<=a.length; i++)
+		arr[i] = new Array(b.length);
+
+	for (i = 0; i <= a.length; i++) {
+		arr[i][0] = i;
+	}
+	for (j = 0; j <= b.length; j++) {
+		arr[0][j] = j;
+	}
+
+	for (i = 1; i <= a.length; i++) {
+		for (j = 1; j <= b.length; j++) {
+			cost = (a[i-1] == b[j-1])? 0 : 1;
+			arr[i][j] = this.min3(arr[i-1][j] + 1, arr[i][j-1] + 1, arr[i-1][j-1] + cost);
+		}
+	}
+	return arr[a.length][b.length];
+}
+
+
 /*
  * Test if a string is an integer
  */
