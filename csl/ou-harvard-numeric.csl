@@ -126,12 +126,12 @@
     </layout>
   </citation>
   <bibliography>
-    <option name="hanging-indent" value="false"/>
+    <option name="hanging-indent" value="true"/>
     <option name="second-field-align" value="true"/>
     <option name="et-al-min" value="6"/>
     <option name="et-al-use-first" value="4"/>
     <layout>
-      <text variable="citation-number" suffix=" "/>
+      <text variable="citation-number" suffix="  "/>
       <group delimiter=" " suffix=" ">
 	<text macro="author" />
 	<text macro="year-date" prefix="(" suffix=")"/>
