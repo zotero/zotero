@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-06-23 16:45:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-06-23 17:05:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-06-16 21:30:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -12067,7 +12067,7 @@ function doWeb(doc, url)
       }
 }');
 
-REPLACE INTO translators VALUES ('1a3e63b2-0adf-4c8e-928b-c58c2594b45d', '1.0.0b4.r1', '', '2008-01-09 20:00:00', '0', '100', '4', 'BioMed Central and More', 'Ben Parr', 'http://[^/]*(biomedcentral|actavetscand|aidsrestherapy|almob|ann-clinmicrob|annals-general-psychiatry|asir-journal|arthritis-research|anzhealthpolicy|behavioralandbrainfunctions|bjoc.beilstein-journals|biology-direct|biomagres|bio-diglib|biomedical-engineering-online|bpsmedicine|breast-cancer-research|cancerci|cbmjournal|cardiab|cardiovascularultrasound|cellandchromosome|biosignaling|celldiv|cerebrospinalfluidresearch|journal.chemistrycentral|capmh|cmjournal|chiroandosteo|clinicalmolecularallergy|cpementalhealth|comparative-hepatology|conflictandhealth|resource-allocation|coughjournal|ccforum|cytojournal|diagnosticpathology|dynamic-med|ete-online|ehjournal|epi-perspectives|filariajournal|frontiersinzoology|gvt-journal|genomebiology|geochemicaltransactions|globalizationandhealth|harmreductionjournal|head-face-med|hqlo|health-policy-systems|human-resources-health|immunityageing|immunome-research|implementationscience|infectagentscancer|internationalbreastfeedingjournal|equityhealthj|ijbnpa|ij-healthgeographics|issoonline|jautoimdis|jbiol|j-biomed-discovery|jbppni|carcinogenesis|cardiothoracicsurgery|jcircadianrhythms|ethnobiomed|jexpclinassistreprod|jibtherapies|journal-inflammation|jmedicalcasereports|jmolecularsignaling|jnanobiotechnology|jnrbm|jneuroengrehab|jneuroinflammation|occup-med|josr-online|translational-medicine|kinetoplastids|lipidworld|malariajournal|medimmunol|microbialcellfactories|molecular-cancer|molecularneurodegeneration|molecularpain|neuraldevelopment|nonlinearbiomedphys|nuclear-receptor|nutritionandmetabolism|nutritionj|ojrd|om-pc|particleandfibretoxicology|ped-rheum|peh-med|plantmethods|pophealthmetrics|proteomesci|ro-journal|rbej|reproductive-health-journal|respiratory-research|retrovirology|salinesystems|scoliosisjournal|scfbm|substanceabusepolicy|tbiomed|thrombosisjournal|trialsjournal|virologyj|wjes|wjso)\.(com|org|net)', 
+REPLACE INTO translators VALUES ('1a3e63b2-0adf-4c8e-928b-c58c2594b45d', '1.0.0b4.r1', '', '2008-06-23 17:05:00', '0', '100', '4', 'BioMed Central and More', 'Ben Parr', 'http://[^/]*(jcmr-online|respiratory-research|bio-diglib|nuclear-receptor|medimmunol|kinetoplastids|filariajournal|cellandchromosome|actavetscand|aidsrestherapy|almob|ann-clinmicrob|annals-general-psychiatry|asir-journal|arthritis-research|apfmj|anzhealthpolicy|behavioralandbrainfunctions|biodatamining|biology-direct|biomagres|biomedical-engineering-online|bpsmedicine|biotechnologyforbiofuels|biomedcentral|breast-cancer-research|cancerci|cbmjournal|cardiab|cardiovascularultrasound|casesjournal|lipidsignaling.cbdjournals|biosignaling|celldiv|cerebrospinalfluidresearch|journal.chemistrycentral|capmh|cmjournal|chiroandosteo|clinicalmolecularallergy|cpementalhealth|comparative-hepatology|conflictandhealth|resource-allocation|coughjournal|ccforum|cytojournal|diagnosticpathology|dynamic-med|ete-online|ehjournal|epi-perspectives|epigeneticsandchromatin|fibrogenesis|frontiersinzoology|gvt-journal|genomebiology|genomemedicine|geochemicaltransactions|globalizationandhealth|gutpathogens|harmreductionjournal|head-face-med|hqlo|health-policy-systems|human-resources-health|immunityageing|immunome-research|implementationscience|infectagentscancer|intarchmed|internationalbreastfeedingjournal|equityhealthj|ijbnpa|ij-healthgeographics|ijmhs|issoonline|jautoimdis|jbioleng|jbiol|j-biomed-discovery|jbppni|carcinogenesis|cardiothoracicsurgery|jcmr-online|jcircadianrhythms|ethnobiomed|jexpclinassistreprod|jeccr|jfootankleres|jhoonline|jibtherapies|journal-inflammation|jmedicalcasereports|jmolecularsignaling|jnanobiotechnology|jnrbm|jneuroengrehab|jneuroinflammation|occup-med|josr-online|jissn|translational-medicine|traumamanagement|lipidworld|malariajournal|microbialcellfactories|molecularbrain|molecular-cancer|molecularcytogenetics|molecularneurodegeneration|molecularpain|neuraldevelopment|nonlinearbiomedphys|nutritionandmetabolism|nutritionj|ojrd|om-pc|parasitesandvectors|particleandfibretoxicology|pathogeneticsjournal|pssjournal|ped-rheum|peh-med|plantmethods|pophealthmetrics|proteomesci|ro-journal|rbej|reproductive-health-journal|respiratory-research|retrovirology|salinesystems|the-scientist|scoliosisjournal|scfbm|substanceabusepolicy|tbiomed|thrombosisjournal|thyroidresearchjournal|tobaccoinduceddiseases|trialsjournal|urooncologyjournal|virologyj|wjes|wjso)\.(com|org|net)', 
 'function detectWeb(doc,url)
 {
 	var namespace = doc.documentElement.namespaceURI;
@@ -12106,6 +12106,23 @@ REPLACE INTO translators VALUES ('1a3e63b2-0adf-4c8e-928b-c58c2594b45d', '1.0.0b
     Zotero.Utilities.HTTP.doGet(getURL, function(text){
         // load translator for RIS
         var translator = Zotero.loadTranslator ("import");
+        translator.setHandler("itemDone", function(obj, newItem) {
+	        var doi = newItem.DOI;
+		var splitURL = newItem.url.split(''/'');
+		
+		if(splitURL.length>=3 && doi != ""){
+			var doiSuffix = doi.slice(doi.indexOf(''/'')+1);
+			var pdfURL = splitURL[0] + ''/'' + splitURL[1] + ''/'' + splitURL[2];
+			pdfURL += ''/content/pdf/'' + doiSuffix + ''.pdf'';
+			var source = splitURL[2].replace(/^www./i,'''').replace(/\.[\w]+$/i,'''');
+			newItem.attachments = [
+				//{url:newItem.url+''/abstract'', title:source + " Abstract Snapshot", mimeType:"text/html"},
+				{url:newItem.url, title:source + " Snapshot", mimeType:"text/html"},
+				{url:pdfURL, title:source + " PDF", mimeType:"application/pdf"}
+			];
+		}
+	        newItem.complete();
+        });
         translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
         translator.setString(text);
         translator.translate();
@@ -12128,7 +12145,7 @@ function doWeb(doc,url)
     	if (row) 
     	{
 	    	//Single Article	    	
-	    	var url=row.textContent+"/citation";
+	    	var url=row.textContent+"/citation/";
 	    	Zotero.Utilities.HTTP.doPost(url, ''include=cit&format=refman&direct=on&submit=Download+references&action=submit'', function(text)
 	    		{parseRIS(url+''?include=cit&format=refman&direct=on&submit=Download+references&action=submit'');});
    
