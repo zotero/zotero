@@ -27,7 +27,7 @@
  */
 
 Zotero.Cite = new function() {
-	default xml namespace = "http://purl.org/net/xbiblio/csl";4
+	default xml namespace = "http://purl.org/net/xbiblio/csl";
 	
 	var _lastCSL = null;
 	var _lastStyle = null;
