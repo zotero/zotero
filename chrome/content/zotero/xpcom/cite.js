@@ -321,6 +321,8 @@ Zotero.Cite.MIMEHandler.StreamListener.prototype.onStopRequest = function(channe
  * want to use the Scholar data model, but does want to use CSL in JavaScript
  */
 Zotero.CSL = function(csl) {
+	// "with ({});" needed to fix default namespace scope issue
+	// See https://bugzilla.mozilla.org/show_bug.cgi?id=330572
 	default xml namespace = "http://purl.org/net/xbiblio/csl"; with ({});
 	
 	if(typeof csl != "XML") {
