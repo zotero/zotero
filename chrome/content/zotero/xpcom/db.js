@@ -942,8 +942,14 @@ Zotero.DBConnection.prototype._getDBConnection = function () {
 		throw (e);
 	}
 	
-	// Get exclusive lock on DB
-	Zotero.DB.query("PRAGMA locking_mode=EXCLUSIVE");
+	// Exclusive locking mode (default) prevents access to Zotero database
+	// while Firefox is open -- normal mode is more convenient for development
+	if (Zotero.Prefs.get('dbLockExclusive')) {
+		Zotero.DB.query("PRAGMA locking_mode=EXCLUSIVE");
+	}
+	else {
+		Zotero.DB.query("PRAGMA locking_mode=NORMAL");
+	}
 	
 	// Register shutdown handler to call this.observe() for DB backup
 	var observerService = Components.classes["@mozilla.org/observer-service;1"]
