@@ -1983,8 +1983,8 @@ Zotero.Item.prototype.getNote = function() {
 		return '';
 	}
 	
-	var sql = "SELECT note FROM itemNotes WHERE itemID=" + this.id;
-	var note = Zotero.DB.valueQuery(sql);
+	var sql = "SELECT note FROM itemNotes WHERE itemID=?";
+	var note = Zotero.DB.valueQuery(sql, this.id);
 	
 	this._noteText = note ? note : '';
 	
@@ -3167,7 +3167,7 @@ Zotero.Item.prototype.toArray = function (mode) {
 		switch (i) {
 			case 'itemTypeID':
 				arr.itemType = Zotero.ItemTypes.getName(this.itemTypeID);
-				break;
+				continue;
 			
 			// Skip virtual fields
 			case 'firstCreator':
@@ -3183,14 +3183,14 @@ Zotero.Item.prototype.toArray = function (mode) {
 	
 	// Item metadata
 	for (var i in this._itemData) {
-		arr[Zotero.ItemFields.getName(i)] = this._itemData[i] ? this._itemData[i] : '';
+		arr[Zotero.ItemFields.getName(i)] = this._itemData[i] ? this._itemData[i] + '': '';
 	}
 	
 	if (mode == 1 || mode == 2) {
 		if (!arr.title &&
 				(this.itemTypeID == Zotero.ItemTypes.getID('letter') ||
 				this.itemTypeID == Zotero.ItemTypes.getID('interview'))) {
-			arr.title = this.getDisplayTitle(mode == 2);
+			arr.title = this.getDisplayTitle(mode == 2) + '';
 		}
 	}
 	
@@ -3289,15 +3289,17 @@ Zotero.Item.prototype.serialize = function(mode) {
 	arr.virtual = {};
 	arr.fields = {};
 	
-	// Primary fields
+	// Primary and virtual fields
 	for (var i in Zotero.Item.primaryFields) {
 		switch (i) {
 			case 'itemTypeID':
 				arr.primary.itemType = Zotero.ItemTypes.getName(this.itemTypeID);
-				break;
+				continue;
 			
-			// Skip virtual fields
 			case 'firstCreator':
+				arr.virtual[i] = this['_' + i] + '';
+				continue;
+				
 			case 'numNotes':
 			case 'numAttachments':
 				arr.virtual[i] = this['_' + i];
@@ -3311,14 +3313,14 @@ Zotero.Item.prototype.serialize = function(mode) {
 	
 	// Item metadata
 	for (var i in this._itemData) {
-		arr.fields[Zotero.ItemFields.getName(i)] = this._itemData[i] ? this._itemData[i] : '';
+		arr.fields[Zotero.ItemFields.getName(i)] = this._itemData[i] ? this._itemData[i] + '' : '';
 	}
 	
 	if (mode == 1 || mode == 2) {
 		if (!arr.fields.title &&
 				(this.itemTypeID == Zotero.ItemTypes.getID('letter') ||
 				this.itemTypeID == Zotero.ItemTypes.getID('interview'))) {
-			arr.fields.title = this.getDisplayTitle(mode == 2);
+			arr.fields.title = this.getDisplayTitle(mode == 2) + '';
 		}
 	}
 	
