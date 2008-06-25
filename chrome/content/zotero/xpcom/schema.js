@@ -1531,6 +1531,61 @@ Zotero.Schema = new function(){
 						}
 					}
 					statement.reset();
+					
+					// Migrate attachment folders to secondary keys
+					Zotero.DB.query("UPDATE itemAttachments SET path=REPLACE(path, itemID || '/', 'storage:') WHERE path REGEXP '^[0-9]+/'");
+					
+					if (Zotero.Prefs.get('useDataDir')) {
+						var dataDir = Components.classes["@mozilla.org/file/local;1"].createInstance(Components.interfaces.nsILocalFile);
+						dataDir.persistentDescriptor = Zotero.Prefs.get('dataDir');
+					}
+					else {
+						var dataDir = Zotero.getProfileDirectory();
+						dataDir.append('zotero');
+					}
+					if (!dataDir.exists() || !dataDir.isDirectory()){
+						var e = { name: "NS_ERROR_FILE_NOT_FOUND" };
+						throw (e);
+					}
+					var movedFiles37 = {};
+					var moveReport = '';
+					var orphaned = dataDir.clone();
+					var storage37 = dataDir.clone();
+					var moveReportFile = dataDir.clone();
+					orphaned.append('orphaned-files');
+					storage37.append('storage');
+					moveReportFile.append('zotero.moved-files.' + fromVersion + '.bak');
+					var keys = {};
+					var rows = Zotero.DB.query("SELECT itemID, key FROM items");
+					for each(var row in rows) {
+						keys[row.itemID] = row.key;
+					}
+					var entries = storage37.directoryEntries;
+					while (entries.hasMoreElements()) {
+						var file = entries.getNext();
+						file.QueryInterface(Components.interfaces.nsILocalFile);
+						var id = parseInt(file.leafName); 
+						if (!file.isDirectory() || isNaN(id)) {
+							continue;
+						}
+						if (keys[id]) {
+							file.moveTo(null, keys[id]);
+							moveReport += keys[id] + ' ' + id + "\n";
+						}
+						else {
+							if (!orphaned.exists()) {
+								orphaned.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0755);
+							}
+							file.moveTo(orphaned, null);
+						}
+						movedFiles37[id] = file;
+					}
+					if (moveReport) {
+						moveReport = 'The following directory names in storage were changed:\n'
+									+ '------------------------------------------------------\n'
+									+ moveReport;
+						Zotero.File.putContents(moveReportFile, moveReport);
+					}
 				}
 			}
 			
@@ -1538,7 +1593,15 @@ Zotero.Schema = new function(){
 			
 			Zotero.DB.commitTransaction();
 		}
-		catch(e){
+		catch (e) {
+			if (movedFiles37) {
+				for (var id in movedFiles37) {
+					try {
+						movedFiles37[id].moveTo(storage37, id);
+					}
+					catch (e2) { Zotero.debug(e2); }
+				}
+			}
 			Zotero.DB.rollbackTransaction();
 			throw(e);
 		}
