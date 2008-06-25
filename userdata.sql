@@ -183,7 +183,6 @@ CREATE TABLE fulltextWords (
     wordID INTEGER PRIMARY KEY,
     word TEXT UNIQUE
 );
-CREATE INDEX fulltextWords_word ON fulltextWords(word);
 
 CREATE TABLE fulltextItemWords (
     wordID INT,
