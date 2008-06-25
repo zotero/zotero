@@ -610,6 +610,9 @@ var Zotero = new function(){
 					if (typeof value == 'function'){
 						dumped_text += level_padding + "'" + item + "' => function(...){...} \n";
 					}
+					else if (typeof value == 'number') {
+						dumped_text += level_padding + "'" + item + "' => " + value + "\n";
+					}
 					else {
 						dumped_text += level_padding + "'" + item + "' => \"" + value + "\"\n";
 					}
