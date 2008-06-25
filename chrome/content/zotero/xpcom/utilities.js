@@ -252,8 +252,7 @@ Zotero.Utilities.prototype.parseMarkup = function(str) {
 
 
 Zotero.Utilities.prototype.min3 = function (a, b, c) {
-	var min;
-	min = a;
+	var min = a;
 	if (b < min) {
 		min = b;
 	}
@@ -265,26 +264,29 @@ Zotero.Utilities.prototype.min3 = function (a, b, c) {
 
 
 Zotero.Utilities.prototype.levenshtein = function (a, b) {
-	var arr = new Array(a.length+1);
+	var aLen = a.length;
+	var bLen = b.length;
+	
+	var arr = new Array(aLen+1);
 	var i, j, cost;
-
-	for(i=0; i<=a.length; i++)
-		arr[i] = new Array(b.length);
-
-	for (i = 0; i <= a.length; i++) {
+	
+	for (i = 0; i <= aLen; i++) {
+		arr[i] = new Array(bLen);
 		arr[i][0] = i;
 	}
-	for (j = 0; j <= b.length; j++) {
+	
+	for (j = 0; j <= bLen; j++) {
 		arr[0][j] = j;
 	}
-
-	for (i = 1; i <= a.length; i++) {
-		for (j = 1; j <= b.length; j++) {
-			cost = (a[i-1] == b[j-1])? 0 : 1;
+	
+	for (i = 1; i <= aLen; i++) {
+		for (j = 1; j <= bLen; j++) {
+			cost = (a[i-1] == b[j-1]) ? 0 : 1;
 			arr[i][j] = this.min3(arr[i-1][j] + 1, arr[i][j-1] + 1, arr[i-1][j-1] + cost);
 		}
 	}
-	return arr[a.length][b.length];
+	
+	return arr[aLen][bLen];
 }
 
 
