@@ -156,16 +156,8 @@ Zotero.Utilities.prototype.cleanTags = function(x) {
  *  <ZOTEROHELLIP/> => &hellip;
  */
 Zotero.Utilities.prototype.htmlSpecialChars = function(str) {
-	switch (typeof str) {
-		case 'string':
-			break;
-		
-		case 'number':
-			str = str + '';
-			break;
-		
-		default:
-			throw "Argument '" + str + "' must be a string in Zotero.Utilities.htmlSpecialChars()";
+	if (typeof str != 'string') {
+		throw "Argument '" + str + "' must be a string in Zotero.Utilities.htmlSpecialChars()";
 	}
 	
 	if (!str) {
