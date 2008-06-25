@@ -153,7 +153,7 @@ Zotero.Utilities.prototype.cleanTags = function(x) {
  * Certain entities can be inserted manually:
  *
  *  <ZOTEROBREAK/> => <br/>
- *  <ZOTEROHELLIP/> => &hellip;
+ *  <ZOTEROHELLIP/> => &#8230;
  */
 Zotero.Utilities.prototype.htmlSpecialChars = function(str) {
 	if (typeof str != 'string') {
@@ -178,7 +178,7 @@ Zotero.Utilities.prototype.htmlSpecialChars = function(str) {
 			case 'BREAK':
 				return '<br/>';
 			case 'HELLIP':
-				return '&hellip;';
+				return '&#8230;';
 			default:
 				return p1;
 		}
