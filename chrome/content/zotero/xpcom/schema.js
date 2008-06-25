@@ -1278,6 +1278,8 @@ Zotero.Schema = new function(){
 					Zotero.DB.query("DROP TABLE IF EXISTS userFields");
 					Zotero.DB.query("DROP TABLE IF EXISTS userItemTypeFields");
 					
+					Zotero.DB.query("DROP INDEX IF EXISTS fulltextWords_word");
+					
 					var wordIDs = Zotero.DB.columnQuery("SELECT GROUP_CONCAT(wordID) AS wordIDs FROM fulltextWords GROUP BY word HAVING COUNT(*)>1");
 					if (wordIDs.length) {
 						Zotero.DB.query("CREATE TEMPORARY TABLE deleteWordIDs (wordID INTEGER PRIMARY KEY)");
