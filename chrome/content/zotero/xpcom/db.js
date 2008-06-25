@@ -957,21 +957,30 @@ Zotero.DBConnection.prototype._getDBConnection = function () {
 	observerService.addObserver(this, "xpcom-shutdown", false);
 	observerService = null;
 	
+	// User-defined functions
+	// TODO: move somewhere else?
+	
 	// Levenshtein distance UDF
-	//
-	// Implements mozIStorageFunction
-	// TODO: move somewhere else
 	var lev = {
 		ZU: new Zotero.Utilities,
-		
 		onFunctionCall: function (arg) {
 			var a = arg.getUTF8String(0);
 			var b = arg.getUTF8String(1);
 			return this.ZU.levenshtein(a, b);
 		}
 	};
-	
 	this._connection.createFunction('levenshtein', 2, lev);
+	
+	// Regexp UDF
+	var rx = {
+		onFunctionCall: function (arg) {
+			var re = new RegExp(arg.getUTF8String(0));
+			var str = arg.getUTF8String(1);
+			return re.test(str);
+		}
+	};
+	this._connection.createFunction('regexp', 2, rx);
+	
 	
 	return this._connection;
 }
