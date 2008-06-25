@@ -5202,7 +5202,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('8082115d-5bc6-4517-a4e8-abed1b2a784a', '1.0.0b4.r5', '', '2008-04-24 14:30:00', '0', '100', '4', 'Copernicus2', 'Michael Berkowitz', 'http://www.(adv-sci-res|astrophys-space-sci-trans|atmos-chem-phys|biogeosciences|clim-past|electronic-earth|hydrol-earth-syst-sci|nat-hazards-earth-syst-sci|nonlin-processes-geophys|ocean-sci|soc-geogr|surv-perspect-integr-environ-soc|the-cryosphere).net/', 
+REPLACE INTO translators VALUES ('8082115d-5bc6-4517-a4e8-abed1b2a784a', '1.0.0b4.r5', '', '2008-06-25 10:48:30', '0', '100', '4', 'Copernicus2', 'Michael Berkowitz', 'http://www.(adv-sci-res|astrophys-space-sci-trans|atmos-chem-phys|biogeosciences(-discuss)?|clim-past|electronic-earth|hydrol-earth-syst-sci|nat-hazards-earth-syst-sci|nonlin-processes-geophys|ocean-sci|soc-geogr|surv-perspect-integr-environ-soc|the-cryosphere).net/', 
 'function detectWeb(doc, url) {
 	if (doc.evaluate(''//div[@id="publisher"]/iframe'', doc, null, XPathResult.ANY_TYPE, null).iterateNext() || doc.evaluate(''//td[*[a[contains(text(), "Abstract")]]]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
