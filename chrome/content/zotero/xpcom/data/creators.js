@@ -306,7 +306,23 @@ Zotero.Creators = new function() {
 		};
 		for (var field in fields) {
 			if (fields[field]) {
-				cleanedFields[field] = fields[field];
+				switch (field) {
+					// Strings
+					case 'firstName':
+					case 'lastName':
+					case 'shortName':
+						cleanedFields[field] = fields[field] + '';
+						break;
+					
+					// Integer
+					case 'fieldMode':
+						cleanedFields[field] = fields[field] ? fields[field] : 0;
+						break;
+					
+					// Null if empty
+					default:
+						cleanedFields[field] = fields[field] ? fields[field] : null;
+				}
 			}
 		}
 		return cleanedFields;
