@@ -1067,6 +1067,7 @@ Zotero.Sync.Server.Data = new function() {
 	this.buildUploadXML = buildUploadXML;
 	this.itemToXML = itemToXML;
 	this.xmlToItem = xmlToItem;
+	this.removeMissingRelatedItems = removeMissingRelatedItems;
 	this.collectionToXML = collectionToXML;
 	this.xmlToCollection = xmlToCollection;
 	this.creatorToXML = creatorToXML;
@@ -1087,6 +1088,7 @@ Zotero.Sync.Server.Data = new function() {
 		}
 		
 		var remoteCreatorStore = {};
+		var relatedItemsStore = {};
 		
 		Zotero.DB.beginTransaction();
 		
@@ -1100,21 +1102,23 @@ Zotero.Sync.Server.Data = new function() {
 				continue;
 			}
 			
-			Zotero.debug("Processing remotely changed " + types);
-			
 			var toSaveParents = [];
 			var toSaveChildren = [];
 			var toDeleteParents = [];
 			var toDeleteChildren = [];
 			var toReconcile = [];
 			
+			//
+			// Handle modified objects
+			//
+			Zotero.debug("Processing remotely changed " + types);
+			
 			typeloop:
 			for each(var xmlNode in xml[types][type]) {
+				var localDelete = false;
+				
 				// Get local object with same id
 				var obj = Zotero[Types].get(parseInt(xmlNode.@id));
-				
-				// TODO: check local deleted items for possible conflict
-				
 				if (obj) {
 					// Key match -- same item
 					if (obj.key == xmlNode.@key.toString()) {
@@ -1130,6 +1134,24 @@ Zotero.Sync.Server.Data = new function() {
 								// linked to a creator whose id changed)
 								|| uploadIDs.updated[types].indexOf(obj.id) != -1) {
 							
+							// Merge and store related items, since CR doesn't
+							// affect related items
+							if (type == 'item') {
+								// TODO: skip conflict if only related items changed
+								
+								var related = xmlNode.related.toString();
+								related = related ? related.split(' ') : [];
+								for each(var relID in obj.relatedItems) {
+									if (related.indexOf(relID) == -1) {
+										related.push(relID);
+									}
+								}
+								if (related.length) {
+									relatedItemsStore[obj.id] = related;
+								}
+								Zotero.Sync.Server.Data.removeMissingRelatedItems(xmlNode);
+							}
+							
 							var remoteObj = Zotero.Sync.Server.Data['xmlTo' + Type](xmlNode);
 							
 							// Some types we don't bother to reconcile
@@ -1138,24 +1160,31 @@ Zotero.Sync.Server.Data = new function() {
 									Zotero.Sync.addToUpdated(uploadIDs.updated.items, obj.id);
 									continue;
 								}
-								else {
-									obj = Zotero.Sync.Server.Data['xmlTo' + Type](xmlNode, obj);
-								}
+								
+								// Overwrite local below
 							}
 							// Mark other types for conflict resolution
 							else {
-								/*
-								// For now, show item conflicts even if only
-								// dateModified changed, since we need to handle
-								// creator conflicts there
-								if (type != 'item') {
-									// Skip if only dateModified changed
+								// Skip item if dateModified is the only modified
+								// field (and no linked creators changed)
+								if (type == 'item') {
 									var diff = obj.diff(remoteObj, false, true);
 									if (!diff) {
-										continue;
+										// Check if creators changed
+										var creatorsChanged = false;
+										var creators = obj.getCreators();
+										creators = creators.concat(remoteObj.getCreators());
+										for each(var creator in creators) {
+											if (remoteCreatorStore[obj.id]) {
+												creatorsChanged = true;
+												break;
+											}
+										}
+										if (!creatorsChanged) {
+											continue;
+										}
 									}
 								}
-								*/
 								
 								// Will be handled by item CR for now
 								if (type == 'creator') {
@@ -1178,17 +1207,14 @@ Zotero.Sync.Server.Data = new function() {
 								continue;
 							}
 						}
-						// Local object hasn't been modified -- overwrite
-						else {
-							obj = Zotero.Sync.Server.Data['xmlTo' + Type](xmlNode, obj);
-						}
+						
+						// Overwrite local below
 					}
 					
 					// Key mismatch -- different objects with same id,
 					// so change id of local object
 					else {
 						var oldID = parseInt(xmlNode.@id);
-						
 						var newID = Zotero.ID.get(types, true);
 						
 						Zotero.debug("Changing " + type + " " + oldID + " id to " + newID);
@@ -1222,6 +1248,9 @@ Zotero.Sync.Server.Data = new function() {
 						// Add items linked to creators to updated array,
 						// since their timestamps will be set to the
 						// transaction timestamp
+						//
+						// Note: Don't need to change collection children or
+						// related items, since they're stored as objects
 						if (type == 'creator') {
 							var linkedItems = obj.getLinkedItems();
 							if (linkedItems) {
@@ -1229,22 +1258,18 @@ Zotero.Sync.Server.Data = new function() {
 							}
 						}
 						
-						
-						// Note: Don't need to change collection children
-						// since they're stored as objects
-						
 						uploadIDs.changed[types][oldID] = {
 							oldID: oldID,
 							newID: newID
 						};
 						
-						// Process new item
-						obj = Zotero.Sync.Server.Data['xmlTo' + Type](xmlNode);
+						obj = null;
 					}
 				}
-				// Object doesn't exist
+				
+				// Object doesn't exist locally
 				else {
-					// Reconcile locally deleted objects
+					// Check if object has been deleted locally
 					for each(var pair in uploadIDs.deleted[types]) {
 						if (pair.id != parseInt(xmlNode.@id) ||
 								pair.key != xmlNode.@key.toString()) {
@@ -1258,24 +1283,31 @@ Zotero.Sync.Server.Data = new function() {
 							throw ('Delete reconciliation unimplemented for ' + types);
 						}
 						
-						var remoteObj = Zotero.Sync.Server.Data['xmlTo' + Type](xmlNode);
-						
-						// TODO: order reconcile by parent/child?
-						
-						toReconcile.push([
-							'deleted',
-							remoteObj
-						]);
-						
-						continue typeloop;
+						localDelete = true;
 					}
-
-					// Create locally
-					obj = Zotero.Sync.Server.Data['xmlTo' + Type](xmlNode);
 				}
 				
+				// Temporarily remove and store related items that don't yet exist
+				if (type == 'item') {
+					var missing = Zotero.Sync.Server.Data.removeMissingRelatedItems(xmlNode);
+					if (missing.length) {
+						relatedItemsStore[xmlNode.@id] = missing;
+					}
+				}
+				
+				// Create or overwrite locally
+				obj = Zotero.Sync.Server.Data['xmlTo' + Type](xmlNode, obj);
+				
+				if (localDelete) {
+					// TODO: order reconcile by parent/child?
+					
+					toReconcile.push([
+						'deleted',
+						obj
+					]);
+				}
 				// Child items have to be saved after parent items
-				if (type == 'item' && obj.getSource()) {
+				else if (type == 'item' && obj.getSource()) {
 					toSaveChildren.push(obj);
 				}
 				else {
@@ -1348,6 +1380,7 @@ Zotero.Sync.Server.Data = new function() {
 					for each(var obj in io.dataOut) {
 						// TODO: do we need to make sure item isn't already being saved?
 						
+						// Handle items deleted during merge
 						if (obj.ref == 'deleted') {
 							// Deleted item was remote
 							if (obj.left != 'deleted') {
@@ -1356,6 +1389,10 @@ Zotero.Sync.Server.Data = new function() {
 								}
 								else {
 									toDeleteChildren.push(obj.id);
+								}
+								
+								if (relatedItemsStore[obj.id]) {
+									delete relatedItemsStore[obj.id];
 								}
 								
 								uploadIDs.deleted[types].push({
@@ -1394,11 +1431,9 @@ Zotero.Sync.Server.Data = new function() {
 				}
 			}
 			
-			// Sort collections in order of parent collections,
-			// so referenced parent collections always exist when saving
 			if (type == 'collection') {
-				var collections = [];
-				
+				// Sort collections in order of parent collections,
+				// so referenced parent collections always exist when saving
 				var cmp = function (a, b) {
 					var pA = a.parent;
 					var pB = b.parent;
@@ -1408,35 +1443,45 @@ Zotero.Sync.Server.Data = new function() {
 					return (pA < pB) ? -1 : 1;
 				};
 				toSaveParents.sort(cmp);
-			}
-			
-			Zotero.debug('Saving merged ' + types);
-			for each(var obj in toSaveParents) {
-				// If collection, temporarily clear subcollections before
-				// saving since referenced collections may not exist yet
-				if (type == 'collection') {
-					var childCollections = obj.getChildCollections(true);
-					if (childCollections) {
-						obj.childCollections = [];
+				
+				// Temporarily remove and store subcollections before saving
+				// since referenced collections may not exist yet
+				var collections = [];
+				for each(var obj in toSaveParents) {
+					var colIDs = obj.getChildCollections(true);
+					if (!colIDs.length) {
+						continue;
 					}
-				}
-				
-				var id = obj.save();
-				
-				// Store subcollections
-				if (type == 'collection') {
+					// TODO: use exist(), like related items above
+					obj.childCollections = [];
 					collections.push({
 						obj: obj,
-						childCollections: childCollections
+						childCollections: colIDs
 					});
 				}
+			}
+			
+			// Save objects
+			Zotero.debug('Saving merged ' + types);
+			for each(var obj in toSaveParents) {
+				obj.save();
 			}
 			for each(var obj in toSaveChildren) {
 				obj.save();
 			}
 			
-			// Set subcollections
-			if (type == 'collection') {
+			// Add back related items (which now exist)
+			if (type == 'item') {
+				for (var itemID in relatedItemsStore) {
+					item = Zotero.Items.get(itemID);
+					for each(var id in relatedItemsStore[itemID]) {
+						item.addRelatedItem(id);
+					}
+					item.save();
+				}
+			}
+			// Add back subcollections
+			else if (type == 'collection') {
 				for each(var collection in collections) {
 					if (collection.collections) {
 						collection.obj.childCollections = collection.collections;
@@ -1631,6 +1676,11 @@ Zotero.Sync.Server.Data = new function() {
 			xml.creator += newCreator;
 		}
 		
+		// Related items
+		if (item.related.length) {
+			xml.related = item.related.join(' ');
+		}
+		
 		return xml;
 	}
 	
@@ -1645,7 +1695,7 @@ Zotero.Sync.Server.Data = new function() {
 	function xmlToItem(xmlItem, item, skipPrimary) {
 		if (!item) {
 			if (skipPrimary) {
-				item = new Zotero.Item(null);
+				item = new Zotero.Item;
 			}
 			else {
 				item = new Zotero.Item(parseInt(xmlItem.@id));
@@ -1740,7 +1790,28 @@ Zotero.Sync.Server.Data = new function() {
 			}
 		}
 		
+		// Related items
+		var related = xmlItem.related.toString();
+		item.relatedItems = related ? related.split(' ') : [];
+		
 		return item;
+	}
+	
+	
+	function removeMissingRelatedItems(xmlNode) {
+		var missing = [];
+		var related = xmlNode.related.toString();
+		var relIDs = related ? related.split(' ') : [];
+		if (relIDs.length) {
+			var exist = Zotero.Items.exist(relIDs);
+			for each(var id in relIDs) {
+				if (exist.indexOf(id) == -1) {
+					missing.push(id);
+				}
+			}
+			xmlNode.related = exist.join(' ');
+		}
+		return missing;
 	}
 	
 	

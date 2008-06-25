@@ -1017,9 +1017,10 @@ Zotero.Translate.prototype._itemTagsAndSeeAlso = function(item, newItem) {
 	if(item.seeAlso) {
 		for each(var seeAlso in item.seeAlso) {
 			if(this._IDMap[seeAlso]) {
-				newItem.addSeeAlso(this._IDMap[seeAlso]);
+				newItem.addRelatedItem(this._IDMap[seeAlso]);
 			}
 		}
+		newItem.save();
 	}
 	if(item.tags) {
 		var tagsToAdd = {};
@@ -1407,9 +1408,10 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 	if(item.seeAlso) {
 		for each(var seeAlso in item.seeAlso) {
 			if(this._IDMap[seeAlso]) {
-				newItem.addSeeAlso(this._IDMap[seeAlso]);
+				newItem.addRelatedItem(this._IDMap[seeAlso]);
 			}
 		}
+		newItem.save();
 	}
 	
 	// handle tags, if this is an import translation or automatic tagging is

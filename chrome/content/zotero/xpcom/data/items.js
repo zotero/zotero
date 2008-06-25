@@ -27,6 +27,7 @@
 Zotero.Items = new function() {
 	// Privileged methods
 	this.get = get;
+	this.exist = exist;
 	this.getAll = getAll;
 	this.getUpdated = getUpdated;
 	this.add = add;
@@ -97,6 +98,14 @@ Zotero.Items = new function() {
 		}
 		
 		return loaded;
+	}
+	
+	
+	function exist(itemIDs) {
+		var sql = "SELECT itemID FROM items WHERE itemID IN ("
+			+ itemIDs.map(function () '?').join() + ")";
+		var exist = Zotero.DB.columnQuery(sql, itemIDs);
+		return exist ? exist : [];
 	}
 	
 	
