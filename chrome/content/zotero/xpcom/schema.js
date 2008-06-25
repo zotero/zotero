@@ -1278,8 +1278,7 @@ Zotero.Schema = new function(){
 					Zotero.DB.query("DROP TABLE IF EXISTS userFields");
 					Zotero.DB.query("DROP TABLE IF EXISTS userItemTypeFields");
 					
-					Zotero.DB.query("DROP INDEX IF EXISTS fulltextWords_word");
-					
+					// Index corruption can allow duplicate values
 					var wordIDs = Zotero.DB.columnQuery("SELECT GROUP_CONCAT(wordID) AS wordIDs FROM fulltextWords GROUP BY word HAVING COUNT(*)>1");
 					if (wordIDs.length) {
 						Zotero.DB.query("CREATE TEMPORARY TABLE deleteWordIDs (wordID INTEGER PRIMARY KEY)");
@@ -1293,6 +1292,8 @@ Zotero.Schema = new function(){
 						Zotero.DB.query("DROP TABLE deleteWordIDs");
 					}
 					
+					Zotero.DB.query("DROP INDEX IF EXISTS fulltextWords_word");
+					
 					Zotero.DB.query("REINDEX");
 					Zotero.DB.transactionVacuum = true;
 					
@@ -1301,9 +1302,11 @@ Zotero.Schema = new function(){
 					var cacheSize = 8192000 / pageSize;
 					Zotero.DB.query("PRAGMA default_cache_size=" + cacheSize);
 					
+					// Orphaned child attachment
 					Zotero.DB.query("UPDATE itemAttachments SET sourceItemID=NULL WHERE sourceItemID NOT IN (SELECT itemID FROM items)");
 					Zotero.DB.query("UPDATE itemNotes SET sourceItemID=NULL WHERE sourceItemID NOT IN (SELECT itemID FROM items)");
 					
+					// Create sync delete log
 					Zotero.DB.query("CREATE TABLE syncDeleteLog (\n    syncObjectTypeID INT NOT NULL,\n    objectID INT NOT NULL,\n    key TEXT NOT NULL,\n    timestamp INT NOT NULL,\n    FOREIGN KEY (syncObjectTypeID) REFERENCES syncObjectTypes(syncObjectTypeID)\n);");
 					Zotero.DB.query("CREATE INDEX syncDeleteLog_timestamp ON syncDeleteLog(timestamp);");
 					
