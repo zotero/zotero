@@ -407,11 +407,13 @@
 			<method name="seeAlsoClick">
 				<body>
 					<![CDATA[
-						var seealsoList = this.item.getSeeAlso();
-						if(seealsoList && seealsoList.length > 0)
+						var relatedList = this.item.relatedItemsBidirectional;
+						if (relatedList.length > 0) {
 							this.id('seeAlsoPopup').showPopup(this.id('seeAlsoLabel'),-1,-1,'popup',0,0);
-						else
+						}
+						else {
 							this.id('seeAlso').add();
+						}
 					]]>
 				</body>
 			</method>

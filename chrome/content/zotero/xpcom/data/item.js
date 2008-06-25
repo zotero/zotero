@@ -69,7 +69,9 @@ Zotero.Item.prototype._init = function () {
 	this._primaryDataLoaded = false;
 	this._creatorsLoaded = false;
 	this._itemDataLoaded = false;
+	this._relatedItemsLoaded = false;
 	
+	this._changed = false;
 	this._changedPrimaryData = false;
 	this._changedItemData = false;
 	this._changedCreators = false;
@@ -87,6 +89,8 @@ Zotero.Item.prototype._init = function () {
 	this._attachmentMIMEType = null;
 	this._attachmentCharset = null;
 	this._attachmentPath = null;
+	
+	this._relatedItems = false;
 }
 
 
@@ -100,6 +104,10 @@ Zotero.Item.prototype.__defineGetter__('firstCreator', function () { return this
 //Zotero.Item.prototype.__defineGetter__('numNotes', function () { return this._itemID; });
 //Zotero.Item.prototype.__defineGetter__('numAttachments', function () { return this._itemID; });
 
+Zotero.Item.prototype.__defineGetter__('relatedItems', function () { var ids = this._getRelatedItems(true); return ids ? ids : []; });
+Zotero.Item.prototype.__defineSetter__('relatedItems', function (arr) { this._setRelatedItems(arr); });
+Zotero.Item.prototype.__defineGetter__('relatedItemsReverse', function () { var ids = this._getRelatedItemsReverse(); return ids ? ids : []; });
+Zotero.Item.prototype.__defineGetter__('relatedItemsBidirectional', function () { var ids = this._getRelatedItemsBidirectional(); return ids ? ids : []; });
 
 /*
  * Deprecated -- use id property
@@ -329,7 +337,8 @@ Zotero.Item.prototype.loadFromRow = function(row, reload) {
  * Check if any data fields have changed since last save
  */
 Zotero.Item.prototype.hasChanged = function() {
-	return !!(this._changedPrimaryData
+	return !!(this._changed
+		|| this._changedPrimaryData
 		|| this._changedCreators
 		|| this._changedItemData
 		|| this._changedNote
@@ -906,6 +915,69 @@ Zotero.Item.prototype.removeCreator = function(orderIndex) {
 }
 
 
+Zotero.Item.prototype.addRelatedItem = function (itemID) {
+	var parsedInt = parseInt(itemID);
+	if (parsedInt != itemID) {
+		throw ("itemID '" + itemID + "' not an integer in Zotero.Item.addRelatedItem()");
+	}
+	itemID = parsedInt;
+	
+	if (itemID == this.id) {
+		Zotero.debug("Can't relate item to itself in Zotero.Item.addRelatedItem()", 2);
+		return false;
+	}
+	
+	var current = this._getRelatedItems(true);
+	if (current && current.indexOf(itemID) != -1) {
+		Zotero.debug("Item " + this.id + " already related to item "
+			+ itemID + " in Zotero.Item.addItem()");
+		return false;
+	}
+	
+	var item = Zotero.Items.get(itemID);
+	if (!item) {
+		throw ("Can't relate item to invalid item " + itemID
+			+ " in Zotero.Item.addRelatedItem()");
+	}
+	/*
+	var otherCurrent = item.relatedItems;
+	if (otherCurrent.length && otherCurrent.indexOf(this.id) != -1) {
+		Zotero.debug("Other item " + itemID + " already related to item "
+			+ this.id + " in Zotero.Item.addItem()");
+		return false;
+	}
+	*/
+	
+	this._prepFieldChange('relatedItems');
+	this._relatedItems.push(item);
+	return true;
+}
+
+
+Zotero.Item.prototype.removeRelatedItem = function (itemID) {
+	var parsedInt = parseInt(itemID);
+	if (parsedInt != itemID) {
+		throw ("itemID '" + itemID + "' not an integer in Zotero.Item.removeRelatedItem()");
+	}
+	itemID = parsedInt;
+	
+	var current = this._getRelatedItems(true);
+	if (current) {
+		var index = current.indexOf(itemID);
+	}
+	
+	if (!current || index == -1) {
+		Zotero.debug("Item " + this.id + " isn't related to item "
+			+ itemID + " in Zotero.Item.removeRelatedItem()");
+		return false;
+	}
+	
+	this._prepFieldChange('relatedItems');
+	this._relatedItems.splice(index, 1);
+	return true;
+}
+
+
 /*
  * Save changes back to database
  *
@@ -1231,6 +1303,59 @@ Zotero.Item.prototype.save = function() {
 						newSourceItem.incrementAttachmentCount();
 						break;
 				}
+			}
+			
+			
+			// Related items
+			if (this._changed.relatedItems) {
+				var removed = [];
+				var newids = [];
+				var currentIDs = this._getRelatedItems(true);
+				if (!currentIDs) {
+					currentIDs = [];
+				}
+				
+				if (this._previousData && this._previousData.related) {
+					for each(var id in this._previousData.related) {
+						if (currentIDs.indexOf(id) == -1) {
+							removed.push(id);
+						}
+					}
+				}
+				for each(var id in currentIDs) {
+					if (this._previousData && this._previousData.related &&
+							this._previousData.related.indexOf(id) != -1) {
+						continue;
+					}
+					newids.push(id);
+				}
+				
+				if (removed.length) {
+					var sql = "DELETE FROM itemSeeAlso WHERE itemID=? "
+						+ "AND linkedItemID IN ("
+						+ removed.map(function () '?').join()
+						+ ")";
+					Zotero.DB.query(sql, [itemID].concat(removed));
+				}
+				
+				if (newids.length) {
+					var sql = "INSERT INTO itemSeeAlso (itemID, linkedItemID) VALUES (?,?)";
+					var insertStatement = Zotero.DB.getStatement(sql);
+					
+					for each(var linkedItemID in newids) {
+						insertStatement.bindInt32Parameter(0, itemID);
+						insertStatement.bindInt32Parameter(1, linkedItemID);
+						
+						try {
+							insertStatement.execute();
+						}
+						catch (e) {
+							throw (e + ' [ERROR: ' + Zotero.DB.getLastErrorString() + ']');
+						}
+					}
+				}
+				
+				Zotero.Notifier.trigger('modify', 'item', removed.concat(newids));
 			}
 		}
 		
@@ -1585,6 +1710,59 @@ Zotero.Item.prototype.save = function() {
 					}
 				}
 			}
+			
+			
+			// Related items
+			if (this._changed.relatedItems) {
+				var removed = [];
+				var newids = [];
+				var currentIDs = this._getRelatedItems(true);
+				if (!currentIDs) {
+					currentIDs = [];
+				}
+				
+				if (this._previousData && this._previousData.related) {
+					for each(var id in this._previousData.related) {
+						if (currentIDs.indexOf(id) == -1) {
+							removed.push(id);
+						}
+					}
+				}
+				for each(var id in currentIDs) {
+					if (this._previousData && this._previousData.related &&
+							this._previousData.related.indexOf(id) != -1) {
+						continue;
+					}
+					newids.push(id);
+				}
+				
+				if (removed.length) {
+					var sql = "DELETE FROM itemSeeAlso WHERE itemID=? "
+						+ "AND linkedItemID IN ("
+						+ removed.map(function () '?').join()
+						+ ")";
+					Zotero.DB.query(sql, [this.id].concat(removed));
+				}
+				
+				if (newids.length) {
+					var sql = "INSERT INTO itemSeeAlso (itemID, linkedItemID) VALUES (?,?)";
+					var insertStatement = Zotero.DB.getStatement(sql);
+					
+					for each(var linkedItemID in newids) {
+						insertStatement.bindInt32Parameter(0, this.id);
+						insertStatement.bindInt32Parameter(1, linkedItemID);
+						
+						try {
+							insertStatement.execute();
+						}
+						catch (e) {
+							throw (e + ' [ERROR: ' + Zotero.DB.getLastErrorString() + ']');
+						}
+					}
+				}
+				
+				Zotero.Notifier.trigger('modify', 'item', removed.concat(newids));
+			}
 		}
 		
 		//Zotero.History.commit();
@@ -1625,7 +1803,6 @@ Zotero.Item.prototype.save = function() {
 	
 	if (isNew) {
 		var id = this.id;
-		Zotero.debug('DISABLING ITEM');
 		this._disabled = true;
 		return id;
 	}
@@ -2568,116 +2745,6 @@ Zotero.Item.prototype.removeAllTags = function() {
 }
 
 
-//
-// Methods dealing with See Also links
-//
-// save() is not required for See Also functions
-//
-Zotero.Item.prototype.addSeeAlso = function(itemID) {
-	if (itemID==this.id) {
-		Zotero.debug('Cannot add item as See Also of itself', 2);
-		return false;
-	}
-	
-	Zotero.DB.beginTransaction();
-	
-	var relatedItem = Zotero.Items.get(itemID);
-	
-	if (!relatedItem) {
-		Zotero.DB.commitTransaction();
-		throw ("Cannot add invalid item " + itemID + " as See Also");
-		return false;
-	}
-	
-	// Check both ways, using a UNION to take advantage of indexes
-	var sql = "SELECT (SELECT COUNT(*) FROM itemSeeAlso WHERE itemID=?1 AND "
-		+ "linkedItemID=?2) + (SELECT COUNT(*) FROM itemSeeAlso WHERE "
-		+ "linkedItemID=?1 AND itemID=?2)";
-	if (Zotero.DB.valueQuery(sql, [this.id, itemID])) {
-		Zotero.DB.commitTransaction();
-		Zotero.debug("Item " + itemID + " already linked", 2);
-		return false;
-	}
-	
-	var notifierData = {};
-	notifierData[this.id] = { old: this.serialize() };
-	notifierData[relatedItem.id] = { old: relatedItem.serialize() };
-	
-	var sql = "INSERT INTO itemSeeAlso VALUES (?,?)";
-	Zotero.DB.query(sql, [this.id, {int:itemID}]);
-	Zotero.DB.commitTransaction();
-	Zotero.Notifier.trigger('modify', 'item', [this.id, itemID], notifierData);
-	return true;
-}
-
-Zotero.Item.prototype.removeSeeAlso = function(itemID) {
-	if (!this.id) {
-		throw ('Cannot remove related item of unsaved item');
-	}
-	
-	Zotero.DB.beginTransaction();
-	
-	var relatedItem = Zotero.Items.get(itemID);
-	if (!relatedItem) {
-		Zotero.DB.commitTransaction();
-		throw ("Cannot remove invalid item " + itemID + " as See Also");
-		return false;
-	}
-	
-	var notifierData = {};
-	notifierData[this.id] = { old: this.serialize() };
-	notifierData[relatedItem.id] = { old: relatedItem.serialize() };
-	
-	var sql = "DELETE FROM itemSeeAlso WHERE itemID=? AND linkedItemID=?";
-	Zotero.DB.query(sql, [this.id, itemID]);
-	var sql = "DELETE FROM itemSeeAlso WHERE itemID=? AND linkedItemID=?";
-	Zotero.DB.query(sql, [itemID, this.id]);
-	Zotero.DB.commitTransaction();
-	Zotero.Notifier.trigger('modify', 'item', [this.id, itemID], notifierData);
-}
-
-Zotero.Item.prototype.removeAllRelated = function() {
-	if (!this.id) {
-		throw ('Cannot remove related items of unsaved item');
-	}
-	
-	Zotero.DB.beginTransaction();
-	var relateds = this.getSeeAlso();
-	if (!relateds) {
-		Zotero.DB.commitTransaction();
-		return;
-	}
-	
-	var notifierData = {};
-	notifierData[this.id] = { old: this.serialize() };
-	
-	for each(var id in relateds) {
-		var item = Zotero.Items.get(id);
-		if (item) {
-			notifierData[item.id] = { old: item.serialize() };
-		}
-	}
-	
-	Zotero.DB.query("DELETE FROM itemSeeAlso WHERE itemID=?", this.id);
-	Zotero.DB.query("DELETE FROM itemSeeAlso WHERE linkedItemID=?", this.id);
-	Zotero.DB.commitTransaction();
-	
-	var ids = [this.id].concat(relateds);
-	
-	Zotero.Notifier.trigger('modify', 'item', ids, notifierData);
-}
-
-Zotero.Item.prototype.getSeeAlso = function() {
-	if (!this.id) {
-		return false;
-	}
-	// Check both ways, using a UNION to take advantage of indexes
-	var sql ="SELECT linkedItemID FROM itemSeeAlso WHERE itemID=?1 UNION "
-		+ "SELECT itemID FROM itemSeeAlso WHERE linkedItemID=?1";
-	return Zotero.DB.columnQuery(sql, this.id);
-}
-
-
 Zotero.Item.prototype.getImageSrc = function() {
 	var itemType = Zotero.ItemTypes.getName(this.itemTypeID);
 	if (itemType == 'attachment') {
@@ -2886,10 +2953,9 @@ Zotero.Item.prototype.clone = function(includePrimary) {
 		}
 	}
 	
-	if (obj.seeAlso) {
-		for each(var id in obj.seeAlso) {
-			newItem.addSeeAlso(id)
-		}
+	if (obj.related) {
+		// DEBUG: this will add reverse-only relateds too
+		newItem.relatedItems = obj.related;
 	}
 	
 	Zotero.DB.commitTransaction();
@@ -3017,16 +3083,16 @@ Zotero.Item.prototype.erase = function(deleteChildren) {
 		Zotero.DB.query(sql);
 	}
 	
-	// Flag See Also links for notification
-	var relateds = this.getSeeAlso();
+	// Flag related items for notification
+	var relateds = this._getRelatedItemsBidirectional();
 	if (relateds) {
 		for each(var id in relateds) {
-			var i = Zotero.Items.get(id);
-			if (!changedItemsNotifierData[i.id]) {
-				changedItemsNotifierData[i.id] = { old: i.serialize() };
+			var relatedItem = Zotero.Items.get(id);
+			if (changedItems.indexOf(id) != -1) {
+				changedItemsNotifierData[id] = { old: relatedItem.serialize() };
+				changedItems.push(id);
 			}
 		}
-		changedItems = changedItems.concat(relateds);
 	}
 	
 	// Clear fulltext cache
@@ -3191,7 +3257,7 @@ Zotero.Item.prototype.toArray = function (mode) {
 		}
 	}
 	
-	arr.related = this.getSeeAlso();
+	arr.related = this._getRelatedItemsBidirectional();
 	if (!arr.related) {
 		arr.related = [];
 	}
@@ -3319,10 +3385,10 @@ Zotero.Item.prototype.serialize = function(mode) {
 		}
 	}
 	
-	arr.related = this.getSeeAlso();
-	if (!arr.related) {
-		arr.related = [];
-	}
+	var related = this._getRelatedItems(true);
+	var reverse = this._getRelatedItemsReverse();
+	arr.related = related ? related : [];
+	arr.relatedReverse = reverse ? reverse : [];
 	
 	return arr;
 }
@@ -3391,6 +3457,196 @@ Zotero.Item.prototype._loadItemData = function() {
 	}
 	
 	this._itemDataLoaded = true;
+}
+
+
+Zotero.Item.prototype._loadRelatedItems = function() {
+	if (!this.id) {
+		return;
+	}
+		
+	if (!this._primaryDataLoaded) {
+		this.loadPrimaryData(true);
+	}
+	
+	var sql = "SELECT linkedItemID FROM itemSeeAlso WHERE itemID=?";
+	var ids = Zotero.DB.columnQuery(sql, this.id);
+	
+	this._relatedItems = [];
+	
+	if (ids) {
+		for each(var id in ids) {
+			this._relatedItems.push(Zotero.Items.get(id));
+		}
+	}
+	
+	this._relatedItemsLoaded = true;
+}
+
+
+/**
+ * Returns related items this item point to
+ *
+ * @param	bool		asIDs		Return as itemIDs
+ * @return	array					Array of itemIDs, or FALSE if none
+ */
+Zotero.Item.prototype._getRelatedItems = function (asIDs) {
+	if (!this._relatedItemsLoaded) {
+		this._loadRelatedItems();
+	}
+	
+	if (this._relatedItems.length == 0) {
+		return false;
+	}
+	
+	// Return itemIDs
+	if (asIDs) {
+		var ids = [];
+		for each(var item in this._relatedItems) {
+			ids.push(item.id);
+		}
+		return ids;
+	}
+	
+	// Return Zotero.Item objects
+	var objs = [];
+	for each(var item in this._relatedItems) {
+		objs.push(item);
+	}
+	return objs;
+}
+
+
+/**
+ * Returns related items that point to this item
+ *
+ * @return	array						Array of itemIDs, or FALSE if none
+ */
+Zotero.Item.prototype._getRelatedItemsReverse = function () {
+	if (!this.id) {
+		return false;
+	}
+	
+	var sql = "SELECT itemID FROM itemSeeAlso WHERE linkedItemID=?";
+	return Zotero.DB.columnQuery(sql, this.id);
+}
+
+
+/**
+ * Returns related items this item points to and that point to this item
+ *
+ * @return array|bool		Array of itemIDs, or false if none
+ */
+Zotero.Item.prototype._getRelatedItemsBidirectional = function () {
+	var related = this._getRelatedItems(true);
+	var reverse = this._getRelatedItemsReverse();
+	if (reverse) {
+		if (!related) {
+			return reverse;
+		}
+		
+		for each(var id in reverse) {
+			if (related.indexOf(id) == -1) {
+				related.push(id);
+			}
+		}
+	}
+	else if (!related) {
+		return false;
+	}
+	return related;
+}
+
+
+Zotero.Item.prototype._setRelatedItems = function (itemIDs) {
+	if (!this._relatedItemsLoaded) {
+		this._loadRelatedItems();
+	}
+	
+	if (itemIDs.constructor.name != 'Array') {
+		throw ('ids must be an array in Zotero.Items._setRelatedItems()');
+	}
+	
+	var currentIDs = this._getRelatedItems(true);
+	if (!currentIDs) {
+		currentIDs = [];
+	}
+	var oldIDs = []; // children being kept
+	var newIDs = []; // new children
+	
+	if (itemIDs.length == 0) {
+		if (currentIDs.length == 0) {
+			Zotero.debug('No related items added', 4);
+			return false;
+		}
+	}
+	else {
+		for (var i in itemIDs) {
+			var id = itemIDs[i];
+			var parsedInt = parseInt(id);
+			if (parsedInt != id) {
+				throw ("itemID '" + id + "' not an integer in Zotero.Item.addRelatedItem()");
+			}
+			id = parsedInt;
+			
+			if (id == this.id) {
+				Zotero.debug("Can't relate item to itself in Zotero.Item._setRelatedItems()", 2);
+				continue;
+			}
+			
+			if (currentIDs.indexOf(id) != -1) {
+				Zotero.debug("Item " + this.id + " is already related to item " + id);
+				oldIDs.push(id);
+				continue;
+			}
+			
+			var item = Zotero.Items.get(id);
+			if (!item) {
+				throw ("Can't relate item to invalid item " + id
+					+ " in Zotero.Item._setRelatedItems()");
+			}
+			/*
+			var otherCurrent = item.relatedItems;
+			if (otherCurrent.length && otherCurrent.indexOf(this.id) != -1) {
+				Zotero.debug("Other item " + id + " already related to item "
+					+ this.id + " in Zotero.Item._setRelatedItems()");
+				return false;
+			}
+			*/
+			
+			newIDs.push(id);
+		}
+	}
+	
+	// Mark as changed if new or removed ids
+	if (newIDs.length > 0 || oldIDs.length != currentIDs.length) {
+		this._prepFieldChange('relatedItems');
+	}
+	else {
+		Zotero.debug('Related items not changed in Zotero.Item._setRelatedItems()', 4);
+		return false;
+	}
+	
+	newIDs = oldIDs.concat(newIDs);
+	this._relatedItems = [];
+	for each(var itemID in newIDs) {
+		this._relatedItems.push(Zotero.Items.get(itemID));
+	}
+	return true;
+}
+
+
+// TODO: use for stuff other than related items
+Zotero.Item.prototype._prepFieldChange = function (field) {
+	if (!this._changed) {
+		this._changed = {};
+	}
+	this._changed[field] = true;
+	
+	// Save a copy of the data before changing
+	if (this.id && this.exists() && !this._previousData) {
+		this._previousData = this.serialize();
+	}
 }
 
 

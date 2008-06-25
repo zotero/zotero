@@ -167,64 +167,6 @@ Zotero.Tag.prototype.getLinkedItems = function (asIDs) {
 }
 
 
-Zotero.Tag.prototype._setLinkedItems = function (itemIDs) {
-	if (!this._linkedItemsLoaded) {
-		this._loadLinkedItems();
-	}
-	
-	if (itemIDs.constructor.name != 'Array') {
-		throw ('ids must be an array in Zotero.Tag._setLinkedItems()');
-	}
-	
-	var currentIDs = this.getLinkedItems(true);
-	if (!currentIDs) {
-		currentIDs = [];
-	}
-	var oldIDs = []; // children being kept
-	var newIDs = []; // new children
-	
-	if (itemIDs.length == 0) {
-		if (currentIDs.length == 0) {
-			Zotero.debug('No linked items added', 4);
-			return false;
-		}
-	}
-	else {
-		for (var i in itemIDs) {
-			var id = parseInt(itemIDs[i]);
-			if (isNaN(id)) {
-				throw ("Invalid itemID '" + itemIDs[i]
-					+ "' in Zotero.Tag._setLinkedItems()");
-			}
-			
-			if (currentIDs.indexOf(id) != -1) {
-				Zotero.debug("Item " + itemIDs[i]
-					+ " is already linked to tag " + this.id);
-				oldIDs.push(id);
-				continue;
-			}
-			
-			newIDs.push(id);
-		}
-	}
-	
-	// Mark as changed if new or removed ids
-	if (newIDs.length > 0 || oldIDs.length != currentIDs.length) {
-		this._prepFieldChange('linkedItems');
-	}
-	else {
-		Zotero.debug('Linked items not changed in Zotero.Tag._setLinkedItems()', 4);
-		return false;
-	}
-	
-	newIDs = oldIDs.concat(newIDs);
-	
-	var items = Zotero.Items.get(itemIDs);
-	this._linkedItems = items ? items : [];
-	return true;
-}
-
-
 Zotero.Tag.prototype.addItem = function (itemID) {
 	var current = this.getLinkedItems(true);
 	if (current && current.indexOf(itemID) != -1) {
@@ -521,6 +463,64 @@ Zotero.Tag.prototype._loadLinkedItems = function() {
 	}
 	
 	this._linkedItemsLoaded = true;
+}
+
+
+Zotero.Tag.prototype._setLinkedItems = function (itemIDs) {
+	if (!this._linkedItemsLoaded) {
+		this._loadLinkedItems();
+	}
+	
+	if (itemIDs.constructor.name != 'Array') {
+		throw ('ids must be an array in Zotero.Tag._setLinkedItems()');
+	}
+	
+	var currentIDs = this.getLinkedItems(true);
+	if (!currentIDs) {
+		currentIDs = [];
+	}
+	var oldIDs = []; // children being kept
+	var newIDs = []; // new children
+	
+	if (itemIDs.length == 0) {
+		if (currentIDs.length == 0) {
+			Zotero.debug('No linked items added', 4);
+			return false;
+		}
+	}
+	else {
+		for (var i in itemIDs) {
+			var id = parseInt(itemIDs[i]);
+			if (isNaN(id)) {
+				throw ("Invalid itemID '" + itemIDs[i]
+					+ "' in Zotero.Tag._setLinkedItems()");
+			}
+			
+			if (currentIDs.indexOf(id) != -1) {
+				Zotero.debug("Item " + itemIDs[i]
+					+ " is already linked to tag " + this.id);
+				oldIDs.push(id);
+				continue;
+			}
+			
+			newIDs.push(id);
+		}
+	}
+	
+	// Mark as changed if new or removed ids
+	if (newIDs.length > 0 || oldIDs.length != currentIDs.length) {
+		this._prepFieldChange('linkedItems');
+	}
+	else {
+		Zotero.debug('Linked items not changed in Zotero.Tag._setLinkedItems()', 4);
+		return false;
+	}
+	
+	newIDs = oldIDs.concat(newIDs);
+	
+	var items = Zotero.Items.get(itemIDs);
+	this._linkedItems = items ? items : [];
+	return true;
 }
 
 

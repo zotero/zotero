@@ -42,15 +42,12 @@
 					<![CDATA[
 						var r = "";
 					
-						if(this.item)
-						{
-							var seealso = this.item.getSeeAlso();
-							if(seealso)
-							{
-								seealso = Zotero.Items.get(seealso);
-								for(var i = 0; i < seealso.length; i++)
-								{
-									r = r + seealso[i].getField('title') + ", ";
+						if (this.item) {
+							var related = this.item.relatedItemsBidirectional;
+							if (related) {
+								related = Zotero.Items.get(related);
+								for(var i = 0; i < related.length; i++) {
+									r = r + related[i].getField('title') + ", ";
 								}
 								r = r.substr(0,r.length-2);
 							}
@@ -67,20 +64,16 @@
 						while(rows.hasChildNodes())
 							rows.removeChild(rows.firstChild);
 						
-						if(this.item)
-						{
-							var seealso = this.item.getSeeAlso();
-							
-							if(seealso)
-							{
-								seealso = Zotero.Items.get(seealso);
-								for(var i = 0; i < seealso.length; i++)
-								{
+						if (this.item) {
+							var related = this.item.relatedItemsBidirectional;
+							if (related) {
+								related = Zotero.Items.get(related);
+								for (var i = 0; i < related.length; i++) {
 									var icon= document.createElement("image");
-									var type = Zotero.ItemTypes.getName(seealso[i].getType());
+									var type = Zotero.ItemTypes.getName(related[i].itemTypeID);
 									if (type=='attachment')
 									{
-										switch (seealso[i].getAttachmentLinkMode())
+										switch (related[i].getAttachmentLinkMode())
 										{
 											case Zotero.Attachments.LINK_MODE_LINKED_URL:
 												type += '-web-link';
@@ -102,12 +95,13 @@
 									icon.setAttribute('src','chrome://zotero/skin/treeitem-' + type + '.png');
 							
 									var label = document.createElement("label");
-									label.setAttribute('value', seealso[i].getField('title'));
+									label.setAttribute('value', related[i].getField('title'));
 									label.setAttribute('crop','end');
 									label.setAttribute('flex','1');
 									
 									var box = document.createElement('box');
-									box.setAttribute('onclick',"this.parentNode.parentNode.parentNode.parentNode.parentNode.showItem('"+seealso[i].getID()+"')");
+									box.setAttribute('onclick',
+										"document.getBindingParent(this).showItem('" + related[i].id + "')");
 									box.setAttribute('class','zotero-clicky');
 									box.setAttribute('flex','1');
 									box.appendChild(icon);
@@ -115,16 +109,17 @@
 					
 									var remove = document.createElement("label");
 									remove.setAttribute('value','-');
-									remove.setAttribute('onclick',"this.parentNode.parentNode.parentNode.parentNode.parentNode.remove('"+seealso[i].getID()+"');");
+									remove.setAttribute('onclick',
+										"document.getBindingParent(this).remove('" + related[i].id + "');");
 									remove.setAttribute('class','zotero-clicky');
 							
 									var row = document.createElement("row");
 									row.appendChild(box);
 									row.appendChild(remove);
-									row.setAttribute('id','seealso-'+seealso[i].getID());
+									row.setAttribute('id', 'seealso-' + related[i].id);
 									rows.appendChild(row);		
 								}
-								this.updateCount(seealso.length);
+								this.updateCount(related.length);
 							}
 							else
 							{
@@ -146,8 +141,9 @@
 						{
 							for(var i = 0; i < io.dataOut.length; i++)
 							{
-								this.item.addSeeAlso(io.dataOut[i]);
+								this.item.addRelatedItem(io.dataOut[i]);
 							}
+							this.item.save();
 						}
 					]]>
 				</body>
@@ -156,12 +152,15 @@
 				<parameter name="id"/>
 				<body>
 					<![CDATA[
-						if(id)
-						{
-							this.item.removeSeeAlso(id);
-							var rows = this.id('seeAlsoRows');
-							rows.removeChild(this.id('seealso-'+id));
-							this.updateCount();
+						if(id) {
+							// TODO: set attribute on reload to determine
+							// which of these is necessary
+							this.item.removeRelatedItem(id);
+							this.item.save();
+							
+							var item = Zotero.Items.get(id);
+							item.removeRelatedItem(this.item.id);
+							item.save();
 						}
 					]]>
 				</body>
@@ -206,13 +205,8 @@
 				<parameter name="count"/>
 				<body>
 					<![CDATA[
-						if(count == null)
-						{
-							var seealso = this.item.getSeeAlso();
-							if(seealso)
-								count = seealso.length;
-							else
-								count = 0;
+						if (count == null) {
+							var count = this.item.relatedItemsBidirectional.length;
 						}
 						
 						var str = 'pane.item.related.count.';
