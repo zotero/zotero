@@ -2120,49 +2120,48 @@ Zotero.Item.prototype.getFile = function(row, skipExistsCheck) {
 	}
 	
 	if (!row) {
-		var sql = "SELECT linkMode, path FROM itemAttachments WHERE itemID="
-			+ this.id;
-		var row = Zotero.DB.rowQuery(sql);
+		var sql = "SELECT linkMode, path FROM itemAttachments WHERE itemID=?"
+		var row = Zotero.DB.rowQuery(sql, this.id);
 	}
 	
 	if (!row) {
-		throw ('Attachment data not found for item ' + this.id
-			+ ' in getFile()');
+		throw ('Attachment data not found for item ' + this.id + ' in getFile()');
 	}
 	
 	// No associated files for linked URLs
-	if (row['linkMode']==Zotero.Attachments.LINK_MODE_LINKED_URL) {
+	if (row.linkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) {
 		return false;
 	}
 	
-	var file = Components.classes["@mozilla.org/file/local;1"].
-		createInstance(Components.interfaces.nsILocalFile);
-	
-	if (row['linkMode']==Zotero.Attachments.LINK_MODE_IMPORTED_URL ||
-			row['linkMode']==Zotero.Attachments.LINK_MODE_IMPORTED_FILE) {
+	if (row.linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_URL ||
+			row.linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_FILE) {
 		try {
-			var storageDir = Zotero.getStorageDirectory();
-			storageDir.QueryInterface(Components.interfaces.nsILocalFile);
-			file.setRelativeDescriptor(storageDir, row['path']);
+			if (row.path.indexOf("storage:") == -1) {
+				Zotero.debug("Invalid attachment path '" + row.path + "'");
+				throw ('Invalid path');
+			}
+			// Strip "storage:"
+			var path = row.path.substr(8);
+			var file = Zotero.Attachments.getStorageDirectory(this.id);
+			file.append(path);
 			if (!file.exists()) {
-				throw('Invalid relative descriptor');
+				Zotero.debug("Attachment file '" + path + "' not found");
+				throw ('File not found');
 			}
 		}
 		catch (e) {
 			// See if this is a persistent path
 			// (deprecated for imported attachments)
-			Zotero.debug('Invalid relative descriptor -- trying persistent');
+			Zotero.debug('Trying as persistent descriptor');
 			try {
-				file.persistentDescriptor = row['path'];
-				
-				var storageDir = Zotero.getStorageDirectory();
-				storageDir.QueryInterface(Components.interfaces.nsILocalFile);
-				var path = file.getRelativeDescriptor(storageDir);
+				var file = Components.classes["@mozilla.org/file/local;1"].
+					createInstance(Components.interfaces.nsILocalFile);
+				file.persistentDescriptor = row.path;
 				
 				// If valid, convert this to a relative descriptor
 				if (file.exists()) {
 					Zotero.DB.query("UPDATE itemAttachments SET path=? WHERE itemID=?",
-						[path, this.id]);
+						["storage:" + file.leafName, this.id]);
 				}
 			}
 			catch (e) {
@@ -2171,16 +2170,19 @@ Zotero.Item.prototype.getFile = function(row, skipExistsCheck) {
 		}
 	}
 	else {
+		var file = Components.classes["@mozilla.org/file/local;1"].
+			createInstance(Components.interfaces.nsILocalFile);
+		
 		try {
-			file.persistentDescriptor = row['path'];
+			file.persistentDescriptor = row.path;
 		}
 		catch (e) {
 			// See if this is an old relative path (deprecated)
 			Zotero.debug('Invalid persistent descriptor -- trying relative');
 			try {
-				var refDir = (row['linkMode']==this.LINK_MODE_LINKED_FILE)
+				var refDir = (row.linkMode == this.LINK_MODE_LINKED_FILE)
 					? Zotero.getZoteroDirectory() : Zotero.getStorageDirectory();
-				file.setRelativeDescriptor(refDir, row['path']);
+				file.setRelativeDescriptor(refDir, row.path);
 				// If valid, convert this to a persistent descriptor
 				if (file.exists()) {
 					Zotero.DB.query("UPDATE itemAttachments SET path=? WHERE itemID=?",
@@ -2229,7 +2231,7 @@ Zotero.Item.prototype.renameAttachmentFile = function(newName, overwrite) {
 			return -1;
 		}
 		
-		file.moveTo(file.parent, newName);
+		file.moveTo(null, newName);
 		this.relinkAttachmentFile(file);
 		
 		return true;

@@ -393,7 +393,7 @@ Zotero.Fulltext = new function(){
 		}
 		
 		var item = Zotero.Items.get(itemID);
-		var linkMode = item.getAttachmentLinkMode();
+		var linkMode = item.attachmentLinkMode;
 		// If file is stored outside of Zotero, create a directory for the item
 		// in the storage directory and save the cache file there
 		if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
@@ -644,8 +644,7 @@ Zotero.Fulltext = new function(){
 	 * Gets the number of pages from the PDF info cache file
 	 */
 	function getTotalPagesFromFile(itemID) {
-		var item = Zotero.Items.get(itemID);
-		var file = Zotero.Attachments.getStorageDirectory(item.getID());
+		var file = Zotero.Attachments.getStorageDirectory(itemID);
 		file.append(this.pdfInfoCacheFile);
 		if (!file.exists()) {
 			return false;
@@ -1029,8 +1028,7 @@ Zotero.Fulltext = new function(){
 	
 	
 	function _getItemCacheFile(itemID) {
-		var cacheFile = Zotero.getStorageDirectory();
-		cacheFile.append(itemID);
+		var cacheFile = Zotero.Attachments.getStorageDirectory(itemID);
 		cacheFile.append(self.pdfConverterCacheFile);
 		return cacheFile;
 	}

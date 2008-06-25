@@ -36,7 +36,9 @@ Zotero.Attachments = new function(){
 	this.createMissingAttachment = createMissingAttachment;
 	this.getFileBaseNameFromItem = getFileBaseNameFromItem;
 	this.createDirectoryForItem = createDirectoryForItem;
+	this.createDirectoryForMissingItem = createDirectoryForMissingItem;
 	this.getStorageDirectory = getStorageDirectory;
+	this.getMissingStorageDirectory = getMissingStorageDirectory;
 	this.getPath = getPath;
 	
 	var self = this;
@@ -56,6 +58,7 @@ Zotero.Attachments = new function(){
 			attachmentItem.setSource(sourceItemID);
 			attachmentItem.attachmentLinkMode = this.LINK_MODE_IMPORTED_FILE;
 			var itemID = attachmentItem.save();
+			attachmentItem = Zotero.Items.get(itemID);
 			
 			// Create directory for attachment files within storage directory
 			var destDir = this.createDirectoryForItem(itemID);
@@ -85,10 +88,9 @@ Zotero.Attachments = new function(){
 			
 			try {
 				// Clean up
-				if (itemID){
-					var itemDir = Zotero.getStorageDirectory();
-					itemDir.append(itemID);
-					if (itemDir.exists()){
+				if (itemID) {
+					var itemDir = this.getStorageDirectory(itemID);
+					if (itemDir.exists()) {
 						itemDir.remove(true);
 					}
 				}
@@ -138,15 +140,17 @@ Zotero.Attachments = new function(){
 			// create a proper item, but at the moment this is only called by
 			// translate.js, which sets the metadata fields itself
 			var itemID = attachmentItem.save();
+			attachmentItem = Zotero.Items.get(itemID)
+			var attachmentKey = attachmentItem.key;
 			
 			var storageDir = Zotero.getStorageDirectory();
-			file.parent.copyTo(storageDir, itemID);
+			file.parent.copyTo(storageDir, attachmentKey);
 			
 			// Point to copied file
 			var newFile = Components.classes["@mozilla.org/file/local;1"]
 							.createInstance(Components.interfaces.nsILocalFile);
 			newFile.initWithFile(storageDir);
-			newFile.append(itemID);
+			newFile.append(attachmentKey);
 			newFile.append(file.leafName);
 			
 			attachmentItem.path = this.getPath(newFile, this.LINK_MODE_IMPORTED_URL);
@@ -162,10 +166,9 @@ Zotero.Attachments = new function(){
 			
 			try {
 				// Clean up
-				if (itemID){
-					var itemDir = Zotero.getStorageDirectory();
-					itemDir.append(itemID);
-					if (itemDir.exists()){
+				if (itemID) {
+					var itemDir = this.getStorageDirectory(itemID);
+					if (itemDir.exists()) {
 						itemDir.remove(true);
 					}
 				}
@@ -260,6 +263,7 @@ Zotero.Attachments = new function(){
 					attachmentItem.attachmentLinkMode = Zotero.Attachments.LINK_MODE_IMPORTED_URL;
 					attachmentItem.attachmentMIMEType = mimeType;
 					var itemID = attachmentItem.save();
+					attachmentItem = Zotero.Items.get(itemID);
 					
 					// Add to collections
 					if (parentCollectionIDs){
@@ -280,8 +284,6 @@ Zotero.Attachments = new function(){
 					
 					wbp.progressListener = new Zotero.WebProgressFinishListener(function(){
 						try {
-							var attachmentItem = Zotero.Items.get(itemID);
-							
 							var str = Zotero.File.getSample(file);
 							if (mimeType == 'application/pdf' &&
 									Zotero.MIME.sniffForMIMEType(str) != 'application/pdf') {
@@ -291,9 +293,10 @@ Zotero.Attachments = new function(){
 								return;
 							}
 							
-							attachmentItem.attachmentPath = Zotero.Attachments.getPath(
-								file, Zotero.Attachments.LINK_MODE_IMPORTED_URL, itemID
-							);
+							attachmentItem.attachmentPath =
+								Zotero.Attachments.getPath(
+									file, Zotero.Attachments.LINK_MODE_IMPORTED_URL
+								);
 							attachmentItem.save();
 							
 							Zotero.Notifier.trigger('add', 'item', itemID);
@@ -337,10 +340,9 @@ Zotero.Attachments = new function(){
 					try {
 						// Clean up
 						if (itemID) {
-							var destDir = Zotero.getStorageDirectory();
-							destDir.append(itemID);
-							if (destDir.exists()) {
-								destDir.remove(true);
+							var itemDir = this.getStorageDirectory(itemID);
+							if (itemDir.exists()) {
+								itemDir.remove(true);
 							}
 						}
 					}
@@ -538,8 +540,9 @@ Zotero.Attachments = new function(){
 				wpdDOMSaver.init(file.path, document);
 				wpdDOMSaver.saveHTMLDocument();
 				
-				var path = this.getPath(file, Zotero.Attachments.LINK_MODE_IMPORTED_URL, itemID);
-				attachmentItem.attachmentPath = path;
+				attachmentItem.attachmentPath = this.getPath(
+					file, Zotero.Attachments.LINK_MODE_IMPORTED_URL
+				);
 				attachmentItem.save();
 			}
 			else {
@@ -555,8 +558,10 @@ Zotero.Attachments = new function(){
 				var nsIURL = ioService.newURI(url, null, null);
 				wbp.progressListener = new Zotero.WebProgressFinishListener(function () {
 					try {
-						var path = this.getPath(file, Zotero.Attachments.LINK_MODE_IMPORTED_URL, itemID);
-						attachmentItem.attachmentPath = path;
+						attachmentItem.attachmentPath = this.getPath(
+							file,
+							Zotero.Attachments.LINK_MODE_IMPORTED_URL
+						);
 						attachmentItem.save();
 						
 						Zotero.Notifier.trigger('add', 'item', itemID);
@@ -618,10 +623,9 @@ Zotero.Attachments = new function(){
 			try {
 				// Clean up
 				if (itemID) {
-					var destDir = Zotero.getStorageDirectory();
-					destDir.append(itemID);
-					if (destDir.exists()) {
-						destDir.remove(true);
+					var itemDir = this.getStorageDirectory(itemID);
+					if (itemDir.exists()) {
+						itemDir.remove(true);
 					}
 				}
 			}
@@ -886,6 +890,8 @@ Zotero.Attachments = new function(){
 	
 	/*
 	 * Create directory for attachment files within storage directory
+	 *
+	 * @param	integer		itemID		Item id
 	 */
 	function createDirectoryForItem(itemID) {
 		var dir = this.getStorageDirectory(itemID);
@@ -896,9 +902,35 @@ Zotero.Attachments = new function(){
 	}
 	
 	
+	/*
+	 * Create directory for missing attachment files within storage directory
+	 *
+	 * @param	string	key		Item secondary lookup key
+	 */
+	function createDirectoryForMissingItem(key) {
+		var dir = this.getMissingStorageDirectory(key);
+		if (!dir.exists()) {
+			dir.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0755);
+		}
+		return dir;
+	}
+	
+	
 	function getStorageDirectory(itemID) {
+		var item = Zotero.Items.get(itemID);
 		var dir = Zotero.getStorageDirectory();
-		dir.append(itemID);
+		dir.append(item.key);
+		return dir;
+	}
+	
+	
+	function getMissingStorageDirectory(key) {
+		if (typeof key != 'string' || !key.match(/^[A-Z0-9]{8}$/)) {
+			throw ('key must be an 8-character string in '
+				+ 'Zotero.Attachments.getMissingStorageDirectory()')
+		}
+		var dir = Zotero.getStorageDirectory();
+		dir.append(key);
 		return dir;
 	}
 	
@@ -906,41 +938,11 @@ Zotero.Attachments = new function(){
 	/*
 	 * Gets a relative descriptor for imported attachments and a persistent
 	 * descriptor for files outside the storage directory
-	 *
-	 * @param	int		missingItemID		Item id to use if file is missing to
-	 *										generate suitable path
 	 */
-	function getPath(file, linkMode, missingItemID) {
-		var exists = file.exists();
-		// TODO: can we get the itemID from the path?
-		if (!missingItemID && !exists) {
-			throw ('Zotero.Attachments.getPath() cannot be called on non-existent file without missingItemID');
-		}
-		
-		// If imported file doesn't exist, create one temporarily so we can get
-		// the relative path (which doesn't work on non-existent files)
-		if (!exists && (linkMode == self.LINK_MODE_IMPORTED_URL ||
-				linkMode == self.LINK_MODE_IMPORTED_FILE)) {
-			var missingFile = self.createDirectoryForItem(missingItemID);
-			missingFile.append(file.leafName);
-			missingFile.create(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0644);
-			
-			var descriptor = Zotero.Attachments.getPath(missingFile, linkMode);
-			
-			var parentDir = missingFile.parent;
-			missingFile.remove(null);
-			parentDir.remove(null);
-			
-			return descriptor;
-		}
-		
-		file.QueryInterface(Components.interfaces.nsILocalFile);
-		
+	function getPath(file, linkMode) {
 		if (linkMode == self.LINK_MODE_IMPORTED_URL ||
 				linkMode == self.LINK_MODE_IMPORTED_FILE) {
-			var storageDir = Zotero.getStorageDirectory();
-			storageDir.QueryInterface(Components.interfaces.nsILocalFile);
-			return file.getRelativeDescriptor(storageDir);
+			return 'storage:' + file.leafName;
 		}
 		
 		return file.persistentDescriptor;
@@ -1009,8 +1011,8 @@ Zotero.Attachments = new function(){
 		
 		// Get path
 		if (file) {
-			var path = Zotero.Attachments.getPath(file, linkMode, attachmentItem.id);
-			attachmentItem.attachmentPath = path;
+			attachmentItem.attachmentPath
+				= Zotero.Attachments.getPath(file, linkMode);
 		}
 		
 		attachmentItem.setSource(sourceItemID);
