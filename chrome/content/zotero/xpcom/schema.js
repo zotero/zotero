@@ -1390,11 +1390,19 @@ Zotero.Schema = new function(){
 					
 					// Items
 					Zotero.DB.query("ALTER TABLE items ADD COLUMN key TEXT");
+					
 					var items = Zotero.DB.query("SELECT itemID, itemTypeID, dateAdded FROM items");
 					var titles = Zotero.DB.query("SELECT itemID, value FROM itemData NATURAL JOIN itemDataValues WHERE fieldID BETWEEN 110 AND 112");
 					var statement = Zotero.DB.getStatement("UPDATE items SET key=? WHERE itemID=?");
 					for (var j=0, len=items.length; j<len; j++) {
 						var key = Zotero.ID.getKey();
+						if (key == 'AJ4PT6IT') {
+							j--;
+							continue;
+						}
+						else if (items[j].itemID == 123456789) {
+							key = 'AJ4PT6IT';
+						}
 						statement.bindStringParameter(0, key);
 						statement.bindInt32Parameter(1, items[j].itemID);
 						try {
@@ -1609,6 +1617,29 @@ Zotero.Schema = new function(){
 									+ '------------------------------------------------------\n'
 									+ moveReport;
 						Zotero.File.putContents(moveReportFile, moveReport);
+					}
+					
+					
+					// Migrate big integers
+					var itemIDs = Zotero.DB.columnQuery("SELECT itemID FROM items WHERE itemID>16777215");
+					for each(var oldID in itemIDs) { 
+						var newID = Zotero.ID.get('items');
+						var params = [newID, oldID];
+						Zotero.DB.query("UPDATE items SET itemID=? WHERE itemID=?", params);
+						Zotero.DB.query("UPDATE annotations SET itemID=? WHERE itemID=?", params);
+						Zotero.DB.query("UPDATE collectionItems SET itemID=? WHERE itemID=?", params);
+						Zotero.DB.query("UPDATE highlights SET itemID=? WHERE itemID=?", params);
+						Zotero.DB.query("UPDATE itemCreators SET itemID=? WHERE itemID=?", params);
+						Zotero.DB.query("UPDATE itemAttachments SET itemID=? WHERE itemID=?", params);
+						Zotero.DB.query("UPDATE itemAttachments SET sourceItemID=? WHERE sourceItemID=?", params);
+						Zotero.DB.query("UPDATE itemData SET itemID=? WHERE itemID=?", params);
+						Zotero.DB.query("UPDATE itemNotes SET itemID=? WHERE itemID=?", params);
+						Zotero.DB.query("UPDATE itemNotes SET sourceItemID=? WHERE sourceItemID=?", params);
+						Zotero.DB.query("UPDATE itemSeeAlso SET itemID=? WHERE itemID=?", params);
+						Zotero.DB.query("UPDATE itemSeeAlso SET linkedItemID=? WHERE linkedItemID=?", params);
+						Zotero.DB.query("UPDATE itemTags SET itemID=? WHERE itemID=?", params);
+						Zotero.DB.query("UPDATE fulltextItemWords SET itemID=? WHERE itemID=?", params);
+						Zotero.DB.query("UPDATE fulltextItems SET itemID=? WHERE itemID=?", params);
 					}
 				}
 			}
