@@ -1569,6 +1569,22 @@ Zotero.Schema = new function(){
 							continue;
 						}
 						if (keys[id]) {
+							var renameTarget = storage37.clone();
+							renameTarget.append(keys[id]);
+							if (renameTarget.exists()) {
+								if (!orphaned.exists()) {
+									orphaned.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0755);
+								}
+								var target = orphaned.clone();
+								target.append(keys[id]);
+								var newName = null;
+								if (target.exists()) {
+									target.createUnique(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0644);
+									newName = target.leafName;
+									target.remove(null);
+								}
+								renameTarget.moveTo(orphaned, newName);
+							}
 							file.moveTo(null, keys[id]);
 							moveReport += keys[id] + ' ' + id + "\n";
 						}
@@ -1576,7 +1592,15 @@ Zotero.Schema = new function(){
 							if (!orphaned.exists()) {
 								orphaned.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0755);
 							}
-							file.moveTo(orphaned, null);
+							var target = orphaned.clone();
+							target.append(file.leafName);
+							var newName = null;
+							if (target.exists()) {
+								target.createUnique(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0644);
+								newName = target.leafName;
+								target.remove(null);
+							}
+							file.moveTo(orphaned, newName);
 						}
 						movedFiles37[id] = file;
 					}
