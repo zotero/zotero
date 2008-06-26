@@ -1564,8 +1564,8 @@ Zotero.Schema = new function(){
 					while (entries.hasMoreElements()) {
 						var file = entries.getNext();
 						file.QueryInterface(Components.interfaces.nsILocalFile);
-						var id = parseInt(file.leafName); 
-						if (!file.isDirectory() || isNaN(id)) {
+						var id = parseInt(file.leafName);
+						if (!file.isDirectory() || file.leafName != id) {
 							continue;
 						}
 						if (keys[id]) {
