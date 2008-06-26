@@ -2166,6 +2166,7 @@ Zotero.Item.prototype.getFile = function(row, skipExistsCheck) {
 			}
 			catch (e) {
 				Zotero.debug('Invalid persistent descriptor');
+				return false;
 			}
 		}
 	}
@@ -2191,6 +2192,7 @@ Zotero.Item.prototype.getFile = function(row, skipExistsCheck) {
 			}
 			catch (e) {
 				Zotero.debug('Invalid relative descriptor');
+				return false;
 			}
 		}
 	}
