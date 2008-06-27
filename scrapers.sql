@@ -25740,7 +25740,7 @@ function doExport() {
 }');
 
 
-REPLACE INTO translators VALUES ('a6ee60df-1ddc-4aae-bb25-45e0537be973', '1.0.0b3.r1', '', '2008-05-05 07:45:00', '1', '100', '1', 'MARC', 'Simon Kornblith', 'marc', 
+REPLACE INTO translators VALUES ('a6ee60df-1ddc-4aae-bb25-45e0537be973', '1.0.0b3.r1', '', '2008-06-27 13:05:14', '1', '100', '1', 'MARC', 'Simon Kornblith', 'marc', 
 'function detectImport() {
 	var marcRecordRegexp = /^[0-9]{5}[a-z ]{3}$/
 	var read = Zotero.read(8);
@@ -25755,6 +25755,9 @@ var subfieldDelimiter = "\x1F";
 /*
  * CLEANING FUNCTIONS
  */
+ 
+
+ 
 
 // general purpose cleaning
 function clean(value) {
@@ -25932,6 +25935,7 @@ record.prototype.getFieldSubfields = function(tag) { // returns a two-dimensiona
 // add field to DB
 record.prototype._associateDBField = function(item, fieldNo, part, fieldName, execMe, arg1, arg2) {
 	var field = this.getFieldSubfields(fieldNo);
+	
 	Zotero.debug(''MARC: found ''+field.length+'' matches for ''+fieldNo+part);
 	if(field) {
 		for(var i in field) {
@@ -26065,6 +26069,8 @@ record.prototype.translate = function(item) {
 	this._associateDBField(item, "300", "a", "pages", pullNumber);
 	// Extract series
 	this._associateDBField(item, "440", "a", "series");
+	// Extract series number
+	this._associateDBField(item, "440", "v", "seriesNumber");
 	// Extract call number
 	this._associateDBField(item, "084", "ab", "callNumber");
 	this._associateDBField(item, "082", "a", "callNumber");
