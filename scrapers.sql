@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-06-23 17:05:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-06-29 21:10:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-06-16 21:30:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1091,7 +1091,7 @@ REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('f39dbd1c-229e-4abb-8414-a09fdbda37b7', '1.0.0b4.r5', '', '2008-06-23 14:40:53', '0', '100', '4', 'Archives Network of Alberta', 'Adam Crymble', 'http://208.38.46.62:8080/', 
+REPLACE INTO translators VALUES ('f39dbd1c-229e-4abb-8414-a09fdbda37b7', '1.0.0b4.r5', '', '2008-06-29 21:10:00', '0', '100', '4', 'Archives Network of Alberta', 'Adam Crymble', 'http://208.38.46.62:8080/', 
 'function detectWeb(doc, url) {
 	
 	var xPathH3 = doc.evaluate(''//h3'', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
@@ -1231,7 +1231,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('a29d22b3-c2e4-4cc0-ace4-6c2326144332', '1.0.0b4.r5', '', '2008-06-23 14:42:02', '0', '100', '4', 'CABI - CAB Abstracts', 'Adam Crymble', 'http://www.cabi.org/', 
+REPLACE INTO translators VALUES ('a29d22b3-c2e4-4cc0-ace4-6c2326144332', '1.0.0b4.r5', '', '2008-06-29 21:10:00', '0', '100', '4', 'CABI - CAB Abstracts', 'Adam Crymble', 'http://www.cabi.org/', 
 'function detectWeb(doc, url) {
 	if (doc.evaluate(''//div/table/tbody/tr[1]/td/a'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
@@ -5202,7 +5202,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('8082115d-5bc6-4517-a4e8-abed1b2a784a', '1.0.0b4.r5', '', '2008-06-25 10:48:30', '0', '100', '4', 'Copernicus2', 'Michael Berkowitz', 'http://www.(adv-sci-res|astrophys-space-sci-trans|atmos-chem-phys|biogeosciences(-discuss)?|clim-past|electronic-earth|hydrol-earth-syst-sci|nat-hazards-earth-syst-sci|nonlin-processes-geophys|ocean-sci|soc-geogr|surv-perspect-integr-environ-soc|the-cryosphere).net/', 
+REPLACE INTO translators VALUES ('8082115d-5bc6-4517-a4e8-abed1b2a784a', '1.0.0b4.r5', '', '2008-06-29 21:10:00', '0', '100', '4', 'Copernicus2', 'Michael Berkowitz', 'http://www.(adv-sci-res|astrophys-space-sci-trans|atmos-chem-phys|biogeosciences(-discuss)?|clim-past|electronic-earth|hydrol-earth-syst-sci|nat-hazards-earth-syst-sci|nonlin-processes-geophys|ocean-sci|soc-geogr|surv-perspect-integr-environ-soc|the-cryosphere).net/', 
 'function detectWeb(doc, url) {
 	if (doc.evaluate(''//div[@id="publisher"]/iframe'', doc, null, XPathResult.ANY_TYPE, null).iterateNext() || doc.evaluate(''//td[*[a[contains(text(), "Abstract")]]]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
@@ -25740,7 +25740,7 @@ function doExport() {
 }');
 
 
-REPLACE INTO translators VALUES ('a6ee60df-1ddc-4aae-bb25-45e0537be973', '1.0.0b3.r1', '', '2008-06-27 13:05:14', '1', '100', '1', 'MARC', 'Simon Kornblith', 'marc', 
+REPLACE INTO translators VALUES ('a6ee60df-1ddc-4aae-bb25-45e0537be973', '1.0.0b3.r1', '', '2008-06-29 21:10:00', '1', '100', '1', 'MARC', 'Simon Kornblith', 'marc', 
 'function detectImport() {
 	var marcRecordRegexp = /^[0-9]{5}[a-z ]{3}$/
 	var read = Zotero.read(8);
