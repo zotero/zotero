@@ -378,6 +378,8 @@ Zotero.Sync.Server = new function () {
 	this.logout = logout;
 	this.setSyncTimeout = setSyncTimeout;
 	this.clearSyncTimeout = clearSyncTimeout;
+	this.startSyncAnimation = startSyncAnimation;
+	this.stopSyncAnimation = stopSyncAnimation;
 	
 	this.__defineGetter__('username', function () {
 		return Zotero.Prefs.get('sync.server.username');
@@ -535,6 +537,7 @@ Zotero.Sync.Server = new function () {
 	
 	function sync() {
 		Zotero.Sync.Server.clearSyncTimeout();
+		Zotero.Sync.Server.startSyncAnimation();
 		
 		if (_attempts < 0) {
 			_error('Too many attempts in Zotero.Sync.Server.sync()');
@@ -852,6 +855,8 @@ Zotero.Sync.Server = new function () {
 			if (callback) {
 				callback();
 			}
+			
+			Zotero.Sync.Server.stopSyncAnimation();
 		});
 	}
 	
@@ -1016,6 +1021,22 @@ Zotero.Sync.Server = new function () {
 	}
 	
 	
+	function startSyncAnimation() {
+		var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+			.getService(Components.interfaces.nsIWindowMediator);
+		var win = wm.getMostRecentWindow('navigator:browser');
+		win.document.getElementById('zotero-tb-sync').setAttribute('animate', 'true');
+	}
+	
+	
+	function stopSyncAnimation() {
+		var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+			.getService(Components.interfaces.nsIWindowMediator);
+		var win = wm.getMostRecentWindow('navigator:browser');
+		win.document.getElementById('zotero-tb-sync').removeAttribute('animate');
+	}
+	
+	
 	function _checkResponse(xmlhttp) {
 		if (!xmlhttp.responseXML ||
 				!xmlhttp.responseXML.childNodes[0] ||
@@ -1053,6 +1074,8 @@ Zotero.Sync.Server = new function () {
 		if (_sessionID && _sessionLock) {
 			Zotero.Sync.Server.unlock()
 		}
+		
+		Zotero.Sync.Server.stopSyncAnimation();
 		
 		throw(e);
 	}

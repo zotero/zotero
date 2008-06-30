@@ -304,10 +304,7 @@
 			
 			<vbox id="zotero-item-pane" persist="width">
 				<toolbar align="right">
-					<toolbarbutton
-							id="zotero-tb-sync"
-							image="chrome://zotero/skin/arrow_refresh.png"
-							tooltip="_child"
+					<toolbarbutton id="zotero-tb-sync" tooltip="_child"
 							oncommand="Zotero.Sync.Server.sync()">
 						<tooltip
 								onpopupshowing="this.firstChild.nextSibling.value = 'Last sync: ' + (Zotero.Sync.Server.lastLocalSyncTime ? new Date(Zotero.Sync.Server.lastLocalSyncTime * 1000).toLocaleString() : 'Not yet synced')"
