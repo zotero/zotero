@@ -367,6 +367,7 @@ Zotero.Sync.EventListener = new function () {
  * Methods for syncing with the Zotero Server
  */
 Zotero.Sync.Server = new function () {
+	this.init = init;
 	this.login = login;
 	this.sync = sync;
 	this.lock = lock;
@@ -375,6 +376,8 @@ Zotero.Sync.Server = new function () {
 	this.resetServer = resetServer;
 	this.resetClient = resetClient;
 	this.logout = logout;
+	this.setSyncTimeout = setSyncTimeout;
+	this.clearSyncTimeout = clearSyncTimeout;
 	
 	this.__defineGetter__('username', function () {
 		return Zotero.Prefs.get('sync.server.username');
@@ -466,9 +469,15 @@ Zotero.Sync.Server = new function () {
 	var _attempts = _maxAttempts;
 	var _syncInProgress;
 	
+	var _autoSyncTimer;
 	var _apiVersionComponent = "version=" + this.apiVersion;
 	var _sessionID;
 	var _sessionLock;
+	
+	
+	function init() {
+		this.EventListener.init();
+	}
 	
 	
 	function login(callback) {
@@ -525,13 +534,15 @@ Zotero.Sync.Server = new function () {
 	
 	
 	function sync() {
+		Zotero.Sync.Server.clearSyncTimeout();
+		
 		if (_attempts < 0) {
 			_error('Too many attempts in Zotero.Sync.Server.sync()');
 		}
 		
 		if (!_sessionID) {
 			Zotero.debug("Session ID not available -- logging in");
-			this.login(Zotero.Sync.Server.sync);
+			Zotero.Sync.Server.login(Zotero.Sync.Server.sync);
 			return;
 		}
 		
@@ -852,7 +863,7 @@ Zotero.Sync.Server = new function () {
 		
 		if (!_sessionID) {
 			Zotero.debug("Session ID not available -- logging in");
-			this.login(Zotero.Sync.Server.clear);
+			Zotero.Sync.Server.login(Zotero.Sync.Server.clear);
 			return;
 		}
 		
@@ -897,7 +908,7 @@ Zotero.Sync.Server = new function () {
 		
 		if (!_sessionID) {
 			Zotero.debug("Session ID not available -- logging in");
-			this.login(Zotero.Sync.Server.resetServer);
+			Zotero.Sync.Server.login(Zotero.Sync.Server.resetServer);
 			return;
 		}
 		
@@ -975,6 +986,33 @@ Zotero.Sync.Server = new function () {
 				callback();
 			}
 		});
+	}
+	
+	
+	function setSyncTimeout() {
+		// check if server/auto-sync are enabled
+		
+		var autoSyncTimeout = 15;
+		Zotero.debug('Setting auto-sync timeout to ' + autoSyncTimeout + ' seconds');
+		
+		if (_autoSyncTimer) {
+			_autoSyncTimer.cancel();
+		}
+		else {
+			_autoSyncTimer = Components.classes["@mozilla.org/timer;1"].
+				createInstance(Components.interfaces.nsITimer);
+		}
+		
+		// {} implements nsITimerCallback
+		_autoSyncTimer.initWithCallback({ notify: Zotero.Sync.Server.sync },
+			autoSyncTimeout * 1000, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
+	}
+	
+	
+	function clearSyncTimeout() {
+		if (_autoSyncTimer) {
+			_autoSyncTimer.cancel();
+		}
 	}
 	
 	
@@ -1060,6 +1098,21 @@ Zotero.BufferedInputListener.prototype = {
 }
 
 
+Zotero.Sync.Server.EventListener = {
+	init: function () {
+		Zotero.Notifier.registerObserver(this);
+	},
+	
+	notify: function (event, type, ids, extraData) {
+		// TODO: skip others
+		if (type == 'refresh') {
+			return;
+		}
+		
+		Zotero.Sync.Server.setSyncTimeout();
+	}
+}
+
 
 
 Zotero.Sync.Server.Data = new function() {
@@ -1137,10 +1190,10 @@ Zotero.Sync.Server.Data = new function() {
 							// Merge and store related items, since CR doesn't
 							// affect related items
 							if (type == 'item') {
-								// TODO: skip conflict if only related items changed
-								
+								// Remote
 								var related = xmlNode.related.toString();
 								related = related ? related.split(' ') : [];
+								// Local
 								for each(var relID in obj.relatedItems) {
 									if (related.indexOf(relID) == -1) {
 										related.push(relID);
