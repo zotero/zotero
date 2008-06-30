@@ -16992,7 +16992,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('9c335444-a562-4f88-b291-607e8f46a9bb', '1.0.0b3.r1', '', '2006-12-15 15:11:00', 1, 100, 4, 'Berkeley Library Catalog', 'Simon Kornblith', '^https?://[^/]*berkeley.edu[^/]*/WebZ/(?:html/results.html|FETCH)\?.*sessionid=',
+REPLACE INTO translators VALUES ('9c335444-a562-4f88-b291-607e8f46a9bb', '1.0.0b3.r1', '', '2008-06-30 09:55:08', '1', '100', '4', 'Berkeley Library Catalog', 'Simon Kornblith', '^https?://[^/]*berkeley.edu[^/]*/WebZ/(?:html/results.html|FETCH)\?.*sessionid=', 
 'function detectWeb(doc, url) {
 	var resultsRegexp = /\/WebZ\/html\/results.html/i
 	if(resultsRegexp.test(url)) {
@@ -17000,7 +17000,7 @@ REPLACE INTO translators VALUES ('9c335444-a562-4f88-b291-607e8f46a9bb', '1.0.0b
 	} else {
 		return "book";
 	}
-}',
+}', 
 'function reformURL(url) {
 	return url.replace(/fmtclass=[^&]*/, "")+":fmtclass=marc";
 }
@@ -17041,19 +17041,17 @@ function doWeb(doc, url) {
 		
 		var record = new marc.record();
 		while(elmt = elmts.iterateNext()) {
-			var field = Zotero.Utilities.superCleanString(doc.evaluate(''./TD[1]/text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue);
-			var value = doc.evaluate(''./TD[2]/text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
-			
+			var field = Zotero.Utilities.superCleanString(newDoc.evaluate(''./TD[1]/text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue);
+			var value = newDoc.evaluate(''./TD[2]/text()[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
 			// remove spacing
 			value = value.replace(/^\s+/, "");
 			value = value.replace(/\s+$/, "");
-			
 			if(field == 0) {
 				record.leader = "00000"+value;
 			} else {
 				var ind = value[3]+value[5];
-				value = Zotero.Utilities.cleanString(value.substr(5)).
-						replace(/\$([a-z0-9]) /g, marc.subfieldDelimiter+"$1");
+				if (value.match(/^\d{1,2}\s{3}/)) value = Zotero.Utilities.cleanString(value.replace(/^\d{1,2}\s{3}/, ""));
+				value = value.replace(/\$([a-z0-9]) /g, marc.subfieldDelimiter+"$1");
 				if(value[0] != marc.subfieldDelimiter) {
 					value = marc.subfieldDelimiter+"a"+value;
 				}
@@ -17063,7 +17061,12 @@ function doWeb(doc, url) {
 		
 		var newItem = new Zotero.Item();
 		record.translate(newItem);
-		
+		var oldTags = newItem.tags;
+		var newTags = new Array();
+		for each (var tag in oldTags) {
+			if (newTags.indexOf(tag) == -1) newTags.push(tag)
+		}
+		newItem.tags = newTags;
 		newItem.repository = "Berkeley Library Catalog";
 		
 		newItem.complete();
