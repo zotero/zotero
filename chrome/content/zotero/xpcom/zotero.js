@@ -266,6 +266,7 @@ var Zotero = new function(){
 		Zotero.Zeroconf.init();
 		
 		Zotero.Sync.init();
+		Zotero.Sync.Server.init();
 		
 		this.initialized = true;
 		

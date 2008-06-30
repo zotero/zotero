@@ -83,6 +83,7 @@ function setTimeout(func, ms){
 	// {} implements nsITimerCallback
 	timer.initWithCallback({notify:func}, ms,
 		Components.interfaces.nsITimer.TYPE_ONE_SHOT);
+	return timer;
 }
 
 
