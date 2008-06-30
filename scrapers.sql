@@ -18166,7 +18166,7 @@ REPLACE INTO translators VALUES ('232903bc-7307-4058-bb1a-27cfe3e4e655', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('fe728bc9-595a-4f03-98fc-766f1d8d0936', '1.0.0b4.r5', '', '2008-06-23 16:45:00', '0', '100', '4', 'Wiley InterScience', 'Sean Takats and Michael Berkowitz', 'https?:\/\/(?:www3\.|www\.)?interscience\.wiley\.com[^\/]*\/(?:search\/|(cgi-bin|journal)\/[0-9]+\/abstract|journal)', 
+REPLACE INTO translators VALUES ('fe728bc9-595a-4f03-98fc-766f1d8d0936', '1.0.0b4.r5', '', '2008-06-30 12:13:10', '1', '100', '4', 'Wiley InterScience', 'Sean Takats and Michael Berkowitz', 'https?:\/\/(?:www3\.|www\.)?interscience\.wiley\.com[^\/]*\/(?:search\/|(cgi-bin|journal)\/[0-9]+\/abstract|journal)', 
 'function detectWeb(doc, url){
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -18177,27 +18177,22 @@ REPLACE INTO translators VALUES ('fe728bc9-595a-4f03-98fc-766f1d8d0936', '1.0.0b
 	if(doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
 	}
-	if (doc.evaluate(''//div[@id="contentCell"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
-		return "journalArticle";
+	if (url.match(/journal\/\d+\/(issue|home)/)) {
+		return "multiple";
 	}
-	var m = url.match(/https?:\/\/[^\/]*\/(cgi-bin|journal)(\/abstract)?\/[0-9]+(\/abstract)?/);
+	var m = url.match(/https?:\/\/[^\/]*\/(cgi-bin|journal)(\/(abstract|summary))?\/[0-9]+(\/abstract)?/);
 	if (m){
 		return "journalArticle";
 	}
 }', 
 'function doWeb(doc, url){
-	Zotero.debug(doc.location.host);
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == ''x'') return namespace; else return null;
 	} : null;
 
-	var m = url.match(/https?:\/\/[^\/]*\/journal\/([0-9]+)\/abstract/);
+	var m = url.match(/https?:\/\/[^\/]*\/(journal|cgi-bin\/summary)\/([0-9]+)\/(abstract)?/);
 	var ids = new Array();
-	/*var xpath = ''//tr[td/input[@name="ID"][@type="checkbox"]]'';
-	var elmt;
-	var elmts = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null); 
-	elmt = elmts.iterateNext();*/
 	if(detectWeb(doc, url) == "multiple") {  //search
 		var id;
 		var title;
@@ -18230,7 +18225,7 @@ REPLACE INTO translators VALUES ('fe728bc9-595a-4f03-98fc-766f1d8d0936', '1.0.0b
 		}
 		
 	} else if (m){ //single article
-		ids.push(m[1]);
+		ids.push(m[2]);
 	}
 	var hostRe = new RegExp("^http(?:s)?://[^/]+");
 	var m = hostRe.exec(doc.location.href);
