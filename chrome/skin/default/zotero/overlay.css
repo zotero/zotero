@@ -194,12 +194,18 @@
 #zotero-tb-sync {
 	margin-top: -2px;
 	margin-left: -2px;
+	margin-right: -2px;
 	list-style-image: url(chrome://zotero/skin/arrow_rotate_static.png);
 }
 
-#zotero-tb-sync[animate=true] {
+#zotero-tb-sync[status=animate] {
 	list-style-image: url(chrome://zotero/skin/arrow_rotate_animated.png);
 }
+
+#zotero-tb-sync[status=error] {
+	list-style-image: url(chrome://zotero/skin/arrow_rotate_error.png);
+}
+
 
 #zotero-tb-sync #zotero-last-sync-time
 {

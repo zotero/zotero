@@ -307,7 +307,7 @@
 					<toolbarbutton id="zotero-tb-sync" tooltip="_child"
 							oncommand="Zotero.Sync.Server.sync()">
 						<tooltip
-								onpopupshowing="this.firstChild.nextSibling.value = 'Last sync: ' + (Zotero.Sync.Server.lastLocalSyncTime ? new Date(Zotero.Sync.Server.lastLocalSyncTime * 1000).toLocaleString() : 'Not yet synced')"
+								onpopupshowing="if (Zotero.Sync.Server.lastSyncError) { this.firstChild.nextSibling.value = 'Last error: ' + Zotero.Sync.Server.lastSyncError; return; } this.firstChild.nextSibling.value = 'Last sync: ' + (Zotero.Sync.Server.lastLocalSyncTime ? new Date(Zotero.Sync.Server.lastLocalSyncTime * 1000).toLocaleString() : 'Not yet synced')"
 								noautohide="true"><!-- localize -->
 							<label value="Sync with Zotero Server"/>
 							<label id="zotero-last-sync-time"/>

@@ -378,8 +378,7 @@ Zotero.Sync.Server = new function () {
 	this.logout = logout;
 	this.setSyncTimeout = setSyncTimeout;
 	this.clearSyncTimeout = clearSyncTimeout;
-	this.startSyncAnimation = startSyncAnimation;
-	this.stopSyncAnimation = stopSyncAnimation;
+	this.setSyncIcon = setSyncIcon;
 	
 	this.__defineGetter__('username', function () {
 		return Zotero.Prefs.get('sync.server.username');
@@ -456,6 +455,12 @@ Zotero.Sync.Server = new function () {
 	this.__defineSetter__("lastLocalSyncTime", function (val) {
 		Zotero.DB.query("REPLACE INTO version VALUES ('lastlocalsync', ?)", { int: val });
 	});
+	this.__defineGetter__("lastSyncError", function () {
+		return _lastSyncError;
+	});
+	this.__defineSetter__("lastSyncError", function (val) {
+		_lastSyncError = val ? val : '';
+	});
 	
 	this.nextLocalSyncDate = false;
 	this.apiVersion = 1;
@@ -467,14 +472,14 @@ Zotero.Sync.Server = new function () {
 	
 	var _serverURL = ZOTERO_CONFIG.SYNC_URL;
 	
+	var _apiVersionComponent = "version=" + this.apiVersion;
 	var _maxAttempts = 3;
 	var _attempts = _maxAttempts;
 	var _syncInProgress;
-	
-	var _autoSyncTimer;
-	var _apiVersionComponent = "version=" + this.apiVersion;
 	var _sessionID;
 	var _sessionLock;
+	var _lastSyncError;
+	var _autoSyncTimer;
 	
 	
 	function init() {
@@ -537,7 +542,7 @@ Zotero.Sync.Server = new function () {
 	
 	function sync() {
 		Zotero.Sync.Server.clearSyncTimeout();
-		Zotero.Sync.Server.startSyncAnimation();
+		Zotero.Sync.Server.setSyncIcon('animate');
 		
 		if (_attempts < 0) {
 			_error('Too many attempts in Zotero.Sync.Server.sync()');
@@ -831,6 +836,8 @@ Zotero.Sync.Server = new function () {
 			_error('No session available in Zotero.Sync.Server.unlock()');
 		}
 		
+		var syncInProgress = _syncInProgress;
+		
 		var url = _serverURL + "unlock";
 		var body = _apiVersionComponent
 					+ '&' + Zotero.Sync.Server.sessionIDComponent;
@@ -856,7 +863,11 @@ Zotero.Sync.Server = new function () {
 				callback();
 			}
 			
-			Zotero.Sync.Server.stopSyncAnimation();
+			// Reset sync icon and last error
+			if (syncInProgress) {
+				Zotero.Sync.Server.lastSyncError = '';
+				Zotero.Sync.Server.setSyncIcon();
+			}
 		});
 	}
 	
@@ -1021,19 +1032,23 @@ Zotero.Sync.Server = new function () {
 	}
 	
 	
-	function startSyncAnimation() {
+	function setSyncIcon(status) {
+		status = status ? status : '';
+		
+		switch (status) {
+			case '':
+			case 'animate':
+			case 'error':
+				break;
+			
+		default:
+			throw ("Invalid sync icon status '" + status + "' in Zotero.Sync.Server.setSyncIcon()");
+		}
+		
 		var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
 			.getService(Components.interfaces.nsIWindowMediator);
 		var win = wm.getMostRecentWindow('navigator:browser');
-		win.document.getElementById('zotero-tb-sync').setAttribute('animate', 'true');
-	}
-	
-	
-	function stopSyncAnimation() {
-		var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-			.getService(Components.interfaces.nsIWindowMediator);
-		var win = wm.getMostRecentWindow('navigator:browser');
-		win.document.getElementById('zotero-tb-sync').removeAttribute('animate');
+		win.document.getElementById('zotero-tb-sync').setAttribute('status', status);
 	}
 	
 	
@@ -1075,8 +1090,14 @@ Zotero.Sync.Server = new function () {
 			Zotero.Sync.Server.unlock()
 		}
 		
-		Zotero.Sync.Server.stopSyncAnimation();
+		Zotero.Sync.Server.setSyncIcon('error');
 		
+		if (e.name) {
+			Zotero.Sync.Server.lastSyncError = e.name;
+		}
+		else {
+			Zotero.Sync.Server.lastSyncError = e;
+		}
 		throw(e);
 	}
 }
