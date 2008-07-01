@@ -380,14 +380,24 @@ Zotero.Sync.Server = new function () {
 	this.clearSyncTimeout = clearSyncTimeout;
 	this.setSyncIcon = setSyncIcon;
 	
+	this.__defineGetter__('enabled', function () {
+		return this.username && this.password;
+	});
+	
 	this.__defineGetter__('username', function () {
 		return Zotero.Prefs.get('sync.server.username');
 	});
 	
 	this.__defineGetter__('password', function () {
-		if (!this.username) {
+		var username = this.username;
+
+		if (!username) {
 			Zotero.debug('Username not set before setting Zotero.Sync.Server.password');
 			return '';
+		}
+		
+		if (_cachedCredentials[username]) {
+			return _cachedCredentials[username];
 		}
 		
 		Zotero.debug('Getting Zotero sync password');
@@ -397,7 +407,8 @@ Zotero.Sync.Server = new function () {
 		
 		// Find user from returned array of nsILoginInfo objects
 		for (var i = 0; i < logins.length; i++) {
-			if (logins[i].username == this.username) {
+			if (logins[i].username == username) {
+				_cachedCredentials[username] = logins[i].password;
 				return logins[i].password;
 			}
 		}
@@ -408,10 +419,14 @@ Zotero.Sync.Server = new function () {
 	this.__defineSetter__('password', function (password) {
 		_sessionID = null;
 		
-		if (!this.username) {
+		var username = this.username;
+		
+		if (!username) {
 			Zotero.debug('Username not set before setting Zotero.Sync.Server.password');
 			return;
 		}
+		
+		delete _cachedCredentials[username];
 		
 		if (!password) {
 			Zotero.debug('Password empty setting Zotero.Sync.Server.password');
@@ -435,8 +450,9 @@ Zotero.Sync.Server = new function () {
 			
 			Zotero.debug('Setting Zotero sync password');
 			var loginInfo = new nsLoginInfo(_loginManagerHost, _loginManagerURL,
-				null, this.username, password, "", "");
+				null, username, password, "", "");
 			loginManager.addLogin(loginInfo);
+			_cachedCredentials[username] = password;
 		}
 	});
 	
@@ -475,6 +491,7 @@ Zotero.Sync.Server = new function () {
 	var _apiVersionComponent = "version=" + this.apiVersion;
 	var _maxAttempts = 3;
 	var _attempts = _maxAttempts;
+	var _cachedCredentials = {};
 	var _syncInProgress;
 	var _sessionID;
 	var _sessionLock;
@@ -1153,7 +1170,9 @@ Zotero.Sync.Server.EventListener = {
 			return;
 		}
 		
-		Zotero.Sync.Server.setSyncTimeout();
+		if (Zotero.Prefs.get('sync.server.autoSync') && Zotero.Sync.Server.enabled) {
+			Zotero.Sync.Server.setSyncTimeout();
+		}
 	}
 }
 
@@ -1292,6 +1311,12 @@ Zotero.Sync.Server.Data = new function() {
 								if (type != 'item') {
 									alert('Reconciliation unimplemented for ' + types);
 									throw ('Reconciliation unimplemented for ' + types);
+								}
+								
+								if (obj.isAttachment()) {
+									var msg = "Reconciliation unimplemented for attachment items";
+									alert(msg);
+									throw(msg);
 								}
 								
 								// TODO: order reconcile by parent/child?
