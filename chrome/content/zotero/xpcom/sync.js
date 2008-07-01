@@ -381,6 +381,12 @@ Zotero.Sync.Server = new function () {
 	this.setSyncIcon = setSyncIcon;
 	
 	this.__defineGetter__('enabled', function () {
+		// Set auto-sync expiry
+		var expiry = new Date("September 1, 2008 00:00:00");
+		if (new Date() > expiry) {
+			return false;
+		}
+		
 		return this.username && this.password;
 	});
 	
