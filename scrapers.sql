@@ -23757,7 +23757,7 @@ function doExport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('9cb70025-a888-4a29-a210-93ec52da40d4', '1.0.0b4.r1', '', '2008-05-20 06:00:00', '1', '200', '3', 'BibTeX', 'Simon Kornblith', 'bib', 
+REPLACE INTO translators VALUES ('9cb70025-a888-4a29-a210-93ec52da40d4', '1.0.0b4.r1', '', '2008-07-01 14:30:13', '1', '200', '3', 'BibTeX', 'Simon Kornblith', 'bib', 
 'Zotero.configure("dataMode", "block");
 Zotero.addOption("UTF8", true);
 
@@ -25348,7 +25348,9 @@ function processField(item, field, value) {
 		}
 	} else if (field == "comment") {
 		item.notes.push({note:value});
-	}
+	} else if(field == "pdf") { // new code to handle PDF import. absolute file path should be specified in bibtex
+        item.attachments = [{url:"file://"+value, mimeType:"application/pdf"}];
+    }
 }
 
 function getFieldValue(read) {
