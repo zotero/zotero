@@ -7661,7 +7661,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('9e306d5d-193f-44ae-9dd6-ace63bf47689', '1.0.0b3r1', '', '2008-06-23 16:45:00', '1', '100', '4', 'IngentaConnect', 'Michael Berkowitz', 'http://(www.)?ingentaconnect.com', 
+REPLACE INTO translators VALUES ('9e306d5d-193f-44ae-9dd6-ace63bf47689', '1.0.0b3r1', '', '2008-07-01 13:29:36', '1', '100', '4', 'IngentaConnect', 'Michael Berkowitz', 'http://(www.)?ingentaconnect.com', 
 'function detectWeb(doc, url) {
 	if (url.indexOf("article?") != -1 || url.indexOf("article;") != -1 || url.indexOf("/art") != -1) {
 		return "journalArticle";
@@ -7686,24 +7686,28 @@ REPLACE INTO translators VALUES ('9e306d5d-193f-44ae-9dd6-ace63bf47689', '1.0.0b
 	} else {
 		articles = [url];
 	}
+	Zotero.debug(articles);
 	Zotero.Utilities.processDocuments(articles, function(newDoc) {
 		var risurl = newDoc.evaluate(''//div[@id="export-formats"]/ul/li/a[@title="EndNote Export"]'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().href;
-		var abs = Zotero.Utilities.trimInternal(newDoc.evaluate(''//div[@id="abstract"]'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent).substr(10);
-		var keywords = newDoc.evaluate(''//div[@id="info"]/p[1]/a'', newDoc, null, XPathResult.ANY_TYPE, null);
-		var key;
-		var keys = new Array();
-		while (key = keywords.iterateNext()) {
-			keys.push(Zotero.Utilities.capitalizeTitle(key.textContent));
+		if (newDoc.evaluate(''//div[@id="abstract"]'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext()) var abs = Zotero.Utilities.trimInternal(newDoc.evaluate(''//div[@id="abstract"]'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent).substr(10);
+		if (newDoc.evaluate(''//div[@id="info"]/p[1]/a'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+			var keywords = newDoc.evaluate(''//div[@id="info"]/p[1]/a'', newDoc, null, XPathResult.ANY_TYPE, null);
+			var key;
+			var keys = new Array();
+			while (key = keywords.iterateNext()) {
+				keys.push(Zotero.Utilities.capitalizeTitle(key.textContent));
+			}
 		}
 		Zotero.Utilities.HTTP.doGet(risurl, function(text) {
 			text = text.replace(/(PY\s+\-\s+)\/+/, "$1");
+			text = text.replace(/ER\s\s\-/, "") + "\nER  - ";
 			var translator = Zotero.loadTranslator("import");
 			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 			translator.setString(text);
 			translator.setHandler("itemDone", function(obj, item) {
-				item.abstractNote = abs;
+				if (abs) item.abstractNote = abs;
 				item.attachments = [{url:item.url, title:"IngentaConnect Snapshot", mimeType:"text/html"}];
-				item.tags = keys;
+				if (keys) item.tags = keys;
 				if (item.DOI) {
 					if (item.DOI.match(/doi/)) {
 						item.DOI = item.DOI.substr(4);
