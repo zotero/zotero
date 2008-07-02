@@ -434,11 +434,6 @@ Zotero.Sync.Server = new function () {
 		
 		delete _cachedCredentials[username];
 		
-		if (!password) {
-			Zotero.debug('Password empty setting Zotero.Sync.Server.password');
-			return;
-		}
-		
 		var loginManager = Components.classes["@mozilla.org/login-manager;1"]
 								.getService(Components.interfaces.nsILoginManager);
 		
