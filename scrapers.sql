@@ -20211,7 +20211,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('594ebe3c-90a0-4830-83bc-9502825a6810', '1.0.0b4.r5', '', '2008-03-21 15:30:00', '1', '100', '4', 'ISI Web of Knowledge', 'Michael Berkowitz', '(WOS_GeneralSearch|product=WOS)', 
+REPLACE INTO translators VALUES ('594ebe3c-90a0-4830-83bc-9502825a6810', '1.0.0b4.r5', '', '2008-07-02 15:28:12', '1', '100', '4', 'ISI Web of Knowledge', 'Michael Berkowitz', '(WOS_GeneralSearch|product=WOS)', 
 'function detectWeb(doc, url) {
 	if (doc.title.indexOf("Web of Science Results") != -1) {
 		return "multiple";
@@ -20225,11 +20225,9 @@ REPLACE INTO translators VALUES ('594ebe3c-90a0-4830-83bc-9502825a6810', '1.0.0b
 		var items = new Object;
 		var xpath = ''//a[@class="smallV110"]'';
 		var titles = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
-		var next_title = titles.iterateNext();
-		while (next_title) {
-			var id = doc.evaluate(''.//@onclick'', next_title, null, XPathResult.ANY_TYPE, null).iterateNext().value.match(/\?([^'']+)''/)[1];
-			items[id] = next_title.textContent;
-			next_title = titles.iterateNext();
+		var next_title;
+		while (next_title = titles.iterateNext()) {
+			items[next_title.href.match(/\?(.*)/)[1]] = next_title.textContent;
 		}
 		items = Zotero.selectItems(items);
 		for (var i in items) {
