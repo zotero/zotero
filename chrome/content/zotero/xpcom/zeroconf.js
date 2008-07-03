@@ -47,6 +47,9 @@ Zotero.Zeroconf = new function () {
 		if (!Zotero.isMac) {
 			this.clientEnabled = false;
 			this.serverEnabled = false;
+			
+			// TODO: Why is Windows breaking without this?
+			return;
 		}
 		
 		// Make sure we have the client executable
