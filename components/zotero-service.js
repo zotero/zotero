@@ -127,7 +127,15 @@ Cc["@mozilla.org/moz/jssubscript-loader;1"]
 // Calls to other XPCOM components must be in here rather than in top-level
 // code, as other components may not have yet been initialized.
 function setupService(){
-	Zotero.init();
+	try {
+		Zotero.init();
+	}
+	catch (e) {
+		var msg = typeof e == 'string' ? e : e.name;
+		dump(e + "\n\n");
+		Components.utils.reportError(e);
+		throw (e);
+	}
 }
 
 function ZoteroService(){
