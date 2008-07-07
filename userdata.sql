@@ -28,7 +28,7 @@ CREATE TABLE items (
 
 CREATE TABLE itemDataValues (
     valueID INTEGER PRIMARY KEY,
-    value
+    value UNIQUE
 );
 
 -- Type-specific data for individual items
