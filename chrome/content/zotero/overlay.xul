@@ -123,9 +123,9 @@
 							<menupopup id="zotero-tb-actions-popup" onpopupshowing="document.getElementById('cmd_zotero_reportErrors').setAttribute('disabled', Zotero.getErrors().length == 0)">
 								<menuitem id="zotero-tb-actions-import" label="&zotero.toolbar.import.label;" oncommand="Zotero_File_Interface.importFile();"/>
 								<menuitem id="zotero-tb-actions-export" label="&zotero.toolbar.export.label;" oncommand="Zotero_File_Interface.exportFile();"/>
+								<menuitem hidden="true" id="zotero-tb-actions-zeroconf-update"
+									label="Search for Shared Libraries" oncommand="Zotero.Zeroconf.findInstances()"/>
 								<menuseparator id="zotero-tb-actions-utilities-separator"/>
-								<menuitem id="zotero-tb-actions-zeroconf-update" label="Search for Shared Libraries"
-									oncommand="Zotero.Zeroconf.findInstances()"/>
 								<menuitem id="zotero-tb-actions-timeline" label="&zotero.toolbar.timeline.label;" oncommand="Zotero_Timeline_Interface.loadTimeline()"/>
 								<menuseparator id="zotero-tb-actions-sync-separator"/>
 								<menuitem label="Clear Server Data" oncommand="Zotero.Sync.Server.clear()"/>

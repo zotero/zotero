@@ -137,6 +137,10 @@ var ZoteroPane = new function()
 		
 		Zotero.setFontSize(document.getElementById('zotero-pane'))
 		
+		if (Zotero.isMac) {
+			document.getElementById('zotero-tb-actions-zeroconf-update').setAttribute('hidden', false);
+		}
+		
 		//Initialize collections view
 		this.collectionsView = new Zotero.CollectionTreeView();
 		var collectionsTree = document.getElementById('zotero-collections-tree');
