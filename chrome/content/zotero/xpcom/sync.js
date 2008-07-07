@@ -513,10 +513,11 @@ Zotero.Sync.Server = new function () {
 		if (!username) {
 			_error("Username not set in Zotero.Sync.Server.login()");
 		}
-		else if (!username.match(/^\w+$/)) {
+		else if (!username.match(/^[\w\d ]+$/)) {
 			_error("Invalid username '" + username + "' in Zotero.Sync.Server.login()");
 		}
 		
+		username = encodeURIComponent(Zotero.Sync.Server.username);
 		var password = encodeURIComponent(Zotero.Sync.Server.password);
 		var body = _apiVersionComponent
 					+ "&username=" + username
