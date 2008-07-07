@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-07-03 09:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-07-07 14:50:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-06-16 21:30:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1091,7 +1091,7 @@ REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('add79dfd-7951-4c72-af1d-ce1d50aa4fb4', '1.0.0b4.r5', '', '2008-07-02 09:57:39', '0', '100', '4', 'informIT database', 'Adam Crymble', 'http://www.informit.com', 
+REPLACE INTO translators VALUES ('add79dfd-7951-4c72-af1d-ce1d50aa4fb4', '1.0.0b4.r5', '', '2008-07-07 14:50:00', '0', '100', '4', 'informIT database', 'Adam Crymble', 'http://www.informit.com', 
 'function detectWeb(doc,  url) {
 	if (doc.title.match("Search Results")) {
 		return "multiple";
@@ -1264,7 +1264,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('9932d1a7-cc6d-4d83-8462-8f6658b13dc0', '1.0.0b4.r5', '', '2008-07-02 10:12:57', '0', '100', '4', 'Biblio.com', 'Adam Crymble and Michael Berkowitz', 'http://www.biblio.com/', 
+REPLACE INTO translators VALUES ('9932d1a7-cc6d-4d83-8462-8f6658b13dc0', '1.0.0b4.r5', '', '2008-07-07 14:50:00', '0', '100', '4', 'Biblio.com', 'Adam Crymble and Michael Berkowitz', 'http://www.biblio.com/', 
 'function detectWeb(doc, url) {
 	if (doc.location.href.match("bookseller_search") || doc.location.href.match("bookstores") || doc.location.href.match("textbooks")) {
 		
@@ -1377,7 +1377,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('9932d1a7-cc6d-4d83-8462-8f6658b13dc0', '1.0.0b4.r5', '', '2008-07-02 10:10:47', '0', '100', '4', 'Biblio.com', 'Adam Crymble and Michael Berkowitz', 'http://www.biblio.com/', 
+REPLACE INTO translators VALUES ('9932d1a7-cc6d-4d83-8462-8f6658b13dc0', '1.0.0b4.r5', '', '2008-07-07 14:50:00', '0', '100', '4', 'Biblio.com', 'Adam Crymble and Michael Berkowitz', 'http://www.biblio.com/', 
 'function detectWeb(doc, url) {
 	if (doc.location.href.match("bookseller_search") || doc.location.href.match("bookstores") || doc.location.href.match("textbooks")) {
 		
@@ -3136,7 +3136,7 @@ function doImport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('83979786-44af-494a-9ddb-46654e0486ef', '1.0.0b4.r5', '', '2008-07-02 10:52:07', '0', '100', '4', 'Reuters', 'Michael Berkowitz', 'http://(www\.)?reuters.com/', 
+REPLACE INTO translators VALUES ('83979786-44af-494a-9ddb-46654e0486ef', '1.0.0b4.r5', '', '2008-07-07 14:50:00', '0', '100', '4', 'Reuters', 'Michael Berkowitz', 'http://(www\.)?reuters.com/', 
 'function detectWeb(doc, url) {
 	if (url.match(/article/)) {
 		return "newspaperArticle";
@@ -9392,7 +9392,7 @@ function doWeb(doc, url) {
 	
 }');
 
-REPLACE INTO translators VALUES ('f26cfb71-efd7-47ae-a28c-d4d8852096bd', '1.0.0b4.r5', '', '2008-07-03 16:57:36', '0', '99', '4', 'Cell Press', 'Michael Berkowitz', 'http://www.(cancercell|cell|cellhostandmicrobe|cellmetabolism|cellstemcell|chembiol|current-biology|developmentalcell|immunity|molecule|neuron|structure).(org|com)', 
+REPLACE INTO translators VALUES ('f26cfb71-efd7-47ae-a28c-d4d8852096bd', '1.0.0b4.r5', '', '2008-07-07 14:50:00', '0', '99', '4', 'Cell Press', 'Michael Berkowitz', 'http://www.(cancercell|cell|cellhostandmicrobe|cellmetabolism|cellstemcell|chembiol|current-biology|developmentalcell|immunity|molecule|neuron|structure).(org|com)', 
 'function detectWeb(doc, url) {
 	
 	if (url.indexOf("search/results") != -1) {
@@ -20280,7 +20280,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('594ebe3c-90a0-4830-83bc-9502825a6810', '1.0.0b4.r5', '', '2008-07-02 15:28:12', '1', '100', '4', 'ISI Web of Knowledge', 'Michael Berkowitz', '(WOS_GeneralSearch|product=WOS)', 
+REPLACE INTO translators VALUES ('594ebe3c-90a0-4830-83bc-9502825a6810', '1.0.0b4.r5', '', '2008-07-07 14:50:00', '1', '100', '4', 'ISI Web of Knowledge', 'Michael Berkowitz', '(WOS_GeneralSearch|product=WOS)', 
 'function detectWeb(doc, url) {
 	if (doc.title.indexOf("Web of Science Results") != -1) {
 		return "multiple";
