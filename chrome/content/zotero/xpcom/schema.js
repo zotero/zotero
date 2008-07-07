@@ -1415,6 +1415,18 @@ Zotero.Schema = new function(){
 					statement.reset();
 					Zotero.DB.query("CREATE UNIQUE INDEX items_key ON items(key)");
 					
+					var rows = Zotero.DB.columnQuery("SELECT GROUP_CONCAT(valueID) FROM itemDataValues GROUP BY value HAVING COUNT(*) > 1");
+					for each(var row in rows) {
+						var ids = row.split(',');
+						var deleteIDs = [];
+						for (var j=1; j<ids.length; j++) {
+							deleteIDs.push(parseInt(ids[j]));
+						}
+						Zotero.DB.query("UPDATE itemData SET valueID=? WHERE valueID IN (" + deleteIDs.map(function () '?').join() + ")", [parseInt(ids[0])].concat(deleteIDs));
+						Zotero.DB.query("DELETE FROM itemDataValues WHERE valueID IN (" + deleteIDs.map(function () '?').join() + ")", deleteIDs);
+					}
+					Zotero.DB.query("CREATE UNIQUE INDEX itemDataValues_value ON itemDataValues(value)");
+					
 					// Collections
 					var collections = Zotero.DB.query("SELECT * FROM collections");
 					Zotero.DB.query("DROP TABLE collections");
