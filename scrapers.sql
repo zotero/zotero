@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-07-07 17:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-07-07 23:40:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-06-16 21:30:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1264,7 +1264,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('daa26181-71d4-48ef-8cac-54c06ff4c20e', '1.0.0b4.r5', '', '2008-07-07 15:52:51', '0', '100', '4', 'Citebase', 'Michael Berkowitz', 'http://(www.)?citebase.org/', 
+REPLACE INTO translators VALUES ('daa26181-71d4-48ef-8cac-54c06ff4c20e', '1.0.0b4.r5', '', '2008-07-07 23:40:00', '0', '100', '4', 'Citebase', 'Michael Berkowitz', 'http://(www.)?citebase.org/', 
 'function detectWeb(doc, url) {
 	if (url.match(/\/search/)) {
 		return "multiple";
