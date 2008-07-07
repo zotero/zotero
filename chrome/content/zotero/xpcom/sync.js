@@ -1039,8 +1039,13 @@ Zotero.Sync.Server = new function () {
 		}
 		
 		// {} implements nsITimerCallback
-		_autoSyncTimer.initWithCallback({ notify: Zotero.Sync.Server.sync },
-			autoSyncTimeout * 1000, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
+		_autoSyncTimer.initWithCallback({ notify: function () {
+			if (_syncInProgress) {
+				Zotero.debug('Sync already in progress -- skipping auto-sync');
+				return;
+			}
+			Zotero.Sync.Server.sync();
+		}}, autoSyncTimeout * 1000, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
 	}
 	
 	
