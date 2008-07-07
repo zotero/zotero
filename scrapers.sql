@@ -9392,43 +9392,68 @@ function doWeb(doc, url) {
 	
 }');
 
-REPLACE INTO translators VALUES ('f26cfb71-efd7-47ae-a28c-d4d8852096bd', '1.0.0b4.r5', '', '2008-04-28 17:50:00', '0', '99', '4', 'Cell Press', 'Michael Berkowitz', 'http://www.(cancercell|cell|cellhostandmicrobe|cellmetabolism|cellstemcell|chembiol|current-biology|developmentalcell|immunity|molecule|neuron|structure).(org|com)', 
+REPLACE INTO translators VALUES ('f26cfb71-efd7-47ae-a28c-d4d8852096bd', '1.0.0b4.r5', '', '2008-07-03 16:57:36', '0', '99', '4', 'Cell Press', 'Michael Berkowitz', 'http://www.(cancercell|cell|cellhostandmicrobe|cellmetabolism|cellstemcell|chembiol|current-biology|developmentalcell|immunity|molecule|neuron|structure).(org|com)', 
 'function detectWeb(doc, url) {
-	if (url.indexOf("search/results?") != -1) {
+	
+	if (url.indexOf("search/results") != -1) {
 		return "multiple";
 	} else if (url.indexOf("content/article") != -1) {
 		return "journalArticle";
 	}
 }', 
-'function doWeb(doc, url) {
-	var articles = new Array();
-	if (detectWeb(doc, url) == "multiple") {
-		var items = new Object();
-		var xpath = ''//form[@id="search_results_form"]/dl/dd'';
-		var arts = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
-		var next_art;
-		while (next_art = arts.iterateNext()) {
-			var title = doc.evaluate(''./strong'', next_art, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-			var link = doc.evaluate(''./nobr[1]/a'', next_art, null, XPathResult.ANY_TYPE, null).iterateNext().href;
-			items[link] = title;
+'function scrape(doc, url) {
+
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;	
+	
+	var dataTags = new Object();
+	var fieldTitle;
+	var commaSplit = new Array();
+	
+	var newItem = new Zotero.Item("journalArticle");
+		
+	//title	
+		newItem.title = doc.evaluate(''//h1[@class="article_title"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+			
+	//publication, volume, pages, date.
+		var voliss = doc.evaluate(''//div[contains(@class, "article_citation")]/p[1]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		
+		var volissSplit = voliss.split(".");
+		
+		for (var i = 0; i < volissSplit.length; i++) {
+			if (volissSplit[i].match(", ")) {
+				commaSplit = volissSplit[i].split(", ");
+			}
 		}
-		items = Zotero.selectItems(items);
-		for (var i in items) {
-			articles.push(i);
+		if (commaSplit[0] != '''') {
+			newItem.publicationTitle = commaSplit[0];
 		}
-	} else {
-		articles = [url];
-	}
-	Zotero.Utilities.processDocuments(articles, function(newDoc) {
-		var newItem = new Zotero.Item("journalArticle");
-		newItem.title = newDoc.evaluate(''//h1[@class="article_title"]'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-		var voliss = newDoc.evaluate(''//div[contains(@class, "article_citation")]/p[1]'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent.split(".")[2].split(",");
-		newItem.publicationTitle = voliss[0];
-		newItem.volume = voliss[1].match(/\d+/)[0];
-		newItem.pages = Zotero.Utilities.trimInternal(voliss[2]);
-		newItem.date = Zotero.Utilities.trimInternal(voliss[3]);
-		newItem.abstractNote = newDoc.evaluate(''//div[@class="panelcontent article_summary"]/p[contains(text(), " ")]'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-		var authors = newDoc.evaluate(''//p[@class="authors"]'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent.split(",");
+		if (commaSplit[1] != '''') {
+			newItem.volume = commaSplit[1];
+		}
+		if (commaSplit[2] != '''') {
+			newItem.pages= commaSplit[2];
+		}
+		if (commaSplit[3] != '''') {
+			newItem.date= commaSplit[3];
+		}
+
+	//abstract
+	
+		var abstractXPath2 = ''//div[@class="min_fulltext"][@id="main_content"]/p'';
+		if (doc.evaluate(abstractXPath2, doc,  nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+			newItem.abstractNote = doc.evaluate(abstractXPath2, doc,  nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		}
+		
+		var abstractXPath = ''//div[@class="panelcontent article_summary"]/p[contains(text(), " ")]'';
+		if (doc.evaluate(abstractXPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+			newItem.abstractNote = doc.evaluate(abstractXPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		}
+
+	//authors
+		var authors = doc.evaluate(''//p[@class="authors"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.split(",");
 		for (var i in authors) {
 			var next_author = authors[i];
 			if (next_author.match(/[a-z]/)) {
@@ -9439,21 +9464,61 @@ REPLACE INTO translators VALUES ('f26cfb71-efd7-47ae-a28c-d4d8852096bd', '1.0.0b
 				newItem.creators.push(Zotero.Utilities.cleanAuthor(next_author, "author"));
 			}
 		}
-		var newurl = newDoc.location.href;
+	
+	//url
+		var newurl = doc.location.href;
 		if (newurl.indexOf("abstract") != -1) {
 			newurl = newurl.replace("abstract", "fulltext");
 		}
+		
+	//attachments	
 		var uid = newurl.match(/uid=([^&]+)/)[1];
 		var pdfx = ''//a[contains(text(), "PDF")][contains(@href, "'' + uid + ''")]'';
-		var pdfurl = newDoc.evaluate(pdfx, newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().href;
+		var pdfurl = doc.evaluate(pdfx, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
 		newItem.attachments = [
 			{url:newurl, title:"Cell Press Snapshot", mimeType:"text/html"},
 			{url:pdfurl, title:"Cell Press Full Text PDF", mimeType:"application/pdf"}
 		];
+		
 		newItem.complete();
-	}, function() {Zotero.done;});
+}
+
+function doWeb(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+	} : null;
 	
+	var articles = new Array();
+	
+	if (detectWeb(doc, url) == "multiple") {
+		var items = new Object();
+		
+		var titles = doc.evaluate(''//dd/strong'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var link = doc.evaluate(''//nobr/a'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		
+		var next_title;
+		var next_lilnk;
+		
+		while (next_title = titles.iterateNext()) {
+			next_link = link.iterateNext();
+			if (next_link.textContent.match("Summary")) {
+				items[next_link.href] = next_title.textContent;
+			} else {
+				next_link = link.iterateNext();
+				items[next_link.href] = next_title.textContent;
+			}
+		}
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			articles.push(i);
+		}
+	} else {
+		articles = [url];
+	}
+	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
+	Zotero.wait();
 }');
+
 
 REPLACE INTO translators VALUES ('0cc8e259-106e-4793-8c26-6ec8114a9160', '1.0.0b4.r5', '', '2008-02-13 11:30:00', '1', '99', '4', 'SlideShare', 'Michael Berkowitz', 'http://www.slideshare.net/', 
 'function detectWeb(doc, url) {
