@@ -131,7 +131,7 @@ Zotero.QuickCopy = new function() {
 	 * If bibliography format, the process is synchronous and an object
 	 * contain properties 'text' and 'html' is returned.
 	 */
-	function getContentFromItems(items, format, callback) {
+	function getContentFromItems(items, format, callback, modified) {
 		var [mode, format] = format.split('=');
 		var [mode, contentType] = mode.split('/');
 		
@@ -192,10 +192,25 @@ Zotero.QuickCopy = new function() {
 			
 			var csl = Zotero.Cite.getStyle(format);
 			var itemSet = csl.createItemSet(items);
-			var bibliography = {
-				text: csl.formatBibliography(itemSet, contentType == "html" ? "HTML" : "Text"),
-				html: csl.formatBibliography(itemSet, "HTML")
-			};
+			
+			// Copy citations if shift key pressed
+			if (modified) {
+				var itemIDs = [];
+				for (var i=0; i<items.length; i++) {
+					itemIDs.push(items[i].id);
+				}
+				var citation = csl.createCitation(itemSet.getItemsByIds(itemIDs));
+				var bibliography = {
+					text: csl.formatCitation(citation, contentType == "html" ? 'HTML' : 'Text'),
+					html: csl.formatCitation(citation, "HTML")
+				}
+			}
+			else {
+				var bibliography = {
+					text: csl.formatBibliography(itemSet, contentType == "html" ? "HTML" : "Text"),
+					html: csl.formatBibliography(itemSet, "HTML")
+				};
+			}
 			return bibliography;
 		}
 		
