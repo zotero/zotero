@@ -2484,9 +2484,10 @@ Zotero.Item.prototype.getAttachments = function() {
 	}
 	
 	var sql = "SELECT A.itemID, value AS title FROM itemAttachments A "
-		+ "NATURAL JOIN items I LEFT JOIN itemData ID USING (itemID) "
+		+ "NATURAL JOIN items I LEFT JOIN itemData ID "
+		+ "ON (fieldID=110 AND A.itemID=ID.itemID) "
 		+ "LEFT JOIN itemDataValues IDV "
-		+ "ON (fieldID=110 AND ID.valueID=IDV.valueID) "
+		+ "ON (ID.valueID=IDV.valueID) "
 		+ "WHERE sourceItemID=?";
 		
 	if (Zotero.Prefs.get('sortAttachmentsChronologically')) {

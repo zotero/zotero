@@ -586,10 +586,12 @@ Zotero.OpenURL = new function() {
 						}
 					}
 				} else if(key == "rft.description") {
-					item.extra = value;
+					item.abstractNote = value;
 				} else if(key == "rft.rights") {
 					item.rights = value;
-				} else if(key == "rft.subject") {
+				} else if(key == "rft.language") {
+				  	item.language = value;
+				}  else if(key == "rft.subject") {
 					item.tags.push(value);
 				} else if(key == "rft.type") {
 					if(Zotero.ItemTypes.getID(value)) item.itemType = value;

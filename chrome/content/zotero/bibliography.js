@@ -86,7 +86,8 @@ var Zotero_File_Interface_Bibliography = new function() {
 		// ONLY FOR bibliography.xul: export options
 		if(document.getElementById("save-as-rtf")) {
 			// restore saved bibliographic settings
-			document.getElementById(Zotero.Prefs.get("export.bibliographySettings")).setAttribute("selected", "true");
+			document.getElementById('output-radio').selectedItem =
+				document.getElementById(Zotero.Prefs.get("export.bibliographySettings"));
 			
 			// disable clipboard on the Mac, because it can't support formatted
 			// output
