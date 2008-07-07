@@ -1172,8 +1172,6 @@ Zotero.Item.prototype.save = function() {
 						}
 						
 						try {
-							Zotero.debug(value);
-							Zotero.debug(valueID);
 							insertValueStatement.execute();
 						}
 						catch (e) {
