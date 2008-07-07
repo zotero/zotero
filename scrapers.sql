@@ -1264,6 +1264,55 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
+REPLACE INTO translators VALUES ('daa26181-71d4-48ef-8cac-54c06ff4c20e', '1.0.0b4.r5', '', '2008-07-07 15:52:51', '0', '100', '4', 'Citebase', 'Michael Berkowitz', 'http://(www.)?citebase.org/', 
+'function detectWeb(doc, url) {
+	if (url.match(/\/search/)) {
+		return "multiple";
+	} else if (url.match(/\/abstract/)) {
+		return "journalArticle";
+	}
+}', 
+'function doWeb(doc, url) {
+	var articles = new Array();
+	if (detectWeb(doc, url) == "multiple") {
+		var links = doc.evaluate(''//div[@class="rs_match"]/div/a[@class="abs_title"]'', doc, null, XPathResult.ANY_TYPE, null);
+		var items = new Object();
+		var link;
+		while (link = links.iterateNext()) {
+			items[link.href] = link.textContent;
+		}
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			articles.push(i);
+		}
+	} else {
+		articles = [url];
+	}
+
+	Zotero.Utilities.processDocuments(articles, function(doc) {
+		var biburl = doc.evaluate(''//a[contains(text(), "BibTeX")]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext().href;
+		if (doc.evaluate(''/html/body/div[@class="body"]/div[@class="abstract"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) var abs = Zotero.Utilities.trimInternal(doc.evaluate(''/html/body/div[@class="body"]/div[@class="abstract"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+		var translator = Zotero.loadTranslator("import");
+		translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
+		Zotero.Utilities.HTTP.doGet(biburl, function(text) {
+			translator.setString(text);
+			translator.setHandler("itemDone", function(obj, item) {
+				if (abs) {
+					if (abs.match(/^Abstract/)) {
+						item.abstractNote = abs.substr(9);
+					} else {
+						item.abstractNote = abs;
+					}
+				}
+				item.attachments = [{url:item.url, title:"Citebase Snapshot", mimeType:"text/html"}];
+				item.complete();
+			});
+			translator.translate();
+		});
+	}, function() {Zotero.done;});
+	Zotero.wait();
+}');
+
 REPLACE INTO translators VALUES ('9932d1a7-cc6d-4d83-8462-8f6658b13dc0', '1.0.0b4.r5', '', '2008-07-07 14:50:00', '0', '100', '4', 'Biblio.com', 'Adam Crymble and Michael Berkowitz', 'http://www.biblio.com/', 
 'function detectWeb(doc, url) {
 	if (doc.location.href.match("bookseller_search") || doc.location.href.match("bookstores") || doc.location.href.match("textbooks")) {
