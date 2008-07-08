@@ -1580,55 +1580,57 @@ Zotero.Schema = new function(){
 					for each(var row in rows) {
 						keys[row.itemID] = row.key;
 					}
-					var entries = storage37.directoryEntries;
-					while (entries.hasMoreElements()) {
-						var file = entries.getNext();
-						file.QueryInterface(Components.interfaces.nsILocalFile);
-						var id = parseInt(file.leafName);
-						if (!file.isDirectory() || file.leafName != id) {
-							continue;
-						}
-						if (keys[id]) {
-							var renameTarget = storage37.clone();
-							renameTarget.append(keys[id]);
-							if (renameTarget.exists()) {
+					if (storage37.exists()) {
+						var entries = storage37.directoryEntries;
+						while (entries.hasMoreElements()) {
+							var file = entries.getNext();
+							file.QueryInterface(Components.interfaces.nsILocalFile);
+							var id = parseInt(file.leafName);
+							if (!file.isDirectory() || file.leafName != id) {
+								continue;
+							}
+							if (keys[id]) {
+								var renameTarget = storage37.clone();
+								renameTarget.append(keys[id]);
+								if (renameTarget.exists()) {
+									if (!orphaned.exists()) {
+										orphaned.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0755);
+									}
+									var target = orphaned.clone();
+									target.append(keys[id]);
+									var newName = null;
+									if (target.exists()) {
+										target.createUnique(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0644);
+										newName = target.leafName;
+										target.remove(null);
+									}
+									renameTarget.moveTo(orphaned, newName);
+								}
+								file.moveTo(null, keys[id]);
+								moveReport += keys[id] + ' ' + id + "\n";
+							}
+							else {
 								if (!orphaned.exists()) {
 									orphaned.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0755);
 								}
 								var target = orphaned.clone();
-								target.append(keys[id]);
+								target.append(file.leafName);
 								var newName = null;
 								if (target.exists()) {
 									target.createUnique(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0644);
 									newName = target.leafName;
 									target.remove(null);
 								}
-								renameTarget.moveTo(orphaned, newName);
+								file.moveTo(orphaned, newName);
 							}
-							file.moveTo(null, keys[id]);
-							moveReport += keys[id] + ' ' + id + "\n";
+							movedFiles37[id] = file;
 						}
-						else {
-							if (!orphaned.exists()) {
-								orphaned.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0755);
-							}
-							var target = orphaned.clone();
-							target.append(file.leafName);
-							var newName = null;
-							if (target.exists()) {
-								target.createUnique(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0644);
-								newName = target.leafName;
-								target.remove(null);
-							}
-							file.moveTo(orphaned, newName);
+						if (moveReport) {
+							moveReport = 'The following directory names in storage were changed:\n'
+										+ '------------------------------------------------------\n'
+										+ moveReport;
+							Zotero.File.putContents(moveReportFile, moveReport);
 						}
-						movedFiles37[id] = file;
-					}
-					if (moveReport) {
-						moveReport = 'The following directory names in storage were changed:\n'
-									+ '------------------------------------------------------\n'
-									+ moveReport;
-						Zotero.File.putContents(moveReportFile, moveReport);
 					}
 					
 					
