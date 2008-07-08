@@ -19931,7 +19931,7 @@ REPLACE INTO translators VALUES ('7bdb79e-a47f-4e3d-b317-ccd5a0a74456', '1.0.0b3
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('850f4c5f-71fb-4669-b7da-7fb7a95500ef', '1.0.0b3r1', '', '2008-05-05 07:45:00', '1', '100', '4', 'Cambridge Journals Online', 'Sean Takats and Michael Berkowitz', 'https?://[^/]*journals.cambridge.org[^/]*//?action/(quickSearch|search|displayAbstract|displayFulltext|displayIssue)', 
+REPLACE INTO translators VALUES ('850f4c5f-71fb-4669-b7da-7fb7a95500ef', '1.0.0b3r1', '', '2008-07-08 09:47:40', '1', '100', '4', 'Cambridge Journals Online', 'Sean Takats and Michael Berkowitz', 'https?://[^/]*journals.cambridge.org[^/]*//?action/(quickSearch|search|displayAbstract|displayFulltext|displayIssue)', 
 'function detectWeb(doc, url)	{
 	var namespace=doc.documentElement.namespaceURI;
 	var nsResolver=namespace?function(prefix)	{
@@ -19944,26 +19944,7 @@ REPLACE INTO translators VALUES ('850f4c5f-71fb-4669-b7da-7fb7a95500ef', '1.0.0b
 		return "multiple";			
 	}
 }', 
-'function titleCase(str) {
-	var skipWords = ["but", "or", "yet", "so", "for", "and", "nor", "a", "an", "the", "at", "by", "from", "in", "into", "of", "on", "to", "with", "up", "down", "as"];
-	var words = str.toLowerCase().split(/\s+/);
-	var newstr = "";
-	for (var i in words) {
-		if (i == 0) {
-			newstr += words[i][0].toUpperCase() + words[i].substr(1);
-		} else if (skipWords.indexOf(words[i].replace(/[^a-zA-Z]+/, "")) != -1) {
-			newstr += " " + words[i];
-		} else if (words[i].indexOf("-") != -1) {
-			newword = words[i].split("-");
-			newstr += " " + newword[0][0].toUpperCase() + newword[0].substr(1) + "-" + newword[1][0].toUpperCase() + newword[1].substr(1);
-		} else {
-			newstr += " " + words[i][0].toUpperCase() + words[i].substr(1);
-		}
-	}
-	return Zotero.Utilities.trimInternal(newstr);
-}
-
-function doWeb(doc, url){
+'function doWeb(doc, url){
 	var namespace=doc.documentElement.namespaceURI;
 	var nsResolver=namespace?function(prefix)	{
 		return (prefix=="x")?namespace:null;
@@ -19980,7 +19961,7 @@ function doWeb(doc, url){
 		while (tableRow = tableRows.iterateNext()){
 			var id = doc.evaluate(''./td/input[@type="checkbox"][@name="toView"]/@value'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 			var title = doc.evaluate(''./td/h3'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-			items[''http://'' + host + ''/action/displayAbstract?aid='' + id.nodeValue]=titleCase(title.textContent);
+			items[''http://'' + host + ''/action/displayAbstract?aid='' + id.nodeValue] = Zotero.Utilities.capitalizeTitle(title.textContent);
 		}
 		items=Zotero.selectItems(items);
 		for (var i in items) {
@@ -20012,11 +19993,11 @@ function doWeb(doc, url){
 					{url:pdflink, title:"Cambridge Journals PDF", mimeType:"application/pdf"}
 				];
 				item.url = url;
-				item.title = titleCase(item.title);
+				item.title = Zotero.Utilities.capitalizeTitle(item.title);
 				var authors = item.creators;
 				item.creators = new Array();
 				for each (var aut in authors) {
-					item.creators.push({firstName:titleCase(aut.firstName), lastName:titleCase(aut.lastName), creatorType:"author"});
+					item.creators.push({firstName:aut.firstName, lastName:aut.lastName, creatorType:"author"});
 				}
 				if (kws) item.tags = kws;
 				if (abs) item.abstractNote = Zotero.Utilities.trimInternal(abs);
