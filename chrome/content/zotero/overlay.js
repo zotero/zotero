@@ -1376,6 +1376,10 @@ var ZoteroPane = new function()
 			if (this.itemsView.rowCount>0) {
 				var enable = [m.exportCollection, m.createBibCollection, m.loadReport];
 			}
+			else if (!this.collectionsView.isContainerEmpty(this.collectionsView.selection.currentIndex)) {
+				var enable = [m.exportCollection];
+				var disable = [m.createBibCollection, m.loadReport];
+			}
 			else
 			{
 				var disable = [m.exportCollection, m.createBibCollection, m.loadReport];
