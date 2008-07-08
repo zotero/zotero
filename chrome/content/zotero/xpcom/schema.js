@@ -1244,8 +1244,7 @@ Zotero.Schema = new function(){
 					Zotero.DB.query("DELETE FROM version WHERE schema='fulltext'");
 				}
 				
-				// 1.5
-				
+				// 1.5 Sync Preview
 				if (i==37) {
 					// Some data cleanup from the pre-FK-trigger days
 					Zotero.DB.query("DELETE FROM annotations WHERE itemID NOT IN (SELECT itemID FROM items)");
@@ -1650,6 +1649,13 @@ Zotero.Schema = new function(){
 						Zotero.DB.query("UPDATE itemTags SET itemID=? WHERE itemID=?", params);
 						Zotero.DB.query("UPDATE fulltextItemWords SET itemID=? WHERE itemID=?", params);
 						Zotero.DB.query("UPDATE fulltextItems SET itemID=? WHERE itemID=?", params);
+					}
+				}
+				
+				if (i==38) {
+					var ids = Zotero.DB.columnQuery("SELECT itemID FROM items WHERE itemTypeID=14 AND itemID NOT IN (SELECT itemID FROM itemAttachments)");
+					for each(var id in ids) {
+						Zotero.DB.query("INSERT INTO itemAttachments (itemID, linkMode) VALUES (?, ?)", [id, 3]);
 					}
 				}
 			}
