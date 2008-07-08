@@ -1764,7 +1764,7 @@ Zotero.Sync.Server.Data = new function() {
 			if (!item.fields[field]) {
 				continue;
 			}
-			var newField = <field>{item.fields[field]}</field>;
+			var newField = <field>{_xmlize(item.fields[field])}</field>;
 			newField.@name = field;
 			xml.field += newField;
 		}
@@ -1777,7 +1777,7 @@ Zotero.Sync.Server.Data = new function() {
 		
 		// Note
 		if (item.primary.itemType == 'note') {
-			var note = <note>{item.note}</note>;
+			var note = <note>{_xmlize(item.note)}</note>;
 			xml.note += note;
 		}
 		
@@ -1794,7 +1794,7 @@ Zotero.Sync.Server.Data = new function() {
 			}
 			
 			if (item.note) {
-				var note = <note>{item.note}</note>;
+				var note = <note>{_xmlize(item.note)}</note>;
 				xml.note += note;
 			}
 		}
@@ -1951,7 +1951,7 @@ Zotero.Sync.Server.Data = new function() {
 		var xml = <collection/>;
 		
 		xml.@id = collection.id;
-		xml.@name = collection.name;
+		xml.@name = _xmlize(collection.name);
 		xml.@dateModified = collection.dateModified;
 		xml.@key = collection.key;
 		if (collection.parent) {
@@ -2056,7 +2056,17 @@ Zotero.Sync.Server.Data = new function() {
 			if (!creator.fields[field] && allowEmpty.indexOf(field) == -1) {
 				continue;
 			}
-			xml[field] = creator.fields[field];
+			
+			switch (field) {
+				case 'firstName':
+				case 'lastName':
+				case 'name':
+					xml[field] = _xmlize(creator.fields[field]);
+					break;
+				
+				default:
+					xml[field] = creator.fields[field];
+			}
 		}
 		return xml;
 	}
@@ -2119,7 +2129,7 @@ Zotero.Sync.Server.Data = new function() {
 		var xml = <search/>;
 		
 		xml.@id = search.id;
-		xml.@name = search.name;
+		xml.@name = _xmlize(search.name);
 		xml.@dateModified = search.dateModified;
 		xml.@key = search.key;
 		
@@ -2133,7 +2143,7 @@ Zotero.Sync.Server.Data = new function() {
 					conditionXML.@mode = condition.mode;
 				}
 				conditionXML.@operator = condition.operator;
-				conditionXML.@value = condition.value;
+				conditionXML.@value = _xmlize(condition.value);
 				if (condition.required) {
 					conditionXML.@required = 1;
 				}
@@ -2224,7 +2234,7 @@ Zotero.Sync.Server.Data = new function() {
 		var xml = <tag/>;
 		
 		xml.@id = tag.id;
-		xml.@name = tag.name;
+		xml.@name = _xmlize(tag.name);
 		if (tag.type) {
 			xml.@type = tag.type;
 		}
@@ -2276,5 +2286,10 @@ Zotero.Sync.Server.Data = new function() {
 		tag.linkedItems = str ? str.split(' ') : [];
 		
 		return tag;
+	}
+	
+	
+	function _xmlize(str) {
+		return str.replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\ud800-\udfff\ufffe\uffff]/, '');
 	}
 }
