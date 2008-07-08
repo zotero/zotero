@@ -1517,17 +1517,13 @@ Zotero.Schema = new function(){
 							var types = Zotero.DB.columnQuery("SELECT DISTINCT tagType FROM tags WHERE tag LIKE ?", l);
 							for each(var type in types) {
 								var newTagID = Zotero.DB.valueQuery("SELECT tagID FROM tags WHERE tag=? AND tagType=?", [newTag, type]);
-								var oldIDs = Zotero.DB.columnQuery("SELECT tagID FROM tags WHERE tag LIKE ? AND tag != ? AND tagType=?", [l, l, type]);
-								if (!newTagID) {
-									if (oldIDs) {
+								var oldIDs = Zotero.DB.columnQuery("SELECT tagID FROM tags WHERE tag LIKE ? AND tag != ? AND tagType=?", [l, newTag, type]);
+								if (oldIDs) {
+									if (!newTagID) {
 										newTagID = oldIDs[0];
 									}
-									else {
-										newTagID = Zotero.DB.valueQuery("SELECT MAX(tagID)+1 FROM tags");
-										Zotero.DB.query("INSERT INTO tags VALUES (?,?,?)", [newTagID, newTag, type]);
-									}
+									Zotero.DB.query("UPDATE OR REPLACE itemTags SET tagID=? WHERE tagID IN (" + oldIDs.map(function () '?').join() + ")", [newTagID].concat(oldIDs));
 								}
-								Zotero.DB.query("UPDATE OR REPLACE itemTags SET tagID=? WHERE tagID IN (" + oldIDs.map(function () '?').join() + ")", [newTagID].concat(oldIDs));
 								newTags.push({ tagID: newTagID, tag: newTag, tagType: type });
 							}
 						}
