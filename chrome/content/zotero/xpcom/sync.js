@@ -1039,7 +1039,10 @@ Zotero.Sync.Server = new function () {
 		}
 		
 		// {} implements nsITimerCallback
-		_autoSyncTimer.initWithCallback({ notify: function () {
+		_autoSyncTimer.initWithCallback({ notify: function (event, type, ids) {
+			if (event == 'refresh') {
+				return;
+			}
 			if (_syncInProgress) {
 				Zotero.debug('Sync already in progress -- skipping auto-sync');
 				return;
