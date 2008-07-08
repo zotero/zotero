@@ -19931,7 +19931,7 @@ REPLACE INTO translators VALUES ('7bdb79e-a47f-4e3d-b317-ccd5a0a74456', '1.0.0b3
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('850f4c5f-71fb-4669-b7da-7fb7a95500ef', '1.0.0b3r1', '', '2008-07-08 14:35:00', '1', '100', '4', 'Cambridge Journals Online', 'Sean Takats and Michael Berkowitz', 'https?://[^/]*journals.cambridge.org[^/]*//?action/(quickSearch|search|displayAbstract|displayFulltext|displayIssue)', 
+REPLACE INTO translators VALUES ('850f4c5f-71fb-4669-b7da-7fb7a95500ef', '1.0.0b3r1', '', '2008-07-08 11:27:20', '1', '100', '4', 'Cambridge Journals Online', 'Sean Takats and Michael Berkowitz', 'https?://[^/]*journals.cambridge.org[^/]*//?action/(quickSearch|search|displayAbstract|displayFulltext|displayIssue)', 
 'function detectWeb(doc, url)	{
 	var namespace=doc.documentElement.namespaceURI;
 	var nsResolver=namespace?function(prefix)	{
@@ -19978,7 +19978,9 @@ REPLACE INTO translators VALUES ('850f4c5f-71fb-4669-b7da-7fb7a95500ef', '1.0.0b
 			var kws = doc.evaluate(''//p[@class="KeyWords"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.substr(11).split(''; '');
 		}
 		var pdfpath=''//div/ul/li/a[contains(text(), "PDF")]'';
-		var pdflink =doc.evaluate(pdfpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
+		if (doc.evaluate(pdfpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+			var pdflink =doc.evaluate(pdfpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
+		}
 		idRe = /aid=([0-9]+)/
 		var m = idRe.exec(doc.location.href);
 		var id = m[1];
@@ -19988,10 +19990,8 @@ REPLACE INTO translators VALUES ('850f4c5f-71fb-4669-b7da-7fb7a95500ef', '1.0.0b
 			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 			translator.setString(text);
 			translator.setHandler("itemDone", function(obj, item) {
-				item.attachments = 	[
-					{url:url, title:"Cambridge Journals Snapshot", mimeType:"text/html"},
-					{url:pdflink, title:"Cambridge Journals PDF", mimeType:"application/pdf"}
-				];
+				item.attachments = 	[{url:url, title:"Cambridge Journals Snapshot", mimeType:"text/html"}]
+				if (pdflink) item.attachments.push({url:pdflink, title:"Cambridge Journals PDF", mimeType:"application/pdf"});
 				item.url = url;
 				item.title = Zotero.Utilities.capitalizeTitle(item.title);
 				var authors = item.creators;
