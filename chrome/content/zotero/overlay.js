@@ -1995,13 +1995,15 @@ var ZoteroPane = new function()
 			var isNative = Zotero.MIME.hasNativeHandler(mimeType, ext);
 			var internal = Zotero.MIME.hasInternalHandler(mimeType, ext);
 			
-			var fileURL = attachment.getLocalFileURL();
-			
 			if (isNative ||
 					(internal && !Zotero.Prefs.get('launchNonNativeFiles'))) {
-				this.loadURI(fileURL, event, { attachmentID: itemID});
+				
+				var url = 'zotero://attachment/' + itemID + '/';
+				this.loadURI(url, event, { attachmentID: itemID});
 			}
 			else {
+				var fileURL = attachment.getLocalFileURL();
+				
 				// Some platforms don't have nsILocalFile.launch, so we just load it and
 				// let the Firefox external helper app window handle it
 				try {
