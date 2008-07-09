@@ -5815,7 +5815,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('f203db7f-7b7b-4dc4-b018-115b7885fe3b', '1.0.0b4.r5', '', '2008-04-24 14:30:00', '0', '100', '4', 'Oxford Music Online', 'Michael Berkowitz', 'http://[^/]*www.oxfordmusiconline.com[^/]*/', 
+REPLACE INTO translators VALUES ('f203db7f-7b7b-4dc4-b018-115b7885fe3b', '1.0.0b4.r5', '', '2008-07-09 10:49:53', '0', '100', '4', 'Oxford Music and Art Online', 'Michael Berkowitz', 'http://[^/]*www.oxford(music|art)online.com[^/]*/', 
 'function detectWeb(doc, url) {
 	if (url.match(/search_results/)) {
 		return "multiple";
@@ -5824,6 +5824,8 @@ REPLACE INTO translators VALUES ('f203db7f-7b7b-4dc4-b018-115b7885fe3b', '1.0.0b
 	}
 }', 
 'function doWeb(doc, url) {
+	var host = doc.location.host;
+	var site = host.match(/oxford(.*)online/)[1];
 	var ids = new Array();
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
@@ -5834,14 +5836,14 @@ REPLACE INTO translators VALUES ('f203db7f-7b7b-4dc4-b018-115b7885fe3b', '1.0.0b
 		}
 		items = Zotero.selectItems(items);
 		for (var i in items) {
-			ids.push(i.match(/music\/(\d+)/)[1]);
+			ids.push(i.match(/(music|art)\/([^?]+)/)[2]);
 		}
 	} else {
-		ids = [url.match(/music\/(\d+)/)[1]];
+		ids = [url.match(/(music|art)\/([^?]+)/)[2]];
 	}
 	Zotero.debug(ids);
 	for each (var id in ids) {
-		var get = ''http://www.oxfordmusiconline.com/subscriber/article_export_citation/grove/music/'' + id;
+		var get = ''http://'' + host + ''/subscriber/article_export_citation/grove/'' + site + ''/'' + id;
 		Zotero.Utilities.HTTP.doGet(get, function(text) {
 			var translator = Zotero.loadTranslator("import");
 			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
