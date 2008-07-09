@@ -11746,7 +11746,7 @@ function doWeb(doc, url) {
 }
 ');
 
-REPLACE INTO translators VALUES ('5af42734-7cd5-4c69-97fc-bc406999bdba', '1.0.0b4.r5', '', '2008-04-08 03:00:00', '1', '100', '4', 'ESA Journals', 'Michael Berkowitz', 'http://www.esajournals.org/', 
+REPLACE INTO translators VALUES ('5af42734-7cd5-4c69-97fc-bc406999bdba', '1.0.0b4.r5', '', '2008-07-09 19:05:28', '1', '100', '4', 'ESA Journals', 'Michael Berkowitz', 'http://www.esajournals.org/', 
 'function detectWeb(doc, url) {
 	if (url.indexOf("get-toc") != -1 || url.indexOf("searchtype") != -1) {
 		return "multiple";
@@ -11798,8 +11798,10 @@ function doWeb(doc, url) {
 		if (newDoc.evaluate(''//a[text() = "Full Text"]'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
 			itemurl = newDoc.evaluate(''//a[text() = "Full Text"]'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
 		}
-		var doi = newDoc.evaluate(''//div[@class="doc-head"]/p[contains(text(), "DOI")][@class="info"]'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-		doi = Zotero.Utilities.trimInternal(doi.substr(4));
+		if (newDoc.evaluate(''//div[@class="doc-head"]/p[contains(text(), "DOI")][@class="info"]'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+			var doi = newDoc.evaluate(''//div[@class="doc-head"]/p[contains(text(), "DOI")][@class="info"]'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+			doi = Zotero.Utilities.trimInternal(doi.substr(4));
+		}
 		var issn = newDoc.evaluate(''//div[@id="pageTitle"]/p/a'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href.match(/issn=([^&]+)/)[1];
 		newlink = newlink.replace(''cite-builder'', ''download-citation&t=refman&site=esaonline'');
 		Zotero.Utilities.HTTP.doGet(newlink, function(text) {
@@ -11809,7 +11811,7 @@ function doWeb(doc, url) {
 			translator.setString(text);
 			translator.setHandler("itemDone", function(obj, item) {
 				item.url = decodeURIComponent(itemurl);
-				item.DOI = decodeURIComponent(doi);
+				if (doi) item.DOI = decodeURIComponent(doi);
 				var bits = new Array(issn, item.volume, item.issue);
 				var pdfurl = ''http://www.esajournals.org/archive/'' + bits.join("/") + "/pdf/i" + bits.join("-") + "-" + item.pages.match(/\d+/)[0] + ".pdf";
 				item.attachments = [
