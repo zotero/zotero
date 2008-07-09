@@ -2143,7 +2143,8 @@ Zotero.Sync.Server.Data = new function() {
 					conditionXML.@mode = condition.mode;
 				}
 				conditionXML.@operator = condition.operator;
-				conditionXML.@value = _xmlize(condition.value);
+				conditionXML.@value =
+					_xmlize(condition.value ? condition.value : '');
 				if (condition.required) {
 					conditionXML.@required = 1;
 				}
