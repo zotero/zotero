@@ -2291,6 +2291,6 @@ Zotero.Sync.Server.Data = new function() {
 	
 	
 	function _xmlize(str) {
-		return str.replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\ud800-\udfff\ufffe\uffff]/, '');
+		return str.replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\ud800-\udfff\ufffe\uffff]/g, '');
 	}
 }
