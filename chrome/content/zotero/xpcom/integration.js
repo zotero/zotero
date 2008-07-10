@@ -15,19 +15,23 @@
     distributed under the License is distributed on an "AS IS" BASIS,
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     See the License for the specific language governing permissions and
-    limitations under the License.
+    limitations under the License.s
     
     ***** END LICENSE BLOCK *****
 */
 
-const API_VERSION = 5;
+const API_VERSION = 1;
+const COMPAT_API_VERSION = 5;
 
 Zotero.Integration = new function() {
 	var _contentLengthRe = /[\r\n]Content-Length: *([0-9]+)/i;
 	var _XMLRe = /<\?[^>]+\?>/;
 	var _onlineObserverRegistered;
 	
-	this.ns = "http://www.zotero.org/namespaces/SOAP";
+	this.sessions = {};
+	
+	var ns = "http://www.zotero.org/namespaces/SOAP";
+	this.ns = ns;
 	
 	this.init = init;
 	this.handleHeader = handleHeader;
@@ -37,6 +41,8 @@ Zotero.Integration = new function() {
 	 * initializes a very rudimentary web server used for SOAP RPC
 	 */
 	function init() {
+		this.env = new Namespace("http://schemas.xmlsoap.org/soap/envelope/");
+		
 		if (Zotero.Utilities.HTTP.browserIsOffline()) {
 			Zotero.debug('Browser is offline -- not initializing integration HTTP server');
 			_registerOnlineObserver()
@@ -89,15 +95,16 @@ Zotero.Integration = new function() {
 	function handleEnvelope(envelope) {
 		Zotero.debug("Integration: SOAP Request\n"+envelope);
 		envelope = envelope.replace(_XMLRe, "");
+		var env = this.env;
 		
-		var env = new Namespace("http://schemas.xmlsoap.org/soap/envelope/");
 		var xml = new XML(envelope);
 		var request = xml.env::Body.children()[0];
 		if(request.namespace() != this.ns) {
 			Zotero.debug("Integration: SOAP method not supported: invalid namespace");
-		} else {
+		} else if(!xml.env::Header.children().length()) {
+			// old style SOAP request
 			var name = request.localName();
-			if(Zotero.Integration.SOAP[name]) {
+			if(Zotero.Integration.SOAP_Compat[name]) {
 				if(request.input.length()) {
 					// split apart passed parameters (same colon-escaped format
 					// as we pass)
@@ -126,7 +133,7 @@ Zotero.Integration = new function() {
 				}
 				
 				// execute request
-				var output = Zotero.Integration.SOAP[name](vars);
+				var output = Zotero.Integration.SOAP_Compat[name](vars);
 				
 				// ugh: we can't use real SOAP, since AppleScript VBA can't pass
 				// objects, so implode arrays
@@ -161,6 +168,11 @@ Zotero.Integration = new function() {
 			} else {
 				Zotero.debug("Integration: SOAP method not supported");
 			}
+		} else {
+			// execute request
+			request = new Zotero.Integration.Request(xml);
+			return _generateResponse(request.status+" "+request.statusText,
+				'text/xml; charset="UTF-8"', request.responseText);
 		}
 	}
 	
@@ -381,20 +393,213 @@ Zotero.Integration.DataListener.prototype._requestFinished = function(response) 
 	}
 }
 
-Zotero.Integration.SOAP = new function() {
+Zotero.Integration.Request = function(xml) {
+	default xml namespace = Zotero.Integration.ns; with({});
+	
+	var env = Zotero.Integration.env;
+	this.header = xml.env::Header;
+	this.body = xml.env::Body;
+	
+	this.responseXML = <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:z={Zotero.Integration.ns}>
+			<SOAP-ENV:Header/>
+			<SOAP-ENV:Body/>
+		</SOAP-ENV:Envelope>
+	
+	this.responseHeader = this.responseXML.env::Header;
+	this.responseBody = this.responseXML.env::Body;
+	
+	this.needPrefs = this.body.setDocPrefs.length();
+	
+	try {
+		this.initializeSession();
+		if(this.needPrefs) {
+			this.setDocPrefs();
+		}
+		if(this.body.updateCitations.length() || this.body.updateBibliography.length()) {
+			this.processCitations();
+		}
+		
+		this.status = 200;
+		this.statusText = "OK";
+	} catch(e) {
+		Components.utils.reportError(e);
+		
+		Zotero.debug(e);
+		
+		// Get a code for this error
+		var code = (e.name ? e.name : "GenericError");
+		var text = e.toString();
+		try {
+			var text = Zotero.getString("integration.error."+e, Zotero.version);
+			code = e;
+		} catch(e) {
+		}
+		
+		this.responseXML = <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:z={Zotero.Integration.ns}>
+			<SOAP-ENV:Body>
+				<SOAP-ENV:Fault>
+					<SOAP-ENV:Code>
+						<SOAP-ENV:Value>XML-ENV:Sender</SOAP-ENV:Value>
+						<SOAP-ENV:Subcode>z:{code}</SOAP-ENV:Subcode>
+					</SOAP-ENV:Code>
+				</SOAP-ENV:Fault>
+				<SOAP-ENV:Reason>
+					<SOAP-ENV:Text>{text}</SOAP-ENV:Text>
+				</SOAP-ENV:Reason>
+			</SOAP-ENV:Body>
+		</SOAP-ENV:Envelope>
+		
+		this.status = 500;
+		this.statusText = "Internal Server Error";
+	}
+	
+	// Zap chars that we don't want in our output
+	this.responseText = this.responseXML.toXMLString().replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '');
+	Zotero.debug("Integration: SOAP Response\n"+this.responseText);
+}
+
+/**
+ * Gets session data to associate with a request
+ **/
+Zotero.Integration.Request.prototype.initializeSession = function() {
+	default xml namespace = Zotero.Integration.ns; with({});
+	
+	if(this.header.client.@api != API_VERSION) {
+		throw "incompatibleVersion";
+	}
+	
+	var styleID = this.header.style.@id.toString();
+	this._sessionID = this.header.session.@id.toString();
+	if(this._sessionID === "" || !Zotero.Integration.sessions[this._sessionID]) {
+		this._sessionID = Zotero.randomString();
+		this._session = Zotero.Integration.sessions[this._sessionID] = new Zotero.Integration.Session();
+		
+		var preferences = {};
+		for each(var pref in this.header.prefs.pref) {
+			preferences[pref.@name] = pref.@value.toString();
+		}
+		
+		this.needPrefs = this.needPrefs || !this._session.setStyle(styleID, preferences);
+		if(this.header.bibliography.length()) {
+			session.loadBibliographyData(Zotero.Utilities.prototype.trim(this.header.bibliography.toString()));
+		}
+	} else {
+		this._session = Zotero.Integration.sessions[this._sessionID];
+	}
+	
+	this.responseHeader.appendChild(<session id={this._sessionID}/>);
+}
+	
+/**
+ * Sets preferences
+ **/
+Zotero.Integration.Request.prototype.setDocPrefs = function() {
+	default xml namespace = Zotero.Integration.ns; with({});
+	
+	var io = new function() {
+		this.wrappedJSObject = this;
+	}
+	
+	io.openOffice = this.header.client.@agent == "OpenOffice.org"
+	
+	var oldStyle = io.style = this._session.styleID;
+	io.useEndnotes = this._session.prefs.useEndnotes;
+	io.useBookmarks = this._session.prefs.fieldType;
+	
+	this.watcher = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
+		.getService(Components.interfaces.nsIWindowWatcher)
+		.openWindow(null, 'chrome://zotero/content/integrationDocPrefs.xul', '',
+		'chrome,modal,centerscreen' + (Zotero.isWin ? ',popup' : ''), io, true);
+	this._session.prefs.useEndnotes = io.useEndnotes;
+	this._session.prefs.fieldType = io.useBookmarks;
+	Zotero.debug("prefs are")
+	Zotero.debug(this._session.prefs);
+	if(!oldStyle || oldStyle != io.style
+			|| io.useEndnotes != this._session.prefs.useEndnotes
+			|| io.useBookmarks != this._session.prefs.fieldType) {
+		this._session.regenerateAll = this._session.bibliographyHasChanged = true;
+		this._session.setStyle(io.style, this._session.prefs);
+	}
+	
+	this.responseHeader.appendChild(<style
+		id={io.style} class={this._session.style.class}
+		hasBibliography={this._session.style.hasBibliography}/>);
+	this.responseHeader.appendChild(<prefs>
+		<pref name="useEndnotes" value={io.useEndnotes}/>
+		<pref name="fieldType" value={io.useBookmarks}/>
+	</prefs>);
+	this.responseBody.appendChild(<setDocPrefsResponse/>);
+}
+
+/**
+ * Updates citations
+ **/
+Zotero.Integration.Request.prototype.processCitations = function() {
+	default xml namespace = Zotero.Integration.ns; with({});
+	
+	// get whether to edit bibliography or edit a citation
+	var editCitationIndex = this.body.updateCitations.@edit.toString();
+	
+	// first collect entire bibliography
+	var editCitation = false;
+	for each(var citation in this.header.citations.citation) {
+		// trim spacing characters
+		var citationData = Zotero.Utilities.prototype.trim(citation.toString());
+		if(citation.@index.toString() === editCitationIndex) {
+			if(!citation.@new.toString()) {	// new citation
+				// save citation data
+				editCitation = this._session.unserializeCitation(citationData, citation.@index.toString());
+			}
+		} else {
+			this._session.addCitation(citation.@index.toString(), citationData);
+		}
+	}
+	
+	this._session.updateItemSet();
+	
+	if(editCitationIndex) { 
+		this._session.updateCitations(editCitationIndex-1);
+		var added = this._session.editCitation(editCitationIndex, editCitation);
+		if(!added) {
+			if(editCitation) {
+				this._session.addCitation(editCitationIndex, editCitation);
+			} else {
+				this._session.deleteCitation(editCitationIndex);
+			}
+		}
+		this._session.updateItemSet();
+	}
+	this._session.updateCitations();
+	
+	if(this.body.updateBibliography.@edit.toString()) {
+		this._session.editBibliography();
+	}
+	
+	// update
+	var output = new Array();
+	if(this.body.updateBibliography.length()	 					// if we want updated bib
+			&& (this._session.bibliographyHasChanged					// and bibliography changed
+			|| this.body.updateBibliography.@force.toString())) {	// or if we should generate regardless of changes
+		if(this._session.bibliographyDataHasChanged) {
+			this.responseBody.updateBibliographyResponse.code = this._session.getBibliographyData();
+		}
+		this.responseBody.updateBibliographyResponse.text = this._session.getBibliography(true);
+	}
+	
+	// get citations
+	if(this.body.updateCitations.length()) {
+		this.responseBody.updateCitationsResponse.citations = this._session.getCitations(!!this.body.updateCitations.@force.toString() || this._session.regenerateAll, true);
+	}
+	
+	// reset citationSet
+	this._session.resetRequest();
+}
+
+Zotero.Integration.SOAP_Compat = new function() {
 	// SOAP methods
-	this.init = init;
 	this.update = update;
 	this.restoreSession = restoreSession;
 	this.setDocPrefs = setDocPrefs;
-	
-	var _sessions = new Array();
-	var watcher;
-	
-	function init() {
-		watcher = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
-		                    .getService(Components.interfaces.nsIWindowWatcher);
-	}
 	
 	/*
 	 * generates a new citation for a given item
@@ -402,9 +607,9 @@ Zotero.Integration.SOAP = new function() {
 	 * RETURNS: bibliography, documentData(, fieldIndex, fieldRename, fieldContent)+
 	 */
 	function update(vars) {
-		if(!_sessions[vars[0]]) return "ERROR:sessionExpired";
+		if(!Zotero.Integration.sessions[vars[0]]) return "ERROR:sessionExpired";
 		
-		var session = _sessions[vars[0]];
+		var session = Zotero.Integration.sessions[vars[0]];
 		var bibliographyMode = vars[1];
 		var citationMode = vars[2];
 		
@@ -468,8 +673,9 @@ Zotero.Integration.SOAP = new function() {
 			output.push("!");
 		}
 		
-		if(session.documentDataHasChanged) {
-			output.push(session.getDocumentData());
+		if(session.bibliographyDataHasChanged) {
+			var data = session.getBibliographyData();
+			output.push(data !== "" ? data : "X");
 		} else {
 			output.push("!");
 		}
@@ -490,7 +696,7 @@ Zotero.Integration.SOAP = new function() {
 	 */
 	function restoreSession(vars) {
 		if(!vars || !_checkVersion(vars[0])) {
-			return "ERROR:"+Zotero.getString("integration.incompatibleVersion", Zotero.version);
+			return "ERROR:"+Zotero.getString("integration.error.incompatibleVersion", Zotero.version);
 		}
 
 		try {
@@ -500,8 +706,8 @@ Zotero.Integration.SOAP = new function() {
 		}
 		
 		var sessionID = Zotero.randomString();
-		var session = _sessions[sessionID] = new Zotero.Integration.Session();
-		session.setStyle(vars[2], vars[3], vars[4]);
+		var session = Zotero.Integration.sessions[sessionID] = new Zotero.Integration.Session();
+		session.setStyle(vars[2], {useEndnotes:vars[3], fieldType:vars[4]});
 		
 		var encounteredItem = new Object();
 		var newField = new Object();
@@ -512,7 +718,7 @@ Zotero.Integration.SOAP = new function() {
 		}
 		
 		session.updateItemSet(session.citationsByItemID);
-		if(vars[1] != "!") session.loadDocumentData(vars[1]);
+		if(vars[1] != "!") session.loadBibliographyData(vars[1]);
 		session.sortItemSet();
 		session.resetRequest();
 		
@@ -526,7 +732,7 @@ Zotero.Integration.SOAP = new function() {
 	 */
 	function setDocPrefs(vars) {
 		if(!vars || !vars.length || !_checkVersion(vars[1])) {
-			return "ERROR:"+Zotero.getString("integration.incompatibleVersion", Zotero.version);
+			return "ERROR:"+Zotero.getString("integration.error.incompatibleVersion", Zotero.version);
 		}
 		
 		var io = new function() {
@@ -542,22 +748,26 @@ Zotero.Integration.SOAP = new function() {
 		if(vars[0] == "!") {
 			// no session ID; generate a new one
 			var sessionID = Zotero.randomString();
-			var session = _sessions[sessionID] = new Zotero.Integration.Session();
+			var session = Zotero.Integration.sessions[sessionID] = new Zotero.Integration.Session();
 		} else {
 			// session ID exists
 			var sessionID = vars[0];
-			var session = _sessions[sessionID];
+			var session = Zotero.Integration.sessions[sessionID];
 			if(!session) return "ERROR:sessionExpired";
 			
 			oldStyle = io.style = session.styleID;
-			io.useEndnotes = session.useEndnotes;
-			io.useBookmarks = session.useBookmarks;
+			io.useEndnotes = session.prefs.useEndnotes;
+			io.useBookmarks = session.prefs.fieldType;
 		}
 		
-		watcher.openWindow(null, 'chrome://zotero/content/integrationDocPrefs.xul', '',
-		                   'chrome,modal,centerscreen' + (Zotero.isWin ? ',popup' : ''), io, true);
-		session.setStyle(io.style, io.useEndnotes, io.useBookmarks);
-		if(!oldStyle || oldStyle == io.style) {
+		Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
+			.getService(Components.interfaces.nsIWindowWatcher)
+			.openWindow(null, 'chrome://zotero/content/integrationDocPrefs.xul', '',
+			'chrome,modal,centerscreen' + (Zotero.isWin ? ',popup' : ''), io, true);
+		session.prefs.useEndnotes = io.useEndnotes;
+		session.prefs.fieldType = io.useBookmarks;
+		session.setStyle(io.style, session.prefs);
+		if(!oldStyle || oldStyle != io.style) {
 			session.regenerateAll = session.bibliographyHasChanged = true;
 		}
 		
@@ -571,7 +781,7 @@ Zotero.Integration.SOAP = new function() {
 	function _checkVersion(version) {
 		versionParts = version.split("/");
 		Zotero.debug("Integration: client version "+version);
-		if(versionParts.length != 3 || versionParts[1] != API_VERSION) return false;
+		if(versionParts.length != 3 || versionParts[1] != COMPAT_API_VERSION) return false;
 		return true;
 	}
 }
@@ -582,6 +792,7 @@ Zotero.Integration.SOAP = new function() {
 Zotero.Integration.Session = function() {
 	// holds items not in document that should be in bibliography
 	this.uncitedItems = new Object();
+	this.prefs = new Object();
 	
 	this.resetRequest();
 }
@@ -589,15 +800,25 @@ Zotero.Integration.Session = function() {
 /*
  * changes the Session style
  */
-Zotero.Integration.Session.prototype.setStyle = function(styleID, useEndnotes, useBookmarks) {
-	this.styleID = styleID;
-	this.style = Zotero.Cite.getStyle(styleID);
-	this.useEndnotes = useEndnotes;
-	this.useBookmarks = useBookmarks;
-	this.itemSet = this.style.createItemSet();
-	this.dateModified = new Object();
-	
-	this.loadUncitedItems();
+Zotero.Integration.Session.prototype.setStyle = function(styleID, prefs) {
+	this.prefs = prefs;
+	if(styleID) {
+		this.styleID = styleID;
+		try {
+			this.style = Zotero.Cite.getStyle(styleID);
+			this.dateModified = new Object();
+			
+			this.itemSet = this.style.createItemSet();
+			this.loadUncitedItems();
+		} catch(e) {
+			Zotero.debug(e)
+			this.styleID = undefined;
+			return false;
+		}
+		
+		return true;
+	}
+	return false;
 }
 
 /*
@@ -609,7 +830,7 @@ Zotero.Integration.Session.prototype.resetRequest = function() {
 	
 	this.regenerateAll = false;
 	this.bibliographyHasChanged = false;
-	this.documentDataHasChanged = false;
+	this.bibliographyDataHasChanged = false;
 	this.updateItemIDs = new Object();
 	this.updateIndices = new Object()
 }
@@ -829,6 +1050,7 @@ Zotero.Integration.Session.prototype.previewCitation = function(citation) {
 	}
 	// get preview citation
 	var text = this.style.formatCitation(citation, "Integration");
+	
 	// delete from item set
 	if(deleteItems.length) {
 		this.itemSet.remove(deleteItems);
@@ -1011,7 +1233,7 @@ Zotero.Integration.Session.prototype.editBibliography = function() {
 	var bibliographyEditor = new Zotero.Integration.Session.BibliographyEditInterface(this);
 	var io = new function() { this.wrappedJSObject = bibliographyEditor; }
 	
-	this.documentDataHasChanged = this.bibliographyHasChanged = true;
+	this.bibliographyDataHasChanged = this.bibliographyHasChanged = true;
 	
 	Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
 	          .getService(Components.interfaces.nsIWindowWatcher)
@@ -1023,14 +1245,26 @@ Zotero.Integration.Session.prototype.editBibliography = function() {
 /*
  * gets integration bibliography
  */
-Zotero.Integration.Session.prototype.getBibliography = function() {
-	return this.style.formatBibliography(this.itemSet, "Integration");
+Zotero.Integration.Session.prototype.getBibliography = function(useXML) {
+	// get preview citation
+	if(useXML) {
+		// use real RTF in XML incarnation, but chop off the first \n
+		var text = this.style.formatBibliography(this.itemSet, "RTF")
+		var nlIndex = text.indexOf("\n");
+		if(nlIndex !== -1) {
+			return "{\\rtf "+text.substr(text.indexOf("\n"));
+		} else {
+			return "";
+		}
+	} else {
+		return this.style.formatBibliography(this.itemSet, "Integration");
+	}
 }
 
 /*
  * gets citations in need of update
  */
-Zotero.Integration.Session.prototype.getCitations = function(regenerateAll) {
+Zotero.Integration.Session.prototype.getCitations = function(regenerateAll, useXML) {
 	if(regenerateAll || this.regenerateAll) {
 		// update all indices
 		for(var i=0; i<this.citationsByIndex.length; i++) {
@@ -1047,39 +1281,75 @@ Zotero.Integration.Session.prototype.getCitations = function(regenerateAll) {
 		}
 	}
 	
-	var output = [];
+	var output = (useXML ? <citations/> : []);
 	var citation;
+	
 	for(var i in this.updateIndices) {
 		citation = this.citationsByIndex[i];
 		
 		if(!citation) continue;
 		
-		output.push(i);
-		if(citation.properties.delete) {
+		if(useXML) {
+			var citationXML = <citation index={i}/>;
+		} else {
+			output.push(i);
+		}
+		
+		if(citation.properties["delete"]) {
 			// delete citation
-			output.push("!");
-			output.push("!");
+			if(useXML) {
+				citationXML.@delete = "1";
+			} else {
+				output.push("!");
+				output.push("!");
+			}
 		} else {
 			var field = this.getCitationField(citation);
-			output.push(field == citation.properties.field ? "!" : field);
+
+			if(useXML) {
+				if(field != citation.properties.field) {
+					citationXML.code = field;
+				}
+			} else {
+				output.push(field == citation.properties.field ? "!" : field);
+			}
 			
 			if(citation.properties.custom) {
-				output.push(citation.properties.custom);
+				var citationText = citation.properties.custom;
+				if(useXML) {
+					// XML uses real RTF, rather than the format used for
+					// integration, so we have to escape things properly
+					citationText = citationText.replace(/[\x7F-\uFFFF]/g,
+						Zotero.Integration.Session._rtfEscapeFunction).
+						replace("\t", "\\tab ", "g");
+				}
+			} else if(useXML) {
+				var citationText = this.style.formatCitation(citation, "RTF");
 			} else {
-				var citation = this.style.formatCitation(citation, "Integration");
-				if(citation == "") citation = " ";
-				output.push(citation);
+				var citationText = this.style.formatCitation(citation, "Integration");
+			}
+			
+			if(useXML) {
+				citationXML.text = "{\\rtf "+citationText+"}";
+			} else {
+				output.push(citationText == "" ? " " : citationText);
 			}
 		}
+		
+		if(useXML) output.appendChild(citationXML);
 	}
 	
 	return output;
 }
 
+Zotero.Integration.Session._rtfEscapeFunction = function(aChar) {
+	return "{\\uc0\\u"+aChar.charCodeAt(0).toString()+"}"
+}
+
 /*
  * loads document data from a JSON object
  */
-Zotero.Integration.Session.prototype.loadDocumentData = function(json) {
+Zotero.Integration.Session.prototype.loadBibliographyData = function(json) {
 	var documentData = Zotero.JSON.unserialize(json);
 	
 	// set uncited
@@ -1119,12 +1389,12 @@ Zotero.Integration.Session.prototype.loadUncitedItems = function() {
 /*
  * saves document data from a JSON object
  */
-Zotero.Integration.Session.prototype.getDocumentData = function() {
-	var documentData = {};
+Zotero.Integration.Session.prototype.getBibliographyData = function() {
+	var bibliographyData = {};
 	
 	// add uncited if there is anything
 	for(var item in this.uncitedItems) {
-		documentData.uncited = this.uncitedItems;
+		bibliographyData.uncited = this.uncitedItems;
 		break;
 	}
 	
@@ -1135,16 +1405,16 @@ Zotero.Integration.Session.prototype.getDocumentData = function() {
 			if(custom !== "") {
 				var itemID = this.itemSet.items[i].getID();
 				
-				if(!documentData.custom) documentData.custom = {};
-				documentData.custom[itemID] = custom;
+				if(!bibliographyData.custom) bibliographyData.custom = {};
+				bibliographyData.custom[itemID] = custom;
 			}
 		}
 	}
 	
-	if(documentData.uncited || documentData.custom) {
-		return Zotero.JSON.serialize(documentData);
+	if(bibliographyData.uncited || bibliographyData.custom) {
+		return Zotero.JSON.serialize(bibliographyData);
 	} else {
-		return "X"; 	// nothing
+		return ""; 	// nothing
 	}
 }
 
