@@ -2141,6 +2141,7 @@ Zotero.Item.prototype.getFile = function(row, skipExistsCheck) {
 			// Strip "storage:"
 			var path = row.path.substr(8);
 			var file = Zotero.Attachments.getStorageDirectory(this.id);
+			file.QueryInterface(Components.interfaces.nsILocalFile);
 			file.append(path);
 			if (!file.exists()) {
 				Zotero.debug("Attachment file '" + path + "' not found");
