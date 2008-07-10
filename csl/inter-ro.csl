@@ -12,7 +12,7 @@
     <summary>Romanian INTER Institute format with full notes and bibliography</summary>
     <category term="theology"/>
     <category term="numeric"/>
-    <updated>2008-01-23T15:27:43+00:00</updated>
+    <updated>2008-07-10T14:24:43+00:00</updated>
   </info>
   <macro name="editor">
     <names variable="editor" delimiter=", ">
@@ -133,6 +133,12 @@
       </else>
     </choose>
   </macro>
+  <macro name="locators">
+    <group>
+      <label variable="locator" suffix="." form="short"/>
+      <text variable="locator" prefix=" "/>
+    </group>
+  </macro>
   <macro name="sort-key">
     <text macro="author-bib" suffix=" "/>
     <text variable="issue" suffix=" "/>
@@ -151,10 +157,7 @@
 	<if position="ibid-with-locator">
 	  <group delimiter=", ">
 	    <text term="ibid" form="long" font-style="italic" text-case="capitalize-first"/>
-	    <group>
-	      <label variable="locator" suffix="." form="short"/>
-	      <text variable="locator" prefix=" "/>
-	    </group>
+	    <text macro="locators"/>
 	  </group>
 	</if>
 	<else-if position="ibid">
@@ -178,10 +181,7 @@
 		<text macro="issued"/>
 	      </else-if>
 	    </choose>
-	    <group>
-	      <label variable="locator" suffix="." form="short"/>
-	      <text variable="locator" prefix=" "/>
-	    </group>
+	    <text macro="locators"/>
 	  </group>  
 	</else-if>
 	<else>
@@ -207,10 +207,7 @@
 	      <text variable="edition" prefix=", "/>
 	      <text macro="publisher" prefix=", "/>
 	      <text macro="issued" prefix=", "/>		   
-	      <group prefix=", ">
-		<label variable="locator" suffix="." form="short"/>
-		<text variable="locator" prefix=" "/>
-	      </group>
+	      <text macro="locators" prefix=", "/>
 	      <text macro="access" prefix=", "/>
 	    </if>
 	    <else-if type="article-journal article-newspaper article-magazine" match="any">
@@ -227,10 +224,7 @@
 		<text macro="translator" prefix=", "/>
 		<text variable="edition" prefix=", "/>
 		<text macro="publisher" prefix=", "/>
-		<group>
-		  <label variable="locator" suffix="." form="short" prefix=", "/>
-		  <text variable="locator" prefix=" "/>
-		</group>
+		<text macro="locators" prefix=", "/>
 		<text macro="access" prefix=", "/>
 	      </group>
 	    </else-if>
@@ -247,10 +241,7 @@
 	      <text variable="edition" prefix=", "/>
 	      <text macro="publisher" prefix=", "/>
 	      <text macro="issued" prefix=", "/>
-	      <group>
-		<label variable="locator" prefix=", " suffix="." form="short"/>
-		<text variable="locator" prefix=" "/>
-	      </group>
+	      <text macro="locators" prefix=", "/>
 	      <text macro="access" prefix=", "/>
 	    </else-if>
 	    <else>
@@ -258,10 +249,7 @@
 		<text variable="container-title" font-style="italic" prefix=", "/>
 		<text variable="volume" prefix=" "/>
 		<text variable="issue" prefix=", "/>
-		<group>
-		  <label variable="locator" include-period="true" form="short" prefix=", "/>
-		  <text variable="locator" prefix=" "/>
-		</group>
+		<text macro="locators" prefix=", "/>
 	      </group>
 	    </else>
 	  </choose>
@@ -300,11 +288,6 @@
 	    <label variable="page" include-period="true" form="short" prefix=", "/>
 	    <text variable="page" prefix=" "/>
 	  </group>
-	  <group prefix=", ">
-	    <label variable="locator" suffix="." form="short"/>
-	    <text variable="locator" prefix=" "/>
-	  </group>
-	  <text macro="access" prefix=", "/>
 	</if>
 	<else-if type="article-journal article-newspaper article-magazine" match="any">
 	  <group class="container" delimiter=" ">
@@ -319,11 +302,6 @@
 	  <text macro="translator" prefix=", "/>
 	  <text variable="edition" prefix=", "/>
 	  <text macro="publisher" prefix=", "/>
-	  <group>
-	    <label variable="locator" suffix="." form="short" prefix=", "/>
-	    <text variable="locator" prefix=" "/>
-	  </group>
-	  <text macro="access" prefix=", "/>
 	</else-if>
 	<else-if type="book">
 	  <group>
@@ -338,24 +316,16 @@
 	  <text variable="edition" prefix=", "/>
 	  <text macro="publisher" prefix=", "/>
 	  <text macro="issued" prefix=", "/>
-	  <group>
-	    <label variable="locator" prefix=", " suffix="." form="short"/>
-	    <text variable="locator" prefix=" "/>
-	  </group>
-	  <text macro="access" prefix=", "/>
 	</else-if>
 	<else>
 	  <group class="container">
 	    <text variable="container-title" font-style="italic" prefix=", "/>
 	    <text variable="volume" prefix=" "/>
 	    <text variable="issue" prefix=", "/>
-	    <group>
-	      <label variable="locator" include-period="true" form="short" prefix=", "/>
-	      <text variable="locator" prefix=" "/>
-	    </group>
 	  </group>
 	</else>
-      </choose>    
+      </choose> 
+      <text macro="locators" prefix=", "/>
       <text macro="access" prefix=", "/>
     </layout>
   </bibliography>
