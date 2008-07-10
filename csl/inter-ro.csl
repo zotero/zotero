@@ -139,6 +139,12 @@
       <text variable="locator" prefix=" "/>
     </group>
   </macro>
+  <macro name="pages">
+    <group>
+      <label variable="page" suffix="." form="short"/>
+      <text variable="page" prefix=" "/>
+    </group>
+  </macro>
   <macro name="sort-key">
     <text macro="author-bib" suffix=" "/>
     <text variable="issue" suffix=" "/>
@@ -207,8 +213,6 @@
 	      <text variable="edition" prefix=", "/>
 	      <text macro="publisher" prefix=", "/>
 	      <text macro="issued" prefix=", "/>		   
-	      <text macro="locators" prefix=", "/>
-	      <text macro="access" prefix=", "/>
 	    </if>
 	    <else-if type="article-journal article-newspaper article-magazine" match="any">
 	      <group>
@@ -224,8 +228,6 @@
 		<text macro="translator" prefix=", "/>
 		<text variable="edition" prefix=", "/>
 		<text macro="publisher" prefix=", "/>
-		<text macro="locators" prefix=", "/>
-		<text macro="access" prefix=", "/>
 	      </group>
 	    </else-if>
 	    <else-if type="book">
@@ -241,18 +243,17 @@
 	      <text variable="edition" prefix=", "/>
 	      <text macro="publisher" prefix=", "/>
 	      <text macro="issued" prefix=", "/>
-	      <text macro="locators" prefix=", "/>
-	      <text macro="access" prefix=", "/>
 	    </else-if>
 	    <else>
 	      <group class="container">
 		<text variable="container-title" font-style="italic" prefix=", "/>
 		<text variable="volume" prefix=" "/>
 		<text variable="issue" prefix=", "/>
-		<text macro="locators" prefix=", "/>
 	      </group>
 	    </else>
 	  </choose>
+	  <text macro="locators" prefix=", "/>
+	  <text macro="access" prefix=", "/>
 	</else>
       </choose>
     </layout>
@@ -302,6 +303,7 @@
 	  <text macro="translator" prefix=", "/>
 	  <text variable="edition" prefix=", "/>
 	  <text macro="publisher" prefix=", "/>
+	  <text macro="pages" prefix=", "/>
 	</else-if>
 	<else-if type="book">
 	  <group>
