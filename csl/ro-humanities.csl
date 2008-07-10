@@ -216,7 +216,7 @@
 		</group>
 		<text macro="volume" prefix=", "/>
 	      </group>		   
-	      <text variable="edition" prefix=", "/>
+	      <text variable="edition" prefix=", "/>  
 	      <text macro="collection-title" prefix=", "/>
 	      <text macro="publisher" prefix=", "/>
 	      <text macro="issued" prefix=", "/>		   
@@ -272,7 +272,7 @@
       <text macro="title"/>
       <choose>
 	<if type="chapter">
-	  <group class="container" delimiter=", ">
+	  <group class="container">
 	    <text term="in" text-case="lowercase" prefix=", "/>
 	    <group delimiter=", " prefix=" ">
 	      <text macro="editor-short"/>
@@ -281,7 +281,7 @@
 	    <text macro="volume" prefix=", "/>
 	  </group>
 	  <group delimiter=", " prefix=", ">
-	    <text variable="edition" prefix=", "/>
+	    <text variable="edition"/>
 	    <text macro="collection-title"/>
 	    <text macro="publisher"/>
 	    <text macro="issued"/>
