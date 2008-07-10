@@ -638,7 +638,7 @@ Zotero.CSL.prototype.formatBibliography = function(itemSet, format) {
 	} else {
 		if(format == "RTF" || format == "Integration") {
 			if(format == "RTF") {
-				preamble = "{\\rtf\\ansi{\\fonttbl\\f0\\froman Times New Roman;}{\\colortbl;\\red255\\green255\\blue255;}\\pard\\f0";
+				preamble = "{\\rtf\\ansi{\\fonttbl\\f0\\froman Times New Roman;}{\\colortbl;\\red255\\green255\\blue255;}\\pard\\f0\r\n";
 			}
 			
 			var tabStop = null;
@@ -774,7 +774,7 @@ Zotero.CSL.prototype.formatBibliography = function(itemSet, format) {
 		output = output.substr(0, output.length-returnChars.length);
 		
 		// add bracket for RTF
-		if(format == "RTF") output += "}";
+		if(format == "RTF") output += "\\par }";
 	}
 	
 	return preamble+output;

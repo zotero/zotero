@@ -258,7 +258,6 @@ var Zotero = new function(){
 		Zotero.Schema.updateScrapersRemote();
 		
 		// Initialize integration web server
-		Zotero.Integration.SOAP.init();
 		Zotero.Integration.init();
 		
 		// Initialize data web server
