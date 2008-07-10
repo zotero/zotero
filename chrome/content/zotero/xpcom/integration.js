@@ -510,16 +510,17 @@ Zotero.Integration.Request.prototype.setDocPrefs = function() {
 		.getService(Components.interfaces.nsIWindowWatcher)
 		.openWindow(null, 'chrome://zotero/content/integrationDocPrefs.xul', '',
 		'chrome,modal,centerscreen' + (Zotero.isWin ? ',popup' : ''), io, true);
-	this._session.prefs.useEndnotes = io.useEndnotes;
-	this._session.prefs.fieldType = io.useBookmarks;
-	Zotero.debug("prefs are")
-	Zotero.debug(this._session.prefs);
 	if(!oldStyle || oldStyle != io.style
 			|| io.useEndnotes != this._session.prefs.useEndnotes
 			|| io.useBookmarks != this._session.prefs.fieldType) {
 		this._session.regenerateAll = this._session.bibliographyHasChanged = true;
-		this._session.setStyle(io.style, this._session.prefs);
+		
+		if(oldStyle != io.style) {
+			this._session.setStyle(io.style, this._session.prefs);
+		}
 	}
+	this._session.prefs.useEndnotes = io.useEndnotes;
+	this._session.prefs.fieldType = io.useBookmarks;
 	
 	this.responseHeader.appendChild(<style
 		id={io.style} class={this._session.style.class}
