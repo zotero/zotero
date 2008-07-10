@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-07-08 15:35:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-07-10 06:15:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-06-16 21:30:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -5815,7 +5815,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('f203db7f-7b7b-4dc4-b018-115b7885fe3b', '1.0.0b4.r5', '', '2008-07-09 10:49:53', '0', '100', '4', 'Oxford Music and Art Online', 'Michael Berkowitz', 'http://[^/]*www.oxford(music|art)online.com[^/]*/', 
+REPLACE INTO translators VALUES ('f203db7f-7b7b-4dc4-b018-115b7885fe3b', '1.0.0b4.r5', '', '2008-07-10 06:15:00', '0', '100', '4', 'Oxford Music and Art Online', 'Michael Berkowitz', 'http://[^/]*www.oxford(music|art)online.com[^/]*/', 
 'function detectWeb(doc, url) {
 	if (url.match(/search_results/)) {
 		return "multiple";
@@ -5862,7 +5862,7 @@ REPLACE INTO translators VALUES ('f203db7f-7b7b-4dc4-b018-115b7885fe3b', '1.0.0b
 	}
 }');
 
-REPLACE INTO translators VALUES ('ea531652-cdeb-4ec2-940e-627d4b107263', '1.0.0b4.r1', '', '2008-07-09 13:41:54', '0', '100', '4', 'AlterNet', 'Jesse Johnson', '^http://(?:www\.)alternet.org', 
+REPLACE INTO translators VALUES ('ea531652-cdeb-4ec2-940e-627d4b107263', '1.0.0b4.r1', '', '2008-07-10 06:15:00', '0', '100', '4', 'AlterNet', 'Jesse Johnson', '^http://(?:www\.)alternet.org', 
 'function detectWeb(doc, url) {
 	// identifies articles according to the presence of an article ID
 	// number in the URL
@@ -11746,7 +11746,7 @@ function doWeb(doc, url) {
 }
 ');
 
-REPLACE INTO translators VALUES ('5af42734-7cd5-4c69-97fc-bc406999bdba', '1.0.0b4.r5', '', '2008-07-09 19:05:28', '1', '100', '4', 'ESA Journals', 'Michael Berkowitz', 'http://www.esajournals.org/', 
+REPLACE INTO translators VALUES ('5af42734-7cd5-4c69-97fc-bc406999bdba', '1.0.0b4.r5', '', '2008-07-10 06:15:00', '1', '100', '4', 'ESA Journals', 'Michael Berkowitz', 'http://www.esajournals.org/', 
 'function detectWeb(doc, url) {
 	if (url.indexOf("get-toc") != -1 || url.indexOf("searchtype") != -1) {
 		return "multiple";
@@ -20484,7 +20484,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('6f5f1b24-7519-4314-880f-d7004fbcfe7e', '1.0.0b4.r5', '', '2008-07-08 14:58:12', '0', '100', '4', 'ReliefWeb', 'Michael Berkowitz', 'http://(www.)?reliefweb.int/', 
+REPLACE INTO translators VALUES ('6f5f1b24-7519-4314-880f-d7004fbcfe7e', '1.0.0b4.r5', '', '2008-07-10 06:15:00', '0', '100', '4', 'ReliefWeb', 'Michael Berkowitz', 'http://(www.)?reliefweb.int/', 
 'function detectWeb(doc, url) {
 	if (url.match(/(S|s)earch(R|r)esults/)) {
 		return "multiple";
