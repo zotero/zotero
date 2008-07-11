@@ -1768,6 +1768,12 @@ Zotero.Translate.prototype._export = function() {
 		if(this.configOptions.getCollections) {
 			// get child collections
 			this._collectionsLeft = Zotero.getCollections(this.collection.getID(), true);
+			
+			if(this._collectionsLeft.length) {
+				// only include parent collection if there are actually children
+				this._collectionsLeft.unshift(this.collection);
+			}
+			
 			// get items in child collections
 			for each(var collection in this._collectionsLeft) {
 				this._itemsLeft = this._itemsLeft.concat(collection.getChildItems());
