@@ -1764,6 +1764,9 @@ Zotero.Translate.prototype._export = function() {
 	} else if(this.collection) {
 		// get items in this collection
 		this._itemsLeft = this.collection.getChildItems();
+		if(!this._itemsLeft) {
+			this._itemsLeft = [];
+		}
 		
 		if(this.configOptions.getCollections) {
 			// get child collections
@@ -1776,7 +1779,10 @@ Zotero.Translate.prototype._export = function() {
 			
 			// get items in child collections
 			for each(var collection in this._collectionsLeft) {
-				this._itemsLeft = this._itemsLeft.concat(collection.getChildItems());
+				var childItems = collection.getChildItems();
+				if(childItems) {
+					this._itemsLeft = this._itemsLeft.concat(childItems);
+				}
 			}
 		}
 	} else {
