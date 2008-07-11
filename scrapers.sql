@@ -13172,7 +13172,7 @@ function doWeb(doc,url)
 }
 ');
 
-REPLACE INTO translators VALUES ('8a07dd43-2bce-47bf-b4bf-c0fc441b79a9', '1.0.0b4.r5', '', '2008-02-27 23:00:00', '0', '100', '4', 'Optics Express', 'Michael Berkowitz', 'http://(www.)?opticsexpress\.org', 
+REPLACE INTO translators VALUES ('8a07dd43-2bce-47bf-b4bf-c0fc441b79a9', '1.0.0b4.r5', '', '2008-07-10 22:23:47', '0', '100', '4', 'Optics Express', 'Michael Berkowitz', 'http://(www.)?opticsexpress\.org', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -13212,13 +13212,11 @@ REPLACE INTO translators VALUES ('8a07dd43-2bce-47bf-b4bf-c0fc441b79a9', '1.0.0b
 	for (var a in articles) {
 		var link = articles[a];
 		Zotero.Utilities.HTTP.doGet(link, function(text) {
+			if (text.match(/doi:.*\"/)) var doi = text.match(/doi:(.*)\"/)[1];
 			var id = text.match(/name=\"articles\"\s+value=\"([^"]+)\"/)[1];
 			var action = text.match(/select\s+name=\"([^"]+)\"/)[1];
-			Zotero.debug(id);
-			Zotero.debug(action);
 			var get = ''http://www.opticsinfobase.org/custom_tags/IB_Download_Citations.cfm'';
 			var post = ''articles='' + id + ''&ArticleAction=save_endnote2&'' + action + ''=save_endnote2'';
-			Zotero.debug(get + "?" + post);
 			Zotero.Utilities.HTTP.doPost(get, post, function(text) {
 				var translator = Zotero.loadTranslator("import");
 				translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
@@ -13230,7 +13228,7 @@ REPLACE INTO translators VALUES ('8a07dd43-2bce-47bf-b4bf-c0fc441b79a9', '1.0.0b
 					} else {
 						pubName = item.publicationTitle;
 					}
-					Zotero.debug(pubName);
+					if (doi) item.DOI = doi;
 					item.attachments = [{url:articles[a], title:pubName + " Snapshot", mimeType:"text/html"}];
 					item.complete();
 				});
