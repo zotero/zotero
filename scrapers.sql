@@ -13240,7 +13240,7 @@ REPLACE INTO translators VALUES ('8a07dd43-2bce-47bf-b4bf-c0fc441b79a9', '1.0.0b
 	}
 }');
 
-REPLACE INTO translators VALUES ('a1a97ad4-493a-45f2-bd46-016069de4162', '1.0.0b4.r1', '', '2008-02-27 23:00:00', '0', '100', '4', 'Optical Society of America', 'Michael Berkowitz', 'https?://[^.]+\.(opticsinfobase|osa)\.org', 
+REPLACE INTO translators VALUES ('a1a97ad4-493a-45f2-bd46-016069de4162', '1.0.0b4.r1', '', '2008-07-10 22:11:09', '0', '100', '4', 'Optical Society of America', 'Michael Berkowitz', 'https?://[^.]+\.(opticsinfobase|osa)\.org', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -13276,14 +13276,15 @@ REPLACE INTO translators VALUES ('a1a97ad4-493a-45f2-bd46-016069de4162', '1.0.0b
 	} else {
 		articles = [url];
 	}
-	Zotero.debug(articles);
 	Zotero.Utilities.processDocuments(articles, function(newDoc) {
-		Zotero.debug(newDoc.location.href);
 		var osalink = newDoc.evaluate(''//div[@id="abstract"]/p/a[contains(text(), "opticsinfobase")]'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
-		Zotero.debug(osalink);
 		Zotero.Utilities.HTTP.doGet(osalink, function(text) {
 			var action = text.match(/select\s+name=\"([^"]+)\"/)[1];
 			var id = text.match(/input\s+type=\"hidden\"\s+name=\"articles\"\s+value=\"([^"]+)\"/)[1];
+			if (newDoc.evaluate(''//p[*[contains(text(), "DOI")]]'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+				var doi = Zotero.Utilities.trimInternal(newDoc.evaluate(''//p[*[contains(text(), "DOI")]]'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+				doi = doi.match(/doi:(.*)$/)[1];
+			}
 			var get = ''http://'' + host + ''/custom_tags/IB_Download_Citations.cfm'';
 			var post = ''articles='' + id + ''&ArticleAction=save_endnote2&'' + action + ''=save_endnote2'';
 			Zotero.Utilities.HTTP.doPost(get, post, function(text) {
@@ -13297,7 +13298,7 @@ REPLACE INTO translators VALUES ('a1a97ad4-493a-45f2-bd46-016069de4162', '1.0.0b
 					} else {
 						pubName = item.publicationTitle;
 					}
-					Zotero.debug(pubName);
+					if (doi) item.DOI = doi;
 					item.attachments = [{url:osalink, title:pubName + " Snapshot", mimeType:"text/html"}];
 					item.complete();
 				});
@@ -13305,7 +13306,6 @@ REPLACE INTO translators VALUES ('a1a97ad4-493a-45f2-bd46-016069de4162', '1.0.0b
 			});
 		});
 	}, function() {Zotero.done;});
-	
 }');
 
 REPLACE INTO translators VALUES ('b61c224b-34b6-4bfd-8a76-a476e7092d43', '1.0.0b4.r5', '', '2008-07-07 17:00:00', '1', '100', '4', 'SSRN', 'Michael Berkowitz', 'http://papers\.ssrn\.com/', 
