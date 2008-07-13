@@ -145,7 +145,7 @@
     </macro>
     <macro name="container-prefix">
         <choose>
-            <if type="chapter" match="any">
+            <if type="chapter article-journal" match="any">
                 <text term="in" text-case="capitalize-first" suffix=":"/>
             </if>
         </choose>
@@ -153,7 +153,7 @@
     <citation>
         <option name="et-al-min" value="3"/>
         <option name="et-al-use-first" value="1"/>
-        <option name="et-al-subsequent-min" value="6"/>
+        <option name="et-al-subsequent-min" value="3"/>
         <option name="et-al-subsequent-use-first" value="1"/>
         <option name="disambiguate-add-year-suffix" value="true"/>
         <option name="disambiguate-add-names" value="true"/>
@@ -173,8 +173,8 @@
     </citation>
     <bibliography>
         <option name="hanging-indent" value="true"/>
-        <option name="et-al-min" value="6"/>
-        <option name="et-al-use-first" value="4"/>
+        <option name="et-al-min" value="4"/>
+        <option name="et-al-use-first" value="1"/>
         <sort>
             <key macro="author"/>
             <key variable="title"/>
@@ -186,7 +186,7 @@
                 <text macro="title" suffix="."/>
                 <text macro="container-prefix"/>
                 <text macro="editor"/>
-                <text variable="container-title" font-style="italic" suffix="." prefix="In: "/>
+                <text variable="container-title" font-style="italic" suffix="."/>
                 <text macro="edition"/>
                 <text macro="publisher"/>
                 
