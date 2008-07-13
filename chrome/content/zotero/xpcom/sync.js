@@ -1363,12 +1363,13 @@ Zotero.Sync.Server.Data = new function() {
 						obj.save();
 						
 						// Update id in local updates array
+						//
+						// Object might not appear in local update array if server
+						// data was cleared and synched from another client
 						var index = uploadIDs.updated[types].indexOf(oldID);
-						if (index == -1) {
-							throw ("Local " + type + " " + oldID + " not in "
-								+ "update array when changing id");
+						if (index != -1) {
+							uploadIDs.updated[types][index] = newID;
 						}
-						uploadIDs.updated[types][index] = newID;
 						
 						// Update id in local deletions array
 						for (var i in uploadIDs.deleted[types]) {
