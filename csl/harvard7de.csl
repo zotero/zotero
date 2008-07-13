@@ -43,8 +43,8 @@
         </names>
     </macro>
     <macro name="author-short">
-        <names variable="author">
-            <name form="short" delimiter=", " initialize-with=". "/>
+        <names variable="author" delimiter="; ">
+            <name form="short" delimiter=", " initialize-with=". " delimiter-precedes-last="always" />
             <substitute>
                 <names variable="editor"/>
                 <names variable="translator"/>
@@ -57,15 +57,15 @@
             <if type="webpage">
                 <choose>
                     <if variable="URL">
-                        <text term="online" prefix="[" suffix="]"/>
-                        <text value=" Available from: "/>
+                        <text value="Online im Internet: URL: "/>
                         <text variable="URL"/>
                         <group prefix=" (" delimiter=" " suffix=")">
-                            <text term="accessed" text-case="capitalize-first"/>
+                          <!--  <text term="accessed" text-case="capitalize-first"/>-->
+                            <text value="Stand:"/> 
                             <date variable="accessed">
-                                <date-part name="day" suffix=" "/>
-                                <date-part name="month" suffix=" "/>
-                                <date-part name="year"/>
+                                <date-part name="day" form="numeric-leading-zeros" suffix="." />
+                                <date-part name="month" suffix="." form="numeric-leading-zeros"/>
+                                <date-part name="year" form="numeric-leading-zeros"/>
                             </date>
                         </group>
                     </if>
@@ -105,7 +105,10 @@
     <macro name="locator">
         <choose>
             <if type="article-journal">
-                <text variable="volume"/>
+                <text variable="volume" suffix=" "/>
+                <date variable="issued">
+                    <!--<date-part name="year" prefix="(" suffix=")"/>-->
+                </date>
                 <text variable="issue" prefix="(" suffix=")"/>
             </if>
         </choose>
@@ -148,7 +151,7 @@
         </choose>
     </macro>
     <citation>
-        <option name="et-al-min" value="4"/>
+        <option name="et-al-min" value="3"/>
         <option name="et-al-use-first" value="1"/>
         <option name="et-al-subsequent-min" value="6"/>
         <option name="et-al-subsequent-use-first" value="1"/>
@@ -183,7 +186,7 @@
                 <text macro="title" suffix="."/>
                 <text macro="container-prefix"/>
                 <text macro="editor"/>
-                <text variable="container-title" font-style="italic" suffix="." prefix=": "/>
+                <text variable="container-title" font-style="italic" suffix="." prefix="In : "/>
                 <text macro="edition"/>
                 <text macro="publisher"/>
                 
