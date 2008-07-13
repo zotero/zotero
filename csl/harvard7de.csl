@@ -186,7 +186,7 @@
                 <text macro="title" suffix="."/>
                 <text macro="container-prefix"/>
                 <text macro="editor"/>
-                <text variable="container-title" font-style="italic" suffix="." prefix="In : "/>
+                <text variable="container-title" font-style="italic" suffix="." prefix="In: "/>
                 <text macro="edition"/>
                 <text macro="publisher"/>
                 
