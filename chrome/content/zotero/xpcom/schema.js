@@ -566,7 +566,8 @@ Zotero.Schema = new function(){
 			return true;
 		}
 		
-		throw("Zotero '" + schema + "' DB version is newer than SQL file");
+		throw ("Zotero '" + schema + "' DB version (" + dbVersion
+			+ ") is newer than SQL file (" + schemaVersion + ")");
 	}
 	
 	
