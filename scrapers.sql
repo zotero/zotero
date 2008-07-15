@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-07-10 06:15:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-07-15 19:45:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-06-16 21:30:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1264,7 +1264,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('87766765-919e-4d3b-9071-3dd7efe984c8', '1.0.0b4.r5', '', '2008-07-14 14:19:40', '0', '100', '4', 'Revues.org', 'Michael Berkowitz', 'http://.*\.revues\.org', 
+REPLACE INTO translators VALUES ('87766765-919e-4d3b-9071-3dd7efe984c8', '1.0.0b4.r5', '', '2008-07-15 19:40:00', '0', '100', '4', 'Revues.org', 'Michael Berkowitz', 'http://.*\.revues\.org', 
 'function detectWeb(doc, url) {
 	if (doc.evaluate(''//div[@id="inside"]/div[@class="sommaire"]/dl[@class="documents"]/dd[@class="titre"]/a'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()
 		|| doc.evaluate(''//ul[@class="summary"]//div[@class="title"]/a'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
@@ -1371,7 +1371,7 @@ REPLACE INTO translators VALUES ('daa26181-71d4-48ef-8cac-54c06ff4c20e', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('dd149efc-7f0e-43e4-b3df-b6d15e171717', '1.0.0b4.r5', '', '2008-07-14 16:21:21', '0', '100', '4', 'Persee', 'Adam Crymble', 'http://www.persee.fr', 
+REPLACE INTO translators VALUES ('dd149efc-7f0e-43e4-b3df-b6d15e171717', '1.0.0b4.r5', '', '2008-07-15 19:40:00', '0', '100', '4', 'Persée', 'Adam Crymble', 'http://www.persee.fr', 
 'function detectWeb(doc, url) {
 	if (doc.location.href.match("search") && doc.evaluate(''//div[@id="searchResults"]/div[@class="oneResult"]/a'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
@@ -13328,7 +13328,7 @@ function doWeb(doc,url)
 }
 ');
 
-REPLACE INTO translators VALUES ('8a07dd43-2bce-47bf-b4bf-c0fc441b79a9', '1.0.0b4.r5', '', '2008-07-10 22:23:47', '0', '100', '4', 'Optics Express', 'Michael Berkowitz', 'http://(www.)?opticsexpress\.org', 
+REPLACE INTO translators VALUES ('8a07dd43-2bce-47bf-b4bf-c0fc441b79a9', '1.0.0b4.r5', '', '2008-07-15 19:40:00', '0', '100', '4', 'Optics Express', 'Michael Berkowitz', 'http://(www.)?opticsexpress\.org', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -13394,7 +13394,7 @@ REPLACE INTO translators VALUES ('8a07dd43-2bce-47bf-b4bf-c0fc441b79a9', '1.0.0b
 	}
 }');
 
-REPLACE INTO translators VALUES ('a1a97ad4-493a-45f2-bd46-016069de4162', '1.0.0b4.r1', '', '2008-07-10 22:11:09', '0', '100', '4', 'Optical Society of America', 'Michael Berkowitz', 'https?://[^.]+\.(opticsinfobase|osa)\.org', 
+REPLACE INTO translators VALUES ('a1a97ad4-493a-45f2-bd46-016069de4162', '1.0.0b4.r1', '', '2008-07-15 19:40:00', '0', '100', '4', 'Optical Society of America', 'Michael Berkowitz', 'https?://[^.]+\.(opticsinfobase|osa)\.org', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
