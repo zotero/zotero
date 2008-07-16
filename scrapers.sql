@@ -1264,12 +1264,12 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('87766765-919e-4d3b-9071-3dd7efe984c8', '1.0.0b4.r5', '', '2008-07-15 19:40:00', '0', '100', '4', 'Revues.org', 'Michael Berkowitz', 'http://.*\.revues\.org', 
+REPLACE INTO translators VALUES ('87766765-919e-4d3b-9071-3dd7efe984c8', '1.0.0b4.r5', '', '2008-07-16 11:20:16', '1', '100', '4', 'Revues.org', 'Michael Berkowitz', 'http://.*\.revues\.org', 
 'function detectWeb(doc, url) {
 	if (doc.evaluate(''//div[@id="inside"]/div[@class="sommaire"]/dl[@class="documents"]/dd[@class="titre"]/a'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()
 		|| doc.evaluate(''//ul[@class="summary"]//div[@class="title"]/a'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
-	} else if (doc.evaluate(''//h1[@id="docTitle"]/span[@class="text"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+	} else if (doc.evaluate(''//h1[@id="docTitle"]/span[@class="text"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext() || url.match(/document\d+/)) {
 		return "journalArticle";
 	}
 }', 
@@ -1300,9 +1300,9 @@ REPLACE INTO translators VALUES ('87766765-919e-4d3b-9071-3dd7efe984c8', '1.0.0b
 		var data = new Object();
 		while (meta = metas.iterateNext()) {
 			if (data[meta.name]) {
-				data[meta.name] = data[meta.name] + ";" + meta.content;
+				data[meta.name.toLowerCase()] = data[meta.name.toLowerCase()] + ";" + meta.content;
 			} else {
-				data[meta.name] = meta.content
+				data[meta.name.toLowerCase()] = meta.content
 			}
 		}
 		var item = new Zotero.Item("journalArticle");
@@ -1311,11 +1311,12 @@ REPLACE INTO translators VALUES ('87766765-919e-4d3b-9071-3dd7efe984c8', '1.0.0b
 		for each (var aut in authors) {
 			if (aut.match(/\w+/)) item.creators.push(Zotero.Utilities.cleanAuthor(aut.replace(/(.*)\s([^\s]+)$/, "$2 $1"), "author"));
 		}
-		item.tags = data[''DC.subject''].split(/,\s+/);
-		item.date = data[''DC.date''];
-		item.title = data[''DC.title''];
-		item.publicationTitle = data[''DC.relation.isPartOf''].match(/^[^,]+/)[0];
-		item.abstractNote = data[''DC.description''];
+		item.tags = data[''dc.subject''].split(/,\s+/);
+		item.date = data[''dc.date''];
+		item.title = data[''dc.title''];
+		if (data[''dc.relation.ispartof'']) item.publicationTitle = data[''dc.relation.ispartof''].match(/^[^,]+/)[0];
+		item.abstractNote = data[''description''];
+		if (!item.abstractNote && data[''dc.description'']) item.abstractNote = data[''dc.description''];
 		
 		item.complete();
 	}, function() {Zotero.done;});
