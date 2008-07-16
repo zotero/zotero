@@ -2040,6 +2040,14 @@ Zotero.Translate.prototype._exportToArray = function(returnItem) {
 	// preserve notes
 	if(returnItemArray.note) returnItemArray.uniqueFields.note = returnItemArray.note;
 	
+	// TODO: Change tag.tag references in scrapers.sql to tag.name
+	// once translators are 1.5-only
+	if (returnItemArray.tags) {
+		for (var i in returnItemArray.tags) {
+			returnItemArray.tags[i].tag = returnItemArray.tags[i].name;
+		}
+	}
+	
 	return returnItemArray;
 }
 
