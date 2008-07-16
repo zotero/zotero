@@ -271,7 +271,7 @@ var Zotero_File_Interface = new function() {
 	 */
 	function bibliographyFromCollection() {
 		// find sorted items
-		var items = Zotero.Items.get(ZoteroPane.getSortedItems());
+		var items = Zotero.Items.get(ZoteroPane.getSortedItems(true));
 		if(!items) return;
 		
 		// find name
