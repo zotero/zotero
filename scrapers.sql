@@ -24650,7 +24650,7 @@ function doExport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('9cb70025-a888-4a29-a210-93ec52da40d4', '1.0.0b4.r1', '', '2008-07-01 14:30:13', '1', '200', '3', 'BibTeX', 'Simon Kornblith', 'bib', 
+REPLACE INTO translators VALUES ('9cb70025-a888-4a29-a210-93ec52da40d4', '1.0.0b4.r1', '', '2008-07-16 05:30:00', '1', '200', '3', 'BibTeX', 'Simon Kornblith', 'bib', 
 'Zotero.configure("dataMode", "block");
 Zotero.addOption("UTF8", true);
 
@@ -24747,7 +24747,7 @@ var bibtex2zoteroTypeMap = {
 	"manual":"book",
 	"mastersthesis":"thesis",
 	"misc":"book",
-	"proceedings":"conference"
+	"proceedings":"book"
 };
 
 /*
@@ -26325,7 +26325,7 @@ function getFieldValue(read) {
 function beginRecord(type, closeChar) {
 	type = Zotero.Utilities.cleanString(type.toLowerCase());
 	if(type != "string") {
-		zoteroType = bibtex2zoteroTypeMap[type];
+		var zoteroType = bibtex2zoteroTypeMap[type];
 		if (!zoteroType) {
 			Zotero.debug("discarded item from BibTeX; type was "+type);
 		}
