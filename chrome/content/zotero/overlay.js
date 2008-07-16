@@ -400,9 +400,9 @@ var ZoteroPane = new function()
 			return;
 		}
 		
-		// Ignore modifiers other than accel-alt (or accel-shift if useShift is on)
+		// Ignore modifiers other than Ctrl-Alt or Cmd-Shift
 		if (!((Zotero.isMac ? event.metaKey : event.ctrlKey) &&
-				useShift ? event.shiftKey : event.altKey)) {
+				(useShift ? event.shiftKey : event.altKey))) {
 			return;
 		}
 		
