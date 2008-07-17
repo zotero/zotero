@@ -1093,6 +1093,414 @@ REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b
 	Zotero.wait();
 }');
 
+REPLACE INTO translators VALUES ('176948f7-9df8-4afc-ace7-4c1c7318d426', '1.0.0b4.r5', '', '2008-07-16 15:35:45', '0', '100', '4', 'ESpacenet', 'Gilles Poulain', 'http://v3.espacenet.com/', 
+'function detectWeb(doc, url) {
+
+	if(doc.location.href.match("results?")) {
+        	return "multiple";
+        } else if (doc.location.href.match("textdoc")) {
+	        return "patent";
+        }
+  }', 
+'function doWeb(doc, url) {
+   
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	var articles = new Array();
+	
+	if (detectWeb(doc, url) == "multiple") {
+		var items = new Object();
+			
+		var titles = doc.evaluate(''//td[3]/strong/a'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+	
+		var next_title;
+		while (next_title = titles.iterateNext()) {
+			items[next_title.href] = next_title.textContent;
+		}
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			articles.push(i);
+		}
+	} else {
+		articles = [url];
+	}
+	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
+	Zotero.wait();
+}
+   
+function getItem(reftext,re) {
+    var item = reftext.match(re);
+    return item[1];
+}
+
+function scrape(doc,url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	
+	//Get title
+	var xpath = "/html/body/form/table[2]/tbody/tr[1]/td[3]/h2";
+	if(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()){
+		var title = Zotero.Utilities.cleanString(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);	
+		
+		var title1 = title.split(" ");		 
+		for (var j in title1) {
+			title1[j] = title1[j][0].toUpperCase() + title1[j].substr(1).toLowerCase();
+		}
+		title = title1.join(" ");
+	}
+
+	//Get Abstract
+	var xpath = ''//td[@id="abCell"]'';
+	if(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()){
+		var abstract = Zotero.Utilities.cleanString(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);	
+	}
+	
+	//Get Applicant
+	var xpath = "//table[1]/tbody/tr/td[1]/table/tbody/tr[4]/td[2]";
+	if(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()){
+		var applicant = Zotero.Utilities.cleanString(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);	
+	}
+
+	//Get application number
+	var xpath = "//table[1]/tbody/tr/td[1]/table/tbody/tr[8]/td[2]";
+	if(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()){
+		var anumber = Zotero.Utilities.cleanString(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);	
+	}
+	
+	//Get patent number
+	var xpath = "//table[1]/tbody/tr/td[1]/table/tbody/tr[1]/td[2]";
+	if(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()){
+		var pnumber = Zotero.Utilities.cleanString(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);	
+	}
+	
+	//Get CIB
+	var xpath = "//table[1]/tbody/tr/td[1]/table/tbody/tr[6]/td[2]";
+	if(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()){
+		var CIBnumber = Zotero.Utilities.cleanString(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);	
+	}
+	
+	//Get ECLA
+	var xpath = "//table[1]/tbody/tr/td[1]/table/tbody/tr[7]/td[2]";
+	if(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()){
+		var tmpECLAnumber = Zotero.Utilities.cleanString(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);		
+		tmpECLAnumber = tmpECLAnumber.substr(24);
+		tmpECLAnumber = tmpECLAnumber.replace(/\)+/g, ''; '');
+		var aus = tmpECLAnumber.split("; ");
+		var ECLAnumber = "";
+		for (var i=0; i< aus.length/2 ; i++){
+			ECLAnumber = ECLAnumber + aus[i] + "; "
+		}
+	}
+
+	//Get priority number
+	var xpath = "//table[1]/tbody/tr/td[1]/table/tbody/tr[9]/td[2]";
+	if(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()){
+		var prnumber = Zotero.Utilities.cleanString(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+	}	
+
+	
+	//Get date
+	var xpath = "//table[1]/tbody/tr/td[1]/table/tbody/tr[2]/td[2]";
+	if(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()){
+		var date = Zotero.Utilities.cleanString(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);	
+	}
+	
+	//Get Creators
+	var xpath = "//table[1]/tbody/tr/td[1]/table/tbody/tr[3]/td[2]";
+	if(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()){
+		var author = Zotero.Utilities.cleanString(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);	
+	}
+
+	//Create Zotero Ref
+	var newArticle = new Zotero.Item(''patent'');
+		newArticle.url = doc.location.href;
+		newArticle.title = title;
+		newArticle.date = date;
+		newArticle.abstractNote = abstract;
+		newArticle.assignee = applicant;
+		newArticle.patentNumber = pnumber;
+		newArticle.priorityNumbers = prnumber;
+		newArticle.applicationNumber = anumber;
+		newArticle.extra = "CIB: " + CIBnumber + "\nECLA: " + ECLAnumber
+
+	var author1 = author.split("; ");
+;
+	for (var m = 0; m< author1.length; m++) {
+		
+		if (author1[m].match(/\(/)) {
+			author1[m] = author1[m].substr(0, author1[m].length-5);
+		}
+		words = author1[m].split(/\s/);
+
+		for (var j in words) {
+			words[j] = words[j][0].toUpperCase() + words[j].substr(1).toLowerCase();
+		}
+
+		var inventor = '''';
+		for (var k = 1; k < words.length; k++) {
+			inventor = inventor +words[k] + " ";
+			if (k == words.length-1) {
+				inventor = inventor +words[0];
+				newArticle.creators.push(Zotero.Utilities.cleanAuthor(inventor, "inventor"));
+			}
+		}
+	}
+
+	 newArticle.complete();
+}');
+
+REPLACE INTO translators VALUES ('4da40f07-904b-4472-93b6-9bea1fe7d4df', '1.0.0b4.r5', '', '2008-07-16 11:17:32', '0', '100', '4', 'Canada.com', 'Adam Crymble', 'http://www.canada.com', 
+'function detectWeb(doc, url) {
+	if (doc.location.href.match("story")) {
+		return "newspaperArticle";
+	} else if (doc.location.href.match("search")) {
+		return "multiple";
+	}
+}', 
+'function scrape(doc, url) {
+
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;		
+	
+	var dataTags = new Object();
+	var tagsContent = new Array();
+	var fieldTitle;
+	
+	var newItem = new Zotero.Item("newspaperArticle");
+
+	newItem.title = doc.title;
+
+	if (doc.evaluate(''//div[@class="storyheader"]/h4'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+		newItem.abstractNote = doc.evaluate(''//div[@class="storyheader"]/h4'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+	} else if (doc.evaluate(''//div[@class="storyheader"]/h2'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+		newItem.abstracteNote = doc.evaluate(''//div[@class="storyheader"]/h2'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+	}
+
+	if (doc.evaluate(''//div[@class="feed_details"]/h4'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+		var author = doc.evaluate(''//div[@class="feed_details"]/h4'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+	
+		if (author.match(/\n/)) {
+			author1 = author.split(/\n/);
+			if (author1[0].match(/ and /)) {
+				author2 = author1[0].split(/ and /);
+				for (var i in author2) {
+					newItem.creators.push(Zotero.Utilities.cleanAuthor(author2[i], "author"));	
+				}
+			} else {
+				newItem.creators.push(Zotero.Utilities.cleanAuthor(author1[0], "author"));	
+			}
+		} else {
+			newItem.creators.push(Zotero.Utilities.cleanAuthor(author, "author"));	
+		}
+	}
+		
+	if (doc.evaluate(''//div[@class="feed_details"]/span'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+		var date1 = doc.evaluate(''//div[@class="feed_details"]/span'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.replace(/^\s*|\s*$/g, '''');
+		if (date1.match("Published:")) {
+			date1 = date1.substr(11);
+			newItem.date = date1;
+		}
+	}	
+	
+	if (doc.evaluate(''//ul[@class="home"]/li/a/span'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+		var pubTitle = doc.evaluate(''//ul[@class="home"]/li/a/span'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		if (pubTitle.match("Home")) {
+			newItem.publicationTitle = pubTitle.substr(0, pubTitle.length-5);
+		} else {
+			newItem.publicationTitle = pubTitle;
+		}
+	} else {
+		newItem.publicationTitle = "Canada.com";
+	}
+	
+	newItem.url = doc.location.href;
+
+	newItem.complete();
+}
+
+function doWeb(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	var articles = new Array();
+	
+	if (detectWeb(doc, url) == "multiple") {
+		var items = new Object();
+		var next_title;
+		
+		if (doc.evaluate(''//div[@class="even"]/p/a'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+		Zotero.debug("AAAAAA");
+			var titles0 = doc.evaluate(''//div[@class="even"]/p/a'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+			
+			while (next_title = titles0.iterateNext()) {
+				if (next_title.href.match("story") && next_title.href.match("canada.com")) {
+					items[next_title.href] = next_title.textContent;
+				}
+			}
+		}
+		
+		if (doc.evaluate(''//div[@class="odd"]/p/a'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+		Zotero.debug("BBBBB");
+			var titles1 = doc.evaluate(''//div[@class="odd"]/p/a'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+			
+			while (next_title = titles1.iterateNext()) {
+				if (next_title.href.match("story") && next_title.href.match("canada.com")) {
+					items[next_title.href] = next_title.textContent;
+				}
+			}
+		}
+		
+		if (doc.evaluate(''//p/b/a'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+			Zotero.debug("CCCCC");
+			var titles2 = doc.evaluate(''//p/b/a'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+			while (next_title = titles2.iterateNext()) {
+				if (next_title.href.match("story") && next_title.href.match("canada.com")) {
+					items[next_title.href] = next_title.textContent;
+				}
+			}
+		}
+		
+		if (doc.evaluate(''//div[@class="name"]/a'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+			
+			Zotero.debug("DDDD");
+			var titles3 = doc.evaluate(''//div[@class="name"]/a'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+			while (next_title = titles3.iterateNext()) {
+				if (next_title.href.match("story")  && next_title.href.match("canada.com")) {
+					items[next_title.href] = next_title.textContent;
+				}
+			}
+		}
+
+		
+		
+		
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			articles.push(i);
+		}
+	} else {
+		articles = [url];
+	}
+	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
+	Zotero.wait();
+}');
+
+REPLACE INTO translators VALUES ('138de272-0d2a-4ab5-8cfb-0fd879958d04', '1.0.0b4.r5', '', '2008-07-16 13:40:00', '0', '100', '4', 'AdvoCAT', 'Adam Crymble', 'http://(142.57.32.51||library.lsuc)', 
+'function detectWeb(doc, url) {
+	if (doc.location.href.match("Search_Code")) {
+		return "multiple";
+	} else if (doc.title.match("Record View")) {
+		return "book";
+	}
+}', 
+'function associateData (newItem, dataTags, field, zoteroField) {
+	if (dataTags[field]) {
+		newItem[zoteroField] = dataTags[field];
+	}
+}
+
+function scrape(doc, url) {
+
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;	
+	
+	var dataTags = new Object();
+	var fieldTitle;
+	
+	var newItem = new Zotero.Item("book");
+
+	var headers = doc.evaluate(''//table[2]/tbody/tr/th'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+	var xPathCount = doc.evaluate(''count (//table[2]/tbody/tr/th)'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+	var contents = doc.evaluate(''//table[2]/tbody/tr/td'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+
+	for (i=0; i<xPathCount.numberValue; i++) {	 	
+     			
+     		fieldTitle = headers.iterateNext().textContent.replace(/\s+/g, '''');
+     		if (!fieldTitle.match(/\w/)) {
+	     		fieldTitle = "Blank" + i;
+     		}
+     		 dataTags[fieldTitle] = Zotero.Utilities.cleanTags(contents.iterateNext().textContent.replace(/^\s*|\s*$/g, ''''));
+     	}
+
+	if (dataTags["MainAuthor:"]) {
+		var author = dataTags["MainAuthor:"];
+		if (author.match(", ") && !author.match(":")) {
+			var authors = author.split(", ");
+			author = authors[1] + " " + authors[0];
+			newItem.creators.push(Zotero.Utilities.cleanAuthor(author, "author"));	
+		} else {
+			newItem.creators.push({lastName: author, creatorType: "creator"});			
+		}
+	}
+
+	if (dataTags["Published:"]) {
+	
+		if (dataTags["Published:"].match(": ")) {
+			var place1 = dataTags["Published:"].indexOf(": ");
+			newItem.place = dataTags["Published:"].substr(0, place1);
+			var publisher1 = dataTags["Published:"].substr(place1 + 2);
+			
+			if (publisher1.match(", ")) {
+				var date1 = publisher1.lastIndexOf(", ");
+				newItem.date = publisher1.substr(date1 +2);
+				newItem.publisher = publisher1.substr(0, date1);
+			} else {
+				newItem.publisher = publisher1;
+			}
+		} else {
+			newItem.publisher = publisher1;
+		}
+	}
+	associateData (newItem, dataTags, "Title:", "title");
+	associateData (newItem, dataTags, "Database:", "repository");
+	associateData (newItem, dataTags, "Description:", "pages");
+	associateData (newItem, dataTags, "Edition:", "edition");
+
+	newItem.url = doc.location.href;
+
+	newItem.complete();
+}
+
+function doWeb(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	var articles = new Array();
+	
+	if (detectWeb(doc, url) == "multiple") {
+		var items = new Object();
+		
+		var titles = doc.evaluate(''//form[2]/table/tbody/tr/td[3]/a'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		
+		var next_title;
+		while (next_title = titles.iterateNext()) {
+			items[next_title.href] = next_title.textContent;
+		}
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			articles.push(i);
+		}
+	} else {
+		articles = [url];
+	}
+	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
+	Zotero.wait();
+}');
+
 REPLACE INTO translators VALUES ('add79dfd-7951-4c72-af1d-ce1d50aa4fb4', '1.0.0b4.r5', '', '2008-07-07 14:50:00', '0', '100', '4', 'informIT database', 'Adam Crymble', 'http://www.informit.com', 
 'function detectWeb(doc,  url) {
 	if (doc.title.match("Search Results")) {
