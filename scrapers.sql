@@ -24267,9 +24267,10 @@ function doImport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7', '1.0.2', '', '2008-03-10 19:45:00', '1', '100', '3', 'RIS', 'Simon Kornblith', 'ris', 
+REPLACE INTO translators VALUES ('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7', '1.0.2', '', '2008-07-17 22:05:00', '1', '100', '3', 'RIS', 'Simon Kornblith', 'ris', 
 'Zotero.configure("dataMode", "line");
 Zotero.addOption("exportNotes", true);
+Zotero.addOption("exportCharset", "UTF-8xBOM");
 
 function detectImport() {
 	var line;
@@ -24355,7 +24356,7 @@ var inputTypeMap = {
 
 function processTag(item, tag, value) {
 	if (Zotero.Utilities.unescapeHTML) {
-		value = Zotero.Utilities.unescapeHTML(value);
+		value = Zotero.Utilities.unescapeHTML(value.replace("\n", "<br>", "g"));
 	}
     
 	if(fieldMap[tag]) {
@@ -24471,7 +24472,10 @@ function processTag(item, tag, value) {
 		item.abstractNote = value;
 	} else if(tag == "KW") {
 		// keywords/tags
-		item.tags.push(value);
+		
+		// technically, treating newlines as new tags breaks the RIS spec, but
+		// it''s required to work with EndNote
+		item.tags = item.tags.concat(value.split("\n"));
 	} else if(tag == "SP") {
 		// start page
 		if(!item.pages) {
@@ -24563,14 +24567,9 @@ function completeItem(item) {
 }
 
 function doImport(attachments) {
-	// this is apparently the proper character set for RIS, although i''m not
-	// sure how many people follow this
-	Zotero.setCharacterSet("IBM850");
-
 	var line = true;
 	var tag = data = false;
 	do {    // first valid line is type
-		Zotero.debug("ignoring "+line);
 		line = Zotero.read();
 		line = line.replace(/^\s+/, "");
 	} while(line !== false && !line.substr(0, 6).match(/^TY {1,2}- /));
@@ -24595,11 +24594,11 @@ function doImport(attachments) {
 	while((rawLine = Zotero.read()) !== false) {    // until EOF
 		// trim leading space if this line is not part of a note
 		line = rawLine.replace(/^\s+/, "");
-		Zotero.debug("line is "+rawLine);
 		if(line.substr(2, 4) == "  - " || line == "ER  -" || line.substr(0, 5) == "TY - ") {
 			// if this line is a tag, take a look at the previous line to map
 			// its tag
 			if(tag) {
+				Zotero.debug("tag: ''"+tag+"''; data: ''"+data+"''");
 				processTag(item, tag, data);
 			}
 
@@ -24614,8 +24613,6 @@ function doImport(attachments) {
 				data = line.substr(6);
 			}
 
-			Zotero.debug("tag: ''"+tag+"''; data: ''"+data+"''");
-
 			if(tag == "ER") {	       // ER signals end of reference
 				// unset info
 				tag = data = false;
@@ -24629,7 +24626,7 @@ function doImport(attachments) {
 			}
 		} else {
 			// otherwise, assume this is data from the previous line continued
-			if(tag == "N1" || tag == "N2" || tag == "AB") {
+			if(tag == "N1" || tag == "N2" || tag == "AB" || tag == "KW") {
 				// preserve line endings for N1/N2/AB fields, for EndNote
 				// compatibility
 				data += "\n"+rawLine;
@@ -24658,10 +24655,6 @@ function addTag(tag, value) {
 }
 
 function doExport() {
-	// this is apparently the proper character set for RIS, although i''m not
-	// sure how many people follow this
-	Zotero.setCharacterSet("IBM850");
-
 	var item;
 
 	while(item = Zotero.nextItem()) {
@@ -24784,8 +24777,9 @@ function doExport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('881f60f2-0802-411a-9228-ce5f47b64c7d', '1.0.0b4.r5', '', '2008-02-03 21:00:00', '1', '100', '3', 'Refer/BibIX', 'Simon Kornblith', 'txt', 
+REPLACE INTO translators VALUES ('881f60f2-0802-411a-9228-ce5f47b64c7d', '1.0.0b4.r5', '', '2008-07-17 22:05:00', '1', '100', '3', 'Refer/BibIX', 'Simon Kornblith', 'txt', 
 'Zotero.configure("dataMode", "line");
+Zotero.addOption("exportCharset", "UTF-8xBOM");
 
 function detectImport() {
 	var lineRe = /%[A-Z0-9\*\$] .+/;
@@ -24951,9 +24945,6 @@ function processTag(item, tag, value) {
 }
 
 function doImport() {
-	// no character set is defined for this format. we use UTF-8.
-	Zotero.setCharacterSet("UTF-8");
-	
 	var line = true;
 	var tag = data = false;
 	do {	// first valid line is type
@@ -25008,9 +24999,6 @@ function addTag(tag, value) {
 }
 
 function doExport() {
-	// use UTF-8 to export
-	Zotero.setCharacterSet("UTF-8");
-	
 	var item;
 	while(item = Zotero.nextItem()) {
 		// can''t store independent notes in RIS
@@ -25062,9 +25050,9 @@ function doExport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('9cb70025-a888-4a29-a210-93ec52da40d4', '1.0.0b4.r1', '', '2008-07-16 05:30:00', '1', '200', '3', 'BibTeX', 'Simon Kornblith', 'bib', 
+REPLACE INTO translators VALUES ('9cb70025-a888-4a29-a210-93ec52da40d4', '1.0.0b4.r1', '', '2008-07-17 22:05:00', '1', '200', '3', 'BibTeX', 'Simon Kornblith', 'bib', 
 'Zotero.configure("dataMode", "block");
-Zotero.addOption("UTF8", true);
+Zotero.addOption("exportCharset", "UTF-8");
 
 function detectImport() {
 	var block = "";
@@ -26807,8 +26795,6 @@ function doImport() {
 	var read = "", text = "", recordCloseElement = false;
 	var type = false;
 	
-	Zotero.setCharacterSet("UTF-8");
-	
 	while(read = Zotero.read(1)) {
 		if(read == "@") {
 			type = "";
@@ -26931,13 +26917,6 @@ function buildCiteKey (item,citekeys) {
 }
 
 function doExport() {
-	if(Zotero.getOption("UTF8")) {
-	    Zotero.setCharacterSet("UTF-8");
-	}
-	else {
-		Zotero.setCharacterSet("us-ascii");
-	}
-	
 	//Zotero.write("% BibTeX export generated by Zotero "+Zotero.Utilities.getVersion());
 	
 	var first = true;
@@ -27434,8 +27413,6 @@ function doImport() {
 	var text;
 	var holdOver = "";	// part of the text held over from the last loop
 	
-	Zotero.setCharacterSet("utf-8");
-	
 	while(text = Zotero.read(4096)) {	// read in 4096 byte increments
 		var records = text.split("\x1D");
 		
@@ -27459,7 +27436,8 @@ function doImport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('3f50aaac-7acc-4350-acd0-59cb77faf620', '1.0.0b4.r1', '', '2007-11-02 08:30:00', '1', '100', '2', 'Wikipedia Citation Templates', 'Simon Kornblith', '', '', 
+REPLACE INTO translators VALUES ('3f50aaac-7acc-4350-acd0-59cb77faf620', '1.0.0b4.r1', '', '2008-07-17 22:05:00', '1', '100', '2', 'Wikipedia Citation Templates', 'Simon Kornblith', '',
+'Zotero.addOption("exportCharset", "UTF-8");',
 'var fieldMap = {
 	edition:"edition",
 	publisher:"publisher",

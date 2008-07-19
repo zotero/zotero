@@ -24,6 +24,18 @@
 // Zotero Translate Engine
 //
 
+
+/**
+ * Set of byte order marks
+ **/
+const BOMs = {
+	"UTF-8":"\xEF\xBB\xBF",
+	"UTF-16BE":"\xFE\xFF",
+	"UTF-16LE":"\xFF\xFE",
+	"UTF-32BE":"\x00\x00\xFE\xFF",
+	"UTF-32LE":"\xFF\xFE\x00\x00"
+}
+
 /*
  * Zotero.Translate: a class for translation of Zotero metadata from and to
  * other formats
@@ -80,6 +92,7 @@
  *
  * PRIVATE PROPERTIES:
  * 
+ * _charset - character set
  * _numericTypes - possible numeric types as a comma-delimited string
  * _handlers - handlers for various events (see setHandler)
  * _sandbox - sandbox in which translators will be executed
@@ -92,7 +105,6 @@
  * _storage - the stored string to be treated as input
  * _storageLength - the length of the stored string
  * _exportFileDirectory - the directory to which files will be exported
- * _hasBOM - whether the given file ready to be imported has a BOM or not
  *
  * WEB-ONLY PROPERTIES:
  *
@@ -105,7 +117,6 @@
  *
  * output - export output (if no location has been specified)
  */
-
 Zotero.Translate = function(type, saveItem) {
 	this.type = type;
 	
@@ -471,9 +482,6 @@ Zotero.Translate.prototype.getTranslators = function() {
 	// do not allow simultaneous instances of getTranslators
 	if(this._translatorSearch) this._translatorSearch.running = false;
 	
-	// clear BOM
-	this._hasBOM = null;
-	
 	if(Zotero.Translate.cache) {
 		var translators = Zotero.Translate.cache[this.type];
 	} else {
@@ -543,7 +551,6 @@ Zotero.Translate.prototype.translate = function() {
 	this._IDMap = new Array();
 	this._complete = false;
 	this._itemsDone = false;
-	this._hasBOM = null;
 	
 	if(!this.translator || !this.translator.length) {
 		throw("cannot translate: no translator specified");
@@ -593,8 +600,8 @@ Zotero.Translate.prototype.translate = function() {
  * parses translator detect code
  */
 Zotero.Translate.prototype._parseDetectCode = function(translator) {
-	this.configOptions = new Array();
-	this.displayOptions = new Array();
+	this.configOptions = {};
+	this.displayOptions = {};
 	
 	if(translator.detectCode) {
 		var detectCode = translator.detectCode;
@@ -672,7 +679,7 @@ Zotero.Translate.prototype._generateSandbox = function() {
 		
 		if(this.type == "import") {
 			// add routines to add new collections
-			this._sandbox.Zotero.Collection = Zotero.Translate.GenerateZoteroItemClass();
+			this._sandbox.Zotero.Collection = Zotero.Translate.GenerateZoteroCollectionClass();
 			// attach the function to be run when a collection is done
 			this._sandbox.Zotero.Collection.prototype.complete = function() {me._collectionDone(this)};
 		}
@@ -1499,9 +1506,9 @@ Zotero.Translate.prototype._web = function() {
 	return true;
 }
 
-/*
- * does the actual search translation
- */
+/**
+ * Does the actual search translation
+ **/
 Zotero.Translate.prototype._search = function() {
 	try {
 		this._sandbox.doSearch(this.search);
@@ -1513,11 +1520,47 @@ Zotero.Translate.prototype._search = function() {
 	return true;
 }
 
-/*
- * does the actual import translation
- */
+/**
+ * Does the actual import translation
+ **/
 Zotero.Translate.prototype._import = function() {
-	this._importConfigureIO();
+	this.waitForCompletion = true;
+	var me = this;
+	this._importGetCharacterSet(function(charset) { me._importDoComplete(charset) });
+	return true;
+}
+
+/**
+ * Sniff file if a real file exists
+ *
+ * @param {Function} callback A callback function to be executed after sniffing
+ **/
+Zotero.Translate.prototype._importGetCharacterSet = function(callback) {
+	if(!this._storage) {
+		// need to check charset
+		
+		if(this._charset) {
+			// have charset already; just go on
+			callback(this._charset);
+		} else {
+			// look for charset
+			var me = this;
+			Zotero.File.getCharsetFromFile(this.location, "text/plain",
+				function(charset) {
+					me._charset = charset;
+					callback(charset);
+				});
+		}
+	} else {
+		callback();
+	}
+}
+
+/**
+ * Complete import (used as callback after sniffing)
+ **/
+Zotero.Translate.prototype._importDoComplete = function(charset) {
+	this._importConfigureIO(charset);
 	
 	try {
 		this._sandbox.doImport();
@@ -1529,14 +1572,13 @@ Zotero.Translate.prototype._import = function() {
 			return false;
 		}
 	}
-	
-	return true;
+	this._translationComplete(true);
 }
 
 /*
- * sets up import for IO
+ * set up import for IO
  */
-Zotero.Translate.prototype._importConfigureIO = function() {
+Zotero.Translate.prototype._importConfigureIO = function(charset) {
 	if(this._storage) {
 		if(this.configOptions.dataMode && this.configOptions.dataMode == "rdf") {
 			this._rdf = new Object();
@@ -1593,32 +1635,43 @@ Zotero.Translate.prototype._importConfigureIO = function() {
 			}
 			
 			var filePosition = 0;
-			var intlStream = this._importDefuseBOM();
-			if(intlStream) {
-				// found a UTF BOM at the beginning of the file; don't allow
-				// translator to set the character set
-				this._sandbox.Zotero.setCharacterSet = function() {}
-				this._streams.push(intlStream);
-			} else {
-				// allow translator to set charset
-				this._sandbox.Zotero.setCharacterSet = function(charset) {
-					// seek
-					if(filePosition != 0) {
-						me._inputStream.QueryInterface(Components.interfaces.nsISeekableStream)
-									 .seek(Components.interfaces.nsISeekableStream.NS_SEEK_SET, filePosition);
-						me._inputStream.QueryInterface(Components.interfaces.nsIFileInputStream);
-					}
-					
-					intlStream = Components.classes["@mozilla.org/intl/converter-input-stream;1"]
-										   .createInstance(Components.interfaces.nsIConverterInputStream);
-					try {
-						intlStream.init(me._inputStream, charset, 65535,
-							Components.interfaces.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER);
-					} catch(e) {
-						throw "Text encoding not supported";
-					}
-					me._streams.push(intlStream);
+			
+			if(charset) {	// if have detected charset
+				Zotero.debug("Using detected character set "+charset);
+				// seek past BOM
+				if(charset.length > 3 && charset.substr(0, 3) == "UTF") {
+					var BOMLength = this._importGetBOMLength();
+					this._inputStream.QueryInterface(Components.interfaces.nsISeekableStream)
+						              .seek(Components.interfaces.nsISeekableStream.NS_SEEK_SET, BOMLength);
 				}
+				
+				// convert from detected charset
+				var intlStream = Components.classes["@mozilla.org/intl/converter-input-stream;1"]
+									   .createInstance(Components.interfaces.nsIConverterInputStream);
+				intlStream.init(this._inputStream, charset, 65535,
+					Components.interfaces.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER);
+				me._streams.push(intlStream);
+			}
+			
+			// allow translator to set charset
+			this._sandbox.Zotero.setCharacterSet = function(charset) {
+				// seek
+				if(filePosition != 0) {
+					me._inputStream.QueryInterface(Components.interfaces.nsISeekableStream)
+								 .seek(Components.interfaces.nsISeekableStream.NS_SEEK_SET, filePosition);
+					me._inputStream.QueryInterface(Components.interfaces.nsIFileInputStream);
+				}
+				
+				intlStream = Components.classes["@mozilla.org/intl/converter-input-stream;1"]
+									   .createInstance(Components.interfaces.nsIConverterInputStream);
+				try {
+					intlStream.init(me._inputStream, charset, 65535,
+						Components.interfaces.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER);
+				} catch(e) {
+					throw "Text encoding not supported";
+				}
+				
+				me._streams.push(intlStream);
 			}
 			
 			var str = new Object();
@@ -1674,87 +1727,49 @@ Zotero.Translate.prototype._importConfigureIO = function() {
 	}
 }
 
-/*
- * searches for a UTF BOM at the beginning of the input stream. if one is found,
- * returns an appropriate converter-input-stream for the UTF type, and sets
- * _hasBOM to the UTF type.  if one is not found, returns false, and sets
- * _hasBOM to false to prevent further checking.
+/**
+ * Searches for a UTF BOM at the beginning of the input stream.
+ *
+ * @return The length of the UTF BOM.
  */
-Zotero.Translate.prototype._importDefuseBOM = function() {
-	// if already found not to have a BOM, skip
-	if(this._hasBOM === false) {
-		return;
-	}
+Zotero.Translate.prototype._importGetBOMLength = function() {
+	// if not checked for a BOM, open a binary input stream and read
+	var binStream = Components.classes["@mozilla.org/binaryinputstream;1"].
+							   createInstance(Components.interfaces.nsIBinaryInputStream);
+	binStream.setInputStream(this._inputStream);
 	
-	if(!this._hasBOM) {
-		// if not checked for a BOM, open a binary input stream and read
-		var binStream = Components.classes["@mozilla.org/binaryinputstream;1"].
-		                           createInstance(Components.interfaces.nsIBinaryInputStream);
-		binStream.setInputStream(this._inputStream);
+	var possibleBOMs = BOMs;
+	var couldHaveBOM = true;
+	var newBOMs, readByte;
+	
+	while(couldHaveBOM) {
+		newBOMs = {};
+		couldHaveBOM = false;
 		
-		// read the first byte
-		var byte1 = binStream.read8();
+		readByte = binStream.read8();
+		readChar = String.fromCharCode(readByte)
 		
-		// at the moment, we don't support UTF-32 or UTF-7. while mozilla
-		// supports these encodings, they add slight additional complexity to
-		// the function and anyone using them for storing bibliographic metadata
-		// is insane.
-		if(byte1 == 0xEF) {			// UTF-8: EF BB BF
-			var byte2 = binStream.read8();
-			if(byte2 == 0xBB) {
-				var byte3 = binStream.read8();
-				if(byte3 == 0xBF) {
-					this._hasBOM = "UTF-8";
+		for(var charset in possibleBOMs) {
+			if(possibleBOMs[charset][0] == readChar) {
+				if(possibleBOMs[charset].length == 1) {
+					// have checked entire BOM
+					return BOMs[charset].length;
+				} else {
+					// keep checking
+					newBOMs[charset] = possibleBOMs[charset].substr(1);
+					couldHaveBOM = true;
 				}
 			}
-		} else if(byte1 == 0xFE) {	// UTF-16BE: FE FF
-			var byte2 = binStream.read8();
-			if(byte2 == 0xFF) {
-				this._hasBOM = "UTF-16BE";
-			}
-		} else if(byte1 == 0xFF) {	// UTF-16LE: FF FE
-			var byte2 = binStream.read8();
-			if(byte2 == 0xFE) {
-				this._hasBOM = "UTF16-LE";
-			}
 		}
 		
-		if(!this._hasBOM) {
-			// seek back to begining of file
-			this._inputStream.QueryInterface(Components.interfaces.nsISeekableStream)
-						     .seek(Components.interfaces.nsISeekableStream.NS_SEEK_SET, 0);
-			this._inputStream.QueryInterface(Components.interfaces.nsIFileInputStream);
-			
-			// say there's no BOM
-			this._hasBOM = false;
-			
-			return false;
-		}
-	} else {
-		// if it had a BOM the last time, it has one this time, too. seek to the
-		// correct position.
-		
-		if(this._hasBOM == "UTF-8") {
-			var seekPosition = 3;
-		} else {
-			var seekPosition = 2;
-		}
-		
-		this._inputStream.QueryInterface(Components.interfaces.nsISeekableStream)
-					     .seek(Components.interfaces.nsISeekableStream.NS_SEEK_SET, seekPosition);
-		this._inputStream.QueryInterface(Components.interfaces.nsIFileInputStream);
+		possibleBOMs = newBOMs;
 	}
 	
-	// if we know what kind of BOM it has, generate an input stream	
-	var intlStream = Components.classes["@mozilla.org/intl/converter-input-stream;1"]
-						   .createInstance(Components.interfaces.nsIConverterInputStream);
-	intlStream.init(this._inputStream, this._hasBOM, 65535,
-		Components.interfaces.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER);
-	return intlStream;
+	return 0;
 }
 
-/*
- * does the actual export, after code has been loaded and parsed
+/**
+ * Does the actual export, after code has been loaded and parsed
  */
 Zotero.Translate.prototype._export = function() {
 	
@@ -1842,8 +1857,9 @@ Zotero.Translate.prototype._export = function() {
 	return true;
 }
 
-/*
- * configures IO for export
+/**
+ * Configures the output stream for export and adds writing functions to the
+ * sandbox
  */
 Zotero.Translate.prototype._exportConfigureIO = function() {
 	if(this.location) {
@@ -1871,20 +1887,51 @@ Zotero.Translate.prototype._exportConfigureIO = function() {
 		} else {
 			// regular io; write just writes to file
 			var intlStream = null;
+			var writtenToStream = false;
+			var streamCharset = null;
 			
 			// allow setting of character sets
 			this._sandbox.Zotero.setCharacterSet = function(charset) {
+				streamCharset = charset.toUpperCase();
 				intlStream = Components.classes["@mozilla.org/intl/converter-output-stream;1"]
 									   .createInstance(Components.interfaces.nsIConverterOutputStream);
+				if(charset == "UTF-8xBOM") charset = "UTF-8";
 				intlStream.init(fStream, charset, 1024, "?".charCodeAt(0));
 			};
 			
+			// if exportCharset option was presented to user, use the result
+			if(this.displayOptions.exportCharset) {
+				this._sandbox.Zotero.setCharacterSet(this.displayOptions.exportCharset);
+			}
+			
 			this._sandbox.Zotero.write = function(data) {
-				if(intlStream) {
-					intlStream.writeString(data);
+				if(streamCharset) {
+					if(!writtenToStream && BOMs[streamCharset]) {
+						// If stream has not yet been written to, and a UTF type
+						// has been selected, write the BOM
+						fStream.write(BOMs[streamCharset], BOMs[streamCharset].length);
+					}
+					
+					if(streamCharset == "MACINTOSH") {
+						// fix buggy Mozilla MacRoman
+						splitData = data.split(/([\r\n]+)/);
+						Zotero.debug(splitData);
+						for(var i=0; i<splitData.length; i+=2) {
+							// write raw newlines straight to the string
+							intlStream.writeString(splitData[i]);
+							if(splitData[i+1]) {
+								fStream.write(splitData[i+1], splitData[i+1].length);
+							}
+						}
+						return;
+					} else {
+						intlStream.writeString(data);
+					}
 				} else {
 					fStream.write(data, data.length);
 				}
+				
+				writtenToStream = true;
 			};
 		}
 	} else {
@@ -2210,54 +2257,68 @@ Zotero.Translate.TranslatorSearch.prototype.execute = function() {
 		this.translate._parseDetectCode(translator);
 		
 		if(this.translate.type == "import") {
-			try {
-				this.translate._importConfigureIO();	// so it can read
-			} catch(e) {
-				Zotero.debug("Translate: "+e+' in opening IO for '+translator.label);
-				this.execute();
-				return;
-			}
-		}
-		
-		translator.configOptions = this.translate.configOptions;
-		translator.displayOptions = this.translate.displayOptions;
-		
-		if((this.translate.type == "web" && this.translate._sandbox.detectWeb) ||
-		   (this.translate.type == "search" && this.translate._sandbox.detectSearch) ||
-		   (this.translate.type == "import" && this.translate._sandbox.detectImport)) {
-			var returnValue;
-			
-			this.currentTranslator = translator;
-			try {
-				if(this.translate.type == "web") {
-					returnValue = this.translate._sandbox.detectWeb(this.translate.document, this.translate.location);
-				} else if(this.translate.type == "search") {
-					returnValue = this.translate._sandbox.detectSearch(this.translate.search);
-				} else if(this.translate.type == "import") {
-					returnValue = this.translate._sandbox.detectImport();
+			var me = this;
+			this.translate._importGetCharacterSet(function(charset) {
+				try {
+					me.translate._importConfigureIO(charset);	// so it can read
+				} catch(e) {
+					Zotero.debug("Translate: "+e+' in opening IO for '+translator.label);
+					me.execute();
+					return;
 				}
-			} catch(e) {
-				this.complete(returnValue, e);
-				return;
-			}
-			
-			Zotero.debug("Translate: executed detectCode for "+translator.label);
-					
-			if(this.translate.type == "web" && this.translate.waitForCompletion) {
-				this.asyncMode = true;
 				
-				// don't immediately execute next
-				return;
-			} else if(returnValue) {
-				this.processReturnValue(translator, returnValue);
-			}
+				me.runDetectCode(translator);
+			});
 		} else {
-			// add translator even though it has no proper detectCode (usually
-			// export translators, which have options but do nothing with them)
-			this.addTranslator(translator);
+			this.runDetectCode(translator);
 		}
+	} else {
+		this.execute();
 	}
+}
 
+/**
+ * Sets options and runs detectCode
+ **/
+Zotero.Translate.TranslatorSearch.prototype.runDetectCode = function(translator) {
+	translator.configOptions = this.translate.configOptions;
+	translator.displayOptions = this.translate.displayOptions;
+	
+	if((this.translate.type == "web" && this.translate._sandbox.detectWeb) ||
+	   (this.translate.type == "search" && this.translate._sandbox.detectSearch) ||
+	   (this.translate.type == "import" && this.translate._sandbox.detectImport)) {
+		var returnValue;
+		
+		this.currentTranslator = translator;
+		try {
+			if(this.translate.type == "web") {
+				returnValue = this.translate._sandbox.detectWeb(this.translate.document, this.translate.location);
+			} else if(this.translate.type == "search") {
+				returnValue = this.translate._sandbox.detectSearch(this.translate.search);
+			} else if(this.translate.type == "import") {
+				returnValue = this.translate._sandbox.detectImport();
+			}
+		} catch(e) {
+			this.complete(returnValue, e);
+			return;
+		}
+		
+		Zotero.debug("Translate: executed detectCode for "+translator.label);
+				
+		if(this.translate.type == "web" && this.translate.waitForCompletion) {
+			this.asyncMode = true;
+			
+			// don't immediately execute next
+			return;
+		} else if(returnValue) {
+			this.processReturnValue(translator, returnValue);
+		}
+	} else {
+		// add translator even though it has no proper detectCode (usually
+		// export translators, which have options but do nothing with them)
+		this.addTranslator(translator);
+	}
+	
 	this.execute();
 }
 
@@ -2357,7 +2418,7 @@ Zotero.Translate.GenerateZoteroItemClass = function() {
  */
 
 Zotero.Translate.GenerateZoteroCollectionClass = function() {
-	var ZoteroCollection = Zotero.Translate.ZoteroCollection = function() {};
+	var ZoteroCollection = function() {};
 	
 	return ZoteroCollection;
 }
