@@ -41,6 +41,9 @@ Zotero.Utilities.prototype.formatDate = function(date) {
 Zotero.Utilities.prototype.strToDate = function(date) {
 	return Zotero.Date.strToDate(date);
 }
+Zotero.Utilities.prototype.strToISO = function(date) {
+	return Zotero.Date.strToISO(date);
+}
 
 /*
  * Cleans extraneous punctuation off an author name
