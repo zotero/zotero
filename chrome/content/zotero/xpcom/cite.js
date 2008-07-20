@@ -644,7 +644,7 @@ Zotero.CSL.prototype.formatBibliography = function(itemSet, format) {
 		if(format == "HTML") {
 			var coins = Zotero.OpenURL.createContextObject(item.zoteroItem, "1.0");
 			
-			var span = (coins ? ' <span class="Z3988" title="'+coins.replace("&", "&amp;", "g")+'"></span>' : '');
+			var span = (coins ? ' <span class="Z3988" title="'+coins.replace("&", "&amp;", "g")+'">&nbsp;</span>' : '');
 			
 			if(this.class == "note" && isCitation) {
 				output += "<li>"+string+span+"</li>\r\n";
