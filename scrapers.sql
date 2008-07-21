@@ -16429,7 +16429,7 @@ REPLACE INTO translators VALUES ('c54d1932-73ce-dfd4-a943-109380e06574', '1.0.0b
 	}
 }');
 
-REPLACE INTO translators VALUES ('fcf41bed-0cbc-3704-85c7-8062a0068a7a', '1.0.0b3.r1', '', '2008-06-12 19:00:00', '1', '100', '4', 'NCBI PubMed', 'Simon Kornblith and Michael Berkowitz', 'http://[^/]*www\.ncbi\.nlm\.nih\.gov[^/]*/(pubmed|sites/entrez|entrez/query\.fcgi\?.*db=PubMed)', 
+REPLACE INTO translators VALUES ('fcf41bed-0cbc-3704-85c7-8062a0068a7a', '1.0.0b3.r1', '', '2008-07-21 09:38:53', '1', '100', '4', 'NCBI PubMed', 'Simon Kornblith and Michael Berkowitz', 'http://[^/]*www\.ncbi\.nlm\.nih\.gov[^/]*/(pubmed|sites/entrez|entrez/query\.fcgi\?.*db=PubMed)', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -16468,7 +16468,6 @@ function detectSearch(item) {
 ', 
 'function lookupPMIDs(ids, doc) {
 	Zotero.wait();
-
 	var newUri = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=PubMed&retmode=xml&rettype=citation&id="+ids.join(",");
 	Zotero.Utilities.HTTP.doGet(newUri, function(text) {
 		// Remove xml parse instruction and doctype
@@ -16482,6 +16481,7 @@ function detectSearch(item) {
 			var citation = xml.PubmedArticle[i].MedlineCitation;
 
 			var PMID = citation.PMID.text().toString();
+			newItem.url = "http://www.ncbi.nlm.nih.gov/pubmed/" + PMID;
 			newItem.extra = "PMID: "+PMID;
 			// add attachments
 			if(doc) {
