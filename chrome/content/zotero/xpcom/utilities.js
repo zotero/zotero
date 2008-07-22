@@ -41,6 +41,9 @@ Zotero.Utilities.prototype.formatDate = function(date) {
 Zotero.Utilities.prototype.strToDate = function(date) {
 	return Zotero.Date.strToDate(date);
 }
+Zotero.Utilities.prototype.strToISO = function(date) {
+	return Zotero.Date.strToISO(date);
+}
 
 /*
  * Cleans extraneous punctuation off an author name
@@ -669,7 +672,19 @@ Zotero.Utilities.HTTP = new function() {
 			_stateChange(xmlhttp, onDone, responseCharset);
 		};
 		
-		xmlhttp.send(null);
+		// Temporarily set cookieBehavior to 0 for Firefox 3
+		// https://www.zotero.org/trac/ticket/1070
+		try {
+			var prefService = Components.classes["@mozilla.org/preferences-service;1"].
+							  getService(Components.interfaces.nsIPrefBranch);
+			var cookieBehavior = prefService.getIntPref("network.cookie.cookieBehavior");
+			prefService.setIntPref("network.cookie.cookieBehavior", 0);
+			
+			xmlhttp.send(null);
+		}
+		finally {
+			prefService.setIntPref("network.cookie.cookieBehavior", cookieBehavior);
+		}
 		
 		return xmlhttp;
 	}
@@ -709,7 +724,19 @@ Zotero.Utilities.HTTP = new function() {
 			_stateChange(xmlhttp, onDone, responseCharset);
 		};
 		
-		xmlhttp.send(body);
+		// Temporarily set cookieBehavior to 0 for Firefox 3
+		// https://www.zotero.org/trac/ticket/1070
+		try {
+			var prefService = Components.classes["@mozilla.org/preferences-service;1"].
+							  getService(Components.interfaces.nsIPrefBranch);
+			var cookieBehavior = prefService.getIntPref("network.cookie.cookieBehavior");
+			prefService.setIntPref("network.cookie.cookieBehavior", 0);
+			
+			xmlhttp.send(body);
+		}
+		finally {
+			prefService.setIntPref("network.cookie.cookieBehavior", cookieBehavior);
+		}
 		
 		return xmlhttp;
 	}
@@ -730,7 +757,19 @@ Zotero.Utilities.HTTP = new function() {
 			_stateChange(xmlhttp, onDone);
 		};
 		
-		xmlhttp.send(null);
+		// Temporarily set cookieBehavior to 0 for Firefox 3
+		// https://www.zotero.org/trac/ticket/1070
+		try {
+			var prefService = Components.classes["@mozilla.org/preferences-service;1"].
+							  getService(Components.interfaces.nsIPrefBranch);
+			var cookieBehavior = prefService.getIntPref("network.cookie.cookieBehavior");
+			prefService.setIntPref("network.cookie.cookieBehavior", 0);
+			
+			xmlhttp.send(null);
+		}
+		finally {
+			prefService.setIntPref("network.cookie.cookieBehavior", cookieBehavior);
+		}
 		
 		return xmlhttp;
 	}
@@ -759,7 +798,19 @@ Zotero.Utilities.HTTP = new function() {
 			_stateChange(xmlhttp, onDone);
 		};
 		
-		xmlhttp.send(body);
+		// Temporarily set cookieBehavior to 0 for Firefox 3
+		// https://www.zotero.org/trac/ticket/1070
+		try {
+			var prefService = Components.classes["@mozilla.org/preferences-service;1"].
+							  getService(Components.interfaces.nsIPrefBranch);
+			var cookieBehavior = prefService.getIntPref("network.cookie.cookieBehavior");
+			prefService.setIntPref("network.cookie.cookieBehavior", 0);
+			
+			xmlhttp.send(body);
+		}
+		finally {
+			prefService.setIntPref("network.cookie.cookieBehavior", cookieBehavior);
+		}
 		
 		return xmlhttp;
 	}

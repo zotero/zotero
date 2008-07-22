@@ -620,9 +620,72 @@ function ChromeExtensionHandler() {
 	
 	
 	/*
+		zotero://attachment/[id]/
+	*/
+	var AttachmentExtension = new function() {
+		this.newChannel = newChannel;
+		
+		function newChannel(uri) {
+			var ioService = Components.classes["@mozilla.org/network/io-service;1"]
+				.getService(Components.interfaces.nsIIOService);
+			
+			var Zotero = Components.classes["@zotero.org/Zotero;1"]
+				.getService(Components.interfaces.nsISupports)
+				.wrappedJSObject;
+			
+			try {
+				var errorMsg;
+				var [id, fileName] = uri.path.substr(1).split('/');
+				
+				if (parseInt(id) != id) {
+					return _errorChannel("Attachment id not an integer");
+				}
+				
+				var item = Zotero.Items.get(id);
+				if (!item) {
+					return _errorChannel("Item not found");
+				}
+				
+				var file = item.getFile();
+				if (!file) {
+					return _errorChannel("File not found");
+				}
+				
+				if (fileName) {
+					file = file.parent;
+					file.append(fileName);
+					if (!file.exists()) {
+						return _errorChannel("File not found");
+					}
+				}
+				
+				var ph = Components.classes["@mozilla.org/network/protocol;1?name=file"].
+						createInstance(Components.interfaces.nsIFileProtocolHandler);
+				fileURI = ph.newFileURI(file);
+				var channel = ioService.newChannelFromURI(fileURI);
+				return channel;
+			}
+			catch (e) {
+				Zotero.debug(e);
+				throw (e);
+			}
+		}
+		
+		
+		function _errorChannel(msg) {
+			var ioService = Components.classes["@mozilla.org/network/io-service;1"]
+				.getService(Components.interfaces.nsIIOService);
+			var uriStr = 'data:text/plain,' + encodeURIComponent(msg);
+			var dataURI = ioService.newURI(uriStr, null, null);
+			var channel = ioService.newChannelFromURI(dataURI);
+			return channel;
+		}
+	};
+	
+	
+	/*
 		zotero://select/type/id
 	*/
-	
 	var SelectExtension = new function(){
 		this.newChannel = newChannel;
 
@@ -660,19 +723,17 @@ function ChromeExtensionHandler() {
 
 	
 	var ReportExtensionSpec = ZOTERO_SCHEME + "://report"
-	ReportExtensionSpec = ReportExtensionSpec.toLowerCase();
-	
 	this._extensions[ReportExtensionSpec] = ReportExtension;
 
 	var TimelineExtensionSpec = ZOTERO_SCHEME + "://timeline"
-	TimelineExtensionSpec = TimelineExtensionSpec.toLowerCase();
-
 	this._extensions[TimelineExtensionSpec] = TimelineExtension;
 	
+	var AttachmentExtensionSpec = ZOTERO_SCHEME + "://attachment"
+	this._extensions[AttachmentExtensionSpec] = AttachmentExtension;
+	
 	var SelectExtensionSpec = ZOTERO_SCHEME + "://select"
-	SelectExtensionSpec = SelectExtensionSpec.toLowerCase();
-
 	this._extensions[SelectExtensionSpec] = SelectExtension;
+
 }
 
 

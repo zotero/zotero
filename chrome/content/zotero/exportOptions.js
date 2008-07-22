@@ -26,6 +26,8 @@
 //
 //////////////////////////////////////////////////////////////////////////////
 
+const OPTION_PREFIX = "export-option-";
+
 // Class to provide options for export
 
 var Zotero_File_Interface_Export = new function() {
@@ -33,6 +35,8 @@ var Zotero_File_Interface_Export = new function() {
 	this.updateOptions = updateOptions;
 	this.accept = accept;
 	this.cancel = cancel;
+	
+	var _charsets;
 	
 	/*
 	 * add options to export
@@ -46,17 +50,19 @@ var Zotero_File_Interface_Export = new function() {
 		
 		var translators = window.arguments[0].translators;
 		
-		var listbox = document.getElementById("format-popup");
+		// get format popup
+		var formatPopup = document.getElementById("format-popup");
 		var formatMenu = document.getElementById("format-menu");
 		var optionsBox = document.getElementById("translator-options");
+		var charsetBox = document.getElementById("charset-box");
 		
 		var selectedTranslator = Zotero.Prefs.get("export.lastTranslator");
 		
-		// add styles to list
+		// add styles to format popup
 		for(var i in translators) {
 			var itemNode = document.createElement("menuitem");
 			itemNode.setAttribute("label", translators[i].label);
-			listbox.appendChild(itemNode);
+			formatPopup.appendChild(itemNode);
 			
 			// add options
 			for(var option in translators[i].displayOptions) {
@@ -73,9 +79,9 @@ var Zotero_File_Interface_Export = new function() {
 					// it interprets as checkboxes
 					if(typeof(translators[i].displayOptions[option]) == "boolean") {
 						var checkbox = document.createElement("checkbox");
-						checkbox.setAttribute("id", "export-option-"+option);
+						checkbox.setAttribute("id", OPTION_PREFIX+option);
 						checkbox.setAttribute("label", optionLabel);
-						optionsBox.appendChild(checkbox);
+						optionsBox.insertBefore(checkbox, charsetBox);
 					}
 					
 					addedOptions[option] = true;
@@ -93,6 +99,9 @@ var Zotero_File_Interface_Export = new function() {
 			formatMenu.selectedIndex = 0;
 		}
 		
+		// from charsetMenu.js
+		_charsets = Zotero_Charset_Menu.populate(document.getElementById(OPTION_PREFIX+"exportCharset"), true);
+		
 		updateOptions(Zotero.Prefs.get("export.translatorSettings"));
 	}
 	
@@ -105,7 +114,9 @@ var Zotero_File_Interface_Export = new function() {
 		var translatorOptions = window.arguments[0].translators[index].displayOptions;
 		
 		if(optionString) {
-			var options = optionString.split(",");
+			try {
+				var options = Zotero.JSON.unserialize(optionString);
+			} catch(e) {}
 		}
 		
 		var optionsBox = document.getElementById("translator-options");
@@ -114,8 +125,13 @@ var Zotero_File_Interface_Export = new function() {
 		for(var i=0; i<optionsBox.childNodes.length; i++) {
 			// loop through options to see which should be enabled
 			var node = optionsBox.childNodes[i];
-			var optionName = node.getAttribute("id").toString().substr(14);
+			// skip non-options
+			if(node.id.length <= OPTION_PREFIX.length
+					|| node.id.substr(0, OPTION_PREFIX.length) != OPTION_PREFIX) {
+				continue;
+			}
 			
+			var optionName = node.id.substr(OPTION_PREFIX.length);
 			if(translatorOptions[optionName] != undefined) {
 				// option should be enabled
 				optionsBox.hidden = undefined;
@@ -123,9 +139,9 @@ var Zotero_File_Interface_Export = new function() {
 				
 				var defValue = translatorOptions[optionName];
 				if(typeof(defValue) == "boolean") {
-					if(optionString) {
+					if(options && options[optionName] !== undefined) {
 						// if there's a saved prefs string, use it
-						var isChecked = options.shift();
+						var isChecked = options[optionName];
 					} else {
 						// use defaults
 						var isChecked = (defValue ? "true" : "false");
@@ -135,8 +151,23 @@ var Zotero_File_Interface_Export = new function() {
 			} else {
 				// option should be disabled and unchecked to prevent confusion
 				node.hidden = true;
-				node.setAttribute("checked", "false");
+				node.checked = false;
 			}
+		}
+		
+		// handle charset popup
+		var charsetMenu = document.getElementById(OPTION_PREFIX+"exportCharset");
+		if(translatorOptions.exportCharset) {
+			document.getElementById("charset-box").hidden = undefined;
+			optionsBox.hidden = undefined;
+			var charset = "UTF-8xBOM";
+			if(options && options.exportCharset && _charsets[options.exportCharset]) {
+				charset = options.exportCharset;
+			} else if(translatorOptions.exportCharset && _charsets[translatorOptions.exportCharset]) {
+				charset = translatorOptions.exportCharset;
+			}
+			
+			charsetMenu.selectedItem = _charsets[charset];
 		}
 		
 		window.sizeToContent();
@@ -158,21 +189,20 @@ var Zotero_File_Interface_Export = new function() {
 		var optionsAvailable = window.arguments[0].selectedTranslator.displayOptions;
 		for(var option in optionsAvailable) {
 			var defValue = optionsAvailable[option];
-			var element = document.getElementById("export-option-"+option);
+			var element = document.getElementById(OPTION_PREFIX+option);
 			
-			if(typeof(defValue) == "boolean") {
-				if(element.checked == true) {
-					optionString += ",true";
-					optionsAvailable[option] = true;
-				} else {
-					optionString += ",false";
-					optionsAvailable[option] = false;
-				}
+			if(option == "exportCharset") {
+				optionsAvailable[option] = element.selectedItem.value;
+			} else if(typeof(defValue) == "boolean") {
+				optionsAvailable[option] = !!element.checked;
 			}
 		}
 		
 		// save options
-		if(optionString) optionString = optionString.substr(1);
+		Zotero.debug("EXPORT OPTIONS");
+		Zotero.debug(optionsAvailable);
+		optionString = Zotero.JSON.serialize(optionsAvailable);
+		Zotero.debug(optionString);
 		Zotero.Prefs.set("export.translatorSettings", optionString);
 	}
 	

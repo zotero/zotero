@@ -44,7 +44,7 @@ Zotero_File_Exporter.prototype.save = function() {
 	// present options dialog
 	var io = {translators:translators}
 	window.openDialog("chrome://zotero/content/exportOptions.xul",
-		"_blank", "chrome,modal,centerscreen", io);
+		"_blank", "chrome,modal,centerscreen,resizable=no", io);
 	if(!io.selectedTranslator) {
 		return false;
 	}
@@ -209,30 +209,34 @@ var Zotero_File_Interface = new function() {
 		if (rv == nsIFilePicker.returnOK || rv == nsIFilePicker.returnReplace) {
 			translation.setLocation(fp.file);
 			// get translators again, bc now we can check against the file
+			translation.setHandler("translators", function(obj, item) { _importTranslatorsAvailable(obj, item) });
 			translators = translation.getTranslators();
-			if(translators.length) {
-				// create a new collection to take in imported items
-				var date = new Date();
-				_importCollection = Zotero.Collections.add(Zotero.getString("fileInterface.imported")+" "+date.toLocaleString());
-				
-				// import items
-				translation.setTranslator(translators[0]);
-				translation.setHandler("collectionDone", _importCollectionDone);
-				translation.setHandler("done", _importDone);
-				Zotero.UnresponsiveScriptIndicator.disable();
-				
-				// show progress indicator
-				Zotero_File_Interface.Progress.show(
-					Zotero.getString("fileInterface.itemsImported"),
-					function() {
-						Zotero.DB.beginTransaction();
-						
-						// translate
-						translation.translate();
-				});
-			} else {
-				window.alert(Zotero.getString("fileInterface.fileFormatUnsupported"));
-			}
+		}
+	}
+	
+	function _importTranslatorsAvailable(translation, translators) {
+		if(translators.length) {
+			// create a new collection to take in imported items
+			var date = new Date();
+			_importCollection = Zotero.Collections.add(Zotero.getString("fileInterface.imported")+" "+date.toLocaleString());
+			
+			// import items
+			translation.setTranslator(translators[0]);
+			translation.setHandler("collectionDone", _importCollectionDone);
+			translation.setHandler("done", _importDone);
+			Zotero.UnresponsiveScriptIndicator.disable();
+			
+			// show progress indicator
+			Zotero_File_Interface.Progress.show(
+				Zotero.getString("fileInterface.itemsImported"),
+				function() {
+					Zotero.DB.beginTransaction();
+					
+					// translate
+					translation.translate();
+			});
+		} else {
+			window.alert(Zotero.getString("fileInterface.fileFormatUnsupported"));
 		}
 	}
 	

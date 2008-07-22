@@ -410,9 +410,9 @@ var ZoteroPane = new function()
 			return;
 		}
 		
-		// Ignore modifiers other than accel-alt (or accel-shift if useShift is on)
+		// Ignore modifiers other than Ctrl-Alt or Cmd-Shift
 		if (!((Zotero.isMac ? event.metaKey : event.ctrlKey) &&
-				useShift ? event.shiftKey : event.altKey)) {
+				(useShift ? event.shiftKey : event.altKey))) {
 			return;
 		}
 		
@@ -1400,6 +1400,10 @@ var ZoteroPane = new function()
 			if (this.itemsView.rowCount>0) {
 				var enable = [m.exportCollection, m.createBibCollection, m.loadReport];
 			}
+			else if (!this.collectionsView.isContainerEmpty(this.collectionsView.selection.currentIndex)) {
+				var enable = [m.exportCollection];
+				var disable = [m.createBibCollection, m.loadReport];
+			}
 			else
 			{
 				var disable = [m.exportCollection, m.createBibCollection, m.loadReport];
@@ -2038,13 +2042,15 @@ var ZoteroPane = new function()
 			var isNative = Zotero.MIME.hasNativeHandler(mimeType, ext);
 			var internal = Zotero.MIME.hasInternalHandler(mimeType, ext);
 			
-			var fileURL = attachment.getLocalFileURL();
-			
 			if (isNative ||
 					(internal && !Zotero.Prefs.get('launchNonNativeFiles'))) {
-				this.loadURI(fileURL, event, { attachmentID: itemID});
+				
+				var url = 'zotero://attachment/' + itemID + '/';
+				this.loadURI(url, event, { attachmentID: itemID});
 			}
 			else {
+				var fileURL = attachment.getLocalFileURL();
+				
 				// Some platforms don't have nsILocalFile.launch, so we just load it and
 				// let the Firefox external helper app window handle it
 				try {

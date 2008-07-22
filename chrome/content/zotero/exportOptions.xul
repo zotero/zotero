@@ -1,7 +1,13 @@
 <?xml version="1.0"?>
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
-<!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
+<!DOCTYPE window [
+<!ENTITY % zoteroDTD SYSTEM "chrome://zotero/locale/zotero.dtd" >
+%zoteroDTD;
+<!ENTITY % charsetDTD SYSTEM "chrome://global/locale/charsetOverlay.dtd" >
+%charsetDTD;
+]>
 <dialog xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
 	title="&zotero.exportOptions.title;" buttons="cancel,accept"
 	ondialogaccept="Zotero_File_Interface_Export.accept()"
 	ondialogcancel="Zotero_File_Interface_Export.cancel()"
@@ -9,7 +15,15 @@
 	onload="Zotero_File_Interface_Export.init()">
 	
 	<script src="include.js"/>
+	<script src="charsetMenu.js"/>
 	<script src="exportOptions.js"/>
+	<script type="application/javascript">
+	<![CDATA[
+		var observerService = Components.classes["@mozilla.org/observer-service;1"].getService(Components.interfaces.nsIObserverService);
+		observerService.notifyObservers(null, "charsetmenu-selected", "other");
+	]]>
+	</script>
+
 	
 	<vbox id="zotero-export-options-container" flex="1">
 		<hbox>
@@ -19,7 +33,13 @@
 			</menulist>
 		</hbox>
 		<groupbox id="translator-options">
-			<caption label="&zotero.exportOptions.translatorOptions.label;"/>
+			<caption id="translator-options-label" label="&zotero.exportOptions.translatorOptions.label;"/>
+			
+			<vbox id="charset-box" hidden="true">
+				<separator class="thin"/>
+				<label value="&zotero.charset.label;:" control="charset-menu"/>
+				<menulist id="export-option-exportCharset"/>
+			</vbox>
 		</groupbox>
 	</vbox>
 </dialog>

@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-07-07 14:50:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-07-20 01:40:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-06-16 21:30:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -932,13 +932,14 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b3.r1', '', '2008-05-05 07:45:00', '1', '100', '4', 'Library Catalog (Voyager)', 'Simon Kornblith', 'Pwebrecon\.cgi', 
+REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b3.r1', '', '2008-07-16 20:10:00', '1', '100', '4', 'Library Catalog (Voyager)', 'Simon Kornblith', 'Pwebrecon\.cgi', 
 'function detectWeb(doc, url) {
 	var export_options = doc.forms.namedItem(''frm'').elements.namedItem(''RD'').options;
 	for(var i in export_options) {
 		if(export_options[i].text == ''Latin1 MARC''
 		|| export_options[i].text == ''Raw MARC''
 		|| export_options[i].text == ''MARC 8''
+		|| export_options[i].text == ''MARC-8''
 		|| export_options[i].text == ''UTF-8''
 		|| export_options[i].text == ''MARC (Unicode/UTF-8)''
 		|| export_options[i].text == ''MARC UTF-8''
@@ -1037,6 +1038,7 @@ REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b
 	for(var i=0; i<export_options.length; i++) {
 		if(export_options[i].text == ''Raw MARC''
 		|| export_options[i].text == ''MARC 8''
+		|| export_options[i].text == ''MARC-8''
 		|| export_options[i].text == ''MARC (non-Unicode/MARC-8)'') {
 			raw = i;
 		}  if(export_options[i].text == ''Latin1 MARC'') {
@@ -1088,6 +1090,414 @@ REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b
 		
 		Zotero.done();
 	})
+	Zotero.wait();
+}');
+
+REPLACE INTO translators VALUES ('176948f7-9df8-4afc-ace7-4c1c7318d426', '1.0.0b4.r5', '', '2008-07-16 15:35:45', '0', '100', '4', 'ESpacenet', 'Gilles Poulain', 'http://v3.espacenet.com/', 
+'function detectWeb(doc, url) {
+
+	if(doc.location.href.match("results?")) {
+        	return "multiple";
+        } else if (doc.location.href.match("textdoc")) {
+	        return "patent";
+        }
+  }', 
+'function doWeb(doc, url) {
+   
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	var articles = new Array();
+	
+	if (detectWeb(doc, url) == "multiple") {
+		var items = new Object();
+			
+		var titles = doc.evaluate(''//td[3]/strong/a'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+	
+		var next_title;
+		while (next_title = titles.iterateNext()) {
+			items[next_title.href] = next_title.textContent;
+		}
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			articles.push(i);
+		}
+	} else {
+		articles = [url];
+	}
+	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
+	Zotero.wait();
+}
+   
+function getItem(reftext,re) {
+    var item = reftext.match(re);
+    return item[1];
+}
+
+function scrape(doc,url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	
+	//Get title
+	var xpath = "/html/body/form/table[2]/tbody/tr[1]/td[3]/h2";
+	if(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()){
+		var title = Zotero.Utilities.cleanString(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);	
+		
+		var title1 = title.split(" ");		 
+		for (var j in title1) {
+			title1[j] = title1[j][0].toUpperCase() + title1[j].substr(1).toLowerCase();
+		}
+		title = title1.join(" ");
+	}
+
+	//Get Abstract
+	var xpath = ''//td[@id="abCell"]'';
+	if(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()){
+		var abstract = Zotero.Utilities.cleanString(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);	
+	}
+	
+	//Get Applicant
+	var xpath = "//table[1]/tbody/tr/td[1]/table/tbody/tr[4]/td[2]";
+	if(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()){
+		var applicant = Zotero.Utilities.cleanString(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);	
+	}
+
+	//Get application number
+	var xpath = "//table[1]/tbody/tr/td[1]/table/tbody/tr[8]/td[2]";
+	if(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()){
+		var anumber = Zotero.Utilities.cleanString(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);	
+	}
+	
+	//Get patent number
+	var xpath = "//table[1]/tbody/tr/td[1]/table/tbody/tr[1]/td[2]";
+	if(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()){
+		var pnumber = Zotero.Utilities.cleanString(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);	
+	}
+	
+	//Get CIB
+	var xpath = "//table[1]/tbody/tr/td[1]/table/tbody/tr[6]/td[2]";
+	if(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()){
+		var CIBnumber = Zotero.Utilities.cleanString(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);	
+	}
+	
+	//Get ECLA
+	var xpath = "//table[1]/tbody/tr/td[1]/table/tbody/tr[7]/td[2]";
+	if(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()){
+		var tmpECLAnumber = Zotero.Utilities.cleanString(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);		
+		tmpECLAnumber = tmpECLAnumber.substr(24);
+		tmpECLAnumber = tmpECLAnumber.replace(/\)+/g, ''; '');
+		var aus = tmpECLAnumber.split("; ");
+		var ECLAnumber = "";
+		for (var i=0; i< aus.length/2 ; i++){
+			ECLAnumber = ECLAnumber + aus[i] + "; "
+		}
+	}
+
+	//Get priority number
+	var xpath = "//table[1]/tbody/tr/td[1]/table/tbody/tr[9]/td[2]";
+	if(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()){
+		var prnumber = Zotero.Utilities.cleanString(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+	}	
+
+	
+	//Get date
+	var xpath = "//table[1]/tbody/tr/td[1]/table/tbody/tr[2]/td[2]";
+	if(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()){
+		var date = Zotero.Utilities.cleanString(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);	
+	}
+	
+	//Get Creators
+	var xpath = "//table[1]/tbody/tr/td[1]/table/tbody/tr[3]/td[2]";
+	if(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()){
+		var author = Zotero.Utilities.cleanString(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);	
+	}
+
+	//Create Zotero Ref
+	var newArticle = new Zotero.Item(''patent'');
+		newArticle.url = doc.location.href;
+		newArticle.title = title;
+		newArticle.date = date;
+		newArticle.abstractNote = abstract;
+		newArticle.assignee = applicant;
+		newArticle.patentNumber = pnumber;
+		newArticle.priorityNumbers = prnumber;
+		newArticle.applicationNumber = anumber;
+		newArticle.extra = "CIB: " + CIBnumber + "\nECLA: " + ECLAnumber
+
+	var author1 = author.split("; ");
+;
+	for (var m = 0; m< author1.length; m++) {
+		
+		if (author1[m].match(/\(/)) {
+			author1[m] = author1[m].substr(0, author1[m].length-5);
+		}
+		words = author1[m].split(/\s/);
+
+		for (var j in words) {
+			words[j] = words[j][0].toUpperCase() + words[j].substr(1).toLowerCase();
+		}
+
+		var inventor = '''';
+		for (var k = 1; k < words.length; k++) {
+			inventor = inventor +words[k] + " ";
+			if (k == words.length-1) {
+				inventor = inventor +words[0];
+				newArticle.creators.push(Zotero.Utilities.cleanAuthor(inventor, "inventor"));
+			}
+		}
+	}
+
+	 newArticle.complete();
+}');
+
+REPLACE INTO translators VALUES ('4da40f07-904b-4472-93b6-9bea1fe7d4df', '1.0.0b4.r5', '', '2008-07-16 11:17:32', '0', '100', '4', 'Canada.com', 'Adam Crymble', 'http://www.canada.com', 
+'function detectWeb(doc, url) {
+	if (doc.location.href.match("story")) {
+		return "newspaperArticle";
+	} else if (doc.location.href.match("search")) {
+		return "multiple";
+	}
+}', 
+'function scrape(doc, url) {
+
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;		
+	
+	var dataTags = new Object();
+	var tagsContent = new Array();
+	var fieldTitle;
+	
+	var newItem = new Zotero.Item("newspaperArticle");
+
+	newItem.title = doc.title;
+
+	if (doc.evaluate(''//div[@class="storyheader"]/h4'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+		newItem.abstractNote = doc.evaluate(''//div[@class="storyheader"]/h4'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+	} else if (doc.evaluate(''//div[@class="storyheader"]/h2'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+		newItem.abstracteNote = doc.evaluate(''//div[@class="storyheader"]/h2'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+	}
+
+	if (doc.evaluate(''//div[@class="feed_details"]/h4'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+		var author = doc.evaluate(''//div[@class="feed_details"]/h4'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+	
+		if (author.match(/\n/)) {
+			author1 = author.split(/\n/);
+			if (author1[0].match(/ and /)) {
+				author2 = author1[0].split(/ and /);
+				for (var i in author2) {
+					newItem.creators.push(Zotero.Utilities.cleanAuthor(author2[i], "author"));	
+				}
+			} else {
+				newItem.creators.push(Zotero.Utilities.cleanAuthor(author1[0], "author"));	
+			}
+		} else {
+			newItem.creators.push(Zotero.Utilities.cleanAuthor(author, "author"));	
+		}
+	}
+		
+	if (doc.evaluate(''//div[@class="feed_details"]/span'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+		var date1 = doc.evaluate(''//div[@class="feed_details"]/span'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.replace(/^\s*|\s*$/g, '''');
+		if (date1.match("Published:")) {
+			date1 = date1.substr(11);
+			newItem.date = date1;
+		}
+	}	
+	
+	if (doc.evaluate(''//ul[@class="home"]/li/a/span'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+		var pubTitle = doc.evaluate(''//ul[@class="home"]/li/a/span'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		if (pubTitle.match("Home")) {
+			newItem.publicationTitle = pubTitle.substr(0, pubTitle.length-5);
+		} else {
+			newItem.publicationTitle = pubTitle;
+		}
+	} else {
+		newItem.publicationTitle = "Canada.com";
+	}
+	
+	newItem.url = doc.location.href;
+
+	newItem.complete();
+}
+
+function doWeb(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	var articles = new Array();
+	
+	if (detectWeb(doc, url) == "multiple") {
+		var items = new Object();
+		var next_title;
+		
+		if (doc.evaluate(''//div[@class="even"]/p/a'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+		Zotero.debug("AAAAAA");
+			var titles0 = doc.evaluate(''//div[@class="even"]/p/a'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+			
+			while (next_title = titles0.iterateNext()) {
+				if (next_title.href.match("story") && next_title.href.match("canada.com")) {
+					items[next_title.href] = next_title.textContent;
+				}
+			}
+		}
+		
+		if (doc.evaluate(''//div[@class="odd"]/p/a'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+		Zotero.debug("BBBBB");
+			var titles1 = doc.evaluate(''//div[@class="odd"]/p/a'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+			
+			while (next_title = titles1.iterateNext()) {
+				if (next_title.href.match("story") && next_title.href.match("canada.com")) {
+					items[next_title.href] = next_title.textContent;
+				}
+			}
+		}
+		
+		if (doc.evaluate(''//p/b/a'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+			Zotero.debug("CCCCC");
+			var titles2 = doc.evaluate(''//p/b/a'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+			while (next_title = titles2.iterateNext()) {
+				if (next_title.href.match("story") && next_title.href.match("canada.com")) {
+					items[next_title.href] = next_title.textContent;
+				}
+			}
+		}
+		
+		if (doc.evaluate(''//div[@class="name"]/a'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+			
+			Zotero.debug("DDDD");
+			var titles3 = doc.evaluate(''//div[@class="name"]/a'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+			while (next_title = titles3.iterateNext()) {
+				if (next_title.href.match("story")  && next_title.href.match("canada.com")) {
+					items[next_title.href] = next_title.textContent;
+				}
+			}
+		}
+
+		
+		
+		
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			articles.push(i);
+		}
+	} else {
+		articles = [url];
+	}
+	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
+	Zotero.wait();
+}');
+
+REPLACE INTO translators VALUES ('138de272-0d2a-4ab5-8cfb-0fd879958d04', '1.0.0b4.r5', '', '2008-07-16 13:40:00', '0', '100', '4', 'AdvoCAT', 'Adam Crymble', 'http://(142.57.32.51||library.lsuc)', 
+'function detectWeb(doc, url) {
+	if (doc.location.href.match("Search_Code")) {
+		return "multiple";
+	} else if (doc.title.match("Record View")) {
+		return "book";
+	}
+}', 
+'function associateData (newItem, dataTags, field, zoteroField) {
+	if (dataTags[field]) {
+		newItem[zoteroField] = dataTags[field];
+	}
+}
+
+function scrape(doc, url) {
+
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;	
+	
+	var dataTags = new Object();
+	var fieldTitle;
+	
+	var newItem = new Zotero.Item("book");
+
+	var headers = doc.evaluate(''//table[2]/tbody/tr/th'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+	var xPathCount = doc.evaluate(''count (//table[2]/tbody/tr/th)'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+	var contents = doc.evaluate(''//table[2]/tbody/tr/td'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+
+	for (i=0; i<xPathCount.numberValue; i++) {	 	
+     			
+     		fieldTitle = headers.iterateNext().textContent.replace(/\s+/g, '''');
+     		if (!fieldTitle.match(/\w/)) {
+	     		fieldTitle = "Blank" + i;
+     		}
+     		 dataTags[fieldTitle] = Zotero.Utilities.cleanTags(contents.iterateNext().textContent.replace(/^\s*|\s*$/g, ''''));
+     	}
+
+	if (dataTags["MainAuthor:"]) {
+		var author = dataTags["MainAuthor:"];
+		if (author.match(", ") && !author.match(":")) {
+			var authors = author.split(", ");
+			author = authors[1] + " " + authors[0];
+			newItem.creators.push(Zotero.Utilities.cleanAuthor(author, "author"));	
+		} else {
+			newItem.creators.push({lastName: author, creatorType: "creator"});			
+		}
+	}
+
+	if (dataTags["Published:"]) {
+	
+		if (dataTags["Published:"].match(": ")) {
+			var place1 = dataTags["Published:"].indexOf(": ");
+			newItem.place = dataTags["Published:"].substr(0, place1);
+			var publisher1 = dataTags["Published:"].substr(place1 + 2);
+			
+			if (publisher1.match(", ")) {
+				var date1 = publisher1.lastIndexOf(", ");
+				newItem.date = publisher1.substr(date1 +2);
+				newItem.publisher = publisher1.substr(0, date1);
+			} else {
+				newItem.publisher = publisher1;
+			}
+		} else {
+			newItem.publisher = publisher1;
+		}
+	}
+	associateData (newItem, dataTags, "Title:", "title");
+	associateData (newItem, dataTags, "Database:", "repository");
+	associateData (newItem, dataTags, "Description:", "pages");
+	associateData (newItem, dataTags, "Edition:", "edition");
+
+	newItem.url = doc.location.href;
+
+	newItem.complete();
+}
+
+function doWeb(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	var articles = new Array();
+	
+	if (detectWeb(doc, url) == "multiple") {
+		var items = new Object();
+		
+		var titles = doc.evaluate(''//form[2]/table/tbody/tr/td[3]/a'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		
+		var next_title;
+		while (next_title = titles.iterateNext()) {
+			items[next_title.href] = next_title.textContent;
+		}
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			articles.push(i);
+		}
+	} else {
+		articles = [url];
+	}
+	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
 	Zotero.wait();
 }');
 
@@ -1259,6 +1669,212 @@ function doWeb(doc, url) {
 		}
 	} else {
 		articles = [url];
+	}
+	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
+	Zotero.wait();
+}');
+
+REPLACE INTO translators VALUES ('87766765-919e-4d3b-9071-3dd7efe984c8', '1.0.0b4.r5', '', '2008-07-16 20:10:00', '1', '100', '4', 'Revues.org', 'Michael Berkowitz', 'http://.*\.revues\.org', 
+'function detectWeb(doc, url) {
+	if (doc.evaluate(''//div[@id="inside"]/div[@class="sommaire"]/dl[@class="documents"]/dd[@class="titre"]/a'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()
+		|| doc.evaluate(''//ul[@class="summary"]//div[@class="title"]/a'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+		return "multiple";
+	} else if (doc.evaluate(''//h1[@id="docTitle"]/span[@class="text"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext() || url.match(/document\d+/)) {
+		return "journalArticle";
+	}
+}', 
+'function doWeb(doc, url) {
+	var arts = new Array();
+	if (detectWeb(doc, url) == "multiple") {
+		if (doc.evaluate(''//ul[@class="summary"]//div[@class="title"]/a'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+			var xpath = ''//ul[@class="summary"]//div[@class="title"]/a'';
+		} else if (doc.evaluate(''//div[@id="inside"]/div[@class="sommaire"]/dl[@class="documents"]/dd[@class="titre"]/a'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+			var xpath = ''//div[@id="inside"]/div[@class="sommaire"]/dl[@class="documents"]/dd[@class="titre"]/a'';
+		}
+		var titles = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
+		var title;
+		var items = new Object();
+		while (title = titles.iterateNext()) {
+			items[title.href] = title.textContent;
+		}
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			arts.push(i);
+		}
+	} else {
+		arts = [url];
+	}
+  	Zotero.Utilities.processDocuments(arts, function(doc) {
+		var metas = doc.evaluate(''//meta'', doc, null, XPathResult.ANY_TYPE, null);
+		var meta;
+		var data = new Object();
+		while (meta = metas.iterateNext()) {
+			if (data[meta.name]) {
+				data[meta.name.toLowerCase()] = data[meta.name.toLowerCase()] + ";" + meta.content;
+			} else {
+				data[meta.name.toLowerCase()] = meta.content
+			}
+		}
+		var item = new Zotero.Item("journalArticle");
+		item.url = data[''url''];
+		var authors = data[''author''].split('';'');
+		for each (var aut in authors) {
+			if (aut.match(/\w+/)) item.creators.push(Zotero.Utilities.cleanAuthor(aut.replace(/(.*)\s([^\s]+)$/, "$2 $1"), "author"));
+		}
+		item.tags = data[''dc.subject''].split(/,\s+/);
+		item.date = data[''dc.date''];
+		item.title = data[''dc.title''];
+		if (data[''dc.relation.ispartof'']) item.publicationTitle = data[''dc.relation.ispartof''].match(/^[^,]+/)[0];
+		item.abstractNote = data[''description''];
+		if (!item.abstractNote && data[''dc.description'']) item.abstractNote = data[''dc.description''];
+		
+		item.complete();
+	}, function() {Zotero.done;});
+	Zotero.wait();
+}');
+
+REPLACE INTO translators VALUES ('daa26181-71d4-48ef-8cac-54c06ff4c20e', '1.0.0b4.r5', '', '2008-07-07 23:40:00', '0', '100', '4', 'Citebase', 'Michael Berkowitz', 'http://(www.)?citebase.org/', 
+'function detectWeb(doc, url) {
+	if (url.match(/\/search/)) {
+		return "multiple";
+	} else if (url.match(/\/abstract/)) {
+		return "journalArticle";
+	}
+}', 
+'function doWeb(doc, url) {
+	var articles = new Array();
+	if (detectWeb(doc, url) == "multiple") {
+		var links = doc.evaluate(''//div[@class="rs_match"]/div/a[@class="abs_title"]'', doc, null, XPathResult.ANY_TYPE, null);
+		var items = new Object();
+		var link;
+		while (link = links.iterateNext()) {
+			items[link.href] = link.textContent;
+		}
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			articles.push(i);
+		}
+	} else {
+		articles = [url];
+	}
+
+	Zotero.Utilities.processDocuments(articles, function(doc) {
+		var biburl = doc.evaluate(''//a[contains(text(), "BibTeX")]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext().href;
+		if (doc.evaluate(''/html/body/div[@class="body"]/div[@class="abstract"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) var abs = Zotero.Utilities.trimInternal(doc.evaluate(''/html/body/div[@class="body"]/div[@class="abstract"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+		var translator = Zotero.loadTranslator("import");
+		translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
+		Zotero.Utilities.HTTP.doGet(biburl, function(text) {
+			translator.setString(text);
+			translator.setHandler("itemDone", function(obj, item) {
+				if (abs) {
+					if (abs.match(/^Abstract/)) {
+						item.abstractNote = abs.substr(9);
+					} else {
+						item.abstractNote = abs;
+					}
+				}
+				item.attachments = [{url:item.url, title:"Citebase Snapshot", mimeType:"text/html"}];
+				item.complete();
+			});
+			translator.translate();
+		});
+	}, function() {Zotero.done;});
+	Zotero.wait();
+}');
+
+REPLACE INTO translators VALUES ('dd149efc-7f0e-43e4-b3df-b6d15e171717', '1.0.0b4.r5', '', '2008-07-15 19:40:00', '0', '100', '4', 'Persée', 'Adam Crymble', 'http://www.persee.fr', 
+'function detectWeb(doc, url) {
+	if (doc.location.href.match("search") && doc.evaluate(''//div[@id="searchResults"]/div[@class="oneResult"]/a'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+		return "multiple";
+	} else if (doc.location.href.match("article")) {
+		return "journalArticle";
+	}
+}', 
+'//Persee Translator. Code by Adam Crymble
+
+function scrape(doc, url) {
+
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;	
+	
+	var newItem = new Zotero.Item("journalArticle");
+
+	newItem.url = doc.location.href;
+	newItem.title = doc.evaluate(''//div[@class="oneResult"]/h2'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.replace(/^\s*|\s+$/g, '''');
+
+	//various journal info
+	if (doc.title.match(", ")) {
+		var contents = doc.title.split(", ");
+			newItem.publicationTitle = contents[0].substr(9);
+		for (var i = 1; i < contents.length; i++) {
+			if (contents[i].match("Year ")) {
+				newItem.date = contents[i].substr(5);
+			} else if (contents[i].match("Volume ")) {
+				newItem.volume = contents[i].substr(7);
+			} else if (contents[i].match("Issue ")) {
+				newItem.issue = contents[i].substr(6);
+			} else if (contents[i].match("pp. ")) {
+				newItem.pages = contents[i].substr(4);
+			}
+		}
+	}
+	
+	//authors
+	var getAuthors = doc.evaluate(''//div[@class="oneResult"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.replace(/^\s*|\s+$/g, '''');
+	var chopAuthors1 = getAuthors.indexOf(newItem.title) + newItem.title.length;
+	var chopAuthors2 = getAuthors.indexOf(newItem.publicationTitle);
+	
+	var authors = getAuthors.substr(chopAuthors1, chopAuthors2-chopAuthors1);
+	if (authors.match(", ")) {
+		authors = authors.split(", ");
+		for (var i in authors) {
+			newItem.creators.push(Zotero.Utilities.cleanAuthor(authors[i], "author"));	
+		}
+	} else {
+		newItem.creators.push(Zotero.Utilities.cleanAuthor(authors, "author"));	
+	}
+	
+	newItem.complete();
+}
+
+function doWeb(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	var articles = new Array();
+	
+	if (detectWeb(doc,url) == "journalArticle") {
+		articles = [url];
+		
+	} else if (detectWeb(doc, url) == "multiple") {
+		var items = new Object();
+		
+		var titles = doc.evaluate(''//div[@id="searchResults"]/div[@class="oneResult"]/a'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		
+		var next_title;
+		var titlesArray = new Array();
+		var linksArray = new Array();
+		
+		 while (next_title = titles.iterateNext()) {
+			 titlesArray.push(next_title.textContent.replace(/^\s*|\s+$/g, ''''));
+			 linksArray.push(next_title.href);
+		 }
+	
+		for (var i = 0; i < titlesArray.length; i++) {
+			
+			if (linksArray[i].match("article")) {
+				items[linksArray[i]] = titlesArray[i];
+			}
+		}
+		
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			articles.push(i);
+		}
 	}
 	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
 	Zotero.wait();
@@ -5766,7 +6382,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('f203db7f-7b7b-4dc4-b018-115b7885fe3b', '1.0.0b4.r5', '', '2008-04-24 14:30:00', '0', '100', '4', 'Oxford Music Online', 'Michael Berkowitz', 'http://[^/]*www.oxfordmusiconline.com[^/]*/', 
+REPLACE INTO translators VALUES ('f203db7f-7b7b-4dc4-b018-115b7885fe3b', '1.0.0b4.r5', '', '2008-07-10 06:15:00', '0', '100', '4', 'Oxford Music and Art Online', 'Michael Berkowitz', 'http://[^/]*www.oxford(music|art)online.com[^/]*/', 
 'function detectWeb(doc, url) {
 	if (url.match(/search_results/)) {
 		return "multiple";
@@ -5775,6 +6391,8 @@ REPLACE INTO translators VALUES ('f203db7f-7b7b-4dc4-b018-115b7885fe3b', '1.0.0b
 	}
 }', 
 'function doWeb(doc, url) {
+	var host = doc.location.host;
+	var site = host.match(/oxford(.*)online/)[1];
 	var ids = new Array();
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
@@ -5785,14 +6403,14 @@ REPLACE INTO translators VALUES ('f203db7f-7b7b-4dc4-b018-115b7885fe3b', '1.0.0b
 		}
 		items = Zotero.selectItems(items);
 		for (var i in items) {
-			ids.push(i.match(/music\/(\d+)/)[1]);
+			ids.push(i.match(/(music|art)\/([^?]+)/)[2]);
 		}
 	} else {
-		ids = [url.match(/music\/(\d+)/)[1]];
+		ids = [url.match(/(music|art)\/([^?]+)/)[2]];
 	}
 	Zotero.debug(ids);
 	for each (var id in ids) {
-		var get = ''http://www.oxfordmusiconline.com/subscriber/article_export_citation/grove/music/'' + id;
+		var get = ''http://'' + host + ''/subscriber/article_export_citation/grove/'' + site + ''/'' + id;
 		Zotero.Utilities.HTTP.doGet(get, function(text) {
 			var translator = Zotero.loadTranslator("import");
 			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
@@ -5809,6 +6427,176 @@ REPLACE INTO translators VALUES ('f203db7f-7b7b-4dc4-b018-115b7885fe3b', '1.0.0b
 			translator.translate();
 		});
 	}
+}');
+
+REPLACE INTO translators VALUES ('ea531652-cdeb-4ec2-940e-627d4b107263', '1.0.0b4.r1', '', '2008-07-10 06:15:00', '0', '100', '4', 'AlterNet', 'Jesse Johnson', '^http://(?:www\.)alternet.org', 
+'function detectWeb(doc, url) {
+	// identifies articles according to the presence of an article ID
+	// number in the URL
+	var index = url.toString().indexOf(''.org/'') + 5;
+	index += url.toString().substr(index).indexOf(''/'');
+	if (index != -1) {
+		// ordinary aritcle
+		var id = url.toString().substr(index + 1, 5);
+		Zotero.Utilities.cleanString(id);
+		if (Number(id)) {
+			return "magazineArticle";
+		}
+		//columnist or blog article
+		index += url.toString().substr(index + 1).indexOf(''/'');
+		id = url.toString().substr(index + 2, 5);
+		Zotero.Utilities.cleanString(id);
+		if  (Number(id) && url.toString().search(''blog'') == -1) {
+			return "magazineArticle";
+		}
+		else if (Number(id)) {
+			return "blogPost";
+		}
+	}
+	
+	return null;
+}', 
+'function scrape(doc, url, title) {    
+	     var index = url.toString().indexOf(''.org/'') + 5;
+	     index += url.toString().substr(index).indexOf(''/'');
+	     if (index != -1) {
+		     // ordinary aritcle
+		     var id = url.toString().substr(index + 1, 5);
+		     Zotero.Utilities.cleanString(id);
+		     if (Number(id)) { 
+			     var newItem = new Zotero.Item("magazineArticle");
+		     }
+		     //columnist or blog article
+		     index += url.toString().substr(index + 1).indexOf(''/'');
+		     id = url.toString().substr(index + 2, 5);
+		     Zotero.Utilities.cleanString(id);
+		     if  (Number(id) && url.toString().search(''blog'') == -1) {
+			     var newItem = new Zotero.Item("magazineArticle");
+		     }
+		     else if (Number(id)) {
+			     var newItem = new Zotero.Item("blogPost");
+		     }
+	     }
+	     	
+ 	     newItem.url = url;
+	     newItem.title = title;
+	     
+	     if (newItem.itemType == "magazineArticle") {
+		     newItem.publicationTitle = "AlterNet";
+		     newItem.repository = "alternet.org";
+	     }
+	     else if (newItem.itemType == "blogPost") {
+		     newItem.websiteType = "AlterNet Blog";
+	     }
+	     
+	     
+	     // general scraping variables
+	     var xpath;
+
+	     
+	     // author
+	     if (newItem.itemType == "magazineArticle") {
+		     xpath = ''//p[@class="storybyline"]//a[contains(@href,"author")]'';
+	     }
+	     else if (newItem.itemType == "blogPost") {
+		     xpath = ''//p[@class="storybyline"]//a[contains(@href,"bloggers")]'';
+	     }
+	     temp = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext();
+	     if (temp) { 
+		     var author = Zotero.Utilities.trimInternal(temp.textContent);
+		     if(author.substr(0, 3).toLowerCase() == "by ") {
+			     author = author.substr(3);
+		     }
+		     
+		     var authors = author.split(",");
+		     for each (var author in authors) {
+			     newItem.creators.push(Zotero.Utilities.cleanAuthor(author, "author"));
+		     } 
+	     }
+	     
+	     // date
+	     if (newItem.itemType == "magazineArticle") {
+		     xpath = ''//p[@class="storybyline"]//a[contains(@href,"date")]'';
+		     temp = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext();
+		     var date = Zotero.Utilities.strToDate(temp.textContent);     
+	     }
+	     else if (newItem.itemType == "blogPost") {
+		     xpath = ''//p[@class="storybyline"]/b'';
+		     temp = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext();
+		     var begin = temp.textContent.lastIndexOf(" on ");
+		     temp = temp.textContent.substr(begin + 4);
+		     var date = Zotero.Utilities.strToDate(temp.substr(0, temp.length - 1));
+	     }
+	     if (date != null) {
+		     var strdate;
+		     
+		     date.month = date.month + 1;
+		     
+		     strdate = date.year + ''-''; 
+		     if (date.month < 10) {
+			     strdate += ''0'' + date.month;
+		     }
+		     else {
+			     strdate += date.month;
+		     }
+		     if (date.day > 10) {
+			     strdate += ''-'' + date.day;
+		     }
+		     else { 
+			     strdate += ''-0'' + date.day;
+		     }
+		   
+		     newItem.date = strdate;
+	     }
+	     
+	     // abstract
+	     xpath = ''//div[@class="teaser"]//div[contains(@class,"teaser")]'';
+	     temp = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext();
+	     if (temp) {
+		     newItem.abstractNote = Zotero.Utilities.trimInternal(temp.textContent);
+	     }   
+
+	     // article snapshot
+	     // grabs 5-digit article code from url and uses it to derive printable page url for use in article snapshot
+	     var index = url.toString().indexOf(''.org/'') + 5;
+	     index += url.toString().substr(index).indexOf(''/'');
+	     if (index != -1) {
+		     var printurl;
+		     // ordinary article
+		     var id = url.toString().substr(index + 1, 5);
+		     if (Number(id)) {
+			     printurl = "http://www.alternet.org/module/printversion/" + id;
+	     	             newItem.attachments.push({url:printurl, title:"AlterNet Article Snapshot", mimeType:"text/html"});
+		     }
+		     // columnist article
+		     else {
+		     	     index += url.toString().substr(index + 1).indexOf(''/'');
+		     	     id = url.toString().substr(index + 2, 5);
+		     	     Zotero.Utilities.cleanString(id);
+		     	     if  (Number(id)) {
+				     printurl = "http://www.alternet.org/module/printversion/" + id;
+				     if (newItem.itemType == "blogPost") {
+					     printurl += "/?type=blog";
+				     }
+	     	             	     newItem.attachments.push({url:printurl, title:"AlterNet Article Snapshot", mimeType:"text/html"});
+	     	             }
+		     }		     		     
+	     }
+	     
+	     newItem.complete();
+}
+
+
+
+function doWeb(doc, url) {      
+      // ordinary and columnist articles
+      var xpath = ''//p[@class="storyheadline"]'';
+      var title;
+      if (title = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {  
+	      scrape(doc, url, title.textContent);
+      }
+
+      return null;
 }');
 
 REPLACE INTO translators VALUES ('56ea09bc-57ee-4f50-976e-cf7cb1f6c6d8', '1.0.0b4.r5', '', '2008-04-23 09:45:00', '0', '100', '4', 'Royal Society Publishing', 'Michael Berkowitz', 'http://journals.royalsociety.org/', 
@@ -10048,7 +10836,7 @@ REPLACE INTO translators VALUES ('303c2744-ea37-4806-853d-e1ca67be6818', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('27ee5b2c-2a5a-4afc-a0aa-d386642d4eed', '1.0.0b4.r5', '', '2008-04-10 03:00:00', '1', '100', '4', 'PubMed Central', 'Michael Berkowitz', 'http://[^/]*.nih.gov/', 
+REPLACE INTO translators VALUES ('27ee5b2c-2a5a-4afc-a0aa-d386642d4eed', '1.0.0b4.r5', '', '2008-07-16 20:10:00', '1', '100', '4', 'PubMed Central', 'Michael Berkowitz', 'http://[^/]*.nih.gov/', 
 'function detectWeb(doc, url) {
 	if (doc.evaluate(''//table[@id="ResultPanel"]//td[2]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
@@ -10087,7 +10875,6 @@ REPLACE INTO translators VALUES ('27ee5b2c-2a5a-4afc-a0aa-d386642d4eed', '1.0.0b
 	} else {
 		URIs.push(url);
 	}
-	
 	for each (var link in URIs) {
 		Zotero.Utilities.HTTP.doGet(link, function(text) {
 			var tags = new Object();
@@ -10113,6 +10900,8 @@ REPLACE INTO translators VALUES ('27ee5b2c-2a5a-4afc-a0aa-d386642d4eed', '1.0.0b
 			}
 			newItem.url = tags["fulltext_html_url"];
 			newItem.extra = text.match(/PMC\d+/)[0];
+			newItem.journalAbbreviation = text.match(/span class=\"citation-abbreviation\">([^<]+)</)[1];
+			newItem.pages = text.match(/span class=\"citation-flpages\">([^<]+)</)[1].replace(/[\.:\s]/g, "")
 			newItem.complete();
 		});
 	}
@@ -11525,7 +12314,7 @@ function doWeb(doc, url) {
 }
 ');
 
-REPLACE INTO translators VALUES ('5af42734-7cd5-4c69-97fc-bc406999bdba', '1.0.0b4.r5', '', '2008-04-08 03:00:00', '1', '100', '4', 'ESA Journals', 'Michael Berkowitz', 'http://www.esajournals.org/', 
+REPLACE INTO translators VALUES ('5af42734-7cd5-4c69-97fc-bc406999bdba', '1.0.0b4.r5', '', '2008-07-10 06:15:00', '1', '100', '4', 'ESA Journals', 'Michael Berkowitz', 'http://www.esajournals.org/', 
 'function detectWeb(doc, url) {
 	if (url.indexOf("get-toc") != -1 || url.indexOf("searchtype") != -1) {
 		return "multiple";
@@ -11577,8 +12366,10 @@ function doWeb(doc, url) {
 		if (newDoc.evaluate(''//a[text() = "Full Text"]'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
 			itemurl = newDoc.evaluate(''//a[text() = "Full Text"]'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
 		}
-		var doi = newDoc.evaluate(''//div[@class="doc-head"]/p[contains(text(), "DOI")][@class="info"]'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-		doi = Zotero.Utilities.trimInternal(doi.substr(4));
+		if (newDoc.evaluate(''//div[@class="doc-head"]/p[contains(text(), "DOI")][@class="info"]'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+			var doi = newDoc.evaluate(''//div[@class="doc-head"]/p[contains(text(), "DOI")][@class="info"]'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+			doi = Zotero.Utilities.trimInternal(doi.substr(4));
+		}
 		var issn = newDoc.evaluate(''//div[@id="pageTitle"]/p/a'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href.match(/issn=([^&]+)/)[1];
 		newlink = newlink.replace(''cite-builder'', ''download-citation&t=refman&site=esaonline'');
 		Zotero.Utilities.HTTP.doGet(newlink, function(text) {
@@ -11588,7 +12379,7 @@ function doWeb(doc, url) {
 			translator.setString(text);
 			translator.setHandler("itemDone", function(obj, item) {
 				item.url = decodeURIComponent(itemurl);
-				item.DOI = decodeURIComponent(doi);
+				if (doi) item.DOI = decodeURIComponent(doi);
 				var bits = new Array(issn, item.volume, item.issue);
 				var pdfurl = ''http://www.esajournals.org/archive/'' + bits.join("/") + "/pdf/i" + bits.join("-") + "-" + item.pages.match(/\d+/)[0] + ".pdf";
 				item.attachments = [
@@ -12820,7 +13611,7 @@ function doWeb(doc, url)
       }
 }');
 
-REPLACE INTO translators VALUES ('1a3e63b2-0adf-4c8e-928b-c58c2594b45d', '1.0.0b4.r1', '', '2008-06-23 17:05:00', '0', '100', '4', 'BioMed Central and More', 'Ben Parr', 'http://[^/]*(jcmr-online|respiratory-research|bio-diglib|nuclear-receptor|medimmunol|kinetoplastids|filariajournal|cellandchromosome|actavetscand|aidsrestherapy|almob|ann-clinmicrob|annals-general-psychiatry|asir-journal|arthritis-research|apfmj|anzhealthpolicy|behavioralandbrainfunctions|biodatamining|biology-direct|biomagres|biomedical-engineering-online|bpsmedicine|biotechnologyforbiofuels|biomedcentral|breast-cancer-research|cancerci|cbmjournal|cardiab|cardiovascularultrasound|casesjournal|lipidsignaling.cbdjournals|biosignaling|celldiv|cerebrospinalfluidresearch|journal.chemistrycentral|capmh|cmjournal|chiroandosteo|clinicalmolecularallergy|cpementalhealth|comparative-hepatology|conflictandhealth|resource-allocation|coughjournal|ccforum|cytojournal|diagnosticpathology|dynamic-med|ete-online|ehjournal|epi-perspectives|epigeneticsandchromatin|fibrogenesis|frontiersinzoology|gvt-journal|genomebiology|genomemedicine|geochemicaltransactions|globalizationandhealth|gutpathogens|harmreductionjournal|head-face-med|hqlo|health-policy-systems|human-resources-health|immunityageing|immunome-research|implementationscience|infectagentscancer|intarchmed|internationalbreastfeedingjournal|equityhealthj|ijbnpa|ij-healthgeographics|ijmhs|issoonline|jautoimdis|jbioleng|jbiol|j-biomed-discovery|jbppni|carcinogenesis|cardiothoracicsurgery|jcmr-online|jcircadianrhythms|ethnobiomed|jexpclinassistreprod|jeccr|jfootankleres|jhoonline|jibtherapies|journal-inflammation|jmedicalcasereports|jmolecularsignaling|jnanobiotechnology|jnrbm|jneuroengrehab|jneuroinflammation|occup-med|josr-online|jissn|translational-medicine|traumamanagement|lipidworld|malariajournal|microbialcellfactories|molecularbrain|molecular-cancer|molecularcytogenetics|molecularneurodegeneration|molecularpain|neuraldevelopment|nonlinearbiomedphys|nutritionandmetabolism|nutritionj|ojrd|om-pc|parasitesandvectors|particleandfibretoxicology|pathogeneticsjournal|pssjournal|ped-rheum|peh-med|plantmethods|pophealthmetrics|proteomesci|ro-journal|rbej|reproductive-health-journal|respiratory-research|retrovirology|salinesystems|the-scientist|scoliosisjournal|scfbm|substanceabusepolicy|tbiomed|thrombosisjournal|thyroidresearchjournal|tobaccoinduceddiseases|trialsjournal|urooncologyjournal|virologyj|wjes|wjso)\.(com|org|net)', 
+REPLACE INTO translators VALUES ('1a3e63b2-0adf-4c8e-928b-c58c2594b45d', '1.0.0b4.r1', '', '2008-07-15 19:45:00', '1', '100', '4', 'BioMed Central and More', 'Ben Parr', 'http://[^/]*(jcmr-online|respiratory-research|bio-diglib|nuclear-receptor|medimmunol|kinetoplastids|filariajournal|cellandchromosome|actavetscand|aidsrestherapy|almob|ann-clinmicrob|annals-general-psychiatry|asir-journal|arthritis-research|apfmj|anzhealthpolicy|behavioralandbrainfunctions|biodatamining|biology-direct|biomagres|biomedical-engineering-online|bpsmedicine|biotechnologyforbiofuels|biomedcentral|breast-cancer-research|cancerci|cbmjournal|cardiab|cardiovascularultrasound|casesjournal|lipidsignaling.cbdjournals|biosignaling|celldiv|cerebrospinalfluidresearch|journal.chemistrycentral|capmh|cmjournal|chiroandosteo|clinicalmolecularallergy|cpementalhealth|comparative-hepatology|conflictandhealth|resource-allocation|coughjournal|ccforum|cytojournal|diagnosticpathology|dynamic-med|ete-online|ehjournal|epi-perspectives|epigeneticsandchromatin|fibrogenesis|frontiersinzoology|gvt-journal|genomebiology|genomemedicine|geochemicaltransactions|globalizationandhealth|gutpathogens|harmreductionjournal|head-face-med|hqlo|health-policy-systems|human-resources-health|immunityageing|immunome-research|implementationscience|infectagentscancer|intarchmed|internationalbreastfeedingjournal|equityhealthj|ijbnpa|ij-healthgeographics|ijmhs|issoonline|jautoimdis|jbioleng|jbiol|j-biomed-discovery|jbppni|carcinogenesis|cardiothoracicsurgery|jcmr-online|jcircadianrhythms|ethnobiomed|jexpclinassistreprod|jeccr|jfootankleres|jhoonline|jibtherapies|journal-inflammation|jmedicalcasereports|jmolecularsignaling|jnanobiotechnology|jnrbm|jneuroengrehab|jneuroinflammation|occup-med|josr-online|jissn|translational-medicine|traumamanagement|lipidworld|malariajournal|microbialcellfactories|molecularbrain|molecular-cancer|molecularcytogenetics|molecularneurodegeneration|molecularpain|neuraldevelopment|nonlinearbiomedphys|nutritionandmetabolism|nutritionj|ojrd|om-pc|parasitesandvectors|particleandfibretoxicology|pathogeneticsjournal|pssjournal|ped-rheum|peh-med|plantmethods|pophealthmetrics|proteomesci|ro-journal|rbej|reproductive-health-journal|respiratory-research|retrovirology|salinesystems|the-scientist|scoliosisjournal|scfbm|substanceabusepolicy|tbiomed|thrombosisjournal|thyroidresearchjournal|tobaccoinduceddiseases|trialsjournal|urooncologyjournal|virologyj|wjes|wjso)\.(com|org|net)', 
 'function detectWeb(doc,url)
 {
 	var namespace = doc.documentElement.namespaceURI;
@@ -12863,7 +13654,7 @@ REPLACE INTO translators VALUES ('1a3e63b2-0adf-4c8e-928b-c58c2594b45d', '1.0.0b
 	        var doi = newItem.DOI;
 		var splitURL = newItem.url.split(''/'');
 		
-		if(splitURL.length>=3 && doi != ""){
+		if(splitURL.length>=3 && doi){
 			var doiSuffix = doi.slice(doi.indexOf(''/'')+1);
 			var pdfURL = splitURL[0] + ''/'' + splitURL[1] + ''/'' + splitURL[2];
 			pdfURL += ''/content/pdf/'' + doiSuffix + ''.pdf'';
@@ -12949,7 +13740,7 @@ function doWeb(doc,url)
 }
 ');
 
-REPLACE INTO translators VALUES ('8a07dd43-2bce-47bf-b4bf-c0fc441b79a9', '1.0.0b4.r5', '', '2008-02-27 23:00:00', '0', '100', '4', 'Optics Express', 'Michael Berkowitz', 'http://(www.)?opticsexpress\.org', 
+REPLACE INTO translators VALUES ('8a07dd43-2bce-47bf-b4bf-c0fc441b79a9', '1.0.0b4.r5', '', '2008-07-15 19:40:00', '0', '100', '4', 'Optics Express', 'Michael Berkowitz', 'http://(www.)?opticsexpress\.org', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -12989,13 +13780,11 @@ REPLACE INTO translators VALUES ('8a07dd43-2bce-47bf-b4bf-c0fc441b79a9', '1.0.0b
 	for (var a in articles) {
 		var link = articles[a];
 		Zotero.Utilities.HTTP.doGet(link, function(text) {
+			if (text.match(/doi:.*\"/)) var doi = text.match(/doi:(.*)\"/)[1];
 			var id = text.match(/name=\"articles\"\s+value=\"([^"]+)\"/)[1];
 			var action = text.match(/select\s+name=\"([^"]+)\"/)[1];
-			Zotero.debug(id);
-			Zotero.debug(action);
 			var get = ''http://www.opticsinfobase.org/custom_tags/IB_Download_Citations.cfm'';
 			var post = ''articles='' + id + ''&ArticleAction=save_endnote2&'' + action + ''=save_endnote2'';
-			Zotero.debug(get + "?" + post);
 			Zotero.Utilities.HTTP.doPost(get, post, function(text) {
 				var translator = Zotero.loadTranslator("import");
 				translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
@@ -13007,7 +13796,7 @@ REPLACE INTO translators VALUES ('8a07dd43-2bce-47bf-b4bf-c0fc441b79a9', '1.0.0b
 					} else {
 						pubName = item.publicationTitle;
 					}
-					Zotero.debug(pubName);
+					if (doi) item.DOI = doi;
 					item.attachments = [{url:articles[a], title:pubName + " Snapshot", mimeType:"text/html"}];
 					item.complete();
 				});
@@ -13017,7 +13806,7 @@ REPLACE INTO translators VALUES ('8a07dd43-2bce-47bf-b4bf-c0fc441b79a9', '1.0.0b
 	}
 }');
 
-REPLACE INTO translators VALUES ('a1a97ad4-493a-45f2-bd46-016069de4162', '1.0.0b4.r1', '', '2008-02-27 23:00:00', '0', '100', '4', 'Optical Society of America', 'Michael Berkowitz', 'https?://[^.]+\.(opticsinfobase|osa)\.org', 
+REPLACE INTO translators VALUES ('a1a97ad4-493a-45f2-bd46-016069de4162', '1.0.0b4.r1', '', '2008-07-15 19:40:00', '0', '100', '4', 'Optical Society of America', 'Michael Berkowitz', 'https?://[^.]+\.(opticsinfobase|osa)\.org', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -13053,14 +13842,15 @@ REPLACE INTO translators VALUES ('a1a97ad4-493a-45f2-bd46-016069de4162', '1.0.0b
 	} else {
 		articles = [url];
 	}
-	Zotero.debug(articles);
 	Zotero.Utilities.processDocuments(articles, function(newDoc) {
-		Zotero.debug(newDoc.location.href);
 		var osalink = newDoc.evaluate(''//div[@id="abstract"]/p/a[contains(text(), "opticsinfobase")]'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
-		Zotero.debug(osalink);
 		Zotero.Utilities.HTTP.doGet(osalink, function(text) {
 			var action = text.match(/select\s+name=\"([^"]+)\"/)[1];
 			var id = text.match(/input\s+type=\"hidden\"\s+name=\"articles\"\s+value=\"([^"]+)\"/)[1];
+			if (newDoc.evaluate(''//p[*[contains(text(), "DOI")]]'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+				var doi = Zotero.Utilities.trimInternal(newDoc.evaluate(''//p[*[contains(text(), "DOI")]]'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+				doi = doi.match(/doi:(.*)$/)[1];
+			}
 			var get = ''http://'' + host + ''/custom_tags/IB_Download_Citations.cfm'';
 			var post = ''articles='' + id + ''&ArticleAction=save_endnote2&'' + action + ''=save_endnote2'';
 			Zotero.Utilities.HTTP.doPost(get, post, function(text) {
@@ -13074,7 +13864,7 @@ REPLACE INTO translators VALUES ('a1a97ad4-493a-45f2-bd46-016069de4162', '1.0.0b
 					} else {
 						pubName = item.publicationTitle;
 					}
-					Zotero.debug(pubName);
+					if (doi) item.DOI = doi;
 					item.attachments = [{url:osalink, title:pubName + " Snapshot", mimeType:"text/html"}];
 					item.complete();
 				});
@@ -13082,10 +13872,9 @@ REPLACE INTO translators VALUES ('a1a97ad4-493a-45f2-bd46-016069de4162', '1.0.0b
 			});
 		});
 	}, function() {Zotero.done;});
-	
 }');
 
-REPLACE INTO translators VALUES ('b61c224b-34b6-4bfd-8a76-a476e7092d43', '1.0.0b4.r5', '', '2008-07-03 08:00:00', '1', '100', '4', 'SSRN', 'Michael Berkowitz', 'http://papers\.ssrn\.com/', 
+REPLACE INTO translators VALUES ('b61c224b-34b6-4bfd-8a76-a476e7092d43', '1.0.0b4.r5', '', '2008-07-07 17:00:00', '1', '100', '4', 'SSRN', 'Michael Berkowitz', 'http://papers\.ssrn\.com/', 
 'function detectWeb(doc, url)	{
 	var namespace=doc.documentElement.namespaceURI;
 	var nsResolver=namespace?function(prefix)	{
@@ -15640,7 +16429,7 @@ REPLACE INTO translators VALUES ('c54d1932-73ce-dfd4-a943-109380e06574', '1.0.0b
 	}
 }');
 
-REPLACE INTO translators VALUES ('fcf41bed-0cbc-3704-85c7-8062a0068a7a', '1.0.0b3.r1', '', '2008-06-12 19:00:00', '1', '100', '4', 'NCBI PubMed', 'Simon Kornblith and Michael Berkowitz', 'http://[^/]*www\.ncbi\.nlm\.nih\.gov[^/]*/(pubmed|sites/entrez|entrez/query\.fcgi\?.*db=PubMed)', 
+REPLACE INTO translators VALUES ('fcf41bed-0cbc-3704-85c7-8062a0068a7a', '1.0.0b3.r1', '', '2008-07-21 09:38:53', '1', '100', '4', 'NCBI PubMed', 'Simon Kornblith and Michael Berkowitz', 'http://[^/]*www\.ncbi\.nlm\.nih\.gov[^/]*/(pubmed|sites/entrez|entrez/query\.fcgi\?.*db=PubMed)', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -15679,7 +16468,6 @@ function detectSearch(item) {
 ', 
 'function lookupPMIDs(ids, doc) {
 	Zotero.wait();
-
 	var newUri = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=PubMed&retmode=xml&rettype=citation&id="+ids.join(",");
 	Zotero.Utilities.HTTP.doGet(newUri, function(text) {
 		// Remove xml parse instruction and doctype
@@ -15693,6 +16481,7 @@ function detectSearch(item) {
 			var citation = xml.PubmedArticle[i].MedlineCitation;
 
 			var PMID = citation.PMID.text().toString();
+			newItem.url = "http://www.ncbi.nlm.nih.gov/pubmed/" + PMID;
 			newItem.extra = "PMID: "+PMID;
 			// add attachments
 			if(doc) {
@@ -18420,7 +19209,7 @@ REPLACE INTO translators VALUES ('8917b41c-8527-4ee7-b2dd-bcbc3fa5eabd', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('ecddda2e-4fc6-4aea-9f17-ef3b56d7377a', '1.0.0b3.r1', '', '2008-07-03 09:00:00', '1', '100', '4', 'arXiv.org', 'Sean Takats and Michael Berkowitz', 'http://(?:(www|uk)\.)?(?:(arxiv\.org|xxx.lanl.gov)/(?:find/\w|list/\w|abs/)|eprintweb.org/S/(?:search|archive|article)(?!.*refs$)(?!.*cited$))', 
+REPLACE INTO translators VALUES ('ecddda2e-4fc6-4aea-9f17-ef3b56d7377a', '1.0.0b3.r1', '', '2008-07-07 17:00:00', '1', '100', '4', 'arXiv.org', 'Sean Takats and Michael Berkowitz', 'http://(?:(www|uk)\.)?(?:(arxiv\.org|xxx.lanl.gov)/(?:find/\w|list/\w|abs/)|eprintweb.org/S/(?:search|archive|article)(?!.*refs$)(?!.*cited$))', 
 'function detectWeb(doc, url) {
 	var searchRe = /^http:\/\/(?:(www|uk)\.)?(?:(arxiv\.org|xxx\.lanl\.gov)\/(?:find|list)|eprintweb.org\/S\/(?:archive|search$))/;
 	if(searchRe.test(url)) {
@@ -19882,7 +20671,7 @@ REPLACE INTO translators VALUES ('7bdb79e-a47f-4e3d-b317-ccd5a0a74456', '1.0.0b3
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('850f4c5f-71fb-4669-b7da-7fb7a95500ef', '1.0.0b3r1', '', '2008-05-05 07:45:00', '1', '100', '4', 'Cambridge Journals Online', 'Sean Takats and Michael Berkowitz', 'https?://[^/]*journals.cambridge.org[^/]*//?action/(quickSearch|search|displayAbstract|displayFulltext|displayIssue)', 
+REPLACE INTO translators VALUES ('850f4c5f-71fb-4669-b7da-7fb7a95500ef', '1.0.0b3r1', '', '2008-07-08 15:35:00', '1', '100', '4', 'Cambridge Journals Online', 'Sean Takats and Michael Berkowitz', 'https?://[^/]*journals.cambridge.org[^/]*//?action/(quickSearch|search|displayAbstract|displayFulltext|displayIssue)', 
 'function detectWeb(doc, url)	{
 	var namespace=doc.documentElement.namespaceURI;
 	var nsResolver=namespace?function(prefix)	{
@@ -19895,26 +20684,7 @@ REPLACE INTO translators VALUES ('850f4c5f-71fb-4669-b7da-7fb7a95500ef', '1.0.0b
 		return "multiple";			
 	}
 }', 
-'function titleCase(str) {
-	var skipWords = ["but", "or", "yet", "so", "for", "and", "nor", "a", "an", "the", "at", "by", "from", "in", "into", "of", "on", "to", "with", "up", "down", "as"];
-	var words = str.toLowerCase().split(/\s+/);
-	var newstr = "";
-	for (var i in words) {
-		if (i == 0) {
-			newstr += words[i][0].toUpperCase() + words[i].substr(1);
-		} else if (skipWords.indexOf(words[i].replace(/[^a-zA-Z]+/, "")) != -1) {
-			newstr += " " + words[i];
-		} else if (words[i].indexOf("-") != -1) {
-			newword = words[i].split("-");
-			newstr += " " + newword[0][0].toUpperCase() + newword[0].substr(1) + "-" + newword[1][0].toUpperCase() + newword[1].substr(1);
-		} else {
-			newstr += " " + words[i][0].toUpperCase() + words[i].substr(1);
-		}
-	}
-	return Zotero.Utilities.trimInternal(newstr);
-}
-
-function doWeb(doc, url){
+'function doWeb(doc, url){
 	var namespace=doc.documentElement.namespaceURI;
 	var nsResolver=namespace?function(prefix)	{
 		return (prefix=="x")?namespace:null;
@@ -19931,7 +20701,7 @@ function doWeb(doc, url){
 		while (tableRow = tableRows.iterateNext()){
 			var id = doc.evaluate(''./td/input[@type="checkbox"][@name="toView"]/@value'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 			var title = doc.evaluate(''./td/h3'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-			items[''http://'' + host + ''/action/displayAbstract?aid='' + id.nodeValue]=titleCase(title.textContent);
+			items[''http://'' + host + ''/action/displayAbstract?aid='' + id.nodeValue] = Zotero.Utilities.capitalizeTitle(title.textContent);
 		}
 		items=Zotero.selectItems(items);
 		for (var i in items) {
@@ -19948,7 +20718,9 @@ function doWeb(doc, url){
 			var kws = doc.evaluate(''//p[@class="KeyWords"]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.substr(11).split(''; '');
 		}
 		var pdfpath=''//div/ul/li/a[contains(text(), "PDF")]'';
-		var pdflink =doc.evaluate(pdfpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
+		if (doc.evaluate(pdfpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+			var pdflink =doc.evaluate(pdfpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
+		}
 		idRe = /aid=([0-9]+)/
 		var m = idRe.exec(doc.location.href);
 		var id = m[1];
@@ -19958,16 +20730,14 @@ function doWeb(doc, url){
 			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 			translator.setString(text);
 			translator.setHandler("itemDone", function(obj, item) {
-				item.attachments = 	[
-					{url:url, title:"Cambridge Journals Snapshot", mimeType:"text/html"},
-					{url:pdflink, title:"Cambridge Journals PDF", mimeType:"application/pdf"}
-				];
+				item.attachments = 	[{url:url, title:"Cambridge Journals Snapshot", mimeType:"text/html"}]
+				if (pdflink) item.attachments.push({url:pdflink, title:"Cambridge Journals PDF", mimeType:"application/pdf"});
 				item.url = url;
-				item.title = titleCase(item.title);
+				item.title = Zotero.Utilities.capitalizeTitle(item.title);
 				var authors = item.creators;
 				item.creators = new Array();
 				for each (var aut in authors) {
-					item.creators.push({firstName:titleCase(aut.firstName), lastName:titleCase(aut.lastName), creatorType:"author"});
+					item.creators.push({firstName:aut.firstName, lastName:aut.lastName, creatorType:"author"});
 				}
 				if (kws) item.tags = kws;
 				if (abs) item.abstractNote = Zotero.Utilities.trimInternal(abs);
@@ -20277,6 +21047,52 @@ function doWeb(doc, url) {
 		scrape(doc);
 	}
 	
+	Zotero.wait();
+}');
+
+REPLACE INTO translators VALUES ('6f5f1b24-7519-4314-880f-d7004fbcfe7e', '1.0.0b4.r5', '', '2008-07-10 06:15:00', '0', '100', '4', 'ReliefWeb', 'Michael Berkowitz', 'http://(www.)?reliefweb.int/', 
+'function detectWeb(doc, url) {
+	if (url.match(/(S|s)earch(R|r)esults/)) {
+		return "multiple";
+	} else if (url.match(/(O|o)pen(D|d)ocument/)) {
+		return "journalArticle";
+	}
+}', 
+'function doWeb(doc, url) {
+	var arts = new Array();
+	if (detectWeb(doc, url) == "multiple") {
+		var items = new Object();
+		var links = doc.evaluate(''//div[@id="View"]/table/tbody/tr/td[4][@class="docView"]/a'', doc, null, XPathResult.ANY_TYPE, null);
+		var link;
+		while (link = links.iterateNext()) {
+			items[link.href] = Zotero.Utilities.trimInternal(link.textContent);
+		}
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			arts.push(i);	
+		}
+	} else {
+		arts = [url];
+	}
+	Zotero.debug(arts);
+	Zotero.Utilities.processDocuments(arts, function(doc) {
+		var item = new Zotero.Item("journalArticle");
+		item.title = Zotero.Utilities.trimInternal(doc.evaluate(''//div[@id="docTitle"]/h1'', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+		item.date = Zotero.Utilities.trimInternal(doc.evaluate(''//div[@id="link"]/p[2]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent.substr(6));
+		item.url = doc.location.href;
+		if (doc.evaluate(''//div[@id="docBody"]/p/i'',doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+			var auts = doc.evaluate(''//div[@id="docBody"]/p/i'', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+			item.abstractNote = Zotero.Utilities.trimInternal(doc.evaluate(''//div[@id="docBody"]/p[1]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent.replace(auts, ""));
+			auts = auts.replace(''By '', "").split(/\//);
+			for each (var aut in auts) {
+				item.creators.push(Zotero.Utilities.cleanAuthor(aut, "author"));
+			}
+		} else {
+			item.abstractNote = Zotero.Utilities.trimInternal(doc.evaluate(''//div[@id="docBody"]/p[1]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+		}
+			
+		item.complete();
+	}, function() {Zotero.done;});
 	Zotero.wait();
 }');
 
@@ -22317,7 +23133,7 @@ function doImport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('14763d24-8ba0-45df-8f52-b8d1108e7ac9', '1.0.0b4.r1', '', '2008-02-08 07:30:00', 1, 25, 2, 'Zotero RDF', 'Simon Kornblith', 'rdf',
+REPLACE INTO translators VALUES ('14763d24-8ba0-45df-8f52-b8d1108e7ac9', '1.0.0b4.r1', '', '2008-07-20 01:40:00', 1, 25, 2, 'Zotero RDF', 'Simon Kornblith', 'rdf',
 'Zotero.configure("getCollections", true);
 Zotero.configure("dataMode", "rdf");
 Zotero.addOption("exportNotes", true);
@@ -22364,7 +23180,9 @@ function generateCollection(collection) {
 	Zotero.RDF.addStatement(collectionResource, rdf+"type", n.z+"Collection", false);
 	Zotero.RDF.addStatement(collectionResource, n.dc+"title", collection.name, true);
 	
-	for each(var child in collection.descendents) {
+	var children = collection.children ? collection.children : collection.descendents;
+	if(!children) return;
+	for each(var child in children) {
 		// add child list items
 		if(child.type == "collection") {
 			Zotero.RDF.addStatement(collectionResource, n.dcterms+"hasPart", "#collection_"+child.id, false);
@@ -23451,9 +24269,10 @@ function doImport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7', '1.0.2', '', '2008-03-10 19:45:00', '1', '100', '3', 'RIS', 'Simon Kornblith', 'ris', 
+REPLACE INTO translators VALUES ('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7', '1.0.2', '', '2008-07-17 22:05:00', '1', '100', '3', 'RIS', 'Simon Kornblith', 'ris', 
 'Zotero.configure("dataMode", "line");
 Zotero.addOption("exportNotes", true);
+Zotero.addOption("exportCharset", "UTF-8xBOM");
 
 function detectImport() {
 	var line;
@@ -23539,7 +24358,7 @@ var inputTypeMap = {
 
 function processTag(item, tag, value) {
 	if (Zotero.Utilities.unescapeHTML) {
-		value = Zotero.Utilities.unescapeHTML(value);
+		value = Zotero.Utilities.unescapeHTML(value.replace("\n", "<br>", "g"));
 	}
     
 	if(fieldMap[tag]) {
@@ -23655,7 +24474,10 @@ function processTag(item, tag, value) {
 		item.abstractNote = value;
 	} else if(tag == "KW") {
 		// keywords/tags
-		item.tags.push(value);
+		
+		// technically, treating newlines as new tags breaks the RIS spec, but
+		// it''s required to work with EndNote
+		item.tags = item.tags.concat(value.split("\n"));
 	} else if(tag == "SP") {
 		// start page
 		if(!item.pages) {
@@ -23747,14 +24569,9 @@ function completeItem(item) {
 }
 
 function doImport(attachments) {
-	// this is apparently the proper character set for RIS, although i''m not
-	// sure how many people follow this
-	Zotero.setCharacterSet("IBM850");
-
 	var line = true;
 	var tag = data = false;
 	do {    // first valid line is type
-		Zotero.debug("ignoring "+line);
 		line = Zotero.read();
 		line = line.replace(/^\s+/, "");
 	} while(line !== false && !line.substr(0, 6).match(/^TY {1,2}- /));
@@ -23779,11 +24596,11 @@ function doImport(attachments) {
 	while((rawLine = Zotero.read()) !== false) {    // until EOF
 		// trim leading space if this line is not part of a note
 		line = rawLine.replace(/^\s+/, "");
-		Zotero.debug("line is "+rawLine);
 		if(line.substr(2, 4) == "  - " || line == "ER  -" || line.substr(0, 5) == "TY - ") {
 			// if this line is a tag, take a look at the previous line to map
 			// its tag
 			if(tag) {
+				Zotero.debug("tag: ''"+tag+"''; data: ''"+data+"''");
 				processTag(item, tag, data);
 			}
 
@@ -23798,8 +24615,6 @@ function doImport(attachments) {
 				data = line.substr(6);
 			}
 
-			Zotero.debug("tag: ''"+tag+"''; data: ''"+data+"''");
-
 			if(tag == "ER") {	       // ER signals end of reference
 				// unset info
 				tag = data = false;
@@ -23813,7 +24628,7 @@ function doImport(attachments) {
 			}
 		} else {
 			// otherwise, assume this is data from the previous line continued
-			if(tag == "N1" || tag == "N2" || tag == "AB") {
+			if(tag == "N1" || tag == "N2" || tag == "AB" || tag == "KW") {
 				// preserve line endings for N1/N2/AB fields, for EndNote
 				// compatibility
 				data += "\n"+rawLine;
@@ -23842,10 +24657,6 @@ function addTag(tag, value) {
 }
 
 function doExport() {
-	// this is apparently the proper character set for RIS, although i''m not
-	// sure how many people follow this
-	Zotero.setCharacterSet("IBM850");
-
 	var item;
 
 	while(item = Zotero.nextItem()) {
@@ -23968,8 +24779,9 @@ function doExport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('881f60f2-0802-411a-9228-ce5f47b64c7d', '1.0.0b4.r5', '', '2008-02-03 21:00:00', '1', '100', '3', 'Refer/BibIX', 'Simon Kornblith', 'txt', 
+REPLACE INTO translators VALUES ('881f60f2-0802-411a-9228-ce5f47b64c7d', '1.0.0b4.r5', '', '2008-07-17 22:05:00', '1', '100', '3', 'Refer/BibIX', 'Simon Kornblith', 'txt', 
 'Zotero.configure("dataMode", "line");
+Zotero.addOption("exportCharset", "UTF-8xBOM");
 
 function detectImport() {
 	var lineRe = /%[A-Z0-9\*\$] .+/;
@@ -24135,9 +24947,6 @@ function processTag(item, tag, value) {
 }
 
 function doImport() {
-	// no character set is defined for this format. we use UTF-8.
-	Zotero.setCharacterSet("UTF-8");
-	
 	var line = true;
 	var tag = data = false;
 	do {	// first valid line is type
@@ -24192,9 +25001,6 @@ function addTag(tag, value) {
 }
 
 function doExport() {
-	// use UTF-8 to export
-	Zotero.setCharacterSet("UTF-8");
-	
 	var item;
 	while(item = Zotero.nextItem()) {
 		// can''t store independent notes in RIS
@@ -24246,9 +25052,9 @@ function doExport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('9cb70025-a888-4a29-a210-93ec52da40d4', '1.0.0b4.r1', '', '2008-07-01 14:30:13', '1', '200', '3', 'BibTeX', 'Simon Kornblith', 'bib', 
+REPLACE INTO translators VALUES ('9cb70025-a888-4a29-a210-93ec52da40d4', '1.0.0b4.r1', '', '2008-07-17 22:05:00', '1', '200', '3', 'BibTeX', 'Simon Kornblith', 'bib', 
 'Zotero.configure("dataMode", "block");
-Zotero.addOption("UTF8", true);
+Zotero.addOption("exportCharset", "UTF-8");
 
 function detectImport() {
 	var block = "";
@@ -24343,7 +25149,7 @@ var bibtex2zoteroTypeMap = {
 	"manual":"book",
 	"mastersthesis":"thesis",
 	"misc":"book",
-	"proceedings":"conference"
+	"proceedings":"book"
 };
 
 /*
@@ -25921,7 +26727,7 @@ function getFieldValue(read) {
 function beginRecord(type, closeChar) {
 	type = Zotero.Utilities.cleanString(type.toLowerCase());
 	if(type != "string") {
-		zoteroType = bibtex2zoteroTypeMap[type];
+		var zoteroType = bibtex2zoteroTypeMap[type];
 		if (!zoteroType) {
 			Zotero.debug("discarded item from BibTeX; type was "+type);
 		}
@@ -25990,8 +26796,6 @@ function beginRecord(type, closeChar) {
 function doImport() {
 	var read = "", text = "", recordCloseElement = false;
 	var type = false;
-	
-	Zotero.setCharacterSet("UTF-8");
 	
 	while(read = Zotero.read(1)) {
 		if(read == "@") {
@@ -26115,13 +26919,6 @@ function buildCiteKey (item,citekeys) {
 }
 
 function doExport() {
-	if(Zotero.getOption("UTF8")) {
-	    Zotero.setCharacterSet("UTF-8");
-	}
-	else {
-		Zotero.setCharacterSet("us-ascii");
-	}
-	
 	//Zotero.write("% BibTeX export generated by Zotero "+Zotero.Utilities.getVersion());
 	
 	var first = true;
@@ -26618,8 +27415,6 @@ function doImport() {
 	var text;
 	var holdOver = "";	// part of the text held over from the last loop
 	
-	Zotero.setCharacterSet("utf-8");
-	
 	while(text = Zotero.read(4096)) {	// read in 4096 byte increments
 		var records = text.split("\x1D");
 		
@@ -26643,7 +27438,8 @@ function doImport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('3f50aaac-7acc-4350-acd0-59cb77faf620', '1.0.0b4.r1', '', '2007-11-02 08:30:00', '1', '100', '2', 'Wikipedia Citation Templates', 'Simon Kornblith', '', '', 
+REPLACE INTO translators VALUES ('3f50aaac-7acc-4350-acd0-59cb77faf620', '1.0.0b4.r1', '', '2008-07-17 22:05:00', '1', '100', '2', 'Wikipedia Citation Templates', 'Simon Kornblith', '',
+'Zotero.addOption("exportCharset", "UTF-8");',
 'var fieldMap = {
 	edition:"edition",
 	publisher:"publisher",
