@@ -134,18 +134,22 @@ Zotero.File = new function(){
 	
 	/*
 	 * Write string to a file, overwriting existing file if necessary
-	 *
-	 * Note: Can only handle ASCII text!
 	 */
 	function putContents(file, str) {
 		if (file.exists()) {
 			file.remove(null);
 		}
-		var foStream = Components.classes["@mozilla.org/network/file-output-stream;1"]
-						 .createInstance(Components.interfaces.nsIFileOutputStream);
-		foStream.init(file, 0x02 | 0x08 | 0x20, 0664, 0); // write, create, truncate
-		foStream.write(str, str.length);
-		foStream.close();
+		var fos = Components.classes["@mozilla.org/network/file-output-stream;1"].
+				createInstance(Components.interfaces.nsIFileOutputStream);
+		fos.init(file, 0x02 | 0x08 | 0x20, 0664, 0);  // write, create, truncate
+		
+		var os = Components.classes["@mozilla.org/intl/converter-output-stream;1"]
+						   .createInstance(Components.interfaces.nsIConverterOutputStream);
+		os.init(fos, "UTF-8", 4096, "?".charCodeAt(0));
+		os.writeString(str);
+		os.close();
+		
+		fos.close();
 	}
 	
 	
