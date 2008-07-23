@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-07-20 01:40:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-07-23 04:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-06-16 21:30:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -17552,7 +17552,7 @@ REPLACE INTO translators VALUES ('b86bb082-6310-4772-a93c-913eaa3dfa1b', '1.0.0b
 	}
 }');
 
-REPLACE INTO translators VALUES ('d9be934c-edb9-490c-a88d-34e2ee106cd7', '1.0.0b4.r5', '', '2008-05-21 19:15:00', '0', '100', '4', 'Time.com', 'Michael Berkowitz', 'http://www.time.com/time/', 
+REPLACE INTO translators VALUES ('d9be934c-edb9-490c-a88d-34e2ee106cd7', '1.0.0b4.r5', '', '2008-07-23 04:00:00', '0', '100', '4', 'Time.com', 'Michael Berkowitz', 'http://www.time.com/time/', 
 'function detectWeb(doc, url) {
 	if (doc.title == "TIME Magazine - Search Results") {
 		return "multiple";
@@ -17567,7 +17567,7 @@ REPLACE INTO translators VALUES ('d9be934c-edb9-490c-a88d-34e2ee106cd7', '1.0.0b
 		var xpath3 = ''//div[@class="copy"]/div[@class="byline"]'';
 		if ((doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext() || doc.evaluate(xpath2, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext() || doc.evaluate(xpath3, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) ) {
 			if (url.substr(-4,4) == "html") {
-				return "newspaperArticle";
+				return "magazineArticle";
 			}
 		}
 	}
@@ -17580,8 +17580,8 @@ REPLACE INTO translators VALUES ('d9be934c-edb9-490c-a88d-34e2ee106cd7', '1.0.0b
 }
 
 function scrape(doc, url) {
-	var newItem = new Zotero.Item("newspaperArticle");
-	newItem.publicationTitle = "Time Magazine";
+	var newItem = new Zotero.Item("magazineArticle");
+	newItem.publicationTitle = "Time";
 	newItem.ISSN = "0040-718X";
 	newItem.url = doc.location.href;
 	var metaTags = new Object();
@@ -17662,6 +17662,7 @@ function scrape(doc, url) {
 			}
 		}
 	}
+	newItem.attachments.push({document:doc, title:doc.title});
 	newItem.complete();
 }
 
