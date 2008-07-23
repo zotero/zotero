@@ -73,17 +73,13 @@ Zotero.Cite = new function() {
 			// create a CSL instance
 			var csl = _getCSL(cslID);
 			
-			// load CSL in compat mode if it is old-style
-			if(csl.indexOf("<defaults") != -1) {
-				_lastCSL = new Zotero.CSL.Compat(csl);
-			} else {
-				if(csl.substr(0, 6) == "\x00\x08\xFF\x00\x00\x00") {	
-					// EN style
-					var enConverter = new Zotero.ENConverter(csl);
-					csl = enConverter.parse();
-				}
-				_lastCSL = new Zotero.CSL(csl);
+			// load CSL in EN mode if necessary
+			if(csl.substr(0, 6) == "\x00\x08\xFF\x00\x00\x00") {	
+				// EN style
+				var enConverter = new Zotero.ENConverter(csl);
+				csl = enConverter.parse();
 			}
+			_lastCSL = new Zotero.CSL(csl);
 			
 			_lastStyle = cslID;
 		}
