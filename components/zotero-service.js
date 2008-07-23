@@ -15,7 +15,7 @@ var ZoteroWrapped = this;
 *********************************************************************/
 
 var xpcomFiles = ['zotero',
-	'annotate', 'attachments', 'cite', 'cite_compat', 'collectionTreeView',
+	'annotate', 'attachments', 'cite', 'collectionTreeView',
 	'dataServer', 'data_access', 'data/item', 'data/items', 'data/collection',
 	'data/collections', 'data/cachedTypes', 'data/creator', 'data/creators',
 	'data/itemFields', 'data/notes', 'data/tag', 'data/tags', 'db', 'enstyle',
