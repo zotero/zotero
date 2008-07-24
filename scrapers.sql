@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-07-24 05:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-07-24 17:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-06-16 21:30:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -24438,7 +24438,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('d0b1914a-11f1-4dd7-8557-b32fe8a3dd47', '1.0.0b3.r1', '', '2008-07-24 05:20:00', '1', '100', '4', 'EBSCOhost', 'Simon Kornblith and Michael Berkowitz', 'https?://[^/]+/(?:bsi|ehost)/(?:results|detail|folder)', 
+REPLACE INTO translators VALUES ('d0b1914a-11f1-4dd7-8557-b32fe8a3dd47', '1.0.0b3.r1', '', '2008-07-24 17:00:00', '1', '100', '4', 'EBSCOhost', 'Simon Kornblith and Michael Berkowitz', 'https?://[^/]+/(?:bsi|ehost)/(?:results|detail|folder)', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -24451,6 +24451,7 @@ REPLACE INTO translators VALUES ('d0b1914a-11f1-4dd7-8557-b32fe8a3dd47', '1.0.0b
 	if(searchResult) {
 		return "multiple";
 	}
+/*
 	var xpath = ''//div[@class="citation-wrapping-div"]/dl[@class="citation-fields"]/dt[starts-with(text(), "Persistent link to this record")''
 		+'' or starts-with(text(), "Vínculo persistente a este informe")''
 		+'' or starts-with(text(), "Lien permanent à cette donnée")''
@@ -24464,7 +24465,8 @@ REPLACE INTO translators VALUES ('d0b1914a-11f1-4dd7-8557-b32fe8a3dd47', '1.0.0b
 		+'' or starts-with(text(), "Постоянная ссылка на эту запись")''
 		+'' or starts-with(text(), "Bu kayda sürekli bağlantı")''
 		+'' or starts-with(text(), "Μόνιμος σύνδεσμος σε αυτό το αρχείο")]'';
-	
+*/
+	var xpath = ''//input[@id="ctl00_ctl00_MainContentArea_MainContentArea_topDeliveryControl_deliveryButtonControl_lnkExportImage"]'';	
 	var persistentLink = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 	if(persistentLink) {
 		return "journalArticle";
