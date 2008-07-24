@@ -665,7 +665,7 @@ Zotero.CSL.prototype.formatBibliography = function(itemSet, format) {
 		if(item == undefined) continue;
 		
 		// try to get custom bibliography
-		var string = item.getProperty("bibliography-"+format);
+		var string = item.getProperty("bibliography-"+(format == "Integration" ? "RTF" : format));
 		if(!string) {
 			string = new Zotero.CSL.FormattedString(context, format);
 			this._processElements(item, context.layout, string, context);
@@ -1441,8 +1441,8 @@ Zotero.CSL.prototype._compareItem = function(a, b, context, cache) {
 	var sortA = [];
 	var sortB = [];
 	
-	var aID = a.getID();
-	var bID = b.getID();
+	var aID = a.id;
+	var bID = b.id;
 	
 	// author
 	if(context.sort.key.length()) {
@@ -1863,7 +1863,7 @@ Zotero.CSL.Global = new function() {
 Zotero.CSL.CitationItem = function(item) {
 	if(item) {
 		this.item = item;
-		this.itemID = item.getID();
+		this.itemID = item.id;
 	}
 }
 
@@ -1967,6 +1967,9 @@ Zotero.CSL.Item = function(item) {
 		throw "Zotero.CSL.Item called to wrap a non-item";
 	}
 	
+	this.id = this.zoteroItem.id;
+	this.key = this.zoteroItem.key;
+	
 	// don't return URL or accessed information for journal articles if a
 	// pages field exists
 	var itemType = Zotero.ItemTypes.getName(this.zoteroItem.itemTypeID);
@@ -1978,6 +1981,18 @@ Zotero.CSL.Item = function(item) {
 	
 	this._properties = {};
 	this._refreshItem();
+}
+
+
+/**
+ * Returns some identifier for the item. Used to create citations. In Zotero,
+ * this is the item ID
+ *
+ * @deprecated
+ **/
+Zotero.CSL.Item.prototype.getID = function() {
+	Zotero.debug("Zotero.CSL.Item.getID() deprecated; use Zotero.CSL.Item.id");
+	return this.zoteroItem.id;
 }
 
 /**
@@ -1993,14 +2008,6 @@ Zotero.CSL.Item.prototype._refreshItem = function() {
 	}
 }
 
-
-/*
- * Returns some identifier for the item. Used to create citations. In Zotero,
- * this is the item ID
- */
-Zotero.CSL.Item.prototype.getID = function() {
-	return this.zoteroItem.getID();
-}
 /*
  * Mappings for names
  */
@@ -2442,6 +2449,7 @@ Zotero.CSL.ItemSet = function(items, csl) {
 	
 	this.items = [];
 	this.itemsById = {};
+	this.itemsByKey = {};
 	
 	// add items
 	this.add(items);
@@ -2465,14 +2473,38 @@ Zotero.CSL.ItemSet = function(items, csl) {
 	this.resort();
 }
 
-/*
- * Gets CSL.Item objects from an item set using their IDs
- */
+
+/**
+ * Gets CSL.Item objects from an item set using their ids
+ *
+ * @param {Array} ids An array of ids
+ * @return {Array} items An array whose indexes correspond to those of ids, whose values are either 
+ *                       the CSL.Item objects or false
+ **/
 Zotero.CSL.ItemSet.prototype.getItemsByIds = function(ids) {
 	var items = [];
 	for each(var id in ids) {
 		if(this.itemsById[id] != undefined) {
 			items.push(this.itemsById[id]);
+		} else {
+			items.push(false);
+		}
+	}
+	return items;
+}
+
+/**
+ * Gets CSL.Item objects from an item set using their keys
+ *
+ * @param {Array} keys An array of keys
+ * @return {Array} items An array whose indexes correspond to those of keys, whose values are either 
+ *                       the CSL.Item objects or false
+ **/
+Zotero.CSL.ItemSet.prototype.getItemsByKeys = function(keys) {
+	var items = [];
+	for each(var key in keys) {
+		if(this.itemsByKey[key] != undefined) {
+			items.push(this.itemsByKey[key]);
 		} else {
 			items.push(false);
 		}
@@ -2496,7 +2528,8 @@ Zotero.CSL.ItemSet.prototype.add = function(items) {
 		
 		newItem.setProperty("index", this.items.length);
 		
-		this.itemsById[newItem.getID()] = newItem;
+		this.itemsById[newItem.id] = newItem;
+		this.itemsByKey[newItem.key] = newItem;
 		this.items.push(newItem);
 		newItems.push(newItem);
 	}
@@ -2516,7 +2549,8 @@ Zotero.CSL.ItemSet.prototype.remove = function(items) {
 		} else {
 			var item = this.itemsById[items[i]];
 		}
-		this.itemsById[item.getID()] = undefined;
+		this.itemsById[item.id] = undefined;
+		this.itemsByKey[item.key] = undefined;
 		this.items.splice(this.items.indexOf(item), 1);
 	}
 }
