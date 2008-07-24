@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-07-23 04:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-07-24 06:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-06-16 21:30:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -24678,7 +24678,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('d0b1914a-11f1-4dd7-8557-b32fe8a3dd47', '1.0.0b3.r1', '', '2008-07-02 11:00:00', '1', '100', '4', 'EBSCOhost', 'Simon Kornblith and Michael Berkowitz', 'https?://[^/]+/(?:bsi|ehost)/(?:results|detail|folder)', 
+REPLACE INTO translators VALUES ('d0b1914a-11f1-4dd7-8557-b32fe8a3dd47', '1.0.0b3.r1', '', '2008-07-24 06:00:00', '1', '100', '4', 'EBSCOhost', 'Simon Kornblith and Michael Berkowitz', 'https?://[^/]+/(?:bsi|ehost)/(?:results|detail|folder)', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -24691,21 +24691,20 @@ REPLACE INTO translators VALUES ('d0b1914a-11f1-4dd7-8557-b32fe8a3dd47', '1.0.0b
 	if(searchResult) {
 		return "multiple";
 	}
+	var xpath = ''//div[@class="citation-wrapping-div"]/dl[@class="citation-fields"]/dt[starts-with(text(), "Persistent link to this record")''
+		+'' or starts-with(text(), "Vínculo persistente a este informe")''
+		+'' or starts-with(text(), "Lien permanent à cette donnée")''
+		+'' or starts-with(text(), "Permanenter Link zu diesem Datensatz")''
+		+'' or starts-with(text(), "Link permanente al record")''
+		+'' or starts-with(text(), "Link permanente para este registro")''
+		+'' or starts-with(text(), "本記錄固定連結")''
+		+'' or starts-with(text(), "此记录的永久链接")''
+		+'' or starts-with(text(), "このレコードへのパーシスタント リンク")''
+		+'' or starts-with(text(), "레코드 링크 URL")''
+		+'' or starts-with(text(), "Постоянная ссылка на эту запись")''
+		+'' or starts-with(text(), "Bu kayda sürekli bağlantı")''
+		+'' or starts-with(text(), "Μόνιμος σύνδεσμος σε αυτό το αρχείο")]'';
 	
-	var xpath = ''//div[@class="record-display"]/dl[@class="citation-fields"]/dt[text() = "Persistent link to this record:"''
-		+''or text() = "Vínculo persistente a este informe:"''
-		+''or text() = "Lien permanent à cette donnée:"''
-		+''or text() = "Permanenter Link zu diesem Datensatz:"''
-		+''or text() = "Link permanente al record:"''
-		+''or text() = "Link permanente para este registro:"''
-		+''or text() = "本記錄固定連結:"''
-		+''or text() = "此记录的永久链接:"''
-		+''or text() = "このレコードへのパーシスタント リンク:"''
-		+''or text() = "레코드 링크 URL:"''
-		+''or text() = "Постоянная ссылка на эту запись:"''
-		+''or text() = "Bu kayda sürekli bağlantı:"''
-		+''or text() = "Μόνιμος σύνδεσμος σε αυτό το αρχείο:"]'';
-
 	var persistentLink = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 	if(persistentLink) {
 		return "journalArticle";
@@ -24718,6 +24717,26 @@ function fullEscape(text) {
 	return escape(text).replace(/\//g, "%2F").replace(/\+/g, "%2B");
 }
 
+function generateDeliverString(nsResolver, doc){	
+	var hiddenInputs = doc.evaluate(''//input[@type="hidden" and not(contains(@name, "folderHas"))]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+	var hiddenInput;
+	var deliverString ="";
+	while(hiddenInput = hiddenInputs.iterateNext()) {
+		deliverString = deliverString+hiddenInput.name.replace(/\$/g, "%24")+"="+encodeURIComponent(hiddenInput.value) + "&";
+	}
+	var otherHiddenInputs = doc.evaluate(''//input[@type="hidden" and contains(@name, "folderHas")]'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+	while(hiddenInput = otherHiddenInputs.iterateNext()) {
+		deliverString = deliverString+hiddenInput.name.replace(/\$/g, "%24")+"="+escape(hiddenInput.value).replace(/\//g, "%2F").replace(/%20/g, "+") + "&";
+	}
+
+
+	deliverString = deliverString
+		+"&ctl00%24ctl00%24MainContentArea%24MainContentArea%24topDeliveryControl%24deliveryButtonControl%24lnkExportImage.x=5"
+		+"&ctl00%24ctl00%24MainContentArea%24MainContentArea%24topDeliveryControl%24deliveryButtonControl%24lnkExportImage.y=14";
+			
+	return deliverString;
+}
+
 /*
  * given the text of the delivery page, downloads an item
  */
@@ -24727,7 +24746,7 @@ function downloadFunction(text) {
 	var deliveryURL = m[1].replace(/&amp;/g, "&");
 	m = customViewStateMatch.exec(text);
 	var downloadString = "__EVENTTARGET=&__EVENTARGUMENT=&__CUSTOMVIEWSTATE="+fullEscape(m[1])+"&__VIEWSTATE=&ctl00%24ctl00%24MainContentArea%24MainContentArea%24ctl00%24btnSubmit=Save&ctl00%24ctl00%24MainContentArea%24MainContentArea%24ctl00%24BibFormat=1&ajax=enabled";
-
+	
 	Zotero.Utilities.HTTP.doPost(host+"/ehost/"+deliveryURL,
 								 downloadString, function(text) {	// get marked records as RIS
 		// load translator for RIS
@@ -24763,12 +24782,8 @@ function doWeb(doc, url) {
 	                                XPathResult.ANY_TYPE, null).iterateNext();                              
 
 	if(searchResult) {
-		var titlex = ''//div[@class="result-list-record" or @class="folder-item-detail"]/a'';
-		if (doc.evaluate(titlex, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
-			var titles = doc.evaluate(titlex, doc, nsResolver, XPathResult.ANY_TYPE, null);
-		} else {
-			var titles = doc.evaluate(''//div[@class="result-list-record" or @class="folder-item-detail"]/span[@class="medium-font"]/a'', doc, nsResolver, XPathResult.ANY_TYPE, null);
-		}
+		var titlex = ''//div[@class="result-list-record" or @class="folder-item-detail"]/span/a'';
+		var titles = doc.evaluate(titlex, doc, nsResolver, XPathResult.ANY_TYPE, null);
 		var items = new Object();
 		var title;
 		while (title = titles.iterateNext()) {
@@ -24786,19 +24801,16 @@ function doWeb(doc, url) {
 		}
 		
 		Zotero.Utilities.processDocuments(uris, function(newDoc){
-			var customViewState = newDoc.evaluate(''//input[@name="__CUSTOMVIEWSTATE"]'', newDoc, nsResolver,
-								 XPathResult.ANY_TYPE, null).iterateNext();
-			customViewState = fullEscape(customViewState.value);
-			var deliverString = "__EVENTTARGET=ctl00%24ctl00%24MainContentArea%24MainContentArea%24topDeliveryControl%24deliveryButtonControl%24lnkExport&__EVENTARGUMENT=&__CUSTOMVIEWSTATE="+customViewState+"&__VIEWSTATE=&ajax=enabled";
-			Zotero.Utilities.HTTP.doPost(newDoc.location.href, deliverString, downloadFunction);
+			var postURL = newDoc.evaluate(''//form[@name="aspnetForm"]/@action'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+			postURL = host+"/ehost/"+postURL.nodeValue;
+			var deliverString = generateDeliverString(nsResolver, newDoc);
+			Zotero.Utilities.HTTP.doPost(postURL, deliverString, downloadFunction);
 		});
 	} else {
-		// get view state for post string		
-		var customViewState = doc.evaluate(''//input[@name="__CUSTOMVIEWSTATE"]'', doc, nsResolver,
-								 XPathResult.ANY_TYPE, null).iterateNext();
-		customViewState = fullEscape(customViewState.value);
-		var deliverString = "__EVENTTARGET=ctl00%24ctl00%24MainContentArea%24MainContentArea%24topDeliveryControl%24deliveryButtonControl%24lnkExport&__EVENTARGUMENT=&__CUSTOMVIEWSTATE="+customViewState+"&__VIEWSTATE=&ajax=enabled";
-		Zotero.Utilities.HTTP.doPost(url, deliverString, downloadFunction);
+		var postURL = doc.evaluate(''//form[@name="aspnetForm"]/@action'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+		postURL = host+"/ehost/"+postURL.nodeValue;
+		var deliverString = generateDeliverString(nsResolver, doc);
+		Zotero.Utilities.HTTP.doPost(postURL, deliverString, downloadFunction);
 	}
 	Zotero.wait();
 }');
