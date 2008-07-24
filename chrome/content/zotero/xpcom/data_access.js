@@ -2483,7 +2483,7 @@ Zotero.Item.prototype.toArray = function(mode) {
 		switch (i){
 			case 'itemTypeID':
 				arr['itemType'] = Zotero.ItemTypes.getName(this._data[i]);
-				break;
+				continue;
 			
 			// Skip certain fields
 			//case 'firstCreator':
@@ -2505,14 +2505,14 @@ Zotero.Item.prototype.toArray = function(mode) {
 	
 	// Item metadata
 	for (var i in this._itemData){
-		arr[Zotero.ItemFields.getName(i)] = this._itemData[i] ? this._itemData[i] : '';
+		arr[Zotero.ItemFields.getName(i)] = this._itemData[i] ? this._itemData[i] + '' : '';
 	}
 	
 	if (mode == 1 || mode == 2) {
 		if (!arr.title &&
 				(this.getType() == Zotero.ItemTypes.getID('letter') ||
 				this.getType() == Zotero.ItemTypes.getID('interview'))) {
-			arr.title = this.getDisplayTitle(mode == 2);
+			arr.title = this.getDisplayTitle(mode == 2) + '';
 		}
 	}
 	
