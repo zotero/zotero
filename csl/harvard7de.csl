@@ -5,27 +5,28 @@
         <title>Harvard Reference format 7 (Author-Date) (de)</title>
         <id>http://www.zotero.org/styles/harvard7de</id>
         <link href="http://www.zotero.org/styles/harvard7de"/>
-        <author>
+        <contributor>
             <name>Julian Onions</name>
             <email>julian.onions@gmail.com</email>
-        </author>
+        </contributor>
         <contributor>
             <name>Sven Rothe</name>
             <email>mmoole@googlemail.com</email>
         </contributor>
         <category term="author-date"/>
         <category term="generic-base"/>
-        <updated>2008-01-01T11:11:11+00:00</updated>
+        <updated>2008-01-01T11:11:12+00:00</updated>
         <summary>A Harvard author-date style variant, mostly german</summary>
         <link href="http://qse.ifs.tuwien.ac.at/courses/Usability2/Literaturangaben.pdf"
             rel="documentation"/>
         <!--please e-mail me about bugs, suggestions etc! i do not often check the website! mmoole@googlemail.com  -->
+<!--        useful things: non breaking space: &#160;   -->
     </info>
     <macro name="editor">
-        <names variable="editor">
-            <name initialize-with=". " sort-separator=", " delimiter="; "
+        <names variable="editor" delimiter="; ">
+            <name name-as-sort-order="all" sort-separator=", " delimiter="; "
                 delimiter-precedes-last="always" form="long"/>
-            <label form="short" prefix=" (" text-case="lowercase" suffix=".)"/>
+            <label form="short" prefix=" (" suffix=".)" />
         </names>
     </macro>
     <macro name="anon">
@@ -126,7 +127,7 @@
     <macro name="pages">
         <choose>
             <if type="chapter article-journal" match="any">
-                <label variable="page" form="short" suffix=". "/>
+                <label variable="page" form="short" suffix=".&#160;"/>
                 <text variable="page"/>
             </if>
         </choose>
@@ -166,7 +167,7 @@
                     <text macro="year-date"/>
                 </group>
                 <group>
-                    <text variable="locator" prefix="S. "/>
+                    <text variable="locator" prefix="S.&#160;"/>
                 </group>
             </group>
         </layout>
@@ -181,13 +182,16 @@
         </sort>
         <layout suffix=".">
             <group delimiter=" ">
-                <text macro="author"/>
+                <group delimiter="; ">
+                    <text macro="author"/>
+                    <text macro="editor"/>
+                </group>
                 <text macro="year-date" prefix="(" suffix="):"/>
                 <text macro="title" suffix="."/>
                 <text macro="container-prefix"/>
-                <text macro="editor"/>
                 <text variable="container-title" font-style="italic" suffix="."/>
                 <text macro="edition"/>
+                <text variable="genre"/>
                 <text macro="publisher"/>
                 
                 <group delimiter=", ">
@@ -195,7 +199,6 @@
                         
                         <text variable="collection-title"/>
                     </group>
-                    <text variable="genre"/>
                     <text macro="locator"/>
                     <text macro="published-date"/>
                     <text macro="pages"/>
