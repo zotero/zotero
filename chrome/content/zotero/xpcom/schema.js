@@ -1050,7 +1050,7 @@ Zotero.Schema = new function(){
 						Zotero.DB.query("UPDATE itemAttachments SET itemID=? WHERE itemID=?", [itemID, 0]);
 					}
 					if (Zotero.DB.valueQuery("SELECT COUNT(*) FROM collections WHERE collectionID=0")) {
-						var collectionID = Zotero.ID.get('collections');
+						var collectionID = Zotero.ID.get('collections', true);
 						Zotero.DB.query("UPDATE collections SET collectionID=? WHERE collectionID=0", [collectionID]);
 						Zotero.DB.query("UPDATE collectionItems SET collectionID=? WHERE collectionID=0", [collectionID]);
 					}
@@ -1633,7 +1633,7 @@ Zotero.Schema = new function(){
 					// Migrate big integers
 					var itemIDs = Zotero.DB.columnQuery("SELECT itemID FROM items WHERE itemID>16777215");
 					for each(var oldID in itemIDs) { 
-						var newID = Zotero.ID.get('items');
+						var newID = Zotero.ID.get('items', true);
 						var params = [newID, oldID];
 						Zotero.DB.query("UPDATE items SET itemID=? WHERE itemID=?", params);
 						Zotero.DB.query("UPDATE annotations SET itemID=? WHERE itemID=?", params);
