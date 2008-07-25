@@ -123,7 +123,6 @@
 
 <!ENTITY zotero.charset.label							"Character Encoding">
 <!ENTITY zotero.moreEncodings.label						"More Encodings">
-<!ENTITY zotero.charset.auto							"auto detect">
 
 <!ENTITY zotero.citation.keepSorted.label				"Keep Sources Sorted">
 

@@ -36,7 +36,7 @@ var Zotero_File_Interface_Export = new function() {
 	this.accept = accept;
 	this.cancel = cancel;
 	
-	var _charsets;
+	var _charsets = false;
 	
 	/*
 	 * add options to export
@@ -156,11 +156,13 @@ var Zotero_File_Interface_Export = new function() {
 		}
 		
 		// handle charset popup
-		var charsetMenu = document.getElementById(OPTION_PREFIX+"exportCharset");
 		if(translatorOptions.exportCharset) {
-			document.getElementById("charset-box").hidden = undefined;
-			optionsBox.hidden = undefined;
-			var charset = "UTF-8xBOM";
+			if(Zotero.Prefs.get("export.displayCharsetOption")) {
+				optionsBox.hidden = undefined;
+				document.getElementById("charset-box").hidden = undefined;
+			}
+			var charsetMenu = document.getElementById(OPTION_PREFIX+"exportCharset");
+			var charset = "UTF-8";
 			if(options && options.exportCharset && _charsets[options.exportCharset]) {
 				charset = options.exportCharset;
 			} else if(translatorOptions.exportCharset && _charsets[translatorOptions.exportCharset]) {
@@ -168,6 +170,8 @@ var Zotero_File_Interface_Export = new function() {
 			}
 			
 			charsetMenu.selectedItem = _charsets[charset];
+		} else {
+			document.getElementById("charset-box").hidden = true;
 		}
 		
 		window.sizeToContent();

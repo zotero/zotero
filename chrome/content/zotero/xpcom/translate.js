@@ -1537,19 +1537,24 @@ Zotero.Translate.prototype._import = function() {
  **/
 Zotero.Translate.prototype._importGetCharacterSet = function(callback) {
 	if(!this._storage) {
-		// need to check charset
 		
 		if(this._charset) {
 			// have charset already; just go on
 			callback(this._charset);
 		} else {
-			// look for charset
-			var me = this;
-			Zotero.File.getCharsetFromFile(this.location, "text/plain",
-				function(charset) {
-					me._charset = charset;
-					callback(charset);
-				});
+			// need to check charset
+			importCharset = Zotero.Prefs.get("import.charset");
+			if(importCharset == "auto") {
+				// look for charset
+				var me = this;
+				Zotero.File.getCharsetFromFile(this.location, "text/plain",
+					function(charset) {
+						me._charset = charset;
+						callback(charset);
+					});
+			} else {
+				callback(importCharset);
+			}
 		}
 	} else {
 		callback();
@@ -1915,7 +1920,6 @@ Zotero.Translate.prototype._exportConfigureIO = function() {
 					if(streamCharset == "MACINTOSH") {
 						// fix buggy Mozilla MacRoman
 						splitData = data.split(/([\r\n]+)/);
-						Zotero.debug(splitData);
 						for(var i=0; i<splitData.length; i+=2) {
 							// write raw newlines straight to the string
 							intlStream.writeString(splitData[i]);

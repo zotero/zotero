@@ -22,6 +22,7 @@
 
 var openURLServerField;
 var openURLVersionMenu;
+var charsets;
 
 function init()
 {
@@ -34,6 +35,10 @@ function init()
 	populateQuickCopyList();
 	updateQuickCopyInstructions();
 	initSearchPane();
+	
+	var charsetMenu = document.getElementById("zotero-import-charsetMenu");
+	charsetMap = Zotero_Charset_Menu.populate(charsetMenu, false);
+	charsetMenu.selectedItem = charsetMap[Zotero.Prefs.get("import.charset")] ? charsetMap[Zotero.Prefs.get("import.charset")] : charsetMap["auto"];
 }
 
 
