@@ -100,7 +100,9 @@ var Zotero_File_Interface_Export = new function() {
 		}
 		
 		// from charsetMenu.js
-		_charsets = Zotero_Charset_Menu.populate(document.getElementById(OPTION_PREFIX+"exportCharset"), true);
+		if(Zotero.Prefs.get("export.displayCharsetOption")) {
+			_charsets = Zotero_Charset_Menu.populate(document.getElementById(OPTION_PREFIX+"exportCharset"), true);
+		}
 		
 		updateOptions(Zotero.Prefs.get("export.translatorSettings"));
 	}
@@ -156,11 +158,9 @@ var Zotero_File_Interface_Export = new function() {
 		}
 		
 		// handle charset popup
-		if(translatorOptions.exportCharset) {
-			if(Zotero.Prefs.get("export.displayCharsetOption")) {
-				optionsBox.hidden = undefined;
-				document.getElementById("charset-box").hidden = undefined;
-			}
+		if(_charsets && translatorOptions.exportCharset) {
+			optionsBox.hidden = undefined;
+			document.getElementById("charset-box").hidden = undefined;
 			var charsetMenu = document.getElementById(OPTION_PREFIX+"exportCharset");
 			var charset = "UTF-8";
 			if(options && options.exportCharset && _charsets[options.exportCharset]) {
@@ -196,7 +196,9 @@ var Zotero_File_Interface_Export = new function() {
 			var element = document.getElementById(OPTION_PREFIX+option);
 			
 			if(option == "exportCharset") {
-				optionsAvailable[option] = element.selectedItem.value;
+				if(_charsets) {
+					optionsAvailable[option] = element.selectedItem.value;
+				}
 			} else if(typeof(defValue) == "boolean") {
 				optionsAvailable[option] = !!element.checked;
 			}
