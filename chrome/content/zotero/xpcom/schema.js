@@ -1633,7 +1633,7 @@ Zotero.Schema = new function(){
 					// Migrate big integers
 					var itemIDs = Zotero.DB.columnQuery("SELECT itemID FROM items WHERE itemID>16777215");
 					for each(var oldID in itemIDs) { 
-						var newID = Zotero.ID.get('items', true);
+						var newID = Zotero.ID.get('items');
 						var params = [newID, oldID];
 						Zotero.DB.query("UPDATE items SET itemID=? WHERE itemID=?", params);
 						Zotero.DB.query("UPDATE annotations SET itemID=? WHERE itemID=?", params);
