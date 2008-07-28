@@ -271,7 +271,7 @@ Zotero.Translate.prototype.setCollection = function(collection) {
 Zotero.Translate.prototype.setLocation = function(location) {
 	if(this.type == "web") {
 		// account for proxies
-		this.location = Zotero.Ingester.ProxyMonitor.proxyToProper(location);
+		this.location = Zotero.Proxies.proxyToProper(location);
 		if(this.location != location) {
 			// figure out if this URL is being proxies
 			this.locationIsProxied = true;
@@ -1109,7 +1109,7 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 		// if item was accessed through a proxy, ensure that the proxy
 		// address remains in the accessed version
 		if(this.locationIsProxied && item.url) {
-			item.url = Zotero.Ingester.ProxyMonitor.properToProxy(item.url);
+			item.url = Zotero.Proxies.properToProxy(item.url);
 		}
 		
 		// create new item
@@ -1383,7 +1383,7 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 								}
 
 								if(this.locationIsProxied) {
-									attachment.url = Zotero.Ingester.ProxyMonitor.properToProxy(attachment.url);
+									attachment.url = Zotero.Proxies.properToProxy(attachment.url);
 								}
 
 								var fileBaseName = Zotero.Attachments.getFileBaseNameFromItem(myID);

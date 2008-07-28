@@ -22,6 +22,7 @@
 
 var openURLServerField;
 var openURLVersionMenu;
+var proxies;
 
 function init()
 {
@@ -32,6 +33,7 @@ function init()
 	}
 	
 	refreshStylesList();
+	refreshProxyList();
 	populateQuickCopyList();
 	updateQuickCopyInstructions();
 	initSearchPane();
@@ -930,8 +932,6 @@ function refreshStylesList(cslID) {
 	var styleData = Zotero.DB.query(sql);
 	if (!styleData) return;
 	
-	Zotero.debug("ASKED FOR "+cslID);
-	
 	var selectIndex = false;
 	for (var i=0; i<styleData.length; i++) {
 		var treeitem = document.createElement('treeitem');
@@ -949,7 +949,6 @@ function refreshStylesList(cslID) {
 		if(styleData[i].cslID.length < Zotero.ENConverter.uriPrefix.length ||
 				styleData[i].cslID.substr(0, Zotero.ENConverter.uriPrefix.length) != Zotero.ENConverter.uriPrefix) {
 			cslCell.setAttribute('src', 'chrome://zotero/skin/tick.png');
-			Zotero.debug("ISCSL");
 		}
 		
 		treerow.appendChild(titleCell);
@@ -1029,12 +1028,13 @@ function addStyle() {
  **/
 function deleteStyle() {
 	var tree = document.getElementById('styleManager');
+	if(tree.currentIndex == -1) return;
 	var treeitem = tree.lastChild.childNodes[tree.currentIndex];
-	Zotero.debug(treeitem.getAttribute('id'));
 	var cslID = treeitem.getAttribute('id').substr(11);
 	
 	Zotero.Cite.deleteStyle(cslID);
 	this.refreshStylesList();
+	document.getElementById('styleManager-delete').disabled = true;
 }
 
 /**
@@ -1042,4 +1042,80 @@ function deleteStyle() {
  **/
 function styleImportError() {
 	alert(Zotero.getString('styles.installError', "This"));
+}
+
+/**
+ * Adds a proxy to the proxy pane
+ */
+function showProxyEditor(index) {
+	if(index == -1) return;
+	window.openDialog('chrome://zotero/content/preferences/proxyEditor.xul',
+		"zotero-preferences-proxyEditor", "chrome, modal", index !== undefined ? proxies[index] : null);
+	refreshProxyList();
+}
+
+/**
+ * Deletes the currently selected proxy
+ */
+function deleteProxy() {
+	if(document.getElementById('proxyTree').currentIndex == -1) return;
+	proxies[document.getElementById('proxyTree').currentIndex].erase();
+	refreshProxyList();
+	document.getElementById('proxyTree-delete').disabled = true;
+}
+
+/**
+ * Refreshes the proxy pane
+ */
+function refreshProxyList() {
+	// get and sort proxies
+	proxies = Zotero.Proxies.get();
+	proxies = proxies.sort(function(a, b) {
+		if(a.multiHost) {
+			if(b.multiHost) {
+				if(a.hosts[0] < b.hosts[0]) {
+					return -1;
+				} else {
+					return 1;
+				}
+			} else {
+				return -1;
+			}
+		} else if(b.multiHost) {
+			return 1;
+		}
+		
+		if(a.scheme < b.scheme) {
+			return -1;
+		} else if(b.scheme > a.scheme) {
+			return 1;
+		}
+		
+		return 0;
+	});
+	
+	// erase old children
+	var treechildren = document.getElementById('proxyTree-rows');
+	while (treechildren.hasChildNodes()) {
+		treechildren.removeChild(treechildren.firstChild);
+	}
+	
+	// add proxies to list
+	for (var i=0; i<proxies.length; i++) {
+		var treeitem = document.createElement('treeitem');
+		var treerow = document.createElement('treerow');
+		var hostnameCell = document.createElement('treecell');
+		var schemeCell = document.createElement('treecell');
+		
+		hostnameCell.setAttribute('label', proxies[i].multiHost ? Zotero.getString("proxies.multiSite") : proxies[i].hosts[0]);
+		schemeCell.setAttribute('label', proxies[i].scheme);
+		
+		treerow.appendChild(hostnameCell);
+		treerow.appendChild(schemeCell);
+		treeitem.appendChild(treerow);
+		treechildren.appendChild(treeitem);
+	}
+	
+	document.getElementById('proxyTree').currentIndex = -1;
+	document.getElementById('proxyTree-delete').disabled = true;
 }

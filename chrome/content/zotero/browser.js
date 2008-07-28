@@ -103,7 +103,7 @@ var Zotero_Browser = new function() {
 		
 		Zotero_Browser.browserData = new Object();
 		Zotero_Browser._scrapePopupShowing = false;
-		Zotero.Ingester.ProxyMonitor.init();
+		Zotero.Proxies.init();
 		Zotero.Ingester.MIMEHandler.init();
 		Zotero.Cite.MIMEHandler.init();
 		Zotero.Translate.init();

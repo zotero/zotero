@@ -80,3 +80,7 @@ pref("extensions.zotero.annotations.warnOnClose", true);
 pref("extensions.zotero.sync.server.autoSync", true);
 pref("extensions.zotero.sync.server.username", '');
 pref("extensions.zotero.sync.server.compressData", true);
+
+// Proxy
+pref("extensions.zotero.proxies.autoRecognize", true);
+pref("extensions.zotero.proxies.transparent", false);

@@ -20,7 +20,7 @@ var xpcomFiles = ['zotero',
 	'data/collections', 'data/cachedTypes', 'data/creator', 'data/creators',
 	'data/itemFields', 'data/notes', 'data/tag', 'data/tags', 'db', 'enstyle',
 	'file', 'fulltext', 'id', 'ingester', 'integration', 'itemTreeView', 'mime',
-	'notifier', 'progressWindow', 'quickCopy', 'report', 'schema', 'search',
+	'notifier', 'progressWindow', 'proxy', 'quickCopy', 'report', 'schema', 'search',
 	'sync', 'timeline', 'translate', 'utilities', 'zeroconf'];
 
 for (var i=0; i<xpcomFiles.length; i++) {

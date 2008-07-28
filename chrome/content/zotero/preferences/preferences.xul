@@ -334,6 +334,7 @@ To add a new preference:
 			<caption label="&zotero.preferences.styles.styleManager;"/>
 			
 			<tree flex="1" id="styleManager" hidecolumnpicker="true" rows="6"
+					onselect="document.getElementById('styleManager-delete').disabled = undefined"
 					onkeypress="if (event.keyCode == event.DOM_VK_DELETE) { deleteSelectedStyle(); }">
 				<treecols>
 					<treecol id="styleManager-title" label="&zotero.preferences.styles.styleManager.title;" flex="3"/>
@@ -344,11 +345,49 @@ To add a new preference:
 			</tree>
 			<separator class="thin"/>
 			<hbox pack="end">
-				<button label="-" onclick="deleteStyle()"/>
+				<button disabled="true" id="styleManager-delete" label="-" onclick="deleteStyle()"/>
 				<button label="+" onclick="addStyle()"/>
 			</hbox>
 			<separator/>
 			<label class="text-link" href="http://www.zotero.org/styles/" value="&zotero.preferences.export.getAdditionalStyles;"/>
+		</groupbox>
+	</prefpane>
+	
+	
+	<prefpane id="zotero-prefpane-proxies"
+						label="&zotero.preferences.prefpane.proxies;"
+						image="chrome://zotero/skin/prefs-proxies.png">
+		<preferences>
+			<preference id="pref-proxies-autoRecognize" name="extensions.zotero.proxies.autoRecognize" type="bool"/>
+			<preference id="pref-proxies-transparent" name="extensions.zotero.proxies.transparent" type="bool"/>
+		</preferences>
+		
+		<groupbox>
+			<caption label="&zotero.preferences.proxies.proxyOptions;"/>
+			
+			<checkbox id="zotero-proxies-autoRecognize" label="&zotero.preferences.proxies.autoRecognize;"
+				preference="pref-proxies-autoRecognize" oncommand="Zotero.Proxies.init()"/>
+			<checkbox id="zotero-proxies-transparent" label="&zotero.preferences.proxies.transparent;"
+				preference="pref-proxies-transparent" oncommand="Zotero.Proxies.init()"/>
+		</groupbox>
+		
+		<groupbox flex="1">
+			<caption label="&zotero.preferences.proxies.configured;"/>
+			
+			<tree flex="1" id="proxyTree" hidecolumnpicker="true" rows="6" seltype="single"
+					ondblclick="showProxyEditor(this.currentIndex)" onselect="document.getElementById('proxyTree-delete').disabled = undefined"
+					onkeypress="if (event.keyCode == event.DOM_VK_DELETE) { deleteProxy(); }">
+				<treecols>
+					<treecol id="proxyTree-hostname" label="&zotero.preferences.proxies.hostname;" flex="1"/>
+					<treecol id="proxyTree-scheme" label="&zotero.preferences.proxies.scheme;" flex="3"/>
+				</treecols>
+				<treechildren id="proxyTree-rows"/>
+			</tree>
+			<separator class="thin"/>
+			<hbox pack="end">
+				<button disabled="true" id="proxyTree-delete" label="-" onclick="deleteProxy()"/>
+				<button label="+" onclick="showProxyEditor()"/>
+			</hbox>
 		</groupbox>
 	</prefpane>
 	
