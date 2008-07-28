@@ -489,7 +489,7 @@ Zotero.Proxies.Detectors.EZProxy = function(channel) {
 	var newURI = ioService.newURI(newURL, null, null);
 	if(!newURI) return false;
 	
-	if(channel.URI.host == newURI.host && channel.URI.port != newURI.port) {
+	if(channel.URI.host == newURI.host && [channel.URI.port, 80, 443, -1].indexOf(newURI.port) == -1) {
 		// Old style per-port
 		var proxy = new Zotero.Proxy();
 		proxy.multiHost = false;
