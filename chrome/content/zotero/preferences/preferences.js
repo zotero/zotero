@@ -1118,4 +1118,15 @@ function refreshProxyList() {
 	
 	document.getElementById('proxyTree').currentIndex = -1;
 	document.getElementById('proxyTree-delete').disabled = true;
+	document.getElementById('zotero-proxies-autoRecognize').checked = Zotero.Prefs.get("proxies.autoRecognize");
+	document.getElementById('zotero-proxies-transparent').checked = Zotero.Prefs.get("proxies.transparent");
+}
+
+/**
+ * Updates proxy autoRecognize and transparent settings based on checkboxes
+ */
+function updateProxyPrefs() {
+	Zotero.Prefs.set("proxies.autoRecognize", document.getElementById('zotero-proxies-autoRecognize').checked);
+	Zotero.Prefs.set("proxies.transparent", document.getElementById('zotero-proxies-transparent').checked);
+	Zotero.Proxies.init()
 }
