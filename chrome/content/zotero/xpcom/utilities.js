@@ -555,7 +555,7 @@ Zotero.Utilities.Ingester.prototype.processDocuments = function(urls, processor,
 	if(this.translate.locationIsProxied) {
 		for(var i in urls) {
 			if(this.translate.locationIsProxied) {
-				urls[i] = Zotero.Ingester.ProxyMonitor.properToProxy(urls[i]);
+				urls[i] = Zotero.Proxies.properToProxy(urls[i]);
 			}
 			// check for a protocol colon
 			if(!Zotero.Utilities.Ingester._protocolRe.test(urls[i])) {
@@ -591,7 +591,7 @@ Zotero.Utilities.Ingester.HTTP.prototype.doGet = function(urls, processor, done,
 	}
 	
 	if(this.translate.locationIsProxied) {
-		url = Zotero.Ingester.ProxyMonitor.properToProxy(url);
+		url = Zotero.Proxies.properToProxy(url);
 	}
 	if(!Zotero.Utilities.Ingester._protocolRe.test(url)) {
 		throw("invalid URL in processDocuments");
@@ -620,7 +620,7 @@ Zotero.Utilities.Ingester.HTTP.prototype.doGet = function(urls, processor, done,
 
 Zotero.Utilities.Ingester.HTTP.prototype.doPost = function(url, body, onDone, requestContentType, responseCharset) {
 	if(this.translate.locationIsProxied) {
-		url = Zotero.Ingester.ProxyMonitor.properToProxy(url);
+		url = Zotero.Ingester.Proxies.properToProxy(url);
 	}
 	if(!Zotero.Utilities.Ingester._protocolRe.test(url)) {
 		throw("invalid URL in processDocuments");

@@ -1665,6 +1665,12 @@ Zotero.Schema = new function(){
 						Zotero.DB.query("INSERT INTO itemAttachments (itemID, linkMode) VALUES (?, ?)", [id, 3]);
 					}
 				}
+				
+				if (i==39) {
+					Zotero.DB.query("CREATE TABLE proxies (\n    proxyID INTEGER PRIMARY KEY,\n    multiHost INT,\n    autoAssociate INT,\n    scheme TEXT\n)");
+					Zotero.DB.query("CREATE TABLE proxyHosts (\n    hostID INTEGER PRIMARY KEY,\n    proxyID INTEGER,\n    hostname TEXT,\n    FOREIGN KEY (proxyID) REFERENCES proxies(proxyID)\n)");
+					Zotero.DB.query("CREATE INDEX proxyHosts_proxyID ON proxyHosts(proxyID)");
+				}
 			}
 			
 			_updateDBVersion('userdata', toVersion);

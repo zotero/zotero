@@ -1,4 +1,4 @@
--- 38
+-- 39
 
 -- This file creates tables containing user-specific data -- any changes made
 -- here must be mirrored in transition steps in schema.js::_migrateSchema()
@@ -255,3 +255,18 @@ CREATE TABLE highlights (
     FOREIGN KEY (itemID) REFERENCES itemAttachments(itemID)
 );
 CREATE INDEX highlights_itemID ON highlights(itemID);
+
+CREATE TABLE proxies (
+    proxyID INTEGER PRIMARY KEY,
+    multiHost INT,
+    autoAssociate INT,
+    scheme TEXT
+);
+
+CREATE TABLE proxyHosts (
+    hostID INTEGER PRIMARY KEY,
+    proxyID INTEGER,
+    hostname TEXT
+    FOREIGN KEY (proxyID) REFERENCES proxies(proxyID)
+);
+CREATE INDEX proxyHosts_proxyID ON proxyHosts(proxyID);
