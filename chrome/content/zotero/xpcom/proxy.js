@@ -270,13 +270,13 @@ Zotero.Proxy.prototype.compileRegexp = function() {
 	var parametersToCheck = Zotero_Proxy_schemeParameters;
 	if(this.multiHost) parametersToCheck["%h"] = "([a-zA-Z0-9]+\\.[a-zA-Z0-9\.]+)";
 	
-	indices = this.indices = {};
+	var indices = this.indices = {};
 	this.parameters = [];
 	for(var param in parametersToCheck) {
 		var index = this.scheme.indexOf(param);
 		
 		// avoid escaped matches
-		while(this.scheme[index-1] == "%") {
+		while(this.scheme[index-1] && (this.scheme[index-1] == "%")) {
 			this.scheme = this.scheme.substr(0, index-1)+this.scheme.substr(index);
 			index = this.scheme.indexOf(param, index+1);
 		}
@@ -402,9 +402,9 @@ Zotero.Proxy.prototype.erase = function() {
  */
 Zotero.Proxy.prototype.toProper = function(m) {
 	if(this.multiHost) {
-		properURL = "http://"+m[this.parameters.indexOf("%h")+1]+"/";
+		var properURL = "http://"+m[this.parameters.indexOf("%h")+1]+"/";
 	} else {
-		properURL = "http://"+this.hosts[0]+"/";
+		var properURL = "http://"+this.hosts[0]+"/";
 	}
 	
 	if(this.indices["%p"]) {

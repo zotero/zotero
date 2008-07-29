@@ -20,7 +20,7 @@
     ***** END LICENSE BLOCK *****
 */
 
-Zotero_ProxyEditor = new function() {
+var Zotero_ProxyEditor = new function() {
 	var treechildren;
 	var tree;
 	var treecol;
