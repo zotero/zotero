@@ -1017,9 +1017,7 @@ Zotero.Item.prototype.save = function() {
 		Zotero.DB.query("INSERT INTO items VALUES (?, ?, ?, ?, ?)",
 			[this.id, row.itemTypeID, row.dateAdded, row.dateModified, 'TEMPKEY']);
 		
-		Zotero.DB.query("UPDATE annotations SET itemID=? WHERE itemID=?", params);
 		Zotero.DB.query("UPDATE collectionItems SET itemID=? WHERE itemID=?", params);
-		Zotero.DB.query("UPDATE highlights SET itemID=? WHERE itemID=?", params);
 		Zotero.DB.query("UPDATE itemCreators SET itemID=? WHERE itemID=?", params);
 		Zotero.DB.query("UPDATE itemAttachments SET itemID=? WHERE itemID=?", params);
 		Zotero.DB.query("UPDATE itemAttachments SET sourceItemID=? WHERE sourceItemID=?", params);
@@ -1031,6 +1029,8 @@ Zotero.Item.prototype.save = function() {
 		Zotero.DB.query("UPDATE itemTags SET itemID=? WHERE itemID=?", params);
 		Zotero.DB.query("UPDATE fulltextItemWords SET itemID=? WHERE itemID=?", params);
 		Zotero.DB.query("UPDATE fulltextItems SET itemID=? WHERE itemID=?", params);
+		Zotero.DB.query("UPDATE annotations SET itemID=? WHERE itemID=?", params);
+		Zotero.DB.query("UPDATE highlights SET itemID=? WHERE itemID=?", params);
 		
 		Zotero.DB.query("DELETE FROM items WHERE itemID=?", oldID);
 		Zotero.DB.query("UPDATE items SET key=? WHERE itemID=?", [row.key, this.id]);
