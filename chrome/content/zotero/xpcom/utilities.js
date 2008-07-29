@@ -620,7 +620,7 @@ Zotero.Utilities.Ingester.HTTP.prototype.doGet = function(urls, processor, done,
 
 Zotero.Utilities.Ingester.HTTP.prototype.doPost = function(url, body, onDone, requestContentType, responseCharset) {
 	if(this.translate.locationIsProxied) {
-		url = Zotero.Ingester.Proxies.properToProxy(url);
+		url = Zotero.Proxies.properToProxy(url);
 	}
 	if(!Zotero.Utilities.Ingester._protocolRe.test(url)) {
 		throw("invalid URL in processDocuments");
