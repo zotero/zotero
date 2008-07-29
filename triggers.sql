@@ -1,4 +1,4 @@
--- 1
+-- 2
 
 -- Triggers to validate date field
 DROP TRIGGER IF EXISTS insert_date_field;
@@ -656,4 +656,29 @@ CREATE TRIGGER fkd_syncDeleteLog_syncObjectTypeID_syncObjectTypes_syncObjectType
   FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'delete on table "syncObjectTypes" violates foreign key constraint "fkd_syncDeleteLog_syncObjectTypeID_syncObjectTypes_syncObjectTypeID"')
     WHERE (SELECT COUNT(*) FROM syncDeleteLog WHERE syncObjectTypeID = OLD.syncObjectTypeID) > 0;
+  END;
+
+-- proxyHosts/proxyID
+DROP TRIGGER IF EXISTS fki_proxyHosts_proxyID_proxies_proxyID;
+CREATE TRIGGER fki_proxyHosts_proxyID_proxies_proxyID
+BEFORE INSERT ON proxyHosts
+  FOR EACH ROW BEGIN
+    SELECT RAISE(ABORT, 'insert on table "proxyHosts" violates foreign key constraint "fki_proxyHosts_proxyID_proxies_proxyID"')
+    WHERE (SELECT COUNT(*) FROM proxies WHERE proxyID = NEW.proxyID) = 0;
+  END;
+
+DROP TRIGGER IF EXISTS fku_proxyHosts_proxyID_proxies_proxyID;
+CREATE TRIGGER fku_proxyHosts_proxyID_proxies_proxyID
+  BEFORE UPDATE OF proxyID ON proxyHosts
+  FOR EACH ROW BEGIN
+      SELECT RAISE(ABORT, 'update on table "proxyHosts" violates foreign key constraint "fku_proxyHosts_proxyID_proxies_proxyID"')
+        WHERE (SELECT COUNT(*) FROM proxies WHERE proxyID = NEW.proxyID) = 0;
+  END;
+
+DROP TRIGGER IF EXISTS fkd_proxyHosts_proxyID_proxies_proxyID;
+CREATE TRIGGER fkd_proxyHosts_proxyID_proxies_proxyID
+  BEFORE DELETE ON proxies
+  FOR EACH ROW BEGIN
+    SELECT RAISE(ABORT, 'delete on table "proxies" violates foreign key constraint "fkd_proxyHosts_proxyID_proxies_proxyID"')
+    WHERE (SELECT COUNT(*) FROM proxyHosts WHERE proxyID = OLD.proxyID) > 0;
   END;

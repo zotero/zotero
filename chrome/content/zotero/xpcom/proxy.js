@@ -386,8 +386,8 @@ Zotero.Proxy.prototype.erase = function() {
 	
 	try {
 		Zotero.DB.beginTransaction();
-		Zotero.DB.query("DELETE FROM proxies WHERE proxyID = ?", [this.proxyID]);
 		Zotero.DB.query("DELETE FROM proxyHosts WHERE proxyID = ?", [this.proxyID]);
+		Zotero.DB.query("DELETE FROM proxies WHERE proxyID = ?", [this.proxyID]);
 		Zotero.DB.commitTransaction();
 	} catch(e) {
 		Zotero.DB.rollbackTransaction();
