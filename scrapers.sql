@@ -14559,7 +14559,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('7cb0089b-9551-44b2-abca-eb03cbf586d9', '1.0.0b4.r5', '', '2008-03-30 08:00:00', '0', '100', '4', 'BioOne', 'Michael Berkowitz', 'http://[^/]*www.bioone.org[^/]*/', 
+REPLACE INTO translators VALUES ('7cb0089b-9551-44b2-abca-eb03cbf586d9', '1.0.0b4.r5', '', '2008-07-29 10:54:21', '0', '100', '4', 'BioOne', 'Michael Berkowitz', 'http://[^/]*www.bioone.org[^/]*/', 
 'function detectWeb(doc, url) {
 	if (url.indexOf("searchtype") != -1) {
 		return "multiple";
@@ -14572,17 +14572,8 @@ REPLACE INTO translators VALUES ('7cb0089b-9551-44b2-abca-eb03cbf586d9', '1.0.0b
 	return "http://www.bioone.org/perlserv/?request=cite-builder&doi=" + str;
 }
 
-function getPDFurl(item) {
-	var bits = new Array(
-		item.DOI.match(/\/([^(]+)\(/)[1],
-		item.volume,
-		item.issue,
-		item.pages.match(/^([^-]+)\-/)[1]
-	);
-	return "http://www.bioone.org/archive/" + bits.slice(0,3).join("/") + "/pdf/i" + bits.join("-") + ".pdf";
-}
-
 function doWeb(doc, url) {
+	var host = doc.location.host;
 	var articles = new Array();
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
@@ -14600,7 +14591,6 @@ function doWeb(doc, url) {
 	} else {
 		articles = [createCitationURL(url)];
 	}
-	Zotero.debug(articles);
 	Zotero.Utilities.processDocuments(articles, function(newDoc) {
 		var newlink = newDoc.evaluate(''//a[contains(@href, "refman")]'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().href;
 		Zotero.Utilities.HTTP.doGet(newlink, function(text) {
@@ -14610,7 +14600,7 @@ function doWeb(doc, url) {
 			translator.setHandler("itemDone", function(obj, item) {
 				item.url = decodeURIComponent(item.url);
 				item.DOI = item.url.match(/http:\/\/dx\.doi\.org\/(.*)$/)[1];
-				var pdfurl = getPDFurl(item);
+				var pdfurl = ''http://'' + host + ''/perlserv/?request=get-pdf&doi='' + item.DOI;
 				item.attachments = [
 					{url:item.url, title:item.title, mimeType:"text/html"},
 					{url:pdfurl, title:"BioOne Full Text PDF", mimeType:"application/pdf"}
