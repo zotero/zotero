@@ -266,7 +266,7 @@ CREATE TABLE proxies (
 CREATE TABLE proxyHosts (
     hostID INTEGER PRIMARY KEY,
     proxyID INTEGER,
-    hostname TEXT
+    hostname TEXT,
     FOREIGN KEY (proxyID) REFERENCES proxies(proxyID)
 );
 CREATE INDEX proxyHosts_proxyID ON proxyHosts(proxyID);
