@@ -1296,7 +1296,7 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 		var downloadAssociatedFiles = Zotero.Prefs.get("downloadAssociatedFiles");
 		
 		// handle attachments
-		if(item.attachments && (automaticSnapshots || downloadAssociatedFiles)) {
+		if(item.attachments && (this.type == 'import' || automaticSnapshots || downloadAssociatedFiles)) {
 			for each(var attachment in item.attachments) {
 				if(this.type == "web") {
 					if(!attachment.url && !attachment.document) {
