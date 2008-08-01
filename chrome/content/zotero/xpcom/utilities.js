@@ -716,7 +716,7 @@ Zotero.Utilities.HTTP = new function() {
 		ds.itemType = Ci.nsIDocShellTreeItem.typeContent;
 		var xmlhttp = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"].
 						createInstance(Ci.nsIXMLHttpRequest);
-		xmlhttp.open("GET", url, true);
+		xmlhttp.open("OPTIONS", url, true);
 		xmlhttp.channel.loadGroup = ds.getInterface(Ci.nsILoadGroup);
 		xmlhttp.channel.loadFlags |= Ci.nsIChannel.LOAD_DOCUMENT_URI;
 		
