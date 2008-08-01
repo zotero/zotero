@@ -572,28 +572,31 @@ Zotero.Utilities.HTTP = new function() {
 			return false;
 		}
 		
+		/*
 		var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
 						.createInstance();
-		
 		var test = xmlhttp.open('GET', url, true);
+		*/
+		
+		// Workaround for "Accept third-party cookies" being off in Firefox 3.0.1
+		// https://www.zotero.org/trac/ticket/1070
+		const Cc = Components.classes;
+		const Ci = Components.interfaces;
+		var ds = Cc["@mozilla.org/webshell;1"].
+					createInstance(Components.interfaces.nsIDocShellTreeItem).
+					QueryInterface(Ci.nsIInterfaceRequestor);
+		ds.itemType = Ci.nsIDocShellTreeItem.typeContent;
+		var xmlhttp = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"].
+						createInstance(Ci.nsIXMLHttpRequest);
+		xmlhttp.open("GET", url, true);
+		xmlhttp.channel.loadGroup = ds.getInterface(Ci.nsILoadGroup);
+		xmlhttp.channel.loadFlags |= Ci.nsIChannel.LOAD_DOCUMENT_URI;
 		
 		xmlhttp.onreadystatechange = function(){
 			_stateChange(xmlhttp, onDone, responseCharset);
 		};
 		
-		// Temporarily set cookieBehavior to 0 for Firefox 3
-		// https://www.zotero.org/trac/ticket/1070
-		try {
-			var prefService = Components.classes["@mozilla.org/preferences-service;1"].
-							  getService(Components.interfaces.nsIPrefBranch);
-			var cookieBehavior = prefService.getIntPref("network.cookie.cookieBehavior");
-			prefService.setIntPref("network.cookie.cookieBehavior", 0);
-			
-			xmlhttp.send(null);
-		}
-		finally {
-			prefService.setIntPref("network.cookie.cookieBehavior", cookieBehavior);
-		}
+		xmlhttp.send(null);
 		
 		return true;
 	}
@@ -609,33 +612,38 @@ Zotero.Utilities.HTTP = new function() {
 	**/
 	function doPost(url, body, onDone, requestContentType, responseCharset) {
 		Zotero.debug("HTTP POST "+body+" to "+url);
+		
 		if (this.browserIsOffline()){
 			return false;
 		}
 		
+		/*
 		var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
 					.createInstance();
-		
 		xmlhttp.open('POST', url, true);
+		*/
+		
+		// Workaround for "Accept third-party cookies" being off in Firefox 3.0.1
+		// https://www.zotero.org/trac/ticket/1070
+		const Cc = Components.classes;
+		const Ci = Components.interfaces;
+		var ds = Cc["@mozilla.org/webshell;1"].
+					createInstance(Components.interfaces.nsIDocShellTreeItem).
+					QueryInterface(Ci.nsIInterfaceRequestor);
+		ds.itemType = Ci.nsIDocShellTreeItem.typeContent;
+		var xmlhttp = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"].
+						createInstance(Ci.nsIXMLHttpRequest);
+		xmlhttp.open("POST", url, true);
+		xmlhttp.channel.loadGroup = ds.getInterface(Ci.nsILoadGroup);
+		xmlhttp.channel.loadFlags |= Ci.nsIChannel.LOAD_DOCUMENT_URI;
+		
 		xmlhttp.setRequestHeader("Content-Type", (requestContentType ? requestContentType : "application/x-www-form-urlencoded" ));
 		
 		xmlhttp.onreadystatechange = function(){
 			_stateChange(xmlhttp, onDone, responseCharset);
 		};
 		
-		// Temporarily set cookieBehavior to 0 for Firefox 3
-		// https://www.zotero.org/trac/ticket/1070
-		try {
-			var prefService = Components.classes["@mozilla.org/preferences-service;1"].
-							  getService(Components.interfaces.nsIPrefBranch);
-			var cookieBehavior = prefService.getIntPref("network.cookie.cookieBehavior");
-			prefService.setIntPref("network.cookie.cookieBehavior", 0);
-			
-			xmlhttp.send(body);
-		}
-		finally {
-			prefService.setIntPref("network.cookie.cookieBehavior", cookieBehavior);
-		}
+		xmlhttp.send(body);
 		
 		return true;
 	}
@@ -647,28 +655,31 @@ Zotero.Utilities.HTTP = new function() {
 			return false;
 		}
 		
+		/*
 		var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
 						.createInstance();
-		
 		var test = xmlhttp.open('HEAD', url, true);
+		*/
+		
+		// Workaround for "Accept third-party cookies" being off in Firefox 3.0.1
+		// https://www.zotero.org/trac/ticket/1070
+		const Cc = Components.classes;
+		const Ci = Components.interfaces;
+		var ds = Cc["@mozilla.org/webshell;1"].
+					createInstance(Components.interfaces.nsIDocShellTreeItem).
+					QueryInterface(Ci.nsIInterfaceRequestor);
+		ds.itemType = Ci.nsIDocShellTreeItem.typeContent;
+		var xmlhttp = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"].
+						createInstance(Ci.nsIXMLHttpRequest);
+		xmlhttp.open("HEAD", url, true);
+		xmlhttp.channel.loadGroup = ds.getInterface(Ci.nsILoadGroup);
+		xmlhttp.channel.loadFlags |= Ci.nsIChannel.LOAD_DOCUMENT_URI;
 		
 		xmlhttp.onreadystatechange = function(){
 			_stateChange(xmlhttp, onDone);
 		};
 		
-		// Temporarily set cookieBehavior to 0 for Firefox 3
-		// https://www.zotero.org/trac/ticket/1070
-		try {
-			var prefService = Components.classes["@mozilla.org/preferences-service;1"].
-							  getService(Components.interfaces.nsIPrefBranch);
-			var cookieBehavior = prefService.getIntPref("network.cookie.cookieBehavior");
-			prefService.setIntPref("network.cookie.cookieBehavior", 0);
-			
-			xmlhttp.send(null);
-		}
-		finally {
-			prefService.setIntPref("network.cookie.cookieBehavior", cookieBehavior);
-		}
+		xmlhttp.send(null);
 		
 		return true;
 	}
@@ -689,28 +700,31 @@ Zotero.Utilities.HTTP = new function() {
 			return false;
 		}
 		
+		/*
 		var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
 					.createInstance();
-		
 		xmlhttp.open('OPTIONS', url, true);
+		*/
+		
+		// Workaround for "Accept third-party cookies" being off in Firefox 3.0.1
+		// https://www.zotero.org/trac/ticket/1070
+		const Cc = Components.classes;
+		const Ci = Components.interfaces;
+		var ds = Cc["@mozilla.org/webshell;1"].
+					createInstance(Components.interfaces.nsIDocShellTreeItem).
+					QueryInterface(Ci.nsIInterfaceRequestor);
+		ds.itemType = Ci.nsIDocShellTreeItem.typeContent;
+		var xmlhttp = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"].
+						createInstance(Ci.nsIXMLHttpRequest);
+		xmlhttp.open("GET", url, true);
+		xmlhttp.channel.loadGroup = ds.getInterface(Ci.nsILoadGroup);
+		xmlhttp.channel.loadFlags |= Ci.nsIChannel.LOAD_DOCUMENT_URI;
 		
 		xmlhttp.onreadystatechange = function(){
 			_stateChange(xmlhttp, onDone);
 		};
 		
-		// Temporarily set cookieBehavior to 0 for Firefox 3
-		// https://www.zotero.org/trac/ticket/1070
-		try {
-			var prefService = Components.classes["@mozilla.org/preferences-service;1"].
-							  getService(Components.interfaces.nsIPrefBranch);
-			var cookieBehavior = prefService.getIntPref("network.cookie.cookieBehavior");
-			prefService.setIntPref("network.cookie.cookieBehavior", 0);
-			
-			xmlhttp.send(body);
-		}
-		finally {
-			prefService.setIntPref("network.cookie.cookieBehavior", cookieBehavior);
-		}
+		xmlhttp.send(body);
 		
 		return true;
 	}
