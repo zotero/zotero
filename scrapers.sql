@@ -17025,7 +17025,7 @@ REPLACE INTO translators VALUES ('303c2744-ea37-4806-853d-e1ca67be6818', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('27ee5b2c-2a5a-4afc-a0aa-d386642d4eed', '1.0.0b4.r5', '', '2008-07-16 20:10:00', '1', '100', '4', 'PubMed Central', 'Michael Berkowitz', 'http://[^/]*.nih.gov/', 
+REPLACE INTO translators VALUES ('27ee5b2c-2a5a-4afc-a0aa-d386642d4eed', '1.0.0b4.r5', '', '2008-08-01 12:05:04', '1', '100', '4', 'PubMed Central', 'Michael Berkowitz', 'http://[^/]*.nih.gov/', 
 'function detectWeb(doc, url) {
 	if (doc.evaluate(''//table[@id="ResultPanel"]//td[2]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
@@ -17088,9 +17088,13 @@ REPLACE INTO translators VALUES ('27ee5b2c-2a5a-4afc-a0aa-d386642d4eed', '1.0.0b
 				newItem.attachments.push({url:tags["pdf_url"], title:"PubMed Central Full Text PDF", mimeType:"application/pdf"});
 			}
 			newItem.url = tags["fulltext_html_url"];
+			if (!newItem.url) newItem.url = tags["abstract_html_url"];
 			newItem.extra = text.match(/PMC\d+/)[0];
 			newItem.journalAbbreviation = text.match(/span class=\"citation-abbreviation\">([^<]+)</)[1];
-			newItem.pages = text.match(/span class=\"citation-flpages\">([^<]+)</)[1].replace(/[\.:\s]/g, "")
+			newItem.pages = text.match(/span class=\"citation-flpages\">([^<]+)</)[1].replace(/[\.:\s]/g, "");
+			
+			var abstract = text.match(/Abstract<\/div>([^<]+)</)[1];
+			if (abstract) newItem.abstractNote = abstract;
 			newItem.complete();
 		});
 	}
