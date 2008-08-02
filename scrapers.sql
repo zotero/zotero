@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-08-02 12:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-08-02 17:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-06-16 21:30:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -17429,7 +17429,7 @@ REPLACE INTO translators VALUES ('b86bb082-6310-4772-a93c-913eaa3dfa1b', '1.0.0b
 	}
 }');
 
-REPLACE INTO translators VALUES ('d9be934c-edb9-490c-a88d-34e2ee106cd7', '1.0.0b4.r5', '', '2008-07-24 05:15:00', '0', '100', '4', 'Time.com', 'Michael Berkowitz', 'http://www.time.com/time/', 
+REPLACE INTO translators VALUES ('d9be934c-edb9-490c-a88d-34e2ee106cd7', '1.0.0b4.r5', '', '2008-08-02 17:00:00', '0', '100', '4', 'Time.com', 'Michael Berkowitz', 'http://www.time.com/time/', 
 'function detectWeb(doc, url) {
 	if (doc.title == "TIME Magazine - Search Results") {
 		return "multiple";
@@ -17470,8 +17470,10 @@ function scrape(doc, url) {
 	
 	if (metaTags["head"]) {
 		associateMeta(newItem, metaTags, "head", "title");
+	} else  if (doc.title.length > 7) {
+		newItem.title = doc.title.substr(0, doc.title.length - 7); 
 	} else {
-		newItem.title = doc.title.substr(0, doc.title.length - 7);
+		newItem.title = "No Title";
 	}
 	
 	if (metaTags["description"]) {
