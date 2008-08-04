@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-08-02 17:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-08-04 07:10:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-06-16 21:30:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1688,7 +1688,7 @@ function doWeb(doc, url) {
 }
 ');
 
-REPLACE INTO translators VALUES ('fef07360-ee97-4f67-b022-6f64d5ec0c25', '1.0.0b4.r5', '', '2008-07-29 09:38:55', '0', '100', '4', 'KOBV', 'Gunar Maiwald', '^http://vs13.kobv.de/V/', 
+REPLACE INTO translators VALUES ('fef07360-ee97-4f67-b022-6f64d5ec0c25', '1.0.0b4.r5', '', '2008-08-04 07:10:00', '0', '100', '4', 'KOBV', 'Gunar Maiwald', '^http://vs13.kobv.de/V/', 
 'function detectWeb(doc, url) {
 	if (doc.evaluate(''//tr /td[@class="no_wrap_center"]/a'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
@@ -3986,7 +3986,7 @@ function doWeb(doc, url) {
 	
 }
 ');
-REPLACE INTO translators VALUES ('e0234bcf-bc56-4577-aa94-fe86a27f6fd6', '1.0.0b4.r5', '', '2008-06-12 09:06:46', '0', '100', '4', 'The Globe and Mail', 'Adam Crymble', 'http://www.theglobeandmail.com', 
+REPLACE INTO translators VALUES ('e0234bcf-bc56-4577-aa94-fe86a27f6fd6', '1.0.0b4.r5', '', '2008-08-04 07:10:00', '0', '100', '4', 'The Globe and Mail', 'Adam Crymble', 'http://www.theglobeandmail.com', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -4194,7 +4194,9 @@ function doWeb(doc, url) {
 	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
 	Zotero.wait();
 }');
-REPLACE INTO translators VALUES ('d71e9b6d-2baa-44ed-acb4-13fe2fe592c0', '1.0.0b4.r5', '', '2008-07-15 15:23:46', '0', '100', '4', 'Google Patents', 'Adam Crymble', 'http://www\.google.*/patents', 
+
+
+REPLACE INTO translators VALUES ('d71e9b6d-2baa-44ed-acb4-13fe2fe592c0', '1.0.0b4.r5', '', '2008-08-04 07:10:00', '0', '100', '4', 'Google Patents', 'Adam Crymble', 'http://www\.google.*/patents', 
 'function detectWeb(doc, url) {
 	
 	if (doc.location.href.match("Search")) {
@@ -4352,7 +4354,9 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }
 ');
-REPLACE INTO translators VALUES ('c41c9c66-8540-4216-b138-7c00532748c9', '1.0.0b4.r5', '', '2008-06-26 14:57:54', '0', '100', '4', 'Gulag: Many Days, Many Lives', 'Adam Crymble', 'http://gulaghistory.org', 
+
+
+REPLACE INTO translators VALUES ('c41c9c66-8540-4216-b138-7c00532748c9', '1.0.0b4.r5', '', '2008-08-04 07:10:00', '0', '100', '4', 'Gulag: Many Days, Many Lives', 'Adam Crymble', 'http://gulaghistory.org', 
 'function detectWeb(doc, url) {
 	if (doc.evaluate(''//div[@class="field"][@id="citation"]/p'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "book";
@@ -4481,7 +4485,9 @@ function doWeb(doc, url) {
 	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
 	Zotero.wait();
 }');
-REPLACE INTO translators VALUES ('c9338ed5-b512-4967-8ffe-ab9c973559ef', '1.0.0b4.r5', '', '2008-07-15 15:15:31', '0', '100', '4', 'The Hamilton Spectator', 'Adam Crymble', 'http://www.thespec.com', 
+
+
+REPLACE INTO translators VALUES ('c9338ed5-b512-4967-8ffe-ab9c973559ef', '1.0.0b4.r5', '', '2008-08-04 07:10:00', '0', '100', '4', 'The Hamilton Spectator', 'Adam Crymble', 'http://www.thespec.com', 
 'function detectWeb(doc, url) {
 	if (doc.location.href.match("search")) {
 		return "multiple";
@@ -4582,6 +4588,8 @@ function doWeb(doc, url) {
 	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
 	Zotero.wait();
 }');
+
+
 REPLACE INTO translators VALUES ('9418dcc2-cc1e-432b-b7a6-7b00b7402d2f', '1.0.0b4.r5', '', '2008-06-26 13:21:15', '0', '100', '4', 'Hurricane Digital Memory Bank', 'Adam Crymble', 'http://hurricanearchive.org', 
 'function detectWeb(doc, url) {
 	
@@ -14559,7 +14567,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('7cb0089b-9551-44b2-abca-eb03cbf586d9', '1.0.0b4.r5', '', '2008-07-29 10:54:21', '0', '100', '4', 'BioOne', 'Michael Berkowitz', 'http://[^/]*www.bioone.org[^/]*/', 
+REPLACE INTO translators VALUES ('7cb0089b-9551-44b2-abca-eb03cbf586d9', '1.0.0b4.r5', '', '2008-08-04 07:10:00', '0', '100', '4', 'BioOne', 'Michael Berkowitz', 'http://[^/]*www.bioone.org[^/]*/', 
 'function detectWeb(doc, url) {
 	if (url.indexOf("searchtype") != -1) {
 		return "multiple";
@@ -17025,7 +17033,7 @@ REPLACE INTO translators VALUES ('303c2744-ea37-4806-853d-e1ca67be6818', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('27ee5b2c-2a5a-4afc-a0aa-d386642d4eed', '1.0.0b4.r5', '', '2008-08-01 12:05:04', '1', '100', '4', 'PubMed Central', 'Michael Berkowitz', 'http://[^/]*.nih.gov/', 
+REPLACE INTO translators VALUES ('27ee5b2c-2a5a-4afc-a0aa-d386642d4eed', '1.0.0b4.r5', '', '2008-08-04 07:10:00', '1', '100', '4', 'PubMed Central', 'Michael Berkowitz', 'http://[^/]*.nih.gov/', 
 'function detectWeb(doc, url) {
 	if (doc.evaluate(''//table[@id="ResultPanel"]//td[2]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
