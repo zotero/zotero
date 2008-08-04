@@ -17437,7 +17437,7 @@ REPLACE INTO translators VALUES ('b86bb082-6310-4772-a93c-913eaa3dfa1b', '1.0.0b
 	}
 }');
 
-REPLACE INTO translators VALUES ('d9be934c-edb9-490c-a88d-34e2ee106cd7', '1.0.0b4.r5', '', '2008-08-02 17:00:00', '0', '100', '4', 'Time.com', 'Michael Berkowitz', 'http://www.time.com/time/', 
+REPLACE INTO translators VALUES ('d9be934c-edb9-490c-a88d-34e2ee106cd7', '1.0.0b4.r5', '', '2008-08-04 07:10:00', '0', '100', '4', 'Time.com', 'Michael Berkowitz', 'http://www.time.com/time/', 
 'function detectWeb(doc, url) {
 	if (doc.title == "TIME Magazine - Search Results") {
 		return "multiple";
