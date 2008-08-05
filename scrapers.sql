@@ -24610,7 +24610,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('d0b1914a-11f1-4dd7-8557-b32fe8a3dd47', '1.0.0b3.r1', '', '2008-07-24 19:30:00', '1', '100', '4', 'EBSCOhost', 'Simon Kornblith and Michael Berkowitz', 'https?://[^/]+/(?:bsi|ehost)/(?:results|detail|folder)', 
+REPLACE INTO translators VALUES ('d0b1914a-11f1-4dd7-8557-b32fe8a3dd47', '1.0.0b3.r1', '', '2008-08-05 10:11:15', '1', '100', '4', 'EBSCOhost', 'Simon Kornblith and Michael Berkowitz', 'https?://[^/]+/(?:bsi|ehost)/(?:results|detail|folder)', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -24694,6 +24694,7 @@ function downloadFunction(text) {
 			if (text.match("L3")) {
 				item.DOI = text.match(/L3\s+\-\s*(.*)/)[1];
 			}
+			item.itemType = "journalArticle";
 			item.complete();
 		});
 		translator.translate();
