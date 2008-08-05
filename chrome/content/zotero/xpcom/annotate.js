@@ -699,7 +699,7 @@ Zotero.Annotation.prototype.displayWithAbsoluteCoordinates = function(absX, absY
 		this.pushpinDiv.style.cursor = "pointer";
 		// generate pushpin image
 		var img = this.document.createElement("img");
-		img.src = "chrome://zotero/skin/annotation-hidden.gif";
+		img.src = "zotero://attachment/annotation-hidden.gif";
 		img.title = Zotero.getString("annotations.expand.tooltip");
 		img.addEventListener("click", function() {
 			me.setCollapsed(false);
@@ -773,7 +773,7 @@ Zotero.Annotation.prototype._addChildElements = function() {
 	
 	// close image
 	var img = this.document.createElement("img");
-	img.src = "chrome://zotero/skin/annotation-close.png";
+	img.src = "zotero://attachment/annotation-close.png";
 	img.title = Zotero.getString("annotations.close.tooltip");
 	img.addEventListener("click", function(event) {
 		if(me._confirmDelete(event)) {
@@ -794,7 +794,7 @@ Zotero.Annotation.prototype._addChildElements = function() {
 	
 	// move image
 	this.moveImg = this.document.createElement("img");
-	this.moveImg.src = "chrome://zotero/skin/annotation-move.png";
+	this.moveImg.src = "zotero://attachment/annotation-move.png";
 	this.moveImg.title = Zotero.getString("annotations.move.tooltip");
 	this.moveImg.addEventListener("click", function(e) {
 		me._startMove(e);
@@ -803,7 +803,7 @@ Zotero.Annotation.prototype._addChildElements = function() {
 	
 	// hide image
 	var img = this.document.createElement("img");
-	img.src = "chrome://zotero/skin/annotation-hide.png";
+	img.src = "zotero://attachment/annotation-hide.png";
 	img.title = Zotero.getString("annotations.collapse.tooltip");
 	img.addEventListener("click", function(event) {
 		me.setCollapsed(true);
@@ -820,7 +820,7 @@ Zotero.Annotation.prototype._addChildElements = function() {
 	this.grippyDiv.style.bottom = "0px";
 	this.grippyDiv.style.cursor = "se-resize";
 	var img = this.document.createElement("img");
-	img.src = "chrome://zotero/skin/annotation-grippy.png";
+	img.src = "zotero://attachment/annotation-grippy.png";
 	img.addEventListener("mousedown", function(event) {
 		me._startDrag(event);
 	}, false);
@@ -959,7 +959,7 @@ Zotero.Annotation.prototype._startMove = function(e) {
 	this.annotationsObj.clearAction = function() {
 		me.document.removeEventListener("click", me._handleMove, false);
 		body.style.cursor = "auto";
-		me.moveImg.src = "chrome://zotero/skin/annotation-move.png";
+		me.moveImg.src = "zotero://attachment/annotation-move.png";
 		me.annotationsObj.clearAction = undefined;
 	}
 	
@@ -975,7 +975,7 @@ Zotero.Annotation.prototype._startMove = function(e) {
 	
 	this.document.addEventListener("click", this._handleMove, false);
 	body.style.cursor = "pointer";
-	this.moveImg.src = "chrome://zotero/skin/annotation-move-selected.png";
+	this.moveImg.src = "zotero://attachment/annotation-move-selected.png";
 }
 
 //////////////////////////////////////////////////////////////////////////////

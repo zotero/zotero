@@ -73,6 +73,8 @@ function ChromeExtensionHandler() {
 	var ReportExtension = new function(){
 		this.newChannel = newChannel;
 		
+		this.__defineGetter__('loadAsChrome', function () { return true; });
+		
 		function newChannel(uri){
 			var ioService = Components.classes["@mozilla.org/network/io-service;1"]
 				.getService(Components.interfaces.nsIIOService);
@@ -413,7 +415,9 @@ function ChromeExtensionHandler() {
 
 	var TimelineExtension = new function(){
 		this.newChannel = newChannel;
-
+		
+		this.__defineGetter__('loadAsChrome', function () { return true; });
+		
 		/*
 		queryString key abbreviations:  intervals = i  |  dateType = t  |  timelineDate = d
 		
@@ -625,6 +629,8 @@ function ChromeExtensionHandler() {
 	var AttachmentExtension = new function() {
 		this.newChannel = newChannel;
 		
+		this.__defineGetter__('loadAsChrome', function () { return false; });
+		
 		function newChannel(uri) {
 			var ioService = Components.classes["@mozilla.org/network/io-service;1"]
 				.getService(Components.interfaces.nsIIOService);
@@ -638,15 +644,24 @@ function ChromeExtensionHandler() {
 				var [id, fileName] = uri.path.substr(1).split('/');
 				
 				if (parseInt(id) != id) {
-					return _errorChannel("Attachment id not an integer");
+					// Proxy annotation icons
+					if (id.match(/^annotation.*\.png$/)) {
+						var chromeURL = 'chrome://zotero/skin/' + id;
+						var file = Zotero.convertChromeURLToFile(chromeURL);
+					}
+					else {
+						return _errorChannel("Attachment id not an integer");
+					}
 				}
 				
-				var item = Zotero.Items.get(id);
-				if (!item) {
-					return _errorChannel("Item not found");
+				if (!file) {
+					var item = Zotero.Items.get(id);
+					if (!item) {
+						return _errorChannel("Item not found");
+					}
+					var file = item.getFile();
 				}
 				
-				var file = item.getFile();
 				if (!file) {
 					return _errorChannel("File not found");
 				}
@@ -661,7 +676,7 @@ function ChromeExtensionHandler() {
 				
 				var ph = Components.classes["@mozilla.org/network/protocol;1?name=file"].
 						createInstance(Components.interfaces.nsIFileProtocolHandler);
-				fileURI = ph.newFileURI(file);
+				var fileURI = ph.newFileURI(file);
 				var channel = ioService.newChannelFromURI(fileURI);
 				return channel;
 			}
@@ -688,7 +703,7 @@ function ChromeExtensionHandler() {
 	*/
 	var SelectExtension = new function(){
 		this.newChannel = newChannel;
-
+		
 		function newChannel(uri) {
 			var ioService = Components.classes["@mozilla.org/network/io-service;1"]
 				.getService(Components.interfaces.nsIIOService);
@@ -745,8 +760,11 @@ ChromeExtensionHandler.prototype = {
 	
 	defaultPort : -1,
 	
-	protocolFlags : Components.interfaces.nsIProtocolHandler.URI_STD,
-	
+	protocolFlags :
+		Components.interfaces.nsIProtocolHandler.URI_NORELATIVE |
+		Components.interfaces.nsIProtocolHandler.URI_NOAUTH |
+		Components.interfaces.nsIProtocolHandler.URI_IS_LOCAL_FILE,
+		
 	allowPort : function(port, scheme) {
 		return false;
 	},
@@ -755,7 +773,6 @@ ChromeExtensionHandler.prototype = {
 		var newURL = Components.classes["@mozilla.org/network/standard-url;1"]
 			.createInstance(Components.interfaces.nsIStandardURL);
 		newURL.init(1, -1, spec, charset, baseURI);
-		
 		return newURL.QueryInterface(Components.interfaces.nsIURI);
 	},
 	
@@ -771,11 +788,11 @@ ChromeExtensionHandler.prototype = {
 		try {
 			var uriString = uri.spec.toLowerCase();
 			
-			for (extSpec in this._extensions) {
+			for (var extSpec in this._extensions) {
 				var ext = this._extensions[extSpec];
 				
 				if (uriString.indexOf(extSpec) == 0) {
-					if (this._systemPrincipal == null) {
+					if (ext.loadAsChrome && this._systemPrincipal == null) {
 						var chromeURI = chromeService.newURI(DUMMY_CHROME_URL, null, null);
 						var chromeChannel = chromeService.newChannel(chromeURI);
 						
@@ -796,8 +813,8 @@ ChromeExtensionHandler.prototype = {
 						chromeRequest.cancel(0x804b0002); // BINDING_ABORTED
 					}
 					
-					if (this._systemPrincipal != null) {
-						// applying cached system principal to extension channel
+					// Apply cached system principal to extension channel
+					if (ext.loadAsChrome) {
 						extChannel.owner = this._systemPrincipal;
 					}
 					
