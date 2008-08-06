@@ -31316,7 +31316,7 @@ function doExport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('9cb70025-a888-4a29-a210-93ec52da40d4', '1.0.0b4.r1', '', '2008-08-06 07:25:00', '1', '200', '3', 'BibTeX', 'Simon Kornblith', 'bib', 
+REPLACE INTO translators VALUES ('9cb70025-a888-4a29-a210-93ec52da40d4', '1.0.0b4.r1', '', '2008-08-06 13:00:00', '1', '200', '3', 'BibTeX', 'Simon Kornblith', 'bib', 
 'Zotero.configure("dataMode", "block");
 Zotero.addOption("exportCharset", "UTF-8");
 
@@ -31360,6 +31360,7 @@ var fieldMap = {
 	copyright:"rights",
 	isbn:"ISBN",
 	issn:"ISSN",
+	lccn:"callNumber",
 	location:"archiveLocation",
 	url:"url",
 	doi:"DOI",
