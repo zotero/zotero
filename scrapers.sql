@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-08-05 07:10:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-08-06 17:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-08-05 07:10:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -6736,7 +6736,9 @@ function doWeb(doc, url) {
 	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
 	Zotero.wait();
 }');
-REPLACE INTO translators VALUES ('6b0b11a6-9b77-4b49-b768-6b715792aa37', '1.0.0b4.r5', '', '2008-07-15 09:30:33', '0', '100', '4', 'Toronto Star', 'Adam Crymble', 'http://www.thestar.com', 
+
+
+REPLACE INTO translators VALUES ('6b0b11a6-9b77-4b49-b768-6b715792aa37', '1.0.0b4.r5', '', '2008-08-06 17:00:00', '0', '100', '4', 'Toronto Star', 'Adam Crymble', 'http://www.thestar.com', 
 'function detectWeb(doc, url) {
 	if (doc.location.href.match("search") && !doc.location.href.match("classifieds")) {
 		return "multiple";
@@ -6844,7 +6846,9 @@ function doWeb(doc, url) {
 	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
 	Zotero.wait();
 }');
-REPLACE INTO translators VALUES ('35d6c82d-4749-4cc5-9e12-2924307df28f', '1.0.0b4.r5', '', '2008-07-09 16:04:12', '0', '100', '4', 'UBC Library Catalog', 'Adam Crymble', 'http://webcat(1||2).library.ubc', 
+
+
+REPLACE INTO translators VALUES ('35d6c82d-4749-4cc5-9e12-2924307df28f', '1.0.0b4.r5', '', '2008-08-06 17:00:00', '0', '100', '4', 'UBC Library Catalog', 'Adam Crymble', 'http://webcat(1||2).library.ubc', 
 'function detectWeb(doc, url) {
 	
 	if (doc.evaluate(''//tbody/tr/td[1]/b'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
@@ -7013,7 +7017,9 @@ function doWeb(doc, url) {
 	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
 	Zotero.wait();
 }');
-REPLACE INTO translators VALUES ('f8b5501a-1acc-4ffa-a0a5-594add5e6bd3', '1.0.0b4.r5', '', '2008-07-10 11:37:27', '0', '100', '4', 'US National Archives Research Catalog', 'Adam Crymble', 'http://arcweb.archives.gov', 
+
+
+REPLACE INTO translators VALUES ('f8b5501a-1acc-4ffa-a0a5-594add5e6bd3', '1.0.0b4.r5', '', '2008-08-06 17:00:00', '0', '100', '4', 'US National Archives Research Catalog', 'Adam Crymble', 'http://arcweb.archives.gov', 
 'function detectWeb(doc, url) {
 	if (doc.location.href.match("ShowArchivalDescriptions") || doc.location.href.match("ShowDODescriptions")) {
 		return "multiple";
@@ -7168,7 +7174,9 @@ function doWeb(doc, url) {
 	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
 	Zotero.wait();
 }');
-REPLACE INTO translators VALUES ('1d82cbdf-703d-4f96-9ae2-246af21bb96e', '1.0.0b4.r5', '', '2008-07-15 11:08:03', '0', '100', '4', 'Winnipeg Free Press', 'Adam Crymble', 'http://www.winnipegfreepress', 
+
+
+REPLACE INTO translators VALUES ('1d82cbdf-703d-4f96-9ae2-246af21bb96e', '1.0.0b4.r5', '', '2008-08-06 17:00:00', '0', '100', '4', 'Winnipeg Free Press', 'Adam Crymble', 'http://www.winnipegfreepress', 
 'function detectWeb(doc, url) {
 	if (doc.location.href.match("articles") || doc.location.href.match("story")) {
 		return "newspaperArticle";
@@ -7253,7 +7261,9 @@ function doWeb (doc, url) {
 	Zotero.Utilities.processDocuments(uris, scrape, function() {Zotero.done();});
 	Zotero.wait();
 }');
-REPLACE INTO translators VALUES ('dbfcaa3e-082a-45a4-9619-9892f49399c1', '1.0.0b4.r5', '', '2008-07-21 12:54:23', '0', '100', '4', 'Cyberpresse', 'Adam Crymble', 'http://www.cyberpresse.ca', 
+
+
+REPLACE INTO translators VALUES ('dbfcaa3e-082a-45a4-9619-9892f49399c1', '1.0.0b4.r5', '', '2008-08-06 17:00:00', '0', '100', '4', 'Cyberpresse', 'Adam Crymble', 'http://www.cyberpresse.ca', 
 'function detectWeb (doc,  url) {
 	if (doc.location.href.match("article")) {
 		return "newspaperArticle";
@@ -7327,7 +7337,9 @@ function doWeb(doc, url) {
 	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
 	Zotero.wait();	
 }');
-REPLACE INTO translators VALUES ('1eb5eb03-26ab-4015-bd0d-65487734744a', '1.0.0b4.r5', '', '2008-07-21 14:09:59', '0', '100', '4', 'Bibliotheque et Archives Nationale du Quebec (Pistard)', 'Adam Crymble', 'http://pistard.banq.qc.ca', 
+
+
+REPLACE INTO translators VALUES ('1eb5eb03-26ab-4015-bd0d-65487734744a', '1.0.0b4.r5', '', '2008-08-06 17:00:00', '0', '100', '4', 'Bibliotheque et Archives Nationale du Quebec (Pistard)', 'Adam Crymble', 'http://pistard.banq.qc.ca', 
 'function detectWeb (doc, url) {
 	
 	if (doc.title.match("Liste détaillée des fonds")) {
@@ -7465,7 +7477,9 @@ function doWeb(doc, url) {
 	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
 	Zotero.wait();
 }');
-REPLACE INTO translators VALUES ('04c0db88-a7fc-4d1a-9cf7-471d0990acb1', '1.0.0b4.r5', '', '2008-07-21 09:47:53', '0', '100', '4', 'Christian Science Monitor', 'Adam Crymble', 'http://(features.csmonitor|www.csmonitor).com', 
+
+
+REPLACE INTO translators VALUES ('04c0db88-a7fc-4d1a-9cf7-471d0990acb1', '1.0.0b4.r5', '', '2008-08-06 17:00:00', '0', '100', '4', 'Christian Science Monitor', 'Adam Crymble', 'http://(features.csmonitor|www.csmonitor).com', 
 'function detectWeb(doc, url) {
 	if (doc.location.href.match("search")) {
 		return "multiple";
@@ -7602,6 +7616,7 @@ function doWeb(doc, url) {
 	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
 	Zotero.wait();
 }');
+
 
 REPLACE INTO translators VALUES ('138de272-0d2a-4ab5-8cfb-0fd879958d04', '1.0.0b4.r5', '', '2008-07-25 17:40:00', '0', '100', '4', 'AdvoCAT', 'Adam Crymble', '^http://(142.57.32.51|library.lsuc.on.ca)', 
 'function detectWeb(doc, url) {
@@ -7881,7 +7896,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('e9632edc-8032-4dc5-b2d4-284d481583e6', '1.0', '', '2008-08-06 10:01:49', '0', '100', '4', 'SAE International', 'Michael Berkowitz', 'http://www.sae.org/', 
+REPLACE INTO translators VALUES ('e9632edc-8032-4dc5-b2d4-284d481583e6', '1.0', '', '2008-08-06 17:00:00', '0', '100', '4', 'SAE International', 'Michael Berkowitz', 'http://www.sae.org/', 
 'function detectWeb(doc, url) {
 	if (doc.evaluate(''//td[2][@class="search-results"]/a'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
@@ -7943,7 +7958,7 @@ REPLACE INTO translators VALUES ('e9632edc-8032-4dc5-b2d4-284d481583e6', '1.0', 
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('48d3b115-7e09-4134-ad5d-0beda6296761', '1.0', '', '2008-08-04 11:38:19', '0', '100', '4', 'SPIE Digital Library', 'Michael Berkowitz', 'http://spiedl.aip.org/', 
+REPLACE INTO translators VALUES ('48d3b115-7e09-4134-ad5d-0beda6296761', '1.0', '', '2008-08-06 17:00:00', '0', '100', '4', 'SPIE Digital Library', 'Michael Berkowitz', 'http://spiedl.aip.org/', 
 'function detectWeb(doc, url) {
 	if (doc.evaluate(''//table[@class="searchResultsTable"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
@@ -17140,7 +17155,7 @@ REPLACE INTO translators VALUES ('303c2744-ea37-4806-853d-e1ca67be6818', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('27ee5b2c-2a5a-4afc-a0aa-d386642d4eed', '1.0.0b4.r5', '', '2008-08-06 12:50:20', '1', '100', '4', 'PubMed Central', 'Michael Berkowitz', 'http://[^/]*.nih.gov/', 
+REPLACE INTO translators VALUES ('27ee5b2c-2a5a-4afc-a0aa-d386642d4eed', '1.0.0b4.r5', '', '2008-08-06 17:00:00', '1', '100', '4', 'PubMed Central', 'Michael Berkowitz', 'http://[^/]*.nih.gov/', 
 'function detectWeb(doc, url) {
 	if (doc.evaluate(''//table[@id="ResultPanel"]//td[2]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
@@ -24676,7 +24691,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('d0b1914a-11f1-4dd7-8557-b32fe8a3dd47', '1.0.0b3.r1', '', '2008-08-05 10:11:15', '1', '100', '4', 'EBSCOhost', 'Simon Kornblith and Michael Berkowitz', 'https?://[^/]+/(?:bsi|ehost)/(?:results|detail|folder)', 
+REPLACE INTO translators VALUES ('d0b1914a-11f1-4dd7-8557-b32fe8a3dd47', '1.0.0b3.r1', '', '2008-08-06 17:00:00', '1', '100', '4', 'EBSCOhost', 'Simon Kornblith and Michael Berkowitz', 'https?://[^/]+/(?:bsi|ehost)/(?:results|detail|folder)', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
