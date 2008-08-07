@@ -320,7 +320,14 @@ var Zotero = new function(){
 		if (Zotero.Prefs.get('useDataDir')) {
 			var file = Components.classes["@mozilla.org/file/local;1"].
 				createInstance(Components.interfaces.nsILocalFile);
-			file.persistentDescriptor = Zotero.Prefs.get('dataDir');
+			try {
+				file.persistentDescriptor = Zotero.Prefs.get('dataDir');
+			}
+			catch (e) {
+				Zotero.debug("Persistent descriptor in extensions.zotero.dataDir did not resolve", 1);
+				e = { name: "NS_ERROR_FILE_NOT_FOUND" };
+				throw (e);
+			}
 			if (!file.exists()) {
 				var e = { name: "NS_ERROR_FILE_NOT_FOUND" };
 				throw (e);
