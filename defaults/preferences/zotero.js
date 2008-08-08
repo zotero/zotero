@@ -35,6 +35,9 @@ pref("extensions.zotero.lastAbstractExpand",0);
 pref("extensions.zotero.lastRenameAssociatedFile", false);
 pref("extensions.zotero.lastViewedFolder", 'L');
 
+//Tag Cloud
+pref("extensions.zotero.tagCloud", true);
+
 // Keyboard shortcuts
 pref("extensions.zotero.keys.overrideGlobal", false);
 pref("extensions.zotero.keys.openZotero", 'Z');
