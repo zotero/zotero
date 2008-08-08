@@ -3117,8 +3117,6 @@ Zotero.Item.prototype.erase = function(deleteChildren) {
 	Zotero.DB.query('DELETE FROM annotations WHERE itemID=?', this.id);
 	Zotero.DB.query('DELETE FROM highlights WHERE itemID=?', this.id);
 	
-	Zotero.DB.query(sql);
-	
 	try {
 		Zotero.DB.commitTransaction();
 	}
