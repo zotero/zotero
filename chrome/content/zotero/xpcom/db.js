@@ -102,7 +102,7 @@ Zotero.DBConnection.prototype.query = function (sql,params) {
 			// Until the native dataset methods work (or at least exist),
 			// we build a multi-dimensional associative array manually
 			
-			var statement = this.getStatement(sql, params);
+			var statement = this.getStatement(sql, params, true);
 			
 			var dataset = new Array();
 			while (statement.executeStep()) {
@@ -119,7 +119,7 @@ Zotero.DBConnection.prototype.query = function (sql,params) {
 		}
 		else {
 			if (params) {
-				var statement = this.getStatement(sql, params);
+				var statement = this.getStatement(sql, params, true);
 				statement.execute();
 			}
 			else {
@@ -150,7 +150,7 @@ Zotero.DBConnection.prototype.query = function (sql,params) {
  * Query a single value and return it
  */
 Zotero.DBConnection.prototype.valueQuery = function (sql,params) {
-	var statement = this.getStatement(sql, params);
+	var statement = this.getStatement(sql, params, true);
 	
 	// No rows
 	if (!statement.executeStep()) {
@@ -179,7 +179,7 @@ Zotero.DBConnection.prototype.rowQuery = function (sql,params) {
  * Run a query and return the first column as a numerically-indexed array
  */
 Zotero.DBConnection.prototype.columnQuery = function (sql,params) {
-	var statement = this.getStatement(sql, params);
+	var statement = this.getStatement(sql, params, true);
 	
 	if (statement) {
 		var column = new Array();
@@ -203,7 +203,7 @@ Zotero.DBConnection.prototype.columnQuery = function (sql,params) {
  *  Optional _params_ is an array of bind parameters in the form
  *		[1,"hello",3] or [{'int':2},{'string':'foobar'}]
  */
-Zotero.DBConnection.prototype.getStatement = function (sql, params) {
+Zotero.DBConnection.prototype.getStatement = function (sql, params, checkParams) {
 	var db = this._getDBConnection();
 	
 	try {
@@ -216,17 +216,23 @@ Zotero.DBConnection.prototype.getStatement = function (sql, params) {
 		throw(e + ' [QUERY: ' + sql + ']' + dberr);
 	}
 	
+	var numParams = statement.parameterCount;
+	
 	if (params) {
 		// If single scalar value or single non-array object, wrap in an array
-		if (typeof params != 'object' || params===null ||
+		if (typeof params != 'object' || params === null ||
 			(params && typeof params == 'object' && !params.length)) {
 			params = [params];
 		}
 		
-		var matches = sql.match(/\?([^0-9]|$)/g);
-		if (matches && matches.length != params.length) {
-			throw ('Incorrect number of parameters in query ('
-				+ params.length + ', expecting ' + matches.length + ')');
+		if (checkParams) {
+			if (numParams == 0) {
+				throw ("Parameters provided for query without placeholders");
+			}
+			else if (numParams != params.length) {
+				throw ("Incorrect number of parameters provided for query "
+					+ "(" + params.length + ", expecting " + numParams + ")");
+			}
 		}
 		
 		for (var i=0; i<params.length; i++) {
@@ -305,6 +311,11 @@ Zotero.DBConnection.prototype.getStatement = function (sql, params) {
 					statement.bindNullParameter(i);
 					break;
 			}
+		}
+	}
+	else {
+		if (checkParams && numParams > 0) {
+			throw ("No parameters provided for query containing placeholders");
 		}
 	}
 	return statement;
