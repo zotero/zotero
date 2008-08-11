@@ -55,31 +55,27 @@
   </macro>
 
 
+  <macro name="year">
+    <date variable="issued">
+      <date-part name="year"/>
+    </date>
+  </macro>
+
+
   <macro name="journal">
     <group suffix=", " font-style="italic">
       <text variable="container-title" suffix=" "/>
       <text variable="volume"/>
     </group>
     <text variable="issue" suffix=" "/>
-    <date variable="issued">
-      <date-part name="year" prefix="(" suffix=")"/>
-    </date>
+    <text macro="year" prefix="(" suffix=")"/>
   </macro>
 
 
   <macro name="conference">
     <text variable="container-title" font-style="italic" suffix=", "/>
     <text variable="publisher" suffix=" "/>
-    <date variable="issued">
-      <date-part name="year" prefix="(" suffix=")"/>
-    </date>
-  </macro>
-
-
-  <macro name="year">
-    <date variable="issued">
-      <date-part name="year"/>
-    </date>
+    <text macro="year" prefix="(" suffix=")"/>
   </macro>
 
 
@@ -114,22 +110,24 @@
         </else>
       </choose>
       <choose>
-	<if type="book">
+	  <if type="book">
         <text variable="publisher" suffix=", "/>
-	  <text variable="publisher-place" suffix=", "/>
+	    <text variable="publisher-place" suffix=", "/>
         <text macro="year" suffix="."/>
       </if>
-	<else-if type="paper-conference">
-         <text macro="conference" suffix=", "/>
-         <text variable="page" suffix="."/>
-	</else-if>
+	  <else-if type="paper-conference">
+        <group suffix=".">
+          <text macro="conference" suffix=", "/>
+          <text variable="page"/>
+        </group>
+	  </else-if>
       <else-if type="chapter">
         <text term="in" text-case="capitalize-first" suffix=" "/>
-	  <text macro="editor" suffix=", "/>
-	  <text variable="container-title" font-style="italic" suffix=". "/>
+	    <text macro="editor" suffix=", "/>
+	    <text variable="container-title" font-style="italic" suffix=". "/>
         <group suffix="." delimiter=", ">
-	    <text variable="publisher"/>
-	    <text variable="publisher-place"/>
+	      <text variable="publisher"/>
+	      <text variable="publisher-place"/>
           <text variable="page"/>
         </group>
       </else-if>
@@ -138,13 +136,11 @@
            <text macro="journal"/>
            <text variable="page"/>
          </group>
-	</else-if>
-	<else>
+	  </else-if>
+	  <else>
         <group suffix="." delimiter=", ">
           <text variable="container-title" font-style="italic"/>
-          <date variable="issued">
-            <date-part name="year"/>
-          </date>
+          <text macro="year"/>
           <text variable="page"/>
         </group>
       </else>
