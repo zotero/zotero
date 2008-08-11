@@ -145,8 +145,8 @@
         <group suffix="." delimiter=", ">
           <text macro="year"/>
           <text variable="page"/>
-          <text variable="URL"/>
         </group>
+        <text variable="URL" prefix=" "/>
       </else>
       </choose>
     </layout>
