@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?oxygen RNGSchema="http://xbiblio.svn.sourceforge.net/viewvc/*checkout*/xbiblio/csl/schema/trunk/csl.rnc" type="compact"?>
+<style xmlns="http://purl.org/net/xbiblio/csl" class="in-text" xml:lang="en">
+
+
+  <info>
+    <title>ACM SIGCHI Conference Proceedings</title>
+    <id>http://www.zotero.org/styles/acm-sigchi-proceedings</id>
+    <link href="http://www.zotero.org/styles/acm-sigchi-proceedings"/>
+    <link href="http://www.chi2009.org/Authors/Guides/Formatting.html"/>
+    <author>
+      <name>Yevgeniy Medynskiy</name>
+      <email>eugenem@gatech.edu</email>
+    </author>
+    <contributor>
+      <name>Svetlana Yarosh</name>
+      <email>lana@cc.gatech.edu</email>
+    </contributor>
+    <category term="engineering"/>
+    <category term="numeric"/>
+    <updated>2008-08-10T00:00:00+00:00</updated>
+  </info>
+
+
+  <macro name="author">
+    <group suffix=".">
+        <names variable="author">
+          <name initialize-with="." delimiter=", " and="text" name-as-sort-order="all" sort-separator=", "/>
+          <label form="short" prefix=", " suffix="." text-case="lowercase" />
+          <substitute>
+	        <names variable="editor"/>
+          </substitute>
+        </names>
+    </group>
+  </macro>
+
+
+  <macro name="editor">
+    <names variable="editor">
+      <name initialize-with="." delimiter=", " and="text" name-as-sort-order="all" delimiter-precedes-last="never"/>
+      <label form="short" prefix=", " text-case="lowercase" suffix="."/>
+    </names>
+  </macro>
+
+
+  <macro name="title">
+    <choose>
+      <if type="book">
+        <text variable="title" font-style="italic" quotes="false"/>
+      </if>
+      <else>
+        <text variable="title" quotes="false"/>
+      </else>
+    </choose>
+  </macro>
+
+
+  <macro name="journal">
+    <group suffix=", " font-style="italic">
+      <text variable="container-title" suffix=" "/>
+      <text variable="volume"/>
+    </group>
+    <text variable="issue" suffix=" "/>
+    <date variable="issued">
+      <date-part name="year" prefix="(" suffix=")"/>
+    </date>
+  </macro>
+
+
+  <macro name="conference">
+    <text variable="container-title" font-style="italic" suffix=", "/>
+    <text variable="publisher" suffix=" "/>
+    <date variable="issued">
+      <date-part name="year" prefix="(" suffix=")"/>
+    </date>
+  </macro>
+
+
+  <macro name="year">
+    <date variable="issued">
+      <date-part name="year"/>
+    </date>
+  </macro>
+
+
+  <citation>
+    <sort>
+      <key variable="citation-number"/>
+    </sort>
+    <layout prefix="[" suffix="]" delimiter=",">
+      <text variable="citation-number"/>
+    </layout>
+  </citation>
+
+
+  <bibliography>
+    <option name="et-al-min" value="7"/>
+    <option name="et-al-use-first" value="3"/>
+	<option name="second-field-align" value="true"/>
+	<option name="entry-spacing" value="0" />
+	<sort>
+		<key macro="author"/>
+		<key variable="issued"/>
+	</sort>
+    <layout suffix=".">
+      <text variable="citation-number" suffix="."/>
+      <text macro="author" suffix=". "/>
+      <choose>
+        <if type="book">
+          <text macro="title" suffix=". " font-style="italic"/>
+        </if>
+        <else>
+          <text macro="title" suffix=". "/>
+        </else>
+      </choose>
+      <choose>
+	<if type="book">
+        <text variable="publisher" suffix=", "/>
+	  <text variable="publisher-place" suffix=", "/>
+        <text macro="year" suffix="."/>
+      </if>
+	<else-if type="paper-conference">
+         <text macro="conference" suffix=", "/>
+         <text variable="page" suffix="."/>
+	</else-if>
+      <else-if type="chapter">
+        <text term="in" text-case="capitalize-first" suffix=" "/>
+	  <text macro="editor" suffix=", "/>
+	  <text variable="container-title" font-style="italic" suffix=". "/>
+        <group suffix="." delimiter=", ">
+	    <text variable="publisher"/>
+	    <text variable="publisher-place"/>
+          <text variable="page"/>
+        </group>
+      </else-if>
+      <else-if type="article-journal">
+         <group suffix="." delimiter=", ">
+           <text macro="journal"/>
+           <text variable="page"/>
+         </group>
+	</else-if>
+	<else>
+        <group suffix="." delimiter=", ">
+          <text variable="container-title" font-style="italic"/>
+          <date variable="issued">
+            <date-part name="year"/>
+          </date>
+          <text variable="page"/>
+        </group>
+      </else>
+      </choose>
+    </layout>
+  </bibliography>
+</style>
