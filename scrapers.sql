@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-08-06 17:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-08-11 20:40:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-08-05 07:10:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -5666,7 +5666,9 @@ function doWeb(doc, url) {
 	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
 	Zotero.wait();
 }');
-REPLACE INTO translators VALUES ('54ac4ec1-9d07-45d3-9d96-48bed3411fb6', '1.0.0b4.r5', '', '2008-07-17 15:38:39', '0', '100', '4', 'National Library of Australia (new catalog)', 'Mark Triggs and Steve McPhillips', 'catalogue.nla.gov.au', 
+
+
+REPLACE INTO translators VALUES ('54ac4ec1-9d07-45d3-9d96-48bed3411fb6', '1.0.0b4.r5', '', '2008-08-11 20:40:00', '0', '100', '4', 'National Library of Australia (new catalog)', 'Mark Triggs and Steve McPhillips', 'catalogue.nla.gov.au', 
 'function detectWeb(doc, url) {
     if (url.match("/Record/[0-9]+")) {
         var format = Zotero.Utilities.cleanString(doc.getElementById("myformat").textContent);
@@ -5783,7 +5785,9 @@ function handleDocument(doc) {
                                     load_item(text, obj, format);
                                 });
 }');
-REPLACE INTO translators VALUES ('45763818-8530-49c6-a069-34acdee1a096', '1.0.0b4.r5', '', '2008-07-11 10:01:40', '0', '100', '4', 'National Library of New Zealand', 'Adam Crymble', 'http://nlnzcat.natlib', 
+
+
+REPLACE INTO translators VALUES ('45763818-8530-49c6-a069-34acdee1a096', '1.0.0b4.r5', '', '2008-08-11 20:40:00', '0', '100', '4', 'National Library of New Zealand', 'Adam Crymble', 'http://nlnzcat.natlib', 
 'function detectWeb(doc, url) {
 	
 	if (doc.title.match("Quick Record View")) {
@@ -5936,7 +5940,9 @@ function doWeb(doc, url) {
 	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
 	Zotero.wait();
 }');
-REPLACE INTO translators VALUES ('1c5b122c-7e58-4cd5-932b-93f5ca0b7e1a', '1.0.0b4.r5', '', '2008-06-16 15:51:24', '0', '100', '4', 'National Post', 'Adam Crymble', 'http://www.(national|financial)post.com/', 
+
+
+REPLACE INTO translators VALUES ('1c5b122c-7e58-4cd5-932b-93f5ca0b7e1a', '1.0.0b4.r5', '', '2008-08-11 20:40:00', '0', '100', '4', 'National Post', 'Adam Crymble', 'http://www.(national|financial)post.com/', 
 'function detectWeb(doc, url) {
 	
 	if (doc.title.match("Search Results")) {
@@ -6046,7 +6052,9 @@ function doWeb(doc, url) {
 	
 	
 }');
-REPLACE INTO translators VALUES ('b10bf941-12e9-4188-be04-f6357fa594a0', '1.0.0b4.r5', '', '2008-07-09 12:25:22', '0', '100', '4', 'Old Bailey Online', 'Adam Crymble', 'http://www.oldbaileyonline.org/', 
+
+
+REPLACE INTO translators VALUES ('b10bf941-12e9-4188-be04-f6357fa594a0', '1.0.0b4.r5', '', '2008-08-11 20:40:00', '0', '100', '4', 'Old Bailey Online', 'Adam Crymble', 'http://www.oldbaileyonline.org/', 
 'function detectWeb(doc, url) {
 	if (doc.location.href.match("search")) {
 		return "multiple";
@@ -6163,6 +6171,7 @@ function doWeb(doc, url) {
 	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
 	Zotero.wait();	
 }');
+
 
 REPLACE INTO translators VALUES ('96b54986-16c7-45ea-b296-fde962d658b2', '1.0.0b4.r5', '', '2008-07-24 05:30:00', '0', '100', '4', 'The Open Library', 'Adam Crymble', 'http://openlibrary.org', 
 'function detectWeb(doc, url) {
@@ -6325,7 +6334,8 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('6871e8c5-f935-4ba1-8305-0ba563ce3941', '1.0.0b4.r5', '', '2008-06-13 14:33:53', '0', '100', '4', 'PEI Archival Information Network', 'Adam Crymble', 'http://www.archives.pe.ca', 
+
+REPLACE INTO translators VALUES ('6871e8c5-f935-4ba1-8305-0ba563ce3941', '1.0.0b4.r5', '', '2008-08-11 20:40:00', '0', '100', '4', 'PEI Archival Information Network', 'Adam Crymble', 'http://www.archives.pe.ca', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -6485,7 +6495,9 @@ function doWeb(doc, url) {
 	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
 	Zotero.wait();
 }');
-REPLACE INTO translators VALUES ('095239e7-c18c-4f45-a932-bcf4a9e48c08', '1.0.0b4.r5', '', '2008-06-26 15:39:48', '0', '100', '4', 'Probing the Past', 'Adam Crymble', 'http://chnm.gmu.edu/probateinventory/', 
+
+
+REPLACE INTO translators VALUES ('095239e7-c18c-4f45-a932-bcf4a9e48c08', '1.0.0b4.r5', '', '2008-08-11 20:40:00', '0', '100', '4', 'Probing the Past', 'Adam Crymble', 'http://chnm.gmu.edu/probateinventory/', 
 'function detectWeb(doc, url) {
 	
 	if (doc.evaluate(''//td/a'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
@@ -6574,7 +6586,9 @@ function doWeb(doc, url) {
 	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
 	Zotero.wait();
 }');
-REPLACE INTO translators VALUES ('d770e7d2-106c-4396-8c32-b35cdc46376c', '1.0.0b4.r5', '', '2008-07-11 11:47:56', '0', '100', '0', 'Project Gutenberg', 'Adam Crymble', 'http://www.gutenberg.org', 
+
+
+REPLACE INTO translators VALUES ('d770e7d2-106c-4396-8c32-b35cdc46376c', '1.0.0b4.r5', '', '2008-08-11 20:40:00', '0', '100', '0', 'Project Gutenberg', 'Adam Crymble', 'http://www.gutenberg.org', 
 'function detectWeb(doc, url) {
 	if (doc.location.href.match("etext")||doc.location.href.match("ebooks")) {
 		return "book";
@@ -22267,7 +22281,7 @@ REPLACE INTO translators VALUES ('774d7dc2-3474-2684-392c-f787789ec63d', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('63a0a351-3131-18f4-21aa-f46b9ac51d87', '1.0.0b3.r1', '', '2008-08-08 15:53:22', '1', '100', '4', 'Library Catalog (VTLS)', 'Simon Kornblith', '/chameleon(?:\?|$)', 
+REPLACE INTO translators VALUES ('63a0a351-3131-18f4-21aa-f46b9ac51d87', '1.0.0b3.r1', '', '2008-08-11 20:40:00', '1', '100', '4', 'Library Catalog (VTLS)', 'Simon Kornblith', '/chameleon(?:\?|$)', 
 'function detectWeb(doc, url) {
 	var node = doc.evaluate(''//tr[@class="intrRow"]/td/table/tbody/tr[th]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 	if(node) {
