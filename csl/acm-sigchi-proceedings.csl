@@ -67,8 +67,8 @@
       <text variable="container-title" suffix=" "/>
       <text variable="volume"/>
     </group>
-    <text variable="issue" suffix=" "/>
-    <text macro="year" prefix="(" suffix=")"/>
+    <text variable="issue"/>
+    <text macro="year" prefix=" (" suffix=")"/>
   </macro>
 
 
@@ -76,6 +76,14 @@
     <text variable="container-title" font-style="italic" suffix=", "/>
     <text variable="publisher" suffix=" "/>
     <text macro="year" prefix="(" suffix=")"/>
+  </macro>
+  
+  <macro name="book-publisher">
+    <group delimiter=", ">
+      <text variable="publisher"/>
+	  <text variable="publisher-place"/>
+      <text macro="year"/>
+    </group>
   </macro>
 
 
@@ -111,9 +119,7 @@
       </choose>
       <choose>
 	  <if type="book">
-        <text variable="publisher" suffix=", "/>
-	    <text variable="publisher-place" suffix=", "/>
-        <text macro="year" suffix="."/>
+        <text macro="book-publisher" suffix="."/>
       </if>
 	  <else-if type="paper-conference">
         <group suffix=".">
@@ -126,8 +132,7 @@
 	    <text macro="editor" suffix=", "/>
 	    <text variable="container-title" font-style="italic" suffix=". "/>
         <group suffix="." delimiter=", ">
-	      <text variable="publisher"/>
-	      <text variable="publisher-place"/>
+          <text macro="book-publisher"/>
           <text variable="page"/>
         </group>
       </else-if>
