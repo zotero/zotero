@@ -138,10 +138,14 @@
          </group>
 	  </else-if>
 	  <else>
+        <group suffix=", " delimiter=" " font-style="italic">
+          <text variable="container-title"/>
+          <text variable="volume"/>
+        </group>
         <group suffix="." delimiter=", ">
-          <text variable="container-title" font-style="italic"/>
           <text macro="year"/>
           <text variable="page"/>
+          <text variable="URL"/>
         </group>
       </else>
       </choose>
