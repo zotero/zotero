@@ -229,7 +229,9 @@ Zotero.Creator.prototype.save = function () {
 			creatorID = insertID;
 		}
 		
-		this.updateLinkedItems(creatorID);
+		if (this.id) {
+			this.updateLinkedItems();
+		}
 		
 		Zotero.DB.commitTransaction();
 	}
