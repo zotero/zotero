@@ -635,12 +635,13 @@
   </citation> 
   <bibliography>
     <option name="hanging-indent" value="true"/>
-    <option name="et-al-min" value="6"/>
-    <option name="et-al-use-first" value="6"/>
+    <option name="et-al-min" value="11"/>
+    <option name="et-al-use-first" value="7"/>
     <option name="subsequent-author-substitute" value="---"/>
     <option name="entry-spacing" value="0"/>
     <sort>
       <key macro="sort-key"/>
+      <key variable="issued"/>
     </sort>
     <layout suffix=".">
       <group delimiter=". ">
