@@ -2436,6 +2436,10 @@ Zotero.Item.prototype.__defineGetter__('attachmentPath', function () {
 		return this._attachmentPath;
 	}
 	
+	if (!this.id) {
+		return undefined;
+	}
+	
 	var sql = "SELECT path FROM itemAttachments WHERE itemID=?";
 	var path = Zotero.DB.valueQuery(sql, this.id);
 	if (!path) {
