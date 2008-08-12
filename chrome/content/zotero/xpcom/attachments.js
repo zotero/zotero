@@ -558,7 +558,7 @@ Zotero.Attachments = new function(){
 				var nsIURL = ioService.newURI(url, null, null);
 				wbp.progressListener = new Zotero.WebProgressFinishListener(function () {
 					try {
-						attachmentItem.attachmentPath = this.getPath(
+						attachmentItem.attachmentPath = Zotero.Attachments.getPath(
 							file,
 							Zotero.Attachments.LINK_MODE_IMPORTED_URL
 						);
