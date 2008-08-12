@@ -169,16 +169,7 @@ Zotero.CollectionTreeView.prototype.notify = function(action, type, ids)
 	
 	var madeChanges = false;
 	
-	if (action == 'refresh') {
-		switch (type) {
-			case 'share':
-				this.reload();
-				this.rememberSelection(savedSelection);
-				break;
-		}
-	}
-	
-	else if(action == 'delete') {
+	if (action == 'delete') {
 		//Since a delete involves shifting of rows, we have to do it in order
 		
 		//sort the ids by row
@@ -222,8 +213,9 @@ Zotero.CollectionTreeView.prototype.notify = function(action, type, ids)
 		for (var i=0; i<ids.length; i++) {
 			// Open the parent collection if closed
 			var collection = Zotero.Collections.get(ids[i]);
-			var parentID = collection.getParent();
-			if (parentID && !this.isContainerOpen(this._collectionRowMap[parentID])) {
+			var parentID = collection.parent;
+			if (parentID && this._collectionRowMap[parentID] &&
+					!this.isContainerOpen(this._collectionRowMap[parentID])) {
 				this.toggleOpenState(this._collectionRowMap[parentID]);
 			}
 		}
@@ -231,8 +223,7 @@ Zotero.CollectionTreeView.prototype.notify = function(action, type, ids)
 		this.reload();
 		this.rememberSelection(savedSelection);
 	}
-	else if(action == 'modify')
-	{
+	else if (action == 'modify' || action == 'refresh') {
 		this.reload();
 		this.rememberSelection(savedSelection);
 	}
@@ -550,6 +541,10 @@ Zotero.CollectionTreeView.prototype.saveSelection = function()
  */
 Zotero.CollectionTreeView.prototype.rememberSelection = function(selection)
 {
+	if (!selection) {
+		return;
+	}
+	
 	var id = selection.substr(1);
 	switch (selection.substr(0, 1)) {
 		// Library

@@ -480,7 +480,7 @@ Zotero.Sync.Server = new function () {
 	});
 	
 	this.nextLocalSyncDate = false;
-	this.apiVersion = 1;
+	this.apiVersion = 2;
 	
 	default xml namespace = '';
 	
@@ -1169,6 +1169,7 @@ Zotero.BufferedInputListener.prototype = {
 }
 
 
+// TODO: use prototype
 Zotero.Sync.Server.EventListener = {
 	init: function () {
 		Zotero.Notifier.registerObserver(this);
@@ -1207,11 +1208,81 @@ Zotero.Sync.Server.Data = new function() {
 	
 	default xml namespace = '';
 	
+	
+	/**
+	 * Reorder XML nodes for parent/child relationships, etc.
+	 *
+	 * @param {E4X}	xml
+	 */
+	function _preprocessUpdatedXML(xml) {
+		if (xml.collections.length()) {
+			var collections = xml.collections.children();
+			var orderedCollections = <collections/>;
+			var collectionIDHash = {};
+			
+			for (var i=0; i<collections.length(); i++) {
+				// Build a hash of all collection ids
+				collectionIDHash[collections[i].@id.toString()] = true;
+				
+				// Pull out top-level collections
+				if (!collections[i].@parent.toString()) {
+					orderedCollections.collection += collections[i];
+					delete collections[i];
+					i--;
+				}
+			}
+			
+			// Pull out all collections pointing to parents that
+			// aren't present, which we assume already exist
+			for (var i=0; i<collections.length(); i++) {
+				if (!collectionIDHash[collections[i].@parent]) {
+					orderedCollections.collection += collections[i]
+					delete collections[i];
+					i--;
+				}
+			}
+			
+			// Insert children directly under parents
+			for (var i=0; i<orderedCollections.children().length(); i++) {
+				for (var j=0; j<collections.length(); j++) {
+					if (collections[j].@parent.toString() ==
+							orderedCollections.children()[i].@id.toString()) {
+						// Make a clone of object, since otherwise
+						// delete below erases inserted item as well
+						// (which only seems to happen with
+						// insertChildBefore(), not += above)
+						var newChild = new XML(collections[j].toXMLString())
+						
+						// If last top-level, just append
+						if (i == orderedCollections.children().length() - 1) {
+							orderedCollections.appendChild(newChild);
+						}
+						else {
+							orderedCollections.insertChildBefore(
+								orderedCollections.children()[i+1],
+								newChild
+							);
+						}
+						delete collections[j];
+						j--;
+					}
+				}
+			}
+			
+			xml.collections = orderedCollections;
+		}
+		
+		return xml;
+	}
+	
+	
 	function processUpdatedXML(xml, lastLocalSyncDate, uploadIDs) {
 		if (xml.children().length() == 0) {
 			Zotero.debug('No changes received from server');
 			return Zotero.Sync.Server.Data.buildUploadXML(uploadIDs);
 		}
+		
+		xml = _preprocessUpdatedXML(xml);
 		
 		var remoteCreatorStore = {};
 		var relatedItemsStore = {};
@@ -1564,27 +1635,13 @@ Zotero.Sync.Server.Data = new function() {
 				}
 			}
 			
+			/*
 			if (type == 'collection') {
-				// Sort collections in order of parent collections,
-				// so referenced parent collections always exist when saving
-				var cmp = function (a, b) {
-					var pA = a.parent;
-					var pB = b.parent;
-					if (pA == pB) {
-						return 0;
-					}
-					return (pA < pB) ? -1 : 1;
-				};
-				toSaveParents.sort(cmp);
-				
 				// Temporarily remove and store subcollections before saving
 				// since referenced collections may not exist yet
 				var collections = [];
 				for each(var obj in toSaveParents) {
 					var colIDs = obj.getChildCollections(true);
-					if (!colIDs.length) {
-						continue;
-					}
 					// TODO: use exist(), like related items above
 					obj.childCollections = [];
 					collections.push({
@@ -1593,6 +1650,7 @@ Zotero.Sync.Server.Data = new function() {
 					});
 				}
 			}
+			*/
 			
 			// Save objects
 			Zotero.debug('Saving merged ' + types);
@@ -1613,15 +1671,17 @@ Zotero.Sync.Server.Data = new function() {
 					item.save();
 				}
 			}
+			/*
 			// Add back subcollections
 			else if (type == 'collection') {
 				for each(var collection in collections) {
-					if (collection.collections) {
-						collection.obj.childCollections = collection.collections;
+					if (collection.childCollections) {
+						collection.obj.childCollections = collection.childCollections;
 						collection.obj.save();
 					}
 				}
 			}
+			*/
 			
 			
 			// Delete
@@ -1961,21 +2021,24 @@ Zotero.Sync.Server.Data = new function() {
 		
 		var children = collection.getChildren();
 		if (children) {
-			xml.collections = '';
+			//xml.collections = '';
 			xml.items = '';
 			for each(var child in children) {
+				/*
 				if (child.type == 'collection') {
 					xml.collections = xml.collections ?
 						xml.collections + ' ' + child.id : child.id;
 				}
-				else if (child.type == 'item') {
+				else */if (child.type == 'item') {
 					xml.items = xml.items ?
 						xml.items + ' ' + child.id : child.id;
 				}
 			}
+			/*
 			if (xml.collections == '') {
 				delete xml.collections;
 			}
+			*/
 			if (xml.items == '') {
 				delete xml.items;
 			}
@@ -2021,9 +2084,11 @@ Zotero.Sync.Server.Data = new function() {
 			collection.key = xmlCollection.@key.toString();
 		}
 		
+		/*
 		// Subcollections
 		var str = xmlCollection.collections.toString();
 		collection.childCollections = str == '' ? [] : str.split(' ');
+		*/
 		
 		// Child items
 		var str = xmlCollection.items.toString();
