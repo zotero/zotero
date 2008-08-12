@@ -37,7 +37,7 @@ Zotero.Collection.prototype._init = function () {
 	this._changed = false;
 	this._previousData = false;
 	
-	this._hasChildCollections = false;
+	this._hasChildCollections;
 	this._childCollections = [];
 	this._childCollectionsLoaded = false;
 	
@@ -59,7 +59,7 @@ Zotero.Collection.prototype.__defineSetter__('dateModified', function (val) { th
 Zotero.Collection.prototype.__defineGetter__('key', function () { return this._get('key'); });
 Zotero.Collection.prototype.__defineSetter__('key', function (val) { this._set('key', val); });
 
-Zotero.Collection.prototype.__defineSetter__('childCollections', function (arr) { this._setChildCollections(arr); });
+//Zotero.Collection.prototype.__defineSetter__('childCollections', function (arr) { this._setChildCollections(arr); });
 Zotero.Collection.prototype.__defineSetter__('childItems', function (arr) { this._setChildItems(arr); });
 
 
@@ -150,8 +150,8 @@ Zotero.Collection.prototype.loadFromRow = function(row) {
 	this._parent = row.parentCollectionID;
 	this._dateModified = row.dateModified;
 	this._key = row.key;
-	this._hasChildCollections = row.hasChildCollections;
-	this._hasChildItems = row.hasChildItems;
+	this._hasChildCollections = !!row.hasChildCollections;
+	this._hasChildItems = !!row.hasChildItems;
 	this._loadChildItems();
 }
 
@@ -161,11 +161,27 @@ Zotero.Collection.prototype.isEmpty = function() {
 }
 
 Zotero.Collection.prototype.hasChildCollections = function() {
-	return !!(parseInt(this._hasChildCollections));
+	if (!this.id) {
+		throw ("Zotero.Collection.hasChildCollections cannot be called "
+			+ "on an unsaved collection");
+	}
+	
+	if (this._hasChildCollections == undefined) {
+		var sql = "SELECT COUNT(*) FROM collections WHERE "
+			+ "parentCollectionID=?";
+		this._hasChildCollections = !!Zotero.DB.valueQuery(sql, this.id);
+	}
+	
+	return this._hasChildCollections;
 }
 
 Zotero.Collection.prototype.hasChildItems = function() {
 	return !!(parseInt(this._hasChildItems));
+}
+
+Zotero.Collection.prototype.refreshChildCollections = function () {
+	this._hasChildCollections = undefined;
+	this._childCollectionsLoaded = false;
 }
 
 
@@ -272,7 +288,7 @@ Zotero.Collection.prototype.save = function () {
 			throw ('Cannot move collection into itself!');
 		}
 		
-		if (this.hasDescendent('collection', this.parent)) {
+		if (this.id && this.hasDescendent('collection', this.parent)) {
 			throw ('Cannot move collection into one of its own descendents!', 2);
 		}
 	}
@@ -339,6 +355,21 @@ Zotero.Collection.prototype.save = function () {
 			collectionID = insertID;
 		}
 		
+		
+		if (this._changed.parent) {
+			var parentIDs = [];
+			if (this._previousData.parent) {
+				parentIDs.push(this._previousData.parent);
+			}
+			if (this.parent) {
+				parentIDs.push(this.parent);
+			}
+			
+			Zotero.Notifier.trigger('move', 'collection', this.id);
+		}
+		
+		
+		/*
 		// Subcollections
 		if (this._changed.childCollections) {
 			var removed = [];
@@ -381,6 +412,7 @@ Zotero.Collection.prototype.save = function () {
 			
 			// TODO: notifier
 		}
+		*/
 		
 		// Child items
 		if (this._changed.childItems) {
@@ -469,7 +501,7 @@ Zotero.Collection.prototype.save = function () {
 		this._key = key;
 	}
 	
-	Zotero.Collections.reloadAll();
+	Zotero.Collections.reload(this.id);
 	
 	if (isNew) {
 		Zotero.Notifier.trigger('add', 'collection', this.id);
@@ -478,15 +510,12 @@ Zotero.Collection.prototype.save = function () {
 		Zotero.Notifier.trigger('modify', 'collection', this.id, this._previousData);
 	}
 	
-	if (this._changed.parent) {
-		var notifyIDs = [this.id];
-		if (this._previousData.parent) {
-			notifyIDs.push(this._previousData.parent);
+	// Refresh child collection counts
+	if (parentIDs) {
+		for each(var id in parentIDs) {
+			var col = Zotero.Collections.get(id);
+			col.refreshChildCollections();
 		}
-		if (this.parent) {
-			notifyIDs.push(this.parent);
-		}
-		//Zotero.Notifier.trigger('move', 'collection', notifyIDs, notifierData);
 	}
 	
 	return this.id;
@@ -701,7 +730,7 @@ Zotero.Collection.prototype.serialize = function(nested) {
 		parent: this.parent,
 		childCollections: this.getChildCollections(true),
 		childItems: this.getChildItems(true),
-		descendents: this.getDescendents(nested)
+		descendents: this.id ? this.getDescendents(nested) : []
 	};
 	return obj;
 }
@@ -709,15 +738,20 @@ Zotero.Collection.prototype.serialize = function(nested) {
 
 /**
  * Returns an array of descendent collections and items
- *	(rows of 'id', 'type' ('item' or 'collection'), 'parent', and,
- * 	if collection, 'name' and the nesting 'level')
  *
  * @param	bool		recursive	Descend into subcollections
  * @param	bool		nested		Return multidimensional array with 'children'
  *									nodes instead of flat array
  * @param	string	type			'item', 'collection', or FALSE for both
+ * @return	{Object[]}			Array of objects with 'id',
+ *								'type' ('item' or 'collection'), 'parent',
+ *								and, if collection, 'name' and the nesting 'level'
  */
 Zotero.Collection.prototype.getChildren = function(recursive, nested, type, level) {
+	if (!this.id) {
+		throw ('Zotero.Collection.getChildren() cannot be called on an unsaved item');
+	}
+	
 	var toReturn = [];
 	
 	if (!level) {
@@ -813,9 +847,11 @@ Zotero.Collection.prototype._prepFieldChange = function (field) {
 }
 
 
+/*
 Zotero.Collection.prototype._setChildCollections = function (collectionIDs) {
 	this._setChildren('collection', collectionIDs);
 }
+*/
 
 
 Zotero.Collection.prototype._setChildItems = function (itemIDs) {
@@ -889,14 +925,17 @@ Zotero.Collection.prototype._setChildren = function (type, ids) {
 		this._childItems = Zotero.Items.get(newIDs);
 	}
 	else {
-		for (var id in newIDs) {
-			this['_child' + Types].push(Zotero[Types].get(id));
+		for each(var id in newIDs) {
+			var obj = Zotero[Types].get(id);
+			if (!obj) {
+				throw (type + ' ' + id + ' not found in Zotero.Collection._setChildren()');
+			}
+			this['_child' + Types].push(obj);
 		}
 	}
 	
 	return true;
 }
-
 
 Zotero.Collection.prototype._loadChildCollections = function () {
 	var sql = "SELECT collectionID FROM collections WHERE parentCollectionID=?";
@@ -906,8 +945,16 @@ Zotero.Collection.prototype._loadChildCollections = function () {
 	
 	if (ids) {
 		for each(var id in ids) {
-			this._childCollections.push(Zotero.Collections.get(id));
+			var col = Zotero.Collections.get(id);
+			if (!col) {
+				throw ('Collection ' + id + ' not found in Zotero.Collection._loadChildCollections()');
+			}
+			this._childCollections.push(col);
 		}
+		this._hasChildCollections = true;
+	}
+	else {
+		this._hasChildCollections = false;
 	}
 	
 	this._childCollectionsLoaded = true;
