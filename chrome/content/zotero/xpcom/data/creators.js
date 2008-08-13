@@ -22,6 +22,9 @@
 
 
 Zotero.Creators = new function() {
+	Zotero.DataObjects.apply(this, ['creator']);
+	this.constructor.prototype = new Zotero.DataObjects();
+	
 	var _creatorsByID = {}; // Zotero.Creator objects indexed by creatorID
 	var _creatorDataHash = {}; // creatorDataIDs indexed by md5 hash of data
 	

@@ -1423,14 +1423,7 @@ Zotero.Sync.Server.Data = new function() {
 						Zotero.debug("Changing " + type + " " + oldID + " id to " + newID);
 						
 						// Save changed object now to update other linked objects
-						switch (type) {
-							case 'item':
-								obj.setField('itemID', newID);
-								break;
-								
-							default:
-								obj[type + 'ID'] = newID;
-						}
+						obj[type + 'ID'] = newID;
 						obj.save();
 						
 						// Update id in local updates array
@@ -1488,6 +1481,18 @@ Zotero.Sync.Server.Data = new function() {
 						}
 						
 						localDelete = true;
+					}
+					
+					// If key already exists on a different item, change local key
+					var oldKey = xmlNode.@key.toString();
+					var keyObj = Zotero[Types].getByKey(oldKey);
+					if (keyObj) {
+						var newKey = Zotero.ID.getKey();
+						Zotero.debug("Changing key of local " + type + " " + keyObj.id
+							+ " from '" + oldKey + "' to '" + newKey + "'", 2);
+						keyObj.key = newKey;
+						keyObj.save();
+						Zotero.Sync.addToUpdated(uploadIDs.updated[types], keyObj.id);
 					}
 				}
 				

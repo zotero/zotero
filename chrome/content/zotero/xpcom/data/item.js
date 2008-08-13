@@ -96,10 +96,12 @@ Zotero.Item.prototype._init = function () {
 
 Zotero.Item.prototype.__defineGetter__('id', function () { return this._itemID; });
 Zotero.Item.prototype.__defineGetter__('itemID', function () { return this._itemID; });
+Zotero.Item.prototype.__defineSetter__('itemID', function (val) { return this.setField('itemID', val); }); // used by sync.js
 Zotero.Item.prototype.__defineGetter__('itemTypeID', function () { return this.getField('itemTypeID'); });
 Zotero.Item.prototype.__defineGetter__('dateAdded', function () { return this.getField('dateAdded'); });
 Zotero.Item.prototype.__defineGetter__('dateModified', function () { return this.getField('dateModified'); });
 Zotero.Item.prototype.__defineGetter__('key', function () { return this.getField('key'); });
+Zotero.Item.prototype.__defineSetter__('key', function (val) { return this.setField('key', val); }); // used by sync.js
 Zotero.Item.prototype.__defineGetter__('firstCreator', function () { return this.getField('firstCreator'); });
 //Zotero.Item.prototype.__defineGetter__('numNotes', function () { return this._itemID; });
 //Zotero.Item.prototype.__defineGetter__('numAttachments', function () { return this._itemID; });

@@ -25,9 +25,11 @@
  * Primary interface for accessing Zotero items
  */
 Zotero.Items = new function() {
+	Zotero.DataObjects.apply(this, ['item']);
+	this.constructor.prototype = new Zotero.DataObjects();
+	
 	// Privileged methods
 	this.get = get;
-	this.getByKey = getByKey;
 	this.exist = exist;
 	this.getAll = getAll;
 	this.getUpdated = getUpdated;
@@ -99,22 +101,6 @@ Zotero.Items = new function() {
 		}
 		
 		return loaded;
-	}
-	
-	
-	/**
-	 * Retrieves an item by its secondary lookup key
-	 *
-	 * @param	string	key		Secondary lookup key
-	 * @return	object			Zotero.Item object, or FALSE if not found
-	 */
-	function getByKey(key) {
-		var sql = "SELECT itemID FROM items WHERE key=?";
-		var itemID = Zotero.DB.valueQuery(sql, key);
-		if (!itemID) {
-			return false;
-		}
-		return Zotero.Items.get(itemID);
 	}
 	
 	
