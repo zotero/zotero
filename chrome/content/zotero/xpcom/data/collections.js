@@ -94,6 +94,40 @@ Zotero.Collections = new function() {
 	}
 	
 	
+	/**
+	 * Refresh cached parents in specified collections, skipping
+	 * any that aren't loaded
+	 *
+	 * @param	{Integer|Integer[]}	ids		One or more itemIDs
+	 */
+	this.refreshParents = function (ids) {
+		ids = Zotero.flattenArguments(ids);
+		
+		for each(var id in ids) {
+			if (_collections[id]) {
+				_collections[id]._refreshParent();
+			}
+		}
+	}
+	
+	
+	/**
+	 * Invalidate child collection cache in specified collections, skipping
+	 * any that aren't loaded
+	 *
+	 * @param	{Integer|Integer[]}	ids		One or more itemIDs
+	 */
+	this.refreshChildCollections = function (ids) {
+		ids = Zotero.flattenArguments(ids);
+		
+		for each(var id in ids) {
+			if (_collections[id]) {
+				_collections[id]._refreshChildCollections();
+			}
+		}
+	}
+	
+	
 	function reload(id) {
 		if (!_collectionsLoaded) {
 			this.reloadAll();
