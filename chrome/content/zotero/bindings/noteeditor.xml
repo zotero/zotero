@@ -459,7 +459,7 @@
 					<xul:popup id="tagsPopup" ignorekeys="true"
 							onpopupshown="if (!document.commandDispatcher.focusedElement || document.commandDispatcher.focusedElement.tagName=='xul:label'){ /* DEBUG: it would be nice to make this work -- if (this.firstChild.count==0){ this.firstChild.new(); } */ this.setAttribute('showing', 'true'); }"
 							onpopuphidden="if (!document.commandDispatcher.focusedElement || document.commandDispatcher.focusedElement.tagName=='xul:label'){ this.setAttribute('showing', 'false'); }">
-						<xul:tagsbox id="tags" flex="1"/>
+						<xul:tagsbox id="tags" flex="1" mode="edit"/>
 					</xul:popup>
 				</xul:popupset>
 			</xul:vbox>

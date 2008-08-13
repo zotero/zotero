@@ -2571,9 +2571,8 @@ Zotero.Item.prototype.addTag = function(name, type) {
 		if (type == 0 && existingTypes.indexOf(1) != -1) {
 			this.removeTag(Zotero.Tags.getID(name, 1));
 		}
-		// If existing user and adding automatic, skip
-		else if (type == 1 && existingTypes.indexOf(0) != -1) {
-			Zotero.debug('Identical user tag already exists -- skipping automatic tag add');
+		else {
+			Zotero.debug('Identical tag already exists -- not adding tag');
 			Zotero.DB.commitTransaction();
 			return false;
 		}
@@ -2588,15 +2587,14 @@ Zotero.Item.prototype.addTag = function(name, type) {
 	}
 	
 	try {
-		var result = this.addTagByID(tagID);
+		this.addTagByID(tagID);
 		Zotero.DB.commitTransaction();
+		return tagID;
 	}
 	catch (e) {
 		Zotero.DB.rollbackTransaction();
 		throw (e);
 	}
-	
-	return result ? tagID : false;
 }
 
 

@@ -94,7 +94,13 @@
 				</getter>
 			</property>
 			
-			
+			<constructor>
+			<![CDATA[
+				if (this.hasAttribute('mode')) {
+					this.mode = this.getAttribute('mode');
+				}
+			]]>
+			</constructor>
 			
 			<method name="reload">
 				<body>
@@ -114,7 +120,7 @@
 							}
 							this.updateCount(tags.length);
 							
-							this.fixPopup();
+							//this.fixPopup();
 							
 							return tags.length;
 						}
@@ -174,7 +180,7 @@
 						if (tagID)
 						{
 							remove.setAttribute('ztabindex', -1);
-							remove.setAttribute('onclick',"this.parentNode.parentNode.parentNode.parentNode.parentNode.remove('"+ tagID +"');");
+							remove.setAttribute('onclick',"document.getBindingParent(this).remove('"+ tagID +"');");
 						}
 						else
 						{
@@ -321,6 +327,7 @@
 								this._tabDirection = 1;
 								var lastTag = true;
 							}
+							
 							focused.blur();
 							
 							// Return focus to items pane
@@ -355,8 +362,6 @@
 							
 						case event.DOM_VK_TAB:
 							this._tabDirection = event.shiftKey ? -1 : 1;
-							// Blur the old manually -- not sure why this is necessary,
-							// but it prevents an immediate blur() on the next tag
 							focused.blur();
 							return false;
 					}
@@ -428,23 +433,21 @@
 						}
 						// New tag
 						else {
-							// If this is an existing automatic tag, it's going to be
-							// deleted and the number of rows will stay the same,
-							// so we have to compensate
-							var existingTypes = Zotero.Tags.getTypes(value);
-							if (existingTypes && existingTypes.indexOf(1) != -1) {
+							var id = tagsbox.add(value);
+							if (!id) {
 								this._lastTabIndex--;
 							}
-							var id = tagsbox.add(value);
 						}
 					}
 					
 					if (id) {
 						elem = this.createValueElement(
 							value,
-							'tag',
 							tabindex
 						);
+						
+						var box = textbox.parentNode;
+						box.replaceChild(elem, textbox);
 					}
 					else {
 						// Just remove the row
@@ -454,18 +457,10 @@
 							var row = rows.removeChild(row);
 						}
 						catch (e) {}
-						tagsbox.fixPopup();
-						tagsbox.closePopup();
-						
-						this._tabDirection = false;
-						return;
 					}
 					
 					var focusMode = 'tags';
 					var focusBox = tagsbox;
-					
-					var box = textbox.parentNode;
-					box.replaceChild(elem,textbox);
 					
 					if (this._tabDirection) {
 						this._focusNextField(focusBox, this._lastTabIndex, this._tabDirection == -1);
@@ -560,6 +555,7 @@
 			</method>
 			
 			
+			<!-- No longer used -->
 			<method name="fixPopup">
 				<body>
 					<![CDATA[

@@ -249,7 +249,7 @@ Zotero.Tag.prototype.save = function () {
 		
 		Zotero.DB.query("UPDATE tags SET key=? WHERE tagID=?", [row.key, this.id]);
 		
-		Zotero.Tags.unload([{ oldID: { name: row.name, type: row.type } }]);
+		Zotero.Tags.unload(oldID);
 		Zotero.Notifier.trigger('id-change', 'tag', oldID + '-' + this.id);
 		
 		// update caches
